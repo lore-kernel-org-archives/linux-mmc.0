@@ -1,7 +1,7 @@
 From: Alexandru Ardelean <alexandru.ardelean@analog.com>
-Subject: [PATCH 06/16] x86/mtrr: use new match_string() helper + add gaps == minor fix
-Date: Wed, 8 May 2019 14:28:32 +0300
-Message-ID: <20190508112842.11654-8-alexandru.ardelean@analog.com>
+Subject: [PATCH 07/16] device connection: use new match_string() helper/macro
+Date: Wed, 8 May 2019 14:28:33 +0300
+Message-ID: <20190508112842.11654-9-alexandru.ardelean@analog.com>
 References: <20190508112842.11654-1-alexandru.ardelean@analog.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,53 +12,38 @@ To: linuxppc-dev@lists.ozlabs.org, linux-kernel@vger.kernel.org, linux-ide@vger.
 Cc: gregkh@linuxfoundation.org, andriy.shevchenko@linux.intel.com, Alexandru Ardelean <alexandru.ardelean@analog.com>
 List-Id: linux-mmc@vger.kernel.org
 
-This change is a bit more than cosmetic.
+The `device_connection` struct is defined as:
+struct device_connection {
+        struct fwnode_handle    *fwnode;
+        const char              *endpoint[2];
+        const char              *id;
+        struct list_head        list;
+};
 
-It replaces 2 values in mtrr_strings with NULL. Previously, they were
-defined as "?", which is not great because you could technically pass "?",
-and you would get value 2.
-It's not sure whether that was intended (likely it wasn't), but this fixes
-that.
+The `endpoint` member is a static array of strings (on the struct), so
+using the match_string() (which does an ARRAY_SIZE((con->endpoint)) should
+be fine.
+
+The recent change to match_string() (to ignore NULL entries up to the size
+of the array) shouldn't affect this.
 
 Signed-off-by: Alexandru Ardelean <alexandru.ardelean@analog.com>
 ---
- arch/x86/kernel/cpu/mtrr/if.c | 10 ++++++----
- 1 file changed, 6 insertions(+), 4 deletions(-)
+ drivers/base/devcon.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/arch/x86/kernel/cpu/mtrr/if.c b/arch/x86/kernel/cpu/mtrr/if.c
-index 4ec7a5f7b94c..e67820a044cc 100644
---- a/arch/x86/kernel/cpu/mtrr/if.c
-+++ b/arch/x86/kernel/cpu/mtrr/if.c
-@@ -20,8 +20,8 @@ static const char *const mtrr_strings[MTRR_NUM_TYPES] =
- {
- 	"uncachable",		/* 0 */
- 	"write-combining",	/* 1 */
--	"?",			/* 2 */
--	"?",			/* 3 */
-+	NULL,			/* 2 */
-+	NULL,			/* 3 */
- 	"write-through",	/* 4 */
- 	"write-protect",	/* 5 */
- 	"write-back",		/* 6 */
-@@ -29,7 +29,9 @@ static const char *const mtrr_strings[MTRR_NUM_TYPES] =
+diff --git a/drivers/base/devcon.c b/drivers/base/devcon.c
+index 7bc1c619b721..4a2338665585 100644
+--- a/drivers/base/devcon.c
++++ b/drivers/base/devcon.c
+@@ -70,7 +70,7 @@ void *device_connection_find_match(struct device *dev, const char *con_id,
+ 	mutex_lock(&devcon_lock);
  
- const char *mtrr_attrib_to_str(int x)
- {
--	return (x <= 6) ? mtrr_strings[x] : "?";
-+	if ((x >= ARRAY_SIZE(mtrr_strings)) || (mtrr_strings[x] == NULL))
-+		return "?";
-+	return mtrr_strings[x];
- }
- 
- #ifdef CONFIG_PROC_FS
-@@ -142,7 +144,7 @@ mtrr_write(struct file *file, const char __user *buf, size_t len, loff_t * ppos)
- 		return -EINVAL;
- 	ptr = skip_spaces(ptr + 5);
- 
--	i = __match_string(mtrr_strings, MTRR_NUM_TYPES, ptr);
-+	i = match_string(mtrr_strings, ptr);
- 	if (i < 0)
- 		return i;
+ 	list_for_each_entry(con, &devcon_list, list) {
+-		ep = __match_string(con->endpoint, 2, devname);
++		ep = match_string(con->endpoint, devname);
+ 		if (ep < 0)
+ 			continue;
  
 -- 
 2.17.1
