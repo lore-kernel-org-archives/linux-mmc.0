@@ -1,50 +1,35 @@
-From: Scott Branden <scott.branden@broadcom.com>
-Subject: [PATCH v3 2/2] mmc: sdhci-iproc: Set NO_HISPD bit to fix HS50 data hold time problem
-Date: Thu,  9 May 2019 10:24:27 -0700
-Message-ID: <20190509172427.17835-3-scott.branden@broadcom.com>
-References: <20190509172427.17835-1-scott.branden@broadcom.com>
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <20190509172427.17835-1-scott.branden@broadcom.com>
-Sender: stable-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>, Stefan Wahren <stefan.wahren@i2se.com>
-Cc: BCM Kernel Feedback <bcm-kernel-feedback-list@broadcom.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, Trac Hoang <trac.hoang@broadcom.com>, stable@vger.kernel.org, Scott Branden <scott.branden@broadcom.com>
+From: Raul Rangel <rrangel@chromium.org>
+Subject: Re: [PATCH 1/2] mmc: v4.14: Fix null pointer dereference in
+ mmc_init_request
+Date: Thu, 9 May 2019 12:42:34 -0600
+Message-ID: <20190509184234.GA197434@google.com>
+References: <20190508185833.187068-1-rrangel@chromium.org>
+ <20190509060456.GA17096@infradead.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20190509060456.GA17096@infradead.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Christoph Hellwig <hch@infradead.org>
+Cc: linux-mmc@vger.kernel.org, djkurtz@google.com, adrian.hunter@intel.com, zwisler@chromium.org, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Trac Hoang <trac.hoang@broadcom.com>
+On Wed, May 08, 2019 at 11:04:56PM -0700, Christoph Hellwig wrote:
+> On Wed, May 08, 2019 at 12:58:32PM -0600, Raul E Rangel wrote:
+> > It is possible for queuedata to be cleared in mmc_cleanup_queue before
+> > the request has been started.
+> 
+> Errm.  I think we need to fix that problem instead of working around it.
+So mmc_request_fn already has a null check, it was just missing on
+mmc_init_request.
 
-The iproc host eMMC/SD controller hold time does not meet the
-specification in the HS50 mode.  This problem can be mitigated
-by disabling the HISPD bit; thus forcing the controller output
-data to be driven on the falling clock edges rather than the
-rising clock edges.
+I could move `blk_cleanup_queue(q)` above `q->queuedata = NULL` and the
+lock. So that would mean cherry-picking
+https://lore.kernel.org/patchwork/patch/856512/ and then a patch with
+moving blk_cleanup_queue.
 
-Stable tag (v4.12+) chosen to assist stable kernel maintainers so that
-the change does not produce merge conflicts backporting to older kernel
-versions. In reality, the timing bug existed since the driver was first
-introduced but there is no need for this driver to be supported in kernel
-versions that old.
+Should I do that instead?
 
-Cc: stable@vger.kernel.org # v4.12+
-Signed-off-by: Trac Hoang <trac.hoang@broadcom.com>
-Signed-off-by: Scott Branden <scott.branden@broadcom.com>
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
----
- drivers/mmc/host/sdhci-iproc.c | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/host/sdhci-iproc.c b/drivers/mmc/host/sdhci-iproc.c
-index 9d4071c41c94..2feb4ef32035 100644
---- a/drivers/mmc/host/sdhci-iproc.c
-+++ b/drivers/mmc/host/sdhci-iproc.c
-@@ -220,7 +220,8 @@ static const struct sdhci_iproc_data iproc_cygnus_data = {
- 
- static const struct sdhci_pltfm_data sdhci_iproc_pltfm_data = {
- 	.quirks = SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
--		  SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12,
-+		  SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12 |
-+		  SDHCI_QUIRK_NO_HISPD_BIT,
- 	.quirks2 = SDHCI_QUIRK2_ACMD23_BROKEN,
- 	.ops = &sdhci_iproc_ops,
- };
--- 
-2.17.1
+Thanks,
+Raul
