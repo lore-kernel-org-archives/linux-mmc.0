@@ -1,35 +1,116 @@
-From: Raul Rangel <rrangel@chromium.org>
-Subject: Re: [PATCH 1/2] mmc: v4.14: Fix null pointer dereference in
- mmc_init_request
-Date: Thu, 9 May 2019 12:42:34 -0600
-Message-ID: <20190509184234.GA197434@google.com>
-References: <20190508185833.187068-1-rrangel@chromium.org>
- <20190509060456.GA17096@infradead.org>
+From: Faiz Abbas <faiz_abbas@ti.com>
+Subject: [PATCH v2 1/3] mmc: sdhci_am654: Improve line wrapping with regmap_*() calls
+Date: Fri, 10 May 2019 09:12:26 +0530
+Message-ID: <20190510034228.32211-2-faiz_abbas@ti.com>
+References: <20190510034228.32211-1-faiz_abbas@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20190509060456.GA17096@infradead.org>
+In-Reply-To: <20190510034228.32211-1-faiz_abbas@ti.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Christoph Hellwig <hch@infradead.org>
-Cc: linux-mmc@vger.kernel.org, djkurtz@google.com, adrian.hunter@intel.com, zwisler@chromium.org, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+To: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: ulf.hansson@linaro.org, adrian.hunter@intel.com, faiz_abbas@ti.com
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, May 08, 2019 at 11:04:56PM -0700, Christoph Hellwig wrote:
-> On Wed, May 08, 2019 at 12:58:32PM -0600, Raul E Rangel wrote:
-> > It is possible for queuedata to be cleared in mmc_cleanup_queue before
-> > the request has been started.
-> 
-> Errm.  I think we need to fix that problem instead of working around it.
-So mmc_request_fn already has a null check, it was just missing on
-mmc_init_request.
+Line wrapping with the regmap_*() functions is way more conservative
+than required by the 80 character rule. Expand the function calls out to
+use less number of lines.
 
-I could move `blk_cleanup_queue(q)` above `q->queuedata = NULL` and the
-lock. So that would mean cherry-picking
-https://lore.kernel.org/patchwork/patch/856512/ and then a patch with
-moving blk_cleanup_queue.
+Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
+---
+ drivers/mmc/host/sdhci_am654.c | 34 +++++++++++++---------------------
+ 1 file changed, 13 insertions(+), 21 deletions(-)
 
-Should I do that instead?
-
-Thanks,
-Raul
+diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
+index a91c0b45c48d..337c24b8f4a8 100644
+--- a/drivers/mmc/host/sdhci_am654.c
++++ b/drivers/mmc/host/sdhci_am654.c
+@@ -88,8 +88,7 @@ static void sdhci_am654_set_clock(struct sdhci_host *host, unsigned int clock)
+ 	int ret;
+ 
+ 	if (sdhci_am654->dll_on) {
+-		regmap_update_bits(sdhci_am654->base, PHY_CTRL1,
+-				   ENDLL_MASK, 0);
++		regmap_update_bits(sdhci_am654->base, PHY_CTRL1, ENDLL_MASK, 0);
+ 
+ 		sdhci_am654->dll_on = false;
+ 	}
+@@ -101,8 +100,7 @@ static void sdhci_am654_set_clock(struct sdhci_host *host, unsigned int clock)
+ 		mask = OTAPDLYENA_MASK | OTAPDLYSEL_MASK;
+ 		val = (1 << OTAPDLYENA_SHIFT) |
+ 		      (sdhci_am654->otap_del_sel << OTAPDLYSEL_SHIFT);
+-		regmap_update_bits(sdhci_am654->base, PHY_CTRL4,
+-				   mask, val);
++		regmap_update_bits(sdhci_am654->base, PHY_CTRL4, mask, val);
+ 		switch (clock) {
+ 		case 200000000:
+ 			sel50 = 0;
+@@ -120,8 +118,7 @@ static void sdhci_am654_set_clock(struct sdhci_host *host, unsigned int clock)
+ 		/* Configure PHY DLL frequency */
+ 		mask = SEL50_MASK | SEL100_MASK;
+ 		val = (sel50 << SEL50_SHIFT) | (sel100 << SEL100_SHIFT);
+-		regmap_update_bits(sdhci_am654->base, PHY_CTRL5,
+-				   mask, val);
++		regmap_update_bits(sdhci_am654->base, PHY_CTRL5, mask, val);
+ 		/* Configure DLL TRIM */
+ 		mask = DLL_TRIM_ICP_MASK;
+ 		val = sdhci_am654->trm_icp << DLL_TRIM_ICP_SHIFT;
+@@ -129,20 +126,17 @@ static void sdhci_am654_set_clock(struct sdhci_host *host, unsigned int clock)
+ 		/* Configure DLL driver strength */
+ 		mask |= DR_TY_MASK;
+ 		val |= sdhci_am654->drv_strength << DR_TY_SHIFT;
+-		regmap_update_bits(sdhci_am654->base, PHY_CTRL1,
+-				   mask, val);
++		regmap_update_bits(sdhci_am654->base, PHY_CTRL1, mask, val);
+ 		/* Enable DLL */
+-		regmap_update_bits(sdhci_am654->base, PHY_CTRL1,
+-				   ENDLL_MASK, 0x1 << ENDLL_SHIFT);
++		regmap_update_bits(sdhci_am654->base, PHY_CTRL1, ENDLL_MASK,
++				   0x1 << ENDLL_SHIFT);
+ 		/*
+ 		 * Poll for DLL ready. Use a one second timeout.
+ 		 * Works in all experiments done so far
+ 		 */
+-		ret = regmap_read_poll_timeout(sdhci_am654->base,
+-					 PHY_STAT1, val,
+-					 val & DLLRDY_MASK,
+-					 1000, 1000000);
+-
++		ret = regmap_read_poll_timeout(sdhci_am654->base, PHY_STAT1,
++					       val, val & DLLRDY_MASK, 1000,
++					       1000000);
+ 		sdhci_am654->dll_on = true;
+ 	}
+ }
+@@ -208,8 +202,7 @@ static int sdhci_am654_init(struct sdhci_host *host)
+ 
+ 	/* Reset OTAP to default value */
+ 	mask = OTAPDLYENA_MASK | OTAPDLYSEL_MASK;
+-	regmap_update_bits(sdhci_am654->base, PHY_CTRL4,
+-				   mask, 0x0);
++	regmap_update_bits(sdhci_am654->base, PHY_CTRL4, mask, 0x0);
+ 
+ 	regmap_read(sdhci_am654->base, PHY_STAT1, &val);
+ 	if (~val & CALDONE_MASK) {
+@@ -223,15 +216,14 @@ static int sdhci_am654_init(struct sdhci_host *host)
+ 	}
+ 
+ 	/* Enable pins by setting IO mux to 0 */
+-	regmap_update_bits(sdhci_am654->base, PHY_CTRL1,
+-			   IOMUX_ENABLE_MASK, 0);
++	regmap_update_bits(sdhci_am654->base, PHY_CTRL1, IOMUX_ENABLE_MASK, 0);
+ 
+ 	/* Set slot type based on SD or eMMC */
+ 	if (host->mmc->caps & MMC_CAP_NONREMOVABLE)
+ 		ctl_cfg_2 = SLOTTYPE_EMBEDDED;
+ 
+-	regmap_update_bits(sdhci_am654->base, CTL_CFG_2,
+-			   ctl_cfg_2, SLOTTYPE_MASK);
++	regmap_update_bits(sdhci_am654->base, CTL_CFG_2, ctl_cfg_2,
++			   SLOTTYPE_MASK);
+ 
+ 	return sdhci_add_host(host);
+ }
+-- 
+2.19.2
