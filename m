@@ -1,27 +1,28 @@
-From: Jerome Brunet <jbrunet@baylibre.com>
-Subject: Re: [PATCH 0/3] mmc: meson-gx: add ddr-access-quirk support
-Date: Mon, 13 May 2019 13:28:43 +0200
-Message-ID: <10e588ae1e259c2c2bc9cfd0e788aa41735f0f66.camel@baylibre.com>
-References: <20190513091548.16674-1-narmstrong@baylibre.com>
-         <24b8cd2eb2879378ca0cac6ddfd9c5cae68699bc.camel@baylibre.com>
+From: Raul Rangel <rrangel@chromium.org>
+Subject: Re: [PATCH 1/2] mmc: v4.14: Fix null pointer dereference in
+ mmc_init_request
+Date: Mon, 13 May 2019 11:19:08 -0600
+Message-ID: <20190513171908.GA37248@google.com>
+References: <20190508185833.187068-1-rrangel@chromium.org>
+ <20190509060456.GA17096@infradead.org>
+ <20190509184234.GA197434@google.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <24b8cd2eb2879378ca0cac6ddfd9c5cae68699bc.camel@baylibre.com>
+Content-Disposition: inline
+In-Reply-To: <20190509184234.GA197434@google.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Neil Armstrong <narmstrong@baylibre.com>, ulf.hansson@linaro.org, khilman@baylibre.com
-Cc: baylibre-upstreaming@groups.io, linux-mmc@vger.kernel.org, linux-amlogic@lists.infradead.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+To: Christoph Hellwig <hch@infradead.org>
+Cc: linux-mmc@vger.kernel.org, djkurtz@google.com, adrian.hunter@intel.com, zwisler@chromium.org, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, 2019-05-13 at 11:58 +0200, Jerome Brunet wrote:
-> > The performance hit hasn't been evaluated, but the fix has been tested
-> > using a WiFi AP6398S SDIO module, and the iperf3 Bandwidth measurement gave
-> > 55.2 Mbits/sec over a 63 Hours long test, with the SDIO ios set as High-Speed
-> > at 50MHz clock. It gave around 170 Mbits/sec as SDR104 and 200MHz clock.
-> 
-> These numbers looks to be limited by the MMC bandwidth of the related modes.
-> So, if the SRAM quirk introduce a penalty for the controller, it does not appear
-> to be a limiting factor, AFAICT.
+> > Errm.  I think we need to fix that problem instead of working around it.
+> So mmc_request_fn already has a null check, it was just missing on
+> mmc_init_request.
+>
+So I got 189650 random connect/disconnect iterations over the weekend
+with these patches. I think they are fine. I'm going to send them to
+stable@ unless anyone has any objections.
 
-Got confused. This comment is completely wrong, please ignore
+Thanks,
+Raul
