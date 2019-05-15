@@ -1,7 +1,7 @@
 From: Yinbo Zhu <yinbo.zhu@nxp.com>
-Subject: [PATCH v2] arm64: dts: ls1028a: Add esdhc node in dts
-Date: Wed, 15 May 2019 12:00:46 +0800
-Message-ID: <20190515040046.9230-1-yinbo.zhu@nxp.com>
+Subject: [PATCH v3] arm64: dts: ls1028a: Add esdhc node in dts
+Date: Wed, 15 May 2019 16:49:25 +0800
+Message-ID: <20190515084925.30155-1-yinbo.zhu@nxp.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Shawn Guo <shawnguo@kernel.org>, Li Yang <leoyang.li@nxp.com>, Rob Herring <robh+dt@kernel.org>
@@ -17,9 +17,8 @@ Signed-off-by: Ashish Kumar <Ashish.Kumar@nxp.com>
 Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
 Signed-off-by: Yinbo Zhu <yinbo.zhu@nxp.com>
 ---
-Change in v2:
-		Update the patch title
-		Add a commont in dts code
+Change in v3:
+		replace "esdhc@" with "mmc@"
 
  arch/arm64/boot/dts/freescale/fsl-ls1028a-qds.dts |    8 ++++++
  arch/arm64/boot/dts/freescale/fsl-ls1028a-rdb.dts |   13 ++++++++++
@@ -70,14 +69,14 @@ index f86b054..1bfaf42 100644
  	status = "okay";
  
 diff --git a/arch/arm64/boot/dts/freescale/fsl-ls1028a.dtsi b/arch/arm64/boot/dts/freescale/fsl-ls1028a.dtsi
-index 2896bbc..5c7546f 100644
+index 2896bbc..462833c 100644
 --- a/arch/arm64/boot/dts/freescale/fsl-ls1028a.dtsi
 +++ b/arch/arm64/boot/dts/freescale/fsl-ls1028a.dtsi
 @@ -274,6 +274,33 @@
  			status = "disabled";
  		};
  
-+		esdhc: esdhc@2140000 {
++		esdhc: mmc@2140000 {
 +			compatible = "fsl,ls1028a-esdhc", "fsl,esdhc";
 +			reg = <0x0 0x2140000 0x0 0x10000>;
 +			interrupts = <0 28 0x4>; /* Level high type */
@@ -90,7 +89,7 @@ index 2896bbc..5c7546f 100644
 +			status = "disabled";
 +		};
 +
-+		esdhc1: esdhc@2150000 {
++		esdhc1: mmc@2150000 {
 +			compatible = "fsl,ls1028a-esdhc", "fsl,esdhc";
 +			reg = <0x0 0x2150000 0x0 0x10000>;
 +			interrupts = <0 63 0x4>; /* Level high type */
