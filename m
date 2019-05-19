@@ -1,74 +1,80 @@
-From: Chaotian Jing <chaotian.jing@mediatek.com>
-Subject: [PATCH 2/2] mmc: mediatek: support 24bits segment size
-Date: Sun, 19 May 2019 15:57:17 +0800
-Message-ID: <1558252637-10556-3-git-send-email-chaotian.jing@mediatek.com>
-References: <1558252637-10556-1-git-send-email-chaotian.jing@mediatek.com>
+From: Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>
+Subject: Re: [PATCH 2/3] mmc: core: API for temporarily disabling
+ auto-retuning due to errors
+Date: Sun, 19 May 2019 11:06:42 +0200
+Message-ID: <20190519090642.GA2279@kunai>
+References: <20190517225420.176893-1-dianders@chromium.org>
+ <20190517225420.176893-3-dianders@chromium.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1558252637-10556-1-git-send-email-chaotian.jing@mediatek.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: srv_heupstream@mediatek.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mediatek@lists.infradead.org, Chaotian Jing <chaotian.jing@mediatek.com>, Matthias Brugger <matthias.bgg@gmail.com>, linux-arm-kernel@lists.infradead.org
+Content-Type: multipart/mixed; boundary="===============4212091236098525067=="
+Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <20190517225420.176893-3-dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
+List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Cc: Madhan Mohan R <madhanmohan.r-+wT8y+m8/X5BDgjK7y7TUQ@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Martin Hicks <mort-THxEKynEWHc@public.gmane.org>, Wolfram Sang <wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org>, Double Lo <double.lo-+wT8y+m8/X5BDgjK7y7TUQ@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Chi-Hsien Lin <chi-hsien.lin-+wT8y+m8/X5BDgjK7y7TUQ@public.gmane.org>, briannorris-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Arend van Spriel <arend.vanspriel-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Avri Altman <avri.altman-Sjgp3cTcYWE@public.gmane.org>, mka-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, Ritesh Harjani <riteshh-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Wright Feng <wright.feng-+wT8y+m8/X5BDgjK7y7TUQ@public.gmane.org>, Jiong Wu <lohengrin1024-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Kalle Valo <kvalo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-MSDC IP which support 64G DRAM will support 24bits BDMA buffer length,
-so add support it.
 
-Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
----
- drivers/mmc/host/mtk-sd.c | 16 +++++++++++++---
- 1 file changed, 13 insertions(+), 3 deletions(-)
+--===============4212091236098525067==
+Content-Type: multipart/signed; micalg=pgp-sha512;
+	protocol="application/pgp-signature"; boundary="envbJBWh7q8WU6mo"
+Content-Disposition: inline
 
-diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index 7d8502a..682e483 100644
---- a/drivers/mmc/host/mtk-sd.c
-+++ b/drivers/mmc/host/mtk-sd.c
-@@ -336,6 +336,7 @@ struct mt_bdma_desc {
- 	u32 ptr;
- 	u32 bd_data_len;
- #define BDMA_DESC_BUFLEN	(0xffff) /* bit0 ~ bit15 */
-+#define BDMA_DESC_BUFLEN_EXT	(0xffffff) /* bit0 ~ bit23 */
- };
- 
- struct msdc_dma {
-@@ -649,8 +650,14 @@ static inline void msdc_dma_setup(struct msdc_host *host, struct msdc_dma *dma,
- 			bd[j].bd_info |= (upper_32_bits(dma_address) & 0xf)
- 					 << 28;
- 		}
--		bd[j].bd_data_len &= ~BDMA_DESC_BUFLEN;
--		bd[j].bd_data_len |= (dma_len & BDMA_DESC_BUFLEN);
-+
-+		if (host->dev_comp->support_64g) {
-+			bd[j].bd_data_len &= ~BDMA_DESC_BUFLEN_EXT;
-+			bd[j].bd_data_len |= (dma_len & BDMA_DESC_BUFLEN_EXT);
-+		} else {
-+			bd[j].bd_data_len &= ~BDMA_DESC_BUFLEN;
-+			bd[j].bd_data_len |= (dma_len & BDMA_DESC_BUFLEN);
-+		}
- 
- 		if (j == data->sg_count - 1) /* the last bd */
- 			bd[j].bd_info |= BDMA_DESC_EOL;
-@@ -2280,7 +2287,10 @@ static int msdc_drv_probe(struct platform_device *pdev)
- 	mmc->caps |= MMC_CAP_ERASE | MMC_CAP_CMD23;
- 	/* MMC core transfer sizes tunable parameters */
- 	mmc->max_segs = MAX_BD_NUM;
--	mmc->max_seg_size = BDMA_DESC_BUFLEN;
-+	if (host->dev_comp->support_64g)
-+		mmc->max_seg_size = BDMA_DESC_BUFLEN_EXT;
-+	else
-+		mmc->max_seg_size = BDMA_DESC_BUFLEN;
- 	mmc->max_blk_size = 2048;
- 	mmc->max_req_size = 512 * 1024;
- 	mmc->max_blk_count = mmc->max_req_size / 512;
--- 
-1.8.1.1.dirty
+
+--envbJBWh7q8WU6mo
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+
+
+> Let's add an API that the SDIO card drivers can call that will
+> temporarily disable the auto-tuning functionality.  Then we can add a
+> call to this in the Broadcom WiFi driver and any other driver that
+> might have similar needs.
+
+Can't you fix the WiFi driver to return something else than -EILSEQ
+before calling mmc_request_done() to skip the retuning?
+
+
+--envbJBWh7q8WU6mo
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAlzhHJ4ACgkQFA3kzBSg
+KbbeARAAjRwuYMVRg9/KiLaxQrOgOKoCgflbt6sCKz+IWQYwpHqy/NMeXxogeaZp
+y/kpClhWulThbXbH5kiV59qh55aSNFsNM0yA+IZFwbye0fKtXEtkJIjBVAOfQDdz
+PY2Jx2nNSJWWJeUzcfbW1LwvygH2a3Hon2p1/UubaqYvLPoZPCZmwVC/1LFdJPPN
+fv2uN5ukpVcfmNBSbQUUaoMPZp6oeuAxHa1+58aQzpCMo3h329ERrcgkDDcw4WP9
+K20azhSC961CnA7Syj84BsmlMnARaCyZ9S8atXXCtX6R5hbgUXLkBIcqtbfB+npd
+j0sTjbHGDh7eaQ0l14Xh3FVSeHZiepGlupQ1wW6HuHkR1Be1mL6nEdCvSqT0mNHf
+TsHkuq9Loh/95/eInWqtpGVM2XOpwDkN8czDOwwiO4ejRHaIEaoZX6FWeV80lDnX
+emtFSLifF0VaH5GqM4HwOu3iXFBxpuj6zwnADaxYZqwnFNyi0+nvhp9W2tHyaLey
+fcB6sw/i+2Knu5k2JnaSHZutc2hqY6lhoLaJyjQKMfk2fxRBmdimnt3u6bNV9U+N
+Qo4IQM5w5wgRGUbUAcfo9/aLXnEdVbEuSy6QJdLgp7pZUBaIj4c5U7XROP6RQRFJ
+6XB4ckAS0xBjDQ/mFNM/W2+Keu+9dcqNtDrAEn3vchAKecUJdO0=
+=k7qP
+-----END PGP SIGNATURE-----
+
+--envbJBWh7q8WU6mo--
+
+
+--===============4212091236098525067==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+Linux-rockchip mailing list
+Linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+http://lists.infradead.org/mailman/listinfo/linux-rockchip
+
+--===============4212091236098525067==--
