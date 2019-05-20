@@ -1,7 +1,7 @@
 From: Baolin Wang <baolin.wang@linaro.org>
-Subject: [PATCH 5/9] mmc: sdhci-sprd: Add HS400 enhanced strobe mode
-Date: Mon, 20 May 2019 18:11:58 +0800
-Message-ID: <20349e8ebd4c1ec64fb5f8cdd9e094d0c1732855.1558346019.git.baolin.wang@linaro.org>
+Subject: [PATCH 6/9] mmc: sdhci-sprd: Enable PHY DLL to make clock stable
+Date: Mon, 20 May 2019 18:11:59 +0800
+Message-ID: <270e86bf6b1ce138e40830fb63c9bcf150440426.1558346019.git.baolin.wang@linaro.org>
 References: <cover.1558346019.git.baolin.wang@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <cover.1558346019.git.baolin.wang@linaro.org>
@@ -12,76 +12,96 @@ To: adrian.hunter@intel.com, ulf.hansson@linaro.org, zhang.lyra@gmail.com, orson
 Cc: baolin.wang@linaro.org, vincent.guittot@linaro.org, arm@kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Add HS400 enhanced strobe mode support for Spreadtrum SD host controller.
+For the Spreadtrum SD host controller, when we changed the clock to be
+more than 52M, we should enable the PHY DLL which is used to track the
+clock frequency to make the clock work more stable. Otherwise deviation
+may occur of the higher clock.
 
 Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
 ---
- drivers/mmc/host/sdhci-sprd.c |   32 ++++++++++++++++++++++++++++++++
- 1 file changed, 32 insertions(+)
+ drivers/mmc/host/sdhci-sprd.c |   44 ++++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 43 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
-index d91281d..edec197 100644
+index edec197..e6eda13 100644
 --- a/drivers/mmc/host/sdhci-sprd.c
 +++ b/drivers/mmc/host/sdhci-sprd.c
-@@ -41,6 +41,7 @@
- /* SDHCI_HOST_CONTROL2 */
- #define  SDHCI_SPRD_CTRL_HS200		0x0005
- #define  SDHCI_SPRD_CTRL_HS400		0x0006
-+#define  SDHCI_SPRD_CTRL_HS400ES	0x0007
+@@ -22,6 +22,13 @@
+ /* SDHCI_ARGUMENT2 register high 16bit */
+ #define SDHCI_SPRD_ARG2_STUFF		GENMASK(31, 16)
  
- /*
-  * According to the standard specification, BIT(3) of SDHCI_SOFTWARE_RESET is
-@@ -132,6 +133,15 @@ static inline void sdhci_sprd_sd_clk_off(struct sdhci_host *host)
- 	sdhci_writew(host, ctrl, SDHCI_CLOCK_CONTROL);
++#define SDHCI_SPRD_REG_32_DLL_CFG	0x200
++#define  SDHCI_SPRD_DLL_ALL_CPST_EN	(BIT(18) | BIT(24) | BIT(25) | BIT(26) | BIT(27))
++#define  SDHCI_SPRD_DLL_EN		BIT(21)
++#define  SDHCI_SPRD_DLL_SEARCH_MODE	BIT(16)
++#define  SDHCI_SPRD_DLL_INIT_COUNT	0xc00
++#define  SDHCI_SPRD_DLL_PHASE_INTERNAL	0x3
++
+ #define SDHCI_SPRD_REG_32_DLL_DLY_OFFSET	0x208
+ #define  SDHCIBSPRD_IT_WR_DLY_INV		BIT(5)
+ #define  SDHCI_SPRD_BIT_CMD_DLY_INV		BIT(13)
+@@ -56,6 +63,7 @@
+ #define SDHCI_SPRD_CLK_MAX_DIV		1023
+ 
+ #define SDHCI_SPRD_CLK_DEF_RATE		26000000
++#define SDHCI_SPRD_PHY_DLL_CLK		52000000
+ 
+ struct sdhci_sprd_host {
+ 	u32 version;
+@@ -200,9 +208,33 @@ static inline void _sdhci_sprd_set_clock(struct sdhci_host *host,
+ 	}
  }
  
-+static inline void sdhci_sprd_sd_clk_on(struct sdhci_host *host)
++static void sdhci_sprd_enable_phy_dll(struct sdhci_host *host)
 +{
-+	u16 ctrl;
++	u32 tmp;
 +
-+	ctrl = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-+	ctrl |= SDHCI_CLOCK_CARD_EN;
-+	sdhci_writew(host, ctrl, SDHCI_CLOCK_CONTROL);
++	tmp = sdhci_readl(host, SDHCI_SPRD_REG_32_DLL_CFG);
++	tmp &= ~(SDHCI_SPRD_DLL_EN | SDHCI_SPRD_DLL_ALL_CPST_EN);
++	sdhci_writel(host, tmp, SDHCI_SPRD_REG_32_DLL_CFG);
++	/* wait 1ms */
++	usleep_range(1000, 1250);
++
++	tmp = sdhci_readl(host, SDHCI_SPRD_REG_32_DLL_CFG);
++	tmp |= SDHCI_SPRD_DLL_ALL_CPST_EN | SDHCI_SPRD_DLL_SEARCH_MODE |
++		SDHCI_SPRD_DLL_INIT_COUNT | SDHCI_SPRD_DLL_PHASE_INTERNAL;
++	sdhci_writel(host, tmp, SDHCI_SPRD_REG_32_DLL_CFG);
++	/* wait 1ms */
++	usleep_range(1000, 1250);
++
++	tmp = sdhci_readl(host, SDHCI_SPRD_REG_32_DLL_CFG);
++	tmp |= SDHCI_SPRD_DLL_EN;
++	sdhci_writel(host, tmp, SDHCI_SPRD_REG_32_DLL_CFG);
++	/* wait 1ms */
++	usleep_range(1000, 1250);
 +}
 +
- static inline void
- sdhci_sprd_set_dll_invert(struct sdhci_host *host, u32 mask, bool en)
+ static void sdhci_sprd_set_clock(struct sdhci_host *host, unsigned int clock)
  {
-@@ -325,6 +335,26 @@ static void sdhci_sprd_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 	sdhci_request(mmc, mrq);
+-	bool en = false;
++	bool en = false, clk_changed = false;
+ 
+ 	if (clock == 0) {
+ 		sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
+@@ -214,9 +246,19 @@ static void sdhci_sprd_set_clock(struct sdhci_host *host, unsigned int clock)
+ 			en = true;
+ 		sdhci_sprd_set_dll_invert(host, SDHCI_SPRD_BIT_CMD_DLY_INV |
+ 					  SDHCI_SPRD_BIT_POSRD_DLY_INV, en);
++		clk_changed = true;
+ 	} else {
+ 		_sdhci_sprd_set_clock(host, clock);
+ 	}
++
++	/*
++	 * According to the Spreadtrum SD host specification, when we changed
++	 * the clock to be more than 52M, we should enable the PHY DLL which
++	 * is used to track the clock frequency to make the clock work more
++	 * stable. Otherwise deviation may occur of the higher clock.
++	 */
++	if (clk_changed && clock > SDHCI_SPRD_PHY_DLL_CLK)
++		sdhci_sprd_enable_phy_dll(host);
  }
  
-+static void sdhci_sprd_hs400_enhanced_strobe(struct mmc_host *mmc,
-+					     struct mmc_ios *ios)
-+{
-+	struct sdhci_host *host = mmc_priv(mmc);
-+	u16 ctrl_2;
-+
-+	if (!ios->enhanced_strobe)
-+		return;
-+
-+	sdhci_sprd_sd_clk_off(host);
-+
-+	/* Set HS400 enhanced strobe mode */
-+	ctrl_2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-+	ctrl_2 &= ~SDHCI_CTRL_UHS_MASK;
-+	ctrl_2 |= SDHCI_SPRD_CTRL_HS400ES;
-+	sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
-+
-+	sdhci_sprd_sd_clk_on(host);
-+}
-+
- static const struct sdhci_pltfm_data sdhci_sprd_pdata = {
- 	.quirks = SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK,
- 	.quirks2 = SDHCI_QUIRK2_BROKEN_HS200 |
-@@ -346,6 +376,8 @@ static int sdhci_sprd_probe(struct platform_device *pdev)
- 	host->dma_mask = DMA_BIT_MASK(64);
- 	pdev->dev.dma_mask = &host->dma_mask;
- 	host->mmc_host_ops.request = sdhci_sprd_request;
-+	host->mmc_host_ops.hs400_enhanced_strobe =
-+		sdhci_sprd_hs400_enhanced_strobe;
- 
- 	host->mmc->caps = MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED |
- 		MMC_CAP_ERASE | MMC_CAP_CMD23;
+ static unsigned int sdhci_sprd_get_max_clock(struct sdhci_host *host)
 -- 
 1.7.9.5
