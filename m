@@ -1,7 +1,7 @@
 From: Baolin Wang <baolin.wang@linaro.org>
-Subject: [PATCH 3/9] mmc: sdhci-sprd: Add optional gate clock support
-Date: Mon, 20 May 2019 18:11:56 +0800
-Message-ID: <16b895cf30c235dc656eeed5888069b6266ab5f8.1558346019.git.baolin.wang@linaro.org>
+Subject: [PATCH 5/9] mmc: sdhci-sprd: Add HS400 enhanced strobe mode
+Date: Mon, 20 May 2019 18:11:58 +0800
+Message-ID: <20349e8ebd4c1ec64fb5f8cdd9e094d0c1732855.1558346019.git.baolin.wang@linaro.org>
 References: <cover.1558346019.git.baolin.wang@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <cover.1558346019.git.baolin.wang@linaro.org>
@@ -12,108 +12,76 @@ To: adrian.hunter@intel.com, ulf.hansson@linaro.org, zhang.lyra@gmail.com, orson
 Cc: baolin.wang@linaro.org, vincent.guittot@linaro.org, arm@kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-For the Spreadtrum SC9860 platform, we should enable another gate clock
-'2x_enable' to make the SD host controller work well.
+Add HS400 enhanced strobe mode support for Spreadtrum SD host controller.
 
 Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
 ---
- drivers/mmc/host/sdhci-sprd.c |   35 +++++++++++++++++++++++++++++------
- 1 file changed, 29 insertions(+), 6 deletions(-)
+ drivers/mmc/host/sdhci-sprd.c |   32 ++++++++++++++++++++++++++++++++
+ 1 file changed, 32 insertions(+)
 
 diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
-index e741491..31ba7d6 100644
+index d91281d..edec197 100644
 --- a/drivers/mmc/host/sdhci-sprd.c
 +++ b/drivers/mmc/host/sdhci-sprd.c
-@@ -60,6 +60,7 @@ struct sdhci_sprd_host {
- 	u32 version;
- 	struct clk *clk_sdio;
- 	struct clk *clk_enable;
-+	struct clk *clk_2x_enable;
- 	u32 base_rate;
- 	int flags; /* backup of host attribute */
- };
-@@ -364,6 +365,10 @@ static int sdhci_sprd_probe(struct platform_device *pdev)
- 	}
- 	sprd_host->clk_enable = clk;
+@@ -41,6 +41,7 @@
+ /* SDHCI_HOST_CONTROL2 */
+ #define  SDHCI_SPRD_CTRL_HS200		0x0005
+ #define  SDHCI_SPRD_CTRL_HS400		0x0006
++#define  SDHCI_SPRD_CTRL_HS400ES	0x0007
  
-+	clk = devm_clk_get(&pdev->dev, "2x_enable");
-+	if (!IS_ERR(clk))
-+		sprd_host->clk_2x_enable = clk;
-+
- 	ret = clk_prepare_enable(sprd_host->clk_sdio);
- 	if (ret)
- 		goto pltfm_free;
-@@ -372,6 +377,10 @@ static int sdhci_sprd_probe(struct platform_device *pdev)
- 	if (ret)
- 		goto clk_disable;
- 
-+	ret = clk_prepare_enable(sprd_host->clk_2x_enable);
-+	if (ret)
-+		goto clk_disable2;
-+
- 	sdhci_sprd_init_config(host);
- 	host->version = sdhci_readw(host, SDHCI_HOST_VERSION);
- 	sprd_host->version = ((host->version & SDHCI_VENDOR_VER_MASK) >>
-@@ -408,6 +417,9 @@ static int sdhci_sprd_probe(struct platform_device *pdev)
- 	pm_runtime_disable(&pdev->dev);
- 	pm_runtime_set_suspended(&pdev->dev);
- 
-+	clk_disable_unprepare(sprd_host->clk_2x_enable);
-+
-+clk_disable2:
- 	clk_disable_unprepare(sprd_host->clk_enable);
- 
- clk_disable:
-@@ -427,6 +439,7 @@ static int sdhci_sprd_remove(struct platform_device *pdev)
- 	mmc_remove_host(mmc);
- 	clk_disable_unprepare(sprd_host->clk_sdio);
- 	clk_disable_unprepare(sprd_host->clk_enable);
-+	clk_disable_unprepare(sprd_host->clk_2x_enable);
- 
- 	mmc_free_host(mmc);
- 
-@@ -449,6 +462,7 @@ static int sdhci_sprd_runtime_suspend(struct device *dev)
- 
- 	clk_disable_unprepare(sprd_host->clk_sdio);
- 	clk_disable_unprepare(sprd_host->clk_enable);
-+	clk_disable_unprepare(sprd_host->clk_2x_enable);
- 
- 	return 0;
+ /*
+  * According to the standard specification, BIT(3) of SDHCI_SOFTWARE_RESET is
+@@ -132,6 +133,15 @@ static inline void sdhci_sprd_sd_clk_off(struct sdhci_host *host)
+ 	sdhci_writew(host, ctrl, SDHCI_CLOCK_CONTROL);
  }
-@@ -459,19 +473,28 @@ static int sdhci_sprd_runtime_resume(struct device *dev)
- 	struct sdhci_sprd_host *sprd_host = TO_SPRD_HOST(host);
- 	int ret;
  
--	ret = clk_prepare_enable(sprd_host->clk_enable);
-+	ret = clk_prepare_enable(sprd_host->clk_2x_enable);
- 	if (ret)
- 		return ret;
- 
-+	ret = clk_prepare_enable(sprd_host->clk_enable);
-+	if (ret)
-+		goto clk_2x_disable;
++static inline void sdhci_sprd_sd_clk_on(struct sdhci_host *host)
++{
++	u16 ctrl;
 +
- 	ret = clk_prepare_enable(sprd_host->clk_sdio);
--	if (ret) {
--		clk_disable_unprepare(sprd_host->clk_enable);
--		return ret;
--	}
-+	if (ret)
-+		goto clk_disable;
- 
- 	sdhci_runtime_resume_host(host);
--
- 	return 0;
++	ctrl = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
++	ctrl |= SDHCI_CLOCK_CARD_EN;
++	sdhci_writew(host, ctrl, SDHCI_CLOCK_CONTROL);
++}
 +
-+clk_disable:
-+	clk_disable_unprepare(sprd_host->clk_enable);
-+
-+clk_2x_disable:
-+	clk_disable_unprepare(sprd_host->clk_2x_enable);
-+
-+	return ret;
+ static inline void
+ sdhci_sprd_set_dll_invert(struct sdhci_host *host, u32 mask, bool en)
+ {
+@@ -325,6 +335,26 @@ static void sdhci_sprd_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ 	sdhci_request(mmc, mrq);
  }
- #endif
  
++static void sdhci_sprd_hs400_enhanced_strobe(struct mmc_host *mmc,
++					     struct mmc_ios *ios)
++{
++	struct sdhci_host *host = mmc_priv(mmc);
++	u16 ctrl_2;
++
++	if (!ios->enhanced_strobe)
++		return;
++
++	sdhci_sprd_sd_clk_off(host);
++
++	/* Set HS400 enhanced strobe mode */
++	ctrl_2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
++	ctrl_2 &= ~SDHCI_CTRL_UHS_MASK;
++	ctrl_2 |= SDHCI_SPRD_CTRL_HS400ES;
++	sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
++
++	sdhci_sprd_sd_clk_on(host);
++}
++
+ static const struct sdhci_pltfm_data sdhci_sprd_pdata = {
+ 	.quirks = SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK,
+ 	.quirks2 = SDHCI_QUIRK2_BROKEN_HS200 |
+@@ -346,6 +376,8 @@ static int sdhci_sprd_probe(struct platform_device *pdev)
+ 	host->dma_mask = DMA_BIT_MASK(64);
+ 	pdev->dev.dma_mask = &host->dma_mask;
+ 	host->mmc_host_ops.request = sdhci_sprd_request;
++	host->mmc_host_ops.hs400_enhanced_strobe =
++		sdhci_sprd_hs400_enhanced_strobe;
+ 
+ 	host->mmc->caps = MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED |
+ 		MMC_CAP_ERASE | MMC_CAP_CMD23;
 -- 
 1.7.9.5
