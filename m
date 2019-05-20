@@ -1,7 +1,7 @@
 From: Baolin Wang <baolin.wang@linaro.org>
-Subject: [PATCH 1/9] mmc: sdhci-sprd: Check the enable clock's return value correctly
-Date: Mon, 20 May 2019 18:11:54 +0800
-Message-ID: <7e4d922ba5aff5241b0186e9480a98b14693b28d.1558346019.git.baolin.wang@linaro.org>
+Subject: [PATCH 2/9] dt-bindings: mmc: sprd: Add another optional clock documentation
+Date: Mon, 20 May 2019 18:11:55 +0800
+Message-ID: <ee4ad0e7e131e4d639dbf6bd25ad93726648ce1c.1558346019.git.baolin.wang@linaro.org>
 References: <cover.1558346019.git.baolin.wang@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <cover.1558346019.git.baolin.wang@linaro.org>
@@ -12,25 +12,26 @@ To: adrian.hunter@intel.com, ulf.hansson@linaro.org, zhang.lyra@gmail.com, orson
 Cc: baolin.wang@linaro.org, vincent.guittot@linaro.org, arm@kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Missed to check the enable clock's return value, fix it.
+For some Spreadtrum platforms like SC9860 platform, we should enable another
+gate clock '2x_enable' to make the SD host controller work well. Thus add
+documentation for this optional clock.
 
 Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
 ---
- drivers/mmc/host/sdhci-sprd.c |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ .../devicetree/bindings/mmc/sdhci-sprd.txt         |    1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
-index 9a822e2..e741491 100644
---- a/drivers/mmc/host/sdhci-sprd.c
-+++ b/drivers/mmc/host/sdhci-sprd.c
-@@ -368,7 +368,7 @@ static int sdhci_sprd_probe(struct platform_device *pdev)
- 	if (ret)
- 		goto pltfm_free;
+diff --git a/Documentation/devicetree/bindings/mmc/sdhci-sprd.txt b/Documentation/devicetree/bindings/mmc/sdhci-sprd.txt
+index 45c9978..a285c77 100644
+--- a/Documentation/devicetree/bindings/mmc/sdhci-sprd.txt
++++ b/Documentation/devicetree/bindings/mmc/sdhci-sprd.txt
+@@ -14,6 +14,7 @@ Required properties:
+ - clock-names: Should contain the following:
+ 	"sdio" - SDIO source clock (required)
+ 	"enable" - gate clock which used for enabling/disabling the device (required)
++	"2x_enable" - gate clock controlling the device for some special platforms (optional)
  
--	clk_prepare_enable(sprd_host->clk_enable);
-+	ret = clk_prepare_enable(sprd_host->clk_enable);
- 	if (ret)
- 		goto clk_disable;
- 
+ Optional properties:
+ - assigned-clocks: the same with "sdio" clock
 -- 
 1.7.9.5
