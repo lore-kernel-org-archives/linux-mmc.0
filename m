@@ -1,43 +1,104 @@
-From: Brian Norris <briannorris@chromium.org>
-Subject: Re: [PATCH 0/3] brcmfmac: sdio: Deal better w/ transmission errors
- waking from sleep
-Date: Mon, 20 May 2019 17:23:14 -0700
-Message-ID: <20190521002312.GA89786@google.com>
-References: <20190517225420.176893-1-dianders@chromium.org>
- <SN6PR04MB49258D4FBE0B4D739E8BAF7EFC040@SN6PR04MB4925.namprd04.prod.outlook.com>
+From: Ludovic BARRE <ludovic.barre@st.com>
+Subject: Re: [PATCH V2 0/5] mmc: mmci: add busy detect for stm32 sdmmc variant
+Date: Tue, 21 May 2019 09:38:07 +0200
+Message-ID: <e884b614-14d4-1cae-5b77-c6aacabb764a@st.com>
+References: <1556264798-18540-1-git-send-email-ludovic.Barre@st.com>
+ <CAPDyKFqbn=UcbwoH_z+yjrjvHQZaMtmsD=n0yrBV7DAK5VRJEQ@mail.gmail.com>
+ <74b91eb4-e5a3-38b2-f732-29cdd058eb6a@st.com>
+ <CAPDyKFoURwnai1hbCbO+Uh6+hc7A4dYHjWkqeFAEgMQET-BzwA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <SN6PR04MB49258D4FBE0B4D739E8BAF7EFC040@SN6PR04MB4925.namprd04.prod.outlook.com>
+In-Reply-To: <CAPDyKFoURwnai1hbCbO+Uh6+hc7A4dYHjWkqeFAEgMQET-BzwA@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Avri Altman <Avri.Altman@wdc.com>
-Cc: Douglas Anderson <dianders@chromium.org>, Ulf Hansson <ulf.hansson@linaro.org>, Kalle Valo <kvalo@codeaurora.org>, Adrian Hunter <adrian.hunter@intel.com>, Arend van Spriel <arend.vanspriel@broadcom.com>, "linux-rockchip@lists.infradead.org" <linux-rockchip@lists.infradead.org>, Double Lo <double.lo@cypress.com>, Madhan Mohan R <madhanmohan.r@cypress.com>, "mka@chromium.org" <mka@chromium.org>, Wright Feng <wright.feng@cypress.com>, Chi-Hsien Lin <chi-hsien.lin@cypress.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Shawn Lin <shawn.lin@rock-chips.com>, "brcm80211-dev-list@cypress.com" <brcm80211-dev-list@cypress.com>, YueHaibing <yuehaibing@huawei.com>, Hante Meuleman <hante.meuleman@broadcom.com>, Martin Hicks <mort@bork.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Rob Herring <robh+dt@kernel.org>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-stm32@st-md-mailman.stormreply.com
 List-Id: linux-mmc@vger.kernel.org
 
-On Sat, May 18, 2019 at 03:09:44PM +0000, Avri Altman wrote:
-> > 
-> > This series attempts to deal better with the expected transmission
-> > errors that we get when waking up the SDIO-based WiFi on
-> > rk3288-veyron-minnie, rk3288-veyron-speedy, and rk3288-veyron-mickey.
-> > 
-> > Some details about those errors can be found in
-> > <https://crbug.com/960222>, but to summarize it here: if we try to
-> > send the wakeup command to the WiFi card at the same time it has
-> > decided to wake up itself then it will behave badly on the SDIO bus.
-> > This can cause timeouts or CRC errors.
-> Wake-up itself: as part of a WoWlan, or d0i3?
+hi Ulf
 
-Neither, IIUC. (It's definitely not WoWLAN, and D0i3 sounds like an
-Intel thing.)
+Just a "gentleman ping" about the rest of series.
+"mmc: mmci: add busy detect for stm32 sdmmc variant"
 
-I believe it's a Broadcom-specific mode. See also Arend's response to
-this thread:
+Regards
+Ludo
 
-http://lkml.kernel.org/linux-wireless/8c3fa57a-3843-947c-ec6b-a6144ccde1e9@broadcom.com
-
-> Looks like this calls for a wifi driver fix, and not WA in the mmc driver.
-
-Basically asked and answered in patch 2's thread:
-
-https://lkml.kernel.org/lkml/20190520085201.GA1021@kunai/
+On 5/3/19 3:29 PM, Ulf Hansson wrote:
+> On Tue, 30 Apr 2019 at 14:06, Ludovic BARRE <ludovic.barre@st.com> wrote:
+>>
+>>
+>>
+>> On 4/30/19 1:13 PM, Ulf Hansson wrote:
+>>> On Fri, 26 Apr 2019 at 09:46, Ludovic Barre <ludovic.Barre@st.com> wrote:
+>>>>
+>>>> From: Ludovic Barre <ludovic.barre@st.com>
+>>>>
+>>>> This patch series adds busy detect for stm32 sdmmc variant.
+>>>> Some adaptations are required:
+>>>> -Avoid to check and poll busy status when is not expected.
+>>>> -Clear busy status bit if busy_detect_flag and busy_detect_mask are
+>>>>    different.
+>>>> -Add hardware busy timeout with MMCIDATATIMER register.
+>>>>
+>>>> V2:
+>>>> -mmci_cmd_irq cleanup in separate patch.
+>>>> -simplify the busy_detect_flag exclude
+>>>> -replace sdmmc specific comment in
+>>>> "mmc: mmci: avoid fake busy polling in mmci_irq"
+>>>> to focus on common behavior
+>>>>
+>>>> Ludovic Barre (5):
+>>>>     mmc: mmci: cleanup mmci_cmd_irq for busy detect feature
+>>>>     mmc: mmci: avoid fake busy polling in mmci_irq
+>>>>     mmc: mmci: fix clear of busy detect status
+>>>>     mmc: mmci: add hardware busy timeout feature
+>>>>     mmc: mmci: add busy detect for stm32 sdmmc variant
+>>>>
+>>>>    drivers/mmc/host/mmci.c | 61 ++++++++++++++++++++++++++++++++++++++-----------
+>>>>    drivers/mmc/host/mmci.h |  3 +++
+>>>>    2 files changed, 51 insertions(+), 13 deletions(-)
+>>>>
+>>>> --
+>>>> 2.7.4
+>>>>
+>>>
+>>> Ludovic, just wanted to let you know that I am reviewing and testing
+>>> this series.
+>>>
+>>> However, while running some tests on Ux500 for validating the busy
+>>> detection code, even without your series applied, I encounter some odd
+>>> behaviors. I am looking into the problem to understand better and will
+>>> let you know as soon as I have some more data to share.
+>>
+>> Oops, don't hesitate to share your status, if I could help.
+> 
+> Thanks! Good and bad news here, then.
+> 
+> I now understand what is going on - and there is certainly room for
+> improvements here, but more importantly the actual mmci busy detection
+> works as expected.
+> 
+> When it comes to improvements, the main issue I have found is how we
+> treat DATA WRITES. In many cases we simply don't use the HW busy
+> detection at all, but instead rely on the mmc core to send CMD13 in a
+> loop to poll. Well, then if the polling would have consisted of a
+> couple of CMD13s that wouldn't be an issue, but my observations is
+> rather that the numbers of CMD13 sent to poll is in the range or
+> hundreds/thousands - per each WRITE request!
+> 
+> I am going to send a patch (or two) that improves the behavior. It
+> might even involve changing parts in core layer, not sure how the end
+> result will look like yet.
+> 
+> In any case, I have applied patch 1 and patch2 for next, as the tests
+> turned out well at my side. I also took the liberty of updating some
+> of the comments/changelogs, please have look and tell if there is
+> something you want to change.
+> 
+> I will continue with the rest of series next week.
+> 
+> Kind regards
+> Uffe
+> 
