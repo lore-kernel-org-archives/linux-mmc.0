@@ -1,12 +1,12 @@
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.14 006/167] mmc: core: Verify SD bus width
-Date: Wed, 22 May 2019 15:26:01 -0400
-Message-ID: <20190522192842.25858-6-sashal@kernel.org>
-References: <20190522192842.25858-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.1 009/375] mmc: core: Verify SD bus width
+Date: Wed, 22 May 2019 15:15:09 -0400
+Message-ID: <20190522192115.22666-9-sashal@kernel.org>
+References: <20190522192115.22666-1-sashal@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190522192842.25858-1-sashal@kernel.org>
+In-Reply-To: <20190522192115.22666-1-sashal@kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc: Raul E Rangel <rrangel@chromium.org>, Avri Altman <avri.altman@wdc.com>, Ulf Hansson <ulf.hansson@linaro.org>, Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org
@@ -43,10 +43,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 8 insertions(+)
 
 diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index eb9de21349679..fe2ef52135b6b 100644
+index 265e1aeeb9d88..d3d32f9a2cb18 100644
 --- a/drivers/mmc/core/sd.c
 +++ b/drivers/mmc/core/sd.c
-@@ -216,6 +216,14 @@ static int mmc_decode_scr(struct mmc_card *card)
+@@ -221,6 +221,14 @@ static int mmc_decode_scr(struct mmc_card *card)
  
  	if (scr->sda_spec3)
  		scr->cmds = UNSTUFF_BITS(resp, 32, 2);
