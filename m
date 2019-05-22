@@ -1,12 +1,12 @@
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 5.0 008/317] mmc: core: Verify SD bus width
-Date: Wed, 22 May 2019 15:18:29 -0400
-Message-ID: <20190522192338.23715-8-sashal@kernel.org>
-References: <20190522192338.23715-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.19 006/244] mmc: core: Verify SD bus width
+Date: Wed, 22 May 2019 15:22:32 -0400
+Message-ID: <20190522192630.24917-6-sashal@kernel.org>
+References: <20190522192630.24917-1-sashal@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190522192338.23715-1-sashal@kernel.org>
+In-Reply-To: <20190522192630.24917-1-sashal@kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc: Raul E Rangel <rrangel@chromium.org>, Avri Altman <avri.altman@wdc.com>, Ulf Hansson <ulf.hansson@linaro.org>, Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org
