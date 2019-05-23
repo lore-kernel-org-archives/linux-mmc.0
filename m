@@ -1,76 +1,135 @@
-From: Yoshihiro Shimoda <yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
-Subject: RE: [PATCH v3 3/3] mmc: renesas_sdhi: use multiple segments if
-	possible
-Date: Thu, 23 May 2019 04:15:58 +0000
-Message-ID: <OSAPR01MB30890D412403BE3DF5C34D6BD8010@OSAPR01MB3089.jpnprd01.prod.outlook.com>
-References: <1558520319-16452-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
-	<1558520319-16452-4-git-send-email-yoshihiro.shimoda.uh@renesas.com>
-	<20190522122901.GA4583@infradead.org>
+From: Shawn Guo <shawnguo@kernel.org>
+Subject: Re: [PATCH v2] arm64: dts: ls1028a: Add esdhc node in dts
+Date: Thu, 23 May 2019 15:37:45 +0800
+Message-ID: <20190523073744.GG9261@dragon>
+References: <20190515040046.9230-1-yinbo.zhu@nxp.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-In-Reply-To: <20190522122901.GA4583-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
-Content-Language: ja-JP
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Christoph Hellwig <hch-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
-Cc: "linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org" <wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org>, "iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org" <iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20190515040046.9230-1-yinbo.zhu@nxp.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Yinbo Zhu <yinbo.zhu@nxp.com>
+Cc: Li Yang <leoyang.li@nxp.com>, Rob Herring <robh+dt@kernel.org>, xiaobo.xie@nxp.com, Mark Rutland <mark.rutland@arm.com>, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, yangbo.lu@nxp.com, jiafei.pan@nxp.com, Ashish Kumar <Ashish.Kumar@nxp.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Christoph,
-
-Thank you for your review!
-
-> From: Christoph Hellwig, Sent: Wednesday, May 22, 2019 9:29 PM
+On Wed, May 15, 2019 at 12:00:46PM +0800, Yinbo Zhu wrote:
+> From: Ashish Kumar <Ashish.Kumar@nxp.com>
 > 
-> On Wed, May 22, 2019 at 07:18:39PM +0900, Yoshihiro Shimoda wrote:
-> > In IOMMU environment, since it's possible to merge scatter gather
-> > buffers of memory requests to one iova, this patch changes the max_segs
-> > value when init_card of mmc_host timing to improve the transfer
-> > performance on renesas_sdhi_internal_dmac.
+> This patch is to add esdhc node and enable SD UHS-I,
+> eMMC HS200 for ls1028ardb/ls1028aqds board.
 > 
-> Well, you can't merge everything with an IOMMU.  For one not every
-> IOMMU can merge multiple scatterlist segments,
-
-I didn't know such IOMMU exists. But, since R-Car Gen3 IOMMU device
-(handled by ipmmu-vmsa.c) can merge multiple scatterlist segments,
-should this mmc driver check whether the IOMMU device is used or not somehow?
-
-> second even it can merge
-> segements the segments need to be aligned to the IOMMU page size.
-
-If this driver checks whether the segments are aligned to the IOMMU
-page size before DMA API is called every time, is it acceptable?
-If one of the segments is not aligned, this driver should not use
-the DMAC.
-
->  And
-> then of course we might have an upper limit on the total mapping.
-
-IIUC, if such a case, DMA API will fail. What do you think?
-
-> > +	if (host->pdata->max_segs < SDHI_MAX_SEGS_IN_IOMMU &&
-> > +	    host->pdev->dev.iommu_group &&
-> > +	    (mmc_card_mmc(card) || mmc_card_sd(card)))
-> > +		host->mmc->max_segs = SDHI_MAX_SEGS_IN_IOMMU;
+> Signed-off-by: Ashish Kumar <Ashish.Kumar@nxp.com>
+> Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
+> Signed-off-by: Yinbo Zhu <yinbo.zhu@nxp.com>
+> ---
+> Change in v2:
+> 		Update the patch title
+> 		Add a commont in dts code
 > 
-> This is way to magic.  We'll need a proper DMA layer API to expose
-> this information, and preferably a block layer helper to increase
-> max_segs instead of hacking that up in the driver.
+>  arch/arm64/boot/dts/freescale/fsl-ls1028a-qds.dts |    8 ++++++
+>  arch/arm64/boot/dts/freescale/fsl-ls1028a-rdb.dts |   13 ++++++++++
+>  arch/arm64/boot/dts/freescale/fsl-ls1028a.dtsi    |   27 +++++++++++++++++++++
+>  3 files changed, 48 insertions(+), 0 deletions(-)
+> 
+> diff --git a/arch/arm64/boot/dts/freescale/fsl-ls1028a-qds.dts b/arch/arm64/boot/dts/freescale/fsl-ls1028a-qds.dts
+> index 14c79f4..180e5d2 100644
+> --- a/arch/arm64/boot/dts/freescale/fsl-ls1028a-qds.dts
+> +++ b/arch/arm64/boot/dts/freescale/fsl-ls1028a-qds.dts
+> @@ -42,6 +42,14 @@
+>  	status = "okay";
+>  };
+>  
+> +&esdhc {
+> +	status = "okay";
+> +};
+> +
+> +&esdhc1 {
+> +	status = "okay";
+> +};
+> +
+>  &i2c0 {
+>  	status = "okay";
+>  
+> diff --git a/arch/arm64/boot/dts/freescale/fsl-ls1028a-rdb.dts b/arch/arm64/boot/dts/freescale/fsl-ls1028a-rdb.dts
+> index f86b054..1bfaf42 100644
+> --- a/arch/arm64/boot/dts/freescale/fsl-ls1028a-rdb.dts
+> +++ b/arch/arm64/boot/dts/freescale/fsl-ls1028a-rdb.dts
+> @@ -30,6 +30,19 @@
+>  	};
+>  };
+>  
+> +&esdhc {
+> +	status = "okay";
 
-I think I should have described the detail somewhere. This can expose
-this information to a block layer by using blk_queue_max_segments()
-that mmc_setup_queue() calls. In other words, this init_card() ops
-is called before a block device is created. Is this acceptable if
-such a comment is described here?
+We usually put 'status' at the end of property list.
 
-Best regards,
-Yoshihiro Shimoda
+> +	sd-uhs-sdr104;
+> +	sd-uhs-sdr50;
+> +	sd-uhs-sdr25;
+> +	sd-uhs-sdr12;
+> +	};
+
+Bad indentation.
+
+> +
+> +&esdhc1 {
+> +	status = "okay";
+> +	mmc-hs200-1_8v;
+> +	};
+> +
+>  &i2c0 {
+>  	status = "okay";
+>  
+> diff --git a/arch/arm64/boot/dts/freescale/fsl-ls1028a.dtsi b/arch/arm64/boot/dts/freescale/fsl-ls1028a.dtsi
+> index 2896bbc..5c7546f 100644
+> --- a/arch/arm64/boot/dts/freescale/fsl-ls1028a.dtsi
+> +++ b/arch/arm64/boot/dts/freescale/fsl-ls1028a.dtsi
+> @@ -274,6 +274,33 @@
+>  			status = "disabled";
+>  		};
+>  
+> +		esdhc: esdhc@2140000 {
+
+'mmc' for node name, and the node should be sorted in unit-address.
+
+> +			compatible = "fsl,ls1028a-esdhc", "fsl,esdhc";
+> +			reg = <0x0 0x2140000 0x0 0x10000>;
+> +			interrupts = <0 28 0x4>; /* Level high type */
+
+interrupts = <GIC_SPI 28 IRQ_TYPE_LEVEL_HIGH>;
+
+> +			clock-frequency = <0>; /* fixed up by bootloader */
+> +			clocks = <&clockgen 2 1>;
+> +			voltage-ranges = <1800 1800 3300 3300>;
+> +			sdhci,auto-cmd12;
+> +			little-endian;
+> +			bus-width = <4>;
+> +			status = "disabled";
+> +		};
+> +
+> +		esdhc1: esdhc@2150000 {
+> +			compatible = "fsl,ls1028a-esdhc", "fsl,esdhc";
+> +			reg = <0x0 0x2150000 0x0 0x10000>;
+> +			interrupts = <0 63 0x4>; /* Level high type */
+> +			clock-frequency = <0>; /* fixed up by bootloader */
+> +			clocks = <&clockgen 2 1>;
+> +			voltage-ranges = <1800 1800 3300 3300>;
+> +			sdhci,auto-cmd12;
+> +			broken-cd;
+
+Shouldn't this one be a board level property?
+
+Shawn
+
+> +			little-endian;
+> +			bus-width = <4>;
+> +			status = "disabled";
+> +		};
+> +
+>  		sata: sata@3200000 {
+>  			compatible = "fsl,ls1028a-ahci";
+>  			reg = <0x0 0x3200000 0x0 0x10000>,
+> -- 
+> 1.7.1
+> 
