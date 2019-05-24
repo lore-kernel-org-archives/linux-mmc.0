@@ -1,41 +1,44 @@
-From: Kevin Hilman <khilman@baylibre.com>
-Subject: Re: [PATCH] mmc: meson-gx: fix irq ack
-Date: Thu, 23 May 2019 08:47:29 -0700
-Message-ID: <7ho93t41gu.fsf@baylibre.com>
-References: <20190523145950.7030-1-jbrunet@baylibre.com>
-Mime-Version: 1.0
-Content-Type: text/plain
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC fixes for v5.2-rc2
+Date: Fri, 24 May 2019 12:10:28 +0200
+Message-ID: <20190524101028.8158-1-ulf.hansson@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190523145950.7030-1-jbrunet@baylibre.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Jerome Brunet <jbrunet@baylibre.com>, linux-amlogic@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Neil Armstrong <narmstrong@baylibre.com>
+To: Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Jerome Brunet <jbrunet@baylibre.com> writes:
+Hi Linus,
 
-> While cleaning the ISR of the meson-gx and acking only raised irqs,
-> the ack of the irq was moved at the very last stage of the function.
->
-> This was stable during the initial tests but it triggered issues with
-> hs200, under specific loads (like booting android). Acking the irqs
-> after calling the mmc_request_done() causes the problem.
->
-> Moving the ack back to the original place solves the issue. Since the
-> irq is edge triggered, it does not hurt to ack irq even earlier, so
-> let's do it early in the ISR.
->
-> Fixes: 9c5fdb07a28d ("mmc: meson-gx: ack only raised irq")
-> Tested-by: Neil Armstrong <narmstrong@baylibre.com>
-> Tested-by: Kevin Hilman <khilman@baylibre.com>
-> Signed-off-by: Jerome Brunet <jbrunet@baylibre.com>
+Here's a PR with a few MMC fixes intended for v5.2-rc2. Details about the
+highlights are as usual found in the signed tag.
 
-Reviewed-by: Kevin Hilman <khilman@baylibre.com>
+Please pull this in!
 
-And to be clear, this fix should go into v5.2-rc.
+Kind regards
+Ulf Hansson
 
-My Tested-by is already above, but just for the benefit of the
-archives... tested this on mainline, and also on a v4.19 backport with
-Android and it fixes issues see there.
 
-Kevin
+The following changes since commit 5ac94332248ee017964ba368cdda4ce647e3aba7:
+
+  Merge tag 'for-linus' of git://git.kernel.org/pub/scm/linux/kernel/git/rdma/rdma (2019-05-14 20:56:31 -0700)
+
+are available in the Git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.2-2
+
+for you to fetch changes up to ec0970e0a1b2c807c908d459641a9f9a1be3e130:
+
+  mmc: sdhci-iproc: Set NO_HISPD bit to fix HS50 data hold time problem (2019-05-15 13:52:05 +0200)
+
+----------------------------------------------------------------
+MMC host:
+ - sdhci-iproc: Fix HS50 data hold time problem for a few variants
+
+----------------------------------------------------------------
+Trac Hoang (2):
+      mmc: sdhci-iproc: cygnus: Set NO_HISPD bit to fix HS50 data hold time problem
+      mmc: sdhci-iproc: Set NO_HISPD bit to fix HS50 data hold time problem
+
+ drivers/mmc/host/sdhci-iproc.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
