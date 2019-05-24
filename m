@@ -1,7 +1,7 @@
 From: Brian Masney <masneyb@onstation.org>
 Subject: Re: [PATCH] mmc: sdhci: queue work after sdhci_defer_done()
-Date: Fri, 24 May 2019 09:02:08 -0400
-Message-ID: <20190524130208.GA16322@basecamp>
+Date: Fri, 24 May 2019 11:49:58 -0400
+Message-ID: <20190524154958.GB16322@basecamp>
 References: <20190524111053.12228-1-masneyb@onstation.org>
  <70782901-a9ac-5647-1abe-89c86a44a01b@intel.com>
 Mime-Version: 1.0
@@ -90,16 +90,10 @@ On Fri, May 24, 2019 at 03:17:13PM +0300, Adrian Hunter wrote:
 > 
 > Can you explain some more?
 
-What I meant by the equivalent change was that tasklet_schedule() used
-to be called in this situation rather than returning IRQ_WAKE_THREAD.
+drivers/net/wireless/broadcom/brcm80211/brcmfmac/sdio.c calls
+sdio_claim_host() and it appears to never return.
 
-I'm honestly not sure exactly what's going on yet. Without the patch I
-sent out, wlan0 is not detected on the phone. Perhaps there is a subtle
-race condition somewhere that is exposed with the reduction in latency
-since I assume tasklet_schedule() is more expensive than doing the
-processing in the bottom half?
-
-I'll do some more digging and see if I can find more information. I sent
-this out to get a discussion started.
+I'm not going to be able to look into this more today but I should have
+time this weekend to dig in more with ftrace.
 
 Brian
