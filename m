@@ -1,37 +1,101 @@
-From: Arend Van Spriel <arend.vanspriel-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
-Subject: Re: [PATCH 2/3] mmc: core: API for temporarily disabling
- auto-retuning due to errors
-Date: Sun, 26 May 2019 20:42:04 +0200
-Message-ID: <05af228c-139b-2b7f-f626-36fb34634be5@broadcom.com>
-References: <20190517225420.176893-1-dianders@chromium.org>
- <20190517225420.176893-3-dianders@chromium.org>
+From: Arend Van Spriel <arend.vanspriel@broadcom.com>
+Subject: Re: Issue with Broadcom wireless in 5.2rc1 (was Re: [PATCH] mmc:
+ sdhci: queue work after sdhci_defer_done())
+Date: Sun, 26 May 2019 20:42:21 +0200
+Message-ID: <e8c049ce-07e1-8b34-678d-41b3d6d41983@broadcom.com>
+References: <20190524111053.12228-1-masneyb@onstation.org>
+ <70782901-a9ac-5647-1abe-89c86a44a01b@intel.com>
+ <20190524154958.GB16322@basecamp> <20190526122136.GA26456@basecamp>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <20190517225420.176893-3-dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20190526122136.GA26456@basecamp>
 Content-Language: en-US
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
-List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Kalle Valo <kvalo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: Madhan Mohan R <madhanmohan.r-+wT8y+m8/X5BDgjK7y7TUQ@public.gmane.org>, Ritesh Harjani <riteshh-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Martin Hicks <mort-THxEKynEWHc@public.gmane.org>, Wolfram Sang <wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org>, Chi-Hsien Lin <chi-hsien.lin-+wT8y+m8/X5BDgjK7y7TUQ@public.gmane.org>, briannorris-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Double Lo <double.lo-+wT8y+m8/X5BDgjK7y7TUQ@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Avri Altman <avri.altman-Sjgp3cTcYWE@public.gmane.org>, mka-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, Wright Feng <wright.feng-+wT8y+m8/X5BDgjK7y7TUQ@public.gmane.org>, Jiong Wu <lohengrin1024-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Brian Masney <masneyb@onstation.org>, Adrian Hunter <adrian.hunter@intel.com>, Franky Lin <franky.lin@broadcom.com>, Hante Meuleman <hante.meuleman@broadcom.com>, Chi-Hsien Lin <chi-hsien.lin@cypress.com>, Wright Feng <wright.feng@cypress.com>
+Cc: ulf.hansson@linaro.org, faiz_abbas@ti.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, Kalle Valo <kvalo@codeaurora.org>, linux-wireless@vger.kernel.org, brcm80211-dev-list.pdl@broadcom.com, brcm80211-dev-list@cypress.com, netdev@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 5/18/2019 12:54 AM, Douglas Anderson wrote:
-> Normally when the MMC core sees an "-EILSEQ" error returned by a host
-> controller then it will trigger a retuning of the card.  This is
-> generally a good idea.
+On 5/26/2019 2:21 PM, Brian Masney wrote:
+> + Broadcom wireless maintainers
+> 
+> On Fri, May 24, 2019 at 11:49:58AM -0400, Brian Masney wrote:
+>> On Fri, May 24, 2019 at 03:17:13PM +0300, Adrian Hunter wrote:
+>>> On 24/05/19 2:10 PM, Brian Masney wrote:
+>>>> WiFi stopped working on the LG Nexus 5 phone and the issue was bisected
+>>>> to the commit c07a48c26519 ("mmc: sdhci: Remove finish_tasklet") that
+>>>> moved from using a tasklet to a work queue. That patch also changed
+>>>> sdhci_irq() to return IRQ_WAKE_THREAD instead of finishing the work when
+>>>> sdhci_defer_done() is true. Change it to queue work to the complete work
+>>>> queue if sdhci_defer_done() is true so that the functionality is
+>>>> equilivent to what was there when the finish_tasklet was present. This
+>>>> corrects the WiFi breakage on the Nexus 5 phone.
+>>>>
+>>>> Signed-off-by: Brian Masney <masneyb@onstation.org>
+>>>> Fixes: c07a48c26519 ("mmc: sdhci: Remove finish_tasklet")
+>>>> ---
+>>>> [ ... ]
+>>>>
+>>>>   drivers/mmc/host/sdhci.c | 2 +-
+>>>>   1 file changed, 1 insertion(+), 1 deletion(-)
+>>>>
+>>>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>>>> index 97158344b862..3563c3bc57c9 100644
+>>>> --- a/drivers/mmc/host/sdhci.c
+>>>> +++ b/drivers/mmc/host/sdhci.c
+>>>> @@ -3115,7 +3115,7 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
+>>>>   			continue;
+>>>>   
+>>>>   		if (sdhci_defer_done(host, mrq)) {
+>>>> -			result = IRQ_WAKE_THREAD;
+>>>> +			queue_work(host->complete_wq, &host->complete_work);
+>>>
+>>> The IRQ thread has a lot less latency than the work queue, which is why it
+>>> is done that way.
+>>>
+>>> I am not sure why you say this change is equivalent to what was there
+>>> before, nor why it fixes your problem.
+>>>
+>>> Can you explain some more?
+>>
+>> [ ... ]
+>>
+>> drivers/net/wireless/broadcom/brcm80211/brcmfmac/sdio.c calls
+>> sdio_claim_host() and it appears to never return.
+> 
+> When the brcmfmac driver is loaded, the firmware is requested from disk,
+> and that's when the deadlock occurs in 5.2rc1. Specifically:
+> 
+> 1) brcmf_sdio_download_firmware() in
+>     drivers/net/wireless/broadcom/brcm80211/brcmfmac/sdio.c calls
+>     sdio_claim_host()
+> 
+> 2) brcmf_sdio_firmware_callback() is called and brcmf_sdiod_ramrw()
+>     tries to claim the host, but has to wait since its already claimed
+>     in #1 and the deadlock occurs.
 
-Probably a question for Adrian, but how is this retuning scheduled. I 
-recall seeing something in mmc_request_done. How about deferring the 
-retuning upon a release host or is that too sdio specific.
+This does not make any sense to me. brcmf_sdio_download_firmware() is 
+called from brcmf_sdio_firmware_callback() so they are in the same 
+context. So #2 is not waiting for #1, but something else I would say. 
+Also #2 calls sdio_claim_host() after brcmf_sdio_download_firmware has 
+completed so definitely not waiting for #1.
+
+> I tried to release the host before the firmware is requested, however
+> parts of brcmf_chip_set_active() needs the host to be claimed, and a
+> similar deadlock occurs in brcmf_sdiod_ramrw() if I claim the host
+> before calling brcmf_chip_set_active().
+> 
+> I started to look at moving the sdio_{claim,release}_host() calls out of
+> brcmf_sdiod_ramrw() but there's a fair number of callers, so I'd like to
+> get feedback about the best course of action here.
+
+Long ago Franky reworked the sdio critical sections requiring sdio 
+claim/release and I am pretty sure they are correct.
+
+Could you try with lockdep kernel and see if that brings any more 
+information. In the mean time I will update my dev branch to 5.2-rc1 and 
+see if I can find any clues.
 
 Regards,
 Arend
