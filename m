@@ -1,66 +1,64 @@
-From: Brian Masney <masneyb@onstation.org>
-Subject: Re: Issue with Broadcom wireless in 5.2rc1 (was Re: [PATCH] mmc:
- sdhci: queue work after sdhci_defer_done())
-Date: Mon, 27 May 2019 08:50:26 -0400
-Message-ID: <20190527125026.GA4272@basecamp>
-References: <20190524111053.12228-1-masneyb@onstation.org>
- <70782901-a9ac-5647-1abe-89c86a44a01b@intel.com>
- <20190524154958.GB16322@basecamp>
- <20190526122136.GA26456@basecamp>
- <e8c049ce-07e1-8b34-678d-41b3d6d41983@broadcom.com>
- <20190526195819.GA29665@basecamp>
- <20190527093711.GA853@basecamp>
- <ead7f268-b730-3541-31f7-4499556efec0@intel.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH V2 3/5] mmc: mmci: fix clear of busy detect status
+Date: Mon, 27 May 2019 20:17:05 +0200
+Message-ID: <CAPDyKFrxp3Y3AudNvkkSRaph2Fe-A-F6Cs0jfy9RUja76GYeiA@mail.gmail.com>
+References: <1556264798-18540-1-git-send-email-ludovic.Barre@st.com> <1556264798-18540-4-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <ead7f268-b730-3541-31f7-4499556efec0@intel.com>
+In-Reply-To: <1556264798-18540-4-git-send-email-ludovic.Barre@st.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Arend Van Spriel <arend.vanspriel@broadcom.com>, Franky Lin <franky.lin@broadcom.com>, Hante Meuleman <hante.meuleman@broadcom.com>, Chi-Hsien Lin <chi-hsien.lin@cypress.com>, Wright Feng <wright.feng@cypress.com>, ulf.hansson@linaro.org, faiz_abbas@ti.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, Kalle Valo <kvalo@codeaurora.org>, linux-wireless@vger.kernel.org, brcm80211-dev-list.pdl@broadcom.com, brcm80211-dev-list@cypress.com, netdev@vger.kernel.org
+To: Ludovic Barre <ludovic.Barre@st.com>
+Cc: Rob Herring <robh+dt@kernel.org>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-stm32@st-md-mailman.stormreply.com
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, May 27, 2019 at 03:08:07PM +0300, Adrian Hunter wrote:
-> On 27/05/19 12:37 PM, Brian Masney wrote:
-> > On Sun, May 26, 2019 at 03:58:19PM -0400, Brian Masney wrote:
-> >> I attached a patch that shows how I was able to determine what had
-> >> already claimed the host.
-> > On Mon, May 27, 2019 at 10:48:24AM +0300, Adrian Hunter wrote:
-> >> This is because SDHCI is using the IRQ thread to process the SDIO card
-> >> interrupt (sdio_run_irqs()).  When the card driver tries to use the card, it
-> >> causes interrupts which deadlocks since c07a48c26519 ("mmc: sdhci: Remove
-> >> finish_tasklet") has moved the tasklet processing to the IRQ thread.
-> >>
-> >> I would expect to be able to use the IRQ thread to complete requests, and it
-> >> is desirable to do so because it is lower latency.
-> >>
-> >> Probably, SDHCI should use sdio_signal_irq() which queues a work item, and
-> >> is what other drivers are doing.
-> >>
-> >> I will investigate some more and send a patch.
-> 
-> Please try the patch below:
-> 
-> From: Adrian Hunter <adrian.hunter@intel.com>
-> Date: Mon, 27 May 2019 14:45:55 +0300
-> Subject: [PATCH] mmc: sdhci: Fix SDIO IRQ thread deadlock
-> 
-> Since commit c07a48c26519 ("mmc: sdhci: Remove finish_tasklet"), the IRQ
-> thread might be used to complete requests, but the IRQ thread is also used
-> to process SDIO card interrupts. This can cause a deadlock when the SDIO
-> processing tries to access the card since that would also require the IRQ
-> thread. Change SDHCI to use sdio_signal_irq() to schedule a work item
-> instead. That also requires implementing the ->ack_sdio_irq() mmc host op.
-> 
-> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
-> Fixes: c07a48c26519 ("mmc: sdhci: Remove finish_tasklet")
+On Fri, 26 Apr 2019 at 09:46, Ludovic Barre <ludovic.Barre@st.com> wrote:
+>
+> From: Ludovic Barre <ludovic.barre@st.com>
+>
+> The "busy_detect_flag" is used to read/clear busy value of
+> mmci status. The "busy_detect_mask" is used to manage busy irq of
+> mmci mask.
+> For sdmmc variant, the 2 properties have not the same offset.
+> To clear the busyd0 status bit, we must add busy detect flag,
+> the mmci mask is not enough.
+>
+> Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
 
-Yes, this fixes the issue for me. You can add my:
+Ludovic, again, apologies for the delay.
 
-Reported-by: Brian Masney <masneyb@onstation.org>
-Tested-by: Brian Masney <masneyb@onstation.org>
+> ---
+>  drivers/mmc/host/mmci.c | 3 ++-
+>  1 file changed, 2 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+> index a040f54..3cd52e8 100644
+> --- a/drivers/mmc/host/mmci.c
+> +++ b/drivers/mmc/host/mmci.c
+> @@ -1517,7 +1517,8 @@ static irqreturn_t mmci_irq(int irq, void *dev_id)
+>                  * to make sure that both start and end interrupts are always
+>                  * cleared one after the other.
+>                  */
+> -               status &= readl(host->base + MMCIMASK0);
+> +               status &= readl(host->base + MMCIMASK0) |
+> +                       host->variant->busy_detect_flag;
 
-Thanks,
+I think this is not entirely correct, because it would mean we check
+for busy even if we haven't unmasked the busy IRQ via the
+variant->busy_detect_mask.
 
-Brian
+I suggest to store a new bool in the host (call it
+"busy_detect_unmasked" or whatever makes sense to you), to track
+whether we have unmasked the busy IRQ or not. Then take this flag into
+account, before ORing the value of host->variant->busy_detect_flag,
+according to above.
+
+>                 if (host->variant->busy_detect)
+>                         writel(status & ~host->variant->busy_detect_mask,
+>                                host->base + MMCICLEAR);
+> --
+> 2.7.4
+>
+
+Kind regards
+Uffe
