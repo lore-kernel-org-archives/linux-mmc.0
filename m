@@ -1,83 +1,66 @@
-From: Neil Armstrong <narmstrong@baylibre.com>
-Subject: [PATCH v2 3/3] arm64: dts: meson: g12a: add SDIO controller
-Date: Mon, 27 May 2019 14:43:07 +0200
-Message-ID: <20190527124307.32075-4-narmstrong@baylibre.com>
-References: <20190527124307.32075-1-narmstrong@baylibre.com>
+From: Brian Masney <masneyb@onstation.org>
+Subject: Re: Issue with Broadcom wireless in 5.2rc1 (was Re: [PATCH] mmc:
+ sdhci: queue work after sdhci_defer_done())
+Date: Mon, 27 May 2019 08:50:26 -0400
+Message-ID: <20190527125026.GA4272@basecamp>
+References: <20190524111053.12228-1-masneyb@onstation.org>
+ <70782901-a9ac-5647-1abe-89c86a44a01b@intel.com>
+ <20190524154958.GB16322@basecamp>
+ <20190526122136.GA26456@basecamp>
+ <e8c049ce-07e1-8b34-678d-41b3d6d41983@broadcom.com>
+ <20190526195819.GA29665@basecamp>
+ <20190527093711.GA853@basecamp>
+ <ead7f268-b730-3541-31f7-4499556efec0@intel.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190527124307.32075-1-narmstrong@baylibre.com>
+Content-Disposition: inline
+In-Reply-To: <ead7f268-b730-3541-31f7-4499556efec0@intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: ulf.hansson@linaro.org, khilman@baylibre.com
-Cc: Jerome Brunet <jbrunet@baylibre.com>, linux-mmc@vger.kernel.org, linux-amlogic@lists.infradead.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, Neil Armstrong <narmstrong@baylibre.com>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Arend Van Spriel <arend.vanspriel@broadcom.com>, Franky Lin <franky.lin@broadcom.com>, Hante Meuleman <hante.meuleman@broadcom.com>, Chi-Hsien Lin <chi-hsien.lin@cypress.com>, Wright Feng <wright.feng@cypress.com>, ulf.hansson@linaro.org, faiz_abbas@ti.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, Kalle Valo <kvalo@codeaurora.org>, linux-wireless@vger.kernel.org, brcm80211-dev-list.pdl@broadcom.com, brcm80211-dev-list@cypress.com, netdev@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-From: Jerome Brunet <jbrunet@baylibre.com>
+On Mon, May 27, 2019 at 03:08:07PM +0300, Adrian Hunter wrote:
+> On 27/05/19 12:37 PM, Brian Masney wrote:
+> > On Sun, May 26, 2019 at 03:58:19PM -0400, Brian Masney wrote:
+> >> I attached a patch that shows how I was able to determine what had
+> >> already claimed the host.
+> > On Mon, May 27, 2019 at 10:48:24AM +0300, Adrian Hunter wrote:
+> >> This is because SDHCI is using the IRQ thread to process the SDIO card
+> >> interrupt (sdio_run_irqs()).  When the card driver tries to use the card, it
+> >> causes interrupts which deadlocks since c07a48c26519 ("mmc: sdhci: Remove
+> >> finish_tasklet") has moved the tasklet processing to the IRQ thread.
+> >>
+> >> I would expect to be able to use the IRQ thread to complete requests, and it
+> >> is desirable to do so because it is lower latency.
+> >>
+> >> Probably, SDHCI should use sdio_signal_irq() which queues a work item, and
+> >> is what other drivers are doing.
+> >>
+> >> I will investigate some more and send a patch.
+> 
+> Please try the patch below:
+> 
+> From: Adrian Hunter <adrian.hunter@intel.com>
+> Date: Mon, 27 May 2019 14:45:55 +0300
+> Subject: [PATCH] mmc: sdhci: Fix SDIO IRQ thread deadlock
+> 
+> Since commit c07a48c26519 ("mmc: sdhci: Remove finish_tasklet"), the IRQ
+> thread might be used to complete requests, but the IRQ thread is also used
+> to process SDIO card interrupts. This can cause a deadlock when the SDIO
+> processing tries to access the card since that would also require the IRQ
+> thread. Change SDHCI to use sdio_signal_irq() to schedule a work item
+> instead. That also requires implementing the ->ack_sdio_irq() mmc host op.
+> 
+> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+> Fixes: c07a48c26519 ("mmc: sdhci: Remove finish_tasklet")
 
-The Amlogic G12A SDIO Controller has a bug preventing direct DDR access,
-add the port A (SDIO) pinctrl and controller nodes and mark this specific
-controller with the amlogic,dram-access-quirk property.
+Yes, this fixes the issue for me. You can add my:
 
-Signed-off-by: Jerome Brunet <jbrunet@baylibre.com>
-Signed-off-by: Neil Armstrong <narmstrong@baylibre.com>
----
- arch/arm64/boot/dts/amlogic/meson-g12a.dtsi | 37 +++++++++++++++++++++
- 1 file changed, 37 insertions(+)
+Reported-by: Brian Masney <masneyb@onstation.org>
+Tested-by: Brian Masney <masneyb@onstation.org>
 
-diff --git a/arch/arm64/boot/dts/amlogic/meson-g12a.dtsi b/arch/arm64/boot/dts/amlogic/meson-g12a.dtsi
-index 9f72396ba710..d1a3da9d0b2e 100644
---- a/arch/arm64/boot/dts/amlogic/meson-g12a.dtsi
-+++ b/arch/arm64/boot/dts/amlogic/meson-g12a.dtsi
-@@ -202,6 +202,30 @@
- 						};
- 					};
- 
-+					sdio_pins: sdio {
-+						mux {
-+							groups = "sdio_d0",
-+								 "sdio_d1",
-+								 "sdio_d2",
-+								 "sdio_d3",
-+								 "sdio_cmd",
-+								 "sdio_clk";
-+							function = "sdio";
-+							bias-disable;
-+							drive-strength-microamp = <4000>;
-+						};
-+					};
-+
-+					sdio_clk_gate_pins: sdio_clk_gate {
-+						mux {
-+							groups = "GPIOX_4";
-+							function = "gpio_periphs";
-+							bias-pull-down;
-+							drive-strength-microamp = <4000>;
-+						};
-+					};
-+
-+
- 					uart_a_pins: uart-a {
- 						mux {
- 							groups = "uart_a_tx",
-@@ -566,6 +590,19 @@
- 			};
- 		};
- 
-+		sd_emmc_a: sd@ffe03000 {
-+			compatible = "amlogic,meson-axg-mmc";
-+			reg = <0x0 0xffe03000 0x0 0x800>;
-+			interrupts = <GIC_SPI 189 IRQ_TYPE_EDGE_RISING>;
-+			status = "disabled";
-+			clocks = <&clkc CLKID_SD_EMMC_A>,
-+				 <&clkc CLKID_SD_EMMC_A_CLK0>,
-+				 <&clkc CLKID_FCLK_DIV2>;
-+			clock-names = "core", "clkin0", "clkin1";
-+			resets = <&reset RESET_SD_EMMC_A>;
-+			amlogic,dram-access-quirk;
-+		};
-+
- 		usb: usb@ffe09000 {
- 			status = "disabled";
- 			compatible = "amlogic,meson-g12a-usb-ctrl";
--- 
-2.21.0
+Thanks,
+
+Brian
