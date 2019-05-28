@@ -1,136 +1,62 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [RFC PATCH 1/2] mmc: sdhci: Manually check card status after reset
-Date: Tue, 28 May 2019 09:38:20 +0200
-Message-ID: <CAPDyKFpL1nHt1E1zgS-iDZf_KDWk2CN32Lvr+5Nmo8CtB2VCWg@mail.gmail.com>
-References: <20190501175457.195855-1-rrangel@chromium.org>
+From: Alexandru Ardelean <alexandru.ardelean@analog.com>
+Subject: [PATCH 1/3][V2] lib: fix match_string() helper on -1 array size
+Date: Tue, 28 May 2019 10:39:30 +0300
+Message-ID: <20190528073932.25365-1-alexandru.ardelean@analog.com>
+References: <20190508112842.11654-1-alexandru.ardelean@analog.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190501175457.195855-1-rrangel@chromium.org>
+In-Reply-To: <20190508112842.11654-1-alexandru.ardelean@analog.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Raul E Rangel <rrangel@chromium.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Daniel Kurtz <djkurtz@chromium.org>, hongjiefang <hongjiefang@asrmicro.com>, Jennifer Dahm <jennifer.dahm@ni.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Shawn Lin <shawn.lin@rock-chips.com>, Kyle Roeschley <kyle.roeschley@ni.com>, Avri Altman <avri.altman@wdc.com>
+To: linuxppc-dev@lists.ozlabs.org, linux-kernel@vger.kernel.org, linux-ide@vger.kernel.org, linux-clk@vger.kernel.org, linux-rpi-kernel@lists.infradead.org, linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org, linux-pm@vger.kernel.org, linux-gpio@vger.kernel.org, dri-devel@lists.freedesktop.org, intel-gfx@lists.freedesktop.org, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, linux-wireless@vger.kernel.org, netdev@vger.kernel.org, linux-pci@vger.kernel.org, linux-tegra@vger.kernel.org, devel@driverdev.osuosl.org, linux-usb@vger.kernel.org, kvm@vger.kernel.org, linux-fbdev@vger.kernel.org, linux-mtd@lists.infradead.org, cgroups@vger.kernel.org, linux-mm@kvack.org, linux-security-module@vger.kernel.org
+Cc: heikki.krogerus@linux.intel.com, gregkh@linuxfoundation.org, andriy.shevchenko@linux.intel.com, Alexandru Ardelean <alexandru.ardelean@analog.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, 1 May 2019 at 19:55, Raul E Rangel <rrangel@chromium.org> wrote:
->
-> There is a race condition between resetting the SDHCI controller and
-> disconnecting the card.
->
-> For example:
-> 0) Card is connected and transferring data
-> 1) mmc_sd_reset is called to reset the controller due to a data error
+The documentation the `_match_string()` helper mentions that `n`
+should be:
+ * @n: number of strings in the array or -1 for NULL terminated arrays
 
-I assume you refer to mmc_sd_hw_reset()? In that case, I think you
-have interpreted the purpose of mmc_sd_hw_reset() slightly wrong. It's
-responsibility is to reset the SD-card and not the host/controller.
+The behavior of the function is different, in the sense that it exits on
+the first NULL element in the array, regardless of whether `n` is -1 or a
+positive number.
 
-Whether there some additional "reset" of the controller needed, that
-is assumed by the core, to be managed via the ->set_ios() callback for
-the host.
+This patch changes the behavior, to exit the loop when a NULL element is
+found and n == -1. Essentially, this aligns the behavior with the
+doc-string.
 
-> 2) sdhci_set_ios calls sdhci_do_reset
-> 3) SOFT_RESET_ALL is toggled which clears the IRQs the controller has
-> configured.
-> 4) Wait for SOFT_RESET_ALL to clear
-> 5) CD logic notices card is gone and CARD_PRESENT goes low, but since the
->    IRQs are not configured a CARD_REMOVED interrupt is never raised.
-> 6) IRQs are enabled again
-> 7) mmc layer never notices the device is disconnected. The SDHCI layer
->    will keep returning -ENOMEDIUM. This results in a card that is always
->    present and not functional.
+There are currently many users of `match_string()`, and so, in order to go
+through them, the next patches in the series will focus on doing some
+cosmetic changes, which are aimed at grouping the users of
+`match_string()`.
 
-This sounds like host specific problems, which most likely should be
-fixed in host driver, solely. Unless I am missing something, of
-course.
+Signed-off-by: Alexandru Ardelean <alexandru.ardelean@analog.com>
+---
 
->
-> Signed-off-by: Raul E Rangel <rrangel@chromium.org>
-> ---
-> You can see an example of the following two patches here:
-> https://privatebin.net/?b0f5953716d34ca6#C699bCBQ99NdvspfDW7CMucT8CJG4DgL+yUNPyepDCo=
-> Line 8213: EILSEQ
-> Line 8235: SDHC is hard reset
-> Line 8240: Controller completes reset and card is no longer present
-> Line 8379: mmc_sd_reset notices card is missing and issues a card_event
->            and schedules a detect change.
-> Line 8402: Don't init the card since it's already gone.
-> Line 8717: Marks card as removed
-> Line 8820: mmc_sd_remove removes the block device
->
-> I am running into a kernel panic. A task gets stuck for more than 120
-> seconds. I keep seeing blkdev_close in the stack trace, so maybe I'm not
-> calling something correctly?
->
-> Here is the panic: https://privatebin.net/?8ec48c1547d19975#dq/h189w5jmTlbMKKAwZjUr4bhm7Q2AgvGdRqc5BxAc=
->
-> I sometimes see the following:
-> [  547.943974] udevd[144]: seq 2350 '/devices/pci0000:00/0000:00:14.7/mmc_host/mmc0/mmc0:0001/block/mmcblk0/mmcblk0p1' is taking a long time
->
-> I was getting the kernel panic on a 4.14 kernel: https://chromium.googlesource.com/chromiumos/third_party/kernel/+/f3dc032faf4d074f20ada437e2d081a28ac699da/drivers/mmc/host
-> So I'm guessing I'm missing an upstream fix.
->
-> Do the patches look correct or am I doing something that would cause a
-> kernel panic?
->
-> I have a DUT setup with a GPIO I can use to toggle the CD pin. I ran a
-> test where I connect and then randomly, between 0s - 1s disconnect the
-> card. This got over 20k iterations before the panic. Though when I do it
-> manually and stop for 2 minutes the panic happens.
->
-> Any help would be appreciated.
->
-> Thanks,
-> Raul
->
->
->  drivers/mmc/core/sd.c | 20 ++++++++++++++++++++
->  1 file changed, 20 insertions(+)
->
-> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-> index 265e1aeeb9d8..9206c4297d66 100644
-> --- a/drivers/mmc/core/sd.c
-> +++ b/drivers/mmc/core/sd.c
-> @@ -1242,7 +1242,27 @@ static int mmc_sd_runtime_resume(struct mmc_host *host)
->
->  static int mmc_sd_hw_reset(struct mmc_host *host)
->  {
-> +       int present;
->         mmc_power_cycle(host, host->card->ocr);
-> +
-> +       present = host->ops->get_cd(host);
-> +
-> +       /* The card status could have changed while resetting. */
-> +       if ((mmc_card_removed(host->card) && present) ||
-> +           (!mmc_card_removed(host->card) && !present)) {
-> +               pr_info("%s: card status changed during reset\n",
-> +                      mmc_hostname(host));
-> +               host->ops->card_event(host);
-> +               mmc_detect_change(host, 0);
-> +       }
-> +
-> +       /* Don't perform unnecessary transactions if the card is missing. */
-> +       if (!present) {
-> +               pr_info("%s: card was removed during reset\n",
-> +                       mmc_hostname(host));
-> +               return -ENOMEDIUM;
-> +       }
-> +
+Changelog v1 -> v2:
+* split the initial series into just 3 patches that fix the
+  `match_string()` helper and start introducing a new version of this
+  helper, which computes array-size of static arrays
 
-When doing a  mmc_hw_reset() (which ends up calling mmc_sd_hw_reset()
-in case of SD cards), we are making a final attempt to make the card
-functional again, via a power cycle and a re-init of it.
+ lib/string.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
 
-In this path, we don't care whether the card is removed, as that
-should have been detected already when the block layer calls
-mmc_detect_card_removed().
-
->         return mmc_sd_init_card(host, host->card->ocr, host->card);
->  }
->
-> --
-> 2.21.0.593.g511ec345e18-goog
->
-
-Kind regards
-Uffe
+diff --git a/lib/string.c b/lib/string.c
+index 6016eb3ac73d..e2cf5acc83bd 100644
+--- a/lib/string.c
++++ b/lib/string.c
+@@ -681,8 +681,11 @@ int match_string(const char * const *array, size_t n, const char *string)
+ 
+ 	for (index = 0; index < n; index++) {
+ 		item = array[index];
+-		if (!item)
++		if (!item) {
++			if (n != (size_t)-1)
++				continue;
+ 			break;
++		}
+ 		if (!strcmp(item, string))
+ 			return index;
+ 	}
+-- 
+2.20.1
