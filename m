@@ -1,95 +1,66 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3 1/2] dt-bindings: mmc: Add YAML schemas for the generic
- MMC options
-Date: Tue, 28 May 2019 21:32:31 +0200
-Message-ID: <CAPDyKFrTroAOjEyT9GxQALC4UsiDg8739F9Qc216bDC=wgk2mg@mail.gmail.com>
-References: <c6b8789d71ce1970be77387c066a262dca0a0dec.1558340089.git-series.maxime.ripard@bootlin.com>
- <CAPDyKFrs6f4_Xr=ATay_wDYNPa+-jdZvP4XSB55B-EFMAETN1Q@mail.gmail.com>
- <20190528172649.6mkdkscnu5d2rybi@flea>
+Subject: Re: Issue with Broadcom wireless in 5.2rc1 (was Re: [PATCH] mmc:
+ sdhci: queue work after sdhci_defer_done())
+Date: Tue, 28 May 2019 22:11:55 +0200
+Message-ID: <CAPDyKFrm=NTKjsEPiwzUVbDDzjW5PwZteXbKtPUi9GTUB4kbMQ@mail.gmail.com>
+References: <20190524111053.12228-1-masneyb@onstation.org> <70782901-a9ac-5647-1abe-89c86a44a01b@intel.com>
+ <20190524154958.GB16322@basecamp> <20190526122136.GA26456@basecamp>
+ <e8c049ce-07e1-8b34-678d-41b3d6d41983@broadcom.com> <20190526195819.GA29665@basecamp>
+ <20190527093711.GA853@basecamp> <ead7f268-b730-3541-31f7-4499556efec0@intel.com>
+ <20190527125026.GA4272@basecamp>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20190528172649.6mkdkscnu5d2rybi@flea>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Maxime Ripard <maxime.ripard@bootlin.com>
-Cc: Mark Rutland <mark.rutland@arm.com>, DTML <devicetree@vger.kernel.org>, Rob Herring <robh@kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chen-Yu Tsai <wens@csie.org>, Rob Herring <robh+dt@kernel.org>, Frank Rowand <frowand.list@gmail.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20190527125026.GA4272@basecamp>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Brian Masney <masneyb@onstation.org>, Adrian Hunter <adrian.hunter@intel.com>
+Cc: Arend Van Spriel <arend.vanspriel@broadcom.com>, Franky Lin <franky.lin@broadcom.com>, Hante Meuleman <hante.meuleman@broadcom.com>, Chi-Hsien Lin <chi-hsien.lin@cypress.com>, Wright Feng <wright.feng@cypress.com>, Faiz Abbas <faiz_abbas@ti.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-arm-msm <linux-arm-msm@vger.kernel.org>, Kalle Valo <kvalo@codeaurora.org>, linux-wireless <linux-wireless@vger.kernel.org>, brcm80211-dev-list.pdl@broadcom.com, brcm80211-dev-list@cypress.com, netdev@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, 28 May 2019 at 19:26, Maxime Ripard <maxime.ripard@bootlin.com> wrote:
+On Mon, 27 May 2019 at 14:50, Brian Masney <masneyb@onstation.org> wrote:
 >
-> Hi Ulf,
+> On Mon, May 27, 2019 at 03:08:07PM +0300, Adrian Hunter wrote:
+> > On 27/05/19 12:37 PM, Brian Masney wrote:
+> > > On Sun, May 26, 2019 at 03:58:19PM -0400, Brian Masney wrote:
+> > >> I attached a patch that shows how I was able to determine what had
+> > >> already claimed the host.
+> > > On Mon, May 27, 2019 at 10:48:24AM +0300, Adrian Hunter wrote:
+> > >> This is because SDHCI is using the IRQ thread to process the SDIO card
+> > >> interrupt (sdio_run_irqs()).  When the card driver tries to use the card, it
+> > >> causes interrupts which deadlocks since c07a48c26519 ("mmc: sdhci: Remove
+> > >> finish_tasklet") has moved the tasklet processing to the IRQ thread.
+> > >>
+> > >> I would expect to be able to use the IRQ thread to complete requests, and it
+> > >> is desirable to do so because it is lower latency.
+> > >>
+> > >> Probably, SDHCI should use sdio_signal_irq() which queues a work item, and
+> > >> is what other drivers are doing.
+> > >>
+> > >> I will investigate some more and send a patch.
+> >
+> > Please try the patch below:
+> >
+> > From: Adrian Hunter <adrian.hunter@intel.com>
+> > Date: Mon, 27 May 2019 14:45:55 +0300
+> > Subject: [PATCH] mmc: sdhci: Fix SDIO IRQ thread deadlock
+> >
+> > Since commit c07a48c26519 ("mmc: sdhci: Remove finish_tasklet"), the IRQ
+> > thread might be used to complete requests, but the IRQ thread is also used
+> > to process SDIO card interrupts. This can cause a deadlock when the SDIO
+> > processing tries to access the card since that would also require the IRQ
+> > thread. Change SDHCI to use sdio_signal_irq() to schedule a work item
+> > instead. That also requires implementing the ->ack_sdio_irq() mmc host op.
+> >
+> > Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+> > Fixes: c07a48c26519 ("mmc: sdhci: Remove finish_tasklet")
 >
-> On Tue, May 28, 2019 at 10:40:16AM +0200, Ulf Hansson wrote:
-> > > +patternProperties:
-> > > +  "^.*@[0-9]+$":
-> > > +    properties:
-> > > +      reg:
-> > > +        items:
-> > > +          - minimum: 0
-> > > +            maximum: 7
-> > > +            description:
-> > > +              Must contain the SDIO function number of the function this
-> > > +              subnode describes. A value of 0 denotes the memory SD
-> > > +              function, values from 1 to 7 denote the SDIO functions.
-> > > +
-> > > +      broken-hpi:
-> > > +        $ref: /schemas/types.yaml#/definitions/flag
-> > > +        description:
-> > > +          Use this to indicate that the mmc-card has a broken hpi
-> > > +          implementation, and that hpi should not be used.
-> > > +
-> > > +    required:
-> > > +      - reg
-> > > +
-> >
-> > [...]
-> >
-> > > -Use of Function subnodes
-> > > -------------------------
-> > > -
-> > > -On embedded systems the cards connected to a host may need additional
-> > > -properties. These can be specified in subnodes to the host controller node.
-> > > -The subnodes are identified by the standard 'reg' property.
-> > > -Which information exactly can be specified depends on the bindings for the
-> > > -SDIO function driver for the subnode, as specified by the compatible string.
-> > > -
-> > > -Required host node properties when using function subnodes:
-> > > -- #address-cells: should be one. The cell is the slot id.
-> > > -- #size-cells: should be zero.
-> > > -
-> > > -Required function subnode properties:
-> > > -- reg: Must contain the SDIO function number of the function this subnode
-> > > -       describes. A value of 0 denotes the memory SD function, values from
-> > > -       1 to 7 denote the SDIO functions.
-> > > -
-> > > -Optional function subnode properties:
-> > > -- compatible: name of SDIO function following generic names recommended practice
-> > > -
-> >
-> > I think most of the information of how we use sub(child) nodes
-> > disappeared in this conversion - or at least gets harder to
-> > understand. Could we perhaps keep some of this?
+> Yes, this fixes the issue for me. You can add my:
 >
-> Sure, what would you like to keep in particular?
+> Reported-by: Brian Masney <masneyb@onstation.org>
+> Tested-by: Brian Masney <masneyb@onstation.org>
+>
 
-Most of it, so we can understand what can be described in sub-nodes.
-
-Additionally, we should also include what is stated in
-Documentation/devicetree/bindings/mmc/mmc-card.txt, as that also
-refers to how subnodes should be used, when it has the "mmc-card"
-compatible.
-
-Or maybe we should simply move all things related to subnodes into a
-separate .yaml?
+Applied for fixes, thanks!
 
 Kind regards
 Uffe
