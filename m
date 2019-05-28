@@ -1,141 +1,73 @@
 From: Doug Anderson <dianders@chromium.org>
-Subject: Re: [PATCH v2] mmc: dw_mmc: Disable SDIO interrupts while suspended
- to fix suspend/resume
-Date: Tue, 28 May 2019 07:38:14 -0700
-Message-ID: <CAD=FV=VqqDK6SLC_1_cFUjjEdTNUU09GJi4ZEMNwt_mgjnVRdg@mail.gmail.com>
-References: <20190429204040.18725-1-dianders@chromium.org> <CAD=FV=WEDkufoEUYv9U+c+Y_bm8MYEWS25n63vUeNG0LLCFnuw@mail.gmail.com>
- <CAPDyKFoKN2zUNvDkgciO6r_ohdh2Vaj5qQaAPwMq21y02XAK8A@mail.gmail.com>
+Subject: Re: [PATCH 2/3] mmc: core: API for temporarily disabling
+ auto-retuning due to errors
+Date: Tue, 28 May 2019 08:42:08 -0700
+Message-ID: <CAD=FV=XV1oudf-xW_s9CQMgF7MryX-UJRrqsUFDQE0DF8Yf80w@mail.gmail.com>
+References: <20190517225420.176893-1-dianders@chromium.org>
+ <20190517225420.176893-3-dianders@chromium.org> <05af228c-139b-2b7f-f626-36fb34634be5@broadcom.com>
+ <4f39e152-04ba-a64e-985a-df93e6d15ff8@intel.com> <aa8e526f-b382-f3b7-74a5-e0fee09ae096@broadcom.com>
+ <2d6fa51d-27af-4f90-2bd6-144112ce75ad@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFoKN2zUNvDkgciO6r_ohdh2Vaj5qQaAPwMq21y02XAK8A@mail.gmail.com>
-Sender: stable-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Kalle Valo <kvalo@codeaurora.org>, =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, Guenter Roeck <groeck@chromium.org>, Brian Norris <briannorris@chromium.org>, linux-wireless <linux-wireless@vger.kernel.org>, Sonny Rao <sonnyrao@chromium.org>, Emil Renner Berthing <emil.renner.berthing@gmail.com>, Matthias Kaehlcke <mka@chromium.org>, Ryan Case <ryandcase@chromium.org>, "# 4.0+" <stable@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Shawn Lin <shawn.lin@rock-chips.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <2d6fa51d-27af-4f90-2bd6-144112ce75ad@intel.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Arend Van Spriel <arend.vanspriel@broadcom.com>, Ulf Hansson <ulf.hansson@linaro.org>, Kalle Valo <kvalo@codeaurora.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, Double Lo <double.lo@cypress.com>, Brian Norris <briannorris@chromium.org>, Madhan Mohan R <madhanmohan.r@cypress.com>, Matthias Kaehlcke <mka@chromium.org>, Wright Feng <wright.feng@cypress.com>, Chi-Hsien Lin <chi-hsien.lin@cypress.com>, Jiong Wu <lohengrin1024@gmail.com>, Ritesh Harjani <riteshh@codeaurora.org>, Linux MMC List <linux-mmc@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>, Shawn Lin <shawn.lin@rock-chips.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Avri Altman <avri.altman@wdc.com>, Martin Hicks <mort@bork.org>
 List-Id: linux-mmc@vger.kernel.org
 
 Hi,
 
-On Tue, May 28, 2019 at 6:12 AM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+On Tue, May 28, 2019 at 4:45 AM Adrian Hunter <adrian.hunter@intel.com> wrote:
 >
-> On Mon, 20 May 2019 at 20:41, Doug Anderson <dianders@chromium.org> wrote:
+> On 28/05/19 2:21 PM, Arend Van Spriel wrote:
 > >
-> > Hi,
 > >
-> > On Mon, Apr 29, 2019 at 1:41 PM Douglas Anderson <dianders@chromium.org> wrote:
-> > >
-> > > Processing SDIO interrupts while dw_mmc is suspended (or partly
-> > > suspended) seems like a bad idea.  We really don't want to be
-> > > processing them until we've gotten ourselves fully powered up.
-> > >
-> > > You might be wondering how it's even possible to become suspended when
-> > > an SDIO interrupt is active.  As can be seen in
-> > > dw_mci_enable_sdio_irq(), we explicitly keep dw_mmc out of runtime
-> > > suspend when the SDIO interrupt is enabled.  ...but even though we
-> > > stop normal runtime suspend transitions when SDIO interrupts are
-> > > enabled, the dw_mci_runtime_suspend() can still get called for a full
-> > > system suspend.
-> > >
-> > > Let's handle all this by explicitly masking SDIO interrupts in the
-> > > suspend call and unmasking them later in the resume call.  To do this
-> > > cleanly I'll keep track of whether the client requested that SDIO
-> > > interrupts be enabled so that we can reliably restore them regardless
-> > > of whether we're masking them for one reason or another.
-> > >
-> > > It should be noted that if dw_mci_enable_sdio_irq() is never called
-> > > (for instance, if we don't have an SDIO card plugged in) that
-> > > "client_sdio_enb" will always be false.  In those cases this patch
-> > > adds a tiny bit of overhead to suspend/resume (a spinlock and a
-> > > read/write of INTMASK) but other than that is a no-op.  The
-> > > SDMMC_INT_SDIO bit should always be clear and clearing it again won't
-> > > hurt.
-> > >
-> > > Without this fix it can be seen that rk3288-veyron Chromebooks with
-> > > Marvell WiFi would sometimes fail to resume WiFi even after picking my
-> > > recent mwifiex patch [1].  Specifically you'd see messages like this:
-> > >   mwifiex_sdio mmc1:0001:1: Firmware wakeup failed
-> > >   mwifiex_sdio mmc1:0001:1: PREP_CMD: FW in reset state
-> > >
-> > > ...and tracing through the resume code in the failing cases showed
-> > > that we were processing a SDIO interrupt really early in the resume
-> > > call.
-> > >
-> > > NOTE: downstream in Chrome OS 3.14 and 3.18 kernels (both of which
-> > > support the Marvell SDIO WiFi card) we had a patch ("CHROMIUM: sdio:
-> > > Defer SDIO interrupt handling until after resume") [2].  Presumably
-> > > this is the same problem that was solved by that patch.
-> > >
-> > > [1] https://lkml.kernel.org/r/20190404040106.40519-1-dianders@chromium.org
-> > > [2] https://crrev.com/c/230765
-> > >
-> > > Cc: <stable@vger.kernel.org> # 4.14.x
-> > > Signed-off-by: Douglas Anderson <dianders@chromium.org>
-> > > ---
-> > > I didn't put any "Fixes" tag here, but presumably this could be
-> > > backported to whichever kernels folks found it useful for.  I have at
-> > > least confirmed that kernels v4.14 and v4.19 (as well as v5.1-rc2)
-> > > show the problem.  It is very easy to pick this to v4.19 and it
-> > > definitely fixes the problem there.
-> > >
-> > > I haven't spent the time to pick this to 4.14 myself, but presumably
-> > > it wouldn't be too hard to backport this as far as v4.13 since that
-> > > contains commit 32dba73772f8 ("mmc: dw_mmc: Convert to use
-> > > MMC_CAP2_SDIO_IRQ_NOTHREAD for SDIO IRQs").  Prior to that it might
-> > > make sense for anyone experiencing this problem to just pick the old
-> > > CHROMIUM patch to fix them.
-> > >
-> > > Changes in v2:
-> > > - Suggested 4.14+ in the stable tag (Sasha-bot)
-> > > - Extra note that this is a noop on non-SDIO (Shawn / Emil)
-> > > - Make boolean logic cleaner as per https://crrev.com/c/1586207/1
-> > > - Hopefully clear comments as per https://crrev.com/c/1586207/1
-> > >
-> > >  drivers/mmc/host/dw_mmc.c | 27 +++++++++++++++++++++++----
-> > >  drivers/mmc/host/dw_mmc.h |  3 +++
-> > >  2 files changed, 26 insertions(+), 4 deletions(-)
+> > On 5/28/2019 12:04 PM, Adrian Hunter wrote:
+> >> On 26/05/19 9:42 PM, Arend Van Spriel wrote:
+> >>> On 5/18/2019 12:54 AM, Douglas Anderson wrote:
+> >>>> Normally when the MMC core sees an "-EILSEQ" error returned by a host
+> >>>> controller then it will trigger a retuning of the card.  This is
+> >>>> generally a good idea.
+> >>>
+> >>> Probably a question for Adrian, but how is this retuning scheduled. I recall
+> >>> seeing something in mmc_request_done. How about deferring the retuning upon
+> >>> a release host or is that too sdio specific.
+> >>
+> >> Below is what I have been carrying the last 4 years.  But according to
+> >> Douglas'
+> >> patch, the release would need to be further down.  See 2nd diff below.
+> >> Would that work?
 > >
-> > Ulf: are you the right person to land this?  With 5.2-rc1 out it might
-> > be a good time for it?  To refresh your memory about this patch:
-> >
-> > * Patch v1 was posted back on April 10th [1] so we're at about 1.5
-> > months of time for people to comment about it now.  Should be more
-> > than enough.
->
-> Apologize for the delay, not sure why this has slipped through my
-> filters. Anyway, let me have a look at it now.
+> > That makes sense. The loop is needed because the device can be a bit bone
+> > headed. So indeed after the loop the device should be awake and able to
+> > handle CMD19.
 
-No worries.  If there's something better I can do in the future to
-avoid problems, please let me know.
+IMO I'd rather not _defer_ the re-tuning.  I believe the correct thing
+is to not schedule the re-tuning at all in response to the IO errors.
+That's what my patch does.
+
+Specifically the IO errors that come up in this case are not due to
+being "out of tune".  They are due to the fact that the other SDIO
+card may be in a transitory state and putting garbage on the bus.
+Scheduling a retuning for later would be just a waste of time and
+needlessly tie up the bus for the retune.
+
+...or am I confused?
 
 
-> > * Shawn Lin saw it and didn't hate it.  He had some confusion about
-> > how it worked and I've hopefully alleviated via extra comments / text.
-> >
-> > * Emil Renner Berthing thought it caused a regression for him but then
-> > tested further and was convinced that it didn't.  This is extra
-> > confirmation that someone other than me did try the patch and found it
-> > to not break things.  ;-)
-> >
-> > * It has been reviewed by Guenter Roeck (in v2)
->
-> One question, I am guessing you are considering
-> https://lkml.org/lkml/2019/5/17/761 as the long term solution, and
-> thus $subject patch should go as fix+stable? No?
+> What if tuning is needed to read SBSDIO_FUNC1_SLEEPCSR successfully?
 
-No, the two problems are completely separate.  ${SUBJECT} patch deals
-with full system suspend/resume.  I originally reproduced the problems
-on a device with Marvell WiFi, though it could possibly affect
-Broadcom parts on dw_mmc too.  ${SUBJECT} patch is ready to land on
-mainline Linux at your leisure.  Also: in case you didn't notice
-(since it didn't thread properly for me), Shawn Lin gave it a reviewed
-by [1].
+Personally I think this would be pretty unlikely.  If we're at this
+point we've already talked to the card quite a bit so we should have a
+tuning that's pretty good.  If we're just slightly out of tune then we
+should still get through the loop with a few retries and then we can
+detect that we're out of tune later, with a more reliable command.
 
-The patch you refer to [2] is related to something akin to an idle
-state (more like Runtime PM) and only affects Broadcom parts.  Also
-the Broadcom issue ought to happen across all host controllers (AKA
-not just dw_mmc).
+However, if you're worried about this, I can always re-enable the old
+behavior if we have already looped a few times.  I suppose I could
+increase the loop duration/count slightly too...  Please let me know
+one way or the other.
 
-[1] https://lkml.kernel.org/r/982ffba1-c599-e73d-e5e0-b1be5668851c@rock-chips.com
-[2] https://lkml.org/lkml/2019/5/17/761
 
 -Doug
