@@ -1,69 +1,53 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: meson-gx: fix irq ack
-Date: Tue, 28 May 2019 10:53:03 +0200
-Message-ID: <CAPDyKFp8KErOHTZTg+DdqRvURjG4ohTXiZ-FQd7yKvkpL0z15A@mail.gmail.com>
-References: <20190523145950.7030-1-jbrunet@baylibre.com>
+Subject: Re: [PATCH v2 1/3] dt-bindings: mmc: meson-gx: add dram-access-quirk property
+Date: Tue, 28 May 2019 10:53:10 +0200
+Message-ID: <CAPDyKFrDKkDO383buUzkWw_4wX15pNvexbHSvJAxHc-na4PSKw@mail.gmail.com>
+References: <20190527124307.32075-1-narmstrong@baylibre.com> <20190527124307.32075-2-narmstrong@baylibre.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190523145950.7030-1-jbrunet@baylibre.com>
+In-Reply-To: <20190527124307.32075-2-narmstrong@baylibre.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Jerome Brunet <jbrunet@baylibre.com>
-Cc: Kevin Hilman <khilman@baylibre.com>, "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Neil Armstrong <narmstrong@baylibre.com>
+To: Neil Armstrong <narmstrong@baylibre.com>
+Cc: Kevin Hilman <khilman@baylibre.com>, DTML <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Martin Blumenstingl <martin.blumenstingl@googlemail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, 23 May 2019 at 16:59, Jerome Brunet <jbrunet@baylibre.com> wrote:
+On Mon, 27 May 2019 at 14:43, Neil Armstrong <narmstrong@baylibre.com> wrote:
 >
-> While cleaning the ISR of the meson-gx and acking only raised irqs,
-> the ack of the irq was moved at the very last stage of the function.
+> On the Amlogic G12A SoC family, (only) the SDIO controller has a bug which
+> makes any DRAM access from the MMC controller fail.
 >
-> This was stable during the initial tests but it triggered issues with
-> hs200, under specific loads (like booting android). Acking the irqs
-> after calling the mmc_request_done() causes the problem.
+> Add the amlogic,dram-access-quirk property so signal this particular
+> controller has this bug and needs a quirk to work properly.
 >
-> Moving the ack back to the original place solves the issue. Since the
-> irq is edge triggered, it does not hurt to ack irq even earlier, so
-> let's do it early in the ISR.
->
-> Fixes: 9c5fdb07a28d ("mmc: meson-gx: ack only raised irq")
-> Tested-by: Neil Armstrong <narmstrong@baylibre.com>
-> Tested-by: Kevin Hilman <khilman@baylibre.com>
-> Signed-off-by: Jerome Brunet <jbrunet@baylibre.com>
+> Reviewed-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+> Signed-off-by: Neil Armstrong <narmstrong@baylibre.com>
 
-Applied for fixes, thanks!
+Applied for next, thanks!
 
 Kind regards
 Uffe
 
 
 > ---
->  drivers/mmc/host/meson-gx-mmc.c | 6 +++---
->  1 file changed, 3 insertions(+), 3 deletions(-)
+>  Documentation/devicetree/bindings/mmc/amlogic,meson-gx.txt | 4 ++++
+>  1 file changed, 4 insertions(+)
 >
-> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-> index 6ef465304052..cb3f6811d69a 100644
-> --- a/drivers/mmc/host/meson-gx-mmc.c
-> +++ b/drivers/mmc/host/meson-gx-mmc.c
-> @@ -873,6 +873,9 @@ static irqreturn_t meson_mmc_irq(int irq, void *dev_id)
->         if (WARN_ON(!host) || WARN_ON(!host->cmd))
->                 return IRQ_NONE;
+> diff --git a/Documentation/devicetree/bindings/mmc/amlogic,meson-gx.txt b/Documentation/devicetree/bindings/mmc/amlogic,meson-gx.txt
+> index 13e70409e8ac..ccc5358db131 100644
+> --- a/Documentation/devicetree/bindings/mmc/amlogic,meson-gx.txt
+> +++ b/Documentation/devicetree/bindings/mmc/amlogic,meson-gx.txt
+> @@ -22,6 +22,10 @@ Required properties:
+>    clock rate requested by the MMC core.
+>  - resets     : phandle of the internal reset line
 >
-> +       /* ack all raised interrupts */
-> +       writel(status, host->regs + SD_EMMC_STATUS);
+> +Optional properties:
+> +- amlogic,dram-access-quirk: set when controller's internal DMA engine cannot access the
+> +  DRAM memory, like on the G12A dedicated SDIO controller.
 > +
->         cmd = host->cmd;
->         data = cmd->data;
->         cmd->error = 0;
-> @@ -919,9 +922,6 @@ static irqreturn_t meson_mmc_irq(int irq, void *dev_id)
->         if (ret == IRQ_HANDLED)
->                 meson_mmc_request_done(host->mmc, cmd->mrq);
+>  Example:
 >
-> -       /* ack all raised interrupts */
-> -       writel(status, host->regs + SD_EMMC_STATUS);
-> -
->         return ret;
->  }
->
+>         sd_emmc_a: mmc@70000 {
 > --
-> 2.20.1
+> 2.21.0
 >
