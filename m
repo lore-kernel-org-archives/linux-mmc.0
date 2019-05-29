@@ -1,13 +1,16 @@
 From: Maxime Ripard <maxime.ripard@bootlin.com>
-Subject: [PATCH v3 2/2] dt-bindings: mmc: sun4i: Add YAML schemas
-Date: Wed, 29 May 2019 09:23:44 +0200
-Message-ID: <18bb36183d93fd6bc03a401c2b6b498c0171d375.1559114458.git-series.maxime.ripard@bootlin.com>
-References: <fab0ec653b4e059cdb1206f65bfca051c8b0a7de.1559114458.git-series.maxime.ripard@bootlin.com>
+Subject: Re: [PATCH v3 1/2] dt-bindings: mmc: Add YAML schemas for the
+ generic MMC options
+Date: Wed, 29 May 2019 09:42:28 +0200
+Message-ID: <20190529074228.viocdc77pdkoqdfi@flea>
+References: <c6b8789d71ce1970be77387c066a262dca0a0dec.1558340089.git-series.maxime.ripard@bootlin.com>
+ <CAPDyKFrs6f4_Xr=ATay_wDYNPa+-jdZvP4XSB55B-EFMAETN1Q@mail.gmail.com>
+ <20190528172649.6mkdkscnu5d2rybi@flea>
+ <CAPDyKFrTroAOjEyT9GxQALC4UsiDg8739F9Qc216bDC=wgk2mg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/mixed; boundary="===============3171636377577200890=="
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <fab0ec653b4e059cdb1206f65bfca051c8b0a7de.1559114458.git-series.maxime.ripard@bootlin.com>
+In-Reply-To: <CAPDyKFrTroAOjEyT9GxQALC4UsiDg8739F9Qc216bDC=wgk2mg@mail.gmail.com>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -17,187 +20,122 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
 Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
 Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Mark Rutland <mark.rutland@arm.com>, Rob Herring <robh+dt@kernel.org>, Frank Rowand <frowand.list@gmail.com>, Chen-Yu Tsai <wens@csie.org>, Maxime Ripard <maxime.ripard@bootlin.com>
-Cc: devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Rob Herring <robh@kernel.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Mark Rutland <mark.rutland@arm.com>, DTML <devicetree@vger.kernel.org>, Rob Herring <robh@kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chen-Yu Tsai <wens@csie.org>, Rob Herring <robh+dt@kernel.org>, Frank Rowand <frowand.list@gmail.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Switch the DT binding to a YAML schema to enable the DT validation.
 
-Reviewed-by: Rob Herring <robh@kernel.org>
-Signed-off-by: Maxime Ripard <maxime.ripard@bootlin.com>
+--===============3171636377577200890==
+Content-Type: multipart/signed; micalg=pgp-sha256;
+	protocol="application/pgp-signature"; boundary="gthk2wzch2cu56ho"
+Content-Disposition: inline
 
----
 
-Changes from v2
-  - Add Rob's Reviewed-by
----
- Documentation/devicetree/bindings/mmc/allwinner,sun4i-a10-mmc.yaml | 98 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-
- Documentation/devicetree/bindings/mmc/sunxi-mmc.txt                | 52 +--------------------------------------
- 2 files changed, 98 insertions(+), 52 deletions(-)
- create mode 100644 Documentation/devicetree/bindings/mmc/allwinner,sun4i-a10-mmc.yaml
- delete mode 100644 Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
+--gthk2wzch2cu56ho
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-diff --git a/Documentation/devicetree/bindings/mmc/allwinner,sun4i-a10-mmc.yaml b/Documentation/devicetree/bindings/mmc/allwinner,sun4i-a10-mmc.yaml
-new file mode 100644
-index 000000000000..df0280edef97
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/allwinner,sun4i-a10-mmc.yaml
-@@ -0,0 +1,98 @@
-+# SPDX-License-Identifier: GPL-2.0
-+%YAML 1.2
-+---
-+$id: http://devicetree.org/schemas/mmc/allwinner,sun4i-a10-mmc.yaml#
-+$schema: http://devicetree.org/meta-schemas/core.yaml#
-+
-+title: Allwinner A10 MMC Controller Device Tree Bindings
-+
-+allOf:
-+  - $ref: "mmc-controller.yaml"
-+
-+maintainers:
-+  - Chen-Yu Tsai <wens@csie.org>
-+  - Maxime Ripard <maxime.ripard@bootlin.com>
-+
-+properties:
-+  "#address-cells": true
-+  "#size-cells": true
-+
-+  compatible:
-+    oneOf:
-+      - const: allwinner,sun4i-a10-mmc
-+      - const: allwinner,sun5i-a13-mmc
-+      - const: allwinner,sun7i-a20-mmc
-+      - const: allwinner,sun8i-a83t-emmc
-+      - const: allwinner,sun9i-a80-mmc
-+      - const: allwinner,sun50i-a64-emmc
-+      - const: allwinner,sun50i-a64-mmc
-+      - items:
-+          - const: allwinner,sun8i-a83t-mmc
-+          - const: allwinner,sun7i-a20-mmc
-+      - items:
-+          - const: allwinner,sun50i-h6-emmc
-+          - const: allwinner,sun50i-a64-emmc
-+      - items:
-+          - const: allwinner,sun50i-h6-mmc
-+          - const: allwinner,sun50i-a64-mmc
-+      - items:
-+          - const: allwinner,sun8i-r40-emmc
-+          - const: allwinner,sun50i-a64-emmc
-+      - items:
-+          - const: allwinner,sun8i-r40-mmc
-+          - const: allwinner,sun50i-a64-mmc
-+
-+  reg:
-+    maxItems: 1
-+
-+  interrupts:
-+    maxItems: 1
-+
-+  clocks:
-+    minItems: 2
-+    maxItems: 4
-+    items:
-+      - description: Bus Clock
-+      - description: Module Clock
-+      - description: Output Clock
-+      - description: Sample Clock
-+
-+  clock-names:
-+    minItems: 2
-+    maxItems: 4
-+    items:
-+      - const: ahb
-+      - const: mmc
-+      - const: output
-+      - const: sample
-+
-+  resets:
-+    maxItems: 1
-+
-+  reset-names:
-+    const: ahb
-+
-+required:
-+  - compatible
-+  - reg
-+  - interrupts
-+  - clocks
-+  - clock-names
-+
-+examples:
-+  - |
-+    mmc0: mmc@1c0f000 {
-+        compatible = "allwinner,sun5i-a13-mmc";
-+        reg = <0x01c0f000 0x1000>;
-+        clocks = <&ahb_gates 8>, <&mmc0_clk>;
-+        clock-names = "ahb", "mmc";
-+        interrupts = <32>;
-+        bus-width = <4>;
-+        cd-gpios = <&pio 7 1 0>;
-+    };
-+
-+# FIXME: We should set it, but it would report all the generic
-+# properties as additional properties.
-+# additionalProperties: false
-+
-+...
-diff --git a/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt b/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
-deleted file mode 100644
-index e9cb3ec5e502..000000000000
---- a/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
-+++ /dev/null
-@@ -1,52 +0,0 @@
--* Allwinner sunxi MMC controller
--
--The highspeed MMC host controller on Allwinner SoCs provides an interface
--for MMC, SD and SDIO types of memory cards.
--
--Supported maximum speeds are the ones of the eMMC standard 4.5 as well
--as the speed of SD standard 3.0.
--Absolute maximum transfer rate is 200MB/s
--
--Required properties:
-- - compatible : should be one of:
--   * "allwinner,sun4i-a10-mmc"
--   * "allwinner,sun5i-a13-mmc"
--   * "allwinner,sun7i-a20-mmc"
--   * "allwinner,sun8i-a83t-emmc"
--   * "allwinner,sun9i-a80-mmc"
--   * "allwinner,sun50i-a64-emmc"
--   * "allwinner,sun50i-a64-mmc"
--   * "allwinner,sun50i-h6-emmc", "allwinner.sun50i-a64-emmc"
--   * "allwinner,sun50i-h6-mmc", "allwinner.sun50i-a64-mmc"
-- - reg : mmc controller base registers
-- - clocks : a list with 4 phandle + clock specifier pairs
-- - clock-names : must contain "ahb", "mmc", "output" and "sample"
-- - interrupts : mmc controller interrupt
--
--Optional properties:
-- - resets : phandle + reset specifier pair
-- - reset-names : must contain "ahb"
-- - for cd, bus-width and additional generic mmc parameters
--   please refer to mmc.txt within this directory
--
--Examples:
--	- Within .dtsi:
--	mmc0: mmc@1c0f000 {
--		compatible = "allwinner,sun5i-a13-mmc";
--		reg = <0x01c0f000 0x1000>;
--		clocks = <&ahb_gates 8>, <&mmc0_clk>, <&mmc0_output_clk>, <&mmc0_sample_clk>;
--		clock-names = "ahb", "mod", "output", "sample";
--		interrupts = <0 32 4>;
--		status = "disabled";
--	};
--
--	- Within dts:
--	mmc0: mmc@1c0f000 {
--		pinctrl-names = "default", "default";
--		pinctrl-0 = <&mmc0_pins_a>;
--		pinctrl-1 = <&mmc0_cd_pin_reference_design>;
--		bus-width = <4>;
--		cd-gpios = <&pio 7 1 0>; /* PH1 */
--		cd-inverted;
--		status = "okay";
--	};
--- 
-git-series 0.9.1
+Hi!
+
+On Tue, May 28, 2019 at 09:32:31PM +0200, Ulf Hansson wrote:
+> On Tue, 28 May 2019 at 19:26, Maxime Ripard <maxime.ripard@bootlin.com> wrote:
+> > On Tue, May 28, 2019 at 10:40:16AM +0200, Ulf Hansson wrote:
+> > > > +patternProperties:
+> > > > +  "^.*@[0-9]+$":
+> > > > +    properties:
+> > > > +      reg:
+> > > > +        items:
+> > > > +          - minimum: 0
+> > > > +            maximum: 7
+> > > > +            description:
+> > > > +              Must contain the SDIO function number of the function this
+> > > > +              subnode describes. A value of 0 denotes the memory SD
+> > > > +              function, values from 1 to 7 denote the SDIO functions.
+> > > > +
+> > > > +      broken-hpi:
+> > > > +        $ref: /schemas/types.yaml#/definitions/flag
+> > > > +        description:
+> > > > +          Use this to indicate that the mmc-card has a broken hpi
+> > > > +          implementation, and that hpi should not be used.
+> > > > +
+> > > > +    required:
+> > > > +      - reg
+> > > > +
+> > >
+> > > [...]
+> > >
+> > > > -Use of Function subnodes
+> > > > -------------------------
+> > > > -
+> > > > -On embedded systems the cards connected to a host may need additional
+> > > > -properties. These can be specified in subnodes to the host controller node.
+> > > > -The subnodes are identified by the standard 'reg' property.
+> > > > -Which information exactly can be specified depends on the bindings for the
+> > > > -SDIO function driver for the subnode, as specified by the compatible string.
+> > > > -
+> > > > -Required host node properties when using function subnodes:
+> > > > -- #address-cells: should be one. The cell is the slot id.
+> > > > -- #size-cells: should be zero.
+> > > > -
+> > > > -Required function subnode properties:
+> > > > -- reg: Must contain the SDIO function number of the function this subnode
+> > > > -       describes. A value of 0 denotes the memory SD function, values from
+> > > > -       1 to 7 denote the SDIO functions.
+> > > > -
+> > > > -Optional function subnode properties:
+> > > > -- compatible: name of SDIO function following generic names recommended practice
+> > > > -
+> > >
+> > > I think most of the information of how we use sub(child) nodes
+> > > disappeared in this conversion - or at least gets harder to
+> > > understand. Could we perhaps keep some of this?
+> >
+> > Sure, what would you like to keep in particular?
+>
+> Most of it, so we can understand what can be described in sub-nodes.
+
+I've pushed a new version that keeps everything, I guess.
+
+> Additionally, we should also include what is stated in
+> Documentation/devicetree/bindings/mmc/mmc-card.txt, as that also
+> refers to how subnodes should be used, when it has the "mmc-card"
+> compatible.
+>
+> Or maybe we should simply move all things related to subnodes into a
+> separate .yaml?
+
+Yeah, this should be a separate YAML schema.
+
+Maxime
+
+--
+Maxime Ripard, Bootlin
+Embedded Linux and Kernel engineering
+https://bootlin.com
+
+--gthk2wzch2cu56ho
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iHUEABYIAB0WIQRcEzekXsqa64kGDp7j7w1vZxhRxQUCXO435AAKCRDj7w1vZxhR
+xRtjAQDZQ5WUDQGL6pNsOq4VZzVT0hbSS3HIWiYEd8Sna/NefAEA9Zc7OLaRbPzq
+Zm91I4RXRQSyPVpZMbAE7oZ9dRlNdgY=
+=e29h
+-----END PGP SIGNATURE-----
+
+--gthk2wzch2cu56ho--
+
+
+--===============3171636377577200890==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+linux-arm-kernel mailing list
+linux-arm-kernel@lists.infradead.org
+http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
+
+--===============3171636377577200890==--
