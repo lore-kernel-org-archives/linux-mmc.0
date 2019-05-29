@@ -1,141 +1,92 @@
-From: Maxime Ripard <maxime.ripard@bootlin.com>
-Subject: Re: [PATCH v3 1/2] dt-bindings: mmc: Add YAML schemas for the
- generic MMC options
-Date: Wed, 29 May 2019 09:42:28 +0200
-Message-ID: <20190529074228.viocdc77pdkoqdfi@flea>
-References: <c6b8789d71ce1970be77387c066a262dca0a0dec.1558340089.git-series.maxime.ripard@bootlin.com>
- <CAPDyKFrs6f4_Xr=ATay_wDYNPa+-jdZvP4XSB55B-EFMAETN1Q@mail.gmail.com>
- <20190528172649.6mkdkscnu5d2rybi@flea>
- <CAPDyKFrTroAOjEyT9GxQALC4UsiDg8739F9Qc216bDC=wgk2mg@mail.gmail.com>
+From: Ludovic BARRE <ludovic.barre@st.com>
+Subject: Re: [PATCH V2 3/5] mmc: mmci: fix clear of busy detect status
+Date: Wed, 29 May 2019 11:20:42 +0200
+Message-ID: <a6a74431-50a6-6298-b77d-9d27a77fd6cc@st.com>
+References: <1556264798-18540-1-git-send-email-ludovic.Barre@st.com>
+ <1556264798-18540-4-git-send-email-ludovic.Barre@st.com>
+ <CAPDyKFrxp3Y3AudNvkkSRaph2Fe-A-F6Cs0jfy9RUja76GYeiA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============3171636377577200890=="
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <CAPDyKFrTroAOjEyT9GxQALC4UsiDg8739F9Qc216bDC=wgk2mg@mail.gmail.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFrxp3Y3AudNvkkSRaph2Fe-A-F6Cs0jfy9RUja76GYeiA@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Mark Rutland <mark.rutland@arm.com>, DTML <devicetree@vger.kernel.org>, Rob Herring <robh@kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chen-Yu Tsai <wens@csie.org>, Rob Herring <robh+dt@kernel.org>, Frank Rowand <frowand.list@gmail.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>
+Cc: Rob Herring <robh+dt@kernel.org>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-stm32@st-md-mailman.stormreply.com
 List-Id: linux-mmc@vger.kernel.org
 
+hi Ulf
 
---===============3171636377577200890==
-Content-Type: multipart/signed; micalg=pgp-sha256;
-	protocol="application/pgp-signature"; boundary="gthk2wzch2cu56ho"
-Content-Disposition: inline
+On 5/27/19 8:17 PM, Ulf Hansson wrote:
+> On Fri, 26 Apr 2019 at 09:46, Ludovic Barre <ludovic.Barre@st.com> wrote:
+>>
+>> From: Ludovic Barre <ludovic.barre@st.com>
+>>
+>> The "busy_detect_flag" is used to read/clear busy value of
+>> mmci status. The "busy_detect_mask" is used to manage busy irq of
+>> mmci mask.
+>> For sdmmc variant, the 2 properties have not the same offset.
+>> To clear the busyd0 status bit, we must add busy detect flag,
+>> the mmci mask is not enough.
+>>
+>> Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
+> 
+> Ludovic, again, apologies for the delay.
+> 
+>> ---
+>>   drivers/mmc/host/mmci.c | 3 ++-
+>>   1 file changed, 2 insertions(+), 1 deletion(-)
+>>
+>> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+>> index a040f54..3cd52e8 100644
+>> --- a/drivers/mmc/host/mmci.c
+>> +++ b/drivers/mmc/host/mmci.c
+>> @@ -1517,7 +1517,8 @@ static irqreturn_t mmci_irq(int irq, void *dev_id)
+>>                   * to make sure that both start and end interrupts are always
+>>                   * cleared one after the other.
+>>                   */
+>> -               status &= readl(host->base + MMCIMASK0);
+>> +               status &= readl(host->base + MMCIMASK0) |
+>> +                       host->variant->busy_detect_flag;
+> 
+> I think this is not entirely correct, because it would mean we check
+> for busy even if we haven't unmasked the busy IRQ via the
+> variant->busy_detect_mask.
 
+if the variant is busy_detect false:
+  => no problem because the busy_detect_flag or busy_detect_mask is not
+     defined.
 
---gthk2wzch2cu56ho
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+if variant is busy_detect true:
+the busy handle is split in 3 steps (see mmci_cmd_irq):
+step 1: detection of busy line => unmasked the busy irq end
+step 2: in busy wait => ignore cmd irq while current busy flag is
+enabled.
+step 3: end of busy => clear and mask busy irq
 
-Hi!
+To detect the first step (see mmci_cmd_irq: which unmasks the busy irq)
+we need to know the current busy state. Actually, the status register is
+re-read in mmci_cmd_irq, why not used the status read in mmci_irq and in
+parameter ?
 
-On Tue, May 28, 2019 at 09:32:31PM +0200, Ulf Hansson wrote:
-> On Tue, 28 May 2019 at 19:26, Maxime Ripard <maxime.ripard@bootlin.com> wrote:
-> > On Tue, May 28, 2019 at 10:40:16AM +0200, Ulf Hansson wrote:
-> > > > +patternProperties:
-> > > > +  "^.*@[0-9]+$":
-> > > > +    properties:
-> > > > +      reg:
-> > > > +        items:
-> > > > +          - minimum: 0
-> > > > +            maximum: 7
-> > > > +            description:
-> > > > +              Must contain the SDIO function number of the function this
-> > > > +              subnode describes. A value of 0 denotes the memory SD
-> > > > +              function, values from 1 to 7 denote the SDIO functions.
-> > > > +
-> > > > +      broken-hpi:
-> > > > +        $ref: /schemas/types.yaml#/definitions/flag
-> > > > +        description:
-> > > > +          Use this to indicate that the mmc-card has a broken hpi
-> > > > +          implementation, and that hpi should not be used.
-> > > > +
-> > > > +    required:
-> > > > +      - reg
-> > > > +
-> > >
-> > > [...]
-> > >
-> > > > -Use of Function subnodes
-> > > > -------------------------
-> > > > -
-> > > > -On embedded systems the cards connected to a host may need additional
-> > > > -properties. These can be specified in subnodes to the host controller node.
-> > > > -The subnodes are identified by the standard 'reg' property.
-> > > > -Which information exactly can be specified depends on the bindings for the
-> > > > -SDIO function driver for the subnode, as specified by the compatible string.
-> > > > -
-> > > > -Required host node properties when using function subnodes:
-> > > > -- #address-cells: should be one. The cell is the slot id.
-> > > > -- #size-cells: should be zero.
-> > > > -
-> > > > -Required function subnode properties:
-> > > > -- reg: Must contain the SDIO function number of the function this subnode
-> > > > -       describes. A value of 0 denotes the memory SD function, values from
-> > > > -       1 to 7 denote the SDIO functions.
-> > > > -
-> > > > -Optional function subnode properties:
-> > > > -- compatible: name of SDIO function following generic names recommended practice
-> > > > -
-> > >
-> > > I think most of the information of how we use sub(child) nodes
-> > > disappeared in this conversion - or at least gets harder to
-> > > understand. Could we perhaps keep some of this?
-> >
-> > Sure, what would you like to keep in particular?
->
-> Most of it, so we can understand what can be described in sub-nodes.
+Regards,
+Ludo
 
-I've pushed a new version that keeps everything, I guess.
-
-> Additionally, we should also include what is stated in
-> Documentation/devicetree/bindings/mmc/mmc-card.txt, as that also
-> refers to how subnodes should be used, when it has the "mmc-card"
-> compatible.
->
-> Or maybe we should simply move all things related to subnodes into a
-> separate .yaml?
-
-Yeah, this should be a separate YAML schema.
-
-Maxime
-
---
-Maxime Ripard, Bootlin
-Embedded Linux and Kernel engineering
-https://bootlin.com
-
---gthk2wzch2cu56ho
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iHUEABYIAB0WIQRcEzekXsqa64kGDp7j7w1vZxhRxQUCXO435AAKCRDj7w1vZxhR
-xRtjAQDZQ5WUDQGL6pNsOq4VZzVT0hbSS3HIWiYEd8Sna/NefAEA9Zc7OLaRbPzq
-Zm91I4RXRQSyPVpZMbAE7oZ9dRlNdgY=
-=e29h
------END PGP SIGNATURE-----
-
---gthk2wzch2cu56ho--
-
-
---===============3171636377577200890==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-linux-arm-kernel mailing list
-linux-arm-kernel@lists.infradead.org
-http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
-
---===============3171636377577200890==--
+> 
+> I suggest to store a new bool in the host (call it
+> "busy_detect_unmasked" or whatever makes sense to you), to track
+> whether we have unmasked the busy IRQ or not. Then take this flag into
+> account, before ORing the value of host->variant->busy_detect_flag,
+> according to above.
+> 
+>>                  if (host->variant->busy_detect)
+>>                          writel(status & ~host->variant->busy_detect_mask,
+>>                                 host->base + MMCICLEAR);
+>> --
+>> 2.7.4
+>>
+> 
+> Kind regards
+> Uffe
+> 
