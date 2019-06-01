@@ -1,12 +1,12 @@
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.19 050/141] mmc: mmci: Prevent polling for busy detection in IRQ context
-Date: Sat,  1 Jun 2019 09:20:26 -0400
-Message-ID: <20190601132158.25821-50-sashal@kernel.org>
-References: <20190601132158.25821-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.14 35/99] mmc: mmci: Prevent polling for busy detection in IRQ context
+Date: Sat,  1 Jun 2019 09:22:42 -0400
+Message-ID: <20190601132346.26558-35-sashal@kernel.org>
+References: <20190601132346.26558-1-sashal@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190601132158.25821-1-sashal@kernel.org>
+In-Reply-To: <20190601132346.26558-1-sashal@kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc: Ludovic Barre <ludovic.barre@st.com>, Ulf Hansson <ulf.hansson@linaro.org>, Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org
@@ -34,10 +34,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 3 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 1841d250e9e2c..eb1a65cb878f0 100644
+index f1f54a8184895..77f18729ee96f 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -1295,9 +1295,10 @@ static irqreturn_t mmci_irq(int irq, void *dev_id)
+@@ -1320,9 +1320,10 @@ static irqreturn_t mmci_irq(int irq, void *dev_id)
  		}
  
  		/*
