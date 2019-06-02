@@ -1,54 +1,38 @@
-From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 5.1 068/186] mmc: mmci: Prevent polling for busy detection in IRQ context
-Date: Sat,  1 Jun 2019 09:14:44 -0400
-Message-ID: <20190601131653.24205-68-sashal@kernel.org>
-References: <20190601131653.24205-1-sashal@kernel.org>
+From: Chaotian Jing <chaotian.jing@mediatek.com>
+Subject: Re: fix controller busy issue and add 24bits segment support
+Date: Sun, 2 Jun 2019 09:23:11 +0800
+Message-ID: <1559438591.25015.0.camel@mhfsdcap03>
+References: <1558252637-10556-1-git-send-email-chaotian.jing@mediatek.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190601131653.24205-1-sashal@kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc: Ludovic Barre <ludovic.barre@st.com>, Ulf Hansson <ulf.hansson@linaro.org>, Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1558252637-10556-1-git-send-email-chaotian.jing@mediatek.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: srv_heupstream@mediatek.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mediatek@lists.infradead.org, Matthias Brugger <matthias.bgg@gmail.com>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-From: Ludovic Barre <ludovic.barre@st.com>
+Hi Ulf,
 
-[ Upstream commit 8520ce1e17799b220ff421d4f39438c9c572ade3 ]
+Gentle ping for this patch.
 
-The IRQ handler, mmci_irq(), loops until all status bits have been cleared.
-However, the status bit signaling busy in variant->busy_detect_flag, may be
-set even if busy detection isn't monitored for the current request.
-
-This may be the case for the CMD11 when switching the I/O voltage, which
-leads to that mmci_irq() busy loops in IRQ context. Fix this problem, by
-clearing the status bit for busy, before continuing to validate the
-condition for the loop. This is safe, because the busy status detection has
-already been taken care of by mmci_cmd_irq().
-
-Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-Signed-off-by: Sasha Levin <sashal@kernel.org>
----
- drivers/mmc/host/mmci.c | 5 +++--
- 1 file changed, 3 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 387ff14587b87..e27978c47db7d 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -1550,9 +1550,10 @@ static irqreturn_t mmci_irq(int irq, void *dev_id)
- 		}
- 
- 		/*
--		 * Don't poll for busy completion in irq context.
-+		 * Busy detection has been handled by mmci_cmd_irq() above.
-+		 * Clear the status bit to prevent polling in IRQ context.
- 		 */
--		if (host->variant->busy_detect && host->busy_status)
-+		if (host->variant->busy_detect_flag)
- 			status &= ~host->variant->busy_detect_flag;
- 
- 		ret = 1;
--- 
-2.20.1
+On Sun, 2019-05-19 at 15:57 +0800, Chaotian Jing wrote:
+> the below 2 patches fix controller busy issue when plug out SD card
+> and add 24bits segment size support.
+> 
+> Chaotian Jing (2):
+>   mmc: mediatek: fix controller busy when plug out SD
+>   mmc: mediatek: support 24bits segment size
+> 
+>  drivers/mmc/host/mtk-sd.c | 24 ++++++++++++++++++------
+>  1 file changed, 18 insertions(+), 6 deletions(-)
+> 
