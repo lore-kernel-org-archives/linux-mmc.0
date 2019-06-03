@@ -1,169 +1,56 @@
-From: Ludovic Barre <ludovic.Barre@st.com>
-Subject: [PATCH V3 2/3] mmc: mmci: add hardware busy timeout feature
-Date: Mon, 3 Jun 2019 17:55:24 +0200
-Message-ID: <1559577325-19266-3-git-send-email-ludovic.Barre@st.com>
-References: <1559577325-19266-1-git-send-email-ludovic.Barre@st.com>
+From: Douglas Anderson <dianders@chromium.org>
+Subject: [PATCH v2 0/3] brcmfmac: sdio: Deal better w/ transmission errors waking from idle
+Date: Mon,  3 Jun 2019 11:37:37 -0700
+Message-ID: <20190603183740.239031-1-dianders@chromium.org>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1559577325-19266-1-git-send-email-ludovic.Barre@st.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>
-Cc: srinivas.kandagatla@linaro.org, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-stm32@st-md-mailman.stormreply.com, Ludovic Barre <ludovic.barre@st.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Kalle Valo <kvalo@codeaurora.org>, Adrian Hunter <adrian.hunter@intel.com>, Arend van Spriel <arend.vanspriel@broadcom.com>
+Cc: brcm80211-dev-list.pdl@broadcom.com, linux-rockchip@lists.infradead.org, Double Lo <double.lo@cypress.com>, briannorris@chromium.org, linux-wireless@vger.kernel.org, Naveen Gupta <naveen.gupta@cypress.com>, Madhan Mohan R <madhanmohan.r@cypress.com>, mka@chromium.org, Wright Feng <wright.feng@cypress.com>, Chi-Hsien Lin <chi-hsien.lin@cypress.com>, netdev@vger.kernel.org, brcm80211-dev-list@cypress.com, Douglas Anderson <dianders@chromium.org>, linux-mmc@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>, YueHaibing <yuehaibing@huawei.com>, Hans de Goede <hdegoede@redhat.com>, Hante Meuleman <hante.meuleman@broadcom.com>, Michael Trimarchi <michael@amarulasolutions.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Franky Lin <franky.lin@broadcom.com>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Ludovic Barre <ludovic.barre@st.com>
+This series attempts to deal better with the expected transmission
+errors that we get when waking up (from idle) the SDIO-based WiFi on
+rk3288-veyron-minnie, rk3288-veyron-speedy, and rk3288-veyron-mickey.
 
-In some variants, the data timer is enabled when the DPSM is in
-busy state (while data transfer or MMC_RSP_BUSY), and could
-generate a data timeout error if the counter reach 0.
+Some details about those errors can be found in
+<https://crbug.com/960222>, but to summarize it here: if we try to
+send the wakeup command to the WiFi card at the same time it has
+decided to wake up itself then it will behave badly on the SDIO bus.
+This can cause timeouts or CRC errors.
 
--Define max_busy_timeout (in ms) according to clock.
--Set data timer register if the command has rsp_busy flag.
- If busy_timeout is not defined by framework, the busy
- length after Data Burst is defined as 1 second
- (refer: 4.6.2.2 Write of sd specification part1 v6-0).
--Add MCI_DATATIMEOUT error management in mmci_cmd_irq.
+When I tested on 4.19 and 4.20 these CRC errors can be seen to cause
+re-tuning.  Since I am currently developing on 4.19 this was the
+original problem I attempted to solve.
 
-Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
----
- drivers/mmc/host/mmci.c | 40 ++++++++++++++++++++++++++++++++++------
- drivers/mmc/host/mmci.h |  2 ++
- 2 files changed, 36 insertions(+), 6 deletions(-)
+On mainline it turns out that you don't see the retuning errors but
+you see tons of spam about timeouts trying to wakeup from sleep.  I
+tracked down the commit that was causing that and have partially
+reverted it here.  I have no real knowledge about Broadcom WiFi, but
+the commit that was causing problems sounds (from the descriptioin) to
+be a hack commit penalizing all Broadcom WiFi users because of a bug
+in a Cypress SD controller.  I will let others comment if this is
+truly the case and, if so, what the right solution should be.
 
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 5b5cc45..5a8b232 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -1078,6 +1078,7 @@ static void
- mmci_start_command(struct mmci_host *host, struct mmc_command *cmd, u32 c)
- {
- 	void __iomem *base = host->base;
-+	unsigned long long clks = 0;
- 
- 	dev_dbg(mmc_dev(host->mmc), "op %02x arg %08x flags %08x\n",
- 	    cmd->opcode, cmd->arg, cmd->flags);
-@@ -1100,6 +1101,19 @@ mmci_start_command(struct mmci_host *host, struct mmc_command *cmd, u32 c)
- 		else
- 			c |= host->variant->cmdreg_srsp;
- 	}
-+
-+	if (host->variant->busy_timeout && !cmd->data) {
-+		if (cmd->flags & MMC_RSP_BUSY) {
-+			if (!cmd->busy_timeout)
-+				cmd->busy_timeout = 1000;
-+
-+			clks = (unsigned long long)cmd->busy_timeout;
-+			clks *=	host->cclk;
-+			do_div(clks, MSEC_PER_SEC);
-+		}
-+		writel_relaxed(clks, host->base + MMCIDATATIMER);
-+	}
-+
- 	if (/*interrupt*/0)
- 		c |= MCI_CPSM_INTERRUPT;
- 
-@@ -1206,6 +1220,7 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
- {
- 	void __iomem *base = host->base;
- 	bool sbc, busy_resp;
-+	u32 err_msk;
- 
- 	if (!cmd)
- 		return;
-@@ -1218,8 +1233,12 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
- 	 * handling. Note that we tag on any latent IRQs postponed
- 	 * due to waiting for busy status.
- 	 */
--	if (!((status|host->busy_status) &
--	      (MCI_CMDCRCFAIL|MCI_CMDTIMEOUT|MCI_CMDSENT|MCI_CMDRESPEND)))
-+	err_msk = MCI_CMDCRCFAIL | MCI_CMDTIMEOUT;
-+	if (host->variant->busy_timeout && busy_resp)
-+		err_msk |= MCI_DATATIMEOUT;
-+
-+	if (!((status | host->busy_status) &
-+	      (err_msk | MCI_CMDSENT | MCI_CMDRESPEND)))
- 		return;
- 
- 	/*
-@@ -1228,7 +1247,7 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
- 	if (busy_resp && host->variant->busy_detect) {
- 
- 		/* We are busy with a command, return */
--		if (host->busy_status &&
-+		if (host->busy_status && !(status & (err_msk)) &&
- 		    (status & host->variant->busy_detect_flag))
- 			return;
- 
-@@ -1238,8 +1257,7 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
- 		 * that the special busy status bit is still set before
- 		 * proceeding.
- 		 */
--		if (!host->busy_status &&
--		    !(status & (MCI_CMDCRCFAIL|MCI_CMDTIMEOUT)) &&
-+		if (!host->busy_status && !(status & (err_msk)) &&
- 		    (status & host->variant->busy_detect_flag)) {
- 
- 			/* Clear the busy start IRQ */
-@@ -1282,6 +1300,9 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
- 		cmd->error = -ETIMEDOUT;
- 	} else if (status & MCI_CMDCRCFAIL && cmd->flags & MMC_RSP_CRC) {
- 		cmd->error = -EILSEQ;
-+	} else if (host->variant->busy_timeout && busy_resp &&
-+		   status & MCI_DATATIMEOUT) {
-+		cmd->error = -ETIMEDOUT;
- 	} else {
- 		cmd->resp[0] = readl(base + MMCIRESPONSE0);
- 		cmd->resp[1] = readl(base + MMCIRESPONSE1);
-@@ -1543,6 +1564,7 @@ static irqreturn_t mmci_irq(int irq, void *dev_id)
- 			status &= ~host->variant->busy_detect_flag;
- 
- 		ret = 1;
-+
- 	} while (status);
- 
- 	spin_unlock(&host->lock);
-@@ -1947,6 +1969,8 @@ static int mmci_probe(struct amba_device *dev,
- 	 * Enable busy detection.
- 	 */
- 	if (variant->busy_detect) {
-+		u32 max_busy_timeout = 0;
-+
- 		mmci_ops.card_busy = mmci_card_busy;
- 		/*
- 		 * Not all variants have a flag to enable busy detection
-@@ -1956,7 +1980,11 @@ static int mmci_probe(struct amba_device *dev,
- 			mmci_write_datactrlreg(host,
- 					       host->variant->busy_dpsm_flag);
- 		mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY;
--		mmc->max_busy_timeout = 0;
-+
-+		if (variant->busy_timeout)
-+			max_busy_timeout = ~0UL / (mmc->f_max / MSEC_PER_SEC);
-+
-+		mmc->max_busy_timeout = max_busy_timeout;
- 	}
- 
- 	/* Prepare a CMD12 - needed to clear the DPSM on some variants. */
-diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-index 4f071bd..b43a958 100644
---- a/drivers/mmc/host/mmci.h
-+++ b/drivers/mmc/host/mmci.h
-@@ -290,6 +290,7 @@ struct mmci_host;
-  * @signal_direction: input/out direction of bus signals can be indicated
-  * @pwrreg_clkgate: MMCIPOWER register must be used to gate the clock
-  * @busy_detect: true if the variant supports busy detection on DAT0.
-+ * @busy_timeout: true if the variant supports hardware busy timeout on R1B.
-  * @busy_dpsm_flag: bitmask enabling busy detection in the DPSM
-  * @busy_detect_flag: bitmask identifying the bit in the MMCISTATUS register
-  *		      indicating that the card is busy
-@@ -336,6 +337,7 @@ struct variant_data {
- 	u8			signal_direction:1;
- 	u8			pwrreg_clkgate:1;
- 	u8			busy_detect:1;
-+	u8			busy_timeout:1;
- 	u32			busy_dpsm_flag;
- 	u32			busy_detect_flag;
- 	u32			busy_detect_mask;
+There wasn't a good resolution on v1 and it's been a while, so I'm
+sending out a v2.  Other than changing patch #1 to a full revert, the
+only other changes here are just to the patch descriptions.
+
+Changes in v2:
+- A full revert, not just a partial one (Arend).  ...with explicit Cc.
+- Updated commit message to clarify based on discussion of v1.
+
+Douglas Anderson (3):
+  Revert "brcmfmac: disable command decode in sdio_aos"
+  mmc: core: API for temporarily disabling auto-retuning due to errors
+  brcmfmac: sdio: Disable auto-tuning around commands expected to fail
+
+ drivers/mmc/core/core.c                       | 27 +++++++++++++++++--
+ .../broadcom/brcm80211/brcmfmac/sdio.c        |  9 +++----
+ include/linux/mmc/core.h                      |  2 ++
+ include/linux/mmc/host.h                      |  1 +
+ 4 files changed, 32 insertions(+), 7 deletions(-)
+
 -- 
-2.7.4
+2.22.0.rc1.311.g5d7573a151-goog
