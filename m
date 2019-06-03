@@ -1,150 +1,53 @@
-From: Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Subject: [PATCH v2 2/3] mmc: core: API for temporarily disabling auto-retuning
- due to errors
-Date: Mon,  3 Jun 2019 11:37:39 -0700
-Message-ID: <20190603183740.239031-3-dianders@chromium.org>
-References: <20190603183740.239031-1-dianders@chromium.org>
+From: Doug Anderson <dianders@chromium.org>
+Subject: Re: [PATCH v2] mmc: dw_mmc: Disable SDIO interrupts while suspended
+ to fix suspend/resume
+Date: Mon, 3 Jun 2019 11:41:42 -0700
+Message-ID: <CAD=FV=U7_ek_z7UfaDn9My8UfZfpNom04OJHowoH-sNsGZQnxA@mail.gmail.com>
+References: <20190429204040.18725-1-dianders@chromium.org> <CAPDyKFp0fQ+3CS-DadE9rO-9Npzve-nztY9hRaMdX7Pw9sUZMw@mail.gmail.com>
+ <CAD=FV=XMph_CE3pFZGP+5d0K2FgbPbheF1oX72TfZn_dpf8SQA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <20190603183740.239031-1-dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
-List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Kalle Valo <kvalo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Arend van Spriel <arend.vanspriel-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
-Cc: Madhan Mohan R <madhanmohan.r-+wT8y+m8/X5BDgjK7y7TUQ@public.gmane.org>, brcm80211-dev-list.pdl-dY08KVG/lbpWk0Htik3J/w@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Wolfram Sang <wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org>, netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Chi-Hsien Lin <chi-hsien.lin-+wT8y+m8/X5BDgjK7y7TUQ@public.gmane.org>, briannorris-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Double Lo <double.lo-+wT8y+m8/X5BDgjK7y7TUQ@public.gmane.org>, Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Avri Altman <avri.altman-Sjgp3cTcYWE@public.gmane.org>, mka-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, Wright Feng <wright.feng-+wT8y+m8/X5BDgjK7y7TUQ@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, brcm80211-dev-list-+wT8y+m8/X5BDgjK7y7TUQ@public.gmane.org, Naveen Gupta <naveen.gupta-+wT8y+m8/X5BDgjK7y7TUQ@public.gmane.org>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAD=FV=XMph_CE3pFZGP+5d0K2FgbPbheF1oX72TfZn_dpf8SQA@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Shawn Lin <shawn.lin@rock-chips.com>, Kalle Valo <kvalo@codeaurora.org>, Heiko Stuebner <heiko@sntech.de>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, Guenter Roeck <groeck@chromium.org>, Brian Norris <briannorris@chromium.org>, linux-wireless <linux-wireless@vger.kernel.org>, Sonny Rao <sonnyrao@chromium.org>, Emil Renner Berthing <emil.renner.berthing@gmail.com>, Matthias Kaehlcke <mka@chromium.org>, Ryan Case <ryandcase@chromium.org>, "# 4.0+" <stable@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Normally when the MMC core sees an "-EILSEQ" error returned by a host
-controller then it will trigger a retuning of the card.  This is
-generally a good idea.
+Ulf,
 
-However, if a command is expected to sometimes cause transfer errors
-then these transfer errors shouldn't cause a re-tuning.  This
-re-tuning will be a needless waste of time.  One example case where a
-transfer is expected to cause errors is when transitioning between
-idle (sometimes referred to as "sleep" in Broadcom code) and active
-state on certain Broadcom WiFi cards.  Specifically if the card was
-already transitioning between states when the command was sent it
-could cause an error on the SDIO bus.
+On Tue, May 28, 2019 at 3:49 PM Doug Anderson <dianders@chromium.org> wrote:
+>
+> > 1) As kind of stated above, did you consider a solution where the core
+> > simply disables the SDIO IRQ in case it isn't enabled for system
+> > wakeup? In this way all host drivers would benefit.
+>
+> I can give it a shot if you can give me a bunch of specific advice,
+> but I only have access to a few devices doing anything with SDIO and
+> they are all using Marvell or Broadcom on dw_mmc.
+>
+> In general I have no idea how SDIO wakeup (plumbed through the SD
+> controller) would work.  As per below the only way I've seen it done
+> is totally out-of-band.  ...and actually, I'm not sure I've actually
+> ever seen even the out of band stuff truly work on a system myself.
+> It's always been one of those "we should support wake on WiFi" but
+> never made it all the way to implementation.  In any case, if there
+> are examples of people plumbing wakeup through the SD controller I'd
+> need to figure out how to not break them.  Just doing a solution for
+> dw_mmc means I don't have to worry about this since dw_mmc definitely
+> doesn't support SDIO wakeup.
+>
+> Maybe one way to get a more generic solution is if you had an idea for
+> a patch that would work for many host controllers then you could post
+> it and I could test to confirm that it's happy on dw_mmc?  ...similar
+> to when you switched dw_mmc away from the old kthread-based SDIO
+> stuff?
 
-Let's add an API that the SDIO card drivers can call that will
-temporarily disable the auto-tuning functionality.  Then we can add a
-call to this in the Broadcom WiFi driver and any other driver that
-might have similar needs.
+Unless you have time to help dig into all the possibilities here to
+help understand how this should behave across all the different host
+controllers / wakeup setups, maybe we could just land ${SUBJECT} patch
+for now and when there is more clarity we can revisit?
 
-NOTE: this makes the assumption that the card is already tuned well
-enough that it's OK to disable the auto-retuning during one of these
-error-prone situations.  Presumably the driver code performing the
-error-prone transfer knows how to recover / retry from errors.  ...and
-after we can get back to a state where transfers are no longer
-error-prone then we can enable the auto-retuning again.  If we truly
-find ourselves in a case where the card needs to be retuned sometimes
-to handle one of these error-prone transfers then we can always try a
-few transfers first without auto-retuning and then re-try with
-auto-retuning if the first few fail.
+Thanks!
 
-Without this change on rk3288-veyron-minnie I periodically see this in
-the logs of a machine just sitting there idle:
-  dwmmc_rockchip ff0d0000.dwmmc: Successfully tuned phase to XYZ
-
-Fixes: bd11e8bd03ca ("mmc: core: Flag re-tuning is needed on CRC errors")
-Signed-off-by: Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
----
-Note that are are a whole boatload of different ways that we could
-provide an API for the Broadcom WiFi SDIO driver.  This patch
-illustrates one way but if maintainers feel strongly that this is too
-ugly and have a better idea then I can give it a shot too.  From a
-purist point of view I kinda felt that the "expect errors" really
-belonged as part of the mmc_request structure, but getting it into
-there meant changing a whole pile of core SD/MMC APIs.  Simply adding
-it to the host seemed to match the current style better and was a less
-intrusive change.
-
-Changes in v2:
-- Updated commit message to clarify based on discussion of v1.
-
- drivers/mmc/core/core.c  | 27 +++++++++++++++++++++++++--
- include/linux/mmc/core.h |  2 ++
- include/linux/mmc/host.h |  1 +
- 3 files changed, 28 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 6db36dc870b5..ba4f71aa8cd9 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -144,8 +144,9 @@ void mmc_request_done(struct mmc_host *host, struct mmc_request *mrq)
- 	int err = cmd->error;
- 
- 	/* Flag re-tuning needed on CRC errors */
--	if ((cmd->opcode != MMC_SEND_TUNING_BLOCK &&
--	    cmd->opcode != MMC_SEND_TUNING_BLOCK_HS200) &&
-+	if (cmd->opcode != MMC_SEND_TUNING_BLOCK &&
-+	    cmd->opcode != MMC_SEND_TUNING_BLOCK_HS200 &&
-+	    !host->expect_errors &&
- 	    (err == -EILSEQ || (mrq->sbc && mrq->sbc->error == -EILSEQ) ||
- 	    (mrq->data && mrq->data->error == -EILSEQ) ||
- 	    (mrq->stop && mrq->stop->error == -EILSEQ)))
-@@ -2163,6 +2164,28 @@ int mmc_sw_reset(struct mmc_host *host)
- }
- EXPORT_SYMBOL(mmc_sw_reset);
- 
-+void mmc_expect_errors_begin(struct mmc_host *host)
-+{
-+	unsigned long flags;
-+
-+	spin_lock_irqsave(&host->lock, flags);
-+	WARN_ON(host->expect_errors);
-+	host->expect_errors = true;
-+	spin_unlock_irqrestore(&host->lock, flags);
-+}
-+EXPORT_SYMBOL_GPL(mmc_expect_errors_begin);
-+
-+void mmc_expect_errors_end(struct mmc_host *host)
-+{
-+	unsigned long flags;
-+
-+	spin_lock_irqsave(&host->lock, flags);
-+	WARN_ON(!host->expect_errors);
-+	host->expect_errors = false;
-+	spin_unlock_irqrestore(&host->lock, flags);
-+}
-+EXPORT_SYMBOL_GPL(mmc_expect_errors_end);
-+
- static int mmc_rescan_try_freq(struct mmc_host *host, unsigned freq)
- {
- 	host->f_init = freq;
-diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
-index 134a6483347a..02a13abf0cda 100644
---- a/include/linux/mmc/core.h
-+++ b/include/linux/mmc/core.h
-@@ -178,6 +178,8 @@ int mmc_wait_for_cmd(struct mmc_host *host, struct mmc_command *cmd,
- 
- int mmc_hw_reset(struct mmc_host *host);
- int mmc_sw_reset(struct mmc_host *host);
-+void mmc_expect_errors_begin(struct mmc_host *host);
-+void mmc_expect_errors_end(struct mmc_host *host);
- void mmc_set_data_timeout(struct mmc_data *data, const struct mmc_card *card);
- 
- #endif /* LINUX_MMC_CORE_H */
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 43d0f0c496f6..8d553fb8c834 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -398,6 +398,7 @@ struct mmc_host {
- 	unsigned int		retune_now:1;	/* do re-tuning at next req */
- 	unsigned int		retune_paused:1; /* re-tuning is temporarily disabled */
- 	unsigned int		use_blk_mq:1;	/* use blk-mq */
-+	unsigned int		expect_errors:1; /* don't trigger retune upon errors */
- 
- 	int			rescan_disable;	/* disable card detection */
- 	int			rescan_entered;	/* used with nonremovable devices */
--- 
-2.22.0.rc1.311.g5d7573a151-goog
+-Doug
