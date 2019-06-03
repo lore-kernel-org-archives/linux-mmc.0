@@ -1,58 +1,51 @@
 From: Ludovic Barre <ludovic.Barre@st.com>
-Subject: [PATCH V3 3/3] mmc: mmci: add busy detect for stm32 sdmmc variant
-Date: Mon, 3 Jun 2019 17:55:25 +0200
-Message-ID: <1559577325-19266-4-git-send-email-ludovic.Barre@st.com>
-References: <1559577325-19266-1-git-send-email-ludovic.Barre@st.com>
+Subject: [PATCH V3 0/3] mmc: mmci: add busy detect for stm32 sdmmc variant
+Date: Mon, 3 Jun 2019 17:55:22 +0200
+Message-ID: <1559577325-19266-1-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1559577325-19266-1-git-send-email-ludovic.Barre@st.com>
-Sender: linux-kernel-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>
-Cc: srinivas.kandagatla@linaro.org, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-stm32@st-md-mailman.stormreply.com, Ludovic Barre <ludovic.barre@st.com>
+Cc: devicetree@vger.kernel.org, Alexandre Torgue <alexandre.torgue@st.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, srinivas.kandagatla@linaro.org, Ludovic Barre <ludovic.barre@st.com>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, linux-stm32@st-md-mailman.stormreply.com, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
 From: Ludovic Barre <ludovic.barre@st.com>
 
-This patch enables busy detection for stm32 sdmmc which requires
-to set data timer to define the busy timeout.
-sdmmc has 2 flags:
--busyd0: inverted value of d0 line.
--busyd0end which indicates only end of busy following a cmd response.
-Only one interrupt on busyd0end.
+This patch series adds busy detect for stm32 sdmmc variant.
+Some adaptations are required:
+-Clear busy status bit if busy_detect_flag and busy_detect_mask are
+ different.
+-Add hardware busy timeout with MMCIDATATIMER register.
 
-Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
----
- drivers/mmc/host/mmci.c | 4 ++++
- drivers/mmc/host/mmci.h | 1 +
- 2 files changed, 5 insertions(+)
+V3:
+-rebase on latest mmc next
+-replace re-read by status parameter. 
 
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 5a8b232..6210f1f 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -264,6 +264,10 @@ static struct variant_data variant_stm32_sdmmc = {
- 	.datalength_bits	= 25,
- 	.datactrl_blocksz	= 14,
- 	.stm32_idmabsize_mask	= GENMASK(12, 5),
-+	.busy_detect		= true,
-+	.busy_timeout		= true,
-+	.busy_detect_flag	= MCI_STM32_BUSYD0,
-+	.busy_detect_mask	= MCI_STM32_BUSYD0ENDMASK,
- 	.init			= sdmmc_variant_init,
- };
- 
-diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-index b43a958..ac19de8 100644
---- a/drivers/mmc/host/mmci.h
-+++ b/drivers/mmc/host/mmci.h
-@@ -167,6 +167,7 @@
- #define MCI_ST_CARDBUSY		(1 << 24)
- /* Extended status bits for the STM32 variants */
- #define MCI_STM32_BUSYD0	BIT(20)
-+#define MCI_STM32_BUSYD0END	BIT(21)
- 
- #define MMCICLEAR		0x038
- #define MCI_CMDCRCFAILCLR	(1 << 0)
+V2:
+-mmci_cmd_irq cleanup in separate patch.
+-simplify the busy_detect_flag exclude
+-replace sdmmc specific comment in
+"mmc: mmci: avoid fake busy polling in mmci_irq"
+to focus on common behavior
+
+Ludovic Barre (3):
+  mmc: mmci: fix read status for busy detect
+  mmc: mmci: add hardware busy timeout feature
+  mmc: mmci: add busy detect for stm32 sdmmc variant
+
+ drivers/mmc/host/mmci.c | 49 +++++++++++++++++++++++++++++++++++++++++--------
+ drivers/mmc/host/mmci.h |  3 +++
+ 2 files changed, 44 insertions(+), 8 deletions(-)
+
 -- 
 2.7.4
