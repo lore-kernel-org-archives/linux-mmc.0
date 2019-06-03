@@ -1,530 +1,628 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 2/2] mmc: sdhci-milbeaut: add Milbeaut SD controller driver
-Date: Mon, 3 Jun 2019 15:48:34 +0200
-Message-ID: <CAPDyKFqeTxqv6W=t_SRgnBnqzjLEpbyW1LR_UkoGC2YfoKJs1A@mail.gmail.com>
-References: <1559208158-468-1-git-send-email-orito.takao@socionext.com>
+Subject: Re: [PATCH v3 1/2] dt-bindings: mmc: Add YAML schemas for the generic
+ MMC options
+Date: Mon, 3 Jun 2019 15:48:19 +0200
+Message-ID: <CAPDyKFr5r39RTNHTd3-vfx92cm-emZG+3V0NoaS_Cd1EKHtwyA@mail.gmail.com>
+References: <fab0ec653b4e059cdb1206f65bfca051c8b0a7de.1559114458.git-series.maxime.ripard@bootlin.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1559208158-468-1-git-send-email-orito.takao@socionext.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Takao Orito <orito.takao@socionext.com>, Adrian Hunter <adrian.hunter@intel.com>
-Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Masami Hiramatsu <masami.hiramatsu@linaro.org>, Jaswinder Singh <jaswinder.singh@linaro.org>, sugaya.taichi@socionext.com, kasai.kazuhiro@socionext.com, kanematsu.shinji@socionext.com
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <fab0ec653b4e059cdb1206f65bfca051c8b0a7de.1559114458.git-series.maxime.ripard@bootlin.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Maxime Ripard <maxime.ripard@bootlin.com>
+Cc: Mark Rutland <mark.rutland@arm.com>, DTML <devicetree@vger.kernel.org>, Rob Herring <robh@kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chen-Yu Tsai <wens@csie.org>, Rob Herring <robh+dt@kernel.org>, Frank Rowand <frowand.list@gmail.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-+ Adrian
+On Wed, 29 May 2019 at 09:23, Maxime Ripard <maxime.ripard@bootlin.com> wrote:
+>
+> The MMC controllers have a bunch of generic options that are needed in a
+> device tree. Add a YAML schemas for those.
+>
+> Reviewed-by: Rob Herring <robh@kernel.org>
+> Signed-off-by: Maxime Ripard <maxime.ripard@bootlin.com>
 
-On Thu, 30 May 2019 at 11:20, Takao Orito <orito.takao@socionext.com> wrote:
->
-> SD Host controller on Milbeaut consists of two controller parts.
-> One is core controller F_SDH30, this is similar to sdhci-fujitsu
-> controller.
-> Another is bridge controller.
-> This bridge controller is not compatible with sdhci-fujitsu controller.
-> This is special for Milbeaut series. This has some functions.
-> For example, reset control, clock enable/select for SDR50/25/12, set
-> property of SD physical pins, retuning control, set capabilityies.
->
-> This bridge controller requires special procedures at reset or clock
-> enablement or change for further tuning of clock.
->
-> Signed-off-by: Takao Orito <orito.takao@socionext.com>
-
-This looks good to me, however I have looped in Adrian who maintains
-SDHCI drivers, to allow him to provide some input.
+Applied for next, thanks!
 
 Kind regards
 Uffe
 
 
+>
 > ---
->  drivers/mmc/host/Kconfig          |  11 ++
->  drivers/mmc/host/Makefile         |   1 +
->  drivers/mmc/host/sdhci-milbeaut.c | 362 ++++++++++++++++++++++++++++++++++++++
->  drivers/mmc/host/sdhci_f_sdh30.c  |  26 +--
->  drivers/mmc/host/sdhci_f_sdh30.h  |  32 ++++
->  5 files changed, 407 insertions(+), 25 deletions(-)
->  create mode 100644 drivers/mmc/host/sdhci-milbeaut.c
->  create mode 100644 drivers/mmc/host/sdhci_f_sdh30.h
 >
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index 28fcd8f..9b39111 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -353,6 +353,17 @@ config MMC_SDHCI_F_SDH30
+> Changes from v2:
+>   - Add a note to mention where the description has moved
+>   - Add Rob's Reviewed-by
 >
->           If unsure, say N.
+> Changes from v1:
 >
-> +config MMC_SDHCI_MILBEAUT
-> +       tristate "SDHCI support for Socionext Milbeaut Serieas using F_SDH30"
-> +       depends on MMC_SDHCI_PLTFM
-> +       depends on OF
-> +       help
-> +         This selects the Secure Digital Host Controller Interface (SDHCI)
-> +         Needed by Milbeaut SoC for MMC / SD / SDIO support.
-> +         If you have a controller with this interface, say Y or M here.
-> +
-> +         If unsure, say N.
-> +
->  config MMC_SDHCI_IPROC
->         tristate "SDHCI support for the BCM2835 & iProc SD/MMC Controller"
->         depends on ARCH_BCM2835 || ARCH_BCM_IPROC || COMPILE_TEST
-> diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-> index 7357871..db98e8a 100644
-> --- a/drivers/mmc/host/Makefile
-> +++ b/drivers/mmc/host/Makefile
-> @@ -21,6 +21,7 @@ obj-$(CONFIG_MMC_SDHCI_PXAV2) += sdhci-pxav2.o
->  obj-$(CONFIG_MMC_SDHCI_S3C)    += sdhci-s3c.o
->  obj-$(CONFIG_MMC_SDHCI_SIRF)           += sdhci-sirf.o
->  obj-$(CONFIG_MMC_SDHCI_F_SDH30)        += sdhci_f_sdh30.o
-> +obj-$(CONFIG_MMC_SDHCI_MILBEAUT)       += sdhci-milbeaut.o
->  obj-$(CONFIG_MMC_SDHCI_SPEAR)  += sdhci-spear.o
->  obj-$(CONFIG_MMC_SDHCI_AM654)  += sdhci_am654.o
->  obj-$(CONFIG_MMC_WBSD)         += wbsd.o
-> diff --git a/drivers/mmc/host/sdhci-milbeaut.c b/drivers/mmc/host/sdhci-milbeaut.c
+>   - Added back the cd-inverted and wp-inverted note
+>   - Removed the dependency of cd-inverted and wp-inverted on cd-gpios and
+>     wp-gpios
+>   - Fixed typo in the title
+>   - Fixed default in the bus-width property
+>   - Fixed typo in the wp-inverted property
+>   - Removed redundant type on cd-debounce-delay-ms
+>   - Switched the dsr maximum to hex instead of decimal notation
+> ---
+>  Documentation/devicetree/bindings/mmc/mmc-controller.yaml | 374 +++++++-
+>  Documentation/devicetree/bindings/mmc/mmc.txt             | 178 +---
+>  2 files changed, 375 insertions(+), 177 deletions(-)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/mmc-controller.yaml
+>
+> diff --git a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
 > new file mode 100644
-> index 0000000..a1aa21b
+> index 000000000000..080754e0ef35
 > --- /dev/null
-> +++ b/drivers/mmc/host/sdhci-milbeaut.c
-> @@ -0,0 +1,362 @@
-> +// SPDX-License-Identifier: GPL-2.0
-> +/*
-> + * Copyright (C) 2013 - 2015 Fujitsu Semiconductor, Ltd
-> + *              Vincent Yang <vincent.yang@tw.fujitsu.com>
-> + * Copyright (C) 2015 Linaro Ltd  Andy Green <andy.green@linaro.org>
-> + * Copyright (C) 2019 Socionext Inc.
-> + *              Takao Orito <orito.takao@socionext.com>
-> + */
-> +
-> +#include <linux/bits.h>
-> +#include <linux/clk.h>
-> +#include <linux/delay.h>
-> +#include <linux/err.h>
-> +#include <linux/gpio/consumer.h>
-> +#include <linux/module.h>
-> +#include <linux/of.h>
-> +#include <linux/property.h>
-> +
-> +#include "sdhci-pltfm.h"
-> +#include "sdhci_f_sdh30.h"
-> +
-> +/* milbeaut bridge controller register */
-> +#define MLB_SOFT_RESET         0x0200
-> +#define  MLB_SOFT_RESET_RSTX           BIT(0)
-> +
-> +#define MLB_WP_CD_LED_SET      0x0210
-> +#define  MLB_WP_CD_LED_SET_LED_INV  BIT(2)
-> +
-> +#define MLB_CR_SET                     0x0220
-> +#define  MLB_CR_SET_CR_TOCLKUNIT       BIT(24)
-> +#define  MLB_CR_SET_CR_TOCLKFREQ_SFT   (16)
-> +#define  MLB_CR_SET_CR_TOCLKFREQ_MASK  (0x3F << MLB_CR_SET_CR_TOCLKFREQ_SFT)
-> +#define  MLB_CR_SET_CR_BCLKFREQ_SFT    (8)
-> +#define  MLB_CR_SET_CR_BCLKFREQ_MASK   (0xFF << MLB_CR_SET_CR_BCLKFREQ_SFT)
-> +#define  MLB_CR_SET_CR_RTUNTIMER_SFT   (4)
-> +#define  MLB_CR_SET_CR_RTUNTIMER_MASK  (0xF << MLB_CR_SET_CR_RTUNTIMER_SFT)
-> +
-> +#define MLB_SD_TOCLK_I_DIV  16
-> +#define MLB_TOCLKFREQ_UNIT_THRES    16000000
-> +#define MLB_CAL_TOCLKFREQ_MHZ(rate) (rate / MLB_SD_TOCLK_I_DIV / 1000000)
-> +#define MLB_CAL_TOCLKFREQ_KHZ(rate) (rate / MLB_SD_TOCLK_I_DIV / 1000)
-> +#define MLB_TOCLKFREQ_MAX   63
-> +#define MLB_TOCLKFREQ_MIN    1
-> +
-> +#define MLB_SD_BCLK_I_DIV   4
-> +#define MLB_CAL_BCLKFREQ(rate)  (rate / MLB_SD_BCLK_I_DIV / 1000000)
-> +#define MLB_BCLKFREQ_MAX        255
-> +#define MLB_BCLKFREQ_MIN          1
-> +
-> +#define MLB_CDR_SET                    0x0230
-> +#define MLB_CDR_SET_CLK2POW16  3
-> +
-> +struct f_sdhost_priv {
-> +       struct clk *clk_iface;
-> +       struct clk *clk;
-> +       struct device *dev;
-> +       bool enable_cmd_dat_delay;
-> +};
-> +
-> +static void sdhci_milbeaut_soft_voltage_switch(struct sdhci_host *host)
-> +{
-> +       u32 ctrl = 0;
-> +
-> +       usleep_range(2500, 3000);
-> +       ctrl = sdhci_readl(host, F_SDH30_IO_CONTROL2);
-> +       ctrl |= F_SDH30_CRES_O_DN;
-> +       sdhci_writel(host, ctrl, F_SDH30_IO_CONTROL2);
-> +       ctrl |= F_SDH30_MSEL_O_1_8;
-> +       sdhci_writel(host, ctrl, F_SDH30_IO_CONTROL2);
-> +
-> +       ctrl &= ~F_SDH30_CRES_O_DN;
-> +       sdhci_writel(host, ctrl, F_SDH30_IO_CONTROL2);
-> +       usleep_range(2500, 3000);
-> +
-> +       ctrl = sdhci_readl(host, F_SDH30_TUNING_SETTING);
-> +       ctrl |= F_SDH30_CMD_CHK_DIS;
-> +       sdhci_writel(host, ctrl, F_SDH30_TUNING_SETTING);
-> +}
-> +
-> +static unsigned int sdhci_milbeaut_get_min_clock(struct sdhci_host *host)
-> +{
-> +       return F_SDH30_MIN_CLOCK;
-> +}
-> +
-> +static void sdhci_milbeaut_reset(struct sdhci_host *host, u8 mask)
-> +{
-> +       struct f_sdhost_priv *priv = sdhci_priv(host);
-> +       u16 clk;
-> +       u32 ctl;
-> +       ktime_t timeout;
-> +
-> +       clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-> +       clk = (clk & ~SDHCI_CLOCK_CARD_EN) | SDHCI_CLOCK_INT_EN;
-> +       sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
-> +
-> +       sdhci_reset(host, mask);
-> +
-> +       clk |= SDHCI_CLOCK_CARD_EN;
-> +       sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
-> +
-> +       timeout = ktime_add_ms(ktime_get(), 10);
-> +       while (1) {
-> +               bool timedout = ktime_after(ktime_get(), timeout);
-> +
-> +               clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-> +               if (clk & SDHCI_CLOCK_INT_STABLE)
-> +                       break;
-> +               if (timedout) {
-> +                       pr_err("%s: Internal clock never stabilised.\n",
-> +                               mmc_hostname(host->mmc));
-> +                       sdhci_dumpregs(host);
-> +                       return;
-> +               }
-> +               udelay(10);
-> +       }
-> +
-> +       if (priv->enable_cmd_dat_delay) {
-> +               ctl = sdhci_readl(host, F_SDH30_ESD_CONTROL);
-> +               ctl |= F_SDH30_CMD_DAT_DELAY;
-> +               sdhci_writel(host, ctl, F_SDH30_ESD_CONTROL);
-> +       }
-> +}
-> +
-> +static void sdhci_milbeaut_set_power(struct sdhci_host *host,
-> +                       unsigned char mode, unsigned short vdd)
-> +{
-> +       if (!IS_ERR(host->mmc->supply.vmmc)) {
-> +               struct mmc_host *mmc = host->mmc;
-> +
-> +               mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, vdd);
-> +       }
-> +       sdhci_set_power_noreg(host, mode, vdd);
-> +}
-> +
-> +static const struct sdhci_ops sdhci_milbeaut_ops = {
-> +       .voltage_switch = sdhci_milbeaut_soft_voltage_switch,
-> +       .get_min_clock = sdhci_milbeaut_get_min_clock,
-> +       .reset = sdhci_milbeaut_reset,
-> +       .set_clock = sdhci_set_clock,
-> +       .set_bus_width = sdhci_set_bus_width,
-> +       .set_uhs_signaling = sdhci_set_uhs_signaling,
-> +       .set_power = sdhci_milbeaut_set_power,
-> +};
-> +
-> +static void sdhci_milbeaut_bridge_reset(struct sdhci_host *host,
-> +                                               int reset_flag)
-> +{
-> +       if (reset_flag)
-> +               sdhci_writel(host, 0, MLB_SOFT_RESET);
-> +       else
-> +               sdhci_writel(host, MLB_SOFT_RESET_RSTX, MLB_SOFT_RESET);
-> +}
-> +
-> +static void sdhci_milbeaut_bridge_init(struct sdhci_host *host,
-> +                                               int rate)
-> +{
-> +       u32 val, clk;
-> +
-> +       /* IO_SDIO_CR_SET should be set while reset */
-> +       val = sdhci_readl(host, MLB_CR_SET);
-> +       val &= ~(MLB_CR_SET_CR_TOCLKFREQ_MASK | MLB_CR_SET_CR_TOCLKUNIT |
-> +                       MLB_CR_SET_CR_BCLKFREQ_MASK);
-> +       if (rate >= MLB_TOCLKFREQ_UNIT_THRES) {
-> +               clk = MLB_CAL_TOCLKFREQ_MHZ(rate);
-> +               clk = min_t(u32, MLB_TOCLKFREQ_MAX, clk);
-> +               val |= MLB_CR_SET_CR_TOCLKUNIT |
-> +                       (clk << MLB_CR_SET_CR_TOCLKFREQ_SFT);
-> +       } else {
-> +               clk = MLB_CAL_TOCLKFREQ_KHZ(rate);
-> +               clk = min_t(u32, MLB_TOCLKFREQ_MAX, clk);
-> +               clk = max_t(u32, MLB_TOCLKFREQ_MIN, clk);
-> +               val |= clk << MLB_CR_SET_CR_TOCLKFREQ_SFT;
-> +       }
-> +
-> +       clk = MLB_CAL_BCLKFREQ(rate);
-> +       clk = min_t(u32, MLB_BCLKFREQ_MAX, clk);
-> +       clk = max_t(u32, MLB_BCLKFREQ_MIN, clk);
-> +       val |=  clk << MLB_CR_SET_CR_BCLKFREQ_SFT;
-> +       val &= ~MLB_CR_SET_CR_RTUNTIMER_MASK;
-> +       sdhci_writel(host, val, MLB_CR_SET);
-> +
-> +       sdhci_writel(host, MLB_CDR_SET_CLK2POW16, MLB_CDR_SET);
-> +
-> +       sdhci_writel(host, MLB_WP_CD_LED_SET_LED_INV, MLB_WP_CD_LED_SET);
-> +}
-> +
-> +static void sdhci_milbeaut_vendor_init(struct sdhci_host *host)
-> +{
-> +       struct f_sdhost_priv *priv = sdhci_priv(host);
-> +       u32 ctl;
-> +
-> +       ctl = sdhci_readl(host, F_SDH30_IO_CONTROL2);
-> +       ctl |= F_SDH30_CRES_O_DN;
-> +       sdhci_writel(host, ctl, F_SDH30_IO_CONTROL2);
-> +       ctl &= ~F_SDH30_MSEL_O_1_8;
-> +       sdhci_writel(host, ctl, F_SDH30_IO_CONTROL2);
-> +       ctl &= ~F_SDH30_CRES_O_DN;
-> +       sdhci_writel(host, ctl, F_SDH30_IO_CONTROL2);
-> +
-> +       ctl = sdhci_readw(host, F_SDH30_AHB_CONFIG);
-> +       ctl |= F_SDH30_SIN | F_SDH30_AHB_INCR_16 | F_SDH30_AHB_INCR_8 |
-> +              F_SDH30_AHB_INCR_4;
-> +       ctl &= ~(F_SDH30_AHB_BIGED | F_SDH30_BUSLOCK_EN);
-> +       sdhci_writew(host, ctl, F_SDH30_AHB_CONFIG);
-> +
-> +       if (priv->enable_cmd_dat_delay) {
-> +               ctl = sdhci_readl(host, F_SDH30_ESD_CONTROL);
-> +               ctl |= F_SDH30_CMD_DAT_DELAY;
-> +               sdhci_writel(host, ctl, F_SDH30_ESD_CONTROL);
-> +       }
-> +}
-> +
-> +static const struct of_device_id mlb_dt_ids[] = {
-> +       {
-> +               .compatible = "socionext,milbeaut-m10v-sdhci-3.0",
-> +       },
-> +       { /* sentinel */ }
-> +};
-> +MODULE_DEVICE_TABLE(of, mlb_dt_ids);
-> +
-> +static void sdhci_milbeaut_init(struct sdhci_host *host)
-> +{
-> +       struct f_sdhost_priv *priv = sdhci_priv(host);
-> +       int rate = clk_get_rate(priv->clk);
-> +       u16 ctl;
-> +
-> +       sdhci_milbeaut_bridge_reset(host, 0);
-> +
-> +       ctl = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-> +       ctl &= ~(SDHCI_CLOCK_CARD_EN | SDHCI_CLOCK_INT_EN);
-> +       sdhci_writew(host, ctl, SDHCI_CLOCK_CONTROL);
-> +
-> +       sdhci_milbeaut_bridge_reset(host, 1);
-> +
-> +       sdhci_milbeaut_bridge_init(host, rate);
-> +       sdhci_milbeaut_bridge_reset(host, 0);
-> +
-> +       sdhci_milbeaut_vendor_init(host);
-> +}
-> +
-> +static int sdhci_milbeaut_probe(struct platform_device *pdev)
-> +{
-> +       struct sdhci_host *host;
-> +       struct device *dev = &pdev->dev;
-> +       struct resource *res;
-> +       int irq, ret = 0;
-> +       struct f_sdhost_priv *priv;
-> +
-> +       irq = platform_get_irq(pdev, 0);
-> +       if (irq < 0) {
-> +               dev_err(dev, "%s: no irq specified\n", __func__);
-> +               return irq;
-> +       }
-> +
-> +       host = sdhci_alloc_host(dev, sizeof(struct f_sdhost_priv));
-> +       if (IS_ERR(host))
-> +               return PTR_ERR(host);
-> +
-> +       priv = sdhci_priv(host);
-> +       priv->dev = dev;
-> +
-> +       host->quirks = SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC |
-> +                          SDHCI_QUIRK_INVERTED_WRITE_PROTECT |
-> +                          SDHCI_QUIRK_CLOCK_BEFORE_RESET |
-> +                          SDHCI_QUIRK_DELAY_AFTER_POWER;
-> +       host->quirks2 = SDHCI_QUIRK2_SUPPORT_SINGLE |
-> +                       SDHCI_QUIRK2_TUNING_WORK_AROUND |
-> +                       SDHCI_QUIRK2_PRESET_VALUE_BROKEN;
-> +
-> +       priv->enable_cmd_dat_delay = device_property_read_bool(dev,
-> +                                               "fujitsu,cmd-dat-delay-select");
-> +
-> +       ret = mmc_of_parse(host->mmc);
-> +       if (ret)
-> +               goto err;
-> +
-> +       platform_set_drvdata(pdev, host);
-> +
-> +       host->hw_name = "f_sdh30";
-> +       host->ops = &sdhci_milbeaut_ops;
-> +       host->irq = irq;
-> +
-> +       res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
-> +       host->ioaddr = devm_ioremap_resource(&pdev->dev, res);
-> +       if (IS_ERR(host->ioaddr)) {
-> +               ret = PTR_ERR(host->ioaddr);
-> +               goto err;
-> +       }
-> +
-> +       if (dev_of_node(dev)) {
-> +               sdhci_get_of_property(pdev);
-> +
-> +               priv->clk_iface = devm_clk_get(&pdev->dev, "iface");
-> +               if (IS_ERR(priv->clk_iface)) {
-> +                       ret = PTR_ERR(priv->clk_iface);
-> +                       goto err;
-> +               }
-> +
-> +               ret = clk_prepare_enable(priv->clk_iface);
-> +               if (ret)
-> +                       goto err;
-> +
-> +               priv->clk = devm_clk_get(&pdev->dev, "core");
-> +               if (IS_ERR(priv->clk)) {
-> +                       ret = PTR_ERR(priv->clk);
-> +                       goto err_clk;
-> +               }
-> +
-> +               ret = clk_prepare_enable(priv->clk);
-> +               if (ret)
-> +                       goto err_clk;
-> +       }
-> +
-> +       sdhci_milbeaut_init(host);
-> +
-> +       ret = sdhci_add_host(host);
-> +       if (ret)
-> +               goto err_add_host;
-> +
-> +       return 0;
-> +
-> +err_add_host:
-> +       clk_disable_unprepare(priv->clk);
-> +err_clk:
-> +       clk_disable_unprepare(priv->clk_iface);
-> +err:
-> +       sdhci_free_host(host);
-> +       return ret;
-> +}
-> +
-> +static int sdhci_milbeaut_remove(struct platform_device *pdev)
-> +{
-> +       struct sdhci_host *host = platform_get_drvdata(pdev);
-> +       struct f_sdhost_priv *priv = sdhci_priv(host);
-> +
-> +       sdhci_remove_host(host, readl(host->ioaddr + SDHCI_INT_STATUS) ==
-> +                         0xffffffff);
-> +
-> +       clk_disable_unprepare(priv->clk_iface);
-> +       clk_disable_unprepare(priv->clk);
-> +
-> +       sdhci_free_host(host);
-> +       platform_set_drvdata(pdev, NULL);
-> +
-> +       return 0;
-> +}
-> +
-> +static struct platform_driver sdhci_milbeaut_driver = {
-> +       .driver = {
-> +               .name = "sdhci-milbeaut",
-> +               .of_match_table = of_match_ptr(mlb_dt_ids),
-> +       },
-> +       .probe  = sdhci_milbeaut_probe,
-> +       .remove = sdhci_milbeaut_remove,
-> +};
-> +
-> +module_platform_driver(sdhci_milbeaut_driver);
-> +
-> +MODULE_DESCRIPTION("MILBEAUT SD Card Controller driver");
-> +MODULE_AUTHOR("Takao Orito <orito.takao@socionext.com>");
-> +MODULE_LICENSE("GPL v2");
-> +MODULE_ALIAS("platform:sdhci-milbeaut");
-> diff --git a/drivers/mmc/host/sdhci_f_sdh30.c b/drivers/mmc/host/sdhci_f_sdh30.c
-> index 485f759..ca4c99a 100644
-> --- a/drivers/mmc/host/sdhci_f_sdh30.c
-> +++ b/drivers/mmc/host/sdhci_f_sdh30.c
-> @@ -19,31 +19,7 @@
->  #include <linux/clk.h>
+> +++ b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
+> @@ -0,0 +1,374 @@
+> +# SPDX-License-Identifier: GPL-2.0
+> +%YAML 1.2
+> +---
+> +$id: http://devicetree.org/schemas/mmc/mmc-controller.yaml#
+> +$schema: http://devicetree.org/meta-schemas/core.yaml#
+> +
+> +title: MMC Controller Generic Binding
+> +
+> +maintainers:
+> +  - Ulf Hansson <ulf.hansson@linaro.org>
+> +
+> +description: |
+> +  These properties are common to multiple MMC host controllers. Any host
+> +  that requires the respective functionality should implement them using
+> +  these definitions.
+> +
+> +properties:
+> +  $nodename:
+> +    pattern: "^mmc(@.*)?$"
+> +
+> +  "#address-cells":
+> +    const: 1
+> +    description: |
+> +      The cell is the slot ID if a function subnode is used.
+> +
+> +  "#size-cells":
+> +    const: 0
+> +
+> +  # Card Detection.
+> +  # If none of these properties are supplied, the host native card
+> +  # detect will be used. Only one of them should be provided.
+> +
+> +  broken-cd:
+> +    $ref: /schemas/types.yaml#/definitions/flag
+> +    description:
+> +      There is no card detection available; polling must be used.
+> +
+> +  cd-gpios:
+> +    description:
+> +      The card detection will be done using the GPIO provided.
+> +
+> +  non-removable:
+> +    $ref: /schemas/types.yaml#/definitions/flag
+> +    description:
+> +      Non-removable slot (like eMMC); assume always present.
+> +
+> +  # *NOTE* on CD and WP polarity. To use common for all SD/MMC host
+> +  # controllers line polarity properties, we have to fix the meaning
+> +  # of the "normal" and "inverted" line levels. We choose to follow
+> +  # the SDHCI standard, which specifies both those lines as "active
+> +  # low." Therefore, using the "cd-inverted" property means, that the
+> +  # CD line is active high, i.e. it is high, when a card is
+> +  # inserted. Similar logic applies to the "wp-inverted" property.
+> +  #
+> +  # CD and WP lines can be implemented on the hardware in one of two
+> +  # ways: as GPIOs, specified in cd-gpios and wp-gpios properties, or
+> +  # as dedicated pins. Polarity of dedicated pins can be specified,
+> +  # using *-inverted properties. GPIO polarity can also be specified
+> +  # using the GPIO_ACTIVE_LOW flag. This creates an ambiguity in the
+> +  # latter case. We choose to use the XOR logic for GPIO CD and WP
+> +  # lines.  This means, the two properties are "superimposed," for
+> +  # example leaving the GPIO_ACTIVE_LOW flag clear and specifying the
+> +  # respective *-inverted property property results in a
+> +  # double-inversion and actually means the "normal" line polarity is
+> +  # in effect.
+> +  wp-inverted:
+> +    $ref: /schemas/types.yaml#/definitions/flag
+> +    description:
+> +      The Write Protect line polarity is inverted.
+> +
+> +  cd-inverted:
+> +    $ref: /schemas/types.yaml#/definitions/flag
+> +    description:
+> +      The CD line polarity is inverted.
+> +
+> +  # Other properties
+> +
+> +  bus-width:
+> +    allOf:
+> +      - $ref: /schemas/types.yaml#/definitions/uint32
+> +      - enum: [1, 4, 8]
+> +        default: 1
+> +    description:
+> +      Number of data lines.
+> +
+> +  max-frequency:
+> +    allOf:
+> +      - $ref: /schemas/types.yaml#/definitions/uint32
+> +      - minimum: 400000
+> +      - maximum: 200000000
+> +    description:
+> +      Maximum operating frequency of the bus.
+> +
+> +  disable-wp:
+> +    $ref: /schemas/types.yaml#/definitions/flag
+> +    description:
+> +      When set, no physical write-protect line is present. This
+> +      property should only be specified when the controller has a
+> +      dedicated write-protect detection logic. If a GPIO is always
+> +      used for the write-protect detection. If a GPIO is always used
+> +      for the write-protect detection logic, it is sufficient to not
+> +      specify the wp-gpios property in the absence of a write-protect
+> +      line.
+> +
+> +  wp-gpios:
+> +    description:
+> +      GPIO to use for the write-protect detection.
+> +
+> +  cd-debounce-delay-ms:
+> +    description:
+> +      Set delay time before detecting card after card insert
+> +      interrupt.
+> +
+> +  no-1-8-v:
+> +    $ref: /schemas/types.yaml#/definitions/flag
+> +    description:
+> +      When specified, denotes that 1.8V card voltage is not supported
+> +      on this system, even if the controller claims it.
+> +
+> +  cap-sd-highspeed:
+> +    $ref: /schemas/types.yaml#/definitions/flag
+> +    description:
+> +      SD high-speed timing is supported.
+> +
+> +  cap-mmc-highspeed:
+> +    $ref: /schemas/types.yaml#/definitions/flag
+> +    description:
+> +      MMC high-speed timing is supported.
+> +
+> +  sd-uhs-sdr12:
+> +    $ref: /schemas/types.yaml#/definitions/flag
+> +    description:
+> +      SD UHS SDR12 speed is supported.
+> +
+> +  sd-uhs-sdr25:
+> +    $ref: /schemas/types.yaml#/definitions/flag
+> +    description:
+> +      SD UHS SDR25 speed is supported.
+> +
+> +  sd-uhs-sdr50:
+> +    $ref: /schemas/types.yaml#/definitions/flag
+> +    description:
+> +      SD UHS SDR50 speed is supported.
+> +
+> +  sd-uhs-sdr104:
+> +    $ref: /schemas/types.yaml#/definitions/flag
+> +    description:
+> +      SD UHS SDR104 speed is supported.
+> +
+> +  sd-uhs-ddr50:
+> +    $ref: /schemas/types.yaml#/definitions/flag
+> +    description:
+> +      SD UHS DDR50 speed is supported.
+> +
+> +  cap-power-off-card:
+> +    $ref: /schemas/types.yaml#/definitions/flag
+> +    description:
+> +      Powering off the card is safe.
+> +
+> +  cap-mmc-hw-reset:
+> +    $ref: /schemas/types.yaml#/definitions/flag
+> +    description:
+> +      eMMC hardware reset is supported
+> +
+> +  cap-sdio-irq:
+> +    $ref: /schemas/types.yaml#/definitions/flag
+> +    description:
+> +      enable SDIO IRQ signalling on this interface
+> +
+> +  full-pwr-cycle:
+> +    $ref: /schemas/types.yaml#/definitions/flag
+> +    description:
+> +      Full power cycle of the card is supported.
+> +
+> +  mmc-ddr-1_2v:
+> +    $ref: /schemas/types.yaml#/definitions/flag
+> +    description:
+> +      eMMC high-speed DDR mode (1.2V I/O) is supported.
+> +
+> +  mmc-ddr-1_8v:
+> +    $ref: /schemas/types.yaml#/definitions/flag
+> +    description:
+> +      eMMC high-speed DDR mode (1.8V I/O) is supported.
+> +
+> +  mmc-ddr-3_3v:
+> +    $ref: /schemas/types.yaml#/definitions/flag
+> +    description:
+> +      eMMC high-speed DDR mode (3.3V I/O) is supported.
+> +
+> +  mmc-hs200-1_2v:
+> +    $ref: /schemas/types.yaml#/definitions/flag
+> +    description:
+> +      eMMC HS200 mode (1.2V I/O) is supported.
+> +
+> +  mmc-hs200-1_8v:
+> +    $ref: /schemas/types.yaml#/definitions/flag
+> +    description:
+> +      eMMC HS200 mode (1.8V I/O) is supported.
+> +
+> +  mmc-hs400-1_2v:
+> +    $ref: /schemas/types.yaml#/definitions/flag
+> +    description:
+> +      eMMC HS400 mode (1.2V I/O) is supported.
+> +
+> +  mmc-hs400-1_8v:
+> +    $ref: /schemas/types.yaml#/definitions/flag
+> +    description:
+> +      eMMC HS400 mode (1.8V I/O) is supported.
+> +
+> +  mmc-hs400-enhanced-strobe:
+> +    $ref: /schemas/types.yaml#/definitions/flag
+> +    description:
+> +      eMMC HS400 enhanced strobe mode is supported
+> +
+> +  dsr:
+> +    allOf:
+> +      - $ref: /schemas/types.yaml#/definitions/uint32
+> +      - minimum: 0
+> +      - maximum: 0xffff
+> +    description:
+> +      Value the card Driver Stage Register (DSR) should be programmed
+> +      with.
+> +
+> +  no-sdio:
+> +    $ref: /schemas/types.yaml#/definitions/flag
+> +    description:
+> +      Controller is limited to send SDIO commands during
+> +      initialization.
+> +
+> +  no-sd:
+> +    $ref: /schemas/types.yaml#/definitions/flag
+> +    description:
+> +      Controller is limited to send SD commands during initialization.
+> +
+> +  no-mmc:
+> +    $ref: /schemas/types.yaml#/definitions/flag
+> +    description:
+> +      Controller is limited to send MMC commands during
+> +      initialization.
+> +
+> +  fixed-emmc-driver-type:
+> +    allOf:
+> +      - $ref: /schemas/types.yaml#/definitions/uint32
+> +      - minimum: 0
+> +      - maximum: 4
+> +    description:
+> +      For non-removable eMMC, enforce this driver type. The value is
+> +      the driver type as specified in the eMMC specification (table
+> +      206 in spec version 5.1)
+> +
+> +  post-power-on-delay-ms:
+> +    allOf:
+> +      - $ref: /schemas/types.yaml#/definitions/uint32
+> +      - default: 10
+> +    description:
+> +      It was invented for MMC pwrseq-simple which could be referred to
+> +      mmc-pwrseq-simple.txt. But now it\'s reused as a tunable delay
+> +      waiting for I/O signalling and card power supply to be stable,
+> +      regardless of whether pwrseq-simple is used. Default to 10ms if
+> +      no available.
+> +
+> +  supports-cqe:
+> +    $ref: /schemas/types.yaml#/definitions/flag
+> +    description:
+> +      The presence of this property indicates that the corresponding
+> +      MMC host controller supports HW command queue feature.
+> +
+> +  disable-cqe-dcmd:
+> +    $ref: /schemas/types.yaml#/definitions/flag
+> +    description:
+> +      The presence of this property indicates that the MMC
+> +      controller\'s command queue engine (CQE) does not support direct
+> +      commands (DCMDs).
+> +
+> +  keep-power-in-suspend:
+> +    $ref: /schemas/types.yaml#/definitions/flag
+> +    description:
+> +      SDIO only. Preserves card power during a suspend/resume cycle.
+> +
+> +  # Deprecated: enable-sdio-wakeup
+> +  wakeup-source:
+> +    $ref: /schemas/types.yaml#/definitions/flag
+> +    description:
+> +      SDIO only. Enables wake up of host system on SDIO IRQ assertion.
+> +
+> +  vmmc-supply:
+> +    description:
+> +      Supply for the card power
+> +
+> +  vqmmc-supply:
+> +    description:
+> +      Supply for the bus IO line power
+> +
+> +  mmc-pwrseq:
+> +    $ref: /schemas/types.yaml#/definitions/phandle
+> +    description:
+> +      System-on-Chip designs may specify a specific MMC power
+> +      sequence. To successfully detect an (e)MMC/SD/SDIO card, that
+> +      power sequence must be maintained while initializing the card.
+> +
+> +patternProperties:
+> +  "^.*@[0-9]+$":
+> +    type: object
+> +    description: |
+> +      On embedded systems the cards connected to a host may need
+> +      additional properties. These can be specified in subnodes to the
+> +      host controller node. The subnodes are identified by the
+> +      standard \'reg\' property. Which information exactly can be
+> +      specified depends on the bindings for the SDIO function driver
+> +      for the subnode, as specified by the compatible string.
+> +
+> +    properties:
+> +      compatible:
+> +        description: |
+> +          Name of SDIO function following generic names recommended
+> +          practice
+> +
+> +      reg:
+> +        items:
+> +          - minimum: 0
+> +            maximum: 7
+> +            description:
+> +              Must contain the SDIO function number of the function this
+> +              subnode describes. A value of 0 denotes the memory SD
+> +              function, values from 1 to 7 denote the SDIO functions.
+> +
+> +      broken-hpi:
+> +        $ref: /schemas/types.yaml#/definitions/flag
+> +        description:
+> +          Use this to indicate that the mmc-card has a broken hpi
+> +          implementation, and that hpi should not be used.
+> +
+> +    required:
+> +      - reg
+> +
+> +dependencies:
+> +  cd-debounce-delay-ms: [ cd-gpios ]
+> +  fixed-emmc-driver-type: [ non-removable ]
+> +
+> +examples:
+> +  - |
+> +    sdhci@ab000000 {
+> +        compatible = "sdhci";
+> +        reg = <0xab000000 0x200>;
+> +        interrupts = <23>;
+> +        bus-width = <4>;
+> +        cd-gpios = <&gpio 69 0>;
+> +        cd-inverted;
+> +        wp-gpios = <&gpio 70 0>;
+> +        max-frequency = <50000000>;
+> +        keep-power-in-suspend;
+> +        wakeup-source;
+> +        mmc-pwrseq = <&sdhci0_pwrseq>;
+> +    };
+> +
+> +  - |
+> +    mmc3: mmc@1c12000 {
+> +        #address-cells = <1>;
+> +        #size-cells = <0>;
+> +        pinctrl-names = "default";
+> +        pinctrl-0 = <&mmc3_pins_a>;
+> +        vmmc-supply = <&reg_vmmc3>;
+> +        bus-width = <4>;
+> +        non-removable;
+> +        mmc-pwrseq = <&sdhci0_pwrseq>;
+> +
+> +        brcmf: bcrmf@1 {
+> +            reg = <1>;
+> +            compatible = "brcm,bcm43xx-fmac";
+> +            interrupt-parent = <&pio>;
+> +            interrupts = <10 8>;
+> +            interrupt-names = "host-wake";
+> +        };
+> +    };
+> diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
+> index c269dbe384fe..bf9d7d3febf1 100644
+> --- a/Documentation/devicetree/bindings/mmc/mmc.txt
+> +++ b/Documentation/devicetree/bindings/mmc/mmc.txt
+> @@ -1,177 +1 @@
+> -These properties are common to multiple MMC host controllers. Any host
+> -that requires the respective functionality should implement them using
+> -these definitions.
+> -
+> -Interpreted by the OF core:
+> -- reg: Registers location and length.
+> -- interrupts: Interrupts used by the MMC controller.
+> -
+> -Card detection:
+> -If no property below is supplied, host native card detect is used.
+> -Only one of the properties in this section should be supplied:
+> -  - broken-cd: There is no card detection available; polling must be used.
+> -  - cd-gpios: Specify GPIOs for card detection, see gpio binding
+> -  - non-removable: non-removable slot (like eMMC); assume always present.
+> -
+> -Optional properties:
+> -- bus-width: Number of data lines, can be <1>, <4>, or <8>.  The default
+> -  will be <1> if the property is absent.
+> -- wp-gpios: Specify GPIOs for write protection, see gpio binding
+> -- cd-inverted: when present, polarity on the CD line is inverted. See the note
+> -  below for the case, when a GPIO is used for the CD line
+> -- cd-debounce-delay-ms: Set delay time before detecting card after card insert interrupt.
+> -  It's only valid when cd-gpios is present.
+> -- wp-inverted: when present, polarity on the WP line is inverted. See the note
+> -  below for the case, when a GPIO is used for the WP line
+> -- disable-wp: When set no physical WP line is present. This property should
+> -  only be specified when the controller has a dedicated write-protect
+> -  detection logic. If a GPIO is always used for the write-protect detection
+> -  logic it is sufficient to not specify wp-gpios property in the absence of a WP
+> -  line.
+> -- max-frequency: maximum operating clock frequency
+> -- no-1-8-v: when present, denotes that 1.8v card voltage is not supported on
+> -  this system, even if the controller claims it is.
+> -- cap-sd-highspeed: SD high-speed timing is supported
+> -- cap-mmc-highspeed: MMC high-speed timing is supported
+> -- sd-uhs-sdr12: SD UHS SDR12 speed is supported
+> -- sd-uhs-sdr25: SD UHS SDR25 speed is supported
+> -- sd-uhs-sdr50: SD UHS SDR50 speed is supported
+> -- sd-uhs-sdr104: SD UHS SDR104 speed is supported
+> -- sd-uhs-ddr50: SD UHS DDR50 speed is supported
+> -- cap-power-off-card: powering off the card is safe
+> -- cap-mmc-hw-reset: eMMC hardware reset is supported
+> -- cap-sdio-irq: enable SDIO IRQ signalling on this interface
+> -- full-pwr-cycle: full power cycle of the card is supported
+> -- mmc-ddr-3_3v: eMMC high-speed DDR mode(3.3V I/O) is supported
+> -- mmc-ddr-1_8v: eMMC high-speed DDR mode(1.8V I/O) is supported
+> -- mmc-ddr-1_2v: eMMC high-speed DDR mode(1.2V I/O) is supported
+> -- mmc-hs200-1_8v: eMMC HS200 mode(1.8V I/O) is supported
+> -- mmc-hs200-1_2v: eMMC HS200 mode(1.2V I/O) is supported
+> -- mmc-hs400-1_8v: eMMC HS400 mode(1.8V I/O) is supported
+> -- mmc-hs400-1_2v: eMMC HS400 mode(1.2V I/O) is supported
+> -- mmc-hs400-enhanced-strobe: eMMC HS400 enhanced strobe mode is supported
+> -- dsr: Value the card's (optional) Driver Stage Register (DSR) should be
+> -  programmed with. Valid range: [0 .. 0xffff].
+> -- no-sdio: controller is limited to send sdio cmd during initialization
+> -- no-sd: controller is limited to send sd cmd during initialization
+> -- no-mmc: controller is limited to send mmc cmd during initialization
+> -- fixed-emmc-driver-type: for non-removable eMMC, enforce this driver type.
+> -  The value <n> is the driver type as specified in the eMMC specification
+> -  (table 206 in spec version 5.1).
+> -- post-power-on-delay-ms : It was invented for MMC pwrseq-simple which could
+> -  be referred to mmc-pwrseq-simple.txt. But now it's reused as a tunable delay
+> -  waiting for I/O signalling and card power supply to be stable, regardless of
+> -  whether pwrseq-simple is used. Default to 10ms if no available.
+> -- supports-cqe : The presence of this property indicates that the corresponding
+> -  MMC host controller supports HW command queue feature.
+> -- disable-cqe-dcmd: This property indicates that the MMC controller's command
+> -  queue engine (CQE) does not support direct commands (DCMDs).
+> -
+> -*NOTE* on CD and WP polarity. To use common for all SD/MMC host controllers line
+> -polarity properties, we have to fix the meaning of the "normal" and "inverted"
+> -line levels. We choose to follow the SDHCI standard, which specifies both those
+> -lines as "active low." Therefore, using the "cd-inverted" property means, that
+> -the CD line is active high, i.e. it is high, when a card is inserted. Similar
+> -logic applies to the "wp-inverted" property.
+> -
+> -CD and WP lines can be implemented on the hardware in one of two ways: as GPIOs,
+> -specified in cd-gpios and wp-gpios properties, or as dedicated pins. Polarity of
+> -dedicated pins can be specified, using *-inverted properties. GPIO polarity can
+> -also be specified using the GPIO_ACTIVE_LOW flag. This creates an ambiguity
+> -in the latter case. We choose to use the XOR logic for GPIO CD and WP lines.
+> -This means, the two properties are "superimposed," for example leaving the
+> -GPIO_ACTIVE_LOW flag clear and specifying the respective *-inverted property
+> -property results in a double-inversion and actually means the "normal" line
+> -polarity is in effect.
+> -
+> -Optional SDIO properties:
+> -- keep-power-in-suspend: Preserves card power during a suspend/resume cycle
+> -- wakeup-source: Enables wake up of host system on SDIO IRQ assertion
+> -                (Legacy property supported: "enable-sdio-wakeup")
+> -
+> -MMC power
+> ----------
+> -
+> -Controllers may implement power control from both the connected cards and
+> -the IO signaling (for example to change to high-speed 1.8V signalling). If
+> -the system supports this, then the following two properties should point
+> -to valid regulator nodes:
+> -
+> -- vqmmc-supply: supply node for IO line power
+> -- vmmc-supply: supply node for card's power
+> -
+> -
+> -MMC power sequences:
+> ---------------------
+> -
+> -System on chip designs may specify a specific MMC power sequence. To
+> -successfully detect an (e)MMC/SD/SDIO card, that power sequence must be
+> -maintained while initializing the card.
+> -
+> -Optional property:
+> -- mmc-pwrseq: phandle to the MMC power sequence node. See "mmc-pwrseq-*"
+> -       for documentation of MMC power sequence bindings.
+> -
+> -
+> -Use of Function subnodes
+> -------------------------
+> -
+> -On embedded systems the cards connected to a host may need additional
+> -properties. These can be specified in subnodes to the host controller node.
+> -The subnodes are identified by the standard 'reg' property.
+> -Which information exactly can be specified depends on the bindings for the
+> -SDIO function driver for the subnode, as specified by the compatible string.
+> -
+> -Required host node properties when using function subnodes:
+> -- #address-cells: should be one. The cell is the slot id.
+> -- #size-cells: should be zero.
+> -
+> -Required function subnode properties:
+> -- reg: Must contain the SDIO function number of the function this subnode
+> -       describes. A value of 0 denotes the memory SD function, values from
+> -       1 to 7 denote the SDIO functions.
+> -
+> -Optional function subnode properties:
+> -- compatible: name of SDIO function following generic names recommended practice
+> -
+> -
+> -Examples
+> ---------
+> -
+> -Basic example:
+> -
+> -sdhci@ab000000 {
+> -       compatible = "sdhci";
+> -       reg = <0xab000000 0x200>;
+> -       interrupts = <23>;
+> -       bus-width = <4>;
+> -       cd-gpios = <&gpio 69 0>;
+> -       cd-inverted;
+> -       wp-gpios = <&gpio 70 0>;
+> -       max-frequency = <50000000>;
+> -       keep-power-in-suspend;
+> -       wakeup-source;
+> -       mmc-pwrseq = <&sdhci0_pwrseq>
+> -}
+> -
+> -Example with sdio function subnode:
+> -
+> -mmc3: mmc@1c12000 {
+> -       #address-cells = <1>;
+> -       #size-cells = <0>;
+> -
+> -       pinctrl-names = "default";
+> -       pinctrl-0 = <&mmc3_pins_a>;
+> -       vmmc-supply = <&reg_vmmc3>;
+> -       bus-width = <4>;
+> -       non-removable;
+> -       mmc-pwrseq = <&sdhci0_pwrseq>
+> -
+> -       brcmf: bcrmf@1 {
+> -               reg = <1>;
+> -               compatible = "brcm,bcm43xx-fmac";
+> -               interrupt-parent = <&pio>;
+> -               interrupts = <10 8>; /* PH10 / EINT10 */
+> -               interrupt-names = "host-wake";
+> -       };
+> -};
+> +This file has moved to mmc-controller.yaml.
 >
->  #include "sdhci-pltfm.h"
-> -
-> -/* F_SDH30 extended Controller registers */
-> -#define F_SDH30_AHB_CONFIG             0x100
-> -#define  F_SDH30_AHB_BIGED             0x00000040
-> -#define  F_SDH30_BUSLOCK_DMA           0x00000020
-> -#define  F_SDH30_BUSLOCK_EN            0x00000010
-> -#define  F_SDH30_SIN                   0x00000008
-> -#define  F_SDH30_AHB_INCR_16           0x00000004
-> -#define  F_SDH30_AHB_INCR_8            0x00000002
-> -#define  F_SDH30_AHB_INCR_4            0x00000001
-> -
-> -#define F_SDH30_TUNING_SETTING         0x108
-> -#define  F_SDH30_CMD_CHK_DIS           0x00010000
-> -
-> -#define F_SDH30_IO_CONTROL2            0x114
-> -#define  F_SDH30_CRES_O_DN             0x00080000
-> -#define  F_SDH30_MSEL_O_1_8            0x00040000
-> -
-> -#define F_SDH30_ESD_CONTROL            0x124
-> -#define  F_SDH30_EMMC_RST              0x00000002
-> -#define  F_SDH30_EMMC_HS200            0x01000000
-> -
-> -#define F_SDH30_CMD_DAT_DELAY          0x200
-> -
-> -#define F_SDH30_MIN_CLOCK              400000
-> +#include "sdhci_f_sdh30.h"
->
->  struct f_sdhost_priv {
->         struct clk *clk_iface;
-> diff --git a/drivers/mmc/host/sdhci_f_sdh30.h b/drivers/mmc/host/sdhci_f_sdh30.h
-> new file mode 100644
-> index 0000000..fc1ad28
-> --- /dev/null
-> +++ b/drivers/mmc/host/sdhci_f_sdh30.h
-> @@ -0,0 +1,32 @@
-> +/* SPDX-License-Identifier: GPL-2.0 */
-> +/*
-> + * Copyright (C) 2013 - 2015 Fujitsu Semiconductor, Ltd
-> + *              Vincent Yang <vincent.yang@tw.fujitsu.com>
-> + * Copyright (C) 2015 Linaro Ltd  Andy Green <andy.green@linaro.org>
-> + * Copyright (C) 2019 Socionext Inc.
-> + *
-> + */
-> +
-> +/* F_SDH30 extended Controller registers */
-> +#define F_SDH30_AHB_CONFIG      0x100
-> +#define  F_SDH30_AHB_BIGED      BIT(6)
-> +#define  F_SDH30_BUSLOCK_DMA    BIT(5)
-> +#define  F_SDH30_BUSLOCK_EN     BIT(4)
-> +#define  F_SDH30_SIN            BIT(3)
-> +#define  F_SDH30_AHB_INCR_16    BIT(2)
-> +#define  F_SDH30_AHB_INCR_8     BIT(1)
-> +#define  F_SDH30_AHB_INCR_4     BIT(0)
-> +
-> +#define F_SDH30_TUNING_SETTING  0x108
-> +#define  F_SDH30_CMD_CHK_DIS    BIT(16)
-> +
-> +#define F_SDH30_IO_CONTROL2     0x114
-> +#define  F_SDH30_CRES_O_DN      BIT(19)
-> +#define  F_SDH30_MSEL_O_1_8     BIT(18)
-> +
-> +#define F_SDH30_ESD_CONTROL     0x124
-> +#define         F_SDH30_EMMC_RST               BIT(1)
-> +#define  F_SDH30_CMD_DAT_DELAY BIT(9)
-> +#define         F_SDH30_EMMC_HS200             BIT(24)
-> +
-> +#define F_SDH30_MIN_CLOCK              400000
+> base-commit: 9a15d2e3fd03e38a6ee7d7bc34d28bb7340f05f2
 > --
-> 1.9.1
->
->
+> git-series 0.9.1
