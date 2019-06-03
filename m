@@ -1,15 +1,14 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH 4/9] mmc: sdhci-sprd: Implement the
- get_max_timeout_count() interface
-Date: Mon, 3 Jun 2019 15:34:38 +0300
-Message-ID: <ed5bdd08-7227-4d55-23de-e78e15d315c7@intel.com>
+Subject: Re: [PATCH 5/9] mmc: sdhci-sprd: Add HS400 enhanced strobe mode
+Date: Mon, 3 Jun 2019 15:39:16 +0300
+Message-ID: <1d527144-b047-1d81-171d-706e1c67e19b@intel.com>
 References: <cover.1558346019.git.baolin.wang@linaro.org>
- <ae6e23d4de6bb25cd697412f1402036d5ecc9843.1558346019.git.baolin.wang@linaro.org>
+ <20349e8ebd4c1ec64fb5f8cdd9e094d0c1732855.1558346019.git.baolin.wang@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <ae6e23d4de6bb25cd697412f1402036d5ecc9843.1558346019.git.baolin.wang@linaro.org>
+In-Reply-To: <20349e8ebd4c1ec64fb5f8cdd9e094d0c1732855.1558346019.git.baolin.wang@linaro.org>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
 To: Baolin Wang <baolin.wang@linaro.org>, ulf.hansson@linaro.org, zhang.lyra@gmail.com, orsonzhai@gmail.com, robh+dt@kernel.org, mark.rutland@arm.com, arnd@arndb.de, olof@lixom.net
@@ -17,43 +16,78 @@ Cc: vincent.guittot@linaro.org, arm@kernel.org, linux-arm-kernel@lists.infradead
 List-Id: linux-mmc@vger.kernel.org
 
 On 20/05/19 1:11 PM, Baolin Wang wrote:
-> Implement the get_max_timeout_count() interface to set the Spredtrum SD
-> host controller actual maximum timeout count.
+> Add HS400 enhanced strobe mode support for Spreadtrum SD host controller.
 > 
 > Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
-
-Seems surprising that there isn't a custom ->set_timeout() as well.
-Nevertheless:
 
 Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
 > ---
->  drivers/mmc/host/sdhci-sprd.c |    7 +++++++
->  1 file changed, 7 insertions(+)
+>  drivers/mmc/host/sdhci-sprd.c |   32 ++++++++++++++++++++++++++++++++
+>  1 file changed, 32 insertions(+)
 > 
 > diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
-> index 31ba7d6..d91281d 100644
+> index d91281d..edec197 100644
 > --- a/drivers/mmc/host/sdhci-sprd.c
 > +++ b/drivers/mmc/host/sdhci-sprd.c
-> @@ -285,6 +285,12 @@ static void sdhci_sprd_hw_reset(struct sdhci_host *host)
->  	usleep_range(300, 500);
+> @@ -41,6 +41,7 @@
+>  /* SDHCI_HOST_CONTROL2 */
+>  #define  SDHCI_SPRD_CTRL_HS200		0x0005
+>  #define  SDHCI_SPRD_CTRL_HS400		0x0006
+> +#define  SDHCI_SPRD_CTRL_HS400ES	0x0007
+>  
+>  /*
+>   * According to the standard specification, BIT(3) of SDHCI_SOFTWARE_RESET is
+> @@ -132,6 +133,15 @@ static inline void sdhci_sprd_sd_clk_off(struct sdhci_host *host)
+>  	sdhci_writew(host, ctrl, SDHCI_CLOCK_CONTROL);
 >  }
 >  
-> +static unsigned int sdhci_sprd_get_max_timeout_count(struct sdhci_host *host)
+> +static inline void sdhci_sprd_sd_clk_on(struct sdhci_host *host)
 > +{
-> +	/* The Spredtrum controller actual maximum timeout count is 1 << 31 */
-> +	return 1 << 31;
+> +	u16 ctrl;
+> +
+> +	ctrl = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+> +	ctrl |= SDHCI_CLOCK_CARD_EN;
+> +	sdhci_writew(host, ctrl, SDHCI_CLOCK_CONTROL);
 > +}
 > +
->  static struct sdhci_ops sdhci_sprd_ops = {
->  	.read_l = sdhci_sprd_readl,
->  	.write_l = sdhci_sprd_writel,
-> @@ -296,6 +302,7 @@ static void sdhci_sprd_hw_reset(struct sdhci_host *host)
->  	.reset = sdhci_reset,
->  	.set_uhs_signaling = sdhci_sprd_set_uhs_signaling,
->  	.hw_reset = sdhci_sprd_hw_reset,
-> +	.get_max_timeout_count = sdhci_sprd_get_max_timeout_count,
->  };
+>  static inline void
+>  sdhci_sprd_set_dll_invert(struct sdhci_host *host, u32 mask, bool en)
+>  {
+> @@ -325,6 +335,26 @@ static void sdhci_sprd_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>  	sdhci_request(mmc, mrq);
+>  }
 >  
->  static void sdhci_sprd_request(struct mmc_host *mmc, struct mmc_request *mrq)
+> +static void sdhci_sprd_hs400_enhanced_strobe(struct mmc_host *mmc,
+> +					     struct mmc_ios *ios)
+> +{
+> +	struct sdhci_host *host = mmc_priv(mmc);
+> +	u16 ctrl_2;
+> +
+> +	if (!ios->enhanced_strobe)
+> +		return;
+> +
+> +	sdhci_sprd_sd_clk_off(host);
+> +
+> +	/* Set HS400 enhanced strobe mode */
+> +	ctrl_2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+> +	ctrl_2 &= ~SDHCI_CTRL_UHS_MASK;
+> +	ctrl_2 |= SDHCI_SPRD_CTRL_HS400ES;
+> +	sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
+> +
+> +	sdhci_sprd_sd_clk_on(host);
+> +}
+> +
+>  static const struct sdhci_pltfm_data sdhci_sprd_pdata = {
+>  	.quirks = SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK,
+>  	.quirks2 = SDHCI_QUIRK2_BROKEN_HS200 |
+> @@ -346,6 +376,8 @@ static int sdhci_sprd_probe(struct platform_device *pdev)
+>  	host->dma_mask = DMA_BIT_MASK(64);
+>  	pdev->dev.dma_mask = &host->dma_mask;
+>  	host->mmc_host_ops.request = sdhci_sprd_request;
+> +	host->mmc_host_ops.hs400_enhanced_strobe =
+> +		sdhci_sprd_hs400_enhanced_strobe;
+>  
+>  	host->mmc->caps = MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED |
+>  		MMC_CAP_ERASE | MMC_CAP_CMD23;
 > 
