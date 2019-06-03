@@ -1,7 +1,7 @@
 From: Ludovic Barre <ludovic.Barre@st.com>
-Subject: [PATCH V3 1/3] mmc: mmci: fix read status for busy detect
-Date: Mon, 3 Jun 2019 17:55:23 +0200
-Message-ID: <1559577325-19266-2-git-send-email-ludovic.Barre@st.com>
+Subject: [PATCH V3 3/3] mmc: mmci: add busy detect for stm32 sdmmc variant
+Date: Mon, 3 Jun 2019 17:55:25 +0200
+Message-ID: <1559577325-19266-4-git-send-email-ludovic.Barre@st.com>
 References: <1559577325-19266-1-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -14,42 +14,45 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Ludovic Barre <ludovic.barre@st.com>
 
-"busy_detect_flag" is used to read & clear busy value of mmci status.
-"busy_detect_mask" is used to manage busy irq of mmci mask.
-So to read mmci status the busy_detect_flag must be take account.
-if the variant does not support busy detect feature the flag is null
-and there is no impact.
-
-Not need to re-read the status register in mmci_cmd_irq, the
-status parameter can be used.
+This patch enables busy detection for stm32 sdmmc which requires
+to set data timer to define the busy timeout.
+sdmmc has 2 flags:
+-busyd0: inverted value of d0 line.
+-busyd0end which indicates only end of busy following a cmd response.
+Only one interrupt on busyd0end.
 
 Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
 ---
- drivers/mmc/host/mmci.c | 5 +++--
- 1 file changed, 3 insertions(+), 2 deletions(-)
+ drivers/mmc/host/mmci.c | 4 ++++
+ drivers/mmc/host/mmci.h | 1 +
+ 2 files changed, 5 insertions(+)
 
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 356833a..5b5cc45 100644
+index 5a8b232..6210f1f 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -1240,7 +1240,7 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
- 		 */
- 		if (!host->busy_status &&
- 		    !(status & (MCI_CMDCRCFAIL|MCI_CMDTIMEOUT)) &&
--		    (readl(base + MMCISTATUS) & host->variant->busy_detect_flag)) {
-+		    (status & host->variant->busy_detect_flag)) {
+@@ -264,6 +264,10 @@ static struct variant_data variant_stm32_sdmmc = {
+ 	.datalength_bits	= 25,
+ 	.datactrl_blocksz	= 14,
+ 	.stm32_idmabsize_mask	= GENMASK(12, 5),
++	.busy_detect		= true,
++	.busy_timeout		= true,
++	.busy_detect_flag	= MCI_STM32_BUSYD0,
++	.busy_detect_mask	= MCI_STM32_BUSYD0ENDMASK,
+ 	.init			= sdmmc_variant_init,
+ };
  
- 			/* Clear the busy start IRQ */
- 			writel(host->variant->busy_detect_mask,
-@@ -1517,7 +1517,8 @@ static irqreturn_t mmci_irq(int irq, void *dev_id)
- 		 * to make sure that both start and end interrupts are always
- 		 * cleared one after the other.
- 		 */
--		status &= readl(host->base + MMCIMASK0);
-+		status &= readl(host->base + MMCIMASK0) |
-+			host->variant->busy_detect_flag;
- 		if (host->variant->busy_detect)
- 			writel(status & ~host->variant->busy_detect_mask,
- 			       host->base + MMCICLEAR);
+diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
+index b43a958..ac19de8 100644
+--- a/drivers/mmc/host/mmci.h
++++ b/drivers/mmc/host/mmci.h
+@@ -167,6 +167,7 @@
+ #define MCI_ST_CARDBUSY		(1 << 24)
+ /* Extended status bits for the STM32 variants */
+ #define MCI_STM32_BUSYD0	BIT(20)
++#define MCI_STM32_BUSYD0END	BIT(21)
+ 
+ #define MMCICLEAR		0x038
+ #define MCI_CMDCRCFAILCLR	(1 << 0)
 -- 
 2.7.4
