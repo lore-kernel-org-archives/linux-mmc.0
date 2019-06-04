@@ -1,48 +1,82 @@
-From: Arend Van Spriel <arend.vanspriel@broadcom.com>
-Subject: Re: Issue with Broadcom wireless in 5.2rc1 (was Re: [PATCH] mmc:
- sdhci: queue work after sdhci_defer_done())
-Date: Tue, 4 Jun 2019 13:33:18 +0200
-Message-ID: <af4d6703-8506-dad7-c2ed-13fa8b2e390d@broadcom.com>
-References: <20190524111053.12228-1-masneyb@onstation.org>
- <70782901-a9ac-5647-1abe-89c86a44a01b@intel.com>
- <20190524154958.GB16322@basecamp> <20190526122136.GA26456@basecamp>
- <e8c049ce-07e1-8b34-678d-41b3d6d41983@broadcom.com>
- <20190526195819.GA29665@basecamp> <20190527093711.GA853@basecamp>
- <ead7f268-b730-3541-31f7-4499556efec0@intel.com>
+From: Faiz Abbas <faiz_abbas@ti.com>
+Subject: Re: [PATCH v3 1/3] mmc: sdhci_am654: Fix SLOTTYPE write
+Date: Tue, 4 Jun 2019 18:31:15 +0530
+Message-ID: <00366591-23db-34a3-2299-90ae97c72a9c@ti.com>
+References: <20190528095928.26452-2-faiz_abbas@ti.com>
+ <20190604125043.C8D40249A2@mail.kernel.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <ead7f268-b730-3541-31f7-4499556efec0@intel.com>
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <20190604125043.C8D40249A2@mail.kernel.org>
 Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Brian Masney <masneyb@onstation.org>
-Cc: Franky Lin <franky.lin@broadcom.com>, Hante Meuleman <hante.meuleman@broadcom.com>, Chi-Hsien Lin <chi-hsien.lin@cypress.com>, Wright Feng <wright.feng@cypress.com>, ulf.hansson@linaro.org, faiz_abbas@ti.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, Kalle Valo <kvalo@codeaurora.org>, linux-wireless@vger.kernel.org, brcm80211-dev-list.pdl@broadcom.com, brcm80211-dev-list@cypress.com, netdev@vger.kernel.org
+Sender: stable-owner@vger.kernel.org
+To: Sasha Levin <sashal@kernel.org>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: ulf.hansson@linaro.org, adrian.hunter@intel.com, stable <stable@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 5/27/2019 2:08 PM, Adrian Hunter wrote:
-> On 27/05/19 12:37 PM, Brian Masney wrote:
->> On Sun, May 26, 2019 at 03:58:19PM -0400, Brian Masney wrote:
->>> I attached a patch that shows how I was able to determine what had
->>> already claimed the host.
->> On Mon, May 27, 2019 at 10:48:24AM +0300, Adrian Hunter wrote:
->>> This is because SDHCI is using the IRQ thread to process the SDIO card
->>> interrupt (sdio_run_irqs()).  When the card driver tries to use the card, it
->>> causes interrupts which deadlocks since c07a48c26519 ("mmc: sdhci: Remove
->>> finish_tasklet") has moved the tasklet processing to the IRQ thread.
->>>
->>> I would expect to be able to use the IRQ thread to complete requests, and it
->>> is desirable to do so because it is lower latency.
->>>
->>> Probably, SDHCI should use sdio_signal_irq() which queues a work item, and
->>> is what other drivers are doing.
->>>
->>> I will investigate some more and send a patch.
-> 
-> Please try the patch below:
+Hi Sasha,
 
-Finally got time to update my kernel to 5.2-rc2. This patch indeed 
-resolves the issue.
+On 04/06/19 6:20 PM, Sasha Levin wrote:
+> Hi,
+> 
+> [This is an automated email]
+> 
+> This commit has been processed because it contains a -stable tag.
+> The stable tag indicates that it's relevant for the following trees: all
+> 
+> The bot has tested the following trees: v5.1.6, v5.0.20, v4.19.47, v4.14.123, v4.9.180, v4.4.180.
+> 
+> v5.1.6: Build OK!
+> v5.0.20: Build OK!
+
+Please apply it only to the above two releases. I guess this script
+could detect that the file was not even present before this and not try
+to apply to those.
+
+> v4.19.47: Failed to apply! Possible dependencies:
+>     06b23ca021c4 ("mmc: sdhci-of-arasan: Add a single data structure to incorporate pdata and soc_ctl_map")
+>     41fd4caeb00b ("mmc: sdhci_am654: Add Initial Support for AM654 SDHCI driver")
+>     f0061fed1f8a ("mmc: sdhci-of-arasan: Add Support for AM654 MMC and PHY")
+> 
+> v4.14.123: Failed to apply! Possible dependencies:
+>     06b23ca021c4 ("mmc: sdhci-of-arasan: Add a single data structure to incorporate pdata and soc_ctl_map")
+>     41fd4caeb00b ("mmc: sdhci_am654: Add Initial Support for AM654 SDHCI driver")
+>     7d326930d352 ("mmc: sdhci-omap: Add OMAP SDHCI driver")
+>     84362d79f436 ("mmc: sdhci-of-arasan: Add CQHCI support for arasan,sdhci-5.1")
+>     f0061fed1f8a ("mmc: sdhci-of-arasan: Add Support for AM654 MMC and PHY")
+> 
+> v4.9.180: Failed to apply! Possible dependencies:
+>     06b23ca021c4 ("mmc: sdhci-of-arasan: Add a single data structure to incorporate pdata and soc_ctl_map")
+>     3a3748dba881 ("mmc: sdhci-xenon: Add Marvell Xenon SDHC core functionality")
+>     41fd4caeb00b ("mmc: sdhci_am654: Add Initial Support for AM654 SDHCI driver")
+>     7d326930d352 ("mmc: sdhci-omap: Add OMAP SDHCI driver")
+>     84362d79f436 ("mmc: sdhci-of-arasan: Add CQHCI support for arasan,sdhci-5.1")
+>     d38dcad4e7b4 ("mmc: sdhci: Let drivers decide whether to use mmc_retune_needed() with pm")
+>     f0061fed1f8a ("mmc: sdhci-of-arasan: Add Support for AM654 MMC and PHY")
+> 
+> v4.4.180: Failed to apply! Possible dependencies:
+>     06b23ca021c4 ("mmc: sdhci-of-arasan: Add a single data structure to incorporate pdata and soc_ctl_map")
+>     0c7fe32e847f ("mmc: sdhci-of-arasan: fix clk issue in sdhci_arasan_remove()")
+>     278d09624eda ("mmc: sdhci-of-arasan: fix missing sdhci_pltfm_free for err handling")
+>     3a3748dba881 ("mmc: sdhci-xenon: Add Marvell Xenon SDHC core functionality")
+>     3ea4666e8d42 ("mmc: sdhci-of-arasan: Properly set corecfg_baseclkfreq on rk3399")
+>     41fd4caeb00b ("mmc: sdhci_am654: Add Initial Support for AM654 SDHCI driver")
+>     476bf3d62d5c ("mmc: sdhci-brcmstb: Add driver for Broadcom BRCMSTB SoCs")
+>     5d9460d74ce5 ("mmc: sdhci-pic32: Add PIC32 SDHCI host controller driver")
+>     7d326930d352 ("mmc: sdhci-omap: Add OMAP SDHCI driver")
+>     802ac39a5566 ("mmc: sdhci-of-arasan: fix set_clock when a phy is supported")
+>     84362d79f436 ("mmc: sdhci-of-arasan: Add CQHCI support for arasan,sdhci-5.1")
+>     89211418cb71 ("mmc: sdhci-of-arasan: use sdhci_pltfm_init for private allocation")
+>     91aa366109e8 ("mmc: sdhci-of-arasan: add phy support for sdhci-of-arasan")
+>     a05c84651145 ("mmc: sdhci-of-arasan: implement enhanced strobe callback")
+>     c390f2110adf ("mmc: sdhci-of-arasan: Add ability to export card clock")
+>     ca572f4636aa ("mmc: sdhci-of-arasan: Always power the PHY off/on when clock changes")
+>     f0061fed1f8a ("mmc: sdhci-of-arasan: Add Support for AM654 MMC and PHY")
+> 
+> 
+> How should we proceed with this patch?
+> 
 
 Thanks,
-Arend
+Faiz
