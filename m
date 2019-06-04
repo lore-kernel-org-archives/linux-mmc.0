@@ -1,11 +1,14 @@
 From: Faiz Abbas <faiz_abbas@ti.com>
-Subject: [PATCH 0/4] Add Support for MMC in J721E
-Date: Tue, 4 Jun 2019 11:39:10 +0530
-Message-ID: <20190604060914.10886-1-faiz_abbas@ti.com>
+Subject: [PATCH 1/4] dt-bindings: mmc: sdhci-am654: Document bindings for the
+ host controllers on TI's J721E devices.
+Date: Tue, 4 Jun 2019 11:39:11 +0530
+Message-ID: <20190604060914.10886-2-faiz_abbas@ti.com>
+References: <20190604060914.10886-1-faiz_abbas@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <20190604060914.10886-1-faiz_abbas@ti.com>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -19,33 +22,45 @@ To: linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, linux-mmc@
 Cc: nm@ti.com, ulf.hansson@linaro.org, robh+dt@kernel.org, nsekhar@ti.com, adrian.hunter@intel.com
 List-Id: linux-mmc@vger.kernel.org
 
-The following patches add driver support for MMC SDHCI interfaces on
-TI's J721E devices. The 8 bit and 4 bit instances have phys which are
-different from the am65x interfaces as well as different from each
-other which leads to 3 different compatibles and a bunch of flags for
-indicating the differences.
+Add binding documentation for mmc host controllers present on TI's J721E
+SOC. The 4 bit IP on J721E doesn't have a phy DLL so make DLL related
+properties as optional for that compatible. Also add an optional
+strobe-sel property used for HS400 speed mode.
 
-Depends on Nishanth's initial J721E patches here:
-https://lore.kernel.org/patchwork/cover/1077382/
+Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
+---
+ Documentation/devicetree/bindings/mmc/sdhci-am654.txt | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
 
-Also depends on my fixes for AM65x driver here:
-https://lore.kernel.org/patchwork/cover/1079924/
-
-Tested with: j721e-evm and am65x-evm.
-
-DT patches will be added in a separate series.
-
-Faiz Abbas (4):
-  dt-bindings: mmc: sdhci-am654: Document bindings for the host
-    controllers on TI's J721E devices.
-  mmc: sdhci_am654: Add Support for 8 bit IP on J721E
-  mmc: sdhci_am654: Add Support for 4 bit IP on J721E
-  arm64: defconfig: Add config for MMC on AM65x and J721E devices
-
- .../devicetree/bindings/mmc/sdhci-am654.txt   |   9 +-
- arch/arm64/configs/defconfig                  |   1 +
- drivers/mmc/host/sdhci_am654.c                | 257 +++++++++++++-----
- 3 files changed, 204 insertions(+), 63 deletions(-)
-
+diff --git a/Documentation/devicetree/bindings/mmc/sdhci-am654.txt b/Documentation/devicetree/bindings/mmc/sdhci-am654.txt
+index 15dbbbace27e..50e87df47971 100644
+--- a/Documentation/devicetree/bindings/mmc/sdhci-am654.txt
++++ b/Documentation/devicetree/bindings/mmc/sdhci-am654.txt
+@@ -8,7 +8,10 @@ Only deviations are documented here.
+   [3] Documentation/devicetree/bindings/interrupt-controller/interrupts.txt
+ 
+ Required Properties:
+-	- compatible: should be "ti,am654-sdhci-5.1"
++	- compatible: should be one of:
++			"ti,am654-sdhci-5.1": SDHCI on AM654 device.
++			"ti,j721e-sdhci-8bit": 8 bit SDHCI on J721E device.
++			"ti,j721e-sdhci-4bit": 4 bit SDHCI on J721E device.
+ 	- reg: Must be two entries.
+ 		- The first should be the sdhci register space
+ 		- The second should the subsystem/phy register space
+@@ -16,9 +19,13 @@ Required Properties:
+ 	- clock-names: Tuple including "clk_xin" and "clk_ahb"
+ 	- interrupts: Interrupt specifiers
+ 	- ti,otap-del-sel: Output Tap Delay select
++
++Optional Properties (Required for ti,am654-sdhci-5.1 and ti,j721e-sdhci-8bit):
+ 	- ti,trm-icp: DLL trim select
+ 	- ti,driver-strength-ohm: driver strength in ohms.
+ 				  Valid values are 33, 40, 50, 66 and 100 ohms.
++Optional Properties:
++	- ti,strobe-sel: strobe select delay for HS400 speed mode. Default value: 0x0.
+ 
+ Example:
+ 
 -- 
 2.19.2
