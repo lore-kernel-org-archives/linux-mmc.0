@@ -1,75 +1,45 @@
-From: Baolin Wang <baolin.wang@linaro.org>
-Subject: [PATCH v2 9/9] arm64: dts: sprd: Add Spreadtrum SD host controller support
-Date: Tue,  4 Jun 2019 16:14:29 +0800
-Message-ID: <3ca273e341f2f5f66b121d411428c60afd412586.1559635435.git.baolin.wang@linaro.org>
-References: <cover.1559635435.git.baolin.wang@linaro.org>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Subject: Re: [PATCH 0/2] mmc: meson: update with SPDX Licence identifier
+Date: Tue, 4 Jun 2019 10:36:53 +0200
+Message-ID: <CAMuHMdWHnyTWMToXU_DSezwYs_Lkxj+v0BC8PKXHZgX=e1N3ww@mail.gmail.com>
+References: <20190520143647.2503-1-narmstrong@baylibre.com> <CAPDyKFoOHnYiYogjogRr=7PBjqHOseDDS6L0eirTo7Y+F449ow@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <cover.1559635435.git.baolin.wang@linaro.org>
-In-Reply-To: <cover.1559635435.git.baolin.wang@linaro.org>
-References: <cover.1559635435.git.baolin.wang@linaro.org>
+In-Reply-To: <CAPDyKFoOHnYiYogjogRr=7PBjqHOseDDS6L0eirTo7Y+F449ow@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: adrian.hunter@intel.com, ulf.hansson@linaro.org, zhang.lyra@gmail.com, orsonzhai@gmail.com, robh+dt@kernel.org, mark.rutland@arm.com, arnd@arndb.de, olof@lixom.net
-Cc: baolin.wang@linaro.org, vincent.guittot@linaro.org, arm@kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Neil Armstrong <narmstrong@baylibre.com>, "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Thomas Gleixner <tglx@linutronix.de>, Greg KH <gregkh@linuxfoundation.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Add one Spreadtrum SD host controller to support eMMC card for Spreadtrum
-SC9860 platform.
+Hi Ulf, Neil,
 
-Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
----
- arch/arm64/boot/dts/sprd/whale2.dtsi |   35 ++++++++++++++++++++++++++++++++++
- 1 file changed, 35 insertions(+)
+On Tue, May 28, 2019 at 10:53 AM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On Mon, 20 May 2019 at 16:36, Neil Armstrong <narmstrong@baylibre.com> wrote:
+> > Update the SPDX Licence identifier for the Amlogic MMC drivers.
+> >
+> > Neil Armstrong (2):
+> >   mmc: meson-gx-mmc: update with SPDX Licence identifier
+> >   mmc: meson-mx-sdio: update with SPDX Licence identifier
+> >
+> >  drivers/mmc/host/meson-gx-mmc.c  | 15 +--------------
+> >  drivers/mmc/host/meson-mx-sdio.c |  6 +-----
+> >  2 files changed, 2 insertions(+), 19 deletions(-)
+>
+> Applied for next, thanks!
 
-diff --git a/arch/arm64/boot/dts/sprd/whale2.dtsi b/arch/arm64/boot/dts/sprd/whale2.dtsi
-index 4bb862c..79b9591c 100644
---- a/arch/arm64/boot/dts/sprd/whale2.dtsi
-+++ b/arch/arm64/boot/dts/sprd/whale2.dtsi
-@@ -130,6 +130,34 @@
- 				clock-names = "enable";
- 				clocks = <&apahb_gate CLK_DMA_EB>;
- 			};
-+
-+			sdio3: sdio@50430000 {
-+				compatible  = "sprd,sdhci-r11";
-+				reg = <0 0x50430000 0 0x1000>;
-+				interrupts = <GIC_SPI 41 IRQ_TYPE_LEVEL_HIGH>;
-+
-+				clock-names = "sdio", "enable", "2x_enable";
-+				clocks = <&aon_prediv CLK_EMMC_2X>,
-+				       <&apahb_gate CLK_EMMC_EB>,
-+				       <&aon_gate CLK_EMMC_2X_EN>;
-+				assigned-clocks = <&aon_prediv CLK_EMMC_2X>;
-+				assigned-clock-parents = <&clk_l0_409m6>;
-+
-+				sprd,phy-delay-mmc-hs400 = <0x44 0x7f 0x2e 0x2e>;
-+				sprd,phy-delay-mmc-hs200 = <0x0 0x8c 0x8c 0x8c>;
-+				sprd,phy-delay-mmc-ddr52 = <0x3f 0x75 0x14 0x14>;
-+				sprd,phy-delay-mmc-hs400es = <0x3f 0x3f 0x2e 0x2e>;
-+				vmmc-supply = <&vddemmccore>;
-+				bus-width = <8>;
-+				non-removable;
-+				no-sdio;
-+				no-sd;
-+				cap-mmc-hw-reset;
-+				mmc-hs400-enhanced-strobe;
-+				mmc-hs400-1_8v;
-+				mmc-hs200-1_8v;
-+				mmc-ddr-1_8v;
-+			};
- 		};
- 
- 		aon {
-@@ -272,4 +300,11 @@
- 		clock-frequency = <100000000>;
- 		clock-output-names = "ext-rco-100m";
- 	};
-+
-+	clk_l0_409m6: clk_l0_409m6 {
-+		compatible = "fixed-clock";
-+		#clock-cells = <0>;
-+		clock-frequency = <409600000>;
-+		clock-output-names = "ext-409m6";
-+	};
- };
--- 
-1.7.9.5
+Please note this conflicts with commit 2874c5fd28426836 ("treewide:
+Replace GPLv2 boilerplate/reference with SPDX - rule 152") upstream,
+which added (different) tags.
+
+Gr{oetje,eeting}s,
+
+                        Geert
+
+
+--
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
