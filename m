@@ -1,51 +1,51 @@
-From: Baolin Wang <baolin.wang@linaro.org>
-Subject: Re: [PATCH 2/9] dt-bindings: mmc: sprd: Add another optional clock documentation
-Date: Tue, 4 Jun 2019 10:33:08 +0800
-Message-ID: <CAMz4kuK+yX=V2zp-C4Xb-6ZjgLOY+ON2iHZU=HwONeXcJCkk4w@mail.gmail.com>
-References: <cover.1558346019.git.baolin.wang@linaro.org> <ee4ad0e7e131e4d639dbf6bd25ad93726648ce1c.1558346019.git.baolin.wang@linaro.org>
- <CAPDyKFrWiG3KJad+L3NOQ-dC2XnBM-8mQGVEsVB_Qg0ACTfVag@mail.gmail.com>
+From: Faiz Abbas <faiz_abbas@ti.com>
+Subject: [PATCH 0/4] Add Support for MMC in J721E
+Date: Tue, 4 Jun 2019 11:39:10 +0530
+Message-ID: <20190604060914.10886-1-faiz_abbas@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFrWiG3KJad+L3NOQ-dC2XnBM-8mQGVEsVB_Qg0ACTfVag@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Chunyan Zhang <zhang.lyra@gmail.com>, Orson Zhai <orsonzhai@gmail.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Arnd Bergmann <arnd@arndb.de>, Olof Johansson <olof@lixom.net>, Vincent Guittot <vincent.guittot@linaro.org>, arm-soc <arm@kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, DTML <devicetree@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: nm@ti.com, ulf.hansson@linaro.org, robh+dt@kernel.org, nsekhar@ti.com, adrian.hunter@intel.com
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Ulf,
+The following patches add driver support for MMC SDHCI interfaces on
+TI's J721E devices. The 8 bit and 4 bit instances have phys which are
+different from the am65x interfaces as well as different from each
+other which leads to 3 different compatibles and a bunch of flags for
+indicating the differences.
 
-On Mon, 3 Jun 2019 at 21:34, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->
-> On Mon, 20 May 2019 at 12:12, Baolin Wang <baolin.wang@linaro.org> wrote:
-> >
-> > For some Spreadtrum platforms like SC9860 platform, we should enable another
-> > gate clock '2x_enable' to make the SD host controller work well. Thus add
-> > documentation for this optional clock.
-> >
-> > Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
-> > ---
-> >  .../devicetree/bindings/mmc/sdhci-sprd.txt         |    1 +
-> >  1 file changed, 1 insertion(+)
-> >
-> > diff --git a/Documentation/devicetree/bindings/mmc/sdhci-sprd.txt b/Documentation/devicetree/bindings/mmc/sdhci-sprd.txt
-> > index 45c9978..a285c77 100644
-> > --- a/Documentation/devicetree/bindings/mmc/sdhci-sprd.txt
-> > +++ b/Documentation/devicetree/bindings/mmc/sdhci-sprd.txt
-> > @@ -14,6 +14,7 @@ Required properties:
-> >  - clock-names: Should contain the following:
-> >         "sdio" - SDIO source clock (required)
-> >         "enable" - gate clock which used for enabling/disabling the device (required)
-> > +       "2x_enable" - gate clock controlling the device for some special platforms (optional)
->
-> This is a bit vague, could you please elaborate (and fold in that
-> information to the doc) on what kind of clock this is?
+Depends on Nishanth's initial J721E patches here:
+https://lore.kernel.org/patchwork/cover/1077382/
 
-Sorry for confusing. For some Spreadtrum platfroms like SC9860
-platform, we should enable 2 gate clocks to enable SD host controller,
-that means we have 2 serialized clock gates. I know that's a little
-weird, but that's our clock's design.
+Also depends on my fixes for AM65x driver here:
+https://lore.kernel.org/patchwork/cover/1079924/
+
+Tested with: j721e-evm and am65x-evm.
+
+DT patches will be added in a separate series.
+
+Faiz Abbas (4):
+  dt-bindings: mmc: sdhci-am654: Document bindings for the host
+    controllers on TI's J721E devices.
+  mmc: sdhci_am654: Add Support for 8 bit IP on J721E
+  mmc: sdhci_am654: Add Support for 4 bit IP on J721E
+  arm64: defconfig: Add config for MMC on AM65x and J721E devices
+
+ .../devicetree/bindings/mmc/sdhci-am654.txt   |   9 +-
+ arch/arm64/configs/defconfig                  |   1 +
+ drivers/mmc/host/sdhci_am654.c                | 257 +++++++++++++-----
+ 3 files changed, 204 insertions(+), 63 deletions(-)
 
 -- 
-Baolin Wang
-Best Regards
+2.19.2
