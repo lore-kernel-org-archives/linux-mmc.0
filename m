@@ -1,7 +1,8 @@
 From: Yoshihiro Shimoda <yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
-Subject: [RFC PATCH v5 4/8] iommu/ipmmu-vmsa: add capable ops
-Date: Wed,  5 Jun 2019 20:11:50 +0900
-Message-ID: <1559733114-4221-5-git-send-email-yoshihiro.shimoda.uh@renesas.com>
+Subject: [RFC PATCH v5 5/8] mmc: tmio: No memory size limitation if runs on
+	IOMMU
+Date: Wed,  5 Jun 2019 20:11:51 +0900
+Message-ID: <1559733114-4221-6-git-send-email-yoshihiro.shimoda.uh@renesas.com>
 References: <1559733114-4221-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -21,44 +22,33 @@ To: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, wsa+renesas-jBu1N2QxHDJ
 Cc: linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-This patch adds the .capable into iommu_ops that can merge scatter
-gather segments.
+This patch adds a condition to avoid a memory size limitation of
+swiotlb if the driver runs on IOMMU.
 
+Tested-by: Takeshi Saito <takeshi.saito.xv-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
 Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
+Reviewed-by: Simon Horman <horms+renesas-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org>
+Reviewed-by: Wolfram Sang <wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org>
 ---
- drivers/iommu/ipmmu-vmsa.c | 13 +++++++++++++
- 1 file changed, 13 insertions(+)
+ drivers/mmc/host/tmio_mmc_core.c | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/iommu/ipmmu-vmsa.c b/drivers/iommu/ipmmu-vmsa.c
-index 408ad0b..81170b8 100644
---- a/drivers/iommu/ipmmu-vmsa.c
-+++ b/drivers/iommu/ipmmu-vmsa.c
-@@ -608,6 +608,18 @@ static irqreturn_t ipmmu_irq(int irq, void *dev)
-  * IOMMU Operations
-  */
+diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
+index 130b91c..c9f6a59 100644
+--- a/drivers/mmc/host/tmio_mmc_core.c
++++ b/drivers/mmc/host/tmio_mmc_core.c
+@@ -1194,9 +1194,10 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host)
+ 	 * Since swiotlb has memory size limitation, this will calculate
+ 	 * the maximum size locally (because we don't have any APIs for it now)
+ 	 * and check the current max_req_size. And then, this will update
+-	 * the max_req_size if needed as a workaround.
++	 * the max_req_size if needed as a workaround. However, if the driver
++	 * runs on IOMMU, this workaround isn't needed.
+ 	 */
+-	if (swiotlb_max_segment()) {
++	if (swiotlb_max_segment() && !device_iommu_mapped(&pdev->dev)) {
+ 		unsigned int max_size = (1 << IO_TLB_SHIFT) * IO_TLB_SEGSIZE;
  
-+static bool ipmmu_capable(enum iommu_cap cap)
-+{
-+	switch (cap) {
-+	case IOMMU_CAP_MERGING:
-+		return true;
-+	default:
-+		break;
-+	}
-+
-+	return false;
-+}
-+
- static struct iommu_domain *__ipmmu_domain_alloc(unsigned type)
- {
- 	struct ipmmu_vmsa_domain *domain;
-@@ -950,6 +962,7 @@ static struct iommu_group *ipmmu_find_group(struct device *dev)
- }
- 
- static const struct iommu_ops ipmmu_ops = {
-+	.capable = ipmmu_capable,
- 	.domain_alloc = ipmmu_domain_alloc,
- 	.domain_free = ipmmu_domain_free,
- 	.attach_dev = ipmmu_attach_device,
+ 		if (mmc->max_req_size > max_size)
 -- 
 2.7.4
