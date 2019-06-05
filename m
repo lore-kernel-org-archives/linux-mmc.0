@@ -1,8 +1,7 @@
 From: Yoshihiro Shimoda <yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
-Subject: [RFC PATCH v5 8/8] mmc: renesas_sdhi: use multiple segments if
-	possible
-Date: Wed,  5 Jun 2019 20:11:54 +0900
-Message-ID: <1559733114-4221-9-git-send-email-yoshihiro.shimoda.uh@renesas.com>
+Subject: [RFC PATCH v5 6/8] mmc: tmio: Add a definition for default max_segs
+Date: Wed,  5 Jun 2019 20:11:52 +0900
+Message-ID: <1559733114-4221-7-git-send-email-yoshihiro.shimoda.uh@renesas.com>
 References: <1559733114-4221-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -22,104 +21,40 @@ To: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, wsa+renesas-jBu1N2QxHDJ
 Cc: linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-If the IOMMU driver has a capable for merging segments to
-a segment strictly, this can expose the host->mmc->max_segs with
-multiple segments to a block layer by using blk_queue_max_segments()
-that mmc_setup_queue() calls. Notes that an sdio card may be
-possible to use multiple segments with non page aligned size, so
-that this will not expose multiple segments to avoid failing
-dma_map_sg() every time.
-
-Notes that on renesas_sdhi_sys_dmac, the max_segs value will change
-from 32 to 512, but the sys_dmac can handle 512 segments, so that
-this init_card ops is added on "TMIO_MMC_MIN_RCAR2" environment.
+This patch adds a definition for default max_segs to be used by other
+driver (renesas_sdhi) in the future.
 
 Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
+Reviewed-by: Wolfram Sang <wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org>
 ---
- drivers/mmc/host/renesas_sdhi_core.c          | 27 +++++++++++++++++++++++++++
- drivers/mmc/host/renesas_sdhi_internal_dmac.c |  4 ++++
- 2 files changed, 31 insertions(+)
+ drivers/mmc/host/tmio_mmc.h      | 1 +
+ drivers/mmc/host/tmio_mmc_core.c | 2 +-
+ 2 files changed, 2 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-index c5ee4a6..379cefa 100644
---- a/drivers/mmc/host/renesas_sdhi_core.c
-+++ b/drivers/mmc/host/renesas_sdhi_core.c
-@@ -20,6 +20,7 @@
+diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
+index c5ba13f..9e387be 100644
+--- a/drivers/mmc/host/tmio_mmc.h
++++ b/drivers/mmc/host/tmio_mmc.h
+@@ -106,6 +106,7 @@
+ #define TMIO_MASK_IRQ     (TMIO_MASK_READOP | TMIO_MASK_WRITEOP | TMIO_MASK_CMD)
  
- #include <linux/clk.h>
- #include <linux/delay.h>
-+#include <linux/iommu.h>
- #include <linux/kernel.h>
- #include <linux/mfd/tmio.h>
- #include <linux/mmc/host.h>
-@@ -46,6 +47,8 @@
- #define SDHI_VER_GEN3_SD	0xcc10
- #define SDHI_VER_GEN3_SDMMC	0xcd10
+ #define TMIO_MAX_BLK_SIZE 512
++#define TMIO_DEFAULT_MAX_SEGS 32
  
-+#define SDHI_MAX_SEGS_IN_IOMMU	512
-+
- struct renesas_sdhi_quirks {
- 	bool hs400_disabled;
- 	bool hs400_4taps;
-@@ -203,6 +206,28 @@ static void renesas_sdhi_clk_disable(struct tmio_mmc_host *host)
- 	clk_disable_unprepare(priv->clk_cd);
- }
+ struct tmio_mmc_data;
+ struct tmio_mmc_host;
+diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
+index c9f6a59..af1343e 100644
+--- a/drivers/mmc/host/tmio_mmc_core.c
++++ b/drivers/mmc/host/tmio_mmc_core.c
+@@ -1185,7 +1185,7 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host)
  
-+static void renesas_sdhi_init_card(struct mmc_host *mmc, struct mmc_card *card)
-+{
-+	struct tmio_mmc_host *host = mmc_priv(mmc);
-+
-+	/*
-+	 * If the IOMMU driver has a capable for merging segments to
-+	 * a segment strictly, this can expose the host->mmc->max_segs with
-+	 * multiple segments to a block layer by using blk_queue_max_segments()
-+	 * that mmc_setup_queue() calls. Notes that an sdio card may be
-+	 * possible to use multiple segments with non page aligned size, so
-+	 * that this will not expose multiple segments to avoid failing
-+	 * dma_map_sg() every time.
-+	 */
-+	if (host->pdata->max_segs < SDHI_MAX_SEGS_IN_IOMMU &&
-+	    iommu_capable(host->pdev->dev.bus, IOMMU_CAP_MERGING) &&
-+	    (mmc_card_mmc(card) || mmc_card_sd(card)))
-+		host->mmc->max_segs = SDHI_MAX_SEGS_IN_IOMMU;
-+	else
-+		host->mmc->max_segs = host->pdata->max_segs ? :
-+				      TMIO_DEFAULT_MAX_SEGS;
-+}
-+
- static int renesas_sdhi_card_busy(struct mmc_host *mmc)
- {
- 	struct tmio_mmc_host *host = mmc_priv(mmc);
-@@ -726,6 +751,8 @@ int renesas_sdhi_probe(struct platform_device *pdev,
- 
- 	/* SDR speeds are only available on Gen2+ */
- 	if (mmc_data->flags & TMIO_MMC_MIN_RCAR2) {
-+		host->ops.init_card = renesas_sdhi_init_card;
-+
- 		/* card_busy caused issues on r8a73a4 (pre-Gen2) CD-less SDHI */
- 		host->ops.card_busy = renesas_sdhi_card_busy;
- 		host->ops.start_signal_voltage_switch =
-diff --git a/drivers/mmc/host/renesas_sdhi_internal_dmac.c b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-index 751fe91..a442f86 100644
---- a/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-+++ b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-@@ -11,6 +11,7 @@
- #include <linux/device.h>
- #include <linux/dma-mapping.h>
- #include <linux/io-64-nonatomic-hi-lo.h>
-+#include <linux/iommu.h>
- #include <linux/mfd/tmio.h>
- #include <linux/mmc/host.h>
- #include <linux/mod_devicetable.h>
-@@ -337,6 +338,9 @@ static int renesas_sdhi_internal_dmac_probe(struct platform_device *pdev)
- 	/* value is max of SD_SECCNT. Confirmed by HW engineers */
- 	dma_set_max_seg_size(dev, 0xffffffff);
- 
-+	if (iommu_capable(dev->bus, IOMMU_CAP_MERGING))
-+		dma_set_iova_contiguous(dev, true);
-+
- 	return renesas_sdhi_probe(pdev, &renesas_sdhi_internal_dmac_dma_ops);
- }
- 
+ 	mmc->caps |= MMC_CAP_4_BIT_DATA | pdata->capabilities;
+ 	mmc->caps2 |= pdata->capabilities2;
+-	mmc->max_segs = pdata->max_segs ? : 32;
++	mmc->max_segs = pdata->max_segs ? : TMIO_DEFAULT_MAX_SEGS;
+ 	mmc->max_blk_size = TMIO_MAX_BLK_SIZE;
+ 	mmc->max_blk_count = pdata->max_blk_count ? :
+ 		(PAGE_SIZE / mmc->max_blk_size) * mmc->max_segs;
 -- 
 2.7.4
