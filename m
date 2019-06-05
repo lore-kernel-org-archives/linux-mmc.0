@@ -1,16 +1,15 @@
-From: Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>
+From: Sergei Shtylyov <sergei.shtylyov-M4DtvfQ/ZS1MRgGoP+s0PdBPR1lH4CV8@public.gmane.org>
 Subject: Re: [RFC PATCH v5 3/8] iommu: add a new capable IOMMU_CAP_MERGING
-Date: Wed, 5 Jun 2019 14:38:08 +0200
-Message-ID: <20190605123808.GA12529@lst.de>
+Date: Wed, 5 Jun 2019 19:17:42 +0300
+Message-ID: <35f63f36-ea4d-850f-8a59-805e67c06b68@cogentembedded.com>
 References: <1559733114-4221-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
 	<1559733114-4221-4-git-send-email-yoshihiro.shimoda.uh@renesas.com>
-	<7dfeb7d8-b777-b4af-d892-2829cd05241b@arm.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <7dfeb7d8-b777-b4af-d892-2829cd05241b-5wv7dgnIgG8@public.gmane.org>
+In-Reply-To: <1559733114-4221-4-git-send-email-yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
+Content-Language: en-MW
 List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
 	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
@@ -20,27 +19,58 @@ List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
 	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
 Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
 Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Robin Murphy <robin.murphy-5wv7dgnIgG8@public.gmane.org>
-Cc: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, hch-jcswGhMUV9g@public.gmane.org, linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: Yoshihiro Shimoda <yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org, hch-jcswGhMUV9g@public.gmane.org, m.szyprowski-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, robin.murphy-5wv7dgnIgG8@public.gmane.org, joro-zLv9SwRftAIdnm+yROfE0A@public.gmane.org
+Cc: linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, Jun 05, 2019 at 01:21:59PM +0100, Robin Murphy wrote:
-> And if the problem is really that you're not getting merging because of 
-> exposing the wrong parameters to the DMA API and/or the block layer, or 
-> that you just can't quite express your requirement to the block layer in 
-> the first place, then that should really be tackled at the source rather 
-> than worked around further down in the stack.
+On 06/05/2019 02:11 PM, Yoshihiro Shimoda wrote:
 
-The problem is that we need a way to communicate to the block layer
-that more than a single segment is ok IFF the DMA API instance supports
-merging.  And of course the answer will depend on futher parameters
-like the maximum merged segment size and alignment for the segement.
+> This patch adds a new capable IOMMU_CAP_MERGING to check whether
+> the IOVA would be contiguous strictly if a device requires and
+> the IOMMU driver has the capable.
 
-We'll need some way to communicate that, but I don't really think this
-is series is the way to go.
+   s/has/is/? Or capable what?
 
-We'd really need something hanging off the device (or through a query
-API) how the dma map ops implementation exposes under what circumstances
-it can merge.  The driver can then communicate that to the block layer
-so that the block layer doesn't split requests up when reaching the
-segement limit.
+> Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
+> ---
+>  drivers/iommu/dma-iommu.c | 26 ++++++++++++++++++++++++--
+>  include/linux/iommu.h     |  1 +
+>  2 files changed, 25 insertions(+), 2 deletions(-)
+> 
+> diff --git a/drivers/iommu/dma-iommu.c b/drivers/iommu/dma-iommu.c
+> index 034caae..ecf1a04 100644
+> --- a/drivers/iommu/dma-iommu.c
+> +++ b/drivers/iommu/dma-iommu.c
+[...]
+> @@ -867,6 +872,13 @@ static int iommu_dma_map_sg(struct device *dev, struct scatterlist *sg,
+>  		sg_dma_len(s) = s_length;
+>  		s->offset -= s_iova_off;
+>  		s_length = iova_align(iovad, s_length + s_iova_off);
+> +		/*
+> +		 * Check whether the IOVA would be contiguous strictly if
+> +		 * a device requires and the IOMMU driver has the capable.
+
+   Same question here...
+
+> +		 */
+> +		if (iova_contiguous && i > 0 &&
+> +		    (s_iova_off || s->length != s_length))
+> +			return 0;
+>  		s->length = s_length;
+>  
+>  		/*
+> @@ -902,8 +914,18 @@ static int iommu_dma_map_sg(struct device *dev, struct scatterlist *sg,
+>  	if (iommu_map_sg(domain, iova, sg, nents, prot) < iova_len)
+>  		goto out_free_iova;
+>  
+> -	return __finalise_sg(dev, sg, nents, iova);
+> +	ret = __finalise_sg(dev, sg, nents, iova);
+> +	/*
+> +	 * Check whether the sg entry is single if a device requires and
+> +	 * the IOMMU driver has the capable.
+
+   You  meant capability perhaps?
+
+[...]
+
+MBR, Sergei
