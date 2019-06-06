@@ -1,78 +1,54 @@
-From: Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>
-Subject: Re: [RFC PATCH v5 3/8] iommu: add a new capable IOMMU_CAP_MERGING
-Date: Thu, 6 Jun 2019 09:00:59 +0200
-Message-ID: <20190606070059.GI27033@lst.de>
-References: <1559733114-4221-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
-	<1559733114-4221-4-git-send-email-yoshihiro.shimoda.uh@renesas.com>
-	<7dfeb7d8-b777-b4af-d892-2829cd05241b@arm.com>
-	<20190605123808.GA12529@lst.de>
-	<OSAPR01MB3089448A3D44BE61B127AA73D8170@OSAPR01MB3089.jpnprd01.prod.outlook.com>
+From: Jason Gunthorpe <jgg@ziepe.ca>
+Subject: Re: [PATCH 08/13] IB/iser: set virt_boundary_mask in the scsi host
+Date: Thu, 6 Jun 2019 09:59:35 -0300
+Message-ID: <20190606125935.GA17373@ziepe.ca>
+References: <20190605190836.32354-1-hch@lst.de>
+ <20190605190836.32354-9-hch@lst.de>
+ <20190605202235.GC3273@ziepe.ca>
+ <20190606062441.GB26745@lst.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <OSAPR01MB3089448A3D44BE61B127AA73D8170-OxqQCv4d1nRTvN4vYzcOL3colHNk5qUtvxpqHgZTriW3zl9H0oFU5g@public.gmane.org>
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Yoshihiro Shimoda <yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
-Cc: "ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org" <wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org>, "iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org" <iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>, Robin Murphy <robin.murphy-5wv7dgnIgG8@public.gmane.org>, Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>
+In-Reply-To: <20190606062441.GB26745@lst.de>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Christoph Hellwig <hch@lst.de>
+Cc: Jens Axboe <axboe@kernel.dk>, Sebastian Ott <sebott@linux.ibm.com>, Sagi Grimberg <sagi@grimberg.me>, Max Gurtovoy <maxg@mellanox.com>, Bart Van Assche <bvanassche@acm.org>, Ulf Hansson <ulf.hansson@linaro.org>, Alan Stern <stern@rowland.harvard.edu>, Oliver Neukum <oneukum@suse.com>, linux-block@vger.kernel.org, linux-rdma@vger.kernel.org, linux-mmc@vger.kernel.org, linux-nvme@lists.infradead.org, linux-scsi@vger.kernel.org, megaraidlinux.pdl@broadcom.com, MPT-FusionLinux.pdl@broadcom.com, linux-hyperv@vger.kernel.org, linux-usb@vger.kernel.org, usb-storage@lists.one-eyed-alien.net, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, Jun 06, 2019 at 06:28:47AM +0000, Yoshihiro Shimoda wrote:
-> > The problem is that we need a way to communicate to the block layer
-> > that more than a single segment is ok IFF the DMA API instance supports
-> > merging.  And of course the answer will depend on futher parameters
-> > like the maximum merged segment size and alignment for the segement.
+On Thu, Jun 06, 2019 at 08:24:41AM +0200, Christoph Hellwig wrote:
+> On Wed, Jun 05, 2019 at 05:22:35PM -0300, Jason Gunthorpe wrote:
+> > On Wed, Jun 05, 2019 at 09:08:31PM +0200, Christoph Hellwig wrote:
+> > > This ensures all proper DMA layer handling is taken care of by the
+> > > SCSI midlayer.
+> > 
+> > Maybe not entirely related to this series, but it looks like the SCSI
+> > layer is changing the device global dma_set_max_seg_size() - at least
+> > in RDMA the dma device is being shared between many users, so we
+> > really don't want SCSI to make this value smaller.
+> > 
+> > Can we do something about this?
 > 
-> I'm afraid but I don't understand why we need a way to communicate to
-> the block layer that more than a single segment is ok IFF the DMA API
-> instance supports merging.
+> We could do something about it as outlined in my mail - pass the
+> dma_params explicitly to the dma_map_sg call.  But that isn't really
+> suitable for a short term fix and will take a little more time.
 
-Assume a device (which I think is your case) that only supports a single
-segment in hardware.  In that case we set max_segments to 1 if no
-IOMMU is present.  But if we have a merge capable IOMMU we can set
-max_segments to unlimited (or some software limit for scatterlist
-allocation), as long as we set a virt_boundary matching what the IOMMU
-expects, and max_sectors_kb isn't larger than the max IOMMU mapping
-size.  Now we could probably just open code this in the driver, but
-I'd feel much happier having a block layer like this:
+Sounds good to me, having every dma mapping specify its restrictions
+makes a lot more sense than a device global setting, IMHO.
 
-bool blk_can_use_iommu_merging(struct request_queue *q, struct device *dev)
-{
-	if (!IOMMU_CAN_MERGE_SEGMENTS(dev))
-		return false;
+In RDMA the restrictions to build a SGL, create a device queue or
+build a MR are all a little different.
 
-	blk_queue_virt_boundary(q, IOMMU_PAGE_SIZE(dev));
-	blk_queue_max_segment_size(q, IOMMU_MAX_SEGMENT_SIZE(dev));
-	return true;
-}
+ie for MRs alignment of the post-IOMMU DMA address is very important
+for performance as the MR logic can only build device huge pages out
+of properly aligned DMA addresses. While for SGLs we don't care about
+this, instead SGLs usually have the 32 bit per-element length limit in
+the HW that MRs do not.
 
-and the driver then does:
+> Until we've sorted that out the device paramter needs to be set to
+> the smallest value supported.
 
-	if (blk_can_use_iommu_merging(q, dev)) {
-		blk_queue_max_segments(q, MAX_SW_SEGMENTS);
-		// initialize sg mempool, etc..
-	}
+smallest? largest? We've been setting it to the largest value the
+device can handle (ie 2G)
 
-
-Where the SCREAMING pseudo code calls are something we need to find a
-good API for.
-
-And thinking about it the backend doesn't need to be an iommu, swiotlb
-could handle this as well, which might be interesting for devices
-that need to boune buffer anyway.  IIRC mmc actually has some code
-to copy multiple segments into a bounce buffer somewhere.
-
-> The block layer already has a limit "max_segment_size" for each device so that
-> regardless it can/cannot merge the segments, we can use the limit.
-> Is my understanding incorrect?
-
-Yes.
+Jason
