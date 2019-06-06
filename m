@@ -1,33 +1,66 @@
-From: Christoph Hellwig <hch@lst.de>
-Subject: Re: [PATCH 08/13] IB/iser: set virt_boundary_mask in the scsi host
-Date: Thu, 6 Jun 2019 08:24:41 +0200
-Message-ID: <20190606062441.GB26745@lst.de>
-References: <20190605190836.32354-1-hch@lst.de> <20190605190836.32354-9-hch@lst.de> <20190605202235.GC3273@ziepe.ca>
+From: Yoshihiro Shimoda <yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
+Subject: RE: [RFC PATCH v5 3/8] iommu: add a new capable IOMMU_CAP_MERGING
+Date: Thu, 6 Jun 2019 06:28:47 +0000
+Message-ID: <OSAPR01MB3089448A3D44BE61B127AA73D8170@OSAPR01MB3089.jpnprd01.prod.outlook.com>
+References: <1559733114-4221-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
+	<1559733114-4221-4-git-send-email-yoshihiro.shimoda.uh@renesas.com>
+	<7dfeb7d8-b777-b4af-d892-2829cd05241b@arm.com>
+	<20190605123808.GA12529@lst.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20190605202235.GC3273@ziepe.ca>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Jason Gunthorpe <jgg@ziepe.ca>
-Cc: Christoph Hellwig <hch@lst.de>, Jens Axboe <axboe@kernel.dk>, Sebastian Ott <sebott@linux.ibm.com>, Sagi Grimberg <sagi@grimberg.me>, Max Gurtovoy <maxg@mellanox.com>, Bart Van Assche <bvanassche@acm.org>, Ulf Hansson <ulf.hansson@linaro.org>, Alan Stern <stern@rowland.harvard.edu>, Oliver Neukum <oneukum@suse.com>, linux-block@vger.kernel.org, linux-rdma@vger.kernel.org, linux-mmc@vger.kernel.org, linux-nvme@lists.infradead.org, linux-scsi@vger.kernel.org, megaraidlinux.pdl@broadcom.com, MPT-FusionLinux.pdl@broadcom.com, linux-hyperv@vger.kernel.org, linux-usb@vger.kernel.org, usb-storage@lists.one-eyed-alien.net, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+In-Reply-To: <20190605123808.GA12529-jcswGhMUV9g@public.gmane.org>
+Content-Language: ja-JP
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>, Robin Murphy <robin.murphy-5wv7dgnIgG8@public.gmane.org>
+Cc: "ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org" <wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org>, "iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org" <iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, Jun 05, 2019 at 05:22:35PM -0300, Jason Gunthorpe wrote:
-> On Wed, Jun 05, 2019 at 09:08:31PM +0200, Christoph Hellwig wrote:
-> > This ensures all proper DMA layer handling is taken care of by the
-> > SCSI midlayer.
-> 
-> Maybe not entirely related to this series, but it looks like the SCSI
-> layer is changing the device global dma_set_max_seg_size() - at least
-> in RDMA the dma device is being shared between many users, so we
-> really don't want SCSI to make this value smaller.
-> 
-> Can we do something about this?
+Hi Christoph,
 
-We could do something about it as outlined in my mail - pass the
-dma_params explicitly to the dma_map_sg call.  But that isn't really
-suitable for a short term fix and will take a little more time.
+Thank you for your comments!
 
-Until we've sorted that out the device paramter needs to be set to
-the smallest value supported.
+> From: Christoph Hellwig, Sent: Wednesday, June 5, 2019 9:38 PM
+> 
+> On Wed, Jun 05, 2019 at 01:21:59PM +0100, Robin Murphy wrote:
+> > And if the problem is really that you're not getting merging because of
+> > exposing the wrong parameters to the DMA API and/or the block layer, or
+> > that you just can't quite express your requirement to the block layer in
+> > the first place, then that should really be tackled at the source rather
+> > than worked around further down in the stack.
+> 
+> The problem is that we need a way to communicate to the block layer
+> that more than a single segment is ok IFF the DMA API instance supports
+> merging.  And of course the answer will depend on futher parameters
+> like the maximum merged segment size and alignment for the segement.
+
+I'm afraid but I don't understand why we need a way to communicate to
+the block layer that more than a single segment is ok IFF the DMA API
+instance supports merging.
+
+> We'll need some way to communicate that, but I don't really think this
+> is series is the way to go.
+
+I should discard the patches 1/8 through 4/8.
+
+> We'd really need something hanging off the device (or through a query
+> API) how the dma map ops implementation exposes under what circumstances
+> it can merge.  The driver can then communicate that to the block layer
+> so that the block layer doesn't split requests up when reaching the
+> segement limit.
+
+The block layer already has a limit "max_segment_size" for each device so that
+regardless it can/cannot merge the segments, we can use the limit.
+Is my understanding incorrect?
+
+Best regards,
+Yoshihiro Shimoda
