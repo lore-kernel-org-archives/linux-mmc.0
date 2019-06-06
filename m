@@ -1,142 +1,101 @@
-From: Yoshihiro Shimoda <yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
-Subject: RE: [RFC PATCH v5 3/8] iommu: add a new capable IOMMU_CAP_MERGING
-Date: Thu, 6 Jun 2019 05:53:56 +0000
-Message-ID: <OSAPR01MB3089C968A7434A635AF5B7C2D8170@OSAPR01MB3089.jpnprd01.prod.outlook.com>
-References: <1559733114-4221-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
-	<1559733114-4221-4-git-send-email-yoshihiro.shimoda.uh@renesas.com>
-	<7dfeb7d8-b777-b4af-d892-2829cd05241b@arm.com>
+From: Hannes Reinecke <hare@suse.de>
+Subject: Re: [PATCH 10/13] megaraid_sas: set virt_boundary_mask in the scsi
+ host
+Date: Thu, 6 Jun 2019 08:02:07 +0200
+Message-ID: <345c3931-0940-7d59-ebc6-fa1ea56c60ac@suse.de>
+References: <20190605190836.32354-1-hch@lst.de>
+ <20190605190836.32354-11-hch@lst.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-In-Reply-To: <7dfeb7d8-b777-b4af-d892-2829cd05241b-5wv7dgnIgG8@public.gmane.org>
-Content-Language: ja-JP
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Robin Murphy <robin.murphy-5wv7dgnIgG8@public.gmane.org>
-Cc: "ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org" <wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org>, "iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org" <iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>, "hch-jcswGhMUV9g@public.gmane.org" <hch-jcswGhMUV9g@public.gmane.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20190605190836.32354-11-hch@lst.de>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: Christoph Hellwig <hch@lst.de>, Jens Axboe <axboe@kernel.dk>
+Cc: Sebastian Ott <sebott@linux.ibm.com>, Sagi Grimberg <sagi@grimberg.me>, Max Gurtovoy <maxg@mellanox.com>, Bart Van Assche <bvanassche@acm.org>, Ulf Hansson <ulf.hansson@linaro.org>, Alan Stern <stern@rowland.harvard.edu>, Oliver Neukum <oneukum@suse.com>, linux-block@vger.kernel.org, linux-rdma@vger.kernel.org, linux-mmc@vger.kernel.org, linux-nvme@lists.infradead.org, linux-scsi@vger.kernel.org, megaraidlinux.pdl@broadcom.com, MPT-FusionLinux.pdl@broadcom.com, linux-hyperv@vger.kernel.org, linux-usb@vger.kernel.org, usb-storage@lists.one-eyed-alien.net, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Robin,
-
-Thank you for your comments!
-
-> From: Robin Murphy, Sent: Wednesday, June 5, 2019 9:22 PM
-<snip>
-> > @@ -902,8 +914,18 @@ static int iommu_dma_map_sg(struct device *dev, struct scatterlist *sg,
-> >   	if (iommu_map_sg(domain, iova, sg, nents, prot) < iova_len)
-> >   		goto out_free_iova;
-> >
-> > -	return __finalise_sg(dev, sg, nents, iova);
-> > +	ret = __finalise_sg(dev, sg, nents, iova);
-> > +	/*
-> > +	 * Check whether the sg entry is single if a device requires and
-> > +	 * the IOMMU driver has the capable.
-> > +	 */
-> > +	if (iova_contiguous && ret != 1)
-> > +		goto out_unmap_sg;
+On 6/5/19 9:08 PM, Christoph Hellwig wrote:
+> This ensures all proper DMA layer handling is taken care of by the
+> SCSI midlayer.  Note that the effect is global, as the IOMMU merging
+> is based off a paramters in struct device.  We could still turn if off
+> if no PCIe devices are present, but I don't know how to find that out.
 > 
-> I don't see that just failing really gives this option any value.
-> Clearly the MMC driver has to do *something* to handle the failure (plus
-> presumably the case of not having IOMMU DMA ops at all), which begs the
-> question of why it couldn't just do whatever that is anyway, without all
-> this infrastructure. For starters, it would be a far simpler and less
-> invasive patch:
+> Also remove the bogus nomerges flag, merges do take the virt_boundary
+> into account.
 > 
-> 	if (dma_map_sg(...) > 1) {
-> 		dma_unmap_sg(...);
-> 		/* split into multiple requests and try again */
-> 	}
-
-I understood it.
-
-> But then it would make even more sense to just have the driver be
-> proactive about its special requirement in the first place, and simply
-> validate the list before it even tries to map it:
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
+> ---
+>  drivers/scsi/megaraid/megaraid_sas_base.c   | 46 +++++----------------
+>  drivers/scsi/megaraid/megaraid_sas_fusion.c |  7 ++++
+>  2 files changed, 18 insertions(+), 35 deletions(-)
 > 
-> 	for_each_sg(sgl, sg, n, i)
-> 		if ((i > 0 && sg->offset % PAGE_SIZE) ||
-> 		    (i < n - 1 && sg->length % PAGE_SIZE))
-> 			/* segment will not be mergeable */
+> diff --git a/drivers/scsi/megaraid/megaraid_sas_base.c b/drivers/scsi/megaraid/megaraid_sas_base.c
+> index 3dd1df472dc6..20b3b3f8bc16 100644
+> --- a/drivers/scsi/megaraid/megaraid_sas_base.c
+> +++ b/drivers/scsi/megaraid/megaraid_sas_base.c
+> @@ -1870,39 +1870,6 @@ void megasas_set_dynamic_target_properties(struct scsi_device *sdev,
+>  	}
+>  }
+>  
+> -/*
+> - * megasas_set_nvme_device_properties -
+> - * set nomerges=2
+> - * set virtual page boundary = 4K (current mr_nvme_pg_size is 4K).
+> - * set maximum io transfer = MDTS of NVME device provided by MR firmware.
+> - *
+> - * MR firmware provides value in KB. Caller of this function converts
+> - * kb into bytes.
+> - *
+> - * e.a MDTS=5 means 2^5 * nvme page size. (In case of 4K page size,
+> - * MR firmware provides value 128 as (32 * 4K) = 128K.
+> - *
+> - * @sdev:				scsi device
+> - * @max_io_size:				maximum io transfer size
+> - *
+> - */
+> -static inline void
+> -megasas_set_nvme_device_properties(struct scsi_device *sdev, u32 max_io_size)
+> -{
+> -	struct megasas_instance *instance;
+> -	u32 mr_nvme_pg_size;
+> -
+> -	instance = (struct megasas_instance *)sdev->host->hostdata;
+> -	mr_nvme_pg_size = max_t(u32, instance->nvme_page_size,
+> -				MR_DEFAULT_NVME_PAGE_SIZE);
+> -
+> -	blk_queue_max_hw_sectors(sdev->request_queue, (max_io_size / 512));
+> -
+> -	blk_queue_flag_set(QUEUE_FLAG_NOMERGES, sdev->request_queue);
+> -	blk_queue_virt_boundary(sdev->request_queue, mr_nvme_pg_size - 1);
+> -}
+> -
+> -
+>  /*
+>   * megasas_set_static_target_properties -
+>   * Device property set by driver are static and it is not required to be
+> @@ -1961,8 +1928,10 @@ static void megasas_set_static_target_properties(struct scsi_device *sdev,
+>  		max_io_size_kb = le32_to_cpu(instance->tgt_prop->max_io_size_kb);
+>  	}
+>  
+> -	if (instance->nvme_page_size && max_io_size_kb)
+> -		megasas_set_nvme_device_properties(sdev, (max_io_size_kb << 10));
+> +	if (instance->nvme_page_size && max_io_size_kb) {
+> +		blk_queue_max_hw_sectors(sdev->request_queue,
+> +				(max_io_size_kb << 10) / 512);
+> +	}
+>  
+>  	scsi_change_queue_depth(sdev, device_qd);
+>  
+What happened to the NOMERGES queue flag?
 
-In previous version, I made such a code [1].
-But, I think I misunderstood Christoph's comments [2] [3].
+Cheers,
 
-[1]
-https://patchwork.kernel.org/patch/10970047/
-
-[2]
-https://marc.info/?l=linux-renesas-soc&m=155956751811689&w=2
-
-[3]
-https://marc.info/?l=linux-renesas-soc&m=155852814607202&w=2
-
-> For reference, I think v4l2 and possibly some areas of DRM already do
-> something vaguely similar to judge whether they get contiguous buffers
-> or not.
-
-I see. I'll check these areas later.
-
-> > +
-> > +	return ret;
-> >
-> > +out_unmap_sg:
-> > +	iommu_dma_unmap_sg(dev, sg, nents, dir, attrs);
-> >   out_free_iova:
-> >   	iommu_dma_free_iova(cookie, iova, iova_len);
-> >   out_restore_sg:
-> > diff --git a/include/linux/iommu.h b/include/linux/iommu.h
-> > index 91af22a..f971dd3 100644
-> > --- a/include/linux/iommu.h
-> > +++ b/include/linux/iommu.h
-> > @@ -104,6 +104,7 @@ enum iommu_cap {
-> >   					   transactions */
-> >   	IOMMU_CAP_INTR_REMAP,		/* IOMMU supports interrupt isolation */
-> >   	IOMMU_CAP_NOEXEC,		/* IOMMU_NOEXEC flag */
-> > +	IOMMU_CAP_MERGING,		/* IOMMU supports segments merging */
-> 
-> This isn't a 'capability' of the IOMMU - "segment merging" equates to
-> just remapping pages, and there's already a fundamental assumption that
-> IOMMUs are capable of that. Plus it's very much a DMA API concept, so
-> hardly belongs in the IOMMU API anyway.
-
-I got it.
-
-> All in all, I'm struggling to see the point of this. Although it's not a
-> DMA API guarantee, iommu-dma already merges scatterlists as aggressively
-> as it is allowed to, and will continue to do so for the foreseeable
-> future (since it avoids considerable complication in the IOVA
-> allocation), so if you want to make sure iommu_dma_map_sg() merges an
-> entire list, just don't give it a non-mergeable list.
-
-Thank you for the explanation. I didn't know that a driver should not
-give it a non-mergeable list.
-
-> And if you still
-> really really want dma_map_sg() to have a behaviour of "merge to a
-> single segment or fail", then that should at least be a DMA API
-> attribute, which could in principle be honoured by bounce-buffering
-> implementations as well.
-
-I got it. For this patch series, it seems I have to modify a block layer
-so that such a new DMA API is not needed though.
-
-> And if the problem is really that you're not getting merging because of
-> exposing the wrong parameters to the DMA API and/or the block layer, or
-> that you just can't quite express your requirement to the block layer in
-> the first place, then that should really be tackled at the source rather
-> than worked around further down in the stack.
-
-I'll reply on Christoph email about this topic later.
-
-Best regards,
-Yoshihiro Shimoda
-
-> Robin.
+Hannes
+-- 
+Dr. Hannes Reinecke		   Teamlead Storage & Networking
+hare@suse.de			               +49 911 74053 688
+SUSE LINUX GmbH, Maxfeldstr. 5, 90409 Nürnberg
+GF: Felix Imendörffer, Mary Higgins, Sri Rasiah
+HRB 21284 (AG Nürnberg)
