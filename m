@@ -1,32 +1,23 @@
-From: "Martin K. Petersen" <martin.petersen@oracle.com>
-Subject: Re: properly communicate queue limits to the DMA layer
-Date: Fri, 07 Jun 2019 13:30:30 -0400
-Message-ID: <yq1o939i9qh.fsf@oracle.com>
-References: <20190605190836.32354-1-hch@lst.de>
-        <591cfa1e-fecb-7d00-c855-3b9eb8eb8a2a@kernel.dk>
-        <20190605192405.GA18243@lst.de>
-        <f07d0abf-b3eb-f530-37b9-e66454740b3f@kernel.dk>
-Mime-Version: 1.0
-Content-Type: text/plain
+From: pr-tracker-bot@kernel.org
+Subject: Re: [GIT PULL] MMC and MEMSTICK fixes for v5.2-rc4
+Date: Fri, 07 Jun 2019 21:00:12 +0000
+Message-ID: <155994121222.4194.16757914361173670130.pr-tracker-bot@kernel.org>
+References: <20190607103911.4623-1-ulf.hansson@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <f07d0abf-b3eb-f530-37b9-e66454740b3f@kernel.dk> (Jens Axboe's
-        message of "Thu, 6 Jun 2019 23:52:35 -0600")
+In-Reply-To: <20190607103911.4623-1-ulf.hansson@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Jens Axboe <axboe@kernel.dk>
-Cc: Christoph Hellwig <hch@lst.de>, Sebastian Ott <sebott@linux.ibm.com>, Sagi Grimberg <sagi@grimberg.me>, Max Gurtovoy <maxg@mellanox.com>, Bart Van Assche <bvanassche@acm.org>, Ulf Hansson <ulf.hansson@linaro.org>, Alan Stern <stern@rowland.harvard.edu>, Oliver Neukum <oneukum@suse.com>, linux-block@vger.kernel.org, linux-rdma@vger.kernel.org, linux-mmc@vger.kernel.org, linux-nvme@lists.infradead.org, linux-scsi@vger.kernel.org, megaraidlinux.pdl@broadcom.com, MPT-FusionLinux.pdl@broadcom.com, linux-hyperv@vger.kernel.org, linux-usb@vger.kernel.org, usb-storage@lists.one-eyed-alien.net, linux-kernel@vger.kernel.org
+Cc: Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
+The pull request you sent on Fri,  7 Jun 2019 12:39:11 +0200:
 
-Jens,
+> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.2-rc2
 
->> The SCSI bits will need a bit more review, and possibly tweaking
->> fo megaraid and mpt3sas.  But they are really independent of the
->> other patches, so maybe skip them for now and leave them for Martin
->> to deal with.
->
-> I dropped the SCSI bits.
+has been merged into torvalds/linux.git:
+https://git.kernel.org/torvalds/c/91f152e75bcdba95130ec5fdb1010e91a48d9a11
 
-I'll monitor and merge them.
+Thank you!
 
 -- 
-Martin K. Petersen	Oracle Linux Engineering
+Deet-doot-dot, I am a bot.
+https://korg.wiki.kernel.org/userdoc/prtracker
