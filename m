@@ -1,68 +1,50 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [GIT PULL] MMC and MEMSTICK fixes for v5.2-rc4
-Date: Fri,  7 Jun 2019 12:39:11 +0200
-Message-ID: <20190607103911.4623-1-ulf.hansson@linaro.org>
+Subject: Re: [PATCH v2 0/9] Add SD host controller support for SC9860 platform
+Date: Fri, 7 Jun 2019 13:02:22 +0200
+Message-ID: <CAPDyKFp+UXDrrferK0zP7nPFtvkq6UU29vhJu3HCEUiKcAOsJQ@mail.gmail.com>
+References: <cover.1559635435.git.baolin.wang@linaro.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <cover.1559635435.git.baolin.wang@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
+To: Baolin Wang <baolin.wang@linaro.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Chunyan Zhang <zhang.lyra@gmail.com>, Orson Zhai <orsonzhai@gmail.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Arnd Bergmann <arnd@arndb.de>, Olof Johansson <olof@lixom.net>, Vincent Guittot <vincent.guittot@linaro.org>, arm-soc <arm@kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, DTML <devicetree@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Linus,
+On Tue, 4 Jun 2019 at 10:14, Baolin Wang <baolin.wang@linaro.org> wrote:
+>
+> This patch set adds optional clock support, HS400 enhanced strobe mode support,
+> PHY DLL configuration and other optimization to make the SD host controller
+> can work well on the Spreadtrum SC9860 platform.
+>
+> Changes from v1:
+>  - Add acked-tags from Adrian.
+>  - Fix one mistake by changing MMC_TIMING_MMC_HS to MMC_TIMING_SD_HS in patch 8.
+>
+> Baolin Wang (9):
+>   mmc: sdhci-sprd: Check the enable clock's return value correctly
+>   dt-bindings: mmc: sprd: Add another optional clock documentation
+>   mmc: sdhci-sprd: Add optional gate clock support
+>   mmc: sdhci-sprd: Implement the get_max_timeout_count() interface
+>   mmc: sdhci-sprd: Add HS400 enhanced strobe mode
+>   mmc: sdhci-sprd: Enable PHY DLL to make clock stable
+>   dt-bindings: mmc: sprd: Add PHY DLL delay documentation
+>   mmc: sdhci-sprd: Add PHY DLL delay configuration
+>   arm64: dts: sprd: Add Spreadtrum SD host controller support
+>
+>  .../devicetree/bindings/mmc/sdhci-sprd.txt         |   19 +++
+>  arch/arm64/boot/dts/sprd/whale2.dtsi               |   35 ++++
+>  drivers/mmc/host/sdhci-sprd.c                      |  171 +++++++++++++++++++-
+>  3 files changed, 217 insertions(+), 8 deletions(-)
+>
+> --
+> 1.7.9.5
+>
 
-Here's a PR with a couple of MMC and MEMSTICK fixes intended for v5.2-rc4.
-Details about the highlights are as usual found in the signed tag.
+Patch 1 -> patch 8, applied for next, thanks!
 
-Please pull this in!
+Patch 9 is for arm-soc.
 
 Kind regards
-Ulf Hansson
-
-
-The following changes since commit cd6c84d8f0cdc911df435bb075ba22ce3c605b07:
-
-  Linux 5.2-rc2 (2019-05-26 16:49:19 -0700)
-
-are available in the Git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.2-rc2
-
-for you to fetch changes up to 7397993145872c74871ab2aa7fa26a427144088a:
-
-  mmc: sdhci_am654: Fix SLOTTYPE write (2019-06-03 15:18:25 +0200)
-
-----------------------------------------------------------------
-MMC host:
- - sdhci: Fix SDIO IRQ thread deadlock
- - sdhci-tegra: Fix a warning message
- - sdhci_am654: Fix SLOTTYPE write
- - meson-gx: Fix IRQ ack
- - tmio: Fix SCC error handling to avoid false positive CRC error
-
-MEMSTICK core:
- - mspro_block: Fix returning a correct error code
-
-----------------------------------------------------------------
-Adrian Hunter (1):
-      mmc: sdhci: Fix SDIO IRQ thread deadlock
-
-Dan Carpenter (2):
-      memstick: mspro_block: Fix an error code in mspro_block_issue_req()
-      mmc: tegra: Fix a warning message
-
-Faiz Abbas (1):
-      mmc: sdhci_am654: Fix SLOTTYPE write
-
-Jerome Brunet (1):
-      mmc: meson-gx: fix irq ack
-
-Takeshi Saito (1):
-      mmc: tmio: fix SCC error handling to avoid false positive CRC error
-
- drivers/memstick/core/mspro_block.c | 13 ++++++-------
- drivers/mmc/host/meson-gx-mmc.c     |  6 +++---
- drivers/mmc/host/sdhci-tegra.c      |  2 +-
- drivers/mmc/host/sdhci.c            | 24 +++++++++++++-----------
- drivers/mmc/host/sdhci_am654.c      |  2 +-
- drivers/mmc/host/tmio_mmc_core.c    |  3 ++-
- 6 files changed, 26 insertions(+), 24 deletions(-)
+Uffe
