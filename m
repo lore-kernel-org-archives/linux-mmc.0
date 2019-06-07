@@ -1,69 +1,145 @@
-From: Douglas Anderson <dianders@chromium.org>
-Subject: [PATCH v3 0/5] brcmfmac: sdio: Deal better w/ transmission errors related to idle
-Date: Fri,  7 Jun 2019 15:37:11 -0700
-Message-ID: <20190607223716.119277-1-dianders@chromium.org>
+From: Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Subject: [PATCH v3 2/5] mmc: core: API for temporarily disabling auto-retuning
+ due to errors
+Date: Fri,  7 Jun 2019 15:37:13 -0700
+Message-ID: <20190607223716.119277-3-dianders@chromium.org>
+References: <20190607223716.119277-1-dianders@chromium.org>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Kalle Valo <kvalo@codeaurora.org>, Adrian Hunter <adrian.hunter@intel.com>, Arend van Spriel <arend.vanspriel@broadcom.com>
-Cc: brcm80211-dev-list.pdl@broadcom.com, linux-rockchip@lists.infradead.org, Double Lo <double.lo@cypress.com>, briannorris@chromium.org, linux-wireless@vger.kernel.org, Naveen Gupta <naveen.gupta@cypress.com>, Madhan Mohan R <madhanmohan.r@cypress.com>, mka@chromium.org, Wright Feng <wright.feng@cypress.com>, Chi-Hsien Lin <chi-hsien.lin@cypress.com>, netdev@vger.kernel.org, brcm80211-dev-list@cypress.com, Douglas Anderson <dianders@chromium.org>, linux-mmc@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, YueHaibing <yuehaibing@huawei.com>, =?UTF-8?q?Rafa=C5=82=20Mi=C5=82ecki?= <rafal@milecki.pl>, Hante Meuleman <hante.meuleman@broadcom.com>, Martin Blumenstingl <martin.blumenstingl@googlemail.com>, Ritesh
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <20190607223716.119277-1-dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
+List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Kalle Valo <kvalo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Arend van Spriel <arend.vanspriel-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
+Cc: Madhan Mohan R <madhanmohan.r-+wT8y+m8/X5BDgjK7y7TUQ@public.gmane.org>, brcm80211-dev-list.pdl-dY08KVG/lbpWk0Htik3J/w@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Wolfram Sang <wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org>, netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Chi-Hsien Lin <chi-hsien.lin-+wT8y+m8/X5BDgjK7y7TUQ@public.gmane.org>, briannorris-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Double Lo <double.lo-+wT8y+m8/X5BDgjK7y7TUQ@public.gmane.org>, Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Avri Altman <avri.altman-Sjgp3cTcYWE@public.gmane.org>, mka-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, Ritesh Harjani <riteshh-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Wright Feng <wright.feng-+wT8y+m8/X5BDgjK7y7TUQ@public.gmane.org>, Jiong Wu <lohengrin1024-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, brcm80211-dev-list-+wT8y+m8/X5BDgjK7y7TUQ@public.gmane.org, Naveen Gupta <naveen.gupta-+wT8y+m8/X5BDgjK7y7TUQ@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-This series attempts to deal better with the expected transmission
-errors related to the idle states (handled by the Always-On-Subsystem
-or AOS) on the SDIO-based WiFi on rk3288-veyron-minnie,
-rk3288-veyron-speedy, and rk3288-veyron-mickey.
+Normally when the MMC core sees an "-EILSEQ" error returned by a host
+controller then it will trigger a retuning of the card.  This is
+generally a good idea.
 
-Some details about those errors can be found in
-<https://crbug.com/960222>, but to summarize it here: if we try to
-send the wakeup command to the WiFi card at the same time it has
-decided to wake up itself then it will behave badly on the SDIO bus.
-This can cause timeouts or CRC errors.
+However, if a command is expected to sometimes cause transfer errors
+then these transfer errors shouldn't cause a re-tuning.  This
+re-tuning will be a needless waste of time.  One example case where a
+transfer is expected to cause errors is when transitioning between
+idle (sometimes referred to as "sleep" in Broadcom code) and active
+state on certain Broadcom WiFi cards.  Specifically if the card was
+already transitioning between states when the command was sent it
+could cause an error on the SDIO bus.
 
-When I tested on 4.19 and 4.20 these CRC errors can be seen to cause
-re-tuning.  Since I am currently developing on 4.19 this was the
-original problem I attempted to solve.
+Let's add an API that the SDIO card drivers can call that will
+temporarily disable the auto-tuning functionality.  Then we can add a
+call to this in the Broadcom WiFi driver and any other driver that
+might have similar needs.
 
-On mainline it turns out that you don't see the retuning errors but
-you see tons of spam about timeouts trying to wakeup from sleep.  I
-tracked down the commit that was causing that and have partially
-reverted it here.  I have no real knowledge about Broadcom WiFi, but
-the commit that was causing problems sounds (from the descriptioin) to
-be a hack commit penalizing all Broadcom WiFi users because of a bug
-in a Cypress SD controller.  I will let others comment if this is
-truly the case and, if so, what the right solution should be.
+NOTE: this makes the assumption that the card is already tuned well
+enough that it's OK to disable the auto-retuning during one of these
+error-prone situations.  Presumably the driver code performing the
+error-prone transfer knows how to recover / retry from errors.  ...and
+after we can get back to a state where transfers are no longer
+error-prone then we can enable the auto-retuning again.  If we truly
+find ourselves in a case where the card needs to be retuned sometimes
+to handle one of these error-prone transfers then we can always try a
+few transfers first without auto-retuning and then re-try with
+auto-retuning if the first few fail.
 
-For v3 of this series I have added 2 patches to the end of the series
-to address errors that would show up on systems with these same SDIO
-WiFi cards when used on controllers that do periodic retuning.  These
-systems need an extra fix to prevent the retuning from happening when
-the card is asleep.
+Without this change on rk3288-veyron-minnie I periodically see this in
+the logs of a machine just sitting there idle:
+  dwmmc_rockchip ff0d0000.dwmmc: Successfully tuned phase to XYZ
+
+Fixes: bd11e8bd03ca ("mmc: core: Flag re-tuning is needed on CRC errors")
+Signed-off-by: Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+---
+Note that are are a whole boatload of different ways that we could
+provide an API for the Broadcom WiFi SDIO driver.  This patch
+illustrates one way but if maintainers feel strongly that this is too
+ugly and have a better idea then I can give it a shot too.  From a
+purist point of view I kinda felt that the "expect errors" really
+belonged as part of the mmc_request structure, but getting it into
+there meant changing a whole pile of core SD/MMC APIs.  Simply adding
+it to the host seemed to match the current style better and was a less
+intrusive change.
 
 Changes in v3:
 - Took out the spinlock since I believe this is all in one context.
-- Expect errors for all of brcmf_sdio_kso_control() (Adrian).
-- ("mmc: core: Export mmc_retune_hold_now() mmc_retune_release()") new for v3.
-- ("brcmfmac: sdio: Don't tune while the card is off") new for v3.
 
 Changes in v2:
-- A full revert, not just a partial one (Arend).  ...with explicit Cc.
 - Updated commit message to clarify based on discussion of v1.
 
-Douglas Anderson (5):
-  Revert "brcmfmac: disable command decode in sdio_aos"
-  mmc: core: API for temporarily disabling auto-retuning due to errors
-  brcmfmac: sdio: Disable auto-tuning around commands expected to fail
-  mmc: core: Export mmc_retune_hold_now() mmc_retune_release()
-  brcmfmac: sdio: Don't tune while the card is off
+ drivers/mmc/core/core.c  | 19 +++++++++++++++++--
+ include/linux/mmc/core.h |  2 ++
+ include/linux/mmc/host.h |  1 +
+ 3 files changed, 20 insertions(+), 2 deletions(-)
 
- drivers/mmc/core/core.c                       | 19 +++++++++++++++++--
- drivers/mmc/core/host.c                       |  7 +++++++
- drivers/mmc/core/host.h                       |  7 -------
- .../broadcom/brcm80211/brcmfmac/sdio.c        | 18 +++++++++++++-----
- include/linux/mmc/core.h                      |  4 ++++
- include/linux/mmc/host.h                      |  1 +
- 6 files changed, 42 insertions(+), 14 deletions(-)
-
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 6db36dc870b5..bc109ec49406 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -144,8 +144,9 @@ void mmc_request_done(struct mmc_host *host, struct mmc_request *mrq)
+ 	int err = cmd->error;
+ 
+ 	/* Flag re-tuning needed on CRC errors */
+-	if ((cmd->opcode != MMC_SEND_TUNING_BLOCK &&
+-	    cmd->opcode != MMC_SEND_TUNING_BLOCK_HS200) &&
++	if (cmd->opcode != MMC_SEND_TUNING_BLOCK &&
++	    cmd->opcode != MMC_SEND_TUNING_BLOCK_HS200 &&
++	    !host->expect_errors &&
+ 	    (err == -EILSEQ || (mrq->sbc && mrq->sbc->error == -EILSEQ) ||
+ 	    (mrq->data && mrq->data->error == -EILSEQ) ||
+ 	    (mrq->stop && mrq->stop->error == -EILSEQ)))
+@@ -2163,6 +2164,20 @@ int mmc_sw_reset(struct mmc_host *host)
+ }
+ EXPORT_SYMBOL(mmc_sw_reset);
+ 
++void mmc_expect_errors_begin(struct mmc_host *host)
++{
++	WARN_ON(host->expect_errors);
++	host->expect_errors = true;
++}
++EXPORT_SYMBOL_GPL(mmc_expect_errors_begin);
++
++void mmc_expect_errors_end(struct mmc_host *host)
++{
++	WARN_ON(!host->expect_errors);
++	host->expect_errors = false;
++}
++EXPORT_SYMBOL_GPL(mmc_expect_errors_end);
++
+ static int mmc_rescan_try_freq(struct mmc_host *host, unsigned freq)
+ {
+ 	host->f_init = freq;
+diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+index 134a6483347a..02a13abf0cda 100644
+--- a/include/linux/mmc/core.h
++++ b/include/linux/mmc/core.h
+@@ -178,6 +178,8 @@ int mmc_wait_for_cmd(struct mmc_host *host, struct mmc_command *cmd,
+ 
+ int mmc_hw_reset(struct mmc_host *host);
+ int mmc_sw_reset(struct mmc_host *host);
++void mmc_expect_errors_begin(struct mmc_host *host);
++void mmc_expect_errors_end(struct mmc_host *host);
+ void mmc_set_data_timeout(struct mmc_data *data, const struct mmc_card *card);
+ 
+ #endif /* LINUX_MMC_CORE_H */
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 43d0f0c496f6..8d553fb8c834 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -398,6 +398,7 @@ struct mmc_host {
+ 	unsigned int		retune_now:1;	/* do re-tuning at next req */
+ 	unsigned int		retune_paused:1; /* re-tuning is temporarily disabled */
+ 	unsigned int		use_blk_mq:1;	/* use blk-mq */
++	unsigned int		expect_errors:1; /* don't trigger retune upon errors */
+ 
+ 	int			rescan_disable;	/* disable card detection */
+ 	int			rescan_entered;	/* used with nonremovable devices */
 -- 
 2.22.0.rc2.383.gf4fbbf30c2-goog
