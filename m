@@ -1,63 +1,58 @@
 From: Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
-Subject: [PATCH 0/7] Add SD/MMC driver for Actions Semi S900 SoC
-Date: Sun,  9 Jun 2019 01:23:10 +0530
-Message-ID: <20190608195317.6336-1-manivannan.sadhasivam@linaro.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+Subject: [PATCH 1/7] clk: actions: Fix factor clk struct member access
+Date: Sun,  9 Jun 2019 01:23:11 +0530
+Message-ID: <20190608195317.6336-2-manivannan.sadhasivam@linaro.org>
+References: <20190608195317.6336-1-manivannan.sadhasivam@linaro.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20190608195317.6336-1-manivannan.sadhasivam@linaro.org>
+Sender: linux-kernel-owner@vger.kernel.org
 To: ulf.hansson@linaro.org, afaerber@suse.de, robh+dt@kernel.org, sboyd@kernel.org
-Cc: devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linus.walleij@linaro.org, linux-actions@lists.infradead.org, linux-kernel@vger.kernel.org, thomas.liau@actions-semi.com, Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>, linux-clk@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, thomas.liau@actions-semi.com, linux-actions@lists.infradead.org, linus.walleij@linaro.org, linux-clk@vger.kernel.org, Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hello,
+Since the helper "owl_factor_helper_round_rate" is shared between factor
+and composite clocks, using the factor clk specific helper function
+like "hw_to_owl_factor" to access its members will create issues when
+called from composite clk specific code. Hence, pass the "factor_hw"
+struct pointer directly instead of fetching it using factor clk specific
+helpers.
 
-This patchset adds SD/MMC driver for Actions Semi S900 SoC from Owl
-family SoCs. There are 4 SD/MMC controller present in this SoC but
-only 2 are enabled currently for Bubblegum96 board to access uSD and
-onboard eMMC. SDIO support for this driver is not currently implemented.
+This issue has been observed when a composite clock like "sd0_clk" tried
+to call "owl_factor_helper_round_rate" resulting in pointer dereferencing
+error.
 
-Note: Currently, driver uses 2 completion mechanisms for maintaining
-the coherency between SDC and DMA interrupts and I know that it is not
-efficient. Hence, I'd like to hear any suggestions for reimplementing
-the logic if anyone has.
+Fixes: 4bb78fc9744a ("clk: actions: Add factor clock support")
+Signed-off-by: Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
+---
+ drivers/clk/actions/owl-factor.c | 7 +++----
+ 1 file changed, 3 insertions(+), 4 deletions(-)
 
-With this driver, this patchset also fixes one clk driver issue and enables
-the Actions Semi platform in ARM64 defconfig.
-
-Thanks,
-Mani
-
-Manivannan Sadhasivam (7):
-  clk: actions: Fix factor clk struct member access
-  dt-bindings: mmc: Add Actions Semi SD/MMC/SDIO controller binding
-  arm64: dts: actions: Add MMC controller support for S900
-  arm64: dts: actions: Add uSD and eMMC support for Bubblegum96
-  mmc: Add Actions Semi Owl SoCs SD/MMC driver
-  MAINTAINERS: Add entry for Actions Semi SD/MMC driver and binding
-  arm64: configs: Enable Actions Semi platform in defconfig
-
- .../devicetree/bindings/mmc/owl-mmc.txt       |  37 +
- MAINTAINERS                                   |   2 +
- .../boot/dts/actions/s900-bubblegum-96.dts    |  50 ++
- arch/arm64/boot/dts/actions/s900.dtsi         |  45 ++
- arch/arm64/configs/defconfig                  |   1 +
- drivers/clk/actions/owl-factor.c              |   7 +-
- drivers/mmc/host/Kconfig                      |   8 +
- drivers/mmc/host/Makefile                     |   1 +
- drivers/mmc/host/owl-mmc.c                    | 705 ++++++++++++++++++
- 9 files changed, 852 insertions(+), 4 deletions(-)
- create mode 100644 Documentation/devicetree/bindings/mmc/owl-mmc.txt
- create mode 100644 drivers/mmc/host/owl-mmc.c
-
+diff --git a/drivers/clk/actions/owl-factor.c b/drivers/clk/actions/owl-factor.c
+index 317d4a9e112e..f419dfdd334f 100644
+--- a/drivers/clk/actions/owl-factor.c
++++ b/drivers/clk/actions/owl-factor.c
+@@ -64,11 +64,10 @@ static unsigned int _get_table_val(const struct clk_factor_table *table,
+ 	return val;
+ }
+ 
+-static int clk_val_best(struct clk_hw *hw, unsigned long rate,
++static int clk_val_best(const struct owl_factor_hw *factor_hw,
++			struct clk_hw *hw, unsigned long rate,
+ 			unsigned long *best_parent_rate)
+ {
+-	struct owl_factor *factor = hw_to_owl_factor(hw);
+-	struct owl_factor_hw *factor_hw = &factor->factor_hw;
+ 	const struct clk_factor_table *clkt = factor_hw->table;
+ 	unsigned long parent_rate, try_parent_rate, best = 0, cur_rate;
+ 	unsigned long parent_rate_saved = *best_parent_rate;
+@@ -126,7 +125,7 @@ long owl_factor_helper_round_rate(struct owl_clk_common *common,
+ 	const struct clk_factor_table *clkt = factor_hw->table;
+ 	unsigned int val, mul = 0, div = 1;
+ 
+-	val = clk_val_best(&common->hw, rate, parent_rate);
++	val = clk_val_best(factor_hw, &common->hw, rate, parent_rate);
+ 	_get_table_div_mul(clkt, val, &mul, &div);
+ 
+ 	return *parent_rate * mul / div;
 -- 
 2.17.1
