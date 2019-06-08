@@ -1,7 +1,7 @@
 From: Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
-Subject: [PATCH 2/7] dt-bindings: mmc: Add Actions Semi SD/MMC/SDIO controller binding
-Date: Sun,  9 Jun 2019 01:23:12 +0530
-Message-ID: <20190608195317.6336-3-manivannan.sadhasivam@linaro.org>
+Subject: [PATCH 3/7] arm64: dts: actions: Add MMC controller support for S900
+Date: Sun,  9 Jun 2019 01:23:13 +0530
+Message-ID: <20190608195317.6336-4-manivannan.sadhasivam@linaro.org>
 References: <20190608195317.6336-1-manivannan.sadhasivam@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20190608195317.6336-1-manivannan.sadhasivam@linaro.org>
@@ -10,43 +10,30 @@ To: ulf.hansson@linaro.org, afaerber@suse.de, robh+dt@kernel.org, sboyd@kernel.o
 Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, thomas.liau@actions-semi.com, linux-actions@lists.infradead.org, linus.walleij@linaro.org, linux-clk@vger.kernel.org, Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Add devicetree binding for Actions Semi Owl SoC's SD/MMC/SDIO controller.
+Add MMC controller support for Actions Semi S900 SoC. There are 4 MMC
+controllers in this SoC which can be used for accessing SD/MMC/SDIO cards.
 
 Signed-off-by: Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
 ---
- .../devicetree/bindings/mmc/owl-mmc.txt       | 37 +++++++++++++++++++
- 1 file changed, 37 insertions(+)
- create mode 100644 Documentation/devicetree/bindings/mmc/owl-mmc.txt
+ arch/arm64/boot/dts/actions/s900.dtsi | 45 +++++++++++++++++++++++++++
+ 1 file changed, 45 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/mmc/owl-mmc.txt b/Documentation/devicetree/bindings/mmc/owl-mmc.txt
-new file mode 100644
-index 000000000000..a702f8d66cec
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/owl-mmc.txt
-@@ -0,0 +1,37 @@
-+Actions Semi Owl SoCs SD/MMC/SDIO controller
-+
-+Required properties:
-+- compatible: should be "actions,owl-mmc"
-+- reg: offset and length of the register set for the device.
-+- interrupts: single interrupt specifier.
-+- clocks: single clock specifier of the controller clock.
-+- resets: phandle to the reset line.
-+- dma-names: should be "mmc".
-+- dmas: single DMA channel specifier
-+
-+Optional properties:
-+- pinctrl-names: pinctrl state names "default" must be defined.
-+- pinctrl-0: phandle referencing pin configuration of the controller.
-+- bus-width: see mmc.txt
-+- cap-sd-highspeed: see mmc.txt
-+- cap-mmc-highspeed: see mmc.txt
-+- sd-uhs-sdr12: see mmc.txt
-+- sd-uhs-sdr25: see mmc.txt
-+- sd-uhs-sdr50: see mmc.txt
-+- non-removable: see mmc.txt
-+
-+Example:
+diff --git a/arch/arm64/boot/dts/actions/s900.dtsi b/arch/arm64/boot/dts/actions/s900.dtsi
+index df3a68a3ac97..eb35cf78ab73 100644
+--- a/arch/arm64/boot/dts/actions/s900.dtsi
++++ b/arch/arm64/boot/dts/actions/s900.dtsi
+@@ -4,6 +4,7 @@
+  */
+ 
+ #include <dt-bindings/clock/actions,s900-cmu.h>
++#include <dt-bindings/gpio/gpio.h>
+ #include <dt-bindings/interrupt-controller/arm-gic.h>
+ #include <dt-bindings/reset/actions,s900-reset.h>
+ 
+@@ -284,5 +285,49 @@
+ 			dma-requests = <46>;
+ 			clocks = <&cmu CLK_DMAC>;
+ 		};
 +
 +		mmc0: mmc@e0330000 {
 +			compatible = "actions,owl-mmc";
@@ -56,10 +43,42 @@ index 000000000000..a702f8d66cec
 +			resets = <&cmu RESET_SD0>;
 +			dmas = <&dma 2>;
 +			dma-names = "mmc";
-+			pinctrl-names = "default";
-+			pinctrl-0 = <&mmc0_default>;
-+			bus-width = <4>;
-+			cap-sd-highspeed;
++			status = "disabled";
 +		};
++
++		mmc1: mmc@e0334000 {
++			compatible = "actions,owl-mmc";
++			reg = <0x0 0xe0334000 0x0 0x4000>;
++			interrupts = <GIC_SPI 43 IRQ_TYPE_LEVEL_HIGH>;
++			clocks = <&cmu CLK_SD1>;
++			resets = <&cmu RESET_SD1>;
++			dmas = <&dma 3>;
++			dma-names = "mmc";
++			status = "disabled";
++		};
++
++		mmc2: mmc@e0338000 {
++			compatible = "actions,owl-mmc";
++			reg = <0x0 0xe0338000 0x0 0x4000>;
++			interrupts = <GIC_SPI 44 IRQ_TYPE_LEVEL_HIGH>;
++			clocks = <&cmu CLK_SD2>;
++			resets = <&cmu RESET_SD2>;
++			dmas = <&dma 4>;
++			dma-names = "mmc";
++			status = "disabled";
++		};
++
++		mmc3: mmc@e033c000 {
++			compatible = "actions,owl-mmc";
++			reg = <0x0 0xe033c000 0x0 0x4000>;
++			interrupts = <GIC_SPI 62 IRQ_TYPE_LEVEL_HIGH>;
++			clocks = <&cmu CLK_SD3>;
++			resets = <&cmu RESET_SD3>;
++			dmas = <&dma 46>;
++			dma-names = "mmc";
++			status = "disabled";
++		};
+ 	};
+ };
 -- 
 2.17.1
