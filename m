@@ -1,157 +1,48 @@
-From: Raul Rangel <rrangel@chromium.org>
-Subject: Re: [RFC PATCH 1/2] mmc: sdhci: Manually check card status after
- reset
-Date: Mon, 10 Jun 2019 10:32:52 -0600
-Message-ID: <20190610163252.GA227032@google.com>
-References: <20190501175457.195855-1-rrangel@chromium.org>
- <CAPDyKFpL1nHt1E1zgS-iDZf_KDWk2CN32Lvr+5Nmo8CtB2VCWg@mail.gmail.com>
- <20190607160553.GA185100@google.com>
- <CAPDyKFout6AY2Q92pYQ-KPH0NENq1-SkYivkDxjjb=uB=tKXuQ@mail.gmail.com>
+From: Raul E Rangel <rrangel@chromium.org>
+Subject: [PATCH 1/3] mmc: sdhci: sdhci-pci-o2micro: Correctly set bus width when tuning
+Date: Mon, 10 Jun 2019 12:53:51 -0600
+Message-ID: <20190610185354.35310-1-rrangel@chromium.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFout6AY2Q92pYQ-KPH0NENq1-SkYivkDxjjb=uB=tKXuQ@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Daniel Kurtz <djkurtz@chromium.org>, hongjiefang <hongjiefang@asrmicro.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Shawn Lin <shawn.lin@rock-chips.com>, Kyle Roeschley <kyle.roeschley@ni.com>, Avri Altman <avri.altman@wdc.com>, Adrian Hunter <adrian.hunter@intel.com>
+To: linux-mmc@vger.kernel.org
+Cc: ernest.zhang@bayhubtech.com, djkurtz@chromium.org, Raul E Rangel <rrangel@chromium.org>, linux-kernel@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, Jun 10, 2019 at 06:17:31PM +0200, Ulf Hansson wrote:
-> + Adrian
-> 
-> On Fri, 7 Jun 2019 at 18:05, Raul Rangel <rrangel@chromium.org> wrote:
-> >
-> > On Tue, May 28, 2019 at 09:38:20AM +0200, Ulf Hansson wrote:
-> > > On Wed, 1 May 2019 at 19:55, Raul E Rangel <rrangel@chromium.org> wrote:
-> >
-> > First off, thanks for the review.
-> >
-> > > >
-> > > > There is a race condition between resetting the SDHCI controller and
-> > > > disconnecting the card.
-> > > >
-> > > > For example:
-> > > > 0) Card is connected and transferring data
-> > > > 1) mmc_sd_reset is called to reset the controller due to a data error
-> > >
-> > > I assume you refer to mmc_sd_hw_reset()? In that case, I think you
-> > > have interpreted the purpose of mmc_sd_hw_reset() slightly wrong. It's
-> > > responsibility is to reset the SD-card and not the host/controller.
-> > You are correct. I was looking at a 4.14 kernel where it's called
-> > mmc_sd_reset. 4.19 and above call it mmc_sd_hw_reset.
-> >
-> > All I was trying to convey here was that a block error will eventually
-> > call sdhci_set_ios with SOFT_RESET_ALL via:
-> > mmc_blk_reset
-> > mmc_hw_reset
-> > mmc_sd_hw_reset
-> > mmc_power_cycle
-> > mmc_power_off
-> > mmc_set_initial_state
-> > sdhci_set_ios
-> > sdhci_reinit
-> > sdhci_init
-> > sdhci_do_reset(host, SDHCI_RESET_ALL);
-> >
-> > >
-> > > Whether there some additional "reset" of the controller needed, that
-> > > is assumed by the core, to be managed via the ->set_ios() callback for
-> > > the host.
-> > >
-> > > > 2) sdhci_set_ios calls sdhci_do_reset
-> > > > 3) SOFT_RESET_ALL is toggled which clears the IRQs the controller has
-> > > > configured.
-> > > > 4) Wait for SOFT_RESET_ALL to clear
-> > > > 5) CD logic notices card is gone and CARD_PRESENT goes low, but since the
-> > > >    IRQs are not configured a CARD_REMOVED interrupt is never raised.
-> > > > 6) IRQs are enabled again
-> > > > 7) mmc layer never notices the device is disconnected. The SDHCI layer
-> > > >    will keep returning -ENOMEDIUM. This results in a card that is always
-> > > >    present and not functional.
-> > >
-> > > This sounds like host specific problems, which most likely should be
-> > > fixed in host driver, solely. Unless I am missing something, of
-> > > course.
-> >
-> > So in sdhci_do_reset we call the reset callback which is typically
-> > sdhci_reset. sdhci_reset can wait for up to 100ms waiting for the
-> > controller to reset. If SDHCI_RESET_ALL was passed as the flag, the
-> > controller will clear the IRQ mask. If during that 100ms the card is
-> > removed there is no notification to the MMC system that the card was
-> > removed. So it seems like the card is always present.
-> 
-> So you are saying that the problem occurs when the card is removed
-> during this 100ms period?
-Exactly. Thought I think most controllers reset fast enough to where
-that window is very small. But for this AMD controller we need to do a
-full reset which takes a while, so we can see the problem.
+sdhci_send_tuning uses mmc->ios.bus_width to determine the block size.
+Without this patch the block size would be set incorrectly when the
+bus_width == 8 which results in tuning failing.
 
-> 
-> I assume there a way for sdhci to re-validate whether the card has
-> been removed during this period, right?
-I'll let Adrian chime in here.
+Signed-off-by: Raul E Rangel <rrangel@chromium.org>
+---
 
-> >
-> > > >  drivers/mmc/core/sd.c | 20 ++++++++++++++++++++
-> > > >  1 file changed, 20 insertions(+)
-> > > >
-> > > > diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-> > > > index 265e1aeeb9d8..9206c4297d66 100644
-> > > > --- a/drivers/mmc/core/sd.c
-> > > > +++ b/drivers/mmc/core/sd.c
-> > > > @@ -1242,7 +1242,27 @@ static int mmc_sd_runtime_resume(struct mmc_host *host)
-> > > >
-> > > >  static int mmc_sd_hw_reset(struct mmc_host *host)
-> > > >  {
-> > > > +       int present;
-> > > >         mmc_power_cycle(host, host->card->ocr);
-> > > > +
-> > > > +       present = host->ops->get_cd(host);
-> > > > +
-> > > > +       /* The card status could have changed while resetting. */
-> > > > +       if ((mmc_card_removed(host->card) && present) ||
-> > > > +           (!mmc_card_removed(host->card) && !present)) {
-> > > > +               pr_info("%s: card status changed during reset\n",
-> > > > +                      mmc_hostname(host));
-> > > > +               host->ops->card_event(host);
-> > > > +               mmc_detect_change(host, 0);
-> > > > +       }
-> > > > +
-> > > > +       /* Don't perform unnecessary transactions if the card is missing. */
-> > > > +       if (!present) {
-> > > > +               pr_info("%s: card was removed during reset\n",
-> > > > +                       mmc_hostname(host));
-> > > > +               return -ENOMEDIUM;
-> > > > +       }
-> > > > +
-> > >
-> > > When doing a  mmc_hw_reset() (which ends up calling mmc_sd_hw_reset()
-> > > in case of SD cards), we are making a final attempt to make the card
-> > > functional again, via a power cycle and a re-init of it.
-> > >
-> > > In this path, we don't care whether the card is removed, as that
-> > > should have been detected already when the block layer calls
-> > > mmc_detect_card_removed().
-> >
-> > mmc_detect_card_removed has the guard `host->detect_change` to
-> > prevent it from checking the card status again. So maybe the fix to the
-> > missing interrupt/race condition is to set `host->detect_change = 1`
-> > from sdhci_do_reset after calling the reset handler. This way there will
-> > always be a single poll after a full reset so the correct card status can
-> > be detected?
-> 
-> It sounds like you should call mmc_detect_change(), after the reset to
-> let the core check for cards that may have been removed/inserted.
-> 
-> Would that work?
-Yeah, I could add `mmc_detect_change()` to the AMD SDHCI patch. I just
-thought it would be better to fix the potential race condition at a
-higher level. Though I'm happy to move it to the AMD patch. Let me know.
+ drivers/mmc/host/sdhci-pci-o2micro.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
 
-Thanks
-> 
-> [...]
-> 
-> Kind regards
-> Uffe
+diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
+index b29bf4e7dcb48..dd21315922c87 100644
+--- a/drivers/mmc/host/sdhci-pci-o2micro.c
++++ b/drivers/mmc/host/sdhci-pci-o2micro.c
+@@ -115,6 +115,7 @@ static int sdhci_o2_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 	 */
+ 	if (mmc->ios.bus_width == MMC_BUS_WIDTH_8) {
+ 		current_bus_width = mmc->ios.bus_width;
++		mmc->ios.bus_width = MMC_BUS_WIDTH_4;
+ 		sdhci_set_bus_width(host, MMC_BUS_WIDTH_4);
+ 	}
+ 
+@@ -126,8 +127,10 @@ static int sdhci_o2_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 
+ 	sdhci_end_tuning(host);
+ 
+-	if (current_bus_width == MMC_BUS_WIDTH_8)
++	if (current_bus_width == MMC_BUS_WIDTH_8) {
++		mmc->ios.bus_width = MMC_BUS_WIDTH_8;
+ 		sdhci_set_bus_width(host, current_bus_width);
++	}
+ 
+ 	host->flags &= ~SDHCI_HS400_TUNING;
+ 	return 0;
+-- 
+2.22.0.rc2.383.gf4fbbf30c2-goog
