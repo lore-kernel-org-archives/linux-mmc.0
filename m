@@ -1,37 +1,28 @@
-From: Raul E Rangel <rrangel@chromium.org>
-Subject: [PATCH 3/3] mmc: sdhci: Fix indenting on SDHCI_CTRL_8BITBUS
-Date: Mon, 10 Jun 2019 12:53:53 -0600
-Message-ID: <20190610185354.35310-3-rrangel@chromium.org>
-References: <20190610185354.35310-1-rrangel@chromium.org>
+From: Manish Narani <manish.narani@xilinx.com>
+Subject: [PATCH 0/3] Add ZynqMP SD Clock Tap Delays configuration support
+Date: Tue, 11 Jun 2019 15:26:48 +0530
+Message-ID: <1560247011-26369-1-git-send-email-manish.narani@xilinx.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190610185354.35310-1-rrangel@chromium.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: ernest.zhang@bayhubtech.com, djkurtz@chromium.org, Raul E Rangel <rrangel@chromium.org>, linux-kernel@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
+To: ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, michal.simek@xilinx.com, adrian.hunter@intel.com, rajan.vaja@xilinx.com, jolly.shah@xilinx.com, nava.manne@xilinx.com, manish.narani@xilinx.com, olof@lixom.net
+Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-The value is referring to SDHCI_HOST_CONTROL, not SDHCI_CTRL_DMA_MASK.
+This patch series adds support to configure SD tap delays on ZynqMP platforms
+using Xilinx firmware driver and clock framework APIs.
 
-Signed-off-by: Raul E Rangel <rrangel@chromium.org>
----
+Manish Narani (3):
+  firmware: xilinx: Add SDIO Tap Delay API
+  dt-bindings: mmc: arasan: Document 'xlnx,zynqmp-8.9a' controller
+  mmc: sdhci-of-arasan: Add support for ZynqMP Platform Tap Delays Setup
 
- drivers/mmc/host/sdhci.h | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ .../devicetree/bindings/mmc/arasan,sdhci.txt       |  32 ++++
+ drivers/firmware/xilinx/zynqmp.c                   |  32 ++++
+ drivers/mmc/host/sdhci-of-arasan.c                 | 173 ++++++++++++++++++++-
+ include/linux/firmware/xlnx-zynqmp.h               |  17 +-
+ 4 files changed, 252 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 199712e7adbb3..89fd96596a1f7 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -89,7 +89,7 @@
- #define   SDHCI_CTRL_ADMA32	0x10
- #define   SDHCI_CTRL_ADMA64	0x18
- #define   SDHCI_CTRL_ADMA3	0x18
--#define   SDHCI_CTRL_8BITBUS	0x20
-+#define  SDHCI_CTRL_8BITBUS	0x20
- #define  SDHCI_CTRL_CDTEST_INS	0x40
- #define  SDHCI_CTRL_CDTEST_EN	0x80
- 
 -- 
-2.22.0.rc2.383.gf4fbbf30c2-goog
+2.1.1
