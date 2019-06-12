@@ -1,14 +1,14 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH 2/4] mmc: sdhci_am654: Add Support for 8 bit IP on J721E
-Date: Wed, 12 Jun 2019 15:07:10 +0300
-Message-ID: <9d5e0314-e466-62c0-b008-7f2de0ca65a0@intel.com>
+Subject: Re: [PATCH 3/4] mmc: sdhci_am654: Add Support for 4 bit IP on J721E
+Date: Wed, 12 Jun 2019 15:09:44 +0300
+Message-ID: <d44fbe8f-4d36-b33e-fa88-90f2f37703aa@intel.com>
 References: <20190604060914.10886-1-faiz_abbas@ti.com>
- <20190604060914.10886-3-faiz_abbas@ti.com>
+ <20190604060914.10886-4-faiz_abbas@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20190604060914.10886-3-faiz_abbas@ti.com>
+In-Reply-To: <20190604060914.10886-4-faiz_abbas@ti.com>
 Content-Language: en-US
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
@@ -24,258 +24,202 @@ Cc: nm@ti.com, ulf.hansson@linaro.org, robh+dt@kernel.org, nsekhar@ti.com
 List-Id: linux-mmc@vger.kernel.org
 
 On 4/06/19 9:09 AM, Faiz Abbas wrote:
-> The 8 bit IP on the TI's J721E device departs from the AM654x IP in some
-> ways which require special handling. Create a driver_data structure
-> which holds the pltfm_data and a flags field which is used to indicate
-> these differences. These are the following:
-> 
-> 1. The pins are not muxed with anything else inside the SoC and hence the
->    IOMUX_ENABLE field does not exist. Add a flag which is used to
->    indicate the presence of the field.
-> 
-> 2. The register field used to select DLL frequency is 3 bit wide as
->    compared to 2 bits in AM65x. Add another flag which differentiates
->    between 3 bit and 2 bit fields.
-> 
-> 3. The strobe select field is 8 bit wide as compared to 4 bits for
->    AM65x. Add yet another flag to indicate this difference. Strobe select
->    is used only for HS400 speed mode, support for which has not yet been
->    added in AM65x.
+> Add support for 4 bit instances on TI's J721E devices. Because these
+> instances have no DLL, introduce a DLL_PRESENT flag and make sure DLL
+> related registers are only accessed when it is present. Also add a
+> separate set_clock callback for this compatible.
 > 
 > Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
 
 Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
 > ---
->  drivers/mmc/host/sdhci_am654.c | 135 +++++++++++++++++++++++++++------
->  1 file changed, 110 insertions(+), 25 deletions(-)
+>  drivers/mmc/host/sdhci_am654.c | 124 +++++++++++++++++++++++----------
+>  1 file changed, 86 insertions(+), 38 deletions(-)
 > 
 > diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
-> index d0b20780dd0f..4575aeb435ec 100644
+> index 4575aeb435ec..3b3948144591 100644
 > --- a/drivers/mmc/host/sdhci_am654.c
 > +++ b/drivers/mmc/host/sdhci_am654.c
-> @@ -6,6 +6,7 @@
->   *
->   */
->  #include <linux/clk.h>
-> +#include <linux/of.h>
->  #include <linux/module.h>
->  #include <linux/pm_runtime.h>
->  #include <linux/property.h>
-> @@ -36,11 +37,14 @@
->  #define OTAPDLYSEL_SHIFT	12
->  #define OTAPDLYSEL_MASK		GENMASK(15, 12)
->  #define STRBSEL_SHIFT		24
-> -#define STRBSEL_MASK		GENMASK(27, 24)
-> +#define STRBSEL_4BIT_MASK	GENMASK(27, 24)
-> +#define STRBSEL_8BIT_MASK	GENMASK(31, 24)
->  #define SEL50_SHIFT		8
->  #define SEL50_MASK		BIT(SEL50_SHIFT)
->  #define SEL100_SHIFT		9
->  #define SEL100_MASK		BIT(SEL100_SHIFT)
-> +#define FREQSEL_SHIFT		8
-> +#define FREQSEL_MASK		GENMASK(10, 8)
->  #define DLL_TRIM_ICP_SHIFT	4
->  #define DLL_TRIM_ICP_MASK	GENMASK(7, 4)
->  #define DR_TY_SHIFT		20
-> @@ -77,13 +81,23 @@ struct sdhci_am654_data {
->  	int trm_icp;
->  	int drv_strength;
->  	bool dll_on;
-> +	int strb_sel;
-> +	u32 flags;
-> +};
-> +
-> +struct sdhci_am654_driver_data {
-> +	const struct sdhci_pltfm_data *pdata;
-> +	u32 flags;
-> +#define IOMUX_PRESENT	(1 << 0)
-> +#define FREQSEL_2_BIT	(1 << 1)
-> +#define STRBSEL_4_BIT	(1 << 2)
+> @@ -91,6 +91,7 @@ struct sdhci_am654_driver_data {
+>  #define IOMUX_PRESENT	(1 << 0)
+>  #define FREQSEL_2_BIT	(1 << 1)
+>  #define STRBSEL_4_BIT	(1 << 2)
+> +#define DLL_PRESENT	(1 << 3)
 >  };
 >  
 >  static void sdhci_am654_set_clock(struct sdhci_host *host, unsigned int clock)
+> @@ -188,6 +189,20 @@ static void sdhci_am654_set_clock(struct sdhci_host *host, unsigned int clock)
+>  	}
+>  }
+>  
+> +void sdhci_j721e_4bit_set_clock(struct sdhci_host *host, unsigned int clock)
+> +{
+> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +	struct sdhci_am654_data *sdhci_am654 = sdhci_pltfm_priv(pltfm_host);
+> +	int val, mask;
+> +
+> +	mask = OTAPDLYENA_MASK | OTAPDLYSEL_MASK;
+> +	val = (1 << OTAPDLYENA_SHIFT) |
+> +	      (sdhci_am654->otap_del_sel << OTAPDLYSEL_SHIFT);
+> +	regmap_update_bits(sdhci_am654->base, PHY_CTRL4, mask, val);
+> +
+> +	sdhci_set_clock(host, clock);
+> +}
+> +
+>  static void sdhci_am654_set_power(struct sdhci_host *host, unsigned char mode,
+>  				  unsigned short vdd)
 >  {
->  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->  	struct sdhci_am654_data *sdhci_am654 = sdhci_pltfm_priv(pltfm_host);
-> -	int sel50, sel100;
-> +	int sel50, sel100, freqsel;
->  	u32 mask, val;
->  	int ret;
+> @@ -240,7 +255,7 @@ static const struct sdhci_pltfm_data sdhci_am654_pdata = {
 >  
-> @@ -101,24 +115,52 @@ static void sdhci_am654_set_clock(struct sdhci_host *host, unsigned int clock)
->  		val = (1 << OTAPDLYENA_SHIFT) |
->  		      (sdhci_am654->otap_del_sel << OTAPDLYSEL_SHIFT);
->  		regmap_update_bits(sdhci_am654->base, PHY_CTRL4, mask, val);
-> -		switch (clock) {
-> -		case 200000000:
-> -			sel50 = 0;
-> -			sel100 = 0;
-> -			break;
-> -		case 100000000:
-> -			sel50 = 0;
-> -			sel100 = 1;
-> -			break;
-> -		default:
-> -			sel50 = 1;
-> -			sel100 = 0;
-> +		/* Write to STRBSEL for HS400 speed mode */
-> +		if (host->mmc->ios.timing == MMC_TIMING_MMC_HS400) {
-> +			if (sdhci_am654->flags & STRBSEL_4_BIT)
-> +				mask = STRBSEL_4BIT_MASK;
-> +			else
-> +				mask = STRBSEL_8BIT_MASK;
-> +
-> +			regmap_update_bits(sdhci_am654->base, PHY_CTRL4, mask,
-> +					   sdhci_am654->strb_sel <<
-> +					   STRBSEL_SHIFT);
-> +		}
-> +
-> +		if (sdhci_am654->flags & FREQSEL_2_BIT) {
-> +			switch (clock) {
-> +			case 200000000:
-> +				sel50 = 0;
-> +				sel100 = 0;
-> +				break;
-> +			case 100000000:
-> +				sel50 = 0;
-> +				sel100 = 1;
-> +				break;
-> +			default:
-> +				sel50 = 1;
-> +				sel100 = 0;
-> +			}
-> +
-> +			/* Configure PHY DLL frequency */
-> +			mask = SEL50_MASK | SEL100_MASK;
-> +			val = (sel50 << SEL50_SHIFT) | (sel100 << SEL100_SHIFT);
-> +			regmap_update_bits(sdhci_am654->base, PHY_CTRL5, mask,
-> +					   val);
-> +		} else {
-> +			switch (clock) {
-> +			case 200000000:
-> +				freqsel = 0x0;
-> +				break;
-> +			default:
-> +				freqsel = 0x4;
-> +			}
-> +
-> +			regmap_update_bits(sdhci_am654->base, PHY_CTRL5,
-> +					   FREQSEL_MASK,
-> +					   freqsel << FREQSEL_SHIFT);
->  		}
->  
-> -		/* Configure PHY DLL frequency */
-> -		mask = SEL50_MASK | SEL100_MASK;
-> -		val = (sel50 << SEL50_SHIFT) | (sel100 << SEL100_SHIFT);
-> -		regmap_update_bits(sdhci_am654->base, PHY_CTRL5, mask, val);
->  		/* Configure DLL TRIM */
->  		mask = DLL_TRIM_ICP_MASK;
->  		val = sdhci_am654->trm_icp << DLL_TRIM_ICP_SHIFT;
-> @@ -196,6 +238,33 @@ static const struct sdhci_pltfm_data sdhci_am654_pdata = {
->  	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
+>  static const struct sdhci_am654_driver_data sdhci_am654_drvdata = {
+>  	.pdata = &sdhci_am654_pdata,
+> -	.flags = IOMUX_PRESENT | FREQSEL_2_BIT | STRBSEL_4_BIT,
+> +	.flags = IOMUX_PRESENT | FREQSEL_2_BIT | STRBSEL_4_BIT | DLL_PRESENT,
 >  };
 >  
-> +static const struct sdhci_am654_driver_data sdhci_am654_drvdata = {
-> +	.pdata = &sdhci_am654_pdata,
-> +	.flags = IOMUX_PRESENT | FREQSEL_2_BIT | STRBSEL_4_BIT,
+>  struct sdhci_ops sdhci_j721e_8bit_ops = {
+> @@ -263,8 +278,31 @@ static const struct sdhci_pltfm_data sdhci_j721e_8bit_pdata = {
+>  
+>  static const struct sdhci_am654_driver_data sdhci_j721e_8bit_drvdata = {
+>  	.pdata = &sdhci_j721e_8bit_pdata,
+> +	.flags = DLL_PRESENT,
 > +};
 > +
-> +struct sdhci_ops sdhci_j721e_8bit_ops = {
+> +struct sdhci_ops sdhci_j721e_4bit_ops = {
 > +	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
 > +	.get_timeout_clock = sdhci_pltfm_clk_get_max_clock,
 > +	.set_uhs_signaling = sdhci_set_uhs_signaling,
 > +	.set_bus_width = sdhci_set_bus_width,
 > +	.set_power = sdhci_am654_set_power,
-> +	.set_clock = sdhci_am654_set_clock,
+> +	.set_clock = sdhci_j721e_4bit_set_clock,
 > +	.write_b = sdhci_am654_write_b,
 > +	.reset = sdhci_reset,
 > +};
 > +
-> +static const struct sdhci_pltfm_data sdhci_j721e_8bit_pdata = {
-> +	.ops = &sdhci_j721e_8bit_ops,
+> +static const struct sdhci_pltfm_data sdhci_j721e_4bit_pdata = {
+> +	.ops = &sdhci_j721e_4bit_ops,
 > +	.quirks = SDHCI_QUIRK_INVERTED_WRITE_PROTECT |
 > +		  SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12,
 > +	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
+>  };
+>  
+> +static const struct sdhci_am654_driver_data sdhci_j721e_4bit_drvdata = {
+> +	.pdata = &sdhci_j721e_4bit_pdata,
+> +	.flags = IOMUX_PRESENT,
 > +};
-> +
-> +static const struct sdhci_am654_driver_data sdhci_j721e_8bit_drvdata = {
-> +	.pdata = &sdhci_j721e_8bit_pdata,
-> +};
-> +
 >  static int sdhci_am654_init(struct sdhci_host *host)
 >  {
 >  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> @@ -221,7 +290,9 @@ static int sdhci_am654_init(struct sdhci_host *host)
+> @@ -278,15 +316,19 @@ static int sdhci_am654_init(struct sdhci_host *host)
+>  	mask = OTAPDLYENA_MASK | OTAPDLYSEL_MASK;
+>  	regmap_update_bits(sdhci_am654->base, PHY_CTRL4, mask, 0x0);
+>  
+> -	regmap_read(sdhci_am654->base, PHY_STAT1, &val);
+> -	if (~val & CALDONE_MASK) {
+> -		/* Calibrate IO lines */
+> -		regmap_update_bits(sdhci_am654->base, PHY_CTRL1,
+> -				   PDB_MASK, PDB_MASK);
+> -		ret = regmap_read_poll_timeout(sdhci_am654->base, PHY_STAT1,
+> -					       val, val & CALDONE_MASK, 1, 20);
+> -		if (ret)
+> -			return ret;
+> +	if (sdhci_am654->flags & DLL_PRESENT) {
+> +		regmap_read(sdhci_am654->base, PHY_STAT1, &val);
+> +		if (~val & CALDONE_MASK) {
+> +			/* Calibrate IO lines */
+> +			regmap_update_bits(sdhci_am654->base, PHY_CTRL1,
+> +					   PDB_MASK, PDB_MASK);
+> +			ret = regmap_read_poll_timeout(sdhci_am654->base,
+> +						       PHY_STAT1, val,
+> +						       val & CALDONE_MASK,
+> +						       1, 20);
+> +			if (ret)
+> +				return ret;
+> +		}
 >  	}
 >  
 >  	/* Enable pins by setting IO mux to 0 */
-> -	regmap_update_bits(sdhci_am654->base, PHY_CTRL1, IOMUX_ENABLE_MASK, 0);
-> +	if (sdhci_am654->flags & IOMUX_PRESENT)
-> +		regmap_update_bits(sdhci_am654->base, PHY_CTRL1,
-> +				   IOMUX_ENABLE_MASK, 0);
->  
->  	/* Set slot type based on SD or eMMC */
->  	if (host->mmc->caps & MMC_CAP_NONREMOVABLE)
-> @@ -276,15 +347,31 @@ static int sdhci_am654_get_of_property(struct platform_device *pdev,
->  		return -EINVAL;
->  	}
->  
-> +	device_property_read_u32(dev, "ti,strobe-sel", &sdhci_am654->strb_sel);
-> +
->  	sdhci_get_of_property(pdev);
->  
->  	return 0;
->  }
->  
-> +static const struct of_device_id sdhci_am654_of_match[] = {
-> +	{
-> +		.compatible = "ti,am654-sdhci-5.1",
-> +		.data = &sdhci_am654_drvdata,
-> +	},
-> +	{
-> +		.compatible = "ti,j721e-sdhci-8bit",
-> +		.data = &sdhci_j721e_8bit_drvdata,
-> +	},
-> +	{ /* sentinel */ }
-> +};
-> +
->  static int sdhci_am654_probe(struct platform_device *pdev)
->  {
-> +	const struct sdhci_am654_driver_data *drvdata;
->  	struct sdhci_pltfm_host *pltfm_host;
->  	struct sdhci_am654_data *sdhci_am654;
-> +	const struct of_device_id *match;
->  	struct sdhci_host *host;
->  	struct resource *res;
->  	struct clk *clk_xin;
-> @@ -292,12 +379,15 @@ static int sdhci_am654_probe(struct platform_device *pdev)
->  	void __iomem *base;
+> @@ -311,40 +353,42 @@ static int sdhci_am654_get_of_property(struct platform_device *pdev,
+>  	int drv_strength;
 >  	int ret;
 >  
-> -	host = sdhci_pltfm_init(pdev, &sdhci_am654_pdata, sizeof(*sdhci_am654));
-> +	match = of_match_node(sdhci_am654_of_match, pdev->dev.of_node);
-> +	drvdata = match->data;
-> +	host = sdhci_pltfm_init(pdev, drvdata->pdata, sizeof(*sdhci_am654));
->  	if (IS_ERR(host))
->  		return PTR_ERR(host);
->  
->  	pltfm_host = sdhci_priv(host);
->  	sdhci_am654 = sdhci_pltfm_priv(pltfm_host);
-> +	sdhci_am654->flags = drvdata->flags;
->  
->  	clk_xin = devm_clk_get(dev, "clk_xin");
->  	if (IS_ERR(clk_xin)) {
-> @@ -372,11 +462,6 @@ static int sdhci_am654_remove(struct platform_device *pdev)
->  	return 0;
->  }
->  
-> -static const struct of_device_id sdhci_am654_of_match[] = {
-> -	{ .compatible = "ti,am654-sdhci-5.1" },
-> -	{ /* sentinel */ }
-> -};
+> -	ret = device_property_read_u32(dev, "ti,trm-icp",
+> -				       &sdhci_am654->trm_icp);
+> -	if (ret)
+> -		return ret;
 > -
->  static struct platform_driver sdhci_am654_driver = {
->  	.driver = {
->  		.name = "sdhci-am654",
+>  	ret = device_property_read_u32(dev, "ti,otap-del-sel",
+>  				       &sdhci_am654->otap_del_sel);
+>  	if (ret)
+>  		return ret;
+>  
+> -	ret = device_property_read_u32(dev, "ti,driver-strength-ohm",
+> -				       &drv_strength);
+> -	if (ret)
+> -		return ret;
+> +	if (sdhci_am654->flags & DLL_PRESENT) {
+> +		ret = device_property_read_u32(dev, "ti,trm-icp",
+> +					       &sdhci_am654->trm_icp);
+> +		if (ret)
+> +			return ret;
+> +
+> +		ret = device_property_read_u32(dev, "ti,driver-strength-ohm",
+> +					       &drv_strength);
+> +		if (ret)
+> +			return ret;
+>  
+> -	switch (drv_strength) {
+> -	case 50:
+> -		sdhci_am654->drv_strength = DRIVER_STRENGTH_50_OHM;
+> -		break;
+> -	case 33:
+> -		sdhci_am654->drv_strength = DRIVER_STRENGTH_33_OHM;
+> -		break;
+> -	case 66:
+> -		sdhci_am654->drv_strength = DRIVER_STRENGTH_66_OHM;
+> -		break;
+> -	case 100:
+> -		sdhci_am654->drv_strength = DRIVER_STRENGTH_100_OHM;
+> -		break;
+> -	case 40:
+> -		sdhci_am654->drv_strength = DRIVER_STRENGTH_40_OHM;
+> -		break;
+> -	default:
+> -		dev_err(dev, "Invalid driver strength\n");
+> -		return -EINVAL;
+> +		switch (drv_strength) {
+> +		case 50:
+> +			sdhci_am654->drv_strength = DRIVER_STRENGTH_50_OHM;
+> +			break;
+> +		case 33:
+> +			sdhci_am654->drv_strength = DRIVER_STRENGTH_33_OHM;
+> +			break;
+> +		case 66:
+> +			sdhci_am654->drv_strength = DRIVER_STRENGTH_66_OHM;
+> +			break;
+> +		case 100:
+> +			sdhci_am654->drv_strength = DRIVER_STRENGTH_100_OHM;
+> +			break;
+> +		case 40:
+> +			sdhci_am654->drv_strength = DRIVER_STRENGTH_40_OHM;
+> +			break;
+> +		default:
+> +			dev_err(dev, "Invalid driver strength\n");
+> +			return -EINVAL;
+> +		}
+>  	}
+>  
+>  	device_property_read_u32(dev, "ti,strobe-sel", &sdhci_am654->strb_sel);
+> @@ -363,6 +407,10 @@ static const struct of_device_id sdhci_am654_of_match[] = {
+>  		.compatible = "ti,j721e-sdhci-8bit",
+>  		.data = &sdhci_j721e_8bit_drvdata,
+>  	},
+> +	{
+> +		.compatible = "ti,j721e-sdhci-4bit",
+> +		.data = &sdhci_j721e_4bit_drvdata,
+> +	},
+>  	{ /* sentinel */ }
+>  };
+>  
 > 
