@@ -1,78 +1,38 @@
 From: Raul Rangel <rrangel@chromium.org>
-Subject: Re: [PATCH 1/3] mmc: sdhci: sdhci-pci-o2micro: Correctly set bus
- width when tuning
-Date: Wed, 12 Jun 2019 09:01:15 -0600
-Message-ID: <20190612150115.GA27989@google.com>
+Subject: Re: [PATCH 2/3] mmc: sdhci: sdhci-pci-o2micro: Check if controller
+ supports 8-bit width
+Date: Wed, 12 Jun 2019 09:08:32 -0600
+Message-ID: <20190612150832.GB27989@google.com>
 References: <20190610185354.35310-1-rrangel@chromium.org>
- <CAPDyKFppNgL_kZPV-QS6ZiJErde5ea8Nj-sQTy_vXhW9jfXhpg@mail.gmail.com>
+ <20190610185354.35310-2-rrangel@chromium.org>
+ <d4939761-317c-ee78-b1e5-c2cdd86a12b4@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <CAPDyKFppNgL_kZPV-QS6ZiJErde5ea8Nj-sQTy_vXhW9jfXhpg@mail.gmail.com>
+In-Reply-To: <d4939761-317c-ee78-b1e5-c2cdd86a12b4@intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "ernest.zhang" <ernest.zhang@bayhubtech.com>, Daniel Kurtz <djkurtz@chromium.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-mmc@vger.kernel.org, ernest.zhang@bayhubtech.com, djkurtz@chromium.org, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, Jun 12, 2019 at 03:36:25PM +0200, Ulf Hansson wrote:
-> On Mon, 10 Jun 2019 at 20:54, Raul E Rangel <rrangel@chromium.org> wrote:
-> >
-> > sdhci_send_tuning uses mmc->ios.bus_width to determine the block size.
-> > Without this patch the block size would be set incorrectly when the
-> > bus_width == 8 which results in tuning failing.
-> >
-> > Signed-off-by: Raul E Rangel <rrangel@chromium.org>
-> > ---
-> >
-> >  drivers/mmc/host/sdhci-pci-o2micro.c | 5 ++++-
-> >  1 file changed, 4 insertions(+), 1 deletion(-)
-> >
-> > diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
-> > index b29bf4e7dcb48..dd21315922c87 100644
-> > --- a/drivers/mmc/host/sdhci-pci-o2micro.c
-> > +++ b/drivers/mmc/host/sdhci-pci-o2micro.c
-> > @@ -115,6 +115,7 @@ static int sdhci_o2_execute_tuning(struct mmc_host *mmc, u32 opcode)
-> >          */
-> >         if (mmc->ios.bus_width == MMC_BUS_WIDTH_8) {
-> >                 current_bus_width = mmc->ios.bus_width;
-> > +               mmc->ios.bus_width = MMC_BUS_WIDTH_4;
+On Wed, Jun 12, 2019 at 04:09:47PM +0300, Adrian Hunter wrote:
+> On 10/06/19 9:53 PM, Raul E Rangel wrote:
+> > The O2 controller supports 8-bit EMMC access. mmc_select_bus_width()
+> > will be used to determine if the MMC supports 8-bit or 4-bit access.
 > 
-> This looks wrong.
-> 
-> mmc->ios.bus_width is not supposed to be updated by a host driver, but
-I guess I left this part out: The O2Micro controller only supports
-tuning at 4-bits. So the host driver needs to change the bus width while
-tuning and then set it back when done. Ideally I would have used
-`mmc_set_bus_width()`, but that is a core only function.
+> The problem is that the bit indicates a host controller capability, not how
+> many data lines there actually are on the board.  Will this break something
+> that does not have 8 lines?
 
-If `sdhci_send_tuning()` didn't rely on mmc->ios.bus_width to determine
-the bus width, but instead read the HOST_CONTROL register then this
-patch wouldn't be needed.
-> rather the value should only be read.
-> 
-> >                 sdhci_set_bus_width(host, MMC_BUS_WIDTH_4);
-> >         }
-> >
-> > @@ -126,8 +127,10 @@ static int sdhci_o2_execute_tuning(struct mmc_host *mmc, u32 opcode)
-> >
-> >         sdhci_end_tuning(host);
-> >
-> > -       if (current_bus_width == MMC_BUS_WIDTH_8)
-> > +       if (current_bus_width == MMC_BUS_WIDTH_8) {
-> > +               mmc->ios.bus_width = MMC_BUS_WIDTH_8;
-> 
-> Ditto.
-> 
-> >                 sdhci_set_bus_width(host, current_bus_width);
-> > +       }
-> >
-> >         host->flags &= ~SDHCI_HS400_TUNING;
-> >         return 0;
-> > --
-> > 2.22.0.rc2.383.gf4fbbf30c2-goog
-> >
-> 
-> Kind regards
-> Uffe
+So I asked the controller vendor about that:
+> The capability shows the host controller can support 1,4,and 8 bit bus
+> data transfer but it also depends on if HW can support it. Driver or FW
+> should implement the bus testing procedure that is defined in A.6.3.a
+> in JESD84-B51 spec to decide the real bus width that is supported in HW.
+
+This seems to be what `mmc_select_bus_width()` is doing.
+
+I don't actually have any 4-bit hardware to test with though.
+
 Thanks for the review!
