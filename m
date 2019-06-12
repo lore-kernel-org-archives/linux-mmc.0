@@ -1,171 +1,63 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3 2/5] mmc: core: API for temporarily disabling
- auto-retuning due to errors
-Date: Wed, 12 Jun 2019 15:25:31 +0200
-Message-ID: <CAPDyKFpdkkzkbSy-uWL8TwdNFjJi10au7ZDOYjoWuDzftpoNsQ@mail.gmail.com>
-References: <20190607223716.119277-1-dianders@chromium.org> <20190607223716.119277-3-dianders@chromium.org>
+Subject: Re: [PATCH 1/3] mmc: sdhci: sdhci-pci-o2micro: Correctly set bus
+ width when tuning
+Date: Wed, 12 Jun 2019 15:36:25 +0200
+Message-ID: <CAPDyKFppNgL_kZPV-QS6ZiJErde5ea8Nj-sQTy_vXhW9jfXhpg@mail.gmail.com>
+References: <20190610185354.35310-1-rrangel@chromium.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190607223716.119277-3-dianders@chromium.org>
+In-Reply-To: <20190610185354.35310-1-rrangel@chromium.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Douglas Anderson <dianders@chromium.org>
-Cc: Kalle Valo <kvalo@codeaurora.org>, Adrian Hunter <adrian.hunter@intel.com>, Arend van Spriel <arend.vanspriel@broadcom.com>, brcm80211-dev-list.pdl@broadcom.com, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, Double Lo <double.lo@cypress.com>, Brian Norris <briannorris@chromium.org>, linux-wireless <linux-wireless@vger.kernel.org>, Naveen Gupta <naveen.gupta@cypress.com>, Madhan Mohan R <madhanmohan.r@cypress.com>, Matthias Kaehlcke <mka@chromium.org>, Wright Feng <wright.feng@cypress.com>, Chi-Hsien Lin <chi-hsien.lin@cypress.com>, netdev@vger.kernel.org, brcm80211-dev-list@cypress.com, Jiong Wu <lohengrin1024@gmail.com>, Ritesh Harjani <riteshh@codeaurora.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux
+To: Raul E Rangel <rrangel@chromium.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "ernest.zhang" <ernest.zhang@bayhubtech.com>, Daniel Kurtz <djkurtz@chromium.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Sat, 8 Jun 2019 at 00:37, Douglas Anderson <dianders@chromium.org> wrote:
+On Mon, 10 Jun 2019 at 20:54, Raul E Rangel <rrangel@chromium.org> wrote:
 >
-> Normally when the MMC core sees an "-EILSEQ" error returned by a host
-> controller then it will trigger a retuning of the card.  This is
-> generally a good idea.
+> sdhci_send_tuning uses mmc->ios.bus_width to determine the block size.
+> Without this patch the block size would be set incorrectly when the
+> bus_width == 8 which results in tuning failing.
 >
-> However, if a command is expected to sometimes cause transfer errors
-> then these transfer errors shouldn't cause a re-tuning.  This
-> re-tuning will be a needless waste of time.  One example case where a
-> transfer is expected to cause errors is when transitioning between
-> idle (sometimes referred to as "sleep" in Broadcom code) and active
-> state on certain Broadcom WiFi cards.  Specifically if the card was
-> already transitioning between states when the command was sent it
-> could cause an error on the SDIO bus.
->
-> Let's add an API that the SDIO card drivers can call that will
-> temporarily disable the auto-tuning functionality.  Then we can add a
-> call to this in the Broadcom WiFi driver and any other driver that
-> might have similar needs.
->
-> NOTE: this makes the assumption that the card is already tuned well
-> enough that it's OK to disable the auto-retuning during one of these
-> error-prone situations.  Presumably the driver code performing the
-> error-prone transfer knows how to recover / retry from errors.  ...and
-> after we can get back to a state where transfers are no longer
-> error-prone then we can enable the auto-retuning again.  If we truly
-> find ourselves in a case where the card needs to be retuned sometimes
-> to handle one of these error-prone transfers then we can always try a
-> few transfers first without auto-retuning and then re-try with
-> auto-retuning if the first few fail.
->
-> Without this change on rk3288-veyron-minnie I periodically see this in
-> the logs of a machine just sitting there idle:
->   dwmmc_rockchip ff0d0000.dwmmc: Successfully tuned phase to XYZ
->
-> Fixes: bd11e8bd03ca ("mmc: core: Flag re-tuning is needed on CRC errors")
-> Signed-off-by: Douglas Anderson <dianders@chromium.org>
+> Signed-off-by: Raul E Rangel <rrangel@chromium.org>
 > ---
-> Note that are are a whole boatload of different ways that we could
-> provide an API for the Broadcom WiFi SDIO driver.  This patch
-> illustrates one way but if maintainers feel strongly that this is too
-> ugly and have a better idea then I can give it a shot too.  From a
-> purist point of view I kinda felt that the "expect errors" really
-> belonged as part of the mmc_request structure, but getting it into
-> there meant changing a whole pile of core SD/MMC APIs.  Simply adding
-> it to the host seemed to match the current style better and was a less
-> intrusive change.
 >
-> Changes in v3:
-> - Took out the spinlock since I believe this is all in one context.
+>  drivers/mmc/host/sdhci-pci-o2micro.c | 5 ++++-
+>  1 file changed, 4 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
+> index b29bf4e7dcb48..dd21315922c87 100644
+> --- a/drivers/mmc/host/sdhci-pci-o2micro.c
+> +++ b/drivers/mmc/host/sdhci-pci-o2micro.c
+> @@ -115,6 +115,7 @@ static int sdhci_o2_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>          */
+>         if (mmc->ios.bus_width == MMC_BUS_WIDTH_8) {
+>                 current_bus_width = mmc->ios.bus_width;
+> +               mmc->ios.bus_width = MMC_BUS_WIDTH_4;
 
-This needs to be clarified, preferable also in a function header.
+This looks wrong.
 
-If I understand correctly, the SDIO func driver needs the host to be
-claimed when it calls mmc_expect_errors_begin(). More importantly, it
-also needs to be keep it claimed until after it had called
-mmc_expect_errors_end(). Correct?
+mmc->ios.bus_width is not supposed to be updated by a host driver, but
+rather the value should only be read.
 
+>                 sdhci_set_bus_width(host, MMC_BUS_WIDTH_4);
+>         }
 >
-> Changes in v2:
-> - Updated commit message to clarify based on discussion of v1.
+> @@ -126,8 +127,10 @@ static int sdhci_o2_execute_tuning(struct mmc_host *mmc, u32 opcode)
 >
->  drivers/mmc/core/core.c  | 19 +++++++++++++++++--
->  include/linux/mmc/core.h |  2 ++
->  include/linux/mmc/host.h |  1 +
->  3 files changed, 20 insertions(+), 2 deletions(-)
+>         sdhci_end_tuning(host);
 >
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index 6db36dc870b5..bc109ec49406 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -144,8 +144,9 @@ void mmc_request_done(struct mmc_host *host, struct mmc_request *mrq)
->         int err = cmd->error;
->
->         /* Flag re-tuning needed on CRC errors */
-> -       if ((cmd->opcode != MMC_SEND_TUNING_BLOCK &&
-> -           cmd->opcode != MMC_SEND_TUNING_BLOCK_HS200) &&
-> +       if (cmd->opcode != MMC_SEND_TUNING_BLOCK &&
-> +           cmd->opcode != MMC_SEND_TUNING_BLOCK_HS200 &&
-> +           !host->expect_errors &&
->             (err == -EILSEQ || (mrq->sbc && mrq->sbc->error == -EILSEQ) ||
->             (mrq->data && mrq->data->error == -EILSEQ) ||
->             (mrq->stop && mrq->stop->error == -EILSEQ)))
-> @@ -2163,6 +2164,20 @@ int mmc_sw_reset(struct mmc_host *host)
->  }
->  EXPORT_SYMBOL(mmc_sw_reset);
->
-> +void mmc_expect_errors_begin(struct mmc_host *host)
-> +{
-> +       WARN_ON(host->expect_errors);
-
-Please remove the WARN_ON. If you believe there is a need for
-reference counting, then please add that instead (but likely not in
-the phase?).
-
-> +       host->expect_errors = true;
-> +}
-> +EXPORT_SYMBOL_GPL(mmc_expect_errors_begin);
-> +
-> +void mmc_expect_errors_end(struct mmc_host *host)
-> +{
-> +       WARN_ON(!host->expect_errors);
+> -       if (current_bus_width == MMC_BUS_WIDTH_8)
+> +       if (current_bus_width == MMC_BUS_WIDTH_8) {
+> +               mmc->ios.bus_width = MMC_BUS_WIDTH_8;
 
 Ditto.
 
-> +       host->expect_errors = false;
-> +}
-> +EXPORT_SYMBOL_GPL(mmc_expect_errors_end);
-
-These new APIs seems to be useful solely for SDIO. Even if it turns
-out later that they can be made generic, I suggest to start with a
-SDIO func API instead.
-
-However, using a new host variable (->expect_errors) is fine by me.
-
-> +
->  static int mmc_rescan_try_freq(struct mmc_host *host, unsigned freq)
->  {
->         host->f_init = freq;
-> diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
-> index 134a6483347a..02a13abf0cda 100644
-> --- a/include/linux/mmc/core.h
-> +++ b/include/linux/mmc/core.h
-> @@ -178,6 +178,8 @@ int mmc_wait_for_cmd(struct mmc_host *host, struct mmc_command *cmd,
+>                 sdhci_set_bus_width(host, current_bus_width);
+> +       }
 >
->  int mmc_hw_reset(struct mmc_host *host);
->  int mmc_sw_reset(struct mmc_host *host);
-> +void mmc_expect_errors_begin(struct mmc_host *host);
-> +void mmc_expect_errors_end(struct mmc_host *host);
-
-The API prevents a new re-tune to be "scheduled" in case requests are
-failing with -EILSEQ.
-
-To better reflect that, may I suggest to rename this to
-sdio_retune_crc_disable() and sdio_retune_crc_enable(). Or something
-along those lines.
-
-
->  void mmc_set_data_timeout(struct mmc_data *data, const struct mmc_card *card);
->
->  #endif /* LINUX_MMC_CORE_H */
-> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index 43d0f0c496f6..8d553fb8c834 100644
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -398,6 +398,7 @@ struct mmc_host {
->         unsigned int            retune_now:1;   /* do re-tuning at next req */
->         unsigned int            retune_paused:1; /* re-tuning is temporarily disabled */
->         unsigned int            use_blk_mq:1;   /* use blk-mq */
-> +       unsigned int            expect_errors:1; /* don't trigger retune upon errors */
->
->         int                     rescan_disable; /* disable card detection */
->         int                     rescan_entered; /* used with nonremovable devices */
+>         host->flags &= ~SDHCI_HS400_TUNING;
+>         return 0;
 > --
 > 2.22.0.rc2.383.gf4fbbf30c2-goog
 >
