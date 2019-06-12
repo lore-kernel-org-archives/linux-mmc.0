@@ -1,82 +1,101 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH] mmc: core: Prevent processing SDIO IRQs when the card is suspended
-Date: Tue, 11 Jun 2019 14:32:21 +0200
-Message-ID: <20190611123221.11580-1-ulf.hansson@linaro.org>
-Return-path: <stable-owner@vger.kernel.org>
-Sender: stable-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Douglas Anderson <dianders@chromium.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Brian Norris <briannorris@chromium.org>, Shawn Lin <shawn.lin@rock-chips.com>, Guenter Roeck <groeck@chromium.org>, Heiko Stuebner <heiko@sntech.de>, Kalle Valo <kvalo@codeaurora.org>, linux-wireless@vger.kernel.org, stable@vger.kernel.org
+From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Subject: [PATCH 4/4] mmc: host: s3cmci: no need to check return value of
+ debugfs_create functions
+Date: Wed, 12 Jun 2019 10:25:31 +0200
+Message-ID: <20190612082531.2652-4-gregkh@linuxfoundation.org>
+References: <20190612082531.2652-1-gregkh@linuxfoundation.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <20190612082531.2652-1-gregkh@linuxfoundation.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Ben Dooks <ben-linux@fluff.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Processing of SDIO IRQs must obviously be prevented while the card is
-system suspended, otherwise we may end up trying to communicate with an
-uninitialized SDIO card.
+When calling debugfs functions, there is no need to ever check the
+return value.  The function can work or not, but the code logic should
+never do something different based on this.
 
-Reports throughout the years shows that this is not only a theoretical
-problem, but a real issue. So, let's finally fix this problem, by keeping
-track of the state for the card and bail out before processing the SDIO
-IRQ, in case the card is suspended.
+Also, because there is no need to save the file dentries, remove them
+from the host-specific structure and just recursively delete the
+directory that the driver created, when shutting down.
 
-Cc: stable@vger.kernel.org
-Reported-by: Douglas Anderson <dianders@chromium.org>
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Ben Dooks <ben-linux@fluff.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: <linux-arm-kernel@lists.infradead.org>
+Cc: <linux-mmc@vger.kernel.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 ---
+ drivers/mmc/host/s3cmci.c | 27 ++++++---------------------
+ drivers/mmc/host/s3cmci.h |  2 --
+ 2 files changed, 6 insertions(+), 23 deletions(-)
 
-This has only been compile tested so far, any help for real test on HW is
-greatly appreciated.
-
-Note that, this is only the initial part of what is needed to make power
-management of SDIO card more robust, but let's start somewhere and continue to
-improve things.
-
-The next step I am looking at right now, is to make sure the SDIO IRQ is turned
-off during system suspend, unless it's supported as a system wakeup (and enabled
-to be used).
-
----
- drivers/mmc/core/sdio.c     | 7 +++++++
- drivers/mmc/core/sdio_irq.c | 4 ++++
- 2 files changed, 11 insertions(+)
-
-diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-index d1aa1c7577bb..9951295d3220 100644
---- a/drivers/mmc/core/sdio.c
-+++ b/drivers/mmc/core/sdio.c
-@@ -937,6 +937,10 @@ static int mmc_sdio_pre_suspend(struct mmc_host *host)
-  */
- static int mmc_sdio_suspend(struct mmc_host *host)
+diff --git a/drivers/mmc/host/s3cmci.c b/drivers/mmc/host/s3cmci.c
+index f31333e831a7..6a91db7ca5f1 100644
+--- a/drivers/mmc/host/s3cmci.c
++++ b/drivers/mmc/host/s3cmci.c
+@@ -1452,33 +1452,18 @@ DEFINE_SHOW_ATTRIBUTE(s3cmci_regs);
+ static void s3cmci_debugfs_attach(struct s3cmci_host *host)
  {
-+	/* Prevent processing of SDIO IRQs in suspended state. */
-+	mmc_card_set_suspended(host->card);
-+	cancel_delayed_work_sync(&host->sdio_irq_work);
-+
- 	mmc_claim_host(host);
+ 	struct device *dev = &host->pdev->dev;
++	struct dentry *root;
  
- 	if (mmc_card_keep_power(host) && mmc_card_wake_sdio_irq(host))
-@@ -985,6 +989,9 @@ static int mmc_sdio_resume(struct mmc_host *host)
- 		err = sdio_enable_4bit_bus(host->card);
- 	}
+-	host->debug_root = debugfs_create_dir(dev_name(dev), NULL);
+-	if (IS_ERR(host->debug_root)) {
+-		dev_err(dev, "failed to create debugfs root\n");
+-		return;
+-	}
+-
+-	host->debug_state = debugfs_create_file("state", 0444,
+-						host->debug_root, host,
+-						&s3cmci_state_fops);
+-
+-	if (IS_ERR(host->debug_state))
+-		dev_err(dev, "failed to create debug state file\n");
+-
+-	host->debug_regs = debugfs_create_file("regs", 0444,
+-					       host->debug_root, host,
+-					       &s3cmci_regs_fops);
++	root = debugfs_create_dir(dev_name(dev), NULL);
++	host->debug_root = root;
  
-+	/* Allow SDIO IRQs to be processed again. */
-+	mmc_card_clr_suspended(host->card);
-+
- 	if (!err && host->sdio_irqs) {
- 		if (!(host->caps2 & MMC_CAP2_SDIO_IRQ_NOTHREAD))
- 			wake_up_process(host->sdio_irq_thread);
-diff --git a/drivers/mmc/core/sdio_irq.c b/drivers/mmc/core/sdio_irq.c
-index 931e6226c0b3..9f54a259a1b3 100644
---- a/drivers/mmc/core/sdio_irq.c
-+++ b/drivers/mmc/core/sdio_irq.c
-@@ -34,6 +34,10 @@ static int process_sdio_pending_irqs(struct mmc_host *host)
- 	unsigned char pending;
- 	struct sdio_func *func;
+-	if (IS_ERR(host->debug_regs))
+-		dev_err(dev, "failed to create debug regs file\n");
++	debugfs_create_file("state", 0444, root, host, &s3cmci_state_fops);
++	debugfs_create_file("regs", 0444, root, host, &s3cmci_regs_fops);
+ }
  
-+	/* Don't process SDIO IRQs if the card is suspended. */
-+	if (mmc_card_suspended(card))
-+		return 0;
-+
- 	/*
- 	 * Optimization, if there is only 1 function interrupt registered
- 	 * and we know an IRQ was signaled then call irq handler directly.
+ static void s3cmci_debugfs_remove(struct s3cmci_host *host)
+ {
+-	debugfs_remove(host->debug_regs);
+-	debugfs_remove(host->debug_state);
+-	debugfs_remove(host->debug_root);
++	debugfs_remove_recursive(host->debug_root);
+ }
+ 
+ #else
+diff --git a/drivers/mmc/host/s3cmci.h b/drivers/mmc/host/s3cmci.h
+index 30c2c0dd1bc8..62cae53b4271 100644
+--- a/drivers/mmc/host/s3cmci.h
++++ b/drivers/mmc/host/s3cmci.h
+@@ -70,8 +70,6 @@ struct s3cmci_host {
+ 
+ #ifdef CONFIG_DEBUG_FS
+ 	struct dentry		*debug_root;
+-	struct dentry		*debug_state;
+-	struct dentry		*debug_regs;
+ #endif
+ 
+ #ifdef CONFIG_ARM_S3C24XX_CPUFREQ
 -- 
-2.17.1
+2.22.0
