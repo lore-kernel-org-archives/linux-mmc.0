@@ -1,225 +1,56 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH 3/4] mmc: sdhci_am654: Add Support for 4 bit IP on J721E
-Date: Wed, 12 Jun 2019 15:09:44 +0300
-Message-ID: <d44fbe8f-4d36-b33e-fa88-90f2f37703aa@intel.com>
-References: <20190604060914.10886-1-faiz_abbas@ti.com>
- <20190604060914.10886-4-faiz_abbas@ti.com>
+Subject: Re: [PATCH 1/3] mmc: sdhci: sdhci-pci-o2micro: Correctly set bus
+ width when tuning
+Date: Wed, 12 Jun 2019 15:53:57 +0300
+Message-ID: <883dab7b-57fc-22dd-e111-72506544d0e8@intel.com>
+References: <20190610185354.35310-1-rrangel@chromium.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20190604060914.10886-4-faiz_abbas@ti.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20190610185354.35310-1-rrangel@chromium.org>
 Content-Language: en-US
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Faiz Abbas <faiz_abbas@ti.com>, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org
-Cc: nm@ti.com, ulf.hansson@linaro.org, robh+dt@kernel.org, nsekhar@ti.com
+Sender: linux-kernel-owner@vger.kernel.org
+To: Raul E Rangel <rrangel@chromium.org>, linux-mmc@vger.kernel.org
+Cc: ernest.zhang@bayhubtech.com, djkurtz@chromium.org, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 4/06/19 9:09 AM, Faiz Abbas wrote:
-> Add support for 4 bit instances on TI's J721E devices. Because these
-> instances have no DLL, introduce a DLL_PRESENT flag and make sure DLL
-> related registers are only accessed when it is present. Also add a
-> separate set_clock callback for this compatible.
+On 10/06/19 9:53 PM, Raul E Rangel wrote:
+> sdhci_send_tuning uses mmc->ios.bus_width to determine the block size.
+> Without this patch the block size would be set incorrectly when the
+> bus_width == 8 which results in tuning failing.
 > 
-> Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
+> Signed-off-by: Raul E Rangel <rrangel@chromium.org>
 
 Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
 > ---
->  drivers/mmc/host/sdhci_am654.c | 124 +++++++++++++++++++++++----------
->  1 file changed, 86 insertions(+), 38 deletions(-)
 > 
-> diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
-> index 4575aeb435ec..3b3948144591 100644
-> --- a/drivers/mmc/host/sdhci_am654.c
-> +++ b/drivers/mmc/host/sdhci_am654.c
-> @@ -91,6 +91,7 @@ struct sdhci_am654_driver_data {
->  #define IOMUX_PRESENT	(1 << 0)
->  #define FREQSEL_2_BIT	(1 << 1)
->  #define STRBSEL_4_BIT	(1 << 2)
-> +#define DLL_PRESENT	(1 << 3)
->  };
->  
->  static void sdhci_am654_set_clock(struct sdhci_host *host, unsigned int clock)
-> @@ -188,6 +189,20 @@ static void sdhci_am654_set_clock(struct sdhci_host *host, unsigned int clock)
->  	}
->  }
->  
-> +void sdhci_j721e_4bit_set_clock(struct sdhci_host *host, unsigned int clock)
-> +{
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	struct sdhci_am654_data *sdhci_am654 = sdhci_pltfm_priv(pltfm_host);
-> +	int val, mask;
-> +
-> +	mask = OTAPDLYENA_MASK | OTAPDLYSEL_MASK;
-> +	val = (1 << OTAPDLYENA_SHIFT) |
-> +	      (sdhci_am654->otap_del_sel << OTAPDLYSEL_SHIFT);
-> +	regmap_update_bits(sdhci_am654->base, PHY_CTRL4, mask, val);
-> +
-> +	sdhci_set_clock(host, clock);
-> +}
-> +
->  static void sdhci_am654_set_power(struct sdhci_host *host, unsigned char mode,
->  				  unsigned short vdd)
->  {
-> @@ -240,7 +255,7 @@ static const struct sdhci_pltfm_data sdhci_am654_pdata = {
->  
->  static const struct sdhci_am654_driver_data sdhci_am654_drvdata = {
->  	.pdata = &sdhci_am654_pdata,
-> -	.flags = IOMUX_PRESENT | FREQSEL_2_BIT | STRBSEL_4_BIT,
-> +	.flags = IOMUX_PRESENT | FREQSEL_2_BIT | STRBSEL_4_BIT | DLL_PRESENT,
->  };
->  
->  struct sdhci_ops sdhci_j721e_8bit_ops = {
-> @@ -263,8 +278,31 @@ static const struct sdhci_pltfm_data sdhci_j721e_8bit_pdata = {
->  
->  static const struct sdhci_am654_driver_data sdhci_j721e_8bit_drvdata = {
->  	.pdata = &sdhci_j721e_8bit_pdata,
-> +	.flags = DLL_PRESENT,
-> +};
-> +
-> +struct sdhci_ops sdhci_j721e_4bit_ops = {
-> +	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
-> +	.get_timeout_clock = sdhci_pltfm_clk_get_max_clock,
-> +	.set_uhs_signaling = sdhci_set_uhs_signaling,
-> +	.set_bus_width = sdhci_set_bus_width,
-> +	.set_power = sdhci_am654_set_power,
-> +	.set_clock = sdhci_j721e_4bit_set_clock,
-> +	.write_b = sdhci_am654_write_b,
-> +	.reset = sdhci_reset,
-> +};
-> +
-> +static const struct sdhci_pltfm_data sdhci_j721e_4bit_pdata = {
-> +	.ops = &sdhci_j721e_4bit_ops,
-> +	.quirks = SDHCI_QUIRK_INVERTED_WRITE_PROTECT |
-> +		  SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12,
-> +	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
->  };
->  
-> +static const struct sdhci_am654_driver_data sdhci_j721e_4bit_drvdata = {
-> +	.pdata = &sdhci_j721e_4bit_pdata,
-> +	.flags = IOMUX_PRESENT,
-> +};
->  static int sdhci_am654_init(struct sdhci_host *host)
->  {
->  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> @@ -278,15 +316,19 @@ static int sdhci_am654_init(struct sdhci_host *host)
->  	mask = OTAPDLYENA_MASK | OTAPDLYSEL_MASK;
->  	regmap_update_bits(sdhci_am654->base, PHY_CTRL4, mask, 0x0);
->  
-> -	regmap_read(sdhci_am654->base, PHY_STAT1, &val);
-> -	if (~val & CALDONE_MASK) {
-> -		/* Calibrate IO lines */
-> -		regmap_update_bits(sdhci_am654->base, PHY_CTRL1,
-> -				   PDB_MASK, PDB_MASK);
-> -		ret = regmap_read_poll_timeout(sdhci_am654->base, PHY_STAT1,
-> -					       val, val & CALDONE_MASK, 1, 20);
-> -		if (ret)
-> -			return ret;
-> +	if (sdhci_am654->flags & DLL_PRESENT) {
-> +		regmap_read(sdhci_am654->base, PHY_STAT1, &val);
-> +		if (~val & CALDONE_MASK) {
-> +			/* Calibrate IO lines */
-> +			regmap_update_bits(sdhci_am654->base, PHY_CTRL1,
-> +					   PDB_MASK, PDB_MASK);
-> +			ret = regmap_read_poll_timeout(sdhci_am654->base,
-> +						       PHY_STAT1, val,
-> +						       val & CALDONE_MASK,
-> +						       1, 20);
-> +			if (ret)
-> +				return ret;
-> +		}
+>  drivers/mmc/host/sdhci-pci-o2micro.c | 5 ++++-
+>  1 file changed, 4 insertions(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
+> index b29bf4e7dcb48..dd21315922c87 100644
+> --- a/drivers/mmc/host/sdhci-pci-o2micro.c
+> +++ b/drivers/mmc/host/sdhci-pci-o2micro.c
+> @@ -115,6 +115,7 @@ static int sdhci_o2_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>  	 */
+>  	if (mmc->ios.bus_width == MMC_BUS_WIDTH_8) {
+>  		current_bus_width = mmc->ios.bus_width;
+> +		mmc->ios.bus_width = MMC_BUS_WIDTH_4;
+>  		sdhci_set_bus_width(host, MMC_BUS_WIDTH_4);
 >  	}
 >  
->  	/* Enable pins by setting IO mux to 0 */
-> @@ -311,40 +353,42 @@ static int sdhci_am654_get_of_property(struct platform_device *pdev,
->  	int drv_strength;
->  	int ret;
+> @@ -126,8 +127,10 @@ static int sdhci_o2_execute_tuning(struct mmc_host *mmc, u32 opcode)
 >  
-> -	ret = device_property_read_u32(dev, "ti,trm-icp",
-> -				       &sdhci_am654->trm_icp);
-> -	if (ret)
-> -		return ret;
-> -
->  	ret = device_property_read_u32(dev, "ti,otap-del-sel",
->  				       &sdhci_am654->otap_del_sel);
->  	if (ret)
->  		return ret;
+>  	sdhci_end_tuning(host);
 >  
-> -	ret = device_property_read_u32(dev, "ti,driver-strength-ohm",
-> -				       &drv_strength);
-> -	if (ret)
-> -		return ret;
-> +	if (sdhci_am654->flags & DLL_PRESENT) {
-> +		ret = device_property_read_u32(dev, "ti,trm-icp",
-> +					       &sdhci_am654->trm_icp);
-> +		if (ret)
-> +			return ret;
-> +
-> +		ret = device_property_read_u32(dev, "ti,driver-strength-ohm",
-> +					       &drv_strength);
-> +		if (ret)
-> +			return ret;
+> -	if (current_bus_width == MMC_BUS_WIDTH_8)
+> +	if (current_bus_width == MMC_BUS_WIDTH_8) {
+> +		mmc->ios.bus_width = MMC_BUS_WIDTH_8;
+>  		sdhci_set_bus_width(host, current_bus_width);
+> +	}
 >  
-> -	switch (drv_strength) {
-> -	case 50:
-> -		sdhci_am654->drv_strength = DRIVER_STRENGTH_50_OHM;
-> -		break;
-> -	case 33:
-> -		sdhci_am654->drv_strength = DRIVER_STRENGTH_33_OHM;
-> -		break;
-> -	case 66:
-> -		sdhci_am654->drv_strength = DRIVER_STRENGTH_66_OHM;
-> -		break;
-> -	case 100:
-> -		sdhci_am654->drv_strength = DRIVER_STRENGTH_100_OHM;
-> -		break;
-> -	case 40:
-> -		sdhci_am654->drv_strength = DRIVER_STRENGTH_40_OHM;
-> -		break;
-> -	default:
-> -		dev_err(dev, "Invalid driver strength\n");
-> -		return -EINVAL;
-> +		switch (drv_strength) {
-> +		case 50:
-> +			sdhci_am654->drv_strength = DRIVER_STRENGTH_50_OHM;
-> +			break;
-> +		case 33:
-> +			sdhci_am654->drv_strength = DRIVER_STRENGTH_33_OHM;
-> +			break;
-> +		case 66:
-> +			sdhci_am654->drv_strength = DRIVER_STRENGTH_66_OHM;
-> +			break;
-> +		case 100:
-> +			sdhci_am654->drv_strength = DRIVER_STRENGTH_100_OHM;
-> +			break;
-> +		case 40:
-> +			sdhci_am654->drv_strength = DRIVER_STRENGTH_40_OHM;
-> +			break;
-> +		default:
-> +			dev_err(dev, "Invalid driver strength\n");
-> +			return -EINVAL;
-> +		}
->  	}
->  
->  	device_property_read_u32(dev, "ti,strobe-sel", &sdhci_am654->strb_sel);
-> @@ -363,6 +407,10 @@ static const struct of_device_id sdhci_am654_of_match[] = {
->  		.compatible = "ti,j721e-sdhci-8bit",
->  		.data = &sdhci_j721e_8bit_drvdata,
->  	},
-> +	{
-> +		.compatible = "ti,j721e-sdhci-4bit",
-> +		.data = &sdhci_j721e_4bit_drvdata,
-> +	},
->  	{ /* sentinel */ }
->  };
->  
+>  	host->flags &= ~SDHCI_HS400_TUNING;
+>  	return 0;
 > 
