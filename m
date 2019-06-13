@@ -1,8 +1,8 @@
 From: Yoshihiro Shimoda <yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
-Subject: [RFC PATCH v6 3/5] block: add a helper function to merge the segments
-	by an IOMMU
-Date: Thu, 13 Jun 2019 19:20:13 +0900
-Message-ID: <1560421215-10750-4-git-send-email-yoshihiro.shimoda.uh@renesas.com>
+Subject: [RFC PATCH v6 4/5] mmc: tmio: Use dma_max_mapping_size() instead of a
+	workaround
+Date: Thu, 13 Jun 2019 19:20:14 +0900
+Message-ID: <1560421215-10750-5-git-send-email-yoshihiro.shimoda.uh@renesas.com>
 References: <1560421215-10750-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -22,76 +22,49 @@ To: joro-zLv9SwRftAIdnm+yROfE0A@public.gmane.org, axboe-tSWWG44O7X1aa/9Udqfwiw@p
 Cc: linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, hch-jcswGhMUV9g@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-This patch adds a helper function whether a queue can merge
-the segments by an IOMMU.
+Since the commit 133d624b1cee ("dma: Introduce dma_max_mapping_size()")
+provides a helper function to get the max mapping size, we can use
+the function instead of the workaround code for swiotlb.
 
 Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
 ---
- block/blk-settings.c   | 28 ++++++++++++++++++++++++++++
- include/linux/blkdev.h |  2 ++
- 2 files changed, 30 insertions(+)
+ drivers/mmc/host/tmio_mmc_core.c | 17 ++++-------------
+ 1 file changed, 4 insertions(+), 13 deletions(-)
 
-diff --git a/block/blk-settings.c b/block/blk-settings.c
-index 45f2c52..4e4e13e 100644
---- a/block/blk-settings.c
-+++ b/block/blk-settings.c
-@@ -4,9 +4,11 @@
-  */
- #include <linux/bio.h>
- #include <linux/blkdev.h>
-+#include <linux/device.h>
- #include <linux/gcd.h>
- #include <linux/gfp.h>
- #include <linux/init.h>
-+#include <linux/iommu.h>
- #include <linux/jiffies.h>
- #include <linux/kernel.h>
- #include <linux/lcm.h>
-@@ -831,6 +833,32 @@ void blk_queue_write_cache(struct request_queue *q, bool wc, bool fua)
- }
- EXPORT_SYMBOL_GPL(blk_queue_write_cache);
+diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
+index 130b91c..85bd6aa6 100644
+--- a/drivers/mmc/host/tmio_mmc_core.c
++++ b/drivers/mmc/host/tmio_mmc_core.c
+@@ -26,6 +26,7 @@
  
-+/**
-+ * blk_queue_can_use_iommu_merging - configure queue for merging segments.
-+ * @q:		the request queue for the device
-+ * @dev:	the device pointer for dma
-+ *
-+ * Tell the block layer about the iommu merging of @q.
-+ */
-+bool blk_queue_can_use_iommu_merging(struct request_queue *q,
-+				     struct device *dev)
-+{
-+	struct iommu_domain *domain;
-+
-+	/*
-+	 * If the device DMA is translated by an IOMMU, we can assume
-+	 * the device can merge the segments.
-+	 */
-+	if (!device_iommu_mapped(dev))
-+		return false;
-+
-+	domain = iommu_get_domain_for_dev(dev);
-+	/* No need to update max_segment_size. see blk_queue_virt_boundary() */
-+	blk_queue_virt_boundary(q, iommu_get_minimum_page_size(domain) - 1);
-+
-+	return true;
-+}
-+
- static int __init blk_settings_init(void)
- {
- 	blk_max_low_pfn = max_low_pfn - 1;
-diff --git a/include/linux/blkdev.h b/include/linux/blkdev.h
-index 592669b..4d1f7dc 100644
---- a/include/linux/blkdev.h
-+++ b/include/linux/blkdev.h
-@@ -1091,6 +1091,8 @@ extern void blk_queue_dma_alignment(struct request_queue *, int);
- extern void blk_queue_update_dma_alignment(struct request_queue *, int);
- extern void blk_queue_rq_timeout(struct request_queue *, unsigned int);
- extern void blk_queue_write_cache(struct request_queue *q, bool enabled, bool fua);
-+extern bool blk_queue_can_use_iommu_merging(struct request_queue *q,
-+					    struct device *dev);
+ #include <linux/delay.h>
+ #include <linux/device.h>
++#include <linux/dma-mapping.h>
+ #include <linux/highmem.h>
+ #include <linux/interrupt.h>
+ #include <linux/io.h>
+@@ -1189,19 +1190,9 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host)
+ 	mmc->max_blk_size = TMIO_MAX_BLK_SIZE;
+ 	mmc->max_blk_count = pdata->max_blk_count ? :
+ 		(PAGE_SIZE / mmc->max_blk_size) * mmc->max_segs;
+-	mmc->max_req_size = mmc->max_blk_size * mmc->max_blk_count;
+-	/*
+-	 * Since swiotlb has memory size limitation, this will calculate
+-	 * the maximum size locally (because we don't have any APIs for it now)
+-	 * and check the current max_req_size. And then, this will update
+-	 * the max_req_size if needed as a workaround.
+-	 */
+-	if (swiotlb_max_segment()) {
+-		unsigned int max_size = (1 << IO_TLB_SHIFT) * IO_TLB_SEGSIZE;
+-
+-		if (mmc->max_req_size > max_size)
+-			mmc->max_req_size = max_size;
+-	}
++	mmc->max_req_size = min_t(unsigned int,
++				  mmc->max_blk_size * mmc->max_blk_count,
++				  dma_max_mapping_size(&pdev->dev));
+ 	mmc->max_seg_size = mmc->max_req_size;
  
- /*
-  * Number of physical segments as sent to the device.
+ 	if (mmc_can_gpio_ro(mmc))
 -- 
 2.7.4
