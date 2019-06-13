@@ -1,309 +1,97 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: Re: [PATCH] mmc: core: Prevent processing SDIO IRQs when the card is suspended
-Date: Thu, 13 Jun 2019 11:05:16 -0700
-Message-ID: <CAD=FV=WODbZa1fBrLbJBsd77xn5ekHWjks-ydxOSzjdBK83Rmg@mail.gmail.com>
-References: <20190611123221.11580-1-ulf.hansson@linaro.org>
- <CAD=FV=XBVRsdiOD0vhgTvMXmqm=fzy9Bzd_x=E1TNPBsT_D-tQ@mail.gmail.com> <CAPDyKFqR-xSKdYZYBTK5kKOt1dk7dx_BjedHiDOKs7-X4od=dg@mail.gmail.com>
+From: Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>
+Subject: Re: [RFC PATCH v6 0/5] treewide: improve R-Car SDHI performance
+Date: Thu, 13 Jun 2019 21:36:28 +0200
+Message-ID: <20190613193628.GA6863@kunai>
+References: <1560421215-10750-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFqR-xSKdYZYBTK5kKOt1dk7dx_BjedHiDOKs7-X4od=dg@mail.gmail.com>
-Sender: stable-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Linux MMC List <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Brian Norris <briannorris@chromium.org>, Shawn Lin <shawn.lin@rock-chips.com>, Guenter Roeck <groeck@chromium.org>, Heiko Stuebner <heiko@sntech.de>, Kalle Valo <kvalo@codeaurora.org>, linux-wireless <linux-wireless@vger.kernel.org>, "# 4.0+" <stable@vger.kernel.org>
+Content-Type: multipart/mixed; boundary="===============7359102268517268240=="
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+In-Reply-To: <1560421215-10750-1-git-send-email-yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: Yoshihiro Shimoda <yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
+Cc: axboe-tSWWG44O7X1aa/9Udqfwiw@public.gmane.org, linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, hch-jcswGhMUV9g@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,
 
-On Thu, Jun 13, 2019 at 2:30 AM Ulf Hansson <ulf.hansson@linaro.org> wrote:
->
-> > > @@ -937,6 +937,10 @@ static int mmc_sdio_pre_suspend(struct mmc_host *host)
-> > >   */
-> > >  static int mmc_sdio_suspend(struct mmc_host *host)
-> > >  {
-> > > +       /* Prevent processing of SDIO IRQs in suspended state. */
-> > > +       mmc_card_set_suspended(host->card);
-> >
-> > Do you need to claim / release the host around the call to
-> > mmc_card_set_suspended() to avoid races?
->
-> The intent is that the races should be taken care of like this:
-> 1) In MMC_CAP2_SDIO_IRQ_NOTHREAD case, the call to
-> cancel_delayed_work_sync() below, will make sure that if there are any
-> new work scheduled beyond that point, mmc_card_suspended() will be set
-> and process_sdio_pending_irqs() will bail out.
->
-> 2. In the non MMC_CAP2_SDIO_IRQ_NOTHREAD case, the call to
-> mmc_claim_host() below will make sure if there is any new attempt to
-> claim the host from the kthread, mmc_card_suspended() will be set and
-> process_sdio_pending_irqs() bails out.
->
-> Ideally in the long run and want to remove the SDIO kthread, so
-> perhaps this is good enough for now, what do you think?
-
-I was more worried about the safety of mmc_card_set_suspended()
-itself.  That is:
-
-#define mmc_card_set_suspended(c) ((c)->state |= MMC_STATE_SUSPENDED)
-
-...so it's doing a read-modify-write of "state".  Is that safe to do
-without any type of locking?
+--===============7359102268517268240==
+Content-Type: multipart/signed; micalg=pgp-sha512;
+	protocol="application/pgp-signature"; boundary="k+w/mQv8wyuph6w0"
+Content-Disposition: inline
 
 
-> BTW, the important point is that the call to
-> cancel_delayed_work_sync(), must not be done while keeping the host
-> claimed, as then it could deadlock.
+--k+w/mQv8wyuph6w0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Definitely.  I was thinking of this sequence:
+On Thu, Jun 13, 2019 at 07:20:10PM +0900, Yoshihiro Shimoda wrote:
+> This patch series is based on iommu.git / next branch.
+>=20
+> Since SDHI host internal DMAC of the R-Car Gen3 cannot handle two or
+> more segments, the performance rate (especially, eMMC HS400 reading)
+> is not good. However, if IOMMU is enabled on the DMAC, since IOMMU will
+> map multiple scatter gather buffers as one contignous iova, the DMAC can
+> handle the iova as well and then the performance rate is possible to
+> improve. In fact, I have measured the performance by using bonnie++,
+> "Sequential Input - block" rate was improved on r8a7795.
+>=20
+> To achieve this, this patch series modifies IOMMU and Block subsystem
+> at first. Since I'd like to get any feedback from each subsystem whether
+> this way is acceptable for upstream, I submit it to treewide with RFC.
+>=20
+> Changes from v5:
+>  - Almost all patches are new code.
+>  - [4/5 for MMC] This is a refactor patch so that I don't add any
+>    {Tested,Reviewed}-by tags.
+>  - [5/5 for MMC] Modify MMC subsystem to use bigger segments instead of
+>    the renesas_sdhi driver.
+>  - [5/5 for MMC] Use BLK_MAX_SEGMENTS (128) instead of local value
+>    SDHI_MAX_SEGS_IN_IOMMU (512). Even if we use BLK_MAX_SEGMENTS,
+>    the performance is still good.
 
-mmc_claim_host(host);
-mmc_card_set_suspended(host->card);
-mmc_release_host(host);
+Thanks for your hard work, Shimoda-san!
 
-cancel_delayed_work_sync(&host->sdio_irq_work);
-
-mmc_claim_host(host);
-
-
-> > >         if (!err && host->sdio_irqs) {
-> > >                 if (!(host->caps2 & MMC_CAP2_SDIO_IRQ_NOTHREAD))
-> > >                         wake_up_process(host->sdio_irq_thread);
-> > > diff --git a/drivers/mmc/core/sdio_irq.c b/drivers/mmc/core/sdio_irq.c
-> > > index 931e6226c0b3..9f54a259a1b3 100644
-> > > --- a/drivers/mmc/core/sdio_irq.c
-> > > +++ b/drivers/mmc/core/sdio_irq.c
-> > > @@ -34,6 +34,10 @@ static int process_sdio_pending_irqs(struct mmc_host *host)
-> > >         unsigned char pending;
-> > >         struct sdio_func *func;
-> > >
-> > > +       /* Don't process SDIO IRQs if the card is suspended. */
-> > > +       if (mmc_card_suspended(card))
-> > > +               return 0;
-> > > +
-> >
-> > Is it really OK to just return like this?  I guess there are two
-> > (somewhat opposite) worries I'd have.  See A) and B) below:
->
-> Let me comment on A) and B) below, for sure there are more problems to address.
->
-> The main reason to why I think it's okay to bail out here, is because
-> I think it still improves the current behavior a lot. So, rather than
-> solving all problems at once, I wanted to take a step by step
-> approach.
->
-> >
-> > A) Do we need to do anything extra to make sure we actually call the
-> > interrupt handler after we've resumed?  I guess we can't actually
-> > "lose" the interrupt since it will be sitting asserted in CCCR_INTx
-> > until we deal with it (right?), but maybe we need to do something to
-> > ensure the handler gets called once we're done resuming?
->
-> Good point!
->
-> Although, it also depends on if we are going to power off the SDIO
-> card or not. In other words, if the SDIO IRQ are configured as a
-> system wakeup.
-
-Even if it's not a system wakeup, we still don't want to drop the
-interrupt on the ground though, do we?  For instance, think about a
-level-triggered GPIO interrupt that's _not_ a wakeup interrupt.  If
-that gets asserted in suspend then we won't wakeup the system, but as
-soon as the system gets to a certain point in the resume sequence then
-we should pass the interrupt on to the handler.  If an edge triggered
-(but non-wakeup) interrupt fires when the system is resuming then we
-should similarly not drop it, should we?
+I may not be the biggest DMA, IOMMU, and block layer expert, but I
+really like how this simplifies the SDHI driver and enhances the MMC
+core. So, I'll add my two cents to the patches although I can't really
+comment on the main functionality.
 
 
-> Moreover there is another related problem, if the SDIO IRQ are
-> configured as a system wakeup, and if there is an IRQ raised during
-> the system suspend process, the system suspend process should be
-> aborted but it may not. This is another issue that currently isn't
-> supported. The PM core helps to deals with this, but to take advantage
-> of that, the host controller device device must be configured via the
-> common wakeup interfaces, such as the device_init_wakeup(), for
-> example.
+--k+w/mQv8wyuph6w0
+Content-Type: application/pgp-signature; name="signature.asc"
 
-As per earlier discussions I don't have any good examples of SDIO IRQs
-being able to wakeup the device to poke at.  ...but from GPIO-based
-wakeups I'm used to the suspend code masking the interrupt (so it
-doesn't fire anymore after the suspend call) but leaving it enabled
-and configured as a wakeup.  I guess we'd have to think about how that
-translates.  Your patch seems to be acting as a "mask" of the
-interrupt, at least on my dw_mmc tests where the hardware presents the
-interrupt like it was edge triggered.  ...so it would work OK there
-I'd guess.
+-----BEGIN PGP SIGNATURE-----
 
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAl0CpbgACgkQFA3kzBSg
+Kbb6fhAAsdfuCLxXS4xDUphPESkF+gt9xfaK1rX85NT4mPOnCRA7AMdH0rzSAboF
+MFBO01ZS1+9P5SOaOuKArFD1rDkk9t41Hp+AEcsyGZMt47QlwvXakNaQeoGVLUuu
+9kex9v8bpMgXjDS9B7CFcbWnLvEjEyysBYBVRMpppo1UwfIwKoQFZAzKJkodXGpE
+i5HOkl+woaQVUDgNnnKEVbAmSmCJ7H8Nb4CvzRk14i5GK2UYUi9ql9B4Fro4tsgM
+dqSlNzb9x/70ajG5EYGv5+E+pA8u3du9hNLzsm7PoFWCUIPa5n74aQC4CpMcjUao
+FqPHfzcT3Mg8fk2K7u6riIaQAO7c/sYJ4quv547+cPTyPoAs290HqRZqH413C9wr
+hQtNlC2g7j+6hgrkzyoesGKl0zpiPdW3TKQ17tDGoCipGKDwQGptKunqWFbDY90h
+UJdgHWAo/kjy+pAGlutoy5bPdEbYYpxgHCgCrOaN0fzV7qKg7N1gfvRCNJSS0U9d
+gNzLc4vE+d3a2jPq90LRNxpBoUgB/iuJBIEhZcTycIMjUBrWQ8ikClrFBMHkLEds
+slSs6vzgUDcqOBSVQUVAif92fBeOUONnGbwOBx/r6x8LFIpG5h3gw0rRr9mF6Ppo
+48Oi8LWLrkZ3ZSjfNyQMaUi4rPwEqULxuhqN7MZIAVUZk3f9L5s=
+=tqtY
+-----END PGP SIGNATURE-----
 
-> > A2): new MMC_CAP2_SDIO_IRQ_NOTHREAD case
-> >
-> > Should we do something to re-kick things?  We could call
-> > sdio_signal_irq() in mmc_sdio_resume() I guess?  I was worried that
-> > might conflict with those that call sdio_run_irqs() directly but it
-> > seems like that's nobody as of commit 89f3c365f3e1 ("mmc: sdhci: Fix
-> > SDIO IRQ thread deadlock").
->
-> Good point!
->
-> Again, whether we should re-kick things depends on if the SDIO IRQ is
-> configured as wakeup, but in general using sdio_signal_irq() should
-> work.
->
-> The other part I am considering is to disable the SDIO irq, in case of
-> "mmc_card_keep_power() && !mmc_card_wake_sdio_irq()".
->
-> Moreover, if !mmc_card_keep_power(), then there really shouldn't be
-> any IRQs registered so perhaps we should add a special check for that
-> and return an error code.
+--k+w/mQv8wyuph6w0--
 
-I haven't looked through all the details here but I can dig if you
-want.  On other drivers it's generally OK to leave your interrupt
-registered (just disabled and/or masked) across suspend/resume, but
-maybe that's not OK for SDIO cards without keep power?
+--===============7359102268517268240==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
 
 
-> In regards to other callers of sdio_run_irqs(). I have a patch that
-> makes it this function static, as it really should not need to be used
-> other than from the work queue path. Let me post it asap to cover that
-> gap. Again, thanks for pointing this out!
-
-Yeah, I was thinking of posting that too, but happy to have you do it!  :-)
-
-
-> > ...side note: overall looking at this code path, two additional
-> > questions come up for me.  One is why sdio_run_irqs() hardcodes
-> > "sdio_irq_pending" as true.  That means we won't _ever_ poll CCCR_INTx
-> > in the 1-function case, right?  That seems wrong.  The other is why
->
-> In the 1-function case, the idea is that we don't have to read the
-> CCCR_INTx to find out what func number the IRQ belongs to.
->
-> This is the same behavior consistent as with the kthread case, see
-> mmc_signal_sdio_irq(), unless I am mistaken.
-
-I think there's at least the bug that nothing will ever set
-"sdio_irq_pending" to false in the MMC_CAP2_SDIO_IRQ_NOTHREAD case,
-right?  So we'll set it to true the first time and from then on out it
-will never be false again?
-
-
-> > mmc_sdio_resume() always calls host->ops->enable_sdio_irq(host, 1) at
-> > resume time when nobody ever turned the IRQs off.
->
-> That's correct and it leads to unbalanced calls of
-> host->ops->enable_sdio_irq(). This needs to be fixed as well.
->
-> >
-> > ===
-> >
-> > B) Are there any instances where the interrupt will just keep firing
-> > over and over again because we don't handle it?
-> >
-> > As per above, this _isn't_ happening on dw_mmc on my setup because
-> > dw_mmc seems to treat the SDIO interrupt as edge triggered.  ...but is
-> > this true everywhere?  If we were using SDIO in 1-bit mode on dw_mmc,
-> > would the interrupt re-assert right away?  If dw_mmc were configured
-> > to use a dedicated pin would it re-assert right away?  What about
-> > other host controllers?
-> >
-> > If you're sure no host controllers will keep asserting the interrupt
-> > over and over then I guess we don't need to worry about it?
-> > ...otherwise we'd need to find some way to mask the interrupt and we'd
-> > need to make sure whatever we do doesn't interfere with anyone who
-> > supports the SDIO interrupt as a wake source, right?
->
-> For the MMC_CAP2_SDIO_IRQ_NOTHREAD case, the expected behavior by the
-> host driver is to prior calling sdio_signal_irq(), is should temporary
-> disable the SDIO IRQ. Then, when the host->ops->ack_sdio_irq is called
-> from the work, the IRQ has been processed, which tells the host driver
-> to re-enable the SDIO IRQ.
-
-So what I'm imagining is this:
-
-1. mmc_sdio_suspend() starts; calls mmc_card_set_suspended() and
-cancel_delayed_work_sync().
-
-2. SDIO interrupt comes in; host controller calls sdio_signal_irq()
-
-3. sdio_signal_irq() queues delayed work, which gets scheduled right away.
-
-4. sdio_run_irqs() calls process_sdio_pending_irqs() which is a no-op
-(because we're suspended)
-
-5. sdio_run_irqs() calls host->ops->ack_sdio_irq(), which re-enables
-more interrupts.
-
-6. If SDIO interrupt was truly level triggered, we'll go straight back
-to #2 because we never actually removed the true source of the
-level-triggered interrupt by handling it.
-
-
-We'll run steps #2 - #6 above ad nauseam until we finally manage to
-get to the point in the suspend process where the system actually
-masks/disables all driver interrupts.  This happens sometime _after_
-the host controller's suspend call happens.  Technically this might
-not really hurt anything (other than burning CPU cycles) because the
-system workqueue isn't all that high priority so I think the suspend
-can continue happening while we're looping.  ...but it still doesn't
-seem great.
-
-We don't end up in the above situation in my tests because the SDIO
-interrupt was acting as an edge triggered interrupt.  ...and because,
-as per below, we eventually turn the clock off.
-
-
-> In the kthread case, this is managed by mmc_signal_sdio_irq() and the
-> sdio_irq_thread() that calls host->ops->enable_sdio_irq() both to
-> enable/disable the IRQ (but there are other problems with that).
->
-> >
-> > ======
-> >
-> > Overall, I can confirm that on my system your patch actually does
-> > work.  ...so if all of the above concerns are moot and won't cause
-> > anyone else problems then I can say that they don't seem to cause any
-> > problems on my system.  On rk3288-veyron-jerry:
-> >
-> > - Before your patch, I got failures at iteration 18, then 32, then 55,
-> > then 7, then 26.
-> >
-> > - After your patch I could do 100 iterations of suspend/resume with no
-> > failures.  I also put printouts to confirm your patch was having an
-> > effect.
->
-> Great news, thanks a lot for testing and sharing these result.
->
-> One more thing to consider. After the system suspend callback have
-> been called for the mmc host driver (assuming SDIO IRQ isn't
-> configured as system wakeup), the host driver shouldn't really receive
-> SDIO IRQs and nor should it signal them via sdio_signal_irq(), simply
-> because it has suspended its device/controller and beyond that point,
-> the behavior might be undefined. Can you check to see if this is
-> happening, or possibly you already know that this is the case and that
-> we are "lucky"?
-
-It's happening fine as long as we're loose with the term "after".  :-)
- Most certainly when we just finished executing the last line of the
-host controller's suspend call then the system can't have done
-anything to prevent interrupts from going off.  Even if the very next
-thing that the core OS did was to disable interrupts there would still
-be at least a few CPU instructions in there where we could have
-finished the suspend call and interrupts were still enabled at the
-system level.
-
-It looks like the actual suspension of interrupts is in
-suspend_device_irqs() which is called right before the "no irq" calls
-are made.  ...so in theory we could still get interrupts for quite a
-while after the host controller's suspend call.
-
-In practice it actually looks to be impossible for dw_mmc, though.
-...part of dw_mmc's suspend call turns off both the ciu (card clock)
-and biu (bus clock).  I believe this means that the controller is
-fully unclocked and there's no way it could give an interrupt.
-
-In fact, the only time we actually get into trouble in dw_mmc is right
-at the beginning of the resume code where we start re-initting the
-host controller (and turning its clocks on) and then the interrupt
-fires before we're quite ready.
-
-
--Doug
+--===============7359102268517268240==--
