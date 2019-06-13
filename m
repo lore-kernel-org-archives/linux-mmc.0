@@ -1,19 +1,46 @@
-From: Christoph Hellwig <hch@lst.de>
-Subject: Re: [PATCH 10/13] megaraid_sas: set virt_boundary_mask in the scsi
- host
-Date: Thu, 13 Jun 2019 10:44:58 +0200
-Message-ID: <20190613084458.GB13221@lst.de>
-References: <20190605190836.32354-1-hch@lst.de> <20190605190836.32354-11-hch@lst.de> <cd713506efb9579d1f69a719d831c28d@mail.gmail.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH 2/3] mmc: sdhci: sdhci-pci-o2micro: Check if controller
+ supports 8-bit width
+Date: Thu, 13 Jun 2019 11:40:14 +0300
+Message-ID: <94fa2a5e-e96d-acb3-46c2-5f6b1dea6711@intel.com>
+References: <20190610185354.35310-1-rrangel@chromium.org>
+ <20190610185354.35310-2-rrangel@chromium.org>
+ <d4939761-317c-ee78-b1e5-c2cdd86a12b4@intel.com>
+ <20190612150832.GB27989@google.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <cd713506efb9579d1f69a719d831c28d@mail.gmail.com>
+In-Reply-To: <20190612150832.GB27989@google.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Kashyap Desai <kashyap.desai@broadcom.com>
-Cc: Christoph Hellwig <hch@lst.de>, Jens Axboe <axboe@kernel.dk>, Sebastian Ott <sebott@linux.ibm.com>, Sagi Grimberg <sagi@grimberg.me>, Max Gurtovoy <maxg@mellanox.com>, Bart Van Assche <bvanassche@acm.org>, Ulf Hansson <ulf.hansson@linaro.org>, Alan Stern <stern@rowland.harvard.edu>, Oliver Neukum <oneukum@suse.com>, linux-block@vger.kernel.org, linux-rdma@vger.kernel.org, linux-mmc@vger.kernel.org, linux-nvme@lists.infradead.org, linux-scsi@vger.kernel.org, "PDL,MEGARAIDLINUX" <megaraidlinux.pdl@broadcom.com>, PDL-MPT-FUSIONLINUX <mpt-fusionlinux.pdl@broadcom.com>, linux-hyperv@vger.kernel.org, linux-usb@vger.kernel.org, usb-storage@lists.one-eyed-alien.net, linux-kernel@vger.kernel.org
+To: Raul Rangel <rrangel@chromium.org>
+Cc: linux-mmc@vger.kernel.org, ernest.zhang@bayhubtech.com, djkurtz@chromium.org, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-So before I respin this series, can you help with a way to figure out
-for mpt3sas and megaraid if a given controller supports NVMe devices
-at all, so that we don't have to set the virt boundary if not?
+On 12/06/19 6:08 PM, Raul Rangel wrote:
+> On Wed, Jun 12, 2019 at 04:09:47PM +0300, Adrian Hunter wrote:
+>> On 10/06/19 9:53 PM, Raul E Rangel wrote:
+>>> The O2 controller supports 8-bit EMMC access. mmc_select_bus_width()
+>>> will be used to determine if the MMC supports 8-bit or 4-bit access.
+>>
+>> The problem is that the bit indicates a host controller capability, not how
+>> many data lines there actually are on the board.  Will this break something
+>> that does not have 8 lines?
+> 
+> So I asked the controller vendor about that:
+>> The capability shows the host controller can support 1,4,and 8 bit bus
+>> data transfer but it also depends on if HW can support it. Driver or FW
+>> should implement the bus testing procedure that is defined in A.6.3.a
+>> in JESD84-B51 spec to decide the real bus width that is supported in HW.
+> 
+> This seems to be what `mmc_select_bus_width()` is doing.
+
+Good point.  Can you add this information to the commit message and add a
+comment in the code.
+
+> 
+> I don't actually have any 4-bit hardware to test with though.
+> 
+> Thanks for the review!
+> 
