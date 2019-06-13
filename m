@@ -1,11 +1,14 @@
 From: Yoshihiro Shimoda <yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
-Subject: [RFC PATCH v6 0/5] treewide: improve R-Car SDHI performance
-Date: Thu, 13 Jun 2019 19:20:10 +0900
-Message-ID: <1560421215-10750-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
+Subject: [RFC PATCH v6 3/5] block: add a helper function to merge the segments
+	by an IOMMU
+Date: Thu, 13 Jun 2019 19:20:13 +0900
+Message-ID: <1560421215-10750-4-git-send-email-yoshihiro.shimoda.uh@renesas.com>
+References: <1560421215-10750-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+In-Reply-To: <1560421215-10750-1-git-send-email-yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
 List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
 	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
@@ -19,79 +22,76 @@ To: joro-zLv9SwRftAIdnm+yROfE0A@public.gmane.org, axboe-tSWWG44O7X1aa/9Udqfwiw@p
 Cc: linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, hch-jcswGhMUV9g@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-This patch series is based on iommu.git / next branch.
+This patch adds a helper function whether a queue can merge
+the segments by an IOMMU.
 
-Since SDHI host internal DMAC of the R-Car Gen3 cannot handle two or
-more segments, the performance rate (especially, eMMC HS400 reading)
-is not good. However, if IOMMU is enabled on the DMAC, since IOMMU will
-map multiple scatter gather buffers as one contignous iova, the DMAC can
-handle the iova as well and then the performance rate is possible to
-improve. In fact, I have measured the performance by using bonnie++,
-"Sequential Input - block" rate was improved on r8a7795.
+Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
+---
+ block/blk-settings.c   | 28 ++++++++++++++++++++++++++++
+ include/linux/blkdev.h |  2 ++
+ 2 files changed, 30 insertions(+)
 
-To achieve this, this patch series modifies IOMMU and Block subsystem
-at first. Since I'd like to get any feedback from each subsystem whether
-this way is acceptable for upstream, I submit it to treewide with RFC.
-
-Changes from v5:
- - Almost all patches are new code.
- - [4/5 for MMC] This is a refactor patch so that I don't add any
-   {Tested,Reviewed}-by tags.
- - [5/5 for MMC] Modify MMC subsystem to use bigger segments instead of
-   the renesas_sdhi driver.
- - [5/5 for MMC] Use BLK_MAX_SEGMENTS (128) instead of local value
-   SDHI_MAX_SEGS_IN_IOMMU (512). Even if we use BLK_MAX_SEGMENTS,
-   the performance is still good.
-https://patchwork.kernel.org/project/linux-renesas-soc/list/?series=127511
-
-Changes from v4:
- - [DMA MAPPING] Add a new device_dma_parameters for iova contiguous.
- - [IOMMU] Add a new capable for "merging" segments.
- - [IOMMU] Add a capable ops into the ipmmu-vmsa driver.
- - [MMC] Sort headers in renesas_sdhi_core.c.
- - [MMC] Remove the following codes that made on v3 that can be achieved by
-	 DMA MAPPING and IOMMU subsystem:
- -- Check if R-Car Gen3 IPMMU is used or not on patch 3.
- -- Check if all multiple segment buffers are aligned to PAGE_SIZE on patch 3.
-https://patchwork.kernel.org/project/linux-renesas-soc/list/?series=125593
-
-Changes from v3:
- - Use a helper function device_iommu_mapped on patch 1 and 3.
- - Check if R-Car Gen3 IPMMU is used or not on patch 3.
- - Check if all multiple segment buffers are aligned to PAGE_SIZE on patch 3.
- - Add Reviewed-by Wolfram-san on patch 1 and 2. Note that I also got his
-   Reviewed-by on patch 3, but I changed it from v2. So, I didn't add
-   his Reviewed-by at this time.
-https://patchwork.kernel.org/project/linux-renesas-soc/list/?series=120985
-
-Changes from v2:
- - Add some conditions in the init_card().
- - Add a comment in the init_card().
- - Add definitions for some "MAX_SEGS".
-https://patchwork.kernel.org/project/linux-renesas-soc/list/?series=116729
-
-Changes from v1:
- - Remove adding init_card ops into struct tmio_mmc_dma_ops and
-   tmio_mmc_host and just set init_card on renesas_sdhi_core.c.
- - Revise typos on "mmc: tmio: No memory size limitation if runs on IOMMU".
- - Add Simon-san's Reviewed-by on a tmio patch.
-https://patchwork.kernel.org/project/linux-renesas-soc/list/?series=110485
-
-Yoshihiro Shimoda (5):
-  iommu: add an exported function to get minimum page size for a domain
-  block: sort headers on blk-setting.c
-  block: add a helper function to merge the segments by an IOMMU
-  mmc: tmio: Use dma_max_mapping_size() instead of a workaround
-  mmc: queue: Use bigger segments if IOMMU can merge the segments
-
- block/blk-settings.c             | 40 ++++++++++++++++++++++++++++++++++------
- drivers/iommu/iommu.c            | 18 +++++++++++++++---
- drivers/mmc/core/queue.c         | 33 +++++++++++++++++++++++++++++----
- drivers/mmc/host/tmio_mmc_core.c | 17 ++++-------------
- include/linux/blkdev.h           |  2 ++
- include/linux/iommu.h            |  1 +
- include/linux/mmc/host.h         |  1 +
- 7 files changed, 86 insertions(+), 26 deletions(-)
-
+diff --git a/block/blk-settings.c b/block/blk-settings.c
+index 45f2c52..4e4e13e 100644
+--- a/block/blk-settings.c
++++ b/block/blk-settings.c
+@@ -4,9 +4,11 @@
+  */
+ #include <linux/bio.h>
+ #include <linux/blkdev.h>
++#include <linux/device.h>
+ #include <linux/gcd.h>
+ #include <linux/gfp.h>
+ #include <linux/init.h>
++#include <linux/iommu.h>
+ #include <linux/jiffies.h>
+ #include <linux/kernel.h>
+ #include <linux/lcm.h>
+@@ -831,6 +833,32 @@ void blk_queue_write_cache(struct request_queue *q, bool wc, bool fua)
+ }
+ EXPORT_SYMBOL_GPL(blk_queue_write_cache);
+ 
++/**
++ * blk_queue_can_use_iommu_merging - configure queue for merging segments.
++ * @q:		the request queue for the device
++ * @dev:	the device pointer for dma
++ *
++ * Tell the block layer about the iommu merging of @q.
++ */
++bool blk_queue_can_use_iommu_merging(struct request_queue *q,
++				     struct device *dev)
++{
++	struct iommu_domain *domain;
++
++	/*
++	 * If the device DMA is translated by an IOMMU, we can assume
++	 * the device can merge the segments.
++	 */
++	if (!device_iommu_mapped(dev))
++		return false;
++
++	domain = iommu_get_domain_for_dev(dev);
++	/* No need to update max_segment_size. see blk_queue_virt_boundary() */
++	blk_queue_virt_boundary(q, iommu_get_minimum_page_size(domain) - 1);
++
++	return true;
++}
++
+ static int __init blk_settings_init(void)
+ {
+ 	blk_max_low_pfn = max_low_pfn - 1;
+diff --git a/include/linux/blkdev.h b/include/linux/blkdev.h
+index 592669b..4d1f7dc 100644
+--- a/include/linux/blkdev.h
++++ b/include/linux/blkdev.h
+@@ -1091,6 +1091,8 @@ extern void blk_queue_dma_alignment(struct request_queue *, int);
+ extern void blk_queue_update_dma_alignment(struct request_queue *, int);
+ extern void blk_queue_rq_timeout(struct request_queue *, unsigned int);
+ extern void blk_queue_write_cache(struct request_queue *q, bool enabled, bool fua);
++extern bool blk_queue_can_use_iommu_merging(struct request_queue *q,
++					    struct device *dev);
+ 
+ /*
+  * Number of physical segments as sent to the device.
 -- 
 2.7.4
