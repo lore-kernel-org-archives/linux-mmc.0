@@ -1,52 +1,48 @@
 From: Doug Anderson <dianders@chromium.org>
-Subject: Re: [PATCH] mmc: core: Prevent processing SDIO IRQs when the card is suspended
-Date: Fri, 14 Jun 2019 08:41:58 -0700
-Message-ID: <CAD=FV=Ujb=_jEFMdxLPW6tYwb9DZo5-RZ8BVuyq5DdFQ5jJbQw@mail.gmail.com>
-References: <20190611123221.11580-1-ulf.hansson@linaro.org>
- <CAD=FV=XBVRsdiOD0vhgTvMXmqm=fzy9Bzd_x=E1TNPBsT_D-tQ@mail.gmail.com>
- <CAPDyKFqR-xSKdYZYBTK5kKOt1dk7dx_BjedHiDOKs7-X4od=dg@mail.gmail.com>
- <CAD=FV=WODbZa1fBrLbJBsd77xn5ekHWjks-ydxOSzjdBK83Rmg@mail.gmail.com> <CAPDyKFpqk4ZcVTqifnbnW1WgNfx9ZNebCttUPcK_e9KWqpDMjQ@mail.gmail.com>
+Subject: Re: [PATCH v4 4/5] mmc: core: Add sdio_retune_hold_now() and sdio_retune_release()
+Date: Fri, 14 Jun 2019 09:38:26 -0700
+Message-ID: <CAD=FV=Wuj=gANR2im_o4ZnoLEB+U6FqzKe4noLdQyi1vw+K2xw@mail.gmail.com>
+References: <20190613234153.59309-1-dianders@chromium.org> <20190613234153.59309-5-dianders@chromium.org>
+ <CAPDyKFrJ4+zn7Ak0tYHkBfXUtH3N7erb5R7Q+hgugchZmCRGrw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFpqk4ZcVTqifnbnW1WgNfx9ZNebCttUPcK_e9KWqpDMjQ@mail.gmail.com>
-Sender: stable-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Linux MMC List <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Brian Norris <briannorris@chromium.org>, Shawn Lin <shawn.lin@rock-chips.com>, Guenter Roeck <groeck@chromium.org>, Heiko Stuebner <heiko@sntech.de>, Kalle Valo <kvalo@codeaurora.org>, linux-wireless <linux-wireless@vger.kernel.org>, "# 4.0+" <stable@vger.kernel.org>
+Return-path: <netdev-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFrJ4+zn7Ak0tYHkBfXUtH3N7erb5R7Q+hgugchZmCRGrw@mail.gmail.com>
+Sender: netdev-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Arend van Spriel <arend.vanspriel@broadcom.com>, Adrian Hunter <adrian.hunter@intel.com>
+Cc: Kalle Valo <kvalo@codeaurora.org>, brcm80211-dev-list.pdl@broadcom.com, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, Double Lo <double.lo@cypress.com>, Brian Norris <briannorris@chromium.org>, linux-wireless <linux-wireless@vger.kernel.org>, Naveen Gupta <naveen.gupta@cypress.com>, Madhan Mohan R <madhanmohan.r@cypress.com>, Matthias Kaehlcke <mka@chromium.org>, Wright Feng <wright.feng@cypress.com>, Chi-Hsien Lin <chi-hsien.lin@cypress.com>, netdev <netdev@vger.kernel.org>, brcm80211-dev-list <brcm80211-dev-list@cypress.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Thomas Gleixner <tglx@linutronix.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 List-Id: linux-mmc@vger.kernel.org
 
 Hi,
 
-On Fri, Jun 14, 2019 at 4:56 AM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+On Fri, Jun 14, 2019 at 5:10 AM Ulf Hansson <ulf.hansson@linaro.org> wrote:
 >
-> > I was more worried about the safety of mmc_card_set_suspended()
-> > itself.  That is:
+> On Fri, 14 Jun 2019 at 01:42, Douglas Anderson <dianders@chromium.org> wrote:
 > >
-> > #define mmc_card_set_suspended(c) ((c)->state |= MMC_STATE_SUSPENDED)
+> > We want SDIO drivers to be able to temporarily stop retuning when the
+> > driver knows that the SDIO card is not in a state where retuning will
+> > work (maybe because the card is asleep).  We'll move the relevant
+> > functions to a place where drivers can call them.
 > >
-> > ...so it's doing a read-modify-write of "state".  Is that safe to do
-> > without any type of locking?
+> > Signed-off-by: Douglas Anderson <dianders@chromium.org>
 >
-> In this case, yes I think so.
+> This looks good to me.
 >
-> The point is, it really doesn't matter if the reader (work or thread),
-> reads a non-updated value, because the synchronization is managed by
-> the later mmc_claim_host() and the cancel_delayed_work_sync().
+> BTW, seems like this series is best funneled via my mmc tree, no? In
+> such case, I need acks for the brcmfmac driver patches.
 
-If this were just an "int" then perhaps, but this is a bitfield.  So
-if someone else updates the bitfield at the same time then we can
-fully clobber their modification or they can clobber ours, right?
+For patch #1 I think it could just go in directly to the wireless
+tree.  It should be fine to land the rest of the patches separately.
 
-task 1: load "state" from memory into CPU register on cpu0
-task 2: load "state" from memory into CPU register on cpu1
-task 1: OR in MMC_CARD_REMOVED
-task 1: write "state" from CPU register on cpu0
-task 2: OR in MMC_STATE_SUSPENDED
-task 2: write "state" from CPU register on cpu1
+For patch #2 - #5 then what you say makes sense to me.  I suppose
+you'd want at least a Reviewed-by from Arend and an Ack from Kalle on
+the Broadcom patches?
 
-...so now we've clobbered MMC_CARD_REMOVED.  ...or am I just being
-paranoid here and everything else in "state" is somehow guaranteed to
-not be touched at the same time this function is running?
+I'd also suggest that we Cc stable explicitly when applying.  That's
+easy for #2 and #3 since they have a Fixes tag.  For #4 and #5 I guess
+the question is how far back to go.  Maybe Adrian has an opinion here
+since I think he's the one who experienced these problems.
 
 
+Thanks!
 -Doug
