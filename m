@@ -1,118 +1,52 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v4 4/5] mmc: core: Add sdio_retune_hold_now() and sdio_retune_release()
-Date: Fri, 14 Jun 2019 14:09:45 +0200
-Message-ID: <CAPDyKFrJ4+zn7Ak0tYHkBfXUtH3N7erb5R7Q+hgugchZmCRGrw@mail.gmail.com>
-References: <20190613234153.59309-1-dianders@chromium.org> <20190613234153.59309-5-dianders@chromium.org>
+From: Doug Anderson <dianders@chromium.org>
+Subject: Re: [PATCH] mmc: core: Prevent processing SDIO IRQs when the card is suspended
+Date: Fri, 14 Jun 2019 08:41:58 -0700
+Message-ID: <CAD=FV=Ujb=_jEFMdxLPW6tYwb9DZo5-RZ8BVuyq5DdFQ5jJbQw@mail.gmail.com>
+References: <20190611123221.11580-1-ulf.hansson@linaro.org>
+ <CAD=FV=XBVRsdiOD0vhgTvMXmqm=fzy9Bzd_x=E1TNPBsT_D-tQ@mail.gmail.com>
+ <CAPDyKFqR-xSKdYZYBTK5kKOt1dk7dx_BjedHiDOKs7-X4od=dg@mail.gmail.com>
+ <CAD=FV=WODbZa1fBrLbJBsd77xn5ekHWjks-ydxOSzjdBK83Rmg@mail.gmail.com> <CAPDyKFpqk4ZcVTqifnbnW1WgNfx9ZNebCttUPcK_e9KWqpDMjQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190613234153.59309-5-dianders@chromium.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Douglas Anderson <dianders@chromium.org>
-Cc: Kalle Valo <kvalo@codeaurora.org>, Adrian Hunter <adrian.hunter@intel.com>, Arend van Spriel <arend.vanspriel@broadcom.com>, brcm80211-dev-list.pdl@broadcom.com, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, Double Lo <double.lo@cypress.com>, Brian Norris <briannorris@chromium.org>, linux-wireless <linux-wireless@vger.kernel.org>, Naveen Gupta <naveen.gupta@cypress.com>, Madhan Mohan R <madhanmohan.r@cypress.com>, Matthias Kaehlcke <mka@chromium.org>, Wright Feng <wright.feng@cypress.com>, Chi-Hsien Lin <chi-hsien.lin@cypress.com>, netdev@vger.kernel.org, brcm80211-dev-list@cypress.com, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Thomas Gleixner <tglx@linutronix.de>
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFpqk4ZcVTqifnbnW1WgNfx9ZNebCttUPcK_e9KWqpDMjQ@mail.gmail.com>
+Sender: stable-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Linux MMC List <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Brian Norris <briannorris@chromium.org>, Shawn Lin <shawn.lin@rock-chips.com>, Guenter Roeck <groeck@chromium.org>, Heiko Stuebner <heiko@sntech.de>, Kalle Valo <kvalo@codeaurora.org>, linux-wireless <linux-wireless@vger.kernel.org>, "# 4.0+" <stable@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, 14 Jun 2019 at 01:42, Douglas Anderson <dianders@chromium.org> wrote:
->
-> We want SDIO drivers to be able to temporarily stop retuning when the
-> driver knows that the SDIO card is not in a state where retuning will
-> work (maybe because the card is asleep).  We'll move the relevant
-> functions to a place where drivers can call them.
->
-> Signed-off-by: Douglas Anderson <dianders@chromium.org>
+Hi,
 
-This looks good to me.
+On Fri, Jun 14, 2019 at 4:56 AM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>
+> > I was more worried about the safety of mmc_card_set_suspended()
+> > itself.  That is:
+> >
+> > #define mmc_card_set_suspended(c) ((c)->state |= MMC_STATE_SUSPENDED)
+> >
+> > ...so it's doing a read-modify-write of "state".  Is that safe to do
+> > without any type of locking?
+>
+> In this case, yes I think so.
+>
+> The point is, it really doesn't matter if the reader (work or thread),
+> reads a non-updated value, because the synchronization is managed by
+> the later mmc_claim_host() and the cancel_delayed_work_sync().
 
-BTW, seems like this series is best funneled via my mmc tree, no? In
-such case, I need acks for the brcmfmac driver patches.
+If this were just an "int" then perhaps, but this is a bitfield.  So
+if someone else updates the bitfield at the same time then we can
+fully clobber their modification or they can clobber ours, right?
 
-Kind regards
-Uffe
+task 1: load "state" from memory into CPU register on cpu0
+task 2: load "state" from memory into CPU register on cpu1
+task 1: OR in MMC_CARD_REMOVED
+task 1: write "state" from CPU register on cpu0
+task 2: OR in MMC_STATE_SUSPENDED
+task 2: write "state" from CPU register on cpu1
+
+...so now we've clobbered MMC_CARD_REMOVED.  ...or am I just being
+paranoid here and everything else in "state" is somehow guaranteed to
+not be touched at the same time this function is running?
 
 
-
-
-> ---
->
-> Changes in v4:
-> - Moved retune hold/release to SDIO API (Adrian).
->
-> Changes in v3:
-> - ("mmc: core: Export mmc_retune_hold_now() mmc_retune_release()") new for v3.
->
-> Changes in v2: None
->
->  drivers/mmc/core/sdio_io.c    | 40 +++++++++++++++++++++++++++++++++++
->  include/linux/mmc/sdio_func.h |  3 +++
->  2 files changed, 43 insertions(+)
->
-> diff --git a/drivers/mmc/core/sdio_io.c b/drivers/mmc/core/sdio_io.c
-> index f822a9630b0e..1b6fe737bd72 100644
-> --- a/drivers/mmc/core/sdio_io.c
-> +++ b/drivers/mmc/core/sdio_io.c
-> @@ -15,6 +15,7 @@
->  #include "sdio_ops.h"
->  #include "core.h"
->  #include "card.h"
-> +#include "host.h"
->
->  /**
->   *     sdio_claim_host - exclusively claim a bus for a certain SDIO function
-> @@ -770,3 +771,42 @@ void sdio_retune_crc_enable(struct sdio_func *func)
->         func->card->host->retune_crc_disable = false;
->  }
->  EXPORT_SYMBOL_GPL(sdio_retune_crc_enable);
-> +
-> +/**
-> + *     sdio_retune_hold_now - start deferring retuning requests till release
-> + *     @func: SDIO function attached to host
-> + *
-> + *     This function can be called if it's currently a bad time to do
-> + *     a retune of the SDIO card.  Retune requests made during this time
-> + *     will be held and we'll actually do the retune sometime after the
-> + *     release.
-> + *
-> + *     This function could be useful if an SDIO card is in a power state
-> + *     where it can respond to a small subset of commands that doesn't
-> + *     include the retuning command.  Care should be taken when using
-> + *     this function since (presumably) the retuning request we might be
-> + *     deferring was made for a good reason.
-> + *
-> + *     This function should be called while the host is claimed.
-> + */
-> +void sdio_retune_hold_now(struct sdio_func *func)
-> +{
-> +       mmc_retune_hold_now(func->card->host);
-> +}
-> +EXPORT_SYMBOL_GPL(sdio_retune_hold_now);
-> +
-> +/**
-> + *     sdio_retune_release - signal that it's OK to retune now
-> + *     @func: SDIO function attached to host
-> + *
-> + *     This is the complement to sdio_retune_hold_now().  Calling this
-> + *     function won't make a retune happen right away but will allow
-> + *     them to be scheduled normally.
-> + *
-> + *     This function should be called while the host is claimed.
-> + */
-> +void sdio_retune_release(struct sdio_func *func)
-> +{
-> +       mmc_retune_release(func->card->host);
-> +}
-> +EXPORT_SYMBOL_GPL(sdio_retune_release);
-> diff --git a/include/linux/mmc/sdio_func.h b/include/linux/mmc/sdio_func.h
-> index 4820e6d09dac..5a177f7a83c3 100644
-> --- a/include/linux/mmc/sdio_func.h
-> +++ b/include/linux/mmc/sdio_func.h
-> @@ -170,4 +170,7 @@ extern int sdio_set_host_pm_flags(struct sdio_func *func, mmc_pm_flag_t flags);
->  extern void sdio_retune_crc_disable(struct sdio_func *func);
->  extern void sdio_retune_crc_enable(struct sdio_func *func);
->
-> +extern void sdio_retune_hold_now(struct sdio_func *func);
-> +extern void sdio_retune_release(struct sdio_func *func);
-> +
->  #endif /* LINUX_MMC_SDIO_FUNC_H */
-> --
-> 2.22.0.rc2.383.gf4fbbf30c2-goog
->
+-Doug
