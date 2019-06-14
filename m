@@ -1,187 +1,118 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v4 2/5] mmc: core: API to temporarily disable retuning for
- SDIO CRC errors
-Date: Fri, 14 Jun 2019 14:04:05 +0200
-Message-ID: <CAPDyKFrgXGf_9=H7G40fiUQj=da5WWRys_oim2azgL4FEOeUVA@mail.gmail.com>
-References: <20190613234153.59309-1-dianders@chromium.org> <20190613234153.59309-3-dianders@chromium.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v4 4/5] mmc: core: Add sdio_retune_hold_now() and sdio_retune_release()
+Date: Fri, 14 Jun 2019 14:09:45 +0200
+Message-ID: <CAPDyKFrJ4+zn7Ak0tYHkBfXUtH3N7erb5R7Q+hgugchZmCRGrw@mail.gmail.com>
+References: <20190613234153.59309-1-dianders@chromium.org> <20190613234153.59309-5-dianders@chromium.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20190613234153.59309-3-dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Cc: Kalle Valo <kvalo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Arend van Spriel <arend.vanspriel-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, brcm80211-dev-list.pdl-dY08KVG/lbpWk0Htik3J/w@public.gmane.org, "open list:ARM/Rockchip SoC..." <linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Double Lo <double.lo-+wT8y+m8/X5BDgjK7y7TUQ@public.gmane.org>, Brian Norris <briannorris-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, linux-wireless <linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Naveen Gupta <naveen.gupta-+wT8y+m8/X5BDgjK7y7TUQ@public.gmane.org>, Madhan Mohan R <madhanmohan.r-+wT8y+m8/X5BDgjK7y7TUQ@public.gmane.org>, Matthias Kaehlcke <mka-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Wright Feng <wright.feng-+wT8y+m8/X5BDgjK7y7TUQ@public.gmane.org>, Chi-Hsien Lin <chi-hsien.lin-+wT8y+m8/X5BDgjK7y7TUQ@public.gmane.org>, netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, brcm80211-dev-list-+wT8y+m8/X5BDgjK7y7TUQ@public.gmane.org, Jiong Wu <lohengrin1024-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Ritesh Harjani <riteshh-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Allison Randal <allison-wcfNWazeolPR7s880joybQ@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20190613234153.59309-5-dianders@chromium.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Douglas Anderson <dianders@chromium.org>
+Cc: Kalle Valo <kvalo@codeaurora.org>, Adrian Hunter <adrian.hunter@intel.com>, Arend van Spriel <arend.vanspriel@broadcom.com>, brcm80211-dev-list.pdl@broadcom.com, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, Double Lo <double.lo@cypress.com>, Brian Norris <briannorris@chromium.org>, linux-wireless <linux-wireless@vger.kernel.org>, Naveen Gupta <naveen.gupta@cypress.com>, Madhan Mohan R <madhanmohan.r@cypress.com>, Matthias Kaehlcke <mka@chromium.org>, Wright Feng <wright.feng@cypress.com>, Chi-Hsien Lin <chi-hsien.lin@cypress.com>, netdev@vger.kernel.org, brcm80211-dev-list@cypress.com, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Thomas Gleixner <tglx@linutronix.de>
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, 14 Jun 2019 at 01:42, Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org> wrote:
+On Fri, 14 Jun 2019 at 01:42, Douglas Anderson <dianders@chromium.org> wrote:
 >
-> Normally when the MMC core sees an "-EILSEQ" error returned by a host
-> controller then it will trigger a retuning of the card.  This is
-> generally a good idea.
+> We want SDIO drivers to be able to temporarily stop retuning when the
+> driver knows that the SDIO card is not in a state where retuning will
+> work (maybe because the card is asleep).  We'll move the relevant
+> functions to a place where drivers can call them.
 >
-> However, if a command is expected to sometimes cause transfer errors
-> then these transfer errors shouldn't cause a re-tuning.  This
-> re-tuning will be a needless waste of time.  One example case where a
-> transfer is expected to cause errors is when transitioning between
-> idle (sometimes referred to as "sleep" in Broadcom code) and active
-> state on certain Broadcom WiFi SDIO cards.  Specifically if the card
-> was already transitioning between states when the command was sent it
-> could cause an error on the SDIO bus.
->
-> Let's add an API that the SDIO function drivers can call that will
-> temporarily disable the auto-tuning functionality.  Then we can add a
-> call to this in the Broadcom WiFi driver and any other driver that
-> might have similar needs.
->
-> NOTE: this makes the assumption that the card is already tuned well
-> enough that it's OK to disable the auto-retuning during one of these
-> error-prone situations.  Presumably the driver code performing the
-> error-prone transfer knows how to recover / retry from errors.  ...and
-> after we can get back to a state where transfers are no longer
-> error-prone then we can enable the auto-retuning again.  If we truly
-> find ourselves in a case where the card needs to be retuned sometimes
-> to handle one of these error-prone transfers then we can always try a
-> few transfers first without auto-retuning and then re-try with
-> auto-retuning if the first few fail.
->
-> Without this change on rk3288-veyron-minnie I periodically see this in
-> the logs of a machine just sitting there idle:
->   dwmmc_rockchip ff0d0000.dwmmc: Successfully tuned phase to XYZ
->
-> Fixes: bd11e8bd03ca ("mmc: core: Flag re-tuning is needed on CRC errors")
-> Signed-off-by: Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+> Signed-off-by: Douglas Anderson <dianders@chromium.org>
+
+This looks good to me.
+
+BTW, seems like this series is best funneled via my mmc tree, no? In
+such case, I need acks for the brcmfmac driver patches.
+
+Kind regards
+Uffe
+
+
+
+
 > ---
 >
 > Changes in v4:
-> - Moved to SDIO API only (Adrian, Ulf).
-> - Renamed to make it less generic, now retune_crc_disable (Ulf).
-> - Function header makes it clear host must be claimed (Ulf).
-> - No more WARN_ON (Ulf).
+> - Moved retune hold/release to SDIO API (Adrian).
 >
 > Changes in v3:
-> - Took out the spinlock since I believe this is all in one context.
+> - ("mmc: core: Export mmc_retune_hold_now() mmc_retune_release()") new for v3.
 >
-> Changes in v2:
-> - Updated commit message to clarify based on discussion of v1.
+> Changes in v2: None
 >
->  drivers/mmc/core/core.c       |  5 +++--
->  drivers/mmc/core/sdio_io.c    | 36 +++++++++++++++++++++++++++++++++++
->  include/linux/mmc/core.h      |  2 ++
->  include/linux/mmc/host.h      |  1 +
+>  drivers/mmc/core/sdio_io.c    | 40 +++++++++++++++++++++++++++++++++++
 >  include/linux/mmc/sdio_func.h |  3 +++
->  5 files changed, 45 insertions(+), 2 deletions(-)
+>  2 files changed, 43 insertions(+)
 >
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index 6db36dc870b5..9020cb2490f7 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -144,8 +144,9 @@ void mmc_request_done(struct mmc_host *host, struct mmc_request *mrq)
->         int err = cmd->error;
->
->         /* Flag re-tuning needed on CRC errors */
-> -       if ((cmd->opcode != MMC_SEND_TUNING_BLOCK &&
-> -           cmd->opcode != MMC_SEND_TUNING_BLOCK_HS200) &&
-> +       if (cmd->opcode != MMC_SEND_TUNING_BLOCK &&
-> +           cmd->opcode != MMC_SEND_TUNING_BLOCK_HS200 &&
-> +           !host->retune_crc_disable &&
->             (err == -EILSEQ || (mrq->sbc && mrq->sbc->error == -EILSEQ) ||
->             (mrq->data && mrq->data->error == -EILSEQ) ||
->             (mrq->stop && mrq->stop->error == -EILSEQ)))
 > diff --git a/drivers/mmc/core/sdio_io.c b/drivers/mmc/core/sdio_io.c
-> index f79f0b0caab8..f822a9630b0e 100644
+> index f822a9630b0e..1b6fe737bd72 100644
 > --- a/drivers/mmc/core/sdio_io.c
 > +++ b/drivers/mmc/core/sdio_io.c
-> @@ -734,3 +734,39 @@ int sdio_set_host_pm_flags(struct sdio_func *func, mmc_pm_flag_t flags)
->         return 0;
+> @@ -15,6 +15,7 @@
+>  #include "sdio_ops.h"
+>  #include "core.h"
+>  #include "card.h"
+> +#include "host.h"
+>
+>  /**
+>   *     sdio_claim_host - exclusively claim a bus for a certain SDIO function
+> @@ -770,3 +771,42 @@ void sdio_retune_crc_enable(struct sdio_func *func)
+>         func->card->host->retune_crc_disable = false;
 >  }
->  EXPORT_SYMBOL_GPL(sdio_set_host_pm_flags);
+>  EXPORT_SYMBOL_GPL(sdio_retune_crc_enable);
 > +
 > +/**
-> + *     sdio_retune_crc_disable - temporarily disable retuning on CRC errors
+> + *     sdio_retune_hold_now - start deferring retuning requests till release
 > + *     @func: SDIO function attached to host
 > + *
-> + *     If the SDIO card is known to be in a state where it might produce
-> + *     CRC errors on the bus in response to commands (like if we know it is
-> + *     transitioning between power states), an SDIO function driver can
-> + *     call this function to temporarily disable the SD/MMC core behavior of
-> + *     triggering an automatic retuning.
+> + *     This function can be called if it's currently a bad time to do
+> + *     a retune of the SDIO card.  Retune requests made during this time
+> + *     will be held and we'll actually do the retune sometime after the
+> + *     release.
 > + *
-> + *     This function should be called while the host is claimed and the host
-> + *     should remain claimed until sdio_retune_crc_enable() is called.
-> + *     Specifically, the expected sequence of calls is:
-> + *     - sdio_claim_host()
-> + *     - sdio_retune_crc_disable()
-> + *     - some number of calls like sdio_writeb() and sdio_readb()
-
-sdio_retune_crc_enable()
-
-> + *     - sdio_release_host()
+> + *     This function could be useful if an SDIO card is in a power state
+> + *     where it can respond to a small subset of commands that doesn't
+> + *     include the retuning command.  Care should be taken when using
+> + *     this function since (presumably) the retuning request we might be
+> + *     deferring was made for a good reason.
+> + *
+> + *     This function should be called while the host is claimed.
 > + */
-> +void sdio_retune_crc_disable(struct sdio_func *func)
+> +void sdio_retune_hold_now(struct sdio_func *func)
 > +{
-> +       func->card->host->retune_crc_disable = true;
+> +       mmc_retune_hold_now(func->card->host);
 > +}
-> +EXPORT_SYMBOL_GPL(sdio_retune_crc_disable);
+> +EXPORT_SYMBOL_GPL(sdio_retune_hold_now);
 > +
 > +/**
-> + *     sdio_retune_crc_enable - reneable retuning on CRC errors
-
-/s/reneable/re-enable
-
+> + *     sdio_retune_release - signal that it's OK to retune now
 > + *     @func: SDIO function attached to host
 > + *
-> + *     This is the compement to sdio_retune_crc_disable().
+> + *     This is the complement to sdio_retune_hold_now().  Calling this
+> + *     function won't make a retune happen right away but will allow
+> + *     them to be scheduled normally.
+> + *
+> + *     This function should be called while the host is claimed.
 > + */
-> +void sdio_retune_crc_enable(struct sdio_func *func)
+> +void sdio_retune_release(struct sdio_func *func)
 > +{
-> +       func->card->host->retune_crc_disable = false;
+> +       mmc_retune_release(func->card->host);
 > +}
-> +EXPORT_SYMBOL_GPL(sdio_retune_crc_enable);
-> diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
-> index 134a6483347a..02a13abf0cda 100644
-> --- a/include/linux/mmc/core.h
-> +++ b/include/linux/mmc/core.h
-> @@ -178,6 +178,8 @@ int mmc_wait_for_cmd(struct mmc_host *host, struct mmc_command *cmd,
->
->  int mmc_hw_reset(struct mmc_host *host);
->  int mmc_sw_reset(struct mmc_host *host);
-> +void mmc_expect_errors_begin(struct mmc_host *host);
-> +void mmc_expect_errors_end(struct mmc_host *host);
-
-Leftovers for earlier versions.
-
->  void mmc_set_data_timeout(struct mmc_data *data, const struct mmc_card *card);
->
->  #endif /* LINUX_MMC_CORE_H */
-> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index 43d0f0c496f6..ecb7972e2423 100644
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -398,6 +398,7 @@ struct mmc_host {
->         unsigned int            retune_now:1;   /* do re-tuning at next req */
->         unsigned int            retune_paused:1; /* re-tuning is temporarily disabled */
->         unsigned int            use_blk_mq:1;   /* use blk-mq */
-> +       unsigned int            retune_crc_disable:1; /* don't trigger retune upon crc */
->
->         int                     rescan_disable; /* disable card detection */
->         int                     rescan_entered; /* used with nonremovable devices */
+> +EXPORT_SYMBOL_GPL(sdio_retune_release);
 > diff --git a/include/linux/mmc/sdio_func.h b/include/linux/mmc/sdio_func.h
-> index e9dfdd501cd1..4820e6d09dac 100644
+> index 4820e6d09dac..5a177f7a83c3 100644
 > --- a/include/linux/mmc/sdio_func.h
 > +++ b/include/linux/mmc/sdio_func.h
-> @@ -167,4 +167,7 @@ extern void sdio_f0_writeb(struct sdio_func *func, unsigned char b,
->  extern mmc_pm_flag_t sdio_get_host_pm_caps(struct sdio_func *func);
->  extern int sdio_set_host_pm_flags(struct sdio_func *func, mmc_pm_flag_t flags);
+> @@ -170,4 +170,7 @@ extern int sdio_set_host_pm_flags(struct sdio_func *func, mmc_pm_flag_t flags);
+>  extern void sdio_retune_crc_disable(struct sdio_func *func);
+>  extern void sdio_retune_crc_enable(struct sdio_func *func);
 >
-> +extern void sdio_retune_crc_disable(struct sdio_func *func);
-> +extern void sdio_retune_crc_enable(struct sdio_func *func);
+> +extern void sdio_retune_hold_now(struct sdio_func *func);
+> +extern void sdio_retune_release(struct sdio_func *func);
 > +
 >  #endif /* LINUX_MMC_SDIO_FUNC_H */
 > --
 > 2.22.0.rc2.383.gf4fbbf30c2-goog
 >
-
-Besides the minor comments, this looks good to me.
-
-Kind regards
-Uffe
