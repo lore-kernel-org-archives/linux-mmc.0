@@ -1,58 +1,44 @@
-From: Geert Uytterhoeven <geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org>
-Subject: Re: [RFC PATCH v6 4/5] mmc: tmio: Use dma_max_mapping_size() instead
-	of a workaround
-Date: Fri, 14 Jun 2019 09:27:06 +0200
-Message-ID: <CAMuHMdXm5RtDUL5Wkyd6aJihu9nykYOhRf7vN6hOtB-OO8CTQQ@mail.gmail.com>
-References: <1560421215-10750-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
-	<1560421215-10750-5-git-send-email-yoshihiro.shimoda.uh@renesas.com>
-	<CAMuHMdXYqgPRX1WfUTRsKHhnSok5vfnr4AY36=vXoUvAxcNyWQ@mail.gmail.com>
-	<20190614071800.GB8420@lst.de>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-In-Reply-To: <20190614071800.GB8420-jcswGhMUV9g@public.gmane.org>
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>
-Cc: Jens Axboe <axboe-tSWWG44O7X1aa/9Udqfwiw@public.gmane.org>, Linux-Renesas <linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Wolfram Sang <wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org>, Linux IOMMU <iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+From: Yinbo Zhu <yinbo.zhu@nxp.com>
+Subject: [PATCH v1] mmc: sdhci-of-esdhc: set the sd clock divisor value above 3
+Date: Fri, 14 Jun 2019 16:29:53 +0800
+Message-ID: <20190614082954.39648-1-yinbo.zhu@nxp.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: yinbo.zhu@nxp.com, xiaobo.xie@nxp.com, jiafei.pan@nxp.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, yangbo.lu@nxp.com
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Christoph,
+From: Yangbo Lu <yangbo.lu@nxp.com>
 
-On Fri, Jun 14, 2019 at 9:18 AM Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org> wrote:
-> On Thu, Jun 13, 2019 at 10:35:44PM +0200, Geert Uytterhoeven wrote:
-> > I'm always triggered by the use of min_t() and other casts:
-> > mmc->max_blk_size and mmc->max_blk_count are both unsigned int.
-> > dma_max_mapping_size() returns size_t, which can be 64-bit.
-> >
-> >  1) Can the multiplication overflow?
-> >     Probably not, as per commit 2a55c1eac7882232 ("mmc: renesas_sdhi:
-> >     prevent overflow for max_req_size"), but I thought I'd better ask.
-> >  2) In theory, dma_max_mapping_size() can return a number that doesn't
-> >     fit in 32-bit, and will be truncated (to e.g. 0), leading to max_req_size
-> >     is zero?
->
-> This really should use a min_t on size_t.  Otherwise the patch looks
-> fine:
+This patch is to set the sd clock divisor value above 3 in tuning mode
 
-Followed by another min() to make it fit in mmc->max_req_size, which is
-unsigned int.
+Signed-off-by: Yinbo Zhu <yinbo.zhu@nxp.com>
+Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
+---
+ drivers/mmc/host/sdhci-of-esdhc.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
 
-Gr{oetje,eeting}s,
-
-                        Geert
-
+diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+index d4ec0a959a75..c4af026c3fba 100644
+--- a/drivers/mmc/host/sdhci-of-esdhc.c
++++ b/drivers/mmc/host/sdhci-of-esdhc.c
+@@ -824,9 +824,17 @@ static int esdhc_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+ 	struct sdhci_esdhc *esdhc = sdhci_pltfm_priv(pltfm_host);
+ 	bool hs400_tuning;
++	unsigned int clk;
+ 	u32 val;
+ 	int ret;
+ 
++	/* For tuning mode, the sd clock divisor value
++	 * must be larger than 3 according to reference manual.
++	 */
++	clk = esdhc->peripheral_clock / 3;
++	if (host->clock > clk)
++		esdhc_of_set_clock(host, clk);
++
+ 	if (esdhc->quirk_limited_clk_division &&
+ 	    host->flags & SDHCI_HS400_TUNING)
+ 		esdhc_of_set_clock(host, host->clock);
 -- 
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+2.17.1
