@@ -1,103 +1,76 @@
-From: Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Subject: [PATCH v4 4/5] mmc: core: Add sdio_retune_hold_now() and sdio_retune_release()
-Date: Thu, 13 Jun 2019 16:41:52 -0700
-Message-ID: <20190613234153.59309-5-dianders@chromium.org>
-References: <20190613234153.59309-1-dianders@chromium.org>
+From: Jjian Zhou <jjian.zhou@mediatek.com>
+Subject: [PATCH 1/2] mmc: mediatek: fix SDIO IRQ interrupt handle flow
+Date: Fri, 14 Jun 2019 13:26:09 +0800
+Message-ID: <1560489970-30467-1-git-send-email-jjian.zhou@mediatek.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20190613234153.59309-1-dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Kalle Valo <kvalo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Arend van Spriel <arend.vanspriel-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
-Cc: brcm80211-dev-list.pdl-dY08KVG/lbpWk0Htik3J/w@public.gmane.org, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Double Lo <double.lo-+wT8y+m8/X5BDgjK7y7TUQ@public.gmane.org>, briannorris-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Naveen Gupta <naveen.gupta-+wT8y+m8/X5BDgjK7y7TUQ@public.gmane.org>, Madhan Mohan R <madhanmohan.r-+wT8y+m8/X5BDgjK7y7TUQ@public.gmane.org>, mka-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, Wright Feng <wright.feng-+wT8y+m8/X5BDgjK7y7TUQ@public.gmane.org>, Chi-Hsien Lin <chi-hsien.lin-+wT8y+m8/X5BDgjK7y7TUQ@public.gmane.org>, netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, brcm80211-dev-list-+wT8y+m8/X5BDgjK7y7TUQ@public.gmane.org, Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, Avri Altman <avri.altman-Sjgp3cTcYWE@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: ulf.hansson@linaro.org, chaotian.jing@mediatek.com, matthias.bgg@gmail.com, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org
+Cc: jjian zhou <jjian.zhou@mediatek.com>, srv_heupstream@mediatek.com, yong.mao@mediatek.com
 List-Id: linux-mmc@vger.kernel.org
 
-We want SDIO drivers to be able to temporarily stop retuning when the
-driver knows that the SDIO card is not in a state where retuning will
-work (maybe because the card is asleep).  We'll move the relevant
-functions to a place where drivers can call them.
+From: jjian zhou <jjian.zhou@mediatek.com>
 
-Signed-off-by: Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+SDIO IRQ is triggered by low level. It need disable SDIO IRQ
+detected function. Otherwise the interrupt register can't be cleared.
+It will process the interrupt more.
+
+Signed-off-by: Jjian Zhou <jjian.zhou@mediatek.com>
+Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
+Signed-off-by: Yong Mao <yong.mao@mediatek.com>
 ---
+ drivers/mmc/host/mtk-sd.c | 13 +++++++------
+ 1 file changed, 7 insertions(+), 6 deletions(-)
 
-Changes in v4:
-- Moved retune hold/release to SDIO API (Adrian).
+diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+index c518cc2..29992ae 100644
+--- a/drivers/mmc/host/mtk-sd.c
++++ b/drivers/mmc/host/mtk-sd.c
+@@ -1389,10 +1389,12 @@ static void __msdc_enable_sdio_irq(struct mmc_host *mmc, int enb)
+ 	struct msdc_host *host = mmc_priv(mmc);
 
-Changes in v3:
-- ("mmc: core: Export mmc_retune_hold_now() mmc_retune_release()") new for v3.
-
-Changes in v2: None
-
- drivers/mmc/core/sdio_io.c    | 40 +++++++++++++++++++++++++++++++++++
- include/linux/mmc/sdio_func.h |  3 +++
- 2 files changed, 43 insertions(+)
-
-diff --git a/drivers/mmc/core/sdio_io.c b/drivers/mmc/core/sdio_io.c
-index f822a9630b0e..1b6fe737bd72 100644
---- a/drivers/mmc/core/sdio_io.c
-+++ b/drivers/mmc/core/sdio_io.c
-@@ -15,6 +15,7 @@
- #include "sdio_ops.h"
- #include "core.h"
- #include "card.h"
-+#include "host.h"
- 
- /**
-  *	sdio_claim_host - exclusively claim a bus for a certain SDIO function
-@@ -770,3 +771,42 @@ void sdio_retune_crc_enable(struct sdio_func *func)
- 	func->card->host->retune_crc_disable = false;
+ 	spin_lock_irqsave(&host->lock, flags);
+-	if (enb)
++	if (enb) {
+ 		sdr_set_bits(host->base + MSDC_INTEN, MSDC_INTEN_SDIOIRQ);
+-	else
++		sdr_set_bits(host->base + SDC_CFG, SDC_CFG_SDIOIDE);
++	} else {
+ 		sdr_clr_bits(host->base + MSDC_INTEN, MSDC_INTEN_SDIOIRQ);
++	}
+ 	spin_unlock_irqrestore(&host->lock, flags);
  }
- EXPORT_SYMBOL_GPL(sdio_retune_crc_enable);
-+
-+/**
-+ *	sdio_retune_hold_now - start deferring retuning requests till release
-+ *	@func: SDIO function attached to host
-+ *
-+ *	This function can be called if it's currently a bad time to do
-+ *	a retune of the SDIO card.  Retune requests made during this time
-+ *	will be held and we'll actually do the retune sometime after the
-+ *	release.
-+ *
-+ *	This function could be useful if an SDIO card is in a power state
-+ *	where it can respond to a small subset of commands that doesn't
-+ *	include the retuning command.  Care should be taken when using
-+ *	this function since (presumably) the retuning request we might be
-+ *	deferring was made for a good reason.
-+ *
-+ *	This function should be called while the host is claimed.
-+ */
-+void sdio_retune_hold_now(struct sdio_func *func)
-+{
-+	mmc_retune_hold_now(func->card->host);
-+}
-+EXPORT_SYMBOL_GPL(sdio_retune_hold_now);
-+
-+/**
-+ *	sdio_retune_release - signal that it's OK to retune now
-+ *	@func: SDIO function attached to host
-+ *
-+ *	This is the complement to sdio_retune_hold_now().  Calling this
-+ *	function won't make a retune happen right away but will allow
-+ *	them to be scheduled normally.
-+ *
-+ *	This function should be called while the host is claimed.
-+ */
-+void sdio_retune_release(struct sdio_func *func)
-+{
-+	mmc_retune_release(func->card->host);
-+}
-+EXPORT_SYMBOL_GPL(sdio_retune_release);
-diff --git a/include/linux/mmc/sdio_func.h b/include/linux/mmc/sdio_func.h
-index 4820e6d09dac..5a177f7a83c3 100644
---- a/include/linux/mmc/sdio_func.h
-+++ b/include/linux/mmc/sdio_func.h
-@@ -170,4 +170,7 @@ extern int sdio_set_host_pm_flags(struct sdio_func *func, mmc_pm_flag_t flags);
- extern void sdio_retune_crc_disable(struct sdio_func *func);
- extern void sdio_retune_crc_enable(struct sdio_func *func);
- 
-+extern void sdio_retune_hold_now(struct sdio_func *func);
-+extern void sdio_retune_release(struct sdio_func *func);
-+
- #endif /* LINUX_MMC_SDIO_FUNC_H */
--- 
-2.22.0.rc2.383.gf4fbbf30c2-goog
+
+@@ -1422,6 +1424,8 @@ static irqreturn_t msdc_irq(int irq, void *dev_id)
+ 		spin_lock_irqsave(&host->lock, flags);
+ 		events = readl(host->base + MSDC_INT);
+ 		event_mask = readl(host->base + MSDC_INTEN);
++		if ((events & event_mask) & MSDC_INT_SDIOIRQ)
++			sdr_clr_bits(host->base + SDC_CFG, SDC_CFG_SDIOIDE);
+ 		/* clear interrupts */
+ 		writel(events & event_mask, host->base + MSDC_INT);
+
+@@ -1572,10 +1576,7 @@ static void msdc_init_hw(struct msdc_host *host)
+ 	sdr_set_bits(host->base + SDC_CFG, SDC_CFG_SDIO);
+
+ 	/* Config SDIO device detect interrupt function */
+-	if (host->mmc->caps & MMC_CAP_SDIO_IRQ)
+-		sdr_set_bits(host->base + SDC_CFG, SDC_CFG_SDIOIDE);
+-	else
+-		sdr_clr_bits(host->base + SDC_CFG, SDC_CFG_SDIOIDE);
++	sdr_clr_bits(host->base + SDC_CFG, SDC_CFG_SDIOIDE);
+
+ 	/* Configure to default data timeout */
+ 	sdr_set_field(host->base + SDC_CFG, SDC_CFG_DTOC, 3);
+--
+1.9.1
