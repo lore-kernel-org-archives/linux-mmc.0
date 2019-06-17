@@ -1,16 +1,16 @@
 From: Yoshihiro Shimoda <yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
 Subject: RE: [RFC PATCH v6 1/5] iommu: add an exported function to get minimum
 	page size for a domain
-Date: Mon, 17 Jun 2019 05:08:32 +0000
-Message-ID: <OSBPR01MB359070B29BCDF41F5C5F92BAD8EB0@OSBPR01MB3590.jpnprd01.prod.outlook.com>
+Date: Mon, 17 Jun 2019 05:23:57 +0000
+Message-ID: <OSBPR01MB359067FF26C34F8D8090D606D8EB0@OSBPR01MB3590.jpnprd01.prod.outlook.com>
 References: <1560421215-10750-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
 	<1560421215-10750-2-git-send-email-yoshihiro.shimoda.uh@renesas.com>
-	<20190613193759.GB6863@kunai>
+	<5e295ec3-39c9-de8a-a649-0aeeb0078ae3@arm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-In-Reply-To: <20190613193759.GB6863@kunai>
+In-Reply-To: <5e295ec3-39c9-de8a-a649-0aeeb0078ae3-5wv7dgnIgG8@public.gmane.org>
 Content-Language: ja-JP
 List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
 	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
@@ -21,49 +21,73 @@ List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
 	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
 Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
 Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>
-Cc: "axboe-tSWWG44O7X1aa/9Udqfwiw@public.gmane.org" <axboe-tSWWG44O7X1aa/9Udqfwiw@public.gmane.org>, "linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org" <wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org>, "iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org" <iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>, "hch-jcswGhMUV9g@public.gmane.org" <hch-jcswGhMUV9g@public.gmane.org>
+To: Robin Murphy <robin.murphy-5wv7dgnIgG8@public.gmane.org>
+Cc: "axboe-tSWWG44O7X1aa/9Udqfwiw@public.gmane.org" <axboe-tSWWG44O7X1aa/9Udqfwiw@public.gmane.org>, "linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org" <wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org>, "iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org" <iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>, "hch-jcswGhMUV9g@public.gmane.org" <hch-jcswGhMUV9g@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Wolfram-san,
-
-> From: Wolfram Sang, Sent: Friday, June 14, 2019 4:38 AM
-> 
-> On Thu, Jun 13, 2019 at 07:20:11PM +0900, Yoshihiro Shimoda wrote:
-> > This patch adds an exported function to get minimum page size for
-> > a domain. This patch also modifies similar codes on the iommu.c.
-> >
-> > Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
-> > ---
-> >  drivers/iommu/iommu.c | 18 +++++++++++++++---
-> >  include/linux/iommu.h |  1 +
-> >  2 files changed, 16 insertions(+), 3 deletions(-)
-> >
-> > diff --git a/drivers/iommu/iommu.c b/drivers/iommu/iommu.c
-> > index 2a90638..7ed16af 100644
-> > --- a/drivers/iommu/iommu.c
-> > +++ b/drivers/iommu/iommu.c
-> > @@ -280,6 +280,18 @@ iommu_insert_device_resv_regions(struct list_head *dev_resv_regions,
-> >  	return ret;
-> >  }
-> >
-> > +/**
-> > + * iommu_get_minimum_page_size - get minimum page size for a domain
-> > + * @domain: the domain
-> > + *
-> > + * Allow iommu driver to get a minimum page size for a domain.
-> > + */
-> > +unsigned long iommu_get_minimum_page_size(struct iommu_domain *domain)
-> > +{
-> > +	return 1UL << __ffs(domain->pgsize_bitmap);
-> > +}
-> > +EXPORT_SYMBOL_GPL(iommu_get_minimum_page_size);
-> 
-> What about making this a 'static inline' in the iommu header file? I'd
-> think it is simple enough and would save us the EXPORT symbol.
-
-Thank you for the review. I think so. I'll use 'static inline' instead of
-EXPORT symbol.
-
-Best regards,
-Yoshihiro Shimoda
+SGkgUm9iaW4sDQoNCj4gRnJvbTogUm9iaW4gTXVycGh5LCBTZW50OiBGcmlkYXksIEp1bmUgMTQs
+IDIwMTkgNjo0MSBQTQ0KPiANCj4gT24gMTMvMDYvMjAxOSAxMToyMCwgWW9zaGloaXJvIFNoaW1v
+ZGEgd3JvdGU6DQo+ID4gVGhpcyBwYXRjaCBhZGRzIGFuIGV4cG9ydGVkIGZ1bmN0aW9uIHRvIGdl
+dCBtaW5pbXVtIHBhZ2Ugc2l6ZSBmb3INCj4gPiBhIGRvbWFpbi4gVGhpcyBwYXRjaCBhbHNvIG1v
+ZGlmaWVzIHNpbWlsYXIgY29kZXMgb24gdGhlIGlvbW11LmMuDQo+IA0KPiBIZWgsIHNlZWluZyB0
+aGlzIGdhdmUgbWUgYSBnZW51aW5lIGTDqWrDoCB2dSBtb21lbnQuLi4NCj4gDQo+IC4uLmJ1dCBp
+dCB0dXJucyBvdXQgSSBhY3R1YWxseSAqaGF2ZSogcmV2aWV3ZWQgdGhpcyBwYXRjaCBiZWZvcmUg
+OikNCj4gDQo+IGh0dHBzOi8vbG9yZS5rZXJuZWwub3JnL2xrbWwvMDVlY2E2MDEtMDI2NC04MTQx
+LWNlZWItN2VmN2FkNWQ1NjUwQGFybS5jb20vDQoNClRoYW5rIHlvdSBmb3IgdGhlIGluZm9ybWF0
+aW9uIDopDQpJIHJlYWxpemVkIG15IHBhdGNoIHNob3VsZCBoYXZlIHRha2VuIGNhcmUgb2YgdGhl
+IENPTkZJR19JUE1NVV9BUEk9biBjYXNlLg0KDQpIb3dldmVyLCB0aGUgbGF0ZXN0IHBhdGNoIHNl
+cmllcyBkb2Vzbid0IGhhdmUgc3VjaCBhIHBhdGNoLiBTbywgSSdsbCBrZWVwIHRoaXMNCm15IHBh
+dGNoIG9uIG5leHQgcGF0Y2ggdmVyc2lvbi4NCmh0dHBzOi8vbG9yZS5rZXJuZWwub3JnL2xrbWwv
+MjAxOTA2MDMwMTE2MjAuMzE5OTktMS1iYW9sdS5sdUBsaW51eC5pbnRlbC5jb20vDQoNCkJlc3Qg
+cmVnYXJkcywNCllvc2hpaGlybyBTaGltb2RhDQoNCj4gUm9iaW4uDQo+IA0KPiA+IFNpZ25lZC1v
+ZmYtYnk6IFlvc2hpaGlybyBTaGltb2RhIDx5b3NoaWhpcm8uc2hpbW9kYS51aEByZW5lc2FzLmNv
+bT4NCj4gPiAtLS0NCj4gPiAgIGRyaXZlcnMvaW9tbXUvaW9tbXUuYyB8IDE4ICsrKysrKysrKysr
+KysrKy0tLQ0KPiA+ICAgaW5jbHVkZS9saW51eC9pb21tdS5oIHwgIDEgKw0KPiA+ICAgMiBmaWxl
+cyBjaGFuZ2VkLCAxNiBpbnNlcnRpb25zKCspLCAzIGRlbGV0aW9ucygtKQ0KPiA+DQo+ID4gZGlm
+ZiAtLWdpdCBhL2RyaXZlcnMvaW9tbXUvaW9tbXUuYyBiL2RyaXZlcnMvaW9tbXUvaW9tbXUuYw0K
+PiA+IGluZGV4IDJhOTA2MzguLjdlZDE2YWYgMTAwNjQ0DQo+ID4gLS0tIGEvZHJpdmVycy9pb21t
+dS9pb21tdS5jDQo+ID4gKysrIGIvZHJpdmVycy9pb21tdS9pb21tdS5jDQo+ID4gQEAgLTI4MCw2
+ICsyODAsMTggQEAgaW9tbXVfaW5zZXJ0X2RldmljZV9yZXN2X3JlZ2lvbnMoc3RydWN0IGxpc3Rf
+aGVhZCAqZGV2X3Jlc3ZfcmVnaW9ucywNCj4gPiAgIAlyZXR1cm4gcmV0Ow0KPiA+ICAgfQ0KPiA+
+DQo+ID4gKy8qKg0KPiA+ICsgKiBpb21tdV9nZXRfbWluaW11bV9wYWdlX3NpemUgLSBnZXQgbWlu
+aW11bSBwYWdlIHNpemUgZm9yIGEgZG9tYWluDQo+ID4gKyAqIEBkb21haW46IHRoZSBkb21haW4N
+Cj4gPiArICoNCj4gPiArICogQWxsb3cgaW9tbXUgZHJpdmVyIHRvIGdldCBhIG1pbmltdW0gcGFn
+ZSBzaXplIGZvciBhIGRvbWFpbi4NCj4gPiArICovDQo+ID4gK3Vuc2lnbmVkIGxvbmcgaW9tbXVf
+Z2V0X21pbmltdW1fcGFnZV9zaXplKHN0cnVjdCBpb21tdV9kb21haW4gKmRvbWFpbikNCj4gPiAr
+ew0KPiA+ICsJcmV0dXJuIDFVTCA8PCBfX2Zmcyhkb21haW4tPnBnc2l6ZV9iaXRtYXApOw0KPiA+
+ICt9DQo+ID4gK0VYUE9SVF9TWU1CT0xfR1BMKGlvbW11X2dldF9taW5pbXVtX3BhZ2Vfc2l6ZSk7
+DQo+ID4gKw0KPiA+ICAgaW50IGlvbW11X2dldF9ncm91cF9yZXN2X3JlZ2lvbnMoc3RydWN0IGlv
+bW11X2dyb3VwICpncm91cCwNCj4gPiAgIAkJCQkgc3RydWN0IGxpc3RfaGVhZCAqaGVhZCkNCj4g
+PiAgIHsNCj4gPiBAQCAtNTU4LDcgKzU3MCw3IEBAIHN0YXRpYyBpbnQgaW9tbXVfZ3JvdXBfY3Jl
+YXRlX2RpcmVjdF9tYXBwaW5ncyhzdHJ1Y3QgaW9tbXVfZ3JvdXAgKmdyb3VwLA0KPiA+DQo+ID4g
+ICAJQlVHX09OKCFkb21haW4tPnBnc2l6ZV9iaXRtYXApOw0KPiA+DQo+ID4gLQlwZ19zaXplID0g
+MVVMIDw8IF9fZmZzKGRvbWFpbi0+cGdzaXplX2JpdG1hcCk7DQo+ID4gKwlwZ19zaXplID0gaW9t
+bXVfZ2V0X21pbmltdW1fcGFnZV9zaXplKGRvbWFpbik7DQo+ID4gICAJSU5JVF9MSVNUX0hFQUQo
+Jm1hcHBpbmdzKTsNCj4gPg0KPiA+ICAgCWlvbW11X2dldF9yZXN2X3JlZ2lvbnMoZGV2LCAmbWFw
+cGluZ3MpOw0KPiA+IEBAIC0xNTk1LDcgKzE2MDcsNyBAQCBpbnQgaW9tbXVfbWFwKHN0cnVjdCBp
+b21tdV9kb21haW4gKmRvbWFpbiwgdW5zaWduZWQgbG9uZyBpb3ZhLA0KPiA+ICAgCQlyZXR1cm4g
+LUVJTlZBTDsNCj4gPg0KPiA+ICAgCS8qIGZpbmQgb3V0IHRoZSBtaW5pbXVtIHBhZ2Ugc2l6ZSBz
+dXBwb3J0ZWQgKi8NCj4gPiAtCW1pbl9wYWdlc3ogPSAxIDw8IF9fZmZzKGRvbWFpbi0+cGdzaXpl
+X2JpdG1hcCk7DQo+ID4gKwltaW5fcGFnZXN6ID0gaW9tbXVfZ2V0X21pbmltdW1fcGFnZV9zaXpl
+KGRvbWFpbik7DQo+ID4NCj4gPiAgIAkvKg0KPiA+ICAgCSAqIGJvdGggdGhlIHZpcnR1YWwgYWRk
+cmVzcyBhbmQgdGhlIHBoeXNpY2FsIG9uZSwgYXMgd2VsbCBhcw0KPiA+IEBAIC0xNjU1LDcgKzE2
+NjcsNyBAQCBzdGF0aWMgc2l6ZV90IF9faW9tbXVfdW5tYXAoc3RydWN0IGlvbW11X2RvbWFpbiAq
+ZG9tYWluLA0KPiA+ICAgCQlyZXR1cm4gMDsNCj4gPg0KPiA+ICAgCS8qIGZpbmQgb3V0IHRoZSBt
+aW5pbXVtIHBhZ2Ugc2l6ZSBzdXBwb3J0ZWQgKi8NCj4gPiAtCW1pbl9wYWdlc3ogPSAxIDw8IF9f
+ZmZzKGRvbWFpbi0+cGdzaXplX2JpdG1hcCk7DQo+ID4gKwltaW5fcGFnZXN6ID0gaW9tbXVfZ2V0
+X21pbmltdW1fcGFnZV9zaXplKGRvbWFpbik7DQo+ID4NCj4gPiAgIAkvKg0KPiA+ICAgCSAqIFRo
+ZSB2aXJ0dWFsIGFkZHJlc3MsIGFzIHdlbGwgYXMgdGhlIHNpemUgb2YgdGhlIG1hcHBpbmcsIG11
+c3QgYmUNCj4gPiBkaWZmIC0tZ2l0IGEvaW5jbHVkZS9saW51eC9pb21tdS5oIGIvaW5jbHVkZS9s
+aW51eC9pb21tdS5oDQo+ID4gaW5kZXggOTFhZjIyYS4uN2U1M2I0MyAxMDA2NDQNCj4gPiAtLS0g
+YS9pbmNsdWRlL2xpbnV4L2lvbW11LmgNCj4gPiArKysgYi9pbmNsdWRlL2xpbnV4L2lvbW11LmgN
+Cj4gPiBAQCAtMzY2LDYgKzM2Niw3IEBAIGV4dGVybiBpbnQgaW9tbXVfcmVxdWVzdF9kbWFfZG9t
+YWluX2Zvcl9kZXYoc3RydWN0IGRldmljZSAqZGV2KTsNCj4gPiAgIGV4dGVybiBzdHJ1Y3QgaW9t
+bXVfcmVzdl9yZWdpb24gKg0KPiA+ICAgaW9tbXVfYWxsb2NfcmVzdl9yZWdpb24ocGh5c19hZGRy
+X3Qgc3RhcnQsIHNpemVfdCBsZW5ndGgsIGludCBwcm90LA0KPiA+ICAgCQkJZW51bSBpb21tdV9y
+ZXN2X3R5cGUgdHlwZSk7DQo+ID4gK2V4dGVybiB1bnNpZ25lZCBsb25nIGlvbW11X2dldF9taW5p
+bXVtX3BhZ2Vfc2l6ZShzdHJ1Y3QgaW9tbXVfZG9tYWluICpkb21haW4pOw0KPiA+ICAgZXh0ZXJu
+IGludCBpb21tdV9nZXRfZ3JvdXBfcmVzdl9yZWdpb25zKHN0cnVjdCBpb21tdV9ncm91cCAqZ3Jv
+dXAsDQo+ID4gICAJCQkJCXN0cnVjdCBsaXN0X2hlYWQgKmhlYWQpOw0KPiA+DQo+ID4NCl9fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCmlvbW11IG1haWxpbmcg
+bGlzdAppb21tdUBsaXN0cy5saW51eC1mb3VuZGF0aW9uLm9yZwpodHRwczovL2xpc3RzLmxpbnV4
+Zm91bmRhdGlvbi5vcmcvbWFpbG1hbi9saXN0aW5mby9pb21tdQ==
