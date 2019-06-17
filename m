@@ -1,71 +1,134 @@
-From: Yoshihiro Shimoda <yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
-Subject: RE: [RFC PATCH v6 5/5] mmc: queue: Use bigger segments if IOMMU can
-	merge the segments
-Date: Mon, 17 Jun 2019 07:02:47 +0000
-Message-ID: <OSBPR01MB3590289F07A53A33296BC9D6D8EB0@OSBPR01MB3590.jpnprd01.prod.outlook.com>
-References: <1560421215-10750-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
-	<1560421215-10750-6-git-send-email-yoshihiro.shimoda.uh@renesas.com>
-	<20190614072459.GD8420@lst.de>
-	<OSBPR01MB3590FA5DB10D9EF34F551335D8EB0@OSBPR01MB3590.jpnprd01.prod.outlook.com>
-	<20190617065331.GA5456@lst.de>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 1/2] mmc: mediatek: fix SDIO IRQ interrupt handle flow
+Date: Mon, 17 Jun 2019 09:47:07 +0200
+Message-ID: <CAPDyKFqs2ngPfR_SM2MEssFVDDw=S7G_Oy7V7x-bP9_aFm5XDQ@mail.gmail.com>
+References: <1560489970-30467-1-git-send-email-jjian.zhou@mediatek.com>
+ <CAPDyKFrXU4bpKeB7Aa15j2nHqUCn-bk+YKn9_vkznmi+PS8H7A@mail.gmail.com> <1560751020.3103.25.camel@mhfsdcap03>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-In-Reply-To: <20190617065331.GA5456-jcswGhMUV9g@public.gmane.org>
-Content-Language: ja-JP
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>
-Cc: "axboe-tSWWG44O7X1aa/9Udqfwiw@public.gmane.org" <axboe-tSWWG44O7X1aa/9Udqfwiw@public.gmane.org>, "linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org" <wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org>, "iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org" <iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1560751020.3103.25.camel@mhfsdcap03>
+Sender: linux-kernel-owner@vger.kernel.org
+To: jjian zhou <jjian.zhou@mediatek.com>
+Cc: =?UTF-8?B?Q2hhb3RpYW4gSmluZyAo5LqV5pyd5aSpKQ==?= <Chaotian.Jing@mediatek.com>, Matthias Brugger <matthias.bgg@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, "linux-mediatek@lists.infradead.org" <linux-mediatek@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, =?UTF-8?B?WW9uZyBNYW8gKOavm+WLhyk=?= <yong.mao@mediatek.com>, srv_heupstream <srv_heupstream@mediatek.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Christoph,
-
-> From: Christoph Hellwig, Sent: Monday, June 17, 2019 3:54 PM
-> 
-> On Mon, Jun 17, 2019 at 06:46:33AM +0000, Yoshihiro Shimoda wrote:
-> > > can_merge seems a little too generic a name to me.  Maybe can_iommu_merge?
+On Mon, 17 Jun 2019 at 07:57, jjian zhou <jjian.zhou@mediatek.com> wrote:
+>
+> On Fri, 2019-06-14 at 17:46 +0800, Ulf Hansson wrote:
+> > On Fri, 14 Jun 2019 at 07:26, Jjian Zhou <jjian.zhou@mediatek.com> wrote:
+> > >
+> > > From: jjian zhou <jjian.zhou@mediatek.com>
+> > >
+> > > SDIO IRQ is triggered by low level. It need disable SDIO IRQ
+> > > detected function. Otherwise the interrupt register can't be cleared.
+> > > It will process the interrupt more.
+> > >
+> > > Signed-off-by: Jjian Zhou <jjian.zhou@mediatek.com>
+> > > Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
+> > > Signed-off-by: Yong Mao <yong.mao@mediatek.com>
+> > > ---
+> > >  drivers/mmc/host/mtk-sd.c | 13 +++++++------
+> > >  1 file changed, 7 insertions(+), 6 deletions(-)
+> > >
+> > > diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+> > > index c518cc2..29992ae 100644
+> > > --- a/drivers/mmc/host/mtk-sd.c
+> > > +++ b/drivers/mmc/host/mtk-sd.c
+> > > @@ -1389,10 +1389,12 @@ static void __msdc_enable_sdio_irq(struct mmc_host *mmc, int enb)
+> > >         struct msdc_host *host = mmc_priv(mmc);
+> > >
+> > >         spin_lock_irqsave(&host->lock, flags);
+> > > -       if (enb)
+> > > +       if (enb) {
+> > >                 sdr_set_bits(host->base + MSDC_INTEN, MSDC_INTEN_SDIOIRQ);
+> > > -       else
+> > > +               sdr_set_bits(host->base + SDC_CFG, SDC_CFG_SDIOIDE);
+> > > +       } else {
+> > >                 sdr_clr_bits(host->base + MSDC_INTEN, MSDC_INTEN_SDIOIRQ);
 > >
-> > I'll fix the name. Also, only the device_iommu_mapped() condition wiil cause
-> > a problem on iommu=pt [1]. So, I'll add another condition here.
-> 
-> Instead of adding another condition here I think we need to properly
-> abstract it out in the DMA layer.  E.g. have a
-
-Thank you for your comment and sample code! I'll add such functions
-on next patch series.
-
-Best regards,
-Yoshihiro Shimoda
-
-> unsigned long dma_get_merge_boundary(struct device *dev)
+> > Rather than clearing SDC_CFG_SDIOIDE in the irq handler, you need to
+> > do it here. As otherwise when the mmc core calls
+> > host->ops->enable_sdio_irq() to disable the SDIO IRQ, it may stay
+> > enabled.
+> >
+>
+> Thank you for your review.
+>
+> I remove the spin lock in "__msdc_enable_sdio_irq" and add
+> spin lock in "msdc_enable_sdio_irq". The modification of
+> "__msdc_enable_sdio_irq" and "msdc_enable_sdio_irq" is as following.
+>
+> static void __msdc_enable_sdio_irq(struct msdc_host *host, int enb)
 > {
-> 	const struct dma_map_ops *ops = get_dma_ops(dev);
-> 
-> 	if (!ops || !ops->get_merge_boundary)
-> 		return 0; /* can't merge */
-> 	return ops->get_merge_boundary(dev);
+>         if (enb) {
+>                 sdr_set_bits(host->base + MSDC_INTEN, MSDC_INTEN_SDIOIRQ);
+>                 sdr_set_bits(host->base + SDC_CFG, SDC_CFG_SDIOIDE);
+>         } else {
+>                 sdr_clr_bits(host->base + MSDC_INTEN, MSDC_INTEN_SDIOIRQ);
+>                 sdr_clr_bits(host->base + SDC_CFG, SDC_CFG_SDIOIDE);
+>         }
 > }
-> 
-> and then implement the method in dma-iommu.c.
-> 
-> blk_queue_can_use_iommu_merging then comes:
-> 
-> bool blk_queue_enable_iommu_merging(struct request_queue *q,
-> 		struct device *dev)
+>
+> static void msdc_enable_sdio_irq(struct mmc_host *mmc, int enb)
 > {
-> 	unsigned long boundary = dma_get_merge_boundary(dev);
-> 
-> 	if (!boundary)
-> 		return false;
-> 	blk_queue_virt_boundary(q, boundary);
-> 	return true;
+>         unsigned long flags;
+>         struct msdc_host *host = mmc_priv(mmc);
+>         spin_lock_irqsave(&host->lock, flags);;
+>         __msdc_enable_sdio_irq(host, enb);
+>         spin_unlock_irqrestore(&host->lock, flags);
+>
+>         if (enb)
+>                 pm_runtime_get_noresume(host->dev);
+>         else
+>                 pm_runtime_get_noidle(host->dev);
 > }
+>
+> > > +       }
+> > >         spin_unlock_irqrestore(&host->lock, flags);
+> > >  }
+> > >
+> > > @@ -1422,6 +1424,8 @@ static irqreturn_t msdc_irq(int irq, void *dev_id)
+> > >                 spin_lock_irqsave(&host->lock, flags);
+> > >                 events = readl(host->base + MSDC_INT);
+> > >                 event_mask = readl(host->base + MSDC_INTEN);
+> > > +               if ((events & event_mask) & MSDC_INT_SDIOIRQ)
+> > > +                       sdr_clr_bits(host->base + SDC_CFG, SDC_CFG_SDIOIDE);
+> >
+> > As stated above, I suggest you move this into __msdc_enable_sdio_irq()
+> > and thus call that function from here instead. Well, that doesn't work
+> > as is, because of the spin lock, so you rather need to make a
+> > sub-function of __msdc_enable_sdio_irq, that don't take/releases the
+> > lock.
+> >
+> > I hope that was clear. If not, I can post a patch to show you what I mean.
+> >
+>
+> I also modify this part handler in msdc_irq.
+>
+>         spin_lock_irqsave(&host->lock, flags);
+>         events = readl(host->base + MSDC_INT);
+>         event_mask = readl(host->base + MSDC_INTEN);
+>         if ((events & event_mask) & MSDC_INT_SDIOIRQ)
+>                 __msdc_enable_sdio_irq(host, 0);
+>         /* clear interrupts */
+>         writel(events & event_mask, host->base + MSDC_INT);
+>
+>         mrq = host->mrq;
+>         cmd = host->cmd;
+>         data = host->data;
+>         spin_unlock_irqrestore(&host->lock, flags);
+>
+>         if ((events & event_mask) & MSDC_INT_SDIOIRQ)
+>                 sdio_signal_irq(host->mmc);
+>
+> I also will add spin lock in the "msdc_ack_sdio_irq".
+>
+> Looking forward to your suggestions.
+
+Seems reasonable, please post a new version, then I will review again.
+
+[...]
+
+Kind regards
+Uffe
