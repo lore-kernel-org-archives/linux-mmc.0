@@ -1,59 +1,87 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 3/3] mmc: sdhci-of-arasan: Add support for ZynqMP Platform
- Tap Delays Setup
-Date: Mon, 17 Jun 2019 16:58:47 +0200
-Message-ID: <CAPDyKFp6O8rPZDZS4iKJam2+tXeen_ZMOXKw=WVzJNpBXcSc9g@mail.gmail.com>
-References: <1560247011-26369-1-git-send-email-manish.narani@xilinx.com>
- <1560247011-26369-4-git-send-email-manish.narani@xilinx.com>
- <CAPDyKFrJwpwUUX_q2kcR9QY_fv9Lgos+ixPmU6JMeJVqJAiFpg@mail.gmail.com>
- <5feac3fb-bef3-b7d1-57d6-81e115e1f555@xilinx.com> <CAPDyKFp_ZvSjFp2FGonzGsnc9xPyZ7qOCaRnX1SimBxLpfz9-Q@mail.gmail.com>
- <948514a0-e310-75fd-e8a8-6ef8bb14e41f@xilinx.com>
+From: Douglas Anderson <dianders@chromium.org>
+Subject: [PATCH v5 0/5] brcmfmac: sdio: Deal better w/ transmission errors related to idle
+Date: Mon, 17 Jun 2019 10:56:48 -0700
+Message-ID: <20190617175653.21756-1-dianders@chromium.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <948514a0-e310-75fd-e8a8-6ef8bb14e41f@xilinx.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Michal Simek <michal.simek@xilinx.com>
-Cc: Manish Narani <manish.narani@xilinx.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Adrian Hunter <adrian.hunter@intel.com>, rajan.vaja@xilinx.com, jolly.shah@xilinx.com, nava.manne@xilinx.com, Olof Johansson <olof@lixom.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>
+Content-Transfer-Encoding: 8bit
+Return-path: <netdev-owner@vger.kernel.org>
+Sender: netdev-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Kalle Valo <kvalo@codeaurora.org>, Adrian Hunter <adrian.hunter@intel.com>, Arend van Spriel <arend.vanspriel@broadcom.com>
+Cc: brcm80211-dev-list.pdl@broadcom.com, linux-rockchip@lists.infradead.org, Double Lo <double.lo@cypress.com>, briannorris@chromium.org, linux-wireless@vger.kernel.org, Naveen Gupta <naveen.gupta@cypress.com>, Madhan Mohan R <madhanmohan.r@cypress.com>, mka@chromium.org, Wright Feng <wright.feng@cypress.com>, Chi-Hsien Lin <chi-hsien.lin@cypress.com>, netdev@vger.kernel.org, brcm80211-dev-list@cypress.com, Douglas Anderson <dianders@chromium.org>, YueHaibing <yuehaibing@huawei.com>, Allison Randal <allison@lohutok.net>, Thomas Gleixner <tglx@linutronix.de>, Hante Meuleman <hante.meuleman@broadcom.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, =?UTF-8?q?Niklas=20S=C3=B6derlund?= <niklas.soderlund+renesas@ragnatech.se>, Ritesh Harjani <riteshh@co>
 List-Id: linux-mmc@vger.kernel.org
 
-[...]
+This series attempts to deal better with the expected transmission
+errors related to the idle states (handled by the Always-On-Subsystem
+or AOS) on the SDIO-based WiFi on rk3288-veyron-minnie,
+rk3288-veyron-speedy, and rk3288-veyron-mickey.
 
-> >>
-> >>
-> >>> In regards to the mmc data part, I suggest to drop the
-> >>> ->set_tap_delay() callback, but rather use a boolean flag to indicate
-> >>> whether clock phases needs to be changed for the variant. Potentially
-> >>> that could even be skipped and instead call clk_set_phase()
-> >>> unconditionally, as the clock core deals fine with clock providers
-> >>> that doesn't support the ->set_phase() callback.
-> >>
-> >> In connection to another version of this driver for latest Xilinx chip
-> >> it would be better to keep set_tap_delay callback in the driver. The
-> >> reason is that new chip/ip is capable to setup tap delays directly
-> >> without asking firmware to do it. That's why for versal IP there is a
-> >> need to call different setup_tap_delay function.
-> >
-> > The ->set_tap_delay() callback is for ZyncMp pointing to
-> > sdhci_arasan_zynqmp_set_tap_delay(). This function calls the
-> > clk_set_phase() API.
-> >
-> > What does ->set_tap_delay() do for the latest version?
->
-> There is different set of default tap delays which should be programmed
-> and it is done just via writing to registers which are the part of
-> controller address space.
+Some details about those errors can be found in
+<https://crbug.com/960222>, but to summarize it here: if we try to
+send the wakeup command to the WiFi card at the same time it has
+decided to wake up itself then it will behave badly on the SDIO bus.
+This can cause timeouts or CRC errors.
 
-Okay, I see.
+When I tested on 4.19 and 4.20 these CRC errors can be seen to cause
+re-tuning.  Since I am currently developing on 4.19 this was the
+original problem I attempted to solve.
 
-Not sure what makes most sense to do here, but it sounds to me like
-another ->set_phase() callback should be implemented for the clock
-provider. In other words, calling clk_set_phase() should continue to
-works just fine for this case as well. If it turns out to be
-inconvenient, we can always add the ->set_tap_delay() at a later point
-when it makes more sense.
+On mainline it turns out that you don't see the retuning errors but
+you see tons of spam about timeouts trying to wakeup from sleep.  I
+tracked down the commit that was causing that and have partially
+reverted it here.  I have no real knowledge about Broadcom WiFi, but
+the commit that was causing problems sounds (from the descriptioin) to
+be a hack commit penalizing all Broadcom WiFi users because of a bug
+in a Cypress SD controller.  I will let others comment if this is
+truly the case and, if so, what the right solution should be.
 
-[...]
+For v3 of this series I have added 2 patches to the end of the series
+to address errors that would show up on systems with these same SDIO
+WiFi cards when used on controllers that do periodic retuning.  These
+systems need an extra fix to prevent the retuning from happening when
+the card is asleep.
 
-Kind regards
-Uffe
+I believe v5 of this series is all ready to go assuming Kalle Valo is
+good with it.  I've added after-the-cut notes to patches awaiting his
+Ack and have added other tags collected so far.
+
+Changes in v5:
+- Add missing sdio_retune_crc_enable() in comments (Ulf).
+- /s/reneable/re-enable (Ulf).
+- Remove leftover prototypes: mmc_expect_errors_begin() / end() (Ulf).
+- Rewording of "sleep command" in commit message (Arend).
+
+Changes in v4:
+- Moved to SDIO API only (Adrian, Ulf).
+- Renamed to make it less generic, now retune_crc_disable (Ulf).
+- Function header makes it clear host must be claimed (Ulf).
+- No more WARN_ON (Ulf).
+- Adjust to API rename (Adrian, Ulf).
+- Moved retune hold/release to SDIO API (Adrian).
+- Adjust to API rename (Adrian).
+
+Changes in v3:
+- Took out the spinlock since I believe this is all in one context.
+- Expect errors for all of brcmf_sdio_kso_control() (Adrian).
+- ("mmc: core: Export mmc_retune_hold_now() mmc_retune_release()") new for v3.
+- ("brcmfmac: sdio: Don't tune while the card is off") new for v3.
+
+Changes in v2:
+- A full revert, not just a partial one (Arend).  ...with explicit Cc.
+- Updated commit message to clarify based on discussion of v1.
+
+Douglas Anderson (5):
+  Revert "brcmfmac: disable command decode in sdio_aos"
+  mmc: core: API to temporarily disable retuning for SDIO CRC errors
+  brcmfmac: sdio: Disable auto-tuning around commands expected to fail
+  mmc: core: Add sdio_retune_hold_now() and sdio_retune_release()
+  brcmfmac: sdio: Don't tune while the card is off
+
+ drivers/mmc/core/core.c                       |  5 +-
+ drivers/mmc/core/sdio_io.c                    | 77 +++++++++++++++++++
+ .../broadcom/brcm80211/brcmfmac/sdio.c        | 17 ++--
+ include/linux/mmc/host.h                      |  1 +
+ include/linux/mmc/sdio_func.h                 |  6 ++
+ 5 files changed, 99 insertions(+), 7 deletions(-)
+
+-- 
+2.22.0.410.gd8fdbe21b5-goog
