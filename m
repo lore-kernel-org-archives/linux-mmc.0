@@ -1,52 +1,66 @@
-From: Kashyap Desai <kashyap.desai@broadcom.com>
-Subject: RE: [PATCH 10/13] megaraid_sas: set virt_boundary_mask in the scsi host
-Date: Mon, 17 Jun 2019 14:40:25 +0530
-Message-ID: <e7443be50725bbdcdb6f1f4cc73955aa@mail.gmail.com>
-References: <20190605190836.32354-1-hch@lst.de> <20190605190836.32354-11-hch@lst.de>
- <cd713506efb9579d1f69a719d831c28d@mail.gmail.com> <20190608081400.GA19573@lst.de>
- <98f6557ae91a7cdfe8069fcf7d788c88@mail.gmail.com> <20190617084433.GA7969@lst.de>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: core: Prevent processing SDIO IRQs when the card is suspended
+Date: Mon, 17 Jun 2019 11:56:20 +0200
+Message-ID: <CAPDyKFoyq5__e-2ZSZMzMzBg3X=7zou6wQ4J6o57a0CfTvEO7g@mail.gmail.com>
+References: <20190611123221.11580-1-ulf.hansson@linaro.org>
+ <CAD=FV=XBVRsdiOD0vhgTvMXmqm=fzy9Bzd_x=E1TNPBsT_D-tQ@mail.gmail.com>
+ <CAPDyKFqR-xSKdYZYBTK5kKOt1dk7dx_BjedHiDOKs7-X4od=dg@mail.gmail.com>
+ <CAD=FV=WODbZa1fBrLbJBsd77xn5ekHWjks-ydxOSzjdBK83Rmg@mail.gmail.com>
+ <CAPDyKFpqk4ZcVTqifnbnW1WgNfx9ZNebCttUPcK_e9KWqpDMjQ@mail.gmail.com> <CAD=FV=Ujb=_jEFMdxLPW6tYwb9DZo5-RZ8BVuyq5DdFQ5jJbQw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190617084433.GA7969@lst.de>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Christoph Hellwig <hch@lst.de>
-Cc: Jens Axboe <axboe@kernel.dk>, Sebastian Ott <sebott@linux.ibm.com>, Sagi Grimberg <sagi@grimberg.me>, Max Gurtovoy <maxg@mellanox.com>, Bart Van Assche <bvanassche@acm.org>, Ulf Hansson <ulf.hansson@linaro.org>, Alan Stern <stern@rowland.harvard.edu>, Oliver Neukum <oneukum@suse.com>, linux-block@vger.kernel.org, linux-rdma@vger.kernel.org, linux-mmc@vger.kernel.org, linux-nvme@lists.infradead.org, linux-scsi@vger.kernel.org, "PDL,MEGARAIDLINUX" <megaraidlinux.pdl@broadcom.com>, PDL-MPT-FUSIONLINUX <mpt-fusionlinux.pdl@broadcom.com>, linux-hyperv@vger.kernel.org, linux-usb@vger.kernel.org, usb-storage@lists.one-eyed-alien.net, linux-kernel@vger.kernel.org
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <CAD=FV=Ujb=_jEFMdxLPW6tYwb9DZo5-RZ8BVuyq5DdFQ5jJbQw@mail.gmail.com>
+Sender: stable-owner@vger.kernel.org
+To: Doug Anderson <dianders@chromium.org>
+Cc: Linux MMC List <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Brian Norris <briannorris@chromium.org>, Shawn Lin <shawn.lin@rock-chips.com>, Guenter Roeck <groeck@chromium.org>, Heiko Stuebner <heiko@sntech.de>, Kalle Valo <kvalo@codeaurora.org>, linux-wireless <linux-wireless@vger.kernel.org>, "# 4.0+" <stable@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
+On Fri, 14 Jun 2019 at 17:42, Doug Anderson <dianders@chromium.org> wrote:
 >
-> On Fri, Jun 14, 2019 at 01:28:47AM +0530, Kashyap Desai wrote:
-> > Is there any changes in API  blk_queue_virt_boundary? I could not find
-> > relevant code which account for this. Can you help ?
-> > Which git repo shall I use for testing ? That way I can confirm, I
-> > didn't miss relevant changes.
+> Hi,
 >
-> Latest mainline plus the series (which is about to get resent).
-> blk_queue_virt_boundary now forced an unlimited max_hw_sectors as that
-is
-> how PRP-like schemes work, to work around a block driver merging bug.
-But
-> we also need to communicate that limit to the DMA layer so that we don't
-set
-> a smaller iommu segment size limitation.
+> On Fri, Jun 14, 2019 at 4:56 AM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> >
+> > > I was more worried about the safety of mmc_card_set_suspended()
+> > > itself.  That is:
+> > >
+> > > #define mmc_card_set_suspended(c) ((c)->state |= MMC_STATE_SUSPENDED)
+> > >
+> > > ...so it's doing a read-modify-write of "state".  Is that safe to do
+> > > without any type of locking?
+> >
+> > In this case, yes I think so.
+> >
+> > The point is, it really doesn't matter if the reader (work or thread),
+> > reads a non-updated value, because the synchronization is managed by
+> > the later mmc_claim_host() and the cancel_delayed_work_sync().
 >
-> > >From your above explanation, it means (after this patch) max segment
-> > >size
-> > of the MR controller will be set to 4K.
-> > Earlier it is possible to receive single SGE of 64K datalength (Since
-> > max seg size was 64K), but now the same buffer will reach the driver
-> > having 16 SGEs (Each SGE will contain 4K length).
+> If this were just an "int" then perhaps, but this is a bitfield.  So
+> if someone else updates the bitfield at the same time then we can
+> fully clobber their modification or they can clobber ours, right?
 >
-> No, there is no more limit for the size of the segment at all, as for
-PRPs each
-> PRP is sort of a segment from the hardware perspective.
-> We just require the segments to not have gaps, as PRPs don't allow for
-that.
-Thanks for clarification. I have also observed that max_segment_size Is
-unchanged and it is 64K.
+> task 1: load "state" from memory into CPU register on cpu0
+> task 2: load "state" from memory into CPU register on cpu1
+> task 1: OR in MMC_CARD_REMOVED
+> task 1: write "state" from CPU register on cpu0
+> task 2: OR in MMC_STATE_SUSPENDED
+> task 2: write "state" from CPU register on cpu1
 >
-> That being said I think these patches are wrong for the case of megaraid
-or
-> mpt having both NVMe and SAS/ATA devices behind a single controller.
-> Is that a valid configuration?
-Yes. This is a valid configuration.
+> ...so now we've clobbered MMC_CARD_REMOVED.  ...or am I just being
+> paranoid here and everything else in "state" is somehow guaranteed to
+> not be touched at the same time this function is running?
+
+I understand your concern. It's not obvious by looking at the code,
+but yes, there should be no other writing to the "state" at the same
+time mmc_sdio_supend() is running.
+
+MMC_CARD_REMOVED for example, is set from  _mmc_detect_card_removed(),
+but because the detect work (mmc_recan()) has been disabled and the
+block device driver has been suspended, it can't be called.
+
+Anyway, perhaps we get reasons to add a lock to the card struct when
+going forward, but at this point I think we are fine.
+
+Kind regards
+Uffe
