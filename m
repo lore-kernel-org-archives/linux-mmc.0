@@ -1,58 +1,50 @@
-From: Arend Van Spriel <arend.vanspriel@broadcom.com>
-Subject: Re: [PATCH v4 4/5] mmc: core: Add sdio_retune_hold_now() and sdio_retune_release()
-Date: Fri, 14 Jun 2019 19:17:10 +0200
-Message-ID: <16b56fe39f0.2764.9b12b7fc0a3841636cfb5e919b41b954@broadcom.com>
-References: <20190613234153.59309-1-dianders@chromium.org>
- <20190613234153.59309-5-dianders@chromium.org>
- <CAPDyKFrJ4+zn7Ak0tYHkBfXUtH3N7erb5R7Q+hgugchZmCRGrw@mail.gmail.com>
- <CAD=FV=Wuj=gANR2im_o4ZnoLEB+U6FqzKe4noLdQyi1vw+K2xw@mail.gmail.com>
+From: Yoshihiro Shimoda <yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
+Subject: RE: [RFC PATCH v6 4/5] mmc: tmio: Use dma_max_mapping_size() instead
+	of a workaround
+Date: Mon, 17 Jun 2019 04:25:55 +0000
+Message-ID: <OSBPR01MB35903578F49A50C64A9557CDD8EB0@OSBPR01MB3590.jpnprd01.prod.outlook.com>
+References: <1560421215-10750-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
+	<1560421215-10750-5-git-send-email-yoshihiro.shimoda.uh@renesas.com>
+	<20190613194547.GD6863@kunai>
 Mime-Version: 1.0
-Content-Type: text/plain; format=flowed; charset="us-ascii"
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAD=FV=Wuj=gANR2im_o4ZnoLEB+U6FqzKe4noLdQyi1vw+K2xw@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Doug Anderson <dianders@chromium.org>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
-Cc: Kalle Valo <kvalo@codeaurora.org>, brcm80211-dev-list.pdl@broadcom.com, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, Double Lo <double.lo@cypress.com>, Brian Norris <briannorris@chromium.org>, linux-wireless <linux-wireless@vger.kernel.org>, Naveen Gupta <naveen.gupta@cypress.com>, Madhan Mohan R <madhanmohan.r@cypress.com>, Matthias Kaehlcke <mka@chromium.org>, Wright Feng <wright.feng@cypress.com>, Chi-Hsien Lin <chi-hsien.lin@cypress.com>, netdev <netdev@vger.kernel.org>, brcm80211-dev-list <brcm80211-dev-list@cypress.com>, linux-mmc@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Thomas Gleixner <tglx@linutronix.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Avri Altman <avri.>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+In-Reply-To: <20190613194547.GD6863@kunai>
+Content-Language: ja-JP
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>
+Cc: "axboe-tSWWG44O7X1aa/9Udqfwiw@public.gmane.org" <axboe-tSWWG44O7X1aa/9Udqfwiw@public.gmane.org>, "linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org" <wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org>, "iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org" <iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>, "hch-jcswGhMUV9g@public.gmane.org" <hch-jcswGhMUV9g@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On June 14, 2019 6:38:51 PM Doug Anderson <dianders@chromium.org> wrote:
+Hi Wolfram-san,
 
-> Hi,
->
-> On Fri, Jun 14, 2019 at 5:10 AM Ulf Hansson <ulf.hansson@linaro.org> wrote:
->>
->> On Fri, 14 Jun 2019 at 01:42, Douglas Anderson <dianders@chromium.org> wrote:
->> >
->> > We want SDIO drivers to be able to temporarily stop retuning when the
->> > driver knows that the SDIO card is not in a state where retuning will
->> > work (maybe because the card is asleep).  We'll move the relevant
->> > functions to a place where drivers can call them.
->> >
->> > Signed-off-by: Douglas Anderson <dianders@chromium.org>
->>
->> This looks good to me.
->>
->> BTW, seems like this series is best funneled via my mmc tree, no? In
->> such case, I need acks for the brcmfmac driver patches.
->
-> For patch #1 I think it could just go in directly to the wireless
-> tree.  It should be fine to land the rest of the patches separately.
+> From: Wolfram Sang, Sent: Friday, June 14, 2019 4:46 AM
+> 
+> On Thu, Jun 13, 2019 at 07:20:14PM +0900, Yoshihiro Shimoda wrote:
+> > Since the commit 133d624b1cee ("dma: Introduce dma_max_mapping_size()")
+> > provides a helper function to get the max mapping size, we can use
+> > the function instead of the workaround code for swiotlb.
+> >
+> > Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
+> 
+> I love it! I'd really like to see this code go away. Do I get this right
+> that this patch is kinda independent of the reset of the series? Anyway:
 
-Agree.
+Thank you for your suggestion! I think so (because IOMMU and block patches seem
+to need update). I'll submit 3/5 and 4/5 patches as independent later.
 
-> For patch #2 - #5 then what you say makes sense to me.  I suppose
-> you'd want at least a Reviewed-by from Arend and an Ack from Kalle on
-> the Broadcom patches?
+> Acked-by: Wolfram Sang <wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org>
 
-Will do.
+Thank you for your Acked-by!
 
-> I'd also suggest that we Cc stable explicitly when applying.  That's
-> easy for #2 and #3 since they have a Fixes tag.  For #4 and #5 I guess
-> the question is how far back to go.  Maybe Adrian has an opinion here
-> since I think he's the one who experienced these problems.
-
-I see if I can come up wit a fixes tag for #5.
-
-Regards,
-Arend
+Best regards,
+Yoshihiro Shimoda
