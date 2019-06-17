@@ -1,42 +1,52 @@
-From: Christoph Hellwig <hch@lst.de>
-Subject: Re: [PATCH 10/13] megaraid_sas: set virt_boundary_mask in the scsi
- host
-Date: Mon, 17 Jun 2019 10:44:33 +0200
-Message-ID: <20190617084433.GA7969@lst.de>
-References: <20190605190836.32354-1-hch@lst.de> <20190605190836.32354-11-hch@lst.de> <cd713506efb9579d1f69a719d831c28d@mail.gmail.com> <20190608081400.GA19573@lst.de> <98f6557ae91a7cdfe8069fcf7d788c88@mail.gmail.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH v4 4/5] mmc: core: Add sdio_retune_hold_now() and
+ sdio_retune_release()
+Date: Mon, 17 Jun 2019 11:46:15 +0300
+Message-ID: <d5ce23c7-d6b2-87ea-c659-29ffc977bfad@intel.com>
+References: <20190613234153.59309-1-dianders@chromium.org>
+ <20190613234153.59309-5-dianders@chromium.org>
+ <CAPDyKFrJ4+zn7Ak0tYHkBfXUtH3N7erb5R7Q+hgugchZmCRGrw@mail.gmail.com>
+ <CAD=FV=Wuj=gANR2im_o4ZnoLEB+U6FqzKe4noLdQyi1vw+K2xw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <98f6557ae91a7cdfe8069fcf7d788c88@mail.gmail.com>
+In-Reply-To: <CAD=FV=Wuj=gANR2im_o4ZnoLEB+U6FqzKe4noLdQyi1vw+K2xw@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Kashyap Desai <kashyap.desai@broadcom.com>
-Cc: Christoph Hellwig <hch@lst.de>, Jens Axboe <axboe@kernel.dk>, Sebastian Ott <sebott@linux.ibm.com>, Sagi Grimberg <sagi@grimberg.me>, Max Gurtovoy <maxg@mellanox.com>, Bart Van Assche <bvanassche@acm.org>, Ulf Hansson <ulf.hansson@linaro.org>, Alan Stern <stern@rowland.harvard.edu>, Oliver Neukum <oneukum@suse.com>, linux-block@vger.kernel.org, linux-rdma@vger.kernel.org, linux-mmc@vger.kernel.org, linux-nvme@lists.infradead.org, linux-scsi@vger.kernel.org, "PDL,MEGARAIDLINUX" <megaraidlinux.pdl@broadcom.com>, PDL-MPT-FUSIONLINUX <mpt-fusionlinux.pdl@broadcom.com>, linux-hyperv@vger.kernel.org, linux-usb@vger.kernel.org, usb-storage@lists.one-eyed-alien.net, linux-kernel@vger.kernel.org
+To: Doug Anderson <dianders@chromium.org>, Ulf Hansson <ulf.hansson@linaro.org>, Arend van Spriel <arend.vanspriel@broadcom.com>
+Cc: Kalle Valo <kvalo@codeaurora.org>, brcm80211-dev-list.pdl@broadcom.com, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, Double Lo <double.lo@cypress.com>, Brian Norris <briannorris@chromium.org>, linux-wireless <linux-wireless@vger.kernel.org>, Naveen Gupta <naveen.gupta@cypress.com>, Madhan Mohan R <madhanmohan.r@cypress.com>, Matthias Kaehlcke <mka@chromium.org>, Wright Feng <wright.feng@cypress.com>, Chi-Hsien Lin <chi-hsien.lin@cypress.com>, netdev <netdev@vger.kernel.org>, brcm80211-dev-list <brcm80211-dev-list@cypress.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Thomas Gleixner <tglx@linutronix.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, Jun 14, 2019 at 01:28:47AM +0530, Kashyap Desai wrote:
-> Is there any changes in API  blk_queue_virt_boundary? I could not find
-> relevant code which account for this. Can you help ?
-> Which git repo shall I use for testing ? That way I can confirm, I didn't
-> miss relevant changes.
+On 14/06/19 7:38 PM, Doug Anderson wrote:
+> Hi,
+> 
+> On Fri, Jun 14, 2019 at 5:10 AM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>>
+>> On Fri, 14 Jun 2019 at 01:42, Douglas Anderson <dianders@chromium.org> wrote:
+>>>
+>>> We want SDIO drivers to be able to temporarily stop retuning when the
+>>> driver knows that the SDIO card is not in a state where retuning will
+>>> work (maybe because the card is asleep).  We'll move the relevant
+>>> functions to a place where drivers can call them.
+>>>
+>>> Signed-off-by: Douglas Anderson <dianders@chromium.org>
+>>
+>> This looks good to me.
+>>
+>> BTW, seems like this series is best funneled via my mmc tree, no? In
+>> such case, I need acks for the brcmfmac driver patches.
+> 
+> For patch #1 I think it could just go in directly to the wireless
+> tree.  It should be fine to land the rest of the patches separately.
+> 
+> For patch #2 - #5 then what you say makes sense to me.  I suppose
+> you'd want at least a Reviewed-by from Arend and an Ack from Kalle on
+> the Broadcom patches?
+> 
+> I'd also suggest that we Cc stable explicitly when applying.  That's
+> easy for #2 and #3 since they have a Fixes tag.  For #4 and #5 I guess
+> the question is how far back to go.  Maybe Adrian has an opinion here
+> since I think he's the one who experienced these problems.
 
-Latest mainline plus the series (which is about to get resent).
-blk_queue_virt_boundary now forced an unlimited max_hw_sectors as that
-is how PRP-like schemes work, to work around a block driver merging
-bug.  But we also need to communicate that limit to the DMA layer so
-that we don't set a smaller iommu segment size limitation.
-
-> >From your above explanation, it means (after this patch) max segment size
-> of the MR controller will be set to 4K.
-> Earlier it is possible to receive single SGE of 64K datalength (Since max
-> seg size was 64K), but now the same buffer will reach the driver having 16
-> SGEs (Each SGE will contain 4K length).
-
-No, there is no more limit for the size of the segment at all,
-as for PRPs each PRP is sort of a segment from the hardware perspective.
-We just require the segments to not have gaps, as PRPs don't allow for
-that.
-
-That being said I think these patches are wrong for the case of megaraid
-or mpt having both NVMe and SAS/ATA devices behind a single controller.
-Is that a valid configuration?
+V4 seemed to apply cleanly back to v4.18
