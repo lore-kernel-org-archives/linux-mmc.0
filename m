@@ -1,61 +1,48 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 0/4] Add Support for MMC in J721E
-Date: Mon, 17 Jun 2019 13:35:03 +0200
-Message-ID: <CAPDyKFqt9N+Hn-VhEr0ANv3zXLGyjCDEDiBgEx8FpLFBBzT0EA@mail.gmail.com>
-References: <20190604060914.10886-1-faiz_abbas@ti.com>
+Subject: Re: [PATCH V2 2/2] mmc: mediatek: fix SDIO IRQ detection issue
+Date: Mon, 17 Jun 2019 13:35:13 +0200
+Message-ID: <CAPDyKFoTBhCy2bB8uzzDTNMBPnNjD81134BGt2Op3USFCW1R7Q@mail.gmail.com>
+References: <1560769448-23070-1-git-send-email-jjian.zhou@mediatek.com> <1560769448-23070-2-git-send-email-jjian.zhou@mediatek.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20190604060914.10886-1-faiz_abbas@ti.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Faiz Abbas <faiz_abbas@ti.com>
-Cc: Nishanth Menon <nm@ti.com>, DTML <devicetree@vger.kernel.org>, Sekhar Nori <nsekhar@ti.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Rob Herring <robh+dt@kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1560769448-23070-2-git-send-email-jjian.zhou@mediatek.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Jjian Zhou <jjian.zhou@mediatek.com>
+Cc: Chaotian Jing <chaotian.jing@mediatek.com>, Matthias Brugger <matthias.bgg@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, linux-mediatek@lists.infradead.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Yong Mao <yong.mao@mediatek.com>, srv_heupstream <srv_heupstream@mediatek.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, 4 Jun 2019 at 08:09, Faiz Abbas <faiz_abbas@ti.com> wrote:
+On Mon, 17 Jun 2019 at 13:04, Jjian Zhou <jjian.zhou@mediatek.com> wrote:
 >
-> The following patches add driver support for MMC SDHCI interfaces on
-> TI's J721E devices. The 8 bit and 4 bit instances have phys which are
-> different from the am65x interfaces as well as different from each
-> other which leads to 3 different compatibles and a bunch of flags for
-> indicating the differences.
+> From: jjian zhou <jjian.zhou@mediatek.com>
 >
-> Depends on Nishanth's initial J721E patches here:
-> https://lore.kernel.org/patchwork/cover/1077382/
+> If cmd19 timeout or response crcerr occurs during execute_tuning(),
+> it need invoke msdc_reset_hw(). Otherwise SDIO IRQ can't be detected.
 >
-> Also depends on my fixes for AM65x driver here:
-> https://lore.kernel.org/patchwork/cover/1079924/
+> Signed-off-by: jjian zhou <jjian.zhou@mediatek.com>
+> Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
+> Signed-off-by: Yong Mao <yong.mao@mediatek.com>
+
+Applied for fixes and by adding a fixes/stable tag, thanks!
+
+
+> ---
+>  drivers/mmc/host/mtk-sd.c | 2 ++
+>  1 file changed, 2 insertions(+)
 >
-> Tested with: j721e-evm and am65x-evm.
->
-> DT patches will be added in a separate series.
->
-> Faiz Abbas (4):
->   dt-bindings: mmc: sdhci-am654: Document bindings for the host
->     controllers on TI's J721E devices.
->   mmc: sdhci_am654: Add Support for 8 bit IP on J721E
->   mmc: sdhci_am654: Add Support for 4 bit IP on J721E
->   arm64: defconfig: Add config for MMC on AM65x and J721E devices
->
->  .../devicetree/bindings/mmc/sdhci-am654.txt   |   9 +-
->  arch/arm64/configs/defconfig                  |   1 +
->  drivers/mmc/host/sdhci_am654.c                | 257 +++++++++++++-----
->  3 files changed, 204 insertions(+), 63 deletions(-)
+> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+> index fa7d420..ba1ad5e 100644
+> --- a/drivers/mmc/host/mtk-sd.c
+> +++ b/drivers/mmc/host/mtk-sd.c
+> @@ -1031,6 +1031,8 @@ static void msdc_request_done(struct msdc_host *host, struct mmc_request *mrq)
+>         msdc_track_cmd_data(host, mrq->cmd, mrq->data);
+>         if (mrq->data)
+>                 msdc_unprepare_data(host, mrq);
+> +       if (host->error)
+> +               msdc_reset_hw(host);
+>         mmc_request_done(host->mmc, mrq);
+>  }
 >
 > --
-> 2.19.2
+> 1.9.1
 >
-
-Patch 1->3 applied for next, patch is for arm-soc, thanks!
-
-Kind regards
-Uffe
