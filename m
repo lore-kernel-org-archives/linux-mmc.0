@@ -1,19 +1,17 @@
-From: Geert Uytterhoeven <geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org>
-Subject: Re: [RFC PATCH v6 4/5] mmc: tmio: Use dma_max_mapping_size() instead
-	of a workaround
-Date: Mon, 17 Jun 2019 08:23:24 +0200
-Message-ID: <CAMuHMdWPUZGFWeKzPK=zkwc5h2SD+aW6ULb8C2rDJSmTWNXjeA@mail.gmail.com>
+From: Yoshihiro Shimoda <yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
+Subject: RE: [RFC PATCH v6 3/5] block: add a helper function to merge the
+	segments by an IOMMU
+Date: Mon, 17 Jun 2019 06:29:31 +0000
+Message-ID: <OSBPR01MB3590A1AA199894E8220777EFD8EB0@OSBPR01MB3590.jpnprd01.prod.outlook.com>
 References: <1560421215-10750-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
-	<1560421215-10750-5-git-send-email-yoshihiro.shimoda.uh@renesas.com>
-	<CAMuHMdXYqgPRX1WfUTRsKHhnSok5vfnr4AY36=vXoUvAxcNyWQ@mail.gmail.com>
-	<20190614071800.GB8420@lst.de>
-	<CAMuHMdXm5RtDUL5Wkyd6aJihu9nykYOhRf7vN6hOtB-OO8CTQQ@mail.gmail.com>
-	<OSBPR01MB3590D4EF069F4554DA5D7ABBD8EB0@OSBPR01MB3590.jpnprd01.prod.outlook.com>
+	<1560421215-10750-4-git-send-email-yoshihiro.shimoda.uh@renesas.com>
+	<039d7388-ed24-c7e7-dd6a-656c719a5ed9@arm.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-In-Reply-To: <OSBPR01MB3590D4EF069F4554DA5D7ABBD8EB0-zhdMvvdcU0ZkIAJEWnuByncolHNk5qUtvxpqHgZTriW3zl9H0oFU5g@public.gmane.org>
+In-Reply-To: <039d7388-ed24-c7e7-dd6a-656c719a5ed9-5wv7dgnIgG8@public.gmane.org>
+Content-Language: ja-JP
 List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
 	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
@@ -23,67 +21,41 @@ List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
 	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
 Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
 Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Yoshihiro Shimoda <yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
-Cc: Jens Axboe <axboe-tSWWG44O7X1aa/9Udqfwiw@public.gmane.org>, Linux-Renesas <linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Wolfram Sang <wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org>, Linux IOMMU <iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>, Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>
+To: Robin Murphy <robin.murphy-5wv7dgnIgG8@public.gmane.org>
+Cc: "axboe-tSWWG44O7X1aa/9Udqfwiw@public.gmane.org" <axboe-tSWWG44O7X1aa/9Udqfwiw@public.gmane.org>, "linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org" <wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org>, "iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org" <iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>, "hch-jcswGhMUV9g@public.gmane.org" <hch-jcswGhMUV9g@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Shimoda-san,
+Hi Robin,
 
-On Mon, Jun 17, 2019 at 6:54 AM Yoshihiro Shimoda
-<yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org> wrote:
-> > From: Geert Uytterhoeven, Sent: Friday, June 14, 2019 4:27 PM
-> > On Fri, Jun 14, 2019 at 9:18 AM Christoph Hellwig wrote:
-> > > On Thu, Jun 13, 2019 at 10:35:44PM +0200, Geert Uytterhoeven wrote:
-> > > > I'm always triggered by the use of min_t() and other casts:
-> > > > mmc->max_blk_size and mmc->max_blk_count are both unsigned int.
-> > > > dma_max_mapping_size() returns size_t, which can be 64-bit.
-> > > >
-> > > >  1) Can the multiplication overflow?
-> > > >     Probably not, as per commit 2a55c1eac7882232 ("mmc: renesas_sdhi:
-> > > >     prevent overflow for max_req_size"), but I thought I'd better ask.
->
-> Geert-san:
->
-> I agree.
->
-> > > >  2) In theory, dma_max_mapping_size() can return a number that doesn't
-> > > >     fit in 32-bit, and will be truncated (to e.g. 0), leading to max_req_size
-> > > >     is zero?
->
-> Geert-san:
->
-> I agree. If dma_max_mapping_size() return 0x1_0000_0000, it will be truncated to 0
-> and then max_req_size is set to zero. It is a problem. Also, the second argument
-> "mmc->max_blk_size * mmc->max_blk_count" will not be overflow and then the value is
-> 0xffff_ffff or less. So, I also think this should use size_t instead of unsigned int.
->
-> > > This really should use a min_t on size_t.  Otherwise the patch looks
-> > > fine:
-> >
-> > Followed by another min() to make it fit in mmc->max_req_size, which is
-> > unsigned int.
->
-> Geert-san:
->
-> I'm afraid, but I cannot understand this means.
-> Is this patch is possible to be upstream? Or, do you have any concern?
+> From: Robin Murphy, Sent: Friday, June 14, 2019 6:55 PM
+> 
+> On 13/06/2019 11:20, Yoshihiro Shimoda wrote:
+<snip>
+> > +bool blk_queue_can_use_iommu_merging(struct request_queue *q,
+> > +				     struct device *dev)
+> > +{
+> > +	struct iommu_domain *domain;
+> > +
+> > +	/*
+> > +	 * If the device DMA is translated by an IOMMU, we can assume
+> > +	 * the device can merge the segments.
+> > +	 */
+> > +	if (!device_iommu_mapped(dev))
+> 
+> Careful here - I think this validates the comment I made when this
+> function was introduced, in that that name doesn't necesarily mean what
+> it sounds like it might mean - "iommu_mapped" was as close as we managed
+> to get to a convenient shorthand for "performs DMA through an
+> IOMMU-API-enabled IOMMU". Specifically, it does not imply that
+> translation is *currently* active; if you boot with "iommu=pt" or
+> equivalent this will still return true even though the device will be
+> using direct/SWIOTLB DMA ops without any IOMMU translation.
 
-Please disregard my last comment: as the value of "mmc->max_blk_size *
-mmc->max_blk_count" is always 0xffff_ffff or less, "min_t(size_t,
-mmc->max_blk_size * mmc->max_blk_count, dma_max_mapping_size(&pdev->dev))"
-will always be 0xffff_ffff or less, too, so there is no extra step needed
-to make it fit in mmc->max_req_size.
+Thank you for your comments. I understood the mean of "iommu_mapped" and
+this patch's condition causes a problem on iommu=pt.
+So, I'll add and additional condition like
+"domain->type == IOMMU_DOMAIN_DMA" to check whether the translation is
+currently active on the domain or not.
 
-
-Sorry for the confusion.
-
-Gr{oetje,eeting}s,
-
-                        Geert
-
--- 
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+Best regards,
+Yoshihiro Shimoda
