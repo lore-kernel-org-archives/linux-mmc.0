@@ -1,110 +1,42 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v4 4/5] mmc: core: Add sdio_retune_hold_now() and
- sdio_retune_release()
-Date: Mon, 17 Jun 2019 11:34:12 +0300
-Message-ID: <d46161e8-cf2b-0aa0-1445-2d92580bf1a6@intel.com>
-References: <20190613234153.59309-1-dianders@chromium.org>
- <20190613234153.59309-5-dianders@chromium.org>
+From: Christoph Hellwig <hch@lst.de>
+Subject: Re: [PATCH 10/13] megaraid_sas: set virt_boundary_mask in the scsi
+ host
+Date: Mon, 17 Jun 2019 10:44:33 +0200
+Message-ID: <20190617084433.GA7969@lst.de>
+References: <20190605190836.32354-1-hch@lst.de> <20190605190836.32354-11-hch@lst.de> <cd713506efb9579d1f69a719d831c28d@mail.gmail.com> <20190608081400.GA19573@lst.de> <98f6557ae91a7cdfe8069fcf7d788c88@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190613234153.59309-5-dianders@chromium.org>
-Content-Language: en-US
+Content-Disposition: inline
+In-Reply-To: <98f6557ae91a7cdfe8069fcf7d788c88@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Douglas Anderson <dianders@chromium.org>, Ulf Hansson <ulf.hansson@linaro.org>, Kalle Valo <kvalo@codeaurora.org>, Arend van Spriel <arend.vanspriel@broadcom.com>
-Cc: brcm80211-dev-list.pdl@broadcom.com, linux-rockchip@lists.infradead.org, Double Lo <double.lo@cypress.com>, briannorris@chromium.org, linux-wireless@vger.kernel.org, Naveen Gupta <naveen.gupta@cypress.com>, Madhan Mohan R <madhanmohan.r@cypress.com>, mka@chromium.org, Wright Feng <wright.feng@cypress.com>, Chi-Hsien Lin <chi-hsien.lin@cypress.com>, netdev@vger.kernel.org, brcm80211-dev-list@cypress.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Thomas Gleixner <tglx@linutronix.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Avri Altman <avri.altman@wdc.com>
+To: Kashyap Desai <kashyap.desai@broadcom.com>
+Cc: Christoph Hellwig <hch@lst.de>, Jens Axboe <axboe@kernel.dk>, Sebastian Ott <sebott@linux.ibm.com>, Sagi Grimberg <sagi@grimberg.me>, Max Gurtovoy <maxg@mellanox.com>, Bart Van Assche <bvanassche@acm.org>, Ulf Hansson <ulf.hansson@linaro.org>, Alan Stern <stern@rowland.harvard.edu>, Oliver Neukum <oneukum@suse.com>, linux-block@vger.kernel.org, linux-rdma@vger.kernel.org, linux-mmc@vger.kernel.org, linux-nvme@lists.infradead.org, linux-scsi@vger.kernel.org, "PDL,MEGARAIDLINUX" <megaraidlinux.pdl@broadcom.com>, PDL-MPT-FUSIONLINUX <mpt-fusionlinux.pdl@broadcom.com>, linux-hyperv@vger.kernel.org, linux-usb@vger.kernel.org, usb-storage@lists.one-eyed-alien.net, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 14/06/19 2:41 AM, Douglas Anderson wrote:
-> We want SDIO drivers to be able to temporarily stop retuning when the
-> driver knows that the SDIO card is not in a state where retuning will
-> work (maybe because the card is asleep).  We'll move the relevant
-> functions to a place where drivers can call them.
-> 
-> Signed-off-by: Douglas Anderson <dianders@chromium.org>
+On Fri, Jun 14, 2019 at 01:28:47AM +0530, Kashyap Desai wrote:
+> Is there any changes in API  blk_queue_virt_boundary? I could not find
+> relevant code which account for this. Can you help ?
+> Which git repo shall I use for testing ? That way I can confirm, I didn't
+> miss relevant changes.
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Latest mainline plus the series (which is about to get resent).
+blk_queue_virt_boundary now forced an unlimited max_hw_sectors as that
+is how PRP-like schemes work, to work around a block driver merging
+bug.  But we also need to communicate that limit to the DMA layer so
+that we don't set a smaller iommu segment size limitation.
 
-> ---
-> 
-> Changes in v4:
-> - Moved retune hold/release to SDIO API (Adrian).
-> 
-> Changes in v3:
-> - ("mmc: core: Export mmc_retune_hold_now() mmc_retune_release()") new for v3.
-> 
-> Changes in v2: None
-> 
->  drivers/mmc/core/sdio_io.c    | 40 +++++++++++++++++++++++++++++++++++
->  include/linux/mmc/sdio_func.h |  3 +++
->  2 files changed, 43 insertions(+)
-> 
-> diff --git a/drivers/mmc/core/sdio_io.c b/drivers/mmc/core/sdio_io.c
-> index f822a9630b0e..1b6fe737bd72 100644
-> --- a/drivers/mmc/core/sdio_io.c
-> +++ b/drivers/mmc/core/sdio_io.c
-> @@ -15,6 +15,7 @@
->  #include "sdio_ops.h"
->  #include "core.h"
->  #include "card.h"
-> +#include "host.h"
->  
->  /**
->   *	sdio_claim_host - exclusively claim a bus for a certain SDIO function
-> @@ -770,3 +771,42 @@ void sdio_retune_crc_enable(struct sdio_func *func)
->  	func->card->host->retune_crc_disable = false;
->  }
->  EXPORT_SYMBOL_GPL(sdio_retune_crc_enable);
-> +
-> +/**
-> + *	sdio_retune_hold_now - start deferring retuning requests till release
-> + *	@func: SDIO function attached to host
-> + *
-> + *	This function can be called if it's currently a bad time to do
-> + *	a retune of the SDIO card.  Retune requests made during this time
-> + *	will be held and we'll actually do the retune sometime after the
-> + *	release.
-> + *
-> + *	This function could be useful if an SDIO card is in a power state
-> + *	where it can respond to a small subset of commands that doesn't
-> + *	include the retuning command.  Care should be taken when using
-> + *	this function since (presumably) the retuning request we might be
-> + *	deferring was made for a good reason.
-> + *
-> + *	This function should be called while the host is claimed.
-> + */
-> +void sdio_retune_hold_now(struct sdio_func *func)
-> +{
-> +	mmc_retune_hold_now(func->card->host);
-> +}
-> +EXPORT_SYMBOL_GPL(sdio_retune_hold_now);
-> +
-> +/**
-> + *	sdio_retune_release - signal that it's OK to retune now
-> + *	@func: SDIO function attached to host
-> + *
-> + *	This is the complement to sdio_retune_hold_now().  Calling this
-> + *	function won't make a retune happen right away but will allow
-> + *	them to be scheduled normally.
-> + *
-> + *	This function should be called while the host is claimed.
-> + */
-> +void sdio_retune_release(struct sdio_func *func)
-> +{
-> +	mmc_retune_release(func->card->host);
-> +}
-> +EXPORT_SYMBOL_GPL(sdio_retune_release);
-> diff --git a/include/linux/mmc/sdio_func.h b/include/linux/mmc/sdio_func.h
-> index 4820e6d09dac..5a177f7a83c3 100644
-> --- a/include/linux/mmc/sdio_func.h
-> +++ b/include/linux/mmc/sdio_func.h
-> @@ -170,4 +170,7 @@ extern int sdio_set_host_pm_flags(struct sdio_func *func, mmc_pm_flag_t flags);
->  extern void sdio_retune_crc_disable(struct sdio_func *func);
->  extern void sdio_retune_crc_enable(struct sdio_func *func);
->  
-> +extern void sdio_retune_hold_now(struct sdio_func *func);
-> +extern void sdio_retune_release(struct sdio_func *func);
-> +
->  #endif /* LINUX_MMC_SDIO_FUNC_H */
-> 
+> >From your above explanation, it means (after this patch) max segment size
+> of the MR controller will be set to 4K.
+> Earlier it is possible to receive single SGE of 64K datalength (Since max
+> seg size was 64K), but now the same buffer will reach the driver having 16
+> SGEs (Each SGE will contain 4K length).
+
+No, there is no more limit for the size of the segment at all,
+as for PRPs each PRP is sort of a segment from the hardware perspective.
+We just require the segments to not have gaps, as PRPs don't allow for
+that.
+
+That being said I think these patches are wrong for the case of megaraid
+or mpt having both NVMe and SAS/ATA devices behind a single controller.
+Is that a valid configuration?
