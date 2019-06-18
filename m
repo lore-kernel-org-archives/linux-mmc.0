@@ -1,121 +1,66 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v5 0/5] brcmfmac: sdio: Deal better w/ transmission errors
- related to idle
-Date: Tue, 18 Jun 2019 13:40:36 +0200
-Message-ID: <CAPDyKFqGtui4+shA0TENF=h6Zk0_tgQaJTNSP1xakw7Nb12irg@mail.gmail.com>
-References: <20190617175653.21756-1-dianders@chromium.org> <CAPDyKFpaX6DSM_BjtghAHUf7qYCyEG+wMagXPUdgz3Eutovqfw@mail.gmail.com>
- <87v9x39mxf.fsf@kamboji.qca.qualcomm.com>
+Subject: Re: [PATCH v2 1/3] mmc: sdhci: sdhci-pci-o2micro: Correctly set bus
+ width when tuning
+Date: Tue, 18 Jun 2019 13:40:45 +0200
+Message-ID: <CAPDyKFom1q33iOmxHp1pbzcDuE3FxYAoBXWupAe97RwUx0BBXQ@mail.gmail.com>
+References: <20190617201014.84503-1-rrangel@chromium.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <87v9x39mxf.fsf@kamboji.qca.qualcomm.com>
+In-Reply-To: <20190617201014.84503-1-rrangel@chromium.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Kalle Valo <kvalo@codeaurora.org>
-Cc: Douglas Anderson <dianders@chromium.org>, Adrian Hunter <adrian.hunter@intel.com>, Arend van Spriel <arend.vanspriel@broadcom.com>, brcm80211-dev-list.pdl@broadcom.com, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, Double Lo <double.lo@cypress.com>, Brian Norris <briannorris@chromium.org>, linux-wireless <linux-wireless@vger.kernel.org>, Naveen Gupta <naveen.gupta@cypress.com>, Madhan Mohan R <madhanmohan.r@cypress.com>, Matthias Kaehlcke <mka@chromium.org>, Wright Feng <wright.feng@cypress.com>, Chi-Hsien Lin <chi-hsien.lin@cypress.com>, netdev <netdev@vger.kernel.org>, brcm80211-dev-list <brcm80211-dev-list@cypress.com>, YueHaibing <yuehaibing@huawei.com>, Allison Randal <allison@lohutok.net>, Thomas Gleixner <tglx@linutroni>
+To: Raul E Rangel <rrangel@chromium.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "ernest.zhang" <ernest.zhang@bayhubtech.com>, Daniel Kurtz <djkurtz@chromium.org>, Adrian Hunter <adrian.hunter@intel.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, 18 Jun 2019 at 13:02, Kalle Valo <kvalo@codeaurora.org> wrote:
+On Mon, 17 Jun 2019 at 22:10, Raul E Rangel <rrangel@chromium.org> wrote:
 >
-> Ulf Hansson <ulf.hansson@linaro.org> writes:
+> The O2Micro controller only supports tuning at 4-bits. So the host driver
+> needs to change the bus width while tuning and then set it back when done.
 >
-> > On Mon, 17 Jun 2019 at 19:57, Douglas Anderson <dianders@chromium.org> wrote:
-> >>
-> >> This series attempts to deal better with the expected transmission
-> >> errors related to the idle states (handled by the Always-On-Subsystem
-> >> or AOS) on the SDIO-based WiFi on rk3288-veyron-minnie,
-> >> rk3288-veyron-speedy, and rk3288-veyron-mickey.
-> >>
-> >> Some details about those errors can be found in
-> >> <https://crbug.com/960222>, but to summarize it here: if we try to
-> >> send the wakeup command to the WiFi card at the same time it has
-> >> decided to wake up itself then it will behave badly on the SDIO bus.
-> >> This can cause timeouts or CRC errors.
-> >>
-> >> When I tested on 4.19 and 4.20 these CRC errors can be seen to cause
-> >> re-tuning.  Since I am currently developing on 4.19 this was the
-> >> original problem I attempted to solve.
-> >>
-> >> On mainline it turns out that you don't see the retuning errors but
-> >> you see tons of spam about timeouts trying to wakeup from sleep.  I
-> >> tracked down the commit that was causing that and have partially
-> >> reverted it here.  I have no real knowledge about Broadcom WiFi, but
-> >> the commit that was causing problems sounds (from the descriptioin) to
-> >> be a hack commit penalizing all Broadcom WiFi users because of a bug
-> >> in a Cypress SD controller.  I will let others comment if this is
-> >> truly the case and, if so, what the right solution should be.
-> >>
-> >> For v3 of this series I have added 2 patches to the end of the series
-> >> to address errors that would show up on systems with these same SDIO
-> >> WiFi cards when used on controllers that do periodic retuning.  These
-> >> systems need an extra fix to prevent the retuning from happening when
-> >> the card is asleep.
-> >>
-> >> I believe v5 of this series is all ready to go assuming Kalle Valo is
-> >> good with it.  I've added after-the-cut notes to patches awaiting his
-> >> Ack and have added other tags collected so far.
-> >>
-> >> Changes in v5:
-> >> - Add missing sdio_retune_crc_enable() in comments (Ulf).
-> >> - /s/reneable/re-enable (Ulf).
-> >> - Remove leftover prototypes: mmc_expect_errors_begin() / end() (Ulf).
-> >> - Rewording of "sleep command" in commit message (Arend).
-> >>
-> >> Changes in v4:
-> >> - Moved to SDIO API only (Adrian, Ulf).
-> >> - Renamed to make it less generic, now retune_crc_disable (Ulf).
-> >> - Function header makes it clear host must be claimed (Ulf).
-> >> - No more WARN_ON (Ulf).
-> >> - Adjust to API rename (Adrian, Ulf).
-> >> - Moved retune hold/release to SDIO API (Adrian).
-> >> - Adjust to API rename (Adrian).
-> >>
-> >> Changes in v3:
-> >> - Took out the spinlock since I believe this is all in one context.
-> >> - Expect errors for all of brcmf_sdio_kso_control() (Adrian).
-> >> - ("mmc: core: Export mmc_retune_hold_now() mmc_retune_release()") new for v3.
-> >> - ("brcmfmac: sdio: Don't tune while the card is off") new for v3.
-> >>
-> >> Changes in v2:
-> >> - A full revert, not just a partial one (Arend).  ...with explicit Cc.
-> >> - Updated commit message to clarify based on discussion of v1.
-> >>
-> >> Douglas Anderson (5):
-> >>   Revert "brcmfmac: disable command decode in sdio_aos"
-> >>   mmc: core: API to temporarily disable retuning for SDIO CRC errors
-> >>   brcmfmac: sdio: Disable auto-tuning around commands expected to fail
-> >>   mmc: core: Add sdio_retune_hold_now() and sdio_retune_release()
-> >>   brcmfmac: sdio: Don't tune while the card is off
-> >>
-> >>  drivers/mmc/core/core.c                       |  5 +-
-> >>  drivers/mmc/core/sdio_io.c                    | 77 +++++++++++++++++++
-> >>  .../broadcom/brcm80211/brcmfmac/sdio.c        | 17 ++--
-> >>  include/linux/mmc/host.h                      |  1 +
-> >>  include/linux/mmc/sdio_func.h                 |  6 ++
-> >>  5 files changed, 99 insertions(+), 7 deletions(-)
-> >>
-> >> --
-> >> 2.22.0.410.gd8fdbe21b5-goog
-> >>
-> >
-> > Applied for fixes, thanks!
-> >
-> > Some minor changes:
-> > 1) Dropped the a few "commit notes", that was more related to version
-> > and practical information about the series.
-> > 2) Dropped fixes tags for patch 2->5, but instead put a stable tag
-> > targeted for v4.18+.
-> >
-> > Awaiting an ack from Kalle before sending the PR to Linus.
-> >
-> > Kalle, perhaps you prefer to pick patch 1, as it could go separate.
-> > Then please tell - and/or if there is anything else you want me to
-> > change.
+> There was a bug in the original implementation in that mmc->ios.bus_width
+> also wasn't updated. Thus setting the incorrect blocksize in
+> sdhci_send_tuning which results in a tuning failure.
 >
-> TBH I haven't followed the thread (or patches) that closely :) So feel
-> free to take them and push them to Linus.
->
+> Signed-off-by: Raul E Rangel <rrangel@chromium.org>
+> Fixes: 0086fc217d5d7 ("mmc: sdhci: Add support for O2 hardware tuning")
+> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-I take that as an ack and will add your tag for it, thanks!
+Applied for fixes and by adding a stable tag, thanks!
 
 Kind regards
 Uffe
+
+
+> ---
+>
+>  drivers/mmc/host/sdhci-pci-o2micro.c | 5 ++++-
+>  1 file changed, 4 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
+> index b29bf4e7dcb48..dd21315922c87 100644
+> --- a/drivers/mmc/host/sdhci-pci-o2micro.c
+> +++ b/drivers/mmc/host/sdhci-pci-o2micro.c
+> @@ -115,6 +115,7 @@ static int sdhci_o2_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>          */
+>         if (mmc->ios.bus_width == MMC_BUS_WIDTH_8) {
+>                 current_bus_width = mmc->ios.bus_width;
+> +               mmc->ios.bus_width = MMC_BUS_WIDTH_4;
+>                 sdhci_set_bus_width(host, MMC_BUS_WIDTH_4);
+>         }
+>
+> @@ -126,8 +127,10 @@ static int sdhci_o2_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>
+>         sdhci_end_tuning(host);
+>
+> -       if (current_bus_width == MMC_BUS_WIDTH_8)
+> +       if (current_bus_width == MMC_BUS_WIDTH_8) {
+> +               mmc->ios.bus_width = MMC_BUS_WIDTH_8;
+>                 sdhci_set_bus_width(host, current_bus_width);
+> +       }
+>
+>         host->flags &= ~SDHCI_HS400_TUNING;
+>         return 0;
+> --
+> 2.22.0.410.gd8fdbe21b5-goog
+>
