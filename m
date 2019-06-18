@@ -1,78 +1,77 @@
-From: Manish Narani <MNARANI@xilinx.com>
-Subject: RE: [PATCH 3/3] mmc: sdhci-of-arasan: Add support for ZynqMP Platform
- Tap Delays Setup
-Date: Tue, 18 Jun 2019 04:59:16 +0000
-Message-ID: <MN2PR02MB60296837F9D1B3088667BE59C1EA0@MN2PR02MB6029.namprd02.prod.outlook.com>
-References: <1560247011-26369-1-git-send-email-manish.narani@xilinx.com>
- <1560247011-26369-4-git-send-email-manish.narani@xilinx.com>
- <CAPDyKFrJwpwUUX_q2kcR9QY_fv9Lgos+ixPmU6JMeJVqJAiFpg@mail.gmail.com>
- <5feac3fb-bef3-b7d1-57d6-81e115e1f555@xilinx.com>
- <CAPDyKFp_ZvSjFp2FGonzGsnc9xPyZ7qOCaRnX1SimBxLpfz9-Q@mail.gmail.com>
- <948514a0-e310-75fd-e8a8-6ef8bb14e41f@xilinx.com>
- <CAPDyKFp6O8rPZDZS4iKJam2+tXeen_ZMOXKw=WVzJNpBXcSc9g@mail.gmail.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH v2 2/3] mmc: sdhci: sdhci-pci-o2micro: Check if controller
+ supports 8-bit width
+Date: Tue, 18 Jun 2019 09:56:45 +0300
+Message-ID: <866e6b54-7e4b-472d-7134-e322b2f0810e@intel.com>
+References: <20190617201014.84503-1-rrangel@chromium.org>
+ <20190617201014.84503-2-rrangel@chromium.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFp6O8rPZDZS4iKJam2+tXeen_ZMOXKw=WVzJNpBXcSc9g@mail.gmail.com>
+In-Reply-To: <20190617201014.84503-2-rrangel@chromium.org>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Michal Simek <michals@xilinx.com>
-Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Adrian Hunter <adrian.hunter@intel.com>, Rajan Vaja <RAJANV@xilinx.com>, Jolly Shah <JOLLYS@xilinx.com>, Nava kishore Manne <navam@xilinx.com>, Olof Johansson <olof@lixom.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>
+To: Raul E Rangel <rrangel@chromium.org>, linux-mmc@vger.kernel.org
+Cc: ernest.zhang@bayhubtech.com, djkurtz@chromium.org, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-SGkgVWZmZSwNCg0KVGhhbmtzIGZvciB0aGUgcmV2aWV3LiBQbGVhc2UgZmluZCBteSBjb21tZW50
-cyBiZWxvdy4NCg0KPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBVbGYgSGFu
-c3NvbiA8dWxmLmhhbnNzb25AbGluYXJvLm9yZz4NCj4gU2VudDogTW9uZGF5LCBKdW5lIDE3LCAy
-MDE5IDg6MjkgUE0NCj4gVG86IE1pY2hhbCBTaW1layA8bWljaGFsc0B4aWxpbnguY29tPg0KPiBD
-YzogTWFuaXNoIE5hcmFuaSA8TU5BUkFOSUB4aWxpbnguY29tPjsgUm9iIEhlcnJpbmcNCj4gPHJv
-YmgrZHRAa2VybmVsLm9yZz47IE1hcmsgUnV0bGFuZCA8bWFyay5ydXRsYW5kQGFybS5jb20+OyBB
-ZHJpYW4NCj4gSHVudGVyIDxhZHJpYW4uaHVudGVyQGludGVsLmNvbT47IFJhamFuIFZhamEgPFJB
-SkFOVkB4aWxpbnguY29tPjsgSm9sbHkNCj4gU2hhaCA8Sk9MTFlTQHhpbGlueC5jb20+OyBOYXZh
-IGtpc2hvcmUgTWFubmUgPG5hdmFtQHhpbGlueC5jb20+OyBPbG9mDQo+IEpvaGFuc3NvbiA8b2xv
-ZkBsaXhvbS5uZXQ+OyBsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnOyBEVE1MDQo+IDxkZXZpY2V0
-cmVlQHZnZXIua2VybmVsLm9yZz47IExpbnV4IEtlcm5lbCBNYWlsaW5nIExpc3QgPGxpbnV4LQ0K
-PiBrZXJuZWxAdmdlci5rZXJuZWwub3JnPjsgTGludXggQVJNIDxsaW51eC1hcm0ta2VybmVsQGxp
-c3RzLmluZnJhZGVhZC5vcmc+DQo+IFN1YmplY3Q6IFJlOiBbUEFUQ0ggMy8zXSBtbWM6IHNkaGNp
-LW9mLWFyYXNhbjogQWRkIHN1cHBvcnQgZm9yIFp5bnFNUA0KPiBQbGF0Zm9ybSBUYXAgRGVsYXlz
-IFNldHVwDQo+IA0KPiBbLi4uXQ0KPiANCj4gPiA+Pg0KPiA+ID4+DQo+ID4gPj4+IEluIHJlZ2Fy
-ZHMgdG8gdGhlIG1tYyBkYXRhIHBhcnQsIEkgc3VnZ2VzdCB0byBkcm9wIHRoZQ0KPiA+ID4+PiAt
-PnNldF90YXBfZGVsYXkoKSBjYWxsYmFjaywgYnV0IHJhdGhlciB1c2UgYSBib29sZWFuIGZsYWcg
-dG8gaW5kaWNhdGUNCj4gPiA+Pj4gd2hldGhlciBjbG9jayBwaGFzZXMgbmVlZHMgdG8gYmUgY2hh
-bmdlZCBmb3IgdGhlIHZhcmlhbnQuIFBvdGVudGlhbGx5DQo+ID4gPj4+IHRoYXQgY291bGQgZXZl
-biBiZSBza2lwcGVkIGFuZCBpbnN0ZWFkIGNhbGwgY2xrX3NldF9waGFzZSgpDQo+ID4gPj4+IHVu
-Y29uZGl0aW9uYWxseSwgYXMgdGhlIGNsb2NrIGNvcmUgZGVhbHMgZmluZSB3aXRoIGNsb2NrIHBy
-b3ZpZGVycw0KPiA+ID4+PiB0aGF0IGRvZXNuJ3Qgc3VwcG9ydCB0aGUgLT5zZXRfcGhhc2UoKSBj
-YWxsYmFjay4NCg0KSW4gdGhlIGN1cnJlbnQgaW1wbGVtZW50YXRpb24sIEkgYW0gdGFraW5nIGNh
-cmUgb2YgYm90aCB0aGUgaW5wdXQgYW5kDQpvdXRwdXQgY2xvY2sgZGVsYXlzIHdpdGggdGhlIHNp
-bmdsZSBjbG9jayAod2hpY2ggaXMgb3V0cHV0IGNsb2NrKSByZWdpc3RyYXRpb24NCmFuZCBkaWZm
-ZXJlbnRpYXRpbmcgdGhlc2UgdGFwIGRlbGF5cyBiYXNlZCBvbiB0aGVpciB2YWx1ZXMNCig8MjU2
-IHRoZW4gaW5wdXQgZGVsYXkgYW5kICA+PSAyNTYgdGhlbiBvdXRwdXQgZGVsYXkpLCBiZWNhdXNl
-IHRoYXQgaXMNCnp5bnFtcCBzcGVjaWZpYy4gSWYgd2Ugd2FudCB0byBtYWtlIHRoaXMgZ2VuZXJp
-Yywgd2UgbWF5IG5lZWQgdG8NCnJlZ2lzdGVyICdhbm90aGVyJyBjbG9jayB3aGljaCB3aWxsIGJl
-IHRoZXJlIGFzIGFuIGlucHV0IChzYW1wbGluZykgY2xvY2sNCmFuZCB0aGVuIHdlIGNhbiBtYWtl
-IHRoaXMgJ2Nsa19zZXRfcGhhc2UoKScgYmUgY2FsbGVkIHVuY29uZGl0aW9uYWxseQ0KZWFjaCBm
-b3IgYm90aCB0aGUgY2xvY2tzIGFuZCBsZXQgdGhlIHBsYXRmb3JtcyBoYW5kbGUgdGhlaXIgY2xv
-Y2sgcGFydC4NCldoYXQncyB5b3VyIHRha2Ugb24gdGhpcz8NCg0KVGhhbmtzLA0KTWFuaXNoDQo+
-ID4gPj4NCj4gPiA+PiBJbiBjb25uZWN0aW9uIHRvIGFub3RoZXIgdmVyc2lvbiBvZiB0aGlzIGRy
-aXZlciBmb3IgbGF0ZXN0IFhpbGlueCBjaGlwDQo+ID4gPj4gaXQgd291bGQgYmUgYmV0dGVyIHRv
-IGtlZXAgc2V0X3RhcF9kZWxheSBjYWxsYmFjayBpbiB0aGUgZHJpdmVyLiBUaGUNCj4gPiA+PiBy
-ZWFzb24gaXMgdGhhdCBuZXcgY2hpcC9pcCBpcyBjYXBhYmxlIHRvIHNldHVwIHRhcCBkZWxheXMg
-ZGlyZWN0bHkNCj4gPiA+PiB3aXRob3V0IGFza2luZyBmaXJtd2FyZSB0byBkbyBpdC4gVGhhdCdz
-IHdoeSBmb3IgdmVyc2FsIElQIHRoZXJlIGlzIGENCj4gPiA+PiBuZWVkIHRvIGNhbGwgZGlmZmVy
-ZW50IHNldHVwX3RhcF9kZWxheSBmdW5jdGlvbi4NCj4gPiA+DQo+ID4gPiBUaGUgLT5zZXRfdGFw
-X2RlbGF5KCkgY2FsbGJhY2sgaXMgZm9yIFp5bmNNcCBwb2ludGluZyB0bw0KPiA+ID4gc2RoY2lf
-YXJhc2FuX3p5bnFtcF9zZXRfdGFwX2RlbGF5KCkuIFRoaXMgZnVuY3Rpb24gY2FsbHMgdGhlDQo+
-ID4gPiBjbGtfc2V0X3BoYXNlKCkgQVBJLg0KPiA+ID4NCj4gPiA+IFdoYXQgZG9lcyAtPnNldF90
-YXBfZGVsYXkoKSBkbyBmb3IgdGhlIGxhdGVzdCB2ZXJzaW9uPw0KPiA+DQo+ID4gVGhlcmUgaXMg
-ZGlmZmVyZW50IHNldCBvZiBkZWZhdWx0IHRhcCBkZWxheXMgd2hpY2ggc2hvdWxkIGJlIHByb2dy
-YW1tZWQNCj4gPiBhbmQgaXQgaXMgZG9uZSBqdXN0IHZpYSB3cml0aW5nIHRvIHJlZ2lzdGVycyB3
-aGljaCBhcmUgdGhlIHBhcnQgb2YNCj4gPiBjb250cm9sbGVyIGFkZHJlc3Mgc3BhY2UuDQo+IA0K
-PiBPa2F5LCBJIHNlZS4NCj4gDQo+IE5vdCBzdXJlIHdoYXQgbWFrZXMgbW9zdCBzZW5zZSB0byBk
-byBoZXJlLCBidXQgaXQgc291bmRzIHRvIG1lIGxpa2UNCj4gYW5vdGhlciAtPnNldF9waGFzZSgp
-IGNhbGxiYWNrIHNob3VsZCBiZSBpbXBsZW1lbnRlZCBmb3IgdGhlIGNsb2NrDQo+IHByb3ZpZGVy
-LiBJbiBvdGhlciB3b3JkcywgY2FsbGluZyBjbGtfc2V0X3BoYXNlKCkgc2hvdWxkIGNvbnRpbnVl
-IHRvDQo+IHdvcmtzIGp1c3QgZmluZSBmb3IgdGhpcyBjYXNlIGFzIHdlbGwuIElmIGl0IHR1cm5z
-IG91dCB0byBiZQ0KPiBpbmNvbnZlbmllbnQsIHdlIGNhbiBhbHdheXMgYWRkIHRoZSAtPnNldF90
-YXBfZGVsYXkoKSBhdCBhIGxhdGVyIHBvaW50DQo+IHdoZW4gaXQgbWFrZXMgbW9yZSBzZW5zZS4N
-Cg0KDQo+IA0KPiBbLi4uXQ0KPiANCj4gS2luZCByZWdhcmRzDQo+IFVmZmUNCg==
+On 17/06/19 11:10 PM, Raul E Rangel wrote:
+> The O2 controller supports 8-bit EMMC access.
+> 
+> JESD84-B51 section A.6.3.a defines the bus testing procedure that
+> `mmc_select_bus_width()` implements. This is used to determine the actual
+> bus width of the eMMC.
+> 
+> Signed-off-by: Raul E Rangel <rrangel@chromium.org>
+
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+
+> ---
+> I tested this on an AMD chromebook.
+> 
+> $ cat /sys/kernel/debug/mmc1/ios
+> clock:          200000000 Hz
+> actual clock:   200000000 Hz
+> vdd:            21 (3.3 ~ 3.4 V)
+> bus mode:       2 (push-pull)
+> chip select:    0 (don't care)
+> power mode:     2 (on)
+> bus width:      3 (8 bits)
+> timing spec:    9 (mmc HS200)
+> signal voltage: 1 (1.80 V)
+> driver type:    0 (driver type B)
+> 
+> Before this patch only 4 bit was negotiated.
+> 
+>  drivers/mmc/host/sdhci-pci-o2micro.c | 12 +++++++++++-
+>  1 file changed, 11 insertions(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
+> index dd21315922c87..9dc4548271b4b 100644
+> --- a/drivers/mmc/host/sdhci-pci-o2micro.c
+> +++ b/drivers/mmc/host/sdhci-pci-o2micro.c
+> @@ -395,11 +395,21 @@ int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
+>  {
+>  	struct sdhci_pci_chip *chip;
+>  	struct sdhci_host *host;
+> -	u32 reg;
+> +	u32 reg, caps;
+>  	int ret;
+>  
+>  	chip = slot->chip;
+>  	host = slot->host;
+> +
+> +	caps = sdhci_readl(host, SDHCI_CAPABILITIES);
+> +
+> +	/*
+> +	 * mmc_select_bus_width() will test the bus to determine the actual bus
+> +	 * width.
+> +	 */
+> +	if (caps & SDHCI_CAN_DO_8BIT)
+> +		host->mmc->caps |= MMC_CAP_8_BIT_DATA;
+> +
+>  	switch (chip->pdev->device) {
+>  	case PCI_DEVICE_ID_O2_SDS0:
+>  	case PCI_DEVICE_ID_O2_SEABIRD0:
+> 
