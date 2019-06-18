@@ -1,87 +1,42 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH v2] mmc: core: Prevent processing SDIO IRQs when the card is suspended
-Date: Tue, 18 Jun 2019 14:05:17 +0200
-Message-ID: <20190618120517.23123-1-ulf.hansson@linaro.org>
-Return-path: <stable-owner@vger.kernel.org>
-Sender: stable-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Douglas Anderson <dianders@chromium.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Brian Norris <briannorris@chromium.org>, Shawn Lin <shawn.lin@rock-chips.com>, Guenter Roeck <groeck@chromium.org>, Heiko Stuebner <heiko@sntech.de>, Kalle Valo <kvalo@codeaurora.org>, linux-wireless@vger.kernel.org, stable@vger.kernel.org
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH 0/7] mmc: sdio: Various fixes/improvements for SDIO PM
+Date: Tue, 18 Jun 2019 17:34:41 +0200
+Message-ID: <20190618153448.27145-1-ulf.hansson@linaro.org>
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Cc: Brian Norris <briannorris-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Guenter Roeck <groeck-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, Kalle Valo <kvalo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Arend Van Spriel <arend.vanspriel-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-Processing of SDIO IRQs must obviously be prevented while the card is
-system suspended, otherwise we may end up trying to communicate with an
-uninitialized SDIO card.
+The power management support implemented via system suspend/resume and runtime
+suspend/resume for SDIO cards is rather messy, but also fragile.
 
-Reports throughout the years shows that this is not only a theoretical
-problem, but a real issue. So, let's finally fix this problem, by keeping
-track of the state for the card and bail out before processing the SDIO
-IRQ, in case the card is suspended.
+This series makes some improvement to this code. In particular the so called
+powered-on re-initialization of SDIO card is quite questionable, I suspect
+it may never really worked well. Therefore this series removes this code, which
+helps to prepare for additional improvements on top in a later series.
 
-Cc: stable@vger.kernel.org
-Reported-by: Douglas Anderson <dianders@chromium.org>
-Tested-by: Douglas Anderson <dianders@chromium.org>
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
----
+So far the series has only been compile tested, so any help in testing on HW for
+regressions is greatly appreciated.
 
-Changes in v2:
-	- Respect error code in mmc_sdio_suspend(), pointed out by Doug.
+Kind regards
+Uffe
 
----
- drivers/mmc/core/sdio.c     | 13 ++++++++++++-
- drivers/mmc/core/sdio_irq.c |  4 ++++
- 2 files changed, 16 insertions(+), 1 deletion(-)
+Ulf Hansson (7):
+  mmc: sdio: Turn sdio_run_irqs() into static
+  mmc: sdio: Drop mmc_claim|release_host() in mmc_sdio_power_restore()
+  mmc: sdio: Move comment about re-initialization to
+    mmc_sdio_reinit_card()
+  mmc: sdio: Drop powered-on re-init at runtime resume and HW reset
+  mmc: sdio: Don't re-initialize powered-on removable SDIO cards at
+    resume
+  mmc: sdio: Drop unused in-parameter to mmc_sdio_reinit_card()
+  mmc: sdio: Drop unused in-parameter from mmc_sdio_init_card()
 
-diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-index d1aa1c7577bb..712a7742765e 100644
---- a/drivers/mmc/core/sdio.c
-+++ b/drivers/mmc/core/sdio.c
-@@ -937,6 +937,10 @@ static int mmc_sdio_pre_suspend(struct mmc_host *host)
-  */
- static int mmc_sdio_suspend(struct mmc_host *host)
- {
-+	/* Prevent processing of SDIO IRQs in suspended state. */
-+	mmc_card_set_suspended(host->card);
-+	cancel_delayed_work_sync(&host->sdio_irq_work);
-+
- 	mmc_claim_host(host);
- 
- 	if (mmc_card_keep_power(host) && mmc_card_wake_sdio_irq(host))
-@@ -985,13 +989,20 @@ static int mmc_sdio_resume(struct mmc_host *host)
- 		err = sdio_enable_4bit_bus(host->card);
- 	}
- 
--	if (!err && host->sdio_irqs) {
-+	if (err)
-+		goto out;
-+
-+	/* Allow SDIO IRQs to be processed again. */
-+	mmc_card_clr_suspended(host->card);
-+
-+	if (host->sdio_irqs) {
- 		if (!(host->caps2 & MMC_CAP2_SDIO_IRQ_NOTHREAD))
- 			wake_up_process(host->sdio_irq_thread);
- 		else if (host->caps & MMC_CAP_SDIO_IRQ)
- 			host->ops->enable_sdio_irq(host, 1);
- 	}
- 
-+out:
- 	mmc_release_host(host);
- 
- 	host->pm_flags &= ~MMC_PM_KEEP_POWER;
-diff --git a/drivers/mmc/core/sdio_irq.c b/drivers/mmc/core/sdio_irq.c
-index 931e6226c0b3..9f54a259a1b3 100644
---- a/drivers/mmc/core/sdio_irq.c
-+++ b/drivers/mmc/core/sdio_irq.c
-@@ -34,6 +34,10 @@ static int process_sdio_pending_irqs(struct mmc_host *host)
- 	unsigned char pending;
- 	struct sdio_func *func;
- 
-+	/* Don't process SDIO IRQs if the card is suspended. */
-+	if (mmc_card_suspended(card))
-+		return 0;
-+
- 	/*
- 	 * Optimization, if there is only 1 function interrupt registered
- 	 * and we know an IRQ was signaled then call irq handler directly.
+ drivers/mmc/core/sdio.c     | 92 +++++++++++++++----------------------
+ drivers/mmc/core/sdio_irq.c |  3 +-
+ include/linux/mmc/host.h    |  1 -
+ 3 files changed, 38 insertions(+), 58 deletions(-)
+
 -- 
 2.17.1
