@@ -1,72 +1,58 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 3/3] mmc: sdhci-of-arasan: Add support for ZynqMP Platform
- Tap Delays Setup
-Date: Wed, 19 Jun 2019 16:40:36 +0200
-Message-ID: <CAPDyKFqC7aGX+BSP7U162Viq8qoL_df+N=zP_6P9xbzSZseipw@mail.gmail.com>
-References: <1560247011-26369-1-git-send-email-manish.narani@xilinx.com>
- <1560247011-26369-4-git-send-email-manish.narani@xilinx.com>
- <CAPDyKFrJwpwUUX_q2kcR9QY_fv9Lgos+ixPmU6JMeJVqJAiFpg@mail.gmail.com>
- <5feac3fb-bef3-b7d1-57d6-81e115e1f555@xilinx.com> <CAPDyKFp_ZvSjFp2FGonzGsnc9xPyZ7qOCaRnX1SimBxLpfz9-Q@mail.gmail.com>
- <948514a0-e310-75fd-e8a8-6ef8bb14e41f@xilinx.com> <CAPDyKFp6O8rPZDZS4iKJam2+tXeen_ZMOXKw=WVzJNpBXcSc9g@mail.gmail.com>
- <MN2PR02MB60296837F9D1B3088667BE59C1EA0@MN2PR02MB6029.namprd02.prod.outlook.com>
+From: Raul Rangel <rrangel@chromium.org>
+Subject: Re: [RFC PATCH 1/2] mmc: sdhci: Manually check card status after
+ reset
+Date: Wed, 19 Jun 2019 08:56:25 -0600
+Message-ID: <20190619145625.GA50985@google.com>
+References: <20190501175457.195855-1-rrangel@chromium.org>
+ <CAPDyKFpL1nHt1E1zgS-iDZf_KDWk2CN32Lvr+5Nmo8CtB2VCWg@mail.gmail.com>
+ <20190607160553.GA185100@google.com>
+ <CAPDyKFout6AY2Q92pYQ-KPH0NENq1-SkYivkDxjjb=uB=tKXuQ@mail.gmail.com>
+ <20190610163252.GA227032@google.com>
+ <fcdf6cc4-2729-abe2-85c8-b0d04901c5ae@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <MN2PR02MB60296837F9D1B3088667BE59C1EA0@MN2PR02MB6029.namprd02.prod.outlook.com>
+Content-Disposition: inline
+In-Reply-To: <fcdf6cc4-2729-abe2-85c8-b0d04901c5ae@intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Manish Narani <MNARANI@xilinx.com>
-Cc: Michal Simek <michals@xilinx.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Adrian Hunter <adrian.hunter@intel.com>, Rajan Vaja <RAJANV@xilinx.com>, Jolly Shah <JOLLYS@xilinx.com>, Nava kishore Manne <navam@xilinx.com>, Olof Johansson <olof@lixom.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Daniel Kurtz <djkurtz@chromium.org>, hongjiefang <hongjiefang@asrmicro.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Shawn Lin <shawn.lin@rock-chips.com>, Kyle Roeschley <kyle.roeschley@ni.com>, Avri Altman <avri.altman@wdc.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, 18 Jun 2019 at 06:59, Manish Narani <MNARANI@xilinx.com> wrote:
->
-> Hi Uffe,
->
-> Thanks for the review. Please find my comments below.
->
-> > -----Original Message-----
-> > From: Ulf Hansson <ulf.hansson@linaro.org>
-> > Sent: Monday, June 17, 2019 8:29 PM
-> > To: Michal Simek <michals@xilinx.com>
-> > Cc: Manish Narani <MNARANI@xilinx.com>; Rob Herring
-> > <robh+dt@kernel.org>; Mark Rutland <mark.rutland@arm.com>; Adrian
-> > Hunter <adrian.hunter@intel.com>; Rajan Vaja <RAJANV@xilinx.com>; Jolly
-> > Shah <JOLLYS@xilinx.com>; Nava kishore Manne <navam@xilinx.com>; Olof
-> > Johansson <olof@lixom.net>; linux-mmc@vger.kernel.org; DTML
-> > <devicetree@vger.kernel.org>; Linux Kernel Mailing List <linux-
-> > kernel@vger.kernel.org>; Linux ARM <linux-arm-kernel@lists.infradead.org>
-> > Subject: Re: [PATCH 3/3] mmc: sdhci-of-arasan: Add support for ZynqMP
-> > Platform Tap Delays Setup
-> >
-> > [...]
-> >
-> > > >>
-> > > >>
-> > > >>> In regards to the mmc data part, I suggest to drop the
-> > > >>> ->set_tap_delay() callback, but rather use a boolean flag to indicate
-> > > >>> whether clock phases needs to be changed for the variant. Potentially
-> > > >>> that could even be skipped and instead call clk_set_phase()
-> > > >>> unconditionally, as the clock core deals fine with clock providers
-> > > >>> that doesn't support the ->set_phase() callback.
->
-> In the current implementation, I am taking care of both the input and
-> output clock delays with the single clock (which is output clock) registration
-> and differentiating these tap delays based on their values
-> (<256 then input delay and  >= 256 then output delay), because that is
-> zynqmp specific. If we want to make this generic, we may need to
-> register 'another' clock which will be there as an input (sampling) clock
-> and then we can make this 'clk_set_phase()' be called unconditionally
-> each for both the clocks and let the platforms handle their clock part.
-> What's your take on this?
+On Tue, Jun 11, 2019 at 01:30:55PM +0300, Adrian Hunter wrote:
+> Does the following work?
+> 
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 0cd5f2ce98df..f672171246b0 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -341,8 +341,19 @@ static void sdhci_init(struct sdhci_host *host, int soft)
+>  
+>  static void sdhci_reinit(struct sdhci_host *host)
+>  {
+> +	u32 cd = host->ier & (SDHCI_INT_CARD_REMOVE | SDHCI_INT_CARD_INSERT);
+> +
+>  	sdhci_init(host, 0);
+>  	sdhci_enable_card_detection(host);
+> +
+> +	/*
+> +	 * A change to the card detect bits indicates a change in present state,
+> +	 * refer sdhci_set_card_detection(). A card detect interrupt might have
+> +	 * been missed while the host controller was being reset, so trigger a
+> +	 * rescan to check.
+> +	 */
+> +	if (cd != (host->ier & (SDHCI_INT_CARD_REMOVE | SDHCI_INT_CARD_INSERT)))
+> +		mmc_detect_change(host->mmc, msecs_to_jiffies(200));
+>  }
+>  
+>  static void __sdhci_led_activate(struct sdhci_host *host)
 
-Not sure exactly what you are suggesting, but my gut feeling says it
-sounds good.
+Your patch looks good. I tried it out and got over 57k insertion/removal
+iterations. Do you want me to send out your patch, or do you want to do
+it?
 
-How is tap delays managed for both the input clock and the output
-clock? Is some managed by the clock provider (which is probably
-firmware in your case) and some managed by the MMC controller?
+Just to recap, the patch you proposed + the AMD SDHCI specific patch fix
+the problem.
 
-[...]
-
-Kind regards
-Uffe
+Thanks!
