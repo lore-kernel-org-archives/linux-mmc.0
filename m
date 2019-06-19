@@ -1,58 +1,99 @@
 From: Raul Rangel <rrangel@chromium.org>
-Subject: Re: [RFC PATCH 1/2] mmc: sdhci: Manually check card status after
- reset
-Date: Wed, 19 Jun 2019 08:56:25 -0600
-Message-ID: <20190619145625.GA50985@google.com>
-References: <20190501175457.195855-1-rrangel@chromium.org>
- <CAPDyKFpL1nHt1E1zgS-iDZf_KDWk2CN32Lvr+5Nmo8CtB2VCWg@mail.gmail.com>
- <20190607160553.GA185100@google.com>
- <CAPDyKFout6AY2Q92pYQ-KPH0NENq1-SkYivkDxjjb=uB=tKXuQ@mail.gmail.com>
- <20190610163252.GA227032@google.com>
- <fcdf6cc4-2729-abe2-85c8-b0d04901c5ae@intel.com>
+Subject: Re: [stable/4.14.y PATCH 0/3] mmc: Fix a potential resource leak
+ when shutting down request queue.
+Date: Wed, 19 Jun 2019 10:46:25 -0600
+Message-ID: <20190619164625.GA85539@google.com>
+References: <20190513175521.84955-1-rrangel@chromium.org>
+ <20190514091933.GA27269@kroah.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <stable-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <fcdf6cc4-2729-abe2-85c8-b0d04901c5ae@intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Daniel Kurtz <djkurtz@chromium.org>, hongjiefang <hongjiefang@asrmicro.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Shawn Lin <shawn.lin@rock-chips.com>, Kyle Roeschley <kyle.roeschley@ni.com>, Avri Altman <avri.altman@wdc.com>
+In-Reply-To: <20190514091933.GA27269@kroah.com>
+Sender: stable-owner@vger.kernel.org
+To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc: stable@vger.kernel.org, linux-mmc@vger.kernel.org, djkurtz@google.com, adrian.hunter@intel.com, zwisler@chromium.org, Linus Walleij <linus.walleij@linaro.org>, linux-kernel@vger.kernel.org, Chris Boot <bootc@bootc.net>, =?iso-8859-1?Q?Cl=E9ment_P=E9ron?= <peron.clem@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Jun 11, 2019 at 01:30:55PM +0300, Adrian Hunter wrote:
-> Does the following work?
+On Tue, May 14, 2019 at 11:19:34AM +0200, Greg Kroah-Hartman wrote:
+> On Mon, May 13, 2019 at 11:55:18AM -0600, Raul E Rangel wrote:
+> > I think we should cherry-pick 41e3efd07d5a02c80f503e29d755aa1bbb4245de
+> > https://lore.kernel.org/patchwork/patch/856512/ into 4.14. It fixes a
+> > potential resource leak when shutting down the request queue.
 > 
+> Potential meaning "it does happen", or "it can happen if we do this", or
+> just "maybe it might happen, we really do not know?"
+It does happen if the AMD SDHCI patches are cherry-picked into 4.14.
+https://lkml.org/lkml/2019/5/1/398
+It can be mitigated by changing the line in the patch with
+`mmc_detect_change(host, 0)` to mmc_detect_change(host, 200)`, but
+that's just a workaround to play with the timing so the race condition
+doesn't happen.
 > 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 0cd5f2ce98df..f672171246b0 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -341,8 +341,19 @@ static void sdhci_init(struct sdhci_host *host, int soft)
->  
->  static void sdhci_reinit(struct sdhci_host *host)
->  {
-> +	u32 cd = host->ier & (SDHCI_INT_CARD_REMOVE | SDHCI_INT_CARD_INSERT);
-> +
->  	sdhci_init(host, 0);
->  	sdhci_enable_card_detection(host);
-> +
-> +	/*
-> +	 * A change to the card detect bits indicates a change in present state,
-> +	 * refer sdhci_set_card_detection(). A card detect interrupt might have
-> +	 * been missed while the host controller was being reset, so trigger a
-> +	 * rescan to check.
-> +	 */
-> +	if (cd != (host->ier & (SDHCI_INT_CARD_REMOVE | SDHCI_INT_CARD_INSERT)))
-> +		mmc_detect_change(host->mmc, msecs_to_jiffies(200));
->  }
->  
->  static void __sdhci_led_activate(struct sdhci_host *host)
+> > Once this patch is applied, there is a potential for a null pointer dereference.
+> > That's what the second patch fixes.
+> 
+> What is the git id of that upstream fix?
+So there is no specific upstream fix. There was a large patch set that
+migrated mmc to using blk-mq, so the bug just kind of went away.
+https://lwn.net/Articles/739774/ or 0fbfd12518303e9b32ac9fd231439459eac848f9
 
-Your patch looks good. I tried it out and got over 57k insertion/removal
-iterations. Do you want me to send out your patch, or do you want to do
-it?
+> 
+> > The third patch is just an optimization to stop processing earlier.
+> 
+> That's not how stable kernels work :(
+Oops, I guess we can ignore that patch. It just prevents mmc_init_request
+from being called, but it doesn't matter since the 2nd patch actually
+checks for NULL now.
+> 
+> > See https://patchwork.kernel.org/patch/10925469/ for the initial motivation.
+> 
+> I don't understand the motivation from that link at all :(
+> 
+> > This commit applies to v4.14.116. It is already included in 4.19. 4.19 doesn't
+> > suffer from the null pointer dereference because later commits migrate the mmc
+> > stack to blk-mq.
+> 
+> What are those later commits?
+Commit 0fbfd12518303e9b32ac9fd231439459eac848f9 specifically deletes the
+code for the 2nd patch. As I said above, the NULL pointer dereference
+just kind of went away as part of the blk-mq migration, so there is no
+upstream fix :(
 
-Just to recap, the patch you proposed + the AMD SDHCI specific patch fix
-the problem.
+> 
+> > I tested this patch set by randomly connecting/disconnecting the SD
+> > card. I got over 189650 itarations without a problem.
+> 
+> And if you do not have these patches, on 4.14.y, how many iterations
+> cause a problem?  If you just apply the first patch, does that work?
+If I apply the AMD SDHCI patches and nothing else, then I can cause a
+resource leak within 10 iterations. If I apply just the first patch then
+I can cause a NULL pointer error within 10 iterations. If I apply both 1
+and 2, then everything works as expected and I can't cause a problem.
+> 
+> _EVERY_ time we take a patch that is not upstream, something usually is
+> broken and needs to be fixed.  We have a long long long history of this,
+> so if you want to have a patch that is not upstream applied to a stable
+> kernel release, you need a whole lot of justification and explanation
+> and begging.  And you need to be around to fix the fallout for when it
+> breaks :)
 
-Thanks!
+It also looks like 2361bfb055f948eac6583fa3c75a014da84fe554 includes a
+fix for 41e3efd07d5a02c80f503e29d755aa1bbb4245de, so that would need to
+be cherry picked in.
+
+I guess I should have included a fixes: line in my second patch.
+
+So to summarize:
+- cherry-pick 41e3efd07d5a02c80f503e29d755aa1bbb4245de
+- cherry-pick 2361bfb055f948eac6583fa3c75a014da84fe554
+- apply 2nd patch but add to commit message:
+  Fixes: 41e3efd07d5a ("mmc: block: Simplify cleaning up the queue")
+- Ignore patch 3 since it's an optimization.
+> 
+> thanks,
+> 
+> greg k-h
+Thanks again for your time, and sorry for the really late response!
+
+Raul
