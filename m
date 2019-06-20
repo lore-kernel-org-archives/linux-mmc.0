@@ -1,77 +1,41 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH V3 0/3] mmc: mmci: add busy detect for stm32 sdmmc variant
-Date: Thu, 20 Jun 2019 15:50:26 +0200
-Message-ID: <CAPDyKFr_KNpNY-xgGdKXdAnmmD5OD1=wxgs2LmBAUJOn0mZwqg@mail.gmail.com>
-References: <1559577325-19266-1-git-send-email-ludovic.Barre@st.com>
- <5b7e1ae5-c97e-5a21-fc3e-7cc328087f04@st.com> <CAPDyKFrULRk=cHzVodU9aa6LDX9ip-VPHNwG7QXhmNZrMpPjGw@mail.gmail.com>
+From: Lubomir Rintel <lkundrak@v3.sk>
+Subject: [PATCH RESEND] mmc: core: try to use an id from the devicetree
+Date: Thu, 20 Jun 2019 17:24:32 +0200
+Message-ID: <20190620152432.1408278-1-lkundrak@v3.sk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFrULRk=cHzVodU9aa6LDX9ip-VPHNwG7QXhmNZrMpPjGw@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ludovic BARRE <ludovic.barre@st.com>
-Cc: Rob Herring <robh+dt@kernel.org>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-stm32@st-md-mailman.stormreply.com
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Lubomir Rintel <lkundrak@v3.sk>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Ludovic,
+If there's a mmc* alias in the device tree, take the device number from
+it, so that we end up with a device name that matches the alias.
 
-On Thu, 13 Jun 2019 at 15:13, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->
-> On Thu, 13 Jun 2019 at 15:02, Ludovic BARRE <ludovic.barre@st.com> wrote:
-> >
-> > hi Ulf
-> >
-> > Just a "gentleman ping" about this series.
-> > I know you are busy, it's just to be sure you do not forget me :-)
->
-> Thanks! I started briefly to review, but got distracted again. I will
-> come to it, but it just seems to take more time than it should, my
-> apologies.
+Signed-off-by: Lubomir Rintel <lkundrak@v3.sk>
+---
+ drivers/mmc/core/host.c | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
 
-Alright, so I planned to review this this week - but failed. I have
-been overwhelmed with work lately (as usual when vacation is getting
-closer).
-
-I need to gently request to come back to this as of week 28, when I
-will give this the highest prio. Again apologize for the delays!
-
-Kind regards
-Uffe
-
->
-> Br
-> Uffe
->
-> >
-> > Regards
-> > Ludo
-> >
-> > On 6/3/19 5:55 PM, Ludovic Barre wrote:
-> > > From: Ludovic Barre <ludovic.barre@st.com>
-> > >
-> > > This patch series adds busy detect for stm32 sdmmc variant.
-> > > Some adaptations are required:
-> > > -Clear busy status bit if busy_detect_flag and busy_detect_mask are
-> > >   different.
-> > > -Add hardware busy timeout with MMCIDATATIMER register.
-> > >
-> > > V3:
-> > > -rebase on latest mmc next
-> > > -replace re-read by status parameter.
-> > >
-> > > V2:
-> > > -mmci_cmd_irq cleanup in separate patch.
-> > > -simplify the busy_detect_flag exclude
-> > > -replace sdmmc specific comment in
-> > > "mmc: mmci: avoid fake busy polling in mmci_irq"
-> > > to focus on common behavior
-> > >
-> > > Ludovic Barre (3):
-> > >    mmc: mmci: fix read status for busy detect
-> > >    mmc: mmci: add hardware busy timeout feature
-> > >    mmc: mmci: add busy detect for stm32 sdmmc variant
-> > >
-> > >   drivers/mmc/host/mmci.c | 49 +++++++++++++++++++++++++++++++++++++++++--------
-> > >   drivers/mmc/host/mmci.h |  3 +++
-> > >   2 files changed, 44 insertions(+), 8 deletions(-)
-> > >
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index 6a51f7a06ce7..4733ddb894da 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -411,7 +411,12 @@ struct mmc_host *mmc_alloc_host(int extra, struct de=
+vice *dev)
+ 	/* scanning will be enabled when we're ready */
+ 	host->rescan_disable =3D 1;
+=20
+-	err =3D ida_simple_get(&mmc_host_ida, 0, 0, GFP_KERNEL);
++	/* prefer an alias */
++	err =3D of_alias_get_id(dev->of_node, "mmc");
++	if (err < 0)
++		err =3D 0;
++
++	err =3D ida_simple_get(&mmc_host_ida, err, 0, GFP_KERNEL);
+ 	if (err < 0) {
+ 		kfree(host);
+ 		return NULL;
+--=20
+2.21.0
