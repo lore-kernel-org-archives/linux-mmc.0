@@ -1,8 +1,7 @@
 From: Yoshihiro Shimoda <yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
-Subject: [RFC PATCH v7 2/5] iommu/dma: Add a new dma_map_ops of
-	get_merge_boundary()
-Date: Thu, 20 Jun 2019 17:50:07 +0900
-Message-ID: <1561020610-953-3-git-send-email-yoshihiro.shimoda.uh@renesas.com>
+Subject: [RFC PATCH v7 4/5] block: add a helper function to merge the segments
+Date: Thu, 20 Jun 2019 17:50:09 +0900
+Message-ID: <1561020610-953-5-git-send-email-yoshihiro.shimoda.uh@renesas.com>
 References: <1561020610-953-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -22,42 +21,67 @@ To: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, hch-jcswGhMUV9g@public.
 Cc: linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-This patch adds a new dma_map_ops of get_merge_boundary() to
-expose the DMA merge boundary if the domain type is IOMMU_DOMAIN_DMA.
+This patch adds a helper function whether a queue can merge
+the segments by the DMA MAP layer (e.g. via IOMMU).
 
 Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
 ---
- drivers/iommu/dma-iommu.c | 11 +++++++++++
- 1 file changed, 11 insertions(+)
+ block/blk-settings.c   | 22 ++++++++++++++++++++++
+ include/linux/blkdev.h |  2 ++
+ 2 files changed, 24 insertions(+)
 
-diff --git a/drivers/iommu/dma-iommu.c b/drivers/iommu/dma-iommu.c
-index 205d694..9950cb5 100644
---- a/drivers/iommu/dma-iommu.c
-+++ b/drivers/iommu/dma-iommu.c
-@@ -1091,6 +1091,16 @@ static int iommu_dma_get_sgtable(struct device *dev, struct sg_table *sgt,
- 	return ret;
+diff --git a/block/blk-settings.c b/block/blk-settings.c
+index 45f2c52..6a78ea0 100644
+--- a/block/blk-settings.c
++++ b/block/blk-settings.c
+@@ -4,6 +4,7 @@
+  */
+ #include <linux/bio.h>
+ #include <linux/blkdev.h>
++#include <linux/dma-mapping.h>
+ #include <linux/gcd.h>
+ #include <linux/gfp.h>
+ #include <linux/init.h>
+@@ -831,6 +832,27 @@ void blk_queue_write_cache(struct request_queue *q, bool wc, bool fua)
  }
+ EXPORT_SYMBOL_GPL(blk_queue_write_cache);
  
-+static unsigned long iommu_dma_get_merge_boundary(struct device *dev)
++/**
++ * blk_queue_can_use_dma_map_merging - configure queue for merging segments.
++ * @q:		the request queue for the device
++ * @dev:	the device pointer for dma
++ *
++ * Tell the block layer about merging the segments by dma map of @q.
++ */
++bool blk_queue_can_use_dma_map_merging(struct request_queue *q,
++				       struct device *dev)
 +{
-+	struct iommu_domain *domain = iommu_get_dma_domain(dev);
++	unsigned long boundary = dma_get_merge_boundary(dev);
 +
-+	if (domain->type != IOMMU_DOMAIN_DMA)
-+		return 0;	/* can't merge */
++	if (!boundary)
++		return false;
 +
-+	return (1 << __ffs(domain->pgsize_bitmap)) - 1;
++	/* No need to update max_segment_size. see blk_queue_virt_boundary() */
++	blk_queue_virt_boundary(q, boundary);
++
++	return true;
 +}
 +
- static const struct dma_map_ops iommu_dma_ops = {
- 	.alloc			= iommu_dma_alloc,
- 	.free			= iommu_dma_free,
-@@ -1106,6 +1116,7 @@ static const struct dma_map_ops iommu_dma_ops = {
- 	.sync_sg_for_device	= iommu_dma_sync_sg_for_device,
- 	.map_resource		= iommu_dma_map_resource,
- 	.unmap_resource		= iommu_dma_unmap_resource,
-+	.get_merge_boundary	= iommu_dma_get_merge_boundary,
- };
+ static int __init blk_settings_init(void)
+ {
+ 	blk_max_low_pfn = max_low_pfn - 1;
+diff --git a/include/linux/blkdev.h b/include/linux/blkdev.h
+index 592669b..a7a839d 100644
+--- a/include/linux/blkdev.h
++++ b/include/linux/blkdev.h
+@@ -1091,6 +1091,8 @@ extern void blk_queue_dma_alignment(struct request_queue *, int);
+ extern void blk_queue_update_dma_alignment(struct request_queue *, int);
+ extern void blk_queue_rq_timeout(struct request_queue *, unsigned int);
+ extern void blk_queue_write_cache(struct request_queue *q, bool enabled, bool fua);
++extern bool blk_queue_can_use_dma_map_merging(struct request_queue *q,
++					      struct device *dev);
  
  /*
+  * Number of physical segments as sent to the device.
 -- 
 2.7.4
