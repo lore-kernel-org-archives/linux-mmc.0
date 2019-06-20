@@ -1,58 +1,77 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 0/7] mmc: sdio: Various fixes/improvements for SDIO PM
-Date: Thu, 20 Jun 2019 15:43:45 +0200
-Message-ID: <CAPDyKFqCyh7pZ3SFkxHZU+edBSHYx6V1LD-BdHBugmoSe+g2PQ@mail.gmail.com>
-References: <20190618153448.27145-1-ulf.hansson@linaro.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH V3 0/3] mmc: mmci: add busy detect for stm32 sdmmc variant
+Date: Thu, 20 Jun 2019 15:50:26 +0200
+Message-ID: <CAPDyKFr_KNpNY-xgGdKXdAnmmD5OD1=wxgs2LmBAUJOn0mZwqg@mail.gmail.com>
+References: <1559577325-19266-1-git-send-email-ludovic.Barre@st.com>
+ <5b7e1ae5-c97e-5a21-fc3e-7cc328087f04@st.com> <CAPDyKFrULRk=cHzVodU9aa6LDX9ip-VPHNwG7QXhmNZrMpPjGw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20190618153448.27145-1-ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Cc: Brian Norris <briannorris-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Guenter Roeck <groeck-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, Kalle Valo <kvalo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Arend Van Spriel <arend.vanspriel-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, linux-wireless <linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFrULRk=cHzVodU9aa6LDX9ip-VPHNwG7QXhmNZrMpPjGw@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ludovic BARRE <ludovic.barre@st.com>
+Cc: Rob Herring <robh+dt@kernel.org>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-stm32@st-md-mailman.stormreply.com
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, 18 Jun 2019 at 17:34, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
->
-> The power management support implemented via system suspend/resume and runtime
-> suspend/resume for SDIO cards is rather messy, but also fragile.
->
-> This series makes some improvement to this code. In particular the so called
-> powered-on re-initialization of SDIO card is quite questionable, I suspect
-> it may never really worked well. Therefore this series removes this code, which
-> helps to prepare for additional improvements on top in a later series.
->
-> So far the series has only been compile tested, so any help in testing on HW for
-> regressions is greatly appreciated.
->
-> Kind regards
-> Uffe
->
-> Ulf Hansson (7):
->   mmc: sdio: Turn sdio_run_irqs() into static
->   mmc: sdio: Drop mmc_claim|release_host() in mmc_sdio_power_restore()
->   mmc: sdio: Move comment about re-initialization to
->     mmc_sdio_reinit_card()
->   mmc: sdio: Drop powered-on re-init at runtime resume and HW reset
->   mmc: sdio: Don't re-initialize powered-on removable SDIO cards at
->     resume
->   mmc: sdio: Drop unused in-parameter to mmc_sdio_reinit_card()
->   mmc: sdio: Drop unused in-parameter from mmc_sdio_init_card()
->
->  drivers/mmc/core/sdio.c     | 92 +++++++++++++++----------------------
->  drivers/mmc/core/sdio_irq.c |  3 +-
->  include/linux/mmc/host.h    |  1 -
->  3 files changed, 38 insertions(+), 58 deletions(-)
->
-> --
-> 2.17.1
->
+Hi Ludovic,
 
-I decided to queue this up, to see what tests from linux-next and
-kernelCI reports.
+On Thu, 13 Jun 2019 at 15:13, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>
+> On Thu, 13 Jun 2019 at 15:02, Ludovic BARRE <ludovic.barre@st.com> wrote:
+> >
+> > hi Ulf
+> >
+> > Just a "gentleman ping" about this series.
+> > I know you are busy, it's just to be sure you do not forget me :-)
+>
+> Thanks! I started briefly to review, but got distracted again. I will
+> come to it, but it just seems to take more time than it should, my
+> apologies.
 
-Still, that doesn't mean I am appreciating test done on HW. I can also
-apply tested-by tags by amending patches after this point.
+Alright, so I planned to review this this week - but failed. I have
+been overwhelmed with work lately (as usual when vacation is getting
+closer).
+
+I need to gently request to come back to this as of week 28, when I
+will give this the highest prio. Again apologize for the delays!
 
 Kind regards
 Uffe
+
+>
+> Br
+> Uffe
+>
+> >
+> > Regards
+> > Ludo
+> >
+> > On 6/3/19 5:55 PM, Ludovic Barre wrote:
+> > > From: Ludovic Barre <ludovic.barre@st.com>
+> > >
+> > > This patch series adds busy detect for stm32 sdmmc variant.
+> > > Some adaptations are required:
+> > > -Clear busy status bit if busy_detect_flag and busy_detect_mask are
+> > >   different.
+> > > -Add hardware busy timeout with MMCIDATATIMER register.
+> > >
+> > > V3:
+> > > -rebase on latest mmc next
+> > > -replace re-read by status parameter.
+> > >
+> > > V2:
+> > > -mmci_cmd_irq cleanup in separate patch.
+> > > -simplify the busy_detect_flag exclude
+> > > -replace sdmmc specific comment in
+> > > "mmc: mmci: avoid fake busy polling in mmci_irq"
+> > > to focus on common behavior
+> > >
+> > > Ludovic Barre (3):
+> > >    mmc: mmci: fix read status for busy detect
+> > >    mmc: mmci: add hardware busy timeout feature
+> > >    mmc: mmci: add busy detect for stm32 sdmmc variant
+> > >
+> > >   drivers/mmc/host/mmci.c | 49 +++++++++++++++++++++++++++++++++++++++++--------
+> > >   drivers/mmc/host/mmci.h |  3 +++
+> > >   2 files changed, 44 insertions(+), 8 deletions(-)
+> > >
