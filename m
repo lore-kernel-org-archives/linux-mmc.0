@@ -1,128 +1,86 @@
-From: Yoshihiro Shimoda <yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
-Subject: [RFC PATCH v7 5/5] mmc: queue: Use bigger segments if DMA MAP layer
-	can merge the segments
-Date: Thu, 20 Jun 2019 17:50:10 +0900
-Message-ID: <1561020610-953-6-git-send-email-yoshihiro.shimoda.uh@renesas.com>
-References: <1561020610-953-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-In-Reply-To: <1561020610-953-1-git-send-email-yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, hch-jcswGhMUV9g@public.gmane.org, m.szyprowski-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, robin.murphy-5wv7dgnIgG8@public.gmane.org, joro-zLv9SwRftAIdnm+yROfE0A@public.gmane.org, axboe-tSWWG44O7X1aa/9Udqfwiw@public.gmane.org
-Cc: linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [GIT PULL] MMC fixes for v5.2-rc6
+Date: Thu, 20 Jun 2019 13:16:02 +0200
+Message-ID: <20190620111602.17958-1-ulf.hansson@linaro.org>
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Linus <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Kalle Valo <kvalo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Arend van Spriel <arend.vanspriel-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-When the max_segs of a mmc host is smaller than 512, the mmc
-subsystem tries to use 512 segments if DMA MAP layer can merge
-the segments, and then the mmc subsystem exposes such information
-to the block layer by using blk_queue_can_use_dma_map_merging().
+Hi Linus,
 
-Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
----
- drivers/mmc/core/queue.c | 35 ++++++++++++++++++++++++++++++++---
- include/linux/mmc/host.h |  1 +
- 2 files changed, 33 insertions(+), 3 deletions(-)
+Here's a PR with quite a few MMC fixes intended for v5.2-rc6. This time the PR
+also contains fixes for a WiFi driver, which device is attached to the SDIO
+interface. Patches for the WiFi driver have been acked by the corresponding
+maintainers. More details about the highlights are as usual found in the signed
+tag.
 
-diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
-index 92900a0..ab0ecc6 100644
---- a/drivers/mmc/core/queue.c
-+++ b/drivers/mmc/core/queue.c
-@@ -24,6 +24,8 @@
- #include "card.h"
- #include "host.h"
- 
-+#define MMC_DMA_MAP_MERGE_SEGMENTS	512
-+
- static inline bool mmc_cqe_dcmd_busy(struct mmc_queue *mq)
- {
- 	/* Allow only 1 DCMD at a time */
-@@ -196,6 +198,12 @@ static void mmc_queue_setup_discard(struct request_queue *q,
- 		blk_queue_flag_set(QUEUE_FLAG_SECERASE, q);
- }
- 
-+static unsigned int mmc_get_max_segments(struct mmc_host *host)
-+{
-+	return host->can_dma_map_merge ? MMC_DMA_MAP_MERGE_SEGMENTS :
-+					 host->max_segs;
-+}
-+
- /**
-  * mmc_init_request() - initialize the MMC-specific per-request data
-  * @q: the request queue
-@@ -209,7 +217,7 @@ static int __mmc_init_request(struct mmc_queue *mq, struct request *req,
- 	struct mmc_card *card = mq->card;
- 	struct mmc_host *host = card->host;
- 
--	mq_rq->sg = mmc_alloc_sg(host->max_segs, gfp);
-+	mq_rq->sg = mmc_alloc_sg(mmc_get_max_segments(host), gfp);
- 	if (!mq_rq->sg)
- 		return -ENOMEM;
- 
-@@ -368,13 +376,23 @@ static void mmc_setup_queue(struct mmc_queue *mq, struct mmc_card *card)
- 	blk_queue_bounce_limit(mq->queue, limit);
- 	blk_queue_max_hw_sectors(mq->queue,
- 		min(host->max_blk_count, host->max_req_size / 512));
--	blk_queue_max_segments(mq->queue, host->max_segs);
-+	if (host->can_dma_map_merge)
-+		WARN(!blk_queue_can_use_dma_map_merging(mq->queue,
-+							mmc_dev(host)),
-+		     "merging was advertised but not possible");
-+	blk_queue_max_segments(mq->queue, mmc_get_max_segments(host));
- 
- 	if (mmc_card_mmc(card))
- 		block_size = card->ext_csd.data_sector_size;
- 
- 	blk_queue_logical_block_size(mq->queue, block_size);
--	blk_queue_max_segment_size(mq->queue,
-+	/*
-+	 * After blk_queue_can_use_dma_map_merging() was called with succeed,
-+	 * since it calls blk_queue_virt_boundary(), the mmc should not call
-+	 * both blk_queue_max_segment_size().
-+	 */
-+	if (host->can_dma_map_merge)
-+		blk_queue_max_segment_size(mq->queue,
- 			round_down(host->max_seg_size, block_size));
- 
- 	dma_set_max_seg_size(mmc_dev(host), queue_max_segment_size(mq->queue));
-@@ -424,6 +442,17 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card)
- 	mq->tag_set.cmd_size = sizeof(struct mmc_queue_req);
- 	mq->tag_set.driver_data = mq;
- 
-+	/*
-+	 * Since blk_mq_alloc_tag_set() calls .init_request() of mmc_mq_ops,
-+	 * the host->can_dma_map_merge should be set before to get max_segs
-+	 * from mmc_get_max_segments().
-+	 */
-+	if (host->max_segs < MMC_DMA_MAP_MERGE_SEGMENTS &&
-+	    dma_get_merge_boundary(mmc_dev(host)))
-+		host->can_dma_map_merge = 1;
-+	else
-+		host->can_dma_map_merge = 0;
-+
- 	ret = blk_mq_alloc_tag_set(&mq->tag_set);
- 	if (ret)
- 		return ret;
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 43d0f0c..10c3719 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -398,6 +398,7 @@ struct mmc_host {
- 	unsigned int		retune_now:1;	/* do re-tuning at next req */
- 	unsigned int		retune_paused:1; /* re-tuning is temporarily disabled */
- 	unsigned int		use_blk_mq:1;	/* use blk-mq */
-+	unsigned int		can_dma_map_merge:1; /* merging can be used */
- 
- 	int			rescan_disable;	/* disable card detection */
- 	int			rescan_entered;	/* used with nonremovable devices */
--- 
-2.7.4
+Please pull this in!
+
+Kind regards
+Ulf Hansson
+
+
+The following changes since commit d1fdb6d8f6a4109a4263176c84b899076a5f8008:
+
+  Linux 5.2-rc4 (2019-06-08 20:24:46 -0700)
+
+are available in the Git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.2-rc4
+
+for you to fetch changes up to 83293386bc95cf5e9f0c0175794455835bd1cb4a:
+
+  mmc: core: Prevent processing SDIO IRQs when the card is suspended (2019-06-18 14:06:32 +0200)
+
+----------------------------------------------------------------
+MMC core:
+ - Make switch to eMMC HS400 more robust for some controllers
+ - Add two SDIO func API to manage re-tuning constraints
+ - Prevent processing SDIO IRQs when the card is suspended
+
+MMC host:
+ - sdhi: Disallow broken HS400 for M3-W ES1.2, RZ/G2M and V3H
+ - mtk-sd: Fixup support for SDIO IRQs
+ - sdhci-pci-o2micro: Fixup support for tuning
+
+Wireless BRCMFMAC (SDIO):
+ - Deal with expected transmission errors related to the idle states
+   (handled by the Always-On-Subsystem or AOS) on the SDIO-based WiFi on
+   rk3288-veyron-minnie, rk3288-veyron-speedy and rk3288-veyron-mickey.
+
+----------------------------------------------------------------
+Douglas Anderson (5):
+      Revert "brcmfmac: disable command decode in sdio_aos"
+      mmc: core: API to temporarily disable retuning for SDIO CRC errors
+      brcmfmac: sdio: Disable auto-tuning around commands expected to fail
+      mmc: core: Add sdio_retune_hold_now() and sdio_retune_release()
+      brcmfmac: sdio: Don't tune while the card is off
+
+Raul E Rangel (1):
+      mmc: sdhci: sdhci-pci-o2micro: Correctly set bus width when tuning
+
+Ulf Hansson (1):
+      mmc: core: Prevent processing SDIO IRQs when the card is suspended
+
+Wolfram Sang (2):
+      mmc: sdhi: disallow HS400 for M3-W ES1.2, RZ/G2M, and V3H
+      mmc: core: complete HS400 before checking status
+
+jjian zhou (2):
+      mmc: mediatek: fix SDIO IRQ interrupt handle flow
+      mmc: mediatek: fix SDIO IRQ detection issue
+
+ drivers/mmc/core/core.c                            |  5 +-
+ drivers/mmc/core/mmc.c                             |  6 +-
+ drivers/mmc/core/sdio.c                            | 13 +++-
+ drivers/mmc/core/sdio_io.c                         | 77 ++++++++++++++++++++++
+ drivers/mmc/core/sdio_irq.c                        |  4 ++
+ drivers/mmc/host/mtk-sd.c                          | 39 ++++++-----
+ drivers/mmc/host/renesas_sdhi_core.c               |  9 ++-
+ drivers/mmc/host/sdhci-pci-o2micro.c               |  5 +-
+ .../wireless/broadcom/brcm80211/brcmfmac/sdio.c    | 17 +++--
+ include/linux/mmc/host.h                           |  1 +
+ include/linux/mmc/sdio_func.h                      |  6 ++
+ 11 files changed, 151 insertions(+), 31 deletions(-)
