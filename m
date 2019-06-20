@@ -1,49 +1,104 @@
-From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: Re: [stable/4.14.y PATCH 0/3] mmc: Fix a potential resource leak
- when shutting down request queue.
-Date: Wed, 19 Jun 2019 20:36:43 +0200
-Message-ID: <20190619183643.GB7018@kroah.com>
-References: <20190513175521.84955-1-rrangel@chromium.org>
- <20190514091933.GA27269@kroah.com>
- <20190619164625.GA85539@google.com>
- <20190619170917.GC10107@kroah.com>
- <20190619182304.GA98587@google.com>
+From: Manish Narani <MNARANI@xilinx.com>
+Subject: RE: [PATCH 3/3] mmc: sdhci-of-arasan: Add support for ZynqMP Platform
+ Tap Delays Setup
+Date: Thu, 20 Jun 2019 08:14:02 +0000
+Message-ID: <MN2PR02MB602935234A2A779B5A05CD63C1E40@MN2PR02MB6029.namprd02.prod.outlook.com>
+References: <1560247011-26369-1-git-send-email-manish.narani@xilinx.com>
+ <1560247011-26369-4-git-send-email-manish.narani@xilinx.com>
+ <CAPDyKFrJwpwUUX_q2kcR9QY_fv9Lgos+ixPmU6JMeJVqJAiFpg@mail.gmail.com>
+ <5feac3fb-bef3-b7d1-57d6-81e115e1f555@xilinx.com>
+ <CAPDyKFp_ZvSjFp2FGonzGsnc9xPyZ7qOCaRnX1SimBxLpfz9-Q@mail.gmail.com>
+ <MN2PR02MB6029DB87CEE32655B0F1E794C1E50@MN2PR02MB6029.namprd02.prod.outlook.com>
+ <CAPDyKFqb3uRU1XbrioSw6UZ5atZ8WwZNhQ_yq2+3JfxXZCxr7g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <stable-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20190619182304.GA98587@google.com>
-Sender: stable-owner@vger.kernel.org
-To: Raul Rangel <rrangel@chromium.org>
-Cc: stable@vger.kernel.org, linux-mmc@vger.kernel.org, djkurtz@google.com, adrian.hunter@intel.com, zwisler@chromium.org, Linus Walleij <linus.walleij@linaro.org>, linux-kernel@vger.kernel.org, Chris Boot <bootc@bootc.net>, =?iso-8859-1?Q?Cl=E9ment_P=E9ron?= <peron.clem@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFqb3uRU1XbrioSw6UZ5atZ8WwZNhQ_yq2+3JfxXZCxr7g@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Michal Simek <michals@xilinx.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Adrian Hunter <adrian.hunter@intel.com>, Rajan Vaja <RAJANV@xilinx.com>, Jolly Shah <JOLLYS@xilinx.com>, Nava kishore Manne <navam@xilinx.com>, Olof Johansson <olof@lixom.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, Jun 19, 2019 at 12:23:04PM -0600, Raul Rangel wrote:
-> On Wed, Jun 19, 2019 at 07:09:17PM +0200, Greg Kroah-Hartman wrote:
-> > On Wed, Jun 19, 2019 at 10:46:25AM -0600, Raul Rangel wrote:
-> > > On Tue, May 14, 2019 at 11:19:34AM +0200, Greg Kroah-Hartman wrote:
-> > > > On Mon, May 13, 2019 at 11:55:18AM -0600, Raul E Rangel wrote:
-> > > > > I think we should cherry-pick 41e3efd07d5a02c80f503e29d755aa1bbb4245de
-> > > > > https://lore.kernel.org/patchwork/patch/856512/ into 4.14. It fixes a
-> > > > > potential resource leak when shutting down the request queue.
-> > > > 
-> > > > Potential meaning "it does happen", or "it can happen if we do this", or
-> > > > just "maybe it might happen, we really do not know?"
-> > > It does happen if the AMD SDHCI patches are cherry-picked into 4.14.
-> > > https://lkml.org/lkml/2019/5/1/398
-> > 
-> > Why are those patches somehow being required to be added to 4.14.y?  If
-> > they are not added, is all fine?
-> I was just thinking we would backport the patches to fix this AMD SDHCI
-> hardware bug, but I guess we don't need to.
-
-Has anyone asked for those to be backported?  Does anyone require them
-to be?  What's keeping users from using a newer kernel that have this
-specific hardware issue?
-
-Trying to apply patches to a stable kernel due to an issue that is not
-even in that stable kernel is crazy.  No wonder I am totally confused...
-
-thanks,
-
-greg k-h
+SGkgVWZmZSwNCg0KDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IFVsZiBI
+YW5zc29uIDx1bGYuaGFuc3NvbkBsaW5hcm8ub3JnPg0KPiBTZW50OiBXZWRuZXNkYXksIEp1bmUg
+MTksIDIwMTkgNzowOSBQTQ0KPiBUbzogTWFuaXNoIE5hcmFuaSA8TU5BUkFOSUB4aWxpbnguY29t
+Pg0KPiBDYzogTWljaGFsIFNpbWVrIDxtaWNoYWxzQHhpbGlueC5jb20+OyBSb2IgSGVycmluZyA8
+cm9iaCtkdEBrZXJuZWwub3JnPjsNCj4gTWFyayBSdXRsYW5kIDxtYXJrLnJ1dGxhbmRAYXJtLmNv
+bT47IEFkcmlhbiBIdW50ZXINCj4gPGFkcmlhbi5odW50ZXJAaW50ZWwuY29tPjsgUmFqYW4gVmFq
+YSA8UkFKQU5WQHhpbGlueC5jb20+OyBKb2xseSBTaGFoDQo+IDxKT0xMWVNAeGlsaW54LmNvbT47
+IE5hdmEga2lzaG9yZSBNYW5uZSA8bmF2YW1AeGlsaW54LmNvbT47IE9sb2YNCj4gSm9oYW5zc29u
+IDxvbG9mQGxpeG9tLm5ldD47IGxpbnV4LW1tY0B2Z2VyLmtlcm5lbC5vcmc7IERUTUwNCj4gPGRl
+dmljZXRyZWVAdmdlci5rZXJuZWwub3JnPjsgTGludXggS2VybmVsIE1haWxpbmcgTGlzdCA8bGlu
+dXgtDQo+IGtlcm5lbEB2Z2VyLmtlcm5lbC5vcmc+OyBMaW51eCBBUk0gPGxpbnV4LWFybS1rZXJu
+ZWxAbGlzdHMuaW5mcmFkZWFkLm9yZz4NCj4gU3ViamVjdDogUmU6IFtQQVRDSCAzLzNdIG1tYzog
+c2RoY2ktb2YtYXJhc2FuOiBBZGQgc3VwcG9ydCBmb3IgWnlucU1QDQo+IFBsYXRmb3JtIFRhcCBE
+ZWxheXMgU2V0dXANCj4gDQo+IE9uIFdlZCwgMTkgSnVuIDIwMTkgYXQgMTA6NDAsIE1hbmlzaCBO
+YXJhbmkgPE1OQVJBTklAeGlsaW54LmNvbT4gd3JvdGU6DQo+ID4NCj4gPiBIaSBVZmZlLA0KPiA+
+DQo+ID4NCj4gPiA+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+ID4gPiBGcm9tOiBVbGYg
+SGFuc3NvbiA8dWxmLmhhbnNzb25AbGluYXJvLm9yZz4NCj4gPiA+IFNlbnQ6IE1vbmRheSwgSnVu
+ZSAxNywgMjAxOSA1OjUxIFBNDQo+ID4gWy4uLl0NCj4gPiA+DQo+ID4gPiBUaGUgImNvbnN0IHN0
+cnVjdCB6eW5xbXBfZWVtaV9vcHMgKmVlbWlfb3BzOyBzaG91bGQgdGhlbiBiZSBtb3ZlZCBpbnRv
+DQo+ID4gPiBhIGNsb2NrIHByb3ZpZGVyIHNwZWNpZmljIHN0cnVjdCwgd2hpY2ggaXMgYXNzaWdu
+ZWQgd2hlbiBjYWxsaW5nDQo+ID4gPiBzZGhjaV9hcmFzYW5fcmVnaXN0ZXJfc2RjbGsuIEkgdW5k
+ZXJzdGFuZCB0aGF0IGFsbCB0aGUgY2xvY2sgZGF0YSBpcw0KPiA+ID4gZm9sZGVkIGludG8gc3Ry
+dWN0IHNkaGNpX2FyYXNhbl9kYXRhIHRvZGF5LCBidXQgSSB0aGluayB0aGF0IHNob3VsZCBiZQ0K
+PiA+ID4gbW92ZWQgaW50byBhICJzdWItc3RydWN0IiBmb3IgdGhlIGNsb2NrIHNwZWNpZmljcy4N
+Cj4gPiA+DQo+ID4gPiBNb3Jlb3Zlciwgd2hlbiByZWdpc3RlcmluZyB0aGUgY2xvY2ssIHdlIHNo
+b3VsZCBjb252ZXJ0IGZyb20gdXNpbmcNCj4gPiA+IGRldm1fY2xrX3JlZ2lzdGVyKCkgaW50byBk
+ZXZtX2Nsa19od19yZWdpc3RlcigpIGFzIHRoZSBmaXJzdCBvbmUgaXMNCj4gPiA+IG5vdyBkZXBy
+ZWNhdGVkLg0KPiA+DQo+ID4gSnVzdCBhIHF1ZXJ5IGhlcmU6DQo+ID4gV2hlbiB3ZSBzd2l0Y2gg
+dG8gdXNpbmcgZGV2bV9jbGtfaHdfcmVnaXN0ZXIoKSBoZXJlLCBpdCB3aWxsIHJlZ2lzdGVyIHRo
+ZQ0KPiBjbGtfaHcgYW5kIHJldHVybiBpbnQuDQo+ID4gSXMgdGhlcmUgYSB3YXkgd2UgY2FuIGdl
+dCB0aGUgY2xrIChyZWxhdGVkIHRvIHRoZSBjbGtfaHcgcmVnaXN0ZXJlZCkgZnJvbSB0aGUNCj4g
+PiBjbG9jayBmcmFtZXdvcms/DQo+ID4gSSBhbSBhc2tpbmcgdGhpcyBiZWNhdXNlIHdlIHdpbGwg
+bmVlZCB0aGF0IGNsayBwb2ludGVyIHdoaWxlIGNhbGxpbmcNCj4gY2xrX3NldF9waGFzZSgpIGZ1
+bmN0aW9uLg0KPiANCj4gSSBhc3N1bWUgZGV2bV9jbGtfZ2V0KCkgc2hvdWxkIHdvcmsgZmluZT8N
+Cg0KVGhpcyBjbG9jayBkb2VzIG5vdCBjb21lIHRocm91Z2ggWnlucU1QIENsb2NrIGZyYW1ld29y
+ay4gV2UgYXJlIGluaXRpYWxpemluZyBpdCBpbiB0aGlzICdzZGhjaS1vZi1hcmFzYW4nIGRyaXZl
+ciBhbmQgZ2V0dGluZyBvbmx5IHRoZSBjbG9jayBuYW1lIGZyb20gImNsb2NrX291dHB1dF9uYW1l
+cyIgcHJvcGVydHkuIFNvIEkgdGhpbmsgZGV2bV9jbGtfZ2V0KCkgd2lsbCBub3Qgd29yayBoZXJl
+IGZvciBvdXIgY2FzZS4NCkkgaGF2ZSBnb25lIHRocm91Z2ggdGhlIGNsb2NrIGZyYW1ld29yayBh
+bmQgSSBmb3VuZCBvbmUgZnVuY3Rpb24gd2hpY2ggbWF5IGJlIHVzZWQgdG8gY3JlYXRlIGNsb2Nr
+IGZyb20gY2xvY2sgaHcsIHRoYXQgaXMgJyBjbGtfaHdfY3JlYXRlX2NsaygpJyB3aGljaCBjYW4g
+YmUgdXNlZCBmcm9tIG91ciBkcml2ZXIsIGhvd2V2ZXIgdGhpcyBuZWVkcyBjaGFuZ2UgaW4gdGhl
+IGNsb2NrIGZyYW1ld29yayBhcyBiZWxvdyA6DQoNCi0tLQ0KZGlmZiAtLWdpdCBhL2RyaXZlcnMv
+Y2xrL2Nsay5jIGIvZHJpdmVycy9jbGsvY2xrLmMNCmluZGV4IGFhNTE3NTYuLjRkYzY5ZmYgMTAw
+NjQ0DQotLS0gYS9kcml2ZXJzL2Nsay9jbGsuYw0KKysrIGIvZHJpdmVycy9jbGsvY2xrLmMNCkBA
+IC0zNDIwLDYgKzM0MjAsNyBAQCBzdHJ1Y3QgY2xrICpjbGtfaHdfY3JlYXRlX2NsayhzdHJ1Y3Qg
+ZGV2aWNlICpkZXYsIHN0cnVjdCBjbGtfaHcgKmh3LA0KIA0KICAgICAgICByZXR1cm4gY2xrOw0K
+IH0NCitFWFBPUlRfU1lNQk9MX0dQTChjbGtfaHdfY3JlYXRlX2Nsayk7DQogDQogc3RhdGljIGlu
+dCBjbGtfY3B5X25hbWUoY29uc3QgY2hhciAqKmRzdF9wLCBjb25zdCBjaGFyICpzcmMsIGJvb2wg
+bXVzdF9leGlzdCkNCiB7DQpkaWZmIC0tZ2l0IGEvZHJpdmVycy9jbGsvY2xrLmggYi9kcml2ZXJz
+L2Nsay9jbGsuaA0KaW5kZXggZDg0MDBkNi4uMjMxOTg5OSAxMDA2NDQNCi0tLSBhL2RyaXZlcnMv
+Y2xrL2Nsay5oDQorKysgYi9kcml2ZXJzL2Nsay9jbGsuaA0KQEAgLTIyLDE3ICsyMiw5IEBAIHN0
+YXRpYyBpbmxpbmUgc3RydWN0IGNsa19odyAqb2ZfY2xrX2dldF9odyhzdHJ1Y3QgZGV2aWNlX25v
+ZGUgKm5wLA0KIHN0cnVjdCBjbGtfaHcgKmNsa19maW5kX2h3KGNvbnN0IGNoYXIgKmRldl9pZCwg
+Y29uc3QgY2hhciAqY29uX2lkKTsNCiANCiAjaWZkZWYgQ09ORklHX0NPTU1PTl9DTEsNCi1zdHJ1
+Y3QgY2xrICpjbGtfaHdfY3JlYXRlX2NsayhzdHJ1Y3QgZGV2aWNlICpkZXYsIHN0cnVjdCBjbGtf
+aHcgKmh3LA0KLSAgICAgICAgICAgICAgICAgICAgICAgICAgICAgY29uc3QgY2hhciAqZGV2X2lk
+LCBjb25zdCBjaGFyICpjb25faWQpOw0KIHZvaWQgX19jbGtfcHV0KHN0cnVjdCBjbGsgKmNsayk7
+DQogI2Vsc2UNCiAvKiBBbGwgdGhlc2UgY2FzdHMgdG8gYXZvaWQgaWZkZWZzIGluIGNsa2Rldi4u
+LiAqLw0KLXN0YXRpYyBpbmxpbmUgc3RydWN0IGNsayAqDQotY2xrX2h3X2NyZWF0ZV9jbGsoc3Ry
+dWN0IGRldmljZSAqZGV2LCBzdHJ1Y3QgY2xrX2h3ICpodywgY29uc3QgY2hhciAqZGV2X2lkLA0K
+LSAgICAgICAgICAgICAgICAgY29uc3QgY2hhciAqY29uX2lkKQ0KLXsNCi0gICAgICAgcmV0dXJu
+IChzdHJ1Y3QgY2xrICopaHc7DQotfQ0KIHN0YXRpYyBzdHJ1Y3QgY2xrX2h3ICpfX2Nsa19nZXRf
+aHcoc3RydWN0IGNsayAqY2xrKQ0KIHsNCiAgICAgICAgcmV0dXJuIChzdHJ1Y3QgY2xrX2h3ICop
+Y2xrOw0KZGlmZiAtLWdpdCBhL2luY2x1ZGUvbGludXgvY2xrLmggYi9pbmNsdWRlL2xpbnV4L2Ns
+ay5oDQppbmRleCBmNjg5ZmM1Li5kM2Y2MGZlIDEwMDY0NA0KLS0tIGEvaW5jbHVkZS9saW51eC9j
+bGsuaA0KKysrIGIvaW5jbHVkZS9saW51eC9jbGsuaA0KQEAgLTE4LDYgKzE4LDcgQEANCiANCiBz
+dHJ1Y3QgZGV2aWNlOw0KIHN0cnVjdCBjbGs7DQorc3RydWN0IGNsa19odzsNCiBzdHJ1Y3QgZGV2
+aWNlX25vZGU7DQogc3RydWN0IG9mX3BoYW5kbGVfYXJnczsNCiANCkBAIC05MzQsNCArOTM1LDE1
+IEBAIHN0YXRpYyBpbmxpbmUgc3RydWN0IGNsayAqb2ZfY2xrX2dldF9mcm9tX3Byb3ZpZGVyKHN0
+cnVjdCBvZl9waGFuZGxlX2FyZ3MgKmNsa3NwDQogfQ0KICNlbmRpZg0KIA0KKyNpZmRlZiBDT05G
+SUdfQ09NTU9OX0NMSw0KK3N0cnVjdCBjbGsgKmNsa19od19jcmVhdGVfY2xrKHN0cnVjdCBkZXZp
+Y2UgKmRldiwgc3RydWN0IGNsa19odyAqaHcsDQorICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICBjb25zdCBjaGFyICpkZXZfaWQsIGNvbnN0IGNoYXIgKmNvbl9pZCk7DQorI2Vsc2UNCitzdGF0
+aWMgaW5saW5lIHN0cnVjdCBjbGsgKg0KK2Nsa19od19jcmVhdGVfY2xrKHN0cnVjdCBkZXZpY2Ug
+KmRldiwgc3RydWN0IGNsa19odyAqaHcsIGNvbnN0IGNoYXIgKmRldl9pZCwNCisgICAgICAgICAg
+ICAgICAgIGNvbnN0IGNoYXIgKmNvbl9pZCkNCit7DQorICAgICAgIHJldHVybiAoc3RydWN0IGNs
+ayAqKWh3Ow0KK30NCisjZW5kaWYNCiAjZW5kaWYNCi0tLQ0KDQpUaGlzIGNoYW5nZSBzaG91bGQg
+aGVscCBvdGhlciBkcml2ZXJzIChvdXRzaWRlICdkcml2ZXJzL2Nsay8nKSBhcyB3ZWxsIGZvciBn
+ZXR0aW5nIHRoZSBjbG9jayBjcmVhdGVkIGZyb20gY2xrX2h3Lg0KSXMgdGhpcyBmaW5lIHRvIGRv
+Pw0KDQpUaGFua3MsDQpNYW5pc2gNCg==
