@@ -1,86 +1,108 @@
-From: Manish Narani <MNARANI@xilinx.com>
-Subject: RE: [PATCH 3/3] mmc: sdhci-of-arasan: Add support for ZynqMP Platform
- Tap Delays Setup
-Date: Thu, 20 Jun 2019 08:19:38 +0000
-Message-ID: <MN2PR02MB6029D633F47B3B0DDF77D841C1E40@MN2PR02MB6029.namprd02.prod.outlook.com>
-References: <1560247011-26369-1-git-send-email-manish.narani@xilinx.com>
- <1560247011-26369-4-git-send-email-manish.narani@xilinx.com>
- <CAPDyKFrJwpwUUX_q2kcR9QY_fv9Lgos+ixPmU6JMeJVqJAiFpg@mail.gmail.com>
- <5feac3fb-bef3-b7d1-57d6-81e115e1f555@xilinx.com>
- <CAPDyKFp_ZvSjFp2FGonzGsnc9xPyZ7qOCaRnX1SimBxLpfz9-Q@mail.gmail.com>
- <948514a0-e310-75fd-e8a8-6ef8bb14e41f@xilinx.com>
- <CAPDyKFp6O8rPZDZS4iKJam2+tXeen_ZMOXKw=WVzJNpBXcSc9g@mail.gmail.com>
- <MN2PR02MB60296837F9D1B3088667BE59C1EA0@MN2PR02MB6029.namprd02.prod.outlook.com>
- <CAPDyKFqC7aGX+BSP7U162Viq8qoL_df+N=zP_6P9xbzSZseipw@mail.gmail.com>
+From: Yoshihiro Shimoda <yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
+Subject: [RFC PATCH v7 0/5] treewide: improve R-Car SDHI performance
+Date: Thu, 20 Jun 2019 17:50:05 +0900
+Message-ID: <1561020610-953-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFqC7aGX+BSP7U162Viq8qoL_df+N=zP_6P9xbzSZseipw@mail.gmail.com>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Michal Simek <michals@xilinx.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Adrian Hunter <adrian.hunter@intel.com>, Rajan Vaja <RAJANV@xilinx.com>, Jolly Shah <JOLLYS@xilinx.com>, Nava kishore Manne <navam@xilinx.com>, Olof Johansson <olof@lixom.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, hch-jcswGhMUV9g@public.gmane.org, m.szyprowski-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, robin.murphy-5wv7dgnIgG8@public.gmane.org, joro-zLv9SwRftAIdnm+yROfE0A@public.gmane.org, axboe-tSWWG44O7X1aa/9Udqfwiw@public.gmane.org
+Cc: linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-SGkgVWZmZSwNCg0KDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IFVsZiBI
-YW5zc29uIDx1bGYuaGFuc3NvbkBsaW5hcm8ub3JnPg0KPiBTZW50OiBXZWRuZXNkYXksIEp1bmUg
-MTksIDIwMTkgODoxMSBQTQ0KPiBUbzogTWFuaXNoIE5hcmFuaSA8TU5BUkFOSUB4aWxpbnguY29t
-Pg0KPiBDYzogTWljaGFsIFNpbWVrIDxtaWNoYWxzQHhpbGlueC5jb20+OyBSb2IgSGVycmluZyA8
-cm9iaCtkdEBrZXJuZWwub3JnPjsNCj4gTWFyayBSdXRsYW5kIDxtYXJrLnJ1dGxhbmRAYXJtLmNv
-bT47IEFkcmlhbiBIdW50ZXINCj4gPGFkcmlhbi5odW50ZXJAaW50ZWwuY29tPjsgUmFqYW4gVmFq
-YSA8UkFKQU5WQHhpbGlueC5jb20+OyBKb2xseSBTaGFoDQo+IDxKT0xMWVNAeGlsaW54LmNvbT47
-IE5hdmEga2lzaG9yZSBNYW5uZSA8bmF2YW1AeGlsaW54LmNvbT47IE9sb2YNCj4gSm9oYW5zc29u
-IDxvbG9mQGxpeG9tLm5ldD47IGxpbnV4LW1tY0B2Z2VyLmtlcm5lbC5vcmc7IERUTUwNCj4gPGRl
-dmljZXRyZWVAdmdlci5rZXJuZWwub3JnPjsgTGludXggS2VybmVsIE1haWxpbmcgTGlzdCA8bGlu
-dXgtDQo+IGtlcm5lbEB2Z2VyLmtlcm5lbC5vcmc+OyBMaW51eCBBUk0gPGxpbnV4LWFybS1rZXJu
-ZWxAbGlzdHMuaW5mcmFkZWFkLm9yZz4NCj4gU3ViamVjdDogUmU6IFtQQVRDSCAzLzNdIG1tYzog
-c2RoY2ktb2YtYXJhc2FuOiBBZGQgc3VwcG9ydCBmb3IgWnlucU1QDQo+IFBsYXRmb3JtIFRhcCBE
-ZWxheXMgU2V0dXANCj4gDQo+IE9uIFR1ZSwgMTggSnVuIDIwMTkgYXQgMDY6NTksIE1hbmlzaCBO
-YXJhbmkgPE1OQVJBTklAeGlsaW54LmNvbT4gd3JvdGU6DQo+ID4NCj4gPiBIaSBVZmZlLA0KPiA+
-DQo+ID4gVGhhbmtzIGZvciB0aGUgcmV2aWV3LiBQbGVhc2UgZmluZCBteSBjb21tZW50cyBiZWxv
-dy4NCj4gPg0KPiA+ID4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gPiA+IEZyb206IFVs
-ZiBIYW5zc29uIDx1bGYuaGFuc3NvbkBsaW5hcm8ub3JnPg0KPiA+ID4gU2VudDogTW9uZGF5LCBK
-dW5lIDE3LCAyMDE5IDg6MjkgUE0NCj4gPiA+IFRvOiBNaWNoYWwgU2ltZWsgPG1pY2hhbHNAeGls
-aW54LmNvbT4NCj4gPiA+IENjOiBNYW5pc2ggTmFyYW5pIDxNTkFSQU5JQHhpbGlueC5jb20+OyBS
-b2IgSGVycmluZw0KPiA+ID4gPHJvYmgrZHRAa2VybmVsLm9yZz47IE1hcmsgUnV0bGFuZCA8bWFy
-ay5ydXRsYW5kQGFybS5jb20+OyBBZHJpYW4NCj4gPiA+IEh1bnRlciA8YWRyaWFuLmh1bnRlckBp
-bnRlbC5jb20+OyBSYWphbiBWYWphIDxSQUpBTlZAeGlsaW54LmNvbT47IEpvbGx5DQo+ID4gPiBT
-aGFoIDxKT0xMWVNAeGlsaW54LmNvbT47IE5hdmEga2lzaG9yZSBNYW5uZSA8bmF2YW1AeGlsaW54
-LmNvbT47DQo+IE9sb2YNCj4gPiA+IEpvaGFuc3NvbiA8b2xvZkBsaXhvbS5uZXQ+OyBsaW51eC1t
-bWNAdmdlci5rZXJuZWwub3JnOyBEVE1MDQo+ID4gPiA8ZGV2aWNldHJlZUB2Z2VyLmtlcm5lbC5v
-cmc+OyBMaW51eCBLZXJuZWwgTWFpbGluZyBMaXN0IDxsaW51eC0NCj4gPiA+IGtlcm5lbEB2Z2Vy
-Lmtlcm5lbC5vcmc+OyBMaW51eCBBUk0gPGxpbnV4LWFybS0NCj4ga2VybmVsQGxpc3RzLmluZnJh
-ZGVhZC5vcmc+DQo+ID4gPiBTdWJqZWN0OiBSZTogW1BBVENIIDMvM10gbW1jOiBzZGhjaS1vZi1h
-cmFzYW46IEFkZCBzdXBwb3J0IGZvciBaeW5xTVANCj4gPiA+IFBsYXRmb3JtIFRhcCBEZWxheXMg
-U2V0dXANCj4gPiA+DQo+ID4gPiBbLi4uXQ0KPiA+ID4NCj4gPiA+ID4gPj4NCj4gPiA+ID4gPj4N
-Cj4gPiA+ID4gPj4+IEluIHJlZ2FyZHMgdG8gdGhlIG1tYyBkYXRhIHBhcnQsIEkgc3VnZ2VzdCB0
-byBkcm9wIHRoZQ0KPiA+ID4gPiA+Pj4gLT5zZXRfdGFwX2RlbGF5KCkgY2FsbGJhY2ssIGJ1dCBy
-YXRoZXIgdXNlIGEgYm9vbGVhbiBmbGFnIHRvIGluZGljYXRlDQo+ID4gPiA+ID4+PiB3aGV0aGVy
-IGNsb2NrIHBoYXNlcyBuZWVkcyB0byBiZSBjaGFuZ2VkIGZvciB0aGUgdmFyaWFudC4gUG90ZW50
-aWFsbHkNCj4gPiA+ID4gPj4+IHRoYXQgY291bGQgZXZlbiBiZSBza2lwcGVkIGFuZCBpbnN0ZWFk
-IGNhbGwgY2xrX3NldF9waGFzZSgpDQo+ID4gPiA+ID4+PiB1bmNvbmRpdGlvbmFsbHksIGFzIHRo
-ZSBjbG9jayBjb3JlIGRlYWxzIGZpbmUgd2l0aCBjbG9jayBwcm92aWRlcnMNCj4gPiA+ID4gPj4+
-IHRoYXQgZG9lc24ndCBzdXBwb3J0IHRoZSAtPnNldF9waGFzZSgpIGNhbGxiYWNrLg0KPiA+DQo+
-ID4gSW4gdGhlIGN1cnJlbnQgaW1wbGVtZW50YXRpb24sIEkgYW0gdGFraW5nIGNhcmUgb2YgYm90
-aCB0aGUgaW5wdXQgYW5kDQo+ID4gb3V0cHV0IGNsb2NrIGRlbGF5cyB3aXRoIHRoZSBzaW5nbGUg
-Y2xvY2sgKHdoaWNoIGlzIG91dHB1dCBjbG9jaykgcmVnaXN0cmF0aW9uDQo+ID4gYW5kIGRpZmZl
-cmVudGlhdGluZyB0aGVzZSB0YXAgZGVsYXlzIGJhc2VkIG9uIHRoZWlyIHZhbHVlcw0KPiA+ICg8
-MjU2IHRoZW4gaW5wdXQgZGVsYXkgYW5kICA+PSAyNTYgdGhlbiBvdXRwdXQgZGVsYXkpLCBiZWNh
-dXNlIHRoYXQgaXMNCj4gPiB6eW5xbXAgc3BlY2lmaWMuIElmIHdlIHdhbnQgdG8gbWFrZSB0aGlz
-IGdlbmVyaWMsIHdlIG1heSBuZWVkIHRvDQo+ID4gcmVnaXN0ZXIgJ2Fub3RoZXInIGNsb2NrIHdo
-aWNoIHdpbGwgYmUgdGhlcmUgYXMgYW4gaW5wdXQgKHNhbXBsaW5nKSBjbG9jaw0KPiA+IGFuZCB0
-aGVuIHdlIGNhbiBtYWtlIHRoaXMgJ2Nsa19zZXRfcGhhc2UoKScgYmUgY2FsbGVkIHVuY29uZGl0
-aW9uYWxseQ0KPiA+IGVhY2ggZm9yIGJvdGggdGhlIGNsb2NrcyBhbmQgbGV0IHRoZSBwbGF0Zm9y
-bXMgaGFuZGxlIHRoZWlyIGNsb2NrIHBhcnQuDQo+ID4gV2hhdCdzIHlvdXIgdGFrZSBvbiB0aGlz
-Pw0KPiANCj4gTm90IHN1cmUgZXhhY3RseSB3aGF0IHlvdSBhcmUgc3VnZ2VzdGluZywgYnV0IG15
-IGd1dCBmZWVsaW5nIHNheXMgaXQNCj4gc291bmRzIGdvb2QuDQo+IA0KPiBIb3cgaXMgdGFwIGRl
-bGF5cyBtYW5hZ2VkIGZvciBib3RoIHRoZSBpbnB1dCBjbG9jayBhbmQgdGhlIG91dHB1dA0KPiBj
-bG9jaz8gSXMgc29tZSBtYW5hZ2VkIGJ5IHRoZSBjbG9jayBwcm92aWRlciAod2hpY2ggaXMgcHJv
-YmFibHkNCj4gZmlybXdhcmUgaW4geW91ciBjYXNlKSBhbmQgc29tZSBtYW5hZ2VkIGJ5IHRoZSBN
-TUMgY29udHJvbGxlcj8NCg0KWWVzLCBmb3IgdGhlIGV4aXN0aW5nICJ4bG54LHp5bnFtcC04Ljlh
-IiBjb250cm9sbGVyLCB0aGUgdGFwIGRlbGF5cyB3aWxsIGJlIG1hbmFnZWQgYnkgdGhlIGZpcm13
-YXJlLCBob3dldmVyIGluIHRoZSB1cGNvbWluZyAieGxueCx2ZXJzYWwtOC45YSIgdmFyaWFudCB0
-aGUgdGFwIGRlbGF5cyB3aWxsIGJlIG1hbmFnZWQgYnkgdGhlIE1NQyBjb250cm9sbGVyIGl0c2Vs
-Zi4NCkkgd2lsbCBpbmNsdWRlIHRoZSBWZXJzYWwgb25lIGluIHRoZSBuZXh0IHNlcmllcyBvZiBw
-YXRjaGVzLg0KDQpUaGFua3MsDQpNYW5pc2gNCg==
+This patch series is based on iommu.git / next branch.
+
+Since SDHI host internal DMAC of the R-Car Gen3 cannot handle two or
+more segments, the performance rate (especially, eMMC HS400 reading)
+is not good. However, if IOMMU is enabled on the DMAC, since IOMMU will
+map multiple scatter gather buffers as one contignous iova, the DMAC can
+handle the iova as well and then the performance rate is possible to
+improve. In fact, I have measured the performance by using bonnie++,
+"Sequential Input - block" rate was improved on r8a7795.
+
+To achieve this, this patch series modifies IOMMU and Block subsystem
+at first. Since I'd like to get any feedback from each subsystem whether
+this way is acceptable for upstream, I submit it to treewide with RFC.
+
+Changes from v6:
+ - [1/5 for DMA MAP] A new patch.
+ - [2/5 for IOMMU] A new patch.
+ - [3/5 for BLOCK] Add Reviewed-by.
+ - [4/5 for BLOCK] Use a new DMA MAP API instead of device_iommu_mapped().
+ - [5/5 for MMC] Likewise, and some minor fix.
+ - Remove patch 4/5 of v6 from this v7 patch series.
+https://patchwork.kernel.org/project/linux-renesas-soc/list/?series=131769
+
+Changes from v5:
+ - Almost all patches are new code.
+ - [4/5 for MMC] This is a refactor patch so that I don't add any
+   {Tested,Reviewed}-by tags.
+ - [5/5 for MMC] Modify MMC subsystem to use bigger segments instead of
+   the renesas_sdhi driver.
+ - [5/5 for MMC] Use BLK_MAX_SEGMENTS (128) instead of local value
+   SDHI_MAX_SEGS_IN_IOMMU (512). Even if we use BLK_MAX_SEGMENTS,
+   the performance is still good.
+https://patchwork.kernel.org/project/linux-renesas-soc/list/?series=127511
+
+Changes from v4:
+ - [DMA MAPPING] Add a new device_dma_parameters for iova contiguous.
+ - [IOMMU] Add a new capable for "merging" segments.
+ - [IOMMU] Add a capable ops into the ipmmu-vmsa driver.
+ - [MMC] Sort headers in renesas_sdhi_core.c.
+ - [MMC] Remove the following codes that made on v3 that can be achieved by
+	 DMA MAPPING and IOMMU subsystem:
+ -- Check if R-Car Gen3 IPMMU is used or not on patch 3.
+ -- Check if all multiple segment buffers are aligned to PAGE_SIZE on patch 3.
+https://patchwork.kernel.org/project/linux-renesas-soc/list/?series=125593
+
+Changes from v3:
+ - Use a helper function device_iommu_mapped on patch 1 and 3.
+ - Check if R-Car Gen3 IPMMU is used or not on patch 3.
+ - Check if all multiple segment buffers are aligned to PAGE_SIZE on patch 3.
+ - Add Reviewed-by Wolfram-san on patch 1 and 2. Note that I also got his
+   Reviewed-by on patch 3, but I changed it from v2. So, I didn't add
+   his Reviewed-by at this time.
+https://patchwork.kernel.org/project/linux-renesas-soc/list/?series=120985
+
+Changes from v2:
+ - Add some conditions in the init_card().
+ - Add a comment in the init_card().
+ - Add definitions for some "MAX_SEGS".
+https://patchwork.kernel.org/project/linux-renesas-soc/list/?series=116729
+
+Changes from v1:
+ - Remove adding init_card ops into struct tmio_mmc_dma_ops and
+   tmio_mmc_host and just set init_card on renesas_sdhi_core.c.
+ - Revise typos on "mmc: tmio: No memory size limitation if runs on IOMMU".
+ - Add Simon-san's Reviewed-by on a tmio patch.
+https://patchwork.kernel.org/project/linux-renesas-soc/list/?series=110485
+
+Yoshihiro Shimoda (5):
+  dma: Introduce dma_get_merge_boundary()
+  iommu/dma: Add a new dma_map_ops of get_merge_boundary()
+  block: sort headers on blk-setting.c
+  block: add a helper function to merge the segments
+  mmc: queue: Use bigger segments if DMA MAP layer can merge the
+    segments
+
+ Documentation/DMA-API.txt   |  8 ++++++++
+ block/blk-settings.c        | 34 ++++++++++++++++++++++++++++------
+ drivers/iommu/dma-iommu.c   | 11 +++++++++++
+ drivers/mmc/core/queue.c    | 35 ++++++++++++++++++++++++++++++++---
+ include/linux/blkdev.h      |  2 ++
+ include/linux/dma-mapping.h |  6 ++++++
+ include/linux/mmc/host.h    |  1 +
+ kernel/dma/mapping.c        | 11 +++++++++++
+ 8 files changed, 99 insertions(+), 9 deletions(-)
+
+-- 
+2.7.4
