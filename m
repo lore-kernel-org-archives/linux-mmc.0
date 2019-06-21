@@ -1,7 +1,7 @@
 From: Baolin Wang <baolin.wang@linaro.org>
-Subject: [PATCH 1/3] mmc: sdhci-sprd: Add start_signal_voltage_switch ops
-Date: Fri, 21 Jun 2019 14:12:31 +0800
-Message-ID: <89fb15e88f33a3c1ce7b5eefa9414a20c984c579.1561094029.git.baolin.wang@linaro.org>
+Subject: [PATCH 2/3] dt-bindings: mmc: sprd: Add pinctrl support
+Date: Fri, 21 Jun 2019 14:12:32 +0800
+Message-ID: <73f6c1291e4c15da6be53a6dd4602622e142fefb.1561094029.git.baolin.wang@linaro.org>
 References: <cover.1561094029.git.baolin.wang@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <cover.1561094029.git.baolin.wang@linaro.org>
@@ -12,58 +12,39 @@ To: adrian.hunter@intel.com, ulf.hansson@linaro.org, zhang.lyra@gmail.com, orson
 Cc: baolin.wang@linaro.org, vincent.guittot@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-For Spreadtrum SD host controller, we can not use standard SD registers
-to change and detect the I/O voltage signals, since our voltage regulator
-for I/O is fixed in hardware, and no signals were connected to the SD
-controller. Thus add Spreadtrum specific voltage switch ops to change
-voltage instead of using standard SD host registers.
+When changing SD card voltage signal for Spreadtrum SD host controller,
+it also need to switch related pin's state. Thus add pinctrl properties'
+description in documentation.
 
 Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
 ---
- drivers/mmc/host/sdhci-sprd.c |   24 ++++++++++++++++++++++++
- 1 file changed, 24 insertions(+)
+ .../devicetree/bindings/mmc/sdhci-sprd.txt         |    7 +++++++
+ 1 file changed, 7 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
-index 024c3c5..8b23c88 100644
---- a/drivers/mmc/host/sdhci-sprd.c
-+++ b/drivers/mmc/host/sdhci-sprd.c
-@@ -403,6 +403,22 @@ static void sdhci_sprd_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 	sdhci_request(mmc, mrq);
- }
+diff --git a/Documentation/devicetree/bindings/mmc/sdhci-sprd.txt b/Documentation/devicetree/bindings/mmc/sdhci-sprd.txt
+index e675397..eb7eb1b 100644
+--- a/Documentation/devicetree/bindings/mmc/sdhci-sprd.txt
++++ b/Documentation/devicetree/bindings/mmc/sdhci-sprd.txt
+@@ -19,6 +19,9 @@ Required properties:
+ Optional properties:
+ - assigned-clocks: the same with "sdio" clock
+ - assigned-clock-parents: the default parent of "sdio" clock
++- pinctrl-names: should be "default", "state_uhs"
++- pinctrl-0: should contain default/high speed pin control
++- pinctrl-1: should contain uhs mode pin control
  
-+static int sdhci_sprd_voltage_switch(struct mmc_host *mmc, struct mmc_ios *ios)
-+{
-+	int ret;
-+
-+	if (!IS_ERR(mmc->supply.vqmmc)) {
-+		ret = mmc_regulator_set_vqmmc(mmc, ios);
-+		if (ret) {
-+			pr_err("%s: Switching signalling voltage failed\n",
-+			       mmc_hostname(mmc));
-+			return ret;
-+		}
-+	}
-+
-+	return 0;
-+}
-+
- static void sdhci_sprd_hs400_enhanced_strobe(struct mmc_host *mmc,
- 					     struct mmc_ios *ios)
- {
-@@ -470,6 +486,14 @@ static int sdhci_sprd_probe(struct platform_device *pdev)
- 	host->mmc_host_ops.request = sdhci_sprd_request;
- 	host->mmc_host_ops.hs400_enhanced_strobe =
- 		sdhci_sprd_hs400_enhanced_strobe;
-+	/*
-+	 * We can not use the standard ops to change and detect the voltage
-+	 * signal for Spreadtrum SD host controller, since our voltage regulator
-+	 * for I/O is fixed in hardware, that means we do not need control
-+	 * the standard SD host controller to change the I/O voltage.
-+	 */
-+	host->mmc_host_ops.start_signal_voltage_switch =
-+		sdhci_sprd_voltage_switch;
+ PHY DLL delays are used to delay the data valid window, and align the window
+ to sampling clock. PHY DLL delays can be configured by following properties,
+@@ -50,6 +53,10 @@ sdio0: sdio@20600000 {
+ 	assigned-clocks = <&ap_clk CLK_EMMC_2X>;
+ 	assigned-clock-parents = <&rpll CLK_RPLL_390M>;
  
- 	host->mmc->caps = MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED |
- 		MMC_CAP_ERASE | MMC_CAP_CMD23;
++	pinctrl-names = "default", "state_uhs";
++	pinctrl-0 = <&sd0_pins_default>;
++	pinctrl-1 = <&sd0_pins_uhs>;
++
+ 	sprd,phy-delay-sd-uhs-sdr104 = <0x3f 0x7f 0x2e 0x2e>;
+ 	bus-width = <8>;
+ 	non-removable;
 -- 
 1.7.9.5
