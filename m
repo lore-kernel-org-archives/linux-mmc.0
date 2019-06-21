@@ -1,77 +1,89 @@
-From: Marek Szyprowski <m.szyprowski-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: [RFC PATCH v7 2/5] iommu/dma: Add a new dma_map_ops of
-	get_merge_boundary()
-Date: Fri, 21 Jun 2019 09:59:21 +0200
-Message-ID: <8bce95ea-93ac-e783-af7c-ec5bfb8e82f6@samsung.com>
-References: <1561020610-953-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
-	<CGME20190620085043epcas2p1f17aa71e547cf3d2b74dfc0c0dcc5ccb@epcas2p1.samsung.com>
-	<1561020610-953-3-git-send-email-yoshihiro.shimoda.uh@renesas.com>
+From: Wolfram Sang <wsa@the-dreams.de>
+Subject: Re: [PATCH] mmc: remove another TMIO MMC variant usdhi6rol0.c
+Date: Fri, 21 Jun 2019 12:50:25 +0200
+Message-ID: <20190621105025.GA2987@kunai>
+References: <20190621060511.29609-1-yamada.masahiro@socionext.com>
+ <CAK7LNASGVbkGgu7psy4DfCxmr-AxSQ3fmGJ=aDAiuSkJ5hrDwA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-In-Reply-To: <1561020610-953-3-git-send-email-yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
-Content-Language: en-US
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Yoshihiro Shimoda <yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, hch-jcswGhMUV9g@public.gmane.org, robin.murphy-5wv7dgnIgG8@public.gmane.org, joro-zLv9SwRftAIdnm+yROfE0A@public.gmane.org, axboe-tSWWG44O7X1aa/9Udqfwiw@public.gmane.org
-Cc: linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="Q68bSM7Ycu6FN28Q"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CAK7LNASGVbkGgu7psy4DfCxmr-AxSQ3fmGJ=aDAiuSkJ5hrDwA@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Masahiro Yamada <yamada.masahiro@socionext.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Rabin Vincent <rabin.vincent@axis.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, DTML <devicetree@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Mark Rutland <mark.rutland@arm.com>
 List-Id: linux-mmc@vger.kernel.org
+
+
+--Q68bSM7Ycu6FN28Q
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
 Hi,
 
-On 2019-06-20 10:50, Yoshihiro Shimoda wrote:
-> This patch adds a new dma_map_ops of get_merge_boundary() to
-> expose the DMA merge boundary if the domain type is IOMMU_DOMAIN_DMA.
->
-> Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
-> ---
->   drivers/iommu/dma-iommu.c | 11 +++++++++++
->   1 file changed, 11 insertions(+)
->
-> diff --git a/drivers/iommu/dma-iommu.c b/drivers/iommu/dma-iommu.c
-> index 205d694..9950cb5 100644
-> --- a/drivers/iommu/dma-iommu.c
-> +++ b/drivers/iommu/dma-iommu.c
-> @@ -1091,6 +1091,16 @@ static int iommu_dma_get_sgtable(struct device *dev, struct sg_table *sgt,
->   	return ret;
->   }
->   
-> +static unsigned long iommu_dma_get_merge_boundary(struct device *dev)
-> +{
-> +	struct iommu_domain *domain = iommu_get_dma_domain(dev);
-> +
-> +	if (domain->type != IOMMU_DOMAIN_DMA)
-> +		return 0;	/* can't merge */
-> +
-> +	return (1 << __ffs(domain->pgsize_bitmap)) - 1;
-> +}
+On Fri, Jun 21, 2019 at 03:16:11PM +0900, Masahiro Yamada wrote:
+> (Added Lars Persson, Guennadi Liakhovetski)
+>=20
+> On Fri, Jun 21, 2019 at 3:06 PM Masahiro Yamada
+> <yamada.masahiro@socionext.com> wrote:
+>=20
+> This needs Ack from Renesas.
+> But, I do not know if TMIO folks are sure about this driver, though.
+> (If they had been sure about it, they should not have duplicated the driv=
+er
+> in the first place.)
 
-I really wonder if there is any IOMMU, which doesn't support 4KiB pages. 
-Cannot you simply assume that the merge boundary is 4KiB and avoid 
-adding this new API?
+=2E.. and from the original mail:
 
-> +
->   static const struct dma_map_ops iommu_dma_ops = {
->   	.alloc			= iommu_dma_alloc,
->   	.free			= iommu_dma_free,
-> @@ -1106,6 +1116,7 @@ static const struct dma_map_ops iommu_dma_ops = {
->   	.sync_sg_for_device	= iommu_dma_sync_sg_for_device,
->   	.map_resource		= iommu_dma_map_resource,
->   	.unmap_resource		= iommu_dma_unmap_resource,
-> +	.get_merge_boundary	= iommu_dma_get_merge_boundary,
->   };
->   
->   /*
+> Delete this driver now. Please re-implement it based on tmio_mmc_core.c
+> if needed.
 
-Best regards
--- 
-Marek Szyprowski, PhD
-Samsung R&D Institute Poland
+I was never happy with this driver existing, yet I never knew which HW
+platform needed this, so I didn't touch it. But I'd like to see it go in
+favor of merging with the TMIO code base.
+
+>=20
+> Perhaps, some code snippets in this driver might be useful for cleaning
+> tmio_mmc. It will stay in git history forever, and you can dig for it
+> whenever you need it.
+>=20
+> Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
+
+I double checked there is no user in the current tree. I also searched
+the web and did not find any out-of-tree user or even a reference of it.
+
+So, for now:
+
+Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+
+But this seriously needs an Ack from Shimoda-san or Morimoto-san. And
+maybe Guennadi has remarks, too?
+
+Thanks,
+
+   Wolfram
+
+
+--Q68bSM7Ycu6FN28Q
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAl0Mtm0ACgkQFA3kzBSg
+KbbYNw//U2nOKt1qTxm7Lxvm3Ii9b1Qhqs/pvoKWphHfPaQw+dgf5vXSZlMkE6QR
+hG3it64ADcyRC+zdjUf+XUgF9GLHHTSZgGtECW4CYQSGjCEQ2Qfc+8WXr5AHCY8h
+NIK7wRhy6MVn0pkLUL0iFQqAYR1a8aFIPim3omAyEjDN2fj0abHuImzoTHtxTgQ3
+kklk1LlsCDS0yDOjkljhxHySzIOY2YkzRCTaOvYYVuyn30G0/uUXL9uuafF1jYPY
+lCPj+88A6px1qXROIJmYTzYpFxdHDmTWBfMtenRHGTM79vXf3nswy8Mxt5PDom04
+C872tCkhTo859e9IwcI24SYr576YZsSU0sw3GY23AJotsg58ifXVrzDjzEZewfNU
+s9MPvBXPhmjlMCEbwOkfEOGtwsDgcXOJdxjKPVF+bMYDbE4XGLxV375axcmf13Vw
+cj0OYvNBpHf9fcejEbYRnYHzAfc1Y4QMLF5NHccF2V1AAAVpl5hADEs+ypcjPBfe
+HChlxkw0rwz8e+ZdEr4FjcpXoIaVHIXYPAcyMn2u/XiADa8XUHmRJxvf0Rz6A30r
+h4ox4TRJrKQy69gPJMxNx4FGyZJjlPlMfa6khtYAhPoiEzruUttVdryTMIRwOD8l
+j/MmsFwAsK06IpUOqosDwNXoUpU/DHXtmk/i/xOo4+9euVaLMrk=
+=gcmd
+-----END PGP SIGNATURE-----
+
+--Q68bSM7Ycu6FN28Q--
