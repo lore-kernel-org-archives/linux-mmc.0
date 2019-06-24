@@ -1,53 +1,28 @@
-From: <orito.takao@socionext.com>
-Subject: Re: [PATCH v2 1/2] dt-bindings: mmc: add DT bindings for Milbeaut SD
- controller
-Date: Mon, 24 Jun 2019 02:09:10 +0000
-Message-ID: <20190624110901.50EF.F0D17A80@socionext.com>
-References: <1559208131-426-1-git-send-email-orito.takao@socionext.com>
+From: Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>
+Subject: Re: [RFC PATCH v7 1/5] dma: Introduce dma_get_merge_boundary()
+Date: Mon, 24 Jun 2019 08:20:09 +0200
+Message-ID: <20190624062009.GA2989@lst.de>
+References: <1561020610-953-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
+	<1561020610-953-2-git-send-email-yoshihiro.shimoda.uh@renesas.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-2022-jp"
-Content-Transfer-Encoding: base64
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1559208131-426-1-git-send-email-orito.takao@socionext.com>
-Content-Language: ja-JP
-Content-ID: <C9EDB484AEAF9B43A83E9452CF7C3FEB@socionext.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, masami.hiramatsu@linaro.org, jaswinder.singh@linaro.org, sugaya.taichi@socionext.com, kasai.kazuhiro@socionext.com, kanematsu.shinji@socionext.com
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1561020610-953-2-git-send-email-yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: Yoshihiro Shimoda <yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
+Cc: axboe-tSWWG44O7X1aa/9Udqfwiw@public.gmane.org, linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, robin.murphy-5wv7dgnIgG8@public.gmane.org, hch-jcswGhMUV9g@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-DQpIZWxsbw0KDQpEb2VzIGFueW9uZSBoYXZlIGFueSBjb21tZW50cyBvbiB0aGlzID8NCg0KPiBB
-ZGQgdGhlIGRldmljZS10cmVlIGJpbmRpbmcgZG9jdW1lbnRhdGlvbiBmb3IgTWlsYmVhdXQgU0RI
-Q0kgZHJpdmVyLg0KPiANCj4gU2lnbmVkLW9mZi1ieTogVGFrYW8gT3JpdG8gPG9yaXRvLnRha2Fv
-QHNvY2lvbmV4dC5jb20+DQo+IC0tLQ0KPiAgLi4uL2RldmljZXRyZWUvYmluZGluZ3MvbW1jL3Nk
-aGNpLW1pbGJlYXV0LnR4dCAgICAgfCAzMiArKysrKysrKysrKysrKysrKysrKysrDQo+ICAxIGZp
-bGUgY2hhbmdlZCwgMzIgaW5zZXJ0aW9ucygrKQ0KPiAgY3JlYXRlIG1vZGUgMTAwNjQ0IERvY3Vt
-ZW50YXRpb24vZGV2aWNldHJlZS9iaW5kaW5ncy9tbWMvc2RoY2ktbWlsYmVhdXQudHh0DQo+IA0K
-PiBkaWZmIC0tZ2l0IGEvRG9jdW1lbnRhdGlvbi9kZXZpY2V0cmVlL2JpbmRpbmdzL21tYy9zZGhj
-aS1taWxiZWF1dC50eHQgYi9Eb2N1bWVudGF0aW9uL2RldmljZXRyZWUvYmluZGluZ3MvbW1jL3Nk
-aGNpLW1pbGJlYXV0LnR4dA0KPiBuZXcgZmlsZSBtb2RlIDEwMDY0NA0KPiBpbmRleCAwMDAwMDAw
-Li42MDYzMTE2DQo+IC0tLSAvZGV2L251bGwNCj4gKysrIGIvRG9jdW1lbnRhdGlvbi9kZXZpY2V0
-cmVlL2JpbmRpbmdzL21tYy9zZGhjaS1taWxiZWF1dC50eHQNCj4gQEAgLTAsMCArMSwzMiBAQA0K
-PiArKiBTT0NJT05FWFQgTWlsYmVhdXQgU0RIQ0kgY29udHJvbGxlcg0KPiArDQo+ICtUaGlzIGZp
-bGUgZG9jdW1lbnRzIGRpZmZlcmVuY2VzIGJldHdlZW4gdGhlIGNvcmUgcHJvcGVydGllcyBpbiBt
-bWMudHh0DQo+ICthbmQgdGhlIHByb3BlcnRpZXMgdXNlZCBieSB0aGUgc2RoY2lfbWlsYmVhdXQg
-ZHJpdmVyLg0KPiArDQo+ICtSZXF1aXJlZCBwcm9wZXJ0aWVzOg0KPiArLSBjb21wYXRpYmxlOiAi
-c29jaW9uZXh0LG1pbGJlYXV0LW0xMHYtc2RoY2ktMy4wIg0KPiArLSBjbG9ja3M6IE11c3QgY29u
-dGFpbiBhbiBlbnRyeSBmb3IgZWFjaCBlbnRyeSBpbiBjbG9jay1uYW1lcy4gSXQgaXMgYQ0KPiAr
-ICBsaXN0IG9mIHBoYW5kbGVzIGFuZCBjbG9jay1zcGVjaWZpZXIgcGFpcnMuDQo+ICsgIFNlZSAu
-Li9jbG9ja3MvY2xvY2stYmluZGluZ3MudHh0IGZvciBkZXRhaWxzLg0KPiArLSBjbG9jay1uYW1l
-czogU2hvdWxkIGNvbnRhaW4gdGhlIGZvbGxvd2luZyB0d28gZW50cmllczoNCj4gKwkiaWZhY2Ui
-IC0gY2xvY2sgdXNlZCBmb3Igc2RoY2kgaW50ZXJmYWNlDQo+ICsJImNvcmUiICAtIGNvcmUgY2xv
-Y2sgZm9yIHNkaGNpIGNvbnRyb2xsZXINCj4gKy0gdm1tYy1zdXBwbHk6IGEgcGhhbmRsZSBvZiBh
-IGZpeGVkIEdQSU8gcmVndWxhdG9yDQo+ICsNCj4gK09wdGlvbmFsIHByb3BlcnRpZXM6DQo+ICst
-IGZ1aml0c3UsY21kLWRhdC1kZWxheS1zZWxlY3Q6IGJvb2xlYW4gcHJvcGVydHkgaW5kaWNhdGlu
-ZyB0aGF0IHRoaXMgaG9zdA0KPiArICByZXF1aXJlcyB0aGUgQ01EX0RBVF9ERUxBWSBjb250cm9s
-IHRvIGJlIGVuYWJsZWQuDQo+ICsNCj4gK0V4YW1wbGU6DQo+ICsJc2RoY2kzOiBtbWNAMWIwMTAw
-MDAgew0KPiArCQljb21wYXRpYmxlID0gInNvY2lvbmV4dCxtaWxiZWF1dC1tMTB2LXNkaGNpLTMu
-MCI7DQo+ICsJCXJlZyA9IDwweDFiMDEwMDAwIDB4MTAwMDA+Ow0KPiArCQlpbnRlcnJ1cHRzID0g
-PDAgMjY1IDB4ND47DQo+ICsJCXZvbHRhZ2UtcmFuZ2VzID0gPDMzMDAgMzMwMD47DQo+ICsJCWJ1
-cy13aWR0aCA9IDw0PjsNCj4gKwkJY2xvY2tzID0gPCZjbGsgNz4sIDwmYWhiX2Nsaz47DQo+ICsJ
-CWNsb2NrLW5hbWVzID0gImNvcmUiLCAiaWZhY2UiOw0KPiArCQljYXAtc2Rpby1pcnE7DQo+ICsJ
-CXZtbWMtc3VwcGx5ID0gPCZ2Y2Nfc2RoY2kzPjsNCj4gKwkJZnVqaXRzdSxjbWQtZGF0LWRlbGF5
-LXNlbGVjdDsNCj4gKwl9Ow0KPiAtLSANCj4gMS45LjENCj4gDQoNClRoYW5rcw0KT3JpdG8NCg0K
-LS0gDQpUYWthbyBPcml0byA8b3JpdG8udGFrYW9Ac29jaW9uZXh0LmNvbT4NCg==
+Looks good,
+
+Reviewed-by: Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>
