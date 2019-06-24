@@ -1,16 +1,16 @@
 From: Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>
-Subject: Re: [RFC PATCH v7 4/5] block: add a helper function to merge the
-	segments
-Date: Mon, 24 Jun 2019 08:22:53 +0200
-Message-ID: <20190624062253.GC2989@lst.de>
+Subject: Re: [RFC PATCH v7 5/5] mmc: queue: Use bigger segments if DMA MAP
+	layer can merge the segments
+Date: Mon, 24 Jun 2019 08:24:14 +0200
+Message-ID: <20190624062414.GD2989@lst.de>
 References: <1561020610-953-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
-	<1561020610-953-5-git-send-email-yoshihiro.shimoda.uh@renesas.com>
+	<1561020610-953-6-git-send-email-yoshihiro.shimoda.uh@renesas.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1561020610-953-5-git-send-email-yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
+In-Reply-To: <1561020610-953-6-git-send-email-yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
 List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
 	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
@@ -24,20 +24,48 @@ To: Yoshihiro Shimoda <yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.
 Cc: axboe-tSWWG44O7X1aa/9Udqfwiw@public.gmane.org, linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, robin.murphy-5wv7dgnIgG8@public.gmane.org, hch-jcswGhMUV9g@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-> +bool blk_queue_can_use_dma_map_merging(struct request_queue *q,
-> +				       struct device *dev)
+On Thu, Jun 20, 2019 at 05:50:10PM +0900, Yoshihiro Shimoda wrote:
+> When the max_segs of a mmc host is smaller than 512, the mmc
+> subsystem tries to use 512 segments if DMA MAP layer can merge
+> the segments, and then the mmc subsystem exposes such information
+> to the block layer by using blk_queue_can_use_dma_map_merging().
+> 
+> Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
+> ---
+>  drivers/mmc/core/queue.c | 35 ++++++++++++++++++++++++++++++++---
+>  include/linux/mmc/host.h |  1 +
+>  2 files changed, 33 insertions(+), 3 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
+> index 92900a0..ab0ecc6 100644
+> --- a/drivers/mmc/core/queue.c
+> +++ b/drivers/mmc/core/queue.c
+> @@ -24,6 +24,8 @@
+>  #include "card.h"
+>  #include "host.h"
+>  
+> +#define MMC_DMA_MAP_MERGE_SEGMENTS	512
+> +
+>  static inline bool mmc_cqe_dcmd_busy(struct mmc_queue *mq)
+>  {
+>  	/* Allow only 1 DCMD at a time */
+> @@ -196,6 +198,12 @@ static void mmc_queue_setup_discard(struct request_queue *q,
+>  		blk_queue_flag_set(QUEUE_FLAG_SECERASE, q);
+>  }
+>  
+> +static unsigned int mmc_get_max_segments(struct mmc_host *host)
 > +{
-> +	unsigned long boundary = dma_get_merge_boundary(dev);
-> +
-> +	if (!boundary)
-> +		return false;
-> +
-> +	/* No need to update max_segment_size. see blk_queue_virt_boundary() */
-> +	blk_queue_virt_boundary(q, boundary);
-> +
-> +	return true;
+> +	return host->can_dma_map_merge ? MMC_DMA_MAP_MERGE_SEGMENTS :
+> +					 host->max_segs;
 
-I'd skip that empty line here, but that is way into nitpick territory.
+I personally don't like superflous use of ? : if an if would be more
+obvious:
+
+	if (host->can_dma_map_merge)
+		return MMC_DMA_MAP_MERGE_SEGMENTS;
+	return host->max_segs;
+
+but that is really just a nitpick and for the mmc maintainer to decide.
 
 Otherwise looks good:
 
