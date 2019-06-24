@@ -1,89 +1,53 @@
-From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH] mmc: remove another TMIO MMC variant usdhi6rol0.c
-Date: Fri, 21 Jun 2019 12:50:25 +0200
-Message-ID: <20190621105025.GA2987@kunai>
-References: <20190621060511.29609-1-yamada.masahiro@socionext.com>
- <CAK7LNASGVbkGgu7psy4DfCxmr-AxSQ3fmGJ=aDAiuSkJ5hrDwA@mail.gmail.com>
+From: <orito.takao@socionext.com>
+Subject: Re: [PATCH v2 1/2] dt-bindings: mmc: add DT bindings for Milbeaut SD
+ controller
+Date: Mon, 24 Jun 2019 02:09:10 +0000
+Message-ID: <20190624110901.50EF.F0D17A80@socionext.com>
+References: <1559208131-426-1-git-send-email-orito.takao@socionext.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="Q68bSM7Ycu6FN28Q"
+Content-Type: text/plain; charset="iso-2022-jp"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAK7LNASGVbkGgu7psy4DfCxmr-AxSQ3fmGJ=aDAiuSkJ5hrDwA@mail.gmail.com>
+In-Reply-To: <1559208131-426-1-git-send-email-orito.takao@socionext.com>
+Content-Language: ja-JP
+Content-ID: <C9EDB484AEAF9B43A83E9452CF7C3FEB@socionext.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Masahiro Yamada <yamada.masahiro@socionext.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Rabin Vincent <rabin.vincent@axis.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, DTML <devicetree@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Mark Rutland <mark.rutland@arm.com>
+To: ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com
+Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, masami.hiramatsu@linaro.org, jaswinder.singh@linaro.org, sugaya.taichi@socionext.com, kasai.kazuhiro@socionext.com, kanematsu.shinji@socionext.com
 List-Id: linux-mmc@vger.kernel.org
 
-
---Q68bSM7Ycu6FN28Q
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-
-Hi,
-
-On Fri, Jun 21, 2019 at 03:16:11PM +0900, Masahiro Yamada wrote:
-> (Added Lars Persson, Guennadi Liakhovetski)
->=20
-> On Fri, Jun 21, 2019 at 3:06 PM Masahiro Yamada
-> <yamada.masahiro@socionext.com> wrote:
->=20
-> This needs Ack from Renesas.
-> But, I do not know if TMIO folks are sure about this driver, though.
-> (If they had been sure about it, they should not have duplicated the driv=
-er
-> in the first place.)
-
-=2E.. and from the original mail:
-
-> Delete this driver now. Please re-implement it based on tmio_mmc_core.c
-> if needed.
-
-I was never happy with this driver existing, yet I never knew which HW
-platform needed this, so I didn't touch it. But I'd like to see it go in
-favor of merging with the TMIO code base.
-
->=20
-> Perhaps, some code snippets in this driver might be useful for cleaning
-> tmio_mmc. It will stay in git history forever, and you can dig for it
-> whenever you need it.
->=20
-> Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
-
-I double checked there is no user in the current tree. I also searched
-the web and did not find any out-of-tree user or even a reference of it.
-
-So, for now:
-
-Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-
-But this seriously needs an Ack from Shimoda-san or Morimoto-san. And
-maybe Guennadi has remarks, too?
-
-Thanks,
-
-   Wolfram
-
-
---Q68bSM7Ycu6FN28Q
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAl0Mtm0ACgkQFA3kzBSg
-KbbYNw//U2nOKt1qTxm7Lxvm3Ii9b1Qhqs/pvoKWphHfPaQw+dgf5vXSZlMkE6QR
-hG3it64ADcyRC+zdjUf+XUgF9GLHHTSZgGtECW4CYQSGjCEQ2Qfc+8WXr5AHCY8h
-NIK7wRhy6MVn0pkLUL0iFQqAYR1a8aFIPim3omAyEjDN2fj0abHuImzoTHtxTgQ3
-kklk1LlsCDS0yDOjkljhxHySzIOY2YkzRCTaOvYYVuyn30G0/uUXL9uuafF1jYPY
-lCPj+88A6px1qXROIJmYTzYpFxdHDmTWBfMtenRHGTM79vXf3nswy8Mxt5PDom04
-C872tCkhTo859e9IwcI24SYr576YZsSU0sw3GY23AJotsg58ifXVrzDjzEZewfNU
-s9MPvBXPhmjlMCEbwOkfEOGtwsDgcXOJdxjKPVF+bMYDbE4XGLxV375axcmf13Vw
-cj0OYvNBpHf9fcejEbYRnYHzAfc1Y4QMLF5NHccF2V1AAAVpl5hADEs+ypcjPBfe
-HChlxkw0rwz8e+ZdEr4FjcpXoIaVHIXYPAcyMn2u/XiADa8XUHmRJxvf0Rz6A30r
-h4ox4TRJrKQy69gPJMxNx4FGyZJjlPlMfa6khtYAhPoiEzruUttVdryTMIRwOD8l
-j/MmsFwAsK06IpUOqosDwNXoUpU/DHXtmk/i/xOo4+9euVaLMrk=
-=gcmd
------END PGP SIGNATURE-----
-
---Q68bSM7Ycu6FN28Q--
+DQpIZWxsbw0KDQpEb2VzIGFueW9uZSBoYXZlIGFueSBjb21tZW50cyBvbiB0aGlzID8NCg0KPiBB
+ZGQgdGhlIGRldmljZS10cmVlIGJpbmRpbmcgZG9jdW1lbnRhdGlvbiBmb3IgTWlsYmVhdXQgU0RI
+Q0kgZHJpdmVyLg0KPiANCj4gU2lnbmVkLW9mZi1ieTogVGFrYW8gT3JpdG8gPG9yaXRvLnRha2Fv
+QHNvY2lvbmV4dC5jb20+DQo+IC0tLQ0KPiAgLi4uL2RldmljZXRyZWUvYmluZGluZ3MvbW1jL3Nk
+aGNpLW1pbGJlYXV0LnR4dCAgICAgfCAzMiArKysrKysrKysrKysrKysrKysrKysrDQo+ICAxIGZp
+bGUgY2hhbmdlZCwgMzIgaW5zZXJ0aW9ucygrKQ0KPiAgY3JlYXRlIG1vZGUgMTAwNjQ0IERvY3Vt
+ZW50YXRpb24vZGV2aWNldHJlZS9iaW5kaW5ncy9tbWMvc2RoY2ktbWlsYmVhdXQudHh0DQo+IA0K
+PiBkaWZmIC0tZ2l0IGEvRG9jdW1lbnRhdGlvbi9kZXZpY2V0cmVlL2JpbmRpbmdzL21tYy9zZGhj
+aS1taWxiZWF1dC50eHQgYi9Eb2N1bWVudGF0aW9uL2RldmljZXRyZWUvYmluZGluZ3MvbW1jL3Nk
+aGNpLW1pbGJlYXV0LnR4dA0KPiBuZXcgZmlsZSBtb2RlIDEwMDY0NA0KPiBpbmRleCAwMDAwMDAw
+Li42MDYzMTE2DQo+IC0tLSAvZGV2L251bGwNCj4gKysrIGIvRG9jdW1lbnRhdGlvbi9kZXZpY2V0
+cmVlL2JpbmRpbmdzL21tYy9zZGhjaS1taWxiZWF1dC50eHQNCj4gQEAgLTAsMCArMSwzMiBAQA0K
+PiArKiBTT0NJT05FWFQgTWlsYmVhdXQgU0RIQ0kgY29udHJvbGxlcg0KPiArDQo+ICtUaGlzIGZp
+bGUgZG9jdW1lbnRzIGRpZmZlcmVuY2VzIGJldHdlZW4gdGhlIGNvcmUgcHJvcGVydGllcyBpbiBt
+bWMudHh0DQo+ICthbmQgdGhlIHByb3BlcnRpZXMgdXNlZCBieSB0aGUgc2RoY2lfbWlsYmVhdXQg
+ZHJpdmVyLg0KPiArDQo+ICtSZXF1aXJlZCBwcm9wZXJ0aWVzOg0KPiArLSBjb21wYXRpYmxlOiAi
+c29jaW9uZXh0LG1pbGJlYXV0LW0xMHYtc2RoY2ktMy4wIg0KPiArLSBjbG9ja3M6IE11c3QgY29u
+dGFpbiBhbiBlbnRyeSBmb3IgZWFjaCBlbnRyeSBpbiBjbG9jay1uYW1lcy4gSXQgaXMgYQ0KPiAr
+ICBsaXN0IG9mIHBoYW5kbGVzIGFuZCBjbG9jay1zcGVjaWZpZXIgcGFpcnMuDQo+ICsgIFNlZSAu
+Li9jbG9ja3MvY2xvY2stYmluZGluZ3MudHh0IGZvciBkZXRhaWxzLg0KPiArLSBjbG9jay1uYW1l
+czogU2hvdWxkIGNvbnRhaW4gdGhlIGZvbGxvd2luZyB0d28gZW50cmllczoNCj4gKwkiaWZhY2Ui
+IC0gY2xvY2sgdXNlZCBmb3Igc2RoY2kgaW50ZXJmYWNlDQo+ICsJImNvcmUiICAtIGNvcmUgY2xv
+Y2sgZm9yIHNkaGNpIGNvbnRyb2xsZXINCj4gKy0gdm1tYy1zdXBwbHk6IGEgcGhhbmRsZSBvZiBh
+IGZpeGVkIEdQSU8gcmVndWxhdG9yDQo+ICsNCj4gK09wdGlvbmFsIHByb3BlcnRpZXM6DQo+ICst
+IGZ1aml0c3UsY21kLWRhdC1kZWxheS1zZWxlY3Q6IGJvb2xlYW4gcHJvcGVydHkgaW5kaWNhdGlu
+ZyB0aGF0IHRoaXMgaG9zdA0KPiArICByZXF1aXJlcyB0aGUgQ01EX0RBVF9ERUxBWSBjb250cm9s
+IHRvIGJlIGVuYWJsZWQuDQo+ICsNCj4gK0V4YW1wbGU6DQo+ICsJc2RoY2kzOiBtbWNAMWIwMTAw
+MDAgew0KPiArCQljb21wYXRpYmxlID0gInNvY2lvbmV4dCxtaWxiZWF1dC1tMTB2LXNkaGNpLTMu
+MCI7DQo+ICsJCXJlZyA9IDwweDFiMDEwMDAwIDB4MTAwMDA+Ow0KPiArCQlpbnRlcnJ1cHRzID0g
+PDAgMjY1IDB4ND47DQo+ICsJCXZvbHRhZ2UtcmFuZ2VzID0gPDMzMDAgMzMwMD47DQo+ICsJCWJ1
+cy13aWR0aCA9IDw0PjsNCj4gKwkJY2xvY2tzID0gPCZjbGsgNz4sIDwmYWhiX2Nsaz47DQo+ICsJ
+CWNsb2NrLW5hbWVzID0gImNvcmUiLCAiaWZhY2UiOw0KPiArCQljYXAtc2Rpby1pcnE7DQo+ICsJ
+CXZtbWMtc3VwcGx5ID0gPCZ2Y2Nfc2RoY2kzPjsNCj4gKwkJZnVqaXRzdSxjbWQtZGF0LWRlbGF5
+LXNlbGVjdDsNCj4gKwl9Ow0KPiAtLSANCj4gMS45LjENCj4gDQoNClRoYW5rcw0KT3JpdG8NCg0K
+LS0gDQpUYWthbyBPcml0byA8b3JpdG8udGFrYW9Ac29jaW9uZXh0LmNvbT4NCg==
