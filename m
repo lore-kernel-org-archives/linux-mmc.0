@@ -1,12 +1,12 @@
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 5.1 76/95] mmc: core: complete HS400 before checking status
-Date: Wed, 26 Jun 2019 20:30:01 -0400
-Message-ID: <20190627003021.19867-76-sashal@kernel.org>
-References: <20190627003021.19867-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.19 50/60] mmc: core: complete HS400 before checking status
+Date: Wed, 26 Jun 2019 20:36:05 -0400
+Message-ID: <20190627003616.20767-50-sashal@kernel.org>
+References: <20190627003616.20767-1-sashal@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190627003021.19867-1-sashal@kernel.org>
+In-Reply-To: <20190627003616.20767-1-sashal@kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Ulf Hansson <ulf.hansson@linaro.org>, Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org
@@ -32,10 +32,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 3 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 3e786ba204c3..671bfcceea6a 100644
+index 55997cf84b39..f1fe446eee66 100644
 --- a/drivers/mmc/core/mmc.c
 +++ b/drivers/mmc/core/mmc.c
-@@ -1212,13 +1212,13 @@ static int mmc_select_hs400(struct mmc_card *card)
+@@ -1209,13 +1209,13 @@ static int mmc_select_hs400(struct mmc_card *card)
  	mmc_set_timing(host, MMC_TIMING_MMC_HS400);
  	mmc_set_bus_speed(card);
  
