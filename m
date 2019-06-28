@@ -1,56 +1,58 @@
-From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.19 50/60] mmc: core: complete HS400 before checking status
-Date: Wed, 26 Jun 2019 20:36:05 -0400
-Message-ID: <20190627003616.20767-50-sashal@kernel.org>
-References: <20190627003616.20767-1-sashal@kernel.org>
+From: YueHaibing <yuehaibing@huawei.com>
+Subject: [PATCH -next] mmc: sdhci_am654: Make some symbols static
+Date: Fri, 28 Jun 2019 12:07:51 +0800
+Message-ID: <20190628040751.46196-1-yuehaibing@huawei.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190627003616.20767-1-sashal@kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Ulf Hansson <ulf.hansson@linaro.org>, Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org
+To: adrian.hunter@intel.com, ulf.hansson@linaro.org, faiz_abbas@ti.com
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, YueHaibing <yuehaibing@huawei.com>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Fix sparse warnings:
 
-[ Upstream commit b0e370b95a3b231d0fb5d1958cce85ef57196fe6 ]
+drivers/mmc/host/sdhci_am654.c:192:6: warning: symbol 'sdhci_j721e_4bit_set_clock' was not declared. Should it be static?
+drivers/mmc/host/sdhci_am654.c:261:18: warning: symbol 'sdhci_j721e_8bit_ops' was not declared. Should it be static?
+drivers/mmc/host/sdhci_am654.c:284:18: warning: symbol 'sdhci_j721e_4bit_ops' was not declared. Should it be static?
 
-We don't have a reproducible error case, yet our BSP team suggested that
-the mmc_switch_status() command in mmc_select_hs400() should come after
-the callback into the driver completing HS400 setup. It makes sense to
-me because we want the status of a fully setup HS400, so it will
-increase the reliability of the mmc_switch_status() command.
-
-Reported-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Fixes: ba6c7ac3a2f4 ("mmc: core: more fine-grained hooks for HS400 tuning")
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-Signed-off-by: Sasha Levin <sashal@kernel.org>
+Reported-by: Hulk Robot <hulkci@huawei.com>
+Signed-off-by: YueHaibing <yuehaibing@huawei.com>
 ---
- drivers/mmc/core/mmc.c | 6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
+ drivers/mmc/host/sdhci_am654.c | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 55997cf84b39..f1fe446eee66 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -1209,13 +1209,13 @@ static int mmc_select_hs400(struct mmc_card *card)
- 	mmc_set_timing(host, MMC_TIMING_MMC_HS400);
- 	mmc_set_bus_speed(card);
+diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
+index 3b39481..bb90757 100644
+--- a/drivers/mmc/host/sdhci_am654.c
++++ b/drivers/mmc/host/sdhci_am654.c
+@@ -189,7 +189,8 @@ static void sdhci_am654_set_clock(struct sdhci_host *host, unsigned int clock)
+ 	}
+ }
  
-+	if (host->ops->hs400_complete)
-+		host->ops->hs400_complete(host);
-+
- 	err = mmc_switch_status(card);
- 	if (err)
- 		goto out_err;
+-void sdhci_j721e_4bit_set_clock(struct sdhci_host *host, unsigned int clock)
++static void sdhci_j721e_4bit_set_clock(struct sdhci_host *host,
++				       unsigned int clock)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+ 	struct sdhci_am654_data *sdhci_am654 = sdhci_pltfm_priv(pltfm_host);
+@@ -258,7 +259,7 @@ static const struct sdhci_am654_driver_data sdhci_am654_drvdata = {
+ 	.flags = IOMUX_PRESENT | FREQSEL_2_BIT | STRBSEL_4_BIT | DLL_PRESENT,
+ };
  
--	if (host->ops->hs400_complete)
--		host->ops->hs400_complete(host);
--
- 	return 0;
+-struct sdhci_ops sdhci_j721e_8bit_ops = {
++static struct sdhci_ops sdhci_j721e_8bit_ops = {
+ 	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
+ 	.get_timeout_clock = sdhci_pltfm_clk_get_max_clock,
+ 	.set_uhs_signaling = sdhci_set_uhs_signaling,
+@@ -281,7 +282,7 @@ static const struct sdhci_am654_driver_data sdhci_j721e_8bit_drvdata = {
+ 	.flags = DLL_PRESENT,
+ };
  
- out_err:
+-struct sdhci_ops sdhci_j721e_4bit_ops = {
++static struct sdhci_ops sdhci_j721e_4bit_ops = {
+ 	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
+ 	.get_timeout_clock = sdhci_pltfm_clk_get_max_clock,
+ 	.set_uhs_signaling = sdhci_set_uhs_signaling,
 -- 
-2.20.1
+2.7.4
