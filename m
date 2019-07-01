@@ -1,24 +1,40 @@
-From: Vinod Koul <vkoul@kernel.org>
-Subject: Re: [PATCH v2] mmc: sdhci-msm: fix mutex while in spinlock
-Date: Mon, 1 Jul 2019 20:52:57 +0530
-Message-ID: <20190701152257.GM2911@vkoul-mobl>
-References: <20190701150125.2602-1-jorge.ramirez-ortiz@linaro.org>
+From: Colin King <colin.king@canonical.com>
+Subject: [PATCH] mmc: alcor: remove a redundant greater or equal to zero comparison
+Date: Mon,  1 Jul 2019 18:52:46 +0100
+Message-ID: <20190701175246.32270-1-colin.king@canonical.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20190701150125.2602-1-jorge.ramirez-ortiz@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Jorge Ramirez-Ortiz <jorge.ramirez-ortiz@linaro.org>
-Cc: agross@kernel.org, adrian.hunter@intel.com, ulf.hansson@linaro.org, bjorn.andersson@linaro.org, linux-arm-msm@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, khasim.mohammed@linaro.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Daniel Drake <drake@endlessm.com>, linux-mmc@vger.kernel.org
+Cc: kernel-janitors@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 01-07-19, 17:01, Jorge Ramirez-Ortiz wrote:
-> mutexes can sleep and therefore should not be taken while holding a
-> spinlock. move clk_get_rate (can sleep) outside the spinlock protected
-> region.
+From: Colin Ian King <colin.king@canonical.com>
 
-Reviewed-by: Vinod Koul <vkoul@kernel.org>
+A greater or equal comparison on the unsigned int variable tmp_diff
+is always true as unsigned ints are never negative.  Hence the
+comparison is redundant and can be removed.
 
+Addresses-Coverity: ("Unsigned compared against 0")
+Signed-off-by: Colin Ian King <colin.king@canonical.com>
+---
+ drivers/mmc/host/alcor.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/alcor.c b/drivers/mmc/host/alcor.c
+index e481535cba2b..1aee485d56d4 100644
+--- a/drivers/mmc/host/alcor.c
++++ b/drivers/mmc/host/alcor.c
+@@ -672,7 +672,7 @@ static void alcor_set_clock(struct alcor_sdmmc_host *host, unsigned int clock)
+ 		tmp_clock = DIV_ROUND_UP(cfg->clk_src_freq, tmp_div);
+ 		tmp_diff = abs(clock - tmp_clock);
+ 
+-		if (tmp_diff >= 0 && tmp_diff < diff) {
++		if (tmp_diff < diff) {
+ 			diff = tmp_diff;
+ 			clk_src = cfg->clk_src_reg;
+ 			clk_div = tmp_div;
 -- 
-~Vinod
+2.20.1
