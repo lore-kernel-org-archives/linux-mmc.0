@@ -1,7 +1,7 @@
 From: Manish Narani <manish.narani@xilinx.com>
-Subject: [PATCH v2 07/11] dt-bindings: mmc: arasan: Add optional properties for Arasan SDHCI
-Date: Mon,  1 Jul 2019 10:59:47 +0530
-Message-ID: <1561958991-21935-8-git-send-email-manish.narani@xilinx.com>
+Subject: [PATCH v2 05/11] dt-bindings: mmc: arasan: Update Documentation for the input clock
+Date: Mon,  1 Jul 2019 10:59:45 +0530
+Message-ID: <1561958991-21935-6-git-send-email-manish.narani@xilinx.com>
 References: <1561958991-21935-1-git-send-email-manish.narani@xilinx.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,39 +12,45 @@ To: ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, heiko@snte
 Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-Add optional propeties for Arasan SDHCI which are used to set clk delays
-for different speed modes in the controller.
+Add documentation for an optional input clock which is essentially used
+in sampling the input data coming from the card.
 
 Signed-off-by: Manish Narani <manish.narani@xilinx.com>
 ---
- Documentation/devicetree/bindings/mmc/arasan,sdhci.txt | 15 +++++++++++++++
- 1 file changed, 15 insertions(+)
+ Documentation/devicetree/bindings/mmc/arasan,sdhci.txt | 14 +++++++-------
+ 1 file changed, 7 insertions(+), 7 deletions(-)
 
 diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-index 7c79496..7425d52 100644
+index 15c6397..7c79496 100644
 --- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
 +++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-@@ -49,6 +49,21 @@ Optional Properties:
-     properly. Test mode can be used to force the controller to function.
-   - xlnx,int-clock-stable-broken: when present, the controller always reports
-     that the internal clock is stable even when it is not.
-+  - clk-phase-legacy: Input/Output Clock Delay pair in degrees for Legacy Mode.
-+  - clk-phase-mmc-hs: Input/Output Clock Delay pair degrees for MMC HS.
-+  - clk-phase-sd-hs: Input/Output Clock Delay pair in degrees for SD HS.
-+  - clk-phase-uhs-sdr12: Input/Output Clock Delay pair in degrees for SDR12.
-+  - clk-phase-uhs-sdr25: Input/Output Clock Delay pair in degrees for SDR25.
-+  - clk-phase-uhs-sdr50: Input/Output Clock Delay pair in degrees for SDR50.
-+  - clk-phase-uhs-sdr104: Input/Output Clock Delay pair in degrees for SDR104.
-+  - clk-phase-uhs-ddr50: Input/Output Clock Delay pair in degrees for SD DDR50.
-+  - clk-phase-mmc-ddr52: Input/Output Clock Delay pair in degrees for MMC DDR52.
-+  - clk-phase-mmc-hs200: Input/Output Clock Delay pair in degrees for MMC HS200.
-+  - clk-phase-mmc-hs400: Input/Output Clock Delay pair in degrees for MMC HS400.
-+
-+  Above mentioned are the clock (phase) delays which are to be configured in the
-+  controller while switching to particular speed mode. If not specified, driver
-+  will configure the default value defined for particular mode in it.
+@@ -23,10 +23,10 @@ Required Properties:
+   - reg: From mmc bindings: Register location and length.
+   - clocks: From clock bindings: Handles to clock inputs.
+   - clock-names: From clock bindings: Tuple including "clk_xin" and "clk_ahb"
+-		 Apart from these two there is one more optional clock which
+-		 is "clk_sdcard". This clock represents output clock from
+-		 controller and card. This must be specified when #clock-cells
+-		 is specified.
++		 Apart from these two there are two more optional clocks which
++		 are "clk_sdcard" and "clk_sample". These two clocks represent
++		 output and input clocks between controller and card. These
++		 must be specified when #clock-cells is specified.
+   - interrupts: Interrupt specifier
  
- Example:
- 	sdhci@e0100000 {
+ Required Properties for "arasan,sdhci-5.1":
+@@ -40,9 +40,9 @@ Optional Properties:
+   - clock-output-names: If specified, this will be the name of the card clock
+     which will be exposed by this device.  Required if #clock-cells is
+     specified.
+-  - #clock-cells: If specified this should be the value <0>. With this
+-    property in place we will export one clock representing the Card
+-    Clock. This clock is expected to be consumed by our PHY. You must also
++  - #clock-cells: If specified this should be the value <0> or <1>. With this
++    property in place we will export one or two clocks representing the Card
++    Clock. These clocks are expected to be consumed by our PHY. You must also
+     specify
+   - xlnx,fails-without-test-cd: when present, the controller doesn't work when
+     the CD line is not connected properly, and the line is not connected
 -- 
 2.1.1
