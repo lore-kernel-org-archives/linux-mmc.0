@@ -1,53 +1,163 @@
 From: Manish Narani <manish.narani@xilinx.com>
-Subject: [PATCH v2 00/11] Arasan SDHCI enhancements and ZynqMP Tap Delays Handling
-Date: Mon,  1 Jul 2019 10:59:40 +0530
-Message-ID: <1561958991-21935-1-git-send-email-manish.narani@xilinx.com>
+Subject: [PATCH v2 08/11] mmc: sdhci-of-arasan: Add support to set clock phase delays for SD
+Date: Mon,  1 Jul 2019 10:59:48 +0530
+Message-ID: <1561958991-21935-9-git-send-email-manish.narani@xilinx.com>
+References: <1561958991-21935-1-git-send-email-manish.narani@xilinx.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1561958991-21935-1-git-send-email-manish.narani@xilinx.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, heiko@sntech.de, michal.simek@xilinx.com, adrian.hunter@intel.com, christoph.muellner@theobroma-systems.com, philipp.tomsich@theobroma-systems.com, viresh.kumar@linaro.org, scott.branden@broadcom.com, ayaka@soulik.info, kernel@esmil.dk, tony.xie@rock-chips.com, rajan.vaja@xilinx.com, jolly.shah@xilinx.com, nava.manne@xilinx.com, mdf@kernel.org, manish.narani@xilinx.com, olof@lixom.net
 Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-This patch series does the following:
- - Reorganize the Clock Handling in Arasan SD driver
- - Adds new sampling clock in Arasan SD driver
- - Adds support to set Clock Delays in SD Arasan Driver
- - Add SDIO Tap Delay handling in ZynqMP firmware driver
- - Add support for ZynqMP Tap Delays setting in Arasan SD driver
+Add support to read Clock Phase Delays from the DT and set it via
+clk_set_phase() API from clock framework. Some of the controllers might
+have their own handling of setting clock delays, for this keep the
+set_clk_delays as function pointer which can be assigned controller
+specific handling of the same.
 
-Changes in v2:
-	- Replaced the deprecated calls to clock framework APIs
-	- Added support for dev_clk_get() call to work for SD card clock
-	- Separated the clock data struct
-	- Fragmented the patch series in smaller patches to make it more
-	  readable
+Signed-off-by: Manish Narani <manish.narani@xilinx.com>
+---
+ drivers/mmc/host/sdhci-of-arasan.c | 91 ++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 91 insertions(+)
 
-This patch series contains a DT patch, which I think should be there to
-maintain the order of commits.
-
-Manish Narani (11):
-  dt-bindings: mmc: arasan: Update documentation for SD Card Clock
-  arm64: dts: rockchip: Add optional clock property indicating sdcard
-    clock
-  mmc: sdhci-of-arasan: Replace deprecated clk API calls
-  mmc: sdhci-of-arasan: Separate out clk related data to another
-    structure
-  dt-bindings: mmc: arasan: Update Documentation for the input clock
-  mmc: sdhci-of-arasan: Add sampling clock for a phy to use
-  dt-bindings: mmc: arasan: Add optional properties for Arasan SDHCI
-  mmc: sdhci-of-arasan: Add support to set clock phase delays for SD
-  firmware: xilinx: Add SDIO Tap Delay APIs
-  dt-bindings: mmc: arasan: Document 'xlnx,zynqmp-8.9a' controller
-  mmc: sdhci-of-arasan: Add support for ZynqMP Platform Tap Delays Setup
-
- .../devicetree/bindings/mmc/arasan,sdhci.txt       |  49 ++-
- arch/arm64/boot/dts/rockchip/rk3399.dtsi           |   4 +-
- drivers/firmware/xilinx/zynqmp.c                   |  48 +++
- drivers/mmc/host/sdhci-of-arasan.c                 | 453 ++++++++++++++++++++-
- include/linux/firmware/xlnx-zynqmp.h               |  15 +-
- 5 files changed, 540 insertions(+), 29 deletions(-)
-
+diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+index 9513813..a545221 100644
+--- a/drivers/mmc/host/sdhci-of-arasan.c
++++ b/drivers/mmc/host/sdhci-of-arasan.c
+@@ -77,12 +77,18 @@ struct sdhci_arasan_soc_ctl_map {
+  * @sdcardclk:		Pointer to normal 'struct clock' for sdcardclk_hw.
+  * @sampleclk_hw:	Struct for the clock we might provide to a PHY.
+  * @sampleclk:		Pointer to normal 'struct clock' for sampleclk_hw.
++ * @clk_phase_in:	Array of Input Clock Phase Delays for all speed modes
++ * @clk_phase_out:	Array of Output Clock Phase Delays for all speed modes
++ * @set_clk_delays:	Function pointer for setting Clock Delays
+  */
+ struct sdhci_arasan_clk_data {
+ 	struct clk_hw	sdcardclk_hw;
+ 	struct clk      *sdcardclk;
+ 	struct clk_hw	sampleclk_hw;
+ 	struct clk      *sampleclk;
++	int		clk_phase_in[MMC_TIMING_MMC_HS400 + 1];
++	int		clk_phase_out[MMC_TIMING_MMC_HS400 + 1];
++	void		(*set_clk_delays)(struct sdhci_host *host);
+ };
+ 
+ /**
+@@ -180,6 +186,7 @@ static void sdhci_arasan_set_clock(struct sdhci_host *host, unsigned int clock)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+ 	struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
++	struct sdhci_arasan_clk_data *clk_data = &sdhci_arasan->clk_data;
+ 	bool ctrl_phy = false;
+ 
+ 	if (!IS_ERR(sdhci_arasan->phy)) {
+@@ -221,6 +228,10 @@ static void sdhci_arasan_set_clock(struct sdhci_host *host, unsigned int clock)
+ 		sdhci_arasan->is_phy_on = false;
+ 	}
+ 
++	/* Set the Input and Output Clock Phase Delays */
++	if (clk_data->set_clk_delays)
++		clk_data->set_clk_delays(host);
++
+ 	sdhci_set_clock(host, clock);
+ 
+ 	if (sdhci_arasan->quirks & SDHCI_ARASAN_QUIRK_CLOCK_UNSTABLE)
+@@ -635,6 +646,84 @@ static void sdhci_arasan_update_baseclkfreq(struct sdhci_host *host)
+ 	sdhci_arasan_syscon_write(host, &soc_ctl_map->baseclkfreq, mhz);
+ }
+ 
++static void sdhci_arasan_set_clk_delays(struct sdhci_host *host)
++{
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
++	struct sdhci_arasan_clk_data *clk_data = &sdhci_arasan->clk_data;
++
++	clk_set_phase(clk_data->sampleclk,
++		      clk_data->clk_phase_in[host->timing]);
++	clk_set_phase(clk_data->sdcardclk,
++		      clk_data->clk_phase_out[host->timing]);
++}
++
++static void arasan_dt_read_clk_phase(struct device *dev,
++				     struct sdhci_arasan_clk_data *clk_data,
++				     unsigned int timing, const char *prop)
++{
++	struct device_node *np = dev->of_node;
++
++	int clk_phase[2] = {0};
++
++	/*
++	 * Read Tap Delay values from DT, if the DT does not contain the
++	 * Tap Values then use the pre-defined values.
++	 */
++	if (of_property_read_variable_u32_array(np, prop, &clk_phase[0],
++	    2, 0)) {
++		dev_dbg(dev, "Using predefined clock phase for %s = %d %d\n",
++			prop, clk_data->clk_phase_in[timing],
++			clk_data->clk_phase_out[timing]);
++		return;
++	}
++
++	/* The values read are Input and Output Clock Delays in order */
++	clk_data->clk_phase_in[timing] = clk_phase[0];
++	clk_data->clk_phase_out[timing] = clk_phase[1];
++}
++
++/**
++ * arasan_dt_parse_clk_phases - Read Clock Delay values from DT
++ *
++ * Called at initialization to parse the values of Clock Delays.
++ *
++ * @dev:		Pointer to our struct device.
++ */
++static void arasan_dt_parse_clk_phases(struct device *dev,
++				      struct sdhci_arasan_clk_data *clk_data)
++{
++	/*
++	 * This has been kept as a pointer and is assigned a function here.
++	 * So that different controller variants can assign their own handling
++	 * function.
++	 */
++	clk_data->set_clk_delays = sdhci_arasan_set_clk_delays;
++
++	arasan_dt_read_clk_phase(dev, clk_data, MMC_TIMING_LEGACY,
++				 "clk-phase-legacy");
++	arasan_dt_read_clk_phase(dev, clk_data, MMC_TIMING_MMC_HS,
++				 "clk-phase-mmc-hs");
++	arasan_dt_read_clk_phase(dev, clk_data, MMC_TIMING_SD_HS,
++				 "clk-phase-sd-hs");
++	arasan_dt_read_clk_phase(dev, clk_data, MMC_TIMING_UHS_SDR12,
++				 "clk-phase-uhs-sdr12");
++	arasan_dt_read_clk_phase(dev, clk_data, MMC_TIMING_UHS_SDR25,
++				 "clk-phase-uhs-sdr25");
++	arasan_dt_read_clk_phase(dev, clk_data, MMC_TIMING_UHS_SDR50,
++				 "clk-phase-uhs-sdr50");
++	arasan_dt_read_clk_phase(dev, clk_data, MMC_TIMING_UHS_SDR104,
++				 "clk-phase-uhs-sdr104");
++	arasan_dt_read_clk_phase(dev, clk_data, MMC_TIMING_UHS_DDR50,
++				 "clk-phase-uhs-ddr50");
++	arasan_dt_read_clk_phase(dev, clk_data, MMC_TIMING_MMC_DDR52,
++				 "clk-phase-mmc-ddr52");
++	arasan_dt_read_clk_phase(dev, clk_data, MMC_TIMING_MMC_HS200,
++				 "clk-phase-mmc-hs200");
++	arasan_dt_read_clk_phase(dev, clk_data, MMC_TIMING_MMC_HS400,
++				 "clk-phase-mmc-hs400");
++}
++
+ /**
+  * sdhci_arasan_register_sdcardclk - Register the sdcardclk for a PHY to use
+  *
+@@ -923,6 +1012,8 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
+ 	if (ret)
+ 		goto unreg_clk;
+ 
++	arasan_dt_parse_clk_phases(&pdev->dev, &sdhci_arasan->clk_data);
++
+ 	ret = mmc_of_parse(host->mmc);
+ 	if (ret) {
+ 		if (ret != -EPROBE_DEFER)
 -- 
 2.1.1
