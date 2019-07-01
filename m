@@ -1,66 +1,75 @@
-From: Jorge Ramirez-Ortiz <jorge.ramirez-ortiz@linaro.org>
-Subject: [PATCH] mmc: sdhci-msm: fix mutex while in spinlock
-Date: Mon,  1 Jul 2019 12:53:16 +0200
-Message-ID: <20190701105316.19419-1-jorge.ramirez-ortiz@linaro.org>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH 1/3] mmc: sdhci-sprd: Add start_signal_voltage_switch ops
+Date: Mon, 1 Jul 2019 16:31:18 +0300
+Message-ID: <09a99609-9126-1df5-5ec4-bffe65daeca6@intel.com>
+References: <cover.1561094029.git.baolin.wang@linaro.org>
+ <89fb15e88f33a3c1ce7b5eefa9414a20c984c579.1561094029.git.baolin.wang@linaro.org>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <89fb15e88f33a3c1ce7b5eefa9414a20c984c579.1561094029.git.baolin.wang@linaro.org>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: jorge.ramirez-ortiz@linaro.org, adrian.hunter@intel.com, agross@kernel.org, ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, linux-kernel@vger.kernel.org, khasim.mohammed@linaro.org, vinod.koul@linaro.org
+To: Baolin Wang <baolin.wang@linaro.org>, ulf.hansson@linaro.org, zhang.lyra@gmail.com, orsonzhai@gmail.com, robh+dt@kernel.org, mark.rutland@arm.com
+Cc: vincent.guittot@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-mutexes can sleep and therefore should not be taken while holding a
-spinlock. move clk_get_rate (can sleep) outside the spinlock protected
-region.
+On 21/06/19 9:12 AM, Baolin Wang wrote:
+> For Spreadtrum SD host controller, we can not use standard SD registers
+> to change and detect the I/O voltage signals, since our voltage regulator
+> for I/O is fixed in hardware, and no signals were connected to the SD
+> controller. Thus add Spreadtrum specific voltage switch ops to change
+> voltage instead of using standard SD host registers.
+> 
+> Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
 
-This regression was introduced with commit
-     Date:   Mon Nov 21 12:07:16 2016 +0530
-     mmc: sdhci-msm: Update DLL reset sequence
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-     SDCC core with minor version >= 0x42 introduced new 14lpp
-     DLL. This has additional requirements in the reset sequence
-     for DLL tuning. Make necessary changes as needed.
-
-Fixes: 83736352e0ca ("mmc: sdhci-msm: Update DLL reset sequence")
-Cc: stable@vger.kernel.org
-Signed-off-by: Jorge Ramirez-Ortiz <jorge.ramirez-ortiz@linaro.org>
----
- drivers/mmc/host/sdhci-msm.c | 9 ++++++---
- 1 file changed, 6 insertions(+), 3 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index 5fc76a1993d0..9cf14b359c14 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -575,11 +575,14 @@ static int msm_init_cm_dll(struct sdhci_host *host)
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
- 	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
- 	int wait_cnt = 50;
--	unsigned long flags;
-+	unsigned long flags, xo_clk = 0;
- 	u32 config;
- 	const struct sdhci_msm_offset *msm_offset =
- 					msm_host->offset;
- 
-+	if (msm_host->use_14lpp_dll_reset && !IS_ERR_OR_NULL(msm_host->xo_clk))
-+		xo_clk = clk_get_rate(msm_host->xo_clk);
-+
- 	spin_lock_irqsave(&host->lock, flags);
- 
- 	/*
-@@ -627,10 +630,10 @@ static int msm_init_cm_dll(struct sdhci_host *host)
- 		config &= CORE_FLL_CYCLE_CNT;
- 		if (config)
- 			mclk_freq = DIV_ROUND_CLOSEST_ULL((host->clock * 8),
--					clk_get_rate(msm_host->xo_clk));
-+					xo_clk);
- 		else
- 			mclk_freq = DIV_ROUND_CLOSEST_ULL((host->clock * 4),
--					clk_get_rate(msm_host->xo_clk));
-+					xo_clk);
- 
- 		config = readl_relaxed(host->ioaddr +
- 				msm_offset->core_dll_config_2);
--- 
-2.21.0
+> ---
+>  drivers/mmc/host/sdhci-sprd.c |   24 ++++++++++++++++++++++++
+>  1 file changed, 24 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
+> index 024c3c5..8b23c88 100644
+> --- a/drivers/mmc/host/sdhci-sprd.c
+> +++ b/drivers/mmc/host/sdhci-sprd.c
+> @@ -403,6 +403,22 @@ static void sdhci_sprd_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>  	sdhci_request(mmc, mrq);
+>  }
+>  
+> +static int sdhci_sprd_voltage_switch(struct mmc_host *mmc, struct mmc_ios *ios)
+> +{
+> +	int ret;
+> +
+> +	if (!IS_ERR(mmc->supply.vqmmc)) {
+> +		ret = mmc_regulator_set_vqmmc(mmc, ios);
+> +		if (ret) {
+> +			pr_err("%s: Switching signalling voltage failed\n",
+> +			       mmc_hostname(mmc));
+> +			return ret;
+> +		}
+> +	}
+> +
+> +	return 0;
+> +}
+> +
+>  static void sdhci_sprd_hs400_enhanced_strobe(struct mmc_host *mmc,
+>  					     struct mmc_ios *ios)
+>  {
+> @@ -470,6 +486,14 @@ static int sdhci_sprd_probe(struct platform_device *pdev)
+>  	host->mmc_host_ops.request = sdhci_sprd_request;
+>  	host->mmc_host_ops.hs400_enhanced_strobe =
+>  		sdhci_sprd_hs400_enhanced_strobe;
+> +	/*
+> +	 * We can not use the standard ops to change and detect the voltage
+> +	 * signal for Spreadtrum SD host controller, since our voltage regulator
+> +	 * for I/O is fixed in hardware, that means we do not need control
+> +	 * the standard SD host controller to change the I/O voltage.
+> +	 */
+> +	host->mmc_host_ops.start_signal_voltage_switch =
+> +		sdhci_sprd_voltage_switch;
+>  
+>  	host->mmc->caps = MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED |
+>  		MMC_CAP_ERASE | MMC_CAP_CMD23;
+> 
