@@ -1,80 +1,40 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: Re: [PATCH v2] dt-binding: mmc: rename tmio_mmc.txt to
- renesas,sdhi.txt
-Date: Tue, 2 Jul 2019 13:24:34 +0200
-Message-ID: <20190702112434.ll3btya7fepkb5tn@verge.net.au>
-References: <20190624070345.20373-1-yamada.masahiro@socionext.com>
+From: YueHaibing <yuehaibing@huawei.com>
+Subject: [PATCH] mmc: sdhci_am654: Add dependency on MMC_SDHCI_AM654
+Date: Tue, 2 Jul 2019 21:36:31 +0800
+Message-ID: <20190702133631.47760-1-yuehaibing@huawei.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20190624070345.20373-1-yamada.masahiro@socionext.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Masahiro Yamada <yamada.masahiro@socionext.com>
-Cc: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Simon Horman <simon.horman@netronome.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-renesas-soc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>
+To: ulf.hansson@linaro.org, adrian.hunter@intel.com, faiz_abbas@ti.com
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, YueHaibing <yuehaibing@huawei.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, Jun 24, 2019 at 04:03:45PM +0900, Masahiro Yamada wrote:
-> As commit b6147490e6aa ("mmc: tmio: split core functionality, DMA and
-> MFD glue") said, these MMC controllers use the IP from Panasonic.
-> 
-> TMIO (Toshiba Mobile IO) MMC was the first upstreamed user of this IP.
-> The common driver code was split and expanded as 'tmio-mmc-core', then
-> it became historical misnomer since 'tmio' is not the name of this IP.
-> 
-> In the discussion [1], we decide to keep this name as-is at least in
-> Linux driver level because renaming everything is a big churn.
-> 
-> However, DT should not be oriented to a particular project even though
-> it is mainly developed in Linux communities.
-> 
-> This is the misfortune only in Linux. Let's stop exporting it to other
-> projects, where there is no good reason to call this hardware "TMIO".
-> Rename the file to renesas,sdhi.txt. In fact, all the information in
-> this file is specific to the Renesas platform.
-> 
-> This commit also removes the first paragraph entirely. The DT-binding
-> should describe the hardware. It is strange to talk about Linux driver
-> internals such as how the drivers are probed, how platform data are
-> handed off, etc.
-> 
-> [1] https://www.spinics.net/lists/linux-mmc/msg46952.html
-> 
-> Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
+Fix build error:
 
-Reviewed-by: Simon Horman <horms+renesas@verge.net.au>
+drivers/mmc/host/sdhci_am654.o: In function `sdhci_am654_probe':
+drivers/mmc/host/sdhci_am654.c:464: undefined reference to `__devm_regmap_init_mmio_clk'
+drivers/mmc/host/sdhci_am654.o:(.debug_addr+0x3f8): undefined reference to `__devm_regmap_init_mmio_clk'
 
-> ---
-> 
-> Changes in v2:
->  - Rename to renesas,sdhi.txt instead of renesas_sdhi.txt
-> 
->  .../bindings/mmc/{tmio_mmc.txt => renesas,sdhi.txt}   | 11 +----------
->  1 file changed, 1 insertion(+), 10 deletions(-)
->  rename Documentation/devicetree/bindings/mmc/{tmio_mmc.txt => renesas,sdhi.txt} (87%)
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt b/Documentation/devicetree/bindings/mmc/renesas,sdhi.txt
-> similarity index 87%
-> rename from Documentation/devicetree/bindings/mmc/tmio_mmc.txt
-> rename to Documentation/devicetree/bindings/mmc/renesas,sdhi.txt
-> index 2b4f17ca9087..dd08d038a65c 100644
-> --- a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
-> +++ b/Documentation/devicetree/bindings/mmc/renesas,sdhi.txt
-> @@ -1,13 +1,4 @@
-> -* Toshiba Mobile IO SD/MMC controller
-> -
-> -The tmio-mmc driver doesn't probe its devices actively, instead its binding to
-> -devices is managed by either MFD drivers or by the sh_mobile_sdhi platform
-> -driver. Those drivers supply the tmio-mmc driver with platform data, that either
-> -describe hardware capabilities, known to them, or are obtained by them from
-> -their own platform data or from their DT information. In the latter case all
-> -compulsory and any optional properties, common to all SD/MMC drivers, as
-> -described in mmc.txt, can be used. Additionally the following tmio_mmc-specific
-> -optional bindings can be used.
-> +* Renesas SDHI SD/MMC controller
->  
->  Required properties:
->  - compatible: should contain one or more of the following:
-> -- 
-> 2.17.1
-> 
+Reported-by: Hulk Robot <hulkci@huawei.com>
+Fixes: aff88ff23512 ("mmc: sdhci_am654: Add Initial Support for AM654 SDHCI driver")
+Signed-off-by: YueHaibing <yuehaibing@huawei.com>
+---
+ drivers/mmc/host/Kconfig | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 931770f..14d89a1 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -996,7 +996,7 @@ config MMC_SDHCI_OMAP
+ 
+ config MMC_SDHCI_AM654
+ 	tristate "Support for the SDHCI Controller in TI's AM654 SOCs"
+-	depends on MMC_SDHCI_PLTFM && OF
++	depends on MMC_SDHCI_PLTFM && OF && REGMAP_MMIO
+ 	select MMC_SDHCI_IO_ACCESSORS
+ 	help
+ 	  This selects the Secure Digital Host Controller Interface (SDHCI)
+-- 
+2.7.4
