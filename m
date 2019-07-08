@@ -1,40 +1,71 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [RFC PATCH v7 0/5] treewide: improve R-Car SDHI performance
-Date: Mon, 8 Jul 2019 13:45:55 +0200
-Message-ID: <CAPDyKFpg6zMRtnD89juuXR8Epas7qJOo8GgdTR=Q1kbZ0=69LA@mail.gmail.com>
-References: <1561020610-953-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
-	<20190701083253.GA22719@lst.de>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH -next] mmc: sdhci_am654: Make some symbols static
+Date: Mon, 8 Jul 2019 13:55:36 +0200
+Message-ID: <CAPDyKFp=7qPeTgx8tJDHaAvg+w+1z8iWExVUeOyRE=5cud8KBQ@mail.gmail.com>
+References: <20190628040751.46196-1-yuehaibing@huawei.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-In-Reply-To: <20190701083253.GA22719-jcswGhMUV9g@public.gmane.org>
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>
-Cc: Jens Axboe <axboe-tSWWG44O7X1aa/9Udqfwiw@public.gmane.org>, linux-block <linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux-Renesas <linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Wolfram Sang <wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org>, "list-Y9sIeH5OGRo@public.gmane.org:IOMMU DRIVERS <iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>,
-	Joerg Roedel <joro-zLv9SwRftAIdnm+yROfE0A@public.gmane.org>, " <iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>, Robin Murphy <robin.murphy-5wv7dgnIgG8@public.gmane.org>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20190628040751.46196-1-yuehaibing@huawei.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: YueHaibing <yuehaibing@huawei.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Faiz Abbas <faiz_abbas@ti.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, 1 Jul 2019 at 10:32, Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org> wrote:
+On Fri, 28 Jun 2019 at 06:09, YueHaibing <yuehaibing@huawei.com> wrote:
 >
-> Any comments from the block, iommu and mmc maintainers?  I'd be happy
-> to queue this up in the dma-mapping tree, but I'll need some ACKs
-> for that fast.  Alternatively I can just queue up the DMA API bits,
-> leaving the rest for the next merge window, but would drag things
-> out far too long IMHO.
+> Fix sparse warnings:
+>
+> drivers/mmc/host/sdhci_am654.c:192:6: warning: symbol 'sdhci_j721e_4bit_set_clock' was not declared. Should it be static?
+> drivers/mmc/host/sdhci_am654.c:261:18: warning: symbol 'sdhci_j721e_8bit_ops' was not declared. Should it be static?
+> drivers/mmc/host/sdhci_am654.c:284:18: warning: symbol 'sdhci_j721e_4bit_ops' was not declared. Should it be static?
+>
+> Reported-by: Hulk Robot <hulkci@huawei.com>
+> Signed-off-by: YueHaibing <yuehaibing@huawei.com>
 
-Apologize for the delay, the mmc parts looks good to me. If not too
-late, feel free to pick it up.
-
-Otherwise, let's do it for the next cycle.
+Applied for next, thanks!
 
 Kind regards
 Uffe
+
+
+> ---
+>  drivers/mmc/host/sdhci_am654.c | 7 ++++---
+>  1 file changed, 4 insertions(+), 3 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
+> index 3b39481..bb90757 100644
+> --- a/drivers/mmc/host/sdhci_am654.c
+> +++ b/drivers/mmc/host/sdhci_am654.c
+> @@ -189,7 +189,8 @@ static void sdhci_am654_set_clock(struct sdhci_host *host, unsigned int clock)
+>         }
+>  }
+>
+> -void sdhci_j721e_4bit_set_clock(struct sdhci_host *host, unsigned int clock)
+> +static void sdhci_j721e_4bit_set_clock(struct sdhci_host *host,
+> +                                      unsigned int clock)
+>  {
+>         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>         struct sdhci_am654_data *sdhci_am654 = sdhci_pltfm_priv(pltfm_host);
+> @@ -258,7 +259,7 @@ static const struct sdhci_am654_driver_data sdhci_am654_drvdata = {
+>         .flags = IOMUX_PRESENT | FREQSEL_2_BIT | STRBSEL_4_BIT | DLL_PRESENT,
+>  };
+>
+> -struct sdhci_ops sdhci_j721e_8bit_ops = {
+> +static struct sdhci_ops sdhci_j721e_8bit_ops = {
+>         .get_max_clock = sdhci_pltfm_clk_get_max_clock,
+>         .get_timeout_clock = sdhci_pltfm_clk_get_max_clock,
+>         .set_uhs_signaling = sdhci_set_uhs_signaling,
+> @@ -281,7 +282,7 @@ static const struct sdhci_am654_driver_data sdhci_j721e_8bit_drvdata = {
+>         .flags = DLL_PRESENT,
+>  };
+>
+> -struct sdhci_ops sdhci_j721e_4bit_ops = {
+> +static struct sdhci_ops sdhci_j721e_4bit_ops = {
+>         .get_max_clock = sdhci_pltfm_clk_get_max_clock,
+>         .get_timeout_clock = sdhci_pltfm_clk_get_max_clock,
+>         .set_uhs_signaling = sdhci_set_uhs_signaling,
+> --
+> 2.7.4
+>
+>
