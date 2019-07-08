@@ -1,83 +1,120 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: remove another TMIO MMC variant usdhi6rol0.c
-Date: Mon, 8 Jul 2019 12:21:52 +0200
-Message-ID: <CAPDyKFqdRO9VeTrG7-nSU-oMB=HenCB3GO4GS0sN=KHnLYDCtw@mail.gmail.com>
-References: <20190621060511.29609-1-yamada.masahiro@socionext.com>
- <CAK7LNASGVbkGgu7psy4DfCxmr-AxSQ3fmGJ=aDAiuSkJ5hrDwA@mail.gmail.com>
- <20190621105025.GA2987@kunai> <CADnJP=sg1Kp=TAvUD-ofQje9Y6mWWE_ZnQM_eB85uw3z6PHrVQ@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH 4/7] mmc: sdio: Drop powered-on re-init at runtime resume
+ and HW reset
+Date: Mon, 8 Jul 2019 12:53:54 +0200
+Message-ID: <CAPDyKFoHzCmobCtyy-j+-4xjW0Bt1_vA5-s4vHLVN78jXJ4X-w@mail.gmail.com>
+References: <20190618153448.27145-1-ulf.hansson@linaro.org>
+ <20190618153448.27145-5-ulf.hansson@linaro.org> <CAD=FV=X7P2F1k_zwHc0mbtfk55-rucTz_GoDH=PL6zWqKYcpuw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CADnJP=sg1Kp=TAvUD-ofQje9Y6mWWE_ZnQM_eB85uw3z6PHrVQ@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Lars Persson <lists@bofh.nu>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Masahiro Yamada <yamada.masahiro@socionext.com>
-Cc: Wolfram Sang <wsa@the-dreams.de>, linux-mmc <linux-mmc@vger.kernel.org>, Rabin Vincent <rabin.vincent@axis.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, DTML <devicetree@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Mark Rutland <mark.rutland@arm.com>
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAD=FV=X7P2F1k_zwHc0mbtfk55-rucTz_GoDH=PL6zWqKYcpuw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Cc: Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Brian Norris <briannorris-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Guenter Roeck <groeck-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, Kalle Valo <kvalo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Arend Van Spriel <arend.vanspriel-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, linux-wireless <linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, 24 Jun 2019 at 09:04, Lars Persson <lists@bofh.nu> wrote:
+On Thu, 4 Jul 2019 at 02:02, Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org> wrote:
 >
-> On Fri, Jun 21, 2019 at 12:50 PM Wolfram Sang <wsa@the-dreams.de> wrote:
-> >
-> > Hi,
-> >
-> > On Fri, Jun 21, 2019 at 03:16:11PM +0900, Masahiro Yamada wrote:
-> > > (Added Lars Persson, Guennadi Liakhovetski)
-> > >
-> > > On Fri, Jun 21, 2019 at 3:06 PM Masahiro Yamada
-> > > <yamada.masahiro@socionext.com> wrote:
-> > >
-> > > This needs Ack from Renesas.
-> > > But, I do not know if TMIO folks are sure about this driver, though.
-> > > (If they had been sure about it, they should not have duplicated the driver
-> > > in the first place.)
-> >
-> > ... and from the original mail:
-> >
-> > > Delete this driver now. Please re-implement it based on tmio_mmc_core.c
-> > > if needed.
-> >
-> > I was never happy with this driver existing, yet I never knew which HW
-> > platform needed this, so I didn't touch it. But I'd like to see it go in
-> > favor of merging with the TMIO code base.
-> >
-> > >
-> > > Perhaps, some code snippets in this driver might be useful for cleaning
-> > > tmio_mmc. It will stay in git history forever, and you can dig for it
-> > > whenever you need it.
-> > >
-> > > Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
-> >
-> > I double checked there is no user in the current tree. I also searched
-> > the web and did not find any out-of-tree user or even a reference of it.
-> >
-> > So, for now:
-> >
-> > Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-> >
-> > But this seriously needs an Ack from Shimoda-san or Morimoto-san. And
-> > maybe Guennadi has remarks, too?
-> >
+> Hi,
 >
-> So let me tell you the real use of this driver.
+> On Tue, Jun 18, 2019 at 8:35 AM Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+> >
+> > To use the so called powered-on re-initialization of an SDIO card, the
+> > power to the card must obviously have stayed on. If not, the initialization
+> > will simply fail.
+> >
+> > In the runtime suspend case, the card is always powered off. Hence, let's
+> > drop the support for powered-on re-initialization during runtime resume, as
+> > it doesn't make sense.
+> >
+> > Moreover, during a HW reset, the point is to cut the power to the card and
+> > then do fresh re-initialization. Therefore drop the support for powered-on
+> > re-initialization during HW reset.
+> >
+> > Signed-off-by: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> > ---
+> >  drivers/mmc/core/sdio.c | 8 +-------
+> >  1 file changed, 1 insertion(+), 7 deletions(-)
 >
-> It is used by Axis Communications in our Artpec-6 chips that will be
-> around for at least 5 years in active development at our side. The SoC
-> is upstreamed, but the upstreaming effort was side-tracked before the
-> usdhi6rol0 was added to the devicetree.
+> This has been on my list of things to test for a while but I never
+> quite got to it...
 >
-> I do agree with you guys that we should not keep two drivers for the
-> same IP so there should be an effort to unify the drivers. In the mean
-> time, we can make the connection with Axis more explicit by assigning
-> us as maintainer and pushing the device tree entries.
+> ...and then, today, I spent time bisecting why the "reset"
+> functionality of miwfiex is broken on my 4.19 kernel [1].  AKA, this
+> is broken:
+>
+> cd /sys/kernel/debug/mwifiex/mlan0
+> echo 1 > reset
+>
+> I finally bisected the problem and tracked it down to commit
+> ca8971ca5753 ("mmc: dw_mmc: Prevent runtime PM suspend when SDIO IRQs
+> are enabled"), which embarrassingly has my Tested-by on it.  I guess I
+> never tested the Marvell reset call.  :-/
+>
+> I dug a little and found that when the Marvell code did its reset we
+> ended up getting a call to dw_mci_enable_sdio_irq(enb=0) and never saw
+> a dw_mci_enable_sdio_irq(enb=1) after.  I tracked it down further and
+> found that specifically it was the call to mmc_signal_sdio_irq() in
+> mmc_sdio_power_restore() that was making the call.  The call stack
+> shown for the "enb=0" call:
+>
+> [<c071a290>] (dw_mci_enable_sdio_irq) from [<c070a960>]
+> (mmc_sdio_power_restore+0x98/0xc0)
+> [<c070a960>] (mmc_sdio_power_restore) from [<c070a9b4>]
+> (mmc_sdio_reset+0x2c/0x30)
+> [<c070a9b4>] (mmc_signal_sdio_irq) from [<c06ff160>] (mmc_hw_reset+0xbc/0x138)
+> [<c06ff160>] (mmc_hw_reset) from [<bf1bbad8>]
+> (mwifiex_sdio_work+0x5d4/0x678 [mwifiex_sdio])
+> [<bf1bbad8>] (mwifiex_sdio_work [mwifiex_sdio]) from [<c0247cd0>]
+> (process_one_work+0x290/0x4b4)
+>
+> I picked your patch here (which gets rid of the call to
+> mmc_signal_sdio_irq()) and magically the problem went away because
+> there is no more call to mmc_signal_sdio_irq().
+>
+> I personally don't have lots of history about the whole
+> "powered_resume" code path.  I checked and mmc_card_keep_power() was 0
+> in my test case of getting called from hw_reset, so the rest of this
+> patch doesn't affect me at all.  This surprised me a little since I
+> saw "MMC_PM_KEEP_POWER" being set in mwifiex but then I realized that
+> it was only set for the duration of suspend and then cleared by the
+> core.  ;-)
+>
+> I will also say that I don't have any test case or knowledge of how
+> SDIO runtime suspend/resume is supposed to work since on dw_mmc SDIO
+> cards are currently not allowed to runtime suspend anyway.  ;-)
+>
+>
+> So I guess the result of all that long-winded reply is that for on
+> rk3288-veyron-jerry:
+>
+> Fixes: ca8971ca5753 ("mmc: dw_mmc: Prevent runtime PM suspend when
+> SDIO IRQs are enabled")
+> Tested-by: Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
 
-To me, this sounds like a reasonable good plan. Although, we need a
-formal maintainer rather than just a company name.
+Thanks a lot for testing and for your detailed feedback. I have
+amended the patch by adding your tags above.
 
-If you or anybody at Axis can send a patch for MAINTAINERS, that would
-serve as commitment that I would be happy with.
+Moreover, we seems to need this for stable as well, but I am leaving
+that to be managed as a separate task. We may even consider the hole
+series for stable, but that requires more testing first.
 
-Additionally, of course, the sooner we can get things moving on
-converting usdhi6rol0 into using the tmio family driver, the better.
+>
+>
+> One last note is that, though Marvell WiFi works after a reset after
+> this commit, Marvell Bluetooth (on the same SDIO module) doesn't.  I
+> guess next week it'll be another bisect...
+
+Is the Bluetooth connected to the same SDIO interface, thus the
+Bluetooth driver is an SDIO func driver?
+
+>
+> [1] https://crbug.com/981113
+>
+>
+>
+> -Doug
 
 Kind regards
 Uffe
