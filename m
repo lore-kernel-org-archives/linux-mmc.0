@@ -1,120 +1,84 @@
 From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 4/7] mmc: sdio: Drop powered-on re-init at runtime resume
- and HW reset
-Date: Mon, 8 Jul 2019 12:53:54 +0200
-Message-ID: <CAPDyKFoHzCmobCtyy-j+-4xjW0Bt1_vA5-s4vHLVN78jXJ4X-w@mail.gmail.com>
-References: <20190618153448.27145-1-ulf.hansson@linaro.org>
- <20190618153448.27145-5-ulf.hansson@linaro.org> <CAD=FV=X7P2F1k_zwHc0mbtfk55-rucTz_GoDH=PL6zWqKYcpuw@mail.gmail.com>
+Subject: Re: [RFC PATCH v7 5/5] mmc: queue: Use bigger segments if DMA MAP
+	layer can merge the segments
+Date: Mon, 8 Jul 2019 13:45:50 +0200
+Message-ID: <CAPDyKFpuRzmZUK730FMnh0hf3WRFb9aA=o9ciNt2ei8n803vsQ@mail.gmail.com>
+References: <1561020610-953-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
+	<1561020610-953-6-git-send-email-yoshihiro.shimoda.uh@renesas.com>
+	<20190624062414.GD2989@lst.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAD=FV=X7P2F1k_zwHc0mbtfk55-rucTz_GoDH=PL6zWqKYcpuw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Cc: Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Brian Norris <briannorris-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Guenter Roeck <groeck-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, Kalle Valo <kvalo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Arend Van Spriel <arend.vanspriel-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, linux-wireless <linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+In-Reply-To: <20190624062414.GD2989-jcswGhMUV9g@public.gmane.org>
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>
+Cc: Jens Axboe <axboe-tSWWG44O7X1aa/9Udqfwiw@public.gmane.org>, Linux-Renesas <linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-block <linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Wolfram Sang <wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org>, "list-Y9sIeH5OGRo@public.gmane.org:IOMMU DRIVERS <iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>,
+	Joerg Roedel <joro-zLv9SwRftAIdnm+yROfE0A@public.gmane.org>, " <iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>, Robin Murphy <robin.murphy-5wv7dgnIgG8@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, 4 Jul 2019 at 02:02, Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org> wrote:
+On Mon, 24 Jun 2019 at 08:24, Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org> wrote:
 >
-> Hi,
->
-> On Tue, Jun 18, 2019 at 8:35 AM Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+> On Thu, Jun 20, 2019 at 05:50:10PM +0900, Yoshihiro Shimoda wrote:
+> > When the max_segs of a mmc host is smaller than 512, the mmc
+> > subsystem tries to use 512 segments if DMA MAP layer can merge
+> > the segments, and then the mmc subsystem exposes such information
+> > to the block layer by using blk_queue_can_use_dma_map_merging().
 > >
-> > To use the so called powered-on re-initialization of an SDIO card, the
-> > power to the card must obviously have stayed on. If not, the initialization
-> > will simply fail.
-> >
-> > In the runtime suspend case, the card is always powered off. Hence, let's
-> > drop the support for powered-on re-initialization during runtime resume, as
-> > it doesn't make sense.
-> >
-> > Moreover, during a HW reset, the point is to cut the power to the card and
-> > then do fresh re-initialization. Therefore drop the support for powered-on
-> > re-initialization during HW reset.
-> >
-> > Signed-off-by: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> > Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
 > > ---
-> >  drivers/mmc/core/sdio.c | 8 +-------
-> >  1 file changed, 1 insertion(+), 7 deletions(-)
+> >  drivers/mmc/core/queue.c | 35 ++++++++++++++++++++++++++++++++---
+> >  include/linux/mmc/host.h |  1 +
+> >  2 files changed, 33 insertions(+), 3 deletions(-)
+> >
+> > diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
+> > index 92900a0..ab0ecc6 100644
+> > --- a/drivers/mmc/core/queue.c
+> > +++ b/drivers/mmc/core/queue.c
+> > @@ -24,6 +24,8 @@
+> >  #include "card.h"
+> >  #include "host.h"
+> >
+> > +#define MMC_DMA_MAP_MERGE_SEGMENTS   512
+> > +
+> >  static inline bool mmc_cqe_dcmd_busy(struct mmc_queue *mq)
+> >  {
+> >       /* Allow only 1 DCMD at a time */
+> > @@ -196,6 +198,12 @@ static void mmc_queue_setup_discard(struct request_queue *q,
+> >               blk_queue_flag_set(QUEUE_FLAG_SECERASE, q);
+> >  }
+> >
+> > +static unsigned int mmc_get_max_segments(struct mmc_host *host)
+> > +{
+> > +     return host->can_dma_map_merge ? MMC_DMA_MAP_MERGE_SEGMENTS :
+> > +                                      host->max_segs;
 >
-> This has been on my list of things to test for a while but I never
-> quite got to it...
+> I personally don't like superflous use of ? : if an if would be more
+> obvious:
 >
-> ...and then, today, I spent time bisecting why the "reset"
-> functionality of miwfiex is broken on my 4.19 kernel [1].  AKA, this
-> is broken:
+>         if (host->can_dma_map_merge)
+>                 return MMC_DMA_MAP_MERGE_SEGMENTS;
+>         return host->max_segs;
 >
-> cd /sys/kernel/debug/mwifiex/mlan0
-> echo 1 > reset
->
-> I finally bisected the problem and tracked it down to commit
-> ca8971ca5753 ("mmc: dw_mmc: Prevent runtime PM suspend when SDIO IRQs
-> are enabled"), which embarrassingly has my Tested-by on it.  I guess I
-> never tested the Marvell reset call.  :-/
->
-> I dug a little and found that when the Marvell code did its reset we
-> ended up getting a call to dw_mci_enable_sdio_irq(enb=0) and never saw
-> a dw_mci_enable_sdio_irq(enb=1) after.  I tracked it down further and
-> found that specifically it was the call to mmc_signal_sdio_irq() in
-> mmc_sdio_power_restore() that was making the call.  The call stack
-> shown for the "enb=0" call:
->
-> [<c071a290>] (dw_mci_enable_sdio_irq) from [<c070a960>]
-> (mmc_sdio_power_restore+0x98/0xc0)
-> [<c070a960>] (mmc_sdio_power_restore) from [<c070a9b4>]
-> (mmc_sdio_reset+0x2c/0x30)
-> [<c070a9b4>] (mmc_signal_sdio_irq) from [<c06ff160>] (mmc_hw_reset+0xbc/0x138)
-> [<c06ff160>] (mmc_hw_reset) from [<bf1bbad8>]
-> (mwifiex_sdio_work+0x5d4/0x678 [mwifiex_sdio])
-> [<bf1bbad8>] (mwifiex_sdio_work [mwifiex_sdio]) from [<c0247cd0>]
-> (process_one_work+0x290/0x4b4)
->
-> I picked your patch here (which gets rid of the call to
-> mmc_signal_sdio_irq()) and magically the problem went away because
-> there is no more call to mmc_signal_sdio_irq().
->
-> I personally don't have lots of history about the whole
-> "powered_resume" code path.  I checked and mmc_card_keep_power() was 0
-> in my test case of getting called from hw_reset, so the rest of this
-> patch doesn't affect me at all.  This surprised me a little since I
-> saw "MMC_PM_KEEP_POWER" being set in mwifiex but then I realized that
-> it was only set for the duration of suspend and then cleared by the
-> core.  ;-)
->
-> I will also say that I don't have any test case or knowledge of how
-> SDIO runtime suspend/resume is supposed to work since on dw_mmc SDIO
-> cards are currently not allowed to runtime suspend anyway.  ;-)
->
->
-> So I guess the result of all that long-winded reply is that for on
-> rk3288-veyron-jerry:
->
-> Fixes: ca8971ca5753 ("mmc: dw_mmc: Prevent runtime PM suspend when
-> SDIO IRQs are enabled")
-> Tested-by: Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+> but that is really just a nitpick and for the mmc maintainer to decide.
 
-Thanks a lot for testing and for your detailed feedback. I have
-amended the patch by adding your tags above.
-
-Moreover, we seems to need this for stable as well, but I am leaving
-that to be managed as a separate task. We may even consider the hole
-series for stable, but that requires more testing first.
+I have no strong opinions, both formats are used in mmc code, so I am
+fine as is.
 
 >
+> Otherwise looks good:
 >
-> One last note is that, though Marvell WiFi works after a reset after
-> this commit, Marvell Bluetooth (on the same SDIO module) doesn't.  I
-> guess next week it'll be another bisect...
+> Reviewed-by: Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>
 
-Is the Bluetooth connected to the same SDIO interface, thus the
-Bluetooth driver is an SDIO func driver?
-
->
-> [1] https://crbug.com/981113
->
->
->
-> -Doug
+Reviewed-by: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 
 Kind regards
 Uffe
