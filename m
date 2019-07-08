@@ -1,28 +1,28 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2] mmc: sdhci-msm: fix mutex while in spinlock
-Date: Mon, 8 Jul 2019 13:55:55 +0200
-Message-ID: <CAPDyKFrcB3Pqe+yiz4T5mL5wQ-2bATyO3aE+hy4T2Ueeu22g1Q@mail.gmail.com>
-References: <20190701150125.2602-1-jorge.ramirez-ortiz@linaro.org>
+Subject: Re: [PATCH] mmc: sdhci_am654: Add dependency on MMC_SDHCI_AM654
+Date: Mon, 8 Jul 2019 13:56:03 +0200
+Message-ID: <CAPDyKFrfAD8_-s+uCeA=XYO5+YM7bPwfK0geNBLQ1gB80G6jbg@mail.gmail.com>
+References: <20190702133631.47760-1-yuehaibing@huawei.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190701150125.2602-1-jorge.ramirez-ortiz@linaro.org>
+In-Reply-To: <20190702133631.47760-1-yuehaibing@huawei.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Jorge Ramirez-Ortiz <jorge.ramirez-ortiz@linaro.org>
-Cc: agross@kernel.org, Adrian Hunter <adrian.hunter@intel.com>, Bjorn Andersson <bjorn.andersson@linaro.org>, linux-arm-msm <linux-arm-msm@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Khasim Syed Mohammed <khasim.mohammed@linaro.org>, vinod.koul@linaro.org
+To: YueHaibing <yuehaibing@huawei.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Faiz Abbas <faiz_abbas@ti.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, 1 Jul 2019 at 17:01, Jorge Ramirez-Ortiz
-<jorge.ramirez-ortiz@linaro.org> wrote:
+On Tue, 2 Jul 2019 at 15:36, YueHaibing <yuehaibing@huawei.com> wrote:
 >
-> mutexes can sleep and therefore should not be taken while holding a
-> spinlock. move clk_get_rate (can sleep) outside the spinlock protected
-> region.
+> Fix build error:
 >
-> Fixes: 83736352e0ca ("mmc: sdhci-msm: Update DLL reset sequence")
-> Cc: stable@vger.kernel.org
-> Signed-off-by: Jorge Ramirez-Ortiz <jorge.ramirez-ortiz@linaro.org>
-> Reviewed-by: Bjorn Andersson <bjorn.andersson@linaro.org>
+> drivers/mmc/host/sdhci_am654.o: In function `sdhci_am654_probe':
+> drivers/mmc/host/sdhci_am654.c:464: undefined reference to `__devm_regmap_init_mmio_clk'
+> drivers/mmc/host/sdhci_am654.o:(.debug_addr+0x3f8): undefined reference to `__devm_regmap_init_mmio_clk'
+>
+> Reported-by: Hulk Robot <hulkci@huawei.com>
+> Fixes: aff88ff23512 ("mmc: sdhci_am654: Add Initial Support for AM654 SDHCI driver")
+> Signed-off-by: YueHaibing <yuehaibing@huawei.com>
 
 Applied for next, thanks!
 
@@ -31,42 +31,23 @@ Uffe
 
 
 > ---
->  drivers/mmc/host/sdhci-msm.c | 9 ++++++---
->  1 file changed, 6 insertions(+), 3 deletions(-)
+>  drivers/mmc/host/Kconfig | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 >
-> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> index 5fc76a1993d0..9cf14b359c14 100644
-> --- a/drivers/mmc/host/sdhci-msm.c
-> +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -575,11 +575,14 @@ static int msm_init_cm_dll(struct sdhci_host *host)
->         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->         struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
->         int wait_cnt = 50;
-> -       unsigned long flags;
-> +       unsigned long flags, xo_clk = 0;
->         u32 config;
->         const struct sdhci_msm_offset *msm_offset =
->                                         msm_host->offset;
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index 931770f..14d89a1 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -996,7 +996,7 @@ config MMC_SDHCI_OMAP
 >
-> +       if (msm_host->use_14lpp_dll_reset && !IS_ERR_OR_NULL(msm_host->xo_clk))
-> +               xo_clk = clk_get_rate(msm_host->xo_clk);
-> +
->         spin_lock_irqsave(&host->lock, flags);
->
->         /*
-> @@ -627,10 +630,10 @@ static int msm_init_cm_dll(struct sdhci_host *host)
->                 config &= CORE_FLL_CYCLE_CNT;
->                 if (config)
->                         mclk_freq = DIV_ROUND_CLOSEST_ULL((host->clock * 8),
-> -                                       clk_get_rate(msm_host->xo_clk));
-> +                                       xo_clk);
->                 else
->                         mclk_freq = DIV_ROUND_CLOSEST_ULL((host->clock * 4),
-> -                                       clk_get_rate(msm_host->xo_clk));
-> +                                       xo_clk);
->
->                 config = readl_relaxed(host->ioaddr +
->                                 msm_offset->core_dll_config_2);
+>  config MMC_SDHCI_AM654
+>         tristate "Support for the SDHCI Controller in TI's AM654 SOCs"
+> -       depends on MMC_SDHCI_PLTFM && OF
+> +       depends on MMC_SDHCI_PLTFM && OF && REGMAP_MMIO
+>         select MMC_SDHCI_IO_ACCESSORS
+>         help
+>           This selects the Secure Digital Host Controller Interface (SDHCI)
 > --
-> 2.21.0
+> 2.7.4
+>
 >
