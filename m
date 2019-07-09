@@ -1,69 +1,168 @@
-From: Krzysztof Kozlowski <krzk@kernel.org>
-Subject: Re: [PATCH] mmc: dw_mmc: Fix occasional hang after tuning on eMMC
-Date: Tue, 9 Jul 2019 11:06:48 +0200
-Message-ID: <CAJKOXPf9OTPaheUdiZtaDGU0sE2vsdRiLx5nptMt_EVKU7GObA@mail.gmail.com>
-References: <20190708195613.205729-1-dianders@chromium.org>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH 4/7] mmc: sdio: Drop powered-on re-init at runtime resume
+ and HW reset
+Date: Tue, 9 Jul 2019 14:01:36 +0200
+Message-ID: <CAPDyKFpN38G-Oj-+cKcxQ8z8K7M_0sA6_CTSKuxvez2s3Td+xw@mail.gmail.com>
+References: <20190618153448.27145-1-ulf.hansson@linaro.org>
+ <20190618153448.27145-5-ulf.hansson@linaro.org> <CAD=FV=X7P2F1k_zwHc0mbtfk55-rucTz_GoDH=PL6zWqKYcpuw@mail.gmail.com>
+ <CAPDyKFoHzCmobCtyy-j+-4xjW0Bt1_vA5-s4vHLVN78jXJ4X-w@mail.gmail.com> <CAD=FV=UfHd=_gqEMajABV19Mb=G-tz6VptDQa48g4kUPxo-A6g@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190708195613.205729-1-dianders@chromium.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Douglas Anderson <dianders@chromium.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-samsung-soc@vger.kernel.org" <linux-samsung-soc@vger.kernel.org>, linux-rockchip@lists.infradead.org, briannorris@chromium.org, mka@chromium.org, groeck@chromium.org, sonnyrao@chromium.org, Marek Szyprowski <m.szyprowski@samsung.com>, Alim Akhtar <alim.akhtar@gmail.com>, Enric Balletbo i Serra <enric.balletbo@collabora.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAD=FV=UfHd=_gqEMajABV19Mb=G-tz6VptDQa48g4kUPxo-A6g-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Cc: Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Brian Norris <briannorris-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Guenter Roeck <groeck-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, Kalle Valo <kvalo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Arend Van Spriel <arend.vanspriel-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, linux-wireless <linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, 9 Jul 2019 at 00:48, Douglas Anderson <dianders@chromium.org> wrote:
+On Mon, 8 Jul 2019 at 23:12, Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org> wrote:
 >
-> In commit 46d179525a1f ("mmc: dw_mmc: Wait for data transfer after
-> response errors.") we fixed a tuning-induced hang that I saw when
-> stress testing tuning on certain SD cards.  I won't re-hash that whole
-> commit, but the summary is that as a normal part of tuning you need to
-> deal with transfer errors and there were cases where these transfer
-> errors was putting my system into a bad state causing all future
-> transfers to fail.  That commit fixed handling of the transfer errors
-> for me.
+> Hi,
 >
-> In downstream Chrome OS my fix landed and had the same behavior for
-> all SD/MMC commands.  However, it looks like when the commit landed
-> upstream we limited it to only SD tuning commands.  Presumably this
-> was to try to get around problems that Alim Akhtar reported on exynos
-> [1].
+> On Mon, Jul 8, 2019 at 3:54 AM Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+> >
+> > On Thu, 4 Jul 2019 at 02:02, Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org> wrote:
+> > >
+> > > Hi,
+> > >
+> > > On Tue, Jun 18, 2019 at 8:35 AM Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+> > > >
+> > > > To use the so called powered-on re-initialization of an SDIO card, the
+> > > > power to the card must obviously have stayed on. If not, the initialization
+> > > > will simply fail.
+> > > >
+> > > > In the runtime suspend case, the card is always powered off. Hence, let's
+> > > > drop the support for powered-on re-initialization during runtime resume, as
+> > > > it doesn't make sense.
+> > > >
+> > > > Moreover, during a HW reset, the point is to cut the power to the card and
+> > > > then do fresh re-initialization. Therefore drop the support for powered-on
+> > > > re-initialization during HW reset.
+> > > >
+> > > > Signed-off-by: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> > > > ---
+> > > >  drivers/mmc/core/sdio.c | 8 +-------
+> > > >  1 file changed, 1 insertion(+), 7 deletions(-)
+> > >
+> > > This has been on my list of things to test for a while but I never
+> > > quite got to it...
+> > >
+> > > ...and then, today, I spent time bisecting why the "reset"
+> > > functionality of miwfiex is broken on my 4.19 kernel [1].  AKA, this
+> > > is broken:
+> > >
+> > > cd /sys/kernel/debug/mwifiex/mlan0
+> > > echo 1 > reset
+> > >
+> > > I finally bisected the problem and tracked it down to commit
+> > > ca8971ca5753 ("mmc: dw_mmc: Prevent runtime PM suspend when SDIO IRQs
+> > > are enabled"), which embarrassingly has my Tested-by on it.  I guess I
+> > > never tested the Marvell reset call.  :-/
+> > >
+> > > I dug a little and found that when the Marvell code did its reset we
+> > > ended up getting a call to dw_mci_enable_sdio_irq(enb=0) and never saw
+> > > a dw_mci_enable_sdio_irq(enb=1) after.  I tracked it down further and
+> > > found that specifically it was the call to mmc_signal_sdio_irq() in
+> > > mmc_sdio_power_restore() that was making the call.  The call stack
+> > > shown for the "enb=0" call:
+> > >
+> > > [<c071a290>] (dw_mci_enable_sdio_irq) from [<c070a960>]
+> > > (mmc_sdio_power_restore+0x98/0xc0)
+> > > [<c070a960>] (mmc_sdio_power_restore) from [<c070a9b4>]
+> > > (mmc_sdio_reset+0x2c/0x30)
+> > > [<c070a9b4>] (mmc_signal_sdio_irq) from [<c06ff160>] (mmc_hw_reset+0xbc/0x138)
+> > > [<c06ff160>] (mmc_hw_reset) from [<bf1bbad8>]
+> > > (mwifiex_sdio_work+0x5d4/0x678 [mwifiex_sdio])
+> > > [<bf1bbad8>] (mwifiex_sdio_work [mwifiex_sdio]) from [<c0247cd0>]
+> > > (process_one_work+0x290/0x4b4)
+> > >
+> > > I picked your patch here (which gets rid of the call to
+> > > mmc_signal_sdio_irq()) and magically the problem went away because
+> > > there is no more call to mmc_signal_sdio_irq().
+> > >
+> > > I personally don't have lots of history about the whole
+> > > "powered_resume" code path.  I checked and mmc_card_keep_power() was 0
+> > > in my test case of getting called from hw_reset, so the rest of this
+> > > patch doesn't affect me at all.  This surprised me a little since I
+> > > saw "MMC_PM_KEEP_POWER" being set in mwifiex but then I realized that
+> > > it was only set for the duration of suspend and then cleared by the
+> > > core.  ;-)
+> > >
+> > > I will also say that I don't have any test case or knowledge of how
+> > > SDIO runtime suspend/resume is supposed to work since on dw_mmc SDIO
+> > > cards are currently not allowed to runtime suspend anyway.  ;-)
+> > >
+> > >
+> > > So I guess the result of all that long-winded reply is that for on
+> > > rk3288-veyron-jerry:
+> > >
+> > > Fixes: ca8971ca5753 ("mmc: dw_mmc: Prevent runtime PM suspend when
+> > > SDIO IRQs are enabled")
+> > > Tested-by: Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+> >
+> > Thanks a lot for testing and for your detailed feedback. I have
+> > amended the patch by adding your tags above.
 >
-> Unfortunately while stress testing reboots (and suspend/resume) on
-> some rk3288-based Chromebooks I found the same problem on the eMMC on
-> some of my Chromebooks (the ones with Hynix eMMC).  Since the eMMC
-> tuning command is different (MMC_SEND_TUNING_BLOCK_HS200
-> vs. MMC_SEND_TUNING_BLOCK) we were basically getting back into the
-> same situation.
+> Sure!  I'm going to try to do some detailed testing on the next patch
+> too to confirm it's OK, but I have a few other tasks to get to first.
+> ;-)
 >
-> I'm hoping that whatever problems exynos was having in the past are
-> somehow magically fixed now and we can make the behavior the same for
-> all commands.
 >
-> [1] https://lkml.kernel.org/r/CAGOxZ53WfNbaMe0_AM0qBqU47kAfgmPBVZC8K8Y-_J3mDMqW4A@mail.gmail.com
+> > Moreover, we seems to need this for stable as well, but I am leaving
+> > that to be managed as a separate task. We may even consider the hole
+> > series for stable, but that requires more testing first.
 >
-> Fixes: 46d179525a1f ("mmc: dw_mmc: Wait for data transfer after response errors.")
-> Signed-off-by: Douglas Anderson <dianders@chromium.org>
-> Cc: Marek Szyprowski <m.szyprowski@samsung.com>
-> Cc: Alim Akhtar <alim.akhtar@gmail.com>
-> Cc: Enric Balletbo i Serra <enric.balletbo@collabora.com>
-> ---
-> Marek (or anyone else using exynos): is it easy for you to test this
-> and check if things are still broken when we land this patch?  If so,
-> I guess we could have a quirk to have different behavior for just
-> Rockchip SoCs but I'd rather avoid that if possible.
+> Sure, makes sense.  We'll pick it to the Chrome OS 4.19 kernel
+> directly but it's usually nice to get fixes like this into stable so
+> everyone can benefit.
 >
-> NOTE: I'm not hoping totally in vain here.  It is possible that some
-> of the CTO/DTO timers that landed could be the magic that would get
-> exynos unstuck.
+>
+> > > One last note is that, though Marvell WiFi works after a reset after
+> > > this commit, Marvell Bluetooth (on the same SDIO module) doesn't.  I
+> > > guess next week it'll be another bisect...
+> >
+> > Is the Bluetooth connected to the same SDIO interface, thus the
+> > Bluetooth driver is an SDIO func driver?
+>
+> Yes, it's a SDIO func driver connected to the same interface.  So far
+> I've managed to confirm the problem on:
+>
+> v4.4 (plus 76ae3e26ea43 mwifiex: add debugfs file for testing reset of card)
+> v4.9
+> next-20190708
+>
+> ...so it seems like it's not a "regression", it's just never worked.
+> :-P  I guess I'll have to see if I can figure out what's different in
+> our chromeos-3.14 kernel.  Ah, I see.  In 3.14 we had this solution:
+>
+> pr_err("Resetting card...\n");
+> mmc_remove_host(reset_host);
+> /* 200ms delay is based on experiment with sdhci controller */
+> mdelay(200);
+> reset_host->rescan_entered = 0;
+> mmc_add_host(reset_host);
+>
+> ...I think that didn't fly upstream.  ...but I can confirm that this works fine:
+>
+> cd /sys/bus/platform/drivers/dwmmc_rockchip
+> echo ff0d0000.dwmmc > unbind
+> sleep .5
+> echo ff0d0000.dwmmc > bind
+>
+> ...so I guess this boils down to: how does the mwifiex reset code not
+> behave like a full removal and re-insertion of the card?  Oh, but
+> maybe that's obvious.  We're doing all the reset / re-init from the
+> WiFi side of things (mwifiex_sdio_card_reset_work) but I don't think
+> anything is communicated to the Bluetooth side of things.  Presumably
+> this is just totally broken for everyone?  ...or am I confused?
 
-I have eMMC module attached to Odroid U3 (Exynos4412,
-samsung,exynos4412-dw-mshc). What is the testing procedure? With your
-patch it boots fine:
-[    3.698637] mmc_host mmc1: Bus speed (slot 0) = 50000000Hz (slot
-req 52000000Hz, actual 50000000HZ div = 0)
-[    3.703900] mmc1: new DDR MMC card at address 0001
-[    3.728458] mmcblk1: mmc1:0001 008G92 7.28 GiB
+Nope, that is most likely what is happening.
 
-Best regards,
-Krzysztof
+I am not sure what is the best method to deal with this. Perhaps we
+should invent some callback the SDIO core code can call, for each
+active SDIO func on the particular SDIO card that becomes reset.
+
+Or is there a better way you think?
+
+Kind regards
+Uffe
