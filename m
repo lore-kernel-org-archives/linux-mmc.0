@@ -1,80 +1,49 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: Re: [PATCH] mmc: dw_mmc: Fix occasional hang after tuning on eMMC
-Date: Tue, 9 Jul 2019 09:38:07 -0700
-Message-ID: <CAD=FV=WquwqKjUKh5=M6tbTrD3svVTGWLU3iSTzD-uXBX73YWA@mail.gmail.com>
-References: <20190708195613.205729-1-dianders@chromium.org> <CAJKOXPf9OTPaheUdiZtaDGU0sE2vsdRiLx5nptMt_EVKU7GObA@mail.gmail.com>
+From: Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Subject: Re: [PATCH 2/7] mmc: sdio: Drop mmc_claim|release_host() in mmc_sdio_power_restore()
+Date: Tue, 9 Jul 2019 14:25:43 -0700
+Message-ID: <CAD=FV=UjXT0UG=JZtvNL4EtHofcuC_HhTe4grWBNJ8+8jVFhYg@mail.gmail.com>
+References: <20190618153448.27145-1-ulf.hansson@linaro.org> <20190618153448.27145-3-ulf.hansson@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAJKOXPf9OTPaheUdiZtaDGU0sE2vsdRiLx5nptMt_EVKU7GObA@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Krzysztof Kozlowski <krzk@kernel.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-samsung-soc@vger.kernel.org" <linux-samsung-soc@vger.kernel.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, Brian Norris <briannorris@chromium.org>, Matthias Kaehlcke <mka@chromium.org>, Guenter Roeck <groeck@chromium.org>, Sonny Rao <sonnyrao@chromium.org>, Marek Szyprowski <m.szyprowski@samsung.com>, Alim Akhtar <alim.akhtar@gmail.com>, Enric Balletbo i Serra <enric.balletbo@collabora.com>, Linux MMC List <linux-mmc@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20190618153448.27145-3-ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Brian Norris <briannorris-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Guenter Roeck <groeck-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, Kalle Valo <kvalo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Arend Van Spriel <arend.vanspriel-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, linux-wireless <linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
 Hi,
 
-On Tue, Jul 9, 2019 at 2:07 AM Krzysztof Kozlowski <krzk@kernel.org> wrote:
+On Tue, Jun 18, 2019 at 8:35 AM Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
 >
-> On Tue, 9 Jul 2019 at 00:48, Douglas Anderson <dianders@chromium.org> wrote:
-> >
-> > In commit 46d179525a1f ("mmc: dw_mmc: Wait for data transfer after
-> > response errors.") we fixed a tuning-induced hang that I saw when
-> > stress testing tuning on certain SD cards.  I won't re-hash that whole
-> > commit, but the summary is that as a normal part of tuning you need to
-> > deal with transfer errors and there were cases where these transfer
-> > errors was putting my system into a bad state causing all future
-> > transfers to fail.  That commit fixed handling of the transfer errors
-> > for me.
-> >
-> > In downstream Chrome OS my fix landed and had the same behavior for
-> > all SD/MMC commands.  However, it looks like when the commit landed
-> > upstream we limited it to only SD tuning commands.  Presumably this
-> > was to try to get around problems that Alim Akhtar reported on exynos
-> > [1].
-> >
-> > Unfortunately while stress testing reboots (and suspend/resume) on
-> > some rk3288-based Chromebooks I found the same problem on the eMMC on
-> > some of my Chromebooks (the ones with Hynix eMMC).  Since the eMMC
-> > tuning command is different (MMC_SEND_TUNING_BLOCK_HS200
-> > vs. MMC_SEND_TUNING_BLOCK) we were basically getting back into the
-> > same situation.
-> >
-> > I'm hoping that whatever problems exynos was having in the past are
-> > somehow magically fixed now and we can make the behavior the same for
-> > all commands.
-> >
-> > [1] https://lkml.kernel.org/r/CAGOxZ53WfNbaMe0_AM0qBqU47kAfgmPBVZC8K8Y-_J3mDMqW4A@mail.gmail.com
-> >
-> > Fixes: 46d179525a1f ("mmc: dw_mmc: Wait for data transfer after response errors.")
-> > Signed-off-by: Douglas Anderson <dianders@chromium.org>
-> > Cc: Marek Szyprowski <m.szyprowski@samsung.com>
-> > Cc: Alim Akhtar <alim.akhtar@gmail.com>
-> > Cc: Enric Balletbo i Serra <enric.balletbo@collabora.com>
-> > ---
-> > Marek (or anyone else using exynos): is it easy for you to test this
-> > and check if things are still broken when we land this patch?  If so,
-> > I guess we could have a quirk to have different behavior for just
-> > Rockchip SoCs but I'd rather avoid that if possible.
-> >
-> > NOTE: I'm not hoping totally in vain here.  It is possible that some
-> > of the CTO/DTO timers that landed could be the magic that would get
-> > exynos unstuck.
+> The function mmc_sdio_power_restore() is called either from
+> mmc_sdio_runtime_resume() or from mmc_sdio_hw_reset(). Both callers either
+> claims/releases the host or require its callers to do so. Therefore let's
+> drop the redundant calls to mmc_claim|release_host() in
+> mmc_sdio_power_restore().
 >
-> I have eMMC module attached to Odroid U3 (Exynos4412,
-> samsung,exynos4412-dw-mshc). What is the testing procedure? With your
-> patch it boots fine:
-> [    3.698637] mmc_host mmc1: Bus speed (slot 0) = 50000000Hz (slot
-> req 52000000Hz, actual 50000000HZ div = 0)
-> [    3.703900] mmc1: new DDR MMC card at address 0001
-> [    3.728458] mmcblk1: mmc1:0001 008G92 7.28 GiB
+> Signed-off-by: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> ---
+>  drivers/mmc/core/sdio.c | 4 ----
+>  1 file changed, 4 deletions(-)
 
-To really test it, it'd be nice to see some HS200 eMMC cards enumerate
-OK.  Specifically the patch adjusts the error handling and the place
-where that happens mostly is during tuning.
+Without being an expert, I looked through the code and as far as I can
+tell this is fine.  Specifically:
 
-I'll also try to find some time today to check a peach_pit or a
-peach_pi.  I think I saw one in the pile near my desk so if it isn't
-in too bad of a shape I can give mainline a shot on it.
+* I agree there are two calls and mmc_sdio_runtime_resume() clearly claims.
 
--Doug
+* The only call to mmc_sdio_hw_reset() looks to be mmc_hw_reset();
+looking through calls to mmc_hw_reset() I see the claims.  It's super
+obvious in the 3 cases in "drivers/net" and I decided that I didn't
+need to look at block.c because that shouldn't be a codepath that
+affects SDIO.
+
+Thus:
+
+Reviewed-by: Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+
+
+I also don't see this patch causing any problems on the rk3288-veyron
+boards I tested it on.  Thus:
+
+Tested-by: Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
