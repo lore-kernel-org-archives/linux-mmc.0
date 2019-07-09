@@ -1,7 +1,7 @@
-From: Enric Balletbo Serra <eballetbo@gmail.com>
+From: Doug Anderson <dianders@chromium.org>
 Subject: Re: [PATCH] mmc: dw_mmc: Fix occasional hang after tuning on eMMC
-Date: Tue, 9 Jul 2019 23:48:19 +0200
-Message-ID: <CAFqH_52Vhonb0ui5eXVHtyt+3td=_9pLZBWTBsHBgt34bX=H+Q@mail.gmail.com>
+Date: Tue, 9 Jul 2019 15:02:13 -0700
+Message-ID: <CAD=FV=X=RALazfX+vjQ7E-JmVu6xqDWCad5hPF+gNtHCuvZMTA@mail.gmail.com>
 References: <20190708195613.205729-1-dianders@chromium.org>
  <CAJKOXPf9OTPaheUdiZtaDGU0sE2vsdRiLx5nptMt_EVKU7GObA@mail.gmail.com> <CAD=FV=WquwqKjUKh5=M6tbTrD3svVTGWLU3iSTzD-uXBX73YWA@mail.gmail.com>
 Mime-Version: 1.0
@@ -9,14 +9,13 @@ Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <CAD=FV=WquwqKjUKh5=M6tbTrD3svVTGWLU3iSTzD-uXBX73YWA@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Doug Anderson <dianders@chromium.org>
-Cc: Krzysztof Kozlowski <krzk@kernel.org>, Enric Balletbo i Serra <enric.balletbo@collabora.com>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-samsung-soc@vger.kernel.org" <linux-samsung-soc@vger.kernel.org>, Brian Norris <briannorris@chromium.org>, Linux MMC List <linux-mmc@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, Matthias Kaehlcke <mka@chromium.org>, Guenter Roeck <groeck@chromium.org>, Alim Akhtar <alim.akhtar@gmail.com>, Sonny Rao <sonnyrao@chromium.org>, Marek Szyprowski <m.szyprowski@samsung.com>
+To: Krzysztof Kozlowski <krzk@kernel.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-samsung-soc@vger.kernel.org" <linux-samsung-soc@vger.kernel.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, Brian Norris <briannorris@chromium.org>, Matthias Kaehlcke <mka@chromium.org>, Guenter Roeck <groeck@chromium.org>, Sonny Rao <sonnyrao@chromium.org>, Marek Szyprowski <m.szyprowski@samsung.com>, Alim Akhtar <alim.akhtar@gmail.com>, Enric Balletbo i Serra <enric.balletbo@collabora.com>, Linux MMC List <linux-mmc@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
 Hi,
 
-Missatge de Doug Anderson <dianders@chromium.org> del dia dt., 9 de
-jul. 2019 a les 18:38:
+On Tue, Jul 9, 2019 at 9:38 AM Doug Anderson <dianders@chromium.org> wrote:
 >
 > Hi,
 >
@@ -82,24 +81,21 @@ jul. 2019 a les 18:38:
 > I'll also try to find some time today to check a peach_pit or a
 > peach_pi.  I think I saw one in the pile near my desk so if it isn't
 > in too bad of a shape I can give mainline a shot on it.
->
 
-I did a normal boot on peach_pi [1] and odroidxu3 [2] with that patch
-applied, and the eMMC attached on both was detected as
+OK, I managed to get an exynos5800-peach-pi up and running.  I put my
+patch in place and am currently at 45 reboots and counting w/ no
+problems.
 
- [    2.294798] mmc0: new HS400 MMC card at address 0001
+NOTE: in my case I actually had to disable "hs400" mode on my peach-pi
+but that's because the board I dug up was an early version of the
+board that didn't have the strobe line connected.  However, Alim's
+earlier reports of problems were with hs200 anyway and hs200 still
+executes the tuning plenty of times.  His reports of problems also
+said that he had problems after just a few boots.
 
-I can do some stress tests tomorrow on those boards if that helps.
+So I'll assert that whatever problems were present 4 years ago have
+indeed gone away.  I'll leave rebooting happening overnight just in
+case, but otherwise I'll assert that this is fine.
 
-Cheers,
-~ Enric
 
-[1] https://storage.kernelci.org/chrome-platform/for-kernelci/ib-mfd-cros-v5.3-87-g0fe7e9d7d5a3/arm/multi_v7_defconfig/gcc-8/lab-collabora/boot-exynos5800-peach-pi.html
-[2] https://storage.kernelci.org/chrome-platform/for-kernelci/ib-mfd-cros-v5.3-87-g0fe7e9d7d5a3/arm/multi_v7_defconfig/gcc-8/lab-collabora/boot-exynos5422-odroidxu3.html
-
-> -Doug
->
-> _______________________________________________
-> Linux-rockchip mailing list
-> Linux-rockchip@lists.infradead.org
-> http://lists.infradead.org/mailman/listinfo/linux-rockchip
+-Doug
