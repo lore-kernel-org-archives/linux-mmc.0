@@ -1,78 +1,69 @@
-From: Rob Herring <robh@kernel.org>
-Subject: Re: [PATCH 2/7] dt-bindings: mmc: Add Actions Semi SD/MMC/SDIO
- controller binding
-Date: Mon, 8 Jul 2019 20:16:41 -0600
-Message-ID: <20190709021641.GA28185@bogus>
-References: <20190608195317.6336-1-manivannan.sadhasivam@linaro.org>
- <20190608195317.6336-3-manivannan.sadhasivam@linaro.org>
- <5d164528-c797-5f94-f905-719d4f69542c@suse.de>
+From: Krzysztof Kozlowski <krzk@kernel.org>
+Subject: Re: [PATCH] mmc: dw_mmc: Fix occasional hang after tuning on eMMC
+Date: Tue, 9 Jul 2019 11:06:48 +0200
+Message-ID: <CAJKOXPf9OTPaheUdiZtaDGU0sE2vsdRiLx5nptMt_EVKU7GObA@mail.gmail.com>
+References: <20190708195613.205729-1-dianders@chromium.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <5d164528-c797-5f94-f905-719d4f69542c@suse.de>
+In-Reply-To: <20190708195613.205729-1-dianders@chromium.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Andreas =?iso-8859-1?Q?F=E4rber?= <afaerber@suse.de>
-Cc: Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>, ulf.hansson@linaro.org, sboyd@kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, thomas.liau@actions-semi.com, linux-actions@lists.infradead.org, linus.walleij@linaro.org, linux-clk@vger.kernel.org
+To: Douglas Anderson <dianders@chromium.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-samsung-soc@vger.kernel.org" <linux-samsung-soc@vger.kernel.org>, linux-rockchip@lists.infradead.org, briannorris@chromium.org, mka@chromium.org, groeck@chromium.org, sonnyrao@chromium.org, Marek Szyprowski <m.szyprowski@samsung.com>, Alim Akhtar <alim.akhtar@gmail.com>, Enric Balletbo i Serra <enric.balletbo@collabora.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, Jun 10, 2019 at 03:45:37PM +0200, Andreas Färber wrote:
-> Am 08.06.19 um 21:53 schrieb Manivannan Sadhasivam:
-> > Add devicetree binding for Actions Semi Owl SoC's SD/MMC/SDIO controller.
-> > 
-> > Signed-off-by: Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
-> > ---
-> >  .../devicetree/bindings/mmc/owl-mmc.txt       | 37 +++++++++++++++++++
-> >  1 file changed, 37 insertions(+)
-> >  create mode 100644 Documentation/devicetree/bindings/mmc/owl-mmc.txt
-> 
-> Rob, should this be YAML now?
+On Tue, 9 Jul 2019 at 00:48, Douglas Anderson <dianders@chromium.org> wrote:
+>
+> In commit 46d179525a1f ("mmc: dw_mmc: Wait for data transfer after
+> response errors.") we fixed a tuning-induced hang that I saw when
+> stress testing tuning on certain SD cards.  I won't re-hash that whole
+> commit, but the summary is that as a normal part of tuning you need to
+> deal with transfer errors and there were cases where these transfer
+> errors was putting my system into a bad state causing all future
+> transfers to fail.  That commit fixed handling of the transfer errors
+> for me.
+>
+> In downstream Chrome OS my fix landed and had the same behavior for
+> all SD/MMC commands.  However, it looks like when the commit landed
+> upstream we limited it to only SD tuning commands.  Presumably this
+> was to try to get around problems that Alim Akhtar reported on exynos
+> [1].
+>
+> Unfortunately while stress testing reboots (and suspend/resume) on
+> some rk3288-based Chromebooks I found the same problem on the eMMC on
+> some of my Chromebooks (the ones with Hynix eMMC).  Since the eMMC
+> tuning command is different (MMC_SEND_TUNING_BLOCK_HS200
+> vs. MMC_SEND_TUNING_BLOCK) we were basically getting back into the
+> same situation.
+>
+> I'm hoping that whatever problems exynos was having in the past are
+> somehow magically fixed now and we can make the behavior the same for
+> all commands.
+>
+> [1] https://lkml.kernel.org/r/CAGOxZ53WfNbaMe0_AM0qBqU47kAfgmPBVZC8K8Y-_J3mDMqW4A@mail.gmail.com
+>
+> Fixes: 46d179525a1f ("mmc: dw_mmc: Wait for data transfer after response errors.")
+> Signed-off-by: Douglas Anderson <dianders@chromium.org>
+> Cc: Marek Szyprowski <m.szyprowski@samsung.com>
+> Cc: Alim Akhtar <alim.akhtar@gmail.com>
+> Cc: Enric Balletbo i Serra <enric.balletbo@collabora.com>
+> ---
+> Marek (or anyone else using exynos): is it easy for you to test this
+> and check if things are still broken when we land this patch?  If so,
+> I guess we could have a quirk to have different behavior for just
+> Rockchip SoCs but I'd rather avoid that if possible.
+>
+> NOTE: I'm not hoping totally in vain here.  It is possible that some
+> of the CTO/DTO timers that landed could be the magic that would get
+> exynos unstuck.
 
-Would be nice and might get reviewed faster, but I'll leave that to Ulf 
-to start requiring.
+I have eMMC module attached to Odroid U3 (Exynos4412,
+samsung,exynos4412-dw-mshc). What is the testing procedure? With your
+patch it boots fine:
+[    3.698637] mmc_host mmc1: Bus speed (slot 0) = 50000000Hz (slot
+req 52000000Hz, actual 50000000HZ div = 0)
+[    3.703900] mmc1: new DDR MMC card at address 0001
+[    3.728458] mmcblk1: mmc1:0001 008G92 7.28 GiB
 
-> 
-> > 
-> > diff --git a/Documentation/devicetree/bindings/mmc/owl-mmc.txt b/Documentation/devicetree/bindings/mmc/owl-mmc.txt
-> > new file mode 100644
-> > index 000000000000..a702f8d66cec
-> > --- /dev/null
-> > +++ b/Documentation/devicetree/bindings/mmc/owl-mmc.txt
-> > @@ -0,0 +1,37 @@
-> > +Actions Semi Owl SoCs SD/MMC/SDIO controller
-> > +
-> > +Required properties:
-> > +- compatible: should be "actions,owl-mmc"
-> > +- reg: offset and length of the register set for the device.
-> > +- interrupts: single interrupt specifier.
-> > +- clocks: single clock specifier of the controller clock.
-> > +- resets: phandle to the reset line.
-> > +- dma-names: should be "mmc".
-> > +- dmas: single DMA channel specifier
-> 
-> I recall the main blocker for MMC being regulators, i.e. the I²C
-> attached multi-function PMIC. Yet I don't see any such required property
-> here, nor any patch series implementing it. Seems like this relies on
-> U-Boot having initialized SD/eMMC? Do you intend to make them optional
-> or did you want to hold off merging this one until the rest is done?
-> 
-> > +
-> > +Optional properties:
-> > +- pinctrl-names: pinctrl state names "default" must be defined.
-> > +- pinctrl-0: phandle referencing pin configuration of the controller.
-> > +- bus-width: see mmc.txt
-> > +- cap-sd-highspeed: see mmc.txt
-> > +- cap-mmc-highspeed: see mmc.txt
-> > +- sd-uhs-sdr12: see mmc.txt
-> > +- sd-uhs-sdr25: see mmc.txt
-> > +- sd-uhs-sdr50: see mmc.txt
-> > +- non-removable: see mmc.txt
-> 
-> I'm not convinced duplicating common properties is a good idea here, in
-> particular pinctrl.
-
-The main value is to define which common properties are valid for this 
-binding (and by omission which ones aren't valid).
-
-Rob
+Best regards,
+Krzysztof
