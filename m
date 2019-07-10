@@ -1,29 +1,65 @@
-From: Johannes Berg <johannes@sipsolutions.net>
+From: Russell King - ARM Linux admin <linux@armlinux.org.uk>
 Subject: Re: [PATCH 00/12] treewide: Fix GENMASK misuses
-Date: Wed, 10 Jul 2019 11:17:31 +0200
-Message-ID: <5fa1fa6998332642c49e2d5209193ffe2713f333.camel@sipsolutions.net>
+Date: Wed, 10 Jul 2019 10:43:37 +0100
+Message-ID: <20190710094337.wf2lftxzfjq2etro@shell.armlinux.org.uk>
 References: <cover.1562734889.git.joe@perches.com>
-         (sfid-20190710_070546_627944_047EEDD0)
+ <5fa1fa6998332642c49e2d5209193ffe2713f333.camel@sipsolutions.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <cover.1562734889.git.joe@perches.com> (sfid-20190710_070546_627944_047EEDD0)
-Sender: linux-kernel-owner@vger.kernel.org
-To: Joe Perches <joe@perches.com>, Andrew Morton <akpm@linux-foundation.org>, Patrick Venture <venture@google.com>, Nancy Yuen <yuenn@google.com>, Benjamin Fair <benjaminfair@google.com>, Andrew Jeffery <andrew@aj.id.au>, openbmc@lists.ozlabs.org, linux-kernel@vger.kernel.org, linux-aspeed@lists.ozlabs.org, linux-arm-kernel@lists.infradead.org, linux-amlogic@lists.infradead.org, netdev@vger.kernel.org, linux-mediatek@lists.infradead.org, linux-stm32@st-md-mailman.stormreply.com, linux-wireless@vger.kernel.org, linux-media@vger.kernel.org
-Cc: dri-devel@lists.freedesktop.org, linux-iio@vger.kernel.org, linux-mmc@vger.kernel.org, devel@driverdev.osuosl.org, alsa-devel@alsa-project.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <dri-devel-bounces@lists.freedesktop.org>
+Content-Disposition: inline
+In-Reply-To: <5fa1fa6998332642c49e2d5209193ffe2713f333.camel@sipsolutions.net>
+List-Unsubscribe: <https://lists.freedesktop.org/mailman/options/dri-devel>,
+ <mailto:dri-devel-request@lists.freedesktop.org?subject=unsubscribe>
+List-Archive: <https://lists.freedesktop.org/archives/dri-devel>
+List-Post: <mailto:dri-devel@lists.freedesktop.org>
+List-Help: <mailto:dri-devel-request@lists.freedesktop.org?subject=help>
+List-Subscribe: <https://lists.freedesktop.org/mailman/listinfo/dri-devel>,
+ <mailto:dri-devel-request@lists.freedesktop.org?subject=subscribe>
+Errors-To: dri-devel-bounces@lists.freedesktop.org
+Sender: "dri-devel" <dri-devel-bounces@lists.freedesktop.org>
+To: Johannes Berg <johannes@sipsolutions.net>
+Cc: devel@driverdev.osuosl.org, linux-mmc@vger.kernel.org, alsa-devel@alsa-project.org, Benjamin Fair <benjaminfair@google.com>, linux-aspeed@lists.ozlabs.org, Andrew Jeffery <andrew@aj.id.au>, Patrick Venture <venture@google.com>, openbmc@lists.ozlabs.org, linux-wireless@vger.kernel.org, linux-kernel@vger.kernel.org, linux-iio@vger.kernel.org, Nancy Yuen <yuenn@google.com>, linux-mediatek@lists.infradead.org, dri-devel@lists.freedesktop.org, netdev@vger.kernel.org, Joe Perches <joe@perches.com>, linux-amlogic@lists.infradead.org, Andrew Morton <akpm@linux-foundation.org>, linux-stm32@st-md-mailman.stormreply.com, linux-arm-kernel@lists.infradead.org, linux-media@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, 2019-07-09 at 22:04 -0700, Joe Perches wrote:
-> These GENMASK uses are inverted argument order and the
-> actual masks produced are incorrect.  Fix them.
-> 
-> Add checkpatch tests to help avoid more misuses too.
-> 
-> Joe Perches (12):
->   checkpatch: Add GENMASK tests
-
-IMHO this doesn't make a lot of sense as a checkpatch test - just throw
-in a BUILD_BUG_ON()?
-
-johannes
+T24gV2VkLCBKdWwgMTAsIDIwMTkgYXQgMTE6MTc6MzFBTSArMDIwMCwgSm9oYW5uZXMgQmVyZyB3
+cm90ZToKPiBPbiBUdWUsIDIwMTktMDctMDkgYXQgMjI6MDQgLTA3MDAsIEpvZSBQZXJjaGVzIHdy
+b3RlOgo+ID4gVGhlc2UgR0VOTUFTSyB1c2VzIGFyZSBpbnZlcnRlZCBhcmd1bWVudCBvcmRlciBh
+bmQgdGhlCj4gPiBhY3R1YWwgbWFza3MgcHJvZHVjZWQgYXJlIGluY29ycmVjdC4gIEZpeCB0aGVt
+Lgo+ID4gCj4gPiBBZGQgY2hlY2twYXRjaCB0ZXN0cyB0byBoZWxwIGF2b2lkIG1vcmUgbWlzdXNl
+cyB0b28uCj4gPiAKPiA+IEpvZSBQZXJjaGVzICgxMik6Cj4gPiAgIGNoZWNrcGF0Y2g6IEFkZCBH
+RU5NQVNLIHRlc3RzCj4gCj4gSU1ITyB0aGlzIGRvZXNuJ3QgbWFrZSBhIGxvdCBvZiBzZW5zZSBh
+cyBhIGNoZWNrcGF0Y2ggdGVzdCAtIGp1c3QgdGhyb3cKPiBpbiBhIEJVSUxEX0JVR19PTigpPwoK
+TXkgcGVyc29uYWwgdGFrZSBvbiB0aGlzIGlzIHRoYXQgR0VOTUFTSygpIGlzIHJlYWxseSBub3Qg
+dXNlZnVsLCBpdCdzCmp1c3QgcHVyZSBvYmZ1c2NhdGlvbiBhbmQgbGVhZHMgdG8gZXhhY3RseSB0
+aGVzZSBraW5kcyBvZiBtaXN0YWtlcy4KClllcywgSSBmdWxseSB1bmRlcnN0YW5kIHRoZSBhcmd1
+bWVudCB0aGF0IHlvdSBjYW4ganVzdCBzcGVjaWZ5IHRoZQpzdGFydCBhbmQgZW5kIGJpdHMsIGFu
+ZCBpdCBfaW4gdGhlb3J5XyBtYWtlcyB0aGUgY29kZSBtb3JlIHJlYWRhYmxlLgoKSG93ZXZlciwg
+dGhlIHByb2JsZW0gaXMgd2hlbiB3cml0aW5nIGNvZGUuICBHRU5NQVNLKGEsIGIpLiAgSXMgYSB0
+aGUKc3RhcnRpbmcgYml0IG9yIGVuZGluZyBiaXQ/ICBJcyBiIHRoZSBudW1iZXIgb2YgYml0cz8g
+IEl0J3MgY29uZnVzaW5nCmFuZCBjYXVzZXMgbWlzdGFrZXMgcmVzdWx0aW5nIGluIGluY29ycmVj
+dCBjb2RlLiAgQSBCVUlMRF9CVUdfT04oKQpjYW4gY2F0Y2ggc29tZSBvZiB0aGUgY2FzZXMsIGJ1
+dCBub3QgYWxsIG9mIHRoZW0uCgpGb3IgZXhhbXBsZToKCglHRU5NQVNLKDYsIDIpCgp3b3VsZCBz
+YXRpc2lmeSB0aGUgcmVxdWlyZW1lbnQgdGhhdCBhID4gYiwgc28gYSBCVUlMRF9CVUdfT04oKSB3
+aWxsCm5vdCB0cmlnZ2VyLCBidXQgd2FzIHRoZSBhdXRob3IgbWVhbmluZyAweDNjIG9yIDB4YzA/
+CgpQZXJzb25hbGx5LCBJJ3ZlIGRlY2lkZWQgSSBhbSBfbm90XyBnb2luZyB0byB1c2UgR0VOTUFT
+SygpIGluIG15IGNvZGUKYmVjYXVzZSBJIHN0cnVnZ2xlIHRvIGdldCB0aGUgbWFjcm8gYXJndW1l
+bnRzIGNvcnJlY3QgLSBJJ20gX211Y2hfCmhhcHBpZXIsIGFuZCBpdCBpcyB3YXkgbW9yZSByZWxp
+YWJsZSBmb3IgbWUgdG8gd3JpdGUgdGhlIG1hc2sgaW4gaGV4Cm5vdGF0aW9uLgoKSSB0aGluayB0
+aGlzIGlzIHdoZXJlIHVzZSBvZiBhIHRlcm5hcnkgb3BlcmF0b3Igd291bGQgY29tZSBpbiB1c2Uu
+ICBUaGUKbm9ybWFsIHdheSBvZiB3cml0aW5nIGEgbnVtYmVyIG9mIGJpdHMgdGVuZHMgdG8gYmUg
+ImE6YiIsIHNvIGlmIEdFTk1BU0sKdG9vayBzb21ldGhpbmcgbGlrZSBHRU5NQVNLKDY6MiksIHRo
+ZW4gSSdkIGhhdmUgbGVzcyBpc3N1ZSB3aXRoIGl0LApiZWNhdXNlIGl0J3MgYXJndW1lbnQgaXMg
+dGhlbiBpbiBhIGZhbWlsaWFyIG5vdGF0aW9uLgoKWWVzLCBJJ20gc3VyZSB0aGF0IHNvbWVvbmUg
+d2lsbCBwb2ludCBvdXQgdGhhdCB0aGUgR0VOTUFTSyBhcmd1bWVudHMKYXJlIGp1c3QgaW4gdGhl
+IHNhbWUgb3JkZXIsIGJ1dCB0aGF0IGRvZXNuJ3QgcHJldmVudCBfbWVfIGZyZXF1ZW50bHkKZ2V0
+dGluZyBpdCB3cm9uZyAtIGFuZCB0aGF0J3MgdGhlIHBvaW50LiAgVGhlIG1hY3JvIHNlZW1zIHRv
+IG1lIHRvCmNhdXNlIG1vcmUgcHJvYmxlbXMgdGhhbiBpdCBzb2x2ZXMuCgotLSAKUk1LJ3MgUGF0
+Y2ggc3lzdGVtOiBodHRwczovL3d3dy5hcm1saW51eC5vcmcudWsvZGV2ZWxvcGVyL3BhdGNoZXMv
+CkZUVEMgYnJvYWRiYW5kIGZvciAwLjhtaWxlIGxpbmUgaW4gc3VidXJiaWE6IHN5bmMgYXQgMTIu
+MU1icHMgZG93biA2MjJrYnBzIHVwCkFjY29yZGluZyB0byBzcGVlZHRlc3QubmV0OiAxMS45TWJw
+cyBkb3duIDUwMGticHMgdXAKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX18KZHJpLWRldmVsIG1haWxpbmcgbGlzdApkcmktZGV2ZWxAbGlzdHMuZnJlZWRlc2t0
+b3Aub3JnCmh0dHBzOi8vbGlzdHMuZnJlZWRlc2t0b3Aub3JnL21haWxtYW4vbGlzdGluZm8vZHJp
+LWRldmVs
