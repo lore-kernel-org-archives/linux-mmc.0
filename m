@@ -1,59 +1,158 @@
-From: Joe Perches <joe@perches.com>
-Subject: Re: [PATCH 00/12] treewide: Fix GENMASK misuses
-Date: Wed, 10 Jul 2019 08:45:53 -0700
-Message-ID: <b9c3b83c9be50286062ae8cefd5d38e2baa0fb22.camel@perches.com>
-References: <cover.1562734889.git.joe@perches.com>
-         <5fa1fa6998332642c49e2d5209193ffe2713f333.camel@sipsolutions.net>
-         <20190710094337.wf2lftxzfjq2etro@shell.armlinux.org.uk>
+From: Rob Herring <robh+dt@kernel.org>
+Subject: Re: [PATCH 1/2] dt-bindings: mmc: Document Aspeed SD controller
+Date: Wed, 10 Jul 2019 09:49:45 -0600
+Message-ID: <CAL_JsqKrYcUbn_02z9GQO6U4rz7k=p3kB7_G0tKmv25MMZZNQg@mail.gmail.com>
+References: <20190710141611.21159-1-andrew@aj.id.au> <20190710141611.21159-2-andrew@aj.id.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"
-Content-Transfer-Encoding: 7bit
-Return-path: <netdev-owner@vger.kernel.org>
-In-Reply-To: <20190710094337.wf2lftxzfjq2etro@shell.armlinux.org.uk>
-Sender: netdev-owner@vger.kernel.org
-To: Russell King - ARM Linux admin <linux@armlinux.org.uk>, Johannes Berg <johannes@sipsolutions.net>
-Cc: Andrew Morton <akpm@linux-foundation.org>, Patrick Venture <venture@google.com>, Nancy Yuen <yuenn@google.com>, Benjamin Fair <benjaminfair@google.com>, Andrew Jeffery <andrew@aj.id.au>, openbmc@lists.ozlabs.org, linux-kernel@vger.kernel.org, linux-aspeed@lists.ozlabs.org, linux-arm-kernel@lists.infradead.org, linux-amlogic@lists.infradead.org, netdev@vger.kernel.org, linux-mediatek@lists.infradead.org, linux-stm32@st-md-mailman.stormreply.com, linux-wireless@vger.kernel.org, linux-media@vger.kernel.org, linux-iio@vger.kernel.org, devel@driverdev.osuosl.org, alsa-devel@alsa-project.org, linux-mmc@vger.kernel.org, dri-devel@lists.freedesktop.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20190710141611.21159-2-andrew@aj.id.au>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Andrew Jeffery <andrew@aj.id.au>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Mark Rutland <mark.rutland@arm.com>, Joel Stanley <joel@jms.id.au>, Adrian Hunter <adrian.hunter@intel.com>, devicetree@vger.kernel.org, "moderated list:ARM/FREESCALE IMX / MXC ARM ARCHITECTURE" <linux-arm-kernel@lists.infradead.org>, linux-aspeed@lists.ozlabs.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, ryanchen.aspeed@gmail.com
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, 2019-07-10 at 10:43 +0100, Russell King - ARM Linux admin wrote:
-> On Wed, Jul 10, 2019 at 11:17:31AM +0200, Johannes Berg wrote:
-> > On Tue, 2019-07-09 at 22:04 -0700, Joe Perches wrote:
-> > > These GENMASK uses are inverted argument order and the
-> > > actual masks produced are incorrect.  Fix them.
-> > > 
-> > > Add checkpatch tests to help avoid more misuses too.
-> > > 
-> > > Joe Perches (12):
-> > >   checkpatch: Add GENMASK tests
-> > 
-> > IMHO this doesn't make a lot of sense as a checkpatch test - just throw
-> > in a BUILD_BUG_ON()?
+On Wed, Jul 10, 2019 at 8:16 AM Andrew Jeffery <andrew@aj.id.au> wrote:
+>
+> The ASPEED SD/SDIO/eMMC controller exposes two slots implementing the
+> SDIO Host Specification v2.00, with 1 or 4 bit data buses, or an 8 bit
+> data bus if only a single slot is enabled.
+>
+> Signed-off-by: Andrew Jeffery <andrew@aj.id.au>
+> ---
+>  .../bindings/mmc/sdhci-of-aspeed.yaml         | 91 +++++++++++++++++++
 
-I tried that.
+aspeed,sdhci.yaml
 
-It'd can't be done as it's used in declarations
-and included in asm files and it uses the UL()
-macro.
+>  1 file changed, 91 insertions(+)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-of-aspeed.yaml
+>
+> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-of-aspeed.yaml b/Documentation/devicetree/bindings/mmc/sdhci-of-aspeed.yaml
+> new file mode 100644
+> index 000000000000..e98a2ac4d46d
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/mmc/sdhci-of-aspeed.yaml
+> @@ -0,0 +1,91 @@
+> +# SPDX-License-Identifier: GPL-2.0-or-later
 
-I also tried just making it do the right thing
-whatever the argument order.
+The preferred license is (GPL-2.0 OR BSD-2-Clause) if that is okay with you.
 
-Oh well.
+> +%YAML 1.2
+> +---
+> +$id: http://devicetree.org/schemas/mmc/sdhci-of-aspeed.yaml#
+> +$schema: http://devicetree.org/meta-schemas/core.yaml#
+> +
+> +title: ASPEED SD/SDIO/eMMC Controller
+> +
+> +maintainers:
+> +  - Andrew Jeffery <andrew@aj.id.au>
+> +  - Ryan Chen <ryanchen.aspeed@gmail.com>
+> +
+> +description: |+
+> +  The ASPEED SD/SDIO/eMMC controller exposes two slots implementing the SDIO
+> +  Host Specification v2.00, with 1 or 4 bit data buses, or an 8 bit data bus if
+> +  only a single slot is enabled.
+> +
+> +  The two slots are supported by a common configuration area. As the SDHCIs for
+> +  the slots are dependent on the common configuration area, they are described
+> +  as child nodes.
+> +
+> +properties:
+> +  compatible:
+> +    enum: [ aspeed,ast2400-sdc, aspeed,ast2500-sdc ]
+> +  reg:
+> +    description: Common configuration registers
 
-> My personal take on this is that GENMASK() is really not useful, it's
-> just pure obfuscation and leads to exactly these kinds of mistakes.
-> 
-> Yes, I fully understand the argument that you can just specify the
-> start and end bits, and it _in theory_ makes the code more readable.
-> 
-> However, the problem is when writing code.  GENMASK(a, b).  Is a the
-> starting bit or ending bit?  Is b the number of bits?  It's confusing
-> and causes mistakes resulting in incorrect code.  A BUILD_BUG_ON()
-> can catch some of the cases, but not all of them.
+This should have a 'maxItems: 1'. Same for the child reg.
 
-It's a horrid little macro and I agree with Russell.
+> +  ranges: true
+> +  clocks:
+> +    maxItems: 1
+> +    description: The SD/SDIO controller clock gate
+> +  sdhci:
 
-I also think if it existed at all it should have been
-GENMASK(low, high) not GENMASK(high, low).
+This needs to be a pattern (under patternProperties) as these have
+unit-addresses.
 
-I
+> +    type: object
+> +    properties:
+> +      compatible:
+> +        allOf:
+> +          - enum: [ aspeed,ast2400-sdhci, aspeed,ast2500-sdhci ]
+> +          - const: sdhci
+
+This condition can never be true. What you need is s/allOf/items/.
+However, 'sdhci' is not really a useful compatible because every
+implementation has quirks, so I'd drop it.
+
+> +      reg:
+> +        description: The SDHCI registers
+> +      clocks:
+> +        maxItems: 1
+> +        description: The SD bus clock
+> +      slot:
+> +        allOf:
+> +          - $ref: /schemas/types.yaml#/definitions/uint32
+> +          - enum: [0, 1]
+
+Is this really needed? Offset 0x100 is slot 0 and offset 0x200 is slot
+1. Does that ever change?
+
+> +      interrupts:
+> +        maxItems: 1
+> +        description: The SD interrupt shared between both slots
+> +    required:
+> +      - compatible
+> +      - reg
+> +      - clocks
+> +      - slot
+> +      - interrupts
+> +
+> +required:
+> +  - compatible
+> +  - reg
+> +  - ranges
+> +  - clocks
+
+#address-cells and #size-cells are required too.
+
+You should also add 'additionalProperties: false' here so other random
+properties can't be present.
+
+> +
+> +examples:
+> +  - |
+> +    #include <dt-bindings/clock/aspeed-clock.h>
+> +    sdc@1e740000 {
+> +            compatible = "aspeed,ast2500-sdc";
+> +            reg = <0x1e740000 0x100>;
+> +            #address-cells = <1>;
+> +            #size-cells = <1>;
+> +            ranges;
+
+It's preferred to limit the range here and then the child addresses
+are 0x100 and 0x200.
+
+> +            clocks = <&syscon ASPEED_CLK_GATE_SDCLK>;
+> +
+> +            sdhci0: sdhci@1e740100 {
+> +                    compatible = "aspeed,ast2500-sdhci", "sdhci";
+> +                    reg = <0x1e740100 0x100>;
+> +                    slot = <0>;
+> +                    interrupts = <26>;
+> +                    sdhci,auto-cmd12;
+> +                    clocks = <&syscon ASPEED_CLK_SDIO>;
+> +            };
+> +
+> +            sdhci1: sdhci@1e740200 {
+> +                    compatible = "aspeed,ast2500-sdhci", "sdhci";
+> +                    reg = <0x1e740200 0x100>;
+> +                    slot = <1>;
+> +                    interrupts = <26>;
+> +                    sdhci,auto-cmd12;
+> +                    clocks = <&syscon ASPEED_CLK_SDIO>;
+> +            };
+> +    };
+> --
+> 2.20.1
+>
