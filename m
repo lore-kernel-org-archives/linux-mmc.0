@@ -1,100 +1,207 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: Re: [PATCH] mmc: dw_mmc: Fix occasional hang after tuning on eMMC
-Date: Wed, 10 Jul 2019 13:21:57 -0700
-Message-ID: <CAD=FV=WL_Hy78REn+0CMOjYgPcuDcN1w-+94QD9HHJraQBNj4g@mail.gmail.com>
-References: <20190708195613.205729-1-dianders@chromium.org>
- <CAJKOXPf9OTPaheUdiZtaDGU0sE2vsdRiLx5nptMt_EVKU7GObA@mail.gmail.com>
- <CAD=FV=WquwqKjUKh5=M6tbTrD3svVTGWLU3iSTzD-uXBX73YWA@mail.gmail.com> <CAD=FV=X=RALazfX+vjQ7E-JmVu6xqDWCad5hPF+gNtHCuvZMTA@mail.gmail.com>
+From: "Andrew Jeffery" <andrew@aj.id.au>
+Subject: Re: [PATCH 1/2] dt-bindings: mmc: Document Aspeed SD controller
+Date: Thu, 11 Jul 2019 10:26:39 +0930
+Message-ID: <3b0788cf-eee4-48b2-901d-d2ab6716ab1b@www.fastmail.com>
+References: <20190710141611.21159-1-andrew@aj.id.au>
+ <20190710141611.21159-2-andrew@aj.id.au>
+ <CAL_JsqKrYcUbn_02z9GQO6U4rz7k=p3kB7_G0tKmv25MMZZNQg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAD=FV=X=RALazfX+vjQ7E-JmVu6xqDWCad5hPF+gNtHCuvZMTA@mail.gmail.com>
+In-Reply-To: <CAL_JsqKrYcUbn_02z9GQO6U4rz7k=p3kB7_G0tKmv25MMZZNQg@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Krzysztof Kozlowski <krzk@kernel.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-samsung-soc@vger.kernel.org" <linux-samsung-soc@vger.kernel.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, Brian Norris <briannorris@chromium.org>, Matthias Kaehlcke <mka@chromium.org>, Guenter Roeck <groeck@chromium.org>, Sonny Rao <sonnyrao@chromium.org>, Marek Szyprowski <m.szyprowski@samsung.com>, Alim Akhtar <alim.akhtar@gmail.com>, Enric Balletbo i Serra <enric.balletbo@collabora.com>, Linux MMC List <linux-mmc@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>
+To: Rob Herring <robh+dt@kernel.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Mark Rutland <mark.rutland@arm.com>, Joel Stanley <joel@jms.id.au>, Adrian Hunter <adrian.hunter@intel.com>, devicetree@vger.kernel.org, "moderated list:ARM/FREESCALE IMX / MXC ARM ARCHITECTURE" <linux-arm-kernel@lists.infradead.org>, linux-aspeed@lists.ozlabs.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Ryan Chen <ryanchen.aspeed@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,
 
-On Tue, Jul 9, 2019 at 3:02 PM Doug Anderson <dianders@chromium.org> wrote:
->
-> Hi,
->
-> On Tue, Jul 9, 2019 at 9:38 AM Doug Anderson <dianders@chromium.org> wrote:
-> >
-> > Hi,
-> >
-> > On Tue, Jul 9, 2019 at 2:07 AM Krzysztof Kozlowski <krzk@kernel.org> wrote:
-> > >
-> > > On Tue, 9 Jul 2019 at 00:48, Douglas Anderson <dianders@chromium.org> wrote:
-> > > >
-> > > > In commit 46d179525a1f ("mmc: dw_mmc: Wait for data transfer after
-> > > > response errors.") we fixed a tuning-induced hang that I saw when
-> > > > stress testing tuning on certain SD cards.  I won't re-hash that whole
-> > > > commit, but the summary is that as a normal part of tuning you need to
-> > > > deal with transfer errors and there were cases where these transfer
-> > > > errors was putting my system into a bad state causing all future
-> > > > transfers to fail.  That commit fixed handling of the transfer errors
-> > > > for me.
-> > > >
-> > > > In downstream Chrome OS my fix landed and had the same behavior for
-> > > > all SD/MMC commands.  However, it looks like when the commit landed
-> > > > upstream we limited it to only SD tuning commands.  Presumably this
-> > > > was to try to get around problems that Alim Akhtar reported on exynos
-> > > > [1].
-> > > >
-> > > > Unfortunately while stress testing reboots (and suspend/resume) on
-> > > > some rk3288-based Chromebooks I found the same problem on the eMMC on
-> > > > some of my Chromebooks (the ones with Hynix eMMC).  Since the eMMC
-> > > > tuning command is different (MMC_SEND_TUNING_BLOCK_HS200
-> > > > vs. MMC_SEND_TUNING_BLOCK) we were basically getting back into the
-> > > > same situation.
-> > > >
-> > > > I'm hoping that whatever problems exynos was having in the past are
-> > > > somehow magically fixed now and we can make the behavior the same for
-> > > > all commands.
-> > > >
-> > > > [1] https://lkml.kernel.org/r/CAGOxZ53WfNbaMe0_AM0qBqU47kAfgmPBVZC8K8Y-_J3mDMqW4A@mail.gmail.com
-> > > >
-> > > > Fixes: 46d179525a1f ("mmc: dw_mmc: Wait for data transfer after response errors.")
-> > > > Signed-off-by: Douglas Anderson <dianders@chromium.org>
-> > > > Cc: Marek Szyprowski <m.szyprowski@samsung.com>
-> > > > Cc: Alim Akhtar <alim.akhtar@gmail.com>
-> > > > Cc: Enric Balletbo i Serra <enric.balletbo@collabora.com>
-> > > > ---
-> > > > Marek (or anyone else using exynos): is it easy for you to test this
-> > > > and check if things are still broken when we land this patch?  If so,
-> > > > I guess we could have a quirk to have different behavior for just
-> > > > Rockchip SoCs but I'd rather avoid that if possible.
-> > > >
-> > > > NOTE: I'm not hoping totally in vain here.  It is possible that some
-> > > > of the CTO/DTO timers that landed could be the magic that would get
-> > > > exynos unstuck.
-> > >
-> > > I have eMMC module attached to Odroid U3 (Exynos4412,
-> > > samsung,exynos4412-dw-mshc). What is the testing procedure? With your
-> > > patch it boots fine:
-> > > [    3.698637] mmc_host mmc1: Bus speed (slot 0) = 50000000Hz (slot
-> > > req 52000000Hz, actual 50000000HZ div = 0)
-> > > [    3.703900] mmc1: new DDR MMC card at address 0001
-> > > [    3.728458] mmcblk1: mmc1:0001 008G92 7.28 GiB
-> >
-> > To really test it, it'd be nice to see some HS200 eMMC cards enumerate
-> > OK.  Specifically the patch adjusts the error handling and the place
-> > where that happens mostly is during tuning.
-> >
-> > I'll also try to find some time today to check a peach_pit or a
-> > peach_pi.  I think I saw one in the pile near my desk so if it isn't
-> > in too bad of a shape I can give mainline a shot on it.
->
-> OK, I managed to get an exynos5800-peach-pi up and running.  I put my
-> patch in place and am currently at 45 reboots and counting w/ no
-> problems.
 
-In case it helps, I made it through 2379 more reboots on my peach_pi
-w/ no hangs.  I'm putting the device back in mothball now.  :-P  I
-didn't go back and try to reproduce the original problems so I guess I
-can't assert with 100% authority that the original issue is gone, but
-my testing combined with Enric's seems like things are working fine.
+On Thu, 11 Jul 2019, at 01:20, Rob Herring wrote:
+> On Wed, Jul 10, 2019 at 8:16 AM Andrew Jeffery <andrew@aj.id.au> wrote:
+> >
+> > The ASPEED SD/SDIO/eMMC controller exposes two slots implementing the
+> > SDIO Host Specification v2.00, with 1 or 4 bit data buses, or an 8 bit
+> > data bus if only a single slot is enabled.
+> >
+> > Signed-off-by: Andrew Jeffery <andrew@aj.id.au>
+> > ---
+> >  .../bindings/mmc/sdhci-of-aspeed.yaml         | 91 +++++++++++++++++++
+> 
+> aspeed,sdhci.yaml
 
--Doug
+Ack. Previously I had separate documents for different compatibles, wasn't sure
+how to tackle name one document covering multiple compatibles.
+
+> 
+> >  1 file changed, 91 insertions(+)
+> >  create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-of-aspeed.yaml
+> >
+> > diff --git a/Documentation/devicetree/bindings/mmc/sdhci-of-aspeed.yaml b/Documentation/devicetree/bindings/mmc/sdhci-of-aspeed.yaml
+> > new file mode 100644
+> > index 000000000000..e98a2ac4d46d
+> > --- /dev/null
+> > +++ b/Documentation/devicetree/bindings/mmc/sdhci-of-aspeed.yaml
+> > @@ -0,0 +1,91 @@
+> > +# SPDX-License-Identifier: GPL-2.0-or-later
+> 
+> The preferred license is (GPL-2.0 OR BSD-2-Clause) if that is okay with you.
+
+I should poke people internally again, I had asked, just haven't got a clear
+answer. What was the justification for the preference (just so I can pass that
+on)?
+
+> 
+> > +%YAML 1.2
+> > +---
+> > +$id: http://devicetree.org/schemas/mmc/sdhci-of-aspeed.yaml#
+> > +$schema: http://devicetree.org/meta-schemas/core.yaml#
+> > +
+> > +title: ASPEED SD/SDIO/eMMC Controller
+> > +
+> > +maintainers:
+> > +  - Andrew Jeffery <andrew@aj.id.au>
+> > +  - Ryan Chen <ryanchen.aspeed@gmail.com>
+> > +
+> > +description: |+
+> > +  The ASPEED SD/SDIO/eMMC controller exposes two slots implementing the SDIO
+> > +  Host Specification v2.00, with 1 or 4 bit data buses, or an 8 bit data bus if
+> > +  only a single slot is enabled.
+> > +
+> > +  The two slots are supported by a common configuration area. As the SDHCIs for
+> > +  the slots are dependent on the common configuration area, they are described
+> > +  as child nodes.
+> > +
+> > +properties:
+> > +  compatible:
+> > +    enum: [ aspeed,ast2400-sdc, aspeed,ast2500-sdc ]
+> > +  reg:
+> > +    description: Common configuration registers
+> 
+> This should have a 'maxItems: 1'. Same for the child reg.
+
+Ack.
+
+> 
+> > +  ranges: true
+> > +  clocks:
+> > +    maxItems: 1
+> > +    description: The SD/SDIO controller clock gate
+> > +  sdhci:
+> 
+> This needs to be a pattern (under patternProperties) as these have
+> unit-addresses.
+
+Ah, I didn't think about that.
+
+> 
+> > +    type: object
+> > +    properties:
+> > +      compatible:
+> > +        allOf:
+> > +          - enum: [ aspeed,ast2400-sdhci, aspeed,ast2500-sdhci ]
+> > +          - const: sdhci
+> 
+> This condition can never be true. What you need is s/allOf/items/.
+> However, 'sdhci' is not really a useful compatible because every
+> implementation has quirks, so I'd drop it.
+
+Yeah, I was tossing up whether to include "sdhci". I'll drop it as you
+suggest.
+
+Pity the shorthand doesn't work how I expected. Might explain
+some of the behaviour I was seeing with the bindings make targets
+though.
+
+> 
+> > +      reg:
+> > +        description: The SDHCI registers
+> > +      clocks:
+> > +        maxItems: 1
+> > +        description: The SD bus clock
+> > +      slot:
+> > +        allOf:
+> > +          - $ref: /schemas/types.yaml#/definitions/uint32
+> > +          - enum: [0, 1]
+> 
+> Is this really needed? Offset 0x100 is slot 0 and offset 0x200 is slot
+> 1. Does that ever change?
+
+It doesn't in the SoCs at hand, but the downstream impact (driver
+implementation) is that you need to derive the slot index from the
+address and I was trying to avoid that. The slot index influences
+some bit index calculations.
+
+> 
+> > +      interrupts:
+> > +        maxItems: 1
+> > +        description: The SD interrupt shared between both slots
+> > +    required:
+> > +      - compatible
+> > +      - reg
+> > +      - clocks
+> > +      - slot
+> > +      - interrupts
+> > +
+> > +required:
+> > +  - compatible
+> > +  - reg
+> > +  - ranges
+> > +  - clocks
+> 
+> #address-cells and #size-cells are required too.
+
+Ack.
+
+> 
+> You should also add 'additionalProperties: false' here so other random
+> properties can't be present.
+
+Ah yes. Will fix.
+
+> 
+> > +
+> > +examples:
+> > +  - |
+> > +    #include <dt-bindings/clock/aspeed-clock.h>
+> > +    sdc@1e740000 {
+> > +            compatible = "aspeed,ast2500-sdc";
+> > +            reg = <0x1e740000 0x100>;
+> > +            #address-cells = <1>;
+> > +            #size-cells = <1>;
+> > +            ranges;
+> 
+> It's preferred to limit the range here and then the child addresses
+> are 0x100 and 0x200.
+
+Okay. Was just trying to dodge mental arithmetic where I could, but
+if that's the preference then I'll fix it up.
+
+Thanks for the review!
+
+Andrew
+
+> 
+> > +            clocks = <&syscon ASPEED_CLK_GATE_SDCLK>;
+> > +
+> > +            sdhci0: sdhci@1e740100 {
+> > +                    compatible = "aspeed,ast2500-sdhci", "sdhci";
+> > +                    reg = <0x1e740100 0x100>;
+> > +                    slot = <0>;
+> > +                    interrupts = <26>;
+> > +                    sdhci,auto-cmd12;
+> > +                    clocks = <&syscon ASPEED_CLK_SDIO>;
+> > +            };
+> > +
+> > +            sdhci1: sdhci@1e740200 {
+> > +                    compatible = "aspeed,ast2500-sdhci", "sdhci";
+> > +                    reg = <0x1e740200 0x100>;
+> > +                    slot = <1>;
+> > +                    interrupts = <26>;
+> > +                    sdhci,auto-cmd12;
+> > +                    clocks = <&syscon ASPEED_CLK_SDIO>;
+> > +            };
+> > +    };
+> > --
+> > 2.20.1
+> >
+>
