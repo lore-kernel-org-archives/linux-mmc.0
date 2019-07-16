@@ -1,86 +1,87 @@
-From: "Andrew Jeffery" <andrew@aj.id.au>
-Subject: Re: [PATCH v2 1/2] dt-bindings: mmc: Document Aspeed SD controller
-Date: Tue, 16 Jul 2019 10:06:11 +0930
-Message-ID: <3fe55ea9-b949-48a0-9eab-90ad3bc1ee2a@www.fastmail.com>
-References: <20190712033214.24713-1-andrew@aj.id.au>
- <20190712033214.24713-2-andrew@aj.id.au>
- <CAL_JsqLkOtsAxj9NvNB=EEkH00k-dtNedNY042uuntSmcjhDhA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain
+From: Baolin Wang <baolin.wang@linaro.org>
+Subject: [PATCH v2] mmc: host: sdhci-sprd: Fix the incorrect soft reset operation when runtime resuming
+Date: Tue, 16 Jul 2019 15:31:39 +0800
+Message-ID: <b9cba2452c0166ef2fa69514d6ac8fbe7ee02883.1563259454.git.baolin.wang@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAL_JsqLkOtsAxj9NvNB=EEkH00k-dtNedNY042uuntSmcjhDhA@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Rob Herring <robh+dt@kernel.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Mark Rutland <mark.rutland@arm.com>, Joel Stanley <joel@jms.id.au>, Adrian Hunter <adrian.hunter@intel.com>, devicetree@vger.kernel.org, "moderated list:ARM/FREESCALE IMX / MXC ARM ARCHITECTURE" <linux-arm-kernel@lists.infradead.org>, linux-aspeed@lists.ozlabs.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Ryan Chen <ryanchen.aspeed@gmail.com>
+To: adrian.hunter@intel.com, ulf.hansson@linaro.org, zhang.lyra@gmail.com, orsonzhai@gmail.com
+Cc: baolin.wang@linaro.org, vincent.guittot@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
+In sdhci_runtime_resume_host() function, we will always do software reset
+for all, which will cause Spreadtrum host controller work abnormally after
+resuming.
 
+Thus for Spreadtrum platform that do not power down the SD/eMMC card during
+runtime suspend, we should not do software reset for all. To fix this
+issue, adding a specific reset operation that add one condition to validate
+the MMC_CAP_AGGRESSIVE_PM to decide if we can do software reset for all or
+just reset command and data lines.
 
-On Tue, 16 Jul 2019, at 07:47, Rob Herring wrote:
-> On Thu, Jul 11, 2019 at 9:32 PM Andrew Jeffery <andrew@aj.id.au> wrote:
-> >
-> > The ASPEED SD/SDIO/eMMC controller exposes two slots implementing the
-> > SDIO Host Specification v2.00, with 1 or 4 bit data buses, or an 8 bit
-> > data bus if only a single slot is enabled.
-> >
-> > Signed-off-by: Andrew Jeffery <andrew@aj.id.au>
-> > ---
-> > In v2:
-> >
-> > * Rename to aspeed,sdhci.yaml
-> > * Rename sd-controller compatible
-> > * Add `maxItems: 1` for reg properties
-> > * Move sdhci subnode description to patternProperties
-> > * Drop sdhci compatible requirement
-> > * #address-cells and #size-cells are required
-> > * Prevent additional properties
-> > * Implement explicit ranges in example
-> > * Remove slot property
-> >
-> >  .../devicetree/bindings/mmc/aspeed,sdhci.yaml | 90 +++++++++++++++++++
-> >  1 file changed, 90 insertions(+)
-> >  create mode 100644 Documentation/devicetree/bindings/mmc/aspeed,sdhci.yaml
-> >
-> > diff --git a/Documentation/devicetree/bindings/mmc/aspeed,sdhci.yaml b/Documentation/devicetree/bindings/mmc/aspeed,sdhci.yaml
-> > new file mode 100644
-> > index 000000000000..67a691c3348c
-> > --- /dev/null
-> > +++ b/Documentation/devicetree/bindings/mmc/aspeed,sdhci.yaml
-> > @@ -0,0 +1,90 @@
-> > +# SPDX-License-Identifier: GPL-2.0-or-later
-> > +%YAML 1.2
-> > +---
-> > +$id: http://devicetree.org/schemas/mmc/aspeed,sdhci.yaml#
-> > +$schema: http://devicetree.org/meta-schemas/core.yaml#
-> > +
-> > +title: ASPEED SD/SDIO/eMMC Controller
-> > +
-> > +maintainers:
-> > +  - Andrew Jeffery <andrew@aj.id.au>
-> > +  - Ryan Chen <ryanchen.aspeed@gmail.com>
-> > +
-> > +description: |+
-> > +  The ASPEED SD/SDIO/eMMC controller exposes two slots implementing the SDIO
-> > +  Host Specification v2.00, with 1 or 4 bit data buses, or an 8 bit data bus if
-> > +  only a single slot is enabled.
-> > +
-> > +  The two slots are supported by a common configuration area. As the SDHCIs for
-> > +  the slots are dependent on the common configuration area, they are described
-> > +  as child nodes.
-> > +
-> > +properties:
-> > +  compatible:
-> > +    enum: [ aspeed,ast2400-sd-controller, aspeed,ast2500-sd-controller ]
-> 
-> This is actually a list of 4 strings. Please reformat to 1 per line.
+Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
+---
+Changes from v1:
+ - Add a specific reset operation instead of changing the core to avoid
+ affecting other hardware.
+---
+ drivers/mmc/host/sdhci-sprd.c |   38 +++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 37 insertions(+), 1 deletion(-)
 
-On reflection that's obvious, but also a somewhat subtle interaction with the
-preference for no quotes (the obvious caveat being "except where required").
-
-Thanks for pointing it out.
-
-I have been running `make dt_binding_check` and `make dtbs_check` over
-these, looks like I need to up my game a bit though. Do you do additional things
-in your workflow?
-
-Andrew
+diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
+index 603a5d9..174b566 100644
+--- a/drivers/mmc/host/sdhci-sprd.c
++++ b/drivers/mmc/host/sdhci-sprd.c
+@@ -373,6 +373,42 @@ static unsigned int sdhci_sprd_get_max_timeout_count(struct sdhci_host *host)
+ 	return 1 << 31;
+ }
+ 
++static void sdhci_sprd_reset(struct sdhci_host *host, u8 mask)
++{
++	struct mmc_host *mmc = host->mmc;
++	ktime_t timeout;
++
++	/*
++	 * When try to reset controller after runtime suspend, we should not
++	 * reset for all if the SD/eMMC card is not power down, just reset
++	 * command and data lines instead. Otherwise will meet some strange
++	 * behaviors for Spreadtrum host controller.
++	 */
++	if (host->runtime_suspended && (mask & SDHCI_RESET_ALL) &&
++	    !(mmc->caps & MMC_CAP_AGGRESSIVE_PM))
++		mask = SDHCI_RESET_CMD | SDHCI_RESET_DATA;
++
++	sdhci_writeb(host, mask, SDHCI_SOFTWARE_RESET);
++
++	/* Wait max 100 ms */
++	timeout = ktime_add_ms(ktime_get(), 100);
++
++	/* hw clears the bit when it's done */
++	while (1) {
++		bool timedout = ktime_after(ktime_get(), timeout);
++
++		if (!(sdhci_readb(host, SDHCI_SOFTWARE_RESET) & mask))
++			break;
++		if (timedout) {
++			pr_err("%s: Reset 0x%x never completed.\n",
++				mmc_hostname(host->mmc), (int)mask);
++			sdhci_dumpregs(host);
++			return;
++		}
++		udelay(10);
++	}
++}
++
+ static struct sdhci_ops sdhci_sprd_ops = {
+ 	.read_l = sdhci_sprd_readl,
+ 	.write_l = sdhci_sprd_writel,
+@@ -381,7 +417,7 @@ static unsigned int sdhci_sprd_get_max_timeout_count(struct sdhci_host *host)
+ 	.get_max_clock = sdhci_sprd_get_max_clock,
+ 	.get_min_clock = sdhci_sprd_get_min_clock,
+ 	.set_bus_width = sdhci_set_bus_width,
+-	.reset = sdhci_reset,
++	.reset = sdhci_sprd_reset,
+ 	.set_uhs_signaling = sdhci_sprd_set_uhs_signaling,
+ 	.hw_reset = sdhci_sprd_hw_reset,
+ 	.get_max_timeout_count = sdhci_sprd_get_max_timeout_count,
+-- 
+1.7.9.5
