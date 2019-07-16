@@ -1,97 +1,86 @@
-From: Rob Herring <robh+dt@kernel.org>
-Subject: Re: [PATCH v2 1/2] dt-bindings: mmc: Document Aspeed SD controller
-Date: Tue, 16 Jul 2019 08:57:21 -0600
-Message-ID: <CAL_JsqKMo_uv4Ur-D4NaUXk94hGJeRt5fg+0998dDjJCTgumGg@mail.gmail.com>
-References: <20190712033214.24713-1-andrew@aj.id.au> <20190712033214.24713-2-andrew@aj.id.au>
- <CAL_JsqLkOtsAxj9NvNB=EEkH00k-dtNedNY042uuntSmcjhDhA@mail.gmail.com> <3fe55ea9-b949-48a0-9eab-90ad3bc1ee2a@www.fastmail.com>
+From: Douglas Anderson <dianders@chromium.org>
+Subject: [PATCH 0/2] mmc: core: Fix Marvell WiFi reset by adding SDIO API to replug card
+Date: Tue, 16 Jul 2019 09:42:07 -0700
+Message-ID: <20190716164209.62320-1-dianders@chromium.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <3fe55ea9-b949-48a0-9eab-90ad3bc1ee2a@www.fastmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Andrew Jeffery <andrew@aj.id.au>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Mark Rutland <mark.rutland@arm.com>, Joel Stanley <joel@jms.id.au>, Adrian Hunter <adrian.hunter@intel.com>, devicetree@vger.kernel.org, "moderated list:ARM/FREESCALE IMX / MXC ARM ARCHITECTURE" <linux-arm-kernel@lists.infradead.org>, linux-aspeed@lists.ozlabs.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Ryan Chen <ryanchen.aspeed@gmail.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Kalle Valo <kvalo@codeaurora.org>, Adrian Hunter <adrian.hunter@intel.com>
+Cc: Ganapathi Bhat <gbhat@marvell.com>, linux-wireless@vger.kernel.org, Brian Norris <briannorris@chromium.org>, Amitkumar Karwar <amitkarwar@gmail.com>, linux-rockchip@lists.infradead.org, Wolfram Sang <wsa+renesas@sang-engineering.com>, Nishant Sarmukadam <nishants@marvell.com>, netdev@vger.kernel.org, Avri Altman <avri.altman@wdc.com>, linux-mmc@vger.kernel.org, davem@davemloft.net, Xinming Hu <huxinming820@gmail.com>, Douglas Anderson <dianders@chromium.org>, Jiong Wu <lohengrin1024@gmail.com>, Ritesh Harjani <riteshh@codeaurora.org>, linux-kernel@vger.kernel.org, Thomas Gleixner <tglx@linutronix.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, =?UTF-8?q?Niklas=20S=C3=B6derlund?= <niklas.soderlund+renesas@ragnatech.se>
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, Jul 15, 2019 at 6:36 PM Andrew Jeffery <andrew@aj.id.au> wrote:
->
->
->
-> On Tue, 16 Jul 2019, at 07:47, Rob Herring wrote:
-> > On Thu, Jul 11, 2019 at 9:32 PM Andrew Jeffery <andrew@aj.id.au> wrote:
-> > >
-> > > The ASPEED SD/SDIO/eMMC controller exposes two slots implementing the
-> > > SDIO Host Specification v2.00, with 1 or 4 bit data buses, or an 8 bit
-> > > data bus if only a single slot is enabled.
-> > >
-> > > Signed-off-by: Andrew Jeffery <andrew@aj.id.au>
-> > > ---
-> > > In v2:
-> > >
-> > > * Rename to aspeed,sdhci.yaml
-> > > * Rename sd-controller compatible
-> > > * Add `maxItems: 1` for reg properties
-> > > * Move sdhci subnode description to patternProperties
-> > > * Drop sdhci compatible requirement
-> > > * #address-cells and #size-cells are required
-> > > * Prevent additional properties
-> > > * Implement explicit ranges in example
-> > > * Remove slot property
-> > >
-> > >  .../devicetree/bindings/mmc/aspeed,sdhci.yaml | 90 +++++++++++++++++++
-> > >  1 file changed, 90 insertions(+)
-> > >  create mode 100644 Documentation/devicetree/bindings/mmc/aspeed,sdhci.yaml
-> > >
-> > > diff --git a/Documentation/devicetree/bindings/mmc/aspeed,sdhci.yaml b/Documentation/devicetree/bindings/mmc/aspeed,sdhci.yaml
-> > > new file mode 100644
-> > > index 000000000000..67a691c3348c
-> > > --- /dev/null
-> > > +++ b/Documentation/devicetree/bindings/mmc/aspeed,sdhci.yaml
-> > > @@ -0,0 +1,90 @@
-> > > +# SPDX-License-Identifier: GPL-2.0-or-later
-> > > +%YAML 1.2
-> > > +---
-> > > +$id: http://devicetree.org/schemas/mmc/aspeed,sdhci.yaml#
-> > > +$schema: http://devicetree.org/meta-schemas/core.yaml#
-> > > +
-> > > +title: ASPEED SD/SDIO/eMMC Controller
-> > > +
-> > > +maintainers:
-> > > +  - Andrew Jeffery <andrew@aj.id.au>
-> > > +  - Ryan Chen <ryanchen.aspeed@gmail.com>
-> > > +
-> > > +description: |+
-> > > +  The ASPEED SD/SDIO/eMMC controller exposes two slots implementing the SDIO
-> > > +  Host Specification v2.00, with 1 or 4 bit data buses, or an 8 bit data bus if
-> > > +  only a single slot is enabled.
-> > > +
-> > > +  The two slots are supported by a common configuration area. As the SDHCIs for
-> > > +  the slots are dependent on the common configuration area, they are described
-> > > +  as child nodes.
-> > > +
-> > > +properties:
-> > > +  compatible:
-> > > +    enum: [ aspeed,ast2400-sd-controller, aspeed,ast2500-sd-controller ]
-> >
-> > This is actually a list of 4 strings. Please reformat to 1 per line.
->
-> On reflection that's obvious, but also a somewhat subtle interaction with the
-> preference for no quotes (the obvious caveat being "except where required").
+As talked about in the thread at:
 
-It wasn't something I'd run into before. I'm working on a check, but
-unfortunately we can only check for quotes not needed and can't check
-for missing quotes.
+http://lkml.kernel.org/r/CAD=FV=X7P2F1k_zwHc0mbtfk55-rucTz_GoDH=PL6zWqKYcpuw@mail.gmail.com
 
-> Thanks for pointing it out.
->
-> I have been running `make dt_binding_check` and `make dtbs_check` over
-> these, looks like I need to up my game a bit though. Do you do additional things
-> in your workflow?
+...when the Marvell WiFi card tries to reset itself it kills
+Bluetooth.  It was observed that we could re-init the card properly by
+unbinding / rebinding the host controller.  It was also observed that
+in the downstream Chrome OS codebase the solution used was
+mmc_remove_host() / mmc_add_host(), which is similar to the solution
+in this series.
 
-That should have thrown the warnings. If you aren't seeing those, do
-you have dtschema package installed (see
-Documentation/devicetree/writing-schema.md)? Or it could be erroring
-out on something else first. There's a few breakages that I'm trying
-to fix.
+So far I've only done testing of this series using the reset test
+source that can be simulated via sysfs.  Specifically I ran this test:
 
-Rob
+for i in $(seq 1000); do
+  echo "LOOP $i --------"
+  echo 1 > /sys/kernel/debug/mwifiex/mlan0/reset
+
+  while true; do
+    if ! ping -w15 -c1 "${GW}" >/dev/null 2>&1; then
+      fail=$(( fail + 1 ))
+      echo "Fail WiFi ${fail}"
+      if [[ ${fail} == 3 ]]; then
+        exit 1
+      fi
+    else
+      fail=0
+      break
+    fi
+  done
+
+  hciconfig hci0 down
+  sleep 1
+  if ! hciconfig hci0 up; then
+    echo "Fail BT"
+    exit 1
+  fi
+done
+
+I ran this several times and got several hundred iterations each
+before a failure.  When I saw failures:
+
+* Once I saw a "Fail BT"; manually resetting the card again fixed it.
+  I didn't give it time to see if it would have detected this
+  automatically.
+* Once I saw the ping fail because (for some reason) my device only
+  got an IPv6 address from my router and the IPv4 ping failed.  I
+  changed my script to use 'ping6' to see if that would help.
+* Once I saw the ping fail because the higher level network stack
+  ("shill" in my case) seemed to crash.  A few minutes later the
+  system recovered itself automatically.  https://crbug.com/984593 if
+  you want more details.
+* Sometimes while I was testing I saw "Fail WiFi 1" indicating a
+  transitory failure.  Usually this was an association failure, but in
+  one case I saw the device do "Firmware wakeup failed" after I
+  triggered the reset.  This caused the driver to trigger a re-reset
+  of itself which eventually recovered things.  This was good because
+  it was an actual test of the normal reset flow (not the one
+  triggered via sysfs).
+
+
+Douglas Anderson (2):
+  mmc: core: Add sdio_trigger_replug() API
+  mwifiex: Make use of the new sdio_trigger_replug() API to reset
+
+ drivers/mmc/core/core.c                     | 28 +++++++++++++++++++--
+ drivers/mmc/core/sdio_io.c                  | 20 +++++++++++++++
+ drivers/net/wireless/marvell/mwifiex/sdio.c | 14 +++--------
+ include/linux/mmc/host.h                    | 15 ++++++++++-
+ include/linux/mmc/sdio_func.h               |  2 ++
+ 5 files changed, 65 insertions(+), 14 deletions(-)
+
+-- 
+2.22.0.510.g264f2c817a-goog
