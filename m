@@ -1,68 +1,74 @@
-From: Douglas Anderson <dianders@chromium.org>
-Subject: [PATCH 2/2] mwifiex: Make use of the new sdio_trigger_replug() API to reset
-Date: Tue, 16 Jul 2019 09:42:09 -0700
-Message-ID: <20190716164209.62320-3-dianders@chromium.org>
-References: <20190716164209.62320-1-dianders@chromium.org>
-Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
+From: Baolin Wang <baolin.wang@linaro.org>
+Subject: [PATCH v4] mmc: host: sdhci-sprd: Fix the incorrect soft reset operation when runtime resuming
+Date: Wed, 17 Jul 2019 10:28:52 +0800
+Message-ID: <89c3ef495c367d58ca3abe99a1f82c48f8c08705.1563274904.git.baolin.wang@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190716164209.62320-1-dianders@chromium.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Kalle Valo <kvalo@codeaurora.org>, Adrian Hunter <adrian.hunter@intel.com>
-Cc: Ganapathi Bhat <gbhat@marvell.com>, linux-wireless@vger.kernel.org, Brian Norris <briannorris@chromium.org>, Amitkumar Karwar <amitkarwar@gmail.com>, linux-rockchip@lists.infradead.org, Wolfram Sang <wsa+renesas@sang-engineering.com>, Nishant Sarmukadam <nishants@marvell.com>, netdev@vger.kernel.org, Avri Altman <avri.altman@wdc.com>, linux-mmc@vger.kernel.org, davem@davemloft.net, Xinming Hu <huxinming820@gmail.com>, Douglas Anderson <dianders@chromium.org>, linux-kernel@vger.kernel.org
+To: adrian.hunter@intel.com, ulf.hansson@linaro.org, zhang.lyra@gmail.com, orsonzhai@gmail.com
+Cc: baolin.wang@linaro.org, vincent.guittot@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-As described in the patch ("mmc: core: Add sdio_trigger_replug()
-API"), the current mwifiex_sdio_card_reset() is broken in the cases
-where we're running Bluetooth on a second SDIO func on the same card
-as WiFi.  The problem goes away if we just use the
-sdio_trigger_replug() API call.
+In sdhci_runtime_resume_host() function, we will always do software reset
+for all, which will cause Spreadtrum host controller work abnormally after
+resuming.
 
-NOTE: Even though with this new solution there is less of a reason to
-do our work from a workqueue (the unplug / plug mechanism we're using
-is possible for a human to perform at any time so the stack is
-supposed to handle it without it needing to be called from a special
-context), we still need a workqueue because the Marvell reset function
-could called from a context where sleeping is invalid and thus we
-can't claim the host.  One example is Marvell's wakeup_timer_fn().
+Thus for Spreadtrum platform that will not power down the SD/eMMC card during
+runtime suspend, we should not do software reset for all. To fix this
+issue, adding a specific reset operation that adds one condition to validate
+the power mode to decide if we can do software reset for all or just reset
+command and data lines.
 
-Signed-off-by: Douglas Anderson <dianders@chromium.org>
+Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
 ---
+Changess from v3:
+ - Use ios.power_mode to validate if the card is power down or not.
 
- drivers/net/wireless/marvell/mwifiex/sdio.c | 14 +++-----------
- 1 file changed, 3 insertions(+), 11 deletions(-)
+Changes from v2:
+ - Simplify the sdhci_sprd_reset() by issuing sdhci_reset().
 
-diff --git a/drivers/net/wireless/marvell/mwifiex/sdio.c b/drivers/net/wireless/marvell/mwifiex/sdio.c
-index 24c041dad9f6..f77ad2615f08 100644
---- a/drivers/net/wireless/marvell/mwifiex/sdio.c
-+++ b/drivers/net/wireless/marvell/mwifiex/sdio.c
-@@ -2218,14 +2218,6 @@ static void mwifiex_sdio_card_reset_work(struct mwifiex_adapter *adapter)
- {
- 	struct sdio_mmc_card *card = adapter->card;
- 	struct sdio_func *func = card->func;
--	int ret;
--
--	mwifiex_shutdown_sw(adapter);
--
--	/* power cycle the adapter */
--	sdio_claim_host(func);
--	mmc_hw_reset(func->card->host);
--	sdio_release_host(func);
- 
- 	/* Previous save_adapter won't be valid after this. We will cancel
- 	 * pending work requests.
-@@ -2233,9 +2225,9 @@ static void mwifiex_sdio_card_reset_work(struct mwifiex_adapter *adapter)
- 	clear_bit(MWIFIEX_IFACE_WORK_DEVICE_DUMP, &card->work_flags);
- 	clear_bit(MWIFIEX_IFACE_WORK_CARD_RESET, &card->work_flags);
- 
--	ret = mwifiex_reinit_sw(adapter);
--	if (ret)
--		dev_err(&func->dev, "reinit failed: %d\n", ret);
-+	sdio_claim_host(func);
-+	sdio_trigger_replug(func);
-+	sdio_release_host(func);
+Changes from v1:
+ - Add a specific reset operation instead of changing the core to avoid
+ affecting other hardware.
+---
+ drivers/mmc/host/sdhci-sprd.c |   19 ++++++++++++++++++-
+ 1 file changed, 18 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
+index 603a5d9..94f9726 100644
+--- a/drivers/mmc/host/sdhci-sprd.c
++++ b/drivers/mmc/host/sdhci-sprd.c
+@@ -373,6 +373,23 @@ static unsigned int sdhci_sprd_get_max_timeout_count(struct sdhci_host *host)
+ 	return 1 << 31;
  }
  
- /* This function read/write firmware */
++static void sdhci_sprd_reset(struct sdhci_host *host, u8 mask)
++{
++	struct mmc_host *mmc = host->mmc;
++
++	/*
++	 * When try to reset controller after runtime suspend, we should not
++	 * reset for all if the SD/eMMC card is not power down, just reset
++	 * command and data lines instead. Otherwise will meet some strange
++	 * behaviors for Spreadtrum host controller.
++	 */
++	if (host->runtime_suspended && (mask & SDHCI_RESET_ALL) &&
++	    mmc->ios.power_mode == MMC_POWER_ON)
++		mask = SDHCI_RESET_CMD | SDHCI_RESET_DATA;
++
++	sdhci_reset(host, mask);
++}
++
+ static struct sdhci_ops sdhci_sprd_ops = {
+ 	.read_l = sdhci_sprd_readl,
+ 	.write_l = sdhci_sprd_writel,
+@@ -381,7 +398,7 @@ static unsigned int sdhci_sprd_get_max_timeout_count(struct sdhci_host *host)
+ 	.get_max_clock = sdhci_sprd_get_max_clock,
+ 	.get_min_clock = sdhci_sprd_get_min_clock,
+ 	.set_bus_width = sdhci_set_bus_width,
+-	.reset = sdhci_reset,
++	.reset = sdhci_sprd_reset,
+ 	.set_uhs_signaling = sdhci_sprd_set_uhs_signaling,
+ 	.hw_reset = sdhci_sprd_hw_reset,
+ 	.get_max_timeout_count = sdhci_sprd_get_max_timeout_count,
 -- 
-2.22.0.510.g264f2c817a-goog
+1.7.9.5
