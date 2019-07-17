@@ -1,74 +1,90 @@
-From: Baolin Wang <baolin.wang@linaro.org>
-Subject: [PATCH v4] mmc: host: sdhci-sprd: Fix the incorrect soft reset operation when runtime resuming
-Date: Wed, 17 Jul 2019 10:28:52 +0800
-Message-ID: <89c3ef495c367d58ca3abe99a1f82c48f8c08705.1563274904.git.baolin.wang@linaro.org>
+From: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+Subject: [PATCH 1/2] mmc: sdhci: Add PLL Enable support to internal clock setup
+Date: Wed, 17 Jul 2019 10:39:51 +0800
+Message-ID: <20190717023951.5064-1-ben.chuang@genesyslogic.com.tw>
+Mime-Version: 1.0
+Content-Type: text/plain
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: adrian.hunter@intel.com, ulf.hansson@linaro.org, zhang.lyra@gmail.com, orsonzhai@gmail.com
-Cc: baolin.wang@linaro.org, vincent.guittot@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: adrian.hunter@intel.com, ulf.hansson@linaro.org
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, johnsonm@danlj.org, Ben Chuang <ben.chuang@genesyslogic.com.tw>
 List-Id: linux-mmc@vger.kernel.org
 
-In sdhci_runtime_resume_host() function, we will always do software reset
-for all, which will cause Spreadtrum host controller work abnormally after
-resuming.
+The GL9750 and GL9755 chipsets, and possibly others, require PLL Enable
+setup as part of the internal clock setup as described in 3.2.1 Internal
+Clock Setup Sequence of SD Host Controller Simplified Specification
+Version 4.20.  This changes the timeouts to the new specification of
+150ms for each step and is documented as safe for "prior versions which
+do not support PLL Enable."
 
-Thus for Spreadtrum platform that will not power down the SD/eMMC card during
-runtime suspend, we should not do software reset for all. To fix this
-issue, adding a specific reset operation that adds one condition to validate
-the power mode to decide if we can do software reset for all or just reset
-command and data lines.
-
-Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
+Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+Co-developed-by: Michael K Johnson <johnsonm@danlj.org>
+Signed-off-by: Michael K Johnson <johnsonm@danlj.org>
 ---
-Changess from v3:
- - Use ios.power_mode to validate if the card is power down or not.
+ drivers/mmc/host/sdhci.c | 33 ++++++++++++++++++++++++---------
+ 1 file changed, 24 insertions(+), 9 deletions(-)
 
-Changes from v2:
- - Simplify the sdhci_sprd_reset() by issuing sdhci_reset().
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 59acf8e3331e..fd684d7a5f15 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1636,15 +1636,11 @@ void sdhci_enable_clk(struct sdhci_host *host, u16 clk)
+        clk |= SDHCI_CLOCK_INT_EN;
+        sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
 
-Changes from v1:
- - Add a specific reset operation instead of changing the core to avoid
- affecting other hardware.
----
- drivers/mmc/host/sdhci-sprd.c |   19 ++++++++++++++++++-
- 1 file changed, 18 insertions(+), 1 deletion(-)
+-       /* Wait max 20 ms */
+-       timeout = ktime_add_ms(ktime_get(), 20);
+-       while (1) {
+-               bool timedout = ktime_after(ktime_get(), timeout);
+-
+-               clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+-               if (clk & SDHCI_CLOCK_INT_STABLE)
+-                       break;
+-               if (timedout) {
++       /* Wait max 150 ms */
++       timeout = ktime_add_ms(ktime_get(), 150);
++       while (!((clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL))
++               & SDHCI_CLOCK_INT_STABLE)) {
++               if (ktime_after(ktime_get(), timeout)) {
+                        pr_err("%s: Internal clock never stabilised.\n",
+                               mmc_hostname(host->mmc));
+                        sdhci_dumpregs(host);
+@@ -1653,8 +1649,27 @@ void sdhci_enable_clk(struct sdhci_host *host, u16 clk)
+                udelay(10);
+        }
 
-diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
-index 603a5d9..94f9726 100644
---- a/drivers/mmc/host/sdhci-sprd.c
-+++ b/drivers/mmc/host/sdhci-sprd.c
-@@ -373,6 +373,23 @@ static unsigned int sdhci_sprd_get_max_timeout_count(struct sdhci_host *host)
- 	return 1 << 31;
++       clk |= SDHCI_CLOCK_PLL_EN;
++       clk &= ~SDHCI_CLOCK_INT_STABLE;
++       sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
++
++       /* Wait max 150 ms */
++       timeout = ktime_add_ms(ktime_get(), 150);
++       while (!((clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL))
++               & SDHCI_CLOCK_INT_STABLE)) {
++               if (ktime_after(ktime_get(), timeout)) {
++                       pr_err("%s: PLL clock never stabilised.\n",
++                              mmc_hostname(host->mmc));
++                       sdhci_dumpregs(host);
++                       return;
++               }
++               udelay(10);
++       }
++
+        clk |= SDHCI_CLOCK_CARD_EN;
+        sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
++
++       mdelay(1);
  }
- 
-+static void sdhci_sprd_reset(struct sdhci_host *host, u8 mask)
-+{
-+	struct mmc_host *mmc = host->mmc;
-+
-+	/*
-+	 * When try to reset controller after runtime suspend, we should not
-+	 * reset for all if the SD/eMMC card is not power down, just reset
-+	 * command and data lines instead. Otherwise will meet some strange
-+	 * behaviors for Spreadtrum host controller.
-+	 */
-+	if (host->runtime_suspended && (mask & SDHCI_RESET_ALL) &&
-+	    mmc->ios.power_mode == MMC_POWER_ON)
-+		mask = SDHCI_RESET_CMD | SDHCI_RESET_DATA;
-+
-+	sdhci_reset(host, mask);
-+}
-+
- static struct sdhci_ops sdhci_sprd_ops = {
- 	.read_l = sdhci_sprd_readl,
- 	.write_l = sdhci_sprd_writel,
-@@ -381,7 +398,7 @@ static unsigned int sdhci_sprd_get_max_timeout_count(struct sdhci_host *host)
- 	.get_max_clock = sdhci_sprd_get_max_clock,
- 	.get_min_clock = sdhci_sprd_get_min_clock,
- 	.set_bus_width = sdhci_set_bus_width,
--	.reset = sdhci_reset,
-+	.reset = sdhci_sprd_reset,
- 	.set_uhs_signaling = sdhci_sprd_set_uhs_signaling,
- 	.hw_reset = sdhci_sprd_hw_reset,
- 	.get_max_timeout_count = sdhci_sprd_get_max_timeout_count,
--- 
-1.7.9.5
+ EXPORT_SYMBOL_GPL(sdhci_enable_clk);
+
+--
+2.22.0
+
+________________________________
+
+Genesys Logic Email Confidentiality Notice:
+This mail and any attachments may contain information that is confidential, proprietary, privileged or otherwise protected by law. The mail is intended solely for the named addressee (or a person responsible for delivering it to the addressee). If you are not the intended recipient of this mail, you are not authorized to read, print, copy or disseminate this mail.
+
+If you have received this email in error, please notify us immediately by reply email and immediately delete this message and any attachments from your system. Please be noted that any unauthorized use, dissemination, distribution or copying of this email is strictly prohibited.
+________________________________
