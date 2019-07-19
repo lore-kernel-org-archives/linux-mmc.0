@@ -1,12 +1,12 @@
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.4 07/35] memstick: Fix error cleanup path of memstick_init
-Date: Fri, 19 Jul 2019 00:13:55 -0400
-Message-ID: <20190719041423.19322-7-sashal@kernel.org>
-References: <20190719041423.19322-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.14 11/60] memstick: Fix error cleanup path of memstick_init
+Date: Fri, 19 Jul 2019 00:10:20 -0400
+Message-ID: <20190719041109.18262-11-sashal@kernel.org>
+References: <20190719041109.18262-1-sashal@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <20190719041423.19322-1-sashal@kernel.org>
+In-Reply-To: <20190719041109.18262-1-sashal@kernel.org>
 Sender: stable-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc: Wang Hai <wanghai26@huawei.com>, Hulk Robot <hulkci@huawei.com>, Ulf Hansson <ulf.hansson@linaro.org>, Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org
@@ -55,7 +55,7 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 9 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/memstick/core/memstick.c b/drivers/memstick/core/memstick.c
-index 4d673a626db4..1041eb7a6167 100644
+index 1246d69ba187..b1564cacd19e 100644
 --- a/drivers/memstick/core/memstick.c
 +++ b/drivers/memstick/core/memstick.c
 @@ -629,13 +629,18 @@ static int __init memstick_init(void)
