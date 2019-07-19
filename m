@@ -1,85 +1,113 @@
-From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 5.2 047/171] memstick: Fix error cleanup path of memstick_init
-Date: Thu, 18 Jul 2019 23:54:38 -0400
-Message-ID: <20190719035643.14300-47-sashal@kernel.org>
-References: <20190719035643.14300-1-sashal@kernel.org>
+From: Brian Norris <briannorris@chromium.org>
+Subject: Re: [PATCH 2/2] mwifiex: Make use of the new sdio_trigger_replug()
+ API to reset
+Date: Fri, 19 Jul 2019 16:36:06 -0700
+Message-ID: <20190719233605.GA66171@google.com>
+References: <20190716164209.62320-1-dianders@chromium.org>
+ <20190716164209.62320-3-dianders@chromium.org>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190719035643.14300-1-sashal@kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc: Wang Hai <wanghai26@huawei.com>, Hulk Robot <hulkci@huawei.com>, Ulf Hansson <ulf.hansson@linaro.org>, Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <netdev-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20190716164209.62320-3-dianders@chromium.org>
+Sender: netdev-owner@vger.kernel.org
+To: Douglas Anderson <dianders@chromium.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Kalle Valo <kvalo@codeaurora.org>, Adrian Hunter <adrian.hunter@intel.com>, Ganapathi Bhat <gbhat@marvell.com>, linux-wireless@vger.kernel.org, Amitkumar Karwar <amitkarwar@gmail.com>, linux-rockchip@lists.infradead.org, Wolfram Sang <wsa+renesas@sang-engineering.com>, Nishant Sarmukadam <nishants@marvell.com>, netdev@vger.kernel.org, Avri Altman <avri.altman@wdc.com>, linux-mmc@vger.kernel.org, davem@davemloft.net, Xinming Hu <huxinming820@gmail.com>, linux-kernel@vger.kernel.org, Andreas Fenkart <afenkart@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Wang Hai <wanghai26@huawei.com>
+Hi Doug,
 
-[ Upstream commit 65f1a0d39c289bb6fc85635528cd36c4b07f560e ]
+On Tue, Jul 16, 2019 at 09:42:09AM -0700, Doug Anderson wrote:
+> As described in the patch ("mmc: core: Add sdio_trigger_replug()
+> API"), the current mwifiex_sdio_card_reset() is broken in the cases
+> where we're running Bluetooth on a second SDIO func on the same card
+> as WiFi.  The problem goes away if we just use the
+> sdio_trigger_replug() API call.
 
-If bus_register fails. On its error handling path, it has cleaned up
-what it has done. There is no need to call bus_unregister again.
-Otherwise, if bus_unregister is called, issues such as null-ptr-deref
-will arise.
+I'm unfortunately not a good evaluator of SDIO/MMC stuff, so I'll mostly
+leave that to others and assume that the "replug" description is pretty
+much all I need to know.
 
-Syzkaller report this:
+> NOTE: Even though with this new solution there is less of a reason to
+> do our work from a workqueue (the unplug / plug mechanism we're using
+> is possible for a human to perform at any time so the stack is
+> supposed to handle it without it needing to be called from a special
+> context), we still need a workqueue because the Marvell reset function
+> could called from a context where sleeping is invalid and thus we
+> can't claim the host.  One example is Marvell's wakeup_timer_fn().
+> 
+> Signed-off-by: Douglas Anderson <dianders@chromium.org>
+> ---
+> 
+>  drivers/net/wireless/marvell/mwifiex/sdio.c | 14 +++-----------
+>  1 file changed, 3 insertions(+), 11 deletions(-)
+> 
+> diff --git a/drivers/net/wireless/marvell/mwifiex/sdio.c b/drivers/net/wireless/marvell/mwifiex/sdio.c
+> index 24c041dad9f6..f77ad2615f08 100644
+> --- a/drivers/net/wireless/marvell/mwifiex/sdio.c
+> +++ b/drivers/net/wireless/marvell/mwifiex/sdio.c
+> @@ -2218,14 +2218,6 @@ static void mwifiex_sdio_card_reset_work(struct mwifiex_adapter *adapter)
+>  {
+>  	struct sdio_mmc_card *card = adapter->card;
+>  	struct sdio_func *func = card->func;
+> -	int ret;
+> -
+> -	mwifiex_shutdown_sw(adapter);
 
-kobject_add_internal failed for memstick (error: -12 parent: bus)
-BUG: KASAN: null-ptr-deref in sysfs_remove_file_ns+0x1b/0x40 fs/sysfs/file.c:467
-Read of size 8 at addr 0000000000000078 by task syz-executor.0/4460
+I'm very mildly unhappy to see this driver diverge from the PCIe one
+again, but the only way it makes sense to do things the same is if there
+is such thing as a "function level reset" for SDIO (i.e., doesn't also
+kill the Bluetooth function). But it appears we don't really have such a
+thing.
 
-Call Trace:
- __dump_stack lib/dump_stack.c:77 [inline]
- dump_stack+0xa9/0x10e lib/dump_stack.c:113
- __kasan_report+0x171/0x18d mm/kasan/report.c:321
- kasan_report+0xe/0x20 mm/kasan/common.c:614
- sysfs_remove_file_ns+0x1b/0x40 fs/sysfs/file.c:467
- sysfs_remove_file include/linux/sysfs.h:519 [inline]
- bus_remove_file+0x6c/0x90 drivers/base/bus.c:145
- remove_probe_files drivers/base/bus.c:599 [inline]
- bus_unregister+0x6e/0x100 drivers/base/bus.c:916 ? 0xffffffffc1590000
- memstick_init+0x7a/0x1000 [memstick]
- do_one_initcall+0xb9/0x3b5 init/main.c:914
- do_init_module+0xe0/0x330 kernel/module.c:3468
- load_module+0x38eb/0x4270 kernel/module.c:3819
- __do_sys_finit_module+0x162/0x190 kernel/module.c:3909
- do_syscall_64+0x72/0x2a0 arch/x86/entry/common.c:298
- entry_SYSCALL_64_after_hwframe+0x49/0xbe
+> -
+> -	/* power cycle the adapter */
+> -	sdio_claim_host(func);
+> -	mmc_hw_reset(func->card->host);
+> -	sdio_release_host(func);
+>  
+>  	/* Previous save_adapter won't be valid after this. We will cancel
 
-Fixes: baf8532a147d ("memstick: initial commit for Sony MemoryStick support")
-Reported-by: Hulk Robot <hulkci@huawei.com>
-Signed-off-by: Wang Hai <wanghai26@huawei.com>
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-Signed-off-by: Sasha Levin <sashal@kernel.org>
----
- drivers/memstick/core/memstick.c | 13 +++++++++----
- 1 file changed, 9 insertions(+), 4 deletions(-)
+^^^ FTR, the "save_adapter" note was already obsolete as of
 
-diff --git a/drivers/memstick/core/memstick.c b/drivers/memstick/core/memstick.c
-index 6cfb293396f2..693ee73eb291 100644
---- a/drivers/memstick/core/memstick.c
-+++ b/drivers/memstick/core/memstick.c
-@@ -625,13 +625,18 @@ static int __init memstick_init(void)
- 		return -ENOMEM;
- 
- 	rc = bus_register(&memstick_bus_type);
--	if (!rc)
--		rc = class_register(&memstick_host_class);
-+	if (rc)
-+		goto error_destroy_workqueue;
- 
--	if (!rc)
--		return 0;
-+	rc = class_register(&memstick_host_class);
-+	if (rc)
-+		goto error_bus_unregister;
-+
-+	return 0;
- 
-+error_bus_unregister:
- 	bus_unregister(&memstick_bus_type);
-+error_destroy_workqueue:
- 	destroy_workqueue(workqueue);
- 
- 	return rc;
--- 
-2.20.1
+  cc75c577806a mwifiex: get rid of global save_adapter and sdio_work
+
+but the clear_bit() calls were (before this patch) still useful for
+other reasons.
+
+>  	 * pending work requests.
+> @@ -2233,9 +2225,9 @@ static void mwifiex_sdio_card_reset_work(struct mwifiex_adapter *adapter)
+>  	clear_bit(MWIFIEX_IFACE_WORK_DEVICE_DUMP, &card->work_flags);
+>  	clear_bit(MWIFIEX_IFACE_WORK_CARD_RESET, &card->work_flags);
+
+But now, I don't think you need these clear_bit() calls any more --
+you're totally destroying the card and its workqueue on remove(). (And
+anyway, MWIFIEX_IFACE_WORK_CARD_RESET was just cleared by your caller.)
+
+>  
+> -	ret = mwifiex_reinit_sw(adapter);
+> -	if (ret)
+> -		dev_err(&func->dev, "reinit failed: %d\n", ret);
+> +	sdio_claim_host(func);
+> +	sdio_trigger_replug(func);
+> +	sdio_release_host(func);
+
+And...we're approximately back to where we were 4 years ago :)
+
+commit b4336a282db86b298b70563f8ed51782b36b772c
+Author: Andreas Fenkart <afenkart@gmail.com>
+Date:   Thu Jul 16 18:50:01 2015 +0200
+
+    mwifiex: sdio: reset adapter using mmc_hw_reset
+
+Anyway, assuming the "function reset" thing isn't workable, and you drop
+the clear_bit() stuff, I think this is fine:
+
+Reviewed-by: Brian Norris <briannorris@chromium.org>
+
+>  }
+>  
+>  /* This function read/write firmware */
+> -- 
+> 2.22.0.510.g264f2c817a-goog
+> 
