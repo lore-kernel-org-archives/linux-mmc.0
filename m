@@ -1,12 +1,12 @@
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.9 09/45] memstick: Fix error cleanup path of memstick_init
-Date: Fri, 19 Jul 2019 00:12:28 -0400
-Message-ID: <20190719041304.18849-9-sashal@kernel.org>
-References: <20190719041304.18849-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.4 07/35] memstick: Fix error cleanup path of memstick_init
+Date: Fri, 19 Jul 2019 00:13:55 -0400
+Message-ID: <20190719041423.19322-7-sashal@kernel.org>
+References: <20190719041423.19322-1-sashal@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <20190719041304.18849-1-sashal@kernel.org>
+In-Reply-To: <20190719041423.19322-1-sashal@kernel.org>
 Sender: stable-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc: Wang Hai <wanghai26@huawei.com>, Hulk Robot <hulkci@huawei.com>, Ulf Hansson <ulf.hansson@linaro.org>, Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org
