@@ -1,7 +1,7 @@
 From: Stefan Wahren <wahrenst@gmx.net>
-Subject: [PATCH 18/18] MAINTAINERS: Add BCM2711 to BCM2835 ARCH
-Date: Mon, 22 Jul 2019 19:07:37 +0200
-Message-ID: <1563815257-2648-6-git-send-email-wahrenst@gmx.net>
+Subject: [PATCH 17/18] arm64: dts: broadcom: Add reference to RPi 4 B
+Date: Mon, 22 Jul 2019 19:07:36 +0200
+Message-ID: <1563815257-2648-5-git-send-email-wahrenst@gmx.net>
 References: <1563815257-2648-1-git-send-email-wahrenst@gmx.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -21,33 +21,35 @@ To: Eric Anholt <eric@anholt.net>, Florian Fainelli <f.fainelli@gmail.com>, Ray 
 Cc: linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org, bcm-kernel-feedback-list@broadcom.com, linux-rpi-kernel@lists.infradead.org, linux-arm-kernel@lists.infradead.org, Stefan Wahren <wahrenst@gmx.net>
 List-Id: linux-mmc@vger.kernel.org
 
-Clarify that BCM2711 belongs to the BCM2835 ARCH.
+This adds a reference to the dts of the Raspberry Pi 4 B,
+so we don't need to maintain the content in arm64.
 
 Signed-off-by: Stefan Wahren <wahrenst@gmx.net>
 ---
- MAINTAINERS | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+ arch/arm64/boot/dts/broadcom/Makefile            | 3 ++-
+ arch/arm64/boot/dts/broadcom/bcm2711-rpi-4-b.dts | 2 ++
+ 2 files changed, 4 insertions(+), 1 deletion(-)
+ create mode 100644 arch/arm64/boot/dts/broadcom/bcm2711-rpi-4-b.dts
 
-diff --git a/MAINTAINERS b/MAINTAINERS
-index c6fa7e8..ef75b7b 100644
---- a/MAINTAINERS
-+++ b/MAINTAINERS
-@@ -3137,7 +3137,7 @@ N:	bcm216*
- N:	kona
- F:	arch/arm/mach-bcm/
-
--BROADCOM BCM2835 ARM ARCHITECTURE
-+BROADCOM BCM2711/BCM2835 ARM ARCHITECTURE
- M:	Eric Anholt <eric@anholt.net>
- M:	Stefan Wahren <wahrenst@gmx.net>
- L:	bcm-kernel-feedback-list@broadcom.com
-@@ -3145,6 +3145,7 @@ L:	linux-rpi-kernel@lists.infradead.org (moderated for non-subscribers)
- L:	linux-arm-kernel@lists.infradead.org (moderated for non-subscribers)
- T:	git git://github.com/anholt/linux
- S:	Maintained
-+N:	bcm2711
- N:	bcm2835
- F:	drivers/staging/vc04_services
-
+diff --git a/arch/arm64/boot/dts/broadcom/Makefile b/arch/arm64/boot/dts/broadcom/Makefile
+index d1d31cc..cb7de8d 100644
+--- a/arch/arm64/boot/dts/broadcom/Makefile
++++ b/arch/arm64/boot/dts/broadcom/Makefile
+@@ -1,5 +1,6 @@
+ # SPDX-License-Identifier: GPL-2.0
+-dtb-$(CONFIG_ARCH_BCM2835) += bcm2837-rpi-3-a-plus.dtb \
++dtb-$(CONFIG_ARCH_BCM2835) += bcm2711-rpi-4-b.dtb \
++			      bcm2837-rpi-3-a-plus.dtb \
+ 			      bcm2837-rpi-3-b.dtb \
+ 			      bcm2837-rpi-3-b-plus.dtb \
+ 			      bcm2837-rpi-cm3-io3.dtb
+diff --git a/arch/arm64/boot/dts/broadcom/bcm2711-rpi-4-b.dts b/arch/arm64/boot/dts/broadcom/bcm2711-rpi-4-b.dts
+new file mode 100644
+index 0000000..d24c536
+--- /dev/null
++++ b/arch/arm64/boot/dts/broadcom/bcm2711-rpi-4-b.dts
+@@ -0,0 +1,2 @@
++// SPDX-License-Identifier: GPL-2.0
++#include "arm/bcm2711-rpi-4-b.dts"
 --
 2.7.4
