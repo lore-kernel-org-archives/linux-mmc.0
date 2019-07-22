@@ -1,60 +1,49 @@
-From: Ming Lei <ming.lei@redhat.com>
-Subject: Re: [RFC PATCH 1/7] blk-mq: Export blk_mq_hctx_has_pending() function
-Date: Mon, 22 Jul 2019 22:19:41 +0800
-Message-ID: <20190722141940.GA26528@ming.t460p>
-References: <cover.1563782844.git.baolin.wang@linaro.org>
- <94a0d20e6304b909391abd9a425c71c376cad964.1563782844.git.baolin.wang@linaro.org>
+From: Stefan Wahren <wahrenst@gmx.net>
+Subject: [PATCH 14/18] dt-bindings: arm: bcm2835: Add Raspberry Pi 4 to DT
+ schema
+Date: Mon, 22 Jul 2019 19:07:33 +0200
+Message-ID: <1563815257-2648-2-git-send-email-wahrenst@gmx.net>
+References: <1563815257-2648-1-git-send-email-wahrenst@gmx.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <94a0d20e6304b909391abd9a425c71c376cad964.1563782844.git.baolin.wang@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Baolin Wang <baolin.wang@linaro.org>
-Cc: axboe@kernel.dk, adrian.hunter@intel.com, ulf.hansson@linaro.org, zhang.lyra@gmail.com, orsonzhai@gmail.com, arnd@arndb.de, linus.walleij@linaro.org, vincent.guittot@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-block@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1563815257-2648-1-git-send-email-wahrenst@gmx.net>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Eric Anholt <eric@anholt.net>, Florian Fainelli <f.fainelli@gmail.com>, Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>, Nicolas Saenz Julienne <nsaenzjulienne@suse.de>, Matthias Brugger <mbrugger@suse.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Linus Walleij <linus.walleij@linaro.org>, Michael Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org, bcm-kernel-feedback-list@broadcom.com, linux-rpi-kernel@lists.infradead.org, linux-arm-kernel@lists.infradead.org, Stefan Wahren <wahrenst@gmx.net>
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, Jul 22, 2019 at 09:09:36PM +0800, Baolin Wang wrote:
-> Some SD/MMC host controllers can support packed command or packed request,
-> that means we can package several requests to host controller at one time
-> to improve performence. And this patch set will introduce MMC packed function
-> to support this feature by following patches.
-> 
-> To support MMC packed function, the MMC layer need to know if there are
-> requests are pending now in hardware queue to help to combine requests
-> as much as possible. If we know there are requests pending in hardware
-> queue, then we should not package requests to host controller immediately,
-> instead we should collect more requests into MMC packed queue to be packed
-> to host controller with packed condition.
-> 
-> Thus export this function for MMC packed function.
-> 
-> Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
-> ---
->  block/blk-mq.c         |    3 ++-
->  include/linux/blk-mq.h |    1 +
->  2 files changed, 3 insertions(+), 1 deletion(-)
-> 
-> diff --git a/block/blk-mq.c b/block/blk-mq.c
-> index b038ec6..5bd4ef9 100644
-> --- a/block/blk-mq.c
-> +++ b/block/blk-mq.c
-> @@ -63,12 +63,13 @@ static int blk_mq_poll_stats_bkt(const struct request *rq)
->   * Check if any of the ctx, dispatch list or elevator
->   * have pending work in this hardware queue.
->   */
-> -static bool blk_mq_hctx_has_pending(struct blk_mq_hw_ctx *hctx)
-> +bool blk_mq_hctx_has_pending(struct blk_mq_hw_ctx *hctx)
->  {
->  	return !list_empty_careful(&hctx->dispatch) ||
->  		sbitmap_any_bit_set(&hctx->ctx_map) ||
->  			blk_mq_sched_has_work(hctx);
->  }
-> +EXPORT_SYMBOL_GPL(blk_mq_hctx_has_pending);
+Add new Raspberry Pi 4 to DT schema.
 
-Just wondering why you don't use the 'last' field of 'struct blk_mq_queue_data',
-which is passed to .queue_rq(), and supposed for implementing batch submission.
-	
+Signed-off-by: Stefan Wahren <wahrenst@gmx.net>
+---
+ Documentation/devicetree/bindings/arm/bcm/bcm2835.yaml | 5 +++++
+ 1 file changed, 5 insertions(+)
 
-Thanks,
-Ming
+diff --git a/Documentation/devicetree/bindings/arm/bcm/bcm2835.yaml b/Documentation/devicetree/bindings/arm/bcm/bcm2835.yaml
+index 1a4be26..8c3bbad 100644
+--- a/Documentation/devicetree/bindings/arm/bcm/bcm2835.yaml
++++ b/Documentation/devicetree/bindings/arm/bcm/bcm2835.yaml
+@@ -15,6 +15,11 @@ properties:
+     const: '/'
+   compatible:
+     oneOf:
++      - description: BCM2711 based Boards
++        items:
++          - enum:
++              - raspberrypi,4-model-b
++
+       - description: BCM2835 based Boards
+         items:
+           - enum:
+--
+2.7.4
