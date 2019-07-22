@@ -1,72 +1,46 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 1/2] dt-bindings: mmc: sunxi: reorder MMC compatibles
-Date: Mon, 22 Jul 2019 15:42:58 +0200
-Message-ID: <CAPDyKFo-HwgkuY1Dat=FXNior0fFcDdD_QtxWqFb5rYGCLNc6g@mail.gmail.com>
-References: <20190722120740.8966-1-maxime.ripard@bootlin.com>
+Subject: Re: [PATCH 06/12] mmc: meson-mx-sdio: Fix misuse of GENMASK macro
+Date: Mon, 22 Jul 2019 15:43:05 +0200
+Message-ID: <CAPDyKFpmc3qkU4mXk7X0nGkOLnZ060e-n-en5T-Z7FXzcO5ymw@mail.gmail.com>
+References: <cover.1562734889.git.joe@perches.com> <94dcbeb13b08a67ae9f404aa590c1c1459bc5287.1562734889.git.joe@perches.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20190722120740.8966-1-maxime.ripard@bootlin.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Maxime Ripard <maxime.ripard@bootlin.com>
-Cc: Mark Rutland <mark.rutland@arm.com>, DTML <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chen-Yu Tsai <wens@csie.org>, Rob Herring <robh+dt@kernel.org>, Frank Rowand <frowand.list@gmail.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <94dcbeb13b08a67ae9f404aa590c1c1459bc5287.1562734889.git.joe@perches.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Joe Perches <joe@perches.com>
+Cc: Andrew Morton <akpm@linux-foundation.org>, Kevin Hilman <khilman@baylibre.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, 22 Jul 2019 at 14:07, Maxime Ripard <maxime.ripard@bootlin.com> wrote:
+On Wed, 10 Jul 2019 at 07:04, Joe Perches <joe@perches.com> wrote:
 >
-> The MMC compatibles in the bindings are not ordered as they should, so
-> let's make sure it's sorted.
+> Arguments are supposed to be ordered high then low.
 >
-> Signed-off-by: Maxime Ripard <maxime.ripard@bootlin.com>
+> Signed-off-by: Joe Perches <joe@perches.com>
 
-Applied for next, thanks!
+Applied for fixes by adding a fixes+stable tag, thanks!
 
 Kind regards
 Uffe
 
 
 > ---
->  .../bindings/mmc/allwinner,sun4i-a10-mmc.yaml        | 12 ++++++------
->  1 file changed, 6 insertions(+), 6 deletions(-)
+>  drivers/mmc/host/meson-mx-sdio.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 >
-> diff --git a/Documentation/devicetree/bindings/mmc/allwinner,sun4i-a10-mmc.yaml b/Documentation/devicetree/bindings/mmc/allwinner,sun4i-a10-mmc.yaml
-> index df0280edef97..06329115dc6a 100644
-> --- a/Documentation/devicetree/bindings/mmc/allwinner,sun4i-a10-mmc.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/allwinner,sun4i-a10-mmc.yaml
-> @@ -29,18 +29,18 @@ properties:
->        - items:
->            - const: allwinner,sun8i-a83t-mmc
->            - const: allwinner,sun7i-a20-mmc
-> -      - items:
-> -          - const: allwinner,sun50i-h6-emmc
-> -          - const: allwinner,sun50i-a64-emmc
-> -      - items:
-> -          - const: allwinner,sun50i-h6-mmc
-> -          - const: allwinner,sun50i-a64-mmc
->        - items:
->            - const: allwinner,sun8i-r40-emmc
->            - const: allwinner,sun50i-a64-emmc
->        - items:
->            - const: allwinner,sun8i-r40-mmc
->            - const: allwinner,sun50i-a64-mmc
-> +      - items:
-> +          - const: allwinner,sun50i-h6-emmc
-> +          - const: allwinner,sun50i-a64-emmc
-> +      - items:
-> +          - const: allwinner,sun50i-h6-mmc
-> +          - const: allwinner,sun50i-a64-mmc
->
->    reg:
->      maxItems: 1
+> diff --git a/drivers/mmc/host/meson-mx-sdio.c b/drivers/mmc/host/meson-mx-sdio.c
+> index 2d736e416775..ba9a63db73da 100644
+> --- a/drivers/mmc/host/meson-mx-sdio.c
+> +++ b/drivers/mmc/host/meson-mx-sdio.c
+> @@ -73,7 +73,7 @@
+>         #define MESON_MX_SDIO_IRQC_IF_CONFIG_MASK               GENMASK(7, 6)
+>         #define MESON_MX_SDIO_IRQC_FORCE_DATA_CLK               BIT(8)
+>         #define MESON_MX_SDIO_IRQC_FORCE_DATA_CMD               BIT(9)
+> -       #define MESON_MX_SDIO_IRQC_FORCE_DATA_DAT_MASK          GENMASK(10, 13)
+> +       #define MESON_MX_SDIO_IRQC_FORCE_DATA_DAT_MASK          GENMASK(13, 10)
+>         #define MESON_MX_SDIO_IRQC_SOFT_RESET                   BIT(15)
+>         #define MESON_MX_SDIO_IRQC_FORCE_HALT                   BIT(30)
+>         #define MESON_MX_SDIO_IRQC_HALT_HOLE                    BIT(31)
 > --
-> 2.21.0
+> 2.15.0
 >
