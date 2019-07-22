@@ -1,7 +1,7 @@
 From: Stefan Wahren <wahrenst@gmx.net>
-Subject: [PATCH 15/18] ARM: bcm2835: Add bcm2711 compatible string
-Date: Mon, 22 Jul 2019 19:07:34 +0200
-Message-ID: <1563815257-2648-3-git-send-email-wahrenst@gmx.net>
+Subject: [PATCH 18/18] MAINTAINERS: Add BCM2711 to BCM2835 ARCH
+Date: Mon, 22 Jul 2019 19:07:37 +0200
+Message-ID: <1563815257-2648-6-git-send-email-wahrenst@gmx.net>
 References: <1563815257-2648-1-git-send-email-wahrenst@gmx.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -21,24 +21,33 @@ To: Eric Anholt <eric@anholt.net>, Florian Fainelli <f.fainelli@gmail.com>, Ray 
 Cc: linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org, bcm-kernel-feedback-list@broadcom.com, linux-rpi-kernel@lists.infradead.org, linux-arm-kernel@lists.infradead.org, Stefan Wahren <wahrenst@gmx.net>
 List-Id: linux-mmc@vger.kernel.org
 
-This adds support for the new BCM2711 SoC found on the Raspberry Pi 4.
+Clarify that BCM2711 belongs to the BCM2835 ARCH.
 
 Signed-off-by: Stefan Wahren <wahrenst@gmx.net>
 ---
- arch/arm/mach-bcm/board_bcm2835.c | 1 +
- 1 file changed, 1 insertion(+)
+ MAINTAINERS | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-diff --git a/arch/arm/mach-bcm/board_bcm2835.c b/arch/arm/mach-bcm/board_bcm2835.c
-index d2b31a9..c09cf25 100644
---- a/arch/arm/mach-bcm/board_bcm2835.c
-+++ b/arch/arm/mach-bcm/board_bcm2835.c
-@@ -17,6 +17,7 @@ static const char * const bcm2835_compat[] = {
- 	"brcm,bcm2835",
- #endif
- #ifdef CONFIG_ARCH_MULTI_V7
-+	"brcm,bcm2711",
- 	"brcm,bcm2836",
- 	"brcm,bcm2837",
- #endif
+diff --git a/MAINTAINERS b/MAINTAINERS
+index c6fa7e8..ef75b7b 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -3137,7 +3137,7 @@ N:	bcm216*
+ N:	kona
+ F:	arch/arm/mach-bcm/
+
+-BROADCOM BCM2835 ARM ARCHITECTURE
++BROADCOM BCM2711/BCM2835 ARM ARCHITECTURE
+ M:	Eric Anholt <eric@anholt.net>
+ M:	Stefan Wahren <wahrenst@gmx.net>
+ L:	bcm-kernel-feedback-list@broadcom.com
+@@ -3145,6 +3145,7 @@ L:	linux-rpi-kernel@lists.infradead.org (moderated for non-subscribers)
+ L:	linux-arm-kernel@lists.infradead.org (moderated for non-subscribers)
+ T:	git git://github.com/anholt/linux
+ S:	Maintained
++N:	bcm2711
+ N:	bcm2835
+ F:	drivers/staging/vc04_services
+
 --
 2.7.4
