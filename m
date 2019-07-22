@@ -1,14 +1,12 @@
 From: Eric Anholt <eric@anholt.net>
-Subject: Re: [PATCH 03/18] ARM: dts: bcm283x: Move BCM2835/6/7 specific to
- bcm2835-common.dtsi
-Date: Mon, 22 Jul 2019 10:54:27 -0700
-Message-ID: <87d0i2eyzw.fsf@anholt.net>
+Subject: Re: [PATCH 00/18] ARM: Add minimal Raspberry Pi 4 support
+Date: Mon, 22 Jul 2019 11:01:10 -0700
+Message-ID: <87a7d6eyop.fsf@anholt.net>
 References: <1563774880-8061-1-git-send-email-wahrenst@gmx.net>
- <1563774880-8061-4-git-send-email-wahrenst@gmx.net>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============3969614884286244014=="
+Content-Type: multipart/mixed; boundary="===============7091143106109168187=="
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1563774880-8061-4-git-send-email-wahrenst@gmx.net>
+In-Reply-To: <1563774880-8061-1-git-send-email-wahrenst@gmx.net>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -22,7 +20,7 @@ To: Florian Fainelli <f.fainelli@gmail.com>, Ray Jui <rjui@broadcom.com>, Scott 
 Cc: linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org, bcm-kernel-feedback-list@broadcom.com, linux-rpi-kernel@lists.infradead.org, linux-arm-kernel@lists.infradead.org, Stefan Wahren <wahrenst@gmx.net>
 List-Id: linux-mmc@vger.kernel.org
 
---===============3969614884286244014==
+--===============7091143106109168187==
 Content-Type: multipart/signed; boundary="=-=-=";
 	micalg=pgp-sha512; protocol="application/pgp-signature"
 
@@ -31,44 +29,64 @@ Content-Type: text/plain
 
 Stefan Wahren <wahrenst@gmx.net> writes:
 
-> As preparation we want all common BCM2711 + BCM2835/6/7 functions in
-> bcm283x.dtsi and all BCM2835/6/7 specific in the new bcm2835-common.dtsi.
+> This series adds minimal support for the new Raspberry Pi 4, so we are able
+> to login via debug UART.
 >
-> Signed-off-by: Stefan Wahren <wahrenst@gmx.net>
+> Patch 1-5:   Prepare platform and DTS for the new SoC BMC2711
+> Patch 6-10:  Enable support for emmc2 on BCM2711
+> Patch 11-12: Enable pinctrl for BCM2711
+> Patch 13-17: Add Raspberry Pi 4 DTS support
+> Patch 18:    Update MAINTAINERS
+>
+> Unfortunately the Raspberry Pi Foundation didn't released a
+> peripheral documentation for the new SoC yet. So we only have a preliminary
+> datasheet [1] and reduced schematics [2].
+>
+> Changes since RFC:
+> - change BCM2838 -> BCM2711 as discussed in RFC
+> - update MAINTAINERS accordingly
+> - drop "spi: bcm2835: enable shared interrupt support" from series
+> - squash all pinctrl-bcm2835 changes into one patch
+> - introduce SoC specific clock registration as suggested by Florian
+> - fix watchdog probing for Raspberry Pi 4
+> - convert brcm,bcm2835.txt to json-schema
+> - move VC4 node to bcm2835-common.dtsi
+> - fallback to legacy pull config for Raspberry Pi 4
+> - revert unintended change of mailbox in bcm283x.dtsi
+> - add reference for arm64
 
-For display:
 
-We should probably move HDMI to bcm2835-common.dtsi as well, as the
-block has very thoroughly changed.
+I gave some comments on the bcm2835-common patch, but I think this is a
+good start and would be worth merging to start bringing the board up,
+even without a respin.
 
-The pixelvalves have also changed and will probably need to be separate
-for 2711.
+Series is:
 
-DSI, DPI, and VEC I belive are the same thing at the same address still.
+Acked-by: Eric Anholt <eric@anholt.net>
 
 --=-=-=
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAEBCgAdFiEE/JuuFDWp9/ZkuCBXtdYpNtH8nugFAl01+FMACgkQtdYpNtH8
-nuhNHg/+Kh+yQKGTRWQP2MLJ7DLvk+gXyEFVpdOkBDEUZ0VgeOgNkhVPV5v/jS+5
-XSmTkAXPSerrT01GwkGw7c8Df/94Jqmt3CXNqI8+35rCYWB6Xj1kw+YhuXzTQafb
-7IS6VYlp+3RoFhPGYYivunRWDv/Q2zQt/ML8LxLLQ+xfqlzwsLICZRC88jnJLabs
-cJAs22DioTwqgFqmsSCaPLFRe4prW/Y3RV3QNGwfh5GtaYTUQQma/vAPqhfqorlL
-zEUik/0nY7/n+j2lDf8jHDZ4wEbGz6miKcIu5NuBBxYw09iK3vDzDnPfKjNd3GZN
-NVnyML39lLAlZfPYYKlGLb1k9brDXtdCWvHAJ8evrpA6pg78QNZgVZPPHpJ21Dxj
-MUEHw8ZaTrDcj015kmDVEntQrdMrEJz74U/V+kSVLYkmxMwss3zl/oh7c3scZwCU
-/ED57Gfl3L6jusiZExmvgmoirrg3B+Nv7y66LdjHGA7o/eTSfrTcfXz2AsF5D+ym
-25ZYalODm+22UO/Spxoak3hP67CO8L9iqU5Nm+7PTVZwuMZPVcwOz1+2taiqXwrT
-iYheIGIxYFZorb+ojg7NMDJf7i0VWGVcn+/D/1+FBlV6aNyfqU1bJcs2BNRv1pXK
-aWm4pX9+rl6ylR9VuGwb6GCGF4y2vPHDDUWYXIaAS91HaVeDcSo=
-=oOH1
+iQIzBAEBCgAdFiEE/JuuFDWp9/ZkuCBXtdYpNtH8nugFAl01+eYACgkQtdYpNtH8
+nuhCnhAAgBRNPAZ35O+bC/XiTCvTUwVxyNmNbtrkztXtBUlmBKrifmsuKEkCbjZb
+yMAmwOIMZtwC8HzeH4h4/bTd/l0djswGTPjb5hoko3u0CFfRnZnMgBwyFenfdThc
+SCI8/+zNSl8JFnmGKKdARYW2gvm2LySsBYS69YC33IhBCPquSHcBupZ7Y/GJYzt0
+KYOGnRglYuUQmJdwBzK/3x9qi4wBaC2wh6X1WRErBrFoY6neodUNT5BAVko4hVXO
+aS5Ej5u0Yx+1VNgNx64DfT8S5WRfpy2wmhwujYn04MWt4PcryHKY8HU7T+UW+/tg
+PVw+yVnsyC+1ctvmW7qXEDY+41msPKcxUIYMEOskftCKGnM7criZrEp6W8m5dVag
+VmlnK/r8JESbAzgBCKE6G0opua0OCGzuOU8GmdFA2eXd6wwwG+uW+SBArjZi7UxF
+p2q7YB52eyzNenqn4pYMrmgRFiO2I3Ai4+zHnPM0tWt2pysfW1uG6wqaJlCPiSJj
+WbIN9dmcauHFKsiiJs3TUIDkWhEcSA0v95wL3k6ormEn+FtKYFbf90R36lRmK49S
+2G70Bd8yGl/kEYAL3+Kb5lBTaqhO8B0uV+M4nN5a73K/LXwQ2kZ/RWsgaQzLPMFa
+3C/xv0Ld6qx/gNSWR2bRcV/DydAP1UjfJaidCUE2tnpWJFmQo7U=
+=dYeO
 -----END PGP SIGNATURE-----
 --=-=-=--
 
 
---===============3969614884286244014==
+--===============7091143106109168187==
 Content-Type: text/plain; charset="us-ascii"
 MIME-Version: 1.0
 Content-Transfer-Encoding: 7bit
@@ -79,4 +97,4 @@ linux-arm-kernel mailing list
 linux-arm-kernel@lists.infradead.org
 http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
 
---===============3969614884286244014==--
+--===============7091143106109168187==--
