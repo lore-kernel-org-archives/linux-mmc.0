@@ -1,13 +1,11 @@
 From: Stefan Wahren <wahrenst@gmx.net>
-Subject: [PATCH 05/18] ARM: dts: bcm283x: Define memory at board level
-Date: Mon, 22 Jul 2019 07:54:36 +0200
-Message-ID: <1563774880-8061-6-git-send-email-wahrenst@gmx.net>
-References: <1563774880-8061-1-git-send-email-wahrenst@gmx.net>
+Subject: [PATCH 00/18] ARM: Add minimal Raspberry Pi 4 support
+Date: Mon, 22 Jul 2019 07:54:31 +0200
+Message-ID: <1563774880-8061-1-git-send-email-wahrenst@gmx.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1563774880-8061-1-git-send-email-wahrenst@gmx.net>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -21,231 +19,101 @@ To: Eric Anholt <eric@anholt.net>, Florian Fainelli <f.fainelli@gmail.com>, Ray 
 Cc: linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org, bcm-kernel-feedback-list@broadcom.com, linux-rpi-kernel@lists.infradead.org, linux-arm-kernel@lists.infradead.org, Stefan Wahren <wahrenst@gmx.net>
 List-Id: linux-mmc@vger.kernel.org
 
-Now with the varity of several RPi boards, the memory should be defined
-at board level. This step gives us the chance to fix the memory size
-of the RPi 1 B+, Zero (incl. W) and Compute Module 1.
+This series adds minimal support for the new Raspberry Pi 4, so we are able
+to login via debug UART.
 
-Signed-off-by: Stefan Wahren <wahrenst@gmx.net>
----
- arch/arm/boot/dts/bcm2835-rpi-a-plus.dts   | 5 +++++
- arch/arm/boot/dts/bcm2835-rpi-a.dts        | 5 +++++
- arch/arm/boot/dts/bcm2835-rpi-b-plus.dts   | 5 +++++
- arch/arm/boot/dts/bcm2835-rpi-b-rev2.dts   | 5 +++++
- arch/arm/boot/dts/bcm2835-rpi-b.dts        | 5 +++++
- arch/arm/boot/dts/bcm2835-rpi-cm1.dtsi     | 5 +++++
- arch/arm/boot/dts/bcm2835-rpi-zero-w.dts   | 5 +++++
- arch/arm/boot/dts/bcm2835-rpi-zero.dts     | 5 +++++
- arch/arm/boot/dts/bcm2835-rpi.dtsi         | 5 -----
- arch/arm/boot/dts/bcm2836-rpi-2-b.dts      | 1 +
- arch/arm/boot/dts/bcm2837-rpi-3-a-plus.dts | 1 +
- arch/arm/boot/dts/bcm2837-rpi-3-b-plus.dts | 1 +
- arch/arm/boot/dts/bcm2837-rpi-3-b.dts      | 1 +
- arch/arm/boot/dts/bcm2837-rpi-cm3.dtsi     | 1 +
- 14 files changed, 45 insertions(+), 5 deletions(-)
+Patch 1-5:   Prepare platform and DTS for the new SoC BMC2711
+Patch 6-10:  Enable support for emmc2 on BCM2711
+Patch 11-12: Enable pinctrl for BCM2711
+Patch 13-17: Add Raspberry Pi 4 DTS support
+Patch 18:    Update MAINTAINERS
 
-diff --git a/arch/arm/boot/dts/bcm2835-rpi-a-plus.dts b/arch/arm/boot/dts/bcm2835-rpi-a-plus.dts
-index cb3f08d..5b42e9a 100644
---- a/arch/arm/boot/dts/bcm2835-rpi-a-plus.dts
-+++ b/arch/arm/boot/dts/bcm2835-rpi-a-plus.dts
-@@ -8,6 +8,11 @@
- 	compatible = "raspberrypi,model-a-plus", "brcm,bcm2835";
- 	model = "Raspberry Pi Model A+";
+Unfortunately the Raspberry Pi Foundation didn't released a
+peripheral documentation for the new SoC yet. So we only have a preliminary
+datasheet [1] and reduced schematics [2].
 
-+	memory@0 {
-+		device_type = "memory";
-+		reg = <0 0x10000000>;
-+	};
-+
- 	leds {
- 		act {
- 			gpios = <&gpio 47 GPIO_ACTIVE_HIGH>;
-diff --git a/arch/arm/boot/dts/bcm2835-rpi-a.dts b/arch/arm/boot/dts/bcm2835-rpi-a.dts
-index 2d167d9..b716214 100644
---- a/arch/arm/boot/dts/bcm2835-rpi-a.dts
-+++ b/arch/arm/boot/dts/bcm2835-rpi-a.dts
-@@ -8,6 +8,11 @@
- 	compatible = "raspberrypi,model-a", "brcm,bcm2835";
- 	model = "Raspberry Pi Model A";
+Changes since RFC:
+- change BCM2838 -> BCM2711 as discussed in RFC
+- update MAINTAINERS accordingly
+- drop "spi: bcm2835: enable shared interrupt support" from series
+- squash all pinctrl-bcm2835 changes into one patch
+- introduce SoC specific clock registration as suggested by Florian
+- fix watchdog probing for Raspberry Pi 4
+- convert brcm,bcm2835.txt to json-schema
+- move VC4 node to bcm2835-common.dtsi
+- fallback to legacy pull config for Raspberry Pi 4
+- revert unintended change of mailbox in bcm283x.dtsi
+- add reference for arm64
 
-+	memory@0 {
-+		device_type = "memory";
-+		reg = <0 0x10000000>;
-+	};
-+
- 	leds {
- 		act {
- 			gpios = <&gpio 16 GPIO_ACTIVE_LOW>;
-diff --git a/arch/arm/boot/dts/bcm2835-rpi-b-plus.dts b/arch/arm/boot/dts/bcm2835-rpi-b-plus.dts
-index 83a3a60..3318082 100644
---- a/arch/arm/boot/dts/bcm2835-rpi-b-plus.dts
-+++ b/arch/arm/boot/dts/bcm2835-rpi-b-plus.dts
-@@ -9,6 +9,11 @@
- 	compatible = "raspberrypi,model-b-plus", "brcm,bcm2835";
- 	model = "Raspberry Pi Model B+";
+[1] - https://www.raspberrypi.org/documentation/hardware/raspberrypi/bcm2711/rpi_DATA_2711_1p0_preliminary.pdf
+[2] - https://www.raspberrypi.org/documentation/hardware/raspberrypi/schematics/rpi_SCH_4b_4p0_reduced.pdf
 
-+	memory@0 {
-+		device_type = "memory";
-+		reg = <0 0x20000000>;
-+	};
-+
- 	leds {
- 		act {
- 			gpios = <&gpio 47 GPIO_ACTIVE_HIGH>;
-diff --git a/arch/arm/boot/dts/bcm2835-rpi-b-rev2.dts b/arch/arm/boot/dts/bcm2835-rpi-b-rev2.dts
-index b6b4fea..97d7eb5 100644
---- a/arch/arm/boot/dts/bcm2835-rpi-b-rev2.dts
-+++ b/arch/arm/boot/dts/bcm2835-rpi-b-rev2.dts
-@@ -9,6 +9,11 @@
- 	compatible = "raspberrypi,model-b-rev2", "brcm,bcm2835";
- 	model = "Raspberry Pi Model B rev2";
+Phil Elwell (1):
+  ARM: bcm2835: DMA can only address 1GB
 
-+	memory@0 {
-+		device_type = "memory";
-+		reg = <0 0x10000000>;
-+	};
-+
- 	leds {
- 		act {
- 			gpios = <&gpio 16 GPIO_ACTIVE_LOW>;
-diff --git a/arch/arm/boot/dts/bcm2835-rpi-b.dts b/arch/arm/boot/dts/bcm2835-rpi-b.dts
-index b5782fa..37e02a1 100644
---- a/arch/arm/boot/dts/bcm2835-rpi-b.dts
-+++ b/arch/arm/boot/dts/bcm2835-rpi-b.dts
-@@ -9,6 +9,11 @@
- 	compatible = "raspberrypi,model-b", "brcm,bcm2835";
- 	model = "Raspberry Pi Model B";
+Stefan Wahren (17):
+  ARM: bcm283x: Reduce register ranges for UART, SPI and I2C
+  ARM: dts: bcm283x: Move BCM2835/6/7 specific to bcm2835-common.dtsi
+  ARM: dts: bcm283x: Define MMC interfaces at board level
+  ARM: dts: bcm283x: Define memory at board level
+  dt-bindings: bcm2835-cprman: Add bcm2711 support
+  clk: bcm2835: Introduce SoC specific clock registration
+  clk: bcm2835: Add BCM2711_CLOCK_EMMC2 support
+  dt-bindings: sdhci-iproc: Add brcm,bcm2711-emmc2
+  mmc: sdhci-iproc: Add support for emmc2 of the BCM2711
+  dt-bindings: pinctrl: bcm2835: Add brcm,bcm2711 compatible
+  pinctrl: bcm2835: Add support for BCM2711 pull-up functionality
+  dt-bindings: arm: Convert BCM2835 board/soc bindings to json-schema
+  dt-bindings: arm: bcm2835: Add Raspberry Pi 4 to DT schema
+  ARM: bcm2835: Add bcm2711 compatible string
+  ARM: dts: Add minimal Raspberry Pi 4 support
+  arm64: dts: broadcom: Add reference to RPi 4 B
+  MAINTAINERS: Add BCM2711 to BCM2835 ARCH
 
-+	memory@0 {
-+		device_type = "memory";
-+		reg = <0 0x10000000>;
-+	};
-+
- 	leds {
- 		act {
- 			gpios = <&gpio 16 GPIO_ACTIVE_LOW>;
-diff --git a/arch/arm/boot/dts/bcm2835-rpi-cm1.dtsi b/arch/arm/boot/dts/bcm2835-rpi-cm1.dtsi
-index ef22c2d..58059c2 100644
---- a/arch/arm/boot/dts/bcm2835-rpi-cm1.dtsi
-+++ b/arch/arm/boot/dts/bcm2835-rpi-cm1.dtsi
-@@ -10,6 +10,11 @@
- 		};
- 	};
-
-+	memory@0 {
-+		device_type = "memory";
-+		reg = <0 0x20000000>;
-+	};
-+
- 	reg_3v3: fixed-regulator {
- 		compatible = "regulator-fixed";
- 		regulator-name = "3V3";
-diff --git a/arch/arm/boot/dts/bcm2835-rpi-zero-w.dts b/arch/arm/boot/dts/bcm2835-rpi-zero-w.dts
-index 5ecc403..f38f388 100644
---- a/arch/arm/boot/dts/bcm2835-rpi-zero-w.dts
-+++ b/arch/arm/boot/dts/bcm2835-rpi-zero-w.dts
-@@ -12,6 +12,11 @@
- 	compatible = "raspberrypi,model-zero-w", "brcm,bcm2835";
- 	model = "Raspberry Pi Zero W";
-
-+	memory@0 {
-+		device_type = "memory";
-+		reg = <0 0x20000000>;
-+	};
-+
- 	chosen {
- 		/* 8250 auxiliary UART instead of pl011 */
- 		stdout-path = "serial1:115200n8";
-diff --git a/arch/arm/boot/dts/bcm2835-rpi-zero.dts b/arch/arm/boot/dts/bcm2835-rpi-zero.dts
-index 84c7035..5fd0686 100644
---- a/arch/arm/boot/dts/bcm2835-rpi-zero.dts
-+++ b/arch/arm/boot/dts/bcm2835-rpi-zero.dts
-@@ -12,6 +12,11 @@
- 	compatible = "raspberrypi,model-zero", "brcm,bcm2835";
- 	model = "Raspberry Pi Zero";
-
-+	memory@0 {
-+		device_type = "memory";
-+		reg = <0 0x20000000>;
-+	};
-+
- 	leds {
- 		act {
- 			gpios = <&gpio 47 GPIO_ACTIVE_HIGH>;
-diff --git a/arch/arm/boot/dts/bcm2835-rpi.dtsi b/arch/arm/boot/dts/bcm2835-rpi.dtsi
-index 40bac52e..f5125b7 100644
---- a/arch/arm/boot/dts/bcm2835-rpi.dtsi
-+++ b/arch/arm/boot/dts/bcm2835-rpi.dtsi
-@@ -1,11 +1,6 @@
- #include <dt-bindings/power/raspberrypi-power.h>
-
- / {
--	memory@0 {
--		device_type = "memory";
--		reg = <0 0x10000000>;
--	};
--
- 	leds {
- 		compatible = "gpio-leds";
-
-diff --git a/arch/arm/boot/dts/bcm2836-rpi-2-b.dts b/arch/arm/boot/dts/bcm2836-rpi-2-b.dts
-index f97ec95..6a89999 100644
---- a/arch/arm/boot/dts/bcm2836-rpi-2-b.dts
-+++ b/arch/arm/boot/dts/bcm2836-rpi-2-b.dts
-@@ -10,6 +10,7 @@
- 	model = "Raspberry Pi 2 Model B";
-
- 	memory@0 {
-+		device_type = "memory";
- 		reg = <0 0x40000000>;
- 	};
-
-diff --git a/arch/arm/boot/dts/bcm2837-rpi-3-a-plus.dts b/arch/arm/boot/dts/bcm2837-rpi-3-a-plus.dts
-index 7f4437a..0e29aaa 100644
---- a/arch/arm/boot/dts/bcm2837-rpi-3-a-plus.dts
-+++ b/arch/arm/boot/dts/bcm2837-rpi-3-a-plus.dts
-@@ -14,6 +14,7 @@
- 	};
-
- 	memory@0 {
-+		device_type = "memory";
- 		reg = <0 0x20000000>;
- 	};
-
-diff --git a/arch/arm/boot/dts/bcm2837-rpi-3-b-plus.dts b/arch/arm/boot/dts/bcm2837-rpi-3-b-plus.dts
-index c6fa34c..a1487ae 100644
---- a/arch/arm/boot/dts/bcm2837-rpi-3-b-plus.dts
-+++ b/arch/arm/boot/dts/bcm2837-rpi-3-b-plus.dts
-@@ -15,6 +15,7 @@
- 	};
-
- 	memory@0 {
-+		device_type = "memory";
- 		reg = <0 0x40000000>;
- 	};
-
-diff --git a/arch/arm/boot/dts/bcm2837-rpi-3-b.dts b/arch/arm/boot/dts/bcm2837-rpi-3-b.dts
-index ce71f57..a36bfdb 100644
---- a/arch/arm/boot/dts/bcm2837-rpi-3-b.dts
-+++ b/arch/arm/boot/dts/bcm2837-rpi-3-b.dts
-@@ -15,6 +15,7 @@
- 	};
-
- 	memory@0 {
-+		device_type = "memory";
- 		reg = <0 0x40000000>;
- 	};
-
-diff --git a/arch/arm/boot/dts/bcm2837-rpi-cm3.dtsi b/arch/arm/boot/dts/bcm2837-rpi-cm3.dtsi
-index 81399b2..7c3cb7e 100644
---- a/arch/arm/boot/dts/bcm2837-rpi-cm3.dtsi
-+++ b/arch/arm/boot/dts/bcm2837-rpi-cm3.dtsi
-@@ -5,6 +5,7 @@
-
- / {
- 	memory@0 {
-+		device_type = "memory";
- 		reg = <0 0x40000000>;
- 	};
+ .../devicetree/bindings/arm/bcm/bcm2835.yaml       |  51 ++
+ .../devicetree/bindings/arm/bcm/brcm,bcm2835.txt   |  67 ---
+ .../bindings/clock/brcm,bcm2835-cprman.txt         |   4 +-
+ .../devicetree/bindings/mmc/brcm,sdhci-iproc.txt   |   4 +-
+ .../bindings/pinctrl/brcm,bcm2835-gpio.txt         |   1 +
+ MAINTAINERS                                        |   3 +-
+ arch/arm/boot/dts/Makefile                         |   1 +
+ arch/arm/boot/dts/bcm2711-rpi-4-b.dts              | 120 ++++
+ arch/arm/boot/dts/bcm2711.dtsi                     | 667 +++++++++++++++++++++
+ arch/arm/boot/dts/bcm2835-common.dtsi              | 177 ++++++
+ arch/arm/boot/dts/bcm2835-rpi-a-plus.dts           |  12 +
+ arch/arm/boot/dts/bcm2835-rpi-a.dts                |  12 +
+ arch/arm/boot/dts/bcm2835-rpi-b-plus.dts           |  12 +
+ arch/arm/boot/dts/bcm2835-rpi-b-rev2.dts           |  12 +
+ arch/arm/boot/dts/bcm2835-rpi-b.dts                |  12 +
+ arch/arm/boot/dts/bcm2835-rpi-cm1-io1.dts          |   7 +
+ arch/arm/boot/dts/bcm2835-rpi-cm1.dtsi             |   5 +
+ arch/arm/boot/dts/bcm2835-rpi-zero-w.dts           |  12 +
+ arch/arm/boot/dts/bcm2835-rpi-zero.dts             |  12 +
+ arch/arm/boot/dts/bcm2835-rpi.dtsi                 |  18 -
+ arch/arm/boot/dts/bcm2835.dtsi                     |   1 +
+ arch/arm/boot/dts/bcm2836-rpi-2-b.dts              |   8 +
+ arch/arm/boot/dts/bcm2836.dtsi                     |   1 +
+ arch/arm/boot/dts/bcm2837-rpi-3-a-plus.dts         |   1 +
+ arch/arm/boot/dts/bcm2837-rpi-3-b-plus.dts         |   1 +
+ arch/arm/boot/dts/bcm2837-rpi-3-b.dts              |   1 +
+ arch/arm/boot/dts/bcm2837-rpi-cm3-io3.dts          |   7 +
+ arch/arm/boot/dts/bcm2837-rpi-cm3.dtsi             |   1 +
+ arch/arm/boot/dts/bcm2837.dtsi                     |   1 +
+ arch/arm/boot/dts/bcm283x.dtsi                     | 160 +----
+ arch/arm/mach-bcm/board_bcm2835.c                  |   2 +
+ arch/arm64/boot/dts/broadcom/Makefile              |   3 +-
+ arch/arm64/boot/dts/broadcom/bcm2711-rpi-4-b.dts   |   2 +
+ drivers/clk/bcm/clk-bcm2835.c                      | 117 +++-
+ drivers/mmc/host/sdhci-iproc.c                     |   9 +
+ drivers/pinctrl/bcm/pinctrl-bcm2835.c              | 105 +++-
+ include/dt-bindings/clock/bcm2835.h                |   2 +
+ 37 files changed, 1365 insertions(+), 266 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/arm/bcm/bcm2835.yaml
+ delete mode 100644 Documentation/devicetree/bindings/arm/bcm/brcm,bcm2835.txt
+ create mode 100644 arch/arm/boot/dts/bcm2711-rpi-4-b.dts
+ create mode 100644 arch/arm/boot/dts/bcm2711.dtsi
+ create mode 100644 arch/arm/boot/dts/bcm2835-common.dtsi
+ create mode 100644 arch/arm64/boot/dts/broadcom/bcm2711-rpi-4-b.dts
 
 --
 2.7.4
