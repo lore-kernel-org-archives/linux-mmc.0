@@ -1,27 +1,32 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: mxs: use devm_platform_ioremap_resource() to
- simplify code
-Date: Mon, 22 Jul 2019 15:43:09 +0200
-Message-ID: <CAPDyKFqfhk6S0gN-eN5ozYKZPBWb8+gC2A_vy55gYOx7dOKQ-w@mail.gmail.com>
-References: <20190717085259.31235-1-Anson.Huang@nxp.com>
+Subject: Re: [PATCH 2/2] dt-bindings: mmc: sunxi: Add H5 compatibles
+Date: Mon, 22 Jul 2019 15:43:16 +0200
+Message-ID: <CAPDyKFr+W4jofZb1Ajt4hyRFYBvB3M64cM=zW5AA0=gcp6OWnw@mail.gmail.com>
+References: <20190722120740.8966-1-maxime.ripard@bootlin.com>
+ <20190722120740.8966-2-maxime.ripard@bootlin.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190717085259.31235-1-Anson.Huang@nxp.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Anson Huang <Anson.Huang@nxp.com>
-Cc: Shawn Guo <shawnguo@kernel.org>, Sascha Hauer <s.hauer@pengutronix.de>, Sascha Hauer <kernel@pengutronix.de>, Fabio Estevam <festevam@gmail.com>, Linus Walleij <linus.walleij@linaro.org>, Stefan Wahren <stefan.wahren@i2se.com>, Kate Stewart <kstewart@linuxfoundation.org>, Thomas Gleixner <tglx@linutronix.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, dl-linux-imx <Linux-imx@nxp.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <20190722120740.8966-2-maxime.ripard@bootlin.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Maxime Ripard <maxime.ripard@bootlin.com>
+Cc: Mark Rutland <mark.rutland@arm.com>, DTML <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chen-Yu Tsai <wens@csie.org>, Rob Herring <robh+dt@kernel.org>, Frank Rowand <frowand.list@gmail.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, 17 Jul 2019 at 11:02, <Anson.Huang@nxp.com> wrote:
+On Mon, 22 Jul 2019 at 14:07, Maxime Ripard <maxime.ripard@bootlin.com> wrote:
 >
-> From: Anson Huang <Anson.Huang@nxp.com>
+> The conversion to the YAML binding left out two compatibles. Add them.
 >
-> Use the new helper devm_platform_ioremap_resource() which wraps the
-> platform_get_resource() and devm_ioremap_resource() together, to
-> simplify the code.
->
-> Signed-off-by: Anson Huang <Anson.Huang@nxp.com>
+> Signed-off-by: Maxime Ripard <maxime.ripard@bootlin.com>
 
 Applied for next, thanks!
 
@@ -30,31 +35,26 @@ Uffe
 
 
 > ---
->  drivers/mmc/host/mxs-mmc.c | 4 +---
->  1 file changed, 1 insertion(+), 3 deletions(-)
+>  .../devicetree/bindings/mmc/allwinner,sun4i-a10-mmc.yaml    | 6 ++++++
+>  1 file changed, 6 insertions(+)
 >
-> diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
-> index b334e81..78e7e35 100644
-> --- a/drivers/mmc/host/mxs-mmc.c
-> +++ b/drivers/mmc/host/mxs-mmc.c
-> @@ -571,7 +571,6 @@ static int mxs_mmc_probe(struct platform_device *pdev)
->         struct device_node *np = pdev->dev.of_node;
->         struct mxs_mmc_host *host;
->         struct mmc_host *mmc;
-> -       struct resource *iores;
->         int ret = 0, irq_err;
->         struct regulator *reg_vmmc;
->         struct mxs_ssp *ssp;
-> @@ -587,8 +586,7 @@ static int mxs_mmc_probe(struct platform_device *pdev)
->         host = mmc_priv(mmc);
->         ssp = &host->ssp;
->         ssp->dev = &pdev->dev;
-> -       iores = platform_get_resource(pdev, IORESOURCE_MEM, 0);
-> -       ssp->base = devm_ioremap_resource(&pdev->dev, iores);
-> +       ssp->base = devm_platform_ioremap_resource(pdev, 0);
->         if (IS_ERR(ssp->base)) {
->                 ret = PTR_ERR(ssp->base);
->                 goto out_mmc_free;
+> diff --git a/Documentation/devicetree/bindings/mmc/allwinner,sun4i-a10-mmc.yaml b/Documentation/devicetree/bindings/mmc/allwinner,sun4i-a10-mmc.yaml
+> index 06329115dc6a..d2d4308596b8 100644
+> --- a/Documentation/devicetree/bindings/mmc/allwinner,sun4i-a10-mmc.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/allwinner,sun4i-a10-mmc.yaml
+> @@ -35,6 +35,12 @@ properties:
+>        - items:
+>            - const: allwinner,sun8i-r40-mmc
+>            - const: allwinner,sun50i-a64-mmc
+> +      - items:
+> +          - const: allwinner,sun50i-h5-emmc
+> +          - const: allwinner,sun50i-a64-emmc
+> +      - items:
+> +          - const: allwinner,sun50i-h5-mmc
+> +          - const: allwinner,sun50i-a64-mmc
+>        - items:
+>            - const: allwinner,sun50i-h6-emmc
+>            - const: allwinner,sun50i-a64-emmc
 > --
-> 2.7.4
+> 2.21.0
 >
