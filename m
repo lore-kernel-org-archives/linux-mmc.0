@@ -1,114 +1,67 @@
 From: Baolin Wang <baolin.wang@linaro.org>
-Subject: [RFC PATCH 0/7] Add MMC packed function
-Date: Mon, 22 Jul 2019 21:09:35 +0800
-Message-ID: <cover.1563782844.git.baolin.wang@linaro.org>
+Subject: [RFC PATCH 1/7] blk-mq: Export blk_mq_hctx_has_pending() function
+Date: Mon, 22 Jul 2019 21:09:36 +0800
+Message-ID: <94a0d20e6304b909391abd9a425c71c376cad964.1563782844.git.baolin.wang@linaro.org>
+References: <cover.1563782844.git.baolin.wang@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <cover.1563782844.git.baolin.wang@linaro.org>
+In-Reply-To: <cover.1563782844.git.baolin.wang@linaro.org>
+References: <cover.1563782844.git.baolin.wang@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: axboe@kernel.dk, adrian.hunter@intel.com, ulf.hansson@linaro.org
 Cc: zhang.lyra@gmail.com, orsonzhai@gmail.com, arnd@arndb.de, linus.walleij@linaro.org, baolin.wang@linaro.org, vincent.guittot@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-block@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi All,
+Some SD/MMC host controllers can support packed command or packed request,
+that means we can package several requests to host controller at one time
+to improve performence. And this patch set will introduce MMC packed function
+to support this feature by following patches.
 
-Now some SD/MMC controllers can support packed command or packed request,
-that means it can package multiple requests to host controller to be handled
-at one time, which can improve the I/O performence. Thus this patchset is
-used to add the MMC packed function to support packed request or packed
-command.
+To support MMC packed function, the MMC layer need to know if there are
+requests are pending now in hardware queue to help to combine requests
+as much as possible. If we know there are requests pending in hardware
+queue, then we should not package requests to host controller immediately,
+instead we should collect more requests into MMC packed queue to be packed
+to host controller with packed condition.
 
-In this patch set, I implemented the SD host ADMA3 transfer mode to support
-packed request. The ADMA3 transfer mode can process a multi-block data transfer
-by using a pair of command descriptor and ADMA2 descriptor. In future we can
-easily expand the MMC packed function to support packed command.
+Thus export this function for MMC packed function.
 
-Below are some comparison data between packed request and non-packed request
-with fio tool. The fio command I used is like below with changing the
-'--rw' parameter and enabling the direct IO flag to measure the actual hardware
-transfer speed.
+Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
+---
+ block/blk-mq.c         |    3 ++-
+ include/linux/blk-mq.h |    1 +
+ 2 files changed, 3 insertions(+), 1 deletion(-)
 
-./fio --filename=/dev/mmcblk0p30 --direct=1 --iodepth=20 --rw=read --bs=4K --size=512M --group_reporting --numjobs=20 --name=test_read
-
-My eMMC card working at HS400 Enhanced strobe mode:
-[    2.229856] mmc0: new HS400 Enhanced strobe MMC card at address 0001
-[    2.237566] mmcblk0: mmc0:0001 HBG4a2 29.1 GiB 
-[    2.242621] mmcblk0boot0: mmc0:0001 HBG4a2 partition 1 4.00 MiB
-[    2.249110] mmcblk0boot1: mmc0:0001 HBG4a2 partition 2 4.00 MiB
-[    2.255307] mmcblk0rpmb: mmc0:0001 HBG4a2 partition 3 4.00 MiB, chardev (248:0)
-
-1. Non-packed request
-I tested 3 times for each case and output a average speed.
-
-1) Sequential read:
-Speed: 28.9MiB/s, 26.4MiB/s, 30.9MiB/s
-Average speed: 28.7MiB/s
-
-2) Random read:
-Speed: 18.2MiB/s, 8.9MiB/s, 15.8MiB/s
-Average speed: 14.3MiB/s
-
-3) Sequential write:
-Speed: 21.1MiB/s, 27.9MiB/s, 25MiB/s
-Average speed: 24.7MiB/s
-
-4) Random write:
-Speed: 21.5MiB/s, 18.1MiB/s, 18.1MiB/s
-Average speed: 19.2MiB/s
-
-2. Packed request
-In packed request mode, I set the host controller can package maximum 10
-requests at one time (Actually I can increase the package number), and I
-enabled read/write packed request mode. Also I tested 3 times for each
-case and output a average speed.
-
-1) Sequential read:
-Speed: 165MiB/s, 167MiB/s, 164MiB/s
-Average speed: 165.3MiB/s
-
-2) Random read:
-Speed: 147MiB/s, 141MiB/s, 144MiB/s
-Average speed: 144MiB/s
-
-3) Sequential write:
-Speed: 87.8MiB/s, 89.1MiB/s, 90.0MiB/s
-Average speed: 89MiB/s
-
-4) Random write:
-Speed: 90.9MiB/s, 89.8MiB/s, 90.4MiB/s
-Average speed: 90.4MiB/s
-
-Form above data, we can see the packed request can improve the performance greatly.
-Any comments are welcome. Thanks a lot.
-
-Baolin Wang (7):
-  blk-mq: Export blk_mq_hctx_has_pending() function
-  mmc: core: Add MMC packed request function
-  mmc: host: sdhci: Introduce ADMA3 transfer mode
-  mmc: host: sdhci: Factor out the command configuration
-  mmc: host: sdhci: Remove redundant sg_count member of struct
-    sdhci_host
-  mmc: host: sdhci: Add MMC packed request support
-  mmc: host: sdhci-sprd: Add MMC packed request support
-
- block/blk-mq.c                |    3 +-
- drivers/mmc/core/Kconfig      |    2 +
- drivers/mmc/core/Makefile     |    1 +
- drivers/mmc/core/block.c      |   71 +++++-
- drivers/mmc/core/block.h      |    3 +-
- drivers/mmc/core/core.c       |   51 ++++
- drivers/mmc/core/core.h       |    3 +
- drivers/mmc/core/packed.c     |  478 ++++++++++++++++++++++++++++++++++++++
- drivers/mmc/core/queue.c      |   28 ++-
- drivers/mmc/host/Kconfig      |    1 +
- drivers/mmc/host/sdhci-sprd.c |   22 +-
- drivers/mmc/host/sdhci.c      |  513 +++++++++++++++++++++++++++++++++++------
- drivers/mmc/host/sdhci.h      |   59 ++++-
- include/linux/blk-mq.h        |    1 +
- include/linux/mmc/core.h      |    1 +
- include/linux/mmc/host.h      |    3 +
- include/linux/mmc/packed.h    |  123 ++++++++++
- 17 files changed, 1286 insertions(+), 77 deletions(-)
- create mode 100644 drivers/mmc/core/packed.c
- create mode 100644 include/linux/mmc/packed.h
-
+diff --git a/block/blk-mq.c b/block/blk-mq.c
+index b038ec6..5bd4ef9 100644
+--- a/block/blk-mq.c
++++ b/block/blk-mq.c
+@@ -63,12 +63,13 @@ static int blk_mq_poll_stats_bkt(const struct request *rq)
+  * Check if any of the ctx, dispatch list or elevator
+  * have pending work in this hardware queue.
+  */
+-static bool blk_mq_hctx_has_pending(struct blk_mq_hw_ctx *hctx)
++bool blk_mq_hctx_has_pending(struct blk_mq_hw_ctx *hctx)
+ {
+ 	return !list_empty_careful(&hctx->dispatch) ||
+ 		sbitmap_any_bit_set(&hctx->ctx_map) ||
+ 			blk_mq_sched_has_work(hctx);
+ }
++EXPORT_SYMBOL_GPL(blk_mq_hctx_has_pending);
+ 
+ /*
+  * Mark this ctx as having pending work in this hardware queue
+diff --git a/include/linux/blk-mq.h b/include/linux/blk-mq.h
+index 3fa1fa5..15a2b7b 100644
+--- a/include/linux/blk-mq.h
++++ b/include/linux/blk-mq.h
+@@ -334,6 +334,7 @@ int blk_mq_freeze_queue_wait_timeout(struct request_queue *q,
+ void blk_mq_quiesce_queue_nowait(struct request_queue *q);
+ 
+ unsigned int blk_mq_rq_cpu(struct request *rq);
++bool blk_mq_hctx_has_pending(struct blk_mq_hw_ctx *hctx);
+ 
+ /*
+  * Driver command data is immediately after the request. So subtract request
 -- 
 1.7.9.5
