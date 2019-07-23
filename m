@@ -1,7 +1,7 @@
 From: Yoshihiro Shimoda <yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
-Subject: [PATCH v8 4/5] block: add a helper function to merge the segments
-Date: Tue, 23 Jul 2019 14:26:47 +0900
-Message-ID: <1563859608-19456-5-git-send-email-yoshihiro.shimoda.uh@renesas.com>
+Subject: [PATCH v8 1/5] dma: Introduce dma_get_merge_boundary()
+Date: Tue, 23 Jul 2019 14:26:44 +0900
+Message-ID: <1563859608-19456-2-git-send-email-yoshihiro.shimoda.uh@renesas.com>
 References: <1563859608-19456-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -21,68 +21,86 @@ To: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, hch-jcswGhMUV9g@public.
 Cc: linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-This patch adds a helper function whether a queue can merge
-the segments by the DMA MAP layer (e.g. via IOMMU).
+This patch adds a new DMA API "dma_get_merge_boundary". This function
+returns the DMA merge boundary if the DMA layer can merge the segments.
+This patch also adds the implementation for a new dma_map_ops pointer.
 
 Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
 Reviewed-by: Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>
 ---
- block/blk-settings.c   | 22 ++++++++++++++++++++++
- include/linux/blkdev.h |  2 ++
- 2 files changed, 24 insertions(+)
+ Documentation/DMA-API.txt   |  8 ++++++++
+ include/linux/dma-mapping.h |  6 ++++++
+ kernel/dma/mapping.c        | 11 +++++++++++
+ 3 files changed, 25 insertions(+)
 
-diff --git a/block/blk-settings.c b/block/blk-settings.c
-index 45f2c52..6a78ea0 100644
---- a/block/blk-settings.c
-+++ b/block/blk-settings.c
-@@ -4,6 +4,7 @@
-  */
- #include <linux/bio.h>
- #include <linux/blkdev.h>
-+#include <linux/dma-mapping.h>
- #include <linux/gcd.h>
- #include <linux/gfp.h>
- #include <linux/init.h>
-@@ -831,6 +832,27 @@ void blk_queue_write_cache(struct request_queue *q, bool wc, bool fua)
- }
- EXPORT_SYMBOL_GPL(blk_queue_write_cache);
+diff --git a/Documentation/DMA-API.txt b/Documentation/DMA-API.txt
+index e47c63b..9c4dd3d 100644
+--- a/Documentation/DMA-API.txt
++++ b/Documentation/DMA-API.txt
+@@ -204,6 +204,14 @@ Returns the maximum size of a mapping for the device. The size parameter
+ of the mapping functions like dma_map_single(), dma_map_page() and
+ others should not be larger than the returned value.
  
-+/**
-+ * blk_queue_can_use_dma_map_merging - configure queue for merging segments.
-+ * @q:		the request queue for the device
-+ * @dev:	the device pointer for dma
-+ *
-+ * Tell the block layer about merging the segments by dma map of @q.
-+ */
-+bool blk_queue_can_use_dma_map_merging(struct request_queue *q,
-+				       struct device *dev)
-+{
-+	unsigned long boundary = dma_get_merge_boundary(dev);
++::
 +
-+	if (!boundary)
-+		return false;
++	unsigned long
++	dma_get_merge_boundary(struct device *dev);
 +
-+	/* No need to update max_segment_size. see blk_queue_virt_boundary() */
-+	blk_queue_virt_boundary(q, boundary);
++Returns the DMA merge boundary. If the device cannot merge any the DMA address
++segments, the function returns 0.
 +
-+	return true;
-+}
-+
- static int __init blk_settings_init(void)
+ Part Id - Streaming DMA mappings
+ --------------------------------
+ 
+diff --git a/include/linux/dma-mapping.h b/include/linux/dma-mapping.h
+index e11b115..f700f8a 100644
+--- a/include/linux/dma-mapping.h
++++ b/include/linux/dma-mapping.h
+@@ -131,6 +131,7 @@ struct dma_map_ops {
+ 	int (*dma_supported)(struct device *dev, u64 mask);
+ 	u64 (*get_required_mask)(struct device *dev);
+ 	size_t (*max_mapping_size)(struct device *dev);
++	unsigned long (*get_merge_boundary)(struct device *dev);
+ };
+ 
+ #define DMA_MAPPING_ERROR		(~(dma_addr_t)0)
+@@ -467,6 +468,7 @@ int dma_set_mask(struct device *dev, u64 mask);
+ int dma_set_coherent_mask(struct device *dev, u64 mask);
+ u64 dma_get_required_mask(struct device *dev);
+ size_t dma_max_mapping_size(struct device *dev);
++unsigned long dma_get_merge_boundary(struct device *dev);
+ #else /* CONFIG_HAS_DMA */
+ static inline dma_addr_t dma_map_page_attrs(struct device *dev,
+ 		struct page *page, size_t offset, size_t size,
+@@ -572,6 +574,10 @@ static inline size_t dma_max_mapping_size(struct device *dev)
  {
- 	blk_max_low_pfn = max_low_pfn - 1;
-diff --git a/include/linux/blkdev.h b/include/linux/blkdev.h
-index 1ef375d..f6d55e2 100644
---- a/include/linux/blkdev.h
-+++ b/include/linux/blkdev.h
-@@ -1085,6 +1085,8 @@ extern void blk_queue_dma_alignment(struct request_queue *, int);
- extern void blk_queue_update_dma_alignment(struct request_queue *, int);
- extern void blk_queue_rq_timeout(struct request_queue *, unsigned int);
- extern void blk_queue_write_cache(struct request_queue *q, bool enabled, bool fua);
-+extern bool blk_queue_can_use_dma_map_merging(struct request_queue *q,
-+					      struct device *dev);
+ 	return 0;
+ }
++static inline unsigned long dma_get_merge_boundary(struct device *dev)
++{
++	return 0;
++}
+ #endif /* CONFIG_HAS_DMA */
  
- /*
-  * Number of physical segments as sent to the device.
+ static inline dma_addr_t dma_map_single_attrs(struct device *dev, void *ptr,
+diff --git a/kernel/dma/mapping.c b/kernel/dma/mapping.c
+index 1f628e7..e8da02e 100644
+--- a/kernel/dma/mapping.c
++++ b/kernel/dma/mapping.c
+@@ -379,3 +379,14 @@ size_t dma_max_mapping_size(struct device *dev)
+ 	return size;
+ }
+ EXPORT_SYMBOL_GPL(dma_max_mapping_size);
++
++unsigned long dma_get_merge_boundary(struct device *dev)
++{
++	const struct dma_map_ops *ops = get_dma_ops(dev);
++
++	if (!ops || !ops->get_merge_boundary)
++		return 0;	/* can't merge */
++
++	return ops->get_merge_boundary(dev);
++}
++EXPORT_SYMBOL_GPL(dma_get_merge_boundary);
 -- 
 2.7.4
