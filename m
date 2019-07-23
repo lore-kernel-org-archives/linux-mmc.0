@@ -1,61 +1,72 @@
-From: Yoshihiro Shimoda <yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
-Subject: [PATCH v8 3/5] block: sort headers on blk-setting.c
-Date: Tue, 23 Jul 2019 14:26:46 +0900
-Message-ID: <1563859608-19456-4-git-send-email-yoshihiro.shimoda.uh@renesas.com>
-References: <1563859608-19456-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
+From: Matthias Brugger <mbrugger@suse.com>
+Subject: Re: [PATCH 17/18] arm64: dts: broadcom: Add reference to RPi 4 B
+Date: Tue, 23 Jul 2019 07:20:29 +0000
+Message-ID: <7dc61967-cf76-f898-e28f-97d3d7df0506@suse.com>
+References: <1563815257-2648-1-git-send-email-wahrenst@gmx.net>
+ <1563815257-2648-5-git-send-email-wahrenst@gmx.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-In-Reply-To: <1563859608-19456-1-git-send-email-yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, hch-jcswGhMUV9g@public.gmane.org, m.szyprowski-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, robin.murphy-5wv7dgnIgG8@public.gmane.org, joro-zLv9SwRftAIdnm+yROfE0A@public.gmane.org, axboe-tSWWG44O7X1aa/9Udqfwiw@public.gmane.org
-Cc: linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1563815257-2648-5-git-send-email-wahrenst@gmx.net>
+Content-Language: en-US
+Content-ID: <ED339DE5CBE7E5458891B23E9F5588BB@namprd18.prod.outlook.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Stefan Wahren <wahrenst@gmx.net>, Eric Anholt <eric@anholt.net>, Mark
+ Rutland <mark.rutland@arm.com>, Michael Turquette <mturquette@baylibre.com>, Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>, Florian
+ Fainelli <f.fainelli@gmail.com>, Adrian Hunter <adrian.hunter@intel.com>, Rob Herring <robh+dt@kernel.org>, Stephen Boyd <sboyd@kernel.org>, Linus Walleij <linus.walleij@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, Nicolas Saenz Julienne <nsaenzjulienne@suse.de>
+Cc: "linux-gpio@vger.kernel.org" <linux-gpio@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "bcm-kernel-feedback-list@broadcom.com" <bcm-kernel-feedback-list@broadcom.com>, "linux-rpi-kernel@lists.infradead.org" <linux-rpi-kernel@lists.infradead.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-This patch sorts the headers in alphabetic order to ease
-the maintenance for this part.
 
-Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
-Reviewed-by: Wolfram Sang <wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org>
----
- block/blk-settings.c | 12 ++++++------
- 1 file changed, 6 insertions(+), 6 deletions(-)
 
-diff --git a/block/blk-settings.c b/block/blk-settings.c
-index 2ae348c..45f2c52 100644
---- a/block/blk-settings.c
-+++ b/block/blk-settings.c
-@@ -2,16 +2,16 @@
- /*
-  * Functions related to setting various queue properties from drivers
-  */
--#include <linux/kernel.h>
--#include <linux/module.h>
--#include <linux/init.h>
- #include <linux/bio.h>
- #include <linux/blkdev.h>
--#include <linux/memblock.h>	/* for max_pfn/max_low_pfn */
- #include <linux/gcd.h>
--#include <linux/lcm.h>
--#include <linux/jiffies.h>
- #include <linux/gfp.h>
-+#include <linux/init.h>
-+#include <linux/jiffies.h>
-+#include <linux/kernel.h>
-+#include <linux/lcm.h>
-+#include <linux/memblock.h>     /* for max_pfn/max_low_pfn */
-+#include <linux/module.h>
- 
- #include "blk.h"
- #include "blk-wbt.h"
--- 
-2.7.4
+On 22/07/2019 19:07, Stefan Wahren wrote:
+> This adds a reference to the dts of the Raspberry Pi 4 B,
+> so we don't need to maintain the content in arm64.
+> 
+> Signed-off-by: Stefan Wahren <wahrenst@gmx.net>
+
+AFAIK arm64 doesn't boot without the DMA RFC patch series from Nicolas. So maybe
+we should wait until this is fixed before adding a for now broken device.
+
+Regards,
+Matthias
+
+> ---
+>  arch/arm64/boot/dts/broadcom/Makefile            | 3 ++-
+>  arch/arm64/boot/dts/broadcom/bcm2711-rpi-4-b.dts | 2 ++
+>  2 files changed, 4 insertions(+), 1 deletion(-)
+>  create mode 100644 arch/arm64/boot/dts/broadcom/bcm2711-rpi-4-b.dts
+> 
+> diff --git a/arch/arm64/boot/dts/broadcom/Makefile b/arch/arm64/boot/dts/broadcom/Makefile
+> index d1d31cc..cb7de8d 100644
+> --- a/arch/arm64/boot/dts/broadcom/Makefile
+> +++ b/arch/arm64/boot/dts/broadcom/Makefile
+> @@ -1,5 +1,6 @@
+>  # SPDX-License-Identifier: GPL-2.0
+> -dtb-$(CONFIG_ARCH_BCM2835) += bcm2837-rpi-3-a-plus.dtb \
+> +dtb-$(CONFIG_ARCH_BCM2835) += bcm2711-rpi-4-b.dtb \
+> +			      bcm2837-rpi-3-a-plus.dtb \
+>  			      bcm2837-rpi-3-b.dtb \
+>  			      bcm2837-rpi-3-b-plus.dtb \
+>  			      bcm2837-rpi-cm3-io3.dtb
+> diff --git a/arch/arm64/boot/dts/broadcom/bcm2711-rpi-4-b.dts b/arch/arm64/boot/dts/broadcom/bcm2711-rpi-4-b.dts
+> new file mode 100644
+> index 0000000..d24c536
+> --- /dev/null
+> +++ b/arch/arm64/boot/dts/broadcom/bcm2711-rpi-4-b.dts
+> @@ -0,0 +1,2 @@
+> +// SPDX-License-Identifier: GPL-2.0
+> +#include "arm/bcm2711-rpi-4-b.dts"
+> --
+> 2.7.4
+> 
+> 
