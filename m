@@ -1,78 +1,63 @@
-From: Ming Lei <ming.lei@redhat.com>
-Subject: Re: [RFC PATCH 1/7] blk-mq: Export blk_mq_hctx_has_pending() function
-Date: Tue, 23 Jul 2019 11:31:04 +0800
-Message-ID: <20190723033103.GA13829@ming.t460p>
-References: <cover.1563782844.git.baolin.wang@linaro.org>
- <94a0d20e6304b909391abd9a425c71c376cad964.1563782844.git.baolin.wang@linaro.org>
- <20190722141940.GA26528@ming.t460p>
- <CAMz4ku+R8OdAQ2S91Xe=V-nZL1Nu5g=_xpHqQCzNF6JeBHY3rw@mail.gmail.com>
+From: Yoshihiro Shimoda <yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
+Subject: [PATCH v8 2/5] iommu/dma: Add a new dma_map_ops of
+	get_merge_boundary()
+Date: Tue, 23 Jul 2019 14:26:45 +0900
+Message-ID: <1563859608-19456-3-git-send-email-yoshihiro.shimoda.uh@renesas.com>
+References: <1563859608-19456-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAMz4ku+R8OdAQ2S91Xe=V-nZL1Nu5g=_xpHqQCzNF6JeBHY3rw@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Baolin Wang <baolin.wang@linaro.org>
-Cc: Jens Axboe <axboe@kernel.dk>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Chunyan Zhang <zhang.lyra@gmail.com>, Orson Zhai <orsonzhai@gmail.com>, Arnd Bergmann <arnd@arndb.de>, Linus Walleij <linus.walleij@linaro.org>, Vincent Guittot <vincent.guittot@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>, linux-block@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+In-Reply-To: <1563859608-19456-1-git-send-email-yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, hch-jcswGhMUV9g@public.gmane.org, m.szyprowski-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, robin.murphy-5wv7dgnIgG8@public.gmane.org, joro-zLv9SwRftAIdnm+yROfE0A@public.gmane.org, axboe-tSWWG44O7X1aa/9Udqfwiw@public.gmane.org
+Cc: linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Jul 23, 2019 at 11:12:57AM +0800, Baolin Wang wrote:
-> Hi Ming,
-> 
-> On Mon, 22 Jul 2019 at 22:19, Ming Lei <ming.lei@redhat.com> wrote:
-> >
-> > On Mon, Jul 22, 2019 at 09:09:36PM +0800, Baolin Wang wrote:
-> > > Some SD/MMC host controllers can support packed command or packed request,
-> > > that means we can package several requests to host controller at one time
-> > > to improve performence. And this patch set will introduce MMC packed function
-> > > to support this feature by following patches.
-> > >
-> > > To support MMC packed function, the MMC layer need to know if there are
-> > > requests are pending now in hardware queue to help to combine requests
-> > > as much as possible. If we know there are requests pending in hardware
-> > > queue, then we should not package requests to host controller immediately,
-> > > instead we should collect more requests into MMC packed queue to be packed
-> > > to host controller with packed condition.
-> > >
-> > > Thus export this function for MMC packed function.
-> > >
-> > > Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
-> > > ---
-> > >  block/blk-mq.c         |    3 ++-
-> > >  include/linux/blk-mq.h |    1 +
-> > >  2 files changed, 3 insertions(+), 1 deletion(-)
-> > >
-> > > diff --git a/block/blk-mq.c b/block/blk-mq.c
-> > > index b038ec6..5bd4ef9 100644
-> > > --- a/block/blk-mq.c
-> > > +++ b/block/blk-mq.c
-> > > @@ -63,12 +63,13 @@ static int blk_mq_poll_stats_bkt(const struct request *rq)
-> > >   * Check if any of the ctx, dispatch list or elevator
-> > >   * have pending work in this hardware queue.
-> > >   */
-> > > -static bool blk_mq_hctx_has_pending(struct blk_mq_hw_ctx *hctx)
-> > > +bool blk_mq_hctx_has_pending(struct blk_mq_hw_ctx *hctx)
-> > >  {
-> > >       return !list_empty_careful(&hctx->dispatch) ||
-> > >               sbitmap_any_bit_set(&hctx->ctx_map) ||
-> > >                       blk_mq_sched_has_work(hctx);
-> > >  }
-> > > +EXPORT_SYMBOL_GPL(blk_mq_hctx_has_pending);
-> >
-> > Just wondering why you don't use the 'last' field of 'struct blk_mq_queue_data',
-> > which is passed to .queue_rq(), and supposed for implementing batch submission.
-> 
-> The 'last' field of 'struct blk_mq_queue_data' does not indicate the
-> last request in the hardware queue, since we want to collect more
-> requests from block layer as much as possible to be packed later.
-> 
-> And from blk_mq_do_dispatch_sched()--->blk_mq_dispatch_rq_list()--->
-> queue_rq(), I always get 'bd.last = true', which is not useful to
-> combine requests for MMC packed queue. Maybe I missed anything?
+This patch adds a new dma_map_ops of get_merge_boundary() to
+expose the DMA merge boundary if the domain type is IOMMU_DOMAIN_DMA.
 
-That is one flaw of current implementation, and we may improve it,
-so other drivers(virtio-io, ...) can benefit from it too.
+Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
+---
+ drivers/iommu/dma-iommu.c | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
 
-
-Thanks,
-Ming
+diff --git a/drivers/iommu/dma-iommu.c b/drivers/iommu/dma-iommu.c
+index a7f9c3e..f3e5f2b 100644
+--- a/drivers/iommu/dma-iommu.c
++++ b/drivers/iommu/dma-iommu.c
+@@ -1085,6 +1085,16 @@ static int iommu_dma_get_sgtable(struct device *dev, struct sg_table *sgt,
+ 	return ret;
+ }
+ 
++static unsigned long iommu_dma_get_merge_boundary(struct device *dev)
++{
++	struct iommu_domain *domain = iommu_get_dma_domain(dev);
++
++	if (domain->type != IOMMU_DOMAIN_DMA)
++		return 0;	/* can't merge */
++
++	return (1 << __ffs(domain->pgsize_bitmap)) - 1;
++}
++
+ static const struct dma_map_ops iommu_dma_ops = {
+ 	.alloc			= iommu_dma_alloc,
+ 	.free			= iommu_dma_free,
+@@ -1100,6 +1110,7 @@ static const struct dma_map_ops iommu_dma_ops = {
+ 	.sync_sg_for_device	= iommu_dma_sync_sg_for_device,
+ 	.map_resource		= iommu_dma_map_resource,
+ 	.unmap_resource		= iommu_dma_unmap_resource,
++	.get_merge_boundary	= iommu_dma_get_merge_boundary,
+ };
+ 
+ /*
+-- 
+2.7.4
