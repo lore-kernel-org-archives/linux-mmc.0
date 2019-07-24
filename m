@@ -1,156 +1,102 @@
-From: Baolin Wang <baolin.wang@linaro.org>
-Subject: Re: [PATCH v4] mmc: host: sdhci-sprd: Fix the incorrect soft reset
- operation when runtime resuming
-Date: Wed, 24 Jul 2019 10:21:56 +0800
-Message-ID: <CAMz4ku+ZTtnJdonZVAPVuvAiGCmCESvM8SbYKjwpNUgE4bO3gA@mail.gmail.com>
-References: <89c3ef495c367d58ca3abe99a1f82c48f8c08705.1563274904.git.baolin.wang@linaro.org>
- <CAPDyKFq1y6xVfA=b1ybWvA1+e9h9aSteHAHjBbXvXGVJx95FQA@mail.gmail.com>
- <CAMz4kuKraOb_o0LFWnqkS7m0Xd3QGrw1P+md0YBNbbbp1967OA@mail.gmail.com> <CAPDyKFpy5JeGZ2w1KJN0ECB6jPG=UTZXbPRjMQQs8+NdK4rxuQ@mail.gmail.com>
+From: Chen-Yu Tsai <wens@kernel.org>
+Subject: Re: [PATCH 00/18] ARM: Add minimal Raspberry Pi 4 support
+Date: Wed, 24 Jul 2019 10:53:32 +0800
+Message-ID: <CAGb2v66-o23CW5iH9Bn1aELymPSiKrA43eJd2q6EZ7iubcogaw@mail.gmail.com>
+References: <1563774880-8061-1-git-send-email-wahrenst@gmx.net>
+ <96113adb5fcab9c2f4bb5fa82b84ff5f9c07fd07.camel@suse.de>
+ <bc650090-db86-ccac-01dc-23f08ad7b19b@gmx.net>
+ <20190723093442.GA27239@lst.de>
+ <04c5eaa03f3a124dbbce6186e11e19acc4539cc8.camel@suse.de>
+ <b15509d6-bc2e-3d06-0eea-943e6e456d62@gmx.net>
+ <5f9b11f54c66fd0487837f7e58af3adf7f86635f.camel@suse.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFpy5JeGZ2w1KJN0ECB6jPG=UTZXbPRjMQQs8+NdK4rxuQ@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Chunyan Zhang <zhang.lyra@gmail.com>, Orson Zhai <orsonzhai@gmail.com>, Vincent Guittot <vincent.guittot@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <5f9b11f54c66fd0487837f7e58af3adf7f86635f.camel@suse.de>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Nicolas Saenz Julienne <nsaenzjulienne@suse.de>
+Cc: Mark Rutland <mark.rutland@arm.com>, Ulf Hansson <ulf.hansson@linaro.org>, Florian Fainelli <f.fainelli@gmail.com>, Scott Branden <sbranden@broadcom.com>, "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>, Stephen Boyd <sboyd@kernel.org>, Ray Jui <rjui@broadcom.com>, Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, Rob Herring <robh+dt@kernel.org>, Eric Anholt <eric@anholt.net>, Matthias Brugger <mbrugger@suse.com>, "open list:BROADCOM BCM281XX..." <bcm-kernel-feedback-list@broadcom.com>, Stefan Wahren <wahrenst@gmx.net>, Michael Turquette <mturquette@baylibre.com>, Christoph Hellwig <hch@lst.de>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, "moderated list:BROADCOM BCM2835..." <linux-rpi-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, 23 Jul 2019 at 20:39, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+On Wed, Jul 24, 2019 at 1:33 AM Nicolas Saenz Julienne
+<nsaenzjulienne@suse.de> wrote:
 >
-> On Tue, 23 Jul 2019 at 05:05, Baolin Wang <baolin.wang@linaro.org> wrote:
+> On Tue, 2019-07-23 at 18:26 +0200, Stefan Wahren wrote:
+> > Hi Nicolas,
 > >
-> > Hi Ulf,
+> > thanks for your work, but i'm a little bit sceptical about these
+> > changes. So here some thoughts.
 > >
-> > On Mon, 22 Jul 2019 at 19:54, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> > >
-> > > On Wed, 17 Jul 2019 at 04:29, Baolin Wang <baolin.wang@linaro.org> wrote:
+> > Am 23.07.19 um 15:32 schrieb Nicolas Saenz Julienne:
+> > > On Tue, 2019-07-23 at 11:34 +0200, Christoph Hellwig wrote:
+> > > > On Mon, Jul 22, 2019 at 08:10:17PM +0200, Stefan Wahren wrote:
+> > > > > i rebased this series also and got this only on the RPi 4.
+> > > > >
+> > > > > After reverting the following:
+> > > > >
+> > > > > 79a986721de dma-mapping: remove dma_max_pfn
+> > > > > 7559d612dff0 mmc: core: let the dma map ops handle bouncing
+> > > > >
+> > > > > This crash disappear, but wifi seems to be still broken.
+> > > > >
+> > > > > Would be nice, if you can investigate further.
+> > > > That means dma addressing on this system doesn't just work for some
+> > > > memory, and the mmc bounce buffering was papering over that just for
+> > > > mmc.  Do you have highmem on this system?
 > > > >
-> > > > In sdhci_runtime_resume_host() function, we will always do software reset
-> > > > for all, which will cause Spreadtrum host controller work abnormally after
-> > > > resuming.
-> > >
-> > > What does "software reset for all" means?
-> >
-> > The SD host controller specification defines 3 types software reset:
-> > software reset for data line, software reset for command line and
-> > software reset for all.
-> > Software reset for all means this reset affects the entire Host
-> > controller except for the card detection circuit.
->
-> Thanks for clarifying, please update the changelog accordingly.
-
-Sure, sorry for confusing.
-
->
-> >
-> > >
+> > > > You might want to try this series, which has been submitted upstream:
 > > > >
-> > > > Thus for Spreadtrum platform that will not power down the SD/eMMC card during
-> > > > runtime suspend, we should not do software reset for all.
+> > > >
+> http://git.infradead.org/users/hch/misc.git/shortlog/refs/heads/arm-swiotlb
+> > > Hi Christoph,
+> > > I tried your series on top of Stefan's, it has no effect. I guess it's no
+> > > surprise as with mult_v7_defconfig, you get SWIOTLB=n & LPAE=n.
 > > >
-> > > Normally, sdhci hosts that enters runtime suspend doesn't power off
-> > > the card (there are some exceptions like PCI variants).
-> >
-> > Yes, same as our controller.
-> >
+> > > FYI DMA addressing constraints for RPi4 are the following: devices can only
+> > > access the first GB of ram even though the board might have up to 4GB of
+> > > ram.
+> > > The DMA addresses are aliased with a 0xc0000000 offset. So 0x00000000 phys
+> > > is
+> > > aliased to 0xc0000000 in DMA. This is the same as for an RFC you commented
+> > > last
+> > > week trying to fix similar issues for arm64.
 > > >
-> > > So, what's so special here and how does the reset come into play? I
-> > > don't see sdhci doing a reset in sdhci_runtime_suspend|resume_host()
-> > > and nor doesn the callback from the sdhci-sprd.c variant doing it.
-> >
-> > In sdhci_runtime_resume_host(), it will issue sdhci_init(host, 0) to
-> > issue software reset for all.
->
-> Aha, I didn't read the code carefully enough. Apologize for the noise.
-
-No worries :)
-
-> >
+> > > You state in "arm: use swiotlb for bounce buffer on LPAE configs" that "The
+> > > DMA
+> > > API requires that 32-bit DMA masks are always supported". If I understand it
+> > > correctly this device breaks that assumption. Which implies we need a bounce
+> > > buffer system in place for any straming DMA user.
 > > >
-> > > > To fix this
-> > > > issue, adding a specific reset operation that adds one condition to validate
-> > > > the power mode to decide if we can do software reset for all or just reset
-> > > > command and data lines.
-> > > >
-> > > > Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
-> > > > ---
-> > > > Changess from v3:
-> > > >  - Use ios.power_mode to validate if the card is power down or not.
-> > > >
-> > > > Changes from v2:
-> > > >  - Simplify the sdhci_sprd_reset() by issuing sdhci_reset().
-> > > >
-> > > > Changes from v1:
-> > > >  - Add a specific reset operation instead of changing the core to avoid
-> > > >  affecting other hardware.
-> > > > ---
-> > > >  drivers/mmc/host/sdhci-sprd.c |   19 ++++++++++++++++++-
-> > > >  1 file changed, 18 insertions(+), 1 deletion(-)
-> > > >
-> > > > diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
-> > > > index 603a5d9..94f9726 100644
-> > > > --- a/drivers/mmc/host/sdhci-sprd.c
-> > > > +++ b/drivers/mmc/host/sdhci-sprd.c
-> > > > @@ -373,6 +373,23 @@ static unsigned int sdhci_sprd_get_max_timeout_count(struct sdhci_host *host)
-> > > >         return 1 << 31;
-> > > >  }
-> > > >
-> > > > +static void sdhci_sprd_reset(struct sdhci_host *host, u8 mask)
-> > > > +{
-> > > > +       struct mmc_host *mmc = host->mmc;
-> > > > +
-> > > > +       /*
-> > > > +        * When try to reset controller after runtime suspend, we should not
-> > > > +        * reset for all if the SD/eMMC card is not power down, just reset
-> > > > +        * command and data lines instead. Otherwise will meet some strange
-> > > > +        * behaviors for Spreadtrum host controller.
-> > > > +        */
-> > > > +       if (host->runtime_suspended && (mask & SDHCI_RESET_ALL) &&
-> > > > +           mmc->ios.power_mode == MMC_POWER_ON)
-> > > > +               mask = SDHCI_RESET_CMD | SDHCI_RESET_DATA;
-> > >
-> > > Can sdhci_sprd_reset() be called when the host is runtime suspended?
-> >
-> > When host tries to runtime resume in sdhci_runtime_resume_host(), it
-> > will call reset operation to do software reset.
+> > > It seems we're unable to use dma-direct/swiotlb, so I enabled arm's
+> > > dmabounce
+> > > on all devices hooked into RPi's limited interconnect, which fixes this
+> > > issue.
+> > Does it fix the wifi issue too?
 >
-> Right, I see that now, thanks for clarifying.
+> Well it works as long as I revert this: 901bb98918 ("nl80211: require and
+> validate vendor command policy"). Which has nothing to do with DMA anyways.
 >
-> However, there are still some weird things going on in
-> sdhci_runtime_resume_host(). Like why is host->ops->enable_dma()
-> called first, directly from sdhci_runtime_resume_host(), then again in
-> sdhci_do_reset(), after host->ops->reset() has been called. Looks like
-> the first call to ->enable_dma() doesn't make sense?
-
-I am mot sure, since our host did not supply enable_dma() operation.
-This logic was used by some other hardware and worked well, I am not
-sure if it can reveal some issues if we change the logic here.
-
-Adrian, could you help to explain why we put enable_dma() in front of
-software reset?
-
+> Was this the issue you where seeing?
 >
-> >
-> > > That sounds like a bug to me, no?
-> >
-> > Since our controller will meet some strange behaviors if we do
-> > software reset for all in sdhci_runtime_resume_host(), and try to
-> > avoid changing the core logic of sdhci_runtime_resume_host() used by
-> > other hardware controllers, thus I introduced a specific reset ops and
-> > added some condition to make sure we just do software reset command
-> > and data lines from runtime suspend state.
->
-> I understand, but perhaps it would become more clear if
-> sdhci_runtime_resume_host() is re-factored a bit. Maybe the caller can
-> give it some new parameter to let it decide if a SDHCI_RESET_ALL shall
-> be done or not.
+> [    4.969679] WARNING: CPU: 2 PID: 21 at net/wireless/core.c:868 wiphy_register+0x8e8/0xbdc [cfg80211]
+> [...]
+> [    4.969974] ieee80211 phy0: brcmf_cfg80211_attach: Could not register wiphy device (-22)
 
-Yes, sounds reasonable, but need change other host drivers which
-issued the sdhci_runtime_resume_host().
+We're seeing this on different platforms (allwinner / rockchip / amlogic)
+with Broadcom WiFi chips. So it's unlikely to be related with anything in
+this series.
 
-Adrian, if you also agree with Ulf's suggestion, then I will post new
-patches to add a parameter to decide the reset mode. Thanks.
+I believe a fix for this has already been queued up:
 
--- 
-Baolin Wang
-Best Regards
+https://git.kernel.org/pub/scm/linux/kernel/git/jberg/mac80211.git/commit/?id=91046d6364afde646734c7ead1f649d253c386e9
+
+ChenYu
