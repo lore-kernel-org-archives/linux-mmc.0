@@ -1,23 +1,33 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sdhci-pci: Use dev_get_drvdata
-Date: Wed, 24 Jul 2019 16:08:28 +0200
-Message-ID: <CAPDyKFpo3P_e1ufxyOLLxdeRLe-z1-1Yx5xERD2Hkf0OQbBh8w@mail.gmail.com>
-References: <20190723124707.24782-1-hslester96@gmail.com>
+Subject: Re: [PATCH 09/18] dt-bindings: sdhci-iproc: Add brcm,bcm2711-emmc2
+Date: Wed, 24 Jul 2019 16:08:34 +0200
+Message-ID: <CAPDyKFqrbwJ9G0Za+U2FCBB=GKpMZdXesQAHZ+8v8T0fCusmiQ@mail.gmail.com>
+References: <1563774880-8061-1-git-send-email-wahrenst@gmx.net>
+ <1563774880-8061-10-git-send-email-wahrenst@gmx.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190723124707.24782-1-hslester96@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Chuhong Yuan <hslester96@gmail.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1563774880-8061-10-git-send-email-wahrenst@gmx.net>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Stefan Wahren <wahrenst@gmx.net>
+Cc: Mark Rutland <mark.rutland@arm.com>, Matthias Brugger <mbrugger@suse.com>, Scott Branden <sbranden@broadcom.com>, "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>, Stephen Boyd <sboyd@kernel.org>, Ray Jui <rjui@broadcom.com>, Linus Walleij <linus.walleij@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Rob Herring <robh+dt@kernel.org>, Eric Anholt <eric@anholt.net>, Florian Fainelli <f.fainelli@gmail.com>, BCM Kernel Feedback <bcm-kernel-feedback-list@broadcom.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Michael Turquette <mturquette@baylibre.com>, Nicolas Saenz Julienne <nsaenzjulienne@suse.de>, linux-rpi-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, 23 Jul 2019 at 14:47, Chuhong Yuan <hslester96@gmail.com> wrote:
+On Mon, 22 Jul 2019 at 07:56, Stefan Wahren <wahrenst@gmx.net> wrote:
 >
-> Instead of using to_pci_dev + pci_get_drvdata,
-> use dev_get_drvdata to make code simpler.
+> Add a new compatible for the additional emmc2 controller
+> on BCM2711 and clearify usage.
 >
-> Signed-off-by: Chuhong Yuan <hslester96@gmail.com>
+> Signed-off-by: Stefan Wahren <wahrenst@gmx.net>
 
 Applied for next, thanks!
 
@@ -26,53 +36,27 @@ Uffe
 
 
 > ---
->  drivers/mmc/host/sdhci-pci-core.c | 12 ++++--------
->  1 file changed, 4 insertions(+), 8 deletions(-)
+>  Documentation/devicetree/bindings/mmc/brcm,sdhci-iproc.txt | 4 +++-
+>  1 file changed, 3 insertions(+), 1 deletion(-)
 >
-> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-> index 4041878eb0f3..d10aceed5bb7 100644
-> --- a/drivers/mmc/host/sdhci-pci-core.c
-> +++ b/drivers/mmc/host/sdhci-pci-core.c
-> @@ -1759,8 +1759,7 @@ static const struct sdhci_ops sdhci_pci_ops = {
->  #ifdef CONFIG_PM_SLEEP
->  static int sdhci_pci_suspend(struct device *dev)
->  {
-> -       struct pci_dev *pdev = to_pci_dev(dev);
-> -       struct sdhci_pci_chip *chip = pci_get_drvdata(pdev);
-> +       struct sdhci_pci_chip *chip = dev_get_drvdata(dev);
+> diff --git a/Documentation/devicetree/bindings/mmc/brcm,sdhci-iproc.txt b/Documentation/devicetree/bindings/mmc/brcm,sdhci-iproc.txt
+> index fa90d25..09d87cc 100644
+> --- a/Documentation/devicetree/bindings/mmc/brcm,sdhci-iproc.txt
+> +++ b/Documentation/devicetree/bindings/mmc/brcm,sdhci-iproc.txt
+> @@ -6,10 +6,12 @@ by mmc.txt and the properties that represent the IPROC SDHCI controller.
+>  Required properties:
+>  - compatible : Should be one of the following
+>                "brcm,bcm2835-sdhci"
+> +              "brcm,bcm2711-emmc2"
+>                "brcm,sdhci-iproc-cygnus"
+>                "brcm,sdhci-iproc"
 >
->         if (!chip)
->                 return 0;
-> @@ -1773,8 +1772,7 @@ static int sdhci_pci_suspend(struct device *dev)
+> -Use brcm2835-sdhci for Rasperry PI.
+> +Use brcm2835-sdhci for the eMMC controller on the BCM2835 (Raspberry Pi) and
+> +bcm2711-emmc2 for the additional eMMC2 controller on BCM2711.
 >
->  static int sdhci_pci_resume(struct device *dev)
->  {
-> -       struct pci_dev *pdev = to_pci_dev(dev);
-> -       struct sdhci_pci_chip *chip = pci_get_drvdata(pdev);
-> +       struct sdhci_pci_chip *chip = dev_get_drvdata(dev);
->
->         if (!chip)
->                 return 0;
-> @@ -1789,8 +1787,7 @@ static int sdhci_pci_resume(struct device *dev)
->  #ifdef CONFIG_PM
->  static int sdhci_pci_runtime_suspend(struct device *dev)
->  {
-> -       struct pci_dev *pdev = to_pci_dev(dev);
-> -       struct sdhci_pci_chip *chip = pci_get_drvdata(pdev);
-> +       struct sdhci_pci_chip *chip = dev_get_drvdata(dev);
->
->         if (!chip)
->                 return 0;
-> @@ -1803,8 +1800,7 @@ static int sdhci_pci_runtime_suspend(struct device *dev)
->
->  static int sdhci_pci_runtime_resume(struct device *dev)
->  {
-> -       struct pci_dev *pdev = to_pci_dev(dev);
-> -       struct sdhci_pci_chip *chip = pci_get_drvdata(pdev);
-> +       struct sdhci_pci_chip *chip = dev_get_drvdata(dev);
->
->         if (!chip)
->                 return 0;
+>  Use sdhci-iproc-cygnus for Broadcom SDHCI Controllers
+>  restricted to 32bit host accesses to SDHCI registers.
 > --
-> 2.20.1
+> 2.7.4
 >
