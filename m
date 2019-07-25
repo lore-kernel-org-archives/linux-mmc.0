@@ -1,16 +1,15 @@
 From: Simon Horman <horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org>
-Subject: Re: [PATCH v8 5/5] mmc: queue: Use bigger segments if DMA MAP layer
-	can merge the segments
-Date: Thu, 25 Jul 2019 08:34:08 +0200
-Message-ID: <20190725063407.xklhsc24et56sdtl@verge.net.au>
+Subject: Re: [PATCH v8 4/5] block: add a helper function to merge the segments
+Date: Thu, 25 Jul 2019 08:33:58 +0200
+Message-ID: <20190725063357.pjgsoe2jpfjfdkrz@verge.net.au>
 References: <1563859608-19456-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
-	<1563859608-19456-6-git-send-email-yoshihiro.shimoda.uh@renesas.com>
+	<1563859608-19456-5-git-send-email-yoshihiro.shimoda.uh@renesas.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1563859608-19456-6-git-send-email-yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
+In-Reply-To: <1563859608-19456-5-git-send-email-yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
 List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
 	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
@@ -24,14 +23,11 @@ To: Yoshihiro Shimoda <yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.
 Cc: axboe-tSWWG44O7X1aa/9Udqfwiw@public.gmane.org, linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, robin.murphy-5wv7dgnIgG8@public.gmane.org, hch-jcswGhMUV9g@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Jul 23, 2019 at 02:26:48PM +0900, Yoshihiro Shimoda wrote:
-> When the max_segs of a mmc host is smaller than 512, the mmc
-> subsystem tries to use 512 segments if DMA MAP layer can merge
-> the segments, and then the mmc subsystem exposes such information
-> to the block layer by using blk_queue_can_use_dma_map_merging().
+On Tue, Jul 23, 2019 at 02:26:47PM +0900, Yoshihiro Shimoda wrote:
+> This patch adds a helper function whether a queue can merge
+> the segments by the DMA MAP layer (e.g. via IOMMU).
 > 
 > Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
 > Reviewed-by: Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>
-> Reviewed-by: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 
 Reviewed-by: Simon Horman <horms+renesas-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org>
