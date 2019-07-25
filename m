@@ -1,14 +1,15 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v5] mmc: host: sdhci: Fix the incorrect soft reset
- operation when runtime resuming
-Date: Thu, 25 Jul 2019 15:14:53 +0200
-Message-ID: <CAPDyKFoNGZRdY3VVf6G9eNBfCyJbN5SUU2+fK24U-mHDX13oFQ@mail.gmail.com>
-References: <74a6462743e3d73a630d2634880d8866daee333e.1564022625.git.baolin.wang@linaro.org>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH v2 2/2] mmc: Add support for the ASPEED SD controller
+Date: Thu, 25 Jul 2019 16:18:26 +0300
+Message-ID: <d6f7fdf2-07ed-354a-ca29-f3175623679c@intel.com>
+References: <20190712033214.24713-1-andrew@aj.id.au>
+ <20190712033214.24713-3-andrew@aj.id.au>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <74a6462743e3d73a630d2634880d8866daee333e.1564022625.git.baolin.wang@linaro.org>
+In-Reply-To: <20190712033214.24713-3-andrew@aj.id.au>
+Content-Language: en-US
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -18,221 +19,443 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
 Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
 Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Baolin Wang <baolin.wang@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
-Cc: Chunyan Zhang <zhang.lyra@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>
+To: Andrew Jeffery <andrew@aj.id.au>, linux-mmc@vger.kernel.org
+Cc: mark.rutland@arm.com, devicetree@vger.kernel.org, ulf.hansson@linaro.org, linux-aspeed@lists.ozlabs.org, ryanchen.aspeed@gmail.com, linux-kernel@vger.kernel.org, robh+dt@kernel.org, joel@jms.id.au, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-- Trimmed cc list
+On 12/07/19 6:32 AM, Andrew Jeffery wrote:
+> Add a minimal driver for ASPEED's SD controller, which exposes two
+> SDHCIs.
+> 
+> The ASPEED design implements a common register set for the SDHCIs, and
+> moves some of the standard configuration elements out to this common
+> area (e.g. 8-bit mode, and card detect configuration which is not
+> currently supported).
+> 
+> The SD controller has a dedicated hardware interrupt that is shared
+> between the slots. The common register set exposes information on which
+> slot triggered the interrupt; early revisions of the patch introduced an
+> irqchip for the register, but reality is it doesn't behave as an
+> irqchip, and the result fits awkwardly into the irqchip APIs. Instead
+> I've taken the simple approach of using the IRQ as a shared IRQ with
+> some minor performance impact for the second slot.
+> 
+> Ryan was the original author of the patch - I've taken his work and
+> massaged it to drop the irqchip support and rework the devicetree
+> integration. The driver has been smoke tested under qemu against a
+> minimal SD controller model and lightly tested on an ast2500-evb.
+> 
+> Signed-off-by: Ryan Chen <ryanchen.aspeed@gmail.com>
+> Signed-off-by: Andrew Jeffery <andrew@aj.id.au>
 
-On Thu, 25 Jul 2019 at 05:14, Baolin Wang <baolin.wang@linaro.org> wrote:
->
-> The SD host controller specification defines 3 types software reset:
-> software reset for data line, software reset for command line and
-> software reset for all. Software reset for all means this reset affects
-> the entire Host controller except for the card detection circuit.
->
-> In sdhci_runtime_resume_host() function, now we will always do software
-> reset for all, which will cause Spreadtrum host controller work abnormally
-> after resuming. For Spreadtrum platform that will not power down the SD/eMMC
-> card during runtime suspend, we should just do software reset for data
-> and command instead doing reset for all.
->
-> To fix this issue, this patch introduces a new parameter of
-> sdhci_runtime_resume_host() to let it decide if a 'reset for all' shall
-> be done or not. Meanwhile changes other host drivers to issue a software
-> reset for all to keep the original logic.
->
-> Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
-
-Applied for next, with a little change (renaming the "soft"
-in-parameter to soft_reset), thanks!
-
-Adrian, if there is anything you want to change, please tell.
-
-BTW, perhaps this should be applied for fixes and tagged for stable?
-Baolin, if so, can point me the commit (or stable tag) the patch
-fixes?
-
-Kind regards
-Uffe
-
-
+Looks fine.  Few minor comments below.
 
 > ---
-> Changes from v4:
->  - Update the commit message.
->  - Add a new parameter to decide if a 'reset for all' shall be done or not.
->
-> Changes from v3:
->  - Use ios.power_mode to validate if the card is power down or not.
->
-> Changes from v2:
->  - Simplify the sdhci_sprd_reset() by issuing sdhci_reset().
->
-> Changes from v1:
->  - Add a specific reset operation instead of changing the core to avoid
->  affecting other hardware.
-> ---
->  drivers/mmc/host/sdhci-acpi.c      |    2 +-
->  drivers/mmc/host/sdhci-esdhc-imx.c |    2 +-
->  drivers/mmc/host/sdhci-of-at91.c   |    2 +-
->  drivers/mmc/host/sdhci-pci-core.c  |    4 ++--
->  drivers/mmc/host/sdhci-pxav3.c     |    2 +-
->  drivers/mmc/host/sdhci-s3c.c       |    2 +-
->  drivers/mmc/host/sdhci-sprd.c      |    2 +-
->  drivers/mmc/host/sdhci-xenon.c     |    2 +-
->  drivers/mmc/host/sdhci.c           |    4 ++--
->  drivers/mmc/host/sdhci.h           |    2 +-
->  10 files changed, 12 insertions(+), 12 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-> index b3a130a..1604f51 100644
-> --- a/drivers/mmc/host/sdhci-acpi.c
-> +++ b/drivers/mmc/host/sdhci-acpi.c
-> @@ -883,7 +883,7 @@ static int sdhci_acpi_runtime_resume(struct device *dev)
->
->         sdhci_acpi_byt_setting(&c->pdev->dev);
->
-> -       return sdhci_runtime_resume_host(c->host);
-> +       return sdhci_runtime_resume_host(c->host, 0);
->  }
->
->  #endif
-> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-> index c391510..776a942 100644
-> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -1705,7 +1705,7 @@ static int sdhci_esdhc_runtime_resume(struct device *dev)
->                 esdhc_pltfm_set_clock(host, imx_data->actual_clock);
->         }
->
-> -       err = sdhci_runtime_resume_host(host);
-> +       err = sdhci_runtime_resume_host(host, 0);
->         if (err)
->                 goto disable_ipg_clk;
->
-> diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
-> index e377b9b..d4e7e8b 100644
-> --- a/drivers/mmc/host/sdhci-of-at91.c
-> +++ b/drivers/mmc/host/sdhci-of-at91.c
-> @@ -289,7 +289,7 @@ static int sdhci_at91_runtime_resume(struct device *dev)
->         }
->
->  out:
-> -       return sdhci_runtime_resume_host(host);
-> +       return sdhci_runtime_resume_host(host, 0);
->  }
->  #endif /* CONFIG_PM */
->
-> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-> index 4041878..7d06e28 100644
-> --- a/drivers/mmc/host/sdhci-pci-core.c
-> +++ b/drivers/mmc/host/sdhci-pci-core.c
-> @@ -167,7 +167,7 @@ static int sdhci_pci_runtime_suspend_host(struct sdhci_pci_chip *chip)
->
->  err_pci_runtime_suspend:
->         while (--i >= 0)
-> -               sdhci_runtime_resume_host(chip->slots[i]->host);
-> +               sdhci_runtime_resume_host(chip->slots[i]->host, 0);
->         return ret;
->  }
->
-> @@ -181,7 +181,7 @@ static int sdhci_pci_runtime_resume_host(struct sdhci_pci_chip *chip)
->                 if (!slot)
->                         continue;
->
-> -               ret = sdhci_runtime_resume_host(slot->host);
-> +               ret = sdhci_runtime_resume_host(slot->host, 0);
->                 if (ret)
->                         return ret;
->         }
-> diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
-> index 3ddecf4..e55037c 100644
-> --- a/drivers/mmc/host/sdhci-pxav3.c
-> +++ b/drivers/mmc/host/sdhci-pxav3.c
-> @@ -554,7 +554,7 @@ static int sdhci_pxav3_runtime_resume(struct device *dev)
->         if (!IS_ERR(pxa->clk_core))
->                 clk_prepare_enable(pxa->clk_core);
->
-> -       return sdhci_runtime_resume_host(host);
-> +       return sdhci_runtime_resume_host(host, 0);
->  }
->  #endif
->
-> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-> index 8e4a8ba..f5753ae 100644
-> --- a/drivers/mmc/host/sdhci-s3c.c
-> +++ b/drivers/mmc/host/sdhci-s3c.c
-> @@ -745,7 +745,7 @@ static int sdhci_s3c_runtime_resume(struct device *dev)
->         clk_prepare_enable(busclk);
->         if (ourhost->cur_clk >= 0)
->                 clk_prepare_enable(ourhost->clk_bus[ourhost->cur_clk]);
-> -       ret = sdhci_runtime_resume_host(host);
-> +       ret = sdhci_runtime_resume_host(host, 0);
->         return ret;
->  }
->  #endif
-> diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
-> index 603a5d9..83a4767 100644
-> --- a/drivers/mmc/host/sdhci-sprd.c
-> +++ b/drivers/mmc/host/sdhci-sprd.c
-> @@ -696,7 +696,7 @@ static int sdhci_sprd_runtime_resume(struct device *dev)
->         if (ret)
->                 goto clk_disable;
->
-> -       sdhci_runtime_resume_host(host);
-> +       sdhci_runtime_resume_host(host, 1);
->         return 0;
->
->  clk_disable:
-> diff --git a/drivers/mmc/host/sdhci-xenon.c b/drivers/mmc/host/sdhci-xenon.c
-> index 8a18f14..1dea1ba 100644
-> --- a/drivers/mmc/host/sdhci-xenon.c
-> +++ b/drivers/mmc/host/sdhci-xenon.c
-> @@ -638,7 +638,7 @@ static int xenon_runtime_resume(struct device *dev)
->                 priv->restore_needed = false;
->         }
->
-> -       ret = sdhci_runtime_resume_host(host);
-> +       ret = sdhci_runtime_resume_host(host, 0);
->         if (ret)
->                 goto out;
->         return 0;
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 59acf8e..4e9ebc8 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -3320,7 +3320,7 @@ int sdhci_runtime_suspend_host(struct sdhci_host *host)
->  }
->  EXPORT_SYMBOL_GPL(sdhci_runtime_suspend_host);
->
-> -int sdhci_runtime_resume_host(struct sdhci_host *host)
-> +int sdhci_runtime_resume_host(struct sdhci_host *host, int soft)
->  {
->         struct mmc_host *mmc = host->mmc;
->         unsigned long flags;
-> @@ -3331,7 +3331,7 @@ int sdhci_runtime_resume_host(struct sdhci_host *host)
->                         host->ops->enable_dma(host);
->         }
->
-> -       sdhci_init(host, 0);
-> +       sdhci_init(host, soft);
->
->         if (mmc->ios.power_mode != MMC_POWER_UNDEFINED &&
->             mmc->ios.power_mode != MMC_POWER_OFF) {
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index 89fd965..f3cd516 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -781,7 +781,7 @@ void sdhci_adma_write_desc(struct sdhci_host *host, void **desc,
->  int sdhci_suspend_host(struct sdhci_host *host);
->  int sdhci_resume_host(struct sdhci_host *host);
->  int sdhci_runtime_suspend_host(struct sdhci_host *host);
-> -int sdhci_runtime_resume_host(struct sdhci_host *host);
-> +int sdhci_runtime_resume_host(struct sdhci_host *host, int soft);
->  #endif
->
->  void sdhci_cqe_enable(struct mmc_host *mmc);
-> --
-> 1.7.9.5
->
+> In v2:
+> 
+> * Drop unnecesasry MODULE_DEVICE_TABLE()
+> * Rename sd-controller compatible
+> * Add IBM copyright
+> * Drop unnecesary data assignment in of match table entries
+> * Derive the slot from the SDHCI offset
+> 
+>  drivers/mmc/host/Kconfig           |  12 ++
+>  drivers/mmc/host/Makefile          |   1 +
+>  drivers/mmc/host/sdhci-of-aspeed.c | 326 +++++++++++++++++++++++++++++
+>  3 files changed, 339 insertions(+)
+>  create mode 100644 drivers/mmc/host/sdhci-of-aspeed.c
+> 
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index 931770f17087..2bb5e1264b3d 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -154,6 +154,18 @@ config MMC_SDHCI_OF_ARASAN
+>  
+>  	  If unsure, say N.
+>  
+> +config MMC_SDHCI_OF_ASPEED
+> +	tristate "SDHCI OF support for the ASPEED SDHCI controller"
+> +	depends on MMC_SDHCI_PLTFM
+> +	depends on OF
+> +	help
+> +	  This selects the ASPEED Secure Digital Host Controller Interface.
+> +
+> +	  If you have a controller with this interface, say Y or M here. You
+> +	  also need to enable an appropriate bus interface.
+> +
+> +	  If unsure, say N.
+> +
+>  config MMC_SDHCI_OF_AT91
+>  	tristate "SDHCI OF support for the Atmel SDMMC controller"
+>  	depends on MMC_SDHCI_PLTFM
+> diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+> index 73578718f119..390ee162fe71 100644
+> --- a/drivers/mmc/host/Makefile
+> +++ b/drivers/mmc/host/Makefile
+> @@ -84,6 +84,7 @@ obj-$(CONFIG_MMC_SDHCI_ESDHC_IMX)	+= sdhci-esdhc-imx.o
+>  obj-$(CONFIG_MMC_SDHCI_DOVE)		+= sdhci-dove.o
+>  obj-$(CONFIG_MMC_SDHCI_TEGRA)		+= sdhci-tegra.o
+>  obj-$(CONFIG_MMC_SDHCI_OF_ARASAN)	+= sdhci-of-arasan.o
+> +obj-$(CONFIG_MMC_SDHCI_OF_ASPEED)	+= sdhci-of-aspeed.o
+>  obj-$(CONFIG_MMC_SDHCI_OF_AT91)		+= sdhci-of-at91.o
+>  obj-$(CONFIG_MMC_SDHCI_OF_ESDHC)	+= sdhci-of-esdhc.o
+>  obj-$(CONFIG_MMC_SDHCI_OF_HLWD)		+= sdhci-of-hlwd.o
+> diff --git a/drivers/mmc/host/sdhci-of-aspeed.c b/drivers/mmc/host/sdhci-of-aspeed.c
+> new file mode 100644
+> index 000000000000..9528e43c257d
+> --- /dev/null
+> +++ b/drivers/mmc/host/sdhci-of-aspeed.c
+> @@ -0,0 +1,326 @@
+> +// SPDX-License-Identifier: GPL-2.0-or-later
+> +/* Copyright (C) 2019 ASPEED Technology Inc. */
+> +/* Copyright (C) 2019 IBM Corp. */
+> +
+> +#include <linux/clk.h>
+> +#include <linux/delay.h>
+> +#include <linux/device.h>
+> +#include <linux/io.h>
+> +#include <linux/mmc/host.h>
+> +#include <linux/module.h>
+> +#include <linux/of_address.h>
+> +#include <linux/of.h>
+> +#include <linux/of_platform.h>
+> +#include <linux/platform_device.h>
+> +#include <linux/spinlock.h>
+> +
+> +#include "sdhci-pltfm.h"
+> +
+> +#define ASPEED_SDC_INFO		0x00
+> +#define   ASPEED_SDC_S1MMC8	BIT(25)
+> +#define   ASPEED_SDC_S0MMC8	BIT(24)
+> +
+> +struct aspeed_sdc {
+> +	struct clk *clk;
+> +	struct resource *res;
+> +
+> +	spinlock_t lock;
+> +	void __iomem *regs;
+> +};
+> +
+> +struct aspeed_sdhci {
+> +	struct aspeed_sdc *parent;
+> +	u32 width_mask;
+> +};
+> +
+> +static void aspeed_sdc_bus_width(struct aspeed_sdc *sdc,
+> +				 struct aspeed_sdhci *sdhci, bool bus8)
+
+The function name threw me at first.  I suggest:
+
+static void aspeed_sdhci_set_clr_8_bit_mode(struct aspeed_sdhci *aspeed_sdhci,
+					    bool bus8)
+{
+	struct aspeed_sdc *aspeed_sdc = aspeed_sdhci->parent;
+
+> +{
+> +	u32 info;
+> +
+> +	/* Set/clear 8 bit mode */
+> +	spin_lock(&sdc->lock);
+> +	info = readl(sdc->regs + ASPEED_SDC_INFO);
+> +	if (bus8)
+> +		info |= sdhci->width_mask;
+> +	else
+> +		info &= ~sdhci->width_mask;
+> +	writel(info, sdc->regs + ASPEED_SDC_INFO);
+> +	spin_unlock(&sdc->lock);
+> +}
+> +
+> +static void aspeed_sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+> +{
+> +	unsigned long timeout;
+> +	int div;
+> +	u16 clk;
+> +
+> +	if (clock == host->clock)
+> +		return;
+> +
+> +	sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
+> +
+> +	if (clock == 0)
+> +		goto out;
+> +
+> +	for (div = 1; div < 256; div *= 2) {
+> +		if ((host->max_clk / div) <= clock)
+> +			break;
+> +	}
+> +	div >>= 1;
+> +
+> +	clk = div << SDHCI_DIVIDER_SHIFT;
+
+Could call sdhci_enable_clk() here.
+
+> +	clk |= SDHCI_CLOCK_INT_EN;
+> +	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
+> +
+> +	/* Wait max 20 ms */
+> +	timeout = 20;
+> +	while (!((clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL))
+> +		 & SDHCI_CLOCK_INT_STABLE)) {
+> +		if (timeout == 0) {
+> +			pr_err("%s: Internal clock never stabilised.\n",
+> +			       mmc_hostname(host->mmc));
+> +			return;
+> +		}
+> +		timeout--;
+> +		mdelay(1);
+> +	}
+> +
+> +	clk |= SDHCI_CLOCK_CARD_EN;
+> +	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
+> +
+> +out:
+> +	host->clock = clock;
+> +}
+> +
+> +static void aspeed_sdhci_set_bus_width(struct sdhci_host *host, int width)
+> +{
+> +	struct sdhci_pltfm_host *pltfm_priv;
+> +	struct aspeed_sdhci *aspeed_sdhci;
+> +	struct aspeed_sdc *aspeed_sdc;
+> +	u8 ctrl;
+> +
+> +	pltfm_priv = sdhci_priv(host);
+> +	aspeed_sdhci = sdhci_pltfm_priv(pltfm_priv);
+> +	aspeed_sdc = aspeed_sdhci->parent;
+> +
+> +	/* Set/clear 8-bit mode */
+> +	aspeed_sdc_bus_width(aspeed_sdc, aspeed_sdhci,
+> +			     width == MMC_BUS_WIDTH_8);
+> +
+> +	/* Set/clear 1 or 4 bit mode */
+> +	ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
+> +	if (width == MMC_BUS_WIDTH_4)
+> +		ctrl |= SDHCI_CTRL_4BITBUS;
+> +	else
+> +		ctrl &= ~SDHCI_CTRL_4BITBUS;
+> +	sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
+> +}
+> +
+> +static const struct sdhci_ops aspeed_sdhci_ops = {
+> +	.set_clock = aspeed_sdhci_set_clock,
+> +	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
+> +	.set_bus_width = aspeed_sdhci_set_bus_width,
+> +	.get_timeout_clock = sdhci_pltfm_clk_get_max_clock,
+> +	.reset = sdhci_reset,
+> +	.set_uhs_signaling = sdhci_set_uhs_signaling,
+> +};
+> +
+> +static const struct sdhci_pltfm_data aspeed_sdc_pdata = {
+
+Up to you, but this is for the aspeed_sdhci driver, so I would
+have expected it to be called aspeed_sdhci_pdata
+
+> +	.ops = &aspeed_sdhci_ops,
+> +	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
+> +	.quirks2 = SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN,
+
+You don't use sdhci_set_clock() or sdhci_calc_clk(), so it doesn't
+look like SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN is needed.
+
+> +};
+> +
+> +static inline int aspeed_sdhci_calculate_slot(struct aspeed_sdhci *dev,
+> +					      struct resource *res)
+> +{
+> +	resource_size_t delta;
+> +
+> +	if (!res || resource_type(res) != IORESOURCE_MEM)
+> +		return -EINVAL;
+> +
+> +	if (res->start < dev->parent->res->start)
+> +		return -EINVAL;
+> +
+> +	delta = res->start - dev->parent->res->start;
+> +	if (delta & (0x100 - 1))
+> +		return -EINVAL;
+> +
+> +	return (delta / 0x100) - 1;
+> +}
+> +
+> +static int aspeed_sdhci_probe(struct platform_device *pdev)
+> +{
+> +	struct sdhci_pltfm_host *pltfm_host;
+> +	struct aspeed_sdhci *dev;
+> +	struct sdhci_host *host;
+> +	struct resource *res;
+> +	int slot;
+> +	int ret;
+> +
+> +	host = sdhci_pltfm_init(pdev, &aspeed_sdc_pdata, sizeof(*dev));
+> +	if (IS_ERR(host))
+> +		return PTR_ERR(host);
+> +
+> +	pltfm_host = sdhci_priv(host);
+> +	dev = sdhci_pltfm_priv(pltfm_host);
+> +	dev->parent = dev_get_drvdata(pdev->dev.parent);
+> +
+> +	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+> +	slot = aspeed_sdhci_calculate_slot(dev, res);
+> +	if (slot < 0)
+> +		return slot;
+> +	dev_info(&pdev->dev, "Configuring for slot %d\n", slot);
+> +	dev->width_mask = !slot ? ASPEED_SDC_S0MMC8 : ASPEED_SDC_S1MMC8;
+
+That implies that you only support 2 slots which begs the question why
+you don't validate slot.
+
+> +
+> +	sdhci_get_of_property(pdev);
+> +
+> +	pltfm_host->clk = devm_clk_get(&pdev->dev, NULL);
+> +	if (IS_ERR(pltfm_host->clk))
+> +		return PTR_ERR(pltfm_host->clk);
+> +
+> +	ret = clk_prepare_enable(pltfm_host->clk);
+> +	if (ret) {
+> +		dev_err(&pdev->dev, "Unable to enable SDIO clock\n");
+> +		goto err_pltfm_free;
+> +	}
+> +
+> +	ret = mmc_of_parse(host->mmc);
+> +	if (ret)
+> +		goto err_sdhci_add;
+> +
+> +	ret = sdhci_add_host(host);
+> +	if (ret)
+> +		goto err_sdhci_add;
+> +
+> +	return 0;
+> +
+> +err_sdhci_add:
+> +	clk_disable_unprepare(pltfm_host->clk);
+> +err_pltfm_free:
+> +	sdhci_pltfm_free(pdev);
+> +	return ret;
+> +}
+> +
+> +static int aspeed_sdhci_remove(struct platform_device *pdev)
+> +{
+> +	struct sdhci_pltfm_host *pltfm_host;
+> +	struct sdhci_host *host;
+> +	int dead;
+> +
+> +	host = platform_get_drvdata(pdev);
+> +	pltfm_host = sdhci_priv(host);
+> +
+> +	dead = readl(host->ioaddr + SDHCI_INT_STATUS) == 0xffffffff;
+
+'dead' only makes sense for PCI. Just set it to zero.
+
+> +
+> +	sdhci_remove_host(host, dead);
+> +
+> +	clk_disable_unprepare(pltfm_host->clk);
+> +
+> +	sdhci_pltfm_free(pdev);
+> +
+> +	return 0;
+> +}
+> +
+> +static const struct of_device_id aspeed_sdhci_of_match[] = {
+> +	{ .compatible = "aspeed,ast2400-sdhci", },
+> +	{ .compatible = "aspeed,ast2500-sdhci", },
+> +	{ }
+> +};
+> +
+> +static struct platform_driver aspeed_sdhci_driver = {
+> +	.driver		= {
+> +		.name	= "sdhci-aspeed",
+> +		.of_match_table = aspeed_sdhci_of_match,
+> +	},
+> +	.probe		= aspeed_sdhci_probe,
+> +	.remove		= aspeed_sdhci_remove,
+> +};
+> +
+> +module_platform_driver(aspeed_sdhci_driver);
+> +
+> +static int aspeed_sdc_probe(struct platform_device *pdev)
+> +
+> +{
+> +	struct device_node *parent, *child;
+> +	struct aspeed_sdc *sdc;
+> +	int ret;
+> +
+> +	sdc = devm_kzalloc(&pdev->dev, sizeof(*sdc), GFP_KERNEL);
+> +	if (!sdc)
+> +		return -ENOMEM;
+> +
+> +	spin_lock_init(&sdc->lock);
+> +
+> +	sdc->clk = devm_clk_get(&pdev->dev, NULL);
+> +	if (IS_ERR(sdc->clk))
+> +		return PTR_ERR(sdc->clk);
+> +
+> +	ret = clk_prepare_enable(sdc->clk);
+> +	if (ret) {
+> +		dev_err(&pdev->dev, "Unable to enable SDCLK\n");
+> +		return ret;
+> +	}
+> +
+> +	sdc->res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+> +	sdc->regs = devm_ioremap_resource(&pdev->dev, sdc->res);
+> +	if (IS_ERR(sdc->regs)) {
+> +		ret = PTR_ERR(sdc->regs);
+> +		goto err_clk;
+> +	}
+> +
+> +	dev_set_drvdata(&pdev->dev, sdc);
+> +
+> +	parent = pdev->dev.of_node;
+> +	for_each_available_child_of_node(parent, child) {
+> +		struct platform_device *cpdev;
+> +
+> +		cpdev = of_platform_device_create(child, NULL, &pdev->dev);
+> +		if (IS_ERR(cpdev)) {
+> +			of_node_put(child);
+> +			ret = PTR_ERR(pdev);
+> +			goto err_clk;
+> +		}
+> +	}
+> +
+> +	return 0;
+> +
+> +err_clk:
+> +	clk_disable_unprepare(sdc->clk);
+> +	return ret;
+> +}
+> +
+> +static int aspeed_sdc_remove(struct platform_device *pdev)
+> +{
+> +	struct aspeed_sdc *sdc = dev_get_drvdata(&pdev->dev);
+> +
+> +	clk_disable_unprepare(sdc->clk);
+> +
+> +	return 0;
+> +}
+> +
+> +static const struct of_device_id aspeed_sdc_of_match[] = {
+> +	{ .compatible = "aspeed,ast2400-sd-controller", },
+> +	{ .compatible = "aspeed,ast2500-sd-controller", },
+> +	{ }
+> +};
+> +
+> +MODULE_DEVICE_TABLE(of, aspeed_sdc_of_match);
+> +
+> +static struct platform_driver aspeed_sdc_driver = {
+> +	.driver		= {
+> +		.name	= "sd-controller-aspeed",
+> +		.pm	= &sdhci_pltfm_pmops,
+> +		.of_match_table = aspeed_sdc_of_match,
+> +	},
+> +	.probe		= aspeed_sdc_probe,
+> +	.remove		= aspeed_sdc_remove,
+> +};
+> +
+> +module_platform_driver(aspeed_sdc_driver);
+> +
+> +MODULE_DESCRIPTION("Driver for the ASPEED SD/SDIO/SDHCI Controllers");
+> +MODULE_AUTHOR("Ryan Chen <ryan_chen@aspeedtech.com>");
+> +MODULE_AUTHOR("Andrew Jeffery <andrew@aj.id.au>");
+> +MODULE_LICENSE("GPL v2");
+> 
