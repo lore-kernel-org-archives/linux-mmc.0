@@ -1,95 +1,117 @@
-From: Alan Cooper <alcooperx@gmail.com>
-Subject: Re: Issue with sequence to switch to HS400
-Date: Thu, 25 Jul 2019 17:37:47 -0400
-Message-ID: <CAOGqxeVjj9Leok-Oph-kNA92fKhdBHzwJZ643uND8GV_8VaHCw@mail.gmail.com>
-References: <CAOGqxeVeEq803rrtGrnubRA8cP3dRCXsU15ss3pS1q6ik+k8Bw@mail.gmail.com>
- <7610bbc9-83d8-ee98-1425-07bb65448541@intel.com> <CAOGqxeVR3XzAQ-yTH35hyT3KpL11nTwMY1Ca96ZW=K=PiWMnHA@mail.gmail.com>
- <23ce5519-cb4b-4d85-4bfc-3e438212ec7f@intel.com>
+From: Stefan Wahren <wahrenst@gmx.net>
+Subject: Re: [PATCH 00/18] ARM: Add minimal Raspberry Pi 4 support
+Date: Fri, 26 Jul 2019 00:09:00 +0200
+Message-ID: <d4fb1feb-78a7-e860-cfdb-21d814bdcfd1@gmx.net>
+References: <1563774880-8061-1-git-send-email-wahrenst@gmx.net>
+ <96113adb5fcab9c2f4bb5fa82b84ff5f9c07fd07.camel@suse.de>
+ <bc650090-db86-ccac-01dc-23f08ad7b19b@gmx.net>
+ <20190723093442.GA27239@lst.de>
+ <04c5eaa03f3a124dbbce6186e11e19acc4539cc8.camel@suse.de>
+ <b15509d6-bc2e-3d06-0eea-943e6e456d62@gmx.net>
+ <5f9b11f54c66fd0487837f7e58af3adf7f86635f.camel@suse.de>
+ <c642de0a85d67f7f758735f1bba083156cca0ddb.camel@suse.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <23ce5519-cb4b-4d85-4bfc-3e438212ec7f@intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <c642de0a85d67f7f758735f1bba083156cca0ddb.camel@suse.de>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Nicolas Saenz Julienne <nsaenzjulienne@suse.de>, Christoph Hellwig <hch@lst.de>
+Cc: Mark Rutland <mark.rutland@arm.com>, Ulf Hansson <ulf.hansson@linaro.org>, Florian Fainelli <f.fainelli@gmail.com>, Scott Branden <sbranden@broadcom.com>, Matthias Brugger <mbrugger@suse.com>, Stephen Boyd <sboyd@kernel.org>, Ray Jui <rjui@broadcom.com>, Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, Eric Anholt <eric@anholt.net>, Rob Herring <robh+dt@kernel.org>, bcm-kernel-feedback-list@broadcom.com, linux-rpi-kernel@lists.infradead.org, linux-gpio@vger.kernel.org, Michael Turquette <mturquette@baylibre.com>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-That's an even better solution and it gets my HS400 mode working.
-Will you add this change or should I?
+Am 25.07.19 um 10:22 schrieb Nicolas Saenz Julienne:
+>>>> Any thoughts on this?
+>>>>
+>>>> diff --git a/arch/arm/mach-bcm/Kconfig b/arch/arm/mach-bcm/Kconfig
+>>>> index 5e5f1fabc3d4..3db8deed83a6 100644
+>>>> --- a/arch/arm/mach-bcm/Kconfig
+>>>> +++ b/arch/arm/mach-bcm/Kconfig
+>>>> @@ -168,6 +168,7 @@ config ARCH_BCM2835
+>>>>         select PINCTRL
+>>>>         select PINCTRL_BCM2835
+>>>>         select MFD_CORE
+>>>> +       select DMABOUNCE
+>>>>         help
+>>>>           This enables support for the Broadcom BCM2835 and BCM2836 SoCs.
+>>>>           This SoC is used in the Raspberry Pi and Roku 2 devices.
+>>>> diff --git a/arch/arm/mach-bcm/board_bcm2835.c b/arch/arm/mach-
+>>>> bcm/board_bcm2835.c
+>>>> index c09cf25596af..be788849c4bb 100644
+>>>> --- a/arch/arm/mach-bcm/board_bcm2835.c
+>>>> +++ b/arch/arm/mach-bcm/board_bcm2835.c
+>>>> @@ -3,6 +3,8 @@
+>>>>   * Copyright (C) 2010 Broadcom
+>>>>   */
+>>>>
+>>>> +#include <linux/device.h>
+>>>> +#include <linux/dma-mapping.h>
+>>>>  #include <linux/init.h>
+>>>>  #include <linux/irqchip.h>
+>>>>  #include <linux/of_address.h>
+>>>> @@ -24,8 +26,37 @@ static const char * const bcm2835_compat[] = {
+>>>>         NULL
+>>>>  };
+>>>>
+>>>> +static int bcm2835_needs_bounce(struct device *dev, dma_addr_t dma_addr,
+>>>> size_t size)
+>>>> +{
+>>>> +       /*
+>>>> +        * The accepted dma addresses are [0xc0000000, 0xffffffff] which
+>>>> map
+>>>> to
+>>>> +        * ram's [0x00000000, 0x3fffffff].
+>>>> +        */
+>>>> +       return dma_addr < 3ULL * SZ_1G;
+>>>> +}
+>>>> +
+>>>> +/*
+>>>> + * Setup DMA mask to 1GB on devices hanging from soc interconnect
+>>>> + */
+>>>> +static int bcm2835_platform_notify(struct device *dev)
+>>>> +{
+>>>> +       if (dev->parent && !strcmp("soc", dev_name(dev->parent))) {
+>>>> +               dev->dma_mask = &dev->coherent_dma_mask;
+>>>> +               dev->coherent_dma_mask = DMA_BIT_MASK(30); /* 1GB */
+>>> Shouldn't this come from the device tree?
+>> Yes, actually I could use the 'dma-ranges' parsing code I suggested on the
+>> arm64 RFC. The same goes with 'dma_zone_size = SZ_1G', it ideally should be
+>> calculated based on the device-tree.
+>>
+>> The way I see it I'm not sure it's worth the effort, in arm64 we have no
+>> choice
+>> as there are no board files. But here we seem to be the only ones with this
+>> specific DMA addressing constraint, so fixing it in arm/common doesn't seem
+>> like it's going to benefit anyone else. Let's see how the arm arch maintainers
+>> react though.
+>>
+>> There is one catch though. I missed it earlier as I was excited to see the
+>> board boot, but some devices are failing to set their DMA masks:
+>>
+>> [    1.989576] dwc2 fe980000.usb: can't set coherent DMA mask: -5
+>>
+>> It seems that other users of dmabounce also implement their own
+>> dma_supported(). I have to look into it.
+> Sadly it seems there are some limitations in dmabounce I didn't take into
+> account earlier. Among other things it can't deal with HighMem out of the box
+> and even when trying to adapt it to our needs, fails to do so as it allocates
+> using GFP_ATOMIC, which rules out using the CMA when allocating coherent
+> memory. Sorry for the noise, I got carried away too soon.
+>
+> I did a dirty hack hooking up dma-direct/swiotlb to the board. It seems to be
+> working fine after some tweaks in arm's dma_capable(). That said I want to test
+> it further before sending anything ;).
+>
+Take your time.
 
-Thanks
-Al
-
-On Thu, Jul 25, 2019 at 3:33 AM Adrian Hunter <adrian.hunter@intel.com> wro=
-te:
->
-> On 23/07/19 3:34 PM, Alan Cooper wrote:
-> > On Tue, Jul 23, 2019 at 1:21 AM Adrian Hunter <adrian.hunter@intel.com>=
- wrote:
-> >>
-> >> On 23/07/19 1:31 AM, Alan Cooper wrote:
-> >>> I'm having a problem with a new SD/MMC controller and PHY in our
-> >>> latest SoC's. The issue I'm seeing is that I can't switch into HS400
-> >>> mode. This looks like something the driver is doing that doesn't meet
-> >>> the JEDEC spec. In the "HS400 timing mode selection" section of the
-> >>> JEDEC spec , in step 7 it states:
-> >>>
-> >>> 7) Set the =E2=80=9CTiming Interface=E2=80=9D parameter in the HS_TIM=
-ING [185] field
-> >>> of the Extended CSD register to 0x1 to switch to High Speed mode and
-> >>> then set the clock frequency to a value not greater than 52 MHz.
-> >>>
-> >>> In the function mmc_select_hs400() in mmc.c, I see that a switch
-> >>> command is done to set the eMMC device to HS mode and then
-> >>> mmc_set_timing(card->host, MMC_TIMING_MMC_HS) is used to change the
-> >>> controller to HS mode. The problem is that the "SD Host Controller
-> >>> Standard Specification" states that "UHS Mode Select" field of the
-> >>> "Host Control 2 Register" controls the mode when the "1.8V Signaling
-> >>> Enable" bit in the same register is set, so mmc_set_timing() is
-> >>> actually leaving the controller in SDR12 mode and mmc_select_hs400()
-> >>> will then set the clock to 52MHz. This causes our PHY to detect an
-> >>> illegal combination and return an error.
-> >>>
-> >>> I think the easiest fix would be to change mmc_set_timing(card->host,
-> >>> MMC_TIMING_MMC_HS) to mmc_set_timing(card->host,
-> >>> MMC_TIMING_UHS_SDR25). The other possibility would be to change
-> >>> mmc_set_timing to handle the "1.8V Signaling Enable" bit properly.
-> >>> I'll submit a patch based on the feedback I get.
-> >>
-> >> eMMC is governed by JEDEC specs not SD specs.
-> >
-> > My understanding is that JEDEC does not have a host controller spec so
-> > this driver uses the "SD Host Controller Standard Specification".
->
-> There is no spec for using eMMC with SDHCI.
->
-> >
-> >>
-> >> Please consider making a change in your driver instead.  For example, =
-hook
-> >> ->set_ios() and if 1.8V is enabled and timing is set to MMC_TIMING_MMC=
-_HS
-> >> then change it to MMC_TIMING_UHS_SDR25.
-> >
-> > That's an easy fix, but it still leaves all other drivers/systems
-> > temporarily using SDR12 at 52MHz during the switch to HS400.
->
-> Yes, I changed my mind.  Does this work:
->
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 59acf8e3331e..f9d241458dcd 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -1849,7 +1849,9 @@ void sdhci_set_uhs_signaling(struct sdhci_host *hos=
-t, unsigned timing)
->                 ctrl_2 |=3D SDHCI_CTRL_UHS_SDR104;
->         else if (timing =3D=3D MMC_TIMING_UHS_SDR12)
->                 ctrl_2 |=3D SDHCI_CTRL_UHS_SDR12;
-> -       else if (timing =3D=3D MMC_TIMING_UHS_SDR25)
-> +       else if (timing =3D=3D MMC_TIMING_SD_HS ||
-> +                timing =3D=3D MMC_TIMING_MMC_HS ||
-> +                timing =3D=3D MMC_TIMING_UHS_SDR25)
->                 ctrl_2 |=3D SDHCI_CTRL_UHS_SDR25;
->         else if (timing =3D=3D MMC_TIMING_UHS_SDR50)
->                 ctrl_2 |=3D SDHCI_CTRL_UHS_SDR50;
+But please inform about possible modifications to the devicetree. I will
+sent out V2 of my series in a few days.
