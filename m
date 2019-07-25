@@ -1,204 +1,61 @@
-From: Baolin Wang <baolin.wang@linaro.org>
-Subject: [PATCH v5] mmc: host: sdhci: Fix the incorrect soft reset operation when runtime resuming
-Date: Thu, 25 Jul 2019 11:14:22 +0800
-Message-ID: <74a6462743e3d73a630d2634880d8866daee333e.1564022625.git.baolin.wang@linaro.org>
+From: Kalle Valo <kvalo@codeaurora.org>
+Subject: Re: [PATCH v2 2/2] mwifiex: Make use of the new sdio_trigger_replug() API to reset
+Date: Thu, 25 Jul 2019 08:56:35 +0300
+Message-ID: <87imrqzmgc.fsf@kamboji.qca.qualcomm.com>
+References: <20190722193939.125578-3-dianders@chromium.org>
+        <20190724113508.47A356021C@smtp.codeaurora.org>
+        <CAD=FV=WAsrBV9PzUz1qPzQru+AkOYZ5hsaWdhNYRTNqUfDeOmQ@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAD=FV=WAsrBV9PzUz1qPzQru+AkOYZ5hsaWdhNYRTNqUfDeOmQ@mail.gmail.com>
+        (Doug Anderson's message of "Wed, 24 Jul 2019 13:22:22 -0700")
 Sender: linux-kernel-owner@vger.kernel.org
-To: adrian.hunter@intel.com, ulf.hansson@linaro.org, shawnguo@kernel.org, s.hauer@pengutronix.de, kernel@pengutronix.de, festevam@gmail.com, ludovic.desroches@microchip.com, nicolas.ferre@microchip.com, alexandre.belloni@bootlin.com, ben-linux@fluff.org, jh80.chung@samsung.com, orsonzhai@gmail.com, zhang.lyra@gmail.com, huziji@marvell.com
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-imx@nxp.com, baolin.wang@linaro.org, vincent.guittot@linaro.org
+To: Doug Anderson <dianders@chromium.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Ganapathi Bhat <gbhat@marvell.com>, linux-wireless <linux-wireless@vger.kernel.org>, Andreas Fenkart <afenkart@gmail.com>, Brian Norris <briannorris@chromium.org>, Amitkumar Karwar <amitkarwar@gmail.com>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Nishant Sarmukadam <nishants@marvell.com>, netdev <netdev@vger.kernel.org>, Avri Altman <avri.altman@wdc.com>, Linux MMC List <linux-mmc@vger.kernel.org>, David Miller <davem@davemloft.net>, Xinming Hu <huxinming820@gmail.com>, LKML <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-The SD host controller specification defines 3 types software reset:
-software reset for data line, software reset for command line and
-software reset for all. Software reset for all means this reset affects
-the entire Host controller except for the card detection circuit.
+Doug Anderson <dianders@chromium.org> writes:
 
-In sdhci_runtime_resume_host() function, now we will always do software
-reset for all, which will cause Spreadtrum host controller work abnormally
-after resuming. For Spreadtrum platform that will not power down the SD/eMMC
-card during runtime suspend, we should just do software reset for data
-and command instead doing reset for all.
+> Hi,
+>
+> On Wed, Jul 24, 2019 at 4:35 AM Kalle Valo <kvalo@codeaurora.org> wrote:
+>>
+>> Douglas Anderson <dianders@chromium.org> wrote:
+>>
+>> > As described in the patch ("mmc: core: Add sdio_trigger_replug()
+>> > API"), the current mwifiex_sdio_card_reset() is broken in the cases
+>> > where we're running Bluetooth on a second SDIO func on the same card
+>> > as WiFi.  The problem goes away if we just use the
+>> > sdio_trigger_replug() API call.
+>> >
+>> > NOTE: Even though with this new solution there is less of a reason to
+>> > do our work from a workqueue (the unplug / plug mechanism we're using
+>> > is possible for a human to perform at any time so the stack is
+>> > supposed to handle it without it needing to be called from a special
+>> > context), we still need a workqueue because the Marvell reset function
+>> > could called from a context where sleeping is invalid and thus we
+>> > can't claim the host.  One example is Marvell's wakeup_timer_fn().
+>> >
+>> > Cc: Andreas Fenkart <afenkart@gmail.com>
+>> > Cc: Brian Norris <briannorris@chromium.org>
+>> > Fixes: b4336a282db8 ("mwifiex: sdio: reset adapter using mmc_hw_reset")
+>> > Signed-off-by: Douglas Anderson <dianders@chromium.org>
+>> > Reviewed-by: Brian Norris <briannorris@chromium.org>
+>>
+>> I assume this is going via some other tree so I'm dropping this from my
+>> queue. If I should apply this please resend once the dependency is in
+>> wireless-drivers-next.
+>>
+>> Patch set to Not Applicable.
+>
+> Thanks.  For now I'll assume that Ulf will pick it up if/when he is
+> happy with patch #1 in this series.  Would you be willing to provide
+> your Ack on this patch to make it clear to Ulf you're OK with that?
 
-To fix this issue, this patch introduces a new parameter of
-sdhci_runtime_resume_host() to let it decide if a 'reset for all' shall
-be done or not. Meanwhile changes other host drivers to issue a software
-reset for all to keep the original logic.
+Sure, I was planning to do that already in my previous email but forgot.
 
-Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
----
-Changes from v4:
- - Update the commit message.
- - Add a new parameter to decide if a 'reset for all' shall be done or not.
+Acked-by: Kalle Valo <kvalo@codeaurora.org>
 
-Changes from v3:
- - Use ios.power_mode to validate if the card is power down or not.
-
-Changes from v2:
- - Simplify the sdhci_sprd_reset() by issuing sdhci_reset().
-
-Changes from v1:
- - Add a specific reset operation instead of changing the core to avoid
- affecting other hardware.
----
- drivers/mmc/host/sdhci-acpi.c      |    2 +-
- drivers/mmc/host/sdhci-esdhc-imx.c |    2 +-
- drivers/mmc/host/sdhci-of-at91.c   |    2 +-
- drivers/mmc/host/sdhci-pci-core.c  |    4 ++--
- drivers/mmc/host/sdhci-pxav3.c     |    2 +-
- drivers/mmc/host/sdhci-s3c.c       |    2 +-
- drivers/mmc/host/sdhci-sprd.c      |    2 +-
- drivers/mmc/host/sdhci-xenon.c     |    2 +-
- drivers/mmc/host/sdhci.c           |    4 ++--
- drivers/mmc/host/sdhci.h           |    2 +-
- 10 files changed, 12 insertions(+), 12 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-index b3a130a..1604f51 100644
---- a/drivers/mmc/host/sdhci-acpi.c
-+++ b/drivers/mmc/host/sdhci-acpi.c
-@@ -883,7 +883,7 @@ static int sdhci_acpi_runtime_resume(struct device *dev)
- 
- 	sdhci_acpi_byt_setting(&c->pdev->dev);
- 
--	return sdhci_runtime_resume_host(c->host);
-+	return sdhci_runtime_resume_host(c->host, 0);
- }
- 
- #endif
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index c391510..776a942 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -1705,7 +1705,7 @@ static int sdhci_esdhc_runtime_resume(struct device *dev)
- 		esdhc_pltfm_set_clock(host, imx_data->actual_clock);
- 	}
- 
--	err = sdhci_runtime_resume_host(host);
-+	err = sdhci_runtime_resume_host(host, 0);
- 	if (err)
- 		goto disable_ipg_clk;
- 
-diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
-index e377b9b..d4e7e8b 100644
---- a/drivers/mmc/host/sdhci-of-at91.c
-+++ b/drivers/mmc/host/sdhci-of-at91.c
-@@ -289,7 +289,7 @@ static int sdhci_at91_runtime_resume(struct device *dev)
- 	}
- 
- out:
--	return sdhci_runtime_resume_host(host);
-+	return sdhci_runtime_resume_host(host, 0);
- }
- #endif /* CONFIG_PM */
- 
-diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-index 4041878..7d06e28 100644
---- a/drivers/mmc/host/sdhci-pci-core.c
-+++ b/drivers/mmc/host/sdhci-pci-core.c
-@@ -167,7 +167,7 @@ static int sdhci_pci_runtime_suspend_host(struct sdhci_pci_chip *chip)
- 
- err_pci_runtime_suspend:
- 	while (--i >= 0)
--		sdhci_runtime_resume_host(chip->slots[i]->host);
-+		sdhci_runtime_resume_host(chip->slots[i]->host, 0);
- 	return ret;
- }
- 
-@@ -181,7 +181,7 @@ static int sdhci_pci_runtime_resume_host(struct sdhci_pci_chip *chip)
- 		if (!slot)
- 			continue;
- 
--		ret = sdhci_runtime_resume_host(slot->host);
-+		ret = sdhci_runtime_resume_host(slot->host, 0);
- 		if (ret)
- 			return ret;
- 	}
-diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
-index 3ddecf4..e55037c 100644
---- a/drivers/mmc/host/sdhci-pxav3.c
-+++ b/drivers/mmc/host/sdhci-pxav3.c
-@@ -554,7 +554,7 @@ static int sdhci_pxav3_runtime_resume(struct device *dev)
- 	if (!IS_ERR(pxa->clk_core))
- 		clk_prepare_enable(pxa->clk_core);
- 
--	return sdhci_runtime_resume_host(host);
-+	return sdhci_runtime_resume_host(host, 0);
- }
- #endif
- 
-diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-index 8e4a8ba..f5753ae 100644
---- a/drivers/mmc/host/sdhci-s3c.c
-+++ b/drivers/mmc/host/sdhci-s3c.c
-@@ -745,7 +745,7 @@ static int sdhci_s3c_runtime_resume(struct device *dev)
- 	clk_prepare_enable(busclk);
- 	if (ourhost->cur_clk >= 0)
- 		clk_prepare_enable(ourhost->clk_bus[ourhost->cur_clk]);
--	ret = sdhci_runtime_resume_host(host);
-+	ret = sdhci_runtime_resume_host(host, 0);
- 	return ret;
- }
- #endif
-diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
-index 603a5d9..83a4767 100644
---- a/drivers/mmc/host/sdhci-sprd.c
-+++ b/drivers/mmc/host/sdhci-sprd.c
-@@ -696,7 +696,7 @@ static int sdhci_sprd_runtime_resume(struct device *dev)
- 	if (ret)
- 		goto clk_disable;
- 
--	sdhci_runtime_resume_host(host);
-+	sdhci_runtime_resume_host(host, 1);
- 	return 0;
- 
- clk_disable:
-diff --git a/drivers/mmc/host/sdhci-xenon.c b/drivers/mmc/host/sdhci-xenon.c
-index 8a18f14..1dea1ba 100644
---- a/drivers/mmc/host/sdhci-xenon.c
-+++ b/drivers/mmc/host/sdhci-xenon.c
-@@ -638,7 +638,7 @@ static int xenon_runtime_resume(struct device *dev)
- 		priv->restore_needed = false;
- 	}
- 
--	ret = sdhci_runtime_resume_host(host);
-+	ret = sdhci_runtime_resume_host(host, 0);
- 	if (ret)
- 		goto out;
- 	return 0;
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 59acf8e..4e9ebc8 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -3320,7 +3320,7 @@ int sdhci_runtime_suspend_host(struct sdhci_host *host)
- }
- EXPORT_SYMBOL_GPL(sdhci_runtime_suspend_host);
- 
--int sdhci_runtime_resume_host(struct sdhci_host *host)
-+int sdhci_runtime_resume_host(struct sdhci_host *host, int soft)
- {
- 	struct mmc_host *mmc = host->mmc;
- 	unsigned long flags;
-@@ -3331,7 +3331,7 @@ int sdhci_runtime_resume_host(struct sdhci_host *host)
- 			host->ops->enable_dma(host);
- 	}
- 
--	sdhci_init(host, 0);
-+	sdhci_init(host, soft);
- 
- 	if (mmc->ios.power_mode != MMC_POWER_UNDEFINED &&
- 	    mmc->ios.power_mode != MMC_POWER_OFF) {
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 89fd965..f3cd516 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -781,7 +781,7 @@ void sdhci_adma_write_desc(struct sdhci_host *host, void **desc,
- int sdhci_suspend_host(struct sdhci_host *host);
- int sdhci_resume_host(struct sdhci_host *host);
- int sdhci_runtime_suspend_host(struct sdhci_host *host);
--int sdhci_runtime_resume_host(struct sdhci_host *host);
-+int sdhci_runtime_resume_host(struct sdhci_host *host, int soft);
- #endif
- 
- void sdhci_cqe_enable(struct mmc_host *mmc);
 -- 
-1.7.9.5
+Kalle Valo
