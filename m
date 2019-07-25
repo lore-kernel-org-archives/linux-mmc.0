@@ -1,172 +1,204 @@
 From: Baolin Wang <baolin.wang@linaro.org>
-Subject: Re: [PATCH v4] mmc: host: sdhci-sprd: Fix the incorrect soft reset
- operation when runtime resuming
-Date: Thu, 25 Jul 2019 11:05:03 +0800
-Message-ID: <CAMz4kuJvUHWwrLOxb=HjULzktue6Awg3VvEGhpJ4Y9t-_xLoKw@mail.gmail.com>
-References: <89c3ef495c367d58ca3abe99a1f82c48f8c08705.1563274904.git.baolin.wang@linaro.org>
- <CAPDyKFq1y6xVfA=b1ybWvA1+e9h9aSteHAHjBbXvXGVJx95FQA@mail.gmail.com>
- <CAMz4kuKraOb_o0LFWnqkS7m0Xd3QGrw1P+md0YBNbbbp1967OA@mail.gmail.com>
- <CAPDyKFpy5JeGZ2w1KJN0ECB6jPG=UTZXbPRjMQQs8+NdK4rxuQ@mail.gmail.com>
- <CAMz4ku+ZTtnJdonZVAPVuvAiGCmCESvM8SbYKjwpNUgE4bO3gA@mail.gmail.com> <d9e90c5f-1939-b07a-ba85-8b61e3df10c6@intel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Subject: [PATCH v5] mmc: host: sdhci: Fix the incorrect soft reset operation when runtime resuming
+Date: Thu, 25 Jul 2019 11:14:22 +0800
+Message-ID: <74a6462743e3d73a630d2634880d8866daee333e.1564022625.git.baolin.wang@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <d9e90c5f-1939-b07a-ba85-8b61e3df10c6@intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Chunyan Zhang <zhang.lyra@gmail.com>, Orson Zhai <orsonzhai@gmail.com>, Vincent Guittot <vincent.guittot@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: adrian.hunter@intel.com, ulf.hansson@linaro.org, shawnguo@kernel.org, s.hauer@pengutronix.de, kernel@pengutronix.de, festevam@gmail.com, ludovic.desroches@microchip.com, nicolas.ferre@microchip.com, alexandre.belloni@bootlin.com, ben-linux@fluff.org, jh80.chung@samsung.com, orsonzhai@gmail.com, zhang.lyra@gmail.com, huziji@marvell.com
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-imx@nxp.com, baolin.wang@linaro.org, vincent.guittot@linaro.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, 24 Jul 2019 at 20:56, Adrian Hunter <adrian.hunter@intel.com> wrote:
->
-> On 24/07/19 5:21 AM, Baolin Wang wrote:
-> > On Tue, 23 Jul 2019 at 20:39, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> >>
-> >> On Tue, 23 Jul 2019 at 05:05, Baolin Wang <baolin.wang@linaro.org> wrote:
-> >>>
-> >>> Hi Ulf,
-> >>>
-> >>> On Mon, 22 Jul 2019 at 19:54, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> >>>>
-> >>>> On Wed, 17 Jul 2019 at 04:29, Baolin Wang <baolin.wang@linaro.org> wrote:
-> >>>>>
-> >>>>> In sdhci_runtime_resume_host() function, we will always do software reset
-> >>>>> for all, which will cause Spreadtrum host controller work abnormally after
-> >>>>> resuming.
-> >>>>
-> >>>> What does "software reset for all" means?
-> >>>
-> >>> The SD host controller specification defines 3 types software reset:
-> >>> software reset for data line, software reset for command line and
-> >>> software reset for all.
-> >>> Software reset for all means this reset affects the entire Host
-> >>> controller except for the card detection circuit.
-> >>
-> >> Thanks for clarifying, please update the changelog accordingly.
-> >
-> > Sure, sorry for confusing.
-> >
-> >>
-> >>>
-> >>>>
-> >>>>>
-> >>>>> Thus for Spreadtrum platform that will not power down the SD/eMMC card during
-> >>>>> runtime suspend, we should not do software reset for all.
-> >>>>
-> >>>> Normally, sdhci hosts that enters runtime suspend doesn't power off
-> >>>> the card (there are some exceptions like PCI variants).
-> >>>
-> >>> Yes, same as our controller.
-> >>>
-> >>>>
-> >>>> So, what's so special here and how does the reset come into play? I
-> >>>> don't see sdhci doing a reset in sdhci_runtime_suspend|resume_host()
-> >>>> and nor doesn the callback from the sdhci-sprd.c variant doing it.
-> >>>
-> >>> In sdhci_runtime_resume_host(), it will issue sdhci_init(host, 0) to
-> >>> issue software reset for all.
-> >>
-> >> Aha, I didn't read the code carefully enough. Apologize for the noise.
-> >
-> > No worries :)
-> >
-> >>>
-> >>>>
-> >>>>> To fix this
-> >>>>> issue, adding a specific reset operation that adds one condition to validate
-> >>>>> the power mode to decide if we can do software reset for all or just reset
-> >>>>> command and data lines.
-> >>>>>
-> >>>>> Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
-> >>>>> ---
-> >>>>> Changess from v3:
-> >>>>>  - Use ios.power_mode to validate if the card is power down or not.
-> >>>>>
-> >>>>> Changes from v2:
-> >>>>>  - Simplify the sdhci_sprd_reset() by issuing sdhci_reset().
-> >>>>>
-> >>>>> Changes from v1:
-> >>>>>  - Add a specific reset operation instead of changing the core to avoid
-> >>>>>  affecting other hardware.
-> >>>>> ---
-> >>>>>  drivers/mmc/host/sdhci-sprd.c |   19 ++++++++++++++++++-
-> >>>>>  1 file changed, 18 insertions(+), 1 deletion(-)
-> >>>>>
-> >>>>> diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
-> >>>>> index 603a5d9..94f9726 100644
-> >>>>> --- a/drivers/mmc/host/sdhci-sprd.c
-> >>>>> +++ b/drivers/mmc/host/sdhci-sprd.c
-> >>>>> @@ -373,6 +373,23 @@ static unsigned int sdhci_sprd_get_max_timeout_count(struct sdhci_host *host)
-> >>>>>         return 1 << 31;
-> >>>>>  }
-> >>>>>
-> >>>>> +static void sdhci_sprd_reset(struct sdhci_host *host, u8 mask)
-> >>>>> +{
-> >>>>> +       struct mmc_host *mmc = host->mmc;
-> >>>>> +
-> >>>>> +       /*
-> >>>>> +        * When try to reset controller after runtime suspend, we should not
-> >>>>> +        * reset for all if the SD/eMMC card is not power down, just reset
-> >>>>> +        * command and data lines instead. Otherwise will meet some strange
-> >>>>> +        * behaviors for Spreadtrum host controller.
-> >>>>> +        */
-> >>>>> +       if (host->runtime_suspended && (mask & SDHCI_RESET_ALL) &&
-> >>>>> +           mmc->ios.power_mode == MMC_POWER_ON)
-> >>>>> +               mask = SDHCI_RESET_CMD | SDHCI_RESET_DATA;
-> >>>>
-> >>>> Can sdhci_sprd_reset() be called when the host is runtime suspended?
-> >>>
-> >>> When host tries to runtime resume in sdhci_runtime_resume_host(), it
-> >>> will call reset operation to do software reset.
-> >>
-> >> Right, I see that now, thanks for clarifying.
-> >>
-> >> However, there are still some weird things going on in
-> >> sdhci_runtime_resume_host(). Like why is host->ops->enable_dma()
-> >> called first, directly from sdhci_runtime_resume_host(), then again in
-> >> sdhci_do_reset(), after host->ops->reset() has been called. Looks like
-> >> the first call to ->enable_dma() doesn't make sense?
-> >
-> > I am mot sure, since our host did not supply enable_dma() operation.
-> > This logic was used by some other hardware and worked well, I am not
-> > sure if it can reveal some issues if we change the logic here.
-> >
-> > Adrian, could you help to explain why we put enable_dma() in front of
-> > software reset?
->
-> No reason I can see.  But if you add a parameter to avoid a full reset, then
-> the ->enable_dma will be needed in that case.
+The SD host controller specification defines 3 types software reset:
+software reset for data line, software reset for command line and
+software reset for all. Software reset for all means this reset affects
+the entire Host controller except for the card detection circuit.
 
-OK. I'll keep it.
+In sdhci_runtime_resume_host() function, now we will always do software
+reset for all, which will cause Spreadtrum host controller work abnormally
+after resuming. For Spreadtrum platform that will not power down the SD/eMMC
+card during runtime suspend, we should just do software reset for data
+and command instead doing reset for all.
 
->
-> >
-> >>
-> >>>
-> >>>> That sounds like a bug to me, no?
-> >>>
-> >>> Since our controller will meet some strange behaviors if we do
-> >>> software reset for all in sdhci_runtime_resume_host(), and try to
-> >>> avoid changing the core logic of sdhci_runtime_resume_host() used by
-> >>> other hardware controllers, thus I introduced a specific reset ops and
-> >>> added some condition to make sure we just do software reset command
-> >>> and data lines from runtime suspend state.
-> >>
-> >> I understand, but perhaps it would become more clear if
-> >> sdhci_runtime_resume_host() is re-factored a bit. Maybe the caller can
-> >> give it some new parameter to let it decide if a SDHCI_RESET_ALL shall
-> >> be done or not.
-> >
-> > Yes, sounds reasonable, but need change other host drivers which
-> > issued the sdhci_runtime_resume_host().
-> >
-> > Adrian, if you also agree with Ulf's suggestion, then I will post new
-> > patches to add a parameter to decide the reset mode. Thanks.
->
-> Sounds fine.
+To fix this issue, this patch introduces a new parameter of
+sdhci_runtime_resume_host() to let it decide if a 'reset for all' shall
+be done or not. Meanwhile changes other host drivers to issue a software
+reset for all to keep the original logic.
 
-OK. Thanks for your input.
+Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
+---
+Changes from v4:
+ - Update the commit message.
+ - Add a new parameter to decide if a 'reset for all' shall be done or not.
 
+Changes from v3:
+ - Use ios.power_mode to validate if the card is power down or not.
+
+Changes from v2:
+ - Simplify the sdhci_sprd_reset() by issuing sdhci_reset().
+
+Changes from v1:
+ - Add a specific reset operation instead of changing the core to avoid
+ affecting other hardware.
+---
+ drivers/mmc/host/sdhci-acpi.c      |    2 +-
+ drivers/mmc/host/sdhci-esdhc-imx.c |    2 +-
+ drivers/mmc/host/sdhci-of-at91.c   |    2 +-
+ drivers/mmc/host/sdhci-pci-core.c  |    4 ++--
+ drivers/mmc/host/sdhci-pxav3.c     |    2 +-
+ drivers/mmc/host/sdhci-s3c.c       |    2 +-
+ drivers/mmc/host/sdhci-sprd.c      |    2 +-
+ drivers/mmc/host/sdhci-xenon.c     |    2 +-
+ drivers/mmc/host/sdhci.c           |    4 ++--
+ drivers/mmc/host/sdhci.h           |    2 +-
+ 10 files changed, 12 insertions(+), 12 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+index b3a130a..1604f51 100644
+--- a/drivers/mmc/host/sdhci-acpi.c
++++ b/drivers/mmc/host/sdhci-acpi.c
+@@ -883,7 +883,7 @@ static int sdhci_acpi_runtime_resume(struct device *dev)
+ 
+ 	sdhci_acpi_byt_setting(&c->pdev->dev);
+ 
+-	return sdhci_runtime_resume_host(c->host);
++	return sdhci_runtime_resume_host(c->host, 0);
+ }
+ 
+ #endif
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index c391510..776a942 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -1705,7 +1705,7 @@ static int sdhci_esdhc_runtime_resume(struct device *dev)
+ 		esdhc_pltfm_set_clock(host, imx_data->actual_clock);
+ 	}
+ 
+-	err = sdhci_runtime_resume_host(host);
++	err = sdhci_runtime_resume_host(host, 0);
+ 	if (err)
+ 		goto disable_ipg_clk;
+ 
+diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
+index e377b9b..d4e7e8b 100644
+--- a/drivers/mmc/host/sdhci-of-at91.c
++++ b/drivers/mmc/host/sdhci-of-at91.c
+@@ -289,7 +289,7 @@ static int sdhci_at91_runtime_resume(struct device *dev)
+ 	}
+ 
+ out:
+-	return sdhci_runtime_resume_host(host);
++	return sdhci_runtime_resume_host(host, 0);
+ }
+ #endif /* CONFIG_PM */
+ 
+diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+index 4041878..7d06e28 100644
+--- a/drivers/mmc/host/sdhci-pci-core.c
++++ b/drivers/mmc/host/sdhci-pci-core.c
+@@ -167,7 +167,7 @@ static int sdhci_pci_runtime_suspend_host(struct sdhci_pci_chip *chip)
+ 
+ err_pci_runtime_suspend:
+ 	while (--i >= 0)
+-		sdhci_runtime_resume_host(chip->slots[i]->host);
++		sdhci_runtime_resume_host(chip->slots[i]->host, 0);
+ 	return ret;
+ }
+ 
+@@ -181,7 +181,7 @@ static int sdhci_pci_runtime_resume_host(struct sdhci_pci_chip *chip)
+ 		if (!slot)
+ 			continue;
+ 
+-		ret = sdhci_runtime_resume_host(slot->host);
++		ret = sdhci_runtime_resume_host(slot->host, 0);
+ 		if (ret)
+ 			return ret;
+ 	}
+diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
+index 3ddecf4..e55037c 100644
+--- a/drivers/mmc/host/sdhci-pxav3.c
++++ b/drivers/mmc/host/sdhci-pxav3.c
+@@ -554,7 +554,7 @@ static int sdhci_pxav3_runtime_resume(struct device *dev)
+ 	if (!IS_ERR(pxa->clk_core))
+ 		clk_prepare_enable(pxa->clk_core);
+ 
+-	return sdhci_runtime_resume_host(host);
++	return sdhci_runtime_resume_host(host, 0);
+ }
+ #endif
+ 
+diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+index 8e4a8ba..f5753ae 100644
+--- a/drivers/mmc/host/sdhci-s3c.c
++++ b/drivers/mmc/host/sdhci-s3c.c
+@@ -745,7 +745,7 @@ static int sdhci_s3c_runtime_resume(struct device *dev)
+ 	clk_prepare_enable(busclk);
+ 	if (ourhost->cur_clk >= 0)
+ 		clk_prepare_enable(ourhost->clk_bus[ourhost->cur_clk]);
+-	ret = sdhci_runtime_resume_host(host);
++	ret = sdhci_runtime_resume_host(host, 0);
+ 	return ret;
+ }
+ #endif
+diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
+index 603a5d9..83a4767 100644
+--- a/drivers/mmc/host/sdhci-sprd.c
++++ b/drivers/mmc/host/sdhci-sprd.c
+@@ -696,7 +696,7 @@ static int sdhci_sprd_runtime_resume(struct device *dev)
+ 	if (ret)
+ 		goto clk_disable;
+ 
+-	sdhci_runtime_resume_host(host);
++	sdhci_runtime_resume_host(host, 1);
+ 	return 0;
+ 
+ clk_disable:
+diff --git a/drivers/mmc/host/sdhci-xenon.c b/drivers/mmc/host/sdhci-xenon.c
+index 8a18f14..1dea1ba 100644
+--- a/drivers/mmc/host/sdhci-xenon.c
++++ b/drivers/mmc/host/sdhci-xenon.c
+@@ -638,7 +638,7 @@ static int xenon_runtime_resume(struct device *dev)
+ 		priv->restore_needed = false;
+ 	}
+ 
+-	ret = sdhci_runtime_resume_host(host);
++	ret = sdhci_runtime_resume_host(host, 0);
+ 	if (ret)
+ 		goto out;
+ 	return 0;
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 59acf8e..4e9ebc8 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -3320,7 +3320,7 @@ int sdhci_runtime_suspend_host(struct sdhci_host *host)
+ }
+ EXPORT_SYMBOL_GPL(sdhci_runtime_suspend_host);
+ 
+-int sdhci_runtime_resume_host(struct sdhci_host *host)
++int sdhci_runtime_resume_host(struct sdhci_host *host, int soft)
+ {
+ 	struct mmc_host *mmc = host->mmc;
+ 	unsigned long flags;
+@@ -3331,7 +3331,7 @@ int sdhci_runtime_resume_host(struct sdhci_host *host)
+ 			host->ops->enable_dma(host);
+ 	}
+ 
+-	sdhci_init(host, 0);
++	sdhci_init(host, soft);
+ 
+ 	if (mmc->ios.power_mode != MMC_POWER_UNDEFINED &&
+ 	    mmc->ios.power_mode != MMC_POWER_OFF) {
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 89fd965..f3cd516 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -781,7 +781,7 @@ void sdhci_adma_write_desc(struct sdhci_host *host, void **desc,
+ int sdhci_suspend_host(struct sdhci_host *host);
+ int sdhci_resume_host(struct sdhci_host *host);
+ int sdhci_runtime_suspend_host(struct sdhci_host *host);
+-int sdhci_runtime_resume_host(struct sdhci_host *host);
++int sdhci_runtime_resume_host(struct sdhci_host *host, int soft);
+ #endif
+ 
+ void sdhci_cqe_enable(struct mmc_host *mmc);
 -- 
-Baolin Wang
-Best Regards
+1.7.9.5
