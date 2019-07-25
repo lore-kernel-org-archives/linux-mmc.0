@@ -1,115 +1,95 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 0/2] mmc: core: Fix Marvell WiFi reset by adding SDIO
- API to replug card
-Date: Thu, 25 Jul 2019 15:28:11 +0200
-Message-ID: <CAPDyKFoND5Kaam72zxO4wChO0z_1XL2KWX6oNjVcMUGA7G8RFg@mail.gmail.com>
-References: <20190722193939.125578-1-dianders@chromium.org>
+From: Alan Cooper <alcooperx@gmail.com>
+Subject: Re: Issue with sequence to switch to HS400
+Date: Thu, 25 Jul 2019 17:37:47 -0400
+Message-ID: <CAOGqxeVjj9Leok-Oph-kNA92fKhdBHzwJZ643uND8GV_8VaHCw@mail.gmail.com>
+References: <CAOGqxeVeEq803rrtGrnubRA8cP3dRCXsU15ss3pS1q6ik+k8Bw@mail.gmail.com>
+ <7610bbc9-83d8-ee98-1425-07bb65448541@intel.com> <CAOGqxeVR3XzAQ-yTH35hyT3KpL11nTwMY1Ca96ZW=K=PiWMnHA@mail.gmail.com>
+ <23ce5519-cb4b-4d85-4bfc-3e438212ec7f@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190722193939.125578-1-dianders@chromium.org>
+In-Reply-To: <23ce5519-cb4b-4d85-4bfc-3e438212ec7f@intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Douglas Anderson <dianders@chromium.org>
-Cc: Kalle Valo <kvalo@codeaurora.org>, Adrian Hunter <adrian.hunter@intel.com>, Ganapathi Bhat <gbhat@marvell.com>, linux-wireless <linux-wireless@vger.kernel.org>, Andreas Fenkart <afenkart@gmail.com>, Brian Norris <briannorris@chromium.org>, Amitkumar Karwar <amitkarwar@gmail.com>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Nishant Sarmukadam <nishants@marvell.com>, netdev <netdev@vger.kernel.org>, Avri Altman <avri.altman@wdc.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "David S. Miller" <davem@davemloft.net>, Xinming Hu <huxinming820@gmail.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Thomas Gleixner <tglx@linutronix.de>, Kate Stewart <kste>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, 22 Jul 2019 at 21:41, Douglas Anderson <dianders@chromium.org> wrote:
->
-> As talked about in the thread at:
->
-> http://lkml.kernel.org/r/CAD=FV=X7P2F1k_zwHc0mbtfk55-rucTz_GoDH=PL6zWqKYcpuw@mail.gmail.com
->
-> ...when the Marvell WiFi card tries to reset itself it kills
-> Bluetooth.  It was observed that we could re-init the card properly by
-> unbinding / rebinding the host controller.  It was also observed that
-> in the downstream Chrome OS codebase the solution used was
-> mmc_remove_host() / mmc_add_host(), which is similar to the solution
-> in this series.
->
-> So far I've only done testing of this series using the reset test
-> source that can be simulated via sysfs.  Specifically I ran this test:
->
-> for i in $(seq 1000); do
->   echo "LOOP $i --------"
->   echo 1 > /sys/kernel/debug/mwifiex/mlan0/reset
->
->   while true; do
->     if ! ping -w15 -c1 "${GW}" >/dev/null 2>&1; then
->       fail=$(( fail + 1 ))
->       echo "Fail WiFi ${fail}"
->       if [[ ${fail} == 3 ]]; then
->         exit 1
->       fi
->     else
->       fail=0
->       break
->     fi
->   done
->
->   hciconfig hci0 down
->   sleep 1
->   if ! hciconfig hci0 up; then
->     echo "Fail BT"
->     exit 1
->   fi
-> done
->
-> I ran this several times and got several hundred iterations each
-> before a failure.  When I saw failures:
->
-> * Once I saw a "Fail BT"; manually resetting the card again fixed it.
->   I didn't give it time to see if it would have detected this
->   automatically.
-> * Once I saw the ping fail because (for some reason) my device only
->   got an IPv6 address from my router and the IPv4 ping failed.  I
->   changed my script to use 'ping6' to see if that would help.
-> * Once I saw the ping fail because the higher level network stack
->   ("shill" in my case) seemed to crash.  A few minutes later the
->   system recovered itself automatically.  https://crbug.com/984593 if
->   you want more details.
-> * Sometimes while I was testing I saw "Fail WiFi 1" indicating a
->   transitory failure.  Usually this was an association failure, but in
->   one case I saw the device do "Firmware wakeup failed" after I
->   triggered the reset.  This caused the driver to trigger a re-reset
->   of itself which eventually recovered things.  This was good because
->   it was an actual test of the normal reset flow (not the one
->   triggered via sysfs).
->
-> Changes in v2:
-> - s/routnine/routine (Brian Norris, Matthias Kaehlcke).
-> - s/contining/containing (Matthias Kaehlcke).
-> - Add Matthias Reviewed-by tag.
-> - Removed clear_bit() calls and old comment (Brian Norris).
-> - Explicit CC of Andreas Fenkart.
-> - Explicit CC of Brian Norris.
-> - Add "Fixes" pointing at the commit Brian talked about.
-> - Add Brian's Reviewed-by tag.
->
-> Douglas Anderson (2):
->   mmc: core: Add sdio_trigger_replug() API
->   mwifiex: Make use of the new sdio_trigger_replug() API to reset
->
->  drivers/mmc/core/core.c                     | 28 +++++++++++++++++++--
->  drivers/mmc/core/sdio_io.c                  | 20 +++++++++++++++
->  drivers/net/wireless/marvell/mwifiex/sdio.c | 16 +-----------
->  include/linux/mmc/host.h                    | 15 ++++++++++-
->  include/linux/mmc/sdio_func.h               |  2 ++
->  5 files changed, 63 insertions(+), 18 deletions(-)
->
+That's an even better solution and it gets my HS400 mode working.
+Will you add this change or should I?
 
-Doug, thanks for sending this!
+Thanks
+Al
 
-As you know, I have been working on additional changes for SDIO
-suspend/resume (still WIP and not ready for sharing) and this series
-is related.
-
-The thing is, that even during system suspend/resume, synchronizations
-are needed between the different layers (mmc host, mmc core and
-sdio-funcs), which is common to the problem you want to solve.
-
-That said, I need to scratch my head a bit more before I can provide
-you some feedback on $subject series. Moreover, it's vacation period
-at my side so things are moving a bit slower. Please be patient.
-
-Kind regards
-Uffe
+On Thu, Jul 25, 2019 at 3:33 AM Adrian Hunter <adrian.hunter@intel.com> wro=
+te:
+>
+> On 23/07/19 3:34 PM, Alan Cooper wrote:
+> > On Tue, Jul 23, 2019 at 1:21 AM Adrian Hunter <adrian.hunter@intel.com>=
+ wrote:
+> >>
+> >> On 23/07/19 1:31 AM, Alan Cooper wrote:
+> >>> I'm having a problem with a new SD/MMC controller and PHY in our
+> >>> latest SoC's. The issue I'm seeing is that I can't switch into HS400
+> >>> mode. This looks like something the driver is doing that doesn't meet
+> >>> the JEDEC spec. In the "HS400 timing mode selection" section of the
+> >>> JEDEC spec , in step 7 it states:
+> >>>
+> >>> 7) Set the =E2=80=9CTiming Interface=E2=80=9D parameter in the HS_TIM=
+ING [185] field
+> >>> of the Extended CSD register to 0x1 to switch to High Speed mode and
+> >>> then set the clock frequency to a value not greater than 52 MHz.
+> >>>
+> >>> In the function mmc_select_hs400() in mmc.c, I see that a switch
+> >>> command is done to set the eMMC device to HS mode and then
+> >>> mmc_set_timing(card->host, MMC_TIMING_MMC_HS) is used to change the
+> >>> controller to HS mode. The problem is that the "SD Host Controller
+> >>> Standard Specification" states that "UHS Mode Select" field of the
+> >>> "Host Control 2 Register" controls the mode when the "1.8V Signaling
+> >>> Enable" bit in the same register is set, so mmc_set_timing() is
+> >>> actually leaving the controller in SDR12 mode and mmc_select_hs400()
+> >>> will then set the clock to 52MHz. This causes our PHY to detect an
+> >>> illegal combination and return an error.
+> >>>
+> >>> I think the easiest fix would be to change mmc_set_timing(card->host,
+> >>> MMC_TIMING_MMC_HS) to mmc_set_timing(card->host,
+> >>> MMC_TIMING_UHS_SDR25). The other possibility would be to change
+> >>> mmc_set_timing to handle the "1.8V Signaling Enable" bit properly.
+> >>> I'll submit a patch based on the feedback I get.
+> >>
+> >> eMMC is governed by JEDEC specs not SD specs.
+> >
+> > My understanding is that JEDEC does not have a host controller spec so
+> > this driver uses the "SD Host Controller Standard Specification".
+>
+> There is no spec for using eMMC with SDHCI.
+>
+> >
+> >>
+> >> Please consider making a change in your driver instead.  For example, =
+hook
+> >> ->set_ios() and if 1.8V is enabled and timing is set to MMC_TIMING_MMC=
+_HS
+> >> then change it to MMC_TIMING_UHS_SDR25.
+> >
+> > That's an easy fix, but it still leaves all other drivers/systems
+> > temporarily using SDR12 at 52MHz during the switch to HS400.
+>
+> Yes, I changed my mind.  Does this work:
+>
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 59acf8e3331e..f9d241458dcd 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1849,7 +1849,9 @@ void sdhci_set_uhs_signaling(struct sdhci_host *hos=
+t, unsigned timing)
+>                 ctrl_2 |=3D SDHCI_CTRL_UHS_SDR104;
+>         else if (timing =3D=3D MMC_TIMING_UHS_SDR12)
+>                 ctrl_2 |=3D SDHCI_CTRL_UHS_SDR12;
+> -       else if (timing =3D=3D MMC_TIMING_UHS_SDR25)
+> +       else if (timing =3D=3D MMC_TIMING_SD_HS ||
+> +                timing =3D=3D MMC_TIMING_MMC_HS ||
+> +                timing =3D=3D MMC_TIMING_UHS_SDR25)
+>                 ctrl_2 |=3D SDHCI_CTRL_UHS_SDR25;
+>         else if (timing =3D=3D MMC_TIMING_UHS_SDR50)
+>                 ctrl_2 |=3D SDHCI_CTRL_UHS_SDR50;
