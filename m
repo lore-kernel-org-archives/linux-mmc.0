@@ -1,69 +1,75 @@
-From: "Andrew Jeffery" <andrew@aj.id.au>
-Subject: Re: [PATCH v2 2/2] mmc: Add support for the ASPEED SD controller
-Date: Fri, 26 Jul 2019 16:17:31 +0930
-Message-ID: <4c6c020d-5985-4c57-aaae-c2393f9cc2fc@www.fastmail.com>
-References: <20190712033214.24713-1-andrew@aj.id.au>
- <20190712033214.24713-3-andrew@aj.id.au>
- <d6f7fdf2-07ed-354a-ca29-f3175623679c@intel.com>
- <7cd30f3d-43fd-42da-9301-091eb2625c65@www.fastmail.com>
- <8a7bfe52-83ca-7601-7d75-e5615da7b5de@intel.com>
+From: Yoshihiro Shimoda <yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
+Subject: RE: [PATCH v8 2/5] iommu/dma: Add a new dma_map_ops of
+	get_merge_boundary()
+Date: Fri, 26 Jul 2019 07:50:38 +0000
+Message-ID: <TYAPR01MB45442AFA1D1417870A3C5D91D8C00@TYAPR01MB4544.jpnprd01.prod.outlook.com>
+References: <1563859608-19456-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
+	<1563859608-19456-3-git-send-email-yoshihiro.shimoda.uh@renesas.com>
+	<ae95cc2e-38b4-0ed9-744a-67f03f220a3f@cogentembedded.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <8a7bfe52-83ca-7601-7d75-e5615da7b5de@intel.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc <linux-mmc@vger.kernel.org>
-Cc: mark.rutland@arm.com, devicetree@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, linux-aspeed@lists.ozlabs.org, Ryan Chen <ryanchen.aspeed@gmail.com>, linux-kernel@vger.kernel.org, Rob Herring <robh+dt@kernel.org>, Joel Stanley <joel@jms.id.au>, linux-arm-kernel@lists.infradead.org
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+In-Reply-To: <ae95cc2e-38b4-0ed9-744a-67f03f220a3f-M4DtvfQ/ZS1MRgGoP+s0PdBPR1lH4CV8@public.gmane.org>
+Content-Language: ja-JP
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: Sergei Shtylyov <sergei.shtylyov-M4DtvfQ/ZS1MRgGoP+s0PdBPR1lH4CV8@public.gmane.org>, "ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "hch-jcswGhMUV9g@public.gmane.org" <hch-jcswGhMUV9g@public.gmane.org>, "m.szyprowski-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org" <m.szyprowski-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, "robin.murphy-5wv7dgnIgG8@public.gmane.org" <robin.murphy-5wv7dgnIgG8@public.gmane.org>, "joro-zLv9SwRftAIdnm+yROfE0A@public.gmane.org" <joro-zLv9SwRftAIdnm+yROfE0A@public.gmane.org>, "axboe-tSWWG44O7X1aa/9Udqfwiw@public.gmane.org" <axboe-tSWWG44O7X1aa/9Udqfwiw@public.gmane.org>
+Cc: "linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org" <wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org>, "iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org" <iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
+Hello!
 
-
-On Fri, 26 Jul 2019, at 15:27, Adrian Hunter wrote:
-> On 26/07/19 3:52 AM, Andrew Jeffery wrote:
-> > On Thu, 25 Jul 2019, at 22:49, Adrian Hunter wrote:
-> >> On 12/07/19 6:32 AM, Andrew Jeffery wrote:
-> >>> +static int aspeed_sdhci_probe(struct platform_device *pdev)
-> >>> +{
-> >>> +	struct sdhci_pltfm_host *pltfm_host;
-> >>> +	struct aspeed_sdhci *dev;
-> >>> +	struct sdhci_host *host;
-> >>> +	struct resource *res;
-> >>> +	int slot;
-> >>> +	int ret;
-> >>> +
-> >>> +	host = sdhci_pltfm_init(pdev, &aspeed_sdc_pdata, sizeof(*dev));
-> >>> +	if (IS_ERR(host))
-> >>> +		return PTR_ERR(host);
-> >>> +
-> >>> +	pltfm_host = sdhci_priv(host);
-> >>> +	dev = sdhci_pltfm_priv(pltfm_host);
-> >>> +	dev->parent = dev_get_drvdata(pdev->dev.parent);
-> >>> +
-> >>> +	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
-> >>> +	slot = aspeed_sdhci_calculate_slot(dev, res);
-> >>> +	if (slot < 0)
-> >>> +		return slot;
-> >>> +	dev_info(&pdev->dev, "Configuring for slot %d\n", slot);
-> >>> +	dev->width_mask = !slot ? ASPEED_SDC_S0MMC8 : ASPEED_SDC_S1MMC8;
-> >>
-> >> That implies that you only support 2 slots which begs the question why
-> >> you don't validate slot.
-> > 
-> > I'm not sure what you mean here, but I'll dig into it.
+> From: Sergei Shtylyov, Sent: Tuesday, July 23, 2019 5:17 PM
 > 
-> I just meant, if you only support 2 slots:
+> Hello!
 > 
-> 	if (slot > 1)
-> 		return -EINVAL;
->
+> On 23.07.2019 8:26, Yoshihiro Shimoda wrote:
+> 
+> > This patch adds a new dma_map_ops of get_merge_boundary() to
+> > expose the DMA merge boundary if the domain type is IOMMU_DOMAIN_DMA.
+> >
+> > Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
+> > ---
+> >   drivers/iommu/dma-iommu.c | 11 +++++++++++
+> >   1 file changed, 11 insertions(+)
+> >
+> > diff --git a/drivers/iommu/dma-iommu.c b/drivers/iommu/dma-iommu.c
+> > index a7f9c3e..f3e5f2b 100644
+> > --- a/drivers/iommu/dma-iommu.c
+> > +++ b/drivers/iommu/dma-iommu.c
+> > @@ -1085,6 +1085,16 @@ static int iommu_dma_get_sgtable(struct device *dev, struct sg_table *sgt,
+> >   	return ret;
+> >   }
+> >
+> > +static unsigned long iommu_dma_get_merge_boundary(struct device *dev)
+> > +{
+> > +	struct iommu_domain *domain = iommu_get_dma_domain(dev);
+> > +
+> > +	if (domain->type != IOMMU_DOMAIN_DMA)
+> > +		return 0;	/* can't merge */
+> > +
+> > +	return (1 << __ffs(domain->pgsize_bitmap)) - 1;
+> 
+>     Not 1UL?
 
-Oh, sure.
+Thank you for your review! I'll fix it.
+
+Best regards,
+Yoshihiro Shimoda
+
+> > +}
+> > +
+> >   static const struct dma_map_ops iommu_dma_ops = {
+> >   	.alloc			= iommu_dma_alloc,
+> >   	.free			= iommu_dma_free,
+> [...]
+> 
+> MBR, Sergei
