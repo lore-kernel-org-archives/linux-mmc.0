@@ -1,71 +1,82 @@
-From: Baolin Wang <baolin.wang@linaro.org>
-Subject: Re: [PATCH v5] mmc: host: sdhci: Fix the incorrect soft reset
- operation when runtime resuming
-Date: Fri, 26 Jul 2019 09:41:15 +0800
-Message-ID: <CAMz4kuKOGmGHoYNELG38qYOw71=AaSk33=johskUtOs0KZ0z-g@mail.gmail.com>
-References: <74a6462743e3d73a630d2634880d8866daee333e.1564022625.git.baolin.wang@linaro.org>
- <CAPDyKFoNGZRdY3VVf6G9eNBfCyJbN5SUU2+fK24U-mHDX13oFQ@mail.gmail.com>
+From: "Michael K. Johnson" <johnsonm@danlj.org>
+Subject: [PATCH v2 1/2] mmc: sdhci: Add PLL Enable support to internal clock
+ setup
+Date: Thu, 25 Jul 2019 22:07:46 -0400
+Message-ID: <20190726020746.GB12042@people.danlj.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <CAPDyKFoNGZRdY3VVf6G9eNBfCyJbN5SUU2+fK24U-mHDX13oFQ@mail.gmail.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Chunyan Zhang <zhang.lyra@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+Sender: linux-kernel-owner@vger.kernel.org
+To: adrian.hunter@intel.com, ulf.hansson@linaro.org
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Ben Chuang <ben.chuang@genesyslogic.com.tw>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, 25 Jul 2019 at 21:15, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->
-> - Trimmed cc list
->
-> On Thu, 25 Jul 2019 at 05:14, Baolin Wang <baolin.wang@linaro.org> wrote:
-> >
-> > The SD host controller specification defines 3 types software reset:
-> > software reset for data line, software reset for command line and
-> > software reset for all. Software reset for all means this reset affects
-> > the entire Host controller except for the card detection circuit.
-> >
-> > In sdhci_runtime_resume_host() function, now we will always do software
-> > reset for all, which will cause Spreadtrum host controller work abnormally
-> > after resuming. For Spreadtrum platform that will not power down the SD/eMMC
-> > card during runtime suspend, we should just do software reset for data
-> > and command instead doing reset for all.
-> >
-> > To fix this issue, this patch introduces a new parameter of
-> > sdhci_runtime_resume_host() to let it decide if a 'reset for all' shall
-> > be done or not. Meanwhile changes other host drivers to issue a software
-> > reset for all to keep the original logic.
-> >
-> > Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
->
-> Applied for next, with a little change (renaming the "soft"
-> in-parameter to soft_reset), thanks!
+The GL9750 and GL9755 chipsets, and possibly others, require PLL Enable
+setup as part of the internal clock setup as described in 3.2.1 Internal
+Clock Setup Sequence of SD Host Controller Simplified Specification
+Version 4.20.  This changes the timeouts to the new specification of
+150ms for each step and is documented as safe for "prior versions which
+do not support PLL Enable."
 
-Thanks Ulf :)
+Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+Co-developed-by: Michael K Johnson <johnsonm@danlj.org>
+Signed-off-by: Michael K Johnson <johnsonm@danlj.org>
 
->
-> Adrian, if there is anything you want to change, please tell.
->
-> BTW, perhaps this should be applied for fixes and tagged for stable?
-> Baolin, if so, can point me the commit (or stable tag) the patch
-> fixes?
-
-Yes, since we fixed the PM runtime issue, which will reveal this
-issue. And I think it still fixes:
-Fixes: fb8bd90f83c4 ("mmc: sdhci-sprd: Add Spreadtrum's initial host
-controller")
-
-Thanks.
-
--- 
-Baolin Wang
-Best Regards
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 59acf8e3331e..14957578bf2e 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1636,8 +1636,8 @@ void sdhci_enable_clk(struct sdhci_host *host, u16 clk)
+ 	clk |= SDHCI_CLOCK_INT_EN;
+ 	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
+ 
+-	/* Wait max 20 ms */
+-	timeout = ktime_add_ms(ktime_get(), 20);
++	/* Wait max 150 ms */
++	timeout = ktime_add_ms(ktime_get(), 150);
+ 	while (1) {
+ 		bool timedout = ktime_after(ktime_get(), timeout);
+ 
+@@ -1650,7 +1650,28 @@ void sdhci_enable_clk(struct sdhci_host *host, u16 clk)
+ 			sdhci_dumpregs(host);
+ 			return;
+ 		}
+-		udelay(10);
++		usleep_range(10,15);
++	}
++
++	clk |= SDHCI_CLOCK_PLL_EN;
++	clk &= ~SDHCI_CLOCK_INT_STABLE;
++	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
++
++	/* Wait max 150 ms */
++	timeout = ktime_add_ms(ktime_get(), 150);
++	while (1) {
++		bool timedout = ktime_after(ktime_get(), timeout);
++
++		clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
++		if (clk & SDHCI_CLOCK_INT_STABLE)
++			break;
++		if (timedout) {
++			pr_err("%s: PLL clock never stabilised.\n",
++			       mmc_hostname(host->mmc));
++			sdhci_dumpregs(host);
++			return;
++		}
++		usleep_range(10,15);
+ 	}
+ 
+ 	clk |= SDHCI_CLOCK_CARD_EN;
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 199712e7adbb..72601a4d2e95 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -114,6 +114,7 @@
+ #define  SDHCI_DIV_HI_MASK	0x300
+ #define  SDHCI_PROG_CLOCK_MODE	0x0020
+ #define  SDHCI_CLOCK_CARD_EN	0x0004
++#define  SDHCI_CLOCK_PLL_EN	0x0008
+ #define  SDHCI_CLOCK_INT_STABLE	0x0002
+ #define  SDHCI_CLOCK_INT_EN	0x0001
+ 
