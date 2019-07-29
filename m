@@ -1,42 +1,74 @@
-From: Stefan Wahren <wahrenst@gmx.net>
-Subject: Re: [PATCH 00/18] ARM: Add minimal Raspberry Pi 4 support
-Date: Sun, 28 Jul 2019 13:22:06 +0200
-Message-ID: <319549e0-23b5-4a49-49ae-723da754f984@gmx.net>
-References: <1563774880-8061-1-git-send-email-wahrenst@gmx.net>
+From: "Gustavo A. R. Silva" <gustavo@embeddedor.com>
+Subject: [PATCH] mmc: atmel-mci: Mark expected switch fall-throughs
+Date: Sun, 28 Jul 2019 19:01:23 -0500
+Message-ID: <20190729000123.GA23902@embeddedor>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1563774880-8061-1-git-send-email-wahrenst@gmx.net>
-Content-Language: en-US
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Linus Walleij <linus.walleij@linaro.org>, Michael Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@kernel.org>
-Cc: Mark Rutland <mark.rutland@arm.com>, Ulf Hansson <ulf.hansson@linaro.org>, Matthias Brugger <mbrugger@suse.com>, Scott Branden <sbranden@broadcom.com>, linux-gpio@vger.kernel.org, Ray Jui <rjui@broadcom.com>, linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, Rob Herring <robh+dt@kernel.org>, Eric Anholt <eric@anholt.net>, Florian Fainelli <f.fainelli@gmail.com>, bcm-kernel-feedback-list@broadcom.com, linux-arm-kernel@lists.infradead.org, Nicolas Saenz Julienne <nsaenzjulienne@suse.de>, linux-rpi-kernel@lists.infradead.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ludovic Desroches <ludovic.desroches@microchip.com>, Ulf Hansson <ulf.hansson@linaro.org>, Nicolas Ferre <nicolas.ferre@microchip.com>, Alexandre Belloni <alexandre.belloni@bootlin.com>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, "Gustavo A. R. Silva" <gustavo@embeddedor.com>, Stephen Rothwell <sfr@canb.auug.org.au>, Kees Cook <keescook@chromium.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Linus,
-hi Michael,
-hi Stephen,
+Mark switch cases where we are expecting to fall through.
 
-Am 22.07.19 um 07:54 schrieb Stefan Wahren:
-> This series adds minimal support for the new Raspberry Pi 4, so we are abl=
-> e
-> to login via debug UART.
->
-> Patch 1-5:   Prepare platform and DTS for the new SoC BMC2711
-> Patch 6-10:  Enable support for emmc2 on BCM2711
-> Patch 11-12: Enable pinctrl for BCM2711
-> Patch 13-17: Add Raspberry Pi 4 DTS support
-> Patch 18:    Update MAINTAINERS
->
-any comments on the clk / pinctrl parts or do you just wait for Rob's Ack?
+This patch fixes the following warnings:
 
-Sorry to bother you, but i want to send a new version before my holidays.
+drivers/mmc/host/atmel-mci.c: In function 'atmci_get_cap':
+drivers/mmc/host/atmel-mci.c:2415:30: warning: this statement may fall through [-Wimplicit-fallthrough=]
+   host->caps.has_odd_clk_div = 1;
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+drivers/mmc/host/atmel-mci.c:2416:2: note: here
+  case 0x400:
+  ^~~~
+drivers/mmc/host/atmel-mci.c:2422:28: warning: this statement may fall through [-Wimplicit-fallthrough=]
+   host->caps.has_highspeed = 1;
+   ~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+drivers/mmc/host/atmel-mci.c:2423:2: note: here
+  case 0x200:
+  ^~~~
+drivers/mmc/host/atmel-mci.c:2426:40: warning: this statement may fall through [-Wimplicit-fallthrough=]
+   host->caps.need_notbusy_for_read_ops = 1;
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+drivers/mmc/host/atmel-mci.c:2427:2: note: here
+  case 0x100:
+  ^~~~
+
+Reported-by: Stephen Rothwell <sfr@canb.auug.org.au>
+Signed-off-by: Gustavo A. R. Silva <gustavo@embeddedor.com>
+---
+ drivers/mmc/host/atmel-mci.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+index 9ee0bc0ce6d0..c26fbe5f2222 100644
+--- a/drivers/mmc/host/atmel-mci.c
++++ b/drivers/mmc/host/atmel-mci.c
+@@ -2413,6 +2413,7 @@ static void atmci_get_cap(struct atmel_mci *host)
+ 	case 0x600:
+ 	case 0x500:
+ 		host->caps.has_odd_clk_div = 1;
++		/* Fall through */
+ 	case 0x400:
+ 	case 0x300:
+ 		host->caps.has_dma_conf_reg = 1;
+@@ -2420,13 +2421,16 @@ static void atmci_get_cap(struct atmel_mci *host)
+ 		host->caps.has_cfg_reg = 1;
+ 		host->caps.has_cstor_reg = 1;
+ 		host->caps.has_highspeed = 1;
++		/* Fall through */
+ 	case 0x200:
+ 		host->caps.has_rwproof = 1;
+ 		host->caps.need_blksz_mul_4 = 0;
+ 		host->caps.need_notbusy_for_read_ops = 1;
++		/* Fall through */
+ 	case 0x100:
+ 		host->caps.has_bad_data_ordering = 0;
+ 		host->caps.need_reset_after_xfer = 0;
++		/* Fall through */
+ 	case 0x0:
+ 		break;
+ 	default:
+-- 
+2.22.0
