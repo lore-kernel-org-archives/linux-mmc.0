@@ -1,208 +1,52 @@
-From: Stephen Boyd <swboyd@chromium.org>
-Subject: [PATCH v6 29/57] mmc: Remove dev_err() usage after platform_get_irq()
-Date: Tue, 30 Jul 2019 11:15:29 -0700
-Message-ID: <20190730181557.90391-30-swboyd@chromium.org>
-References: <20190730181557.90391-1-swboyd@chromium.org>
+From: "Shirley Her (SC)" <shirley.her@bayhubtech.com>
+Subject: [PATCH V3 1/2] mmc: sdhci: Fix O2 Host data read/write DLL lock phase
+ shift issue
+Date: Tue, 30 Jul 2019 19:07:30 +0000
+Message-ID: <1564513648-16377-1-git-send-email-shirley.her@bayhubtech.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190730181557.90391-1-swboyd@chromium.org>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+To: "adrian.hunter@intel.com" <adrian.hunter@intel.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Cc: "Chevron Li (WH)" <chevron.li@bayhubtech.com>, "Louis Lu (TP)" <louis.lu@bayhubtech.com>, "Max Huang (SC)" <max.huang@bayhubtech.com>, "Shirley Her (SC)" <shirley.her@bayhubtech.com>
 List-Id: linux-mmc@vger.kernel.org
 
-We don't need dev_err() messages when platform_get_irq() fails now that
-platform_get_irq() prints an error message itself when something goes
-wrong. Let's remove these prints with a simple semantic patch.
+Fix data read/write error in HS200 mode due to chip DLL lock phase shift
 
-// <smpl>
-@@
-expression ret;
-struct platform_device *E;
-@@
-
-ret =
-(
-platform_get_irq(E, ...)
-|
-platform_get_irq_byname(E, ...)
-);
-
-if ( \( ret < 0 \| ret <= 0 \) )
-{
-(
--if (ret != -EPROBE_DEFER)
--{ ...
--dev_err(...);
--... }
-|
-...
--dev_err(...);
-)
-...
-}
-// </smpl>
-
-While we're here, remove braces on if statements that only have one
-statement (manually).
-
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Signed-off-by: Stephen Boyd <swboyd@chromium.org>
+Signed-off-by:Shirley Her <shirley.her@bayhubtech.com>
 ---
+change in V3:
+ 1. add more explanation in dll_recovery and execute_tuning function
+ 2. move dll_adjust_count to O2_host struct
+ 3. fix some coding style error
+ 4. renaming O2_PLL_WDT_CONTROL1 to O2_PLL_DLL_WDT_CONTROL1
 
-Please apply directly to subsystem trees
+change in V2:
+ 1. use usleep_range instead of udelay
+ 2. move dll_adjust_count to sdhci-pci-o2micro.com
 
- drivers/mmc/host/bcm2835.c       | 1 -
- drivers/mmc/host/jz4740_mmc.c    | 1 -
- drivers/mmc/host/meson-gx-mmc.c  | 1 -
- drivers/mmc/host/mxcmmc.c        | 4 +---
- drivers/mmc/host/s3cmci.c        | 1 -
- drivers/mmc/host/sdhci-msm.c     | 2 --
- drivers/mmc/host/sdhci-pltfm.c   | 1 -
- drivers/mmc/host/sdhci-s3c.c     | 4 +---
- drivers/mmc/host/sdhci_f_sdh30.c | 4 +---
- drivers/mmc/host/uniphier-sd.c   | 4 +---
- 10 files changed, 4 insertions(+), 19 deletions(-)
+change in V1:
+ 1. add error recovery function to relock DLL with correct phase
+ 2. retunign HS200 after DLL locked
+---
+ drivers/mmc/host/sdhci-pci-o2micro.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/bcm2835.c b/drivers/mmc/host/bcm2835.c
-index 7e0d3a49c06d..e1b7757c48fe 100644
---- a/drivers/mmc/host/bcm2835.c
-+++ b/drivers/mmc/host/bcm2835.c
-@@ -1409,7 +1409,6 @@ static int bcm2835_probe(struct platform_device *pdev)
- 
- 	host->irq = platform_get_irq(pdev, 0);
- 	if (host->irq <= 0) {
--		dev_err(dev, "get IRQ failed\n");
- 		ret = -EINVAL;
- 		goto err;
- 	}
-diff --git a/drivers/mmc/host/jz4740_mmc.c b/drivers/mmc/host/jz4740_mmc.c
-index ffdbfaadd3f2..672708543a11 100644
---- a/drivers/mmc/host/jz4740_mmc.c
-+++ b/drivers/mmc/host/jz4740_mmc.c
-@@ -969,7 +969,6 @@ static int jz4740_mmc_probe(struct platform_device* pdev)
- 	host->irq = platform_get_irq(pdev, 0);
- 	if (host->irq < 0) {
- 		ret = host->irq;
--		dev_err(&pdev->dev, "Failed to get platform irq: %d\n", ret);
- 		goto err_free_host;
- 	}
- 
-diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-index 037311db3551..e712315c7e8d 100644
---- a/drivers/mmc/host/meson-gx-mmc.c
-+++ b/drivers/mmc/host/meson-gx-mmc.c
-@@ -1091,7 +1091,6 @@ static int meson_mmc_probe(struct platform_device *pdev)
- 
- 	host->irq = platform_get_irq(pdev, 0);
- 	if (host->irq <= 0) {
--		dev_err(&pdev->dev, "failed to get interrupt resource.\n");
- 		ret = -EINVAL;
- 		goto free_host;
- 	}
-diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
-index 750604f7fac9..011b59a3602e 100644
---- a/drivers/mmc/host/mxcmmc.c
-+++ b/drivers/mmc/host/mxcmmc.c
-@@ -1010,10 +1010,8 @@ static int mxcmci_probe(struct platform_device *pdev)
- 
- 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
- 	irq = platform_get_irq(pdev, 0);
--	if (irq < 0) {
--		dev_err(&pdev->dev, "failed to get IRQ: %d\n", irq);
-+	if (irq < 0)
- 		return irq;
--	}
- 
- 	mmc = mmc_alloc_host(sizeof(*host), &pdev->dev);
- 	if (!mmc)
-diff --git a/drivers/mmc/host/s3cmci.c b/drivers/mmc/host/s3cmci.c
-index ccc5f095775f..bce9c33bc4b5 100644
---- a/drivers/mmc/host/s3cmci.c
-+++ b/drivers/mmc/host/s3cmci.c
-@@ -1614,7 +1614,6 @@ static int s3cmci_probe(struct platform_device *pdev)
- 
- 	host->irq = platform_get_irq(pdev, 0);
- 	if (host->irq <= 0) {
--		dev_err(&pdev->dev, "failed to get interrupt resource.\n");
- 		ret = -EINVAL;
- 		goto probe_iounmap;
- 	}
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index 9cf14b359c14..b75c82d8d6c1 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -1917,8 +1917,6 @@ static int sdhci_msm_probe(struct platform_device *pdev)
- 	/* Setup IRQ for handling power/voltage tasks with PMIC */
- 	msm_host->pwr_irq = platform_get_irq_byname(pdev, "pwr_irq");
- 	if (msm_host->pwr_irq < 0) {
--		dev_err(&pdev->dev, "Get pwr_irq failed (%d)\n",
--			msm_host->pwr_irq);
- 		ret = msm_host->pwr_irq;
- 		goto clk_disable;
- 	}
-diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
-index d268b3b8850a..caf0ad5de604 100644
---- a/drivers/mmc/host/sdhci-pltfm.c
-+++ b/drivers/mmc/host/sdhci-pltfm.c
-@@ -131,7 +131,6 @@ struct sdhci_host *sdhci_pltfm_init(struct platform_device *pdev,
- 
- 	irq = platform_get_irq(pdev, 0);
- 	if (irq < 0) {
--		dev_err(&pdev->dev, "failed to get IRQ number\n");
- 		ret = irq;
- 		goto err;
- 	}
-diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-index 8e4a8ba33f05..3d7fa948b4c3 100644
---- a/drivers/mmc/host/sdhci-s3c.c
-+++ b/drivers/mmc/host/sdhci-s3c.c
-@@ -490,10 +490,8 @@ static int sdhci_s3c_probe(struct platform_device *pdev)
- 	}
- 
- 	irq = platform_get_irq(pdev, 0);
--	if (irq < 0) {
--		dev_err(dev, "no irq specified\n");
-+	if (irq < 0)
- 		return irq;
--	}
- 
- 	host = sdhci_alloc_host(dev, sizeof(struct sdhci_s3c));
- 	if (IS_ERR(host)) {
-diff --git a/drivers/mmc/host/sdhci_f_sdh30.c b/drivers/mmc/host/sdhci_f_sdh30.c
-index e369cbf1ff02..f8b939e63e02 100644
---- a/drivers/mmc/host/sdhci_f_sdh30.c
-+++ b/drivers/mmc/host/sdhci_f_sdh30.c
-@@ -119,10 +119,8 @@ static int sdhci_f_sdh30_probe(struct platform_device *pdev)
- 	u32 reg = 0;
- 
- 	irq = platform_get_irq(pdev, 0);
--	if (irq < 0) {
--		dev_err(dev, "%s: no irq specified\n", __func__);
-+	if (irq < 0)
- 		return irq;
--	}
- 
- 	host = sdhci_alloc_host(dev, sizeof(struct f_sdhost_priv));
- 	if (IS_ERR(host))
-diff --git a/drivers/mmc/host/uniphier-sd.c b/drivers/mmc/host/uniphier-sd.c
-index 49aad9a79c18..e09336f9166d 100644
---- a/drivers/mmc/host/uniphier-sd.c
-+++ b/drivers/mmc/host/uniphier-sd.c
-@@ -557,10 +557,8 @@ static int uniphier_sd_probe(struct platform_device *pdev)
- 	int irq, ret;
- 
- 	irq = platform_get_irq(pdev, 0);
--	if (irq < 0) {
--		dev_err(dev, "failed to get IRQ number");
-+	if (irq < 0)
- 		return irq;
--	}
- 
- 	priv = devm_kzalloc(dev, sizeof(*priv), GFP_KERNEL);
- 	if (!priv)
--- 
-Sent by a computer through tubes
+diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-=
+pci-o2micro.c
+index 9dc4548..186a33d 100644
+--- a/drivers/mmc/host/sdhci-pci-o2micro.c
++++ b/drivers/mmc/host/sdhci-pci-o2micro.c
+@@ -51,7 +51,7 @@
+ #define O2_SD_VENDOR_SETTING2	0x1C8
+ #define O2_SD_HW_TUNING_DISABLE	BIT(4)
+=20
+-#define O2_PLL_WDT_CONTROL1	0x1CC
++#define O2_PLL_DLL_WDT_CONTROL1	0x1CC
+ #define  O2_PLL_FORCE_ACTIVE	BIT(18)
+ #define  O2_PLL_LOCK_STATUS	BIT(14)
+ #define  O2_PLL_SOFT_RESET	BIT(12)
+--=20
+2.7.4
