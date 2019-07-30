@@ -1,86 +1,39 @@
-From: Kees Cook <keescook@chromium.org>
-Subject: Re: [PATCH] mmc: atmel-mci: Mark expected switch fall-throughs
-Date: Mon, 29 Jul 2019 09:35:40 -0700
-Message-ID: <201907290935.2B95CBC@keescook>
-References: <20190729000123.GA23902@embeddedor>
+From: Andrew Jeffery <andrew@aj.id.au>
+Subject: [PATCH v3 0/2] mmc: Add support for the ASPEED SD controller
+Date: Tue, 30 Jul 2019 15:53:14 +0930
+Message-ID: <20190730062316.32037-1-andrew@aj.id.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20190729000123.GA23902@embeddedor>
 Sender: linux-kernel-owner@vger.kernel.org
-To: "Gustavo A. R. Silva" <gustavo@embeddedor.com>
-Cc: Ludovic Desroches <ludovic.desroches@microchip.com>, Ulf Hansson <ulf.hansson@linaro.org>, Nicolas Ferre <nicolas.ferre@microchip.com>, Alexandre Belloni <alexandre.belloni@bootlin.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, Stephen Rothwell <sfr@canb.auug.org.au>
+To: linux-mmc@vger.kernel.org
+Cc: Andrew Jeffery <andrew@aj.id.au>, ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, joel@jms.id.au, adrian.hunter@intel.com, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-aspeed@lists.ozlabs.org, linux-kernel@vger.kernel.org, ryanchen.aspeed@gmail.com
 List-Id: linux-mmc@vger.kernel.org
 
-On Sun, Jul 28, 2019 at 07:01:23PM -0500, Gustavo A. R. Silva wrote:
-> Mark switch cases where we are expecting to fall through.
-> 
-> This patch fixes the following warnings:
-> 
-> drivers/mmc/host/atmel-mci.c: In function 'atmci_get_cap':
-> drivers/mmc/host/atmel-mci.c:2415:30: warning: this statement may fall through [-Wimplicit-fallthrough=]
->    host->caps.has_odd_clk_div = 1;
->    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
-> drivers/mmc/host/atmel-mci.c:2416:2: note: here
->   case 0x400:
->   ^~~~
-> drivers/mmc/host/atmel-mci.c:2422:28: warning: this statement may fall through [-Wimplicit-fallthrough=]
->    host->caps.has_highspeed = 1;
->    ~~~~~~~~~~~~~~~~~~~~~~~~~^~~
-> drivers/mmc/host/atmel-mci.c:2423:2: note: here
->   case 0x200:
->   ^~~~
-> drivers/mmc/host/atmel-mci.c:2426:40: warning: this statement may fall through [-Wimplicit-fallthrough=]
->    host->caps.need_notbusy_for_read_ops = 1;
->    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
-> drivers/mmc/host/atmel-mci.c:2427:2: note: here
->   case 0x100:
->   ^~~~
-> 
-> Reported-by: Stephen Rothwell <sfr@canb.auug.org.au>
-> Signed-off-by: Gustavo A. R. Silva <gustavo@embeddedor.com>
+Hello,
 
-Reviewed-by: Kees Cook <keescook@chromium.org>
+v3 of the ASPEED SDHCI driver makes a bunch of fixes to the driver and the
+devicetree binding, including the addition of the AST2600 compatible string.
 
--Kees
+v2 can be found here:
 
-> ---
->  drivers/mmc/host/atmel-mci.c | 4 ++++
->  1 file changed, 4 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-> index 9ee0bc0ce6d0..c26fbe5f2222 100644
-> --- a/drivers/mmc/host/atmel-mci.c
-> +++ b/drivers/mmc/host/atmel-mci.c
-> @@ -2413,6 +2413,7 @@ static void atmci_get_cap(struct atmel_mci *host)
->  	case 0x600:
->  	case 0x500:
->  		host->caps.has_odd_clk_div = 1;
-> +		/* Fall through */
->  	case 0x400:
->  	case 0x300:
->  		host->caps.has_dma_conf_reg = 1;
-> @@ -2420,13 +2421,16 @@ static void atmci_get_cap(struct atmel_mci *host)
->  		host->caps.has_cfg_reg = 1;
->  		host->caps.has_cstor_reg = 1;
->  		host->caps.has_highspeed = 1;
-> +		/* Fall through */
->  	case 0x200:
->  		host->caps.has_rwproof = 1;
->  		host->caps.need_blksz_mul_4 = 0;
->  		host->caps.need_notbusy_for_read_ops = 1;
-> +		/* Fall through */
->  	case 0x100:
->  		host->caps.has_bad_data_ordering = 0;
->  		host->caps.need_reset_after_xfer = 0;
-> +		/* Fall through */
->  	case 0x0:
->  		break;
->  	default:
-> -- 
-> 2.22.0
-> 
+https://lists.ozlabs.org/pipermail/linux-aspeed/2019-July/002013.html
+
+Please review!
+
+Andrew
+
+Andrew Jeffery (2):
+  dt-bindings: mmc: Document Aspeed SD controller
+  mmc: Add support for the ASPEED SD controller
+
+ .../devicetree/bindings/mmc/aspeed,sdhci.yaml | 100 ++++++
+ drivers/mmc/host/Kconfig                      |  12 +
+ drivers/mmc/host/Makefile                     |   1 +
+ drivers/mmc/host/sdhci-of-aspeed.c            | 328 ++++++++++++++++++
+ 4 files changed, 441 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/mmc/aspeed,sdhci.yaml
+ create mode 100644 drivers/mmc/host/sdhci-of-aspeed.c
 
 -- 
-Kees Cook
+2.20.1
