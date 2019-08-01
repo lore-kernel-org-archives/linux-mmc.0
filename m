@@ -1,80 +1,40 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: host: dw_mmc: Fix possible null-pointer dereferences
- in dw_mci_runtime_resume()
-Date: Thu, 1 Aug 2019 16:58:34 +0200
-Message-ID: <CAPDyKFp7z3uXws4+jL=-U6cZekVX+QeJNKmqegmap8ZWhbgRoA@mail.gmail.com>
-References: <20190726142252.9654-1-baijiaju1990@gmail.com>
+From: Raul Rangel <rrangel@chromium.org>
+Subject: Re: [RFC PATCH 1/2] mmc: sdhci: Manually check card status after
+ reset
+Date: Thu, 1 Aug 2019 09:16:24 -0600
+Message-ID: <20190801151624.GA155392@google.com>
+References: <20190501175457.195855-1-rrangel@chromium.org>
+ <CAPDyKFpL1nHt1E1zgS-iDZf_KDWk2CN32Lvr+5Nmo8CtB2VCWg@mail.gmail.com>
+ <20190607160553.GA185100@google.com>
+ <CAPDyKFout6AY2Q92pYQ-KPH0NENq1-SkYivkDxjjb=uB=tKXuQ@mail.gmail.com>
+ <20190610163252.GA227032@google.com>
+ <fcdf6cc4-2729-abe2-85c8-b0d04901c5ae@intel.com>
+ <20190619145625.GA50985@google.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190726142252.9654-1-baijiaju1990@gmail.com>
+Content-Disposition: inline
+In-Reply-To: <20190619145625.GA50985@google.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Jia-Ju Bai <baijiaju1990@gmail.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Daniel Kurtz <djkurtz@chromium.org>, hongjiefang <hongjiefang@asrmicro.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Shawn Lin <shawn.lin@rock-chips.com>, Kyle Roeschley <kyle.roeschley@ni.com>, Avri Altman <avri.altman@wdc.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, 26 Jul 2019 at 16:23, Jia-Ju Bai <baijiaju1990@gmail.com> wrote:
->
-> In dw_mci_runtime_resume(), there is an if statement on line 3420
-> to check whether host->slot is NULL:
->     if (host->slot && ...)
->
-> When host->slot is NULL, it is used on line 3458:
->     if (host->slot->mmc->pm_flags & MMC_PM_KEEP_POWER)
-> and on line 3462:
->     dw_mci_setup_bus(host->slot, true);
->         struct dw_mci *host = slot->host;
->
-> Thus, possible null-pointer dereferences may occur.
->
-> To fix these bugs, host->slot is checked before being used.
->
-> These bugs are found by a static analysis tool STCheck written by us.
+On Wed, Jun 19, 2019 at 08:56:25AM -0600, Raul Rangel wrote:
+> Your patch looks good. I tried it out and got over 57k insertion/removal
+> iterations. Do you want me to send out your patch, or do you want to do
+> it?
+> 
+> Just to recap, the patch you proposed + the AMD SDHCI specific patch fix
+> the problem.
+> 
 
-I fully respect these kind of tools and they for sure find lots of
-problems for us.
+Just pinging the thread again to see what you would prefer. I can send
+the patch with you in the Signed-off. Or if you would prefer to not
+update the sdhci driver at all, I can add the logic into the AMD
+specific patch.
 
-However, in this case I think the fix should be made a bit
-differently, see more below.
+I would like to get this in so it lands by 5.4.
 
->
-> Signed-off-by: Jia-Ju Bai <baijiaju1990@gmail.com>
-> ---
->  drivers/mmc/host/dw_mmc.c | 5 +++--
->  1 file changed, 3 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index faaaf52a46d2..91bd6c3ccf50 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -3455,11 +3455,12 @@ int dw_mci_runtime_resume(struct device *dev)
->         mci_writel(host, CTRL, SDMMC_CTRL_INT_ENABLE);
->
->
-> -       if (host->slot->mmc->pm_flags & MMC_PM_KEEP_POWER)
-> +       if (host->slot && (host->slot->mmc->pm_flags & MMC_PM_KEEP_POWER))
->                 dw_mci_set_ios(host->slot->mmc, &host->slot->mmc->ios);
-
-Unless I missing something (still in "slow mode" due to holidays),
-dw_mci_runtime_suspend|resume() should only be called when there is a
-slot (host->slot) initialized for the host. This is guaranteed by the
-the driver when it runs ->probe().
-
->
->         /* Force setup bus to guarantee available clock output */
-> -       dw_mci_setup_bus(host->slot, true);
-> +       if (host->slot)
-> +               dw_mci_setup_bus(host->slot, true);
-
-Ditto.
-
->
->         /* Now that slots are all setup, we can enable card detect */
->         dw_mci_enable_cd(host);
-
-So, I am thinking that there is really no need to check for host->slot
-at all. And if there really were, I am sure there would have been bug
-reports already about it.
-
-Kind regards
-Uffe
+Thanks,
+Raul
