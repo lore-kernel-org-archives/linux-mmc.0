@@ -1,86 +1,74 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: atmel-mci: Mark expected switch fall-throughs
-Date: Fri, 2 Aug 2019 17:16:22 +0200
-Message-ID: <CAPDyKFo9UjyiCrWpB2Xid=tWdZ3GUgdO7pnzrZ4JEKm7nPZAww@mail.gmail.com>
-References: <20190729000123.GA23902@embeddedor>
+Subject: Re: [PATCH v5] mmc: host: sdhci: Fix the incorrect soft reset
+ operation when runtime resuming
+Date: Fri, 2 Aug 2019 17:16:36 +0200
+Message-ID: <CAPDyKFrUxTzMr+aJ=mXcVJeiP8f4-8+wAxkbA9n8mJaAn=ftVA@mail.gmail.com>
+References: <74a6462743e3d73a630d2634880d8866daee333e.1564022625.git.baolin.wang@linaro.org>
+ <CAPDyKFoNGZRdY3VVf6G9eNBfCyJbN5SUU2+fK24U-mHDX13oFQ@mail.gmail.com>
+ <CAMz4kuKOGmGHoYNELG38qYOw71=AaSk33=johskUtOs0KZ0z-g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190729000123.GA23902@embeddedor>
-Sender: linux-kernel-owner@vger.kernel.org
-To: "Gustavo A. R. Silva" <gustavo@embeddedor.com>
-Cc: Ludovic Desroches <ludovic.desroches@microchip.com>, Nicolas Ferre <nicolas.ferre@microchip.com>, Alexandre Belloni <alexandre.belloni@bootlin.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Stephen Rothwell <sfr@canb.auug.org.au>, Kees Cook <keescook@chromium.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <CAMz4kuKOGmGHoYNELG38qYOw71=AaSk33=johskUtOs0KZ0z-g@mail.gmail.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Baolin Wang <baolin.wang@linaro.org>
+Cc: Chunyan Zhang <zhang.lyra@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, 29 Jul 2019 at 02:01, Gustavo A. R. Silva
-<gustavo@embeddedor.com> wrote:
+On Fri, 26 Jul 2019 at 03:41, Baolin Wang <baolin.wang@linaro.org> wrote:
 >
-> Mark switch cases where we are expecting to fall through.
+> On Thu, 25 Jul 2019 at 21:15, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> >
+> > - Trimmed cc list
+> >
+> > On Thu, 25 Jul 2019 at 05:14, Baolin Wang <baolin.wang@linaro.org> wrote:
+> > >
+> > > The SD host controller specification defines 3 types software reset:
+> > > software reset for data line, software reset for command line and
+> > > software reset for all. Software reset for all means this reset affects
+> > > the entire Host controller except for the card detection circuit.
+> > >
+> > > In sdhci_runtime_resume_host() function, now we will always do software
+> > > reset for all, which will cause Spreadtrum host controller work abnormally
+> > > after resuming. For Spreadtrum platform that will not power down the SD/eMMC
+> > > card during runtime suspend, we should just do software reset for data
+> > > and command instead doing reset for all.
+> > >
+> > > To fix this issue, this patch introduces a new parameter of
+> > > sdhci_runtime_resume_host() to let it decide if a 'reset for all' shall
+> > > be done or not. Meanwhile changes other host drivers to issue a software
+> > > reset for all to keep the original logic.
+> > >
+> > > Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
+> >
+> > Applied for next, with a little change (renaming the "soft"
+> > in-parameter to soft_reset), thanks!
 >
-> This patch fixes the following warnings:
+> Thanks Ulf :)
 >
-> drivers/mmc/host/atmel-mci.c: In function 'atmci_get_cap':
-> drivers/mmc/host/atmel-mci.c:2415:30: warning: this statement may fall through [-Wimplicit-fallthrough=]
->    host->caps.has_odd_clk_div = 1;
->    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
-> drivers/mmc/host/atmel-mci.c:2416:2: note: here
->   case 0x400:
->   ^~~~
-> drivers/mmc/host/atmel-mci.c:2422:28: warning: this statement may fall through [-Wimplicit-fallthrough=]
->    host->caps.has_highspeed = 1;
->    ~~~~~~~~~~~~~~~~~~~~~~~~~^~~
-> drivers/mmc/host/atmel-mci.c:2423:2: note: here
->   case 0x200:
->   ^~~~
-> drivers/mmc/host/atmel-mci.c:2426:40: warning: this statement may fall through [-Wimplicit-fallthrough=]
->    host->caps.need_notbusy_for_read_ops = 1;
->    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
-> drivers/mmc/host/atmel-mci.c:2427:2: note: here
->   case 0x100:
->   ^~~~
+> >
+> > Adrian, if there is anything you want to change, please tell.
+> >
+> > BTW, perhaps this should be applied for fixes and tagged for stable?
+> > Baolin, if so, can point me the commit (or stable tag) the patch
+> > fixes?
 >
-> Reported-by: Stephen Rothwell <sfr@canb.auug.org.au>
-> Signed-off-by: Gustavo A. R. Silva <gustavo@embeddedor.com>
+> Yes, since we fixed the PM runtime issue, which will reveal this
+> issue. And I think it still fixes:
+> Fixes: fb8bd90f83c4 ("mmc: sdhci-sprd: Add Spreadtrum's initial host
+> controller")
 
-Applied for next, thanks!
+Make sense. I moved this to the fixes branch and also to took the
+opportunity to clarify the changelog a bit.
 
-Kind regards
+Thanks and kind regards
 Uffe
-
-
-> ---
->  drivers/mmc/host/atmel-mci.c | 4 ++++
->  1 file changed, 4 insertions(+)
->
-> diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-> index 9ee0bc0ce6d0..c26fbe5f2222 100644
-> --- a/drivers/mmc/host/atmel-mci.c
-> +++ b/drivers/mmc/host/atmel-mci.c
-> @@ -2413,6 +2413,7 @@ static void atmci_get_cap(struct atmel_mci *host)
->         case 0x600:
->         case 0x500:
->                 host->caps.has_odd_clk_div = 1;
-> +               /* Fall through */
->         case 0x400:
->         case 0x300:
->                 host->caps.has_dma_conf_reg = 1;
-> @@ -2420,13 +2421,16 @@ static void atmci_get_cap(struct atmel_mci *host)
->                 host->caps.has_cfg_reg = 1;
->                 host->caps.has_cstor_reg = 1;
->                 host->caps.has_highspeed = 1;
-> +               /* Fall through */
->         case 0x200:
->                 host->caps.has_rwproof = 1;
->                 host->caps.need_blksz_mul_4 = 0;
->                 host->caps.need_notbusy_for_read_ops = 1;
-> +               /* Fall through */
->         case 0x100:
->                 host->caps.has_bad_data_ordering = 0;
->                 host->caps.need_reset_after_xfer = 0;
-> +               /* Fall through */
->         case 0x0:
->                 break;
->         default:
-> --
-> 2.22.0
->
