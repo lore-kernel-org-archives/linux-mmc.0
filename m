@@ -1,74 +1,55 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v5] mmc: host: sdhci: Fix the incorrect soft reset
- operation when runtime resuming
-Date: Fri, 2 Aug 2019 17:16:36 +0200
-Message-ID: <CAPDyKFrUxTzMr+aJ=mXcVJeiP8f4-8+wAxkbA9n8mJaAn=ftVA@mail.gmail.com>
-References: <74a6462743e3d73a630d2634880d8866daee333e.1564022625.git.baolin.wang@linaro.org>
- <CAPDyKFoNGZRdY3VVf6G9eNBfCyJbN5SUU2+fK24U-mHDX13oFQ@mail.gmail.com>
- <CAMz4kuKOGmGHoYNELG38qYOw71=AaSk33=johskUtOs0KZ0z-g@mail.gmail.com>
+From: "Shirley Her (SC)" <shirley.her@bayhubtech.com>
+Subject: [PATCH V4 1/2] mmc: sdhci: Fix O2 Host data read/write DLL Lock Phase
+ shift issue
+Date: Fri, 2 Aug 2019 17:39:34 +0000
+Message-ID: <1564767547-4515-1-git-send-email-shirley.her@bayhubtech.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <CAMz4kuKOGmGHoYNELG38qYOw71=AaSk33=johskUtOs0KZ0z-g@mail.gmail.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Baolin Wang <baolin.wang@linaro.org>
-Cc: Chunyan Zhang <zhang.lyra@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: "adrian.hunter@intel.com" <adrian.hunter@intel.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Cc: "Louis Lu (TP)" <louis.lu@bayhubtech.com>, "Chevron Li (WH)" <chevron.li@bayhubtech.com>, "Max Huang (SC)" <max.huang@bayhubtech.com>, "Shirley Her (SC)" <shirley.her@bayhubtech.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, 26 Jul 2019 at 03:41, Baolin Wang <baolin.wang@linaro.org> wrote:
->
-> On Thu, 25 Jul 2019 at 21:15, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> >
-> > - Trimmed cc list
-> >
-> > On Thu, 25 Jul 2019 at 05:14, Baolin Wang <baolin.wang@linaro.org> wrote:
-> > >
-> > > The SD host controller specification defines 3 types software reset:
-> > > software reset for data line, software reset for command line and
-> > > software reset for all. Software reset for all means this reset affects
-> > > the entire Host controller except for the card detection circuit.
-> > >
-> > > In sdhci_runtime_resume_host() function, now we will always do software
-> > > reset for all, which will cause Spreadtrum host controller work abnormally
-> > > after resuming. For Spreadtrum platform that will not power down the SD/eMMC
-> > > card during runtime suspend, we should just do software reset for data
-> > > and command instead doing reset for all.
-> > >
-> > > To fix this issue, this patch introduces a new parameter of
-> > > sdhci_runtime_resume_host() to let it decide if a 'reset for all' shall
-> > > be done or not. Meanwhile changes other host drivers to issue a software
-> > > reset for all to keep the original logic.
-> > >
-> > > Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
-> >
-> > Applied for next, with a little change (renaming the "soft"
-> > in-parameter to soft_reset), thanks!
->
-> Thanks Ulf :)
->
-> >
-> > Adrian, if there is anything you want to change, please tell.
-> >
-> > BTW, perhaps this should be applied for fixes and tagged for stable?
-> > Baolin, if so, can point me the commit (or stable tag) the patch
-> > fixes?
->
-> Yes, since we fixed the PM runtime issue, which will reveal this
-> issue. And I think it still fixes:
-> Fixes: fb8bd90f83c4 ("mmc: sdhci-sprd: Add Spreadtrum's initial host
-> controller")
+Fix data read/write error in HS200 mode due to chip DLL lock phase shift
 
-Make sense. I moved this to the fixes branch and also to took the
-opportunity to clarify the changelog a bit.
+Signed-off-by:Shirley Her<shirley.her@bayhubtech.com>
+---
+change in V4:
+ 1. add a bug fix in V3
 
-Thanks and kind regards
-Uffe
+change in V3:
+ 1. add more explanation in dll_recovery and execute_tuning function
+ 2. move dll_adjust_count to O2_host struct
+ 3. fix some coding style error
+ 4. renaming O2_PLL_WDT_CONTROL1 TO O2_PLL_DLL_WDT_CONTROL1
+
+change in V2:
+ 1. use usleep_range instead of udelay
+ 2. move dll_adjust_count to sdhci-pci-o2micro.c
+
+chagne in V1:
+ 1. add error recovery function to relock DLL with correct phase
+ 2. retuning HS200 after DLL locked
+---
+ drivers/mmc/host/sdhci-pci-o2micro.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-=
+pci-o2micro.c
+index 9dc4548..186a33d 100644
+--- a/drivers/mmc/host/sdhci-pci-o2micro.c
++++ b/drivers/mmc/host/sdhci-pci-o2micro.c
+@@ -51,7 +51,7 @@
+ #define O2_SD_VENDOR_SETTING2	0x1C8
+ #define O2_SD_HW_TUNING_DISABLE	BIT(4)
+=20
+-#define O2_PLL_WDT_CONTROL1	0x1CC
++#define O2_PLL_DLL_WDT_CONTROL1	0x1CC
+ #define  O2_PLL_FORCE_ACTIVE	BIT(18)
+ #define  O2_PLL_LOCK_STATUS	BIT(14)
+ #define  O2_PLL_SOFT_RESET	BIT(12)
+--=20
+2.7.4
