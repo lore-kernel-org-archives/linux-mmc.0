@@ -1,228 +1,218 @@
-From: "Chevron Li (WH)" <chevron.li@bayhubtech.com>
-Subject: RE: [PATCH V2 1/1] mmc: sdhci: Fix O2 Host data read/write DLL lock
- Phase shift issue
-Date: Fri, 2 Aug 2019 10:53:58 +0000
-Message-ID: <MW2PR16MB2249FF19BBE7890B0E7703C9EAD90@MW2PR16MB2249.namprd16.prod.outlook.com>
-References: <1564166909-7437-1-git-send-email-shirley.her@bayhubtech.com>
- <0ce0b72d-46f6-ee06-092b-abb0d656c083@intel.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v6 29/57] mmc: Remove dev_err() usage after platform_get_irq()
+Date: Fri, 2 Aug 2019 17:16:10 +0200
+Message-ID: <CAPDyKFpgMioHCLbwJ7+koZw13UqXTEXE+cnO8+AeT2s-nj-OTQ@mail.gmail.com>
+References: <20190730181557.90391-1-swboyd@chromium.org> <20190730181557.90391-30-swboyd@chromium.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <0ce0b72d-46f6-ee06-092b-abb0d656c083@intel.com>
-Content-Language: en-US
+In-Reply-To: <20190730181557.90391-30-swboyd@chromium.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Cc: "Max Huang (SC)" <max.huang@bayhubtech.com>, "Xiaoguang Yu (WH)" <xiaoguang.yu@bayhubtech.com>, "Shirley Her (SC)" <shirley.her@bayhubtech.com>, "Shaper Liu (WH)" <shaper.liu@bayhubtech.com>, "Louis Lu (TP)" <louis.lu@bayhubtech.com>
+To: Stephen Boyd <swboyd@chromium.org>
+Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 List-Id: linux-mmc@vger.kernel.org
 
-SGksIEFkcmlhbiwNCg0KRmlyc3RseSwgcmVhbGx5IGFwcHJlY2lhdGUgZm9yIHlvdXIgdmFsdWFi
-bGUgc3VnZ2VzdGlvbnMuDQoNCkZvciB5b3VyIHF1ZXN0aW9uIHRoYXQgIiBUdW5pbmcgd2lsbCBi
-ZSBleGVjdXRlZCB3aGVuZXZlciB0aGUgc3lzdGVtIHJlc3VtZXMsIHdoaWNoIGlzIG5vdCBhbiBl
-cnJvci4gQ2FuIHlvdSBleHBsYWluIHdoZW4gZXJyb3IgcmVjb3ZlcnkgaXMgbmVlZGVkLA0KYW5k
-IGhvdyB0aGlzIHBhdGNoIHdvcmtzLiINCg0KV2UgaGF2ZSBibG93IHF1ZXN0aW9ucyBuZWVkIHlv
-dXIgaGVscC4NCg0KMS4gSW4gd2hpY2ggY2FzZXMgY2FyZCBpbml0aWFsaXphdGlvbiBtb2R1bGUo
-bW1jX2luaXRfY2FyZCkgd2lsbCBiZSBjYWxsZWQgYWZ0ZXIgZmlyc3QgaW5pdCBjb21wbGV0ZWQg
-ZXhjbHVkZSBlcnJvciBoYXBwZW5lZD8gV2hldGhlciB0aGUgY2FzZSBpcyBSZXN1bWUgZnJvbSBp
-ZGxlIG9yIHNsZWVwLCBhbnkgY2FzZSBlbHNlPw0KICBJbiB3aGljaCBjYXNlcyB0dW5pbmcgbW9k
-dWxlKGV4ZWN1dGVfdHVuaW5nKSB3aWxsIGJlIGNhbGxlZCBhZnRlciBmaXJzdCBpbml0IGNvbXBs
-ZXRlZCBleGNsdWRlIGVycm9yIGhhcHBlbmVkPyBXaGV0aGVyIHRoZSBjYXNlIGlzIFJlc3VtZSBm
-cm9tIGlkbGUgb3Igc2xlZXAsIGFueSBjYXNlIGVsc2U/DQoNCkJlY2F1c2UgaW4gQmF5aHViIGRy
-aXZlciwgb25jZSB0dW5pbmcgbW9kdWxlIGlzIGNhbGxlZCBleGNsdWRlIGZpcnN0IGluaXRpYWxp
-emF0aW9uIHRoZSB0dW5pbmcgY2FsbCB3aWxsIGJlIHRob3VnaHQgYXMgZXJyb3IgcmVjb3Zlcnkg
-dHVuaW5nLg0KDQoyLiBJZiB0aGUgdHVuaW5nIGFuZCBpbml0aWFsaXphdGlvbiBhcmUgY2FsbGVk
-IGNhc2VzIGFyZSBub3QgY2xlYXJseSwgY2FuIHdlIGdldCB0aGUgbW1jX2Jsa19yZXF1ZXN0IGVy
-cm9yIHN0YXR1cyhibG9jayByZXF1ZXN0IGVycm9yKSBpbiB0dW5pbmcgbW9kdWxlPw0KDQpXaGF0
-IG1ldGhvZCBjYW4gYmUgdXNlZCB0byBnZXQgdGhlIHN0cnVjdHVyZSBtbWNfYmxrX3JlcXVlc3Qg
-aW4gdHVuaW5nIG1vZHVsZShleGVjdXRlX3R1bmluZykNCg0KMy4gSWYgdGhlcmUgaXMgbm8gbWV0
-aG9kIHRvIGdldCB0aGUgYmxvY2sgcmVxdWVzdCBlcnJvciBzdGF0dXMgaW4gdHVuaW5nIG1vZHVs
-ZSwgd2Ugd2FudCB0byBhZGQgYSB2YXJpYWJsZSB0byBzYXZlIHRoZSBlcnJvciBzdGF0dXMgZHVy
-aW5nIGJsb2NrIHJlcXVlc3QsDQphbmQgdXNlIGl0IGluIHR1bmluZyBtb2R1bGUgYXMgdGhlIGNv
-bmRpdGlvbiB0byBjYWxsIEJheWh1YiBkbGwgcmVjb3ZlcnkuDQoNClNvIHdoaWNoIHN0cnVjdHVy
-ZSB0aGUgdmFyaWFibGUgc2hvdWxkIGJlIGFkZGVkLCBhbmQgaG93IHRvIGFjcXVpcmUgaXQgaW4g
-bW1jX2Jsa19tcV9yd19yZWNvdmVyeSwgaG93IHRvIGFjcXVpcmUgaXQgaW4gZXhlY3V0ZV90dW5p
-bmcuDQoNCkxvb2tpbmcgZm9yd2FyZCB0byB5b3VyIHJlcGx5IQ0KDQpUaGFua3MsDQpDaGV2cm9u
-DQoNCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IEFkcmlhbiBIdW50ZXIgW21h
-aWx0bzphZHJpYW4uaHVudGVyQGludGVsLmNvbV0gDQpTZW50OiAyMDE55bm0N+aciDI55pelIDIw
-OjEzDQpUbzogU2hpcmxleSBIZXIgKFNDKTsgVWxmIEhhbnNzb247IGxpbnV4LW1tY0B2Z2VyLmtl
-cm5lbC5vcmc7IGxpbnV4LWtlcm5lbEB2Z2VyLmtlcm5lbC5vcmcNCkNjOiBMb3VpcyBMdSAoVFAp
-OyBNYXggSHVhbmcgKFNDKTsgQ2hldnJvbiBMaSAoV0gpDQpTdWJqZWN0OiBSZTogW1BBVENIIFYy
-IDEvMV0gbW1jOiBzZGhjaTogRml4IE8yIEhvc3QgZGF0YSByZWFkL3dyaXRlIERMTCBsb2NrIFBo
-YXNlIHNoaWZ0IGlzc3VlDQoNCk9uIDI2LzA3LzE5IDk6NDggUE0sIFNoaXJsZXkgSGVyIChTQykg
-d3JvdGU6DQo+IEZpeCBkYXRhIHJlYWQvd3JpdGUgZXJyb3IgaW4gSFMyMDAgbW9kZSBkdWUgdG8g
-Y2hpcCBETEwgbG9jayBwaGFzZSANCj4gc2hpZnQNCg0KTW9yZSBleHBsYW5hdGlvbiBpcyBuZWVk
-ZWQuICBTZWUgY29tbWVudCBiZWxvdyB3aGVyZQ0Kc2RoY2lfbzJfZXJyb3JfcmVjb3ZlcnkoKSBp
-cyBjYWxsZWQuDQoNCj4gDQo+IFNpZ25lZC1vZmYtYnk6U2hpcmxleSBIZXI8c2hpcmxleS5oZXJA
-YmF5aHVidGVjaC5jb20+DQo+IC0tLQ0KPiBjaGFuZ2UgaW4gVjI6DQo+ICAgMS4gVXNlIHVzbGVl
-cF9yYW5nZSBpbnN0ZWFkIG9mIHVkZWxheQ0KPiAgIDIuIG1vdmUgZGxsX2FkanVzdF9jb3VudCB0
-byBzZGhjaS1wY2ktbzJtaWNyby5jDQo+IA0KPiBjaGFuZ2UgaW4gVjE6DQo+ICAgMS4gQWRkIGVy
-cm9yIHJlY292ZXJ5IGZ1bmN0aW9uIHRvIHJlbG9jayB0aGUgRExMIHdpdGggY29ycmVjdCBwaGFz
-ZQ0KPiAgIDIuIFJldHVuaW5nIEhTMjAwIGFmdGVyIERMTCBsb2NrZWQNCj4gLS0tDQo+IC0tLQ0K
-PiAgZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1wY2ktbzJtaWNyby5jIHwgMTU3IA0KPiArKysrKysr
-KysrKysrKysrKysrKysrKysrKysrKy0tLS0tLQ0KPiAgMSBmaWxlIGNoYW5nZWQsIDEzMyBpbnNl
-cnRpb25zKCspLCAyNCBkZWxldGlvbnMoLSkNCj4gDQo+IGRpZmYgLS1naXQgYS9kcml2ZXJzL21t
-Yy9ob3N0L3NkaGNpLXBjaS1vMm1pY3JvLmMgDQo+IGIvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1w
-Y2ktbzJtaWNyby5jDQo+IGluZGV4IDlkYzQ1NDguLmM0M2IyY2UgMTAwNjQ0DQo+IC0tLSBhL2Ry
-aXZlcnMvbW1jL2hvc3Qvc2RoY2ktcGNpLW8ybWljcm8uYw0KPiArKysgYi9kcml2ZXJzL21tYy9o
-b3N0L3NkaGNpLXBjaS1vMm1pY3JvLmMNCj4gQEAgLTUxLDEzICs1MSw2MCBAQA0KPiAgI2RlZmlu
-ZSBPMl9TRF9WRU5ET1JfU0VUVElORzIJMHgxQzgNCj4gICNkZWZpbmUgTzJfU0RfSFdfVFVOSU5H
-X0RJU0FCTEUJQklUKDQpDQo+ICANCj4gLSNkZWZpbmUgTzJfUExMX1dEVF9DT05UUk9MMQkweDFD
-Qw0KPiArI2RlZmluZSBPMl9QTExfRExMX1dEVF9DT05UUk9MMQkweDFDQw0KDQpSZW5hbWluZyBP
-Ml9QTExfV0RUX0NPTlRST0wxIHNob3VsZCBiZSBhIHNlcGFyYXRlIHBhdGNoLg0KDQo+ICAjZGVm
-aW5lICBPMl9QTExfRk9SQ0VfQUNUSVZFCUJJVCgxOCkNCj4gICNkZWZpbmUgIE8yX1BMTF9MT0NL
-X1NUQVRVUwlCSVQoMTQpDQo+ICAjZGVmaW5lICBPMl9QTExfU09GVF9SRVNFVAlCSVQoMTIpDQo+
-ICsjZGVmaW5lICBPMl9ETExfTE9DS19TVEFUVVMJQklUKDExKQ0KPiAgDQo+ICAjZGVmaW5lIE8y
-X1NEX0RFVEVDVF9TRVRUSU5HIDB4MzI0DQo+ICANCj4gK3N0YXRpYyBjb25zdCB1MzIgZG1kbl90
-YWJsZVs1XSA9IHsweDI1MTAwMDAwLCAweDJCMUMwMDAwLA0KPiArCTB4MkMxQTAwMDAsIDB4Mzcx
-QjAwMDAsIDB4MzUxMDAwMDB9OyBzdGF0aWMgdTggZGxsX2FkanVzdF9jb3VudDsNCg0KVGhpcyBz
-aG91bGQgYmUgaW4gYSBzdHJ1Y3Q6DQoNCnN0cnVjdCBvMl9ob3N0IHsNCgl1OCBkbGxfYWRqdXN0
-X2NvdW50Ow0KfQ0KDQoNCj4gK3N0YXRpYyBpbnQgc2RoY2lfbzJfZ2V0X2NkKHN0cnVjdCBtbWNf
-aG9zdCAqbW1jKTsNCg0KUGxlYXNlIG1ha2UgYSBzZXBhcmF0ZSBwYXRjaCB0aGF0IHJlb3JkZXJz
-IHRoZSBmdW5jdGlvbnMgc28gdGhhdCBmb3J3YXJkIGRlY2xhcmF0aW9uIG9mIHNkaGNpX28yX2dl
-dF9jZCgpIGlzIG5vdCBuZWNlc3NhcnkuDQoNCj4gKw0KPiArc3RhdGljIHZvaWQgbzJfcGNpX3Nl
-dF9iYXNlY2xrKHN0cnVjdCBzZGhjaV9wY2lfY2hpcCAqY2hpcCwgdTMyIA0KPiArdmFsdWUpIHsN
-Cj4gKwl1MzIgc2NyYXRjaF8zMjsNCj4gKw0KPiArCXBjaV9yZWFkX2NvbmZpZ19kd29yZChjaGlw
-LT5wZGV2LA0KPiArCQkJICAgICAgTzJfU0RfUExMX1NFVFRJTkcsICZzY3JhdGNoXzMyKTsNCj4g
-Kw0KPiArCXNjcmF0Y2hfMzIgJj0gMHgwMDAwRkZGRjsNCj4gKwlzY3JhdGNoXzMyIHw9IHZhbHVl
-Ow0KPiArDQo+ICsJcGNpX3dyaXRlX2NvbmZpZ19kd29yZChjaGlwLT5wZGV2LA0KPiArCQkJICAg
-ICAgIE8yX1NEX1BMTF9TRVRUSU5HLCBzY3JhdGNoXzMyKTsgfQ0KPiArDQo+ICtzdGF0aWMgaW50
-IHNkaGNpX28yX3dhaXRfZGxsX2RldGVjdF9sb2NrKHN0cnVjdCBzZGhjaV9ob3N0ICpob3N0KSB7
-DQo+ICsJa3RpbWVfdCB0aW1lb3V0Ow0KPiArCXUzMiBzY3JhdGNoMzI7DQo+ICsNCj4gKwl1c2xl
-ZXBfcmFuZ2UoNTAwMCwgNjAwMCk7DQo+ICsJc2NyYXRjaDMyID0gc2RoY2lfcmVhZGwoaG9zdCwg
-TzJfUExMX0RMTF9XRFRfQ09OVFJPTDEpOw0KPiArCWlmICghKHNjcmF0Y2gzMiAmIE8yX0RMTF9M
-T0NLX1NUQVRVUykpIHsNCj4gKwkJcHJfd2FybigiJXM6IERMTCBpcyBzdGlsbCB1bmxvY2tlZCBh
-ZnRlciB3YWl0IDVtc1xuIiwNCj4gKwkJCW1tY19ob3N0bmFtZShob3N0LT5tbWMpKTsNCj4gKwl9
-DQo+ICsNCj4gKwkvKiBEZXRlY3QgNTAwIG1zICovDQo+ICsJdGltZW91dCA9IGt0aW1lX2FkZF9t
-cyhrdGltZV9nZXQoKSwgNTAwKTsNCj4gKwl3aGlsZSAoMSkgew0KPiArCQlib29sIHRpbWVkb3V0
-ID0ga3RpbWVfYWZ0ZXIoa3RpbWVfZ2V0KCksIHRpbWVvdXQpOw0KPiArDQo+ICsJCXNjcmF0Y2gz
-MiA9IHNkaGNpX3JlYWRsKGhvc3QsIE8yX1BMTF9ETExfV0RUX0NPTlRST0wxKTsNCj4gKwkJaWYg
-KCEoc2NyYXRjaDMyICYgTzJfRExMX0xPQ0tfU1RBVFVTKSkNCj4gKwkJCXJldHVybiAwOw0KPiAr
-DQo+ICsJCWlmICh0aW1lZG91dCkNCj4gKwkJCXJldHVybiAxOw0KPiArCQl1c2xlZXBfcmFuZ2Uo
-MTAsIDEwMDApOw0KPiArCX0NCj4gK30NCj4gKw0KPiAgc3RhdGljIHZvaWQgc2RoY2lfbzJfc2V0
-X3R1bmluZ19tb2RlKHN0cnVjdCBzZGhjaV9ob3N0ICpob3N0KSAgew0KPiAgCXUxNiByZWc7DQo+
-IEBAIC05NSwxMSArMTQyLDg1IEBAIHN0YXRpYyB2b2lkIF9fc2RoY2lfbzJfZXhlY3V0ZV90dW5p
-bmcoc3RydWN0IHNkaGNpX2hvc3QgKmhvc3QsIHUzMiBvcGNvZGUpDQo+ICAJc2RoY2lfcmVzZXRf
-dHVuaW5nKGhvc3QpOw0KPiAgfQ0KPiAgDQo+ICtzdGF0aWMgaW50IHNkaGNpX28yX2Vycm9yX3Jl
-Y292ZXJ5KHN0cnVjdCBzZGhjaV9wY2lfY2hpcCAqY2hpcCwNCj4gKwkJCQkgc3RydWN0IHNkaGNp
-X2hvc3QgKmhvc3QpDQo+ICt7DQo+ICsJaW50IHJldCA9IDA7DQo+ICsJdTggc2NyYXRjaF84ID0g
-MDsNCj4gKwl1MzIgc2NyYXRjaF8zMiA9IDA7DQoNClBsZWFzZSBhZGQgYSBibGFuayBsaW5lIGFm
-dGVyIGxvY2FsIHZhcmlhYmxlIGRlY2xhcmF0aW9uDQoNCj4gKwkvKiBEaXNhYmxlIGNsb2NrICov
-DQo+ICsJc2RoY2lfd3JpdGViKGhvc3QsIDAsIFNESENJX0NMT0NLX0NPTlRST0wpOw0KPiArDQo+
-ICtETExfQURKVVNUOg0KDQpQbGVhc2UgdXNlIGEgJ2RvJywgJ2Zvcicgb3IgJ3doaWxlJyBsb29w
-Lg0KDQo+ICsJaWYgKGRsbF9hZGp1c3RfY291bnQgPj0gNSkgew0KPiArCQlkbGxfYWRqdXN0X2Nv
-dW50ID0gNDsNCj4gKwkJcHJfd2FybigiJXM6IGVycm9yIHJlY292ZXJ5IGZhaWxlZCB3aXRoIHRo
-ZSBkbGxfYWRqdXN0X2NvdW50IG92ZXIgbWF4IHZhbHVlLlxuIiwNCj4gKwkJCW1tY19ob3N0bmFt
-ZShob3N0LT5tbWMpKTsNCg0KSXNuJ3QgaXQgbmVjZXNzYXJ5IHRvIGV4aXQgdGhlIGxvb3AgaGVy
-ZT8NCg0KPiArCX0NCj4gKw0KPiArCS8qIFVuTG9jayBXUCAqLw0KPiArCXJldCA9IHBjaV9yZWFk
-X2NvbmZpZ19ieXRlKGNoaXAtPnBkZXYsDQo+ICsJCQlPMl9TRF9MT0NLX1dQLCAmc2NyYXRjaF84
-KTsNCj4gKwlpZiAocmV0KQ0KPiArCQlyZXR1cm4gcmV0Ow0KPiArDQo+ICsJc2NyYXRjaF84ICY9
-IDB4N2Y7DQo+ICsJcGNpX3dyaXRlX2NvbmZpZ19ieXRlKGNoaXAtPnBkZXYsIE8yX1NEX0xPQ0tf
-V1AsIHNjcmF0Y2hfOCk7DQo+ICsNCj4gKwkvKiBQTEwgc29mdHdhcmUgcmVzZXQgKi8NCj4gKwlz
-Y3JhdGNoXzMyID0gc2RoY2lfcmVhZGwoaG9zdCwgTzJfUExMX0RMTF9XRFRfQ09OVFJPTDEpOw0K
-PiArCXNjcmF0Y2hfMzIgfD0gTzJfUExMX1NPRlRfUkVTRVQ7DQo+ICsJc2RoY2lfd3JpdGVsKGhv
-c3QsIHNjcmF0Y2hfMzIsIE8yX1BMTF9ETExfV0RUX0NPTlRST0wxKTsNCj4gKw0KPiArCXJldCA9
-IHBjaV9yZWFkX2NvbmZpZ19kd29yZChjaGlwLT5wZGV2LA0KPiArCQkJCSAgICBPMl9TRF9GVU5D
-X1JFRzQsDQo+ICsJCQkJICAgICZzY3JhdGNoXzMyKTsNCj4gKwkvKiBFbmFibGUgQmFzZSBDbGsg
-c2V0dGluZyBjaGFuZ2UgKi8NCj4gKwlzY3JhdGNoXzMyIHw9IE8yX1NEX0ZSRUc0X0VOQUJMRV9D
-TEtfU0VUOw0KPiArCXBjaV93cml0ZV9jb25maWdfZHdvcmQoY2hpcC0+cGRldiwgTzJfU0RfRlVO
-Q19SRUc0LCBzY3JhdGNoXzMyKTsNCj4gKwlvMl9wY2lfc2V0X2Jhc2VjbGsoY2hpcCwgZG1kbl90
-YWJsZVtkbGxfYWRqdXN0X2NvdW50XSk7DQo+ICsNCj4gKw0KDQpQbGVhc2UgZG9uJ3QgdXNlIG11
-bHRpcGxlIGJsYW5rIGxpbmVzDQoNCj4gKwkvKiBFbmFibGUgaW50ZXJuYWwgY2xvY2sgKi8NCj4g
-KwlzY3JhdGNoXzggPSBTREhDSV9DTE9DS19JTlRfRU47DQo+ICsJc2RoY2lfd3JpdGViKGhvc3Qs
-IHNjcmF0Y2hfOCwgU0RIQ0lfQ0xPQ0tfQ09OVFJPTCk7DQo+ICsNCj4gKwlpZiAoc2RoY2lfbzJf
-Z2V0X2NkKGhvc3QtPm1tYykpIHsNCj4gKwkJaWYgKHNkaGNpX28yX3dhaXRfZGxsX2RldGVjdF9s
-b2NrKGhvc3QpKSB7DQo+ICsJCQlzY3JhdGNoXzggfD0gU0RIQ0lfQ0xPQ0tfQ0FSRF9FTjsNCj4g
-KwkJCXNkaGNpX3dyaXRlYihob3N0LCBzY3JhdGNoXzgsIFNESENJX0NMT0NLX0NPTlRST0wpOw0K
-PiArCQkJcmV0ID0gMTsNCj4gKwkJfSBlbHNlIHsNCj4gKw0KDQpCbGFuayBsaW5lcyBhcmVuJ3Qg
-bmVjZXNzYXJ5IGFmdGVyIGFuIG9wZW4gYnJhY2UgJ3snDQoNCj4gKwkJCXByX3dhcm4oIiVzOiBE
-TEwgdW5sb2NrZWQgd2hlbiBkbGxfYWRqdXN0X2NvdW50IGlzICVkLlxuIiwNCj4gKwkJCW1tY19o
-b3N0bmFtZShob3N0LT5tbWMpLCBkbGxfYWRqdXN0X2NvdW50KTsNCj4gKwkJCWRsbF9hZGp1c3Rf
-Y291bnQrKzsNCj4gKwkJCWdvdG8gRExMX0FESlVTVDsNCj4gKwkJfQ0KPiArCX0gZWxzZQ0KPiAr
-CQlnb3RvIERMTF9BREpVU1Q7DQoNCmJyYWNlcyB7fSBzaG91bGQgYmUgdXNlZCBvbiBhbGwgYXJt
-cyBvZiB0aGlzIHN0YXRlbWVudA0KDQo+ICsNCj4gKwkJLyogTG9jayBXUCAqLw0KPiArCXJldCA9
-IHBjaV9yZWFkX2NvbmZpZ19ieXRlKGNoaXAtPnBkZXYsDQo+ICsJCQkJICAgTzJfU0RfTE9DS19X
-UCwgJnNjcmF0Y2hfOCk7DQo+ICsJaWYgKHJldCkNCj4gKwkJcmV0dXJuIHJldDsNCj4gKwlzY3Jh
-dGNoXzggfD0gMHg4MDsNCj4gKwlwY2lfd3JpdGVfY29uZmlnX2J5dGUoY2hpcC0+cGRldiwgTzJf
-U0RfTE9DS19XUCwgc2NyYXRjaF84KTsNCj4gKwlyZXR1cm4gcmV0Ow0KPiArfQ0KPiArDQo+ICBz
-dGF0aWMgaW50IHNkaGNpX28yX2V4ZWN1dGVfdHVuaW5nKHN0cnVjdCBtbWNfaG9zdCAqbW1jLCB1
-MzIgb3Bjb2RlKSAgDQo+IHsNCj4gIAlzdHJ1Y3Qgc2RoY2lfaG9zdCAqaG9zdCA9IG1tY19wcml2
-KG1tYyk7DQo+ICsJc3RydWN0IHNkaGNpX3BjaV9zbG90ICpzbG90ID0gc2RoY2lfcHJpdihob3N0
-KTsNCg0KVGhpcyBpcyBob3cgeW91IGdldCBhIHJlZmVyZW5jZSB0byBvMl9ob3N0Og0KDQoJc3Ry
-dWN0IG8yX2hvc3QgKm8yX2hvc3QgPSBzZGhjaV9wY2lfcHJpdihzbG90KTsNCg0KPiAgCWludCBj
-dXJyZW50X2J1c193aWR0aCA9IDA7DQo+ICANCj4gKw0KDQpQbGVhc2UgZG9uJ3QgdXNlIG11bHRp
-cGxlIGJsYW5rIGxpbmVzDQoNCj4gKwlpZiAoZGxsX2FkanVzdF9jb3VudCkNCg0KZGxsX2FkanVz
-dF9jb3VudCBzaG91bGQgYmUgaW4gc3RydWN0IG8yX2hvc3QNCg0KCW8yX2hvc3QtPmRsbF9hZGp1
-c3RfY291bnQNCg0KPiArCQlzZGhjaV9vMl9lcnJvcl9yZWNvdmVyeShzbG90LT5jaGlwLCBob3N0
-KTsNCg0KVHVuaW5nIHdpbGwgYmUgZXhlY3V0ZWQgd2hlbmV2ZXIgdGhlIHN5c3RlbSByZXN1bWVz
-LCB3aGljaCBpcyBub3QgYW4gZXJyb3IuDQpDYW4geW91IGV4cGxhaW4gd2hlbiBlcnJvciByZWNv
-dmVyeSBpcyBuZWVkZWQsIGFuZCBob3cgdGhpcyBwYXRjaCB3b3Jrcy4NCg0KPiArDQo+ICsJZGxs
-X2FkanVzdF9jb3VudCsrOw0KPiAgCS8qDQo+ICAJICogVGhpcyBoYW5kbGVyIG9ubHkgaW1wbGVt
-ZW50cyB0aGUgZU1NQyB0dW5pbmcgdGhhdCBpcyBzcGVjaWZpYyB0bw0KPiAgCSAqIHRoaXMgY29u
-dHJvbGxlci4gIEZhbGwgYmFjayB0byB0aGUgc3RhbmRhcmQgbWV0aG9kIGZvciBvdGhlciBUSU1J
-TkcuDQo+IEBAIC0xMzEsMjMgKzI1MiwxMSBAQCBzdGF0aWMgaW50IHNkaGNpX28yX2V4ZWN1dGVf
-dHVuaW5nKHN0cnVjdCBtbWNfaG9zdCAqbW1jLCB1MzIgb3Bjb2RlKQ0KPiAgCQltbWMtPmlvcy5i
-dXNfd2lkdGggPSBNTUNfQlVTX1dJRFRIXzg7DQo+ICAJCXNkaGNpX3NldF9idXNfd2lkdGgoaG9z
-dCwgY3VycmVudF9idXNfd2lkdGgpOw0KPiAgCX0NCj4gLQ0KDQpQbGVhc2UgYXZvaWQgdW5yZWxh
-dGVkIHdoaXRlIHNwYWNlIGNoYW5nZXMuDQoNCj4gIAlob3N0LT5mbGFncyAmPSB+U0RIQ0lfSFM0
-MDBfVFVOSU5HOw0KPiAgCXJldHVybiAwOw0KPiAgfQ0KPiAgDQo+IC1zdGF0aWMgdm9pZCBvMl9w
-Y2lfc2V0X2Jhc2VjbGsoc3RydWN0IHNkaGNpX3BjaV9jaGlwICpjaGlwLCB1MzIgDQo+IHZhbHVl
-KSAtew0KPiAtCXUzMiBzY3JhdGNoXzMyOw0KPiAtCXBjaV9yZWFkX2NvbmZpZ19kd29yZChjaGlw
-LT5wZGV2LA0KPiAtCQkJICAgICAgTzJfU0RfUExMX1NFVFRJTkcsICZzY3JhdGNoXzMyKTsNCj4g
-IA0KPiAtCXNjcmF0Y2hfMzIgJj0gMHgwMDAwRkZGRjsNCj4gLQlzY3JhdGNoXzMyIHw9IHZhbHVl
-Ow0KPiAtDQo+IC0JcGNpX3dyaXRlX2NvbmZpZ19kd29yZChjaGlwLT5wZGV2LA0KPiAtCQkJICAg
-ICAgIE8yX1NEX1BMTF9TRVRUSU5HLCBzY3JhdGNoXzMyKTsNCj4gLX0NCj4gIA0KPiAgc3RhdGlj
-IHZvaWQgbzJfcGNpX2xlZF9lbmFibGUoc3RydWN0IHNkaGNpX3BjaV9jaGlwICpjaGlwKSAgeyBA
-QCANCj4gLTMxNiwyMyArNDI1LDIzIEBAIHN0YXRpYyB2b2lkIHNkaGNpX28yX2VuYWJsZV9pbnRl
-cm5hbF9jbG9jayhzdHJ1Y3Qgc2RoY2lfaG9zdCAqaG9zdCkNCj4gIAl1MzIgc2NyYXRjaDMyOw0K
-PiAgDQo+ICAJLyogUExMIHNvZnR3YXJlIHJlc2V0ICovDQo+IC0Jc2NyYXRjaDMyID0gc2RoY2lf
-cmVhZGwoaG9zdCwgTzJfUExMX1dEVF9DT05UUk9MMSk7DQo+ICsJc2NyYXRjaDMyID0gc2RoY2lf
-cmVhZGwoaG9zdCwgTzJfUExMX0RMTF9XRFRfQ09OVFJPTDEpOw0KPiAgCXNjcmF0Y2gzMiB8PSBP
-Ml9QTExfU09GVF9SRVNFVDsNCj4gLQlzZGhjaV93cml0ZWwoaG9zdCwgc2NyYXRjaDMyLCBPMl9Q
-TExfV0RUX0NPTlRST0wxKTsNCj4gKwlzZGhjaV93cml0ZWwoaG9zdCwgc2NyYXRjaDMyLCBPMl9Q
-TExfRExMX1dEVF9DT05UUk9MMSk7DQo+ICAJdWRlbGF5KDEpOw0KPiAgCXNjcmF0Y2gzMiAmPSB+
-KE8yX1BMTF9TT0ZUX1JFU0VUKTsNCj4gLQlzZGhjaV93cml0ZWwoaG9zdCwgc2NyYXRjaDMyLCBP
-Ml9QTExfV0RUX0NPTlRST0wxKTsNCj4gKwlzZGhjaV93cml0ZWwoaG9zdCwgc2NyYXRjaDMyLCBP
-Ml9QTExfRExMX1dEVF9DT05UUk9MMSk7DQo+ICANCj4gIAkvKiBQTEwgZm9yY2UgYWN0aXZlICov
-DQo+ICAJc2NyYXRjaDMyIHw9IE8yX1BMTF9GT1JDRV9BQ1RJVkU7DQo+IC0Jc2RoY2lfd3JpdGVs
-KGhvc3QsIHNjcmF0Y2gzMiwgTzJfUExMX1dEVF9DT05UUk9MMSk7DQo+ICsJc2RoY2lfd3JpdGVs
-KGhvc3QsIHNjcmF0Y2gzMiwgTzJfUExMX0RMTF9XRFRfQ09OVFJPTDEpOw0KPiAgDQo+ICAJLyog
-V2FpdCBtYXggMjAgbXMgKi8NCj4gIAl0aW1lb3V0ID0ga3RpbWVfYWRkX21zKGt0aW1lX2dldCgp
-LCAyMCk7DQo+ICAJd2hpbGUgKDEpIHsNCj4gIAkJYm9vbCB0aW1lZG91dCA9IGt0aW1lX2FmdGVy
-KGt0aW1lX2dldCgpLCB0aW1lb3V0KTsNCj4gIA0KPiAtCQlzY3JhdGNoID0gc2RoY2lfcmVhZHco
-aG9zdCwgTzJfUExMX1dEVF9DT05UUk9MMSk7DQo+ICsJCXNjcmF0Y2ggPSBzZGhjaV9yZWFkdyho
-b3N0LCBPMl9QTExfRExMX1dEVF9DT05UUk9MMSk7DQo+ICAJCWlmIChzY3JhdGNoICYgTzJfUExM
-X0xPQ0tfU1RBVFVTKQ0KPiAgCQkJYnJlYWs7DQo+ICAJCWlmICh0aW1lZG91dCkgew0KPiBAQCAt
-MzUwLDE2ICs0NTksMTYgQEAgc3RhdGljIHZvaWQgDQo+IHNkaGNpX28yX2VuYWJsZV9pbnRlcm5h
-bF9jbG9jayhzdHJ1Y3Qgc2RoY2lfaG9zdCAqaG9zdCkNCj4gIA0KPiAgb3V0Og0KPiAgCS8qIENh
-bmNlbCBQTEwgZm9yY2UgYWN0aXZlICovDQo+IC0Jc2NyYXRjaDMyID0gc2RoY2lfcmVhZGwoaG9z
-dCwgTzJfUExMX1dEVF9DT05UUk9MMSk7DQo+ICsJc2NyYXRjaDMyID0gc2RoY2lfcmVhZGwoaG9z
-dCwgTzJfUExMX0RMTF9XRFRfQ09OVFJPTDEpOw0KPiAgCXNjcmF0Y2gzMiAmPSB+TzJfUExMX0ZP
-UkNFX0FDVElWRTsNCj4gLQlzZGhjaV93cml0ZWwoaG9zdCwgc2NyYXRjaDMyLCBPMl9QTExfV0RU
-X0NPTlRST0wxKTsNCj4gKwlzZGhjaV93cml0ZWwoaG9zdCwgc2NyYXRjaDMyLCBPMl9QTExfRExM
-X1dEVF9DT05UUk9MMSk7DQo+ICB9DQo+ICANCj4gIHN0YXRpYyBpbnQgc2RoY2lfbzJfZ2V0X2Nk
-KHN0cnVjdCBtbWNfaG9zdCAqbW1jKSAgew0KPiAgCXN0cnVjdCBzZGhjaV9ob3N0ICpob3N0ID0g
-bW1jX3ByaXYobW1jKTsNCj4gLQ0KDQpQbGVhc2Uga2VlcCB0aGUgYmxhbmsgbGluZSBhZnRlciBk
-ZWNsYXJhdGlvbnMuDQoNCj4gLQlzZGhjaV9vMl9lbmFibGVfaW50ZXJuYWxfY2xvY2soaG9zdCk7
-DQo+ICsJaWYgKCEoc2RoY2lfcmVhZHcoaG9zdCwgTzJfUExMX0RMTF9XRFRfQ09OVFJPTDEpICYg
-TzJfUExMX0xPQ0tfU1RBVFVTKSkNCj4gKwkJc2RoY2lfbzJfZW5hYmxlX2ludGVybmFsX2Nsb2Nr
-KGhvc3QpOw0KPiAgDQo+ICAJcmV0dXJuICEhKHNkaGNpX3JlYWRsKGhvc3QsIFNESENJX1BSRVNF
-TlRfU1RBVEUpICYgDQo+IFNESENJX0NBUkRfUFJFU0VOVCk7ICB9IEBAIC0zNjksNyArNDc4LDcg
-QEAgc3RhdGljIHZvaWQgDQo+IHNkaGNpX28yX2VuYWJsZV9jbGsoc3RydWN0IHNkaGNpX2hvc3Qg
-Kmhvc3QsIHUxNiBjbGspDQo+ICAJLyogRW5hYmxlIGludGVybmFsIGNsb2NrICovDQo+ICAJY2xr
-IHw9IFNESENJX0NMT0NLX0lOVF9FTjsNCj4gIAlzZGhjaV93cml0ZXcoaG9zdCwgY2xrLCBTREhD
-SV9DTE9DS19DT05UUk9MKTsNCj4gLQ0KPiArCXNkaGNpX28yX2VuYWJsZV9pbnRlcm5hbF9jbG9j
-ayhob3N0KTsNCj4gIAlpZiAoc2RoY2lfbzJfZ2V0X2NkKGhvc3QtPm1tYykpIHsNCj4gIAkJY2xr
-IHw9IFNESENJX0NMT0NLX0NBUkRfRU47DQo+ICAJCXNkaGNpX3dyaXRldyhob3N0LCBjbGssIFNE
-SENJX0NMT0NLX0NPTlRST0wpOyBAQCAtNDAwLDcgKzUwOSw3IEBAIA0KPiBpbnQgc2RoY2lfcGNp
-X28yX3Byb2JlX3Nsb3Qoc3RydWN0IHNkaGNpX3BjaV9zbG90ICpzbG90KQ0KPiAgDQo+ICAJY2hp
-cCA9IHNsb3QtPmNoaXA7DQo+ICAJaG9zdCA9IHNsb3QtPmhvc3Q7DQo+IC0NCj4gKwlkbGxfYWRq
-dXN0X2NvdW50ID0gMDsNCj4gIAljYXBzID0gc2RoY2lfcmVhZGwoaG9zdCwgU0RIQ0lfQ0FQQUJJ
-TElUSUVTKTsNCj4gIA0KPiAgCS8qDQo+IA0KDQpTZXQgdXAgbzJfaG9zdCBsaWtlIHRoaXM6DQoN
-CmRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLXBjaS1vMm1pY3JvLmMNCmIvZHJp
-dmVycy9tbWMvaG9zdC9zZGhjaS1wY2ktbzJtaWNyby5jDQppbmRleCBjNDNiMmNlY2RmMzAuLmNm
-ZTU3ZjIzZGNmMSAxMDA2NDQNCi0tLSBhL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktcGNpLW8ybWlj
-cm8uYw0KKysrIGIvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1wY2ktbzJtaWNyby5jDQpAQCAtNzk2
-LDQgKzc5Niw1IEBAIGNvbnN0IHN0cnVjdCBzZGhjaV9wY2lfZml4ZXMgc2RoY2lfbzIgPSB7DQog
-CS5yZXN1bWUgPSBzZGhjaV9wY2lfbzJfcmVzdW1lLA0KICNlbmRpZg0KIAkub3BzID0gJnNkaGNp
-X3BjaV9vMl9vcHMsDQorCS5wcml2X3NpemUgPSBzaXplb2Yoc3RydWN0IG8yX2hvc3QpLA0KIH07
-DQo=
+On Tue, 30 Jul 2019 at 20:16, Stephen Boyd <swboyd@chromium.org> wrote:
+>
+> We don't need dev_err() messages when platform_get_irq() fails now that
+> platform_get_irq() prints an error message itself when something goes
+> wrong. Let's remove these prints with a simple semantic patch.
+>
+> // <smpl>
+> @@
+> expression ret;
+> struct platform_device *E;
+> @@
+>
+> ret =
+> (
+> platform_get_irq(E, ...)
+> |
+> platform_get_irq_byname(E, ...)
+> );
+>
+> if ( \( ret < 0 \| ret <= 0 \) )
+> {
+> (
+> -if (ret != -EPROBE_DEFER)
+> -{ ...
+> -dev_err(...);
+> -... }
+> |
+> ...
+> -dev_err(...);
+> )
+> ...
+> }
+> // </smpl>
+>
+> While we're here, remove braces on if statements that only have one
+> statement (manually).
+>
+> Cc: Ulf Hansson <ulf.hansson@linaro.org>
+> Cc: linux-mmc@vger.kernel.org
+> Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+> Signed-off-by: Stephen Boyd <swboyd@chromium.org>
+
+Applied for next, thanks!
+
+Kind regards
+Uffe
+
+
+> ---
+>
+> Please apply directly to subsystem trees
+>
+>  drivers/mmc/host/bcm2835.c       | 1 -
+>  drivers/mmc/host/jz4740_mmc.c    | 1 -
+>  drivers/mmc/host/meson-gx-mmc.c  | 1 -
+>  drivers/mmc/host/mxcmmc.c        | 4 +---
+>  drivers/mmc/host/s3cmci.c        | 1 -
+>  drivers/mmc/host/sdhci-msm.c     | 2 --
+>  drivers/mmc/host/sdhci-pltfm.c   | 1 -
+>  drivers/mmc/host/sdhci-s3c.c     | 4 +---
+>  drivers/mmc/host/sdhci_f_sdh30.c | 4 +---
+>  drivers/mmc/host/uniphier-sd.c   | 4 +---
+>  10 files changed, 4 insertions(+), 19 deletions(-)
+>
+> diff --git a/drivers/mmc/host/bcm2835.c b/drivers/mmc/host/bcm2835.c
+> index 7e0d3a49c06d..e1b7757c48fe 100644
+> --- a/drivers/mmc/host/bcm2835.c
+> +++ b/drivers/mmc/host/bcm2835.c
+> @@ -1409,7 +1409,6 @@ static int bcm2835_probe(struct platform_device *pdev)
+>
+>         host->irq = platform_get_irq(pdev, 0);
+>         if (host->irq <= 0) {
+> -               dev_err(dev, "get IRQ failed\n");
+>                 ret = -EINVAL;
+>                 goto err;
+>         }
+> diff --git a/drivers/mmc/host/jz4740_mmc.c b/drivers/mmc/host/jz4740_mmc.c
+> index ffdbfaadd3f2..672708543a11 100644
+> --- a/drivers/mmc/host/jz4740_mmc.c
+> +++ b/drivers/mmc/host/jz4740_mmc.c
+> @@ -969,7 +969,6 @@ static int jz4740_mmc_probe(struct platform_device* pdev)
+>         host->irq = platform_get_irq(pdev, 0);
+>         if (host->irq < 0) {
+>                 ret = host->irq;
+> -               dev_err(&pdev->dev, "Failed to get platform irq: %d\n", ret);
+>                 goto err_free_host;
+>         }
+>
+> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
+> index 037311db3551..e712315c7e8d 100644
+> --- a/drivers/mmc/host/meson-gx-mmc.c
+> +++ b/drivers/mmc/host/meson-gx-mmc.c
+> @@ -1091,7 +1091,6 @@ static int meson_mmc_probe(struct platform_device *pdev)
+>
+>         host->irq = platform_get_irq(pdev, 0);
+>         if (host->irq <= 0) {
+> -               dev_err(&pdev->dev, "failed to get interrupt resource.\n");
+>                 ret = -EINVAL;
+>                 goto free_host;
+>         }
+> diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
+> index 750604f7fac9..011b59a3602e 100644
+> --- a/drivers/mmc/host/mxcmmc.c
+> +++ b/drivers/mmc/host/mxcmmc.c
+> @@ -1010,10 +1010,8 @@ static int mxcmci_probe(struct platform_device *pdev)
+>
+>         res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+>         irq = platform_get_irq(pdev, 0);
+> -       if (irq < 0) {
+> -               dev_err(&pdev->dev, "failed to get IRQ: %d\n", irq);
+> +       if (irq < 0)
+>                 return irq;
+> -       }
+>
+>         mmc = mmc_alloc_host(sizeof(*host), &pdev->dev);
+>         if (!mmc)
+> diff --git a/drivers/mmc/host/s3cmci.c b/drivers/mmc/host/s3cmci.c
+> index ccc5f095775f..bce9c33bc4b5 100644
+> --- a/drivers/mmc/host/s3cmci.c
+> +++ b/drivers/mmc/host/s3cmci.c
+> @@ -1614,7 +1614,6 @@ static int s3cmci_probe(struct platform_device *pdev)
+>
+>         host->irq = platform_get_irq(pdev, 0);
+>         if (host->irq <= 0) {
+> -               dev_err(&pdev->dev, "failed to get interrupt resource.\n");
+>                 ret = -EINVAL;
+>                 goto probe_iounmap;
+>         }
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index 9cf14b359c14..b75c82d8d6c1 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -1917,8 +1917,6 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+>         /* Setup IRQ for handling power/voltage tasks with PMIC */
+>         msm_host->pwr_irq = platform_get_irq_byname(pdev, "pwr_irq");
+>         if (msm_host->pwr_irq < 0) {
+> -               dev_err(&pdev->dev, "Get pwr_irq failed (%d)\n",
+> -                       msm_host->pwr_irq);
+>                 ret = msm_host->pwr_irq;
+>                 goto clk_disable;
+>         }
+> diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
+> index d268b3b8850a..caf0ad5de604 100644
+> --- a/drivers/mmc/host/sdhci-pltfm.c
+> +++ b/drivers/mmc/host/sdhci-pltfm.c
+> @@ -131,7 +131,6 @@ struct sdhci_host *sdhci_pltfm_init(struct platform_device *pdev,
+>
+>         irq = platform_get_irq(pdev, 0);
+>         if (irq < 0) {
+> -               dev_err(&pdev->dev, "failed to get IRQ number\n");
+>                 ret = irq;
+>                 goto err;
+>         }
+> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+> index 8e4a8ba33f05..3d7fa948b4c3 100644
+> --- a/drivers/mmc/host/sdhci-s3c.c
+> +++ b/drivers/mmc/host/sdhci-s3c.c
+> @@ -490,10 +490,8 @@ static int sdhci_s3c_probe(struct platform_device *pdev)
+>         }
+>
+>         irq = platform_get_irq(pdev, 0);
+> -       if (irq < 0) {
+> -               dev_err(dev, "no irq specified\n");
+> +       if (irq < 0)
+>                 return irq;
+> -       }
+>
+>         host = sdhci_alloc_host(dev, sizeof(struct sdhci_s3c));
+>         if (IS_ERR(host)) {
+> diff --git a/drivers/mmc/host/sdhci_f_sdh30.c b/drivers/mmc/host/sdhci_f_sdh30.c
+> index e369cbf1ff02..f8b939e63e02 100644
+> --- a/drivers/mmc/host/sdhci_f_sdh30.c
+> +++ b/drivers/mmc/host/sdhci_f_sdh30.c
+> @@ -119,10 +119,8 @@ static int sdhci_f_sdh30_probe(struct platform_device *pdev)
+>         u32 reg = 0;
+>
+>         irq = platform_get_irq(pdev, 0);
+> -       if (irq < 0) {
+> -               dev_err(dev, "%s: no irq specified\n", __func__);
+> +       if (irq < 0)
+>                 return irq;
+> -       }
+>
+>         host = sdhci_alloc_host(dev, sizeof(struct f_sdhost_priv));
+>         if (IS_ERR(host))
+> diff --git a/drivers/mmc/host/uniphier-sd.c b/drivers/mmc/host/uniphier-sd.c
+> index 49aad9a79c18..e09336f9166d 100644
+> --- a/drivers/mmc/host/uniphier-sd.c
+> +++ b/drivers/mmc/host/uniphier-sd.c
+> @@ -557,10 +557,8 @@ static int uniphier_sd_probe(struct platform_device *pdev)
+>         int irq, ret;
+>
+>         irq = platform_get_irq(pdev, 0);
+> -       if (irq < 0) {
+> -               dev_err(dev, "failed to get IRQ number");
+> +       if (irq < 0)
+>                 return irq;
+> -       }
+>
+>         priv = devm_kzalloc(dev, sizeof(*priv), GFP_KERNEL);
+>         if (!priv)
+> --
+> Sent by a computer through tubes
+>
