@@ -1,58 +1,33 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v6 29/57] mmc: Remove dev_err() usage after platform_get_irq()
-Date: Fri, 2 Aug 2019 17:16:10 +0200
-Message-ID: <CAPDyKFpgMioHCLbwJ7+koZw13UqXTEXE+cnO8+AeT2s-nj-OTQ@mail.gmail.com>
-References: <20190730181557.90391-1-swboyd@chromium.org> <20190730181557.90391-30-swboyd@chromium.org>
+Subject: Re: [PATCH] mmc: sdhci-s3c: Mark expected switch fall-through
+Date: Fri, 2 Aug 2019 17:16:18 +0200
+Message-ID: <CAPDyKFpv0CW2G9ServNX9UKEtGrHRK=u9KoQWfZ8LyQ6Gy3-KQ@mail.gmail.com>
+References: <20190729000259.GA24022@embeddedor>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190730181557.90391-30-swboyd@chromium.org>
+In-Reply-To: <20190729000259.GA24022@embeddedor>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Stephen Boyd <swboyd@chromium.org>
-Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+To: "Gustavo A. R. Silva" <gustavo@embeddedor.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Ben Dooks <ben-linux@fluff.org>, Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Stephen Rothwell <sfr@canb.auug.org.au>, Kees Cook <keescook@chromium.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, 30 Jul 2019 at 20:16, Stephen Boyd <swboyd@chromium.org> wrote:
+On Mon, 29 Jul 2019 at 02:03, Gustavo A. R. Silva
+<gustavo@embeddedor.com> wrote:
 >
-> We don't need dev_err() messages when platform_get_irq() fails now that
-> platform_get_irq() prints an error message itself when something goes
-> wrong. Let's remove these prints with a simple semantic patch.
+> Mark switch cases where we are expecting to fall through.
 >
-> // <smpl>
-> @@
-> expression ret;
-> struct platform_device *E;
-> @@
+> This patch fixes the following warnings:
 >
-> ret =
-> (
-> platform_get_irq(E, ...)
-> |
-> platform_get_irq_byname(E, ...)
-> );
+> drivers/mmc/host/sdhci-s3c.c: In function 'sdhci_s3c_probe':
+> drivers/mmc/host/sdhci-s3c.c:613:19: warning: this statement may fall through [-Wimplicit-fallthrough=]
+>    host->mmc->caps |= MMC_CAP_8_BIT_DATA;
+> drivers/mmc/host/sdhci-s3c.c:614:2: note: here
+>   case 4:
+>   ^~~~
 >
-> if ( \( ret < 0 \| ret <= 0 \) )
-> {
-> (
-> -if (ret != -EPROBE_DEFER)
-> -{ ...
-> -dev_err(...);
-> -... }
-> |
-> ...
-> -dev_err(...);
-> )
-> ...
-> }
-> // </smpl>
->
-> While we're here, remove braces on if statements that only have one
-> statement (manually).
->
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: linux-mmc@vger.kernel.org
-> Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-> Signed-off-by: Stephen Boyd <swboyd@chromium.org>
+> Reported-by: Stephen Rothwell <sfr@canb.auug.org.au>
+> Signed-off-by: Gustavo A. R. Silva <gustavo@embeddedor.com>
 
 Applied for next, thanks!
 
@@ -61,158 +36,21 @@ Uffe
 
 
 > ---
+>  drivers/mmc/host/sdhci-s3c.c | 1 +
+>  1 file changed, 1 insertion(+)
 >
-> Please apply directly to subsystem trees
->
->  drivers/mmc/host/bcm2835.c       | 1 -
->  drivers/mmc/host/jz4740_mmc.c    | 1 -
->  drivers/mmc/host/meson-gx-mmc.c  | 1 -
->  drivers/mmc/host/mxcmmc.c        | 4 +---
->  drivers/mmc/host/s3cmci.c        | 1 -
->  drivers/mmc/host/sdhci-msm.c     | 2 --
->  drivers/mmc/host/sdhci-pltfm.c   | 1 -
->  drivers/mmc/host/sdhci-s3c.c     | 4 +---
->  drivers/mmc/host/sdhci_f_sdh30.c | 4 +---
->  drivers/mmc/host/uniphier-sd.c   | 4 +---
->  10 files changed, 4 insertions(+), 19 deletions(-)
->
-> diff --git a/drivers/mmc/host/bcm2835.c b/drivers/mmc/host/bcm2835.c
-> index 7e0d3a49c06d..e1b7757c48fe 100644
-> --- a/drivers/mmc/host/bcm2835.c
-> +++ b/drivers/mmc/host/bcm2835.c
-> @@ -1409,7 +1409,6 @@ static int bcm2835_probe(struct platform_device *pdev)
->
->         host->irq = platform_get_irq(pdev, 0);
->         if (host->irq <= 0) {
-> -               dev_err(dev, "get IRQ failed\n");
->                 ret = -EINVAL;
->                 goto err;
->         }
-> diff --git a/drivers/mmc/host/jz4740_mmc.c b/drivers/mmc/host/jz4740_mmc.c
-> index ffdbfaadd3f2..672708543a11 100644
-> --- a/drivers/mmc/host/jz4740_mmc.c
-> +++ b/drivers/mmc/host/jz4740_mmc.c
-> @@ -969,7 +969,6 @@ static int jz4740_mmc_probe(struct platform_device* pdev)
->         host->irq = platform_get_irq(pdev, 0);
->         if (host->irq < 0) {
->                 ret = host->irq;
-> -               dev_err(&pdev->dev, "Failed to get platform irq: %d\n", ret);
->                 goto err_free_host;
->         }
->
-> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-> index 037311db3551..e712315c7e8d 100644
-> --- a/drivers/mmc/host/meson-gx-mmc.c
-> +++ b/drivers/mmc/host/meson-gx-mmc.c
-> @@ -1091,7 +1091,6 @@ static int meson_mmc_probe(struct platform_device *pdev)
->
->         host->irq = platform_get_irq(pdev, 0);
->         if (host->irq <= 0) {
-> -               dev_err(&pdev->dev, "failed to get interrupt resource.\n");
->                 ret = -EINVAL;
->                 goto free_host;
->         }
-> diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
-> index 750604f7fac9..011b59a3602e 100644
-> --- a/drivers/mmc/host/mxcmmc.c
-> +++ b/drivers/mmc/host/mxcmmc.c
-> @@ -1010,10 +1010,8 @@ static int mxcmci_probe(struct platform_device *pdev)
->
->         res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
->         irq = platform_get_irq(pdev, 0);
-> -       if (irq < 0) {
-> -               dev_err(&pdev->dev, "failed to get IRQ: %d\n", irq);
-> +       if (irq < 0)
->                 return irq;
-> -       }
->
->         mmc = mmc_alloc_host(sizeof(*host), &pdev->dev);
->         if (!mmc)
-> diff --git a/drivers/mmc/host/s3cmci.c b/drivers/mmc/host/s3cmci.c
-> index ccc5f095775f..bce9c33bc4b5 100644
-> --- a/drivers/mmc/host/s3cmci.c
-> +++ b/drivers/mmc/host/s3cmci.c
-> @@ -1614,7 +1614,6 @@ static int s3cmci_probe(struct platform_device *pdev)
->
->         host->irq = platform_get_irq(pdev, 0);
->         if (host->irq <= 0) {
-> -               dev_err(&pdev->dev, "failed to get interrupt resource.\n");
->                 ret = -EINVAL;
->                 goto probe_iounmap;
->         }
-> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> index 9cf14b359c14..b75c82d8d6c1 100644
-> --- a/drivers/mmc/host/sdhci-msm.c
-> +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -1917,8 +1917,6 @@ static int sdhci_msm_probe(struct platform_device *pdev)
->         /* Setup IRQ for handling power/voltage tasks with PMIC */
->         msm_host->pwr_irq = platform_get_irq_byname(pdev, "pwr_irq");
->         if (msm_host->pwr_irq < 0) {
-> -               dev_err(&pdev->dev, "Get pwr_irq failed (%d)\n",
-> -                       msm_host->pwr_irq);
->                 ret = msm_host->pwr_irq;
->                 goto clk_disable;
->         }
-> diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
-> index d268b3b8850a..caf0ad5de604 100644
-> --- a/drivers/mmc/host/sdhci-pltfm.c
-> +++ b/drivers/mmc/host/sdhci-pltfm.c
-> @@ -131,7 +131,6 @@ struct sdhci_host *sdhci_pltfm_init(struct platform_device *pdev,
->
->         irq = platform_get_irq(pdev, 0);
->         if (irq < 0) {
-> -               dev_err(&pdev->dev, "failed to get IRQ number\n");
->                 ret = irq;
->                 goto err;
->         }
 > diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-> index 8e4a8ba33f05..3d7fa948b4c3 100644
+> index 8e4a8ba33f05..cefa0fb8cfde 100644
 > --- a/drivers/mmc/host/sdhci-s3c.c
 > +++ b/drivers/mmc/host/sdhci-s3c.c
-> @@ -490,10 +490,8 @@ static int sdhci_s3c_probe(struct platform_device *pdev)
->         }
->
->         irq = platform_get_irq(pdev, 0);
-> -       if (irq < 0) {
-> -               dev_err(dev, "no irq specified\n");
-> +       if (irq < 0)
->                 return irq;
-> -       }
->
->         host = sdhci_alloc_host(dev, sizeof(struct sdhci_s3c));
->         if (IS_ERR(host)) {
-> diff --git a/drivers/mmc/host/sdhci_f_sdh30.c b/drivers/mmc/host/sdhci_f_sdh30.c
-> index e369cbf1ff02..f8b939e63e02 100644
-> --- a/drivers/mmc/host/sdhci_f_sdh30.c
-> +++ b/drivers/mmc/host/sdhci_f_sdh30.c
-> @@ -119,10 +119,8 @@ static int sdhci_f_sdh30_probe(struct platform_device *pdev)
->         u32 reg = 0;
->
->         irq = platform_get_irq(pdev, 0);
-> -       if (irq < 0) {
-> -               dev_err(dev, "%s: no irq specified\n", __func__);
-> +       if (irq < 0)
->                 return irq;
-> -       }
->
->         host = sdhci_alloc_host(dev, sizeof(struct f_sdhost_priv));
->         if (IS_ERR(host))
-> diff --git a/drivers/mmc/host/uniphier-sd.c b/drivers/mmc/host/uniphier-sd.c
-> index 49aad9a79c18..e09336f9166d 100644
-> --- a/drivers/mmc/host/uniphier-sd.c
-> +++ b/drivers/mmc/host/uniphier-sd.c
-> @@ -557,10 +557,8 @@ static int uniphier_sd_probe(struct platform_device *pdev)
->         int irq, ret;
->
->         irq = platform_get_irq(pdev, 0);
-> -       if (irq < 0) {
-> -               dev_err(dev, "failed to get IRQ number");
-> +       if (irq < 0)
->                 return irq;
-> -       }
->
->         priv = devm_kzalloc(dev, sizeof(*priv), GFP_KERNEL);
->         if (!priv)
+> @@ -611,6 +611,7 @@ static int sdhci_s3c_probe(struct platform_device *pdev)
+>         switch (pdata->max_width) {
+>         case 8:
+>                 host->mmc->caps |= MMC_CAP_8_BIT_DATA;
+> +               /* Fall through */
+>         case 4:
+>                 host->mmc->caps |= MMC_CAP_4_BIT_DATA;
+>                 break;
 > --
-> Sent by a computer through tubes
+> 2.22.0
 >
