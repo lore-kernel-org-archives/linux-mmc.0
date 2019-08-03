@@ -1,427 +1,135 @@
-From: "Shirley Her (SC)" <shirley.her@bayhubtech.com>
-Subject: [PATCH V4 2/2] mmc: sdhci: Fix O2 Host data read/write DLL Lock Phase
- shift issue
-Date: Fri, 2 Aug 2019 17:40:17 +0000
-Message-ID: <1564767615-4566-1-git-send-email-shirley.her@bayhubtech.com>
+From: Shawn Guo <shawnguo@kernel.org>
+Subject: Re: [PATCH v3] arm64: dts: ls1028a: Add esdhc node in dts
+Date: Sat, 3 Aug 2019 09:00:34 +0200
+Message-ID: <20190803070033.GA5627@X250>
+References: <20190515084925.30155-1-yinbo.zhu@nxp.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Language: en-US
+Content-Disposition: inline
+In-Reply-To: <20190515084925.30155-1-yinbo.zhu@nxp.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: "adrian.hunter@intel.com" <adrian.hunter@intel.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Cc: "Louis Lu (TP)" <louis.lu@bayhubtech.com>, "Chevron Li (WH)" <chevron.li@bayhubtech.com>, "Max Huang (SC)" <max.huang@bayhubtech.com>, "Shirley Her (SC)" <shirley.her@bayhubtech.com>
+To: Yinbo Zhu <yinbo.zhu@nxp.com>
+Cc: Li Yang <leoyang.li@nxp.com>, Rob Herring <robh+dt@kernel.org>, xiaobo.xie@nxp.com, Mark Rutland <mark.rutland@arm.com>, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, yangbo.lu@nxp.com, jiafei.pan@nxp.com, Ashish Kumar <Ashish.Kumar@nxp.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Fix data read/write error in HS200 mode due to chip DLL lock phase shift
+On Wed, May 15, 2019 at 04:49:25PM +0800, Yinbo Zhu wrote:
+> From: Ashish Kumar <Ashish.Kumar@nxp.com>
+> 
+> This patch is to add esdhc node and enable SD UHS-I,
+> eMMC HS200 for ls1028ardb/ls1028aqds board.
+> 
+> Signed-off-by: Ashish Kumar <Ashish.Kumar@nxp.com>
+> Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
+> Signed-off-by: Yinbo Zhu <yinbo.zhu@nxp.com>
+> ---
+> Change in v3:
+> 		replace "esdhc@" with "mmc@"
+> 
+>  arch/arm64/boot/dts/freescale/fsl-ls1028a-qds.dts |    8 ++++++
+>  arch/arm64/boot/dts/freescale/fsl-ls1028a-rdb.dts |   13 ++++++++++
+>  arch/arm64/boot/dts/freescale/fsl-ls1028a.dtsi    |   27 +++++++++++++++++++++
+>  3 files changed, 48 insertions(+), 0 deletions(-)
+> 
+> diff --git a/arch/arm64/boot/dts/freescale/fsl-ls1028a-qds.dts b/arch/arm64/boot/dts/freescale/fsl-ls1028a-qds.dts
+> index 14c79f4..180e5d2 100644
+> --- a/arch/arm64/boot/dts/freescale/fsl-ls1028a-qds.dts
+> +++ b/arch/arm64/boot/dts/freescale/fsl-ls1028a-qds.dts
+> @@ -42,6 +42,14 @@
+>  	status = "okay";
+>  };
+>  
+> +&esdhc {
+> +	status = "okay";
+> +};
+> +
+> +&esdhc1 {
+> +	status = "okay";
+> +};
+> +
+>  &i2c0 {
+>  	status = "okay";
+>  
+> diff --git a/arch/arm64/boot/dts/freescale/fsl-ls1028a-rdb.dts b/arch/arm64/boot/dts/freescale/fsl-ls1028a-rdb.dts
+> index f86b054..1bfaf42 100644
+> --- a/arch/arm64/boot/dts/freescale/fsl-ls1028a-rdb.dts
+> +++ b/arch/arm64/boot/dts/freescale/fsl-ls1028a-rdb.dts
+> @@ -30,6 +30,19 @@
+>  	};
+>  };
+>  
+> +&esdhc {
+> +	status = "okay";
 
-Signed-off-by:Shirley Her<shirley.her@bayhubtech.com>
----
-change in V4:
- 1. add a bug fix for V3
+We usually put 'status' at end of property list.
 
-change in V3:
- 1. add more explanation in dll_recovery and execute_tuning function
- 2. move dll_adjust_count to O2_host struct
- 3. fix some coding style error
- 4. renaming O2_PLL_WDT_CONTROL1 TO O2_PLL_DLL_WDT_CONTROL1
+> +	sd-uhs-sdr104;
+> +	sd-uhs-sdr50;
+> +	sd-uhs-sdr25;
+> +	sd-uhs-sdr12;
+> +	};
 
-change in V2:
- 1. use usleep_range instead of udelay
- 2. move dll_adjust_count to sdhci-pci-o2micro.c
+Please follow the indent style of closing parentheses in the file.
 
-chagne in V1:
- 1. add error recovery function to relock DLL with correct phase
- 2. retuning HS200 after DLL locked
----
- drivers/mmc/host/sdhci-pci-o2micro.c | 305 ++++++++++++++++++++++++-------=
-----
- 1 file changed, 208 insertions(+), 97 deletions(-)
+> +
+> +&esdhc1 {
+> +	status = "okay";
+> +	mmc-hs200-1_8v;
+> +	};
 
-diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-=
-pci-o2micro.c
-index 186a33d..aee0d15 100644
---- a/drivers/mmc/host/sdhci-pci-o2micro.c
-+++ b/drivers/mmc/host/sdhci-pci-o2micro.c
-@@ -55,9 +55,138 @@
- #define  O2_PLL_FORCE_ACTIVE	BIT(18)
- #define  O2_PLL_LOCK_STATUS	BIT(14)
- #define  O2_PLL_SOFT_RESET	BIT(12)
-+#define  O2_DLL_LOCK_STATUS	BIT(11)
-=20
- #define O2_SD_DETECT_SETTING 0x324
-=20
-+static const u32 dmdn_table[5] =3D {0x25100000, 0x2B1C0000,
-+	0x2C1A0000, 0x371B0000, 0x35100000};
-+
-+struct o2_host {
-+	u8 dll_adjust_count;
-+};
-+
-+static void sdhci_o2_wait_card_detect_stable(struct sdhci_host *host)
-+{
-+	ktime_t timeout;
-+	u32 scratch32;
-+
-+	/* Wait max 50 ms */
-+	timeout =3D ktime_add_ms(ktime_get(), 50);
-+	while (1) {
-+		bool timedout =3D ktime_after(ktime_get(), timeout);
-+
-+		scratch32 =3D sdhci_readl(host, SDHCI_PRESENT_STATE);
-+		if ((scratch32 & SDHCI_CARD_PRESENT) >> SDHCI_CARD_PRES_SHIFT
-+		    =3D=3D (scratch32 & SDHCI_CD_LVL) >> SDHCI_CD_LVL_SHIFT)
-+			break;
-+
-+		if (timedout) {
-+			pr_err("%s: Card Detect debounce never finished.\n",
-+			       mmc_hostname(host->mmc));
-+			sdhci_dumpregs(host);
-+			return;
-+		}
-+		udelay(10);
-+	}
-+}
-+
-+static void sdhci_o2_enable_internal_clock(struct sdhci_host *host)
-+{
-+	ktime_t timeout;
-+	u16 scratch;
-+	u32 scratch32;
-+
-+	/* PLL software reset */
-+	scratch32 =3D sdhci_readl(host, O2_PLL_DLL_WDT_CONTROL1);
-+	scratch32 |=3D O2_PLL_SOFT_RESET;
-+	sdhci_writel(host, scratch32, O2_PLL_DLL_WDT_CONTROL1);
-+	udelay(1);
-+	scratch32 &=3D ~(O2_PLL_SOFT_RESET);
-+	sdhci_writel(host, scratch32, O2_PLL_DLL_WDT_CONTROL1);
-+
-+	/* PLL force active */
-+	scratch32 |=3D O2_PLL_FORCE_ACTIVE;
-+	sdhci_writel(host, scratch32, O2_PLL_DLL_WDT_CONTROL1);
-+
-+	/* Wait max 20 ms */
-+	timeout =3D ktime_add_ms(ktime_get(), 20);
-+	while (1) {
-+		bool timedout =3D ktime_after(ktime_get(), timeout);
-+
-+		scratch =3D sdhci_readw(host, O2_PLL_DLL_WDT_CONTROL1);
-+		if (scratch & O2_PLL_LOCK_STATUS)
-+			break;
-+		if (timedout) {
-+			pr_err("%s: Internal clock never stabilised.\n",
-+			       mmc_hostname(host->mmc));
-+			sdhci_dumpregs(host);
-+			goto out;
-+		}
-+		udelay(10);
-+	}
-+
-+	/* Wait for card detect finish */
-+	udelay(1);
-+	sdhci_o2_wait_card_detect_stable(host);
-+
-+out:
-+	/* Cancel PLL force active */
-+	scratch32 =3D sdhci_readl(host, O2_PLL_DLL_WDT_CONTROL1);
-+	scratch32 &=3D ~O2_PLL_FORCE_ACTIVE;
-+	sdhci_writel(host, scratch32, O2_PLL_DLL_WDT_CONTROL1);
-+}
-+
-+static int sdhci_o2_get_cd(struct mmc_host *mmc)
-+{
-+	struct sdhci_host *host =3D mmc_priv(mmc);
-+
-+	if (!(sdhci_readw(host, O2_PLL_DLL_WDT_CONTROL1) & O2_PLL_LOCK_STATUS))
-+		sdhci_o2_enable_internal_clock(host);
-+
-+	return !!(sdhci_readl(host, SDHCI_PRESENT_STATE) & SDHCI_CARD_PRESENT);
-+}
-+
-+static void o2_pci_set_baseclk(struct sdhci_pci_chip *chip, u32 value)
-+{
-+	u32 scratch_32;
-+
-+	pci_read_config_dword(chip->pdev,
-+			      O2_SD_PLL_SETTING, &scratch_32);
-+
-+	scratch_32 &=3D 0x0000FFFF;
-+	scratch_32 |=3D value;
-+
-+	pci_write_config_dword(chip->pdev,
-+			       O2_SD_PLL_SETTING, scratch_32);
-+}
-+
-+static int sdhci_o2_wait_dll_detect_lock(struct sdhci_host *host)
-+{
-+	ktime_t timeout;
-+	u32 scratch32;
-+
-+	usleep_range(5000, 6000);
-+	scratch32 =3D sdhci_readl(host, O2_PLL_DLL_WDT_CONTROL1);
-+	if (!(scratch32 & O2_DLL_LOCK_STATUS)) {
-+		pr_warn("%s: DLL is still unlocked after wait 5ms\n",
-+			mmc_hostname(host->mmc));
-+	}
-+
-+	/* Detect 1 s */
-+	timeout =3D ktime_add_ms(ktime_get(), 1000);
-+	while (1) {
-+		bool timedout =3D ktime_after(ktime_get(), timeout);
-+
-+		scratch32 =3D sdhci_readl(host, O2_PLL_DLL_WDT_CONTROL1);
-+		if (!(scratch32 & O2_DLL_LOCK_STATUS))
-+			return 0;
-+
-+		if (timedout)
-+			return 1;
-+	}
-+}
-+
- static void sdhci_o2_set_tuning_mode(struct sdhci_host *host)
- {
- 	u16 reg;
-@@ -73,7 +202,6 @@ static void __sdhci_o2_execute_tuning(struct sdhci_host =
-*host, u32 opcode)
- 	int i;
-=20
- 	sdhci_send_tuning(host, MMC_SEND_TUNING_BLOCK_HS200);
--
- 	for (i =3D 0; i < 150; i++) {
- 		u16 ctrl =3D sdhci_readw(host, SDHCI_HOST_CONTROL2);
-=20
-@@ -95,12 +223,87 @@ static void __sdhci_o2_execute_tuning(struct sdhci_hos=
-t *host, u32 opcode)
- 	sdhci_reset_tuning(host);
- }
-=20
-+/* this function is used to fix o2 dll shift issue */
-+static int sdhci_o2_dll_recovery(struct sdhci_host *host)
-+{
-+	int ret =3D 0;
-+	u8 scratch_8 =3D 0;
-+	u32 scratch_32 =3D 0;
-+	struct sdhci_pci_slot *slot =3D sdhci_priv(host);
-+	struct sdhci_pci_chip *chip =3D slot->chip;
-+	struct o2_host *o2_host =3D sdhci_pci_priv(slot);
-+
-+	/* Disable clock */
-+	sdhci_writeb(host, 0, SDHCI_CLOCK_CONTROL);
-+	while (o2_host->dll_adjust_count < 5) {
-+		o2_host->dll_adjust_count++;
-+		/* UnLock WP */
-+		ret =3D pci_read_config_byte(chip->pdev,
-+				O2_SD_LOCK_WP, &scratch_8);
-+		if (ret)
-+			return ret;
-+
-+		scratch_8 &=3D 0x7f;
-+		pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch_8);
-+
-+		/* PLL software reset */
-+		scratch_32 =3D sdhci_readl(host, O2_PLL_DLL_WDT_CONTROL1);
-+		scratch_32 |=3D O2_PLL_SOFT_RESET;
-+		sdhci_writel(host, scratch_32, O2_PLL_DLL_WDT_CONTROL1);
-+
-+		ret =3D pci_read_config_dword(chip->pdev,
-+					    O2_SD_FUNC_REG4,
-+					    &scratch_32);
-+		/* Enable Base Clk setting change */
-+		scratch_32 |=3D O2_SD_FREG4_ENABLE_CLK_SET;
-+		pci_write_config_dword(chip->pdev, O2_SD_FUNC_REG4, scratch_32);
-+		o2_pci_set_baseclk(chip, dmdn_table[o2_host->dll_adjust_count]);
-+
-+		/* Enable internal clock */
-+		scratch_8 =3D SDHCI_CLOCK_INT_EN;
-+		sdhci_writeb(host, scratch_8, SDHCI_CLOCK_CONTROL);
-+
-+		if (sdhci_o2_get_cd(host->mmc)) {
-+			if (sdhci_o2_wait_dll_detect_lock(host)) {
-+				scratch_8 |=3D SDHCI_CLOCK_CARD_EN;
-+				sdhci_writeb(host, scratch_8,
-+					SDHCI_CLOCK_CONTROL);
-+				ret =3D 1;
-+				goto out;
-+			} else {
-+				pr_warn("%s: DLL unlocked when dll_adjust_count is %d.\n",
-+					mmc_hostname(host->mmc),
-+					o2_host->dll_adjust_count);
-+			}
-+		}
-+	}
-+out:
-+	if (o2_host->dll_adjust_count =3D=3D 5)
-+		pr_err("%s: DLL adjust over max times\n",
-+		mmc_hostname(host->mmc));
-+	/* Lock WP */
-+	ret =3D pci_read_config_byte(chip->pdev,
-+				   O2_SD_LOCK_WP, &scratch_8);
-+	if (ret)
-+		return ret;
-+	scratch_8 |=3D 0x80;
-+	pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch_8);
-+	return ret;
-+}
-+
- static int sdhci_o2_execute_tuning(struct mmc_host *mmc, u32 opcode)
- {
- 	struct sdhci_host *host =3D mmc_priv(mmc);
- 	int current_bus_width =3D 0;
-=20
- 	/*
-+	 * Judge the tuning reason, whether caused by dll shift
-+	 * If cause by dll shift, should call sdhci_o2_dll_recovery
-+	 */
-+	if (!sdhci_o2_wait_dll_detect_lock(host))
-+		sdhci_o2_dll_recovery(host);
-+
-+	/*
- 	 * This handler only implements the eMMC tuning that is specific to
- 	 * this controller.  Fall back to the standard method for other TIMING.
- 	 */
-@@ -131,24 +334,10 @@ static int sdhci_o2_execute_tuning(struct mmc_host *m=
-mc, u32 opcode)
- 		mmc->ios.bus_width =3D MMC_BUS_WIDTH_8;
- 		sdhci_set_bus_width(host, current_bus_width);
- 	}
--
- 	host->flags &=3D ~SDHCI_HS400_TUNING;
- 	return 0;
- }
-=20
--static void o2_pci_set_baseclk(struct sdhci_pci_chip *chip, u32 value)
--{
--	u32 scratch_32;
--	pci_read_config_dword(chip->pdev,
--			      O2_SD_PLL_SETTING, &scratch_32);
--
--	scratch_32 &=3D 0x0000FFFF;
--	scratch_32 |=3D value;
--
--	pci_write_config_dword(chip->pdev,
--			       O2_SD_PLL_SETTING, scratch_32);
--}
--
- static void o2_pci_led_enable(struct sdhci_pci_chip *chip)
- {
- 	int ret;
-@@ -284,92 +473,12 @@ static void sdhci_pci_o2_enable_msi(struct sdhci_pci_=
-chip *chip,
- 	host->irq =3D pci_irq_vector(chip->pdev, 0);
- }
-=20
--static void sdhci_o2_wait_card_detect_stable(struct sdhci_host *host)
--{
--	ktime_t timeout;
--	u32 scratch32;
--
--	/* Wait max 50 ms */
--	timeout =3D ktime_add_ms(ktime_get(), 50);
--	while (1) {
--		bool timedout =3D ktime_after(ktime_get(), timeout);
--
--		scratch32 =3D sdhci_readl(host, SDHCI_PRESENT_STATE);
--		if ((scratch32 & SDHCI_CARD_PRESENT) >> SDHCI_CARD_PRES_SHIFT
--		    =3D=3D (scratch32 & SDHCI_CD_LVL) >> SDHCI_CD_LVL_SHIFT)
--			break;
--
--		if (timedout) {
--			pr_err("%s: Card Detect debounce never finished.\n",
--			       mmc_hostname(host->mmc));
--			sdhci_dumpregs(host);
--			return;
--		}
--		udelay(10);
--	}
--}
--
--static void sdhci_o2_enable_internal_clock(struct sdhci_host *host)
--{
--	ktime_t timeout;
--	u16 scratch;
--	u32 scratch32;
--
--	/* PLL software reset */
--	scratch32 =3D sdhci_readl(host, O2_PLL_WDT_CONTROL1);
--	scratch32 |=3D O2_PLL_SOFT_RESET;
--	sdhci_writel(host, scratch32, O2_PLL_WDT_CONTROL1);
--	udelay(1);
--	scratch32 &=3D ~(O2_PLL_SOFT_RESET);
--	sdhci_writel(host, scratch32, O2_PLL_WDT_CONTROL1);
--
--	/* PLL force active */
--	scratch32 |=3D O2_PLL_FORCE_ACTIVE;
--	sdhci_writel(host, scratch32, O2_PLL_WDT_CONTROL1);
--
--	/* Wait max 20 ms */
--	timeout =3D ktime_add_ms(ktime_get(), 20);
--	while (1) {
--		bool timedout =3D ktime_after(ktime_get(), timeout);
--
--		scratch =3D sdhci_readw(host, O2_PLL_WDT_CONTROL1);
--		if (scratch & O2_PLL_LOCK_STATUS)
--			break;
--		if (timedout) {
--			pr_err("%s: Internal clock never stabilised.\n",
--			       mmc_hostname(host->mmc));
--			sdhci_dumpregs(host);
--			goto out;
--		}
--		udelay(10);
--	}
--
--	/* Wait for card detect finish */
--	udelay(1);
--	sdhci_o2_wait_card_detect_stable(host);
--
--out:
--	/* Cancel PLL force active */
--	scratch32 =3D sdhci_readl(host, O2_PLL_WDT_CONTROL1);
--	scratch32 &=3D ~O2_PLL_FORCE_ACTIVE;
--	sdhci_writel(host, scratch32, O2_PLL_WDT_CONTROL1);
--}
--
--static int sdhci_o2_get_cd(struct mmc_host *mmc)
--{
--	struct sdhci_host *host =3D mmc_priv(mmc);
--
--	sdhci_o2_enable_internal_clock(host);
--
--	return !!(sdhci_readl(host, SDHCI_PRESENT_STATE) & SDHCI_CARD_PRESENT);
--}
--
- static void sdhci_o2_enable_clk(struct sdhci_host *host, u16 clk)
- {
- 	/* Enable internal clock */
- 	clk |=3D SDHCI_CLOCK_INT_EN;
- 	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
--
-+	sdhci_o2_enable_internal_clock(host);
- 	if (sdhci_o2_get_cd(host->mmc)) {
- 		clk |=3D SDHCI_CLOCK_CARD_EN;
- 		sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
-@@ -395,12 +504,13 @@ int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *sl=
-ot)
- {
- 	struct sdhci_pci_chip *chip;
- 	struct sdhci_host *host;
-+	struct o2_host *o2_host =3D sdhci_pci_priv(slot);
- 	u32 reg, caps;
- 	int ret;
-=20
- 	chip =3D slot->chip;
- 	host =3D slot->host;
--
-+	o2_host->dll_adjust_count =3D 0;
- 	caps =3D sdhci_readl(host, SDHCI_CAPABILITIES);
-=20
- 	/*
-@@ -687,4 +797,5 @@ const struct sdhci_pci_fixes sdhci_o2 =3D {
- 	.resume =3D sdhci_pci_o2_resume,
- #endif
- 	.ops =3D &sdhci_pci_o2_ops,
-+	.priv_size =3D sizeof(struct o2_host),
- };
---=20
-2.7.4
+Ditto
+
+> +
+>  &i2c0 {
+>  	status = "okay";
+>  
+> diff --git a/arch/arm64/boot/dts/freescale/fsl-ls1028a.dtsi b/arch/arm64/boot/dts/freescale/fsl-ls1028a.dtsi
+> index 2896bbc..462833c 100644
+> --- a/arch/arm64/boot/dts/freescale/fsl-ls1028a.dtsi
+> +++ b/arch/arm64/boot/dts/freescale/fsl-ls1028a.dtsi
+> @@ -274,6 +274,33 @@
+>  			status = "disabled";
+>  		};
+>  
+> +		esdhc: mmc@2140000 {
+
+Please sort the nodes in unit-address.  From what I see, it should go
+before device serial@21c0500.
+
+> +			compatible = "fsl,ls1028a-esdhc", "fsl,esdhc";
+> +			reg = <0x0 0x2140000 0x0 0x10000>;
+> +			interrupts = <0 28 0x4>; /* Level high type */
+
+Use IRQ_TYPE_LEVEL_HIGH, then you can drop the comment.
+
+Shawn
+
+> +			clock-frequency = <0>; /* fixed up by bootloader */
+> +			clocks = <&clockgen 2 1>;
+> +			voltage-ranges = <1800 1800 3300 3300>;
+> +			sdhci,auto-cmd12;
+> +			little-endian;
+> +			bus-width = <4>;
+> +			status = "disabled";
+> +		};
+> +
+> +		esdhc1: mmc@2150000 {
+> +			compatible = "fsl,ls1028a-esdhc", "fsl,esdhc";
+> +			reg = <0x0 0x2150000 0x0 0x10000>;
+> +			interrupts = <0 63 0x4>; /* Level high type */
+> +			clock-frequency = <0>; /* fixed up by bootloader */
+> +			clocks = <&clockgen 2 1>;
+> +			voltage-ranges = <1800 1800 3300 3300>;
+> +			sdhci,auto-cmd12;
+> +			broken-cd;
+> +			little-endian;
+> +			bus-width = <4>;
+> +			status = "disabled";
+> +		};
+> +
+>  		sata: sata@3200000 {
+>  			compatible = "fsl,ls1028a-ahci";
+>  			reg = <0x0 0x3200000 0x0 0x10000>,
+> -- 
+> 1.7.1
+> 
