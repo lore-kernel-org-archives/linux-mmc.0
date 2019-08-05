@@ -1,135 +1,151 @@
-From: Shawn Guo <shawnguo@kernel.org>
-Subject: Re: [PATCH v3] arm64: dts: ls1028a: Add esdhc node in dts
-Date: Sat, 3 Aug 2019 09:00:34 +0200
-Message-ID: <20190803070033.GA5627@X250>
-References: <20190515084925.30155-1-yinbo.zhu@nxp.com>
+From: "Andrew Jeffery" <andrew@aj.id.au>
+Subject: Re: [PATCH v3 1/2] dt-bindings: mmc: Document Aspeed SD controller
+Date: Mon, 05 Aug 2019 11:40:17 +0930
+Message-ID: <35aaa5a4-1e0d-4f64-8985-36e2c01ccc05@www.fastmail.com>
+References: <20190730062316.32037-1-andrew@aj.id.au>
+ <20190730062316.32037-2-andrew@aj.id.au>
+ <CAL_Jsq+oZRREV=VjYUxT3WphOa5tBaF1pvS_JKSphBY=3XB5MA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20190515084925.30155-1-yinbo.zhu@nxp.com>
+In-Reply-To: <CAL_Jsq+oZRREV=VjYUxT3WphOa5tBaF1pvS_JKSphBY=3XB5MA@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Yinbo Zhu <yinbo.zhu@nxp.com>
-Cc: Li Yang <leoyang.li@nxp.com>, Rob Herring <robh+dt@kernel.org>, xiaobo.xie@nxp.com, Mark Rutland <mark.rutland@arm.com>, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, yangbo.lu@nxp.com, jiafei.pan@nxp.com, Ashish Kumar <Ashish.Kumar@nxp.com>
+To: Rob Herring <robh+dt@kernel.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Mark Rutland <mark.rutland@arm.com>, Joel Stanley <joel@jms.id.au>, Adrian Hunter <adrian.hunter@intel.com>, devicetree@vger.kernel.org, "moderated list:ARM/FREESCALE IMX / MXC ARM ARCHITECTURE" <linux-arm-kernel@lists.infradead.org>, linux-aspeed@lists.ozlabs.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Ryan Chen <ryanchen.aspeed@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, May 15, 2019 at 04:49:25PM +0800, Yinbo Zhu wrote:
-> From: Ashish Kumar <Ashish.Kumar@nxp.com>
+
+
+On Fri, 2 Aug 2019, at 08:29, Rob Herring wrote:
+> On Tue, Jul 30, 2019 at 12:23 AM Andrew Jeffery <andrew@aj.id.au> wrote:
+> >
+> > The ASPEED SD/SDIO/eMMC controller exposes two slots implementing the
+> > SDIO Host Specification v2.00, with 1 or 4 bit data buses, or an 8 bit
+> > data bus if only a single slot is enabled.
+> >
+> > Signed-off-by: Andrew Jeffery <andrew@aj.id.au>
+> >
+> > ---
+> > v3:
+> > * Fix compatible enums
+> > * Add AST2600 compatibles
+> > * Describe #address-cells / #size-cells
+> > ---
+> >  .../devicetree/bindings/mmc/aspeed,sdhci.yaml | 100 ++++++++++++++++++
+> >  1 file changed, 100 insertions(+)
+> >  create mode 100644 Documentation/devicetree/bindings/mmc/aspeed,sdhci.yaml
+> >
+> > diff --git a/Documentation/devicetree/bindings/mmc/aspeed,sdhci.yaml b/Documentation/devicetree/bindings/mmc/aspeed,sdhci.yaml
+> > new file mode 100644
+> > index 000000000000..dd2a00c59641
+> > --- /dev/null
+> > +++ b/Documentation/devicetree/bindings/mmc/aspeed,sdhci.yaml
+> > @@ -0,0 +1,100 @@
+> > +# SPDX-License-Identifier: GPL-2.0-or-later
+> > +%YAML 1.2
+> > +---
+> > +$id: http://devicetree.org/schemas/mmc/aspeed,sdhci.yaml#
+> > +$schema: http://devicetree.org/meta-schemas/core.yaml#
+> > +
+> > +title: ASPEED SD/SDIO/eMMC Controller
+> > +
+> > +maintainers:
+> > +  - Andrew Jeffery <andrew@aj.id.au>
+> > +  - Ryan Chen <ryanchen.aspeed@gmail.com>
+> > +
+> > +description: |+
+> > +  The ASPEED SD/SDIO/eMMC controller exposes two slots implementing the SDIO
+> > +  Host Specification v2.00, with 1 or 4 bit data buses, or an 8 bit data bus if
+> > +  only a single slot is enabled.
+> > +
+> > +  The two slots are supported by a common configuration area. As the SDHCIs for
+> > +  the slots are dependent on the common configuration area, they are described
+> > +  as child nodes.
+> > +
+> > +properties:
+> > +  compatible:
+> > +    enum:
+> > +      - aspeed,ast2400-sd-controller
+> > +      - aspeed,ast2500-sd-controller
+> > +      - aspeed,ast2600-sd-controller
+> > +  reg:
+> > +    maxItems: 1
+> > +    description: Common configuration registers
+> > +  "#address-cells":
+> > +    const: 1
+> > +  "#size-cells":
+> > +    const: 1
+> > +  ranges: true
+> > +  clocks:
+> > +    maxItems: 1
+> > +    description: The SD/SDIO controller clock gate
+> > +
+> > +patternProperties:
+> > +  "^sdhci@[0-9a-f]+$":
 > 
-> This patch is to add esdhc node and enable SD UHS-I,
-> eMMC HS200 for ls1028ardb/ls1028aqds board.
+> This should probably have:
 > 
-> Signed-off-by: Ashish Kumar <Ashish.Kumar@nxp.com>
-> Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
-> Signed-off-by: Yinbo Zhu <yinbo.zhu@nxp.com>
-> ---
-> Change in v3:
-> 		replace "esdhc@" with "mmc@"
+> allOf:
+>   - $ref: mmc-controller.yaml
 > 
->  arch/arm64/boot/dts/freescale/fsl-ls1028a-qds.dts |    8 ++++++
->  arch/arm64/boot/dts/freescale/fsl-ls1028a-rdb.dts |   13 ++++++++++
->  arch/arm64/boot/dts/freescale/fsl-ls1028a.dtsi    |   27 +++++++++++++++++++++
->  3 files changed, 48 insertions(+), 0 deletions(-)
+> Another new thing in 5.3. :)
+
+Ack.
+
 > 
-> diff --git a/arch/arm64/boot/dts/freescale/fsl-ls1028a-qds.dts b/arch/arm64/boot/dts/freescale/fsl-ls1028a-qds.dts
-> index 14c79f4..180e5d2 100644
-> --- a/arch/arm64/boot/dts/freescale/fsl-ls1028a-qds.dts
-> +++ b/arch/arm64/boot/dts/freescale/fsl-ls1028a-qds.dts
-> @@ -42,6 +42,14 @@
->  	status = "okay";
->  };
->  
-> +&esdhc {
-> +	status = "okay";
-> +};
-> +
-> +&esdhc1 {
-> +	status = "okay";
-> +};
-> +
->  &i2c0 {
->  	status = "okay";
->  
-> diff --git a/arch/arm64/boot/dts/freescale/fsl-ls1028a-rdb.dts b/arch/arm64/boot/dts/freescale/fsl-ls1028a-rdb.dts
-> index f86b054..1bfaf42 100644
-> --- a/arch/arm64/boot/dts/freescale/fsl-ls1028a-rdb.dts
-> +++ b/arch/arm64/boot/dts/freescale/fsl-ls1028a-rdb.dts
-> @@ -30,6 +30,19 @@
->  	};
->  };
->  
-> +&esdhc {
-> +	status = "okay";
-
-We usually put 'status' at end of property list.
-
-> +	sd-uhs-sdr104;
-> +	sd-uhs-sdr50;
-> +	sd-uhs-sdr25;
-> +	sd-uhs-sdr12;
-> +	};
-
-Please follow the indent style of closing parentheses in the file.
-
-> +
-> +&esdhc1 {
-> +	status = "okay";
-> +	mmc-hs200-1_8v;
-> +	};
-
-Ditto
-
-> +
->  &i2c0 {
->  	status = "okay";
->  
-> diff --git a/arch/arm64/boot/dts/freescale/fsl-ls1028a.dtsi b/arch/arm64/boot/dts/freescale/fsl-ls1028a.dtsi
-> index 2896bbc..462833c 100644
-> --- a/arch/arm64/boot/dts/freescale/fsl-ls1028a.dtsi
-> +++ b/arch/arm64/boot/dts/freescale/fsl-ls1028a.dtsi
-> @@ -274,6 +274,33 @@
->  			status = "disabled";
->  		};
->  
-> +		esdhc: mmc@2140000 {
-
-Please sort the nodes in unit-address.  From what I see, it should go
-before device serial@21c0500.
-
-> +			compatible = "fsl,ls1028a-esdhc", "fsl,esdhc";
-> +			reg = <0x0 0x2140000 0x0 0x10000>;
-> +			interrupts = <0 28 0x4>; /* Level high type */
-
-Use IRQ_TYPE_LEVEL_HIGH, then you can drop the comment.
-
-Shawn
-
-> +			clock-frequency = <0>; /* fixed up by bootloader */
-> +			clocks = <&clockgen 2 1>;
-> +			voltage-ranges = <1800 1800 3300 3300>;
-> +			sdhci,auto-cmd12;
-> +			little-endian;
-> +			bus-width = <4>;
-> +			status = "disabled";
-> +		};
-> +
-> +		esdhc1: mmc@2150000 {
-> +			compatible = "fsl,ls1028a-esdhc", "fsl,esdhc";
-> +			reg = <0x0 0x2150000 0x0 0x10000>;
-> +			interrupts = <0 63 0x4>; /* Level high type */
-> +			clock-frequency = <0>; /* fixed up by bootloader */
-> +			clocks = <&clockgen 2 1>;
-> +			voltage-ranges = <1800 1800 3300 3300>;
-> +			sdhci,auto-cmd12;
-> +			broken-cd;
-> +			little-endian;
-> +			bus-width = <4>;
-> +			status = "disabled";
-> +		};
-> +
->  		sata: sata@3200000 {
->  			compatible = "fsl,ls1028a-ahci";
->  			reg = <0x0 0x3200000 0x0 0x10000>,
-> -- 
-> 1.7.1
+> > +    type: object
+> > +    properties:
+> > +      compatible:
+> > +        enum:
+> > +          - aspeed,ast2400-sdhci
+> > +          - aspeed,ast2500-sdhci
+> > +          - aspeed,ast2600-sdhci
+> > +      reg:
+> > +        maxItems: 1
+> > +        description: The SDHCI registers
+> > +      clocks:
+> > +        maxItems: 1
+> > +        description: The SD bus clock
+> > +      interrupts:
+> > +        maxItems: 1
+> > +        description: The SD interrupt shared between both slots
+> > +    required:
+> > +      - compatible
+> > +      - reg
+> > +      - clocks
+> > +      - interrupts
+> > +
+> > +additionalProperties: false
+> > +
+> > +required:
+> > +  - compatible
+> > +  - reg
+> > +  - "#address-cells"
+> > +  - "#size-cells"
+> > +  - ranges
+> > +  - clocks
+> > +
+> > +examples:
+> > +  - |
+> > +    #include <dt-bindings/clock/aspeed-clock.h>
+> > +    sdc@1e740000 {
+> > +            compatible = "aspeed,ast2500-sd-controller";
+> > +            reg = <0x1e740000 0x100>;
+> > +            #address-cells = <1>;
+> > +            #size-cells = <1>;
+> > +            ranges = <0 0x1e740000 0x10000>;
+> > +            clocks = <&syscon ASPEED_CLK_GATE_SDCLK>;
+> > +
+> > +            sdhci0: sdhci@100 {
+> > +                    compatible = "aspeed,ast2500-sdhci";
+> > +                    reg = <0x100 0x100>;
+> > +                    interrupts = <26>;
+> > +                    sdhci,auto-cmd12;
 > 
+> Not documented. Maybe should be common, but there's only a few users.
+
+I'll document it locally for the moment.
+
+Cheers,
+
+Andrew
