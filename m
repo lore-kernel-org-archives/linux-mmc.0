@@ -1,15 +1,14 @@
 From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH 11/18] dt-bindings: pinctrl: bcm2835: Add brcm,
- bcm2711 compatible
-Date: Mon, 5 Aug 2019 11:30:31 +0200
-Message-ID: <CACRpkdYN249RE+=MpKz0X6Y9rX=hMQHPQmou6EMdCkO-m2LsDQ@mail.gmail.com>
-References: <1563776607-8368-1-git-send-email-wahrenst@gmx.net>
- <1563776607-8368-2-git-send-email-wahrenst@gmx.net>
+Subject: Re: [PATCH 00/18] ARM: Add minimal Raspberry Pi 4 support
+Date: Mon, 5 Aug 2019 11:33:26 +0200
+Message-ID: <CACRpkdatwda5Pj_mLsg4zgT5WnRWyhkm=eaOschd8UTJGHKYvg@mail.gmail.com>
+References: <1563774880-8061-1-git-send-email-wahrenst@gmx.net>
+ <319549e0-23b5-4a49-49ae-723da754f984@gmx.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1563776607-8368-2-git-send-email-wahrenst@gmx.net>
+In-Reply-To: <319549e0-23b5-4a49-49ae-723da754f984@gmx.net>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -20,18 +19,14 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
 Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
 Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: Stefan Wahren <wahrenst@gmx.net>
-Cc: Mark Rutland <mark.rutland@arm.com>, "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" <devicetree@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Matthias Brugger <mbrugger@suse.com>, Scott Branden <sbranden@broadcom.com>, "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>, Stephen Boyd <sboyd@kernel.org>, Ray Jui <rjui@broadcom.com>, Michael Turquette <mturquette@baylibre.com>, linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Rob Herring <robh+dt@kernel.org>, Eric Anholt <eric@anholt.net>, Florian Fainelli <f.fainelli@gmail.com>, bcm-kernel-feedback-list <bcm-kernel-feedback-list@broadcom.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Nicolas Saenz Julienne <nsaenzjulienne@suse.de>, linux-rpi-kernel <linux-rpi-kernel@lists.infradead.org>
+Cc: Mark Rutland <mark.rutland@arm.com>, Ulf Hansson <ulf.hansson@linaro.org>, Florian Fainelli <f.fainelli@gmail.com>, Scott Branden <sbranden@broadcom.com>, "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>, Stephen Boyd <sboyd@kernel.org>, Ray Jui <rjui@broadcom.com>, Michael Turquette <mturquette@baylibre.com>, linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Rob Herring <robh+dt@kernel.org>, Eric Anholt <eric@anholt.net>, Matthias Brugger <mbrugger@suse.com>, bcm-kernel-feedback-list <bcm-kernel-feedback-list@broadcom.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Nicolas Saenz Julienne <nsaenzjulienne@suse.de>, linux-rpi-kernel <linux-rpi-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, Jul 22, 2019 at 8:23 AM Stefan Wahren <wahrenst@gmx.net> wrote:
+On Sun, Jul 28, 2019 at 1:22 PM Stefan Wahren <wahrenst@gmx.net> wrote:
 
-> Add a new compatible for the BCM2711.
->
-> Signed-off-by: Stefan Wahren <wahrenst@gmx.net>
-(...)
-> +  "brcm,bcm2711-gpio" - BCM2711 compatible pinctrl
+> any comments on the clk / pinctrl parts or do you just wait for Rob's Ack?
 
-Completely uncontroversial so patch applied.
+I'm just gonna apply it.
 
 Yours,
 Linus Walleij
