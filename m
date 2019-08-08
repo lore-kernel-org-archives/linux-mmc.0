@@ -1,54 +1,55 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 1/2] mmc: sdhci-of-at91: add quirk for broken HS200
-Date: Thu, 8 Aug 2019 17:23:00 +0200
-Message-ID: <CAPDyKFrUr8_VP1JLRk48zR8_p1Y62wKLBnS0iTgdhUSArwD49Q@mail.gmail.com>
-References: <1565252928-28994-1-git-send-email-eugen.hristev@microchip.com>
+From: Raul Rangel <rrangel@chromium.org>
+Subject: Re: [PATCH V5 3/3] mmc: sdhci: Fix O2 Host data read/write DLL Lock
+ Phase shift issue
+Date: Thu, 8 Aug 2019 10:42:37 -0600
+Message-ID: <20190808164237.GA250824@google.com>
+References: <1565212208-32259-1-git-send-email-shirley.her@bayhubtech.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1565252928-28994-1-git-send-email-eugen.hristev@microchip.com>
+Content-Disposition: inline
+In-Reply-To: <1565212208-32259-1-git-send-email-shirley.her@bayhubtech.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Eugen.Hristev@microchip.com
-Cc: Nicolas Ferre <Nicolas.Ferre@microchip.com>, Ludovic Desroches <Ludovic.Desroches@microchip.com>, Alexandre Belloni <alexandre.belloni@bootlin.com>, Adrian Hunter <adrian.hunter@intel.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, DTML <devicetree@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: "Shirley Her (SC)" <shirley.her@bayhubtech.com>
+Cc: "adrian.hunter@intel.com" <adrian.hunter@intel.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Chevron Li (WH)" <chevron.li@bayhubtech.com>, "Louis Lu (TP)" <louis.lu@bayhubtech.com>, "Max Huang (SC)" <max.huang@bayhubtech.com>, "Shaper Liu (WH)" <shaper.liu@bayhubtech.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, 8 Aug 2019 at 10:35, <Eugen.Hristev@microchip.com> wrote:
->
-> From: Eugen Hristev <eugen.hristev@microchip.com>
->
-> HS200 is not implemented in the driver, but the controller claims it
-> through caps.
-> Remove it via quirk.
-> Without this quirk, the mmc core will try to enable hs200, which will fail,
-> and the eMMC initialization will fail.
->
-> Signed-off-by: Eugen Hristev <eugen.hristev@microchip.com>
-
-Should this be applied as a fix and possibly tagged for stable?
-
-In such case, do you have a specific commit that it fixes?
-
-Kind regards
-Uffe
-
-> ---
->  drivers/mmc/host/sdhci-of-at91.c | 3 +++
->  1 file changed, 3 insertions(+)
->
-> diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
-> index 57fe3b2..3a8c6d8 100644
-> --- a/drivers/mmc/host/sdhci-of-at91.c
-> +++ b/drivers/mmc/host/sdhci-of-at91.c
-> @@ -370,6 +370,9 @@ static int sdhci_at91_probe(struct platform_device *pdev)
->         pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
->         pm_runtime_use_autosuspend(&pdev->dev);
->
-> +       /* HS200 is broken at this moment */
-> +       host->quirks2 = SDHCI_QUIRK2_BROKEN_HS200;
+On Wed, Aug 07, 2019 at 09:10:10PM +0000, Shirley Her (SC) wrote:
+> Fix data read/write error in HS200 mode due to chip DLL lock phase shift
+> +static int sdhci_o2_wait_dll_detect_lock(struct sdhci_host *host)
+> +{
+> +	ktime_t timeout;
+> +	u32 scratch32;
 > +
->         ret = sdhci_add_host(host);
->         if (ret)
->                 goto pm_runtime_disable;
-> --
-> 2.7.4
->
+> +	usleep_range(5000, 6000);
+> +	scratch32 = sdhci_readl(host, O2_PLL_DLL_WDT_CONTROL1);
+> +	if (!(scratch32 & O2_DLL_LOCK_STATUS)) {
+> +		pr_warn("%s: DLL is still unlocked after wait 5ms\n",
+> +			mmc_hostname(host->mmc));
+> +	}
+> +
+> +	/* Detect 1 s */
+> +	timeout = ktime_add_ms(ktime_get(), 1000);
+> +	while (1) {
+> +		bool timedout = ktime_after(ktime_get(), timeout);
+> +
+> +		scratch32 = sdhci_readl(host, O2_PLL_DLL_WDT_CONTROL1);
+> +		if (!(scratch32 & O2_DLL_LOCK_STATUS))
+> +			return 0;
+> +
+> +		if (timedout)
+> +			return 1;
+> +	}
+> +}
+
+It would be better to use readx_poll_timeout instead of open coding the
+same logic.
+
+static u32 sdhci_o2_pll_dll_wdt_control(struct sdhci_host *host) {
+	return sdhci_readl(host, O2_PLL_DLL_WDT_CONTROL1);
+}
+
+static int sdhci_o2_wait_dll_detect_lock(struct sdhci_host *host) {
+	return readx_poll_timeout(sdhci_o2_pll_dll_wdt_control, host,
+		scratch32, !(scratch32 & O2_DLL_LOCK_STATUS), 100, 6000);
+}
