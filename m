@@ -1,91 +1,45 @@
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Subject: Re: [PATCH v6 29/57] mmc: Remove dev_err() usage after platform_get_irq()
-Date: Thu, 8 Aug 2019 09:58:49 +0200
-Message-ID: <CAMuHMdVMTAQ7oiRd443qLfY42cwd21x1nJM0yhKLtoqKjHDLQg@mail.gmail.com>
-References: <20190730181557.90391-1-swboyd@chromium.org> <20190730181557.90391-30-swboyd@chromium.org>
+From: <Eugen.Hristev@microchip.com>
+Subject: [PATCH 1/2] mmc: sdhci-of-at91: add quirk for broken HS200
+Date: Thu, 8 Aug 2019 08:35:40 +0000
+Message-ID: <1565252928-28994-1-git-send-email-eugen.hristev@microchip.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190730181557.90391-30-swboyd@chromium.org>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Stephen Boyd <swboyd@chromium.org>
-Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+To: Nicolas.Ferre@microchip.com, Ludovic.Desroches@microchip.com, alexandre.belloni@bootlin.com, adrian.hunter@intel.com, ulf.hansson@linaro.org, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: Eugen.Hristev@microchip.com
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Stephen,
+From: Eugen Hristev <eugen.hristev@microchip.com>
 
-On Tue, Jul 30, 2019 at 10:58 PM Stephen Boyd <swboyd@chromium.org> wrote:
-> We don't need dev_err() messages when platform_get_irq() fails now that
-> platform_get_irq() prints an error message itself when something goes
-> wrong. Let's remove these prints with a simple semantic patch.
->
-> // <smpl>
-> @@
-> expression ret;
-> struct platform_device *E;
-> @@
->
-> ret =
-> (
-> platform_get_irq(E, ...)
-> |
-> platform_get_irq_byname(E, ...)
-> );
->
-> if ( \( ret < 0 \| ret <= 0 \) )
-> {
-> (
-> -if (ret != -EPROBE_DEFER)
-> -{ ...
-> -dev_err(...);
-> -... }
-> |
-> ...
-> -dev_err(...);
-> )
-> ...
-> }
-> // </smpl>
->
-> While we're here, remove braces on if statements that only have one
-> statement (manually).
->
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: linux-mmc@vger.kernel.org
-> Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-> Signed-off-by: Stephen Boyd <swboyd@chromium.org>
-> ---
->
-> Please apply directly to subsystem trees
->
->  drivers/mmc/host/bcm2835.c       | 1 -
->  drivers/mmc/host/jz4740_mmc.c    | 1 -
->  drivers/mmc/host/meson-gx-mmc.c  | 1 -
->  drivers/mmc/host/mxcmmc.c        | 4 +---
->  drivers/mmc/host/s3cmci.c        | 1 -
->  drivers/mmc/host/sdhci-msm.c     | 2 --
->  drivers/mmc/host/sdhci-pltfm.c   | 1 -
->  drivers/mmc/host/sdhci-s3c.c     | 4 +---
->  drivers/mmc/host/sdhci_f_sdh30.c | 4 +---
->  drivers/mmc/host/uniphier-sd.c   | 4 +---
->  10 files changed, 4 insertions(+), 19 deletions(-)
+HS200 is not implemented in the driver, but the controller claims it
+through caps.
+Remove it via quirk.
+Without this quirk, the mmc core will try to enable hs200, which will fail,
+and the eMMC initialization will fail.
 
-Failed to catch:
+Signed-off-by: Eugen Hristev <eugen.hristev@microchip.com>
+---
+ drivers/mmc/host/sdhci-of-at91.c | 3 +++
+ 1 file changed, 3 insertions(+)
 
-drivers/mmc/host/sh_mmcif.c:    irq[0] = platform_get_irq(pdev, 0);
-drivers/mmc/host/sh_mmcif.c:    irq[1] = platform_get_irq(pdev, 1);
-drivers/mmc/host/sh_mmcif.c-    if (irq[0] < 0) {
-drivers/mmc/host/sh_mmcif.c-            dev_err(dev, "Get irq error\n");
-drivers/mmc/host/sh_mmcif.c-            return -ENXIO;
-drivers/mmc/host/sh_mmcif.c-    }
-
-Gr{oetje,eeting}s,
-
-                        Geert
-
--- 
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-a=
+t91.c
+index 57fe3b2..3a8c6d8 100644
+--- a/drivers/mmc/host/sdhci-of-at91.c
++++ b/drivers/mmc/host/sdhci-of-at91.c
+@@ -370,6 +370,9 @@ static int sdhci_at91_probe(struct platform_device *pde=
+v)
+ 	pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
+ 	pm_runtime_use_autosuspend(&pdev->dev);
+=20
++	/* HS200 is broken at this moment */
++	host->quirks2 =3D SDHCI_QUIRK2_BROKEN_HS200;
++
+ 	ret =3D sdhci_add_host(host);
+ 	if (ret)
+ 		goto pm_runtime_disable;
+--=20
+2.7.4
