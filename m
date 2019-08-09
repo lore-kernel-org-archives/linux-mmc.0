@@ -1,87 +1,68 @@
 From: Ludovic Desroches <ludovic.desroches@microchip.com>
-Subject: Re: [PATCH 2/2] ARM: dts: at91: sama5d27_som1_ek: add mmc
- capabilities for SDMMC0
-Date: Fri, 9 Aug 2019 08:23:22 +0200
-Message-ID: <20190809062322.syuieymdqjs4e7lh@M43218.corp.atmel.com>
+Subject: Re: [PATCH 1/2] mmc: sdhci-of-at91: add quirk for broken HS200
+Date: Fri, 9 Aug 2019 10:08:43 +0200
+Message-ID: <20190809080842.zl4ytbjyt54bj6ta@M43218.corp.atmel.com>
 References: <1565252928-28994-1-git-send-email-eugen.hristev@microchip.com>
- <1565252928-28994-2-git-send-email-eugen.hristev@microchip.com>
- <20190808124217.wrmcxohw5i6ju2qe@M43218.corp.atmel.com>
- <04fd74c3-a828-1064-b77b-f3de07a26190@intel.com>
+ <CAPDyKFrUr8_VP1JLRk48zR8_p1Y62wKLBnS0iTgdhUSArwD49Q@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <04fd74c3-a828-1064-b77b-f3de07a26190@intel.com>
+In-Reply-To: <CAPDyKFrUr8_VP1JLRk48zR8_p1Y62wKLBnS0iTgdhUSArwD49Q@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Eugen Hristev - M18282 <Eugen.Hristev@microchip.com>, Nicolas Ferre - M43238 <Nicolas.Ferre@microchip.com>, "alexandre.belloni@bootlin.com" <alexandre.belloni@bootlin.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Eugen.Hristev@microchip.com, Nicolas Ferre <Nicolas.Ferre@microchip.com>, Alexandre Belloni <alexandre.belloni@bootlin.com>, Adrian Hunter <adrian.hunter@intel.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, DTML <devicetree@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, Aug 08, 2019 at 03:57:30PM +0300, Adrian Hunter wrote:
-> On 8/08/19 3:42 PM, Ludovic Desroches wrote:
-> > On Thu, Aug 08, 2019 at 10:35:43AM +0200, Eugen Hristev - M18282 wrote:
-> >> From: Eugen Hristev <eugen.hristev@microchip.com>
-> >>
-> >> Add mmc capabilities for SDMMC0 for this board.
-> >> With this enabled, eMMC connected card is detected as:
-> >>
-> >> mmc0: new DDR MMC card at address 0001
-> >>
-> >> Signed-off-by: Eugen Hristev <eugen.hristev@microchip.com>
-> > Acked-by: Ludovic Desroches <ludovic.desroches@microchip.com>
-> > 
-> > I am interested to have the some insights about the use of sd-uhs-*
-> > properties.
-> > 
-> > Our IP can't deal with 1V8 by itself. It has a 1V8SEL signal which can
-> > be used as the logic control input of a mux. So even if the IP claims
-> > to support UHS modes, it depends on the board.
-> > 
-> > Are the sd-uhs-* properties a way to deal with this? I tend to think no
-> > as sdhci_setup_host() will set the caps depending on the content of the
-> > capabilities register. Do we have to use the SDHCI_QUIRK_MISSING_CAPS
-> > quirk or sdhci-caps/sdhci-caps-mask?
+On Thu, Aug 08, 2019 at 05:23:00PM +0200, Ulf Hansson wrote:
+> On Thu, 8 Aug 2019 at 10:35, <Eugen.Hristev@microchip.com> wrote:
+> >
+> > From: Eugen Hristev <eugen.hristev@microchip.com>
+> >
+> > HS200 is not implemented in the driver, but the controller claims it
+> > through caps.
+> > Remove it via quirk.
+> > Without this quirk, the mmc core will try to enable hs200, which will fail,
+> > and the eMMC initialization will fail.
+> >
+> > Signed-off-by: Eugen Hristev <eugen.hristev@microchip.com>
 > 
-> There is "no-1-8-v" which it looks like sdhci-of-at91.c already supports:
+> Should this be applied as a fix and possibly tagged for stable?
 > 
->   sdhci_at91_probe() -> sdhci_get_of_property() -> sdhci_get_property()
-> 
->     	if (device_property_present(dev, "no-1-8-v"))
-> 		host->quirks2 |= SDHCI_QUIRK2_NO_1_8_V;
-> 
+> In such case, do you have a specific commit that it fixes?
 
-Right, I forgot this property. Thanks.
+I think so, I would say:
+Fixes: bb5f8ea4d514 ("mmc: sdhci-of-at91: introduce driver for the Atmel SDMMC")
+Cc: stable@vger.kernel.org #v4.4 and later
 
-Eugen, do you see cases we can't cover with this property?
+It doesn't apply on 4.4 but resolution is trivial.
 
 Regards
 
 Ludovic
 
 > 
-> > 
-> > Regards
-> > 
-> > Ludovic
-> > 
-> >> ---
-> >>  arch/arm/boot/dts/at91-sama5d27_som1_ek.dts | 1 +
-> >>  1 file changed, 1 insertion(+)
-> >>
-> >> diff --git a/arch/arm/boot/dts/at91-sama5d27_som1_ek.dts b/arch/arm/boot/dts/at91-sama5d27_som1_ek.dts
-> >> index 149e539..194b3a3 100644
-> >> --- a/arch/arm/boot/dts/at91-sama5d27_som1_ek.dts
-> >> +++ b/arch/arm/boot/dts/at91-sama5d27_som1_ek.dts
-> >> @@ -54,6 +54,7 @@
-> >>  
-> >>  		sdmmc0: sdio-host@a0000000 {
-> >>  			bus-width = <8>;
-> >> +			mmc-ddr-3_3v;
-> >>  			pinctrl-names = "default";
-> >>  			pinctrl-0 = <&pinctrl_sdmmc0_default>;
-> >>  			status = "okay";
-> >> -- 
-> >> 2.7.4
-> >>
-> > 
+> Kind regards
+> Uffe
 > 
+> > ---
+> >  drivers/mmc/host/sdhci-of-at91.c | 3 +++
+> >  1 file changed, 3 insertions(+)
+> >
+> > diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
+> > index 57fe3b2..3a8c6d8 100644
+> > --- a/drivers/mmc/host/sdhci-of-at91.c
+> > +++ b/drivers/mmc/host/sdhci-of-at91.c
+> > @@ -370,6 +370,9 @@ static int sdhci_at91_probe(struct platform_device *pdev)
+> >         pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
+> >         pm_runtime_use_autosuspend(&pdev->dev);
+> >
+> > +       /* HS200 is broken at this moment */
+> > +       host->quirks2 = SDHCI_QUIRK2_BROKEN_HS200;
+> > +
+> >         ret = sdhci_add_host(host);
+> >         if (ret)
+> >                 goto pm_runtime_disable;
+> > --
+> > 2.7.4
+> >
