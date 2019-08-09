@@ -1,68 +1,58 @@
-From: Ludovic Desroches <ludovic.desroches@microchip.com>
-Subject: Re: [PATCH 1/2] mmc: sdhci-of-at91: add quirk for broken HS200
-Date: Fri, 9 Aug 2019 10:08:43 +0200
-Message-ID: <20190809080842.zl4ytbjyt54bj6ta@M43218.corp.atmel.com>
-References: <1565252928-28994-1-git-send-email-eugen.hristev@microchip.com>
- <CAPDyKFrUr8_VP1JLRk48zR8_p1Y62wKLBnS0iTgdhUSArwD49Q@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC fixes for v5.3-rc4
+Date: Fri,  9 Aug 2019 12:01:49 +0200
+Message-ID: <20190809100149.7027-1-ulf.hansson@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFrUr8_VP1JLRk48zR8_p1Y62wKLBnS0iTgdhUSArwD49Q@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Eugen.Hristev@microchip.com, Nicolas Ferre <Nicolas.Ferre@microchip.com>, Alexandre Belloni <alexandre.belloni@bootlin.com>, Adrian Hunter <adrian.hunter@intel.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, DTML <devicetree@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, Aug 08, 2019 at 05:23:00PM +0200, Ulf Hansson wrote:
-> On Thu, 8 Aug 2019 at 10:35, <Eugen.Hristev@microchip.com> wrote:
-> >
-> > From: Eugen Hristev <eugen.hristev@microchip.com>
-> >
-> > HS200 is not implemented in the driver, but the controller claims it
-> > through caps.
-> > Remove it via quirk.
-> > Without this quirk, the mmc core will try to enable hs200, which will fail,
-> > and the eMMC initialization will fail.
-> >
-> > Signed-off-by: Eugen Hristev <eugen.hristev@microchip.com>
-> 
-> Should this be applied as a fix and possibly tagged for stable?
-> 
-> In such case, do you have a specific commit that it fixes?
+Hi Linus,
 
-I think so, I would say:
-Fixes: bb5f8ea4d514 ("mmc: sdhci-of-at91: introduce driver for the Atmel SDMMC")
-Cc: stable@vger.kernel.org #v4.4 and later
+Here's a PR with a couple of MMC fixes intended for v5.3-rc4. Details about the
+highlights are as usual found in the signed tag.
 
-It doesn't apply on 4.4 but resolution is trivial.
+Please pull this in!
 
-Regards
+Kind regards
+Ulf Hansson
 
-Ludovic
 
-> 
-> Kind regards
-> Uffe
-> 
-> > ---
-> >  drivers/mmc/host/sdhci-of-at91.c | 3 +++
-> >  1 file changed, 3 insertions(+)
-> >
-> > diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
-> > index 57fe3b2..3a8c6d8 100644
-> > --- a/drivers/mmc/host/sdhci-of-at91.c
-> > +++ b/drivers/mmc/host/sdhci-of-at91.c
-> > @@ -370,6 +370,9 @@ static int sdhci_at91_probe(struct platform_device *pdev)
-> >         pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
-> >         pm_runtime_use_autosuspend(&pdev->dev);
-> >
-> > +       /* HS200 is broken at this moment */
-> > +       host->quirks2 = SDHCI_QUIRK2_BROKEN_HS200;
-> > +
-> >         ret = sdhci_add_host(host);
-> >         if (ret)
-> >                 goto pm_runtime_disable;
-> > --
-> > 2.7.4
-> >
+The following changes since commit e21a712a9685488f5ce80495b37b9fdbe96c230d:
+
+  Linux 5.3-rc3 (2019-08-04 18:40:12 -0700)
+
+are available in the Git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.3-rc3
+
+for you to fetch changes up to b803974a86039913d5280add083d730b2b9ed8ec:
+
+  mmc: cavium: Add the missing dma unmap when the dma has finished. (2019-08-06 18:59:14 +0200)
+
+----------------------------------------------------------------
+MMC host:
+ - cavium: Fix DMA support
+ - sdhci-sprd: Fix soft reset when runtime resuming
+
+----------------------------------------------------------------
+Baolin Wang (1):
+      mmc: sdhci-sprd: Fix the incorrect soft reset operation when runtime resuming
+
+Kevin Hao (2):
+      mmc: cavium: Set the correct dma max segment size for mmc_host
+      mmc: cavium: Add the missing dma unmap when the dma has finished.
+
+ drivers/mmc/host/cavium.c          | 4 +++-
+ drivers/mmc/host/sdhci-acpi.c      | 2 +-
+ drivers/mmc/host/sdhci-esdhc-imx.c | 2 +-
+ drivers/mmc/host/sdhci-of-at91.c   | 2 +-
+ drivers/mmc/host/sdhci-pci-core.c  | 4 ++--
+ drivers/mmc/host/sdhci-pxav3.c     | 2 +-
+ drivers/mmc/host/sdhci-s3c.c       | 2 +-
+ drivers/mmc/host/sdhci-sprd.c      | 2 +-
+ drivers/mmc/host/sdhci-xenon.c     | 2 +-
+ drivers/mmc/host/sdhci.c           | 4 ++--
+ drivers/mmc/host/sdhci.h           | 2 +-
+ 11 files changed, 15 insertions(+), 13 deletions(-)
