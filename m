@@ -1,131 +1,74 @@
-From: Baolin Wang <baolin.wang@linaro.org>
-Subject: Re: [RFC PATCH 0/7] Add MMC packed function
-Date: Mon, 12 Aug 2019 13:20:35 +0800
-Message-ID: <CAMz4ku+NjcqLY0tWRxrBCRUnkpyWih42LYieKaf0FO6WsqO2vA@mail.gmail.com>
-References: <cover.1563782844.git.baolin.wang@linaro.org>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH] mmc: sdhci-cadence: use struct_size() helper
+Date: Mon, 12 Aug 2019 11:23:07 +0300
+Message-ID: <994dec08-a6fb-56b1-c931-9a034e9a5f8d@intel.com>
+References: <20190808165301.GA30877@embeddedor>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <cover.1563782844.git.baolin.wang@linaro.org>
+In-Reply-To: <20190808165301.GA30877@embeddedor>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Jens Axboe <axboe@kernel.dk>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Chunyan Zhang <zhang.lyra@gmail.com>, Orson Zhai <orsonzhai@gmail.com>, Arnd Bergmann <arnd@arndb.de>, Linus Walleij <linus.walleij@linaro.org>, Vincent Guittot <vincent.guittot@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>, linux-block@vger.kernel.org
+To: "Gustavo A. R. Silva" <gustavo@embeddedor.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,
+On 8/08/19 7:53 PM, Gustavo A. R. Silva wrote:
+> One of the more common cases of allocation size calculations is finding
+> the size of a structure that has a zero-sized array at the end, along
+> with memory for some number of elements for that array. For example:
+> 
+> struct sdhci_cdns_priv {
+> 	...
+>         struct sdhci_cdns_phy_param phy_params[0];
+> };
+> 
+> Make use of the struct_size() helper instead of an open-coded version
+> in order to avoid any potential type mistakes.
+> 
+> So, replace the following form:
+> 
+> sizeof(*priv) + sizeof(priv->phy_params[0]) * nr_phy_params
+> 
+> with:
+> 
+> struct_size(priv, phy_params, nr_phy_params)
+> 
+> Also, notice that, in this case, variable priv_size is not necessary,
+> hence it is removed.
+> 
+> This code was detected with the help of Coccinelle.
+> 
+> Signed-off-by: Gustavo A. R. Silva <gustavo@embeddedor.com>
 
-On Mon, 22 Jul 2019 at 21:10, Baolin Wang <baolin.wang@linaro.org> wrote:
->
-> Hi All,
->
-> Now some SD/MMC controllers can support packed command or packed request,
-> that means it can package multiple requests to host controller to be handled
-> at one time, which can improve the I/O performence. Thus this patchset is
-> used to add the MMC packed function to support packed request or packed
-> command.
->
-> In this patch set, I implemented the SD host ADMA3 transfer mode to support
-> packed request. The ADMA3 transfer mode can process a multi-block data transfer
-> by using a pair of command descriptor and ADMA2 descriptor. In future we can
-> easily expand the MMC packed function to support packed command.
->
-> Below are some comparison data between packed request and non-packed request
-> with fio tool. The fio command I used is like below with changing the
-> '--rw' parameter and enabling the direct IO flag to measure the actual hardware
-> transfer speed.
->
-> ./fio --filename=/dev/mmcblk0p30 --direct=1 --iodepth=20 --rw=read --bs=4K --size=512M --group_reporting --numjobs=20 --name=test_read
->
-> My eMMC card working at HS400 Enhanced strobe mode:
-> [    2.229856] mmc0: new HS400 Enhanced strobe MMC card at address 0001
-> [    2.237566] mmcblk0: mmc0:0001 HBG4a2 29.1 GiB
-> [    2.242621] mmcblk0boot0: mmc0:0001 HBG4a2 partition 1 4.00 MiB
-> [    2.249110] mmcblk0boot1: mmc0:0001 HBG4a2 partition 2 4.00 MiB
-> [    2.255307] mmcblk0rpmb: mmc0:0001 HBG4a2 partition 3 4.00 MiB, chardev (248:0)
->
-> 1. Non-packed request
-> I tested 3 times for each case and output a average speed.
->
-> 1) Sequential read:
-> Speed: 28.9MiB/s, 26.4MiB/s, 30.9MiB/s
-> Average speed: 28.7MiB/s
->
-> 2) Random read:
-> Speed: 18.2MiB/s, 8.9MiB/s, 15.8MiB/s
-> Average speed: 14.3MiB/s
->
-> 3) Sequential write:
-> Speed: 21.1MiB/s, 27.9MiB/s, 25MiB/s
-> Average speed: 24.7MiB/s
->
-> 4) Random write:
-> Speed: 21.5MiB/s, 18.1MiB/s, 18.1MiB/s
-> Average speed: 19.2MiB/s
->
-> 2. Packed request
-> In packed request mode, I set the host controller can package maximum 10
-> requests at one time (Actually I can increase the package number), and I
-> enabled read/write packed request mode. Also I tested 3 times for each
-> case and output a average speed.
->
-> 1) Sequential read:
-> Speed: 165MiB/s, 167MiB/s, 164MiB/s
-> Average speed: 165.3MiB/s
->
-> 2) Random read:
-> Speed: 147MiB/s, 141MiB/s, 144MiB/s
-> Average speed: 144MiB/s
->
-> 3) Sequential write:
-> Speed: 87.8MiB/s, 89.1MiB/s, 90.0MiB/s
-> Average speed: 89MiB/s
->
-> 4) Random write:
-> Speed: 90.9MiB/s, 89.8MiB/s, 90.4MiB/s
-> Average speed: 90.4MiB/s
->
-> Form above data, we can see the packed request can improve the performance greatly.
-> Any comments are welcome. Thanks a lot.
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-Any comments for this patch set? Thanks.
-
->
-> Baolin Wang (7):
->   blk-mq: Export blk_mq_hctx_has_pending() function
->   mmc: core: Add MMC packed request function
->   mmc: host: sdhci: Introduce ADMA3 transfer mode
->   mmc: host: sdhci: Factor out the command configuration
->   mmc: host: sdhci: Remove redundant sg_count member of struct
->     sdhci_host
->   mmc: host: sdhci: Add MMC packed request support
->   mmc: host: sdhci-sprd: Add MMC packed request support
->
->  block/blk-mq.c                |    3 +-
->  drivers/mmc/core/Kconfig      |    2 +
->  drivers/mmc/core/Makefile     |    1 +
->  drivers/mmc/core/block.c      |   71 +++++-
->  drivers/mmc/core/block.h      |    3 +-
->  drivers/mmc/core/core.c       |   51 ++++
->  drivers/mmc/core/core.h       |    3 +
->  drivers/mmc/core/packed.c     |  478 ++++++++++++++++++++++++++++++++++++++
->  drivers/mmc/core/queue.c      |   28 ++-
->  drivers/mmc/host/Kconfig      |    1 +
->  drivers/mmc/host/sdhci-sprd.c |   22 +-
->  drivers/mmc/host/sdhci.c      |  513 +++++++++++++++++++++++++++++++++++------
->  drivers/mmc/host/sdhci.h      |   59 ++++-
->  include/linux/blk-mq.h        |    1 +
->  include/linux/mmc/core.h      |    1 +
->  include/linux/mmc/host.h      |    3 +
->  include/linux/mmc/packed.h    |  123 ++++++++++
->  17 files changed, 1286 insertions(+), 77 deletions(-)
->  create mode 100644 drivers/mmc/core/packed.c
->  create mode 100644 include/linux/mmc/packed.h
->
-> --
-> 1.7.9.5
->
-
-
--- 
-Baolin Wang
-Best Regards
+> ---
+>  drivers/mmc/host/sdhci-cadence.c | 5 ++---
+>  1 file changed, 2 insertions(+), 3 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
+> index 163d1cf4367e..1768a13f89be 100644
+> --- a/drivers/mmc/host/sdhci-cadence.c
+> +++ b/drivers/mmc/host/sdhci-cadence.c
+> @@ -337,7 +337,6 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
+>  	struct sdhci_pltfm_host *pltfm_host;
+>  	struct sdhci_cdns_priv *priv;
+>  	struct clk *clk;
+> -	size_t priv_size;
+>  	unsigned int nr_phy_params;
+>  	int ret;
+>  	struct device *dev = &pdev->dev;
+> @@ -351,8 +350,8 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
+>  		return ret;
+>  
+>  	nr_phy_params = sdhci_cdns_phy_param_count(dev->of_node);
+> -	priv_size = sizeof(*priv) + sizeof(priv->phy_params[0]) * nr_phy_params;
+> -	host = sdhci_pltfm_init(pdev, &sdhci_cdns_pltfm_data, priv_size);
+> +	host = sdhci_pltfm_init(pdev, &sdhci_cdns_pltfm_data,
+> +				struct_size(priv, phy_params, nr_phy_params));
+>  	if (IS_ERR(host)) {
+>  		ret = PTR_ERR(host);
+>  		goto disable_clk;
+> 
