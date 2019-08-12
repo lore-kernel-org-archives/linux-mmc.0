@@ -1,89 +1,99 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v1] Revert "mmc: sdhci-tegra: drop ->get_ro()
- implementation"
-Date: Mon, 12 Aug 2019 11:33:08 +0300
-Message-ID: <1771bc5f-864c-ea05-be06-f45d9260a446@intel.com>
-References: <20190808222430.28477-1-digetx@gmail.com>
+Subject: Re: [RFC PATCH 0/7] Add MMC packed function
+Date: Mon, 12 Aug 2019 11:58:00 +0300
+Message-ID: <8abff7d6-0a3e-efe7-e8ec-9309fada9121@intel.com>
+References: <cover.1563782844.git.baolin.wang@linaro.org>
+ <CAMz4ku+NjcqLY0tWRxrBCRUnkpyWih42LYieKaf0FO6WsqO2vA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190808222430.28477-1-digetx@gmail.com>
+In-Reply-To: <CAMz4ku+NjcqLY0tWRxrBCRUnkpyWih42LYieKaf0FO6WsqO2vA@mail.gmail.com>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Dmitry Osipenko <digetx@gmail.com>, Thierry Reding <thierry.reding@gmail.com>, Jonathan Hunter <jonathanh@nvidia.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, Thierry Reding <treding@nvidia.com>
+To: Baolin Wang <baolin.wang@linaro.org>, Jens Axboe <axboe@kernel.dk>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Chunyan Zhang <zhang.lyra@gmail.com>, Orson Zhai <orsonzhai@gmail.com>, Arnd Bergmann <arnd@arndb.de>, Linus Walleij <linus.walleij@linaro.org>, Vincent Guittot <vincent.guittot@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>, linux-block@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 9/08/19 1:24 AM, Dmitry Osipenko wrote:
-> The WRITE_PROTECT bit is always in a "protected mode" on Tegra and
-> WP-GPIO state need to be used instead. In a case of the GPIO absence,
-> write-enable should be assumed. External SD is writable once again as
-> a result of this patch because the offending commit changed behaviour for
-> the case of a missing WP-GPIO to fall back to WRITE_PROTECT bit-checking,
-> which is incorrect for Tegra.
+On 12/08/19 8:20 AM, Baolin Wang wrote:
+> Hi,
 > 
-> Cc: stable@vger.kernel.org # v5.1+
-> Fixes: e8391453e27f ("mmc: sdhci-tegra: drop ->get_ro() implementation")
-> Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
+> On Mon, 22 Jul 2019 at 21:10, Baolin Wang <baolin.wang@linaro.org> wrote:
+>>
+>> Hi All,
+>>
+>> Now some SD/MMC controllers can support packed command or packed request,
+>> that means it can package multiple requests to host controller to be handled
+>> at one time, which can improve the I/O performence. Thus this patchset is
+>> used to add the MMC packed function to support packed request or packed
+>> command.
+>>
+>> In this patch set, I implemented the SD host ADMA3 transfer mode to support
+>> packed request. The ADMA3 transfer mode can process a multi-block data transfer
+>> by using a pair of command descriptor and ADMA2 descriptor. In future we can
+>> easily expand the MMC packed function to support packed command.
+>>
+>> Below are some comparison data between packed request and non-packed request
+>> with fio tool. The fio command I used is like below with changing the
+>> '--rw' parameter and enabling the direct IO flag to measure the actual hardware
+>> transfer speed.
+>>
+>> ./fio --filename=/dev/mmcblk0p30 --direct=1 --iodepth=20 --rw=read --bs=4K --size=512M --group_reporting --numjobs=20 --name=test_read
+>>
+>> My eMMC card working at HS400 Enhanced strobe mode:
+>> [    2.229856] mmc0: new HS400 Enhanced strobe MMC card at address 0001
+>> [    2.237566] mmcblk0: mmc0:0001 HBG4a2 29.1 GiB
+>> [    2.242621] mmcblk0boot0: mmc0:0001 HBG4a2 partition 1 4.00 MiB
+>> [    2.249110] mmcblk0boot1: mmc0:0001 HBG4a2 partition 2 4.00 MiB
+>> [    2.255307] mmcblk0rpmb: mmc0:0001 HBG4a2 partition 3 4.00 MiB, chardev (248:0)
+>>
+>> 1. Non-packed request
+>> I tested 3 times for each case and output a average speed.
+>>
+>> 1) Sequential read:
+>> Speed: 28.9MiB/s, 26.4MiB/s, 30.9MiB/s
+>> Average speed: 28.7MiB/s
 
-Can we get an Ack from someone from Nvidia
+This seems surprising low for a HS400ES card.  Do you know why that is?
 
-> ---
->  drivers/mmc/host/sdhci-tegra.c | 14 ++++++++++++++
->  1 file changed, 14 insertions(+)
+>>
+>> 2) Random read:
+>> Speed: 18.2MiB/s, 8.9MiB/s, 15.8MiB/s
+>> Average speed: 14.3MiB/s
+>>
+>> 3) Sequential write:
+>> Speed: 21.1MiB/s, 27.9MiB/s, 25MiB/s
+>> Average speed: 24.7MiB/s
+>>
+>> 4) Random write:
+>> Speed: 21.5MiB/s, 18.1MiB/s, 18.1MiB/s
+>> Average speed: 19.2MiB/s
+>>
+>> 2. Packed request
+>> In packed request mode, I set the host controller can package maximum 10
+>> requests at one time (Actually I can increase the package number), and I
+>> enabled read/write packed request mode. Also I tested 3 times for each
+>> case and output a average speed.
+>>
+>> 1) Sequential read:
+>> Speed: 165MiB/s, 167MiB/s, 164MiB/s
+>> Average speed: 165.3MiB/s
+>>
+>> 2) Random read:
+>> Speed: 147MiB/s, 141MiB/s, 144MiB/s
+>> Average speed: 144MiB/s
+>>
+>> 3) Sequential write:
+>> Speed: 87.8MiB/s, 89.1MiB/s, 90.0MiB/s
+>> Average speed: 89MiB/s
+>>
+>> 4) Random write:
+>> Speed: 90.9MiB/s, 89.8MiB/s, 90.4MiB/s
+>> Average speed: 90.4MiB/s
+>>
+>> Form above data, we can see the packed request can improve the performance greatly.
+>> Any comments are welcome. Thanks a lot.
 > 
-> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-> index f4d4761cf20a..02d8f524bb9e 100644
-> --- a/drivers/mmc/host/sdhci-tegra.c
-> +++ b/drivers/mmc/host/sdhci-tegra.c
-> @@ -258,6 +258,16 @@ static void tegra210_sdhci_writew(struct sdhci_host *host, u16 val, int reg)
->  	}
->  }
->  
-> +static unsigned int tegra_sdhci_get_ro(struct sdhci_host *host)
-> +{
-> +	/*
-> +	 * Write-enable shall be assumed if GPIO is missing in a board's
-> +	 * device-tree because SDHCI's WRITE_PROTECT bit doesn't work on
-> +	 * Tegra.
-> +	 */
-> +	return mmc_gpio_get_ro(host->mmc);
-> +}
-> +
->  static bool tegra_sdhci_is_pad_and_regulator_valid(struct sdhci_host *host)
->  {
->  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> @@ -1224,6 +1234,7 @@ static const struct cqhci_host_ops sdhci_tegra_cqhci_ops = {
->  };
->  
->  static const struct sdhci_ops tegra_sdhci_ops = {
-> +	.get_ro     = tegra_sdhci_get_ro,
->  	.read_w     = tegra_sdhci_readw,
->  	.write_l    = tegra_sdhci_writel,
->  	.set_clock  = tegra_sdhci_set_clock,
-> @@ -1279,6 +1290,7 @@ static const struct sdhci_tegra_soc_data soc_data_tegra30 = {
->  };
->  
->  static const struct sdhci_ops tegra114_sdhci_ops = {
-> +	.get_ro     = tegra_sdhci_get_ro,
->  	.read_w     = tegra_sdhci_readw,
->  	.write_w    = tegra_sdhci_writew,
->  	.write_l    = tegra_sdhci_writel,
-> @@ -1332,6 +1344,7 @@ static const struct sdhci_tegra_soc_data soc_data_tegra124 = {
->  };
->  
->  static const struct sdhci_ops tegra210_sdhci_ops = {
-> +	.get_ro     = tegra_sdhci_get_ro,
->  	.read_w     = tegra_sdhci_readw,
->  	.write_w    = tegra210_sdhci_writew,
->  	.write_l    = tegra_sdhci_writel,
-> @@ -1366,6 +1379,7 @@ static const struct sdhci_tegra_soc_data soc_data_tegra210 = {
->  };
->  
->  static const struct sdhci_ops tegra186_sdhci_ops = {
-> +	.get_ro     = tegra_sdhci_get_ro,
->  	.read_w     = tegra_sdhci_readw,
->  	.write_l    = tegra_sdhci_writel,
->  	.set_clock  = tegra_sdhci_set_clock,
-> 
+> Any comments for this patch set? Thanks.
+
+Did you consider adapting the CQE interface?
