@@ -1,99 +1,61 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [RFC PATCH 0/7] Add MMC packed function
-Date: Mon, 12 Aug 2019 11:58:00 +0300
-Message-ID: <8abff7d6-0a3e-efe7-e8ec-9309fada9121@intel.com>
-References: <cover.1563782844.git.baolin.wang@linaro.org>
- <CAMz4ku+NjcqLY0tWRxrBCRUnkpyWih42LYieKaf0FO6WsqO2vA@mail.gmail.com>
+From: Thierry Reding <thierry.reding@gmail.com>
+Subject: Re: [PATCH v1] Revert "mmc: sdhci-tegra: drop ->get_ro()
+ implementation"
+Date: Mon, 12 Aug 2019 11:06:59 +0200
+Message-ID: <20190812090659.GB8903@ulmo>
+References: <20190808222430.28477-1-digetx@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="qcHopEYAB45HaUaB"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAMz4ku+NjcqLY0tWRxrBCRUnkpyWih42LYieKaf0FO6WsqO2vA@mail.gmail.com>
-Content-Language: en-US
+Content-Disposition: inline
+In-Reply-To: <20190808222430.28477-1-digetx@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Baolin Wang <baolin.wang@linaro.org>, Jens Axboe <axboe@kernel.dk>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Chunyan Zhang <zhang.lyra@gmail.com>, Orson Zhai <orsonzhai@gmail.com>, Arnd Bergmann <arnd@arndb.de>, Linus Walleij <linus.walleij@linaro.org>, Vincent Guittot <vincent.guittot@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>, linux-block@vger.kernel.org
+To: Dmitry Osipenko <digetx@gmail.com>
+Cc: Jonathan Hunter <jonathanh@nvidia.com>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 12/08/19 8:20 AM, Baolin Wang wrote:
-> Hi,
-> 
-> On Mon, 22 Jul 2019 at 21:10, Baolin Wang <baolin.wang@linaro.org> wrote:
->>
->> Hi All,
->>
->> Now some SD/MMC controllers can support packed command or packed request,
->> that means it can package multiple requests to host controller to be handled
->> at one time, which can improve the I/O performence. Thus this patchset is
->> used to add the MMC packed function to support packed request or packed
->> command.
->>
->> In this patch set, I implemented the SD host ADMA3 transfer mode to support
->> packed request. The ADMA3 transfer mode can process a multi-block data transfer
->> by using a pair of command descriptor and ADMA2 descriptor. In future we can
->> easily expand the MMC packed function to support packed command.
->>
->> Below are some comparison data between packed request and non-packed request
->> with fio tool. The fio command I used is like below with changing the
->> '--rw' parameter and enabling the direct IO flag to measure the actual hardware
->> transfer speed.
->>
->> ./fio --filename=/dev/mmcblk0p30 --direct=1 --iodepth=20 --rw=read --bs=4K --size=512M --group_reporting --numjobs=20 --name=test_read
->>
->> My eMMC card working at HS400 Enhanced strobe mode:
->> [    2.229856] mmc0: new HS400 Enhanced strobe MMC card at address 0001
->> [    2.237566] mmcblk0: mmc0:0001 HBG4a2 29.1 GiB
->> [    2.242621] mmcblk0boot0: mmc0:0001 HBG4a2 partition 1 4.00 MiB
->> [    2.249110] mmcblk0boot1: mmc0:0001 HBG4a2 partition 2 4.00 MiB
->> [    2.255307] mmcblk0rpmb: mmc0:0001 HBG4a2 partition 3 4.00 MiB, chardev (248:0)
->>
->> 1. Non-packed request
->> I tested 3 times for each case and output a average speed.
->>
->> 1) Sequential read:
->> Speed: 28.9MiB/s, 26.4MiB/s, 30.9MiB/s
->> Average speed: 28.7MiB/s
 
-This seems surprising low for a HS400ES card.  Do you know why that is?
+--qcHopEYAB45HaUaB
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
->>
->> 2) Random read:
->> Speed: 18.2MiB/s, 8.9MiB/s, 15.8MiB/s
->> Average speed: 14.3MiB/s
->>
->> 3) Sequential write:
->> Speed: 21.1MiB/s, 27.9MiB/s, 25MiB/s
->> Average speed: 24.7MiB/s
->>
->> 4) Random write:
->> Speed: 21.5MiB/s, 18.1MiB/s, 18.1MiB/s
->> Average speed: 19.2MiB/s
->>
->> 2. Packed request
->> In packed request mode, I set the host controller can package maximum 10
->> requests at one time (Actually I can increase the package number), and I
->> enabled read/write packed request mode. Also I tested 3 times for each
->> case and output a average speed.
->>
->> 1) Sequential read:
->> Speed: 165MiB/s, 167MiB/s, 164MiB/s
->> Average speed: 165.3MiB/s
->>
->> 2) Random read:
->> Speed: 147MiB/s, 141MiB/s, 144MiB/s
->> Average speed: 144MiB/s
->>
->> 3) Sequential write:
->> Speed: 87.8MiB/s, 89.1MiB/s, 90.0MiB/s
->> Average speed: 89MiB/s
->>
->> 4) Random write:
->> Speed: 90.9MiB/s, 89.8MiB/s, 90.4MiB/s
->> Average speed: 90.4MiB/s
->>
->> Form above data, we can see the packed request can improve the performance greatly.
->> Any comments are welcome. Thanks a lot.
-> 
-> Any comments for this patch set? Thanks.
+On Fri, Aug 09, 2019 at 01:24:30AM +0300, Dmitry Osipenko wrote:
+> The WRITE_PROTECT bit is always in a "protected mode" on Tegra and
+> WP-GPIO state need to be used instead. In a case of the GPIO absence,
+> write-enable should be assumed. External SD is writable once again as
+> a result of this patch because the offending commit changed behaviour for
+> the case of a missing WP-GPIO to fall back to WRITE_PROTECT bit-checking,
+> which is incorrect for Tegra.
+>=20
+> Cc: stable@vger.kernel.org # v5.1+
+> Fixes: e8391453e27f ("mmc: sdhci-tegra: drop ->get_ro() implementation")
+> Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
+> ---
+>  drivers/mmc/host/sdhci-tegra.c | 14 ++++++++++++++
+>  1 file changed, 14 insertions(+)
 
-Did you consider adapting the CQE interface?
+Acked-by: Thierry Reding <treding@nvidia.com>
+
+--qcHopEYAB45HaUaB
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAl1RLDMACgkQ3SOs138+
+s6H/bxAAqFkZoITao90AFM94NfokMprlU0+LtNV+socSWBzYJzTPeGoAvHvaVn22
+qqg8sUervEonzshVlyUr4+bTty5QfMhtn6LVPQN2nxCFz7GTiGR5ZM4sLqV+xlMu
+SekWpTgeQIFeyFx/k/ZL4UUzbgAZx4BXy2VMdZmqh+ZLU5Ou3rkmhf8lUU2JxJtY
+wtbFhopsxovlRE6ElAuwraN8Sqd3RepRQKBxHZJxazXY6Nvn1Ni+KUVaWow0lb1w
+jL9lAgAVoDI8CfH8OemxOTKMB7BvJLAJ1VmniZuwTqpQqlrhLnCkb/Bw29jjmToj
+wLVr7+m+96CQvpqgrcTg13QAZyH2gwr1DjJTH6u1XoOij0fezLmADg4eETgUxCjb
+BSdPRqnH9uQq79szJ42464aRyF8Lcu+yIGT7x7F/WX5AVU0Jjtmk9khvGQOsVEvp
+fv1r7GzsiQy1RyH2fyjRj9yuiyHwVAvdVupHhkcLz3lLGFBnImwM2KOO+LjJQPFq
+9i11pbwAFkZbUo/mBY5Ar0nBigu7eIZ6gtk6vIF0pi5WrQDqj0EpY0M72TvbwQfh
+Nlo/MNJqtQcsO7FT2uYWKHLZ/9VvONkK44tS5KGbceCGXeAaL1vrxDnZ761lc5ga
+c4xiuv+/CputZ4qYunS0qDbSdpJ86SfDODhghzbdM1TaOx6JuyQ=
+=5Rj9
+-----END PGP SIGNATURE-----
+
+--qcHopEYAB45HaUaB--
