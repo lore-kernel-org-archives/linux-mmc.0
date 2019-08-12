@@ -1,75 +1,32 @@
-From: Matthias Kaehlcke <mka@chromium.org>
-Subject: Re: [PATCH] mmc: core: Prevent processing SDIO IRQs when the card is
- suspended
-Date: Mon, 12 Aug 2019 11:39:54 -0700
-Message-ID: <20190812183954.GQ250418@google.com>
-References: <20190611123221.11580-1-ulf.hansson@linaro.org>
- <CAD=FV=XBVRsdiOD0vhgTvMXmqm=fzy9Bzd_x=E1TNPBsT_D-tQ@mail.gmail.com>
- <CAPDyKFqR-xSKdYZYBTK5kKOt1dk7dx_BjedHiDOKs7-X4od=dg@mail.gmail.com>
- <CAD=FV=WODbZa1fBrLbJBsd77xn5ekHWjks-ydxOSzjdBK83Rmg@mail.gmail.com>
- <CAPDyKFpqk4ZcVTqifnbnW1WgNfx9ZNebCttUPcK_e9KWqpDMjQ@mail.gmail.com>
+From: Stefan Wahren <wahrenst@gmx.net>
+Subject: Re: [PATCH 05/18] ARM: dts: bcm283x: Define memory at board level
+Date: Mon, 12 Aug 2019 23:02:44 +0200
+Message-ID: <22482ae9-0239-560e-ad4a-4ab13d864e15@gmx.net>
+References: <1563774880-8061-1-git-send-email-wahrenst@gmx.net>
+ <1563774880-8061-6-git-send-email-wahrenst@gmx.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <stable-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFpqk4ZcVTqifnbnW1WgNfx9ZNebCttUPcK_e9KWqpDMjQ@mail.gmail.com>
-Sender: stable-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Doug Anderson <dianders@chromium.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Brian Norris <briannorris@chromium.org>, Shawn Lin <shawn.lin@rock-chips.com>, Guenter Roeck <groeck@chromium.org>, Heiko Stuebner <heiko@sntech.de>, Kalle Valo <kvalo@codeaurora.org>, linux-wireless <linux-wireless@vger.kernel.org>, "# 4.0+" <stable@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1563774880-8061-6-git-send-email-wahrenst@gmx.net>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Eric Anholt <eric@anholt.net>, Florian Fainelli <f.fainelli@gmail.com>, Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>, Nicolas Saenz Julienne <nsaenzjulienne@suse.de>, Matthias Brugger <mbrugger@suse.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Linus Walleij <linus.walleij@linaro.org>, Michael Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-gpio@vger.kernel.org, linux-mmc@vger.kernel.org, linux-rpi-kernel@lists.infradead.org, linux-arm-kernel@lists.infradead.org, bcm-kernel-feedback-list@broadcom.com
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Ulf,
-
-On Fri, Jun 14, 2019 at 01:55:54PM +0200, Ulf Hansson wrote:
-> On Thu, 13 Jun 2019 at 20:05, Doug Anderson <dianders@chromium.org> wrote:
-> >
-> > Hi,
-> >
-> > On Thu, Jun 13, 2019 at 2:30 AM Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> > >
-> > > > A) Do we need to do anything extra to make sure we actually call the
-> > > > interrupt handler after we've resumed?  I guess we can't actually
-> > > > "lose" the interrupt since it will be sitting asserted in CCCR_INTx
-> > > > until we deal with it (right?), but maybe we need to do something to
-> > > > ensure the handler gets called once we're done resuming?
-> > >
-> > > Good point!
-> > >
-> > > Although, it also depends on if we are going to power off the SDIO
-> > > card or not. In other words, if the SDIO IRQ are configured as a
-> > > system wakeup.
-> >
-> > Even if it's not a system wakeup, we still don't want to drop the
-> > interrupt on the ground though, do we?  For instance, think about a
-> > level-triggered GPIO interrupt that's _not_ a wakeup interrupt.  If
-> > that gets asserted in suspend then we won't wakeup the system, but as
-> > soon as the system gets to a certain point in the resume sequence then
-> > we should pass the interrupt on to the handler.  If an edge triggered
-> > (but non-wakeup) interrupt fires when the system is resuming then we
-> > should similarly not drop it, should we?
-> 
-> GPIOs is clearly different.
-> 
-> When it comes to SDIO cards, re-playing/re-kicking an SDIO IRQ doesn't
-> make sense in case the SDIO card was powered off during system
-> suspend. The reason is simply because the internal state inside the
-> SDIO card gets lost at a power off. For example, the used SDIO func
-> number, needs to re-enabled before any SDIO IRQs can be delivered for
-> it.
-> 
-> So yes, I really think we should drop the SDIO IRQ, unless it's
-> configured as a wakeup. Simply because it's not valid after the system
-> has resumed.
-
-With the dropped interrupts SDIO is broken on veyron jerry when
-the Marvell 8997 Bluetooth controller sends events while
-suspending. On the system MMC remains powered during suspend, but SDIO
-isn't configured as wakeup. On this system the problem can be fixed by
-processing the interrupt after resuming, however from the discussion
-it seems this isn't universally a good solution.
-
-Not sure if this is just a special case that is best worked around in
-the downstream kernel of the device, or if this could affect other
-systems and it would be worth to address it upstream (e.g. by
-processing the dropped interrupt on resume if MMC_PM_KEEP_POWER is
-set and the SDIO interrupt is not configured as wakeup).
+Am 22.07.19 um 07:54 schrieb Stefan Wahren:
+> Now with the varity of several RPi boards, the memory should be defined
+> at board level. This step gives us the chance to fix the memory size
+> of the RPi 1 B+, Zero (incl. W) and Compute Module 1.
+>
+> Signed-off-by: Stefan Wahren <wahrenst@gmx.net>
+Applied to bcm2835-dt-next
