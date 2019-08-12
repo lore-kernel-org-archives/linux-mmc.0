@@ -1,14 +1,15 @@
 From: Stefan Wahren <wahrenst@gmx.net>
-Subject: Re: [PATCH 05/18] ARM: dts: bcm283x: Define memory at board level
-Date: Mon, 12 Aug 2019 23:02:44 +0200
-Message-ID: <22482ae9-0239-560e-ad4a-4ab13d864e15@gmx.net>
+Subject: Re: [PATCH 04/18] ARM: dts: bcm283x: Define MMC interfaces at board
+ level
+Date: Mon, 12 Aug 2019 23:03:38 +0200
+Message-ID: <b9ed2030-25de-4e21-7fc0-9382f6250630@gmx.net>
 References: <1563774880-8061-1-git-send-email-wahrenst@gmx.net>
- <1563774880-8061-6-git-send-email-wahrenst@gmx.net>
+ <1563774880-8061-5-git-send-email-wahrenst@gmx.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1563774880-8061-6-git-send-email-wahrenst@gmx.net>
+In-Reply-To: <1563774880-8061-5-git-send-email-wahrenst@gmx.net>
 Content-Language: en-US
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
@@ -24,9 +25,10 @@ Cc: linux-gpio@vger.kernel.org, linux-mmc@vger.kernel.org, linux-rpi-kernel@list
 List-Id: linux-mmc@vger.kernel.org
 
 Am 22.07.19 um 07:54 schrieb Stefan Wahren:
-> Now with the varity of several RPi boards, the memory should be defined
-> at board level. This step gives us the chance to fix the memory size
-> of the RPi 1 B+, Zero (incl. W) and Compute Module 1.
+> Starting with RPi 4 this is the first board, which doesn't use sdhost
+> as default SD interface. So the MMC interfaces should be defined finally at
+> board level. Since all boards using sdhci already does this, we can drop the
+> pinctrl part from bcm2835-rpi.dtsi.
 >
 > Signed-off-by: Stefan Wahren <wahrenst@gmx.net>
 Applied to bcm2835-dt-next
