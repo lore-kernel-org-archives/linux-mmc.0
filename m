@@ -1,155 +1,154 @@
-From: Thierry Reding <thierry.reding@gmail.com>
-Subject: Re: [PATCH] mmc: tegra: Implement enable_dma() to set dma_mask
-Date: Tue, 13 Aug 2019 11:36:51 +0200
-Message-ID: <20190813093651.GE1137@ulmo>
-References: <20190812224217.12423-1-nicoleotsuka@gmail.com>
+From: Ludovic Barre <ludovic.Barre@st.com>
+Subject: [PATCH V5 1/3] mmc: mmci: add hardware busy timeout feature
+Date: Tue, 13 Aug 2019 11:59:49 +0200
+Message-ID: <20190813095951.26275-2-ludovic.Barre@st.com>
+References: <20190813095951.26275-1-ludovic.Barre@st.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="sfyO1m2EN8ZOtJL6"
+Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20190812224217.12423-1-nicoleotsuka@gmail.com>
+In-Reply-To: <20190813095951.26275-1-ludovic.Barre@st.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Nicolin Chen <nicoleotsuka@gmail.com>
-Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org, jonathanh@nvidia.com, linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, vdumpa@nvidia.com
+To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>
+Cc: srinivas.kandagatla@linaro.org, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-stm32@st-md-mailman.stormreply.com, Ludovic Barre <ludovic.barre@st.com>
 List-Id: linux-mmc@vger.kernel.org
 
+From: Ludovic Barre <ludovic.barre@st.com>
 
---sfyO1m2EN8ZOtJL6
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+In some variants, the data timer starts and decrements
+when the DPSM enters in Wait_R or Busy state
+(while data transfer or MMC_RSP_BUSY), and generates a
+data timeout error if the counter reach 0.
 
-On Mon, Aug 12, 2019 at 03:42:17PM -0700, Nicolin Chen wrote:
-> Commit 68481a7e1c84 ("mmc: tegra: Mark 64 bit dma broken on Tegra186")
-> added a SDHCI_QUIRK2_BROKEN_64_BIT_DMA flag to let sdhci core fallback
-> to 32-bit DMA so as to fit the 40-bit addressing on Tegra186. However,
-> there's a common way, being mentioned in sdhci.c file, to set dma_mask
-> via enable_dma() callback in the device driver directly.
->=20
-> So this patch implements an enable_dma() callback in the sdhci-tegra,
-> in order to set an accurate DMA_BIT_MASK, other than 32-bit or 64-bit.
->=20
-> Signed-off-by: Nicolin Chen <nicoleotsuka@gmail.com>
-> ---
->  drivers/mmc/host/sdhci-tegra.c | 28 +++++++++++++++++++---------
->  1 file changed, 19 insertions(+), 9 deletions(-)
+-Define max_busy_timeout (in ms) according to clock.
+-Set data timer register if the command has rsp_busy flag.
+ If busy_timeout is not defined by framework, the busy
+ length after Data Burst is defined as 1 second
+ (refer: 4.6.2.2 Write of sd specification part1 v6-0).
+-Add MCI_DATATIMEOUT error management in mmci_cmd_irq.
 
-I like this. However, I'd prefer if we set the DMA mask explicitly for
-each generation. A while ago, I had done a similar patch which relied on
-some core changes that no longer seem necessary with this enable_dma()
-hook. You can find the DMA masks for each generation in that patch:
+Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
+---
+ drivers/mmc/host/mmci.c | 37 ++++++++++++++++++++++++++++++++-----
+ drivers/mmc/host/mmci.h |  3 +++
+ 2 files changed, 35 insertions(+), 5 deletions(-)
 
-	http://patchwork.ozlabs.org/patch/1020678/
-
-Thierry
-
-> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegr=
-a.c
-> index f4d4761cf20a..23289adb78d6 100644
-> --- a/drivers/mmc/host/sdhci-tegra.c
-> +++ b/drivers/mmc/host/sdhci-tegra.c
-> @@ -16,6 +16,7 @@
->  #include <linux/pinctrl/consumer.h>
->  #include <linux/regulator/consumer.h>
->  #include <linux/reset.h>
-> +#include <linux/dma-mapping.h>
->  #include <linux/mmc/card.h>
->  #include <linux/mmc/host.h>
->  #include <linux/mmc/mmc.h>
-> @@ -104,6 +105,7 @@
-> =20
->  struct sdhci_tegra_soc_data {
->  	const struct sdhci_pltfm_data *pdata;
-> +	u64 dma_bit_mask;
->  	u32 nvquirks;
->  	u8 min_tap_delay;
->  	u8 max_tap_delay;
-> @@ -749,6 +751,19 @@ static void tegra_sdhci_set_clock(struct sdhci_host =
-*host, unsigned int clock)
->  	}
->  }
-> =20
-> +static int tegra_sdhci_enable_dma(struct sdhci_host *host)
-> +{
-> +	struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host);
-> +	struct sdhci_tegra *tegra_host =3D sdhci_pltfm_priv(pltfm_host);
-> +	const struct sdhci_tegra_soc_data *soc_data =3D tegra_host->soc_data;
-> +	struct device *dev =3D mmc_dev(host->mmc);
-> +
-> +	if (soc_data->dma_bit_mask)
-> +		return dma_set_mask_and_coherent(dev, soc_data->dma_bit_mask);
-> +
-> +	return 0;
-> +}
-> +
->  static unsigned int tegra_sdhci_get_max_clock(struct sdhci_host *host)
->  {
->  	struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host);
-> @@ -1370,6 +1385,7 @@ static const struct sdhci_ops tegra186_sdhci_ops =
-=3D {
->  	.write_l    =3D tegra_sdhci_writel,
->  	.set_clock  =3D tegra_sdhci_set_clock,
->  	.set_bus_width =3D sdhci_set_bus_width,
-> +	.enable_dma =3D tegra_sdhci_enable_dma,
->  	.reset      =3D tegra_sdhci_reset,
->  	.set_uhs_signaling =3D tegra_sdhci_set_uhs_signaling,
->  	.voltage_switch =3D tegra_sdhci_voltage_switch,
-> @@ -1384,20 +1400,13 @@ static const struct sdhci_pltfm_data sdhci_tegra1=
-86_pdata =3D {
->  		  SDHCI_QUIRK_NO_HISPD_BIT |
->  		  SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC |
->  		  SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
-> -	.quirks2 =3D SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
-> -		   /* SDHCI controllers on Tegra186 support 40-bit addressing.
-> -		    * IOVA addresses are 48-bit wide on Tegra186.
-> -		    * With 64-bit dma mask used for SDHCI, accesses can
-> -		    * be broken. Disable 64-bit dma, which would fall back
-> -		    * to 32-bit dma mask. Ideally 40-bit dma mask would work,
-> -		    * But it is not supported as of now.
-> -		    */
-> -		   SDHCI_QUIRK2_BROKEN_64_BIT_DMA,
-> +	.quirks2 =3D SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
->  	.ops  =3D &tegra186_sdhci_ops,
->  };
-> =20
->  static const struct sdhci_tegra_soc_data soc_data_tegra186 =3D {
->  	.pdata =3D &sdhci_tegra186_pdata,
-> +	.dma_bit_mask =3D DMA_BIT_MASK(40),
->  	.nvquirks =3D NVQUIRK_NEEDS_PAD_CONTROL |
->  		    NVQUIRK_HAS_PADCALIB |
->  		    NVQUIRK_DIS_CARD_CLK_CONFIG_TAP |
-> @@ -1410,6 +1419,7 @@ static const struct sdhci_tegra_soc_data soc_data_t=
-egra186 =3D {
-> =20
->  static const struct sdhci_tegra_soc_data soc_data_tegra194 =3D {
->  	.pdata =3D &sdhci_tegra186_pdata,
-> +	.dma_bit_mask =3D DMA_BIT_MASK(39),
->  	.nvquirks =3D NVQUIRK_NEEDS_PAD_CONTROL |
->  		    NVQUIRK_HAS_PADCALIB |
->  		    NVQUIRK_DIS_CARD_CLK_CONFIG_TAP |
-> --=20
-> 2.17.1
->=20
-
---sfyO1m2EN8ZOtJL6
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAl1ShLIACgkQ3SOs138+
-s6Hucw//S7RpqDYyK6kxObaiY3jb9h8P8Goo/iuBWANHCIBSUh/Odd5x+pGkx8Qt
-zPMCccHu7Kwj0pAro3N6rX+e5WmG+gzEL/81+sPps9Kuuw2cGz2vFzYrElQmmj51
-9sZDS/KfcpkZ7CBFj0i8YMNNJ4suwpQyVbsTHHsaCe/rCEr4ACGdbHMCarQkX6O0
-q9a0kgLj/8wdOXEzpPJQCzFsm/pUF6LGguq7eriKrJNIsObgCVQUBBLMkUXmkp+5
-yGv2Ko7djq/lWf9tZ1TZcXMfeVUan/+NMeZ23GFR+vvDpX6UqP6L0AWjPgugamS2
-qVfOlK+8U9/ubQdOGByIi9qYZpV/gs/6KFeQnztJNhIH76GyMvil7zPa098POnj8
-a3lnNApUlfEsszL2fz9cxHEeJGzdGfGQBCQhhnIx0V9b/ypOMUus1OhbJvtf0Zbp
-iFjg69C5zpWSq7UoW35X1D0xwPObfEb8IK/+dyNFS+Me9F0DXDrumczECYvvsK8P
-sUee/K7ZGqGT51ZB8RcNweeKnLmYF78xRIjkKUqfC8J0XflRp+zK8X04D1Md8TA1
-c3puztYz3S9L/9N/WEXXa7YFah+3s7GTJr50z71OSK8qFpHGO3YgzbCuQXKAimJQ
-jkiznX6EU53RHgye/T2wwC+AlQGOJywTzUPLLUmUyBy3KNrZ9Fs=
-=iYEF
------END PGP SIGNATURE-----
-
---sfyO1m2EN8ZOtJL6--
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index c37e70dbe250..c50586540765 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -1075,6 +1075,7 @@ static void
+ mmci_start_command(struct mmci_host *host, struct mmc_command *cmd, u32 c)
+ {
+ 	void __iomem *base = host->base;
++	unsigned long long clks = 0;
+ 
+ 	dev_dbg(mmc_dev(host->mmc), "op %02x arg %08x flags %08x\n",
+ 	    cmd->opcode, cmd->arg, cmd->flags);
+@@ -1097,6 +1098,19 @@ mmci_start_command(struct mmci_host *host, struct mmc_command *cmd, u32 c)
+ 		else
+ 			c |= host->variant->cmdreg_srsp;
+ 	}
++
++	if (host->variant->busy_timeout && !host->mrq->data) {
++		if (cmd->flags & MMC_RSP_BUSY) {
++			if (!cmd->busy_timeout)
++				cmd->busy_timeout = 1000;
++
++			clks = (unsigned long long)cmd->busy_timeout;
++			clks *=	host->cclk;
++			do_div(clks, MSEC_PER_SEC);
++		}
++		writel_relaxed(clks, host->base + MMCIDATATIMER);
++	}
++
+ 	if (/*interrupt*/0)
+ 		c |= MCI_CPSM_INTERRUPT;
+ 
+@@ -1203,6 +1217,7 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
+ {
+ 	void __iomem *base = host->base;
+ 	bool sbc, busy_resp;
++	u32 err_msk;
+ 
+ 	if (!cmd)
+ 		return;
+@@ -1215,8 +1230,12 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
+ 	 * handling. Note that we tag on any latent IRQs postponed
+ 	 * due to waiting for busy status.
+ 	 */
+-	if (!((status|host->busy_status) &
+-	      (MCI_CMDCRCFAIL|MCI_CMDTIMEOUT|MCI_CMDSENT|MCI_CMDRESPEND)))
++	err_msk = MCI_CMDCRCFAIL | MCI_CMDTIMEOUT;
++	if (host->variant->busy_timeout && busy_resp)
++		err_msk |= MCI_DATATIMEOUT;
++
++	if (!((status | host->busy_status) &
++	      (err_msk | MCI_CMDSENT | MCI_CMDRESPEND)))
+ 		return;
+ 
+ 	/* Handle busy detection on DAT0 if the variant supports it. */
+@@ -1235,8 +1254,7 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
+ 		 * while, to allow it to be set, but tests indicates that it
+ 		 * isn't needed.
+ 		 */
+-		if (!host->busy_status &&
+-		    !(status & (MCI_CMDCRCFAIL|MCI_CMDTIMEOUT)) &&
++		if (!host->busy_status && !(status & err_msk) &&
+ 		    (readl(base + MMCISTATUS) & host->variant->busy_detect_flag)) {
+ 
+ 			writel(readl(base + MMCIMASK0) |
+@@ -1290,6 +1308,9 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
+ 		cmd->error = -ETIMEDOUT;
+ 	} else if (status & MCI_CMDCRCFAIL && cmd->flags & MMC_RSP_CRC) {
+ 		cmd->error = -EILSEQ;
++	} else if (host->variant->busy_timeout && busy_resp &&
++		   status & MCI_DATATIMEOUT) {
++		cmd->error = -ETIMEDOUT;
+ 	} else {
+ 		cmd->resp[0] = readl(base + MMCIRESPONSE0);
+ 		cmd->resp[1] = readl(base + MMCIRESPONSE1);
+@@ -1948,6 +1969,8 @@ static int mmci_probe(struct amba_device *dev,
+ 	 * Enable busy detection.
+ 	 */
+ 	if (variant->busy_detect) {
++		u32 max_busy_timeout = 0;
++
+ 		mmci_ops.card_busy = mmci_card_busy;
+ 		/*
+ 		 * Not all variants have a flag to enable busy detection
+@@ -1957,7 +1980,11 @@ static int mmci_probe(struct amba_device *dev,
+ 			mmci_write_datactrlreg(host,
+ 					       host->variant->busy_dpsm_flag);
+ 		mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY;
+-		mmc->max_busy_timeout = 0;
++
++		if (variant->busy_timeout)
++			max_busy_timeout = ~0UL / (mmc->f_max / MSEC_PER_SEC);
++
++		mmc->max_busy_timeout = max_busy_timeout;
+ 	}
+ 
+ 	/* Prepare a CMD12 - needed to clear the DPSM on some variants. */
+diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
+index 833236ecb31e..d8b7f6774e8f 100644
+--- a/drivers/mmc/host/mmci.h
++++ b/drivers/mmc/host/mmci.h
+@@ -287,6 +287,8 @@ struct mmci_host;
+  * @signal_direction: input/out direction of bus signals can be indicated
+  * @pwrreg_clkgate: MMCIPOWER register must be used to gate the clock
+  * @busy_detect: true if the variant supports busy detection on DAT0.
++ * @busy_timeout: true if the variant starts data timer when the DPSM
++ *		  enter in Wait_R or Busy state.
+  * @busy_dpsm_flag: bitmask enabling busy detection in the DPSM
+  * @busy_detect_flag: bitmask identifying the bit in the MMCISTATUS register
+  *		      indicating that the card is busy
+@@ -333,6 +335,7 @@ struct variant_data {
+ 	u8			signal_direction:1;
+ 	u8			pwrreg_clkgate:1;
+ 	u8			busy_detect:1;
++	u8			busy_timeout:1;
+ 	u32			busy_dpsm_flag;
+ 	u32			busy_detect_flag;
+ 	u32			busy_detect_mask;
+-- 
+2.17.1
