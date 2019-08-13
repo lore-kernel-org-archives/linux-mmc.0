@@ -1,73 +1,155 @@
-From: Ludovic Desroches <ludovic.desroches@microchip.com>
-Subject: Re: [PATCH 2/2] ARM: dts: at91: sama5d27_som1_ek: add mmc
- capabilities for SDMMC0
-Date: Tue, 13 Aug 2019 08:53:06 +0200
-Message-ID: <20190813065306.tqz57hqeiofofbnz@M43218.corp.atmel.com>
-References: <1565252928-28994-1-git-send-email-eugen.hristev@microchip.com>
- <1565252928-28994-2-git-send-email-eugen.hristev@microchip.com>
- <20190808124217.wrmcxohw5i6ju2qe@M43218.corp.atmel.com>
- <04fd74c3-a828-1064-b77b-f3de07a26190@intel.com>
- <20190809062322.syuieymdqjs4e7lh@M43218.corp.atmel.com>
- <fa0debbb-b84c-1f74-f8b8-8fdd7812aaee@microchip.com>
+From: Thierry Reding <thierry.reding@gmail.com>
+Subject: Re: [PATCH] mmc: tegra: Implement enable_dma() to set dma_mask
+Date: Tue, 13 Aug 2019 11:36:51 +0200
+Message-ID: <20190813093651.GE1137@ulmo>
+References: <20190812224217.12423-1-nicoleotsuka@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="sfyO1m2EN8ZOtJL6"
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <fa0debbb-b84c-1f74-f8b8-8fdd7812aaee@microchip.com>
+In-Reply-To: <20190812224217.12423-1-nicoleotsuka@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Eugen.Hristev@microchip.com
-Cc: adrian.hunter@intel.com, Nicolas.Ferre@microchip.com, alexandre.belloni@bootlin.com, ulf.hansson@linaro.org, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+To: Nicolin Chen <nicoleotsuka@gmail.com>
+Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org, jonathanh@nvidia.com, linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, vdumpa@nvidia.com
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, Aug 12, 2019 at 03:38:34PM +0000, Eugen.Hristev@microchip.com wrote:
-> On 09.08.2019 09:23, Ludovic Desroches wrote:
-> > On Thu, Aug 08, 2019 at 03:57:30PM +0300, Adrian Hunter wrote:
-> >> On 8/08/19 3:42 PM, Ludovic Desroches wrote:
-> >>> On Thu, Aug 08, 2019 at 10:35:43AM +0200, Eugen Hristev - M18282 wrote:
-> >>>> From: Eugen Hristev <eugen.hristev@microchip.com>
-> >>>>
-> >>>> Add mmc capabilities for SDMMC0 for this board.
-> >>>> With this enabled, eMMC connected card is detected as:
-> >>>>
-> >>>> mmc0: new DDR MMC card at address 0001
-> >>>>
-> >>>> Signed-off-by: Eugen Hristev <eugen.hristev@microchip.com>
-> >>> Acked-by: Ludovic Desroches <ludovic.desroches@microchip.com>
-> >>>
-> >>> I am interested to have the some insights about the use of sd-uhs-*
-> >>> properties.
-> >>>
-> >>> Our IP can't deal with 1V8 by itself. It has a 1V8SEL signal which can
-> >>> be used as the logic control input of a mux. So even if the IP claims
-> >>> to support UHS modes, it depends on the board.
-> >>>
-> >>> Are the sd-uhs-* properties a way to deal with this? I tend to think no
-> >>> as sdhci_setup_host() will set the caps depending on the content of the
-> >>> capabilities register. Do we have to use the SDHCI_QUIRK_MISSING_CAPS
-> >>> quirk or sdhci-caps/sdhci-caps-mask?
-> >>
-> >> There is "no-1-8-v" which it looks like sdhci-of-at91.c already supports:
-> >>
-> >>    sdhci_at91_probe() -> sdhci_get_of_property() -> sdhci_get_property()
-> >>
-> >>      	if (device_property_present(dev, "no-1-8-v"))
-> >> 		host->quirks2 |= SDHCI_QUIRK2_NO_1_8_V;
-> >>
-> > 
-> > Right, I forgot this property. Thanks.
-> > 
-> > Eugen, do you see cases we can't cover with this property?
-> 
-> Hi,
-> 
-> For current requirements and driver support, this should be enough.
-> 
-> I noticed one thing regarding SD-Cards, if I add property sd-uhs-sdr104 
-> the class 10 uhs1 cards are detected as SDR104 . Without this property 
-> they are detected as DDR50. Any idea why the difference ? The controller 
-> does not claim to have SDR104 support ?  We should add it ?
 
-With the mainline, our tree or both? In our tree, SDR104 is removed from
-the capabilities.
+--sfyO1m2EN8ZOtJL6
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Ludovic
+On Mon, Aug 12, 2019 at 03:42:17PM -0700, Nicolin Chen wrote:
+> Commit 68481a7e1c84 ("mmc: tegra: Mark 64 bit dma broken on Tegra186")
+> added a SDHCI_QUIRK2_BROKEN_64_BIT_DMA flag to let sdhci core fallback
+> to 32-bit DMA so as to fit the 40-bit addressing on Tegra186. However,
+> there's a common way, being mentioned in sdhci.c file, to set dma_mask
+> via enable_dma() callback in the device driver directly.
+>=20
+> So this patch implements an enable_dma() callback in the sdhci-tegra,
+> in order to set an accurate DMA_BIT_MASK, other than 32-bit or 64-bit.
+>=20
+> Signed-off-by: Nicolin Chen <nicoleotsuka@gmail.com>
+> ---
+>  drivers/mmc/host/sdhci-tegra.c | 28 +++++++++++++++++++---------
+>  1 file changed, 19 insertions(+), 9 deletions(-)
+
+I like this. However, I'd prefer if we set the DMA mask explicitly for
+each generation. A while ago, I had done a similar patch which relied on
+some core changes that no longer seem necessary with this enable_dma()
+hook. You can find the DMA masks for each generation in that patch:
+
+	http://patchwork.ozlabs.org/patch/1020678/
+
+Thierry
+
+> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegr=
+a.c
+> index f4d4761cf20a..23289adb78d6 100644
+> --- a/drivers/mmc/host/sdhci-tegra.c
+> +++ b/drivers/mmc/host/sdhci-tegra.c
+> @@ -16,6 +16,7 @@
+>  #include <linux/pinctrl/consumer.h>
+>  #include <linux/regulator/consumer.h>
+>  #include <linux/reset.h>
+> +#include <linux/dma-mapping.h>
+>  #include <linux/mmc/card.h>
+>  #include <linux/mmc/host.h>
+>  #include <linux/mmc/mmc.h>
+> @@ -104,6 +105,7 @@
+> =20
+>  struct sdhci_tegra_soc_data {
+>  	const struct sdhci_pltfm_data *pdata;
+> +	u64 dma_bit_mask;
+>  	u32 nvquirks;
+>  	u8 min_tap_delay;
+>  	u8 max_tap_delay;
+> @@ -749,6 +751,19 @@ static void tegra_sdhci_set_clock(struct sdhci_host =
+*host, unsigned int clock)
+>  	}
+>  }
+> =20
+> +static int tegra_sdhci_enable_dma(struct sdhci_host *host)
+> +{
+> +	struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host);
+> +	struct sdhci_tegra *tegra_host =3D sdhci_pltfm_priv(pltfm_host);
+> +	const struct sdhci_tegra_soc_data *soc_data =3D tegra_host->soc_data;
+> +	struct device *dev =3D mmc_dev(host->mmc);
+> +
+> +	if (soc_data->dma_bit_mask)
+> +		return dma_set_mask_and_coherent(dev, soc_data->dma_bit_mask);
+> +
+> +	return 0;
+> +}
+> +
+>  static unsigned int tegra_sdhci_get_max_clock(struct sdhci_host *host)
+>  {
+>  	struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host);
+> @@ -1370,6 +1385,7 @@ static const struct sdhci_ops tegra186_sdhci_ops =
+=3D {
+>  	.write_l    =3D tegra_sdhci_writel,
+>  	.set_clock  =3D tegra_sdhci_set_clock,
+>  	.set_bus_width =3D sdhci_set_bus_width,
+> +	.enable_dma =3D tegra_sdhci_enable_dma,
+>  	.reset      =3D tegra_sdhci_reset,
+>  	.set_uhs_signaling =3D tegra_sdhci_set_uhs_signaling,
+>  	.voltage_switch =3D tegra_sdhci_voltage_switch,
+> @@ -1384,20 +1400,13 @@ static const struct sdhci_pltfm_data sdhci_tegra1=
+86_pdata =3D {
+>  		  SDHCI_QUIRK_NO_HISPD_BIT |
+>  		  SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC |
+>  		  SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
+> -	.quirks2 =3D SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
+> -		   /* SDHCI controllers on Tegra186 support 40-bit addressing.
+> -		    * IOVA addresses are 48-bit wide on Tegra186.
+> -		    * With 64-bit dma mask used for SDHCI, accesses can
+> -		    * be broken. Disable 64-bit dma, which would fall back
+> -		    * to 32-bit dma mask. Ideally 40-bit dma mask would work,
+> -		    * But it is not supported as of now.
+> -		    */
+> -		   SDHCI_QUIRK2_BROKEN_64_BIT_DMA,
+> +	.quirks2 =3D SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
+>  	.ops  =3D &tegra186_sdhci_ops,
+>  };
+> =20
+>  static const struct sdhci_tegra_soc_data soc_data_tegra186 =3D {
+>  	.pdata =3D &sdhci_tegra186_pdata,
+> +	.dma_bit_mask =3D DMA_BIT_MASK(40),
+>  	.nvquirks =3D NVQUIRK_NEEDS_PAD_CONTROL |
+>  		    NVQUIRK_HAS_PADCALIB |
+>  		    NVQUIRK_DIS_CARD_CLK_CONFIG_TAP |
+> @@ -1410,6 +1419,7 @@ static const struct sdhci_tegra_soc_data soc_data_t=
+egra186 =3D {
+> =20
+>  static const struct sdhci_tegra_soc_data soc_data_tegra194 =3D {
+>  	.pdata =3D &sdhci_tegra186_pdata,
+> +	.dma_bit_mask =3D DMA_BIT_MASK(39),
+>  	.nvquirks =3D NVQUIRK_NEEDS_PAD_CONTROL |
+>  		    NVQUIRK_HAS_PADCALIB |
+>  		    NVQUIRK_DIS_CARD_CLK_CONFIG_TAP |
+> --=20
+> 2.17.1
+>=20
+
+--sfyO1m2EN8ZOtJL6
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAl1ShLIACgkQ3SOs138+
+s6Hucw//S7RpqDYyK6kxObaiY3jb9h8P8Goo/iuBWANHCIBSUh/Odd5x+pGkx8Qt
+zPMCccHu7Kwj0pAro3N6rX+e5WmG+gzEL/81+sPps9Kuuw2cGz2vFzYrElQmmj51
+9sZDS/KfcpkZ7CBFj0i8YMNNJ4suwpQyVbsTHHsaCe/rCEr4ACGdbHMCarQkX6O0
+q9a0kgLj/8wdOXEzpPJQCzFsm/pUF6LGguq7eriKrJNIsObgCVQUBBLMkUXmkp+5
+yGv2Ko7djq/lWf9tZ1TZcXMfeVUan/+NMeZ23GFR+vvDpX6UqP6L0AWjPgugamS2
+qVfOlK+8U9/ubQdOGByIi9qYZpV/gs/6KFeQnztJNhIH76GyMvil7zPa098POnj8
+a3lnNApUlfEsszL2fz9cxHEeJGzdGfGQBCQhhnIx0V9b/ypOMUus1OhbJvtf0Zbp
+iFjg69C5zpWSq7UoW35X1D0xwPObfEb8IK/+dyNFS+Me9F0DXDrumczECYvvsK8P
+sUee/K7ZGqGT51ZB8RcNweeKnLmYF78xRIjkKUqfC8J0XflRp+zK8X04D1Md8TA1
+c3puztYz3S9L/9N/WEXXa7YFah+3s7GTJr50z71OSK8qFpHGO3YgzbCuQXKAimJQ
+jkiznX6EU53RHgye/T2wwC+AlQGOJywTzUPLLUmUyBy3KNrZ9Fs=
+=iYEF
+-----END PGP SIGNATURE-----
+
+--sfyO1m2EN8ZOtJL6--
