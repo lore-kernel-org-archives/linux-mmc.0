@@ -1,39 +1,37 @@
-From: Nicolin Chen <nicoleotsuka@gmail.com>
-Subject: Re: [PATCH] mmc: tegra: Implement enable_dma() to set dma_mask
-Date: Tue, 13 Aug 2019 14:13:38 -0700
-Message-ID: <20190813211337.GA18501@Asurada-Nvidia.nvidia.com>
-References: <20190812224217.12423-1-nicoleotsuka@gmail.com>
- <20190813093651.GE1137@ulmo>
+From: Rob Herring <robh+dt@kernel.org>
+Subject: Re: [PATCH v5 1/2] dt-bindings: mmc: Document Aspeed SD controller
+Date: Tue, 13 Aug 2019 16:14:22 -0600
+Message-ID: <CAL_JsqKXda7f43=ZdtTsyrdhdqn+H4L=7zQXtB_EEfHdi=rHLg@mail.gmail.com>
+References: <20190807003629.2974-1-andrew@aj.id.au> <20190807003629.2974-2-andrew@aj.id.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20190813093651.GE1137@ulmo>
+In-Reply-To: <20190807003629.2974-2-andrew@aj.id.au>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Thierry Reding <thierry.reding@gmail.com>
-Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org, jonathanh@nvidia.com, linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, vdumpa@nvidia.com
+To: Andrew Jeffery <andrew@aj.id.au>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Mark Rutland <mark.rutland@arm.com>, Joel Stanley <joel@jms.id.au>, Adrian Hunter <adrian.hunter@intel.com>, devicetree@vger.kernel.org, "moderated list:ARM/FREESCALE IMX / MXC ARM ARCHITECTURE" <linux-arm-kernel@lists.infradead.org>, linux-aspeed@lists.ozlabs.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Ryan Chen <ryanchen.aspeed@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Aug 13, 2019 at 11:36:51AM +0200, Thierry Reding wrote:
-> On Mon, Aug 12, 2019 at 03:42:17PM -0700, Nicolin Chen wrote:
-> > Commit 68481a7e1c84 ("mmc: tegra: Mark 64 bit dma broken on Tegra186")
-> > added a SDHCI_QUIRK2_BROKEN_64_BIT_DMA flag to let sdhci core fallback
-> > to 32-bit DMA so as to fit the 40-bit addressing on Tegra186. However,
-> > there's a common way, being mentioned in sdhci.c file, to set dma_mask
-> > via enable_dma() callback in the device driver directly.
-> > 
-> > So this patch implements an enable_dma() callback in the sdhci-tegra,
-> > in order to set an accurate DMA_BIT_MASK, other than 32-bit or 64-bit.
-> > 
-> > Signed-off-by: Nicolin Chen <nicoleotsuka@gmail.com>
-> > ---
-> >  drivers/mmc/host/sdhci-tegra.c | 28 +++++++++++++++++++---------
-> >  1 file changed, 19 insertions(+), 9 deletions(-)
-> 
-> I like this. However, I'd prefer if we set the DMA mask explicitly for
-> each generation. A while ago, I had done a similar patch which relied on
-> some core changes that no longer seem necessary with this enable_dma()
-> hook. You can find the DMA masks for each generation in that patch:
-> 	http://patchwork.ozlabs.org/patch/1020678/
+On Tue, Aug 6, 2019 at 6:38 PM Andrew Jeffery <andrew@aj.id.au> wrote:
+>
+> The ASPEED SD/SDIO/MMC controller exposes two slots implementing the
+> SDIO Host Specification v2.00, with 1 or 4 bit data buses, or an 8 bit
+> data bus if only a single slot is enabled.
+>
+> Signed-off-by: Andrew Jeffery <andrew@aj.id.au>
+>
+> ---
+> v4:
+> * Make use of mmc-controller.yaml
+> * Document sdhci,auto-cmd12
+>
+> v2:
+> * Fix compatible enums
+> * Add AST2600 compatibles
+> * Describe #address-cells / #size-cells
+> ---
+>  .../devicetree/bindings/mmc/aspeed,sdhci.yaml | 105 ++++++++++++++++++
+>  1 file changed, 105 insertions(+)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/aspeed,sdhci.yaml
 
-Thank you for the reference patch. I will add those masks in v2.
+Reviewed-by: Rob Herring <robh@kernel.org>
