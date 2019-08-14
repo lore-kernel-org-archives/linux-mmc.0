@@ -1,7 +1,7 @@
 From: Yinbo Zhu <yinbo.zhu@nxp.com>
-Subject: [PATCH v1 2/4] soc: fsl: guts: Add definition for LS1028A
-Date: Wed, 14 Aug 2019 15:26:47 +0800
-Message-ID: <20190814072649.8237-2-yinbo.zhu@nxp.com>
+Subject: [PATCH v1 3/4] arm64: dts: ls1028a: fix little-big endian issue for dcfg
+Date: Wed, 14 Aug 2019 15:26:48 +0800
+Message-ID: <20190814072649.8237-3-yinbo.zhu@nxp.com>
 References: <20190814072649.8237-1-yinbo.zhu@nxp.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20190814072649.8237-1-yinbo.zhu@nxp.com>
@@ -10,37 +10,25 @@ To: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Catal
 Cc: yinbo.zhu@nxp.com, xiaobo.xie@nxp.com, jiafei.pan@nxp.com, Alison Wang <alison.wang@nxp.com>, Alex Marginean <alexandru.marginean@nxp.com>, Catalin Horghidan <catalin.horghidan@nxp.com>, Rajat Srivastava <rajat.srivastava@nxp.com>, linuxppc-dev@lists.ozlabs.org
 List-Id: linux-mmc@vger.kernel.org
 
-Adding compatible string "ls1028a-dcfg" to initialize guts driver
-for ls1028 and SoC die attribute definition for LS1028A
+dcfg use little endian that SoC register value will be correct
 
 Signed-off-by: Yinbo Zhu <yinbo.zhu@nxp.com>
 ---
- drivers/soc/fsl/guts.c | 6 ++++++
- 1 file changed, 6 insertions(+)
+ arch/arm64/boot/dts/freescale/fsl-ls1028a.dtsi | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/soc/fsl/guts.c b/drivers/soc/fsl/guts.c
-index 1ef8068c8dd3..34810f9bb2ee 100644
---- a/drivers/soc/fsl/guts.c
-+++ b/drivers/soc/fsl/guts.c
-@@ -102,6 +102,11 @@ static const struct fsl_soc_die_attr fsl_soc_die[] = {
- 	  .svr          = 0x87360000,
- 	  .mask         = 0xff3f0000,
- 	},
-+	/* Die: LS1028A, SoC: LS1028A */
-+	{ .die          = "LS1028A",
-+	  .svr          = 0x870b0000,
-+	  .mask         = 0xff3f0000,
-+	},
- 	{ },
- };
+diff --git a/arch/arm64/boot/dts/freescale/fsl-ls1028a.dtsi b/arch/arm64/boot/dts/freescale/fsl-ls1028a.dtsi
+index b0d4f8916ede..5538e8e354b2 100644
+--- a/arch/arm64/boot/dts/freescale/fsl-ls1028a.dtsi
++++ b/arch/arm64/boot/dts/freescale/fsl-ls1028a.dtsi
+@@ -162,7 +162,7 @@
+ 		dcfg: syscon@1e00000 {
+ 			compatible = "fsl,ls1028a-dcfg", "syscon";
+ 			reg = <0x0 0x1e00000 0x0 0x10000>;
+-			big-endian;
++			little-endian;
+ 		};
  
-@@ -224,6 +229,7 @@ static const struct of_device_id fsl_guts_of_match[] = {
- 	{ .compatible = "fsl,ls1012a-dcfg", },
- 	{ .compatible = "fsl,ls1046a-dcfg", },
- 	{ .compatible = "fsl,lx2160a-dcfg", },
-+	{ .compatible = "fsl,ls1028a-dcfg", },
- 	{}
- };
- MODULE_DEVICE_TABLE(of, fsl_guts_of_match);
+ 		scfg: syscon@1fc0000 {
 -- 
 2.17.1
