@@ -1,54 +1,55 @@
-From: Li Yang <leoyang.li@nxp.com>
-Subject: Re: [PATCH v1 2/4] soc: fsl: guts: Add definition for LS1028A
-Date: Thu, 15 Aug 2019 17:40:09 -0500
-Message-ID: <CADRPPNSW4A0gkbzcPD=y-J_YHSnbAgP7p=RQnS6i0U-Ze=L6qA@mail.gmail.com>
-References: <20190814072649.8237-1-yinbo.zhu@nxp.com> <20190814072649.8237-2-yinbo.zhu@nxp.com>
+From: Nicolin Chen <nicoleotsuka@gmail.com>
+Subject: Re: [PATCH v2] mmc: tegra: Implement enable_dma() to set dma_mask
+Date: Thu, 15 Aug 2019 16:16:46 -0700
+Message-ID: <20190815231646.GA15635@Asurada-Nvidia.nvidia.com>
+References: <20190814005741.13331-1-nicoleotsuka@gmail.com>
+ <09d9ba41-f4cd-e515-cd2d-0b4134648059@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190814072649.8237-2-yinbo.zhu@nxp.com>
+Content-Disposition: inline
+In-Reply-To: <09d9ba41-f4cd-e515-cd2d-0b4134648059@intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Yinbo Zhu <yinbo.zhu@nxp.com>
-Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Claudiu Manoil <claudiu.manoil@nxp.com>, Amit Jain <amit.jain_1@nxp.com>, Yangbo Lu <yangbo.lu@nxp.com>, Vabhav Sharma <vabhav.sharma@nxp.com>, Rajesh Bhagat <rajesh.bhagat@nxp.com>, Ashish Kumar <Ashish.Kumar@nxp.com>, "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" <devicetree@vger.kernel.org>, "moderated list:ARM/FREESCALE IMX / MXC ARM ARCHITECTURE" <linux-arm-kernel@lists.infradead.org>, lkml <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org, Xiaobo Xie <xiaobo.xie@nxp.com>, Jiafei Pan <jiafei.pan@n>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: ulf.hansson@linaro.org, thierry.reding@gmail.com, jonathanh@nvidia.com, linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, vdumpa@nvidia.com
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, Aug 14, 2019 at 2:26 AM Yinbo Zhu <yinbo.zhu@nxp.com> wrote:
->
-> Adding compatible string "ls1028a-dcfg" to initialize guts driver
-> for ls1028 and SoC die attribute definition for LS1028A
->
-> Signed-off-by: Yinbo Zhu <yinbo.zhu@nxp.com>
+On Thu, Aug 15, 2019 at 02:48:20PM +0300, Adrian Hunter wrote:
+> On 14/08/19 3:57 AM, Nicolin Chen wrote:
+> > [ Integrated the change and commit message made by Thierry Reding ]
+> > 
+> > The SDHCI controller found in early Tegra SoCs (from Tegra20 through
+> > Tegra114) used an AHB interface to the memory controller, which allowed
+> > only 32 bits of memory to be addressed.
+> > 
+> > Starting with Tegra124, this limitation was removed by making the SDHCI
+> > controllers native MCCIF clients, which means that they got increased
+> > bandwidth and better arbitration to the memory controller as well as an
+> > address range extended to 40 bits, out of which only 34 were actually
+> > used (bits 34-39 are tied to 0 in the controller).
+> > 
+> > For Tegra186, all of the 40 bits can be used; For Tegra194, 39-bit can
+> > be used.
+> > 
+> > So far, sdhci-tegra driver has been relying on sdhci core to configure
+> > the DMA_BIT_MASK between 32-bit or 64-bit, using one of quirks2 flags:
+> > SDHCI_QUIRK2_BROKEN_64_BIT_DMA. However, there is a common way, being
+> > mentioned in sdhci.c file, to set dma_mask via enable_dma() callback in
+> > the device driver directly.
+> > 
+> > So this patch implements an enable_dma() callback in the sdhci-tegra,
+> > in order to set an accurate DMA_BIT_MASK, other than just 32/64 bits.
+> 
+> Is there a reason this cannot be done at probe time?
 
-Applied for next.
+It's supposed to be done at probe() time. But sdhci_setup_host()
+does both 32-bit/64-bit dma_mask setting and dma_alloc(), so if
+the dma_mask isn't correctly set inside sdhci_setup_host(), the
+allocation would fall to a 64-bit IOVA range that hardware does
+not support -- smmu error would happen and crash the system. On
+the other hand, ->enable_dma() is called in that function right
+after 32-bit/64-bit dma_mask setting. Or is there any other way
+of adding to probe() that I am missing here?
 
-> ---
->  drivers/soc/fsl/guts.c | 6 ++++++
->  1 file changed, 6 insertions(+)
->
-> diff --git a/drivers/soc/fsl/guts.c b/drivers/soc/fsl/guts.c
-> index 1ef8068c8dd3..34810f9bb2ee 100644
-> --- a/drivers/soc/fsl/guts.c
-> +++ b/drivers/soc/fsl/guts.c
-> @@ -102,6 +102,11 @@ static const struct fsl_soc_die_attr fsl_soc_die[] = {
->           .svr          = 0x87360000,
->           .mask         = 0xff3f0000,
->         },
-> +       /* Die: LS1028A, SoC: LS1028A */
-> +       { .die          = "LS1028A",
-> +         .svr          = 0x870b0000,
-> +         .mask         = 0xff3f0000,
-> +       },
->         { },
->  };
->
-> @@ -224,6 +229,7 @@ static const struct of_device_id fsl_guts_of_match[] = {
->         { .compatible = "fsl,ls1012a-dcfg", },
->         { .compatible = "fsl,ls1046a-dcfg", },
->         { .compatible = "fsl,lx2160a-dcfg", },
-> +       { .compatible = "fsl,ls1028a-dcfg", },
->         {}
->  };
->  MODULE_DEVICE_TABLE(of, fsl_guts_of_match);
-> --
-> 2.17.1
->
+Thanks
+Nicolin
