@@ -1,33 +1,38 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH V6 1/3] mmc: sdhci: Change O2 Host PLL and DLL register
- name
-Date: Thu, 15 Aug 2019 14:07:06 +0300
-Message-ID: <242852f2-a70e-c233-7893-eb7b346950a9@intel.com>
-References: <1565372245-4598-1-git-send-email-shirley.her@bayhubtech.com>
+Subject: Re: [PATCH V6 2/3] mmc: sdhci: Modify get CD status function
+Date: Thu, 15 Aug 2019 14:07:14 +0300
+Message-ID: <16f15218-daa2-e22c-2174-416387323072@intel.com>
+References: <1565372322-4667-1-git-send-email-shirley.her@bayhubtech.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1565372245-4598-1-git-send-email-shirley.her@bayhubtech.com>
+In-Reply-To: <1565372322-4667-1-git-send-email-shirley.her@bayhubtech.com>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
 To: "Shirley Her (SC)" <shirley.her@bayhubtech.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 Cc: "Chevron Li (WH)" <chevron.li@bayhubtech.com>, "Shaper Liu (WH)" <shaper.liu@bayhubtech.com>, "Xiaoguang Yu (WH)" <xiaoguang.yu@bayhubtech.com>, "Max Huang (SC)" <max.huang@bayhubtech.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 9/08/19 8:37 PM, Shirley Her (SC) wrote:
-> Change register name O2_PLL_WDT_CONTROL1 to O2_PLL_DLL_WDT_CONTROL1
-> 
-> Signed-off-by:Shirley Her <shirley.her@bayhubtech.com>
+On 9/08/19 8:38 PM, Shirley Her (SC) wrote:
+> Modify get CD status function
 
 Please change the subject to:
 
-mmc: sdhci-pci-o2micro: Change O2 Host PLL and DLL register name
+mmc: sdhci-pci-o2micro: Move functions in preparation to fix DLL lock phase shift issue
 
+Please change the commit message accordingly.
+
+Also this patch should not make any changes except moving
+functions, see comment further below.
+
+> 
+> Signed-off-by:Shirley Her <shirley.her@bayhubtech.com>
 > ---
 > change in V6:
->  1. change subject and commit message to match the patch
->  2. change register name O2_PLL_WDT_CONTROL1 to O2_PLL_DLL_WDT_CONTROL1
+>  1. change subjec and commit message to match the patch
+>  2. modify the get CD status function
+>  3. re-arrange the order of some functions
 > 
 > change in V5:
 >  1. split 2 patches into 3 patches
@@ -52,61 +57,223 @@ mmc: sdhci-pci-o2micro: Change O2 Host PLL and DLL register name
 >  1. add error recovery function to relock DLL with correct phase
 >  2. retuning HS200 after DLL locked
 > ---
->  drivers/mmc/host/sdhci-pci-o2micro.c | 16 ++++++++--------
->  1 file changed, 8 insertions(+), 8 deletions(-)
+>  drivers/mmc/host/sdhci-pci-o2micro.c | 188 ++++++++++++++++++-----------------
+>  1 file changed, 95 insertions(+), 93 deletions(-)
 > 
 > diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
-> index 9dc4548..b3a33d9 100644
+> index b3a33d9..c780888 100644
 > --- a/drivers/mmc/host/sdhci-pci-o2micro.c
 > +++ b/drivers/mmc/host/sdhci-pci-o2micro.c
-> @@ -51,7 +51,7 @@
->  #define O2_SD_VENDOR_SETTING2	0x1C8
->  #define O2_SD_HW_TUNING_DISABLE	BIT(4)
+> @@ -58,6 +58,101 @@
 >  
-> -#define O2_PLL_WDT_CONTROL1	0x1CC
-> +#define O2_PLL_DLL_WDT_CONTROL1	0x1CC
->  #define  O2_PLL_FORCE_ACTIVE	BIT(18)
->  #define  O2_PLL_LOCK_STATUS	BIT(14)
->  #define  O2_PLL_SOFT_RESET	BIT(12)
-> @@ -316,23 +316,23 @@ static void sdhci_o2_enable_internal_clock(struct sdhci_host *host)
->  	u32 scratch32;
+>  #define O2_SD_DETECT_SETTING 0x324
 >  
->  	/* PLL software reset */
-> -	scratch32 = sdhci_readl(host, O2_PLL_WDT_CONTROL1);
+> +static void sdhci_o2_wait_card_detect_stable(struct sdhci_host *host)
+> +{
+> +	ktime_t timeout;
+> +	u32 scratch32;
+> +
+> +	/* Wait max 50 ms */
+> +	timeout = ktime_add_ms(ktime_get(), 50);
+> +	while (1) {
+> +		bool timedout = ktime_after(ktime_get(), timeout);
+> +
+> +		scratch32 = sdhci_readl(host, SDHCI_PRESENT_STATE);
+> +		if ((scratch32 & SDHCI_CARD_PRESENT) >> SDHCI_CARD_PRES_SHIFT
+> +		    == (scratch32 & SDHCI_CD_LVL) >> SDHCI_CD_LVL_SHIFT)
+> +			break;
+> +
+> +		if (timedout) {
+> +			pr_err("%s: Card Detect debounce never finished.\n",
+> +			       mmc_hostname(host->mmc));
+> +			sdhci_dumpregs(host);
+> +			return;
+> +		}
+> +		udelay(10);
+> +	}
+> +}
+> +
+> +static void sdhci_o2_enable_internal_clock(struct sdhci_host *host)
+> +{
+> +	ktime_t timeout;
+> +	u16 scratch;
+> +	u32 scratch32;
+> +
+> +	/* PLL software reset */
 > +	scratch32 = sdhci_readl(host, O2_PLL_DLL_WDT_CONTROL1);
->  	scratch32 |= O2_PLL_SOFT_RESET;
-> -	sdhci_writel(host, scratch32, O2_PLL_WDT_CONTROL1);
+> +	scratch32 |= O2_PLL_SOFT_RESET;
 > +	sdhci_writel(host, scratch32, O2_PLL_DLL_WDT_CONTROL1);
->  	udelay(1);
->  	scratch32 &= ~(O2_PLL_SOFT_RESET);
-> -	sdhci_writel(host, scratch32, O2_PLL_WDT_CONTROL1);
+> +	udelay(1);
+> +	scratch32 &= ~(O2_PLL_SOFT_RESET);
 > +	sdhci_writel(host, scratch32, O2_PLL_DLL_WDT_CONTROL1);
->  
->  	/* PLL force active */
->  	scratch32 |= O2_PLL_FORCE_ACTIVE;
-> -	sdhci_writel(host, scratch32, O2_PLL_WDT_CONTROL1);
+> +
+> +	/* PLL force active */
+> +	scratch32 |= O2_PLL_FORCE_ACTIVE;
 > +	sdhci_writel(host, scratch32, O2_PLL_DLL_WDT_CONTROL1);
->  
->  	/* Wait max 20 ms */
->  	timeout = ktime_add_ms(ktime_get(), 20);
->  	while (1) {
->  		bool timedout = ktime_after(ktime_get(), timeout);
->  
-> -		scratch = sdhci_readw(host, O2_PLL_WDT_CONTROL1);
+> +
+> +	/* Wait max 20 ms */
+> +	timeout = ktime_add_ms(ktime_get(), 20);
+> +	while (1) {
+> +		bool timedout = ktime_after(ktime_get(), timeout);
+> +
 > +		scratch = sdhci_readw(host, O2_PLL_DLL_WDT_CONTROL1);
->  		if (scratch & O2_PLL_LOCK_STATUS)
->  			break;
->  		if (timedout) {
-> @@ -350,9 +350,9 @@ static void sdhci_o2_enable_internal_clock(struct sdhci_host *host)
->  
->  out:
->  	/* Cancel PLL force active */
-> -	scratch32 = sdhci_readl(host, O2_PLL_WDT_CONTROL1);
+> +		if (scratch & O2_PLL_LOCK_STATUS)
+> +			break;
+> +		if (timedout) {
+> +			pr_err("%s: Internal clock never stabilised.\n",
+> +			       mmc_hostname(host->mmc));
+> +			sdhci_dumpregs(host);
+> +			goto out;
+> +		}
+> +		udelay(10);
+> +	}
+> +
+> +	/* Wait for card detect finish */
+> +	udelay(1);
+> +	sdhci_o2_wait_card_detect_stable(host);
+> +
+> +out:
+> +	/* Cancel PLL force active */
 > +	scratch32 = sdhci_readl(host, O2_PLL_DLL_WDT_CONTROL1);
->  	scratch32 &= ~O2_PLL_FORCE_ACTIVE;
-> -	sdhci_writel(host, scratch32, O2_PLL_WDT_CONTROL1);
+> +	scratch32 &= ~O2_PLL_FORCE_ACTIVE;
 > +	sdhci_writel(host, scratch32, O2_PLL_DLL_WDT_CONTROL1);
+> +}
+> +
+> +static int sdhci_o2_get_cd(struct mmc_host *mmc)
+> +{
+> +	struct sdhci_host *host = mmc_priv(mmc);
+> +
+> +	if (!(sdhci_readw(host, O2_PLL_DLL_WDT_CONTROL1) & O2_PLL_LOCK_STATUS))
+
+This patch should not make any changes except moving the functions.
+
+> +		sdhci_o2_enable_internal_clock(host);
+> +
+> +	return !!(sdhci_readl(host, SDHCI_PRESENT_STATE) & SDHCI_CARD_PRESENT);
+> +}
+> +
+> +static void o2_pci_set_baseclk(struct sdhci_pci_chip *chip, u32 value)
+> +{
+> +	u32 scratch_32;
+> +
+> +	pci_read_config_dword(chip->pdev,
+> +			      O2_SD_PLL_SETTING, &scratch_32);
+> +
+> +	scratch_32 &= 0x0000FFFF;
+> +	scratch_32 |= value;
+> +
+> +	pci_write_config_dword(chip->pdev,
+> +			       O2_SD_PLL_SETTING, scratch_32);
+> +}
+> +
+>  static void sdhci_o2_set_tuning_mode(struct sdhci_host *host)
+>  {
+>  	u16 reg;
+> @@ -136,19 +231,6 @@ static int sdhci_o2_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>  	return 0;
 >  }
 >  
->  static int sdhci_o2_get_cd(struct mmc_host *mmc)
+> -static void o2_pci_set_baseclk(struct sdhci_pci_chip *chip, u32 value)
+> -{
+> -	u32 scratch_32;
+> -	pci_read_config_dword(chip->pdev,
+> -			      O2_SD_PLL_SETTING, &scratch_32);
+> -
+> -	scratch_32 &= 0x0000FFFF;
+> -	scratch_32 |= value;
+> -
+> -	pci_write_config_dword(chip->pdev,
+> -			       O2_SD_PLL_SETTING, scratch_32);
+> -}
+> -
+>  static void o2_pci_led_enable(struct sdhci_pci_chip *chip)
+>  {
+>  	int ret;
+> @@ -284,86 +366,6 @@ static void sdhci_pci_o2_enable_msi(struct sdhci_pci_chip *chip,
+>  	host->irq = pci_irq_vector(chip->pdev, 0);
+>  }
+>  
+> -static void sdhci_o2_wait_card_detect_stable(struct sdhci_host *host)
+> -{
+> -	ktime_t timeout;
+> -	u32 scratch32;
+> -
+> -	/* Wait max 50 ms */
+> -	timeout = ktime_add_ms(ktime_get(), 50);
+> -	while (1) {
+> -		bool timedout = ktime_after(ktime_get(), timeout);
+> -
+> -		scratch32 = sdhci_readl(host, SDHCI_PRESENT_STATE);
+> -		if ((scratch32 & SDHCI_CARD_PRESENT) >> SDHCI_CARD_PRES_SHIFT
+> -		    == (scratch32 & SDHCI_CD_LVL) >> SDHCI_CD_LVL_SHIFT)
+> -			break;
+> -
+> -		if (timedout) {
+> -			pr_err("%s: Card Detect debounce never finished.\n",
+> -			       mmc_hostname(host->mmc));
+> -			sdhci_dumpregs(host);
+> -			return;
+> -		}
+> -		udelay(10);
+> -	}
+> -}
+> -
+> -static void sdhci_o2_enable_internal_clock(struct sdhci_host *host)
+> -{
+> -	ktime_t timeout;
+> -	u16 scratch;
+> -	u32 scratch32;
+> -
+> -	/* PLL software reset */
+> -	scratch32 = sdhci_readl(host, O2_PLL_DLL_WDT_CONTROL1);
+> -	scratch32 |= O2_PLL_SOFT_RESET;
+> -	sdhci_writel(host, scratch32, O2_PLL_DLL_WDT_CONTROL1);
+> -	udelay(1);
+> -	scratch32 &= ~(O2_PLL_SOFT_RESET);
+> -	sdhci_writel(host, scratch32, O2_PLL_DLL_WDT_CONTROL1);
+> -
+> -	/* PLL force active */
+> -	scratch32 |= O2_PLL_FORCE_ACTIVE;
+> -	sdhci_writel(host, scratch32, O2_PLL_DLL_WDT_CONTROL1);
+> -
+> -	/* Wait max 20 ms */
+> -	timeout = ktime_add_ms(ktime_get(), 20);
+> -	while (1) {
+> -		bool timedout = ktime_after(ktime_get(), timeout);
+> -
+> -		scratch = sdhci_readw(host, O2_PLL_DLL_WDT_CONTROL1);
+> -		if (scratch & O2_PLL_LOCK_STATUS)
+> -			break;
+> -		if (timedout) {
+> -			pr_err("%s: Internal clock never stabilised.\n",
+> -			       mmc_hostname(host->mmc));
+> -			sdhci_dumpregs(host);
+> -			goto out;
+> -		}
+> -		udelay(10);
+> -	}
+> -
+> -	/* Wait for card detect finish */
+> -	udelay(1);
+> -	sdhci_o2_wait_card_detect_stable(host);
+> -
+> -out:
+> -	/* Cancel PLL force active */
+> -	scratch32 = sdhci_readl(host, O2_PLL_DLL_WDT_CONTROL1);
+> -	scratch32 &= ~O2_PLL_FORCE_ACTIVE;
+> -	sdhci_writel(host, scratch32, O2_PLL_DLL_WDT_CONTROL1);
+> -}
+> -
+> -static int sdhci_o2_get_cd(struct mmc_host *mmc)
+> -{
+> -	struct sdhci_host *host = mmc_priv(mmc);
+> -
+> -	sdhci_o2_enable_internal_clock(host);
+> -
+> -	return !!(sdhci_readl(host, SDHCI_PRESENT_STATE) & SDHCI_CARD_PRESENT);
+> -}
+> -
+>  static void sdhci_o2_enable_clk(struct sdhci_host *host, u16 clk)
+>  {
+>  	/* Enable internal clock */
 > 
