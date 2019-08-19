@@ -1,43 +1,111 @@
-From: Jens Axboe <axboe-tSWWG44O7X1aa/9Udqfwiw@public.gmane.org>
-Subject: Re: [PATCH v9 3/5] block: sort headers on blk-setting.c
-Date: Mon, 19 Aug 2019 08:53:44 -0600
-Message-ID: <6ed6c62d-d773-71ec-382b-acd850e3dff1@kernel.dk>
-References: <1564129876-28261-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
-	<1564129876-28261-4-git-send-email-yoshihiro.shimoda.uh@renesas.com>
-	<20190816195026.GC6886@kunai>
+From: "Shirley Her (SC)" <shirley.her@bayhubtech.com>
+Subject: Subject: [PATCH V7 1/3] mmc: sdhci-pci-o2micro: Change O2 Host PLL
+ and DLL register name
+Date: Mon, 19 Aug 2019 22:08:58 +0000
+Message-ID: <1566252529-5074-1-git-send-email-shirley.her@bayhubtech.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-In-Reply-To: <20190816195026.GC6886@kunai>
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Language: en-US
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>, Yoshihiro Shimoda <yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
-Cc: linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, robin.murphy-5wv7dgnIgG8@public.gmane.org, hch-jcswGhMUV9g@public.gmane.org
+Sender: linux-kernel-owner@vger.kernel.org
+To: "adrian.hunter@intel.com" <adrian.hunter@intel.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Cc: "Chevron Li (WH)" <chevron.li@bayhubtech.com>, "Shaper Liu (WH)" <shaper.liu@bayhubtech.com>, "Louis Lu (TP)" <louis.lu@bayhubtech.com>, "Xiaoguang Yu (WH)" <xiaoguang.yu@bayhubtech.com>, "max.huang@bayhbutech.com" <max.huang@bayhbutech.com>, "Shirley Her (SC)" <shirley.her@bayhubtech.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 8/16/19 1:50 PM, Wolfram Sang wrote:
-> On Fri, Jul 26, 2019 at 05:31:14PM +0900, Yoshihiro Shimoda wrote:
->> This patch sorts the headers in alphabetic order to ease
->> the maintenance for this part.
->>
->> Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
->> Reviewed-by: Wolfram Sang <wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org>
->> Reviewed-by: Simon Horman <horms+renesas-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org>
->> ---
-> 
-> Jens, can we have your ack for this patch so Christoph can take this
-> series via his tree (also for patch 4/5)?
+Change O2 Host PLL and DLL register name
 
-Please just drop this patch.
+Signed-off-by:Shirley Her <shirley.her@bayhubtech.com>
+---
+change in v7:
+ 1. change subject
 
--- 
-Jens Axboe
+change in V6:
+ 1. change subject and commit message to match the patch
+ 2. change register name O2_PLL_WDT_CONTROL1 TO O2_PLL_DLL_WDT_CONTROL1
+
+change in V5:
+ 1. split 2 patches into 3 patches
+ 2. make dll_adjust_count start from 0
+ 3. fix ret overwritten issue
+ 4. use break instead of goto
+
+change in V4:
+ 1. add a bug fix for V3
+
+change in V3:
+ 1. add more explanation in dll_recovery and execute_tuning function
+ 2. move dll_adjust_count to O2_host struct
+ 3. fix some coding style error
+ 4. renaming O2_PLL_WDT_CONTROL1 TO O2_PLL_DLL_WDT_CONTROL1
+
+change in V2:
+ 1. use usleep_range instead of udelay
+ 2. move dll_adjust_count to sdhci-pci-o2micro.c
+
+chagne in V1:
+ 1. add error recovery function to relock DLL with correct phase
+ 2. retuning HS200 after DLL locked
+---
+ drivers/mmc/host/sdhci-pci-o2micro.c | 16 ++++++++--------
+ 1 file changed, 8 insertions(+), 8 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-=
+pci-o2micro.c
+index 9dc4548..b3a33d9 100644
+--- a/drivers/mmc/host/sdhci-pci-o2micro.c
++++ b/drivers/mmc/host/sdhci-pci-o2micro.c
+@@ -51,7 +51,7 @@
+ #define O2_SD_VENDOR_SETTING2	0x1C8
+ #define O2_SD_HW_TUNING_DISABLE	BIT(4)
+=20
+-#define O2_PLL_WDT_CONTROL1	0x1CC
++#define O2_PLL_DLL_WDT_CONTROL1	0x1CC
+ #define  O2_PLL_FORCE_ACTIVE	BIT(18)
+ #define  O2_PLL_LOCK_STATUS	BIT(14)
+ #define  O2_PLL_SOFT_RESET	BIT(12)
+@@ -316,23 +316,23 @@ static void sdhci_o2_enable_internal_clock(struct sdh=
+ci_host *host)
+ 	u32 scratch32;
+=20
+ 	/* PLL software reset */
+-	scratch32 =3D sdhci_readl(host, O2_PLL_WDT_CONTROL1);
++	scratch32 =3D sdhci_readl(host, O2_PLL_DLL_WDT_CONTROL1);
+ 	scratch32 |=3D O2_PLL_SOFT_RESET;
+-	sdhci_writel(host, scratch32, O2_PLL_WDT_CONTROL1);
++	sdhci_writel(host, scratch32, O2_PLL_DLL_WDT_CONTROL1);
+ 	udelay(1);
+ 	scratch32 &=3D ~(O2_PLL_SOFT_RESET);
+-	sdhci_writel(host, scratch32, O2_PLL_WDT_CONTROL1);
++	sdhci_writel(host, scratch32, O2_PLL_DLL_WDT_CONTROL1);
+=20
+ 	/* PLL force active */
+ 	scratch32 |=3D O2_PLL_FORCE_ACTIVE;
+-	sdhci_writel(host, scratch32, O2_PLL_WDT_CONTROL1);
++	sdhci_writel(host, scratch32, O2_PLL_DLL_WDT_CONTROL1);
+=20
+ 	/* Wait max 20 ms */
+ 	timeout =3D ktime_add_ms(ktime_get(), 20);
+ 	while (1) {
+ 		bool timedout =3D ktime_after(ktime_get(), timeout);
+=20
+-		scratch =3D sdhci_readw(host, O2_PLL_WDT_CONTROL1);
++		scratch =3D sdhci_readw(host, O2_PLL_DLL_WDT_CONTROL1);
+ 		if (scratch & O2_PLL_LOCK_STATUS)
+ 			break;
+ 		if (timedout) {
+@@ -350,9 +350,9 @@ static void sdhci_o2_enable_internal_clock(struct sdhci=
+_host *host)
+=20
+ out:
+ 	/* Cancel PLL force active */
+-	scratch32 =3D sdhci_readl(host, O2_PLL_WDT_CONTROL1);
++	scratch32 =3D sdhci_readl(host, O2_PLL_DLL_WDT_CONTROL1);
+ 	scratch32 &=3D ~O2_PLL_FORCE_ACTIVE;
+-	sdhci_writel(host, scratch32, O2_PLL_WDT_CONTROL1);
++	sdhci_writel(host, scratch32, O2_PLL_DLL_WDT_CONTROL1);
+ }
+=20
+ static int sdhci_o2_get_cd(struct mmc_host *mmc)
+--=20
+2.7.4
