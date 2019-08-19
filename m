@@ -1,16 +1,16 @@
-From: Robin Murphy <robin.murphy-5wv7dgnIgG8@public.gmane.org>
-Subject: Re: [PATCH v9 2/5] iommu/dma: Add a new dma_map_ops of
-	get_merge_boundary()
-Date: Mon, 19 Aug 2019 13:54:58 +0100
-Message-ID: <312d6e38-5143-fb07-1efb-01e60cafa2c9@arm.com>
+From: Jens Axboe <axboe-tSWWG44O7X1aa/9Udqfwiw@public.gmane.org>
+Subject: Re: [PATCH v9 3/5] block: sort headers on blk-setting.c
+Date: Mon, 19 Aug 2019 08:53:44 -0600
+Message-ID: <6ed6c62d-d773-71ec-382b-acd850e3dff1@kernel.dk>
 References: <1564129876-28261-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
-	<1564129876-28261-3-git-send-email-yoshihiro.shimoda.uh@renesas.com>
+	<1564129876-28261-4-git-send-email-yoshihiro.shimoda.uh@renesas.com>
+	<20190816195026.GC6886@kunai>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-In-Reply-To: <1564129876-28261-3-git-send-email-yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
-Content-Language: en-GB
+In-Reply-To: <20190816195026.GC6886@kunai>
+Content-Language: en-US
 List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
 	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
@@ -20,56 +20,24 @@ List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
 	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
 Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
 Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Yoshihiro Shimoda <yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, hch-jcswGhMUV9g@public.gmane.org, m.szyprowski-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, joro-zLv9SwRftAIdnm+yROfE0A@public.gmane.org, axboe-tSWWG44O7X1aa/9Udqfwiw@public.gmane.org
-Cc: linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>, Yoshihiro Shimoda <yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
+Cc: linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, robin.murphy-5wv7dgnIgG8@public.gmane.org, hch-jcswGhMUV9g@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 26/07/2019 09:31, Yoshihiro Shimoda wrote:
-> This patch adds a new dma_map_ops of get_merge_boundary() to
-> expose the DMA merge boundary if the domain type is IOMMU_DOMAIN_DMA.
+On 8/16/19 1:50 PM, Wolfram Sang wrote:
+> On Fri, Jul 26, 2019 at 05:31:14PM +0900, Yoshihiro Shimoda wrote:
+>> This patch sorts the headers in alphabetic order to ease
+>> the maintenance for this part.
+>>
+>> Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
+>> Reviewed-by: Wolfram Sang <wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org>
+>> Reviewed-by: Simon Horman <horms+renesas-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org>
+>> ---
 > 
-> Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
-> Reviewed-by: Simon Horman <horms+renesas-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org>
-> ---
->   drivers/iommu/dma-iommu.c | 11 +++++++++++
->   1 file changed, 11 insertions(+)
-> 
-> diff --git a/drivers/iommu/dma-iommu.c b/drivers/iommu/dma-iommu.c
-> index a7f9c3e..2992ce4 100644
-> --- a/drivers/iommu/dma-iommu.c
-> +++ b/drivers/iommu/dma-iommu.c
-> @@ -1085,6 +1085,16 @@ static int iommu_dma_get_sgtable(struct device *dev, struct sg_table *sgt,
->   	return ret;
->   }
->   
-> +static unsigned long iommu_dma_get_merge_boundary(struct device *dev)
-> +{
-> +	struct iommu_domain *domain = iommu_get_dma_domain(dev);
-> +
-> +	if (domain->type != IOMMU_DOMAIN_DMA)
+> Jens, can we have your ack for this patch so Christoph can take this
+> series via his tree (also for patch 4/5)?
 
-Did you actually need this check? In principle, if the default domain is 
-not of type IOMMU_DOMAIN_DMA then the device should be assigned 
-dma_direct_ops rather than iommu_dma_ops, thus it shouldn't be possible 
-to get here. If you did manage to hit a case where the domain type 
-didn't match the ops it would be interesting to figure out how.
+Please just drop this patch.
 
-Robin.
-
-> +		return 0;	/* can't merge */
-> +
-> +	return (1UL << __ffs(domain->pgsize_bitmap)) - 1;
-> +}
-> +
->   static const struct dma_map_ops iommu_dma_ops = {
->   	.alloc			= iommu_dma_alloc,
->   	.free			= iommu_dma_free,
-> @@ -1100,6 +1110,7 @@ static const struct dma_map_ops iommu_dma_ops = {
->   	.sync_sg_for_device	= iommu_dma_sync_sg_for_device,
->   	.map_resource		= iommu_dma_map_resource,
->   	.unmap_resource		= iommu_dma_unmap_resource,
-> +	.get_merge_boundary	= iommu_dma_get_merge_boundary,
->   };
->   
->   /*
-> 
+-- 
+Jens Axboe
