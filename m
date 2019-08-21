@@ -1,30 +1,18 @@
-From: Herbert Xu <herbert@gondor.apana.org.au>
+From: "boojin.kim" <boojin.kim@samsung.com>
 Subject: Re: [PATCH 6/9] dm crypt: support diskcipher
-Date: Wed, 21 Aug 2019 17:21:09 +1000
-Message-ID: <20190821072109.GA22686@gondor.apana.org.au>
-References: <CGME20190821064230epcas2p1ad7301f2b1331bcab3126e6e37c0e272@epcas2p1.samsung.com>
-	<004201d557eb$9b0a4410$d11ecc30$@samsung.com>
-	<cc484ef6-aacc-7864-0e6d-313b2e1c5d92@gmail.com>
+Date: Wed, 21 Aug 2019 16:54:32 +0900
+Message-ID: <001a01d557f5$ab0a4a40$011edec0$@samsung.com>
+References: <CGME20190821075432epcas2p3758bf7b07f209fb4094d79bf46c8f4e9@epcas2p3.samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <dm-devel-bounces@redhat.com>
-Content-Disposition: inline
-In-Reply-To: <cc484ef6-aacc-7864-0e6d-313b2e1c5d92@gmail.com>
-List-Unsubscribe: <https://www.redhat.com/mailman/options/dm-devel>,
-	<mailto:dm-devel-request@redhat.com?subject=unsubscribe>
-List-Archive: <https://www.redhat.com/archives/dm-devel>
-List-Post: <mailto:dm-devel@redhat.com>
-List-Help: <mailto:dm-devel-request@redhat.com?subject=help>
-List-Subscribe: <https://www.redhat.com/mailman/listinfo/dm-devel>,
-	<mailto:dm-devel-request@redhat.com?subject=subscribe>
-Sender: dm-devel-bounces@redhat.com
-Errors-To: dm-devel-bounces@redhat.com
-To: Milan Broz <gmazyland@gmail.com>
-Cc: 'Jens Axboe' <axboe@kernel.dk>, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Ulf Hansson' <ulf.hansson@linaro.org>, "'Theodore Y. Ts'o'" <tytso@mit.edu>, 'Mike Snitzer' <snitzer@redhat.com>, "boojin.kim" <boojin.kim@samsung.com>, 'Chao Yu' <chao@kernel.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 'Krzysztof Kozlowski' <krzk@kernel.org>, 'Eric Biggers' <ebiggers@kernel.org>, dm-devel@redhat.com, 'Kukjin Kim' <kgene@kernel.org>, 'Andreas Dilger' <adilger.kernel@dilger.ca>, linux-crypto@vger.kernel.org, 'Jaegeuk Kim' <jaegeuk@kernel.org>, linux-fscrypt@vger.kernel.org, "'David S. Miller'" <davem@davemloft.net>, 'Alasdair Kergon' <agk@redhat.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Language: ko
+Sender: linux-kernel-owner@vger.kernel.org
+Cc: 'Herbert Xu' <herbert@gondor.apana.org.au>, "'David S. Miller'" <davem@davemloft.net>, 'Eric Biggers' <ebiggers@kernel.org>, "'Theodore Y. Ts'o'" <tytso@mit.edu>, 'Chao Yu' <chao@kernel.org>, 'Jaegeuk Kim' <jaegeuk@kernel.org>, 'Andreas Dilger' <adilger.kernel@dilger.ca>'Theodore Ts'o' <tytso@mit.edu>, dm-devel@redhat.com, 'Mike Snitzer' <snitzer@redhat.com>, 'Alasdair Kergon' <agk@redhat.com>, 'Jens Axboe' <axboe@kernel.dk>, 'Krzysztof Kozlowski' <krzk@kernel.org>, 'Kukjin Kim' <kgene@kernel.org>, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Ulf Hansson' <ulf.hansson@linaro.org>, linux-crypto@vger.kernel.org, linux-kernel@vger.kernel.org, linux-fscrypt@vger.kernel.org, linux-mmc@vger.kernel.org, linux-samsung-soc
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, Aug 21, 2019 at 09:13:36AM +0200, Milan Broz wrote:
+On Wed, Aug 21, 2019 at 09:13:36AM +0200, Milan Broz wrote: 
 >
 > NACK.
 > 
@@ -39,14 +27,16 @@ On Wed, Aug 21, 2019 at 09:13:36AM +0200, Milan Broz wrote:
 > (software-based full disk encryption), it must not depend on
 > any underlying hardware.
 > Hardware can be of course used used for acceleration, but then
-> just implement proper crypto API module that accelerates particular cipher.
+> just implement proper crypto API module that accelerates particular
+cipher.
 
-I agree.  Please take a look at the recent ESSIV patches on
-linux-crypto and build multi-block operations on top of them
-which can then be implemented by the hardware.
+I'm sorry for breaking the basic rules of dm-crypt. 
+But, if I want to use the H/W crypto accelerator running in storage
+controller,
+I have to drop plaintext to bio.
+I think the "proper crypto API module" that you mentioned is diskcipher
+because diskcipher isn't only for FMP.
+Diskcipher is a crypto API that supports encryption on storage controllers.
 
-Cheers,
--- 
-Email: Herbert Xu <herbert@gondor.apana.org.au>
-Home Page: http://gondor.apana.org.au/~herbert/
-PGP Key: http://gondor.apana.org.au/~herbert/pubkey.txt
+Thanks
+Boojin Kim
