@@ -1,7 +1,7 @@
 From: Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
-Subject: [PATCH v2 1/7] clk: actions: Fix factor clk struct member access
-Date: Wed, 21 Aug 2019 08:10:08 +0530
-Message-ID: <20190821024014.14070-2-manivannan.sadhasivam@linaro.org>
+Subject: [PATCH v2 2/7] dt-bindings: mmc: Add Actions Semi SD/MMC/SDIO controller binding
+Date: Wed, 21 Aug 2019 08:10:09 +0530
+Message-ID: <20190821024014.14070-3-manivannan.sadhasivam@linaro.org>
 References: <20190821024014.14070-1-manivannan.sadhasivam@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20190821024014.14070-1-manivannan.sadhasivam@linaro.org>
@@ -10,53 +10,82 @@ To: ulf.hansson@linaro.org, afaerber@suse.de, robh+dt@kernel.org, sboyd@kernel.o
 Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, thomas.liau@actions-semi.com, linux-actions@lists.infradead.org, linus.walleij@linaro.org, linux-clk@vger.kernel.org, Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Since the helper "owl_factor_helper_round_rate" is shared between factor
-and composite clocks, using the factor clk specific helper function
-like "hw_to_owl_factor" to access its members will create issues when
-called from composite clk specific code. Hence, pass the "factor_hw"
-struct pointer directly instead of fetching it using factor clk specific
-helpers.
+Add devicetree YAML binding for Actions Semi Owl SoC's SD/MMC/SDIO
+controller.
 
-This issue has been observed when a composite clock like "sd0_clk" tried
-to call "owl_factor_helper_round_rate" resulting in pointer dereferencing
-error.
-
-While we are at it, let's rename the "clk_val_best" function to
-"owl_clk_val_best" since this is an owl SoCs specific helper.
-
-Fixes: 4bb78fc9744a ("clk: actions: Add factor clock support")
 Signed-off-by: Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
-Reviewed-by: Stephen Boyd <sboyd@kernel.org>
 ---
- drivers/clk/actions/owl-factor.c | 7 +++----
- 1 file changed, 3 insertions(+), 4 deletions(-)
+ .../devicetree/bindings/mmc/owl-mmc.yaml      | 62 +++++++++++++++++++
+ 1 file changed, 62 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/mmc/owl-mmc.yaml
 
-diff --git a/drivers/clk/actions/owl-factor.c b/drivers/clk/actions/owl-factor.c
-index 317d4a9e112e..f15e2621fa18 100644
---- a/drivers/clk/actions/owl-factor.c
-+++ b/drivers/clk/actions/owl-factor.c
-@@ -64,11 +64,10 @@ static unsigned int _get_table_val(const struct clk_factor_table *table,
- 	return val;
- }
- 
--static int clk_val_best(struct clk_hw *hw, unsigned long rate,
-+static int owl_clk_val_best(const struct owl_factor_hw *factor_hw,
-+			struct clk_hw *hw, unsigned long rate,
- 			unsigned long *best_parent_rate)
- {
--	struct owl_factor *factor = hw_to_owl_factor(hw);
--	struct owl_factor_hw *factor_hw = &factor->factor_hw;
- 	const struct clk_factor_table *clkt = factor_hw->table;
- 	unsigned long parent_rate, try_parent_rate, best = 0, cur_rate;
- 	unsigned long parent_rate_saved = *best_parent_rate;
-@@ -126,7 +125,7 @@ long owl_factor_helper_round_rate(struct owl_clk_common *common,
- 	const struct clk_factor_table *clkt = factor_hw->table;
- 	unsigned int val, mul = 0, div = 1;
- 
--	val = clk_val_best(&common->hw, rate, parent_rate);
-+	val = owl_clk_val_best(factor_hw, &common->hw, rate, parent_rate);
- 	_get_table_div_mul(clkt, val, &mul, &div);
- 
- 	return *parent_rate * mul / div;
+diff --git a/Documentation/devicetree/bindings/mmc/owl-mmc.yaml b/Documentation/devicetree/bindings/mmc/owl-mmc.yaml
+new file mode 100644
+index 000000000000..f7eff4c43017
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mmc/owl-mmc.yaml
+@@ -0,0 +1,62 @@
++# SPDX-License-Identifier: GPL-2.0
++%YAML 1.2
++---
++$id: http://devicetree.org/schemas/mmc/owl-mmc.yaml#
++$schema: http://devicetree.org/meta-schemas/core.yaml#
++
++title: Actions Semi Owl SoCs SD/MMC/SDIO controller
++
++allOf:
++  - $ref: "mmc-controller.yaml"
++
++maintainers:
++  - Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
++
++properties:
++  "#address-cells": true
++  "#size-cells": true
++
++  compatible:
++    const: actions,owl-mmc
++
++  reg:
++    maxItems: 1
++
++  interrupts:
++    maxItems: 1
++
++  clocks:
++    minItems: 1
++
++  resets:
++    maxItems: 1
++
++  dmas:
++    maxItems: 1
++
++  dma-names:
++    const: mmc
++
++required:
++  - compatible
++  - reg
++  - interrupts
++  - clocks
++  - resets
++  - dmas
++  - dma-names
++
++examples:
++  - |
++    mmc0: mmc@e0330000 {
++        compatible = "actions,owl-mmc";
++        reg = <0x0 0xe0330000 0x0 0x4000>;
++        interrupts = <0 42 4>;
++        clocks = <&cmu 56>;
++        resets = <&cmu 23>;
++        dmas = <&dma 2>;
++        dma-names = "mmc";
++        bus-width = <4>;
++    };
++
++...
 -- 
 2.17.1
