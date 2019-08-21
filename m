@@ -1,93 +1,114 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v1] Revert "mmc: sdhci-tegra: drop ->get_ro() implementation"
-Date: Wed, 21 Aug 2019 17:11:39 +0200
-Message-ID: <CAPDyKFqtAc_PK+yg4ev=-vm4-OPjhUdD2F9t+-ATJHO6y41G2w@mail.gmail.com>
-References: <20190808222430.28477-1-digetx@gmail.com>
+From: "Shirley Her (SC)" <shirley.her@bayhubtech.com>
+Subject: [PATCH V8 1/3] mmc: sdhci-pci-o2micro: Change O2 Host PLL and DLL
+ register name
+Date: Wed, 21 Aug 2019 18:38:30 +0000
+Message-ID: <1566412708-6130-1-git-send-email-shirley.her@bayhubtech.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190808222430.28477-1-digetx@gmail.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Dmitry Osipenko <digetx@gmail.com>
-Cc: Thierry Reding <thierry.reding@gmail.com>, Jonathan Hunter <jonathanh@nvidia.com>, Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-tegra <linux-tegra@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: "adrian.hunter@intel.com" <adrian.hunter@intel.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Cc: "Chevron Li (WH)" <chevron.li@bayhubtech.com>, "Shaper Liu (WH)" <shaper.liu@bayhubtech.com>, "Louis Lu (TP)" <louis.lu@bayhubtech.com>, "Max Huang (SC)" <max.huang@bayhubtech.com>, "Shirley Her (SC)" <shirley.her@bayhubtech.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, 9 Aug 2019 at 00:25, Dmitry Osipenko <digetx@gmail.com> wrote:
->
-> The WRITE_PROTECT bit is always in a "protected mode" on Tegra and
-> WP-GPIO state need to be used instead. In a case of the GPIO absence,
-> write-enable should be assumed. External SD is writable once again as
-> a result of this patch because the offending commit changed behaviour for
-> the case of a missing WP-GPIO to fall back to WRITE_PROTECT bit-checking,
-> which is incorrect for Tegra.
->
-> Cc: stable@vger.kernel.org # v5.1+
-> Fixes: e8391453e27f ("mmc: sdhci-tegra: drop ->get_ro() implementation")
-> Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
+Change O2 Host PLL and DLL register name
 
-Applied for fixes, thanks!
+Signed-off-by: Shirley Her <shirley.her@bayhubtech.com>
+---
+change in V8:
+ 1. fix patch format error
 
-Kind regards
-Uffe
+change in V7:
+ 1. change subject
 
+change in V6:
+ 1. change subject and commit message to match the patch
+ 2. change register name O2_PLL_WDT_CONTROL1 to O2_PLL_DLL_WDT_CONTROL1
 
-> ---
->  drivers/mmc/host/sdhci-tegra.c | 14 ++++++++++++++
->  1 file changed, 14 insertions(+)
->
-> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-> index f4d4761cf20a..02d8f524bb9e 100644
-> --- a/drivers/mmc/host/sdhci-tegra.c
-> +++ b/drivers/mmc/host/sdhci-tegra.c
-> @@ -258,6 +258,16 @@ static void tegra210_sdhci_writew(struct sdhci_host *host, u16 val, int reg)
->         }
->  }
->
-> +static unsigned int tegra_sdhci_get_ro(struct sdhci_host *host)
-> +{
-> +       /*
-> +        * Write-enable shall be assumed if GPIO is missing in a board's
-> +        * device-tree because SDHCI's WRITE_PROTECT bit doesn't work on
-> +        * Tegra.
-> +        */
-> +       return mmc_gpio_get_ro(host->mmc);
-> +}
-> +
->  static bool tegra_sdhci_is_pad_and_regulator_valid(struct sdhci_host *host)
->  {
->         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> @@ -1224,6 +1234,7 @@ static const struct cqhci_host_ops sdhci_tegra_cqhci_ops = {
->  };
->
->  static const struct sdhci_ops tegra_sdhci_ops = {
-> +       .get_ro     = tegra_sdhci_get_ro,
->         .read_w     = tegra_sdhci_readw,
->         .write_l    = tegra_sdhci_writel,
->         .set_clock  = tegra_sdhci_set_clock,
-> @@ -1279,6 +1290,7 @@ static const struct sdhci_tegra_soc_data soc_data_tegra30 = {
->  };
->
->  static const struct sdhci_ops tegra114_sdhci_ops = {
-> +       .get_ro     = tegra_sdhci_get_ro,
->         .read_w     = tegra_sdhci_readw,
->         .write_w    = tegra_sdhci_writew,
->         .write_l    = tegra_sdhci_writel,
-> @@ -1332,6 +1344,7 @@ static const struct sdhci_tegra_soc_data soc_data_tegra124 = {
->  };
->
->  static const struct sdhci_ops tegra210_sdhci_ops = {
-> +       .get_ro     = tegra_sdhci_get_ro,
->         .read_w     = tegra_sdhci_readw,
->         .write_w    = tegra210_sdhci_writew,
->         .write_l    = tegra_sdhci_writel,
-> @@ -1366,6 +1379,7 @@ static const struct sdhci_tegra_soc_data soc_data_tegra210 = {
->  };
->
->  static const struct sdhci_ops tegra186_sdhci_ops = {
-> +       .get_ro     = tegra_sdhci_get_ro,
->         .read_w     = tegra_sdhci_readw,
->         .write_l    = tegra_sdhci_writel,
->         .set_clock  = tegra_sdhci_set_clock,
-> --
-> 2.22.0
->
+change in V5:
+ 1. split 2 patches into 3 patches
+ 2. make dll_adjust_count start from 0
+ 3. fix ret overwritten issue
+ 4. use break instead of goto
+
+change in V4:
+ 1. add a bug fix for V3
+
+change in V3:
+ 1. add more explanation in dll_recovery and execute_tuning function
+ 2. move dll_adjust_count to O2_host struct
+ 3. fix some coding style error
+ 4. renaming O2_PLL_WDT_CONTROL1 TO O2_PLL_DLL_WDT_CONTROL1
+
+change in V2:
+ 1. use usleep_range instead of udelay
+ 2. move dll_adjust_count to sdhci-pci-o2micro.c
+
+chagne in V1:
+ 1. add error recovery function to relock DLL with correct phase
+ 2. retuning HS200 after DLL locked
+---
+ drivers/mmc/host/sdhci-pci-o2micro.c | 16 ++++++++--------
+ 1 file changed, 8 insertions(+), 8 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-=
+pci-o2micro.c
+index 9dc4548..b3a33d9 100644
+--- a/drivers/mmc/host/sdhci-pci-o2micro.c
++++ b/drivers/mmc/host/sdhci-pci-o2micro.c
+@@ -51,7 +51,7 @@
+ #define O2_SD_VENDOR_SETTING2	0x1C8
+ #define O2_SD_HW_TUNING_DISABLE	BIT(4)
+=20
+-#define O2_PLL_WDT_CONTROL1	0x1CC
++#define O2_PLL_DLL_WDT_CONTROL1	0x1CC
+ #define  O2_PLL_FORCE_ACTIVE	BIT(18)
+ #define  O2_PLL_LOCK_STATUS	BIT(14)
+ #define  O2_PLL_SOFT_RESET	BIT(12)
+@@ -316,23 +316,23 @@ static void sdhci_o2_enable_internal_clock(struct sdh=
+ci_host *host)
+ 	u32 scratch32;
+=20
+ 	/* PLL software reset */
+-	scratch32 =3D sdhci_readl(host, O2_PLL_WDT_CONTROL1);
++	scratch32 =3D sdhci_readl(host, O2_PLL_DLL_WDT_CONTROL1);
+ 	scratch32 |=3D O2_PLL_SOFT_RESET;
+-	sdhci_writel(host, scratch32, O2_PLL_WDT_CONTROL1);
++	sdhci_writel(host, scratch32, O2_PLL_DLL_WDT_CONTROL1);
+ 	udelay(1);
+ 	scratch32 &=3D ~(O2_PLL_SOFT_RESET);
+-	sdhci_writel(host, scratch32, O2_PLL_WDT_CONTROL1);
++	sdhci_writel(host, scratch32, O2_PLL_DLL_WDT_CONTROL1);
+=20
+ 	/* PLL force active */
+ 	scratch32 |=3D O2_PLL_FORCE_ACTIVE;
+-	sdhci_writel(host, scratch32, O2_PLL_WDT_CONTROL1);
++	sdhci_writel(host, scratch32, O2_PLL_DLL_WDT_CONTROL1);
+=20
+ 	/* Wait max 20 ms */
+ 	timeout =3D ktime_add_ms(ktime_get(), 20);
+ 	while (1) {
+ 		bool timedout =3D ktime_after(ktime_get(), timeout);
+=20
+-		scratch =3D sdhci_readw(host, O2_PLL_WDT_CONTROL1);
++		scratch =3D sdhci_readw(host, O2_PLL_DLL_WDT_CONTROL1);
+ 		if (scratch & O2_PLL_LOCK_STATUS)
+ 			break;
+ 		if (timedout) {
+@@ -350,9 +350,9 @@ static void sdhci_o2_enable_internal_clock(struct sdhci=
+_host *host)
+=20
+ out:
+ 	/* Cancel PLL force active */
+-	scratch32 =3D sdhci_readl(host, O2_PLL_WDT_CONTROL1);
++	scratch32 =3D sdhci_readl(host, O2_PLL_DLL_WDT_CONTROL1);
+ 	scratch32 &=3D ~O2_PLL_FORCE_ACTIVE;
+-	sdhci_writel(host, scratch32, O2_PLL_WDT_CONTROL1);
++	sdhci_writel(host, scratch32, O2_PLL_DLL_WDT_CONTROL1);
+ }
+=20
+ static int sdhci_o2_get_cd(struct mmc_host *mmc)
+--=20
+2.7.4
