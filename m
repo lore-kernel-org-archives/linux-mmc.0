@@ -1,7 +1,7 @@
 From: Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
-Subject: [PATCH v2 2/7] dt-bindings: mmc: Add Actions Semi SD/MMC/SDIO controller binding
-Date: Wed, 21 Aug 2019 08:10:09 +0530
-Message-ID: <20190821024014.14070-3-manivannan.sadhasivam@linaro.org>
+Subject: [PATCH v2 3/7] arm64: dts: actions: Add MMC controller support for S900
+Date: Wed, 21 Aug 2019 08:10:10 +0530
+Message-ID: <20190821024014.14070-4-manivannan.sadhasivam@linaro.org>
 References: <20190821024014.14070-1-manivannan.sadhasivam@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20190821024014.14070-1-manivannan.sadhasivam@linaro.org>
@@ -10,82 +10,75 @@ To: ulf.hansson@linaro.org, afaerber@suse.de, robh+dt@kernel.org, sboyd@kernel.o
 Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, thomas.liau@actions-semi.com, linux-actions@lists.infradead.org, linus.walleij@linaro.org, linux-clk@vger.kernel.org, Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Add devicetree YAML binding for Actions Semi Owl SoC's SD/MMC/SDIO
-controller.
+Add MMC controller support for Actions Semi S900 SoC. There are 4 MMC
+controllers in this SoC which can be used for accessing SD/MMC/SDIO cards.
 
 Signed-off-by: Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
 ---
- .../devicetree/bindings/mmc/owl-mmc.yaml      | 62 +++++++++++++++++++
- 1 file changed, 62 insertions(+)
- create mode 100644 Documentation/devicetree/bindings/mmc/owl-mmc.yaml
+ arch/arm64/boot/dts/actions/s900.dtsi | 45 +++++++++++++++++++++++++++
+ 1 file changed, 45 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/mmc/owl-mmc.yaml b/Documentation/devicetree/bindings/mmc/owl-mmc.yaml
-new file mode 100644
-index 000000000000..f7eff4c43017
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/owl-mmc.yaml
-@@ -0,0 +1,62 @@
-+# SPDX-License-Identifier: GPL-2.0
-+%YAML 1.2
-+---
-+$id: http://devicetree.org/schemas/mmc/owl-mmc.yaml#
-+$schema: http://devicetree.org/meta-schemas/core.yaml#
+diff --git a/arch/arm64/boot/dts/actions/s900.dtsi b/arch/arm64/boot/dts/actions/s900.dtsi
+index df3a68a3ac97..eb35cf78ab73 100644
+--- a/arch/arm64/boot/dts/actions/s900.dtsi
++++ b/arch/arm64/boot/dts/actions/s900.dtsi
+@@ -4,6 +4,7 @@
+  */
+ 
+ #include <dt-bindings/clock/actions,s900-cmu.h>
++#include <dt-bindings/gpio/gpio.h>
+ #include <dt-bindings/interrupt-controller/arm-gic.h>
+ #include <dt-bindings/reset/actions,s900-reset.h>
+ 
+@@ -284,5 +285,49 @@
+ 			dma-requests = <46>;
+ 			clocks = <&cmu CLK_DMAC>;
+ 		};
 +
-+title: Actions Semi Owl SoCs SD/MMC/SDIO controller
++		mmc0: mmc@e0330000 {
++			compatible = "actions,owl-mmc";
++			reg = <0x0 0xe0330000 0x0 0x4000>;
++			interrupts = <GIC_SPI 42 IRQ_TYPE_LEVEL_HIGH>;
++			clocks = <&cmu CLK_SD0>;
++			resets = <&cmu RESET_SD0>;
++			dmas = <&dma 2>;
++			dma-names = "mmc";
++			status = "disabled";
++		};
 +
-+allOf:
-+  - $ref: "mmc-controller.yaml"
++		mmc1: mmc@e0334000 {
++			compatible = "actions,owl-mmc";
++			reg = <0x0 0xe0334000 0x0 0x4000>;
++			interrupts = <GIC_SPI 43 IRQ_TYPE_LEVEL_HIGH>;
++			clocks = <&cmu CLK_SD1>;
++			resets = <&cmu RESET_SD1>;
++			dmas = <&dma 3>;
++			dma-names = "mmc";
++			status = "disabled";
++		};
 +
-+maintainers:
-+  - Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
++		mmc2: mmc@e0338000 {
++			compatible = "actions,owl-mmc";
++			reg = <0x0 0xe0338000 0x0 0x4000>;
++			interrupts = <GIC_SPI 44 IRQ_TYPE_LEVEL_HIGH>;
++			clocks = <&cmu CLK_SD2>;
++			resets = <&cmu RESET_SD2>;
++			dmas = <&dma 4>;
++			dma-names = "mmc";
++			status = "disabled";
++		};
 +
-+properties:
-+  "#address-cells": true
-+  "#size-cells": true
-+
-+  compatible:
-+    const: actions,owl-mmc
-+
-+  reg:
-+    maxItems: 1
-+
-+  interrupts:
-+    maxItems: 1
-+
-+  clocks:
-+    minItems: 1
-+
-+  resets:
-+    maxItems: 1
-+
-+  dmas:
-+    maxItems: 1
-+
-+  dma-names:
-+    const: mmc
-+
-+required:
-+  - compatible
-+  - reg
-+  - interrupts
-+  - clocks
-+  - resets
-+  - dmas
-+  - dma-names
-+
-+examples:
-+  - |
-+    mmc0: mmc@e0330000 {
-+        compatible = "actions,owl-mmc";
-+        reg = <0x0 0xe0330000 0x0 0x4000>;
-+        interrupts = <0 42 4>;
-+        clocks = <&cmu 56>;
-+        resets = <&cmu 23>;
-+        dmas = <&dma 2>;
-+        dma-names = "mmc";
-+        bus-width = <4>;
-+    };
-+
-+...
++		mmc3: mmc@e033c000 {
++			compatible = "actions,owl-mmc";
++			reg = <0x0 0xe033c000 0x0 0x4000>;
++			interrupts = <GIC_SPI 62 IRQ_TYPE_LEVEL_HIGH>;
++			clocks = <&cmu CLK_SD3>;
++			resets = <&cmu RESET_SD3>;
++			dmas = <&dma 46>;
++			dma-names = "mmc";
++			status = "disabled";
++		};
+ 	};
+ };
 -- 
 2.17.1
