@@ -1,42 +1,93 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: fix controller busy issue and add 24bits segment support
-Date: Wed, 21 Aug 2019 17:07:17 +0200
-Message-ID: <CAPDyKFofoJKqnchJT-Bty9MMLDviiBWupf+MPmMtv+mRemVXLw@mail.gmail.com>
-References: <1558252637-10556-1-git-send-email-chaotian.jing@mediatek.com> <1559438591.25015.0.camel@mhfsdcap03>
+Subject: Re: [PATCH v1] Revert "mmc: sdhci-tegra: drop ->get_ro() implementation"
+Date: Wed, 21 Aug 2019 17:11:39 +0200
+Message-ID: <CAPDyKFqtAc_PK+yg4ev=-vm4-OPjhUdD2F9t+-ATJHO6y41G2w@mail.gmail.com>
+References: <20190808222430.28477-1-digetx@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1559438591.25015.0.camel@mhfsdcap03>
+In-Reply-To: <20190808222430.28477-1-digetx@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Chaotian Jing <chaotian.jing@mediatek.com>
-Cc: srv_heupstream <srv_heupstream@mediatek.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-mediatek@lists.infradead.org, Matthias Brugger <matthias.bgg@gmail.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>
+To: Dmitry Osipenko <digetx@gmail.com>
+Cc: Thierry Reding <thierry.reding@gmail.com>, Jonathan Hunter <jonathanh@nvidia.com>, Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-tegra <linux-tegra@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Sun, 2 Jun 2019 at 03:23, Chaotian Jing <chaotian.jing@mediatek.com> wrote:
+On Fri, 9 Aug 2019 at 00:25, Dmitry Osipenko <digetx@gmail.com> wrote:
 >
-> Hi Ulf,
+> The WRITE_PROTECT bit is always in a "protected mode" on Tegra and
+> WP-GPIO state need to be used instead. In a case of the GPIO absence,
+> write-enable should be assumed. External SD is writable once again as
+> a result of this patch because the offending commit changed behaviour for
+> the case of a missing WP-GPIO to fall back to WRITE_PROTECT bit-checking,
+> which is incorrect for Tegra.
 >
-> Gentle ping for this patch.
+> Cc: stable@vger.kernel.org # v5.1+
+> Fixes: e8391453e27f ("mmc: sdhci-tegra: drop ->get_ro() implementation")
+> Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
 
-For some reason these patches didn't reach the patchtracker, hence I
-have just not seen them.
-
-Could you please re-post this so we can get this merged?
+Applied for fixes, thanks!
 
 Kind regards
 Uffe
 
+
+> ---
+>  drivers/mmc/host/sdhci-tegra.c | 14 ++++++++++++++
+>  1 file changed, 14 insertions(+)
 >
-> On Sun, 2019-05-19 at 15:57 +0800, Chaotian Jing wrote:
-> > the below 2 patches fix controller busy issue when plug out SD card
-> > and add 24bits segment size support.
-> >
-> > Chaotian Jing (2):
-> >   mmc: mediatek: fix controller busy when plug out SD
-> >   mmc: mediatek: support 24bits segment size
-> >
-> >  drivers/mmc/host/mtk-sd.c | 24 ++++++++++++++++++------
-> >  1 file changed, 18 insertions(+), 6 deletions(-)
-> >
+> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+> index f4d4761cf20a..02d8f524bb9e 100644
+> --- a/drivers/mmc/host/sdhci-tegra.c
+> +++ b/drivers/mmc/host/sdhci-tegra.c
+> @@ -258,6 +258,16 @@ static void tegra210_sdhci_writew(struct sdhci_host *host, u16 val, int reg)
+>         }
+>  }
 >
+> +static unsigned int tegra_sdhci_get_ro(struct sdhci_host *host)
+> +{
+> +       /*
+> +        * Write-enable shall be assumed if GPIO is missing in a board's
+> +        * device-tree because SDHCI's WRITE_PROTECT bit doesn't work on
+> +        * Tegra.
+> +        */
+> +       return mmc_gpio_get_ro(host->mmc);
+> +}
+> +
+>  static bool tegra_sdhci_is_pad_and_regulator_valid(struct sdhci_host *host)
+>  {
+>         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> @@ -1224,6 +1234,7 @@ static const struct cqhci_host_ops sdhci_tegra_cqhci_ops = {
+>  };
+>
+>  static const struct sdhci_ops tegra_sdhci_ops = {
+> +       .get_ro     = tegra_sdhci_get_ro,
+>         .read_w     = tegra_sdhci_readw,
+>         .write_l    = tegra_sdhci_writel,
+>         .set_clock  = tegra_sdhci_set_clock,
+> @@ -1279,6 +1290,7 @@ static const struct sdhci_tegra_soc_data soc_data_tegra30 = {
+>  };
+>
+>  static const struct sdhci_ops tegra114_sdhci_ops = {
+> +       .get_ro     = tegra_sdhci_get_ro,
+>         .read_w     = tegra_sdhci_readw,
+>         .write_w    = tegra_sdhci_writew,
+>         .write_l    = tegra_sdhci_writel,
+> @@ -1332,6 +1344,7 @@ static const struct sdhci_tegra_soc_data soc_data_tegra124 = {
+>  };
+>
+>  static const struct sdhci_ops tegra210_sdhci_ops = {
+> +       .get_ro     = tegra_sdhci_get_ro,
+>         .read_w     = tegra_sdhci_readw,
+>         .write_w    = tegra210_sdhci_writew,
+>         .write_l    = tegra_sdhci_writel,
+> @@ -1366,6 +1379,7 @@ static const struct sdhci_tegra_soc_data soc_data_tegra210 = {
+>  };
+>
+>  static const struct sdhci_ops tegra186_sdhci_ops = {
+> +       .get_ro     = tegra_sdhci_get_ro,
+>         .read_w     = tegra_sdhci_readw,
+>         .write_l    = tegra_sdhci_writel,
+>         .set_clock  = tegra_sdhci_set_clock,
+> --
+> 2.22.0
 >
