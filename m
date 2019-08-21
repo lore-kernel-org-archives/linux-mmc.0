@@ -1,45 +1,44 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH V5 3/4] PCI: Add Genesys Logic, Inc. Vendor ID
-Date: Wed, 21 Aug 2019 15:05:00 +0300
-Message-ID: <f1975e6e-b7fe-3fb0-bbd9-256462d686c8@intel.com>
-References: <20190820020650.8334-1-benchuanggli@gmail.com>
+From: Jens Axboe <axboe@kernel.dk>
+Subject: Re: [PATCH 5/9] block: support diskcipher
+Date: Wed, 21 Aug 2019 06:09:50 -0600
+Message-ID: <6ea5e5db-4dd4-719f-3b3e-b89099636ea6@kernel.dk>
+References: <CGME20190821064226epcas2p2835b8a9084988b79107e54abfc5e7dab@epcas2p2.samsung.com>
+ <004101d557eb$98b00060$ca100120$@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190820020650.8334-1-benchuanggli@gmail.com>
+In-Reply-To: <004101d557eb$98b00060$ca100120$@samsung.com>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ben Chuang <benchuanggli@gmail.com>, ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, johnsonm@danlj.org, ben.chuang@genesyslogic.com.tw
+To: "boojin.kim" <boojin.kim@samsung.com>, linux-block@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: 'Herbert Xu' <herbert@gondor.apana.org.au>, "'David S. Miller'" <davem@davemloft.net>, 'Eric Biggers' <ebiggers@kernel.org>, "'Theodore Y. Ts'o'" <tytso@mit.edu>, 'Chao Yu' <chao@kernel.org>, 'Jaegeuk Kim' <jaegeuk@kernel.org>, 'Andreas Dilger' <adilger.kernel@dilger.ca>, dm-devel@redhat.com, 'Mike Snitzer' <snitzer@redhat.com>, 'Alasdair Kergon' <agk@redhat.com>, 'Krzysztof Kozlowski' <krzk@kernel.org>, 'Kukjin Kim' <kgene@kernel.org>, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Ulf Hansson' <ulf.hansson@linaro.org>, linux-crypto@vger.kernel.org, linux-fscrypt@vger.kernel.org, linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, linux-ext4@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net, linux-arm-kernel@lists.infradead.org, linux-fsdevel@vger.kerne
 List-Id: linux-mmc@vger.kernel.org
 
-On 20/08/19 5:06 AM, Ben Chuang wrote:
-> From: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+On 8/21/19 12:42 AM, boojin.kim wrote:
+> This patch supports crypto information to be maintained via BIO
+> and passed to the storage driver.
 > 
-> Add the Genesys Logic, Inc. vendor ID to pci_ids.h.
+> To do this, 'bi_aux_private', 'REQ_CYPTE' and 'bi_dun' are added
+> to the block layer.
 > 
-> Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
-> Co-developed-by: Michael K Johnson <johnsonm@danlj.org>
-> Signed-off-by: Michael K Johnson <johnsonm@danlj.org>
+> 'bi_aux_private' is added for loading additional private information into
+> BIO.
+> 'REQ_CRYPT' is added to distinguish that bi_aux_private is being used
+> for diskcipher.
+> F2FS among encryption users uses DUN(device unit number) as
+> the IV(initial vector) for cryptographic operations.
+> DUN is stored in 'bi_dun' of bi_iter as a specific value for each BIO.
+> 
+> Before attempting to merge the two BIOs, the operation is also added to
+> verify that the crypto information contained in two BIOs is consistent.
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+This isn't going to happen. With this, and the inline encryption
+proposed by Google, we'll bloat the bio even more. At least the Google
+approach didn't include bio iter changes as well.
 
-> ---
->  include/linux/pci_ids.h | 2 ++
->  1 file changed, 2 insertions(+)
-> 
-> diff --git a/include/linux/pci_ids.h b/include/linux/pci_ids.h
-> index 70e86148cb1e..4f7e12772a14 100644
-> --- a/include/linux/pci_ids.h
-> +++ b/include/linux/pci_ids.h
-> @@ -2403,6 +2403,8 @@
->  #define PCI_DEVICE_ID_RDC_R6061		0x6061
->  #define PCI_DEVICE_ID_RDC_D1010		0x1010
->  
-> +#define PCI_VENDOR_ID_GLI		0x17a0
-> +
->  #define PCI_VENDOR_ID_LENOVO		0x17aa
->  
->  #define PCI_VENDOR_ID_QCOM		0x17cb
-> 
+Please work it out between yourselves so we can have a single, clean
+abstraction that works for both.
+
+-- 
+Jens Axboe
