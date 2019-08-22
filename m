@@ -1,122 +1,157 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH V8 1/3] mmc: sdhci-pci-o2micro: Change O2 Host PLL and DLL
- register name
-Date: Thu, 22 Aug 2019 10:35:15 +0200
-Message-ID: <CAPDyKFoyvT-nvU+rng7y=MitzuPfd3HdJ+SZNm4tPhkb-ER=nA@mail.gmail.com>
-References: <1566412708-6130-1-git-send-email-shirley.her@bayhubtech.com>
+From: Krzysztof Kozlowski <krzk@kernel.org>
+Subject: Re: [PATCH 1/9] crypt: Add diskcipher
+Date: Thu, 22 Aug 2019 10:37:26 +0200
+Message-ID: <CAJKOXPdK3ZzQXjzPZLzu5q0HZsL1vohQ4UxYTONcWdtDbEe2ng@mail.gmail.com>
+References: <CGME20190821064211epcas2p43ed73f4fd126bcc5b470c9136db6aabc@epcas2p4.samsung.com>
+ <003d01d557eb$8f6ca210$ae45e630$@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1566412708-6130-1-git-send-email-shirley.her@bayhubtech.com>
+In-Reply-To: <003d01d557eb$8f6ca210$ae45e630$@samsung.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: "Shirley Her (SC)" <shirley.her@bayhubtech.com>
-Cc: "adrian.hunter@intel.com" <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Chevron Li (WH)" <chevron.li@bayhubtech.com>, "Shaper Liu (WH)" <shaper.liu@bayhubtech.com>, "Louis Lu (TP)" <louis.lu@bayhubtech.com>, "Max Huang (SC)" <max.huang@bayhubtech.com>
+To: "boojin.kim" <boojin.kim@samsung.com>
+Cc: Herbert Xu <herbert@gondor.apana.org.au>, "David S. Miller" <davem@davemloft.net>, linux-crypto@vger.kernel.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Eric Biggers <ebiggers@kernel.org>, "Theodore Y. Ts'o" <tytso@mit.edu>, Chao Yu <chao@kernel.org>, Jaegeuk Kim <jaegeuk@kernel.org>, Andreas Dilger <adilger.kernel@dilger.ca>, dm-devel@redhat.com, Mike Snitzer <snitzer@redhat.com>, Alasdair Kergon <agk@redhat.com>, Jens Axboe <axboe@kernel.dk>, Kukjin Kim <kgene@kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-fscrypt@vger.kernel.org, linux-mmc@vger.kernel.org, "linux-samsung-soc@vger.kernel.org" <linux-samsung-soc@vger.kernel.org>, linux-block@vger.kernel.org, linux-ext4@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, 21 Aug 2019 at 20:38, Shirley Her (SC)
-<shirley.her@bayhubtech.com> wrote:
+On Wed, 21 Aug 2019 at 08:42, boojin.kim <boojin.kim@samsung.com> wrote:
 >
-> Change O2 Host PLL and DLL register name
+> Diskcipher supports cryptographic operations of inline crypto engines like
+> FMP. Inline crypto engine refers to hardware and solutions implemented
+> to encrypt data stored in storage device.
 >
-> Signed-off-by: Shirley Her <shirley.her@bayhubtech.com>
-
-It seems like you managed to post the version 8, two times. Is there
-any difference? Which one should we review?
-
-Kind regards
-Uffe
-
+> When encrypting using the FMP, Additional control is required
+> to carry and maintain the crypto information between
+> the encryption user(fscrypt, DM-crypt) and FMP driver.
+> Diskcipher provides this control.
+>
+> Diskcipher is a symmetric key cipher in linux crypto API to support FMP.
+> FMP are registered with the cihper algorithm that uses diskcipher.
+>
+> Diskcipher has three major steps.
+> The first step is to assign a cipher and set the key.
+> The second step is to pass the cipher through the BIO to the storage
+> driver.
+> The third step is to get the cipher from BIO and request a crypt
+> to FMP algorithm.
+>
+> In the first step, encryption users such as fscrypt or dm-crypt
+> allocate/release a diskcipher and set key into the diskcipher.
+> Diskcipher provides allocate(), free(), and setkey() that are similar
+> to existing ciphers.
+>
+> In the second step, BIO is used to pass the diskcipher to the storage
+> driver.
+> The BIO submitters such as ext4, f2fs and DM-crypt set diskcipher to BIO.
+> Diskcipher provides the set () API for this.
+>
+> In the third step, the storage driver extracts the diskcipher from the BIO
+> and requests the actual encryption behavior to inline crypto engine driver.
+> Diskcipher provides get() and crypt() APIs for this.
+>
+> Cc: Herbert Xu <herbert@gondor.apana.org.au>
+> Cc: David S. Miller <davem@davemloft.net>
+> Signed-off-by: Boojin Kim <boojin.kim@samsung.com>
 > ---
-> change in V8:
->  1. fix patch format error
+>  crypto/Kconfig              |   9 ++
+>  crypto/Makefile             |   1 +
+>  crypto/diskcipher.c         | 349
+> ++++++++++++++++++++++++++++++++++++++++++++
+>  crypto/testmgr.c            | 157 ++++++++++++++++++++
+>  include/crypto/diskcipher.h | 245 +++++++++++++++++++++++++++++++
+>  include/linux/crypto.h      |   1 +
+>  6 files changed, 762 insertions(+)
+>  create mode 100644 crypto/diskcipher.c
+>  create mode 100644 include/crypto/diskcipher.h
 >
-> change in V7:
->  1. change subject
+> diff --git a/crypto/Kconfig b/crypto/Kconfig
+> index 455a335..382d43a 100644
+> --- a/crypto/Kconfig
+> +++ b/crypto/Kconfig
+> @@ -1636,6 +1636,15 @@ config CRYPTO_TWOFISH_AVX_X86_64
+>           See also:
+>           <http://www.schneier.com/twofish.html>
 >
-> change in V6:
->  1. change subject and commit message to match the patch
->  2. change register name O2_PLL_WDT_CONTROL1 to O2_PLL_DLL_WDT_CONTROL1
+> +config CRYPTO_DISKCIPHER
+> +       bool "Diskcipher support"
+> +       default n
+> +       help
+> +         Disk cipher algorithm
+> +
+> +         This cipher supports the crypt operation of the block host device
+> +         that has inline crypto engine.
+> +
+>  comment "Compression"
 >
-> change in V5:
->  1. split 2 patches into 3 patches
->  2. make dll_adjust_count start from 0
->  3. fix ret overwritten issue
->  4. use break instead of goto
+>  config CRYPTO_DEFLATE
+> diff --git a/crypto/Makefile b/crypto/Makefile
+> index 0d2cdd5..71df76a 100644
+> --- a/crypto/Makefile
+> +++ b/crypto/Makefile
+> @@ -165,6 +165,7 @@ obj-$(CONFIG_CRYPTO_USER_API_AEAD) += algif_aead.o
+>  obj-$(CONFIG_CRYPTO_ZSTD) += zstd.o
+>  obj-$(CONFIG_CRYPTO_OFB) += ofb.o
+>  obj-$(CONFIG_CRYPTO_ECC) += ecc.o
+> +obj-$(CONFIG_CRYPTO_DISKCIPHER) += diskcipher.o
 >
-> change in V4:
->  1. add a bug fix for V3
->
-> change in V3:
->  1. add more explanation in dll_recovery and execute_tuning function
->  2. move dll_adjust_count to O2_host struct
->  3. fix some coding style error
->  4. renaming O2_PLL_WDT_CONTROL1 TO O2_PLL_DLL_WDT_CONTROL1
->
-> change in V2:
->  1. use usleep_range instead of udelay
->  2. move dll_adjust_count to sdhci-pci-o2micro.c
->
-> chagne in V1:
->  1. add error recovery function to relock DLL with correct phase
->  2. retuning HS200 after DLL locked
-> ---
->  drivers/mmc/host/sdhci-pci-o2micro.c | 16 ++++++++--------
->  1 file changed, 8 insertions(+), 8 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
-> index 9dc4548..b3a33d9 100644
-> --- a/drivers/mmc/host/sdhci-pci-o2micro.c
-> +++ b/drivers/mmc/host/sdhci-pci-o2micro.c
-> @@ -51,7 +51,7 @@
->  #define O2_SD_VENDOR_SETTING2  0x1C8
->  #define O2_SD_HW_TUNING_DISABLE        BIT(4)
->
-> -#define O2_PLL_WDT_CONTROL1    0x1CC
-> +#define O2_PLL_DLL_WDT_CONTROL1        0x1CC
->  #define  O2_PLL_FORCE_ACTIVE   BIT(18)
->  #define  O2_PLL_LOCK_STATUS    BIT(14)
->  #define  O2_PLL_SOFT_RESET     BIT(12)
-> @@ -316,23 +316,23 @@ static void sdhci_o2_enable_internal_clock(struct sdhci_host *host)
->         u32 scratch32;
->
->         /* PLL software reset */
-> -       scratch32 = sdhci_readl(host, O2_PLL_WDT_CONTROL1);
-> +       scratch32 = sdhci_readl(host, O2_PLL_DLL_WDT_CONTROL1);
->         scratch32 |= O2_PLL_SOFT_RESET;
-> -       sdhci_writel(host, scratch32, O2_PLL_WDT_CONTROL1);
-> +       sdhci_writel(host, scratch32, O2_PLL_DLL_WDT_CONTROL1);
->         udelay(1);
->         scratch32 &= ~(O2_PLL_SOFT_RESET);
-> -       sdhci_writel(host, scratch32, O2_PLL_WDT_CONTROL1);
-> +       sdhci_writel(host, scratch32, O2_PLL_DLL_WDT_CONTROL1);
->
->         /* PLL force active */
->         scratch32 |= O2_PLL_FORCE_ACTIVE;
-> -       sdhci_writel(host, scratch32, O2_PLL_WDT_CONTROL1);
-> +       sdhci_writel(host, scratch32, O2_PLL_DLL_WDT_CONTROL1);
->
->         /* Wait max 20 ms */
->         timeout = ktime_add_ms(ktime_get(), 20);
->         while (1) {
->                 bool timedout = ktime_after(ktime_get(), timeout);
->
-> -               scratch = sdhci_readw(host, O2_PLL_WDT_CONTROL1);
-> +               scratch = sdhci_readw(host, O2_PLL_DLL_WDT_CONTROL1);
->                 if (scratch & O2_PLL_LOCK_STATUS)
->                         break;
->                 if (timedout) {
-> @@ -350,9 +350,9 @@ static void sdhci_o2_enable_internal_clock(struct sdhci_host *host)
->
->  out:
->         /* Cancel PLL force active */
-> -       scratch32 = sdhci_readl(host, O2_PLL_WDT_CONTROL1);
-> +       scratch32 = sdhci_readl(host, O2_PLL_DLL_WDT_CONTROL1);
->         scratch32 &= ~O2_PLL_FORCE_ACTIVE;
-> -       sdhci_writel(host, scratch32, O2_PLL_WDT_CONTROL1);
-> +       sdhci_writel(host, scratch32, O2_PLL_DLL_WDT_CONTROL1);
->  }
->
->  static int sdhci_o2_get_cd(struct mmc_host *mmc)
-> --
-> 2.7.4
->
+>  ecdh_generic-y += ecdh.o
+>  ecdh_generic-y += ecdh_helper.o
+> diff --git a/crypto/diskcipher.c b/crypto/diskcipher.c
+> new file mode 100644
+> index 0000000..ffe95a5
+> --- /dev/null
+> +++ b/crypto/diskcipher.c
+> @@ -0,0 +1,349 @@
+> +// SPDX-License-Identifier: GPL-2.0-or-later
+> +/*
+> + * Copyright (C) 2017 Samsung Electronics Co., Ltd.
+> + *
+> + * This program is free software; you can redistribute it and/or modify
+> + * it under the terms of the GNU General Public License as published by
+> + * the Free Software Foundation; either version 2 of the License, or
+> + * (at your option) any later version.
+> + */
+> +
+> +#include <linux/kernel.h>
+> +#include <linux/blkdev.h>
+> +#include <linux/errno.h>
+> +#include <linux/module.h>
+> +#include <linux/seq_file.h>
+> +#include <linux/string.h>
+> +#include <linux/crypto.h>
+> +#include <crypto/algapi.h>
+> +#include <crypto/diskcipher.h>
+> +#include <linux/delay.h>
+> +#include <linux/mm_types.h>
+> +#include <linux/fs.h>
+> +#include <linux/fscrypt.h>
+> +
+> +#include "internal.h"
+> +
+> +static int crypto_diskcipher_check(struct bio *bio)
+> +{
+> +       struct crypto_diskcipher *ci = NULL;
+> +       struct inode *inode = NULL;
+> +       struct page *page = NULL;
+> +
+> +       if (!bio) {
+> +               pr_err("%s: doesn't exist bio\n", __func__);
+> +               return 0;
+> +       }
+> +
+> +       /* enc without fscrypt */
+> +       ci = bio->bi_aux_private;
+> +       if (!ci->inode)
+> +               return 0;
+> +       if (ci->algo == 0)
+> +               return 0;
+> +
+> +       page = bio->bi_io_vec[0].bv_page;
+> +       if (!page || PageAnon(page) || !page->mapping ||
+> !page->mapping->host)
+
+Your patch looks corrupted - wrapped by mailer. The easiest way
+usually is to use git format-patch and git send-email - then you do
+not have to worry about formatting etc.
+
+Best regards,
+Krzysztof
