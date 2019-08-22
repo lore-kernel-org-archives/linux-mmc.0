@@ -1,61 +1,98 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH RFC v1 2/2] mmc: host: meson-mx-sdhc: new driver for the
- Amlogic Meson SDHC host
-Date: Thu, 22 Aug 2019 15:52:24 +0200
-Message-ID: <CAPDyKFoFQ_QvHD-+Mg_VAR5rqs3CM_h7dw25p81JTzE1Yz7d1A@mail.gmail.com>
-References: <20190708173330.13217-1-martin.blumenstingl@googlemail.com> <20190708173330.13217-3-martin.blumenstingl@googlemail.com>
+From: "Shirley Her (SC)" <shirley.her@bayhubtech.com>
+Subject: RE: [PATCH V8 1/3] mmc: sdhci-pci-o2micro: Change O2 Host PLL and DLL
+ register name
+Date: Thu, 22 Aug 2019 16:16:18 +0000
+Message-ID: <MWHPR16MB14555AB570D340E138FDAB1E8BA50@MWHPR16MB1455.namprd16.prod.outlook.com>
+References: <1566412708-6130-1-git-send-email-shirley.her@bayhubtech.com>
+ <CAPDyKFoyvT-nvU+rng7y=MitzuPfd3HdJ+SZNm4tPhkb-ER=nA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190708173330.13217-3-martin.blumenstingl@googlemail.com>
+In-Reply-To: <CAPDyKFoyvT-nvU+rng7y=MitzuPfd3HdJ+SZNm4tPhkb-ER=nA@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Cc: "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>, DTML <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, jianxin.pan@amlogic.com, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Mark Rutland <mark.rutland@arm.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "adrian.hunter@intel.com" <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Chevron Li (WH)" <chevron.li@bayhubtech.com>, "Shaper Liu (WH)" <shaper.liu@bayhubtech.com>, "Louis Lu (TP)" <louis.lu@bayhubtech.com>, "Max Huang (SC)" <max.huang@bayhubtech.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, 8 Jul 2019 at 19:33, Martin Blumenstingl
-<martin.blumenstingl@googlemail.com> wrote:
->
-> WiP - only partially working - see performance numbers.
->
-> Odroid-C1 eMMC (HS-200):
-> Amlogic's vendor driver @ Linux 3.10:
->   7781351936 bytes (7.8 GB) copied, 134.714 s, 57.8 MB/s
-> This driver:
->   7781351936 bytes (7.8 GB, 7.2 GiB) copied, 189.02 s, 41.2 MB/s
->
-> EC-100 eMMC (HS MMC):
-> Amlogic's vendor driver @ Linux 3.10:
->   15762194432 bytes (16 GB) copied, 422.967 s, 37.3 MB/s
-> This driver:
->   15762194432 bytes (16 GB, 15 GiB) copied, 9232.65 s, 1.7 MB/s
->
-> 1) Amlogic's vendor driver does some magic with the divider:
->       clk_div = input_rate / clk_ios - !(input_rate%clk_ios);
->       if (!(clk_div & 0x01)) // if even number, turn it to an odd one
->          clk_div++;
->    It's not clear to me whether what the reason behind this is, what is
->    supposed to be achieved with this?
->
-> 2) The hardcoded RX clock phases are taken from the vendor driver. It
->    seems that these are only valid when fclk_div3 is used as input
->    clock (however, there are four more inputs). It's not clear to me how
->    to calculate the RX clock phases in set_ios based on the input clock
->    and the ios rate.
->
-> 3) The hardware supports a timeout IRQ but the max_busy_timeout is not
->    documented anywhere.
->
-> Signed-off-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-
-Martin, overall this looks good to me. Once you moved from RFC to a
-formal patch I will check again, of course.
-
-There are a couple of calls to readl_poll_timeout(), for different
-reasons, that I have some questions about, but we can discuss those in
-the next step.
-
-[...]
-
-Kind regards
-Uffe
+U29ycnkgYWJvdXQgdGhlIGNvbmZ1c2lvbiBhbmQgdGhleSBhcmUgdGhlIHNhbWUsIHBsZWFzZSBy
+ZXZpZXcgdGhlIDJuZCBvbmUuIE9uZSBvZiB0aGUgZW1haWwgYWRkcmVzcyBpcyB3cm9uZyB3aGVu
+IEkgc2VuZCB0aGUgMXN0IG9uZS4NCg0KVGhhbmtzIGZvciB5b3VyIGhlbHAsDQpTaGlybGV5DQoN
+Ci0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBVbGYgSGFuc3NvbiBbbWFpbHRvOnVs
+Zi5oYW5zc29uQGxpbmFyby5vcmddIA0KU2VudDogVGh1cnNkYXksIEF1Z3VzdCAyMiwgMjAxOSAx
+OjM1IEFNDQpUbzogU2hpcmxleSBIZXIgKFNDKSA8c2hpcmxleS5oZXJAYmF5aHVidGVjaC5jb20+
+DQpDYzogYWRyaWFuLmh1bnRlckBpbnRlbC5jb207IGxpbnV4LW1tY0B2Z2VyLmtlcm5lbC5vcmc7
+IGxpbnV4LWtlcm5lbEB2Z2VyLmtlcm5lbC5vcmc7IENoZXZyb24gTGkgKFdIKSA8Y2hldnJvbi5s
+aUBiYXlodWJ0ZWNoLmNvbT47IFNoYXBlciBMaXUgKFdIKSA8c2hhcGVyLmxpdUBiYXlodWJ0ZWNo
+LmNvbT47IExvdWlzIEx1IChUUCkgPGxvdWlzLmx1QGJheWh1YnRlY2guY29tPjsgTWF4IEh1YW5n
+IChTQykgPG1heC5odWFuZ0BiYXlodWJ0ZWNoLmNvbT4NClN1YmplY3Q6IFJlOiBbUEFUQ0ggVjgg
+MS8zXSBtbWM6IHNkaGNpLXBjaS1vMm1pY3JvOiBDaGFuZ2UgTzIgSG9zdCBQTEwgYW5kIERMTCBy
+ZWdpc3RlciBuYW1lDQoNCk9uIFdlZCwgMjEgQXVnIDIwMTkgYXQgMjA6MzgsIFNoaXJsZXkgSGVy
+IChTQykgPHNoaXJsZXkuaGVyQGJheWh1YnRlY2guY29tPiB3cm90ZToNCj4NCj4gQ2hhbmdlIE8y
+IEhvc3QgUExMIGFuZCBETEwgcmVnaXN0ZXIgbmFtZQ0KPg0KPiBTaWduZWQtb2ZmLWJ5OiBTaGly
+bGV5IEhlciA8c2hpcmxleS5oZXJAYmF5aHVidGVjaC5jb20+DQoNCkl0IHNlZW1zIGxpa2UgeW91
+IG1hbmFnZWQgdG8gcG9zdCB0aGUgdmVyc2lvbiA4LCB0d28gdGltZXMuIElzIHRoZXJlIGFueSBk
+aWZmZXJlbmNlPyBXaGljaCBvbmUgc2hvdWxkIHdlIHJldmlldz8NCg0KS2luZCByZWdhcmRzDQpV
+ZmZlDQoNCj4gLS0tDQo+IGNoYW5nZSBpbiBWODoNCj4gIDEuIGZpeCBwYXRjaCBmb3JtYXQgZXJy
+b3INCj4NCj4gY2hhbmdlIGluIFY3Og0KPiAgMS4gY2hhbmdlIHN1YmplY3QNCj4NCj4gY2hhbmdl
+IGluIFY2Og0KPiAgMS4gY2hhbmdlIHN1YmplY3QgYW5kIGNvbW1pdCBtZXNzYWdlIHRvIG1hdGNo
+IHRoZSBwYXRjaCAgMi4gY2hhbmdlIA0KPiByZWdpc3RlciBuYW1lIE8yX1BMTF9XRFRfQ09OVFJP
+TDEgdG8gTzJfUExMX0RMTF9XRFRfQ09OVFJPTDENCj4NCj4gY2hhbmdlIGluIFY1Og0KPiAgMS4g
+c3BsaXQgMiBwYXRjaGVzIGludG8gMyBwYXRjaGVzDQo+ICAyLiBtYWtlIGRsbF9hZGp1c3RfY291
+bnQgc3RhcnQgZnJvbSAwICAzLiBmaXggcmV0IG92ZXJ3cml0dGVuIGlzc3VlICANCj4gNC4gdXNl
+IGJyZWFrIGluc3RlYWQgb2YgZ290bw0KPg0KPiBjaGFuZ2UgaW4gVjQ6DQo+ICAxLiBhZGQgYSBi
+dWcgZml4IGZvciBWMw0KPg0KPiBjaGFuZ2UgaW4gVjM6DQo+ICAxLiBhZGQgbW9yZSBleHBsYW5h
+dGlvbiBpbiBkbGxfcmVjb3ZlcnkgYW5kIGV4ZWN1dGVfdHVuaW5nIGZ1bmN0aW9uICANCj4gMi4g
+bW92ZSBkbGxfYWRqdXN0X2NvdW50IHRvIE8yX2hvc3Qgc3RydWN0ICAzLiBmaXggc29tZSBjb2Rp
+bmcgc3R5bGUgDQo+IGVycm9yICA0LiByZW5hbWluZyBPMl9QTExfV0RUX0NPTlRST0wxIFRPIE8y
+X1BMTF9ETExfV0RUX0NPTlRST0wxDQo+DQo+IGNoYW5nZSBpbiBWMjoNCj4gIDEuIHVzZSB1c2xl
+ZXBfcmFuZ2UgaW5zdGVhZCBvZiB1ZGVsYXkgIDIuIG1vdmUgZGxsX2FkanVzdF9jb3VudCB0byAN
+Cj4gc2RoY2ktcGNpLW8ybWljcm8uYw0KPg0KPiBjaGFnbmUgaW4gVjE6DQo+ICAxLiBhZGQgZXJy
+b3IgcmVjb3ZlcnkgZnVuY3Rpb24gdG8gcmVsb2NrIERMTCB3aXRoIGNvcnJlY3QgcGhhc2UgIDIu
+IA0KPiByZXR1bmluZyBIUzIwMCBhZnRlciBETEwgbG9ja2VkDQo+IC0tLQ0KPiAgZHJpdmVycy9t
+bWMvaG9zdC9zZGhjaS1wY2ktbzJtaWNyby5jIHwgMTYgKysrKysrKystLS0tLS0tLQ0KPiAgMSBm
+aWxlIGNoYW5nZWQsIDggaW5zZXJ0aW9ucygrKSwgOCBkZWxldGlvbnMoLSkNCj4NCj4gZGlmZiAt
+LWdpdCBhL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktcGNpLW8ybWljcm8uYyANCj4gYi9kcml2ZXJz
+L21tYy9ob3N0L3NkaGNpLXBjaS1vMm1pY3JvLmMNCj4gaW5kZXggOWRjNDU0OC4uYjNhMzNkOSAx
+MDA2NDQNCj4gLS0tIGEvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1wY2ktbzJtaWNyby5jDQo+ICsr
+KyBiL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktcGNpLW8ybWljcm8uYw0KPiBAQCAtNTEsNyArNTEs
+NyBAQA0KPiAgI2RlZmluZSBPMl9TRF9WRU5ET1JfU0VUVElORzIgIDB4MUM4DQo+ICAjZGVmaW5l
+IE8yX1NEX0hXX1RVTklOR19ESVNBQkxFICAgICAgICBCSVQoNCkNCj4NCj4gLSNkZWZpbmUgTzJf
+UExMX1dEVF9DT05UUk9MMSAgICAweDFDQw0KPiArI2RlZmluZSBPMl9QTExfRExMX1dEVF9DT05U
+Uk9MMSAgICAgICAgMHgxQ0MNCj4gICNkZWZpbmUgIE8yX1BMTF9GT1JDRV9BQ1RJVkUgICBCSVQo
+MTgpDQo+ICAjZGVmaW5lICBPMl9QTExfTE9DS19TVEFUVVMgICAgQklUKDE0KQ0KPiAgI2RlZmlu
+ZSAgTzJfUExMX1NPRlRfUkVTRVQgICAgIEJJVCgxMikNCj4gQEAgLTMxNiwyMyArMzE2LDIzIEBA
+IHN0YXRpYyB2b2lkIHNkaGNpX28yX2VuYWJsZV9pbnRlcm5hbF9jbG9jayhzdHJ1Y3Qgc2RoY2lf
+aG9zdCAqaG9zdCkNCj4gICAgICAgICB1MzIgc2NyYXRjaDMyOw0KPg0KPiAgICAgICAgIC8qIFBM
+TCBzb2Z0d2FyZSByZXNldCAqLw0KPiAtICAgICAgIHNjcmF0Y2gzMiA9IHNkaGNpX3JlYWRsKGhv
+c3QsIE8yX1BMTF9XRFRfQ09OVFJPTDEpOw0KPiArICAgICAgIHNjcmF0Y2gzMiA9IHNkaGNpX3Jl
+YWRsKGhvc3QsIE8yX1BMTF9ETExfV0RUX0NPTlRST0wxKTsNCj4gICAgICAgICBzY3JhdGNoMzIg
+fD0gTzJfUExMX1NPRlRfUkVTRVQ7DQo+IC0gICAgICAgc2RoY2lfd3JpdGVsKGhvc3QsIHNjcmF0
+Y2gzMiwgTzJfUExMX1dEVF9DT05UUk9MMSk7DQo+ICsgICAgICAgc2RoY2lfd3JpdGVsKGhvc3Qs
+IHNjcmF0Y2gzMiwgTzJfUExMX0RMTF9XRFRfQ09OVFJPTDEpOw0KPiAgICAgICAgIHVkZWxheSgx
+KTsNCj4gICAgICAgICBzY3JhdGNoMzIgJj0gfihPMl9QTExfU09GVF9SRVNFVCk7DQo+IC0gICAg
+ICAgc2RoY2lfd3JpdGVsKGhvc3QsIHNjcmF0Y2gzMiwgTzJfUExMX1dEVF9DT05UUk9MMSk7DQo+
+ICsgICAgICAgc2RoY2lfd3JpdGVsKGhvc3QsIHNjcmF0Y2gzMiwgTzJfUExMX0RMTF9XRFRfQ09O
+VFJPTDEpOw0KPg0KPiAgICAgICAgIC8qIFBMTCBmb3JjZSBhY3RpdmUgKi8NCj4gICAgICAgICBz
+Y3JhdGNoMzIgfD0gTzJfUExMX0ZPUkNFX0FDVElWRTsNCj4gLSAgICAgICBzZGhjaV93cml0ZWwo
+aG9zdCwgc2NyYXRjaDMyLCBPMl9QTExfV0RUX0NPTlRST0wxKTsNCj4gKyAgICAgICBzZGhjaV93
+cml0ZWwoaG9zdCwgc2NyYXRjaDMyLCBPMl9QTExfRExMX1dEVF9DT05UUk9MMSk7DQo+DQo+ICAg
+ICAgICAgLyogV2FpdCBtYXggMjAgbXMgKi8NCj4gICAgICAgICB0aW1lb3V0ID0ga3RpbWVfYWRk
+X21zKGt0aW1lX2dldCgpLCAyMCk7DQo+ICAgICAgICAgd2hpbGUgKDEpIHsNCj4gICAgICAgICAg
+ICAgICAgIGJvb2wgdGltZWRvdXQgPSBrdGltZV9hZnRlcihrdGltZV9nZXQoKSwgdGltZW91dCk7
+DQo+DQo+IC0gICAgICAgICAgICAgICBzY3JhdGNoID0gc2RoY2lfcmVhZHcoaG9zdCwgTzJfUExM
+X1dEVF9DT05UUk9MMSk7DQo+ICsgICAgICAgICAgICAgICBzY3JhdGNoID0gc2RoY2lfcmVhZHco
+aG9zdCwgTzJfUExMX0RMTF9XRFRfQ09OVFJPTDEpOw0KPiAgICAgICAgICAgICAgICAgaWYgKHNj
+cmF0Y2ggJiBPMl9QTExfTE9DS19TVEFUVVMpDQo+ICAgICAgICAgICAgICAgICAgICAgICAgIGJy
+ZWFrOw0KPiAgICAgICAgICAgICAgICAgaWYgKHRpbWVkb3V0KSB7DQo+IEBAIC0zNTAsOSArMzUw
+LDkgQEAgc3RhdGljIHZvaWQgc2RoY2lfbzJfZW5hYmxlX2ludGVybmFsX2Nsb2NrKHN0cnVjdCAN
+Cj4gc2RoY2lfaG9zdCAqaG9zdCkNCj4NCj4gIG91dDoNCj4gICAgICAgICAvKiBDYW5jZWwgUExM
+IGZvcmNlIGFjdGl2ZSAqLw0KPiAtICAgICAgIHNjcmF0Y2gzMiA9IHNkaGNpX3JlYWRsKGhvc3Qs
+IE8yX1BMTF9XRFRfQ09OVFJPTDEpOw0KPiArICAgICAgIHNjcmF0Y2gzMiA9IHNkaGNpX3JlYWRs
+KGhvc3QsIE8yX1BMTF9ETExfV0RUX0NPTlRST0wxKTsNCj4gICAgICAgICBzY3JhdGNoMzIgJj0g
+fk8yX1BMTF9GT1JDRV9BQ1RJVkU7DQo+IC0gICAgICAgc2RoY2lfd3JpdGVsKGhvc3QsIHNjcmF0
+Y2gzMiwgTzJfUExMX1dEVF9DT05UUk9MMSk7DQo+ICsgICAgICAgc2RoY2lfd3JpdGVsKGhvc3Qs
+IHNjcmF0Y2gzMiwgTzJfUExMX0RMTF9XRFRfQ09OVFJPTDEpOw0KPiAgfQ0KPg0KPiAgc3RhdGlj
+IGludCBzZGhjaV9vMl9nZXRfY2Qoc3RydWN0IG1tY19ob3N0ICptbWMpDQo+IC0tDQo+IDIuNy40
+DQo+DQo=
