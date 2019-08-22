@@ -1,23 +1,23 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v1 4/4] mmc: sdhci-of-esdhc: add erratum A011334 support
- in ls1028a 1.0 SoC
-Date: Thu, 22 Aug 2019 14:13:03 +0200
-Message-ID: <CAPDyKFpwGGPAShEoXPK8Ksg5FPEVrbD3-HfeTSMACPsDC_V5FA@mail.gmail.com>
-References: <20190814072649.8237-1-yinbo.zhu@nxp.com> <20190814072649.8237-4-yinbo.zhu@nxp.com>
+Subject: Re: [PATCH 2/2] mmc: jz4740: Drop dependency on arch header
+Date: Thu, 22 Aug 2019 14:13:15 +0200
+Message-ID: <CAPDyKFqMmCcsJi9r9j24wW9gOPsYr+t5TrryqpJ3=EH0ANwi9A@mail.gmail.com>
+References: <20190810121608.24145-1-paul@crapouillou.net> <20190810121608.24145-2-paul@crapouillou.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190814072649.8237-4-yinbo.zhu@nxp.com>
+In-Reply-To: <20190810121608.24145-2-paul@crapouillou.net>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Yinbo Zhu <yinbo.zhu@nxp.com>
-Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Adrian Hunter <adrian.hunter@intel.com>, Li Yang <leoyang.li@nxp.com>, Claudiu Manoil <claudiu.manoil@nxp.com>, Amit Jain <amit.jain_1@nxp.com>, Yangbo Lu <yangbo.lu@nxp.com>, Vabhav Sharma <vabhav.sharma@nxp.com>, Rajesh Bhagat <rajesh.bhagat@nxp.com>, Ashish Kumar <Ashish.Kumar@nxp.com>, DTML <devicetree@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Xiaobo Xie <xiaobo.xie@nxp.com>, Jiafei Pan <jiafei.pan@nxp.com>, Alison Wang <alison.wang@nxp.com>, Alex
+To: Paul Cercueil <paul@crapouillou.net>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, od@zcrc.me
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, 14 Aug 2019 at 09:24, Yinbo Zhu <yinbo.zhu@nxp.com> wrote:
+On Sat, 10 Aug 2019 at 14:16, Paul Cercueil <paul@crapouillou.net> wrote:
 >
-> This patch is to add erratum A011334 support in ls1028a 1.0 SoC
+> We don't need to set the 'slave_id' anymore - that field is never read
+> by the DMA driver.
 >
-> Signed-off-by: Yinbo Zhu <yinbo.zhu@nxp.com>
+> Signed-off-by: Paul Cercueil <paul@crapouillou.net>
 
 Applied for next, thanks!
 
@@ -26,21 +26,34 @@ Uffe
 
 
 > ---
->  drivers/mmc/host/sdhci-of-esdhc.c | 1 +
->  1 file changed, 1 insertion(+)
+>  drivers/mmc/host/jz4740_mmc.c | 4 ----
+>  1 file changed, 4 deletions(-)
 >
-> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-> index b16f7d440f78..eb2b290447fc 100644
-> --- a/drivers/mmc/host/sdhci-of-esdhc.c
-> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
-> @@ -1006,6 +1006,7 @@ static struct soc_device_attribute soc_incorrect_hostver[] = {
->  static struct soc_device_attribute soc_fixup_sdhc_clkdivs[] = {
->         { .family = "QorIQ LX2160A", .revision = "1.0", },
->         { .family = "QorIQ LX2160A", .revision = "2.0", },
-> +       { .family = "QorIQ LS1028A", .revision = "1.0", },
->         { },
->  };
+> diff --git a/drivers/mmc/host/jz4740_mmc.c b/drivers/mmc/host/jz4740_mmc.c
+> index 59f81e8afcce..7ff2034d739a 100644
+> --- a/drivers/mmc/host/jz4740_mmc.c
+> +++ b/drivers/mmc/host/jz4740_mmc.c
+> @@ -25,8 +25,6 @@
 >
+>  #include <asm/cacheflush.h>
+>
+> -#include <asm/mach-jz4740/dma.h>
+> -
+>  #define JZ_REG_MMC_STRPCL      0x00
+>  #define JZ_REG_MMC_STATUS      0x04
+>  #define JZ_REG_MMC_CLKRT       0x08
+> @@ -292,11 +290,9 @@ static int jz4740_mmc_start_dma_transfer(struct jz4740_mmc_host *host,
+>         if (data->flags & MMC_DATA_WRITE) {
+>                 conf.direction = DMA_MEM_TO_DEV;
+>                 conf.dst_addr = host->mem_res->start + JZ_REG_MMC_TXFIFO;
+> -               conf.slave_id = JZ4740_DMA_TYPE_MMC_TRANSMIT;
+>         } else {
+>                 conf.direction = DMA_DEV_TO_MEM;
+>                 conf.src_addr = host->mem_res->start + JZ_REG_MMC_RXFIFO;
+> -               conf.slave_id = JZ4740_DMA_TYPE_MMC_RECEIVE;
+>         }
+>
+>         sg_count = jz4740_mmc_prepare_dma_data(host, data, COOKIE_MAPPED);
 > --
-> 2.17.1
+> 2.21.0.593.g511ec345e18
 >
