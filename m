@@ -1,70 +1,30 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 1/2] mmc: jz4740: Code cleanup
-Date: Thu, 22 Aug 2019 14:13:11 +0200
-Message-ID: <CAPDyKFowvV=O_3Xg8j9nH7szb91Dd1heUt7nK0acRanZL68zsQ@mail.gmail.com>
-References: <20190810121608.24145-1-paul@crapouillou.net>
+Subject: Re: fix controller busy issue and add 24bits segment support
+Date: Thu, 22 Aug 2019 14:13:21 +0200
+Message-ID: <CAPDyKFqEqF_ZHerbkTqqcVBceQvMr_A+-MkbzQJBByhCv9B0fg@mail.gmail.com>
+References: <20190822064741.11196-1-chaotian.jing@mediatek.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190810121608.24145-1-paul@crapouillou.net>
+In-Reply-To: <20190822064741.11196-1-chaotian.jing@mediatek.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Paul Cercueil <paul@crapouillou.net>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, od@zcrc.me
+To: Chaotian Jing <chaotian.jing@mediatek.com>
+Cc: Matthias Brugger <matthias.bgg@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, linux-mediatek@lists.infradead.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, srv_heupstream <srv_heupstream@mediatek.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Sat, 10 Aug 2019 at 14:16, Paul Cercueil <paul@crapouillou.net> wrote:
+On Thu, 22 Aug 2019 at 08:47, Chaotian Jing <chaotian.jing@mediatek.com> wrote:
 >
-> Fix wrong code indentation which made the code hard to read, and fix
-> return with value in void function.
+> the below 2 patches fix controller busy issue when plug out SD card
+> and add 24bits segment size support.
 >
-> Signed-off-by: Paul Cercueil <paul@crapouillou.net>
+> Chaotian Jing (2):
+>   mmc: mediatek: fix controller busy when plug out SD
+>   mmc: mediatek: support 24bits segment size
+>
+>  drivers/mmc/host/mtk-sd.c | 24 ++++++++++++++++++------
+>  1 file changed, 18 insertions(+), 6 deletions(-)
 
 Applied for next, thanks!
 
 Kind regards
 Uffe
-
-
-> ---
->  drivers/mmc/host/jz4740_mmc.c | 14 +++++++-------
->  1 file changed, 7 insertions(+), 7 deletions(-)
->
-> diff --git a/drivers/mmc/host/jz4740_mmc.c b/drivers/mmc/host/jz4740_mmc.c
-> index ffdbfaadd3f2..59f81e8afcce 100644
-> --- a/drivers/mmc/host/jz4740_mmc.c
-> +++ b/drivers/mmc/host/jz4740_mmc.c
-> @@ -186,9 +186,9 @@ static void jz4740_mmc_write_irq_reg(struct jz4740_mmc_host *host,
->                                      uint32_t val)
->  {
->         if (host->version >= JZ_MMC_JZ4780)
-> -               return writel(val, host->base + JZ_REG_MMC_IREG);
-> +               writel(val, host->base + JZ_REG_MMC_IREG);
->         else
-> -               return writew(val, host->base + JZ_REG_MMC_IREG);
-> +               writew(val, host->base + JZ_REG_MMC_IREG);
->  }
->
->  static uint32_t jz4740_mmc_read_irq_reg(struct jz4740_mmc_host *host)
-> @@ -820,14 +820,14 @@ static irqreturn_t jz_mmc_irq(int irq, void *devid)
->                         del_timer(&host->timeout_timer);
->
->                         if (status & JZ_MMC_STATUS_TIMEOUT_RES) {
-> -                                       cmd->error = -ETIMEDOUT;
-> +                               cmd->error = -ETIMEDOUT;
->                         } else if (status & JZ_MMC_STATUS_CRC_RES_ERR) {
-> -                                       cmd->error = -EIO;
-> +                               cmd->error = -EIO;
->                         } else if (status & (JZ_MMC_STATUS_CRC_READ_ERROR |
->                                     JZ_MMC_STATUS_CRC_WRITE_ERROR)) {
-> -                                       if (cmd->data)
-> -                                                       cmd->data->error = -EIO;
-> -                                       cmd->error = -EIO;
-> +                               if (cmd->data)
-> +                                       cmd->data->error = -EIO;
-> +                               cmd->error = -EIO;
->                         }
->
->                         jz4740_mmc_set_irq_enabled(host, irq_reg, false);
-> --
-> 2.21.0.593.g511ec345e18
->
