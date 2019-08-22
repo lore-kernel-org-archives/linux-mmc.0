@@ -1,81 +1,90 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v5 1/2] dt-bindings: mmc: Document Aspeed SD controller
-Date: Thu, 22 Aug 2019 14:14:16 +0200
-Message-ID: <CAPDyKFrWMjaqv8z6HnmDn12c2SsjU6fEzjZesxj=nwbP9YRiPw@mail.gmail.com>
-References: <20190807003629.2974-1-andrew@aj.id.au> <20190807003629.2974-2-andrew@aj.id.au>
- <CACPK8Xe6Zp1uOqEffEc0b6oGa7portEAifGPRqb876HmA+oZeg@mail.gmail.com>
- <6c94aada-9c4a-4f55-9a43-349282ad12af@www.fastmail.com> <CAPDyKFrDPxFMm710Z25i-euOT2rrgCNXVa4na-fye0xamMXq_A@mail.gmail.com>
- <c78d4c45-477b-4078-b269-aec72571c8cd@www.fastmail.com>
+Subject: Re: [PATCH v2 01/11] dt-bindings: mmc: arasan: Update documentation
+ for SD Card Clock
+Date: Thu, 22 Aug 2019 15:38:26 +0200
+Message-ID: <CAPDyKFqdLE7d9uz_KcpO0CihM+QsFyKbNsoDMoNLT2Qy_TmNdw@mail.gmail.com>
+References: <1561958991-21935-1-git-send-email-manish.narani@xilinx.com>
+ <1561958991-21935-2-git-send-email-manish.narani@xilinx.com>
+ <20190722215404.GA28292@bogus> <MN2PR02MB602907616249FF19C1A737D8C1C70@MN2PR02MB6029.namprd02.prod.outlook.com>
+ <CAPDyKFostBKYipTkCsDbggsrux7w8BPqARx7fwRsL1XqEEX2NQ@mail.gmail.com> <MN2PR02MB60299EB8B83C4EA68A0F2B33C1A80@MN2PR02MB6029.namprd02.prod.outlook.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <c78d4c45-477b-4078-b269-aec72571c8cd@www.fastmail.com>
+In-Reply-To: <MN2PR02MB60299EB8B83C4EA68A0F2B33C1A80@MN2PR02MB6029.namprd02.prod.outlook.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Andrew Jeffery <andrew@aj.id.au>
-Cc: Joel Stanley <joel@jms.id.au>, linux-mmc <linux-mmc@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Adrian Hunter <adrian.hunter@intel.com>, devicetree <devicetree@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, linux-aspeed <linux-aspeed@lists.ozlabs.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Ryan Chen <ryanchen.aspeed@gmail.com>
+To: Manish Narani <MNARANI@xilinx.com>
+Cc: Rob Herring <robh@kernel.org>, "mark.rutland@arm.com" <mark.rutland@arm.com>, "heiko@sntech.de" <heiko@sntech.de>, Michal Simek <michals@xilinx.com>, "adrian.hunter@intel.com" <adrian.hunter@intel.com>, "christoph.muellner@theobroma-systems.com" <christoph.muellner@theobroma-systems.com>, "philipp.tomsich@theobroma-systems.com" <philipp.tomsich@theobroma-systems.com>, "viresh.kumar@linaro.org" <viresh.kumar@linaro.org>, "scott.branden@broadcom.com" <scott.branden@broadcom.com>, "ayaka@soulik.info" <ayaka@soulik.info>, "kernel@esmil.dk" <kernel@esmil.dk>, "tony.xie@rock-chips.com" <tony.xie@rock-chips.com>, Rajan Vaja <RAJANV@xilinx.com>, Jolly Shah <JOLLYS@xilinx.com>, Nava kishore Manne <navam@xilinx.com>, "mdf@kernel.org" <mdf@kernel.org>, olof@
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, 22 Aug 2019 at 13:55, Andrew Jeffery <andrew@aj.id.au> wrote:
->
->
->
-> On Thu, 22 Aug 2019, at 21:15, Ulf Hansson wrote:
-> > On Thu, 15 Aug 2019 at 07:37, Andrew Jeffery <andrew@aj.id.au> wrote:
-> > >
-> > >
-> > >
-> > > On Thu, 15 Aug 2019, at 15:06, Joel Stanley wrote:
-> > > > On Wed, 7 Aug 2019 at 00:38, Andrew Jeffery <andrew@aj.id.au> wrote:
-> > > > >
-> > > > > The ASPEED SD/SDIO/MMC controller exposes two slots implementing the
-> > > > > SDIO Host Specification v2.00, with 1 or 4 bit data buses, or an 8 bit
-> > > > > data bus if only a single slot is enabled.
-> > > > >
-> > > > > Signed-off-by: Andrew Jeffery <andrew@aj.id.au>
-> > > >
-> > > > Reviewed-by: Joel Stanley <joel@jms.id.au>
-> > > >
-> > > > Two minor comments below.
-> > > >
-> > > > > +++ b/Documentation/devicetree/bindings/mmc/aspeed,sdhci.yaml
-> > > > > @@ -0,0 +1,105 @@
-> > > > > +# SPDX-License-Identifier: GPL-2.0-or-later
-> > > >
-> > > > No "Copyright IBM" ?
-> > >
-> > > I'm going rogue.
-> > >
-> > > That reminds me I should chase up where we got to with the binding
-> > > licensing.
-> > >
-> > > >
-> > > > > +%YAML 1.2
-> > > > > +---
-> > > >
-> > > > > +
-> > > > > +examples:
-> > > > > +  - |
-> > > > > +    #include <dt-bindings/clock/aspeed-clock.h>
-> > > > > +    sdc@1e740000 {
-> > > > > +            compatible = "aspeed,ast2500-sd-controller";
-> > > > > +            reg = <0x1e740000 0x100>;
-> > > > > +            #address-cells = <1>;
-> > > > > +            #size-cells = <1>;
-> > > > > +            ranges = <0 0x1e740000 0x10000>;
-> > > >
-> > > > According to the datasheet this could be 0x20000. It does not matter
-> > > > though, as there's nothing in it past 0x300.
-> > >
-> > > Good catch.
-> > >
-> >
-> > Are you planning on sending a v6 or you want me to apply this and you
-> > can post a patch on top?
->
-> Yeah, sorry, I wasn't very clear there. I was hoping just to do a follow-up
-> patch with the cleanups if you're okay with that?
+[...]
 
-That's fine. V5 applied for next, thanks!
+> > > > > ---
+> > > > >  Documentation/devicetree/bindings/mmc/arasan,sdhci.txt | 15
+> > ++++++++++-
+> > > > ----
+> > > > >  1 file changed, 10 insertions(+), 5 deletions(-)
+> > > > >
+> > > > > diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
+> > > > b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
+> > > > > index 1edbb04..15c6397 100644
+> > > > > --- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
+> > > > > +++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
+> > > > > @@ -23,6 +23,10 @@ Required Properties:
+> > > > >    - reg: From mmc bindings: Register location and length.
+> > > > >    - clocks: From clock bindings: Handles to clock inputs.
+> > > > >    - clock-names: From clock bindings: Tuple including "clk_xin" and
+> > "clk_ahb"
+> > > > > +            Apart from these two there is one more optional clock which
+> > > > > +            is "clk_sdcard". This clock represents output clock from
+> > > > > +            controller and card. This must be specified when #clock-cells
+> > > > > +            is specified.
+> > > > >    - interrupts: Interrupt specifier
+> > > > >
+> > > > >  Required Properties for "arasan,sdhci-5.1":
+> > > > > @@ -36,9 +40,10 @@ Optional Properties:
+> > > > >    - clock-output-names: If specified, this will be the name of the card
+> > clock
+> > > > >      which will be exposed by this device.  Required if #clock-cells is
+> > > > >      specified.
+> > > > > -  - #clock-cells: If specified this should be the value <0>.  With this
+> > property
+> > > > > -    in place we will export a clock representing the Card Clock.  This clock
+> > > > > -    is expected to be consumed by our PHY.  You must also specify
+> > > > > +  - #clock-cells: If specified this should be the value <0>. With this
+> > > > > +    property in place we will export one clock representing the Card
+> > > > > +    Clock. This clock is expected to be consumed by our PHY. You must
+> > also
+> > > > > +    specify
+> > > >
+> > > > specify what?
+> > > I think this line was already there, I missed to correct it, Will update in v3.
+> > >
+> > > >
+> > > > The 3rd clock input I assume? This statement means any existing users
+> > > > with 2 clock inputs and #clock-cells are in error now. Is that correct?
+> > > Yes, this is correct. So far there was only one vendor using '#clock-cells'
+> > which is Rockchip. I have sent DT patch (02/11) for that also.
+> > > Here this is needed as earlier implementation isn't correct as suggested by
+> > Uffe. (https://lkml.org/lkml/2019/6/20/486) .
+> >
+> > I am not sure how big of a problem the backwards compatible thingy
+> > with DT is, in general we must not break it. What do you say Manish?
+>
+> Though I agree with Uffe on this, there is no other way from my understanding. Please suggest.
+>
+> >
+> > As a workaround, would it be possible to use
+> > of_clk_get_from_provider() somehow to address the compatibility issue?
+>
+> For this to be used we have to parse 'clkspec' from the DT node and pass the same as an argument to this function. In this case also the DT node needs to be updated, which is same as we have done in this series.
+
+Alright. I guess breaking DTBs for Rockchip platforms isn't
+acceptable, especially if those are already widely deployed, which I
+have no idea of....
+
+And having support for both options in the driver seems not a great
+option either, so it looks like you need to convert back into the old
+v1 approach. Huh, sorry.
 
 Kind regards
 Uffe
