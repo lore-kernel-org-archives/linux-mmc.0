@@ -1,157 +1,80 @@
-From: Krzysztof Kozlowski <krzk@kernel.org>
-Subject: Re: [PATCH 1/9] crypt: Add diskcipher
-Date: Thu, 22 Aug 2019 10:37:26 +0200
-Message-ID: <CAJKOXPdK3ZzQXjzPZLzu5q0HZsL1vohQ4UxYTONcWdtDbEe2ng@mail.gmail.com>
-References: <CGME20190821064211epcas2p43ed73f4fd126bcc5b470c9136db6aabc@epcas2p4.samsung.com>
- <003d01d557eb$8f6ca210$ae45e630$@samsung.com>
+From: Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>
+Subject: Re: [PATCH v9 3/5] block: sort headers on blk-setting.c
+Date: Thu, 22 Aug 2019 11:35:56 +0200
+Message-ID: <20190822093556.ludte2vtp77fiaax@katana>
+References: <1564129876-28261-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
+	<1564129876-28261-4-git-send-email-yoshihiro.shimoda.uh@renesas.com>
+	<20190816195026.GC6886@kunai>
+	<6ed6c62d-d773-71ec-382b-acd850e3dff1@kernel.dk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <003d01d557eb$8f6ca210$ae45e630$@samsung.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: "boojin.kim" <boojin.kim@samsung.com>
-Cc: Herbert Xu <herbert@gondor.apana.org.au>, "David S. Miller" <davem@davemloft.net>, linux-crypto@vger.kernel.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Eric Biggers <ebiggers@kernel.org>, "Theodore Y. Ts'o" <tytso@mit.edu>, Chao Yu <chao@kernel.org>, Jaegeuk Kim <jaegeuk@kernel.org>, Andreas Dilger <adilger.kernel@dilger.ca>, dm-devel@redhat.com, Mike Snitzer <snitzer@redhat.com>, Alasdair Kergon <agk@redhat.com>, Jens Axboe <axboe@kernel.dk>, Kukjin Kim <kgene@kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-fscrypt@vger.kernel.org, linux-mmc@vger.kernel.org, "linux-samsung-soc@vger.kernel.org" <linux-samsung-soc@vger.kernel.org>, linux-block@vger.kernel.org, linux-ext4@vger.kernel.org
+Content-Type: multipart/mixed; boundary="===============4156837875677353964=="
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+In-Reply-To: <6ed6c62d-d773-71ec-382b-acd850e3dff1-tSWWG44O7X1aa/9Udqfwiw@public.gmane.org>
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: Jens Axboe <axboe-tSWWG44O7X1aa/9Udqfwiw@public.gmane.org>
+Cc: linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, hch-jcswGhMUV9g@public.gmane.org, linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, robin.murphy-5wv7dgnIgG8@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, 21 Aug 2019 at 08:42, boojin.kim <boojin.kim@samsung.com> wrote:
->
-> Diskcipher supports cryptographic operations of inline crypto engines like
-> FMP. Inline crypto engine refers to hardware and solutions implemented
-> to encrypt data stored in storage device.
->
-> When encrypting using the FMP, Additional control is required
-> to carry and maintain the crypto information between
-> the encryption user(fscrypt, DM-crypt) and FMP driver.
-> Diskcipher provides this control.
->
-> Diskcipher is a symmetric key cipher in linux crypto API to support FMP.
-> FMP are registered with the cihper algorithm that uses diskcipher.
->
-> Diskcipher has three major steps.
-> The first step is to assign a cipher and set the key.
-> The second step is to pass the cipher through the BIO to the storage
-> driver.
-> The third step is to get the cipher from BIO and request a crypt
-> to FMP algorithm.
->
-> In the first step, encryption users such as fscrypt or dm-crypt
-> allocate/release a diskcipher and set key into the diskcipher.
-> Diskcipher provides allocate(), free(), and setkey() that are similar
-> to existing ciphers.
->
-> In the second step, BIO is used to pass the diskcipher to the storage
-> driver.
-> The BIO submitters such as ext4, f2fs and DM-crypt set diskcipher to BIO.
-> Diskcipher provides the set () API for this.
->
-> In the third step, the storage driver extracts the diskcipher from the BIO
-> and requests the actual encryption behavior to inline crypto engine driver.
-> Diskcipher provides get() and crypt() APIs for this.
->
-> Cc: Herbert Xu <herbert@gondor.apana.org.au>
-> Cc: David S. Miller <davem@davemloft.net>
-> Signed-off-by: Boojin Kim <boojin.kim@samsung.com>
-> ---
->  crypto/Kconfig              |   9 ++
->  crypto/Makefile             |   1 +
->  crypto/diskcipher.c         | 349
-> ++++++++++++++++++++++++++++++++++++++++++++
->  crypto/testmgr.c            | 157 ++++++++++++++++++++
->  include/crypto/diskcipher.h | 245 +++++++++++++++++++++++++++++++
->  include/linux/crypto.h      |   1 +
->  6 files changed, 762 insertions(+)
->  create mode 100644 crypto/diskcipher.c
->  create mode 100644 include/crypto/diskcipher.h
->
-> diff --git a/crypto/Kconfig b/crypto/Kconfig
-> index 455a335..382d43a 100644
-> --- a/crypto/Kconfig
-> +++ b/crypto/Kconfig
-> @@ -1636,6 +1636,15 @@ config CRYPTO_TWOFISH_AVX_X86_64
->           See also:
->           <http://www.schneier.com/twofish.html>
->
-> +config CRYPTO_DISKCIPHER
-> +       bool "Diskcipher support"
-> +       default n
-> +       help
-> +         Disk cipher algorithm
-> +
-> +         This cipher supports the crypt operation of the block host device
-> +         that has inline crypto engine.
-> +
->  comment "Compression"
->
->  config CRYPTO_DEFLATE
-> diff --git a/crypto/Makefile b/crypto/Makefile
-> index 0d2cdd5..71df76a 100644
-> --- a/crypto/Makefile
-> +++ b/crypto/Makefile
-> @@ -165,6 +165,7 @@ obj-$(CONFIG_CRYPTO_USER_API_AEAD) += algif_aead.o
->  obj-$(CONFIG_CRYPTO_ZSTD) += zstd.o
->  obj-$(CONFIG_CRYPTO_OFB) += ofb.o
->  obj-$(CONFIG_CRYPTO_ECC) += ecc.o
-> +obj-$(CONFIG_CRYPTO_DISKCIPHER) += diskcipher.o
->
->  ecdh_generic-y += ecdh.o
->  ecdh_generic-y += ecdh_helper.o
-> diff --git a/crypto/diskcipher.c b/crypto/diskcipher.c
-> new file mode 100644
-> index 0000000..ffe95a5
-> --- /dev/null
-> +++ b/crypto/diskcipher.c
-> @@ -0,0 +1,349 @@
-> +// SPDX-License-Identifier: GPL-2.0-or-later
-> +/*
-> + * Copyright (C) 2017 Samsung Electronics Co., Ltd.
-> + *
-> + * This program is free software; you can redistribute it and/or modify
-> + * it under the terms of the GNU General Public License as published by
-> + * the Free Software Foundation; either version 2 of the License, or
-> + * (at your option) any later version.
-> + */
-> +
-> +#include <linux/kernel.h>
-> +#include <linux/blkdev.h>
-> +#include <linux/errno.h>
-> +#include <linux/module.h>
-> +#include <linux/seq_file.h>
-> +#include <linux/string.h>
-> +#include <linux/crypto.h>
-> +#include <crypto/algapi.h>
-> +#include <crypto/diskcipher.h>
-> +#include <linux/delay.h>
-> +#include <linux/mm_types.h>
-> +#include <linux/fs.h>
-> +#include <linux/fscrypt.h>
-> +
-> +#include "internal.h"
-> +
-> +static int crypto_diskcipher_check(struct bio *bio)
-> +{
-> +       struct crypto_diskcipher *ci = NULL;
-> +       struct inode *inode = NULL;
-> +       struct page *page = NULL;
-> +
-> +       if (!bio) {
-> +               pr_err("%s: doesn't exist bio\n", __func__);
-> +               return 0;
-> +       }
-> +
-> +       /* enc without fscrypt */
-> +       ci = bio->bi_aux_private;
-> +       if (!ci->inode)
-> +               return 0;
-> +       if (ci->algo == 0)
-> +               return 0;
-> +
-> +       page = bio->bi_io_vec[0].bv_page;
-> +       if (!page || PageAnon(page) || !page->mapping ||
-> !page->mapping->host)
 
-Your patch looks corrupted - wrapped by mailer. The easiest way
-usually is to use git format-patch and git send-email - then you do
-not have to worry about formatting etc.
+--===============4156837875677353964==
+Content-Type: multipart/signed; micalg=pgp-sha256;
+	protocol="application/pgp-signature"; boundary="kgj75bivo7t7ncfe"
+Content-Disposition: inline
 
-Best regards,
-Krzysztof
+
+--kgj75bivo7t7ncfe
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+
+Hi Jens,
+
+thanks for the feedback.
+
+> Please just drop this patch.
+
+OK, we will do. And patch 4/5? Is it OK or do you need some more time to
+think about it?
+
+Regards,
+
+   Wolfram
+
+
+--kgj75bivo7t7ncfe
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAl1eYfcACgkQFA3kzBSg
+KbaLww/+Ke0gLqx1XCJqev3VRm9mm9T+lYoT5L7RlOSw7vRIZSGbZ5TtRLZvKmsY
+Kec20o8ozIAuXKsYsOZ3TC2sMh+ntcnP+Gaadoj0pSB3APqT/KdCae9q31zL5DV5
+JoJUfQs9OKhNT1kiQgSa3lkZdOsFheB0k1e8l0lnZJOga68dRFcOA57Vx0vFm5UC
+dobMpbGoF/aLRfF7rPOdGGy1kZ+8L1+TVLrK97YTlHFrrSlAT2l4HBHAn0gCUOxD
+7naLN2w4PQ1fLHVfEAZQHp5wg1XTYjyBIHj3hafLdvxXFtJZmlZDKQ+cTMFD9Ht1
+EKW18HKFyUhzrdBgmOlizxqybL5lOpJhFXXE9KZsFVgpbKW6+WtPpzmRk02UagF0
+N5zPf7TqQLWzUzxDT9zR4baTy074i+Oazzv5ur9GTCk48JFLdtTNhW4BXCj55ksZ
+lkYmbKBNxfI6V8rZn9zhJNJAXAi9Vq6mHJnTLfIHIvcTT2uWJ67Mg8kbB5I9NJ4K
+APmuIvXoss/cgXllOwkUZO7A6Z4HCbAS4H5M5seSqJ3DBf4wN0DR6ihOlktho0vz
+LTsI5Kqi65RZbtJFfLWmHp2HhHEJbt8zZqvrTivv9uv23lS3tfKLzHReTSW5yJIa
+d40nFCayfsQPfE2+FqK49Nvw4KBcH7q0TtUhwsb4is/iHnV/Nvc=
+=QW4f
+-----END PGP SIGNATURE-----
+
+--kgj75bivo7t7ncfe--
+
+--===============4156837875677353964==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+
+--===============4156837875677353964==--
