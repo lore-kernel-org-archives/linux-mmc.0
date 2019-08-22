@@ -1,98 +1,87 @@
-From: "Shirley Her (SC)" <shirley.her@bayhubtech.com>
-Subject: RE: [PATCH V8 1/3] mmc: sdhci-pci-o2micro: Change O2 Host PLL and DLL
- register name
-Date: Thu, 22 Aug 2019 16:16:18 +0000
-Message-ID: <MWHPR16MB14555AB570D340E138FDAB1E8BA50@MWHPR16MB1455.namprd16.prod.outlook.com>
-References: <1566412708-6130-1-git-send-email-shirley.her@bayhubtech.com>
- <CAPDyKFoyvT-nvU+rng7y=MitzuPfd3HdJ+SZNm4tPhkb-ER=nA@mail.gmail.com>
+From: Heiko Stuebner <heiko@sntech.de>
+Subject: Re: [PATCH v2 01/11] dt-bindings: mmc: arasan: Update documentation for SD Card Clock
+Date: Thu, 22 Aug 2019 20:23:01 +0200
+Message-ID: <4911073.ucheZMAtV3@phil>
+References: <1561958991-21935-1-git-send-email-manish.narani@xilinx.com> <MN2PR02MB60299EB8B83C4EA68A0F2B33C1A80@MN2PR02MB6029.namprd02.prod.outlook.com> <CAPDyKFqdLE7d9uz_KcpO0CihM+QsFyKbNsoDMoNLT2Qy_TmNdw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFoyvT-nvU+rng7y=MitzuPfd3HdJ+SZNm4tPhkb-ER=nA@mail.gmail.com>
-Content-Language: en-US
+In-Reply-To: <CAPDyKFqdLE7d9uz_KcpO0CihM+QsFyKbNsoDMoNLT2Qy_TmNdw@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "adrian.hunter@intel.com" <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Chevron Li (WH)" <chevron.li@bayhubtech.com>, "Shaper Liu (WH)" <shaper.liu@bayhubtech.com>, "Louis Lu (TP)" <louis.lu@bayhubtech.com>, "Max Huang (SC)" <max.huang@bayhubtech.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Manish Narani <MNARANI@xilinx.com>, Rob Herring <robh@kernel.org>, "mark.rutland@arm.com" <mark.rutland@arm.com>, Michal Simek <michals@xilinx.com>, "adrian.hunter@intel.com" <adrian.hunter@intel.com>, "christoph.muellner@theobroma-systems.com" <christoph.muellner@theobroma-systems.com>, "philipp.tomsich@theobroma-systems.com" <philipp.tomsich@theobroma-systems.com>, "viresh.kumar@linaro.org" <viresh.kumar@linaro.org>, "scott.branden@broadcom.com" <scott.branden@broadcom.com>, "ayaka@soulik.info" <ayaka@soulik.info>, "kernel@esmil.dk" <kernel@esmil.dk>, "tony.xie@rock-chips.com" <tony.xie@rock-chips.com>, Rajan Vaja <RAJANV@xilinx.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-U29ycnkgYWJvdXQgdGhlIGNvbmZ1c2lvbiBhbmQgdGhleSBhcmUgdGhlIHNhbWUsIHBsZWFzZSBy
-ZXZpZXcgdGhlIDJuZCBvbmUuIE9uZSBvZiB0aGUgZW1haWwgYWRkcmVzcyBpcyB3cm9uZyB3aGVu
-IEkgc2VuZCB0aGUgMXN0IG9uZS4NCg0KVGhhbmtzIGZvciB5b3VyIGhlbHAsDQpTaGlybGV5DQoN
-Ci0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBVbGYgSGFuc3NvbiBbbWFpbHRvOnVs
-Zi5oYW5zc29uQGxpbmFyby5vcmddIA0KU2VudDogVGh1cnNkYXksIEF1Z3VzdCAyMiwgMjAxOSAx
-OjM1IEFNDQpUbzogU2hpcmxleSBIZXIgKFNDKSA8c2hpcmxleS5oZXJAYmF5aHVidGVjaC5jb20+
-DQpDYzogYWRyaWFuLmh1bnRlckBpbnRlbC5jb207IGxpbnV4LW1tY0B2Z2VyLmtlcm5lbC5vcmc7
-IGxpbnV4LWtlcm5lbEB2Z2VyLmtlcm5lbC5vcmc7IENoZXZyb24gTGkgKFdIKSA8Y2hldnJvbi5s
-aUBiYXlodWJ0ZWNoLmNvbT47IFNoYXBlciBMaXUgKFdIKSA8c2hhcGVyLmxpdUBiYXlodWJ0ZWNo
-LmNvbT47IExvdWlzIEx1IChUUCkgPGxvdWlzLmx1QGJheWh1YnRlY2guY29tPjsgTWF4IEh1YW5n
-IChTQykgPG1heC5odWFuZ0BiYXlodWJ0ZWNoLmNvbT4NClN1YmplY3Q6IFJlOiBbUEFUQ0ggVjgg
-MS8zXSBtbWM6IHNkaGNpLXBjaS1vMm1pY3JvOiBDaGFuZ2UgTzIgSG9zdCBQTEwgYW5kIERMTCBy
-ZWdpc3RlciBuYW1lDQoNCk9uIFdlZCwgMjEgQXVnIDIwMTkgYXQgMjA6MzgsIFNoaXJsZXkgSGVy
-IChTQykgPHNoaXJsZXkuaGVyQGJheWh1YnRlY2guY29tPiB3cm90ZToNCj4NCj4gQ2hhbmdlIE8y
-IEhvc3QgUExMIGFuZCBETEwgcmVnaXN0ZXIgbmFtZQ0KPg0KPiBTaWduZWQtb2ZmLWJ5OiBTaGly
-bGV5IEhlciA8c2hpcmxleS5oZXJAYmF5aHVidGVjaC5jb20+DQoNCkl0IHNlZW1zIGxpa2UgeW91
-IG1hbmFnZWQgdG8gcG9zdCB0aGUgdmVyc2lvbiA4LCB0d28gdGltZXMuIElzIHRoZXJlIGFueSBk
-aWZmZXJlbmNlPyBXaGljaCBvbmUgc2hvdWxkIHdlIHJldmlldz8NCg0KS2luZCByZWdhcmRzDQpV
-ZmZlDQoNCj4gLS0tDQo+IGNoYW5nZSBpbiBWODoNCj4gIDEuIGZpeCBwYXRjaCBmb3JtYXQgZXJy
-b3INCj4NCj4gY2hhbmdlIGluIFY3Og0KPiAgMS4gY2hhbmdlIHN1YmplY3QNCj4NCj4gY2hhbmdl
-IGluIFY2Og0KPiAgMS4gY2hhbmdlIHN1YmplY3QgYW5kIGNvbW1pdCBtZXNzYWdlIHRvIG1hdGNo
-IHRoZSBwYXRjaCAgMi4gY2hhbmdlIA0KPiByZWdpc3RlciBuYW1lIE8yX1BMTF9XRFRfQ09OVFJP
-TDEgdG8gTzJfUExMX0RMTF9XRFRfQ09OVFJPTDENCj4NCj4gY2hhbmdlIGluIFY1Og0KPiAgMS4g
-c3BsaXQgMiBwYXRjaGVzIGludG8gMyBwYXRjaGVzDQo+ICAyLiBtYWtlIGRsbF9hZGp1c3RfY291
-bnQgc3RhcnQgZnJvbSAwICAzLiBmaXggcmV0IG92ZXJ3cml0dGVuIGlzc3VlICANCj4gNC4gdXNl
-IGJyZWFrIGluc3RlYWQgb2YgZ290bw0KPg0KPiBjaGFuZ2UgaW4gVjQ6DQo+ICAxLiBhZGQgYSBi
-dWcgZml4IGZvciBWMw0KPg0KPiBjaGFuZ2UgaW4gVjM6DQo+ICAxLiBhZGQgbW9yZSBleHBsYW5h
-dGlvbiBpbiBkbGxfcmVjb3ZlcnkgYW5kIGV4ZWN1dGVfdHVuaW5nIGZ1bmN0aW9uICANCj4gMi4g
-bW92ZSBkbGxfYWRqdXN0X2NvdW50IHRvIE8yX2hvc3Qgc3RydWN0ICAzLiBmaXggc29tZSBjb2Rp
-bmcgc3R5bGUgDQo+IGVycm9yICA0LiByZW5hbWluZyBPMl9QTExfV0RUX0NPTlRST0wxIFRPIE8y
-X1BMTF9ETExfV0RUX0NPTlRST0wxDQo+DQo+IGNoYW5nZSBpbiBWMjoNCj4gIDEuIHVzZSB1c2xl
-ZXBfcmFuZ2UgaW5zdGVhZCBvZiB1ZGVsYXkgIDIuIG1vdmUgZGxsX2FkanVzdF9jb3VudCB0byAN
-Cj4gc2RoY2ktcGNpLW8ybWljcm8uYw0KPg0KPiBjaGFnbmUgaW4gVjE6DQo+ICAxLiBhZGQgZXJy
-b3IgcmVjb3ZlcnkgZnVuY3Rpb24gdG8gcmVsb2NrIERMTCB3aXRoIGNvcnJlY3QgcGhhc2UgIDIu
-IA0KPiByZXR1bmluZyBIUzIwMCBhZnRlciBETEwgbG9ja2VkDQo+IC0tLQ0KPiAgZHJpdmVycy9t
-bWMvaG9zdC9zZGhjaS1wY2ktbzJtaWNyby5jIHwgMTYgKysrKysrKystLS0tLS0tLQ0KPiAgMSBm
-aWxlIGNoYW5nZWQsIDggaW5zZXJ0aW9ucygrKSwgOCBkZWxldGlvbnMoLSkNCj4NCj4gZGlmZiAt
-LWdpdCBhL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktcGNpLW8ybWljcm8uYyANCj4gYi9kcml2ZXJz
-L21tYy9ob3N0L3NkaGNpLXBjaS1vMm1pY3JvLmMNCj4gaW5kZXggOWRjNDU0OC4uYjNhMzNkOSAx
-MDA2NDQNCj4gLS0tIGEvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1wY2ktbzJtaWNyby5jDQo+ICsr
-KyBiL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktcGNpLW8ybWljcm8uYw0KPiBAQCAtNTEsNyArNTEs
-NyBAQA0KPiAgI2RlZmluZSBPMl9TRF9WRU5ET1JfU0VUVElORzIgIDB4MUM4DQo+ICAjZGVmaW5l
-IE8yX1NEX0hXX1RVTklOR19ESVNBQkxFICAgICAgICBCSVQoNCkNCj4NCj4gLSNkZWZpbmUgTzJf
-UExMX1dEVF9DT05UUk9MMSAgICAweDFDQw0KPiArI2RlZmluZSBPMl9QTExfRExMX1dEVF9DT05U
-Uk9MMSAgICAgICAgMHgxQ0MNCj4gICNkZWZpbmUgIE8yX1BMTF9GT1JDRV9BQ1RJVkUgICBCSVQo
-MTgpDQo+ICAjZGVmaW5lICBPMl9QTExfTE9DS19TVEFUVVMgICAgQklUKDE0KQ0KPiAgI2RlZmlu
-ZSAgTzJfUExMX1NPRlRfUkVTRVQgICAgIEJJVCgxMikNCj4gQEAgLTMxNiwyMyArMzE2LDIzIEBA
-IHN0YXRpYyB2b2lkIHNkaGNpX28yX2VuYWJsZV9pbnRlcm5hbF9jbG9jayhzdHJ1Y3Qgc2RoY2lf
-aG9zdCAqaG9zdCkNCj4gICAgICAgICB1MzIgc2NyYXRjaDMyOw0KPg0KPiAgICAgICAgIC8qIFBM
-TCBzb2Z0d2FyZSByZXNldCAqLw0KPiAtICAgICAgIHNjcmF0Y2gzMiA9IHNkaGNpX3JlYWRsKGhv
-c3QsIE8yX1BMTF9XRFRfQ09OVFJPTDEpOw0KPiArICAgICAgIHNjcmF0Y2gzMiA9IHNkaGNpX3Jl
-YWRsKGhvc3QsIE8yX1BMTF9ETExfV0RUX0NPTlRST0wxKTsNCj4gICAgICAgICBzY3JhdGNoMzIg
-fD0gTzJfUExMX1NPRlRfUkVTRVQ7DQo+IC0gICAgICAgc2RoY2lfd3JpdGVsKGhvc3QsIHNjcmF0
-Y2gzMiwgTzJfUExMX1dEVF9DT05UUk9MMSk7DQo+ICsgICAgICAgc2RoY2lfd3JpdGVsKGhvc3Qs
-IHNjcmF0Y2gzMiwgTzJfUExMX0RMTF9XRFRfQ09OVFJPTDEpOw0KPiAgICAgICAgIHVkZWxheSgx
-KTsNCj4gICAgICAgICBzY3JhdGNoMzIgJj0gfihPMl9QTExfU09GVF9SRVNFVCk7DQo+IC0gICAg
-ICAgc2RoY2lfd3JpdGVsKGhvc3QsIHNjcmF0Y2gzMiwgTzJfUExMX1dEVF9DT05UUk9MMSk7DQo+
-ICsgICAgICAgc2RoY2lfd3JpdGVsKGhvc3QsIHNjcmF0Y2gzMiwgTzJfUExMX0RMTF9XRFRfQ09O
-VFJPTDEpOw0KPg0KPiAgICAgICAgIC8qIFBMTCBmb3JjZSBhY3RpdmUgKi8NCj4gICAgICAgICBz
-Y3JhdGNoMzIgfD0gTzJfUExMX0ZPUkNFX0FDVElWRTsNCj4gLSAgICAgICBzZGhjaV93cml0ZWwo
-aG9zdCwgc2NyYXRjaDMyLCBPMl9QTExfV0RUX0NPTlRST0wxKTsNCj4gKyAgICAgICBzZGhjaV93
-cml0ZWwoaG9zdCwgc2NyYXRjaDMyLCBPMl9QTExfRExMX1dEVF9DT05UUk9MMSk7DQo+DQo+ICAg
-ICAgICAgLyogV2FpdCBtYXggMjAgbXMgKi8NCj4gICAgICAgICB0aW1lb3V0ID0ga3RpbWVfYWRk
-X21zKGt0aW1lX2dldCgpLCAyMCk7DQo+ICAgICAgICAgd2hpbGUgKDEpIHsNCj4gICAgICAgICAg
-ICAgICAgIGJvb2wgdGltZWRvdXQgPSBrdGltZV9hZnRlcihrdGltZV9nZXQoKSwgdGltZW91dCk7
-DQo+DQo+IC0gICAgICAgICAgICAgICBzY3JhdGNoID0gc2RoY2lfcmVhZHcoaG9zdCwgTzJfUExM
-X1dEVF9DT05UUk9MMSk7DQo+ICsgICAgICAgICAgICAgICBzY3JhdGNoID0gc2RoY2lfcmVhZHco
-aG9zdCwgTzJfUExMX0RMTF9XRFRfQ09OVFJPTDEpOw0KPiAgICAgICAgICAgICAgICAgaWYgKHNj
-cmF0Y2ggJiBPMl9QTExfTE9DS19TVEFUVVMpDQo+ICAgICAgICAgICAgICAgICAgICAgICAgIGJy
-ZWFrOw0KPiAgICAgICAgICAgICAgICAgaWYgKHRpbWVkb3V0KSB7DQo+IEBAIC0zNTAsOSArMzUw
-LDkgQEAgc3RhdGljIHZvaWQgc2RoY2lfbzJfZW5hYmxlX2ludGVybmFsX2Nsb2NrKHN0cnVjdCAN
-Cj4gc2RoY2lfaG9zdCAqaG9zdCkNCj4NCj4gIG91dDoNCj4gICAgICAgICAvKiBDYW5jZWwgUExM
-IGZvcmNlIGFjdGl2ZSAqLw0KPiAtICAgICAgIHNjcmF0Y2gzMiA9IHNkaGNpX3JlYWRsKGhvc3Qs
-IE8yX1BMTF9XRFRfQ09OVFJPTDEpOw0KPiArICAgICAgIHNjcmF0Y2gzMiA9IHNkaGNpX3JlYWRs
-KGhvc3QsIE8yX1BMTF9ETExfV0RUX0NPTlRST0wxKTsNCj4gICAgICAgICBzY3JhdGNoMzIgJj0g
-fk8yX1BMTF9GT1JDRV9BQ1RJVkU7DQo+IC0gICAgICAgc2RoY2lfd3JpdGVsKGhvc3QsIHNjcmF0
-Y2gzMiwgTzJfUExMX1dEVF9DT05UUk9MMSk7DQo+ICsgICAgICAgc2RoY2lfd3JpdGVsKGhvc3Qs
-IHNjcmF0Y2gzMiwgTzJfUExMX0RMTF9XRFRfQ09OVFJPTDEpOw0KPiAgfQ0KPg0KPiAgc3RhdGlj
-IGludCBzZGhjaV9vMl9nZXRfY2Qoc3RydWN0IG1tY19ob3N0ICptbWMpDQo+IC0tDQo+IDIuNy40
-DQo+DQo=
+Am Donnerstag, 22. August 2019, 15:38:26 CEST schrieb Ulf Hansson:
+> [...]
+> 
+> > > > > > ---
+> > > > > >  Documentation/devicetree/bindings/mmc/arasan,sdhci.txt | 15
+> > > ++++++++++-
+> > > > > ----
+> > > > > >  1 file changed, 10 insertions(+), 5 deletions(-)
+> > > > > >
+> > > > > > diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
+> > > > > b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
+> > > > > > index 1edbb04..15c6397 100644
+> > > > > > --- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
+> > > > > > +++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
+> > > > > > @@ -23,6 +23,10 @@ Required Properties:
+> > > > > >    - reg: From mmc bindings: Register location and length.
+> > > > > >    - clocks: From clock bindings: Handles to clock inputs.
+> > > > > >    - clock-names: From clock bindings: Tuple including "clk_xin" and
+> > > "clk_ahb"
+> > > > > > +            Apart from these two there is one more optional clock which
+> > > > > > +            is "clk_sdcard". This clock represents output clock from
+> > > > > > +            controller and card. This must be specified when #clock-cells
+> > > > > > +            is specified.
+> > > > > >    - interrupts: Interrupt specifier
+> > > > > >
+> > > > > >  Required Properties for "arasan,sdhci-5.1":
+> > > > > > @@ -36,9 +40,10 @@ Optional Properties:
+> > > > > >    - clock-output-names: If specified, this will be the name of the card
+> > > clock
+> > > > > >      which will be exposed by this device.  Required if #clock-cells is
+> > > > > >      specified.
+> > > > > > -  - #clock-cells: If specified this should be the value <0>.  With this
+> > > property
+> > > > > > -    in place we will export a clock representing the Card Clock.  This clock
+> > > > > > -    is expected to be consumed by our PHY.  You must also specify
+> > > > > > +  - #clock-cells: If specified this should be the value <0>. With this
+> > > > > > +    property in place we will export one clock representing the Card
+> > > > > > +    Clock. This clock is expected to be consumed by our PHY. You must
+> > > also
+> > > > > > +    specify
+> > > > >
+> > > > > specify what?
+> > > > I think this line was already there, I missed to correct it, Will update in v3.
+> > > >
+> > > > >
+> > > > > The 3rd clock input I assume? This statement means any existing users
+> > > > > with 2 clock inputs and #clock-cells are in error now. Is that correct?
+> > > > Yes, this is correct. So far there was only one vendor using '#clock-cells'
+> > > which is Rockchip. I have sent DT patch (02/11) for that also.
+> > > > Here this is needed as earlier implementation isn't correct as suggested by
+> > > Uffe. (https://lkml.org/lkml/2019/6/20/486) .
+> > >
+> > > I am not sure how big of a problem the backwards compatible thingy
+> > > with DT is, in general we must not break it. What do you say Manish?
+> >
+> > Though I agree with Uffe on this, there is no other way from my understanding. Please suggest.
+> >
+> > >
+> > > As a workaround, would it be possible to use
+> > > of_clk_get_from_provider() somehow to address the compatibility issue?
+> >
+> > For this to be used we have to parse 'clkspec' from the DT node and pass the same as an argument to this function. In this case also the DT node needs to be updated, which is same as we have done in this series.
+> 
+> Alright. I guess breaking DTBs for Rockchip platforms isn't
+> acceptable, especially if those are already widely deployed, which I
+> have no idea of....
+
+The arasan sdhci is part of the rk3399, so every SBC using that SoC, but
+also the whole Gru series of ChromeOS devices (Samsung Chromebook Plus
+among them) would be affected.
+
+Heiko
