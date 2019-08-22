@@ -1,52 +1,46 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 1/2] mmc: sdhci-of-at91: add quirk for broken HS200
-Date: Thu, 22 Aug 2019 14:12:59 +0200
-Message-ID: <CAPDyKFp_UdPqnOtqsOZcNxt+fTayMYm89_YLNH8J5-=VRcWTJA@mail.gmail.com>
-References: <1565252928-28994-1-git-send-email-eugen.hristev@microchip.com>
- <CAPDyKFrUr8_VP1JLRk48zR8_p1Y62wKLBnS0iTgdhUSArwD49Q@mail.gmail.com> <20190809080842.zl4ytbjyt54bj6ta@M43218.corp.atmel.com>
+Subject: Re: [PATCH v1 4/4] mmc: sdhci-of-esdhc: add erratum A011334 support
+ in ls1028a 1.0 SoC
+Date: Thu, 22 Aug 2019 14:13:03 +0200
+Message-ID: <CAPDyKFpwGGPAShEoXPK8Ksg5FPEVrbD3-HfeTSMACPsDC_V5FA@mail.gmail.com>
+References: <20190814072649.8237-1-yinbo.zhu@nxp.com> <20190814072649.8237-4-yinbo.zhu@nxp.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190809080842.zl4ytbjyt54bj6ta@M43218.corp.atmel.com>
+In-Reply-To: <20190814072649.8237-4-yinbo.zhu@nxp.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Eugen.Hristev@microchip.com, Ludovic Desroches <ludovic.desroches@microchip.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Nicolas Ferre <Nicolas.Ferre@microchip.com>, Adrian Hunter <adrian.hunter@intel.com>, Alexandre Belloni <alexandre.belloni@bootlin.com>, Ulf Hansson <ulf.hansson@linaro.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>
+To: Yinbo Zhu <yinbo.zhu@nxp.com>
+Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Adrian Hunter <adrian.hunter@intel.com>, Li Yang <leoyang.li@nxp.com>, Claudiu Manoil <claudiu.manoil@nxp.com>, Amit Jain <amit.jain_1@nxp.com>, Yangbo Lu <yangbo.lu@nxp.com>, Vabhav Sharma <vabhav.sharma@nxp.com>, Rajesh Bhagat <rajesh.bhagat@nxp.com>, Ashish Kumar <Ashish.Kumar@nxp.com>, DTML <devicetree@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Xiaobo Xie <xiaobo.xie@nxp.com>, Jiafei Pan <jiafei.pan@nxp.com>, Alison Wang <alison.wang@nxp.com>, Alex
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, 9 Aug 2019 at 10:09, Ludovic Desroches
-<ludovic.desroches@microchip.com> wrote:
+On Wed, 14 Aug 2019 at 09:24, Yinbo Zhu <yinbo.zhu@nxp.com> wrote:
 >
-> On Thu, Aug 08, 2019 at 05:23:00PM +0200, Ulf Hansson wrote:
-> > On Thu, 8 Aug 2019 at 10:35, <Eugen.Hristev@microchip.com> wrote:
-> > >
-> > > From: Eugen Hristev <eugen.hristev@microchip.com>
-> > >
-> > > HS200 is not implemented in the driver, but the controller claims it
-> > > through caps.
-> > > Remove it via quirk.
-> > > Without this quirk, the mmc core will try to enable hs200, which will fail,
-> > > and the eMMC initialization will fail.
-> > >
-> > > Signed-off-by: Eugen Hristev <eugen.hristev@microchip.com>
-> >
-> > Should this be applied as a fix and possibly tagged for stable?
-> >
-> > In such case, do you have a specific commit that it fixes?
+> This patch is to add erratum A011334 support in ls1028a 1.0 SoC
 >
-> I think so, I would say:
-> Fixes: bb5f8ea4d514 ("mmc: sdhci-of-at91: introduce driver for the Atmel SDMMC")
-> Cc: stable@vger.kernel.org #v4.4 and later
->
-> It doesn't apply on 4.4 but resolution is trivial.
->
-> Regards
->
-> Ludovic
->
+> Signed-off-by: Yinbo Zhu <yinbo.zhu@nxp.com>
 
-[...]
-
-Applied for fixes, by adding the above tags, thanks!
+Applied for next, thanks!
 
 Kind regards
 Uffe
+
+
+> ---
+>  drivers/mmc/host/sdhci-of-esdhc.c | 1 +
+>  1 file changed, 1 insertion(+)
+>
+> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+> index b16f7d440f78..eb2b290447fc 100644
+> --- a/drivers/mmc/host/sdhci-of-esdhc.c
+> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
+> @@ -1006,6 +1006,7 @@ static struct soc_device_attribute soc_incorrect_hostver[] = {
+>  static struct soc_device_attribute soc_fixup_sdhc_clkdivs[] = {
+>         { .family = "QorIQ LX2160A", .revision = "1.0", },
+>         { .family = "QorIQ LX2160A", .revision = "2.0", },
+> +       { .family = "QorIQ LS1028A", .revision = "1.0", },
+>         { },
+>  };
+>
+> --
+> 2.17.1
+>
