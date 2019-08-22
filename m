@@ -1,79 +1,81 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sdhci-cadence: use struct_size() helper
-Date: Thu, 22 Aug 2019 14:13:07 +0200
-Message-ID: <CAPDyKFoS3_RJvOxjQXpYT6YUgqJM7WXfvdHe1f6cTkab0rgsEQ@mail.gmail.com>
-References: <20190808165301.GA30877@embeddedor>
+Subject: Re: [PATCH v5 1/2] dt-bindings: mmc: Document Aspeed SD controller
+Date: Thu, 22 Aug 2019 14:14:16 +0200
+Message-ID: <CAPDyKFrWMjaqv8z6HnmDn12c2SsjU6fEzjZesxj=nwbP9YRiPw@mail.gmail.com>
+References: <20190807003629.2974-1-andrew@aj.id.au> <20190807003629.2974-2-andrew@aj.id.au>
+ <CACPK8Xe6Zp1uOqEffEc0b6oGa7portEAifGPRqb876HmA+oZeg@mail.gmail.com>
+ <6c94aada-9c4a-4f55-9a43-349282ad12af@www.fastmail.com> <CAPDyKFrDPxFMm710Z25i-euOT2rrgCNXVa4na-fye0xamMXq_A@mail.gmail.com>
+ <c78d4c45-477b-4078-b269-aec72571c8cd@www.fastmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190808165301.GA30877@embeddedor>
+In-Reply-To: <c78d4c45-477b-4078-b269-aec72571c8cd@www.fastmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: "Gustavo A. R. Silva" <gustavo@embeddedor.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: Andrew Jeffery <andrew@aj.id.au>
+Cc: Joel Stanley <joel@jms.id.au>, linux-mmc <linux-mmc@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Adrian Hunter <adrian.hunter@intel.com>, devicetree <devicetree@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, linux-aspeed <linux-aspeed@lists.ozlabs.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Ryan Chen <ryanchen.aspeed@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, 8 Aug 2019 at 18:53, Gustavo A. R. Silva <gustavo@embeddedor.com> wrote:
+On Thu, 22 Aug 2019 at 13:55, Andrew Jeffery <andrew@aj.id.au> wrote:
 >
-> One of the more common cases of allocation size calculations is finding
-> the size of a structure that has a zero-sized array at the end, along
-> with memory for some number of elements for that array. For example:
 >
-> struct sdhci_cdns_priv {
->         ...
->         struct sdhci_cdns_phy_param phy_params[0];
-> };
 >
-> Make use of the struct_size() helper instead of an open-coded version
-> in order to avoid any potential type mistakes.
+> On Thu, 22 Aug 2019, at 21:15, Ulf Hansson wrote:
+> > On Thu, 15 Aug 2019 at 07:37, Andrew Jeffery <andrew@aj.id.au> wrote:
+> > >
+> > >
+> > >
+> > > On Thu, 15 Aug 2019, at 15:06, Joel Stanley wrote:
+> > > > On Wed, 7 Aug 2019 at 00:38, Andrew Jeffery <andrew@aj.id.au> wrote:
+> > > > >
+> > > > > The ASPEED SD/SDIO/MMC controller exposes two slots implementing the
+> > > > > SDIO Host Specification v2.00, with 1 or 4 bit data buses, or an 8 bit
+> > > > > data bus if only a single slot is enabled.
+> > > > >
+> > > > > Signed-off-by: Andrew Jeffery <andrew@aj.id.au>
+> > > >
+> > > > Reviewed-by: Joel Stanley <joel@jms.id.au>
+> > > >
+> > > > Two minor comments below.
+> > > >
+> > > > > +++ b/Documentation/devicetree/bindings/mmc/aspeed,sdhci.yaml
+> > > > > @@ -0,0 +1,105 @@
+> > > > > +# SPDX-License-Identifier: GPL-2.0-or-later
+> > > >
+> > > > No "Copyright IBM" ?
+> > >
+> > > I'm going rogue.
+> > >
+> > > That reminds me I should chase up where we got to with the binding
+> > > licensing.
+> > >
+> > > >
+> > > > > +%YAML 1.2
+> > > > > +---
+> > > >
+> > > > > +
+> > > > > +examples:
+> > > > > +  - |
+> > > > > +    #include <dt-bindings/clock/aspeed-clock.h>
+> > > > > +    sdc@1e740000 {
+> > > > > +            compatible = "aspeed,ast2500-sd-controller";
+> > > > > +            reg = <0x1e740000 0x100>;
+> > > > > +            #address-cells = <1>;
+> > > > > +            #size-cells = <1>;
+> > > > > +            ranges = <0 0x1e740000 0x10000>;
+> > > >
+> > > > According to the datasheet this could be 0x20000. It does not matter
+> > > > though, as there's nothing in it past 0x300.
+> > >
+> > > Good catch.
+> > >
+> >
+> > Are you planning on sending a v6 or you want me to apply this and you
+> > can post a patch on top?
 >
-> So, replace the following form:
->
-> sizeof(*priv) + sizeof(priv->phy_params[0]) * nr_phy_params
->
-> with:
->
-> struct_size(priv, phy_params, nr_phy_params)
->
-> Also, notice that, in this case, variable priv_size is not necessary,
-> hence it is removed.
->
-> This code was detected with the help of Coccinelle.
->
-> Signed-off-by: Gustavo A. R. Silva <gustavo@embeddedor.com>
+> Yeah, sorry, I wasn't very clear there. I was hoping just to do a follow-up
+> patch with the cleanups if you're okay with that?
 
-Applied for next, thanks!
+That's fine. V5 applied for next, thanks!
 
 Kind regards
 Uffe
-
-
-> ---
->  drivers/mmc/host/sdhci-cadence.c | 5 ++---
->  1 file changed, 2 insertions(+), 3 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
-> index 163d1cf4367e..1768a13f89be 100644
-> --- a/drivers/mmc/host/sdhci-cadence.c
-> +++ b/drivers/mmc/host/sdhci-cadence.c
-> @@ -337,7 +337,6 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
->         struct sdhci_pltfm_host *pltfm_host;
->         struct sdhci_cdns_priv *priv;
->         struct clk *clk;
-> -       size_t priv_size;
->         unsigned int nr_phy_params;
->         int ret;
->         struct device *dev = &pdev->dev;
-> @@ -351,8 +350,8 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
->                 return ret;
->
->         nr_phy_params = sdhci_cdns_phy_param_count(dev->of_node);
-> -       priv_size = sizeof(*priv) + sizeof(priv->phy_params[0]) * nr_phy_params;
-> -       host = sdhci_pltfm_init(pdev, &sdhci_cdns_pltfm_data, priv_size);
-> +       host = sdhci_pltfm_init(pdev, &sdhci_cdns_pltfm_data,
-> +                               struct_size(priv, phy_params, nr_phy_params));
->         if (IS_ERR(host)) {
->                 ret = PTR_ERR(host);
->                 goto disable_clk;
-> --
-> 2.22.0
->
