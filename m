@@ -1,80 +1,69 @@
-From: Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>
-Subject: Re: [PATCH v9 3/5] block: sort headers on blk-setting.c
-Date: Thu, 22 Aug 2019 11:35:56 +0200
-Message-ID: <20190822093556.ludte2vtp77fiaax@katana>
-References: <1564129876-28261-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
-	<1564129876-28261-4-git-send-email-yoshihiro.shimoda.uh@renesas.com>
-	<20190816195026.GC6886@kunai>
-	<6ed6c62d-d773-71ec-382b-acd850e3dff1@kernel.dk>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v5 1/2] dt-bindings: mmc: Document Aspeed SD controller
+Date: Thu, 22 Aug 2019 13:45:19 +0200
+Message-ID: <CAPDyKFrDPxFMm710Z25i-euOT2rrgCNXVa4na-fye0xamMXq_A@mail.gmail.com>
+References: <20190807003629.2974-1-andrew@aj.id.au> <20190807003629.2974-2-andrew@aj.id.au>
+ <CACPK8Xe6Zp1uOqEffEc0b6oGa7portEAifGPRqb876HmA+oZeg@mail.gmail.com> <6c94aada-9c4a-4f55-9a43-349282ad12af@www.fastmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============4156837875677353964=="
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-In-Reply-To: <6ed6c62d-d773-71ec-382b-acd850e3dff1-tSWWG44O7X1aa/9Udqfwiw@public.gmane.org>
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Jens Axboe <axboe-tSWWG44O7X1aa/9Udqfwiw@public.gmane.org>
-Cc: linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, hch-jcswGhMUV9g@public.gmane.org, linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, robin.murphy-5wv7dgnIgG8@public.gmane.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <6c94aada-9c4a-4f55-9a43-349282ad12af@www.fastmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Andrew Jeffery <andrew@aj.id.au>
+Cc: Joel Stanley <joel@jms.id.au>, linux-mmc <linux-mmc@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Adrian Hunter <adrian.hunter@intel.com>, devicetree <devicetree@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, linux-aspeed <linux-aspeed@lists.ozlabs.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Ryan Chen <ryanchen.aspeed@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
+On Thu, 15 Aug 2019 at 07:37, Andrew Jeffery <andrew@aj.id.au> wrote:
+>
+>
+>
+> On Thu, 15 Aug 2019, at 15:06, Joel Stanley wrote:
+> > On Wed, 7 Aug 2019 at 00:38, Andrew Jeffery <andrew@aj.id.au> wrote:
+> > >
+> > > The ASPEED SD/SDIO/MMC controller exposes two slots implementing the
+> > > SDIO Host Specification v2.00, with 1 or 4 bit data buses, or an 8 bit
+> > > data bus if only a single slot is enabled.
+> > >
+> > > Signed-off-by: Andrew Jeffery <andrew@aj.id.au>
+> >
+> > Reviewed-by: Joel Stanley <joel@jms.id.au>
+> >
+> > Two minor comments below.
+> >
+> > > +++ b/Documentation/devicetree/bindings/mmc/aspeed,sdhci.yaml
+> > > @@ -0,0 +1,105 @@
+> > > +# SPDX-License-Identifier: GPL-2.0-or-later
+> >
+> > No "Copyright IBM" ?
+>
+> I'm going rogue.
+>
+> That reminds me I should chase up where we got to with the binding
+> licensing.
+>
+> >
+> > > +%YAML 1.2
+> > > +---
+> >
+> > > +
+> > > +examples:
+> > > +  - |
+> > > +    #include <dt-bindings/clock/aspeed-clock.h>
+> > > +    sdc@1e740000 {
+> > > +            compatible = "aspeed,ast2500-sd-controller";
+> > > +            reg = <0x1e740000 0x100>;
+> > > +            #address-cells = <1>;
+> > > +            #size-cells = <1>;
+> > > +            ranges = <0 0x1e740000 0x10000>;
+> >
+> > According to the datasheet this could be 0x20000. It does not matter
+> > though, as there's nothing in it past 0x300.
+>
+> Good catch.
+>
 
---===============4156837875677353964==
-Content-Type: multipart/signed; micalg=pgp-sha256;
-	protocol="application/pgp-signature"; boundary="kgj75bivo7t7ncfe"
-Content-Disposition: inline
+Are you planning on sending a v6 or you want me to apply this and you
+can post a patch on top?
 
-
---kgj75bivo7t7ncfe
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-
-Hi Jens,
-
-thanks for the feedback.
-
-> Please just drop this patch.
-
-OK, we will do. And patch 4/5? Is it OK or do you need some more time to
-think about it?
-
-Regards,
-
-   Wolfram
-
-
---kgj75bivo7t7ncfe
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAl1eYfcACgkQFA3kzBSg
-KbaLww/+Ke0gLqx1XCJqev3VRm9mm9T+lYoT5L7RlOSw7vRIZSGbZ5TtRLZvKmsY
-Kec20o8ozIAuXKsYsOZ3TC2sMh+ntcnP+Gaadoj0pSB3APqT/KdCae9q31zL5DV5
-JoJUfQs9OKhNT1kiQgSa3lkZdOsFheB0k1e8l0lnZJOga68dRFcOA57Vx0vFm5UC
-dobMpbGoF/aLRfF7rPOdGGy1kZ+8L1+TVLrK97YTlHFrrSlAT2l4HBHAn0gCUOxD
-7naLN2w4PQ1fLHVfEAZQHp5wg1XTYjyBIHj3hafLdvxXFtJZmlZDKQ+cTMFD9Ht1
-EKW18HKFyUhzrdBgmOlizxqybL5lOpJhFXXE9KZsFVgpbKW6+WtPpzmRk02UagF0
-N5zPf7TqQLWzUzxDT9zR4baTy074i+Oazzv5ur9GTCk48JFLdtTNhW4BXCj55ksZ
-lkYmbKBNxfI6V8rZn9zhJNJAXAi9Vq6mHJnTLfIHIvcTT2uWJ67Mg8kbB5I9NJ4K
-APmuIvXoss/cgXllOwkUZO7A6Z4HCbAS4H5M5seSqJ3DBf4wN0DR6ihOlktho0vz
-LTsI5Kqi65RZbtJFfLWmHp2HhHEJbt8zZqvrTivv9uv23lS3tfKLzHReTSW5yJIa
-d40nFCayfsQPfE2+FqK49Nvw4KBcH7q0TtUhwsb4is/iHnV/Nvc=
-=QW4f
------END PGP SIGNATURE-----
-
---kgj75bivo7t7ncfe--
-
---===============4156837875677353964==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-
---===============4156837875677353964==--
+Kind regards
+Uffe
