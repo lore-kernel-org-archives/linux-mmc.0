@@ -1,90 +1,61 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 01/11] dt-bindings: mmc: arasan: Update documentation
- for SD Card Clock
-Date: Thu, 22 Aug 2019 15:38:26 +0200
-Message-ID: <CAPDyKFqdLE7d9uz_KcpO0CihM+QsFyKbNsoDMoNLT2Qy_TmNdw@mail.gmail.com>
-References: <1561958991-21935-1-git-send-email-manish.narani@xilinx.com>
- <1561958991-21935-2-git-send-email-manish.narani@xilinx.com>
- <20190722215404.GA28292@bogus> <MN2PR02MB602907616249FF19C1A737D8C1C70@MN2PR02MB6029.namprd02.prod.outlook.com>
- <CAPDyKFostBKYipTkCsDbggsrux7w8BPqARx7fwRsL1XqEEX2NQ@mail.gmail.com> <MN2PR02MB60299EB8B83C4EA68A0F2B33C1A80@MN2PR02MB6029.namprd02.prod.outlook.com>
+Subject: Re: [PATCH RFC v1 2/2] mmc: host: meson-mx-sdhc: new driver for the
+ Amlogic Meson SDHC host
+Date: Thu, 22 Aug 2019 15:52:24 +0200
+Message-ID: <CAPDyKFoFQ_QvHD-+Mg_VAR5rqs3CM_h7dw25p81JTzE1Yz7d1A@mail.gmail.com>
+References: <20190708173330.13217-1-martin.blumenstingl@googlemail.com> <20190708173330.13217-3-martin.blumenstingl@googlemail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <MN2PR02MB60299EB8B83C4EA68A0F2B33C1A80@MN2PR02MB6029.namprd02.prod.outlook.com>
+In-Reply-To: <20190708173330.13217-3-martin.blumenstingl@googlemail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Manish Narani <MNARANI@xilinx.com>
-Cc: Rob Herring <robh@kernel.org>, "mark.rutland@arm.com" <mark.rutland@arm.com>, "heiko@sntech.de" <heiko@sntech.de>, Michal Simek <michals@xilinx.com>, "adrian.hunter@intel.com" <adrian.hunter@intel.com>, "christoph.muellner@theobroma-systems.com" <christoph.muellner@theobroma-systems.com>, "philipp.tomsich@theobroma-systems.com" <philipp.tomsich@theobroma-systems.com>, "viresh.kumar@linaro.org" <viresh.kumar@linaro.org>, "scott.branden@broadcom.com" <scott.branden@broadcom.com>, "ayaka@soulik.info" <ayaka@soulik.info>, "kernel@esmil.dk" <kernel@esmil.dk>, "tony.xie@rock-chips.com" <tony.xie@rock-chips.com>, Rajan Vaja <RAJANV@xilinx.com>, Jolly Shah <JOLLYS@xilinx.com>, Nava kishore Manne <navam@xilinx.com>, "mdf@kernel.org" <mdf@kernel.org>, olof@
+To: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+Cc: "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>, DTML <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, jianxin.pan@amlogic.com, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Mark Rutland <mark.rutland@arm.com>
 List-Id: linux-mmc@vger.kernel.org
 
+On Mon, 8 Jul 2019 at 19:33, Martin Blumenstingl
+<martin.blumenstingl@googlemail.com> wrote:
+>
+> WiP - only partially working - see performance numbers.
+>
+> Odroid-C1 eMMC (HS-200):
+> Amlogic's vendor driver @ Linux 3.10:
+>   7781351936 bytes (7.8 GB) copied, 134.714 s, 57.8 MB/s
+> This driver:
+>   7781351936 bytes (7.8 GB, 7.2 GiB) copied, 189.02 s, 41.2 MB/s
+>
+> EC-100 eMMC (HS MMC):
+> Amlogic's vendor driver @ Linux 3.10:
+>   15762194432 bytes (16 GB) copied, 422.967 s, 37.3 MB/s
+> This driver:
+>   15762194432 bytes (16 GB, 15 GiB) copied, 9232.65 s, 1.7 MB/s
+>
+> 1) Amlogic's vendor driver does some magic with the divider:
+>       clk_div = input_rate / clk_ios - !(input_rate%clk_ios);
+>       if (!(clk_div & 0x01)) // if even number, turn it to an odd one
+>          clk_div++;
+>    It's not clear to me whether what the reason behind this is, what is
+>    supposed to be achieved with this?
+>
+> 2) The hardcoded RX clock phases are taken from the vendor driver. It
+>    seems that these are only valid when fclk_div3 is used as input
+>    clock (however, there are four more inputs). It's not clear to me how
+>    to calculate the RX clock phases in set_ios based on the input clock
+>    and the ios rate.
+>
+> 3) The hardware supports a timeout IRQ but the max_busy_timeout is not
+>    documented anywhere.
+>
+> Signed-off-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+
+Martin, overall this looks good to me. Once you moved from RFC to a
+formal patch I will check again, of course.
+
+There are a couple of calls to readl_poll_timeout(), for different
+reasons, that I have some questions about, but we can discuss those in
+the next step.
+
 [...]
-
-> > > > > ---
-> > > > >  Documentation/devicetree/bindings/mmc/arasan,sdhci.txt | 15
-> > ++++++++++-
-> > > > ----
-> > > > >  1 file changed, 10 insertions(+), 5 deletions(-)
-> > > > >
-> > > > > diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-> > > > b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-> > > > > index 1edbb04..15c6397 100644
-> > > > > --- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-> > > > > +++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-> > > > > @@ -23,6 +23,10 @@ Required Properties:
-> > > > >    - reg: From mmc bindings: Register location and length.
-> > > > >    - clocks: From clock bindings: Handles to clock inputs.
-> > > > >    - clock-names: From clock bindings: Tuple including "clk_xin" and
-> > "clk_ahb"
-> > > > > +            Apart from these two there is one more optional clock which
-> > > > > +            is "clk_sdcard". This clock represents output clock from
-> > > > > +            controller and card. This must be specified when #clock-cells
-> > > > > +            is specified.
-> > > > >    - interrupts: Interrupt specifier
-> > > > >
-> > > > >  Required Properties for "arasan,sdhci-5.1":
-> > > > > @@ -36,9 +40,10 @@ Optional Properties:
-> > > > >    - clock-output-names: If specified, this will be the name of the card
-> > clock
-> > > > >      which will be exposed by this device.  Required if #clock-cells is
-> > > > >      specified.
-> > > > > -  - #clock-cells: If specified this should be the value <0>.  With this
-> > property
-> > > > > -    in place we will export a clock representing the Card Clock.  This clock
-> > > > > -    is expected to be consumed by our PHY.  You must also specify
-> > > > > +  - #clock-cells: If specified this should be the value <0>. With this
-> > > > > +    property in place we will export one clock representing the Card
-> > > > > +    Clock. This clock is expected to be consumed by our PHY. You must
-> > also
-> > > > > +    specify
-> > > >
-> > > > specify what?
-> > > I think this line was already there, I missed to correct it, Will update in v3.
-> > >
-> > > >
-> > > > The 3rd clock input I assume? This statement means any existing users
-> > > > with 2 clock inputs and #clock-cells are in error now. Is that correct?
-> > > Yes, this is correct. So far there was only one vendor using '#clock-cells'
-> > which is Rockchip. I have sent DT patch (02/11) for that also.
-> > > Here this is needed as earlier implementation isn't correct as suggested by
-> > Uffe. (https://lkml.org/lkml/2019/6/20/486) .
-> >
-> > I am not sure how big of a problem the backwards compatible thingy
-> > with DT is, in general we must not break it. What do you say Manish?
->
-> Though I agree with Uffe on this, there is no other way from my understanding. Please suggest.
->
-> >
-> > As a workaround, would it be possible to use
-> > of_clk_get_from_provider() somehow to address the compatibility issue?
->
-> For this to be used we have to parse 'clkspec' from the DT node and pass the same as an argument to this function. In this case also the DT node needs to be updated, which is same as we have done in this series.
-
-Alright. I guess breaking DTBs for Rockchip platforms isn't
-acceptable, especially if those are already widely deployed, which I
-have no idea of....
-
-And having support for both options in the driver seems not a great
-option either, so it looks like you need to convert back into the old
-v1 approach. Huh, sorry.
 
 Kind regards
 Uffe
