@@ -1,87 +1,36 @@
-From: Heiko Stuebner <heiko@sntech.de>
-Subject: Re: [PATCH v2 01/11] dt-bindings: mmc: arasan: Update documentation for SD Card Clock
-Date: Thu, 22 Aug 2019 20:23:01 +0200
-Message-ID: <4911073.ucheZMAtV3@phil>
-References: <1561958991-21935-1-git-send-email-manish.narani@xilinx.com> <MN2PR02MB60299EB8B83C4EA68A0F2B33C1A80@MN2PR02MB6029.namprd02.prod.outlook.com> <CAPDyKFqdLE7d9uz_KcpO0CihM+QsFyKbNsoDMoNLT2Qy_TmNdw@mail.gmail.com>
+From: "boojin.kim" <boojin.kim@samsung.com>
+Subject: Re: [PATCH 1/9] crypt: Add diskcipher
+Date: Fri, 23 Aug 2019 09:50:41 +0900
+Message-ID: <00da01d5594c$c9d87390$5d895ab0$@samsung.com>
+References: <CGME20190823005041epcas2p3c8550c3fabbd6a6db6429cb06dbbf3a6@epcas2p3.samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFqdLE7d9uz_KcpO0CihM+QsFyKbNsoDMoNLT2Qy_TmNdw@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: Manish Narani <MNARANI@xilinx.com>, Rob Herring <robh@kernel.org>, "mark.rutland@arm.com" <mark.rutland@arm.com>, Michal Simek <michals@xilinx.com>, "adrian.hunter@intel.com" <adrian.hunter@intel.com>, "christoph.muellner@theobroma-systems.com" <christoph.muellner@theobroma-systems.com>, "philipp.tomsich@theobroma-systems.com" <philipp.tomsich@theobroma-systems.com>, "viresh.kumar@linaro.org" <viresh.kumar@linaro.org>, "scott.branden@broadcom.com" <scott.branden@broadcom.com>, "ayaka@soulik.info" <ayaka@soulik.info>, "kernel@esmil.dk" <kernel@esmil.dk>, "tony.xie@rock-chips.com" <tony.xie@rock-chips.com>, Rajan Vaja <RAJANV@xilinx.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-f2fs-devel-bounces@lists.sourceforge.net>
+Content-Language: ko
+List-Unsubscribe: <https://lists.sourceforge.net/lists/options/linux-f2fs-devel>,
+ <mailto:linux-f2fs-devel-request@lists.sourceforge.net?subject=unsubscribe>
+List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=linux-f2fs-devel>
+List-Post: <mailto:linux-f2fs-devel@lists.sourceforge.net>
+List-Help: <mailto:linux-f2fs-devel-request@lists.sourceforge.net?subject=help>
+List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/linux-f2fs-devel>,
+ <mailto:linux-f2fs-devel-request@lists.sourceforge.net?subject=subscribe>
+Errors-To: linux-f2fs-devel-bounces@lists.sourceforge.net
+Cc: 'Ulf Hansson' <ulf.hansson@linaro.org>, 'Mike Snitzer' <snitzer@redhat.com>, dm-devel@redhat.com, 'Andreas Dilger' <adilger.kernel@dilger.ca>, 'Alasdair Kergon' <agk@redhat.com>, 'Eric Biggers' <ebiggers@kernel.org>, linux-samsung-soc@vger.kernel.org, 'Herbert Xu' <herbert@gondor.apana.org.au>, 'Krzysztof Kozlowski' <krzk@kernel.org>, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Kukjin Kim' <kgene@kernel.org>, linux-ext4@vger.kernel.org, linux-block@vger.kernel.org, linux-fscrypt@vger.kernel.org, 'Jaegeuk Kim' <jaegeuk@kernel.org>, linux-arm-kernel@lists.infradead.org, 'Jens Axboe' <axboe@kernel.dk>, 'Theodore Ts'o' <tytso@mit.edu>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net, linux-crypto@vger.kernel.org, linux-fsdevel@vger.kernel.org, "'David S. Miller'" <davem@davemloft.net>
 List-Id: linux-mmc@vger.kernel.org
 
-Am Donnerstag, 22. August 2019, 15:38:26 CEST schrieb Ulf Hansson:
-> [...]
-> 
-> > > > > > ---
-> > > > > >  Documentation/devicetree/bindings/mmc/arasan,sdhci.txt | 15
-> > > ++++++++++-
-> > > > > ----
-> > > > > >  1 file changed, 10 insertions(+), 5 deletions(-)
-> > > > > >
-> > > > > > diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-> > > > > b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-> > > > > > index 1edbb04..15c6397 100644
-> > > > > > --- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-> > > > > > +++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-> > > > > > @@ -23,6 +23,10 @@ Required Properties:
-> > > > > >    - reg: From mmc bindings: Register location and length.
-> > > > > >    - clocks: From clock bindings: Handles to clock inputs.
-> > > > > >    - clock-names: From clock bindings: Tuple including "clk_xin" and
-> > > "clk_ahb"
-> > > > > > +            Apart from these two there is one more optional clock which
-> > > > > > +            is "clk_sdcard". This clock represents output clock from
-> > > > > > +            controller and card. This must be specified when #clock-cells
-> > > > > > +            is specified.
-> > > > > >    - interrupts: Interrupt specifier
-> > > > > >
-> > > > > >  Required Properties for "arasan,sdhci-5.1":
-> > > > > > @@ -36,9 +40,10 @@ Optional Properties:
-> > > > > >    - clock-output-names: If specified, this will be the name of the card
-> > > clock
-> > > > > >      which will be exposed by this device.  Required if #clock-cells is
-> > > > > >      specified.
-> > > > > > -  - #clock-cells: If specified this should be the value <0>.  With this
-> > > property
-> > > > > > -    in place we will export a clock representing the Card Clock.  This clock
-> > > > > > -    is expected to be consumed by our PHY.  You must also specify
-> > > > > > +  - #clock-cells: If specified this should be the value <0>. With this
-> > > > > > +    property in place we will export one clock representing the Card
-> > > > > > +    Clock. This clock is expected to be consumed by our PHY. You must
-> > > also
-> > > > > > +    specify
-> > > > >
-> > > > > specify what?
-> > > > I think this line was already there, I missed to correct it, Will update in v3.
-> > > >
-> > > > >
-> > > > > The 3rd clock input I assume? This statement means any existing users
-> > > > > with 2 clock inputs and #clock-cells are in error now. Is that correct?
-> > > > Yes, this is correct. So far there was only one vendor using '#clock-cells'
-> > > which is Rockchip. I have sent DT patch (02/11) for that also.
-> > > > Here this is needed as earlier implementation isn't correct as suggested by
-> > > Uffe. (https://lkml.org/lkml/2019/6/20/486) .
-> > >
-> > > I am not sure how big of a problem the backwards compatible thingy
-> > > with DT is, in general we must not break it. What do you say Manish?
-> >
-> > Though I agree with Uffe on this, there is no other way from my understanding. Please suggest.
-> >
-> > >
-> > > As a workaround, would it be possible to use
-> > > of_clk_get_from_provider() somehow to address the compatibility issue?
-> >
-> > For this to be used we have to parse 'clkspec' from the DT node and pass the same as an argument to this function. In this case also the DT node needs to be updated, which is same as we have done in this series.
-> 
-> Alright. I guess breaking DTBs for Rockchip platforms isn't
-> acceptable, especially if those are already widely deployed, which I
-> have no idea of....
+On Wed, 22 Aug 2019 at 17:37, Krzysztof Kozlowski <krzk@kernel.org> wrote:
+>
+> Your patch looks corrupted - wrapped by mailer. The easiest way
+> usually is to use git format-patch and git send-email - then you do
+> not have to worry about formatting etc.
+>
+> Best regards,
+> Krzysztof
 
-The arasan sdhci is part of the rk3399, so every SBC using that SoC, but
-also the whole Gru series of ChromeOS devices (Samsung Chromebook Plus
-among them) would be affected.
+I'm using outlook instead of 'git send-email' because of workplace policy.
+It's probably broken when I copied the code.
+Thanks for your notice. I will be more careful.
 
-Heiko
+Thanks for your reply
+Boojin Kim.
