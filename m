@@ -1,146 +1,167 @@
-From: Manish Narani <MNARANI@xilinx.com>
-Subject: RE: [PATCH v2 01/11] dt-bindings: mmc: arasan: Update documentation
- for SD Card Clock
-Date: Fri, 23 Aug 2019 10:01:31 +0000
-Message-ID: <MN2PR02MB6029DEFCD8E9B54AA9610023C1A40@MN2PR02MB6029.namprd02.prod.outlook.com>
-References: <1561958991-21935-1-git-send-email-manish.narani@xilinx.com>
- <MN2PR02MB60299EB8B83C4EA68A0F2B33C1A80@MN2PR02MB6029.namprd02.prod.outlook.com>
- <CAPDyKFqdLE7d9uz_KcpO0CihM+QsFyKbNsoDMoNLT2Qy_TmNdw@mail.gmail.com>
- <4911073.ucheZMAtV3@phil>
+From: Masahiro Yamada <yamada.masahiro@socionext.com>
+Subject: Re: [PATCH v2 2/2] dma-contiguous: Use fallback alloc_pages for
+ single pages
+Date: Fri, 23 Aug 2019 21:56:52 +0900
+Message-ID: <CAK7LNAQfYBCoChMV=MOwcUyVoqRkrPWs7DaWdzDqjBe18gGiAQ@mail.gmail.com>
+References: <20190506223334.1834-1-nicoleotsuka@gmail.com> <20190506223334.1834-3-nicoleotsuka@gmail.com>
+ <CAK7LNARacEorb38mVBw_V-Zvz-znWgBma1AP1-z_5B_xZU4ogg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <4911073.ucheZMAtV3@phil>
-Content-Language: en-US
+In-Reply-To: <CAK7LNARacEorb38mVBw_V-Zvz-znWgBma1AP1-z_5B_xZU4ogg@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Heiko Stuebner <heiko@sntech.de>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: Rob Herring <robh@kernel.org>, "mark.rutland@arm.com" <mark.rutland@arm.com>, Michal Simek <michals@xilinx.com>, "adrian.hunter@intel.com" <adrian.hunter@intel.com>, "christoph.muellner@theobroma-systems.com" <christoph.muellner@theobroma-systems.com>, "philipp.tomsich@theobroma-systems.com" <philipp.tomsich@theobroma-systems.com>, "viresh.kumar@linaro.org" <viresh.kumar@linaro.org>, "scott.branden@broadcom.com" <scott.branden@broadcom.com>, "ayaka@soulik.info" <ayaka@soulik.info>, "kernel@esmil.dk" <kernel@esmil.dk>, "tony.xie@rock-chips.com" <tony.xie@rock-chips.com>, Rajan Vaja <RAJANV@xilinx.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-arm-kernel@lists.infradead.o
+To: Nicolin Chen <nicoleotsuka@gmail.com>, Christoph Hellwig <hch@lst.de>, linux-mmc <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
+Cc: Robin Murphy <robin.murphy@arm.com>, Marek Szyprowski <m.szyprowski@samsung.com>, vdumpa@nvidia.com, Russell King <linux@armlinux.org.uk>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Chris Zankel <chris@zankel.net>, Max Filippov <jcmvbkbc@gmail.com>, Joerg Roedel <joro@8bytes.org>, David Woodhouse <dwmw2@infradead.org>, Tony Lindgren <tony@atomide.com>, Andrew Morton <akpm@linux-foundation.org>, Stephen Rothwell <sfr@canb.auug.org.au>, Thierry Reding <treding@nvidia.com>, Kees Cook <keescook@chromium.org>, iamjoonsoo.kim@lge.com, Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-xtensa@linux-xtensa.
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Heiko/Uffe,
++ linux-mmc, Ulf Hansson, Adrian Hunter,
+
+
+ADMA of SDHCI is not working
+since bd2e75633c8012fc8a7431c82fda66237133bf7e
+
+
+Did anybody see the same problem?
+
+
+Masahiro
 
 
 
-> -----Original Message-----
-> From: Heiko Stuebner <heiko@sntech.de>
-> Sent: Thursday, August 22, 2019 11:53 PM
-> To: Ulf Hansson <ulf.hansson@linaro.org>; linux-mmc@vger.kernel.org
-> Cc: Manish Narani <MNARANI@xilinx.com>; Rob Herring <robh@kernel.org>;
-> mark.rutland@arm.com; Michal Simek <michals@xilinx.com>;
-> adrian.hunter@intel.com; christoph.muellner@theobroma-systems.com;
-> philipp.tomsich@theobroma-systems.com; viresh.kumar@linaro.org;
-> scott.branden@broadcom.com; ayaka@soulik.info; kernel@esmil.dk;
-> tony.xie@rock-chips.com; Rajan Vaja <RAJANV@xilinx.com>;
-> devicetree@vger.kernel.org; linux-kernel@vger.kernel.org; linux-arm-
-> kernel@lists.infradead.org; linux-rockchip@lists.infradead.org
-> Subject: Re: [PATCH v2 01/11] dt-bindings: mmc: arasan: Update
-> documentation for SD Card Clock
->=20
-> Am Donnerstag, 22. August 2019, 15:38:26 CEST schrieb Ulf Hansson:
-> > [...]
+
+On Fri, Aug 23, 2019 at 9:49 PM Masahiro Yamada
+<yamada.masahiro@socionext.com> wrote:
+>
+> On Tue, May 7, 2019 at 7:36 AM Nicolin Chen <nicoleotsuka@gmail.com> wrote:
 > >
-> > > > > > > ---
-> > > > > > >  Documentation/devicetree/bindings/mmc/arasan,sdhci.txt | 15
-> > > > ++++++++++-
-> > > > > > ----
-> > > > > > >  1 file changed, 10 insertions(+), 5 deletions(-)
-> > > > > > >
-> > > > > > > diff --git
-> a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-> > > > > > b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-> > > > > > > index 1edbb04..15c6397 100644
-> > > > > > > --- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-> > > > > > > +++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-> > > > > > > @@ -23,6 +23,10 @@ Required Properties:
-> > > > > > >    - reg: From mmc bindings: Register location and length.
-> > > > > > >    - clocks: From clock bindings: Handles to clock inputs.
-> > > > > > >    - clock-names: From clock bindings: Tuple including "clk_x=
-in" and
-> > > > "clk_ahb"
-> > > > > > > +            Apart from these two there is one more optional =
-clock
-> which
-> > > > > > > +            is "clk_sdcard". This clock represents output cl=
-ock from
-> > > > > > > +            controller and card. This must be specified when=
- #clock-
-> cells
-> > > > > > > +            is specified.
-> > > > > > >    - interrupts: Interrupt specifier
-> > > > > > >
-> > > > > > >  Required Properties for "arasan,sdhci-5.1":
-> > > > > > > @@ -36,9 +40,10 @@ Optional Properties:
-> > > > > > >    - clock-output-names: If specified, this will be the name =
-of the card
-> > > > clock
-> > > > > > >      which will be exposed by this device.  Required if #cloc=
-k-cells is
-> > > > > > >      specified.
-> > > > > > > -  - #clock-cells: If specified this should be the value <0>.=
-  With this
-> > > > property
-> > > > > > > -    in place we will export a clock representing the Card Cl=
-ock.  This
-> clock
-> > > > > > > -    is expected to be consumed by our PHY.  You must also sp=
-ecify
-> > > > > > > +  - #clock-cells: If specified this should be the value <0>.=
- With this
-> > > > > > > +    property in place we will export one clock representing =
-the Card
-> > > > > > > +    Clock. This clock is expected to be consumed by our PHY.=
- You
-> must
-> > > > also
-> > > > > > > +    specify
-> > > > > >
-> > > > > > specify what?
-> > > > > I think this line was already there, I missed to correct it, Will=
- update in
-> v3.
-> > > > >
-> > > > > >
-> > > > > > The 3rd clock input I assume? This statement means any existing=
- users
-> > > > > > with 2 clock inputs and #clock-cells are in error now. Is that =
-correct?
-> > > > > Yes, this is correct. So far there was only one vendor using '#cl=
-ock-cells'
-> > > > which is Rockchip. I have sent DT patch (02/11) for that also.
-> > > > > Here this is needed as earlier implementation isn't correct as su=
-ggested
-> by
-> > > > Uffe. (https://lkml.org/lkml/2019/6/20/486) .
-> > > >
-> > > > I am not sure how big of a problem the backwards compatible thingy
-> > > > with DT is, in general we must not break it. What do you say Manish=
-?
-> > >
-> > > Though I agree with Uffe on this, there is no other way from my
-> understanding. Please suggest.
-> > >
-> > > >
-> > > > As a workaround, would it be possible to use
-> > > > of_clk_get_from_provider() somehow to address the compatibility iss=
-ue?
-> > >
-> > > For this to be used we have to parse 'clkspec' from the DT node and p=
-ass
-> the same as an argument to this function. In this case also the DT node n=
-eeds to
-> be updated, which is same as we have done in this series.
+> > The addresses within a single page are always contiguous, so it's
+> > not so necessary to always allocate one single page from CMA area.
+> > Since the CMA area has a limited predefined size of space, it may
+> > run out of space in heavy use cases, where there might be quite a
+> > lot CMA pages being allocated for single pages.
 > >
-> > Alright. I guess breaking DTBs for Rockchip platforms isn't
-> > acceptable, especially if those are already widely deployed, which I
-> > have no idea of....
->=20
-> The arasan sdhci is part of the rk3399, so every SBC using that SoC, but
-> also the whole Gru series of ChromeOS devices (Samsung Chromebook Plus
-> among them) would be affected.
+> > However, there is also a concern that a device might care where a
+> > page comes from -- it might expect the page from CMA area and act
+> > differently if the page doesn't.
+> >
+> > This patch tries to use the fallback alloc_pages path, instead of
+> > one-page size allocations from the global CMA area in case that a
+> > device does not have its own CMA area. This'd save resources from
+> > the CMA global area for more CMA allocations, and also reduce CMA
+> > fragmentations resulted from trivial allocations.
+> >
+> > Signed-off-by: Nicolin Chen <nicoleotsuka@gmail.com>
+>
+>
+> This commit (bd2e75633c8012fc8a7431c82fda66237133bf7e)
+> broke the DMA for my MMC driver in the following way:
+>
+>
+>
+>
+> [    1.876755] mmc0: ADMA error
+> [    1.883385] mmc0: sdhci: ============ SDHCI REGISTER DUMP ===========
+> [    1.889834] mmc0: sdhci: Sys addr:  0x00000000 | Version:  0x00000002
+> [    1.896284] mmc0: sdhci: Blk size:  0x00007200 | Blk cnt:  0x00000001
+> [    1.902733] mmc0: sdhci: Argument:  0x00000000 | Trn mode: 0x00000013
+> [    1.909182] mmc0: sdhci: Present:   0x01ff02f6 | Host ctl: 0x00000019
+> [    1.915631] mmc0: sdhci: Power:     0x0000000b | Blk gap:  0x00000000
+> [    1.922081] mmc0: sdhci: Wake-up:   0x00000000 | Clock:    0x0000fa07
+> [    1.928530] mmc0: sdhci: Timeout:   0x0000000b | Int stat: 0x00000001
+> [    1.934981] mmc0: sdhci: Int enab:  0x03ff008b | Sig enab: 0x03ff008b
+> [    1.941429] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000001
+> [    1.947880] mmc0: sdhci: Caps:      0x546ec800 | Caps_1:   0x00000000
+> [    1.954329] mmc0: sdhci: Cmd:       0x0000083a | Max curr: 0x00000000
+> [    1.960778] mmc0: sdhci: Resp[0]:   0x00000900 | Resp[1]:  0xffffffff
+> [    1.967229] mmc0: sdhci: Resp[2]:   0x320f5903 | Resp[3]:  0x3fd05e00
+> [    1.973678] mmc0: sdhci: Host ctl2: 0x00000000
+> [    1.978125] mmc0: sdhci: ADMA Err:  0x00000001 | ADMA Ptr: 0x000000013965b200
+> [    1.985271] mmc0: sdhci: ============================================
+> [    1.991758] mmc0: error -5 whilst initialising MMC card
+> [    1.991913] 43fb0000.uart: ttyS1 at MMIO 0x43fb0000 (irq = 0,
+> base_baud = 768000) is a 16550A
+> [    2.011011] hctosys: unable to open rtc device (rtc0)
+> [    2.017694] Freeing unused kernel memory: 2368K
+> [    2.027131] Run /init as init process
+> Starting syslogd: OK
+> Starting klogd: OK
+> Initializing random number generator... [    2.074399] random: dd:
+> uninitialized urandom read (512 bytes read)
+> done.
+> Starting network: OK
+> [    2.109593] mmc0: ADMA error
+> [    2.112488] mmc0: sdhci: ============ SDHCI REGISTER DUMP ===========
+> [    2.118941] mmc0: sdhci: Sys addr:  0x00000000 | Version:  0x00000002
+> [    2.125389] mmc0: sdhci: Blk size:  0x00007200 | Blk cnt:  0x00000001
+> [    2.131840] mmc0: sdhci: Argument:  0x00000000 | Trn mode: 0x00000013
+> [    2.138289] mmc0: sdhci: Present:   0x01ff02f6 | Host ctl: 0x00000019
+> [    2.144738] mmc0: sdhci: Power:     0x0000000b | Blk gap:  0x00000000
+> [    2.151188] mmc0: sdhci: Wake-up:   0x00000000 | Clock:    0x00004e47
+> [    2.157637] mmc0: sdhci: Timeout:   0x0000000b | Int stat: 0x00000001
+> [    2.164087] mmc0: sdhci: Int enab:  0x03ff008b | Sig enab: 0x03ff008b
+> [    2.170536] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000001
+> [    2.176987] mmc0: sdhci: Caps:      0x546ec800 | Caps_1:   0x00000000
+> [    2.183435] mmc0: sdhci: Cmd:       0x0000083a | Max curr: 0x00000000
+> [    2.189886] mmc0: sdhci: Resp[0]:   0x00000900 | Resp[1]:  0xffffffff
+> [    2.196335] mmc0: sdhci: Resp[2]:   0x320f5903 | Resp[3]:  0x3fd05e00
+> [    2.202784] mmc0: sdhci: Host ctl2: 0x00000000
+> [    2.207232] mmc0: sdhci: ADMA Err:  0x00000001 | ADMA Ptr: 0x000000013965b200
+> [    2.214379] mmc0: sdhci: ============================================
+>
+> [    2.220881] mmc0: error -5 whilst initialising MMC card
+> Welcome to Buildroot
+> buildroot login: [    2.332786] mmc0: ADMA error
+> [    2.335668] mmc0: sdhci: ============ SDHCI REGISTER DUMP ===========
+> [    2.342119] mmc0: sdhci: Sys addr:  0x00000000 | Version:  0x00000002
+> [    2.348568] mmc0: sdhci: Blk size:  0x00007200 | Blk cnt:  0x00000001
+> [    2.355018] mmc0: sdhci: Argument:  0x00000000 | Trn mode: 0x00000013
+> [    2.361468] mmc0: sdhci: Present:   0x01ff02f6 | Host ctl: 0x00000019
+> [    2.367917] mmc0: sdhci: Power:     0x0000000b | Blk gap:  0x00000000
+> [    2.374367] mmc0: sdhci: Wake-up:   0x00000000 | Clock:    0x0000f447
+> [    2.380816] mmc0: sdhci: Timeout:   0x0000000b | Int stat: 0x00000001
+> [    2.387267] mmc0: sdhci: Int enab:  0x03ff008b | Sig enab: 0x03ff008b
+> [    2.393716] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000001
+> [    2.400166] mmc0: sdhci: Caps:      0x546ec800 | Caps_1:   0x00000000
+> [    2.406615] mmc0: sdhci: Cmd:       0x0000083a | Max curr: 0x00000000
+> [    2.413065] mmc0: sdhci: Resp[0]:   0x00000900 | Resp[1]:  0xffffffff
+> [    2.419515] mmc0: sdhci: Resp[2]:   0x320f5903 | Resp[3]:  0x3fd05e00
+> [    2.425963] mmc0: sdhci: Host ctl2: 0x00000000
+> [    2.430412] mmc0: sdhci: ADMA Err:  0x00000001 | ADMA Ptr: 0x000000013965b200
+> [    2.437557] mmc0: sdhci: ============================================
+> [    2.444031] mmc0: error -5 whilst initialising MMC card
+> [    2.572203] mmc0: ADMA error
+> [    2.575089] mmc0: sdhci: ============ SDHCI REGISTER DUMP ===========
+> [    2.581540] mmc0: sdhci: Sys addr:  0x00000000 | Version:  0x00000002
+> [    2.587989] mmc0: sdhci: Blk size:  0x00007200 | Blk cnt:  0x00000001
+> [    2.594439] mmc0: sdhci: Argument:  0x00000000 | Trn mode: 0x00000013
+> [    2.600889] mmc0: sdhci: Present:   0x01ef02f6 | Host ctl: 0x00000019
+> [    2.607339] mmc0: sdhci: Power:     0x0000000b | Blk gap:  0x00000000
+> [    2.613788] mmc0: sdhci: Wake-up:   0x00000000 | Clock:    0x0000e8c7
+> [    2.620237] mmc0: sdhci: Timeout:   0x0000000b | Int stat: 0x00000001
+> [    2.626686] mmc0: sdhci: Int enab:  0x03ff008b | Sig enab: 0x03ff008b
+> [    2.633137] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000001
+> [    2.639586] mmc0: sdhci: Caps:      0x546ec800 | Caps_1:   0x00000000
+> [    2.646036] mmc0: sdhci: Cmd:       0x0000083a | Max curr: 0x00000000
+> [    2.652485] mmc0: sdhci: Resp[0]:   0x00000900 | Resp[1]:  0xffffffff
+> [    2.658936] mmc0: sdhci: Resp[2]:   0x320f5903 | Resp[3]:  0x3fd05e00
+> [    2.665384] mmc0: sdhci: Host ctl2: 0x00000000
+> [    2.669832] mmc0: sdhci: ADMA Err:  0x00000001 | ADMA Ptr: 0x000000013965b200
+> [    2.676979] mmc0: sdhci: ============================================
+> [    2.683450] mmc0: error -5 whilst initialising MMC card
+>
+> CTRL-A Z for help | 115200 8N1 | NOR | Minicom 2.7.1 | VT102 | Offline
+> | ttyUSB0
+>
+> Reverting this commit fixed the problem.
+>
+>
+>
+> --
+> Best Regards
+> Masahiro Yamada
 
-Thanks for confirming. This will be taken care of. I will go back to v1 cha=
-nges and will send v3.
 
-Thanks,
-Manish
+
+-- 
+Best Regards
+Masahiro Yamada
