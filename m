@@ -1,88 +1,38 @@
-From: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Subject: Re: [PATCH RFC v1 2/2] mmc: host: meson-mx-sdhc: new driver for the
- Amlogic Meson SDHC host
-Date: Sat, 24 Aug 2019 23:34:31 +0200
-Message-ID: <CAFBinCBOhKezUQMJb4eRHTbzXOhucxuAJydDe4H5JyRFgOxS-w@mail.gmail.com>
-References: <20190708173330.13217-1-martin.blumenstingl@googlemail.com>
- <20190708173330.13217-3-martin.blumenstingl@googlemail.com>
- <CAPDyKFoFQ_QvHD-+Mg_VAR5rqs3CM_h7dw25p81JTzE1Yz7d1A@mail.gmail.com>
+From: Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>
+Subject: Re: [PATCH v2 2/2] dma-contiguous: Use fallback alloc_pages for
+	single pages
+Date: Sun, 25 Aug 2019 03:10:25 +0200
+Message-ID: <20190825011025.GA23410@lst.de>
+References: <20190506223334.1834-1-nicoleotsuka@gmail.com>
+	<20190506223334.1834-3-nicoleotsuka@gmail.com>
+	<CAK7LNARacEorb38mVBw_V-Zvz-znWgBma1AP1-z_5B_xZU4ogg@mail.gmail.com>
+	<CAK7LNAQfYBCoChMV=MOwcUyVoqRkrPWs7DaWdzDqjBe18gGiAQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <CAPDyKFoFQ_QvHD-+Mg_VAR5rqs3CM_h7dw25p81JTzE1Yz7d1A@mail.gmail.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Mark Rutland <mark.rutland@arm.com>, DTML <devicetree@vger.kernel.org>, jianxin.pan@amlogic.com, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <CAK7LNAQfYBCoChMV=MOwcUyVoqRkrPWs7DaWdzDqjBe18gGiAQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: Masahiro Yamada <yamada.masahiro-uWyLwvC0a2jby3iVrkZq2A@public.gmane.org>
+Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Max Filippov <jcmvbkbc-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>, Stephen Rothwell <sfr-3FnU+UHB4dNDw9hX6IcOSA@public.gmane.org>, Russell King <linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org>, Thierry Reding <treding-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, linux-xtensa-PjhNF2WwrV/0Sa2dR60CXw@public.gmane.org, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Nicolin Chen <nicoleotsuka-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, linux-arm-kernel <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Chris Zankel <chris-YvXeqwSYzG2sTnJN9+BGXg@public.gmane.org>, Wolfram Sang <wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org>, Robin Murphy <robin.murphy-5wv7dgnIgG8@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, iamjoonsoo.kim-Hm3cg6mZ9cc@public.gmane.org, David Woodhouse <dwmw2@infr>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Ulf,
+On Fri, Aug 23, 2019 at 09:56:52PM +0900, Masahiro Yamada wrote:
+> + linux-mmc, Ulf Hansson, Adrian Hunter,
+> 
+> 
+> ADMA of SDHCI is not working
+> since bd2e75633c8012fc8a7431c82fda66237133bf7e
 
-On Thu, Aug 22, 2019 at 3:53 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
->
-> On Mon, 8 Jul 2019 at 19:33, Martin Blumenstingl
-> <martin.blumenstingl@googlemail.com> wrote:
-> >
-> > WiP - only partially working - see performance numbers.
-> >
-> > Odroid-C1 eMMC (HS-200):
-> > Amlogic's vendor driver @ Linux 3.10:
-> >   7781351936 bytes (7.8 GB) copied, 134.714 s, 57.8 MB/s
-> > This driver:
-> >   7781351936 bytes (7.8 GB, 7.2 GiB) copied, 189.02 s, 41.2 MB/s
-> >
-> > EC-100 eMMC (HS MMC):
-> > Amlogic's vendor driver @ Linux 3.10:
-> >   15762194432 bytes (16 GB) copied, 422.967 s, 37.3 MB/s
-> > This driver:
-> >   15762194432 bytes (16 GB, 15 GiB) copied, 9232.65 s, 1.7 MB/s
-> >
-> > 1) Amlogic's vendor driver does some magic with the divider:
-> >       clk_div = input_rate / clk_ios - !(input_rate%clk_ios);
-> >       if (!(clk_div & 0x01)) // if even number, turn it to an odd one
-> >          clk_div++;
-> >    It's not clear to me whether what the reason behind this is, what is
-> >    supposed to be achieved with this?
-> >
-> > 2) The hardcoded RX clock phases are taken from the vendor driver. It
-> >    seems that these are only valid when fclk_div3 is used as input
-> >    clock (however, there are four more inputs). It's not clear to me how
-> >    to calculate the RX clock phases in set_ios based on the input clock
-> >    and the ios rate.
-> >
-> > 3) The hardware supports a timeout IRQ but the max_busy_timeout is not
-> >    documented anywhere.
-> >
-> > Signed-off-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
->
-> Martin, overall this looks good to me. Once you moved from RFC to a
-> formal patch I will check again, of course.
-OK, great
+Does it work for you with this commit:
 
-in the meantime I got answers to my questions (off-list) from Jianxin.
-
-also someone asked me (just this week) for the .dts patches so he
-could test on his own board (I have them ready but didn't send them
-yet)
-unfortunately he ran into some data corruption on writing
-I can reproduce it but I didn't have time to debug this yet
-
-I'll send an updated version once I have resolved that - as non-RFC
-
-> There are a couple of calls to readl_poll_timeout(), for different
-> reasons, that I have some questions about, but we can discuss those in
-> the next step.
-sure.
-feel free to ask now since I still have to debug that data corruption
-problem as stated above
-
-
-Martin
+http://git.infradead.org/users/hch/dma-mapping.git/commitdiff/90ae409f9eb3bcaf38688f9ec22375816053a08e
