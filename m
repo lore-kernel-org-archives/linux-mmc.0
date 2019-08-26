@@ -1,42 +1,53 @@
-From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: Re: [PATCH v2 2/2] dma-contiguous: Use fallback alloc_pages for
- single pages
-Date: Mon, 26 Aug 2019 11:05:00 +0900
-Message-ID: <CAK7LNAQb1ZHr=DiHLNeNRaQExMuXdDOV4sFghoGbco_Q=Qzb8g@mail.gmail.com>
-References: <20190506223334.1834-1-nicoleotsuka@gmail.com> <20190506223334.1834-3-nicoleotsuka@gmail.com>
- <CAK7LNARacEorb38mVBw_V-Zvz-znWgBma1AP1-z_5B_xZU4ogg@mail.gmail.com>
- <CAK7LNAQfYBCoChMV=MOwcUyVoqRkrPWs7DaWdzDqjBe18gGiAQ@mail.gmail.com> <20190825011025.GA23410@lst.de>
+From: Andrew Jeffery <andrew@aj.id.au>
+Subject: [PATCH] dt-bindings: mmc: aspeed: Update example ranges property
+Date: Mon, 26 Aug 2019 11:46:19 +0930
+Message-ID: <20190826021620.11915-1-andrew@aj.id.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190825011025.GA23410@lst.de>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Christoph Hellwig <hch@lst.de>
-Cc: Nicolin Chen <nicoleotsuka@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Robin Murphy <robin.murphy@arm.com>, Marek Szyprowski <m.szyprowski@samsung.com>, vdumpa@nvidia.com, Russell King <linux@armlinux.org.uk>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Chris Zankel <chris@zankel.net>, Max Filippov <jcmvbkbc@gmail.com>, Joerg Roedel <joro@8bytes.org>, David Woodhouse <dwmw2@infradead.org>, Tony Lindgren <tony@atomide.com>, Andrew Morton <akpm@linux-foundation.org>, Stephen Rothwell <sfr@canb.auug.org.au>, Thierry Reding <treding@nvidia.com>, Kees Cook <keescook@chromium.org>, iamjoonsoo.kim@lge.com, Wolfram Sang <wsa+renesas>
+To: linux-mmc@vger.kernel.org
+Cc: Andrew Jeffery <andrew@aj.id.au>, ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, joel@jms.id.au, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-aspeed@lists.ozlabs.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Christoph,
+The example node in the binding uses the AST2500 compatible string for
+the SD controller with a 64kiB ranges property, but the SD controller is
+allocated 128kiB of MMIO space according to the AST2500 datasheet. Fix
+the example to correctly reflect the hardware in the AST2500, however it
+should be noted that the MMIO region is reduced to 64kiB in the AST2600
+where a second SD controller block has been introduced into the address
+space.
 
-On Sun, Aug 25, 2019 at 10:10 AM Christoph Hellwig <hch@lst.de> wrote:
->
-> On Fri, Aug 23, 2019 at 09:56:52PM +0900, Masahiro Yamada wrote:
-> > + linux-mmc, Ulf Hansson, Adrian Hunter,
-> >
-> >
-> > ADMA of SDHCI is not working
-> > since bd2e75633c8012fc8a7431c82fda66237133bf7e
->
-> Does it work for you with this commit:
->
-> http://git.infradead.org/users/hch/dma-mapping.git/commitdiff/90ae409f9eb3bcaf38688f9ec22375816053a08e
+Also add the IBM copyright header that I left out of the initial patch.
 
+Suggested-by: Joel Stanley <joel@jms.id.au>
+Signed-off-by: Andrew Jeffery <andrew@aj.id.au>
+---
+Hi Ulf, this is the follow-up fix as discussed here:
 
-This is included in v5.3-rc6
-so I tested it.
+http://patchwork.ozlabs.org/patch/1143090/
 
-No, it did not fix the problem.
+ Documentation/devicetree/bindings/mmc/aspeed,sdhci.yaml | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-
---
-Best Regards
-Masahiro Yamada
+diff --git a/Documentation/devicetree/bindings/mmc/aspeed,sdhci.yaml b/Documentation/devicetree/bindings/mmc/aspeed,sdhci.yaml
+index 570f8c72662b..200de9396036 100644
+--- a/Documentation/devicetree/bindings/mmc/aspeed,sdhci.yaml
++++ b/Documentation/devicetree/bindings/mmc/aspeed,sdhci.yaml
+@@ -1,4 +1,5 @@
+ # SPDX-License-Identifier: GPL-2.0-or-later
++# Copyright 2019 IBM Corp.
+ %YAML 1.2
+ ---
+ $id: http://devicetree.org/schemas/mmc/aspeed,sdhci.yaml#
+@@ -84,7 +85,7 @@ examples:
+             reg = <0x1e740000 0x100>;
+             #address-cells = <1>;
+             #size-cells = <1>;
+-            ranges = <0 0x1e740000 0x10000>;
++            ranges = <0 0x1e740000 0x20000>;
+             clocks = <&syscon ASPEED_CLK_GATE_SDCLK>;
+ 
+             sdhci0: sdhci@100 {
+-- 
+2.20.1
