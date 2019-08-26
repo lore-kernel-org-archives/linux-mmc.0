@@ -1,68 +1,42 @@
-From: =?UTF-8?q?Alejandro=20Gonz=C3=A1lez?=
-        <alejandro.gonzalez.correo@gmail.com>
-Subject: [PATCH] mmc: sunxi: fix unusuable eMMC on some H6 boards by disabling DDR
-Date: Sun, 25 Aug 2019 17:05:58 +0200
-Message-ID: <20190825150558.15173-1-alejandro.gonzalez.correo@gmail.com>
+From: Masahiro Yamada <yamada.masahiro@socionext.com>
+Subject: Re: [PATCH v2 2/2] dma-contiguous: Use fallback alloc_pages for
+ single pages
+Date: Mon, 26 Aug 2019 11:05:00 +0900
+Message-ID: <CAK7LNAQb1ZHr=DiHLNeNRaQExMuXdDOV4sFghoGbco_Q=Qzb8g@mail.gmail.com>
+References: <20190506223334.1834-1-nicoleotsuka@gmail.com> <20190506223334.1834-3-nicoleotsuka@gmail.com>
+ <CAK7LNARacEorb38mVBw_V-Zvz-znWgBma1AP1-z_5B_xZU4ogg@mail.gmail.com>
+ <CAK7LNAQfYBCoChMV=MOwcUyVoqRkrPWs7DaWdzDqjBe18gGiAQ@mail.gmail.com> <20190825011025.GA23410@lst.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20190825011025.GA23410@lst.de>
 Sender: linux-kernel-owner@vger.kernel.org
-To: ulf.hansson@linaro.org, maxime.ripard@bootlin.com, wens@csie.org, linus.walleij@linaro.org, gregkh@linuxfoundation.org, tglx@linutronix.de, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
-Cc: =?UTF-8?q?Alejandro=20Gonz=C3=A1lez?= <alejandro.gonzalez.correo@gmail.com>, linux-sunxi@googlegroups.com
+To: Christoph Hellwig <hch@lst.de>
+Cc: Nicolin Chen <nicoleotsuka@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Robin Murphy <robin.murphy@arm.com>, Marek Szyprowski <m.szyprowski@samsung.com>, vdumpa@nvidia.com, Russell King <linux@armlinux.org.uk>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Chris Zankel <chris@zankel.net>, Max Filippov <jcmvbkbc@gmail.com>, Joerg Roedel <joro@8bytes.org>, David Woodhouse <dwmw2@infradead.org>, Tony Lindgren <tony@atomide.com>, Andrew Morton <akpm@linux-foundation.org>, Stephen Rothwell <sfr@canb.auug.org.au>, Thierry Reding <treding@nvidia.com>, Kees Cook <keescook@chromium.org>, iamjoonsoo.kim@lge.com, Wolfram Sang <wsa+renesas>
 List-Id: linux-mmc@vger.kernel.org
 
-Some Allwinner H6 boards have timing problems when dealing with
-DDR-capable eMMC cards. These boards include the Pine H64 and Tanix TX6.
+Christoph,
 
-These timing problems result in out of sync communication between the
-driver and the eMMC, which renders the memory unsuable for every
-operation but some basic commmands, like reading the status register.
+On Sun, Aug 25, 2019 at 10:10 AM Christoph Hellwig <hch@lst.de> wrote:
+>
+> On Fri, Aug 23, 2019 at 09:56:52PM +0900, Masahiro Yamada wrote:
+> > + linux-mmc, Ulf Hansson, Adrian Hunter,
+> >
+> >
+> > ADMA of SDHCI is not working
+> > since bd2e75633c8012fc8a7431c82fda66237133bf7e
+>
+> Does it work for you with this commit:
+>
+> http://git.infradead.org/users/hch/dma-mapping.git/commitdiff/90ae409f9eb3bcaf38688f9ec22375816053a08e
 
-The cause of these timing problems is not yet well known, but they go
-away by disabling DDR mode operation in the driver. Like on some H5
-boards, it might be that the traces are not precise enough to support
-these speeds. However, Jernej Skrabec compared the BSP driver with this
-driver, and found that the BSP driver configures pinctrl to operate at
-1.8 V when entering DDR mode (although 3.3 V operation is supported), while
-the mainline kernel lacks any mechanism to switch voltages dynamically.
-Finally, other possible cause might be some timing parameter that is
-different on the H6 with respect to other SoCs.
 
-Therefore, as this fix works reliably, the kernel lacks the required
-dynamic pinctrl control for now and a slow eMMC is better than a not
-working eMMC, just disable DDR operation for now on H6-compatible
-devices.
+This is included in v5.3-rc6
+so I tested it.
 
-Signed-off-by: Alejandro González <alejandro.gonzalez.correo@gmail.com>
----
- drivers/mmc/host/sunxi-mmc.c | 9 ++++++---
- 1 file changed, 6 insertions(+), 3 deletions(-)
+No, it did not fix the problem.
 
-diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-index d577a6b0ceae..dac57d76d009 100644
---- a/drivers/mmc/host/sunxi-mmc.c
-+++ b/drivers/mmc/host/sunxi-mmc.c
-@@ -1395,14 +1395,17 @@ static int sunxi_mmc_probe(struct platform_device *pdev)
- 
- 	/*
- 	 * Some H5 devices do not have signal traces precise enough to
--	 * use HS DDR mode for their eMMC chips.
-+	 * use HS DDR mode for their eMMC chips. Other H6 devices operate
-+	 * unreliably on HS DDR mode, too.
- 	 *
- 	 * We still enable HS DDR modes for all the other controller
--	 * variants that support them.
-+	 * variants that support them properly.
- 	 */
- 	if ((host->cfg->clk_delays || host->use_new_timings) &&
- 	    !of_device_is_compatible(pdev->dev.of_node,
--				     "allwinner,sun50i-h5-emmc"))
-+				     "allwinner,sun50i-h5-emmc") &&
-+	    !of_device_is_compatible(pdev->dev.of_node,
-+				     "allwinner,sun50i-h6-emmc"))
- 		mmc->caps      |= MMC_CAP_1_8V_DDR | MMC_CAP_3_3V_DDR;
- 
- 	ret = mmc_of_parse(mmc);
--- 
-2.20.1
+
+--
+Best Regards
+Masahiro Yamada
