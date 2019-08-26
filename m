@@ -1,41 +1,43 @@
-From: Chunyan Zhang <zhang.lyra@gmail.com>
-Subject: [PATCH 3/5] mmc: sdhci-sprd: add SDHCI_QUIRK2_PRESET_VALUE_BROKEN
-Date: Mon, 26 Aug 2019 11:18:28 +0800
-Message-ID: <20190826031830.30931-4-zhang.lyra@gmail.com>
+From: Baolin Wang <baolin.wang@linaro.org>
+Subject: Re: [PATCH 0/5] a few fixes for sprd's sd host controller
+Date: Mon, 26 Aug 2019 13:56:44 +0800
+Message-ID: <CAMz4ku+o9KiqV4fJ17v4JwQCaTSxz1F6e+FBOnDssaVg1HztVw@mail.gmail.com>
 References: <20190826031830.30931-1-zhang.lyra@gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20190826031830.30931-1-zhang.lyra@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Orson Zhai <orsonzhai@gmail.com>, Baolin Wang <baolin.wang@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Chunyan Zhang <zhang.lyra@gmail.com>
+To: Chunyan Zhang <zhang.lyra@gmail.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Orson Zhai <orsonzhai@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Chunyan Zhang <chunyan.zhang@unisoc.com>
+On Mon, 26 Aug 2019 at 11:18, Chunyan Zhang <zhang.lyra@gmail.com> wrote:
+>
+> From: Chunyan Zhang <chunyan.zhang@unisoc.com>
+>
+> With this patch-set, both sd card and mmc can be setup.  This patch-set was
+> verified on Unisoc's Whale2 and another mobile phone platform SC9863A.
 
-The bit of PRESET_VAL_ENABLE in HOST_CONTROL2 register is reserved on
-sprd's sd host controller, set quirk2 to disable configuring this.
+Tested on my board, so for the whole patch set.
+Reviewed-by: Baolin Wang <baolin.wang@linaro.org>
+Tested-by: Baolin Wang <baolin.wang@linaro.org>
 
-Signed-off-by: Chunyan Zhang <chunyan.zhang@unisoc.com>
-Signed-off-by: Chunyan Zhang <zhang.lyra@gmail.com>
----
- drivers/mmc/host/sdhci-sprd.c | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+> Chunyan Zhang (5):
+>   mmc: sdhci-sprd: fixed incorrect clock divider
+>   mmc: sdhci: sprd: add get_ro hook function
+>   mmc: sdhci: sprd: add SDHCI_QUIRK2_PRESET_VALUE_BROKEN
+>   mms: sdhci: sprd: add SDHCI_QUIRK_BROKEN_CARD_DETECTION
+>   mmc: sdhci: sprd: clear the UHS-I modes read from registers
+>
+>  drivers/mmc/host/sdhci-sprd.c | 30 +++++++++++++++++++++++++-----
+>  1 file changed, 25 insertions(+), 5 deletions(-)
+>
+> --
+> 2.20.1
+>
 
-diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
-index 90cb2af91159..27d0b57f3f89 100644
---- a/drivers/mmc/host/sdhci-sprd.c
-+++ b/drivers/mmc/host/sdhci-sprd.c
-@@ -510,7 +510,8 @@ static void sdhci_sprd_phy_param_parse(struct sdhci_sprd_host *sprd_host,
- static const struct sdhci_pltfm_data sdhci_sprd_pdata = {
- 	.quirks = SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK,
- 	.quirks2 = SDHCI_QUIRK2_BROKEN_HS200 |
--		   SDHCI_QUIRK2_USE_32BIT_BLK_CNT,
-+		   SDHCI_QUIRK2_USE_32BIT_BLK_CNT |
-+		   SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
- 	.ops = &sdhci_sprd_ops,
- };
- 
+
 -- 
-2.20.1
+Baolin Wang
+Best Regards
