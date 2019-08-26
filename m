@@ -1,10 +1,12 @@
 From: Chunyan Zhang <zhang.lyra@gmail.com>
-Subject: [PATCH 0/5] a few fixes for sprd's sd host controller
-Date: Mon, 26 Aug 2019 11:18:25 +0800
-Message-ID: <20190826031830.30931-1-zhang.lyra@gmail.com>
+Subject: [PATCH 1/5] mmc: sdhci-sprd: fixed incorrect clock divider
+Date: Mon, 26 Aug 2019 11:18:26 +0800
+Message-ID: <20190826031830.30931-2-zhang.lyra@gmail.com>
+References: <20190826031830.30931-1-zhang.lyra@gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20190826031830.30931-1-zhang.lyra@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Orson Zhai <orsonzhai@gmail.com>, Baolin Wang <baolin.wang@linaro.org>
 Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Chunyan Zhang <zhang.lyra@gmail.com>
@@ -12,18 +14,36 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Chunyan Zhang <chunyan.zhang@unisoc.com>
 
-With this patch-set, both sd card and mmc can be setup.  This patch-set was
-verified on Unisoc's Whale2 and another mobile phone platform SC9863A.
+The register SDHCI_CLOCK_CONTROL should be cleared before config clock
+divider, otherwise the frequency configured maybe lower than we
+expected.
 
-Chunyan Zhang (5):
-  mmc: sdhci-sprd: fixed incorrect clock divider
-  mmc: sdhci: sprd: add get_ro hook function
-  mmc: sdhci: sprd: add SDHCI_QUIRK2_PRESET_VALUE_BROKEN
-  mms: sdhci: sprd: add SDHCI_QUIRK_BROKEN_CARD_DETECTION
-  mmc: sdhci: sprd: clear the UHS-I modes read from registers
+Fixes: fb8bd90f83c4 ("mmc: sdhci-sprd: Add Spreadtrum's initial host
+controller")
+Signed-off-by: Chunyan Zhang <chunyan.zhang@unisoc.com>
+Signed-off-by: Chunyan Zhang <zhang.lyra@gmail.com>
+---
+ drivers/mmc/host/sdhci-sprd.c | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
 
- drivers/mmc/host/sdhci-sprd.c | 30 +++++++++++++++++++++++++-----
- 1 file changed, 25 insertions(+), 5 deletions(-)
-
+diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
+index 6ee340a3fb3a..d5871865a1e9 100644
+--- a/drivers/mmc/host/sdhci-sprd.c
++++ b/drivers/mmc/host/sdhci-sprd.c
+@@ -217,10 +217,11 @@ static inline void _sdhci_sprd_set_clock(struct sdhci_host *host,
+ 	struct sdhci_sprd_host *sprd_host = TO_SPRD_HOST(host);
+ 	u32 div, val, mask;
+ 
+-	div = sdhci_sprd_calc_div(sprd_host->base_rate, clk);
++	sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
+ 
+-	clk |= ((div & 0x300) >> 2) | ((div & 0xFF) << 8);
+-	sdhci_enable_clk(host, clk);
++	div = sdhci_sprd_calc_div(sprd_host->base_rate, clk);
++	div = ((div & 0x300) >> 2) | ((div & 0xFF) << 8);
++	sdhci_enable_clk(host, div);
+ 
+ 	/* enable auto gate sdhc_enable_auto_gate */
+ 	val = sdhci_readl(host, SDHCI_SPRD_REG_32_BUSY_POSI);
 -- 
 2.20.1
