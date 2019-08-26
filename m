@@ -1,7 +1,7 @@
 From: Chunyan Zhang <zhang.lyra@gmail.com>
-Subject: [PATCH 2/5] mmc: sdhci-sprd: add get_ro hook function
-Date: Mon, 26 Aug 2019 11:18:27 +0800
-Message-ID: <20190826031830.30931-3-zhang.lyra@gmail.com>
+Subject: [PATCH 4/5] mms: sdhci-sprd: add SDHCI_QUIRK_BROKEN_CARD_DETECTION
+Date: Mon, 26 Aug 2019 11:18:29 +0800
+Message-ID: <20190826031830.30931-5-zhang.lyra@gmail.com>
 References: <20190826031830.30931-1-zhang.lyra@gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -14,37 +14,28 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Chunyan Zhang <chunyan.zhang@unisoc.com>
 
-sprd's sd host controller doesn't support write protect to sd card.
+sprd's sd host controller doesn't support detection to
+card insert or remove.
 
 Signed-off-by: Chunyan Zhang <chunyan.zhang@unisoc.com>
 Signed-off-by: Chunyan Zhang <zhang.lyra@gmail.com>
 ---
- drivers/mmc/host/sdhci-sprd.c | 6 ++++++
- 1 file changed, 6 insertions(+)
+ drivers/mmc/host/sdhci-sprd.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
-index d5871865a1e9..90cb2af91159 100644
+index 27d0b57f3f89..1fecf055682c 100644
 --- a/drivers/mmc/host/sdhci-sprd.c
 +++ b/drivers/mmc/host/sdhci-sprd.c
-@@ -374,6 +374,11 @@ static unsigned int sdhci_sprd_get_max_timeout_count(struct sdhci_host *host)
- 	return 1 << 31;
+@@ -508,7 +508,8 @@ static void sdhci_sprd_phy_param_parse(struct sdhci_sprd_host *sprd_host,
  }
  
-+static unsigned int sdhci_sprd_get_ro(struct sdhci_host *host)
-+{
-+	return 0;
-+}
-+
- static struct sdhci_ops sdhci_sprd_ops = {
- 	.read_l = sdhci_sprd_readl,
- 	.write_l = sdhci_sprd_writel,
-@@ -386,6 +391,7 @@ static struct sdhci_ops sdhci_sprd_ops = {
- 	.set_uhs_signaling = sdhci_sprd_set_uhs_signaling,
- 	.hw_reset = sdhci_sprd_hw_reset,
- 	.get_max_timeout_count = sdhci_sprd_get_max_timeout_count,
-+	.get_ro = sdhci_sprd_get_ro,
- };
- 
- static void sdhci_sprd_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ static const struct sdhci_pltfm_data sdhci_sprd_pdata = {
+-	.quirks = SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK,
++	.quirks = SDHCI_QUIRK_BROKEN_CARD_DETECTION |
++		  SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK,
+ 	.quirks2 = SDHCI_QUIRK2_BROKEN_HS200 |
+ 		   SDHCI_QUIRK2_USE_32BIT_BLK_CNT |
+ 		   SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
 -- 
 2.20.1
