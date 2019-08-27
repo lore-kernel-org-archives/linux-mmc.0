@@ -1,60 +1,62 @@
-From: "Andrew Jeffery" <andrew@aj.id.au>
-Subject: =?UTF-8?Q?Re:_[PATCH_-next]_mmc:_aspeed:_Fix_return_value_check_in_aspee?=
- =?UTF-8?Q?d=5Fsdc=5Fprobe()?=
-Date: Tue, 27 Aug 2019 09:10:37 +0930
-Message-ID: <e23e0193-51c8-41a2-95f7-d48f0ef00eb5@www.fastmail.com>
-References: <20190826120013.183435-1-weiyongjun1@huawei.com>
+From: Ben Chuang <benchuanggli@gmail.com>
+Subject: [PATCH V6 0/5] Add Genesys Logic GL975x support
+Date: Tue, 27 Aug 2019 08:31:45 +0800
+Message-ID: <20190827003145.2249-1-benchuanggli@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20190826120013.183435-1-weiyongjun1@huawei.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Wei Yongjun <weiyongjun1@huawei.com>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Joel Stanley <joel@jms.id.au>
-Cc: kernel-janitors@vger.kernel.org, linux-mmc <linux-mmc@vger.kernel.org>, linux-arm-kernel@lists.infradead.org, linux-aspeed@lists.ozlabs.org
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: adrian.hunter@intel.com, ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, johnsonm@danlj.org, ben.chuang@genesyslogic.com.tw, Ben Chuang <benchuanggli@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
+From: Ben Chuang <ben.chuang@genesyslogic.com.tw>
 
+The patches modify internal clock setup to match SD Host Controller
+Simplified Specifications 4.20 and support Genesys Logic GL9750/GL9755 chipsets.
 
-On Mon, 26 Aug 2019, at 21:27, Wei Yongjun wrote:
-> In case of error, the function of_platform_device_create() returns
-> NULL pointer not ERR_PTR(). The IS_ERR() test in the return value
-> check should be replaced with NULL test.
-> 
-> Fixes: 09eed7fffd33 ("mmc: Add support for the ASPEED SD controller")
-> Signed-off-by: Wei Yongjun <weiyongjun1@huawei.com>
-> ---
->  drivers/mmc/host/sdhci-of-aspeed.c | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-of-aspeed.c 
-> b/drivers/mmc/host/sdhci-of-aspeed.c
-> index 8bb095ca2fa9..d5acb5afc50f 100644
-> --- a/drivers/mmc/host/sdhci-of-aspeed.c
-> +++ b/drivers/mmc/host/sdhci-of-aspeed.c
-> @@ -261,9 +261,9 @@ static int aspeed_sdc_probe(struct platform_device 
-> *pdev)
->  		struct platform_device *cpdev;
->  
->  		cpdev = of_platform_device_create(child, NULL, &pdev->dev);
-> -		if (IS_ERR(cpdev)) {
-> +		if (!cpdev) {
->  			of_node_put(child);
-> -			ret = PTR_ERR(cpdev);
-> +			ret = -ENODEV;
->  			goto err_clk;
->  		}
->  	}
+V6:
+ - export sdhci_abot_tuning() function symbol
+ - use C-style comments
+ - use BIT, FIELD_{GET,PREP} and GENMASK to define bit fields of register
+ - use host->ops->platform_execute_tuning instead of mmc->ops->execute_tuning
+ - call sdhci_reset() instead of duplicating the code in sdhci_gl9750_reset
+ - remove .hw_reset 
+ - use condition define CONFIG_MMC_SDHCI_IO_ACCESSORS for read_l
 
-I ... have no idea why I wrote it that way. I must have just assumed it returned
-an ERR_PTR(). Thanks for finding/fixing that.
+V5:
+ - add "change timeout of loop .." to a patch
+ - fix typo "verndor" to "vendor"
 
-Reviewed-by: Andrew Jeffery <andrew@aj.id.au>
+V4:
+ - change name from sdhci_gli_reset to sdhci_gl9750_reset
+ - fix sdhci_reset to sdhci_gl9750_reset in sdhci_gl9750_ops
+ - fix sdhci_gli_reset to sdhci_reset in sdhci_gl9755_ops
+ 
+V3:
+ - change usleep_range to udelay
+ - add Genesys Logic PCI Vendor ID to a patch
+ - separate the Genesys Logic specific part to a patch
+
+V2:
+ - change udelay to usleep_range
+
+Ben Chuang (5):
+  mmc: sdhci: Change timeout of loop for checking internal clock stable
+  mmc: sdhci: Add PLL Enable support to internal clock setup
+  PCI: Add Genesys Logic, Inc. Vendor ID
+  mmc: sdhci: Export sdhci_abort_tuning function symbol
+  mmc: host: sdhci-pci: Add Genesys Logic GL975x support
+
+ drivers/mmc/host/Makefile         |   2 +-
+ drivers/mmc/host/sdhci-pci-core.c |   2 +
+ drivers/mmc/host/sdhci-pci-gli.c  | 354 ++++++++++++++++++++++++++++++
+ drivers/mmc/host/sdhci-pci.h      |   5 +
+ drivers/mmc/host/sdhci.c          |  30 ++-
+ drivers/mmc/host/sdhci.h          |   2 +
+ include/linux/pci_ids.h           |   2 +
+ 7 files changed, 393 insertions(+), 4 deletions(-)
+ create mode 100644 drivers/mmc/host/sdhci-pci-gli.c
+
+-- 
+2.22.1
