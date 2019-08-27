@@ -1,7 +1,7 @@
 From: Ben Chuang <benchuanggli@gmail.com>
-Subject: [PATCH V6 0/5] Add Genesys Logic GL975x support
-Date: Tue, 27 Aug 2019 08:31:45 +0800
-Message-ID: <20190827003145.2249-1-benchuanggli@gmail.com>
+Subject: [PATCH V6 1/5] mmc: sdhci: Change timeout of loop for checking internal clock stable
+Date: Tue, 27 Aug 2019 08:32:42 +0800
+Message-ID: <20190827003242.2298-1-benchuanggli@gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
@@ -12,51 +12,32 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Ben Chuang <ben.chuang@genesyslogic.com.tw>
 
-The patches modify internal clock setup to match SD Host Controller
-Simplified Specifications 4.20 and support Genesys Logic GL9750/GL9755 chipsets.
+According to section 3.2.1 internal clock setup in SD Host Controller
+Simplified Specifications 4.20, the timeout of loop for checking
+internal clock stable is defined as 150ms.
 
-V6:
- - export sdhci_abot_tuning() function symbol
- - use C-style comments
- - use BIT, FIELD_{GET,PREP} and GENMASK to define bit fields of register
- - use host->ops->platform_execute_tuning instead of mmc->ops->execute_tuning
- - call sdhci_reset() instead of duplicating the code in sdhci_gl9750_reset
- - remove .hw_reset 
- - use condition define CONFIG_MMC_SDHCI_IO_ACCESSORS for read_l
+Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+Co-developed-by: Michael K Johnson <johnsonm@danlj.org>
+Signed-off-by: Michael K Johnson <johnsonm@danlj.org>
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+---
+ drivers/mmc/host/sdhci.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-V5:
- - add "change timeout of loop .." to a patch
- - fix typo "verndor" to "vendor"
-
-V4:
- - change name from sdhci_gli_reset to sdhci_gl9750_reset
- - fix sdhci_reset to sdhci_gl9750_reset in sdhci_gl9750_ops
- - fix sdhci_gli_reset to sdhci_reset in sdhci_gl9755_ops
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 59acf8e3331e..bed0760a6c2a 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1636,8 +1636,8 @@ void sdhci_enable_clk(struct sdhci_host *host, u16 clk)
+ 	clk |= SDHCI_CLOCK_INT_EN;
+ 	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
  
-V3:
- - change usleep_range to udelay
- - add Genesys Logic PCI Vendor ID to a patch
- - separate the Genesys Logic specific part to a patch
-
-V2:
- - change udelay to usleep_range
-
-Ben Chuang (5):
-  mmc: sdhci: Change timeout of loop for checking internal clock stable
-  mmc: sdhci: Add PLL Enable support to internal clock setup
-  PCI: Add Genesys Logic, Inc. Vendor ID
-  mmc: sdhci: Export sdhci_abort_tuning function symbol
-  mmc: host: sdhci-pci: Add Genesys Logic GL975x support
-
- drivers/mmc/host/Makefile         |   2 +-
- drivers/mmc/host/sdhci-pci-core.c |   2 +
- drivers/mmc/host/sdhci-pci-gli.c  | 354 ++++++++++++++++++++++++++++++
- drivers/mmc/host/sdhci-pci.h      |   5 +
- drivers/mmc/host/sdhci.c          |  30 ++-
- drivers/mmc/host/sdhci.h          |   2 +
- include/linux/pci_ids.h           |   2 +
- 7 files changed, 393 insertions(+), 4 deletions(-)
- create mode 100644 drivers/mmc/host/sdhci-pci-gli.c
-
+-	/* Wait max 20 ms */
+-	timeout = ktime_add_ms(ktime_get(), 20);
++	/* Wait max 150 ms */
++	timeout = ktime_add_ms(ktime_get(), 150);
+ 	while (1) {
+ 		bool timedout = ktime_after(ktime_get(), timeout);
+ 
 -- 
 2.22.1
