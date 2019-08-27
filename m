@@ -1,22 +1,27 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
+From: Maxime Ripard <maxime.ripard@bootlin.com>
 Subject: Re: [PATCH] mmc: sunxi: fix unusuable eMMC on some H6 boards by
  disabling DDR
-Date: Tue, 27 Aug 2019 15:24:26 +0200
-Message-ID: <CAPDyKFr5opD2yBXmFRBY-9oA_3ShVv0GPFRO8Q_8TEiT+z2pQA@mail.gmail.com>
+Date: Tue, 27 Aug 2019 15:32:11 +0200
+Message-ID: <20190827133211.g5n4uasyz2yvjpjr@flea>
 References: <20190825150558.15173-1-alejandro.gonzalez.correo@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="lkjtz2d6pscj5wie"
 Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
 In-Reply-To: <20190825150558.15173-1-alejandro.gonzalez.correo@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: =?UTF-8?Q?Alejandro_Gonz=C3=A1lez?= <alejandro.gonzalez.correo@gmail.com>
-Cc: Maxime Ripard <maxime.ripard@bootlin.com>, Chen-Yu Tsai <wens@csie.org>, Linus Walleij <linus.walleij@linaro.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Thomas Gleixner <tglx@linutronix.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-sunxi <linux-sunxi@googlegroups.com>
+To: Alejandro =?utf-8?B?R29uesOhbGV6?= <alejandro.gonzalez.correo@gmail.com>
+Cc: ulf.hansson@linaro.org, wens@csie.org, linus.walleij@linaro.org, gregkh@linuxfoundation.org, tglx@linutronix.de, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-sunxi@googlegroups.com
 List-Id: linux-mmc@vger.kernel.org
 
-On Sun, 25 Aug 2019 at 17:06, Alejandro Gonz=C3=A1lez
-<alejandro.gonzalez.correo@gmail.com> wrote:
->
+
+--lkjtz2d6pscj5wie
+Content-Type: text/plain; charset=iso-8859-1
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+On Sun, Aug 25, 2019 at 05:05:58PM +0200, Alejandro Gonz=E1lez wrote:
 > Some Allwinner H6 boards have timing problems when dealing with
 > DDR-capable eMMC cards. These boards include the Pine H64 and Tanix TX6.
 >
@@ -34,51 +39,25 @@ le
 > the mainline kernel lacks any mechanism to switch voltages dynamically.
 > Finally, other possible cause might be some timing parameter that is
 > different on the H6 with respect to other SoCs.
->
-> Therefore, as this fix works reliably, the kernel lacks the required
-> dynamic pinctrl control for now and a slow eMMC is better than a not
-> working eMMC, just disable DDR operation for now on H6-compatible
-> devices.
->
-> Signed-off-by: Alejandro Gonz=C3=A1lez <alejandro.gonzalez.correo@gmail.c=
-om>
 
-Assuming this should go stable as well? Perhaps you can find a
-relevant commit that we can put as a fixes tag as well?
+This should be a comment in the driver where this is disabled.
 
-Kind regards
-Uffe
+Maxime
 
-> ---
->  drivers/mmc/host/sunxi-mmc.c | 9 ++++++---
->  1 file changed, 6 insertions(+), 3 deletions(-)
->
-> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-> index d577a6b0ceae..dac57d76d009 100644
-> --- a/drivers/mmc/host/sunxi-mmc.c
-> +++ b/drivers/mmc/host/sunxi-mmc.c
-> @@ -1395,14 +1395,17 @@ static int sunxi_mmc_probe(struct platform_device=
- *pdev)
->
->         /*
->          * Some H5 devices do not have signal traces precise enough to
-> -        * use HS DDR mode for their eMMC chips.
-> +        * use HS DDR mode for their eMMC chips. Other H6 devices operate
-> +        * unreliably on HS DDR mode, too.
->          *
->          * We still enable HS DDR modes for all the other controller
-> -        * variants that support them.
-> +        * variants that support them properly.
->          */
->         if ((host->cfg->clk_delays || host->use_new_timings) &&
->             !of_device_is_compatible(pdev->dev.of_node,
-> -                                    "allwinner,sun50i-h5-emmc"))
-> +                                    "allwinner,sun50i-h5-emmc") &&
-> +           !of_device_is_compatible(pdev->dev.of_node,
-> +                                    "allwinner,sun50i-h6-emmc"))
->                 mmc->caps      |=3D MMC_CAP_1_8V_DDR | MMC_CAP_3_3V_DDR;
->
->         ret =3D mmc_of_parse(mmc);
-> --
-> 2.20.1
->
+--
+Maxime Ripard, Bootlin
+Embedded Linux and Kernel engineering
+https://bootlin.com
+
+--lkjtz2d6pscj5wie
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iHUEABYIAB0WIQRcEzekXsqa64kGDp7j7w1vZxhRxQUCXWUw2wAKCRDj7w1vZxhR
+xYt3AP4+3qKwy0ckh4dZ7jCoxIsKTjo6Lg7T9mmsX0KTdpD3uAD/UnDk8+qHwDox
+MZfS8s6gYu/gIOndKMAIAGQBPJh+bgU=
+=Cii8
+-----END PGP SIGNATURE-----
+
+--lkjtz2d6pscj5wie--
