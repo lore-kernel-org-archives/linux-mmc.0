@@ -1,70 +1,57 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v1 1/2] dt-bindings: mmc: sdhci-of-arasan: Add new
- compatible for Intel LGM eMMC
-Date: Tue, 27 Aug 2019 15:49:46 +0200
-Message-ID: <CAPDyKFpsvZ+LEwY91LiSExgm=4g=BhWNpkkJMniBNff+qch-QA@mail.gmail.com>
-References: <20190826072800.38413-1-vadivel.muruganx.ramuthevar@linux.intel.com>
+Subject: Re: [PATCH] mmc: bcm2835: Take SWIOTLB memory size limitation into
+ account
+Date: Tue, 27 Aug 2019 15:49:35 +0200
+Message-ID: <CAPDyKFo6cWqRkJg=aoVzjHiR_Q6CWHe4et7QimWeWVZyLntQ9Q@mail.gmail.com>
+References: <1566628264-3289-1-git-send-email-wahrenst@gmx.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190826072800.38413-1-vadivel.muruganx.ramuthevar@linux.intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: "Ramuthevar,Vadivel MuruganX" <vadivel.muruganx.ramuthevar@linux.intel.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, DTML <devicetree@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Michal Simek <michal.simek@xilinx.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, andriy.shevchenko@intel.com, cheol.yong.kim@intel.com, qi-ming.wu@intel.com
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1566628264-3289-1-git-send-email-wahrenst@gmx.net>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Stefan Wahren <wahrenst@gmx.net>
+Cc: Florian Fainelli <f.fainelli@gmail.com>, Scott Branden <sbranden@broadcom.com>, Ray Jui <rjui@broadcom.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Eric Anholt <eric@anholt.net>, Lukas Wunner <lukas@wunner.de>, Linux ARM <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, 26 Aug 2019 at 09:28, Ramuthevar,Vadivel MuruganX
-<vadivel.muruganx.ramuthevar@linux.intel.com> wrote:
+On Sat, 24 Aug 2019 at 08:31, Stefan Wahren <wahrenst@gmx.net> wrote:
 >
-> From: Ramuthevar Vadivel Murugan <vadivel.muruganx.ramuthevar@linux.intel.com>
+> Make sure the sdhost driver doesn't use requests bigger than SWIOTLB
+> can handle.
 >
-> Add a new compatible to use the sdhc-arasan host controller driver
-> with the eMMC PHY on Intel's Lightning Mountain SoC.
->
-> Signed-off-by: Ramuthevar Vadivel Murugan <vadivel.muruganx.ramuthevar@linux.intel.com>
+> Signed-off-by: Stefan Wahren <wahrenst@gmx.net>
 
-Applied for next, thanks!
+Applies for next, thanks!
 
 Kind regards
 Uffe
 
 
 > ---
->  Documentation/devicetree/bindings/mmc/arasan,sdhci.txt | 17 +++++++++++++++++
->  1 file changed, 17 insertions(+)
+>  drivers/mmc/host/bcm2835.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 >
-> diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-> index 1edbb049cccb..7ca0aa7ccc0b 100644
-> --- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-> +++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-> @@ -17,6 +17,8 @@ Required Properties:
->        For this device it is strongly suggested to include arasan,soc-ctl-syscon.
->      - "ti,am654-sdhci-5.1", "arasan,sdhci-5.1": TI AM654 MMC PHY
->         Note: This binding has been deprecated and moved to [5].
-> +    - "intel,lgm-sdhci-5.1-emmc", "arasan,sdhci-5.1": Intel LGM eMMC PHY
-> +      For this device it is strongly suggested to include arasan,soc-ctl-syscon.
+> diff --git a/drivers/mmc/host/bcm2835.c b/drivers/mmc/host/bcm2835.c
+> index 7e0d3a4..7ec0d95 100644
+> --- a/drivers/mmc/host/bcm2835.c
+> +++ b/drivers/mmc/host/bcm2835.c
+> @@ -1314,7 +1314,7 @@ static int bcm2835_add_host(struct bcm2835_host *host)
+>         }
 >
->    [5] Documentation/devicetree/bindings/mmc/sdhci-am654.txt
->
-> @@ -80,3 +82,18 @@ Example:
->                 phy-names = "phy_arasan";
->                 #clock-cells = <0>;
->         };
-> +
-> +       emmc: sdhci@ec700000 {
-> +               compatible = "intel,lgm-sdhci-5.1-emmc", "arasan,sdhci-5.1";
-> +               reg = <0xec700000 0x300>;
-> +               interrupt-parent = <&ioapic1>;
-> +               interrupts = <44 1>;
-> +               clocks = <&cgu0 LGM_CLK_EMMC5>, <&cgu0 LGM_CLK_NGI>,
-> +                        <&cgu0 LGM_GCLK_EMMC>;
-> +               clock-names = "clk_xin", "clk_ahb", "gate";
-> +               clock-output-names = "emmc_cardclock";
-> +               #clock-cells = <0>;
-> +               phys = <&emmc_phy>;
-> +               phy-names = "phy_arasan";
-> +               arasan,soc-ctl-syscon = <&sysconf>;
-> +       };
+>         mmc->max_segs = 128;
+> -       mmc->max_req_size = 524288;
+> +       mmc->max_req_size = min_t(size_t, 524288, dma_max_mapping_size(dev));
+>         mmc->max_seg_size = mmc->max_req_size;
+>         mmc->max_blk_size = 1024;
+>         mmc->max_blk_count =  65535;
 > --
-> 2.11.0
+> 2.7.4
 >
