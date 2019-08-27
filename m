@@ -1,17 +1,13 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH -next] mmc: aspeed: Fix return value check in
- aspeed_sdc_probe()
-Date: Tue, 27 Aug 2019 15:49:43 +0200
-Message-ID: <CAPDyKFqXLG7VCh+9oQQ4HD=6dHQLY1PHEkmC+atnB-zDntKULA@mail.gmail.com>
-References: <20190826120013.183435-1-weiyongjun1@huawei.com>
- <20190826130343.GA23584@kadam>
- <629128e7-cc91-412f-8946-668fac2eb3b9@www.fastmail.com>
- <alpine.DEB.2.21.1908270845410.2537@hadrien>
+Subject: Re: Continuous SD IO causes hung task messages
+Date: Tue, 27 Aug 2019 15:55:23 +0200
+Message-ID: <CAPDyKFp7e2OD_idam3-2sEd0wJU5OcP=H04G1OvHmAUo2Y-bYw@mail.gmail.com>
+References: <20190827134337.GK13294@shell.armlinux.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <alpine.DEB.2.21.1908270845410.2537@hadrien>
+In-Reply-To: <20190827134337.GK13294@shell.armlinux.org.uk>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -21,41 +17,109 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
 Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
 Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Julia Lawall <julia.lawall@lip6.fr>, Dan Carpenter <dan.carpenter@oracle.com>, Andrew Jeffery <andrew@aj.id.au>, Wei Yongjun <weiyongjun1@huawei.com>
-Cc: linux-aspeed <linux-aspeed@lists.ozlabs.org>, linux-mmc <linux-mmc@vger.kernel.org>, kernel-janitors@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, Joel Stanley <joel@jms.id.au>, Linux ARM <linux-arm-kernel@lists.infradead.org>
+To: Russell King - ARM Linux admin <linux@armlinux.org.uk>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, 27 Aug 2019 at 02:47, Julia Lawall <julia.lawall@lip6.fr> wrote:
+On Tue, 27 Aug 2019 at 15:43, Russell King - ARM Linux admin
+<linux@armlinux.org.uk> wrote:
 >
+> Hi,
 >
+> While dd'ing the contents of a SD card, I get hung task timeout
+> messages as per below.  However, the dd is making progress.  Any
+> ideas?
 >
-> On Tue, 27 Aug 2019, Andrew Jeffery wrote:
->
-> >
-> >
-> > On Mon, 26 Aug 2019, at 22:34, Dan Carpenter wrote:
-> > > > Fixes: 09eed7fffd33 ("mmc: Add support for the ASPEED SD controller")
-> > >                         ^^^^
-> > > When we're adding new files, could we use the prefix for the new driver
-> > > instead of just the subsystem?  "mmc: aspeed: Add new driver"?
-> > > Otherwise it's tricky to know what people want for the driver.
-> >
-> > I don't have any issue with the request, but I don't understand this last
-> > bit. What do you mean by "it's tricky to know what people want for the
-> > driver"?
->
-> There is no obvious algorithm that tells how to go from a file name to an
-> appropriate subject line prefix.
+> Presumably, mmc_rescan doesn't get a look-in while IO is progressing
+> for the card?
 
-For MMC we normally use the name of the host driver file (excluding
-".c") as part of the prefix.
+Is it a regression?
 
-For this case that means I amended the header into: mmc:
-sdhci-of-aspeed: Fix return value check in aspeed_sdc_probe() and
-applied it for next.
+There not much of recent mmc core and mmc block changes, that I can
+think of at this point.
 
-I also took the liberty to change this for the other related patches
-for the "aspeed" driver to follow the same pattern.
+>
+> ARM64 host, Macchiatobin, uSD card.
+
+What mmc host driver is it? mmci?
 
 Kind regards
 Uffe
+
+>
+> Thanks.
+>
+> root@arm-d06300000000:~# dd if=/dev/mmcblk1 | md5sum
+> INFO: task kworker/2:1:52 blocked for more than 120 seconds.
+>       Not tainted 5.2.0+ #309
+> "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
+> kworker/2:1     D    0    52      2 0x00000028
+> Workqueue: events_freezable mmc_rescan
+> Call trace:
+>  __switch_to+0xb0/0x198
+>  __schedule+0x22c/0x604
+>  schedule+0x38/0xc8
+>  __mmc_claim_host+0xcc/0x1ec
+>  mmc_get_card+0x30/0x3c
+>  mmc_sd_detect+0x1c/0x78
+>  mmc_rescan+0x1c4/0x35c
+>  process_one_work+0x14c/0x408
+>  worker_thread+0x140/0x3f4
+>  kthread+0xfc/0x128
+>  ret_from_fork+0x10/0x18
+> INFO: task kworker/2:1:52 blocked for more than 120 seconds.
+>       Not tainted 5.2.0+ #309
+> "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
+> kworker/2:1     D    0    52      2 0x00000028
+> Workqueue: events_freezable mmc_rescan
+> Call trace:
+>  __switch_to+0xb0/0x198
+>  __schedule+0x22c/0x604
+>  schedule+0x38/0xc8
+>  __mmc_claim_host+0xcc/0x1ec
+>  mmc_get_card+0x30/0x3c
+>  mmc_sd_detect+0x1c/0x78
+>  mmc_rescan+0x1c4/0x35c
+>  process_one_work+0x14c/0x408
+>  worker_thread+0x140/0x3f4
+>  kthread+0xfc/0x128
+>  ret_from_fork+0x10/0x18
+> INFO: task kworker/2:1:52 blocked for more than 241 seconds.
+>       Not tainted 5.2.0+ #309
+> "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
+> kworker/2:1     D    0    52      2 0x00000028
+> Workqueue: events_freezable mmc_rescan
+> Call trace:
+>  __switch_to+0xb0/0x198
+>  __schedule+0x22c/0x604
+>  schedule+0x38/0xc8
+>  __mmc_claim_host+0xcc/0x1ec
+>  mmc_get_card+0x30/0x3c
+>  mmc_sd_detect+0x1c/0x78
+>  mmc_rescan+0x1c4/0x35c
+>  process_one_work+0x14c/0x408
+>  worker_thread+0x140/0x3f4
+>  kthread+0xfc/0x128
+>  ret_from_fork+0x10/0x18
+> INFO: task kworker/2:1:52 blocked for more than 362 seconds.
+>       Not tainted 5.2.0+ #309
+> "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
+> kworker/2:1     D    0    52      2 0x00000028
+> Workqueue: events_freezable mmc_rescan
+> Call trace:
+>  __switch_to+0xb0/0x198
+>  __schedule+0x22c/0x604
+>  schedule+0x38/0xc8
+>  __mmc_claim_host+0xcc/0x1ec
+>  mmc_get_card+0x30/0x3c
+>  mmc_sd_detect+0x1c/0x78
+>  mmc_rescan+0x1c4/0x35c
+>  process_one_work+0x14c/0x408
+>  worker_thread+0x140/0x3f4
+>  kthread+0xfc/0x128
+>  ret_from_fork+0x10/0x18
+>
+> --
+> RMK's Patch system: https://www.armlinux.org.uk/developer/patches/
+> FTTC broadband for 0.8mile line in suburbia: sync at 12.1Mbps down 622kbps up
+> According to speedtest.net: 11.9Mbps down 500kbps up
