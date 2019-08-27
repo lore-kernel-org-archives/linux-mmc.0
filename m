@@ -1,48 +1,60 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH] mmc: core: Fix init of SD cards reporting an invalid VDD range
-Date: Tue, 27 Aug 2019 10:10:43 +0200
-Message-ID: <20190827081043.15443-1-ulf.hansson@linaro.org>
-Return-path: <stable-owner@vger.kernel.org>
-Sender: stable-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Philip Langdale <philipl@overt.org>
-Cc: stable@vger.kernel.org
+From: "boojin.kim" <boojin.kim@samsung.com>
+Subject: Re: [PATCH 5/9] block: support diskcipher
+Date: Tue, 27 Aug 2019 17:33:33 +0900
+Message-ID: <03b201d55cb2$1d4d31b0$57e79510$@samsung.com>
+References: <CGME20190827083334epcas2p115d479190b9a72c886f66569add78203@epcas2p1.samsung.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Language: ko
+Sender: linux-kernel-owner@vger.kernel.org
+To: 'Satya Tangirala' <satyat@google.com>
+Cc: 'Herbert Xu' <herbert@gondor.apana.org.au>, "'David S. Miller'" <davem@davemloft.net>, 'Eric Biggers' <ebiggers@kernel.org>, "'Theodore Y. Ts'o'" <tytso@mit.edu>, 'Chao Yu' <chao@kernel.org>, 'Jaegeuk Kim' <jaegeuk@kernel.org>, 'Andreas Dilger' <adilger.kernel@dilger.ca>'Theodore Ts'o' <tytso@mit.edu>, dm-devel@redhat.com, 'Mike Snitzer' <snitzer@redhat.com>, 'Alasdair Kergon' <agk@redhat.com>, 'Jens Axboe' <axboe@kernel.dk>, 'Krzysztof Kozlowski' <krzk@kernel.org>, 'Kukjin Kim' <kgene@kernel.org>, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Ulf Hansson' <ulf.hansson@linaro.org>, linux-crypto@vger.kernel.org, linux-kernel@vger.kernel.org, linux-fscrypt@vger.kernel.org, linux-mmc@vger.kernel.org, linux-samsung-soc
 List-Id: linux-mmc@vger.kernel.org
 
-The OCR register defines the supported range of VDD voltages for SD cards.
-However, it has turned out that some SD cards reports an invalid voltage
-range, for example having bit7 set.
+On Wed, Aug 21, 2019 at 5:10 AM Satya Tangirala <satyat@kernel.dk> wrote:
+> 
+> Hi Boojin,
+>
+> We're very keen to make sure that our approach to inline encryption can
+> work with diverse hardware, including Samsung's FMP hardware; if you
+> can see any issues with using our approach with your hardware please
+> let us know.
+>
+> We understand that a possible concern for getting FMP working with our
+> patch series for Inline Encryption Support at
+>
+>
+https://lore.kernel.org/linux-block/20190821075714.65140-1-satyat@google.com
+/
+>
+> is that unlike some inline encryption hardware (and also unlike the JEDEC
+> UFS v2.1 spec), FMP doesn't have the concept of a limited number of
+> keyslots - to address that difference we have a "passthrough keyslot
+> manager", which we put up on top of our patch series for inline encryption
+> support at
+>
+> https://android-review.googlesource.com/c/kernel/common/+/980137/2
+>
+> Setting up a passthrough keyslot manager in the request queue of a
+> device allows the device to receive a bio's encryption context as-is with
+> the bio, which is what FMP would prefer. Are there any issues with
+> using the passthrough keyslot manager for FMP?
+>
+> Thanks!
+> Satya
 
-When a host supports MMC_CAP2_FULL_PWR_CYCLE and some of the voltages from
-the invalid VDD range, this triggers the core to run a power cycle of the
-card to try to initialize it at the lowest common supported voltage.
-Obviously this fails, since the card can't support it.
+Dear Satya.
+Keyslot manager is a good solution for ICE. And probably no issue for FMP.
+But, I think it's complicated for FMP because FMP doesn't need
+any keyslot control.
+Crypto API that FMP's using is simply, stable, and supports test. 
+FMP has been mass producing and certificating using crypto APIs
+for several years. 
+So I wants to keep  our current crypto API solution.
+But, I'm looking at your patch.  And I will keep examining at your patch
+because our goal is to run the FMP on the mainline kernel.
 
-Let's fix this problem, by clearing invalid bits from the read OCR register
-for SD cards, before proceeding with the VDD voltage negotiation.
-
-Cc: stable@vger.kernel.org
-Reported-by: Philip Langdale <philipl@overt.org>
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
----
- drivers/mmc/core/sd.c | 6 ++++++
- 1 file changed, 6 insertions(+)
-
-diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index d681e8aaca83..fe914ff5f5d6 100644
---- a/drivers/mmc/core/sd.c
-+++ b/drivers/mmc/core/sd.c
-@@ -1292,6 +1292,12 @@ int mmc_attach_sd(struct mmc_host *host)
- 			goto err;
- 	}
- 
-+	/*
-+	 * Some SD cards claims an out of spec VDD voltage range. Let's treat
-+	 * these bits as being in-valid and especially also bit7.
-+	 */
-+	ocr &= ~0x7FFF;
-+
- 	rocr = mmc_select_voltage(host, ocr);
- 
- 	/*
--- 
-2.17.1
+Thanks for your reply.
+Boojin Kim.
