@@ -1,46 +1,84 @@
-From: Rob Herring <robh+dt@kernel.org>
-Subject: Re: [PATCH] dt-bindings: mmc: aspeed: Update example ranges property
-Date: Tue, 27 Aug 2019 07:36:12 -0500
-Message-ID: <CAL_JsqJsLt5FjKayO9ksksrpXDFs3cbAngcQ21xhZYz3JLG=7g@mail.gmail.com>
-References: <20190826021620.11915-1-andrew@aj.id.au>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: sunxi: fix unusuable eMMC on some H6 boards by
+ disabling DDR
+Date: Tue, 27 Aug 2019 15:24:26 +0200
+Message-ID: <CAPDyKFr5opD2yBXmFRBY-9oA_3ShVv0GPFRO8Q_8TEiT+z2pQA@mail.gmail.com>
+References: <20190825150558.15173-1-alejandro.gonzalez.correo@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20190826021620.11915-1-andrew@aj.id.au>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Andrew Jeffery <andrew@aj.id.au>
-Cc: Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, linux-aspeed@lists.ozlabs.org, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Joel Stanley <joel@jms.id.au>, "moderated list:ARM/FREESCALE IMX / MXC ARM ARCHITECTURE" <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20190825150558.15173-1-alejandro.gonzalez.correo@gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: =?UTF-8?Q?Alejandro_Gonz=C3=A1lez?= <alejandro.gonzalez.correo@gmail.com>
+Cc: Maxime Ripard <maxime.ripard@bootlin.com>, Chen-Yu Tsai <wens@csie.org>, Linus Walleij <linus.walleij@linaro.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Thomas Gleixner <tglx@linutronix.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-sunxi <linux-sunxi@googlegroups.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Sun, Aug 25, 2019 at 9:15 PM Andrew Jeffery <andrew@aj.id.au> wrote:
+On Sun, 25 Aug 2019 at 17:06, Alejandro Gonz=C3=A1lez
+<alejandro.gonzalez.correo@gmail.com> wrote:
 >
-> The example node in the binding uses the AST2500 compatible string for
-> the SD controller with a 64kiB ranges property, but the SD controller is
-> allocated 128kiB of MMIO space according to the AST2500 datasheet. Fix
-> the example to correctly reflect the hardware in the AST2500, however it
-> should be noted that the MMIO region is reduced to 64kiB in the AST2600
-> where a second SD controller block has been introduced into the address
-> space.
+> Some Allwinner H6 boards have timing problems when dealing with
+> DDR-capable eMMC cards. These boards include the Pine H64 and Tanix TX6.
 >
-> Also add the IBM copyright header that I left out of the initial patch.
+> These timing problems result in out of sync communication between the
+> driver and the eMMC, which renders the memory unsuable for every
+> operation but some basic commmands, like reading the status register.
 >
-> Suggested-by: Joel Stanley <joel@jms.id.au>
-> Signed-off-by: Andrew Jeffery <andrew@aj.id.au>
-> ---
-> Hi Ulf, this is the follow-up fix as discussed here:
+> The cause of these timing problems is not yet well known, but they go
+> away by disabling DDR mode operation in the driver. Like on some H5
+> boards, it might be that the traces are not precise enough to support
+> these speeds. However, Jernej Skrabec compared the BSP driver with this
+> driver, and found that the BSP driver configures pinctrl to operate at
+> 1.8 V when entering DDR mode (although 3.3 V operation is supported), whi=
+le
+> the mainline kernel lacks any mechanism to switch voltages dynamically.
+> Finally, other possible cause might be some timing parameter that is
+> different on the H6 with respect to other SoCs.
 >
-> http://patchwork.ozlabs.org/patch/1143090/
+> Therefore, as this fix works reliably, the kernel lacks the required
+> dynamic pinctrl control for now and a slow eMMC is better than a not
+> working eMMC, just disable DDR operation for now on H6-compatible
+> devices.
 >
->  Documentation/devicetree/bindings/mmc/aspeed,sdhci.yaml | 3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
+> Signed-off-by: Alejandro Gonz=C3=A1lez <alejandro.gonzalez.correo@gmail.c=
+om>
 
-Acked-by: Rob Herring <robh@kernel.org>
+Assuming this should go stable as well? Perhaps you can find a
+relevant commit that we can put as a fixes tag as well?
+
+Kind regards
+Uffe
+
+> ---
+>  drivers/mmc/host/sunxi-mmc.c | 9 ++++++---
+>  1 file changed, 6 insertions(+), 3 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
+> index d577a6b0ceae..dac57d76d009 100644
+> --- a/drivers/mmc/host/sunxi-mmc.c
+> +++ b/drivers/mmc/host/sunxi-mmc.c
+> @@ -1395,14 +1395,17 @@ static int sunxi_mmc_probe(struct platform_device=
+ *pdev)
+>
+>         /*
+>          * Some H5 devices do not have signal traces precise enough to
+> -        * use HS DDR mode for their eMMC chips.
+> +        * use HS DDR mode for their eMMC chips. Other H6 devices operate
+> +        * unreliably on HS DDR mode, too.
+>          *
+>          * We still enable HS DDR modes for all the other controller
+> -        * variants that support them.
+> +        * variants that support them properly.
+>          */
+>         if ((host->cfg->clk_delays || host->use_new_timings) &&
+>             !of_device_is_compatible(pdev->dev.of_node,
+> -                                    "allwinner,sun50i-h5-emmc"))
+> +                                    "allwinner,sun50i-h5-emmc") &&
+> +           !of_device_is_compatible(pdev->dev.of_node,
+> +                                    "allwinner,sun50i-h6-emmc"))
+>                 mmc->caps      |=3D MMC_CAP_1_8V_DDR | MMC_CAP_3_3V_DDR;
+>
+>         ret =3D mmc_of_parse(mmc);
+> --
+> 2.20.1
+>
