@@ -1,11 +1,13 @@
 From: Yoshihiro Shimoda <yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
-Subject: [PATCH v10 0/4] treewide: improve R-Car SDHI performance
-Date: Wed, 28 Aug 2019 21:35:39 +0900
-Message-ID: <1566995743-5614-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
+Subject: [PATCH v10 1/4] dma: Introduce dma_get_merge_boundary()
+Date: Wed, 28 Aug 2019 21:35:40 +0900
+Message-ID: <1566995743-5614-2-git-send-email-yoshihiro.shimoda.uh@renesas.com>
+References: <1566995743-5614-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+In-Reply-To: <1566995743-5614-1-git-send-email-yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
 List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
 	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
@@ -19,91 +21,87 @@ To: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, hch-jcswGhMUV9g@public.
 Cc: linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-This patch series is based on linux-next.git / next-20190828 tag.
+This patch adds a new DMA API "dma_get_merge_boundary". This function
+returns the DMA merge boundary if the DMA layer can merge the segments.
+This patch also adds the implementation for a new dma_map_ops pointer.
 
-Since SDHI host internal DMAC of the R-Car Gen3 cannot handle two or
-more segments, the performance rate (especially, eMMC HS400 reading)
-is not good. However, if IOMMU is enabled on the DMAC, since IOMMU will
-map multiple scatter gather buffers as one contignous iova, the DMAC can
-handle the iova as well and then the performance rate is possible to
-improve. In fact, I have measured the performance by using bonnie++,
-"Sequential Input - block" rate was improved on r8a7795.
-
-To achieve this, this patch series modifies IOMMU and Block subsystem
-at first. This patch series is strictly depended on each subsystem
-modification, so that I submit it as treewide.
-
-Changes from v9:
- - Rebase on next-20190828.
- - Drop a blk-setting.c patch to sort headers.
- - Remove an unnecessary condition on patch 2/4.
- - Add Joerg-san's Reviewed-by into patch 2/4.
- - Fix a condition on patch 4/4 not to call blk_queue_max_segment_size()
-   as the comment.
-https://patchwork.kernel.org/project/linux-renesas-soc/list/?series=151067
-
-Changes from v8:
- - Rebase on next-20190726.
- - Use "1UL" instead of just "1" for iommu_dma_get_merge_boundary().
- - Add Simon-san's Reviewed-by into all patches.
-https://patchwork.kernel.org/project/linux-renesas-soc/list/?series=149023
-
-Changes from v7:
- - Rebase on next-20190722 (v5.3-rc1 + next branches of subsystems)
- - Add some Reviewed-by.
-https://patchwork.kernel.org/project/linux-renesas-soc/list/?series=135391
-
-Changes from v6:
- - [1/5 for DMA MAP] A new patch.
- - [2/5 for IOMMU] A new patch.
- - [3/5 for BLOCK] Add Reviewed-by.
- - [4/5 for BLOCK] Use a new DMA MAP API instead of device_iommu_mapped().
- - [5/5 for MMC] Likewise, and some minor fix.
- - Remove patch 4/5 of v6 from this v7 patch series.
-https://patchwork.kernel.org/project/linux-renesas-soc/list/?series=131769
-
-Changes from v5:
- - Almost all patches are new code.
- - [4/5 for MMC] This is a refactor patch so that I don't add any
-   {Tested,Reviewed}-by tags.
- - [5/5 for MMC] Modify MMC subsystem to use bigger segments instead of
-   the renesas_sdhi driver.
- - [5/5 for MMC] Use BLK_MAX_SEGMENTS (128) instead of local value
-   SDHI_MAX_SEGS_IN_IOMMU (512). Even if we use BLK_MAX_SEGMENTS,
-   the performance is still good.
-https://patchwork.kernel.org/project/linux-renesas-soc/list/?series=127511
-
-Changes from v4:
- - [DMA MAPPING] Add a new device_dma_parameters for iova contiguous.
- - [IOMMU] Add a new capable for "merging" segments.
- - [IOMMU] Add a capable ops into the ipmmu-vmsa driver.
- - [MMC] Sort headers in renesas_sdhi_core.c.
- - [MMC] Remove the following codes that made on v3 that can be achieved by
-	 DMA MAPPING and IOMMU subsystem:
- -- Check if R-Car Gen3 IPMMU is used or not on patch 3.
- -- Check if all multiple segment buffers are aligned to PAGE_SIZE on patch 3.
-https://patchwork.kernel.org/project/linux-renesas-soc/list/?series=125593
-
-Changes from v3:
- - Use a helper function device_iommu_mapped on patch 1 and 3.
- - Check if R-Car Gen3 IPMMU is used or not on patch 3.
-
-Yoshihiro Shimoda (4):
-  dma: Introduce dma_get_merge_boundary()
-  iommu/dma: Add a new dma_map_ops of get_merge_boundary()
-  block: add a helper function to merge the segments
-  mmc: queue: Use bigger segments if DMA MAP layer can merge the
-    segments
-
+Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
+Reviewed-by: Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>
+Reviewed-by: Simon Horman <horms+renesas-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org>
+---
  Documentation/DMA-API.txt   |  8 ++++++++
- block/blk-settings.c        | 23 +++++++++++++++++++++++
- drivers/iommu/dma-iommu.c   |  8 ++++++++
- drivers/mmc/core/queue.c    | 35 ++++++++++++++++++++++++++++++++---
- include/linux/blkdev.h      |  2 ++
  include/linux/dma-mapping.h |  6 ++++++
- include/linux/mmc/host.h    |  1 +
  kernel/dma/mapping.c        | 11 +++++++++++
- 8 files changed, 91 insertions(+), 3 deletions(-)
+ 3 files changed, 25 insertions(+)
 
+diff --git a/Documentation/DMA-API.txt b/Documentation/DMA-API.txt
+index e47c63b..9c4dd3d 100644
+--- a/Documentation/DMA-API.txt
++++ b/Documentation/DMA-API.txt
+@@ -204,6 +204,14 @@ Returns the maximum size of a mapping for the device. The size parameter
+ of the mapping functions like dma_map_single(), dma_map_page() and
+ others should not be larger than the returned value.
+ 
++::
++
++	unsigned long
++	dma_get_merge_boundary(struct device *dev);
++
++Returns the DMA merge boundary. If the device cannot merge any the DMA address
++segments, the function returns 0.
++
+ Part Id - Streaming DMA mappings
+ --------------------------------
+ 
+diff --git a/include/linux/dma-mapping.h b/include/linux/dma-mapping.h
+index 14702e2..7072b78 100644
+--- a/include/linux/dma-mapping.h
++++ b/include/linux/dma-mapping.h
+@@ -131,6 +131,7 @@ struct dma_map_ops {
+ 	int (*dma_supported)(struct device *dev, u64 mask);
+ 	u64 (*get_required_mask)(struct device *dev);
+ 	size_t (*max_mapping_size)(struct device *dev);
++	unsigned long (*get_merge_boundary)(struct device *dev);
+ };
+ 
+ #define DMA_MAPPING_ERROR		(~(dma_addr_t)0)
+@@ -462,6 +463,7 @@ int dma_set_mask(struct device *dev, u64 mask);
+ int dma_set_coherent_mask(struct device *dev, u64 mask);
+ u64 dma_get_required_mask(struct device *dev);
+ size_t dma_max_mapping_size(struct device *dev);
++unsigned long dma_get_merge_boundary(struct device *dev);
+ #else /* CONFIG_HAS_DMA */
+ static inline dma_addr_t dma_map_page_attrs(struct device *dev,
+ 		struct page *page, size_t offset, size_t size,
+@@ -567,6 +569,10 @@ static inline size_t dma_max_mapping_size(struct device *dev)
+ {
+ 	return 0;
+ }
++static inline unsigned long dma_get_merge_boundary(struct device *dev)
++{
++	return 0;
++}
+ #endif /* CONFIG_HAS_DMA */
+ 
+ static inline dma_addr_t dma_map_single_attrs(struct device *dev, void *ptr,
+diff --git a/kernel/dma/mapping.c b/kernel/dma/mapping.c
+index b0038ca..b3077b5 100644
+--- a/kernel/dma/mapping.c
++++ b/kernel/dma/mapping.c
+@@ -405,3 +405,14 @@ size_t dma_max_mapping_size(struct device *dev)
+ 	return size;
+ }
+ EXPORT_SYMBOL_GPL(dma_max_mapping_size);
++
++unsigned long dma_get_merge_boundary(struct device *dev)
++{
++	const struct dma_map_ops *ops = get_dma_ops(dev);
++
++	if (!ops || !ops->get_merge_boundary)
++		return 0;	/* can't merge */
++
++	return ops->get_merge_boundary(dev);
++}
++EXPORT_SYMBOL_GPL(dma_get_merge_boundary);
 -- 
 2.7.4
