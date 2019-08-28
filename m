@@ -1,91 +1,45 @@
-From: "Ramuthevar, Vadivel MuruganX"
-        <vadivel.muruganx.ramuthevar@linux.intel.com>
-Subject: Re: [PATCH v1 2/2] mmc: sdhci-of-arasan: Add Support for Intel LGM
- eMMC
-Date: Wed, 28 Aug 2019 09:34:15 +0800
-Message-ID: <373e55ab-c76b-7657-bd47-1a5efc75a062@linux.intel.com>
-References: <20190826072800.38413-1-vadivel.muruganx.ramuthevar@linux.intel.com>
- <20190826072800.38413-2-vadivel.muruganx.ramuthevar@linux.intel.com>
- <CAPDyKFrPoPqnh3_23P=wGO+QrUE9ogJzC6xgzy+0QeyuyeO=HQ@mail.gmail.com>
+From: Chunyan Zhang <zhang.lyra@gmail.com>
+Subject: Re: [PATCH 0/5] a few fixes for sprd's sd host controller
+Date: Wed, 28 Aug 2019 10:01:14 +0800
+Message-ID: <CAAfSe-txS9MObU+ygxk5NA-FneDL7ftrDruvuou9PYhvXY0E=w@mail.gmail.com>
+References: <20190826031830.30931-1-zhang.lyra@gmail.com> <CAPDyKFrpvtS9mHO7xN=cbrMHWN+ydPw08mF9oXtNW-TOMsP7Ew@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFrPoPqnh3_23P=wGO+QrUE9ogJzC6xgzy+0QeyuyeO=HQ@mail.gmail.com>
-Content-Language: en-US
+In-Reply-To: <CAPDyKFrpvtS9mHO7xN=cbrMHWN+ydPw08mF9oXtNW-TOMsP7Ew@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, DTML <devicetree@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Michal Simek <michal.simek@xilinx.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, andriy.shevchenko@intel.com, cheol.yong.kim@intel.com, qi-ming.wu@intel.com
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Orson Zhai <orsonzhai@gmail.com>, Baolin Wang <baolin.wang@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Ulf,
-
-On 27/8/2019 9:49 PM, Ulf Hansson wrote:
-> On Mon, 26 Aug 2019 at 09:28, Ramuthevar,Vadivel MuruganX
-> <vadivel.muruganx.ramuthevar@linux.intel.com> wrote:
->> From: Ramuthevar Vadivel Muruganx <vadivel.muruganx.ramuthevar@linux.intel.com>
->>
->> The current arasan sdhci PHY configuration isn't compatible
->> with the PHY on Intel's LGM(Lightning Mountain) SoC devices.
->>
->> Therefore, add a new compatible, to adapt the Intel's LGM
->> eMMC PHY with arasan-sdhc controller to configure the PHY.
->>
->> Signed-off-by: Ramuthevar Vadivel Muruganx <vadivel.muruganx.ramuthevar@linux.intel.com>
+On Tue, 27 Aug 2019 at 21:47, Ulf Hansson <ulf.hansson@linaro.org> wrote:
 >
-> Applied for next, thanks!
+> On Mon, 26 Aug 2019 at 05:18, Chunyan Zhang <zhang.lyra@gmail.com> wrote:
+> >
+> > From: Chunyan Zhang <chunyan.zhang@unisoc.com>
+> >
+> > With this patch-set, both sd card and mmc can be setup.  This patch-set was
+> > verified on Unisoc's Whale2 and another mobile phone platform SC9863A.
+> >
+> > Chunyan Zhang (5):
+> >   mmc: sdhci-sprd: fixed incorrect clock divider
+> >   mmc: sdhci: sprd: add get_ro hook function
+> >   mmc: sdhci: sprd: add SDHCI_QUIRK2_PRESET_VALUE_BROKEN
+> >   mms: sdhci: sprd: add SDHCI_QUIRK_BROKEN_CARD_DETECTION
+> >   mmc: sdhci: sprd: clear the UHS-I modes read from registers
+> >
+> >  drivers/mmc/host/sdhci-sprd.c | 30 +++++++++++++++++++++++++-----
+> >  1 file changed, 25 insertions(+), 5 deletions(-)
+> >
+> > --
+> > 2.20.1
+> >
+>
+> Looks like the entire series should be tagged for stable and having
+> the same fixes tag as patch1. No?
+
+Ok.
+
 >
 > Kind regards
 > Uffe
->
-Thank you so much for review and applied for next.
-
-Best Regards
-Vadivel
->> ---
->>   drivers/mmc/host/sdhci-of-arasan.c | 15 +++++++++++++++
->>   1 file changed, 15 insertions(+)
->>
->> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
->> index b12abf9b15f2..7023cbec4017 100644
->> --- a/drivers/mmc/host/sdhci-of-arasan.c
->> +++ b/drivers/mmc/host/sdhci-of-arasan.c
->> @@ -114,6 +114,12 @@ static const struct sdhci_arasan_soc_ctl_map rk3399_soc_ctl_map = {
->>          .hiword_update = true,
->>   };
->>
->> +static const struct sdhci_arasan_soc_ctl_map intel_lgm_emmc_soc_ctl_map = {
->> +       .baseclkfreq = { .reg = 0xa0, .width = 8, .shift = 2 },
->> +       .clockmultiplier = { .reg = 0, .width = -1, .shift = -1 },
->> +       .hiword_update = false,
->> +};
->> +
->>   /**
->>    * sdhci_arasan_syscon_write - Write to a field in soc_ctl registers
->>    *
->> @@ -373,6 +379,11 @@ static struct sdhci_arasan_of_data sdhci_arasan_rk3399_data = {
->>          .pdata = &sdhci_arasan_cqe_pdata,
->>   };
->>
->> +static struct sdhci_arasan_of_data intel_lgm_emmc_data = {
->> +       .soc_ctl_map = &intel_lgm_emmc_soc_ctl_map,
->> +       .pdata = &sdhci_arasan_cqe_pdata,
->> +};
->> +
->>   #ifdef CONFIG_PM_SLEEP
->>   /**
->>    * sdhci_arasan_suspend - Suspend method for the driver
->> @@ -474,6 +485,10 @@ static const struct of_device_id sdhci_arasan_of_match[] = {
->>                  .compatible = "rockchip,rk3399-sdhci-5.1",
->>                  .data = &sdhci_arasan_rk3399_data,
->>          },
->> +       {
->> +               .compatible = "intel,lgm-sdhci-5.1-emmc",
->> +               .data = &intel_lgm_emmc_data,
->> +       },
->>          /* Generic compatible below here */
->>          {
->>                  .compatible = "arasan,sdhci-8.9a",
->> --
->> 2.11.0
->>
