@@ -1,68 +1,80 @@
 From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: [PATCH] mmc: sdhci: use lower/upper_32_bits() macros for DMA addresses
-Date: Wed, 28 Aug 2019 20:14:53 +0900
-Message-ID: <20190828111453.4023-1-yamada.masahiro@socionext.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Masahiro Yamada <yamada.masahiro@socionext.com>, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH v2 2/2] dma-contiguous: Use fallback alloc_pages for
+ single pages
+Date: Wed, 28 Aug 2019 21:23:43 +0900
+Message-ID: <CAK7LNATvz=TTe+3OyLrtUqDuTUTn1dg9Sk-t3BD_OFZfViCPMw@mail.gmail.com>
+References: <20190506223334.1834-1-nicoleotsuka@gmail.com>
+ <20190506223334.1834-3-nicoleotsuka@gmail.com>
+ <CAK7LNARacEorb38mVBw_V-Zvz-znWgBma1AP1-z_5B_xZU4ogg@mail.gmail.com>
+ <CAK7LNAQfYBCoChMV=MOwcUyVoqRkrPWs7DaWdzDqjBe18gGiAQ@mail.gmail.com>
+ <20190825011025.GA23410@lst.de>
+ <CAK7LNAQb1ZHr=DiHLNeNRaQExMuXdDOV4sFghoGbco_Q=Qzb8g@mail.gmail.com>
+ <20190826073320.GA11712@lst.de>
+ <CAK7LNATYOLEboUTO4qPx2z7cqwDrHBO1HFHG8VzZEJ15STv+nw@mail.gmail.com>
+ <20190827075021.GA953@lst.de>
+ <CAK7LNAQZ+bueZZzSoMADmgLjWNvijHRV=wLQzN_kvLG3b5Uu+w@mail.gmail.com>
+ <20190827115541.GB5921@lst.de>
+ <CAK7LNAQ_nQcBt=xH1-h+=co85mTxFgbe+_46Gu4LaNsDSm+kYA@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <CAK7LNAQ_nQcBt=xH1-h+=co85mTxFgbe+_46Gu4LaNsDSm+kYA@mail.gmail.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Christoph Hellwig <hch@lst.de>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Tony Lindgren <tony@atomide.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Max Filippov <jcmvbkbc@gmail.com>, Marek Szyprowski <m.szyprowski@samsung.com>, Stephen Rothwell <sfr@canb.auug.org.au>, Joerg Roedel <joro@8bytes.org>, Russell King <linux@armlinux.org.uk>, Thierry Reding <treding@nvidia.com>, linux-xtensa@linux-xtensa.org, Kees Cook <keescook@chromium.org>, Nicolin Chen <nicoleotsuka@gmail.com>, Andrew Morton <akpm@linux-foundation.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, Chris Zankel <chris@zankel.net>, Wolfram Sang <wsa+renesas@sang-engineering.com>, David Woodhouse <dwmw2@infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, iommu@lists.linux-foundation.org, iamjoo
 List-Id: linux-mmc@vger.kernel.org
 
-Currently, the DMA addresses are casted to (u64) for the upper 32bits
-to avoid "right shift count >= width of type" warning.
+On Wed, Aug 28, 2019 at 7:53 PM Masahiro Yamada
+<yamada.masahiro@socionext.com> wrote:
+>
+> Hi Christoph,
+>
+> On Tue, Aug 27, 2019 at 8:55 PM Christoph Hellwig <hch@lst.de> wrote:
+> >
+> > On Tue, Aug 27, 2019 at 06:03:14PM +0900, Masahiro Yamada wrote:
+> > > Yes, this makes my driver working again
+> > > when CONFIG_DMA_CMA=y.
+> > >
+> > >
+> > > If I apply the following, my driver gets back working
+> > > irrespective of CONFIG_DMA_CMA.
+> >
+> > That sounds a lot like the device simply isn't 64-bit DMA capable, and
+> > previously always got CMA allocations under the limit it actually
+> > supported.  I suggest that you submit this quirk to the mmc maintainers.
+>
+>
+> I tested v5.2 and my MMC host controller works with
+> dma_address that exceeds 32-bit physical address.
+>
+> So, I believe my MMC device is 64-bit DMA capable.
+>
+> I am still looking into the code
+> to find out what was changed.
 
-<linux/kernel.h> provides macros to address this, and the macro names
-are self-documenting.
 
-Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
----
+I retract this comment.
 
- drivers/mmc/host/sdhci.c | 14 ++++++++------
- 1 file changed, 8 insertions(+), 6 deletions(-)
+Prior to bd2e75633c8012fc8a7431c82fda66237133bf7e,
+the descriptor table for ADMA is placed within the
+32-bit phys address range, not exceeds the 32-bit limit.
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index a5dc5aae973e..07144a195a9f 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -668,10 +668,10 @@ void sdhci_adma_write_desc(struct sdhci_host *host, void **desc,
- 	/* 32-bit and 64-bit descriptors have these members in same position */
- 	dma_desc->cmd = cpu_to_le16(cmd);
- 	dma_desc->len = cpu_to_le16(len);
--	dma_desc->addr_lo = cpu_to_le32((u32)addr);
-+	dma_desc->addr_lo = cpu_to_le32(lower_32_bits(addr));
- 
- 	if (host->flags & SDHCI_USE_64_BIT_DMA)
--		dma_desc->addr_hi = cpu_to_le32((u64)addr >> 32);
-+		dma_desc->addr_hi = cpu_to_le32(upper_32_bits(addr));
- 
- 	*desc += host->desc_sz;
- }
-@@ -827,9 +827,10 @@ static dma_addr_t sdhci_sdma_address(struct sdhci_host *host)
- static void sdhci_set_sdma_addr(struct sdhci_host *host, dma_addr_t addr)
- {
- 	if (host->v4_mode) {
--		sdhci_writel(host, addr, SDHCI_ADMA_ADDRESS);
-+		sdhci_writel(host, lower_32_bits(addr), SDHCI_ADMA_ADDRESS);
- 		if (host->flags & SDHCI_USE_64_BIT_DMA)
--			sdhci_writel(host, (u64)addr >> 32, SDHCI_ADMA_ADDRESS_HI);
-+			sdhci_writel(host, upper_32_bits(addr),
-+				     SDHCI_ADMA_ADDRESS_HI);
- 	} else {
- 		sdhci_writel(host, addr, SDHCI_DMA_ADDRESS);
- 	}
-@@ -1096,10 +1097,11 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
- 		} else if (host->flags & SDHCI_USE_ADMA) {
- 			sdhci_adma_table_pre(host, data, sg_cnt);
- 
--			sdhci_writel(host, host->adma_addr, SDHCI_ADMA_ADDRESS);
-+			sdhci_writel(host, lower_32_bits(host->adma_addr),
-+				     SDHCI_ADMA_ADDRESS);
- 			if (host->flags & SDHCI_USE_64_BIT_DMA)
- 				sdhci_writel(host,
--					     (u64)host->adma_addr >> 32,
-+					     upper_32_bits(host->adma_addr),
- 					     SDHCI_ADMA_ADDRESS_HI);
- 		} else {
- 			WARN_ON(sg_cnt != 1);
+Probably, my device is not 64-bit capable.
+
+I will talk to the hardware engineer,
+and check the hardware spec just in case.
+
+Thanks.
+
 -- 
-2.17.1
+Best Regards
+Masahiro Yamada
