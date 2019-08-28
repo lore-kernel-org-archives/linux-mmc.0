@@ -1,41 +1,87 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH] mmc: sunxi: fix unusuable eMMC on some H6 boards by
- disabling DDR
-Date: Wed, 28 Aug 2019 14:52:30 +0200
-Message-ID: <CACRpkdazfe3gJr6Q+X05GzxPuKtUg0M780SPA_oR5bd+-xBPvA@mail.gmail.com>
-References: <20190825150558.15173-1-alejandro.gonzalez.correo@gmail.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH] mmc: sdhci: use lower/upper_32_bits() macros for DMA
+ addresses
+Date: Wed, 28 Aug 2019 16:01:37 +0300
+Message-ID: <0d5da294-61f8-4b9f-1a6e-7212da40f572@intel.com>
+References: <20190828111453.4023-1-yamada.masahiro@socionext.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190825150558.15173-1-alejandro.gonzalez.correo@gmail.com>
+In-Reply-To: <20190828111453.4023-1-yamada.masahiro@socionext.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: =?UTF-8?Q?Alejandro_Gonz=C3=A1lez?= <alejandro.gonzalez.correo@gmail.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Maxime Ripard <maxime.ripard@bootlin.com>, Chen-Yu Tsai <wens@csie.org>, Greg KH <gregkh@linuxfoundation.org>, Thomas Gleixner <tglx@linutronix.de>, linux-mmc <linux-mmc@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-sunxi <linux-sunxi@googlegroups.com>
+To: Masahiro Yamada <yamada.masahiro@socionext.com>, linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Sun, Aug 25, 2019 at 5:06 PM Alejandro Gonz=C3=A1lez
-<alejandro.gonzalez.correo@gmail.com> wrote:
+On 28/08/19 2:14 PM, Masahiro Yamada wrote:
+> Currently, the DMA addresses are casted to (u64) for the upper 32bits
+> to avoid "right shift count >= width of type" warning.
+> 
+> <linux/kernel.h> provides macros to address this, and the macro names
+> are self-documenting.
+> 
+> Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
+> ---
+> 
+>  drivers/mmc/host/sdhci.c | 14 ++++++++------
+>  1 file changed, 8 insertions(+), 6 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index a5dc5aae973e..07144a195a9f 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -668,10 +668,10 @@ void sdhci_adma_write_desc(struct sdhci_host *host, void **desc,
+>  	/* 32-bit and 64-bit descriptors have these members in same position */
+>  	dma_desc->cmd = cpu_to_le16(cmd);
+>  	dma_desc->len = cpu_to_le16(len);
+> -	dma_desc->addr_lo = cpu_to_le32((u32)addr);
+> +	dma_desc->addr_lo = cpu_to_le32(lower_32_bits(addr));
+>  
+>  	if (host->flags & SDHCI_USE_64_BIT_DMA)
+> -		dma_desc->addr_hi = cpu_to_le32((u64)addr >> 32);
+> +		dma_desc->addr_hi = cpu_to_le32(upper_32_bits(addr));
+>  
+>  	*desc += host->desc_sz;
+>  }
+> @@ -827,9 +827,10 @@ static dma_addr_t sdhci_sdma_address(struct sdhci_host *host)
+>  static void sdhci_set_sdma_addr(struct sdhci_host *host, dma_addr_t addr)
+>  {
+>  	if (host->v4_mode) {
 
-> Jernej Skrabec compared the BSP driver with this
-> driver, and found that the BSP driver configures pinctrl to operate at
-> 1.8 V when entering DDR mode (although 3.3 V operation is supported), whi=
-le
-> the mainline kernel lacks any mechanism to switch voltages dynamically.
-(...)
-> the kernel lacks the required
-> dynamic pinctrl control for now
+To reduce line wrapping, how about using:
 
-This is not a pin control thing, the I/O voltage level is usually
-controlled by a regulator called VCCQ, if the selection of the
-voltage rails is inside the pin control registers, see the solution
-in drivers/pinctrl/sh-pfc/pfc-sh73a0.c where we simply provide
-a regulator from inside the pinctrl driver to make things easy
-for the MMC core. Do this thing!
+		u32 lo = lower_32_bits(addr);
+		u32 hi = upper_32_bits(addr);
 
-If you don't have time to fix it up properly right now I would slap
-in a big FIXME in the code so people know this needs
-to be fixed properly.
+> -		sdhci_writel(host, addr, SDHCI_ADMA_ADDRESS);
+> +		sdhci_writel(host, lower_32_bits(addr), SDHCI_ADMA_ADDRESS);
+>  		if (host->flags & SDHCI_USE_64_BIT_DMA)
+> -			sdhci_writel(host, (u64)addr >> 32, SDHCI_ADMA_ADDRESS_HI);
+> +			sdhci_writel(host, upper_32_bits(addr),
+> +				     SDHCI_ADMA_ADDRESS_HI);
+>  	} else {
+>  		sdhci_writel(host, addr, SDHCI_DMA_ADDRESS);
+>  	}
+> @@ -1096,10 +1097,11 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
+>  		} else if (host->flags & SDHCI_USE_ADMA) {
 
-Yours,
-Linus Walleij
+To reduce line wrapping, how about using:
+
+			u32 lo = lower_32_bits(host->adma_addr);
+			u32 hi = upper_32_bits(host->adma_addr);
+
+>  			sdhci_adma_table_pre(host, data, sg_cnt);
+>  
+> -			sdhci_writel(host, host->adma_addr, SDHCI_ADMA_ADDRESS);
+> +			sdhci_writel(host, lower_32_bits(host->adma_addr),
+> +				     SDHCI_ADMA_ADDRESS);
+>  			if (host->flags & SDHCI_USE_64_BIT_DMA)
+>  				sdhci_writel(host,
+> -					     (u64)host->adma_addr >> 32,
+> +					     upper_32_bits(host->adma_addr),
+>  					     SDHCI_ADMA_ADDRESS_HI);
+>  		} else {
+>  			WARN_ON(sg_cnt != 1);
+> 
