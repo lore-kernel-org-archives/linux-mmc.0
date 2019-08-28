@@ -1,7 +1,7 @@
 From: Chunyan Zhang <zhang.lyra@gmail.com>
-Subject: [PATCH v2 2/5] mmc: sdhci-sprd: add get_ro hook function
-Date: Wed, 28 Aug 2019 10:17:33 +0800
-Message-ID: <20190828021736.22049-3-zhang.lyra@gmail.com>
+Subject: [PATCH v2 3/5] mmc: sdhci-sprd: add SDHCI_QUIRK2_PRESET_VALUE_BROKEN
+Date: Wed, 28 Aug 2019 10:17:34 +0800
+Message-ID: <20190828021736.22049-4-zhang.lyra@gmail.com>
 References: <20190828021736.22049-1-zhang.lyra@gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -14,7 +14,8 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Chunyan Zhang <chunyan.zhang@unisoc.com>
 
-sprd's sd host controller doesn't support write protect to sd card.
+The bit of PRESET_VAL_ENABLE in HOST_CONTROL2 register is reserved on
+sprd's sd host controller, set quirk2 to disable configuring this.
 
 Fixes: fb8bd90f83c4 ("mmc: sdhci-sprd: Add Spreadtrum's initial host
 controller")
@@ -23,32 +24,22 @@ Signed-off-by: Chunyan Zhang <zhang.lyra@gmail.com>
 Reviewed-by: Baolin Wang <baolin.wang@linaro.org>
 Tested-by: Baolin Wang <baolin.wang@linaro.org>
 ---
- drivers/mmc/host/sdhci-sprd.c | 6 ++++++
- 1 file changed, 6 insertions(+)
+ drivers/mmc/host/sdhci-sprd.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
-index d5871865a1e9..90cb2af91159 100644
+index 90cb2af91159..27d0b57f3f89 100644
 --- a/drivers/mmc/host/sdhci-sprd.c
 +++ b/drivers/mmc/host/sdhci-sprd.c
-@@ -374,6 +374,11 @@ static unsigned int sdhci_sprd_get_max_timeout_count(struct sdhci_host *host)
- 	return 1 << 31;
- }
- 
-+static unsigned int sdhci_sprd_get_ro(struct sdhci_host *host)
-+{
-+	return 0;
-+}
-+
- static struct sdhci_ops sdhci_sprd_ops = {
- 	.read_l = sdhci_sprd_readl,
- 	.write_l = sdhci_sprd_writel,
-@@ -386,6 +391,7 @@ static struct sdhci_ops sdhci_sprd_ops = {
- 	.set_uhs_signaling = sdhci_sprd_set_uhs_signaling,
- 	.hw_reset = sdhci_sprd_hw_reset,
- 	.get_max_timeout_count = sdhci_sprd_get_max_timeout_count,
-+	.get_ro = sdhci_sprd_get_ro,
+@@ -510,7 +510,8 @@ static void sdhci_sprd_phy_param_parse(struct sdhci_sprd_host *sprd_host,
+ static const struct sdhci_pltfm_data sdhci_sprd_pdata = {
+ 	.quirks = SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK,
+ 	.quirks2 = SDHCI_QUIRK2_BROKEN_HS200 |
+-		   SDHCI_QUIRK2_USE_32BIT_BLK_CNT,
++		   SDHCI_QUIRK2_USE_32BIT_BLK_CNT |
++		   SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
+ 	.ops = &sdhci_sprd_ops,
  };
  
- static void sdhci_sprd_request(struct mmc_host *mmc, struct mmc_request *mrq)
 -- 
 2.20.1
