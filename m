@@ -1,49 +1,67 @@
-From: Yong Mao <yong.mao@mediatek.com>
-Subject: [PATCH v2] mmc: mediatek: enable SDIO IRQ low level trigger function
-Date: Wed, 28 Aug 2019 17:45:24 +0800
-Message-ID: <1566985524-22749-2-git-send-email-yong.mao@mediatek.com>
-References: <1566985524-22749-1-git-send-email-yong.mao@mediatek.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: core: Fix init of SD cards reporting an invalid VDD range
+Date: Wed, 28 Aug 2019 12:07:29 +0200
+Message-ID: <CAPDyKFqz-JD6V8_uYDyi87hOF4JJL_b_2uHhmwgfo1dS6SO+5A@mail.gmail.com>
+References: <20190827081043.15443-1-ulf.hansson@linaro.org> <20190827181518.2e7aaa44@fido6>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1566985524-22749-1-git-send-email-yong.mao@mediatek.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Chaotian Jing <chaotian.jing@mediatek.com>, Matthias Brugger <matthias.bgg@gmail.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org, srv_heupstream@mediatek.com, yong mao <yong.mao@mediatek.com>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <20190827181518.2e7aaa44@fido6>
+Sender: stable-owner@vger.kernel.org
+To: Philip Langdale <philipl@overt.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "# 4.0+" <stable@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-From: yong mao <yong.mao@mediatek.com>
+On Wed, 28 Aug 2019 at 03:15, Philip Langdale <philipl@overt.org> wrote:
+>
+> On Tue, 27 Aug 2019 10:10:43 +0200
+> Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>
+> > The OCR register defines the supported range of VDD voltages for SD
+> > cards. However, it has turned out that some SD cards reports an
+> > invalid voltage range, for example having bit7 set.
+> >
+> > When a host supports MMC_CAP2_FULL_PWR_CYCLE and some of the voltages
+> > from the invalid VDD range, this triggers the core to run a power
+> > cycle of the card to try to initialize it at the lowest common
+> > supported voltage. Obviously this fails, since the card can't support
+> > it.
+> >
+> > Let's fix this problem, by clearing invalid bits from the read OCR
+> > register for SD cards, before proceeding with the VDD voltage
+> > negotiation.
+> >
+> > Cc: stable@vger.kernel.org
+> > Reported-by: Philip Langdale <philipl@overt.org>
+> > Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> > ---
+> >  drivers/mmc/core/sd.c | 6 ++++++
+> >  1 file changed, 6 insertions(+)
+> >
+> > diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+> > index d681e8aaca83..fe914ff5f5d6 100644
+> > --- a/drivers/mmc/core/sd.c
+> > +++ b/drivers/mmc/core/sd.c
+> > @@ -1292,6 +1292,12 @@ int mmc_attach_sd(struct mmc_host *host)
+> >                       goto err;
+> >       }
+> >
+> > +     /*
+> > +      * Some SD cards claims an out of spec VDD voltage range.
+> > Let's treat
+> > +      * these bits as being in-valid and especially also bit7.
+> > +      */
+> > +     ocr &= ~0x7FFF;
+> > +
+> >       rocr = mmc_select_voltage(host, ocr);
+> >
+> >       /*
+>
+> Looks right. Tried it out and worked as expected.
+>
+> Reviewed-by: Philip Langdale <philipl@overt.org>
 
-SDIO IRQ is not defaultly triggered by low level,
-but by falling edge. It needs to set related register
-to enable SDIO IRQ low level trigger function.
-Otherwise the SDIO IRQ may be lost in some specail condition.
+Thanks! I add your tested-by tag as well!
 
-Signed-off-by: Yong Mao <yong.mao@mediatek.com>
-Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
----
- drivers/mmc/host/mtk-sd.c | 2 ++
- 1 file changed, 2 insertions(+)
-
-diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index 33f4b63..585f0c7 100644
---- a/drivers/mmc/host/mtk-sd.c
-+++ b/drivers/mmc/host/mtk-sd.c
-@@ -192,6 +192,7 @@
- #define SDC_STS_CMDBUSY         (0x1 << 1)	/* RW */
- #define SDC_STS_SWR_COMPL       (0x1 << 31)	/* RW */
- 
-+#define SDC_DAT1_IRQ_TRIGGER	(0x1 << 19)	/* RW */
- /* SDC_ADV_CFG0 mask */
- #define SDC_RX_ENHANCE_EN	(0x1 << 20)	/* RW */
- 
-@@ -1568,6 +1569,7 @@ static void msdc_init_hw(struct msdc_host *host)
- 
- 	/* Config SDIO device detect interrupt function */
- 	sdr_clr_bits(host->base + SDC_CFG, SDC_CFG_SDIOIDE);
-+	sdr_set_bits(host->base + SDC_ADV_CFG0, SDC_DAT1_IRQ_TRIGGER);
- 
- 	/* Configure to default data timeout */
- 	sdr_set_field(host->base + SDC_CFG, SDC_CFG_DTOC, 3);
--- 
-1.9.1
+Kind regards
+Uffe
