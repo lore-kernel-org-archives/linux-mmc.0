@@ -1,62 +1,49 @@
-From: Chunyan Zhang <zhang.lyra@gmail.com>
-Subject: [PATCH v2 5/5] mmc: sdhci-sprd: clear the UHS-I modes read from registers
-Date: Wed, 28 Aug 2019 10:17:36 +0800
-Message-ID: <20190828021736.22049-6-zhang.lyra@gmail.com>
-References: <20190828021736.22049-1-zhang.lyra@gmail.com>
+From: "boojin.kim" <boojin.kim@samsung.com>
+Subject: Re: [PATCH 5/9] block: support diskcipher
+Date: Wed, 28 Aug 2019 11:20:53 +0900
+Message-ID: <009301d55d47$38606400$a9212c00$@samsung.com>
+References: <CGME20190828022055epcas2p25525077d0a5a3fa5a2027bac06a10bc1@epcas2p2.samsung.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190828021736.22049-1-zhang.lyra@gmail.com>
+Content-Language: ko
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Orson Zhai <orsonzhai@gmail.com>, Baolin Wang <baolin.wang@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Chunyan Zhang <zhang.lyra@gmail.com>
+Cc: 'Herbert Xu' <herbert@gondor.apana.org.au>, "'David S. Miller'" <davem@davemloft.net>, 'Eric Biggers' <ebiggers@kernel.org>, "'Theodore Y. Ts'o'" <tytso@mit.edu>, 'Chao Yu' <chao@kernel.org>, 'Jaegeuk Kim' <jaegeuk@kernel.org>, 'Andreas Dilger' <adilger.kernel@dilger.ca>'Theodore Ts'o' <tytso@mit.edu>, dm-devel@redhat.com, 'Mike Snitzer' <snitzer@redhat.com>, 'Alasdair Kergon' <agk@redhat.com>, 'Jens Axboe' <axboe@kernel.dk>, 'Krzysztof Kozlowski' <krzk@kernel.org>, 'Kukjin Kim' <kgene@kernel.org>, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Ulf Hansson' <ulf.hansson@linaro.org>, linux-crypto@vger.kernel.org, linux-kernel@vger.kernel.org, linux-fscrypt@vger.kernel.org, linux-mmc@vger.kernel.org, linux-samsung-soc
 List-Id: linux-mmc@vger.kernel.org
 
-From: Chunyan Zhang <chunyan.zhang@unisoc.com>
+On Tue, Aug 27, 2019 at 05:33:33PM +0900, boojin.kim wrote:
+>
+> Hi Boojin,
+>
+> I think the important thing to realize here is that there are a large
+> number of hardware devices for which the keyslot manager *is* needed.
+> And from the upstream kernel's perspective, supporting two different
+> schemes for supporting the inline encryption feature is more
+> complexity than just supporting one which is general enough to support
+> a wider variety of hardware devices.
+>
+> If you want somethig which is only good for the hardware platform you
+> are charged to support, that's fine if it's only going to be in a
+> Samsung-specific kernel.  But if your goal is to get something that
+> works upstream, especially if it requires changes in core layers of
+> the kernel, it's important that it's general enough to support most,
+> if not all, if the hardware devices in the industry.
+>
+> Regards,
 
-sprd's sd host controller supports SDR50/SDR104/DDR50 though, the UHS-I
-mode used by the specific card can be selected via devicetree only.
+I understood your reply.
+But, Please consider the diskcipher isn't just for FMP. 
+The UFS in Samsung SoC also has UFS ICE. This UFS ICE can be registered 
+as an algorithm of diskcipher like FMP.
 
-Fixes: fb8bd90f83c4 ("mmc: sdhci-sprd: Add Spreadtrum's initial host
-controller")
-Signed-off-by: Chunyan Zhang <chunyan.zhang@unisoc.com>
-Signed-off-by: Chunyan Zhang <zhang.lyra@gmail.com>
-Reviewed-by: Baolin Wang <baolin.wang@linaro.org>
-Tested-by: Baolin Wang <baolin.wang@linaro.org>
----
- drivers/mmc/host/sdhci-sprd.c | 13 ++++++++++++-
- 1 file changed, 12 insertions(+), 1 deletion(-)
+Following is my opinion to introduce diskcipher.
+I think the common feature of ICE like FMP and UFS ICE, 
+is 'exposing cipher text to storage".
+And, Crypto test is also important for ICE.  Diskcipher supports
+the common feature of ICE. 
+I think specific functions for each ICE such as the key control of UFS ICE
+and the writing crypto table of FMP can be processed at algorithm level.
 
-diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
-index 1fecf055682c..d3c3e95676f0 100644
---- a/drivers/mmc/host/sdhci-sprd.c
-+++ b/drivers/mmc/host/sdhci-sprd.c
-@@ -509,7 +509,8 @@ static void sdhci_sprd_phy_param_parse(struct sdhci_sprd_host *sprd_host,
- 
- static const struct sdhci_pltfm_data sdhci_sprd_pdata = {
- 	.quirks = SDHCI_QUIRK_BROKEN_CARD_DETECTION |
--		  SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK,
-+		  SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
-+		  SDHCI_QUIRK_MISSING_CAPS,
- 	.quirks2 = SDHCI_QUIRK2_BROKEN_HS200 |
- 		   SDHCI_QUIRK2_USE_32BIT_BLK_CNT |
- 		   SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
-@@ -614,6 +615,16 @@ static int sdhci_sprd_probe(struct platform_device *pdev)
- 
- 	sdhci_enable_v4_mode(host);
- 
-+	/*
-+	 * Supply the existing CAPS, but clear the UHS-I modes. This
-+	 * will allow these modes to be specified only by device
-+	 * tree properties through mmc_of_parse().
-+	 */
-+	host->caps = sdhci_readl(host, SDHCI_CAPABILITIES);
-+	host->caps1 = sdhci_readl(host, SDHCI_CAPABILITIES_1);
-+	host->caps1 &= ~(SDHCI_SUPPORT_SDR50 | SDHCI_SUPPORT_SDR104 |
-+			 SDHCI_SUPPORT_DDR50);
-+
- 	ret = sdhci_setup_host(host);
- 	if (ret)
- 		goto pm_runtime_disable;
--- 
-2.20.1
+Thanks for your reply.
+Boojin Kim.
