@@ -1,52 +1,68 @@
 From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: Re: [PATCH v2 2/2] dma-contiguous: Use fallback alloc_pages for
- single pages
-Date: Wed, 28 Aug 2019 19:53:40 +0900
-Message-ID: <CAK7LNAQ_nQcBt=xH1-h+=co85mTxFgbe+_46Gu4LaNsDSm+kYA@mail.gmail.com>
-References: <20190506223334.1834-1-nicoleotsuka@gmail.com> <20190506223334.1834-3-nicoleotsuka@gmail.com>
- <CAK7LNARacEorb38mVBw_V-Zvz-znWgBma1AP1-z_5B_xZU4ogg@mail.gmail.com>
- <CAK7LNAQfYBCoChMV=MOwcUyVoqRkrPWs7DaWdzDqjBe18gGiAQ@mail.gmail.com>
- <20190825011025.GA23410@lst.de> <CAK7LNAQb1ZHr=DiHLNeNRaQExMuXdDOV4sFghoGbco_Q=Qzb8g@mail.gmail.com>
- <20190826073320.GA11712@lst.de> <CAK7LNATYOLEboUTO4qPx2z7cqwDrHBO1HFHG8VzZEJ15STv+nw@mail.gmail.com>
- <20190827075021.GA953@lst.de> <CAK7LNAQZ+bueZZzSoMADmgLjWNvijHRV=wLQzN_kvLG3b5Uu+w@mail.gmail.com>
- <20190827115541.GB5921@lst.de>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Subject: [PATCH] mmc: sdhci: use lower/upper_32_bits() macros for DMA addresses
+Date: Wed, 28 Aug 2019 20:14:53 +0900
+Message-ID: <20190828111453.4023-1-yamada.masahiro@socionext.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190827115541.GB5921@lst.de>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Christoph Hellwig <hch@lst.de>
-Cc: Nicolin Chen <nicoleotsuka@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Robin Murphy <robin.murphy@arm.com>, Marek Szyprowski <m.szyprowski@samsung.com>, vdumpa@nvidia.com, Russell King <linux@armlinux.org.uk>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Chris Zankel <chris@zankel.net>, Max Filippov <jcmvbkbc@gmail.com>, Joerg Roedel <joro@8bytes.org>, David Woodhouse <dwmw2@infradead.org>, Tony Lindgren <tony@atomide.com>, Andrew Morton <akpm@linux-foundation.org>, Stephen Rothwell <sfr@canb.auug.org.au>, Thierry Reding <treding@nvidia.com>, Kees Cook <keescook@chromium.org>, iamjoonsoo.kim@lge.com, Wolfram Sang <wsa+renesas>
+To: linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Masahiro Yamada <yamada.masahiro@socionext.com>, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Christoph,
+Currently, the DMA addresses are casted to (u64) for the upper 32bits
+to avoid "right shift count >= width of type" warning.
 
-On Tue, Aug 27, 2019 at 8:55 PM Christoph Hellwig <hch@lst.de> wrote:
->
-> On Tue, Aug 27, 2019 at 06:03:14PM +0900, Masahiro Yamada wrote:
-> > Yes, this makes my driver working again
-> > when CONFIG_DMA_CMA=y.
-> >
-> >
-> > If I apply the following, my driver gets back working
-> > irrespective of CONFIG_DMA_CMA.
->
-> That sounds a lot like the device simply isn't 64-bit DMA capable, and
-> previously always got CMA allocations under the limit it actually
-> supported.  I suggest that you submit this quirk to the mmc maintainers.
+<linux/kernel.h> provides macros to address this, and the macro names
+are self-documenting.
 
+Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
+---
 
-I tested v5.2 and my MMC host controller works with
-dma_address that exceeds 32-bit physical address.
+ drivers/mmc/host/sdhci.c | 14 ++++++++------
+ 1 file changed, 8 insertions(+), 6 deletions(-)
 
-So, I believe my MMC device is 64-bit DMA capable.
-
-I am still looking into the code
-to find out what was changed.
-
-
-
-
---
-Best Regards
-Masahiro Yamada
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index a5dc5aae973e..07144a195a9f 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -668,10 +668,10 @@ void sdhci_adma_write_desc(struct sdhci_host *host, void **desc,
+ 	/* 32-bit and 64-bit descriptors have these members in same position */
+ 	dma_desc->cmd = cpu_to_le16(cmd);
+ 	dma_desc->len = cpu_to_le16(len);
+-	dma_desc->addr_lo = cpu_to_le32((u32)addr);
++	dma_desc->addr_lo = cpu_to_le32(lower_32_bits(addr));
+ 
+ 	if (host->flags & SDHCI_USE_64_BIT_DMA)
+-		dma_desc->addr_hi = cpu_to_le32((u64)addr >> 32);
++		dma_desc->addr_hi = cpu_to_le32(upper_32_bits(addr));
+ 
+ 	*desc += host->desc_sz;
+ }
+@@ -827,9 +827,10 @@ static dma_addr_t sdhci_sdma_address(struct sdhci_host *host)
+ static void sdhci_set_sdma_addr(struct sdhci_host *host, dma_addr_t addr)
+ {
+ 	if (host->v4_mode) {
+-		sdhci_writel(host, addr, SDHCI_ADMA_ADDRESS);
++		sdhci_writel(host, lower_32_bits(addr), SDHCI_ADMA_ADDRESS);
+ 		if (host->flags & SDHCI_USE_64_BIT_DMA)
+-			sdhci_writel(host, (u64)addr >> 32, SDHCI_ADMA_ADDRESS_HI);
++			sdhci_writel(host, upper_32_bits(addr),
++				     SDHCI_ADMA_ADDRESS_HI);
+ 	} else {
+ 		sdhci_writel(host, addr, SDHCI_DMA_ADDRESS);
+ 	}
+@@ -1096,10 +1097,11 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
+ 		} else if (host->flags & SDHCI_USE_ADMA) {
+ 			sdhci_adma_table_pre(host, data, sg_cnt);
+ 
+-			sdhci_writel(host, host->adma_addr, SDHCI_ADMA_ADDRESS);
++			sdhci_writel(host, lower_32_bits(host->adma_addr),
++				     SDHCI_ADMA_ADDRESS);
+ 			if (host->flags & SDHCI_USE_64_BIT_DMA)
+ 				sdhci_writel(host,
+-					     (u64)host->adma_addr >> 32,
++					     upper_32_bits(host->adma_addr),
+ 					     SDHCI_ADMA_ADDRESS_HI);
+ 		} else {
+ 			WARN_ON(sg_cnt != 1);
+-- 
+2.17.1
