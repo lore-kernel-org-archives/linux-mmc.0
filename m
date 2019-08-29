@@ -1,104 +1,48 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v2] mmc: sdhci: use lower/upper_32_bits() macros for DMA
- addresses
-Date: Thu, 29 Aug 2019 16:19:33 +0300
-Message-ID: <20e6bfc4-b56a-780f-2dd8-d80af1fd1947@intel.com>
-References: <20190829112206.22213-1-yamada.masahiro@socionext.com>
+Subject: Re: [PATCH V6 5/5] mmc: host: sdhci-pci: Add Genesys Logic GL975x
+ support
+Date: Thu, 29 Aug 2019 16:21:11 +0300
+Message-ID: <7fcd0fd5-97cb-1dab-7477-666838478541@intel.com>
+References: <20190827003335.2494-1-benchuanggli@gmail.com>
+ <99735a03-c698-624d-f5cf-4feed7e6a9ca@intel.com>
+ <20190828134714.GA30547@people.danlj.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190829112206.22213-1-yamada.masahiro@socionext.com>
+In-Reply-To: <20190828134714.GA30547@people.danlj.org>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Masahiro Yamada <yamada.masahiro@socionext.com>, linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Piotr Sroka <piotrs@cadence.com>, linux-kernel@vger.kernel.org
+To: "Michael K. Johnson" <johnsonm@danlj.org>
+Cc: Ben Chuang <benchuanggli@gmail.com>, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, ben.chuang@genesyslogic.com.tw
 List-Id: linux-mmc@vger.kernel.org
 
-On 29/08/19 2:22 PM, Masahiro Yamada wrote:
-> Currently, the DMA addresses are casted to (u64) for the upper 32bits
-> to avoid "right shift count >= width of type" warning.
+On 28/08/19 4:47 PM, Michael K. Johnson wrote:
+> On Wed, Aug 28, 2019 at 04:13:03PM +0300, Adrian Hunter wrote:
+>> On 27/08/19 3:33 AM, Ben Chuang wrote:
+>> Looks good, one minor comment
+> ...
+>>> +#ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
+>>
+>> Arguably CONFIG_MMC_SDHCI_IO_ACCESSORS needs to be removed altogether. i.e.
+>> making the accessors always available.  So for now, I'd prefer to select
+>> MMC_SDHCI_IO_ACCESSORS:
+>>
+>> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+>> index 14d89a108edd..c3bd967d8a1a 100644
+>> --- a/drivers/mmc/host/Kconfig
+>> +++ b/drivers/mmc/host/Kconfig
+>> @@ -94,6 +94,7 @@ config MMC_SDHCI_PCI
+>>  	depends on MMC_SDHCI && PCI
+>>  	select MMC_CQHCI
+>>  	select IOSF_MBI if X86
+>> +	select MMC_SDHCI_IO_ACCESSORS
+>>  	help
+>>  	  This selects the PCI Secure Digital Host Controller Interface.
+>>  	  Most controllers found today are PCI devices.
 > 
-> <linux/kernel.h> provides macros to address this, and I like the macro
-> names are self-documenting.
+> Unless I'm missing something, this seems like a separate patch;
+> are you asking for it first, as a predecessor to the GLI patch?
 > 
-> I introduced a new helper, sdhci_set_adma_addr() to avoid the code
-> duplication.
-> 
-> Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
 
-Even better, thanks!
-
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-
-> ---
-> 
-> Changes in v2:
->   - Another way to reduce linu wrapping
-> 
->  drivers/mmc/host/sdhci.c | 27 +++++++++++++--------------
->  1 file changed, 13 insertions(+), 14 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 08cc0792c174..66c2cf89ee22 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -668,10 +668,10 @@ void sdhci_adma_write_desc(struct sdhci_host *host, void **desc,
->  	/* 32-bit and 64-bit descriptors have these members in same position */
->  	dma_desc->cmd = cpu_to_le16(cmd);
->  	dma_desc->len = cpu_to_le16(len);
-> -	dma_desc->addr_lo = cpu_to_le32((u32)addr);
-> +	dma_desc->addr_lo = cpu_to_le32(lower_32_bits(addr));
->  
->  	if (host->flags & SDHCI_USE_64_BIT_DMA)
-> -		dma_desc->addr_hi = cpu_to_le32((u64)addr >> 32);
-> +		dma_desc->addr_hi = cpu_to_le32(upper_32_bits(addr));
->  
->  	*desc += host->desc_sz;
->  }
-> @@ -816,6 +816,13 @@ static void sdhci_adma_table_post(struct sdhci_host *host,
->  	}
->  }
->  
-> +static void sdhci_set_adma_addr(struct sdhci_host *host, dma_addr_t addr)
-> +{
-> +	sdhci_writel(host, lower_32_bits(addr), SDHCI_ADMA_ADDRESS);
-> +	if (host->flags & SDHCI_USE_64_BIT_DMA)
-> +		sdhci_writel(host, upper_32_bits(addr), SDHCI_ADMA_ADDRESS_HI);
-> +}
-> +
->  static dma_addr_t sdhci_sdma_address(struct sdhci_host *host)
->  {
->  	if (host->bounce_buffer)
-> @@ -826,13 +833,10 @@ static dma_addr_t sdhci_sdma_address(struct sdhci_host *host)
->  
->  static void sdhci_set_sdma_addr(struct sdhci_host *host, dma_addr_t addr)
->  {
-> -	if (host->v4_mode) {
-> -		sdhci_writel(host, addr, SDHCI_ADMA_ADDRESS);
-> -		if (host->flags & SDHCI_USE_64_BIT_DMA)
-> -			sdhci_writel(host, (u64)addr >> 32, SDHCI_ADMA_ADDRESS_HI);
-> -	} else {
-> +	if (host->v4_mode)
-> +		sdhci_set_adma_addr(host, addr);
-> +	else
->  		sdhci_writel(host, addr, SDHCI_DMA_ADDRESS);
-> -	}
->  }
->  
->  static unsigned int sdhci_target_timeout(struct sdhci_host *host,
-> @@ -1095,12 +1099,7 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
->  			host->flags &= ~SDHCI_REQ_USE_DMA;
->  		} else if (host->flags & SDHCI_USE_ADMA) {
->  			sdhci_adma_table_pre(host, data, sg_cnt);
-> -
-> -			sdhci_writel(host, host->adma_addr, SDHCI_ADMA_ADDRESS);
-> -			if (host->flags & SDHCI_USE_64_BIT_DMA)
-> -				sdhci_writel(host,
-> -					     (u64)host->adma_addr >> 32,
-> -					     SDHCI_ADMA_ADDRESS_HI);
-> +			sdhci_set_adma_addr(host, host->adma_addr);
->  		} else {
->  			WARN_ON(sg_cnt != 1);
->  			sdhci_set_sdma_addr(host, sdhci_sdma_address(host));
-> 
+No, it is fine with this patch.
