@@ -1,48 +1,64 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH V6 5/5] mmc: host: sdhci-pci: Add Genesys Logic GL975x
- support
-Date: Thu, 29 Aug 2019 16:21:11 +0300
-Message-ID: <7fcd0fd5-97cb-1dab-7477-666838478541@intel.com>
-References: <20190827003335.2494-1-benchuanggli@gmail.com>
- <99735a03-c698-624d-f5cf-4feed7e6a9ca@intel.com>
- <20190828134714.GA30547@people.danlj.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 1/3] mmc: sdhci-cadence: enable v4_mode to fix ADMA 64-bit addressing
+Date: Thu, 29 Aug 2019 15:27:03 +0200
+Message-ID: <CAPDyKFpnRbtVpYkpM7CDYfxvdBjqybB4SVWyuSrS1jpYduTbCw@mail.gmail.com>
+References: <20190829104928.27404-1-yamada.masahiro@socionext.com>
+ <CAPDyKFooFQgBgK3N1Ob9rsT_7-5kqC9i7PeMxkkeAbnDP+Fwnw@mail.gmail.com> <CAK7LNASDfJQrMq4jjwDjrQF-4E9A_BZtgh+K-duTAo8zRVZA0g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190828134714.GA30547@people.danlj.org>
-Content-Language: en-US
+In-Reply-To: <CAK7LNASDfJQrMq4jjwDjrQF-4E9A_BZtgh+K-duTAo8zRVZA0g@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: "Michael K. Johnson" <johnsonm@danlj.org>
-Cc: Ben Chuang <benchuanggli@gmail.com>, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, ben.chuang@genesyslogic.com.tw
+To: Masahiro Yamada <yamada.masahiro@socionext.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Piotr Sroka <piotrs@cadence.com>, "# 4.0+" <stable@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 28/08/19 4:47 PM, Michael K. Johnson wrote:
-> On Wed, Aug 28, 2019 at 04:13:03PM +0300, Adrian Hunter wrote:
->> On 27/08/19 3:33 AM, Ben Chuang wrote:
->> Looks good, one minor comment
-> ...
->>> +#ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
->>
->> Arguably CONFIG_MMC_SDHCI_IO_ACCESSORS needs to be removed altogether. i.e.
->> making the accessors always available.  So for now, I'd prefer to select
->> MMC_SDHCI_IO_ACCESSORS:
->>
->> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
->> index 14d89a108edd..c3bd967d8a1a 100644
->> --- a/drivers/mmc/host/Kconfig
->> +++ b/drivers/mmc/host/Kconfig
->> @@ -94,6 +94,7 @@ config MMC_SDHCI_PCI
->>  	depends on MMC_SDHCI && PCI
->>  	select MMC_CQHCI
->>  	select IOSF_MBI if X86
->> +	select MMC_SDHCI_IO_ACCESSORS
->>  	help
->>  	  This selects the PCI Secure Digital Host Controller Interface.
->>  	  Most controllers found today are PCI devices.
-> 
-> Unless I'm missing something, this seems like a separate patch;
-> are you asking for it first, as a predecessor to the GLI patch?
-> 
+On Thu, 29 Aug 2019 at 14:05, Masahiro Yamada
+<yamada.masahiro@socionext.com> wrote:
+>
+> On Thu, Aug 29, 2019 at 8:48 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> >
+> > On Thu, 29 Aug 2019 at 12:49, Masahiro Yamada
+> > <yamada.masahiro@socionext.com> wrote:
+> > >
+> > > The IP datasheet says this controller is compatible with SD Host
+> > > Specification Version v4.00.
+> > >
+> > > As it turned out, the ADMA of this IP does not work with 64-bit mode
+> > > when it is in the Version 3.00 compatible mode; it understands the
+> > > old 64-bit descriptor table (as defined in SDHCI v2), but the ADMA
+> > > System Address Register (SDHCI_ADMA_ADDRESS) cannot point to the
+> > > 64-bit address.
+> > >
+> > > I noticed this issue only after commit bd2e75633c80 ("dma-contiguous:
+> > > use fallback alloc_pages for single pages"). Prior to that commit,
+> > > dma_set_mask_and_coherent() returned the dma address that fits in
+> > > 32-bit range, at least for the default arm64 configuration
+> > > (arch/arm64/configs/defconfig). Now the host->adma_addr exceeds the
+> > > 32-bit limit, causing the real problem for the Socionext SoCs.
+> > > (As a side-note, I was also able to reproduce the issue for older
+> > > kernels by turning off CONFIG_DMA_CMA.)
+> > >
+> > > Call sdhci_enable_v4_mode() to fix this.
+> > >
+> > > I think it is better to back-port this, but only possible for v4.20+.
+> > >
+> > > When this driver was merged (v4.10), the v4 mode support did not exist.
+> > > It was added by commit b3f80b434f72 ("mmc: sdhci: Add sd host v4 mode")
+> > > i.e. v4.20.
+> > >
+> > > Cc: <stable@vger.kernel.org> # v4.20+
+> > > Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
+> >
+> > Applied for fixes, by adding below tag, thanks!
+> >
+> > Fixes: b3f80b434f72 ("mmc: sdhci: Add sd host v4 mode")
+>
+> This is not a bug commit.
 
-No, it is fine with this patch.
+Right, but it can't be applied before this commit, hence why I added
+it. Not sure that it matters, but I can remove the tag if you
+insists!?
+
+Kind regards
+Uffe
