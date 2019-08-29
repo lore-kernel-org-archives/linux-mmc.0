@@ -1,58 +1,80 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2] mmc: mediatek: enable SDIO IRQ low level trigger function
-Date: Thu, 29 Aug 2019 15:36:28 +0200
-Message-ID: <CAPDyKFqgO7fwybn1nYcf14jiHswM+T7fqY1BuSvx5AubYA6F=A@mail.gmail.com>
-References: <1566985524-22749-1-git-send-email-yong.mao@mediatek.com> <1566985524-22749-2-git-send-email-yong.mao@mediatek.com>
+From: Masahiro Yamada <yamada.masahiro@socionext.com>
+Subject: Re: [PATCH 1/3] mmc: sdhci-cadence: enable v4_mode to fix ADMA 64-bit addressing
+Date: Thu, 29 Aug 2019 23:04:03 +0900
+Message-ID: <CAK7LNARC_Y968UtXE3v72Dw=69-6jutFTVy54K=iT5o52udXSg@mail.gmail.com>
+References: <20190829104928.27404-1-yamada.masahiro@socionext.com>
+ <CAPDyKFooFQgBgK3N1Ob9rsT_7-5kqC9i7PeMxkkeAbnDP+Fwnw@mail.gmail.com>
+ <CAK7LNASDfJQrMq4jjwDjrQF-4E9A_BZtgh+K-duTAo8zRVZA0g@mail.gmail.com> <CAPDyKFpnRbtVpYkpM7CDYfxvdBjqybB4SVWyuSrS1jpYduTbCw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1566985524-22749-2-git-send-email-yong.mao@mediatek.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Yong Mao <yong.mao@mediatek.com>
-Cc: Chaotian Jing <chaotian.jing@mediatek.com>, Matthias Brugger <matthias.bgg@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, linux-mediatek@lists.infradead.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, srv_heupstream <srv_heupstream@mediatek.com>
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFpnRbtVpYkpM7CDYfxvdBjqybB4SVWyuSrS1jpYduTbCw@mail.gmail.com>
+Sender: stable-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Piotr Sroka <piotrs@cadence.com>, "# 4.0+" <stable@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, 28 Aug 2019 at 11:45, Yong Mao <yong.mao@mediatek.com> wrote:
->
-> From: yong mao <yong.mao@mediatek.com>
->
-> SDIO IRQ is not defaultly triggered by low level,
-> but by falling edge. It needs to set related register
-> to enable SDIO IRQ low level trigger function.
-> Otherwise the SDIO IRQ may be lost in some specail condition.
->
-> Signed-off-by: Yong Mao <yong.mao@mediatek.com>
-> Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
+Hi Ulf,
 
-Applied for next, thanks!
+On Thu, Aug 29, 2019 at 10:27 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>
+> On Thu, 29 Aug 2019 at 14:05, Masahiro Yamada
+> <yamada.masahiro@socionext.com> wrote:
+> >
+> > On Thu, Aug 29, 2019 at 8:48 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> > >
+> > > On Thu, 29 Aug 2019 at 12:49, Masahiro Yamada
+> > > <yamada.masahiro@socionext.com> wrote:
+> > > >
+> > > > The IP datasheet says this controller is compatible with SD Host
+> > > > Specification Version v4.00.
+> > > >
+> > > > As it turned out, the ADMA of this IP does not work with 64-bit mode
+> > > > when it is in the Version 3.00 compatible mode; it understands the
+> > > > old 64-bit descriptor table (as defined in SDHCI v2), but the ADMA
+> > > > System Address Register (SDHCI_ADMA_ADDRESS) cannot point to the
+> > > > 64-bit address.
+> > > >
+> > > > I noticed this issue only after commit bd2e75633c80 ("dma-contiguous:
+> > > > use fallback alloc_pages for single pages"). Prior to that commit,
+> > > > dma_set_mask_and_coherent() returned the dma address that fits in
+> > > > 32-bit range, at least for the default arm64 configuration
+> > > > (arch/arm64/configs/defconfig). Now the host->adma_addr exceeds the
+> > > > 32-bit limit, causing the real problem for the Socionext SoCs.
+> > > > (As a side-note, I was also able to reproduce the issue for older
+> > > > kernels by turning off CONFIG_DMA_CMA.)
+> > > >
+> > > > Call sdhci_enable_v4_mode() to fix this.
+> > > >
+> > > > I think it is better to back-port this, but only possible for v4.20+.
+> > > >
+> > > > When this driver was merged (v4.10), the v4 mode support did not exist.
+> > > > It was added by commit b3f80b434f72 ("mmc: sdhci: Add sd host v4 mode")
+> > > > i.e. v4.20.
+> > > >
+> > > > Cc: <stable@vger.kernel.org> # v4.20+
+> > > > Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
+> > >
+> > > Applied for fixes, by adding below tag, thanks!
+> > >
+> > > Fixes: b3f80b434f72 ("mmc: sdhci: Add sd host v4 mode")
+> >
+> > This is not a bug commit.
+>
+> Right, but it can't be applied before this commit, hence why I added
+> it. Not sure that it matters, but I can remove the tag if you
+> insists!?
 
-Kind regards
-Uffe
+I hesitate to add Fixes to the commit that
+did nothing wrong.
 
-> ---
->  drivers/mmc/host/mtk-sd.c | 2 ++
->  1 file changed, 2 insertions(+)
->
-> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-> index 33f4b63..585f0c7 100644
-> --- a/drivers/mmc/host/mtk-sd.c
-> +++ b/drivers/mmc/host/mtk-sd.c
-> @@ -192,6 +192,7 @@
->  #define SDC_STS_CMDBUSY         (0x1 << 1)     /* RW */
->  #define SDC_STS_SWR_COMPL       (0x1 << 31)    /* RW */
->
-> +#define SDC_DAT1_IRQ_TRIGGER   (0x1 << 19)     /* RW */
->  /* SDC_ADV_CFG0 mask */
->  #define SDC_RX_ENHANCE_EN      (0x1 << 20)     /* RW */
->
-> @@ -1568,6 +1569,7 @@ static void msdc_init_hw(struct msdc_host *host)
->
->         /* Config SDIO device detect interrupt function */
->         sdr_clr_bits(host->base + SDC_CFG, SDC_CFG_SDIOIDE);
-> +       sdr_set_bits(host->base + SDC_ADV_CFG0, SDC_DAT1_IRQ_TRIGGER);
->
->         /* Configure to default data timeout */
->         sdr_set_field(host->base + SDC_CFG, SDC_CFG_DTOC, 3);
-> --
-> 1.9.1
->
+
+I added "Cc: <stable@vger.kernel.org> # v4.20+"
+so this is enough for the stable kernel maintainers.
+
+
+
+
+-- 
+Best Regards
+Masahiro Yamada
