@@ -1,53 +1,52 @@
-From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH] mmc: sdhi: fill in actual_clock
-Date: Thu, 29 Aug 2019 19:34:06 +0200
-Message-ID: <20190829173406.GA1127@kunai>
-References: <20190828185518.4340-1-tszucs@protonmail.ch>
- <CAMuHMdWcp-3B7ZZjbyo02ECyzDX_rQxXF645OCutCkjUu_jWaA@mail.gmail.com>
- <FaBiPuw0MFfdsj60MQTULROSN-8cSV7sNRlgO5SSVPo5jfQopmm9zTq4JT71VxaO32qdcAhisOrhFYG_QLByLNHcBrMgshsI_WwP9rlH2ms=@protonmail.ch>
+From: Doug Anderson <dianders@chromium.org>
+Subject: Re: [PATCH 2/2] mmc: core: Run handlers for pending SDIO interrupts
+ on resume
+Date: Thu, 29 Aug 2019 10:39:47 -0700
+Message-ID: <CAD=FV=VhAFGZusYac8hqYNZ9t+ipTZ5EAo5qY5+A8jA4xjw2vg@mail.gmail.com>
+References: <20190828214620.66003-1-mka@chromium.org> <20190828214620.66003-2-mka@chromium.org>
+ <CAPDyKFr2R-ta5Xob12-6k=+mXXt0NowJ=dpLGJu10qhn7cB1HQ@mail.gmail.com> <20190829171555.GD70797@google.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="BXVAT5kNtrzKuDFl"
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <FaBiPuw0MFfdsj60MQTULROSN-8cSV7sNRlgO5SSVPo5jfQopmm9zTq4JT71VxaO32qdcAhisOrhFYG_QLByLNHcBrMgshsI_WwP9rlH2ms=@protonmail.ch>
+In-Reply-To: <20190829171555.GD70797@google.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: =?utf-8?B?VGFtw6FzIFN6xbFjcw==?= <tszucs@protonmail.ch>
-Cc: Geert Uytterhoeven <geert@linux-m68k.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
+To: Matthias Kaehlcke <mka@chromium.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
+Hi,
 
---BXVAT5kNtrzKuDFl
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+On Thu, Aug 29, 2019 at 10:16 AM Matthias Kaehlcke <mka@chromium.org> wrote:
+>
+> > In one way, this change makes sense as it adopts the legacy behavior,
+> > signaling "cached" SDIO IRQs also for the new SDIO irq work interface.
+> >
+> > However, there is at least one major concern I see with this approach.
+> > That is, in the execution path for sdio_signal_irq() (or calling
+> > wake_up_process() for the legacy path), we may end up invoking the
+> > SDIO func's ->irq_handler() callback, as to let the SDIO func driver
+> > to consume the SDIO IRQ.
+> >
+> > The problem with this is, that the corresponding SDIO func driver may
+> > not have been system resumed, when the ->irq_handler() callback is
+> > invoked.
+>
+> While debugging the the problem with btmrvl I found that this is
+> already the case without the patch, just not during resume, but when
+> suspending. The func driver suspends before the SDIO bus and
+> interrupts can keep coming in. These are processed while the func
+> driver is suspended, until the SDIO core starts dropping the
+> interrupts.
+>
+> And I think it is also already true at resume time: mmc_sdio_resume()
+> re-enables SDIO IRQs and disables dropping them.
 
+I would also note that this matches the design of the normal system
+suspend/resume functions.  Interrupts continue to be enabled even
+after the "suspend" call is made for a device.  Presumably this is so
+that the suspend function can make use of interrupts even if there is
+no other reason.  If it's important for a device to stop getting
+interrupts after the "suspend" function is called then it's up to that
+device to re-configure the device to stop giving interrupts.
 
-> It would be possible to call clk_get_rate() unconditionally but
-> there's usually no need, thus the ternary. Are you in favor of that
-> though?
-
-I like Geert's suggestion. Even if it is "usually" not needed, I think
-it is better to be always proper. This is not a hot code path.
-
-
---BXVAT5kNtrzKuDFl
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAl1oDIoACgkQFA3kzBSg
-KbbqQxAAkEIlIUR/pH7ns6rpMdSMyadvSmUCzGCB0JMIOOCsQvvEg5jdC3cP+9+x
-p2ynHXyxOVKmMPGy6zKeGfv2AgMoa6rCGnDSX7v1Yuj2vLC6y+a+dkw3dZILXvtQ
-15aAGYOpGNqMqWYyuj3O7Q/AELjh7oDYbovJyqL19pQd7SdFpJ3BEPwdbSMgPT+L
-dU5fqll6UvpstB+U1S6m5wBLOnNkCUBciIPoTvjC/YOde8jbJEWgTgnlH0ZDvZnx
-lX63Yigqn/jLgUG2XMV7E7VzLhH/CUFGNFNBn7RqoPbqO20nPrIIrbd19WmXwlkU
-piEh+mEPtLpzIoUXJu28x8MUQiQyOu9OhlbePBQij2Vjhh+ki98LJF2qbHajCBIt
-rnTO9BOtZjlt4UnHbe3sDnnHQxdu0zGeXdI++ieUqZ+GqJQvBKwdoiIWqVvs3Yc9
-9ccDwUARByNOTJf3icbzMnZWfnP3jiTgRWeggJM/n+4s1l0ds89QS2cyGCDTfZnt
-jAjw2pUz3Xwz5aQ23/FSBbNtQF9IRvH4rWDYeAuDU4Ek2hBd0hT/HpK9R1XNyqFe
-KnnadHFlPGJiWeEBLjmYS6wQlMYPoLpa8aw5LjgpQE1NNfGMVoYG9pEnJtlLrFm+
-rQt1gbAeAWqrNKKu7R/G9inj85a67I0pxNZxGnGrGHHbputXWkA=
-=KOsZ
------END PGP SIGNATURE-----
-
---BXVAT5kNtrzKuDFl--
+-Doug
