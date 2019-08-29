@@ -1,12 +1,12 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 2/3] mmc: sdhci: constify references of parameters to __sdhci_read_caps()
-Date: Thu, 29 Aug 2019 15:34:00 +0200
-Message-ID: <CAPDyKFo9B6pDTcyoK-APicu+WcroCrjA7niHzd3DZH-7qkoZ_w@mail.gmail.com>
-References: <20190829104928.27404-1-yamada.masahiro@socionext.com> <20190829104928.27404-2-yamada.masahiro@socionext.com>
+Subject: Re: [PATCH 3/3] mmc: sdhci-cadence: override spec version
+Date: Thu, 29 Aug 2019 15:34:04 +0200
+Message-ID: <CAPDyKFrcvVKXmLpMdjtkX+OZ=VfyYa0hS_dStEiawUN3zMtbvA@mail.gmail.com>
+References: <20190829104928.27404-1-yamada.masahiro@socionext.com> <20190829104928.27404-3-yamada.masahiro@socionext.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190829104928.27404-2-yamada.masahiro@socionext.com>
+In-Reply-To: <20190829104928.27404-3-yamada.masahiro@socionext.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Masahiro Yamada <yamada.masahiro@socionext.com>
 Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Piotr Sroka <piotrs@cadence.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
@@ -15,10 +15,16 @@ List-Id: linux-mmc@vger.kernel.org
 On Thu, 29 Aug 2019 at 12:49, Masahiro Yamada
 <yamada.masahiro@socionext.com> wrote:
 >
-> __sdhci_read_caps() does not modify *ver, *caps, or *caps1.
+> The datasheet of the IP (sd4hc) says it is compiatible with SDHCI v4,
+> but the spec version field in the version register is read as 2
+> (i.e. SDHCI_SPEC_300) based on the RTL provided by Cadence.
 >
-> Probably, the caller of this function will want to constifythe
-> parameters passed in.
+> Socionext did not fix it up when it integrated the IP into the SoCs.
+> So, it is working as SDHCI v3.
+>
+> It is not a real problem because there is no difference in the program
+> flow in sdhci.c between SDHCI_SPEC_300/400, but set the real version
+> just in case.
 >
 > Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
 
@@ -30,39 +36,29 @@ Uffe
 
 > ---
 >
->  drivers/mmc/host/sdhci.c | 3 ++-
->  drivers/mmc/host/sdhci.h | 4 ++--
->  2 files changed, 4 insertions(+), 3 deletions(-)
+>  drivers/mmc/host/sdhci-cadence.c | 2 ++
+>  1 file changed, 2 insertions(+)
 >
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index a5dc5aae973e..08cc0792c174 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -3565,7 +3565,8 @@ static int sdhci_set_dma_mask(struct sdhci_host *host)
->         return ret;
->  }
+> diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
+> index 44139fceac24..9837214685b6 100644
+> --- a/drivers/mmc/host/sdhci-cadence.c
+> +++ b/drivers/mmc/host/sdhci-cadence.c
+> @@ -341,6 +341,7 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
+>         unsigned int nr_phy_params;
+>         int ret;
+>         struct device *dev = &pdev->dev;
+> +       static const u16 version = SDHCI_SPEC_400 << SDHCI_SPEC_VER_SHIFT;
 >
-> -void __sdhci_read_caps(struct sdhci_host *host, u16 *ver, u32 *caps, u32 *caps1)
-> +void __sdhci_read_caps(struct sdhci_host *host, const u16 *ver,
-> +                      const u32 *caps, const u32 *caps1)
->  {
->         u16 v;
->         u64 dt_caps_mask = 0;
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index 902f855efe8f..81e23784475a 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -738,8 +738,8 @@ static inline void *sdhci_priv(struct sdhci_host *host)
->  }
+>         clk = devm_clk_get(dev, NULL);
+>         if (IS_ERR(clk))
+> @@ -370,6 +371,7 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
+>         host->mmc_host_ops.hs400_enhanced_strobe =
+>                                 sdhci_cdns_hs400_enhanced_strobe;
+>         sdhci_enable_v4_mode(host);
+> +       __sdhci_read_caps(host, &version, NULL, NULL);
 >
->  void sdhci_card_detect(struct sdhci_host *host);
-> -void __sdhci_read_caps(struct sdhci_host *host, u16 *ver, u32 *caps,
-> -                      u32 *caps1);
-> +void __sdhci_read_caps(struct sdhci_host *host, const u16 *ver,
-> +                      const u32 *caps, const u32 *caps1);
->  int sdhci_setup_host(struct sdhci_host *host);
->  void sdhci_cleanup_host(struct sdhci_host *host);
->  int __sdhci_add_host(struct sdhci_host *host);
+>         sdhci_get_of_property(pdev);
+>
 > --
 > 2.17.1
 >
