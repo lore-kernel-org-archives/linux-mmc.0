@@ -1,76 +1,76 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH] mmc: sunxi: fix unusuable eMMC on some H6
- boards by disabling DDR
-Date: Thu, 29 Aug 2019 13:37:14 +0200
-Message-ID: <CAPDyKFp420OaeoedkR=KuX1EMNwOvCkCfJHZPRDXhVz-w8J0mg@mail.gmail.com>
-References: <20190825150558.15173-1-alejandro.gonzalez.correo@gmail.com>
- <CAPDyKFr5opD2yBXmFRBY-9oA_3ShVv0GPFRO8Q_8TEiT+z2pQA@mail.gmail.com> <f84d62b7-da00-f2bd-36e9-972435080bfe@gmail.com>
-Reply-To: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+From: Masahiro Yamada <yamada.masahiro@socionext.com>
+Subject: Re: [PATCH v2 2/2] dma-contiguous: Use fallback alloc_pages for
+ single pages
+Date: Thu, 29 Aug 2019 20:45:27 +0900
+Message-ID: <CAK7LNASs2qkpGY_BkL--hvmKm3FJ9sEK4+v5VVYc1_CrowAB4w@mail.gmail.com>
+References: <20190506223334.1834-1-nicoleotsuka@gmail.com> <20190506223334.1834-3-nicoleotsuka@gmail.com>
+ <CAK7LNARacEorb38mVBw_V-Zvz-znWgBma1AP1-z_5B_xZU4ogg@mail.gmail.com>
+ <CAK7LNAQfYBCoChMV=MOwcUyVoqRkrPWs7DaWdzDqjBe18gGiAQ@mail.gmail.com>
+ <20190825011025.GA23410@lst.de> <CAK7LNAQb1ZHr=DiHLNeNRaQExMuXdDOV4sFghoGbco_Q=Qzb8g@mail.gmail.com>
+ <20190826073320.GA11712@lst.de> <CAK7LNATYOLEboUTO4qPx2z7cqwDrHBO1HFHG8VzZEJ15STv+nw@mail.gmail.com>
+ <20190827075021.GA953@lst.de> <CAK7LNAQZ+bueZZzSoMADmgLjWNvijHRV=wLQzN_kvLG3b5Uu+w@mail.gmail.com>
+ <20190827115541.GB5921@lst.de> <CAK7LNAQ_nQcBt=xH1-h+=co85mTxFgbe+_46Gu4LaNsDSm+kYA@mail.gmail.com>
+ <CAK7LNATvz=TTe+3OyLrtUqDuTUTn1dg9Sk-t3BD_OFZfViCPMw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-sunxi+bncBDF57NG2XIHRBD7ST3VQKGQEOS6DHBQ-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-In-Reply-To: <f84d62b7-da00-f2bd-36e9-972435080bfe-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <https://groups.google.com/group/linux-sunxi
-List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
- <https://groups.google.com/group/linux-sunxi/subscribe>
-To: =?UTF-8?Q?Alejandro_Gonz=C3=A1lez?= <alejandro.gonzalez.correo-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Maxime Ripard <maxime.ripard-LDxbnhwyfcJBDgjK7y7TUQ@public.gmane.org>, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-sunxi <linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAK7LNATvz=TTe+3OyLrtUqDuTUTn1dg9Sk-t3BD_OFZfViCPMw@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Christoph Hellwig <hch@lst.de>
+Cc: Nicolin Chen <nicoleotsuka@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Robin Murphy <robin.murphy@arm.com>, Marek Szyprowski <m.szyprowski@samsung.com>, vdumpa@nvidia.com, Russell King <linux@armlinux.org.uk>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Chris Zankel <chris@zankel.net>, Max Filippov <jcmvbkbc@gmail.com>, Joerg Roedel <joro@8bytes.org>, David Woodhouse <dwmw2@infradead.org>, Tony Lindgren <tony@atomide.com>, Andrew Morton <akpm@linux-foundation.org>, Stephen Rothwell <sfr@canb.auug.org.au>, Thierry Reding <treding@nvidia.com>, Kees Cook <keescook@chromium.org>, iamjoonsoo.kim@lge.com, Wolfram Sang <wsa+renesas>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, 28 Aug 2019 at 12:52, Alejandro Gonz=C3=A1lez
-<alejandro.gonzalez.correo-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+On Wed, Aug 28, 2019 at 9:23 PM Masahiro Yamada
+<yamada.masahiro@socionext.com> wrote:
 >
-> El 27/8/19 a las 15:24, Ulf Hansson escribi=C3=B3:> Assuming this should =
-go stable as well? Perhaps you can find a
-> > relevant commit that we can put as a fixes tag as well?
+> On Wed, Aug 28, 2019 at 7:53 PM Masahiro Yamada
+> <yamada.masahiro@socionext.com> wrote:
 > >
-> > Kind regards
-> > Uffe
+> > Hi Christoph,
+> >
+> > On Tue, Aug 27, 2019 at 8:55 PM Christoph Hellwig <hch@lst.de> wrote:
+> > >
+> > > On Tue, Aug 27, 2019 at 06:03:14PM +0900, Masahiro Yamada wrote:
+> > > > Yes, this makes my driver working again
+> > > > when CONFIG_DMA_CMA=y.
+> > > >
+> > > >
+> > > > If I apply the following, my driver gets back working
+> > > > irrespective of CONFIG_DMA_CMA.
+> > >
+> > > That sounds a lot like the device simply isn't 64-bit DMA capable, and
+> > > previously always got CMA allocations under the limit it actually
+> > > supported.  I suggest that you submit this quirk to the mmc maintainers.
+> >
+> >
+> > I tested v5.2 and my MMC host controller works with
+> > dma_address that exceeds 32-bit physical address.
+> >
+> > So, I believe my MMC device is 64-bit DMA capable.
+> >
+> > I am still looking into the code
+> > to find out what was changed.
 >
-> The most relevant commit I've found that is related to enabling DDR speed=
-s
-> on H6 boards is this one: https://github.com/torvalds/linux/commit/07bafc=
-1e3536a4e3c422dbd13341688b54f159bb .
-> But it doesn't address the H6 SoC specifically, so I doubted whether it w=
-ould
-> be appropiate to mark this patch as fixing it, and opted to not do it. I =
-don't
-> mind adding that tag if it's appropiate, though :-)
-
-Hard to say what makes sense here, but how about picking this below instead=
-?
-
-Fixes: 0a23f1ad88fc ("dt-binding: mmc: sunxi: add H6 compatible (with
-A64 fallback)")
-
 >
-> On the other hand, I'm not sure that I understood correctly what do you m=
-ean by
-> this patch going stable, but I might say the changes themselves are stabl=
-e and work.
-> The only downside I can think of to them is that they are a kind of worka=
-round that
-> reduces performance on H6 boards and/or eMMC not affected by this problem=
- (are there
-> any?), unless device trees are changed.
+> I retract this comment.
+>
+> Prior to bd2e75633c8012fc8a7431c82fda66237133bf7e,
+> the descriptor table for ADMA is placed within the
+> 32-bit phys address range, not exceeds the 32-bit limit.
+>
+> Probably, my device is not 64-bit capable.
+>
+> I will talk to the hardware engineer,
+> and check the hardware spec just in case.
+>
 
-Adding a stable tag and a fixes tag for the commit, makes maintainers
-of stable kernels to try to backport this commit and fix the problem
-for "older" kernels.
 
-Kind regards
-Uffe
+After looking more into my hardware,
+I found out how to fix my driver:
+https://lore.kernel.org/patchwork/patch/1121600/
 
---=20
-You received this message because you are subscribed to the Google Groups "=
-linux-sunxi" group.
-To unsubscribe from this group and stop receiving emails from it, send an e=
-mail to linux-sunxi+unsubscribe-/JYPxA39Uh5TLH3MbocFF+G/Ez6ZCGd0@public.gmane.org
-To view this discussion on the web, visit https://groups.google.com/d/msgid=
-/linux-sunxi/CAPDyKFp420OaeoedkR%3DKuX1EMNwOvCkCfJHZPRDXhVz-w8J0mg%40mail.g=
-mail.com.
+
+
+-- 
+Best Regards
+Masahiro Yamada
