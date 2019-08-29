@@ -1,57 +1,92 @@
 From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: [PATCH 1/3] mmc: sdhci-cadence: enable v4_mode to fix ADMA 64-bit addressing
-Date: Thu, 29 Aug 2019 19:49:26 +0900
-Message-ID: <20190829104928.27404-1-yamada.masahiro@socionext.com>
-Return-path: <stable-owner@vger.kernel.org>
-Sender: stable-owner@vger.kernel.org
+Subject: [PATCH v2] mmc: sdhci: use lower/upper_32_bits() macros for DMA addresses
+Date: Thu, 29 Aug 2019 20:22:06 +0900
+Message-ID: <20190829112206.22213-1-yamada.masahiro@socionext.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Piotr Sroka <piotrs@cadence.com>, Masahiro Yamada <yamada.masahiro@socionext.com>, stable@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Piotr Sroka <piotrs@cadence.com>, Masahiro Yamada <yamada.masahiro@socionext.com>, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-The IP datasheet says this controller is compatible with SD Host
-Specification Version v4.00.
+Currently, the DMA addresses are casted to (u64) for the upper 32bits
+to avoid "right shift count >= width of type" warning.
 
-As it turned out, the ADMA of this IP does not work with 64-bit mode
-when it is in the Version 3.00 compatible mode; it understands the
-old 64-bit descriptor table (as defined in SDHCI v2), but the ADMA
-System Address Register (SDHCI_ADMA_ADDRESS) cannot point to the
-64-bit address.
+<linux/kernel.h> provides macros to address this, and I like the macro
+names are self-documenting.
 
-I noticed this issue only after commit bd2e75633c80 ("dma-contiguous:
-use fallback alloc_pages for single pages"). Prior to that commit,
-dma_set_mask_and_coherent() returned the dma address that fits in
-32-bit range, at least for the default arm64 configuration
-(arch/arm64/configs/defconfig). Now the host->adma_addr exceeds the
-32-bit limit, causing the real problem for the Socionext SoCs.
-(As a side-note, I was also able to reproduce the issue for older
-kernels by turning off CONFIG_DMA_CMA.)
+I introduced a new helper, sdhci_set_adma_addr() to avoid the code
+duplication.
 
-Call sdhci_enable_v4_mode() to fix this.
-
-I think it is better to back-port this, but only possible for v4.20+.
-
-When this driver was merged (v4.10), the v4 mode support did not exist.
-It was added by commit b3f80b434f72 ("mmc: sdhci: Add sd host v4 mode")
-i.e. v4.20.
-
-Cc: <stable@vger.kernel.org> # v4.20+
 Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
 ---
 
- drivers/mmc/host/sdhci-cadence.c | 1 +
- 1 file changed, 1 insertion(+)
+Changes in v2:
+  - Another way to reduce linu wrapping
 
-diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
-index 163d1cf4367e..44139fceac24 100644
---- a/drivers/mmc/host/sdhci-cadence.c
-+++ b/drivers/mmc/host/sdhci-cadence.c
-@@ -369,6 +369,7 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
- 	host->mmc_host_ops.execute_tuning = sdhci_cdns_execute_tuning;
- 	host->mmc_host_ops.hs400_enhanced_strobe =
- 				sdhci_cdns_hs400_enhanced_strobe;
-+	sdhci_enable_v4_mode(host);
+ drivers/mmc/host/sdhci.c | 27 +++++++++++++--------------
+ 1 file changed, 13 insertions(+), 14 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 08cc0792c174..66c2cf89ee22 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -668,10 +668,10 @@ void sdhci_adma_write_desc(struct sdhci_host *host, void **desc,
+ 	/* 32-bit and 64-bit descriptors have these members in same position */
+ 	dma_desc->cmd = cpu_to_le16(cmd);
+ 	dma_desc->len = cpu_to_le16(len);
+-	dma_desc->addr_lo = cpu_to_le32((u32)addr);
++	dma_desc->addr_lo = cpu_to_le32(lower_32_bits(addr));
  
- 	sdhci_get_of_property(pdev);
+ 	if (host->flags & SDHCI_USE_64_BIT_DMA)
+-		dma_desc->addr_hi = cpu_to_le32((u64)addr >> 32);
++		dma_desc->addr_hi = cpu_to_le32(upper_32_bits(addr));
  
+ 	*desc += host->desc_sz;
+ }
+@@ -816,6 +816,13 @@ static void sdhci_adma_table_post(struct sdhci_host *host,
+ 	}
+ }
+ 
++static void sdhci_set_adma_addr(struct sdhci_host *host, dma_addr_t addr)
++{
++	sdhci_writel(host, lower_32_bits(addr), SDHCI_ADMA_ADDRESS);
++	if (host->flags & SDHCI_USE_64_BIT_DMA)
++		sdhci_writel(host, upper_32_bits(addr), SDHCI_ADMA_ADDRESS_HI);
++}
++
+ static dma_addr_t sdhci_sdma_address(struct sdhci_host *host)
+ {
+ 	if (host->bounce_buffer)
+@@ -826,13 +833,10 @@ static dma_addr_t sdhci_sdma_address(struct sdhci_host *host)
+ 
+ static void sdhci_set_sdma_addr(struct sdhci_host *host, dma_addr_t addr)
+ {
+-	if (host->v4_mode) {
+-		sdhci_writel(host, addr, SDHCI_ADMA_ADDRESS);
+-		if (host->flags & SDHCI_USE_64_BIT_DMA)
+-			sdhci_writel(host, (u64)addr >> 32, SDHCI_ADMA_ADDRESS_HI);
+-	} else {
++	if (host->v4_mode)
++		sdhci_set_adma_addr(host, addr);
++	else
+ 		sdhci_writel(host, addr, SDHCI_DMA_ADDRESS);
+-	}
+ }
+ 
+ static unsigned int sdhci_target_timeout(struct sdhci_host *host,
+@@ -1095,12 +1099,7 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
+ 			host->flags &= ~SDHCI_REQ_USE_DMA;
+ 		} else if (host->flags & SDHCI_USE_ADMA) {
+ 			sdhci_adma_table_pre(host, data, sg_cnt);
+-
+-			sdhci_writel(host, host->adma_addr, SDHCI_ADMA_ADDRESS);
+-			if (host->flags & SDHCI_USE_64_BIT_DMA)
+-				sdhci_writel(host,
+-					     (u64)host->adma_addr >> 32,
+-					     SDHCI_ADMA_ADDRESS_HI);
++			sdhci_set_adma_addr(host, host->adma_addr);
+ 		} else {
+ 			WARN_ON(sg_cnt != 1);
+ 			sdhci_set_sdma_addr(host, sdhci_sdma_address(host));
 -- 
 2.17.1
