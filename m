@@ -1,64 +1,120 @@
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Subject: Re: [PATCH] mmc: sdhi: fill in actual_clock
-Date: Thu, 29 Aug 2019 09:47:31 +0200
-Message-ID: <CAMuHMdWcp-3B7ZZjbyo02ECyzDX_rQxXF645OCutCkjUu_jWaA@mail.gmail.com>
-References: <20190828185518.4340-1-tszucs@protonmail.ch>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 1/2] mmc: sdio: Move code to get pending SDIO IRQs to a function
+Date: Thu, 29 Aug 2019 10:29:26 +0200
+Message-ID: <CAPDyKFrJOXC5DaYzPrEr-ttv5Mz6NLAvVW+L4xUUaiZpqyj+Dw@mail.gmail.com>
+References: <20190828214620.66003-1-mka@chromium.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190828185518.4340-1-tszucs@protonmail.ch>
+In-Reply-To: <20190828214620.66003-1-mka@chromium.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: =?UTF-8?B?VGFtw6FzIFN6xbFjcw==?= <tszucs@protonmail.ch>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
+To: Matthias Kaehlcke <mka@chromium.org>
+Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Douglas Anderson <dianders@chromium.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Tamás,
-
-On Wed, Aug 28, 2019 at 9:02 PM Tamás Szűcs <tszucs@protonmail.ch> wrote:
-> Save set clock in mmc_host actual_clock enabling exporting it via debugfs.
-> This will indicate the precise SD clock in I/O settings rather than only the
-> sometimes misleading requested clock.
+On Wed, 28 Aug 2019 at 23:46, Matthias Kaehlcke <mka@chromium.org> wrote:
 >
-> Signed-off-by: Tamás Szűcs <tszucs@protonmail.ch>
+> Move the code to get pending SDIO interrupts from
+> process_sdio_pending_irqs() to a dedicated function.
+>
+> Signed-off-by: Matthias Kaehlcke <mka@chromium.org>
+> ---
+>  drivers/mmc/core/sdio_irq.c | 47 ++++++++++++++++++++++++-------------
+>  include/linux/mmc/host.h    |  1 +
+>  2 files changed, 32 insertions(+), 16 deletions(-)
+>
+> diff --git a/drivers/mmc/core/sdio_irq.c b/drivers/mmc/core/sdio_irq.c
+> index 0bcc5e83bd1a..fedc49901efd 100644
+> --- a/drivers/mmc/core/sdio_irq.c
+> +++ b/drivers/mmc/core/sdio_irq.c
+> @@ -27,6 +27,35 @@
+>  #include "core.h"
+>  #include "card.h"
+>
+> +int sdio_get_pending_irqs(struct mmc_host *host, u8 *pending)
+> +{
+> +       struct mmc_card *card = host->card;
+> +       int ret;
+> +
+> +       WARN_ON(!host->claimed);
+> +
+> +       ret = mmc_io_rw_direct(card, 0, 0, SDIO_CCCR_INTx, 0, pending);
+> +       if (ret) {
+> +               pr_debug("%s: error %d reading SDIO_CCCR_INTx\n",
+> +                      mmc_card_id(card), ret);
+> +               return ret;
+> +       }
+> +
+> +       if (*pending && mmc_card_broken_irq_polling(card) &&
+> +           !(host->caps & MMC_CAP_SDIO_IRQ)) {
+> +               unsigned char dummy;
+> +
+> +               /* A fake interrupt could be created when we poll SDIO_CCCR_INTx
+> +                * register with a Marvell SD8797 card. A dummy CMD52 read to
+> +                * function 0 register 0xff can avoid this.
+> +                */
+> +               mmc_io_rw_direct(card, 0, 0, 0xff, 0, &dummy);
+> +       }
+> +
+> +       return 0;
+> +}
+> +EXPORT_SYMBOL_GPL(sdio_get_pending_irqs);
 
-Thanks for your patch!
+I don't think you need export the sympol as this should be an internal
+function for the core module.
 
-> --- a/drivers/mmc/host/renesas_sdhi_core.c
-> +++ b/drivers/mmc/host/renesas_sdhi_core.c
-> @@ -124,7 +124,7 @@ static unsigned int renesas_sdhi_clk_update(struct tmio_mmc_host *host,
+> +
+>  static int process_sdio_pending_irqs(struct mmc_host *host)
 >  {
->         struct renesas_sdhi *priv = host_to_priv(host);
->         unsigned int freq, diff, best_freq = 0, diff_min = ~0;
-> -       int i, ret;
-> +       int i;
->
->         /* tested only on R-Car Gen2+ currently; may work for others */
->         if (!(host->pdata->flags & TMIO_MMC_MIN_RCAR2))
-> @@ -153,9 +153,11 @@ static unsigned int renesas_sdhi_clk_update(struct tmio_mmc_host *host,
->                 }
+>         struct mmc_card *card = host->card;
+> @@ -49,23 +78,9 @@ static int process_sdio_pending_irqs(struct mmc_host *host)
+>                 return 1;
 >         }
 >
-> -       ret = clk_set_rate(priv->clk, best_freq);
-> +       host->mmc->actual_clock =
-> +               clk_set_rate(priv->clk, best_freq) == 0 ?
-> +                       best_freq : clk_get_rate(priv->clk);
-
-When clk_set_rate() returns 0 to indicate success, it may still have
-rounded the requested clock rate, no?
-So wouldn't it be better to always call clk_get_rate()?
+> -       ret = mmc_io_rw_direct(card, 0, 0, SDIO_CCCR_INTx, 0, &pending);
+> -       if (ret) {
+> -               pr_debug("%s: error %d reading SDIO_CCCR_INTx\n",
+> -                      mmc_card_id(card), ret);
+> +       ret = sdio_get_pending_irqs(host, &pending);
+> +       if (ret)
+>                 return ret;
+> -       }
+> -
+> -       if (pending && mmc_card_broken_irq_polling(card) &&
+> -           !(host->caps & MMC_CAP_SDIO_IRQ)) {
+> -               unsigned char dummy;
+> -
+> -               /* A fake interrupt could be created when we poll SDIO_CCCR_INTx
+> -                * register with a Marvell SD8797 card. A dummy CMD52 read to
+> -                * function 0 register 0xff can avoid this.
+> -                */
+> -               mmc_io_rw_direct(card, 0, 0, 0xff, 0, &dummy);
+> -       }
 >
-> -       return ret == 0 ? best_freq : clk_get_rate(priv->clk);
-> +       return host->mmc->actual_clock;
+>         count = 0;
+>         for (i = 1; i <= 7; i++) {
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index 4a351cb7f20f..7ce0e98e3dbd 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -502,6 +502,7 @@ static inline void mmc_signal_sdio_irq(struct mmc_host *host)
 >  }
+>
+>  void sdio_signal_irq(struct mmc_host *host);
+> +int sdio_get_pending_irqs(struct mmc_host *host, u8 *pending);
 
-Gr{oetje,eeting}s,
+I want to avoid to sprinkle the public mmc headers, avoiding
+interfaces to be abused outside mmc core.
 
-                        Geert
+That said, I think this should be internal to the mmc core, thus
+please move this to drivers/mmc/core/sdio_ops.h.
 
--- 
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+>
+>  #ifdef CONFIG_REGULATOR
+>  int mmc_regulator_set_ocr(struct mmc_host *mmc,
+> --
+> 2.23.0.187.g17f5b7556c-goog
+>
 
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+Kind regards
+Uffe
