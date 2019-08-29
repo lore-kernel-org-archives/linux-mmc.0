@@ -1,61 +1,64 @@
-From: Chunyan Zhang <zhang.lyra@gmail.com>
-Subject: [RESEND PATCH v2 5/5] mmc: sdhci-sprd: clear the UHS-I modes read from registers
-Date: Thu, 29 Aug 2019 09:46:45 +0800
-Message-ID: <20190829014645.4479-6-zhang.lyra@gmail.com>
-References: <20190829014645.4479-1-zhang.lyra@gmail.com>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Subject: Re: [PATCH] mmc: sdhi: fill in actual_clock
+Date: Thu, 29 Aug 2019 09:47:31 +0200
+Message-ID: <CAMuHMdWcp-3B7ZZjbyo02ECyzDX_rQxXF645OCutCkjUu_jWaA@mail.gmail.com>
+References: <20190828185518.4340-1-tszucs@protonmail.ch>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190829014645.4479-1-zhang.lyra@gmail.com>
+In-Reply-To: <20190828185518.4340-1-tszucs@protonmail.ch>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Orson Zhai <orsonzhai@gmail.com>, Baolin Wang <baolin.wang@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Chunyan Zhang <zhang.lyra@gmail.com>
+To: =?UTF-8?B?VGFtw6FzIFN6xbFjcw==?= <tszucs@protonmail.ch>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Chunyan Zhang <chunyan.zhang@unisoc.com>
+Hi Tamás,
 
-sprd's sd host controller supports SDR50/SDR104/DDR50 though, the UHS-I
-mode used by the specific card can be selected via devicetree only.
+On Wed, Aug 28, 2019 at 9:02 PM Tamás Szűcs <tszucs@protonmail.ch> wrote:
+> Save set clock in mmc_host actual_clock enabling exporting it via debugfs.
+> This will indicate the precise SD clock in I/O settings rather than only the
+> sometimes misleading requested clock.
+>
+> Signed-off-by: Tamás Szűcs <tszucs@protonmail.ch>
 
-Fixes: fb8bd90f83c4 ("mmc: sdhci-sprd: Add Spreadtrum's initial host controller")
-Signed-off-by: Chunyan Zhang <chunyan.zhang@unisoc.com>
-Signed-off-by: Chunyan Zhang <zhang.lyra@gmail.com>
-Reviewed-by: Baolin Wang <baolin.wang@linaro.org>
-Tested-by: Baolin Wang <baolin.wang@linaro.org>
----
- drivers/mmc/host/sdhci-sprd.c | 13 ++++++++++++-
- 1 file changed, 12 insertions(+), 1 deletion(-)
+Thanks for your patch!
 
-diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
-index 1fecf055682c..d3c3e95676f0 100644
---- a/drivers/mmc/host/sdhci-sprd.c
-+++ b/drivers/mmc/host/sdhci-sprd.c
-@@ -509,7 +509,8 @@ static void sdhci_sprd_phy_param_parse(struct sdhci_sprd_host *sprd_host,
- 
- static const struct sdhci_pltfm_data sdhci_sprd_pdata = {
- 	.quirks = SDHCI_QUIRK_BROKEN_CARD_DETECTION |
--		  SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK,
-+		  SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
-+		  SDHCI_QUIRK_MISSING_CAPS,
- 	.quirks2 = SDHCI_QUIRK2_BROKEN_HS200 |
- 		   SDHCI_QUIRK2_USE_32BIT_BLK_CNT |
- 		   SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
-@@ -614,6 +615,16 @@ static int sdhci_sprd_probe(struct platform_device *pdev)
- 
- 	sdhci_enable_v4_mode(host);
- 
-+	/*
-+	 * Supply the existing CAPS, but clear the UHS-I modes. This
-+	 * will allow these modes to be specified only by device
-+	 * tree properties through mmc_of_parse().
-+	 */
-+	host->caps = sdhci_readl(host, SDHCI_CAPABILITIES);
-+	host->caps1 = sdhci_readl(host, SDHCI_CAPABILITIES_1);
-+	host->caps1 &= ~(SDHCI_SUPPORT_SDR50 | SDHCI_SUPPORT_SDR104 |
-+			 SDHCI_SUPPORT_DDR50);
-+
- 	ret = sdhci_setup_host(host);
- 	if (ret)
- 		goto pm_runtime_disable;
+> --- a/drivers/mmc/host/renesas_sdhi_core.c
+> +++ b/drivers/mmc/host/renesas_sdhi_core.c
+> @@ -124,7 +124,7 @@ static unsigned int renesas_sdhi_clk_update(struct tmio_mmc_host *host,
+>  {
+>         struct renesas_sdhi *priv = host_to_priv(host);
+>         unsigned int freq, diff, best_freq = 0, diff_min = ~0;
+> -       int i, ret;
+> +       int i;
+>
+>         /* tested only on R-Car Gen2+ currently; may work for others */
+>         if (!(host->pdata->flags & TMIO_MMC_MIN_RCAR2))
+> @@ -153,9 +153,11 @@ static unsigned int renesas_sdhi_clk_update(struct tmio_mmc_host *host,
+>                 }
+>         }
+>
+> -       ret = clk_set_rate(priv->clk, best_freq);
+> +       host->mmc->actual_clock =
+> +               clk_set_rate(priv->clk, best_freq) == 0 ?
+> +                       best_freq : clk_get_rate(priv->clk);
+
+When clk_set_rate() returns 0 to indicate success, it may still have
+rounded the requested clock rate, no?
+So wouldn't it be better to always call clk_get_rate()?
+>
+> -       return ret == 0 ? best_freq : clk_get_rate(priv->clk);
+> +       return host->mmc->actual_clock;
+>  }
+
+Gr{oetje,eeting}s,
+
+                        Geert
+
 -- 
-2.20.1
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
