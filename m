@@ -1,118 +1,111 @@
-From: =?UTF-8?Q?Tam=C3=A1s_Sz=C5=B1cs?= <tszucs@protonmail.ch>
-Subject: Re: [PATCH] mmc: sdhi: fill in actual_clock
-Date: Thu, 29 Aug 2019 15:59:46 +0000
-Message-ID: <FaBiPuw0MFfdsj60MQTULROSN-8cSV7sNRlgO5SSVPo5jfQopmm9zTq4JT71VxaO32qdcAhisOrhFYG_QLByLNHcBrMgshsI_WwP9rlH2ms=@protonmail.ch>
-References: <20190828185518.4340-1-tszucs@protonmail.ch>
- <CAMuHMdWcp-3B7ZZjbyo02ECyzDX_rQxXF645OCutCkjUu_jWaA@mail.gmail.com>
-Reply-To: =?UTF-8?Q?Tam=C3=A1s_Sz=C5=B1cs?= <tszucs@protonmail.ch>
+From: Matthias Kaehlcke <mka@chromium.org>
+Subject: Re: [PATCH 2/2] mmc: core: Run handlers for pending SDIO interrupts
+ on resume
+Date: Thu, 29 Aug 2019 10:15:55 -0700
+Message-ID: <20190829171555.GD70797@google.com>
+References: <20190828214620.66003-1-mka@chromium.org>
+ <20190828214620.66003-2-mka@chromium.org>
+ <CAPDyKFr2R-ta5Xob12-6k=+mXXt0NowJ=dpLGJu10qhn7cB1HQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=utf-8
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAMuHMdWcp-3B7ZZjbyo02ECyzDX_rQxXF645OCutCkjUu_jWaA@mail.gmail.com>
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFr2R-ta5Xob12-6k=+mXXt0NowJ=dpLGJu10qhn7cB1HQ@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Geert Uytterhoeven <geert@linux-m68k.org>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Douglas Anderson <dianders@chromium.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Geert,
+Hi Ulf,
 
-It would be possible to call clk_get_rate() unconditionally but there's usu=
-ally no need, thus the ternary. Are you in favor of that though?
+On Thu, Aug 29, 2019 at 10:48:58AM +0200, Ulf Hansson wrote:
+> On Wed, 28 Aug 2019 at 23:46, Matthias Kaehlcke <mka@chromium.org> wrote:
+> >
+> > With commit 83293386bc95 ("mmc: core: Prevent processing SDIO IRQs
+> > when the card is suspended") SDIO interrupts are dropped if they
+> > occur while the card is suspended. Dropping the interrupts can cause
+> > problems after resume with cards that remain powered during suspend
+> > and preserve their state. These cards may end up in an inconsistent
+> > state since the event that triggered the interrupt is never processed
+> > and remains pending. One example is the Bluetooth function of the
+> > Marvell 8997, SDIO is broken on resume (for both Bluetooth and WiFi)
+> > when processing of a pending HCI event is skipped.
+> >
+> > For cards that remained powered during suspend check on resume if
+> > SDIO interrupts are pending, and trigger interrupt processing if
+> > needed.
+> 
+> Thanks for the detailed changelog, much appreciated!
+> 
+> >
+> > Fixes: 83293386bc95 ("mmc: core: Prevent processing SDIO IRQs when the card is suspended")
+> > Signed-off-by: Matthias Kaehlcke <mka@chromium.org>
+> > ---
+> >  drivers/mmc/core/sdio.c | 9 +++++++++
+> >  1 file changed, 9 insertions(+)
+> >
+> > diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+> > index 8dd8fc32ecca..a6b4742a91c6 100644
+> > --- a/drivers/mmc/core/sdio.c
+> > +++ b/drivers/mmc/core/sdio.c
+> > @@ -975,6 +975,7 @@ static int mmc_sdio_suspend(struct mmc_host *host)
+> >  static int mmc_sdio_resume(struct mmc_host *host)
+> >  {
+> >         int err = 0;
+> > +       u8 pending = 0;
+> >
+> >         /* Basic card reinitialization. */
+> >         mmc_claim_host(host);
+> > @@ -1009,6 +1010,14 @@ static int mmc_sdio_resume(struct mmc_host *host)
+> >         /* Allow SDIO IRQs to be processed again. */
+> >         mmc_card_clr_suspended(host->card);
+> >
+> > +       if (!mmc_card_keep_power(host))
+> > +               goto skip_pending_irqs;
+> > +
+> > +       if (!sdio_get_pending_irqs(host, &pending) &&
+> > +           pending != 0)
+> > +               sdio_signal_irq(host);
+> 
+> In one way, this change makes sense as it adopts the legacy behavior,
+> signaling "cached" SDIO IRQs also for the new SDIO irq work interface.
+> 
+> However, there is at least one major concern I see with this approach.
+> That is, in the execution path for sdio_signal_irq() (or calling
+> wake_up_process() for the legacy path), we may end up invoking the
+> SDIO func's ->irq_handler() callback, as to let the SDIO func driver
+> to consume the SDIO IRQ.
+> 
+> The problem with this is, that the corresponding SDIO func driver may
+> not have been system resumed, when the ->irq_handler() callback is
+> invoked.
 
-It turns out I need to send a followup to fix some glitches. Please stay tu=
-ned.
+While debugging the the problem with btmrvl I found that this is
+already the case without the patch, just not during resume, but when
+suspending. The func driver suspends before the SDIO bus and
+interrupts can keep coming in. These are processed while the func
+driver is suspended, until the SDIO core starts dropping the
+interrupts.
 
-Kind regards,
-Tamas
+And I think it is also already true at resume time: mmc_sdio_resume()
+re-enables SDIO IRQs and disables dropping them.
 
+> If the SDIO func driver would have configured the IRQ as a
+> wakeup, then I would expect this to work, but not just by having a
+> maintained power to the card.
 
-Tam=C3=A1s Sz=C5=B1cs
-tszucs@protonmail.ch
+Is the assumption that no IRQs are generated after SDIO func suspend
+unless wakeup is enabled?
 
-=E2=80=90=E2=80=90=E2=80=90=E2=80=90=E2=80=90=E2=80=90=E2=80=90 Original Me=
-ssage =E2=80=90=E2=80=90=E2=80=90=E2=80=90=E2=80=90=E2=80=90=E2=80=90
-On Thursday, August 29, 2019 9:47 AM, Geert Uytterhoeven <geert@linux-m68k.=
-org> wrote:
+On the system I'm currently debugging OOB wakeup is not working,
+which might be part of the problem.
 
-> Hi Tam=C3=A1s,
->
-> On Wed, Aug 28, 2019 at 9:02 PM Tam=C3=A1s Sz=C5=B1cs tszucs@protonmail.c=
-h wrote:
->
-> > Save set clock in mmc_host actual_clock enabling exporting it via debug=
-fs.
-> > This will indicate the precise SD clock in I/O settings rather than onl=
-y the
-> > sometimes misleading requested clock.
-> > Signed-off-by: Tam=C3=A1s Sz=C5=B1cs tszucs@protonmail.ch
->
-> Thanks for your patch!
->
-> > --- a/drivers/mmc/host/renesas_sdhi_core.c
-> > +++ b/drivers/mmc/host/renesas_sdhi_core.c
-> > @@ -124,7 +124,7 @@ static unsigned int renesas_sdhi_clk_update(struct =
-tmio_mmc_host *host,
-> > {
-> > struct renesas_sdhi *priv =3D host_to_priv(host);
-> > unsigned int freq, diff, best_freq =3D 0, diff_min =3D ~0;
-> >
-> > -         int i, ret;
-> >
-> >
-> >
-> > -         int i;
-> >
-> >           /* tested only on R-Car Gen2+ currently; may work for others =
-*/
-> >           if (!(host->pdata->flags & TMIO_MMC_MIN_RCAR2))
-> >
-> >
-> >
-> > @@ -153,9 +153,11 @@ static unsigned int renesas_sdhi_clk_update(struct=
- tmio_mmc_host *host,
-> > }
-> > }
-> >
-> > -         ret =3D clk_set_rate(priv->clk, best_freq);
-> >
-> >
-> >
-> > -         host->mmc->actual_clock =3D
-> >
-> >
-> > -                 clk_set_rate(priv->clk, best_freq) =3D=3D 0 ?
-> >
-> >
-> > -                         best_freq : clk_get_rate(priv->clk);
-> >
-> >
->
-> When clk_set_rate() returns 0 to indicate success, it may still have
-> rounded the requested clock rate, no?
-> So wouldn't it be better to always call clk_get_rate()?
->
-> > -         return ret =3D=3D 0 ? best_freq : clk_get_rate(priv->clk);
-> >
-> >
-> >
-> > -         return host->mmc->actual_clock;
-> >
-> >
-> >
-> > }
->
-> Gr{oetje,eeting}s,
->
-> Geert
->
-> ----------------------------
->
-> Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m6=
-8k.org
->
-> In personal conversations with technical people, I call myself a hacker. =
-But
-> when I'm talking to journalists I just say "programmer" or something like=
- that.
-> -- Linus Torvalds
+> In the end, I think we need to deal with synchronizations for this,
+> through the mmc/sdio core, in one way or the other - before we kick
+> SDIO IRQs during system resume.
+> 
+> > +
+> > +skip_pending_irqs:
+> >         if (host->sdio_irqs) {
+> >                 if (!(host->caps2 & MMC_CAP2_SDIO_IRQ_NOTHREAD))
+> >                         wake_up_process(host->sdio_irq_thread);
