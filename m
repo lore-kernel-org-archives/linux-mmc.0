@@ -1,101 +1,76 @@
-From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: Re: [PATCH] mmc: sdhci: use lower/upper_32_bits() macros for DMA addresses
-Date: Thu, 29 Aug 2019 20:25:52 +0900
-Message-ID: <CAK7LNATsw8=jc7tJpj3w120R0op6ZwquEmoB8UNg6giW4V_6Nw@mail.gmail.com>
-References: <20190828111453.4023-1-yamada.masahiro@socionext.com> <0d5da294-61f8-4b9f-1a6e-7212da40f572@intel.com>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH] mmc: sunxi: fix unusuable eMMC on some H6
+ boards by disabling DDR
+Date: Thu, 29 Aug 2019 13:37:14 +0200
+Message-ID: <CAPDyKFp420OaeoedkR=KuX1EMNwOvCkCfJHZPRDXhVz-w8J0mg@mail.gmail.com>
+References: <20190825150558.15173-1-alejandro.gonzalez.correo@gmail.com>
+ <CAPDyKFr5opD2yBXmFRBY-9oA_3ShVv0GPFRO8Q_8TEiT+z2pQA@mail.gmail.com> <f84d62b7-da00-f2bd-36e9-972435080bfe@gmail.com>
+Reply-To: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <0d5da294-61f8-4b9f-1a6e-7212da40f572@intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-sunxi+bncBDF57NG2XIHRBD7ST3VQKGQEOS6DHBQ-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+In-Reply-To: <f84d62b7-da00-f2bd-36e9-972435080bfe-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <https://groups.google.com/group/linux-sunxi
+List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
+ <https://groups.google.com/group/linux-sunxi/subscribe>
+To: =?UTF-8?Q?Alejandro_Gonz=C3=A1lez?= <alejandro.gonzalez.correo-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: Maxime Ripard <maxime.ripard-LDxbnhwyfcJBDgjK7y7TUQ@public.gmane.org>, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-sunxi <linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi.
+On Wed, 28 Aug 2019 at 12:52, Alejandro Gonz=C3=A1lez
+<alejandro.gonzalez.correo-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+>
+> El 27/8/19 a las 15:24, Ulf Hansson escribi=C3=B3:> Assuming this should =
+go stable as well? Perhaps you can find a
+> > relevant commit that we can put as a fixes tag as well?
+> >
+> > Kind regards
+> > Uffe
+>
+> The most relevant commit I've found that is related to enabling DDR speed=
+s
+> on H6 boards is this one: https://github.com/torvalds/linux/commit/07bafc=
+1e3536a4e3c422dbd13341688b54f159bb .
+> But it doesn't address the H6 SoC specifically, so I doubted whether it w=
+ould
+> be appropiate to mark this patch as fixing it, and opted to not do it. I =
+don't
+> mind adding that tag if it's appropiate, though :-)
 
-On Wed, Aug 28, 2019 at 10:02 PM Adrian Hunter <adrian.hunter@intel.com> wrote:
->
-> On 28/08/19 2:14 PM, Masahiro Yamada wrote:
-> > Currently, the DMA addresses are casted to (u64) for the upper 32bits
-> > to avoid "right shift count >= width of type" warning.
-> >
-> > <linux/kernel.h> provides macros to address this, and the macro names
-> > are self-documenting.
-> >
-> > Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
-> > ---
-> >
-> >  drivers/mmc/host/sdhci.c | 14 ++++++++------
-> >  1 file changed, 8 insertions(+), 6 deletions(-)
-> >
-> > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> > index a5dc5aae973e..07144a195a9f 100644
-> > --- a/drivers/mmc/host/sdhci.c
-> > +++ b/drivers/mmc/host/sdhci.c
-> > @@ -668,10 +668,10 @@ void sdhci_adma_write_desc(struct sdhci_host *host, void **desc,
-> >       /* 32-bit and 64-bit descriptors have these members in same position */
-> >       dma_desc->cmd = cpu_to_le16(cmd);
-> >       dma_desc->len = cpu_to_le16(len);
-> > -     dma_desc->addr_lo = cpu_to_le32((u32)addr);
-> > +     dma_desc->addr_lo = cpu_to_le32(lower_32_bits(addr));
-> >
-> >       if (host->flags & SDHCI_USE_64_BIT_DMA)
-> > -             dma_desc->addr_hi = cpu_to_le32((u64)addr >> 32);
-> > +             dma_desc->addr_hi = cpu_to_le32(upper_32_bits(addr));
-> >
-> >       *desc += host->desc_sz;
-> >  }
-> > @@ -827,9 +827,10 @@ static dma_addr_t sdhci_sdma_address(struct sdhci_host *host)
-> >  static void sdhci_set_sdma_addr(struct sdhci_host *host, dma_addr_t addr)
-> >  {
-> >       if (host->v4_mode) {
->
-> To reduce line wrapping, how about using:
->
->                 u32 lo = lower_32_bits(addr);
->                 u32 hi = upper_32_bits(addr);
->
-> > -             sdhci_writel(host, addr, SDHCI_ADMA_ADDRESS);
-> > +             sdhci_writel(host, lower_32_bits(addr), SDHCI_ADMA_ADDRESS);
-> >               if (host->flags & SDHCI_USE_64_BIT_DMA)
-> > -                     sdhci_writel(host, (u64)addr >> 32, SDHCI_ADMA_ADDRESS_HI);
-> > +                     sdhci_writel(host, upper_32_bits(addr),
-> > +                                  SDHCI_ADMA_ADDRESS_HI);
-> >       } else {
-> >               sdhci_writel(host, addr, SDHCI_DMA_ADDRESS);
-> >       }
-> > @@ -1096,10 +1097,11 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
-> >               } else if (host->flags & SDHCI_USE_ADMA) {
->
-> To reduce line wrapping, how about using:
->
->                         u32 lo = lower_32_bits(host->adma_addr);
->                         u32 hi = upper_32_bits(host->adma_addr);
->
-> >                       sdhci_adma_table_pre(host, data, sg_cnt);
-> >
-> > -                     sdhci_writel(host, host->adma_addr, SDHCI_ADMA_ADDRESS);
-> > +                     sdhci_writel(host, lower_32_bits(host->adma_addr),
-> > +                                  SDHCI_ADMA_ADDRESS);
-> >                       if (host->flags & SDHCI_USE_64_BIT_DMA)
-> >                               sdhci_writel(host,
-> > -                                          (u64)host->adma_addr >> 32,
-> > +                                          upper_32_bits(host->adma_addr),
-> >                                            SDHCI_ADMA_ADDRESS_HI);
-> >               } else {
-> >                       WARN_ON(sg_cnt != 1);
-> >
->
+Hard to say what makes sense here, but how about picking this below instead=
+?
 
+Fixes: 0a23f1ad88fc ("dt-binding: mmc: sunxi: add H6 compatible (with
+A64 fallback)")
 
-I used another way to reduce the line wrapping in v2.
-I factored out the duplicated code into a new helper,
-sdhci_set_adma_addr().
+>
+> On the other hand, I'm not sure that I understood correctly what do you m=
+ean by
+> this patch going stable, but I might say the changes themselves are stabl=
+e and work.
+> The only downside I can think of to them is that they are a kind of worka=
+round that
+> reduces performance on H6 boards and/or eMMC not affected by this problem=
+ (are there
+> any?), unless device trees are changed.
 
-If you do not like it, I will adopt your suggestion,
-but anyway take a look at v2.
+Adding a stable tag and a fixes tag for the commit, makes maintainers
+of stable kernels to try to backport this commit and fix the problem
+for "older" kernels.
 
--- 
-Best Regards
-Masahiro Yamada
+Kind regards
+Uffe
+
+--=20
+You received this message because you are subscribed to the Google Groups "=
+linux-sunxi" group.
+To unsubscribe from this group and stop receiving emails from it, send an e=
+mail to linux-sunxi+unsubscribe-/JYPxA39Uh5TLH3MbocFF+G/Ez6ZCGd0@public.gmane.org
+To view this discussion on the web, visit https://groups.google.com/d/msgid=
+/linux-sunxi/CAPDyKFp420OaeoedkR%3DKuX1EMNwOvCkCfJHZPRDXhVz-w8J0mg%40mail.g=
+mail.com.
