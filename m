@@ -1,43 +1,51 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [RESEND PATCH v2 0/5] a few fixes for sprd's sd host controller
-Date: Thu, 29 Aug 2019 11:32:32 +0200
-Message-ID: <CAPDyKFp_+YuPOjURiE0YhT0uotZi=P2sRVYNr3ejgZmrMaN=tA@mail.gmail.com>
-References: <20190829014645.4479-1-zhang.lyra@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+From: Masahiro Yamada <yamada.masahiro@socionext.com>
+Subject: [PATCH 3/3] mmc: sdhci-cadence: override spec version
+Date: Thu, 29 Aug 2019 19:49:28 +0900
+Message-ID: <20190829104928.27404-3-yamada.masahiro@socionext.com>
+References: <20190829104928.27404-1-yamada.masahiro@socionext.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190829014645.4479-1-zhang.lyra@gmail.com>
+In-Reply-To: <20190829104928.27404-1-yamada.masahiro@socionext.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Chunyan Zhang <zhang.lyra@gmail.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Orson Zhai <orsonzhai@gmail.com>, Baolin Wang <baolin.wang@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Piotr Sroka <piotrs@cadence.com>, Masahiro Yamada <yamada.masahiro@socionext.com>, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, 29 Aug 2019 at 03:47, Chunyan Zhang <zhang.lyra@gmail.com> wrote:
->
-> With this patch-set, both sd card and mmc can be setup.  This patch-set was
-> verified on Unisoc's Whale2 and another mobile phone platform SC9863A.
->
-> Changes from v1:
-> - Added Reviewed-by and Tested-by of Baolin;
-> - Added fixes tag for all patches in this series.
->
-> Chunyan Zhang (5):
->   mmc: sdhci-sprd: fixed incorrect clock divider
->   mmc: sdhci-sprd: add get_ro hook function
->   mmc: sdhci-sprd: add SDHCI_QUIRK2_PRESET_VALUE_BROKEN
->   mms: sdhci-sprd: add SDHCI_QUIRK_BROKEN_CARD_DETECTION
->   mmc: sdhci-sprd: clear the UHS-I modes read from registers
->
->  drivers/mmc/host/sdhci-sprd.c | 30 +++++++++++++++++++++++++-----
->  1 file changed, 25 insertions(+), 5 deletions(-)
->
-> --
-> 2.20.1
->
+The datasheet of the IP (sd4hc) says it is compiatible with SDHCI v4,
+but the spec version field in the version register is read as 2
+(i.e. SDHCI_SPEC_300) based on the RTL provided by Cadence.
 
-Thanks, but I amended the current applied patches, assuming the only
-change change you did was to put the fixes tag on one single line (for
-each patch).
+Socionext did not fix it up when it integrated the IP into the SoCs.
+So, it is working as SDHCI v3.
 
-Kind regards
-Uffe
+It is not a real problem because there is no difference in the program
+flow in sdhci.c between SDHCI_SPEC_300/400, but set the real version
+just in case.
+
+Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
+---
+
+ drivers/mmc/host/sdhci-cadence.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
+index 44139fceac24..9837214685b6 100644
+--- a/drivers/mmc/host/sdhci-cadence.c
++++ b/drivers/mmc/host/sdhci-cadence.c
+@@ -341,6 +341,7 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
+ 	unsigned int nr_phy_params;
+ 	int ret;
+ 	struct device *dev = &pdev->dev;
++	static const u16 version = SDHCI_SPEC_400 << SDHCI_SPEC_VER_SHIFT;
+ 
+ 	clk = devm_clk_get(dev, NULL);
+ 	if (IS_ERR(clk))
+@@ -370,6 +371,7 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
+ 	host->mmc_host_ops.hs400_enhanced_strobe =
+ 				sdhci_cdns_hs400_enhanced_strobe;
+ 	sdhci_enable_v4_mode(host);
++	__sdhci_read_caps(host, &version, NULL, NULL);
+ 
+ 	sdhci_get_of_property(pdev);
+ 
+-- 
+2.17.1
