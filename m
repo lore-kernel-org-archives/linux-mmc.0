@@ -1,63 +1,31 @@
-From: Matthias Kaehlcke <mka@chromium.org>
-Subject: [PATCH 2/2] mmc: core: Run handlers for pending SDIO interrupts on resume
-Date: Wed, 28 Aug 2019 14:46:20 -0700
-Message-ID: <20190828214620.66003-2-mka@chromium.org>
-References: <20190828214620.66003-1-mka@chromium.org>
+From: Chunyan Zhang <zhang.lyra@gmail.com>
+Subject: [RESEND PATCH v2 0/5] a few fixes for sprd's sd host controller
+Date: Thu, 29 Aug 2019 09:46:40 +0800
+Message-ID: <20190829014645.4479-1-zhang.lyra@gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190828214620.66003-1-mka@chromium.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Douglas Anderson <dianders@chromium.org>, Matthias Kaehlcke <mka@chromium.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Orson Zhai <orsonzhai@gmail.com>, Baolin Wang <baolin.wang@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Chunyan Zhang <zhang.lyra@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-With commit 83293386bc95 ("mmc: core: Prevent processing SDIO IRQs
-when the card is suspended") SDIO interrupts are dropped if they
-occur while the card is suspended. Dropping the interrupts can cause
-problems after resume with cards that remain powered during suspend
-and preserve their state. These cards may end up in an inconsistent
-state since the event that triggered the interrupt is never processed
-and remains pending. One example is the Bluetooth function of the
-Marvell 8997, SDIO is broken on resume (for both Bluetooth and WiFi)
-when processing of a pending HCI event is skipped.
+With this patch-set, both sd card and mmc can be setup.  This patch-set was
+verified on Unisoc's Whale2 and another mobile phone platform SC9863A.
 
-For cards that remained powered during suspend check on resume if
-SDIO interrupts are pending, and trigger interrupt processing if
-needed.
+Changes from v1:
+- Added Reviewed-by and Tested-by of Baolin;
+- Added fixes tag for all patches in this series.
 
-Fixes: 83293386bc95 ("mmc: core: Prevent processing SDIO IRQs when the card is suspended")
-Signed-off-by: Matthias Kaehlcke <mka@chromium.org>
----
- drivers/mmc/core/sdio.c | 9 +++++++++
- 1 file changed, 9 insertions(+)
+Chunyan Zhang (5):
+  mmc: sdhci-sprd: fixed incorrect clock divider
+  mmc: sdhci-sprd: add get_ro hook function
+  mmc: sdhci-sprd: add SDHCI_QUIRK2_PRESET_VALUE_BROKEN
+  mms: sdhci-sprd: add SDHCI_QUIRK_BROKEN_CARD_DETECTION
+  mmc: sdhci-sprd: clear the UHS-I modes read from registers
 
-diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-index 8dd8fc32ecca..a6b4742a91c6 100644
---- a/drivers/mmc/core/sdio.c
-+++ b/drivers/mmc/core/sdio.c
-@@ -975,6 +975,7 @@ static int mmc_sdio_suspend(struct mmc_host *host)
- static int mmc_sdio_resume(struct mmc_host *host)
- {
- 	int err = 0;
-+	u8 pending = 0;
- 
- 	/* Basic card reinitialization. */
- 	mmc_claim_host(host);
-@@ -1009,6 +1010,14 @@ static int mmc_sdio_resume(struct mmc_host *host)
- 	/* Allow SDIO IRQs to be processed again. */
- 	mmc_card_clr_suspended(host->card);
- 
-+	if (!mmc_card_keep_power(host))
-+		goto skip_pending_irqs;
-+
-+	if (!sdio_get_pending_irqs(host, &pending) &&
-+	    pending != 0)
-+		sdio_signal_irq(host);
-+
-+skip_pending_irqs:
- 	if (host->sdio_irqs) {
- 		if (!(host->caps2 & MMC_CAP2_SDIO_IRQ_NOTHREAD))
- 			wake_up_process(host->sdio_irq_thread);
+ drivers/mmc/host/sdhci-sprd.c | 30 +++++++++++++++++++++++++-----
+ 1 file changed, 25 insertions(+), 5 deletions(-)
+
 -- 
-2.23.0.187.g17f5b7556c-goog
+2.20.1
