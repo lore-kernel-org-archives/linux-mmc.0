@@ -1,7 +1,7 @@
 From: Chunyan Zhang <zhang.lyra@gmail.com>
-Subject: [RESEND PATCH v2 1/5] mmc: sdhci-sprd: fixed incorrect clock divider
-Date: Thu, 29 Aug 2019 09:46:41 +0800
-Message-ID: <20190829014645.4479-2-zhang.lyra@gmail.com>
+Subject: [RESEND PATCH v2 2/5] mmc: sdhci-sprd: add get_ro hook function
+Date: Thu, 29 Aug 2019 09:46:42 +0800
+Message-ID: <20190829014645.4479-3-zhang.lyra@gmail.com>
 References: <20190829014645.4479-1-zhang.lyra@gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -14,9 +14,7 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Chunyan Zhang <chunyan.zhang@unisoc.com>
 
-The register SDHCI_CLOCK_CONTROL should be cleared before config clock
-divider, otherwise the frequency configured maybe lower than we
-expected.
+sprd's sd host controller doesn't support write protect to sd card.
 
 Fixes: fb8bd90f83c4 ("mmc: sdhci-sprd: Add Spreadtrum's initial host controller")
 Signed-off-by: Chunyan Zhang <chunyan.zhang@unisoc.com>
@@ -24,27 +22,32 @@ Signed-off-by: Chunyan Zhang <zhang.lyra@gmail.com>
 Reviewed-by: Baolin Wang <baolin.wang@linaro.org>
 Tested-by: Baolin Wang <baolin.wang@linaro.org>
 ---
- drivers/mmc/host/sdhci-sprd.c | 7 ++++---
- 1 file changed, 4 insertions(+), 3 deletions(-)
+ drivers/mmc/host/sdhci-sprd.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
 
 diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
-index 6ee340a3fb3a..d5871865a1e9 100644
+index d5871865a1e9..90cb2af91159 100644
 --- a/drivers/mmc/host/sdhci-sprd.c
 +++ b/drivers/mmc/host/sdhci-sprd.c
-@@ -217,10 +217,11 @@ static inline void _sdhci_sprd_set_clock(struct sdhci_host *host,
- 	struct sdhci_sprd_host *sprd_host = TO_SPRD_HOST(host);
- 	u32 div, val, mask;
+@@ -374,6 +374,11 @@ static unsigned int sdhci_sprd_get_max_timeout_count(struct sdhci_host *host)
+ 	return 1 << 31;
+ }
  
--	div = sdhci_sprd_calc_div(sprd_host->base_rate, clk);
-+	sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
++static unsigned int sdhci_sprd_get_ro(struct sdhci_host *host)
++{
++	return 0;
++}
++
+ static struct sdhci_ops sdhci_sprd_ops = {
+ 	.read_l = sdhci_sprd_readl,
+ 	.write_l = sdhci_sprd_writel,
+@@ -386,6 +391,7 @@ static struct sdhci_ops sdhci_sprd_ops = {
+ 	.set_uhs_signaling = sdhci_sprd_set_uhs_signaling,
+ 	.hw_reset = sdhci_sprd_hw_reset,
+ 	.get_max_timeout_count = sdhci_sprd_get_max_timeout_count,
++	.get_ro = sdhci_sprd_get_ro,
+ };
  
--	clk |= ((div & 0x300) >> 2) | ((div & 0xFF) << 8);
--	sdhci_enable_clk(host, clk);
-+	div = sdhci_sprd_calc_div(sprd_host->base_rate, clk);
-+	div = ((div & 0x300) >> 2) | ((div & 0xFF) << 8);
-+	sdhci_enable_clk(host, div);
- 
- 	/* enable auto gate sdhc_enable_auto_gate */
- 	val = sdhci_readl(host, SDHCI_SPRD_REG_32_BUSY_POSI);
+ static void sdhci_sprd_request(struct mmc_host *mmc, struct mmc_request *mrq)
 -- 
 2.20.1
