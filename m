@@ -1,76 +1,73 @@
-From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: Re: [PATCH v2 2/2] dma-contiguous: Use fallback alloc_pages for
- single pages
-Date: Thu, 29 Aug 2019 20:45:27 +0900
-Message-ID: <CAK7LNASs2qkpGY_BkL--hvmKm3FJ9sEK4+v5VVYc1_CrowAB4w@mail.gmail.com>
-References: <20190506223334.1834-1-nicoleotsuka@gmail.com> <20190506223334.1834-3-nicoleotsuka@gmail.com>
- <CAK7LNARacEorb38mVBw_V-Zvz-znWgBma1AP1-z_5B_xZU4ogg@mail.gmail.com>
- <CAK7LNAQfYBCoChMV=MOwcUyVoqRkrPWs7DaWdzDqjBe18gGiAQ@mail.gmail.com>
- <20190825011025.GA23410@lst.de> <CAK7LNAQb1ZHr=DiHLNeNRaQExMuXdDOV4sFghoGbco_Q=Qzb8g@mail.gmail.com>
- <20190826073320.GA11712@lst.de> <CAK7LNATYOLEboUTO4qPx2z7cqwDrHBO1HFHG8VzZEJ15STv+nw@mail.gmail.com>
- <20190827075021.GA953@lst.de> <CAK7LNAQZ+bueZZzSoMADmgLjWNvijHRV=wLQzN_kvLG3b5Uu+w@mail.gmail.com>
- <20190827115541.GB5921@lst.de> <CAK7LNAQ_nQcBt=xH1-h+=co85mTxFgbe+_46Gu4LaNsDSm+kYA@mail.gmail.com>
- <CAK7LNATvz=TTe+3OyLrtUqDuTUTn1dg9Sk-t3BD_OFZfViCPMw@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 1/3] mmc: sdhci-cadence: enable v4_mode to fix ADMA 64-bit addressing
+Date: Thu, 29 Aug 2019 13:47:47 +0200
+Message-ID: <CAPDyKFooFQgBgK3N1Ob9rsT_7-5kqC9i7PeMxkkeAbnDP+Fwnw@mail.gmail.com>
+References: <20190829104928.27404-1-yamada.masahiro@socionext.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAK7LNATvz=TTe+3OyLrtUqDuTUTn1dg9Sk-t3BD_OFZfViCPMw@mail.gmail.com>
+In-Reply-To: <20190829104928.27404-1-yamada.masahiro@socionext.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Christoph Hellwig <hch@lst.de>
-Cc: Nicolin Chen <nicoleotsuka@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Robin Murphy <robin.murphy@arm.com>, Marek Szyprowski <m.szyprowski@samsung.com>, vdumpa@nvidia.com, Russell King <linux@armlinux.org.uk>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Chris Zankel <chris@zankel.net>, Max Filippov <jcmvbkbc@gmail.com>, Joerg Roedel <joro@8bytes.org>, David Woodhouse <dwmw2@infradead.org>, Tony Lindgren <tony@atomide.com>, Andrew Morton <akpm@linux-foundation.org>, Stephen Rothwell <sfr@canb.auug.org.au>, Thierry Reding <treding@nvidia.com>, Kees Cook <keescook@chromium.org>, iamjoonsoo.kim@lge.com, Wolfram Sang <wsa+renesas>
+To: Masahiro Yamada <yamada.masahiro@socionext.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Piotr Sroka <piotrs@cadence.com>, "# 4.0+" <stable@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, Aug 28, 2019 at 9:23 PM Masahiro Yamada
+On Thu, 29 Aug 2019 at 12:49, Masahiro Yamada
 <yamada.masahiro@socionext.com> wrote:
 >
-> On Wed, Aug 28, 2019 at 7:53 PM Masahiro Yamada
-> <yamada.masahiro@socionext.com> wrote:
-> >
-> > Hi Christoph,
-> >
-> > On Tue, Aug 27, 2019 at 8:55 PM Christoph Hellwig <hch@lst.de> wrote:
-> > >
-> > > On Tue, Aug 27, 2019 at 06:03:14PM +0900, Masahiro Yamada wrote:
-> > > > Yes, this makes my driver working again
-> > > > when CONFIG_DMA_CMA=y.
-> > > >
-> > > >
-> > > > If I apply the following, my driver gets back working
-> > > > irrespective of CONFIG_DMA_CMA.
-> > >
-> > > That sounds a lot like the device simply isn't 64-bit DMA capable, and
-> > > previously always got CMA allocations under the limit it actually
-> > > supported.  I suggest that you submit this quirk to the mmc maintainers.
-> >
-> >
-> > I tested v5.2 and my MMC host controller works with
-> > dma_address that exceeds 32-bit physical address.
-> >
-> > So, I believe my MMC device is 64-bit DMA capable.
-> >
-> > I am still looking into the code
-> > to find out what was changed.
+> The IP datasheet says this controller is compatible with SD Host
+> Specification Version v4.00.
 >
+> As it turned out, the ADMA of this IP does not work with 64-bit mode
+> when it is in the Version 3.00 compatible mode; it understands the
+> old 64-bit descriptor table (as defined in SDHCI v2), but the ADMA
+> System Address Register (SDHCI_ADMA_ADDRESS) cannot point to the
+> 64-bit address.
 >
-> I retract this comment.
+> I noticed this issue only after commit bd2e75633c80 ("dma-contiguous:
+> use fallback alloc_pages for single pages"). Prior to that commit,
+> dma_set_mask_and_coherent() returned the dma address that fits in
+> 32-bit range, at least for the default arm64 configuration
+> (arch/arm64/configs/defconfig). Now the host->adma_addr exceeds the
+> 32-bit limit, causing the real problem for the Socionext SoCs.
+> (As a side-note, I was also able to reproduce the issue for older
+> kernels by turning off CONFIG_DMA_CMA.)
 >
-> Prior to bd2e75633c8012fc8a7431c82fda66237133bf7e,
-> the descriptor table for ADMA is placed within the
-> 32-bit phys address range, not exceeds the 32-bit limit.
+> Call sdhci_enable_v4_mode() to fix this.
 >
-> Probably, my device is not 64-bit capable.
+> I think it is better to back-port this, but only possible for v4.20+.
 >
-> I will talk to the hardware engineer,
-> and check the hardware spec just in case.
+> When this driver was merged (v4.10), the v4 mode support did not exist.
+> It was added by commit b3f80b434f72 ("mmc: sdhci: Add sd host v4 mode")
+> i.e. v4.20.
 >
+> Cc: <stable@vger.kernel.org> # v4.20+
+> Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
 
+Applied for fixes, by adding below tag, thanks!
 
-After looking more into my hardware,
-I found out how to fix my driver:
-https://lore.kernel.org/patchwork/patch/1121600/
+Fixes: b3f80b434f72 ("mmc: sdhci: Add sd host v4 mode")
 
+Kind regards
+Uffe
 
-
--- 
-Best Regards
-Masahiro Yamada
+> ---
+>
+>  drivers/mmc/host/sdhci-cadence.c | 1 +
+>  1 file changed, 1 insertion(+)
+>
+> diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
+> index 163d1cf4367e..44139fceac24 100644
+> --- a/drivers/mmc/host/sdhci-cadence.c
+> +++ b/drivers/mmc/host/sdhci-cadence.c
+> @@ -369,6 +369,7 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
+>         host->mmc_host_ops.execute_tuning = sdhci_cdns_execute_tuning;
+>         host->mmc_host_ops.hs400_enhanced_strobe =
+>                                 sdhci_cdns_hs400_enhanced_strobe;
+> +       sdhci_enable_v4_mode(host);
+>
+>         sdhci_get_of_property(pdev);
+>
+> --
+> 2.17.1
+>
