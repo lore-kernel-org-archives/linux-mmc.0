@@ -1,69 +1,41 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [GIT PULL] MMC fixes for v5.3-rc7
-Date: Fri, 30 Aug 2019 09:41:47 +0200
-Message-ID: <20190830074147.3691-1-ulf.hansson@linaro.org>
+From: Andrew Jeffery <andrew@aj.id.au>
+Subject: [PATCH 0/2] mmc: sdhci-of-aspeed: Fixes for AST2600 eMMC support
+Date: Fri, 30 Aug 2019 17:16:42 +0930
+Message-ID: <20190830074644.10936-1-andrew@aj.id.au>
+Mime-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
+To: linux-mmc@vger.kernel.org
+Cc: Andrew Jeffery <andrew@aj.id.au>, adrian.hunter@intel.com, ulf.hansson@linaro.org, joel@jms.id.au, ryanchen.aspeed@gmail.com, openbmc@lists.ozlabs.org, linux-arm-kernel@lists.infradead.org, linux-aspeed@lists.ozlabs.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Linus,
+Hello,
 
-Here's a PR with a couple of MMC fixes intended for v5.3-rc7. Details about the
-highlights are as usual found in the signed tag.
+The ASPEED SDHCI driver patches sent previously were based on testing on the
+AST2500. The SD controllers in the 2500 and 2600 had the same register layout
+according to the documentation, so we added the necessary devicetree compatible
+string at the same time.
 
-Please pull this in!
+Now that I've got access to 2600 hardware with an eMMC chip I have a couple of
+patches that are fixes enabling support for it. I don't think the first patch
+is too controversial - in some cases we weren't ensuring the clock was enabled
+before returning from the set_clock() callback.
 
-Kind regards
-Ulf Hansson
+I'm a bit unsure about the second patch though which enables use of
+max-frequency in the devicetree, it feels a bit hacky so I'm looking for any
+suggestions on the approach.
 
+Please review!
 
-The following changes since commit d1abaeb3be7b5fa6d7a1fbbd2e14e3310005c4c1:
+Andrew
 
-  Linux 5.3-rc5 (2019-08-18 14:31:08 -0700)
+Andrew Jeffery (2):
+  mmc: sdhci-of-aspeed: Uphold clocks-on post-condition of set_clock()
+  mmc: sdhci-of-aspeed: Allow max-frequency limitation of SDCLK
 
-are available in the Git repository at:
+ drivers/mmc/host/sdhci-of-aspeed.c | 21 +++++++++++++++++----
+ 1 file changed, 17 insertions(+), 4 deletions(-)
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.3-rc5
-
-for you to fetch changes up to e73a3896eaca95ea5fc895720502a3f040eb4b39:
-
-  mmc: sdhci-cadence: enable v4_mode to fix ADMA 64-bit addressing (2019-08-30 09:17:53 +0200)
-
-----------------------------------------------------------------
-MMC core:
- - Fix init of SD cards reporting an invalid VDD range
-
-MMC host:
- - sdhci-sprd: Fixes for clocks, card-detect, write-protect etc
- - sdhci-cadence: Fix ADMA 64-bit addressing
- - sdhci-tegra: Re-allow writing to SD card when GPIO pin is absent
- - sdhci-of-at91: Fix eMMC init by clearing HS200 cap as it's not supported
-
-----------------------------------------------------------------
-Chunyan Zhang (5):
-      mmc: sdhci-sprd: fixed incorrect clock divider
-      mmc: sdhci-sprd: add get_ro hook function
-      mmc: sdhci-sprd: add SDHCI_QUIRK2_PRESET_VALUE_BROKEN
-      mms: sdhci-sprd: add SDHCI_QUIRK_BROKEN_CARD_DETECTION
-      mmc: sdhci-sprd: clear the UHS-I modes read from registers
-
-Dmitry Osipenko (1):
-      Revert "mmc: sdhci-tegra: drop ->get_ro() implementation"
-
-Eugen Hristev (1):
-      mmc: sdhci-of-at91: add quirk for broken HS200
-
-Masahiro Yamada (1):
-      mmc: sdhci-cadence: enable v4_mode to fix ADMA 64-bit addressing
-
-Ulf Hansson (1):
-      mmc: core: Fix init of SD cards reporting an invalid VDD range
-
- drivers/mmc/core/sd.c            |  6 ++++++
- drivers/mmc/host/sdhci-cadence.c |  1 +
- drivers/mmc/host/sdhci-of-at91.c |  3 +++
- drivers/mmc/host/sdhci-sprd.c    | 30 +++++++++++++++++++++++++-----
- drivers/mmc/host/sdhci-tegra.c   | 14 ++++++++++++++
- 5 files changed, 49 insertions(+), 5 deletions(-)
+-- 
+2.20.1
