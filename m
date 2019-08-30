@@ -1,93 +1,23 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 2/2] mmc: core: Run handlers for pending SDIO interrupts
- on resume
-Date: Fri, 30 Aug 2019 12:38:26 +0200
-Message-ID: <CAPDyKFp-p_iunzFd8vSuuP0ubd7WzPY4XOzCoo=EEFQ8rscWCw@mail.gmail.com>
-References: <20190828214620.66003-1-mka@chromium.org> <20190828214620.66003-2-mka@chromium.org>
- <CAPDyKFr2R-ta5Xob12-6k=+mXXt0NowJ=dpLGJu10qhn7cB1HQ@mail.gmail.com>
- <20190829171555.GD70797@google.com> <CAD=FV=VhAFGZusYac8hqYNZ9t+ipTZ5EAo5qY5+A8jA4xjw2vg@mail.gmail.com>
- <CAPDyKFo-NkkYyNNxtU9PpP7aG5zRd-pXsxOujdN53J=uAezieA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+From: pr-tracker-bot@kernel.org
+Subject: Re: [GIT PULL] MMC fixes for v5.3-rc7
+Date: Fri, 30 Aug 2019 16:40:08 +0000
+Message-ID: <156718320803.32023.885555795131888742.pr-tracker-bot@kernel.org>
+References: <20190830074147.3691-1-ulf.hansson@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFo-NkkYyNNxtU9PpP7aG5zRd-pXsxOujdN53J=uAezieA@mail.gmail.com>
+In-Reply-To: <20190830074147.3691-1-ulf.hansson@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Doug Anderson <dianders@chromium.org>, Matthias Kaehlcke <mka@chromium.org>
-Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, 30 Aug 2019 at 08:08, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->
-> On Thu, 29 Aug 2019 at 19:40, Doug Anderson <dianders@chromium.org> wrote:
-> >
-> > Hi,
-> >
-> > On Thu, Aug 29, 2019 at 10:16 AM Matthias Kaehlcke <mka@chromium.org> wrote:
-> > >
-> > > > In one way, this change makes sense as it adopts the legacy behavior,
-> > > > signaling "cached" SDIO IRQs also for the new SDIO irq work interface.
-> > > >
-> > > > However, there is at least one major concern I see with this approach.
-> > > > That is, in the execution path for sdio_signal_irq() (or calling
-> > > > wake_up_process() for the legacy path), we may end up invoking the
-> > > > SDIO func's ->irq_handler() callback, as to let the SDIO func driver
-> > > > to consume the SDIO IRQ.
-> > > >
-> > > > The problem with this is, that the corresponding SDIO func driver may
-> > > > not have been system resumed, when the ->irq_handler() callback is
-> > > > invoked.
-> > >
-> > > While debugging the the problem with btmrvl I found that this is
-> > > already the case without the patch, just not during resume, but when
-> > > suspending. The func driver suspends before the SDIO bus and
-> > > interrupts can keep coming in. These are processed while the func
-> > > driver is suspended, until the SDIO core starts dropping the
-> > > interrupts.
-> > >
-> > > And I think it is also already true at resume time: mmc_sdio_resume()
-> > > re-enables SDIO IRQs and disables dropping them.
-> >
-> > I would also note that this matches the design of the normal system
-> > suspend/resume functions.  Interrupts continue to be enabled even
-> > after the "suspend" call is made for a device.  Presumably this is so
-> > that the suspend function can make use of interrupts even if there is
-> > no other reason.
->
-> I understand and you have a good point!
->
-> However, in my experience, the most common generic case, is that it's
-> a bad idea to let a device process interrupts once they have been
-> suspended. This also applies to runtime suspend (via runtime PM).
->
-> > If it's important for a device to stop getting
-> > interrupts after the "suspend" function is called then it's up to that
-> > device to re-configure the device to stop giving interrupts.
->
-> Again, you have a very good point. The corresponding driver for the
-> device in question is responsible for dealing with this.
->
-> Then, for this particular case, the SDIO func driver scenario, how
-> would that work?
->
-> For example, assume that the SDIO func driver can't process IRQs after
-> its been system suspended, however it still wants the IRQs to be
-> re-kicked to consume them once it has been resumed?
->
-> Or are you saying that the SDIO func driver for cases when IRQs can't
-> be consumed during system suspend, that is should call
-> sdio_release_irq() (then reclaim the IRQ once resumed)?
+The pull request you sent on Fri, 30 Aug 2019 09:41:47 +0200:
 
-I have been thinking more about this. The above seems like a
-reasonable assumption to make. So, I started to hack and improve the
-SDIO IRQ management, again.
+> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.3-rc5
 
-Just to be clear, I like the approach Matthias has taken here, which
-means reading SDIO_CCCR_INTx register at system resume, to understand
-whether there are some SDIO IRQs that needs to be processed, however
-there are some more corner cases that needs to be covered as well.
+has been merged into torvalds/linux.git:
+https://git.kernel.org/torvalds/c/0d70787b65941a8db36fd2c35d25c93178f8b545
 
-Let me post something on Monday, then we can continue our discussions
-and run some tests as well.
+Thank you!
 
-Have nice weekend!
-Uffe
+-- 
+Deet-doot-dot, I am a bot.
+https://korg.wiki.kernel.org/userdoc/prtracker
