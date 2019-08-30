@@ -1,99 +1,93 @@
-From: =?UTF-8?Q?Tam=C3=A1s_Sz=C5=B1cs?= <tszucs@protonmail.ch>
-Subject: Re: [PATCH v2] mmc: sdhi: fill in actual_clock
-Date: Fri, 30 Aug 2019 09:33:17 +0000
-Message-ID: <zQCmpTJgh3DStTAOFOYXmO44eMRsagV7uM-pCHjc3YlsFmTQuG2GNK9ELGBQZsFn44kr91MRGZ3U7z45D79XHNvCuMTuA6PltlSDx379ws0=@protonmail.ch>
-References: <20190829183634.3376-1-tszucs@protonmail.ch>
- <CAMuHMdVe_d6N8hhG0VNZMKAGwXm7kiOQVnqNkL9+6DbkBsKAZw@mail.gmail.com>
-Reply-To: =?UTF-8?Q?Tam=C3=A1s_Sz=C5=B1cs?= <tszucs@protonmail.ch>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 2/2] mmc: core: Run handlers for pending SDIO interrupts
+ on resume
+Date: Fri, 30 Aug 2019 12:38:26 +0200
+Message-ID: <CAPDyKFp-p_iunzFd8vSuuP0ubd7WzPY4XOzCoo=EEFQ8rscWCw@mail.gmail.com>
+References: <20190828214620.66003-1-mka@chromium.org> <20190828214620.66003-2-mka@chromium.org>
+ <CAPDyKFr2R-ta5Xob12-6k=+mXXt0NowJ=dpLGJu10qhn7cB1HQ@mail.gmail.com>
+ <20190829171555.GD70797@google.com> <CAD=FV=VhAFGZusYac8hqYNZ9t+ipTZ5EAo5qY5+A8jA4xjw2vg@mail.gmail.com>
+ <CAPDyKFo-NkkYyNNxtU9PpP7aG5zRd-pXsxOujdN53J=uAezieA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAMuHMdVe_d6N8hhG0VNZMKAGwXm7kiOQVnqNkL9+6DbkBsKAZw@mail.gmail.com>
+In-Reply-To: <CAPDyKFo-NkkYyNNxtU9PpP7aG5zRd-pXsxOujdN53J=uAezieA@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Geert Uytterhoeven <geert@linux-m68k.org>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
+To: Doug Anderson <dianders@chromium.org>, Matthias Kaehlcke <mka@chromium.org>
+Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Geert,
+On Fri, 30 Aug 2019 at 08:08, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>
+> On Thu, 29 Aug 2019 at 19:40, Doug Anderson <dianders@chromium.org> wrote:
+> >
+> > Hi,
+> >
+> > On Thu, Aug 29, 2019 at 10:16 AM Matthias Kaehlcke <mka@chromium.org> wrote:
+> > >
+> > > > In one way, this change makes sense as it adopts the legacy behavior,
+> > > > signaling "cached" SDIO IRQs also for the new SDIO irq work interface.
+> > > >
+> > > > However, there is at least one major concern I see with this approach.
+> > > > That is, in the execution path for sdio_signal_irq() (or calling
+> > > > wake_up_process() for the legacy path), we may end up invoking the
+> > > > SDIO func's ->irq_handler() callback, as to let the SDIO func driver
+> > > > to consume the SDIO IRQ.
+> > > >
+> > > > The problem with this is, that the corresponding SDIO func driver may
+> > > > not have been system resumed, when the ->irq_handler() callback is
+> > > > invoked.
+> > >
+> > > While debugging the the problem with btmrvl I found that this is
+> > > already the case without the patch, just not during resume, but when
+> > > suspending. The func driver suspends before the SDIO bus and
+> > > interrupts can keep coming in. These are processed while the func
+> > > driver is suspended, until the SDIO core starts dropping the
+> > > interrupts.
+> > >
+> > > And I think it is also already true at resume time: mmc_sdio_resume()
+> > > re-enables SDIO IRQs and disables dropping them.
+> >
+> > I would also note that this matches the design of the normal system
+> > suspend/resume functions.  Interrupts continue to be enabled even
+> > after the "suspend" call is made for a device.  Presumably this is so
+> > that the suspend function can make use of interrupts even if there is
+> > no other reason.
+>
+> I understand and you have a good point!
+>
+> However, in my experience, the most common generic case, is that it's
+> a bad idea to let a device process interrupts once they have been
+> suspended. This also applies to runtime suspend (via runtime PM).
+>
+> > If it's important for a device to stop getting
+> > interrupts after the "suspend" function is called then it's up to that
+> > device to re-configure the device to stop giving interrupts.
+>
+> Again, you have a very good point. The corresponding driver for the
+> device in question is responsible for dealing with this.
+>
+> Then, for this particular case, the SDIO func driver scenario, how
+> would that work?
+>
+> For example, assume that the SDIO func driver can't process IRQs after
+> its been system suspended, however it still wants the IRQs to be
+> re-kicked to consume them once it has been resumed?
+>
+> Or are you saying that the SDIO func driver for cases when IRQs can't
+> be consumed during system suspend, that is should call
+> sdio_release_irq() (then reclaim the IRQ once resumed)?
 
-You are correct, there is no way to distinguish between the old and new ker=
-nels just by mmc ios output when the bus is down. I don't think it's an iss=
-ue. I find it more helpful to have this information available.
-Yes, actual_clock should only display when non-zero and it should be zero w=
-hen the bus is down. I fixed this in v2.
+I have been thinking more about this. The above seems like a
+reasonable assumption to make. So, I started to hack and improve the
+SDIO IRQ management, again.
 
-Kind regards,
-Tamas
+Just to be clear, I like the approach Matthias has taken here, which
+means reading SDIO_CCCR_INTx register at system resume, to understand
+whether there are some SDIO IRQs that needs to be processed, however
+there are some more corner cases that needs to be covered as well.
 
+Let me post something on Monday, then we can continue our discussions
+and run some tests as well.
 
-Tam=C3=A1s Sz=C5=B1cs
-tszucs@protonmail.ch
-
-=E2=80=90=E2=80=90=E2=80=90=E2=80=90=E2=80=90=E2=80=90=E2=80=90 Original Me=
-ssage =E2=80=90=E2=80=90=E2=80=90=E2=80=90=E2=80=90=E2=80=90=E2=80=90
-On Friday, August 30, 2019 9:21 AM, Geert Uytterhoeven <geert@linux-m68k.or=
-g> wrote:
-
-> Hi Tam=C3=A1s,
->
-> On Thu, Aug 29, 2019 at 8:37 PM Tam=C3=A1s Sz=C5=B1cs tszucs@protonmail.c=
-h wrote:
->
-> > Save set clock in mmc_host actual_clock enabling exporting it via debug=
-fs.
-> > This will indicate the precise SD clock in I/O settings rather than onl=
-y the
-> > sometimes misleading requested clock.
-> > Signed-off-by: Tam=C3=A1s Sz=C5=B1cs tszucs@protonmail.ch
->
-> Thanks for the update!
->
-> Reviewed-by: Geert Uytterhoeven geert+renesas@glider.be
->
-> However, one question below.
->
-> > --- a/drivers/mmc/host/renesas_sdhi_core.c
-> > +++ b/drivers/mmc/host/renesas_sdhi_core.c
-> > @@ -166,10 +166,13 @@ static void renesas_sdhi_set_clock(struct tmio_mm=
-c_host *host,
-> > sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, ~CLK_CTL_SCLKEN &
-> > sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL));
-> >
-> > -         if (new_clock =3D=3D 0)
-> >
-> >
-> >
-> > -         if (new_clock =3D=3D 0) {
-> >
-> >
-> > -                 host->mmc->actual_clock =3D 0;
-> >
-> >
->
-> The actual clock is present in the debugfs output only when non-zero.
-> Hence userspace cannot distinguish between an old kernel where the
-> Renesas SDHI driver didn't fill in actual_clock, and a new kernel when
-> the SDHI controller is powered down.
-> Could that be an issue? Should the old value be retained?
-> Probably it's OK, as this is debugfs, not an official ABI.
->
-> Gr{oetje,eeting}s,
->
-> Geert
->
-> -------------------------------------------------------------------------=
----------------------------------------------------------------------------=
----------------------------------------------------------------------------=
----------------------------------------------------------------------------=
----------------------------------------------------------------------------=
-------------------
->
-> Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m6=
-8k.org
->
-> In personal conversations with technical people, I call myself a hacker. =
-But
-> when I'm talking to journalists I just say "programmer" or something like=
- that.
-> -- Linus Torvalds
+Have nice weekend!
+Uffe
