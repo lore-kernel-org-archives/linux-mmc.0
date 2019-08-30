@@ -1,65 +1,50 @@
-From: =?UTF-8?q?Tam=C3=A1s=20Sz=C5=B1cs?= <tszucs@protonmail.ch>
-Subject: [PATCH v2] mmc: sdhi: fill in actual_clock
-Date: Thu, 29 Aug 2019 20:36:34 +0200
-Message-ID: <20190829183634.3376-1-tszucs@protonmail.ch>
+From: Ben Chuang <benchuanggli@gmail.com>
+Subject: Re: [PATCH V6 5/5] mmc: host: sdhci-pci: Add Genesys Logic GL975x support
+Date: Fri, 30 Aug 2019 09:15:13 +0800
+Message-ID: <CACT4zj_nzknKWt8yhk8KxDVE0WB27_FosPxu6NUQ5vxanc7CVw@mail.gmail.com>
+References: <20190827003335.2494-1-benchuanggli@gmail.com> <99735a03-c698-624d-f5cf-4feed7e6a9ca@intel.com>
+ <20190828134714.GA30547@people.danlj.org> <7fcd0fd5-97cb-1dab-7477-666838478541@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <7fcd0fd5-97cb-1dab-7477-666838478541@intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: linux-renesas-soc@vger.kernel.org, =?UTF-8?q?Tam=C3=A1s=20Sz=C5=B1cs?= <tszucs@protonmail.ch>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: "Michael K. Johnson" <johnsonm@danlj.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Ben Chuang <ben.chuang@genesyslogic.com.tw>
 List-Id: linux-mmc@vger.kernel.org
 
-Save set clock in mmc_host actual_clock enabling exporting it via debugfs.
-This will indicate the precise SD clock in I/O settings rather than only the
-sometimes misleading requested clock.
+On Thu, Aug 29, 2019 at 9:22 PM Adrian Hunter <adrian.hunter@intel.com> wrote:
+>
+> On 28/08/19 4:47 PM, Michael K. Johnson wrote:
+> > On Wed, Aug 28, 2019 at 04:13:03PM +0300, Adrian Hunter wrote:
+> >> On 27/08/19 3:33 AM, Ben Chuang wrote:
+> >> Looks good, one minor comment
+> > ...
+> >>> +#ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
+> >>
+> >> Arguably CONFIG_MMC_SDHCI_IO_ACCESSORS needs to be removed altogether. i.e.
+> >> making the accessors always available.  So for now, I'd prefer to select
+> >> MMC_SDHCI_IO_ACCESSORS:
+> >>
+> >> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> >> index 14d89a108edd..c3bd967d8a1a 100644
+> >> --- a/drivers/mmc/host/Kconfig
+> >> +++ b/drivers/mmc/host/Kconfig
+> >> @@ -94,6 +94,7 @@ config MMC_SDHCI_PCI
+> >>      depends on MMC_SDHCI && PCI
+> >>      select MMC_CQHCI
+> >>      select IOSF_MBI if X86
+> >> +    select MMC_SDHCI_IO_ACCESSORS
+> >>      help
+> >>        This selects the PCI Secure Digital Host Controller Interface.
+> >>        Most controllers found today are PCI devices.
+> >
+> > Unless I'm missing something, this seems like a separate patch;
+> > are you asking for it first, as a predecessor to the GLI patch?
+> >
+>
+> No, it is fine with this patch.
 
-Signed-off-by: Tamás Szűcs <tszucs@protonmail.ch>
----
- drivers/mmc/host/renesas_sdhi_core.c | 13 ++++++++-----
- 1 file changed, 8 insertions(+), 5 deletions(-)
-
-diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-index 64d3b5fb7fe5..4c9774dbcfc1 100644
---- a/drivers/mmc/host/renesas_sdhi_core.c
-+++ b/drivers/mmc/host/renesas_sdhi_core.c
-@@ -124,7 +124,7 @@ static unsigned int renesas_sdhi_clk_update(struct tmio_mmc_host *host,
- {
- 	struct renesas_sdhi *priv = host_to_priv(host);
- 	unsigned int freq, diff, best_freq = 0, diff_min = ~0;
--	int i, ret;
-+	int i;
- 
- 	/* tested only on R-Car Gen2+ currently; may work for others */
- 	if (!(host->pdata->flags & TMIO_MMC_MIN_RCAR2))
-@@ -153,9 +153,9 @@ static unsigned int renesas_sdhi_clk_update(struct tmio_mmc_host *host,
- 		}
- 	}
- 
--	ret = clk_set_rate(priv->clk, best_freq);
-+	clk_set_rate(priv->clk, best_freq);
- 
--	return ret == 0 ? best_freq : clk_get_rate(priv->clk);
-+	return clk_get_rate(priv->clk);
- }
- 
- static void renesas_sdhi_set_clock(struct tmio_mmc_host *host,
-@@ -166,10 +166,13 @@ static void renesas_sdhi_set_clock(struct tmio_mmc_host *host,
- 	sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, ~CLK_CTL_SCLKEN &
- 		sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL));
- 
--	if (new_clock == 0)
-+	if (new_clock == 0) {
-+		host->mmc->actual_clock = 0;
- 		goto out;
-+	}
- 
--	clock = renesas_sdhi_clk_update(host, new_clock) / 512;
-+	host->mmc->actual_clock = renesas_sdhi_clk_update(host, new_clock);
-+	clock = host->mmc->actual_clock / 512;
- 
- 	for (clk = 0x80000080; new_clock >= (clock << 1); clk >>= 1)
- 		clock <<= 1;
--- 
-2.11.0
+I will remove CONFIG_MMC_SDHCI_IO_ACCESSORS from sdhci-pci-gli.c and
+add add `select MMC_SDHCI_IO_ACCESSORS` in Kconfig.
+Thank you.
