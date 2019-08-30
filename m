@@ -1,57 +1,69 @@
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Subject: Re: [PATCH v2] mmc: sdhi: fill in actual_clock
-Date: Fri, 30 Aug 2019 09:21:45 +0200
-Message-ID: <CAMuHMdVe_d6N8hhG0VNZMKAGwXm7kiOQVnqNkL9+6DbkBsKAZw@mail.gmail.com>
-References: <20190829183634.3376-1-tszucs@protonmail.ch>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC fixes for v5.3-rc7
+Date: Fri, 30 Aug 2019 09:41:47 +0200
+Message-ID: <20190830074147.3691-1-ulf.hansson@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190829183634.3376-1-tszucs@protonmail.ch>
 Sender: linux-kernel-owner@vger.kernel.org
-To: =?UTF-8?B?VGFtw6FzIFN6xbFjcw==?= <tszucs@protonmail.ch>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
+To: Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Tamás,
+Hi Linus,
 
-On Thu, Aug 29, 2019 at 8:37 PM Tamás Szűcs <tszucs@protonmail.ch> wrote:
-> Save set clock in mmc_host actual_clock enabling exporting it via debugfs.
-> This will indicate the precise SD clock in I/O settings rather than only the
-> sometimes misleading requested clock.
->
-> Signed-off-by: Tamás Szűcs <tszucs@protonmail.ch>
+Here's a PR with a couple of MMC fixes intended for v5.3-rc7. Details about the
+highlights are as usual found in the signed tag.
 
-Thanks for the update!
+Please pull this in!
 
-Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
+Kind regards
+Ulf Hansson
 
-However, one question below.
 
-> --- a/drivers/mmc/host/renesas_sdhi_core.c
-> +++ b/drivers/mmc/host/renesas_sdhi_core.c
-> @@ -166,10 +166,13 @@ static void renesas_sdhi_set_clock(struct tmio_mmc_host *host,
->         sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, ~CLK_CTL_SCLKEN &
->                 sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL));
->
-> -       if (new_clock == 0)
-> +       if (new_clock == 0) {
-> +               host->mmc->actual_clock = 0;
+The following changes since commit d1abaeb3be7b5fa6d7a1fbbd2e14e3310005c4c1:
 
-The actual clock is present in the debugfs output only when non-zero.
-Hence userspace cannot distinguish between an old kernel where the
-Renesas SDHI driver didn't fill in actual_clock, and a new kernel when
-the SDHI controller is powered down.
-Could that be an issue? Should the old value be retained?
-Probably it's OK, as this is debugfs, not an official ABI.
+  Linux 5.3-rc5 (2019-08-18 14:31:08 -0700)
 
-Gr{oetje,eeting}s,
+are available in the Git repository at:
 
-                        Geert
+  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.3-rc5
 
--- 
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+for you to fetch changes up to e73a3896eaca95ea5fc895720502a3f040eb4b39:
 
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+  mmc: sdhci-cadence: enable v4_mode to fix ADMA 64-bit addressing (2019-08-30 09:17:53 +0200)
+
+----------------------------------------------------------------
+MMC core:
+ - Fix init of SD cards reporting an invalid VDD range
+
+MMC host:
+ - sdhci-sprd: Fixes for clocks, card-detect, write-protect etc
+ - sdhci-cadence: Fix ADMA 64-bit addressing
+ - sdhci-tegra: Re-allow writing to SD card when GPIO pin is absent
+ - sdhci-of-at91: Fix eMMC init by clearing HS200 cap as it's not supported
+
+----------------------------------------------------------------
+Chunyan Zhang (5):
+      mmc: sdhci-sprd: fixed incorrect clock divider
+      mmc: sdhci-sprd: add get_ro hook function
+      mmc: sdhci-sprd: add SDHCI_QUIRK2_PRESET_VALUE_BROKEN
+      mms: sdhci-sprd: add SDHCI_QUIRK_BROKEN_CARD_DETECTION
+      mmc: sdhci-sprd: clear the UHS-I modes read from registers
+
+Dmitry Osipenko (1):
+      Revert "mmc: sdhci-tegra: drop ->get_ro() implementation"
+
+Eugen Hristev (1):
+      mmc: sdhci-of-at91: add quirk for broken HS200
+
+Masahiro Yamada (1):
+      mmc: sdhci-cadence: enable v4_mode to fix ADMA 64-bit addressing
+
+Ulf Hansson (1):
+      mmc: core: Fix init of SD cards reporting an invalid VDD range
+
+ drivers/mmc/core/sd.c            |  6 ++++++
+ drivers/mmc/host/sdhci-cadence.c |  1 +
+ drivers/mmc/host/sdhci-of-at91.c |  3 +++
+ drivers/mmc/host/sdhci-sprd.c    | 30 +++++++++++++++++++++++++-----
+ drivers/mmc/host/sdhci-tegra.c   | 14 ++++++++++++++
+ 5 files changed, 49 insertions(+), 5 deletions(-)
