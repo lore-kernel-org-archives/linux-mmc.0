@@ -1,23 +1,26 @@
-From: pr-tracker-bot@kernel.org
-Subject: Re: [GIT PULL] MMC fixes for v5.3-rc7
-Date: Fri, 30 Aug 2019 16:40:08 +0000
-Message-ID: <156718320803.32023.885555795131888742.pr-tracker-bot@kernel.org>
-References: <20190830074147.3691-1-ulf.hansson@linaro.org>
+From: =?UTF-8?B?w5N2w6FyaQ==?= <ovari123@zoho.com>
+Subject: Asus VivoBook Flip TP202NA-EH012T EMMC problem
+Date: Sat, 31 Aug 2019 19:43:04 +1000
+Message-ID: <d355e790-7c60-5681-3ea5-dc4fd6206628@zoho.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190830074147.3691-1-ulf.hansson@linaro.org>
+Content-Language: en-AU
 Sender: linux-kernel-owner@vger.kernel.org
-Cc: Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-The pull request you sent on Fri, 30 Aug 2019 09:41:47 +0200:
+Hello,
 
-> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.3-rc5
+As per https://bugs.launchpad.net/ubuntu/+source/linux/+bug/1818407/comment=
+s/26 here is an email.
 
-has been merged into torvalds/linux.git:
-https://git.kernel.org/torvalds/c/0d70787b65941a8db36fd2c35d25c93178f8b545
+Information is provided at https://bugs.launchpad.net/ubuntu/+source/linux/=
++bug/1818407/comments/32
 
-Thank you!
+Please advise what else you require.
 
--- 
-Deet-doot-dot, I am a bot.
-https://korg.wiki.kernel.org/userdoc/prtracker
+Thank you
+
+=C3=93v=C3=A1ri
