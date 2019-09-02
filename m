@@ -1,7 +1,7 @@
 From: Andrew Jeffery <andrew@aj.id.au>
-Subject: [PATCH v2 1/4] mmc: sdhci-of-aspeed: Fix link failure for SPARC
-Date: Mon,  2 Sep 2019 13:28:39 +0930
-Message-ID: <20190902035842.2747-2-andrew@aj.id.au>
+Subject: [PATCH v2 2/4] mmc: sdhci-of-aspeed: Drop redundant assignment to host->clock
+Date: Mon,  2 Sep 2019 13:28:40 +0930
+Message-ID: <20190902035842.2747-3-andrew@aj.id.au>
 References: <20190902035842.2747-1-andrew@aj.id.au>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -9,79 +9,39 @@ Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20190902035842.2747-1-andrew@aj.id.au>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: Andrew Jeffery <andrew@aj.id.au>, adrian.hunter@intel.com, ulf.hansson@linaro.org, joel@jms.id.au, openbmc@lists.ozlabs.org, linux-arm-kernel@lists.infradead.org, linux-aspeed@lists.ozlabs.org, linux-kernel@vger.kernel.org, kbuild test robot <lkp@intel.com>
+Cc: Andrew Jeffery <andrew@aj.id.au>, adrian.hunter@intel.com, ulf.hansson@linaro.org, joel@jms.id.au, openbmc@lists.ozlabs.org, linux-arm-kernel@lists.infradead.org, linux-aspeed@lists.ozlabs.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Resolves the following build error reported by the 0-day bot:
+host->clock is already managed by sdhci_set_ios().
 
-    ERROR: "of_platform_device_create" [drivers/mmc/host/sdhci-of-aspeed.ko] undefined!
-
-SPARC does not set CONFIG_OF_ADDRESS so the symbol is missing. Guard the
-callsite to maintain build coverage for the rest of the driver.
-
-Reported-by: kbuild test robot <lkp@intel.com>
+Suggested-by: Ulf Hansson <ulf.hansson@linaro.org>
 Signed-off-by: Andrew Jeffery <andrew@aj.id.au>
 ---
- drivers/mmc/host/sdhci-of-aspeed.c | 38 ++++++++++++++++++++----------
- 1 file changed, 25 insertions(+), 13 deletions(-)
+ drivers/mmc/host/sdhci-of-aspeed.c | 5 +----
+ 1 file changed, 1 insertion(+), 4 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci-of-aspeed.c b/drivers/mmc/host/sdhci-of-aspeed.c
-index d5acb5afc50f..96ca494752c5 100644
+index 96ca494752c5..213b3dbd49ef 100644
 --- a/drivers/mmc/host/sdhci-of-aspeed.c
 +++ b/drivers/mmc/host/sdhci-of-aspeed.c
-@@ -224,10 +224,30 @@ static struct platform_driver aspeed_sdhci_driver = {
- 	.remove		= aspeed_sdhci_remove,
- };
+@@ -61,7 +61,7 @@ static void aspeed_sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+ 	sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
  
--static int aspeed_sdc_probe(struct platform_device *pdev)
+ 	if (clock == 0)
+-		goto out;
++		return;
+ 
+ 	for (div = 1; div < 256; div *= 2) {
+ 		if ((host->max_clk / div) <= clock)
+@@ -72,9 +72,6 @@ static void aspeed_sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+ 	clk = div << SDHCI_DIVIDER_SHIFT;
+ 
+ 	sdhci_enable_clk(host, clk);
 -
-+static int aspeed_sdc_create_sdhcis(struct platform_device *pdev)
- {
-+#if defined(CONFIG_OF_ADDRESS)
- 	struct device_node *parent, *child;
-+
-+	parent = pdev->dev.of_node;
-+
-+	for_each_available_child_of_node(parent, child) {
-+		struct platform_device *cpdev;
-+
-+		cpdev = of_platform_device_create(child, NULL, &pdev->dev);
-+		if (!cpdev) {
-+			of_node_put(child);
-+			return -ENODEV;
-+		}
-+	}
-+#endif
-+
-+	return 0;
-+}
-+
-+static int aspeed_sdc_probe(struct platform_device *pdev)
-+
-+{
- 	struct aspeed_sdc *sdc;
- 	int ret;
+-out:
+-	host->clock = clock;
+ }
  
-@@ -256,17 +276,9 @@ static int aspeed_sdc_probe(struct platform_device *pdev)
- 
- 	dev_set_drvdata(&pdev->dev, sdc);
- 
--	parent = pdev->dev.of_node;
--	for_each_available_child_of_node(parent, child) {
--		struct platform_device *cpdev;
--
--		cpdev = of_platform_device_create(child, NULL, &pdev->dev);
--		if (!cpdev) {
--			of_node_put(child);
--			ret = -ENODEV;
--			goto err_clk;
--		}
--	}
-+	ret = aspeed_sdc_create_sdhcis(pdev);
-+	if (ret)
-+		goto err_clk;
- 
- 	return 0;
- 
+ static void aspeed_sdhci_set_bus_width(struct sdhci_host *host, int width)
 -- 
 2.20.1
