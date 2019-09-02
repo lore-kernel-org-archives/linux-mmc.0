@@ -1,80 +1,102 @@
-From: Andrew Jeffery <andrew@aj.id.au>
-Subject: [PATCH v2 4/4] mmc: sdhci-of-aspeed: Allow max-frequency limitation of SDCLK
-Date: Mon,  2 Sep 2019 13:28:42 +0930
-Message-ID: <20190902035842.2747-5-andrew@aj.id.au>
-References: <20190902035842.2747-1-andrew@aj.id.au>
+From: Joel Stanley <joel@jms.id.au>
+Subject: Re: [PATCH v2 1/4] mmc: sdhci-of-aspeed: Fix link failure for SPARC
+Date: Mon, 2 Sep 2019 04:12:51 +0000
+Message-ID: <CACPK8XfYgEUfaK6rtr+FdEq-Vau6d4wE2Rvfp6Q4G2-kjVLT0g@mail.gmail.com>
+References: <20190902035842.2747-1-andrew@aj.id.au> <20190902035842.2747-2-andrew@aj.id.au>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190902035842.2747-1-andrew@aj.id.au>
+In-Reply-To: <20190902035842.2747-2-andrew@aj.id.au>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Andrew Jeffery <andrew@aj.id.au>, adrian.hunter@intel.com, ulf.hansson@linaro.org, joel@jms.id.au, openbmc@lists.ozlabs.org, linux-arm-kernel@lists.infradead.org, linux-aspeed@lists.ozlabs.org, linux-kernel@vger.kernel.org
+To: Andrew Jeffery <andrew@aj.id.au>, Arnd Bergmann <arnd@arndb.de>
+Cc: linux-mmc@vger.kernel.org, adrian.hunter@intel.com, Ulf Hansson <ulf.hansson@linaro.org>, OpenBMC Maillist <openbmc@lists.ozlabs.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, linux-aspeed <linux-aspeed@lists.ozlabs.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, kbuild test robot <lkp@intel.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Add a get_max_clock() handler to sdhci-of-aspeed to report f_max as the
-maximum clock rate if it is set. This enables artificial limitation of
-the bus speed via max-frequency in the devicetree for e.g. the AST2600
-evaluation board where I was seeing errors at 200MHz.
+On Mon, 2 Sep 2019 at 03:58, Andrew Jeffery <andrew@aj.id.au> wrote:
+>
+> Resolves the following build error reported by the 0-day bot:
+>
+>     ERROR: "of_platform_device_create" [drivers/mmc/host/sdhci-of-aspeed.ko] undefined!
+>
+> SPARC does not set CONFIG_OF_ADDRESS so the symbol is missing. Guard the
+> callsite to maintain build coverage for the rest of the driver.
+>
+> Reported-by: kbuild test robot <lkp@intel.com>
+> Signed-off-by: Andrew Jeffery <andrew@aj.id.au>
+> ---
+>  drivers/mmc/host/sdhci-of-aspeed.c | 38 ++++++++++++++++++++----------
+>  1 file changed, 25 insertions(+), 13 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-of-aspeed.c b/drivers/mmc/host/sdhci-of-aspeed.c
+> index d5acb5afc50f..96ca494752c5 100644
+> --- a/drivers/mmc/host/sdhci-of-aspeed.c
+> +++ b/drivers/mmc/host/sdhci-of-aspeed.c
+> @@ -224,10 +224,30 @@ static struct platform_driver aspeed_sdhci_driver = {
+>         .remove         = aspeed_sdhci_remove,
+>  };
+>
+> -static int aspeed_sdc_probe(struct platform_device *pdev)
+> -
+> +static int aspeed_sdc_create_sdhcis(struct platform_device *pdev)
+>  {
+> +#if defined(CONFIG_OF_ADDRESS)
 
-Signed-off-by: Andrew Jeffery <andrew@aj.id.au>
----
- drivers/mmc/host/sdhci-of-aspeed.c | 20 ++++++++++++++++++--
- 1 file changed, 18 insertions(+), 2 deletions(-)
+This is going to be untested code forever, as no one will be running
+on a chip with this hardware present but OF_ADDRESS disabled.
 
-diff --git a/drivers/mmc/host/sdhci-of-aspeed.c b/drivers/mmc/host/sdhci-of-aspeed.c
-index c31d74427c49..a8a5341b526c 100644
---- a/drivers/mmc/host/sdhci-of-aspeed.c
-+++ b/drivers/mmc/host/sdhci-of-aspeed.c
-@@ -52,16 +52,24 @@ static void aspeed_sdc_configure_8bit_mode(struct aspeed_sdc *sdc,
- 
- static void aspeed_sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
- {
-+	struct sdhci_pltfm_host *pltfm_host;
-+	unsigned long parent;
- 	int div;
- 	u16 clk;
- 
-+	pltfm_host = sdhci_priv(host);
-+	parent = clk_get_rate(pltfm_host->clk);
-+
- 	sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
- 
- 	if (clock == 0)
- 		return;
- 
-+	if (WARN_ON(clock > host->max_clk))
-+		clock = host->max_clk;
-+
- 	for (div = 1; div < 256; div *= 2) {
--		if ((host->max_clk / div) <= clock)
-+		if ((parent / div) <= clock)
- 			break;
- 	}
- 	div >>= 1;
-@@ -71,6 +79,14 @@ static void aspeed_sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
- 	sdhci_enable_clk(host, clk);
- }
- 
-+static unsigned int aspeed_sdhci_get_max_clock(struct sdhci_host *host)
-+{
-+	if (host->mmc->f_max)
-+		return host->mmc->f_max;
-+
-+	return sdhci_pltfm_clk_get_max_clock(host);
-+}
-+
- static void aspeed_sdhci_set_bus_width(struct sdhci_host *host, int width)
- {
- 	struct sdhci_pltfm_host *pltfm_priv;
-@@ -97,7 +113,7 @@ static void aspeed_sdhci_set_bus_width(struct sdhci_host *host, int width)
- 
- static const struct sdhci_ops aspeed_sdhci_ops = {
- 	.set_clock = aspeed_sdhci_set_clock,
--	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
-+	.get_max_clock = aspeed_sdhci_get_max_clock,
- 	.set_bus_width = aspeed_sdhci_set_bus_width,
- 	.get_timeout_clock = sdhci_pltfm_clk_get_max_clock,
- 	.reset = sdhci_reset,
--- 
-2.20.1
+How about we make the driver depend on OF_ADDRESS instead?
+
+Cheers,
+
+Joel
+
+
+
+>         struct device_node *parent, *child;
+> +
+> +       parent = pdev->dev.of_node;
+> +
+> +       for_each_available_child_of_node(parent, child) {
+> +               struct platform_device *cpdev;
+> +
+> +               cpdev = of_platform_device_create(child, NULL, &pdev->dev);
+> +               if (!cpdev) {
+> +                       of_node_put(child);
+> +                       return -ENODEV;
+> +               }
+> +       }
+> +#endif
+> +
+> +       return 0;
+> +}
+> +
+> +static int aspeed_sdc_probe(struct platform_device *pdev)
+> +
+> +{
+>         struct aspeed_sdc *sdc;
+>         int ret;
+>
+> @@ -256,17 +276,9 @@ static int aspeed_sdc_probe(struct platform_device *pdev)
+>
+>         dev_set_drvdata(&pdev->dev, sdc);
+>
+> -       parent = pdev->dev.of_node;
+> -       for_each_available_child_of_node(parent, child) {
+> -               struct platform_device *cpdev;
+> -
+> -               cpdev = of_platform_device_create(child, NULL, &pdev->dev);
+> -               if (!cpdev) {
+> -                       of_node_put(child);
+> -                       ret = -ENODEV;
+> -                       goto err_clk;
+> -               }
+> -       }
+> +       ret = aspeed_sdc_create_sdhcis(pdev);
+> +       if (ret)
+> +               goto err_clk;
+>
+>         return 0;
+>
+> --
+> 2.20.1
+>
