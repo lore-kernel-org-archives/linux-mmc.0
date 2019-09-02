@@ -1,26 +1,38 @@
-From: =?UTF-8?B?w5N2w6FyaQ==?= <ovari123@zoho.com>
-Subject: Asus VivoBook Flip TP202NA-EH012T EMMC problem
-Date: Sat, 31 Aug 2019 19:43:04 +1000
-Message-ID: <d355e790-7c60-5681-3ea5-dc4fd6206628@zoho.com>
+From: Andrew Jeffery <andrew@aj.id.au>
+Subject: [PATCH v2 0/4] mmc: sdhci-of-aspeed: Fixes for AST2600 eMMC support
+Date: Mon,  2 Sep 2019 13:28:38 +0930
+Message-ID: <20190902035842.2747-1-andrew@aj.id.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Language: en-AU
 Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Andrew Jeffery <andrew@aj.id.au>, adrian.hunter@intel.com, ulf.hansson@linaro.org, joel@jms.id.au, openbmc@lists.ozlabs.org, linux-arm-kernel@lists.infradead.org, linux-aspeed@lists.ozlabs.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
 Hello,
 
-As per https://bugs.launchpad.net/ubuntu/+source/linux/+bug/1818407/comment=
-s/26 here is an email.
+I've added a couple of patches since v1 of this series. The horizon has
+broadened slightly with a fix for SPARC builds as well in patch 1/4. Ulf
+suggested a minor cleanup on v1 with respect to handling of the current clock
+value, so that's now patch 2/4. Patches 3/4 and 4/4 are as they were in v1.
 
-Information is provided at https://bugs.launchpad.net/ubuntu/+source/linux/=
-+bug/1818407/comments/32
+The v1 series can be found here:
 
-Please advise what else you require.
+https://patchwork.ozlabs.org/cover/1155757/
 
-Thank you
+Please review!
 
-=C3=93v=C3=A1ri
+Andrew
+
+Andrew Jeffery (4):
+  mmc: sdhci-of-aspeed: Fix link failure for SPARC
+  mmc: sdhci-of-aspeed: Drop redundant assignment to host->clock
+  mmc: sdhci-of-aspeed: Uphold clocks-on post-condition of set_clock()
+  mmc: sdhci-of-aspeed: Allow max-frequency limitation of SDCLK
+
+ drivers/mmc/host/sdhci-of-aspeed.c | 62 ++++++++++++++++++++----------
+ 1 file changed, 42 insertions(+), 20 deletions(-)
+
+-- 
+2.20.1
