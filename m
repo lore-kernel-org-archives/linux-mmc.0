@@ -1,47 +1,56 @@
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.19 102/167] dt-bindings: mmc: Add disable-cqe-dcmd property.
-Date: Tue,  3 Sep 2019 12:24:14 -0400
-Message-ID: <20190903162519.7136-102-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.19 107/167] mmc: sdhci-pci: Add support for Intel CML
+Date: Tue,  3 Sep 2019 12:24:19 -0400
+Message-ID: <20190903162519.7136-107-sashal@kernel.org>
 References: <20190903162519.7136-1-sashal@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <stable-owner@vger.kernel.org>
 In-Reply-To: <20190903162519.7136-1-sashal@kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
+Sender: stable-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc: Christoph Muellner <christoph.muellner@theobroma-systems.com>, Philipp Tomsich <philipp.tomsich@theobroma-systems.com>, Ulf Hansson <ulf.hansson@linaro.org>, Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-From: Christoph Muellner <christoph.muellner@theobroma-systems.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
 
-[ Upstream commit 28f22fb755ecf9f933f045bc0afdb8140641b01c ]
+[ Upstream commit 765c59675ab571caf7ada456bbfd23a73136b535 ]
 
-Add disable-cqe-dcmd as optional property for MMC hosts.
-This property allows to disable or not enable the direct command
-features of the command queue engine.
+Add PCI Ids for Intel CML.
 
-Signed-off-by: Christoph Muellner <christoph.muellner@theobroma-systems.com>
-Signed-off-by: Philipp Tomsich <philipp.tomsich@theobroma-systems.com>
-Fixes: 84362d79f436 ("mmc: sdhci-of-arasan: Add CQHCI support for arasan,sdhci-5.1")
-Cc: stable@vger.kernel.org
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 Signed-off-by: Sasha Levin <sashal@kernel.org>
 ---
- Documentation/devicetree/bindings/mmc/mmc.txt | 2 ++
- 1 file changed, 2 insertions(+)
+ drivers/mmc/host/sdhci-pci-core.c | 2 ++
+ drivers/mmc/host/sdhci-pci.h      | 2 ++
+ 2 files changed, 4 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
-index cdbcfd3a4ff21..c269dbe384fea 100644
---- a/Documentation/devicetree/bindings/mmc/mmc.txt
-+++ b/Documentation/devicetree/bindings/mmc/mmc.txt
-@@ -64,6 +64,8 @@ Optional properties:
-   whether pwrseq-simple is used. Default to 10ms if no available.
- - supports-cqe : The presence of this property indicates that the corresponding
-   MMC host controller supports HW command queue feature.
-+- disable-cqe-dcmd: This property indicates that the MMC controller's command
-+  queue engine (CQE) does not support direct commands (DCMDs).
+diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+index c4115bae5db18..71794391f48fa 100644
+--- a/drivers/mmc/host/sdhci-pci-core.c
++++ b/drivers/mmc/host/sdhci-pci-core.c
+@@ -1577,6 +1577,8 @@ static const struct pci_device_id pci_ids[] = {
+ 	SDHCI_PCI_DEVICE(INTEL, CNPH_SD,   intel_byt_sd),
+ 	SDHCI_PCI_DEVICE(INTEL, ICP_EMMC,  intel_glk_emmc),
+ 	SDHCI_PCI_DEVICE(INTEL, ICP_SD,    intel_byt_sd),
++	SDHCI_PCI_DEVICE(INTEL, CML_EMMC,  intel_glk_emmc),
++	SDHCI_PCI_DEVICE(INTEL, CML_SD,    intel_byt_sd),
+ 	SDHCI_PCI_DEVICE(O2, 8120,     o2),
+ 	SDHCI_PCI_DEVICE(O2, 8220,     o2),
+ 	SDHCI_PCI_DEVICE(O2, 8221,     o2),
+diff --git a/drivers/mmc/host/sdhci-pci.h b/drivers/mmc/host/sdhci-pci.h
+index 2ef0bdca91974..6f04a62b2998e 100644
+--- a/drivers/mmc/host/sdhci-pci.h
++++ b/drivers/mmc/host/sdhci-pci.h
+@@ -50,6 +50,8 @@
+ #define PCI_DEVICE_ID_INTEL_CNPH_SD	0xa375
+ #define PCI_DEVICE_ID_INTEL_ICP_EMMC	0x34c4
+ #define PCI_DEVICE_ID_INTEL_ICP_SD	0x34f8
++#define PCI_DEVICE_ID_INTEL_CML_EMMC	0x02c4
++#define PCI_DEVICE_ID_INTEL_CML_SD	0x02f5
  
- *NOTE* on CD and WP polarity. To use common for all SD/MMC host controllers line
- polarity properties, we have to fix the meaning of the "normal" and "inverted"
+ #define PCI_DEVICE_ID_SYSKONNECT_8000	0x8000
+ #define PCI_DEVICE_ID_VIA_95D0		0x95d0
 -- 
 2.20.1
