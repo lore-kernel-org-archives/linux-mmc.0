@@ -1,68 +1,86 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sdhci: Fix incorrect switch to HS mode
-Date: Tue, 3 Sep 2019 16:51:39 +0200
-Message-ID: <CAPDyKFqaNBH3Thwy1O+KXkcsgM2gMrm9zNGYWH8vVP+Y2vSLdA@mail.gmail.com>
-References: <20190903115114.33053-1-alcooperx@gmail.com>
+Subject: Re: [PATCH v2] mmc: sdhi: fill in actual_clock
+Date: Tue, 3 Sep 2019 17:10:35 +0200
+Message-ID: <CAPDyKFpRtzS3CXAi4jKjyPOEd5KjCZ1Vqpi_fmm-F+O8eAqbmQ@mail.gmail.com>
+References: <20190829183634.3376-1-tszucs@protonmail.ch>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190903115114.33053-1-alcooperx@gmail.com>
+In-Reply-To: <20190829183634.3376-1-tszucs@protonmail.ch>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Al Cooper <alcooperx@gmail.com>
-Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: =?UTF-8?B?VGFtw6FzIFN6xbFjcw==?= <tszucs@protonmail.ch>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, 3 Sep 2019 at 13:51, Al Cooper <alcooperx@gmail.com> wrote:
+On Thu, 29 Aug 2019 at 20:36, Tam=C3=A1s Sz=C5=B1cs <tszucs@protonmail.ch> =
+wrote:
 >
-> When switching from any MMC speed mode that requires 1.8v
-> (HS200, HS400 and HS400ES) to High Speed (HS) mode, the system
-> ends up configured for SDR12 with a 50MHz clock which is an illegal
-> mode.
+> Save set clock in mmc_host actual_clock enabling exporting it via debugfs=
+.
+> This will indicate the precise SD clock in I/O settings rather than only =
+the
+> sometimes misleading requested clock.
 >
-> This happens because the SDHCI_CTRL_VDD_180 bit in the
-> SDHCI_HOST_CONTROL2 register is left set and when this bit is
-> set, the speed mode is controlled by the SDHCI_CTRL_UHS field
-> in the SDHCI_HOST_CONTROL2 register. The SDHCI_CTRL_UHS field
-> will end up being set to 0 (SDR12) by sdhci_set_uhs_signaling()
-> because there is no UHS mode being set.
->
-> The fix is to change sdhci_set_uhs_signaling() to set the
-> SDHCI_CTRL_UHS field to SDR25 (which is the same as HS) for
-> any switch to HS mode.
->
-> This was found on a new eMMC controller that does strict checking
-> of the speed mode and the corresponding clock rate. It caused the
-> switch to HS400 mode to fail because part of the sequence to switch
-> to HS400 requires a switch from HS200 to HS before going to HS400.
->
-> This fix was suggested by Adrian Hunter
->
-> Signed-off-by: Al Cooper <alcooperx@gmail.com>
+> Signed-off-by: Tam=C3=A1s Sz=C5=B1cs <tszucs@protonmail.ch>
 
-Should this be applied for fixes and tagged for stable you think?
+Applied for next, thanks!
 
 Kind regards
 Uffe
 
+
 > ---
->  drivers/mmc/host/sdhci.c | 4 +++-
->  1 file changed, 3 insertions(+), 1 deletion(-)
+>  drivers/mmc/host/renesas_sdhi_core.c | 13 ++++++++-----
+>  1 file changed, 8 insertions(+), 5 deletions(-)
 >
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 61d845fe0b97..068149640ecd 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -1858,7 +1858,9 @@ void sdhci_set_uhs_signaling(struct sdhci_host *host, unsigned timing)
->                 ctrl_2 |= SDHCI_CTRL_UHS_SDR104;
->         else if (timing == MMC_TIMING_UHS_SDR12)
->                 ctrl_2 |= SDHCI_CTRL_UHS_SDR12;
-> -       else if (timing == MMC_TIMING_UHS_SDR25)
-> +       else if (timing == MMC_TIMING_SD_HS ||
-> +                timing == MMC_TIMING_MMC_HS ||
-> +                timing == MMC_TIMING_UHS_SDR25)
->                 ctrl_2 |= SDHCI_CTRL_UHS_SDR25;
->         else if (timing == MMC_TIMING_UHS_SDR50)
->                 ctrl_2 |= SDHCI_CTRL_UHS_SDR50;
+> diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/rene=
+sas_sdhi_core.c
+> index 64d3b5fb7fe5..4c9774dbcfc1 100644
+> --- a/drivers/mmc/host/renesas_sdhi_core.c
+> +++ b/drivers/mmc/host/renesas_sdhi_core.c
+> @@ -124,7 +124,7 @@ static unsigned int renesas_sdhi_clk_update(struct tm=
+io_mmc_host *host,
+>  {
+>         struct renesas_sdhi *priv =3D host_to_priv(host);
+>         unsigned int freq, diff, best_freq =3D 0, diff_min =3D ~0;
+> -       int i, ret;
+> +       int i;
+>
+>         /* tested only on R-Car Gen2+ currently; may work for others */
+>         if (!(host->pdata->flags & TMIO_MMC_MIN_RCAR2))
+> @@ -153,9 +153,9 @@ static unsigned int renesas_sdhi_clk_update(struct tm=
+io_mmc_host *host,
+>                 }
+>         }
+>
+> -       ret =3D clk_set_rate(priv->clk, best_freq);
+> +       clk_set_rate(priv->clk, best_freq);
+>
+> -       return ret =3D=3D 0 ? best_freq : clk_get_rate(priv->clk);
+> +       return clk_get_rate(priv->clk);
+>  }
+>
+>  static void renesas_sdhi_set_clock(struct tmio_mmc_host *host,
+> @@ -166,10 +166,13 @@ static void renesas_sdhi_set_clock(struct tmio_mmc_=
+host *host,
+>         sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, ~CLK_CTL_SCLKEN &
+>                 sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL));
+>
+> -       if (new_clock =3D=3D 0)
+> +       if (new_clock =3D=3D 0) {
+> +               host->mmc->actual_clock =3D 0;
+>                 goto out;
+> +       }
+>
+> -       clock =3D renesas_sdhi_clk_update(host, new_clock) / 512;
+> +       host->mmc->actual_clock =3D renesas_sdhi_clk_update(host, new_clo=
+ck);
+> +       clock =3D host->mmc->actual_clock / 512;
+>
+>         for (clk =3D 0x80000080; new_clock >=3D (clock << 1); clk >>=3D 1=
+)
+>                 clock <<=3D 1;
 > --
-> 2.17.1
+> 2.11.0
 >
