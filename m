@@ -1,55 +1,57 @@
-From: Al Cooper <alcooperx@gmail.com>
-Subject: [PATCH] mmc: sdhci: Fix incorrect switch to HS mode
-Date: Tue,  3 Sep 2019 07:51:14 -0400
-Message-ID: <20190903115114.33053-1-alcooperx@gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [PATCH 00/11] mmc: core: PM fixes/improvements for SDIO IRQs
+Date: Tue,  3 Sep 2019 16:21:56 +0200
+Message-ID: <20190903142207.5825-1-ulf.hansson@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: Al Cooper <alcooperx@gmail.com>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Douglas Anderson <dianders@chromium.org>, Matthias Kaehlcke <mka@chromium.org>
+Cc: Shawn Lin <shawn.lin@rock-chips.com>, Jaehoon Chung <jh80.chung@samsung.com>, Yong Mao <yong.mao@mediatek.com>, Chaotian Jing <chaotian.jing@mediatek.com>, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-When switching from any MMC speed mode that requires 1.8v
-(HS200, HS400 and HS400ES) to High Speed (HS) mode, the system
-ends up configured for SDR12 with a 50MHz clock which is an illegal
-mode.
+The power management support for SDIO cards have slowly been improved, but
+there are still quite some serious problems, especially when dealing with the
+so called SDIO IRQs during system suspend/resume.
 
-This happens because the SDHCI_CTRL_VDD_180 bit in the
-SDHCI_HOST_CONTROL2 register is left set and when this bit is
-set, the speed mode is controlled by the SDHCI_CTRL_UHS field
-in the SDHCI_HOST_CONTROL2 register. The SDHCI_CTRL_UHS field
-will end up being set to 0 (SDR12) by sdhci_set_uhs_signaling()
-because there is no UHS mode being set.
+This series makes some additional improvements to this code in the mmc core,
+but also includes some needed adaptations for the sdhci, the dw_mmc and the
+mtk-sd host drivers.
 
-The fix is to change sdhci_set_uhs_signaling() to set the
-SDHCI_CTRL_UHS field to SDR25 (which is the same as HS) for
-any switch to HS mode.
+So far the series has only been compile tested, so definitely need some help in
+testing this on HW, which of course would be greatly appreciated.
 
-This was found on a new eMMC controller that does strict checking
-of the speed mode and the corresponding clock rate. It caused the
-switch to HS400 mode to fail because part of the sequence to switch
-to HS400 requires a switch from HS200 to HS before going to HS400.
+The series is also available at:
+git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git sdio_irq_suspend_next
 
-This fix was suggested by Adrian Hunter
+Kind regards
+Uffe
 
-Signed-off-by: Al Cooper <alcooperx@gmail.com>
----
- drivers/mmc/host/sdhci.c | 4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 61d845fe0b97..068149640ecd 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1858,7 +1858,9 @@ void sdhci_set_uhs_signaling(struct sdhci_host *host, unsigned timing)
- 		ctrl_2 |= SDHCI_CTRL_UHS_SDR104;
- 	else if (timing == MMC_TIMING_UHS_SDR12)
- 		ctrl_2 |= SDHCI_CTRL_UHS_SDR12;
--	else if (timing == MMC_TIMING_UHS_SDR25)
-+	else if (timing == MMC_TIMING_SD_HS ||
-+		 timing == MMC_TIMING_MMC_HS ||
-+		 timing == MMC_TIMING_UHS_SDR25)
- 		ctrl_2 |= SDHCI_CTRL_UHS_SDR25;
- 	else if (timing == MMC_TIMING_UHS_SDR50)
- 		ctrl_2 |= SDHCI_CTRL_UHS_SDR50;
+Matthias Kaehlcke (1):
+  mmc: core: Move code to get pending SDIO IRQs to a function
+
+Ulf Hansson (10):
+  mmc: core: Add helper function to indicate if SDIO IRQs is enabled
+  mmc: dw_mmc: Re-store SDIO IRQs mask at system resume
+  mmc: mtk-sd: Re-store SDIO IRQs mask at system resume
+  mmc: core: Clarify sdio_irq_pending flag for
+    MMC_CAP2_SDIO_IRQ_NOTHREAD
+  mmc: core: Clarify that the ->ack_sdio_irq() callback is mandatory
+  mmc: core: WARN if SDIO IRQs are enabled for non-powered card in
+    suspend
+  mmc: core: Fixup processing of SDIO IRQs during system suspend/resume
+  mmc: sdhci: Drop redundant check in sdhci_ack_sdio_irq()
+  mmc: sdhci: Drop redundant code for SDIO IRQs
+  mmc: sdhci: Convert to use sdio_irq_enabled()
+
+ drivers/mmc/core/sdio.c            |  4 ++-
+ drivers/mmc/core/sdio_irq.c        | 57 +++++++++++++++++++-----------
+ drivers/mmc/host/dw_mmc.c          |  4 +++
+ drivers/mmc/host/mtk-sd.c          |  3 ++
+ drivers/mmc/host/sdhci-esdhc-imx.c | 34 ++++++++----------
+ drivers/mmc/host/sdhci.c           | 12 ++-----
+ drivers/mmc/host/sdhci.h           |  6 ----
+ include/linux/mmc/host.h           | 10 ++++++
+ 8 files changed, 75 insertions(+), 55 deletions(-)
+
 -- 
 2.17.1
