@@ -1,7 +1,7 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH 08/11] mmc: core: Fixup processing of SDIO IRQs during system suspend/resume
-Date: Tue,  3 Sep 2019 16:22:04 +0200
-Message-ID: <20190903142207.5825-9-ulf.hansson@linaro.org>
+Subject: [PATCH 11/11] mmc: sdhci: Convert to use sdio_irq_enabled()
+Date: Tue,  3 Sep 2019 16:22:07 +0200
+Message-ID: <20190903142207.5825-12-ulf.hansson@linaro.org>
 References: <20190903142207.5825-1-ulf.hansson@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20190903142207.5825-1-ulf.hansson@linaro.org>
@@ -10,71 +10,52 @@ To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunt
 Cc: Shawn Lin <shawn.lin@rock-chips.com>, Jaehoon Chung <jh80.chung@samsung.com>, Yong Mao <yong.mao@mediatek.com>, Chaotian Jing <chaotian.jing@mediatek.com>, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-System suspend/resume of SDIO cards, with SDIO IRQs enabled and when using
-MMC_CAP2_SDIO_IRQ_NOTHREAD is unfortunate still suffering from a fragile
-behaviour. Some problems have been taken care of so far, but more issues
-remains.
-
-For example, calling the ->ack_sdio_irq() callback to let host drivers
-re-enable the SDIO IRQs is a bad idea, unless the IRQ have been consumed,
-which may not be the case during system suspend/resume. This may lead to
-that a host driver re-signals the same SDIO IRQ over and over again,
-causing a storm of IRQs and gives a ping-pong effect towards the
-sdio_irq_work().
-
-Moreover, calling the ->enable_sdio_irq() callback at system resume to
-re-enable already enabled SDIO IRQs for the host, causes the runtime PM
-count for some host drivers to become in-balanced. This then leads to the
-host to remain runtime resumed, no matter if it's needed or not.
-
-To fix these problems, let's check if process_sdio_pending_irqs() actually
-consumed the SDIO IRQ, before we continue to ack the IRQ by invoking the
-->ack_sdio_irq() callback.
-
-Additionally, there should be no need to re-enable SDIO IRQs as the host
-driver already knows if they were enabled at system suspend, thus also
-whether it needs to re-enable them at system resume. For this reason, drop
-the call to ->enable_sdio_irq() during system resume.
-
-In regards to these changes there is yet another issue, which is when there
-is an SDIO IRQ being signaled by the host driver, but after the SDIO card
-has been system suspended. Currently these IRQs are just thrown away, while
-we should at least make sure to try to consume them when the SDIO card has
-been system resumed. Fix this by calling sdio_signal_irq() after system
-resumed the SDIO card.
+Instead of keeping track of whether SDIO IRQs have been enabled via an
+internal sdhci status flag, avoid the open-coding and convert into using
+sdio_irq_enabled().
 
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/mmc/core/sdio.c     | 2 +-
- drivers/mmc/core/sdio_irq.c | 3 ++-
- 2 files changed, 3 insertions(+), 2 deletions(-)
+ drivers/mmc/host/sdhci.c | 7 +------
+ drivers/mmc/host/sdhci.h | 1 -
+ 2 files changed, 1 insertion(+), 7 deletions(-)
 
-diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-index c557f1519b77..3114d496495a 100644
---- a/drivers/mmc/core/sdio.c
-+++ b/drivers/mmc/core/sdio.c
-@@ -1015,7 +1015,7 @@ static int mmc_sdio_resume(struct mmc_host *host)
- 		if (!(host->caps2 & MMC_CAP2_SDIO_IRQ_NOTHREAD))
- 			wake_up_process(host->sdio_irq_thread);
- 		else if (host->caps & MMC_CAP_SDIO_IRQ)
--			host->ops->enable_sdio_irq(host, 1);
-+			sdio_signal_irq(host);
- 	}
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index a7df22ed65aa..4b4db41aec50 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2142,11 +2142,6 @@ void sdhci_enable_sdio_irq(struct mmc_host *mmc, int enable)
+ 		pm_runtime_get_noresume(host->mmc->parent);
  
- out:
-diff --git a/drivers/mmc/core/sdio_irq.c b/drivers/mmc/core/sdio_irq.c
-index d7965b53a6d2..900871073bd7 100644
---- a/drivers/mmc/core/sdio_irq.c
-+++ b/drivers/mmc/core/sdio_irq.c
-@@ -115,7 +115,8 @@ static void sdio_run_irqs(struct mmc_host *host)
- 	mmc_claim_host(host);
- 	if (host->sdio_irqs) {
- 		process_sdio_pending_irqs(host);
--		host->ops->ack_sdio_irq(host);
-+		if (!host->sdio_irq_pending)
-+			host->ops->ack_sdio_irq(host);
- 	}
- 	mmc_release_host(host);
- }
+ 	spin_lock_irqsave(&host->lock, flags);
+-	if (enable)
+-		host->flags |= SDHCI_SDIO_IRQ_ENABLED;
+-	else
+-		host->flags &= ~SDHCI_SDIO_IRQ_ENABLED;
+-
+ 	sdhci_enable_sdio_irq_nolock(host, enable);
+ 	spin_unlock_irqrestore(&host->lock, flags);
+ 
+@@ -3380,7 +3375,7 @@ int sdhci_runtime_resume_host(struct sdhci_host *host, int soft_reset)
+ 	host->runtime_suspended = false;
+ 
+ 	/* Enable SDIO IRQ */
+-	if (host->flags & SDHCI_SDIO_IRQ_ENABLED)
++	if (sdio_irq_enabled(mmc))
+ 		sdhci_enable_sdio_irq_nolock(host, true);
+ 
+ 	/* Enable Card Detection */
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 8effaac61c3a..a29c4cd2d92e 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -512,7 +512,6 @@ struct sdhci_host {
+ #define SDHCI_AUTO_CMD12	(1<<6)	/* Auto CMD12 support */
+ #define SDHCI_AUTO_CMD23	(1<<7)	/* Auto CMD23 support */
+ #define SDHCI_PV_ENABLED	(1<<8)	/* Preset value enabled */
+-#define SDHCI_SDIO_IRQ_ENABLED	(1<<9)	/* SDIO irq enabled */
+ #define SDHCI_USE_64_BIT_DMA	(1<<12)	/* Use 64-bit DMA */
+ #define SDHCI_HS400_TUNING	(1<<13)	/* Tuning for HS400 */
+ #define SDHCI_SIGNALING_330	(1<<14)	/* Host is capable of 3.3V signaling */
 -- 
 2.17.1
