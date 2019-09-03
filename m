@@ -1,92 +1,201 @@
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.19 076/167] mmc: renesas_sdhi: Fix card initialization failure in high speed mode
-Date: Tue,  3 Sep 2019 12:23:48 -0400
-Message-ID: <20190903162519.7136-76-sashal@kernel.org>
-References: <20190903162519.7136-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.2 15/23] mmc: sdhci-sprd: Fix the incorrect soft reset operation when runtime resuming
+Date: Tue,  3 Sep 2019 12:24:16 -0400
+Message-ID: <20190903162424.6877-15-sashal@kernel.org>
+References: <20190903162424.6877-1-sashal@kernel.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <20190903162519.7136-1-sashal@kernel.org>
-Sender: stable-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20190903162424.6877-1-sashal@kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc: Takeshi Saito <takeshi.saito.xv@renesas.com>, Marek Vasut <marek.vasut+renesas@gmail.com>, =?UTF-8?q?Niklas=20S=C3=B6derlund?= <niklas.soderlund+renesas@ragnatech.se>, Simon Horman <horms+renesas@verge.net.au>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org
+Cc: Baolin Wang <baolin.wang@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-From: Takeshi Saito <takeshi.saito.xv@renesas.com>
+From: Baolin Wang <baolin.wang@linaro.org>
 
-[ Upstream commit d30ae056adb81e1d2b8b953efa74735a020b8e3b ]
+[ Upstream commit c6303c5d52d5ec3e5bce2e6a5480fa2a1baa45e6 ]
 
-This fixes card initialization failure in high speed mode.
+The SD host controller specification defines 3 types software reset:
+software reset for data line, software reset for command line and software
+reset for all. Software reset for all means this reset affects the entire
+Host controller except for the card detection circuit.
 
-If U-Boot uses SDR or HS200/400 mode before starting Linux and Linux
-DT does not enable SDR/HS200/HS400 mode, card initialization fails in
-high speed mode.
+In sdhci_runtime_resume_host() we always do a software "reset for all",
+which causes the Spreadtrum variant controller to work abnormally after
+resuming. To fix the problem, let's do a software reset for the data and
+the command part, rather than "for all".
 
-It is necessary to initialize SCC registers during card initialization
-phase. HW reset function is registered only for a port with either of
-SDR/HS200/HS400 properties in device tree. If SDR/HS200/HS400 properties
-are not present in device tree, SCC registers will not be reset. In SoC
-that support SCC registers, HW reset function should be registered
-regardless of the configuration of device tree.
+However, as sdhci_runtime_resume() is a common sdhci function and we don't
+want to change the behaviour for other variants, let's introduce a new
+in-parameter for it. This enables the caller to decide if a "reset for all"
+shall be done or not.
 
-Reproduction procedure:
-- Use U-Boot that support MMC HS200/400 mode.
-- Delete HS200/HS400 properties in device tree.
-  (Delete mmc-hs200-1_8v and mmc-hs400-1_8v)
-- MMC port works high speed mode and all commands fail.
-
-Signed-off-by: Takeshi Saito <takeshi.saito.xv@renesas.com>
-Signed-off-by: Marek Vasut <marek.vasut+renesas@gmail.com>
-Cc: Niklas Söderlund <niklas.soderlund+renesas@ragnatech.se>
-Cc: Simon Horman <horms+renesas@verge.net.au>
-Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
+Fixes: fb8bd90f83c4 ("mmc: sdhci-sprd: Add Spreadtrum's initial host controller")
 Cc: stable@vger.kernel.org
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 Signed-off-by: Sasha Levin <sashal@kernel.org>
 ---
- drivers/mmc/host/renesas_sdhi_core.c | 11 +++++++----
- 1 file changed, 7 insertions(+), 4 deletions(-)
+ drivers/mmc/host/sdhci-acpi.c      | 2 +-
+ drivers/mmc/host/sdhci-esdhc-imx.c | 2 +-
+ drivers/mmc/host/sdhci-of-at91.c   | 2 +-
+ drivers/mmc/host/sdhci-pci-core.c  | 4 ++--
+ drivers/mmc/host/sdhci-pxav3.c     | 2 +-
+ drivers/mmc/host/sdhci-s3c.c       | 2 +-
+ drivers/mmc/host/sdhci-sprd.c      | 2 +-
+ drivers/mmc/host/sdhci-xenon.c     | 2 +-
+ drivers/mmc/host/sdhci.c           | 4 ++--
+ drivers/mmc/host/sdhci.h           | 2 +-
+ 10 files changed, 12 insertions(+), 12 deletions(-)
 
-diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-index 45baf5d9120e3..61f0faddfd889 100644
---- a/drivers/mmc/host/renesas_sdhi_core.c
-+++ b/drivers/mmc/host/renesas_sdhi_core.c
-@@ -636,6 +636,13 @@ int renesas_sdhi_probe(struct platform_device *pdev,
- 		host->ops.card_busy = renesas_sdhi_card_busy;
- 		host->ops.start_signal_voltage_switch =
- 			renesas_sdhi_start_signal_voltage_switch;
-+
-+		/* SDR and HS200/400 registers requires HW reset */
-+		if (of_data && of_data->scc_offset) {
-+			priv->scc_ctl = host->ctl + of_data->scc_offset;
-+			host->mmc->caps |= MMC_CAP_HW_RESET;
-+			host->hw_reset = renesas_sdhi_hw_reset;
-+		}
+diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+index b3a130a9ee233..1604f512c7bd1 100644
+--- a/drivers/mmc/host/sdhci-acpi.c
++++ b/drivers/mmc/host/sdhci-acpi.c
+@@ -883,7 +883,7 @@ static int sdhci_acpi_runtime_resume(struct device *dev)
+ 
+ 	sdhci_acpi_byt_setting(&c->pdev->dev);
+ 
+-	return sdhci_runtime_resume_host(c->host);
++	return sdhci_runtime_resume_host(c->host, 0);
+ }
+ 
+ #endif
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index c391510e9ef40..776a942162488 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -1705,7 +1705,7 @@ static int sdhci_esdhc_runtime_resume(struct device *dev)
+ 		esdhc_pltfm_set_clock(host, imx_data->actual_clock);
  	}
  
- 	/* Orginally registers were 16 bit apart, could be 32 or 64 nowadays */
-@@ -693,8 +700,6 @@ int renesas_sdhi_probe(struct platform_device *pdev,
- 		const struct renesas_sdhi_scc *taps = of_data->taps;
- 		bool hit = false;
+-	err = sdhci_runtime_resume_host(host);
++	err = sdhci_runtime_resume_host(host, 0);
+ 	if (err)
+ 		goto disable_ipg_clk;
  
--		host->mmc->caps |= MMC_CAP_HW_RESET;
--
- 		for (i = 0; i < of_data->taps_num; i++) {
- 			if (taps[i].clk_rate == 0 ||
- 			    taps[i].clk_rate == host->mmc->f_max) {
-@@ -707,12 +712,10 @@ int renesas_sdhi_probe(struct platform_device *pdev,
- 		if (!hit)
- 			dev_warn(&host->pdev->dev, "Unknown clock rate for SDR104\n");
+diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
+index e377b9bc55a46..d4e7e8b7be772 100644
+--- a/drivers/mmc/host/sdhci-of-at91.c
++++ b/drivers/mmc/host/sdhci-of-at91.c
+@@ -289,7 +289,7 @@ static int sdhci_at91_runtime_resume(struct device *dev)
+ 	}
  
--		priv->scc_ctl = host->ctl + of_data->scc_offset;
- 		host->init_tuning = renesas_sdhi_init_tuning;
- 		host->prepare_tuning = renesas_sdhi_prepare_tuning;
- 		host->select_tuning = renesas_sdhi_select_tuning;
- 		host->check_scc_error = renesas_sdhi_check_scc_error;
--		host->hw_reset = renesas_sdhi_hw_reset;
- 		host->prepare_hs400_tuning =
- 			renesas_sdhi_prepare_hs400_tuning;
- 		host->hs400_downgrade = renesas_sdhi_disable_scc;
+ out:
+-	return sdhci_runtime_resume_host(host);
++	return sdhci_runtime_resume_host(host, 0);
+ }
+ #endif /* CONFIG_PM */
+ 
+diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+index 4154ee11b47dc..267b90374fa48 100644
+--- a/drivers/mmc/host/sdhci-pci-core.c
++++ b/drivers/mmc/host/sdhci-pci-core.c
+@@ -167,7 +167,7 @@ static int sdhci_pci_runtime_suspend_host(struct sdhci_pci_chip *chip)
+ 
+ err_pci_runtime_suspend:
+ 	while (--i >= 0)
+-		sdhci_runtime_resume_host(chip->slots[i]->host);
++		sdhci_runtime_resume_host(chip->slots[i]->host, 0);
+ 	return ret;
+ }
+ 
+@@ -181,7 +181,7 @@ static int sdhci_pci_runtime_resume_host(struct sdhci_pci_chip *chip)
+ 		if (!slot)
+ 			continue;
+ 
+-		ret = sdhci_runtime_resume_host(slot->host);
++		ret = sdhci_runtime_resume_host(slot->host, 0);
+ 		if (ret)
+ 			return ret;
+ 	}
+diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
+index 3ddecf4792958..e55037ceda734 100644
+--- a/drivers/mmc/host/sdhci-pxav3.c
++++ b/drivers/mmc/host/sdhci-pxav3.c
+@@ -554,7 +554,7 @@ static int sdhci_pxav3_runtime_resume(struct device *dev)
+ 	if (!IS_ERR(pxa->clk_core))
+ 		clk_prepare_enable(pxa->clk_core);
+ 
+-	return sdhci_runtime_resume_host(host);
++	return sdhci_runtime_resume_host(host, 0);
+ }
+ #endif
+ 
+diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+index 8e4a8ba33f050..f5753aef71511 100644
+--- a/drivers/mmc/host/sdhci-s3c.c
++++ b/drivers/mmc/host/sdhci-s3c.c
+@@ -745,7 +745,7 @@ static int sdhci_s3c_runtime_resume(struct device *dev)
+ 	clk_prepare_enable(busclk);
+ 	if (ourhost->cur_clk >= 0)
+ 		clk_prepare_enable(ourhost->clk_bus[ourhost->cur_clk]);
+-	ret = sdhci_runtime_resume_host(host);
++	ret = sdhci_runtime_resume_host(host, 0);
+ 	return ret;
+ }
+ #endif
+diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
+index 06f84a4d79e00..f3261068adfbc 100644
+--- a/drivers/mmc/host/sdhci-sprd.c
++++ b/drivers/mmc/host/sdhci-sprd.c
+@@ -470,7 +470,7 @@ static int sdhci_sprd_runtime_resume(struct device *dev)
+ 		return ret;
+ 	}
+ 
+-	sdhci_runtime_resume_host(host);
++	sdhci_runtime_resume_host(host, 1);
+ 
+ 	return 0;
+ }
+diff --git a/drivers/mmc/host/sdhci-xenon.c b/drivers/mmc/host/sdhci-xenon.c
+index 8a18f14cf842d..1dea1ba66f7b4 100644
+--- a/drivers/mmc/host/sdhci-xenon.c
++++ b/drivers/mmc/host/sdhci-xenon.c
+@@ -638,7 +638,7 @@ static int xenon_runtime_resume(struct device *dev)
+ 		priv->restore_needed = false;
+ 	}
+ 
+-	ret = sdhci_runtime_resume_host(host);
++	ret = sdhci_runtime_resume_host(host, 0);
+ 	if (ret)
+ 		goto out;
+ 	return 0;
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 59acf8e3331ee..a5dc5aae973e6 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -3320,7 +3320,7 @@ int sdhci_runtime_suspend_host(struct sdhci_host *host)
+ }
+ EXPORT_SYMBOL_GPL(sdhci_runtime_suspend_host);
+ 
+-int sdhci_runtime_resume_host(struct sdhci_host *host)
++int sdhci_runtime_resume_host(struct sdhci_host *host, int soft_reset)
+ {
+ 	struct mmc_host *mmc = host->mmc;
+ 	unsigned long flags;
+@@ -3331,7 +3331,7 @@ int sdhci_runtime_resume_host(struct sdhci_host *host)
+ 			host->ops->enable_dma(host);
+ 	}
+ 
+-	sdhci_init(host, 0);
++	sdhci_init(host, soft_reset);
+ 
+ 	if (mmc->ios.power_mode != MMC_POWER_UNDEFINED &&
+ 	    mmc->ios.power_mode != MMC_POWER_OFF) {
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 199712e7adbb3..d2c7c9c436c97 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -781,7 +781,7 @@ void sdhci_adma_write_desc(struct sdhci_host *host, void **desc,
+ int sdhci_suspend_host(struct sdhci_host *host);
+ int sdhci_resume_host(struct sdhci_host *host);
+ int sdhci_runtime_suspend_host(struct sdhci_host *host);
+-int sdhci_runtime_resume_host(struct sdhci_host *host);
++int sdhci_runtime_resume_host(struct sdhci_host *host, int soft_reset);
+ #endif
+ 
+ void sdhci_cqe_enable(struct mmc_host *mmc);
 -- 
 2.20.1
