@@ -1,57 +1,46 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH 00/11] mmc: core: PM fixes/improvements for SDIO IRQs
-Date: Tue,  3 Sep 2019 16:21:56 +0200
-Message-ID: <20190903142207.5825-1-ulf.hansson@linaro.org>
+Subject: [PATCH 02/11] mmc: dw_mmc: Re-store SDIO IRQs mask at system resume
+Date: Tue,  3 Sep 2019 16:21:58 +0200
+Message-ID: <20190903142207.5825-3-ulf.hansson@linaro.org>
+References: <20190903142207.5825-1-ulf.hansson@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20190903142207.5825-1-ulf.hansson@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Douglas Anderson <dianders@chromium.org>, Matthias Kaehlcke <mka@chromium.org>
 Cc: Shawn Lin <shawn.lin@rock-chips.com>, Jaehoon Chung <jh80.chung@samsung.com>, Yong Mao <yong.mao@mediatek.com>, Chaotian Jing <chaotian.jing@mediatek.com>, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-The power management support for SDIO cards have slowly been improved, but
-there are still quite some serious problems, especially when dealing with the
-so called SDIO IRQs during system suspend/resume.
+In cases when SDIO IRQs have been enabled, runtime suspend is prevented by
+the driver. However, this still means dw_mci_runtime_suspend|resume() gets
+called during system suspend/resume, via pm_runtime_force_suspend|resume().
+This means during system suspend/resume, the register context of the dw_mmc
+device most likely loses its register context, even in cases when SDIO IRQs
+have been enabled.
 
-This series makes some additional improvements to this code in the mmc core,
-but also includes some needed adaptations for the sdhci, the dw_mmc and the
-mtk-sd host drivers.
+To re-enable the SDIO IRQs during system resume, the dw_mmc driver
+currently relies on the mmc core to re-enable the SDIO IRQs when it resumes
+the SDIO card, but this isn't the recommended solution. Instead, it's
+better to deal with this locally in the dw_mmc driver, so let's do that.
 
-So far the series has only been compile tested, so definitely need some help in
-testing this on HW, which of course would be greatly appreciated.
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+---
+ drivers/mmc/host/dw_mmc.c | 4 ++++
+ 1 file changed, 4 insertions(+)
 
-The series is also available at:
-git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git sdio_irq_suspend_next
-
-Kind regards
-Uffe
-
-
-Matthias Kaehlcke (1):
-  mmc: core: Move code to get pending SDIO IRQs to a function
-
-Ulf Hansson (10):
-  mmc: core: Add helper function to indicate if SDIO IRQs is enabled
-  mmc: dw_mmc: Re-store SDIO IRQs mask at system resume
-  mmc: mtk-sd: Re-store SDIO IRQs mask at system resume
-  mmc: core: Clarify sdio_irq_pending flag for
-    MMC_CAP2_SDIO_IRQ_NOTHREAD
-  mmc: core: Clarify that the ->ack_sdio_irq() callback is mandatory
-  mmc: core: WARN if SDIO IRQs are enabled for non-powered card in
-    suspend
-  mmc: core: Fixup processing of SDIO IRQs during system suspend/resume
-  mmc: sdhci: Drop redundant check in sdhci_ack_sdio_irq()
-  mmc: sdhci: Drop redundant code for SDIO IRQs
-  mmc: sdhci: Convert to use sdio_irq_enabled()
-
- drivers/mmc/core/sdio.c            |  4 ++-
- drivers/mmc/core/sdio_irq.c        | 57 +++++++++++++++++++-----------
- drivers/mmc/host/dw_mmc.c          |  4 +++
- drivers/mmc/host/mtk-sd.c          |  3 ++
- drivers/mmc/host/sdhci-esdhc-imx.c | 34 ++++++++----------
- drivers/mmc/host/sdhci.c           | 12 ++-----
- drivers/mmc/host/sdhci.h           |  6 ----
- include/linux/mmc/host.h           | 10 ++++++
- 8 files changed, 75 insertions(+), 55 deletions(-)
-
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index eea52e2c5a0c..f114710e82b4 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -3460,6 +3460,10 @@ int dw_mci_runtime_resume(struct device *dev)
+ 	/* Force setup bus to guarantee available clock output */
+ 	dw_mci_setup_bus(host->slot, true);
+ 
++	/* Re-enable SDIO interrupts. */
++	if (sdio_irq_enabled(host->slot->mmc))
++		__dw_mci_enable_sdio_irq(host->slot, 1);
++
+ 	/* Now that slots are all setup, we can enable card detect */
+ 	dw_mci_enable_cd(host);
+ 
 -- 
 2.17.1
