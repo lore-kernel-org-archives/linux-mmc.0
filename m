@@ -1,86 +1,50 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2] mmc: sdhi: fill in actual_clock
-Date: Tue, 3 Sep 2019 17:10:35 +0200
-Message-ID: <CAPDyKFpRtzS3CXAi4jKjyPOEd5KjCZ1Vqpi_fmm-F+O8eAqbmQ@mail.gmail.com>
-References: <20190829183634.3376-1-tszucs@protonmail.ch>
+Subject: Re: [PATCH v2 0/4] mmc: sdhci-of-aspeed: Fixes for AST2600 eMMC support
+Date: Tue, 3 Sep 2019 17:10:42 +0200
+Message-ID: <CAPDyKFph4C7fCcGYzFp2PwwJsaFvw6a0Do4Vm0uF8mbwD7zUzQ@mail.gmail.com>
+References: <20190902035842.2747-1-andrew@aj.id.au>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190829183634.3376-1-tszucs@protonmail.ch>
+In-Reply-To: <20190902035842.2747-1-andrew@aj.id.au>
 Sender: linux-kernel-owner@vger.kernel.org
-To: =?UTF-8?B?VGFtw6FzIFN6xbFjcw==?= <tszucs@protonmail.ch>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
+To: Andrew Jeffery <andrew@aj.id.au>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Joel Stanley <joel@jms.id.au>, OpenBMC Maillist <openbmc@lists.ozlabs.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, linux-aspeed <linux-aspeed@lists.ozlabs.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, 29 Aug 2019 at 20:36, Tam=C3=A1s Sz=C5=B1cs <tszucs@protonmail.ch> =
-wrote:
+On Mon, 2 Sep 2019 at 05:58, Andrew Jeffery <andrew@aj.id.au> wrote:
 >
-> Save set clock in mmc_host actual_clock enabling exporting it via debugfs=
-.
-> This will indicate the precise SD clock in I/O settings rather than only =
-the
-> sometimes misleading requested clock.
+> Hello,
 >
-> Signed-off-by: Tam=C3=A1s Sz=C5=B1cs <tszucs@protonmail.ch>
+> I've added a couple of patches since v1 of this series. The horizon has
+> broadened slightly with a fix for SPARC builds as well in patch 1/4. Ulf
+> suggested a minor cleanup on v1 with respect to handling of the current clock
+> value, so that's now patch 2/4. Patches 3/4 and 4/4 are as they were in v1.
 
-Applied for next, thanks!
+Applied patch 2->4 for next, thanks!
 
 Kind regards
 Uffe
 
 
-> ---
->  drivers/mmc/host/renesas_sdhi_core.c | 13 ++++++++-----
->  1 file changed, 8 insertions(+), 5 deletions(-)
 >
-> diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/rene=
-sas_sdhi_core.c
-> index 64d3b5fb7fe5..4c9774dbcfc1 100644
-> --- a/drivers/mmc/host/renesas_sdhi_core.c
-> +++ b/drivers/mmc/host/renesas_sdhi_core.c
-> @@ -124,7 +124,7 @@ static unsigned int renesas_sdhi_clk_update(struct tm=
-io_mmc_host *host,
->  {
->         struct renesas_sdhi *priv =3D host_to_priv(host);
->         unsigned int freq, diff, best_freq =3D 0, diff_min =3D ~0;
-> -       int i, ret;
-> +       int i;
+> The v1 series can be found here:
 >
->         /* tested only on R-Car Gen2+ currently; may work for others */
->         if (!(host->pdata->flags & TMIO_MMC_MIN_RCAR2))
-> @@ -153,9 +153,9 @@ static unsigned int renesas_sdhi_clk_update(struct tm=
-io_mmc_host *host,
->                 }
->         }
+> https://patchwork.ozlabs.org/cover/1155757/
 >
-> -       ret =3D clk_set_rate(priv->clk, best_freq);
-> +       clk_set_rate(priv->clk, best_freq);
+> Please review!
 >
-> -       return ret =3D=3D 0 ? best_freq : clk_get_rate(priv->clk);
-> +       return clk_get_rate(priv->clk);
->  }
+> Andrew
 >
->  static void renesas_sdhi_set_clock(struct tmio_mmc_host *host,
-> @@ -166,10 +166,13 @@ static void renesas_sdhi_set_clock(struct tmio_mmc_=
-host *host,
->         sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, ~CLK_CTL_SCLKEN &
->                 sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL));
+> Andrew Jeffery (4):
+>   mmc: sdhci-of-aspeed: Fix link failure for SPARC
+>   mmc: sdhci-of-aspeed: Drop redundant assignment to host->clock
+>   mmc: sdhci-of-aspeed: Uphold clocks-on post-condition of set_clock()
+>   mmc: sdhci-of-aspeed: Allow max-frequency limitation of SDCLK
 >
-> -       if (new_clock =3D=3D 0)
-> +       if (new_clock =3D=3D 0) {
-> +               host->mmc->actual_clock =3D 0;
->                 goto out;
-> +       }
+>  drivers/mmc/host/sdhci-of-aspeed.c | 62 ++++++++++++++++++++----------
+>  1 file changed, 42 insertions(+), 20 deletions(-)
 >
-> -       clock =3D renesas_sdhi_clk_update(host, new_clock) / 512;
-> +       host->mmc->actual_clock =3D renesas_sdhi_clk_update(host, new_clo=
-ck);
-> +       clock =3D host->mmc->actual_clock / 512;
->
->         for (clk =3D 0x80000080; new_clock >=3D (clock << 1); clk >>=3D 1=
-)
->                 clock <<=3D 1;
 > --
-> 2.11.0
+> 2.20.1
 >
