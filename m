@@ -1,56 +1,47 @@
-From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH v2] mmc: sdhi: fill in actual_clock
-Date: Tue, 3 Sep 2019 17:25:29 +0200
-Message-ID: <20190903152529.GB6718@kunai>
-References: <20190829183634.3376-1-tszucs@protonmail.ch>
+From: Sasha Levin <sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.19 102/167] dt-bindings: mmc: Add disable-cqe-dcmd property.
+Date: Tue,  3 Sep 2019 12:24:14 -0400
+Message-ID: <20190903162519.7136-102-sashal@kernel.org>
+References: <20190903162519.7136-1-sashal@kernel.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="tsOsTdHNUZQcU9Ye"
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20190829183634.3376-1-tszucs@protonmail.ch>
+In-Reply-To: <20190903162519.7136-1-sashal@kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: =?utf-8?B?VGFtw6FzIFN6xbFjcw==?= <tszucs@protonmail.ch>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-renesas-soc@vger.kernel.org
+To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
+Cc: Christoph Muellner <christoph.muellner@theobroma-systems.com>, Philipp Tomsich <philipp.tomsich@theobroma-systems.com>, Ulf Hansson <ulf.hansson@linaro.org>, Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
+From: Christoph Muellner <christoph.muellner@theobroma-systems.com>
 
---tsOsTdHNUZQcU9Ye
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+[ Upstream commit 28f22fb755ecf9f933f045bc0afdb8140641b01c ]
 
-On Thu, Aug 29, 2019 at 08:36:34PM +0200, Tam=C3=A1s Sz=C5=B1cs wrote:
-> Save set clock in mmc_host actual_clock enabling exporting it via debugfs.
-> This will indicate the precise SD clock in I/O settings rather than only =
-the
-> sometimes misleading requested clock.
->=20
-> Signed-off-by: Tam=C3=A1s Sz=C5=B1cs <tszucs@protonmail.ch>
+Add disable-cqe-dcmd as optional property for MMC hosts.
+This property allows to disable or not enable the direct command
+features of the command queue engine.
 
-Oops, I thought I replied already. For the record:
+Signed-off-by: Christoph Muellner <christoph.muellner@theobroma-systems.com>
+Signed-off-by: Philipp Tomsich <philipp.tomsich@theobroma-systems.com>
+Fixes: 84362d79f436 ("mmc: sdhci-of-arasan: Add CQHCI support for arasan,sdhci-5.1")
+Cc: stable@vger.kernel.org
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+Signed-off-by: Sasha Levin <sashal@kernel.org>
+---
+ Documentation/devicetree/bindings/mmc/mmc.txt | 2 ++
+ 1 file changed, 2 insertions(+)
 
-Acked-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-
-
---tsOsTdHNUZQcU9Ye
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAl1uheUACgkQFA3kzBSg
-KbaCwg/+O2P7U/V3PSUWunSFkHZg7dqiAeb5loMjy2RYmUnjrc7PCir2Cb44mRkz
-Tyz9XMXpx3g+7VtqUNHG7pj76M7em1OdiulP631pOUroRmVzfo8vpEu/JJlGTAhG
-cymJ5x4KSaBA5itAdYWa4TbIdIxfDTxCNkxdZvvpI8LwR5TZ6anPXgwZwQBeYEhk
-jyFbyPgoa7ipivVCJKtNCIlxzWPvTOwNiOD/Y8AwL4MdvTXXqdIM6yD6lhao9wm2
-+HaSrMYLX9yv0sFBP2OyOpB3tgTPtsyj9MTjYpffzvy/BVeombUE2qYJg2uuOAda
-rcUWQNST5hMRoblcWaLoh1pEX5DiuDeV0J9x5x3cnuRAQnpevPo4mli/GLTyaZYB
-nklFBJMhr3Yi9cXrnBYmtNvOnm8A6pjo7ML8G/5q3d1+LrqqMEEE2totRFs7/bw/
-CXYhW5Y2/m3VEhPflPwq8nzg5jycVegtm9dz7FphAGvYuzCVY0zbggMNPVkBiTbS
-RNZJGmlepoJJiR126SOJDNYyedH8zuHpj2DFazOZlfi+aBAehNBoGAmDJTiOzHrf
-hXdhPFENueQgdu0nJ71mYNwqatqiYTgcPfSEA5mFV8g2ji5xsS80alB97neoODKS
-lBCuQAWSwPF0oPQlTYgRhpd81h+9gYa7IX1SQoAeLIlQoCBo/lE=
-=0Ztz
------END PGP SIGNATURE-----
-
---tsOsTdHNUZQcU9Ye--
+diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
+index cdbcfd3a4ff21..c269dbe384fea 100644
+--- a/Documentation/devicetree/bindings/mmc/mmc.txt
++++ b/Documentation/devicetree/bindings/mmc/mmc.txt
+@@ -64,6 +64,8 @@ Optional properties:
+   whether pwrseq-simple is used. Default to 10ms if no available.
+ - supports-cqe : The presence of this property indicates that the corresponding
+   MMC host controller supports HW command queue feature.
++- disable-cqe-dcmd: This property indicates that the MMC controller's command
++  queue engine (CQE) does not support direct commands (DCMDs).
+ 
+ *NOTE* on CD and WP polarity. To use common for all SD/MMC host controllers line
+ polarity properties, we have to fix the meaning of the "normal" and "inverted"
+-- 
+2.20.1
