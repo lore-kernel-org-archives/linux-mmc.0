@@ -1,28 +1,158 @@
 From: Chaotian Jing <chaotian.jing@mediatek.com>
-Subject: fix device in programming state after ioctl()
-Date: Wed, 4 Sep 2019 15:54:42 +0800
-Message-ID: <20190904075444.2163-1-chaotian.jing@mediatek.com>
+Subject: [PATCH 2/2] mmc: block: add CMD13 polling for ioctl() cmd with R1B response
+Date: Wed, 4 Sep 2019 15:54:44 +0800
+Message-ID: <20190904075444.2163-3-chaotian.jing@mediatek.com>
+References: <20190904075444.2163-1-chaotian.jing@mediatek.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20190904075444.2163-1-chaotian.jing@mediatek.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Matthias Brugger <matthias.bgg@gmail.com>, Jens Axboe <axboe@kernel.dk>, Hannes Reinecke <hare@suse.de>, Chaotian Jing <chaotian.jing@mediatek.com>, Avri Altman <avri.altman@wdc.com>, YueHaibing <yuehaibing@huawei.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Ming Lei <ming.lei@redhat.com>, Chris Boot <bootc@bootc.net>, Zachary Hays <zhays@lexmark.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org, srv_heupstream@mediatek.com
 List-Id: linux-mmc@vger.kernel.org
 
-the user space program may access eMMC by ioctl(), after the ioctl() was
-completed, it should ensure that eMMC is in transfer state, or it will
-cause other thread which access eMMC got timeout error, as it assume that
-card was in transfer state.
+currently there is no CMD13 polling and other code to wait card
+change to transfer state after R1B command completed. and this
+polling operation cannot do in user space, because other request
+may coming before the CMD13 from user space.
 
-this patch add CMD13 polling for R1B command to avoid this issue.
+Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
+---
+ drivers/mmc/core/block.c | 107 ++++++++++++++++++++-------------------
+ 1 file changed, 55 insertions(+), 52 deletions(-)
 
-Chaotian Jing (2):
-  mmc: block: make the card_busy_detect() more generic
-  mmc: block: add CMD13 polling for ioctl() cmd with R1B response
-
- drivers/mmc/core/block.c | 111 ++++++++++++++++++++-------------------
- 1 file changed, 57 insertions(+), 54 deletions(-)
-
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index aa7c19f7e298..9d6f7a5612b5 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -468,6 +468,58 @@ static int ioctl_do_sanitize(struct mmc_card *card)
+ 	return err;
+ }
+ 
++static inline bool mmc_blk_in_tran_state(u32 status)
++{
++	/*
++	 * Some cards mishandle the status bits, so make sure to check both the
++	 * busy indication and the card state.
++	 */
++	return status & R1_READY_FOR_DATA &&
++	       (R1_CURRENT_STATE(status) == R1_STATE_TRAN);
++}
++
++static int card_busy_detect(struct mmc_card *card, unsigned int timeout_ms,
++			    u32 *resp_errs)
++{
++	unsigned long timeout = jiffies + msecs_to_jiffies(timeout_ms);
++	int err = 0;
++	u32 status;
++
++	do {
++		bool done = time_after(jiffies, timeout);
++
++		err = __mmc_send_status(card, &status, 5);
++		if (err) {
++			dev_err(mmc_dev(card->host),
++				"error %d requesting status\n", err);
++			return err;
++		}
++
++		/* Accumulate any response error bits seen */
++		if (resp_errs)
++			*resp_errs |= status;
++
++		/*
++		 * Timeout if the device never becomes ready for data and never
++		 * leaves the program state.
++		 */
++		if (done) {
++			dev_err(mmc_dev(card->host),
++				"Card stuck in wrong state! %s status: %#x\n",
++				 __func__, status);
++			return -ETIMEDOUT;
++		}
++
++		/*
++		 * Some cards mishandle the status bits,
++		 * so make sure to check both the busy
++		 * indication and the card state.
++		 */
++	} while (!mmc_blk_in_tran_state(status));
++
++	return err;
++}
++
+ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
+ 			       struct mmc_blk_ioc_data *idata)
+ {
+@@ -623,6 +675,9 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
+ 					__func__, status, err);
+ 	}
+ 
++	if (!err && (cmd.flags & MMC_RSP_R1B))
++		err = card_busy_detect(card, MMC_BLK_TIMEOUT_MS, NULL);
++
+ 	return err;
+ }
+ 
+@@ -970,58 +1025,6 @@ static unsigned int mmc_blk_data_timeout_ms(struct mmc_host *host,
+ 	return ms;
+ }
+ 
+-static inline bool mmc_blk_in_tran_state(u32 status)
+-{
+-	/*
+-	 * Some cards mishandle the status bits, so make sure to check both the
+-	 * busy indication and the card state.
+-	 */
+-	return status & R1_READY_FOR_DATA &&
+-	       (R1_CURRENT_STATE(status) == R1_STATE_TRAN);
+-}
+-
+-static int card_busy_detect(struct mmc_card *card, unsigned int timeout_ms,
+-			    u32 *resp_errs)
+-{
+-	unsigned long timeout = jiffies + msecs_to_jiffies(timeout_ms);
+-	int err = 0;
+-	u32 status;
+-
+-	do {
+-		bool done = time_after(jiffies, timeout);
+-
+-		err = __mmc_send_status(card, &status, 5);
+-		if (err) {
+-			dev_err(mmc_dev(card->host),
+-				"error %d requesting status\n", err);
+-			return err;
+-		}
+-
+-		/* Accumulate any response error bits seen */
+-		if (resp_errs)
+-			*resp_errs |= status;
+-
+-		/*
+-		 * Timeout if the device never becomes ready for data and never
+-		 * leaves the program state.
+-		 */
+-		if (done) {
+-			dev_err(mmc_dev(card->host),
+-				"Card stuck in wrong state! %s status: %#x\n",
+-				 __func__, status);
+-			return -ETIMEDOUT;
+-		}
+-
+-		/*
+-		 * Some cards mishandle the status bits,
+-		 * so make sure to check both the busy
+-		 * indication and the card state.
+-		 */
+-	} while (!mmc_blk_in_tran_state(status));
+-
+-	return err;
+-}
+-
+ static int mmc_blk_reset(struct mmc_blk_data *md, struct mmc_host *host,
+ 			 int type)
+ {
 -- 
 2.18.0
