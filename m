@@ -1,52 +1,122 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: Asus VivoBook Flip TP202NA-EH012T EMMC problem
-Date: Wed, 4 Sep 2019 11:33:07 +0200
-Message-ID: <CAPDyKFqKxSo50FSmesuOBz+FfE_DEFsZmEHD5CiU8SORv1Jrow@mail.gmail.com>
-References: <d355e790-7c60-5681-3ea5-dc4fd6206628@zoho.com>
+Subject: Re: [PATCH V8 1/3] mmc: sdhci-pci-o2micro: Change O2 Host PLL and DLL
+ register name
+Date: Wed, 4 Sep 2019 11:52:58 +0200
+Message-ID: <CAPDyKFouaWGBa8TjBRR78U5=gind7Ku2cqZ4fx-Hz5-O+ytjPQ@mail.gmail.com>
+References: <1566412708-6130-1-git-send-email-shirley.her@bayhubtech.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <d355e790-7c60-5681-3ea5-dc4fd6206628@zoho.com>
+In-Reply-To: <1566412708-6130-1-git-send-email-shirley.her@bayhubtech.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: =?UTF-8?B?w5N2w6FyaQ==?= <ovari123@zoho.com>, Kai Heng Feng <kai.heng.feng@canonical.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: "Shirley Her (SC)" <shirley.her@bayhubtech.com>
+Cc: "adrian.hunter@intel.com" <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Chevron Li (WH)" <chevron.li@bayhubtech.com>, "Shaper Liu (WH)" <shaper.liu@bayhubtech.com>, "Louis Lu (TP)" <louis.lu@bayhubtech.com>, "Max Huang (SC)" <max.huang@bayhubtech.com>
 List-Id: linux-mmc@vger.kernel.org
 
-+ Kai Heng Feng
-
-On Sat, 31 Aug 2019 at 11:43, =C3=93v=C3=A1ri <ovari123@zoho.com> wrote:
+On Wed, 21 Aug 2019 at 20:38, Shirley Her (SC)
+<shirley.her@bayhubtech.com> wrote:
 >
-> Hello,
+> Change O2 Host PLL and DLL register name
 >
-> As per https://bugs.launchpad.net/ubuntu/+source/linux/+bug/1818407/comme=
-nts/26 here is an email.
->
-> Information is provided at https://bugs.launchpad.net/ubuntu/+source/linu=
-x/+bug/1818407/comments/32
->
-> Please advise what else you require.
+> Signed-off-by: Shirley Her <shirley.her@bayhubtech.com>
 
-Future wise, rather than solely sending links to bugreports, please
-copy the relevant data into the email. Moreover, we don't normally
-care that much about "old" kernels, unless problems exists on the
-latest kernels as well.
-
-Anyway, by following the above links, I figured this is about
-sdhci-pci and you get a CRC problem when switching to HS400 mode.
-
-[ 3.673358] mmc0: error -84 whilst initialising MMC card
-[ 3.808029] mmc0: mmc_select_hs400 failed, error -84
-
-A wild shot is to try out my fixes branch, which holds the following
-below queued fix, that might solve the problem if it's a regression.
-
-commit 8ad8e02c2fa70cfddc1ded53ba9001c9d444075d
-Author: Jan Kaisrlik <ja.kaisrlik@gmail.com>
-Date:   Tue Aug 20 13:42:29 2019 +0200
-Revert "mmc: core: do not retry CMD6 in __mmc_switch()"
-
-git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git fixes
+Applied for next, thanks!
 
 Kind regards
 Uffe
+
+
+> ---
+> change in V8:
+>  1. fix patch format error
+>
+> change in V7:
+>  1. change subject
+>
+> change in V6:
+>  1. change subject and commit message to match the patch
+>  2. change register name O2_PLL_WDT_CONTROL1 to O2_PLL_DLL_WDT_CONTROL1
+>
+> change in V5:
+>  1. split 2 patches into 3 patches
+>  2. make dll_adjust_count start from 0
+>  3. fix ret overwritten issue
+>  4. use break instead of goto
+>
+> change in V4:
+>  1. add a bug fix for V3
+>
+> change in V3:
+>  1. add more explanation in dll_recovery and execute_tuning function
+>  2. move dll_adjust_count to O2_host struct
+>  3. fix some coding style error
+>  4. renaming O2_PLL_WDT_CONTROL1 TO O2_PLL_DLL_WDT_CONTROL1
+>
+> change in V2:
+>  1. use usleep_range instead of udelay
+>  2. move dll_adjust_count to sdhci-pci-o2micro.c
+>
+> chagne in V1:
+>  1. add error recovery function to relock DLL with correct phase
+>  2. retuning HS200 after DLL locked
+> ---
+>  drivers/mmc/host/sdhci-pci-o2micro.c | 16 ++++++++--------
+>  1 file changed, 8 insertions(+), 8 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
+> index 9dc4548..b3a33d9 100644
+> --- a/drivers/mmc/host/sdhci-pci-o2micro.c
+> +++ b/drivers/mmc/host/sdhci-pci-o2micro.c
+> @@ -51,7 +51,7 @@
+>  #define O2_SD_VENDOR_SETTING2  0x1C8
+>  #define O2_SD_HW_TUNING_DISABLE        BIT(4)
+>
+> -#define O2_PLL_WDT_CONTROL1    0x1CC
+> +#define O2_PLL_DLL_WDT_CONTROL1        0x1CC
+>  #define  O2_PLL_FORCE_ACTIVE   BIT(18)
+>  #define  O2_PLL_LOCK_STATUS    BIT(14)
+>  #define  O2_PLL_SOFT_RESET     BIT(12)
+> @@ -316,23 +316,23 @@ static void sdhci_o2_enable_internal_clock(struct sdhci_host *host)
+>         u32 scratch32;
+>
+>         /* PLL software reset */
+> -       scratch32 = sdhci_readl(host, O2_PLL_WDT_CONTROL1);
+> +       scratch32 = sdhci_readl(host, O2_PLL_DLL_WDT_CONTROL1);
+>         scratch32 |= O2_PLL_SOFT_RESET;
+> -       sdhci_writel(host, scratch32, O2_PLL_WDT_CONTROL1);
+> +       sdhci_writel(host, scratch32, O2_PLL_DLL_WDT_CONTROL1);
+>         udelay(1);
+>         scratch32 &= ~(O2_PLL_SOFT_RESET);
+> -       sdhci_writel(host, scratch32, O2_PLL_WDT_CONTROL1);
+> +       sdhci_writel(host, scratch32, O2_PLL_DLL_WDT_CONTROL1);
+>
+>         /* PLL force active */
+>         scratch32 |= O2_PLL_FORCE_ACTIVE;
+> -       sdhci_writel(host, scratch32, O2_PLL_WDT_CONTROL1);
+> +       sdhci_writel(host, scratch32, O2_PLL_DLL_WDT_CONTROL1);
+>
+>         /* Wait max 20 ms */
+>         timeout = ktime_add_ms(ktime_get(), 20);
+>         while (1) {
+>                 bool timedout = ktime_after(ktime_get(), timeout);
+>
+> -               scratch = sdhci_readw(host, O2_PLL_WDT_CONTROL1);
+> +               scratch = sdhci_readw(host, O2_PLL_DLL_WDT_CONTROL1);
+>                 if (scratch & O2_PLL_LOCK_STATUS)
+>                         break;
+>                 if (timedout) {
+> @@ -350,9 +350,9 @@ static void sdhci_o2_enable_internal_clock(struct sdhci_host *host)
+>
+>  out:
+>         /* Cancel PLL force active */
+> -       scratch32 = sdhci_readl(host, O2_PLL_WDT_CONTROL1);
+> +       scratch32 = sdhci_readl(host, O2_PLL_DLL_WDT_CONTROL1);
+>         scratch32 &= ~O2_PLL_FORCE_ACTIVE;
+> -       sdhci_writel(host, scratch32, O2_PLL_WDT_CONTROL1);
+> +       sdhci_writel(host, scratch32, O2_PLL_DLL_WDT_CONTROL1);
+>  }
+>
+>  static int sdhci_o2_get_cd(struct mmc_host *mmc)
+> --
+> 2.7.4
+>
