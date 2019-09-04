@@ -1,58 +1,107 @@
 From: Raul E Rangel <rrangel@chromium.org>
-Subject: [PATCH 1/2] mmc: sdhci: Check card status after reset
-Date: Wed,  4 Sep 2019 10:46:24 -0600
-Message-ID: <20190904164625.236978-1-rrangel@chromium.org>
+Subject: [PATCH 2/2] mmc: sdhci: Quirk for AMD SDHC Device 0x7906
+Date: Wed,  4 Sep 2019 10:46:25 -0600
+Message-ID: <20190904164625.236978-2-rrangel@chromium.org>
+References: <20190904164625.236978-1-rrangel@chromium.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20190904164625.236978-1-rrangel@chromium.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: adrian.hunter@intel.com
-Cc: Raul E Rangel <rrangel@chromium.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Raul E Rangel <rrangel@chromium.org>, Shyam Sundar S K <Shyam-sundar.S-k@amd.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-In sdhci_do_reset we call the reset callback which is typically
-sdhci_reset. sdhci_reset can wait for up to 100ms waiting for the
-controller to reset. If SDHCI_RESET_ALL was passed as the flag, the
-controller will clear the IRQ mask. If during that 100ms the card is
-removed there is no notification to the MMC system that the card was
-removed. So from the drivers point of view the card is always present.
+AMD SDHC 0x7906 requires a hard reset to clear all internal state.
+Otherwise it can get into a bad state where the DATA lines are always
+read as zeros.
 
-By making sdhci_reinit compare the present state it can schedule a
-rescan if the card was removed while a reset was in progress.
+This change requires firmware that can transition the device into
+D3Cold for it to work correctly. If the firmware does not support
+transitioning to D3Cold then the power state transitions are a no-op.
 
 Signed-off-by: Raul E Rangel <rrangel@chromium.org>
+Signed-off-by: Shyam Sundar S K <Shyam-sundar.S-k@amd.com>
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
-Sorry this took me so long to send out. I tested out the patch set on
-5.3-rc5 with multiple devices.
+This is just a resend of https://patchwork.kernel.org/patch/10925467/
 
-This patch was proposed here by Adrian: https://patchwork.kernel.org/patch/10925469/#22691177
 
- drivers/mmc/host/sdhci.c | 11 +++++++++++
- 1 file changed, 11 insertions(+)
+ drivers/mmc/host/sdhci-pci-core.c | 51 ++++++++++++++++++++++++++++++-
+ 1 file changed, 50 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index a5dc5aae973e..b0045880ee3d 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -337,8 +337,19 @@ static void sdhci_init(struct sdhci_host *host, int soft)
- 
- static void sdhci_reinit(struct sdhci_host *host)
- {
-+	u32 cd = host->ier & (SDHCI_INT_CARD_REMOVE | SDHCI_INT_CARD_INSERT);
-+
- 	sdhci_init(host, 0);
- 	sdhci_enable_card_detection(host);
-+
-+	/*
-+	 * A change to the card detect bits indicates a change in present state,
-+	 * refer sdhci_set_card_detection(). A card detect interrupt might have
-+	 * been missed while the host controller was being reset, so trigger a
-+	 * rescan to check.
-+	 */
-+	if (cd != (host->ier & (SDHCI_INT_CARD_REMOVE | SDHCI_INT_CARD_INSERT)))
-+		mmc_detect_change(host->mmc, msecs_to_jiffies(200));
+diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+index 7d06e2860c36..84931ebe0c93 100644
+--- a/drivers/mmc/host/sdhci-pci-core.c
++++ b/drivers/mmc/host/sdhci-pci-core.c
+@@ -21,6 +21,7 @@
+ #include <linux/mmc/mmc.h>
+ #include <linux/scatterlist.h>
+ #include <linux/io.h>
++#include <linux/iopoll.h>
+ #include <linux/gpio.h>
+ #include <linux/pm_runtime.h>
+ #include <linux/mmc/slot-gpio.h>
+@@ -1590,11 +1591,59 @@ static int amd_probe(struct sdhci_pci_chip *chip)
+ 	return 0;
  }
  
- static void __sdhci_led_activate(struct sdhci_host *host)
++static u32 sdhci_read_present_state(struct sdhci_host *host)
++{
++	return sdhci_readl(host, SDHCI_PRESENT_STATE);
++}
++
++void amd_sdhci_reset(struct sdhci_host *host, u8 mask)
++{
++	struct sdhci_pci_slot *slot = sdhci_priv(host);
++	struct pci_dev *pdev = slot->chip->pdev;
++	u32 present_state;
++
++	/*
++	 * SDHC 0x7906 requires a hard reset to clear all internal state.
++	 * Otherwise it can get into a bad state where the DATA lines are always
++	 * read as zeros.
++	 */
++	if (pdev->device == 0x7906 && (mask & SDHCI_RESET_ALL)) {
++		pci_clear_master(pdev);
++
++		pci_save_state(pdev);
++
++		pci_set_power_state(pdev, PCI_D3cold);
++		pr_debug("%s: power_state=%u\n", mmc_hostname(host->mmc),
++			pdev->current_state);
++		pci_set_power_state(pdev, PCI_D0);
++
++		pci_restore_state(pdev);
++
++		/*
++		 * SDHCI_RESET_ALL says the card detect logic should not be
++		 * reset, but since we need to reset the entire controller
++		 * we should wait until the card detect logic has stabilized.
++		 *
++		 * This normally takes about 40ms.
++		 */
++		readx_poll_timeout(
++			sdhci_read_present_state,
++			host,
++			present_state,
++			present_state & SDHCI_CD_STABLE,
++			10000,
++			100000
++		);
++	}
++
++	return sdhci_reset(host, mask);
++}
++
+ static const struct sdhci_ops amd_sdhci_pci_ops = {
+ 	.set_clock			= sdhci_set_clock,
+ 	.enable_dma			= sdhci_pci_enable_dma,
+ 	.set_bus_width			= sdhci_set_bus_width,
+-	.reset				= sdhci_reset,
++	.reset				= amd_sdhci_reset,
+ 	.set_uhs_signaling		= sdhci_set_uhs_signaling,
+ };
+ 
 -- 
 2.23.0.187.g17f5b7556c-goog
