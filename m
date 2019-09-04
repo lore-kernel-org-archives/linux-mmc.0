@@ -1,88 +1,58 @@
-From: Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Subject: Re: [PATCH] mmc: dw_mmc-rockchip: Using 180 sample phase if all
- phases work
-Date: Wed, 4 Sep 2019 08:44:01 -0700
-Message-ID: <CAD=FV=Vwmj=LehhLCN5OBbEfNNXp9gULLYRoVV86HtqZBxvEjw@mail.gmail.com>
-References: <1567564030-83224-1-git-send-email-shawn.lin@rock-chips.com>
+From: Raul E Rangel <rrangel@chromium.org>
+Subject: [PATCH 1/2] mmc: sdhci: Check card status after reset
+Date: Wed,  4 Sep 2019 10:46:24 -0600
+Message-ID: <20190904164625.236978-1-rrangel@chromium.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <1567564030-83224-1-git-send-email-shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
-List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Cc: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: adrian.hunter@intel.com
+Cc: Raul E Rangel <rrangel@chromium.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,
+In sdhci_do_reset we call the reset callback which is typically
+sdhci_reset. sdhci_reset can wait for up to 100ms waiting for the
+controller to reset. If SDHCI_RESET_ALL was passed as the flag, the
+controller will clear the IRQ mask. If during that 100ms the card is
+removed there is no notification to the MMC system that the card was
+removed. So from the drivers point of view the card is always present.
 
-On Tue, Sep 3, 2019 at 7:28 PM Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org> wrote:
->
-> default_sample_phase is used to make sure the cards are enumurated
-> properly and will be set to 0 if not assigned. However, the sample
-> phase should depends on the tuned phase if running higher clock rate.
-> If all phases work but default_sample_phase isn't assigned, driver
-> set sample phase to 0 for this case, which isn't the best choice,
-> because we always expect to set phase to the middle of window. To
-> solve the following continually issues we have seen in the test, we
-> need set phase to the more stable one, 180, if all phases work.
->
-> mmcblk1: error -84 transferring data, sector 1735064, nr 8, cmd
-> response 0x900, card status 0xb00
-> mmcblk1: retrying using single block read
-> dwmmc_rockchip ff0f0000.dwmmc: All phases work, using default phase 0.
-> mmcblk1: retrying because a re-tune was needed
->
-> .....
->
-> mmcblk1: error -84 transferring data, sector 1728672, nr 248, cmd
-> response 0x900, card status 0xb00
-> mmcblk1: retrying using single block read
-> dwmmc_rockchip ff0f0000.dwmmc: All phases work, using default phase 0.
->
-> Signed-off-by: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-> ---
->
->  drivers/mmc/host/dw_mmc-rockchip.c | 5 ++---
->  1 file changed, 2 insertions(+), 3 deletions(-)
->
-> diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
-> index d4d0213..9ef9723 100644
-> --- a/drivers/mmc/host/dw_mmc-rockchip.c
-> +++ b/drivers/mmc/host/dw_mmc-rockchip.c
-> @@ -209,9 +209,8 @@ static int dw_mci_rk3288_execute_tuning(struct dw_mci_slot *slot, u32 opcode)
->         }
->
->         if (ranges[0].start == 0 && ranges[0].end == priv->num_phases - 1) {
-> -               clk_set_phase(priv->sample_clk, priv->default_sample_phase);
-> -               dev_info(host->dev, "All phases work, using default phase %d.",
-> -                        priv->default_sample_phase);
-> +               clk_set_phase(priv->sample_clk, 180);
-> +               dev_info(host->dev, "All phases work, using phase 180.");
+By making sdhci_reinit compare the present state it can schedule a
+rescan if the card was removed while a reset was in progress.
 
-This violates what is documented in the device tree bindings, which says:
+Signed-off-by: Raul E Rangel <rrangel@chromium.org>
+---
+Sorry this took me so long to send out. I tested out the patch set on
+5.3-rc5 with multiple devices.
 
-* rockchip,default-sample-phase: The default phase to set ciu-sample at
-  probing, low speeds or in case where all phases work at tuning time.
-  If not specified 0 deg will be used.
+This patch was proposed here by Adrian: https://patchwork.kernel.org/patch/10925469/#22691177
 
-Specifically:
-* You don't use "default-sample-phase" at all when all phases pass.
-* You don't default to 0 if not specified.
+ drivers/mmc/host/sdhci.c | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
 
-Personally I think we could change the bindings to say: "If not
-specified 180 deg will be used" and then change the code to do the
-same.  If we wanted to keep the "stable ABI" that is device tree we
-could also just do the "180 default" for new SoCs and then manually
-add the device tree fragment to all old dts files.
-
-
--Doug
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index a5dc5aae973e..b0045880ee3d 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -337,8 +337,19 @@ static void sdhci_init(struct sdhci_host *host, int soft)
+ 
+ static void sdhci_reinit(struct sdhci_host *host)
+ {
++	u32 cd = host->ier & (SDHCI_INT_CARD_REMOVE | SDHCI_INT_CARD_INSERT);
++
+ 	sdhci_init(host, 0);
+ 	sdhci_enable_card_detection(host);
++
++	/*
++	 * A change to the card detect bits indicates a change in present state,
++	 * refer sdhci_set_card_detection(). A card detect interrupt might have
++	 * been missed while the host controller was being reset, so trigger a
++	 * rescan to check.
++	 */
++	if (cd != (host->ier & (SDHCI_INT_CARD_REMOVE | SDHCI_INT_CARD_INSERT)))
++		mmc_detect_change(host->mmc, msecs_to_jiffies(200));
+ }
+ 
+ static void __sdhci_led_activate(struct sdhci_host *host)
+-- 
+2.23.0.187.g17f5b7556c-goog
