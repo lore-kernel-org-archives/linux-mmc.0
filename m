@@ -1,112 +1,281 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v2] mmc: tegra: Implement enable_dma() to set dma_mask
-Date: Wed, 4 Sep 2019 11:31:56 +0300
-Message-ID: <4a9c5d15-5f33-4275-8cf0-24cf374ad86b@intel.com>
-References: <20190814005741.13331-1-nicoleotsuka@gmail.com>
- <09d9ba41-f4cd-e515-cd2d-0b4134648059@intel.com>
- <20190815231646.GA15635@Asurada-Nvidia.nvidia.com>
+Subject: Re: [PATCH V9 2/3] mmc: sdhci-pci-o2micro: Move functions in
+ preparation to fix DLL lock phase shift issue
+Date: Wed, 4 Sep 2019 11:59:46 +0300
+Message-ID: <d4030287-1cf4-2e8a-a02a-10d2e40d230b@intel.com>
+References: <1567100454-5905-1-git-send-email-shirley.her@bayhubtech.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190815231646.GA15635@Asurada-Nvidia.nvidia.com>
+In-Reply-To: <1567100454-5905-1-git-send-email-shirley.her@bayhubtech.com>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Nicolin Chen <nicoleotsuka@gmail.com>
-Cc: ulf.hansson@linaro.org, thierry.reding@gmail.com, jonathanh@nvidia.com, linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, vdumpa@nvidia.com
+To: "Shirley Her (SC)" <shirley.her@bayhubtech.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Cc: "Chevron Li (WH)" <chevron.li@bayhubtech.com>, "Shaper Liu (WH)" <shaper.liu@bayhubtech.com>, "Louis Lu (TP)" <louis.lu@bayhubtech.com>, "Xiaoguang Yu (WH)" <xiaoguang.yu@bayhubtech.com>, "Max Huang (SC)" <max.huang@bayhubtech.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 16/08/19 2:16 AM, Nicolin Chen wrote:
-> On Thu, Aug 15, 2019 at 02:48:20PM +0300, Adrian Hunter wrote:
->> On 14/08/19 3:57 AM, Nicolin Chen wrote:
->>> [ Integrated the change and commit message made by Thierry Reding ]
->>>
->>> The SDHCI controller found in early Tegra SoCs (from Tegra20 through
->>> Tegra114) used an AHB interface to the memory controller, which allowed
->>> only 32 bits of memory to be addressed.
->>>
->>> Starting with Tegra124, this limitation was removed by making the SDHCI
->>> controllers native MCCIF clients, which means that they got increased
->>> bandwidth and better arbitration to the memory controller as well as an
->>> address range extended to 40 bits, out of which only 34 were actually
->>> used (bits 34-39 are tied to 0 in the controller).
->>>
->>> For Tegra186, all of the 40 bits can be used; For Tegra194, 39-bit can
->>> be used.
->>>
->>> So far, sdhci-tegra driver has been relying on sdhci core to configure
->>> the DMA_BIT_MASK between 32-bit or 64-bit, using one of quirks2 flags:
->>> SDHCI_QUIRK2_BROKEN_64_BIT_DMA. However, there is a common way, being
->>> mentioned in sdhci.c file, to set dma_mask via enable_dma() callback in
->>> the device driver directly.
->>>
->>> So this patch implements an enable_dma() callback in the sdhci-tegra,
->>> in order to set an accurate DMA_BIT_MASK, other than just 32/64 bits.
->>
->> Is there a reason this cannot be done at probe time?
+On 29/08/19 8:40 PM, Shirley Her (SC) wrote:
+> Move functions in preparation to fix DLL lock phase shift issue
 > 
-> It's supposed to be done at probe() time. But sdhci_setup_host()
-> does both 32-bit/64-bit dma_mask setting and dma_alloc(), so if
-> the dma_mask isn't correctly set inside sdhci_setup_host(), the
-> allocation would fall to a 64-bit IOVA range that hardware does
-> not support -- smmu error would happen and crash the system. On
-> the other hand, ->enable_dma() is called in that function right
-> after 32-bit/64-bit dma_mask setting. Or is there any other way
-> of adding to probe() that I am missing here?
+> Signed-off-by: Shirley Her <shirley.her@bayhubtech.com>
 
-Hmmm.  Maybe we should clean that up a bit.  What do about this:
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-From: Adrian Hunter <adrian.hunter@intel.com>
-Date: Wed, 4 Sep 2019 11:28:51 +0300
-Subject: [PATCH] mmc: sdhci: Let drivers define their DMA mask
+So that is all 3 patches acked now.
 
-Add host operation ->set_dma_mask() so that drivers can define their own
-DMA masks.
-
-Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
----
- drivers/mmc/host/sdhci.c | 12 ++++--------
- drivers/mmc/host/sdhci.h |  1 +
- 2 files changed, 5 insertions(+), 8 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 66c2cf89ee22..43d32ba63ff5 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -3756,18 +3756,14 @@ int sdhci_setup_host(struct sdhci_host *host)
- 		host->flags &= ~SDHCI_USE_ADMA;
- 	}
- 
--	/*
--	 * It is assumed that a 64-bit capable device has set a 64-bit DMA mask
--	 * and *must* do 64-bit DMA.  A driver has the opportunity to change
--	 * that during the first call to ->enable_dma().  Similarly
--	 * SDHCI_QUIRK2_BROKEN_64_BIT_DMA must be left to the drivers to
--	 * implement.
--	 */
- 	if (sdhci_can_64bit_dma(host))
- 		host->flags |= SDHCI_USE_64_BIT_DMA;
- 
- 	if (host->flags & (SDHCI_USE_SDMA | SDHCI_USE_ADMA)) {
--		ret = sdhci_set_dma_mask(host);
-+		if (host->ops->set_dma_mask)
-+			ret = host->ops->set_dma_mask(host);
-+		else
-+			ret = sdhci_set_dma_mask(host);
- 
- 		if (!ret && host->ops->enable_dma)
- 			ret = host->ops->enable_dma(host);
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 81e23784475a..a9ab2deaeb45 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -623,6 +623,7 @@ struct sdhci_ops {
- 	u32		(*irq)(struct sdhci_host *host, u32 intmask);
- 
- 	int		(*enable_dma)(struct sdhci_host *host);
-+	int		(*set_dma_mask)(struct sdhci_host *host);
- 	unsigned int	(*get_max_clock)(struct sdhci_host *host);
- 	unsigned int	(*get_min_clock)(struct sdhci_host *host);
- 	/* get_timeout_clock should return clk rate in unit of Hz */
--- 
-2.17.1
+> ---
+> change in V9:
+>  1. modify subject and commit message to match the patch
+> 
+> change in V8:
+>  1. fix patch format error
+> 
+> change in V7:
+>  1. change subject to match the patch
+>  2. move functions in preparation to fix DLL lock phase shift issue
+> 
+> change in V6:
+>  1. change subject and commit message to match the patch
+>  2. modify the get CD status function
+>  3. re-arrange the order of some functions
+> 
+> change in V5:
+>  1. split 2 patches into 3 patches
+>  2. make dll_adjust_count start from 0
+>  3. fix ret overwritten issue
+>  4. use break instead of goto
+> 
+> change in V4:
+>  1. add a bug fix for V3
+> 
+> change in V3:
+>  1. add more explanation in dll_recovery and execute_tuning function
+>  2. move dll_adjust_count to O2_host struct
+>  3. fix some coding style error
+>  4. renaming O2_PLL_WDT_CONTROL1 TO O2_PLL_DLL_WDT_CONTROL1
+> 
+> change in V2:
+>  1. use usleep_range instead of udelay
+>  2. move dll_adjust_count to sdhci-pci-o2micro.c
+> 
+> chagne in V1:
+>  1. add error recovery function to relock DLL with correct phase
+>  2. retuning HS200 after DLL locked
+> ---
+>  drivers/mmc/host/sdhci-pci-o2micro.c | 187 ++++++++++++++++++-----------------
+>  1 file changed, 94 insertions(+), 93 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
+> index b3a33d9..57c8b83 100644
+> --- a/drivers/mmc/host/sdhci-pci-o2micro.c
+> +++ b/drivers/mmc/host/sdhci-pci-o2micro.c
+> @@ -58,6 +58,100 @@
+>  
+>  #define O2_SD_DETECT_SETTING 0x324
+>  
+> +static void sdhci_o2_wait_card_detect_stable(struct sdhci_host *host)
+> +{
+> +	ktime_t timeout;
+> +	u32 scratch32;
+> +
+> +	/* Wait max 50 ms */
+> +	timeout = ktime_add_ms(ktime_get(), 50);
+> +	while (1) {
+> +		bool timedout = ktime_after(ktime_get(), timeout);
+> +
+> +		scratch32 = sdhci_readl(host, SDHCI_PRESENT_STATE);
+> +		if ((scratch32 & SDHCI_CARD_PRESENT) >> SDHCI_CARD_PRES_SHIFT
+> +		    == (scratch32 & SDHCI_CD_LVL) >> SDHCI_CD_LVL_SHIFT)
+> +			break;
+> +
+> +		if (timedout) {
+> +			pr_err("%s: Card Detect debounce never finished.\n",
+> +			       mmc_hostname(host->mmc));
+> +			sdhci_dumpregs(host);
+> +			return;
+> +		}
+> +		udelay(10);
+> +	}
+> +}
+> +
+> +static void sdhci_o2_enable_internal_clock(struct sdhci_host *host)
+> +{
+> +	ktime_t timeout;
+> +	u16 scratch;
+> +	u32 scratch32;
+> +
+> +	/* PLL software reset */
+> +	scratch32 = sdhci_readl(host, O2_PLL_DLL_WDT_CONTROL1);
+> +	scratch32 |= O2_PLL_SOFT_RESET;
+> +	sdhci_writel(host, scratch32, O2_PLL_DLL_WDT_CONTROL1);
+> +	udelay(1);
+> +	scratch32 &= ~(O2_PLL_SOFT_RESET);
+> +	sdhci_writel(host, scratch32, O2_PLL_DLL_WDT_CONTROL1);
+> +
+> +	/* PLL force active */
+> +	scratch32 |= O2_PLL_FORCE_ACTIVE;
+> +	sdhci_writel(host, scratch32, O2_PLL_DLL_WDT_CONTROL1);
+> +
+> +	/* Wait max 20 ms */
+> +	timeout = ktime_add_ms(ktime_get(), 20);
+> +	while (1) {
+> +		bool timedout = ktime_after(ktime_get(), timeout);
+> +
+> +		scratch = sdhci_readw(host, O2_PLL_DLL_WDT_CONTROL1);
+> +		if (scratch & O2_PLL_LOCK_STATUS)
+> +			break;
+> +		if (timedout) {
+> +			pr_err("%s: Internal clock never stabilised.\n",
+> +			       mmc_hostname(host->mmc));
+> +			sdhci_dumpregs(host);
+> +			goto out;
+> +		}
+> +		udelay(10);
+> +	}
+> +
+> +	/* Wait for card detect finish */
+> +	udelay(1);
+> +	sdhci_o2_wait_card_detect_stable(host);
+> +
+> +out:
+> +	/* Cancel PLL force active */
+> +	scratch32 = sdhci_readl(host, O2_PLL_DLL_WDT_CONTROL1);
+> +	scratch32 &= ~O2_PLL_FORCE_ACTIVE;
+> +	sdhci_writel(host, scratch32, O2_PLL_DLL_WDT_CONTROL1);
+> +}
+> +
+> +static int sdhci_o2_get_cd(struct mmc_host *mmc)
+> +{
+> +	struct sdhci_host *host = mmc_priv(mmc);
+> +
+> +	sdhci_o2_enable_internal_clock(host);
+> +
+> +	return !!(sdhci_readl(host, SDHCI_PRESENT_STATE) & SDHCI_CARD_PRESENT);
+> +}
+> +
+> +static void o2_pci_set_baseclk(struct sdhci_pci_chip *chip, u32 value)
+> +{
+> +	u32 scratch_32;
+> +
+> +	pci_read_config_dword(chip->pdev,
+> +			      O2_SD_PLL_SETTING, &scratch_32);
+> +
+> +	scratch_32 &= 0x0000FFFF;
+> +	scratch_32 |= value;
+> +
+> +	pci_write_config_dword(chip->pdev,
+> +			       O2_SD_PLL_SETTING, scratch_32);
+> +}
+> +
+>  static void sdhci_o2_set_tuning_mode(struct sdhci_host *host)
+>  {
+>  	u16 reg;
+> @@ -136,19 +230,6 @@ static int sdhci_o2_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>  	return 0;
+>  }
+>  
+> -static void o2_pci_set_baseclk(struct sdhci_pci_chip *chip, u32 value)
+> -{
+> -	u32 scratch_32;
+> -	pci_read_config_dword(chip->pdev,
+> -			      O2_SD_PLL_SETTING, &scratch_32);
+> -
+> -	scratch_32 &= 0x0000FFFF;
+> -	scratch_32 |= value;
+> -
+> -	pci_write_config_dword(chip->pdev,
+> -			       O2_SD_PLL_SETTING, scratch_32);
+> -}
+> -
+>  static void o2_pci_led_enable(struct sdhci_pci_chip *chip)
+>  {
+>  	int ret;
+> @@ -284,86 +365,6 @@ static void sdhci_pci_o2_enable_msi(struct sdhci_pci_chip *chip,
+>  	host->irq = pci_irq_vector(chip->pdev, 0);
+>  }
+>  
+> -static void sdhci_o2_wait_card_detect_stable(struct sdhci_host *host)
+> -{
+> -	ktime_t timeout;
+> -	u32 scratch32;
+> -
+> -	/* Wait max 50 ms */
+> -	timeout = ktime_add_ms(ktime_get(), 50);
+> -	while (1) {
+> -		bool timedout = ktime_after(ktime_get(), timeout);
+> -
+> -		scratch32 = sdhci_readl(host, SDHCI_PRESENT_STATE);
+> -		if ((scratch32 & SDHCI_CARD_PRESENT) >> SDHCI_CARD_PRES_SHIFT
+> -		    == (scratch32 & SDHCI_CD_LVL) >> SDHCI_CD_LVL_SHIFT)
+> -			break;
+> -
+> -		if (timedout) {
+> -			pr_err("%s: Card Detect debounce never finished.\n",
+> -			       mmc_hostname(host->mmc));
+> -			sdhci_dumpregs(host);
+> -			return;
+> -		}
+> -		udelay(10);
+> -	}
+> -}
+> -
+> -static void sdhci_o2_enable_internal_clock(struct sdhci_host *host)
+> -{
+> -	ktime_t timeout;
+> -	u16 scratch;
+> -	u32 scratch32;
+> -
+> -	/* PLL software reset */
+> -	scratch32 = sdhci_readl(host, O2_PLL_DLL_WDT_CONTROL1);
+> -	scratch32 |= O2_PLL_SOFT_RESET;
+> -	sdhci_writel(host, scratch32, O2_PLL_DLL_WDT_CONTROL1);
+> -	udelay(1);
+> -	scratch32 &= ~(O2_PLL_SOFT_RESET);
+> -	sdhci_writel(host, scratch32, O2_PLL_DLL_WDT_CONTROL1);
+> -
+> -	/* PLL force active */
+> -	scratch32 |= O2_PLL_FORCE_ACTIVE;
+> -	sdhci_writel(host, scratch32, O2_PLL_DLL_WDT_CONTROL1);
+> -
+> -	/* Wait max 20 ms */
+> -	timeout = ktime_add_ms(ktime_get(), 20);
+> -	while (1) {
+> -		bool timedout = ktime_after(ktime_get(), timeout);
+> -
+> -		scratch = sdhci_readw(host, O2_PLL_DLL_WDT_CONTROL1);
+> -		if (scratch & O2_PLL_LOCK_STATUS)
+> -			break;
+> -		if (timedout) {
+> -			pr_err("%s: Internal clock never stabilised.\n",
+> -			       mmc_hostname(host->mmc));
+> -			sdhci_dumpregs(host);
+> -			goto out;
+> -		}
+> -		udelay(10);
+> -	}
+> -
+> -	/* Wait for card detect finish */
+> -	udelay(1);
+> -	sdhci_o2_wait_card_detect_stable(host);
+> -
+> -out:
+> -	/* Cancel PLL force active */
+> -	scratch32 = sdhci_readl(host, O2_PLL_DLL_WDT_CONTROL1);
+> -	scratch32 &= ~O2_PLL_FORCE_ACTIVE;
+> -	sdhci_writel(host, scratch32, O2_PLL_DLL_WDT_CONTROL1);
+> -}
+> -
+> -static int sdhci_o2_get_cd(struct mmc_host *mmc)
+> -{
+> -	struct sdhci_host *host = mmc_priv(mmc);
+> -
+> -	sdhci_o2_enable_internal_clock(host);
+> -
+> -	return !!(sdhci_readl(host, SDHCI_PRESENT_STATE) & SDHCI_CARD_PRESENT);
+> -}
+> -
+>  static void sdhci_o2_enable_clk(struct sdhci_host *host, u16 clk)
+>  {
+>  	/* Enable internal clock */
+> 
