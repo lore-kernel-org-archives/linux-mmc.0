@@ -1,95 +1,62 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH] mmc: dw_mmc-rockchip: Using 180 sample phase if all
- phases work
-Date: Thu, 5 Sep 2019 09:30:08 +0200
-Message-ID: <CAPDyKFqbr9Q-aDOf3t+nftw=a1vR95yHHo=-ieoT1fnQ1S-HCQ@mail.gmail.com>
-References: <1567564030-83224-1-git-send-email-shawn.lin@rock-chips.com>
- <CAD=FV=Vwmj=LehhLCN5OBbEfNNXp9gULLYRoVV86HtqZBxvEjw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <CAD=FV=Vwmj=LehhLCN5OBbEfNNXp9gULLYRoVV86HtqZBxvEjw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
-List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Cc: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
+From: Zhou Yanjie <zhouyanjie@zoho.com>
+Subject: [PATCH 2/4] MMC: Ingenic: Add 8bit mode support.
+Date: Thu,  5 Sep 2019 15:38:07 +0800
+Message-ID: <1567669089-88693-3-git-send-email-zhouyanjie@zoho.com>
+References: <1567669089-88693-1-git-send-email-zhouyanjie@zoho.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1567669089-88693-1-git-send-email-zhouyanjie@zoho.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-mips@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, ulf.hansson@linaro.org, paul.burton@mips.com, linus.walleij@linaro.org, paul@crapouillou.net, malat@debian.org, yuehaibing@huawei.com, ezequiel@collabora.com, robh+dt@kernel.org, mark.rutland@arm.com, syq@debian.org, jiaxun.yang@flygoat.com
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, 4 Sep 2019 at 17:44, Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org> wrote:
->
-> Hi,
->
-> On Tue, Sep 3, 2019 at 7:28 PM Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org> wrote:
-> >
-> > default_sample_phase is used to make sure the cards are enumurated
-> > properly and will be set to 0 if not assigned. However, the sample
-> > phase should depends on the tuned phase if running higher clock rate.
-> > If all phases work but default_sample_phase isn't assigned, driver
-> > set sample phase to 0 for this case, which isn't the best choice,
-> > because we always expect to set phase to the middle of window. To
-> > solve the following continually issues we have seen in the test, we
-> > need set phase to the more stable one, 180, if all phases work.
-> >
-> > mmcblk1: error -84 transferring data, sector 1735064, nr 8, cmd
-> > response 0x900, card status 0xb00
-> > mmcblk1: retrying using single block read
-> > dwmmc_rockchip ff0f0000.dwmmc: All phases work, using default phase 0.
-> > mmcblk1: retrying because a re-tune was needed
-> >
-> > .....
-> >
-> > mmcblk1: error -84 transferring data, sector 1728672, nr 248, cmd
-> > response 0x900, card status 0xb00
-> > mmcblk1: retrying using single block read
-> > dwmmc_rockchip ff0f0000.dwmmc: All phases work, using default phase 0.
-> >
-> > Signed-off-by: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-> > ---
-> >
-> >  drivers/mmc/host/dw_mmc-rockchip.c | 5 ++---
-> >  1 file changed, 2 insertions(+), 3 deletions(-)
-> >
-> > diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
-> > index d4d0213..9ef9723 100644
-> > --- a/drivers/mmc/host/dw_mmc-rockchip.c
-> > +++ b/drivers/mmc/host/dw_mmc-rockchip.c
-> > @@ -209,9 +209,8 @@ static int dw_mci_rk3288_execute_tuning(struct dw_mci_slot *slot, u32 opcode)
-> >         }
-> >
-> >         if (ranges[0].start == 0 && ranges[0].end == priv->num_phases - 1) {
-> > -               clk_set_phase(priv->sample_clk, priv->default_sample_phase);
-> > -               dev_info(host->dev, "All phases work, using default phase %d.",
-> > -                        priv->default_sample_phase);
-> > +               clk_set_phase(priv->sample_clk, 180);
-> > +               dev_info(host->dev, "All phases work, using phase 180.");
->
-> This violates what is documented in the device tree bindings, which says:
->
-> * rockchip,default-sample-phase: The default phase to set ciu-sample at
->   probing, low speeds or in case where all phases work at tuning time.
->   If not specified 0 deg will be used.
->
-> Specifically:
-> * You don't use "default-sample-phase" at all when all phases pass.
-> * You don't default to 0 if not specified.
->
-> Personally I think we could change the bindings to say: "If not
-> specified 180 deg will be used" and then change the code to do the
-> same.  If we wanted to keep the "stable ABI" that is device tree we
-> could also just do the "180 default" for new SoCs and then manually
-> add the device tree fragment to all old dts files.
->
+Add support for 8bit mode, now supports 1bit/4bit/8bit modes.
 
-Thanks for spotting this! Let me drop the patch and wait for a new
-version from Shawn.
+Signed-off-by: Zhou Yanjie <zhouyanjie@zoho.com>
+---
+ drivers/mmc/host/jz4740_mmc.c | 12 ++++++++++--
+ 1 file changed, 10 insertions(+), 2 deletions(-)
 
-Kind regards
-Uffe
+diff --git a/drivers/mmc/host/jz4740_mmc.c b/drivers/mmc/host/jz4740_mmc.c
+index 1b1fcb7..d6811a7 100644
+--- a/drivers/mmc/host/jz4740_mmc.c
++++ b/drivers/mmc/host/jz4740_mmc.c
+@@ -79,6 +79,8 @@
+ 
+ #define JZ_MMC_CMDAT_IO_ABORT BIT(11)
+ #define JZ_MMC_CMDAT_BUS_WIDTH_4BIT BIT(10)
++#define JZ_MMC_CMDAT_BUS_WIDTH_8BIT (BIT(10) | BIT(9))
++#define	JZ_MMC_CMDAT_BUS_WIDTH_MASK (BIT(10) | BIT(9))
+ #define JZ_MMC_CMDAT_DMA_EN BIT(8)
+ #define JZ_MMC_CMDAT_INIT BIT(7)
+ #define JZ_MMC_CMDAT_BUSY BIT(6)
+@@ -899,11 +901,16 @@ static void jz4740_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 
+ 	switch (ios->bus_width) {
+ 	case MMC_BUS_WIDTH_1:
+-		host->cmdat &= ~JZ_MMC_CMDAT_BUS_WIDTH_4BIT;
++		host->cmdat &= ~JZ_MMC_CMDAT_BUS_WIDTH_MASK;
+ 		break;
+ 	case MMC_BUS_WIDTH_4:
++		host->cmdat &= ~JZ_MMC_CMDAT_BUS_WIDTH_MASK;
+ 		host->cmdat |= JZ_MMC_CMDAT_BUS_WIDTH_4BIT;
+ 		break;
++	case MMC_BUS_WIDTH_8:
++		host->cmdat &= ~JZ_MMC_CMDAT_BUS_WIDTH_MASK;
++		host->cmdat |= JZ_MMC_CMDAT_BUS_WIDTH_8BIT;
++		break;
+ 	default:
+ 		break;
+ 	}
+@@ -1034,7 +1041,8 @@ static int jz4740_mmc_probe(struct platform_device* pdev)
+ 
+ 	dev_info(&pdev->dev, "Using %s, %d-bit mode\n",
+ 		 host->use_dma ? "DMA" : "PIO",
+-		 (mmc->caps & MMC_CAP_4_BIT_DATA) ? 4 : 1);
++		 (mmc->caps & MMC_CAP_8_BIT_DATA) ? 8 :
++		 ((mmc->caps & MMC_CAP_4_BIT_DATA) ? 4 : 1));
+ 
+ 	return 0;
+ 
+-- 
+2.7.4
