@@ -1,102 +1,95 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 05/11] mmc: core: Clarify sdio_irq_pending flag for MMC_CAP2_SDIO_IRQ_NOTHREAD
-Date: Thu, 5 Sep 2019 09:29:48 +0200
-Message-ID: <CAPDyKFpAegE+7ySjnAPChHJY8L7yRQYSvvTMZq0=TDDnV1TD0Q@mail.gmail.com>
-References: <20190903142207.5825-1-ulf.hansson@linaro.org> <20190903142207.5825-6-ulf.hansson@linaro.org>
- <20190905003451.GI70797@google.com>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH] mmc: dw_mmc-rockchip: Using 180 sample phase if all
+ phases work
+Date: Thu, 5 Sep 2019 09:30:08 +0200
+Message-ID: <CAPDyKFqbr9Q-aDOf3t+nftw=a1vR95yHHo=-ieoT1fnQ1S-HCQ@mail.gmail.com>
+References: <1567564030-83224-1-git-send-email-shawn.lin@rock-chips.com>
+ <CAD=FV=Vwmj=LehhLCN5OBbEfNNXp9gULLYRoVV86HtqZBxvEjw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190905003451.GI70797@google.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matthias Kaehlcke <mka@chromium.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Douglas Anderson <dianders@chromium.org>, Shawn Lin <shawn.lin@rock-chips.com>, Jaehoon Chung <jh80.chung@samsung.com>, Yong Mao <yong.mao@mediatek.com>, Chaotian Jing <chaotian.jing@mediatek.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <CAD=FV=Vwmj=LehhLCN5OBbEfNNXp9gULLYRoVV86HtqZBxvEjw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
+List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Cc: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, 5 Sep 2019 at 02:34, Matthias Kaehlcke <mka@chromium.org> wrote:
+On Wed, 4 Sep 2019 at 17:44, Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org> wrote:
 >
-> On Tue, Sep 03, 2019 at 04:22:01PM +0200, Ulf Hansson wrote:
-> > In the single SDIO IRQ handler case, the sdio_irq_pending flag is used to
-> > avoid reading the SDIO_CCCR_INTx register and instead immediately call the
-> > SDIO func's >irq_handler() callback.
+> Hi,
+>
+> On Tue, Sep 3, 2019 at 7:28 PM Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org> wrote:
 > >
-> > To clarify the use behind the flag for the MMC_CAP2_SDIO_IRQ_NOTHREAD case,
-> > let's set the flag from inside sdio_signal_irq(), rather from
-> > sdio_run_irqs(). Moreover, let's also reset the flag when the SDIO IRQ have
-> > been properly processed.
+> > default_sample_phase is used to make sure the cards are enumurated
+> > properly and will be set to 0 if not assigned. However, the sample
+> > phase should depends on the tuned phase if running higher clock rate.
+> > If all phases work but default_sample_phase isn't assigned, driver
+> > set sample phase to 0 for this case, which isn't the best choice,
+> > because we always expect to set phase to the middle of window. To
+> > solve the following continually issues we have seen in the test, we
+> > need set phase to the more stable one, 180, if all phases work.
 > >
-> > Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> > mmcblk1: error -84 transferring data, sector 1735064, nr 8, cmd
+> > response 0x900, card status 0xb00
+> > mmcblk1: retrying using single block read
+> > dwmmc_rockchip ff0f0000.dwmmc: All phases work, using default phase 0.
+> > mmcblk1: retrying because a re-tune was needed
+> >
+> > .....
+> >
+> > mmcblk1: error -84 transferring data, sector 1728672, nr 248, cmd
+> > response 0x900, card status 0xb00
+> > mmcblk1: retrying using single block read
+> > dwmmc_rockchip ff0f0000.dwmmc: All phases work, using default phase 0.
+> >
+> > Signed-off-by: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
 > > ---
-> >  drivers/mmc/core/sdio_irq.c | 9 ++++++---
-> >  1 file changed, 6 insertions(+), 3 deletions(-)
 > >
-> > diff --git a/drivers/mmc/core/sdio_irq.c b/drivers/mmc/core/sdio_irq.c
-> > index f75043266984..0962a4357d54 100644
-> > --- a/drivers/mmc/core/sdio_irq.c
-> > +++ b/drivers/mmc/core/sdio_irq.c
-> > @@ -59,6 +59,7 @@ static int process_sdio_pending_irqs(struct mmc_host *host)
-> >  {
-> >       struct mmc_card *card = host->card;
-> >       int i, ret, count;
-> > +     bool sdio_irq_pending = host->sdio_irq_pending;
-> >       unsigned char pending;
-> >       struct sdio_func *func;
+> >  drivers/mmc/host/dw_mmc-rockchip.c | 5 ++---
+> >  1 file changed, 2 insertions(+), 3 deletions(-)
 > >
-> > @@ -66,13 +67,16 @@ static int process_sdio_pending_irqs(struct mmc_host *host)
-> >       if (mmc_card_suspended(card))
-> >               return 0;
+> > diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
+> > index d4d0213..9ef9723 100644
+> > --- a/drivers/mmc/host/dw_mmc-rockchip.c
+> > +++ b/drivers/mmc/host/dw_mmc-rockchip.c
+> > @@ -209,9 +209,8 @@ static int dw_mci_rk3288_execute_tuning(struct dw_mci_slot *slot, u32 opcode)
+> >         }
 > >
-> > +     /* Clear the flag to indicate that we have processed the IRQ. */
-> > +     host->sdio_irq_pending = false;
-> > +
+> >         if (ranges[0].start == 0 && ranges[0].end == priv->num_phases - 1) {
+> > -               clk_set_phase(priv->sample_clk, priv->default_sample_phase);
+> > -               dev_info(host->dev, "All phases work, using default phase %d.",
+> > -                        priv->default_sample_phase);
+> > +               clk_set_phase(priv->sample_clk, 180);
+> > +               dev_info(host->dev, "All phases work, using phase 180.");
 >
-> It's not entirely true that we have processed the IRQ,
-> the sdio_get_pending_irqs() below could fail and we'd return. However
-> I guess if it comes to that we are in a pretty bad shape already and
-> the value of the flag doesn't really matter.
-
-Yes, that's my view as well.
-
+> This violates what is documented in the device tree bindings, which says:
 >
-> >       /*
-> >        * Optimization, if there is only 1 function interrupt registered
-> >        * and we know an IRQ was signaled then call irq handler directly.
-> >        * Otherwise do the full probe.
-> >        */
-> >       func = card->sdio_single_irq;
-> > -     if (func && host->sdio_irq_pending) {
-> > +     if (func && sdio_irq_pending) {
-> >               func->irq_handler(func);
-> >               return 1;
-> >       }
-> > @@ -110,7 +114,6 @@ static void sdio_run_irqs(struct mmc_host *host)
-> >  {
-> >       mmc_claim_host(host);
-> >       if (host->sdio_irqs) {
-> > -             host->sdio_irq_pending = true;
-> >               process_sdio_pending_irqs(host);
-> >               if (host->ops->ack_sdio_irq)
-> >                       host->ops->ack_sdio_irq(host);
-> > @@ -128,6 +131,7 @@ void sdio_irq_work(struct work_struct *work)
-> >
-> >  void sdio_signal_irq(struct mmc_host *host)
-> >  {
-> > +     host->sdio_irq_pending = true;
-> >       queue_delayed_work(system_wq, &host->sdio_irq_work, 0);
-> >  }
-> >  EXPORT_SYMBOL_GPL(sdio_signal_irq);
-> > @@ -173,7 +177,6 @@ static int sdio_irq_thread(void *_host)
-> >               if (ret)
-> >                       break;
-> >               ret = process_sdio_pending_irqs(host);
-> > -             host->sdio_irq_pending = false;
-> >               mmc_release_host(host);
-> >
-> >               /*
+> * rockchip,default-sample-phase: The default phase to set ciu-sample at
+>   probing, low speeds or in case where all phases work at tuning time.
+>   If not specified 0 deg will be used.
 >
-> Reviewed-by: Matthias Kaehlcke <mka@chromium.org>
+> Specifically:
+> * You don't use "default-sample-phase" at all when all phases pass.
+> * You don't default to 0 if not specified.
+>
+> Personally I think we could change the bindings to say: "If not
+> specified 180 deg will be used" and then change the code to do the
+> same.  If we wanted to keep the "stable ABI" that is device tree we
+> could also just do the "180 default" for new SoCs and then manually
+> add the device tree fragment to all old dts files.
+>
 
-Thanks!
+Thanks for spotting this! Let me drop the patch and wait for a new
+version from Shawn.
 
 Kind regards
 Uffe
