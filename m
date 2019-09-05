@@ -1,66 +1,94 @@
-From: Matthias Kaehlcke <mka@chromium.org>
-Subject: Re: [PATCH 11/11] mmc: sdhci: Convert to use sdio_irq_enabled()
-Date: Thu, 5 Sep 2019 12:02:46 -0700
-Message-ID: <20190905190246.GC133864@google.com>
-References: <20190903142207.5825-1-ulf.hansson@linaro.org>
- <20190903142207.5825-12-ulf.hansson@linaro.org>
+From: Doug Anderson <dianders@chromium.org>
+Subject: Re: [PATCH 02/11] mmc: dw_mmc: Re-store SDIO IRQs mask at system resume
+Date: Thu, 5 Sep 2019 16:47:05 -0700
+Message-ID: <CAD=FV=XaaC=RpCiF09WAuhmDgte3EmFjFxk9y7xpX=HBwaRr9g@mail.gmail.com>
+References: <20190903142207.5825-1-ulf.hansson@linaro.org> <20190903142207.5825-3-ulf.hansson@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20190903142207.5825-12-ulf.hansson@linaro.org>
+In-Reply-To: <20190903142207.5825-3-ulf.hansson@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, Douglas Anderson <dianders@chromium.org>, Shawn Lin <shawn.lin@rock-chips.com>, Jaehoon Chung <jh80.chung@samsung.com>, Yong Mao <yong.mao@mediatek.com>, Chaotian Jing <chaotian.jing@mediatek.com>, linux-kernel@vger.kernel.org
+Cc: Linux MMC List <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Matthias Kaehlcke <mka@chromium.org>, Shawn Lin <shawn.lin@rock-chips.com>, Jaehoon Chung <jh80.chung@samsung.com>, Yong Mao <yong.mao@mediatek.com>, Chaotian Jing <chaotian.jing@mediatek.com>, LKML <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Sep 03, 2019 at 04:22:07PM +0200, Ulf Hansson wrote:
-> Instead of keeping track of whether SDIO IRQs have been enabled via an
-> internal sdhci status flag, avoid the open-coding and convert into using
-> sdio_irq_enabled().
-> 
+Hi,
+
+On Tue, Sep 3, 2019 at 7:22 AM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>
+> In cases when SDIO IRQs have been enabled, runtime suspend is prevented by
+> the driver. However, this still means dw_mci_runtime_suspend|resume() gets
+> called during system suspend/resume, via pm_runtime_force_suspend|resume().
+> This means during system suspend/resume, the register context of the dw_mmc
+> device most likely loses its register context, even in cases when SDIO IRQs
+> have been enabled.
+
+Even if they weren't lost the resume code currently has this statement:
+
+mci_writel(host, INTMASK, SDMMC_INT_CMD_DONE | SDMMC_INT_DATA_OVER |
+   SDMMC_INT_TXDR | SDMMC_INT_RXDR |
+   DW_MCI_ERROR_FLAGS);
+
+...so that would have clobbered any existing state even if register
+state wasn't lost.  ;-)
+
+> To re-enable the SDIO IRQs during system resume, the dw_mmc driver
+> currently relies on the mmc core to re-enable the SDIO IRQs when it resumes
+> the SDIO card, but this isn't the recommended solution. Instead, it's
+> better to deal with this locally in the dw_mmc driver, so let's do that.
+>
 > Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 > ---
->  drivers/mmc/host/sdhci.c | 7 +------
->  drivers/mmc/host/sdhci.h | 1 -
->  2 files changed, 1 insertion(+), 7 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index a7df22ed65aa..4b4db41aec50 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -2142,11 +2142,6 @@ void sdhci_enable_sdio_irq(struct mmc_host *mmc, int enable)
->  		pm_runtime_get_noresume(host->mmc->parent);
->  
->  	spin_lock_irqsave(&host->lock, flags);
-> -	if (enable)
-> -		host->flags |= SDHCI_SDIO_IRQ_ENABLED;
-> -	else
-> -		host->flags &= ~SDHCI_SDIO_IRQ_ENABLED;
-> -
->  	sdhci_enable_sdio_irq_nolock(host, enable);
->  	spin_unlock_irqrestore(&host->lock, flags);
->  
-> @@ -3380,7 +3375,7 @@ int sdhci_runtime_resume_host(struct sdhci_host *host, int soft_reset)
->  	host->runtime_suspended = false;
->  
->  	/* Enable SDIO IRQ */
-> -	if (host->flags & SDHCI_SDIO_IRQ_ENABLED)
-> +	if (sdio_irq_enabled(mmc))
->  		sdhci_enable_sdio_irq_nolock(host, true);
->  
->  	/* Enable Card Detection */
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index 8effaac61c3a..a29c4cd2d92e 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -512,7 +512,6 @@ struct sdhci_host {
->  #define SDHCI_AUTO_CMD12	(1<<6)	/* Auto CMD12 support */
->  #define SDHCI_AUTO_CMD23	(1<<7)	/* Auto CMD23 support */
->  #define SDHCI_PV_ENABLED	(1<<8)	/* Preset value enabled */
-> -#define SDHCI_SDIO_IRQ_ENABLED	(1<<9)	/* SDIO irq enabled */
->  #define SDHCI_USE_64_BIT_DMA	(1<<12)	/* Use 64-bit DMA */
->  #define SDHCI_HS400_TUNING	(1<<13)	/* Tuning for HS400 */
->  #define SDHCI_SIGNALING_330	(1<<14)	/* Host is capable of 3.3V signaling */
+>  drivers/mmc/host/dw_mmc.c | 4 ++++
+>  1 file changed, 4 insertions(+)
+>
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index eea52e2c5a0c..f114710e82b4 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -3460,6 +3460,10 @@ int dw_mci_runtime_resume(struct device *dev)
+>         /* Force setup bus to guarantee available clock output */
+>         dw_mci_setup_bus(host->slot, true);
+>
+> +       /* Re-enable SDIO interrupts. */
+> +       if (sdio_irq_enabled(host->slot->mmc))
+> +               __dw_mci_enable_sdio_irq(host->slot, 1);
+> +
 
-Reviewed-by: Matthias Kaehlcke <mka@chromium.org>
+There's a slight bit of subtleness here and I guess we need to figure
+out if it matters.  From testing things seem to work OK so maybe we're
+fine, but just to explain what's bugging me:
+
+If we got an SDIO interrupt that was never ACKed then this is going to
+act like an implicit ACK.  Notice that dw_mci_ack_sdio_irq() is
+exactly this call because when the SDIO IRQ fires we mask it out.
+...then unmask when Acked.
+
+Specifically after your series is applied, I think this is what
+happens if an interrupt fires while the SDIO bus is officially
+suspended:
+
+1. dw_mci_interrupt() will get called which will mask the SDIO IRQ and
+then call sdio_signal_irq()
+
+2. sdio_signal_irq() will queue some delayed work.
+
+3. The work will call sdio_run_irqs()
+
+4. sdio_run_irqs() _won't_ ack the IRQ, so it will stay disabled.
+
+5. When we get to the resume we'll re-enable the interrupt.
+
+I guess that's fine, but it is a little weird that we might not really
+be restoring it simply because it got disabled due to the clobbering
+of INTMASK but also because we implicitly skipped Acking an interrupt
+that fired.
+
+
+I wonder if the correct fix is to just add an explit zeroing of the
+INTMASK (so mask all interrupts) in dw_mmc's suspend callback.  Then
+there's no possible way we could get an interrupt during suspend...
+
+
+
+-Doug
