@@ -1,13 +1,13 @@
 From: Doug Anderson <dianders@chromium.org>
-Subject: Re: [PATCH 05/11] mmc: core: Clarify sdio_irq_pending flag for MMC_CAP2_SDIO_IRQ_NOTHREAD
-Date: Fri, 6 Sep 2019 14:30:08 -0700
-Message-ID: <CAD=FV=UStS7xbChnmZwgcrqQJqC2xCjrNn9wKe-8Yod9xjWTKw@mail.gmail.com>
-References: <20190903142207.5825-1-ulf.hansson@linaro.org> <20190903142207.5825-6-ulf.hansson@linaro.org>
- <CAD=FV=UhA4pxui29k+SHygCYq+a3O8ELJCq7=6iVSUrnwvk8DQ@mail.gmail.com> <CAPDyKFo3BNjFcqfURP2TWrMWB3SGC6p4hMcxz++QRRBwCsLH4w@mail.gmail.com>
+Subject: Re: [PATCH 02/11] mmc: dw_mmc: Re-store SDIO IRQs mask at system resume
+Date: Fri, 6 Sep 2019 14:37:04 -0700
+Message-ID: <CAD=FV=XsEYg8vKMwynNTH1uCo7bXhorG2ON2zjBhsBDBZeTYSw@mail.gmail.com>
+References: <20190903142207.5825-1-ulf.hansson@linaro.org> <20190903142207.5825-3-ulf.hansson@linaro.org>
+ <CAD=FV=XaaC=RpCiF09WAuhmDgte3EmFjFxk9y7xpX=HBwaRr9g@mail.gmail.com> <CAPDyKFo7j=m0OWuhspzY-viU0cg1xdYqu83D1sfDsqz54YngQw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFo3BNjFcqfURP2TWrMWB3SGC6p4hMcxz++QRRBwCsLH4w@mail.gmail.com>
+In-Reply-To: <CAPDyKFo7j=m0OWuhspzY-viU0cg1xdYqu83D1sfDsqz54YngQw@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Linux MMC List <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Matthias Kaehlcke <mka@chromium.org>, Shawn Lin <shawn.lin@rock-chips.com>, Jaehoon Chung <jh80.chung@samsung.com>, Yong Mao <yong.mao@mediatek.com>, Chaotian Jing <chaotian.jing@mediatek.com>, LKML <linux-kernel@vger.kernel.org>
@@ -23,137 +23,123 @@ On Fri, Sep 6, 2019 at 2:20 AM Ulf Hansson <ulf.hansson@linaro.org> wrote:
 > >
 > > On Tue, Sep 3, 2019 at 7:22 AM Ulf Hansson <ulf.hansson@linaro.org> wrote:
 > > >
-> > > In the single SDIO IRQ handler case, the sdio_irq_pending flag is used to
-> > > avoid reading the SDIO_CCCR_INTx register and instead immediately call the
-> > > SDIO func's >irq_handler() callback.
-> > >
-> > > To clarify the use behind the flag for the MMC_CAP2_SDIO_IRQ_NOTHREAD case,
-> > > let's set the flag from inside sdio_signal_irq(), rather from
-> > > sdio_run_irqs().
+> > > In cases when SDIO IRQs have been enabled, runtime suspend is prevented by
+> > > the driver. However, this still means dw_mci_runtime_suspend|resume() gets
+> > > called during system suspend/resume, via pm_runtime_force_suspend|resume().
+> > > This means during system suspend/resume, the register context of the dw_mmc
+> > > device most likely loses its register context, even in cases when SDIO IRQs
+> > > have been enabled.
 > >
-> > I'm having a hard time parsing the above statement...  Can you reword
-> > and maybe I'll understand?
->
-> Sure, I admit, it's not very good. :-) How about the below.
->
-> The sdio_irq_pending flag is used to let host drivers indicate that it
-> has signaled an IRQ. If that is the case and we only have a single
-> SDIO func that have claimed an SDIO IRQ, our assumption is that we can
-> avoid reading the SDIO_CCCR_INTx register and just call the SDIO func
-> irq handler immediately. This makes sense, but the flag is set/cleared
-> in a somewhat messy order, let's fix that up according to below.
->
-> First, the flag is currently set in sdio_run_irqs(), which is executed
-> as a work that was scheduled from sdio_signal_irq(). To make it more
-> implicit that the host have signaled an IRQ, let's instead immediately
-> set the flag in sdio_signal_irq(). This also makes the behavior
-> consistent with host drivers that uses the legacy,
-> mmc_signal_sdio_irq() API. This have no functional impact, because we
-> don't expect host drivers to call sdio_signal_irq() until after the
-> work (sdio_run_irqs()) have been executed anyways.
->
-> Second, currently we never clears the flag when using the
-> sdio_run_irqs() work, but only when using the sdio_irq_thread(). Let
-> make the behavior consistent, by moving the flag to be cleared inside
-> the common process_sdio_pending_irqs() function. Additionally, tweak
-> the behavior of the flag slightly, by avoiding to clear it unless we
-> processed the SDIO IRQ. The purpose with this at this point, is to
-> keep the information about whether there have been an SDIO IRQ
-> signaled by the host, so at system resume we can decide to process it
-> without reading the SDIO_CCCR_INTx register.
->
+> > Even if they weren't lost the resume code currently has this statement:
 > >
+> > mci_writel(host, INTMASK, SDMMC_INT_CMD_DONE | SDMMC_INT_DATA_OVER |
+> >    SDMMC_INT_TXDR | SDMMC_INT_RXDR |
+> >    DW_MCI_ERROR_FLAGS);
 > >
-> > > Moreover, let's also reset the flag when the SDIO IRQ have
-> > > been properly processed.
+> > ...so that would have clobbered any existing state even if register
+> > state wasn't lost.  ;-)
+> >
+> > > To re-enable the SDIO IRQs during system resume, the dw_mmc driver
+> > > currently relies on the mmc core to re-enable the SDIO IRQs when it resumes
+> > > the SDIO card, but this isn't the recommended solution. Instead, it's
+> > > better to deal with this locally in the dw_mmc driver, so let's do that.
 > > >
 > > > Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 > > > ---
-> > >  drivers/mmc/core/sdio_irq.c | 9 ++++++---
-> > >  1 file changed, 6 insertions(+), 3 deletions(-)
-> >
-> > Nice!  This looks like it addresses some of the things that came up in
-> > the previous discussion [1] and should be a nice improvement.  From
-> > re-reading that discussion that will probably change the behvaior
-> > slightly (hopefully for the better) in the single-function case where
-> > we might actually poll CCCR_INTx sometimes now.
->
-> Correct!
->
-> >
-> >
-> > > diff --git a/drivers/mmc/core/sdio_irq.c b/drivers/mmc/core/sdio_irq.c
-> > > index f75043266984..0962a4357d54 100644
-> > > --- a/drivers/mmc/core/sdio_irq.c
-> > > +++ b/drivers/mmc/core/sdio_irq.c
-> > > @@ -59,6 +59,7 @@ static int process_sdio_pending_irqs(struct mmc_host *host)
-> > >  {
-> > >         struct mmc_card *card = host->card;
-> > >         int i, ret, count;
-> > > +       bool sdio_irq_pending = host->sdio_irq_pending;
-> > >         unsigned char pending;
-> > >         struct sdio_func *func;
+> > >  drivers/mmc/host/dw_mmc.c | 4 ++++
+> > >  1 file changed, 4 insertions(+)
 > > >
-> > > @@ -66,13 +67,16 @@ static int process_sdio_pending_irqs(struct mmc_host *host)
-> > >         if (mmc_card_suspended(card))
-> > >                 return 0;
+> > > diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> > > index eea52e2c5a0c..f114710e82b4 100644
+> > > --- a/drivers/mmc/host/dw_mmc.c
+> > > +++ b/drivers/mmc/host/dw_mmc.c
+> > > @@ -3460,6 +3460,10 @@ int dw_mci_runtime_resume(struct device *dev)
+> > >         /* Force setup bus to guarantee available clock output */
+> > >         dw_mci_setup_bus(host->slot, true);
 > > >
-> > > +       /* Clear the flag to indicate that we have processed the IRQ. */
-> > > +       host->sdio_irq_pending = false;
+> > > +       /* Re-enable SDIO interrupts. */
+> > > +       if (sdio_irq_enabled(host->slot->mmc))
+> > > +               __dw_mci_enable_sdio_irq(host->slot, 1);
 > > > +
-> > >         /*
-> > >          * Optimization, if there is only 1 function interrupt registered
-> > >          * and we know an IRQ was signaled then call irq handler directly.
-> > >          * Otherwise do the full probe.
-> > >          */
-> > >         func = card->sdio_single_irq;
-> > > -       if (func && host->sdio_irq_pending) {
-> > > +       if (func && sdio_irq_pending) {
-> > >                 func->irq_handler(func);
-> > >                 return 1;
-> > >         }
-> > > @@ -110,7 +114,6 @@ static void sdio_run_irqs(struct mmc_host *host)
-> > >  {
-> > >         mmc_claim_host(host);
-> > >         if (host->sdio_irqs) {
-> > > -               host->sdio_irq_pending = true;
-> > >                 process_sdio_pending_irqs(host);
-> > >                 if (host->ops->ack_sdio_irq)
-> > >                         host->ops->ack_sdio_irq(host);
-> > > @@ -128,6 +131,7 @@ void sdio_irq_work(struct work_struct *work)
-> > >
-> > >  void sdio_signal_irq(struct mmc_host *host)
-> > >  {
-> > > +       host->sdio_irq_pending = true;
 > >
-> > Is this safe to do without claiming the host or any other type of
-> > locking?  sdio_signal_irq() is called directly from the interrupt
-> > handler on dw_mmc with no locks held at all.  Could we have races /
-> > problems with weakly ordered memory?
+> > There's a slight bit of subtleness here and I guess we need to figure
+> > out if it matters.  From testing things seem to work OK so maybe we're
+> > fine, but just to explain what's bugging me:
+> >
+> > If we got an SDIO interrupt that was never ACKed then this is going to
+> > act like an implicit ACK.  Notice that dw_mci_ack_sdio_irq() is
+> > exactly this call because when the SDIO IRQ fires we mask it out.
+> > ...then unmask when Acked.
+> >
+> > Specifically after your series is applied, I think this is what
+> > happens if an interrupt fires while the SDIO bus is officially
+> > suspended:
+> >
+> > 1. dw_mci_interrupt() will get called which will mask the SDIO IRQ and
+> > then call sdio_signal_irq()
+> >
+> > 2. sdio_signal_irq() will queue some delayed work.
+> >
+> > 3. The work will call sdio_run_irqs()
+> >
+> > 4. sdio_run_irqs() _won't_ ack the IRQ, so it will stay disabled.
+> >
+> > 5. When we get to the resume we'll re-enable the interrupt.
 >
-> At this point, for $subject patch and @subject series, I don't see any
-> issues. But perhaps when we go forward and start using the flag
-> slightly differently.
+> Correct.
+>
+> >
+> > I guess that's fine, but it is a little weird that we might not really
+> > be restoring it simply because it got disabled due to the clobbering
+> > of INTMASK but also because we implicitly skipped Acking an interrupt
+> > that fired.
+>
+> Let me comment on that, because there is actually two cases that are
+> relevant here to be covered.
+>
+> 1. After the SDIO card has been system suspended, sdio_run_irqs()
+> doesn't call the ->ack_sdio_irq() callback, as to prevents the host
+> driver from re-enabling the SDIO irq (acking). This is to avoid the
+> host from re-signalling the same SDIO IRQ over and over again when the
+> SDIO card is suspended.
+>
+> 2. Dealing with the SDIO IRQ bit-mask when the host driver system
+> suspends/resumes. This is host specific, but a common behavior is that
+> the driver can't allow any IRQ to be managed by its IRQ handler in a
+> suspended state. This is because the device (MMC controller) may be
+> put into a low power state (no clocks enabled, register context is
+> lost and not accessible, etc), which makes the device non-functional.
 
-Lockless concurrency always makes my head hurt (especially when I try
-to consider weakly ordered memory) and I've learned that the only way
-I can reason about it and have any belief that I got it right is to
-always make sure I access values in a context where things are locked.
+Yeah, if you look at dw_mci_runtime_suspend() you can actually see
+that (at least in many cases) we actually disable the "BIU" clock.  I
+believe this fully turns the clock off the controller and it can't
+fire interrupts.
+
+If I remember correctly the problem I actually saw before was that the
+moment we turned the BIU back on in resume the SDIO interrupt fired.
 :-P
 
-Let's see if I can figure out any actual problem, though...
 
-Certainly the queue_delayed_work() would act as a barrier so you don't
-have to worry about the worker not seeing the "= true".
+> > I wonder if the correct fix is to just add an explit zeroing of the
+> > INTMASK (so mask all interrupts) in dw_mmc's suspend callback.  Then
+> > there's no possible way we could get an interrupt during suspend...
+>
+> Exactly. Other host drivers do this as well.
+>
+> Although note that the host device gets system suspended after the
+> sdio card device, so there is still a window when an SDIO IRQ can be
+> signaled. This is covered by 1) above.
+>
+> Also note that, in general it also depends on whether there is wakeup
+> IRQ configured and how that wakeup might be handled. This is another
+> story, which doesn't seem relevant for dw_mmc, at least not at this
+> point.
 
-I suppose it's definitely possible that (if the worker is already
-running) that our "= true" will get clobbered by an "= false" from a
-previous instance of the worker running.  I guess that's unlikely
-because we can't get a second IRQ signaled until the "->ack_sdio_irq"
-ran and presumably there's enough stuff after the "= false" that one
-of them would have a barrier that made sure that the "= false" didn't
-affect us in a delayed way.
+I guess for now things will work OK so we can leave things as they
+are.  If I see problems I can try masking all the interrupts at
+suspend time, making sure that I don't mess up runtime suspend in
+cases where we have a removable card using the builtin CD...
 
-So I guess we're fine...
+Thanks!
 
 -Doug
