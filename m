@@ -1,7 +1,7 @@
 From: Baolin Wang <baolin.wang@linaro.org>
-Subject: [PATCH 3/4] mmc: host: sdhci-sprd: Add virtual command queue support
-Date: Fri,  6 Sep 2019 11:52:01 +0800
-Message-ID: <c8cb69b48dd8b6317a9e53e87c5669fbfbeedc30.1567740135.git.baolin.wang@linaro.org>
+Subject: [PATCH 4/4] mmc: host: sdhci: Add virtual command queue support
+Date: Fri,  6 Sep 2019 11:52:02 +0800
+Message-ID: <fc8a0fe513d244375013546c3c03967510feea4a.1567740135.git.baolin.wang@linaro.org>
 References: <cover.1567740135.git.baolin.wang@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <cover.1567740135.git.baolin.wang@linaro.org>
@@ -12,80 +12,45 @@ To: adrian.hunter@intel.com, ulf.hansson@linaro.org, riteshh@codeaurora.org, asu
 Cc: orsonzhai@gmail.com, zhang.lyra@gmail.com, arnd@arndb.de, linus.walleij@linaro.org, vincent.guittot@linaro.org, baolin.wang@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Add virtual command queue support.
+Add cqhci_virt_finalize_request() to help to complete a request
+from virtual command queue.
 
 Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
 ---
- drivers/mmc/host/Kconfig      |    1 +
- drivers/mmc/host/sdhci-sprd.c |   16 ++++++++++++++++
- 2 files changed, 17 insertions(+)
+ drivers/mmc/host/sdhci.c |    7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index e2a12c3..851e947 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -619,6 +619,7 @@ config MMC_SDHCI_SPRD
- 	depends on ARCH_SPRD
- 	depends on MMC_SDHCI_PLTFM
- 	select MMC_SDHCI_IO_ACCESSORS
-+	select MMC_VIRTUAL_CQHCI
- 	help
- 	  This selects the SDIO Host Controller in Spreadtrum
- 	  SoCs, this driver supports R11(IP version: R11P0).
-diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
-index 19a2104..ff4886a3 100644
---- a/drivers/mmc/host/sdhci-sprd.c
-+++ b/drivers/mmc/host/sdhci-sprd.c
-@@ -19,6 +19,7 @@
- #include <linux/slab.h>
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 4e9ebc8..fb5983e 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -32,6 +32,7 @@
+ #include <linux/mmc/slot-gpio.h>
  
- #include "sdhci-pltfm.h"
+ #include "sdhci.h"
 +#include "cqhci.h"
  
- /* SDHCI_ARGUMENT2 register high 16bit */
- #define SDHCI_SPRD_ARG2_STUFF		GENMASK(31, 16)
-@@ -515,6 +516,7 @@ static int sdhci_sprd_probe(struct platform_device *pdev)
- {
- 	struct sdhci_host *host;
- 	struct sdhci_sprd_host *sprd_host;
-+	struct cqhci_host *cqv_host;
- 	struct clk *clk;
- 	int ret = 0;
+ #define DRIVER_NAME "sdhci"
  
-@@ -625,6 +627,17 @@ static int sdhci_sprd_probe(struct platform_device *pdev)
+@@ -2710,7 +2711,8 @@ static bool sdhci_request_done(struct sdhci_host *host)
  
- 	sprd_host->flags = host->flags;
+ 	spin_unlock_irqrestore(&host->lock, flags);
  
-+	cqv_host = devm_kzalloc(&pdev->dev,
-+				sizeof(*cqv_host), GFP_KERNEL);
-+	if (!cqv_host) {
-+		ret = -ENOMEM;
-+		goto err_cleanup_host;
-+	}
-+
-+	ret = cqhci_virt_init(cqv_host, host->mmc);
-+	if (ret)
-+		goto err_cleanup_host;
-+
- 	ret = __sdhci_add_host(host);
- 	if (ret)
- 		goto err_cleanup_host;
-@@ -685,6 +698,7 @@ static int sdhci_sprd_runtime_suspend(struct device *dev)
- 	struct sdhci_host *host = dev_get_drvdata(dev);
- 	struct sdhci_sprd_host *sprd_host = TO_SPRD_HOST(host);
+-	mmc_request_done(host->mmc, mrq);
++	if (!cqhci_virt_finalize_request(host->mmc, mrq))
++		mmc_request_done(host->mmc, mrq);
  
-+	cqhci_virt_suspend(host->mmc);
- 	sdhci_runtime_suspend_host(host);
+ 	return false;
+ }
+@@ -3133,7 +3135,8 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
  
- 	clk_disable_unprepare(sprd_host->clk_sdio);
-@@ -713,6 +727,8 @@ static int sdhci_sprd_runtime_resume(struct device *dev)
- 		goto clk_disable;
+ 	/* Process mrqs ready for immediate completion */
+ 	for (i = 0; i < SDHCI_MAX_MRQS; i++) {
+-		if (mrqs_done[i])
++		if (mrqs_done[i] &&
++		    !cqhci_virt_finalize_request(host->mmc, mrqs_done[i]))
+ 			mmc_request_done(host->mmc, mrqs_done[i]);
+ 	}
  
- 	sdhci_runtime_resume_host(host, 1);
-+	cqhci_virt_resume(host->mmc);
-+
- 	return 0;
- 
- clk_disable:
 -- 
 1.7.9.5
