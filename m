@@ -1,56 +1,48 @@
-From: Baolin Wang <baolin.wang@linaro.org>
-Subject: [PATCH 4/4] mmc: host: sdhci: Add virtual command queue support
-Date: Fri,  6 Sep 2019 11:52:02 +0800
-Message-ID: <fc8a0fe513d244375013546c3c03967510feea4a.1567740135.git.baolin.wang@linaro.org>
-References: <cover.1567740135.git.baolin.wang@linaro.org>
+From: Colin King <colin.king@canonical.com>
+Subject: [PATCH] mmc: dw_mmc: hi3798cv200: make array degrees static const, makes object smaller
+Date: Fri,  6 Sep 2019 10:17:19 +0100
+Message-ID: <20190906091719.24886-1-colin.king@canonical.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <cover.1567740135.git.baolin.wang@linaro.org>
-In-Reply-To: <cover.1567740135.git.baolin.wang@linaro.org>
-References: <cover.1567740135.git.baolin.wang@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: adrian.hunter@intel.com, ulf.hansson@linaro.org, riteshh@codeaurora.org, asutoshd@codeaurora.org
-Cc: orsonzhai@gmail.com, zhang.lyra@gmail.com, arnd@arndb.de, linus.walleij@linaro.org, vincent.guittot@linaro.org, baolin.wang@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+Cc: kernel-janitors@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Add cqhci_virt_finalize_request() to help to complete a request
-from virtual command queue.
+From: Colin Ian King <colin.king@canonical.com>
 
-Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
+Don't populate the array degrees on the stack but instead make it
+static const. Makes the object code smaller by 46 bytes.
+
+Before:
+   text	   data	    bss	    dec	    hex	filename
+   5356	   1560	      0	   6916	   1b04	dw_mmc-hi3798cv200.o
+
+After:
+   text	   data	    bss	    dec	    hex	filename
+   5214	   1656	      0	   6870	   1ad6	dw_mmc-hi3798cv200.o
+
+(gcc version 9.2.1, amd64)
+
+Signed-off-by: Colin Ian King <colin.king@canonical.com>
 ---
- drivers/mmc/host/sdhci.c |    7 +++++--
- 1 file changed, 5 insertions(+), 2 deletions(-)
+ drivers/mmc/host/dw_mmc-hi3798cv200.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 4e9ebc8..fb5983e 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -32,6 +32,7 @@
- #include <linux/mmc/slot-gpio.h>
- 
- #include "sdhci.h"
-+#include "cqhci.h"
- 
- #define DRIVER_NAME "sdhci"
- 
-@@ -2710,7 +2711,8 @@ static bool sdhci_request_done(struct sdhci_host *host)
- 
- 	spin_unlock_irqrestore(&host->lock, flags);
- 
--	mmc_request_done(host->mmc, mrq);
-+	if (!cqhci_virt_finalize_request(host->mmc, mrq))
-+		mmc_request_done(host->mmc, mrq);
- 
- 	return false;
- }
-@@ -3133,7 +3135,8 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
- 
- 	/* Process mrqs ready for immediate completion */
- 	for (i = 0; i < SDHCI_MAX_MRQS; i++) {
--		if (mrqs_done[i])
-+		if (mrqs_done[i] &&
-+		    !cqhci_virt_finalize_request(host->mmc, mrqs_done[i]))
- 			mmc_request_done(host->mmc, mrqs_done[i]);
- 	}
- 
+diff --git a/drivers/mmc/host/dw_mmc-hi3798cv200.c b/drivers/mmc/host/dw_mmc-hi3798cv200.c
+index bc51cef47c47..83e1bad0a008 100644
+--- a/drivers/mmc/host/dw_mmc-hi3798cv200.c
++++ b/drivers/mmc/host/dw_mmc-hi3798cv200.c
+@@ -66,7 +66,7 @@ static void dw_mci_hi3798cv200_set_ios(struct dw_mci *host, struct mmc_ios *ios)
+ static int dw_mci_hi3798cv200_execute_tuning(struct dw_mci_slot *slot,
+ 					     u32 opcode)
+ {
+-	int degrees[] = { 0, 45, 90, 135, 180, 225, 270, 315 };
++	static const int degrees[] = { 0, 45, 90, 135, 180, 225, 270, 315 };
+ 	struct dw_mci *host = slot->host;
+ 	struct hi3798cv200_priv *priv = host->priv;
+ 	int raise_point = -1, fall_point = -1;
 -- 
-1.7.9.5
+2.20.1
