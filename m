@@ -1,54 +1,51 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH v2 01/11] mmc: core: Add helper function to indicate if SDIO IRQs is enabled
-Date: Sun,  8 Sep 2019 12:12:26 +0200
-Message-ID: <20190908101236.2802-2-ulf.hansson@linaro.org>
-References: <20190908101236.2802-1-ulf.hansson@linaro.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190908101236.2802-1-ulf.hansson@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Douglas Anderson <dianders@chromium.org>, Matthias Kaehlcke <mka@chromium.org>
-Cc: Shawn Lin <shawn.lin@rock-chips.com>, Jaehoon Chung <jh80.chung@samsung.com>, Yong Mao <yong.mao@mediatek.com>, Chaotian Jing <chaotian.jing@mediatek.com>, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH] Revert "mmc: bcm2835: Terminate timeout work synchronously"
+Date: Sun, 8 Sep 2019 12:32:21 +0200
+Message-ID: <CAPDyKFpdZnQaH9NfTsmFk2pjREL_pv6netQjwubMzrkXAOg6hA@mail.gmail.com>
+References: <1567928752-2557-1-git-send-email-wahrenst@gmx.net>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <1567928752-2557-1-git-send-email-wahrenst@gmx.net>
+Sender: stable-owner@vger.kernel.org
+To: Stefan Wahren <wahrenst@gmx.net>
+Cc: Eric Anholt <eric@anholt.net>, Florian Fainelli <f.fainelli@gmail.com>, Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>, Lukas Wunner <lukas@wunner.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, "# 4.0+" <stable@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-To avoid each host driver supporting SDIO IRQs, from keeping track
-internally about if SDIO IRQs has been claimed, let's introduce a common
-helper function, sdio_irq_claimed().
+On Sun, 8 Sep 2019 at 09:46, Stefan Wahren <wahrenst@gmx.net> wrote:
+>
+> The commit 37fefadee8bb ("mmc: bcm2835: Terminate timeout work
+> synchronously") causes lockups in case of hardware timeouts due the
+> timeout work also calling cancel_delayed_work_sync() on its own.
+> So revert it.
+>
+> Fixes: 37fefadee8bb ("mmc: bcm2835: Terminate timeout work synchronously")
+> Cc: stable@vger.kernel.org
+> Signed-off-by: Stefan Wahren <wahrenst@gmx.net>
 
-The function returns true if SDIO IRQs are claimed, via using the
-information about the number of claimed irqs. This is safe, even without
-any locks, as long as the helper function is called only from
-runtime/system suspend callbacks of the host driver.
+Applied for fixes, thanks!
 
-Tested-by: Matthias Kaehlcke <mka@chromium.org>
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
----
+Kind regards
+Uffe
 
-Changes in v2:
-	- Renamed function to sdio_irq_claimed().
 
----
- include/linux/mmc/host.h | 9 +++++++++
- 1 file changed, 9 insertions(+)
-
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 4a351cb7f20f..a9d52a4d5041 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -493,6 +493,15 @@ void mmc_command_done(struct mmc_host *host, struct mmc_request *mrq);
- 
- void mmc_cqe_request_done(struct mmc_host *host, struct mmc_request *mrq);
- 
-+/*
-+ * May be called from host driver's system/runtime suspend/resume callbacks,
-+ * to know if SDIO IRQs has been claimed.
-+*/
-+static inline bool sdio_irq_claimed(struct mmc_host *host)
-+{
-+	return host->sdio_irqs > 0;
-+}
-+
- static inline void mmc_signal_sdio_irq(struct mmc_host *host)
- {
- 	host->ops->enable_sdio_irq(host, 0);
--- 
-2.17.1
+> ---
+>  drivers/mmc/host/bcm2835.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/bcm2835.c b/drivers/mmc/host/bcm2835.c
+> index 7e0d3a4..bb31e13 100644
+> --- a/drivers/mmc/host/bcm2835.c
+> +++ b/drivers/mmc/host/bcm2835.c
+> @@ -597,7 +597,7 @@ static void bcm2835_finish_request(struct bcm2835_host *host)
+>         struct dma_chan *terminate_chan = NULL;
+>         struct mmc_request *mrq;
+>
+> -       cancel_delayed_work_sync(&host->timeout_work);
+> +       cancel_delayed_work(&host->timeout_work);
+>
+>         mrq = host->mrq;
+>
+> --
+> 2.7.4
+>
