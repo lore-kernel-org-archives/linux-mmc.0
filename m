@@ -1,7 +1,7 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH v2 06/11] mmc: core: Clarify that the ->ack_sdio_irq() callback is mandatory
-Date: Sun,  8 Sep 2019 12:12:31 +0200
-Message-ID: <20190908101236.2802-7-ulf.hansson@linaro.org>
+Subject: [PATCH v2 04/11] mmc: core: Move code to get pending SDIO IRQs to a function
+Date: Sun,  8 Sep 2019 12:12:29 +0200
+Message-ID: <20190908101236.2802-5-ulf.hansson@linaro.org>
 References: <20190908101236.2802-1-ulf.hansson@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20190908101236.2802-1-ulf.hansson@linaro.org>
@@ -10,47 +10,83 @@ To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunt
 Cc: Shawn Lin <shawn.lin@rock-chips.com>, Jaehoon Chung <jh80.chung@samsung.com>, Yong Mao <yong.mao@mediatek.com>, Chaotian Jing <chaotian.jing@mediatek.com>, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-For the MMC_CAP2_SDIO_IRQ_NOTHREAD case and when using sdio_signal_irq(),
-the ->ack_sdio_irq() is already mandatory, which was not the case for those
-host drivers that called sdio_run_irqs() directly.
+From: Matthias Kaehlcke <mka@chromium.org>
 
-As there are no longer any drivers calling sdio_run_irqs(), let's clarify
-the code by dropping the unnecessary check and explicitly state that the
-callback is mandatory in the header file.
+To improve code quality, let's move the code that gets pending SDIO IRQs
+from process_sdio_pending_irqs() into a dedicated function.
 
+Signed-off-by: Matthias Kaehlcke <mka@chromium.org>
+[Ulf: Converted function into static]
 Tested-by: Matthias Kaehlcke <mka@chromium.org>
-Reviewed-by: Matthias Kaehlcke <mka@chromium.org>
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/mmc/core/sdio_irq.c | 3 +--
- include/linux/mmc/host.h    | 1 +
- 2 files changed, 2 insertions(+), 2 deletions(-)
+ drivers/mmc/core/sdio_irq.c | 46 ++++++++++++++++++++++++-------------
+ 1 file changed, 30 insertions(+), 16 deletions(-)
 
 diff --git a/drivers/mmc/core/sdio_irq.c b/drivers/mmc/core/sdio_irq.c
-index 0962a4357d54..d7965b53a6d2 100644
+index 0bcc5e83bd1a..f75043266984 100644
 --- a/drivers/mmc/core/sdio_irq.c
 +++ b/drivers/mmc/core/sdio_irq.c
-@@ -115,8 +115,7 @@ static void sdio_run_irqs(struct mmc_host *host)
- 	mmc_claim_host(host);
- 	if (host->sdio_irqs) {
- 		process_sdio_pending_irqs(host);
--		if (host->ops->ack_sdio_irq)
--			host->ops->ack_sdio_irq(host);
-+		host->ops->ack_sdio_irq(host);
+@@ -27,6 +27,34 @@
+ #include "core.h"
+ #include "card.h"
+ 
++static int sdio_get_pending_irqs(struct mmc_host *host, u8 *pending)
++{
++	struct mmc_card *card = host->card;
++	int ret;
++
++	WARN_ON(!host->claimed);
++
++	ret = mmc_io_rw_direct(card, 0, 0, SDIO_CCCR_INTx, 0, pending);
++	if (ret) {
++		pr_debug("%s: error %d reading SDIO_CCCR_INTx\n",
++		       mmc_card_id(card), ret);
++		return ret;
++	}
++
++	if (*pending && mmc_card_broken_irq_polling(card) &&
++	    !(host->caps & MMC_CAP_SDIO_IRQ)) {
++		unsigned char dummy;
++
++		/* A fake interrupt could be created when we poll SDIO_CCCR_INTx
++		 * register with a Marvell SD8797 card. A dummy CMD52 read to
++		 * function 0 register 0xff can avoid this.
++		 */
++		mmc_io_rw_direct(card, 0, 0, 0xff, 0, &dummy);
++	}
++
++	return 0;
++}
++
+ static int process_sdio_pending_irqs(struct mmc_host *host)
+ {
+ 	struct mmc_card *card = host->card;
+@@ -49,23 +77,9 @@ static int process_sdio_pending_irqs(struct mmc_host *host)
+ 		return 1;
  	}
- 	mmc_release_host(host);
- }
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index a9d52a4d5041..0e6afe66cf68 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -128,6 +128,7 @@ struct mmc_host_ops {
- 	int	(*get_cd)(struct mmc_host *host);
  
- 	void	(*enable_sdio_irq)(struct mmc_host *host, int enable);
-+	/* Mandatory callback when using MMC_CAP2_SDIO_IRQ_NOTHREAD. */
- 	void	(*ack_sdio_irq)(struct mmc_host *host);
+-	ret = mmc_io_rw_direct(card, 0, 0, SDIO_CCCR_INTx, 0, &pending);
+-	if (ret) {
+-		pr_debug("%s: error %d reading SDIO_CCCR_INTx\n",
+-		       mmc_card_id(card), ret);
++	ret = sdio_get_pending_irqs(host, &pending);
++	if (ret)
+ 		return ret;
+-	}
+-
+-	if (pending && mmc_card_broken_irq_polling(card) &&
+-	    !(host->caps & MMC_CAP_SDIO_IRQ)) {
+-		unsigned char dummy;
+-
+-		/* A fake interrupt could be created when we poll SDIO_CCCR_INTx
+-		 * register with a Marvell SD8797 card. A dummy CMD52 read to
+-		 * function 0 register 0xff can avoid this.
+-		 */
+-		mmc_io_rw_direct(card, 0, 0, 0xff, 0, &dummy);
+-	}
  
- 	/* optional callback for HC quirks */
+ 	count = 0;
+ 	for (i = 1; i <= 7; i++) {
 -- 
 2.17.1
