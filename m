@@ -1,7 +1,7 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH v2 07/11] mmc: core: WARN if SDIO IRQs are enabled for non-powered card in suspend
-Date: Sun,  8 Sep 2019 12:12:32 +0200
-Message-ID: <20190908101236.2802-8-ulf.hansson@linaro.org>
+Subject: [PATCH v2 06/11] mmc: core: Clarify that the ->ack_sdio_irq() callback is mandatory
+Date: Sun,  8 Sep 2019 12:12:31 +0200
+Message-ID: <20190908101236.2802-7-ulf.hansson@linaro.org>
 References: <20190908101236.2802-1-ulf.hansson@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20190908101236.2802-1-ulf.hansson@linaro.org>
@@ -10,29 +10,47 @@ To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunt
 Cc: Shawn Lin <shawn.lin@rock-chips.com>, Jaehoon Chung <jh80.chung@samsung.com>, Yong Mao <yong.mao@mediatek.com>, Chaotian Jing <chaotian.jing@mediatek.com>, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-To make sure SDIO func drivers behaves correctly during system
-suspend/resume, let add a WARN_ON in case the condition is a non-powered
-SDIO card and there are some SDIO IRQs still being claimed.
+For the MMC_CAP2_SDIO_IRQ_NOTHREAD case and when using sdio_signal_irq(),
+the ->ack_sdio_irq() is already mandatory, which was not the case for those
+host drivers that called sdio_run_irqs() directly.
+
+As there are no longer any drivers calling sdio_run_irqs(), let's clarify
+the code by dropping the unnecessary check and explicitly state that the
+callback is mandatory in the header file.
 
 Tested-by: Matthias Kaehlcke <mka@chromium.org>
 Reviewed-by: Matthias Kaehlcke <mka@chromium.org>
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/mmc/core/sdio.c | 2 ++
- 1 file changed, 2 insertions(+)
+ drivers/mmc/core/sdio_irq.c | 3 +--
+ include/linux/mmc/host.h    | 1 +
+ 2 files changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-index 8dd8fc32ecca..c557f1519b77 100644
---- a/drivers/mmc/core/sdio.c
-+++ b/drivers/mmc/core/sdio.c
-@@ -951,6 +951,8 @@ static int mmc_sdio_pre_suspend(struct mmc_host *host)
-  */
- static int mmc_sdio_suspend(struct mmc_host *host)
- {
-+	WARN_ON(host->sdio_irqs && !mmc_card_keep_power(host));
-+
- 	/* Prevent processing of SDIO IRQs in suspended state. */
- 	mmc_card_set_suspended(host->card);
- 	cancel_delayed_work_sync(&host->sdio_irq_work);
+diff --git a/drivers/mmc/core/sdio_irq.c b/drivers/mmc/core/sdio_irq.c
+index 0962a4357d54..d7965b53a6d2 100644
+--- a/drivers/mmc/core/sdio_irq.c
++++ b/drivers/mmc/core/sdio_irq.c
+@@ -115,8 +115,7 @@ static void sdio_run_irqs(struct mmc_host *host)
+ 	mmc_claim_host(host);
+ 	if (host->sdio_irqs) {
+ 		process_sdio_pending_irqs(host);
+-		if (host->ops->ack_sdio_irq)
+-			host->ops->ack_sdio_irq(host);
++		host->ops->ack_sdio_irq(host);
+ 	}
+ 	mmc_release_host(host);
+ }
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index a9d52a4d5041..0e6afe66cf68 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -128,6 +128,7 @@ struct mmc_host_ops {
+ 	int	(*get_cd)(struct mmc_host *host);
+ 
+ 	void	(*enable_sdio_irq)(struct mmc_host *host, int enable);
++	/* Mandatory callback when using MMC_CAP2_SDIO_IRQ_NOTHREAD. */
+ 	void	(*ack_sdio_irq)(struct mmc_host *host);
+ 
+ 	/* optional callback for HC quirks */
 -- 
 2.17.1
