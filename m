@@ -1,7 +1,7 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH v2 04/11] mmc: core: Move code to get pending SDIO IRQs to a function
-Date: Sun,  8 Sep 2019 12:12:29 +0200
-Message-ID: <20190908101236.2802-5-ulf.hansson@linaro.org>
+Subject: [PATCH v2 01/11] mmc: core: Add helper function to indicate if SDIO IRQs is enabled
+Date: Sun,  8 Sep 2019 12:12:26 +0200
+Message-ID: <20190908101236.2802-2-ulf.hansson@linaro.org>
 References: <20190908101236.2802-1-ulf.hansson@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20190908101236.2802-1-ulf.hansson@linaro.org>
@@ -10,83 +10,45 @@ To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunt
 Cc: Shawn Lin <shawn.lin@rock-chips.com>, Jaehoon Chung <jh80.chung@samsung.com>, Yong Mao <yong.mao@mediatek.com>, Chaotian Jing <chaotian.jing@mediatek.com>, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-From: Matthias Kaehlcke <mka@chromium.org>
+To avoid each host driver supporting SDIO IRQs, from keeping track
+internally about if SDIO IRQs has been claimed, let's introduce a common
+helper function, sdio_irq_claimed().
 
-To improve code quality, let's move the code that gets pending SDIO IRQs
-from process_sdio_pending_irqs() into a dedicated function.
+The function returns true if SDIO IRQs are claimed, via using the
+information about the number of claimed irqs. This is safe, even without
+any locks, as long as the helper function is called only from
+runtime/system suspend callbacks of the host driver.
 
-Signed-off-by: Matthias Kaehlcke <mka@chromium.org>
-[Ulf: Converted function into static]
 Tested-by: Matthias Kaehlcke <mka@chromium.org>
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/mmc/core/sdio_irq.c | 46 ++++++++++++++++++++++++-------------
- 1 file changed, 30 insertions(+), 16 deletions(-)
 
-diff --git a/drivers/mmc/core/sdio_irq.c b/drivers/mmc/core/sdio_irq.c
-index 0bcc5e83bd1a..f75043266984 100644
---- a/drivers/mmc/core/sdio_irq.c
-+++ b/drivers/mmc/core/sdio_irq.c
-@@ -27,6 +27,34 @@
- #include "core.h"
- #include "card.h"
+Changes in v2:
+	- Renamed function to sdio_irq_claimed().
+
+---
+ include/linux/mmc/host.h | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 4a351cb7f20f..a9d52a4d5041 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -493,6 +493,15 @@ void mmc_command_done(struct mmc_host *host, struct mmc_request *mrq);
  
-+static int sdio_get_pending_irqs(struct mmc_host *host, u8 *pending)
+ void mmc_cqe_request_done(struct mmc_host *host, struct mmc_request *mrq);
+ 
++/*
++ * May be called from host driver's system/runtime suspend/resume callbacks,
++ * to know if SDIO IRQs has been claimed.
++*/
++static inline bool sdio_irq_claimed(struct mmc_host *host)
 +{
-+	struct mmc_card *card = host->card;
-+	int ret;
-+
-+	WARN_ON(!host->claimed);
-+
-+	ret = mmc_io_rw_direct(card, 0, 0, SDIO_CCCR_INTx, 0, pending);
-+	if (ret) {
-+		pr_debug("%s: error %d reading SDIO_CCCR_INTx\n",
-+		       mmc_card_id(card), ret);
-+		return ret;
-+	}
-+
-+	if (*pending && mmc_card_broken_irq_polling(card) &&
-+	    !(host->caps & MMC_CAP_SDIO_IRQ)) {
-+		unsigned char dummy;
-+
-+		/* A fake interrupt could be created when we poll SDIO_CCCR_INTx
-+		 * register with a Marvell SD8797 card. A dummy CMD52 read to
-+		 * function 0 register 0xff can avoid this.
-+		 */
-+		mmc_io_rw_direct(card, 0, 0, 0xff, 0, &dummy);
-+	}
-+
-+	return 0;
++	return host->sdio_irqs > 0;
 +}
 +
- static int process_sdio_pending_irqs(struct mmc_host *host)
+ static inline void mmc_signal_sdio_irq(struct mmc_host *host)
  {
- 	struct mmc_card *card = host->card;
-@@ -49,23 +77,9 @@ static int process_sdio_pending_irqs(struct mmc_host *host)
- 		return 1;
- 	}
- 
--	ret = mmc_io_rw_direct(card, 0, 0, SDIO_CCCR_INTx, 0, &pending);
--	if (ret) {
--		pr_debug("%s: error %d reading SDIO_CCCR_INTx\n",
--		       mmc_card_id(card), ret);
-+	ret = sdio_get_pending_irqs(host, &pending);
-+	if (ret)
- 		return ret;
--	}
--
--	if (pending && mmc_card_broken_irq_polling(card) &&
--	    !(host->caps & MMC_CAP_SDIO_IRQ)) {
--		unsigned char dummy;
--
--		/* A fake interrupt could be created when we poll SDIO_CCCR_INTx
--		 * register with a Marvell SD8797 card. A dummy CMD52 read to
--		 * function 0 register 0xff can avoid this.
--		 */
--		mmc_io_rw_direct(card, 0, 0, 0xff, 0, &dummy);
--	}
- 
- 	count = 0;
- 	for (i = 1; i <= 7; i++) {
+ 	host->ops->enable_sdio_irq(host, 0);
 -- 
 2.17.1
