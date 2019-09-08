@@ -1,7 +1,7 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH v2 10/11] mmc: sdhci: Drop redundant code for SDIO IRQs
-Date: Sun,  8 Sep 2019 12:12:35 +0200
-Message-ID: <20190908101236.2802-11-ulf.hansson@linaro.org>
+Subject: [PATCH v2 07/11] mmc: core: WARN if SDIO IRQs are enabled for non-powered card in suspend
+Date: Sun,  8 Sep 2019 12:12:32 +0200
+Message-ID: <20190908101236.2802-8-ulf.hansson@linaro.org>
 References: <20190908101236.2802-1-ulf.hansson@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20190908101236.2802-1-ulf.hansson@linaro.org>
@@ -10,113 +10,29 @@ To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunt
 Cc: Shawn Lin <shawn.lin@rock-chips.com>, Jaehoon Chung <jh80.chung@samsung.com>, Yong Mao <yong.mao@mediatek.com>, Chaotian Jing <chaotian.jing@mediatek.com>, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Nowadays sdhci prevents runtime suspend when SDIO IRQs are enabled.
+To make sure SDIO func drivers behaves correctly during system
+suspend/resume, let add a WARN_ON in case the condition is a non-powered
+SDIO card and there are some SDIO IRQs still being claimed.
 
-However, some variants such as sdhci-esdhc-imx's, tries to allow runtime
-suspend while having the SDIO IRQs enabled, but without supporting remote
-wakeups. This support is a bit questionable, especially if the host device
-have a PM domain attached that can be power gated, but more importantly,
-the code have also become redundant (which was not the case when it was
-introduced).
-
-Rather than keeping the redundant code around, let's drop it and leave this
-to be revisited later on.
-
+Tested-by: Matthias Kaehlcke <mka@chromium.org>
+Reviewed-by: Matthias Kaehlcke <mka@chromium.org>
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/mmc/host/sdhci-esdhc-imx.c | 34 +++++++++++++-----------------
- drivers/mmc/host/sdhci.c           |  2 +-
- drivers/mmc/host/sdhci.h           |  5 -----
- 3 files changed, 16 insertions(+), 25 deletions(-)
+ drivers/mmc/core/sdio.c | 2 ++
+ 1 file changed, 2 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index 776a94216248..1c988d6a2433 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -1666,12 +1666,10 @@ static int sdhci_esdhc_runtime_suspend(struct device *dev)
- 	if (host->tuning_mode != SDHCI_TUNING_MODE_3)
- 		mmc_retune_needed(host->mmc);
- 
--	if (!sdhci_sdio_irq_enabled(host)) {
--		imx_data->actual_clock = host->mmc->actual_clock;
--		esdhc_pltfm_set_clock(host, 0);
--		clk_disable_unprepare(imx_data->clk_per);
--		clk_disable_unprepare(imx_data->clk_ipg);
--	}
-+	imx_data->actual_clock = host->mmc->actual_clock;
-+	esdhc_pltfm_set_clock(host, 0);
-+	clk_disable_unprepare(imx_data->clk_per);
-+	clk_disable_unprepare(imx_data->clk_ipg);
- 	clk_disable_unprepare(imx_data->clk_ahb);
- 
- 	if (imx_data->socdata->flags & ESDHC_FLAG_PMQOS)
-@@ -1695,15 +1693,15 @@ static int sdhci_esdhc_runtime_resume(struct device *dev)
- 	if (err)
- 		goto remove_pm_qos_request;
- 
--	if (!sdhci_sdio_irq_enabled(host)) {
--		err = clk_prepare_enable(imx_data->clk_per);
--		if (err)
--			goto disable_ahb_clk;
--		err = clk_prepare_enable(imx_data->clk_ipg);
--		if (err)
--			goto disable_per_clk;
--		esdhc_pltfm_set_clock(host, imx_data->actual_clock);
--	}
-+	err = clk_prepare_enable(imx_data->clk_per);
-+	if (err)
-+		goto disable_ahb_clk;
+diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+index 8dd8fc32ecca..c557f1519b77 100644
+--- a/drivers/mmc/core/sdio.c
++++ b/drivers/mmc/core/sdio.c
+@@ -951,6 +951,8 @@ static int mmc_sdio_pre_suspend(struct mmc_host *host)
+  */
+ static int mmc_sdio_suspend(struct mmc_host *host)
+ {
++	WARN_ON(host->sdio_irqs && !mmc_card_keep_power(host));
 +
-+	err = clk_prepare_enable(imx_data->clk_ipg);
-+	if (err)
-+		goto disable_per_clk;
-+
-+	esdhc_pltfm_set_clock(host, imx_data->actual_clock);
- 
- 	err = sdhci_runtime_resume_host(host, 0);
- 	if (err)
-@@ -1715,11 +1713,9 @@ static int sdhci_esdhc_runtime_resume(struct device *dev)
- 	return err;
- 
- disable_ipg_clk:
--	if (!sdhci_sdio_irq_enabled(host))
--		clk_disable_unprepare(imx_data->clk_ipg);
-+	clk_disable_unprepare(imx_data->clk_ipg);
- disable_per_clk:
--	if (!sdhci_sdio_irq_enabled(host))
--		clk_disable_unprepare(imx_data->clk_per);
-+	clk_disable_unprepare(imx_data->clk_per);
- disable_ahb_clk:
- 	clk_disable_unprepare(imx_data->clk_ahb);
- remove_pm_qos_request:
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index efa6cda8c991..4c4285387b47 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -3048,7 +3048,7 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
- 
- 	spin_lock(&host->lock);
- 
--	if (host->runtime_suspended && !sdhci_sdio_irq_enabled(host)) {
-+	if (host->runtime_suspended) {
- 		spin_unlock(&host->lock);
- 		return IRQ_NONE;
- 	}
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index cf3d1ed91909..8effaac61c3a 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -753,11 +753,6 @@ static inline void sdhci_read_caps(struct sdhci_host *host)
- 	__sdhci_read_caps(host, NULL, NULL, NULL);
- }
- 
--static inline bool sdhci_sdio_irq_enabled(struct sdhci_host *host)
--{
--	return !!(host->flags & SDHCI_SDIO_IRQ_ENABLED);
--}
--
- u16 sdhci_calc_clk(struct sdhci_host *host, unsigned int clock,
- 		   unsigned int *actual_clock);
- void sdhci_set_clock(struct sdhci_host *host, unsigned int clock);
+ 	/* Prevent processing of SDIO IRQs in suspended state. */
+ 	mmc_card_set_suspended(host->card);
+ 	cancel_delayed_work_sync(&host->sdio_irq_work);
 -- 
 2.17.1
