@@ -1,51 +1,47 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] Revert "mmc: bcm2835: Terminate timeout work synchronously"
-Date: Sun, 8 Sep 2019 12:32:21 +0200
-Message-ID: <CAPDyKFpdZnQaH9NfTsmFk2pjREL_pv6netQjwubMzrkXAOg6hA@mail.gmail.com>
-References: <1567928752-2557-1-git-send-email-wahrenst@gmx.net>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH v2 09/11] mmc: sdhci: Drop redundant check in
+ sdhci_ack_sdio_irq()
+Date: Mon, 9 Sep 2019 14:19:25 +0300
+Message-ID: <40034b79-8e52-8ed7-2d18-1a8da498e5ea@intel.com>
+References: <20190908101236.2802-1-ulf.hansson@linaro.org>
+ <20190908101236.2802-10-ulf.hansson@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <1567928752-2557-1-git-send-email-wahrenst@gmx.net>
-Sender: stable-owner@vger.kernel.org
-To: Stefan Wahren <wahrenst@gmx.net>
-Cc: Eric Anholt <eric@anholt.net>, Florian Fainelli <f.fainelli@gmail.com>, Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>, Lukas Wunner <lukas@wunner.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, "# 4.0+" <stable@vger.kernel.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20190908101236.2802-10-ulf.hansson@linaro.org>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Douglas Anderson <dianders@chromium.org>, Matthias Kaehlcke <mka@chromium.org>
+Cc: Shawn Lin <shawn.lin@rock-chips.com>, Jaehoon Chung <jh80.chung@samsung.com>, Yong Mao <yong.mao@mediatek.com>, Chaotian Jing <chaotian.jing@mediatek.com>, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Sun, 8 Sep 2019 at 09:46, Stefan Wahren <wahrenst@gmx.net> wrote:
->
-> The commit 37fefadee8bb ("mmc: bcm2835: Terminate timeout work
-> synchronously") causes lockups in case of hardware timeouts due the
-> timeout work also calling cancel_delayed_work_sync() on its own.
-> So revert it.
->
-> Fixes: 37fefadee8bb ("mmc: bcm2835: Terminate timeout work synchronously")
-> Cc: stable@vger.kernel.org
-> Signed-off-by: Stefan Wahren <wahrenst@gmx.net>
+On 8/09/19 1:12 PM, Ulf Hansson wrote:
+> The sdhci_ack_sdio_irq() is called only when SDIO IRQs are enabled.
+> Therefore, let's drop the redundant check of the internal
+> SDHCI_SDIO_IRQ_ENABLED flag and just re-enable the IRQs immediately.
+> 
+> Reviewed-by: Matthias Kaehlcke <mka@chromium.org>
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 
-Applied for fixes, thanks!
-
-Kind regards
-Uffe
-
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
 > ---
->  drivers/mmc/host/bcm2835.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/bcm2835.c b/drivers/mmc/host/bcm2835.c
-> index 7e0d3a4..bb31e13 100644
-> --- a/drivers/mmc/host/bcm2835.c
-> +++ b/drivers/mmc/host/bcm2835.c
-> @@ -597,7 +597,7 @@ static void bcm2835_finish_request(struct bcm2835_host *host)
->         struct dma_chan *terminate_chan = NULL;
->         struct mmc_request *mrq;
->
-> -       cancel_delayed_work_sync(&host->timeout_work);
-> +       cancel_delayed_work(&host->timeout_work);
->
->         mrq = host->mrq;
->
-> --
-> 2.7.4
->
+>  drivers/mmc/host/sdhci.c | 3 +--
+>  1 file changed, 1 insertion(+), 2 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index d814dc004bad..efa6cda8c991 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -2163,8 +2163,7 @@ static void sdhci_ack_sdio_irq(struct mmc_host *mmc)
+>  	unsigned long flags;
+>  
+>  	spin_lock_irqsave(&host->lock, flags);
+> -	if (host->flags & SDHCI_SDIO_IRQ_ENABLED)
+> -		sdhci_enable_sdio_irq_nolock(host, true);
+> +	sdhci_enable_sdio_irq_nolock(host, true);
+>  	spin_unlock_irqrestore(&host->lock, flags);
+>  }
+>  
+> 
