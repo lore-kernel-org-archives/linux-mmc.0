@@ -1,13 +1,13 @@
 From: Baolin Wang <baolin.wang@linaro.org>
-Subject: Re: [PATCH 4/4] mmc: host: sdhci: Add virtual command queue support
-Date: Mon, 9 Sep 2019 20:11:35 +0800
-Message-ID: <CAMz4kuJp38Y20XHpF5vm0bwFK3MQK8bqJNtgwgqeXu_FcdpikQ@mail.gmail.com>
-References: <cover.1567740135.git.baolin.wang@linaro.org> <fc8a0fe513d244375013546c3c03967510feea4a.1567740135.git.baolin.wang@linaro.org>
- <5594efd0-6076-bbb5-5aec-a6b3a21dd7ca@intel.com>
+Subject: Re: [PATCH 2/4] mmc: Add virtual command queue support
+Date: Mon, 9 Sep 2019 20:16:43 +0800
+Message-ID: <CAMz4kuKsk7ZN2BnD4zp53PQE22jD-BTsJLL53SL3ndZ5=OCHYA@mail.gmail.com>
+References: <cover.1567740135.git.baolin.wang@linaro.org> <14599f7165f23db2bf7b71a2596e808e2bc2056c.1567740135.git.baolin.wang@linaro.org>
+ <3bcd69fd-2f8e-9b87-7292-4b0b1aa5be78@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <5594efd0-6076-bbb5-5aec-a6b3a21dd7ca@intel.com>
+In-Reply-To: <3bcd69fd-2f8e-9b87-7292-4b0b1aa5be78@intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Adrian Hunter <adrian.hunter@intel.com>
 Cc: Ulf Hansson <ulf.hansson@linaro.org>, riteshh@codeaurora.org, asutoshd@codeaurora.org, Orson Zhai <orsonzhai@gmail.com>, Chunyan Zhang <zhang.lyra@gmail.com>, Arnd Bergmann <arnd@arndb.de>, Linus Walleij <linus.walleij@linaro.org>, Vincent Guittot <vincent.guittot@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>
@@ -15,63 +15,30 @@ List-Id: linux-mmc@vger.kernel.org
 
 Hi Adrian,
 
-On Mon, 9 Sep 2019 at 20:04, Adrian Hunter <adrian.hunter@intel.com> wrote:
+On Mon, 9 Sep 2019 at 20:02, Adrian Hunter <adrian.hunter@intel.com> wrote:
 >
 > On 6/09/19 6:52 AM, Baolin Wang wrote:
-> > Add cqhci_virt_finalize_request() to help to complete a request
-> > from virtual command queue.
+> > Now the MMC read/write stack will always wait for previous request is
+> > completed by mmc_blk_rw_wait(), before sending a new request to hardware,
+> > or queue a work to complete request, that will bring context switching
+> > overhead, especially for high I/O per second rates, to affect the IO
+> > performance.
 > >
-> > Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
-> > ---
-> >  drivers/mmc/host/sdhci.c |    7 +++++--
-> >  1 file changed, 5 insertions(+), 2 deletions(-)
-> >
-> > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> > index 4e9ebc8..fb5983e 100644
-> > --- a/drivers/mmc/host/sdhci.c
-> > +++ b/drivers/mmc/host/sdhci.c
-> > @@ -32,6 +32,7 @@
-> >  #include <linux/mmc/slot-gpio.h>
-> >
-> >  #include "sdhci.h"
-> > +#include "cqhci.h"
-> >
-> >  #define DRIVER_NAME "sdhci"
-> >
-> > @@ -2710,7 +2711,8 @@ static bool sdhci_request_done(struct sdhci_host *host)
-> >
-> >       spin_unlock_irqrestore(&host->lock, flags);
-> >
-> > -     mmc_request_done(host->mmc, mrq);
-> > +     if (!cqhci_virt_finalize_request(host->mmc, mrq))
-> > +             mmc_request_done(host->mmc, mrq);
+> > Thus this patch introduces virtual command queue interface, which is
+> > similar with the hardware command queue engine's idea, that can remove
+> > the context switching.
 >
-> Please add a sdhci_ops callback for request->done then:
->
->         if (host->ops->request_done)
->                 host->ops->request_done(host, mrq);
->         else
->                 mmc_request_done(host->mmc, mrq);
+> CQHCI is a hardware interface for eMMC's that support command queuing.  What
+> you are doing is a software issue queue, unrelated to CQHCI.  I think you
 
-Sure, will do.
+Yes.
 
->
-> >
-> >       return false;
-> >  }
-> > @@ -3133,7 +3135,8 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
-> >
-> >       /* Process mrqs ready for immediate completion */
-> >       for (i = 0; i < SDHCI_MAX_MRQS; i++) {
-> > -             if (mrqs_done[i])
-> > +             if (mrqs_done[i] &&
-> > +                 !cqhci_virt_finalize_request(host->mmc, mrqs_done[i]))
->
-> sdhci does not support calling mmc->ops->request in interrupt context.
-> So probably, you should avoid immediate completion.
+> should avoid all reference to CQHCI i.e. call it something else.
 
-Yes, I missed this, will remove. Thanks.
+Since its process is similar with CQHCI and re-use the CQHCI's
+interfaces, I called it virtual command queue. I am not sure what else
+name is better, any thoughts? VCQHCI? Thanks.
 
--- 
+--
 Baolin Wang
 Best Regards
