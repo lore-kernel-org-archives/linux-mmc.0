@@ -1,7 +1,7 @@
 From: Ben Chuang <benchuanggli@gmail.com>
-Subject: [PATCH V9 3/5] PCI: Add Genesys Logic, Inc. Vendor ID
-Date: Wed, 11 Sep 2019 15:23:15 +0800
-Message-ID: <860ef173fe110630d91e384ae44d7ad42cb72d3a.1568184581.git.benchuanggli@gmail.com>
+Subject: [PATCH V9 4/5] mmc: sdhci: Export sdhci_abort_tuning function symbol
+Date: Wed, 11 Sep 2019 15:23:31 +0800
+Message-ID: <8495caa6af2bcfb916e57e626dd2d9eaeb0310c5.1568184581.git.benchuanggli@gmail.com>
 References: <cover.1568184581.git.benchuanggli@gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -14,28 +14,49 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Ben Chuang <ben.chuang@genesyslogic.com.tw>
 
-Add the Genesys Logic, Inc. vendor ID to pci_ids.h.
+Export sdhci_abort_tuning() function symbols which are used by other SD Host
+controller driver modules.
 
 Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
 Co-developed-by: Michael K Johnson <johnsonm@danlj.org>
 Signed-off-by: Michael K Johnson <johnsonm@danlj.org>
 Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- include/linux/pci_ids.h | 2 ++
- 1 file changed, 2 insertions(+)
+ drivers/mmc/host/sdhci.c | 3 ++-
+ drivers/mmc/host/sdhci.h | 1 +
+ 2 files changed, 3 insertions(+), 1 deletion(-)
 
-diff --git a/include/linux/pci_ids.h b/include/linux/pci_ids.h
-index 70e86148cb1e..4f7e12772a14 100644
---- a/include/linux/pci_ids.h
-+++ b/include/linux/pci_ids.h
-@@ -2403,6 +2403,8 @@
- #define PCI_DEVICE_ID_RDC_R6061		0x6061
- #define PCI_DEVICE_ID_RDC_D1010		0x1010
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 9106ebc7a422..0f2f110534db 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2328,7 +2328,7 @@ void sdhci_reset_tuning(struct sdhci_host *host)
+ }
+ EXPORT_SYMBOL_GPL(sdhci_reset_tuning);
  
-+#define PCI_VENDOR_ID_GLI		0x17a0
-+
- #define PCI_VENDOR_ID_LENOVO		0x17aa
+-static void sdhci_abort_tuning(struct sdhci_host *host, u32 opcode)
++void sdhci_abort_tuning(struct sdhci_host *host, u32 opcode)
+ {
+ 	sdhci_reset_tuning(host);
  
- #define PCI_VENDOR_ID_QCOM		0x17cb
+@@ -2339,6 +2339,7 @@ static void sdhci_abort_tuning(struct sdhci_host *host, u32 opcode)
+ 
+ 	mmc_abort_tuning(host->mmc, opcode);
+ }
++EXPORT_SYMBOL_GPL(sdhci_abort_tuning);
+ 
+ /*
+  * We use sdhci_send_tuning() because mmc_send_tuning() is not a good fit. SDHCI
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 72601a4d2e95..437bab3af195 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -797,5 +797,6 @@ void sdhci_start_tuning(struct sdhci_host *host);
+ void sdhci_end_tuning(struct sdhci_host *host);
+ void sdhci_reset_tuning(struct sdhci_host *host);
+ void sdhci_send_tuning(struct sdhci_host *host, u32 opcode);
++void sdhci_abort_tuning(struct sdhci_host *host, u32 opcode);
+ 
+ #endif /* __SDHCI_HW_H */
 -- 
 2.23.0
