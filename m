@@ -1,115 +1,74 @@
-From: Baolin Wang <baolin.wang@linaro.org>
-Subject: [PATCH v2 4/4] mmc: host: sdhci-sprd: Add software queue support
-Date: Wed, 11 Sep 2019 21:14:43 +0800
-Message-ID: <351897e271069582a7ce7775fd803d556b5bebde.1568206300.git.baolin.wang@linaro.org>
-References: <cover.1568206300.git.baolin.wang@linaro.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v2 00/11] mmc: core: PM fixes/improvements for SDIO IRQs
+Date: Wed, 11 Sep 2019 16:21:06 +0200
+Message-ID: <CAPDyKFrx1pGSp56fZ6ksmWKpv66mMdPas=VE3V6JwF4J_xwCKQ@mail.gmail.com>
+References: <20190908101236.2802-1-ulf.hansson@linaro.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <cover.1568206300.git.baolin.wang@linaro.org>
-In-Reply-To: <cover.1568206300.git.baolin.wang@linaro.org>
-References: <cover.1568206300.git.baolin.wang@linaro.org>
+In-Reply-To: <20190908101236.2802-1-ulf.hansson@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: adrian.hunter@intel.com, ulf.hansson@linaro.org, asutoshd@codeaurora.org
-Cc: orsonzhai@gmail.com, zhang.lyra@gmail.com, arnd@arndb.de, linus.walleij@linaro.org, vincent.guittot@linaro.org, baolin.wang@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Douglas Anderson <dianders@chromium.org>, Matthias Kaehlcke <mka@chromium.org>
+Cc: Shawn Lin <shawn.lin@rock-chips.com>, Jaehoon Chung <jh80.chung@samsung.com>, Yong Mao <yong.mao@mediatek.com>, Chaotian Jing <chaotian.jing@mediatek.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Add software queue support to improve the performance.
+On Sun, 8 Sep 2019 at 12:12, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>
+> Changes in v2:
+>         - Added reviewed/tested-by tags.
+>         - Updated some changelogs.
+>         - Renamed sdio_irq_enabled() to sdio_irq_claimed().
+>         - Don't set sdio_irq_pending when resuming SDIO card, but just queue the
+>         work.
+>
+> The power management support for SDIO cards have slowly been improved, but
+> there are still quite some serious problems, especially when dealing with the
+> so called SDIO IRQs during system suspend/resume.
+>
+> This series makes some additional improvements to this code in the mmc core,
+> but also includes some needed adaptations for the sdhci, the dw_mmc and the
+> mtk-sd host drivers.
+>
+> The series is also available at:
+> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git sdio_irq_suspend_next_v2
+>
+> Kind regards
+> Uffe
+>
+>
+> Matthias Kaehlcke (1):
+>   mmc: core: Move code to get pending SDIO IRQs to a function
+>
+> Ulf Hansson (10):
+>   mmc: core: Add helper function to indicate if SDIO IRQs is enabled
+>   mmc: dw_mmc: Re-store SDIO IRQs mask at system resume
+>   mmc: mtk-sd: Re-store SDIO IRQs mask at system resume
+>   mmc: core: Clarify sdio_irq_pending flag for
+>     MMC_CAP2_SDIO_IRQ_NOTHREAD
+>   mmc: core: Clarify that the ->ack_sdio_irq() callback is mandatory
+>   mmc: core: WARN if SDIO IRQs are enabled for non-powered card in
+>     suspend
+>   mmc: core: Fixup processing of SDIO IRQs during system suspend/resume
+>   mmc: sdhci: Drop redundant check in sdhci_ack_sdio_irq()
+>   mmc: sdhci: Drop redundant code for SDIO IRQs
+>   mmc: sdhci: Convert to use sdio_irq_claimed()
+>
+>  drivers/mmc/core/sdio.c            |  4 ++-
+>  drivers/mmc/core/sdio_irq.c        | 57 +++++++++++++++++++-----------
+>  drivers/mmc/host/dw_mmc.c          |  4 +++
+>  drivers/mmc/host/mtk-sd.c          |  3 ++
+>  drivers/mmc/host/sdhci-esdhc-imx.c | 34 ++++++++----------
+>  drivers/mmc/host/sdhci.c           | 12 ++-----
+>  drivers/mmc/host/sdhci.h           |  6 ----
+>  include/linux/mmc/host.h           | 10 ++++++
+>  8 files changed, 75 insertions(+), 55 deletions(-)
+>
+> --
+> 2.17.1
+>
 
-Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
----
- drivers/mmc/host/Kconfig      |    1 +
- drivers/mmc/host/sdhci-sprd.c |   26 ++++++++++++++++++++++++++
- 2 files changed, 27 insertions(+)
+So, I have queued this up for next (using v3 of patch 3), thanks all
+for reviewing and testing!
 
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index d117f18..862e8e9 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -619,6 +619,7 @@ config MMC_SDHCI_SPRD
- 	depends on ARCH_SPRD
- 	depends on MMC_SDHCI_PLTFM
- 	select MMC_SDHCI_IO_ACCESSORS
-+	select MMC_SQHCI
- 	help
- 	  This selects the SDIO Host Controller in Spreadtrum
- 	  SoCs, this driver supports R11(IP version: R11P0).
-diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
-index d07b979..f6f157f 100644
---- a/drivers/mmc/host/sdhci-sprd.c
-+++ b/drivers/mmc/host/sdhci-sprd.c
-@@ -19,6 +19,7 @@
- #include <linux/slab.h>
- 
- #include "sdhci-pltfm.h"
-+#include "sqhci.h"
- 
- /* SDHCI_ARGUMENT2 register high 16bit */
- #define SDHCI_SPRD_ARG2_STUFF		GENMASK(31, 16)
-@@ -379,6 +380,16 @@ static unsigned int sdhci_sprd_get_ro(struct sdhci_host *host)
- 	return 0;
- }
- 
-+static void sdhci_sprd_request_done(struct sdhci_host *host,
-+				    struct mmc_request *mrq)
-+{
-+	/* Validate if the request was from software queue firstly. */
-+	if (sqhci_finalize_request(host->mmc, mrq))
-+		return;
-+
-+	 mmc_request_done(host->mmc, mrq);
-+}
-+
- static struct sdhci_ops sdhci_sprd_ops = {
- 	.read_l = sdhci_sprd_readl,
- 	.write_l = sdhci_sprd_writel,
-@@ -392,6 +403,7 @@ static unsigned int sdhci_sprd_get_ro(struct sdhci_host *host)
- 	.hw_reset = sdhci_sprd_hw_reset,
- 	.get_max_timeout_count = sdhci_sprd_get_max_timeout_count,
- 	.get_ro = sdhci_sprd_get_ro,
-+	.request_done = sdhci_sprd_request_done,
- };
- 
- static void sdhci_sprd_request(struct mmc_host *mmc, struct mmc_request *mrq)
-@@ -521,6 +533,7 @@ static int sdhci_sprd_probe(struct platform_device *pdev)
- {
- 	struct sdhci_host *host;
- 	struct sdhci_sprd_host *sprd_host;
-+	struct cqhci_host *sq_host;
- 	struct clk *clk;
- 	int ret = 0;
- 
-@@ -631,6 +644,16 @@ static int sdhci_sprd_probe(struct platform_device *pdev)
- 
- 	sprd_host->flags = host->flags;
- 
-+	sq_host = devm_kzalloc(&pdev->dev, sizeof(*sq_host), GFP_KERNEL);
-+	if (!sq_host) {
-+		ret = -ENOMEM;
-+		goto err_cleanup_host;
-+	}
-+
-+	ret = sqhci_init(sq_host, host->mmc);
-+	if (ret)
-+		goto err_cleanup_host;
-+
- 	ret = __sdhci_add_host(host);
- 	if (ret)
- 		goto err_cleanup_host;
-@@ -689,6 +712,7 @@ static int sdhci_sprd_runtime_suspend(struct device *dev)
- 	struct sdhci_host *host = dev_get_drvdata(dev);
- 	struct sdhci_sprd_host *sprd_host = TO_SPRD_HOST(host);
- 
-+	sqhci_suspend(host->mmc);
- 	sdhci_runtime_suspend_host(host);
- 
- 	clk_disable_unprepare(sprd_host->clk_sdio);
-@@ -717,6 +741,8 @@ static int sdhci_sprd_runtime_resume(struct device *dev)
- 		goto clk_disable;
- 
- 	sdhci_runtime_resume_host(host, 1);
-+	sqhci_resume(host->mmc);
-+
- 	return 0;
- 
- clk_disable:
--- 
-1.7.9.5
+Kind regards
+Uffe
