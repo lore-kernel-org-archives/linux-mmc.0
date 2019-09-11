@@ -1,74 +1,60 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 00/11] mmc: core: PM fixes/improvements for SDIO IRQs
-Date: Wed, 11 Sep 2019 16:21:06 +0200
-Message-ID: <CAPDyKFrx1pGSp56fZ6ksmWKpv66mMdPas=VE3V6JwF4J_xwCKQ@mail.gmail.com>
-References: <20190908101236.2802-1-ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: dw_mmc: hi3798cv200: make array degrees static
+ const, makes object smaller
+Date: Wed, 11 Sep 2019 16:21:10 +0200
+Message-ID: <CAPDyKFqriNuywSzk-c77==abgJQLWRXuKWSn_04jVy+gaB8h-Q@mail.gmail.com>
+References: <20190906091719.24886-1-colin.king@canonical.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190908101236.2802-1-ulf.hansson@linaro.org>
+In-Reply-To: <20190906091719.24886-1-colin.king@canonical.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Douglas Anderson <dianders@chromium.org>, Matthias Kaehlcke <mka@chromium.org>
-Cc: Shawn Lin <shawn.lin@rock-chips.com>, Jaehoon Chung <jh80.chung@samsung.com>, Yong Mao <yong.mao@mediatek.com>, Chaotian Jing <chaotian.jing@mediatek.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: Colin King <colin.king@canonical.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, kernel-janitors@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Sun, 8 Sep 2019 at 12:12, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+On Fri, 6 Sep 2019 at 11:17, Colin King <colin.king@canonical.com> wrote:
 >
-> Changes in v2:
->         - Added reviewed/tested-by tags.
->         - Updated some changelogs.
->         - Renamed sdio_irq_enabled() to sdio_irq_claimed().
->         - Don't set sdio_irq_pending when resuming SDIO card, but just queue the
->         work.
+> From: Colin Ian King <colin.king@canonical.com>
 >
-> The power management support for SDIO cards have slowly been improved, but
-> there are still quite some serious problems, especially when dealing with the
-> so called SDIO IRQs during system suspend/resume.
+> Don't populate the array degrees on the stack but instead make it
+> static const. Makes the object code smaller by 46 bytes.
 >
-> This series makes some additional improvements to this code in the mmc core,
-> but also includes some needed adaptations for the sdhci, the dw_mmc and the
-> mtk-sd host drivers.
+> Before:
+>    text    data     bss     dec     hex filename
+>    5356    1560       0    6916    1b04 dw_mmc-hi3798cv200.o
 >
-> The series is also available at:
-> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git sdio_irq_suspend_next_v2
+> After:
+>    text    data     bss     dec     hex filename
+>    5214    1656       0    6870    1ad6 dw_mmc-hi3798cv200.o
 >
-> Kind regards
-> Uffe
+> (gcc version 9.2.1, amd64)
 >
->
-> Matthias Kaehlcke (1):
->   mmc: core: Move code to get pending SDIO IRQs to a function
->
-> Ulf Hansson (10):
->   mmc: core: Add helper function to indicate if SDIO IRQs is enabled
->   mmc: dw_mmc: Re-store SDIO IRQs mask at system resume
->   mmc: mtk-sd: Re-store SDIO IRQs mask at system resume
->   mmc: core: Clarify sdio_irq_pending flag for
->     MMC_CAP2_SDIO_IRQ_NOTHREAD
->   mmc: core: Clarify that the ->ack_sdio_irq() callback is mandatory
->   mmc: core: WARN if SDIO IRQs are enabled for non-powered card in
->     suspend
->   mmc: core: Fixup processing of SDIO IRQs during system suspend/resume
->   mmc: sdhci: Drop redundant check in sdhci_ack_sdio_irq()
->   mmc: sdhci: Drop redundant code for SDIO IRQs
->   mmc: sdhci: Convert to use sdio_irq_claimed()
->
->  drivers/mmc/core/sdio.c            |  4 ++-
->  drivers/mmc/core/sdio_irq.c        | 57 +++++++++++++++++++-----------
->  drivers/mmc/host/dw_mmc.c          |  4 +++
->  drivers/mmc/host/mtk-sd.c          |  3 ++
->  drivers/mmc/host/sdhci-esdhc-imx.c | 34 ++++++++----------
->  drivers/mmc/host/sdhci.c           | 12 ++-----
->  drivers/mmc/host/sdhci.h           |  6 ----
->  include/linux/mmc/host.h           | 10 ++++++
->  8 files changed, 75 insertions(+), 55 deletions(-)
->
-> --
-> 2.17.1
->
+> Signed-off-by: Colin Ian King <colin.king@canonical.com>
 
-So, I have queued this up for next (using v3 of patch 3), thanks all
-for reviewing and testing!
+Applied for next, thanks!
 
 Kind regards
 Uffe
+
+
+> ---
+>  drivers/mmc/host/dw_mmc-hi3798cv200.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/dw_mmc-hi3798cv200.c b/drivers/mmc/host/dw_mmc-hi3798cv200.c
+> index bc51cef47c47..83e1bad0a008 100644
+> --- a/drivers/mmc/host/dw_mmc-hi3798cv200.c
+> +++ b/drivers/mmc/host/dw_mmc-hi3798cv200.c
+> @@ -66,7 +66,7 @@ static void dw_mci_hi3798cv200_set_ios(struct dw_mci *host, struct mmc_ios *ios)
+>  static int dw_mci_hi3798cv200_execute_tuning(struct dw_mci_slot *slot,
+>                                              u32 opcode)
+>  {
+> -       int degrees[] = { 0, 45, 90, 135, 180, 225, 270, 315 };
+> +       static const int degrees[] = { 0, 45, 90, 135, 180, 225, 270, 315 };
+>         struct dw_mci *host = slot->host;
+>         struct hi3798cv200_priv *priv = host->priv;
+>         int raise_point = -1, fall_point = -1;
+> --
+> 2.20.1
+>
