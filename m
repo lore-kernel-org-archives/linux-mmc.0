@@ -1,37 +1,66 @@
-From: Colin King <colin.king@canonical.com>
-Subject: [PATCH] ms_block: fix spelling mistake "randomally" -> "randomly"
-Date: Wed, 11 Sep 2019 11:33:57 +0100
-Message-ID: <20190911103357.1744-1-colin.king@canonical.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v2 03/11] mmc: mtk-sd: Re-store SDIO IRQs mask at system resume
+Date: Wed, 11 Sep 2019 14:06:35 +0200
+Message-ID: <CAPDyKFpaM5Os_B_f=b5aY87Espm6GvGG=C6sRemzvfG=9rE74A@mail.gmail.com>
+References: <20190908101236.2802-1-ulf.hansson@linaro.org> <20190908101236.2802-4-ulf.hansson@linaro.org>
+ <CAD=FV=U=ohP9KFWrMYfdbT4WbOxGXFNMd71c7ej1G9Qrtim=7w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAD=FV=U=ohP9KFWrMYfdbT4WbOxGXFNMd71c7ej1G9Qrtim=7w@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Maxim Levitsky <maximlevitsky@gmail.com>, Alex Dubov <oakad@yahoo.com>, Ulf Hansson <ulf.hansson@linaro.org>, Jens Axboe <axboe@kernel.dk>, linux-mmc@vger.kernel.org
-Cc: kernel-janitors@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Doug Anderson <dianders@chromium.org>
+Cc: Linux MMC List <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Matthias Kaehlcke <mka@chromium.org>, Shawn Lin <shawn.lin@rock-chips.com>, Jaehoon Chung <jh80.chung@samsung.com>, Yong Mao <yong.mao@mediatek.com>, Chaotian Jing <chaotian.jing@mediatek.com>, LKML <linux-kernel@vger.kernel.org>, Nicolas Boichat <drinkcat@chromium.org>, Daniel Kurtz <djkurtz@chromium.org>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Colin Ian King <colin.king@canonical.com>
+On Tue, 10 Sep 2019 at 00:29, Doug Anderson <dianders@chromium.org> wrote:
+>
+> Hi,
+>
+> On Sun, Sep 8, 2019 at 3:12 AM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> >
+> > In cases when SDIO IRQs have been enabled, runtime suspend is prevented by
+> > the driver. However, this still means msdc_runtime_suspend|resume() gets
+> > called during system suspend/resume, via pm_runtime_force_suspend|resume().
+> >
+> > This means during system suspend/resume, the register context of the mtk-sd
+> > device most likely loses its register context, even in cases when SDIO IRQs
+> > have been enabled.
+> >
+> > To re-enable the SDIO IRQs during system resume, the mtk-sd driver
+> > currently relies on the mmc core to re-enable the SDIO IRQs when it resumes
+> > the SDIO card, but this isn't the recommended solution. Instead, it's
+> > better to deal with this locally in the mtk-sd driver, so let's do that.
+> >
+> > Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> > ---
+> >  drivers/mmc/host/mtk-sd.c | 3 +++
+> >  1 file changed, 3 insertions(+)
+> >
+> > diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+> > index 6946bb040a28..ae7688098b7b 100644
+> > --- a/drivers/mmc/host/mtk-sd.c
+> > +++ b/drivers/mmc/host/mtk-sd.c
+> > @@ -2408,6 +2408,9 @@ static void msdc_save_reg(struct msdc_host *host)
+> >         } else {
+> >                 host->save_para.pad_tune = readl(host->base + tune_reg);
+> >         }
+> > +
+> > +       if (sdio_irq_claimed(host->mmc))
+> > +               __msdc_enable_sdio_irq(host, 1);
+> >  }
+> >
+> >  static void msdc_restore_reg(struct msdc_host *host)
+>
+> I don't personally have a Mediatek device setup to test this patch on.
+> If it's super urgent I could try to track down one and try to set it
+> up, but hopefully it's easier for someone else...
+>
+> That being said, from code inspection it seems like you should be
+> adding your code to msdc_restore_reg(), not to msdc_save_reg().  Am I
+> confused?
 
-There is a spelling mistake in a dbg_verbose message. Fix it.
+No, you are absolutely correct, my bad. Thanks a lot for spotting this!
 
-Signed-off-by: Colin Ian King <colin.king@canonical.com>
----
- drivers/memstick/core/ms_block.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/drivers/memstick/core/ms_block.c b/drivers/memstick/core/ms_block.c
-index 384927ebde74..d9ee8e3dc72d 100644
---- a/drivers/memstick/core/ms_block.c
-+++ b/drivers/memstick/core/ms_block.c
-@@ -1087,7 +1087,7 @@ static u16 msb_get_free_block(struct msb_data *msb, int zone)
- 
- 	pos %= msb->free_block_count[zone];
- 
--	dbg_verbose("have %d choices for a free block, selected randomally: %d",
-+	dbg_verbose("have %d choices for a free block, selected randomly: %d",
- 		msb->free_block_count[zone], pos);
- 
- 	pba = find_next_zero_bit(msb->used_blocks_bitmap,
--- 
-2.20.1
+Kind regards
+Uffe
