@@ -1,49 +1,116 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH v3 03/11] mmc: mtk-sd: Re-store SDIO IRQs mask at system resume
-Date: Wed, 11 Sep 2019 14:09:20 +0200
-Message-ID: <20190911120920.9026-1-ulf.hansson@linaro.org>
+From: Baolin Wang <baolin.wang@linaro.org>
+Subject: [PATCH v2 0/4] Add MMC software queue support
+Date: Wed, 11 Sep 2019 21:14:39 +0800
+Message-ID: <cover.1568206300.git.baolin.wang@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Douglas Anderson <dianders@chromium.org>, Matthias Kaehlcke <mka@chromium.org>
-Cc: Shawn Lin <shawn.lin@rock-chips.com>, Jaehoon Chung <jh80.chung@samsung.com>, Yong Mao <yong.mao@mediatek.com>, Chaotian Jing <chaotian.jing@mediatek.com>, linux-kernel@vger.kernel.org
+To: adrian.hunter@intel.com, ulf.hansson@linaro.org, asutoshd@codeaurora.org
+Cc: orsonzhai@gmail.com, zhang.lyra@gmail.com, arnd@arndb.de, linus.walleij@linaro.org, vincent.guittot@linaro.org, baolin.wang@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-In cases when SDIO IRQs have been enabled, runtime suspend is prevented by
-the driver. However, this still means msdc_runtime_suspend|resume() gets
-called during system suspend/resume, via pm_runtime_force_suspend|resume().
+Hi All,
 
-This means during system suspend/resume, the register context of the mtk-sd
-device most likely loses its register context, even in cases when SDIO IRQs
-have been enabled.
+Now the MMC read/write stack will always wait for previous request is
+completed by mmc_blk_rw_wait(), before sending a new request to hardware,
+or queue a work to complete request, that will bring context switching
+overhead, especially for high I/O per second rates, to affect the IO
+performance.
 
-To re-enable the SDIO IRQs during system resume, the mtk-sd driver
-currently relies on the mmc core to re-enable the SDIO IRQs when it resumes
-the SDIO card, but this isn't the recommended solution. Instead, it's
-better to deal with this locally in the mtk-sd driver, so let's do that.
+Thus this patch set will introduce the MMC software command queue support
+based on command queue engine's interfaces, and set the queue depth as 2,
+that means we do not need wait for previous request is completed and can
+queue 2 requests in flight. It is enough to let the irq handler always
+trigger the next request without a context switch and then ask the blk_mq
+layer for the next one to get queued, as well as avoiding a long latency.
 
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
----
+Moreover we can expand the MMC software queue interface to support
+MMC packed request or packed command instead of adding new interfaces,
+according to previosus discussion.
 
-Changes in v3:
-	- Fix the code to do the restore in msdc_restore_reg().
+Below are some comparison data with fio tool. The fio command I used
+is like below with changing the '--rw' parameter and enabling the direct
+IO flag to measure the actual hardware transfer speed in 4K block size.
 
----
- drivers/mmc/host/mtk-sd.c | 3 +++
- 1 file changed, 3 insertions(+)
+./fio --filename=/dev/mmcblk0p30 --direct=1 --iodepth=20 --rw=read --bs=4K --size=512M --group_reporting --numjobs=20 --name=test_read
 
-diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index 6946bb040a28..189e42674d85 100644
---- a/drivers/mmc/host/mtk-sd.c
-+++ b/drivers/mmc/host/mtk-sd.c
-@@ -2435,6 +2435,9 @@ static void msdc_restore_reg(struct msdc_host *host)
- 	} else {
- 		writel(host->save_para.pad_tune, host->base + tune_reg);
- 	}
-+
-+	if (sdio_irq_claimed(host->mmc))
-+		__msdc_enable_sdio_irq(host, 1);
- }
- 
- static int msdc_runtime_suspend(struct device *dev)
+My eMMC card working at HS400 Enhanced strobe mode:
+[    2.229856] mmc0: new HS400 Enhanced strobe MMC card at address 0001
+[    2.237566] mmcblk0: mmc0:0001 HBG4a2 29.1 GiB 
+[    2.242621] mmcblk0boot0: mmc0:0001 HBG4a2 partition 1 4.00 MiB
+[    2.249110] mmcblk0boot1: mmc0:0001 HBG4a2 partition 2 4.00 MiB
+[    2.255307] mmcblk0rpmb: mmc0:0001 HBG4a2 partition 3 4.00 MiB, chardev (248:0)
+
+1. Without MMC software queue
+I tested 3 times for each case and output a average speed.
+
+1) Sequential read:
+Speed: 28.9MiB/s, 26.4MiB/s, 30.9MiB/s
+Average speed: 28.7MiB/s
+
+2) Random read:
+Speed: 18.2MiB/s, 8.9MiB/s, 15.8MiB/s
+Average speed: 14.3MiB/s
+
+3) Sequential write:
+Speed: 21.1MiB/s, 27.9MiB/s, 25MiB/s
+Average speed: 24.7MiB/s
+
+4) Random write:
+Speed: 21.5MiB/s, 18.1MiB/s, 18.1MiB/s
+Average speed: 19.2MiB/s
+
+2. With MMC software queue
+I tested 3 times for each case and output a average speed.
+
+1) Sequential read:
+Speed: 44.1MiB/s, 42.3MiB/s, 44.4MiB/s
+Average speed: 43.6MiB/s
+
+2) Random read:
+Speed: 30.6MiB/s, 30.9MiB/s, 30.5MiB/s
+Average speed: 30.6MiB/s
+
+3) Sequential write:
+Speed: 44.1MiB/s, 45.9MiB/s, 44.2MiB/s
+Average speed: 44.7MiB/s
+
+4) Random write:
+Speed: 45.1MiB/s, 43.3MiB/s, 42.4MiB/s
+Average speed: 43.6MiB/s
+
+Form above data, we can see the MMC software queue can help to improve the
+performance obviously.
+
+Any comments are welcome. Thanks a lot.
+
+Changes from v1:
+ - Add request_done ops for sdhci_ops.
+ - Replace virtual command queue with software queue for functions and
+ variables.
+ - Rename the software queue file and add sqhci.h header file.
+
+Baolin Wang (4):
+  mmc: host: cqhci: Move the struct cqhci_slot into header file
+  mmc: Add MMC software queue support
+  mmc: host: sdhci: Add request_done ops for struct sdhci_ops
+  mmc: host: sdhci-sprd: Add software queue support
+
+ drivers/mmc/core/block.c      |   61 ++++++++
+ drivers/mmc/core/mmc.c        |   13 +-
+ drivers/mmc/core/queue.c      |   25 ++-
+ drivers/mmc/host/Kconfig      |    9 ++
+ drivers/mmc/host/Makefile     |    1 +
+ drivers/mmc/host/cqhci.c      |   10 --
+ drivers/mmc/host/cqhci.h      |   17 +-
+ drivers/mmc/host/sdhci-sprd.c |   26 ++++
+ drivers/mmc/host/sdhci.c      |   12 +-
+ drivers/mmc/host/sdhci.h      |    2 +
+ drivers/mmc/host/sqhci.c      |  345 +++++++++++++++++++++++++++++++++++++++++
+ drivers/mmc/host/sqhci.h      |   35 +++++
+ include/linux/mmc/host.h      |    3 +
+ 13 files changed, 536 insertions(+), 23 deletions(-)
+ create mode 100644 drivers/mmc/host/sqhci.c
+ create mode 100644 drivers/mmc/host/sqhci.h
+
 -- 
-2.17.1
+1.7.9.5
