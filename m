@@ -1,47 +1,90 @@
-From: Ludovic Desroches <ludovic.desroches@microchip.com>
-Subject: [PATCH 3/3] ARM: dts: at91: sama5d2: set the sdmmc gclk frequency
-Date: Thu, 12 Sep 2019 22:09:08 +0200
-Message-ID: <20190912200908.31318-3-ludovic.desroches@microchip.com>
-References: <20190912200908.31318-1-ludovic.desroches@microchip.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190912200908.31318-1-ludovic.desroches@microchip.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org
-Cc: ulf.hansson@linaro.org, nicolas.ferre@microchip.com, ludovic.desroches@microchip.com, adrian.hunter@intel.com, linux-kernel@vger.kernel.org, robh+dt@kernel.org, mark.rutland@arm.com, claudiu.beznea@microchip.com
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [PATCH 2/3] mmc: tmio: Fixup runtime PM management during probe
+Date: Fri, 13 Sep 2019 11:41:09 +0200
+Message-ID: <20190913094109.21192-1-ulf.hansson@linaro.org>
+Return-path: <stable-owner@vger.kernel.org>
+Sender: stable-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc: Ulrich Hecht <uli+renesas@fpond.eu>, Simon Horman <horms+renesas@verge.net.au>, Niklas Soderlund <niklas.soderlund@ragnatech.se>, Geert Uytterhoeven <geert@linux-m68k.org>, stable@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Set the frequency of the generated clock used by sdmmc devices in order
-to not rely on the configuration done by previous components.
+The tmio_mmc_host_probe() calls pm_runtime_set_active() to update the
+runtime PM status of the device, as to make it reflect the current status
+of the HW. This works fine for most cases, but unfortunate not for all.
+Especially, there is a generic problem when the device has a genpd attached
+and that genpd have the ->start|stop() callbacks assigned.
 
-Signed-off-by: Ludovic Desroches <ludovic.desroches@microchip.com>
+More precisely, if the driver calls pm_runtime_set_active() during
+->probe(), genpd does not get to invoke the ->start() callback for it,
+which means the HW isn't really fully powered on. Furthermore, in the next
+phase, when the device becomes runtime suspended, genpd will invoke the
+->stop() callback for it, potentially leading to usage count imbalance
+problems, depending on what's implemented behind the callbacks of course.
+
+To fix this problem, convert to call pm_runtime_get_sync() from
+tmio_mmc_host_probe() rather than pm_runtime_set_active(). Additionally, to
+avoid bumping usage counters and unnecessary re-initializing the HW the
+first time the tmio driver's ->runtime_resume() callback is called,
+introduce a state flag to keeping track of this.
+
+Cc: stable@vger.kernel.org
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- arch/arm/boot/dts/sama5d2.dtsi | 4 ++++
- 1 file changed, 4 insertions(+)
+ drivers/mmc/host/tmio_mmc.h      | 1 +
+ drivers/mmc/host/tmio_mmc_core.c | 9 ++++++++-
+ 2 files changed, 9 insertions(+), 1 deletion(-)
 
-diff --git a/arch/arm/boot/dts/sama5d2.dtsi b/arch/arm/boot/dts/sama5d2.dtsi
-index 2e2c1a7b1d1d..8d79ff75e3cd 100644
---- a/arch/arm/boot/dts/sama5d2.dtsi
-+++ b/arch/arm/boot/dts/sama5d2.dtsi
-@@ -300,6 +300,8 @@
- 			interrupts = <31 IRQ_TYPE_LEVEL_HIGH 0>;
- 			clocks = <&pmc PMC_TYPE_PERIPHERAL 31>, <&pmc PMC_TYPE_GCK 31>, <&pmc PMC_TYPE_CORE PMC_MAIN>;
- 			clock-names = "hclock", "multclk", "baseclk";
-+			assigned-clocks = <&pmc PMC_TYPE_GCK 31>;
-+			assigned-clock-rates = <480000000>;
- 			status = "disabled";
- 		};
+diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
+index c5ba13fae399..2f0b092d6dcc 100644
+--- a/drivers/mmc/host/tmio_mmc.h
++++ b/drivers/mmc/host/tmio_mmc.h
+@@ -163,6 +163,7 @@ struct tmio_mmc_host {
+ 	unsigned long		last_req_ts;
+ 	struct mutex		ios_lock;	/* protect set_ios() context */
+ 	bool			native_hotplug;
++	bool			runtime_synced;
+ 	bool			sdio_irq_enabled;
  
-@@ -309,6 +311,8 @@
- 			interrupts = <32 IRQ_TYPE_LEVEL_HIGH 0>;
- 			clocks = <&pmc PMC_TYPE_PERIPHERAL 32>, <&pmc PMC_TYPE_GCK 32>, <&pmc PMC_TYPE_CORE PMC_MAIN>;
- 			clock-names = "hclock", "multclk", "baseclk";
-+			assigned-clocks = <&pmc PMC_TYPE_GCK 32>;
-+			assigned-clock-rates = <480000000>;
- 			status = "disabled";
- 		};
+ 	/* Mandatory callback */
+diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
+index 8b299c1f0069..32f9679ec42e 100644
+--- a/drivers/mmc/host/tmio_mmc_core.c
++++ b/drivers/mmc/host/tmio_mmc_core.c
+@@ -1248,20 +1248,22 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host)
+ 	/* See if we also get DMA */
+ 	tmio_mmc_request_dma(_host, pdata);
+ 
+-	pm_runtime_set_active(&pdev->dev);
+ 	pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
+ 	pm_runtime_use_autosuspend(&pdev->dev);
+ 	pm_runtime_enable(&pdev->dev);
++	pm_runtime_get_sync(&pdev->dev);
+ 
+ 	ret = mmc_add_host(mmc);
+ 	if (ret)
+ 		goto remove_host;
+ 
+ 	dev_pm_qos_expose_latency_limit(&pdev->dev, 100);
++	pm_runtime_put(&pdev->dev);
+ 
+ 	return 0;
+ 
+ remove_host:
++	pm_runtime_put_noidle(&pdev->dev);
+ 	tmio_mmc_host_remove(_host);
+ 	return ret;
+ }
+@@ -1330,6 +1332,11 @@ int tmio_mmc_host_runtime_resume(struct device *dev)
+ {
+ 	struct tmio_mmc_host *host = dev_get_drvdata(dev);
+ 
++	if (!host->runtime_synced) {
++		host->runtime_synced = true;
++		return 0;
++	}
++
+ 	tmio_mmc_clk_enable(host);
+ 	tmio_mmc_hw_reset(host->mmc);
  
 -- 
-2.23.0
+2.17.1
