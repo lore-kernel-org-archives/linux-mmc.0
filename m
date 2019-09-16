@@ -1,40 +1,29 @@
-From: Denis Efremov <efremov@linux.com>
-Subject: [PATCH v3 23/26] memstick: use PCI_STD_NUM_BARS
-Date: Mon, 16 Sep 2019 23:41:55 +0300
-Message-ID: <20190916204158.6889-24-efremov@linux.com>
-References: <20190916204158.6889-1-efremov@linux.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH v4 2/7] dt-bindings: mmc: Add Actions Semi SD/MMC/SDIO
+ controller binding
+Date: Tue, 17 Sep 2019 00:57:41 +0200
+Message-ID: <CACRpkdZC9t-1ZtFzn=4tyWjVteRog6M=VDb5Y+g_3qSfVO_epg@mail.gmail.com>
+References: <20190916154546.24982-1-manivannan.sadhasivam@linaro.org> <20190916154546.24982-3-manivannan.sadhasivam@linaro.org>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190916204158.6889-1-efremov@linux.com>
+In-Reply-To: <20190916154546.24982-3-manivannan.sadhasivam@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Bjorn Helgaas <bhelgaas@google.com>
-Cc: Denis Efremov <efremov@linux.com>, linux-kernel@vger.kernel.org, linux-pci@vger.kernel.org, Andrew Murray <andrew.murray@arm.com>, linux-mmc@vger.kernel.org, Maxim Levitsky <maximlevitsky@gmail.com>, Alex Dubov <oakad@yahoo.com>, Ulf Hansson <ulf.hansson@linaro.org>
+To: Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, =?UTF-8?Q?Andreas_F=C3=A4rber?= <afaerber@suse.de>, Rob Herring <robh+dt@kernel.org>, Stephen Boyd <sboyd@kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" <devicetree@vger.kernel.org>, "Thomas C. Liau" <thomas.liau@actions-semi.com>, linux-actions@lists.infradead.org, linux-clk <linux-clk@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Use define PCI_STD_NUM_BARS instead of PCI_ROM_RESOURCE for the number of
-PCI BARs.
+On Mon, Sep 16, 2019 at 5:46 PM Manivannan Sadhasivam
+<manivannan.sadhasivam@linaro.org> wrote:
 
-Cc: Maxim Levitsky <maximlevitsky@gmail.com>
-Cc: Alex Dubov <oakad@yahoo.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
-Signed-off-by: Denis Efremov <efremov@linux.com>
----
- drivers/memstick/host/jmb38x_ms.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+> Add devicetree YAML binding for Actions Semi Owl SoC's SD/MMC/SDIO
+> controller.
+>
+> Signed-off-by: Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
 
-diff --git a/drivers/memstick/host/jmb38x_ms.c b/drivers/memstick/host/jmb38x_ms.c
-index 32747425297d..fd281c1d39b1 100644
---- a/drivers/memstick/host/jmb38x_ms.c
-+++ b/drivers/memstick/host/jmb38x_ms.c
-@@ -848,7 +848,7 @@ static int jmb38x_ms_count_slots(struct pci_dev *pdev)
- {
- 	int cnt, rc = 0;
- 
--	for (cnt = 0; cnt < PCI_ROM_RESOURCE; ++cnt) {
-+	for (cnt = 0; cnt < PCI_STD_NUM_BARS; ++cnt) {
- 		if (!(IORESOURCE_MEM & pci_resource_flags(pdev, cnt)))
- 			break;
- 
--- 
-2.21.0
+Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
+
+Neat use of yaml!
+
+Yours,
+Linus Walleij
