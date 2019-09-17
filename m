@@ -1,7 +1,7 @@
-From: Russell King - ARM Linux admin <linux@armlinux.org.uk>
+From: Will Deacon <will@kernel.org>
 Subject: Re: [REGRESSION] sdhci no longer detects SD cards on LX2160A
-Date: Tue, 17 Sep 2019 14:49:47 +0100
-Message-ID: <20190917134947.GS25745@shell.armlinux.org.uk>
+Date: Tue, 17 Sep 2019 14:50:03 +0100
+Message-ID: <20190917135002.5rolyvlgmnyepk2c@willie-the-truck>
 References: <20190916171509.GG25745@shell.armlinux.org.uk>
  <b19a0640-5d71-a005-eb0f-c6840f181e5d@free.fr>
  <20190917081931.GI25745@shell.armlinux.org.uk>
@@ -27,7 +27,7 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
 Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
 Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: Robin Murphy <robin.murphy@arm.com>
-Cc: dann frazier <dann.frazier@canonical.com>, linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, Will Deacon <will.deacon@arm.com>, Nicolin Chen <nicoleotsuka@gmail.com>, Christoph Hellwig <hch@lst.de>, Linux ARM <linux-arm-kernel@lists.infradead.org>
+Cc: dann frazier <dann.frazier@canonical.com>, Will Deacon <will.deacon@arm.com>, Russell King - ARM Linux admin <linux@armlinux.org.uk>, Adrian Hunter <adrian.hunter@intel.com>, Nicolin Chen <nicoleotsuka@gmail.com>, linux-mmc@vger.kernel.org, Christoph Hellwig <hch@lst.de>, Linux ARM <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
 On Tue, Sep 17, 2019 at 02:38:00PM +0100, Robin Murphy wrote:
@@ -251,29 +251,10 @@ On Tue, Sep 17, 2019 at 02:38:00PM +0100, Robin Murphy wrote:
 > addresses that the controller needed additional configuration to be able to
 > access[1] - no amount of cache maintenance would affect that.
 
-As already replied, v4 mode is not documented as being available on
-the LX2160A - the bit in the control register is marked as "reserved".
-This is as expected as it is documented that it is using a v3.00 of
-the SDHCI standard, rather than v4.00.
+To be honest, the conclusion in that other thread wasn't exactly satisfying.
+The reporter says "Probably, my device is not 64-bit capable." and the fix
+changes the buffer allocation enough that I wouldn't rule out the same
+coherency issue as being the root cause. I don't think we ever tried adding
+cache flushing to see if it helped.
 
-So, sorry, enabling "v4 mode" isn't a workaround in this scenario.
-
-Given that v4 mode is not mandatory, this shouldn't be a work-around.
-
-Given that it _does_ work some of the time with the table >4GB, then
-this is not an addressing limitation.
-
-> However, the other difference between getting a single page directly from
-> the page allocator vs. the CMA area is that accesses to the linear mapping
-> of the CMA area are probably pretty rare, whereas for the single-page case
-> it's much more likely that kernel tasks using adjacent pages could lead to
-> prefetching of the descriptor page's cacheable alias. That could certainly
-> explain how reverting that commit manages to hide an apparent coherency
-> issue.
-
-Right, so how do we fix this?
-
--- 
-RMK's Patch system: https://www.armlinux.org.uk/developer/patches/
-FTTC broadband for 0.8mile line in suburbia: sync at 12.1Mbps down 622kbps up
-According to speedtest.net: 11.9Mbps down 500kbps up
+Will
