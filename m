@@ -1,59 +1,33 @@
-From: Ludovic BARRE <ludovic.barre@st.com>
-Subject: Re: [PATCH V6 0/3] mmc: mmci: add busy detect for stm32 sdmmc variant
-Date: Wed, 18 Sep 2019 11:33:08 +0200
-Message-ID: <940e3ce8-1a4f-7e03-dfec-25330051ea5f@st.com>
-References: <20190905122112.29672-1-ludovic.Barre@st.com>
+From: "Michael K. Johnson" <johnsonm@danlj.org>
+Subject: Re: [PATCH V9 5/5] mmc: host: sdhci-pci: Add Genesys Logic GL975x
+ support
+Date: Wed, 18 Sep 2019 06:47:34 -0400
+Message-ID: <20190918104734.GA3320@people.danlj.org>
+References: <cover.1568184581.git.benchuanggli@gmail.com>
+ <2d08c47490a349d7ee5682749f68604adc62f19f.1568184581.git.benchuanggli@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; Format="flowed"
-Content-Transfer-Encoding: base64
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20190905122112.29672-1-ludovic.Barre@st.com>
-Content-Language: fr
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>
-Cc: devicetree@vger.kernel.org, Alexandre Torgue <alexandre.torgue@st.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, srinivas.kandagatla@linaro.org, Maxime Coquelin <mcoquelin.stm32@gmail.com>, linux-stm32@st-md-mailman.stormreply.com, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <2d08c47490a349d7ee5682749f68604adc62f19f.1568184581.git.benchuanggli@gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: ulf.hansson@linaro.org
+Cc: adrian.hunter@intel.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, "ben.chuang@genesyslogic.com.tw Ben Chuang" <benchuanggli@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-aGkgVWxmCgpKdXN0IGEgImdlbnRsZW1hbiBwaW5nIiBhYm91dCB0aGlzIHNlcmllcyBhbmQKaHR0
-cHM6Ly9sa21sLm9yZy9sa21sLzIwMTkvOS80Lzc0NwoKUmVnYXJkcwpMdWRvCgpMZSA5LzUvMTkg
-w6AgMjoyMSBQTSwgTHVkb3ZpYyBCYXJyZSBhIMOpY3JpdMKgOgo+IEZyb206IEx1ZG92aWMgQmFy
-cmUgPGx1ZG92aWMuYmFycmVAc3QuY29tPgo+IAo+IFRoaXMgcGF0Y2ggc2VyaWVzIGFkZHMgYnVz
-eSBkZXRlY3QgZm9yIHN0bTMyIHNkbW1jIHZhcmlhbnQuCj4gU29tZSBhZGFwdGF0aW9ucyBhcmUg
-cmVxdWlyZWQ6Cj4gLU9uIHNkbW1jIHRoZSBkYXRhIHRpbWVyIGlzIHN0YXJ0ZWQgb24gZGF0YSB0
-cmFuc2ZlcnQKPiBhbmQgYnVzeSBzdGF0ZSwgc28gd2UgbXVzdCBhZGQgaGFyZHdhcmUgYnVzeSB0
-aW1lb3V0IHN1cHBvcnQuCj4gLUFkZCBidXN5X2NvbXBsZXRlIGNhbGxiYWNrIGF0IG1tY2lfaG9z
-dF9vcHMgdG8gYWxsb3cgdG8gZGVmaW5lCj4gYSBzcGVjaWZpYyBidXN5IGNvbXBsZXRpb24gYnkg
-dmFyaWFudC4KPiAtQWRkIHNkbW1jIGJ1c3lfY29tcGxldGUgY2FsbGJhY2suCj4gCj4gVjY6Cj4g
-LW1tY2lfc3RhcnRfY29tbWFuZDogc2V0IGRhdGF0aW1lciBvbmx5IG9uIHJzcF9idXN5IGZsYWcK
-PiAocmVtb3ZlIGhvc3QtPm1ycS0+ZGF0YSkuCj4gLW1vdmUgbWF4X2J1c3lfdGltZW91dCBpbiBz
-ZXRfaW9zIGNhbGxiYWNrLgo+IC10eXBvIGZpeDogZXJyX21zaywgY2xrcyBvbiBvbmUgbGluZXMu
-Cj4gCj4gVjU6Cj4gLVJlcGxhY2VzICFjbWQtPmRhdGEgdG8gIWhvc3QtPm1ycS0+ZGF0YSB0byBh
-dm9pZCBvdmVyd3JpdGUKPiAgIG9mIGRhdGF0aW1lciByZWdpc3RlciBieSB0aGUgZmlyc3QgY29t
-bWFuZCAoY21kMjMsIHdpdGhvdXQgZGF0YSkgb2YKPiAgIFNCQyByZXF1ZXN0Lgo+IAo+IFY0Ogo+
-IC1SZS13b3JrIHdpdGggYnVzeV9jb21wbGV0ZSBjYWxsYmFjawo+IC1JbiBzZXJpZXMsIG1vdmUg
-Im1tYzogbW1jaTogYWRkIGhhcmR3YXJlIGJ1c3kgdGltZW91dCBmZWF0dXJlIiBpbgo+IGZpcnN0
-IHRvIHNpbXBsaWZ5IGJ1c3lfY29tcGxldGUgcHJvdG90eXBlIHdpdGggZXJyX21zayBwYXJhbWV0
-ZXIuCj4gCj4gVjM6Cj4gLXJlYmFzZSBvbiBsYXRlc3QgbW1jIG5leHQKPiAtcmVwbGFjZSByZS1y
-ZWFkIGJ5IHN0YXR1cyBwYXJhbWV0ZXIuCj4gCj4gVjI6Cj4gLW1tY2lfY21kX2lycSBjbGVhbnVw
-IGluIHNlcGFyYXRlIHBhdGNoLgo+IC1zaW1wbGlmeSB0aGUgYnVzeV9kZXRlY3RfZmxhZyBleGNs
-dWRlCj4gLXJlcGxhY2Ugc2RtbWMgc3BlY2lmaWMgY29tbWVudCBpbgo+ICJtbWM6IG1tY2k6IGF2
-b2lkIGZha2UgYnVzeSBwb2xsaW5nIGluIG1tY2lfaXJxIgo+IHRvIGZvY3VzIG9uIGNvbW1vbiBi
-ZWhhdmlvcgo+IAo+IEx1ZG92aWMgQmFycmUgKDMpOgo+ICAgIG1tYzogbW1jaTogYWRkIGhhcmR3
-YXJlIGJ1c3kgdGltZW91dCBmZWF0dXJlCj4gICAgbW1jOiBtbWNpOiBhZGQgYnVzeV9jb21wbGV0
-ZSBjYWxsYmFjawo+ICAgIG1tYzogbW1jaTogc2RtbWM6IGFkZCBidXN5X2NvbXBsZXRlIGNhbGxi
-YWNrCj4gCj4gICBkcml2ZXJzL21tYy9ob3N0L21tY2kuYyAgICAgICAgICAgICB8IDE4MyArKysr
-KysrKysrKysrKysrKy0tLS0tLS0tLS0tCj4gICBkcml2ZXJzL21tYy9ob3N0L21tY2kuaCAgICAg
-ICAgICAgICB8ICAgNyArLQo+ICAgZHJpdmVycy9tbWMvaG9zdC9tbWNpX3N0bTMyX3NkbW1jLmMg
-fCAgMzggKysrKysrCj4gICAzIGZpbGVzIGNoYW5nZWQsIDE1NiBpbnNlcnRpb25zKCspLCA3MiBk
-ZWxldGlvbnMoLSkKPiAKCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fCmxpbnV4LWFybS1rZXJuZWwgbWFpbGluZyBsaXN0CmxpbnV4LWFybS1rZXJuZWxAbGlz
-dHMuaW5mcmFkZWFkLm9yZwpodHRwOi8vbGlzdHMuaW5mcmFkZWFkLm9yZy9tYWlsbWFuL2xpc3Rp
-bmZvL2xpbnV4LWFybS1rZXJuZWwK
+I see that the first four patches made it into Linus's kernel
+yesterday. Is there any chance of this final patch that actually
+enables the hardware making it into another pull request still
+intended for 5.4?  Waiting on additional acked-by on Ben's work
+addressing all the review comments?
+
+Thanks.
+
+On Wed, Sep 11, 2019 at 03:23:44PM +0800, Ben Chuang wrote:
+> From: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+> 
+> Add support for the GL9750 and GL9755 chipsets.
+> 
+> Enable v4 mode and wait 5ms after set 1.8V signal enable for GL9750/
+> GL9755. Fix the value of SDHCI_MAX_CURRENT register and use the vendor
+> tuning flow for GL9750.
