@@ -1,7 +1,7 @@
-From: Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
+From: pr-tracker-bot-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
 Subject: Re: [GIT PULL] dma-mapping updates for 5.4
-Date: Thu, 19 Sep 2019 13:33:50 -0700
-Message-ID: <CAHk-=wjXF63BKNJH=GtnnoJmXZHEnRwjgeu4foJQvFYYBm9HHA@mail.gmail.com>
+Date: Thu, 19 Sep 2019 21:30:29 +0000
+Message-ID: <156892862992.30913.10484528229946005623.pr-tracker-bot@kernel.org>
 References: <20190918152748.GA21241@infradead.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -17,35 +17,19 @@ List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
 	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
 Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
 Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Christoph Hellwig <hch-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, Michael Ellerman <mpe-Gsx/Oe8HsFggBc27wqDAHg@public.gmane.org>, Michal Simek <monstr-pSz03upnqPeHXe+LvDLADg@public.gmane.org>
-Cc: xen-devel-GuqFBffKawtpuQazS67q72D2FQJk+8+b@public.gmane.org, iommu <iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Christoph Hellwig <hch-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
+Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, xen-devel-GuqFBffKawtpuQazS67q72D2FQJk+8+b@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, Sep 18, 2019 at 8:27 AM Christoph Hellwig <hch-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org> wrote:
->
-> please pull the dma-mapping updates for 5.4.
+The pull request you sent on Wed, 18 Sep 2019 08:27:48 -0700:
 
-Pulled.
+> git://git.infradead.org/users/hch/dma-mapping.git tags/dma-mapping-5.4
 
-> In addition to the usual Kconfig conflics where you just want to keep
-> both edits there are a few more interesting merge issues this time:
->
->  - most importanly powerpc and microblaze add new callers of
->    dma_atomic_pool_init, while this tree marks the function static
->    and calls it from a common postcore_initcall().  The trivial
->    functions added in powerpc and microblaze adding the calls
->    need to be removed for the code to compile.  This will not show up
->    as a merge conflict and needs to be dealt with manually!
+has been merged into torvalds/linux.git:
+https://git.kernel.org/torvalds/c/671df189537883f36cf9c7d4f9495bfac0f86627
 
-So I haven't gotten the powerpc or microblaze pull requests yet, so
-I'm not able to fix that part up yet.
+Thank you!
 
-Intead, I'm cc'ing Michael Ellerman and Michal Simek to ask them to
-remind me when they _do_ send those pull requests, since otherwise I
-may well forget and miss it. Without an actual data conflict, and
-since this won't show up in my build tests either, it would be very
-easy for me to forget.
-
-Micha[e]l, can you both please make sure to remind me?
-
-             Linus
+-- 
+Deet-doot-dot, I am a bot.
+https://korg.wiki.kernel.org/userdoc/prtracker
