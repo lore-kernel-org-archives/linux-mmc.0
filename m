@@ -1,81 +1,117 @@
-From: "Y.b. Lu" <yangbo.lu@nxp.com>
-Subject: RE: [REGRESSION] sdhci no longer detects SD cards on LX2160A
-Date: Thu, 19 Sep 2019 04:13:20 +0000
-Message-ID: <VI1PR0401MB22376A0EA85123B2AEB72EDEF8890@VI1PR0401MB2237.eurprd04.prod.outlook.com>
-References: <b19a0640-5d71-a005-eb0f-c6840f181e5d@free.fr>
- <20190917081931.GI25745@shell.armlinux.org.uk>
- <20190917104200.GJ25745@shell.armlinux.org.uk>
- <20190917111631.GL25745@shell.armlinux.org.uk>
- <20190917114210.GM25745@shell.armlinux.org.uk>
- <20190917123326.GN25745@shell.armlinux.org.uk>
- <20190917130759.GO25745@shell.armlinux.org.uk>
- <CAOMZO5DXv8g5qTGdvobDdLWim+tW=vK4+K=P-VqJK23KERMhJw@mail.gmail.com>
- <20190917133317.GQ25745@shell.armlinux.org.uk>
- <CAOMZO5DS_1Uc9TMc29e+8tCg-srvMjf3uth_9P3cnro6det+7A@mail.gmail.com>
- <20190917135157.GT25745@shell.armlinux.org.uk>
- <CAOMZO5BDirX0Fwo716v1ddYaaO+OL8Woht63mw8OEhDuMBTb8Q@mail.gmail.com>
- <CADRPPNQ-WTY0QC7_bX=N0QeueKve=k0SaMvbjOrByyvzFojz2g@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <CADRPPNQ-WTY0QC7_bX=N0QeueKve=k0SaMvbjOrByyvzFojz2g@mail.gmail.com>
-Content-Language: en-US
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Leo Li <leoyang.li@nxp.com>, Fabio Estevam <festevam@gmail.com>, Russell King - ARM Linux admin <linux@armlinux.org.uk>
-Cc: dann frazier <dann.frazier@canonical.com>, Will Deacon <will.deacon@arm.com>, Adrian Hunter <adrian.hunter@intel.com>, Nicolin Chen <nicoleotsuka@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, Christoph Hellwig <hch@lst.de>, Linux ARM <linux-arm-kernel@lists.infradead.org>
+From: Baolin Wang <baolin.wang@linaro.org>
+Subject: [PATCH v3 0/3] Add MMC software queue support
+Date: Thu, 19 Sep 2019 13:58:44 +0800
+Message-ID: <cover.1568864712.git.baolin.wang@linaro.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: adrian.hunter@intel.com, ulf.hansson@linaro.org, asutoshd@codeaurora.org
+Cc: orsonzhai@gmail.com, zhang.lyra@gmail.com, arnd@arndb.de, linus.walleij@linaro.org, vincent.guittot@linaro.org, baolin.wang@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-U29ycnkuIE15IGVtYWlsIHdhcyByZWplY3RlZCBieSBtYWlsaW5nIGxpc3RzLiBMZXQgbWUgcmUt
-c2VuZC4NCg0KSGkgUnVzc2VsbCwNCg0KSeKAmW0gbm90IHN1cmUgd2hhdCBib2FyZCB5b3Ugd2Vy
-ZSB1c2luZyBmb3IgTFgyMTYwQS4NCldlIGhhZCBhbiBrbm93biBpc3N1ZSBmb3IgZVNESEMgY29u
-dHJvbGxlciBhbmQgYWxsIE5YUCBMYXllcnNjYXBlIFJEQiBib2FyZHMuDQplU0RIQyBjb3VsZG7i
-gJl0IHByb3ZpZGUgcG93ZXItY3ljbGUgdG8gU0QgY2FyZCwgYW5kIGV2ZW4gd29yc2UsIGJvYXJk
-IHJlc2V0IGNvdWxkbuKAmXQgcHJvdmlkZSBwb3dlci1jeWNsZSB0byBTRCBjYXJkIGVpdGhlci4N
-CkJ1dCBmb3IgVUhTLUkgU0QgY2FyZCwgaXTigJlzIHJlcXVpcmVkIHRvIGhhdmUgYSBwb3dlci1j
-eWNsZSB0byByZXNldCBjYXJkIGlmIGl0IGdvZXMgaW50byBVSFMtSSBtb2RlLiBPdGhlcndpc2Us
-IHdlIGRvbuKAmXQga25vdyB3aGF0IHdpbGwgaGFwcGVuIHdoZW4ga2VybmVsIGluaXRpYWxpemVz
-IFNEIGNhcmQgYWZ0ZXIgYSByZWJvb3QvcmVzZXQuDQoNCkkgY291bGQgcmVwcm9kdWNlIHRoYXQg
-aXNzdWUgd2l0aCBiZWxvdyBzdGVwcyBvbiBsYXRlc3QgbWFpbmxpbmUga2VybmVsLg0KMS4gUG93
-ZXIgb2ZmIGJvYXJkLCBhbmQgcG93ZXIgb24gYm9hcmQuDQoyLiBTdGFydCB1cCBrZXJuZWwsIHRo
-ZSBTRCBjYXJkIHdvcmtzIGZpbmUgaW4gVUhTLUkgbW9kZS4NCjMuIFJlYm9vdC9yZXNldCBib2Fy
-ZC4gKFRoaXMgY291bGRu4oCZdCBwcm92aWRlIHBvd2VyLWN5Y2xlIHRvIFNEIGNhcmQpDQo0LiBT
-dGFydCB1cCBrZXJuZWwsIHRoZSBTRCBjYXJkIGdldHMgdGhhdCBBRE1BIGVycm9yIGlzc3VlLg0K
-DQpTbyBjb3VsZCB5b3UgaGF2ZSBhIHRyeSB0byBwb3dlciBvZmYvcG93ZXIgb24gdGhlIGJvYXJk
-LCBhbmQgdGhlbiBzdGFydCB1cCBrZXJuZWwuIERvbuKAmXQgdXNlIHJlYm9vdCwgb3IgYm9hcmQg
-cmVzZXQgYnV0dG9uLg0KT3IgeW91IGNhbiByZW1vdmUgU0QgY2FyZCBhbmQgc3RhcnQgdXAga2Vy
-bmVsLCBhbmQgaW5zZXJ0IFNEIGNhcmQgd2hlbiBrZXJuZWwgaGFzIGJlZW4gc3RhcnRlZCB1cC4N
-ClRoYW5rcyBhIGxvdC4NCg0KQmVzdCByZWdhcmRzLA0KWWFuZ2JvIEx1DQoNCg0KRnJvbTogTGkg
-WWFuZyA8bGVveWFuZy5saUBueHAuY29tPiANClNlbnQ6IFdlZG5lc2RheSwgU2VwdGVtYmVyIDE4
-LCAyMDE5IDE6NDggQU0NClRvOiBGYWJpbyBFc3RldmFtIDxmZXN0ZXZhbUBnbWFpbC5jb20+OyBZ
-LmIuIEx1IDx5YW5nYm8ubHVAbnhwLmNvbT4NCkNjOiBBZHJpYW4gSHVudGVyIDxhZHJpYW4uaHVu
-dGVyQGludGVsLmNvbT47IENocmlzdG9waCBIZWxsd2lnIDxoY2hAbHN0LmRlPjsgTGludXggQVJN
-IDxsaW51eC1hcm0ta2VybmVsQGxpc3RzLmluZnJhZGVhZC5vcmc+OyBOaWNvbGluIENoZW4gPG5p
-Y29sZW90c3VrYUBnbWFpbC5jb20+OyBSdXNzZWxsIEtpbmcgLSBBUk0gTGludXggYWRtaW4gPGxp
-bnV4QGFybWxpbnV4Lm9yZy51az47IFdpbGwgRGVhY29uIDx3aWxsLmRlYWNvbkBhcm0uY29tPjsg
-ZGFubiBmcmF6aWVyIDxkYW5uLmZyYXppZXJAY2Fub25pY2FsLmNvbT47IGxpbnV4LW1tYyA8bGlu
-dXgtbW1jQHZnZXIua2VybmVsLm9yZz4NClN1YmplY3Q6IFJlOiBbUkVHUkVTU0lPTl0gc2RoY2kg
-bm8gbG9uZ2VyIGRldGVjdHMgU0QgY2FyZHMgb24gTFgyMTYwQQ0KDQoNCg0KT24gVHVlLCBTZXAg
-MTcsIDIwMTkgYXQgNjozMSBQTSBGYWJpbyBFc3RldmFtIDxtYWlsdG86ZmVzdGV2YW1AZ21haWwu
-Y29tPiB3cm90ZToNCltBZGRpbmcgTGkgWWFuZ10NCg0KT24gVHVlLCBTZXAgMTcsIDIwMTkgYXQg
-MTA6NTIgQU0gUnVzc2VsbCBLaW5nIC0gQVJNIExpbnV4IGFkbWluDQo8bWFpbHRvOmxpbnV4QGFy
-bWxpbnV4Lm9yZy51az4gd3JvdGU6DQoNCj4gVGhlIHByZXNzaW5nIHF1ZXN0aW9uIHNlZW1zIHRv
-IGJlIHRoaXM6DQo+DQo+IEFyZSB0aGUgZVNESEMgb24gdGhlIExYMjE2MEEgRE1BIGNvaGVyZW50
-IG9yIGFyZSB0aGV5IG5vdD8NCj4NCj4gQW55IGNoYW5jZXMgb2YgZmluZGluZyBvdXQgaW50ZXJu
-YWxseSB3aGF0IHRoZSB0cnVlIGFuc3dlciB0byB0aGF0LA0KPiByYXRoZXIgdGhhbiBtZSBwb2tp
-bmcgYWJvdXQgdHJ5aW5nIHN0dWZmIGV4cGVyaW1lbnRhbGx5P8KgIEhhdmluZyBhDQo+IGRlZmlu
-aXRpdmUgYW5zd2VyIGZvciBhIHBvdGVudGlhbGx5IGRhdGEtY29ycnVwdGluZyBjaGFuZ2Ugd291
-bGQNCj4gYmUgcmVhbGx5IGdvb2QuLi4NCg0KTGkgWWFuZywNCg0KQ291bGQgeW91IHBsZWFzZSBo
-ZWxwIHRvIGNvbmZpcm0gUnVzc2VsbCdzIHF1ZXN0aW9uPw0KQWRkaW5nIFlhbmdibyB3aG8gaXMg
-d29ya2luZyBvbiBTREhDLg0KDQpSZWdhcmRzLA0KTGVvDQpfX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fXwpsaW51eC1hcm0ta2VybmVsIG1haWxpbmcgbGlzdAps
-aW51eC1hcm0ta2VybmVsQGxpc3RzLmluZnJhZGVhZC5vcmcKaHR0cDovL2xpc3RzLmluZnJhZGVh
-ZC5vcmcvbWFpbG1hbi9saXN0aW5mby9saW51eC1hcm0ta2VybmVsCg==
+Hi All,
+
+Now the MMC read/write stack will always wait for previous request is
+completed by mmc_blk_rw_wait(), before sending a new request to hardware,
+or queue a work to complete request, that will bring context switching
+overhead, especially for high I/O per second rates, to affect the IO
+performance.
+
+Thus this patch set will introduce the MMC software command queue support
+based on command queue engine's interfaces, and set the queue depth as 2,
+that means we do not need wait for previous request is completed and can
+queue 2 requests in flight. It is enough to let the irq handler always
+trigger the next request without a context switch and then ask the blk_mq
+layer for the next one to get queued, as well as avoiding a long latency.
+
+Moreover we can expand the MMC software queue interface to support
+MMC packed request or packed command instead of adding new interfaces,
+according to previosus discussion.
+
+Below are some comparison data with fio tool. The fio command I used
+is like below with changing the '--rw' parameter and enabling the direct
+IO flag to measure the actual hardware transfer speed in 4K block size.
+
+./fio --filename=/dev/mmcblk0p30 --direct=1 --iodepth=20 --rw=read --bs=4K --size=512M --group_reporting --numjobs=20 --name=test_read
+
+My eMMC card working at HS400 Enhanced strobe mode:
+[    2.229856] mmc0: new HS400 Enhanced strobe MMC card at address 0001
+[    2.237566] mmcblk0: mmc0:0001 HBG4a2 29.1 GiB 
+[    2.242621] mmcblk0boot0: mmc0:0001 HBG4a2 partition 1 4.00 MiB
+[    2.249110] mmcblk0boot1: mmc0:0001 HBG4a2 partition 2 4.00 MiB
+[    2.255307] mmcblk0rpmb: mmc0:0001 HBG4a2 partition 3 4.00 MiB, chardev (248:0)
+
+1. Without MMC software queue
+I tested 3 times for each case and output a average speed.
+
+1) Sequential read:
+Speed: 28.9MiB/s, 26.4MiB/s, 30.9MiB/s
+Average speed: 28.7MiB/s
+
+2) Random read:
+Speed: 18.2MiB/s, 8.9MiB/s, 15.8MiB/s
+Average speed: 14.3MiB/s
+
+3) Sequential write:
+Speed: 21.1MiB/s, 27.9MiB/s, 25MiB/s
+Average speed: 24.7MiB/s
+
+4) Random write:
+Speed: 21.5MiB/s, 18.1MiB/s, 18.1MiB/s
+Average speed: 19.2MiB/s
+
+2. With MMC software queue
+I tested 3 times for each case and output a average speed.
+
+1) Sequential read:
+Speed: 44.1MiB/s, 42.3MiB/s, 44.4MiB/s
+Average speed: 43.6MiB/s
+
+2) Random read:
+Speed: 30.6MiB/s, 30.9MiB/s, 30.5MiB/s
+Average speed: 30.6MiB/s
+
+3) Sequential write:
+Speed: 44.1MiB/s, 45.9MiB/s, 44.2MiB/s
+Average speed: 44.7MiB/s
+
+4) Random write:
+Speed: 45.1MiB/s, 43.3MiB/s, 42.4MiB/s
+Average speed: 43.6MiB/s
+
+Form above data, we can see the MMC software queue can help to improve the
+performance obviously.
+
+Any comments are welcome. Thanks a lot.
+
+Changes from v2:
+ - Remove reference to 'struct cqhci_host' and 'struct cqhci_slot',
+ instead adding 'struct sqhci_host', which is only used by software queue.
+
+Changes from v1:
+ - Add request_done ops for sdhci_ops.
+ - Replace virtual command queue with software queue for functions and
+ variables.
+ - Rename the software queue file and add sqhci.h header file.
+
+Baolin Wang (3):
+  mmc: Add MMC software queue support
+  mmc: host: sdhci: Add request_done ops for struct sdhci_ops
+  mmc: host: sdhci-sprd: Add software queue support
+
+ drivers/mmc/core/block.c      |   61 ++++++++
+ drivers/mmc/core/mmc.c        |   13 +-
+ drivers/mmc/core/queue.c      |   25 ++-
+ drivers/mmc/host/Kconfig      |    9 ++
+ drivers/mmc/host/Makefile     |    1 +
+ drivers/mmc/host/sdhci-sprd.c |   26 ++++
+ drivers/mmc/host/sdhci.c      |   12 +-
+ drivers/mmc/host/sdhci.h      |    2 +
+ drivers/mmc/host/sqhci.c      |  344 +++++++++++++++++++++++++++++++++++++++++
+ drivers/mmc/host/sqhci.h      |   53 +++++++
+ include/linux/mmc/host.h      |    3 +
+ 11 files changed, 537 insertions(+), 12 deletions(-)
+ create mode 100644 drivers/mmc/host/sqhci.c
+ create mode 100644 drivers/mmc/host/sqhci.h
+
+-- 
+1.7.9.5
