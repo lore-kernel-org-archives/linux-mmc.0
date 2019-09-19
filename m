@@ -1,42 +1,81 @@
-From: Ben Chuang <benchuanggli@gmail.com>
-Subject: Re: [PATCH V9 5/5] mmc: host: sdhci-pci: Add Genesys Logic GL975x support
-Date: Thu, 19 Sep 2019 09:50:31 +0800
-Message-ID: <CACT4zj8dyLWfQ5uDafwXxd7A09S522j1nQTGHV0p5gn8nUzbRQ@mail.gmail.com>
-References: <cover.1568184581.git.benchuanggli@gmail.com> <2d08c47490a349d7ee5682749f68604adc62f19f.1568184581.git.benchuanggli@gmail.com>
- <20190918104734.GA3320@people.danlj.org> <781dc676-4903-5ab2-84d1-b5357c11dccd@intel.com>
+From: "Y.b. Lu" <yangbo.lu@nxp.com>
+Subject: RE: [REGRESSION] sdhci no longer detects SD cards on LX2160A
+Date: Thu, 19 Sep 2019 04:13:20 +0000
+Message-ID: <VI1PR0401MB22376A0EA85123B2AEB72EDEF8890@VI1PR0401MB2237.eurprd04.prod.outlook.com>
+References: <b19a0640-5d71-a005-eb0f-c6840f181e5d@free.fr>
+ <20190917081931.GI25745@shell.armlinux.org.uk>
+ <20190917104200.GJ25745@shell.armlinux.org.uk>
+ <20190917111631.GL25745@shell.armlinux.org.uk>
+ <20190917114210.GM25745@shell.armlinux.org.uk>
+ <20190917123326.GN25745@shell.armlinux.org.uk>
+ <20190917130759.GO25745@shell.armlinux.org.uk>
+ <CAOMZO5DXv8g5qTGdvobDdLWim+tW=vK4+K=P-VqJK23KERMhJw@mail.gmail.com>
+ <20190917133317.GQ25745@shell.armlinux.org.uk>
+ <CAOMZO5DS_1Uc9TMc29e+8tCg-srvMjf3uth_9P3cnro6det+7A@mail.gmail.com>
+ <20190917135157.GT25745@shell.armlinux.org.uk>
+ <CAOMZO5BDirX0Fwo716v1ddYaaO+OL8Woht63mw8OEhDuMBTb8Q@mail.gmail.com>
+ <CADRPPNQ-WTY0QC7_bX=N0QeueKve=k0SaMvbjOrByyvzFojz2g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <781dc676-4903-5ab2-84d1-b5357c11dccd@intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: "Michael K. Johnson" <johnsonm@danlj.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <CADRPPNQ-WTY0QC7_bX=N0QeueKve=k0SaMvbjOrByyvzFojz2g@mail.gmail.com>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Leo Li <leoyang.li@nxp.com>, Fabio Estevam <festevam@gmail.com>, Russell King - ARM Linux admin <linux@armlinux.org.uk>
+Cc: dann frazier <dann.frazier@canonical.com>, Will Deacon <will.deacon@arm.com>, Adrian Hunter <adrian.hunter@intel.com>, Nicolin Chen <nicoleotsuka@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, Christoph Hellwig <hch@lst.de>, Linux ARM <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, Sep 18, 2019 at 7:09 PM Adrian Hunter <adrian.hunter@intel.com> wrote:
->
-> On 18/09/19 1:47 PM, Michael K. Johnson wrote:
-> > I see that the first four patches made it into Linus's kernel
-> > yesterday. Is there any chance of this final patch that actually
-> > enables the hardware making it into another pull request still
-> > intended for 5.4?  Waiting on additional acked-by on Ben's work
-> > addressing all the review comments?
-> >
-> > Thanks.
-> >
-> > On Wed, Sep 11, 2019 at 03:23:44PM +0800, Ben Chuang wrote:
-> >> From: Ben Chuang <ben.chuang@genesyslogic.com.tw>
-> >>
-> >> Add support for the GL9750 and GL9755 chipsets.
-> >>
-> >> Enable v4 mode and wait 5ms after set 1.8V signal enable for GL9750/
-> >> GL9755. Fix the value of SDHCI_MAX_CURRENT register and use the vendor
-> >> tuning flow for GL9750.
-> >
->
-> It is OK by me:
->
-> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-
-Thank you. Also thanks to other people who have given me their comments.
-Ben
+U29ycnkuIE15IGVtYWlsIHdhcyByZWplY3RlZCBieSBtYWlsaW5nIGxpc3RzLiBMZXQgbWUgcmUt
+c2VuZC4NCg0KSGkgUnVzc2VsbCwNCg0KSeKAmW0gbm90IHN1cmUgd2hhdCBib2FyZCB5b3Ugd2Vy
+ZSB1c2luZyBmb3IgTFgyMTYwQS4NCldlIGhhZCBhbiBrbm93biBpc3N1ZSBmb3IgZVNESEMgY29u
+dHJvbGxlciBhbmQgYWxsIE5YUCBMYXllcnNjYXBlIFJEQiBib2FyZHMuDQplU0RIQyBjb3VsZG7i
+gJl0IHByb3ZpZGUgcG93ZXItY3ljbGUgdG8gU0QgY2FyZCwgYW5kIGV2ZW4gd29yc2UsIGJvYXJk
+IHJlc2V0IGNvdWxkbuKAmXQgcHJvdmlkZSBwb3dlci1jeWNsZSB0byBTRCBjYXJkIGVpdGhlci4N
+CkJ1dCBmb3IgVUhTLUkgU0QgY2FyZCwgaXTigJlzIHJlcXVpcmVkIHRvIGhhdmUgYSBwb3dlci1j
+eWNsZSB0byByZXNldCBjYXJkIGlmIGl0IGdvZXMgaW50byBVSFMtSSBtb2RlLiBPdGhlcndpc2Us
+IHdlIGRvbuKAmXQga25vdyB3aGF0IHdpbGwgaGFwcGVuIHdoZW4ga2VybmVsIGluaXRpYWxpemVz
+IFNEIGNhcmQgYWZ0ZXIgYSByZWJvb3QvcmVzZXQuDQoNCkkgY291bGQgcmVwcm9kdWNlIHRoYXQg
+aXNzdWUgd2l0aCBiZWxvdyBzdGVwcyBvbiBsYXRlc3QgbWFpbmxpbmUga2VybmVsLg0KMS4gUG93
+ZXIgb2ZmIGJvYXJkLCBhbmQgcG93ZXIgb24gYm9hcmQuDQoyLiBTdGFydCB1cCBrZXJuZWwsIHRo
+ZSBTRCBjYXJkIHdvcmtzIGZpbmUgaW4gVUhTLUkgbW9kZS4NCjMuIFJlYm9vdC9yZXNldCBib2Fy
+ZC4gKFRoaXMgY291bGRu4oCZdCBwcm92aWRlIHBvd2VyLWN5Y2xlIHRvIFNEIGNhcmQpDQo0LiBT
+dGFydCB1cCBrZXJuZWwsIHRoZSBTRCBjYXJkIGdldHMgdGhhdCBBRE1BIGVycm9yIGlzc3VlLg0K
+DQpTbyBjb3VsZCB5b3UgaGF2ZSBhIHRyeSB0byBwb3dlciBvZmYvcG93ZXIgb24gdGhlIGJvYXJk
+LCBhbmQgdGhlbiBzdGFydCB1cCBrZXJuZWwuIERvbuKAmXQgdXNlIHJlYm9vdCwgb3IgYm9hcmQg
+cmVzZXQgYnV0dG9uLg0KT3IgeW91IGNhbiByZW1vdmUgU0QgY2FyZCBhbmQgc3RhcnQgdXAga2Vy
+bmVsLCBhbmQgaW5zZXJ0IFNEIGNhcmQgd2hlbiBrZXJuZWwgaGFzIGJlZW4gc3RhcnRlZCB1cC4N
+ClRoYW5rcyBhIGxvdC4NCg0KQmVzdCByZWdhcmRzLA0KWWFuZ2JvIEx1DQoNCg0KRnJvbTogTGkg
+WWFuZyA8bGVveWFuZy5saUBueHAuY29tPiANClNlbnQ6IFdlZG5lc2RheSwgU2VwdGVtYmVyIDE4
+LCAyMDE5IDE6NDggQU0NClRvOiBGYWJpbyBFc3RldmFtIDxmZXN0ZXZhbUBnbWFpbC5jb20+OyBZ
+LmIuIEx1IDx5YW5nYm8ubHVAbnhwLmNvbT4NCkNjOiBBZHJpYW4gSHVudGVyIDxhZHJpYW4uaHVu
+dGVyQGludGVsLmNvbT47IENocmlzdG9waCBIZWxsd2lnIDxoY2hAbHN0LmRlPjsgTGludXggQVJN
+IDxsaW51eC1hcm0ta2VybmVsQGxpc3RzLmluZnJhZGVhZC5vcmc+OyBOaWNvbGluIENoZW4gPG5p
+Y29sZW90c3VrYUBnbWFpbC5jb20+OyBSdXNzZWxsIEtpbmcgLSBBUk0gTGludXggYWRtaW4gPGxp
+bnV4QGFybWxpbnV4Lm9yZy51az47IFdpbGwgRGVhY29uIDx3aWxsLmRlYWNvbkBhcm0uY29tPjsg
+ZGFubiBmcmF6aWVyIDxkYW5uLmZyYXppZXJAY2Fub25pY2FsLmNvbT47IGxpbnV4LW1tYyA8bGlu
+dXgtbW1jQHZnZXIua2VybmVsLm9yZz4NClN1YmplY3Q6IFJlOiBbUkVHUkVTU0lPTl0gc2RoY2kg
+bm8gbG9uZ2VyIGRldGVjdHMgU0QgY2FyZHMgb24gTFgyMTYwQQ0KDQoNCg0KT24gVHVlLCBTZXAg
+MTcsIDIwMTkgYXQgNjozMSBQTSBGYWJpbyBFc3RldmFtIDxtYWlsdG86ZmVzdGV2YW1AZ21haWwu
+Y29tPiB3cm90ZToNCltBZGRpbmcgTGkgWWFuZ10NCg0KT24gVHVlLCBTZXAgMTcsIDIwMTkgYXQg
+MTA6NTIgQU0gUnVzc2VsbCBLaW5nIC0gQVJNIExpbnV4IGFkbWluDQo8bWFpbHRvOmxpbnV4QGFy
+bWxpbnV4Lm9yZy51az4gd3JvdGU6DQoNCj4gVGhlIHByZXNzaW5nIHF1ZXN0aW9uIHNlZW1zIHRv
+IGJlIHRoaXM6DQo+DQo+IEFyZSB0aGUgZVNESEMgb24gdGhlIExYMjE2MEEgRE1BIGNvaGVyZW50
+IG9yIGFyZSB0aGV5IG5vdD8NCj4NCj4gQW55IGNoYW5jZXMgb2YgZmluZGluZyBvdXQgaW50ZXJu
+YWxseSB3aGF0IHRoZSB0cnVlIGFuc3dlciB0byB0aGF0LA0KPiByYXRoZXIgdGhhbiBtZSBwb2tp
+bmcgYWJvdXQgdHJ5aW5nIHN0dWZmIGV4cGVyaW1lbnRhbGx5P8KgIEhhdmluZyBhDQo+IGRlZmlu
+aXRpdmUgYW5zd2VyIGZvciBhIHBvdGVudGlhbGx5IGRhdGEtY29ycnVwdGluZyBjaGFuZ2Ugd291
+bGQNCj4gYmUgcmVhbGx5IGdvb2QuLi4NCg0KTGkgWWFuZywNCg0KQ291bGQgeW91IHBsZWFzZSBo
+ZWxwIHRvIGNvbmZpcm0gUnVzc2VsbCdzIHF1ZXN0aW9uPw0KQWRkaW5nIFlhbmdibyB3aG8gaXMg
+d29ya2luZyBvbiBTREhDLg0KDQpSZWdhcmRzLA0KTGVvDQpfX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fXwpsaW51eC1hcm0ta2VybmVsIG1haWxpbmcgbGlzdAps
+aW51eC1hcm0ta2VybmVsQGxpc3RzLmluZnJhZGVhZC5vcmcKaHR0cDovL2xpc3RzLmluZnJhZGVh
+ZC5vcmcvbWFpbG1hbi9saXN0aW5mby9saW51eC1hcm0ta2VybmVsCg==
