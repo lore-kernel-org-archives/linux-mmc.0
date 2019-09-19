@@ -1,115 +1,88 @@
-From: Baolin Wang <baolin.wang@linaro.org>
-Subject: [PATCH v3 3/3] mmc: host: sdhci-sprd: Add software queue support
-Date: Thu, 19 Sep 2019 13:58:47 +0800
-Message-ID: <17069e44dbab0302bb7bd5eee64dc769b1f181d3.1568864713.git.baolin.wang@linaro.org>
-References: <cover.1568864712.git.baolin.wang@linaro.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <cover.1568864712.git.baolin.wang@linaro.org>
-In-Reply-To: <cover.1568864712.git.baolin.wang@linaro.org>
-References: <cover.1568864712.git.baolin.wang@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: adrian.hunter@intel.com, ulf.hansson@linaro.org, asutoshd@codeaurora.org
-Cc: orsonzhai@gmail.com, zhang.lyra@gmail.com, arnd@arndb.de, linus.walleij@linaro.org, vincent.guittot@linaro.org, baolin.wang@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+From: Russell King - ARM Linux admin <linux@armlinux.org.uk>
+Subject: Re: [REGRESSION] sdhci no longer detects SD cards on LX2160A
+Date: Thu, 19 Sep 2019 08:04:35 +0100
+Message-ID: <20190919070435.GF25745@shell.armlinux.org.uk>
+References: <20190917114210.GM25745@shell.armlinux.org.uk>
+ <20190917123326.GN25745@shell.armlinux.org.uk>
+ <20190917130759.GO25745@shell.armlinux.org.uk>
+ <CAOMZO5DXv8g5qTGdvobDdLWim+tW=vK4+K=P-VqJK23KERMhJw@mail.gmail.com>
+ <20190917133317.GQ25745@shell.armlinux.org.uk>
+ <CAOMZO5DS_1Uc9TMc29e+8tCg-srvMjf3uth_9P3cnro6det+7A@mail.gmail.com>
+ <20190917135157.GT25745@shell.armlinux.org.uk>
+ <CAOMZO5BDirX0Fwo716v1ddYaaO+OL8Woht63mw8OEhDuMBTb8Q@mail.gmail.com>
+ <CADRPPNQ-WTY0QC7_bX=N0QeueKve=k0SaMvbjOrByyvzFojz2g@mail.gmail.com>
+ <VI1PR0401MB22376A0EA85123B2AEB72EDEF8890@VI1PR0401MB2237.eurprd04.prod.outlook.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Disposition: inline
+In-Reply-To: <VI1PR0401MB22376A0EA85123B2AEB72EDEF8890@VI1PR0401MB2237.eurprd04.prod.outlook.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: "Y.b. Lu" <yangbo.lu@nxp.com>
+Cc: dann frazier <dann.frazier@canonical.com>, Will Deacon <will.deacon@arm.com>, Adrian Hunter <adrian.hunter@intel.com>, Leo Li <leoyang.li@nxp.com>, Nicolin Chen <nicoleotsuka@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, Fabio Estevam <festevam@gmail.com>, Christoph Hellwig <hch@lst.de>, Linux ARM <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Add software queue support to improve the performance.
-
-Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
----
- drivers/mmc/host/Kconfig      |    1 +
- drivers/mmc/host/sdhci-sprd.c |   26 ++++++++++++++++++++++++++
- 2 files changed, 27 insertions(+)
-
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index d117f18..862e8e9 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -619,6 +619,7 @@ config MMC_SDHCI_SPRD
- 	depends on ARCH_SPRD
- 	depends on MMC_SDHCI_PLTFM
- 	select MMC_SDHCI_IO_ACCESSORS
-+	select MMC_SQHCI
- 	help
- 	  This selects the SDIO Host Controller in Spreadtrum
- 	  SoCs, this driver supports R11(IP version: R11P0).
-diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
-index d07b979..4dec0b3 100644
---- a/drivers/mmc/host/sdhci-sprd.c
-+++ b/drivers/mmc/host/sdhci-sprd.c
-@@ -19,6 +19,7 @@
- #include <linux/slab.h>
- 
- #include "sdhci-pltfm.h"
-+#include "sqhci.h"
- 
- /* SDHCI_ARGUMENT2 register high 16bit */
- #define SDHCI_SPRD_ARG2_STUFF		GENMASK(31, 16)
-@@ -379,6 +380,16 @@ static unsigned int sdhci_sprd_get_ro(struct sdhci_host *host)
- 	return 0;
- }
- 
-+static void sdhci_sprd_request_done(struct sdhci_host *host,
-+				    struct mmc_request *mrq)
-+{
-+	/* Validate if the request was from software queue firstly. */
-+	if (sqhci_finalize_request(host->mmc, mrq))
-+		return;
-+
-+	 mmc_request_done(host->mmc, mrq);
-+}
-+
- static struct sdhci_ops sdhci_sprd_ops = {
- 	.read_l = sdhci_sprd_readl,
- 	.write_l = sdhci_sprd_writel,
-@@ -392,6 +403,7 @@ static unsigned int sdhci_sprd_get_ro(struct sdhci_host *host)
- 	.hw_reset = sdhci_sprd_hw_reset,
- 	.get_max_timeout_count = sdhci_sprd_get_max_timeout_count,
- 	.get_ro = sdhci_sprd_get_ro,
-+	.request_done = sdhci_sprd_request_done,
- };
- 
- static void sdhci_sprd_request(struct mmc_host *mmc, struct mmc_request *mrq)
-@@ -521,6 +533,7 @@ static int sdhci_sprd_probe(struct platform_device *pdev)
- {
- 	struct sdhci_host *host;
- 	struct sdhci_sprd_host *sprd_host;
-+	struct sqhci_host *sq_host;
- 	struct clk *clk;
- 	int ret = 0;
- 
-@@ -631,6 +644,16 @@ static int sdhci_sprd_probe(struct platform_device *pdev)
- 
- 	sprd_host->flags = host->flags;
- 
-+	sq_host = devm_kzalloc(&pdev->dev, sizeof(*sq_host), GFP_KERNEL);
-+	if (!sq_host) {
-+		ret = -ENOMEM;
-+		goto err_cleanup_host;
-+	}
-+
-+	ret = sqhci_init(sq_host, host->mmc);
-+	if (ret)
-+		goto err_cleanup_host;
-+
- 	ret = __sdhci_add_host(host);
- 	if (ret)
- 		goto err_cleanup_host;
-@@ -689,6 +712,7 @@ static int sdhci_sprd_runtime_suspend(struct device *dev)
- 	struct sdhci_host *host = dev_get_drvdata(dev);
- 	struct sdhci_sprd_host *sprd_host = TO_SPRD_HOST(host);
- 
-+	sqhci_suspend(host->mmc);
- 	sdhci_runtime_suspend_host(host);
- 
- 	clk_disable_unprepare(sprd_host->clk_sdio);
-@@ -717,6 +741,8 @@ static int sdhci_sprd_runtime_resume(struct device *dev)
- 		goto clk_disable;
- 
- 	sdhci_runtime_resume_host(host, 1);
-+	sqhci_resume(host->mmc);
-+
- 	return 0;
- 
- clk_disable:
--- 
-1.7.9.5
+SGksCgpUaGlzIGlzIG5vdCB0aGUgaXNzdWUsIHNpbmNlIHRoZSBwcm9ibGVtIGhhcyBiZWVuIG9i
+c2VydmVkIHdpdGggZU1NQwp0b28sIGFuZCBpcyBzcG9yYWRpYyBpbiBuYXR1cmUuCgpQbGVhc2Ug
+Y291bGQgeW91IGFuc3dlciB0aGUgcXVlc3Rpb24gcG9zZWQ6IGFyZSB0aGUgZVNESEMgY29udHJv
+bGxlcnMKRE1BIGNvaGVyZW50IG9yIGFyZSB0aGV5IG5vdCBjb2hlcmVudD8KClRoYW5rcy4KCk9u
+IFRodSwgU2VwIDE5LCAyMDE5IGF0IDA0OjEzOjIwQU0gKzAwMDAsIFkuYi4gTHUgd3JvdGU6Cj4g
+U29ycnkuIE15IGVtYWlsIHdhcyByZWplY3RlZCBieSBtYWlsaW5nIGxpc3RzLiBMZXQgbWUgcmUt
+c2VuZC4KPiAKPiBIaSBSdXNzZWxsLAo+IAo+IEnigJltIG5vdCBzdXJlIHdoYXQgYm9hcmQgeW91
+IHdlcmUgdXNpbmcgZm9yIExYMjE2MEEuCj4gV2UgaGFkIGFuIGtub3duIGlzc3VlIGZvciBlU0RI
+QyBjb250cm9sbGVyIGFuZCBhbGwgTlhQIExheWVyc2NhcGUgUkRCIGJvYXJkcy4KPiBlU0RIQyBj
+b3VsZG7igJl0IHByb3ZpZGUgcG93ZXItY3ljbGUgdG8gU0QgY2FyZCwgYW5kIGV2ZW4gd29yc2Us
+IGJvYXJkIHJlc2V0IGNvdWxkbuKAmXQgcHJvdmlkZSBwb3dlci1jeWNsZSB0byBTRCBjYXJkIGVp
+dGhlci4KPiBCdXQgZm9yIFVIUy1JIFNEIGNhcmQsIGl04oCZcyByZXF1aXJlZCB0byBoYXZlIGEg
+cG93ZXItY3ljbGUgdG8gcmVzZXQgY2FyZCBpZiBpdCBnb2VzIGludG8gVUhTLUkgbW9kZS4gT3Ro
+ZXJ3aXNlLCB3ZSBkb27igJl0IGtub3cgd2hhdCB3aWxsIGhhcHBlbiB3aGVuIGtlcm5lbCBpbml0
+aWFsaXplcyBTRCBjYXJkIGFmdGVyIGEgcmVib290L3Jlc2V0Lgo+IAo+IEkgY291bGQgcmVwcm9k
+dWNlIHRoYXQgaXNzdWUgd2l0aCBiZWxvdyBzdGVwcyBvbiBsYXRlc3QgbWFpbmxpbmUga2VybmVs
+Lgo+IDEuIFBvd2VyIG9mZiBib2FyZCwgYW5kIHBvd2VyIG9uIGJvYXJkLgo+IDIuIFN0YXJ0IHVw
+IGtlcm5lbCwgdGhlIFNEIGNhcmQgd29ya3MgZmluZSBpbiBVSFMtSSBtb2RlLgo+IDMuIFJlYm9v
+dC9yZXNldCBib2FyZC4gKFRoaXMgY291bGRu4oCZdCBwcm92aWRlIHBvd2VyLWN5Y2xlIHRvIFNE
+IGNhcmQpCj4gNC4gU3RhcnQgdXAga2VybmVsLCB0aGUgU0QgY2FyZCBnZXRzIHRoYXQgQURNQSBl
+cnJvciBpc3N1ZS4KPiAKPiBTbyBjb3VsZCB5b3UgaGF2ZSBhIHRyeSB0byBwb3dlciBvZmYvcG93
+ZXIgb24gdGhlIGJvYXJkLCBhbmQgdGhlbiBzdGFydCB1cCBrZXJuZWwuIERvbuKAmXQgdXNlIHJl
+Ym9vdCwgb3IgYm9hcmQgcmVzZXQgYnV0dG9uLgo+IE9yIHlvdSBjYW4gcmVtb3ZlIFNEIGNhcmQg
+YW5kIHN0YXJ0IHVwIGtlcm5lbCwgYW5kIGluc2VydCBTRCBjYXJkIHdoZW4ga2VybmVsIGhhcyBi
+ZWVuIHN0YXJ0ZWQgdXAuCj4gVGhhbmtzIGEgbG90Lgo+IAo+IEJlc3QgcmVnYXJkcywKPiBZYW5n
+Ym8gTHUKPiAKPiAKPiBGcm9tOiBMaSBZYW5nIDxsZW95YW5nLmxpQG54cC5jb20+IAo+IFNlbnQ6
+IFdlZG5lc2RheSwgU2VwdGVtYmVyIDE4LCAyMDE5IDE6NDggQU0KPiBUbzogRmFiaW8gRXN0ZXZh
+bSA8ZmVzdGV2YW1AZ21haWwuY29tPjsgWS5iLiBMdSA8eWFuZ2JvLmx1QG54cC5jb20+Cj4gQ2M6
+IEFkcmlhbiBIdW50ZXIgPGFkcmlhbi5odW50ZXJAaW50ZWwuY29tPjsgQ2hyaXN0b3BoIEhlbGx3
+aWcgPGhjaEBsc3QuZGU+OyBMaW51eCBBUk0gPGxpbnV4LWFybS1rZXJuZWxAbGlzdHMuaW5mcmFk
+ZWFkLm9yZz47IE5pY29saW4gQ2hlbiA8bmljb2xlb3RzdWthQGdtYWlsLmNvbT47IFJ1c3NlbGwg
+S2luZyAtIEFSTSBMaW51eCBhZG1pbiA8bGludXhAYXJtbGludXgub3JnLnVrPjsgV2lsbCBEZWFj
+b24gPHdpbGwuZGVhY29uQGFybS5jb20+OyBkYW5uIGZyYXppZXIgPGRhbm4uZnJhemllckBjYW5v
+bmljYWwuY29tPjsgbGludXgtbW1jIDxsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnPgo+IFN1Ympl
+Y3Q6IFJlOiBbUkVHUkVTU0lPTl0gc2RoY2kgbm8gbG9uZ2VyIGRldGVjdHMgU0QgY2FyZHMgb24g
+TFgyMTYwQQo+IAo+IAo+IAo+IE9uIFR1ZSwgU2VwIDE3LCAyMDE5IGF0IDY6MzEgUE0gRmFiaW8g
+RXN0ZXZhbSA8bWFpbHRvOmZlc3RldmFtQGdtYWlsLmNvbT4gd3JvdGU6Cj4gW0FkZGluZyBMaSBZ
+YW5nXQo+IAo+IE9uIFR1ZSwgU2VwIDE3LCAyMDE5IGF0IDEwOjUyIEFNIFJ1c3NlbGwgS2luZyAt
+IEFSTSBMaW51eCBhZG1pbgo+IDxtYWlsdG86bGludXhAYXJtbGludXgub3JnLnVrPiB3cm90ZToK
+PiAKPiA+IFRoZSBwcmVzc2luZyBxdWVzdGlvbiBzZWVtcyB0byBiZSB0aGlzOgo+ID4KPiA+IEFy
+ZSB0aGUgZVNESEMgb24gdGhlIExYMjE2MEEgRE1BIGNvaGVyZW50IG9yIGFyZSB0aGV5IG5vdD8K
+PiA+Cj4gPiBBbnkgY2hhbmNlcyBvZiBmaW5kaW5nIG91dCBpbnRlcm5hbGx5IHdoYXQgdGhlIHRy
+dWUgYW5zd2VyIHRvIHRoYXQsCj4gPiByYXRoZXIgdGhhbiBtZSBwb2tpbmcgYWJvdXQgdHJ5aW5n
+IHN0dWZmIGV4cGVyaW1lbnRhbGx5P8KgIEhhdmluZyBhCj4gPiBkZWZpbml0aXZlIGFuc3dlciBm
+b3IgYSBwb3RlbnRpYWxseSBkYXRhLWNvcnJ1cHRpbmcgY2hhbmdlIHdvdWxkCj4gPiBiZSByZWFs
+bHkgZ29vZC4uLgo+IAo+IExpIFlhbmcsCj4gCj4gQ291bGQgeW91IHBsZWFzZSBoZWxwIHRvIGNv
+bmZpcm0gUnVzc2VsbCdzIHF1ZXN0aW9uPwo+IEFkZGluZyBZYW5nYm8gd2hvIGlzIHdvcmtpbmcg
+b24gU0RIQy4KPiAKPiBSZWdhcmRzLAo+IExlbwoKLS0gClJNSydzIFBhdGNoIHN5c3RlbTogaHR0
+cHM6Ly93d3cuYXJtbGludXgub3JnLnVrL2RldmVsb3Blci9wYXRjaGVzLwpGVFRDIGJyb2FkYmFu
+ZCBmb3IgMC44bWlsZSBsaW5lIGluIHN1YnVyYmlhOiBzeW5jIGF0IDEyLjFNYnBzIGRvd24gNjIy
+a2JwcyB1cApBY2NvcmRpbmcgdG8gc3BlZWR0ZXN0Lm5ldDogMTEuOU1icHMgZG93biA1MDBrYnBz
+IHVwCgpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpsaW51
+eC1hcm0ta2VybmVsIG1haWxpbmcgbGlzdApsaW51eC1hcm0ta2VybmVsQGxpc3RzLmluZnJhZGVh
+ZC5vcmcKaHR0cDovL2xpc3RzLmluZnJhZGVhZC5vcmcvbWFpbG1hbi9saXN0aW5mby9saW51eC1h
+cm0ta2VybmVsCg==
