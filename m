@@ -1,53 +1,71 @@
-From: Michael Ellerman <michael@ellerman.id.au>
+From: Michal Simek <monstr-pSz03upnqPeHXe+LvDLADg@public.gmane.org>
 Subject: Re: [GIT PULL] dma-mapping updates for 5.4
-Date: Fri, 20 Sep 2019 09:17:30 +1000
-Message-ID: <D422FEED-06F6-44BE-955F-90318693FD96@ellerman.id.au>
-References: <20190918152748.GA21241@infradead.org> <CAHk-=wjXF63BKNJH=GtnnoJmXZHEnRwjgeu4foJQvFYYBm9HHA@mail.gmail.com>
+Date: Fri, 20 Sep 2019 07:49:46 +0200
+Message-ID: <5cc09e92-96ce-dc40-4bc1-f10a4cad6f7d@monstr.eu>
+References: <20190918152748.GA21241@infradead.org>
+	<CAHk-=wjXF63BKNJH=GtnnoJmXZHEnRwjgeu4foJQvFYYBm9HHA@mail.gmail.com>
+	<D422FEED-06F6-44BE-955F-90318693FD96@ellerman.id.au>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=utf-8
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAHk-=wjXF63BKNJH=GtnnoJmXZHEnRwjgeu4foJQvFYYBm9HHA@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>, Christoph Hellwig <hch@infradead.org>, Michael Ellerman <mpe@ellerman.id.au>, Michal Simek <monstr@monstr.eu>
-Cc: linux-mmc@vger.kernel.org, iommu <iommu@lists.linux-foundation.org>, xen-devel@lists.xenproject.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+In-Reply-To: <D422FEED-06F6-44BE-955F-90318693FD96-Gsx/Oe8HsFggBc27wqDAHg@public.gmane.org>
+Content-Language: en-US
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: Michael Ellerman <michael-Gsx/Oe8HsFggBc27wqDAHg@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Christoph Hellwig <hch-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, Michael Ellerman <mpe-Gsx/Oe8HsFggBc27wqDAHg@public.gmane.org>
+Cc: xen-devel-GuqFBffKawtpuQazS67q72D2FQJk+8+b@public.gmane.org, iommu <iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-
-
-On 20 September 2019 6:33:50 am AEST, Linus Torvalds <torvalds@linux-foundation.org> wrote:
->On Wed, Sep 18, 2019 at 8:27 AM Christoph Hellwig <hch@infradead.org>
->wrote:
+On 20. 09. 19 1:17, Michael Ellerman wrote:
+> 
+> 
+> On 20 September 2019 6:33:50 am AEST, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org> wrote:
+>> On Wed, Sep 18, 2019 at 8:27 AM Christoph Hellwig <hch-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
+>> wrote:
+>>>
+>>> please pull the dma-mapping updates for 5.4.
 >>
->> please pull the dma-mapping updates for 5.4.
->
->Pulled.
->
->> In addition to the usual Kconfig conflics where you just want to keep
->> both edits there are a few more interesting merge issues this time:
+>> Pulled.
 >>
->>  - most importanly powerpc and microblaze add new callers of
->>    dma_atomic_pool_init, while this tree marks the function static
->>    and calls it from a common postcore_initcall().  The trivial
->>    functions added in powerpc and microblaze adding the calls
->>    need to be removed for the code to compile.  This will not show up
->>    as a merge conflict and needs to be dealt with manually!
->
->So I haven't gotten the powerpc or microblaze pull requests yet, so
->I'm not able to fix that part up yet.
->
->Intead, I'm cc'ing Michael Ellerman and Michal Simek to ask them to
->remind me when they _do_ send those pull requests, since otherwise I
->may well forget and miss it. Without an actual data conflict, and
->since this won't show up in my build tests either, it would be very
->easy for me to forget.
->
->Micha[e]l, can you both please make sure to remind me?
+>>> In addition to the usual Kconfig conflics where you just want to keep
+>>> both edits there are a few more interesting merge issues this time:
+>>>
+>>>  - most importanly powerpc and microblaze add new callers of
+>>>    dma_atomic_pool_init, while this tree marks the function static
+>>>    and calls it from a common postcore_initcall().  The trivial
+>>>    functions added in powerpc and microblaze adding the calls
+>>>    need to be removed for the code to compile.  This will not show up
+>>>    as a merge conflict and needs to be dealt with manually!
+>>
+>> So I haven't gotten the powerpc or microblaze pull requests yet, so
+>> I'm not able to fix that part up yet.
+>>
+>> Intead, I'm cc'ing Michael Ellerman and Michal Simek to ask them to
+>> remind me when they _do_ send those pull requests, since otherwise I
+>> may well forget and miss it. Without an actual data conflict, and
+>> since this won't show up in my build tests either, it would be very
+>> easy for me to forget.
+>>
+>> Micha[e]l, can you both please make sure to remind me?
+> 
+> Yeah I was aware of it, and will make sure to remind you in my pull request.
 
-Yeah I was aware of it, and will make sure to remind you in my pull request.
+Same here.
 
-cheers
+Michal
+
 
 -- 
-Sent from my Android phone with K-9 Mail. Please excuse my brevity.
+Michal Simek, Ing. (M.Eng), OpenPGP -> KeyID: FE3D1F91
+w: www.monstr.eu p: +42-0-721842854
+Maintainer of Linux kernel - Xilinx Microblaze
+Maintainer of Linux kernel - Xilinx Zynq ARM and ZynqMP ARM64 SoCs
+U-Boot custodian - Xilinx Microblaze/Zynq/ZynqMP/Versal SoCs
