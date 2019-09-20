@@ -1,71 +1,52 @@
-From: Michal Simek <monstr-pSz03upnqPeHXe+LvDLADg@public.gmane.org>
-Subject: Re: [GIT PULL] dma-mapping updates for 5.4
-Date: Fri, 20 Sep 2019 07:49:46 +0200
-Message-ID: <5cc09e92-96ce-dc40-4bc1-f10a4cad6f7d@monstr.eu>
-References: <20190918152748.GA21241@infradead.org>
-	<CAHk-=wjXF63BKNJH=GtnnoJmXZHEnRwjgeu4foJQvFYYBm9HHA@mail.gmail.com>
-	<D422FEED-06F6-44BE-955F-90318693FD96@ellerman.id.au>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v3 23/26] memstick: use PCI_STD_NUM_BARS
+Date: Fri, 20 Sep 2019 09:42:20 +0200
+Message-ID: <CAPDyKFoVEMex2_p1M-cFZnGLuwgK0wZk-kL_eZ=eDiT1tjvDGA@mail.gmail.com>
+References: <20190916204158.6889-1-efremov@linux.com> <20190916204158.6889-24-efremov@linux.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-In-Reply-To: <D422FEED-06F6-44BE-955F-90318693FD96-Gsx/Oe8HsFggBc27wqDAHg@public.gmane.org>
-Content-Language: en-US
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Michael Ellerman <michael-Gsx/Oe8HsFggBc27wqDAHg@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Christoph Hellwig <hch-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, Michael Ellerman <mpe-Gsx/Oe8HsFggBc27wqDAHg@public.gmane.org>
-Cc: xen-devel-GuqFBffKawtpuQazS67q72D2FQJk+8+b@public.gmane.org, iommu <iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20190916204158.6889-24-efremov@linux.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Denis Efremov <efremov@linux.com>
+Cc: Bjorn Helgaas <bhelgaas@google.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux PCI <linux-pci@vger.kernel.org>, Andrew Murray <andrew.murray@arm.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Maxim Levitsky <maximlevitsky@gmail.com>, Alex Dubov <oakad@yahoo.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 20. 09. 19 1:17, Michael Ellerman wrote:
-> 
-> 
-> On 20 September 2019 6:33:50 am AEST, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org> wrote:
->> On Wed, Sep 18, 2019 at 8:27 AM Christoph Hellwig <hch-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
->> wrote:
->>>
->>> please pull the dma-mapping updates for 5.4.
->>
->> Pulled.
->>
->>> In addition to the usual Kconfig conflics where you just want to keep
->>> both edits there are a few more interesting merge issues this time:
->>>
->>>  - most importanly powerpc and microblaze add new callers of
->>>    dma_atomic_pool_init, while this tree marks the function static
->>>    and calls it from a common postcore_initcall().  The trivial
->>>    functions added in powerpc and microblaze adding the calls
->>>    need to be removed for the code to compile.  This will not show up
->>>    as a merge conflict and needs to be dealt with manually!
->>
->> So I haven't gotten the powerpc or microblaze pull requests yet, so
->> I'm not able to fix that part up yet.
->>
->> Intead, I'm cc'ing Michael Ellerman and Michal Simek to ask them to
->> remind me when they _do_ send those pull requests, since otherwise I
->> may well forget and miss it. Without an actual data conflict, and
->> since this won't show up in my build tests either, it would be very
->> easy for me to forget.
->>
->> Micha[e]l, can you both please make sure to remind me?
-> 
-> Yeah I was aware of it, and will make sure to remind you in my pull request.
+On Mon, 16 Sep 2019 at 22:47, Denis Efremov <efremov@linux.com> wrote:
+>
+> Use define PCI_STD_NUM_BARS instead of PCI_ROM_RESOURCE for the number of
+> PCI BARs.
+>
+> Cc: Maxim Levitsky <maximlevitsky@gmail.com>
+> Cc: Alex Dubov <oakad@yahoo.com>
+> Cc: Ulf Hansson <ulf.hansson@linaro.org>
+> Signed-off-by: Denis Efremov <efremov@linux.com>
 
-Same here.
+Assuming this depends on other changes in the series? Thus this is
+probably for PCI maintainers to pick up?
 
-Michal
+Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
 
+Kind regards
+Uffe
 
--- 
-Michal Simek, Ing. (M.Eng), OpenPGP -> KeyID: FE3D1F91
-w: www.monstr.eu p: +42-0-721842854
-Maintainer of Linux kernel - Xilinx Microblaze
-Maintainer of Linux kernel - Xilinx Zynq ARM and ZynqMP ARM64 SoCs
-U-Boot custodian - Xilinx Microblaze/Zynq/ZynqMP/Versal SoCs
+> ---
+>  drivers/memstick/host/jmb38x_ms.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/drivers/memstick/host/jmb38x_ms.c b/drivers/memstick/host/jmb38x_ms.c
+> index 32747425297d..fd281c1d39b1 100644
+> --- a/drivers/memstick/host/jmb38x_ms.c
+> +++ b/drivers/memstick/host/jmb38x_ms.c
+> @@ -848,7 +848,7 @@ static int jmb38x_ms_count_slots(struct pci_dev *pdev)
+>  {
+>         int cnt, rc = 0;
+>
+> -       for (cnt = 0; cnt < PCI_ROM_RESOURCE; ++cnt) {
+> +       for (cnt = 0; cnt < PCI_STD_NUM_BARS; ++cnt) {
+>                 if (!(IORESOURCE_MEM & pci_resource_flags(pdev, cnt)))
+>                         break;
+>
+> --
+> 2.21.0
+>
