@@ -1,52 +1,30 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3 23/26] memstick: use PCI_STD_NUM_BARS
-Date: Fri, 20 Sep 2019 09:42:20 +0200
-Message-ID: <CAPDyKFoVEMex2_p1M-cFZnGLuwgK0wZk-kL_eZ=eDiT1tjvDGA@mail.gmail.com>
-References: <20190916204158.6889-1-efremov@linux.com> <20190916204158.6889-24-efremov@linux.com>
+Subject: Re: [PATCH V6 0/3] mmc: mmci: add busy detect for stm32 sdmmc variant
+Date: Fri, 20 Sep 2019 09:47:07 +0200
+Message-ID: <CAPDyKFoha6q1CmhLXREz8OAzd4UiBDKpHo46J1PLGMkf8CStpg@mail.gmail.com>
+References: <20190905122112.29672-1-ludovic.Barre@st.com> <940e3ce8-1a4f-7e03-dfec-25330051ea5f@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190916204158.6889-24-efremov@linux.com>
+In-Reply-To: <940e3ce8-1a4f-7e03-dfec-25330051ea5f@st.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Denis Efremov <efremov@linux.com>
-Cc: Bjorn Helgaas <bhelgaas@google.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux PCI <linux-pci@vger.kernel.org>, Andrew Murray <andrew.murray@arm.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Maxim Levitsky <maximlevitsky@gmail.com>, Alex Dubov <oakad@yahoo.com>
+To: Ludovic BARRE <ludovic.barre@st.com>
+Cc: Rob Herring <robh+dt@kernel.org>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-stm32@st-md-mailman.stormreply.com
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, 16 Sep 2019 at 22:47, Denis Efremov <efremov@linux.com> wrote:
+On Wed, 18 Sep 2019 at 11:33, Ludovic BARRE <ludovic.barre@st.com> wrote:
 >
-> Use define PCI_STD_NUM_BARS instead of PCI_ROM_RESOURCE for the number of
-> PCI BARs.
+> hi Ulf
 >
-> Cc: Maxim Levitsky <maximlevitsky@gmail.com>
-> Cc: Alex Dubov <oakad@yahoo.com>
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Signed-off-by: Denis Efremov <efremov@linux.com>
+> Just a "gentleman ping" about this series and
+> https://lkml.org/lkml/2019/9/4/747
 
-Assuming this depends on other changes in the series? Thus this is
-probably for PCI maintainers to pick up?
+Thanks for pinging, I will come to this as soon as I can. September
+has been a busy month, being on the road most of the time.
 
-Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+Apologize for the delays!
+
+[...]
 
 Kind regards
 Uffe
-
-> ---
->  drivers/memstick/host/jmb38x_ms.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/drivers/memstick/host/jmb38x_ms.c b/drivers/memstick/host/jmb38x_ms.c
-> index 32747425297d..fd281c1d39b1 100644
-> --- a/drivers/memstick/host/jmb38x_ms.c
-> +++ b/drivers/memstick/host/jmb38x_ms.c
-> @@ -848,7 +848,7 @@ static int jmb38x_ms_count_slots(struct pci_dev *pdev)
->  {
->         int cnt, rc = 0;
->
-> -       for (cnt = 0; cnt < PCI_ROM_RESOURCE; ++cnt) {
-> +       for (cnt = 0; cnt < PCI_STD_NUM_BARS; ++cnt) {
->                 if (!(IORESOURCE_MEM & pci_resource_flags(pdev, cnt)))
->                         break;
->
-> --
-> 2.21.0
->
