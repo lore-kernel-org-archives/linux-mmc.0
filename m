@@ -1,170 +1,184 @@
-From: <Eugen.Hristev@microchip.com>
-Subject: Re: [PATCH 2/3] mmc: sdhci-of-at91: rework clocks management to
- support SAM9x60 device
-Date: Fri, 20 Sep 2019 09:34:50 +0000
-Message-ID: <fb87bb5d-2853-9fed-bf34-a354996636df@microchip.com>
-References: <20190912200908.31318-1-ludovic.desroches@microchip.com>
- <20190912200908.31318-2-ludovic.desroches@microchip.com>
+From: Russell King - ARM Linux admin <linux@armlinux.org.uk>
+Subject: Re: [REGRESSION] sdhci no longer detects SD cards on LX2160A
+Date: Fri, 20 Sep 2019 10:55:19 +0100
+Message-ID: <20190920095519.GK25745@shell.armlinux.org.uk>
+References: <20190917111631.GL25745@shell.armlinux.org.uk>
+ <20190917114210.GM25745@shell.armlinux.org.uk>
+ <20190917123326.GN25745@shell.armlinux.org.uk>
+ <20190917130759.GO25745@shell.armlinux.org.uk>
+ <c12e21c3-6bef-38ed-3693-b958be17d555@arm.com>
+ <20190917134947.GS25745@shell.armlinux.org.uk>
+ <ab90e9a4-052d-5a7b-bfae-f2f02f17f1b7@arm.com>
+ <20190919091601.GH25745@shell.armlinux.org.uk>
+ <20fe58a0-f0ed-733b-87fb-47d667094491@arm.com>
+ <20190919172349.GJ25745@shell.armlinux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190912200908.31318-2-ludovic.desroches@microchip.com>
-Content-Language: en-US
-Content-ID: <9497F3C1BA13734ABE531EDA73990DD3@namprd11.prod.outlook.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ludovic.Desroches@microchip.com, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org
-Cc: mark.rutland@arm.com, ulf.hansson@linaro.org, linux-kernel@vger.kernel.org, robh+dt@kernel.org, adrian.hunter@intel.com, Claudiu.Beznea@microchip.com
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Disposition: inline
+In-Reply-To: <20190919172349.GJ25745@shell.armlinux.org.uk>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Robin Murphy <robin.murphy@arm.com>
+Cc: dann frazier <dann.frazier@canonical.com>, linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, Will Deacon <will.deacon@arm.com>, Nicolin Chen <nicoleotsuka@gmail.com>, "Y.b. Lu" <yangbo.lu@nxp.com>, Christoph Hellwig <hch@lst.de>, Linux ARM <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-DQoNCk9uIDEyLjA5LjIwMTkgMjM6MDksIEx1ZG92aWMgRGVzcm9jaGVzIHdyb3RlOg0KDQo+IA0K
-PiBJbiB0aGUgU0FNOXg2MCBTb0MsIHRoZXJlIGFyZSBvbmx5IHR3byBjbG9ja3MgaW5zdGVhZCBv
-ZiB0aHJlZSBmb3IgdGhlDQo+IFNESENJIGRldmljZS4gVGhlIGJhc2UgY2xrIGlzIG5vIGxvbmdl
-ciBwcm92aWRlZCwgaXQgaXMgZ2VuZXJhdGVkDQo+IGludGVybmFsbHkgZnJvbSB0aGUgbXVsdCBj
-bGsuDQo+IA0KPiBUaGUgdmFsdWVzIG9mIHRoZSBiYXNlIGNsayBhbmQgbXVsIGluIHRoZSBjYXBh
-YmlsaXRpZXMgcmVnaXN0ZXJzIG1heSBub3QNCj4gcmVmbGVjdCB0aGUgcmVhbGl0eSBhcyB0aGUg
-bXVsdCBjbGsgaXMgYSBwcm9ncmFtbWFibGUgY2xvY2sgd2hpY2ggY2FuIHRha2UNCj4gc2V2ZXJh
-bCByYXRlcy4gQXMgd2UgY2FuJ3QgdHJ1c3QgdGhvc2UgdmFsdWVzLCB0YWtlIHRoZW0gZnJvbSB0
-aGUgY2xvY2sNCj4gdHJlZSBhbmQgdXBkYXRlIHRoZSBjYXBhYmlsaXRpZXMgYWNjb3JkaW5nIHRv
-Lg0KPiANCj4gQXMgd2UgY2FuIGhhdmUgdGhlIHNhbWUgcGl0ZmFsbCwgaW4gc29tZSBjYXNlcywg
-d2l0aCB0aGUgU0FNQTVEMiBTb2MsDQo+IHN0b3AgcmVseWluZyBvbiBjYXBhYmlsaXRpZXMgdG9v
-Lg0KPiANCj4gU2lnbmVkLW9mZi1ieTogTHVkb3ZpYyBEZXNyb2NoZXMgPGx1ZG92aWMuZGVzcm9j
-aGVzQG1pY3JvY2hpcC5jb20+DQo+IC0tLQ0KPiAgIGRyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktb2Yt
-YXQ5MS5jIHwgMTA0ICsrKysrKysrKysrKysrKysrLS0tLS0tLS0tLS0tLS0NCj4gICAxIGZpbGUg
-Y2hhbmdlZCwgNTcgaW5zZXJ0aW9ucygrKSwgNDcgZGVsZXRpb25zKC0pDQo+IA0KPiBkaWZmIC0t
-Z2l0IGEvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1vZi1hdDkxLmMgYi9kcml2ZXJzL21tYy9ob3N0
-L3NkaGNpLW9mLWF0OTEuYw0KPiBpbmRleCBlN2QxOTIwNzI5ZmIuLmE5YzEyNmYxNGQ4NSAxMDA2
-NDQNCj4gLS0tIGEvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1vZi1hdDkxLmMNCj4gKysrIGIvZHJp
-dmVycy9tbWMvaG9zdC9zZGhjaS1vZi1hdDkxLmMNCj4gQEAgLTMwLDcgKzMwLDE0IEBADQo+ICAg
-DQo+ICAgI2RlZmluZSBTREhDSV9BVDkxX1BSRVNFVF9DT01NT05fQ09ORgkweDQwMCAvKiBkcnYg
-dHlwZSBCLCBwcm9ncmFtbWFibGUgY2xvY2sgbW9kZSAqLw0KPiAgIA0KPiArc3RydWN0IHNkaGNp
-X2F0OTFfc29jX2RhdGEgew0KPiArCWNvbnN0IHN0cnVjdCBzZGhjaV9wbHRmbV9kYXRhICpwZGF0
-YTsNCj4gKwlib29sIGJhc2VjbGtfaXNfZ2VuZXJhdGVkX2ludGVybmFsbHk7DQo+ICsJdW5zaWdu
-ZWQgaW50IGRpdmlkZXJfZm9yX2Jhc2VjbGs7DQo+ICt9Ow0KPiArDQo+ICAgc3RydWN0IHNkaGNp
-X2F0OTFfcHJpdiB7DQo+ICsJY29uc3Qgc3RydWN0IHNkaGNpX2F0OTFfc29jX2RhdGEgKnNvY19k
-YXRhOw0KPiAgIAlzdHJ1Y3QgY2xrICpoY2xvY2s7DQo+ICAgCXN0cnVjdCBjbGsgKmdjazsNCj4g
-ICAJc3RydWN0IGNsayAqbWFpbmNrOw0KPiBAQCAtMTMwLDEyICsxMzcsMjQgQEAgc3RhdGljIGNv
-bnN0IHN0cnVjdCBzZGhjaV9vcHMgc2RoY2lfYXQ5MV9zYW1hNWQyX29wcyA9IHsNCj4gICAJLnNl
-dF9wb3dlcgkJPSBzZGhjaV9hdDkxX3NldF9wb3dlciwNCj4gICB9Ow0KPiAgIA0KPiAtc3RhdGlj
-IGNvbnN0IHN0cnVjdCBzZGhjaV9wbHRmbV9kYXRhIHNvY19kYXRhX3NhbWE1ZDIgPSB7DQo+ICtz
-dGF0aWMgY29uc3Qgc3RydWN0IHNkaGNpX3BsdGZtX2RhdGEgc2RoY2lfc2FtYTVkMl9wZGF0YSA9
-IHsNCj4gICAJLm9wcyA9ICZzZGhjaV9hdDkxX3NhbWE1ZDJfb3BzLA0KPiAgIH07DQo+ICAgDQo+
-ICtzdGF0aWMgY29uc3Qgc3RydWN0IHNkaGNpX2F0OTFfc29jX2RhdGEgc29jX2RhdGFfc2FtYTVk
-MiA9IHsNCj4gKwkucGRhdGEgPSAmc2RoY2lfc2FtYTVkMl9wZGF0YSwNCj4gKwkuYmFzZWNsa19p
-c19nZW5lcmF0ZWRfaW50ZXJuYWxseSA9IGZhbHNlLA0KPiArfTsNCj4gKw0KPiArc3RhdGljIGNv
-bnN0IHN0cnVjdCBzZGhjaV9hdDkxX3NvY19kYXRhIHNvY19kYXRhX3NhbTl4NjAgPSB7DQo+ICsJ
-LnBkYXRhID0gJnNkaGNpX3NhbWE1ZDJfcGRhdGEsDQo+ICsJLmJhc2VjbGtfaXNfZ2VuZXJhdGVk
-X2ludGVybmFsbHkgPSB0cnVlLA0KPiArCS5kaXZpZGVyX2Zvcl9iYXNlY2xrID0gMiwNCj4gK307
-DQo+ICsNCj4gICBzdGF0aWMgY29uc3Qgc3RydWN0IG9mX2RldmljZV9pZCBzZGhjaV9hdDkxX2R0
-X21hdGNoW10gPSB7DQo+ICAgCXsgLmNvbXBhdGlibGUgPSAiYXRtZWwsc2FtYTVkMi1zZGhjaSIs
-IC5kYXRhID0gJnNvY19kYXRhX3NhbWE1ZDIgfSwNCj4gKwl7IC5jb21wYXRpYmxlID0gIm1pY3Jv
-Y2hpcCxzYW05eDYwLXNkaGNpIiwgLmRhdGEgPSAmc29jX2RhdGFfc2FtOXg2MCB9LA0KPiAgIAl7
-fQ0KPiAgIH07DQo+ICAgTU9EVUxFX0RFVklDRV9UQUJMRShvZiwgc2RoY2lfYXQ5MV9kdF9tYXRj
-aCk7DQo+IEBAIC0xNDUsNTAgKzE2NCwzNiBAQCBzdGF0aWMgaW50IHNkaGNpX2F0OTFfc2V0X2Ns
-a3NfcHJlc2V0cyhzdHJ1Y3QgZGV2aWNlICpkZXYpDQo+ICAgCXN0cnVjdCBzZGhjaV9ob3N0ICpo
-b3N0ID0gZGV2X2dldF9kcnZkYXRhKGRldik7DQo+ICAgCXN0cnVjdCBzZGhjaV9wbHRmbV9ob3N0
-ICpwbHRmbV9ob3N0ID0gc2RoY2lfcHJpdihob3N0KTsNCj4gICAJc3RydWN0IHNkaGNpX2F0OTFf
-cHJpdiAqcHJpdiA9IHNkaGNpX3BsdGZtX3ByaXYocGx0Zm1faG9zdCk7DQo+IC0JaW50IHJldDsN
-Cj4gICAJdW5zaWduZWQgaW50CQkJY2FwczAsIGNhcHMxOw0KPiAgIAl1bnNpZ25lZCBpbnQJCQlj
-bGtfYmFzZSwgY2xrX211bDsNCj4gLQl1bnNpZ25lZCBpbnQJCQlnY2tfcmF0ZSwgcmVhbF9nY2tf
-cmF0ZTsNCj4gKwl1bnNpZ25lZCBpbnQJCQlnY2tfcmF0ZSwgY2xrX2Jhc2VfcmF0ZTsNCj4gICAJ
-dW5zaWduZWQgaW50CQkJcHJlc2V0X2RpdjsNCj4gICANCj4gLQkvKg0KPiAtCSAqIFRoZSBtdWx0
-IGNsb2NrIGlzIHByb3ZpZGVkIGJ5IGFzIGEgZ2VuZXJhdGVkIGNsb2NrIGJ5IHRoZSBQTUMNCj4g
-LQkgKiBjb250cm9sbGVyLiBJbiBvcmRlciB0byBzZXQgdGhlIHJhdGUgb2YgZ2NrLCB3ZSBoYXZl
-IHRvIGdldCB0aGUNCj4gLQkgKiBiYXNlIGNsb2NrIHJhdGUgYW5kIHRoZSBjbG9jayBtdWx0IGZy
-b20gY2FwYWJpbGl0aWVzLg0KPiAtCSAqLw0KPiAgIAljbGtfcHJlcGFyZV9lbmFibGUocHJpdi0+
-aGNsb2NrKTsNCj4gICAJY2FwczAgPSByZWFkbChob3N0LT5pb2FkZHIgKyBTREhDSV9DQVBBQklM
-SVRJRVMpOw0KPiAgIAljYXBzMSA9IHJlYWRsKGhvc3QtPmlvYWRkciArIFNESENJX0NBUEFCSUxJ
-VElFU18xKTsNCj4gLQljbGtfYmFzZSA9IChjYXBzMCAmIFNESENJX0NMT0NLX1YzX0JBU0VfTUFT
-SykgPj4gU0RIQ0lfQ0xPQ0tfQkFTRV9TSElGVDsNCj4gLQljbGtfbXVsID0gKGNhcHMxICYgU0RI
-Q0lfQ0xPQ0tfTVVMX01BU0spID4+IFNESENJX0NMT0NLX01VTF9TSElGVDsNCj4gLQlnY2tfcmF0
-ZSA9IGNsa19iYXNlICogMTAwMDAwMCAqIChjbGtfbXVsICsgMSk7DQo+IC0JcmV0ID0gY2xrX3Nl
-dF9yYXRlKHByaXYtPmdjaywgZ2NrX3JhdGUpOw0KPiAtCWlmIChyZXQgPCAwKSB7DQo+IC0JCWRl
-dl9lcnIoZGV2LCAiZmFpbGVkIHRvIHNldCBnY2siKTsNCj4gLQkJY2xrX2Rpc2FibGVfdW5wcmVw
-YXJlKHByaXYtPmhjbG9jayk7DQo+IC0JCXJldHVybiByZXQ7DQo+IC0JfQ0KPiAtCS8qDQo+IC0J
-ICogV2UgbmVlZCB0byBjaGVjayBpZiB3ZSBoYXZlIHRoZSByZXF1ZXN0ZWQgcmF0ZSBmb3IgZ2Nr
-IGJlY2F1c2UgaW4NCj4gLQkgKiBzb21lIGNhc2VzIHRoaXMgcmF0ZSBjb3VsZCBiZSBub3Qgc3Vw
-cG9ydGVkLiBJZiBpdCBoYXBwZW5zLCB0aGUgcmF0ZQ0KPiAtCSAqIGlzIHRoZSBjbG9zZXN0IG9u
-ZSBnY2sgY2FuIHByb3ZpZGUuIFdlIGhhdmUgdG8gdXBkYXRlIHRoZSB2YWx1ZQ0KPiAtCSAqIG9m
-IGNsayBtdWwuDQo+IC0JICovDQo+IC0JcmVhbF9nY2tfcmF0ZSA9IGNsa19nZXRfcmF0ZShwcml2
-LT5nY2spOw0KPiAtCWlmIChyZWFsX2dja19yYXRlICE9IGdja19yYXRlKSB7DQo+IC0JCWNsa19t
-dWwgPSByZWFsX2dja19yYXRlIC8gKGNsa19iYXNlICogMTAwMDAwMCkgLSAxOw0KPiAtCQljYXBz
-MSAmPSAoflNESENJX0NMT0NLX01VTF9NQVNLKTsNCj4gLQkJY2FwczEgfD0gKChjbGtfbXVsIDw8
-IFNESENJX0NMT0NLX01VTF9TSElGVCkgJg0KPiAtCQkJICBTREhDSV9DTE9DS19NVUxfTUFTSyk7
-DQo+IC0JCS8qIFNldCBjYXBhYmlsaXRpZXMgaW4gci93IG1vZGUuICovDQo+IC0JCXdyaXRlbChT
-RE1NQ19DQUNSX0tFWSB8IFNETU1DX0NBQ1JfQ0FQV1JFTiwNCj4gLQkJICAgICAgIGhvc3QtPmlv
-YWRkciArIFNETU1DX0NBQ1IpOw0KPiAtCQl3cml0ZWwoY2FwczEsIGhvc3QtPmlvYWRkciArIFNE
-SENJX0NBUEFCSUxJVElFU18xKTsNCj4gLQkJLyogU2V0IGNhcGFiaWxpdGllcyBpbiBybyBtb2Rl
-LiAqLw0KPiAtCQl3cml0ZWwoMCwgaG9zdC0+aW9hZGRyICsgU0RNTUNfQ0FDUik7DQo+IC0JCWRl
-dl9pbmZvKGRldiwgInVwZGF0ZSBjbGsgbXVsIHRvICV1IGFzIGdjayByYXRlIGlzICV1IEh6XG4i
-LA0KPiAtCQkJIGNsa19tdWwsIHJlYWxfZ2NrX3JhdGUpOw0KPiAtCX0NCj4gKw0KPiArCWdja19y
-YXRlID0gY2xrX2dldF9yYXRlKHByaXYtPmdjayk7DQo+ICsJaWYgKHByaXYtPnNvY19kYXRhLT5i
-YXNlY2xrX2lzX2dlbmVyYXRlZF9pbnRlcm5hbGx5KQ0KPiArCQljbGtfYmFzZV9yYXRlID0gZ2Nr
-X3JhdGUgLyBwcml2LT5zb2NfZGF0YS0+ZGl2aWRlcl9mb3JfYmFzZWNsazsNCj4gKwllbHNlDQo+
-ICsJCWNsa19iYXNlX3JhdGUgPSBjbGtfZ2V0X3JhdGUocHJpdi0+bWFpbmNrKTsNCj4gKw0KPiAr
-CWNsa19iYXNlID0gY2xrX2Jhc2VfcmF0ZSAvIDEwMDAwMDA7DQo+ICsJY2xrX211bCA9IGdja19y
-YXRlIC8gY2xrX2Jhc2VfcmF0ZSAtIDE7DQo+ICsNCj4gKwljYXBzMCAmPSAoflNESENJX0NMT0NL
-X1YzX0JBU0VfTUFTSyk7DQo+ICsJY2FwczAgfD0gKChjbGtfYmFzZSA8PCBTREhDSV9DTE9DS19C
-QVNFX1NISUZUKSAmIFNESENJX0NMT0NLX1YzX0JBU0VfTUFTSyk7DQo+ICsJY2FwczEgJj0gKH5T
-REhDSV9DTE9DS19NVUxfTUFTSyk7DQo+ICsJY2FwczEgfD0gKChjbGtfbXVsIDw8IFNESENJX0NM
-T0NLX01VTF9TSElGVCkgJiBTREhDSV9DTE9DS19NVUxfTUFTSyk7DQo+ICsJLyogU2V0IGNhcGFi
-aWxpdGllcyBpbiByL3cgbW9kZS4gKi8NCj4gKwl3cml0ZWwoU0RNTUNfQ0FDUl9LRVkgfCBTRE1N
-Q19DQUNSX0NBUFdSRU4sIGhvc3QtPmlvYWRkciArIFNETU1DX0NBQ1IpOw0KDQpIaSBMdWRvdmlj
-LA0KDQpJIGhhdmUgYSBmZWVsaW5nIHRoYXQgaGVyZSB5b3UgbWF5IHdpc2ggdG8gYWxzbyB3cml0
-ZSB0aGUgY2FwczAgdG8gdGhlIA0KU0RIQ19DQVBBQklMSVRJRVM6DQp3cml0ZWwoY2FwczAsIGhv
-c3QtPmlvYWRkciArIFNESENJX0NBUEFCSUxJVElFUyk7DQoNCllvdSBhcmUgY29tcHV0aW5nIHRo
-ZSBjYXBzMCBidXQgbm90IHdyaXRpbmcgdGhlbSB0byByZWdpc3Rlci4NCg0KRXVnZW4NCg0KPiAr
-CXdyaXRlbChjYXBzMSwgaG9zdC0+aW9hZGRyICsgU0RIQ0lfQ0FQQUJJTElUSUVTXzEpOw0KPiAr
-CS8qIFNldCBjYXBhYmlsaXRpZXMgaW4gcm8gbW9kZS4gKi8NCj4gKwl3cml0ZWwoMCwgaG9zdC0+
-aW9hZGRyICsgU0RNTUNfQ0FDUik7DQo+ICsNCj4gKwlkZXZfaW5mbyhkZXYsICJ1cGRhdGUgY2xr
-IG11bCB0byAldSBhcyBnY2sgcmF0ZSBpcyAldSBIeiBhbmQgY2xrIGJhc2UgaXMgJXUgSHpcbiIs
-DQo+ICsJCSBjbGtfbXVsLCBnY2tfcmF0ZSwgY2xrX2Jhc2VfcmF0ZSk7DQo+ICAgDQo+ICAgCS8q
-DQo+ICAgCSAqIFdlIGhhdmUgdG8gc2V0IHByZXNldCB2YWx1ZXMgYmVjYXVzZSBpdCBkZXBlbmRz
-IG9uIHRoZSBjbGtfbXVsDQo+IEBAIC0xOTYsMTkgKzIwMSwxOSBAQCBzdGF0aWMgaW50IHNkaGNp
-X2F0OTFfc2V0X2Nsa3NfcHJlc2V0cyhzdHJ1Y3QgZGV2aWNlICpkZXYpDQo+ICAgCSAqIG1heGlt
-dW0gc2QgY2xvY2sgdmFsdWUgaXMgMTIwIE1IeiBpbnN0ZWFkIG9mIDIwOCBNSHouIEZvciB0aGF0
-DQo+ICAgCSAqIHJlYXNvbiwgd2UgbmVlZCB0byB1c2UgcHJlc2V0cyB0byBzdXBwb3J0IFNEUjEw
-NC4NCj4gICAJICovDQo+IC0JcHJlc2V0X2RpdiA9IERJVl9ST1VORF9VUChyZWFsX2dja19yYXRl
-LCAyNDAwMDAwMCkgLSAxOw0KPiArCXByZXNldF9kaXYgPSBESVZfUk9VTkRfVVAoZ2NrX3JhdGUs
-IDI0MDAwMDAwKSAtIDE7DQo+ICAgCXdyaXRldyhTREhDSV9BVDkxX1BSRVNFVF9DT01NT05fQ09O
-RiB8IHByZXNldF9kaXYsDQo+ICAgCSAgICAgICBob3N0LT5pb2FkZHIgKyBTREhDSV9QUkVTRVRf
-Rk9SX1NEUjEyKTsNCj4gLQlwcmVzZXRfZGl2ID0gRElWX1JPVU5EX1VQKHJlYWxfZ2NrX3JhdGUs
-IDUwMDAwMDAwKSAtIDE7DQo+ICsJcHJlc2V0X2RpdiA9IERJVl9ST1VORF9VUChnY2tfcmF0ZSwg
-NTAwMDAwMDApIC0gMTsNCj4gICAJd3JpdGV3KFNESENJX0FUOTFfUFJFU0VUX0NPTU1PTl9DT05G
-IHwgcHJlc2V0X2RpdiwNCj4gICAJICAgICAgIGhvc3QtPmlvYWRkciArIFNESENJX1BSRVNFVF9G
-T1JfU0RSMjUpOw0KPiAtCXByZXNldF9kaXYgPSBESVZfUk9VTkRfVVAocmVhbF9nY2tfcmF0ZSwg
-MTAwMDAwMDAwKSAtIDE7DQo+ICsJcHJlc2V0X2RpdiA9IERJVl9ST1VORF9VUChnY2tfcmF0ZSwg
-MTAwMDAwMDAwKSAtIDE7DQo+ICAgCXdyaXRldyhTREhDSV9BVDkxX1BSRVNFVF9DT01NT05fQ09O
-RiB8IHByZXNldF9kaXYsDQo+ICAgCSAgICAgICBob3N0LT5pb2FkZHIgKyBTREhDSV9QUkVTRVRf
-Rk9SX1NEUjUwKTsNCj4gLQlwcmVzZXRfZGl2ID0gRElWX1JPVU5EX1VQKHJlYWxfZ2NrX3JhdGUs
-IDEyMDAwMDAwMCkgLSAxOw0KPiArCXByZXNldF9kaXYgPSBESVZfUk9VTkRfVVAoZ2NrX3JhdGUs
-IDEyMDAwMDAwMCkgLSAxOw0KPiAgIAl3cml0ZXcoU0RIQ0lfQVQ5MV9QUkVTRVRfQ09NTU9OX0NP
-TkYgfCBwcmVzZXRfZGl2LA0KPiAgIAkgICAgICAgaG9zdC0+aW9hZGRyICsgU0RIQ0lfUFJFU0VU
-X0ZPUl9TRFIxMDQpOw0KPiAtCXByZXNldF9kaXYgPSBESVZfUk9VTkRfVVAocmVhbF9nY2tfcmF0
-ZSwgNTAwMDAwMDApIC0gMTsNCj4gKwlwcmVzZXRfZGl2ID0gRElWX1JPVU5EX1VQKGdja19yYXRl
-LCA1MDAwMDAwMCkgLSAxOw0KPiAgIAl3cml0ZXcoU0RIQ0lfQVQ5MV9QUkVTRVRfQ09NTU9OX0NP
-TkYgfCBwcmVzZXRfZGl2LA0KPiAgIAkgICAgICAgaG9zdC0+aW9hZGRyICsgU0RIQ0lfUFJFU0VU
-X0ZPUl9ERFI1MCk7DQo+ICAgDQo+IEBAIC0zMDMsNyArMzA4LDcgQEAgc3RhdGljIGNvbnN0IHN0
-cnVjdCBkZXZfcG1fb3BzIHNkaGNpX2F0OTFfZGV2X3BtX29wcyA9IHsNCj4gICBzdGF0aWMgaW50
-IHNkaGNpX2F0OTFfcHJvYmUoc3RydWN0IHBsYXRmb3JtX2RldmljZSAqcGRldikNCj4gICB7DQo+
-ICAgCWNvbnN0IHN0cnVjdCBvZl9kZXZpY2VfaWQJKm1hdGNoOw0KPiAtCWNvbnN0IHN0cnVjdCBz
-ZGhjaV9wbHRmbV9kYXRhCSpzb2NfZGF0YTsNCj4gKwljb25zdCBzdHJ1Y3Qgc2RoY2lfYXQ5MV9z
-b2NfZGF0YQkqc29jX2RhdGE7DQo+ICAgCXN0cnVjdCBzZGhjaV9ob3N0CQkqaG9zdDsNCj4gICAJ
-c3RydWN0IHNkaGNpX3BsdGZtX2hvc3QJCSpwbHRmbV9ob3N0Ow0KPiAgIAlzdHJ1Y3Qgc2RoY2lf
-YXQ5MV9wcml2CQkqcHJpdjsNCj4gQEAgLTMxNCwxNyArMzE5LDIyIEBAIHN0YXRpYyBpbnQgc2Ro
-Y2lfYXQ5MV9wcm9iZShzdHJ1Y3QgcGxhdGZvcm1fZGV2aWNlICpwZGV2KQ0KPiAgIAkJcmV0dXJu
-IC1FSU5WQUw7DQo+ICAgCXNvY19kYXRhID0gbWF0Y2gtPmRhdGE7DQo+ICAgDQo+IC0JaG9zdCA9
-IHNkaGNpX3BsdGZtX2luaXQocGRldiwgc29jX2RhdGEsIHNpemVvZigqcHJpdikpOw0KPiArCWhv
-c3QgPSBzZGhjaV9wbHRmbV9pbml0KHBkZXYsIHNvY19kYXRhLT5wZGF0YSwgc2l6ZW9mKCpwcml2
-KSk7DQo+ICAgCWlmIChJU19FUlIoaG9zdCkpDQo+ICAgCQlyZXR1cm4gUFRSX0VSUihob3N0KTsN
-Cj4gICANCj4gICAJcGx0Zm1faG9zdCA9IHNkaGNpX3ByaXYoaG9zdCk7DQo+ICAgCXByaXYgPSBz
-ZGhjaV9wbHRmbV9wcml2KHBsdGZtX2hvc3QpOw0KPiArCXByaXYtPnNvY19kYXRhID0gc29jX2Rh
-dGE7DQo+ICAgDQo+ICAgCXByaXYtPm1haW5jayA9IGRldm1fY2xrX2dldCgmcGRldi0+ZGV2LCAi
-YmFzZWNsayIpOw0KPiAgIAlpZiAoSVNfRVJSKHByaXYtPm1haW5jaykpIHsNCj4gLQkJZGV2X2Vy
-cigmcGRldi0+ZGV2LCAiZmFpbGVkIHRvIGdldCBiYXNlY2xrXG4iKTsNCj4gLQkJcmV0dXJuIFBU
-Ul9FUlIocHJpdi0+bWFpbmNrKTsNCj4gKwkJaWYgKHNvY19kYXRhLT5iYXNlY2xrX2lzX2dlbmVy
-YXRlZF9pbnRlcm5hbGx5KSB7DQo+ICsJCQlwcml2LT5tYWluY2sgPSBOVUxMOw0KPiArCQl9IGVs
-c2Ugew0KPiArCQkJZGV2X2VycigmcGRldi0+ZGV2LCAiZmFpbGVkIHRvIGdldCBiYXNlY2xrXG4i
-KTsNCj4gKwkJCXJldHVybiBQVFJfRVJSKHByaXYtPm1haW5jayk7DQo+ICsJCX0NCj4gICAJfQ0K
-PiAgIA0KPiAgIAlwcml2LT5oY2xvY2sgPSBkZXZtX2Nsa19nZXQoJnBkZXYtPmRldiwgImhjbG9j
-ayIpOw0KPiANCg==
+On Thu, Sep 19, 2019 at 06:23:49PM +0100, Russell King - ARM Linux admin wrote:
+> On Thu, Sep 19, 2019 at 03:02:39PM +0100, Robin Murphy wrote:
+> > On 19/09/2019 10:16, Russell King - ARM Linux admin wrote:
+> > > On Tue, Sep 17, 2019 at 03:03:29PM +0100, Robin Murphy wrote:
+> > > > On 17/09/2019 14:49, Russell King - ARM Linux admin wrote:
+> > > > > As already replied, v4 mode is not documented as being available on
+> > > > > the LX2160A - the bit in the control register is marked as "reserved".
+> > > > > This is as expected as it is documented that it is using a v3.00 of
+> > > > > the SDHCI standard, rather than v4.00.
+> > > > > 
+> > > > > So, sorry, enabling "v4 mode" isn't a workaround in this scenario.
+> > > > > 
+> > > > > Given that v4 mode is not mandatory, this shouldn't be a work-around.
+> > > > > 
+> > > > > Given that it _does_ work some of the time with the table >4GB, then
+> > > > > this is not an addressing limitation.
+> > > > 
+> > > > Yes, that's what "something totally different" usually means.
+> > > > 
+> > > > > > However, the other difference between getting a single page directly from
+> > > > > > the page allocator vs. the CMA area is that accesses to the linear mapping
+> > > > > > of the CMA area are probably pretty rare, whereas for the single-page case
+> > > > > > it's much more likely that kernel tasks using adjacent pages could lead to
+> > > > > > prefetching of the descriptor page's cacheable alias. That could certainly
+> > > > > > explain how reverting that commit manages to hide an apparent coherency
+> > > > > > issue.
+> > > > > 
+> > > > > Right, so how do we fix this?
+> > > > 
+> > > > By describing the hardware correctly in the DT.
+> > > 
+> > > It would appear that it _is_ correctly described given the default
+> > > hardware configuration, but the driver sets a bit in a control
+> > > register that enables cache snooping.
+> > 
+> > Oh, fun. FWIW, the more general form of that statement would be "by ensuring
+> > that the device behaviour and the DT description are consistent", it's just
+> > rare to have both degrees of freedom.
+> > 
+> > Even in these cases, though, it tends to be ultimately necessary to defer to
+> > what the DT says, because there can be situations where the IP believes
+> > itself capable of enabling snoops, but the integration failed to wire things
+> > up correctly for them to actually work. I know we have to deal with that in
+> > arm-smmu, for one example.
+> > 
+> > > Adding "dma-coherent" to the DT description does not seem to be the
+> > > correct solution, as we are reliant on the DT description and driver
+> > > implementation both agreeing, which is fragile.
+> > > 
+> > >  From what I can see, there isn't a way for a driver to say "I've made
+> > > this device is coherent now" and I suspect making the driver set the
+> > > DMA snoop bit depending on whether "dma-coherent" is present in DT or
+> > > not will cause data-corrupting regressions for other people.
+> > > 
+> > > So, we're back to where we started - what is the right solution to
+> > > this problem?
+> > > 
+> > > The only thing I can think is that the driver needs to do something
+> > > like:
+> > > 
+> > > 	WARN_ON(!dev_is_dma_coherent(dev));
+> > > 
+> > > in esdhc_of_enable_dma() as a first step, and ensuring that the snoop
+> > > bit matches the state of dev_is_dma_coherent(dev)?  Is it permitted to
+> > > use dev_is_dma_coherent() in drivers - it doesn't seem to be part of
+> > > the normal DMA API?
+> > 
+> > The safest option would be to query the firmware property layer via
+> > device_get_dma_attr() - or potentially short-cut to of_dma_is_coherent() for
+> > a pure DT driver. Even disregarding API purity, I don't think the DMA API
+> > internals are really generic enough yet to reliably poke at (although FWIW,
+> > *certain* cases like dma_direct_ops would now actually work as expected if
+> > one did the unspeakable and flipped dev->dma_coherent from a driver, but
+> > that would definitely not win any friends).
+> 
+> So, I prepared a few options, and option 2 was:
+> 
+>  drivers/mmc/host/sdhci-of-esdhc.c | 8 +++++++-
+>  1 file changed, 7 insertions(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+> index 4dd43b1adf2c..8076a1322499 100644
+> --- a/drivers/mmc/host/sdhci-of-esdhc.c
+> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
+> @@ -19,6 +19,7 @@
+>  #include <linux/clk.h>
+>  #include <linux/ktime.h>
+>  #include <linux/dma-mapping.h>
+> +#include <linux/dma-noncoherent.h>
+>  #include <linux/mmc/host.h>
+>  #include <linux/mmc/mmc.h>
+>  #include "sdhci-pltfm.h"
+> @@ -495,7 +496,12 @@ static int esdhc_of_enable_dma(struct sdhci_host *host)
+>  		dma_set_mask_and_coherent(dev, DMA_BIT_MASK(40));
+>  
+>  	value = sdhci_readl(host, ESDHC_DMA_SYSCTL);
+> -	value |= ESDHC_DMA_SNOOP;
+> +
+> +	if (dev_is_dma_coherent(dev))
+> +		value |= ESDHC_DMA_SNOOP;
+> +	else
+> +		value &= ~ESDHC_DMA_SNOOP;
+> +
+>  	sdhci_writel(host, value, ESDHC_DMA_SYSCTL);
+>  	return 0;
+>  }
+> 
+> The dev_is_dma_coherent() could be changed to something like
+> device_get_dma_attr() if that's the correct thing to base this
+> off of.  However, if it returns DEV_DMA_NOT_SUPPORTED, then what?
+> Assume non-coherent or assume coherent?  What will the DMA API
+> layer assume?
+> 
+> It seems to me that we want the DMA API layer and the driver to
+> both agree whether the device is to be coherent or not, and for
+> the sake of data integrity, we do not want any possibility for
+> them to deviate in that decision making process.
+
+I think using of_dma_is_coherent() is the safest, as if the driver
+needs to be updated to ACPI, the problem will need to be readdressed.
+The conditions on which dev->dma_coherent is set by the ACPI code
+differs from the conditions that determine the return value of
+acpi_get_dma_attr().
+
+So, how about this:
+
+ drivers/mmc/host/sdhci-of-esdhc.c | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+index 4dd43b1adf2c..74de5e8c45c8 100644
+--- a/drivers/mmc/host/sdhci-of-esdhc.c
++++ b/drivers/mmc/host/sdhci-of-esdhc.c
+@@ -495,7 +495,12 @@ static int esdhc_of_enable_dma(struct sdhci_host *host)
+ 		dma_set_mask_and_coherent(dev, DMA_BIT_MASK(40));
+ 
+ 	value = sdhci_readl(host, ESDHC_DMA_SYSCTL);
+-	value |= ESDHC_DMA_SNOOP;
++
++	if (of_dma_is_coherent(dev->of_node))
++		value |= ESDHC_DMA_SNOOP;
++	else
++		value &= ~ESDHC_DMA_SNOOP;
++
+ 	sdhci_writel(host, value, ESDHC_DMA_SYSCTL);
+ 	return 0;
+ }
+-- 
+RMK's Patch system: https://www.armlinux.org.uk/developer/patches/
+FTTC broadband for 0.8mile line in suburbia: sync at 12.1Mbps down 622kbps up
+According to speedtest.net: 11.9Mbps down 500kbps up
