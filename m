@@ -1,32 +1,29 @@
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.19 118/128] mmc: dw_mmc: Re-store SDIO IRQs mask at system resume
-Date: Sun, 22 Sep 2019 14:54:08 -0400
-Message-ID: <20190922185418.2158-118-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.19 117/128] mmc: core: Add helper function to indicate if SDIO IRQs is enabled
+Date: Sun, 22 Sep 2019 14:54:07 -0400
+Message-ID: <20190922185418.2158-117-sashal@kernel.org>
 References: <20190922185418.2158-1-sashal@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
-Return-path: <stable-owner@vger.kernel.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20190922185418.2158-1-sashal@kernel.org>
-Sender: stable-owner@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc: Ulf Hansson <ulf.hansson@linaro.org>, Matthias Kaehlcke <mka@chromium.org>, Douglas Anderson <dianders@chromium.org>, Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
 From: Ulf Hansson <ulf.hansson@linaro.org>
 
-[ Upstream commit 7c526608d5afb62cbc967225e2ccaacfdd142e9d ]
+[ Upstream commit bd880b00697befb73eff7220ee20bdae4fdd487b ]
 
-In cases when SDIO IRQs have been enabled, runtime suspend is prevented by
-the driver. However, this still means dw_mci_runtime_suspend|resume() gets
-called during system suspend/resume, via pm_runtime_force_suspend|resume().
-This means during system suspend/resume, the register context of the dw_mmc
-device most likely loses its register context, even in cases when SDIO IRQs
-have been enabled.
+To avoid each host driver supporting SDIO IRQs, from keeping track
+internally about if SDIO IRQs has been claimed, let's introduce a common
+helper function, sdio_irq_claimed().
 
-To re-enable the SDIO IRQs during system resume, the dw_mmc driver
-currently relies on the mmc core to re-enable the SDIO IRQs when it resumes
-the SDIO card, but this isn't the recommended solution. Instead, it's
-better to deal with this locally in the dw_mmc driver, so let's do that.
+The function returns true if SDIO IRQs are claimed, via using the
+information about the number of claimed irqs. This is safe, even without
+any locks, as long as the helper function is called only from
+runtime/system suspend callbacks of the host driver.
 
 Tested-by: Matthias Kaehlcke <mka@chromium.org>
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
@@ -34,23 +31,28 @@ Reviewed-by: Douglas Anderson <dianders@chromium.org>
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 Signed-off-by: Sasha Levin <sashal@kernel.org>
 ---
- drivers/mmc/host/dw_mmc.c | 4 ++++
- 1 file changed, 4 insertions(+)
+ include/linux/mmc/host.h | 9 +++++++++
+ 1 file changed, 9 insertions(+)
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 942da07c9eb87..22c454c7aaca6 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -3486,6 +3486,10 @@ int dw_mci_runtime_resume(struct device *dev)
- 	/* Force setup bus to guarantee available clock output */
- 	dw_mci_setup_bus(host->slot, true);
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 2ff52de1c2b89..840462ed1ec7e 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -488,6 +488,15 @@ void mmc_command_done(struct mmc_host *host, struct mmc_request *mrq);
  
-+	/* Re-enable SDIO interrupts. */
-+	if (sdio_irq_claimed(host->slot->mmc))
-+		__dw_mci_enable_sdio_irq(host->slot, 1);
+ void mmc_cqe_request_done(struct mmc_host *host, struct mmc_request *mrq);
+ 
++/*
++ * May be called from host driver's system/runtime suspend/resume callbacks,
++ * to know if SDIO IRQs has been claimed.
++ */
++static inline bool sdio_irq_claimed(struct mmc_host *host)
++{
++	return host->sdio_irqs > 0;
++}
 +
- 	/* Now that slots are all setup, we can enable card detect */
- 	dw_mci_enable_cd(host);
- 
+ static inline void mmc_signal_sdio_irq(struct mmc_host *host)
+ {
+ 	host->ops->enable_sdio_irq(host, 0);
 -- 
 2.20.1
