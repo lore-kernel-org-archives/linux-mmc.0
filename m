@@ -1,13 +1,13 @@
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 5.3 187/203] mmc: mtk-sd: Re-store SDIO IRQs mask at system resume
-Date: Sun, 22 Sep 2019 14:43:33 -0400
-Message-ID: <20190922184350.30563-187-sashal@kernel.org>
-References: <20190922184350.30563-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.2 169/185] mmc: mtk-sd: Re-store SDIO IRQs mask at system resume
+Date: Sun, 22 Sep 2019 14:49:07 -0400
+Message-ID: <20190922184924.32534-169-sashal@kernel.org>
+References: <20190922184924.32534-1-sashal@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190922184350.30563-1-sashal@kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <20190922184924.32534-1-sashal@kernel.org>
+Sender: stable-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc: Ulf Hansson <ulf.hansson@linaro.org>, Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
