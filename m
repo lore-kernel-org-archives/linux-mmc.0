@@ -1,49 +1,40 @@
 From: Colin King <colin.king@canonical.com>
-Subject: [PATCH] memstick: jmb38x_ms: clean up indentation issue
-Date: Sun, 22 Sep 2019 13:47:00 +0200
-Message-ID: <20190922114700.10563-1-colin.king@canonical.com>
+Subject: [PATCH] mmc: dw_mmc: fix indentation issue
+Date: Sun, 22 Sep 2019 13:54:43 +0200
+Message-ID: <20190922115443.11693-1-colin.king@canonical.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Maxim Levitsky <maximlevitsky@gmail.com>, Alex Dubov <oakad@yahoo.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
 Cc: kernel-janitors@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
 From: Colin Ian King <colin.king@canonical.com>
 
-There is a hunk of code that is indented one level too deep, fix
-this by removing the extraneous tabs.
+There are a couple of statements that are indented by an extra
+space, clean this up by remove the extraneous spaces.
 
 Signed-off-by: Colin Ian King <colin.king@canonical.com>
 ---
- drivers/memstick/host/jmb38x_ms.c | 12 ++++++------
- 1 file changed, 6 insertions(+), 6 deletions(-)
+ drivers/mmc/host/dw_mmc.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/memstick/host/jmb38x_ms.c b/drivers/memstick/host/jmb38x_ms.c
-index 32747425297d..3394164a7968 100644
---- a/drivers/memstick/host/jmb38x_ms.c
-+++ b/drivers/memstick/host/jmb38x_ms.c
-@@ -433,13 +433,13 @@ static int jmb38x_ms_issue_cmd(struct memstick_host *msh)
- 		writel(((1 << 16) & BLOCK_COUNT_MASK)
- 		       | (data_len & BLOCK_SIZE_MASK),
- 		       host->addr + BLOCK);
--			t_val = readl(host->addr + INT_STATUS_ENABLE);
--			t_val |= host->req->data_dir == READ
--				 ? INT_STATUS_FIFO_RRDY
--				 : INT_STATUS_FIFO_WRDY;
-+		t_val = readl(host->addr + INT_STATUS_ENABLE);
-+		t_val |= host->req->data_dir == READ
-+			 ? INT_STATUS_FIFO_RRDY
-+			 : INT_STATUS_FIFO_WRDY;
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 79c55c7b4afd..bf0048ebbda3 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -3441,8 +3441,8 @@ int dw_mci_runtime_resume(struct device *dev)
+ 	 * Restore the initial value at FIFOTH register
+ 	 * And Invalidate the prev_blksz with zero
+ 	 */
+-	 mci_writel(host, FIFOTH, host->fifoth_val);
+-	 host->prev_blksz = 0;
++	mci_writel(host, FIFOTH, host->fifoth_val);
++	host->prev_blksz = 0;
  
--			writel(t_val, host->addr + INT_STATUS_ENABLE);
--			writel(t_val, host->addr + INT_SIGNAL_ENABLE);
-+		writel(t_val, host->addr + INT_STATUS_ENABLE);
-+		writel(t_val, host->addr + INT_SIGNAL_ENABLE);
- 	} else {
- 		cmd &= ~(TPC_DATA_SEL | 0xf);
- 		host->cmd_flags |= REG_DATA;
+ 	/* Put in max timeout */
+ 	mci_writel(host, TMOUT, 0xFFFFFFFF);
 -- 
 2.20.1
