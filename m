@@ -1,12 +1,12 @@
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.14 80/89] mmc: sdhci: Fix incorrect switch to HS mode
-Date: Sun, 22 Sep 2019 14:57:08 -0400
-Message-ID: <20190922185717.3412-80-sashal@kernel.org>
-References: <20190922185717.3412-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.4 40/44] mmc: sdhci: Fix incorrect switch to HS mode
+Date: Sun, 22 Sep 2019 15:00:58 -0400
+Message-ID: <20190922190103.4906-40-sashal@kernel.org>
+References: <20190922190103.4906-1-sashal@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190922185717.3412-1-sashal@kernel.org>
+In-Reply-To: <20190922190103.4906-1-sashal@kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc: Al Cooper <alcooperx@gmail.com>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org
@@ -46,10 +46,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 3 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 9540fda7fc6ba..3741d4c846e5e 100644
+index 62d37d2ac557b..1d6dfde1104d1 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -1635,7 +1635,9 @@ void sdhci_set_uhs_signaling(struct sdhci_host *host, unsigned timing)
+@@ -1452,7 +1452,9 @@ void sdhci_set_uhs_signaling(struct sdhci_host *host, unsigned timing)
  		ctrl_2 |= SDHCI_CTRL_UHS_SDR104;
  	else if (timing == MMC_TIMING_UHS_SDR12)
  		ctrl_2 |= SDHCI_CTRL_UHS_SDR12;
