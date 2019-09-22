@@ -1,53 +1,64 @@
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 5.2 169/185] mmc: mtk-sd: Re-store SDIO IRQs mask at system resume
-Date: Sun, 22 Sep 2019 14:49:07 -0400
-Message-ID: <20190922184924.32534-169-sashal@kernel.org>
-References: <20190922184924.32534-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.19 116/128] mmc: sdhci: Fix incorrect switch to HS mode
+Date: Sun, 22 Sep 2019 14:54:06 -0400
+Message-ID: <20190922185418.2158-116-sashal@kernel.org>
+References: <20190922185418.2158-1-sashal@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <20190922184924.32534-1-sashal@kernel.org>
-Sender: stable-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20190922185418.2158-1-sashal@kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org
+Cc: Al Cooper <alcooperx@gmail.com>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-From: Ulf Hansson <ulf.hansson@linaro.org>
+From: Al Cooper <alcooperx@gmail.com>
 
-[ Upstream commit 1c81d69d4c98aab56c5a7d5a810f84aefdb37e9b ]
+[ Upstream commit c894e33ddc1910e14d6f2a2016f60ab613fd8b37 ]
 
-In cases when SDIO IRQs have been enabled, runtime suspend is prevented by
-the driver. However, this still means msdc_runtime_suspend|resume() gets
-called during system suspend/resume, via pm_runtime_force_suspend|resume().
+When switching from any MMC speed mode that requires 1.8v
+(HS200, HS400 and HS400ES) to High Speed (HS) mode, the system
+ends up configured for SDR12 with a 50MHz clock which is an illegal
+mode.
 
-This means during system suspend/resume, the register context of the mtk-sd
-device most likely loses its register context, even in cases when SDIO IRQs
-have been enabled.
+This happens because the SDHCI_CTRL_VDD_180 bit in the
+SDHCI_HOST_CONTROL2 register is left set and when this bit is
+set, the speed mode is controlled by the SDHCI_CTRL_UHS field
+in the SDHCI_HOST_CONTROL2 register. The SDHCI_CTRL_UHS field
+will end up being set to 0 (SDR12) by sdhci_set_uhs_signaling()
+because there is no UHS mode being set.
 
-To re-enable the SDIO IRQs during system resume, the mtk-sd driver
-currently relies on the mmc core to re-enable the SDIO IRQs when it resumes
-the SDIO card, but this isn't the recommended solution. Instead, it's
-better to deal with this locally in the mtk-sd driver, so let's do that.
+The fix is to change sdhci_set_uhs_signaling() to set the
+SDHCI_CTRL_UHS field to SDR25 (which is the same as HS) for
+any switch to HS mode.
 
+This was found on a new eMMC controller that does strict checking
+of the speed mode and the corresponding clock rate. It caused the
+switch to HS400 mode to fail because part of the sequence to switch
+to HS400 requires a switch from HS200 to HS before going to HS400.
+
+Suggested-by: Adrian Hunter <adrian.hunter@intel.com>
+Signed-off-by: Al Cooper <alcooperx@gmail.com>
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 Signed-off-by: Sasha Levin <sashal@kernel.org>
 ---
- drivers/mmc/host/mtk-sd.c | 3 +++
- 1 file changed, 3 insertions(+)
+ drivers/mmc/host/sdhci.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index 33f4b6387ef71..978c8ccce7e31 100644
---- a/drivers/mmc/host/mtk-sd.c
-+++ b/drivers/mmc/host/mtk-sd.c
-@@ -2421,6 +2421,9 @@ static void msdc_restore_reg(struct msdc_host *host)
- 	} else {
- 		writel(host->save_para.pad_tune, host->base + tune_reg);
- 	}
-+
-+	if (sdio_irq_claimed(host->mmc))
-+		__msdc_enable_sdio_irq(host, 1);
- }
- 
- static int msdc_runtime_suspend(struct device *dev)
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index c749d3dc1d36d..eb33b892b484c 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1713,7 +1713,9 @@ void sdhci_set_uhs_signaling(struct sdhci_host *host, unsigned timing)
+ 		ctrl_2 |= SDHCI_CTRL_UHS_SDR104;
+ 	else if (timing == MMC_TIMING_UHS_SDR12)
+ 		ctrl_2 |= SDHCI_CTRL_UHS_SDR12;
+-	else if (timing == MMC_TIMING_UHS_SDR25)
++	else if (timing == MMC_TIMING_SD_HS ||
++		 timing == MMC_TIMING_MMC_HS ||
++		 timing == MMC_TIMING_UHS_SDR25)
+ 		ctrl_2 |= SDHCI_CTRL_UHS_SDR25;
+ 	else if (timing == MMC_TIMING_UHS_SDR50)
+ 		ctrl_2 |= SDHCI_CTRL_UHS_SDR50;
 -- 
 2.20.1
