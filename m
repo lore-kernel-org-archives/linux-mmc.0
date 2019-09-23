@@ -1,52 +1,69 @@
-From: Baolin Wang <baolin.wang@linaro.org>
-Subject: Re: [PATCH v3 1/3] mmc: Add MMC software queue support
-Date: Mon, 23 Sep 2019 15:53:44 +0800
-Message-ID: <CAMz4kuJONoMYAmQrKukxxpDbYDQQ8G7SYaL4svk8A6ewr2sYEA@mail.gmail.com>
-References: <63395d0c73f0bb1cf7c2f52545137fd4014f84ba.1568864712.git.baolin.wang@linaro.org>
- <20190921144922.GB13091@xsang-OptiPlex-9020>
+From: Thierry Reding <thierry.reding@gmail.com>
+Subject: [PATCH v2 1/2] mmc: sdhci: Let drivers define their DMA mask
+Date: Mon, 23 Sep 2019 12:08:09 +0200
+Message-ID: <20190923100810.12698-1-thierry.reding@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190921144922.GB13091@xsang-OptiPlex-9020>
 Sender: linux-kernel-owner@vger.kernel.org
-To: kbuild test robot <lkp@intel.com>
-Cc: kbuild-all@01.org, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, asutoshd@codeaurora.org, Orson Zhai <orsonzhai@gmail.com>, Chunyan Zhang <zhang.lyra@gmail.com>, Arnd Bergmann <arnd@arndb.de>, Linus Walleij <linus.walleij@linaro.org>, Vincent Guittot <vincent.guittot@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
+Cc: Jon Hunter <jonathanh@nvidia.com>, Nicolin Chen <nicoleotsuka@gmail.com>, linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,
+From: Adrian Hunter <adrian.hunter@intel.com>
 
-On Sat, 21 Sep 2019 at 22:43, kbuild test robot <lkp@intel.com> wrote:
->
-> Hi Baolin,
->
-> I love your patch! Yet something to improve:
->
-> [auto build test ERROR on linus/master]
-> [cannot apply to v5.3 next-20190918]
-> [if your patch is applied to the wrong git tree, please drop us a note to help
-> improve the system. BTW, we also suggest to use '--base' option to specify the
-> base tree in git format-patch, please see https://stackoverflow.com/a/37406982]
->
-> url:    https://github.com/0day-ci/linux/commits/Baolin-Wang/mmc-Add-MMC-software-queue-support/20190919-140107
-> config: i386-allmodconfig (attached as .config)
-> compiler: gcc-7 (Debian 7.4.0-13) 7.4.0
-> reproduce:
->         # save the attached .config to linux build tree
->         make ARCH=i386
-> :::::: branch date: 7 hours ago
-> :::::: commit date: 7 hours ago
->
-> If you fix the issue, kindly add following tag
-> Reported-by: kbuild test robot <lkp@intel.com>
->
-> All errors (new ones prefixed by >>):
->
->    ld: drivers/mmc/host/sqhci.o: in function `sqhci_finalize_request':
-> >> (.text+0x644): undefined reference to `mmc_cqe_request_done'
+Add host operation ->set_dma_mask() so that drivers can define their own
+DMA masks.
 
-OK. I will fix this issue in the next version and wait for a while to
-see if there are any new comments for this patch set. Thanks.
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+Tested-by: Nicolin Chen <nicoleotsuka@gmail.com>
+Signed-off-by: Thierry Reding <treding@nvidia.com>
+---
+Changes in v2:
+- add Tested-by tag from Nicolin
 
+ drivers/mmc/host/sdhci.c | 12 ++++--------
+ drivers/mmc/host/sdhci.h |  1 +
+ 2 files changed, 5 insertions(+), 8 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index d814dc004bad..cf38ff09bef0 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -3782,18 +3782,14 @@ int sdhci_setup_host(struct sdhci_host *host)
+ 		host->flags &= ~SDHCI_USE_ADMA;
+ 	}
+ 
+-	/*
+-	 * It is assumed that a 64-bit capable device has set a 64-bit DMA mask
+-	 * and *must* do 64-bit DMA.  A driver has the opportunity to change
+-	 * that during the first call to ->enable_dma().  Similarly
+-	 * SDHCI_QUIRK2_BROKEN_64_BIT_DMA must be left to the drivers to
+-	 * implement.
+-	 */
+ 	if (sdhci_can_64bit_dma(host))
+ 		host->flags |= SDHCI_USE_64_BIT_DMA;
+ 
+ 	if (host->flags & (SDHCI_USE_SDMA | SDHCI_USE_ADMA)) {
+-		ret = sdhci_set_dma_mask(host);
++		if (host->ops->set_dma_mask)
++			ret = host->ops->set_dma_mask(host);
++		else
++			ret = sdhci_set_dma_mask(host);
+ 
+ 		if (!ret && host->ops->enable_dma)
+ 			ret = host->ops->enable_dma(host);
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index cf3d1ed91909..61018e7fb0b6 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -623,6 +623,7 @@ struct sdhci_ops {
+ 
+ 	u32		(*irq)(struct sdhci_host *host, u32 intmask);
+ 
++	int		(*set_dma_mask)(struct sdhci_host *host);
+ 	int		(*enable_dma)(struct sdhci_host *host);
+ 	unsigned int	(*get_max_clock)(struct sdhci_host *host);
+ 	unsigned int	(*get_min_clock)(struct sdhci_host *host);
 -- 
-Baolin Wang
-Best Regards
+2.23.0
