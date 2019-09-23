@@ -1,53 +1,81 @@
-From: "Michael K. Johnson" <johnsonm@danlj.org>
-Subject: Re: [PATCH V9 5/5] mmc: host: sdhci-pci: Add Genesys Logic GL975x
- support
-Date: Mon, 23 Sep 2019 17:39:25 -0400
-Message-ID: <20190923213925.GA19247@people.danlj.org>
-References: <cover.1568184581.git.benchuanggli@gmail.com>
- <2d08c47490a349d7ee5682749f68604adc62f19f.1568184581.git.benchuanggli@gmail.com>
- <20190918104734.GA3320@people.danlj.org>
- <781dc676-4903-5ab2-84d1-b5357c11dccd@intel.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v2 1/2] mmc: sdhci: Let drivers define their DMA mask
+Date: Mon, 23 Sep 2019 23:55:01 +0200
+Message-ID: <CAPDyKForzWMVVWRNRk6dhTVt-13M11=vktBJn8Rzxk0yZtNJNA@mail.gmail.com>
+References: <20190923100810.12698-1-thierry.reding@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <781dc676-4903-5ab2-84d1-b5357c11dccd@intel.com>
+In-Reply-To: <20190923100810.12698-1-thierry.reding@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, linux-kernel@vger.kernel.org, "ben.chuang@genesyslogic.com.tw Ben Chuang" <benchuanggli@gmail.com>
+To: Thierry Reding <thierry.reding@gmail.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Jon Hunter <jonathanh@nvidia.com>, Nicolin Chen <nicoleotsuka@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-tegra <linux-tegra@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, Sep 18, 2019 at 02:07:51PM +0300, Adrian Hunter wrote:
-> On 18/09/19 1:47 PM, Michael K. Johnson wrote:
-> > I see that the first four patches made it into Linus's kernel
-> > yesterday. Is there any chance of this final patch that actually
-> > enables the hardware making it into another pull request still
-> > intended for 5.4?  Waiting on additional acked-by on Ben's work
-> > addressing all the review comments?
-...
-> > On Wed, Sep 11, 2019 at 03:23:44PM +0800, Ben Chuang wrote:
-> >> From: Ben Chuang <ben.chuang@genesyslogic.com.tw>
-> >>
-> >> Add support for the GL9750 and GL9755 chipsets.
-> >>
-> >> Enable v4 mode and wait 5ms after set 1.8V signal enable for GL9750/
-> >> GL9755. Fix the value of SDHCI_MAX_CURRENT register and use the vendor
-> >> tuning flow for GL9750.
-> > 
-> 
-> It is OK by me:
-> 
-> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+On Mon, 23 Sep 2019 at 12:08, Thierry Reding <thierry.reding@gmail.com> wrote:
+>
+> From: Adrian Hunter <adrian.hunter@intel.com>
+>
+> Add host operation ->set_dma_mask() so that drivers can define their own
+> DMA masks.
+>
+> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+> Tested-by: Nicolin Chen <nicoleotsuka@gmail.com>
+> Signed-off-by: Thierry Reding <treding@nvidia.com>
 
-Ulf,
+Applied for fixes and adding a stable tag, thanks!
 
-Sorry to be a bother... Is anything remaining for this work to make
-it into a second PR for 5.4 before the merge window closes?
+Kind regards
+Uffe
 
-It would be really convenient for the microsd readers in
-current-generation thinkpads (for instance) to have hardware support out
-of the box without having to wait another kernel release cycle, if
-there's nothing otherwise remaining to change.  I confirmed that
-it currently applies cleanly on top of Linus's kernel.
 
-Thanks
+> ---
+> Changes in v2:
+> - add Tested-by tag from Nicolin
+>
+>  drivers/mmc/host/sdhci.c | 12 ++++--------
+>  drivers/mmc/host/sdhci.h |  1 +
+>  2 files changed, 5 insertions(+), 8 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index d814dc004bad..cf38ff09bef0 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -3782,18 +3782,14 @@ int sdhci_setup_host(struct sdhci_host *host)
+>                 host->flags &= ~SDHCI_USE_ADMA;
+>         }
+>
+> -       /*
+> -        * It is assumed that a 64-bit capable device has set a 64-bit DMA mask
+> -        * and *must* do 64-bit DMA.  A driver has the opportunity to change
+> -        * that during the first call to ->enable_dma().  Similarly
+> -        * SDHCI_QUIRK2_BROKEN_64_BIT_DMA must be left to the drivers to
+> -        * implement.
+> -        */
+>         if (sdhci_can_64bit_dma(host))
+>                 host->flags |= SDHCI_USE_64_BIT_DMA;
+>
+>         if (host->flags & (SDHCI_USE_SDMA | SDHCI_USE_ADMA)) {
+> -               ret = sdhci_set_dma_mask(host);
+> +               if (host->ops->set_dma_mask)
+> +                       ret = host->ops->set_dma_mask(host);
+> +               else
+> +                       ret = sdhci_set_dma_mask(host);
+>
+>                 if (!ret && host->ops->enable_dma)
+>                         ret = host->ops->enable_dma(host);
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index cf3d1ed91909..61018e7fb0b6 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -623,6 +623,7 @@ struct sdhci_ops {
+>
+>         u32             (*irq)(struct sdhci_host *host, u32 intmask);
+>
+> +       int             (*set_dma_mask)(struct sdhci_host *host);
+>         int             (*enable_dma)(struct sdhci_host *host);
+>         unsigned int    (*get_max_clock)(struct sdhci_host *host);
+>         unsigned int    (*get_min_clock)(struct sdhci_host *host);
+> --
+> 2.23.0
+>
