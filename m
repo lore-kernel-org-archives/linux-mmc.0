@@ -1,14 +1,14 @@
 From: kbuild test robot <lkp-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH v1 2/5] ACPI / utils: Introduce acpi_dev_hid_uid_match()
-	helper
-Date: Wed, 25 Sep 2019 01:24:32 +0800
-Message-ID: <201909250158.Hfgr0hpz%lkp@intel.com>
-References: <20190924120153.8382-2-andriy.shevchenko@linux.intel.com>
+Subject: Re: [PATCH v1 4/5] mmc: sdhci-acpi: Switch to use
+	acpi_dev_hid_uid_match()
+Date: Wed, 25 Sep 2019 01:34:12 +0800
+Message-ID: <201909250108.F3KSGdTa%lkp@intel.com>
+References: <20190924120153.8382-4-andriy.shevchenko@linux.intel.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="lsiuphidnm33bsjl"
+Content-Type: multipart/mixed; boundary="6doarigtovadqahv"
 Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20190924120153.8382-2-andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+In-Reply-To: <20190924120153.8382-4-andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
 List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
 	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
@@ -22,7 +22,7 @@ Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "Rafael J
 List-Id: linux-mmc@vger.kernel.org
 
 
---lsiuphidnm33bsjl
+--6doarigtovadqahv
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 
@@ -49,232 +49,95 @@ reproduce:
 If you fix the issue, kindly add following tag
 Reported-by: kbuild test robot <lkp-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 
-All error/warnings (new ones prefixed by >>):
+All errors (new ones prefixed by >>):
 
    In file included from include/linux/acpi.h:32:0,
-                    from include/linux/i2c.h:13,
-                    from drivers//media/radio/si4713/si4713.c:15:
->> include/acpi/acpi_bus.h:78:36: warning: 'struct acpi_device' declared inside parameter list will not be visible outside of this definition or declaration
+                    from drivers/mmc/host/sdhci-acpi.c:22:
+   include/acpi/acpi_bus.h:78:36: warning: 'struct acpi_device' declared inside parameter list will not be visible outside of this definition or declaration
     bool acpi_dev_hid_uid_match(struct acpi_device *adev,
                                        ^~~~~~~~~~~
---
+   drivers/mmc/host/sdhci-acpi.c: In function 'intel_probe_slot':
+>> drivers/mmc/host/sdhci-acpi.c:381:29: error: passing argument 1 of 'acpi_dev_hid_uid_match' from incompatible pointer type [-Werror=incompatible-pointer-types]
+     if (acpi_dev_hid_uid_match(adev, "80860F14", "1") &&
+                                ^~~~
    In file included from include/linux/acpi.h:32:0,
-                    from drivers/acpi/utils.c:15:
->> include/acpi/acpi_bus.h:78:36: warning: 'struct acpi_device' declared inside parameter list will not be visible outside of this definition or declaration
-    bool acpi_dev_hid_uid_match(struct acpi_device *adev,
-                                       ^~~~~~~~~~~
->> drivers/acpi/utils.c:713:6: error: conflicting types for 'acpi_dev_hid_uid_match'
+                    from drivers/mmc/host/sdhci-acpi.c:22:
+   include/acpi/acpi_bus.h:78:6: note: expected 'struct acpi_device *' but argument is of type 'struct acpi_device *'
     bool acpi_dev_hid_uid_match(struct acpi_device *adev,
          ^~~~~~~~~~~~~~~~~~~~~~
+   drivers/mmc/host/sdhci-acpi.c:386:29: error: passing argument 1 of 'acpi_dev_hid_uid_match' from incompatible pointer type [-Werror=incompatible-pointer-types]
+     if (acpi_dev_hid_uid_match(adev, "80865ACA", NULL))
+                                ^~~~
    In file included from include/linux/acpi.h:32:0,
-                    from drivers/acpi/utils.c:15:
-   include/acpi/acpi_bus.h:78:6: note: previous declaration of 'acpi_dev_hid_uid_match' was here
+                    from drivers/mmc/host/sdhci-acpi.c:22:
+   include/acpi/acpi_bus.h:78:6: note: expected 'struct acpi_device *' but argument is of type 'struct acpi_device *'
     bool acpi_dev_hid_uid_match(struct acpi_device *adev,
          ^~~~~~~~~~~~~~~~~~~~~~
-   In file included from include/linux/linkage.h:7:0,
-                    from include/linux/kernel.h:8,
-                    from drivers/acpi/utils.c:9:
-   drivers/acpi/utils.c:727:15: error: conflicting types for 'acpi_dev_hid_uid_match'
-    EXPORT_SYMBOL(acpi_dev_hid_uid_match);
-                  ^
-   include/linux/export.h:79:21: note: in definition of macro '___EXPORT_SYMBOL'
-     extern typeof(sym) sym;      \
-                        ^~~
->> drivers/acpi/utils.c:727:1: note: in expansion of macro 'EXPORT_SYMBOL'
-    EXPORT_SYMBOL(acpi_dev_hid_uid_match);
-    ^~~~~~~~~~~~~
+   drivers/mmc/host/sdhci-acpi.c: In function 'qcom_probe_slot':
+   drivers/mmc/host/sdhci-acpi.c:480:29: error: passing argument 1 of 'acpi_dev_hid_uid_match' from incompatible pointer type [-Werror=incompatible-pointer-types]
+     if (acpi_dev_hid_uid_match(adev, "QCOM8051", NULL))
+                                ^~~~
    In file included from include/linux/acpi.h:32:0,
-                    from drivers/acpi/utils.c:15:
-   include/acpi/acpi_bus.h:78:6: note: previous declaration of 'acpi_dev_hid_uid_match' was here
+                    from drivers/mmc/host/sdhci-acpi.c:22:
+   include/acpi/acpi_bus.h:78:6: note: expected 'struct acpi_device *' but argument is of type 'struct acpi_device *'
     bool acpi_dev_hid_uid_match(struct acpi_device *adev,
          ^~~~~~~~~~~~~~~~~~~~~~
---
+   drivers/mmc/host/sdhci-acpi.c: In function 'qcom_free_slot':
+   drivers/mmc/host/sdhci-acpi.c:504:30: error: passing argument 1 of 'acpi_dev_hid_uid_match' from incompatible pointer type [-Werror=incompatible-pointer-types]
+     if (!acpi_dev_hid_uid_match(adev, "QCOM8051", NULL))
+                                 ^~~~
    In file included from include/linux/acpi.h:32:0,
-                    from drivers/cpufreq/ia64-acpi-cpufreq.c:24:
->> include/acpi/acpi_bus.h:78:36: warning: 'struct acpi_device' declared inside parameter list will not be visible outside of this definition or declaration
-    bool acpi_dev_hid_uid_match(struct acpi_device *adev,
-                                       ^~~~~~~~~~~
-   drivers/cpufreq/ia64-acpi-cpufreq.c: In function 'processor_set_pstate':
-   <command-line>:0:16: warning: format '%lx' expects argument of type 'long unsigned int', but argument 4 has type 's64 {aka long long int}' [-Wformat=]
-   drivers/cpufreq/ia64-acpi-cpufreq.c:12:21: note: in expansion of macro 'KBUILD_MODNAME'
-    #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
-                        ^~~~~~~~~~~~~~
-   include/linux/dynamic_debug.h:125:15: note: in expansion of macro 'pr_fmt'
-      func(&id, ##__VA_ARGS__);  \
-                  ^~~~~~~~~~~
-   include/linux/dynamic_debug.h:143:2: note: in expansion of macro '__dynamic_func_call'
-     __dynamic_func_call(__UNIQUE_ID(ddebug), fmt, func, ##__VA_ARGS__)
-     ^~~~~~~~~~~~~~~~~~~
-   include/linux/dynamic_debug.h:153:2: note: in expansion of macro '_dynamic_func_call'
-     _dynamic_func_call(fmt, __dynamic_pr_debug,  \
-     ^~~~~~~~~~~~~~~~~~
-   include/linux/printk.h:336:2: note: in expansion of macro 'dynamic_pr_debug'
-     dynamic_pr_debug(fmt, ##__VA_ARGS__)
-     ^~~~~~~~~~~~~~~~
-   drivers/cpufreq/ia64-acpi-cpufreq.c:57:3: note: in expansion of macro 'pr_debug'
-      pr_debug("Failed to set freq to 0x%x, with error 0x%lx\n",
-      ^~~~~~~~
-   drivers/cpufreq/ia64-acpi-cpufreq.c: In function 'processor_get_pstate':
-   <command-line>:0:16: warning: format '%lx' expects argument of type 'long unsigned int', but argument 3 has type 's64 {aka long long int}' [-Wformat=]
-   drivers/cpufreq/ia64-acpi-cpufreq.c:12:21: note: in expansion of macro 'KBUILD_MODNAME'
-    #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
-                        ^~~~~~~~~~~~~~
-   include/linux/dynamic_debug.h:125:15: note: in expansion of macro 'pr_fmt'
-      func(&id, ##__VA_ARGS__);  \
-                  ^~~~~~~~~~~
-   include/linux/dynamic_debug.h:143:2: note: in expansion of macro '__dynamic_func_call'
-     __dynamic_func_call(__UNIQUE_ID(ddebug), fmt, func, ##__VA_ARGS__)
-     ^~~~~~~~~~~~~~~~~~~
-   include/linux/dynamic_debug.h:153:2: note: in expansion of macro '_dynamic_func_call'
-     _dynamic_func_call(fmt, __dynamic_pr_debug,  \
-     ^~~~~~~~~~~~~~~~~~
-   include/linux/printk.h:336:2: note: in expansion of macro 'dynamic_pr_debug'
-     dynamic_pr_debug(fmt, ##__VA_ARGS__)
-     ^~~~~~~~~~~~~~~~
-   drivers/cpufreq/ia64-acpi-cpufreq.c:79:3: note: in expansion of macro 'pr_debug'
-      pr_debug("Failed to get current freq with "
-      ^~~~~~~~
---
-   In file included from include/linux/acpi.h:32:0,
-                    from drivers//acpi/utils.c:15:
->> include/acpi/acpi_bus.h:78:36: warning: 'struct acpi_device' declared inside parameter list will not be visible outside of this definition or declaration
-    bool acpi_dev_hid_uid_match(struct acpi_device *adev,
-                                       ^~~~~~~~~~~
-   drivers//acpi/utils.c:713:6: error: conflicting types for 'acpi_dev_hid_uid_match'
+                    from drivers/mmc/host/sdhci-acpi.c:22:
+   include/acpi/acpi_bus.h:78:6: note: expected 'struct acpi_device *' but argument is of type 'struct acpi_device *'
     bool acpi_dev_hid_uid_match(struct acpi_device *adev,
          ^~~~~~~~~~~~~~~~~~~~~~
+   drivers/mmc/host/sdhci-acpi.c: In function 'sdhci_acpi_get_slot':
+   drivers/mmc/host/sdhci-acpi.c:655:30: error: passing argument 1 of 'acpi_dev_hid_uid_match' from incompatible pointer type [-Werror=incompatible-pointer-types]
+      if (acpi_dev_hid_uid_match(adev, u->hid, u->uid))
+                                 ^~~~
    In file included from include/linux/acpi.h:32:0,
-                    from drivers//acpi/utils.c:15:
-   include/acpi/acpi_bus.h:78:6: note: previous declaration of 'acpi_dev_hid_uid_match' was here
+                    from drivers/mmc/host/sdhci-acpi.c:22:
+   include/acpi/acpi_bus.h:78:6: note: expected 'struct acpi_device *' but argument is of type 'struct acpi_device *'
     bool acpi_dev_hid_uid_match(struct acpi_device *adev,
          ^~~~~~~~~~~~~~~~~~~~~~
-   In file included from include/linux/linkage.h:7:0,
-                    from include/linux/kernel.h:8,
-                    from drivers//acpi/utils.c:9:
-   drivers//acpi/utils.c:727:15: error: conflicting types for 'acpi_dev_hid_uid_match'
-    EXPORT_SYMBOL(acpi_dev_hid_uid_match);
-                  ^
-   include/linux/export.h:79:21: note: in definition of macro '___EXPORT_SYMBOL'
-     extern typeof(sym) sym;      \
-                        ^~~
-   drivers//acpi/utils.c:727:1: note: in expansion of macro 'EXPORT_SYMBOL'
-    EXPORT_SYMBOL(acpi_dev_hid_uid_match);
-    ^~~~~~~~~~~~~
-   In file included from include/linux/acpi.h:32:0,
-                    from drivers//acpi/utils.c:15:
-   include/acpi/acpi_bus.h:78:6: note: previous declaration of 'acpi_dev_hid_uid_match' was here
-    bool acpi_dev_hid_uid_match(struct acpi_device *adev,
-         ^~~~~~~~~~~~~~~~~~~~~~
---
-   In file included from include/linux/acpi.h:32:0,
-                    from drivers//cpufreq/ia64-acpi-cpufreq.c:24:
->> include/acpi/acpi_bus.h:78:36: warning: 'struct acpi_device' declared inside parameter list will not be visible outside of this definition or declaration
-    bool acpi_dev_hid_uid_match(struct acpi_device *adev,
-                                       ^~~~~~~~~~~
-   drivers//cpufreq/ia64-acpi-cpufreq.c: In function 'processor_set_pstate':
-   <command-line>:0:16: warning: format '%lx' expects argument of type 'long unsigned int', but argument 4 has type 's64 {aka long long int}' [-Wformat=]
-   drivers//cpufreq/ia64-acpi-cpufreq.c:12:21: note: in expansion of macro 'KBUILD_MODNAME'
-    #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
-                        ^~~~~~~~~~~~~~
-   include/linux/dynamic_debug.h:125:15: note: in expansion of macro 'pr_fmt'
-      func(&id, ##__VA_ARGS__);  \
-                  ^~~~~~~~~~~
-   include/linux/dynamic_debug.h:143:2: note: in expansion of macro '__dynamic_func_call'
-     __dynamic_func_call(__UNIQUE_ID(ddebug), fmt, func, ##__VA_ARGS__)
-     ^~~~~~~~~~~~~~~~~~~
-   include/linux/dynamic_debug.h:153:2: note: in expansion of macro '_dynamic_func_call'
-     _dynamic_func_call(fmt, __dynamic_pr_debug,  \
-     ^~~~~~~~~~~~~~~~~~
-   include/linux/printk.h:336:2: note: in expansion of macro 'dynamic_pr_debug'
-     dynamic_pr_debug(fmt, ##__VA_ARGS__)
-     ^~~~~~~~~~~~~~~~
-   drivers//cpufreq/ia64-acpi-cpufreq.c:57:3: note: in expansion of macro 'pr_debug'
-      pr_debug("Failed to set freq to 0x%x, with error 0x%lx\n",
-      ^~~~~~~~
-   drivers//cpufreq/ia64-acpi-cpufreq.c: In function 'processor_get_pstate':
-   <command-line>:0:16: warning: format '%lx' expects argument of type 'long unsigned int', but argument 3 has type 's64 {aka long long int}' [-Wformat=]
-   drivers//cpufreq/ia64-acpi-cpufreq.c:12:21: note: in expansion of macro 'KBUILD_MODNAME'
-    #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
-                        ^~~~~~~~~~~~~~
-   include/linux/dynamic_debug.h:125:15: note: in expansion of macro 'pr_fmt'
-      func(&id, ##__VA_ARGS__);  \
-                  ^~~~~~~~~~~
-   include/linux/dynamic_debug.h:143:2: note: in expansion of macro '__dynamic_func_call'
-     __dynamic_func_call(__UNIQUE_ID(ddebug), fmt, func, ##__VA_ARGS__)
-     ^~~~~~~~~~~~~~~~~~~
-   include/linux/dynamic_debug.h:153:2: note: in expansion of macro '_dynamic_func_call'
-     _dynamic_func_call(fmt, __dynamic_pr_debug,  \
-     ^~~~~~~~~~~~~~~~~~
-   include/linux/printk.h:336:2: note: in expansion of macro 'dynamic_pr_debug'
-     dynamic_pr_debug(fmt, ##__VA_ARGS__)
-     ^~~~~~~~~~~~~~~~
-   drivers//cpufreq/ia64-acpi-cpufreq.c:79:3: note: in expansion of macro 'pr_debug'
-      pr_debug("Failed to get current freq with "
-      ^~~~~~~~
---
-   In file included from include/linux/acpi.h:32:0,
-                    from include/linux/i2c.h:13,
-                    from include/media/dvb_frontend.h:38,
-                    from drivers/media/tuners/mxl5005s.c:66:
->> include/acpi/acpi_bus.h:78:36: warning: 'struct acpi_device' declared inside parameter list will not be visible outside of this definition or declaration
-    bool acpi_dev_hid_uid_match(struct acpi_device *adev,
-                                       ^~~~~~~~~~~
-   drivers/media/tuners/mxl5005s.c: In function 'MXL5005_ControlInit.isra.2':
-   drivers/media/tuners/mxl5005s.c:1660:1: warning: the frame size of 4448 bytes is larger than 2048 bytes [-Wframe-larger-than=]
-    }
-    ^
---
-   In file included from include/linux/acpi.h:32:0,
-                    from include/linux/i2c.h:13,
-                    from include/media/dvb_frontend.h:38,
-                    from drivers//media/tuners/mxl5005s.c:66:
->> include/acpi/acpi_bus.h:78:36: warning: 'struct acpi_device' declared inside parameter list will not be visible outside of this definition or declaration
-    bool acpi_dev_hid_uid_match(struct acpi_device *adev,
-                                       ^~~~~~~~~~~
-   drivers//media/tuners/mxl5005s.c: In function 'MXL5005_ControlInit.isra.2':
-   drivers//media/tuners/mxl5005s.c:1660:1: warning: the frame size of 4448 bytes is larger than 2048 bytes [-Wframe-larger-than=]
-    }
-    ^
+   cc1: some warnings being treated as errors
 
-vim +/acpi_dev_hid_uid_match +713 drivers/acpi/utils.c
+vim +/acpi_dev_hid_uid_match +381 drivers/mmc/host/sdhci-acpi.c
 
-   703	
-   704	/**
-   705	 * acpi_dev_hid_uid_match - Match device by supplied HID and UID
-   706	 * @adev: ACPI device to match.
-   707	 * @hid2: Hardware ID of the device.
-   708	 * @uid2: Unique ID of the device, pass NULL to not check _UID.
-   709	 *
-   710	 * Matches HID and UID in @adev with given @hid2 and @uid2.
-   711	 * Returns true if matches.
-   712	 */
- > 713	bool acpi_dev_hid_uid_match(struct acpi_device *adev,
-   714				    const char *hid2, const char *uid2)
-   715	{
-   716		const char *hid1 = acpi_device_hid(adev);
-   717		const char *uid1 = acpi_device_uid(adev);
-   718	
-   719		if (strcmp(hid1, hid2))
-   720			return false;
-   721	
-   722		if (!uid2)
-   723			return true;
-   724	
-   725		return uid1 && !strcmp(uid1, uid2);
-   726	}
- > 727	EXPORT_SYMBOL(acpi_dev_hid_uid_match);
-   728	
+   374	
+   375	static int intel_probe_slot(struct platform_device *pdev, struct acpi_device *adev)
+   376	{
+   377		struct sdhci_acpi_host *c = platform_get_drvdata(pdev);
+   378		struct intel_host *intel_host = sdhci_acpi_priv(c);
+   379		struct sdhci_host *host = c->host;
+   380	
+ > 381		if (acpi_dev_hid_uid_match(adev, "80860F14", "1") &&
+   382		    sdhci_readl(host, SDHCI_CAPABILITIES) == 0x446cc8b2 &&
+   383		    sdhci_readl(host, SDHCI_CAPABILITIES_1) == 0x00000807)
+   384			host->timeout_clk = 1000; /* 1000 kHz i.e. 1 MHz */
+   385	
+   386		if (acpi_dev_hid_uid_match(adev, "80865ACA", NULL))
+   387			host->mmc_host_ops.get_cd = bxt_get_cd;
+   388	
+   389		intel_dsm_init(intel_host, &pdev->dev, host->mmc);
+   390	
+   391		host->mmc_host_ops.start_signal_voltage_switch =
+   392						intel_start_signal_voltage_switch;
+   393	
+   394		return 0;
+   395	}
+   396	
 
 ---
 0-DAY kernel test infrastructure                Open Source Technology Center
 https://lists.01.org/pipermail/kbuild-all                   Intel Corporation
 
---lsiuphidnm33bsjl
+--6doarigtovadqahv
 Content-Type: application/gzip
 Content-Disposition: attachment; filename=".config.gz"
 Content-Transfer-Encoding: base64
 
-H4sICJ9Fil0AAy5jb25maWcAlDzZktu2su/5CpXzkjzEZzZPcs+teQBBkMIRSdAEqJHmhaWM
+H4sICIdSil0AAy5jb25maWcAlDzZktu2su/5CpXzkjzEZzZPcs+teQBBkMIRSdAEqJHmhaWM
 ZWcqs/hoNEn897cb3LCR8q1ylYfdjSbQ6B2gfvzhxwV5O7487Y4P97vHx2+LL/vn/WF33H9a
 fH543P/vIhaLQqgFi7l6D8TZw/PbP/962F1fLT68v3x/9svh/tfFan943j8u6Mvz54cvbzD6
 4eX5hx9/gH8/AvDpKzA6/HuBg355xPG/fLm/X/yUUvrz4tf3V+/PgJCKIuFpQ2nDZQOYm289
@@ -1286,11 +1149,11 @@ YL/3d5MCGKZ9qkfLIQ50ip+nbslsOE/HGJExDNl5jgpPBOgK4ivtCSzz1CQK5onWxjHXVOlZ
 BxjTRZss7armVzXpJ25GgzRZ55mwEtt2Iv6xLHhQgpFIcjxIXhzzgxAi2fix6JFVRVzD6Z2a
 zzdl43zRKz/28FCl2b2OfzGgP4zlCh8FwEXv8CJssTJYhP8DTLukegtbAwA=
 
---lsiuphidnm33bsjl
+--6doarigtovadqahv
 Content-Type: text/plain; charset="us-ascii"
 MIME-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Content-Disposition: inline
 
 
---lsiuphidnm33bsjl--
+--6doarigtovadqahv--
