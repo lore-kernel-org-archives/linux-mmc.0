@@ -1,7 +1,8 @@
 From: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-Subject: [PATCH v2 6/6] iommu/amd: Switch to use acpi_dev_hid_uid_match()
-Date: Tue, 24 Sep 2019 22:37:39 +0300
-Message-ID: <20190924193739.86133-7-andriy.shevchenko@linux.intel.com>
+Subject: [PATCH v2 2/6] ACPI / utils: Move acpi_dev_get_first_match_dev()
+	under CONFIG_ACPI
+Date: Tue, 24 Sep 2019 22:37:35 +0300
+Message-ID: <20190924193739.86133-3-andriy.shevchenko@linux.intel.com>
 References: <20190924193739.86133-1-andriy.shevchenko@linux.intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -18,66 +19,47 @@ List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
 Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
 Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
 To: Joerg Roedel <joro-zLv9SwRftAIdnm+yROfE0A@public.gmane.org>, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Cc: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, kbuild test robot <lkp-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Since we have a generic helper, drop custom implementation in the driver.
+We have a stub defined for the acpi_dev_get_first_match_dev() in acpi.h
+for the case when CONFIG_ACPI=n.
 
+Moreover, acpi_dev_put(), counterpart function, is already placed under
+CONFIG_ACPI.
+
+Thus, move acpi_dev_get_first_match_dev() under CONFIG_ACPI as well.
+
+Fixes: 817b4d64da03 ("Introduce acpi_dev_get_first_match_dev() helper")
+Reported-by: kbuild test robot <lkp-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 Signed-off-by: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
 ---
- drivers/iommu/amd_iommu.c | 30 +++++-------------------------
- 1 file changed, 5 insertions(+), 25 deletions(-)
+ include/acpi/acpi_bus.h | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
 
-diff --git a/drivers/iommu/amd_iommu.c b/drivers/iommu/amd_iommu.c
-index 61de81965c44..79d38191e502 100644
---- a/drivers/iommu/amd_iommu.c
-+++ b/drivers/iommu/amd_iommu.c
-@@ -125,30 +125,6 @@ static struct lock_class_key reserved_rbtree_key;
-  *
-  ****************************************************************************/
+diff --git a/include/acpi/acpi_bus.h b/include/acpi/acpi_bus.h
+index 175f7b40c585..3f6fddeb7519 100644
+--- a/include/acpi/acpi_bus.h
++++ b/include/acpi/acpi_bus.h
+@@ -78,9 +78,6 @@ acpi_evaluate_dsm_typed(acpi_handle handle, const guid_t *guid, u64 rev,
+ bool acpi_dev_found(const char *hid);
+ bool acpi_dev_present(const char *hid, const char *uid, s64 hrv);
  
--static inline int match_hid_uid(struct device *dev,
--				struct acpihid_map_entry *entry)
--{
--	struct acpi_device *adev = ACPI_COMPANION(dev);
--	const char *hid, *uid;
+-struct acpi_device *
+-acpi_dev_get_first_match_dev(const char *hid, const char *uid, s64 hrv);
 -
--	if (!adev)
--		return -ENODEV;
--
--	hid = acpi_device_hid(adev);
--	uid = acpi_device_uid(adev);
--
--	if (!hid || !(*hid))
--		return -ENODEV;
--
--	if (!uid || !(*uid))
--		return strcmp(hid, entry->hid);
--
--	if (!(*entry->uid))
--		return strcmp(hid, entry->hid);
--
--	return (strcmp(hid, entry->hid) || strcmp(uid, entry->uid));
--}
--
- static inline u16 get_pci_device_id(struct device *dev)
- {
- 	struct pci_dev *pdev = to_pci_dev(dev);
-@@ -159,10 +135,14 @@ static inline u16 get_pci_device_id(struct device *dev)
- static inline int get_acpihid_device_id(struct device *dev,
- 					struct acpihid_map_entry **entry)
- {
-+	struct acpi_device *adev = ACPI_COMPANION(dev);
- 	struct acpihid_map_entry *p;
+ #ifdef CONFIG_ACPI
  
-+	if (!adev)
-+		return -ENODEV;
+ #include <linux/proc_fs.h>
+@@ -683,6 +680,9 @@ static inline bool acpi_device_can_poweroff(struct acpi_device *adev)
+ 		adev->power.states[ACPI_STATE_D3_HOT].flags.explicit_set);
+ }
+ 
++struct acpi_device *
++acpi_dev_get_first_match_dev(const char *hid, const char *uid, s64 hrv);
 +
- 	list_for_each_entry(p, &acpihid_map, list) {
--		if (!match_hid_uid(dev, p)) {
-+		if (acpi_dev_hid_uid_match(adev, p->hid, p->uid)) {
- 			if (entry)
- 				*entry = p;
- 			return p->devid;
+ static inline void acpi_dev_put(struct acpi_device *adev)
+ {
+ 	put_device(&adev->dev);
 -- 
 2.23.0
