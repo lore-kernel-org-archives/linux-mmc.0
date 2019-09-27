@@ -1,18 +1,18 @@
-From: Stefan Wahren <wahrenst@gmx.net>
+From: Linus Walleij <linus.walleij@linaro.org>
 Subject: Re: [PATCH 12/18] pinctrl: bcm2835: Add support for BCM2711 pull-up
  functionality
-Date: Fri, 27 Sep 2019 21:28:39 +0200
-Message-ID: <66dc2cad-673e-0a0b-0aeb-3d62fa2d4ccf@gmx.net>
+Date: Fri, 27 Sep 2019 22:15:01 +0200
+Message-ID: <CACRpkdb9pxCF-WvA0f3rU2cttX1XmQxB=xtOhPAaP+nYoBd_LA@mail.gmail.com>
 References: <1563776607-8368-1-git-send-email-wahrenst@gmx.net>
  <1563776607-8368-3-git-send-email-wahrenst@gmx.net>
  <CACRpkdabfiDbGmAQciAUSThY-KfTsVq3tHz0bBszs2j_ej18Nw@mail.gmail.com>
  <63f17284-5551-9492-9eff-f8a4c003196b@gmx.net>
+ <66dc2cad-673e-0a0b-0aeb-3d62fa2d4ccf@gmx.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <63f17284-5551-9492-9eff-f8a4c003196b@gmx.net>
-Content-Language: en-US
+In-Reply-To: <66dc2cad-673e-0a0b-0aeb-3d62fa2d4ccf@gmx.net>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -22,53 +22,59 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
 Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
 Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: Mark Rutland <mark.rutland@arm.com>, Ulf Hansson <ulf.hansson@linaro.org>, Matthias Brugger <mbrugger@suse.com>, Scott Branden <sbranden@broadcom.com>, "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>, Stephen Boyd <sboyd@kernel.org>, Ray Jui <rjui@broadcom.com>, Michael Turquette <mturquette@baylibre.com>, linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Rob Herring <robh+dt@kernel.org>, Eric Anholt <eric@anholt.net>, Florian Fainelli <f.fainelli@gmail.com>, bcm-kernel-feedback-list <bcm-kernel-feedback-list@broadcom.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Nicolas Saenz Julienne <nsaenzjulienne@suse.de>, linux-rpi-kernel <linux-rpi-kernel@lists.infradead.org>
+To: Stefan Wahren <wahrenst@gmx.net>
+Cc: Mark Rutland <mark.rutland@arm.com>, Ulf Hansson <ulf.hansson@linaro.org>, Matthias Brugger <mbrugger@suse.com>, Scott Branden <sbranden@broadcom.com>, Eric Anholt <eric@anholt.net>, Stephen Boyd <sboyd@kernel.org>, Ray Jui <rjui@broadcom.com>, Michael Turquette <mturquette@baylibre.com>, linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, bcm-kernel-feedback-list <bcm-kernel-feedback-list@broadcom.com>, Nicolas Saenz Julienne <nsaenzjulienne@suse.de>, Florian Fainelli <f.fainelli@gmail.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, linux-rpi-kernel <linux-rpi-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-SGkgTGludXMsCgpBbSAxMS4wOC4xOSB1bSAyMjoxNSBzY2hyaWViIFN0ZWZhbiBXYWhyZW46Cj4g
-QW0gMDUuMDguMTkgdW0gMTE6Mzggc2NocmllYiBMaW51cyBXYWxsZWlqOgo+PiBPbiBNb24sIEp1
-bCAyMiwgMjAxOSBhdCA4OjI0IEFNIFN0ZWZhbiBXYWhyZW4gPHdhaHJlbnN0QGdteC5uZXQ+IHdy
-b3RlOgo+Pgo+Pj4gVGhlIEJDTTI3MTEgaGFzIGEgbmV3IHdheSBvZiBzZWxlY3RpbmcgdGhlIHB1
-bGwtdXAvcHVsbC1kb3duIHNldHRpbmcKPj4+IGZvciBhIEdQSU8gcGluLiBUaGUgcmVnaXN0ZXJz
-IHVzZWQgZm9yIHRoZSBCQ00yODM1LCBHUF9QVUQgYW5kCj4+PiBHUF9QVURDTEtuMCwgYXJlIG5v
-IGxvbmdlciBjb25uZWN0ZWQuIEEgbmV3IHNldCBvZiByZWdpc3RlcnMsCj4+PiBHUF9HUElPX1BV
-UF9QRE5fQ05UUkxfUkVHeCBtdXN0IGJlIHVzZWQuIFRoaXMgY29tbWl0IHdpbGwgYWRkCj4+PiBh
-IG5ldyBjb21wYXRpYmxlIHN0cmluZyAiYnJjbSxiY20yNzExLWdwaW8iIGFuZCB0aGUga2VybmVs
-Cj4+PiBkcml2ZXIgd2lsbCB1c2UgaXQgdG8gc2VsZWN0IHdoaWNoIG1ldGhvZCBpcyB1c2VkIHRv
-IHNlbGVjdAo+Pj4gcHVsbC11cC9wdWxsLWRvd24uCj4+Pgo+Pj4gVGhpcyBwYXRjaCBiYXNlZCBv
-biBhIHBhdGNoIGJ5IEFsIENvb3BlciB3aGljaCB3YXMgaW50ZW5kZWQgZm9yIHRoZQo+Pj4gQkNN
-NzIxMS4gVGhpcyBpcyBhIGJ1Z2ZpeGVkIGFuZCBpbXByb3ZlZCB2ZXJzaW9uLgo+Pj4KPj4+IFNp
-Z25lZC1vZmYtYnk6IFN0ZWZhbiBXYWhyZW4gPHdhaHJlbnN0QGdteC5uZXQ+Cj4+IFBhdGNoIGFw
-cGxpZWQuCj4gVGhhbmtzCj4+IEkgdGhpbmsgSSBjb21wbGFpbmVkIGFib3V0IHNvbWUgb3RoZXIg
-dmVyc2lvbiBvZiB0aGlzIHBhdGNoLCB0aGlzIG9uZQo+PiBsb29rcyBlbnRpcmVseSBhY2NlcHRh
-YmxlLgo+Pgo+PiBDYW4gd2UgZ2V0IHJpZCBvZiBjdXN0b20gcHVsbCBzZXR0aW5ncyBldGMgZnJv
-bSB0aGUgdXBzdHJlYW0gZGV2aWNlCj4+IHRyZWVzIHNvIHdlIGRvbid0IHNldCBiYWQgZXhhbXBs
-ZXM/IEkgaGF2ZSBhIHN0cm9uZyB1cmdlIHRvCj4+IHRocm93IGluIGEgcHJfd2FybigpIGFib3V0
-IGFueSB1c2Ugb2YgaXQuCj4gSXJvbmljYWxseSwgbXkgcHJlLVJGQyB2ZXJzaW9uIHRyaWVkIHRv
-IGNvbnZlcnQgYWxsIEJDTTI4MzUgcGlubXV4Cj4gc2V0dGluZ3MgdG8gZ2VuZXJpYyBvbmVzLiBV
-bmZvcnR1bmF0ZWx5IGl0IHNlZW1zIHRoYXQgaSBtYWRlIGEgbWlzdGFrZSwKPiBiZWNhdXNlIGl0
-IGRpZG4ndCB3b3JrIGFzIGV4cGVjdGVkLiBTaW5jZSB3ZSBzdHVtcGxlZCBhYm92ZSBtb3JlIGFu
-ZAo+IG1vcmUgb3RoZXIgaXNzdWVzIChub3QgcmVsZXZhbnQgdG8gcGluY3RybCkgZHVyaW5nIHVw
-c3RyZWFtIHJldmlldywgaQo+IGRlY2lkZWQgdG8gc3RhcnQgd2l0aCBsZWdhY3kgcHVsbC11cCBz
-dXBwb3J0LCBzbyB3ZSBjYW4gZml4IHRoaXMgbGF0ZXIKPiBpbiB0aGUgZGV2aWNldHJlZSBmb3Ig
-Ym90aCBwbGF0Zm9ybXMgKGN1cnJlbnRseSBCQ00yNzExIHVzZXMgbW9zdCBvZiB0aGUKPiBvbGQg
-QkNNMjgzNSBwaW5tdXhlcyBpbmNsdWRpbmcgdGhlIGxlZ2FjeSBzdHVmZikuIFNvIHllcyBteSBw
-bGFuIGlzIHRvCj4gZml4IHRoaXMgc29vbi4KCnRvZGF5IGkgaGFkIHRoZSB0aW1lIHRvIHRyeSB0
-aGlzIG91dC4gSW5zdGVhZCBvZiB0aGUgZm9sbG93aW5nOgoKwqDCoMKgIGkyYzBfZ3BpbzA6IGky
-YzBfZ3BpbzAgewrCoMKgwqAgwqDCoMKgIGJyY20scGlucyA9IDwwIDE+OwrCoMKgwqAgwqDCoMKg
-IGJyY20sZnVuY3Rpb24gPSA8QkNNMjgzNV9GU0VMX0FMVDA+OwrCoMKgwqAgwqDCoMKgIGJyY20s
-cHVsbCA9IDxCQ00yODM1X1BVRF9VUArCoMKgwqAgwqDCoMKgIMKgwqDCoCDCoMKgwqDCoCBCQ00y
-ODM1X1BVRF9PRkY+OwrCoMKgwqAgfQoKeW91IHdhbnQgdGhpcz8KCsKgwqDCoCBpMmMwX2dwaW8w
-OiBpMmMwX2dwaW8wIHsKwqDCoMKgIMKgwqDCoCBwaW4tc2RhIHsKwqDCoMKgIMKgwqDCoCDCoMKg
-wqAgZnVuY3Rpb24gPSAiYWx0MCI7CsKgwqDCoCDCoMKgwqAgwqDCoMKgIHBpbnMgPSAiZ3BpbzAi
-OwrCoMKgwqAgwqDCoMKgIMKgwqDCoCBiaWFzLXB1bGwtdXA7CsKgwqDCoCDCoMKgwqAgfTsKwqDC
-oMKgIMKgwqDCoCBwaW4tc2NsIHsKwqDCoMKgIMKgwqDCoCDCoMKgwqAgZnVuY3Rpb24gPSAiYWx0
-MCI7CsKgwqDCoCDCoMKgwqAgwqDCoMKgIHBpbnMgPSAiZ3BpbzEiOwrCoMKgwqAgwqDCoMKgIMKg
-wqDCoCBiaWFzLWRpc2FibGU7CsKgwqDCoCDCoMKgwqAgfTsKwqDCoMKgIH07CgpVbmZvcnR1bmF0
-ZWx5IGkgZG9uJ3Qga25vdyBVLUJvb3QgaXMgaGFuZGxlIHRoZSBCQ00yODM1IHNwZWNpZmljIHBp
-bmN0cmwKZnVuY3Rpb25zLgoKPgo+IFN0ZWZhbgo+Cj4+IFlvdXJzLAo+PiBMaW51cyBXYWxsZWlq
-CgpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpsaW51eC1h
-cm0ta2VybmVsIG1haWxpbmcgbGlzdApsaW51eC1hcm0ta2VybmVsQGxpc3RzLmluZnJhZGVhZC5v
-cmcKaHR0cDovL2xpc3RzLmluZnJhZGVhZC5vcmcvbWFpbG1hbi9saXN0aW5mby9saW51eC1hcm0t
-a2VybmVsCg==
+On Fri, Sep 27, 2019 at 9:29 PM Stefan Wahren <wahrenst@gmx.net> wrote:
+
+> today i had the time to try this out. Instead of the following:
+>
+>     i2c0_gpio0: i2c0_gpio0 {
+>         brcm,pins = <0 1>;
+>         brcm,function = <BCM2835_FSEL_ALT0>;
+>         brcm,pull = <BCM2835_PUD_UP
+>                  BCM2835_PUD_OFF>;
+>     }
+>
+> you want this?
+>
+>     i2c0_gpio0: i2c0_gpio0 {
+>         pin-sda {
+>             function = "alt0";
+>             pins = "gpio0";
+>             bias-pull-up;
+>         };
+>         pin-scl {
+>             function = "alt0";
+>             pins = "gpio1";
+>             bias-disable;
+>         };
+>     };
+
+Yes that looks much better. In my opinion.
+
+I understand that it puts some developers off because of being
+more lines or excessively verbose, so to be on the clear,
+verboseness in itself is not the goal.
+
+The goal is universal
+portability: i.e. it should not matter one bit whether I work
+on an 2001 Intel StrongARM SoC, a 2019 Broadcom SoC
+or a 2011 ST-Ericsson SoC: I will understand what bias-disable;
+or bias-pull-up; means, which lowers the threshold to
+maintenance.
+
+Opaque macros, however helpfully named, still creates
+a higher cognitive resistance and stresses developers.
+
+> Unfortunately i don't know U-Boot is handle the BCM2835 specific pinctrl
+> functions.
+
+I think it would be nice if boot loaders avoid to forking the
+standards, but I suppose it will invariably happen.
+Just keep in mind the IETF motto "rough consensus and
+running code".
+
+Yours,
+Linus Walleij
