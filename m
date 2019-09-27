@@ -1,56 +1,74 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH V9 5/5] mmc: host: sdhci-pci: Add Genesys Logic GL975x support
-Date: Fri, 27 Sep 2019 20:49:31 +0200
-Message-ID: <CAPDyKFqTtGAygYPQ-qJuBaU2YU8CU-OgZJyWSmAQYYtq5xnpvg@mail.gmail.com>
-References: <cover.1568184581.git.benchuanggli@gmail.com> <2d08c47490a349d7ee5682749f68604adc62f19f.1568184581.git.benchuanggli@gmail.com>
- <20190918104734.GA3320@people.danlj.org> <781dc676-4903-5ab2-84d1-b5357c11dccd@intel.com>
- <20190923213925.GA19247@people.danlj.org>
+From: Stefan Wahren <wahrenst@gmx.net>
+Subject: Re: [PATCH 12/18] pinctrl: bcm2835: Add support for BCM2711 pull-up
+ functionality
+Date: Fri, 27 Sep 2019 21:28:39 +0200
+Message-ID: <66dc2cad-673e-0a0b-0aeb-3d62fa2d4ccf@gmx.net>
+References: <1563776607-8368-1-git-send-email-wahrenst@gmx.net>
+ <1563776607-8368-3-git-send-email-wahrenst@gmx.net>
+ <CACRpkdabfiDbGmAQciAUSThY-KfTsVq3tHz0bBszs2j_ej18Nw@mail.gmail.com>
+ <63f17284-5551-9492-9eff-f8a4c003196b@gmx.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190923213925.GA19247@people.danlj.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: "Michael K. Johnson" <johnsonm@danlj.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "ben.chuang@genesyslogic.com.tw Ben Chuang" <benchuanggli@gmail.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <63f17284-5551-9492-9eff-f8a4c003196b@gmx.net>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: Mark Rutland <mark.rutland@arm.com>, Ulf Hansson <ulf.hansson@linaro.org>, Matthias Brugger <mbrugger@suse.com>, Scott Branden <sbranden@broadcom.com>, "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>, Stephen Boyd <sboyd@kernel.org>, Ray Jui <rjui@broadcom.com>, Michael Turquette <mturquette@baylibre.com>, linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Rob Herring <robh+dt@kernel.org>, Eric Anholt <eric@anholt.net>, Florian Fainelli <f.fainelli@gmail.com>, bcm-kernel-feedback-list <bcm-kernel-feedback-list@broadcom.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Nicolas Saenz Julienne <nsaenzjulienne@suse.de>, linux-rpi-kernel <linux-rpi-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, 23 Sep 2019 at 23:39, Michael K. Johnson <johnsonm@danlj.org> wrote:
->
-> On Wed, Sep 18, 2019 at 02:07:51PM +0300, Adrian Hunter wrote:
-> > On 18/09/19 1:47 PM, Michael K. Johnson wrote:
-> > > I see that the first four patches made it into Linus's kernel
-> > > yesterday. Is there any chance of this final patch that actually
-> > > enables the hardware making it into another pull request still
-> > > intended for 5.4?  Waiting on additional acked-by on Ben's work
-> > > addressing all the review comments?
-> ...
-> > > On Wed, Sep 11, 2019 at 03:23:44PM +0800, Ben Chuang wrote:
-> > >> From: Ben Chuang <ben.chuang@genesyslogic.com.tw>
-> > >>
-> > >> Add support for the GL9750 and GL9755 chipsets.
-> > >>
-> > >> Enable v4 mode and wait 5ms after set 1.8V signal enable for GL9750/
-> > >> GL9755. Fix the value of SDHCI_MAX_CURRENT register and use the vendor
-> > >> tuning flow for GL9750.
-> > >
-> >
-> > It is OK by me:
-> >
-> > Acked-by: Adrian Hunter <adrian.hunter@intel.com>
->
-> Ulf,
->
-> Sorry to be a bother... Is anything remaining for this work to make
-> it into a second PR for 5.4 before the merge window closes?
->
-> It would be really convenient for the microsd readers in
-> current-generation thinkpads (for instance) to have hardware support out
-> of the box without having to wait another kernel release cycle, if
-> there's nothing otherwise remaining to change.  I confirmed that
-> it currently applies cleanly on top of Linus's kernel.
-
-I have applied this for fixes, so it will go in for 5.4, but perhaps I
-need to defer my PR to after rc1 as I am still on the road.
-
-Kind regards
-Uffe
+SGkgTGludXMsCgpBbSAxMS4wOC4xOSB1bSAyMjoxNSBzY2hyaWViIFN0ZWZhbiBXYWhyZW46Cj4g
+QW0gMDUuMDguMTkgdW0gMTE6Mzggc2NocmllYiBMaW51cyBXYWxsZWlqOgo+PiBPbiBNb24sIEp1
+bCAyMiwgMjAxOSBhdCA4OjI0IEFNIFN0ZWZhbiBXYWhyZW4gPHdhaHJlbnN0QGdteC5uZXQ+IHdy
+b3RlOgo+Pgo+Pj4gVGhlIEJDTTI3MTEgaGFzIGEgbmV3IHdheSBvZiBzZWxlY3RpbmcgdGhlIHB1
+bGwtdXAvcHVsbC1kb3duIHNldHRpbmcKPj4+IGZvciBhIEdQSU8gcGluLiBUaGUgcmVnaXN0ZXJz
+IHVzZWQgZm9yIHRoZSBCQ00yODM1LCBHUF9QVUQgYW5kCj4+PiBHUF9QVURDTEtuMCwgYXJlIG5v
+IGxvbmdlciBjb25uZWN0ZWQuIEEgbmV3IHNldCBvZiByZWdpc3RlcnMsCj4+PiBHUF9HUElPX1BV
+UF9QRE5fQ05UUkxfUkVHeCBtdXN0IGJlIHVzZWQuIFRoaXMgY29tbWl0IHdpbGwgYWRkCj4+PiBh
+IG5ldyBjb21wYXRpYmxlIHN0cmluZyAiYnJjbSxiY20yNzExLWdwaW8iIGFuZCB0aGUga2VybmVs
+Cj4+PiBkcml2ZXIgd2lsbCB1c2UgaXQgdG8gc2VsZWN0IHdoaWNoIG1ldGhvZCBpcyB1c2VkIHRv
+IHNlbGVjdAo+Pj4gcHVsbC11cC9wdWxsLWRvd24uCj4+Pgo+Pj4gVGhpcyBwYXRjaCBiYXNlZCBv
+biBhIHBhdGNoIGJ5IEFsIENvb3BlciB3aGljaCB3YXMgaW50ZW5kZWQgZm9yIHRoZQo+Pj4gQkNN
+NzIxMS4gVGhpcyBpcyBhIGJ1Z2ZpeGVkIGFuZCBpbXByb3ZlZCB2ZXJzaW9uLgo+Pj4KPj4+IFNp
+Z25lZC1vZmYtYnk6IFN0ZWZhbiBXYWhyZW4gPHdhaHJlbnN0QGdteC5uZXQ+Cj4+IFBhdGNoIGFw
+cGxpZWQuCj4gVGhhbmtzCj4+IEkgdGhpbmsgSSBjb21wbGFpbmVkIGFib3V0IHNvbWUgb3RoZXIg
+dmVyc2lvbiBvZiB0aGlzIHBhdGNoLCB0aGlzIG9uZQo+PiBsb29rcyBlbnRpcmVseSBhY2NlcHRh
+YmxlLgo+Pgo+PiBDYW4gd2UgZ2V0IHJpZCBvZiBjdXN0b20gcHVsbCBzZXR0aW5ncyBldGMgZnJv
+bSB0aGUgdXBzdHJlYW0gZGV2aWNlCj4+IHRyZWVzIHNvIHdlIGRvbid0IHNldCBiYWQgZXhhbXBs
+ZXM/IEkgaGF2ZSBhIHN0cm9uZyB1cmdlIHRvCj4+IHRocm93IGluIGEgcHJfd2FybigpIGFib3V0
+IGFueSB1c2Ugb2YgaXQuCj4gSXJvbmljYWxseSwgbXkgcHJlLVJGQyB2ZXJzaW9uIHRyaWVkIHRv
+IGNvbnZlcnQgYWxsIEJDTTI4MzUgcGlubXV4Cj4gc2V0dGluZ3MgdG8gZ2VuZXJpYyBvbmVzLiBV
+bmZvcnR1bmF0ZWx5IGl0IHNlZW1zIHRoYXQgaSBtYWRlIGEgbWlzdGFrZSwKPiBiZWNhdXNlIGl0
+IGRpZG4ndCB3b3JrIGFzIGV4cGVjdGVkLiBTaW5jZSB3ZSBzdHVtcGxlZCBhYm92ZSBtb3JlIGFu
+ZAo+IG1vcmUgb3RoZXIgaXNzdWVzIChub3QgcmVsZXZhbnQgdG8gcGluY3RybCkgZHVyaW5nIHVw
+c3RyZWFtIHJldmlldywgaQo+IGRlY2lkZWQgdG8gc3RhcnQgd2l0aCBsZWdhY3kgcHVsbC11cCBz
+dXBwb3J0LCBzbyB3ZSBjYW4gZml4IHRoaXMgbGF0ZXIKPiBpbiB0aGUgZGV2aWNldHJlZSBmb3Ig
+Ym90aCBwbGF0Zm9ybXMgKGN1cnJlbnRseSBCQ00yNzExIHVzZXMgbW9zdCBvZiB0aGUKPiBvbGQg
+QkNNMjgzNSBwaW5tdXhlcyBpbmNsdWRpbmcgdGhlIGxlZ2FjeSBzdHVmZikuIFNvIHllcyBteSBw
+bGFuIGlzIHRvCj4gZml4IHRoaXMgc29vbi4KCnRvZGF5IGkgaGFkIHRoZSB0aW1lIHRvIHRyeSB0
+aGlzIG91dC4gSW5zdGVhZCBvZiB0aGUgZm9sbG93aW5nOgoKwqDCoMKgIGkyYzBfZ3BpbzA6IGky
+YzBfZ3BpbzAgewrCoMKgwqAgwqDCoMKgIGJyY20scGlucyA9IDwwIDE+OwrCoMKgwqAgwqDCoMKg
+IGJyY20sZnVuY3Rpb24gPSA8QkNNMjgzNV9GU0VMX0FMVDA+OwrCoMKgwqAgwqDCoMKgIGJyY20s
+cHVsbCA9IDxCQ00yODM1X1BVRF9VUArCoMKgwqAgwqDCoMKgIMKgwqDCoCDCoMKgwqDCoCBCQ00y
+ODM1X1BVRF9PRkY+OwrCoMKgwqAgfQoKeW91IHdhbnQgdGhpcz8KCsKgwqDCoCBpMmMwX2dwaW8w
+OiBpMmMwX2dwaW8wIHsKwqDCoMKgIMKgwqDCoCBwaW4tc2RhIHsKwqDCoMKgIMKgwqDCoCDCoMKg
+wqAgZnVuY3Rpb24gPSAiYWx0MCI7CsKgwqDCoCDCoMKgwqAgwqDCoMKgIHBpbnMgPSAiZ3BpbzAi
+OwrCoMKgwqAgwqDCoMKgIMKgwqDCoCBiaWFzLXB1bGwtdXA7CsKgwqDCoCDCoMKgwqAgfTsKwqDC
+oMKgIMKgwqDCoCBwaW4tc2NsIHsKwqDCoMKgIMKgwqDCoCDCoMKgwqAgZnVuY3Rpb24gPSAiYWx0
+MCI7CsKgwqDCoCDCoMKgwqAgwqDCoMKgIHBpbnMgPSAiZ3BpbzEiOwrCoMKgwqAgwqDCoMKgIMKg
+wqDCoCBiaWFzLWRpc2FibGU7CsKgwqDCoCDCoMKgwqAgfTsKwqDCoMKgIH07CgpVbmZvcnR1bmF0
+ZWx5IGkgZG9uJ3Qga25vdyBVLUJvb3QgaXMgaGFuZGxlIHRoZSBCQ00yODM1IHNwZWNpZmljIHBp
+bmN0cmwKZnVuY3Rpb25zLgoKPgo+IFN0ZWZhbgo+Cj4+IFlvdXJzLAo+PiBMaW51cyBXYWxsZWlq
+CgpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpsaW51eC1h
+cm0ta2VybmVsIG1haWxpbmcgbGlzdApsaW51eC1hcm0ta2VybmVsQGxpc3RzLmluZnJhZGVhZC5v
+cmcKaHR0cDovL2xpc3RzLmluZnJhZGVhZC5vcmcvbWFpbG1hbi9saXN0aW5mby9saW51eC1hcm0t
+a2VybmVsCg==
