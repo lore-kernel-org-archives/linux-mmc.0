@@ -1,118 +1,56 @@
-From: Baolin Wang <baolin.wang@linaro.org>
-Subject: Re: [PATCH v3 0/3] Add MMC software queue support
-Date: Fri, 27 Sep 2019 17:33:03 +0800
-Message-ID: <CAMz4kuLGUybpYfESCerYo3DuzhK+WjjbuZ7XwCyeh=S7vxBh9A@mail.gmail.com>
-References: <cover.1568864712.git.baolin.wang@linaro.org> <CAMz4kuKFYCcY_Wh4mntwoSNgk5=QQvkV7zC-RpAWgdJpM2-4HA@mail.gmail.com>
- <f6f147df-510b-f1ec-0745-a9c7eed67b84@intel.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH V9 5/5] mmc: host: sdhci-pci: Add Genesys Logic GL975x support
+Date: Fri, 27 Sep 2019 20:49:31 +0200
+Message-ID: <CAPDyKFqTtGAygYPQ-qJuBaU2YU8CU-OgZJyWSmAQYYtq5xnpvg@mail.gmail.com>
+References: <cover.1568184581.git.benchuanggli@gmail.com> <2d08c47490a349d7ee5682749f68604adc62f19f.1568184581.git.benchuanggli@gmail.com>
+ <20190918104734.GA3320@people.danlj.org> <781dc676-4903-5ab2-84d1-b5357c11dccd@intel.com>
+ <20190923213925.GA19247@people.danlj.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <f6f147df-510b-f1ec-0745-a9c7eed67b84@intel.com>
+In-Reply-To: <20190923213925.GA19247@people.danlj.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, asutoshd@codeaurora.org, Orson Zhai <orsonzhai@gmail.com>, Chunyan Zhang <zhang.lyra@gmail.com>, Arnd Bergmann <arnd@arndb.de>, Linus Walleij <linus.walleij@linaro.org>, Vincent Guittot <vincent.guittot@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>
+To: "Michael K. Johnson" <johnsonm@danlj.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "ben.chuang@genesyslogic.com.tw Ben Chuang" <benchuanggli@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, 26 Sep 2019 at 20:08, Adrian Hunter <adrian.hunter@intel.com> wrote:
+On Mon, 23 Sep 2019 at 23:39, Michael K. Johnson <johnsonm@danlj.org> wrote:
 >
-> On 26/09/19 12:43 PM, Baolin Wang wrote:
-> > Hi Adrian and Ulf,
+> On Wed, Sep 18, 2019 at 02:07:51PM +0300, Adrian Hunter wrote:
+> > On 18/09/19 1:47 PM, Michael K. Johnson wrote:
+> > > I see that the first four patches made it into Linus's kernel
+> > > yesterday. Is there any chance of this final patch that actually
+> > > enables the hardware making it into another pull request still
+> > > intended for 5.4?  Waiting on additional acked-by on Ben's work
+> > > addressing all the review comments?
+> ...
+> > > On Wed, Sep 11, 2019 at 03:23:44PM +0800, Ben Chuang wrote:
+> > >> From: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+> > >>
+> > >> Add support for the GL9750 and GL9755 chipsets.
+> > >>
+> > >> Enable v4 mode and wait 5ms after set 1.8V signal enable for GL9750/
+> > >> GL9755. Fix the value of SDHCI_MAX_CURRENT register and use the vendor
+> > >> tuning flow for GL9750.
+> > >
 > >
-> > On Thu, 19 Sep 2019 at 13:59, Baolin Wang <baolin.wang@linaro.org> wrote:
-> >>
-> >> Hi All,
-> >>
-> >> Now the MMC read/write stack will always wait for previous request is
-> >> completed by mmc_blk_rw_wait(), before sending a new request to hardware,
-> >> or queue a work to complete request, that will bring context switching
-> >> overhead, especially for high I/O per second rates, to affect the IO
-> >> performance.
-> >>
-> >> Thus this patch set will introduce the MMC software command queue support
-> >> based on command queue engine's interfaces, and set the queue depth as 2,
-> >> that means we do not need wait for previous request is completed and can
-> >> queue 2 requests in flight. It is enough to let the irq handler always
-> >> trigger the next request without a context switch and then ask the blk_mq
-> >> layer for the next one to get queued, as well as avoiding a long latency.
-> >>
-> >> Moreover we can expand the MMC software queue interface to support
-> >> MMC packed request or packed command instead of adding new interfaces,
-> >> according to previosus discussion.
-> >>
-> >> Below are some comparison data with fio tool. The fio command I used
-> >> is like below with changing the '--rw' parameter and enabling the direct
-> >> IO flag to measure the actual hardware transfer speed in 4K block size.
-> >>
-> >> ./fio --filename=/dev/mmcblk0p30 --direct=1 --iodepth=20 --rw=read --bs=4K --size=512M --group_reporting --numjobs=20 --name=test_read
-> >>
-> >> My eMMC card working at HS400 Enhanced strobe mode:
-> >> [    2.229856] mmc0: new HS400 Enhanced strobe MMC card at address 0001
-> >> [    2.237566] mmcblk0: mmc0:0001 HBG4a2 29.1 GiB
-> >> [    2.242621] mmcblk0boot0: mmc0:0001 HBG4a2 partition 1 4.00 MiB
-> >> [    2.249110] mmcblk0boot1: mmc0:0001 HBG4a2 partition 2 4.00 MiB
-> >> [    2.255307] mmcblk0rpmb: mmc0:0001 HBG4a2 partition 3 4.00 MiB, chardev (248:0)
-> >>
-> >> 1. Without MMC software queue
-> >> I tested 3 times for each case and output a average speed.
-> >>
-> >> 1) Sequential read:
-> >> Speed: 28.9MiB/s, 26.4MiB/s, 30.9MiB/s
-> >> Average speed: 28.7MiB/s
-> >>
-> >> 2) Random read:
-> >> Speed: 18.2MiB/s, 8.9MiB/s, 15.8MiB/s
-> >> Average speed: 14.3MiB/s
-> >>
-> >> 3) Sequential write:
-> >> Speed: 21.1MiB/s, 27.9MiB/s, 25MiB/s
-> >> Average speed: 24.7MiB/s
-> >>
-> >> 4) Random write:
-> >> Speed: 21.5MiB/s, 18.1MiB/s, 18.1MiB/s
-> >> Average speed: 19.2MiB/s
-> >>
-> >> 2. With MMC software queue
-> >> I tested 3 times for each case and output a average speed.
-> >>
-> >> 1) Sequential read:
-> >> Speed: 44.1MiB/s, 42.3MiB/s, 44.4MiB/s
-> >> Average speed: 43.6MiB/s
-> >>
-> >> 2) Random read:
-> >> Speed: 30.6MiB/s, 30.9MiB/s, 30.5MiB/s
-> >> Average speed: 30.6MiB/s
-> >>
-> >> 3) Sequential write:
-> >> Speed: 44.1MiB/s, 45.9MiB/s, 44.2MiB/s
-> >> Average speed: 44.7MiB/s
-> >>
-> >> 4) Random write:
-> >> Speed: 45.1MiB/s, 43.3MiB/s, 42.4MiB/s
-> >> Average speed: 43.6MiB/s
-> >>
-> >> Form above data, we can see the MMC software queue can help to improve the
-> >> performance obviously.
-> >>
-> >> Any comments are welcome. Thanks a lot.
-> >>
-> >> Changes from v2:
-> >>  - Remove reference to 'struct cqhci_host' and 'struct cqhci_slot',
-> >>  instead adding 'struct sqhci_host', which is only used by software queue.
-> >>
-> >> Changes from v1:
-> >>  - Add request_done ops for sdhci_ops.
-> >>  - Replace virtual command queue with software queue for functions and
-> >>  variables.
-> >>  - Rename the software queue file and add sqhci.h header file.
+> > It is OK by me:
 > >
-> > Do you have any comments for this patch set except the random config
-> > building issue that will be fixed in the next version? Thanks.
+> > Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 >
-> Pedantically, swhci is not a host controller interface, so the name still
-> seems inappropriate. Otherwise I haven't had time to look at it, sorry.
+> Ulf,
+>
+> Sorry to be a bother... Is anything remaining for this work to make
+> it into a second PR for 5.4 before the merge window closes?
+>
+> It would be really convenient for the microsd readers in
+> current-generation thinkpads (for instance) to have hardware support out
+> of the box without having to wait another kernel release cycle, if
+> there's nothing otherwise remaining to change.  I confirmed that
+> it currently applies cleanly on top of Linus's kernel.
 
-OK. I will talk with Ulf to think about a good name. Thanks.
+I have applied this for fixes, so it will go in for 5.4, but perhaps I
+need to defer my PR to after rc1 as I am still on the road.
 
--- 
-Baolin Wang
-Best Regards
+Kind regards
+Uffe
