@@ -1,138 +1,78 @@
-From: ppvk@codeaurora.org
-Subject: Re: [RFC 2/2] dt-bindings: mmc: sdhci-msm: Add Bus BW vote supported
- strings
-Date: Mon, 30 Sep 2019 20:02:19 +0530
-Message-ID: <695802ae255fe40ab9ca7750e0bbed91@codeaurora.org>
-References: <1567774037-2344-1-git-send-email-ppvk@codeaurora.org>
- <1567774037-2344-3-git-send-email-ppvk@codeaurora.org>
- <5d7ba95c.1c69fb81.edf8e.6556@mx.google.com>
+From: Rob Herring <robh@kernel.org>
+Subject: Re: [PATCH 1/3] dt-bindings: sdhci-of-at91: new compatible string
+ and update properties
+Date: Mon, 30 Sep 2019 09:56:13 -0500
+Message-ID: <20190930145613.GA11254@bogus>
+References: <20190912200908.31318-1-ludovic.desroches@microchip.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII;
- format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <5d7ba95c.1c69fb81.edf8e.6556@mx.google.com>
+Content-Disposition: inline
+In-Reply-To: <20190912200908.31318-1-ludovic.desroches@microchip.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Rob Herring <robh@kernel.org>
-Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org, asutoshd@codeaurora.org, vbadigan@codeaurora.org, stummala@codeaurora.org, sayalil@codeaurora.org, rampraka@codeaurora.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org, Mark Rutland <mark.rutland@arm.com>
+To: Ludovic Desroches <ludovic.desroches@microchip.com>
+Cc: linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, ulf.hansson@linaro.org, nicolas.ferre@microchip.com, adrian.hunter@intel.com, linux-kernel@vger.kernel.org, mark.rutland@arm.com, claudiu.beznea@microchip.com
 List-Id: linux-mmc@vger.kernel.org
 
-On 2019-09-13 20:06, Rob Herring wrote:
-> On Fri, Sep 06, 2019 at 06:17:17PM +0530, Pradeep P V K wrote:
->> Add Bus bandwidth voting supported strings for qcom-sdhci controller.
+On Thu, Sep 12, 2019 at 10:09:06PM +0200, Ludovic Desroches wrote:
+> There is a new compatible string for the SAM9X60 sdhci device. It involves
+> an update of the properties about the clocks stuff.
 > 
-> What is bus bandwidth voting?
+> Signed-off-by: Ludovic Desroches <ludovic.desroches@microchip.com>
+> ---
+>  .../devicetree/bindings/mmc/sdhci-atmel.txt   | 25 ++++++++++++++++---
+>  1 file changed, 22 insertions(+), 3 deletions(-)
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-atmel.txt b/Documentation/devicetree/bindings/mmc/sdhci-atmel.txt
+> index 1b662d7171a0..364ceea330b6 100644
+> --- a/Documentation/devicetree/bindings/mmc/sdhci-atmel.txt
+> +++ b/Documentation/devicetree/bindings/mmc/sdhci-atmel.txt
+> @@ -5,12 +5,19 @@ Documentation/devicetree/bindings/mmc/mmc.txt and the properties used by the
+>  sdhci-of-at91 driver.
+>  
+>  Required properties:
+> -- compatible:		Must be "atmel,sama5d2-sdhci".
+> +- compatible:		Must be "atmel,sama5d2-sdhci" or "microchip,sam9x60-sdhci".
+>  - clocks:		Phandlers to the clocks.
+> -- clock-names:		Must be "hclock", "multclk", "baseclk";
+> +- clock-names:		Must be "hclock", "multclk", "baseclk" for
+> +			"atmel,sama5d2-sdhci".
+> +			Must be "hclock", "multclk" for "microchip,sam9x60-sdhci".
+>  
+> +Optional properties:
+> +- assigned-clocks:	The same with "multclk".
+> +- assigned-clock-rates	The rate of "multclk" in order to not rely on the
+> +			gck configuration set by previous components.
+>  
+> -Example:
+> +
+> +Examples:
+>  
+>  sdmmc0: sdio-host@a0000000 {
+>  	compatible = "atmel,sama5d2-sdhci";
+> @@ -18,4 +25,16 @@ sdmmc0: sdio-host@a0000000 {
+>  	interrupts = <31 IRQ_TYPE_LEVEL_HIGH 0>;
+>  	clocks = <&sdmmc0_hclk>, <&sdmmc0_gclk>, <&main>;
+>  	clock-names = "hclock", "multclk", "baseclk";
+> +	assigned-clocks = <&sdmmc0_gclk>;
+> +	assigned-clock-rates = <480000000>;
+> +};
+> +
+> +sdmmc0: sdio-host@80000000 {
 
-Controller is connected with its master using NOC and it controls its 
-slaves using another NOC path.
-So,controller have 2 NOC paths as below.
-     a. CPU to Controller, This path is used to access the registers of 
-controllers.
-     b. Controller to DDR, This path is a data path, where data is 
-read/write from/to DDR.
-All data transfer will happen on these NOC's, which is shared between 
-other peripherals.
-In order to achieve required throughput (Data transfer Bandwidth) we put 
-vote on these NOC's to
-scale the NOC clocks to support required bandwidth.
+mmc@...
 
-Instantaneous bandwidth (ib) and Arbitrated bandwidth (ab) values are 
-the values calculated (This involves various arch. specific parameters
-like clock plans, voltage corners, etc. which varies from vendor to 
-vendor and target to target)
-to put vote on those noc's to achieve require throughput.
+Though I don't see much value in a second example. Examples are not a 
+complete enumeration of all possible dts entries.
 
+> +	compatible = "microchip,sam9x60-sdhci";
+> +	reg = <0x80000000 0x300>;
+> +	interrupts = <12 IRQ_TYPE_LEVEL_HIGH 0>;
+> +	clocks = <&pmc PMC_TYPE_PERIPHERAL 12>, <&pmc PMC_TYPE_GCK 12>;
+> +	clock-names = "hclock", "multclk";
+> +	assigned-clocks = <&pmc PMC_TYPE_GCK 12>;
+> +	assigned-clock-rates = <100000000>;
+>  };
+> -- 
+> 2.23.0
 > 
->> 
->> Signed-off-by: Pradeep P V K <ppvk@codeaurora.org>
->> ---
->>  .../devicetree/bindings/mmc/sdhci-msm.txt          | 32 
->> ++++++++++++++++++++++
->>  1 file changed, 32 insertions(+)
->> 
->> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt 
->> b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
->> index da4edb1..8255d92 100644
->> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
->> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
->> @@ -39,6 +39,25 @@ Required properties:
->>  	"cal"	- reference clock for RCLK delay calibration (optional)
->>  	"sleep"	- sleep clock for RCLK delay calibration (optional)
->> 
->> +Optional Properties:
->> +* Following bus parameters are required for bus bw voting:
->> +- interconnects: Pairs of phandles and interconnect provider 
->> specifier
->> +		 to denote the edge source and destination ports of
->> +		 the interconnect path. Please refer to
->> +		 Documentation/devicetree/bindings/interconnect/
->> +		 for more details.
->> +- interconnect-names: List of interconnect path name strings sorted 
->> in the same
->> +		order as the interconnects property. Consumers drivers will use
->> +		interconnect-names to match interconnect paths with interconnect
->> +		specifiers. Please refer to Documentation/devicetree/bindings/
->> +		interconnect/ for more details.
-> 
-> How many? What are the strings?
-
-As this is implemented using interconnect framework, "interconnects" and 
-"interconnect-names" are required
-and below qcom specific properties are required to calculate the ab and 
-ib values.
-> 
->> +- qcom,msm-bus,name: string describing the bus path
->> +- qcom,msm-bus,num-cases: number of configurations in which sdhc can 
->> operate in
->> +- qcom,msm-bus,num-paths: number of paths to vote for
->> +- qcom,msm-bus,vectors-KBps: Takes a tuple <ib ab>, <ib ab> (2 tuples 
->> for 2
-> 
-> ib and ab are what? Didn't we just add interconnect bindings for
-> expressing bandwidth?
-
-Instantaneous bandwidth (ib) is peak bandwidth and Arbitrated bandwidth 
-(ab) is the Average bandwidth.
-There is no interconnect binding node as such for expressing the 
-bandwidth. Hence the reason to use the
-above qcom nodes for parsing and storing the req. bandwidth.
-
-> 
->> +				num-paths) The number of these entries *must*
->> +				be same as num-cases.
-> 
-> Are all these properties SDHCI specific or can we expect to get these
-> for *all* the QCom blocks?
-> 
-As per the current implementation, these are some optional properties 
-and is required
-only when the bus bandwidth support is needed and all these are qcom 
-specific.
-
->> +
->>  Example:
->> 
->>  	sdhc_1: sdhci@f9824900 {
->> @@ -56,6 +75,19 @@ Example:
->> 
->>  		clocks = <&gcc GCC_SDCC1_APPS_CLK>, <&gcc GCC_SDCC1_AHB_CLK>;
->>  		clock-names = "core", "iface";
->> +		interconnects = <&qnoc 50 &qnoc 512>,
->> +				<&qnoc 1 &qnoc 544>;
->> +		interconnect-names = "sdhc-ddr","cpu-sdhc";
->> +		qcom,msm-bus,name = "sdhc1";
->> +		qcom,msm-bus,num-cases = <3>;
->> +		qcom,msm-bus,num-paths = <2>;
->> +		qcom,msm-bus,vectors-KBps =
->> +		/* No Vote */
->> +		<0 0>, <0 0>,
->> +		/* 50 MB/s */
->> +		<130718 200000>, <133320 133320>,
->> +		/* 200 MB/s */
->> +		<1338562 4096000>, <1338562 4096000>;
->>  	};
->> 
->>  	sdhc_2: sdhci@f98a4900 {
->> --
->> 1.9.1
->> 
