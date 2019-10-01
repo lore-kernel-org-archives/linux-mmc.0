@@ -1,23 +1,52 @@
-From: pr-tracker-bot@kernel.org
-Subject: Re: [GIT PULL] MMC updates for v5.4 take 2
-Date: Mon, 30 Sep 2019 17:30:21 +0000
-Message-ID: <156986462175.9141.2830072160556301661.pr-tracker-bot@kernel.org>
-References: <20190929193810.2551-1-ulf.hansson@linaro.org>
+From: <orito.takao@socionext.com>
+Subject: Re: [PATCH v3 0/2] mmc: sdhci-milbeaut: add Milbeaut SD driver
+Date: Tue, 1 Oct 2019 05:17:02 +0000
+Message-ID: <20191001141655.C8BE.F0D17A80@socionext.com>
+References: <1568079631-28808-1-git-send-email-orito.takao@socionext.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="iso-2022-jp"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190929193810.2551-1-ulf.hansson@linaro.org>
+In-Reply-To: <1568079631-28808-1-git-send-email-orito.takao@socionext.com>
+Content-Language: ja-JP
+Content-ID: <AA2CA0E6E0E71E458AE7E083CDEB38D8@socionext.com>
 Sender: linux-kernel-owner@vger.kernel.org
-Cc: Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+To: ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, adrian.hunter@intel.com
+Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, masami.hiramatsu@linaro.org, jaswinder.singh@linaro.org, sugaya.taichi@socionext.com, kasai.kazuhiro@socionext.com, kanematsu.shinji@socionext.com
 List-Id: linux-mmc@vger.kernel.org
 
-The pull request you sent on Sun, 29 Sep 2019 21:38:10 +0200:
-
-> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.4-2
-
-has been merged into torvalds/linux.git:
-https://git.kernel.org/torvalds/c/c710364f78afdef8c2ed07556d0743c5a30ed429
-
-Thank you!
-
--- 
-Deet-doot-dot, I am a bot.
-https://korg.wiki.kernel.org/userdoc/prtracker
+DQpIZWxsbw0KDQpEb2VzIGFueW9uZSBoYXZlIGFueSBjb21tZW50cyBvbiB0aGlzID8NCg0KPiBU
+aGUgZm9sbG93aW5nIHBhdGNoZXMgYWRkIGRyaXZlciBmb3IgU0QgSG9zdCBjb250cm9sbGVyIG9u
+DQo+IFNvY2lvbmV4dCdzIE1pbGJlYXV0IE0xMFYgcGxhdGZvcm1zLg0KPiANCj4gU0QgSG9zdCBj
+b250cm9sbGVyIG9uIE1pbGJlYXV0IGNvbnNpc3RzIG9mIHR3byBjb250cm9sbGVyIHBhcnRzLg0K
+PiBPbmUgaXMgY29yZSBjb250cm9sbGVyIEZfU0RIMzAsIHRoaXMgaXMgc2ltaWxhciB0byBzZGhj
+aS1mdWppdHN1DQo+IGNvbnRyb2xsZXIuDQo+IEFub3RoZXIgaXMgYnJpZGdlIGNvbnRyb2xsZXIu
+IFRoaXMgYnJpZGdlIGNvbnRyb2xsZXIgaXMgbm90IGNvbXBhdGlibGUNCj4gd2l0aCBzZGhjaS1m
+dWppdHN1IGNvbnRyb2xsZXIuIFRoaXMgaXMgc3BlY2lhbCBmb3IgTWlsYmVhdXQgc2VyaWVzLg0K
+PiANCj4gSXQgaGFzIHRoZSBzZXZlcmFsIHBhcnRzLA0KPiAgLSByZXNldCBjb250cm9sDQo+ICAt
+IGNsb2NrIGVuYWJsZSAvIHNlbGVjdCBmb3IgU0RSNTAvMjUvMTINCj4gIC0gaG9sZCBjb250cm9s
+IG9mIERBVEEvQ01EIGxpbmUNCj4gIC0gc2VsZWN0IGNoYXJhY3RlcmlzdGljcyBmb3IgV1AvQ0Qv
+TEVEIGxpbmUNCj4gIC0gUmUtdHVuaW5nIGNvbnRyb2wgZm9yIG1vZGUzDQo+ICAtIENhcGFiaWxp
+dHkgc2V0dGluZw0KPiAgICBUaW1lb3V0IENsb2NrIC8gQmFzZSBDbG9jayAvIFRpbWVyIENvdW50
+IGZvciBSZS1UdW5pbmcgLw0KPiAgICBEZWJvdW5jZSBwZXJpb2QNCj4gVGhlc2UgcmVxdWlyZXMg
+c3BlY2lhbCBwcm9jZWR1cmVzIGF0IHJlc2V0IG9yIGNsb2NrIGVuYWJsZS9jaGFuZ2Ugb3INCj4g
+IGZ1cnRoZXIgdHVuaW5nIG9mIGNsb2NrLg0KPiANCj4gVGFrYW8gT3JpdG8gKDIpOg0KPiAgIGR0
+LWJpbmRpbmdzOiBtbWM6IGFkZCBEVCBiaW5kaW5ncyBmb3IgTWlsYmVhdXQgU0QgY29udHJvbGxl
+cg0KPiAgIG1tYzogc2RoY2ktbWlsYmVhdXQ6IGFkZCBNaWxiZWF1dCBTRCBjb250cm9sbGVyIGRy
+aXZlcg0KPiANCj4gIC4uLi9kZXZpY2V0cmVlL2JpbmRpbmdzL21tYy9zZGhjaS1taWxiZWF1dC50
+eHQgICAgIHwgIDMwICsrDQo+ICBkcml2ZXJzL21tYy9ob3N0L0tjb25maWcgICAgICAgICAgICAg
+ICAgICAgICAgICAgICB8ICAxMSArDQo+ICBkcml2ZXJzL21tYy9ob3N0L01ha2VmaWxlICAgICAg
+ICAgICAgICAgICAgICAgICAgICB8ICAgMSArDQo+ICBkcml2ZXJzL21tYy9ob3N0L3NkaGNpLW1p
+bGJlYXV0LmMgICAgICAgICAgICAgICAgICB8IDM2MiArKysrKysrKysrKysrKysrKysrKysNCj4g
+IGRyaXZlcnMvbW1jL2hvc3Qvc2RoY2lfZl9zZGgzMC5jICAgICAgICAgICAgICAgICAgIHwgIDI2
+ICstDQo+ICBkcml2ZXJzL21tYy9ob3N0L3NkaGNpX2Zfc2RoMzAuaCAgICAgICAgICAgICAgICAg
+ICB8ICAzMiArKw0KPiAgNiBmaWxlcyBjaGFuZ2VkLCA0MzcgaW5zZXJ0aW9ucygrKSwgMjUgZGVs
+ZXRpb25zKC0pDQo+ICBjcmVhdGUgbW9kZSAxMDA2NDQgRG9jdW1lbnRhdGlvbi9kZXZpY2V0cmVl
+L2JpbmRpbmdzL21tYy9zZGhjaS1taWxiZWF1dC50eHQNCj4gIGNyZWF0ZSBtb2RlIDEwMDY0NCBk
+cml2ZXJzL21tYy9ob3N0L3NkaGNpLW1pbGJlYXV0LmMNCj4gIGNyZWF0ZSBtb2RlIDEwMDY0NCBk
+cml2ZXJzL21tYy9ob3N0L3NkaGNpX2Zfc2RoMzAuaA0KPiANCj4gLS0gDQo+IDEuOS4xDQo+IA0K
+DQpUaGFua3MNCk9yaXRvDQoNCi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tDQpUYWthbyBPcml0bw0KU29jaW9uZXh0IEluYy4N
+CkUtbWFpbDpvcml0by50YWthb0Bzb2Npb25leHQuY29tDQpUZWw6KzgxLTgwLTk4MTUtMTQ2MA0K
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0NCg==
