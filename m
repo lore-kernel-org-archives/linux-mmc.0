@@ -1,8 +1,8 @@
 From: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-Subject: [PATCH v3 2/6] ACPI / utils: Move acpi_dev_get_first_match_dev()
-	under CONFIG_ACPI
-Date: Tue,  1 Oct 2019 17:27:21 +0300
-Message-ID: <20191001142725.30857-3-andriy.shevchenko@linux.intel.com>
+Subject: [PATCH v3 1/6] ACPI / utils: Describe function parameters in
+	kernel-doc
+Date: Tue,  1 Oct 2019 17:27:20 +0300
+Message-ID: <20191001142725.30857-2-andriy.shevchenko@linux.intel.com>
 References: <20191001142725.30857-1-andriy.shevchenko@linux.intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -19,48 +19,59 @@ List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
 Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
 Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
 To: Joerg Roedel <joro-zLv9SwRftAIdnm+yROfE0A@public.gmane.org>, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Mika Westerberg <mika.westerberg-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-Cc: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, kbuild test robot <lkp-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-We have a stub defined for the acpi_dev_get_first_match_dev() in acpi.h
-for the case when CONFIG_ACPI=n.
+Kernel documentation script complains that some of the function parameters
+are not described:
 
-Moreover, acpi_dev_put(), counterpart function, is already placed under
-CONFIG_ACPI.
+drivers/acpi/utils.c:462: warning: Function parameter or member 'handle' not described in 'acpi_handle_path'
+drivers/acpi/utils.c:484: warning: Function parameter or member 'level' not described in 'acpi_handle_printk'
+drivers/acpi/utils.c:484: warning: Function parameter or member 'handle' not described in 'acpi_handle_printk'
+drivers/acpi/utils.c:484: warning: Function parameter or member 'fmt' not described in 'acpi_handle_printk'
+drivers/acpi/utils.c:513: warning: Function parameter or member 'descriptor' not described in '__acpi_handle_debug'
+drivers/acpi/utils.c:513: warning: Function parameter or member 'handle' not described in '__acpi_handle_debug'
+drivers/acpi/utils.c:513: warning: Function parameter or member 'fmt' not described in '__acpi_handle_debug'
 
-Thus, move acpi_dev_get_first_match_dev() under CONFIG_ACPI as well.
+Describe function parameters where it's appropriate.
 
-Fixes: 817b4d64da03 ("Introduce acpi_dev_get_first_match_dev() helper")
-Reported-by: kbuild test robot <lkp-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 Signed-off-by: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
 Reviewed-by: Mika Westerberg <mika.westerberg-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
 ---
- include/acpi/acpi_bus.h | 6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
+ drivers/acpi/utils.c | 7 +++++++
+ 1 file changed, 7 insertions(+)
 
-diff --git a/include/acpi/acpi_bus.h b/include/acpi/acpi_bus.h
-index 175f7b40c585..3f6fddeb7519 100644
---- a/include/acpi/acpi_bus.h
-+++ b/include/acpi/acpi_bus.h
-@@ -78,9 +78,6 @@ acpi_evaluate_dsm_typed(acpi_handle handle, const guid_t *guid, u64 rev,
- bool acpi_dev_found(const char *hid);
- bool acpi_dev_present(const char *hid, const char *uid, s64 hrv);
+diff --git a/drivers/acpi/utils.c b/drivers/acpi/utils.c
+index e3974a8f8fd4..dbd1c4cfd7d1 100644
+--- a/drivers/acpi/utils.c
++++ b/drivers/acpi/utils.c
+@@ -455,6 +455,7 @@ EXPORT_SYMBOL(acpi_evaluate_ost);
  
--struct acpi_device *
--acpi_dev_get_first_match_dev(const char *hid, const char *uid, s64 hrv);
--
- #ifdef CONFIG_ACPI
+ /**
+  * acpi_handle_path: Return the object path of handle
++ * @handle: ACPI device handle
+  *
+  * Caller must free the returned buffer
+  */
+@@ -473,6 +474,9 @@ static char *acpi_handle_path(acpi_handle handle)
  
- #include <linux/proc_fs.h>
-@@ -683,6 +680,9 @@ static inline bool acpi_device_can_poweroff(struct acpi_device *adev)
- 		adev->power.states[ACPI_STATE_D3_HOT].flags.explicit_set);
- }
- 
-+struct acpi_device *
-+acpi_dev_get_first_match_dev(const char *hid, const char *uid, s64 hrv);
-+
- static inline void acpi_dev_put(struct acpi_device *adev)
- {
- 	put_device(&adev->dev);
+ /**
+  * acpi_handle_printk: Print message with ACPI prefix and object path
++ * @level: log level
++ * @handle: ACPI device handle
++ * @fmt: format string
+  *
+  * This function is called through acpi_handle_<level> macros and prints
+  * a message with ACPI prefix and object path.  This function acquires
+@@ -501,6 +505,9 @@ EXPORT_SYMBOL(acpi_handle_printk);
+ #if defined(CONFIG_DYNAMIC_DEBUG)
+ /**
+  * __acpi_handle_debug: pr_debug with ACPI prefix and object path
++ * @descriptor: Dynamic Debug descriptor
++ * @handle: ACPI device handle
++ * @fmt: format string
+  *
+  * This function is called through acpi_handle_debug macro and debug
+  * prints a message with ACPI prefix and object path. This function
 -- 
 2.23.0
