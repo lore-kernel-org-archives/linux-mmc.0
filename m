@@ -1,192 +1,81 @@
-From: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-Subject: [PATCH v3 5/6] mmc: sdhci-acpi: Switch to use acpi_dev_hid_uid_match()
-Date: Tue,  1 Oct 2019 17:27:24 +0300
-Message-ID: <20191001142725.30857-6-andriy.shevchenko@linux.intel.com>
-References: <20191001142725.30857-1-andriy.shevchenko@linux.intel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-In-Reply-To: <20191001142725.30857-1-andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Joerg Roedel <joro-zLv9SwRftAIdnm+yROfE0A@public.gmane.org>, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Mika Westerberg <mika.westerberg-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-Cc: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+From: Geert Uytterhoeven <geert+renesas@glider.be>
+Subject: [PATCH] mmc: renesas_sdhi: Do not use platform_get_irq() to count interrupts
+Date: Tue,  1 Oct 2019 20:07:03 +0200
+Message-ID: <20191001180703.910-1-geert+renesas@glider.be>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc: Stephen Boyd <swboyd@chromium.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-renesas-soc@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Geert Uytterhoeven <geert+renesas@glider.be>
 List-Id: linux-mmc@vger.kernel.org
 
-Since we have a generic helper, drop custom implementation in the driver.
+As platform_get_irq() now prints an error when the interrupt does not
+exist, counting interrupts by looping until failure causes the printing
+of scary messages like:
 
-Signed-off-by: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-Reviewed-by: Mika Westerberg <mika.westerberg-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+    renesas_sdhi_internal_dmac ee140000.sd: IRQ index 1 not found
+
+Fix this by using the platform_irq_count() helper to avoid touching
+non-existent interrupts.
+
+Fixes: 7723f4c5ecdb8d83 ("driver core: platform: Add an error message to platform_get_irq*()")
+Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
 ---
- drivers/mmc/host/sdhci-acpi.c | 49 ++++++++++++-----------------------
- 1 file changed, 16 insertions(+), 33 deletions(-)
+This is a fix for v5.4-rc1.
+---
+ drivers/mmc/host/renesas_sdhi_core.c | 26 ++++++++++++++------------
+ 1 file changed, 14 insertions(+), 12 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-index 1604f512c7bd..105e73d4a3b9 100644
---- a/drivers/mmc/host/sdhci-acpi.c
-+++ b/drivers/mmc/host/sdhci-acpi.c
-@@ -61,7 +61,7 @@ struct sdhci_acpi_slot {
- 	mmc_pm_flag_t	pm_caps;
- 	unsigned int	flags;
- 	size_t		priv_size;
--	int (*probe_slot)(struct platform_device *, const char *, const char *);
-+	int (*probe_slot)(struct platform_device *, struct acpi_device *);
- 	int (*remove_slot)(struct platform_device *);
- 	int (*free_slot)(struct platform_device *pdev);
- 	int (*setup_host)(struct platform_device *pdev);
-@@ -325,12 +325,10 @@ static bool sdhci_acpi_cht_pci_wifi(unsigned int vendor, unsigned int device,
-  * wifi card in the expected slot with an ACPI companion node, is used to
-  * indicate that acpi_device_fix_up_power() should be avoided.
-  */
--static inline bool sdhci_acpi_no_fixup_child_power(const char *hid,
--						   const char *uid)
-+static inline bool sdhci_acpi_no_fixup_child_power(struct acpi_device *adev)
- {
- 	return sdhci_acpi_cht() &&
--	       !strcmp(hid, "80860F14") &&
--	       !strcmp(uid, "2") &&
-+	       acpi_dev_hid_uid_match(adev, "80860F14", "2") &&
- 	       sdhci_acpi_cht_pci_wifi(0x14e4, 0x43ec, 0, 28);
- }
+diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
+index d4ada5cca2d14f6a..122f429602d825bd 100644
+--- a/drivers/mmc/host/renesas_sdhi_core.c
++++ b/drivers/mmc/host/renesas_sdhi_core.c
+@@ -646,8 +646,8 @@ int renesas_sdhi_probe(struct platform_device *pdev,
+ 	struct tmio_mmc_dma *dma_priv;
+ 	struct tmio_mmc_host *host;
+ 	struct renesas_sdhi *priv;
++	int num_irqs, irq, ret, i;
+ 	struct resource *res;
+-	int irq, ret, i;
+ 	u16 ver;
  
-@@ -345,8 +343,7 @@ static inline bool sdhci_acpi_byt_defer(struct device *dev)
- 	return false;
- }
- 
--static inline bool sdhci_acpi_no_fixup_child_power(const char *hid,
--						   const char *uid)
-+static inline bool sdhci_acpi_no_fixup_child_power(struct acpi_device *adev)
- {
- 	return false;
- }
-@@ -375,19 +372,18 @@ static int bxt_get_cd(struct mmc_host *mmc)
- 	return ret;
- }
- 
--static int intel_probe_slot(struct platform_device *pdev, const char *hid,
--			    const char *uid)
-+static int intel_probe_slot(struct platform_device *pdev, struct acpi_device *adev)
- {
- 	struct sdhci_acpi_host *c = platform_get_drvdata(pdev);
- 	struct intel_host *intel_host = sdhci_acpi_priv(c);
- 	struct sdhci_host *host = c->host;
- 
--	if (hid && uid && !strcmp(hid, "80860F14") && !strcmp(uid, "1") &&
-+	if (acpi_dev_hid_uid_match(adev, "80860F14", "1") &&
- 	    sdhci_readl(host, SDHCI_CAPABILITIES) == 0x446cc8b2 &&
- 	    sdhci_readl(host, SDHCI_CAPABILITIES_1) == 0x00000807)
- 		host->timeout_clk = 1000; /* 1000 kHz i.e. 1 MHz */
- 
--	if (hid && !strcmp(hid, "80865ACA"))
-+	if (acpi_dev_hid_uid_match(adev, "80865ACA", NULL))
- 		host->mmc_host_ops.get_cd = bxt_get_cd;
- 
- 	intel_dsm_init(intel_host, &pdev->dev, host->mmc);
-@@ -473,8 +469,7 @@ static irqreturn_t sdhci_acpi_qcom_handler(int irq, void *ptr)
- 	return IRQ_HANDLED;
- }
- 
--static int qcom_probe_slot(struct platform_device *pdev, const char *hid,
--			   const char *uid)
-+static int qcom_probe_slot(struct platform_device *pdev, struct acpi_device *adev)
- {
- 	struct sdhci_acpi_host *c = platform_get_drvdata(pdev);
- 	struct sdhci_host *host = c->host;
-@@ -482,7 +477,7 @@ static int qcom_probe_slot(struct platform_device *pdev, const char *hid,
- 
- 	*irq = -EINVAL;
- 
--	if (strcmp(hid, "QCOM8051"))
-+	if (!acpi_dev_hid_uid_match(adev, "QCOM8051", NULL))
- 		return 0;
- 
- 	*irq = platform_get_irq(pdev, 1);
-@@ -501,14 +496,12 @@ static int qcom_free_slot(struct platform_device *pdev)
- 	struct sdhci_host *host = c->host;
- 	struct acpi_device *adev;
- 	int *irq = sdhci_acpi_priv(c);
--	const char *hid;
- 
- 	adev = ACPI_COMPANION(dev);
- 	if (!adev)
- 		return -ENODEV;
- 
--	hid = acpi_device_hid(adev);
--	if (strcmp(hid, "QCOM8051"))
-+	if (!acpi_dev_hid_uid_match(adev, "QCOM8051", NULL))
- 		return 0;
- 
- 	if (*irq < 0)
-@@ -583,7 +576,7 @@ static const struct sdhci_acpi_chip sdhci_acpi_chip_amd = {
- };
- 
- static int sdhci_acpi_emmc_amd_probe_slot(struct platform_device *pdev,
--					  const char *hid, const char *uid)
-+					  struct acpi_device *adev)
- {
- 	struct sdhci_acpi_host *c = platform_get_drvdata(pdev);
- 	struct sdhci_host *host   = c->host;
-@@ -654,17 +647,12 @@ static const struct acpi_device_id sdhci_acpi_ids[] = {
- };
- MODULE_DEVICE_TABLE(acpi, sdhci_acpi_ids);
- 
--static const struct sdhci_acpi_slot *sdhci_acpi_get_slot(const char *hid,
--							 const char *uid)
-+static const struct sdhci_acpi_slot *sdhci_acpi_get_slot(struct acpi_device *adev)
- {
- 	const struct sdhci_acpi_uid_slot *u;
- 
- 	for (u = sdhci_acpi_uids; u->hid; u++) {
--		if (strcmp(u->hid, hid))
--			continue;
--		if (!u->uid)
--			return u->slot;
--		if (uid && !strcmp(u->uid, uid))
-+		if (acpi_dev_hid_uid_match(adev, u->hid, u->uid))
- 			return u->slot;
+ 	of_data = of_device_get_match_data(&pdev->dev);
+@@ -825,24 +825,26 @@ int renesas_sdhi_probe(struct platform_device *pdev,
+ 		host->hs400_complete = renesas_sdhi_hs400_complete;
  	}
- 	return NULL;
-@@ -680,22 +668,17 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
- 	struct resource *iomem;
- 	resource_size_t len;
- 	size_t priv_size;
--	const char *hid;
--	const char *uid;
- 	int err;
  
- 	device = ACPI_COMPANION(dev);
- 	if (!device)
- 		return -ENODEV;
+-	i = 0;
+-	while (1) {
++	/* There must be at least one IRQ source */
++	num_irqs = platform_irq_count(pdev);
++	if (num_irqs < 1) {
++		ret = num_irqs;
++		goto eirq;
++	}
++
++	for (i = 0; i < num_irqs; i++) {
+ 		irq = platform_get_irq(pdev, i);
+-		if (irq < 0)
+-			break;
+-		i++;
++		if (irq < 0) {
++			ret = irq;
++			goto eirq;
++		}
++
+ 		ret = devm_request_irq(&pdev->dev, irq, tmio_mmc_irq, 0,
+ 				       dev_name(&pdev->dev), host);
+ 		if (ret)
+ 			goto eirq;
+ 	}
  
--	hid = acpi_device_hid(device);
--	uid = acpi_device_uid(device);
+-	/* There must be at least one IRQ source */
+-	if (!i) {
+-		ret = irq;
+-		goto eirq;
+-	}
 -
--	slot = sdhci_acpi_get_slot(hid, uid);
-+	slot = sdhci_acpi_get_slot(device);
- 
- 	/* Power on the SDHCI controller and its children */
- 	acpi_device_fix_up_power(device);
--	if (!sdhci_acpi_no_fixup_child_power(hid, uid)) {
-+	if (!sdhci_acpi_no_fixup_child_power(device)) {
- 		list_for_each_entry(child, &device->children, node)
- 			if (child->status.present && child->status.enabled)
- 				acpi_device_fix_up_power(child);
-@@ -745,7 +728,7 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
- 
- 	if (c->slot) {
- 		if (c->slot->probe_slot) {
--			err = c->slot->probe_slot(pdev, hid, uid);
-+			err = c->slot->probe_slot(pdev, device);
- 			if (err)
- 				goto err_free;
- 		}
+ 	dev_info(&pdev->dev, "%s base at 0x%08lx max clock rate %u MHz\n",
+ 		 mmc_hostname(host->mmc), (unsigned long)
+ 		 (platform_get_resource(pdev, IORESOURCE_MEM, 0)->start),
 -- 
-2.23.0
+2.17.1
