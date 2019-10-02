@@ -1,67 +1,48 @@
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Subject: Re: [PATCH] mmc: renesas_sdhi: Do not use platform_get_irq() to count interrupts
-Date: Wed, 2 Oct 2019 11:20:07 +0200
-Message-ID: <CAMuHMdW=zF=hf2wHEeUHDciYF7wU7j0XZYuiG=T0vpsvykLCSA@mail.gmail.com>
-References: <20191001180703.910-1-geert+renesas@glider.be> <bc48041c-df06-8108-9c45-3dfb1d527678@cogentembedded.com>
+From: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Subject: RE: [PATCH] mmc: sh_mmcif: Use platform_get_irq_optional() for
+ optional interrupt
+Date: Wed, 2 Oct 2019 09:20:44 +0000
+Message-ID: <TYAPR01MB454448F002B0D9B82C732C44D89C0@TYAPR01MB4544.jpnprd01.prod.outlook.com>
+References: <20191001180834.1158-1-geert+renesas@glider.be>
+ <20191002081553.GB1388@ninjato>
+ <TYAPR01MB454472C76E03930717A2898BD89C0@TYAPR01MB4544.jpnprd01.prod.outlook.com>
+ <CAMuHMdWBghL8Em0OoCKjJdU7OiY_pV3Lmc=SXhV2yY=sKJJ-aw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <bc48041c-df06-8108-9c45-3dfb1d527678@cogentembedded.com>
+In-Reply-To: <CAMuHMdWBghL8Em0OoCKjJdU7OiY_pV3Lmc=SXhV2yY=sKJJ-aw@mail.gmail.com>
+Content-Language: ja-JP
 Sender: linux-kernel-owner@vger.kernel.org
-To: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
-Cc: Geert Uytterhoeven <geert+renesas@glider.be>, Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Stephen Boyd <swboyd@chromium.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: Geert Uytterhoeven <geert@linux-m68k.org>, Wolfram Sang <wsa@the-dreams.de>
+Cc: Geert Uytterhoeven <geert+renesas@glider.be>, Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Jiri Slaby <jslaby@suse.com>, Stephen Boyd <swboyd@chromium.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Sergei,
-
-On Wed, Oct 2, 2019 at 11:11 AM Sergei Shtylyov
-<sergei.shtylyov@cogentembedded.com> wrote:
-> On 01.10.2019 21:07, Geert Uytterhoeven wrote:
-> > As platform_get_irq() now prints an error when the interrupt does not
-> > exist, counting interrupts by looping until failure causes the printing
->
->    s/the//?
-
-I believe "the printing" is correct.
-Any native English speakers to comment?
-
-> > of scary messages like:
-> >
-> >      renesas_sdhi_internal_dmac ee140000.sd: IRQ index 1 not found
-> >
-> > Fix this by using the platform_irq_count() helper to avoid touching
-> > non-existent interrupts.
-> >
-> > Fixes: 7723f4c5ecdb8d83 ("driver core: platform: Add an error message to platform_get_irq*()")
-> > Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
-
-> > --- a/drivers/mmc/host/renesas_sdhi_core.c
-> > +++ b/drivers/mmc/host/renesas_sdhi_core.c
-> [...]
-> > @@ -825,24 +825,26 @@ int renesas_sdhi_probe(struct platform_device *pdev,
-> >               host->hs400_complete = renesas_sdhi_hs400_complete;
-> >       }
-> >
-> > -     i = 0;
-> > -     while (1) {
-> > +     /* There must be at least one IRQ source */
-> > +     num_irqs = platform_irq_count(pdev);
-> > +     if (num_irqs < 1) {
-> > +             ret = num_irqs;
-> > +             goto eirq;
->
->     This will return 0 with failed probe if 'num_irqs' is 0, I don't think you
-> want this...
-
-Thanks, will fix.
-
-Gr{oetje,eeting}s,
-
-                        Geert
-
--- 
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+SGkgR2VlcnQtc2FuLA0KDQo+IEZyb206IEdlZXJ0IFV5dHRlcmhvZXZlbiwgU2VudDogV2VkbmVz
+ZGF5LCBPY3RvYmVyIDIsIDIwMTkgNTozMiBQTQ0KPiANCj4gSGkgU2hpbW9kYS1zYW4sIFdvbGZy
+YW0sDQo+IA0KPiBPbiBXZWQsIE9jdCAyLCAyMDE5IGF0IDEwOjI2IEFNIFlvc2hpaGlybyBTaGlt
+b2RhDQo+IDx5b3NoaWhpcm8uc2hpbW9kYS51aEByZW5lc2FzLmNvbT4gd3JvdGU6DQo+ID4gPiBG
+cm9tOiBXb2xmcmFtIFNhbmcsIFNlbnQ6IFdlZG5lc2RheSwgT2N0b2JlciAyLCAyMDE5IDU6MTYg
+UE0NCj4gPiA8c25pcD4NCj4gPiA+IFRlc3RlZCBvbiBhIFItQ2FyIEgyOiBpdCBkb2VzIG1ha2Ug
+dGhlIGVycm9yIG1lc3NhZ2UgZ28gYXdheSBhbmQgdGhlDQo+ID4gPiBNTUNJRiBkZXZpY2UgYWN0
+cyBub3JtYWwgZHVyaW5nIGJvb3QuIENhbid0IGVudGVyIHVzZXJzcGFjZSBjdXJyZW50bHkNCj4g
+PiA+IHdpdGggdjUuNC1yYzEgYnV0IHRoaXMgaXMgdW5yZWxhdGVkIHRvIHRoaXMgcGF0Y2ggYW5k
+IE1NQ0lGLiBMb29rcyBsaWtlIGENCj4gPiA+IGNvbmZpZ3VyYXRpb24gdGhpbmcgb24gbXkgc2lk
+ZSwgc28gSSB3aWxsIHN0aWxsIGdpdmU6DQo+ID4NCj4gPiBJIGFsc28gc2hvdWxkIGhhdmUgcmVw
+b3J0ZWQgdGhpcyB0aG91Z2gsIG15IGVudmlyb25tZW50IChSLUNhciBIMiArIE5GUyArDQo+ID4g
+YnVpbGRyb290IG9uIHY1LjQtcmMxIHdpdGggc2htb2JpbGVfZGVmY29uZmlnKSBhbHNvIGhhcyBh
+IHNpbWlsYXIgaXNzdWUNCj4gPiBsaWtlIHRoZSBmb2xsb3dpbmc6DQo+ID4NCj4gPiBbICAgIDMu
+NTczNDg4XSBWRlM6IE1vdW50ZWQgcm9vdCAobmZzIGZpbGVzeXN0ZW0pIG9uIGRldmljZSAwOjE2
+Lg0KPiA+IFsgICAgMy41Nzk4NjldIGRldnRtcGZzOiBtb3VudGVkDQo+ID4gWyAgICAzLjU4ODAx
+NF0gRnJlZWluZyB1bnVzZWQga2VybmVsIG1lbW9yeTogMTAyNEsNCj4gPiBbICAgIDMuNjUxNzcx
+XSBSdW4gL3NiaW4vaW5pdCBhcyBpbml0IHByb2Nlc3MNCj4gPiBTdGFydGluZyBzeXNsb2dkOiBP
+Sw0KPiA+IFN0YXJ0aW5nIGtsb2dkOiBPSw0KPiA+IEluaXRpYWxpemluZyByYW5kb20gbnVtYmVy
+IGdlbmVyYXRvci4uLiBbICAgIDQuMDczNjI5XSByYW5kb206IGRkOiB1bmluaXRpYWxpemVkIHVy
+YW5kb20gcmVhZCAoNTEyIGJ5dGVzIHJlYWQpDQo+ID4gdXJhbmRvbSBzdGFydDogZmFpbGVkLg0K
+PiA+IGRvbmUuDQo+ID4gU3RhcnRpbmcgbmV0d29yazogaXA6IE9WRVJSVU46IEJhZCBhZGRyZXNz
+DQo+ID4gaXA6IE9WRVJSVU46IEJhZCBhZGRyZXNzDQo+ID4gaXA6IE9WRVJSVU46IEJhZCBhZGRy
+ZXNzDQo+IA0KPiBQbGVhc2UgY2hlcnJ5LXBpY2sgdGhlIHRvcCBjb21taXQgZnJvbSByZW5lc2Fz
+LWRldmVsOg0KPiA2ZTQ3Yzg0MTMyOWViOWIwICgiQVJNOiBmaXggX19nZXRfdXNlcl9jaGVjaygp
+IGluIGNhc2UgdWFjY2Vzc18qIGNhbGxzDQo+IGFyZSBub3QgaW5saW5lZCIpDQoNClRoYW5rIHlv
+dSBmb3IgdGhlIGluZm9ybWF0aW9uLiBUaGlzIGNvbW1pdCBjb3VsZCBmaXggdGhlIGlzc3VlIG9u
+IG15IGVudmlyb25tZW50Lg0KDQpCZXN0IHJlZ2FyZHMsDQpZb3NoaWhpcm8gU2hpbW9kYQ0KDQo=
