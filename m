@@ -1,48 +1,197 @@
-From: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-Subject: RE: [PATCH] mmc: sh_mmcif: Use platform_get_irq_optional() for
- optional interrupt
-Date: Wed, 2 Oct 2019 09:20:44 +0000
-Message-ID: <TYAPR01MB454448F002B0D9B82C732C44D89C0@TYAPR01MB4544.jpnprd01.prod.outlook.com>
-References: <20191001180834.1158-1-geert+renesas@glider.be>
- <20191002081553.GB1388@ninjato>
- <TYAPR01MB454472C76E03930717A2898BD89C0@TYAPR01MB4544.jpnprd01.prod.outlook.com>
- <CAMuHMdWBghL8Em0OoCKjJdU7OiY_pV3Lmc=SXhV2yY=sKJJ-aw@mail.gmail.com>
+From: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH v3 5/6] mmc: sdhci-acpi: Switch to use
+	acpi_dev_hid_uid_match()
+Date: Wed, 2 Oct 2019 14:16:56 +0300
+Message-ID: <8a0435b1-beee-d84b-aeda-9a38d655d96a@intel.com>
+References: <20191001142725.30857-1-andriy.shevchenko@linux.intel.com>
+	<20191001142725.30857-6-andriy.shevchenko@linux.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAMuHMdWBghL8Em0OoCKjJdU7OiY_pV3Lmc=SXhV2yY=sKJJ-aw@mail.gmail.com>
-Content-Language: ja-JP
-Sender: linux-kernel-owner@vger.kernel.org
-To: Geert Uytterhoeven <geert@linux-m68k.org>, Wolfram Sang <wsa@the-dreams.de>
-Cc: Geert Uytterhoeven <geert+renesas@glider.be>, Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Jiri Slaby <jslaby@suse.com>, Stephen Boyd <swboyd@chromium.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+In-Reply-To: <20191001142725.30857-6-andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Content-Language: en-US
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Joerg Roedel <joro-zLv9SwRftAIdnm+yROfE0A@public.gmane.org>, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Mika Westerberg <mika.westerberg-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-SGkgR2VlcnQtc2FuLA0KDQo+IEZyb206IEdlZXJ0IFV5dHRlcmhvZXZlbiwgU2VudDogV2VkbmVz
-ZGF5LCBPY3RvYmVyIDIsIDIwMTkgNTozMiBQTQ0KPiANCj4gSGkgU2hpbW9kYS1zYW4sIFdvbGZy
-YW0sDQo+IA0KPiBPbiBXZWQsIE9jdCAyLCAyMDE5IGF0IDEwOjI2IEFNIFlvc2hpaGlybyBTaGlt
-b2RhDQo+IDx5b3NoaWhpcm8uc2hpbW9kYS51aEByZW5lc2FzLmNvbT4gd3JvdGU6DQo+ID4gPiBG
-cm9tOiBXb2xmcmFtIFNhbmcsIFNlbnQ6IFdlZG5lc2RheSwgT2N0b2JlciAyLCAyMDE5IDU6MTYg
-UE0NCj4gPiA8c25pcD4NCj4gPiA+IFRlc3RlZCBvbiBhIFItQ2FyIEgyOiBpdCBkb2VzIG1ha2Ug
-dGhlIGVycm9yIG1lc3NhZ2UgZ28gYXdheSBhbmQgdGhlDQo+ID4gPiBNTUNJRiBkZXZpY2UgYWN0
-cyBub3JtYWwgZHVyaW5nIGJvb3QuIENhbid0IGVudGVyIHVzZXJzcGFjZSBjdXJyZW50bHkNCj4g
-PiA+IHdpdGggdjUuNC1yYzEgYnV0IHRoaXMgaXMgdW5yZWxhdGVkIHRvIHRoaXMgcGF0Y2ggYW5k
-IE1NQ0lGLiBMb29rcyBsaWtlIGENCj4gPiA+IGNvbmZpZ3VyYXRpb24gdGhpbmcgb24gbXkgc2lk
-ZSwgc28gSSB3aWxsIHN0aWxsIGdpdmU6DQo+ID4NCj4gPiBJIGFsc28gc2hvdWxkIGhhdmUgcmVw
-b3J0ZWQgdGhpcyB0aG91Z2gsIG15IGVudmlyb25tZW50IChSLUNhciBIMiArIE5GUyArDQo+ID4g
-YnVpbGRyb290IG9uIHY1LjQtcmMxIHdpdGggc2htb2JpbGVfZGVmY29uZmlnKSBhbHNvIGhhcyBh
-IHNpbWlsYXIgaXNzdWUNCj4gPiBsaWtlIHRoZSBmb2xsb3dpbmc6DQo+ID4NCj4gPiBbICAgIDMu
-NTczNDg4XSBWRlM6IE1vdW50ZWQgcm9vdCAobmZzIGZpbGVzeXN0ZW0pIG9uIGRldmljZSAwOjE2
-Lg0KPiA+IFsgICAgMy41Nzk4NjldIGRldnRtcGZzOiBtb3VudGVkDQo+ID4gWyAgICAzLjU4ODAx
-NF0gRnJlZWluZyB1bnVzZWQga2VybmVsIG1lbW9yeTogMTAyNEsNCj4gPiBbICAgIDMuNjUxNzcx
-XSBSdW4gL3NiaW4vaW5pdCBhcyBpbml0IHByb2Nlc3MNCj4gPiBTdGFydGluZyBzeXNsb2dkOiBP
-Sw0KPiA+IFN0YXJ0aW5nIGtsb2dkOiBPSw0KPiA+IEluaXRpYWxpemluZyByYW5kb20gbnVtYmVy
-IGdlbmVyYXRvci4uLiBbICAgIDQuMDczNjI5XSByYW5kb206IGRkOiB1bmluaXRpYWxpemVkIHVy
-YW5kb20gcmVhZCAoNTEyIGJ5dGVzIHJlYWQpDQo+ID4gdXJhbmRvbSBzdGFydDogZmFpbGVkLg0K
-PiA+IGRvbmUuDQo+ID4gU3RhcnRpbmcgbmV0d29yazogaXA6IE9WRVJSVU46IEJhZCBhZGRyZXNz
-DQo+ID4gaXA6IE9WRVJSVU46IEJhZCBhZGRyZXNzDQo+ID4gaXA6IE9WRVJSVU46IEJhZCBhZGRy
-ZXNzDQo+IA0KPiBQbGVhc2UgY2hlcnJ5LXBpY2sgdGhlIHRvcCBjb21taXQgZnJvbSByZW5lc2Fz
-LWRldmVsOg0KPiA2ZTQ3Yzg0MTMyOWViOWIwICgiQVJNOiBmaXggX19nZXRfdXNlcl9jaGVjaygp
-IGluIGNhc2UgdWFjY2Vzc18qIGNhbGxzDQo+IGFyZSBub3QgaW5saW5lZCIpDQoNClRoYW5rIHlv
-dSBmb3IgdGhlIGluZm9ybWF0aW9uLiBUaGlzIGNvbW1pdCBjb3VsZCBmaXggdGhlIGlzc3VlIG9u
-IG15IGVudmlyb25tZW50Lg0KDQpCZXN0IHJlZ2FyZHMsDQpZb3NoaWhpcm8gU2hpbW9kYQ0KDQo=
+On 1/10/19 5:27 PM, Andy Shevchenko wrote:
+> Since we have a generic helper, drop custom implementation in the driver.
+> 
+> Signed-off-by: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+> Reviewed-by: Mika Westerberg <mika.westerberg-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+
+Acked-by: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+
+> ---
+>  drivers/mmc/host/sdhci-acpi.c | 49 ++++++++++++-----------------------
+>  1 file changed, 16 insertions(+), 33 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+> index 1604f512c7bd..105e73d4a3b9 100644
+> --- a/drivers/mmc/host/sdhci-acpi.c
+> +++ b/drivers/mmc/host/sdhci-acpi.c
+> @@ -61,7 +61,7 @@ struct sdhci_acpi_slot {
+>  	mmc_pm_flag_t	pm_caps;
+>  	unsigned int	flags;
+>  	size_t		priv_size;
+> -	int (*probe_slot)(struct platform_device *, const char *, const char *);
+> +	int (*probe_slot)(struct platform_device *, struct acpi_device *);
+>  	int (*remove_slot)(struct platform_device *);
+>  	int (*free_slot)(struct platform_device *pdev);
+>  	int (*setup_host)(struct platform_device *pdev);
+> @@ -325,12 +325,10 @@ static bool sdhci_acpi_cht_pci_wifi(unsigned int vendor, unsigned int device,
+>   * wifi card in the expected slot with an ACPI companion node, is used to
+>   * indicate that acpi_device_fix_up_power() should be avoided.
+>   */
+> -static inline bool sdhci_acpi_no_fixup_child_power(const char *hid,
+> -						   const char *uid)
+> +static inline bool sdhci_acpi_no_fixup_child_power(struct acpi_device *adev)
+>  {
+>  	return sdhci_acpi_cht() &&
+> -	       !strcmp(hid, "80860F14") &&
+> -	       !strcmp(uid, "2") &&
+> +	       acpi_dev_hid_uid_match(adev, "80860F14", "2") &&
+>  	       sdhci_acpi_cht_pci_wifi(0x14e4, 0x43ec, 0, 28);
+>  }
+>  
+> @@ -345,8 +343,7 @@ static inline bool sdhci_acpi_byt_defer(struct device *dev)
+>  	return false;
+>  }
+>  
+> -static inline bool sdhci_acpi_no_fixup_child_power(const char *hid,
+> -						   const char *uid)
+> +static inline bool sdhci_acpi_no_fixup_child_power(struct acpi_device *adev)
+>  {
+>  	return false;
+>  }
+> @@ -375,19 +372,18 @@ static int bxt_get_cd(struct mmc_host *mmc)
+>  	return ret;
+>  }
+>  
+> -static int intel_probe_slot(struct platform_device *pdev, const char *hid,
+> -			    const char *uid)
+> +static int intel_probe_slot(struct platform_device *pdev, struct acpi_device *adev)
+>  {
+>  	struct sdhci_acpi_host *c = platform_get_drvdata(pdev);
+>  	struct intel_host *intel_host = sdhci_acpi_priv(c);
+>  	struct sdhci_host *host = c->host;
+>  
+> -	if (hid && uid && !strcmp(hid, "80860F14") && !strcmp(uid, "1") &&
+> +	if (acpi_dev_hid_uid_match(adev, "80860F14", "1") &&
+>  	    sdhci_readl(host, SDHCI_CAPABILITIES) == 0x446cc8b2 &&
+>  	    sdhci_readl(host, SDHCI_CAPABILITIES_1) == 0x00000807)
+>  		host->timeout_clk = 1000; /* 1000 kHz i.e. 1 MHz */
+>  
+> -	if (hid && !strcmp(hid, "80865ACA"))
+> +	if (acpi_dev_hid_uid_match(adev, "80865ACA", NULL))
+>  		host->mmc_host_ops.get_cd = bxt_get_cd;
+>  
+>  	intel_dsm_init(intel_host, &pdev->dev, host->mmc);
+> @@ -473,8 +469,7 @@ static irqreturn_t sdhci_acpi_qcom_handler(int irq, void *ptr)
+>  	return IRQ_HANDLED;
+>  }
+>  
+> -static int qcom_probe_slot(struct platform_device *pdev, const char *hid,
+> -			   const char *uid)
+> +static int qcom_probe_slot(struct platform_device *pdev, struct acpi_device *adev)
+>  {
+>  	struct sdhci_acpi_host *c = platform_get_drvdata(pdev);
+>  	struct sdhci_host *host = c->host;
+> @@ -482,7 +477,7 @@ static int qcom_probe_slot(struct platform_device *pdev, const char *hid,
+>  
+>  	*irq = -EINVAL;
+>  
+> -	if (strcmp(hid, "QCOM8051"))
+> +	if (!acpi_dev_hid_uid_match(adev, "QCOM8051", NULL))
+>  		return 0;
+>  
+>  	*irq = platform_get_irq(pdev, 1);
+> @@ -501,14 +496,12 @@ static int qcom_free_slot(struct platform_device *pdev)
+>  	struct sdhci_host *host = c->host;
+>  	struct acpi_device *adev;
+>  	int *irq = sdhci_acpi_priv(c);
+> -	const char *hid;
+>  
+>  	adev = ACPI_COMPANION(dev);
+>  	if (!adev)
+>  		return -ENODEV;
+>  
+> -	hid = acpi_device_hid(adev);
+> -	if (strcmp(hid, "QCOM8051"))
+> +	if (!acpi_dev_hid_uid_match(adev, "QCOM8051", NULL))
+>  		return 0;
+>  
+>  	if (*irq < 0)
+> @@ -583,7 +576,7 @@ static const struct sdhci_acpi_chip sdhci_acpi_chip_amd = {
+>  };
+>  
+>  static int sdhci_acpi_emmc_amd_probe_slot(struct platform_device *pdev,
+> -					  const char *hid, const char *uid)
+> +					  struct acpi_device *adev)
+>  {
+>  	struct sdhci_acpi_host *c = platform_get_drvdata(pdev);
+>  	struct sdhci_host *host   = c->host;
+> @@ -654,17 +647,12 @@ static const struct acpi_device_id sdhci_acpi_ids[] = {
+>  };
+>  MODULE_DEVICE_TABLE(acpi, sdhci_acpi_ids);
+>  
+> -static const struct sdhci_acpi_slot *sdhci_acpi_get_slot(const char *hid,
+> -							 const char *uid)
+> +static const struct sdhci_acpi_slot *sdhci_acpi_get_slot(struct acpi_device *adev)
+>  {
+>  	const struct sdhci_acpi_uid_slot *u;
+>  
+>  	for (u = sdhci_acpi_uids; u->hid; u++) {
+> -		if (strcmp(u->hid, hid))
+> -			continue;
+> -		if (!u->uid)
+> -			return u->slot;
+> -		if (uid && !strcmp(u->uid, uid))
+> +		if (acpi_dev_hid_uid_match(adev, u->hid, u->uid))
+>  			return u->slot;
+>  	}
+>  	return NULL;
+> @@ -680,22 +668,17 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
+>  	struct resource *iomem;
+>  	resource_size_t len;
+>  	size_t priv_size;
+> -	const char *hid;
+> -	const char *uid;
+>  	int err;
+>  
+>  	device = ACPI_COMPANION(dev);
+>  	if (!device)
+>  		return -ENODEV;
+>  
+> -	hid = acpi_device_hid(device);
+> -	uid = acpi_device_uid(device);
+> -
+> -	slot = sdhci_acpi_get_slot(hid, uid);
+> +	slot = sdhci_acpi_get_slot(device);
+>  
+>  	/* Power on the SDHCI controller and its children */
+>  	acpi_device_fix_up_power(device);
+> -	if (!sdhci_acpi_no_fixup_child_power(hid, uid)) {
+> +	if (!sdhci_acpi_no_fixup_child_power(device)) {
+>  		list_for_each_entry(child, &device->children, node)
+>  			if (child->status.present && child->status.enabled)
+>  				acpi_device_fix_up_power(child);
+> @@ -745,7 +728,7 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
+>  
+>  	if (c->slot) {
+>  		if (c->slot->probe_slot) {
+> -			err = c->slot->probe_slot(pdev, hid, uid);
+> +			err = c->slot->probe_slot(pdev, device);
+>  			if (err)
+>  				goto err_free;
+>  		}
+> 
