@@ -1,49 +1,47 @@
-From: Geert Uytterhoeven <geert+renesas@glider.be>
-Subject: [PATCH] mmc: sh_mmcif: Use platform_get_irq_optional() for optional interrupt
-Date: Tue,  1 Oct 2019 20:08:34 +0200
-Message-ID: <20191001180834.1158-1-geert+renesas@glider.be>
+From: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Subject: RE: [PATCH] mmc: renesas_sdhi: Do not use platform_get_irq() to count
+ interrupts
+Date: Wed, 2 Oct 2019 04:49:35 +0000
+Message-ID: <TYAPR01MB45447ABA9739F32FB2F672DBD89C0@TYAPR01MB4544.jpnprd01.prod.outlook.com>
+References: <20191001180703.910-1-geert+renesas@glider.be>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20191001180703.910-1-geert+renesas@glider.be>
+Content-Language: ja-JP
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Jiri Slaby <jslaby@suse.com>
-Cc: Stephen Boyd <swboyd@chromium.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-renesas-soc@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Geert Uytterhoeven <geert+renesas@glider.be>
+To: Geert Uytterhoeven <geert+renesas@glider.be>, Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc: Stephen Boyd <swboyd@chromium.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-As platform_get_irq() now prints an error when the interrupt does not
-exist, a scary warning may be printed for an optional interrupt:
+Hi Geert-san,
 
-    sh_mmcif ee200000.mmc: IRQ index 1 not found
+> From: Geert Uytterhoeven, Sent: Wednesday, October 2, 2019 3:07 AM
+>=20
+> As platform_get_irq() now prints an error when the interrupt does not
+> exist, counting interrupts by looping until failure causes the printing
+> of scary messages like:
+>=20
+>     renesas_sdhi_internal_dmac ee140000.sd: IRQ index 1 not found
+>=20
+> Fix this by using the platform_irq_count() helper to avoid touching
+> non-existent interrupts.
+>=20
+> Fixes: 7723f4c5ecdb8d83 ("driver core: platform: Add an error message to =
+platform_get_irq*()")
+> Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
+> ---
+> This is a fix for v5.4-rc1.
+> ---
 
-Fix this by calling platform_get_irq_optional() instead for the second
-interrupt, which is optional.
+Thank you for the patch!
 
-Remove the now superfluous error printing for the first interrupt, which
-is mandatory.
+Reviewed-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
 
-Fixes: 7723f4c5ecdb8d83 ("driver core: platform: Add an error message to platform_get_irq*()")
-Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
----
-This is a fix for v5.4-rc1.
----
- drivers/mmc/host/sh_mmcif.c | 6 ++----
- 1 file changed, 2 insertions(+), 4 deletions(-)
+And, I tested this patch on R-Car H3. So,
 
-diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-index 81bd9afb0980525e..98c575de43c755ed 100644
---- a/drivers/mmc/host/sh_mmcif.c
-+++ b/drivers/mmc/host/sh_mmcif.c
-@@ -1393,11 +1393,9 @@ static int sh_mmcif_probe(struct platform_device *pdev)
- 	const char *name;
- 
- 	irq[0] = platform_get_irq(pdev, 0);
--	irq[1] = platform_get_irq(pdev, 1);
--	if (irq[0] < 0) {
--		dev_err(dev, "Get irq error\n");
-+	irq[1] = platform_get_irq_optional(pdev, 1);
-+	if (irq[0] < 0)
- 		return -ENXIO;
--	}
- 
- 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
- 	reg = devm_ioremap_resource(dev, res);
--- 
-2.17.1
+Tested-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+
+Best regards,
+Yoshihiro Shimoda
