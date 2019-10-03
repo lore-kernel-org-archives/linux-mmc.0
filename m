@@ -1,45 +1,69 @@
-From: "Ramuthevar, Vadivel MuruganX"
-        <vadivel.muruganx.ramuthevar@linux.intel.com>
-Subject: Re: [PATCH v1 2/2] mmc: sdhci-of-arasan: Add Support for Intel LGM
- SDXC
-Date: Thu, 3 Oct 2019 15:46:56 +0800
-Message-ID: <0c3d406c-dc28-a670-91df-7c7e6f818f87@linux.intel.com>
-References: <20191003040032.37696-1-vadivel.muruganx.ramuthevar@linux.intel.com>
- <20191003040032.37696-3-vadivel.muruganx.ramuthevar@linux.intel.com>
- <329a38b4-4fba-eb6e-0d40-c241cfa28e25@intel.com>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v3 0/6] ACPI / utils: add new helper for HID/UID match
+Date: Thu, 3 Oct 2019 12:00:29 +0200
+Message-ID: <CAPDyKFq_HPDW5i5ND_df4GJsnaOowHWbFTkgCCOP6w9ar2uo6w@mail.gmail.com>
+References: <20191001142725.30857-1-andriy.shevchenko@linux.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <329a38b4-4fba-eb6e-0d40-c241cfa28e25@intel.com>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, michal.simek@xilinx.com, robh+dt@kernel.org, mark.rutland@arm.com, andriy.shevchenko@intel.com, cheol.yong.kim@intel.com, qi-ming.wu@intel.com
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+In-Reply-To: <20191001142725.30857-1-andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Cc: "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, ACPI Devel Maling List <linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "list-Y9sIeH5OGRo@public.gmane.org:IOMMU DRIVERS <iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>,
+	Joerg Roedel <joro-zLv9SwRftAIdnm+yROfE0A@public.gmane.org>, " <iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>, Mika Westerberg <mika.westerberg-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Adrian,
+On Tue, 1 Oct 2019 at 16:27, Andy Shevchenko
+<andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org> wrote:
+>
+> There are few users outside of ACPI realm that re-introduce a custom
+> solution to match ACPI device against HID/UID. Add a generic helper for
+> them.
+>
+> The series is supposed to go via linux-pm tree.
+>
+> In v3:
+> - correct logic in sdhci-acpi for qcom devices (Adrian)
+> - add Mika's Ack
+>
+> In v2:
+> - add patch 2 due to latent issue in the header (lkp)
+> - get rid of match_hid_uid() completely in patch 6
+>
+> Andy Shevchenko (6):
+>   ACPI / utils: Describe function parameters in kernel-doc
+>   ACPI / utils: Move acpi_dev_get_first_match_dev() under CONFIG_ACPI
+>   ACPI / utils: Introduce acpi_dev_hid_uid_match() helper
+>   ACPI / LPSS: Switch to use acpi_dev_hid_uid_match()
+>   mmc: sdhci-acpi: Switch to use acpi_dev_hid_uid_match()
+>   iommu/amd: Switch to use acpi_dev_hid_uid_match()
+>
+>  drivers/acpi/acpi_lpss.c      | 21 +++------------
+>  drivers/acpi/utils.c          | 32 +++++++++++++++++++++++
+>  drivers/iommu/amd_iommu.c     | 30 ++++-----------------
+>  drivers/mmc/host/sdhci-acpi.c | 49 ++++++++++++-----------------------
+>  include/acpi/acpi_bus.h       |  8 +++---
+>  include/linux/acpi.h          |  6 +++++
+>  6 files changed, 67 insertions(+), 79 deletions(-)
+>
+> --
+> 2.23.0
+>
 
-  Thank you for the comments.
+I guess Rafael intend to pick this up for v5.5?
 
-On 3/10/2019 3:02 PM, Adrian Hunter wrote:
-> On 3/10/19 7:00 AM, Ramuthevar,Vadivel MuruganX wrote:
->> From: Ramuthevar Vadivel Murugan <vadivel.muruganx.ramuthevar@linux.intel.com>
->>
->> The current arasan sdhci PHY configuration isn't compatible
->> with the PHY on Intel's LGM(Lightning Mountain) SoC devices.
->>
->> Therefore, add a new compatible, to adapt the Intel's LGM
->> SDXC PHY with arasan-sdhc controller to configure the PHY.
->>
->> Signed-off-by: Ramuthevar Vadivel Murugan <vadivel.muruganx.ramuthevar@linux.intel.com>
-> Aren't these patches already in v5.4-rc1
+In any case, for the mmc patch, feel free to add:
 
-  No, these patches are not there in v5.4-rc1.
+Acked-by: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 
-  The one which is in v5.4-rc1 supports only eMMC, does not SD/SDIO, so 
-these patches are required.
-
----
-With Best Regards
-Vadivel Murugan
+Kind regards
+Uffe
