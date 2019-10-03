@@ -1,13 +1,12 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v4 6/7] MAINTAINERS: Add entry for Actions Semi SD/MMC
- driver and binding
-Date: Thu, 3 Oct 2019 12:01:14 +0200
-Message-ID: <CAPDyKFoDhtXwzsEzh2tST96VQHqu2PKHq4F=Zs__mqA1=AVaTQ@mail.gmail.com>
-References: <20190916154546.24982-1-manivannan.sadhasivam@linaro.org> <20190916154546.24982-7-manivannan.sadhasivam@linaro.org>
+Subject: Re: [PATCH v4 0/7] Add SD/MMC driver for Actions Semi S900 SoC
+Date: Thu, 3 Oct 2019 12:01:18 +0200
+Message-ID: <CAPDyKFqsZ1mZ53b9wLruATzi+ymFrUCLhxzx7NFUq48p5w0Gtw@mail.gmail.com>
+References: <20190916154546.24982-1-manivannan.sadhasivam@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190916154546.24982-7-manivannan.sadhasivam@linaro.org>
+In-Reply-To: <20190916154546.24982-1-manivannan.sadhasivam@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
 Cc: =?UTF-8?Q?Andreas_F=C3=A4rber?= <afaerber@suse.de>, Rob Herring <robh+dt@kernel.org>, Stephen Boyd <sboyd@kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, thomas.liau@actions-semi.com, linux-actions@lists.infradead.org, Linus Walleij <linus.walleij@linaro.org>, linux-clk <linux-clk@vger.kernel.org>
@@ -16,40 +15,70 @@ List-Id: linux-mmc@vger.kernel.org
 On Mon, 16 Sep 2019 at 17:46, Manivannan Sadhasivam
 <manivannan.sadhasivam@linaro.org> wrote:
 >
-> Add MAINTAINERS entry for Actions Semi SD/MMC driver with its binding.
+> Hello,
 >
-> Signed-off-by: Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
-
-Applied for next, thanks!
-
-Kind regards
-Uffe
-
-
-> ---
->  MAINTAINERS | 2 ++
->  1 file changed, 2 insertions(+)
+> This patchset adds SD/MMC driver for Actions Semi S900 SoC from Owl
+> family SoCs. There are 4 SD/MMC controller present in this SoC but
+> only 2 are enabled currently for Bubblegum96 board to access uSD and
+> onboard eMMC. SDIO support for this driver is not currently implemented.
 >
-> diff --git a/MAINTAINERS b/MAINTAINERS
-> index c31e6492b601..d13138330b97 100644
-> --- a/MAINTAINERS
-> +++ b/MAINTAINERS
-> @@ -1375,6 +1375,7 @@ F:        drivers/clk/actions/
->  F:     drivers/clocksource/timer-owl*
->  F:     drivers/dma/owl-dma.c
->  F:     drivers/i2c/busses/i2c-owl.c
-> +F:     drivers/mmc/host/owl-mmc.c
->  F:     drivers/pinctrl/actions/*
->  F:     drivers/soc/actions/
->  F:     include/dt-bindings/power/owl-*
-> @@ -1383,6 +1384,7 @@ F:        Documentation/devicetree/bindings/arm/actions.yaml
->  F:     Documentation/devicetree/bindings/clock/actions,owl-cmu.txt
->  F:     Documentation/devicetree/bindings/dma/owl-dma.txt
->  F:     Documentation/devicetree/bindings/i2c/i2c-owl.txt
-> +F:     Documentation/devicetree/bindings/mmc/owl-mmc.yaml
->  F:     Documentation/devicetree/bindings/pinctrl/actions,s900-pinctrl.txt
->  F:     Documentation/devicetree/bindings/power/actions,owl-sps.txt
->  F:     Documentation/devicetree/bindings/timer/actions,owl-timer.txt
+> Note: Currently, driver uses 2 completion mechanisms for maintaining
+> the coherency between SDC and DMA interrupts and I know that it is not
+> efficient. Hence, I'd like to hear any suggestions for reimplementing
+> the logic if anyone has.
+>
+> With this driver, this patchset also fixes one clk driver issue and enables
+> the Actions Semi platform in ARM64 defconfig.
+>
+> Thanks,
+> Mani
+>
+> Changes in v4:
+>
+> * Incorporated review comments from Rob on dt binding
+>
+> Changes in v3:
+>
+> * Incorporated a review comment from Andreas on board dts patch
+> * Modified the MAINTAINERS entry for devicetree YAML binding
+>
+> Changes in v2:
+>
+> * Converted the devicetree bindings to YAML
+> * Misc changes to bubblegum devicetree as per the review from Andreas
+> * Dropped the read/write wrappers and renamed all functions to use owl-
+>   prefix as per the review from Ulf
+> * Renamed clk_val_best to owl_clk_val_best and added Reviewed-by tag
+>   from Stephen
+>
+> Manivannan Sadhasivam (7):
+>   clk: actions: Fix factor clk struct member access
+>   dt-bindings: mmc: Add Actions Semi SD/MMC/SDIO controller binding
+>   arm64: dts: actions: Add MMC controller support for S900
+>   arm64: dts: actions: Add uSD and eMMC support for Bubblegum96
+>   mmc: Add Actions Semi Owl SoCs SD/MMC driver
+>   MAINTAINERS: Add entry for Actions Semi SD/MMC driver and binding
+>   arm64: configs: Enable Actions Semi platform in defconfig
+>
+>  .../devicetree/bindings/mmc/owl-mmc.yaml      |  59 ++
+>  MAINTAINERS                                   |   2 +
+>  .../boot/dts/actions/s900-bubblegum-96.dts    |  62 ++
+>  arch/arm64/boot/dts/actions/s900.dtsi         |  45 ++
+>  arch/arm64/configs/defconfig                  |   1 +
+>  drivers/clk/actions/owl-factor.c              |   7 +-
+>  drivers/mmc/host/Kconfig                      |   8 +
+>  drivers/mmc/host/Makefile                     |   1 +
+>  drivers/mmc/host/owl-mmc.c                    | 696 ++++++++++++++++++
+>  9 files changed, 877 insertions(+), 4 deletions(-)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/owl-mmc.yaml
+>  create mode 100644 drivers/mmc/host/owl-mmc.c
+>
 > --
 > 2.17.1
 >
+
+I have picked up the mmc patches for next and as Stephen picked the
+clock patch, the rest are now for arm-soc, I guess!?
+
+Kind regards
+Uffe
