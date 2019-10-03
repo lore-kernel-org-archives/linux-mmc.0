@@ -1,42 +1,57 @@
-From: "Ramuthevar,
- Vadivel MuruganX" <vadivel.muruganx.ramuthevar@linux.intel.com>
-Subject: [PATCH v1 0/2] mmc: sdhci-of-arasan: Add Support for Intel LGM SDXC
-Date: Thu,  3 Oct 2019 12:00:30 +0800
-Message-ID: <20191003040032.37696-1-vadivel.muruganx.ramuthevar@linux.intel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+From: "Ramuthevar,Vadivel MuruganX"
+        <vadivel.muruganx.ramuthevar@linux.intel.com>
+Subject: [PATCH v1 1/2] dt-bindings: mmc: sdhci-of-arasan: Add new compatible for Intel LGM SDXC
+Date: Thu,  3 Oct 2019 12:00:31 +0800
+Message-ID: <20191003040032.37696-2-vadivel.muruganx.ramuthevar@linux.intel.com>
+References: <20191003040032.37696-1-vadivel.muruganx.ramuthevar@linux.intel.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20191003040032.37696-1-vadivel.muruganx.ramuthevar@linux.intel.com>
+Sender: linux-kernel-owner@vger.kernel.org
 To: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org
-Cc: mark.rutland@arm.com, devicetree@vger.kernel.org, qi-ming.wu@intel.com, andriy.shevchenko@intel.com, cheol.yong.kim@intel.com, michal.simek@xilinx.com, linux-kernel@vger.kernel.org, "Ramuthevar,
- Vadivel MuruganX" <vadivel.muruganx.ramuthevar@linux.intel.com>, robh+dt@kernel.org, adrian.hunter@intel.com, linux-arm-kernel@lists.infradead.org
+Cc: linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, adrian.hunter@intel.com, michal.simek@xilinx.com, robh+dt@kernel.org, mark.rutland@arm.com, andriy.shevchenko@intel.com, cheol.yong.kim@intel.com, qi-ming.wu@intel.com, Ramuthevar Vadivel Murugan <vadivel.muruganx.ramuthevar@linux.intel.com>
 List-Id: linux-mmc@vger.kernel.org
 
-The current arasan sdhci PHY configuration isn't compatible
-with the PHY on Intel's LGM(Lightning Mountain) SoC devices.
+From: Ramuthevar Vadivel Murugan <vadivel.muruganx.ramuthevar@linux.intel.com>
 
-Therefore, add a new compatible, to adapt the Intel's LGM
-SDXC PHY with arasan-sdhc controller to configure the PHY.
+Add a new compatible to use the sdhc-arasan host controller driver
+with the eMMC PHY on Intel's Lightning Mountain(LGM) SoC.
 
-Linux code base : V5.4-rc1 
-
-Ramuthevar Vadivel Murugan (2):
-  dt-bindings: mmc: sdhci-of-arasan: Add new compatible for Intel LGM
-    SDXC
-  mmc: sdhci-of-arasan: Add Support for Intel LGM SDXC
-
+Signed-off-by: Ramuthevar Vadivel Murugan <vadivel.muruganx.ramuthevar@linux.intel.com>
+---
  Documentation/devicetree/bindings/mmc/arasan,sdhci.txt | 17 +++++++++++++++++
- drivers/mmc/host/sdhci-of-arasan.c                     | 15 +++++++++++++++
- 2 files changed, 32 insertions(+)
+ 1 file changed, 17 insertions(+)
 
+diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
+index 7ca0aa7ccc0b..eb78d9a28c8b 100644
+--- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
++++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
+@@ -19,6 +19,8 @@ Required Properties:
+ 	Note: This binding has been deprecated and moved to [5].
+     - "intel,lgm-sdhci-5.1-emmc", "arasan,sdhci-5.1": Intel LGM eMMC PHY
+       For this device it is strongly suggested to include arasan,soc-ctl-syscon.
++    - "intel,lgm-sdhci-5.1-sdxc", "arasan,sdhci-5.1": Intel LGM SDXC PHY
++      For this device it is strongly suggested to include arasan,soc-ctl-syscon.
+ 
+   [5] Documentation/devicetree/bindings/mmc/sdhci-am654.txt
+ 
+@@ -97,3 +99,18 @@ Example:
+ 		phy-names = "phy_arasan";
+ 		arasan,soc-ctl-syscon = <&sysconf>;
+ 	};
++
++	sdxc: sdhci@ec600000 {
++		compatible = "arasan,sdhci-5.1", "intel,lgm-sdhci-5.1-sdxc";
++		reg = <0xec600000 0x300>;
++		interrupt-parent = <&ioapic1>;
++		interrupts = <43 1>;
++		clocks = <&cgu0 LGM_CLK_SDIO>, <&cgu0 LGM_CLK_NGI>,
++			 <&cgu0 LGM_GCLK_SDXC>;
++		clock-names = "clk_xin", "clk_ahb", "gate";
++		clock-output-names = "sdxc_cardclock";
++		#clock-cells = <0>;
++		phys = <&sdxc_phy>;
++		phy-names = "phy_arasan";
++		arasan,soc-ctl-syscon = <&sysconf>;
++	};
 -- 
 2.11.0
