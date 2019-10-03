@@ -1,49 +1,66 @@
-From: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-Subject: Re: [PATCH v3 0/6] ACPI / utils: add new helper for HID/UID match
-Date: Thu, 3 Oct 2019 13:17:51 +0300
-Message-ID: <20191003101751.GE32742@smile.fi.intel.com>
-References: <20191001142725.30857-1-andriy.shevchenko@linux.intel.com>
-	<CAPDyKFq_HPDW5i5ND_df4GJsnaOowHWbFTkgCCOP6w9ar2uo6w@mail.gmail.com>
+From: <Eugen.Hristev@microchip.com>
+Subject: Re: [PATCH 2/2] ARM: dts: at91: sama5d27_som1_ek: add mmc
+ capabilities for SDMMC0
+Date: Thu, 3 Oct 2019 10:24:52 +0000
+Message-ID: <c2c355cd-b798-02de-0606-0f6442f6fdca@microchip.com>
+References: <1565252928-28994-1-git-send-email-eugen.hristev@microchip.com>
+ <1565252928-28994-2-git-send-email-eugen.hristev@microchip.com>
+ <20190808124217.wrmcxohw5i6ju2qe@M43218.corp.atmel.com>
+ <04fd74c3-a828-1064-b77b-f3de07a26190@intel.com>
+ <20190809062322.syuieymdqjs4e7lh@M43218.corp.atmel.com>
+ <fa0debbb-b84c-1f74-f8b8-8fdd7812aaee@microchip.com>
+ <20190813065306.tqz57hqeiofofbnz@M43218.corp.atmel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFq_HPDW5i5ND_df4GJsnaOowHWbFTkgCCOP6w9ar2uo6w-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, ACPI Devel Maling List <linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "list-Y9sIeH5OGRo@public.gmane.org:IOMMU DRIVERS <iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>,
-	Joerg Roedel <joro-zLv9SwRftAIdnm+yROfE0A@public.gmane.org>, " <iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>, Mika Westerberg <mika.westerberg-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20190813065306.tqz57hqeiofofbnz@M43218.corp.atmel.com>
+Content-Language: en-US
+Content-ID: <B477413D9188AE4692F41B4A177C285D@namprd11.prod.outlook.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: alexandre.belloni@bootlin.com, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: adrian.hunter@intel.com, Nicolas.Ferre@microchip.com, ulf.hansson@linaro.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, Oct 03, 2019 at 12:00:29PM +0200, Ulf Hansson wrote:
-> On Tue, 1 Oct 2019 at 16:27, Andy Shevchenko
-> <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org> wrote:
-> >
-> > There are few users outside of ACPI realm that re-introduce a custom
-> > solution to match ACPI device against HID/UID. Add a generic helper for
-> > them.
-> >
-> > The series is supposed to go via linux-pm tree.
-
-> I guess Rafael intend to pick this up for v5.5?
-
-Yes, linux-pm tree is maintained by Rafael.
-
-> In any case, for the mmc patch, feel free to add:
-> 
-> Acked-by: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-
-Thanks!
-
--- 
-With Best Regards,
-Andy Shevchenko
+DQoNCk9uIDEzLjA4LjIwMTkgMDk6NTMsIEx1ZG92aWMgRGVzcm9jaGVzIHdyb3RlOg0KPiBPbiBN
+b24sIEF1ZyAxMiwgMjAxOSBhdCAwMzozODozNFBNICswMDAwLCBFdWdlbi5IcmlzdGV2QG1pY3Jv
+Y2hpcC5jb20gd3JvdGU6DQo+PiBPbiAwOS4wOC4yMDE5IDA5OjIzLCBMdWRvdmljIERlc3JvY2hl
+cyB3cm90ZToNCj4+PiBPbiBUaHUsIEF1ZyAwOCwgMjAxOSBhdCAwMzo1NzozMFBNICswMzAwLCBB
+ZHJpYW4gSHVudGVyIHdyb3RlOg0KPj4+PiBPbiA4LzA4LzE5IDM6NDIgUE0sIEx1ZG92aWMgRGVz
+cm9jaGVzIHdyb3RlOg0KPj4+Pj4gT24gVGh1LCBBdWcgMDgsIDIwMTkgYXQgMTA6MzU6NDNBTSAr
+MDIwMCwgRXVnZW4gSHJpc3RldiAtIE0xODI4MiB3cm90ZToNCj4+Pj4+PiBGcm9tOiBFdWdlbiBI
+cmlzdGV2IDxldWdlbi5ocmlzdGV2QG1pY3JvY2hpcC5jb20+DQo+Pj4+Pj4NCj4+Pj4+PiBBZGQg
+bW1jIGNhcGFiaWxpdGllcyBmb3IgU0RNTUMwIGZvciB0aGlzIGJvYXJkLg0KPj4+Pj4+IFdpdGgg
+dGhpcyBlbmFibGVkLCBlTU1DIGNvbm5lY3RlZCBjYXJkIGlzIGRldGVjdGVkIGFzOg0KPj4+Pj4+
+DQo+Pj4+Pj4gbW1jMDogbmV3IEREUiBNTUMgY2FyZCBhdCBhZGRyZXNzIDAwMDENCj4+Pj4+Pg0K
+Pj4+Pj4+IFNpZ25lZC1vZmYtYnk6IEV1Z2VuIEhyaXN0ZXYgPGV1Z2VuLmhyaXN0ZXZAbWljcm9j
+aGlwLmNvbT4NCj4+Pj4+IEFja2VkLWJ5OiBMdWRvdmljIERlc3JvY2hlcyA8bHVkb3ZpYy5kZXNy
+b2NoZXNAbWljcm9jaGlwLmNvbT4NCj4+Pj4+DQo+Pj4+PiBJIGFtIGludGVyZXN0ZWQgdG8gaGF2
+ZSB0aGUgc29tZSBpbnNpZ2h0cyBhYm91dCB0aGUgdXNlIG9mIHNkLXVocy0qDQo+Pj4+PiBwcm9w
+ZXJ0aWVzLg0KPj4+Pj4NCj4+Pj4+IE91ciBJUCBjYW4ndCBkZWFsIHdpdGggMVY4IGJ5IGl0c2Vs
+Zi4gSXQgaGFzIGEgMVY4U0VMIHNpZ25hbCB3aGljaCBjYW4NCj4+Pj4+IGJlIHVzZWQgYXMgdGhl
+IGxvZ2ljIGNvbnRyb2wgaW5wdXQgb2YgYSBtdXguIFNvIGV2ZW4gaWYgdGhlIElQIGNsYWltcw0K
+Pj4+Pj4gdG8gc3VwcG9ydCBVSFMgbW9kZXMsIGl0IGRlcGVuZHMgb24gdGhlIGJvYXJkLg0KPj4+
+Pj4NCj4+Pj4+IEFyZSB0aGUgc2QtdWhzLSogcHJvcGVydGllcyBhIHdheSB0byBkZWFsIHdpdGgg
+dGhpcz8gSSB0ZW5kIHRvIHRoaW5rIG5vDQo+Pj4+PiBhcyBzZGhjaV9zZXR1cF9ob3N0KCkgd2ls
+bCBzZXQgdGhlIGNhcHMgZGVwZW5kaW5nIG9uIHRoZSBjb250ZW50IG9mIHRoZQ0KPj4+Pj4gY2Fw
+YWJpbGl0aWVzIHJlZ2lzdGVyLiBEbyB3ZSBoYXZlIHRvIHVzZSB0aGUgU0RIQ0lfUVVJUktfTUlT
+U0lOR19DQVBTDQo+Pj4+PiBxdWlyayBvciBzZGhjaS1jYXBzL3NkaGNpLWNhcHMtbWFzaz8NCj4+
+Pj4NCj4+Pj4gVGhlcmUgaXMgIm5vLTEtOC12IiB3aGljaCBpdCBsb29rcyBsaWtlIHNkaGNpLW9m
+LWF0OTEuYyBhbHJlYWR5IHN1cHBvcnRzOg0KPj4+Pg0KPj4+PiAgICAgc2RoY2lfYXQ5MV9wcm9i
+ZSgpIC0+IHNkaGNpX2dldF9vZl9wcm9wZXJ0eSgpIC0+IHNkaGNpX2dldF9wcm9wZXJ0eSgpDQo+
+Pj4+DQo+Pj4+ICAgICAgIAlpZiAoZGV2aWNlX3Byb3BlcnR5X3ByZXNlbnQoZGV2LCAibm8tMS04
+LXYiKSkNCj4+Pj4gCQlob3N0LT5xdWlya3MyIHw9IFNESENJX1FVSVJLMl9OT18xXzhfVjsNCj4+
+Pj4NCj4+Pg0KPj4+IFJpZ2h0LCBJIGZvcmdvdCB0aGlzIHByb3BlcnR5LiBUaGFua3MuDQo+Pj4N
+Cj4+PiBFdWdlbiwgZG8geW91IHNlZSBjYXNlcyB3ZSBjYW4ndCBjb3ZlciB3aXRoIHRoaXMgcHJv
+cGVydHk/DQo+Pg0KPj4gSGksDQo+Pg0KPj4gRm9yIGN1cnJlbnQgcmVxdWlyZW1lbnRzIGFuZCBk
+cml2ZXIgc3VwcG9ydCwgdGhpcyBzaG91bGQgYmUgZW5vdWdoLg0KPj4NCj4+IEkgbm90aWNlZCBv
+bmUgdGhpbmcgcmVnYXJkaW5nIFNELUNhcmRzLCBpZiBJIGFkZCBwcm9wZXJ0eSBzZC11aHMtc2Ry
+MTA0DQo+PiB0aGUgY2xhc3MgMTAgdWhzMSBjYXJkcyBhcmUgZGV0ZWN0ZWQgYXMgU0RSMTA0IC4g
+V2l0aG91dCB0aGlzIHByb3BlcnR5DQo+PiB0aGV5IGFyZSBkZXRlY3RlZCBhcyBERFI1MC4gQW55
+IGlkZWEgd2h5IHRoZSBkaWZmZXJlbmNlID8gVGhlIGNvbnRyb2xsZXINCj4+IGRvZXMgbm90IGNs
+YWltIHRvIGhhdmUgU0RSMTA0IHN1cHBvcnQgPyAgV2Ugc2hvdWxkIGFkZCBpdCA/DQo+IA0KPiBX
+aXRoIHRoZSBtYWlubGluZSwgb3VyIHRyZWUgb3IgYm90aD8gSW4gb3VyIHRyZWUsIFNEUjEwNCBp
+cyByZW1vdmVkIGZyb20NCj4gdGhlIGNhcGFiaWxpdGllcy4NCj4gDQo+IEx1ZG92aWMNCj4gDQoN
+Cg0KSGVsbG8gQWxleGFuZHJlLA0KDQpBbnl0aGluZyBtb3JlIG5lZWRlZCByZWdhcmRpbmcgdGhp
+cyBwYXRjaCA/DQoNClRoYW5rcywNCkV1Z2VuDQo=
