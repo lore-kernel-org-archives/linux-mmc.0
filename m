@@ -1,69 +1,70 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v3 0/6] ACPI / utils: add new helper for HID/UID match
-Date: Thu, 3 Oct 2019 12:00:29 +0200
-Message-ID: <CAPDyKFq_HPDW5i5ND_df4GJsnaOowHWbFTkgCCOP6w9ar2uo6w@mail.gmail.com>
-References: <20191001142725.30857-1-andriy.shevchenko@linux.intel.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 1/2] mmc: sdhci: Check card status after reset
+Date: Thu, 3 Oct 2019 12:00:33 +0200
+Message-ID: <CAPDyKFpy_bC=pngV8c6PuTYm4UGeH0FtQxGPSydCf8VB9MvH9A@mail.gmail.com>
+References: <20190904164625.236978-1-rrangel@chromium.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-In-Reply-To: <20191001142725.30857-1-andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-Cc: "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, ACPI Devel Maling List <linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "list-Y9sIeH5OGRo@public.gmane.org:IOMMU DRIVERS <iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>,
-	Joerg Roedel <joro-zLv9SwRftAIdnm+yROfE0A@public.gmane.org>, " <iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>, Mika Westerberg <mika.westerberg-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20190904164625.236978-1-rrangel@chromium.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Raul E Rangel <rrangel@chromium.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, 1 Oct 2019 at 16:27, Andy Shevchenko
-<andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org> wrote:
+On Wed, 4 Sep 2019 at 18:46, Raul E Rangel <rrangel@chromium.org> wrote:
 >
-> There are few users outside of ACPI realm that re-introduce a custom
-> solution to match ACPI device against HID/UID. Add a generic helper for
-> them.
+> In sdhci_do_reset we call the reset callback which is typically
+> sdhci_reset. sdhci_reset can wait for up to 100ms waiting for the
+> controller to reset. If SDHCI_RESET_ALL was passed as the flag, the
+> controller will clear the IRQ mask. If during that 100ms the card is
+> removed there is no notification to the MMC system that the card was
+> removed. So from the drivers point of view the card is always present.
 >
-> The series is supposed to go via linux-pm tree.
+> By making sdhci_reinit compare the present state it can schedule a
+> rescan if the card was removed while a reset was in progress.
 >
-> In v3:
-> - correct logic in sdhci-acpi for qcom devices (Adrian)
-> - add Mika's Ack
->
-> In v2:
-> - add patch 2 due to latent issue in the header (lkp)
-> - get rid of match_hid_uid() completely in patch 6
->
-> Andy Shevchenko (6):
->   ACPI / utils: Describe function parameters in kernel-doc
->   ACPI / utils: Move acpi_dev_get_first_match_dev() under CONFIG_ACPI
->   ACPI / utils: Introduce acpi_dev_hid_uid_match() helper
->   ACPI / LPSS: Switch to use acpi_dev_hid_uid_match()
->   mmc: sdhci-acpi: Switch to use acpi_dev_hid_uid_match()
->   iommu/amd: Switch to use acpi_dev_hid_uid_match()
->
->  drivers/acpi/acpi_lpss.c      | 21 +++------------
->  drivers/acpi/utils.c          | 32 +++++++++++++++++++++++
->  drivers/iommu/amd_iommu.c     | 30 ++++-----------------
->  drivers/mmc/host/sdhci-acpi.c | 49 ++++++++++++-----------------------
->  include/acpi/acpi_bus.h       |  8 +++---
->  include/linux/acpi.h          |  6 +++++
->  6 files changed, 67 insertions(+), 79 deletions(-)
->
-> --
-> 2.23.0
->
+> Signed-off-by: Raul E Rangel <rrangel@chromium.org>
 
-I guess Rafael intend to pick this up for v5.5?
-
-In any case, for the mmc patch, feel free to add:
-
-Acked-by: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Applied for next, thanks!
 
 Kind regards
 Uffe
+
+
+> ---
+> Sorry this took me so long to send out. I tested out the patch set on
+> 5.3-rc5 with multiple devices.
+>
+> This patch was proposed here by Adrian: https://patchwork.kernel.org/patch/10925469/#22691177
+>
+>  drivers/mmc/host/sdhci.c | 11 +++++++++++
+>  1 file changed, 11 insertions(+)
+>
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index a5dc5aae973e..b0045880ee3d 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -337,8 +337,19 @@ static void sdhci_init(struct sdhci_host *host, int soft)
+>
+>  static void sdhci_reinit(struct sdhci_host *host)
+>  {
+> +       u32 cd = host->ier & (SDHCI_INT_CARD_REMOVE | SDHCI_INT_CARD_INSERT);
+> +
+>         sdhci_init(host, 0);
+>         sdhci_enable_card_detection(host);
+> +
+> +       /*
+> +        * A change to the card detect bits indicates a change in present state,
+> +        * refer sdhci_set_card_detection(). A card detect interrupt might have
+> +        * been missed while the host controller was being reset, so trigger a
+> +        * rescan to check.
+> +        */
+> +       if (cd != (host->ier & (SDHCI_INT_CARD_REMOVE | SDHCI_INT_CARD_INSERT)))
+> +               mmc_detect_change(host->mmc, msecs_to_jiffies(200));
+>  }
+>
+>  static void __sdhci_led_activate(struct sdhci_host *host)
+> --
+> 2.23.0.187.g17f5b7556c-goog
+>
