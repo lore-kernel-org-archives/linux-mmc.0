@@ -1,117 +1,32 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 2/2] mmc: sdhci: Quirk for AMD SDHC Device 0x7906
-Date: Thu, 3 Oct 2019 12:00:37 +0200
-Message-ID: <CAPDyKFpgNQ_MbrM8wqox3a9JutemNng+qrCjz91uam=gaLW-HQ@mail.gmail.com>
-References: <20190904164625.236978-1-rrangel@chromium.org> <20190904164625.236978-2-rrangel@chromium.org>
+Subject: Re: [PATCH 4/4] MMC: Ingenic: Add support for JZ4760 and support for LPM.
+Date: Thu, 3 Oct 2019 12:00:42 +0200
+Message-ID: <CAPDyKFo0aR2fhCd8qCNAf7hoXSjV+9vG1BqB6vEM=B9Vpmpovg@mail.gmail.com>
+References: <1567669089-88693-1-git-send-email-zhouyanjie@zoho.com> <1567669089-88693-5-git-send-email-zhouyanjie@zoho.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190904164625.236978-2-rrangel@chromium.org>
+In-Reply-To: <1567669089-88693-5-git-send-email-zhouyanjie@zoho.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Raul E Rangel <rrangel@chromium.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Shyam Sundar S K <Shyam-sundar.S-k@amd.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: Zhou Yanjie <zhouyanjie@zoho.com>
+Cc: linux-mips@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, Paul Burton <paul.burton@mips.com>, Linus Walleij <linus.walleij@linaro.org>, Paul Cercueil <paul@crapouillou.net>, Mathieu Malaterre <malat@debian.org>, YueHaibing <yuehaibing@huawei.com>, Ezequiel Garcia <ezequiel@collabora.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, syq@debian.org, jiaxun.yang@flygoat.com
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, 4 Sep 2019 at 18:46, Raul E Rangel <rrangel@chromium.org> wrote:
+On Thu, 5 Sep 2019 at 09:40, Zhou Yanjie <zhouyanjie@zoho.com> wrote:
 >
-> AMD SDHC 0x7906 requires a hard reset to clear all internal state.
-> Otherwise it can get into a bad state where the DATA lines are always
-> read as zeros.
->
-> This change requires firmware that can transition the device into
-> D3Cold for it to work correctly. If the firmware does not support
-> transitioning to D3Cold then the power state transitions are a no-op.
->
-> Signed-off-by: Raul E Rangel <rrangel@chromium.org>
-> Signed-off-by: Shyam Sundar S K <Shyam-sundar.S-k@amd.com>
-> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+> 1.add support for probing mmc driver on the JZ4760 Soc from Ingenic.
+> 2.add support for Low Power Mode of Ingenic's MMC/SD Controller.
 
-Applied for next, thanks!
+Normally we try to make "one" change per patch, unless there are some
+good reasons not to.
+
+In this case, it seems like you should rather split this patch into
+two separate pieces. Can you please do that?
+
+Additionally, please change the prefix for the commit message header
+to start with "mmc: jz4740:"
+
+[...]
 
 Kind regards
 Uffe
-
-
-> ---
-> This is just a resend of https://patchwork.kernel.org/patch/10925467/
->
->
->  drivers/mmc/host/sdhci-pci-core.c | 51 ++++++++++++++++++++++++++++++-
->  1 file changed, 50 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-> index 7d06e2860c36..84931ebe0c93 100644
-> --- a/drivers/mmc/host/sdhci-pci-core.c
-> +++ b/drivers/mmc/host/sdhci-pci-core.c
-> @@ -21,6 +21,7 @@
->  #include <linux/mmc/mmc.h>
->  #include <linux/scatterlist.h>
->  #include <linux/io.h>
-> +#include <linux/iopoll.h>
->  #include <linux/gpio.h>
->  #include <linux/pm_runtime.h>
->  #include <linux/mmc/slot-gpio.h>
-> @@ -1590,11 +1591,59 @@ static int amd_probe(struct sdhci_pci_chip *chip)
->         return 0;
->  }
->
-> +static u32 sdhci_read_present_state(struct sdhci_host *host)
-> +{
-> +       return sdhci_readl(host, SDHCI_PRESENT_STATE);
-> +}
-> +
-> +void amd_sdhci_reset(struct sdhci_host *host, u8 mask)
-> +{
-> +       struct sdhci_pci_slot *slot = sdhci_priv(host);
-> +       struct pci_dev *pdev = slot->chip->pdev;
-> +       u32 present_state;
-> +
-> +       /*
-> +        * SDHC 0x7906 requires a hard reset to clear all internal state.
-> +        * Otherwise it can get into a bad state where the DATA lines are always
-> +        * read as zeros.
-> +        */
-> +       if (pdev->device == 0x7906 && (mask & SDHCI_RESET_ALL)) {
-> +               pci_clear_master(pdev);
-> +
-> +               pci_save_state(pdev);
-> +
-> +               pci_set_power_state(pdev, PCI_D3cold);
-> +               pr_debug("%s: power_state=%u\n", mmc_hostname(host->mmc),
-> +                       pdev->current_state);
-> +               pci_set_power_state(pdev, PCI_D0);
-> +
-> +               pci_restore_state(pdev);
-> +
-> +               /*
-> +                * SDHCI_RESET_ALL says the card detect logic should not be
-> +                * reset, but since we need to reset the entire controller
-> +                * we should wait until the card detect logic has stabilized.
-> +                *
-> +                * This normally takes about 40ms.
-> +                */
-> +               readx_poll_timeout(
-> +                       sdhci_read_present_state,
-> +                       host,
-> +                       present_state,
-> +                       present_state & SDHCI_CD_STABLE,
-> +                       10000,
-> +                       100000
-> +               );
-> +       }
-> +
-> +       return sdhci_reset(host, mask);
-> +}
-> +
->  static const struct sdhci_ops amd_sdhci_pci_ops = {
->         .set_clock                      = sdhci_set_clock,
->         .enable_dma                     = sdhci_pci_enable_dma,
->         .set_bus_width                  = sdhci_set_bus_width,
-> -       .reset                          = sdhci_reset,
-> +       .reset                          = amd_sdhci_reset,
->         .set_uhs_signaling              = sdhci_set_uhs_signaling,
->  };
->
-> --
-> 2.23.0.187.g17f5b7556c-goog
->
