@@ -1,84 +1,109 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v4 0/7] Add SD/MMC driver for Actions Semi S900 SoC
-Date: Thu, 3 Oct 2019 12:01:18 +0200
-Message-ID: <CAPDyKFqsZ1mZ53b9wLruATzi+ymFrUCLhxzx7NFUq48p5w0Gtw@mail.gmail.com>
-References: <20190916154546.24982-1-manivannan.sadhasivam@linaro.org>
+Subject: Re: [PATCH v2] mmc: renesas_sdhi: Do not use platform_get_irq() to
+ count interrupts
+Date: Thu, 3 Oct 2019 12:01:32 +0200
+Message-ID: <CAPDyKFprzytDRz10GMqwKuCj+9VKhKWprxZpnA0-hVCN7Ldzhg@mail.gmail.com>
+References: <20191002152946.11586-1-geert+renesas@glider.be>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190916154546.24982-1-manivannan.sadhasivam@linaro.org>
+In-Reply-To: <20191002152946.11586-1-geert+renesas@glider.be>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
-Cc: =?UTF-8?Q?Andreas_F=C3=A4rber?= <afaerber@suse.de>, Rob Herring <robh+dt@kernel.org>, Stephen Boyd <sboyd@kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, thomas.liau@actions-semi.com, linux-actions@lists.infradead.org, Linus Walleij <linus.walleij@linaro.org>, linux-clk <linux-clk@vger.kernel.org>
+To: Geert Uytterhoeven <geert+renesas@glider.be>
+Cc: Stephen Boyd <swboyd@chromium.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, 16 Sep 2019 at 17:46, Manivannan Sadhasivam
-<manivannan.sadhasivam@linaro.org> wrote:
+On Wed, 2 Oct 2019 at 17:29, Geert Uytterhoeven <geert+renesas@glider.be> wrote:
 >
-> Hello,
+> As platform_get_irq() now prints an error when the interrupt does not
+> exist, counting interrupts by looping until failure causes the printing
+> of scary messages like:
 >
-> This patchset adds SD/MMC driver for Actions Semi S900 SoC from Owl
-> family SoCs. There are 4 SD/MMC controller present in this SoC but
-> only 2 are enabled currently for Bubblegum96 board to access uSD and
-> onboard eMMC. SDIO support for this driver is not currently implemented.
+>     renesas_sdhi_internal_dmac ee140000.sd: IRQ index 1 not found
 >
-> Note: Currently, driver uses 2 completion mechanisms for maintaining
-> the coherency between SDC and DMA interrupts and I know that it is not
-> efficient. Hence, I'd like to hear any suggestions for reimplementing
-> the logic if anyone has.
+> Fix this by using the platform_irq_count() helper to avoid touching
+> non-existent interrupts.
 >
-> With this driver, this patchset also fixes one clk driver issue and enables
-> the Actions Semi platform in ARM64 defconfig.
->
-> Thanks,
-> Mani
->
-> Changes in v4:
->
-> * Incorporated review comments from Rob on dt binding
->
-> Changes in v3:
->
-> * Incorporated a review comment from Andreas on board dts patch
-> * Modified the MAINTAINERS entry for devicetree YAML binding
->
-> Changes in v2:
->
-> * Converted the devicetree bindings to YAML
-> * Misc changes to bubblegum devicetree as per the review from Andreas
-> * Dropped the read/write wrappers and renamed all functions to use owl-
->   prefix as per the review from Ulf
-> * Renamed clk_val_best to owl_clk_val_best and added Reviewed-by tag
->   from Stephen
->
-> Manivannan Sadhasivam (7):
->   clk: actions: Fix factor clk struct member access
->   dt-bindings: mmc: Add Actions Semi SD/MMC/SDIO controller binding
->   arm64: dts: actions: Add MMC controller support for S900
->   arm64: dts: actions: Add uSD and eMMC support for Bubblegum96
->   mmc: Add Actions Semi Owl SoCs SD/MMC driver
->   MAINTAINERS: Add entry for Actions Semi SD/MMC driver and binding
->   arm64: configs: Enable Actions Semi platform in defconfig
->
->  .../devicetree/bindings/mmc/owl-mmc.yaml      |  59 ++
->  MAINTAINERS                                   |   2 +
->  .../boot/dts/actions/s900-bubblegum-96.dts    |  62 ++
->  arch/arm64/boot/dts/actions/s900.dtsi         |  45 ++
->  arch/arm64/configs/defconfig                  |   1 +
->  drivers/clk/actions/owl-factor.c              |   7 +-
->  drivers/mmc/host/Kconfig                      |   8 +
->  drivers/mmc/host/Makefile                     |   1 +
->  drivers/mmc/host/owl-mmc.c                    | 696 ++++++++++++++++++
->  9 files changed, 877 insertions(+), 4 deletions(-)
->  create mode 100644 Documentation/devicetree/bindings/mmc/owl-mmc.yaml
->  create mode 100644 drivers/mmc/host/owl-mmc.c
->
-> --
-> 2.17.1
->
+> Fixes: 7723f4c5ecdb8d83 ("driver core: platform: Add an error message to platform_get_irq*()")
+> Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
+> Reviewed-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+> Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> Tested-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+> Tested-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-I have picked up the mmc patches for next and as Stephen picked the
-clock patch, the rest are now for arm-soc, I guess!?
+Applied for fixes, thanks!
 
 Kind regards
 Uffe
+
+
+> ---
+> v2:
+>   - Add Reviewed-by, Tested-by,
+>   - Return failure in case num_irqs is zero, as before.
+>
+> This is a fix for v5.4-rc1.
+> ---
+>  drivers/mmc/host/renesas_sdhi_core.c | 31 +++++++++++++++++-----------
+>  1 file changed, 19 insertions(+), 12 deletions(-)
+>
+> diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
+> index d4ada5cca2d14f6a..234551a68739b65b 100644
+> --- a/drivers/mmc/host/renesas_sdhi_core.c
+> +++ b/drivers/mmc/host/renesas_sdhi_core.c
+> @@ -646,8 +646,8 @@ int renesas_sdhi_probe(struct platform_device *pdev,
+>         struct tmio_mmc_dma *dma_priv;
+>         struct tmio_mmc_host *host;
+>         struct renesas_sdhi *priv;
+> +       int num_irqs, irq, ret, i;
+>         struct resource *res;
+> -       int irq, ret, i;
+>         u16 ver;
+>
+>         of_data = of_device_get_match_data(&pdev->dev);
+> @@ -825,24 +825,31 @@ int renesas_sdhi_probe(struct platform_device *pdev,
+>                 host->hs400_complete = renesas_sdhi_hs400_complete;
+>         }
+>
+> -       i = 0;
+> -       while (1) {
+> +       num_irqs = platform_irq_count(pdev);
+> +       if (num_irqs < 0) {
+> +               ret = num_irqs;
+> +               goto eirq;
+> +       }
+> +
+> +       /* There must be at least one IRQ source */
+> +       if (!num_irqs) {
+> +               ret = -ENXIO;
+> +               goto eirq;
+> +       }
+> +
+> +       for (i = 0; i < num_irqs; i++) {
+>                 irq = platform_get_irq(pdev, i);
+> -               if (irq < 0)
+> -                       break;
+> -               i++;
+> +               if (irq < 0) {
+> +                       ret = irq;
+> +                       goto eirq;
+> +               }
+> +
+>                 ret = devm_request_irq(&pdev->dev, irq, tmio_mmc_irq, 0,
+>                                        dev_name(&pdev->dev), host);
+>                 if (ret)
+>                         goto eirq;
+>         }
+>
+> -       /* There must be at least one IRQ source */
+> -       if (!i) {
+> -               ret = irq;
+> -               goto eirq;
+> -       }
+> -
+>         dev_info(&pdev->dev, "%s base at 0x%08lx max clock rate %u MHz\n",
+>                  mmc_hostname(host->mmc), (unsigned long)
+>                  (platform_get_resource(pdev, IORESOURCE_MEM, 0)->start),
+> --
+> 2.17.1
+>
