@@ -1,35 +1,33 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2] mmc: renesas_sdhi: Do not use platform_get_irq() to
- count interrupts
-Date: Thu, 3 Oct 2019 12:01:32 +0200
-Message-ID: <CAPDyKFprzytDRz10GMqwKuCj+9VKhKWprxZpnA0-hVCN7Ldzhg@mail.gmail.com>
-References: <20191002152946.11586-1-geert+renesas@glider.be>
+Subject: Re: [PATCH] mmc: sh_mmcif: Use platform_get_irq_optional() for
+ optional interrupt
+Date: Thu, 3 Oct 2019 12:01:37 +0200
+Message-ID: <CAPDyKFo3_QmWHSwmKAXsvfr8F=UviP+vSGOuDMoJppYjv1_aNA@mail.gmail.com>
+References: <20191001180834.1158-1-geert+renesas@glider.be>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20191002152946.11586-1-geert+renesas@glider.be>
+In-Reply-To: <20191001180834.1158-1-geert+renesas@glider.be>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Geert Uytterhoeven <geert+renesas@glider.be>
-Cc: Stephen Boyd <swboyd@chromium.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Jiri Slaby <jslaby@suse.com>, Stephen Boyd <swboyd@chromium.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, 2 Oct 2019 at 17:29, Geert Uytterhoeven <geert+renesas@glider.be> wrote:
+On Tue, 1 Oct 2019 at 20:08, Geert Uytterhoeven <geert+renesas@glider.be> wrote:
 >
 > As platform_get_irq() now prints an error when the interrupt does not
-> exist, counting interrupts by looping until failure causes the printing
-> of scary messages like:
+> exist, a scary warning may be printed for an optional interrupt:
 >
->     renesas_sdhi_internal_dmac ee140000.sd: IRQ index 1 not found
+>     sh_mmcif ee200000.mmc: IRQ index 1 not found
 >
-> Fix this by using the platform_irq_count() helper to avoid touching
-> non-existent interrupts.
+> Fix this by calling platform_get_irq_optional() instead for the second
+> interrupt, which is optional.
+>
+> Remove the now superfluous error printing for the first interrupt, which
+> is mandatory.
 >
 > Fixes: 7723f4c5ecdb8d83 ("driver core: platform: Add an error message to platform_get_irq*()")
 > Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
-> Reviewed-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-> Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-> Tested-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-> Tested-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
 Applied for fixes, thanks!
 
@@ -38,72 +36,29 @@ Uffe
 
 
 > ---
-> v2:
->   - Add Reviewed-by, Tested-by,
->   - Return failure in case num_irqs is zero, as before.
->
 > This is a fix for v5.4-rc1.
 > ---
->  drivers/mmc/host/renesas_sdhi_core.c | 31 +++++++++++++++++-----------
->  1 file changed, 19 insertions(+), 12 deletions(-)
+>  drivers/mmc/host/sh_mmcif.c | 6 ++----
+>  1 file changed, 2 insertions(+), 4 deletions(-)
 >
-> diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-> index d4ada5cca2d14f6a..234551a68739b65b 100644
-> --- a/drivers/mmc/host/renesas_sdhi_core.c
-> +++ b/drivers/mmc/host/renesas_sdhi_core.c
-> @@ -646,8 +646,8 @@ int renesas_sdhi_probe(struct platform_device *pdev,
->         struct tmio_mmc_dma *dma_priv;
->         struct tmio_mmc_host *host;
->         struct renesas_sdhi *priv;
-> +       int num_irqs, irq, ret, i;
->         struct resource *res;
-> -       int irq, ret, i;
->         u16 ver;
+> diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+> index 81bd9afb0980525e..98c575de43c755ed 100644
+> --- a/drivers/mmc/host/sh_mmcif.c
+> +++ b/drivers/mmc/host/sh_mmcif.c
+> @@ -1393,11 +1393,9 @@ static int sh_mmcif_probe(struct platform_device *pdev)
+>         const char *name;
 >
->         of_data = of_device_get_match_data(&pdev->dev);
-> @@ -825,24 +825,31 @@ int renesas_sdhi_probe(struct platform_device *pdev,
->                 host->hs400_complete = renesas_sdhi_hs400_complete;
->         }
->
-> -       i = 0;
-> -       while (1) {
-> +       num_irqs = platform_irq_count(pdev);
-> +       if (num_irqs < 0) {
-> +               ret = num_irqs;
-> +               goto eirq;
-> +       }
-> +
-> +       /* There must be at least one IRQ source */
-> +       if (!num_irqs) {
-> +               ret = -ENXIO;
-> +               goto eirq;
-> +       }
-> +
-> +       for (i = 0; i < num_irqs; i++) {
->                 irq = platform_get_irq(pdev, i);
-> -               if (irq < 0)
-> -                       break;
-> -               i++;
-> +               if (irq < 0) {
-> +                       ret = irq;
-> +                       goto eirq;
-> +               }
-> +
->                 ret = devm_request_irq(&pdev->dev, irq, tmio_mmc_irq, 0,
->                                        dev_name(&pdev->dev), host);
->                 if (ret)
->                         goto eirq;
->         }
->
-> -       /* There must be at least one IRQ source */
-> -       if (!i) {
-> -               ret = irq;
-> -               goto eirq;
+>         irq[0] = platform_get_irq(pdev, 0);
+> -       irq[1] = platform_get_irq(pdev, 1);
+> -       if (irq[0] < 0) {
+> -               dev_err(dev, "Get irq error\n");
+> +       irq[1] = platform_get_irq_optional(pdev, 1);
+> +       if (irq[0] < 0)
+>                 return -ENXIO;
 > -       }
-> -
->         dev_info(&pdev->dev, "%s base at 0x%08lx max clock rate %u MHz\n",
->                  mmc_hostname(host->mmc), (unsigned long)
->                  (platform_get_resource(pdev, IORESOURCE_MEM, 0)->start),
+>
+>         res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+>         reg = devm_ioremap_resource(dev, res);
 > --
 > 2.17.1
 >
