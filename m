@@ -1,108 +1,95 @@
-From: Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
-Subject: Re: [PATCH v4 0/7] Add SD/MMC driver for Actions Semi S900 SoC
-Date: Thu, 3 Oct 2019 21:47:14 +0530
-Message-ID: <20191003161714.GA14774@Mani-XPS-13-9360>
-References: <20190916154546.24982-1-manivannan.sadhasivam@linaro.org>
- <CAPDyKFqsZ1mZ53b9wLruATzi+ymFrUCLhxzx7NFUq48p5w0Gtw@mail.gmail.com>
+From: Alexandre Belloni <alexandre.belloni@bootlin.com>
+Subject: Re: [PATCH 2/2] ARM: dts: at91: sama5d27_som1_ek: add mmc
+ capabilities for SDMMC0
+Date: Thu, 3 Oct 2019 21:42:03 +0200
+Message-ID: <20191003194203.GI575@piout.net>
+References: <1565252928-28994-1-git-send-email-eugen.hristev@microchip.com>
+ <1565252928-28994-2-git-send-email-eugen.hristev@microchip.com>
+ <20190808124217.wrmcxohw5i6ju2qe@M43218.corp.atmel.com>
+ <04fd74c3-a828-1064-b77b-f3de07a26190@intel.com>
+ <20190809062322.syuieymdqjs4e7lh@M43218.corp.atmel.com>
+ <fa0debbb-b84c-1f74-f8b8-8fdd7812aaee@microchip.com>
+ <20190813065306.tqz57hqeiofofbnz@M43218.corp.atmel.com>
+ <c2c355cd-b798-02de-0606-0f6442f6fdca@microchip.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <CAPDyKFqsZ1mZ53b9wLruATzi+ymFrUCLhxzx7NFUq48p5w0Gtw@mail.gmail.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: DTML <devicetree@vger.kernel.org>, Stephen Boyd <sboyd@kernel.org>, linux-actions@lists.infradead.org, Linus Walleij <linus.walleij@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, thomas.liau@actions-semi.com, linux-clk <linux-clk@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, Andreas =?iso-8859-1?Q?F=E4rber?= <afaerber@suse.de>, Linux ARM <linux-arm-kernel@lists.infradead.org>
+In-Reply-To: <c2c355cd-b798-02de-0606-0f6442f6fdca@microchip.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Eugen.Hristev@microchip.com
+Cc: linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, adrian.hunter@intel.com, Nicolas.Ferre@microchip.com, ulf.hansson@linaro.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Ulf,
-
-On Thu, Oct 03, 2019 at 12:01:18PM +0200, Ulf Hansson wrote:
-> On Mon, 16 Sep 2019 at 17:46, Manivannan Sadhasivam
-> <manivannan.sadhasivam@linaro.org> wrote:
-> >
-> > Hello,
-> >
-> > This patchset adds SD/MMC driver for Actions Semi S900 SoC from Owl
-> > family SoCs. There are 4 SD/MMC controller present in this SoC but
-> > only 2 are enabled currently for Bubblegum96 board to access uSD and
-> > onboard eMMC. SDIO support for this driver is not currently implemented.
-> >
-> > Note: Currently, driver uses 2 completion mechanisms for maintaining
-> > the coherency between SDC and DMA interrupts and I know that it is not
-> > efficient. Hence, I'd like to hear any suggestions for reimplementing
-> > the logic if anyone has.
-> >
-> > With this driver, this patchset also fixes one clk driver issue and enables
-> > the Actions Semi platform in ARM64 defconfig.
-> >
-> > Thanks,
-> > Mani
-> >
-> > Changes in v4:
-> >
-> > * Incorporated review comments from Rob on dt binding
-> >
-> > Changes in v3:
-> >
-> > * Incorporated a review comment from Andreas on board dts patch
-> > * Modified the MAINTAINERS entry for devicetree YAML binding
-> >
-> > Changes in v2:
-> >
-> > * Converted the devicetree bindings to YAML
-> > * Misc changes to bubblegum devicetree as per the review from Andreas
-> > * Dropped the read/write wrappers and renamed all functions to use owl-
-> >   prefix as per the review from Ulf
-> > * Renamed clk_val_best to owl_clk_val_best and added Reviewed-by tag
-> >   from Stephen
-> >
-> > Manivannan Sadhasivam (7):
-> >   clk: actions: Fix factor clk struct member access
-> >   dt-bindings: mmc: Add Actions Semi SD/MMC/SDIO controller binding
-> >   arm64: dts: actions: Add MMC controller support for S900
-> >   arm64: dts: actions: Add uSD and eMMC support for Bubblegum96
-> >   mmc: Add Actions Semi Owl SoCs SD/MMC driver
-> >   MAINTAINERS: Add entry for Actions Semi SD/MMC driver and binding
-> >   arm64: configs: Enable Actions Semi platform in defconfig
-> >
-> >  .../devicetree/bindings/mmc/owl-mmc.yaml      |  59 ++
-> >  MAINTAINERS                                   |   2 +
-> >  .../boot/dts/actions/s900-bubblegum-96.dts    |  62 ++
-> >  arch/arm64/boot/dts/actions/s900.dtsi         |  45 ++
-> >  arch/arm64/configs/defconfig                  |   1 +
-> >  drivers/clk/actions/owl-factor.c              |   7 +-
-> >  drivers/mmc/host/Kconfig                      |   8 +
-> >  drivers/mmc/host/Makefile                     |   1 +
-> >  drivers/mmc/host/owl-mmc.c                    | 696 ++++++++++++++++++
-> >  9 files changed, 877 insertions(+), 4 deletions(-)
-> >  create mode 100644 Documentation/devicetree/bindings/mmc/owl-mmc.yaml
-> >  create mode 100644 drivers/mmc/host/owl-mmc.c
-> >
-> > --
-> > 2.17.1
-> >
+On 03/10/2019 10:24:52+0000, Eugen.Hristev@microchip.com wrote:
 > 
-> I have picked up the mmc patches for next
-
-Thanks :)
-
-> and as Stephen picked the
-> clock patch, the rest are now for arm-soc, I guess!?
+> 
+> On 13.08.2019 09:53, Ludovic Desroches wrote:
+> > On Mon, Aug 12, 2019 at 03:38:34PM +0000, Eugen.Hristev@microchip.com wrote:
+> >> On 09.08.2019 09:23, Ludovic Desroches wrote:
+> >>> On Thu, Aug 08, 2019 at 03:57:30PM +0300, Adrian Hunter wrote:
+> >>>> On 8/08/19 3:42 PM, Ludovic Desroches wrote:
+> >>>>> On Thu, Aug 08, 2019 at 10:35:43AM +0200, Eugen Hristev - M18282 wrote:
+> >>>>>> From: Eugen Hristev <eugen.hristev@microchip.com>
+> >>>>>>
+> >>>>>> Add mmc capabilities for SDMMC0 for this board.
+> >>>>>> With this enabled, eMMC connected card is detected as:
+> >>>>>>
+> >>>>>> mmc0: new DDR MMC card at address 0001
+> >>>>>>
+> >>>>>> Signed-off-by: Eugen Hristev <eugen.hristev@microchip.com>
+> >>>>> Acked-by: Ludovic Desroches <ludovic.desroches@microchip.com>
+> >>>>>
+> >>>>> I am interested to have the some insights about the use of sd-uhs-*
+> >>>>> properties.
+> >>>>>
+> >>>>> Our IP can't deal with 1V8 by itself. It has a 1V8SEL signal which can
+> >>>>> be used as the logic control input of a mux. So even if the IP claims
+> >>>>> to support UHS modes, it depends on the board.
+> >>>>>
+> >>>>> Are the sd-uhs-* properties a way to deal with this? I tend to think no
+> >>>>> as sdhci_setup_host() will set the caps depending on the content of the
+> >>>>> capabilities register. Do we have to use the SDHCI_QUIRK_MISSING_CAPS
+> >>>>> quirk or sdhci-caps/sdhci-caps-mask?
+> >>>>
+> >>>> There is "no-1-8-v" which it looks like sdhci-of-at91.c already supports:
+> >>>>
+> >>>>     sdhci_at91_probe() -> sdhci_get_of_property() -> sdhci_get_property()
+> >>>>
+> >>>>       	if (device_property_present(dev, "no-1-8-v"))
+> >>>> 		host->quirks2 |= SDHCI_QUIRK2_NO_1_8_V;
+> >>>>
+> >>>
+> >>> Right, I forgot this property. Thanks.
+> >>>
+> >>> Eugen, do you see cases we can't cover with this property?
+> >>
+> >> Hi,
+> >>
+> >> For current requirements and driver support, this should be enough.
+> >>
+> >> I noticed one thing regarding SD-Cards, if I add property sd-uhs-sdr104
+> >> the class 10 uhs1 cards are detected as SDR104 . Without this property
+> >> they are detected as DDR50. Any idea why the difference ? The controller
+> >> does not claim to have SDR104 support ?  We should add it ?
+> > 
+> > With the mainline, our tree or both? In our tree, SDR104 is removed from
+> > the capabilities.
+> > 
+> > Ludovic
+> > 
+> 
+> 
+> Hello Alexandre,
+> 
+> Anything more needed regarding this patch ?
 > 
 
-Yes, I'll queue them through actions tree (unless Andreas wants to do the PR).
+I was not sure it was applicable, seeing the discussion. I'll apply it
+now.
 
-Regards,
-Mani
 
-> Kind regards
-> Uffe
+-- 
+Alexandre Belloni, Bootlin
+Embedded Linux and Kernel engineering
+https://bootlin.com
