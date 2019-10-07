@@ -1,43 +1,56 @@
-From: Zhou Yanjie <zhouyanjie@zoho.com>
-Subject: Re: [PATCH 4/4] MMC: Ingenic: Add support for JZ4760 and support for
- LPM.
-Date: Sun, 6 Oct 2019 13:58:22 +0800
-Message-ID: <5D99827E.9070505@zoho.com>
-References: <1567669089-88693-1-git-send-email-zhouyanjie@zoho.com>
- <1567669089-88693-5-git-send-email-zhouyanjie@zoho.com>
- <CAPDyKFo0aR2fhCd8qCNAf7hoXSjV+9vG1BqB6vEM=B9Vpmpovg@mail.gmail.com>
+From: <orito.takao@socionext.com>
+Subject: Re: [PATCH v3 0/2] mmc: sdhci-milbeaut: add Milbeaut SD driver
+Date: Mon, 7 Oct 2019 02:32:44 +0000
+Message-ID: <20191007113235.355F.F0D17A80@socionext.com>
+References: <1568079631-28808-1-git-send-email-orito.takao@socionext.com>
+ <CAPDyKFq6wbscGGq_0Q3_8eGLXk-+xBtmPbjq97jiejR7Qd_QbA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="iso-2022-jp"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFo0aR2fhCd8qCNAf7hoXSjV+9vG1BqB6vEM=B9Vpmpovg@mail.gmail.com>
+In-Reply-To: <CAPDyKFq6wbscGGq_0Q3_8eGLXk-+xBtmPbjq97jiejR7Qd_QbA@mail.gmail.com>
+Content-Language: ja-JP
+Content-ID: <36AE662AED835746B2F222A52E6199E0@socionext.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mips@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, Paul Burton <paul.burton@mips.com>, Linus Walleij <linus.walleij@linaro.org>, Paul Cercueil <paul@crapouillou.net>, Mathieu Malaterre <malat@debian.org>, YueHaibing <yuehaibing@huawei.com>, Ezequiel Garcia <ezequiel@collabora.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, syq@debian.org, jiaxun.yang@flygoat.com
+To: ulf.hansson@linaro.org
+Cc: robh+dt@kernel.org, mark.rutland@arm.com, adrian.hunter@intel.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, masami.hiramatsu@linaro.org, jaswinder.singh@linaro.org, sugaya.taichi@socionext.com, kasai.kazuhiro@socionext.com, kanematsu.shinji@socionext.com
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Uffe,
-On 2019=E5=B9=B410=E6=9C=8803=E6=97=A5 18:00, Ulf Hansson wrote:
-> On Thu, 5 Sep 2019 at 09:40, Zhou Yanjie <zhouyanjie@zoho.com> wrote:
->> 1.add support for probing mmc driver on the JZ4760 Soc from Ingenic.
->> 2.add support for Low Power Mode of Ingenic's MMC/SD Controller.
-> Normally we try to make "one" change per patch, unless there are some
-> good reasons not to.
->
-> In this case, it seems like you should rather split this patch into
-> two separate pieces. Can you please do that?
-
-OK,I'll split it in v2.
-
->
-> Additionally, please change the prefix for the commit message header
-> to start with "mmc: jz4740:"
-
-sure, it will be change in v2.
-
->
-> [...]
->
-> Kind regards
-> Uffe
-Thanks  and best regards!
+DQpUaGFua3MgZm9yIGNoZWNraW5nIGFuZCBwdXNoaW5nIG15IHBhdGNoICENCg0KT3JpdG8NCg0K
+PiBPbiBUdWUsIDEwIFNlcCAyMDE5IGF0IDAzOjM5LCBUYWthbyBPcml0byA8b3JpdG8udGFrYW9A
+c29jaW9uZXh0LmNvbT4gd3JvdGU6DQo+ID4NCj4gPiBUaGUgZm9sbG93aW5nIHBhdGNoZXMgYWRk
+IGRyaXZlciBmb3IgU0QgSG9zdCBjb250cm9sbGVyIG9uDQo+ID4gU29jaW9uZXh0J3MgTWlsYmVh
+dXQgTTEwViBwbGF0Zm9ybXMuDQo+ID4NCj4gPiBTRCBIb3N0IGNvbnRyb2xsZXIgb24gTWlsYmVh
+dXQgY29uc2lzdHMgb2YgdHdvIGNvbnRyb2xsZXIgcGFydHMuDQo+ID4gT25lIGlzIGNvcmUgY29u
+dHJvbGxlciBGX1NESDMwLCB0aGlzIGlzIHNpbWlsYXIgdG8gc2RoY2ktZnVqaXRzdQ0KPiA+IGNv
+bnRyb2xsZXIuDQo+ID4gQW5vdGhlciBpcyBicmlkZ2UgY29udHJvbGxlci4gVGhpcyBicmlkZ2Ug
+Y29udHJvbGxlciBpcyBub3QgY29tcGF0aWJsZQ0KPiA+IHdpdGggc2RoY2ktZnVqaXRzdSBjb250
+cm9sbGVyLiBUaGlzIGlzIHNwZWNpYWwgZm9yIE1pbGJlYXV0IHNlcmllcy4NCj4gPg0KPiA+IEl0
+IGhhcyB0aGUgc2V2ZXJhbCBwYXJ0cywNCj4gPiAgLSByZXNldCBjb250cm9sDQo+ID4gIC0gY2xv
+Y2sgZW5hYmxlIC8gc2VsZWN0IGZvciBTRFI1MC8yNS8xMg0KPiA+ICAtIGhvbGQgY29udHJvbCBv
+ZiBEQVRBL0NNRCBsaW5lDQo+ID4gIC0gc2VsZWN0IGNoYXJhY3RlcmlzdGljcyBmb3IgV1AvQ0Qv
+TEVEIGxpbmUNCj4gPiAgLSBSZS10dW5pbmcgY29udHJvbCBmb3IgbW9kZTMNCj4gPiAgLSBDYXBh
+YmlsaXR5IHNldHRpbmcNCj4gPiAgICBUaW1lb3V0IENsb2NrIC8gQmFzZSBDbG9jayAvIFRpbWVy
+IENvdW50IGZvciBSZS1UdW5pbmcgLw0KPiA+ICAgIERlYm91bmNlIHBlcmlvZA0KPiA+IFRoZXNl
+IHJlcXVpcmVzIHNwZWNpYWwgcHJvY2VkdXJlcyBhdCByZXNldCBvciBjbG9jayBlbmFibGUvY2hh
+bmdlIG9yDQo+ID4gIGZ1cnRoZXIgdHVuaW5nIG9mIGNsb2NrLg0KPiA+DQo+ID4gVGFrYW8gT3Jp
+dG8gKDIpOg0KPiA+ICAgZHQtYmluZGluZ3M6IG1tYzogYWRkIERUIGJpbmRpbmdzIGZvciBNaWxi
+ZWF1dCBTRCBjb250cm9sbGVyDQo+ID4gICBtbWM6IHNkaGNpLW1pbGJlYXV0OiBhZGQgTWlsYmVh
+dXQgU0QgY29udHJvbGxlciBkcml2ZXINCj4gPg0KPiA+ICAuLi4vZGV2aWNldHJlZS9iaW5kaW5n
+cy9tbWMvc2RoY2ktbWlsYmVhdXQudHh0ICAgICB8ICAzMCArKw0KPiA+ICBkcml2ZXJzL21tYy9o
+b3N0L0tjb25maWcgICAgICAgICAgICAgICAgICAgICAgICAgICB8ICAxMSArDQo+ID4gIGRyaXZl
+cnMvbW1jL2hvc3QvTWFrZWZpbGUgICAgICAgICAgICAgICAgICAgICAgICAgIHwgICAxICsNCj4g
+PiAgZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1taWxiZWF1dC5jICAgICAgICAgICAgICAgICAgfCAz
+NjIgKysrKysrKysrKysrKysrKysrKysrDQo+ID4gIGRyaXZlcnMvbW1jL2hvc3Qvc2RoY2lfZl9z
+ZGgzMC5jICAgICAgICAgICAgICAgICAgIHwgIDI2ICstDQo+ID4gIGRyaXZlcnMvbW1jL2hvc3Qv
+c2RoY2lfZl9zZGgzMC5oICAgICAgICAgICAgICAgICAgIHwgIDMyICsrDQo+ID4gIDYgZmlsZXMg
+Y2hhbmdlZCwgNDM3IGluc2VydGlvbnMoKyksIDI1IGRlbGV0aW9ucygtKQ0KPiA+ICBjcmVhdGUg
+bW9kZSAxMDA2NDQgRG9jdW1lbnRhdGlvbi9kZXZpY2V0cmVlL2JpbmRpbmdzL21tYy9zZGhjaS1t
+aWxiZWF1dC50eHQNCj4gPiAgY3JlYXRlIG1vZGUgMTAwNjQ0IGRyaXZlcnMvbW1jL2hvc3Qvc2Ro
+Y2ktbWlsYmVhdXQuYw0KPiA+ICBjcmVhdGUgbW9kZSAxMDA2NDQgZHJpdmVycy9tbWMvaG9zdC9z
+ZGhjaV9mX3NkaDMwLmgNCj4gPg0KPiA+IC0tDQo+ID4gMS45LjENCj4gPg0KPiA+DQo+IA0KPiBB
+cHBsaWVkIGZvciBuZXh0LCB0aGFua3MhDQo+IA0KPiBLaW5kIHJlZ2FyZHMNCj4gVWZmZQ0KDQot
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLQ0KVGFrYW8gT3JpdG8NClNvY2lvbmV4dCBJbmMuDQpFLW1haWw6b3JpdG8udGFrYW9A
+c29jaW9uZXh0LmNvbQ0KVGVsOis4MS04MC05ODE1LTE0NjANCi0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tDQo=
