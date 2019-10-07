@@ -1,53 +1,34 @@
-From: "Ramuthevar, Vadivel MuruganX"
-        <vadivel.muruganx.ramuthevar@linux.intel.com>
-Subject: Re: [PATCH v1 2/2] mmc: sdhci-of-arasan: Add Support for Intel LGM
- SDXC
-Date: Mon, 7 Oct 2019 15:33:43 +0800
-Message-ID: <535ae010-c8b1-ceda-39dc-2dda049b1952@linux.intel.com>
-References: <20191003040032.37696-1-vadivel.muruganx.ramuthevar@linux.intel.com>
- <20191003040032.37696-3-vadivel.muruganx.ramuthevar@linux.intel.com>
- <329a38b4-4fba-eb6e-0d40-c241cfa28e25@intel.com>
- <0c3d406c-dc28-a670-91df-7c7e6f818f87@linux.intel.com>
+From: Joerg Roedel <joro-zLv9SwRftAIdnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v2 6/6] iommu/amd: Switch to use acpi_dev_hid_uid_match()
+Date: Mon, 7 Oct 2019 17:28:48 +0200
+Message-ID: <20191007152848.GA20456@8bytes.org>
+References: <20190924193739.86133-1-andriy.shevchenko@linux.intel.com>
+	<20190924193739.86133-7-andriy.shevchenko@linux.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <0c3d406c-dc28-a670-91df-7c7e6f818f87@linux.intel.com>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, michal.simek@xilinx.com, robh+dt@kernel.org, mark.rutland@arm.com, andriy.shevchenko@intel.com, cheol.yong.kim@intel.com, qi-ming.wu@intel.com
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20190924193739.86133-7-andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Adrian,
-
-On 3/10/2019 3:46 PM, Ramuthevar, Vadivel MuruganX wrote:
-> Hi Adrian,
->
->  Thank you for the comments.
->
-> On 3/10/2019 3:02 PM, Adrian Hunter wrote:
->> On 3/10/19 7:00 AM, Ramuthevar,Vadivel MuruganX wrote:
->>> From: Ramuthevar Vadivel Murugan 
->>> <vadivel.muruganx.ramuthevar@linux.intel.com>
->>>
->>> The current arasan sdhci PHY configuration isn't compatible
->>> with the PHY on Intel's LGM(Lightning Mountain) SoC devices.
->>>
->>> Therefore, add a new compatible, to adapt the Intel's LGM
->>> SDXC PHY with arasan-sdhc controller to configure the PHY.
->>>
->>> Signed-off-by: Ramuthevar Vadivel Murugan 
->>> <vadivel.muruganx.ramuthevar@linux.intel.com>
->> Aren't these patches already in v5.4-rc1
->
->  No, these patches are not there in v5.4-rc1.
->
->  The one which is in v5.4-rc1 supports only eMMC, does not SD/SDIO, so 
-> these patches are required.
->
-can you please provide your suggestions and opinions further on the 
-above reply,  to proceed, Thanks!
+On Tue, Sep 24, 2019 at 10:37:39PM +0300, Andy Shevchenko wrote:
+> Since we have a generic helper, drop custom implementation in the driver.
+> 
+> Signed-off-by: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
 > ---
-> With Best Regards
-> Vadivel Murugan
+>  drivers/iommu/amd_iommu.c | 30 +++++-------------------------
+>  1 file changed, 5 insertions(+), 25 deletions(-)
+
+Acked-by: Joerg Roedel <jroedel-l3A5Bk7waGM@public.gmane.org>
