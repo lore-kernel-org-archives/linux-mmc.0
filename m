@@ -1,16 +1,11 @@
-From: Ludovic Desroches <ludovic.desroches@microchip.com>
-Subject: Re: [PATCH 1/3] dt-bindings: sdhci-of-at91: new compatible string
- and update properties
-Date: Tue, 8 Oct 2019 11:28:27 +0200
-Message-ID: <20191008092826.63kbia2wkggeab74@M43218.corp.atmel.com>
-References: <20190912200908.31318-1-ludovic.desroches@microchip.com>
- <20190930145613.GA11254@bogus>
+From: Ludovic Barre <ludovic.Barre@st.com>
+Subject: [PATCH V7 0/3] mmc: mmci: add busy detect for stm32 sdmmc variant
+Date: Tue, 8 Oct 2019 11:56:01 +0200
+Message-ID: <20191008095604.20675-1-ludovic.Barre@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-Content-Disposition: inline
-In-Reply-To: <20190930145613.GA11254@bogus>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -20,75 +15,64 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
 Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
 Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Rob Herring <robh@kernel.org>
-Cc: mark.rutland@arm.com, devicetree@vger.kernel.org, ulf.hansson@linaro.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, adrian.hunter@intel.com, claudiu.beznea@microchip.com, linux-arm-kernel@lists.infradead.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>
+Cc: devicetree@vger.kernel.org, Alexandre Torgue <alexandre.torgue@st.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, srinivas.kandagatla@linaro.org, Ludovic Barre <ludovic.barre@st.com>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, linux-stm32@st-md-mailman.stormreply.com, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, Sep 30, 2019 at 09:56:13AM -0500, Rob Herring wrote:
-> On Thu, Sep 12, 2019 at 10:09:06PM +0200, Ludovic Desroches wrote:
-> > There is a new compatible string for the SAM9X60 sdhci device. It involves
-> > an update of the properties about the clocks stuff.
-> > 
-> > Signed-off-by: Ludovic Desroches <ludovic.desroches@microchip.com>
-> > ---
-> >  .../devicetree/bindings/mmc/sdhci-atmel.txt   | 25 ++++++++++++++++---
-> >  1 file changed, 22 insertions(+), 3 deletions(-)
-> > 
-> > diff --git a/Documentation/devicetree/bindings/mmc/sdhci-atmel.txt b/Documentation/devicetree/bindings/mmc/sdhci-atmel.txt
-> > index 1b662d7171a0..364ceea330b6 100644
-> > --- a/Documentation/devicetree/bindings/mmc/sdhci-atmel.txt
-> > +++ b/Documentation/devicetree/bindings/mmc/sdhci-atmel.txt
-> > @@ -5,12 +5,19 @@ Documentation/devicetree/bindings/mmc/mmc.txt and the properties used by the
-> >  sdhci-of-at91 driver.
-> >  
-> >  Required properties:
-> > -- compatible:		Must be "atmel,sama5d2-sdhci".
-> > +- compatible:		Must be "atmel,sama5d2-sdhci" or "microchip,sam9x60-sdhci".
-> >  - clocks:		Phandlers to the clocks.
-> > -- clock-names:		Must be "hclock", "multclk", "baseclk";
-> > +- clock-names:		Must be "hclock", "multclk", "baseclk" for
-> > +			"atmel,sama5d2-sdhci".
-> > +			Must be "hclock", "multclk" for "microchip,sam9x60-sdhci".
-> >  
-> > +Optional properties:
-> > +- assigned-clocks:	The same with "multclk".
-> > +- assigned-clock-rates	The rate of "multclk" in order to not rely on the
-> > +			gck configuration set by previous components.
-> >  
-> > -Example:
-> > +
-> > +Examples:
-> >  
-> >  sdmmc0: sdio-host@a0000000 {
-> >  	compatible = "atmel,sama5d2-sdhci";
-> > @@ -18,4 +25,16 @@ sdmmc0: sdio-host@a0000000 {
-> >  	interrupts = <31 IRQ_TYPE_LEVEL_HIGH 0>;
-> >  	clocks = <&sdmmc0_hclk>, <&sdmmc0_gclk>, <&main>;
-> >  	clock-names = "hclock", "multclk", "baseclk";
-> > +	assigned-clocks = <&sdmmc0_gclk>;
-> > +	assigned-clock-rates = <480000000>;
-> > +};
-> > +
-> > +sdmmc0: sdio-host@80000000 {
-> 
-> mmc@...
-> 
-> Though I don't see much value in a second example. Examples are not a 
-> complete enumeration of all possible dts entries.
-> 
+From: Ludovic Barre <ludovic.barre@st.com>
 
-Ok, I'll skip this example.
+This patch series adds busy detect for stm32 sdmmc variant.
+Some adaptations are required:
+-On sdmmc the data timer is started on data transfert
+and busy state, so we must add hardware busy timeout support.
+-Add busy_complete callback at mmci_host_ops to allow to define
+a specific busy completion by variant.
+-Add sdmmc busy_complete callback.
 
-Ludovic
+V7:
+-Patch 1/3: rephrasing like proposed (thx ulf)
+-If busy timeout is undefined => increase to 10s
+-Keep busy_detect.
+-Patch 3/3: rephrasing comment header
+-Avoid twice read of status register
+-Avoid writing in MMCIMASK0 & MMCICLEAR if not modified
 
-> > +	compatible = "microchip,sam9x60-sdhci";
-> > +	reg = <0x80000000 0x300>;
-> > +	interrupts = <12 IRQ_TYPE_LEVEL_HIGH 0>;
-> > +	clocks = <&pmc PMC_TYPE_PERIPHERAL 12>, <&pmc PMC_TYPE_GCK 12>;
-> > +	clock-names = "hclock", "multclk";
-> > +	assigned-clocks = <&pmc PMC_TYPE_GCK 12>;
-> > +	assigned-clock-rates = <100000000>;
-> >  };
-> > -- 
-> > 2.23.0
-> > 
+V6:
+-mmci_start_command: set datatimer only on rsp_busy flag
+(remove host->mrq->data).
+-move max_busy_timeout in set_ios callback.
+-typo fix: err_msk, clks on one lines.
+
+V5:
+-Replaces !cmd->data to !host->mrq->data to avoid overwrite
+ of datatimer register by the first command (cmd23, without data) of
+ SBC request.
+
+V4:
+-Re-work with busy_complete callback
+-In series, move "mmc: mmci: add hardware busy timeout feature" in
+first to simplify busy_complete prototype with err_msk parameter.
+
+V3:
+-rebase on latest mmc next
+-replace re-read by status parameter. 
+
+V2:
+-mmci_cmd_irq cleanup in separate patch.
+-simplify the busy_detect_flag exclude
+-replace sdmmc specific comment in
+"mmc: mmci: avoid fake busy polling in mmci_irq"
+to focus on common behavior
+
+Ludovic Barre (3):
+  mmc: mmci: add hardware busy timeout feature
+  mmc: mmci: add busy_complete callback
+  mmc: mmci: sdmmc: add busy_complete callback
+
+ drivers/mmc/host/mmci.c             | 178 +++++++++++++++++-----------
+ drivers/mmc/host/mmci.h             |   5 +
+ drivers/mmc/host/mmci_stm32_sdmmc.c |  42 +++++++
+ 3 files changed, 159 insertions(+), 66 deletions(-)
+
+-- 
+2.17.1
