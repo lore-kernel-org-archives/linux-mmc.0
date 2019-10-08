@@ -1,219 +1,149 @@
-From: Ludovic Barre <ludovic.Barre@st.com>
-Subject: [PATCH V7 2/3] mmc: mmci: add busy_complete callback
-Date: Tue, 8 Oct 2019 11:56:03 +0200
-Message-ID: <20191008095604.20675-3-ludovic.Barre@st.com>
-References: <20191008095604.20675-1-ludovic.Barre@st.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v2 0/2] mmc: core: Fix Marvell WiFi reset by adding SDIO
+ API to replug card
+Date: Tue, 8 Oct 2019 13:49:04 +0200
+Message-ID: <CAPDyKFoXh9dzunsac9M43gHky1HjWvEBXXGp5Mj=0g3APM36aw@mail.gmail.com>
+References: <20190722193939.125578-1-dianders@chromium.org>
+ <CAPDyKFoND5Kaam72zxO4wChO0z_1XL2KWX6oNjVcMUGA7G8RFg@mail.gmail.com>
+ <CAD=FV=VTLoqGbxFFMT8h72cfHCLupyvZpD75JB0N86+kFA+vzw@mail.gmail.com>
+ <CAPDyKFrPHguMrMvXN0yHbD9GmEg4m=J1Un=LcpE0PB7WqMRYSg@mail.gmail.com> <CAD=FV=W-qh2NnDc-C1_Tki3=D7vzNGG2PgnZjCjdLU9gL68AxA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20191008095604.20675-1-ludovic.Barre@st.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>
-Cc: srinivas.kandagatla@linaro.org, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-stm32@st-md-mailman.stormreply.com, Ludovic Barre <ludovic.barre@st.com>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <netdev-owner@vger.kernel.org>
+In-Reply-To: <CAD=FV=W-qh2NnDc-C1_Tki3=D7vzNGG2PgnZjCjdLU9gL68AxA@mail.gmail.com>
+Sender: netdev-owner@vger.kernel.org
+To: Doug Anderson <dianders@chromium.org>
+Cc: Kalle Valo <kvalo@codeaurora.org>, Adrian Hunter <adrian.hunter@intel.com>, Ganapathi Bhat <gbhat@marvell.com>, linux-wireless <linux-wireless@vger.kernel.org>, Andreas Fenkart <afenkart@gmail.com>, Brian Norris <briannorris@chromium.org>, Amitkumar Karwar <amitkarwar@gmail.com>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Nishant Sarmukadam <nishants@marvell.com>, netdev <netdev@vger.kernel.org>, Avri Altman <avri.altman@wdc.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "David S. Miller" <davem@davemloft.net>, Xinming Hu <huxinming820@gmail.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Thomas Gleixner <tglx@linutronix.de>, Kate Stewart <kste>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Ludovic Barre <ludovic.barre@st.com>
+On Tue, 8 Oct 2019 at 01:39, Doug Anderson <dianders@chromium.org> wrote:
+>
+> Hi,
+>
+> On Mon, Sep 16, 2019 at 2:25 AM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> >
+> > On Wed, 11 Sep 2019 at 23:26, Doug Anderson <dianders@chromium.org> wrote:
+> > >
+> > > Hi,
+> > >
+> > > On Thu, Jul 25, 2019 at 6:28 AM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> > > >
+> > > > On Mon, 22 Jul 2019 at 21:41, Douglas Anderson <dianders@chromium.org> wrote:
+> > > > >
+> > > > > As talked about in the thread at:
+> > > > >
+> > > > > http://lkml.kernel.org/r/CAD=FV=X7P2F1k_zwHc0mbtfk55-rucTz_GoDH=PL6zWqKYcpuw@mail.gmail.com
+> > > > >
+> > > > > ...when the Marvell WiFi card tries to reset itself it kills
+> > > > > Bluetooth.  It was observed that we could re-init the card properly by
+> > > > > unbinding / rebinding the host controller.  It was also observed that
+> > > > > in the downstream Chrome OS codebase the solution used was
+> > > > > mmc_remove_host() / mmc_add_host(), which is similar to the solution
+> > > > > in this series.
+> > > > >
+> > > > > So far I've only done testing of this series using the reset test
+> > > > > source that can be simulated via sysfs.  Specifically I ran this test:
+> > > > >
+> > > > > for i in $(seq 1000); do
+> > > > >   echo "LOOP $i --------"
+> > > > >   echo 1 > /sys/kernel/debug/mwifiex/mlan0/reset
+> > > > >
+> > > > >   while true; do
+> > > > >     if ! ping -w15 -c1 "${GW}" >/dev/null 2>&1; then
+> > > > >       fail=$(( fail + 1 ))
+> > > > >       echo "Fail WiFi ${fail}"
+> > > > >       if [[ ${fail} == 3 ]]; then
+> > > > >         exit 1
+> > > > >       fi
+> > > > >     else
+> > > > >       fail=0
+> > > > >       break
+> > > > >     fi
+> > > > >   done
+> > > > >
+> > > > >   hciconfig hci0 down
+> > > > >   sleep 1
+> > > > >   if ! hciconfig hci0 up; then
+> > > > >     echo "Fail BT"
+> > > > >     exit 1
+> > > > >   fi
+> > > > > done
+> > > > >
+> > > > > I ran this several times and got several hundred iterations each
+> > > > > before a failure.  When I saw failures:
+> > > > >
+> > > > > * Once I saw a "Fail BT"; manually resetting the card again fixed it.
+> > > > >   I didn't give it time to see if it would have detected this
+> > > > >   automatically.
+> > > > > * Once I saw the ping fail because (for some reason) my device only
+> > > > >   got an IPv6 address from my router and the IPv4 ping failed.  I
+> > > > >   changed my script to use 'ping6' to see if that would help.
+> > > > > * Once I saw the ping fail because the higher level network stack
+> > > > >   ("shill" in my case) seemed to crash.  A few minutes later the
+> > > > >   system recovered itself automatically.  https://crbug.com/984593 if
+> > > > >   you want more details.
+> > > > > * Sometimes while I was testing I saw "Fail WiFi 1" indicating a
+> > > > >   transitory failure.  Usually this was an association failure, but in
+> > > > >   one case I saw the device do "Firmware wakeup failed" after I
+> > > > >   triggered the reset.  This caused the driver to trigger a re-reset
+> > > > >   of itself which eventually recovered things.  This was good because
+> > > > >   it was an actual test of the normal reset flow (not the one
+> > > > >   triggered via sysfs).
+> > > > >
+> > > > > Changes in v2:
+> > > > > - s/routnine/routine (Brian Norris, Matthias Kaehlcke).
+> > > > > - s/contining/containing (Matthias Kaehlcke).
+> > > > > - Add Matthias Reviewed-by tag.
+> > > > > - Removed clear_bit() calls and old comment (Brian Norris).
+> > > > > - Explicit CC of Andreas Fenkart.
+> > > > > - Explicit CC of Brian Norris.
+> > > > > - Add "Fixes" pointing at the commit Brian talked about.
+> > > > > - Add Brian's Reviewed-by tag.
+> > > > >
+> > > > > Douglas Anderson (2):
+> > > > >   mmc: core: Add sdio_trigger_replug() API
+> > > > >   mwifiex: Make use of the new sdio_trigger_replug() API to reset
+> > > > >
+> > > > >  drivers/mmc/core/core.c                     | 28 +++++++++++++++++++--
+> > > > >  drivers/mmc/core/sdio_io.c                  | 20 +++++++++++++++
+> > > > >  drivers/net/wireless/marvell/mwifiex/sdio.c | 16 +-----------
+> > > > >  include/linux/mmc/host.h                    | 15 ++++++++++-
+> > > > >  include/linux/mmc/sdio_func.h               |  2 ++
+> > > > >  5 files changed, 63 insertions(+), 18 deletions(-)
+> > > > >
+> > > >
+> > > > Doug, thanks for sending this!
+> > > >
+> > > > As you know, I have been working on additional changes for SDIO
+> > > > suspend/resume (still WIP and not ready for sharing) and this series
+> > > > is related.
+> > > >
+> > > > The thing is, that even during system suspend/resume, synchronizations
+> > > > are needed between the different layers (mmc host, mmc core and
+> > > > sdio-funcs), which is common to the problem you want to solve.
+> > > >
+> > > > That said, I need to scratch my head a bit more before I can provide
+> > > > you some feedback on $subject series. Moreover, it's vacation period
+> > > > at my side so things are moving a bit slower. Please be patient.
+> > >
+> > > I had kinda forgotten about this series after we landed it locally in
+> > > Chrome OS, but I realized that it never got resolved upstream.  Any
+> > > chance your head has been sufficiently scratched and you're now happy
+> > > with $subject series?  ;-)
+> >
+> > It's still on my TODO list. Apologize for the delay, but I still need
+> > more time to look into it, possibly later this week.
+> >
+> > In any case, let's make sure we get this problem resolved for v5.5.
+>
+> Hi Ulf.  It's your friendly pest, Doug, here to ask how things are going.  :-P
 
-This patch adds busy_completion callback at mmci_host_ops
-to allow to define a specific busy completion by variant.
+:-)
 
-The legacy code corresponding to busy completion used
-by ux500 variants is moved to ux500_busy_complete function.
+The series on the top of my "things to review" list. I will definitely
+provide you with some feedback then next days or so.
 
-Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
----
- drivers/mmc/host/mmci.c | 134 +++++++++++++++++++++-------------------
- drivers/mmc/host/mmci.h |   1 +
- 2 files changed, 73 insertions(+), 62 deletions(-)
+Again, sorry for the delay!
 
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index ed0b40287dea..5e53f9b6d82a 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -44,6 +44,7 @@
- #define DRIVER_NAME "mmci-pl18x"
- 
- static void mmci_variant_init(struct mmci_host *host);
-+static void ux500_variant_init(struct mmci_host *host);
- static void ux500v2_variant_init(struct mmci_host *host);
- 
- static unsigned int fmax = 515633;
-@@ -184,7 +185,7 @@ static struct variant_data variant_ux500 = {
- 	.irq_pio_mask		= MCI_IRQ_PIO_MASK,
- 	.start_err		= MCI_STARTBITERR,
- 	.opendrain		= MCI_OD,
--	.init			= mmci_variant_init,
-+	.init			= ux500_variant_init,
- };
- 
- static struct variant_data variant_ux500v2 = {
-@@ -610,6 +611,67 @@ static u32 ux500v2_get_dctrl_cfg(struct mmci_host *host)
- 	return MCI_DPSM_ENABLE | (host->data->blksz << 16);
- }
- 
-+static bool ux500_busy_complete(struct mmci_host *host, u32 status, u32 err_msk)
-+{
-+	void __iomem *base = host->base;
-+
-+	/*
-+	 * Before unmasking for the busy end IRQ, confirm that the
-+	 * command was sent successfully. To keep track of having a
-+	 * command in-progress, waiting for busy signaling to end,
-+	 * store the status in host->busy_status.
-+	 *
-+	 * Note that, the card may need a couple of clock cycles before
-+	 * it starts signaling busy on DAT0, hence re-read the
-+	 * MMCISTATUS register here, to allow the busy bit to be set.
-+	 * Potentially we may even need to poll the register for a
-+	 * while, to allow it to be set, but tests indicates that it
-+	 * isn't needed.
-+	 */
-+	if (!host->busy_status && !(status & err_msk) &&
-+	    (readl(base + MMCISTATUS) & host->variant->busy_detect_flag)) {
-+		writel(readl(base + MMCIMASK0) |
-+		       host->variant->busy_detect_mask,
-+		       base + MMCIMASK0);
-+
-+		host->busy_status = status & (MCI_CMDSENT | MCI_CMDRESPEND);
-+		return false;
-+	}
-+
-+	/*
-+	 * If there is a command in-progress that has been successfully
-+	 * sent, then bail out if busy status is set and wait for the
-+	 * busy end IRQ.
-+	 *
-+	 * Note that, the HW triggers an IRQ on both edges while
-+	 * monitoring DAT0 for busy completion, but there is only one
-+	 * status bit in MMCISTATUS for the busy state. Therefore
-+	 * both the start and the end interrupts needs to be cleared,
-+	 * one after the other. So, clear the busy start IRQ here.
-+	 */
-+	if (host->busy_status &&
-+	    (status & host->variant->busy_detect_flag)) {
-+		writel(host->variant->busy_detect_mask, base + MMCICLEAR);
-+		return false;
-+	}
-+
-+	/*
-+	 * If there is a command in-progress that has been successfully
-+	 * sent and the busy bit isn't set, it means we have received
-+	 * the busy end IRQ. Clear and mask the IRQ, then continue to
-+	 * process the command.
-+	 */
-+	if (host->busy_status) {
-+		writel(host->variant->busy_detect_mask, base + MMCICLEAR);
-+
-+		writel(readl(base + MMCIMASK0) &
-+		       ~host->variant->busy_detect_mask, base + MMCIMASK0);
-+		host->busy_status = 0;
-+	}
-+
-+	return true;
-+}
-+
- /*
-  * All the DMA operation mode stuff goes inside this ifdef.
-  * This assumes that you have a generic DMA device interface,
-@@ -953,9 +1015,16 @@ static void mmci_variant_init(struct mmci_host *host)
- 	host->ops = &mmci_variant_ops;
- }
- 
-+static void ux500_variant_init(struct mmci_host *host)
-+{
-+	host->ops = &mmci_variant_ops;
-+	host->ops->busy_complete = ux500_busy_complete;
-+}
-+
- static void ux500v2_variant_init(struct mmci_host *host)
- {
- 	host->ops = &mmci_variant_ops;
-+	host->ops->busy_complete = ux500_busy_complete;
- 	host->ops->get_datactrl_cfg = ux500v2_get_dctrl_cfg;
- }
- 
-@@ -1235,68 +1304,9 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
- 		return;
- 
- 	/* Handle busy detection on DAT0 if the variant supports it. */
--	if (busy_resp && host->variant->busy_detect) {
--
--		/*
--		 * Before unmasking for the busy end IRQ, confirm that the
--		 * command was sent successfully. To keep track of having a
--		 * command in-progress, waiting for busy signaling to end,
--		 * store the status in host->busy_status.
--		 *
--		 * Note that, the card may need a couple of clock cycles before
--		 * it starts signaling busy on DAT0, hence re-read the
--		 * MMCISTATUS register here, to allow the busy bit to be set.
--		 * Potentially we may even need to poll the register for a
--		 * while, to allow it to be set, but tests indicates that it
--		 * isn't needed.
--		 */
--		if (!host->busy_status && !(status & err_msk) &&
--		    (readl(base + MMCISTATUS) & host->variant->busy_detect_flag)) {
--
--			writel(readl(base + MMCIMASK0) |
--			       host->variant->busy_detect_mask,
--			       base + MMCIMASK0);
--
--			host->busy_status =
--				status & (MCI_CMDSENT|MCI_CMDRESPEND);
--			return;
--		}
--
--		/*
--		 * If there is a command in-progress that has been successfully
--		 * sent, then bail out if busy status is set and wait for the
--		 * busy end IRQ.
--		 *
--		 * Note that, the HW triggers an IRQ on both edges while
--		 * monitoring DAT0 for busy completion, but there is only one
--		 * status bit in MMCISTATUS for the busy state. Therefore
--		 * both the start and the end interrupts needs to be cleared,
--		 * one after the other. So, clear the busy start IRQ here.
--		 */
--		if (host->busy_status &&
--		    (status & host->variant->busy_detect_flag)) {
--			writel(host->variant->busy_detect_mask,
--			       host->base + MMCICLEAR);
-+	if (busy_resp && host->variant->busy_detect)
-+		if (!host->ops->busy_complete(host, status, err_msk))
- 			return;
--		}
--
--		/*
--		 * If there is a command in-progress that has been successfully
--		 * sent and the busy bit isn't set, it means we have received
--		 * the busy end IRQ. Clear and mask the IRQ, then continue to
--		 * process the command.
--		 */
--		if (host->busy_status) {
--
--			writel(host->variant->busy_detect_mask,
--			       host->base + MMCICLEAR);
--
--			writel(readl(base + MMCIMASK0) &
--			       ~host->variant->busy_detect_mask,
--			       base + MMCIMASK0);
--			host->busy_status = 0;
--		}
--	}
- 
- 	host->cmd = NULL;
- 
-diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-index d8b7f6774e8f..2a0b98f98c36 100644
---- a/drivers/mmc/host/mmci.h
-+++ b/drivers/mmc/host/mmci.h
-@@ -369,6 +369,7 @@ struct mmci_host_ops {
- 	void (*dma_error)(struct mmci_host *host);
- 	void (*set_clkreg)(struct mmci_host *host, unsigned int desired);
- 	void (*set_pwrreg)(struct mmci_host *host, unsigned int pwr);
-+	bool (*busy_complete)(struct mmci_host *host, u32 status, u32 err_msk);
- };
- 
- struct mmci_host {
--- 
-2.17.1
+Kind regards
+Uffe
