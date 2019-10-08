@@ -1,240 +1,94 @@
 From: Ludovic Desroches <ludovic.desroches@microchip.com>
-Subject: Re: [PATCH 2/3] mmc: sdhci-of-at91: rework clocks management to
- support SAM9x60 device
-Date: Tue, 8 Oct 2019 11:24:05 +0200
-Message-ID: <20191008092404.goj636pffaw4ytt7@M43218.corp.atmel.com>
+Subject: Re: [PATCH 1/3] dt-bindings: sdhci-of-at91: new compatible string
+ and update properties
+Date: Tue, 8 Oct 2019 11:28:27 +0200
+Message-ID: <20191008092826.63kbia2wkggeab74@M43218.corp.atmel.com>
 References: <20190912200908.31318-1-ludovic.desroches@microchip.com>
- <20190912200908.31318-2-ludovic.desroches@microchip.com>
- <fb87bb5d-2853-9fed-bf34-a354996636df@microchip.com>
+ <20190930145613.GA11254@bogus>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 Content-Disposition: inline
-In-Reply-To: <fb87bb5d-2853-9fed-bf34-a354996636df@microchip.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Eugen Hristev - M18282 <Eugen.Hristev@microchip.com>
-Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "mark.rutland@arm.com" <mark.rutland@arm.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "robh+dt@kernel.org" <robh+dt@kernel.org>, "adrian.hunter@intel.com" <adrian.hunter@intel.com>, Claudiu Beznea - M18063 <Claudiu.Beznea@microchip.com>
+In-Reply-To: <20190930145613.GA11254@bogus>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Rob Herring <robh@kernel.org>
+Cc: mark.rutland@arm.com, devicetree@vger.kernel.org, ulf.hansson@linaro.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, adrian.hunter@intel.com, claudiu.beznea@microchip.com, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, Sep 20, 2019 at 11:34:50AM +0200, Eugen Hristev - M18282 wrote:
-> 
-> 
-> On 12.09.2019 23:09, Ludovic Desroches wrote:
-> 
-> > 
-> > In the SAM9x60 SoC, there are only two clocks instead of three for the
-> > SDHCI device. The base clk is no longer provided, it is generated
-> > internally from the mult clk.
-> > 
-> > The values of the base clk and mul in the capabilities registers may not
-> > reflect the reality as the mult clk is a programmable clock which can take
-> > several rates. As we can't trust those values, take them from the clock
-> > tree and update the capabilities according to.
-> > 
-> > As we can have the same pitfall, in some cases, with the SAMA5D2 Soc,
-> > stop relying on capabilities too.
+On Mon, Sep 30, 2019 at 09:56:13AM -0500, Rob Herring wrote:
+> On Thu, Sep 12, 2019 at 10:09:06PM +0200, Ludovic Desroches wrote:
+> > There is a new compatible string for the SAM9X60 sdhci device. It involves
+> > an update of the properties about the clocks stuff.
 > > 
 > > Signed-off-by: Ludovic Desroches <ludovic.desroches@microchip.com>
 > > ---
-> >   drivers/mmc/host/sdhci-of-at91.c | 104 +++++++++++++++++--------------
-> >   1 file changed, 57 insertions(+), 47 deletions(-)
+> >  .../devicetree/bindings/mmc/sdhci-atmel.txt   | 25 ++++++++++++++++---
+> >  1 file changed, 22 insertions(+), 3 deletions(-)
 > > 
-> > diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
-> > index e7d1920729fb..a9c126f14d85 100644
-> > --- a/drivers/mmc/host/sdhci-of-at91.c
-> > +++ b/drivers/mmc/host/sdhci-of-at91.c
-> > @@ -30,7 +30,14 @@
-> >   
-> >   #define SDHCI_AT91_PRESET_COMMON_CONF	0x400 /* drv type B, programmable clock mode */
-> >   
-> > +struct sdhci_at91_soc_data {
-> > +	const struct sdhci_pltfm_data *pdata;
-> > +	bool baseclk_is_generated_internally;
-> > +	unsigned int divider_for_baseclk;
+> > diff --git a/Documentation/devicetree/bindings/mmc/sdhci-atmel.txt b/Documentation/devicetree/bindings/mmc/sdhci-atmel.txt
+> > index 1b662d7171a0..364ceea330b6 100644
+> > --- a/Documentation/devicetree/bindings/mmc/sdhci-atmel.txt
+> > +++ b/Documentation/devicetree/bindings/mmc/sdhci-atmel.txt
+> > @@ -5,12 +5,19 @@ Documentation/devicetree/bindings/mmc/mmc.txt and the properties used by the
+> >  sdhci-of-at91 driver.
+> >  
+> >  Required properties:
+> > -- compatible:		Must be "atmel,sama5d2-sdhci".
+> > +- compatible:		Must be "atmel,sama5d2-sdhci" or "microchip,sam9x60-sdhci".
+> >  - clocks:		Phandlers to the clocks.
+> > -- clock-names:		Must be "hclock", "multclk", "baseclk";
+> > +- clock-names:		Must be "hclock", "multclk", "baseclk" for
+> > +			"atmel,sama5d2-sdhci".
+> > +			Must be "hclock", "multclk" for "microchip,sam9x60-sdhci".
+> >  
+> > +Optional properties:
+> > +- assigned-clocks:	The same with "multclk".
+> > +- assigned-clock-rates	The rate of "multclk" in order to not rely on the
+> > +			gck configuration set by previous components.
+> >  
+> > -Example:
+> > +
+> > +Examples:
+> >  
+> >  sdmmc0: sdio-host@a0000000 {
+> >  	compatible = "atmel,sama5d2-sdhci";
+> > @@ -18,4 +25,16 @@ sdmmc0: sdio-host@a0000000 {
+> >  	interrupts = <31 IRQ_TYPE_LEVEL_HIGH 0>;
+> >  	clocks = <&sdmmc0_hclk>, <&sdmmc0_gclk>, <&main>;
+> >  	clock-names = "hclock", "multclk", "baseclk";
+> > +	assigned-clocks = <&sdmmc0_gclk>;
+> > +	assigned-clock-rates = <480000000>;
 > > +};
 > > +
-> >   struct sdhci_at91_priv {
-> > +	const struct sdhci_at91_soc_data *soc_data;
-> >   	struct clk *hclock;
-> >   	struct clk *gck;
-> >   	struct clk *mainck;
-> > @@ -130,12 +137,24 @@ static const struct sdhci_ops sdhci_at91_sama5d2_ops = {
-> >   	.set_power		= sdhci_at91_set_power,
-> >   };
-> >   
-> > -static const struct sdhci_pltfm_data soc_data_sama5d2 = {
-> > +static const struct sdhci_pltfm_data sdhci_sama5d2_pdata = {
-> >   	.ops = &sdhci_at91_sama5d2_ops,
-> >   };
-> >   
-> > +static const struct sdhci_at91_soc_data soc_data_sama5d2 = {
-> > +	.pdata = &sdhci_sama5d2_pdata,
-> > +	.baseclk_is_generated_internally = false,
-> > +};
-> > +
-> > +static const struct sdhci_at91_soc_data soc_data_sam9x60 = {
-> > +	.pdata = &sdhci_sama5d2_pdata,
-> > +	.baseclk_is_generated_internally = true,
-> > +	.divider_for_baseclk = 2,
-> > +};
-> > +
-> >   static const struct of_device_id sdhci_at91_dt_match[] = {
-> >   	{ .compatible = "atmel,sama5d2-sdhci", .data = &soc_data_sama5d2 },
-> > +	{ .compatible = "microchip,sam9x60-sdhci", .data = &soc_data_sam9x60 },
-> >   	{}
-> >   };
-> >   MODULE_DEVICE_TABLE(of, sdhci_at91_dt_match);
-> > @@ -145,50 +164,36 @@ static int sdhci_at91_set_clks_presets(struct device *dev)
-> >   	struct sdhci_host *host = dev_get_drvdata(dev);
-> >   	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> >   	struct sdhci_at91_priv *priv = sdhci_pltfm_priv(pltfm_host);
-> > -	int ret;
-> >   	unsigned int			caps0, caps1;
-> >   	unsigned int			clk_base, clk_mul;
-> > -	unsigned int			gck_rate, real_gck_rate;
-> > +	unsigned int			gck_rate, clk_base_rate;
-> >   	unsigned int			preset_div;
-> >   
-> > -	/*
-> > -	 * The mult clock is provided by as a generated clock by the PMC
-> > -	 * controller. In order to set the rate of gck, we have to get the
-> > -	 * base clock rate and the clock mult from capabilities.
-> > -	 */
-> >   	clk_prepare_enable(priv->hclock);
-> >   	caps0 = readl(host->ioaddr + SDHCI_CAPABILITIES);
-> >   	caps1 = readl(host->ioaddr + SDHCI_CAPABILITIES_1);
-> > -	clk_base = (caps0 & SDHCI_CLOCK_V3_BASE_MASK) >> SDHCI_CLOCK_BASE_SHIFT;
-> > -	clk_mul = (caps1 & SDHCI_CLOCK_MUL_MASK) >> SDHCI_CLOCK_MUL_SHIFT;
-> > -	gck_rate = clk_base * 1000000 * (clk_mul + 1);
-> > -	ret = clk_set_rate(priv->gck, gck_rate);
-> > -	if (ret < 0) {
-> > -		dev_err(dev, "failed to set gck");
-> > -		clk_disable_unprepare(priv->hclock);
-> > -		return ret;
-> > -	}
-> > -	/*
-> > -	 * We need to check if we have the requested rate for gck because in
-> > -	 * some cases this rate could be not supported. If it happens, the rate
-> > -	 * is the closest one gck can provide. We have to update the value
-> > -	 * of clk mul.
-> > -	 */
-> > -	real_gck_rate = clk_get_rate(priv->gck);
-> > -	if (real_gck_rate != gck_rate) {
-> > -		clk_mul = real_gck_rate / (clk_base * 1000000) - 1;
-> > -		caps1 &= (~SDHCI_CLOCK_MUL_MASK);
-> > -		caps1 |= ((clk_mul << SDHCI_CLOCK_MUL_SHIFT) &
-> > -			  SDHCI_CLOCK_MUL_MASK);
-> > -		/* Set capabilities in r/w mode. */
-> > -		writel(SDMMC_CACR_KEY | SDMMC_CACR_CAPWREN,
-> > -		       host->ioaddr + SDMMC_CACR);
-> > -		writel(caps1, host->ioaddr + SDHCI_CAPABILITIES_1);
-> > -		/* Set capabilities in ro mode. */
-> > -		writel(0, host->ioaddr + SDMMC_CACR);
-> > -		dev_info(dev, "update clk mul to %u as gck rate is %u Hz\n",
-> > -			 clk_mul, real_gck_rate);
-> > -	}
-> > +
-> > +	gck_rate = clk_get_rate(priv->gck);
-> > +	if (priv->soc_data->baseclk_is_generated_internally)
-> > +		clk_base_rate = gck_rate / priv->soc_data->divider_for_baseclk;
-> > +	else
-> > +		clk_base_rate = clk_get_rate(priv->mainck);
-> > +
-> > +	clk_base = clk_base_rate / 1000000;
-> > +	clk_mul = gck_rate / clk_base_rate - 1;
-> > +
-> > +	caps0 &= (~SDHCI_CLOCK_V3_BASE_MASK);
-> > +	caps0 |= ((clk_base << SDHCI_CLOCK_BASE_SHIFT) & SDHCI_CLOCK_V3_BASE_MASK);
-> > +	caps1 &= (~SDHCI_CLOCK_MUL_MASK);
-> > +	caps1 |= ((clk_mul << SDHCI_CLOCK_MUL_SHIFT) & SDHCI_CLOCK_MUL_MASK);
-> > +	/* Set capabilities in r/w mode. */
-> > +	writel(SDMMC_CACR_KEY | SDMMC_CACR_CAPWREN, host->ioaddr + SDMMC_CACR);
+> > +sdmmc0: sdio-host@80000000 {
 > 
-> Hi Ludovic,
+> mmc@...
 > 
-> I have a feeling that here you may wish to also write the caps0 to the 
-> SDHC_CAPABILITIES:
-> writel(caps0, host->ioaddr + SDHCI_CAPABILITIES);
+> Though I don't see much value in a second example. Examples are not a 
+> complete enumeration of all possible dts entries.
 > 
-> You are computing the caps0 but not writing them to register.
 
-Hi Eugen,
-
-It slipped through the net as it didn't cause error when I tested it.
-Thanks, I'll fix it.
+Ok, I'll skip this example.
 
 Ludovic
 
-> 
-> Eugen
-> 
-> > +	writel(caps1, host->ioaddr + SDHCI_CAPABILITIES_1);
-> > +	/* Set capabilities in ro mode. */
-> > +	writel(0, host->ioaddr + SDMMC_CACR);
-> > +
-> > +	dev_info(dev, "update clk mul to %u as gck rate is %u Hz and clk base is %u Hz\n",
-> > +		 clk_mul, gck_rate, clk_base_rate);
-> >   
-> >   	/*
-> >   	 * We have to set preset values because it depends on the clk_mul
-> > @@ -196,19 +201,19 @@ static int sdhci_at91_set_clks_presets(struct device *dev)
-> >   	 * maximum sd clock value is 120 MHz instead of 208 MHz. For that
-> >   	 * reason, we need to use presets to support SDR104.
-> >   	 */
-> > -	preset_div = DIV_ROUND_UP(real_gck_rate, 24000000) - 1;
-> > +	preset_div = DIV_ROUND_UP(gck_rate, 24000000) - 1;
-> >   	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
-> >   	       host->ioaddr + SDHCI_PRESET_FOR_SDR12);
-> > -	preset_div = DIV_ROUND_UP(real_gck_rate, 50000000) - 1;
-> > +	preset_div = DIV_ROUND_UP(gck_rate, 50000000) - 1;
-> >   	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
-> >   	       host->ioaddr + SDHCI_PRESET_FOR_SDR25);
-> > -	preset_div = DIV_ROUND_UP(real_gck_rate, 100000000) - 1;
-> > +	preset_div = DIV_ROUND_UP(gck_rate, 100000000) - 1;
-> >   	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
-> >   	       host->ioaddr + SDHCI_PRESET_FOR_SDR50);
-> > -	preset_div = DIV_ROUND_UP(real_gck_rate, 120000000) - 1;
-> > +	preset_div = DIV_ROUND_UP(gck_rate, 120000000) - 1;
-> >   	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
-> >   	       host->ioaddr + SDHCI_PRESET_FOR_SDR104);
-> > -	preset_div = DIV_ROUND_UP(real_gck_rate, 50000000) - 1;
-> > +	preset_div = DIV_ROUND_UP(gck_rate, 50000000) - 1;
-> >   	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
-> >   	       host->ioaddr + SDHCI_PRESET_FOR_DDR50);
-> >   
-> > @@ -303,7 +308,7 @@ static const struct dev_pm_ops sdhci_at91_dev_pm_ops = {
-> >   static int sdhci_at91_probe(struct platform_device *pdev)
-> >   {
-> >   	const struct of_device_id	*match;
-> > -	const struct sdhci_pltfm_data	*soc_data;
-> > +	const struct sdhci_at91_soc_data	*soc_data;
-> >   	struct sdhci_host		*host;
-> >   	struct sdhci_pltfm_host		*pltfm_host;
-> >   	struct sdhci_at91_priv		*priv;
-> > @@ -314,17 +319,22 @@ static int sdhci_at91_probe(struct platform_device *pdev)
-> >   		return -EINVAL;
-> >   	soc_data = match->data;
-> >   
-> > -	host = sdhci_pltfm_init(pdev, soc_data, sizeof(*priv));
-> > +	host = sdhci_pltfm_init(pdev, soc_data->pdata, sizeof(*priv));
-> >   	if (IS_ERR(host))
-> >   		return PTR_ERR(host);
-> >   
-> >   	pltfm_host = sdhci_priv(host);
-> >   	priv = sdhci_pltfm_priv(pltfm_host);
-> > +	priv->soc_data = soc_data;
-> >   
-> >   	priv->mainck = devm_clk_get(&pdev->dev, "baseclk");
-> >   	if (IS_ERR(priv->mainck)) {
-> > -		dev_err(&pdev->dev, "failed to get baseclk\n");
-> > -		return PTR_ERR(priv->mainck);
-> > +		if (soc_data->baseclk_is_generated_internally) {
-> > +			priv->mainck = NULL;
-> > +		} else {
-> > +			dev_err(&pdev->dev, "failed to get baseclk\n");
-> > +			return PTR_ERR(priv->mainck);
-> > +		}
-> >   	}
-> >   
-> >   	priv->hclock = devm_clk_get(&pdev->dev, "hclock");
+> > +	compatible = "microchip,sam9x60-sdhci";
+> > +	reg = <0x80000000 0x300>;
+> > +	interrupts = <12 IRQ_TYPE_LEVEL_HIGH 0>;
+> > +	clocks = <&pmc PMC_TYPE_PERIPHERAL 12>, <&pmc PMC_TYPE_GCK 12>;
+> > +	clock-names = "hclock", "multclk";
+> > +	assigned-clocks = <&pmc PMC_TYPE_GCK 12>;
+> > +	assigned-clock-rates = <100000000>;
+> >  };
+> > -- 
+> > 2.23.0
 > > 
