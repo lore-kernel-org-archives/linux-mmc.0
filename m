@@ -1,43 +1,90 @@
 From: Nicolas Ferre <nicolas.ferre@microchip.com>
-Subject: [PATCH 1/2] dt-bindings: sdhci-of-at91: add the microchip,sdcal-inverted property
-Date: Tue, 8 Oct 2019 14:34:31 +0200
-Message-ID: <4d269f30b1122487a2b5c8b48e24f78f2b75a509.1570537903.git.nicolas.ferre@microchip.com>
+Subject: [PATCH 2/2] mmc: sdhci-of-at91: add DT property to enable calibration on full reset
+Date: Tue, 8 Oct 2019 14:34:32 +0200
+Message-ID: <d25c8f909d039938a5696e8de32396cf2aaf54b7.1570537903.git.nicolas.ferre@microchip.com>
+References: <4d269f30b1122487a2b5c8b48e24f78f2b75a509.1570537903.git.nicolas.ferre@microchip.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <4d269f30b1122487a2b5c8b48e24f78f2b75a509.1570537903.git.nicolas.ferre@microchip.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Ludovic Desroches <ludovic.desroches@microchip.com>, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, robh+dt@kernel.org
 Cc: Alexandre Belloni <alexandre.belloni@bootlin.com>, linux-kernel@vger.kernel.org, ulf.hansson@linaro.org, adrian.hunter@intel.com, Nicolas Ferre <nicolas.ferre@microchip.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Add the specific microchip,sdcal-inverted property to at91 sdhci
-device binding.
-This optional property describes how the SoC SDCAL pin is connected.
-It could be handled at SiP, SoM or board level.
+Add a property to keep the analog calibration cell powered.
+This feature is specific to the Microchip SDHCI IP and outside
+of the standard SDHCI register map.
 
-This property read by at91 sdhci driver will allow to put in place a
-software workaround that would reduce power consumption.
+By always keeping it on, after a full reset sequence, we make sure
+that this feature is activated and not disabled.
+
+We expose a hardware property to the DT as this feature can be used
+to adapt SDHCI behavior vs. how the SDCAL SoC pin is connected
+on the board.
+
+Note that managing properly this property would reduce
+power consumption on some SAMA5D2 SiP revisions.
 
 Signed-off-by: Nicolas Ferre <nicolas.ferre@microchip.com>
 ---
- Documentation/devicetree/bindings/mmc/sdhci-atmel.txt | 5 +++++
- 1 file changed, 5 insertions(+)
+ drivers/mmc/host/sdhci-of-at91.c | 19 +++++++++++++++++++
+ 1 file changed, 19 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/mmc/sdhci-atmel.txt b/Documentation/devicetree/bindings/mmc/sdhci-atmel.txt
-index 1b662d7171a0..503c6dbac1b2 100644
---- a/Documentation/devicetree/bindings/mmc/sdhci-atmel.txt
-+++ b/Documentation/devicetree/bindings/mmc/sdhci-atmel.txt
-@@ -9,6 +9,11 @@ Required properties:
- - clocks:		Phandlers to the clocks.
- - clock-names:		Must be "hclock", "multclk", "baseclk";
+diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
+index e7d1920729fb..9571c4a882a9 100644
+--- a/drivers/mmc/host/sdhci-of-at91.c
++++ b/drivers/mmc/host/sdhci-of-at91.c
+@@ -27,6 +27,9 @@
+ #define SDMMC_CACR	0x230
+ #define		SDMMC_CACR_CAPWREN	BIT(0)
+ #define		SDMMC_CACR_KEY		(0x46 << 8)
++#define SDMMC_CALCR	0x240
++#define		SDMMC_CALCR_EN		BIT(0)
++#define		SDMMC_CALCR_ALWYSON	BIT(4)
  
-+Optional properties:
-+- microchip,sdcal-inverted: when present, polarity on the SDCAL SoC pin is
-+  inverted. The default polarity for this signal is described in the datasheet.
-+  For instance on SAMA5D2, the pin is usually tied to the GND with a resistor
-+  and a capacitor (see "SDMMC I/O Calibration" chapter).
+ #define SDHCI_AT91_PRESET_COMMON_CONF	0x400 /* drv type B, programmable clock mode */
  
- Example:
+@@ -35,6 +38,7 @@ struct sdhci_at91_priv {
+ 	struct clk *gck;
+ 	struct clk *mainck;
+ 	bool restore_needed;
++	bool cal_always_on;
+ };
  
+ static void sdhci_at91_set_force_card_detect(struct sdhci_host *host)
+@@ -116,10 +120,17 @@ static void sdhci_at91_set_uhs_signaling(struct sdhci_host *host,
+ 
+ static void sdhci_at91_reset(struct sdhci_host *host, u8 mask)
+ {
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct sdhci_at91_priv *priv = sdhci_pltfm_priv(pltfm_host);
++
+ 	sdhci_reset(host, mask);
+ 
+ 	if (host->mmc->caps & MMC_CAP_NONREMOVABLE)
+ 		sdhci_at91_set_force_card_detect(host);
++
++	if (priv->cal_always_on && (mask & SDHCI_RESET_ALL))
++		sdhci_writel(host, SDMMC_CALCR_ALWYSON | SDMMC_CALCR_EN,
++			     SDMMC_CALCR);
+ }
+ 
+ static const struct sdhci_ops sdhci_at91_sama5d2_ops = {
+@@ -345,6 +356,14 @@ static int sdhci_at91_probe(struct platform_device *pdev)
+ 
+ 	priv->restore_needed = false;
+ 
++	/*
++	 * if SDCAL pin is wrongly connected, we must enable
++	 * the analog calibration cell permanently.
++	 */
++	priv->cal_always_on =
++		device_property_read_bool(&pdev->dev,
++					  "microchip,sdcal-inverted");
++
+ 	ret = mmc_of_parse(host->mmc);
+ 	if (ret)
+ 		goto clocks_disable_unprepare;
 -- 
 2.17.1
