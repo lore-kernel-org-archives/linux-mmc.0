@@ -1,7 +1,7 @@
 From: Ludovic Barre <ludovic.Barre@st.com>
-Subject: [PATCH V7 1/3] mmc: mmci: add hardware busy timeout feature
-Date: Tue, 8 Oct 2019 11:56:02 +0200
-Message-ID: <20191008095604.20675-2-ludovic.Barre@st.com>
+Subject: [PATCH V7 3/3] mmc: mmci: sdmmc: add busy_complete callback
+Date: Tue, 8 Oct 2019 11:56:04 +0200
+Message-ID: <20191008095604.20675-4-ludovic.Barre@st.com>
 References: <20191008095604.20675-1-ludovic.Barre@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -14,152 +14,114 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Ludovic Barre <ludovic.barre@st.com>
 
-In the stm32_sdmmc variant, the datatimer is active not only during
-data transfers with the DPSM, but also while waiting for the busyend
-IRQs from commands having the MMC_RSP_BUSY flag set. This leads to an
-incorrect IRQ being raised to signal MCI_DATATIMEOUT error, which
-simply breaks the behaviour.
+This patch adds a specific busy_complete callback for sdmmc variant.
 
-Address this by updating the datatimer value before sending a command
-having the MMC_RSP_BUSY flag set. To inform the mmc core about the
-maximum supported busy timeout, which also depends on the current
-clock rate, set ->max_busy_timeout (in ms).
+sdmmc has 2 status flags:
+-busyd0: This is a hardware status flag (inverted value of d0 line).
+it does not generate an interrupt.
+-busyd0end: This indicates only end of busy following a CMD response.
+On busy to Not busy changes, an interrupt is generated (if unmask)
+and BUSYD0END status flag is set. Status flag is cleared by writing
+corresponding interrupt clear bit in MMCICLEAR.
+
+The legacy busy completion has no dedicated interrupt for the end
+of busy, so it's must monitor step by step the busy progression.
+On sdmmc variant, this procedure is not needed, it's just need
+to wait the busyd0end interrupt.
 
 Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
 ---
- drivers/mmc/host/mmci.c | 42 ++++++++++++++++++++++++++++++++++++-----
- drivers/mmc/host/mmci.h |  3 +++
- 2 files changed, 40 insertions(+), 5 deletions(-)
+ drivers/mmc/host/mmci.c             |  4 +++
+ drivers/mmc/host/mmci.h             |  1 +
+ drivers/mmc/host/mmci_stm32_sdmmc.c | 42 +++++++++++++++++++++++++++++
+ 3 files changed, 47 insertions(+)
 
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index e14003e52058..ed0b40287dea 100644
+index 5e53f9b6d82a..40e72c30ea84 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -1075,6 +1075,7 @@ static void
- mmci_start_command(struct mmci_host *host, struct mmc_command *cmd, u32 c)
- {
- 	void __iomem *base = host->base;
-+	unsigned long long clks;
+@@ -262,6 +262,10 @@ static struct variant_data variant_stm32_sdmmc = {
+ 	.datalength_bits	= 25,
+ 	.datactrl_blocksz	= 14,
+ 	.stm32_idmabsize_mask	= GENMASK(12, 5),
++	.busy_timeout		= true,
++	.busy_detect		= true,
++	.busy_detect_flag	= MCI_STM32_BUSYD0,
++	.busy_detect_mask	= MCI_STM32_BUSYD0ENDMASK,
+ 	.init			= sdmmc_variant_init,
+ };
  
- 	dev_dbg(mmc_dev(host->mmc), "op %02x arg %08x flags %08x\n",
- 	    cmd->opcode, cmd->arg, cmd->flags);
-@@ -1097,6 +1098,16 @@ mmci_start_command(struct mmci_host *host, struct mmc_command *cmd, u32 c)
- 		else
- 			c |= host->variant->cmdreg_srsp;
- 	}
-+
-+	if (host->variant->busy_timeout && cmd->flags & MMC_RSP_BUSY) {
-+		if (!cmd->busy_timeout)
-+			cmd->busy_timeout = 10 * MSEC_PER_SEC;
-+
-+		clks = (unsigned long long)cmd->busy_timeout * host->cclk;
-+		do_div(clks, MSEC_PER_SEC);
-+		writel_relaxed(clks, host->base + MMCIDATATIMER);
-+	}
-+
- 	if (/*interrupt*/0)
- 		c |= MCI_CPSM_INTERRUPT;
- 
-@@ -1201,6 +1212,7 @@ static void
- mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
- 	     unsigned int status)
- {
-+	u32 err_msk = MCI_CMDCRCFAIL | MCI_CMDTIMEOUT;
- 	void __iomem *base = host->base;
- 	bool sbc, busy_resp;
- 
-@@ -1215,8 +1227,11 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
- 	 * handling. Note that we tag on any latent IRQs postponed
- 	 * due to waiting for busy status.
- 	 */
--	if (!((status|host->busy_status) &
--	      (MCI_CMDCRCFAIL|MCI_CMDTIMEOUT|MCI_CMDSENT|MCI_CMDRESPEND)))
-+	if (host->variant->busy_timeout && busy_resp)
-+		err_msk |= MCI_DATATIMEOUT;
-+
-+	if (!((status | host->busy_status) &
-+	      (err_msk | MCI_CMDSENT | MCI_CMDRESPEND)))
- 		return;
- 
- 	/* Handle busy detection on DAT0 if the variant supports it. */
-@@ -1235,8 +1250,7 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
- 		 * while, to allow it to be set, but tests indicates that it
- 		 * isn't needed.
- 		 */
--		if (!host->busy_status &&
--		    !(status & (MCI_CMDCRCFAIL|MCI_CMDTIMEOUT)) &&
-+		if (!host->busy_status && !(status & err_msk) &&
- 		    (readl(base + MMCISTATUS) & host->variant->busy_detect_flag)) {
- 
- 			writel(readl(base + MMCIMASK0) |
-@@ -1290,6 +1304,9 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
- 		cmd->error = -ETIMEDOUT;
- 	} else if (status & MCI_CMDCRCFAIL && cmd->flags & MMC_RSP_CRC) {
- 		cmd->error = -EILSEQ;
-+	} else if (host->variant->busy_timeout && busy_resp &&
-+		   status & MCI_DATATIMEOUT) {
-+		cmd->error = -ETIMEDOUT;
- 	} else {
- 		cmd->resp[0] = readl(base + MMCIRESPONSE0);
- 		cmd->resp[1] = readl(base + MMCIRESPONSE1);
-@@ -1583,6 +1600,20 @@ static void mmci_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 	spin_unlock_irqrestore(&host->lock, flags);
- }
- 
-+static void mmci_set_max_busy_timeout(struct mmc_host *mmc)
-+{
-+	struct mmci_host *host = mmc_priv(mmc);
-+	u32 max_busy_timeout = 0;
-+
-+	if (!host->variant->busy_detect)
-+		return;
-+
-+	if (host->variant->busy_timeout && mmc->actual_clock)
-+		max_busy_timeout = ~0UL / (mmc->actual_clock / MSEC_PER_SEC);
-+
-+	mmc->max_busy_timeout = max_busy_timeout;
-+}
-+
- static void mmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- {
- 	struct mmci_host *host = mmc_priv(mmc);
-@@ -1687,6 +1718,8 @@ static void mmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 	else
- 		mmci_set_clkreg(host, ios->clock);
- 
-+	mmci_set_max_busy_timeout(mmc);
-+
- 	if (host->ops && host->ops->set_pwrreg)
- 		host->ops->set_pwrreg(host, pwr);
- 	else
-@@ -1957,7 +1990,6 @@ static int mmci_probe(struct amba_device *dev,
- 			mmci_write_datactrlreg(host,
- 					       host->variant->busy_dpsm_flag);
- 		mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY;
--		mmc->max_busy_timeout = 0;
- 	}
- 
- 	/* Prepare a CMD12 - needed to clear the DPSM on some variants. */
 diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-index 833236ecb31e..d8b7f6774e8f 100644
+index 2a0b98f98c36..158e1231aa23 100644
 --- a/drivers/mmc/host/mmci.h
 +++ b/drivers/mmc/host/mmci.h
-@@ -287,6 +287,8 @@ struct mmci_host;
-  * @signal_direction: input/out direction of bus signals can be indicated
-  * @pwrreg_clkgate: MMCIPOWER register must be used to gate the clock
-  * @busy_detect: true if the variant supports busy detection on DAT0.
-+ * @busy_timeout: true if the variant starts data timer when the DPSM
-+ *		  enter in Wait_R or Busy state.
-  * @busy_dpsm_flag: bitmask enabling busy detection in the DPSM
-  * @busy_detect_flag: bitmask identifying the bit in the MMCISTATUS register
-  *		      indicating that the card is busy
-@@ -333,6 +335,7 @@ struct variant_data {
- 	u8			signal_direction:1;
- 	u8			pwrreg_clkgate:1;
- 	u8			busy_detect:1;
-+	u8			busy_timeout:1;
- 	u32			busy_dpsm_flag;
- 	u32			busy_detect_flag;
- 	u32			busy_detect_mask;
+@@ -164,6 +164,7 @@
+ #define MCI_ST_CARDBUSY		(1 << 24)
+ /* Extended status bits for the STM32 variants */
+ #define MCI_STM32_BUSYD0	BIT(20)
++#define MCI_STM32_BUSYD0END	BIT(21)
+ 
+ #define MMCICLEAR		0x038
+ #define MCI_CMDCRCFAILCLR	(1 << 0)
+diff --git a/drivers/mmc/host/mmci_stm32_sdmmc.c b/drivers/mmc/host/mmci_stm32_sdmmc.c
+index 8e83ae6920ae..1de855d29ad4 100644
+--- a/drivers/mmc/host/mmci_stm32_sdmmc.c
++++ b/drivers/mmc/host/mmci_stm32_sdmmc.c
+@@ -282,6 +282,47 @@ static u32 sdmmc_get_dctrl_cfg(struct mmci_host *host)
+ 	return datactrl;
+ }
+ 
++static bool sdmmc_busy_complete(struct mmci_host *host, u32 status, u32 err_msk)
++{
++	void __iomem *base = host->base;
++	u32 busy_d0, busy_d0end, mask, sdmmc_status;
++
++	mask = readl_relaxed(base + MMCIMASK0);
++	sdmmc_status = readl_relaxed(base + MMCISTATUS);
++	busy_d0end = sdmmc_status & MCI_STM32_BUSYD0END;
++	busy_d0 = sdmmc_status & MCI_STM32_BUSYD0;
++
++	/* complete if there is an error or busy_d0end */
++	if ((status & err_msk) || busy_d0end)
++		goto complete;
++
++	/*
++	 * On response the busy signaling is reflected in the BUSYD0 flag.
++	 * if busy_d0 is in-progress we must activate busyd0end interrupt
++	 * to wait this completion. Else this request has no busy step.
++	 */
++	if (busy_d0) {
++		if (!host->busy_status) {
++			writel_relaxed(mask | host->variant->busy_detect_mask,
++				       base + MMCIMASK0);
++			host->busy_status = status &
++				(MCI_CMDSENT | MCI_CMDRESPEND);
++		}
++		return false;
++	}
++
++complete:
++	if (host->busy_status) {
++		writel_relaxed(mask & ~host->variant->busy_detect_mask,
++			       base + MMCIMASK0);
++		writel_relaxed(host->variant->busy_detect_mask,
++			       base + MMCICLEAR);
++		host->busy_status = 0;
++	}
++
++	return true;
++}
++
+ static struct mmci_host_ops sdmmc_variant_ops = {
+ 	.validate_data = sdmmc_idma_validate_data,
+ 	.prep_data = sdmmc_idma_prep_data,
+@@ -292,6 +333,7 @@ static struct mmci_host_ops sdmmc_variant_ops = {
+ 	.dma_finalize = sdmmc_idma_finalize,
+ 	.set_clkreg = mmci_sdmmc_set_clkreg,
+ 	.set_pwrreg = mmci_sdmmc_set_pwrreg,
++	.busy_complete = sdmmc_busy_complete,
+ };
+ 
+ void sdmmc_variant_init(struct mmci_host *host)
 -- 
 2.17.1
