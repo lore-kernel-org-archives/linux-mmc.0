@@ -1,90 +1,76 @@
-From: Nicolas Ferre <nicolas.ferre@microchip.com>
-Subject: [PATCH 2/2] mmc: sdhci-of-at91: add DT property to enable calibration on full reset
-Date: Tue, 8 Oct 2019 14:34:32 +0200
-Message-ID: <d25c8f909d039938a5696e8de32396cf2aaf54b7.1570537903.git.nicolas.ferre@microchip.com>
-References: <4d269f30b1122487a2b5c8b48e24f78f2b75a509.1570537903.git.nicolas.ferre@microchip.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH v1 2/2] mmc: sdhci-of-arasan: Add Support for Intel LGM
+ SDXC
+Date: Tue, 8 Oct 2019 16:44:19 +0300
+Message-ID: <2cbda555-42d2-392c-0887-09cae4a35dce@intel.com>
+References: <20191003040032.37696-1-vadivel.muruganx.ramuthevar@linux.intel.com>
+ <20191003040032.37696-3-vadivel.muruganx.ramuthevar@linux.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <4d269f30b1122487a2b5c8b48e24f78f2b75a509.1570537903.git.nicolas.ferre@microchip.com>
+In-Reply-To: <20191003040032.37696-3-vadivel.muruganx.ramuthevar@linux.intel.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ludovic Desroches <ludovic.desroches@microchip.com>, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, robh+dt@kernel.org
-Cc: Alexandre Belloni <alexandre.belloni@bootlin.com>, linux-kernel@vger.kernel.org, ulf.hansson@linaro.org, adrian.hunter@intel.com, Nicolas Ferre <nicolas.ferre@microchip.com>
+To: "Ramuthevar,Vadivel MuruganX" <vadivel.muruganx.ramuthevar@linux.intel.com>, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, michal.simek@xilinx.com, robh+dt@kernel.org, mark.rutland@arm.com, andriy.shevchenko@intel.com, cheol.yong.kim@intel.com, qi-ming.wu@intel.com
 List-Id: linux-mmc@vger.kernel.org
 
-Add a property to keep the analog calibration cell powered.
-This feature is specific to the Microchip SDHCI IP and outside
-of the standard SDHCI register map.
+On 3/10/19 7:00 AM, Ramuthevar,Vadivel MuruganX wrote:
+> From: Ramuthevar Vadivel Murugan <vadivel.muruganx.ramuthevar@linux.intel.com>
+> 
+> The current arasan sdhci PHY configuration isn't compatible
+> with the PHY on Intel's LGM(Lightning Mountain) SoC devices.
+> 
+> Therefore, add a new compatible, to adapt the Intel's LGM
+> SDXC PHY with arasan-sdhc controller to configure the PHY.
+> 
+> Signed-off-by: Ramuthevar Vadivel Murugan <vadivel.muruganx.ramuthevar@linux.intel.com>
 
-By always keeping it on, after a full reset sequence, we make sure
-that this feature is activated and not disabled.
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-We expose a hardware property to the DT as this feature can be used
-to adapt SDHCI behavior vs. how the SDCAL SoC pin is connected
-on the board.
-
-Note that managing properly this property would reduce
-power consumption on some SAMA5D2 SiP revisions.
-
-Signed-off-by: Nicolas Ferre <nicolas.ferre@microchip.com>
----
- drivers/mmc/host/sdhci-of-at91.c | 19 +++++++++++++++++++
- 1 file changed, 19 insertions(+)
-
-diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
-index e7d1920729fb..9571c4a882a9 100644
---- a/drivers/mmc/host/sdhci-of-at91.c
-+++ b/drivers/mmc/host/sdhci-of-at91.c
-@@ -27,6 +27,9 @@
- #define SDMMC_CACR	0x230
- #define		SDMMC_CACR_CAPWREN	BIT(0)
- #define		SDMMC_CACR_KEY		(0x46 << 8)
-+#define SDMMC_CALCR	0x240
-+#define		SDMMC_CALCR_EN		BIT(0)
-+#define		SDMMC_CALCR_ALWYSON	BIT(4)
- 
- #define SDHCI_AT91_PRESET_COMMON_CONF	0x400 /* drv type B, programmable clock mode */
- 
-@@ -35,6 +38,7 @@ struct sdhci_at91_priv {
- 	struct clk *gck;
- 	struct clk *mainck;
- 	bool restore_needed;
-+	bool cal_always_on;
- };
- 
- static void sdhci_at91_set_force_card_detect(struct sdhci_host *host)
-@@ -116,10 +120,17 @@ static void sdhci_at91_set_uhs_signaling(struct sdhci_host *host,
- 
- static void sdhci_at91_reset(struct sdhci_host *host, u8 mask)
- {
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_at91_priv *priv = sdhci_pltfm_priv(pltfm_host);
-+
- 	sdhci_reset(host, mask);
- 
- 	if (host->mmc->caps & MMC_CAP_NONREMOVABLE)
- 		sdhci_at91_set_force_card_detect(host);
-+
-+	if (priv->cal_always_on && (mask & SDHCI_RESET_ALL))
-+		sdhci_writel(host, SDMMC_CALCR_ALWYSON | SDMMC_CALCR_EN,
-+			     SDMMC_CALCR);
- }
- 
- static const struct sdhci_ops sdhci_at91_sama5d2_ops = {
-@@ -345,6 +356,14 @@ static int sdhci_at91_probe(struct platform_device *pdev)
- 
- 	priv->restore_needed = false;
- 
-+	/*
-+	 * if SDCAL pin is wrongly connected, we must enable
-+	 * the analog calibration cell permanently.
-+	 */
-+	priv->cal_always_on =
-+		device_property_read_bool(&pdev->dev,
-+					  "microchip,sdcal-inverted");
-+
- 	ret = mmc_of_parse(host->mmc);
- 	if (ret)
- 		goto clocks_disable_unprepare;
--- 
-2.17.1
+> ---
+>  drivers/mmc/host/sdhci-of-arasan.c | 15 +++++++++++++++
+>  1 file changed, 15 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+> index 7023cbec4017..55de839a8a5e 100644
+> --- a/drivers/mmc/host/sdhci-of-arasan.c
+> +++ b/drivers/mmc/host/sdhci-of-arasan.c
+> @@ -120,6 +120,12 @@ static const struct sdhci_arasan_soc_ctl_map intel_lgm_emmc_soc_ctl_map = {
+>  	.hiword_update = false,
+>  };
+>  
+> +static const struct sdhci_arasan_soc_ctl_map intel_lgm_sdxc_soc_ctl_map = {
+> +	.baseclkfreq = { .reg = 0x80, .width = 8, .shift = 2 },
+> +	.clockmultiplier = { .reg = 0, .width = -1, .shift = -1 },
+> +	.hiword_update = false,
+> +};
+> +
+>  /**
+>   * sdhci_arasan_syscon_write - Write to a field in soc_ctl registers
+>   *
+> @@ -384,6 +390,11 @@ static struct sdhci_arasan_of_data intel_lgm_emmc_data = {
+>  	.pdata = &sdhci_arasan_cqe_pdata,
+>  };
+>  
+> +static struct sdhci_arasan_of_data intel_lgm_sdxc_data = {
+> +	.soc_ctl_map = &intel_lgm_sdxc_soc_ctl_map,
+> +	.pdata = &sdhci_arasan_cqe_pdata,
+> +};
+> +
+>  #ifdef CONFIG_PM_SLEEP
+>  /**
+>   * sdhci_arasan_suspend - Suspend method for the driver
+> @@ -489,6 +500,10 @@ static const struct of_device_id sdhci_arasan_of_match[] = {
+>  		.compatible = "intel,lgm-sdhci-5.1-emmc",
+>  		.data = &intel_lgm_emmc_data,
+>  	},
+> +	{
+> +		.compatible = "intel,lgm-sdhci-5.1-sdxc",
+> +		.data = &intel_lgm_sdxc_data,
+> +	},
+>  	/* Generic compatible below here */
+>  	{
+>  		.compatible = "arasan,sdhci-8.9a",
+> 
