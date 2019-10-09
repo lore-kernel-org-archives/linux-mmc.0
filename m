@@ -1,79 +1,51 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2] mmc: sdhci-iproc: fix spurious interrupts on
- Multiblock reads with bcm2711
-Date: Wed, 9 Oct 2019 11:12:29 +0200
-Message-ID: <CAPDyKFpprt9TVP2Ywu2urqy6zB_H7Xrbo=N6OGp6-O6Qk7rLPw@mail.gmail.com>
-References: <20191004134452.6493-1-nsaenzjulienne@suse.de>
+Subject: Re: [PATCH] memstick: jmb38x_ms: Fix an error handling path in 'jmb38x_ms_probe()'
+Date: Wed, 9 Oct 2019 11:12:33 +0200
+Message-ID: <CAPDyKFp6=6JsMSg7PV6zEohw16FeQ07G_VWSM1qFxmqswfrqFw@mail.gmail.com>
+References: <20191005112101.14410-1-christophe.jaillet@wanadoo.fr>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20191004134452.6493-1-nsaenzjulienne@suse.de>
+In-Reply-To: <20191005112101.14410-1-christophe.jaillet@wanadoo.fr>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Nicolas Saenz Julienne <nsaenzjulienne@suse.de>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>, BCM Kernel Feedback <bcm-kernel-feedback-list@broadcom.com>, Stefan Wahren <wahrenst@gmx.net>, Matthias Brugger <mbrugger@suse.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: Christophe JAILLET <christophe.jaillet@wanadoo.fr>
+Cc: Maxim Levitsky <maximlevitsky@gmail.com>, Alex Dubov <oakad@yahoo.com>, Will Deacon <will@kernel.org>, gustavo.pimentel@synopsys.com, Colin King <colin.king@canonical.com>, "Gustavo A. R. Silva" <gustavo@embeddedor.com>, Denis Efremov <efremov@linux.com>, Thomas Gleixner <tglx@linutronix.de>, YueHaibing <yuehaibing@huawei.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, 4 Oct 2019 at 15:45, Nicolas Saenz Julienne
-<nsaenzjulienne@suse.de> wrote:
+On Sat, 5 Oct 2019 at 13:21, Christophe JAILLET
+<christophe.jaillet@wanadoo.fr> wrote:
 >
-> The Raspberry Pi 4 SDHCI hardware seems to automatically issue CMD12
-> after multiblock reads even when ACMD12 is disabled. This triggers
-> spurious interrupts after the data transfer is done with the following
-> message:
+> If 'jmb38x_ms_count_slots()' returns 0, we must undo the previous
+> 'pci_request_regions()' call.
 >
->   mmc1: Got data interrupt 0x00000002 even though no data operation was in progress.
->   mmc1: sdhci: ============ SDHCI REGISTER DUMP ===========
->   mmc1: sdhci: Sys addr:  0x00000000 | Version:  0x00001002
->   mmc1: sdhci: Blk size:  0x00007200 | Blk cnt:  0x00000000
->   mmc1: sdhci: Argument:  0x00000000 | Trn mode: 0x00000033
->   mmc1: sdhci: Present:   0x1fff0000 | Host ctl: 0x00000017
->   mmc1: sdhci: Power:     0x0000000f | Blk gap:  0x00000080
->   mmc1: sdhci: Wake-up:   0x00000000 | Clock:    0x00000107
->   mmc1: sdhci: Timeout:   0x00000000 | Int stat: 0x00000000
->   mmc1: sdhci: Int enab:  0x03ff100b | Sig enab: 0x03ff100b
->   mmc1: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
->   mmc1: sdhci: Caps:      0x45ee6432 | Caps_1:   0x0000a525
->   mmc1: sdhci: Cmd:       0x00000c1a | Max curr: 0x00080008
->   mmc1: sdhci: Resp[0]:   0x00000b00 | Resp[1]:  0x00edc87f
->   mmc1: sdhci: Resp[2]:   0x325b5900 | Resp[3]:  0x00400e00
->   mmc1: sdhci: Host ctl2: 0x00000001
->   mmc1: sdhci: ADMA Err:  0x00000000 | ADMA Ptr: 0xf3025208
->   mmc1: sdhci: ============================================
+> Goto 'err_out_int' to fix it.
 >
-> Enable SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12 to enable ACMD12 on multiblock
-> reads and suppress the spurious interrupts.
->
-> Fixes: f84e411c85be ("mmc: sdhci-iproc: Add support for emmc2 of the BCM2711")
-> Signed-off-by: Nicolas Saenz Julienne <nsaenzjulienne@suse.de>
-> Tested-by: Matthias Brugger <mbrugger@suse.com>
-> Acked-by: Stefan Wahren <wahrenst@gmx.net>
+> Fixes: 60fdd931d577 ("memstick: add support for JMicron jmb38x MemoryStick host controller")
+> Signed-off-by: Christophe JAILLET <christophe.jaillet@wanadoo.fr>
 
-Applied for fixes, thanks!
+Applied for fixes and by adding stable tag, thanks!
 
 Kind regards
 Uffe
 
 
 > ---
+>  drivers/memstick/host/jmb38x_ms.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 >
-> Changes since v1:
-> - Add Fixes tag and Acked-by
+> diff --git a/drivers/memstick/host/jmb38x_ms.c b/drivers/memstick/host/jmb38x_ms.c
+> index c4a477643977..0a9c5ddf2f59 100644
+> --- a/drivers/memstick/host/jmb38x_ms.c
+> +++ b/drivers/memstick/host/jmb38x_ms.c
+> @@ -941,7 +941,7 @@ static int jmb38x_ms_probe(struct pci_dev *pdev,
+>         if (!cnt) {
+>                 rc = -ENODEV;
+>                 pci_dev_busy = 1;
+> -               goto err_out;
+> +               goto err_out_int;
+>         }
 >
->  drivers/mmc/host/sdhci-iproc.c | 1 +
->  1 file changed, 1 insertion(+)
->
-> diff --git a/drivers/mmc/host/sdhci-iproc.c b/drivers/mmc/host/sdhci-iproc.c
-> index 2b9cdcd1dd9d..f4f5f0a70cda 100644
-> --- a/drivers/mmc/host/sdhci-iproc.c
-> +++ b/drivers/mmc/host/sdhci-iproc.c
-> @@ -262,6 +262,7 @@ static const struct sdhci_iproc_data bcm2835_data = {
->  };
->
->  static const struct sdhci_pltfm_data sdhci_bcm2711_pltfm_data = {
-> +       .quirks = SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12,
->         .ops = &sdhci_iproc_32only_ops,
->  };
->
+>         jm = kzalloc(sizeof(struct jmb38x_ms)
 > --
-> 2.23.0
+> 2.20.1
 >
