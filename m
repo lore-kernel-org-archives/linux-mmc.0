@@ -1,8 +1,8 @@
 From: "Ramuthevar,Vadivel MuruganX"
         <vadivel.muruganx.ramuthevar@linux.intel.com>
-Subject: [PATCH v2 1/2] dt-bindings: mmc: sdhci-of-arasan: Add new compatible for Intel LGM SDXC
-Date: Wed,  9 Oct 2019 09:28:17 +0800
-Message-ID: <20191009012818.32763-2-vadivel.muruganx.ramuthevar@linux.intel.com>
+Subject: [PATCH v2 2/2] mmc: sdhci-of-arasan: Add Support for Intel LGM SDXC
+Date: Wed,  9 Oct 2019 09:28:18 +0800
+Message-ID: <20191009012818.32763-3-vadivel.muruganx.ramuthevar@linux.intel.com>
 References: <20191009012818.32763-1-vadivel.muruganx.ramuthevar@linux.intel.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20191009012818.32763-1-vadivel.muruganx.ramuthevar@linux.intel.com>
@@ -13,45 +13,57 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Ramuthevar Vadivel Murugan <vadivel.muruganx.ramuthevar@linux.intel.com>
 
-Add a new compatible to use the sdhc-arasan host controller driver
-with the SDXC PHY to support on Intel's Lightning Mountain(LGM) SoC.
+The current arasan sdhci PHY configuration isn't compatible
+with the PHY on Intel's LGM(Lightning Mountain) SoC devices.
+
+Therefore, add a new compatible, to adapt the Intel's LGM
+SDXC PHY with arasan-sdhc controller to configure the PHY.
 
 Signed-off-by: Ramuthevar Vadivel Murugan <vadivel.muruganx.ramuthevar@linux.intel.com>
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- Documentation/devicetree/bindings/mmc/arasan,sdhci.txt | 17 +++++++++++++++++
- 1 file changed, 17 insertions(+)
+ drivers/mmc/host/sdhci-of-arasan.c | 15 +++++++++++++++
+ 1 file changed, 15 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-index 7ca0aa7ccc0b..eb78d9a28c8b 100644
---- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-+++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-@@ -19,6 +19,8 @@ Required Properties:
- 	Note: This binding has been deprecated and moved to [5].
-     - "intel,lgm-sdhci-5.1-emmc", "arasan,sdhci-5.1": Intel LGM eMMC PHY
-       For this device it is strongly suggested to include arasan,soc-ctl-syscon.
-+    - "intel,lgm-sdhci-5.1-sdxc", "arasan,sdhci-5.1": Intel LGM SDXC PHY
-+      For this device it is strongly suggested to include arasan,soc-ctl-syscon.
+diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+index 7023cbec4017..55de839a8a5e 100644
+--- a/drivers/mmc/host/sdhci-of-arasan.c
++++ b/drivers/mmc/host/sdhci-of-arasan.c
+@@ -120,6 +120,12 @@ static const struct sdhci_arasan_soc_ctl_map intel_lgm_emmc_soc_ctl_map = {
+ 	.hiword_update = false,
+ };
  
-   [5] Documentation/devicetree/bindings/mmc/sdhci-am654.txt
- 
-@@ -97,3 +99,18 @@ Example:
- 		phy-names = "phy_arasan";
- 		arasan,soc-ctl-syscon = <&sysconf>;
- 	};
++static const struct sdhci_arasan_soc_ctl_map intel_lgm_sdxc_soc_ctl_map = {
++	.baseclkfreq = { .reg = 0x80, .width = 8, .shift = 2 },
++	.clockmultiplier = { .reg = 0, .width = -1, .shift = -1 },
++	.hiword_update = false,
++};
 +
-+	sdxc: sdhci@ec600000 {
-+		compatible = "arasan,sdhci-5.1", "intel,lgm-sdhci-5.1-sdxc";
-+		reg = <0xec600000 0x300>;
-+		interrupt-parent = <&ioapic1>;
-+		interrupts = <43 1>;
-+		clocks = <&cgu0 LGM_CLK_SDIO>, <&cgu0 LGM_CLK_NGI>,
-+			 <&cgu0 LGM_GCLK_SDXC>;
-+		clock-names = "clk_xin", "clk_ahb", "gate";
-+		clock-output-names = "sdxc_cardclock";
-+		#clock-cells = <0>;
-+		phys = <&sdxc_phy>;
-+		phy-names = "phy_arasan";
-+		arasan,soc-ctl-syscon = <&sysconf>;
-+	};
+ /**
+  * sdhci_arasan_syscon_write - Write to a field in soc_ctl registers
+  *
+@@ -384,6 +390,11 @@ static struct sdhci_arasan_of_data intel_lgm_emmc_data = {
+ 	.pdata = &sdhci_arasan_cqe_pdata,
+ };
+ 
++static struct sdhci_arasan_of_data intel_lgm_sdxc_data = {
++	.soc_ctl_map = &intel_lgm_sdxc_soc_ctl_map,
++	.pdata = &sdhci_arasan_cqe_pdata,
++};
++
+ #ifdef CONFIG_PM_SLEEP
+ /**
+  * sdhci_arasan_suspend - Suspend method for the driver
+@@ -489,6 +500,10 @@ static const struct of_device_id sdhci_arasan_of_match[] = {
+ 		.compatible = "intel,lgm-sdhci-5.1-emmc",
+ 		.data = &intel_lgm_emmc_data,
+ 	},
++	{
++		.compatible = "intel,lgm-sdhci-5.1-sdxc",
++		.data = &intel_lgm_sdxc_data,
++	},
+ 	/* Generic compatible below here */
+ 	{
+ 		.compatible = "arasan,sdhci-8.9a",
 -- 
 2.11.0
