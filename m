@@ -1,51 +1,33 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] memstick: jmb38x_ms: Fix an error handling path in 'jmb38x_ms_probe()'
-Date: Wed, 9 Oct 2019 11:12:33 +0200
-Message-ID: <CAPDyKFp6=6JsMSg7PV6zEohw16FeQ07G_VWSM1qFxmqswfrqFw@mail.gmail.com>
-References: <20191005112101.14410-1-christophe.jaillet@wanadoo.fr>
+From: Andy Shevchenko <andriy.shevchenko@intel.com>
+Subject: Re: [PATCH v1 2/2] mmc: sdhci-of-arasan: Add Support for Intel LGM
+ SDXC
+Date: Wed, 9 Oct 2019 12:40:05 +0300
+Message-ID: <20191009094005.GB32742@smile.fi.intel.com>
+References: <20191003040032.37696-1-vadivel.muruganx.ramuthevar@linux.intel.com>
+ <20191003040032.37696-3-vadivel.muruganx.ramuthevar@linux.intel.com>
+ <2cbda555-42d2-392c-0887-09cae4a35dce@intel.com>
+ <38228535-8d4c-76e9-f568-c0dfdc3994b3@linux.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20191005112101.14410-1-christophe.jaillet@wanadoo.fr>
+Content-Disposition: inline
+In-Reply-To: <38228535-8d4c-76e9-f568-c0dfdc3994b3@linux.intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Christophe JAILLET <christophe.jaillet@wanadoo.fr>
-Cc: Maxim Levitsky <maximlevitsky@gmail.com>, Alex Dubov <oakad@yahoo.com>, Will Deacon <will@kernel.org>, gustavo.pimentel@synopsys.com, Colin King <colin.king@canonical.com>, "Gustavo A. R. Silva" <gustavo@embeddedor.com>, Denis Efremov <efremov@linux.com>, Thomas Gleixner <tglx@linutronix.de>, YueHaibing <yuehaibing@huawei.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org
+To: "Ramuthevar, Vadivel MuruganX" <vadivel.muruganx.ramuthevar@linux.intel.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, michal.simek@xilinx.com, robh+dt@kernel.org, mark.rutland@arm.com, cheol.yong.kim@intel.com, qi-ming.wu@intel.com
 List-Id: linux-mmc@vger.kernel.org
 
-On Sat, 5 Oct 2019 at 13:21, Christophe JAILLET
-<christophe.jaillet@wanadoo.fr> wrote:
->
-> If 'jmb38x_ms_count_slots()' returns 0, we must undo the previous
-> 'pci_request_regions()' call.
->
-> Goto 'err_out_int' to fix it.
->
-> Fixes: 60fdd931d577 ("memstick: add support for JMicron jmb38x MemoryStick host controller")
-> Signed-off-by: Christophe JAILLET <christophe.jaillet@wanadoo.fr>
+On Wed, Oct 09, 2019 at 09:06:16AM +0800, Ramuthevar, Vadivel MuruganX wrote:
+> Hi Adrian,
+> 
+>     Thank you for the Acked-by, will add *Acked-by* in the next-patch.
 
-Applied for fixes and by adding stable tag, thanks!
+Please, stop top-posting.
 
-Kind regards
-Uffe
+Besides that, there is no need for next version if the only comments you got
+are ACKs. Rb:s, etc.
 
-
-> ---
->  drivers/memstick/host/jmb38x_ms.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/drivers/memstick/host/jmb38x_ms.c b/drivers/memstick/host/jmb38x_ms.c
-> index c4a477643977..0a9c5ddf2f59 100644
-> --- a/drivers/memstick/host/jmb38x_ms.c
-> +++ b/drivers/memstick/host/jmb38x_ms.c
-> @@ -941,7 +941,7 @@ static int jmb38x_ms_probe(struct pci_dev *pdev,
->         if (!cnt) {
->                 rc = -ENODEV;
->                 pci_dev_busy = 1;
-> -               goto err_out;
-> +               goto err_out_int;
->         }
->
->         jm = kzalloc(sizeof(struct jmb38x_ms)
-> --
-> 2.20.1
->
+-- 
+With Best Regards,
+Andy Shevchenko
