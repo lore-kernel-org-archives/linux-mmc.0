@@ -1,41 +1,42 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH V7 0/3] mmc: mmci: add busy detect for stm32 sdmmc variant
-Date: Wed, 9 Oct 2019 11:12:14 +0200
-Message-ID: <CAPDyKFrKrV3e6WmrgzUA0OV4VGm0BMXr0=orogAhHQM3nRpxqQ@mail.gmail.com>
-References: <20191008095604.20675-1-ludovic.Barre@st.com>
+Subject: Re: [PATCH v2 0/2] mmc: sdhci-of-arasan: Add Support for Intel LGM SDXC
+Date: Wed, 9 Oct 2019 11:12:19 +0200
+Message-ID: <CAPDyKFqDB_aOikZYSDEvQKF3PsD=AXq0PZJTj8AUAH0XaGj8Eg@mail.gmail.com>
+References: <20191009012818.32763-1-vadivel.muruganx.ramuthevar@linux.intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20191008095604.20675-1-ludovic.Barre@st.com>
+In-Reply-To: <20191009012818.32763-1-vadivel.muruganx.ramuthevar@linux.intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ludovic Barre <ludovic.Barre@st.com>
-Cc: Rob Herring <robh+dt@kernel.org>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-stm32@st-md-mailman.stormreply.com
+To: "Ramuthevar,Vadivel MuruganX" <vadivel.muruganx.ramuthevar@linux.intel.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, DTML <devicetree@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Michal Simek <michal.simek@xilinx.com>, Rob Herring <robh+dt@kernel.org>, cheol.yong.kim@intel.com, qi-ming.wu@intel.com
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, 8 Oct 2019 at 11:56, Ludovic Barre <ludovic.Barre@st.com> wrote:
+On Wed, 9 Oct 2019 at 03:28, Ramuthevar,Vadivel MuruganX
+<vadivel.muruganx.ramuthevar@linux.intel.com> wrote:
 >
-> From: Ludovic Barre <ludovic.barre@st.com>
+> The current arasan sdhci PHY configuration isn't compatible
+> with the PHY on Intel's LGM(Lightning Mountain) SoC devices.
 >
-> This patch series adds busy detect for stm32 sdmmc variant.
-> Some adaptations are required:
-> -On sdmmc the data timer is started on data transfert
-> and busy state, so we must add hardware busy timeout support.
-> -Add busy_complete callback at mmci_host_ops to allow to define
-> a specific busy completion by variant.
-> -Add sdmmc busy_complete callback.
+> Therefore, add a new compatible, to adapt the Intel's LGM
+> SDXC PHY with arasan-sdhc controller to configure the PHY.
 >
-> V7:
-> -Patch 1/3: rephrasing like proposed (thx ulf)
-> -If busy timeout is undefined => increase to 10s
-> -Keep busy_detect.
-> -Patch 3/3: rephrasing comment header
-> -Avoid twice read of status register
-> -Avoid writing in MMCIMASK0 & MMCICLEAR if not modified
+> Linux code base : V5.4-rc1
 >
+> Ramuthevar Vadivel Murugan (2):
+>   dt-bindings: mmc: sdhci-of-arasan: Add new compatible for Intel LGM
+>     SDXC
+>   mmc: sdhci-of-arasan: Add Support for Intel LGM SDXC
+>
+> changes from v1:
+>  -  commit message updated
+>  -  Acked-by tag added
+>
+>  Documentation/devicetree/bindings/mmc/arasan,sdhci.txt | 17 +++++++++++++++++
+>  drivers/mmc/host/sdhci-of-arasan.c                     | 15 +++++++++++++++
+>  2 files changed, 32 insertions(+)
 
 Applied for next, thanks!
-
-[...]
 
 Kind regards
 Uffe
