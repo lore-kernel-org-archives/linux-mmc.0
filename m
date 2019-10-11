@@ -1,57 +1,68 @@
-From: "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>
-Subject: Re: [PATCH v3 0/6] ACPI / utils: add new helper for HID/UID match
-Date: Fri, 11 Oct 2019 11:16:43 +0200
-Message-ID: <6926760.z8q4ev7VEa@kreacher>
-References: <20191001142725.30857-1-andriy.shevchenko@linux.intel.com>
+From: Ludovic Desroches <ludovic.desroches@microchip.com>
+Subject: [PATCH v2 1/3] dt-bindings: sdhci-of-at91: new compatible string and update properties
+Date: Fri, 11 Oct 2019 12:33:37 +0200
+Message-ID: <20191011103340.26749-1-ludovic.desroches@microchip.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-In-Reply-To: <20191001142725.30857-1-andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, Mika Westerberg <mika.westerberg-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org
+Cc: ulf.hansson@linaro.org, nicolas.ferre@microchip.com, adrian.hunter@intel.com, linux-kernel@vger.kernel.org, robh+dt@kernel.org, mark.rutland@arm.com, claudiu.beznea@microchip.com, Eugen.Hristev@microchip.com, Ludovic Desroches <ludovic.desroches@microchip.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tuesday, October 1, 2019 4:27:19 PM CEST Andy Shevchenko wrote:
-> There are few users outside of ACPI realm that re-introduce a custom
-> solution to match ACPI device against HID/UID. Add a generic helper for
-> them.
-> 
-> The series is supposed to go via linux-pm tree.
-> 
-> In v3:
-> - correct logic in sdhci-acpi for qcom devices (Adrian)
-> - add Mika's Ack
-> 
-> In v2:
-> - add patch 2 due to latent issue in the header (lkp)
-> - get rid of match_hid_uid() completely in patch 6
-> 
-> Andy Shevchenko (6):
->   ACPI / utils: Describe function parameters in kernel-doc
->   ACPI / utils: Move acpi_dev_get_first_match_dev() under CONFIG_ACPI
->   ACPI / utils: Introduce acpi_dev_hid_uid_match() helper
->   ACPI / LPSS: Switch to use acpi_dev_hid_uid_match()
->   mmc: sdhci-acpi: Switch to use acpi_dev_hid_uid_match()
->   iommu/amd: Switch to use acpi_dev_hid_uid_match()
-> 
->  drivers/acpi/acpi_lpss.c      | 21 +++------------
->  drivers/acpi/utils.c          | 32 +++++++++++++++++++++++
->  drivers/iommu/amd_iommu.c     | 30 ++++-----------------
->  drivers/mmc/host/sdhci-acpi.c | 49 ++++++++++++-----------------------
->  include/acpi/acpi_bus.h       |  8 +++---
->  include/linux/acpi.h          |  6 +++++
->  6 files changed, 67 insertions(+), 79 deletions(-)
-> 
-> 
+There is a new compatible string for the SAM9X60 sdhci device. It involves
+an update of the properties about the clocks stuff.
 
-Applying the series (with the tags given so far) as 5.5 material, thanks!
+Signed-off-by: Ludovic Desroches <ludovic.desroches@microchip.com>
+---
+
+Changes:
+- v2: remove the extra example and fix node label
+
+This patch conflicts with Nicolas' one: "dt-bindings: sdhci-of-at91: add
+the microchip,sdcal-inverted property". Let me know which one has to be
+rebased or you can handle it.
+
+Ludovic
+
+
+ .../devicetree/bindings/mmc/sdhci-atmel.txt       | 15 ++++++++++++---
+ 1 file changed, 12 insertions(+), 3 deletions(-)
+
+diff --git a/Documentation/devicetree/bindings/mmc/sdhci-atmel.txt b/Documentation/devicetree/bindings/mmc/sdhci-atmel.txt
+index 1b662d7171a0..5d541ad4d4eb 100644
+--- a/Documentation/devicetree/bindings/mmc/sdhci-atmel.txt
++++ b/Documentation/devicetree/bindings/mmc/sdhci-atmel.txt
+@@ -5,17 +5,26 @@ Documentation/devicetree/bindings/mmc/mmc.txt and the properties used by the
+ sdhci-of-at91 driver.
+ 
+ Required properties:
+-- compatible:		Must be "atmel,sama5d2-sdhci".
++- compatible:		Must be "atmel,sama5d2-sdhci" or "microchip,sam9x60-sdhci".
+ - clocks:		Phandlers to the clocks.
+-- clock-names:		Must be "hclock", "multclk", "baseclk";
++- clock-names:		Must be "hclock", "multclk", "baseclk" for
++			"atmel,sama5d2-sdhci".
++			Must be "hclock", "multclk" for "microchip,sam9x60-sdhci".
++
++Optional properties:
++- assigned-clocks:	The same with "multclk".
++- assigned-clock-rates	The rate of "multclk" in order to not rely on the
++			gck configuration set by previous components.
+ 
+ 
+ Example:
+ 
+-sdmmc0: sdio-host@a0000000 {
++mmc0: sdio-host@a0000000 {
+ 	compatible = "atmel,sama5d2-sdhci";
+ 	reg = <0xa0000000 0x300>;
+ 	interrupts = <31 IRQ_TYPE_LEVEL_HIGH 0>;
+ 	clocks = <&sdmmc0_hclk>, <&sdmmc0_gclk>, <&main>;
+ 	clock-names = "hclock", "multclk", "baseclk";
++	assigned-clocks = <&sdmmc0_gclk>;
++	assigned-clock-rates = <480000000>;
+ };
+-- 
+2.23.0
