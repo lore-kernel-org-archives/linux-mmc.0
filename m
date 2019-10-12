@@ -1,7 +1,7 @@
 From: Zhou Yanjie <zhouyanjie@zoho.com>
-Subject: [PATCH 5/6 v2] MMC: JZ4740: Add support for the X1000.
-Date: Sat, 12 Oct 2019 13:13:19 +0800
-Message-ID: <1570857203-49192-6-git-send-email-zhouyanjie@zoho.com>
+Subject: [PATCH 6/6 v2] MMC: JZ4740: Add support for LPM.
+Date: Sat, 12 Oct 2019 13:13:20 +0800
+Message-ID: <1570857203-49192-7-git-send-email-zhouyanjie@zoho.com>
 References: <1567669089-88693-1-git-send-email-zhouyanjie@zoho.com>
  <1570857203-49192-1-git-send-email-zhouyanjie@zoho.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
@@ -11,41 +11,60 @@ To: linux-mips@vger.kernel.org
 Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, robh+dt@kernel.org, paul.burton@mips.com, mark.rutland@arm.com, syq@debian.org, ulf.hansson@linaro.org, linus.walleij@linaro.org, armijn@tjaldur.nl, tglx@linutronix.de, yuehaibing@huawei.com, malat@debian.org, ezequiel@collabora.com, paul@crapouillou.net
 List-Id: linux-mmc@vger.kernel.org
 
-Add support for probing mmc driver on the X1000 Soc from Ingenic.
+add support for low power mode of Ingenic's MMC/SD Controller.
 
 Signed-off-by: Zhou Yanjie <zhouyanjie@zoho.com>
 ---
- drivers/mmc/host/jz4740_mmc.c | 4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
+ drivers/mmc/host/jz4740_mmc.c | 23 +++++++++++++++++++++++
+ 1 file changed, 23 insertions(+)
 
 diff --git a/drivers/mmc/host/jz4740_mmc.c b/drivers/mmc/host/jz4740_mmc.c
-index f4c4890..44a04fe 100644
+index 44a04fe..4cbe7fb 100644
 --- a/drivers/mmc/host/jz4740_mmc.c
 +++ b/drivers/mmc/host/jz4740_mmc.c
-@@ -109,6 +109,7 @@ enum jz4740_mmc_version {
- 	JZ_MMC_JZ4725B,
- 	JZ_MMC_JZ4760,
- 	JZ_MMC_JZ4780,
-+	JZ_MMC_X1000,
- };
+@@ -43,6 +43,7 @@
+ #define JZ_REG_MMC_RESP_FIFO	0x34
+ #define JZ_REG_MMC_RXFIFO	0x38
+ #define JZ_REG_MMC_TXFIFO	0x3C
++#define JZ_REG_MMC_LPM		0x40
+ #define JZ_REG_MMC_DMAC		0x44
  
- enum jz4740_mmc_state {
-@@ -938,6 +939,7 @@ static const struct of_device_id jz4740_mmc_of_match[] = {
- 	{ .compatible = "ingenic,jz4725b-mmc", .data = (void *)JZ_MMC_JZ4725B },
- 	{ .compatible = "ingenic,jz4760-mmc", .data = (void *) JZ_MMC_JZ4760 },
- 	{ .compatible = "ingenic,jz4780-mmc", .data = (void *) JZ_MMC_JZ4780 },
-+	{ .compatible = "ingenic,x1000-mmc", .data = (void *) JZ_MMC_X1000 },
- 	{},
- };
- MODULE_DEVICE_TABLE(of, jz4740_mmc_of_match);
-@@ -1039,7 +1041,7 @@ static int jz4740_mmc_probe(struct platform_device* pdev)
- 		dev_err(&pdev->dev, "Failed to add mmc host: %d\n", ret);
- 		goto err_release_dma;
+ #define JZ_MMC_STRPCL_EXIT_MULTIPLE BIT(7)
+@@ -102,6 +103,12 @@
+ #define JZ_MMC_DMAC_DMA_SEL BIT(1)
+ #define JZ_MMC_DMAC_DMA_EN BIT(0)
+ 
++#define	JZ_MMC_LPM_DRV_RISING BIT(31)
++#define	JZ_MMC_LPM_DRV_RISING_QTR_PHASE_DLY BIT(31)
++#define	JZ_MMC_LPM_DRV_RISING_1NS_DLY BIT(30)
++#define	JZ_MMC_LPM_SMP_RISING_QTR_OR_HALF_PHASE_DLY BIT(29)
++#define	JZ_MMC_LPM_LOW_POWER_MODE_EN BIT(0)
++
+ #define JZ_MMC_CLK_RATE 24000000
+ 
+ enum jz4740_mmc_version {
+@@ -860,6 +867,22 @@ static int jz4740_mmc_set_clock_rate(struct jz4740_mmc_host *host, int rate)
  	}
--	dev_info(&pdev->dev, "JZ SD/MMC card driver registered\n");
-+	dev_info(&pdev->dev, "Ingenic SD/MMC card driver registered\n");
  
- 	dev_info(&pdev->dev, "Using %s, %d-bit mode\n",
- 		 host->use_dma ? "DMA" : "PIO",
+ 	writew(div, host->base + JZ_REG_MMC_CLKRT);
++
++	if (real_rate > 25000000) {
++		if (host->version >= JZ_MMC_X1000) {
++			writel(JZ_MMC_LPM_DRV_RISING_QTR_PHASE_DLY |
++				   JZ_MMC_LPM_SMP_RISING_QTR_OR_HALF_PHASE_DLY |
++				   JZ_MMC_LPM_LOW_POWER_MODE_EN,
++				   host->base + JZ_REG_MMC_LPM);
++		} else if (host->version >= JZ_MMC_JZ4760) {
++			writel(JZ_MMC_LPM_DRV_RISING |
++				   JZ_MMC_LPM_LOW_POWER_MODE_EN,
++				   host->base + JZ_REG_MMC_LPM);
++		} else if (host->version >= JZ_MMC_JZ4725B)
++			writel(JZ_MMC_LPM_LOW_POWER_MODE_EN,
++				   host->base + JZ_REG_MMC_LPM);
++	}
++
+ 	return real_rate;
+ }
+ 
 -- 
 2.7.4
