@@ -1,13 +1,63 @@
 From: Zhou Yanjie <zhouyanjie@zoho.com>
-Subject: MMC: JZ4740: Add support for 8bit mode and LPM and JZ4760 Soc v2
-Date: Sat, 12 Oct 2019 13:13:14 +0800
-Message-ID: <1570857203-49192-1-git-send-email-zhouyanjie@zoho.com>
+Subject: [PATCH 1/6 v2] MMC: Ingenic: Add 8bit mode support.
+Date: Sat, 12 Oct 2019 13:13:15 +0800
+Message-ID: <1570857203-49192-2-git-send-email-zhouyanjie@zoho.com>
 References: <1567669089-88693-1-git-send-email-zhouyanjie@zoho.com>
+ <1570857203-49192-1-git-send-email-zhouyanjie@zoho.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1567669089-88693-1-git-send-email-zhouyanjie@zoho.com>
+In-Reply-To: <1570857203-49192-1-git-send-email-zhouyanjie@zoho.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-mips@vger.kernel.org
 Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, robh+dt@kernel.org, paul.burton@mips.com, mark.rutland@arm.com, syq@debian.org, ulf.hansson@linaro.org, linus.walleij@linaro.org, armijn@tjaldur.nl, tglx@linutronix.de, yuehaibing@huawei.com, malat@debian.org, ezequiel@collabora.com, paul@crapouillou.net
 List-Id: linux-mmc@vger.kernel.org
 
-v1->v2: drop macro definition rename, split patch, add support for x1000.
+Add support for 8bit mode, now supports 1bit/4bit/8bit modes.
+
+Signed-off-by: Zhou Yanjie <zhouyanjie@zoho.com>
+---
+ drivers/mmc/host/jz4740_mmc.c | 12 ++++++++++--
+ 1 file changed, 10 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/mmc/host/jz4740_mmc.c b/drivers/mmc/host/jz4740_mmc.c
+index ffdbfaa..69c4a8b 100644
+--- a/drivers/mmc/host/jz4740_mmc.c
++++ b/drivers/mmc/host/jz4740_mmc.c
+@@ -79,6 +79,8 @@
+ 
+ #define JZ_MMC_CMDAT_IO_ABORT BIT(11)
+ #define JZ_MMC_CMDAT_BUS_WIDTH_4BIT BIT(10)
++#define JZ_MMC_CMDAT_BUS_WIDTH_8BIT (BIT(10) | BIT(9))
++#define	JZ_MMC_CMDAT_BUS_WIDTH_MASK (BIT(10) | BIT(9))
+ #define JZ_MMC_CMDAT_DMA_EN BIT(8)
+ #define JZ_MMC_CMDAT_INIT BIT(7)
+ #define JZ_MMC_CMDAT_BUSY BIT(6)
+@@ -899,11 +901,16 @@ static void jz4740_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 
+ 	switch (ios->bus_width) {
+ 	case MMC_BUS_WIDTH_1:
+-		host->cmdat &= ~JZ_MMC_CMDAT_BUS_WIDTH_4BIT;
++		host->cmdat &= ~JZ_MMC_CMDAT_BUS_WIDTH_MASK;
+ 		break;
+ 	case MMC_BUS_WIDTH_4:
++		host->cmdat &= ~JZ_MMC_CMDAT_BUS_WIDTH_MASK;
+ 		host->cmdat |= JZ_MMC_CMDAT_BUS_WIDTH_4BIT;
+ 		break;
++	case MMC_BUS_WIDTH_8:
++		host->cmdat &= ~JZ_MMC_CMDAT_BUS_WIDTH_MASK;
++		host->cmdat |= JZ_MMC_CMDAT_BUS_WIDTH_8BIT;
++		break;
+ 	default:
+ 		break;
+ 	}
+@@ -1034,7 +1041,8 @@ static int jz4740_mmc_probe(struct platform_device* pdev)
+ 
+ 	dev_info(&pdev->dev, "Using %s, %d-bit mode\n",
+ 		 host->use_dma ? "DMA" : "PIO",
+-		 (mmc->caps & MMC_CAP_4_BIT_DATA) ? 4 : 1);
++		 (mmc->caps & MMC_CAP_8_BIT_DATA) ? 8 :
++		 ((mmc->caps & MMC_CAP_4_BIT_DATA) ? 4 : 1));
+ 
+ 	return 0;
+ 
+-- 
+2.7.4
