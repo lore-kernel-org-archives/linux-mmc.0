@@ -1,70 +1,34 @@
-From: Zhou Yanjie <zhouyanjie@zoho.com>
-Subject: [PATCH 6/6 v2] MMC: JZ4740: Add support for LPM.
-Date: Sat, 12 Oct 2019 13:13:20 +0800
-Message-ID: <1570857203-49192-7-git-send-email-zhouyanjie@zoho.com>
-References: <1567669089-88693-1-git-send-email-zhouyanjie@zoho.com>
- <1570857203-49192-1-git-send-email-zhouyanjie@zoho.com>
+From: Greg KH <gregkh@linuxfoundation.org>
+Subject: Re: [PATCH v3 1/2] Serial: Ingenic: Add support for the X1000.
+Date: Sat, 12 Oct 2019 09:35:31 +0200
+Message-ID: <20191012073531.GA2036970@kroah.com>
+References: <1548667176-119830-1-git-send-email-zhouyanjie@zoho.com>
+ <1548695029-11900-1-git-send-email-zhouyanjie@zoho.com>
+ <1548695029-11900-2-git-send-email-zhouyanjie@zoho.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1570857203-49192-1-git-send-email-zhouyanjie@zoho.com>
+Content-Disposition: inline
+In-Reply-To: <1548695029-11900-2-git-send-email-zhouyanjie@zoho.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-mips@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, robh+dt@kernel.org, paul.burton@mips.com, mark.rutland@arm.com, syq@debian.org, ulf.hansson@linaro.org, linus.walleij@linaro.org, armijn@tjaldur.nl, tglx@linutronix.de, yuehaibing@huawei.com, malat@debian.org, ezequiel@collabora.com, paul@crapouillou.net
+To: Zhou Yanjie <zhouyanjie@zoho.com>
+Cc: linux-mips@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, robh+dt@kernel.org, paul.burton@mips.com, mark.rutland@arm.com, syq@debian.org, ulf.hansson@linaro.org, linus.walleij@linaro.org, armijn@tjaldur.nl, tglx@linutronix.de, yuehaibing@huawei.com, malat@debian.org, ezequiel@collabora.com, paul@crapouillou.net, linux-serial@vger.kernel.org, jslaby@suse.com, jiaxun.yang@flygoat.com, 772753199@qq.com
 List-Id: linux-mmc@vger.kernel.org
 
-add support for low power mode of Ingenic's MMC/SD Controller.
+On Sat, Oct 12, 2019 at 01:13:23PM +0800, Zhou Yanjie wrote:
+> Add support for probing the 8250_ingenic driver on the
+> X1000 Soc from Ingenic.
+> 
+> Signed-off-by: Zhou Yanjie <zhouyanjie@zoho.com>
+> ---
+>  drivers/tty/serial/8250/8250_ingenic.c | 13 +++++++++----
+>  1 file changed, 9 insertions(+), 4 deletions(-)
 
-Signed-off-by: Zhou Yanjie <zhouyanjie@zoho.com>
----
- drivers/mmc/host/jz4740_mmc.c | 23 +++++++++++++++++++++++
- 1 file changed, 23 insertions(+)
+<snip>
 
-diff --git a/drivers/mmc/host/jz4740_mmc.c b/drivers/mmc/host/jz4740_mmc.c
-index 44a04fe..4cbe7fb 100644
---- a/drivers/mmc/host/jz4740_mmc.c
-+++ b/drivers/mmc/host/jz4740_mmc.c
-@@ -43,6 +43,7 @@
- #define JZ_REG_MMC_RESP_FIFO	0x34
- #define JZ_REG_MMC_RXFIFO	0x38
- #define JZ_REG_MMC_TXFIFO	0x3C
-+#define JZ_REG_MMC_LPM		0x40
- #define JZ_REG_MMC_DMAC		0x44
- 
- #define JZ_MMC_STRPCL_EXIT_MULTIPLE BIT(7)
-@@ -102,6 +103,12 @@
- #define JZ_MMC_DMAC_DMA_SEL BIT(1)
- #define JZ_MMC_DMAC_DMA_EN BIT(0)
- 
-+#define	JZ_MMC_LPM_DRV_RISING BIT(31)
-+#define	JZ_MMC_LPM_DRV_RISING_QTR_PHASE_DLY BIT(31)
-+#define	JZ_MMC_LPM_DRV_RISING_1NS_DLY BIT(30)
-+#define	JZ_MMC_LPM_SMP_RISING_QTR_OR_HALF_PHASE_DLY BIT(29)
-+#define	JZ_MMC_LPM_LOW_POWER_MODE_EN BIT(0)
-+
- #define JZ_MMC_CLK_RATE 24000000
- 
- enum jz4740_mmc_version {
-@@ -860,6 +867,22 @@ static int jz4740_mmc_set_clock_rate(struct jz4740_mmc_host *host, int rate)
- 	}
- 
- 	writew(div, host->base + JZ_REG_MMC_CLKRT);
-+
-+	if (real_rate > 25000000) {
-+		if (host->version >= JZ_MMC_X1000) {
-+			writel(JZ_MMC_LPM_DRV_RISING_QTR_PHASE_DLY |
-+				   JZ_MMC_LPM_SMP_RISING_QTR_OR_HALF_PHASE_DLY |
-+				   JZ_MMC_LPM_LOW_POWER_MODE_EN,
-+				   host->base + JZ_REG_MMC_LPM);
-+		} else if (host->version >= JZ_MMC_JZ4760) {
-+			writel(JZ_MMC_LPM_DRV_RISING |
-+				   JZ_MMC_LPM_LOW_POWER_MODE_EN,
-+				   host->base + JZ_REG_MMC_LPM);
-+		} else if (host->version >= JZ_MMC_JZ4725B)
-+			writel(JZ_MMC_LPM_LOW_POWER_MODE_EN,
-+				   host->base + JZ_REG_MMC_LPM);
-+	}
-+
- 	return real_rate;
- }
- 
--- 
-2.7.4
+you seem to have two patches merged into one here, please fix up and
+resend.
+
+thanks,
+
+greg k-h
