@@ -1,27 +1,48 @@
-From: Rob Herring <robh@kernel.org>
-Subject: Re: [PATCH 4/6 v2] dt-bindings: MMC: Add X1000 bindings.
-Date: Mon, 14 Oct 2019 13:15:10 -0500
-Message-ID: <20191014181510.GA10839@bogus>
-References: <1567669089-88693-1-git-send-email-zhouyanjie@zoho.com>
- <1570857203-49192-1-git-send-email-zhouyanjie@zoho.com>
- <1570857203-49192-5-git-send-email-zhouyanjie@zoho.com>
+From: Faiz Abbas <faiz_abbas@ti.com>
+Subject: [RFC] mmc: cqhci: commit descriptors before setting the doorbell
+Date: Tue, 15 Oct 2019 00:08:49 +0530
+Message-ID: <20191014183849.14864-1-faiz_abbas@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1570857203-49192-5-git-send-email-zhouyanjie@zoho.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Zhou Yanjie <zhouyanjie@zoho.com>
-Cc: linux-mips@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, robh+dt@kernel.org, paul.burton@mips.com, mark.rutland@arm.com, syq@debian.org, ulf.hansson@linaro.org, linus.walleij@linaro.org, armijn@tjaldur.nl, tglx@linutronix.de, yuehaibing@huawei.com, malat@debian.org, ezequiel@collabora.com, paul@crapouillou.net
+To: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: ulf.hansson@linaro.org, asutoshd@codeaurora.org, riteshh@codeaurora.org, adrian.hunter@intel.com, faiz_abbas@ti.com
 List-Id: linux-mmc@vger.kernel.org
 
-On Sat, 12 Oct 2019 13:13:18 +0800, Zhou Yanjie wrote:
-> Add the MMC bindings for the X1000 Soc from Ingenic.
-> 
-> Signed-off-by: Zhou Yanjie <zhouyanjie@zoho.com>
-> ---
->  Documentation/devicetree/bindings/mmc/jz4740.txt | 7 ++++---
->  1 file changed, 4 insertions(+), 3 deletions(-)
-> 
+Add a write memory barrier to make sure that descriptors are actually
+written to memory before ringing the doorbell.
 
-Acked-by: Rob Herring <robh@kernel.org>
+Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
+---
+
+This patch fixes a very infrequent ADMA error (1 out of 100 times) that
+I have been seeing after enabling command queuing for J721e.
+Also looking at memory-barriers.txt and this commit[1],
+it looks like we should be doing this before any descriptor write
+followed by a doorbell ring operation. It'll be nice if someone with more
+expertise in memory barriers can comment.
+
+[1] ad1a1b9cd67a ("scsi: ufs: commit descriptors before setting the
+    doorbell")
+
+ drivers/mmc/host/cqhci.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/cqhci.c b/drivers/mmc/host/cqhci.c
+index f7bdae5354c3..5047f7343ffc 100644
+--- a/drivers/mmc/host/cqhci.c
++++ b/drivers/mmc/host/cqhci.c
+@@ -611,7 +611,8 @@ static int cqhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ 	cq_host->slot[tag].flags = 0;
+ 
+ 	cq_host->qcnt += 1;
+-
++	/* Make sure descriptors are ready before ringing the doorbell */
++	wmb();
+ 	cqhci_writel(cq_host, 1 << tag, CQHCI_TDBR);
+ 	if (!(cqhci_readl(cq_host, CQHCI_TDBR) & (1 << tag)))
+ 		pr_debug("%s: cqhci: doorbell not set for tag %d\n",
+-- 
+2.19.2
