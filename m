@@ -1,37 +1,27 @@
 From: Rob Herring <robh@kernel.org>
-Subject: Re: [PATCH v2 1/3] dt-bindings: sdhci-of-at91: new compatible string
- and update properties
-Date: Mon, 14 Oct 2019 13:11:35 -0500
-Message-ID: <20191014181135.GA4428@bogus>
-References: <20191011103340.26749-1-ludovic.desroches@microchip.com>
+Subject: Re: [PATCH 4/6 v2] dt-bindings: MMC: Add X1000 bindings.
+Date: Mon, 14 Oct 2019 13:15:10 -0500
+Message-ID: <20191014181510.GA10839@bogus>
+References: <1567669089-88693-1-git-send-email-zhouyanjie@zoho.com>
+ <1570857203-49192-1-git-send-email-zhouyanjie@zoho.com>
+ <1570857203-49192-5-git-send-email-zhouyanjie@zoho.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20191011103340.26749-1-ludovic.desroches@microchip.com>
+In-Reply-To: <1570857203-49192-5-git-send-email-zhouyanjie@zoho.com>
 Sender: linux-kernel-owner@vger.kernel.org
-Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, ulf.hansson@linaro.org, nicolas.ferre@microchip.com, adrian.hunter@intel.com, linux-kernel@vger.kernel.org, robh+dt@kernel.org, mark.rutland@arm.com, claudiu.beznea@microchip.com, Eugen.Hristev@microchip.com, Ludovic Desroches <ludovic.desroches@microchip.com>
+To: Zhou Yanjie <zhouyanjie@zoho.com>
+Cc: linux-mips@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, robh+dt@kernel.org, paul.burton@mips.com, mark.rutland@arm.com, syq@debian.org, ulf.hansson@linaro.org, linus.walleij@linaro.org, armijn@tjaldur.nl, tglx@linutronix.de, yuehaibing@huawei.com, malat@debian.org, ezequiel@collabora.com, paul@crapouillou.net
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, 11 Oct 2019 12:33:37 +0200, Ludovic Desroches wrote:
-> There is a new compatible string for the SAM9X60 sdhci device. It involves
-> an update of the properties about the clocks stuff.
+On Sat, 12 Oct 2019 13:13:18 +0800, Zhou Yanjie wrote:
+> Add the MMC bindings for the X1000 Soc from Ingenic.
 > 
-> Signed-off-by: Ludovic Desroches <ludovic.desroches@microchip.com>
+> Signed-off-by: Zhou Yanjie <zhouyanjie@zoho.com>
 > ---
-> 
-> Changes:
-> - v2: remove the extra example and fix node label
-> 
-> This patch conflicts with Nicolas' one: "dt-bindings: sdhci-of-at91: add
-> the microchip,sdcal-inverted property". Let me know which one has to be
-> rebased or you can handle it.
-> 
-> Ludovic
-> 
-> 
->  .../devicetree/bindings/mmc/sdhci-atmel.txt       | 15 ++++++++++++---
->  1 file changed, 12 insertions(+), 3 deletions(-)
+>  Documentation/devicetree/bindings/mmc/jz4740.txt | 7 ++++---
+>  1 file changed, 4 insertions(+), 3 deletions(-)
 > 
 
-Reviewed-by: Rob Herring <robh@kernel.org>
+Acked-by: Rob Herring <robh@kernel.org>
