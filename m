@@ -1,41 +1,48 @@
 From: Manish Narani <manish.narani@xilinx.com>
-Subject: [PATCH v3 2/8] dt-bindings: mmc: arasan: Update Documentation for the input clock
-Date: Thu, 17 Oct 2019 11:51:44 +0530
-Message-ID: <1571293310-92563-3-git-send-email-manish.narani@xilinx.com>
-References: <1571293310-92563-1-git-send-email-manish.narani@xilinx.com>
+Subject: [PATCH v3 0/8] Arasan SDHCI enhancements and ZynqMP Tap Delays Handling
+Date: Thu, 17 Oct 2019 11:51:42 +0530
+Message-ID: <1571293310-92563-1-git-send-email-manish.narani@xilinx.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1571293310-92563-1-git-send-email-manish.narani@xilinx.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, adrian.hunter@intel.com, michal.simek@xilinx.com, jolly.shah@xilinx.com, rajan.vaja@xilinx.com, nava.manne@xilinx.com, mdf@kernel.org, manish.narani@xilinx.com
 Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, git@xilinx.com
 List-Id: linux-mmc@vger.kernel.org
 
-Add documentation for an optional input clock which is essentially used
-in sampling the input data coming from the card.
+This patch series does the following:
+ - Reorganize the Clock Handling in Arasan SD driver
+ - Adds new sampling clock in Arasan SD driver
+ - Adds support to set Clock Delays in SD Arasan Driver
+ - Add SDIO Tap Delay handling in ZynqMP firmware driver
+ - Add support for ZynqMP Tap Delays setting in Arasan SD driver
 
-Signed-off-by: Manish Narani <manish.narani@xilinx.com>
----
- Documentation/devicetree/bindings/mmc/arasan,sdhci.txt | 6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
+Changes in v2:
+	- Replaced the deprecated calls to clock framework APIs
+	- Added support for dev_clk_get() call to work for SD card clock
+	- Separated the clock data struct
+	- Fragmented the patch series in smaller patches to make it more
+	  readable
 
-diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-index 7ca0aa7ccc0b..b51e40b2e0c5 100644
---- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-+++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-@@ -38,9 +38,9 @@ Optional Properties:
-   - clock-output-names: If specified, this will be the name of the card clock
-     which will be exposed by this device.  Required if #clock-cells is
-     specified.
--  - #clock-cells: If specified this should be the value <0>.  With this property
--    in place we will export a clock representing the Card Clock.  This clock
--    is expected to be consumed by our PHY.  You must also specify
-+  - #clock-cells: If specified this should be the value <0> or <1>. With this
-+    property in place we will export one or two clocks representing the Card
-+    Clock. These clocks are expected to be consumed by our PHY.
-   - xlnx,fails-without-test-cd: when present, the controller doesn't work when
-     the CD line is not connected properly, and the line is not connected
-     properly. Test mode can be used to force the controller to function.
+Changes in v3:
+	- Reverted "Replaced the deprecated calls to clock framework APIs"
+	- Removed devm_clk_get() call which was added in v2
+
+Manish Narani (8):
+  mmc: sdhci-of-arasan: Separate out clk related data to another
+    structure
+  dt-bindings: mmc: arasan: Update Documentation for the input clock
+  mmc: sdhci-of-arasan: Add sampling clock for a phy to use
+  dt-bindings: mmc: arasan: Add optional properties for Arasan SDHCI
+  mmc: sdhci-of-arasan: Add support to set clock phase delays for SD
+  firmware: xilinx: Add SDIO Tap Delay nodes
+  dt-bindings: mmc: arasan: Document 'xlnx,zynqmp-8.9a' controller
+  mmc: sdhci-of-arasan: Add support for ZynqMP Platform Tap Delays Setup
+
+ .../devicetree/bindings/mmc/arasan,sdhci.txt  |  40 +-
+ drivers/mmc/host/sdhci-of-arasan.c            | 477 +++++++++++++++++-
+ include/linux/firmware/xlnx-zynqmp.h          |  13 +-
+ 3 files changed, 498 insertions(+), 32 deletions(-)
+
 -- 
 2.17.1
