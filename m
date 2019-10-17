@@ -1,7 +1,7 @@
 From: Manish Narani <manish.narani@xilinx.com>
-Subject: [PATCH v3 1/8] mmc: sdhci-of-arasan: Separate out clk related data to another structure
-Date: Thu, 17 Oct 2019 11:51:43 +0530
-Message-ID: <1571293310-92563-2-git-send-email-manish.narani@xilinx.com>
+Subject: [PATCH v3 4/8] dt-bindings: mmc: arasan: Add optional properties for Arasan SDHCI
+Date: Thu, 17 Oct 2019 11:51:46 +0530
+Message-ID: <1571293310-92563-5-git-send-email-manish.narani@xilinx.com>
 References: <1571293310-92563-1-git-send-email-manish.narani@xilinx.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,92 +12,39 @@ To: ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, adrian.hun
 Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, git@xilinx.com
 List-Id: linux-mmc@vger.kernel.org
 
-To improve the code readability, use two different structs, one for
-clock provider data and one for mmc platform data.
+Add optional propeties for Arasan SDHCI which are used to set clk delays
+for different speed modes in the controller.
 
 Signed-off-by: Manish Narani <manish.narani@xilinx.com>
 ---
- drivers/mmc/host/sdhci-of-arasan.c | 31 ++++++++++++++++++++----------
- 1 file changed, 21 insertions(+), 10 deletions(-)
+ .../devicetree/bindings/mmc/arasan,sdhci.txt      | 15 +++++++++++++++
+ 1 file changed, 15 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-index 7023cbec4017..701b6cc0f9a3 100644
---- a/drivers/mmc/host/sdhci-of-arasan.c
-+++ b/drivers/mmc/host/sdhci-of-arasan.c
-@@ -71,14 +71,23 @@ struct sdhci_arasan_soc_ctl_map {
- 	bool					hiword_update;
- };
- 
-+/**
-+ * struct sdhci_arasan_clk_data
-+ * @sdcardclk_hw:	Struct for the clock we might provide to a PHY.
-+ * @sdcardclk:		Pointer to normal 'struct clock' for sdcardclk_hw.
-+ */
-+struct sdhci_arasan_clk_data {
-+	struct clk_hw	sdcardclk_hw;
-+	struct clk      *sdcardclk;
-+};
+diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
+index b51e40b2e0c5..e0369dd7fb18 100644
+--- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
++++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
+@@ -46,6 +46,21 @@ Optional Properties:
+     properly. Test mode can be used to force the controller to function.
+   - xlnx,int-clock-stable-broken: when present, the controller always reports
+     that the internal clock is stable even when it is not.
++  - clk-phase-legacy: Input/Output Clock Delay pair in degrees for Legacy Mode.
++  - clk-phase-mmc-hs: Input/Output Clock Delay pair degrees for MMC HS.
++  - clk-phase-sd-hs: Input/Output Clock Delay pair in degrees for SD HS.
++  - clk-phase-uhs-sdr12: Input/Output Clock Delay pair in degrees for SDR12.
++  - clk-phase-uhs-sdr25: Input/Output Clock Delay pair in degrees for SDR25.
++  - clk-phase-uhs-sdr50: Input/Output Clock Delay pair in degrees for SDR50.
++  - clk-phase-uhs-sdr104: Input/Output Clock Delay pair in degrees for SDR104.
++  - clk-phase-uhs-ddr50: Input/Output Clock Delay pair in degrees for SD DDR50.
++  - clk-phase-mmc-ddr52: Input/Output Clock Delay pair in degrees for MMC DDR52.
++  - clk-phase-mmc-hs200: Input/Output Clock Delay pair in degrees for MMC HS200.
++  - clk-phase-mmc-hs400: Input/Output Clock Delay pair in degrees for MMC HS400.
 +
- /**
-  * struct sdhci_arasan_data
-  * @host:		Pointer to the main SDHCI host structure.
-  * @clk_ahb:		Pointer to the AHB clock
-  * @phy:		Pointer to the generic phy
-  * @is_phy_on:		True if the PHY is on; false if not.
-- * @sdcardclk_hw:	Struct for the clock we might provide to a PHY.
-- * @sdcardclk:		Pointer to normal 'struct clock' for sdcardclk_hw.
-+ * @clk_data:		Struct for the Arasan Controller Clock Data.
-  * @soc_ctl_base:	Pointer to regmap for syscon for soc_ctl registers.
-  * @soc_ctl_map:	Map to get offsets into soc_ctl registers.
-  */
-@@ -89,8 +98,7 @@ struct sdhci_arasan_data {
- 	bool		is_phy_on;
++  Above mentioned are the clock (phase) delays which are to be configured in the
++  controller while switching to particular speed mode. If not specified, driver
++  will configure the default value defined for particular mode in it.
  
- 	bool		has_cqe;
--	struct clk_hw	sdcardclk_hw;
--	struct clk      *sdcardclk;
-+	struct sdhci_arasan_clk_data clk_data;
- 
- 	struct regmap	*soc_ctl_base;
- 	const struct sdhci_arasan_soc_ctl_map *soc_ctl_map;
-@@ -520,8 +528,10 @@ static unsigned long sdhci_arasan_sdcardclk_recalc_rate(struct clk_hw *hw,
- 						      unsigned long parent_rate)
- 
- {
-+	struct sdhci_arasan_clk_data *clk_data =
-+		container_of(hw, struct sdhci_arasan_clk_data, sdcardclk_hw);
- 	struct sdhci_arasan_data *sdhci_arasan =
--		container_of(hw, struct sdhci_arasan_data, sdcardclk_hw);
-+		container_of(clk_data, struct sdhci_arasan_data, clk_data);
- 	struct sdhci_host *host = sdhci_arasan->host;
- 
- 	return host->mmc->actual_clock;
-@@ -633,6 +643,7 @@ static int sdhci_arasan_register_sdclk(struct sdhci_arasan_data *sdhci_arasan,
- 				       struct clk *clk_xin,
- 				       struct device *dev)
- {
-+	struct sdhci_arasan_clk_data *clk_data = &sdhci_arasan->clk_data;
- 	struct device_node *np = dev->of_node;
- 	struct clk_init_data sdcardclk_init;
- 	const char *parent_clk_name;
-@@ -655,13 +666,13 @@ static int sdhci_arasan_register_sdclk(struct sdhci_arasan_data *sdhci_arasan,
- 	sdcardclk_init.flags = CLK_GET_RATE_NOCACHE;
- 	sdcardclk_init.ops = &arasan_sdcardclk_ops;
- 
--	sdhci_arasan->sdcardclk_hw.init = &sdcardclk_init;
--	sdhci_arasan->sdcardclk =
--		devm_clk_register(dev, &sdhci_arasan->sdcardclk_hw);
--	sdhci_arasan->sdcardclk_hw.init = NULL;
-+	clk_data->sdcardclk_hw.init = &sdcardclk_init;
-+	clk_data->sdcardclk =
-+		devm_clk_register(dev, &clk_data->sdcardclk_hw);
-+	clk_data->sdcardclk_hw.init = NULL;
- 
- 	ret = of_clk_add_provider(np, of_clk_src_simple_get,
--				  sdhci_arasan->sdcardclk);
-+				  clk_data->sdcardclk);
- 	if (ret)
- 		dev_err(dev, "Failed to add clock provider\n");
- 
+ Example:
+ 	sdhci@e0100000 {
 -- 
 2.17.1
