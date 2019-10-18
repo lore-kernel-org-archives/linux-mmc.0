@@ -1,63 +1,66 @@
-From: Rob Herring <robh@kernel.org>
-Subject: Re: [PATCH v3 4/8] dt-bindings: mmc: arasan: Add optional properties
- for Arasan SDHCI
-Date: Thu, 17 Oct 2019 13:22:55 -0500
-Message-ID: <20191017182255.GA7053@bogus>
-References: <1571293310-92563-1-git-send-email-manish.narani@xilinx.com>
- <1571293310-92563-5-git-send-email-manish.narani@xilinx.com>
+From: Faiz Abbas <faiz_abbas@ti.com>
+Subject: Re: [RFC] mmc: cqhci: commit descriptors before setting the doorbell
+Date: Fri, 18 Oct 2019 12:52:55 +0530
+Message-ID: <8fba4072-a252-7397-15b2-791e2619024d@ti.com>
+References: <20191014183849.14864-1-faiz_abbas@ti.com>
+ <fac9ad28-dbc3-3948-d99c-742420f3e651@ti.com>
+ <ca62cbaa-111c-4546-afd5-aad70eb98993@intel.com>
+ <2275bfdc-ff30-719e-ae78-8c8bd20b8c80@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1571293310-92563-5-git-send-email-manish.narani@xilinx.com>
+In-Reply-To: <2275bfdc-ff30-719e-ae78-8c8bd20b8c80@ti.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Manish Narani <manish.narani@xilinx.com>
-Cc: ulf.hansson@linaro.org, mark.rutland@arm.com, adrian.hunter@intel.com, michal.simek@xilinx.com, jolly.shah@xilinx.com, rajan.vaja@xilinx.com, nava.manne@xilinx.com, mdf@kernel.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, git@xilinx.com
+To: Adrian Hunter <adrian.hunter@intel.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: ulf.hansson@linaro.org, asutoshd@codeaurora.org, riteshh@codeaurora.org, venkatg@codeaurora.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, Oct 17, 2019 at 11:51:46AM +0530, Manish Narani wrote:
-> Add optional propeties for Arasan SDHCI which are used to set clk delays
+Adrian,
 
-properties
-
-> for different speed modes in the controller.
+On 16/10/19 5:46 PM, Faiz Abbas wrote:
+> Adrian,
 > 
-> Signed-off-by: Manish Narani <manish.narani@xilinx.com>
-> ---
->  .../devicetree/bindings/mmc/arasan,sdhci.txt      | 15 +++++++++++++++
->  1 file changed, 15 insertions(+)
+> On 15/10/19 7:15 PM, Adrian Hunter wrote:
+>> On 15/10/19 10:55 AM, Faiz Abbas wrote:
+>>> Hi,
+>>>
+>>> On 15/10/19 12:08 AM, Faiz Abbas wrote:
+>>>> Add a write memory barrier to make sure that descriptors are actually
+>>>> written to memory before ringing the doorbell.
+>>>>
+>>>> Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
+>>>> ---
+>>>>
+>>>> This patch fixes a very infrequent ADMA error (1 out of 100 times) that
+>>>> I have been seeing after enabling command queuing for J721e.
+>>>> Also looking at memory-barriers.txt and this commit[1],
+>>>> it looks like we should be doing this before any descriptor write
+>>>> followed by a doorbell ring operation. It'll be nice if someone with more
+>>>> expertise in memory barriers can comment.
+>>>>
+>>>> [1] ad1a1b9cd67a ("scsi: ufs: commit descriptors before setting the
+>>>>     doorbell")
+>>>
+>>> So I see that cqhci_readl/writel() use readl/writel_relaxed() which
+>>> seems to be causing this issue. Should I just fix this by converting
+>>> those to readl/writel with memory barriers instead?
+>>
+>> Perhaps we could do both changes i.e. add wmb() and convert to non-relaxed
+>> readl/writel
+>>
 > 
-> diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-> index b51e40b2e0c5..e0369dd7fb18 100644
-> --- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-> +++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-> @@ -46,6 +46,21 @@ Optional Properties:
->      properly. Test mode can be used to force the controller to function.
->    - xlnx,int-clock-stable-broken: when present, the controller always reports
->      that the internal clock is stable even when it is not.
-> +  - clk-phase-legacy: Input/Output Clock Delay pair in degrees for Legacy Mode.
-> +  - clk-phase-mmc-hs: Input/Output Clock Delay pair degrees for MMC HS.
-> +  - clk-phase-sd-hs: Input/Output Clock Delay pair in degrees for SD HS.
-> +  - clk-phase-uhs-sdr12: Input/Output Clock Delay pair in degrees for SDR12.
-> +  - clk-phase-uhs-sdr25: Input/Output Clock Delay pair in degrees for SDR25.
-> +  - clk-phase-uhs-sdr50: Input/Output Clock Delay pair in degrees for SDR50.
-> +  - clk-phase-uhs-sdr104: Input/Output Clock Delay pair in degrees for SDR104.
-> +  - clk-phase-uhs-ddr50: Input/Output Clock Delay pair in degrees for SD DDR50.
-> +  - clk-phase-mmc-ddr52: Input/Output Clock Delay pair in degrees for MMC DDR52.
-> +  - clk-phase-mmc-hs200: Input/Output Clock Delay pair in degrees for MMC HS200.
-> +  - clk-phase-mmc-hs400: Input/Output Clock Delay pair in degrees for MMC HS400.
-
-Should be common?
-
-Range of values?
-
-> +
-> +  Above mentioned are the clock (phase) delays which are to be configured in the
-> +  controller while switching to particular speed mode. If not specified, driver
-> +  will configure the default value defined for particular mode in it.
->  
->  Example:
->  	sdhci@e0100000 {
-> -- 
-> 2.17.1
+> readl is implemented as  readl_relaxed(); __rmb();
+> and
+> writel is implemented as wmb(); writel_relaxed();
 > 
+> I think another wmb() before writel will be redundant.
+> 
+> Maybe this patch is good enough in itself.
+> 
+
+Do you agree?
+
+Thanks,
+Faiz
