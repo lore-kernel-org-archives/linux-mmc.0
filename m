@@ -1,69 +1,91 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [RFC] mmc: cqhci: commit descriptors before setting the doorbell
-Date: Fri, 18 Oct 2019 10:30:43 +0300
-Message-ID: <ce800827-d867-87a7-47fd-a65e92bd26db@intel.com>
-References: <20191014183849.14864-1-faiz_abbas@ti.com>
- <fac9ad28-dbc3-3948-d99c-742420f3e651@ti.com>
- <ca62cbaa-111c-4546-afd5-aad70eb98993@intel.com>
- <2275bfdc-ff30-719e-ae78-8c8bd20b8c80@ti.com>
- <8fba4072-a252-7397-15b2-791e2619024d@ti.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 6/6 v2] MMC: JZ4740: Add support for LPM.
+Date: Fri, 18 Oct 2019 10:52:41 +0200
+Message-ID: <CAPDyKFo9juNmf6hrcBjzOprS6GwzAPBq8y3ReGu=ry+MdxT9Bg@mail.gmail.com>
+References: <1567669089-88693-1-git-send-email-zhouyanjie@zoho.com>
+ <1570857203-49192-1-git-send-email-zhouyanjie@zoho.com> <1570857203-49192-7-git-send-email-zhouyanjie@zoho.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <8fba4072-a252-7397-15b2-791e2619024d@ti.com>
-Content-Language: en-US
+In-Reply-To: <1570857203-49192-7-git-send-email-zhouyanjie@zoho.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Faiz Abbas <faiz_abbas@ti.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
-Cc: ulf.hansson@linaro.org, asutoshd@codeaurora.org, riteshh@codeaurora.org, venkatg@codeaurora.org
+To: Zhou Yanjie <zhouyanjie@zoho.com>, Paul Cercueil <paul@crapouillou.net>
+Cc: linux-mips@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, Paul Burton <paul.burton@mips.com>, Mark Rutland <mark.rutland@arm.com>, syq@debian.org, Linus Walleij <linus.walleij@linaro.org>, armijn@tjaldur.nl, Thomas Gleixner <tglx@linutronix.de>, YueHaibing <yuehaibing@huawei.com>, Mathieu Malaterre <malat@debian.org>, Ezequiel Garcia <ezequiel@collabora.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 18/10/19 10:22 AM, Faiz Abbas wrote:
-> Adrian,
-> 
-> On 16/10/19 5:46 PM, Faiz Abbas wrote:
->> Adrian,
->>
->> On 15/10/19 7:15 PM, Adrian Hunter wrote:
->>> On 15/10/19 10:55 AM, Faiz Abbas wrote:
->>>> Hi,
->>>>
->>>> On 15/10/19 12:08 AM, Faiz Abbas wrote:
->>>>> Add a write memory barrier to make sure that descriptors are actually
->>>>> written to memory before ringing the doorbell.
->>>>>
->>>>> Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
->>>>> ---
->>>>>
->>>>> This patch fixes a very infrequent ADMA error (1 out of 100 times) that
->>>>> I have been seeing after enabling command queuing for J721e.
->>>>> Also looking at memory-barriers.txt and this commit[1],
->>>>> it looks like we should be doing this before any descriptor write
->>>>> followed by a doorbell ring operation. It'll be nice if someone with more
->>>>> expertise in memory barriers can comment.
->>>>>
->>>>> [1] ad1a1b9cd67a ("scsi: ufs: commit descriptors before setting the
->>>>>     doorbell")
->>>>
->>>> So I see that cqhci_readl/writel() use readl/writel_relaxed() which
->>>> seems to be causing this issue. Should I just fix this by converting
->>>> those to readl/writel with memory barriers instead?
->>>
->>> Perhaps we could do both changes i.e. add wmb() and convert to non-relaxed
->>> readl/writel
->>>
->>
->> readl is implemented as  readl_relaxed(); __rmb();
->> and
->> writel is implemented as wmb(); writel_relaxed();
->>
->> I think another wmb() before writel will be redundant.
->>
->> Maybe this patch is good enough in itself.
->>
-> 
-> Do you agree?
+On Sat, 12 Oct 2019 at 07:19, Zhou Yanjie <zhouyanjie@zoho.com> wrote:
+>
+> add support for low power mode of Ingenic's MMC/SD Controller.
+>
+> Signed-off-by: Zhou Yanjie <zhouyanjie@zoho.com>
 
-Sure.
+I couldn't find a proper coverletter for the series, please provide
+that next time as it really helps review. Additionally, it seems like
+you forgot to change the prefix of the patches to "mmc: jz4740" (or at
+least you chosed upper case letters), but I will take care of that
+this time. So, I have applied the series for next, thanks!
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+I also have a general question. Should we perhaps rename the driver
+from jz4740_mmc.c to ingenic.c (and the file for the DT bindings, the
+Kconfig, etc), as that seems like a more appropriate name? No?
+
+Kind regards
+Uffe
+
+
+> ---
+>  drivers/mmc/host/jz4740_mmc.c | 23 +++++++++++++++++++++++
+>  1 file changed, 23 insertions(+)
+>
+> diff --git a/drivers/mmc/host/jz4740_mmc.c b/drivers/mmc/host/jz4740_mmc.c
+> index 44a04fe..4cbe7fb 100644
+> --- a/drivers/mmc/host/jz4740_mmc.c
+> +++ b/drivers/mmc/host/jz4740_mmc.c
+> @@ -43,6 +43,7 @@
+>  #define JZ_REG_MMC_RESP_FIFO   0x34
+>  #define JZ_REG_MMC_RXFIFO      0x38
+>  #define JZ_REG_MMC_TXFIFO      0x3C
+> +#define JZ_REG_MMC_LPM         0x40
+>  #define JZ_REG_MMC_DMAC                0x44
+>
+>  #define JZ_MMC_STRPCL_EXIT_MULTIPLE BIT(7)
+> @@ -102,6 +103,12 @@
+>  #define JZ_MMC_DMAC_DMA_SEL BIT(1)
+>  #define JZ_MMC_DMAC_DMA_EN BIT(0)
+>
+> +#define        JZ_MMC_LPM_DRV_RISING BIT(31)
+> +#define        JZ_MMC_LPM_DRV_RISING_QTR_PHASE_DLY BIT(31)
+> +#define        JZ_MMC_LPM_DRV_RISING_1NS_DLY BIT(30)
+> +#define        JZ_MMC_LPM_SMP_RISING_QTR_OR_HALF_PHASE_DLY BIT(29)
+> +#define        JZ_MMC_LPM_LOW_POWER_MODE_EN BIT(0)
+> +
+>  #define JZ_MMC_CLK_RATE 24000000
+>
+>  enum jz4740_mmc_version {
+> @@ -860,6 +867,22 @@ static int jz4740_mmc_set_clock_rate(struct jz4740_mmc_host *host, int rate)
+>         }
+>
+>         writew(div, host->base + JZ_REG_MMC_CLKRT);
+> +
+> +       if (real_rate > 25000000) {
+> +               if (host->version >= JZ_MMC_X1000) {
+> +                       writel(JZ_MMC_LPM_DRV_RISING_QTR_PHASE_DLY |
+> +                                  JZ_MMC_LPM_SMP_RISING_QTR_OR_HALF_PHASE_DLY |
+> +                                  JZ_MMC_LPM_LOW_POWER_MODE_EN,
+> +                                  host->base + JZ_REG_MMC_LPM);
+> +               } else if (host->version >= JZ_MMC_JZ4760) {
+> +                       writel(JZ_MMC_LPM_DRV_RISING |
+> +                                  JZ_MMC_LPM_LOW_POWER_MODE_EN,
+> +                                  host->base + JZ_REG_MMC_LPM);
+> +               } else if (host->version >= JZ_MMC_JZ4725B)
+> +                       writel(JZ_MMC_LPM_LOW_POWER_MODE_EN,
+> +                                  host->base + JZ_REG_MMC_LPM);
+> +       }
+> +
+>         return real_rate;
+>  }
+>
+> --
+> 2.7.4
+>
+>
