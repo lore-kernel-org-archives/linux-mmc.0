@@ -1,12 +1,13 @@
 From: "H. Nikolaus Schaller" <hns@goldelico.com>
-Subject: [PATCH 0/9] OpenPandora: make wl1251 connected to mmc3 sdio port of
- OpenPandora work again
-Date: Fri, 18 Oct 2019 22:25:21 +0200
-Message-ID: <cover.1571430329.git.hns@goldelico.com>
+Subject: [PATCH 2/9] net: wireless: ti: wl1251 add device tree support
+Date: Fri, 18 Oct 2019 22:25:23 +0200
+Message-ID: <13d0a47ea50eacda2a493c8fde5143d6c4f34592.1571430329.git.hns@goldelico.com>
+References: <cover.1571430329.git.hns@goldelico.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <cover.1571430329.git.hns@goldelico.com>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -20,51 +21,54 @@ To: =?UTF-8?q?Beno=C3=AEt=20Cousson?= <bcousson@baylibre.com>, Tony Lindgren <to
 Cc: devicetree@vger.kernel.org, letux-kernel@openphoenux.org, linux-mmc@vger.kernel.org, kernel@pyra-handheld.com, linux-wireless@vger.kernel.org, linux-kernel@vger.kernel.org, netdev@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-
-Here we have a set of scattered patches to make the OpenPandora WiFi work again.
-
-v4.7 did break the pdata-quirks which made the mmc3 interface
-fail completely, because some code now assumes device tree
-based instantiation.
+We will have the wl1251 defined as a child node of the mmc interface
+and can read setup for gpios, interrupts and the ti,use-eeprom
+property from there instead of pdata to be provided by pdata-quirks.
 
 Fixes: 81eef6ca9201 ("mmc: omap_hsmmc: Use dma_request_chan() for requesting DMA channel")
 
-v4.11 did break the sdio qirks for wl1251 which made the driver no longer
-load, although the device was found as an sdio client.
+Signed-off-by: H. Nikolaus Schaller <hns@goldelico.com>
+---
+ drivers/net/wireless/ti/wl1251/sdio.c | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
 
-Fixes: 884f38607897 ("mmc: core: move some sdio IDs out of quirks file")
-
-To solve these issues:
-* we convert mmc3 and wl1251 initialization from pdata-quirks
-  to device tree
-* we make the wl1251 driver read properties from device tree
-* we fix the mmc core vendor ids and quirks
-* we fix the wl1251 (and wl1271) driver to use only vendor ids
-  from header file instead of (potentially conflicting) local
-  definitions
-
-
-H. Nikolaus Schaller (9):
-  Documentation: dt: wireless: update wl1251 for sdio
-  net: wireless: ti: wl1251 add device tree support
-  DTS: ARM: pandora-common: define wl1251 as child node of mmc3
-  mmc: host: omap_hsmmc: add code for special init of wl1251 to get rid
-    of pandora_wl1251_init_card
-  omap: pdata-quirks: remove openpandora quirks for mmc3 and wl1251
-  mmc: sdio: fix wl1251 vendor id
-  mmc: core: fix wl1251 sdio quirks
-  net: wireless: ti: wl1251 use new SDIO_VENDOR_ID_TI_WL1251 definition
-  net: wireless: ti: remove local VENDOR_ID and DEVICE_ID definitions
-
- .../bindings/net/wireless/ti,wl1251.txt       | 26 +++++++++++++
- arch/arm/boot/dts/omap3-pandora-common.dtsi   | 37 ++++++++++++++++++-
- arch/arm/mach-omap2/pdata-quirks.c            | 13 +++----
- drivers/mmc/core/quirks.h                     |  7 ++++
- drivers/mmc/host/omap_hsmmc.c                 | 21 +++++++++++
- drivers/net/wireless/ti/wl1251/sdio.c         | 23 +++++++-----
- drivers/net/wireless/ti/wlcore/sdio.c         |  8 ----
- include/linux/mmc/sdio_ids.h                  |  2 +
- 8 files changed, 111 insertions(+), 26 deletions(-)
-
+diff --git a/drivers/net/wireless/ti/wl1251/sdio.c b/drivers/net/wireless/ti/wl1251/sdio.c
+index 677f1146ccf0..c54a273713ed 100644
+--- a/drivers/net/wireless/ti/wl1251/sdio.c
++++ b/drivers/net/wireless/ti/wl1251/sdio.c
+@@ -16,6 +16,9 @@
+ #include <linux/irq.h>
+ #include <linux/pm_runtime.h>
+ #include <linux/gpio.h>
++#include <linux/of.h>
++#include <linux/of_gpio.h>
++#include <linux/of_irq.h>
+ 
+ #include "wl1251.h"
+ 
+@@ -217,6 +220,7 @@ static int wl1251_sdio_probe(struct sdio_func *func,
+ 	struct ieee80211_hw *hw;
+ 	struct wl1251_sdio *wl_sdio;
+ 	const struct wl1251_platform_data *wl1251_board_data;
++	struct device_node *np = func->dev.of_node;
+ 
+ 	hw = wl1251_alloc_hw();
+ 	if (IS_ERR(hw))
+@@ -248,6 +252,15 @@ static int wl1251_sdio_probe(struct sdio_func *func,
+ 		wl->power_gpio = wl1251_board_data->power_gpio;
+ 		wl->irq = wl1251_board_data->irq;
+ 		wl->use_eeprom = wl1251_board_data->use_eeprom;
++	} else if (np) {
++		wl->use_eeprom =of_property_read_bool(np, "ti,wl1251-has-eeprom");
++		wl->power_gpio = of_get_named_gpio(np, "ti,power-gpio", 0);
++		wl->irq = of_irq_get(np, 0);
++
++		if (wl->power_gpio == -EPROBE_DEFER || wl->irq == -EPROBE_DEFER) {
++			ret = -EPROBE_DEFER;
++			goto disable;
++		}
+ 	}
+ 
+ 	if (gpio_is_valid(wl->power_gpio)) {
 -- 
 2.19.1
