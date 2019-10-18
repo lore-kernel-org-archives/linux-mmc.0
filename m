@@ -1,55 +1,61 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sdhci-omap: Fix Tuning procedure for temperatures < -20C
-Date: Fri, 18 Oct 2019 12:58:26 +0200
-Message-ID: <CAPDyKFo=00NzUUs45bokScp2XUBRaEEvtr4PHWVSXk3x7zV3iQ@mail.gmail.com>
-References: <20191010105230.16736-1-faiz_abbas@ti.com>
+Subject: Re: [RFC] mmc: cqhci: commit descriptors before setting the doorbell
+Date: Fri, 18 Oct 2019 12:58:30 +0200
+Message-ID: <CAPDyKFqbRNXaNVEACFQkKEymaY=Jm8L65-Ne_LbAmqFUkY1zcw@mail.gmail.com>
+References: <20191014183849.14864-1-faiz_abbas@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20191010105230.16736-1-faiz_abbas@ti.com>
+In-Reply-To: <20191014183849.14864-1-faiz_abbas@ti.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Faiz Abbas <faiz_abbas@ti.com>
-Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Kishon <kishon@ti.com>
+Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Asutosh Das <asutoshd@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Adrian Hunter <adrian.hunter@intel.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, 10 Oct 2019 at 12:51, Faiz Abbas <faiz_abbas@ti.com> wrote:
+On Mon, 14 Oct 2019 at 20:37, Faiz Abbas <faiz_abbas@ti.com> wrote:
 >
-> According to the App note[1] detailing the tuning algorithm, for
-> temperatures < -20C, the initial tuning value should be min(largest
-> value in LPW - 24, ceil(13/16 ratio of LPW)). The largest value in
-> LPW is (max_window + 4 * (max_len - 1)) and not (max_window + 4 * max_len)
-> itself. Fix this implementation.
+> Add a write memory barrier to make sure that descriptors are actually
+> written to memory before ringing the doorbell.
 >
-> [1] http://www.ti.com/lit/an/spraca9b/spraca9b.pdf
->
-> Fixes: 961de0a856e3 ("mmc: sdhci-omap: Workaround errata regarding
-> SDR104/HS200 tuning failures (i929)")
-> Cc: stable@vger.kernel.org
 > Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
 
-Applied for fixes, thanks!
+Applied for fixes and by adding a stable tag, thanks!
+
+BTW, do you have a valid commit that it fixes?
 
 Kind regards
 Uffe
 
 
 > ---
->  drivers/mmc/host/sdhci-omap.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
 >
-> diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
-> index 41c2677c587f..083e7e053c95 100644
-> --- a/drivers/mmc/host/sdhci-omap.c
-> +++ b/drivers/mmc/host/sdhci-omap.c
-> @@ -372,7 +372,7 @@ static int sdhci_omap_execute_tuning(struct mmc_host *mmc, u32 opcode)
->          * on temperature
->          */
->         if (temperature < -20000)
-> -               phase_delay = min(max_window + 4 * max_len - 24,
-> +               phase_delay = min(max_window + 4 * (max_len - 1) - 24,
->                                   max_window +
->                                   DIV_ROUND_UP(13 * max_len, 16) * 4);
->         else if (temperature < 20000)
+> This patch fixes a very infrequent ADMA error (1 out of 100 times) that
+> I have been seeing after enabling command queuing for J721e.
+> Also looking at memory-barriers.txt and this commit[1],
+> it looks like we should be doing this before any descriptor write
+> followed by a doorbell ring operation. It'll be nice if someone with more
+> expertise in memory barriers can comment.
+>
+> [1] ad1a1b9cd67a ("scsi: ufs: commit descriptors before setting the
+>     doorbell")
+>
+>  drivers/mmc/host/cqhci.c | 3 ++-
+>  1 file changed, 2 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/cqhci.c b/drivers/mmc/host/cqhci.c
+> index f7bdae5354c3..5047f7343ffc 100644
+> --- a/drivers/mmc/host/cqhci.c
+> +++ b/drivers/mmc/host/cqhci.c
+> @@ -611,7 +611,8 @@ static int cqhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>         cq_host->slot[tag].flags = 0;
+>
+>         cq_host->qcnt += 1;
+> -
+> +       /* Make sure descriptors are ready before ringing the doorbell */
+> +       wmb();
+>         cqhci_writel(cq_host, 1 << tag, CQHCI_TDBR);
+>         if (!(cqhci_readl(cq_host, CQHCI_TDBR) & (1 << tag)))
+>                 pr_debug("%s: cqhci: doorbell not set for tag %d\n",
 > --
 > 2.19.2
 >
