@@ -1,68 +1,37 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: mmci: stm32: make sdmmc_idma_validate_data static
-Date: Fri, 18 Oct 2019 12:58:20 +0200
-Message-ID: <CAPDyKFqGwB2uo5dVqL3nbBpch1FBO2D-TG+yXo0R0hFiCL0Tfg@mail.gmail.com>
-References: <20191009115415.15691-1-ben.dooks@codethink.co.uk>
+From: Faiz Abbas <faiz_abbas@ti.com>
+Subject: Re: [RFC] mmc: cqhci: commit descriptors before setting the doorbell
+Date: Fri, 18 Oct 2019 16:57:32 +0530
+Message-ID: <ceb94a3f-9785-9fc7-b9e5-35435df9b498@ti.com>
+References: <20191014183849.14864-1-faiz_abbas@ti.com>
+ <CAPDyKFqbRNXaNVEACFQkKEymaY=Jm8L65-Ne_LbAmqFUkY1zcw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20191009115415.15691-1-ben.dooks@codethink.co.uk>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Ben Dooks <ben.dooks@codethink.co.uk>
-Cc: linux-kernel@lists.codethink.co.uk, Alexandre Torgue <alexandre.torgue@st.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, linux-stm32@st-md-mailman.stormreply.com, Linux ARM <linux-arm-kernel@lists.infradead.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFqbRNXaNVEACFQkKEymaY=Jm8L65-Ne_LbAmqFUkY1zcw@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Asutosh Das <asutoshd@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Adrian Hunter <adrian.hunter@intel.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, 9 Oct 2019 at 13:54, Ben Dooks <ben.dooks@codethink.co.uk> wrote:
->
-> Make sdmmc_idma_validate_data to avoid the following warning
-> from sparse:
->
-> drivers/mmc/host/mmci_stm32_sdmmc.c:28:5: warning: symbol 'sdmmc_idma_validate_data' was not declared. Should it be static?
->
-> Signed-off-by: Ben Dooks <ben.dooks@codethink.co.uk>
+Hi Uffe,
 
-Applied for next, thanks!
+On 18/10/19 4:28 PM, Ulf Hansson wrote:
+> On Mon, 14 Oct 2019 at 20:37, Faiz Abbas <faiz_abbas@ti.com> wrote:
+>>
+>> Add a write memory barrier to make sure that descriptors are actually
+>> written to memory before ringing the doorbell.
+>>
+>> Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
+> 
+> Applied for fixes and by adding a stable tag, thanks!
+> 
+> BTW, do you have a valid commit that it fixes?
+> 
+You can add:
 
-Kind regards
-Uffe
+Fixes: a4080225f51d ("mmc: cqhci: support for command queue enabled host")
 
-
-
-> ---
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: Maxime Coquelin <mcoquelin.stm32@gmail.com>
-> Cc: Alexandre Torgue <alexandre.torgue@st.com>
-> Cc: linux-mmc@vger.kernel.org
-> Cc: linux-stm32@st-md-mailman.stormreply.com
-> Cc: linux-arm-kernel@lists.infradead.org
-> ---
->  drivers/mmc/host/mmci_stm32_sdmmc.c | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/host/mmci_stm32_sdmmc.c b/drivers/mmc/host/mmci_stm32_sdmmc.c
-> index 8e83ae6920ae..296be8a060a6 100644
-> --- a/drivers/mmc/host/mmci_stm32_sdmmc.c
-> +++ b/drivers/mmc/host/mmci_stm32_sdmmc.c
-> @@ -25,8 +25,8 @@ struct sdmmc_priv {
->         void *sg_cpu;
->  };
->
-> -int sdmmc_idma_validate_data(struct mmci_host *host,
-> -                            struct mmc_data *data)
-> +static int sdmmc_idma_validate_data(struct mmci_host *host,
-> +                                   struct mmc_data *data)
->  {
->         struct scatterlist *sg;
->         int i;
-> --
-> 2.23.0
->
+Thanks,
+Faiz
