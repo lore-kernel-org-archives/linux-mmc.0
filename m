@@ -1,7 +1,8 @@
 From: "H. Nikolaus Schaller" <hns@goldelico.com>
-Subject: [PATCH 2/9] net: wireless: ti: wl1251 add device tree support
-Date: Fri, 18 Oct 2019 22:25:23 +0200
-Message-ID: <13d0a47ea50eacda2a493c8fde5143d6c4f34592.1571430329.git.hns@goldelico.com>
+Subject: [PATCH 5/9] omap: pdata-quirks: remove openpandora quirks for mmc3
+ and wl1251
+Date: Fri, 18 Oct 2019 22:25:26 +0200
+Message-ID: <63f59daa6b6e079905ff128b88282cf2c72e3540.1571430329.git.hns@goldelico.com>
 References: <cover.1571430329.git.hns@goldelico.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -18,57 +19,64 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
 Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
 Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: =?UTF-8?q?Beno=C3=AEt=20Cousson?= <bcousson@baylibre.com>, Tony Lindgren <tony@atomide.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Russell King <linux@armlinux.org.uk>, Ulf Hansson <ulf.hansson@linaro.org>, Kalle Valo <kvalo@codeaurora.org>, Mike Rapoport <rppt@linux.ibm.com>, David Sterba <dsterba@suse.com>, "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>, Petr Mladek <pmladek@suse.com>, Sakari Ailus <sakari.ailus@linux.intel.com>, "H. Nikolaus Schaller" <hns@goldelico.com>, Kefeng Wang <wangkefeng.wang@huawei.com>, Yangtao Li <tiny.windzz@gmail.com>, Alexios Zavras <alexios.zavras@intel.com>, Thomas Gleixner <tglx@linutronix.de>, Allison Randal <allison@lohutok.net>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, John Stultz <john.stultz@linaro.org>, Bjorn Helgaas <bhelgaas@google.com>
-Cc: devicetree@vger.kernel.org, letux-kernel@openphoenux.org, linux-mmc@vger.kernel.org, kernel@pyra-handheld.com, linux-wireless@vger.kernel.org, linux-kernel@vger.kernel.org, netdev@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Cc: devicetree@vger.kernel.org, letux-kernel@openphoenux.org, linux-mmc@vger.kernel.org, kernel@pyra-handheld.com, linux-wireless@vger.kernel.org, linux-kernel@vger.kernel.org, stable@vger.kernel.org, netdev@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-We will have the wl1251 defined as a child node of the mmc interface
-and can read setup for gpios, interrupts and the ti,use-eeprom
-property from there instead of pdata to be provided by pdata-quirks.
+With a wl1251 child node of mmc3 in the device tree decoded
+in omap_hsmmc.c to handle special wl1251 initialization, we do
+no longer need to instantiate the mmc3 through pdata quirks.
+
+We also can remove the wlan regulator and reset/interrupt definitions
+and do them through device tree.
 
 Fixes: 81eef6ca9201 ("mmc: omap_hsmmc: Use dma_request_chan() for requesting DMA channel")
 
 Signed-off-by: H. Nikolaus Schaller <hns@goldelico.com>
+Cc: <stable@vger.kernel.org> # 4.7.0
 ---
- drivers/net/wireless/ti/wl1251/sdio.c | 13 +++++++++++++
- 1 file changed, 13 insertions(+)
+ arch/arm/mach-omap2/pdata-quirks.c | 13 ++++++-------
+ 1 file changed, 6 insertions(+), 7 deletions(-)
 
-diff --git a/drivers/net/wireless/ti/wl1251/sdio.c b/drivers/net/wireless/ti/wl1251/sdio.c
-index 677f1146ccf0..c54a273713ed 100644
---- a/drivers/net/wireless/ti/wl1251/sdio.c
-+++ b/drivers/net/wireless/ti/wl1251/sdio.c
-@@ -16,6 +16,9 @@
- #include <linux/irq.h>
- #include <linux/pm_runtime.h>
- #include <linux/gpio.h>
-+#include <linux/of.h>
-+#include <linux/of_gpio.h>
-+#include <linux/of_irq.h>
+diff --git a/arch/arm/mach-omap2/pdata-quirks.c b/arch/arm/mach-omap2/pdata-quirks.c
+index d942a3357090..231bf4dc55fa 100644
+--- a/arch/arm/mach-omap2/pdata-quirks.c
++++ b/arch/arm/mach-omap2/pdata-quirks.c
+@@ -304,14 +304,17 @@ static void __init omap3_logicpd_torpedo_init(void)
+ }
  
- #include "wl1251.h"
+ /* omap3pandora legacy devices */
+-#define PANDORA_WIFI_IRQ_GPIO		21
+-#define PANDORA_WIFI_NRESET_GPIO	23
  
-@@ -217,6 +220,7 @@ static int wl1251_sdio_probe(struct sdio_func *func,
- 	struct ieee80211_hw *hw;
- 	struct wl1251_sdio *wl_sdio;
- 	const struct wl1251_platform_data *wl1251_board_data;
-+	struct device_node *np = func->dev.of_node;
+ static struct platform_device pandora_backlight = {
+ 	.name	= "pandora-backlight",
+ 	.id	= -1,
+ };
  
- 	hw = wl1251_alloc_hw();
- 	if (IS_ERR(hw))
-@@ -248,6 +252,15 @@ static int wl1251_sdio_probe(struct sdio_func *func,
- 		wl->power_gpio = wl1251_board_data->power_gpio;
- 		wl->irq = wl1251_board_data->irq;
- 		wl->use_eeprom = wl1251_board_data->use_eeprom;
-+	} else if (np) {
-+		wl->use_eeprom =of_property_read_bool(np, "ti,wl1251-has-eeprom");
-+		wl->power_gpio = of_get_named_gpio(np, "ti,power-gpio", 0);
-+		wl->irq = of_irq_get(np, 0);
++#if OLD_WL1251
 +
-+		if (wl->power_gpio == -EPROBE_DEFER || wl->irq == -EPROBE_DEFER) {
-+			ret = -EPROBE_DEFER;
-+			goto disable;
-+		}
- 	}
++#define PANDORA_WIFI_IRQ_GPIO		21
++#define PANDORA_WIFI_NRESET_GPIO	23
++
+ static struct regulator_consumer_supply pandora_vmmc3_supply[] = {
+ 	REGULATOR_SUPPLY("vmmc", "omap_hsmmc.2"),
+ };
+@@ -407,15 +410,11 @@ static void __init pandora_wl1251_init(void)
+ fail:
+ 	pr_err("wl1251 board initialisation failed\n");
+ }
++#endif
  
- 	if (gpio_is_valid(wl->power_gpio)) {
+ static void __init omap3_pandora_legacy_init(void)
+ {
+ 	platform_device_register(&pandora_backlight);
+-	gpiod_add_lookup_table(&pandora_vwlan_gpiod_table);
+-	platform_device_register(&pandora_vwlan_device);
+-	omap_hsmmc_init(pandora_mmc3);
+-	omap_hsmmc_late_init(pandora_mmc3);
+-	pandora_wl1251_init();
+ }
+ #endif /* CONFIG_ARCH_OMAP3 */
+ 
 -- 
 2.19.1
