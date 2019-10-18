@@ -1,68 +1,57 @@
-From: Sascha Hauer <s.hauer@pengutronix.de>
-Subject: [PATCH] mmc: mxs: fix flags passed to dmaengine_prep_slave_sg
-Date: Fri, 18 Oct 2019 11:39:34 +0200
-Message-ID: <20191018093934.29695-1-s.hauer@pengutronix.de>
-Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Return-path: <stable-owner@vger.kernel.org>
-Sender: stable-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Sascha Hauer <s.hauer@pengutronix.de>, Fabio Estevam <festevam@gmail.com>, Bruno Thomsen <bruno.thomsen@gmail.com>, stable@vger.kernel.org
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC fixes for v5.4-rc4
+Date: Fri, 18 Oct 2019 12:08:14 +0200
+Message-ID: <20191018100814.5265-1-ulf.hansson@linaro.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Since ceeeb99cd821 we no longer abuse the DMA_CTRL_ACK flag for custom
-driver use and introduced the MXS_DMA_CTRL_WAIT4END instead. We have not
-changed all users to this flag though. This patch fixes it for the
-mxs-mmc driver.
+Hi Linus,
 
-Fixes: ceeeb99cd821 ("dmaengine: mxs: rename custom flag")
-Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
-Tested-by: Fabio Estevam <festevam@gmail.com>
-Reported-by: Bruno Thomsen <bruno.thomsen@gmail.com>
-Tested-by: Bruno Thomsen <bruno.thomsen@gmail.com>
-Cc: stable@vger.kernel.org
----
- drivers/mmc/host/mxs-mmc.c | 7 ++++---
- 1 file changed, 4 insertions(+), 3 deletions(-)
+Here's a PR with a couple of MMC fixes intended for v5.4-rc4. Details about the
+highlights are as usual found in the signed tag.
 
-diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
-index 78e7e350655c..4031217d21c3 100644
---- a/drivers/mmc/host/mxs-mmc.c
-+++ b/drivers/mmc/host/mxs-mmc.c
-@@ -17,6 +17,7 @@
- #include <linux/interrupt.h>
- #include <linux/dma-mapping.h>
- #include <linux/dmaengine.h>
-+#include <linux/dma/mxs-dma.h>
- #include <linux/highmem.h>
- #include <linux/clk.h>
- #include <linux/err.h>
-@@ -266,7 +267,7 @@ static void mxs_mmc_bc(struct mxs_mmc_host *host)
- 	ssp->ssp_pio_words[2] = cmd1;
- 	ssp->dma_dir = DMA_NONE;
- 	ssp->slave_dirn = DMA_TRANS_NONE;
--	desc = mxs_mmc_prep_dma(host, DMA_CTRL_ACK);
-+	desc = mxs_mmc_prep_dma(host, MXS_DMA_CTRL_WAIT4END);
- 	if (!desc)
- 		goto out;
- 
-@@ -311,7 +312,7 @@ static void mxs_mmc_ac(struct mxs_mmc_host *host)
- 	ssp->ssp_pio_words[2] = cmd1;
- 	ssp->dma_dir = DMA_NONE;
- 	ssp->slave_dirn = DMA_TRANS_NONE;
--	desc = mxs_mmc_prep_dma(host, DMA_CTRL_ACK);
-+	desc = mxs_mmc_prep_dma(host, MXS_DMA_CTRL_WAIT4END);
- 	if (!desc)
- 		goto out;
- 
-@@ -441,7 +442,7 @@ static void mxs_mmc_adtc(struct mxs_mmc_host *host)
- 	host->data = data;
- 	ssp->dma_dir = dma_data_dir;
- 	ssp->slave_dirn = slave_dirn;
--	desc = mxs_mmc_prep_dma(host, DMA_PREP_INTERRUPT | DMA_CTRL_ACK);
-+	desc = mxs_mmc_prep_dma(host, DMA_PREP_INTERRUPT | MXS_DMA_CTRL_WAIT4END);
- 	if (!desc)
- 		goto out;
- 
--- 
-2.23.0
+Please pull this in!
+
+Kind regards
+Ulf Hansson
+
+
+The following changes since commit 54ecb8f7028c5eb3d740bb82b0f1d90f2df63c5c:
+
+  Linux 5.4-rc1 (2019-09-30 10:35:40 -0700)
+
+are available in the Git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.4-rc1
+
+for you to fetch changes up to 28c9fac09ab0147158db0baeec630407a5e9b892:
+
+  memstick: jmb38x_ms: Fix an error handling path in 'jmb38x_ms_probe()' (2019-10-09 11:08:03 +0200)
+
+----------------------------------------------------------------
+MMC host:
+ - sdhci-iproc: Prevent some spurious interrupts
+ - renesas_sdhi/sh_mmcif: Avoid false warnings about IRQs not found
+
+MEMSTICK host:
+ - jmb38x_ms: Fix an error handling path at ->probe()
+
+----------------------------------------------------------------
+Christophe JAILLET (1):
+      memstick: jmb38x_ms: Fix an error handling path in 'jmb38x_ms_probe()'
+
+Geert Uytterhoeven (2):
+      mmc: renesas_sdhi: Do not use platform_get_irq() to count interrupts
+      mmc: sh_mmcif: Use platform_get_irq_optional() for optional interrupt
+
+Nicolas Saenz Julienne (1):
+      mmc: sdhci-iproc: fix spurious interrupts on Multiblock reads with bcm2711
+
+ drivers/memstick/host/jmb38x_ms.c    |  2 +-
+ drivers/mmc/host/renesas_sdhi_core.c | 31 +++++++++++++++++++------------
+ drivers/mmc/host/sdhci-iproc.c       |  1 +
+ drivers/mmc/host/sh_mmcif.c          |  6 ++----
+ 4 files changed, 23 insertions(+), 17 deletions(-)
