@@ -1,61 +1,68 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [RFC] mmc: cqhci: commit descriptors before setting the doorbell
-Date: Fri, 18 Oct 2019 12:58:30 +0200
-Message-ID: <CAPDyKFqbRNXaNVEACFQkKEymaY=Jm8L65-Ne_LbAmqFUkY1zcw@mail.gmail.com>
-References: <20191014183849.14864-1-faiz_abbas@ti.com>
+Subject: Re: [PATCH] mmc: mmci: stm32: make sdmmc_idma_validate_data static
+Date: Fri, 18 Oct 2019 12:58:20 +0200
+Message-ID: <CAPDyKFqGwB2uo5dVqL3nbBpch1FBO2D-TG+yXo0R0hFiCL0Tfg@mail.gmail.com>
+References: <20191009115415.15691-1-ben.dooks@codethink.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20191014183849.14864-1-faiz_abbas@ti.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Faiz Abbas <faiz_abbas@ti.com>
-Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Asutosh Das <asutoshd@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Adrian Hunter <adrian.hunter@intel.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <20191009115415.15691-1-ben.dooks@codethink.co.uk>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Ben Dooks <ben.dooks@codethink.co.uk>
+Cc: linux-kernel@lists.codethink.co.uk, Alexandre Torgue <alexandre.torgue@st.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, linux-stm32@st-md-mailman.stormreply.com, Linux ARM <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, 14 Oct 2019 at 20:37, Faiz Abbas <faiz_abbas@ti.com> wrote:
+On Wed, 9 Oct 2019 at 13:54, Ben Dooks <ben.dooks@codethink.co.uk> wrote:
 >
-> Add a write memory barrier to make sure that descriptors are actually
-> written to memory before ringing the doorbell.
+> Make sdmmc_idma_validate_data to avoid the following warning
+> from sparse:
 >
-> Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
+> drivers/mmc/host/mmci_stm32_sdmmc.c:28:5: warning: symbol 'sdmmc_idma_validate_data' was not declared. Should it be static?
+>
+> Signed-off-by: Ben Dooks <ben.dooks@codethink.co.uk>
 
-Applied for fixes and by adding a stable tag, thanks!
-
-BTW, do you have a valid commit that it fixes?
+Applied for next, thanks!
 
 Kind regards
 Uffe
 
 
+
 > ---
+> Cc: Ulf Hansson <ulf.hansson@linaro.org>
+> Cc: Maxime Coquelin <mcoquelin.stm32@gmail.com>
+> Cc: Alexandre Torgue <alexandre.torgue@st.com>
+> Cc: linux-mmc@vger.kernel.org
+> Cc: linux-stm32@st-md-mailman.stormreply.com
+> Cc: linux-arm-kernel@lists.infradead.org
+> ---
+>  drivers/mmc/host/mmci_stm32_sdmmc.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
 >
-> This patch fixes a very infrequent ADMA error (1 out of 100 times) that
-> I have been seeing after enabling command queuing for J721e.
-> Also looking at memory-barriers.txt and this commit[1],
-> it looks like we should be doing this before any descriptor write
-> followed by a doorbell ring operation. It'll be nice if someone with more
-> expertise in memory barriers can comment.
+> diff --git a/drivers/mmc/host/mmci_stm32_sdmmc.c b/drivers/mmc/host/mmci_stm32_sdmmc.c
+> index 8e83ae6920ae..296be8a060a6 100644
+> --- a/drivers/mmc/host/mmci_stm32_sdmmc.c
+> +++ b/drivers/mmc/host/mmci_stm32_sdmmc.c
+> @@ -25,8 +25,8 @@ struct sdmmc_priv {
+>         void *sg_cpu;
+>  };
 >
-> [1] ad1a1b9cd67a ("scsi: ufs: commit descriptors before setting the
->     doorbell")
->
->  drivers/mmc/host/cqhci.c | 3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/cqhci.c b/drivers/mmc/host/cqhci.c
-> index f7bdae5354c3..5047f7343ffc 100644
-> --- a/drivers/mmc/host/cqhci.c
-> +++ b/drivers/mmc/host/cqhci.c
-> @@ -611,7 +611,8 @@ static int cqhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
->         cq_host->slot[tag].flags = 0;
->
->         cq_host->qcnt += 1;
-> -
-> +       /* Make sure descriptors are ready before ringing the doorbell */
-> +       wmb();
->         cqhci_writel(cq_host, 1 << tag, CQHCI_TDBR);
->         if (!(cqhci_readl(cq_host, CQHCI_TDBR) & (1 << tag)))
->                 pr_debug("%s: cqhci: doorbell not set for tag %d\n",
+> -int sdmmc_idma_validate_data(struct mmci_host *host,
+> -                            struct mmc_data *data)
+> +static int sdmmc_idma_validate_data(struct mmci_host *host,
+> +                                   struct mmc_data *data)
+>  {
+>         struct scatterlist *sg;
+>         int i;
 > --
-> 2.19.2
+> 2.23.0
 >
