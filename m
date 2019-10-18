@@ -1,81 +1,102 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 1/3] dt-bindings: sdhci-of-at91: new compatible string
- and update properties
-Date: Fri, 18 Oct 2019 12:56:14 +0200
-Message-ID: <CAPDyKFqxfBG-CDd_O9d8X89GZmNFXh=CoFE2QqptgtLtOU5=_Q@mail.gmail.com>
-References: <20191011103340.26749-1-ludovic.desroches@microchip.com>
+Subject: Re: [PATCH 2/2] mmc: sdhci-of-at91: add DT property to enable
+ calibration on full reset
+Date: Fri, 18 Oct 2019 12:58:14 +0200
+Message-ID: <CAPDyKFrR810Yb+CqrhvJpSPW0yDEuWsNBysnbEq=3YHcOsVLhw@mail.gmail.com>
+References: <4d269f30b1122487a2b5c8b48e24f78f2b75a509.1570537903.git.nicolas.ferre@microchip.com>
+ <d25c8f909d039938a5696e8de32396cf2aaf54b7.1570537903.git.nicolas.ferre@microchip.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20191011103340.26749-1-ludovic.desroches@microchip.com>
+In-Reply-To: <d25c8f909d039938a5696e8de32396cf2aaf54b7.1570537903.git.nicolas.ferre@microchip.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ludovic Desroches <ludovic.desroches@microchip.com>
-Cc: Linux ARM <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, Nicolas Ferre <nicolas.ferre@microchip.com>, Adrian Hunter <adrian.hunter@intel.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, claudiu.beznea@microchip.com, Eugen.Hristev@microchip.com
+To: Nicolas Ferre <nicolas.ferre@microchip.com>
+Cc: Ludovic Desroches <ludovic.desroches@microchip.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, Alexandre Belloni <alexandre.belloni@bootlin.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, 11 Oct 2019 at 12:33, Ludovic Desroches
-<ludovic.desroches@microchip.com> wrote:
+On Tue, 8 Oct 2019 at 14:34, Nicolas Ferre <nicolas.ferre@microchip.com> wrote:
 >
-> There is a new compatible string for the SAM9X60 sdhci device. It involves
-> an update of the properties about the clocks stuff.
+> Add a property to keep the analog calibration cell powered.
+> This feature is specific to the Microchip SDHCI IP and outside
+> of the standard SDHCI register map.
 >
-> Signed-off-by: Ludovic Desroches <ludovic.desroches@microchip.com>
+> By always keeping it on, after a full reset sequence, we make sure
+> that this feature is activated and not disabled.
+>
+> We expose a hardware property to the DT as this feature can be used
+> to adapt SDHCI behavior vs. how the SDCAL SoC pin is connected
+> on the board.
+>
+> Note that managing properly this property would reduce
+> power consumption on some SAMA5D2 SiP revisions.
+>
+> Signed-off-by: Nicolas Ferre <nicolas.ferre@microchip.com>
 
-This doesn't apply any more, can you please re-spin it?
+Applied for next, thanks!
 
 Kind regards
 Uffe
 
 
 > ---
+>  drivers/mmc/host/sdhci-of-at91.c | 19 +++++++++++++++++++
+>  1 file changed, 19 insertions(+)
 >
-> Changes:
-> - v2: remove the extra example and fix node label
+> diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
+> index e7d1920729fb..9571c4a882a9 100644
+> --- a/drivers/mmc/host/sdhci-of-at91.c
+> +++ b/drivers/mmc/host/sdhci-of-at91.c
+> @@ -27,6 +27,9 @@
+>  #define SDMMC_CACR     0x230
+>  #define                SDMMC_CACR_CAPWREN      BIT(0)
+>  #define                SDMMC_CACR_KEY          (0x46 << 8)
+> +#define SDMMC_CALCR    0x240
+> +#define                SDMMC_CALCR_EN          BIT(0)
+> +#define                SDMMC_CALCR_ALWYSON     BIT(4)
 >
-> This patch conflicts with Nicolas' one: "dt-bindings: sdhci-of-at91: add
-> the microchip,sdcal-inverted property". Let me know which one has to be
-> rebased or you can handle it.
+>  #define SDHCI_AT91_PRESET_COMMON_CONF  0x400 /* drv type B, programmable clock mode */
 >
-> Ludovic
->
->
->  .../devicetree/bindings/mmc/sdhci-atmel.txt       | 15 ++++++++++++---
->  1 file changed, 12 insertions(+), 3 deletions(-)
->
-> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-atmel.txt b/Documentation/devicetree/bindings/mmc/sdhci-atmel.txt
-> index 1b662d7171a0..5d541ad4d4eb 100644
-> --- a/Documentation/devicetree/bindings/mmc/sdhci-atmel.txt
-> +++ b/Documentation/devicetree/bindings/mmc/sdhci-atmel.txt
-> @@ -5,17 +5,26 @@ Documentation/devicetree/bindings/mmc/mmc.txt and the properties used by the
->  sdhci-of-at91 driver.
->
->  Required properties:
-> -- compatible:          Must be "atmel,sama5d2-sdhci".
-> +- compatible:          Must be "atmel,sama5d2-sdhci" or "microchip,sam9x60-sdhci".
->  - clocks:              Phandlers to the clocks.
-> -- clock-names:         Must be "hclock", "multclk", "baseclk";
-> +- clock-names:         Must be "hclock", "multclk", "baseclk" for
-> +                       "atmel,sama5d2-sdhci".
-> +                       Must be "hclock", "multclk" for "microchip,sam9x60-sdhci".
-> +
-> +Optional properties:
-> +- assigned-clocks:     The same with "multclk".
-> +- assigned-clock-rates The rate of "multclk" in order to not rely on the
-> +                       gck configuration set by previous components.
->
->
->  Example:
->
-> -sdmmc0: sdio-host@a0000000 {
-> +mmc0: sdio-host@a0000000 {
->         compatible = "atmel,sama5d2-sdhci";
->         reg = <0xa0000000 0x300>;
->         interrupts = <31 IRQ_TYPE_LEVEL_HIGH 0>;
->         clocks = <&sdmmc0_hclk>, <&sdmmc0_gclk>, <&main>;
->         clock-names = "hclock", "multclk", "baseclk";
-> +       assigned-clocks = <&sdmmc0_gclk>;
-> +       assigned-clock-rates = <480000000>;
+> @@ -35,6 +38,7 @@ struct sdhci_at91_priv {
+>         struct clk *gck;
+>         struct clk *mainck;
+>         bool restore_needed;
+> +       bool cal_always_on;
 >  };
+>
+>  static void sdhci_at91_set_force_card_detect(struct sdhci_host *host)
+> @@ -116,10 +120,17 @@ static void sdhci_at91_set_uhs_signaling(struct sdhci_host *host,
+>
+>  static void sdhci_at91_reset(struct sdhci_host *host, u8 mask)
+>  {
+> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +       struct sdhci_at91_priv *priv = sdhci_pltfm_priv(pltfm_host);
+> +
+>         sdhci_reset(host, mask);
+>
+>         if (host->mmc->caps & MMC_CAP_NONREMOVABLE)
+>                 sdhci_at91_set_force_card_detect(host);
+> +
+> +       if (priv->cal_always_on && (mask & SDHCI_RESET_ALL))
+> +               sdhci_writel(host, SDMMC_CALCR_ALWYSON | SDMMC_CALCR_EN,
+> +                            SDMMC_CALCR);
+>  }
+>
+>  static const struct sdhci_ops sdhci_at91_sama5d2_ops = {
+> @@ -345,6 +356,14 @@ static int sdhci_at91_probe(struct platform_device *pdev)
+>
+>         priv->restore_needed = false;
+>
+> +       /*
+> +        * if SDCAL pin is wrongly connected, we must enable
+> +        * the analog calibration cell permanently.
+> +        */
+> +       priv->cal_always_on =
+> +               device_property_read_bool(&pdev->dev,
+> +                                         "microchip,sdcal-inverted");
+> +
+>         ret = mmc_of_parse(host->mmc);
+>         if (ret)
+>                 goto clocks_disable_unprepare;
 > --
-> 2.23.0
+> 2.17.1
 >
