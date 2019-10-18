@@ -1,40 +1,26 @@
-From: Chuhong Yuan <hslester96@gmail.com>
-Subject: [PATCH] mmc: renesas_sdhi: add checks for pinctrl_lookup_state
-Date: Fri, 18 Oct 2019 21:13:38 +0800
-Message-ID: <20191018131338.11713-1-hslester96@gmail.com>
+From: Fabio Estevam <festevam@gmail.com>
+Subject: Re: [PATCH] mmc: mxs: fix flags passed to dmaengine_prep_slave_sg
+Date: Fri, 18 Oct 2019 10:25:21 -0300
+Message-ID: <CAOMZO5DUoj4xVZQSvk9Juw9z37UgrMn3g24h2_pAMxuTkBjw4g@mail.gmail.com>
+References: <20191018093934.29695-1-s.hauer@pengutronix.de>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Chuhong Yuan <hslester96@gmail.com>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <20191018093934.29695-1-s.hauer@pengutronix.de>
+Sender: stable-owner@vger.kernel.org
+To: Sascha Hauer <s.hauer@pengutronix.de>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Bruno Thomsen <bruno.thomsen@gmail.com>, stable <stable@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-renesas_sdhi_probe misses checks for pinctrl_lookup_state and may miss
-failures.
-Add checks for them to fix the problem.
+Hi Sascha,
 
-Signed-off-by: Chuhong Yuan <hslester96@gmail.com>
----
- drivers/mmc/host/renesas_sdhi_core.c | 5 +++++
- 1 file changed, 5 insertions(+)
+On Fri, Oct 18, 2019 at 6:39 AM Sascha Hauer <s.hauer@pengutronix.de> wrote:
+>
+> Since ceeeb99cd821 we no longer abuse the DMA_CTRL_ACK flag for custom
+> driver use and introduced the MXS_DMA_CTRL_WAIT4END instead. We have not
+> changed all users to this flag though. This patch fixes it for the
+> mxs-mmc driver.
 
-diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-index d4ada5cca2d1..dc5ad6632df3 100644
---- a/drivers/mmc/host/renesas_sdhi_core.c
-+++ b/drivers/mmc/host/renesas_sdhi_core.c
-@@ -694,8 +694,13 @@ int renesas_sdhi_probe(struct platform_device *pdev,
- 	if (!IS_ERR(priv->pinctrl)) {
- 		priv->pins_default = pinctrl_lookup_state(priv->pinctrl,
- 						PINCTRL_STATE_DEFAULT);
-+		if (IS_ERR(priv->pins_default))
-+			return PTR_ERR(priv->pins_default);
-+
- 		priv->pins_uhs = pinctrl_lookup_state(priv->pinctrl,
- 						"state_uhs");
-+		if (IS_ERR(priv->pins_uhs))
-+			return PTR_ERR(priv->pins_uhs);
- 	}
- 
- 	host = tmio_mmc_host_alloc(pdev, mmc_data);
--- 
-2.20.1
+If I read this correctly, this patch is not the complete fix for all users.
+
+Wouldn't it be better to revert the offending commit instead?
