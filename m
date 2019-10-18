@@ -1,25 +1,23 @@
-From: Fabio Estevam <festevam@gmail.com>
-Subject: Re: [PATCH] mmc: mxs: fix flags passed to dmaengine_prep_slave_sg
-Date: Fri, 18 Oct 2019 12:58:07 -0300
-Message-ID: <CAOMZO5DLebwVYJGfT=n+j3T62Ps8eJAZWKCb55Xck=thimubrA@mail.gmail.com>
-References: <20191018093934.29695-1-s.hauer@pengutronix.de>
- <CAOMZO5DUoj4xVZQSvk9Juw9z37UgrMn3g24h2_pAMxuTkBjw4g@mail.gmail.com> <20191018133435.oncn7nktihpqyj4z@pengutronix.de>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <20191018133435.oncn7nktihpqyj4z@pengutronix.de>
-Sender: stable-owner@vger.kernel.org
-To: Sascha Hauer <s.hauer@pengutronix.de>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Bruno Thomsen <bruno.thomsen@gmail.com>, stable <stable@vger.kernel.org>
+From: pr-tracker-bot@kernel.org
+Subject: Re: [GIT PULL] MMC fixes for v5.4-rc4
+Date: Fri, 18 Oct 2019 17:05:05 +0000
+Message-ID: <157141830546.1926.13182537401302216866.pr-tracker-bot@kernel.org>
+References: <20191018100814.5265-1-ulf.hansson@linaro.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20191018100814.5265-1-ulf.hansson@linaro.org>
+Sender: linux-kernel-owner@vger.kernel.org
+Cc: Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, Oct 18, 2019 at 10:34 AM Sascha Hauer <s.hauer@pengutronix.de> wrote:
+The pull request you sent on Fri, 18 Oct 2019 12:08:14 +0200:
 
-> We would probably also have to revert the exec_op conversion of the gpmi
-> NAND driver, something which I'd rather not do.
+> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.4-rc1
 
-Ok, understood. Thanks for the clarification.
+has been merged into torvalds/linux.git:
+https://git.kernel.org/torvalds/c/7571438a4868e7cb09d698ab52e54f9722020eef
 
-Better go with your patch then.
+Thank you!
 
-Thanks
+-- 
+Deet-doot-dot, I am a bot.
+https://korg.wiki.kernel.org/userdoc/prtracker
