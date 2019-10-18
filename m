@@ -1,67 +1,41 @@
-From: Dmitry Torokhov <dmitry.torokhov@gmail.com>
-Subject: Re: [PATCH 05/46] ARM: pxa: split up mach/hardware.h
-Date: Fri, 18 Oct 2019 11:37:57 -0700
-Message-ID: <20191018183757.GL35946@dtor-ws>
+From: Robert Jarzmik <robert.jarzmik@free.fr>
+Subject: Re: [PATCH 00/46] ARM: pxa: towards multiplatform support
+Date: Fri, 18 Oct 2019 21:03:54 +0200
+Message-ID: <87v9slg9k5.fsf@belgarion.home>
 References: <20191018154052.1276506-1-arnd@arndb.de>
- <20191018154201.1276638-5-arnd@arndb.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20191018154201.1276638-5-arnd@arndb.de>
+In-Reply-To: <20191018154052.1276506-1-arnd@arndb.de> (Arnd Bergmann's message
+        of "Fri, 18 Oct 2019 17:40:52 +0200")
 Sender: linux-kernel-owner@vger.kernel.org
 To: Arnd Bergmann <arnd@arndb.de>
-Cc: Daniel Mack <daniel@zonque.org>, Haojian Zhuang <haojian.zhuang@gmail.com>, Robert Jarzmik <robert.jarzmik@free.fr>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, Michael Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@kernel.org>, Viresh Kumar <viresh.kumar@linaro.org>, Jacek Anaszewski <jacek.anaszewski@gmail.com>, Pavel Machek <pavel@ucw.cz>, Ulf Hansson <ulf.hansson@linaro.org>, Dominik Brodowski <linux@dominikbrodowski.net>, Alexandre Belloni <alexandre.belloni@bootlin.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Guenter Roeck <linux@roeck-us.net>, Mark Brown <broonie@kernel.org>, linux-clk@vger.kernel.org, linux-pm@vger.kernel.org, linux-input@vger.kernel.orgli
+Cc: Daniel Mack <daniel@zonque.org>, Haojian Zhuang <haojian.zhuang@gmail.com>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, linux-clk@vger.kernel.org, linux-fbdev@vger.kernel.org, linux-ide@vger.kernel.org, linux-input@vger.kernel.org, linux-leds@vger.kernel.org, linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org, linux-pm@vger.kernel.org, linux-rtc@vger.kernel.org, linux-usb@vger.kernel.org, linux-watchdog@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, Oct 18, 2019 at 05:41:20PM +0200, Arnd Bergmann wrote:
-> The mach/hardware.h is included in lots of places, and it provides
-> three different things on pxa:
-> 
-> - the cpu_is_pxa* macros
-> - an indirect inclusion of mach/addr-map.h
-> - the __REG() and io_pv2() helper macros
-> 
-> Split it up into separate <linux/soc/pxa/cpu.h> and mach/pxa-regs.h
-> headers, then change all the files that use mach/hardware.h to
-> include the exact set of those three headers that they actually
-> need, allowing for further more targeted cleanup.
-> 
-> linux/soc/pxa/cpu.h can remain permanently exported and is now in
-> a global location along with similar headers. pxa-regs.h and
-> addr-map.h are only used in a very small number of drivers now
-> and can be moved to arch/arm/mach-pxa/ directly when those drivers
-> are to pass the necessary data as resources.
-> 
-> Cc: Michael Turquette <mturquette@baylibre.com>
-> Cc: Stephen Boyd <sboyd@kernel.org>
-> Cc: Viresh Kumar <viresh.kumar@linaro.org>
-> Cc: Dmitry Torokhov <dmitry.torokhov@gmail.com>
-> Cc: Jacek Anaszewski <jacek.anaszewski@gmail.com>
-> Cc: Pavel Machek <pavel@ucw.cz>
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: Dominik Brodowski <linux@dominikbrodowski.net>
-> Cc: Alexandre Belloni <alexandre.belloni@bootlin.com>
-> Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-> Cc: Guenter Roeck <linux@roeck-us.net>
-> Cc: Mark Brown <broonie@kernel.org>
-> Cc: linux-clk@vger.kernel.org
-> Cc: linux-pm@vger.kernel.org
-> Cc: linux-input@vger.kernel.org
-> Cc: linux-leds@vger.kernel.org
-> Cc: linux-mmc@vger.kernel.org
-> Cc: linux-mtd@lists.infradead.org
-> Cc: linux-rtc@vger.kernel.org
-> Cc: linux-usb@vger.kernel.org
-> Cc: dri-devel@lists.freedesktop.org
-> Cc: linux-fbdev@vger.kernel.org
-> Cc: linux-watchdog@vger.kernel.org
-> Cc: alsa-devel@alsa-project.org
-> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+Arnd Bergmann <arnd@arndb.de> writes:
 
-For input bits:
+> Hi PXA maintainers,
+>
+> I'm in the process of getting the old ARM platforms to all build
+> in a single kernel. The largest part of that work is changing all
+> the device drivers to no longer require mach/*.h header files.
+>
+> This series does it for arch/pxa/.
+>
+> As with the omap1 and s3c24xx series I sent before, I don't
+> expect this all to be correct in the first version, though
+> a lot of the patches are fairly simple and I did exhaustive
+> compile-time testing on them.
+>
+> Please test if you have the hardware, or review!
 
-Acked-by: Dmitry Torokhov <dmitry.torokhov@gmail.com>
+Hi Arnd,
 
--- 
-Dmitry
+Would you have a git tree I can pull from ?
+That would make my life easier than applying manually 46 patches...
+
+Cheers.
+
+--
+Robert
