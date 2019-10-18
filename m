@@ -1,91 +1,96 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 6/6 v2] MMC: JZ4740: Add support for LPM.
-Date: Fri, 18 Oct 2019 10:52:41 +0200
-Message-ID: <CAPDyKFo9juNmf6hrcBjzOprS6GwzAPBq8y3ReGu=ry+MdxT9Bg@mail.gmail.com>
-References: <1567669089-88693-1-git-send-email-zhouyanjie@zoho.com>
- <1570857203-49192-1-git-send-email-zhouyanjie@zoho.com> <1570857203-49192-7-git-send-email-zhouyanjie@zoho.com>
+From: Manish Narani <MNARANI@xilinx.com>
+Subject: RE: [PATCH v3 4/8] dt-bindings: mmc: arasan: Add optional properties
+ for Arasan SDHCI
+Date: Fri, 18 Oct 2019 09:05:07 +0000
+Message-ID: <MN2PR02MB602959AB68B4C88B81359F2EC16C0@MN2PR02MB6029.namprd02.prod.outlook.com>
+References: <1571293310-92563-1-git-send-email-manish.narani@xilinx.com>
+ <1571293310-92563-5-git-send-email-manish.narani@xilinx.com>
+ <20191017182255.GA7053@bogus>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1570857203-49192-7-git-send-email-zhouyanjie@zoho.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Zhou Yanjie <zhouyanjie@zoho.com>, Paul Cercueil <paul@crapouillou.net>
-Cc: linux-mips@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, Paul Burton <paul.burton@mips.com>, Mark Rutland <mark.rutland@arm.com>, syq@debian.org, Linus Walleij <linus.walleij@linaro.org>, armijn@tjaldur.nl, Thomas Gleixner <tglx@linutronix.de>, YueHaibing <yuehaibing@huawei.com>, Mathieu Malaterre <malat@debian.org>, Ezequiel Garcia <ezequiel@collabora.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <20191017182255.GA7053@bogus>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Rob Herring <robh@kernel.org>
+Cc: "mark.rutland@arm.com" <mark.rutland@arm.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, Nava kishore Manne <navam@xilinx.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "adrian.hunter@intel.com" <adrian.hunter@intel.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Jolly Shah <JOLLYS@xilinx.com>, Rajan Vaja <RAJANV@xilinx.com>, Michal Simek <michals@xilinx.com>, git <git@xilinx.com>, "mdf@kernel.org" <mdf@kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Sat, 12 Oct 2019 at 07:19, Zhou Yanjie <zhouyanjie@zoho.com> wrote:
->
-> add support for low power mode of Ingenic's MMC/SD Controller.
->
-> Signed-off-by: Zhou Yanjie <zhouyanjie@zoho.com>
+Hi Rob,
 
-I couldn't find a proper coverletter for the series, please provide
-that next time as it really helps review. Additionally, it seems like
-you forgot to change the prefix of the patches to "mmc: jz4740" (or at
-least you chosed upper case letters), but I will take care of that
-this time. So, I have applied the series for next, thanks!
+Thank you so much for the review.
+Please find my comments inline below.
 
-I also have a general question. Should we perhaps rename the driver
-from jz4740_mmc.c to ingenic.c (and the file for the DT bindings, the
-Kconfig, etc), as that seems like a more appropriate name? No?
+Thanks,
+Manish
 
-Kind regards
-Uffe
+> -----Original Message-----
+> From: Rob Herring <robh@kernel.org>
+> Sent: Thursday, October 17, 2019 11:53 PM
+> To: Manish Narani <MNARANI@xilinx.com>
+> Cc: ulf.hansson@linaro.org; mark.rutland@arm.com; adrian.hunter@intel.com;
+> Michal Simek <michals@xilinx.com>; Jolly Shah <JOLLYS@xilinx.com>; Rajan
+> Vaja <RAJANV@xilinx.com>; Nava kishore Manne <navam@xilinx.com>;
+> mdf@kernel.org; linux-mmc@vger.kernel.org; devicetree@vger.kernel.org;
+> linux-kernel@vger.kernel.org; linux-arm-kernel@lists.infradead.org; git
+> <git@xilinx.com>
+> Subject: Re: [PATCH v3 4/8] dt-bindings: mmc: arasan: Add optional properties
+> for Arasan SDHCI
+> 
+> On Thu, Oct 17, 2019 at 11:51:46AM +0530, Manish Narani wrote:
+> > Add optional propeties for Arasan SDHCI which are used to set clk delays
+> 
+> properties
+> 
+> > for different speed modes in the controller.
+> >
+> > Signed-off-by: Manish Narani <manish.narani@xilinx.com>
+> > ---
+> >  .../devicetree/bindings/mmc/arasan,sdhci.txt      | 15 +++++++++++++++
+> >  1 file changed, 15 insertions(+)
+> >
+> > diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
+> b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
+> > index b51e40b2e0c5..e0369dd7fb18 100644
+> > --- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
+> > +++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
+> > @@ -46,6 +46,21 @@ Optional Properties:
+> >      properly. Test mode can be used to force the controller to function.
+> >    - xlnx,int-clock-stable-broken: when present, the controller always reports
+> >      that the internal clock is stable even when it is not.
+> > +  - clk-phase-legacy: Input/Output Clock Delay pair in degrees for Legacy
+> Mode.
+> > +  - clk-phase-mmc-hs: Input/Output Clock Delay pair degrees for MMC HS.
+> > +  - clk-phase-sd-hs: Input/Output Clock Delay pair in degrees for SD HS.
+> > +  - clk-phase-uhs-sdr12: Input/Output Clock Delay pair in degrees for SDR12.
+> > +  - clk-phase-uhs-sdr25: Input/Output Clock Delay pair in degrees for SDR25.
+> > +  - clk-phase-uhs-sdr50: Input/Output Clock Delay pair in degrees for SDR50.
+> > +  - clk-phase-uhs-sdr104: Input/Output Clock Delay pair in degrees for
+> SDR104.
+> > +  - clk-phase-uhs-ddr50: Input/Output Clock Delay pair in degrees for SD
+> DDR50.
+> > +  - clk-phase-mmc-ddr52: Input/Output Clock Delay pair in degrees for MMC
+> DDR52.
+> > +  - clk-phase-mmc-hs200: Input/Output Clock Delay pair in degrees for MMC
+> HS200.
+> > +  - clk-phase-mmc-hs400: Input/Output Clock Delay pair in degrees for MMC
+> HS400.
+> 
+> Should be common?
+Yes, these properties should be common.
 
+> 
+> Range of values?
+As these values are in degrees, the range of values is 0 to 359 degrees.
 
-> ---
->  drivers/mmc/host/jz4740_mmc.c | 23 +++++++++++++++++++++++
->  1 file changed, 23 insertions(+)
->
-> diff --git a/drivers/mmc/host/jz4740_mmc.c b/drivers/mmc/host/jz4740_mmc.c
-> index 44a04fe..4cbe7fb 100644
-> --- a/drivers/mmc/host/jz4740_mmc.c
-> +++ b/drivers/mmc/host/jz4740_mmc.c
-> @@ -43,6 +43,7 @@
->  #define JZ_REG_MMC_RESP_FIFO   0x34
->  #define JZ_REG_MMC_RXFIFO      0x38
->  #define JZ_REG_MMC_TXFIFO      0x3C
-> +#define JZ_REG_MMC_LPM         0x40
->  #define JZ_REG_MMC_DMAC                0x44
->
->  #define JZ_MMC_STRPCL_EXIT_MULTIPLE BIT(7)
-> @@ -102,6 +103,12 @@
->  #define JZ_MMC_DMAC_DMA_SEL BIT(1)
->  #define JZ_MMC_DMAC_DMA_EN BIT(0)
->
-> +#define        JZ_MMC_LPM_DRV_RISING BIT(31)
-> +#define        JZ_MMC_LPM_DRV_RISING_QTR_PHASE_DLY BIT(31)
-> +#define        JZ_MMC_LPM_DRV_RISING_1NS_DLY BIT(30)
-> +#define        JZ_MMC_LPM_SMP_RISING_QTR_OR_HALF_PHASE_DLY BIT(29)
-> +#define        JZ_MMC_LPM_LOW_POWER_MODE_EN BIT(0)
-> +
->  #define JZ_MMC_CLK_RATE 24000000
->
->  enum jz4740_mmc_version {
-> @@ -860,6 +867,22 @@ static int jz4740_mmc_set_clock_rate(struct jz4740_mmc_host *host, int rate)
->         }
->
->         writew(div, host->base + JZ_REG_MMC_CLKRT);
-> +
-> +       if (real_rate > 25000000) {
-> +               if (host->version >= JZ_MMC_X1000) {
-> +                       writel(JZ_MMC_LPM_DRV_RISING_QTR_PHASE_DLY |
-> +                                  JZ_MMC_LPM_SMP_RISING_QTR_OR_HALF_PHASE_DLY |
-> +                                  JZ_MMC_LPM_LOW_POWER_MODE_EN,
-> +                                  host->base + JZ_REG_MMC_LPM);
-> +               } else if (host->version >= JZ_MMC_JZ4760) {
-> +                       writel(JZ_MMC_LPM_DRV_RISING |
-> +                                  JZ_MMC_LPM_LOW_POWER_MODE_EN,
-> +                                  host->base + JZ_REG_MMC_LPM);
-> +               } else if (host->version >= JZ_MMC_JZ4725B)
-> +                       writel(JZ_MMC_LPM_LOW_POWER_MODE_EN,
-> +                                  host->base + JZ_REG_MMC_LPM);
-> +       }
-> +
->         return real_rate;
->  }
->
-> --
-> 2.7.4
->
->
+Thanks,
+Manish
