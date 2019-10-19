@@ -1,67 +1,79 @@
 From: "H. Nikolaus Schaller" <hns@goldelico.com>
-Subject: [PATCH v2 11/11] net: wireless: ti: remove local VENDOR_ID and DEVICE_ID definitions
-Date: Sat, 19 Oct 2019 20:41:26 +0200
-Message-ID: <da609ecf83eca8af70172627ada29902b096bae9.1571510481.git.hns@goldelico.com>
-References: <cover.1571510481.git.hns@goldelico.com>
+Subject: [PATCH v2 00/11] OpenPandora: make wl1251 connected to mmc3 sdio port of OpenPandora work again
+Date: Sat, 19 Oct 2019 20:41:15 +0200
+Message-ID: <cover.1571510481.git.hns@goldelico.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <cover.1571510481.git.hns@goldelico.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: =?UTF-8?q?Beno=C3=AEt=20Cousson?= <bcousson@baylibre.com>, Tony Lindgren <tony@atomide.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Russell King <linux@armlinux.org.uk>, Ulf Hansson <ulf.hansson@linaro.org>, Kalle Valo <kvalo@codeaurora.org>, Mike Rapoport <rppt@linux.ibm.com>, David Sterba <dsterba@suse.com>, "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>, Petr Mladek <pmladek@suse.com>, Sakari Ailus <sakari.ailus@linux.intel.com>, "H. Nikolaus Schaller" <hns@goldelico.com>, Kefeng Wang <wangkefeng.wang@huawei.com>, Yangtao Li <tiny.windzz@gmail.com>, Alexios Zavras <alexios.zavras@intel.com>, Thomas Gleixner <tglx@linutronix.de>, Allison Randal <allison@lohutok.net>, Greg Kroah-Hartman <gregkh@linuxfoundati>
-Cc: linux-omap@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-wireless@vger.kernel.org, netdev@vger.kernel.org, letux-kernel@openphoenux.org, kernel@pyra-handheld.com, stable@vger.kernel.org
+Cc: linux-omap@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-wireless@vger.kernel.org, netdev@vger.kernel.org, letux-kernel@openphoenux.org, kernel@pyra-handheld.com
 List-Id: linux-mmc@vger.kernel.org
 
-They are already included from mmc/sdio_ids.h and do not need
-a local definition.
+
+* added acked-by for wl1251 patches - Kalle Valo <kvalo@codeaurora.org>
+* really removed old pdata-quirks code (not through #if 0)
+* splited out a partial revert of
+	efdfeb079cc3b ("regulator: fixed: Convert to use GPIO descriptor only")
+  because that was introduced after v4.19 and stops the removal of
+  the pdata-quirks patch from cleanly applying to v4.9, v4.14, v4.19
+  - reported by Sasha Levin <sashal@kernel.org>
+* added a new patch to remove old omap hsmmc since pdata quirks
+  were last user - suggested by Tony Lindgren <tony@atomide.com>
+
+PATCH V1 2019-10-18 22:25:39:
+
+Here we have a set of scattered patches to make the OpenPandora WiFi work again.
+
+v4.7 did break the pdata-quirks which made the mmc3 interface
+fail completely, because some code now assumes device tree
+based instantiation.
+
+Fixes: 81eef6ca9201 ("mmc: omap_hsmmc: Use dma_request_chan() for requesting DMA channel")
+
+v4.11 did break the sdio qirks for wl1251 which made the driver no longer
+load, although the device was found as an sdio client.
 
 Fixes: 884f38607897 ("mmc: core: move some sdio IDs out of quirks file")
 
-Signed-off-by: H. Nikolaus Schaller <hns@goldelico.com>
-Acked-by: Kalle Valo <kvalo@codeaurora.org>
-Cc: <stable@vger.kernel.org> # 4.11.0
----
- drivers/net/wireless/ti/wl1251/sdio.c | 8 --------
- drivers/net/wireless/ti/wlcore/sdio.c | 8 --------
- 2 files changed, 16 deletions(-)
+To solve these issues:
+* we convert mmc3 and wl1251 initialization from pdata-quirks
+  to device tree
+* we make the wl1251 driver read properties from device tree
+* we fix the mmc core vendor ids and quirks
+* we fix the wl1251 (and wl1271) driver to use only vendor ids
+  from header file instead of (potentially conflicting) local
+  definitions
 
-diff --git a/drivers/net/wireless/ti/wl1251/sdio.c b/drivers/net/wireless/ti/wl1251/sdio.c
-index 42b55f3a50df..3c4d5e38c66c 100644
---- a/drivers/net/wireless/ti/wl1251/sdio.c
-+++ b/drivers/net/wireless/ti/wl1251/sdio.c
-@@ -22,14 +22,6 @@
- 
- #include "wl1251.h"
- 
--#ifndef SDIO_VENDOR_ID_TI
--#define SDIO_VENDOR_ID_TI		0x104c
--#endif
--
--#ifndef SDIO_DEVICE_ID_TI_WL1251
--#define SDIO_DEVICE_ID_TI_WL1251	0x9066
--#endif
--
- struct wl1251_sdio {
- 	struct sdio_func *func;
- 	u32 elp_val;
-diff --git a/drivers/net/wireless/ti/wlcore/sdio.c b/drivers/net/wireless/ti/wlcore/sdio.c
-index 7afaf35f2453..9fd8cf2d270c 100644
---- a/drivers/net/wireless/ti/wlcore/sdio.c
-+++ b/drivers/net/wireless/ti/wlcore/sdio.c
-@@ -26,14 +26,6 @@
- #include "wl12xx_80211.h"
- #include "io.h"
- 
--#ifndef SDIO_VENDOR_ID_TI
--#define SDIO_VENDOR_ID_TI		0x0097
--#endif
--
--#ifndef SDIO_DEVICE_ID_TI_WL1271
--#define SDIO_DEVICE_ID_TI_WL1271	0x4076
--#endif
--
- static bool dump = false;
- 
- struct wl12xx_sdio_glue {
+
+H. Nikolaus Schaller (11):
+  Documentation: dt: wireless: update wl1251 for sdio
+  net: wireless: ti: wl1251 add device tree support
+  DTS: ARM: pandora-common: define wl1251 as child node of mmc3
+  mmc: host: omap_hsmmc: add code for special init of wl1251 to get rid
+    of pandora_wl1251_init_card
+  omap: pdata-quirks: revert pandora specific gpiod additions
+  omap: pdata-quirks: remove openpandora quirks for mmc3 and wl1251
+  omap: remove old hsmmc.[ch] and in Makefile
+  mmc: sdio: fix wl1251 vendor id
+  mmc: core: fix wl1251 sdio quirks
+  net: wireless: ti: wl1251 use new SDIO_VENDOR_ID_TI_WL1251 definition
+  net: wireless: ti: remove local VENDOR_ID and DEVICE_ID definitions
+
+ .../bindings/net/wireless/ti,wl1251.txt       |  26 +++
+ arch/arm/boot/dts/omap3-pandora-common.dtsi   |  37 +++-
+ arch/arm/mach-omap2/Makefile                  |   1 -
+ arch/arm/mach-omap2/hsmmc.c                   | 171 ------------------
+ arch/arm/mach-omap2/hsmmc.h                   |  32 ----
+ arch/arm/mach-omap2/pdata-quirks.c            | 105 -----------
+ drivers/mmc/core/quirks.h                     |   7 +
+ drivers/mmc/host/omap_hsmmc.c                 |  21 +++
+ drivers/net/wireless/ti/wl1251/sdio.c         |  23 ++-
+ drivers/net/wireless/ti/wlcore/sdio.c         |   8 -
+ include/linux/mmc/sdio_ids.h                  |   2 +
+ 11 files changed, 105 insertions(+), 328 deletions(-)
+ delete mode 100644 arch/arm/mach-omap2/hsmmc.c
+ delete mode 100644 arch/arm/mach-omap2/hsmmc.h
+
 -- 
 2.19.1
