@@ -1,57 +1,35 @@
 From: Geert Uytterhoeven <geert+renesas@glider.be>
-Subject: [PATCH 2/7] mac80211: Use debugfs_create_xul() helper
-Date: Mon, 21 Oct 2019 16:37:37 +0200
-Message-ID: <20191021143742.14487-3-geert+renesas@glider.be>
+Subject: [PATCH 7/7] mmc: dw_mmc: Remove superfluous cast in debugfs_create_u32() call
+Date: Mon, 21 Oct 2019 16:37:42 +0200
+Message-ID: <20191021143742.14487-8-geert+renesas@glider.be>
 References: <20191021143742.14487-1-geert+renesas@glider.be>
-Return-path: <netdev-owner@vger.kernel.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20191021143742.14487-1-geert+renesas@glider.be>
-Sender: netdev-owner@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Ludovic Desroches <ludovic.desroches@microchip.com>, Ulf Hansson <ulf.hansson@linaro.org>, Nicolas Ferre <nicolas.ferre@microchip.com>, Alexandre Belloni <alexandre.belloni@bootlin.com>, Jaehoon Chung <jh80.chung@samsung.com>, "David S . Miller" <davem@davemloft.net>, "Rafael J . Wysocki" <rafael@kernel.org>, Johannes Berg <johannes@sipsolutions.net>
 Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, netdev@vger.kernel.org, linux-wireless@vger.kernel.org, linux-kernel@vger.kernel.org, Geert Uytterhoeven <geert+renesas@glider.be>
 List-Id: linux-mmc@vger.kernel.org
 
-Use the new debugfs_create_xul() helper instead of open-coding the same
-operation.
+"dw_mci.state" is an enum, which is compatible with u32, so there is no
+need to cast its address, preventing further compiler checks.
 
 Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
 ---
- net/mac80211/debugfs_sta.c | 17 +++--------------
- 1 file changed, 3 insertions(+), 14 deletions(-)
+ drivers/mmc/host/dw_mmc.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/net/mac80211/debugfs_sta.c b/net/mac80211/debugfs_sta.c
-index c8ad20c28c438dab..ca34dcdac8c0bd4d 100644
---- a/net/mac80211/debugfs_sta.c
-+++ b/net/mac80211/debugfs_sta.c
-@@ -928,12 +928,7 @@ STA_OPS(he_capa);
- 		sta->debugfs_dir, sta, &sta_ ##name## _ops);
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index b4c4a9cd6365f122..fc9d4d000f97e434 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -176,7 +176,7 @@ static void dw_mci_init_debugfs(struct dw_mci_slot *slot)
  
- #define DEBUGFS_ADD_COUNTER(name, field)				\
--	if (sizeof(sta->field) == sizeof(u32))				\
--		debugfs_create_u32(#name, 0400, sta->debugfs_dir,	\
--			(u32 *) &sta->field);				\
--	else								\
--		debugfs_create_u64(#name, 0400, sta->debugfs_dir,	\
--			(u64 *) &sta->field);
-+	debugfs_create_ulong(#name, 0400, sta->debugfs_dir, &sta->field);
- 
- void ieee80211_sta_debugfs_add(struct sta_info *sta)
- {
-@@ -978,14 +973,8 @@ void ieee80211_sta_debugfs_add(struct sta_info *sta)
- 				    NL80211_EXT_FEATURE_AIRTIME_FAIRNESS))
- 		DEBUGFS_ADD(airtime);
- 
--	if (sizeof(sta->driver_buffered_tids) == sizeof(u32))
--		debugfs_create_x32("driver_buffered_tids", 0400,
--				   sta->debugfs_dir,
--				   (u32 *)&sta->driver_buffered_tids);
--	else
--		debugfs_create_x64("driver_buffered_tids", 0400,
--				   sta->debugfs_dir,
--				   (u64 *)&sta->driver_buffered_tids);
-+	debugfs_create_xul("driver_buffered_tids", 0400, sta->debugfs_dir,
-+			   &sta->driver_buffered_tids);
- 
- 	drv_sta_add_debugfs(local, sdata, &sta->sta, sta->debugfs_dir);
- }
+ 	debugfs_create_file("regs", S_IRUSR, root, host, &dw_mci_regs_fops);
+ 	debugfs_create_file("req", S_IRUSR, root, slot, &dw_mci_req_fops);
+-	debugfs_create_u32("state", S_IRUSR, root, (u32 *)&host->state);
++	debugfs_create_u32("state", S_IRUSR, root, &host->state);
+ 	debugfs_create_xul("pending_events", S_IRUSR, root,
+ 			   &host->pending_events);
+ 	debugfs_create_xul("completed_events", S_IRUSR, root,
 -- 
 2.17.1
