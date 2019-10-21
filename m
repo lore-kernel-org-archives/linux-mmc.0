@@ -1,79 +1,75 @@
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Subject: Re: [PATCH 1/7] debugfs: Add debugfs_create_xul() for hexadecimal
- unsigned long
-Date: Mon, 21 Oct 2019 16:59:37 +0200
-Message-ID: <CAMuHMdXdd87FwcHs0iQrjmLaAJPRC7P7ZByUhw+DkzZ6J+eGqw@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 0/7] debugfs: Add and use debugfs_create_xul()
+Date: Mon, 21 Oct 2019 17:20:59 +0200
+Message-ID: <CAPDyKFr5H5x9LRjvVsDbNoGgZx-EnZGgUD9fEt=esN8HumNDHQ@mail.gmail.com>
 References: <20191021143742.14487-1-geert+renesas@glider.be>
- <20191021143742.14487-2-geert+renesas@glider.be> <20191021144548.GA41107@kroah.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20191021144548.GA41107@kroah.com>
+In-Reply-To: <20191021143742.14487-1-geert+renesas@glider.be>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Cc: Geert Uytterhoeven <geert+renesas@glider.be>, Ludovic Desroches <ludovic.desroches@microchip.com>, Ulf Hansson <ulf.hansson@linaro.org>, Nicolas Ferre <nicolas.ferre@microchip.com>, Alexandre Belloni <alexandre.belloni@bootlin.com>, Jaehoon Chung <jh80.chung@samsung.com>, "David S . Miller" <davem@davemloft.net>, "Rafael J . Wysocki" <rafael@kernel.org>, Johannes Berg <johannes@sipsolutions.net>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, netdev <netdev@vger.kernel.org>, linux-wireless <linux-wireless@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: Geert Uytterhoeven <geert+renesas@glider.be>
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Ludovic Desroches <ludovic.desroches@microchip.com>, Nicolas Ferre <nicolas.ferre@microchip.com>, Alexandre Belloni <alexandre.belloni@bootlin.com>, Jaehoon Chung <jh80.chung@samsung.com>, "David S . Miller" <davem@davemloft.net>, "Rafael J . Wysocki" <rafael@kernel.org>, Johannes Berg <johannes@sipsolutions.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, netdev <netdev@vger.kernel.org>, linux-wireless <linux-wireless@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Greg,
-
-On Mon, Oct 21, 2019 at 4:45 PM Greg Kroah-Hartman
-<gregkh@linuxfoundation.org> wrote:
-> On Mon, Oct 21, 2019 at 04:37:36PM +0200, Geert Uytterhoeven wrote:
-> > The existing debugfs_create_ulong() function supports objects of
-> > type "unsigned long", which are 32-bit or 64-bit depending on the
-> > platform, in decimal form.  To format objects in hexadecimal, various
-> > debugfs_create_x*() functions exist, but all of them take fixed-size
-> > types.
-> >
-> > Add a debugfs helper for "unsigned long" objects in hexadecimal format.
-> > This avoids the need for users to open-code the same, or introduce
-> > bugs when casting the value pointer to "u32 *" or "u64 *" to call
-> > debugfs_create_x{32,64}().
-> >
-> > Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
-> > ---
-> >  include/linux/debugfs.h | 10 ++++++++++
-> >  1 file changed, 10 insertions(+)
-> >
-> > diff --git a/include/linux/debugfs.h b/include/linux/debugfs.h
-> > index 33690949b45d6904..d7b2aebcc277d65e 100644
-> > --- a/include/linux/debugfs.h
-> > +++ b/include/linux/debugfs.h
-> > @@ -356,4 +356,14 @@ static inline ssize_t debugfs_write_file_bool(struct file *file,
-> >
-> >  #endif
-> >
-> > +static inline void debugfs_create_xul(const char *name, umode_t mode,
-> > +                                   struct dentry *parent,
-> > +                                   unsigned long *value)
-> > +{
-> > +     if (sizeof(*value) == sizeof(u32))
-> > +             debugfs_create_x32(name, mode, parent, (u32 *)value);
-> > +     else
-> > +             debugfs_create_x64(name, mode, parent, (u64 *)value);
-> > +}
+On Mon, 21 Oct 2019 at 16:37, Geert Uytterhoeven
+<geert+renesas@glider.be> wrote:
 >
-> Looks sane, but can you add some kernel-doc comments here so that we can
-> pull it into the debugfs documentation?  Also there is debugfs
+>         Hi all,
+>
+> The existing debugfs_create_ulong() function supports objects of
+> type "unsigned long", which are 32-bit or 64-bit depending on the
+> platform, in decimal form.  To format objects in hexadecimal, various
+> debugfs_create_x*() functions exist, but all of them take fixed-size
+> types.
+>
+> To work around this, some drivers call one of debugfs_create_x{32,64}(),
+> depending on the size of unsigned long.
+> Other driver just cast the value pointer to "u32 *" or "u64 *",
+> introducing portability bugs or data leaks in the process.
+>
+> Hence this patch series adds a debugfs helper for "unsigned long"
+> objects in hexadecimal format, and converts drivers to make use of it.
+> It also contains two cleanups removing superfluous casts, which I added
+> to this series to avoid conflicts.
+>
+> Thanks for your comments!
 
-Sure, will do.
+The mmc changes looks good to me. I guess we could funnel via Greg's
+"debugfs" tree?
 
-> documentation in Documentation/filesystems/ so maybe also add this
-> there?  I am going to be overhauling the debugfs documentation "soon"
-> but it's at the lower part of my todo list, so it will take a while,
-> might as well keep it up to date with new stuff added like this so that
-> people don't get lost.
+In such case, feel free to add my ack for the mmc changes.
 
-Right. Currently it already lacks debugfs_create_ulong(). Will add both
-debugfs_create_ulong() and debugfs_create_xul().
+Kind regards
+Uffe
 
-Gr{oetje,eeting}s,
-
-                        Geert
-
--- 
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+>
+> Geert Uytterhoeven (7):
+>   debugfs: Add debugfs_create_xul() for hexadecimal unsigned long
+>   mac80211: Use debugfs_create_xul() helper
+>   net: caif: Fix debugfs on 64-bit platforms
+>   mmc: atmel-mci: Fix debugfs on 64-bit platforms
+>   mmc: atmel-mci: Remove superfluous cast in debugfs_create_u32() call
+>   mmc: dw_mmc: Fix debugfs on 64-bit platforms
+>   mmc: dw_mmc: Remove superfluous cast in debugfs_create_u32() call
+>
+>  drivers/mmc/host/atmel-mci.c   | 10 +++++-----
+>  drivers/mmc/host/dw_mmc.c      | 10 +++++-----
+>  drivers/net/caif/caif_serial.c |  4 ++--
+>  include/linux/debugfs.h        | 10 ++++++++++
+>  net/mac80211/debugfs_sta.c     | 17 +++--------------
+>  5 files changed, 25 insertions(+), 26 deletions(-)
+>
+> --
+> 2.17.1
+>
+> Gr{oetje,eeting}s,
+>
+>                                                 Geert
+>
+> --
+> Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+>
+> In personal conversations with technical people, I call myself a hacker. But
+> when I'm talking to journalists I just say "programmer" or something like that.
+>                                                             -- Linus Torvalds
