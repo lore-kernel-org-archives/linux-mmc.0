@@ -1,52 +1,57 @@
 From: Geert Uytterhoeven <geert+renesas@glider.be>
-Subject: [PATCH 3/7] net: caif: Fix debugfs on 64-bit platforms
-Date: Mon, 21 Oct 2019 16:37:38 +0200
-Message-ID: <20191021143742.14487-4-geert+renesas@glider.be>
+Subject: [PATCH 2/7] mac80211: Use debugfs_create_xul() helper
+Date: Mon, 21 Oct 2019 16:37:37 +0200
+Message-ID: <20191021143742.14487-3-geert+renesas@glider.be>
 References: <20191021143742.14487-1-geert+renesas@glider.be>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Return-path: <netdev-owner@vger.kernel.org>
 In-Reply-To: <20191021143742.14487-1-geert+renesas@glider.be>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+Sender: netdev-owner@vger.kernel.org
 To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Ludovic Desroches <ludovic.desroches@microchip.com>, Ulf Hansson <ulf.hansson@linaro.org>, Nicolas Ferre <nicolas.ferre@microchip.com>, Alexandre Belloni <alexandre.belloni@bootlin.com>, Jaehoon Chung <jh80.chung@samsung.com>, "David S . Miller" <davem@davemloft.net>, "Rafael J . Wysocki" <rafael@kernel.org>, Johannes Berg <johannes@sipsolutions.net>
-Cc: Geert Uytterhoeven <geert+renesas@glider.be>, netdev@vger.kernel.org, linux-wireless@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, netdev@vger.kernel.org, linux-wireless@vger.kernel.org, linux-kernel@vger.kernel.org, Geert Uytterhoeven <geert+renesas@glider.be>
 List-Id: linux-mmc@vger.kernel.org
 
-"ser_device.state" is "unsigned long", i.e. 32-bit or 64-bit, depending
-on the platform.  Hence casting its address to "u32 *", and calling
-debugfs_create_x32() breaks operation on 64-bit platforms.
+Use the new debugfs_create_xul() helper instead of open-coding the same
+operation.
 
-Fix this by using the new debugfs_create_xul() helper instead.
-
-Fixes: 9b27105b4a44c54b ("net-caif-driver: add CAIF serial driver (ldisc)")
 Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
 ---
- drivers/net/caif/caif_serial.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ net/mac80211/debugfs_sta.c | 17 +++--------------
+ 1 file changed, 3 insertions(+), 14 deletions(-)
 
-diff --git a/drivers/net/caif/caif_serial.c b/drivers/net/caif/caif_serial.c
-index 40b079162804fb0c..bd40b114d6cd7214 100644
---- a/drivers/net/caif/caif_serial.c
-+++ b/drivers/net/caif/caif_serial.c
-@@ -102,8 +102,8 @@ static inline void debugfs_init(struct ser_device *ser, struct tty_struct *tty)
- 	debugfs_create_blob("last_rx_msg", 0400, ser->debugfs_tty_dir,
- 			    &ser->rx_blob);
+diff --git a/net/mac80211/debugfs_sta.c b/net/mac80211/debugfs_sta.c
+index c8ad20c28c438dab..ca34dcdac8c0bd4d 100644
+--- a/net/mac80211/debugfs_sta.c
++++ b/net/mac80211/debugfs_sta.c
+@@ -928,12 +928,7 @@ STA_OPS(he_capa);
+ 		sta->debugfs_dir, sta, &sta_ ##name## _ops);
  
--	debugfs_create_x32("ser_state", 0400, ser->debugfs_tty_dir,
--			   (u32 *)&ser->state);
-+	debugfs_create_xul("ser_state", 0400, ser->debugfs_tty_dir,
-+			   &ser->state);
+ #define DEBUGFS_ADD_COUNTER(name, field)				\
+-	if (sizeof(sta->field) == sizeof(u32))				\
+-		debugfs_create_u32(#name, 0400, sta->debugfs_dir,	\
+-			(u32 *) &sta->field);				\
+-	else								\
+-		debugfs_create_u64(#name, 0400, sta->debugfs_dir,	\
+-			(u64 *) &sta->field);
++	debugfs_create_ulong(#name, 0400, sta->debugfs_dir, &sta->field);
  
- 	debugfs_create_x8("tty_status", 0400, ser->debugfs_tty_dir,
- 			  &ser->tty_status);
+ void ieee80211_sta_debugfs_add(struct sta_info *sta)
+ {
+@@ -978,14 +973,8 @@ void ieee80211_sta_debugfs_add(struct sta_info *sta)
+ 				    NL80211_EXT_FEATURE_AIRTIME_FAIRNESS))
+ 		DEBUGFS_ADD(airtime);
+ 
+-	if (sizeof(sta->driver_buffered_tids) == sizeof(u32))
+-		debugfs_create_x32("driver_buffered_tids", 0400,
+-				   sta->debugfs_dir,
+-				   (u32 *)&sta->driver_buffered_tids);
+-	else
+-		debugfs_create_x64("driver_buffered_tids", 0400,
+-				   sta->debugfs_dir,
+-				   (u64 *)&sta->driver_buffered_tids);
++	debugfs_create_xul("driver_buffered_tids", 0400, sta->debugfs_dir,
++			   &sta->driver_buffered_tids);
+ 
+ 	drv_sta_add_debugfs(local, sdata, &sta->sta, sta->debugfs_dir);
+ }
 -- 
 2.17.1
