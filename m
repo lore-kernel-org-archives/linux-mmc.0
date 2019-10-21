@@ -1,58 +1,46 @@
-From: Joe Perches <joe@perches.com>
-Subject: Re: [PATCH 1/7] debugfs: Add debugfs_create_xul() for hexadecimal
- unsigned long
-Date: Mon, 21 Oct 2019 08:37:26 -0700
-Message-ID: <0f91839d858fcb03435ebc85e61ee4e75371ff37.camel@perches.com>
-References: <20191021143742.14487-1-geert+renesas@glider.be>
-         <20191021143742.14487-2-geert+renesas@glider.be>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"
+From: "H. Nikolaus Schaller" <hns@goldelico.com>
+Subject: Re: [PATCH v2 07/11] omap: remove old hsmmc.[ch] and in Makefile
+Date: Mon, 21 Oct 2019 19:07:31 +0200
+Message-ID: <3FDBE28F-B2C5-4EDE-905C-687F601462B6@goldelico.com>
+References: <cover.1571510481.git.hns@goldelico.com> <9bd4c0bb0df26523d7f5265cdb06d86d63dafba8.1571510481.git.hns@goldelico.com> <20191021143008.GS5610@atomide.com>
+Mime-Version: 1.0 (Mac OS X Mail 9.3 \(3124\))
+Content-Type: text/plain; charset=us-ascii
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20191021143742.14487-2-geert+renesas@glider.be>
+In-Reply-To: <20191021143008.GS5610@atomide.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Geert Uytterhoeven <geert+renesas@glider.be>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Ludovic Desroches <ludovic.desroches@microchip.com>, Ulf Hansson <ulf.hansson@linaro.org>, Nicolas Ferre <nicolas.ferre@microchip.com>, Alexandre Belloni <alexandre.belloni@bootlin.com>, Jaehoon Chung <jh80.chung@samsung.com>, "David S . Miller" <davem@davemloft.net>, "Rafael J . Wysocki" <rafael@kernel.org>, Johannes Berg <johannes@sipsolutions.net>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, netdev@vger.kernel.org, linux-wireless@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Tony Lindgren <tony@atomide.com>
+Cc: =?utf-8?Q?Beno=C3=AEt_Cousson?= <bcousson@baylibre.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Russell King <linux@armlinux.org.uk>, Ulf Hansson <ulf.hansson@linaro.org>, Kalle Valo <kvalo@codeaurora.org>, Mike Rapoport <rppt@linux.ibm.com>, David Sterba <dsterba@suse.com>, "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>, Petr Mladek <pmladek@suse.com>, Sakari Ailus <sakari.ailus@linux.intel.com>, Kefeng Wang <wangkefeng.wang@huawei.com>, Yangtao Li <tiny.windzz@gmail.com>, Alexios Zavras <alexios.zavras@intel.com>, Thomas Gleixner <tglx@linutronix.de>, Allison Randal <allison@lohutok.net>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, John Stultz <john.stultz@linaro.org>, Bjorn Helgaas <bhelgaas@google.co>
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, 2019-10-21 at 16:37 +0200, Geert Uytterhoeven wrote:
-> The existing debugfs_create_ulong() function supports objects of
-> type "unsigned long", which are 32-bit or 64-bit depending on the
-> platform, in decimal form.  To format objects in hexadecimal, various
-> debugfs_create_x*() functions exist, but all of them take fixed-size
-> types.
+
+> Am 21.10.2019 um 16:30 schrieb Tony Lindgren <tony@atomide.com>:
 > 
-> Add a debugfs helper for "unsigned long" objects in hexadecimal format.
-> This avoids the need for users to open-code the same, or introduce
-> bugs when casting the value pointer to "u32 *" or "u64 *" to call
-> debugfs_create_x{32,64}().
-[]
-> diff --git a/include/linux/debugfs.h b/include/linux/debugfs.h
-[]
-> @@ -356,4 +356,14 @@ static inline ssize_t debugfs_write_file_bool(struct file *file,
->  
->  #endif
->  
-> +static inline void debugfs_create_xul(const char *name, umode_t mode,
-> +				      struct dentry *parent,
-> +				      unsigned long *value)
-> +{
-> +	if (sizeof(*value) == sizeof(u32))
-> +		debugfs_create_x32(name, mode, parent, (u32 *)value);
-> +	else
-> +		debugfs_create_x64(name, mode, parent, (u64 *)value);
+> * H. Nikolaus Schaller <hns@goldelico.com> [191019 18:43]:
+>> --- a/arch/arm/mach-omap2/Makefile
+>> +++ b/arch/arm/mach-omap2/Makefile
+>> @@ -216,7 +216,6 @@ obj-$(CONFIG_MACH_NOKIA_N8X0)		+= board-n8x0.o
+>> 
+>> # Platform specific device init code
+>> 
+>> -omap-hsmmc-$(CONFIG_MMC_OMAP_HS)	:= hsmmc.o
+>> obj-y					+= $(omap-hsmmc-m) $(omap-hsmmc-y)
+> 
+> The related obj-y line can go now too, right?
 
-trivia: the casts are unnecessary.
+Yes, I think so. It is a construction that I have never seen before :)
+Therefore I did not recognize that it is related.
 
-This might be more sensible using #ifdef
+> And looks like common.h also has struct omap2_hsmmc_info
+> so maybe check by grepping for hsmmc_info to see it's gone.
 
-static inline void debugfs_create_xul(const char *name, umode_t mode,
-				      struct dentry *parent,
-				      unsigned long *value)
-{
-#if BITS_PER_LONG == 64
-	debugfs_create_x64(name, mode, parent, value);
-#else
-	debugfs_create_x32(name, mode, parent, value);
-#endif
-}
+Yes, it is just a forward-declaration of the struct name with
+no user anywhere.
+
+Scheduled for v3.
+
+BTW: should this series go through your tree since it is an
+omap machine?
+
+BR and thanks,
+Nikolaus
