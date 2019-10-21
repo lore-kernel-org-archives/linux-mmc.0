@@ -1,222 +1,197 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 2/2] mmc: block: add CMD13 polling for ioctl() cmd with
- R1B response
-Date: Mon, 21 Oct 2019 13:43:59 +0200
-Message-ID: <CAPDyKFp7cmWpD_9TUR2bPArGevo9M82MTff0RQ-Ly-+L7t5pHA@mail.gmail.com>
-References: <20190905075318.15554-1-chaotian.jing@mediatek.com> <20190905075318.15554-3-chaotian.jing@mediatek.com>
+Subject: Re: [PATCH 1/2] mmc: add unstuck function if host is in deadlock state
+Date: Mon, 21 Oct 2019 15:35:44 +0200
+Message-ID: <CAPDyKFqE09nqdev_qewwNzjjUuhm0UUC03tgvY=ZukYY4az7wg@mail.gmail.com>
+References: <20191011131502.29579-1-ludovic.Barre@st.com> <20191011131502.29579-2-ludovic.Barre@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190905075318.15554-3-chaotian.jing@mediatek.com>
+In-Reply-To: <20191011131502.29579-2-ludovic.Barre@st.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Chaotian Jing <chaotian.jing@mediatek.com>
-Cc: Matthias Brugger <matthias.bgg@gmail.com>, Jens Axboe <axboe@kernel.dk>, Hannes Reinecke <hare@suse.de>, Avri Altman <avri.altman@wdc.com>, YueHaibing <yuehaibing@huawei.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Ming Lei <ming.lei@redhat.com>, Chris Boot <bootc@bootc.net>, Zachary Hays <zhays@lexmark.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, linux-mediatek@lists.infradead.org, srv_heupstream <srv_heupstream@mediatek.com>
+To: Ludovic Barre <ludovic.Barre@st.com>
+Cc: Rob Herring <robh+dt@kernel.org>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-stm32@st-md-mailman.stormreply.com
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, 5 Sep 2019 at 09:53, Chaotian Jing <chaotian.jing@mediatek.com> wrote:
+On Fri, 11 Oct 2019 at 15:15, Ludovic Barre <ludovic.Barre@st.com> wrote:
 >
-> currently there is no CMD13 polling and other code to wait card
-> change to transfer state after R1B command completed. and this
-> polling operation cannot do in user space, because other request
-> may coming before the CMD13 from user space.
+> From: Ludovic Barre <ludovic.barre@st.com>
 >
-> Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
+> After a request a host may be in deadlock state, and wait
+> a specific action to unstuck the hardware block before
+> re-sending a new command.
 
-Both patch 1 and patch2, looks like material for stable, so unless
-someone objects I am adding a tag for that.
+Rather than talking about "unstuck" and "deadlock", how about instead
+describing that an MMC controller, may end up in an non-functional
+state hanging on something. Then to allow it to serve new requests it
+needs to be reset.
 
-Moreover, I updated the changelogs, also according to suggestions from
-Avri and then applied both patches for next, thanks!
+>
+> This patch adds an optional callback mmc_hw_unstuck which
+> allows the host to unstuck the controller. In order to avoid
+> a critical context, this callback must be called when the
+> request is completed. Depending the mmc request, the completion
+> function is defined by mrq->done and could be in block.c or core.c.
+
+I think it's important to state exactly what is expected from the core
+perspective, by the mmc host driver when it calls this new host ops.
+We need to clarify that.
+
+>
+> mmc_hw_unstuck is called if the host returns an cmd/sbc/stop/data
+> DEADLK error.
+
+To me, this approach seems a bit upside-down. Although, I have to
+admit that I haven't thought through this completely yet.
+
+The thing is, to make this useful for host drivers in general, I
+instead think we need to add timeout to each request that the core
+sends to the host driver. In other words, rather than waiting forever
+in the core for the completion variable to be set, via calling
+wait_for_completion() we could call wait_for_completion_timeout(). The
+tricky part is to figure out what timeout to use for each request.
+Perhaps that is even why you picked the approach as implemented in
+@subject patch instead?
+
+Anyway, the typical scenario I see, is that the host driver is
+hanging, likely waiting for an IRQ that never get raised. So, unless
+it implements it own variant of a "request timeout" mechanism, it
+simple isn't able to call mmc_request_done() to inform the core about
+that the request has failed.
+
+For comments to the code, I defer that to the next step, when we have
+agreed on the way forward.
 
 Kind regards
 Uffe
 
-
+>
+> Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
 > ---
->  drivers/mmc/core/block.c | 146 +++++++++++++++------------------------
->  1 file changed, 55 insertions(+), 91 deletions(-)
+>  drivers/mmc/core/block.c | 11 +++++++++++
+>  drivers/mmc/core/core.c  | 35 +++++++++++++++++++++++++++++++++--
+>  include/linux/mmc/core.h |  1 +
+>  include/linux/mmc/host.h |  7 +++++++
+>  4 files changed, 52 insertions(+), 2 deletions(-)
 >
 > diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> index aa7c19f7e298..ee1fd7df4ec8 100644
+> index 2c71a434c915..2f723e2f5fde 100644
 > --- a/drivers/mmc/core/block.c
 > +++ b/drivers/mmc/core/block.c
-> @@ -408,38 +408,6 @@ static int mmc_blk_ioctl_copy_to_user(struct mmc_ioc_cmd __user *ic_ptr,
->         return 0;
->  }
->
-> -static int ioctl_rpmb_card_status_poll(struct mmc_card *card, u32 *status,
-> -                                      u32 retries_max)
-> -{
-> -       int err;
-> -       u32 retry_count = 0;
-> -
-> -       if (!status || !retries_max)
-> -               return -EINVAL;
-> -
-> -       do {
-> -               err = __mmc_send_status(card, status, 5);
-> -               if (err)
-> -                       break;
-> -
-> -               if (!R1_STATUS(*status) &&
-> -                               (R1_CURRENT_STATE(*status) != R1_STATE_PRG))
-> -                       break; /* RPMB programming operation complete */
-> -
-> -               /*
-> -                * Rechedule to give the MMC device a chance to continue
-> -                * processing the previous command without being polled too
-> -                * frequently.
-> -                */
-> -               usleep_range(1000, 5000);
-> -       } while (++retry_count < retries_max);
-> -
-> -       if (retry_count == retries_max)
-> -               err = -EPERM;
-> -
-> -       return err;
-> -}
-> -
->  static int ioctl_do_sanitize(struct mmc_card *card)
->  {
+> @@ -1799,6 +1799,17 @@ static void mmc_blk_mq_rw_recovery(struct mmc_queue *mq, struct request *req)
+>         u32 blocks;
 >         int err;
-> @@ -468,6 +436,58 @@ static int ioctl_do_sanitize(struct mmc_card *card)
->         return err;
->  }
 >
-> +static inline bool mmc_blk_in_tran_state(u32 status)
-> +{
 > +       /*
-> +        * Some cards mishandle the status bits, so make sure to check both the
-> +        * busy indication and the card state.
+> +        * if the host return a deadlock, it needs to be unstuck
+> +        * before to send a new command.
 > +        */
-> +       return status & R1_READY_FOR_DATA &&
-> +              (R1_CURRENT_STATE(status) == R1_STATE_TRAN);
-> +}
+> +       if (brq->sbc.error == -EDEADLK || brq->cmd.error == -EDEADLK ||
+> +           brq->stop.error == -EDEADLK || brq->data.error == -EDEADLK) {
+> +               pr_err("%s: host is in bad state, must be unstuck\n",
+> +                      req->rq_disk->disk_name);
+> +               mmc_hw_unstuck(card->host);
+> +       }
 > +
-> +static int card_busy_detect(struct mmc_card *card, unsigned int timeout_ms,
-> +                           u32 *resp_errs)
-> +{
-> +       unsigned long timeout = jiffies + msecs_to_jiffies(timeout_ms);
-> +       int err = 0;
-> +       u32 status;
-> +
-> +       do {
-> +               bool done = time_after(jiffies, timeout);
-> +
-> +               err = __mmc_send_status(card, &status, 5);
-> +               if (err) {
-> +                       dev_err(mmc_dev(card->host),
-> +                               "error %d requesting status\n", err);
-> +                       return err;
-> +               }
-> +
-> +               /* Accumulate any response error bits seen */
-> +               if (resp_errs)
-> +                       *resp_errs |= status;
-> +
-> +               /*
-> +                * Timeout if the device never becomes ready for data and never
-> +                * leaves the program state.
-> +                */
-> +               if (done) {
-> +                       dev_err(mmc_dev(card->host),
-> +                               "Card stuck in wrong state! %s status: %#x\n",
-> +                                __func__, status);
-> +                       return -ETIMEDOUT;
-> +               }
-> +
-> +               /*
-> +                * Some cards mishandle the status bits,
-> +                * so make sure to check both the busy
-> +                * indication and the card state.
-> +                */
-> +       } while (!mmc_blk_in_tran_state(status));
-> +
-> +       return err;
-> +}
-> +
->  static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
->                                struct mmc_blk_ioc_data *idata)
+>         /*
+>          * Some errors the host driver might not have seen. Set the number of
+>          * bytes transferred to zero in that case.
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 221127324709..43fe59a7403b 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -397,6 +397,7 @@ static int __mmc_start_req(struct mmc_host *host, struct mmc_request *mrq)
+>  void mmc_wait_for_req_done(struct mmc_host *host, struct mmc_request *mrq)
 >  {
-> @@ -611,16 +631,12 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
+>         struct mmc_command *cmd;
+> +       int sbc_err, stop_err, data_err;
 >
->         memcpy(&(idata->ic.response), cmd.resp, sizeof(cmd.resp));
+>         while (1) {
+>                 wait_for_completion(&mrq->completion);
+> @@ -420,8 +421,24 @@ void mmc_wait_for_req_done(struct mmc_host *host, struct mmc_request *mrq)
+>                                        mmc_hostname(host), __func__);
+>                         }
+>                 }
+> -               if (!cmd->error || !cmd->retries ||
+> -                   mmc_card_removed(host->card))
+> +
+> +               sbc_err =  mrq->sbc ? mrq->sbc->error : 0;
+> +               stop_err = mrq->stop ? mrq->stop->error : 0;
+> +               data_err =  mrq->data ? mrq->data->error : 0;
+> +
+> +               /*
+> +                * if the host return a deadlock, it needs to be unstuck
+> +                * before to send a new command.
+> +                */
+> +               if (cmd->error == -EDEADLK || sbc_err == -EDEADLK ||
+> +                   stop_err == -EDEADLK || data_err == -EDEADLK) {
+> +                       pr_debug("%s: host is in bad state, must be unstuck\n",
+> +                                mmc_hostname(host));
+> +                       mmc_hw_unstuck(host);
+> +               }
+> +
+> +               if ((!cmd->error && !sbc_err && !stop_err && !data_err) ||
+> +                   !cmd->retries || mmc_card_removed(host->card))
+>                         break;
 >
-> -       if (idata->rpmb) {
-> +       if (idata->rpmb || (cmd.flags & MMC_RSP_R1B)) {
->                 /*
-> -                * Ensure RPMB command has completed by polling CMD13
-> +                * Ensure RPMB/R1B command has completed by polling CMD13
->                  * "Send Status".
->                  */
-> -               err = ioctl_rpmb_card_status_poll(card, &status, 5);
-> -               if (err)
-> -                       dev_err(mmc_dev(card->host),
-> -                                       "%s: Card Status=0x%08X, error %d\n",
-> -                                       __func__, status, err);
-> +               err = card_busy_detect(card, MMC_BLK_TIMEOUT_MS, NULL);
+>                 mmc_retune_recheck(host);
+> @@ -430,6 +447,12 @@ void mmc_wait_for_req_done(struct mmc_host *host, struct mmc_request *mrq)
+>                          mmc_hostname(host), cmd->opcode, cmd->error);
+>                 cmd->retries--;
+>                 cmd->error = 0;
+> +               if (mrq->sbc)
+> +                       mrq->sbc->error = 0;
+> +               if (mrq->stop)
+> +                       mrq->stop->error = 0;
+> +               if (mrq->data)
+> +                       mrq->data->error = 0;
+>                 __mmc_start_request(host, mrq);
 >         }
 >
->         return err;
-> @@ -970,58 +986,6 @@ static unsigned int mmc_blk_data_timeout_ms(struct mmc_host *host,
->         return ms;
+> @@ -2161,6 +2184,14 @@ int mmc_sw_reset(struct mmc_host *host)
 >  }
+>  EXPORT_SYMBOL(mmc_sw_reset);
 >
-> -static inline bool mmc_blk_in_tran_state(u32 status)
-> -{
-> -       /*
-> -        * Some cards mishandle the status bits, so make sure to check both the
-> -        * busy indication and the card state.
-> -        */
-> -       return status & R1_READY_FOR_DATA &&
-> -              (R1_CURRENT_STATE(status) == R1_STATE_TRAN);
-> -}
-> -
-> -static int card_busy_detect(struct mmc_card *card, unsigned int timeout_ms,
-> -                           u32 *resp_errs)
-> -{
-> -       unsigned long timeout = jiffies + msecs_to_jiffies(timeout_ms);
-> -       int err = 0;
-> -       u32 status;
-> -
-> -       do {
-> -               bool done = time_after(jiffies, timeout);
-> -
-> -               err = __mmc_send_status(card, &status, 5);
-> -               if (err) {
-> -                       dev_err(mmc_dev(card->host),
-> -                               "error %d requesting status\n", err);
-> -                       return err;
-> -               }
-> -
-> -               /* Accumulate any response error bits seen */
-> -               if (resp_errs)
-> -                       *resp_errs |= status;
-> -
-> -               /*
-> -                * Timeout if the device never becomes ready for data and never
-> -                * leaves the program state.
-> -                */
-> -               if (done) {
-> -                       dev_err(mmc_dev(card->host),
-> -                               "Card stuck in wrong state! %s status: %#x\n",
-> -                                __func__, status);
-> -                       return -ETIMEDOUT;
-> -               }
-> -
-> -               /*
-> -                * Some cards mishandle the status bits,
-> -                * so make sure to check both the busy
-> -                * indication and the card state.
-> -                */
-> -       } while (!mmc_blk_in_tran_state(status));
-> -
-> -       return err;
-> -}
-> -
->  static int mmc_blk_reset(struct mmc_blk_data *md, struct mmc_host *host,
->                          int type)
+> +void mmc_hw_unstuck(struct mmc_host *host)
+> +{
+> +       if (!host->ops->hw_unstuck)
+> +               return;
+> +       host->ops->hw_unstuck(host);
+> +}
+> +EXPORT_SYMBOL(mmc_hw_unstuck);
+> +
+>  static int mmc_rescan_try_freq(struct mmc_host *host, unsigned freq)
 >  {
+>         host->f_init = freq;
+> diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+> index b7ba8810a3b5..eb10b8194073 100644
+> --- a/include/linux/mmc/core.h
+> +++ b/include/linux/mmc/core.h
+> @@ -173,6 +173,7 @@ void mmc_wait_for_req(struct mmc_host *host, struct mmc_request *mrq);
+>  int mmc_wait_for_cmd(struct mmc_host *host, struct mmc_command *cmd,
+>                 int retries);
+>
+> +void mmc_hw_unstuck(struct mmc_host *host);
+>  int mmc_hw_reset(struct mmc_host *host);
+>  int mmc_sw_reset(struct mmc_host *host);
+>  void mmc_set_data_timeout(struct mmc_data *data, const struct mmc_card *card);
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index ba703384bea0..8b52cafcd1eb 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -163,6 +163,13 @@ struct mmc_host_ops {
+>         void    (*hw_reset)(struct mmc_host *host);
+>         void    (*card_event)(struct mmc_host *host);
+>
+> +       /*
+> +        * Optional callback, if your host could be in deadlock after a command
+> +        * and need a specific action to unstuck the controller before sending
+> +        * new command.
+> +        */
+> +       void    (*hw_unstuck)(struct mmc_host *host);
+> +
+>         /*
+>          * Optional callback to support controllers with HW issues for multiple
+>          * I/O. Returns the number of supported blocks for the request.
 > --
-> 2.18.0
+> 2.17.1
 >
