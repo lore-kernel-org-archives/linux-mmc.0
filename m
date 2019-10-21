@@ -1,68 +1,79 @@
-From: Viresh Kumar <viresh.kumar@linaro.org>
-Subject: Re: [PATCH 05/46] ARM: pxa: split up mach/hardware.h
-Date: Mon, 21 Oct 2019 07:57:36 +0530
-Message-ID: <20191021022736.yu6unspozqf5634p@vireshk-i7>
-References: <20191018154052.1276506-1-arnd@arndb.de>
- <20191018154201.1276638-5-arnd@arndb.de>
+From: Jianxin Pan <jianxin.pan@amlogic.com>
+Subject: [PATCH] mmc: fix mmc dma operation
+Date: Mon, 21 Oct 2019 13:59:01 +0800
+Message-ID: <1571637541-119016-1-git-send-email-jianxin.pan@amlogic.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20191018154201.1276638-5-arnd@arndb.de>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Daniel Mack <daniel@zonque.org>, Haojian Zhuang <haojian.zhuang@gmail.com>, Robert Jarzmik <robert.jarzmik@free.fr>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, Michael Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@kernel.org>, Dmitry Torokhov <dmitry.torokhov@gmail.com>, Jacek Anaszewski <jacek.anaszewski@gmail.com>, Pavel Machek <pavel@ucw.cz>, Ulf Hansson <ulf.hansson@linaro.org>, Dominik Brodowski <linux@dominikbrodowski.net>, Alexandre Belloni <alexandre.belloni@bootlin.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Guenter Roeck <linux@roeck-us.net>, Mark Brown <broonie@kernel.org>, linux-clk@vger.kernel.org, linux-pm@vger.kernel.org, linux-input@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Kevin Hilman <khilman@baylibre.com>
+Cc: Nan Li <nan.li@amlogic.com>, Jianxin Pan <jianxin.pan@amlogic.com>, Jerome Brunet <jbrunet@baylibre.com>, Neil Armstrong <narmstrong@baylibre.com>, linux-amlogic@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Victor Wan <victor.wan@amlogic.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 18-10-19, 17:41, Arnd Bergmann wrote:
-> The mach/hardware.h is included in lots of places, and it provides
-> three different things on pxa:
-> 
-> - the cpu_is_pxa* macros
-> - an indirect inclusion of mach/addr-map.h
-> - the __REG() and io_pv2() helper macros
-> 
-> Split it up into separate <linux/soc/pxa/cpu.h> and mach/pxa-regs.h
-> headers, then change all the files that use mach/hardware.h to
-> include the exact set of those three headers that they actually
-> need, allowing for further more targeted cleanup.
-> 
-> linux/soc/pxa/cpu.h can remain permanently exported and is now in
-> a global location along with similar headers. pxa-regs.h and
-> addr-map.h are only used in a very small number of drivers now
-> and can be moved to arch/arm/mach-pxa/ directly when those drivers
-> are to pass the necessary data as resources.
-> 
-> Cc: Michael Turquette <mturquette@baylibre.com>
-> Cc: Stephen Boyd <sboyd@kernel.org>
-> Cc: Viresh Kumar <viresh.kumar@linaro.org>
-> Cc: Dmitry Torokhov <dmitry.torokhov@gmail.com>
-> Cc: Jacek Anaszewski <jacek.anaszewski@gmail.com>
-> Cc: Pavel Machek <pavel@ucw.cz>
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: Dominik Brodowski <linux@dominikbrodowski.net>
-> Cc: Alexandre Belloni <alexandre.belloni@bootlin.com>
-> Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-> Cc: Guenter Roeck <linux@roeck-us.net>
-> Cc: Mark Brown <broonie@kernel.org>
-> Cc: linux-clk@vger.kernel.org
-> Cc: linux-pm@vger.kernel.org
-> Cc: linux-input@vger.kernel.org
-> Cc: linux-leds@vger.kernel.org
-> Cc: linux-mmc@vger.kernel.org
-> Cc: linux-mtd@lists.infradead.org
-> Cc: linux-rtc@vger.kernel.org
-> Cc: linux-usb@vger.kernel.org
-> Cc: dri-devel@lists.freedesktop.org
-> Cc: linux-fbdev@vger.kernel.org
-> Cc: linux-watchdog@vger.kernel.org
-> Cc: alsa-devel@alsa-project.org
-> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
-> ---
->  drivers/cpufreq/pxa2xx-cpufreq.c              |  1 +
->  drivers/cpufreq/pxa3xx-cpufreq.c              |  1 +
+From: Nan Li <nan.li@amlogic.com>
 
-Acked-by: Viresh Kumar <viresh.kumar@linaro.org>
+In MMC dma transfer, the region requested by dma_map_sg() may be released
+by dma_unmap_sg() before the transfer is completed.
 
+Put the unmap operation in front of mmc_request_done() to avoid this.
+
+Signed-off-by: Nan Li <nan.li@amlogic.com>
+Signed-off-by: Jianxin Pan <jianxin.pan@amlogic.com>
+---
+ drivers/mmc/host/meson-gx-mmc.c | 15 ++++++++-------
+ 1 file changed, 8 insertions(+), 7 deletions(-)
+
+diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
+index e712315..7667e8a 100644
+--- a/drivers/mmc/host/meson-gx-mmc.c
++++ b/drivers/mmc/host/meson-gx-mmc.c
+@@ -173,6 +173,7 @@ struct meson_host {
+ 	int irq;
+ 
+ 	bool vqmmc_enabled;
++	bool needs_pre_post_req;
+ };
+ 
+ #define CMD_CFG_LENGTH_MASK GENMASK(8, 0)
+@@ -654,6 +655,8 @@ static void meson_mmc_request_done(struct mmc_host *mmc,
+ 	struct meson_host *host = mmc_priv(mmc);
+ 
+ 	host->cmd = NULL;
++	if (host->needs_pre_post_req)
++		meson_mmc_post_req(mmc, mrq, 0);
+ 	mmc_request_done(host->mmc, mrq);
+ }
+ 
+@@ -803,25 +806,23 @@ static void meson_mmc_start_cmd(struct mmc_host *mmc, struct mmc_command *cmd)
+ static void meson_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ {
+ 	struct meson_host *host = mmc_priv(mmc);
+-	bool needs_pre_post_req = mrq->data &&
++
++	host->needs_pre_post_req = mrq->data &&
+ 			!(mrq->data->host_cookie & SD_EMMC_PRE_REQ_DONE);
+ 
+-	if (needs_pre_post_req) {
++	if (host->needs_pre_post_req) {
+ 		meson_mmc_get_transfer_mode(mmc, mrq);
+ 		if (!meson_mmc_desc_chain_mode(mrq->data))
+-			needs_pre_post_req = false;
++			host->needs_pre_post_req = false;
+ 	}
+ 
+-	if (needs_pre_post_req)
++	if (host->needs_pre_post_req)
+ 		meson_mmc_pre_req(mmc, mrq);
+ 
+ 	/* Stop execution */
+ 	writel(0, host->regs + SD_EMMC_START);
+ 
+ 	meson_mmc_start_cmd(mmc, mrq->sbc ?: mrq->cmd);
+-
+-	if (needs_pre_post_req)
+-		meson_mmc_post_req(mmc, mrq, 0);
+ }
+ 
+ static void meson_mmc_read_resp(struct mmc_host *mmc, struct mmc_command *cmd)
 -- 
-viresh
+2.7.4
