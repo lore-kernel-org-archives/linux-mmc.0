@@ -1,62 +1,34 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3 0/8] Arasan SDHCI enhancements and ZynqMP Tap Delays Handling
-Date: Mon, 21 Oct 2019 16:14:20 +0200
-Message-ID: <CAPDyKFo-8=crHZd9X7JpGJHdEwFs4Pz8rzEtVg6e7QZqE8N8nw@mail.gmail.com>
-References: <1571293310-92563-1-git-send-email-manish.narani@xilinx.com>
+From: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>
+Subject: Re: [PATCH v2 07/11] omap: remove old hsmmc.[ch] and in Makefile
+Date: Mon, 21 Oct 2019 07:30:08 -0700
+Message-ID: <20191021143008.GS5610@atomide.com>
+References: <cover.1571510481.git.hns@goldelico.com>
+ <9bd4c0bb0df26523d7f5265cdb06d86d63dafba8.1571510481.git.hns@goldelico.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1571293310-92563-1-git-send-email-manish.narani@xilinx.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Manish Narani <manish.narani@xilinx.com>
-Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Adrian Hunter <adrian.hunter@intel.com>, Michal Simek <michal.simek@xilinx.com>, jolly.shah@xilinx.com, rajan.vaja@xilinx.com, nava.manne@xilinx.com, Moritz Fischer <mdf@kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, git@xilinx.com
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <9bd4c0bb0df26523d7f5265cdb06d86d63dafba8.1571510481.git.hns-xXXSsgcRVICgSpxsJD1C4w@public.gmane.org>
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: "H. Nikolaus Schaller" <hns-xXXSsgcRVICgSpxsJD1C4w@public.gmane.org>
+Cc: =?utf-8?Q?Beno=C3=AEt?= Cousson <bcousson-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Russell King <linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Kalle Valo <kvalo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Mike Rapoport <rppt-tEXmvtCZX7AybS5Ee8rs3A@public.gmane.org>, David Sterba <dsterba-IBi9RG/b67k@public.gmane.org>, "Rafael J. Wysocki" <rafael.j.wysocki-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Petr Mladek <pmladek-IBi9RG/b67k@public.gmane.org>, Sakari Ailus <sakari.ailus-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Kefeng Wang <wangkefeng.wang-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>, Yangtao Li <tiny.windzz-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Alexios Zavras <alexios.zavras-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Allison Randal <allison-wcfNWazeolPR7s880joybQ@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, John Stultz <john.stultz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Bjorn Helgaas <bhelgaas-hpIqsD4AKldhl2p70BpVqQ@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, 17 Oct 2019 at 08:22, Manish Narani <manish.narani@xilinx.com> wrote:
->
-> This patch series does the following:
->  - Reorganize the Clock Handling in Arasan SD driver
->  - Adds new sampling clock in Arasan SD driver
->  - Adds support to set Clock Delays in SD Arasan Driver
->  - Add SDIO Tap Delay handling in ZynqMP firmware driver
->  - Add support for ZynqMP Tap Delays setting in Arasan SD driver
->
-> Changes in v2:
->         - Replaced the deprecated calls to clock framework APIs
->         - Added support for dev_clk_get() call to work for SD card clock
->         - Separated the clock data struct
->         - Fragmented the patch series in smaller patches to make it more
->           readable
->
-> Changes in v3:
->         - Reverted "Replaced the deprecated calls to clock framework APIs"
->         - Removed devm_clk_get() call which was added in v2
->
-> Manish Narani (8):
->   mmc: sdhci-of-arasan: Separate out clk related data to another
->     structure
->   dt-bindings: mmc: arasan: Update Documentation for the input clock
->   mmc: sdhci-of-arasan: Add sampling clock for a phy to use
->   dt-bindings: mmc: arasan: Add optional properties for Arasan SDHCI
->   mmc: sdhci-of-arasan: Add support to set clock phase delays for SD
->   firmware: xilinx: Add SDIO Tap Delay nodes
->   dt-bindings: mmc: arasan: Document 'xlnx,zynqmp-8.9a' controller
->   mmc: sdhci-of-arasan: Add support for ZynqMP Platform Tap Delays Setup
->
->  .../devicetree/bindings/mmc/arasan,sdhci.txt  |  40 +-
->  drivers/mmc/host/sdhci-of-arasan.c            | 477 +++++++++++++++++-
->  include/linux/firmware/xlnx-zynqmp.h          |  13 +-
->  3 files changed, 498 insertions(+), 32 deletions(-)
->
-> --
-> 2.17.1
->
+* H. Nikolaus Schaller <hns-xXXSsgcRVICgSpxsJD1C4w@public.gmane.org> [191019 18:43]:
+> --- a/arch/arm/mach-omap2/Makefile
+> +++ b/arch/arm/mach-omap2/Makefile
+> @@ -216,7 +216,6 @@ obj-$(CONFIG_MACH_NOKIA_N8X0)		+= board-n8x0.o
+>  
+>  # Platform specific device init code
+>  
+> -omap-hsmmc-$(CONFIG_MMC_OMAP_HS)	:= hsmmc.o
+>  obj-y					+= $(omap-hsmmc-m) $(omap-hsmmc-y)
 
-Manish, the series looks good to me. However, I expect you to post a
-re-spin, to move some of the new DT bindings into common mmc DT
-bindings, as Rob suggested.
+The related obj-y line can go now too, right?
 
-So waiting for another version, before I apply it.
+And looks like common.h also has struct omap2_hsmmc_info
+so maybe check by grepping for hsmmc_info to see it's gone.
 
-Kind regards
-Uffe
+Regards,
+
+Tony
