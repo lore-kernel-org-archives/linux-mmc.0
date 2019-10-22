@@ -1,146 +1,56 @@
 From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 2/2] mmc: core: Re-work HW reset for SDIO cards
-Date: Tue, 22 Oct 2019 08:51:14 +0200
-Message-ID: <CAPDyKFq_Utz+ztdXTV534pY9Q9CyTSBJV_mfyPKAsHxaSyZjpA@mail.gmail.com>
-References: <20191017135739.1315-1-ulf.hansson@linaro.org> <20191017135739.1315-3-ulf.hansson@linaro.org>
- <CAD=FV=XsCGqLwKOicW47Yk3y3mHzU+9fR8kS7jx2pW6SzjgCbg@mail.gmail.com>
+Subject: Re: [PATCH v2 07/11] omap: remove old hsmmc.[ch] and in Makefile
+Date: Tue, 22 Oct 2019 08:58:44 +0200
+Message-ID: <CAPDyKFryqo3wF-GphhytNqrDL4rbZ7Qou1Ki3e2_5w-yh2o=uw@mail.gmail.com>
+References: <cover.1571510481.git.hns@goldelico.com> <9bd4c0bb0df26523d7f5265cdb06d86d63dafba8.1571510481.git.hns@goldelico.com>
+ <20191021143008.GS5610@atomide.com> <3FDBE28F-B2C5-4EDE-905C-687F601462B6@goldelico.com>
+ <20191021171104.GY5610@atomide.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAD=FV=XsCGqLwKOicW47Yk3y3mHzU+9fR8kS7jx2pW6SzjgCbg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+In-Reply-To: <20191021171104.GY5610-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>
 Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Cc: Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matthias Kaehlcke <mka-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Kalle Valo <kvalo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Wen Gong <wgong-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Erik Stromdahl <erik.stromdahl-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Eyal Reizer <eyalreizer-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-wireless <linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, "H. Nikolaus Schaller" <hns-xXXSsgcRVICgSpxsJD1C4w@public.gmane.org>
+Cc: Kalle Valo <kvalo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-omap <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, DTML <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-wireless <linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, 22 Oct 2019 at 00:13, Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org> wrote:
+- Trimmed cc-list (could be a good idea for next submission as well)
+
+On Mon, 21 Oct 2019 at 19:11, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org> wrote:
 >
-> Hi,
->
-> On Thu, Oct 17, 2019 at 6:58 AM Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+> * H. Nikolaus Schaller <hns-xXXSsgcRVICgSpxsJD1C4w@public.gmane.org> [191021 17:08]:
 > >
-> > It have turned out that it's not a good idea to try to power cycle and to
-> > re-initialize the SDIO card, via mmc_hw_reset. This because there may be
-> > multiple SDIO funcs attached to the same SDIO card.
+> > > Am 21.10.2019 um 16:30 schrieb Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>:
+> > >
+> > > * H. Nikolaus Schaller <hns-xXXSsgcRVICgSpxsJD1C4w@public.gmane.org> [191019 18:43]:
+> > >> --- a/arch/arm/mach-omap2/Makefile
+> > >> +++ b/arch/arm/mach-omap2/Makefile
+> > >> @@ -216,7 +216,6 @@ obj-$(CONFIG_MACH_NOKIA_N8X0)          += board-n8x0.o
+> > >>
+> > >> # Platform specific device init code
+> > >>
+> > >> -omap-hsmmc-$(CONFIG_MMC_OMAP_HS)  := hsmmc.o
+> > >> obj-y                                      += $(omap-hsmmc-m) $(omap-hsmmc-y)
+> > >
+> > > The related obj-y line can go now too, right?
 > >
-> > To solve this problem, we would need to inform each of the SDIO func in
-> > some way when mmc_sdio_hw_reset() gets called, but that isn't an entirely
-> > trivial operation. Therefore, let's instead take the easy way out, by
-> > triggering a card removal and force a new rescan of the SDIO card.
+> > Yes, I think so. It is a construction that I have never seen before :)
+> > Therefore I did not recognize that it is related.
 > >
-> > Signed-off-by: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> > ---
-> >  drivers/mmc/core/core.c |  3 +--
-> >  drivers/mmc/core/core.h |  2 ++
-> >  drivers/mmc/core/sdio.c | 11 +++++++++--
-> >  3 files changed, 12 insertions(+), 4 deletions(-)
+> > > And looks like common.h also has struct omap2_hsmmc_info
+> > > so maybe check by grepping for hsmmc_info to see it's gone.
 > >
-> > diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> > index 6f8342702c73..39c4567e39d8 100644
-> > --- a/drivers/mmc/core/core.c
-> > +++ b/drivers/mmc/core/core.c
-> > @@ -1469,8 +1469,7 @@ void mmc_detach_bus(struct mmc_host *host)
-> >         mmc_bus_put(host);
-> >  }
+> > Yes, it is just a forward-declaration of the struct name with
+> > no user anywhere.
 > >
-> > -static void _mmc_detect_change(struct mmc_host *host, unsigned long delay,
-> > -                               bool cd_irq)
-> > +void _mmc_detect_change(struct mmc_host *host, unsigned long delay, bool cd_irq)
-> >  {
-> >         /*
-> >          * If the device is configured as wakeup, we prevent a new sleep for
-> > diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
-> > index 328c78dbee66..575ac0257af2 100644
-> > --- a/drivers/mmc/core/core.h
-> > +++ b/drivers/mmc/core/core.h
-> > @@ -70,6 +70,8 @@ void mmc_rescan(struct work_struct *work);
-> >  void mmc_start_host(struct mmc_host *host);
-> >  void mmc_stop_host(struct mmc_host *host);
+> > Scheduled for v3.
 > >
-> > +void _mmc_detect_change(struct mmc_host *host, unsigned long delay,
-> > +                       bool cd_irq);
-> >  int _mmc_detect_card_removed(struct mmc_host *host);
-> >  int mmc_detect_card_removed(struct mmc_host *host);
-> >
-> > diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-> > index 26cabd53ddc5..5d7462c223c3 100644
-> > --- a/drivers/mmc/core/sdio.c
-> > +++ b/drivers/mmc/core/sdio.c
-> > @@ -1050,8 +1050,15 @@ static int mmc_sdio_runtime_resume(struct mmc_host *host)
-> >
-> >  static int mmc_sdio_hw_reset(struct mmc_host *host)
-> >  {
-> > -       mmc_power_cycle(host, host->card->ocr);
-> > -       return mmc_sdio_reinit_card(host);
-> > +       /*
-> > +        * We may have more multiple SDIO funcs. Rather than to inform them all,
-> > +        * let's trigger a removal and force a new rescan of the card.
-> > +        */
-> > +       host->rescan_entered = 0;
-> > +       mmc_card_set_removed(host->card);
-> > +       _mmc_detect_change(host, 0, false);
-> > +
-> > +       return 0;
-> >  }
+> > BTW: should this series go through your tree since it is an
+> > omap machine?
 >
-> The problem I see here is that callers of this reset function aren't
-> expecting it to work this way.  Look specifically at
-> mwifiex_sdio_card_reset_work().  It's assuming that it needs to do
-> things like shutdown / reinit.  Now it's true that the old
-> mwifiex_sdio_card_reset_work() was pretty broken on any systems that
-> also had SDIO bluetooth, but presumably it worked OK on systems
-> without SDIO Bluetooth.  I don't think it'll work so well now.
+> Or MMC tree as that's where the code change really are.
 
-Good point!
-
-I guess I was hoping that running through ->remove() and then
-->probe() for the SDIO func drivers should simply take care of
-whatever that may be needed. In some way this makes the driver broken
-already in regards to this path, but never mind.
-
->
-> Testing shows that indeed your patch breaks mwifiex reset worse than
-> it was before (AKA WiFi totally fails instead of it just killing
-> Bluetooth).
->
-> I think it may be better to add a new API call rather than trying to
-> co-opt the old one.  Maybe put a WARN_ON() for the old API call to
-> make people move away from it, or something?
-
-Thanks again for testing and for valuable feedback! Clearly this needs
-a little more thinking.
-
-An additional concern I see with the "hotplug approach" implemented in
-$subject patch, is that it becomes unnecessary heavy when there is
-only one SDIO func driver bound.
-
-In one way I am tempted to try to address that situation, as it seems
-a bit silly to do full hotplug dance when it isn't needed.
-
->
->
-> ...but on the bright side, your patch does seem to work.  If I add my
-> patch from <https://lkml.kernel.org/r/20190722193939.125578-3-dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-> and change "sdio_trigger_replug(func)" to
-> "mmc_hw_reset(func->card->host)" then I can pass reboot tests.  I made
-> it through about 300 cycles of my old test before stopping the test to
-> work on other things.
-
-That's really good news. Thanks!
-
->
->
-> In terms of the implementation, I will freely admit that I'm always
-> confused by the SD/MMC state machines, but as far as I can tell your
-> patch accomplishes the same thing as mine but in a bit simpler way.
-> ;-)  I even confirmed that with your patch mmc_power_off() /
-> mmc_power_up are still called...
->
-> Thanks!
->
-> -Doug
-
-Alright, let me rework this and post a new version. I keep you posted.
+I am okay with that. I will have a look at the series and provide some comments.
 
 Kind regards
 Uffe
