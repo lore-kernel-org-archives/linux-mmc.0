@@ -1,88 +1,124 @@
-From: Nan Li <Nan.Li@amlogic.com>
-Subject: Re: [PATCH] mmc: fix mmc dma operation
-Date: Tue, 22 Oct 2019 02:45:02 +0000
-Message-ID: <8fc785d5-78a7-6933-8462-22d4afa24068@amlogic.com>
-References: <1571637541-119016-1-git-send-email-jianxin.pan@amlogic.com>
- <fc1f61e1-b156-11e6-3f21-c498d2f0a8c6@baylibre.com>
- <1jwocybgpw.fsf@starbuckisacylon.baylibre.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+From: Baolin Wang <baolin.wang@linaro.org>
+Subject: [PATCH v4 0/3] Add MMC software queue support
+Date: Tue, 22 Oct 2019 13:58:54 +0800
+Message-ID: <cover.1571722391.git.baolin.wang@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1jwocybgpw.fsf@starbuckisacylon.baylibre.com>
-Content-Language: zh-CN
-Content-ID: <21F36A73DE7F4C4491A23F3C776498B7@amlogic.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Jerome Brunet <jbrunet@baylibre.com>, Neil Armstrong <narmstrong@baylibre.com>, Jianxin Pan <Jianxin.Pan@amlogic.com>, Ulf Hansson <ulf.hansson@linaro.org>, Kevin Hilman <khilman@baylibre.com>
-Cc: "linux-amlogic@lists.infradead.org" <linux-amlogic@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Victor Wan <victor.wan@amlogic.com>
+To: adrian.hunter@intel.com, ulf.hansson@linaro.org, asutoshd@codeaurora.org
+Cc: orsonzhai@gmail.com, zhang.lyra@gmail.com, arnd@arndb.de, linus.walleij@linaro.org, vincent.guittot@linaro.org, baolin.wang@linaro.org, baolin.wang7@gmail.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-5ZyoIDIwMTkvMTAvMjEgMTc6MTcsIEplcm9tZSBCcnVuZXQg5YaZ6YGTOg0KPiBPbiBNb24gMjEg
-T2N0IDIwMTkgYXQgMDk6NTcsIE5laWwgQXJtc3Ryb25nIDxuYXJtc3Ryb25nQGJheWxpYnJlLmNv
-bT4gd3JvdGU6DQo+DQo+PiBIaSwNCj4+DQo+PiBUaGFua3MgZm9yIHRoZSBmaXguDQo+Pg0KPj4g
-Rmlyc3QsIHlvdSBzaG91bGQgYWRkICJtbWM6IG1lc29uLWd4OiIgaW4gdGhlIHN1YmplY3QuDQo+
-Pg0KPj4gT24gMjEvMTAvMjAxOSAwNzo1OSwgSmlhbnhpbiBQYW4gd3JvdGU6DQo+Pj4gRnJvbTog
-TmFuIExpIDxuYW4ubGlAYW1sb2dpYy5jb20+DQo+Pj4NCj4+PiBJbiBNTUMgZG1hIHRyYW5zZmVy
-LCB0aGUgcmVnaW9uIHJlcXVlc3RlZCBieSBkbWFfbWFwX3NnKCkgbWF5IGJlIHJlbGVhc2VkDQo+
-Pj4gYnkgZG1hX3VubWFwX3NnKCkgYmVmb3JlIHRoZSB0cmFuc2ZlciBpcyBjb21wbGV0ZWQuDQo+
-Pj4NCj4+PiBQdXQgdGhlIHVubWFwIG9wZXJhdGlvbiBpbiBmcm9udCBvZiBtbWNfcmVxdWVzdF9k
-b25lKCkgdG8gYXZvaWQgdGhpcy4NCj4gU2luY2Ugd2UgaGF2ZSBzZWVuIHRoaXMgcHJvYmxlbSAo
-eWV0KSwgY291bGQgeW91IGJyaWVmbHkgaG93IHlvdSd2ZQ0KPiB0cmlnZ2VyZWQgaXQgPw0KDQpU
-aGUgcHJvYmxlbSB3ZSBmb3VuZCBpbiB0aGUgc3RyZXNzIHRlc3Qgd2FzIHRoYXQgdGhlIHNkaW8g
-ZGV2aWNlIHdhcyANCmNvbnN0YW50bHkgb3BlcmF0ZWQgb24gYW5kIG9mZiBlbGVjdHJpY2l0eSB0
-byBtYWtlIGl0IHJlcGVhdGVkbHkgDQppbml0aWFsaXplZC4NCg0KRHVyaW5nIHRoZSB0ZXN0LCB3
-ZSBmb3VuZCB0aGF0IHRoZXJlIHdhcyBhIGNoYW5jZSB0aGF0IHRoZSBpbmZvcm1hdGlvbiANCnJl
-YWQgYnkgdGhlIGNvbnRyb2xsZXIgZnJvbSB0aGUgc2RpbyBkZXZpY2Ugc2lkZSB3YXMgd3Jvbmcs
-IHdoaWNoIG1hZGUgDQp0aGUgc2RpbyBpbml0aWFsaXphdGlvbiBmYWlsLg0KDQo+PiBZb3Ugc2hv
-dWxkIGFkZCBhICJGaXhlczoiIHRhZyBzbyBpdCBjYW4gYmUgYmFja3BvcnRlZCBvbiBzdGFibGUg
-a2VybmVscy4NCj4+DQo+Pj4gU2lnbmVkLW9mZi1ieTogTmFuIExpIDxuYW4ubGlAYW1sb2dpYy5j
-b20+DQo+Pj4gU2lnbmVkLW9mZi1ieTogSmlhbnhpbiBQYW4gPGppYW54aW4ucGFuQGFtbG9naWMu
-Y29tPg0KPj4+IC0tLQ0KPj4+ICAgZHJpdmVycy9tbWMvaG9zdC9tZXNvbi1neC1tbWMuYyB8IDE1
-ICsrKysrKysrLS0tLS0tLQ0KPj4+ICAgMSBmaWxlIGNoYW5nZWQsIDggaW5zZXJ0aW9ucygrKSwg
-NyBkZWxldGlvbnMoLSkNCj4+Pg0KPj4+IGRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9ob3N0L21l
-c29uLWd4LW1tYy5jIGIvZHJpdmVycy9tbWMvaG9zdC9tZXNvbi1neC1tbWMuYw0KPj4+IGluZGV4
-IGU3MTIzMTUuLjc2NjdlOGEgMTAwNjQ0DQo+Pj4gLS0tIGEvZHJpdmVycy9tbWMvaG9zdC9tZXNv
-bi1neC1tbWMuYw0KPj4+ICsrKyBiL2RyaXZlcnMvbW1jL2hvc3QvbWVzb24tZ3gtbW1jLmMNCj4+
-PiBAQCAtMTczLDYgKzE3Myw3IEBAIHN0cnVjdCBtZXNvbl9ob3N0IHsNCj4+PiAgIAlpbnQgaXJx
-Ow0KPj4+ICAgDQo+Pj4gICAJYm9vbCB2cW1tY19lbmFibGVkOw0KPj4+ICsJYm9vbCBuZWVkc19w
-cmVfcG9zdF9yZXE7DQo+Pj4gICB9Ow0KPj4+ICAgDQo+Pj4gICAjZGVmaW5lIENNRF9DRkdfTEVO
-R1RIX01BU0sgR0VOTUFTSyg4LCAwKQ0KPj4+IEBAIC02NTQsNiArNjU1LDggQEAgc3RhdGljIHZv
-aWQgbWVzb25fbW1jX3JlcXVlc3RfZG9uZShzdHJ1Y3QgbW1jX2hvc3QgKm1tYywNCj4+PiAgIAlz
-dHJ1Y3QgbWVzb25faG9zdCAqaG9zdCA9IG1tY19wcml2KG1tYyk7DQo+Pj4gICANCj4+PiAgIAlo
-b3N0LT5jbWQgPSBOVUxMOw0KPj4+ICsJaWYgKGhvc3QtPm5lZWRzX3ByZV9wb3N0X3JlcSkNCj4+
-PiArCQltZXNvbl9tbWNfcG9zdF9yZXEobW1jLCBtcnEsIDApOw0KPj4+ICAgCW1tY19yZXF1ZXN0
-X2RvbmUoaG9zdC0+bW1jLCBtcnEpOw0KPj4+ICAgfQ0KPj4+ICAgDQo+Pj4gQEAgLTgwMywyNSAr
-ODA2LDIzIEBAIHN0YXRpYyB2b2lkIG1lc29uX21tY19zdGFydF9jbWQoc3RydWN0IG1tY19ob3N0
-ICptbWMsIHN0cnVjdCBtbWNfY29tbWFuZCAqY21kKQ0KPj4+ICAgc3RhdGljIHZvaWQgbWVzb25f
-bW1jX3JlcXVlc3Qoc3RydWN0IG1tY19ob3N0ICptbWMsIHN0cnVjdCBtbWNfcmVxdWVzdCAqbXJx
-KQ0KPj4+ICAgew0KPj4+ICAgCXN0cnVjdCBtZXNvbl9ob3N0ICpob3N0ID0gbW1jX3ByaXYobW1j
-KTsNCj4+PiAtCWJvb2wgbmVlZHNfcHJlX3Bvc3RfcmVxID0gbXJxLT5kYXRhICYmDQo+Pj4gKw0K
-Pj4+ICsJaG9zdC0+bmVlZHNfcHJlX3Bvc3RfcmVxID0gbXJxLT5kYXRhICYmDQo+Pj4gICAJCQkh
-KG1ycS0+ZGF0YS0+aG9zdF9jb29raWUgJiBTRF9FTU1DX1BSRV9SRVFfRE9ORSk7DQo+Pj4gICAN
-Cj4+PiAtCWlmIChuZWVkc19wcmVfcG9zdF9yZXEpIHsNCj4+PiArCWlmIChob3N0LT5uZWVkc19w
-cmVfcG9zdF9yZXEpIHsNCj4+PiAgIAkJbWVzb25fbW1jX2dldF90cmFuc2Zlcl9tb2RlKG1tYywg
-bXJxKTsNCj4+PiAgIAkJaWYgKCFtZXNvbl9tbWNfZGVzY19jaGFpbl9tb2RlKG1ycS0+ZGF0YSkp
-DQo+Pj4gLQkJCW5lZWRzX3ByZV9wb3N0X3JlcSA9IGZhbHNlOw0KPj4+ICsJCQlob3N0LT5uZWVk
-c19wcmVfcG9zdF9yZXEgPSBmYWxzZTsNCj4+PiAgIAl9DQo+Pj4gICANCj4+PiAtCWlmIChuZWVk
-c19wcmVfcG9zdF9yZXEpDQo+Pj4gKwlpZiAoaG9zdC0+bmVlZHNfcHJlX3Bvc3RfcmVxKQ0KPj4+
-ICAgCQltZXNvbl9tbWNfcHJlX3JlcShtbWMsIG1ycSk7DQo+Pj4gICANCj4+PiAgIAkvKiBTdG9w
-IGV4ZWN1dGlvbiAqLw0KPj4+ICAgCXdyaXRlbCgwLCBob3N0LT5yZWdzICsgU0RfRU1NQ19TVEFS
-VCk7DQo+Pj4gICANCj4+PiAgIAltZXNvbl9tbWNfc3RhcnRfY21kKG1tYywgbXJxLT5zYmMgPzog
-bXJxLT5jbWQpOw0KPj4+IC0NCj4+PiAtCWlmIChuZWVkc19wcmVfcG9zdF9yZXEpDQo+Pj4gLQkJ
-bWVzb25fbW1jX3Bvc3RfcmVxKG1tYywgbXJxLCAwKTsNCj4+PiAgIH0NCj4gVGhlIGNvZGUgYXJv
-dW5kIGFsbCB0aGlzIGlzIGdldHRpbmcgcXVpdGUgZGlmZmljdWx0IHRvIGZvbGxvdyBldmVudGhv
-dWdoDQo+IGl0IGRvZXMgbm90IGFjdHVhbGx5IGRvIG11Y2gNCj4NCj4gVGhlIHJvb3Qgb2YgdGhl
-IHByb2JsZW0gc2VlbXMgYmUgdGhhdCBtZXNvbl9tbWNfcHJlX3JlcSgpIGFuZA0KPiBtZXNvbl9t
-bWNfcG9zdF9yZXEoKSBhcmUgcGFzc2VkIHRvIGZyYW1ld29yayBidXQgYWxzbyBjYWxsZWQgbWFu
-dWFsbHkNCj4gZnJvbSBtZXNvbl9tbWNfcmVxdWVzdCgpLg0KPg0KPiBCZWNhdXNlIG9mIHRoaXMs
-IHNvbWUgY29kZSBpcyBhZGRlZCB0byBtYWtlIHN1cmUgd2UgZG9uJ3QgZG8gdGhpbmdzIHR3aWNl
-Lg0KPiBNYXliZSBJJ20gbWlzc2luZyBzb21ldGhpbmcgYnV0IGl0IGxvb2sgd2VpcmQgPyBVbGYs
-IGNvdWxkIHlvdSBnaXZlIHVzDQo+IHlvdXIgdmlldyA/DQo+DQo+IEFzIGZhciBhcyBJIGNhbiB0
-ZWxsOg0KPiAgICogcHJlX3JlcSA6IGRldGVybWluZSBpZiB3ZSB1c2UgQ0hBSU5fTU9ERSBvciBu
-b3QgQU5EDQo+ICAgICAgICAgICAgICAgZG1hX21hcF9zZygpIGlmIHdlIGRvDQo+ICAgKiBwb3N0
-X3JlcSA6IGRtYV91bm1hcF9zZygpIGlmIHByZXZpb3VzbHkgYWxsb2NhdGVkDQo+DQo+IERvIHdl
-IHJlYWxseSBuZWVkIHRvIGRvIGFsbCB0aGlzIG1lc29uX21tY19yZXF1ZXN0KCkgPyBTaG91bGRu
-J3Qgd2UgbGV0IHRoZQ0KPiBmcmFtZXdvcmsgZG8gdGhlIGNhbGxzIHRvIHByZS9wb3N0X3JlcSBm
-b3IgdXMgPw0KPg0KPj4+ICAgDQo+Pj4gICBzdGF0aWMgdm9pZCBtZXNvbl9tbWNfcmVhZF9yZXNw
-KHN0cnVjdCBtbWNfaG9zdCAqbW1jLCBzdHJ1Y3QgbW1jX2NvbW1hbmQgKmNtZCkNCj4+Pg0KPj4g
-TmVpbA0KDQoNCg==
+Hi All,
+
+Now the MMC read/write stack will always wait for previous request is
+completed by mmc_blk_rw_wait(), before sending a new request to hardware,
+or queue a work to complete request, that will bring context switching
+overhead, especially for high I/O per second rates, to affect the IO
+performance.
+
+Thus this patch set will introduce the MMC software command queue support
+based on command queue engine's interfaces, and set the queue depth as 32
+to allow more requests can be be prepared, merged and inserted into IO
+scheduler, but we only allow 2 requests in flight, that is enough to let
+the irq handler always trigger the next request without a context switch,
+as well as avoiding a long latency.
+
+Moreover we can expand the MMC software queue interface to support
+MMC packed request or packed command instead of adding new interfaces,
+according to previosus discussion.
+
+Below are some comparison data with fio tool. The fio command I used
+is like below with changing the '--rw' parameter and enabling the direct
+IO flag to measure the actual hardware transfer speed in 4K block size.
+
+./fio --filename=/dev/mmcblk0p30 --direct=1 --iodepth=20 --rw=read --bs=4K --size=1G --group_reporting --numjobs=20 --name=test_read
+
+My eMMC card working at HS400 Enhanced strobe mode:
+[    2.229856] mmc0: new HS400 Enhanced strobe MMC card at address 0001
+[    2.237566] mmcblk0: mmc0:0001 HBG4a2 29.1 GiB 
+[    2.242621] mmcblk0boot0: mmc0:0001 HBG4a2 partition 1 4.00 MiB
+[    2.249110] mmcblk0boot1: mmc0:0001 HBG4a2 partition 2 4.00 MiB
+[    2.255307] mmcblk0rpmb: mmc0:0001 HBG4a2 partition 3 4.00 MiB, chardev (248:0)
+
+1. Without MMC software queue
+I tested 5 times for each case and output a average speed.
+
+1) Sequential read:
+Speed: 59.4MiB/s, 63.4MiB/s, 57.5MiB/s, 57.2MiB/s, 60.8MiB/s
+Average speed: 59.66MiB/s
+
+2) Random read:
+Speed: 26.9MiB/s, 26.9MiB/s, 27.1MiB/s, 27.1MiB/s, 27.2MiB/s
+Average speed: 27.04MiB/s
+
+3) Sequential write:
+Speed: 71.6MiB/s, 72.5MiB/s, 72.2MiB/s, 64.6MiB/s, 67.5MiB/s
+Average speed: 69.68MiB/s
+
+4) Random write:
+Speed: 36.3MiB/s, 35.4MiB/s, 38.6MiB/s, 34MiB/s, 35.5MiB/s
+Average speed: 35.96MiB/s
+
+2. With MMC software queue
+I tested 5 times for each case and output a average speed.
+
+1) Sequential read:
+Speed: 59.2MiB/s, 60.4MiB/s, 63.6MiB/s, 60.3MiB/s, 59.9MiB/s
+Average speed: 60.68MiB/s
+
+2) Random read:
+Speed: 31.3MiB/s, 31.4MiB/s, 31.5MiB/s, 31.3MiB/s, 31.3MiB/s
+Average speed: 31.36MiB/s
+
+3) Sequential write:
+Speed: 71MiB/s, 71.8MiB/s, 72.3MiB/s, 72.2MiB/s, 71MiB/s
+Average speed: 71.66MiB/s
+
+4) Random write:
+Speed: 68.9MiB/s, 68.7MiB/s, 68.8MiB/s, 68.6MiB/s, 68.8MiB/s
+Average speed: 68.76MiB/s
+
+Form above data, we can see the MMC software queue can help to improve some
+performance obviously for random read and write, though no obvious improvement
+for sequential read and write.
+
+Any comments are welcome. Thanks a lot.
+
+Changes from v3:
+ - Use host software queue instead of sqhci.
+ - Fix random config building issue.
+ - Change queue depth to 32, but still only allow 2 requests in flight.
+ - Update the testing data.
+
+Changes from v2:
+ - Remove reference to 'struct cqhci_host' and 'struct cqhci_slot',
+ instead adding 'struct sqhci_host', which is only used by software queue.
+
+Changes from v1:
+ - Add request_done ops for sdhci_ops.
+ - Replace virtual command queue with software queue for functions and
+ variables.
+ - Rename the software queue file and add sqhci.h header file.
+
+Baolin Wang (3):
+  mmc: Add MMC host software queue support
+  mmc: host: sdhci: Add request_done ops for struct sdhci_ops
+  mmc: host: sdhci-sprd: Add software queue support
+
+ drivers/mmc/core/block.c      |   61 ++++++++
+ drivers/mmc/core/mmc.c        |   13 +-
+ drivers/mmc/core/queue.c      |   33 +++-
+ drivers/mmc/host/Kconfig      |    8 +
+ drivers/mmc/host/Makefile     |    1 +
+ drivers/mmc/host/mmc_hsq.c    |  344 +++++++++++++++++++++++++++++++++++++++++
+ drivers/mmc/host/mmc_hsq.h    |   30 ++++
+ drivers/mmc/host/sdhci-sprd.c |   26 ++++
+ drivers/mmc/host/sdhci.c      |   12 +-
+ drivers/mmc/host/sdhci.h      |    2 +
+ include/linux/mmc/host.h      |    3 +
+ 11 files changed, 521 insertions(+), 12 deletions(-)
+ create mode 100644 drivers/mmc/host/mmc_hsq.c
+ create mode 100644 drivers/mmc/host/mmc_hsq.h
+
+-- 
+1.7.9.5
