@@ -1,68 +1,86 @@
-From: Mark Brown <broonie@kernel.org>
-Subject: Re: [PATCH 05/46] ARM: pxa: split up mach/hardware.h
-Date: Tue, 22 Oct 2019 17:36:13 +0100
-Message-ID: <20191022163613.GL5554@sirena.co.uk>
-References: <20191018154052.1276506-1-arnd@arndb.de>
- <20191018154201.1276638-5-arnd@arndb.de>
+From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Subject: Re: [PATCH 1/7] debugfs: Add debugfs_create_xul() for hexadecimal
+ unsigned long
+Date: Tue, 22 Oct 2019 13:35:27 -0400
+Message-ID: <20191022173527.GD230934@kroah.com>
+References: <20191021143742.14487-1-geert+renesas@glider.be>
+ <20191021143742.14487-2-geert+renesas@glider.be>
+ <0f91839d858fcb03435ebc85e61ee4e75371ff37.camel@perches.com>
+ <CAMuHMdU4OhsK6Jvy406ZCM+OeGcfVB0b7ccsne9KdMZFLf=JqQ@mail.gmail.com>
+ <a32b6a6b5f48ff0c4685bd417a8fb66229d95033.camel@perches.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============1406154586=="
-Return-path: <dri-devel-bounces@lists.freedesktop.org>
-In-Reply-To: <20191018154201.1276638-5-arnd@arndb.de>
-List-Unsubscribe: <https://lists.freedesktop.org/mailman/options/dri-devel>,
- <mailto:dri-devel-request@lists.freedesktop.org?subject=unsubscribe>
-List-Archive: <https://lists.freedesktop.org/archives/dri-devel>
-List-Post: <mailto:dri-devel@lists.freedesktop.org>
-List-Help: <mailto:dri-devel-request@lists.freedesktop.org?subject=help>
-List-Subscribe: <https://lists.freedesktop.org/mailman/listinfo/dri-devel>,
- <mailto:dri-devel-request@lists.freedesktop.org?subject=subscribe>
-Errors-To: dri-devel-bounces@lists.freedesktop.org
-Sender: "dri-devel" <dri-devel-bounces@lists.freedesktop.org>
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-usb@vger.kernel.org, Viresh Kumar <viresh.kumar@linaro.org>, Alexandre Belloni <alexandre.belloni@bootlin.com>, Dominik Brodowski <linux@dominikbrodowski.net>, linux-mtd@lists.infradead.org, Pavel Machek <pavel@ucw.cz>, Robert Jarzmik <robert.jarzmik@free.fr>, linux-clk@vger.kernel.org, linux-leds@vger.kernel.org, linux-rtc@vger.kernel.org, linux-input@vger.kernel.org, Michael Turquette <mturquette@baylibre.com>, Guenter Roeck <linux@roeck-us.net>, linux-watchdog@vger.kernel.org, alsa-devel@alsa-project.org, linux-pm@vger.kernel.org, Haojian Zhuang <haojian.zhuang@gmail.com>, Jacek Anaszewski <jacek.anaszewski@gmail.com>, linux-fbdev@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Stephen Boyd <sboyd@kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, dri-devel@lists.freedesktop.org, Dmitry Torokhov <dmitry.to>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <a32b6a6b5f48ff0c4685bd417a8fb66229d95033.camel@perches.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Joe Perches <joe@perches.com>
+Cc: Geert Uytterhoeven <geert@linux-m68k.org>, Ludovic Desroches <ludovic.desroches@microchip.com>, Ulf Hansson <ulf.hansson@linaro.org>, Nicolas Ferre <nicolas.ferre@microchip.com>, Alexandre Belloni <alexandre.belloni@bootlin.com>, Jaehoon Chung <jh80.chung@samsung.com>, "David S . Miller" <davem@davemloft.net>, "Rafael J . Wysocki" <rafael@kernel.org>, Johannes Berg <johannes@sipsolutions.net>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, netdev <netdev@vger.kernel.org>, linux-wireless <linux-wireless@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
+On Tue, Oct 22, 2019 at 02:07:34AM -0700, Joe Perches wrote:
+> On Tue, 2019-10-22 at 10:03 +0200, Geert Uytterhoeven wrote:
+> > Hi Joe,
+> 
+> Hey again Geert.
+> 
+> > On Mon, Oct 21, 2019 at 5:37 PM Joe Perches <joe@perches.com> wrote:
+> > > On Mon, 2019-10-21 at 16:37 +0200, Geert Uytterhoeven wrote:
+> > > > The existing debugfs_create_ulong() function supports objects of
+> > > > type "unsigned long", which are 32-bit or 64-bit depending on the
+> > > > platform, in decimal form.  To format objects in hexadecimal, various
+> > > > debugfs_create_x*() functions exist, but all of them take fixed-size
+> > > > types.
+> > > > 
+> > > > Add a debugfs helper for "unsigned long" objects in hexadecimal format.
+> > > > This avoids the need for users to open-code the same, or introduce
+> > > > bugs when casting the value pointer to "u32 *" or "u64 *" to call
+> > > > debugfs_create_x{32,64}().
+> > > []
+> > > > diff --git a/include/linux/debugfs.h b/include/linux/debugfs.h
+> > > []
+> > > > @@ -356,4 +356,14 @@ static inline ssize_t debugfs_write_file_bool(struct file *file,
+> > > > 
+> > > >  #endif
+> > > > 
+> > > > +static inline void debugfs_create_xul(const char *name, umode_t mode,
+> > > > +                                   struct dentry *parent,
+> > > > +                                   unsigned long *value)
+> > > > +{
+> > > > +     if (sizeof(*value) == sizeof(u32))
+> > > > +             debugfs_create_x32(name, mode, parent, (u32 *)value);
+> > > > +     else
+> > > > +             debugfs_create_x64(name, mode, parent, (u64 *)value);
+> > > 
+> > > trivia: the casts are unnecessary.
+> > 
+> > They are necessary, in both calls (so using #ifdef as suggested below
+> > won't help):
+> 
+> Silly thinko, (I somehow thought the compiler would
+> eliminate the code after the branch not taken, but
+> of course it has to compile it first...  oops)
+> though the #ifdef should work.
+> 
+> > > This might be more sensible using #ifdef
+> > > 
+> > > static inline void debugfs_create_xul(const char *name, umode_t mode,
+> > >                                       struct dentry *parent,
+> > >                                       unsigned long *value)
+> > > {
+> > > #if BITS_PER_LONG == 64
+> > >         debugfs_create_x64(name, mode, parent, value);
+> > > #else
+> > >         debugfs_create_x32(name, mode, parent, value);
+> > > #endif
+> > > }
+> > 
+> > ... at the expense of the compiler checking only one branch.
+> > 
+> > Just like "if (IS_ENABLED(CONFIG_<foo>)" (when possible) is preferred
+> > over "#ifdef CONFIG_<foo>" because of compile-coverage, I think using
+> > "if" here is better than using "#if".
+> 
+> True if all compilers will always eliminate the unused branch.
 
---===============1406154586==
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="cy9Nn4fUvYST66Pl"
-Content-Disposition: inline
-
-
---cy9Nn4fUvYST66Pl
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-
-On Fri, Oct 18, 2019 at 05:41:20PM +0200, Arnd Bergmann wrote:
-> The mach/hardware.h is included in lots of places, and it provides
-> three different things on pxa:
-
-Acked-by: Mark Brown <broonie@kernel.org>
-
---cy9Nn4fUvYST66Pl
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQEzBAABCgAdFiEEreZoqmdXGLWf4p/qJNaLcl1Uh9AFAl2vL/wACgkQJNaLcl1U
-h9A46Qf/bdiNYPmWVC2CHNC1L2OLkyJ66QpIcTPyD+TqK5kJogwOBaO1gXSF9Zzl
-FrZ20C2apP/oPsDhXu0l5d3giQifXBNvev/89QnOX2UBhrtJV9qE4LHll1hjeyKZ
-BEGejSMZnKNLyUDKEbrGg/LeAlDx8G1odI34QfZvmSJVBKinRssnwpnH7UNZhU9s
-9SvLSPJjxoWD6gDsShV0vYuFkd6XQ68qOna4lj6KknkkAE9jIpQb+fFBVqYNKNgp
-Ttp0KkT/l1DAlDx4lMDfWkr/8u3807G0HTJ6xYcjeyd7e40utLqPnFLeQpMS+RGb
-96bq1ZoL9nd8PdzO8lOK09fB0kB8Mg==
-=tCNh
------END PGP SIGNATURE-----
-
---cy9Nn4fUvYST66Pl--
-
---===============1406154586==
-Content-Type: text/plain; charset="utf-8"
-MIME-Version: 1.0
-Content-Transfer-Encoding: base64
-Content-Disposition: inline
-
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KZHJpLWRldmVs
-IG1haWxpbmcgbGlzdApkcmktZGV2ZWxAbGlzdHMuZnJlZWRlc2t0b3Aub3JnCmh0dHBzOi8vbGlz
-dHMuZnJlZWRlc2t0b3Aub3JnL21haWxtYW4vbGlzdGluZm8vZHJpLWRldmVs
-
---===============1406154586==--
+Good ones will, we don't care about bad ones :)
