@@ -1,42 +1,72 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH 00/36] ARM: samsung platform cleanup
-Date: Wed, 23 Oct 2019 15:39:32 +0200
-Message-ID: <CAK8P3a1v2-+geD+JbNP-t418ZjntQNSte4rt8c7N6sJdpb3+DQ@mail.gmail.com>
-References: <20191010202802.1132272-1-arnd@arndb.de> <20191023131049.GG11048@pi3>
+From: Rob Herring <robh+dt@kernel.org>
+Subject: Re: Onboard SD card doesn't work anymore after the 'mmc-v5.4-2'
+ updates
+Date: Wed, 23 Oct 2019 08:52:33 -0500
+Message-ID: <CAL_JsqJpFy-g3earNjZs7jANx4pyRd=CDvZN3emMdXL5YNkYHQ@mail.gmail.com>
+References: <7b549219-a2e1-08c7-331b-9c3e4fdb8a8f@xenosoft.de>
+ <3aeae0d8-e9be-2585-cbbd-70263cb495f1@xenosoft.de>
+ <20191015125105.GU25745@shell.armlinux.org.uk>
+ <5611f3bc-68aa-78ec-182a-1cb414202314@xenosoft.de>
+ <20191015131750.GV25745@shell.armlinux.org.uk>
+ <87muds586t.fsf@mpe.ellerman.id.au>
+ <31d58f086f964937b27209bc18b334d9c9791767.camel@kernel.crashing.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20191023131049.GG11048@pi3>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Krzysztof Kozlowski <krzk@kernel.org>
-Cc: Linux Fbdev development list <linux-fbdev@vger.kernel.org>, ALSA Development Mailing List <alsa-devel@alsa-project.org>, dri-devel <dri-devel@lists.freedesktop.org>, Sylwester Nawrocki <s.nawrocki@samsung.com>, linux-clk <linux-clk@vger.kernel.org>, linux-leds@vger.kernel.org, "moderated list:ARM/SAMSUNG EXYNOS ARM ARCHITECTURES" <linux-samsung-soc@vger.kernel.org>, linux-stm32@st-md-mailman.stormreply.com, Lihua Yao <ylhuajnu@outlook.com>, Kukjin Kim <kgene@kernel.org>, linux-serial@vger.kernel.org, "open list:HID CORE LAYER" <linux-input@vger.kernel.org>, =?UTF-8?Q?Pawe=C5=82_Chmiel?= <pawel.mikolaj.chmiel@gmail.com>, Linux PWM List <linux-pwm@vger.kernel.org>, Sergio Prado <sergio.prado@e-labworks.com>, Linux PM list <linux-pm@vger.kernel.org>Lihua
+Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
+In-Reply-To: <31d58f086f964937b27209bc18b334d9c9791767.camel@kernel.crashing.org>
+List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
+ <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev/>
+List-Post: <mailto:linuxppc-dev@lists.ozlabs.org>
+List-Help: <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
+ <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=subscribe>
+Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
+Sender: "Linuxppc-dev"
+ <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
+To: Benjamin Herrenschmidt <benh@kernel.crashing.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, mad skateman <madskateman@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, Russell King - ARM Linux admin <linux@armlinux.org.uk>, Paul Mackerras <paulus@samba.org>, "R.T.Dickinson" <rtd2@xtra.co.nz>, Christian Zigotzky <chzigotzky@xenosoft.de>, "contact@a-eon.com" <contact@a-eon.com>, linuxppc-dev <linuxppc-dev@lists.ozlabs.org>, Christian Zigotzky <info@xenosoft.de>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, Oct 23, 2019 at 3:11 PM Krzysztof Kozlowski <krzk@kernel.org> wrote:
-> On Thu, Oct 10, 2019 at 10:28:02PM +0200, Arnd Bergmann wrote:
-> > The contents are available for testing in
+On Wed, Oct 23, 2019 at 1:41 AM Benjamin Herrenschmidt
+<benh@kernel.crashing.org> wrote:
+>
+> On Wed, 2019-10-23 at 16:42 +1100, Michael Ellerman wrote:
 > >
-> > git://kernel.org:/pub/scm/linux/kernel/git/arnd/playground.git s3c-multiplatform
+> > Right, it seems of_dma_is_coherent() has baked in the assumption that
+> > devices are non-coherent unless explicitly marked as coherent.
+> >
+> > Which is wrong on all or at least most existing powerpc systems
+> > according to Ben.
 >
-> When sending v2, can you Cc:
->
-> Paweł Chmiel <pawel.mikolaj.chmiel@gmail.com>
-> Lihua Yao <ylhuajnu@outlook.com>
-> (or Lihua Yao <ylhuajnu@163.com> if outlook.com bounces)
-> Sergio Prado <sergio.prado@e-labworks.com>
-> Sylwester Nawrocki <s.nawrocki@samsung.com>
->
-> These are folks which to my knowledge had working S3C and S5P boards
-> so maybe they could provide testing.
+> This is probably broken on sparc(64) as well and whatever else uses
+> DT and is an intrinsicly coherent architecture (did we ever have
+> DT enabled x86s ? Wasn't OLPC such a beast ?).
 
-Ok, will do. I've uploaded the modified version based on your comments to
-the above URL for now.
+Only if those platforms use one of the 5 drivers that call this function:
 
-I'll probably give it a little more time before resending, but they
-could already
-start testing that version.
+drivers/ata/ahci_qoriq.c:       qoriq_priv->is_dmacoherent =
+of_dma_is_coherent(np);
+drivers/crypto/ccree/cc_driver.c:       new_drvdata->coherent =
+of_dma_is_coherent(np);
+drivers/iommu/arm-smmu-v3.c:    if (of_dma_is_coherent(dev->of_node))
+drivers/iommu/arm-smmu.c:       if (of_dma_is_coherent(dev->of_node))
+drivers/mmc/host/sdhci-of-esdhc.c:      if (of_dma_is_coherent(dev->of_node))
 
-Thanks a lot for the review!
+Curious that a PPC specific driver (ahci_qoriq) calls it...
 
-      Arnd
+Note that the value is also passed to arch_setup_dma_ops(), but only
+arc, arm, arm64, and mips implement arch_setup_dma_ops.
+
+> I think this should have been done the other way around and default to
+> coherent since most traditional OF platforms are coherent, and you
+> can't just require those DTs to change.
+
+You can blame me. This was really only intended for cases where
+coherency is configurable on a per peripheral basis and can't be
+determined in other ways.
+
+The simple solution here is simply to use the compatible string for
+the device to determine coherent or not.
+
+Rob
