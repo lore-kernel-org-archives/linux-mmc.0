@@ -1,8 +1,8 @@
 From: Russell King - ARM Linux admin <linux@armlinux.org.uk>
 Subject: Re: Onboard SD card doesn't work anymore after the 'mmc-v5.4-2'
  updates
-Date: Wed, 23 Oct 2019 15:12:57 +0100
-Message-ID: <20191023141257.GA25745@shell.armlinux.org.uk>
+Date: Wed, 23 Oct 2019 15:31:59 +0100
+Message-ID: <20191023143159.GB25745@shell.armlinux.org.uk>
 References: <7b549219-a2e1-08c7-331b-9c3e4fdb8a8f@xenosoft.de>
  <3aeae0d8-e9be-2585-cbbd-70263cb495f1@xenosoft.de>
  <20191015125105.GU25745@shell.armlinux.org.uk>
@@ -31,45 +31,60 @@ Cc: Ulf Hansson <ulf.hansson@linaro.org>, mad skateman <madskateman@gmail.com>, 
 List-Id: linux-mmc@vger.kernel.org
 
 On Wed, Oct 23, 2019 at 08:52:33AM -0500, Rob Herring wrote:
-> On Wed, Oct 23, 2019 at 1:41 AM Benjamin Herrenschmidt
-> <benh@kernel.crashing.org> wrote:
-> >
-> > On Wed, 2019-10-23 at 16:42 +1100, Michael Ellerman wrote:
-> > >
-> > > Right, it seems of_dma_is_coherent() has baked in the assumption that
-> > > devices are non-coherent unless explicitly marked as coherent.
-> > >
-> > > Which is wrong on all or at least most existing powerpc systems
-> > > according to Ben.
-> >
-> > This is probably broken on sparc(64) as well and whatever else uses
-> > DT and is an intrinsicly coherent architecture (did we ever have
-> > DT enabled x86s ? Wasn't OLPC such a beast ?).
+> > I think this should have been done the other way around and default to
+> > coherent since most traditional OF platforms are coherent, and you
+> > can't just require those DTs to change.
 > 
-> Only if those platforms use one of the 5 drivers that call this function:
+> You can blame me. This was really only intended for cases where
+> coherency is configurable on a per peripheral basis and can't be
+> determined in other ways.
 > 
-> drivers/ata/ahci_qoriq.c:       qoriq_priv->is_dmacoherent =
-> of_dma_is_coherent(np);
-> drivers/crypto/ccree/cc_driver.c:       new_drvdata->coherent =
-> of_dma_is_coherent(np);
-> drivers/iommu/arm-smmu-v3.c:    if (of_dma_is_coherent(dev->of_node))
-> drivers/iommu/arm-smmu.c:       if (of_dma_is_coherent(dev->of_node))
-> drivers/mmc/host/sdhci-of-esdhc.c:      if (of_dma_is_coherent(dev->of_node))
-> 
-> Curious that a PPC specific driver (ahci_qoriq) calls it...
+> The simple solution here is simply to use the compatible string for
+> the device to determine coherent or not.
 
-Maybe because it is not PPC specific:
+It really isn't that simple.
 
-arch/arm64/boot/dts/freescale/fsl-lx2160a.dtsi:
-compatible = "fsl,lx2160a-ahci";
-arch/arm64/boot/dts/freescale/fsl-lx2160a.dtsi:
-compatible = "fsl,lx2160a-ahci";
-arch/arm64/boot/dts/freescale/fsl-lx2160a.dtsi:
-compatible = "fsl,lx2160a-ahci";
-arch/arm64/boot/dts/freescale/fsl-lx2160a.dtsi:
-compatible = "fsl,lx2160a-ahci";
+There are two aspects to coherency, both of which must match:
 
-drivers/ata/ahci_qoriq.c:       { .compatible = "fsl,lx2160a-ahci", .data = (void *)AHCI_LX2160A},
+1) The configuration of the device
+2) The configuration of the kernel's DMA API
+
+(1) is controlled by the driver, which can make the decision any way
+it pleases.
+
+(2) on ARM64 is controlled depending on whether or not "dma-coherent"
+is specified in the device tree, since ARM64 can have a mixture of
+DMA coherent and non-coherent devices.
+
+A mismatch between (1) and (2) results in data corruption, potentially
+eating your filesystem.  So, it's very important that the two match.
+
+These didn't match for the LX2160A, but, due to the way CMA was working,
+we sort of got away with it, but it was very dangerous as far as data
+safety went.
+
+Then, a change to CMA happened which moved where it was located, which
+caused a regression.  Reverting the CMA changes didn't seem to be an
+option, so another solution had to be found.
+
+I started a discussion on how best to solve this:
+
+https://archive.armlinux.org.uk/lurker/thread/20190919.041320.1e53541f.en.html
+
+and the solution that the discussion came out with was the one that has
+been merged - which we now know caused a regression on PPC.
+
+Using compatible strings doesn't solve the issue: there is no way to
+tell the DMA API from the driver that the device is coherent.  The
+only way to do that is via the "dma-coherent" property in DT on ARM64.
+
+To say that this is a mess is an under-statement, but we seem to have
+ended up here because of a series of piece-meal changes that don't seem
+to have been thought through enough.
+
+So, what's the right way to solve this, and ensure that the DMA API and
+device match as far as their coherency expectations go?  Revert all the
+changes for sdhci-of-esdhc and CMA back to 5.0 or 5.1 state?
 
 -- 
 RMK's Patch system: https://www.armlinux.org.uk/developer/patches/
