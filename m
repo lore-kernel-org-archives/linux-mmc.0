@@ -1,18 +1,19 @@
-From: Michael Ellerman <mpe@ellerman.id.au>
+From: Benjamin Herrenschmidt <benh@kernel.crashing.org>
 Subject: Re: Onboard SD card doesn't work anymore after the 'mmc-v5.4-2'
  updates
-Date: Wed, 23 Oct 2019 16:42:34 +1100
-Message-ID: <87muds586t.fsf@mpe.ellerman.id.au>
+Date: Wed, 23 Oct 2019 17:41:24 +1100
+Message-ID: <31d58f086f964937b27209bc18b334d9c9791767.camel@kernel.crashing.org>
 References: <7b549219-a2e1-08c7-331b-9c3e4fdb8a8f@xenosoft.de>
  <3aeae0d8-e9be-2585-cbbd-70263cb495f1@xenosoft.de>
  <20191015125105.GU25745@shell.armlinux.org.uk>
  <5611f3bc-68aa-78ec-182a-1cb414202314@xenosoft.de>
  <20191015131750.GV25745@shell.armlinux.org.uk>
+ <87muds586t.fsf@mpe.ellerman.id.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
-In-Reply-To: <20191015131750.GV25745@shell.armlinux.org.uk>
+In-Reply-To: <87muds586t.fsf@mpe.ellerman.id.au>
 List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
  <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
 List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev/>
@@ -23,90 +24,36 @@ List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
 Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
 Sender: "Linuxppc-dev"
  <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
-To: Russell King - ARM Linux admin <linux@armlinux.org.uk>, Christian Zigotzky <chzigotzky@xenosoft.de>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Paul Mackerras <paulus@samba.org>
+To: Michael Ellerman <mpe@ellerman.id.au>, Russell King - ARM Linux admin <linux@armlinux.org.uk>, Christian Zigotzky <chzigotzky@xenosoft.de>, Paul Mackerras <paulus@samba.org>
 Cc: ulf.hansson@linaro.org, "R.T.Dickinson" <rtd2@xtra.co.nz>, linux-mmc@vger.kernel.org, Rob Herring <robh+dt@kernel.org>, "contact@a-eon.com" <contact@a-eon.com>, mad skateman <madskateman@gmail.com>, linuxppc-dev@lists.ozlabs.org, Christian Zigotzky <info@xenosoft.de>
 List-Id: linux-mmc@vger.kernel.org
 
-UnVzc2VsbCBLaW5nIC0gQVJNIExpbnV4IGFkbWluIDxsaW51eEBhcm1saW51eC5vcmcudWs+IHdy
-aXRlczoNCj4gT24gVHVlLCBPY3QgMTUsIDIwMTkgYXQgMDM6MTI6NDlQTSArMDIwMCwgQ2hyaXN0
-aWFuIFppZ290emt5IHdyb3RlOg0KPj4gSGVsbG8gUnVzc2VsbCwNCj4+IA0KPj4gWW91IGFza2Vk
-IG1lIGFib3V0ICJkbWEtY29oZXJlbnQiIGluIHRoZSBDeXJ1cyBkZXZpY2UgdHJlZS4gVW5mb3J0
-dW5hdGVseSBJDQo+PiBkb24ndCBmaW5kIHRoZSBwcm9wZXJ0eSAiZG1hLWNvaGVyZW50IiBpbiB0
-aGUgZHRiIHNvdXJjZSBmaWxlcy4NCj4+IA0KPj4gT3V0cHV0IG9mICJmZHRkdW1wIGN5cnVzX3A1
-MDIwX2V0aF9wb3dlcm9mZi5kdGIgfCBncmVwIGRtYSI6DQo+PiANCj4+IGRtYTAgPSAiL3NvY0Bm
-ZmUwMDAwMDAvZG1hQDEwMDMwMCI7DQo+PiDCoMKgwqDCoMKgwqDCoCBkbWExID0gIi9zb2NAZmZl
-MDAwMDAwL2RtYUAxMDEzMDAiOw0KPj4gwqDCoMKgwqDCoMKgwqAgZG1hQDEwMDMwMCB7DQo+PiDC
-oMKgwqDCoMKgwqDCoMKgwqDCoMKgIGNvbXBhdGlibGUgPSAiZnNsLGVsb3BsdXMtZG1hIjsNCj4+
-IMKgwqDCoMKgwqDCoMKgwqDCoMKgwqAgZG1hLWNoYW5uZWxAMCB7DQo+PiDCoMKgwqDCoMKgwqDC
-oMKgwqDCoMKgwqDCoMKgwqAgY29tcGF0aWJsZSA9ICJmc2wsZWxvcGx1cy1kbWEtY2hhbm5lbCI7
-DQo+PiDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgIGRtYS1jaGFubmVsQDgwIHsNCj4+IMKgwqDCoMKg
-wqDCoMKgwqDCoMKgwqDCoMKgwqDCoCBjb21wYXRpYmxlID0gImZzbCxlbG9wbHVzLWRtYS1jaGFu
-bmVsIjsNCj4+IMKgwqDCoMKgwqDCoMKgwqDCoMKgwqAgZG1hLWNoYW5uZWxAMTAwIHsNCj4+IMKg
-wqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoCBjb21wYXRpYmxlID0gImZzbCxlbG9wbHVzLWRt
-YS1jaGFubmVsIjsNCj4+IMKgwqDCoMKgwqDCoMKgwqDCoMKgwqAgZG1hLWNoYW5uZWxAMTgwIHsN
-Cj4+IMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoCBjb21wYXRpYmxlID0gImZzbCxlbG9w
-bHVzLWRtYS1jaGFubmVsIjsNCj4+IMKgwqDCoMKgwqDCoMKgIGRtYUAxMDEzMDAgew0KPj4gwqDC
-oMKgwqDCoMKgwqDCoMKgwqDCoCBjb21wYXRpYmxlID0gImZzbCxlbG9wbHVzLWRtYSI7DQo+PiDC
-oMKgwqDCoMKgwqDCoMKgwqDCoMKgIGRtYS1jaGFubmVsQDAgew0KPj4gwqDCoMKgwqDCoMKgwqDC
-oMKgwqDCoMKgwqDCoMKgIGNvbXBhdGlibGUgPSAiZnNsLGVsb3BsdXMtZG1hLWNoYW5uZWwiOw0K
-Pj4gwqDCoMKgwqDCoMKgwqDCoMKgwqDCoCBkbWEtY2hhbm5lbEA4MCB7DQo+PiDCoMKgwqDCoMKg
-wqDCoMKgwqDCoMKgwqDCoMKgwqAgY29tcGF0aWJsZSA9ICJmc2wsZWxvcGx1cy1kbWEtY2hhbm5l
-bCI7DQo+PiDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgIGRtYS1jaGFubmVsQDEwMCB7DQo+PiDCoMKg
-wqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqAgY29tcGF0aWJsZSA9ICJmc2wsZWxvcGx1cy1kbWEt
-Y2hhbm5lbCI7DQo+PiDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgIGRtYS1jaGFubmVsQDE4MCB7DQo+
-PiDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqAgY29tcGF0aWJsZSA9ICJmc2wsZWxvcGx1
-cy1kbWEtY2hhbm5lbCI7DQo+DQo+IEhtbSwgc28gaXQgbG9va3MgbGlrZSBQb3dlclBDIGRvZXNu
-J3QgbWFyayBkZXZpY2VzIHRoYXQgYXJlIGRtYQ0KPiBjb2hlcmVudCB3aXRoIGEgcHJvcGVydHkg
-dGhhdCBkZXNjcmliZXMgdGhlbSBhcyBzdWNoLg0KPg0KPiBJIHRoaW5rIHRoaXMgb3BlbnMgYSB3
-aWRlciBxdWVzdGlvbiAtIHdoYXQgc2hvdWxkIG9mX2RtYV9pc19jb2hlcmVudCgpDQo+IHJldHVy
-biBmb3IgUG93ZXJQQz8gIEl0IHNlZW1zIHJpZ2h0IG5vdyB0aGF0IGl0IHJldHVybnMgZmFsc2Ug
-Zm9yDQo+IGRldmljZXMgdGhhdCBhcmUgRE1BIGNvaGVyZW50LCB3aGljaCBzZWVtcyB0byBtZSB0
-byBiZSBhIHJlY2lwZSBmb3INCj4gZnV0dXJlIG1pc3Rha2VzLg0KDQpSaWdodCwgaXQgc2VlbXMg
-b2ZfZG1hX2lzX2NvaGVyZW50KCkgaGFzIGJha2VkIGluIHRoZSBhc3N1bXB0aW9uIHRoYXQNCmRl
-dmljZXMgYXJlIG5vbi1jb2hlcmVudCB1bmxlc3MgZXhwbGljaXRseSBtYXJrZWQgYXMgY29oZXJl
-bnQuDQoNCldoaWNoIGlzIHdyb25nIG9uIGFsbCBvciBhdCBsZWFzdCBtb3N0IGV4aXN0aW5nIHBv
-d2VycGMgc3lzdGVtcw0KYWNjb3JkaW5nIHRvIEJlbi4NCg0KPiBBbnkgaWRlYXMgZnJvbSB0aGUg
-UFBDIG1haW50YWluZXJzPw0KDQpGaXhpbmcgaXQgYXQgdGhlIHNvdXJjZSBzZWVtcyBsaWtlIHRo
-ZSBiZXN0IG9wdGlvbiB0byBwcmV2ZW50IGZ1dHVyZQ0KYnJlYWthZ2UuDQoNClNvIEkgZ3Vlc3Mg
-dGhhdCB3b3VsZCBtZWFuIG1ha2luZyBvZl9kbWFfaXNfY29oZXJlbnQoKSByZXR1cm4gdHJ1ZS9m
-YWxzZQ0KYmFzZWQgb24gQ09ORklHX05PVF9DT0hFUkVOVF9DQUNIRSBvbiBwb3dlcnBjLg0KDQpX
-ZSBjb3VsZCBkbyBpdCBsaWtlIGJlbG93LCB3aGljaCB3b3VsZCBzdGlsbCBhbGxvdyB0aGUgZG1h
-LWNvaGVyZW50DQpwcm9wZXJ0eSB0byB3b3JrIGlmIGl0IGV2ZXIgbWFrZXMgc2Vuc2Ugb24gYSBm
-dXR1cmUgcG93ZXJwYyBwbGF0Zm9ybS4NCg0KSSBkb24ndCByZWFsbHkga25vdyBhbnkgb2YgdGhp
-cyBlbWJlZGRlZCBzdHVmZiB3ZWxsLCBzbyBoYXBweSB0byB0YWtlDQpvdGhlciBzdWdnZXN0aW9u
-cyBvbiBob3cgdG8gaGFuZGxlIHRoaXMgbWVzcy4NCg0KY2hlZXJzDQoNCg0KZGlmZiAtLWdpdCBh
-L2FyY2gvcG93ZXJwYy9rZXJuZWwvc2V0dXAtY29tbW9uLmMgYi9hcmNoL3Bvd2VycGMva2VybmVs
-L3NldHVwLWNvbW1vbi5jDQppbmRleCAyNWFhYTM5MDMwMDAuLmI5NmM5MDEwYWNiNiAxMDA2NDQN
-Ci0tLSBhL2FyY2gvcG93ZXJwYy9rZXJuZWwvc2V0dXAtY29tbW9uLmMNCisrKyBiL2FyY2gvcG93
-ZXJwYy9rZXJuZWwvc2V0dXAtY29tbW9uLmMNCkBAIC03NjAsNiArNzYwLDIyIEBAIHN0YXRpYyBp
-bnQgX19pbml0IGNoZWNrX2NhY2hlX2NvaGVyZW5jeSh2b2lkKQ0KIGxhdGVfaW5pdGNhbGwoY2hl
-Y2tfY2FjaGVfY29oZXJlbmN5KTsNCiAjZW5kaWYgLyogQ09ORklHX0NIRUNLX0NBQ0hFX0NPSEVS
-RU5DWSAqLw0KIA0KKyNpZm5kZWYgQ09ORklHX05PVF9DT0hFUkVOVF9DQUNIRQ0KKy8qDQorICog
-Rm9yIGhpc3RvcmljYWwgcmVhc29ucyBwb3dlcnBjIGtlcm5lbHMgYXJlIGJ1aWx0IHdpdGggaGFy
-ZCB3aXJlZCBrbm93bGVkZ2Ugb2YNCisgKiB3aGV0aGVyIG9yIG5vdCBETUEgYWNjZXNzZXMgYXJl
-IGNhY2hlIGNvaGVyZW50LiBBZGRpdGlvbmFsbHkgZGV2aWNlIHRyZWVzIG9uDQorICogcG93ZXJw
-YyBkbyBub3QgdHlwaWNhbGx5IHN1cHBvcnQgdGhlIGRtYS1jb2hlcmVudCBwcm9wZXJ0eS4NCisg
-Kg0KKyAqIFNvIHdoZW4gd2Uga25vdyB0aGF0IERNQSBpcyBjb2hlcmVudCwgb3ZlcnJpZGUgYXJj
-aF9vZl9kbWFfaXNfY29oZXJlbnQoKSB0bw0KKyAqIHRlbGwgdGhlIGRyaXZlcnMvb2YgY29kZSB0
-aGF0IGFsbCBkZXZpY2VzIGFyZSBjb2hlcmVudCByZWdhcmRsZXNzIG9mIHdoZXRoZXINCisgKiB0
-aGV5IGhhdmUgYSBkbWEtY29oZXJlbnQgcHJvcGVydHkuDQorICovDQorYm9vbCBhcmNoX29mX2Rt
-YV9pc19jb2hlcmVudChzdHJ1Y3QgZGV2aWNlX25vZGUgKm5wKQ0KK3sNCisJcmV0dXJuIHRydWU7
-DQorfQ0KKyNlbmRpZg0KKw0KICNpZmRlZiBDT05GSUdfREVCVUdfRlMNCiBzdHJ1Y3QgZGVudHJ5
-ICpwb3dlcnBjX2RlYnVnZnNfcm9vdDsNCiBFWFBPUlRfU1lNQk9MKHBvd2VycGNfZGVidWdmc19y
-b290KTsNCmRpZmYgLS1naXQgYS9kcml2ZXJzL29mL2FkZHJlc3MuYyBiL2RyaXZlcnMvb2YvYWRk
-cmVzcy5jDQppbmRleCA5Nzg0MjdhOWQ1ZTYuLjNhNGIyOTQ5YTMyMiAxMDA2NDQNCi0tLSBhL2Ry
-aXZlcnMvb2YvYWRkcmVzcy5jDQorKysgYi9kcml2ZXJzL29mL2FkZHJlc3MuYw0KQEAgLTk5Myw2
-ICs5OTMsMTQgQEAgaW50IG9mX2RtYV9nZXRfcmFuZ2Uoc3RydWN0IGRldmljZV9ub2RlICpucCwg
-dTY0ICpkbWFfYWRkciwgdTY0ICpwYWRkciwgdTY0ICpzaXoNCiB9DQogRVhQT1JUX1NZTUJPTF9H
-UEwob2ZfZG1hX2dldF9yYW5nZSk7DQogDQorLyoNCisgKiBhcmNoX29mX2RtYV9pc19jb2hlcmVu
-dCAtIEFyY2ggaG9vayB0byBkZXRlcm1pbmUgaWYgZGV2aWNlIGlzIGNvaGVyZW50IGZvciBETUEN
-CisgKi8NCitib29sIF9fd2VhayBhcmNoX29mX2RtYV9pc19jb2hlcmVudChzdHJ1Y3QgZGV2aWNl
-X25vZGUgKm5wKQ0KK3sNCisJcmV0dXJuIGZhbHNlOw0KK30NCisNCiAvKioNCiAgKiBvZl9kbWFf
-aXNfY29oZXJlbnQgLSBDaGVjayBpZiBkZXZpY2UgaXMgY29oZXJlbnQNCiAgKiBAbnA6CWRldmlj
-ZSBub2RlDQpAQCAtMTAwMiw4ICsxMDEwLDEyIEBAIEVYUE9SVF9TWU1CT0xfR1BMKG9mX2RtYV9n
-ZXRfcmFuZ2UpOw0KICAqLw0KIGJvb2wgb2ZfZG1hX2lzX2NvaGVyZW50KHN0cnVjdCBkZXZpY2Vf
-bm9kZSAqbnApDQogew0KLQlzdHJ1Y3QgZGV2aWNlX25vZGUgKm5vZGUgPSBvZl9ub2RlX2dldChu
-cCk7DQorCXN0cnVjdCBkZXZpY2Vfbm9kZSAqbm9kZTsNCisNCisJaWYgKGFyY2hfb2ZfZG1hX2lz
-X2NvaGVyZW50KG5wKSkNCisJCXJldHVybiB0cnVlOw0KIA0KKwlucCA9IG9mX25vZGVfZ2V0KG5w
-KTsNCiAJd2hpbGUgKG5vZGUpIHsNCiAJCWlmIChvZl9wcm9wZXJ0eV9yZWFkX2Jvb2wobm9kZSwg
-ImRtYS1jb2hlcmVudCIpKSB7DQogCQkJb2Zfbm9kZV9wdXQobm9kZSk7DQo=
+On Wed, 2019-10-23 at 16:42 +1100, Michael Ellerman wrote:
+> 
+> Right, it seems of_dma_is_coherent() has baked in the assumption that
+> devices are non-coherent unless explicitly marked as coherent.
+> 
+> Which is wrong on all or at least most existing powerpc systems
+> according to Ben.
+
+This is probably broken on sparc(64) as well and whatever else uses
+DT and is an intrinsicly coherent architecture (did we ever have
+DT enabled x86s ? Wasn't OLPC such a beast ?).
+
+I think this should have been done the other way around and default to
+coherent since most traditional OF platforms are coherent, and you
+can't just require those DTs to change.
+
+> > Any ideas from the PPC maintainers?
+> 
+> Fixing it at the source seems like the best option to prevent future
+> breakage.
+> 
+> So I guess that would mean making of_dma_is_coherent() return true/false
+> based on CONFIG_NOT_COHERENT_CACHE on powerpc.
+> 
+> We could do it like below, which would still allow the dma-coherent
+> property to work if it ever makes sense on a future powerpc platform.
+> 
+> I don't really know any of this embedded stuff well, so happy to take
+> other suggestions on how to handle this mess.
