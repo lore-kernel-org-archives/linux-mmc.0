@@ -1,48 +1,56 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: block: remove unused variable
-Date: Wed, 23 Oct 2019 14:39:57 +0200
-Message-ID: <CAPDyKFq7_Obp2Qc2iZDC4wCokMt9-ttuZ0A8A1CYR+b4=JbqOw@mail.gmail.com>
-References: <20191022130036.23877-1-sudipm.mukherjee@gmail.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH 08/36] ARM: exynos: stop selecting PLAT_SAMSUNG
+Date: Wed, 23 Oct 2019 14:43:36 +0200
+Message-ID: <CAK8P3a2k0nZCJu-DCC7unMM_rOU7edmBOnb7dTKw_mAsi5sUuA@mail.gmail.com>
+References: <20191010202802.1132272-1-arnd@arndb.de>
+ <20191010203043.1241612-1-arnd@arndb.de>
+ <20191010203043.1241612-8-arnd@arndb.de> <20191023105717.GF10630@pi3>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20191022130036.23877-1-sudipm.mukherjee@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Sudip Mukherjee <sudipm.mukherjee@gmail.com>
-Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Chaotian Jing <chaotian.jing@mediatek.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <20191023105717.GF10630@pi3>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Krzysztof Kozlowski <krzk@kernel.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, "moderated list:ARM/SAMSUNG EXYNOS ARM ARCHITECTURES" <linux-samsung-soc@vger.kernel.org>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Linus Walleij <linus.walleij@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Kukjin Kim <kgene@kernel.org>, Olof Johansson <olof@lixom.net>, "Enrico Weigelt, metux IT consult" <info@metux.net>, Sascha Hauer <s.hauer@pengutronix.de>, Linux ARM <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, 22 Oct 2019 at 15:00, Sudip Mukherjee
-<sudipm.mukherjee@gmail.com> wrote:
+On Wed, Oct 23, 2019 at 12:57 PM Krzysztof Kozlowski <krzk@kernel.org> wrote:
+> On Thu, Oct 10, 2019 at 10:29:52PM +0200, Arnd Bergmann wrote:
+> > @@ -1022,7 +1022,7 @@ choice
+> >                 by the boot-loader before use.
+> >
+> >       config DEBUG_S3C_UART2
+> > -             depends on PLAT_SAMSUNG
+> > +             depends on PLAT_SAMSUNG || ARCH_EXYNOS
+> >               select DEBUG_EXYNOS_UART if ARCH_EXYNOS
+> >               select DEBUG_S3C24XX_UART if ARCH_S3C24XX
+> >               select DEBUG_S3C64XX_UART if ARCH_S3C64XX
+> > @@ -1034,7 +1034,7 @@ choice
+> >                 by the boot-loader before use.
+> >
+> >       config DEBUG_S3C_UART3
+> > -             depends on PLAT_SAMSUNG && (ARCH_EXYNOS || ARCH_S5PV210)
+> > +             depends on ARCH_EXYNOS || ARCH_S5PV210
 >
-> The use of 'status' was removed but the variable itself was not
-> removed and thus adding a build warning.
->
-> Fixes: 05224f7e4975 ("mmc: block: Add CMD13 polling for MMC IOCTLS with R1B response")
-> Signed-off-by: Sudip Mukherjee <sudipm.mukherjee@gmail.com>
+> You need to keep PLAT_SAMSUNG because of additional architectures, so
+> follow pattern from DEBUG_S3C_UART2.
 
-This has already been taken care of, by amending the original patch.
-Thanks anyway!
+Are you sure? I think my version is correct: for UART2, the
+"PLAT_SAMSUNG || ARCH_EXYNOS" is equivalent to "s3c24xx || s3c64xx ||
+s5pv210 || exynos", which keeps the existing behavior unchanged.
 
-Kind regards
-Uffe
+For UART3, the "PLAT_SAMSUNG && ..." is redundant, this is already
+limited to "s5pv210 || exynos", which my patch keeps. Changing it to
+"PLAT_SAMSUNG || ..." would allow selecting the symbol on s3c24xx
+and s3c64xx, which presumably is not valid.
 
-> ---
->  drivers/mmc/core/block.c | 1 -
->  1 file changed, 1 deletion(-)
->
-> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> index ee1fd7df4ec8..95b41c0891d0 100644
-> --- a/drivers/mmc/core/block.c
-> +++ b/drivers/mmc/core/block.c
-> @@ -497,7 +497,6 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
->         struct scatterlist sg;
->         int err;
->         unsigned int target_part;
-> -       u32 status = 0;
->
->         if (!card || !md || !idata)
->                 return -EINVAL;
-> --
-> 2.11.0
->
+      Arnd
