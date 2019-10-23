@@ -1,72 +1,63 @@
-From: Rob Herring <robh+dt@kernel.org>
-Subject: Re: Onboard SD card doesn't work anymore after the 'mmc-v5.4-2'
- updates
-Date: Wed, 23 Oct 2019 08:52:33 -0500
-Message-ID: <CAL_JsqJpFy-g3earNjZs7jANx4pyRd=CDvZN3emMdXL5YNkYHQ@mail.gmail.com>
-References: <7b549219-a2e1-08c7-331b-9c3e4fdb8a8f@xenosoft.de>
- <3aeae0d8-e9be-2585-cbbd-70263cb495f1@xenosoft.de>
- <20191015125105.GU25745@shell.armlinux.org.uk>
- <5611f3bc-68aa-78ec-182a-1cb414202314@xenosoft.de>
- <20191015131750.GV25745@shell.armlinux.org.uk>
- <87muds586t.fsf@mpe.ellerman.id.au>
- <31d58f086f964937b27209bc18b334d9c9791767.camel@kernel.crashing.org>
+From: Krzysztof Kozlowski <krzk@kernel.org>
+Subject: Re: [PATCH 11/36] ARM: s5pv210: split from plat-samsung
+Date: Wed, 23 Oct 2019 16:12:21 +0200
+Message-ID: <20191023141221.GA11575@pi3>
+References: <20191010202802.1132272-1-arnd@arndb.de>
+ <20191010203043.1241612-1-arnd@arndb.de>
+ <20191010203043.1241612-11-arnd@arndb.de>
+ <20191023121458.GB11048@pi3>
+ <CAK8P3a3ktdA12vpi6zrTXs7-03efk2Ke_0_mQ9X40MLNcZnEqA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
-In-Reply-To: <31d58f086f964937b27209bc18b334d9c9791767.camel@kernel.crashing.org>
-List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
- <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev/>
-List-Post: <mailto:linuxppc-dev@lists.ozlabs.org>
-List-Help: <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
- <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=subscribe>
-Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
-Sender: "Linuxppc-dev"
- <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
-To: Benjamin Herrenschmidt <benh@kernel.crashing.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, mad skateman <madskateman@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, Russell King - ARM Linux admin <linux@armlinux.org.uk>, Paul Mackerras <paulus@samba.org>, "R.T.Dickinson" <rtd2@xtra.co.nz>, Christian Zigotzky <chzigotzky@xenosoft.de>, "contact@a-eon.com" <contact@a-eon.com>, linuxppc-dev <linuxppc-dev@lists.ozlabs.org>, Christian Zigotzky <info@xenosoft.de>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Disposition: inline
+In-Reply-To: <CAK8P3a3ktdA12vpi6zrTXs7-03efk2Ke_0_mQ9X40MLNcZnEqA@mail.gmail.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Linus Walleij <linus.walleij@linaro.org>, ALSA Development Mailing List <alsa-devel@alsa-project.org>, Liam Girdwood <lgirdwood@gmail.com>, Thierry Reding <thierry.reding@gmail.com>, Sylwester Nawrocki <s.nawrocki@samsung.com>, Mauro Carvalho Chehab <mchehab+samsung@kernel.org>, "moderated list:ARM/SAMSUNG EXYNOS ARM ARCHITECTURES" <linux-samsung-soc@vger.kernel.org>, Takashi Iwai <tiwai@suse.com>, Kukjin Kim <kgene@kernel.org>, =?utf-8?B?Q2zDqW1lbnQgUMOpcm9u?= <peron.clem@gmail.com>, linux-serial@vger.kernel.org, Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>, Linux PWM List <linux-pwm@vger.kernel.org>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Sascha Hauer <s.hauer@pengutronix.de>, Jiri Slaby <jslaby@suse.com>, Mark Brown <broonie@kernel.org>, Jaroslav Kysela <perex@perex.cz>, Linux ARM <linux-arm>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, Oct 23, 2019 at 1:41 AM Benjamin Herrenschmidt
-<benh@kernel.crashing.org> wrote:
->
-> On Wed, 2019-10-23 at 16:42 +1100, Michael Ellerman wrote:
+On Wed, Oct 23, 2019 at 03:17:35PM +0200, Arnd Bergmann wrote:
+> On Wed, Oct 23, 2019 at 2:15 PM Krzysztof Kozlowski <krzk@kernel.org> wrote:
+> > On Thu, Oct 10, 2019 at 10:29:55PM +0200, Arnd Bergmann wrote:
+> > > These can be build completely independently, so split
+> > > the two Kconfig symbols.
+> > >       config DEBUG_S3C_UART0
+> > > -             depends on PLAT_SAMSUNG || ARCH_EXYNOS
+> > > +             depends on PLAT_SAMSUNG || ARCH_S5PV210 || ARCH_EXYNOS
 > >
-> > Right, it seems of_dma_is_coherent() has baked in the assumption that
-> > devices are non-coherent unless explicitly marked as coherent.
-> >
-> > Which is wrong on all or at least most existing powerpc systems
-> > according to Ben.
->
-> This is probably broken on sparc(64) as well and whatever else uses
-> DT and is an intrinsicly coherent architecture (did we ever have
-> DT enabled x86s ? Wasn't OLPC such a beast ?).
+> > How are you going to select DEBUG_S5PV210_UART now?
+> 
+> I don't see a problem here, the patch should not change the behavior at all.
+> 
+> The whole entry now looks like:
+> 
+>         config DEBUG_S3C_UART0
+>                 depends on PLAT_SAMSUNG || ARCH_S5PV210 || ARCH_EXYNOS
+>                 select DEBUG_EXYNOS_UART if ARCH_EXYNOS
+>                 select DEBUG_S3C24XX_UART if ARCH_S3C24XX
+>                 select DEBUG_S3C64XX_UART if ARCH_S3C64XX
+>                 select DEBUG_S5PV210_UART if ARCH_S5PV210
+>                 bool "Use Samsung S3C UART 0 for low-level debug"
+> 
+> so this will work as before with any of ARCH_EXYNOS, ARCH_S3C24XX,
+> ARCH_S3C64XX and ARCH_S5PV210.
+> 
+> What am I missing?
 
-Only if those platforms use one of the 5 drivers that call this function:
+Ah, everything is OK, I mixed up removed with added line so it looked
+reversed (removal of ARCH_S5PV210).
 
-drivers/ata/ahci_qoriq.c:       qoriq_priv->is_dmacoherent =
-of_dma_is_coherent(np);
-drivers/crypto/ccree/cc_driver.c:       new_drvdata->coherent =
-of_dma_is_coherent(np);
-drivers/iommu/arm-smmu-v3.c:    if (of_dma_is_coherent(dev->of_node))
-drivers/iommu/arm-smmu.c:       if (of_dma_is_coherent(dev->of_node))
-drivers/mmc/host/sdhci-of-esdhc.c:      if (of_dma_is_coherent(dev->of_node))
+Looks good.
 
-Curious that a PPC specific driver (ahci_qoriq) calls it...
-
-Note that the value is also passed to arch_setup_dma_ops(), but only
-arc, arm, arm64, and mips implement arch_setup_dma_ops.
-
-> I think this should have been done the other way around and default to
-> coherent since most traditional OF platforms are coherent, and you
-> can't just require those DTs to change.
-
-You can blame me. This was really only intended for cases where
-coherency is configurable on a per peripheral basis and can't be
-determined in other ways.
-
-The simple solution here is simply to use the compatible string for
-the device to determine coherent or not.
-
-Rob
+Best regards,
+Krzysztof
