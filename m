@@ -1,54 +1,90 @@
-From: Lihua Yao <ylhuajnu@outlook.com>
-Subject: Re: [PATCH 00/36] ARM: samsung platform cleanup
-Date: Wed, 23 Oct 2019 15:17:57 +0000
-Message-ID: <BY5PR12MB3699C846E761F257D0FB1373C46B0@BY5PR12MB3699.namprd12.prod.outlook.com>
-References: <20191010202802.1132272-1-arnd@arndb.de>
- <20191023131049.GG11048@pi3>
- <CAK8P3a1v2-+geD+JbNP-t418ZjntQNSte4rt8c7N6sJdpb3+DQ@mail.gmail.com>
+From: Wolfram Sang <wsa@the-dreams.de>
+Subject: Re: [PATCH] mmc: renesas_sdhi: add checks for pinctrl_lookup_state
+Date: Wed, 23 Oct 2019 17:33:13 +0200
+Message-ID: <20191023153313.GB5153@kunai>
+References: <20191018131338.11713-1-hslester96@gmail.com>
+ <CAPDyKFoBYchP96hv=7XfTo8CrCSD+KC0h_oFRAsOYT-Lc1SFZQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <CAK8P3a1v2-+geD+JbNP-t418ZjntQNSte4rt8c7N6sJdpb3+DQ@mail.gmail.com>
-Content-Language: en-US
-Content-ID: <DCE39A5A7726614091BE95843816F1DC@namprd12.prod.outlook.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Arnd Bergmann <arnd@arndb.de>, Krzysztof Kozlowski <krzk@kernel.org>
-Cc: Linux Fbdev development list <linux-fbdev@vger.kernel.org>, ALSA Development Mailing List <alsa-devel@alsa-project.org>, dri-devel <dri-devel@lists.freedesktop.org>, Sylwester Nawrocki <s.nawrocki@samsung.com>, "linux-stm32@st-md-mailman.stormreply.com" <linux-stm32@st-md-mailman.stormreply.com>, "linux-leds@vger.kernel.org" <linux-leds@vger.kernel.org>, "moderated
- list:ARM/SAMSUNG EXYNOS ARM ARCHITECTURES" <linux-samsung-soc@vger.kernel.org>, linux-clk <linux-clk@vger.kernel.org>, Kukjin Kim <kgene@kernel.org>, "linux-serial@vger.kernel.org" <linux-serial@vger.kernel.org>, "open list:HID
- CORE LAYER" <linux-input@vger.kernel.org>, =?utf-8?B?UGF3ZcWCIENobWllbA==?= <pawel.mikolaj.chmiel@gmail.com>, Linux PWM List <linux-pwm@vger.kernel.org>, Sergio Prado <sergio.prado@e-labworks.com>, Linux PM list <linux-pm@vger.kernel.org>, Lihua Yao <ylhuajnu@163.com>Linux ARM <linu>
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="gatW/ieO32f1wygP"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFoBYchP96hv=7XfTo8CrCSD+KC0h_oFRAsOYT-Lc1SFZQ@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Chuhong Yuan <hslester96@gmail.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-SGkgQXJuZCwgS3J6eXN6dG9mLA0KDQpPbiAyMy8xMC8yMDE5IDk6MzkgUE0sIEFybmQgQmVyZ21h
-bm4gd3JvdGU6DQo+IE9uIFdlZCwgT2N0IDIzLCAyMDE5IGF0IDM6MTEgUE0gS3J6eXN6dG9mIEtv
-emxvd3NraSA8a3J6a0BrZXJuZWwub3JnPiB3cm90ZToNCj4+IE9uIFRodSwgT2N0IDEwLCAyMDE5
-IGF0IDEwOjI4OjAyUE0gKzAyMDAsIEFybmQgQmVyZ21hbm4gd3JvdGU6DQo+Pj4gVGhlIGNvbnRl
-bnRzIGFyZSBhdmFpbGFibGUgZm9yIHRlc3RpbmcgaW4NCj4+Pg0KPj4+IGdpdDovL2tlcm5lbC5v
-cmc6L3B1Yi9zY20vbGludXgva2VybmVsL2dpdC9hcm5kL3BsYXlncm91bmQuZ2l0IHMzYy1tdWx0
-aXBsYXRmb3JtDQo+PiBXaGVuIHNlbmRpbmcgdjIsIGNhbiB5b3UgQ2M6DQo+Pg0KPj4gUGF3ZcWC
-IENobWllbCA8cGF3ZWwubWlrb2xhai5jaG1pZWxAZ21haWwuY29tPg0KPj4gTGlodWEgWWFvIDx5
-bGh1YWpudUBvdXRsb29rLmNvbT4NCj4+IChvciBMaWh1YSBZYW8gPHlsaHVham51QDE2My5jb20+
-IGlmIG91dGxvb2suY29tIGJvdW5jZXMpDQoNCllvdSBjb3VsZCByZWFjaCBtZSBieSBlLW1haWwg
-dG8gTGlodWEgWWFvIDxsaWh1YS55YW9AZ214LmNvbT4uDQoNCk5laXRoZXIgMTYzLmNvbSBub3Ig
-b3V0bG9vay5jb20gZS1tYWlsIHNlcnZlciBjb29wZXJhdGVzIHdlbGwgd2l0aA0KDQp2Z2VyLmtl
-cm5lbC5vcmcgbWFpbCBsaXN0Lg0KDQo+PiBTZXJnaW8gUHJhZG8gPHNlcmdpby5wcmFkb0BlLWxh
-YndvcmtzLmNvbT4NCj4+IFN5bHdlc3RlciBOYXdyb2NraSA8cy5uYXdyb2NraUBzYW1zdW5nLmNv
-bT4NCj4+DQo+PiBUaGVzZSBhcmUgZm9sa3Mgd2hpY2ggdG8gbXkga25vd2xlZGdlIGhhZCB3b3Jr
-aW5nIFMzQyBhbmQgUzVQIGJvYXJkcw0KPj4gc28gbWF5YmUgdGhleSBjb3VsZCBwcm92aWRlIHRl
-c3RpbmcuDQo+IE9rLCB3aWxsIGRvLiBJJ3ZlIHVwbG9hZGVkIHRoZSBtb2RpZmllZCB2ZXJzaW9u
-IGJhc2VkIG9uIHlvdXIgY29tbWVudHMgdG8NCj4gdGhlIGFib3ZlIFVSTCBmb3Igbm93Lg0KPg0K
-PiBJJ2xsIHByb2JhYmx5IGdpdmUgaXQgYSBsaXR0bGUgbW9yZSB0aW1lIGJlZm9yZSByZXNlbmRp
-bmcsIGJ1dCB0aGV5DQo+IGNvdWxkIGFscmVhZHkNCj4gc3RhcnQgdGVzdGluZyB0aGF0IHZlcnNp
-b24uDQoNCk5pY2XvvIHCoCBTYWRseSBJIGFtIG9uIHZvY2F0aW9uIGFuZCB3aWxsIHRlc3QgaXQg
-dW50aWwgTm92IDE1Lg0KDQpCZXN0IFJlZ2FyZHMNCg0KTGlodWENCg0KX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KbGludXgtYXJtLWtlcm5lbCBtYWlsaW5n
-IGxpc3QKbGludXgtYXJtLWtlcm5lbEBsaXN0cy5pbmZyYWRlYWQub3JnCmh0dHA6Ly9saXN0cy5p
-bmZyYWRlYWQub3JnL21haWxtYW4vbGlzdGluZm8vbGludXgtYXJtLWtlcm5lbAo=
+
+--gatW/ieO32f1wygP
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+On Mon, Oct 21, 2019 at 04:32:49PM +0200, Ulf Hansson wrote:
+> On Fri, 18 Oct 2019 at 15:13, Chuhong Yuan <hslester96@gmail.com> wrote:
+> >
+> > renesas_sdhi_probe misses checks for pinctrl_lookup_state and may miss
+> > failures.
+> > Add checks for them to fix the problem.
+> >
+> > Signed-off-by: Chuhong Yuan <hslester96@gmail.com>
+> > ---
+> >  drivers/mmc/host/renesas_sdhi_core.c | 5 +++++
+> >  1 file changed, 5 insertions(+)
+> >
+> > diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/re=
+nesas_sdhi_core.c
+> > index d4ada5cca2d1..dc5ad6632df3 100644
+> > --- a/drivers/mmc/host/renesas_sdhi_core.c
+> > +++ b/drivers/mmc/host/renesas_sdhi_core.c
+> > @@ -694,8 +694,13 @@ int renesas_sdhi_probe(struct platform_device *pde=
+v,
+> >         if (!IS_ERR(priv->pinctrl)) {
+> >                 priv->pins_default =3D pinctrl_lookup_state(priv->pinct=
+rl,
+> >                                                 PINCTRL_STATE_DEFAULT);
+> > +               if (IS_ERR(priv->pins_default))
+> > +                       return PTR_ERR(priv->pins_default);
+> > +
+> >                 priv->pins_uhs =3D pinctrl_lookup_state(priv->pinctrl,
+> >                                                 "state_uhs");
+> > +               if (IS_ERR(priv->pins_uhs))
+> > +                       return PTR_ERR(priv->pins_uhs);
+> >         }
+>=20
+> This looks correct to me, as I guess if there is a pinctrl specified
+> for device node of the controller, it means that it should be used!?
+>=20
+> I understand that this is only used for those variants that supports
+> UHS-I via the renesas_sdhi_start_signal_voltage_switch(). Wolfram, is
+> this fine you think?
+
+Well, I don't like to bail out because this error is not fatal for basic
+operations. How about releasing priv->pinctrl again with an additional
+warning that pinctrl settings are broken and will prevent 1.8v modes?
+
+Opinions?
+
+
+--gatW/ieO32f1wygP
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAl2wcrkACgkQFA3kzBSg
+KbYLrA//c8zF4HqJkaFNFIInZh0QWFD/4DVtK/SARs7eE/Ccf0DEE3hKk8WxvZAQ
+r21YVOhBw/dPlgog4xF0zBZZ2B4KIptDyJRZPVj/ZVoFBFrA1w+hu4HlUtiJMr79
+apZNpwlhSkxTYfO6PEo4wuFuGmoLRA6qj+PJDeFb9uAWdxMUTU26KVwa6jZBAbE6
+Hzfzvs4OXZGoawXSxfzY9IkwtHKR8CWaB8FpcdUSN88wwWVMopejAVMr2zUrOeec
+6E6/mjT29Qut+rBl0SUcZZyy/9ZKsAsrslFOU8YLAMknHAonz0NYO+6XKu26qRhH
+wHgv6/6htzpeFJh8f8wbQ4aRdeRuCJFFvcAd1bqeTrWJ5sFq1MYFMRJs38bFgs1J
+AbWD5BBSC2nIGhHGXt9dHv7hxl4SDE+JCZu+VNjbdJOYqbGlNBMGyMXfZ2ZjPNS1
+Z8cwz4l6KModx+s4sqM0BkSbn/uLzlCtmVHN7s/lLs0FMXOG4NQkKZwgowu6cKJX
+/PzXcT4N3Roswar2c5sncYHMPvTYNkknmp2T9qXQ3XELHZsb9f5xgONyzxNjwap1
+K2H1ZCuoTrJMpi7NNQwmG5NovFEcAOQ7qlRlCE2ITBniH4XFeduveigSntXnioEE
+K5RKUqi+9gOjU9+BbXxLSzo8OCrF+6o+psCNCUWdVQHbnTgtKsw=
+=S45A
+-----END PGP SIGNATURE-----
+
+--gatW/ieO32f1wygP--
