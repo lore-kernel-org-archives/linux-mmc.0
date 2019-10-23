@@ -1,96 +1,54 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 2/2] mmc: core: Re-work HW reset for SDIO cards
-Date: Wed, 23 Oct 2019 17:06:54 +0200
-Message-ID: <CAPDyKFoumdj9u1B4fQh8ws2PqvtYtVekDyq+M4nLs=hriqD-VA@mail.gmail.com>
-References: <20191017135739.1315-1-ulf.hansson@linaro.org> <20191017135739.1315-3-ulf.hansson@linaro.org>
- <CAD=FV=XsCGqLwKOicW47Yk3y3mHzU+9fR8kS7jx2pW6SzjgCbg@mail.gmail.com>
- <CAPDyKFq_Utz+ztdXTV534pY9Q9CyTSBJV_mfyPKAsHxaSyZjpA@mail.gmail.com> <CAD=FV=U7Tm0eB00Ze8PUvCvDw_nqHFL6nGO=vEP2t9d-zVveTw@mail.gmail.com>
+From: Lihua Yao <ylhuajnu@outlook.com>
+Subject: Re: [PATCH 00/36] ARM: samsung platform cleanup
+Date: Wed, 23 Oct 2019 15:17:57 +0000
+Message-ID: <BY5PR12MB3699C846E761F257D0FB1373C46B0@BY5PR12MB3699.namprd12.prod.outlook.com>
+References: <20191010202802.1132272-1-arnd@arndb.de>
+ <20191023131049.GG11048@pi3>
+ <CAK8P3a1v2-+geD+JbNP-t418ZjntQNSte4rt8c7N6sJdpb3+DQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAD=FV=U7Tm0eB00Ze8PUvCvDw_nqHFL6nGO=vEP2t9d-zVveTw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Cc: Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matthias Kaehlcke <mka-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Kalle Valo <kvalo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Wen Gong <wgong-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Erik Stromdahl <erik.stromdahl-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Eyal Reizer <eyalreizer-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-wireless <linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <CAK8P3a1v2-+geD+JbNP-t418ZjntQNSte4rt8c7N6sJdpb3+DQ@mail.gmail.com>
+Content-Language: en-US
+Content-ID: <DCE39A5A7726614091BE95843816F1DC@namprd12.prod.outlook.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Arnd Bergmann <arnd@arndb.de>, Krzysztof Kozlowski <krzk@kernel.org>
+Cc: Linux Fbdev development list <linux-fbdev@vger.kernel.org>, ALSA Development Mailing List <alsa-devel@alsa-project.org>, dri-devel <dri-devel@lists.freedesktop.org>, Sylwester Nawrocki <s.nawrocki@samsung.com>, "linux-stm32@st-md-mailman.stormreply.com" <linux-stm32@st-md-mailman.stormreply.com>, "linux-leds@vger.kernel.org" <linux-leds@vger.kernel.org>, "moderated
+ list:ARM/SAMSUNG EXYNOS ARM ARCHITECTURES" <linux-samsung-soc@vger.kernel.org>, linux-clk <linux-clk@vger.kernel.org>, Kukjin Kim <kgene@kernel.org>, "linux-serial@vger.kernel.org" <linux-serial@vger.kernel.org>, "open list:HID
+ CORE LAYER" <linux-input@vger.kernel.org>, =?utf-8?B?UGF3ZcWCIENobWllbA==?= <pawel.mikolaj.chmiel@gmail.com>, Linux PWM List <linux-pwm@vger.kernel.org>, Sergio Prado <sergio.prado@e-labworks.com>, Linux PM list <linux-pm@vger.kernel.org>, Lihua Yao <ylhuajnu@163.com>Linux ARM <linu>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, 22 Oct 2019 at 16:47, Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org> wrote:
->
-> Hi,
->
-> On Mon, Oct 21, 2019 at 11:51 PM Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> >
-> > > The problem I see here is that callers of this reset function aren't
-> > > expecting it to work this way.  Look specifically at
-> > > mwifiex_sdio_card_reset_work().  It's assuming that it needs to do
-> > > things like shutdown / reinit.  Now it's true that the old
-> > > mwifiex_sdio_card_reset_work() was pretty broken on any systems that
-> > > also had SDIO bluetooth, but presumably it worked OK on systems
-> > > without SDIO Bluetooth.  I don't think it'll work so well now.
-> >
-> > Good point!
-> >
-> > I guess I was hoping that running through ->remove() and then
-> > ->probe() for the SDIO func drivers should simply take care of
-> > whatever that may be needed. In some way this makes the driver broken
-> > already in regards to this path, but never mind.
->
-> Yeah, probably true.  I guess if anyone actually expected to use one
-> of these cards as a removable SDIO card (I have seen such dev boards
-> long ago) then it would always have been possible for someone to
-> remove the card at just the wrong time and break things.
-
-Well, this isn't solely about card removal but driver removal as well.
-And the latter can be managed from user space at any point in time.
-
->
->
-> > > Testing shows that indeed your patch breaks mwifiex reset worse than
-> > > it was before (AKA WiFi totally fails instead of it just killing
-> > > Bluetooth).
-> > >
-> > > I think it may be better to add a new API call rather than trying to
-> > > co-opt the old one.  Maybe put a WARN_ON() for the old API call to
-> > > make people move away from it, or something?
-> >
-> > Thanks again for testing and for valuable feedback! Clearly this needs
-> > a little more thinking.
-> >
-> > An additional concern I see with the "hotplug approach" implemented in
-> > $subject patch, is that it becomes unnecessary heavy when there is
-> > only one SDIO func driver bound.
-> >
-> > In one way I am tempted to try to address that situation, as it seems
-> > a bit silly to do full hotplug dance when it isn't needed.
->
-> True, though I kinda like the heavy solution here.  At least in the
-> mwifiex case this isn't a part of the normal flow.  AKA: we don't call
-> this function during normal bootup nor during any normal operations.
-> It's much more of an "oh crap, something's not working and we don't
-> know what to do" type solution.  I mean, I guess it's still not
-> uncommon that we end up in this code path due to the number of bugs in
-> Marvell firmware, but I'm just trying to say that it's an error code
-> path and not a normal one.  In my mind that means the more things we
-> can re-init the better.
-
-You have a point, but...
-
->
-> If this was, on the other hand, a reset that we were supposed to
-> always assert when doing a normal operation (like it wants us to reset
-> it when we switch modes, or something) then a lighter operation would
-> make more sense.
-
-This is indeed the tricky part, as it depends on the level of bugs,
-but also under what specific circumstances the reset is getting
-called.
-
-In the TI case (drivers/net/wireless/ti/wlcore/sdio.c) the reset is
-executed at the "power on" case, which for example is at system
-resume. And we want system resume to be as fast as possible...
-
-I am exploring a few options to deal with both cases, let's see what I
-can come up with in a day or two.
-
-Kind regards
-Uffe
+SGkgQXJuZCwgS3J6eXN6dG9mLA0KDQpPbiAyMy8xMC8yMDE5IDk6MzkgUE0sIEFybmQgQmVyZ21h
+bm4gd3JvdGU6DQo+IE9uIFdlZCwgT2N0IDIzLCAyMDE5IGF0IDM6MTEgUE0gS3J6eXN6dG9mIEtv
+emxvd3NraSA8a3J6a0BrZXJuZWwub3JnPiB3cm90ZToNCj4+IE9uIFRodSwgT2N0IDEwLCAyMDE5
+IGF0IDEwOjI4OjAyUE0gKzAyMDAsIEFybmQgQmVyZ21hbm4gd3JvdGU6DQo+Pj4gVGhlIGNvbnRl
+bnRzIGFyZSBhdmFpbGFibGUgZm9yIHRlc3RpbmcgaW4NCj4+Pg0KPj4+IGdpdDovL2tlcm5lbC5v
+cmc6L3B1Yi9zY20vbGludXgva2VybmVsL2dpdC9hcm5kL3BsYXlncm91bmQuZ2l0IHMzYy1tdWx0
+aXBsYXRmb3JtDQo+PiBXaGVuIHNlbmRpbmcgdjIsIGNhbiB5b3UgQ2M6DQo+Pg0KPj4gUGF3ZcWC
+IENobWllbCA8cGF3ZWwubWlrb2xhai5jaG1pZWxAZ21haWwuY29tPg0KPj4gTGlodWEgWWFvIDx5
+bGh1YWpudUBvdXRsb29rLmNvbT4NCj4+IChvciBMaWh1YSBZYW8gPHlsaHVham51QDE2My5jb20+
+IGlmIG91dGxvb2suY29tIGJvdW5jZXMpDQoNCllvdSBjb3VsZCByZWFjaCBtZSBieSBlLW1haWwg
+dG8gTGlodWEgWWFvIDxsaWh1YS55YW9AZ214LmNvbT4uDQoNCk5laXRoZXIgMTYzLmNvbSBub3Ig
+b3V0bG9vay5jb20gZS1tYWlsIHNlcnZlciBjb29wZXJhdGVzIHdlbGwgd2l0aA0KDQp2Z2VyLmtl
+cm5lbC5vcmcgbWFpbCBsaXN0Lg0KDQo+PiBTZXJnaW8gUHJhZG8gPHNlcmdpby5wcmFkb0BlLWxh
+YndvcmtzLmNvbT4NCj4+IFN5bHdlc3RlciBOYXdyb2NraSA8cy5uYXdyb2NraUBzYW1zdW5nLmNv
+bT4NCj4+DQo+PiBUaGVzZSBhcmUgZm9sa3Mgd2hpY2ggdG8gbXkga25vd2xlZGdlIGhhZCB3b3Jr
+aW5nIFMzQyBhbmQgUzVQIGJvYXJkcw0KPj4gc28gbWF5YmUgdGhleSBjb3VsZCBwcm92aWRlIHRl
+c3RpbmcuDQo+IE9rLCB3aWxsIGRvLiBJJ3ZlIHVwbG9hZGVkIHRoZSBtb2RpZmllZCB2ZXJzaW9u
+IGJhc2VkIG9uIHlvdXIgY29tbWVudHMgdG8NCj4gdGhlIGFib3ZlIFVSTCBmb3Igbm93Lg0KPg0K
+PiBJJ2xsIHByb2JhYmx5IGdpdmUgaXQgYSBsaXR0bGUgbW9yZSB0aW1lIGJlZm9yZSByZXNlbmRp
+bmcsIGJ1dCB0aGV5DQo+IGNvdWxkIGFscmVhZHkNCj4gc3RhcnQgdGVzdGluZyB0aGF0IHZlcnNp
+b24uDQoNCk5pY2XvvIHCoCBTYWRseSBJIGFtIG9uIHZvY2F0aW9uIGFuZCB3aWxsIHRlc3QgaXQg
+dW50aWwgTm92IDE1Lg0KDQpCZXN0IFJlZ2FyZHMNCg0KTGlodWENCg0KX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KbGludXgtYXJtLWtlcm5lbCBtYWlsaW5n
+IGxpc3QKbGludXgtYXJtLWtlcm5lbEBsaXN0cy5pbmZyYWRlYWQub3JnCmh0dHA6Ly9saXN0cy5p
+bmZyYWRlYWQub3JnL21haWxtYW4vbGlzdGluZm8vbGludXgtYXJtLWtlcm5lbAo=
