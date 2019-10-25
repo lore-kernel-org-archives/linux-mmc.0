@@ -1,50 +1,66 @@
-From: Robert Jarzmik <robert.jarzmik@free.fr>
-Subject: Re: [PATCH 00/46] ARM: pxa: towards multiplatform support
-Date: Thu, 24 Oct 2019 22:49:51 +0200
-Message-ID: <87eez1rhqo.fsf@belgarion.home>
-References: <20191018154052.1276506-1-arnd@arndb.de>
-        <87v9slg9k5.fsf@belgarion.home>
-        <CAK8P3a1JDtHsOW=iaxEycbJ4TBkR9MHUyDMeJnwxCtb=tefnBQ@mail.gmail.com>
-        <CAK8P3a0376Anmoc8VWXcEBg+z2B+1vcxJoywYYROBQNxpVmZuA@mail.gmail.com>
-        <87r239f2g8.fsf@belgarion.home>
+From: Ludovic Desroches <ludovic.desroches@microchip.com>
+Subject: [PATCH v3 1/3] dt-bindings: sdhci-of-at91: new compatible string and update properties
+Date: Fri, 25 Oct 2019 10:03:42 +0200
+Message-ID: <20191025080344.15492-1-ludovic.desroches@microchip.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <87r239f2g8.fsf@belgarion.home> (Robert Jarzmik's message of
-        "Sat, 19 Oct 2019 12:35:03 +0200")
 Sender: linux-kernel-owner@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Daniel Mack <daniel@zonque.org>, Haojian Zhuang <haojian.zhuang@gmail.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Linus Walleij <linus.walleij@linaro.org>, linux-clk <linux-clk@vger.kernel.org>, Linux Fbdev development list <linux-fbdev@vger.kernel.org>, IDE-ML <linux-ide@vger.kernel.org>, "open list:HID CORE LAYER" <linux-input@vger.kernel.org>, linux-leds@vger.kernel.org, linux-mmc <linux-mmc@vger.kernel.org>, linux-mtd <linux-mtd@lists.infradead.org>, Linux PM list <linux-pm@vger.kernel.org>, linux-rtc@vger.kernel.org, USB list <linux-usb@vger.kernel.org>, LINUXWATCHDOG <linux-watchdog@vger.kernel.org>
+To: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org
+Cc: ulf.hansson@linaro.org, nicolas.ferre@microchip.com, adrian.hunter@intel.com, linux-kernel@vger.kernel.org, robh+dt@kernel.org, mark.rutland@arm.com, claudiu.beznea@microchip.com, Eugen.Hristev@microchip.com, alexandre.belloni@bootlin.com, Ludovic Desroches <ludovic.desroches@microchip.com>, Rob Herring <robh@kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Robert Jarzmik <robert.jarzmik@free.fr> writes:
+There is a new compatible string for the SAM9X60 sdhci device. It involves
+an update of the properties about the clocks stuff.
 
->>> I've now pushed it to
->>>
->>> git://git.kernel.org:/pub/scm/linux/kernel/git/arnd/playground.git
->>> pxa-multiplatform
->>
->> Sorry for the duplication, I had some problems with email configuration
->> so my reply got rejected, let's see if it goes through this time.
-> I have it now, thanks, I'll test and review as soon as I can.
->
-> Cheers.
+Signed-off-by: Ludovic Desroches <ludovic.desroches@microchip.com>
+Reviewed-by: Rob Herring <robh@kernel.org>
+---
 
-Ok Arnd, I have a preliminary test report.
+Changes:
+- v3: rebase due to conflict with Nicolas' patch
+- v2: remove the extra example and fix node label
 
-I tested only the pxa27x (mioa701), which happens to have a lot of drivers, and
-only the platform_data flavor (ie. no device-tree test yet). Apart a panic in
-the regulator framework (which is a known issue [1]), your version seems
-equivalent so far in terms of runtime to Linux 5.4-rc3).
+ .../devicetree/bindings/mmc/sdhci-atmel.txt         | 13 ++++++++++---
+ 1 file changed, 10 insertions(+), 3 deletions(-)
 
-The sound and RTC seem broken, but not by you ...
-
-I'll continue the test onwards for pxa3xx and pxa2xx when I'll gather a bit of
-time, and try to review as well the mach-pxa part.
-
-Cheers.
-
+diff --git a/Documentation/devicetree/bindings/mmc/sdhci-atmel.txt b/Documentation/devicetree/bindings/mmc/sdhci-atmel.txt
+index 503c6dbac1b2..69edfd4d3922 100644
+--- a/Documentation/devicetree/bindings/mmc/sdhci-atmel.txt
++++ b/Documentation/devicetree/bindings/mmc/sdhci-atmel.txt
+@@ -5,11 +5,16 @@ Documentation/devicetree/bindings/mmc/mmc.txt and the properties used by the
+ sdhci-of-at91 driver.
+ 
+ Required properties:
+-- compatible:		Must be "atmel,sama5d2-sdhci".
++- compatible:		Must be "atmel,sama5d2-sdhci" or "microchip,sam9x60-sdhci".
+ - clocks:		Phandlers to the clocks.
+-- clock-names:		Must be "hclock", "multclk", "baseclk";
++- clock-names:		Must be "hclock", "multclk", "baseclk" for
++			"atmel,sama5d2-sdhci".
++			Must be "hclock", "multclk" for "microchip,sam9x60-sdhci".
+ 
+ Optional properties:
++- assigned-clocks:	The same with "multclk".
++- assigned-clock-rates	The rate of "multclk" in order to not rely on the
++			gck configuration set by previous components.
+ - microchip,sdcal-inverted: when present, polarity on the SDCAL SoC pin is
+   inverted. The default polarity for this signal is described in the datasheet.
+   For instance on SAMA5D2, the pin is usually tied to the GND with a resistor
+@@ -17,10 +22,12 @@ Optional properties:
+ 
+ Example:
+ 
+-sdmmc0: sdio-host@a0000000 {
++mmc0: sdio-host@a0000000 {
+ 	compatible = "atmel,sama5d2-sdhci";
+ 	reg = <0xa0000000 0x300>;
+ 	interrupts = <31 IRQ_TYPE_LEVEL_HIGH 0>;
+ 	clocks = <&sdmmc0_hclk>, <&sdmmc0_gclk>, <&main>;
+ 	clock-names = "hclock", "multclk", "baseclk";
++	assigned-clocks = <&sdmmc0_gclk>;
++	assigned-clock-rates = <480000000>;
+ };
 -- 
-Robert
-
-[1] https://lore.kernel.org/patchwork/patch/1130436/
+2.24.0.rc0
