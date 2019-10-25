@@ -1,39 +1,85 @@
-From: Geert Uytterhoeven <geert+renesas-gXvu3+zWzMSzQB+pC5nmwQ@public.gmane.org>
-Subject: [PATCH v2 5/7] mmc: atmel-mci: Remove superfluous cast in debugfs_create_u32() call
-Date: Fri, 25 Oct 2019 11:41:28 +0200
-Message-ID: <20191025094130.26033-6-geert+renesas@glider.be>
+From: Geert Uytterhoeven <geert+renesas@glider.be>
+Subject: [PATCH v2 1/7] debugfs: Add debugfs_create_xul() for hexadecimal unsigned long
+Date: Fri, 25 Oct 2019 11:41:24 +0200
+Message-ID: <20191025094130.26033-2-geert+renesas@glider.be>
 References: <20191025094130.26033-1-geert+renesas@glider.be>
-Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20191025094130.26033-1-geert+renesas-gXvu3+zWzMSzQB+pC5nmwQ@public.gmane.org>
-Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, Ludovic Desroches <ludovic.desroches-UWL1GkI3JZL3oGB3hsPCZA@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Nicolas Ferre <nicolas.ferre-UWL1GkI3JZL3oGB3hsPCZA@public.gmane.org>, Alexandre Belloni <alexandre.belloni-LDxbnhwyfcJBDgjK7y7TUQ@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, "David S . Miller" <davem-fT/PcQaiUtIeIZ0/mPfg9Q@public.gmane.org>, "Rafael J . Wysocki" <rafael-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Johannes Berg <johannes-cdvu00un1VgdHxzADdlk8Q@public.gmane.org>
-Cc: linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Geert Uytterhoeven <geert+renesas-gXvu3+zWzMSzQB+pC5nmwQ@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20191025094130.26033-1-geert+renesas@glider.be>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Jonathan Corbet <corbet@lwn.net>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Ludovic Desroches <ludovic.desroches@microchip.com>, Ulf Hansson <ulf.hansson@linaro.org>, Nicolas Ferre <nicolas.ferre@microchip.com>, Alexandre Belloni <alexandre.belloni@bootlin.com>, Jaehoon Chung <jh80.chung@samsung.com>, "David S . Miller" <davem@davemloft.net>, "Rafael J . Wysocki" <rafael@kernel.org>, Johannes Berg <johannes@sipsolutions.net>
+Cc: linux-doc@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, netdev@vger.kernel.org, linux-wireless@vger.kernel.org, linux-kernel@vger.kernel.org, Geert Uytterhoeven <geert+renesas@glider.be>
 List-Id: linux-mmc@vger.kernel.org
 
-"atmel_mci.state" is an enum, which is compatible with u32, so there is
-no need to cast its address, preventing further compiler checks.
+The existing debugfs_create_ulong() function supports objects of
+type "unsigned long", which are 32-bit or 64-bit depending on the
+platform, in decimal form.  To format objects in hexadecimal, various
+debugfs_create_x*() functions exist, but all of them take fixed-size
+types.
 
-Signed-off-by: Geert Uytterhoeven <geert+renesas-gXvu3+zWzMSzQB+pC5nmwQ@public.gmane.org>
-Acked-by: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Add a debugfs helper for "unsigned long" objects in hexadecimal format.
+This avoids the need for users to open-code the same, or introduce
+bugs when casting the value pointer to "u32 *" or "u64 *" to call
+debugfs_create_x{32,64}().
+
+Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
 ---
 v2:
-  - Add Acked-by.
+  - Add kerneldoc,
+  - Update Documentation/filesystems/debugfs.txt.
 ---
- drivers/mmc/host/atmel-mci.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ Documentation/filesystems/debugfs.txt |  5 ++++-
+ include/linux/debugfs.h               | 21 +++++++++++++++++++++
+ 2 files changed, 25 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-index ef2eb9e7c75a32a1..34c992d875298932 100644
---- a/drivers/mmc/host/atmel-mci.c
-+++ b/drivers/mmc/host/atmel-mci.c
-@@ -583,7 +583,7 @@ static void atmci_init_debugfs(struct atmel_mci_slot *slot)
+diff --git a/Documentation/filesystems/debugfs.txt b/Documentation/filesystems/debugfs.txt
+index 50e8f91f2421ec04..8c8e60fe8c7deb86 100644
+--- a/Documentation/filesystems/debugfs.txt
++++ b/Documentation/filesystems/debugfs.txt
+@@ -102,11 +102,14 @@ functions meant to help out in such special cases:
+ As might be expected, this function will create a debugfs file to represent
+ a variable of type size_t.
  
- 	debugfs_create_file("regs", S_IRUSR, root, host, &atmci_regs_fops);
- 	debugfs_create_file("req", S_IRUSR, root, slot, &atmci_req_fops);
--	debugfs_create_u32("state", S_IRUSR, root, (u32 *)&host->state);
-+	debugfs_create_u32("state", S_IRUSR, root, &host->state);
- 	debugfs_create_xul("pending_events", S_IRUSR, root,
- 			   &host->pending_events);
- 	debugfs_create_xul("completed_events", S_IRUSR, root,
+-Similarly, there is a helper for variables of type unsigned long:
++Similarly, there are helpers for variables of type unsigned long, in decimal
++and hexadecimal:
+ 
+     struct dentry *debugfs_create_ulong(const char *name, umode_t mode,
+ 					struct dentry *parent,
+ 					unsigned long *value);
++    void debugfs_create_xul(const char *name, umode_t mode,
++			    struct dentry *parent, unsigned long *value);
+ 
+ Boolean values can be placed in debugfs with:
+ 
+diff --git a/include/linux/debugfs.h b/include/linux/debugfs.h
+index 33690949b45d6904..af6c2e5b7d3c7afa 100644
+--- a/include/linux/debugfs.h
++++ b/include/linux/debugfs.h
+@@ -356,4 +356,25 @@ static inline ssize_t debugfs_write_file_bool(struct file *file,
+ 
+ #endif
+ 
++/**
++ * debugfs_create_xul - create a debugfs file that is used to read and write an
++ * unsigned long value, formatted in hexadecimal
++ * @name: a pointer to a string containing the name of the file to create.
++ * @mode: the permission that the file should have
++ * @parent: a pointer to the parent dentry for this file.  This should be a
++ *          directory dentry if set.  If this parameter is %NULL, then the
++ *          file will be created in the root of the debugfs filesystem.
++ * @value: a pointer to the variable that the file should read to and write
++ *         from.
++ */
++static inline void debugfs_create_xul(const char *name, umode_t mode,
++				      struct dentry *parent,
++				      unsigned long *value)
++{
++	if (sizeof(*value) == sizeof(u32))
++		debugfs_create_x32(name, mode, parent, (u32 *)value);
++	else
++		debugfs_create_x64(name, mode, parent, (u64 *)value);
++}
++
+ #endif
 -- 
 2.17.1
