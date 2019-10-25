@@ -1,50 +1,60 @@
-From: Geert Uytterhoeven <geert+renesas-gXvu3+zWzMSzQB+pC5nmwQ@public.gmane.org>
-Subject: [PATCH v2 6/7] mmc: dw_mmc: Fix debugfs on 64-bit platforms
-Date: Fri, 25 Oct 2019 11:41:29 +0200
-Message-ID: <20191025094130.26033-7-geert+renesas@glider.be>
+From: Geert Uytterhoeven <geert+renesas@glider.be>
+Subject: [PATCH v2 2/7] mac80211: Use debugfs_create_xul() helper
+Date: Fri, 25 Oct 2019 11:41:25 +0200
+Message-ID: <20191025094130.26033-3-geert+renesas@glider.be>
 References: <20191025094130.26033-1-geert+renesas@glider.be>
-Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20191025094130.26033-1-geert+renesas-gXvu3+zWzMSzQB+pC5nmwQ@public.gmane.org>
-Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, Ludovic Desroches <ludovic.desroches-UWL1GkI3JZL3oGB3hsPCZA@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Nicolas Ferre <nicolas.ferre-UWL1GkI3JZL3oGB3hsPCZA@public.gmane.org>, Alexandre Belloni <alexandre.belloni-LDxbnhwyfcJBDgjK7y7TUQ@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, "David S . Miller" <davem-fT/PcQaiUtIeIZ0/mPfg9Q@public.gmane.org>, "Rafael J . Wysocki" <rafael-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Johannes Berg <johannes-cdvu00un1VgdHxzADdlk8Q@public.gmane.org>
-Cc: linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Geert Uytterhoeven <geert+renesas-gXvu3+zWzMSzQB+pC5nmwQ@public.gmane.org>
+Return-path: <netdev-owner@vger.kernel.org>
+In-Reply-To: <20191025094130.26033-1-geert+renesas@glider.be>
+Sender: netdev-owner@vger.kernel.org
+To: Jonathan Corbet <corbet@lwn.net>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Ludovic Desroches <ludovic.desroches@microchip.com>, Ulf Hansson <ulf.hansson@linaro.org>, Nicolas Ferre <nicolas.ferre@microchip.com>, Alexandre Belloni <alexandre.belloni@bootlin.com>, Jaehoon Chung <jh80.chung@samsung.com>, "David S . Miller" <davem@davemloft.net>, "Rafael J . Wysocki" <rafael@kernel.org>, Johannes Berg <johannes@sipsolutions.net>
+Cc: linux-doc@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, netdev@vger.kernel.org, linux-wireless@vger.kernel.org, linux-kernel@vger.kernel.org, Geert Uytterhoeven <geert+renesas@glider.be>
 List-Id: linux-mmc@vger.kernel.org
 
-"dw_mci.pending_events" and "dw_mci.completed_events" are "unsigned
-long", i.e. 32-bit or 64-bit, depending on the platform.  Hence casting
-their addresses to "u32 *", and calling debugfs_create_x32() breaks
-operation on 64-bit platforms.
+Use the new debugfs_create_xul() helper instead of open-coding the same
+operation.
 
-Fix this by using the new debugfs_create_xul() helper instead.
-
-Fixes: f95f3850f7a9e1d4 ("mmc: dw_mmc: Add Synopsys DesignWare mmc host driver.")
-Signed-off-by: Geert Uytterhoeven <geert+renesas-gXvu3+zWzMSzQB+pC5nmwQ@public.gmane.org>
-Acked-by: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
 ---
 v2:
-  - Add Acked-by.
+  - No changes.
 ---
- drivers/mmc/host/dw_mmc.c | 8 ++++----
- 1 file changed, 4 insertions(+), 4 deletions(-)
+ net/mac80211/debugfs_sta.c | 17 +++--------------
+ 1 file changed, 3 insertions(+), 14 deletions(-)
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index bf0048ebbda356a7..b4c4a9cd6365f122 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -177,10 +177,10 @@ static void dw_mci_init_debugfs(struct dw_mci_slot *slot)
- 	debugfs_create_file("regs", S_IRUSR, root, host, &dw_mci_regs_fops);
- 	debugfs_create_file("req", S_IRUSR, root, slot, &dw_mci_req_fops);
- 	debugfs_create_u32("state", S_IRUSR, root, (u32 *)&host->state);
--	debugfs_create_x32("pending_events", S_IRUSR, root,
--			   (u32 *)&host->pending_events);
--	debugfs_create_x32("completed_events", S_IRUSR, root,
--			   (u32 *)&host->completed_events);
-+	debugfs_create_xul("pending_events", S_IRUSR, root,
-+			   &host->pending_events);
-+	debugfs_create_xul("completed_events", S_IRUSR, root,
-+			   &host->completed_events);
- }
- #endif /* defined(CONFIG_DEBUG_FS) */
+diff --git a/net/mac80211/debugfs_sta.c b/net/mac80211/debugfs_sta.c
+index c8ad20c28c438dab..ca34dcdac8c0bd4d 100644
+--- a/net/mac80211/debugfs_sta.c
++++ b/net/mac80211/debugfs_sta.c
+@@ -928,12 +928,7 @@ STA_OPS(he_capa);
+ 		sta->debugfs_dir, sta, &sta_ ##name## _ops);
  
+ #define DEBUGFS_ADD_COUNTER(name, field)				\
+-	if (sizeof(sta->field) == sizeof(u32))				\
+-		debugfs_create_u32(#name, 0400, sta->debugfs_dir,	\
+-			(u32 *) &sta->field);				\
+-	else								\
+-		debugfs_create_u64(#name, 0400, sta->debugfs_dir,	\
+-			(u64 *) &sta->field);
++	debugfs_create_ulong(#name, 0400, sta->debugfs_dir, &sta->field);
+ 
+ void ieee80211_sta_debugfs_add(struct sta_info *sta)
+ {
+@@ -978,14 +973,8 @@ void ieee80211_sta_debugfs_add(struct sta_info *sta)
+ 				    NL80211_EXT_FEATURE_AIRTIME_FAIRNESS))
+ 		DEBUGFS_ADD(airtime);
+ 
+-	if (sizeof(sta->driver_buffered_tids) == sizeof(u32))
+-		debugfs_create_x32("driver_buffered_tids", 0400,
+-				   sta->debugfs_dir,
+-				   (u32 *)&sta->driver_buffered_tids);
+-	else
+-		debugfs_create_x64("driver_buffered_tids", 0400,
+-				   sta->debugfs_dir,
+-				   (u64 *)&sta->driver_buffered_tids);
++	debugfs_create_xul("driver_buffered_tids", 0400, sta->debugfs_dir,
++			   &sta->driver_buffered_tids);
+ 
+ 	drv_sta_add_debugfs(local, sdata, &sta->sta, sta->debugfs_dir);
+ }
 -- 
 2.17.1
