@@ -1,51 +1,92 @@
-From: Christoph Hellwig <hch@infradead.org>
-Subject: Re: Onboard SD card doesn't work anymore after the 'mmc-v5.4-2'
- updates
-Date: Fri, 25 Oct 2019 23:39:18 -0700
-Message-ID: <20191026063918.GA24015@infradead.org>
-References: <7b549219-a2e1-08c7-331b-9c3e4fdb8a8f@xenosoft.de>
- <3aeae0d8-e9be-2585-cbbd-70263cb495f1@xenosoft.de>
- <20191015125105.GU25745@shell.armlinux.org.uk>
- <5611f3bc-68aa-78ec-182a-1cb414202314@xenosoft.de>
- <20191015131750.GV25745@shell.armlinux.org.uk>
- <87muds586t.fsf@mpe.ellerman.id.au>
- <31d58f086f964937b27209bc18b334d9c9791767.camel@kernel.crashing.org>
- <CAL_JsqJpFy-g3earNjZs7jANx4pyRd=CDvZN3emMdXL5YNkYHQ@mail.gmail.com>
- <20191023143159.GB25745@shell.armlinux.org.uk>
- <CAL_JsqLZV1sXc053QMLcV-dV1BbGcRtX3eu1zbtNA_N3hzQE4g@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
-Content-Disposition: inline
-In-Reply-To: <CAL_JsqLZV1sXc053QMLcV-dV1BbGcRtX3eu1zbtNA_N3hzQE4g@mail.gmail.com>
-List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
- <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev/>
-List-Post: <mailto:linuxppc-dev@lists.ozlabs.org>
-List-Help: <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
- <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=subscribe>
-Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
-Sender: "Linuxppc-dev"
- <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
-To: Rob Herring <robh+dt@kernel.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, mad skateman <madskateman@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, Russell King - ARM Linux admin <linux@armlinux.org.uk>, Paul Mackerras <paulus@samba.org>, "R.T.Dickinson" <rtd2@xtra.co.nz>, Christian Zigotzky <chzigotzky@xenosoft.de>, "contact@a-eon.com" <contact@a-eon.com>, linuxppc-dev <linuxppc-dev@lists.ozlabs.org>, Christian Zigotzky <info@xenosoft.de>
+From: "H. Nikolaus Schaller" <hns@goldelico.com>
+Subject: Re: [PATCH v2 01/11] Documentation: dt: wireless: update wl1251 for
+ sdio
+Date: Sat, 26 Oct 2019 10:24:05 +0200
+Message-ID: <3A15C879-3A17-4FFC-B41E-0B98B63E8F7C@goldelico.com>
+References: <cover.1571510481.git.hns@goldelico.com>
+ <741828f69eca2a9c9a0a7e80973c91f50cc71f9b.1571510481.git.hns@goldelico.com>
+ <20191025211338.GA20249@bogus>
+Mime-Version: 1.0 (Mac OS X Mail 9.3 \(3124\))
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <20191025211338.GA20249@bogus>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Rob Herring <robh@kernel.org>
+Cc: Mark Rutland <mark.rutland@arm.com>, Ulf Hansson <ulf.hansson@linaro.org>, devicetree@vger.kernel.org, Tony Lindgren <tony@atomide.com>, linux-wireless@vger.kernel.org, Kefeng Wang <wangkefeng.wang@huawei.com>, Bjorn Helgaas <bhelgaas@google.com>, netdev@vger.kernel.org, linux-omap@vger.kernel.org, "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>, Russell King <linux@armlinux.org.uk>, Mike Rapoport <rppt@linux.ibm.com>, Yangtao Li <tiny.windzz@gmail.com>, Kalle Valo <kvalo@codeaurora.org>, Petr Mladek <pmladek@suse.com>, =?utf-8?Q?Beno=C3=AEt_Cousson?= <bcousson@baylibre.com>, Alexios Zavras <alexios.zavras@intel.com>, John Stultz <john.stultz@linaro.org>, David Sterba <dsterba@suse.com>, Thomas Gleixner <tglx@linutronix.de>, letux-kernel@openphoenux.org, Allison Randal <allison@lohutok.net>, linux-arm-kernel@lists.infradead.org, Greg Kroah-Hartman <gregkh@linuxfoundatio>
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, Oct 25, 2019 at 05:28:45PM -0500, Rob Herring wrote:
-> This doesn't work?:
-> 
->         if (IS_ENABLED(CONFIG_PPC) || of_dma_is_coherent(dev->of_node))
->                 value |= ESDHC_DMA_SNOOP;
->         else
->                 value &= ~ESDHC_DMA_SNOOP;
-> 
-> While I said use the compatibles, using the kconfig symbol is easier
-> than sorting out which compatibles are PPC SoCs. Though if that's
-> already done elsewhere in the driver, you could set a flag and use
-> that here. I'd be surprised if this was the only difference between
-> ARM and PPC SoCs for this block.
 
-I think the right thing is a Kconfig variable that the architectures
-selects which says if OF is by default coherent or incoherent, and then
-use that in of_dma_is_coherent.
+> Am 25.10.2019 um 23:13 schrieb Rob Herring <robh@kernel.org>:
+> 
+> On Sat, Oct 19, 2019 at 08:41:16PM +0200, H. Nikolaus Schaller wrote:
+>> The standard method for sdio devices connected to
+>> an sdio interface is to define them as a child node
+>> like we can see with wlcore.
+>> 
+>> Signed-off-by: H. Nikolaus Schaller <hns@goldelico.com>
+>> Acked-by: Kalle Valo <kvalo@codeaurora.org>
+>> ---
+>> .../bindings/net/wireless/ti,wl1251.txt       | 26 +++++++++++++++++++
+>> 1 file changed, 26 insertions(+)
+>> 
+>> diff --git a/Documentation/devicetree/bindings/net/wireless/ti,wl1251.txt b/Documentation/devicetree/bindings/net/wireless/ti,wl1251.txt
+>> index bb2fcde6f7ff..88612ff29f2d 100644
+>> --- a/Documentation/devicetree/bindings/net/wireless/ti,wl1251.txt
+>> +++ b/Documentation/devicetree/bindings/net/wireless/ti,wl1251.txt
+>> @@ -35,3 +35,29 @@ Examples:
+>> 		ti,power-gpio = <&gpio3 23 GPIO_ACTIVE_HIGH>; /* 87 */
+>> 	};
+>> };
+>> +
+>> +&mmc3 {
+>> +	vmmc-supply = <&wlan_en>;
+>> +
+>> +	bus-width = <4>;
+>> +	non-removable;
+>> +	ti,non-removable;
+>> +	cap-power-off-card;
+>> +
+>> +	pinctrl-names = "default";
+>> +	pinctrl-0 = <&mmc3_pins>;
+> 
+> None of the above are really relevant to this binding.
+
+Ok, but how and where do we document that they are needed to make both ends of the interface work together?
+
+> 
+>> +
+>> +	#address-cells = <1>;
+>> +	#size-cells = <0>;
+>> +
+>> +	wlan: wl1251@1 {
+> 
+> wifi@1
+
+Ok.
+
+> 
+>> +		compatible = "ti,wl1251";
+>> +
+>> +		reg = <1>;
+>> +
+>> +		interrupt-parent = <&gpio1>;
+>> +		interrupts = <21 IRQ_TYPE_LEVEL_HIGH>;	/* GPIO_21 */
+>> +
+>> +		ti,wl1251-has-eeprom;
+>> +	};
+>> +};
+>> -- 
+>> 2.19.1
+>> 
+
+BR and thanks,
+Nikolaus
