@@ -1,92 +1,82 @@
-From: "H. Nikolaus Schaller" <hns@goldelico.com>
-Subject: Re: [PATCH v2 01/11] Documentation: dt: wireless: update wl1251 for
- sdio
-Date: Sat, 26 Oct 2019 10:24:05 +0200
-Message-ID: <3A15C879-3A17-4FFC-B41E-0B98B63E8F7C@goldelico.com>
-References: <cover.1571510481.git.hns@goldelico.com>
- <741828f69eca2a9c9a0a7e80973c91f50cc71f9b.1571510481.git.hns@goldelico.com>
- <20191025211338.GA20249@bogus>
-Mime-Version: 1.0 (Mac OS X Mail 9.3 \(3124\))
-Content-Type: text/plain; charset="us-ascii"
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH v4 2/3] mmc: host: sdhci: Add request_done ops for struct
+ sdhci_ops
+Date: Mon, 28 Oct 2019 10:19:02 +0200
+Message-ID: <50696230-75f4-3de4-7424-c33d531ee159@intel.com>
+References: <cover.1571722391.git.baolin.wang@linaro.org>
+ <487c2e45810c6dc6485638474136e375cb567807.1571722391.git.baolin.wang@linaro.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20191025211338.GA20249@bogus>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Rob Herring <robh@kernel.org>
-Cc: Mark Rutland <mark.rutland@arm.com>, Ulf Hansson <ulf.hansson@linaro.org>, devicetree@vger.kernel.org, Tony Lindgren <tony@atomide.com>, linux-wireless@vger.kernel.org, Kefeng Wang <wangkefeng.wang@huawei.com>, Bjorn Helgaas <bhelgaas@google.com>, netdev@vger.kernel.org, linux-omap@vger.kernel.org, "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>, Russell King <linux@armlinux.org.uk>, Mike Rapoport <rppt@linux.ibm.com>, Yangtao Li <tiny.windzz@gmail.com>, Kalle Valo <kvalo@codeaurora.org>, Petr Mladek <pmladek@suse.com>, =?utf-8?Q?Beno=C3=AEt_Cousson?= <bcousson@baylibre.com>, Alexios Zavras <alexios.zavras@intel.com>, John Stultz <john.stultz@linaro.org>, David Sterba <dsterba@suse.com>, Thomas Gleixner <tglx@linutronix.de>, letux-kernel@openphoenux.org, Allison Randal <allison@lohutok.net>, linux-arm-kernel@lists.infradead.org, Greg Kroah-Hartman <gregkh@linuxfoundatio>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <487c2e45810c6dc6485638474136e375cb567807.1571722391.git.baolin.wang@linaro.org>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: Baolin Wang <baolin.wang@linaro.org>, ulf.hansson@linaro.org, asutoshd@codeaurora.org
+Cc: orsonzhai@gmail.com, zhang.lyra@gmail.com, arnd@arndb.de, linus.walleij@linaro.org, vincent.guittot@linaro.org, baolin.wang7@gmail.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-
-> Am 25.10.2019 um 23:13 schrieb Rob Herring <robh@kernel.org>:
+On 22/10/19 8:58 AM, Baolin Wang wrote:
+> Add request_done ops for struct sdhci_ops as a preparation in case some
+> host controllers have different method to complete one request, such as
+> supporting request completion of MMC software queue.
 > 
-> On Sat, Oct 19, 2019 at 08:41:16PM +0200, H. Nikolaus Schaller wrote:
->> The standard method for sdio devices connected to
->> an sdio interface is to define them as a child node
->> like we can see with wlcore.
->> 
->> Signed-off-by: H. Nikolaus Schaller <hns@goldelico.com>
->> Acked-by: Kalle Valo <kvalo@codeaurora.org>
->> ---
->> .../bindings/net/wireless/ti,wl1251.txt       | 26 +++++++++++++++++++
->> 1 file changed, 26 insertions(+)
->> 
->> diff --git a/Documentation/devicetree/bindings/net/wireless/ti,wl1251.txt b/Documentation/devicetree/bindings/net/wireless/ti,wl1251.txt
->> index bb2fcde6f7ff..88612ff29f2d 100644
->> --- a/Documentation/devicetree/bindings/net/wireless/ti,wl1251.txt
->> +++ b/Documentation/devicetree/bindings/net/wireless/ti,wl1251.txt
->> @@ -35,3 +35,29 @@ Examples:
->> 		ti,power-gpio = <&gpio3 23 GPIO_ACTIVE_HIGH>; /* 87 */
->> 	};
->> };
->> +
->> +&mmc3 {
->> +	vmmc-supply = <&wlan_en>;
->> +
->> +	bus-width = <4>;
->> +	non-removable;
->> +	ti,non-removable;
->> +	cap-power-off-card;
->> +
->> +	pinctrl-names = "default";
->> +	pinctrl-0 = <&mmc3_pins>;
+> Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
+> ---
+>  drivers/mmc/host/sdhci.c |   12 ++++++++++--
+>  drivers/mmc/host/sdhci.h |    2 ++
+>  2 files changed, 12 insertions(+), 2 deletions(-)
 > 
-> None of the above are really relevant to this binding.
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index b056400..850241f 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -2729,7 +2729,10 @@ static bool sdhci_request_done(struct sdhci_host *host)
+>  
+>  	spin_unlock_irqrestore(&host->lock, flags);
+>  
+> -	mmc_request_done(host->mmc, mrq);
+> +	if (host->ops->request_done)
+> +		host->ops->request_done(host, mrq);
 
-Ok, but how and where do we document that they are needed to make both ends of the interface work together?
+For hsq, couldn't this result in sdhci_request() being called interrupt
+context here.
 
+To prevent that you would need to add a condition to sdhci_defer_done() so
+it always defers when using hsq.
+
+That would be a separate patch.
+
+> +	else
+> +		mmc_request_done(host->mmc, mrq);
+>  
+>  	return false;
+>  }
+> @@ -3157,7 +3160,12 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
+>  
+>  	/* Process mrqs ready for immediate completion */
+>  	for (i = 0; i < SDHCI_MAX_MRQS; i++) {
+> -		if (mrqs_done[i])
+> +		if (!mrqs_done[i])
+> +			continue;
+> +
+> +		if (host->ops->request_done)
+> +			host->ops->request_done(host, mrqs_done[i]);
+> +		else
+>  			mmc_request_done(host->mmc, mrqs_done[i]);
+>  	}
+>  
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index 0ed3e0e..d89cdb9 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -644,6 +644,8 @@ struct sdhci_ops {
+>  	void	(*voltage_switch)(struct sdhci_host *host);
+>  	void	(*adma_write_desc)(struct sdhci_host *host, void **desc,
+>  				   dma_addr_t addr, int len, unsigned int cmd);
+> +	void	(*request_done)(struct sdhci_host *host,
+> +				struct mmc_request *mrq);
+>  };
+>  
+>  #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
 > 
->> +
->> +	#address-cells = <1>;
->> +	#size-cells = <0>;
->> +
->> +	wlan: wl1251@1 {
-> 
-> wifi@1
-
-Ok.
-
-> 
->> +		compatible = "ti,wl1251";
->> +
->> +		reg = <1>;
->> +
->> +		interrupt-parent = <&gpio1>;
->> +		interrupts = <21 IRQ_TYPE_LEVEL_HIGH>;	/* GPIO_21 */
->> +
->> +		ti,wl1251-has-eeprom;
->> +	};
->> +};
->> -- 
->> 2.19.1
->> 
-
-BR and thanks,
-Nikolaus
