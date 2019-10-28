@@ -1,81 +1,53 @@
-From: Baolin Wang <baolin.wang@linaro.org>
-Subject: Re: [PATCH v4 2/3] mmc: host: sdhci: Add request_done ops for struct sdhci_ops
-Date: Mon, 28 Oct 2019 16:38:30 +0800
-Message-ID: <CAMz4kuKfqMoM3WdaG8o0JHpXeUZHYpLt4P15BsOriU2h2OV--A@mail.gmail.com>
-References: <cover.1571722391.git.baolin.wang@linaro.org> <487c2e45810c6dc6485638474136e375cb567807.1571722391.git.baolin.wang@linaro.org>
- <50696230-75f4-3de4-7424-c33d531ee159@intel.com> <CAMz4kuJAwV7f=pjUqs1nO3+L5NbcwCQrCi-HGUPPXgp7rWUs=g@mail.gmail.com>
+From: Benjamin Herrenschmidt <benh@kernel.crashing.org>
+Subject: Re: Onboard SD card doesn't work anymore after the 'mmc-v5.4-2'
+ updates
+Date: Mon, 28 Oct 2019 19:45:34 +1100
+Message-ID: <47e67f44f5e955108759fe32400d2622c4a5ba3f.camel@kernel.crashing.org>
+References: <7b549219-a2e1-08c7-331b-9c3e4fdb8a8f@xenosoft.de>
+ <3aeae0d8-e9be-2585-cbbd-70263cb495f1@xenosoft.de>
+ <20191015125105.GU25745@shell.armlinux.org.uk>
+ <5611f3bc-68aa-78ec-182a-1cb414202314@xenosoft.de>
+ <20191015131750.GV25745@shell.armlinux.org.uk>
+ <87muds586t.fsf@mpe.ellerman.id.au>
+ <31d58f086f964937b27209bc18b334d9c9791767.camel@kernel.crashing.org>
+ <CAL_JsqJpFy-g3earNjZs7jANx4pyRd=CDvZN3emMdXL5YNkYHQ@mail.gmail.com>
+ <20191023143159.GB25745@shell.armlinux.org.uk>
+ <CAL_JsqLZV1sXc053QMLcV-dV1BbGcRtX3eu1zbtNA_N3hzQE4g@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAMz4kuJAwV7f=pjUqs1nO3+L5NbcwCQrCi-HGUPPXgp7rWUs=g@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, asutoshd@codeaurora.org, Orson Zhai <orsonzhai@gmail.com>, Chunyan Zhang <zhang.lyra@gmail.com>, Arnd Bergmann <arnd@arndb.de>, Linus Walleij <linus.walleij@linaro.org>, Vincent Guittot <vincent.guittot@linaro.org>, baolin.wang7@gmail.com, linux-mmc <linux-mmc@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>
+Content-Transfer-Encoding: 7bit
+Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
+In-Reply-To: <CAL_JsqLZV1sXc053QMLcV-dV1BbGcRtX3eu1zbtNA_N3hzQE4g@mail.gmail.com>
+List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
+ <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev/>
+List-Post: <mailto:linuxppc-dev@lists.ozlabs.org>
+List-Help: <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
+ <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=subscribe>
+Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
+Sender: "Linuxppc-dev"
+ <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
+To: Rob Herring <robh+dt@kernel.org>, Russell King - ARM Linux admin <linux@armlinux.org.uk>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, mad skateman <madskateman@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, Paul Mackerras <paulus@samba.org>, "R.T.Dickinson" <rtd2@xtra.co.nz>, Christian Zigotzky <chzigotzky@xenosoft.de>, "contact@a-eon.com" <contact@a-eon.com>, linuxppc-dev <linuxppc-dev@lists.ozlabs.org>, Christian Zigotzky <info@xenosoft.de>
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, 28 Oct 2019 at 16:27, Baolin Wang <baolin.wang@linaro.org> wrote:
->
-> Hi Adrian,
->
-> On Mon, 28 Oct 2019 at 16:20, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> >
-> > On 22/10/19 8:58 AM, Baolin Wang wrote:
-> > > Add request_done ops for struct sdhci_ops as a preparation in case some
-> > > host controllers have different method to complete one request, such as
-> > > supporting request completion of MMC software queue.
-> > >
-> > > Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
-> > > ---
-> > >  drivers/mmc/host/sdhci.c |   12 ++++++++++--
-> > >  drivers/mmc/host/sdhci.h |    2 ++
-> > >  2 files changed, 12 insertions(+), 2 deletions(-)
-> > >
-> > > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> > > index b056400..850241f 100644
-> > > --- a/drivers/mmc/host/sdhci.c
-> > > +++ b/drivers/mmc/host/sdhci.c
-> > > @@ -2729,7 +2729,10 @@ static bool sdhci_request_done(struct sdhci_host *host)
-> > >
-> > >       spin_unlock_irqrestore(&host->lock, flags);
-> > >
-> > > -     mmc_request_done(host->mmc, mrq);
-> > > +     if (host->ops->request_done)
-> > > +             host->ops->request_done(host, mrq);
-> >
-> > For hsq, couldn't this result in sdhci_request() being called interrupt
-> > context here.
->
-> Right, now it did not support.
->
-> >
-> > To prevent that you would need to add a condition to sdhci_defer_done() so
-> > it always defers when using hsq.
->
-> Yes, but now the condition can be matched in sdhci_defer_done()  when
-> using hsq. So no need to worry that the sdhci_request() will be called
-> in interrupt
-> context in this patch set. Thanks.
->
+On Fri, 2019-10-25 at 17:28 -0500, Rob Herring wrote:
+> This doesn't work?:
+> 
+>         if (IS_ENABLED(CONFIG_PPC) || of_dma_is_coherent(dev-
+> >of_node))
+>                 value |= ESDHC_DMA_SNOOP;
+>         else
+>                 value &= ~ESDHC_DMA_SNOOP;
 
-Wait, sorry, I realized some drivers may not select the
-SDHCI_REQ_USE_DMA flag in sdhci_defer_done()  when using hsq. OK, So
-how about below changes?
+CONFIG_PPC is restrictive. What about sparc64 ? There could be others
+.. .we can't suddenly requests people to add new properties for what
+was implied behaviours before hand, esp since it's not in the base 1275
+spec, no ?
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 850241f..6c7a396 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -3035,7 +3035,7 @@ static inline bool sdhci_defer_done(struct
-sdhci_host *host,
- {
-        struct mmc_data *data = mrq->data;
+I would suggest of_dma_is_coherent is *true* by default unless
+overriden to do something else.
 
--       return host->pending_reset ||
-+       return IS_ENABLED(CONFIG_MMC_HSQ) || host->pending_reset ||
-               ((host->flags & SDHCI_REQ_USE_DMA) && data &&
-                data->host_cookie == COOKIE_MAPPED);
- }
-
--- 
-Baolin Wang
-Best Regards
+Cheers,
+Ben.
