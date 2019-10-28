@@ -1,61 +1,227 @@
-From: Stephen Boyd <sboyd@kernel.org>
-Subject: Re: [PATCH 05/46] ARM: pxa: split up mach/hardware.h
-Date: Mon, 28 Oct 2019 02:18:24 -0700
-Message-ID: <20191028091825.A1F3B20717@mail.kernel.org>
-References: <20191018154052.1276506-1-arnd@arndb.de>
- <20191018154201.1276638-5-arnd@arndb.de>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH v3 2/3] mmc: sdhci-of-at91: rework clocks management to
+ support SAM9x60 device
+Date: Mon, 28 Oct 2019 13:30:01 +0200
+Message-ID: <1351fc1a-3d07-4a56-2622-07ea92727c4f@intel.com>
+References: <20191025080344.15492-1-ludovic.desroches@microchip.com>
+ <20191025080344.15492-2-ludovic.desroches@microchip.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <dri-devel-bounces@lists.freedesktop.org>
-In-Reply-To: <20191018154201.1276638-5-arnd@arndb.de>
-List-Unsubscribe: <https://lists.freedesktop.org/mailman/options/dri-devel>,
- <mailto:dri-devel-request@lists.freedesktop.org?subject=unsubscribe>
-List-Archive: <https://lists.freedesktop.org/archives/dri-devel>
-List-Post: <mailto:dri-devel@lists.freedesktop.org>
-List-Help: <mailto:dri-devel-request@lists.freedesktop.org?subject=help>
-List-Subscribe: <https://lists.freedesktop.org/mailman/listinfo/dri-devel>,
- <mailto:dri-devel-request@lists.freedesktop.org?subject=subscribe>
-Errors-To: dri-devel-bounces@lists.freedesktop.org
-Sender: "dri-devel" <dri-devel-bounces@lists.freedesktop.org>
-To: Daniel Mack <daniel@zonque.org>, Haojian Zhuang <haojian.zhuang@gmail.com>, Robert Jarzmik <robert.jarzmik@free.fr>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-usb@vger.kernel.org, Viresh Kumar <viresh.kumar@linaro.org>, Michael Turquette <mturquette@baylibre.com>, Alexandre Belloni <alexandre.belloni@bootlin.com>, Dominik Brodowski <linux@dominikbrodowski.net>, linux-mtd@lists.infradead.org, Pavel Machek <pavel@ucw.cz>, linux-clk@vger.kernel.org, linux-leds@vger.kernel.org, linux-rtc@vger.kernel.org, linux-input@vger.kernel.org, Guenter Roeck <linux@roeck-us.net>, linux-watchdog@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>, linux-pm@vger.kernel.org, Mark Brown <broonie@kernel.org>, Jacek Anaszewski <jacek.anaszewski@gmail.com>, linux-fbdev@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, dri-devel@lists.freedesktop.org, Dmitry Torokhov <dmitry.torokhov@gmail.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, alsa-
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20191025080344.15492-2-ludovic.desroches@microchip.com>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ludovic Desroches <ludovic.desroches@microchip.com>, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org
+Cc: ulf.hansson@linaro.org, nicolas.ferre@microchip.com, linux-kernel@vger.kernel.org, robh+dt@kernel.org, mark.rutland@arm.com, claudiu.beznea@microchip.com, Eugen.Hristev@microchip.com, alexandre.belloni@bootlin.com
 List-Id: linux-mmc@vger.kernel.org
 
-UXVvdGluZyBBcm5kIEJlcmdtYW5uICgyMDE5LTEwLTE4IDA4OjQxOjIwKQo+IFRoZSBtYWNoL2hh
-cmR3YXJlLmggaXMgaW5jbHVkZWQgaW4gbG90cyBvZiBwbGFjZXMsIGFuZCBpdCBwcm92aWRlcwo+
-IHRocmVlIGRpZmZlcmVudCB0aGluZ3Mgb24gcHhhOgo+IAo+IC0gdGhlIGNwdV9pc19weGEqIG1h
-Y3Jvcwo+IC0gYW4gaW5kaXJlY3QgaW5jbHVzaW9uIG9mIG1hY2gvYWRkci1tYXAuaAo+IC0gdGhl
-IF9fUkVHKCkgYW5kIGlvX3B2MigpIGhlbHBlciBtYWNyb3MKPiAKPiBTcGxpdCBpdCB1cCBpbnRv
-IHNlcGFyYXRlIDxsaW51eC9zb2MvcHhhL2NwdS5oPiBhbmQgbWFjaC9weGEtcmVncy5oCj4gaGVh
-ZGVycywgdGhlbiBjaGFuZ2UgYWxsIHRoZSBmaWxlcyB0aGF0IHVzZSBtYWNoL2hhcmR3YXJlLmgg
-dG8KPiBpbmNsdWRlIHRoZSBleGFjdCBzZXQgb2YgdGhvc2UgdGhyZWUgaGVhZGVycyB0aGF0IHRo
-ZXkgYWN0dWFsbHkKPiBuZWVkLCBhbGxvd2luZyBmb3IgZnVydGhlciBtb3JlIHRhcmdldGVkIGNs
-ZWFudXAuCj4gCj4gbGludXgvc29jL3B4YS9jcHUuaCBjYW4gcmVtYWluIHBlcm1hbmVudGx5IGV4
-cG9ydGVkIGFuZCBpcyBub3cgaW4KPiBhIGdsb2JhbCBsb2NhdGlvbiBhbG9uZyB3aXRoIHNpbWls
-YXIgaGVhZGVycy4gcHhhLXJlZ3MuaCBhbmQKPiBhZGRyLW1hcC5oIGFyZSBvbmx5IHVzZWQgaW4g
-YSB2ZXJ5IHNtYWxsIG51bWJlciBvZiBkcml2ZXJzIG5vdwo+IGFuZCBjYW4gYmUgbW92ZWQgdG8g
-YXJjaC9hcm0vbWFjaC1weGEvIGRpcmVjdGx5IHdoZW4gdGhvc2UgZHJpdmVycwo+IGFyZSB0byBw
-YXNzIHRoZSBuZWNlc3NhcnkgZGF0YSBhcyByZXNvdXJjZXMuCj4gCj4gQ2M6IE1pY2hhZWwgVHVy
-cXVldHRlIDxtdHVycXVldHRlQGJheWxpYnJlLmNvbT4KPiBDYzogU3RlcGhlbiBCb3lkIDxzYm95
-ZEBrZXJuZWwub3JnPgo+IENjOiBWaXJlc2ggS3VtYXIgPHZpcmVzaC5rdW1hckBsaW5hcm8ub3Jn
-Pgo+IENjOiBEbWl0cnkgVG9yb2tob3YgPGRtaXRyeS50b3Jva2hvdkBnbWFpbC5jb20+Cj4gQ2M6
-IEphY2VrIEFuYXN6ZXdza2kgPGphY2VrLmFuYXN6ZXdza2lAZ21haWwuY29tPgo+IENjOiBQYXZl
-bCBNYWNoZWsgPHBhdmVsQHVjdy5jej4KPiBDYzogVWxmIEhhbnNzb24gPHVsZi5oYW5zc29uQGxp
-bmFyby5vcmc+Cj4gQ2M6IERvbWluaWsgQnJvZG93c2tpIDxsaW51eEBkb21pbmlrYnJvZG93c2tp
-Lm5ldD4KPiBDYzogQWxleGFuZHJlIEJlbGxvbmkgPGFsZXhhbmRyZS5iZWxsb25pQGJvb3RsaW4u
-Y29tPgo+IENjOiBHcmVnIEtyb2FoLUhhcnRtYW4gPGdyZWdraEBsaW51eGZvdW5kYXRpb24ub3Jn
-Pgo+IENjOiBHdWVudGVyIFJvZWNrIDxsaW51eEByb2Vjay11cy5uZXQ+Cj4gQ2M6IE1hcmsgQnJv
-d24gPGJyb29uaWVAa2VybmVsLm9yZz4KPiBDYzogbGludXgtY2xrQHZnZXIua2VybmVsLm9yZwo+
-IENjOiBsaW51eC1wbUB2Z2VyLmtlcm5lbC5vcmcKPiBDYzogbGludXgtaW5wdXRAdmdlci5rZXJu
-ZWwub3JnCj4gQ2M6IGxpbnV4LWxlZHNAdmdlci5rZXJuZWwub3JnCj4gQ2M6IGxpbnV4LW1tY0B2
-Z2VyLmtlcm5lbC5vcmcKPiBDYzogbGludXgtbXRkQGxpc3RzLmluZnJhZGVhZC5vcmcKPiBDYzog
-bGludXgtcnRjQHZnZXIua2VybmVsLm9yZwo+IENjOiBsaW51eC11c2JAdmdlci5rZXJuZWwub3Jn
-Cj4gQ2M6IGRyaS1kZXZlbEBsaXN0cy5mcmVlZGVza3RvcC5vcmcKPiBDYzogbGludXgtZmJkZXZA
-dmdlci5rZXJuZWwub3JnCj4gQ2M6IGxpbnV4LXdhdGNoZG9nQHZnZXIua2VybmVsLm9yZwo+IENj
-OiBhbHNhLWRldmVsQGFsc2EtcHJvamVjdC5vcmcKPiBTaWduZWQtb2ZmLWJ5OiBBcm5kIEJlcmdt
-YW5uIDxhcm5kQGFybmRiLmRlPgo+IC0tLQoKQWNrZWQtYnk6IFN0ZXBoZW4gQm95ZCA8c2JveWRA
-a2VybmVsLm9yZz4KCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fCmRyaS1kZXZlbCBtYWlsaW5nIGxpc3QKZHJpLWRldmVsQGxpc3RzLmZyZWVkZXNrdG9wLm9y
-ZwpodHRwczovL2xpc3RzLmZyZWVkZXNrdG9wLm9yZy9tYWlsbWFuL2xpc3RpbmZvL2RyaS1kZXZl
-bA==
+On 25/10/19 11:03 AM, Ludovic Desroches wrote:
+> In the SAM9x60 SoC, there are only two clocks instead of three for the
+> SDHCI device. The base clk is no longer provided, it is generated
+> internally from the mult clk.
+> 
+> The values of the base clk and mul in the capabilities registers may not
+> reflect the reality as the mult clk is a programmable clock which can take
+> several rates. As we can't trust those values, take them from the clock
+> tree and update the capabilities according to.
+> 
+> As we can have the same pitfall, in some cases, with the SAMA5D2 Soc,
+> stop relying on capabilities too.
+> 
+> Signed-off-by: Ludovic Desroches <ludovic.desroches@microchip.com>
+> ---
+> 
+> Changes:
+> - v3: none
+> - v2: none
+> 
+>  drivers/mmc/host/sdhci-of-at91.c | 105 +++++++++++++++++--------------
+>  1 file changed, 58 insertions(+), 47 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
+> index 9571c4a882a9..7477471dac00 100644
+> --- a/drivers/mmc/host/sdhci-of-at91.c
+> +++ b/drivers/mmc/host/sdhci-of-at91.c
+> @@ -33,7 +33,14 @@
+>  
+>  #define SDHCI_AT91_PRESET_COMMON_CONF	0x400 /* drv type B, programmable clock mode */
+>  
+> +struct sdhci_at91_soc_data {
+> +	const struct sdhci_pltfm_data *pdata;
+> +	bool baseclk_is_generated_internally;
+> +	unsigned int divider_for_baseclk;
+> +};
+> +
+>  struct sdhci_at91_priv {
+> +	const struct sdhci_at91_soc_data *soc_data;
+>  	struct clk *hclock;
+>  	struct clk *gck;
+>  	struct clk *mainck;
+> @@ -141,12 +148,24 @@ static const struct sdhci_ops sdhci_at91_sama5d2_ops = {
+>  	.set_power		= sdhci_at91_set_power,
+>  };
+>  
+> -static const struct sdhci_pltfm_data soc_data_sama5d2 = {
+> +static const struct sdhci_pltfm_data sdhci_sama5d2_pdata = {
+>  	.ops = &sdhci_at91_sama5d2_ops,
+>  };
+>  
+> +static const struct sdhci_at91_soc_data soc_data_sama5d2 = {
+> +	.pdata = &sdhci_sama5d2_pdata,
+> +	.baseclk_is_generated_internally = false,
+> +};
+> +
+> +static const struct sdhci_at91_soc_data soc_data_sam9x60 = {
+> +	.pdata = &sdhci_sama5d2_pdata,
+> +	.baseclk_is_generated_internally = true,
+> +	.divider_for_baseclk = 2,
+> +};
+> +
+>  static const struct of_device_id sdhci_at91_dt_match[] = {
+>  	{ .compatible = "atmel,sama5d2-sdhci", .data = &soc_data_sama5d2 },
+> +	{ .compatible = "microchip,sam9x60-sdhci", .data = &soc_data_sam9x60 },
+>  	{}
+>  };
+>  MODULE_DEVICE_TABLE(of, sdhci_at91_dt_match);
+> @@ -156,50 +175,37 @@ static int sdhci_at91_set_clks_presets(struct device *dev)
+>  	struct sdhci_host *host = dev_get_drvdata(dev);
+>  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>  	struct sdhci_at91_priv *priv = sdhci_pltfm_priv(pltfm_host);
+> -	int ret;
+>  	unsigned int			caps0, caps1;
+>  	unsigned int			clk_base, clk_mul;
+> -	unsigned int			gck_rate, real_gck_rate;
+> +	unsigned int			gck_rate, clk_base_rate;
+>  	unsigned int			preset_div;
+>  
+> -	/*
+> -	 * The mult clock is provided by as a generated clock by the PMC
+> -	 * controller. In order to set the rate of gck, we have to get the
+> -	 * base clock rate and the clock mult from capabilities.
+> -	 */
+>  	clk_prepare_enable(priv->hclock);
+>  	caps0 = readl(host->ioaddr + SDHCI_CAPABILITIES);
+>  	caps1 = readl(host->ioaddr + SDHCI_CAPABILITIES_1);
+> -	clk_base = (caps0 & SDHCI_CLOCK_V3_BASE_MASK) >> SDHCI_CLOCK_BASE_SHIFT;
+> -	clk_mul = (caps1 & SDHCI_CLOCK_MUL_MASK) >> SDHCI_CLOCK_MUL_SHIFT;
+> -	gck_rate = clk_base * 1000000 * (clk_mul + 1);
+> -	ret = clk_set_rate(priv->gck, gck_rate);
+> -	if (ret < 0) {
+> -		dev_err(dev, "failed to set gck");
+> -		clk_disable_unprepare(priv->hclock);
+> -		return ret;
+> -	}
+> -	/*
+> -	 * We need to check if we have the requested rate for gck because in
+> -	 * some cases this rate could be not supported. If it happens, the rate
+> -	 * is the closest one gck can provide. We have to update the value
+> -	 * of clk mul.
+> -	 */
+> -	real_gck_rate = clk_get_rate(priv->gck);
+> -	if (real_gck_rate != gck_rate) {
+> -		clk_mul = real_gck_rate / (clk_base * 1000000) - 1;
+> -		caps1 &= (~SDHCI_CLOCK_MUL_MASK);
+> -		caps1 |= ((clk_mul << SDHCI_CLOCK_MUL_SHIFT) &
+> -			  SDHCI_CLOCK_MUL_MASK);
+> -		/* Set capabilities in r/w mode. */
+> -		writel(SDMMC_CACR_KEY | SDMMC_CACR_CAPWREN,
+> -		       host->ioaddr + SDMMC_CACR);
+> -		writel(caps1, host->ioaddr + SDHCI_CAPABILITIES_1);
+> -		/* Set capabilities in ro mode. */
+> -		writel(0, host->ioaddr + SDMMC_CACR);
+> -		dev_info(dev, "update clk mul to %u as gck rate is %u Hz\n",
+> -			 clk_mul, real_gck_rate);
+> -	}
+> +
+> +	gck_rate = clk_get_rate(priv->gck);
+> +	if (priv->soc_data->baseclk_is_generated_internally)
+> +		clk_base_rate = gck_rate / priv->soc_data->divider_for_baseclk;
+> +	else
+> +		clk_base_rate = clk_get_rate(priv->mainck);
+> +
+> +	clk_base = clk_base_rate / 1000000;
+> +	clk_mul = gck_rate / clk_base_rate - 1;
+> +
+> +	caps0 &= (~SDHCI_CLOCK_V3_BASE_MASK);
+> +	caps0 |= ((clk_base << SDHCI_CLOCK_BASE_SHIFT) & SDHCI_CLOCK_V3_BASE_MASK);
+> +	caps1 &= (~SDHCI_CLOCK_MUL_MASK);
+> +	caps1 |= ((clk_mul << SDHCI_CLOCK_MUL_SHIFT) & SDHCI_CLOCK_MUL_MASK);
+> +	/* Set capabilities in r/w mode. */
+> +	writel(SDMMC_CACR_KEY | SDMMC_CACR_CAPWREN, host->ioaddr + SDMMC_CACR);
+> +	writel(caps0, host->ioaddr + SDHCI_CAPABILITIES_1);
+
+Shouldn't that be:
+
+	writel(caps0, host->ioaddr + SDHCI_CAPABILITIES);
+
+> +	writel(caps1, host->ioaddr + SDHCI_CAPABILITIES_1);
+> +	/* Set capabilities in ro mode. */
+> +	writel(0, host->ioaddr + SDMMC_CACR);
+> +
+> +	dev_info(dev, "update clk mul to %u as gck rate is %u Hz and clk base is %u Hz\n",
+> +		 clk_mul, gck_rate, clk_base_rate);
+>  
+>  	/*
+>  	 * We have to set preset values because it depends on the clk_mul
+> @@ -207,19 +213,19 @@ static int sdhci_at91_set_clks_presets(struct device *dev)
+>  	 * maximum sd clock value is 120 MHz instead of 208 MHz. For that
+>  	 * reason, we need to use presets to support SDR104.
+>  	 */
+> -	preset_div = DIV_ROUND_UP(real_gck_rate, 24000000) - 1;
+> +	preset_div = DIV_ROUND_UP(gck_rate, 24000000) - 1;
+>  	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
+>  	       host->ioaddr + SDHCI_PRESET_FOR_SDR12);
+> -	preset_div = DIV_ROUND_UP(real_gck_rate, 50000000) - 1;
+> +	preset_div = DIV_ROUND_UP(gck_rate, 50000000) - 1;
+>  	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
+>  	       host->ioaddr + SDHCI_PRESET_FOR_SDR25);
+> -	preset_div = DIV_ROUND_UP(real_gck_rate, 100000000) - 1;
+> +	preset_div = DIV_ROUND_UP(gck_rate, 100000000) - 1;
+>  	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
+>  	       host->ioaddr + SDHCI_PRESET_FOR_SDR50);
+> -	preset_div = DIV_ROUND_UP(real_gck_rate, 120000000) - 1;
+> +	preset_div = DIV_ROUND_UP(gck_rate, 120000000) - 1;
+>  	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
+>  	       host->ioaddr + SDHCI_PRESET_FOR_SDR104);
+> -	preset_div = DIV_ROUND_UP(real_gck_rate, 50000000) - 1;
+> +	preset_div = DIV_ROUND_UP(gck_rate, 50000000) - 1;
+>  	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
+>  	       host->ioaddr + SDHCI_PRESET_FOR_DDR50);
+>  
+> @@ -314,7 +320,7 @@ static const struct dev_pm_ops sdhci_at91_dev_pm_ops = {
+>  static int sdhci_at91_probe(struct platform_device *pdev)
+>  {
+>  	const struct of_device_id	*match;
+> -	const struct sdhci_pltfm_data	*soc_data;
+> +	const struct sdhci_at91_soc_data	*soc_data;
+>  	struct sdhci_host		*host;
+>  	struct sdhci_pltfm_host		*pltfm_host;
+>  	struct sdhci_at91_priv		*priv;
+> @@ -325,17 +331,22 @@ static int sdhci_at91_probe(struct platform_device *pdev)
+>  		return -EINVAL;
+>  	soc_data = match->data;
+>  
+> -	host = sdhci_pltfm_init(pdev, soc_data, sizeof(*priv));
+> +	host = sdhci_pltfm_init(pdev, soc_data->pdata, sizeof(*priv));
+>  	if (IS_ERR(host))
+>  		return PTR_ERR(host);
+>  
+>  	pltfm_host = sdhci_priv(host);
+>  	priv = sdhci_pltfm_priv(pltfm_host);
+> +	priv->soc_data = soc_data;
+>  
+>  	priv->mainck = devm_clk_get(&pdev->dev, "baseclk");
+>  	if (IS_ERR(priv->mainck)) {
+> -		dev_err(&pdev->dev, "failed to get baseclk\n");
+> -		return PTR_ERR(priv->mainck);
+> +		if (soc_data->baseclk_is_generated_internally) {
+> +			priv->mainck = NULL;
+> +		} else {
+> +			dev_err(&pdev->dev, "failed to get baseclk\n");
+> +			return PTR_ERR(priv->mainck);
+> +		}
+>  	}
+>  
+>  	priv->hclock = devm_clk_get(&pdev->dev, "hclock");
+> 
