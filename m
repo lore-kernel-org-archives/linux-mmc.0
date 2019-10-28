@@ -1,8 +1,8 @@
 From: Benjamin Herrenschmidt <benh@kernel.crashing.org>
 Subject: Re: Onboard SD card doesn't work anymore after the 'mmc-v5.4-2'
  updates
-Date: Mon, 28 Oct 2019 19:45:34 +1100
-Message-ID: <47e67f44f5e955108759fe32400d2622c4a5ba3f.camel@kernel.crashing.org>
+Date: Mon, 28 Oct 2019 19:47:01 +1100
+Message-ID: <e68c5f8d73fbf1841531bf07eef0132d409e91b3.camel@kernel.crashing.org>
 References: <7b549219-a2e1-08c7-331b-9c3e4fdb8a8f@xenosoft.de>
  <3aeae0d8-e9be-2585-cbbd-70263cb495f1@xenosoft.de>
  <20191015125105.GU25745@shell.armlinux.org.uk>
@@ -13,11 +13,12 @@ References: <7b549219-a2e1-08c7-331b-9c3e4fdb8a8f@xenosoft.de>
  <CAL_JsqJpFy-g3earNjZs7jANx4pyRd=CDvZN3emMdXL5YNkYHQ@mail.gmail.com>
  <20191023143159.GB25745@shell.armlinux.org.uk>
  <CAL_JsqLZV1sXc053QMLcV-dV1BbGcRtX3eu1zbtNA_N3hzQE4g@mail.gmail.com>
+ <20191026063918.GA24015@infradead.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
-In-Reply-To: <CAL_JsqLZV1sXc053QMLcV-dV1BbGcRtX3eu1zbtNA_N3hzQE4g@mail.gmail.com>
+In-Reply-To: <20191026063918.GA24015@infradead.org>
 List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
  <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
 List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev/>
@@ -28,26 +29,33 @@ List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
 Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
 Sender: "Linuxppc-dev"
  <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
-To: Rob Herring <robh+dt@kernel.org>, Russell King - ARM Linux admin <linux@armlinux.org.uk>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, mad skateman <madskateman@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, Paul Mackerras <paulus@samba.org>, "R.T.Dickinson" <rtd2@xtra.co.nz>, Christian Zigotzky <chzigotzky@xenosoft.de>, "contact@a-eon.com" <contact@a-eon.com>, linuxppc-dev <linuxppc-dev@lists.ozlabs.org>, Christian Zigotzky <info@xenosoft.de>
+To: Christoph Hellwig <hch@infradead.org>, Rob Herring <robh+dt@kernel.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, mad skateman <madskateman@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, Russell King - ARM Linux admin <linux@armlinux.org.uk>, Paul Mackerras <paulus@samba.org>, "R.T.Dickinson" <rtd2@xtra.co.nz>, Christian Zigotzky <chzigotzky@xenosoft.de>, "contact@a-eon.com" <contact@a-eon.com>, linuxppc-dev <linuxppc-dev@lists.ozlabs.org>, Christian Zigotzky <info@xenosoft.de>
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, 2019-10-25 at 17:28 -0500, Rob Herring wrote:
-> This doesn't work?:
+On Fri, 2019-10-25 at 23:39 -0700, Christoph Hellwig wrote:
+> On Fri, Oct 25, 2019 at 05:28:45PM -0500, Rob Herring wrote:
+> > This doesn't work?:
+> > 
+> >         if (IS_ENABLED(CONFIG_PPC) || of_dma_is_coherent(dev-
+> > >of_node))
+> >                 value |= ESDHC_DMA_SNOOP;
+> >         else
+> >                 value &= ~ESDHC_DMA_SNOOP;
+> > 
+> > While I said use the compatibles, using the kconfig symbol is
+> > easier
+> > than sorting out which compatibles are PPC SoCs. Though if that's
+> > already done elsewhere in the driver, you could set a flag and use
+> > that here. I'd be surprised if this was the only difference between
+> > ARM and PPC SoCs for this block.
 > 
->         if (IS_ENABLED(CONFIG_PPC) || of_dma_is_coherent(dev-
-> >of_node))
->                 value |= ESDHC_DMA_SNOOP;
->         else
->                 value &= ~ESDHC_DMA_SNOOP;
+> I think the right thing is a Kconfig variable that the architectures
+> selects which says if OF is by default coherent or incoherent, and
+> then use that in of_dma_is_coherent.
 
-CONFIG_PPC is restrictive. What about sparc64 ? There could be others
-.. .we can't suddenly requests people to add new properties for what
-was implied behaviours before hand, esp since it's not in the base 1275
-spec, no ?
-
-I would suggest of_dma_is_coherent is *true* by default unless
-overriden to do something else.
+That too. We could also define properties for both ways so we can
+override the default either way.
 
 Cheers,
 Ben.
