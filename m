@@ -1,51 +1,74 @@
-From: Manish Narani <manish.narani@xilinx.com>
-Subject: [PATCH v4 4/8] dt-bindings: mmc: arasan: Add optional properties for Arasan SDHCI
-Date: Tue, 29 Oct 2019 16:00:38 +0530
-Message-ID: <1572345042-101207-4-git-send-email-manish.narani@xilinx.com>
-References: <1572345042-101207-1-git-send-email-manish.narani@xilinx.com>
+From: Rob Herring <robh@kernel.org>
+Subject: Re: [RFC 6/6] dt-bindings: mmc: sdhci-msm: Add clk scaling dt
+ parameters
+Date: Tue, 29 Oct 2019 11:36:59 -0500
+Message-ID: <20191029163659.GC1057@bogus>
+References: <1571668177-3766-1-git-send-email-rampraka@codeaurora.org>
+ <1571668177-3766-7-git-send-email-rampraka@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1572345042-101207-1-git-send-email-manish.narani@xilinx.com>
+Content-Disposition: inline
+In-Reply-To: <1571668177-3766-7-git-send-email-rampraka@codeaurora.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, adrian.hunter@intel.com, michal.simek@xilinx.com, jolly.shah@xilinx.com, nava.manne@xilinx.com, rajan.vaja@xilinx.com, manish.narani@xilinx.com
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, git@xilinx.com
+To: Ram Prakash Gupta <rampraka@codeaurora.org>
+Cc: asutoshd@codeaurora.org, stummala@codeaurora.org, sayalil@codeaurora.org, vbadigan@codeaurora.org, cang@codeaurora.org, ppvk@codeaurora.org, adrian.hunter@intel.com, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Add optional properties for Arasan SDHCI which are used to set clk delays
-for different speed modes in the controller.
+On Mon, Oct 21, 2019 at 07:59:37PM +0530, Ram Prakash Gupta wrote:
+> Adding clk scaling dt parameters.
+> 
+> Signed-off-by: Ram Prakash Gupta <rampraka@codeaurora.org>
+> ---
+>  Documentation/devicetree/bindings/mmc/sdhci-msm.txt | 19 +++++++++++++++++++
+>  1 file changed, 19 insertions(+)
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+> index da4edb1..afaf88d 100644
+> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+> @@ -39,6 +39,21 @@ Required properties:
+>  	"cal"	- reference clock for RCLK delay calibration (optional)
+>  	"sleep"	- sleep clock for RCLK delay calibration (optional)
+>  
+> +Optional properties:
+> +- devfreq,freq-table - specifies supported frequencies for clock scaling.
+> +	Clock scaling logic shall toggle between these frequencies based
+> +	on card load. In case the defined frequencies are over or below
+> +	the supported card frequencies, they will be overridden
+> +	during card init. In case this entry is not supplied,
+> +	the driver will construct one based on the card
+> +	supported max and min frequencies.
+> +	The frequencies must be ordered from lowest to highest.
 
-Signed-off-by: Manish Narani <manish.narani@xilinx.com>
----
- .../devicetree/bindings/mmc/arasan,sdhci.txt     | 16 ++++++++++++++++
- 1 file changed, 16 insertions(+)
+This should be common. Surely we already have something?
 
-diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-index b51e40b2e0c5..c0f505b6cab5 100644
---- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-+++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-@@ -46,6 +46,22 @@ Optional Properties:
-     properly. Test mode can be used to force the controller to function.
-   - xlnx,int-clock-stable-broken: when present, the controller always reports
-     that the internal clock is stable even when it is not.
-+  - arasan-clk-phase-legacy: Input/Output Clock Delay pair in degrees for Legacy Mode.
-+  - arasan-clk-phase-mmc-hs: Input/Output Clock Delay pair degrees for MMC HS.
-+  - arasan-clk-phase-sd-hs: Input/Output Clock Delay pair in degrees for SD HS.
-+  - arasan-clk-phase-uhs-sdr12: Input/Output Clock Delay pair in degrees for SDR12.
-+  - arasan-clk-phase-uhs-sdr25: Input/Output Clock Delay pair in degrees for SDR25.
-+  - arasan-clk-phase-uhs-sdr50: Input/Output Clock Delay pair in degrees for SDR50.
-+  - arasan-clk-phase-uhs-sdr104: Input/Output Clock Delay pair in degrees for SDR104.
-+  - arasan-clk-phase-uhs-ddr50: Input/Output Clock Delay pair in degrees for SD DDR50.
-+  - arasan-clk-phase-mmc-ddr52: Input/Output Clock Delay pair in degrees for MMC DDR52.
-+  - arasan-clk-phase-mmc-hs200: Input/Output Clock Delay pair in degrees for MMC HS200.
-+  - arasan-clk-phase-mmc-hs400: Input/Output Clock Delay pair in degrees for MMC HS400.
-+
-+  Above mentioned are the clock (phase) delays which are to be configured in the
-+  controller while switching to particular speed mode. The range of values are
-+  0 to 359 degrees. If not specified, driver will configure the default value
-+  defined for particular mode in it.
- 
- Example:
- 	sdhci@e0100000 {
--- 
-2.17.1
+> +
+> +- scaling-lower-bus-speed-mode - Few hosts can support DDR52 mode at the
+> +	same lower system voltage corner as high-speed mode. In such
+> +	cases, it is always better to put it in DDR  mode which will
+> +	improve the performance without any power impact.
+
+The description sounds like a boolean. Why the string? What are possible 
+values?
+
+Also needs a 'qcom' vendor prefix.
+
+> +
+>  Example:
+>  
+>  	sdhc_1: sdhci@f9824900 {
+> @@ -56,6 +71,10 @@ Example:
+>  
+>  		clocks = <&gcc GCC_SDCC1_APPS_CLK>, <&gcc GCC_SDCC1_AHB_CLK>;
+>  		clock-names = "core", "iface";
+> +
+> +		devfreq,freq-table = <50000000 200000000>;
+> +		scaling-lower-bus-speed-mode = "DDR52"
+> +
+>  	};
+>  
+>  	sdhc_2: sdhci@f98a4900 {
+> -- 
+> 1.9.1
+> 
