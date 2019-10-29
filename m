@@ -1,7 +1,7 @@
 From: Manish Narani <manish.narani@xilinx.com>
-Subject: [PATCH v4 6/8] firmware: xilinx: Add SDIO Tap Delay nodes
-Date: Tue, 29 Oct 2019 16:00:40 +0530
-Message-ID: <1572345042-101207-6-git-send-email-manish.narani@xilinx.com>
+Subject: [PATCH v4 2/8] dt-bindings: mmc: arasan: Update Documentation for the input clock
+Date: Tue, 29 Oct 2019 16:00:36 +0530
+Message-ID: <1572345042-101207-2-git-send-email-manish.narani@xilinx.com>
 References: <1572345042-101207-1-git-send-email-manish.narani@xilinx.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,43 +12,30 @@ To: ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, adrian.hun
 Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, git@xilinx.com
 List-Id: linux-mmc@vger.kernel.org
 
-Add tap delay nodes for setting SDIO Tap Delays on ZynqMP platform.
+Add documentation for an optional input clock which is essentially used
+in sampling the input data coming from the card.
 
 Signed-off-by: Manish Narani <manish.narani@xilinx.com>
 ---
- include/linux/firmware/xlnx-zynqmp.h | 13 ++++++++++++-
- 1 file changed, 12 insertions(+), 1 deletion(-)
+ Documentation/devicetree/bindings/mmc/arasan,sdhci.txt | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
 
-diff --git a/include/linux/firmware/xlnx-zynqmp.h b/include/linux/firmware/xlnx-zynqmp.h
-index 778abbbc7d94..df366f1a4cb4 100644
---- a/include/linux/firmware/xlnx-zynqmp.h
-+++ b/include/linux/firmware/xlnx-zynqmp.h
-@@ -91,7 +91,8 @@ enum pm_ret_status {
- };
- 
- enum pm_ioctl_id {
--	IOCTL_SET_PLL_FRAC_MODE = 8,
-+	IOCTL_SET_SD_TAPDELAY = 7,
-+	IOCTL_SET_PLL_FRAC_MODE,
- 	IOCTL_GET_PLL_FRAC_MODE,
- 	IOCTL_SET_PLL_FRAC_DATA,
- 	IOCTL_GET_PLL_FRAC_DATA,
-@@ -250,6 +251,16 @@ enum zynqmp_pm_request_ack {
- 	ZYNQMP_PM_REQUEST_ACK_NON_BLOCKING,
- };
- 
-+enum pm_node_id {
-+	NODE_SD_0 = 39,
-+	NODE_SD_1,
-+};
-+
-+enum tap_delay_type {
-+	PM_TAPDELAY_INPUT = 0,
-+	PM_TAPDELAY_OUTPUT,
-+};
-+
- /**
-  * struct zynqmp_pm_query_data - PM query data
-  * @qid:	query ID
+diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
+index 7ca0aa7ccc0b..b51e40b2e0c5 100644
+--- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
++++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
+@@ -38,9 +38,9 @@ Optional Properties:
+   - clock-output-names: If specified, this will be the name of the card clock
+     which will be exposed by this device.  Required if #clock-cells is
+     specified.
+-  - #clock-cells: If specified this should be the value <0>.  With this property
+-    in place we will export a clock representing the Card Clock.  This clock
+-    is expected to be consumed by our PHY.  You must also specify
++  - #clock-cells: If specified this should be the value <0> or <1>. With this
++    property in place we will export one or two clocks representing the Card
++    Clock. These clocks are expected to be consumed by our PHY.
+   - xlnx,fails-without-test-cd: when present, the controller doesn't work when
+     the CD line is not connected properly, and the line is not connected
+     properly. Test mode can be used to force the controller to function.
 -- 
 2.17.1
