@@ -1,63 +1,111 @@
-From: Baolin Wang <baolin.wang@linaro.org>
-Subject: [PATCH v5 4/4] mmc: host: sdhci: Add a variable to defer to complete data requests if needed
-Date: Tue, 29 Oct 2019 13:43:22 +0800
-Message-ID: <19910a2f34b9be81f64637a5a5fc8d07bd5f4885.1572326519.git.baolin.wang@linaro.org>
-References: <cover.1572326519.git.baolin.wang@linaro.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <cover.1572326519.git.baolin.wang@linaro.org>
-In-Reply-To: <cover.1572326519.git.baolin.wang@linaro.org>
-References: <cover.1572326519.git.baolin.wang@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: adrian.hunter@intel.com, ulf.hansson@linaro.org, asutoshd@codeaurora.org
-Cc: orsonzhai@gmail.com, zhang.lyra@gmail.com, arnd@arndb.de, linus.walleij@linaro.org, vincent.guittot@linaro.org, baolin.wang@linaro.org, baolin.wang7@gmail.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+From: Manish Narani <manish.narani@xilinx.com>
+Subject: [PATCH v4 1/8] mmc: sdhci-of-arasan: Separate out clk related data to
+ another structure
+Date: Tue, 29 Oct 2019 16:00:35 +0530
+Message-ID: <1572345042-101207-1-git-send-email-manish.narani@xilinx.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, adrian.hunter@intel.com, michal.simek@xilinx.com, jolly.shah@xilinx.com, nava.manne@xilinx.com, rajan.vaja@xilinx.com, manish.narani@xilinx.com
+Cc: devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, git@xilinx.com
 List-Id: linux-mmc@vger.kernel.org
 
-When using the host software queue, it will trigger the next request in
-irq handler without a context switch. But the sdhci_request() can not be
-called in interrupt context when using host software queue for some host
-drivers, due to the get_cd() ops can be sleepable.
+To improve the code readability, use two different structs, one for
+clock provider data and one for mmc platform data.
 
-But for some host drivers, such as Spreadtrum host driver, the card is
-nonremovable, so the get_cd() ops is not sleepable, which means we can
-complete the data request and trigger the next request in irq handler
-to remove the context switch for the Spreadtrum host driver.
-
-Thus we still need introduce a variable in struct sdhci_host to indicate
-that we will always to defer to complete data requests if the sdhci_request()
-can not be called in interrupt context for some host drivers, when using
-the host software queue.
-
-Suggested-by: Adrian Hunter <adrian.hunter@intel.com>
-Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
+Signed-off-by: Manish Narani <manish.narani@xilinx.com>
 ---
- drivers/mmc/host/sdhci.c |    2 +-
- drivers/mmc/host/sdhci.h |    1 +
- 2 files changed, 2 insertions(+), 1 deletion(-)
+ drivers/mmc/host/sdhci-of-arasan.c | 31 ++++++++++++++++++++----------
+ 1 file changed, 21 insertions(+), 10 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 850241f..9cf2130 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -3035,7 +3035,7 @@ static inline bool sdhci_defer_done(struct sdhci_host *host,
+diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+index 7023cbec4017..701b6cc0f9a3 100644
+--- a/drivers/mmc/host/sdhci-of-arasan.c
++++ b/drivers/mmc/host/sdhci-of-arasan.c
+@@ -71,14 +71,23 @@ struct sdhci_arasan_soc_ctl_map {
+ 	bool					hiword_update;
+ };
+ 
++/**
++ * struct sdhci_arasan_clk_data
++ * @sdcardclk_hw:	Struct for the clock we might provide to a PHY.
++ * @sdcardclk:		Pointer to normal 'struct clock' for sdcardclk_hw.
++ */
++struct sdhci_arasan_clk_data {
++	struct clk_hw	sdcardclk_hw;
++	struct clk      *sdcardclk;
++};
++
+ /**
+  * struct sdhci_arasan_data
+  * @host:		Pointer to the main SDHCI host structure.
+  * @clk_ahb:		Pointer to the AHB clock
+  * @phy:		Pointer to the generic phy
+  * @is_phy_on:		True if the PHY is on; false if not.
+- * @sdcardclk_hw:	Struct for the clock we might provide to a PHY.
+- * @sdcardclk:		Pointer to normal 'struct clock' for sdcardclk_hw.
++ * @clk_data:		Struct for the Arasan Controller Clock Data.
+  * @soc_ctl_base:	Pointer to regmap for syscon for soc_ctl registers.
+  * @soc_ctl_map:	Map to get offsets into soc_ctl registers.
+  */
+@@ -89,8 +98,7 @@ struct sdhci_arasan_data {
+ 	bool		is_phy_on;
+ 
+ 	bool		has_cqe;
+-	struct clk_hw	sdcardclk_hw;
+-	struct clk      *sdcardclk;
++	struct sdhci_arasan_clk_data clk_data;
+ 
+ 	struct regmap	*soc_ctl_base;
+ 	const struct sdhci_arasan_soc_ctl_map *soc_ctl_map;
+@@ -520,8 +528,10 @@ static unsigned long sdhci_arasan_sdcardclk_recalc_rate(struct clk_hw *hw,
+ 						      unsigned long parent_rate)
+ 
  {
- 	struct mmc_data *data = mrq->data;
++	struct sdhci_arasan_clk_data *clk_data =
++		container_of(hw, struct sdhci_arasan_clk_data, sdcardclk_hw);
+ 	struct sdhci_arasan_data *sdhci_arasan =
+-		container_of(hw, struct sdhci_arasan_data, sdcardclk_hw);
++		container_of(clk_data, struct sdhci_arasan_data, clk_data);
+ 	struct sdhci_host *host = sdhci_arasan->host;
  
--	return host->pending_reset ||
-+	return host->pending_reset || (host->always_defer_done && data) ||
- 	       ((host->flags & SDHCI_REQ_USE_DMA) && data &&
- 		data->host_cookie == COOKIE_MAPPED);
- }
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index d89cdb9..38fbd18 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -533,6 +533,7 @@ struct sdhci_host {
- 	bool pending_reset;	/* Cmd/data reset is pending */
- 	bool irq_wake_enabled;	/* IRQ wakeup is enabled */
- 	bool v4_mode;		/* Host Version 4 Enable */
-+	bool always_defer_done;	/* Always defer to complete data requests */
+ 	return host->mmc->actual_clock;
+@@ -633,6 +643,7 @@ static int sdhci_arasan_register_sdclk(struct sdhci_arasan_data *sdhci_arasan,
+ 				       struct clk *clk_xin,
+ 				       struct device *dev)
+ {
++	struct sdhci_arasan_clk_data *clk_data = &sdhci_arasan->clk_data;
+ 	struct device_node *np = dev->of_node;
+ 	struct clk_init_data sdcardclk_init;
+ 	const char *parent_clk_name;
+@@ -655,13 +666,13 @@ static int sdhci_arasan_register_sdclk(struct sdhci_arasan_data *sdhci_arasan,
+ 	sdcardclk_init.flags = CLK_GET_RATE_NOCACHE;
+ 	sdcardclk_init.ops = &arasan_sdcardclk_ops;
  
- 	struct mmc_request *mrqs_done[SDHCI_MAX_MRQS];	/* Requests done */
- 	struct mmc_command *cmd;	/* Current command */
+-	sdhci_arasan->sdcardclk_hw.init = &sdcardclk_init;
+-	sdhci_arasan->sdcardclk =
+-		devm_clk_register(dev, &sdhci_arasan->sdcardclk_hw);
+-	sdhci_arasan->sdcardclk_hw.init = NULL;
++	clk_data->sdcardclk_hw.init = &sdcardclk_init;
++	clk_data->sdcardclk =
++		devm_clk_register(dev, &clk_data->sdcardclk_hw);
++	clk_data->sdcardclk_hw.init = NULL;
+ 
+ 	ret = of_clk_add_provider(np, of_clk_src_simple_get,
+-				  sdhci_arasan->sdcardclk);
++				  clk_data->sdcardclk);
+ 	if (ret)
+ 		dev_err(dev, "Failed to add clock provider\n");
+ 
 -- 
-1.7.9.5
+2.17.1
