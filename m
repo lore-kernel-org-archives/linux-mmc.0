@@ -1,64 +1,71 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v4 4/8] dt-bindings: mmc: arasan: Add optional properties
- for Arasan SDHCI
-Date: Wed, 30 Oct 2019 15:57:29 +0100
-Message-ID: <CAPDyKFqRmFPaiM=AoiWvy5xhYj=fHTt+S1wu8o0W67Nc5ZZ1kA@mail.gmail.com>
-References: <1572345042-101207-1-git-send-email-manish.narani@xilinx.com> <1572345042-101207-4-git-send-email-manish.narani@xilinx.com>
+Subject: Re: [PATCH] mmc: renesas_sdhi: add checks for pinctrl_lookup_state
+Date: Wed, 30 Oct 2019 16:09:58 +0100
+Message-ID: <CAPDyKFo9wYwhdy-1BDcRMJKTjADappsT-gBaKZE7hTLE4obxiA@mail.gmail.com>
+References: <20191018131338.11713-1-hslester96@gmail.com> <CAPDyKFoBYchP96hv=7XfTo8CrCSD+KC0h_oFRAsOYT-Lc1SFZQ@mail.gmail.com>
+ <20191023153313.GB5153@kunai>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1572345042-101207-4-git-send-email-manish.narani@xilinx.com>
+In-Reply-To: <20191023153313.GB5153@kunai>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Manish Narani <manish.narani@xilinx.com>
-Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Adrian Hunter <adrian.hunter@intel.com>, Michal Simek <michal.simek@xilinx.com>, jolly.shah@xilinx.com, nava.manne@xilinx.com, rajan.vaja@xilinx.com, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, git@xilinx.com
+To: Wolfram Sang <wsa@the-dreams.de>
+Cc: Chuhong Yuan <hslester96@gmail.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, 29 Oct 2019 at 11:30, Manish Narani <manish.narani@xilinx.com> wrote:
+On Wed, 23 Oct 2019 at 17:33, Wolfram Sang <wsa@the-dreams.de> wrote:
 >
-> Add optional properties for Arasan SDHCI which are used to set clk delays
-> for different speed modes in the controller.
+> On Mon, Oct 21, 2019 at 04:32:49PM +0200, Ulf Hansson wrote:
+> > On Fri, 18 Oct 2019 at 15:13, Chuhong Yuan <hslester96@gmail.com> wrote:
+> > >
+> > > renesas_sdhi_probe misses checks for pinctrl_lookup_state and may miss
+> > > failures.
+> > > Add checks for them to fix the problem.
+> > >
+> > > Signed-off-by: Chuhong Yuan <hslester96@gmail.com>
+> > > ---
+> > >  drivers/mmc/host/renesas_sdhi_core.c | 5 +++++
+> > >  1 file changed, 5 insertions(+)
+> > >
+> > > diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
+> > > index d4ada5cca2d1..dc5ad6632df3 100644
+> > > --- a/drivers/mmc/host/renesas_sdhi_core.c
+> > > +++ b/drivers/mmc/host/renesas_sdhi_core.c
+> > > @@ -694,8 +694,13 @@ int renesas_sdhi_probe(struct platform_device *pdev,
+> > >         if (!IS_ERR(priv->pinctrl)) {
+> > >                 priv->pins_default = pinctrl_lookup_state(priv->pinctrl,
+> > >                                                 PINCTRL_STATE_DEFAULT);
+> > > +               if (IS_ERR(priv->pins_default))
+> > > +                       return PTR_ERR(priv->pins_default);
+> > > +
+> > >                 priv->pins_uhs = pinctrl_lookup_state(priv->pinctrl,
+> > >                                                 "state_uhs");
+> > > +               if (IS_ERR(priv->pins_uhs))
+> > > +                       return PTR_ERR(priv->pins_uhs);
+> > >         }
+> >
+> > This looks correct to me, as I guess if there is a pinctrl specified
+> > for device node of the controller, it means that it should be used!?
+> >
+> > I understand that this is only used for those variants that supports
+> > UHS-I via the renesas_sdhi_start_signal_voltage_switch(). Wolfram, is
+> > this fine you think?
 >
-> Signed-off-by: Manish Narani <manish.narani@xilinx.com>
-> ---
->  .../devicetree/bindings/mmc/arasan,sdhci.txt     | 16 ++++++++++++++++
->  1 file changed, 16 insertions(+)
+> Well, I don't like to bail out because this error is not fatal for basic
+> operations. How about releasing priv->pinctrl again with an additional
+> warning that pinctrl settings are broken and will prevent 1.8v modes?
 >
-> diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-> index b51e40b2e0c5..c0f505b6cab5 100644
-> --- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-> +++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-> @@ -46,6 +46,22 @@ Optional Properties:
->      properly. Test mode can be used to force the controller to function.
->    - xlnx,int-clock-stable-broken: when present, the controller always reports
->      that the internal clock is stable even when it is not.
-> +  - arasan-clk-phase-legacy: Input/Output Clock Delay pair in degrees for Legacy Mode.
-> +  - arasan-clk-phase-mmc-hs: Input/Output Clock Delay pair degrees for MMC HS.
-> +  - arasan-clk-phase-sd-hs: Input/Output Clock Delay pair in degrees for SD HS.
-> +  - arasan-clk-phase-uhs-sdr12: Input/Output Clock Delay pair in degrees for SDR12.
-> +  - arasan-clk-phase-uhs-sdr25: Input/Output Clock Delay pair in degrees for SDR25.
-> +  - arasan-clk-phase-uhs-sdr50: Input/Output Clock Delay pair in degrees for SDR50.
-> +  - arasan-clk-phase-uhs-sdr104: Input/Output Clock Delay pair in degrees for SDR104.
-> +  - arasan-clk-phase-uhs-ddr50: Input/Output Clock Delay pair in degrees for SD DDR50.
-> +  - arasan-clk-phase-mmc-ddr52: Input/Output Clock Delay pair in degrees for MMC DDR52.
-> +  - arasan-clk-phase-mmc-hs200: Input/Output Clock Delay pair in degrees for MMC HS200.
-> +  - arasan-clk-phase-mmc-hs400: Input/Output Clock Delay pair in degrees for MMC HS400.
+> Opinions?
 
-I don't mind if you convert these to common mmc bindings.
+Hmm, from a mmc driver probe point of view, I don't quite share this approach.
 
-I think other controllers/platforms may find them useful, at least at
-some point, if not already.
+I would rather fail as it forces the DTB to be corrected immediately,
+rather than trusting some developer to look at a warning in a log. The
+point is, in such a case it may never get fixed, if the product is
+shipped with the wrong DTB.
 
-> +
-> +  Above mentioned are the clock (phase) delays which are to be configured in the
-> +  controller while switching to particular speed mode. The range of values are
-> +  0 to 359 degrees. If not specified, driver will configure the default value
-> +  defined for particular mode in it.
->
->  Example:
->         sdhci@e0100000 {
-> --
-> 2.17.1
->
+My concern at this point is rather to break existing DTBs, but it
+seems that should not be an issue, right?
 
 Kind regards
 Uffe
