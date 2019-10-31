@@ -1,58 +1,82 @@
 From: Manish Narani <MNARANI@xilinx.com>
-Subject: RE: [PATCH v4 2/8] dt-bindings: mmc: arasan: Update Documentation for
- the input clock
-Date: Thu, 31 Oct 2019 08:52:59 +0000
-Message-ID: <MN2PR02MB6029A5A7D65C8360B55A1E93C1630@MN2PR02MB6029.namprd02.prod.outlook.com>
+Subject: RE: [PATCH v4 4/8] dt-bindings: mmc: arasan: Add optional properties
+ for Arasan SDHCI
+Date: Thu, 31 Oct 2019 08:54:28 +0000
+Message-ID: <MN2PR02MB60299A66F6E18111D34983E6C1630@MN2PR02MB6029.namprd02.prod.outlook.com>
 References: <1572345042-101207-1-git-send-email-manish.narani@xilinx.com>
- <1572345042-101207-2-git-send-email-manish.narani@xilinx.com>
- <20191029184014.GA837@bogus>
+ <1572345042-101207-4-git-send-email-manish.narani@xilinx.com>
+ <CAPDyKFqRmFPaiM=AoiWvy5xhYj=fHTt+S1wu8o0W67Nc5ZZ1kA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20191029184014.GA837@bogus>
+In-Reply-To: <CAPDyKFqRmFPaiM=AoiWvy5xhYj=fHTt+S1wu8o0W67Nc5ZZ1kA@mail.gmail.com>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Rob Herring <robh@kernel.org>
-Cc: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "robh+dt@kernel.org" <robh+dt@kernel.org>, "mark.rutland@arm.com" <mark.rutland@arm.com>, "adrian.hunter@intel.com" <adrian.hunter@intel.com>, Michal Simek <michals@xilinx.com>, Jolly Shah <JOLLYS@xilinx.com>, Nava kishore Manne <navam@xilinx.com>, Rajan Vaja <RAJANV@xilinx.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, git <git@xilinx.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Adrian Hunter <adrian.hunter@intel.com>, Michal Simek <michals@xilinx.com>, Jolly Shah <JOLLYS@xilinx.com>, Nava kishore Manne <navam@xilinx.com>, Rajan Vaja <RAJANV@xilinx.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, git <git@xilinx.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Rob,
-
-> -----Original Message-----
-> From: Rob Herring <robh@kernel.org>
-> Sent: Wednesday, October 30, 2019 12:10 AM
-> To: Manish Narani <MNARANI@xilinx.com>
-> Cc: ulf.hansson@linaro.org; robh+dt@kernel.org; mark.rutland@arm.com;
-> adrian.hunter@intel.com; Michal Simek <michals@xilinx.com>; Jolly Shah
-> <JOLLYS@xilinx.com>; Nava kishore Manne <navam@xilinx.com>; Rajan Vaja
-> <RAJANV@xilinx.com>; Manish Narani <MNARANI@xilinx.com>; linux-
-> mmc@vger.kernel.org; devicetree@vger.kernel.org; linux-
-> kernel@vger.kernel.org; linux-arm-kernel@lists.infradead.org; git
-> <git@xilinx.com>
-> Subject: Re: [PATCH v4 2/8] dt-bindings: mmc: arasan: Update
-> Documentation for the input clock
->=20
-> On Tue, 29 Oct 2019 16:00:36 +0530, Manish Narani wrote:
-> > Add documentation for an optional input clock which is essentially used
-> > in sampling the input data coming from the card.
-> >
-> > Signed-off-by: Manish Narani <manish.narani@xilinx.com>
-> > ---
-> >  Documentation/devicetree/bindings/mmc/arasan,sdhci.txt | 6 +++---
-> >  1 file changed, 3 insertions(+), 3 deletions(-)
-> >
->=20
-> Please add Acked-by/Reviewed-by tags when posting new versions.
-> However,
-> there's no need to repost patches *only* to add the tags. The upstream
-> maintainer will do that for acks received on the version they apply.
->=20
-> If a tag was not added on purpose, please state why and what changed.
-
-That was mistakenly not added. My apologies.
-However, Uffe has some comments on this version, so will send out v5 with a=
-ddressing them and will include the 'reviewed-by' tag.
-
-Thanks,
-Manish
+SGkgVWZmZSwNCg0KVGhhbmtzIGZvciB5b3VyIGNvbW1lbnRzLiBQbGVhc2Ugc2VlIGJlbG93IGlu
+bGluZS4NCg0KPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBVbGYgSGFuc3Nv
+biA8dWxmLmhhbnNzb25AbGluYXJvLm9yZz4NCj4gU2VudDogV2VkbmVzZGF5LCBPY3RvYmVyIDMw
+LCAyMDE5IDg6MjcgUE0NCj4gVG86IE1hbmlzaCBOYXJhbmkgPE1OQVJBTklAeGlsaW54LmNvbT4N
+Cj4gQ2M6IFJvYiBIZXJyaW5nIDxyb2JoK2R0QGtlcm5lbC5vcmc+OyBNYXJrIFJ1dGxhbmQNCj4g
+PG1hcmsucnV0bGFuZEBhcm0uY29tPjsgQWRyaWFuIEh1bnRlciA8YWRyaWFuLmh1bnRlckBpbnRl
+bC5jb20+Ow0KPiBNaWNoYWwgU2ltZWsgPG1pY2hhbHNAeGlsaW54LmNvbT47IEpvbGx5IFNoYWgg
+PEpPTExZU0B4aWxpbnguY29tPjsgTmF2YQ0KPiBraXNob3JlIE1hbm5lIDxuYXZhbUB4aWxpbngu
+Y29tPjsgUmFqYW4gVmFqYSA8UkFKQU5WQHhpbGlueC5jb20+Ow0KPiBsaW51eC1tbWNAdmdlci5r
+ZXJuZWwub3JnOyBEVE1MIDxkZXZpY2V0cmVlQHZnZXIua2VybmVsLm9yZz47IExpbnV4DQo+IEtl
+cm5lbCBNYWlsaW5nIExpc3QgPGxpbnV4LWtlcm5lbEB2Z2VyLmtlcm5lbC5vcmc+OyBMaW51eCBB
+Uk0gPGxpbnV4LWFybS0NCj4ga2VybmVsQGxpc3RzLmluZnJhZGVhZC5vcmc+OyBnaXQgPGdpdEB4
+aWxpbnguY29tPg0KPiBTdWJqZWN0OiBSZTogW1BBVENIIHY0IDQvOF0gZHQtYmluZGluZ3M6IG1t
+YzogYXJhc2FuOiBBZGQgb3B0aW9uYWwNCj4gcHJvcGVydGllcyBmb3IgQXJhc2FuIFNESENJDQo+
+IA0KPiBPbiBUdWUsIDI5IE9jdCAyMDE5IGF0IDExOjMwLCBNYW5pc2ggTmFyYW5pIDxtYW5pc2gu
+bmFyYW5pQHhpbGlueC5jb20+DQo+IHdyb3RlOg0KPiA+DQo+ID4gQWRkIG9wdGlvbmFsIHByb3Bl
+cnRpZXMgZm9yIEFyYXNhbiBTREhDSSB3aGljaCBhcmUgdXNlZCB0byBzZXQgY2xrIGRlbGF5cw0K
+PiA+IGZvciBkaWZmZXJlbnQgc3BlZWQgbW9kZXMgaW4gdGhlIGNvbnRyb2xsZXIuDQo+ID4NCj4g
+PiBTaWduZWQtb2ZmLWJ5OiBNYW5pc2ggTmFyYW5pIDxtYW5pc2gubmFyYW5pQHhpbGlueC5jb20+
+DQo+ID4gLS0tDQo+ID4gIC4uLi9kZXZpY2V0cmVlL2JpbmRpbmdzL21tYy9hcmFzYW4sc2RoY2ku
+dHh0ICAgICB8IDE2ICsrKysrKysrKysrKysrKysNCj4gPiAgMSBmaWxlIGNoYW5nZWQsIDE2IGlu
+c2VydGlvbnMoKykNCj4gPg0KPiA+IGRpZmYgLS1naXQgYS9Eb2N1bWVudGF0aW9uL2RldmljZXRy
+ZWUvYmluZGluZ3MvbW1jL2FyYXNhbixzZGhjaS50eHQNCj4gYi9Eb2N1bWVudGF0aW9uL2Rldmlj
+ZXRyZWUvYmluZGluZ3MvbW1jL2FyYXNhbixzZGhjaS50eHQNCj4gPiBpbmRleCBiNTFlNDBiMmUw
+YzUuLmMwZjUwNWI2Y2FiNSAxMDA2NDQNCj4gPiAtLS0gYS9Eb2N1bWVudGF0aW9uL2RldmljZXRy
+ZWUvYmluZGluZ3MvbW1jL2FyYXNhbixzZGhjaS50eHQNCj4gPiArKysgYi9Eb2N1bWVudGF0aW9u
+L2RldmljZXRyZWUvYmluZGluZ3MvbW1jL2FyYXNhbixzZGhjaS50eHQNCj4gPiBAQCAtNDYsNiAr
+NDYsMjIgQEAgT3B0aW9uYWwgUHJvcGVydGllczoNCj4gPiAgICAgIHByb3Blcmx5LiBUZXN0IG1v
+ZGUgY2FuIGJlIHVzZWQgdG8gZm9yY2UgdGhlIGNvbnRyb2xsZXIgdG8gZnVuY3Rpb24uDQo+ID4g
+ICAgLSB4bG54LGludC1jbG9jay1zdGFibGUtYnJva2VuOiB3aGVuIHByZXNlbnQsIHRoZSBjb250
+cm9sbGVyIGFsd2F5cw0KPiByZXBvcnRzDQo+ID4gICAgICB0aGF0IHRoZSBpbnRlcm5hbCBjbG9j
+ayBpcyBzdGFibGUgZXZlbiB3aGVuIGl0IGlzIG5vdC4NCj4gPiArICAtIGFyYXNhbi1jbGstcGhh
+c2UtbGVnYWN5OiBJbnB1dC9PdXRwdXQgQ2xvY2sgRGVsYXkgcGFpciBpbiBkZWdyZWVzIGZvcg0K
+PiBMZWdhY3kgTW9kZS4NCj4gPiArICAtIGFyYXNhbi1jbGstcGhhc2UtbW1jLWhzOiBJbnB1dC9P
+dXRwdXQgQ2xvY2sgRGVsYXkgcGFpciBkZWdyZWVzIGZvcg0KPiBNTUMgSFMuDQo+ID4gKyAgLSBh
+cmFzYW4tY2xrLXBoYXNlLXNkLWhzOiBJbnB1dC9PdXRwdXQgQ2xvY2sgRGVsYXkgcGFpciBpbiBk
+ZWdyZWVzIGZvciBTRA0KPiBIUy4NCj4gPiArICAtIGFyYXNhbi1jbGstcGhhc2UtdWhzLXNkcjEy
+OiBJbnB1dC9PdXRwdXQgQ2xvY2sgRGVsYXkgcGFpciBpbiBkZWdyZWVzDQo+IGZvciBTRFIxMi4N
+Cj4gPiArICAtIGFyYXNhbi1jbGstcGhhc2UtdWhzLXNkcjI1OiBJbnB1dC9PdXRwdXQgQ2xvY2sg
+RGVsYXkgcGFpciBpbiBkZWdyZWVzDQo+IGZvciBTRFIyNS4NCj4gPiArICAtIGFyYXNhbi1jbGst
+cGhhc2UtdWhzLXNkcjUwOiBJbnB1dC9PdXRwdXQgQ2xvY2sgRGVsYXkgcGFpciBpbiBkZWdyZWVz
+DQo+IGZvciBTRFI1MC4NCj4gPiArICAtIGFyYXNhbi1jbGstcGhhc2UtdWhzLXNkcjEwNDogSW5w
+dXQvT3V0cHV0IENsb2NrIERlbGF5IHBhaXIgaW4gZGVncmVlcw0KPiBmb3IgU0RSMTA0Lg0KPiA+
+ICsgIC0gYXJhc2FuLWNsay1waGFzZS11aHMtZGRyNTA6IElucHV0L091dHB1dCBDbG9jayBEZWxh
+eSBwYWlyIGluIGRlZ3JlZXMNCj4gZm9yIFNEIEREUjUwLg0KPiA+ICsgIC0gYXJhc2FuLWNsay1w
+aGFzZS1tbWMtZGRyNTI6IElucHV0L091dHB1dCBDbG9jayBEZWxheSBwYWlyIGluIGRlZ3JlZXMN
+Cj4gZm9yIE1NQyBERFI1Mi4NCj4gPiArICAtIGFyYXNhbi1jbGstcGhhc2UtbW1jLWhzMjAwOiBJ
+bnB1dC9PdXRwdXQgQ2xvY2sgRGVsYXkgcGFpciBpbiBkZWdyZWVzDQo+IGZvciBNTUMgSFMyMDAu
+DQo+ID4gKyAgLSBhcmFzYW4tY2xrLXBoYXNlLW1tYy1oczQwMDogSW5wdXQvT3V0cHV0IENsb2Nr
+IERlbGF5IHBhaXIgaW4gZGVncmVlcw0KPiBmb3IgTU1DIEhTNDAwLg0KPiANCj4gSSBkb24ndCBt
+aW5kIGlmIHlvdSBjb252ZXJ0IHRoZXNlIHRvIGNvbW1vbiBtbWMgYmluZGluZ3MuDQo+IA0KPiBJ
+IHRoaW5rIG90aGVyIGNvbnRyb2xsZXJzL3BsYXRmb3JtcyBtYXkgZmluZCB0aGVtIHVzZWZ1bCwg
+YXQgbGVhc3QgYXQNCj4gc29tZSBwb2ludCwgaWYgbm90IGFscmVhZHkuDQoNClRoYXQgd2lsbCBi
+ZSBhIGdvb2QgdGhpbmcgdG8gZG8gaW5kZWVkLiBXaWxsIHNlbmQgdjUgd2l0aCBtYWtpbmcgdGhl
+c2UgcHJvcGVydGllcyBhcyBjb21tb24uDQoNClRoYW5rcywNCk1hbmlzaA0KDQo+IA0KPiA+ICsN
+Cj4gPiArICBBYm92ZSBtZW50aW9uZWQgYXJlIHRoZSBjbG9jayAocGhhc2UpIGRlbGF5cyB3aGlj
+aCBhcmUgdG8gYmUNCj4gY29uZmlndXJlZCBpbiB0aGUNCj4gPiArICBjb250cm9sbGVyIHdoaWxl
+IHN3aXRjaGluZyB0byBwYXJ0aWN1bGFyIHNwZWVkIG1vZGUuIFRoZSByYW5nZSBvZiB2YWx1ZXMN
+Cj4gYXJlDQo+ID4gKyAgMCB0byAzNTkgZGVncmVlcy4gSWYgbm90IHNwZWNpZmllZCwgZHJpdmVy
+IHdpbGwgY29uZmlndXJlIHRoZSBkZWZhdWx0IHZhbHVlDQo+ID4gKyAgZGVmaW5lZCBmb3IgcGFy
+dGljdWxhciBtb2RlIGluIGl0Lg0KPiA+DQo+ID4gIEV4YW1wbGU6DQo+ID4gICAgICAgICBzZGhj
+aUBlMDEwMDAwMCB7DQo+ID4gLS0NCj4gPiAyLjE3LjENCj4gPg0KPiANCj4gS2luZCByZWdhcmRz
+DQo+IFVmZmUNCg==
