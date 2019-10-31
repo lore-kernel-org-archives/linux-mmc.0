@@ -1,82 +1,119 @@
-From: Manish Narani <MNARANI@xilinx.com>
-Subject: RE: [PATCH v4 4/8] dt-bindings: mmc: arasan: Add optional properties
- for Arasan SDHCI
-Date: Thu, 31 Oct 2019 08:54:28 +0000
-Message-ID: <MN2PR02MB60299A66F6E18111D34983E6C1630@MN2PR02MB6029.namprd02.prod.outlook.com>
-References: <1572345042-101207-1-git-send-email-manish.narani@xilinx.com>
- <1572345042-101207-4-git-send-email-manish.narani@xilinx.com>
- <CAPDyKFqRmFPaiM=AoiWvy5xhYj=fHTt+S1wu8o0W67Nc5ZZ1kA@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v2 04/11] mmc: host: omap_hsmmc: add code for special init
+ of wl1251 to get rid of pandora_wl1251_init_card
+Date: Thu, 31 Oct 2019 17:23:40 +0100
+Message-ID: <CAPDyKFr3oh9HcExn4Sx0Cd2e0oBTsxz+L4tDvypRFP8=hQP=cg@mail.gmail.com>
+References: <cover.1571510481.git.hns@goldelico.com> <0887d84402f796d1e7361261b88ec6057fbb0065.1571510481.git.hns@goldelico.com>
+ <CAPDyKFp3EjTuCTj+HXhxf+Ssti0hW8eMDR-NrGYWDWSDmQz6Lw@mail.gmail.com> <607E3AE4-65BF-4003-86BE-C70646D53D09@goldelico.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFqRmFPaiM=AoiWvy5xhYj=fHTt+S1wu8o0W67Nc5ZZ1kA@mail.gmail.com>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Adrian Hunter <adrian.hunter@intel.com>, Michal Simek <michals@xilinx.com>, Jolly Shah <JOLLYS@xilinx.com>, Nava kishore Manne <navam@xilinx.com>, Rajan Vaja <RAJANV@xilinx.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, git <git@xilinx.com>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <netdev-owner@vger.kernel.org>
+In-Reply-To: <607E3AE4-65BF-4003-86BE-C70646D53D09@goldelico.com>
+Sender: netdev-owner@vger.kernel.org
+To: "H. Nikolaus Schaller" <hns@goldelico.com>
+Cc: =?UTF-8?Q?Beno=C3=AEt_Cousson?= <bcousson@baylibre.com>, Tony Lindgren <tony@atomide.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Russell King <linux@armlinux.org.uk>, Kalle Valo <kvalo@codeaurora.org>, Mike Rapoport <rppt@linux.ibm.com>, David Sterba <dsterba@suse.com>, "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>, Petr Mladek <pmladek@suse.com>, Sakari Ailus <sakari.ailus@linux.intel.com>, Kefeng Wang <wangkefeng.wang@huawei.com>, Yangtao Li <tiny.windzz@gmail.com>, Alexios Zavras <alexios.zavras@intel.com>, Thomas Gleixner <tglx@linutronix.de>, Allison Randal <allison@lohutok.net>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, John Stultz <john.stultz@linaro.org>, Bjorn Helgaas <bhelgaas@google.com>
 List-Id: linux-mmc@vger.kernel.org
 
-SGkgVWZmZSwNCg0KVGhhbmtzIGZvciB5b3VyIGNvbW1lbnRzLiBQbGVhc2Ugc2VlIGJlbG93IGlu
-bGluZS4NCg0KPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBVbGYgSGFuc3Nv
-biA8dWxmLmhhbnNzb25AbGluYXJvLm9yZz4NCj4gU2VudDogV2VkbmVzZGF5LCBPY3RvYmVyIDMw
-LCAyMDE5IDg6MjcgUE0NCj4gVG86IE1hbmlzaCBOYXJhbmkgPE1OQVJBTklAeGlsaW54LmNvbT4N
-Cj4gQ2M6IFJvYiBIZXJyaW5nIDxyb2JoK2R0QGtlcm5lbC5vcmc+OyBNYXJrIFJ1dGxhbmQNCj4g
-PG1hcmsucnV0bGFuZEBhcm0uY29tPjsgQWRyaWFuIEh1bnRlciA8YWRyaWFuLmh1bnRlckBpbnRl
-bC5jb20+Ow0KPiBNaWNoYWwgU2ltZWsgPG1pY2hhbHNAeGlsaW54LmNvbT47IEpvbGx5IFNoYWgg
-PEpPTExZU0B4aWxpbnguY29tPjsgTmF2YQ0KPiBraXNob3JlIE1hbm5lIDxuYXZhbUB4aWxpbngu
-Y29tPjsgUmFqYW4gVmFqYSA8UkFKQU5WQHhpbGlueC5jb20+Ow0KPiBsaW51eC1tbWNAdmdlci5r
-ZXJuZWwub3JnOyBEVE1MIDxkZXZpY2V0cmVlQHZnZXIua2VybmVsLm9yZz47IExpbnV4DQo+IEtl
-cm5lbCBNYWlsaW5nIExpc3QgPGxpbnV4LWtlcm5lbEB2Z2VyLmtlcm5lbC5vcmc+OyBMaW51eCBB
-Uk0gPGxpbnV4LWFybS0NCj4ga2VybmVsQGxpc3RzLmluZnJhZGVhZC5vcmc+OyBnaXQgPGdpdEB4
-aWxpbnguY29tPg0KPiBTdWJqZWN0OiBSZTogW1BBVENIIHY0IDQvOF0gZHQtYmluZGluZ3M6IG1t
-YzogYXJhc2FuOiBBZGQgb3B0aW9uYWwNCj4gcHJvcGVydGllcyBmb3IgQXJhc2FuIFNESENJDQo+
-IA0KPiBPbiBUdWUsIDI5IE9jdCAyMDE5IGF0IDExOjMwLCBNYW5pc2ggTmFyYW5pIDxtYW5pc2gu
-bmFyYW5pQHhpbGlueC5jb20+DQo+IHdyb3RlOg0KPiA+DQo+ID4gQWRkIG9wdGlvbmFsIHByb3Bl
-cnRpZXMgZm9yIEFyYXNhbiBTREhDSSB3aGljaCBhcmUgdXNlZCB0byBzZXQgY2xrIGRlbGF5cw0K
-PiA+IGZvciBkaWZmZXJlbnQgc3BlZWQgbW9kZXMgaW4gdGhlIGNvbnRyb2xsZXIuDQo+ID4NCj4g
-PiBTaWduZWQtb2ZmLWJ5OiBNYW5pc2ggTmFyYW5pIDxtYW5pc2gubmFyYW5pQHhpbGlueC5jb20+
-DQo+ID4gLS0tDQo+ID4gIC4uLi9kZXZpY2V0cmVlL2JpbmRpbmdzL21tYy9hcmFzYW4sc2RoY2ku
-dHh0ICAgICB8IDE2ICsrKysrKysrKysrKysrKysNCj4gPiAgMSBmaWxlIGNoYW5nZWQsIDE2IGlu
-c2VydGlvbnMoKykNCj4gPg0KPiA+IGRpZmYgLS1naXQgYS9Eb2N1bWVudGF0aW9uL2RldmljZXRy
-ZWUvYmluZGluZ3MvbW1jL2FyYXNhbixzZGhjaS50eHQNCj4gYi9Eb2N1bWVudGF0aW9uL2Rldmlj
-ZXRyZWUvYmluZGluZ3MvbW1jL2FyYXNhbixzZGhjaS50eHQNCj4gPiBpbmRleCBiNTFlNDBiMmUw
-YzUuLmMwZjUwNWI2Y2FiNSAxMDA2NDQNCj4gPiAtLS0gYS9Eb2N1bWVudGF0aW9uL2RldmljZXRy
-ZWUvYmluZGluZ3MvbW1jL2FyYXNhbixzZGhjaS50eHQNCj4gPiArKysgYi9Eb2N1bWVudGF0aW9u
-L2RldmljZXRyZWUvYmluZGluZ3MvbW1jL2FyYXNhbixzZGhjaS50eHQNCj4gPiBAQCAtNDYsNiAr
-NDYsMjIgQEAgT3B0aW9uYWwgUHJvcGVydGllczoNCj4gPiAgICAgIHByb3Blcmx5LiBUZXN0IG1v
-ZGUgY2FuIGJlIHVzZWQgdG8gZm9yY2UgdGhlIGNvbnRyb2xsZXIgdG8gZnVuY3Rpb24uDQo+ID4g
-ICAgLSB4bG54LGludC1jbG9jay1zdGFibGUtYnJva2VuOiB3aGVuIHByZXNlbnQsIHRoZSBjb250
-cm9sbGVyIGFsd2F5cw0KPiByZXBvcnRzDQo+ID4gICAgICB0aGF0IHRoZSBpbnRlcm5hbCBjbG9j
-ayBpcyBzdGFibGUgZXZlbiB3aGVuIGl0IGlzIG5vdC4NCj4gPiArICAtIGFyYXNhbi1jbGstcGhh
-c2UtbGVnYWN5OiBJbnB1dC9PdXRwdXQgQ2xvY2sgRGVsYXkgcGFpciBpbiBkZWdyZWVzIGZvcg0K
-PiBMZWdhY3kgTW9kZS4NCj4gPiArICAtIGFyYXNhbi1jbGstcGhhc2UtbW1jLWhzOiBJbnB1dC9P
-dXRwdXQgQ2xvY2sgRGVsYXkgcGFpciBkZWdyZWVzIGZvcg0KPiBNTUMgSFMuDQo+ID4gKyAgLSBh
-cmFzYW4tY2xrLXBoYXNlLXNkLWhzOiBJbnB1dC9PdXRwdXQgQ2xvY2sgRGVsYXkgcGFpciBpbiBk
-ZWdyZWVzIGZvciBTRA0KPiBIUy4NCj4gPiArICAtIGFyYXNhbi1jbGstcGhhc2UtdWhzLXNkcjEy
-OiBJbnB1dC9PdXRwdXQgQ2xvY2sgRGVsYXkgcGFpciBpbiBkZWdyZWVzDQo+IGZvciBTRFIxMi4N
-Cj4gPiArICAtIGFyYXNhbi1jbGstcGhhc2UtdWhzLXNkcjI1OiBJbnB1dC9PdXRwdXQgQ2xvY2sg
-RGVsYXkgcGFpciBpbiBkZWdyZWVzDQo+IGZvciBTRFIyNS4NCj4gPiArICAtIGFyYXNhbi1jbGst
-cGhhc2UtdWhzLXNkcjUwOiBJbnB1dC9PdXRwdXQgQ2xvY2sgRGVsYXkgcGFpciBpbiBkZWdyZWVz
-DQo+IGZvciBTRFI1MC4NCj4gPiArICAtIGFyYXNhbi1jbGstcGhhc2UtdWhzLXNkcjEwNDogSW5w
-dXQvT3V0cHV0IENsb2NrIERlbGF5IHBhaXIgaW4gZGVncmVlcw0KPiBmb3IgU0RSMTA0Lg0KPiA+
-ICsgIC0gYXJhc2FuLWNsay1waGFzZS11aHMtZGRyNTA6IElucHV0L091dHB1dCBDbG9jayBEZWxh
-eSBwYWlyIGluIGRlZ3JlZXMNCj4gZm9yIFNEIEREUjUwLg0KPiA+ICsgIC0gYXJhc2FuLWNsay1w
-aGFzZS1tbWMtZGRyNTI6IElucHV0L091dHB1dCBDbG9jayBEZWxheSBwYWlyIGluIGRlZ3JlZXMN
-Cj4gZm9yIE1NQyBERFI1Mi4NCj4gPiArICAtIGFyYXNhbi1jbGstcGhhc2UtbW1jLWhzMjAwOiBJ
-bnB1dC9PdXRwdXQgQ2xvY2sgRGVsYXkgcGFpciBpbiBkZWdyZWVzDQo+IGZvciBNTUMgSFMyMDAu
-DQo+ID4gKyAgLSBhcmFzYW4tY2xrLXBoYXNlLW1tYy1oczQwMDogSW5wdXQvT3V0cHV0IENsb2Nr
-IERlbGF5IHBhaXIgaW4gZGVncmVlcw0KPiBmb3IgTU1DIEhTNDAwLg0KPiANCj4gSSBkb24ndCBt
-aW5kIGlmIHlvdSBjb252ZXJ0IHRoZXNlIHRvIGNvbW1vbiBtbWMgYmluZGluZ3MuDQo+IA0KPiBJ
-IHRoaW5rIG90aGVyIGNvbnRyb2xsZXJzL3BsYXRmb3JtcyBtYXkgZmluZCB0aGVtIHVzZWZ1bCwg
-YXQgbGVhc3QgYXQNCj4gc29tZSBwb2ludCwgaWYgbm90IGFscmVhZHkuDQoNClRoYXQgd2lsbCBi
-ZSBhIGdvb2QgdGhpbmcgdG8gZG8gaW5kZWVkLiBXaWxsIHNlbmQgdjUgd2l0aCBtYWtpbmcgdGhl
-c2UgcHJvcGVydGllcyBhcyBjb21tb24uDQoNClRoYW5rcywNCk1hbmlzaA0KDQo+IA0KPiA+ICsN
-Cj4gPiArICBBYm92ZSBtZW50aW9uZWQgYXJlIHRoZSBjbG9jayAocGhhc2UpIGRlbGF5cyB3aGlj
-aCBhcmUgdG8gYmUNCj4gY29uZmlndXJlZCBpbiB0aGUNCj4gPiArICBjb250cm9sbGVyIHdoaWxl
-IHN3aXRjaGluZyB0byBwYXJ0aWN1bGFyIHNwZWVkIG1vZGUuIFRoZSByYW5nZSBvZiB2YWx1ZXMN
-Cj4gYXJlDQo+ID4gKyAgMCB0byAzNTkgZGVncmVlcy4gSWYgbm90IHNwZWNpZmllZCwgZHJpdmVy
-IHdpbGwgY29uZmlndXJlIHRoZSBkZWZhdWx0IHZhbHVlDQo+ID4gKyAgZGVmaW5lZCBmb3IgcGFy
-dGljdWxhciBtb2RlIGluIGl0Lg0KPiA+DQo+ID4gIEV4YW1wbGU6DQo+ID4gICAgICAgICBzZGhj
-aUBlMDEwMDAwMCB7DQo+ID4gLS0NCj4gPiAyLjE3LjENCj4gPg0KPiANCj4gS2luZCByZWdhcmRz
-DQo+IFVmZmUNCg==
+On Wed, 30 Oct 2019 at 18:25, H. Nikolaus Schaller <hns@goldelico.com> wrote:
+>
+> Hi Ulf,
+>
+> > Am 30.10.2019 um 16:51 schrieb Ulf Hansson <ulf.hansson@linaro.org>:
+> >
+> >> +
+> >> +               np = of_get_compatible_child(np, "ti,wl1251");
+> >> +               if (np) {
+> >> +                       /*
+> >> +                        * We have TI wl1251 attached to MMC3. Pass this information to
+> >> +                        * SDIO core because it can't be probed by normal methods.
+> >> +                        */
+> >> +
+> >> +                       dev_info(host->dev, "found wl1251\n");
+> >> +                       card->quirks |= MMC_QUIRK_NONSTD_SDIO;
+> >> +                       card->cccr.wide_bus = 1;
+> >> +                       card->cis.vendor = 0x104c;
+> >> +                       card->cis.device = 0x9066;
+> >> +                       card->cis.blksize = 512;
+> >> +                       card->cis.max_dtr = 24000000;
+> >> +                       card->ocr = 0x80;
+> >
+> > These things should really be figured out by the mmc core during SDIO
+> > card initialization itself, not via the host ops ->init_card()
+> > callback. That is just poor hack, which in the long run should go
+> > away.
+>
+> Yes, I agree.
+>
+> But I am just the poor guy who is trying to fix really broken code with
+> as low effort as possible.
+
+I see. Thanks for looking at this mess!
+
+In general, as long as we improve the code, I am happy to move forward.
+
+However, my main concern at this point, is to make sure we get the DT
+bindings and the DTS files updated correctly. We don't want to come
+back to this again.
+
+>
+> I don't even have a significant clue what this code is exactly doing and what
+> the magic values mean. They were setup by pandora_wl1251_init_card() in the
+> same way so that I have just moved the code here and make it called in (almost)
+> the same situation.
+
+Okay!
+
+>
+> > Moreover, I think we should add a subnode to the host node in the DT,
+> > to describe the embedded SDIO card, rather than parsing the subnode
+> > for the SDIO func - as that seems wrong to me.
+>
+> You mean a second subnode?
+>
+> The wl1251 is the child node of the mmc node and describes the SDIO card.
+> We just check if it is a wl1251 or e.g. wl1837 or something else or even
+> no child.
+
+The reason why I brought this up, was because there are sometimes
+cases where an SDIO card is shared between more than one SDIO func.
+WiFi+Bluetooth for example, but if I am correct, that is not the case
+for wl1251?
+
+That said, I am happy to continue with your approach.
+
+>
+> > To add a subnode for the SDIO card, we already have a binding that I
+> > think we should extend. Please have a look at
+> > Documentation/devicetree/bindings/mmc/mmc-card.txt.
+> >
+> > If you want an example of how to implement this for your case, do a
+> > git grep "broken-hpi" in the driver/mmc/core/, I think it will tell
+> > you more of what I have in mind.
+>
+> So while I agree that it should be improved in the long run, we should
+> IMHO fix the hack first (broken since v4.9!), even if it remains a hack
+> for now. Improving this part seems to be quite independent and focussed
+> on the mmc subsystem, while the other patches involve other subsystems.
+
+I agree.
+
+>
+> Maybe should we make a REVISIT note in the code? Or add something to
+> the commit message about the idea how it should be done right?
+
+Just add a note that we should move this DT parsing of the subnode to
+the mmc core, but that we are leaving that as a future improvement.
+That's good enough. Then I can have a look as a second step, and when
+I get some time, to move this to the mmc core.
+
+However, there is one thing I would like you to add to the series. That is:
+
+In the struct omap_hsmmc_platform_data, there is an ->init_card()
+callback. Beyond the changes of this series, there is no longer any
+users of that, unless I am mistaken. Going forward, let's make sure it
+doesn't get used again, so can you please remove it!?
+
+[...]
+
+Kind regards
+Uffe
