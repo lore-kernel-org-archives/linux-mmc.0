@@ -1,119 +1,153 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 04/11] mmc: host: omap_hsmmc: add code for special init
- of wl1251 to get rid of pandora_wl1251_init_card
-Date: Thu, 31 Oct 2019 17:23:40 +0100
-Message-ID: <CAPDyKFr3oh9HcExn4Sx0Cd2e0oBTsxz+L4tDvypRFP8=hQP=cg@mail.gmail.com>
-References: <cover.1571510481.git.hns@goldelico.com> <0887d84402f796d1e7361261b88ec6057fbb0065.1571510481.git.hns@goldelico.com>
- <CAPDyKFp3EjTuCTj+HXhxf+Ssti0hW8eMDR-NrGYWDWSDmQz6Lw@mail.gmail.com> <607E3AE4-65BF-4003-86BE-C70646D53D09@goldelico.com>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v2 03/11] DTS: ARM: pandora-common: define wl1251 as child
+ node of mmc3
+Date: Thu, 31 Oct 2019 17:59:05 +0100
+Message-ID: <CAPDyKFrbOH=ROv_JefSQsEnmGqN6oFVfbhpqscOK=KUqJgzarw@mail.gmail.com>
+References: <cover.1571510481.git.hns@goldelico.com> <bec9d76e6da03d734649b9bdf76e9d575c57631a.1571510481.git.hns@goldelico.com>
+ <CAPDyKFrMQ3fBaeeAYVJfUdL8m=PDRU9Xt_9oGw6D1XOY68qDuQ@mail.gmail.com> <D9A82904-35BE-41F2-A308-9A49606428B1@goldelico.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <netdev-owner@vger.kernel.org>
-In-Reply-To: <607E3AE4-65BF-4003-86BE-C70646D53D09@goldelico.com>
-Sender: netdev-owner@vger.kernel.org
-To: "H. Nikolaus Schaller" <hns@goldelico.com>
-Cc: =?UTF-8?Q?Beno=C3=AEt_Cousson?= <bcousson@baylibre.com>, Tony Lindgren <tony@atomide.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Russell King <linux@armlinux.org.uk>, Kalle Valo <kvalo@codeaurora.org>, Mike Rapoport <rppt@linux.ibm.com>, David Sterba <dsterba@suse.com>, "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>, Petr Mladek <pmladek@suse.com>, Sakari Ailus <sakari.ailus@linux.intel.com>, Kefeng Wang <wangkefeng.wang@huawei.com>, Yangtao Li <tiny.windzz@gmail.com>, Alexios Zavras <alexios.zavras@intel.com>, Thomas Gleixner <tglx@linutronix.de>, Allison Randal <allison@lohutok.net>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, John Stultz <john.stultz@linaro.org>, Bjorn Helgaas <bhelgaas@google.com>
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <D9A82904-35BE-41F2-A308-9A49606428B1-xXXSsgcRVICgSpxsJD1C4w@public.gmane.org>
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: "H. Nikolaus Schaller" <hns-xXXSsgcRVICgSpxsJD1C4w@public.gmane.org>
+Cc: =?UTF-8?Q?Beno=C3=AEt_Cousson?= <bcousson-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Russell King <linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org>, Kalle Valo <kvalo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Mike Rapoport <rppt-tEXmvtCZX7AybS5Ee8rs3A@public.gmane.org>, David Sterba <dsterba-IBi9RG/b67k@public.gmane.org>, "Rafael J. Wysocki" <rafael.j.wysocki-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Petr Mladek <pmladek-IBi9RG/b67k@public.gmane.org>, Sakari Ailus <sakari.ailus-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Kefeng Wang <wangkefeng.wang-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>, Yangtao Li <tiny.windzz-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Alexios Zavras <alexios.zavras-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Allison Randal <allison-wcfNWazeolPR7s880joybQ@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, John Stultz <john.stultz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Bjorn Helgaas <bhelgaas-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, 30 Oct 2019 at 18:25, H. Nikolaus Schaller <hns@goldelico.com> wrote:
+On Wed, 30 Oct 2019 at 18:25, H. Nikolaus Schaller <hns-xXXSsgcRVICgSpxsJD1C4w@public.gmane.org> wrote:
 >
-> Hi Ulf,
 >
-> > Am 30.10.2019 um 16:51 schrieb Ulf Hansson <ulf.hansson@linaro.org>:
+> > Am 30.10.2019 um 17:44 schrieb Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>:
 > >
+> > On Sat, 19 Oct 2019 at 20:42, H. Nikolaus Schaller <hns-xXXSsgcRVICgSpxsJD1C4w@public.gmane.org> wrote:
+> >>
+> >> Since v4.7 the dma initialization requires that there is a
+> >> device tree property for "rx" and "tx" channels which is
+> >> not provided by the pdata-quirks initialization.
+> >>
+> >> By conversion of the mmc3 setup to device tree this will
+> >> finally allows to remove the OpenPandora wlan specific omap3
+> >> data-quirks.
+> >>
+> >> Fixes: 81eef6ca9201 ("mmc: omap_hsmmc: Use dma_request_chan() for requesting DMA channel")
+> >>
+> >> Signed-off-by: H. Nikolaus Schaller <hns-xXXSsgcRVICgSpxsJD1C4w@public.gmane.org>
+> >> Cc: <stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org> # 4.7.0
+> >> ---
+> >> arch/arm/boot/dts/omap3-pandora-common.dtsi | 37 +++++++++++++++++++--
+> >> 1 file changed, 35 insertions(+), 2 deletions(-)
+> >>
+> >> diff --git a/arch/arm/boot/dts/omap3-pandora-common.dtsi b/arch/arm/boot/dts/omap3-pandora-common.dtsi
+> >> index ec5891718ae6..c595b3eb314d 100644
+> >> --- a/arch/arm/boot/dts/omap3-pandora-common.dtsi
+> >> +++ b/arch/arm/boot/dts/omap3-pandora-common.dtsi
+> >> @@ -226,6 +226,18 @@
+> >>                gpio = <&gpio6 4 GPIO_ACTIVE_HIGH>;     /* GPIO_164 */
+> >>        };
+> >>
+> >> +       /* wl1251 wifi+bt module */
+> >> +       wlan_en: fixed-regulator-wg7210_en {
+> >> +               compatible = "regulator-fixed";
+> >> +               regulator-name = "vwlan";
+> >> +               regulator-min-microvolt = <1800000>;
+> >> +               regulator-max-microvolt = <1800000>;
+> >
+> > I doubt these are correct.
+> >
+> > I guess this should be in the range of 2.7V-3.6V.
+>
+> Well, it is a gpio which enables some LDO inside the
+> wifi chip. We do not really know the voltage it produces
+> and it does not matter. The gpio voltage is 1.8V.
+>
+> Basically we use a fixed-regulator to "translate" a
+> regulator into a control gpio because the mmc interface
+> wants to see a vmmc-supply.
+
+The vmmc supply represent the core power to the SDIO card (or
+SD/(e)MMC). Depending on what voltage range the vmmc supply supports,
+the so called OCR mask is created by the mmc core. The mask is then
+used to let the core negotiate the voltage level with the SDIO card,
+during the card initialization. This is not to confuse with the I/O
+voltage level, which is a different regulator.
+
+Anyway, according to the TI WiLink series specifications, it looks
+like vmmc should be a regulator supporting 3-3.3V (in many schematics
+it's called VBAT).
+
+Furthermore I decided to dig into various DTS files that specifies the
+vmmc regulator, of course for mmc nodes having a subnode specifying an
+SDIO card for a TI WiLink. In most cases a 1.8V fixed GPIO regulator
+is used. This looks wrong to me. The fixed GPIO regulator isn't really
+the one that should model vmmc.
+
+The proper solution, would rather be to use separate regulator for
+vmmc and instead use a so called mmc-pwrseq node to manage the GPIO.
+
+To conclude from my side, as we have lots of DTS that are wrong, I
+don't really care if we add another one in the way you suggest above.
+But feel free to look into the mmc-pwrseq option.
+
+>
+> >
+> >> +               startup-delay-us = <50000>;
+> >> +               regulator-always-on;
+> >
+> > Always on?
+>
+> Oops. Yes, that is something to check!
+
+As it's a GPIO regulator, for sure it's not always on.
+
+>
+> >
+> >> +               enable-active-high;
+> >> +               gpio = <&gpio1 23 GPIO_ACTIVE_HIGH>;
+> >> +       };
 > >> +
-> >> +               np = of_get_compatible_child(np, "ti,wl1251");
-> >> +               if (np) {
-> >> +                       /*
-> >> +                        * We have TI wl1251 attached to MMC3. Pass this information to
-> >> +                        * SDIO core because it can't be probed by normal methods.
-> >> +                        */
+> >>        /* wg7210 (wifi+bt module) 32k clock buffer */
+> >>        wg7210_32k: fixed-regulator-wg7210_32k {
+> >>                compatible = "regulator-fixed";
+> >> @@ -522,9 +534,30 @@
+> >>        /*wp-gpios = <&gpio4 31 GPIO_ACTIVE_HIGH>;*/    /* GPIO_127 */
+> >> };
+> >>
+> >> -/* mmc3 is probed using pdata-quirks to pass wl1251 card data */
+> >> &mmc3 {
+> >> -       status = "disabled";
+> >> +       vmmc-supply = <&wlan_en>;
 > >> +
-> >> +                       dev_info(host->dev, "found wl1251\n");
-> >> +                       card->quirks |= MMC_QUIRK_NONSTD_SDIO;
-> >> +                       card->cccr.wide_bus = 1;
-> >> +                       card->cis.vendor = 0x104c;
-> >> +                       card->cis.device = 0x9066;
-> >> +                       card->cis.blksize = 512;
-> >> +                       card->cis.max_dtr = 24000000;
-> >> +                       card->ocr = 0x80;
-> >
-> > These things should really be figured out by the mmc core during SDIO
-> > card initialization itself, not via the host ops ->init_card()
-> > callback. That is just poor hack, which in the long run should go
-> > away.
+> >> +       bus-width = <4>;
+> >> +       non-removable;
+> >> +       ti,non-removable;
+> >> +       cap-power-off-card;
+> >> +
+> >> +       pinctrl-names = "default";
+> >> +       pinctrl-0 = <&mmc3_pins>;
+> >> +
+> >> +       #address-cells = <1>;
+> >> +       #size-cells = <0>;
+> >> +
+> >> +       wlan: wl1251@1 {
+> >> +               compatible = "ti,wl1251";
+> >> +
+> >> +               reg = <1>;
+> >> +
+> >> +               interrupt-parent = <&gpio1>;
+> >> +               interrupts = <21 IRQ_TYPE_LEVEL_HIGH>;  /* GPIO_21 */
+> >> +
+> >> +               ti,wl1251-has-eeprom;
+> >> +       };
+> >> };
+> >>
+> >> /* bluetooth*/
+> >> --
+> >> 2.19.1
+> >>
 >
-> Yes, I agree.
+> BR and thanks,
+> Nikolaus
 >
-> But I am just the poor guy who is trying to fix really broken code with
-> as low effort as possible.
-
-I see. Thanks for looking at this mess!
-
-In general, as long as we improve the code, I am happy to move forward.
-
-However, my main concern at this point, is to make sure we get the DT
-bindings and the DTS files updated correctly. We don't want to come
-back to this again.
-
->
-> I don't even have a significant clue what this code is exactly doing and what
-> the magic values mean. They were setup by pandora_wl1251_init_card() in the
-> same way so that I have just moved the code here and make it called in (almost)
-> the same situation.
-
-Okay!
-
->
-> > Moreover, I think we should add a subnode to the host node in the DT,
-> > to describe the embedded SDIO card, rather than parsing the subnode
-> > for the SDIO func - as that seems wrong to me.
->
-> You mean a second subnode?
->
-> The wl1251 is the child node of the mmc node and describes the SDIO card.
-> We just check if it is a wl1251 or e.g. wl1837 or something else or even
-> no child.
-
-The reason why I brought this up, was because there are sometimes
-cases where an SDIO card is shared between more than one SDIO func.
-WiFi+Bluetooth for example, but if I am correct, that is not the case
-for wl1251?
-
-That said, I am happy to continue with your approach.
-
->
-> > To add a subnode for the SDIO card, we already have a binding that I
-> > think we should extend. Please have a look at
-> > Documentation/devicetree/bindings/mmc/mmc-card.txt.
-> >
-> > If you want an example of how to implement this for your case, do a
-> > git grep "broken-hpi" in the driver/mmc/core/, I think it will tell
-> > you more of what I have in mind.
->
-> So while I agree that it should be improved in the long run, we should
-> IMHO fix the hack first (broken since v4.9!), even if it remains a hack
-> for now. Improving this part seems to be quite independent and focussed
-> on the mmc subsystem, while the other patches involve other subsystems.
-
-I agree.
-
->
-> Maybe should we make a REVISIT note in the code? Or add something to
-> the commit message about the idea how it should be done right?
-
-Just add a note that we should move this DT parsing of the subnode to
-the mmc core, but that we are leaving that as a future improvement.
-That's good enough. Then I can have a look as a second step, and when
-I get some time, to move this to the mmc core.
-
-However, there is one thing I would like you to add to the series. That is:
-
-In the struct omap_hsmmc_platform_data, there is an ->init_card()
-callback. Beyond the changes of this series, there is no longer any
-users of that, unless I am mistaken. Going forward, let's make sure it
-doesn't get used again, so can you please remove it!?
-
-[...]
 
 Kind regards
 Uffe
