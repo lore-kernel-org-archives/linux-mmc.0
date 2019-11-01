@@ -1,7 +1,7 @@
 From: Manish Narani <manish.narani@xilinx.com>
-Subject: [PATCH v5 4/8] dt-bindings: mmc: Add optional generic properties for mmc
-Date: Fri,  1 Nov 2019 11:35:49 +0530
-Message-ID: <1572588353-110682-5-git-send-email-manish.narani@xilinx.com>
+Subject: [PATCH v5 5/8] mmc: sdhci-of-arasan: Add support to set clock phase delays for SD
+Date: Fri,  1 Nov 2019 11:35:50 +0530
+Message-ID: <1572588353-110682-6-git-send-email-manish.narani@xilinx.com>
 References: <1572588353-110682-1-git-send-email-manish.narani@xilinx.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,116 +12,153 @@ To: ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, adrian.hun
 Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, git@xilinx.com
 List-Id: linux-mmc@vger.kernel.org
 
-Add optional properties for mmc hosts which are used to set clk delays
-for different speed modes in the controller.
+Add support to read Clock Phase Delays from the DT and set it via
+clk_set_phase() API from clock framework. Some of the controllers might
+have their own handling of setting clock delays, for this keep the
+set_clk_delays as function pointer which can be assigned controller
+specific handling of the same.
 
 Signed-off-by: Manish Narani <manish.narani@xilinx.com>
 ---
- .../bindings/mmc/mmc-controller.yaml          | 92 +++++++++++++++++++
+ drivers/mmc/host/sdhci-of-arasan.c | 92 ++++++++++++++++++++++++++++++
  1 file changed, 92 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
-index 080754e0ef35..87a83d966851 100644
---- a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
-+++ b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
-@@ -212,6 +212,98 @@ properties:
-     description:
-       eMMC HS400 enhanced strobe mode is supported
+diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+index b75ba780f902..9452ae01f6fa 100644
+--- a/drivers/mmc/host/sdhci-of-arasan.c
++++ b/drivers/mmc/host/sdhci-of-arasan.c
+@@ -77,12 +77,18 @@ struct sdhci_arasan_soc_ctl_map {
+  * @sdcardclk:		Pointer to normal 'struct clock' for sdcardclk_hw.
+  * @sampleclk_hw:	Struct for the clock we might provide to a PHY.
+  * @sampleclk:		Pointer to normal 'struct clock' for sampleclk_hw.
++ * @clk_phase_in:	Array of Input Clock Phase Delays for all speed modes
++ * @clk_phase_out:	Array of Output Clock Phase Delays for all speed modes
++ * @set_clk_delays:	Function pointer for setting Clock Delays
+  */
+ struct sdhci_arasan_clk_data {
+ 	struct clk_hw	sdcardclk_hw;
+ 	struct clk      *sdcardclk;
+ 	struct clk_hw	sampleclk_hw;
+ 	struct clk      *sampleclk;
++	int		clk_phase_in[MMC_TIMING_MMC_HS400 + 1];
++	int		clk_phase_out[MMC_TIMING_MMC_HS400 + 1];
++	void		(*set_clk_delays)(struct sdhci_host *host);
+ };
  
-+  # Below mentioned are the clock (phase) delays which are to be configured
-+  # in the controller while switching to particular speed mode. The range
-+  # of values are 0 to 359 degrees.
+ /**
+@@ -186,6 +192,7 @@ static void sdhci_arasan_set_clock(struct sdhci_host *host, unsigned int clock)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+ 	struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
++	struct sdhci_arasan_clk_data *clk_data = &sdhci_arasan->clk_data;
+ 	bool ctrl_phy = false;
+ 
+ 	if (!IS_ERR(sdhci_arasan->phy)) {
+@@ -227,6 +234,10 @@ static void sdhci_arasan_set_clock(struct sdhci_host *host, unsigned int clock)
+ 		sdhci_arasan->is_phy_on = false;
+ 	}
+ 
++	/* Set the Input and Output Clock Phase Delays */
++	if (clk_data->set_clk_delays)
++		clk_data->set_clk_delays(host);
 +
-+  clk-phase-legacy:
-+    allOf:
-+      - $ref: /schemas/types.yaml#/definitions/uint32
-+      - minimum: 0
-+      - maximum: 359
-+    description:
-+      Input/Output Clock Delay pair in degrees for Legacy Mode.
+ 	sdhci_set_clock(host, clock);
+ 
+ 	if (sdhci_arasan->quirks & SDHCI_ARASAN_QUIRK_CLOCK_UNSTABLE)
+@@ -650,6 +661,85 @@ static void sdhci_arasan_update_baseclkfreq(struct sdhci_host *host)
+ 	sdhci_arasan_syscon_write(host, &soc_ctl_map->baseclkfreq, mhz);
+ }
+ 
++static void sdhci_arasan_set_clk_delays(struct sdhci_host *host)
++{
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
++	struct sdhci_arasan_clk_data *clk_data = &sdhci_arasan->clk_data;
 +
-+  clk-phase-mmc-hs:
-+    allOf:
-+      - $ref: /schemas/types.yaml#/definitions/uint32
-+      - minimum: 0
-+      - maximum: 359
-+    description:
-+      Input/Output Clock Delay pair degrees for MMC HS.
++	clk_set_phase(clk_data->sampleclk,
++		      clk_data->clk_phase_in[host->timing]);
++	clk_set_phase(clk_data->sdcardclk,
++		      clk_data->clk_phase_out[host->timing]);
++}
 +
-+  clk-phase-sd-hs:
-+    allOf:
-+      - $ref: /schemas/types.yaml#/definitions/uint32
-+      - minimum: 0
-+      - maximum: 359
-+    description:
-+      Input/Output Clock Delay pair in degrees for SD HS.
++static void arasan_dt_read_clk_phase(struct device *dev,
++				     struct sdhci_arasan_clk_data *clk_data,
++				     unsigned int timing, const char *prop)
++{
++	struct device_node *np = dev->of_node;
 +
-+  clk-phase-uhs-sdr12:
-+    allOf:
-+      - $ref: /schemas/types.yaml#/definitions/uint32
-+      - minimum: 0
-+      - maximum: 359
-+    description:
-+      Input/Output Clock Delay pair in degrees for SDR12.
++	int clk_phase[2] = {0};
 +
-+  clk-phase-uhs-sdr25:
-+    allOf:
-+      - $ref: /schemas/types.yaml#/definitions/uint32
-+      - minimum: 0
-+      - maximum: 359
-+    description:
-+      Input/Output Clock Delay pair in degrees for SDR25.
++	/*
++	 * Read Tap Delay values from DT, if the DT does not contain the
++	 * Tap Values then use the pre-defined values.
++	 */
++	if (of_property_read_variable_u32_array(np, prop, &clk_phase[0],
++						2, 0)) {
++		dev_dbg(dev, "Using predefined clock phase for %s = %d %d\n",
++			prop, clk_data->clk_phase_in[timing],
++			clk_data->clk_phase_out[timing]);
++		return;
++	}
 +
-+  clk-phase-uhs-sdr50:
-+    allOf:
-+      - $ref: /schemas/types.yaml#/definitions/uint32
-+      - minimum: 0
-+      - maximum: 359
-+    description:
-+      Input/Output Clock Delay pair in degrees for SDR50.
++	/* The values read are Input and Output Clock Delays in order */
++	clk_data->clk_phase_in[timing] = clk_phase[0];
++	clk_data->clk_phase_out[timing] = clk_phase[1];
++}
 +
-+  clk-phase-uhs-sdr104:
-+    allOf:
-+      - $ref: /schemas/types.yaml#/definitions/uint32
-+      - minimum: 0
-+      - maximum: 359
-+    description:
-+      Input/Output Clock Delay pair in degrees for SDR104.
++/**
++ * arasan_dt_parse_clk_phases - Read Clock Delay values from DT
++ *
++ * Called at initialization to parse the values of Clock Delays.
++ *
++ * @dev:		Pointer to our struct device.
++ * @clk_data:		Pointer to the Clock Data structure
++ */
++static void arasan_dt_parse_clk_phases(struct device *dev,
++				       struct sdhci_arasan_clk_data *clk_data)
++{
++	/*
++	 * This has been kept as a pointer and is assigned a function here.
++	 * So that different controller variants can assign their own handling
++	 * function.
++	 */
++	clk_data->set_clk_delays = sdhci_arasan_set_clk_delays;
 +
-+  clk-phase-uhs-ddr50:
-+    allOf:
-+      - $ref: /schemas/types.yaml#/definitions/uint32
-+      - minimum: 0
-+      - maximum: 359
-+    description:
-+      Input/Output Clock Delay pair in degrees for SD DDR50.
++	arasan_dt_read_clk_phase(dev, clk_data, MMC_TIMING_LEGACY,
++				 "clk-phase-legacy");
++	arasan_dt_read_clk_phase(dev, clk_data, MMC_TIMING_MMC_HS,
++				 "clk-phase-mmc-hs");
++	arasan_dt_read_clk_phase(dev, clk_data, MMC_TIMING_SD_HS,
++				 "clk-phase-sd-hs");
++	arasan_dt_read_clk_phase(dev, clk_data, MMC_TIMING_UHS_SDR12,
++				 "clk-phase-uhs-sdr12");
++	arasan_dt_read_clk_phase(dev, clk_data, MMC_TIMING_UHS_SDR25,
++				 "clk-phase-uhs-sdr25");
++	arasan_dt_read_clk_phase(dev, clk_data, MMC_TIMING_UHS_SDR50,
++				 "clk-phase-uhs-sdr50");
++	arasan_dt_read_clk_phase(dev, clk_data, MMC_TIMING_UHS_SDR104,
++				 "clk-phase-uhs-sdr104");
++	arasan_dt_read_clk_phase(dev, clk_data, MMC_TIMING_UHS_DDR50,
++				 "clk-phase-uhs-ddr50");
++	arasan_dt_read_clk_phase(dev, clk_data, MMC_TIMING_MMC_DDR52,
++				 "clk-phase-mmc-ddr52");
++	arasan_dt_read_clk_phase(dev, clk_data, MMC_TIMING_MMC_HS200,
++				 "clk-phase-mmc-hs200");
++	arasan_dt_read_clk_phase(dev, clk_data, MMC_TIMING_MMC_HS400,
++				 "clk-phase-mmc-hs400");
++}
 +
-+  clk-phase-mmc-ddr52:
-+    allOf:
-+      - $ref: /schemas/types.yaml#/definitions/uint32
-+      - minimum: 0
-+      - maximum: 359
-+    description:
-+      Input/Output Clock Delay pair in degrees for MMC DDR52.
+ /**
+  * sdhci_arasan_register_sdcardclk - Register the sdcardclk for a PHY to use
+  *
+@@ -942,6 +1032,8 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
+ 	if (ret)
+ 		goto clk_disable_all;
+ 
++	arasan_dt_parse_clk_phases(&pdev->dev, &sdhci_arasan->clk_data);
 +
-+  clk-phase-mmc-hs200:
-+    allOf:
-+      - $ref: /schemas/types.yaml#/definitions/uint32
-+      - minimum: 0
-+      - maximum: 359
-+    description:
-+      Input/Output Clock Delay pair in degrees for MMC HS200.
-+
-+  clk-phase-mmc-hs400:
-+    allOf:
-+      - $ref: /schemas/types.yaml#/definitions/uint32
-+      - minimum: 0
-+      - maximum: 359
-+    description:
-+      Input/Output Clock Delay pair in degrees for MMC HS400.
-+
-   dsr:
-     allOf:
-       - $ref: /schemas/types.yaml#/definitions/uint32
+ 	ret = mmc_of_parse(host->mmc);
+ 	if (ret) {
+ 		if (ret != -EPROBE_DEFER)
 -- 
 2.17.1
