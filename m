@@ -1,34 +1,80 @@
-From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: Re: [PATCH v2 2/7] mac80211: Use debugfs_create_xul() helper
-Date: Mon, 4 Nov 2019 08:39:35 +0100
-Message-ID: <20191104073935.GA1292321@kroah.com>
-References: <20191025094130.26033-1-geert+renesas@glider.be>
- <20191025094130.26033-3-geert+renesas@glider.be>
- <69baa44c928ae7f6ca1f4631b7beb6b2c2b1c033.camel@sipsolutions.net>
+From: Jianxin Pan <jianxin.pan@amlogic.com>
+Subject: [PATCH v2] mmc: meson-gx: fix mmc dma operation
+Date: Mon, 4 Nov 2019 19:54:55 +0800
+Message-ID: <1572868495-84816-1-git-send-email-jianxin.pan@amlogic.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <69baa44c928ae7f6ca1f4631b7beb6b2c2b1c033.camel@sipsolutions.net>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Johannes Berg <johannes@sipsolutions.net>
-Cc: Geert Uytterhoeven <geert+renesas@glider.be>, Jonathan Corbet <corbet@lwn.net>, Ludovic Desroches <ludovic.desroches@microchip.com>, Ulf Hansson <ulf.hansson@linaro.org>, Nicolas Ferre <nicolas.ferre@microchip.com>, Alexandre Belloni <alexandre.belloni@bootlin.com>, Jaehoon Chung <jh80.chung@samsung.com>, "David S . Miller" <davem@davemloft.net>, "Rafael J . Wysocki" <rafael@kernel.org>, linux-doc@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, netdev@vger.kernel.org, linux-wireless@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Kevin Hilman <khilman@baylibre.com>
+Cc: Nan Li <nan.li@amlogic.com>, Jianxin Pan <jianxin.pan@amlogic.com>, Jerome Brunet <jbrunet@baylibre.com>, Neil Armstrong <narmstrong@baylibre.com>, linux-amlogic@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Victor Wan <victor.wan@amlogic.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, Nov 04, 2019 at 08:28:57AM +0100, Johannes Berg wrote:
-> On Fri, 2019-10-25 at 11:41 +0200, Geert Uytterhoeven wrote:
-> > Use the new debugfs_create_xul() helper instead of open-coding the same
-> > operation.
-> > 
-> > Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
-> 
-> Sorry Greg, this slipped through on my side.
-> 
-> Acked-by: Johannes Berg <johannes@sipsolutions.net>
-> 
-> Do you prefer to take this to your tree still, or should I pick it up
-> later once debugfs_create_xul() is available (to me)?
+From: Nan Li <nan.li@amlogic.com>
 
-I can take it now, thanks!
+In MMC dma transfer, the region requested by dma_map_sg() may be released
+by dma_unmap_sg() before the transfer is completed.
 
-greg k-h
+Put the unmap operation in front of mmc_request_done() to avoid this.
+
+Fixes: 79ed05e329c3 ("mmc: meson-gx: add support for descriptor chain mode")
+Signed-off-by: Nan Li <nan.li@amlogic.com>
+Signed-off-by: Jianxin Pan <jianxin.pan@amlogic.com>
+---
+ drivers/mmc/host/meson-gx-mmc.c | 15 ++++++++-------
+ 1 file changed, 8 insertions(+), 7 deletions(-)
+
+diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
+index e712315..7667e8a 100644
+--- a/drivers/mmc/host/meson-gx-mmc.c
++++ b/drivers/mmc/host/meson-gx-mmc.c
+@@ -173,6 +173,7 @@ struct meson_host {
+ 	int irq;
+ 
+ 	bool vqmmc_enabled;
++	bool needs_pre_post_req;
+ };
+ 
+ #define CMD_CFG_LENGTH_MASK GENMASK(8, 0)
+@@ -654,6 +655,8 @@ static void meson_mmc_request_done(struct mmc_host *mmc,
+ 	struct meson_host *host = mmc_priv(mmc);
+ 
+ 	host->cmd = NULL;
++	if (host->needs_pre_post_req)
++		meson_mmc_post_req(mmc, mrq, 0);
+ 	mmc_request_done(host->mmc, mrq);
+ }
+ 
+@@ -803,25 +806,23 @@ static void meson_mmc_start_cmd(struct mmc_host *mmc, struct mmc_command *cmd)
+ static void meson_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ {
+ 	struct meson_host *host = mmc_priv(mmc);
+-	bool needs_pre_post_req = mrq->data &&
++
++	host->needs_pre_post_req = mrq->data &&
+ 			!(mrq->data->host_cookie & SD_EMMC_PRE_REQ_DONE);
+ 
+-	if (needs_pre_post_req) {
++	if (host->needs_pre_post_req) {
+ 		meson_mmc_get_transfer_mode(mmc, mrq);
+ 		if (!meson_mmc_desc_chain_mode(mrq->data))
+-			needs_pre_post_req = false;
++			host->needs_pre_post_req = false;
+ 	}
+ 
+-	if (needs_pre_post_req)
++	if (host->needs_pre_post_req)
+ 		meson_mmc_pre_req(mmc, mrq);
+ 
+ 	/* Stop execution */
+ 	writel(0, host->regs + SD_EMMC_START);
+ 
+ 	meson_mmc_start_cmd(mmc, mrq->sbc ?: mrq->cmd);
+-
+-	if (needs_pre_post_req)
+-		meson_mmc_post_req(mmc, mrq, 0);
+ }
+ 
+ static void meson_mmc_read_resp(struct mmc_host *mmc, struct mmc_command *cmd)
+-- 
+2.7.4
