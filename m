@@ -1,168 +1,173 @@
-From: Christian Zigotzky <chzigotzky@xenosoft.de>
-Subject: Re: Onboard SD card doesn't work anymore after the 'mmc-v5.4-2'
- updates
-Date: Mon, 4 Nov 2019 15:44:35 +0100
-Message-ID: <668ae8d5-f9f9-6304-d389-a854da53c2d2@xenosoft.de>
-References: <7b549219-a2e1-08c7-331b-9c3e4fdb8a8f@xenosoft.de>
- <3aeae0d8-e9be-2585-cbbd-70263cb495f1@xenosoft.de>
- <20191015125105.GU25745@shell.armlinux.org.uk>
- <5611f3bc-68aa-78ec-182a-1cb414202314@xenosoft.de>
- <20191015131750.GV25745@shell.armlinux.org.uk>
- <87muds586t.fsf@mpe.ellerman.id.au>
- <AD53973C-4491-4114-9CEE-81F516EF6249@xenosoft.de>
+From: Jerome Brunet <jbrunet@baylibre.com>
+Subject: Re: [PATCH v2] mmc: meson-gx: fix mmc dma operation
+Date: Mon, 04 Nov 2019 17:46:29 +0100
+Message-ID: <1ja79b4mje.fsf@starbuckisacylon.baylibre.com>
+References: <1572868495-84816-1-git-send-email-jianxin.pan@amlogic.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
-In-Reply-To: <AD53973C-4491-4114-9CEE-81F516EF6249@xenosoft.de>
-Content-Language: de-DE
-List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
- <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev/>
-List-Post: <mailto:linuxppc-dev@lists.ozlabs.org>
-List-Help: <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
- <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=subscribe>
-Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
-Sender: "Linuxppc-dev"
- <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
-To: Michael Ellerman <mpe@ellerman.id.au>
-Cc: ulf.hansson@linaro.org, mad skateman <madskateman@gmail.com>, linux-mmc@vger.kernel.org, Russell King - ARM Linux admin <linux@armlinux.org.uk>, Rob Herring <robh+dt@kernel.org>, Paul Mackerras <paulus@samba.org>, "R.T.Dickinson" <rtd2@xtra.co.nz>, "contact@a-eon.com" <contact@a-eon.com>, linuxppc-dev@lists.ozlabs.org, Christian Zigotzky <info@xenosoft.de>
+Content-Type: text/plain
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-reply-to: <1572868495-84816-1-git-send-email-jianxin.pan@amlogic.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Jianxin Pan <jianxin.pan@amlogic.com>, Ulf Hansson <ulf.hansson@linaro.org>, Kevin Hilman <khilman@baylibre.com>
+Cc: Nan Li <nan.li@amlogic.com>, Neil Armstrong <narmstrong@baylibre.com>, linux-amlogic@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Victor Wan <victor.wan@amlogic.com>
 List-Id: linux-mmc@vger.kernel.org
 
-FYI: The onboard SD card works also with the RC6 of kernel 5.4 with the 
-patch below.
 
--- Christian
+On Mon 04 Nov 2019 at 12:54, Jianxin Pan <jianxin.pan@amlogic.com> wrote:
 
-On 23 October 2019 at 4:20pm, Christian Zigotzky wrote:
-> Hello,
+> From: Nan Li <nan.li@amlogic.com>
 >
-> The patch below works. I compiled the RC4 of kernel 5.4 with this patch today and the onboard SD card works without any problems.
+> In MMC dma transfer, the region requested by dma_map_sg() may be released
+> by dma_unmap_sg() before the transfer is completed.
 >
-> Thanks!
+> Put the unmap operation in front of mmc_request_done() to avoid this.
+
+In the previous thread, you have described what was the issue you found.
+It would be nice to have this information here
+
 >
-> Christian
+> Fixes: 79ed05e329c3 ("mmc: meson-gx: add support for descriptor chain mode")
+> Signed-off-by: Nan Li <nan.li@amlogic.com>
+> Signed-off-by: Jianxin Pan <jianxin.pan@amlogic.com>
+> ---
+>  drivers/mmc/host/meson-gx-mmc.c | 15 ++++++++-------
+>  1 file changed, 8 insertions(+), 7 deletions(-)
+
+Based on Uffe comment I tried something else.
+
+Basically, it enables chained mode in the driver only when the framework
+calls pre/post_req callback. As far as understood, the framework calls
+this when there is more than one request pending ... which seems to be
+when chained mode actually make sense
+
+----8<-----
+diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
+index e712315c7e8d..399604b4124d 100644
+--- a/drivers/mmc/host/meson-gx-mmc.c
++++ b/drivers/mmc/host/meson-gx-mmc.c
+@@ -126,8 +126,7 @@
+ #define SD_EMMC_CFG_CMD_GAP 16 /* in clock cycles */
+ #define SD_EMMC_DESC_BUF_LEN PAGE_SIZE
+ 
+-#define SD_EMMC_PRE_REQ_DONE BIT(0)
+-#define SD_EMMC_DESC_CHAIN_MODE BIT(1)
++#define SD_EMMC_DESC_CHAIN_MODE BIT(0)
+ 
+ #define MUX_CLK_NUM_PARENTS 2
+ 
+@@ -228,7 +227,6 @@ static void meson_mmc_get_transfer_mode(struct mmc_host *mmc,
+ 	struct mmc_data *data = mrq->data;
+ 	struct scatterlist *sg;
+ 	int i;
+-	bool use_desc_chain_mode = true;
+ 
+ 	/*
+ 	 * When Controller DMA cannot directly access DDR memory, disable
+@@ -251,12 +249,11 @@ static void meson_mmc_get_transfer_mode(struct mmc_host *mmc,
+ 		/* check for 8 byte alignment */
+ 		if (sg->offset & 7) {
+ 			WARN_ONCE(1, "unaligned scatterlist buffer\n");
+-			use_desc_chain_mode = false;
+-			break;
++			return;
+ 		}
+ 
+-	if (use_desc_chain_mode)
+-		data->host_cookie |= SD_EMMC_DESC_CHAIN_MODE;
++	/* The planets are aligned, let's chain them up */
++	data->host_cookie |= SD_EMMC_DESC_CHAIN_MODE;
+ }
+ 
+ static inline bool meson_mmc_desc_chain_mode(const struct mmc_data *data)
+@@ -278,7 +275,6 @@ static void meson_mmc_pre_req(struct mmc_host *mmc, struct mmc_request *mrq)
+ 		return;
+ 
+ 	meson_mmc_get_transfer_mode(mmc, mrq);
+-	data->host_cookie |= SD_EMMC_PRE_REQ_DONE;
+ 
+ 	if (!meson_mmc_desc_chain_mode(data))
+ 		return;
+@@ -803,25 +799,11 @@ static void meson_mmc_start_cmd(struct mmc_host *mmc, struct mmc_command *cmd)
+ static void meson_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ {
+ 	struct meson_host *host = mmc_priv(mmc);
+-	bool needs_pre_post_req = mrq->data &&
+-			!(mrq->data->host_cookie & SD_EMMC_PRE_REQ_DONE);
+-
+-	if (needs_pre_post_req) {
+-		meson_mmc_get_transfer_mode(mmc, mrq);
+-		if (!meson_mmc_desc_chain_mode(mrq->data))
+-			needs_pre_post_req = false;
+-	}
+-
+-	if (needs_pre_post_req)
+-		meson_mmc_pre_req(mmc, mrq);
+ 
+ 	/* Stop execution */
+ 	writel(0, host->regs + SD_EMMC_START);
+ 
+ 	meson_mmc_start_cmd(mmc, mrq->sbc ?: mrq->cmd);
+-
+-	if (needs_pre_post_req)
+-		meson_mmc_post_req(mmc, mrq, 0);
+ }
+ 
+ static void meson_mmc_read_resp(struct mmc_host *mmc, struct mmc_command *cmd)
+---->8-----
+
+No performance hit AFAICT.
+>From your description, it should address your problem too.
+
 >
->> On 23. Oct 2019, at 07:42, Michael Ellerman <mpe@ellerman.id.au> wrote:
->>
->> Russell King - ARM Linux admin <linux@armlinux.org.uk> writes:
->>>> On Tue, Oct 15, 2019 at 03:12:49PM +0200, Christian Zigotzky wrote:
->>>> Hello Russell,
->>>>
->>>> You asked me about "dma-coherent" in the Cyrus device tree. Unfortunately I
->>>> don't find the property "dma-coherent" in the dtb source files.
->>>>
->>>> Output of "fdtdump cyrus_p5020_eth_poweroff.dtb | grep dma":
->>>>
->>>> dma0 = "/soc@ffe000000/dma@100300";
->>>>          dma1 = "/soc@ffe000000/dma@101300";
->>>>          dma@100300 {
->>>>              compatible = "fsl,eloplus-dma";
->>>>              dma-channel@0 {
->>>>                  compatible = "fsl,eloplus-dma-channel";
->>>>              dma-channel@80 {
->>>>                  compatible = "fsl,eloplus-dma-channel";
->>>>              dma-channel@100 {
->>>>                  compatible = "fsl,eloplus-dma-channel";
->>>>              dma-channel@180 {
->>>>                  compatible = "fsl,eloplus-dma-channel";
->>>>          dma@101300 {
->>>>              compatible = "fsl,eloplus-dma";
->>>>              dma-channel@0 {
->>>>                  compatible = "fsl,eloplus-dma-channel";
->>>>              dma-channel@80 {
->>>>                  compatible = "fsl,eloplus-dma-channel";
->>>>              dma-channel@100 {
->>>>                  compatible = "fsl,eloplus-dma-channel";
->>>>              dma-channel@180 {
->>>>                  compatible = "fsl,eloplus-dma-channel";
->>> Hmm, so it looks like PowerPC doesn't mark devices that are dma
->>> coherent with a property that describes them as such.
->>>
->>> I think this opens a wider question - what should of_dma_is_coherent()
->>> return for PowerPC?  It seems right now that it returns false for
->>> devices that are DMA coherent, which seems to me to be a recipe for
->>> future mistakes.
->> Right, it seems of_dma_is_coherent() has baked in the assumption that
->> devices are non-coherent unless explicitly marked as coherent.
->>
->> Which is wrong on all or at least most existing powerpc systems
->> according to Ben.
->>
->>> Any ideas from the PPC maintainers?
->> Fixing it at the source seems like the best option to prevent future
->> breakage.
->>
->> So I guess that would mean making of_dma_is_coherent() return true/false
->> based on CONFIG_NOT_COHERENT_CACHE on powerpc.
->>
->> We could do it like below, which would still allow the dma-coherent
->> property to work if it ever makes sense on a future powerpc platform.
->>
->> I don't really know any of this embedded stuff well, so happy to take
->> other suggestions on how to handle this mess.
->>
->> cheers
->>
->>
->> diff --git a/arch/powerpc/kernel/setup-common.c b/arch/powerpc/kernel/setup-common.c
->> index 25aaa3903000..b96c9010acb6 100644
->> --- a/arch/powerpc/kernel/setup-common.c
->> +++ b/arch/powerpc/kernel/setup-common.c
->> @@ -760,6 +760,22 @@ static int __init check_cache_coherency(void)
->> late_initcall(check_cache_coherency);
->> #endif /* CONFIG_CHECK_CACHE_COHERENCY */
->>
->> +#ifndef CONFIG_NOT_COHERENT_CACHE
->> +/*
->> + * For historical reasons powerpc kernels are built with hard wired knowledge of
->> + * whether or not DMA accesses are cache coherent. Additionally device trees on
->> + * powerpc do not typically support the dma-coherent property.
->> + *
->> + * So when we know that DMA is coherent, override arch_of_dma_is_coherent() to
->> + * tell the drivers/of code that all devices are coherent regardless of whether
->> + * they have a dma-coherent property.
->> + */
->> +bool arch_of_dma_is_coherent(struct device_node *np)
->> +{
->> +    return true;
->> +}
->> +#endif
->> +
->> #ifdef CONFIG_DEBUG_FS
->> struct dentry *powerpc_debugfs_root;
->> EXPORT_SYMBOL(powerpc_debugfs_root);
->> diff --git a/drivers/of/address.c b/drivers/of/address.c
->> index 978427a9d5e6..3a4b2949a322 100644
->> --- a/drivers/of/address.c
->> +++ b/drivers/of/address.c
->> @@ -993,6 +993,14 @@ int of_dma_get_range(struct device_node *np, u64 *dma_addr, u64 *paddr, u64 *siz
->> }
->> EXPORT_SYMBOL_GPL(of_dma_get_range);
->>
->> +/*
->> + * arch_of_dma_is_coherent - Arch hook to determine if device is coherent for DMA
->> + */
->> +bool __weak arch_of_dma_is_coherent(struct device_node *np)
->> +{
->> +    return false;
->> +}
->> +
->> /**
->>   * of_dma_is_coherent - Check if device is coherent
->>   * @np:    device node
->> @@ -1002,8 +1010,12 @@ EXPORT_SYMBOL_GPL(of_dma_get_range);
->>   */
->> bool of_dma_is_coherent(struct device_node *np)
->> {
->> -    struct device_node *node = of_node_get(np);
->> +    struct device_node *node;
->> +
->> +    if (arch_of_dma_is_coherent(np))
->> +        return true;
->>
->> +    np = of_node_get(np);
->>     while (node) {
->>         if (of_property_read_bool(node, "dma-coherent")) {
->>             of_node_put(node);
+> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
+> index e712315..7667e8a 100644
+> --- a/drivers/mmc/host/meson-gx-mmc.c
+> +++ b/drivers/mmc/host/meson-gx-mmc.c
+> @@ -173,6 +173,7 @@ struct meson_host {
+>  	int irq;
+>  
+>  	bool vqmmc_enabled;
+> +	bool needs_pre_post_req;
+>  };
+>  
+>  #define CMD_CFG_LENGTH_MASK GENMASK(8, 0)
+> @@ -654,6 +655,8 @@ static void meson_mmc_request_done(struct mmc_host *mmc,
+>  	struct meson_host *host = mmc_priv(mmc);
+>  
+>  	host->cmd = NULL;
+> +	if (host->needs_pre_post_req)
+> +		meson_mmc_post_req(mmc, mrq, 0);
+>  	mmc_request_done(host->mmc, mrq);
+>  }
+>  
+> @@ -803,25 +806,23 @@ static void meson_mmc_start_cmd(struct mmc_host *mmc, struct mmc_command *cmd)
+>  static void meson_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>  {
+>  	struct meson_host *host = mmc_priv(mmc);
+> -	bool needs_pre_post_req = mrq->data &&
+> +
+> +	host->needs_pre_post_req = mrq->data &&
+>  			!(mrq->data->host_cookie & SD_EMMC_PRE_REQ_DONE);
+>  
+> -	if (needs_pre_post_req) {
+> +	if (host->needs_pre_post_req) {
+>  		meson_mmc_get_transfer_mode(mmc, mrq);
+>  		if (!meson_mmc_desc_chain_mode(mrq->data))
+> -			needs_pre_post_req = false;
+> +			host->needs_pre_post_req = false;
+>  	}
+>  
+> -	if (needs_pre_post_req)
+> +	if (host->needs_pre_post_req)
+>  		meson_mmc_pre_req(mmc, mrq);
+>  
+>  	/* Stop execution */
+>  	writel(0, host->regs + SD_EMMC_START);
+>  
+>  	meson_mmc_start_cmd(mmc, mrq->sbc ?: mrq->cmd);
+> -
+> -	if (needs_pre_post_req)
+> -		meson_mmc_post_req(mmc, mrq, 0);
+>  }
+>  
+>  static void meson_mmc_read_resp(struct mmc_host *mmc, struct mmc_command *cmd)
