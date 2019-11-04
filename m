@@ -1,173 +1,145 @@
-From: Jerome Brunet <jbrunet@baylibre.com>
-Subject: Re: [PATCH v2] mmc: meson-gx: fix mmc dma operation
-Date: Mon, 04 Nov 2019 17:46:29 +0100
-Message-ID: <1ja79b4mje.fsf@starbuckisacylon.baylibre.com>
-References: <1572868495-84816-1-git-send-email-jianxin.pan@amlogic.com>
+From: Rob Herring <robh@kernel.org>
+Subject: Re: [PATCH v5 4/8] dt-bindings: mmc: Add optional generic properties
+ for mmc
+Date: Mon, 4 Nov 2019 17:14:27 -0600
+Message-ID: <20191104231427.GA7606@bogus>
+References: <1572588353-110682-1-git-send-email-manish.narani@xilinx.com>
+ <1572588353-110682-5-git-send-email-manish.narani@xilinx.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-reply-to: <1572868495-84816-1-git-send-email-jianxin.pan@amlogic.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Jianxin Pan <jianxin.pan@amlogic.com>, Ulf Hansson <ulf.hansson@linaro.org>, Kevin Hilman <khilman@baylibre.com>
-Cc: Nan Li <nan.li@amlogic.com>, Neil Armstrong <narmstrong@baylibre.com>, linux-amlogic@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Victor Wan <victor.wan@amlogic.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Disposition: inline
+In-Reply-To: <1572588353-110682-5-git-send-email-manish.narani@xilinx.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Manish Narani <manish.narani@xilinx.com>
+Cc: mark.rutland@arm.com, devicetree@vger.kernel.org, ulf.hansson@linaro.org, rajan.vaja@xilinx.com, nava.manne@xilinx.com, linux-mmc@vger.kernel.org, adrian.hunter@intel.com, michal.simek@xilinx.com, linux-arm-kernel@lists.infradead.org, jolly.shah@xilinx.com, linux-kernel@vger.kernel.org, git@xilinx.com
 List-Id: linux-mmc@vger.kernel.org
 
-
-On Mon 04 Nov 2019 at 12:54, Jianxin Pan <jianxin.pan@amlogic.com> wrote:
-
-> From: Nan Li <nan.li@amlogic.com>
->
-> In MMC dma transfer, the region requested by dma_map_sg() may be released
-> by dma_unmap_sg() before the transfer is completed.
->
-> Put the unmap operation in front of mmc_request_done() to avoid this.
-
-In the previous thread, you have described what was the issue you found.
-It would be nice to have this information here
-
->
-> Fixes: 79ed05e329c3 ("mmc: meson-gx: add support for descriptor chain mode")
-> Signed-off-by: Nan Li <nan.li@amlogic.com>
-> Signed-off-by: Jianxin Pan <jianxin.pan@amlogic.com>
+On Fri, Nov 01, 2019 at 11:35:49AM +0530, Manish Narani wrote:
+> Add optional properties for mmc hosts which are used to set clk delays
+> for different speed modes in the controller.
+> 
+> Signed-off-by: Manish Narani <manish.narani@xilinx.com>
 > ---
->  drivers/mmc/host/meson-gx-mmc.c | 15 ++++++++-------
->  1 file changed, 8 insertions(+), 7 deletions(-)
-
-Based on Uffe comment I tried something else.
-
-Basically, it enables chained mode in the driver only when the framework
-calls pre/post_req callback. As far as understood, the framework calls
-this when there is more than one request pending ... which seems to be
-when chained mode actually make sense
-
-----8<-----
-diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-index e712315c7e8d..399604b4124d 100644
---- a/drivers/mmc/host/meson-gx-mmc.c
-+++ b/drivers/mmc/host/meson-gx-mmc.c
-@@ -126,8 +126,7 @@
- #define SD_EMMC_CFG_CMD_GAP 16 /* in clock cycles */
- #define SD_EMMC_DESC_BUF_LEN PAGE_SIZE
- 
--#define SD_EMMC_PRE_REQ_DONE BIT(0)
--#define SD_EMMC_DESC_CHAIN_MODE BIT(1)
-+#define SD_EMMC_DESC_CHAIN_MODE BIT(0)
- 
- #define MUX_CLK_NUM_PARENTS 2
- 
-@@ -228,7 +227,6 @@ static void meson_mmc_get_transfer_mode(struct mmc_host *mmc,
- 	struct mmc_data *data = mrq->data;
- 	struct scatterlist *sg;
- 	int i;
--	bool use_desc_chain_mode = true;
- 
- 	/*
- 	 * When Controller DMA cannot directly access DDR memory, disable
-@@ -251,12 +249,11 @@ static void meson_mmc_get_transfer_mode(struct mmc_host *mmc,
- 		/* check for 8 byte alignment */
- 		if (sg->offset & 7) {
- 			WARN_ONCE(1, "unaligned scatterlist buffer\n");
--			use_desc_chain_mode = false;
--			break;
-+			return;
- 		}
- 
--	if (use_desc_chain_mode)
--		data->host_cookie |= SD_EMMC_DESC_CHAIN_MODE;
-+	/* The planets are aligned, let's chain them up */
-+	data->host_cookie |= SD_EMMC_DESC_CHAIN_MODE;
- }
- 
- static inline bool meson_mmc_desc_chain_mode(const struct mmc_data *data)
-@@ -278,7 +275,6 @@ static void meson_mmc_pre_req(struct mmc_host *mmc, struct mmc_request *mrq)
- 		return;
- 
- 	meson_mmc_get_transfer_mode(mmc, mrq);
--	data->host_cookie |= SD_EMMC_PRE_REQ_DONE;
- 
- 	if (!meson_mmc_desc_chain_mode(data))
- 		return;
-@@ -803,25 +799,11 @@ static void meson_mmc_start_cmd(struct mmc_host *mmc, struct mmc_command *cmd)
- static void meson_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
- {
- 	struct meson_host *host = mmc_priv(mmc);
--	bool needs_pre_post_req = mrq->data &&
--			!(mrq->data->host_cookie & SD_EMMC_PRE_REQ_DONE);
--
--	if (needs_pre_post_req) {
--		meson_mmc_get_transfer_mode(mmc, mrq);
--		if (!meson_mmc_desc_chain_mode(mrq->data))
--			needs_pre_post_req = false;
--	}
--
--	if (needs_pre_post_req)
--		meson_mmc_pre_req(mmc, mrq);
- 
- 	/* Stop execution */
- 	writel(0, host->regs + SD_EMMC_START);
- 
- 	meson_mmc_start_cmd(mmc, mrq->sbc ?: mrq->cmd);
--
--	if (needs_pre_post_req)
--		meson_mmc_post_req(mmc, mrq, 0);
- }
- 
- static void meson_mmc_read_resp(struct mmc_host *mmc, struct mmc_command *cmd)
----->8-----
-
-No performance hit AFAICT.
->From your description, it should address your problem too.
-
->
-> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-> index e712315..7667e8a 100644
-> --- a/drivers/mmc/host/meson-gx-mmc.c
-> +++ b/drivers/mmc/host/meson-gx-mmc.c
-> @@ -173,6 +173,7 @@ struct meson_host {
->  	int irq;
+>  .../bindings/mmc/mmc-controller.yaml          | 92 +++++++++++++++++++
+>  1 file changed, 92 insertions(+)
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
+> index 080754e0ef35..87a83d966851 100644
+> --- a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
+> @@ -212,6 +212,98 @@ properties:
+>      description:
+>        eMMC HS400 enhanced strobe mode is supported
 >  
->  	bool vqmmc_enabled;
-> +	bool needs_pre_post_req;
->  };
->  
->  #define CMD_CFG_LENGTH_MASK GENMASK(8, 0)
-> @@ -654,6 +655,8 @@ static void meson_mmc_request_done(struct mmc_host *mmc,
->  	struct meson_host *host = mmc_priv(mmc);
->  
->  	host->cmd = NULL;
-> +	if (host->needs_pre_post_req)
-> +		meson_mmc_post_req(mmc, mrq, 0);
->  	mmc_request_done(host->mmc, mrq);
->  }
->  
-> @@ -803,25 +806,23 @@ static void meson_mmc_start_cmd(struct mmc_host *mmc, struct mmc_command *cmd)
->  static void meson_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
->  {
->  	struct meson_host *host = mmc_priv(mmc);
-> -	bool needs_pre_post_req = mrq->data &&
+> +  # Below mentioned are the clock (phase) delays which are to be configured
+> +  # in the controller while switching to particular speed mode. The range
+> +  # of values are 0 to 359 degrees.
 > +
-> +	host->needs_pre_post_req = mrq->data &&
->  			!(mrq->data->host_cookie & SD_EMMC_PRE_REQ_DONE);
->  
-> -	if (needs_pre_post_req) {
-> +	if (host->needs_pre_post_req) {
->  		meson_mmc_get_transfer_mode(mmc, mrq);
->  		if (!meson_mmc_desc_chain_mode(mrq->data))
-> -			needs_pre_post_req = false;
-> +			host->needs_pre_post_req = false;
->  	}
->  
-> -	if (needs_pre_post_req)
-> +	if (host->needs_pre_post_req)
->  		meson_mmc_pre_req(mmc, mrq);
->  
->  	/* Stop execution */
->  	writel(0, host->regs + SD_EMMC_START);
->  
->  	meson_mmc_start_cmd(mmc, mrq->sbc ?: mrq->cmd);
-> -
-> -	if (needs_pre_post_req)
-> -		meson_mmc_post_req(mmc, mrq, 0);
->  }
->  
->  static void meson_mmc_read_resp(struct mmc_host *mmc, struct mmc_command *cmd)
+> +  clk-phase-legacy:
+> +    allOf:
+> +      - $ref: /schemas/types.yaml#/definitions/uint32
+> +      - minimum: 0
+> +      - maximum: 359
+> +    description:
+> +      Input/Output Clock Delay pair in degrees for Legacy Mode.
+> +
+> +  clk-phase-mmc-hs:
+> +    allOf:
+> +      - $ref: /schemas/types.yaml#/definitions/uint32
+> +      - minimum: 0
+> +      - maximum: 359
+> +    description:
+> +      Input/Output Clock Delay pair degrees for MMC HS.
+> +
+> +  clk-phase-sd-hs:
+> +    allOf:
+> +      - $ref: /schemas/types.yaml#/definitions/uint32
+> +      - minimum: 0
+> +      - maximum: 359
+> +    description:
+> +      Input/Output Clock Delay pair in degrees for SD HS.
+> +
+> +  clk-phase-uhs-sdr12:
+> +    allOf:
+> +      - $ref: /schemas/types.yaml#/definitions/uint32
+> +      - minimum: 0
+> +      - maximum: 359
+> +    description:
+> +      Input/Output Clock Delay pair in degrees for SDR12.
+> +
+> +  clk-phase-uhs-sdr25:
+> +    allOf:
+> +      - $ref: /schemas/types.yaml#/definitions/uint32
+> +      - minimum: 0
+> +      - maximum: 359
+> +    description:
+> +      Input/Output Clock Delay pair in degrees for SDR25.
+> +
+> +  clk-phase-uhs-sdr50:
+> +    allOf:
+> +      - $ref: /schemas/types.yaml#/definitions/uint32
+> +      - minimum: 0
+> +      - maximum: 359
+> +    description:
+> +      Input/Output Clock Delay pair in degrees for SDR50.
+> +
+> +  clk-phase-uhs-sdr104:
+> +    allOf:
+> +      - $ref: /schemas/types.yaml#/definitions/uint32
+> +      - minimum: 0
+> +      - maximum: 359
+> +    description:
+> +      Input/Output Clock Delay pair in degrees for SDR104.
+> +
+> +  clk-phase-uhs-ddr50:
+> +    allOf:
+> +      - $ref: /schemas/types.yaml#/definitions/uint32
+> +      - minimum: 0
+> +      - maximum: 359
+> +    description:
+> +      Input/Output Clock Delay pair in degrees for SD DDR50.
+> +
+> +  clk-phase-mmc-ddr52:
+> +    allOf:
+> +      - $ref: /schemas/types.yaml#/definitions/uint32
+> +      - minimum: 0
+> +      - maximum: 359
+> +    description:
+> +      Input/Output Clock Delay pair in degrees for MMC DDR52.
+> +
+> +  clk-phase-mmc-hs200:
+> +    allOf:
+> +      - $ref: /schemas/types.yaml#/definitions/uint32
+> +      - minimum: 0
+> +      - maximum: 359
+> +    description:
+> +      Input/Output Clock Delay pair in degrees for MMC HS200.
+> +
+> +  clk-phase-mmc-hs400:
+> +    allOf:
+> +      - $ref: /schemas/types.yaml#/definitions/uint32
+> +      - minimum: 0
+> +      - maximum: 359
+> +    description:
+> +      Input/Output Clock Delay pair in degrees for MMC HS400.
+
+This can be condensed into:
+
+patternProperties:
+  
+"^clk-phase-(legacy|sd-hs|mmc-(hs|hs[24]00|ddr52)|uhs-(sdr(12|25|50|104)|ddr50))$":
+
+Or if you want to divide them between SD and MMC ones, that would be 
+fine for me.
+
+Rob
