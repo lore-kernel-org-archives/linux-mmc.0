@@ -1,80 +1,37 @@
-From: Jianxin Pan <jianxin.pan@amlogic.com>
-Subject: [PATCH v2] mmc: meson-gx: fix mmc dma operation
-Date: Mon, 4 Nov 2019 19:54:55 +0800
-Message-ID: <1572868495-84816-1-git-send-email-jianxin.pan@amlogic.com>
-Mime-Version: 1.0
-Content-Type: text/plain
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [PATCH] MAINTAINERS: Mark vub300 mmc driver as orphan
+Date: Mon,  4 Nov 2019 14:22:59 +0100
+Message-ID: <20191104132259.32500-1-ulf.hansson@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Kevin Hilman <khilman@baylibre.com>
-Cc: Nan Li <nan.li@amlogic.com>, Jianxin Pan <jianxin.pan@amlogic.com>, Jerome Brunet <jbrunet@baylibre.com>, Neil Armstrong <narmstrong@baylibre.com>, linux-amlogic@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Victor Wan <victor.wan@amlogic.com>
+To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-From: Nan Li <nan.li@amlogic.com>
+Tony's email address from elandigitalsystems.com has bounced for a long
+time. Let's update MAINTAINERS to mark the driver as orphan as to reflect
+the situation.
 
-In MMC dma transfer, the region requested by dma_map_sg() may be released
-by dma_unmap_sg() before the transfer is completed.
-
-Put the unmap operation in front of mmc_request_done() to avoid this.
-
-Fixes: 79ed05e329c3 ("mmc: meson-gx: add support for descriptor chain mode")
-Signed-off-by: Nan Li <nan.li@amlogic.com>
-Signed-off-by: Jianxin Pan <jianxin.pan@amlogic.com>
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/mmc/host/meson-gx-mmc.c | 15 ++++++++-------
- 1 file changed, 8 insertions(+), 7 deletions(-)
+ MAINTAINERS | 4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
 
-diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-index e712315..7667e8a 100644
---- a/drivers/mmc/host/meson-gx-mmc.c
-+++ b/drivers/mmc/host/meson-gx-mmc.c
-@@ -173,6 +173,7 @@ struct meson_host {
- 	int irq;
+diff --git a/MAINTAINERS b/MAINTAINERS
+index 77fc3ff3cb23..be6a6539103b 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -17456,10 +17456,8 @@ S:	Maintained
+ F:	drivers/hwmon/vt8231.c
  
- 	bool vqmmc_enabled;
-+	bool needs_pre_post_req;
- };
+ VUB300 USB to SDIO/SD/MMC bridge chip
+-M:	Tony Olech <tony.olech@elandigitalsystems.com>
+ L:	linux-mmc@vger.kernel.org
+-L:	linux-usb@vger.kernel.org
+-S:	Supported
++S:	Orphan
+ F:	drivers/mmc/host/vub300.c
  
- #define CMD_CFG_LENGTH_MASK GENMASK(8, 0)
-@@ -654,6 +655,8 @@ static void meson_mmc_request_done(struct mmc_host *mmc,
- 	struct meson_host *host = mmc_priv(mmc);
- 
- 	host->cmd = NULL;
-+	if (host->needs_pre_post_req)
-+		meson_mmc_post_req(mmc, mrq, 0);
- 	mmc_request_done(host->mmc, mrq);
- }
- 
-@@ -803,25 +806,23 @@ static void meson_mmc_start_cmd(struct mmc_host *mmc, struct mmc_command *cmd)
- static void meson_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
- {
- 	struct meson_host *host = mmc_priv(mmc);
--	bool needs_pre_post_req = mrq->data &&
-+
-+	host->needs_pre_post_req = mrq->data &&
- 			!(mrq->data->host_cookie & SD_EMMC_PRE_REQ_DONE);
- 
--	if (needs_pre_post_req) {
-+	if (host->needs_pre_post_req) {
- 		meson_mmc_get_transfer_mode(mmc, mrq);
- 		if (!meson_mmc_desc_chain_mode(mrq->data))
--			needs_pre_post_req = false;
-+			host->needs_pre_post_req = false;
- 	}
- 
--	if (needs_pre_post_req)
-+	if (host->needs_pre_post_req)
- 		meson_mmc_pre_req(mmc, mrq);
- 
- 	/* Stop execution */
- 	writel(0, host->regs + SD_EMMC_START);
- 
- 	meson_mmc_start_cmd(mmc, mrq->sbc ?: mrq->cmd);
--
--	if (needs_pre_post_req)
--		meson_mmc_post_req(mmc, mrq, 0);
- }
- 
- static void meson_mmc_read_resp(struct mmc_host *mmc, struct mmc_command *cmd)
+ W1 DALLAS'S 1-WIRE BUS
 -- 
-2.7.4
+2.17.1
