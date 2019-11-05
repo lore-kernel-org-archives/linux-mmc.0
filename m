@@ -1,154 +1,84 @@
-From: Eugeniu Rosca <erosca@de.adit-jv.com>
-Subject: [PATCH 3/3] mmc: core: Add 'fixed-emmc-driver-type-hs{200,400}'
-Date: Tue, 5 Nov 2019 06:50:15 +0100
-Message-ID: <20191105055015.23656-3-erosca@de.adit-jv.com>
+From: Wolfram Sang <wsa@the-dreams.de>
+Subject: Re: [PATCH 1/3] dt-bindings: mmc: Add
+ 'fixed-emmc-driver-type-hs{200,400}'
+Date: Tue, 5 Nov 2019 07:22:23 +0100
+Message-ID: <20191105062223.GB1048@kunai>
 References: <20191105055015.23656-1-erosca@de.adit-jv.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="3lcZGd9BuhuYXNfi"
 Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
 In-Reply-To: <20191105055015.23656-1-erosca@de.adit-jv.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc@vger.kernel.org
-Cc: Linus Walleij <linus.walleij@linaro.org>, Mathieu Malaterre <malat@debian.org>, Pavel Machek <pavel@ucw.cz>, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, Eugeniu Rosca <erosca@de.adit-jv.com>, Eugeniu Rosca <roscaeugeniu@gmail.com>
+To: Eugeniu Rosca <erosca@de.adit-jv.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, Mathieu Malaterre <malat@debian.org>, Pavel Machek <pavel@ucw.cz>, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, Eugeniu Rosca <roscaeugeniu@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Add support for two more DT bindings, which stem from the need to
-implement below real-life requirement shared by eMMC vendor:
 
- ---snip---
- Use "drive strength" value of 4 or 1 for HS400 or 0 for HS200.
- ---snip---
+--3lcZGd9BuhuYXNfi
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Inspire from [Y] and [Z] during implementation and testing (H3ULCB-KF).
-Below decision matrix is intended as function of user's input:
+Hi Eugeniu,
 
-      [0]        [2]        [4]
-[0]  hs200:[0]  hs200:[2]  hs200:[0]
-     hs400:[0]  hs400:[0]  hs400:[4]
-[2]  hs200:[2]  hs200:[2]  hs200:[2]
-     hs400:[0]  hs400:[R]  hs400:[4]
-[4]  hs200:[0]  hs200:[2]  hs200:[R]
-     hs400:[4]  hs400:[4]  hs400:[4]
+thanks for this work!
 
-[0] "fixed-emmc-driver-type"
-[2] "fixed-emmc-driver-type-hs200"
-[4] "fixed-emmc-driver-type-hs400"
-[R] RAW/ECSD drive strength as implemented in
-    commit cc4f414c885cd0 ("mmc: mmc: Add driver strength selection")
-[Y] commit 6186d06c519e21 ("mmc: parse new binding for eMMC fixed driver type")
-[Z] https://www.elinux.org/Tests:eMMC-fixed-drive-strength
+> A certain eMMC manufacturer provided below requirement:
+>  ---snip---
+>  Use "drive strength" value of 4 or 1 for HS400 or 0 for HS200.
+>  ---snip---
 
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Signed-off-by: Eugeniu Rosca <erosca@de.adit-jv.com>
----
- drivers/mmc/core/host.c  |  4 ++++
- drivers/mmc/core/mmc.c   | 19 ++++++++++++++++---
- include/linux/mmc/host.h |  2 ++
- 3 files changed, 22 insertions(+), 3 deletions(-)
+I see.
 
-diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index 54abfdfc69ba..2a3d3b542e0d 100644
---- a/drivers/mmc/core/host.c
-+++ b/drivers/mmc/core/host.c
-@@ -336,6 +336,8 @@ int mmc_of_parse(struct mmc_host *host)
- 
- 	/* Must be after "non-removable" check */
- 	mmc_of_read_drv_type(host, "fixed-emmc-driver-type", &host->fixed_drv_type);
-+	mmc_of_read_drv_type(host, "fixed-emmc-driver-type-hs200", &host->fixed_drv_type_hs200);
-+	mmc_of_read_drv_type(host, "fixed-emmc-driver-type-hs400", &host->fixed_drv_type_hs400);
- 
- 	host->dsr_req = !device_property_read_u32(dev, "dsr", &host->dsr);
- 	if (host->dsr_req && (host->dsr & ~0xffff)) {
-@@ -455,6 +457,8 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
- 	host->max_blk_count = PAGE_SIZE / 512;
- 
- 	host->fixed_drv_type = -EINVAL;
-+	host->fixed_drv_type_hs200 = -EINVAL;
-+	host->fixed_drv_type_hs400 = -EINVAL;
- 	host->ios.power_delay_ms = 10;
- 
- 	return host;
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index c8804895595f..89e6fb9aedeb 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -62,6 +62,8 @@ static const unsigned int taac_mant[] = {
- 		__res & __mask;						\
- 	})
- 
-+static void mmc_select_driver_type(struct mmc_card *card, int timing);
-+
- /*
-  * Given the decoded CSD structure, decode the raw CID to our CID structure.
-  */
-@@ -1192,6 +1194,8 @@ static int mmc_select_hs400(struct mmc_card *card)
- 		return err;
- 	}
- 
-+	mmc_select_driver_type(card, EXT_CSD_TIMING_HS400);
-+
- 	/* Switch card to HS400 */
- 	val = EXT_CSD_TIMING_HS400 |
- 	      card->drive_strength << EXT_CSD_DRV_STR_SHIFT;
-@@ -1270,6 +1274,8 @@ int mmc_hs400_to_hs200(struct mmc_card *card)
- 	if (err)
- 		goto out_err;
- 
-+	mmc_select_driver_type(card, EXT_CSD_TIMING_HS200);
-+
- 	/* Switch HS to HS200 */
- 	val = EXT_CSD_TIMING_HS200 |
- 	      card->drive_strength << EXT_CSD_DRV_STR_SHIFT;
-@@ -1304,10 +1310,17 @@ int mmc_hs400_to_hs200(struct mmc_card *card)
- 	return err;
- }
- 
--static void mmc_select_driver_type(struct mmc_card *card)
-+static void mmc_select_driver_type(struct mmc_card *card, int timing)
- {
- 	int card_drv_type, drive_strength, drv_type = 0;
- 	int fixed_drv_type = card->host->fixed_drv_type;
-+	int fixed_drv_type_hs200 = card->host->fixed_drv_type_hs200;
-+	int fixed_drv_type_hs400 = card->host->fixed_drv_type_hs400;
-+
-+	if (fixed_drv_type_hs200 >= 0 && timing == EXT_CSD_TIMING_HS200)
-+		fixed_drv_type = fixed_drv_type_hs200;
-+	else if (fixed_drv_type_hs400 >= 0 && timing == EXT_CSD_TIMING_HS400)
-+		fixed_drv_type = fixed_drv_type_hs400;
- 
- 	card_drv_type = card->ext_csd.raw_driver_strength |
- 			mmc_driver_type_mask(0);
-@@ -1385,7 +1398,7 @@ static int mmc_select_hs400es(struct mmc_card *card)
- 		goto out_err;
- 	}
- 
--	mmc_select_driver_type(card);
-+	mmc_select_driver_type(card, EXT_CSD_TIMING_HS400);
- 
- 	/* Switch card to HS400 */
- 	val = EXT_CSD_TIMING_HS400 |
-@@ -1445,7 +1458,7 @@ static int mmc_select_hs200(struct mmc_card *card)
- 	if (err)
- 		return err;
- 
--	mmc_select_driver_type(card);
-+	mmc_select_driver_type(card, EXT_CSD_TIMING_HS200);
- 
- 	/*
- 	 * Set the bus width(4 or 8) with host's support and
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index ba703384bea0..6960ba98810a 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -371,6 +371,8 @@ struct mmc_host {
- #define MMC_CAP2_MERGE_CAPABLE	(1 << 26)	/* Host can merge a segment over the segment size */
- 
- 	int			fixed_drv_type;	/* fixed driver type for non-removable media */
-+	int			fixed_drv_type_hs200;	/* HS200-specific fixed_drv_type */
-+	int			fixed_drv_type_hs400;	/* HS400-specific fixed_drv_type */
- 
- 	mmc_pm_flag_t		pm_caps;	/* supported pm features */
- 
--- 
-2.23.0
+> The existing "fixed-emmc-driver-type" property [1] is the closest one
+> to implement the above, but it falls short due to being unable to define
+> two values to differentiate between HS200 and HS400 (both modes may be
+> supported by the same non-removable MMC device).
+>=20
+> To allow users to set a preferred HS200/HS400 "drive strength", provide
+> two more bindings inspired from [1]:
+>  - fixed-emmc-driver-type-hs200
+>  - fixed-emmc-driver-type-hs400
+
+Main question before looking at the code: Can't we just extend the
+existing binding with an optional second parameter?
+
+        minItems: 1
+        maxItems: 2
+
+I tend to favour this approach...
+
+> For more details about eMMC I/O driver strength types, see Jedec spec.
+> Keep "fixed-emmc-driver-type" in place for backward compatibility.
+
+If we decide for the path proposed here, should the old binding be
+deprecated then?
+
+Happy hacking,
+
+   Wolfram
+
+
+--3lcZGd9BuhuYXNfi
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAl3BFR8ACgkQFA3kzBSg
+KbY0cA//YZ6N9IHHaKq423ABXNnBXaT4hOB/WYncPHRaK6cijvTKtR+eE10CRPpa
+ebYVYr6UatR/vR+Pq4QZixmmF5bn1mT2HbzC7nw1QIJm8OKNghOewSSWAoT3HrYn
+aBlen9t61+u/wC+Wnv8JZh/3A7XWG4gqkocWUTEihWrJv0uJ/f0rIR78mIV3ADAi
+ho5B7QBmmt2Bwsls4SEnpPvwgXwaKay0HoGOyITKE6eIk8Xokbx65KwYa50WTslR
+/q2bIZNeIrYx3Tk0zC2Qkof1brwfg9UxhCHPD7+6cbZCRvnI7nHFPQa1FCxqwTtm
+XOvB7Afzf5rowAEUnQ7Kofxp7l+zbPGo0BvuBxAQsUYsJjG/AXpso/owQKzM7ob7
++NnKgpkqHtg5wnxtTjOmLJZwfOLLmAEp7z9ibPalFpX2s4WT9kEdqNpkSanwnXSx
+bF69QHSM4nPsSCrhPLyowditB/FjtkAHceAiiBHIDcN4v+ytXVTsJbjiESudaQdZ
+co0K/mYz3VfdcJ3wDhYUUOx/Lg1ejxhYDV+V9iHxYTeWoYHS9NNny8lnP6U9Bz1v
+/E4VBIhDm+LvNE9DH1b9yMxzrD5TnISC8XBtgqkjW9m1DVu1wmtCE/WTeG+0NdNl
+zlox2HdI0G4JEJIdLrbNtVfpNMRwurT4UMLKFFPcvpSvIAaIaNw=
+=bGHK
+-----END PGP SIGNATURE-----
+
+--3lcZGd9BuhuYXNfi--
