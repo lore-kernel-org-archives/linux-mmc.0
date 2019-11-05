@@ -1,111 +1,219 @@
-From: Eugeniu Rosca <erosca@de.adit-jv.com>
-Subject: Re: [PATCH 1/3] dt-bindings: mmc: Add
- 'fixed-emmc-driver-type-hs{200,400}'
-Date: Tue, 5 Nov 2019 09:32:13 +0100
-Message-ID: <20191105083213.GA24603@vmlxhi-102.adit-jv.com>
-References: <20191105055015.23656-1-erosca@de.adit-jv.com>
- <20191105062223.GB1048@kunai>
+From: Jerome Brunet <jbrunet@baylibre.com>
+Subject: Re: [PATCH v2] mmc: meson-gx: fix mmc dma operation
+Date: Tue, 05 Nov 2019 09:54:36 +0100
+Message-ID: <1j7e4e4sab.fsf@starbuckisacylon.baylibre.com>
+References: <1572868495-84816-1-git-send-email-jianxin.pan@amlogic.com> <1ja79b4mje.fsf@starbuckisacylon.baylibre.com> <e80cb817-e58a-68ce-a3c6-d82636aaf7d3@amlogic.com> <1j8sou4u1g.fsf@starbuckisacylon.baylibre.com> <7ec2e682-cfec-395e-cf38-58f050440c40@amlogic.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20191105062223.GB1048@kunai>
+In-reply-to: <7ec2e682-cfec-395e-cf38-58f050440c40@amlogic.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Wolfram Sang <wsa@the-dreams.de>
-Cc: Eugeniu Rosca <erosca@de.adit-jv.com>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, Mathieu Malaterre <malat@debian.org>, Pavel Machek <pavel@ucw.cz>, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, Eugeniu Rosca <roscaeugeniu@gmail.com>
+To: Nan Li <Nan.Li@amlogic.com>, Jianxin Pan <Jianxin.Pan@amlogic.com>, Ulf Hansson <ulf.hansson@linaro.org>, Kevin Hilman <khilman@baylibre.com>
+Cc: Neil Armstrong <narmstrong@baylibre.com>, "linux-amlogic@lists.infradead.org" <linux-amlogic@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Victor Wan <victor.wan@amlogic.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Wolfram,
 
-On Tue, Nov 05, 2019 at 07:22:23AM +0100, Wolfram Sang wrote:
-> Hi Eugeniu,
-> 
-> thanks for this work!
+On Tue 05 Nov 2019 at 09:30, Nan Li <Nan.Li@amlogic.com> wrote:
 
-Thanks for the prompt response. Very much appreciated.
 
-> 
-> > A certain eMMC manufacturer provided below requirement:
-> >  ---snip---
-> >  Use "drive strength" value of 4 or 1 for HS400 or 0 for HS200.
-> >  ---snip---
-> 
-> I see.
-> 
-> > The existing "fixed-emmc-driver-type" property [1] is the closest one
-> > to implement the above, but it falls short due to being unable to define
-> > two values to differentiate between HS200 and HS400 (both modes may be
-> > supported by the same non-removable MMC device).
-> > 
-> > To allow users to set a preferred HS200/HS400 "drive strength", provide
-> > two more bindings inspired from [1]:
-> >  - fixed-emmc-driver-type-hs200
-> >  - fixed-emmc-driver-type-hs400
-> 
-> Main question before looking at the code: Can't we just extend the
-> existing binding with an optional second parameter?
+>
+> Based on Uffe comment I tried something else.
+>
+> Basically, it enables chained mode in the driver only when the framework
+> calls pre/post_req callback. As far as understood, the framework calls
+> this when there is more than one request pending ... which seems to be
+> when chained mode actually make sense
+>
+> Jerome, what you are talking about is the system framework problem when you call pre/post_req,
+>
+> which is not related to the patch I submitted.
+>
+>
+>
+> I strongly disagree.
+> As far as I understand from your description, the problem was with the
+> life cycle of the dma mapping. This is tighly related with pre/post req.
+> Just the variable names you have picked clearly show that.
+>
+>
+>
+> As you said, pre/post_req is called only when there is data to implement the chained mode,
+>
+> but it is also possible to cause memory consistency problems,
+> resulting in incorrect data.
+>
+>
+>
+> The life cycle of the mapping is also taken care of with patch,
+> since dma mapping is no longer handled in .request(). IOW the mapping,
+> if any, will be released after the request is done using .post_req()
+>
+> If you think otherwise, please elaborate.
+>
+>
+> I see what you mean. You want to pull the pre/post_req operation out of the request interface and invoke it at the top.
+>
+> I didn't notice the following modification of patch in your last email and reply in time. I'm really sorry.
+>
+> The following patch removes all pre/post_req operations,
 
-That's a great question/proposal, but before pushing the v2 right away,
-I would like to first share some thoughts.
+No it does not. Callbacks are still provided to the MMC framework.
 
->         minItems: 1
->         maxItems: 2
-> 
-> I tend to favour this approach...
+> but you do not send out the operation patch added to the upper layer
+> together.
 
-The first question which pops up in my mind is related to the meaning
-of each item. The option which I envision based on your proposal is:
+There is no modification needed in the upper layer
 
-  * minItems: 1
-  * maxItems: 2
-  * Item[0]: Presumably equivalent to the current
-    "fixed-emmc-driver-type", i.e. the strength value applied in both
-    HS200 and HS400 modes.
-  * Item[1] (optional): Presumably equivalent to
-    "fixed-emmc-driver-type-hs400" proposed in this series. If this
-    element is provided, the first one should likely change its role
-    and become an equivalent of "fixed-emmc-driver-type-hs200" from
-    this series.
-  + Pro: Full backward compatibility. No need to touch the existing
-    users of "fixed-emmc-driver-type".
-  - Con: Not sure we have such DT bindings which dynamically change
-    their semantics based on the usage pattern.
-  - Con: Can't easily achieve the same flexibility as accomplished in
-    this series. For example, current implementation allows users to
-    define each of the three parameters (i.e. HSx00-agnostic drive
-    strength, HS200 and HS400 specific drive strengths) individually,
-    as well as in all possible combinations. This might be needed if,
-    in certain HSx00 mode, users still need to rely on the
-    RAW/unmodified drive strength. I am unsure if/how this can be
-    achieved with an array OF property with a constant or variable
-    number of elements (I try to sketch one solution below).
+>
+> Then the patch is incomplete, which will affect the dma data transfer function in start_cmd function and affect the multi-block write operation.
+>
 
-One option to achieve a similar degree of flexibility by using an array
-OF property (instead of several u32 properties) would be to agree on a
-convention based on magic values, i.e. below DT one-liner could be an
-example of providing solely the "fixed-emmc-driver-type-hs200" value
-(based on the agreement that 0xFF values are discarded by the driver):
+No it is not incomplete. pre and post request are correctly called. You
+can check that with ftrace if you want.
 
-    fixed-emmc-driver-type = <0xFF 0x1 0xFF>;
+Maybe you could try it ?
 
-> 
-> > For more details about eMMC I/O driver strength types, see Jedec spec.
-> > Keep "fixed-emmc-driver-type" in place for backward compatibility.
-> 
-> If we decide for the path proposed here, should the old binding be
-> deprecated then?
-
-I can either zap "fixed-emmc-driver-type" or extend its type and
-meaning, depending on the feedback from the reviewers.
-Looking forward to any comments and suggestions.
-
-> 
-> Happy hacking,
-> 
->    Wolfram
-
-Thanks.
-
--- 
-Best Regards,
-Eugeniu
+> Please send your complete patch, including core layer modification,
+> thank you.
+>
+>
+>
+>
+>
+> Therefore, this patch is added to make memory consistent and obtain real effective information.
+>
+>
+>
+> ----8<-----
+> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
+> index e712315c7e8d..399604b4124d 100644
+> --- a/drivers/mmc/host/meson-gx-mmc.c
+> +++ b/drivers/mmc/host/meson-gx-mmc.c
+> @@ -126,8 +126,7 @@
+>  #define SD_EMMC_CFG_CMD_GAP 16 /* in clock cycles */
+>  #define SD_EMMC_DESC_BUF_LEN PAGE_SIZE
+>
+> -#define SD_EMMC_PRE_REQ_DONE BIT(0)
+> -#define SD_EMMC_DESC_CHAIN_MODE BIT(1)
+> +#define SD_EMMC_DESC_CHAIN_MODE BIT(0)
+>
+>  #define MUX_CLK_NUM_PARENTS 2
+>
+> @@ -228,7 +227,6 @@ static void meson_mmc_get_transfer_mode(struct mmc_host *mmc,
+>         struct mmc_data *data = mrq->data;
+>         struct scatterlist *sg;
+>         int i;
+> -       bool use_desc_chain_mode = true;
+>
+>         /*
+>          * When Controller DMA cannot directly access DDR memory, disable
+> @@ -251,12 +249,11 @@ static void meson_mmc_get_transfer_mode(struct mmc_host *mmc,
+>                 /* check for 8 byte alignment */
+>                 if (sg->offset & 7) {
+>                         WARN_ONCE(1, "unaligned scatterlist buffer\n");
+> -                       use_desc_chain_mode = false;
+> -                       break;
+> +                       return;
+>                 }
+>
+> -       if (use_desc_chain_mode)
+> -               data->host_cookie |= SD_EMMC_DESC_CHAIN_MODE;
+> +       /* The planets are aligned, let's chain them up */
+> +       data->host_cookie |= SD_EMMC_DESC_CHAIN_MODE;
+>  }
+>
+>  static inline bool meson_mmc_desc_chain_mode(const struct mmc_data *data)
+> @@ -278,7 +275,6 @@ static void meson_mmc_pre_req(struct mmc_host *mmc, struct mmc_request *mrq)
+>                 return;
+>
+>         meson_mmc_get_transfer_mode(mmc, mrq);
+> -       data->host_cookie |= SD_EMMC_PRE_REQ_DONE;
+>
+>         if (!meson_mmc_desc_chain_mode(data))
+>                 return;
+> @@ -803,25 +799,11 @@ static void meson_mmc_start_cmd(struct mmc_host *mmc, struct mmc_command *cmd)
+>  static void meson_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>  {
+>         struct meson_host *host = mmc_priv(mmc);
+> -       bool needs_pre_post_req = mrq->data &&
+> -                       !(mrq->data->host_cookie & SD_EMMC_PRE_REQ_DONE);
+> -
+> -       if (needs_pre_post_req) {
+> -               meson_mmc_get_transfer_mode(mmc, mrq);
+> -               if (!meson_mmc_desc_chain_mode(mrq->data))
+> -                       needs_pre_post_req = false;
+> -       }
+> -
+> -       if (needs_pre_post_req)
+> -               meson_mmc_pre_req(mmc, mrq);
+>
+>         /* Stop execution */
+>         writel(0, host->regs + SD_EMMC_START);
+>
+>         meson_mmc_start_cmd(mmc, mrq->sbc ?: mrq->cmd);
+> -
+> -       if (needs_pre_post_req)
+> -               meson_mmc_post_req(mmc, mrq, 0);
+>  }
+>
+>  static void meson_mmc_read_resp(struct mmc_host *mmc, struct mmc_command *cmd)
+> ---->8-----
+>
+> No performance hit AFAICT.
+> From your description, it should address your problem too.
+>
+>
+>
+>
+> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
+> index e712315..7667e8a 100644
+> --- a/drivers/mmc/host/meson-gx-mmc.c
+> +++ b/drivers/mmc/host/meson-gx-mmc.c
+> @@ -173,6 +173,7 @@ struct meson_host {
+>         int irq;
+>
+>         bool vqmmc_enabled;
+> +       bool needs_pre_post_req;
+>  };
+>
+>  #define CMD_CFG_LENGTH_MASK GENMASK(8, 0)
+> @@ -654,6 +655,8 @@ static void meson_mmc_request_done(struct mmc_host *mmc,
+>         struct meson_host *host = mmc_priv(mmc);
+>
+>         host->cmd = NULL;
+> +       if (host->needs_pre_post_req)
+> +               meson_mmc_post_req(mmc, mrq, 0);
+>         mmc_request_done(host->mmc, mrq);
+>  }
+>
+> @@ -803,25 +806,23 @@ static void meson_mmc_start_cmd(struct mmc_host *mmc, struct mmc_command *cmd)
+>  static void meson_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>  {
+>         struct meson_host *host = mmc_priv(mmc);
+> -       bool needs_pre_post_req = mrq->data &&
+> +
+> +       host->needs_pre_post_req = mrq->data &&
+>                         !(mrq->data->host_cookie & SD_EMMC_PRE_REQ_DONE);
+>
+> -       if (needs_pre_post_req) {
+> +       if (host->needs_pre_post_req) {
+>                 meson_mmc_get_transfer_mode(mmc, mrq);
+>                 if (!meson_mmc_desc_chain_mode(mrq->data))
+> -                       needs_pre_post_req = false;
+> +                       host->needs_pre_post_req = false;
+>         }
+>
+> -       if (needs_pre_post_req)
+> +       if (host->needs_pre_post_req)
+>                 meson_mmc_pre_req(mmc, mrq);
+>
+>         /* Stop execution */
+>         writel(0, host->regs + SD_EMMC_START);
+>
+>         meson_mmc_start_cmd(mmc, mrq->sbc ?: mrq->cmd);
+> -
+> -       if (needs_pre_post_req)
+> -               meson_mmc_post_req(mmc, mrq, 0);
+>  }
+>
+>  static void meson_mmc_read_resp(struct mmc_host *mmc, struct mmc_command *cmd)
