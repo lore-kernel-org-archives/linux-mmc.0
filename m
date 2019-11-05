@@ -1,145 +1,79 @@
-From: Rob Herring <robh@kernel.org>
-Subject: Re: [PATCH v5 4/8] dt-bindings: mmc: Add optional generic properties
- for mmc
-Date: Mon, 4 Nov 2019 17:14:27 -0600
-Message-ID: <20191104231427.GA7606@bogus>
-References: <1572588353-110682-1-git-send-email-manish.narani@xilinx.com>
- <1572588353-110682-5-git-send-email-manish.narani@xilinx.com>
+From: Eugeniu Rosca <erosca@de.adit-jv.com>
+Subject: [PATCH 1/3] dt-bindings: mmc: Add 'fixed-emmc-driver-type-hs{200,400}'
+Date: Tue, 5 Nov 2019 06:50:13 +0100
+Message-ID: <20191105055015.23656-1-erosca@de.adit-jv.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-Content-Disposition: inline
-In-Reply-To: <1572588353-110682-5-git-send-email-manish.narani@xilinx.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Manish Narani <manish.narani@xilinx.com>
-Cc: mark.rutland@arm.com, devicetree@vger.kernel.org, ulf.hansson@linaro.org, rajan.vaja@xilinx.com, nava.manne@xilinx.com, linux-mmc@vger.kernel.org, adrian.hunter@intel.com, michal.simek@xilinx.com, linux-arm-kernel@lists.infradead.org, jolly.shah@xilinx.com, linux-kernel@vger.kernel.org, git@xilinx.com
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc@vger.kernel.org
+Cc: Linus Walleij <linus.walleij@linaro.org>, Mathieu Malaterre <malat@debian.org>, Pavel Machek <pavel@ucw.cz>, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, Eugeniu Rosca <erosca@de.adit-jv.com>, Eugeniu Rosca <roscaeugeniu@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, Nov 01, 2019 at 11:35:49AM +0530, Manish Narani wrote:
-> Add optional properties for mmc hosts which are used to set clk delays
-> for different speed modes in the controller.
-> 
-> Signed-off-by: Manish Narani <manish.narani@xilinx.com>
-> ---
->  .../bindings/mmc/mmc-controller.yaml          | 92 +++++++++++++++++++
->  1 file changed, 92 insertions(+)
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
-> index 080754e0ef35..87a83d966851 100644
-> --- a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
-> @@ -212,6 +212,98 @@ properties:
->      description:
->        eMMC HS400 enhanced strobe mode is supported
->  
-> +  # Below mentioned are the clock (phase) delays which are to be configured
-> +  # in the controller while switching to particular speed mode. The range
-> +  # of values are 0 to 359 degrees.
-> +
-> +  clk-phase-legacy:
-> +    allOf:
-> +      - $ref: /schemas/types.yaml#/definitions/uint32
-> +      - minimum: 0
-> +      - maximum: 359
-> +    description:
-> +      Input/Output Clock Delay pair in degrees for Legacy Mode.
-> +
-> +  clk-phase-mmc-hs:
-> +    allOf:
-> +      - $ref: /schemas/types.yaml#/definitions/uint32
-> +      - minimum: 0
-> +      - maximum: 359
-> +    description:
-> +      Input/Output Clock Delay pair degrees for MMC HS.
-> +
-> +  clk-phase-sd-hs:
-> +    allOf:
-> +      - $ref: /schemas/types.yaml#/definitions/uint32
-> +      - minimum: 0
-> +      - maximum: 359
-> +    description:
-> +      Input/Output Clock Delay pair in degrees for SD HS.
-> +
-> +  clk-phase-uhs-sdr12:
-> +    allOf:
-> +      - $ref: /schemas/types.yaml#/definitions/uint32
-> +      - minimum: 0
-> +      - maximum: 359
-> +    description:
-> +      Input/Output Clock Delay pair in degrees for SDR12.
-> +
-> +  clk-phase-uhs-sdr25:
-> +    allOf:
-> +      - $ref: /schemas/types.yaml#/definitions/uint32
-> +      - minimum: 0
-> +      - maximum: 359
-> +    description:
-> +      Input/Output Clock Delay pair in degrees for SDR25.
-> +
-> +  clk-phase-uhs-sdr50:
-> +    allOf:
-> +      - $ref: /schemas/types.yaml#/definitions/uint32
-> +      - minimum: 0
-> +      - maximum: 359
-> +    description:
-> +      Input/Output Clock Delay pair in degrees for SDR50.
-> +
-> +  clk-phase-uhs-sdr104:
-> +    allOf:
-> +      - $ref: /schemas/types.yaml#/definitions/uint32
-> +      - minimum: 0
-> +      - maximum: 359
-> +    description:
-> +      Input/Output Clock Delay pair in degrees for SDR104.
-> +
-> +  clk-phase-uhs-ddr50:
-> +    allOf:
-> +      - $ref: /schemas/types.yaml#/definitions/uint32
-> +      - minimum: 0
-> +      - maximum: 359
-> +    description:
-> +      Input/Output Clock Delay pair in degrees for SD DDR50.
-> +
-> +  clk-phase-mmc-ddr52:
-> +    allOf:
-> +      - $ref: /schemas/types.yaml#/definitions/uint32
-> +      - minimum: 0
-> +      - maximum: 359
-> +    description:
-> +      Input/Output Clock Delay pair in degrees for MMC DDR52.
-> +
-> +  clk-phase-mmc-hs200:
-> +    allOf:
-> +      - $ref: /schemas/types.yaml#/definitions/uint32
-> +      - minimum: 0
-> +      - maximum: 359
-> +    description:
-> +      Input/Output Clock Delay pair in degrees for MMC HS200.
-> +
-> +  clk-phase-mmc-hs400:
-> +    allOf:
-> +      - $ref: /schemas/types.yaml#/definitions/uint32
-> +      - minimum: 0
-> +      - maximum: 359
-> +    description:
-> +      Input/Output Clock Delay pair in degrees for MMC HS400.
+A certain eMMC manufacturer provided below requirement:
+ ---snip---
+ Use "drive strength" value of 4 or 1 for HS400 or 0 for HS200.
+ ---snip---
 
-This can be condensed into:
+The existing "fixed-emmc-driver-type" property [1] is the closest one
+to implement the above, but it falls short due to being unable to define
+two values to differentiate between HS200 and HS400 (both modes may be
+supported by the same non-removable MMC device).
 
-patternProperties:
-  
-"^clk-phase-(legacy|sd-hs|mmc-(hs|hs[24]00|ddr52)|uhs-(sdr(12|25|50|104)|ddr50))$":
+To allow users to set a preferred HS200/HS400 "drive strength", provide
+two more bindings inspired from [1]:
+ - fixed-emmc-driver-type-hs200
+ - fixed-emmc-driver-type-hs400
 
-Or if you want to divide them between SD and MMC ones, that would be 
-fine for me.
+For more details about eMMC I/O driver strength types, see Jedec spec.
+Keep "fixed-emmc-driver-type" in place for backward compatibility.
 
-Rob
+[1] commit 6186d06c519e21 ("mmc: parse new binding for eMMC fixed driver type")
+
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Signed-off-by: Eugeniu Rosca <erosca@de.adit-jv.com>
+---
+ .../bindings/mmc/mmc-controller.yaml          | 20 +++++++++++++++++++
+ 1 file changed, 20 insertions(+)
+
+diff --git a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
+index 080754e0ef35..1c64b14f91a3 100644
+--- a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
++++ b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
+@@ -248,6 +248,24 @@ properties:
+       the driver type as specified in the eMMC specification (table
+       206 in spec version 5.1)
+ 
++  fixed-emmc-driver-type-hs200:
++    allOf:
++      - $ref: /schemas/types.yaml#/definitions/uint32
++      - minimum: 0
++      - maximum: 4
++    description:
++      Same as "fixed-emmc-driver-type", but specific to HS200 mode.
++      If defined, overrides "fixed-emmc-driver-type" in HS200 mode.
++
++  fixed-emmc-driver-type-hs400:
++    allOf:
++      - $ref: /schemas/types.yaml#/definitions/uint32
++      - minimum: 0
++      - maximum: 4
++    description:
++      Same as "fixed-emmc-driver-type", but specific to HS400 mode.
++      If defined, overrides "fixed-emmc-driver-type" in HS400 mode.
++
+   post-power-on-delay-ms:
+     allOf:
+       - $ref: /schemas/types.yaml#/definitions/uint32
+@@ -336,6 +354,8 @@ patternProperties:
+ dependencies:
+   cd-debounce-delay-ms: [ cd-gpios ]
+   fixed-emmc-driver-type: [ non-removable ]
++  fixed-emmc-driver-type-hs200: [ non-removable ]
++  fixed-emmc-driver-type-hs400: [ non-removable ]
+ 
+ examples:
+   - |
+-- 
+2.23.0
