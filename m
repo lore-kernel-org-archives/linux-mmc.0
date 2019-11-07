@@ -1,90 +1,285 @@
 From: "H. Nikolaus Schaller" <hns@goldelico.com>
-Subject: [PATCH v3 00/12] OpenPandora: make wl1251 connected to mmc3 sdio port of OpenPandora work again
-Date: Thu,  7 Nov 2019 11:30:33 +0100
-Message-ID: <cover.1573122644.git.hns@goldelico.com>
+Subject: [PATCH v3 07/12] omap: remove omap2_hsmmc_info in old hsmmc.[ch] and update Makefile
+Date: Thu,  7 Nov 2019 11:30:40 +0100
+Message-ID: <c3e0a1392dd6d44fe8bde0161c508007f4abdd5f.1573122644.git.hns@goldelico.com>
+References: <cover.1573122644.git.hns@goldelico.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <cover.1573122644.git.hns@goldelico.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: =?UTF-8?q?Beno=C3=AEt=20Cousson?= <bcousson@baylibre.com>, Tony Lindgren <tony@atomide.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Russell King <linux@armlinux.org.uk>, Ulf Hansson <ulf.hansson@linaro.org>, Kalle Valo <kvalo@codeaurora.org>, Mike Rapoport <rppt@linux.ibm.com>, David Sterba <dsterba@suse.com>, "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>, Petr Mladek <pmladek@suse.com>, Sakari Ailus <sakari.ailus@linux.intel.com>, "H. Nikolaus Schaller" <hns@goldelico.com>, Kefeng Wang <wangkefeng.wang@huawei.com>, Yangtao Li <tiny.windzz@gmail.com>, Alexios Zavras <alexios.zavras@intel.com>, Thomas Gleixner <tglx@linutronix.de>, Allison Randal <allison@lohutok.net>, Greg Kroah-Hartman <gregkh@linuxfoundati>
 Cc: linux-omap@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-wireless@vger.kernel.org, netdev@vger.kernel.org, letux-kernel@openphoenux.org, kernel@pyra-handheld.com
 List-Id: linux-mmc@vger.kernel.org
 
+There is a new driver in drivers/mmc/host/omap_hsmmc.c
+configured by CONFIG_MMC_OMAP_HS and the last user
+was the pdata-quirks for pandora.
 
-* add a revisit note for special wl1251 handling code because it should
-  be solved more generic in mmc core - suggested by Ulf Hansson <ulf.hansson@linaro.org>
-* remove init_card callback from platform_data/hsmmc-omap.h - suggested by Ulf Hansson <ulf.hansson@linaro.org>
-* remove obstructive always-on for vwlan regulator - suggested by Ulf Hansson <ulf.hansson@linaro.org>
-* rename DT node - suggested by Rob Herring <robh@kernel.org>
-* fix ARM: dts: subject prefix - suggested by Tony Lindgren <tony@atomide.com>
-* also remove omap2_hsmmc_info and obc-y line in Makefile - suggested by Tony Lindgren <tony@atomide.com>
-
-PATCH V2 2019-10-19 20:41:47:
-* added acked-by for wl1251 patches - Kalle Valo <kvalo@codeaurora.org>
-* really removed old pdata-quirks code (not through #if 0)
-* splited out a partial revert of
-	efdfeb079cc3b ("regulator: fixed: Convert to use GPIO descriptor only")
-  because that was introduced after v4.19 and stops the removal of
-  the pdata-quirks patch from cleanly applying to v4.9, v4.14, v4.19
-  - reported by Sasha Levin <sashal@kernel.org>
-* added a new patch to remove old omap hsmmc since pdata quirks
-  were last user - suggested by Tony Lindgren <tony@atomide.com>
-
-PATCH V1 2019-10-18 22:25:39:
-Here we have a set of scattered patches to make the OpenPandora WiFi work again.
-
-v4.7 did break the pdata-quirks which made the mmc3 interface
-fail completely, because some code now assumes device tree
-based instantiation.
-
-Fixes: 81eef6ca9201 ("mmc: omap_hsmmc: Use dma_request_chan() for requesting DMA channel")
-
-v4.11 did break the sdio qirks for wl1251 which made the driver no longer
-load, although the device was found as an sdio client.
-
-Fixes: 884f38607897 ("mmc: core: move some sdio IDs out of quirks file")
-
-To solve these issues:
-* we convert mmc3 and wl1251 initialization from pdata-quirks
-  to device tree
-* we make the wl1251 driver read properties from device tree
-* we fix the mmc core vendor ids and quirks
-* we fix the wl1251 (and wl1271) driver to use only vendor ids
-  from header file instead of (potentially conflicting) local
-  definitions
-
-
-H. Nikolaus Schaller (12):
-  Documentation: dt: wireless: update wl1251 for sdio
-  net: wireless: ti: wl1251 add device tree support
-  ARM: dts: pandora-common: define wl1251 as child node of mmc3
-  mmc: host: omap_hsmmc: add code for special init of wl1251 to get rid
-    of pandora_wl1251_init_card
-  omap: pdata-quirks: revert pandora specific gpiod additions
-  omap: pdata-quirks: remove openpandora quirks for mmc3 and wl1251
-  omap: remove omap2_hsmmc_info in old hsmmc.[ch] and update Makefile
-  mmc: host: omap-hsmmc: remove init_card pdata callback from pdata
-  mmc: sdio: fix wl1251 vendor id
-  mmc: core: fix wl1251 sdio quirks
-  net: wireless: ti: wl1251 use new SDIO_VENDOR_ID_TI_WL1251 definition
-  net: wireless: ti: remove local VENDOR_ID and DEVICE_ID definitions
-
- .../bindings/net/wireless/ti,wl1251.txt       |  26 +++
- arch/arm/boot/dts/omap3-pandora-common.dtsi   |  36 +++-
- arch/arm/mach-omap2/Makefile                  |   3 -
- arch/arm/mach-omap2/common.h                  |   1 -
- arch/arm/mach-omap2/hsmmc.c                   | 171 ------------------
- arch/arm/mach-omap2/hsmmc.h                   |  32 ----
- arch/arm/mach-omap2/pdata-quirks.c            | 105 -----------
- drivers/mmc/core/quirks.h                     |   7 +
- drivers/mmc/host/omap_hsmmc.c                 |  30 ++-
- drivers/net/wireless/ti/wl1251/sdio.c         |  23 ++-
- drivers/net/wireless/ti/wlcore/sdio.c         |   8 -
- include/linux/mmc/sdio_ids.h                  |   2 +
- include/linux/platform_data/hsmmc-omap.h      |   3 -
- 13 files changed, 111 insertions(+), 336 deletions(-)
+Suggested-by: Tony Lindgren <tony@atomide.com>
+Signed-off-by: H. Nikolaus Schaller <hns@goldelico.com>
+---
+ arch/arm/mach-omap2/Makefile       |   3 -
+ arch/arm/mach-omap2/common.h       |   1 -
+ arch/arm/mach-omap2/hsmmc.c        | 171 -----------------------------
+ arch/arm/mach-omap2/hsmmc.h        |  32 ------
+ arch/arm/mach-omap2/pdata-quirks.c |   1 -
+ 5 files changed, 208 deletions(-)
  delete mode 100644 arch/arm/mach-omap2/hsmmc.c
  delete mode 100644 arch/arm/mach-omap2/hsmmc.h
 
+diff --git a/arch/arm/mach-omap2/Makefile b/arch/arm/mach-omap2/Makefile
+index 8f208197988f..1e1e86d17fc5 100644
+--- a/arch/arm/mach-omap2/Makefile
++++ b/arch/arm/mach-omap2/Makefile
+@@ -216,9 +216,6 @@ obj-$(CONFIG_MACH_NOKIA_N8X0)		+= board-n8x0.o
+ 
+ # Platform specific device init code
+ 
+-omap-hsmmc-$(CONFIG_MMC_OMAP_HS)	:= hsmmc.o
+-obj-y					+= $(omap-hsmmc-m) $(omap-hsmmc-y)
+-
+ obj-y					+= omap_phy_internal.o
+ 
+ obj-$(CONFIG_MACH_OMAP2_TUSB6010)	+= usb-tusb6010.o
+diff --git a/arch/arm/mach-omap2/common.h b/arch/arm/mach-omap2/common.h
+index 6316da3623b3..223b37c48389 100644
+--- a/arch/arm/mach-omap2/common.h
++++ b/arch/arm/mach-omap2/common.h
+@@ -352,7 +352,6 @@ void omap_pcs_legacy_init(int irq, void (*rearm)(void));
+ struct omap_sdrc_params;
+ extern void omap_sdrc_init(struct omap_sdrc_params *sdrc_cs0,
+ 				      struct omap_sdrc_params *sdrc_cs1);
+-struct omap2_hsmmc_info;
+ extern void omap_reserve(void);
+ 
+ struct omap_hwmod;
+diff --git a/arch/arm/mach-omap2/hsmmc.c b/arch/arm/mach-omap2/hsmmc.c
+deleted file mode 100644
+index 63423ea6a240..000000000000
+--- a/arch/arm/mach-omap2/hsmmc.c
++++ /dev/null
+@@ -1,171 +0,0 @@
+-// SPDX-License-Identifier: GPL-2.0-only
+-/*
+- * linux/arch/arm/mach-omap2/hsmmc.c
+- *
+- * Copyright (C) 2007-2008 Texas Instruments
+- * Copyright (C) 2008 Nokia Corporation
+- * Author: Texas Instruments
+- */
+-#include <linux/kernel.h>
+-#include <linux/slab.h>
+-#include <linux/string.h>
+-#include <linux/delay.h>
+-#include <linux/mmc/host.h>
+-#include <linux/platform_data/hsmmc-omap.h>
+-
+-#include "soc.h"
+-#include "omap_device.h"
+-
+-#include "hsmmc.h"
+-#include "control.h"
+-
+-#if IS_ENABLED(CONFIG_MMC_OMAP_HS)
+-
+-static u16 control_pbias_offset;
+-static u16 control_devconf1_offset;
+-
+-#define HSMMC_NAME_LEN	9
+-
+-static int __init omap_hsmmc_pdata_init(struct omap2_hsmmc_info *c,
+-					struct omap_hsmmc_platform_data *mmc)
+-{
+-	char *hc_name;
+-
+-	hc_name = kzalloc(HSMMC_NAME_LEN + 1, GFP_KERNEL);
+-	if (!hc_name)
+-		return -ENOMEM;
+-
+-	snprintf(hc_name, (HSMMC_NAME_LEN + 1), "mmc%islot%i", c->mmc, 1);
+-	mmc->name = hc_name;
+-	mmc->caps = c->caps;
+-	mmc->reg_offset = 0;
+-
+-	return 0;
+-}
+-
+-static int omap_hsmmc_done;
+-
+-void omap_hsmmc_late_init(struct omap2_hsmmc_info *c)
+-{
+-	struct platform_device *pdev;
+-	int res;
+-
+-	if (omap_hsmmc_done)
+-		return;
+-
+-	omap_hsmmc_done = 1;
+-
+-	for (; c->mmc; c++) {
+-		pdev = c->pdev;
+-		if (!pdev)
+-			continue;
+-		res = omap_device_register(pdev);
+-		if (res)
+-			pr_err("Could not late init MMC\n");
+-	}
+-}
+-
+-#define MAX_OMAP_MMC_HWMOD_NAME_LEN		16
+-
+-static void __init omap_hsmmc_init_one(struct omap2_hsmmc_info *hsmmcinfo,
+-					int ctrl_nr)
+-{
+-	struct omap_hwmod *oh;
+-	struct omap_hwmod *ohs[1];
+-	struct omap_device *od;
+-	struct platform_device *pdev;
+-	char oh_name[MAX_OMAP_MMC_HWMOD_NAME_LEN];
+-	struct omap_hsmmc_platform_data *mmc_data;
+-	struct omap_hsmmc_dev_attr *mmc_dev_attr;
+-	char *name;
+-	int res;
+-
+-	mmc_data = kzalloc(sizeof(*mmc_data), GFP_KERNEL);
+-	if (!mmc_data)
+-		return;
+-
+-	res = omap_hsmmc_pdata_init(hsmmcinfo, mmc_data);
+-	if (res < 0)
+-		goto free_mmc;
+-
+-	name = "omap_hsmmc";
+-	res = snprintf(oh_name, MAX_OMAP_MMC_HWMOD_NAME_LEN,
+-		     "mmc%d", ctrl_nr);
+-	WARN(res >= MAX_OMAP_MMC_HWMOD_NAME_LEN,
+-	     "String buffer overflow in MMC%d device setup\n", ctrl_nr);
+-
+-	oh = omap_hwmod_lookup(oh_name);
+-	if (!oh) {
+-		pr_err("Could not look up %s\n", oh_name);
+-		goto free_name;
+-	}
+-	ohs[0] = oh;
+-	if (oh->dev_attr != NULL) {
+-		mmc_dev_attr = oh->dev_attr;
+-		mmc_data->controller_flags = mmc_dev_attr->flags;
+-	}
+-
+-	pdev = platform_device_alloc(name, ctrl_nr - 1);
+-	if (!pdev) {
+-		pr_err("Could not allocate pdev for %s\n", name);
+-		goto free_name;
+-	}
+-	dev_set_name(&pdev->dev, "%s.%d", pdev->name, pdev->id);
+-
+-	od = omap_device_alloc(pdev, ohs, 1);
+-	if (IS_ERR(od)) {
+-		pr_err("Could not allocate od for %s\n", name);
+-		goto put_pdev;
+-	}
+-
+-	res = platform_device_add_data(pdev, mmc_data,
+-			      sizeof(struct omap_hsmmc_platform_data));
+-	if (res) {
+-		pr_err("Could not add pdata for %s\n", name);
+-		goto put_pdev;
+-	}
+-
+-	hsmmcinfo->pdev = pdev;
+-
+-	res = omap_device_register(pdev);
+-	if (res) {
+-		pr_err("Could not register od for %s\n", name);
+-		goto free_od;
+-	}
+-
+-	goto free_mmc;
+-
+-free_od:
+-	omap_device_delete(od);
+-
+-put_pdev:
+-	platform_device_put(pdev);
+-
+-free_name:
+-	kfree(mmc_data->name);
+-
+-free_mmc:
+-	kfree(mmc_data);
+-}
+-
+-void __init omap_hsmmc_init(struct omap2_hsmmc_info *controllers)
+-{
+-	if (omap_hsmmc_done)
+-		return;
+-
+-	omap_hsmmc_done = 1;
+-
+-	if (cpu_is_omap2430()) {
+-		control_pbias_offset = OMAP243X_CONTROL_PBIAS_LITE;
+-		control_devconf1_offset = OMAP243X_CONTROL_DEVCONF1;
+-	} else {
+-		control_pbias_offset = OMAP343X_CONTROL_PBIAS_LITE;
+-		control_devconf1_offset = OMAP343X_CONTROL_DEVCONF1;
+-	}
+-
+-	for (; controllers->mmc; controllers++)
+-		omap_hsmmc_init_one(controllers, controllers->mmc);
+-
+-}
+-
+-#endif
+diff --git a/arch/arm/mach-omap2/hsmmc.h b/arch/arm/mach-omap2/hsmmc.h
+deleted file mode 100644
+index 76c5ed2afa72..000000000000
+--- a/arch/arm/mach-omap2/hsmmc.h
++++ /dev/null
+@@ -1,32 +0,0 @@
+-/* SPDX-License-Identifier: GPL-2.0-only */
+-/*
+- * MMC definitions for OMAP2
+- */
+-
+-struct mmc_card;
+-
+-struct omap2_hsmmc_info {
+-	u8	mmc;		/* controller 1/2/3 */
+-	u32	caps;		/* 4/8 wires and any additional host
+-				 * capabilities OR'd (ref. linux/mmc/host.h) */
+-	struct platform_device *pdev;	/* mmc controller instance */
+-	/* init some special card */
+-	void (*init_card)(struct mmc_card *card);
+-};
+-
+-#if IS_ENABLED(CONFIG_MMC_OMAP_HS)
+-
+-void omap_hsmmc_init(struct omap2_hsmmc_info *);
+-void omap_hsmmc_late_init(struct omap2_hsmmc_info *);
+-
+-#else
+-
+-static inline void omap_hsmmc_init(struct omap2_hsmmc_info *info)
+-{
+-}
+-
+-static inline void omap_hsmmc_late_init(struct omap2_hsmmc_info *info)
+-{
+-}
+-
+-#endif
+diff --git a/arch/arm/mach-omap2/pdata-quirks.c b/arch/arm/mach-omap2/pdata-quirks.c
+index 1b7cf81ff035..ad0e00724578 100644
+--- a/arch/arm/mach-omap2/pdata-quirks.c
++++ b/arch/arm/mach-omap2/pdata-quirks.c
+@@ -32,7 +32,6 @@
+ #include "omap_device.h"
+ #include "omap-secure.h"
+ #include "soc.h"
+-#include "hsmmc.h"
+ 
+ static struct omap_hsmmc_platform_data __maybe_unused mmc_pdata[2];
+ 
 -- 
 2.23.0
