@@ -1,7 +1,7 @@
 From: "H. Nikolaus Schaller" <hns@goldelico.com>
-Subject: [PATCH v3 03/12] ARM: dts: pandora-common: define wl1251 as child node of mmc3
-Date: Thu,  7 Nov 2019 11:30:36 +0100
-Message-ID: <bd14b481105b21a0c1882a1ea34281893233db31.1573122644.git.hns@goldelico.com>
+Subject: [PATCH v3 05/12] omap: pdata-quirks: revert pandora specific gpiod additions
+Date: Thu,  7 Nov 2019 11:30:38 +0100
+Message-ID: <a90b488031c3d5da2feb2f157efa6c4287cf1922.1573122644.git.hns@goldelico.com>
 References: <cover.1573122644.git.hns@goldelico.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -9,79 +9,84 @@ Return-path: <netdev-owner@vger.kernel.org>
 In-Reply-To: <cover.1573122644.git.hns@goldelico.com>
 Sender: netdev-owner@vger.kernel.org
 To: =?UTF-8?q?Beno=C3=AEt=20Cousson?= <bcousson@baylibre.com>, Tony Lindgren <tony@atomide.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Russell King <linux@armlinux.org.uk>, Ulf Hansson <ulf.hansson@linaro.org>, Kalle Valo <kvalo@codeaurora.org>, Mike Rapoport <rppt@linux.ibm.com>, David Sterba <dsterba@suse.com>, "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>, Petr Mladek <pmladek@suse.com>, Sakari Ailus <sakari.ailus@linux.intel.com>, "H. Nikolaus Schaller" <hns@goldelico.com>, Kefeng Wang <wangkefeng.wang@huawei.com>, Yangtao Li <tiny.windzz@gmail.com>, Alexios Zavras <alexios.zavras@intel.com>, Thomas Gleixner <tglx@linutronix.de>, Allison Randal <allison@lohutok.net>, Greg Kroah-Hartman <gregkh@linuxfoundati>
-Cc: linux-omap@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-wireless@vger.kernel.org, netdev@vger.kernel.org, letux-kernel@openphoenux.org, kernel@pyra-handheld.com, stable@vger.kernel.org
+Cc: linux-omap@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-wireless@vger.kernel.org, netdev@vger.kernel.org, letux-kernel@openphoenux.org, kernel@pyra-handheld.com
 List-Id: linux-mmc@vger.kernel.org
 
-Since v4.7 the dma initialization requires that there is a
-device tree property for "rx" and "tx" channels which is
-not provided by the pdata-quirks initialization.
+introduced by commit
 
-By conversion of the mmc3 setup to device tree this will
-finally allows to remove the OpenPandora wlan specific omap3
-data-quirks.
+efdfeb079cc3b ("regulator: fixed: Convert to use GPIO descriptor only")
 
-Fixes: 81eef6ca9201 ("mmc: omap_hsmmc: Use dma_request_chan() for requesting DMA channel")
+We must remove this from mainline first, so that the following patch
+to remove the openpandora quirks for mmc3 and wl1251 cleanly applies
+to stable v4.9, v4.14, v4.19 where the above mentioned patch is not yet
+present.
+
+Since the code affected is removed (no pandora gpios in pdata-quirks
+and more), there will be no matching revert-of-the-revert.
 
 Signed-off-by: H. Nikolaus Schaller <hns@goldelico.com>
-Cc: <stable@vger.kernel.org> # 4.7.0
 ---
- arch/arm/boot/dts/omap3-pandora-common.dtsi | 36 +++++++++++++++++++--
- 1 file changed, 34 insertions(+), 2 deletions(-)
+ arch/arm/mach-omap2/pdata-quirks.c | 19 ++++---------------
+ 1 file changed, 4 insertions(+), 15 deletions(-)
 
-diff --git a/arch/arm/boot/dts/omap3-pandora-common.dtsi b/arch/arm/boot/dts/omap3-pandora-common.dtsi
-index ec5891718ae6..150d5be42d27 100644
---- a/arch/arm/boot/dts/omap3-pandora-common.dtsi
-+++ b/arch/arm/boot/dts/omap3-pandora-common.dtsi
-@@ -226,6 +226,17 @@
- 		gpio = <&gpio6 4 GPIO_ACTIVE_HIGH>;	/* GPIO_164 */
- 	};
- 
-+	/* wl1251 wifi+bt module */
-+	wlan_en: fixed-regulator-wg7210_en {
-+		compatible = "regulator-fixed";
-+		regulator-name = "vwlan";
-+		regulator-min-microvolt = <1800000>;
-+		regulator-max-microvolt = <1800000>;
-+		startup-delay-us = <50000>;
-+		enable-active-high;
-+		gpio = <&gpio1 23 GPIO_ACTIVE_HIGH>;
-+	};
-+
- 	/* wg7210 (wifi+bt module) 32k clock buffer */
- 	wg7210_32k: fixed-regulator-wg7210_32k {
- 		compatible = "regulator-fixed";
-@@ -522,9 +533,30 @@
- 	/*wp-gpios = <&gpio4 31 GPIO_ACTIVE_HIGH>;*/	/* GPIO_127 */
+diff --git a/arch/arm/mach-omap2/pdata-quirks.c b/arch/arm/mach-omap2/pdata-quirks.c
+index 2efd18e8824c..800a602c06ec 100644
+--- a/arch/arm/mach-omap2/pdata-quirks.c
++++ b/arch/arm/mach-omap2/pdata-quirks.c
+@@ -7,7 +7,6 @@
+ #include <linux/clk.h>
+ #include <linux/davinci_emac.h>
+ #include <linux/gpio.h>
+-#include <linux/gpio/machine.h>
+ #include <linux/init.h>
+ #include <linux/kernel.h>
+ #include <linux/of_platform.h>
+@@ -334,7 +333,9 @@ static struct regulator_init_data pandora_vmmc3 = {
+ static struct fixed_voltage_config pandora_vwlan = {
+ 	.supply_name		= "vwlan",
+ 	.microvolts		= 1800000, /* 1.8V */
++	.gpio			= PANDORA_WIFI_NRESET_GPIO,
+ 	.startup_delay		= 50000, /* 50ms */
++	.enable_high		= 1,
+ 	.init_data		= &pandora_vmmc3,
  };
  
--/* mmc3 is probed using pdata-quirks to pass wl1251 card data */
- &mmc3 {
--	status = "disabled";
-+	vmmc-supply = <&wlan_en>;
-+
-+	bus-width = <4>;
-+	non-removable;
-+	ti,non-removable;
-+	cap-power-off-card;
-+
-+	pinctrl-names = "default";
-+	pinctrl-0 = <&mmc3_pins>;
-+
-+	#address-cells = <1>;
-+	#size-cells = <0>;
-+
-+	wlan: wifi@1 {
-+		compatible = "ti,wl1251";
-+
-+		reg = <1>;
-+
-+		interrupt-parent = <&gpio1>;
-+		interrupts = <21 IRQ_TYPE_LEVEL_HIGH>;	/* GPIO_21 */
-+
-+		ti,wl1251-has-eeprom;
-+	};
+@@ -346,19 +347,6 @@ static struct platform_device pandora_vwlan_device = {
+ 	},
  };
  
- /* bluetooth*/
+-static struct gpiod_lookup_table pandora_vwlan_gpiod_table = {
+-	.dev_id = "reg-fixed-voltage.1",
+-	.table = {
+-		/*
+-		 * As this is a low GPIO number it should be at the first
+-		 * GPIO bank.
+-		 */
+-		GPIO_LOOKUP("gpio-0-31", PANDORA_WIFI_NRESET_GPIO,
+-			    NULL, GPIO_ACTIVE_HIGH),
+-		{ },
+-	},
+-};
+-
+ static void pandora_wl1251_init_card(struct mmc_card *card)
+ {
+ 	/*
+@@ -380,6 +368,8 @@ static struct omap2_hsmmc_info pandora_mmc3[] = {
+ 	{
+ 		.mmc		= 3,
+ 		.caps		= MMC_CAP_4_BIT_DATA | MMC_CAP_POWER_OFF_CARD,
++		.gpio_cd	= -EINVAL,
++		.gpio_wp	= -EINVAL,
+ 		.init_card	= pandora_wl1251_init_card,
+ 	},
+ 	{}	/* Terminator */
+@@ -418,7 +408,6 @@ static void __init pandora_wl1251_init(void)
+ static void __init omap3_pandora_legacy_init(void)
+ {
+ 	platform_device_register(&pandora_backlight);
+-	gpiod_add_lookup_table(&pandora_vwlan_gpiod_table);
+ 	platform_device_register(&pandora_vwlan_device);
+ 	omap_hsmmc_init(pandora_mmc3);
+ 	omap_hsmmc_late_init(pandora_mmc3);
 -- 
 2.23.0
