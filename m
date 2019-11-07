@@ -1,7 +1,7 @@
 From: "H. Nikolaus Schaller" <hns@goldelico.com>
-Subject: [PATCH v3 10/12] mmc: core: fix wl1251 sdio quirks
-Date: Thu,  7 Nov 2019 11:30:43 +0100
-Message-ID: <3474d474661b7026db8b009ae3701958e8451300.1573122644.git.hns@goldelico.com>
+Subject: [PATCH v3 03/12] ARM: dts: pandora-common: define wl1251 as child node of mmc3
+Date: Thu,  7 Nov 2019 11:30:36 +0100
+Message-ID: <bd14b481105b21a0c1882a1ea34281893233db31.1573122644.git.hns@goldelico.com>
 References: <cover.1573122644.git.hns@goldelico.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -12,35 +12,76 @@ To: =?UTF-8?q?Beno=C3=AEt=20Cousson?= <bcousson@baylibre.com>, Tony Lindgren <to
 Cc: linux-omap@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-wireless@vger.kernel.org, netdev@vger.kernel.org, letux-kernel@openphoenux.org, kernel@pyra-handheld.com, stable@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-wl1251 and wl1271 have different vendor id and device id.
-So we need to handle both with sdio quirks.
+Since v4.7 the dma initialization requires that there is a
+device tree property for "rx" and "tx" channels which is
+not provided by the pdata-quirks initialization.
 
-Fixes: 884f38607897 ("mmc: core: move some sdio IDs out of quirks file")
+By conversion of the mmc3 setup to device tree this will
+finally allows to remove the OpenPandora wlan specific omap3
+data-quirks.
+
+Fixes: 81eef6ca9201 ("mmc: omap_hsmmc: Use dma_request_chan() for requesting DMA channel")
 
 Signed-off-by: H. Nikolaus Schaller <hns@goldelico.com>
-Cc: <stable@vger.kernel.org> # 4.11.0
+Cc: <stable@vger.kernel.org> # 4.7.0
 ---
- drivers/mmc/core/quirks.h | 7 +++++++
- 1 file changed, 7 insertions(+)
+ arch/arm/boot/dts/omap3-pandora-common.dtsi | 36 +++++++++++++++++++--
+ 1 file changed, 34 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h
-index 2d2d9ea8be4f..3dba15bccce2 100644
---- a/drivers/mmc/core/quirks.h
-+++ b/drivers/mmc/core/quirks.h
-@@ -119,7 +119,14 @@ static const struct mmc_fixup mmc_ext_csd_fixups[] = {
- 	END_FIXUP
+diff --git a/arch/arm/boot/dts/omap3-pandora-common.dtsi b/arch/arm/boot/dts/omap3-pandora-common.dtsi
+index ec5891718ae6..150d5be42d27 100644
+--- a/arch/arm/boot/dts/omap3-pandora-common.dtsi
++++ b/arch/arm/boot/dts/omap3-pandora-common.dtsi
+@@ -226,6 +226,17 @@
+ 		gpio = <&gpio6 4 GPIO_ACTIVE_HIGH>;	/* GPIO_164 */
+ 	};
+ 
++	/* wl1251 wifi+bt module */
++	wlan_en: fixed-regulator-wg7210_en {
++		compatible = "regulator-fixed";
++		regulator-name = "vwlan";
++		regulator-min-microvolt = <1800000>;
++		regulator-max-microvolt = <1800000>;
++		startup-delay-us = <50000>;
++		enable-active-high;
++		gpio = <&gpio1 23 GPIO_ACTIVE_HIGH>;
++	};
++
+ 	/* wg7210 (wifi+bt module) 32k clock buffer */
+ 	wg7210_32k: fixed-regulator-wg7210_32k {
+ 		compatible = "regulator-fixed";
+@@ -522,9 +533,30 @@
+ 	/*wp-gpios = <&gpio4 31 GPIO_ACTIVE_HIGH>;*/	/* GPIO_127 */
  };
  
+-/* mmc3 is probed using pdata-quirks to pass wl1251 card data */
+ &mmc3 {
+-	status = "disabled";
++	vmmc-supply = <&wlan_en>;
 +
- static const struct mmc_fixup sdio_fixup_methods[] = {
-+	SDIO_FIXUP(SDIO_VENDOR_ID_TI_WL1251, SDIO_DEVICE_ID_TI_WL1251,
-+		   add_quirk, MMC_QUIRK_NONSTD_FUNC_IF),
++	bus-width = <4>;
++	non-removable;
++	ti,non-removable;
++	cap-power-off-card;
 +
-+	SDIO_FIXUP(SDIO_VENDOR_ID_TI_WL1251, SDIO_DEVICE_ID_TI_WL1251,
-+		   add_quirk, MMC_QUIRK_DISABLE_CD),
++	pinctrl-names = "default";
++	pinctrl-0 = <&mmc3_pins>;
 +
- 	SDIO_FIXUP(SDIO_VENDOR_ID_TI, SDIO_DEVICE_ID_TI_WL1271,
- 		   add_quirk, MMC_QUIRK_NONSTD_FUNC_IF),
++	#address-cells = <1>;
++	#size-cells = <0>;
++
++	wlan: wifi@1 {
++		compatible = "ti,wl1251";
++
++		reg = <1>;
++
++		interrupt-parent = <&gpio1>;
++		interrupts = <21 IRQ_TYPE_LEVEL_HIGH>;	/* GPIO_21 */
++
++		ti,wl1251-has-eeprom;
++	};
+ };
  
+ /* bluetooth*/
 -- 
 2.23.0
