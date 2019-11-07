@@ -1,111 +1,102 @@
-From: Baolin Wang <baolin.wang@linaro.org>
-Subject: Re: [PATCH v5 4/4] mmc: host: sdhci: Add a variable to defer to
- complete data requests if needed
-Date: Wed, 6 Nov 2019 20:17:33 +0800
-Message-ID: <CAMz4kuJe64hdVGBTCvZW3t4_JGnTBRF=NhYDookrzNPiXacq_w@mail.gmail.com>
-References: <cover.1572326519.git.baolin.wang@linaro.org> <19910a2f34b9be81f64637a5a5fc8d07bd5f4885.1572326519.git.baolin.wang@linaro.org>
- <a9f42792-3432-48f2-c5c4-8b03c32995dd@intel.com> <CAMz4kuK=wV1qtO4tOCcqibzKAFD-_p8+OzGOjdkvajVymJ5EgA@mail.gmail.com>
- <2ed0bcd1-fa74-d095-97ee-7d0c46a4fdbb@intel.com>
+From: Rob Herring <robh@kernel.org>
+Subject: Re: [PATCH 1/3] dt-bindings: mmc: Add
+ 'fixed-emmc-driver-type-hs{200,400}'
+Date: Wed, 6 Nov 2019 18:39:07 -0600
+Message-ID: <20191107003907.GA22634@bogus>
+References: <20191105055015.23656-1-erosca@de.adit-jv.com>
+ <20191105062223.GB1048@kunai>
+ <20191105083213.GA24603@vmlxhi-102.adit-jv.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <2ed0bcd1-fa74-d095-97ee-7d0c46a4fdbb@intel.com>
+Content-Disposition: inline
+In-Reply-To: <20191105083213.GA24603@vmlxhi-102.adit-jv.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, asutoshd@codeaurora.org, Orson Zhai <orsonzhai@gmail.com>, Chunyan Zhang <zhang.lyra@gmail.com>, Arnd Bergmann <arnd@arndb.de>, Linus Walleij <linus.walleij@linaro.org>, Vincent Guittot <vincent.guittot@linaro.org>, baolin.wang7@gmail.com, linux-mmc <linux-mmc@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>
+To: Eugeniu Rosca <erosca@de.adit-jv.com>
+Cc: Wolfram Sang <wsa@the-dreams.de>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, Mathieu Malaterre <malat@debian.org>, Pavel Machek <pavel@ucw.cz>, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, Eugeniu Rosca <roscaeugeniu@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, 6 Nov 2019 at 20:02, Adrian Hunter <adrian.hunter@intel.com> wrote:
->
-> On 6/11/19 12:48 PM, Baolin Wang wrote:
-> > On Wed, 6 Nov 2019 at 18:10, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> >>
-> >> On 29/10/19 7:43 AM, Baolin Wang wrote:
-> >>> When using the host software queue, it will trigger the next request in
-> >>> irq handler without a context switch. But the sdhci_request() can not be
-> >>> called in interrupt context when using host software queue for some host
-> >>> drivers, due to the get_cd() ops can be sleepable.
-> >>>
-> >>> But for some host drivers, such as Spreadtrum host driver, the card is
-> >>> nonremovable, so the get_cd() ops is not sleepable, which means we can
-> >>> complete the data request and trigger the next request in irq handler
-> >>> to remove the context switch for the Spreadtrum host driver.
-> >>>
-> >>> Thus we still need introduce a variable in struct sdhci_host to indicate
-> >>> that we will always to defer to complete data requests if the sdhci_request()
-> >>> can not be called in interrupt context for some host drivers, when using
-> >>> the host software queue.
-> >>>
-> >>> Suggested-by: Adrian Hunter <adrian.hunter@intel.com>
-> >>> Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
-> >>> ---
-> >>>  drivers/mmc/host/sdhci.c |    2 +-
-> >>>  drivers/mmc/host/sdhci.h |    1 +
-> >>>  2 files changed, 2 insertions(+), 1 deletion(-)
-> >>>
-> >>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> >>> index 850241f..9cf2130 100644
-> >>> --- a/drivers/mmc/host/sdhci.c
-> >>> +++ b/drivers/mmc/host/sdhci.c
-> >>> @@ -3035,7 +3035,7 @@ static inline bool sdhci_defer_done(struct sdhci_host *host,
-> >>>  {
-> >>>       struct mmc_data *data = mrq->data;
-> >>>
-> >>> -     return host->pending_reset ||
-> >>> +     return host->pending_reset || (host->always_defer_done && data) ||
->
-> To move ahead in the meantime without a new host API, just defer always i.e.
+On Tue, Nov 05, 2019 at 09:32:13AM +0100, Eugeniu Rosca wrote:
+> Hi Wolfram,
+> 
+> On Tue, Nov 05, 2019 at 07:22:23AM +0100, Wolfram Sang wrote:
+> > Hi Eugeniu,
+> > 
+> > thanks for this work!
+> 
+> Thanks for the prompt response. Very much appreciated.
+> 
+> > 
+> > > A certain eMMC manufacturer provided below requirement:
+> > >  ---snip---
+> > >  Use "drive strength" value of 4 or 1 for HS400 or 0 for HS200.
+> > >  ---snip---
+> > 
+> > I see.
+> > 
+> > > The existing "fixed-emmc-driver-type" property [1] is the closest one
+> > > to implement the above, but it falls short due to being unable to define
+> > > two values to differentiate between HS200 and HS400 (both modes may be
+> > > supported by the same non-removable MMC device).
+> > > 
+> > > To allow users to set a preferred HS200/HS400 "drive strength", provide
+> > > two more bindings inspired from [1]:
+> > >  - fixed-emmc-driver-type-hs200
+> > >  - fixed-emmc-driver-type-hs400
+> > 
+> > Main question before looking at the code: Can't we just extend the
+> > existing binding with an optional second parameter?
 
-OK.
+I was thinking the same thing...
 
-And I'll wait for a while to see if Ulf will post some comments for
-this patch set before new version. Thanks.
+> 
+> That's a great question/proposal, but before pushing the v2 right away,
+> I would like to first share some thoughts.
+> 
+> >         minItems: 1
+> >         maxItems: 2
+> > 
+> > I tend to favour this approach...
+> 
+> The first question which pops up in my mind is related to the meaning
+> of each item. The option which I envision based on your proposal is:
+> 
+>   * minItems: 1
+>   * maxItems: 2
+>   * Item[0]: Presumably equivalent to the current
+>     "fixed-emmc-driver-type", i.e. the strength value applied in both
+>     HS200 and HS400 modes.
+>   * Item[1] (optional): Presumably equivalent to
+>     "fixed-emmc-driver-type-hs400" proposed in this series. If this
+>     element is provided, the first one should likely change its role
+>     and become an equivalent of "fixed-emmc-driver-type-hs200" from
+>     this series.
+>   + Pro: Full backward compatibility. No need to touch the existing
+>     users of "fixed-emmc-driver-type".
+>   - Con: Not sure we have such DT bindings which dynamically change
+>     their semantics based on the usage pattern.
+>   - Con: Can't easily achieve the same flexibility as accomplished in
+>     this series. For example, current implementation allows users to
+>     define each of the three parameters (i.e. HSx00-agnostic drive
+>     strength, HS200 and HS400 specific drive strengths) individually,
+>     as well as in all possible combinations. This might be needed if,
+>     in certain HSx00 mode, users still need to rely on the
+>     RAW/unmodified drive strength. I am unsure if/how this can be
+>     achieved with an array OF property with a constant or variable
+>     number of elements (I try to sketch one solution below).
+> 
+> One option to achieve a similar degree of flexibility by using an array
+> OF property (instead of several u32 properties) would be to agree on a
+> convention based on magic values, i.e. below DT one-liner could be an
+> example of providing solely the "fixed-emmc-driver-type-hs200" value
+> (based on the agreement that 0xFF values are discarded by the driver):
+> 
+>     fixed-emmc-driver-type = <0xFF 0x1 0xFF>;
 
->
-> +     return host->pending_reset || host->always_defer_done ||
->
-> >>
-> >> I didn't realize you still wanted to call the request function in interrupt
-> >> context.  In my view that needs a new host API
-> >> i.e. int (*request_atomic)(struct mmc_host *mmc, struct mmc_request *mrq)
-> >
-> > Actually there are no documentation said that the
-> > mmc_host_ops->request() is a sleepable API, so I introduce a
-> > host->always_defer_done flag to decide if the request can be called in
-> > interrupt context or not, since for some host drivers, the request()
-> > implementation can be called in interrupt context.
-> >
-> > Yes, I agree a new host API is more reasonable, if you do not like the
-> > current approach, I can add new patches to introduce the new
-> > request_atomic() API. But can I create another separate patch set to
-> > do this? since in this patch set, the Spreadtrum host driver's
-> > request() implementation can be called in interrupt context. Or you
-> > still want these changes introducing new request_atomic() can be done
-> > in this patch set? Thanks.
-> >
-> >>
-> >>>              ((host->flags & SDHCI_REQ_USE_DMA) && data &&
-> >>>               data->host_cookie == COOKIE_MAPPED);
-> >>>  }
-> >>> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> >>> index d89cdb9..38fbd18 100644
-> >>> --- a/drivers/mmc/host/sdhci.h
-> >>> +++ b/drivers/mmc/host/sdhci.h
-> >>> @@ -533,6 +533,7 @@ struct sdhci_host {
-> >>>       bool pending_reset;     /* Cmd/data reset is pending */
-> >>>       bool irq_wake_enabled;  /* IRQ wakeup is enabled */
-> >>>       bool v4_mode;           /* Host Version 4 Enable */
-> >>> +     bool always_defer_done; /* Always defer to complete data requests */
-> >>>
-> >>>       struct mmc_request *mrqs_done[SDHCI_MAX_MRQS];  /* Requests done */
-> >>>       struct mmc_command *cmd;        /* Current command */
-> >>>
-> >>
-> >
-> >
->
+I don't understand why you have 3 values instead of 2.
 
+I would just use -1 if you want to ignore an entry. If that's the common 
+case, then I'd stick with what you originally proposed. If rare, then I 
+think an array is the better route.
 
--- 
-Baolin Wang
-Best Regards
+Rob
