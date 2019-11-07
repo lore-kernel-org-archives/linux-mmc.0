@@ -1,81 +1,52 @@
-From: Avri Altman <Avri.Altman@wdc.com>
-Subject: RE: [PATCH v2] mmc: core: Fix size overflow for mmc partitions
-Date: Thu, 7 Nov 2019 08:30:22 +0000
-Message-ID: <MN2PR04MB69915AFED1B6AFD1B30EFBCDFC780@MN2PR04MB6991.namprd04.prod.outlook.com>
-References: <1573097159-3914-1-git-send-email-bradleybolen@gmail.com>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Subject: Re: [PATCH] mmc: renesas_sdhi: add checks for pinctrl_lookup_state
+Date: Thu, 7 Nov 2019 09:30:36 +0100
+Message-ID: <CAMuHMdXSKU40E8Br0Z53H2FyrQsLxnB-EERZoN6HQHExP5tqxQ@mail.gmail.com>
+References: <20191018131338.11713-1-hslester96@gmail.com> <CAPDyKFoBYchP96hv=7XfTo8CrCSD+KC0h_oFRAsOYT-Lc1SFZQ@mail.gmail.com>
+ <20191023153313.GB5153@kunai> <CAPDyKFo9wYwhdy-1BDcRMJKTjADappsT-gBaKZE7hTLE4obxiA@mail.gmail.com>
+ <20191031221211.GA3853@kunai>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1573097159-3914-1-git-send-email-bradleybolen@gmail.com>
-Content-Language: en-US
+In-Reply-To: <20191031221211.GA3853@kunai>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Bradley Bolen <bradleybolen@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "kstewart@linuxfoundation.org" <kstewart@linuxfoundation.org>, "tglx@linutronix.de" <tglx@linutronix.de>, "wsa+renesas@sang-engineering.com" <wsa+renesas@sang-engineering.com>, "yinbo.zhu@nxp.com" <yinbo.zhu@nxp.com>, "hongjiefang@asrmicro.com" <hongjiefang@asrmicro.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Wolfram Sang <wsa@the-dreams.de>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Chuhong Yuan <hslester96@gmail.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
->=20
-> With large eMMC cards, it is possible to create general purpose partition=
-s that
-> are bigger than 4GB.  The size member of the mmc_part struct is only an
-> unsigned int which overflows for gp partitions larger than 4GB.  Change t=
-his to a
-> u64 to handle the overflow.
->=20
-> Signed-off-by: Bradley Bolen <bradleybolen@gmail.com>
-Looks fine.
-Avri
+Hi Wolfram,
 
-> ---
->  drivers/mmc/core/mmc.c   | 6 +++---
->  include/linux/mmc/card.h | 2 +-
->  2 files changed, 4 insertions(+), 4 deletions(-)
->=20
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c index
-> c880489..fc02124 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -297,7 +297,7 @@ static void mmc_manage_enhanced_area(struct
-> mmc_card *card, u8 *ext_csd)
->         }
->  }
->=20
-> -static void mmc_part_add(struct mmc_card *card, unsigned int size,
-> +static void mmc_part_add(struct mmc_card *card, u64 size,
->                          unsigned int part_cfg, char *name, int idx, bool=
- ro,
->                          int area_type)
->  {
-> @@ -313,7 +313,7 @@ static void mmc_manage_gp_partitions(struct
-> mmc_card *card, u8 *ext_csd)  {
->         int idx;
->         u8 hc_erase_grp_sz, hc_wp_grp_sz;
-> -       unsigned int part_size;
-> +       u64 part_size;
->=20
->         /*
->          * General purpose partition feature support -- @@ -362,7 +362,7 =
-@@
-> static void mmc_manage_gp_partitions(struct mmc_card *card, u8 *ext_csd)
-> static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)  {
->         int err =3D 0, idx;
-> -       unsigned int part_size;
-> +       u64 part_size;
->         struct device_node *np;
->         bool broken_hpi =3D false;
->=20
-> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h index
-> 9b6336a..b59d35b 100644
-> --- a/include/linux/mmc/card.h
-> +++ b/include/linux/mmc/card.h
-> @@ -226,7 +226,7 @@ struct mmc_queue_req;
->   * MMC Physical partitions
->   */
->  struct mmc_part {
-> -       unsigned int    size;   /* partition size (in bytes) */
-> +       u64             size;   /* partition size (in bytes) */
->         unsigned int    part_cfg;       /* partition type */
->         char    name[MAX_MMC_PART_NAME_LEN];
->         bool    force_ro;       /* to make boot parts RO by default */
-> --
-> 2.7.4
+On Thu, Oct 31, 2019 at 11:58 PM Wolfram Sang <wsa@the-dreams.de> wrote:
+> > > Well, I don't like to bail out because this error is not fatal for basic
+> > > operations. How about releasing priv->pinctrl again with an additional
+> > > warning that pinctrl settings are broken and will prevent 1.8v modes?
+> > >
+> > > Opinions?
+> >
+> > Hmm, from a mmc driver probe point of view, I don't quite share this approach.
+> >
+> > I would rather fail as it forces the DTB to be corrected immediately,
+> > rather than trusting some developer to look at a warning in a log. The
+> > point is, in such a case it may never get fixed, if the product is
+> > shipped with the wrong DTB.
+>
+> I could agree to this arguement, iff the only way pinctrl_select fails
+> is a DT misconfiguration. I am not sure if this is true right now, and
+> we can't be sure about the future. Or?
+
+Isn't "state_uhs" optional? So bailing out if it doesn't exist is wrong.
+"default" should be there, if the device node has pinctrl properties.
+
+renesas_sdhi_start_signal_voltage_switch() already handles fallback
+to 3v3 operation.
+
+Gr{oetje,eeting}s,
+
+                        Geert
+
+-- 
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
