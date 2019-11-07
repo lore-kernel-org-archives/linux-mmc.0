@@ -1,67 +1,87 @@
 From: "H. Nikolaus Schaller" <hns@goldelico.com>
-Subject: [PATCH v3 12/12] net: wireless: ti: remove local VENDOR_ID and DEVICE_ID definitions
-Date: Thu,  7 Nov 2019 11:30:45 +0100
-Message-ID: <3f2a982b3be2c90e5e0af5869df8580793b39882.1573122644.git.hns@goldelico.com>
+Subject: [PATCH v3 04/12] mmc: host: omap_hsmmc: add code for special init of
+ wl1251 to get rid of pandora_wl1251_init_card
+Date: Thu,  7 Nov 2019 11:30:37 +0100
+Message-ID: <2f050912668e5e3581ccc22707df54d8bb14c696.1573122644.git.hns@goldelico.com>
 References: <cover.1573122644.git.hns@goldelico.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Return-path: <stable-owner@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 In-Reply-To: <cover.1573122644.git.hns@goldelico.com>
-Sender: stable-owner@vger.kernel.org
-To: =?UTF-8?q?Beno=C3=AEt=20Cousson?= <bcousson@baylibre.com>, Tony Lindgren <tony@atomide.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Russell King <linux@armlinux.org.uk>, Ulf Hansson <ulf.hansson@linaro.org>, Kalle Valo <kvalo@codeaurora.org>, Mike Rapoport <rppt@linux.ibm.com>, David Sterba <dsterba@suse.com>, "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>, Petr Mladek <pmladek@suse.com>, Sakari Ailus <sakari.ailus@linux.intel.com>, "H. Nikolaus Schaller" <hns@goldelico.com>, Kefeng Wang <wangkefeng.wang@huawei.com>, Yangtao Li <tiny.windzz@gmail.com>, Alexios Zavras <alexios.zavras@intel.com>, Thomas Gleixner <tglx@linutronix.de>, Allison Randal <allison@lohutok.net>, Greg Kroah-Hartman <gregkh@linuxfoundati>
-Cc: linux-omap@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-wireless@vger.kernel.org, netdev@vger.kernel.org, letux-kernel@openphoenux.org, kernel@pyra-handheld.com, stable@vger.kernel.org
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: =?UTF-8?q?Beno=C3=AEt=20Cousson?= <bcousson@baylibre.com>, Tony Lindgren <tony@atomide.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Russell King <linux@armlinux.org.uk>, Ulf Hansson <ulf.hansson@linaro.org>, Kalle Valo <kvalo@codeaurora.org>, Mike Rapoport <rppt@linux.ibm.com>, David Sterba <dsterba@suse.com>, "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>, Petr Mladek <pmladek@suse.com>, Sakari Ailus <sakari.ailus@linux.intel.com>, "H. Nikolaus Schaller" <hns@goldelico.com>, Kefeng Wang <wangkefeng.wang@huawei.com>, Yangtao Li <tiny.windzz@gmail.com>, Alexios Zavras <alexios.zavras@intel.com>, Thomas Gleixner <tglx@linutronix.de>, Allison Randal <allison@lohutok.net>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, John Stultz <john.stultz@linaro.org>, Bjorn Helgaas <bhelgaas@google.com>
+Cc: devicetree@vger.kernel.org, letux-kernel@openphoenux.org, linux-mmc@vger.kernel.org, kernel@pyra-handheld.com, linux-wireless@vger.kernel.org, linux-kernel@vger.kernel.org, stable@vger.kernel.org, netdev@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-They are already included from mmc/sdio_ids.h and do not need
-a local definition.
+Pandora_wl1251_init_card was used to do special pdata based
+setup of the sdio mmc interface. This does no longer work with
+v4.7 and later. A fix requires a device tree based mmc3 setup.
 
-Fixes: 884f38607897 ("mmc: core: move some sdio IDs out of quirks file")
+Therefore we move the special setup to omap_hsmmc.c instead
+of calling some pdata supplied init_card function.
+
+The new code checks for a DT child node compatible to wl1251
+so it will not affect other MMC3 use cases.
+
+Generally, this code was and still is a hack and should be
+moved to mmc core to e.g. read such properties from optional
+DT child nodes.
+
+Fixes: 81eef6ca9201 ("mmc: omap_hsmmc: Use dma_request_chan() for requesting DMA channel")
 
 Signed-off-by: H. Nikolaus Schaller <hns@goldelico.com>
-Acked-by: Kalle Valo <kvalo@codeaurora.org>
-Cc: <stable@vger.kernel.org> # 4.11.0
+Cc: <stable@vger.kernel.org> # 4.7.0
 ---
- drivers/net/wireless/ti/wl1251/sdio.c | 8 --------
- drivers/net/wireless/ti/wlcore/sdio.c | 8 --------
- 2 files changed, 16 deletions(-)
+ drivers/mmc/host/omap_hsmmc.c | 28 ++++++++++++++++++++++++++++
+ 1 file changed, 28 insertions(+)
 
-diff --git a/drivers/net/wireless/ti/wl1251/sdio.c b/drivers/net/wireless/ti/wl1251/sdio.c
-index 42b55f3a50df..3c4d5e38c66c 100644
---- a/drivers/net/wireless/ti/wl1251/sdio.c
-+++ b/drivers/net/wireless/ti/wl1251/sdio.c
-@@ -22,14 +22,6 @@
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index 952fa4063ff8..a7192731ac13 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -1512,6 +1512,34 @@ static void omap_hsmmc_init_card(struct mmc_host *mmc, struct mmc_card *card)
  
- #include "wl1251.h"
+ 	if (mmc_pdata(host)->init_card)
+ 		mmc_pdata(host)->init_card(card);
++	else if (card->type == MMC_TYPE_SDIO || card->type == MMC_TYPE_SD_COMBO) {
++		struct device_node *np = mmc_dev(mmc)->of_node;
++
++		/*
++		 * REVISIT: should be moved to sdio core and made more
++		 * general e.g. by expanding the DT bindings of child nodes
++		 * to provide a mechanism to provide this information:
++		 * Documentation/devicetree/bindings/mmc/mmc-card.txt
++		 */
++
++		np = of_get_compatible_child(np, "ti,wl1251");
++		if (np) {
++			/*
++			 * We have TI wl1251 attached to MMC3. Pass this information to
++			 * SDIO core because it can't be probed by normal methods.
++			 */
++
++			dev_info(host->dev, "found wl1251\n");
++			card->quirks |= MMC_QUIRK_NONSTD_SDIO;
++			card->cccr.wide_bus = 1;
++			card->cis.vendor = 0x104c;
++			card->cis.device = 0x9066;
++			card->cis.blksize = 512;
++			card->cis.max_dtr = 24000000;
++			card->ocr = 0x80;
++			of_node_put(np);
++		}
++	}
+ }
  
--#ifndef SDIO_VENDOR_ID_TI
--#define SDIO_VENDOR_ID_TI		0x104c
--#endif
--
--#ifndef SDIO_DEVICE_ID_TI_WL1251
--#define SDIO_DEVICE_ID_TI_WL1251	0x9066
--#endif
--
- struct wl1251_sdio {
- 	struct sdio_func *func;
- 	u32 elp_val;
-diff --git a/drivers/net/wireless/ti/wlcore/sdio.c b/drivers/net/wireless/ti/wlcore/sdio.c
-index 7afaf35f2453..9fd8cf2d270c 100644
---- a/drivers/net/wireless/ti/wlcore/sdio.c
-+++ b/drivers/net/wireless/ti/wlcore/sdio.c
-@@ -26,14 +26,6 @@
- #include "wl12xx_80211.h"
- #include "io.h"
- 
--#ifndef SDIO_VENDOR_ID_TI
--#define SDIO_VENDOR_ID_TI		0x0097
--#endif
--
--#ifndef SDIO_DEVICE_ID_TI_WL1271
--#define SDIO_DEVICE_ID_TI_WL1271	0x4076
--#endif
--
- static bool dump = false;
- 
- struct wl12xx_sdio_glue {
+ static void omap_hsmmc_enable_sdio_irq(struct mmc_host *mmc, int enable)
 -- 
 2.23.0
