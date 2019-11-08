@@ -1,45 +1,31 @@
-From: Thierry Reding <thierry.reding@gmail.com>
-Subject: [PATCH] mmc: mmc_spi: Use proper debounce time for CD GPIO
-Date: Fri,  8 Nov 2019 17:09:00 +0100
-Message-ID: <20191108160900.3280960-1-thierry.reding@gmail.com>
+From: Tony Lindgren <tony@atomide.com>
+Subject: Re: [PATCH v3 03/12] ARM: dts: pandora-common: define wl1251 as
+ child node of mmc3
+Date: Fri, 8 Nov 2019 09:10:08 -0800
+Message-ID: <20191108171008.GJ5610@atomide.com>
+References: <cover.1573122644.git.hns@goldelico.com>
+ <bd14b481105b21a0c1882a1ea34281893233db31.1573122644.git.hns@goldelico.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Linus Walleij <linus.walleij@linaro.org>, Pavel Machek <pavel@denx.de>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <netdev-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <bd14b481105b21a0c1882a1ea34281893233db31.1573122644.git.hns@goldelico.com>
+Sender: netdev-owner@vger.kernel.org
+To: "H. Nikolaus Schaller" <hns@goldelico.com>
+Cc: =?utf-8?Q?Beno=C3=AEt?= Cousson <bcousson@baylibre.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Russell King <linux@armlinux.org.uk>, Ulf Hansson <ulf.hansson@linaro.org>, Kalle Valo <kvalo@codeaurora.org>, Mike Rapoport <rppt@linux.ibm.com>, David Sterba <dsterba@suse.com>, "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>, Petr Mladek <pmladek@suse.com>, Sakari Ailus <sakari.ailus@linux.intel.com>, Kefeng Wang <wangkefeng.wang@huawei.com>, Yangtao Li <tiny.windzz@gmail.com>, Alexios Zavras <alexios.zavras@intel.com>, Thomas Gleixner <tglx@linutronix.de>, Allison Randal <allison@lohutok.net>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, John Stultz <john.stultz@linaro.org>, Bjorn Helgaas <bhelgaas@google.co>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Thierry Reding <treding@nvidia.com>
+* H. Nikolaus Schaller <hns@goldelico.com> [191107 10:33]:
+> Since v4.7 the dma initialization requires that there is a
+> device tree property for "rx" and "tx" channels which is
+> not provided by the pdata-quirks initialization.
+> 
+> By conversion of the mmc3 setup to device tree this will
+> finally allows to remove the OpenPandora wlan specific omap3
+> data-quirks.
+> 
+> Fixes: 81eef6ca9201 ("mmc: omap_hsmmc: Use dma_request_chan() for requesting DMA channel")
 
-According to the comment, board files used to specify 1 ms for the
-debounce time. gpiod_set_debounce() needs the debounce time to be
-specified in units of microseconds, so make sure to multiply the value
-by 1000.
+Probably best to queue this all via the mmc tree when no more comments:
 
-Note that, according to the git log, the board files actually did
-specify 1 us for bounce times, but that seems really low. Device tree
-bindings for this type of GPIO typically specify the debounce times in
-milliseconds, so setting this default value to 1 ms seems like it would
-be somewhat safer.
-
-Signed-off-by: Thierry Reding <treding@nvidia.com>
----
- drivers/mmc/host/mmc_spi.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/host/mmc_spi.c b/drivers/mmc/host/mmc_spi.c
-index 66e354d51ee9..74c6cfbf9172 100644
---- a/drivers/mmc/host/mmc_spi.c
-+++ b/drivers/mmc/host/mmc_spi.c
-@@ -1421,7 +1421,7 @@ static int mmc_spi_probe(struct spi_device *spi)
- 	 * Index 0 is card detect
- 	 * Old boardfiles were specifying 1 ms as debounce
- 	 */
--	status = mmc_gpiod_request_cd(mmc, NULL, 0, false, 1, NULL);
-+	status = mmc_gpiod_request_cd(mmc, NULL, 0, false, 1000, NULL);
- 	if (status == -EPROBE_DEFER)
- 		goto fail_add_host;
- 	if (!status) {
--- 
-2.23.0
+Acked-by: Tony Lindgren <tony@atomide.com>
