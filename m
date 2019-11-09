@@ -1,45 +1,46 @@
 From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v2 0/3] mmc: Fixup HW reset for SDIO cards
-Date: Sat,  9 Nov 2019 11:30:43 +0100
-Message-ID: <20191109103046.26445-1-ulf.hansson@linaro.org>
+Subject: [PATCH v2 2/3] mmc: core: Drop check for mmc_card_is_removable() in mmc_rescan()
+Date: Sat,  9 Nov 2019 11:30:45 +0100
+Message-ID: <20191109103046.26445-3-ulf.hansson@linaro.org>
+References: <20191109103046.26445-1-ulf.hansson@linaro.org>
 Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20191109103046.26445-1-ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Matthias Kaehlcke <mka-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
 Cc: Kalle Valo <kvalo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Wen Gong <wgong-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Erik Stromdahl <erik.stromdahl-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Eyal Reizer <eyalreizer-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-Changes in v2:
-	- Add adaptations to the mwifiex driver.
-	- Keep existing syncronous reset behaviour if the SDIO card has a single
-	func driver.
+Upfront in mmc_rescan() we use the host->rescan_entered flag, to allow
+scanning only once for non-removable cards. Therefore, it's also not
+possible that we can have a corresponding card bus attached (host->bus_ops
+is NULL), when we are scanning non-removable cards.
 
-It has turned out that it's not a good idea to try to power cycle and to
-re-initialize the SDIO card, as currently done through mmc_hw_reset(). This
-because there may be multiple SDIO funcs attached to the same SDIO card and
-some of the others that didn't execute the call to mmc_hw_reset(), may then
-simply experience an undefined behaviour.
+For this reason, let' drop the check for mmc_card_is_removable() as it's
+redundant.
 
-The following patches in this series attempts to address this problem, by
-reworking the mmc_hw_reset() behaviour for SDIO and by adopting the Marvel
-mwifiex driver to these changes.
+Reviewed-by: Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Signed-off-by: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+---
+ drivers/mmc/core/core.c | 7 ++-----
+ 1 file changed, 2 insertions(+), 5 deletions(-)
 
-Note that, I don't have the HW at hand so the the code has only compile tested.
-Test on HW is greatly appreciated!
-
-Ulf Hansson (3):
-  mwifiex: Re-work support for SDIO HW reset
-  mmc: core: Drop check for mmc_card_is_removable() in mmc_rescan()
-  mmc: core: Re-work HW reset for SDIO cards
-
- drivers/mmc/core/core.c                     | 12 +++-----
- drivers/mmc/core/core.h                     |  2 ++
- drivers/mmc/core/sdio.c                     | 28 ++++++++++++++++-
- drivers/mmc/core/sdio_bus.c                 |  9 +++++-
- drivers/net/wireless/marvell/mwifiex/main.c |  6 +++-
- drivers/net/wireless/marvell/mwifiex/main.h |  1 +
- drivers/net/wireless/marvell/mwifiex/sdio.c | 33 ++++++++++++++-------
- include/linux/mmc/card.h                    |  1 +
- 8 files changed, 70 insertions(+), 22 deletions(-)
-
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 221127324709..6f8342702c73 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -2297,11 +2297,8 @@ void mmc_rescan(struct work_struct *work)
+ 
+ 	mmc_bus_get(host);
+ 
+-	/*
+-	 * if there is a _removable_ card registered, check whether it is
+-	 * still present
+-	 */
+-	if (host->bus_ops && !host->bus_dead && mmc_card_is_removable(host))
++	/* Verify a registered card to be functional, else remove it. */
++	if (host->bus_ops && !host->bus_dead)
+ 		host->bus_ops->detect(host);
+ 
+ 	host->detect_change = 0;
 -- 
 2.17.1
