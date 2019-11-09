@@ -1,7 +1,7 @@
 From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v2 1/3] mwifiex: Re-work support for SDIO HW reset
-Date: Sat,  9 Nov 2019 11:30:44 +0100
-Message-ID: <20191109103046.26445-2-ulf.hansson@linaro.org>
+Subject: [PATCH v2 3/3] mmc: core: Re-work HW reset for SDIO cards
+Date: Sat,  9 Nov 2019 11:30:46 +0100
+Message-ID: <20191109103046.26445-4-ulf.hansson@linaro.org>
 References: <20191109103046.26445-1-ulf.hansson@linaro.org>
 Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <20191109103046.26445-1-ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
@@ -10,118 +10,171 @@ To: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ulf Hansson <ulf.hansson-
 Cc: Kalle Valo <kvalo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Wen Gong <wgong-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Erik Stromdahl <erik.stromdahl-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Eyal Reizer <eyalreizer-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-The SDIO HW reset procedure in mwifiex_sdio_card_reset_work() is broken,
-when the SDIO card is shared with another SDIO func driver. This is the
-case when the Bluetooth btmrvl driver is being used in combination with
-mwifiex. More precisely, when mwifiex_sdio_card_reset_work() runs to resets
-the SDIO card, the btmrvl driver doesn't get notified about it. Beyond that
-point, the btmrvl driver will fail to communicate with the SDIO card.
+It have turned out that it's not a good idea to unconditionally do a power
+cycle and then to re-initialize the SDIO card, as currently done through
+mmc_hw_reset() -> mmc_sdio_hw_reset(). This because there may be multiple
+SDIO func drivers probed, who also shares the same SDIO card.
 
-This is a generic problem for SDIO func drivers sharing an SDIO card, which
-are about to be addressed in subsequent changes to the mmc core and the
-mmc_hw_reset() interface. In principle, these changes means the
-mmc_hw_reset() interface starts to return 1 if the are multiple drivers for
-the SDIO card, as to indicate to the caller that the reset needed to be
-scheduled asynchronously through a hotplug mechanism of the SDIO card.
+To address these scenarios, one may be tempted to use a notification
+mechanism, as to allow the core to inform each of the probed func drivers,
+about an ongoing HW reset. However, supporting such an operation from the
+func driver point of view, may not be entirely trivial.
 
-Let's prepare the mwifiex driver to support the upcoming new behaviour of
-mmc_hw_reset(), which means extending the mwifiex_sdio_card_reset_work() to
-support the asynchronous SDIO HW reset path. This also means, we need to
-allow the ->remove() callback to run, without waiting for the FW to be
-loaded. Additionally, during system suspend, mwifiex_sdio_suspend() may be
-called when a reset has been scheduled, but waiting to be executed. In this
-scenario let's simply return -EBUSY to abort the suspend process, as to
-allow the reset to be completed first.
+Therefore, let's use a more simplistic approach to solve the problem, by
+instead forcing the card to be removed and re-detected, via scheduling a
+rescan-work. In this way, we can rely on existing infrastructure, as the
+func driver's ->remove() and ->probe() callbacks, becomes invoked to deal
+with the cleanup and the re-initialization.
+
+This solution may be considered as rather heavy, especially if a func
+driver doesn't share its card with other func drivers. To address this,
+let's keep the current immediate HW reset option as well, but run it only
+when there is one func driver probed for the card.
+
+Finally, to allow the caller of mmc_hw_reset(), to understand if the reset
+is being asynchronously managed from a scheduled work, it returns 1
+(propagated from mmc_sdio_hw_reset()). If the HW reset is executed
+successfully and synchronously it returns 0, which maintains the existing
+behaviour.
 
 Signed-off-by: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
- drivers/net/wireless/marvell/mwifiex/main.c |  6 +++-
- drivers/net/wireless/marvell/mwifiex/main.h |  1 +
- drivers/net/wireless/marvell/mwifiex/sdio.c | 33 ++++++++++++++-------
- 3 files changed, 28 insertions(+), 12 deletions(-)
+ drivers/mmc/core/core.c     |  5 ++---
+ drivers/mmc/core/core.h     |  2 ++
+ drivers/mmc/core/sdio.c     | 28 +++++++++++++++++++++++++++-
+ drivers/mmc/core/sdio_bus.c |  9 ++++++++-
+ include/linux/mmc/card.h    |  1 +
+ 5 files changed, 40 insertions(+), 5 deletions(-)
 
-diff --git a/drivers/net/wireless/marvell/mwifiex/main.c b/drivers/net/wireless/marvell/mwifiex/main.c
-index a9657ae6d782..dbdbdd6769a9 100644
---- a/drivers/net/wireless/marvell/mwifiex/main.c
-+++ b/drivers/net/wireless/marvell/mwifiex/main.c
-@@ -76,6 +76,7 @@ static int mwifiex_register(void *card, struct device *dev,
- 	*padapter = adapter;
- 	adapter->dev = dev;
- 	adapter->card = card;
-+	adapter->is_adapter_up = false;
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 6f8342702c73..abf8f5eb0a1c 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -1469,8 +1469,7 @@ void mmc_detach_bus(struct mmc_host *host)
+ 	mmc_bus_put(host);
+ }
  
- 	/* Save interface specific operations in adapter */
- 	memmove(&adapter->if_ops, if_ops, sizeof(struct mwifiex_if_ops));
-@@ -631,6 +632,7 @@ static int _mwifiex_fw_dpc(const struct firmware *firmware, void *context)
+-static void _mmc_detect_change(struct mmc_host *host, unsigned long delay,
+-				bool cd_irq)
++void _mmc_detect_change(struct mmc_host *host, unsigned long delay, bool cd_irq)
+ {
+ 	/*
+ 	 * If the device is configured as wakeup, we prevent a new sleep for
+@@ -2129,7 +2128,7 @@ int mmc_hw_reset(struct mmc_host *host)
+ 	ret = host->bus_ops->hw_reset(host);
+ 	mmc_bus_put(host);
  
- 	mwifiex_drv_get_driver_version(adapter, fmt, sizeof(fmt) - 1);
- 	mwifiex_dbg(adapter, MSG, "driver_version = %s\n", fmt);
-+	adapter->is_adapter_up = true;
- 	goto done;
+-	if (ret)
++	if (ret < 0)
+ 		pr_warn("%s: tried to HW reset card, got error %d\n",
+ 			mmc_hostname(host), ret);
  
- err_add_intf:
-@@ -1469,6 +1471,7 @@ int mwifiex_shutdown_sw(struct mwifiex_adapter *adapter)
- 	mwifiex_deauthenticate(priv, NULL);
+diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
+index 328c78dbee66..575ac0257af2 100644
+--- a/drivers/mmc/core/core.h
++++ b/drivers/mmc/core/core.h
+@@ -70,6 +70,8 @@ void mmc_rescan(struct work_struct *work);
+ void mmc_start_host(struct mmc_host *host);
+ void mmc_stop_host(struct mmc_host *host);
  
- 	mwifiex_uninit_sw(adapter);
-+	adapter->is_adapter_up = false;
++void _mmc_detect_change(struct mmc_host *host, unsigned long delay,
++			bool cd_irq);
+ int _mmc_detect_card_removed(struct mmc_host *host);
+ int mmc_detect_card_removed(struct mmc_host *host);
  
- 	if (adapter->if_ops.down_dev)
- 		adapter->if_ops.down_dev(adapter);
-@@ -1730,7 +1733,8 @@ int mwifiex_remove_card(struct mwifiex_adapter *adapter)
- 	if (!adapter)
- 		return 0;
+diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+index 26cabd53ddc5..ebb387aa5158 100644
+--- a/drivers/mmc/core/sdio.c
++++ b/drivers/mmc/core/sdio.c
+@@ -1048,9 +1048,35 @@ static int mmc_sdio_runtime_resume(struct mmc_host *host)
+ 	return ret;
+ }
  
--	mwifiex_uninit_sw(adapter);
-+	if (adapter->is_adapter_up)
-+		mwifiex_uninit_sw(adapter);
- 
- 	if (adapter->irq_wakeup >= 0)
- 		device_init_wakeup(adapter->dev, false);
-diff --git a/drivers/net/wireless/marvell/mwifiex/main.h b/drivers/net/wireless/marvell/mwifiex/main.h
-index 095837fba300..7703d2e5d2e0 100644
---- a/drivers/net/wireless/marvell/mwifiex/main.h
-+++ b/drivers/net/wireless/marvell/mwifiex/main.h
-@@ -1017,6 +1017,7 @@ struct mwifiex_adapter {
- 
- 	/* For synchronizing FW initialization with device lifecycle. */
- 	struct completion *fw_done;
-+	bool is_adapter_up;
- 
- 	bool ext_scan;
- 	u8 fw_api_ver;
-diff --git a/drivers/net/wireless/marvell/mwifiex/sdio.c b/drivers/net/wireless/marvell/mwifiex/sdio.c
-index 24c041dad9f6..2417c94c29c0 100644
---- a/drivers/net/wireless/marvell/mwifiex/sdio.c
-+++ b/drivers/net/wireless/marvell/mwifiex/sdio.c
-@@ -444,6 +444,9 @@ static int mwifiex_sdio_suspend(struct device *dev)
- 		return 0;
- 	}
- 
-+	if (!adapter->is_adapter_up)
-+		return -EBUSY;
++/*
++ * SDIO HW reset
++ *
++ * Returns 0 if the HW reset was executed synchronously, returns 1 if the HW
++ * reset was asynchronously scheduled, else a negative error code.
++ */
+ static int mmc_sdio_hw_reset(struct mmc_host *host)
+ {
+-	mmc_power_cycle(host, host->card->ocr);
++	struct mmc_card *card = host->card;
 +
- 	mwifiex_enable_wake(adapter);
++	/*
++	 * In case the card is shared among multiple func drivers, reset the
++	 * card through a rescan work. In this way it will be removed and
++	 * re-detected, thus all func drivers becomes informed about it.
++	 */
++	if (atomic_read(&card->sdio_funcs_probed) > 1) {
++		if (mmc_card_removed(card))
++			return 1;
++		host->rescan_entered = 0;
++		mmc_card_set_removed(card);
++		_mmc_detect_change(host, 0, false);
++		return 1;
++	}
++
++	/*
++	 * A single func driver has been probed, then let's skip the heavy
++	 * hotplug dance above and execute the reset immediately.
++	 */
++	mmc_power_cycle(host, card->ocr);
+ 	return mmc_sdio_reinit_card(host);
+ }
  
- 	/* Enable the Host Sleep */
-@@ -2220,22 +2223,30 @@ static void mwifiex_sdio_card_reset_work(struct mwifiex_adapter *adapter)
- 	struct sdio_func *func = card->func;
- 	int ret;
+diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
+index 2963e6542958..3cc928282af7 100644
+--- a/drivers/mmc/core/sdio_bus.c
++++ b/drivers/mmc/core/sdio_bus.c
+@@ -138,6 +138,8 @@ static int sdio_bus_probe(struct device *dev)
+ 	if (ret)
+ 		return ret;
  
-+	/* Prepare the adapter for the reset. */
- 	mwifiex_shutdown_sw(adapter);
-+	clear_bit(MWIFIEX_IFACE_WORK_DEVICE_DUMP, &card->work_flags);
-+	clear_bit(MWIFIEX_IFACE_WORK_CARD_RESET, &card->work_flags);
- 
--	/* power cycle the adapter */
-+	/* Run a HW reset of the SDIO interface. */
++	atomic_inc(&func->card->sdio_funcs_probed);
++
+ 	/* Unbound SDIO functions are always suspended.
+ 	 * During probe, the function is set active and the usage count
+ 	 * is incremented.  If the driver supports runtime PM,
+@@ -153,7 +155,10 @@ static int sdio_bus_probe(struct device *dev)
+ 	/* Set the default block size so the driver is sure it's something
+ 	 * sensible. */
  	sdio_claim_host(func);
--	mmc_hw_reset(func->card->host);
-+	ret = mmc_hw_reset(func->card->host);
+-	ret = sdio_set_block_size(func, 0);
++	if (mmc_card_removed(func->card))
++		ret = -ENOMEDIUM;
++	else
++		ret = sdio_set_block_size(func, 0);
  	sdio_release_host(func);
+ 	if (ret)
+ 		goto disable_runtimepm;
+@@ -165,6 +170,7 @@ static int sdio_bus_probe(struct device *dev)
+ 	return 0;
  
--	/* Previous save_adapter won't be valid after this. We will cancel
--	 * pending work requests.
--	 */
--	clear_bit(MWIFIEX_IFACE_WORK_DEVICE_DUMP, &card->work_flags);
--	clear_bit(MWIFIEX_IFACE_WORK_CARD_RESET, &card->work_flags);
+ disable_runtimepm:
++	atomic_dec(&func->card->sdio_funcs_probed);
+ 	if (func->card->host->caps & MMC_CAP_POWER_OFF_CARD)
+ 		pm_runtime_put_noidle(dev);
+ 	dev_pm_domain_detach(dev, false);
+@@ -181,6 +187,7 @@ static int sdio_bus_remove(struct device *dev)
+ 		pm_runtime_get_sync(dev);
+ 
+ 	drv->remove(func);
++	atomic_dec(&func->card->sdio_funcs_probed);
+ 
+ 	if (func->irq_handler) {
+ 		pr_warn("WARNING: driver %s did not remove its interrupt handler!\n",
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index 9b6336ad3266..e459b38ef33c 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -291,6 +291,7 @@ struct mmc_card {
+ 	struct sd_switch_caps	sw_caps;	/* switch (CMD6) caps */
+ 
+ 	unsigned int		sdio_funcs;	/* number of SDIO functions */
++	atomic_t		sdio_funcs_probed; /* number of probed SDIO funcs */
+ 	struct sdio_cccr	cccr;		/* common card info */
+ 	struct sdio_cis		cis;		/* common tuple info */
+ 	struct sdio_func	*sdio_func[SDIO_MAX_FUNCS]; /* SDIO functions (devices) */
+-- 
+2.17.1
