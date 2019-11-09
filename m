@@ -1,55 +1,45 @@
-From: Pavel Machek <pavel@denx.de>
-Subject: Re: [PATCH] mmc: mmc_spi: Use proper debounce time for CD GPIO
-Date: Fri, 8 Nov 2019 21:53:11 +0100
-Message-ID: <20191108205311.GD23750@amd>
-References: <20191108160900.3280960-1-thierry.reding@gmail.com>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="8w3uRX/HFJGApMzv"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20191108160900.3280960-1-thierry.reding@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Thierry Reding <thierry.reding@gmail.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Linus Walleij <linus.walleij@linaro.org>, Pavel Machek <pavel@denx.de>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH v2 0/3] mmc: Fixup HW reset for SDIO cards
+Date: Sat,  9 Nov 2019 11:30:43 +0100
+Message-ID: <20191109103046.26445-1-ulf.hansson@linaro.org>
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Matthias Kaehlcke <mka-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Cc: Kalle Valo <kvalo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Wen Gong <wgong-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Erik Stromdahl <erik.stromdahl-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Eyal Reizer <eyalreizer-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
+Changes in v2:
+	- Add adaptations to the mwifiex driver.
+	- Keep existing syncronous reset behaviour if the SDIO card has a single
+	func driver.
 
---8w3uRX/HFJGApMzv
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+It has turned out that it's not a good idea to try to power cycle and to
+re-initialize the SDIO card, as currently done through mmc_hw_reset(). This
+because there may be multiple SDIO funcs attached to the same SDIO card and
+some of the others that didn't execute the call to mmc_hw_reset(), may then
+simply experience an undefined behaviour.
 
-On Fri 2019-11-08 17:09:00, Thierry Reding wrote:
-> From: Thierry Reding <treding@nvidia.com>
->=20
-> According to the comment, board files used to specify 1 ms for the
-> debounce time. gpiod_set_debounce() needs the debounce time to be
-> specified in units of microseconds, so make sure to multiply the value
-> by 1000.
->=20
-> Note that, according to the git log, the board files actually did
-> specify 1 us for bounce times, but that seems really low. Device tree
-> bindings for this type of GPIO typically specify the debounce times in
-> milliseconds, so setting this default value to 1 ms seems like it would
-> be somewhat safer.
->=20
-> Signed-off-by: Thierry Reding <treding@nvidia.com>
+The following patches in this series attempts to address this problem, by
+reworking the mmc_hw_reset() behaviour for SDIO and by adopting the Marvel
+mwifiex driver to these changes.
 
-Acked-by: Pavel Machek <pavel@denx.de>
+Note that, I don't have the HW at hand so the the code has only compile tested.
+Test on HW is greatly appreciated!
 
---=20
-DENX Software Engineering GmbH,      Managing Director: Wolfgang Denk
-HRB 165235 Munich, Office: Kirchenstr.5, D-82194 Groebenzell, Germany
+Ulf Hansson (3):
+  mwifiex: Re-work support for SDIO HW reset
+  mmc: core: Drop check for mmc_card_is_removable() in mmc_rescan()
+  mmc: core: Re-work HW reset for SDIO cards
 
---8w3uRX/HFJGApMzv
-Content-Type: application/pgp-signature; name="signature.asc"
+ drivers/mmc/core/core.c                     | 12 +++-----
+ drivers/mmc/core/core.h                     |  2 ++
+ drivers/mmc/core/sdio.c                     | 28 ++++++++++++++++-
+ drivers/mmc/core/sdio_bus.c                 |  9 +++++-
+ drivers/net/wireless/marvell/mwifiex/main.c |  6 +++-
+ drivers/net/wireless/marvell/mwifiex/main.h |  1 +
+ drivers/net/wireless/marvell/mwifiex/sdio.c | 33 ++++++++++++++-------
+ include/linux/mmc/card.h                    |  1 +
+ 8 files changed, 70 insertions(+), 22 deletions(-)
 
------BEGIN PGP SIGNATURE-----
-
-iF0EABECAB0WIQRPfPO7r0eAhk010v0w5/Bqldv68gUCXcXVtwAKCRAw5/Bqldv6
-8i60AJ9+HnW7KWLQ4Gzd+50rSbaEhAlNzQCgvmtOhTJcKVQRoI00YK/ZOpkBmjg=
-=+1yy
------END PGP SIGNATURE-----
-
---8w3uRX/HFJGApMzv--
+-- 
+2.17.1
