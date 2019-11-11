@@ -1,180 +1,141 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v2 3/3] mmc: core: Re-work HW reset for SDIO cards
-Date: Sat,  9 Nov 2019 11:30:46 +0100
-Message-ID: <20191109103046.26445-4-ulf.hansson@linaro.org>
-References: <20191109103046.26445-1-ulf.hansson@linaro.org>
-Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20191109103046.26445-1-ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Matthias Kaehlcke <mka-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Cc: Kalle Valo <kvalo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Wen Gong <wgong-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Erik Stromdahl <erik.stromdahl-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Eyal Reizer <eyalreizer-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+From: Baolin Wang <baolin.wang@linaro.org>
+Subject: [PATCH v6 0/4] Add MMC software queue support
+Date: Mon, 11 Nov 2019 15:33:56 +0800
+Message-ID: <cover.1573456283.git.baolin.wang@linaro.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: adrian.hunter@intel.com, ulf.hansson@linaro.org, asutoshd@codeaurora.org
+Cc: orsonzhai@gmail.com, zhang.lyra@gmail.com, arnd@arndb.de, linus.walleij@linaro.org, vincent.guittot@linaro.org, baolin.wang@linaro.org, baolin.wang7@gmail.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-It have turned out that it's not a good idea to unconditionally do a power
-cycle and then to re-initialize the SDIO card, as currently done through
-mmc_hw_reset() -> mmc_sdio_hw_reset(). This because there may be multiple
-SDIO func drivers probed, who also shares the same SDIO card.
+Hi All,
 
-To address these scenarios, one may be tempted to use a notification
-mechanism, as to allow the core to inform each of the probed func drivers,
-about an ongoing HW reset. However, supporting such an operation from the
-func driver point of view, may not be entirely trivial.
+Now the MMC read/write stack will always wait for previous request is
+completed by mmc_blk_rw_wait(), before sending a new request to hardware,
+or queue a work to complete request, that will bring context switching
+overhead, especially for high I/O per second rates, to affect the IO
+performance.
 
-Therefore, let's use a more simplistic approach to solve the problem, by
-instead forcing the card to be removed and re-detected, via scheduling a
-rescan-work. In this way, we can rely on existing infrastructure, as the
-func driver's ->remove() and ->probe() callbacks, becomes invoked to deal
-with the cleanup and the re-initialization.
+Thus this patch set will introduce the MMC software command queue support
+based on command queue engine's interfaces, and set the queue depth as 32
+to allow more requests can be be prepared, merged and inserted into IO
+scheduler, but we only allow 2 requests in flight, that is enough to let
+the irq handler always trigger the next request without a context switch,
+as well as avoiding a long latency.
 
-This solution may be considered as rather heavy, especially if a func
-driver doesn't share its card with other func drivers. To address this,
-let's keep the current immediate HW reset option as well, but run it only
-when there is one func driver probed for the card.
+Moreover we can expand the MMC software queue interface to support
+MMC packed request or packed command instead of adding new interfaces,
+according to previosus discussion.
 
-Finally, to allow the caller of mmc_hw_reset(), to understand if the reset
-is being asynchronously managed from a scheduled work, it returns 1
-(propagated from mmc_sdio_hw_reset()). If the HW reset is executed
-successfully and synchronously it returns 0, which maintains the existing
-behaviour.
+Below are some comparison data with fio tool. The fio command I used
+is like below with changing the '--rw' parameter and enabling the direct
+IO flag to measure the actual hardware transfer speed in 4K block size.
 
-Signed-off-by: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
----
- drivers/mmc/core/core.c     |  5 ++---
- drivers/mmc/core/core.h     |  2 ++
- drivers/mmc/core/sdio.c     | 28 +++++++++++++++++++++++++++-
- drivers/mmc/core/sdio_bus.c |  9 ++++++++-
- include/linux/mmc/card.h    |  1 +
- 5 files changed, 40 insertions(+), 5 deletions(-)
+./fio --filename=/dev/mmcblk0p30 --direct=1 --iodepth=20 --rw=read --bs=4K --size=1G --group_reporting --numjobs=20 --name=test_read
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 6f8342702c73..abf8f5eb0a1c 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -1469,8 +1469,7 @@ void mmc_detach_bus(struct mmc_host *host)
- 	mmc_bus_put(host);
- }
- 
--static void _mmc_detect_change(struct mmc_host *host, unsigned long delay,
--				bool cd_irq)
-+void _mmc_detect_change(struct mmc_host *host, unsigned long delay, bool cd_irq)
- {
- 	/*
- 	 * If the device is configured as wakeup, we prevent a new sleep for
-@@ -2129,7 +2128,7 @@ int mmc_hw_reset(struct mmc_host *host)
- 	ret = host->bus_ops->hw_reset(host);
- 	mmc_bus_put(host);
- 
--	if (ret)
-+	if (ret < 0)
- 		pr_warn("%s: tried to HW reset card, got error %d\n",
- 			mmc_hostname(host), ret);
- 
-diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
-index 328c78dbee66..575ac0257af2 100644
---- a/drivers/mmc/core/core.h
-+++ b/drivers/mmc/core/core.h
-@@ -70,6 +70,8 @@ void mmc_rescan(struct work_struct *work);
- void mmc_start_host(struct mmc_host *host);
- void mmc_stop_host(struct mmc_host *host);
- 
-+void _mmc_detect_change(struct mmc_host *host, unsigned long delay,
-+			bool cd_irq);
- int _mmc_detect_card_removed(struct mmc_host *host);
- int mmc_detect_card_removed(struct mmc_host *host);
- 
-diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-index 26cabd53ddc5..ebb387aa5158 100644
---- a/drivers/mmc/core/sdio.c
-+++ b/drivers/mmc/core/sdio.c
-@@ -1048,9 +1048,35 @@ static int mmc_sdio_runtime_resume(struct mmc_host *host)
- 	return ret;
- }
- 
-+/*
-+ * SDIO HW reset
-+ *
-+ * Returns 0 if the HW reset was executed synchronously, returns 1 if the HW
-+ * reset was asynchronously scheduled, else a negative error code.
-+ */
- static int mmc_sdio_hw_reset(struct mmc_host *host)
- {
--	mmc_power_cycle(host, host->card->ocr);
-+	struct mmc_card *card = host->card;
-+
-+	/*
-+	 * In case the card is shared among multiple func drivers, reset the
-+	 * card through a rescan work. In this way it will be removed and
-+	 * re-detected, thus all func drivers becomes informed about it.
-+	 */
-+	if (atomic_read(&card->sdio_funcs_probed) > 1) {
-+		if (mmc_card_removed(card))
-+			return 1;
-+		host->rescan_entered = 0;
-+		mmc_card_set_removed(card);
-+		_mmc_detect_change(host, 0, false);
-+		return 1;
-+	}
-+
-+	/*
-+	 * A single func driver has been probed, then let's skip the heavy
-+	 * hotplug dance above and execute the reset immediately.
-+	 */
-+	mmc_power_cycle(host, card->ocr);
- 	return mmc_sdio_reinit_card(host);
- }
- 
-diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
-index 2963e6542958..3cc928282af7 100644
---- a/drivers/mmc/core/sdio_bus.c
-+++ b/drivers/mmc/core/sdio_bus.c
-@@ -138,6 +138,8 @@ static int sdio_bus_probe(struct device *dev)
- 	if (ret)
- 		return ret;
- 
-+	atomic_inc(&func->card->sdio_funcs_probed);
-+
- 	/* Unbound SDIO functions are always suspended.
- 	 * During probe, the function is set active and the usage count
- 	 * is incremented.  If the driver supports runtime PM,
-@@ -153,7 +155,10 @@ static int sdio_bus_probe(struct device *dev)
- 	/* Set the default block size so the driver is sure it's something
- 	 * sensible. */
- 	sdio_claim_host(func);
--	ret = sdio_set_block_size(func, 0);
-+	if (mmc_card_removed(func->card))
-+		ret = -ENOMEDIUM;
-+	else
-+		ret = sdio_set_block_size(func, 0);
- 	sdio_release_host(func);
- 	if (ret)
- 		goto disable_runtimepm;
-@@ -165,6 +170,7 @@ static int sdio_bus_probe(struct device *dev)
- 	return 0;
- 
- disable_runtimepm:
-+	atomic_dec(&func->card->sdio_funcs_probed);
- 	if (func->card->host->caps & MMC_CAP_POWER_OFF_CARD)
- 		pm_runtime_put_noidle(dev);
- 	dev_pm_domain_detach(dev, false);
-@@ -181,6 +187,7 @@ static int sdio_bus_remove(struct device *dev)
- 		pm_runtime_get_sync(dev);
- 
- 	drv->remove(func);
-+	atomic_dec(&func->card->sdio_funcs_probed);
- 
- 	if (func->irq_handler) {
- 		pr_warn("WARNING: driver %s did not remove its interrupt handler!\n",
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index 9b6336ad3266..e459b38ef33c 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -291,6 +291,7 @@ struct mmc_card {
- 	struct sd_switch_caps	sw_caps;	/* switch (CMD6) caps */
- 
- 	unsigned int		sdio_funcs;	/* number of SDIO functions */
-+	atomic_t		sdio_funcs_probed; /* number of probed SDIO funcs */
- 	struct sdio_cccr	cccr;		/* common card info */
- 	struct sdio_cis		cis;		/* common tuple info */
- 	struct sdio_func	*sdio_func[SDIO_MAX_FUNCS]; /* SDIO functions (devices) */
+My eMMC card working at HS400 Enhanced strobe mode:
+[    2.229856] mmc0: new HS400 Enhanced strobe MMC card at address 0001
+[    2.237566] mmcblk0: mmc0:0001 HBG4a2 29.1 GiB 
+[    2.242621] mmcblk0boot0: mmc0:0001 HBG4a2 partition 1 4.00 MiB
+[    2.249110] mmcblk0boot1: mmc0:0001 HBG4a2 partition 2 4.00 MiB
+[    2.255307] mmcblk0rpmb: mmc0:0001 HBG4a2 partition 3 4.00 MiB, chardev (248:0)
+
+1. Without MMC software queue
+I tested 5 times for each case and output a average speed.
+
+1) Sequential read:
+Speed: 59.4MiB/s, 63.4MiB/s, 57.5MiB/s, 57.2MiB/s, 60.8MiB/s
+Average speed: 59.66MiB/s
+
+2) Random read:
+Speed: 26.9MiB/s, 26.9MiB/s, 27.1MiB/s, 27.1MiB/s, 27.2MiB/s
+Average speed: 27.04MiB/s
+
+3) Sequential write:
+Speed: 71.6MiB/s, 72.5MiB/s, 72.2MiB/s, 64.6MiB/s, 67.5MiB/s
+Average speed: 69.68MiB/s
+
+4) Random write:
+Speed: 36.3MiB/s, 35.4MiB/s, 38.6MiB/s, 34MiB/s, 35.5MiB/s
+Average speed: 35.96MiB/s
+
+2. With MMC software queue
+I tested 5 times for each case and output a average speed.
+
+1) Sequential read:
+Speed: 59.2MiB/s, 60.4MiB/s, 63.6MiB/s, 60.3MiB/s, 59.9MiB/s
+Average speed: 60.68MiB/s
+
+2) Random read:
+Speed: 31.3MiB/s, 31.4MiB/s, 31.5MiB/s, 31.3MiB/s, 31.3MiB/s
+Average speed: 31.36MiB/s
+
+3) Sequential write:
+Speed: 71MiB/s, 71.8MiB/s, 72.3MiB/s, 72.2MiB/s, 71MiB/s
+Average speed: 71.66MiB/s
+
+4) Random write:
+Speed: 68.9MiB/s, 68.7MiB/s, 68.8MiB/s, 68.6MiB/s, 68.8MiB/s
+Average speed: 68.76MiB/s
+
+Form above data, we can see the MMC software queue can help to improve some
+performance obviously for random read and write, though no obvious improvement
+for sequential read and write.
+
+Any comments are welcome. Thanks a lot.
+
+Hi Ulf,
+
+This patch set was pending for a while, and I've tested it several times and
+have not found any recessions. Hope this patch set can be merged into v5.5
+if no objection from you, since I still have some patches introducing the
+packed request depend on the mmc software queue as we talked before.
+Thanks a lot.
+
+Changes from v5:
+ - Modify the condition of defering to complete request suggested by Adrian.
+
+Changes from v4:
+ - Add a seperate patch to introduce a variable to defer to complete
+ data requests for some host drivers, when using host software queue.
+
+Changes from v3:
+ - Use host software queue instead of sqhci.
+ - Fix random config building issue.
+ - Change queue depth to 32, but still only allow 2 requests in flight.
+ - Update the testing data.
+
+Changes from v2:
+ - Remove reference to 'struct cqhci_host' and 'struct cqhci_slot',
+ instead adding 'struct sqhci_host', which is only used by software queue.
+
+Changes from v1:
+ - Add request_done ops for sdhci_ops.
+ - Replace virtual command queue with software queue for functions and
+ variables.
+ - Rename the software queue file and add sqhci.h header file.
+
+Baolin Wang (4):
+  mmc: Add MMC host software queue support
+  mmc: host: sdhci: Add request_done ops for struct sdhci_ops
+  mmc: host: sdhci-sprd: Add software queue support
+  mmc: host: sdhci: Add a variable to defer to complete requests if
+    needed
+
+ drivers/mmc/core/block.c      |   61 ++++++++
+ drivers/mmc/core/mmc.c        |   13 +-
+ drivers/mmc/core/queue.c      |   33 +++-
+ drivers/mmc/host/Kconfig      |    8 +
+ drivers/mmc/host/Makefile     |    1 +
+ drivers/mmc/host/mmc_hsq.c    |  344 +++++++++++++++++++++++++++++++++++++++++
+ drivers/mmc/host/mmc_hsq.h    |   30 ++++
+ drivers/mmc/host/sdhci-sprd.c |   26 ++++
+ drivers/mmc/host/sdhci.c      |   14 +-
+ drivers/mmc/host/sdhci.h      |    3 +
+ include/linux/mmc/host.h      |    3 +
+ 11 files changed, 523 insertions(+), 13 deletions(-)
+ create mode 100644 drivers/mmc/host/mmc_hsq.c
+ create mode 100644 drivers/mmc/host/mmc_hsq.h
+
 -- 
-2.17.1
+1.7.9.5
