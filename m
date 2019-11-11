@@ -1,334 +1,101 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 2/3] [2/3] mmc: mediatek: command queue support
-Date: Mon, 11 Nov 2019 14:37:53 +0100
-Message-ID: <CAPDyKFqJEhTsPOsBJPCx6acDNKsiJ+kZX_NRwy901xEVCbiR4Q@mail.gmail.com>
-References: <1572590582-11056-1-git-send-email-chun-hung.wu@mediatek.com> <1572590582-11056-2-git-send-email-chun-hung.wu@mediatek.com>
+From: Markus Reichl <m.reichl@fivetechno.de>
+Subject: arm64: dts: rockchip: Add SDR104 mode to SD-card I/F on rk3399-roc-pc
+Date: Mon, 11 Nov 2019 15:13:31 +0100
+Message-ID: <f03c978c-86de-b8bb-22c2-177d7fafed94@fivetechno.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1572590582-11056-2-git-send-email-chun-hung.wu@mediatek.com>
+Content-Language: de-DE
 Sender: linux-kernel-owner@vger.kernel.org
-To: Chun-Hung Wu <chun-hung.wu@mediatek.com>
-Cc: Chaotian Jing <chaotian.jing@mediatek.com>, Matthias Brugger <matthias.bgg@gmail.com>, Pan Bian <bianpan2016@163.com>, Stanley Chu <stanley.chu@mediatek.com>, Kuohong Wang <kuohong.wang@mediatek.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-mediatek@lists.infradead.org, wsd_upstream@mediatek.com, Linux ARM <linux-arm-kernel@lists.infradead.org>
+To: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Heiko Stuebner <heiko@sntech.de>, Jagan Teki <jagan@amarulasolutions.com>, Markus Reichl <m.reichl@fivetechno.de>, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org, linux-kernel@vger.kernel.org, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-+ Trimmed cc list (please do that as well for your next submission).
+Add SDR104 capability and regulators to SD card node.
+While at it, fix a typo in lcd pinctrl and remove two
+undocumented bindings from pmic.
 
-On Fri, 1 Nov 2019 at 07:43, Chun-Hung Wu <chun-hung.wu@mediatek.com> wrote:
->
-> Support command queue for mt6779 platform.
+Signed-off-by: Markus Reichl <m.reichl@fivetechno.de>
+---
+ .../boot/dts/rockchip/rk3399-roc-pc.dtsi      | 31 +++++++++++++++----
+ 1 file changed, 25 insertions(+), 6 deletions(-)
 
-A lot of changes summarized on only one line. I would appreciate some
-more information here, please.
-
->
-> Change-Id: I56b866fa4097a3c0bee77f53486c470e4f1944b9
-> Feature:
-
-Drop these please.
-
-> Signed-off-by: Chun-Hung Wu <chun-hung.wu@mediatek.com>
-
-For the next submission, please add the maintainers for the cqhci
-driver. They may have some valuable feedback for you.
-
-Below follows a few review comments, which are more from a patch
-formatting point of view, than technical.
-
-> ---
->  drivers/mmc/host/mtk-sd.c | 151 +++++++++++++++++++++++++++++++++++++++++++---
->  1 file changed, 141 insertions(+), 10 deletions(-)
->
-> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-> index 189e426..b132397 100644
-> --- a/drivers/mmc/host/mtk-sd.c
-> +++ b/drivers/mmc/host/mtk-sd.c
-> @@ -31,6 +31,8 @@
->  #include <linux/mmc/sdio.h>
->  #include <linux/mmc/slot-gpio.h>
->
-> +#include "cqhci.h"
-> +
->  #define MAX_BD_NUM          1024
->
->  /*--------------------------------------------------------------------------*/
-> @@ -151,6 +153,7 @@
->  #define MSDC_INT_DMA_BDCSERR    (0x1 << 17)    /* W1C */
->  #define MSDC_INT_DMA_GPDCSERR   (0x1 << 18)    /* W1C */
->  #define MSDC_INT_DMA_PROTECT    (0x1 << 19)    /* W1C */
-> +#define MSDC_INT_CMDQ           (0x1 << 28)    /* W1C */
->
->  /* MSDC_INTEN mask */
->  #define MSDC_INTEN_MMCIRQ       (0x1 << 0)     /* RW */
-> @@ -181,6 +184,7 @@
->  /* SDC_CFG mask */
->  #define SDC_CFG_SDIOINTWKUP     (0x1 << 0)     /* RW */
->  #define SDC_CFG_INSWKUP         (0x1 << 1)     /* RW */
-> +#define SDC_CFG_WRDTOC          (0x1fff  << 2)  /* RW */
->  #define SDC_CFG_BUSWIDTH        (0x3 << 16)    /* RW */
->  #define SDC_CFG_SDIO            (0x1 << 19)    /* RW */
->  #define SDC_CFG_SDIOIDE         (0x1 << 20)    /* RW */
-> @@ -228,6 +232,7 @@
->  #define MSDC_PATCH_BIT_SPCPUSH    (0x1 << 29)  /* RW */
->  #define MSDC_PATCH_BIT_DECRCTMO   (0x1 << 30)  /* RW */
->
-> +#define MSDC_PB1_BUSY_CHECK_SEL   (0x1 << 7)    /* RW */
->  #define MSDC_PATCH_BIT1_STOP_DLY  (0xf << 8)    /* RW */
->
->  #define MSDC_PATCH_BIT2_CFGRESP   (0x1 << 15)   /* RW */
-> @@ -431,6 +436,7 @@ struct msdc_host {
->         struct msdc_save_para save_para; /* used when gate HCLK */
->         struct msdc_tune_para def_tune_para; /* default tune setting */
->         struct msdc_tune_para saved_tune_para; /* tune result of CMD21/CMD19 */
-> +       struct cqhci_host *cq_host;
->  };
->
->  static const struct mtk_mmc_compatible mt8135_compat = {
-> @@ -527,6 +533,18 @@ struct msdc_host {
->         .use_internal_cd = true,
->  };
->
-> +static const struct mtk_mmc_compatible mt6779_compat = {
-> +       .clk_div_bits = 12,
-> +       .hs400_tune = false,
-> +       .pad_tune_reg = MSDC_PAD_TUNE0,
-> +       .async_fifo = true,
-> +       .data_tune = true,
-> +       .busy_check = true,
-> +       .stop_clk_fix = true,
-> +       .enhance_rx = true,
-> +       .support_64g = true,
-> +};
-> +
->  static const struct of_device_id msdc_of_ids[] = {
->         { .compatible = "mediatek,mt8135-mmc", .data = &mt8135_compat},
->         { .compatible = "mediatek,mt8173-mmc", .data = &mt8173_compat},
-> @@ -536,6 +554,7 @@ struct msdc_host {
->         { .compatible = "mediatek,mt7622-mmc", .data = &mt7622_compat},
->         { .compatible = "mediatek,mt8516-mmc", .data = &mt8516_compat},
->         { .compatible = "mediatek,mt7620-mmc", .data = &mt7620_compat},
-> +       { .compatible = "mediatek,mt6779-mmc", .data = &mt6779_compat},
->         {}
->  };
->  MODULE_DEVICE_TABLE(of, msdc_of_ids);
-> @@ -698,21 +717,21 @@ static void msdc_unprepare_data(struct msdc_host *host, struct mmc_request *mrq)
->         }
->  }
->
-> -/* clock control primitives */
-> -static void msdc_set_timeout(struct msdc_host *host, u32 ns, u32 clks)
-> +static u64 msdc_timeout_cal(struct msdc_host *host, u64 ns, u64 clks)
->  {
-> -       u32 timeout, clk_ns;
-> +       u64 timeout, clk_ns;
->         u32 mode = 0;
->
-> -       host->timeout_ns = ns;
-> -       host->timeout_clks = clks;
->         if (host->mmc->actual_clock == 0) {
->                 timeout = 0;
->         } else {
-> -               clk_ns  = 1000000000UL / host->mmc->actual_clock;
-> -               timeout = (ns + clk_ns - 1) / clk_ns + clks;
-> +               clk_ns  = 1000000000ULL;
-> +               do_div(clk_ns, host->mmc->actual_clock);
-> +               timeout = ns + clk_ns - 1;
-> +               do_div(timeout, clk_ns);
-> +               timeout += clks;
->                 /* in 1048576 sclk cycle unit */
-> -               timeout = (timeout + (0x1 << 20) - 1) >> 20;
-> +               timeout = DIV_ROUND_UP(timeout, (0x1 << 20));
->                 if (host->dev_comp->clk_div_bits == 8)
->                         sdr_get_field(host->base + MSDC_CFG,
->                                       MSDC_CFG_CKMOD, &mode);
-> @@ -722,9 +741,30 @@ static void msdc_set_timeout(struct msdc_host *host, u32 ns, u32 clks)
->                 /*DDR mode will double the clk cycles for data timeout */
->                 timeout = mode >= 2 ? timeout * 2 : timeout;
->                 timeout = timeout > 1 ? timeout - 1 : 0;
-> -               timeout = timeout > 255 ? 255 : timeout;
->         }
-> -       sdr_set_field(host->base + SDC_CFG, SDC_CFG_DTOC, timeout);
-> +       return timeout;
-> +}
-> +
-> +/* clock control primitives */
-> +static void msdc_set_timeout(struct msdc_host *host, u64 ns, u64 clks)
-> +{
-> +       u64 timeout;
-> +
-> +       host->timeout_ns = ns;
-> +       host->timeout_clks = clks;
-> +
-> +       timeout = msdc_timeout_cal(host, ns, clks);
-> +       sdr_set_field(host->base + SDC_CFG, SDC_CFG_DTOC,
-> +                     (u32)(timeout > 255 ? 255 : timeout));
-> +}
-
-Does the above changes make sense to split out in a separate patch?
-
-It looks to me, that these are generic clock updates to the driver
-that really doesn't have to be included in $subject patch.
-
-> +
-> +static void msdc_set_busy_timeout(struct msdc_host *host, u64 ns, u64 clks)
-> +{
-> +       u64 timeout;
-> +
-> +       timeout = msdc_timeout_cal(host, ns, clks);
-> +       sdr_set_field(host->base + SDC_CFG, SDC_CFG_WRDTOC,
-> +                     (u32)(timeout > 8191 ? 8191 : timeout));
->  }
->
->  static void msdc_gate_clock(struct msdc_host *host)
-> @@ -1413,6 +1453,36 @@ static void msdc_enable_sdio_irq(struct mmc_host *mmc, int enb)
->                 pm_runtime_put_noidle(host->dev);
->  }
->
-> +#if IS_ENABLED(CONFIG_MMC_CQHCI)
-
-Other drivers Kconfig option, uses "select MMC_CQHCI". Would that make
-this more simple and allowing to remove the "if IS_ENABLED" thingy?
-
-> +static irqreturn_t msdc_cmdq_irq(struct msdc_host *host, u32 intsts)
-> +{
-> +       int cmd_err = 0, dat_err = 0;
-> +
-> +       if (intsts & MSDC_INT_RSPCRCERR) {
-> +               cmd_err = (unsigned int)-EILSEQ;
-> +               dev_err(host->dev, "%s: CMD CRC ERR", __func__);
-> +       } else if (intsts & MSDC_INT_CMDTMO) {
-> +               cmd_err = (unsigned int)-ETIMEDOUT;
-> +               dev_err(host->dev, "%s: CMD TIMEOUT ERR", __func__);
-> +       }
-> +
-> +       if (intsts & MSDC_INT_DATCRCERR) {
-> +               dat_err = (unsigned int)-EILSEQ;
-> +               dev_err(host->dev, "%s: DATA CRC ERR", __func__);
-> +       } else if (intsts & MSDC_INT_DATTMO) {
-> +               dat_err = (unsigned int)-ETIMEDOUT;
-> +               dev_err(host->dev, "%s: DATA TIMEOUT ERR", __func__);
-> +       }
-> +
-> +       if (cmd_err || dat_err) {
-> +               dev_err(host->dev, "cmd_err = %d, dat_err =%d, intsts = 0x%x",
-> +                       cmd_err, dat_err, intsts);
-> +       }
-> +
-> +       return cqhci_irq(host->mmc, 0, cmd_err, dat_err);
-> +}
-> +#endif
-> +
->  static irqreturn_t msdc_irq(int irq, void *dev_id)
->  {
->         struct msdc_host *host = (struct msdc_host *) dev_id;
-> @@ -1449,6 +1519,16 @@ static irqreturn_t msdc_irq(int irq, void *dev_id)
->                 if (!(events & (event_mask & ~MSDC_INT_SDIOIRQ)))
->                         break;
->
-> +#if IS_ENABLED(CONFIG_MMC_CQHCI)
-
-Again, please to avoid these "IS_ENABLED".
-
-> +               if ((host->mmc->caps2 & MMC_CAP2_CQE) &&
-> +                   (events & MSDC_INT_CMDQ)) {
-> +                       msdc_cmdq_irq(host, events);
-> +                       /* clear interrupts */
-> +                       writel(events, host->base + MSDC_INT);
-> +                       return IRQ_HANDLED;
-> +               }
-> +#endif
-> +
->                 if (!mrq) {
->                         dev_err(host->dev,
->                                 "%s: MRQ=NULL; events=%08X; event_mask=%08X\n",
-> @@ -2132,6 +2212,36 @@ static int msdc_get_cd(struct mmc_host *mmc)
->                 return !val;
->  }
->
-> +static void msdc_cqe_enable(struct mmc_host *mmc)
-> +{
-> +       struct msdc_host *host = mmc_priv(mmc);
-> +
-> +       /* enable cmdq irq */
-> +       writel(MSDC_INT_CMDQ, host->base + MSDC_INTEN);
-> +       /* enable busy check */
-> +       sdr_set_bits(host->base + MSDC_PATCH_BIT1, MSDC_PB1_BUSY_CHECK_SEL);
-> +       /* default write data / busy timeout 20s */
-> +       msdc_set_busy_timeout(host, 20 * 1000000000ULL, 0);
-> +       /* default read data timeout 1s */
-> +       msdc_set_timeout(host, 1000000000ULL, 0);
-
-Some magic timeout values here. Can you elaborate why these values?
-
-> +}
-> +
-> +void msdc_cqe_disable(struct mmc_host *mmc, bool recovery)
-> +{
-> +       struct msdc_host *host = mmc_priv(mmc);
-> +
-> +       /* disable cmdq irq */
-> +       sdr_clr_bits(host->base + MSDC_INTEN, MSDC_INT_CMDQ);
-> +       /* disable busy check */
-> +       sdr_clr_bits(host->base + MSDC_PATCH_BIT1, MSDC_PB1_BUSY_CHECK_SEL);
-> +
-> +       if (recovery) {
-> +               sdr_set_field(host->base + MSDC_DMA_CTRL,
-> +                             MSDC_DMA_CTRL_STOP, 1);
-> +               msdc_reset_hw(host);
-> +       }
-> +}
-> +
->  static const struct mmc_host_ops mt_msdc_ops = {
->         .post_req = msdc_post_req,
->         .pre_req = msdc_pre_req,
-> @@ -2148,6 +2258,11 @@ static int msdc_get_cd(struct mmc_host *mmc)
->         .hw_reset = msdc_hw_reset,
-
-The hw_reset callback is really for resetting the card, but it seems
-like you are using it to reset the controller. No?
-
-I notice there are some other drivers abusing the callback as well,
-but I am wondering whether it's time to really look into what's going
-on here.
-
-Can you elaborate on why you need this?
-
->  };
->
-> +static const struct cqhci_host_ops msdc_cmdq_ops = {
-> +       .enable         = msdc_cqe_enable,
-> +       .disable        = msdc_cqe_disable,
-> +};
-> +
->  static void msdc_of_property_parse(struct platform_device *pdev,
->                                    struct msdc_host *host)
->  {
-> @@ -2299,6 +2414,22 @@ static int msdc_drv_probe(struct platform_device *pdev)
->                 host->dma_mask = DMA_BIT_MASK(32);
->         mmc_dev(mmc)->dma_mask = &host->dma_mask;
->
-> +#if IS_ENABLED(CONFIG_MMC_CQHCI)
-> +       if (mmc->caps2 & MMC_CAP2_CQE) {
-> +               host->cq_host = devm_kzalloc(host->mmc->parent,
-> +                                            sizeof(*host->cq_host),
-> +                                            GFP_KERNEL);
-> +               host->cq_host->caps |= CQHCI_TASK_DESC_SZ_128;
-> +               host->cq_host->mmio = host->base + 0x800;
-> +               host->cq_host->ops = &msdc_cmdq_ops;
-> +               cqhci_init(host->cq_host, mmc, true);
-> +               mmc->max_segs = 128;
-> +               /* cqhci 16bit length */
-> +               /* 0 size, means 65536 so we don't have to -1 here */
-> +               mmc->max_seg_size = 64 * 1024;
-> +       }
-> +#endif
-> +
->         host->timeout_clks = 3 * 1048576;
->         host->dma.gpd = dma_alloc_coherent(&pdev->dev,
->                                 2 * sizeof(struct mt_gpdma_desc),
-> --
-> 1.9.1
->
-
-Kind regards
-Uffe
+diff --git a/arch/arm64/boot/dts/rockchip/rk3399-roc-pc.dtsi b/arch/arm64/boot/dts/rockchip/rk3399-roc-pc.dtsi
+index 33df95e384b4..e86a6db54499 100644
+--- a/arch/arm64/boot/dts/rockchip/rk3399-roc-pc.dtsi
++++ b/arch/arm64/boot/dts/rockchip/rk3399-roc-pc.dtsi
+@@ -135,6 +135,20 @@
+ 		vin-supply = <&vcc_1v8>;
+ 	};
+ 
++	vcc3v0_sd: vcc3v0-sd {
++		compatible = "regulator-fixed";
++		enable-active-high;
++		gpio = <&gpio4 RK_PD6 GPIO_ACTIVE_HIGH>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&vcc3v0_sd_en>;
++		regulator-name = "vcc3v0_sd";
++		regulator-always-on;
++		regulator-boot-on;
++		regulator-min-microvolt = <3000000>;
++		regulator-max-microvolt = <3000000>;
++		vin-supply = <&vcc3v3_sys>;
++	};
++
+ 	vcc3v3_sys: vcc3v3-sys {
+ 		compatible = "regulator-fixed";
+ 		regulator-name = "vcc3v3_sys";
+@@ -279,8 +293,6 @@
+ 		vcc10-supply = <&vcc3v3_sys>;
+ 		vcc11-supply = <&vcc3v3_sys>;
+ 		vcc12-supply = <&vcc3v3_sys>;
+-		vcc13-supply = <&vcc3v3_sys>;
+-		vcc14-supply = <&vcc3v3_sys>;
+ 		vddio-supply = <&vcc_3v0>;
+ 
+ 		regulators {
+@@ -562,7 +574,7 @@
+ 
+ 	lcd-panel {
+ 		lcd_panel_reset: lcd-panel-reset {
+-			rockchip,pins = <4 RK_PD6 RK_FUNC_GPIO &pcfg_pull_up>;
++			rockchip,pins = <4 RK_PD5 RK_FUNC_GPIO &pcfg_pull_up>;
+ 		};
+ 	};
+ 
+@@ -588,6 +600,10 @@
+ 		vsel2_gpio: vsel2-gpio {
+ 			rockchip,pins = <1 RK_PB6 RK_FUNC_GPIO &pcfg_pull_down>;
+ 		};
++
++		pmic_int_l: pmic-int-l {
++			rockchip,pins = <1 RK_PC5 RK_FUNC_GPIO &pcfg_pull_up>;
++		};
+ 	};
+ 
+ 	sdio-pwrseq {
+@@ -596,9 +612,9 @@
+ 		};
+ 	};
+ 
+-	pmic {
+-		pmic_int_l: pmic-int-l {
+-			rockchip,pins = <1 RK_PC5 RK_FUNC_GPIO &pcfg_pull_up>;
++	sdmmc {
++		vcc3v0_sd_en: vcc3v0-sd-en {
++			rockchip,pins = <4 RK_PD6 RK_FUNC_GPIO &pcfg_pull_none>;
+ 		};
+ 	};
+ 
+@@ -653,6 +669,9 @@
+ 	cd-gpios = <&gpio0 RK_PA7 GPIO_ACTIVE_LOW>;
+ 	disable-wp;
+ 	max-frequency = <150000000>;
++	sd-uhs-sdr104;
++	vmmc-supply = <&vcc3v0_sd>;
++	vqmmc-supply = <&vcc_sdio>;
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&sdmmc_clk &sdmmc_cmd &sdmmc_bus4>;
+ 	status = "okay";
+-- 
+2.20.1
