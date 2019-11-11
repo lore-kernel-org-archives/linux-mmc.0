@@ -1,105 +1,58 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH v6 0/4] Add MMC software queue support
-Date: Mon, 11 Nov 2019 17:59:04 +0100
-Message-ID: <CAK8P3a0rNhyxmUWLUV1js3FsuAESDOPX3E4b8ActtL4GRT4uTA@mail.gmail.com>
-References: <cover.1573456283.git.baolin.wang@linaro.org> <CAK8P3a1we9D5C2NOBww=cW-4L1PT3t0NnDRmknLwiLm652TmKg@mail.gmail.com>
- <CAMz4kuK9HEuGdhNqHO_qoy9jD=ccsPPhD_dKYwNRgQyWyYwqRA@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: arm64: dts: rockchip: Add SDR104 mode to SD-card I/F on rk3399-roc-pc
+Date: Mon, 11 Nov 2019 18:27:54 +0100
+Message-ID: <CAPDyKFqn06LZZMXLD2o-M6A0R6KU97PFUTN=NgYnMtf=ESULTA@mail.gmail.com>
+References: <f03c978c-86de-b8bb-22c2-177d7fafed94@fivetechno.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAMz4kuK9HEuGdhNqHO_qoy9jD=ccsPPhD_dKYwNRgQyWyYwqRA@mail.gmail.com>
+In-Reply-To: <f03c978c-86de-b8bb-22c2-177d7fafed94@fivetechno.de>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Baolin Wang <baolin.wang@linaro.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, asutoshd@codeaurora.org, Orson Zhai <orsonzhai@gmail.com>, Lyra Zhang <zhang.lyra@gmail.com>, Linus Walleij <linus.walleij@linaro.org>, Vincent Guittot <vincent.guittot@linaro.org>, baolin.wang7@gmail.com, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Hannes Reinecke <hare@suse.com>, linux-block <linux-block@vger.kernel.org>
+To: Markus Reichl <m.reichl@fivetechno.de>
+Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Heiko Stuebner <heiko@sntech.de>, Jagan Teki <jagan@amarulasolutions.com>, DTML <devicetree@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, Nov 11, 2019 at 1:58 PM Baolin Wang <baolin.wang@linaro.org> wrote:
-> On Mon, 11 Nov 2019 at 17:28, Arnd Bergmann <arnd@arndb.de> wrote:
-> > On Mon, Nov 11, 2019 at 8:35 AM Baolin Wang <baolin.wang@linaro.org> wrote:
-> > - Removing all the context switches and workqueues from the data submission
-> >   path is also the right idea. As you found, there is still a workqueue inside
-> >   of blk_mq that is used because it may get called from atomic context but
-> >   the submission may get blocked in __mmc_claim_host(). This really
-> >   needs to be changed as well, but not in the way I originally suggested:
-> >   As Hannes suggested, the host interrrupt handler should always use
-> >   request_threaded_irq() to have its own process context, and then pass a
-> >   flag to blk_mq to say that we never need another workqueue there.
+On Mon, 11 Nov 2019 at 15:13, Markus Reichl <m.reichl@fivetechno.de> wrote:
 >
-> So you mean we should complete the request in the host driver irq
-> thread context, then issue another request in this context by calling
-> blk_mq_run_hw_queues()?
-
-Yes. I assumed there was already code that would always run
-blk_mq_run_hw_queue() at I/O completion, but I can't find where
-that happens today.
-
-As I understand, the main difference to today is that
-__blk_mq_delay_run_hw_queue() can call into __blk_mq_run_hw_queue
-directly rather than using the delayed work queue once we
-can skip the BLK_MQ_F_BLOCKING check.
-
-> > - With that change in place calling a blocking __mmc_claim_host() is
-> >   still a problem, so there should still be a nonblocking mmc_try_claim_host()
-> >   for the submission path, leading to a BLK_STS_DEV_RESOURCE (?)
-> >   return code from mmc_mq_queue_rq(). Basically mmc_mq_queue_rq()
-> >   should always return right away, either after having queued the next I/O
-> >   or with an error, but not waiting for the device in any way.
+> Add SDR104 capability and regulators to SD card node.
+> While at it, fix a typo in lcd pinctrl and remove two
+> undocumented bindings from pmic.
 >
-> Actually not only the mmc_claim_host() will block the MMC request
-> processing, in this routine, the mmc_blk_part_switch() and
-> mmc_retune() can also block the request processing. Moreover the part
-> switching and tuning should be sync operations, and we can not move
-> them to a work or a thread.
-
-Ok, I see.
-
-Those would also cause requests to be sent to the device or the host
-controller, right? Maybe we can treat them as "a non-IO request
-has successfully been queued to the device" events, returning
-busy from the mmc_mq_queue_rq() function and then running
-the queue again when they complete?
-
-> > - For the packed requests, there is apparently a very simple way to implement
-> >   that without a software queue: mmc_mq_queue_rq() is allowed to look at
-> >   and dequeue all requests that are currently part of the request_queue,
-> >   so it should take out as many as it wants to submit at once and send
-> >   them all down to the driver together, avoiding the need for any further
-> >   round-trips to blk_mq or maintaining a queue in mmc.
+> Signed-off-by: Markus Reichl <m.reichl@fivetechno.de>
+> ---
+>  .../boot/dts/rockchip/rk3399-roc-pc.dtsi      | 31 +++++++++++++++----
+>  1 file changed, 25 insertions(+), 6 deletions(-)
 >
-> You mean we can dispatch a request directly from
-> elevator->type->ops.dispatch_request()?  but we still need some helper
-> functions to check if these requests can be packed (the package
-> condition), and need to invent new APIs to start a packed request (or
-> using cqe interfaces, which means we still need to implement some cqe
-> callbacks).
-
-I don't know how the dispatch_request() function fits in there,
-what Hannes told me is that in ->queue_rq() you can always
-look at the following requests that are already queued up
-and take the next ones off the list. Looking at bd->last
-tells you if there are additional requests. If there are, you can
-look at the next one from blk_mq_hw_ctx (not sure how, but
-should not be hard to find)
-
-I also see that there is a commit_rqs() callback that may
-go along with queue_rq(), implementing that one could make
-this easier as well.
-
-> > - The DMA management (bounce buffer, map, unmap) that is currently
-> >   done in mmc_blk_mq_issue_rq() should ideally be done in the
-> >   init_request()/exit_request()  (?) callbacks from mmc_mq_ops so this
-> >   can be done asynchronously, out of the critical timing path for the
-> >   submission. With this, there won't be any need for a software queue.
+> diff --git a/arch/arm64/boot/dts/rockchip/rk3399-roc-pc.dtsi b/arch/arm64/boot/dts/rockchip/rk3399-roc-pc.dtsi
+> index 33df95e384b4..e86a6db54499 100644
+> --- a/arch/arm64/boot/dts/rockchip/rk3399-roc-pc.dtsi
+> +++ b/arch/arm64/boot/dts/rockchip/rk3399-roc-pc.dtsi
+> @@ -135,6 +135,20 @@
+>                 vin-supply = <&vcc_1v8>;
+>         };
 >
-> This is not true, now the blk-mq will allocate some static request
-> objects (usually the static requests number should be the same with
-> the hardware queue depth) saved in struct blk_mq_tags. So the
-> init_request() is used to initialize the static requests when
-> allocating them, and call exit_request to free the static requests
-> when freeing the 'struct blk_mq_tags', such as the queue is dead. So
-> we can not move the DMA management into the init_request/exit_request.
+> +       vcc3v0_sd: vcc3v0-sd {
+> +               compatible = "regulator-fixed";
+> +               enable-active-high;
+> +               gpio = <&gpio4 RK_PD6 GPIO_ACTIVE_HIGH>;
+> +               pinctrl-names = "default";
+> +               pinctrl-0 = <&vcc3v0_sd_en>;
+> +               regulator-name = "vcc3v0_sd";
+> +               regulator-always-on;
 
-Ok, I must have misremembered which callback that is then, but I guess
-there is some other place to do it.
+This looks odd. A GPIO regulator being always on?
 
-       Arnd
+> +               regulator-boot-on;
+> +               regulator-min-microvolt = <3000000>;
+> +               regulator-max-microvolt = <3000000>;
+> +               vin-supply = <&vcc3v3_sys>;
+> +       };
+
+Assumes this powers an SDIO embedded card. Often those have a specific
+power sequence, just wanted to make sure the above are really
+sufficient? No delays or external clock needed?
+
+[...]
+
+Kind regards
+Uffe
