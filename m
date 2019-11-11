@@ -1,83 +1,51 @@
-From: Markus Reichl <m.reichl@fivetechno.de>
-Subject: Re: arm64: dts: rockchip: Add SDR104 mode to SD-card I/F on
- rk3399-roc-pc
-Date: Mon, 11 Nov 2019 20:31:57 +0100
-Message-ID: <e69268d2-4a3f-3cd8-fc2e-57ae52ad337a@fivetechno.de>
-References: <f03c978c-86de-b8bb-22c2-177d7fafed94@fivetechno.de>
- <CAPDyKFqn06LZZMXLD2o-M6A0R6KU97PFUTN=NgYnMtf=ESULTA@mail.gmail.com>
+From: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>
+Subject: Re: [PATCH v2 0/3] mmc: Fixup HW reset for SDIO cards
+Date: Mon, 11 Nov 2019 14:08:12 -0800
+Message-ID: <20191111220812.GX43123@atomide.com>
+References: <20191109103046.26445-1-ulf.hansson@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFqn06LZZMXLD2o-M6A0R6KU97PFUTN=NgYnMtf=ESULTA@mail.gmail.com>
-Content-Language: de-DE
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Heiko Stuebner <heiko@sntech.de>, Jagan Teki <jagan@amarulasolutions.com>, DTML <devicetree@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20191109103046.26445-1-ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Matthias Kaehlcke <mka-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Kalle Valo <kvalo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Wen Gong <wgong-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Erik Stromdahl <erik.stromdahl-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Eyal Reizer <eyalreizer-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Ulf,
+Hi,
 
-Am 11.11.19 um 18:27 schrieb Ulf Hansson:
-> On Mon, 11 Nov 2019 at 15:13, Markus Reichl <m.reichl@fivetechno.de> wrote:
->>
->> Add SDR104 capability and regulators to SD card node.
->> While at it, fix a typo in lcd pinctrl and remove two
->> undocumented bindings from pmic.
->>
->> Signed-off-by: Markus Reichl <m.reichl@fivetechno.de>
->> ---
->>  .../boot/dts/rockchip/rk3399-roc-pc.dtsi      | 31 +++++++++++++++----
->>  1 file changed, 25 insertions(+), 6 deletions(-)
->>
->> diff --git a/arch/arm64/boot/dts/rockchip/rk3399-roc-pc.dtsi b/arch/arm64/boot/dts/rockchip/rk3399-roc-pc.dtsi
->> index 33df95e384b4..e86a6db54499 100644
->> --- a/arch/arm64/boot/dts/rockchip/rk3399-roc-pc.dtsi
->> +++ b/arch/arm64/boot/dts/rockchip/rk3399-roc-pc.dtsi
->> @@ -135,6 +135,20 @@
->>                 vin-supply = <&vcc_1v8>;
->>         };
->>
->> +       vcc3v0_sd: vcc3v0-sd {
->> +               compatible = "regulator-fixed";
->> +               enable-active-high;
->> +               gpio = <&gpio4 RK_PD6 GPIO_ACTIVE_HIGH>;
->> +               pinctrl-names = "default";
->> +               pinctrl-0 = <&vcc3v0_sd_en>;
->> +               regulator-name = "vcc3v0_sd";
->> +               regulator-always-on;
+* Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> [191109 10:31]:
+> Changes in v2:
+> 	- Add adaptations to the mwifiex driver.
+> 	- Keep existing syncronous reset behaviour if the SDIO card has a single
+> 	func driver.
 > 
-> This looks odd. A GPIO regulator being always on?
+> It has turned out that it's not a good idea to try to power cycle and to
+> re-initialize the SDIO card, as currently done through mmc_hw_reset(). This
+> because there may be multiple SDIO funcs attached to the same SDIO card and
+> some of the others that didn't execute the call to mmc_hw_reset(), may then
+> simply experience an undefined behaviour.
+> 
+> The following patches in this series attempts to address this problem, by
+> reworking the mmc_hw_reset() behaviour for SDIO and by adopting the Marvel
+> mwifiex driver to these changes.
+> 
+> Note that, I don't have the HW at hand so the the code has only compile tested.
+> Test on HW is greatly appreciated!
 
-This is a standard micro SD card socket that can also be used for
-booting the board. I wanted to be cautious and start
-working with it and several SD cards and explore the capabilities.
+Looks good to me. I tried testing this, but looks like at least on duovero
+mwifiex_sdio is broken in v5.4-rc7:
 
-On this board nearly all regulators are still continously
-switched on. I plan to remove the always-on properties step
-by step from the regulators when the board runs stable with it's
-components all enbled. 
+# dmesg | grep mwifi
+mwifiex_sdio mmc1:0001:1: poll card status failed, tries = 100
+mwifiex_sdio mmc1:0001:1: FW download with helper:       poll status timeout @ 0
+mwifiex_sdio mmc1:0001:1: prog_fw failed ret=0xffffffff
+mwifiex_sdio mmc1:0001:1: info: _mwifiex_fw_dpc: unregister device
 
-> 
->> +               regulator-boot-on;
->> +               regulator-min-microvolt = <3000000>;
->> +               regulator-max-microvolt = <3000000>;
->> +               vin-supply = <&vcc3v3_sys>;
->> +       };
-> 
-> Assumes this powers an SDIO embedded card. Often those have a specific
-> power sequence, just wanted to make sure the above are really
-> sufficient? No delays or external clock needed?
+No idea when it broke and what might be the issue this time around.
+Any ideas?
 
-It's not embedded, just a standard µSD plug. It is already enabled
-by mainline U-Boot and ejecting and inserting the card works fine.
+Regards,
 
---
-Gruß,
-Markus
-> 
-> [...]
-> 
-> Kind regards
-> Uffe
-> 
+Tony
