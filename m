@@ -1,50 +1,190 @@
-From: Markus Reichl <m.reichl@fivetechno.de>
-Subject: arm64: dts: rockchip: Disable HS400 for mmc on rk3399-roc-pc
-Date: Mon, 11 Nov 2019 10:51:04 +0100
-Message-ID: <367bf78a-f079-f0b4-68fe-52c86823c174@fivetechno.de>
-References: <20190301153348.29870-1-christoph.muellner@theobroma-systems.com>
- <20190301153348.29870-2-christoph.muellner@theobroma-systems.com>
+From: Manish Narani <MNARANI@xilinx.com>
+Subject: RE: [PATCH v5 4/8] dt-bindings: mmc: Add optional generic properties
+ for mmc
+Date: Mon, 11 Nov 2019 10:07:37 +0000
+Message-ID: <MN2PR02MB6029D371F580123CB32BE148C1740@MN2PR02MB6029.namprd02.prod.outlook.com>
+References: <1572588353-110682-1-git-send-email-manish.narani@xilinx.com>
+ <1572588353-110682-5-git-send-email-manish.narani@xilinx.com>
+ <20191104231427.GA7606@bogus>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190301153348.29870-2-christoph.muellner@theobroma-systems.com>
-Content-Language: de-DE
+In-Reply-To: <20191104231427.GA7606@bogus>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Christoph Muellner <christoph.muellner@theobroma-systems.com>, robh+dt@kernel.org, mark.rutland@arm.com, heiko@sntech.de, shawn.lin@rock-chips.com
-Cc: devicetree@vger.kernel.org, Jeffy Chen <jeffy.chen@rock-chips.com>, linux-kernel@vger.kernel.org, Viresh Kumar <viresh.kumar@linaro.org>, Brian Norris <briannorris@chromium.org>, Douglas Anderson <dianders@chromium.org>, Vicente Bergas <vicencb@gmail.com>, Kishon Vijay Abraham I <kishon@ti.com>, linux-rockchip@lists.infradead.org, Tony Xie <tony.xie@rock-chips.com>, Klaus Goger <klaus.goger@theobroma-systems.com>, Enric Balletbo i Serra <enric.balletbo@collabora.com>, Randy Li <ayaka@soulik.info>, Philipp Tomsich <philipp.tomsich@theobroma-systems.com>, Ezequiel Garcia <ezequiel@collabora.com>, linux-arm-kernel@lists.infradead.org, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Rob Herring <robh@kernel.org>
+Cc: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "mark.rutland@arm.com" <mark.rutland@arm.com>, "adrian.hunter@intel.com" <adrian.hunter@intel.com>, Michal Simek <michals@xilinx.com>, Jolly Shah <JOLLYS@xilinx.com>, Nava kishore Manne <navam@xilinx.com>, Rajan Vaja <RAJANV@xilinx.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, git <git@xilinx.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Working with rootfs on two 128GB mmcs on rk3399-roc-pc.
+Hi Rob,
 
-One (mmc name 128G72, one screw hole) works fine in HS400 mode.
-Other (mmc name DJNB4R, firefly on pcb, two screw holes) gets lots of
-mmc1: "running CQE recovery", even hangs with damaged fs,
-when running under heavy load, e.g. compiling kernel.
-Both run fine with HS200.
 
-Disabling CQ with patch mmc: core: Add MMC Command Queue Support kernel parameter [0] did not help.
-[0] https://gitlab.com/ayufan-repos/rock64/linux-mainline-kernel/commit/54e264154b87dfe32a8359b2726e2d5611adbaf3
+> -----Original Message-----
+> From: Rob Herring <robh@kernel.org>
+> Sent: Tuesday, November 5, 2019 4:44 AM
+> To: Manish Narani <MNARANI@xilinx.com>
+> Cc: ulf.hansson@linaro.org; mark.rutland@arm.com;
+> adrian.hunter@intel.com; Michal Simek <michals@xilinx.com>; Jolly Shah
+> <JOLLYS@xilinx.com>; Nava kishore Manne <navam@xilinx.com>; Rajan Vaja
+> <RAJANV@xilinx.com>; linux-mmc@vger.kernel.org;
+> devicetree@vger.kernel.org; linux-kernel@vger.kernel.org; linux-arm-
+> kernel@lists.infradead.org; git <git@xilinx.com>
+> Subject: Re: [PATCH v5 4/8] dt-bindings: mmc: Add optional generic
+> properties for mmc
+>=20
+> On Fri, Nov 01, 2019 at 11:35:49AM +0530, Manish Narani wrote:
+> > Add optional properties for mmc hosts which are used to set clk delays
+> > for different speed modes in the controller.
+> >
+> > Signed-off-by: Manish Narani <manish.narani@xilinx.com>
+> > ---
+> >  .../bindings/mmc/mmc-controller.yaml          | 92 +++++++++++++++++++
+> >  1 file changed, 92 insertions(+)
+> >
+> > diff --git a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
+> b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
+> > index 080754e0ef35..87a83d966851 100644
+> > --- a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
+> > +++ b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
+> > @@ -212,6 +212,98 @@ properties:
+> >      description:
+> >        eMMC HS400 enhanced strobe mode is supported
+> >
+> > +  # Below mentioned are the clock (phase) delays which are to be
+> configured
+> > +  # in the controller while switching to particular speed mode. The ra=
+nge
+> > +  # of values are 0 to 359 degrees.
+> > +
+> > +  clk-phase-legacy:
+> > +    allOf:
+> > +      - $ref: /schemas/types.yaml#/definitions/uint32
+> > +      - minimum: 0
+> > +      - maximum: 359
+> > +    description:
+> > +      Input/Output Clock Delay pair in degrees for Legacy Mode.
+> > +
+> > +  clk-phase-mmc-hs:
+> > +    allOf:
+> > +      - $ref: /schemas/types.yaml#/definitions/uint32
+> > +      - minimum: 0
+> > +      - maximum: 359
+> > +    description:
+> > +      Input/Output Clock Delay pair degrees for MMC HS.
+> > +
+> > +  clk-phase-sd-hs:
+> > +    allOf:
+> > +      - $ref: /schemas/types.yaml#/definitions/uint32
+> > +      - minimum: 0
+> > +      - maximum: 359
+> > +    description:
+> > +      Input/Output Clock Delay pair in degrees for SD HS.
+> > +
+> > +  clk-phase-uhs-sdr12:
+> > +    allOf:
+> > +      - $ref: /schemas/types.yaml#/definitions/uint32
+> > +      - minimum: 0
+> > +      - maximum: 359
+> > +    description:
+> > +      Input/Output Clock Delay pair in degrees for SDR12.
+> > +
+> > +  clk-phase-uhs-sdr25:
+> > +    allOf:
+> > +      - $ref: /schemas/types.yaml#/definitions/uint32
+> > +      - minimum: 0
+> > +      - maximum: 359
+> > +    description:
+> > +      Input/Output Clock Delay pair in degrees for SDR25.
+> > +
+> > +  clk-phase-uhs-sdr50:
+> > +    allOf:
+> > +      - $ref: /schemas/types.yaml#/definitions/uint32
+> > +      - minimum: 0
+> > +      - maximum: 359
+> > +    description:
+> > +      Input/Output Clock Delay pair in degrees for SDR50.
+> > +
+> > +  clk-phase-uhs-sdr104:
+> > +    allOf:
+> > +      - $ref: /schemas/types.yaml#/definitions/uint32
+> > +      - minimum: 0
+> > +      - maximum: 359
+> > +    description:
+> > +      Input/Output Clock Delay pair in degrees for SDR104.
+> > +
+> > +  clk-phase-uhs-ddr50:
+> > +    allOf:
+> > +      - $ref: /schemas/types.yaml#/definitions/uint32
+> > +      - minimum: 0
+> > +      - maximum: 359
+> > +    description:
+> > +      Input/Output Clock Delay pair in degrees for SD DDR50.
+> > +
+> > +  clk-phase-mmc-ddr52:
+> > +    allOf:
+> > +      - $ref: /schemas/types.yaml#/definitions/uint32
+> > +      - minimum: 0
+> > +      - maximum: 359
+> > +    description:
+> > +      Input/Output Clock Delay pair in degrees for MMC DDR52.
+> > +
+> > +  clk-phase-mmc-hs200:
+> > +    allOf:
+> > +      - $ref: /schemas/types.yaml#/definitions/uint32
+> > +      - minimum: 0
+> > +      - maximum: 359
+> > +    description:
+> > +      Input/Output Clock Delay pair in degrees for MMC HS200.
+> > +
+> > +  clk-phase-mmc-hs400:
+> > +    allOf:
+> > +      - $ref: /schemas/types.yaml#/definitions/uint32
+> > +      - minimum: 0
+> > +      - maximum: 359
+> > +    description:
+> > +      Input/Output Clock Delay pair in degrees for MMC HS400.
+>=20
+> This can be condensed into:
+>=20
+> patternProperties:
+>=20
+> "^clk-phase-(legacy|sd-hs|mmc-(hs|hs[24]00|ddr52)|uhs-
+> (sdr(12|25|50|104)|ddr50))$":
+>=20
+> Or if you want to divide them between SD and MMC ones, that would be
+> fine for me.
 
-Therefore I propose to disable HS400 mode on roc-pc for now.
+Below change should work? Please review.
 
-Signed-off-by: Markus Reichl <m.reichl@fivetechno.de>
----
- arch/arm64/boot/dts/rockchip/rk3399-roc-pc.dtsi | 2 --
- 1 file changed, 2 deletions(-)
+--- a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
++++ b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
+@@ -333,6 +333,16 @@ patternProperties:
+     required:
+       - reg
 
-diff --git a/arch/arm64/boot/dts/rockchip/rk3399-roc-pc.dtsi b/arch/arm64/boot/dts/rockchip/rk3399-roc-pc.dtsi
-index 29a50a083c42..33df95e384b4 100644
---- a/arch/arm64/boot/dts/rockchip/rk3399-roc-pc.dtsi
-+++ b/arch/arm64/boot/dts/rockchip/rk3399-roc-pc.dtsi
-@@ -660,8 +660,6 @@
- 
- &sdhci {
- 	bus-width = <8>;
--	mmc-hs400-1_8v;
--	mmc-hs400-enhanced-strobe;
- 	non-removable;
- 	status = "okay";
- };
--- 
-2.20.1
++  "^clk-phase-(legacy|sd-hs|mmc-(hs|hs[24]00|ddr52)|uhs-(sdr(12|25|50|104)=
+|ddr50))$":
++    allOf:
++      - $ref: /schemas/types.yaml#/definitions/uint32
++      - minimum: 0
++      - maximum: 359
++    description:
++      Set the clock (phase) delays which are to be configured in the
++      controller while switching to particular speed mode. These values
++      are in pair of degrees.
++
+ dependencies:
+   cd-debounce-delay-ms: [ cd-gpios ]
+   fixed-emmc-driver-type: [ non-removable ]
+@@ -351,6 +361,7 @@ examples:
+         keep-power-in-suspend;
+         wakeup-source;
+         mmc-pwrseq =3D <&sdhci0_pwrseq>;
++        clk-phase-sd-hs =3D <63>, <72>;
+     };
+
+   - |
+
+Thanks,
+Manish
