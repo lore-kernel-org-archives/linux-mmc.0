@@ -1,190 +1,241 @@
-From: Manish Narani <MNARANI@xilinx.com>
-Subject: RE: [PATCH v5 4/8] dt-bindings: mmc: Add optional generic properties
- for mmc
-Date: Mon, 11 Nov 2019 10:07:37 +0000
-Message-ID: <MN2PR02MB6029D371F580123CB32BE148C1740@MN2PR02MB6029.namprd02.prod.outlook.com>
-References: <1572588353-110682-1-git-send-email-manish.narani@xilinx.com>
- <1572588353-110682-5-git-send-email-manish.narani@xilinx.com>
- <20191104231427.GA7606@bogus>
+From: Baolin Wang <baolin.wang@linaro.org>
+Subject: Re: [PATCH v6 0/4] Add MMC software queue support
+Date: Mon, 11 Nov 2019 20:58:40 +0800
+Message-ID: <CAMz4kuK9HEuGdhNqHO_qoy9jD=ccsPPhD_dKYwNRgQyWyYwqRA@mail.gmail.com>
+References: <cover.1573456283.git.baolin.wang@linaro.org> <CAK8P3a1we9D5C2NOBww=cW-4L1PT3t0NnDRmknLwiLm652TmKg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20191104231427.GA7606@bogus>
-Content-Language: en-US
+In-Reply-To: <CAK8P3a1we9D5C2NOBww=cW-4L1PT3t0NnDRmknLwiLm652TmKg@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Rob Herring <robh@kernel.org>
-Cc: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "mark.rutland@arm.com" <mark.rutland@arm.com>, "adrian.hunter@intel.com" <adrian.hunter@intel.com>, Michal Simek <michals@xilinx.com>, Jolly Shah <JOLLYS@xilinx.com>, Nava kishore Manne <navam@xilinx.com>, Rajan Vaja <RAJANV@xilinx.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, git <git@xilinx.com>
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, asutoshd@codeaurora.org, Orson Zhai <orsonzhai@gmail.com>, Lyra Zhang <zhang.lyra@gmail.com>, Linus Walleij <linus.walleij@linaro.org>, Vincent Guittot <vincent.guittot@linaro.org>, baolin.wang7@gmail.com, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Hannes Reinecke <hare@suse.com>, linux-block <linux-block@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Rob,
+Hi Arnd,
 
-
-> -----Original Message-----
-> From: Rob Herring <robh@kernel.org>
-> Sent: Tuesday, November 5, 2019 4:44 AM
-> To: Manish Narani <MNARANI@xilinx.com>
-> Cc: ulf.hansson@linaro.org; mark.rutland@arm.com;
-> adrian.hunter@intel.com; Michal Simek <michals@xilinx.com>; Jolly Shah
-> <JOLLYS@xilinx.com>; Nava kishore Manne <navam@xilinx.com>; Rajan Vaja
-> <RAJANV@xilinx.com>; linux-mmc@vger.kernel.org;
-> devicetree@vger.kernel.org; linux-kernel@vger.kernel.org; linux-arm-
-> kernel@lists.infradead.org; git <git@xilinx.com>
-> Subject: Re: [PATCH v5 4/8] dt-bindings: mmc: Add optional generic
-> properties for mmc
->=20
-> On Fri, Nov 01, 2019 at 11:35:49AM +0530, Manish Narani wrote:
-> > Add optional properties for mmc hosts which are used to set clk delays
-> > for different speed modes in the controller.
+On Mon, 11 Nov 2019 at 17:28, Arnd Bergmann <arnd@arndb.de> wrote:
+>
+> On Mon, Nov 11, 2019 at 8:35 AM Baolin Wang <baolin.wang@linaro.org> wrote:
 > >
-> > Signed-off-by: Manish Narani <manish.narani@xilinx.com>
-> > ---
-> >  .../bindings/mmc/mmc-controller.yaml          | 92 +++++++++++++++++++
-> >  1 file changed, 92 insertions(+)
+> > Hi All,
 > >
-> > diff --git a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
-> b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
-> > index 080754e0ef35..87a83d966851 100644
-> > --- a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
-> > +++ b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
-> > @@ -212,6 +212,98 @@ properties:
-> >      description:
-> >        eMMC HS400 enhanced strobe mode is supported
+> > Now the MMC read/write stack will always wait for previous request is
+> > completed by mmc_blk_rw_wait(), before sending a new request to hardware,
+> > or queue a work to complete request, that will bring context switching
+> > overhead, especially for high I/O per second rates, to affect the IO
+> > performance.
+>
+> Hi Baolin,
+>
+> I had a chance to discuss your changes and what other improvements
+> can be done to the way mmc-blk works with Hannes Reinecke during the ELC
+> conference. He had some good suggestions. Adding him and the linux-block
+> mailing list to Cc to make sure I'm correctly representing this.
+
+Great, thanks for your input.
+
+>
+> - For the queue_depth of a non-queuing block device, you indeed need to
+>   leave it at e.g. 32 or 64 rather than 1 or 2, as you do now (I was wrong
+>   here originally, but just confirmed that). The queue depth is just used to
+>   ensure there is room for reordering and merging, as you also noticed.
+
+Right.
+
+>
+> - Removing all the context switches and workqueues from the data submission
+>   path is also the right idea. As you found, there is still a workqueue inside
+>   of blk_mq that is used because it may get called from atomic context but
+>   the submission may get blocked in __mmc_claim_host(). This really
+>   needs to be changed as well, but not in the way I originally suggested:
+>   As Hannes suggested, the host interrrupt handler should always use
+>   request_threaded_irq() to have its own process context, and then pass a
+>   flag to blk_mq to say that we never need another workqueue there.
+
+So you mean we should complete the request in the host driver irq
+thread context, then issue another request in this context by calling
+blk_mq_run_hw_queues()?
+
+>
+> - With that change in place calling a blocking __mmc_claim_host() is
+>   still a problem, so there should still be a nonblocking mmc_try_claim_host()
+>   for the submission path, leading to a BLK_STS_DEV_RESOURCE (?)
+>   return code from mmc_mq_queue_rq(). Basically mmc_mq_queue_rq()
+>   should always return right away, either after having queued the next I/O
+>   or with an error, but not waiting for the device in any way.
+
+Actually not only the mmc_claim_host() will block the MMC request
+processing, in this routine, the mmc_blk_part_switch() and
+mmc_retune() can also block the request processing. Moreover the part
+switching and tuning should be sync operations, and we can not move
+them to a work or a thread.
+
+>
+> - For the packed requests, there is apparently a very simple way to implement
+>   that without a software queue: mmc_mq_queue_rq() is allowed to look at
+>   and dequeue all requests that are currently part of the request_queue,
+>   so it should take out as many as it wants to submit at once and send
+>   them all down to the driver together, avoiding the need for any further
+>   round-trips to blk_mq or maintaining a queue in mmc.
+
+You mean we can dispatch a request directly from
+elevator->type->ops.dispatch_request()?  but we still need some helper
+functions to check if these requests can be packed (the package
+condition), and need to invent new APIs to start a packed request (or
+using cqe interfaces, which means we still need to implement some cqe
+callbacks).
+
+>
+> - The DMA management (bounce buffer, map, unmap) that is currently
+>   done in mmc_blk_mq_issue_rq() should ideally be done in the
+>   init_request()/exit_request()  (?) callbacks from mmc_mq_ops so this
+>   can be done asynchronously, out of the critical timing path for the
+>   submission. With this, there won't be any need for a software queue.
+
+This is not true, now the blk-mq will allocate some static request
+objects (usually the static requests number should be the same with
+the hardware queue depth) saved in struct blk_mq_tags. So the
+init_request() is used to initialize the static requests when
+allocating them, and call exit_request to free the static requests
+when freeing the 'struct blk_mq_tags', such as the queue is dead. So
+we can not move the DMA management into the init_request/exit_request.
+
+>
+> Hannes,
+>
+> Let me know if I misunderstood any of the above, or if I missed any
+> additional points.
+>
+>        Arnd
+>
+> > Thus this patch set will introduce the MMC software command queue support
+> > based on command queue engine's interfaces, and set the queue depth as 32
+> > to allow more requests can be be prepared, merged and inserted into IO
+> > scheduler, but we only allow 2 requests in flight, that is enough to let
+> > the irq handler always trigger the next request without a context switch,
+> > as well as avoiding a long latency.
 > >
-> > +  # Below mentioned are the clock (phase) delays which are to be
-> configured
-> > +  # in the controller while switching to particular speed mode. The ra=
-nge
-> > +  # of values are 0 to 359 degrees.
-> > +
-> > +  clk-phase-legacy:
-> > +    allOf:
-> > +      - $ref: /schemas/types.yaml#/definitions/uint32
-> > +      - minimum: 0
-> > +      - maximum: 359
-> > +    description:
-> > +      Input/Output Clock Delay pair in degrees for Legacy Mode.
-> > +
-> > +  clk-phase-mmc-hs:
-> > +    allOf:
-> > +      - $ref: /schemas/types.yaml#/definitions/uint32
-> > +      - minimum: 0
-> > +      - maximum: 359
-> > +    description:
-> > +      Input/Output Clock Delay pair degrees for MMC HS.
-> > +
-> > +  clk-phase-sd-hs:
-> > +    allOf:
-> > +      - $ref: /schemas/types.yaml#/definitions/uint32
-> > +      - minimum: 0
-> > +      - maximum: 359
-> > +    description:
-> > +      Input/Output Clock Delay pair in degrees for SD HS.
-> > +
-> > +  clk-phase-uhs-sdr12:
-> > +    allOf:
-> > +      - $ref: /schemas/types.yaml#/definitions/uint32
-> > +      - minimum: 0
-> > +      - maximum: 359
-> > +    description:
-> > +      Input/Output Clock Delay pair in degrees for SDR12.
-> > +
-> > +  clk-phase-uhs-sdr25:
-> > +    allOf:
-> > +      - $ref: /schemas/types.yaml#/definitions/uint32
-> > +      - minimum: 0
-> > +      - maximum: 359
-> > +    description:
-> > +      Input/Output Clock Delay pair in degrees for SDR25.
-> > +
-> > +  clk-phase-uhs-sdr50:
-> > +    allOf:
-> > +      - $ref: /schemas/types.yaml#/definitions/uint32
-> > +      - minimum: 0
-> > +      - maximum: 359
-> > +    description:
-> > +      Input/Output Clock Delay pair in degrees for SDR50.
-> > +
-> > +  clk-phase-uhs-sdr104:
-> > +    allOf:
-> > +      - $ref: /schemas/types.yaml#/definitions/uint32
-> > +      - minimum: 0
-> > +      - maximum: 359
-> > +    description:
-> > +      Input/Output Clock Delay pair in degrees for SDR104.
-> > +
-> > +  clk-phase-uhs-ddr50:
-> > +    allOf:
-> > +      - $ref: /schemas/types.yaml#/definitions/uint32
-> > +      - minimum: 0
-> > +      - maximum: 359
-> > +    description:
-> > +      Input/Output Clock Delay pair in degrees for SD DDR50.
-> > +
-> > +  clk-phase-mmc-ddr52:
-> > +    allOf:
-> > +      - $ref: /schemas/types.yaml#/definitions/uint32
-> > +      - minimum: 0
-> > +      - maximum: 359
-> > +    description:
-> > +      Input/Output Clock Delay pair in degrees for MMC DDR52.
-> > +
-> > +  clk-phase-mmc-hs200:
-> > +    allOf:
-> > +      - $ref: /schemas/types.yaml#/definitions/uint32
-> > +      - minimum: 0
-> > +      - maximum: 359
-> > +    description:
-> > +      Input/Output Clock Delay pair in degrees for MMC HS200.
-> > +
-> > +  clk-phase-mmc-hs400:
-> > +    allOf:
-> > +      - $ref: /schemas/types.yaml#/definitions/uint32
-> > +      - minimum: 0
-> > +      - maximum: 359
-> > +    description:
-> > +      Input/Output Clock Delay pair in degrees for MMC HS400.
->=20
-> This can be condensed into:
->=20
-> patternProperties:
->=20
-> "^clk-phase-(legacy|sd-hs|mmc-(hs|hs[24]00|ddr52)|uhs-
-> (sdr(12|25|50|104)|ddr50))$":
->=20
-> Or if you want to divide them between SD and MMC ones, that would be
-> fine for me.
+> > Moreover we can expand the MMC software queue interface to support
+> > MMC packed request or packed command instead of adding new interfaces,
+> > according to previosus discussion.
+> >
+> > Below are some comparison data with fio tool. The fio command I used
+> > is like below with changing the '--rw' parameter and enabling the direct
+> > IO flag to measure the actual hardware transfer speed in 4K block size.
+> >
+> > ./fio --filename=/dev/mmcblk0p30 --direct=1 --iodepth=20 --rw=read --bs=4K --size=1G --group_reporting --numjobs=20 --name=test_read
+> >
+> > My eMMC card working at HS400 Enhanced strobe mode:
+> > [    2.229856] mmc0: new HS400 Enhanced strobe MMC card at address 0001
+> > [    2.237566] mmcblk0: mmc0:0001 HBG4a2 29.1 GiB
+> > [    2.242621] mmcblk0boot0: mmc0:0001 HBG4a2 partition 1 4.00 MiB
+> > [    2.249110] mmcblk0boot1: mmc0:0001 HBG4a2 partition 2 4.00 MiB
+> > [    2.255307] mmcblk0rpmb: mmc0:0001 HBG4a2 partition 3 4.00 MiB, chardev (248:0)
+> >
+> > 1. Without MMC software queue
+> > I tested 5 times for each case and output a average speed.
+> >
+> > 1) Sequential read:
+> > Speed: 59.4MiB/s, 63.4MiB/s, 57.5MiB/s, 57.2MiB/s, 60.8MiB/s
+> > Average speed: 59.66MiB/s
+> >
+> > 2) Random read:
+> > Speed: 26.9MiB/s, 26.9MiB/s, 27.1MiB/s, 27.1MiB/s, 27.2MiB/s
+> > Average speed: 27.04MiB/s
+> >
+> > 3) Sequential write:
+> > Speed: 71.6MiB/s, 72.5MiB/s, 72.2MiB/s, 64.6MiB/s, 67.5MiB/s
+> > Average speed: 69.68MiB/s
+> >
+> > 4) Random write:
+> > Speed: 36.3MiB/s, 35.4MiB/s, 38.6MiB/s, 34MiB/s, 35.5MiB/s
+> > Average speed: 35.96MiB/s
+> >
+> > 2. With MMC software queue
+> > I tested 5 times for each case and output a average speed.
+> >
+> > 1) Sequential read:
+> > Speed: 59.2MiB/s, 60.4MiB/s, 63.6MiB/s, 60.3MiB/s, 59.9MiB/s
+> > Average speed: 60.68MiB/s
+> >
+> > 2) Random read:
+> > Speed: 31.3MiB/s, 31.4MiB/s, 31.5MiB/s, 31.3MiB/s, 31.3MiB/s
+> > Average speed: 31.36MiB/s
+> >
+> > 3) Sequential write:
+> > Speed: 71MiB/s, 71.8MiB/s, 72.3MiB/s, 72.2MiB/s, 71MiB/s
+> > Average speed: 71.66MiB/s
+> >
+> > 4) Random write:
+> > Speed: 68.9MiB/s, 68.7MiB/s, 68.8MiB/s, 68.6MiB/s, 68.8MiB/s
+> > Average speed: 68.76MiB/s
+> >
+> > Form above data, we can see the MMC software queue can help to improve some
+> > performance obviously for random read and write, though no obvious improvement
+> > for sequential read and write.
+> >
+> > Any comments are welcome. Thanks a lot.
+> >
+> > Hi Ulf,
+> >
+> > This patch set was pending for a while, and I've tested it several times and
+> > have not found any recessions. Hope this patch set can be merged into v5.5
+> > if no objection from you, since I still have some patches introducing the
+> > packed request depend on the mmc software queue as we talked before.
+> > Thanks a lot.
+> >
+> > Changes from v5:
+> >  - Modify the condition of defering to complete request suggested by Adrian.
+> >
+> > Changes from v4:
+> >  - Add a seperate patch to introduce a variable to defer to complete
+> >  data requests for some host drivers, when using host software queue.
+> >
+> > Changes from v3:
+> >  - Use host software queue instead of sqhci.
+> >  - Fix random config building issue.
+> >  - Change queue depth to 32, but still only allow 2 requests in flight.
+> >  - Update the testing data.
+> >
+> > Changes from v2:
+> >  - Remove reference to 'struct cqhci_host' and 'struct cqhci_slot',
+> >  instead adding 'struct sqhci_host', which is only used by software queue.
+> >
+> > Changes from v1:
+> >  - Add request_done ops for sdhci_ops.
+> >  - Replace virtual command queue with software queue for functions and
+> >  variables.
+> >  - Rename the software queue file and add sqhci.h header file.
+> >
+> > Baolin Wang (4):
+> >   mmc: Add MMC host software queue support
+> >   mmc: host: sdhci: Add request_done ops for struct sdhci_ops
+> >   mmc: host: sdhci-sprd: Add software queue support
+> >   mmc: host: sdhci: Add a variable to defer to complete requests if
+> >     needed
+> >
+> >  drivers/mmc/core/block.c      |   61 ++++++++
+> >  drivers/mmc/core/mmc.c        |   13 +-
+> >  drivers/mmc/core/queue.c      |   33 +++-
+> >  drivers/mmc/host/Kconfig      |    8 +
+> >  drivers/mmc/host/Makefile     |    1 +
+> >  drivers/mmc/host/mmc_hsq.c    |  344 +++++++++++++++++++++++++++++++++++++++++
+> >  drivers/mmc/host/mmc_hsq.h    |   30 ++++
+> >  drivers/mmc/host/sdhci-sprd.c |   26 ++++
+> >  drivers/mmc/host/sdhci.c      |   14 +-
+> >  drivers/mmc/host/sdhci.h      |    3 +
+> >  include/linux/mmc/host.h      |    3 +
+> >  11 files changed, 523 insertions(+), 13 deletions(-)
+> >  create mode 100644 drivers/mmc/host/mmc_hsq.c
+> >  create mode 100644 drivers/mmc/host/mmc_hsq.h
+> >
+> > --
+> > 1.7.9.5
+> >
 
-Below change should work? Please review.
 
---- a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
-+++ b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
-@@ -333,6 +333,16 @@ patternProperties:
-     required:
-       - reg
 
-+  "^clk-phase-(legacy|sd-hs|mmc-(hs|hs[24]00|ddr52)|uhs-(sdr(12|25|50|104)=
-|ddr50))$":
-+    allOf:
-+      - $ref: /schemas/types.yaml#/definitions/uint32
-+      - minimum: 0
-+      - maximum: 359
-+    description:
-+      Set the clock (phase) delays which are to be configured in the
-+      controller while switching to particular speed mode. These values
-+      are in pair of degrees.
-+
- dependencies:
-   cd-debounce-delay-ms: [ cd-gpios ]
-   fixed-emmc-driver-type: [ non-removable ]
-@@ -351,6 +361,7 @@ examples:
-         keep-power-in-suspend;
-         wakeup-source;
-         mmc-pwrseq =3D <&sdhci0_pwrseq>;
-+        clk-phase-sd-hs =3D <63>, <72>;
-     };
-
-   - |
-
-Thanks,
-Manish
+-- 
+Baolin Wang
+Best Regards
