@@ -1,92 +1,104 @@
-From: Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Subject: Re: [PATCH v2 0/3] mmc: Fixup HW reset for SDIO cards
-Date: Mon, 11 Nov 2019 16:51:10 -0800
-Message-ID: <CAD=FV=Wv9DgzQZZE8YvB+qjBzPsKdJvafSnFy8YAN_dN6UJbtQ@mail.gmail.com>
-References: <20191109103046.26445-1-ulf.hansson@linaro.org>
+From: Markus Reichl <m.reichl@fivetechno.de>
+Subject: [PATCH v2] arm64: dts: rockchip: Add SDR104 mode to SD-card I/F on
+ rk3399-roc-pc
+Date: Tue, 12 Nov 2019 09:45:36 +0100
+Message-ID: <25466090-3b24-2695-10fb-88c59be3f149@fivetechno.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20191109103046.26445-1-ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matthias Kaehlcke <mka-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Kalle Valo <kvalo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Wen Gong <wgong-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Erik Stromdahl <erik.stromdahl-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Eyal Reizer <eyalreizer-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-wireless <linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Brian Norris <briannorris-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Language: de-DE
+Sender: linux-kernel-owner@vger.kernel.org
+To: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Heiko Stuebner <heiko@sntech.de>, Jagan Teki <jagan@amarulasolutions.com>, Markus Reichl <m.reichl@fivetechno.de>, 'Ulf Hansson' <ulf.hansson@linaro.org>
+Cc: devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org, linux-kernel@vger.kernel.org, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,
+Add SDR104 capability and regulators to SD card node.
+While at it, fix a typo in lcd pinctrl and remove two
+undocumented bindings from pmic.
 
-On Sat, Nov 9, 2019 at 2:31 AM Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
->
-> Changes in v2:
->         - Add adaptations to the mwifiex driver.
->         - Keep existing syncronous reset behaviour if the SDIO card has a single
->         func driver.
->
-> It has turned out that it's not a good idea to try to power cycle and to
-> re-initialize the SDIO card, as currently done through mmc_hw_reset(). This
-> because there may be multiple SDIO funcs attached to the same SDIO card and
-> some of the others that didn't execute the call to mmc_hw_reset(), may then
-> simply experience an undefined behaviour.
->
-> The following patches in this series attempts to address this problem, by
-> reworking the mmc_hw_reset() behaviour for SDIO and by adopting the Marvel
-> mwifiex driver to these changes.
->
-> Note that, I don't have the HW at hand so the the code has only compile tested.
-> Test on HW is greatly appreciated!
->
-> Ulf Hansson (3):
->   mwifiex: Re-work support for SDIO HW reset
->   mmc: core: Drop check for mmc_card_is_removable() in mmc_rescan()
->   mmc: core: Re-work HW reset for SDIO cards
->
->  drivers/mmc/core/core.c                     | 12 +++-----
->  drivers/mmc/core/core.h                     |  2 ++
->  drivers/mmc/core/sdio.c                     | 28 ++++++++++++++++-
->  drivers/mmc/core/sdio_bus.c                 |  9 +++++-
->  drivers/net/wireless/marvell/mwifiex/main.c |  6 +++-
->  drivers/net/wireless/marvell/mwifiex/main.h |  1 +
->  drivers/net/wireless/marvell/mwifiex/sdio.c | 33 ++++++++++++++-------
->  include/linux/mmc/card.h                    |  1 +
->  8 files changed, 70 insertions(+), 22 deletions(-)
-
-I put this on rk3288-veyron-jerry atop v5.4-rc7 and I could run my
-test case for a while, AKA I got over 50 cycles of:
-
+Signed-off-by: Markus Reichl <m.reichl@fivetechno.de>
 ---
-
-for i in $(seq 1000); do
-  echo "LOOP $i --------"
-  echo 1 > /sys/kernel/debug/mwifiex/mlan0/reset
-
-  while true; do
-    if ! ping6 -w15 -c1 "${GW}" >/dev/null 2>&1; then
-      fail=$(( fail + 1 ))
-      echo "Fail WiFi ${fail}"
-      if [[ ${fail} == 3 ]]; then
-        exit 1
-      fi
-    else
-      fail=0
-      break
-    fi
-  done
-
-  hciconfig hci0 down
-  sleep 1
-  if ! hciconfig hci0 up; then
-    echo "Fail BT"
-    exit 1
-  fi
-
-done
-
+v2: Remove always-on from vcc3v0_sd
 ---
+ .../boot/dts/rockchip/rk3399-roc-pc.dtsi      | 30 +++++++++++++++----
+ 1 file changed, 24 insertions(+), 6 deletions(-)
 
-NOTE: with no patches I couldn't even get my test case to pass w/out
-the BT bits and I swear that used to work before.  ...but I didn't
-debug since the end result (with full card hotplug) is happy-working
-for me.  I'll still use it as further argument that (IMO) full unplug
-/ plug of the card is better it uses more standard code paths and is
-less likely to break.  ;-)
-
-Tested-by: Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+diff --git a/arch/arm64/boot/dts/rockchip/rk3399-roc-pc.dtsi b/arch/arm64/boot/dts/rockchip/rk3399-roc-pc.dtsi
+index d1eb55c855b3..a31099f7620b 100644
+--- a/arch/arm64/boot/dts/rockchip/rk3399-roc-pc.dtsi
++++ b/arch/arm64/boot/dts/rockchip/rk3399-roc-pc.dtsi
+@@ -135,6 +135,19 @@
+ 		vin-supply = <&vcc_1v8>;
+ 	};
+ 
++	vcc3v0_sd: vcc3v0-sd {
++		compatible = "regulator-fixed";
++		enable-active-high;
++		gpio = <&gpio4 RK_PD6 GPIO_ACTIVE_HIGH>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&vcc3v0_sd_en>;
++		regulator-name = "vcc3v0_sd";
++		regulator-boot-on;
++		regulator-min-microvolt = <3000000>;
++		regulator-max-microvolt = <3000000>;
++		vin-supply = <&vcc3v3_sys>;
++	};
++
+ 	vcc3v3_sys: vcc3v3-sys {
+ 		compatible = "regulator-fixed";
+ 		regulator-name = "vcc3v3_sys";
+@@ -293,8 +306,6 @@
+ 		vcc10-supply = <&vcc3v3_sys>;
+ 		vcc11-supply = <&vcc3v3_sys>;
+ 		vcc12-supply = <&vcc3v3_sys>;
+-		vcc13-supply = <&vcc3v3_sys>;
+-		vcc14-supply = <&vcc3v3_sys>;
+ 		vddio-supply = <&vcc_3v0>;
+ 
+ 		regulators {
+@@ -576,7 +587,7 @@
+ 
+ 	lcd-panel {
+ 		lcd_panel_reset: lcd-panel-reset {
+-			rockchip,pins = <4 RK_PD6 RK_FUNC_GPIO &pcfg_pull_up>;
++			rockchip,pins = <4 RK_PD5 RK_FUNC_GPIO &pcfg_pull_up>;
+ 		};
+ 	};
+ 
+@@ -602,6 +613,10 @@
+ 		vsel2_gpio: vsel2-gpio {
+ 			rockchip,pins = <1 RK_PB6 RK_FUNC_GPIO &pcfg_pull_down>;
+ 		};
++
++		pmic_int_l: pmic-int-l {
++			rockchip,pins = <1 RK_PC5 RK_FUNC_GPIO &pcfg_pull_up>;
++		};
+ 	};
+ 
+ 	sdio-pwrseq {
+@@ -610,9 +625,9 @@
+ 		};
+ 	};
+ 
+-	pmic {
+-		pmic_int_l: pmic-int-l {
+-			rockchip,pins = <1 RK_PC5 RK_FUNC_GPIO &pcfg_pull_up>;
++	sdmmc {
++		vcc3v0_sd_en: vcc3v0-sd-en {
++			rockchip,pins = <4 RK_PD6 RK_FUNC_GPIO &pcfg_pull_none>;
+ 		};
+ 	};
+ 
+@@ -667,6 +682,9 @@
+ 	cd-gpios = <&gpio0 RK_PA7 GPIO_ACTIVE_LOW>;
+ 	disable-wp;
+ 	max-frequency = <150000000>;
++	sd-uhs-sdr104;
++	vmmc-supply = <&vcc3v0_sd>;
++	vqmmc-supply = <&vcc_sdio>;
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&sdmmc_clk &sdmmc_cmd &sdmmc_bus4>;
+ 	status = "okay";
+-- 
+2.20.1
