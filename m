@@ -1,47 +1,44 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v3 2/3] mmc: core: Drop check for mmc_card_is_removable() in mmc_rescan()
-Date: Tue, 12 Nov 2019 13:40:20 +0100
-Message-ID: <20191112124021.8718-3-ulf.hansson@linaro.org>
-References: <20191112124021.8718-1-ulf.hansson@linaro.org>
-Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20191112124021.8718-1-ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Matthias Kaehlcke <mka-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Cc: Kalle Valo <kvalo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Wen Gong <wgong-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Erik Stromdahl <erik.stromdahl-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Eyal Reizer <eyalreizer-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+From: Eugeniu Rosca <erosca@de.adit-jv.com>
+Subject: [PATCH] mmc: renesas_sdhi_internal_dmac: Add MMC_CAP_ERASE to Gen3 SoCs
+Date: Tue, 12 Nov 2019 14:48:08 +0100
+Message-ID: <20191112134808.23546-1-erosca@de.adit-jv.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Wolfram Sang <wsa+renesas@sang-engineering.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, =?UTF-8?q?Niklas=20S=C3=B6derlund?= <niklas.soderlund@ragnatech.se>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Geert Uytterhoeven <geert@linux-m68k.org>, Simon Horman <horms+renesas@verge.net.au>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Eugeniu Rosca <erosca@de.adit-jv.com>, Eugeniu Rosca <roscaeugeniu@gmail.com>, Harish Jenny K N <harish_kandiga@mentor.com>, Andrew Gabbasov <andrew_gabbasov@mentor.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Upfront in mmc_rescan() we use the host->rescan_entered flag, to allow
-scanning only once for non-removable cards. Therefore, it's also not
-possible that we can have a corresponding card bus attached (host->bus_ops
-is NULL), when we are scanning non-removable cards.
+From: Harish Jenny K N <harish_kandiga@mentor.com>
 
-For this reason, let' drop the check for mmc_card_is_removable() as it's
-redundant.
+Enable MMC_CAP_ERASE capability in the driver to allow
+erase/discard/trim requests.
 
-Reviewed-by: Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Tested-by: Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Signed-off-by: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Suggested-by: Andrew Gabbasov <andrew_gabbasov@mentor.com>
+Signed-off-by: Harish Jenny K N <harish_kandiga@mentor.com>
+[erosca: Forward-port and test on v5.4-rc7 using H3ULCB-KF:
+         "blkdiscard /dev/mmcblk0" passes with this patch applied
+         and complains otherwise:
+	 "BLKDISCARD ioctl failed: Operation not supported"]
+Signed-off-by: Eugeniu Rosca <erosca@de.adit-jv.com>
 ---
- drivers/mmc/core/core.c | 7 ++-----
- 1 file changed, 2 insertions(+), 5 deletions(-)
+ drivers/mmc/host/renesas_sdhi_internal_dmac.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 221127324709..6f8342702c73 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -2297,11 +2297,8 @@ void mmc_rescan(struct work_struct *work)
- 
- 	mmc_bus_get(host);
- 
--	/*
--	 * if there is a _removable_ card registered, check whether it is
--	 * still present
--	 */
--	if (host->bus_ops && !host->bus_dead && mmc_card_is_removable(host))
-+	/* Verify a registered card to be functional, else remove it. */
-+	if (host->bus_ops && !host->bus_dead)
- 		host->bus_ops->detect(host);
- 
- 	host->detect_change = 0;
+diff --git a/drivers/mmc/host/renesas_sdhi_internal_dmac.c b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
+index a66f8d6d61d1..61fcbf51c947 100644
+--- a/drivers/mmc/host/renesas_sdhi_internal_dmac.c
++++ b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
+@@ -105,7 +105,7 @@ static const struct renesas_sdhi_of_data of_rcar_gen3_compatible = {
+ 	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT | TMIO_MMC_CLK_ACTUAL |
+ 			  TMIO_MMC_HAVE_CBSY | TMIO_MMC_MIN_RCAR2,
+ 	.capabilities	= MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ |
+-			  MMC_CAP_CMD23,
++			  MMC_CAP_ERASE | MMC_CAP_CMD23,
+ 	.capabilities2	= MMC_CAP2_NO_WRITE_PROTECT | MMC_CAP2_MERGE_CAPABLE,
+ 	.bus_shift	= 2,
+ 	.scc_offset	= 0x1000,
 -- 
-2.17.1
+2.24.0
