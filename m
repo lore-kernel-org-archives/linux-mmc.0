@@ -1,74 +1,69 @@
-From: Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Subject: Re: [PATCH v2 1/3] mwifiex: Re-work support for SDIO HW reset
-Date: Tue, 12 Nov 2019 10:04:48 -0800
-Message-ID: <CAD=FV=VWdzqGY778SXZnC1YDyxc6EHPgRjkJ_2sOHrxHTams-w@mail.gmail.com>
-References: <20191109103046.26445-1-ulf.hansson@linaro.org>
- <20191109103046.26445-2-ulf.hansson@linaro.org> <CAD=FV=WccuUCnQXHq-HuojCRAKVA02D7HBS9PgqSqq3+b2v4CA@mail.gmail.com>
- <CAPDyKFq-djJFyYu6Wzg9t9hLOQMuqff9KVhbx5Zp5i=Fsynsdw@mail.gmail.com>
+From: Wolfram Sang <wsa@the-dreams.de>
+Subject: Re: [PATCH] mmc: renesas_sdhi_internal_dmac: Add MMC_CAP_ERASE to
+ Gen3 SoCs
+Date: Tue, 12 Nov 2019 21:49:52 +0100
+Message-ID: <20191112204952.GA2976@kunai>
+References: <20191112134808.23546-1-erosca@de.adit-jv.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAPDyKFq-djJFyYu6Wzg9t9hLOQMuqff9KVhbx5Zp5i=Fsynsdw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matthias Kaehlcke <mka-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Kalle Valo <kvalo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Wen Gong <wgong-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Erik Stromdahl <erik.stromdahl-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Eyal Reizer <eyalreizer-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-wireless <linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Brian Norris <briannorris-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="5mCyUwZo2JvN/JJP"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20191112134808.23546-1-erosca@de.adit-jv.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Eugeniu Rosca <erosca@de.adit-jv.com>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Niklas =?utf-8?Q?S=C3=B6derlund?= <niklas.soderlund@ragnatech.se>, Ulf Hansson <ulf.hansson@linaro.org>, Geert Uytterhoeven <geert@linux-m68k.org>, Simon Horman <horms+renesas@verge.net.au>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Eugeniu Rosca <roscaeugeniu@gmail.com>, Harish Jenny K N <harish_kandiga@mentor.com>, Andrew Gabbasov <andrew_gabbasov@mentor.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,
 
-On Tue, Nov 12, 2019 at 4:14 AM Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
->
-> > > diff --git a/drivers/net/wireless/marvell/mwifiex/sdio.c b/drivers/net/wireless/marvell/mwifiex/sdio.c
-> > > index 24c041dad9f6..2417c94c29c0 100644
-> > > --- a/drivers/net/wireless/marvell/mwifiex/sdio.c
-> > > +++ b/drivers/net/wireless/marvell/mwifiex/sdio.c
-> > > @@ -444,6 +444,9 @@ static int mwifiex_sdio_suspend(struct device *dev)
-> > >                 return 0;
-> > >         }
-> > >
-> > > +       if (!adapter->is_adapter_up)
-> > > +               return -EBUSY;
-> >
-> > I'm moderately concerned that there might be cases where firmware
-> > never got loaded but we could suspend/resume OK.  ...and now we never
-> > will?  I'm not familiar enough with the code to know if this is a real
-> > concern, so I guess we can do this and then see...
->
-> There is a completion variable that is used to make sure the firmware
-> is loaded, before the mwifiex driver runs ->suspend|remove(). This is
-> needed, because during ->probe() the FW will be loaded asynchronously,
-> hence both mwifiex_sdio_remove() and mwifiex_sdio_suspend(), may be
-> called while waiting for the FW to be loaded.
->
-> If a HW reset has been scheduled but not completed, which would be the
-> case if mmc_hw_reset() gets called after mmc_pm_notify() with a
-> PM_SUSPEND_PREPARE. This is because mmc_pm_notify() then disables the
-> rescan work, but then re-kicks/enables it at PM_POST_SUSPEND (after
-> the system has resumed).
->
-> Returning -EBUSY, should allow the mmc rescan work to be completed
-> when the system have resumed.
->
-> Of course, one could also considering using pm_wakeup_event(), in case
-> mmc_hw_reset() needed to schedule the reset, as to prevent the system
-> for suspending for a small amount of time. As to make sure the rescan
-> work, gets to run. But I am not sure that's needed here.
+--5mCyUwZo2JvN/JJP
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-I was more worried that we could get into a state where we'd return
-EBUSY forever, but I think I've convinced myself that this isn't
-possible.  If we fail to load things then the adapter variable will be
-freed anyway.
+On Tue, Nov 12, 2019 at 02:48:08PM +0100, Eugeniu Rosca wrote:
+> From: Harish Jenny K N <harish_kandiga@mentor.com>
+>=20
+> Enable MMC_CAP_ERASE capability in the driver to allow
+> erase/discard/trim requests.
+>=20
+> Suggested-by: Andrew Gabbasov <andrew_gabbasov@mentor.com>
+> Signed-off-by: Harish Jenny K N <harish_kandiga@mentor.com>
+> [erosca: Forward-port and test on v5.4-rc7 using H3ULCB-KF:
+>          "blkdiscard /dev/mmcblk0" passes with this patch applied
+>          and complains otherwise:
+> 	 "BLKDISCARD ioctl failed: Operation not supported"]
+> Signed-off-by: Eugeniu Rosca <erosca@de.adit-jv.com>
+
+Looks good to me. Just a generic question, probably more for Ulf:
+
+Why does this CAP_ERASE exist? As I understand, the driver only needs to
+set the flag and no further handling is required. Why would a driver not
+set this flag and not support erase/trim commands?
+
+Kind regards,
+
+   Wolfram
 
 
-> Finally, if you want to verify that the above system suspend path
-> works fine, you could change the call to "_mmc_detect_change(host, 0,
-> false)" in mmc_sdio_hw_reset(), into "_mmc_detect_change(host,
-> msecs_to_jiffies(30000), false)", in patch3.
->
-> This should leave you a 30s window of where you can try to system
-> suspend the platform, while also waiting for the scheduled reset to be
-> completed.
+--5mCyUwZo2JvN/JJP
+Content-Type: application/pgp-signature; name="signature.asc"
 
-It worked.
+-----BEGIN PGP SIGNATURE-----
 
-https://pastebin.com/NdsvAdE8
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAl3LGusACgkQFA3kzBSg
+KbYKkw//VxC8isy0WeY7yOM8Eu1mt8LljuDDozsi46StVWx608b6GQAsLW34WLCs
+sFTSRhYuQkld3iiYD+mFiQ/4X/W6Wj7c45SaIQ9doP+2EjT592pUMaSNhMTrPt84
+XP48vZKZa4SOyEkP/TUSkAXqgFZsqO3Kos/qceqJb02il5N+biuEmFQM6rwj71sx
+P71aDgWiq1eKVej8WEHn4t/A+UNsUbQpVmqvyyUXYm7KVgM5PZjogQBzc6Y8p+12
+gI6AlUm0h5Nl8o7NDM6jy1VgP+UgZ8qjTTylFcYr6wSKKiUvJNb+U0Imd+txY8DZ
+gtoWBuMDPQEAdngoX9jbw6Q9zFI41eJ6fM1LX5UnVO5VxopY+WRqiLfmp4u356tT
+T2e/VNX9ZnGTrYWazo3jmpDpL0DoAPhbfgRkrpAG98vtNujOb3xtejglxbPfUYx+
+8aXP3a0htCkgsaap34hHeAu4UiOyuZsh6Ie4iHukMP+S3m+5+vX9uXEi7ZQHgiLC
+t9ANcKGUki2syaauaCZSSon0E0offhnuNqb6SRHla3rKAptSKNwoqlnDz2LoIUIV
+Z+I/YUl2PNcHAJk1IkqIJwnBeMZKVUlMPdi38VlDdFQG0kXdCb6dABe7Km4kOr/e
+AgdIusuIpZxP90NAGtgBm3JPiDEzEHxOEVobI7kJNKMCISgWYto=
+=vVLb
+-----END PGP SIGNATURE-----
+
+--5mCyUwZo2JvN/JJP--
