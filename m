@@ -1,26 +1,27 @@
 From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Subject: Re: [PATCH v2 0/3] mmc: Fixup HW reset for SDIO cards
-Date: Tue, 12 Nov 2019 13:23:17 +0100
-Message-ID: <CAPDyKFq03X0hd5B6h6fuNht5OjSEWe6Ap4hH4a+0nVZsS4r3hw@mail.gmail.com>
-References: <20191109103046.26445-1-ulf.hansson@linaro.org> <20191111220812.GX43123@atomide.com>
+Date: Tue, 12 Nov 2019 13:27:29 +0100
+Message-ID: <CAPDyKFq5=B8u=9awGaXuhTmYK6Sbbe6EmF9EMhBQQyyrD1bKRw@mail.gmail.com>
+References: <20191109103046.26445-1-ulf.hansson@linaro.org> <CAD=FV=Wv9DgzQZZE8YvB+qjBzPsKdJvafSnFy8YAN_dN6UJbtQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20191111220812.GX43123-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>
+In-Reply-To: <CAD=FV=Wv9DgzQZZE8YvB+qjBzPsKdJvafSnFy8YAN_dN6UJbtQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>
-Cc: "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Matthias Kaehlcke <mka-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Kalle Valo <kvalo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Wen Gong <wgong-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Erik Stromdahl <erik.stromdahl-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Eyal Reizer <eyalreizer-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-wireless <linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Cc: Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matthias Kaehlcke <mka-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Kalle Valo <kvalo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Wen Gong <wgong-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Erik Stromdahl <erik.stromdahl-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Eyal Reizer <eyalreizer-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-wireless <linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Brian Norris <briannorris-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, 11 Nov 2019 at 23:08, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org> wrote:
+On Tue, 12 Nov 2019 at 01:51, Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org> wrote:
 >
 > Hi,
 >
-> * Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> [191109 10:31]:
+> On Sat, Nov 9, 2019 at 2:31 AM Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+> >
 > > Changes in v2:
-> >       - Add adaptations to the mwifiex driver.
-> >       - Keep existing syncronous reset behaviour if the SDIO card has a single
-> >       func driver.
+> >         - Add adaptations to the mwifiex driver.
+> >         - Keep existing syncronous reset behaviour if the SDIO card has a single
+> >         func driver.
 > >
 > > It has turned out that it's not a good idea to try to power cycle and to
 > > re-initialize the SDIO card, as currently done through mmc_hw_reset(). This
@@ -34,22 +35,71 @@ On Mon, 11 Nov 2019 at 23:08, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.
 > >
 > > Note that, I don't have the HW at hand so the the code has only compile tested.
 > > Test on HW is greatly appreciated!
+> >
+> > Ulf Hansson (3):
+> >   mwifiex: Re-work support for SDIO HW reset
+> >   mmc: core: Drop check for mmc_card_is_removable() in mmc_rescan()
+> >   mmc: core: Re-work HW reset for SDIO cards
+> >
+> >  drivers/mmc/core/core.c                     | 12 +++-----
+> >  drivers/mmc/core/core.h                     |  2 ++
+> >  drivers/mmc/core/sdio.c                     | 28 ++++++++++++++++-
+> >  drivers/mmc/core/sdio_bus.c                 |  9 +++++-
+> >  drivers/net/wireless/marvell/mwifiex/main.c |  6 +++-
+> >  drivers/net/wireless/marvell/mwifiex/main.h |  1 +
+> >  drivers/net/wireless/marvell/mwifiex/sdio.c | 33 ++++++++++++++-------
+> >  include/linux/mmc/card.h                    |  1 +
+> >  8 files changed, 70 insertions(+), 22 deletions(-)
 >
-> Looks good to me. I tried testing this, but looks like at least on duovero
-> mwifiex_sdio is broken in v5.4-rc7:
+> I put this on rk3288-veyron-jerry atop v5.4-rc7 and I could run my
+> test case for a while, AKA I got over 50 cycles of:
 >
-> # dmesg | grep mwifi
-> mwifiex_sdio mmc1:0001:1: poll card status failed, tries = 100
-> mwifiex_sdio mmc1:0001:1: FW download with helper:       poll status timeout @ 0
-> mwifiex_sdio mmc1:0001:1: prog_fw failed ret=0xffffffff
-> mwifiex_sdio mmc1:0001:1: info: _mwifiex_fw_dpc: unregister device
+> ---
 >
-> No idea when it broke and what might be the issue this time around.
-> Any ideas?
+> for i in $(seq 1000); do
+>   echo "LOOP $i --------"
+>   echo 1 > /sys/kernel/debug/mwifiex/mlan0/reset
+>
+>   while true; do
+>     if ! ping6 -w15 -c1 "${GW}" >/dev/null 2>&1; then
+>       fail=$(( fail + 1 ))
+>       echo "Fail WiFi ${fail}"
+>       if [[ ${fail} == 3 ]]; then
+>         exit 1
+>       fi
+>     else
+>       fail=0
+>       break
+>     fi
+>   done
+>
+>   hciconfig hci0 down
+>   sleep 1
+>   if ! hciconfig hci0 up; then
+>     echo "Fail BT"
+>     exit 1
+>   fi
+>
+> done
+>
+> ---
+>
+> NOTE: with no patches I couldn't even get my test case to pass w/out
+> the BT bits and I swear that used to work before.  ...but I didn't
+> debug since the end result (with full card hotplug) is happy-working
+> for me.  I'll still use it as further argument that (IMO) full unplug
+> / plug of the card is better it uses more standard code paths and is
+> less likely to break.  ;-)
+>
+> Tested-by: Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
 
-Sorry, no good idea.
+Thanks, I add this to the series and make a re-spin.
 
-Perhaps something on the mmc host level that has changed?
+What do you think about tagging the patches for stable?
+
+I guess there is a risk that we may "break" the other two users of
+mmc_hw_reset(). But, as I said, in that case those needs to be fixed
+anyways.
 
 Kind regards
 Uffe
