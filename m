@@ -1,44 +1,29 @@
-From: Eugeniu Rosca <erosca@de.adit-jv.com>
-Subject: [PATCH] mmc: renesas_sdhi_internal_dmac: Add MMC_CAP_ERASE to Gen3 SoCs
-Date: Tue, 12 Nov 2019 14:48:08 +0100
-Message-ID: <20191112134808.23546-1-erosca@de.adit-jv.com>
+From: Jerome Brunet <jbrunet@baylibre.com>
+Subject: Re: [PATCH v2] mmc: meson-gx: fix mmc dma operation
+Date: Tue, 12 Nov 2019 18:02:25 +0100
+Message-ID: <1jftitf2ou.fsf@starbuckisacylon.baylibre.com>
+References: <1572868495-84816-1-git-send-email-jianxin.pan@amlogic.com> <1ja79b4mje.fsf@starbuckisacylon.baylibre.com> <e80cb817-e58a-68ce-a3c6-d82636aaf7d3@amlogic.com> <1j8sou4u1g.fsf@starbuckisacylon.baylibre.com> <7ec2e682-cfec-395e-cf38-58f050440c40@amlogic.com> <1j7e4e4sab.fsf@starbuckisacylon.baylibre.com> <dee789ae-6825-3f4c-16e7-227e064562d6@amlogic.com> <1j5zjy4fif.fsf@starbuckisacylon.baylibre.com> <399e3fda-91c0-6dcb-5040-a117fe78519d@amlogic.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-reply-to: <399e3fda-91c0-6dcb-5040-a117fe78519d@amlogic.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, =?UTF-8?q?Niklas=20S=C3=B6derlund?= <niklas.soderlund@ragnatech.se>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Geert Uytterhoeven <geert@linux-m68k.org>, Simon Horman <horms+renesas@verge.net.au>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Eugeniu Rosca <erosca@de.adit-jv.com>, Eugeniu Rosca <roscaeugeniu@gmail.com>, Harish Jenny K N <harish_kandiga@mentor.com>, Andrew Gabbasov <andrew_gabbasov@mentor.com>
+To: Nan Li <Nan.Li@amlogic.com>, Jianxin Pan <Jianxin.Pan@amlogic.com>, Ulf Hansson <ulf.hansson@linaro.org>, Kevin Hilman <khilman@baylibre.com>
+Cc: Neil Armstrong <narmstrong@baylibre.com>, "linux-amlogic@lists.infradead.org" <linux-amlogic@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Victor Wan <victor.wan@amlogic.com>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Harish Jenny K N <harish_kandiga@mentor.com>
 
-Enable MMC_CAP_ERASE capability in the driver to allow
-erase/discard/trim requests.
+On Thu 07 Nov 2019 at 04:07, Nan Li <Nan.Li@amlogic.com> wrote:
 
-Suggested-by: Andrew Gabbasov <andrew_gabbasov@mentor.com>
-Signed-off-by: Harish Jenny K N <harish_kandiga@mentor.com>
-[erosca: Forward-port and test on v5.4-rc7 using H3ULCB-KF:
-         "blkdiscard /dev/mmcblk0" passes with this patch applied
-         and complains otherwise:
-	 "BLKDISCARD ioctl failed: Operation not supported"]
-Signed-off-by: Eugeniu Rosca <erosca@de.adit-jv.com>
----
- drivers/mmc/host/renesas_sdhi_internal_dmac.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+> On 2019/11/5 21:30, Jerome Brunet wrote:
+>> 
+>> On Tue 05 Nov 2019 at 10:05, Nan Li <Nan.Li@amlogic.com> wrote:
+>> 
+>> Nan Li, please fix your mailer to use plain text properly, your reply
+>> are near impossible to read
+>> 
+> Sorry, maybe there is something wrong with my email address. Please help 
+> me check whether my reply is in accordance with the format.
+>
 
-diff --git a/drivers/mmc/host/renesas_sdhi_internal_dmac.c b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-index a66f8d6d61d1..61fcbf51c947 100644
---- a/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-+++ b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-@@ -105,7 +105,7 @@ static const struct renesas_sdhi_of_data of_rcar_gen3_compatible = {
- 	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT | TMIO_MMC_CLK_ACTUAL |
- 			  TMIO_MMC_HAVE_CBSY | TMIO_MMC_MIN_RCAR2,
- 	.capabilities	= MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ |
--			  MMC_CAP_CMD23,
-+			  MMC_CAP_ERASE | MMC_CAP_CMD23,
- 	.capabilities2	= MMC_CAP2_NO_WRITE_PROTECT | MMC_CAP2_MERGE_CAPABLE,
- 	.bus_shift	= 2,
- 	.scc_offset	= 0x1000,
--- 
-2.24.0
+Please use plain text instead on html when replying on these mailing list.
