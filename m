@@ -1,52 +1,124 @@
-From: Jerome Brunet <jbrunet@baylibre.com>
-Subject: Re: [PATCH v2] mmc: meson-gx: fix mmc dma operation
-Date: Tue, 12 Nov 2019 18:12:50 +0100
-Message-ID: <1jeeydf27h.fsf@starbuckisacylon.baylibre.com>
-References: <1572868495-84816-1-git-send-email-jianxin.pan@amlogic.com> <1ja79b4mje.fsf@starbuckisacylon.baylibre.com> <e80cb817-e58a-68ce-a3c6-d82636aaf7d3@amlogic.com> <1j8sou4u1g.fsf@starbuckisacylon.baylibre.com> <7ec2e682-cfec-395e-cf38-58f050440c40@amlogic.com> <1j7e4e4sab.fsf@starbuckisacylon.baylibre.com> <dee789ae-6825-3f4c-16e7-227e064562d6@amlogic.com> <1j5zjy4fif.fsf@starbuckisacylon.baylibre.com> <ec705819-9763-b0d2-9480-949e7ccd1cb9@amlogic.com>
+From: Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Subject: Re: [PATCH v2 0/3] mmc: Fixup HW reset for SDIO cards
+Date: Tue, 12 Nov 2019 09:42:46 -0800
+Message-ID: <CAD=FV=Xf5O_ew+hG9BLSZUM7bKAZvEvqaK4Cy1xUWgKdTGUMwA@mail.gmail.com>
+References: <20191109103046.26445-1-ulf.hansson@linaro.org>
+ <CAD=FV=Wv9DgzQZZE8YvB+qjBzPsKdJvafSnFy8YAN_dN6UJbtQ@mail.gmail.com> <CAPDyKFq5=B8u=9awGaXuhTmYK6Sbbe6EmF9EMhBQQyyrD1bKRw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-reply-to: <ec705819-9763-b0d2-9480-949e7ccd1cb9@amlogic.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Nan Li <Nan.Li@amlogic.com>, Jianxin Pan <Jianxin.Pan@amlogic.com>, Ulf Hansson <ulf.hansson@linaro.org>, Kevin Hilman <khilman@baylibre.com>
-Cc: Neil Armstrong <narmstrong@baylibre.com>, "linux-amlogic@lists.infradead.org" <linux-amlogic@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Victor Wan <victor.wan@amlogic.com>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAPDyKFq5=B8u=9awGaXuhTmYK6Sbbe6EmF9EMhBQQyyrD1bKRw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matthias Kaehlcke <mka-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Kalle Valo <kvalo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Wen Gong <wgong-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Erik Stromdahl <erik.stromdahl-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Eyal Reizer <eyalreizer-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-wireless <linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Brian Norris <briannorris-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
+Hi,
 
-On Wed 06 Nov 2019 at 04:28, Nan Li <Nan.Li@amlogic.com> wrote:
+On Tue, Nov 12, 2019 at 4:28 AM Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+>
+> On Tue, 12 Nov 2019 at 01:51, Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org> wrote:
+> >
+> > Hi,
+> >
+> > On Sat, Nov 9, 2019 at 2:31 AM Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+> > >
+> > > Changes in v2:
+> > >         - Add adaptations to the mwifiex driver.
+> > >         - Keep existing syncronous reset behaviour if the SDIO card has a single
+> > >         func driver.
+> > >
+> > > It has turned out that it's not a good idea to try to power cycle and to
+> > > re-initialize the SDIO card, as currently done through mmc_hw_reset(). This
+> > > because there may be multiple SDIO funcs attached to the same SDIO card and
+> > > some of the others that didn't execute the call to mmc_hw_reset(), may then
+> > > simply experience an undefined behaviour.
+> > >
+> > > The following patches in this series attempts to address this problem, by
+> > > reworking the mmc_hw_reset() behaviour for SDIO and by adopting the Marvel
+> > > mwifiex driver to these changes.
+> > >
+> > > Note that, I don't have the HW at hand so the the code has only compile tested.
+> > > Test on HW is greatly appreciated!
+> > >
+> > > Ulf Hansson (3):
+> > >   mwifiex: Re-work support for SDIO HW reset
+> > >   mmc: core: Drop check for mmc_card_is_removable() in mmc_rescan()
+> > >   mmc: core: Re-work HW reset for SDIO cards
+> > >
+> > >  drivers/mmc/core/core.c                     | 12 +++-----
+> > >  drivers/mmc/core/core.h                     |  2 ++
+> > >  drivers/mmc/core/sdio.c                     | 28 ++++++++++++++++-
+> > >  drivers/mmc/core/sdio_bus.c                 |  9 +++++-
+> > >  drivers/net/wireless/marvell/mwifiex/main.c |  6 +++-
+> > >  drivers/net/wireless/marvell/mwifiex/main.h |  1 +
+> > >  drivers/net/wireless/marvell/mwifiex/sdio.c | 33 ++++++++++++++-------
+> > >  include/linux/mmc/card.h                    |  1 +
+> > >  8 files changed, 70 insertions(+), 22 deletions(-)
+> >
+> > I put this on rk3288-veyron-jerry atop v5.4-rc7 and I could run my
+> > test case for a while, AKA I got over 50 cycles of:
+> >
+> > ---
+> >
+> > for i in $(seq 1000); do
+> >   echo "LOOP $i --------"
+> >   echo 1 > /sys/kernel/debug/mwifiex/mlan0/reset
+> >
+> >   while true; do
+> >     if ! ping6 -w15 -c1 "${GW}" >/dev/null 2>&1; then
+> >       fail=$(( fail + 1 ))
+> >       echo "Fail WiFi ${fail}"
+> >       if [[ ${fail} == 3 ]]; then
+> >         exit 1
+> >       fi
+> >     else
+> >       fail=0
+> >       break
+> >     fi
+> >   done
+> >
+> >   hciconfig hci0 down
+> >   sleep 1
+> >   if ! hciconfig hci0 up; then
+> >     echo "Fail BT"
+> >     exit 1
+> >   fi
+> >
+> > done
+> >
+> > ---
+> >
+> > NOTE: with no patches I couldn't even get my test case to pass w/out
+> > the BT bits and I swear that used to work before.  ...but I didn't
+> > debug since the end result (with full card hotplug) is happy-working
+> > for me.  I'll still use it as further argument that (IMO) full unplug
+> > / plug of the card is better it uses more standard code paths and is
+> > less likely to break.  ;-)
+> >
+> > Tested-by: Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+>
+> Thanks, I add this to the series and make a re-spin.
+>
+> What do you think about tagging the patches for stable?
+>
+> I guess there is a risk that we may "break" the other two users of
+> mmc_hw_reset(). But, as I said, in that case those needs to be fixed
+> anyways.
 
->
-> I see what you mean, pre/post_req already provides callbacks in meson_mmc_ops for the framework to decide whether to invoke the chain mode or not.
->
-> However, I searched the frame of MMC and found the use of mmc_pre_req() for this callback in the block layer mmc_blk_mq_issue_rw_rq().
->
-> Block layer mmc_blk_mq_issue_rw_rq() may be useful for emmc and SD card devices.
->
-> But it may not be useful for reading and writing operations of sdio wifi, and the sdio device communication may not use the chain mode.
->
->
-> Our chain-mode is a way to transfer data using dma.
->
-> This approach is very efficient for reading and writing large amounts of data.
->
-> If you don't do it that way, you'll do it the other way, the bounce buf way, which is limited by the size of the buf, so when you do big data reads and writes, it affects the transfer rate.
->
-> Therefore, our chain mode means that emmc, SD card or sdio device will use dma to transfer data when reading and writing operations, so our previous driver and the patch behind me all ensure this.
->
+I'm not sure how to make that judgement call.  Certainly it would help
+anyone using the Marvell case and the Marvell case was pretty broken
+before.
 
-I see.
-The problem is that you are providing the same function to pre/post_req
-callbacks and the request()
+How about this: if you can get a Tested-by from the other users then
+I'd be good with a general CC: stable.  Otherwise, I'd be OK with a CC
+to stable for 5.4, but I'd be a little hesitant to send it back to
+older kernels (even though it certainly applies and fixes problems).
+At least in the case of Chrome OS we already have a workable solution
+for our 4.19 tree (my previous patches), and I'd guess anyone testing
+on real hardware is either not seeing problems or has their own
+private patches already.  If things have been sitting stable on 5.4
+for a while and no problems were reported, then we could consider
+going back further?
 
-IOW, things mapped in the pre_req() callback might be unmapped by
-request_done() instead post_req() which, I think, is not great.
-
-It's been like that so far, your patch is not making much worse, so I
-guess you can go ahead with it but we need to look a this before it
-blows again
-
-In the future, we should probably use the cookie to distinguish the 2
-cases ... or drop pre/post_req in the ops.
-
-Regards
-Jerome
+-Doug
