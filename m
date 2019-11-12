@@ -1,139 +1,72 @@
-From: Baolin Wang <baolin.wang7@gmail.com>
-Subject: Re: [PATCH v6 0/4] Add MMC software queue support
-Date: Tue, 12 Nov 2019 16:48:30 +0800
-Message-ID: <CADBw62pzV+5ZXBEbFvTQJ9essAd4cd7Xkz5j9AXB5rAQy0wLqA@mail.gmail.com>
-References: <cover.1573456283.git.baolin.wang@linaro.org> <CAK8P3a1we9D5C2NOBww=cW-4L1PT3t0NnDRmknLwiLm652TmKg@mail.gmail.com>
- <CAMz4kuK9HEuGdhNqHO_qoy9jD=ccsPPhD_dKYwNRgQyWyYwqRA@mail.gmail.com> <CAK8P3a0rNhyxmUWLUV1js3FsuAESDOPX3E4b8ActtL4GRT4uTA@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: arm64: dts: rockchip: Add SDR104 mode to SD-card I/F on
+ rk3399-roc-pc
+Date: Tue, 12 Nov 2019 09:58:37 +0100
+Message-ID: <CAPDyKFrsQNMhDb3yh4M1EPGtftFrVmHY-pmpR7AbfrXW=xzyyg@mail.gmail.com>
+References: <f03c978c-86de-b8bb-22c2-177d7fafed94@fivetechno.de>
+ <CAPDyKFqn06LZZMXLD2o-M6A0R6KU97PFUTN=NgYnMtf=ESULTA@mail.gmail.com>
+ <e69268d2-4a3f-3cd8-fc2e-57ae52ad337a@fivetechno.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAK8P3a0rNhyxmUWLUV1js3FsuAESDOPX3E4b8ActtL4GRT4uTA@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Baolin Wang <baolin.wang@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, asutoshd@codeaurora.org, Orson Zhai <orsonzhai@gmail.com>, Lyra Zhang <zhang.lyra@gmail.com>, Linus Walleij <linus.walleij@linaro.org>, Vincent Guittot <vincent.guittot@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Hannes Reinecke <hare@suse.com>, linux-block <linux-block@vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <e69268d2-4a3f-3cd8-fc2e-57ae52ad337a-SRyzfwRm/0rPTwkrwQOX7A@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
+List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Markus Reichl <m.reichl-SRyzfwRm/0rPTwkrwQOX7A@public.gmane.org>
+Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, DTML <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Jagan Teki <jagan-dyjBcgdgk7Pe9wHmmfpqLFaTQe2KTcn/@public.gmane.org>, Linux ARM <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Nov 12, 2019 at 12:59 AM Arnd Bergmann <arnd@arndb.de> wrote:
->
-> On Mon, Nov 11, 2019 at 1:58 PM Baolin Wang <baolin.wang@linaro.org> wrote:
-> > On Mon, 11 Nov 2019 at 17:28, Arnd Bergmann <arnd@arndb.de> wrote:
-> > > On Mon, Nov 11, 2019 at 8:35 AM Baolin Wang <baolin.wang@linaro.org> wrote:
-> > > - Removing all the context switches and workqueues from the data submission
-> > >   path is also the right idea. As you found, there is still a workqueue inside
-> > >   of blk_mq that is used because it may get called from atomic context but
-> > >   the submission may get blocked in __mmc_claim_host(). This really
-> > >   needs to be changed as well, but not in the way I originally suggested:
-> > >   As Hannes suggested, the host interrrupt handler should always use
-> > >   request_threaded_irq() to have its own process context, and then pass a
-> > >   flag to blk_mq to say that we never need another workqueue there.
-> >
-> > So you mean we should complete the request in the host driver irq
-> > thread context, then issue another request in this context by calling
-> > blk_mq_run_hw_queues()?
->
-> Yes. I assumed there was already code that would always run
-> blk_mq_run_hw_queue() at I/O completion, but I can't find where
-> that happens today.
-
-OK. Now we will complete a request in block softirq, which means the
-irq thread of host driver should call blk_mq_complete_request() to
-complete this request (triggering the block softirq) and call
-blk_mq_run_hw_queues() to dispatch another request in this context.
-
->
-> As I understand, the main difference to today is that
-> __blk_mq_delay_run_hw_queue() can call into __blk_mq_run_hw_queue
-> directly rather than using the delayed work queue once we
-> can skip the BLK_MQ_F_BLOCKING check.
-
-Right. Need to improve this as you suggested.
-
->
-> > > - With that change in place calling a blocking __mmc_claim_host() is
-> > >   still a problem, so there should still be a nonblocking mmc_try_claim_host()
-> > >   for the submission path, leading to a BLK_STS_DEV_RESOURCE (?)
-> > >   return code from mmc_mq_queue_rq(). Basically mmc_mq_queue_rq()
-> > >   should always return right away, either after having queued the next I/O
-> > >   or with an error, but not waiting for the device in any way.
-> >
-> > Actually not only the mmc_claim_host() will block the MMC request
-> > processing, in this routine, the mmc_blk_part_switch() and
-> > mmc_retune() can also block the request processing. Moreover the part
-> > switching and tuning should be sync operations, and we can not move
-> > them to a work or a thread.
->
-> Ok, I see.
->
-> Those would also cause requests to be sent to the device or the host
-> controller, right? Maybe we can treat them as "a non-IO request
-
-Right.
-
-> has successfully been queued to the device" events, returning
-> busy from the mmc_mq_queue_rq() function and then running
-> the queue again when they complete?
-
-Yes, seems reasonable to me.
-
->
-> > > - For the packed requests, there is apparently a very simple way to implement
-> > >   that without a software queue: mmc_mq_queue_rq() is allowed to look at
-> > >   and dequeue all requests that are currently part of the request_queue,
-> > >   so it should take out as many as it wants to submit at once and send
-> > >   them all down to the driver together, avoiding the need for any further
-> > >   round-trips to blk_mq or maintaining a queue in mmc.
-> >
-> > You mean we can dispatch a request directly from
-> > elevator->type->ops.dispatch_request()?  but we still need some helper
-> > functions to check if these requests can be packed (the package
-> > condition), and need to invent new APIs to start a packed request (or
-> > using cqe interfaces, which means we still need to implement some cqe
-> > callbacks).
->
-> I don't know how the dispatch_request() function fits in there,
-> what Hannes told me is that in ->queue_rq() you can always
-> look at the following requests that are already queued up
-> and take the next ones off the list. Looking at bd->last
-> tells you if there are additional requests. If there are, you can
-> look at the next one from blk_mq_hw_ctx (not sure how, but
-> should not be hard to find)
->
-> I also see that there is a commit_rqs() callback that may
-> go along with queue_rq(), implementing that one could make
-> this easier as well.
-
-Yes, we can use queue_rq()/commit_rqs() and bd->last (now bd->last may
-can not work well, see [1]), but like we talked before, for packed
-request, we still need some new interfaces (for example, a interface
-used to start a packed request, and a interface used to complete a
-packed request), but at last we got a consensus that we should re-use
-the CQE interfaces instead of new invention.
-
-[1] https://lore.kernel.org/patchwork/patch/1102897/
-
->
-> > > - The DMA management (bounce buffer, map, unmap) that is currently
-> > >   done in mmc_blk_mq_issue_rq() should ideally be done in the
-> > >   init_request()/exit_request()  (?) callbacks from mmc_mq_ops so this
-> > >   can be done asynchronously, out of the critical timing path for the
-> > >   submission. With this, there won't be any need for a software queue.
-> >
-> > This is not true, now the blk-mq will allocate some static request
-> > objects (usually the static requests number should be the same with
-> > the hardware queue depth) saved in struct blk_mq_tags. So the
-> > init_request() is used to initialize the static requests when
-> > allocating them, and call exit_request to free the static requests
-> > when freeing the 'struct blk_mq_tags', such as the queue is dead. So
-> > we can not move the DMA management into the init_request/exit_request.
->
-> Ok, I must have misremembered which callback that is then, but I guess
-> there is some other place to do it.
-
-I checked the 'struct blk_mq_ops', and I did not find a ops can be
-used to do DMA management. And I also checked UFS driver, it also did
-the DMA mapping in the queue_rq() (scsi_queue_rq() --->
-ufshcd_queuecommand() ---> ufshcd_map_sg()). Maybe I missed something?
-
-Moreover like I said above, for the packed request, we still need
-implement something (like the software queue) based on the CQE
-interfaces to help to handle packed requests.
+T24gTW9uLCAxMSBOb3YgMjAxOSBhdCAyMDozMiwgTWFya3VzIFJlaWNobCA8bS5yZWljaGxAZml2
+ZXRlY2huby5kZT4gd3JvdGU6Cj4KPiBIaSBVbGYsCj4KPiBBbSAxMS4xMS4xOSB1bSAxODoyNyBz
+Y2hyaWViIFVsZiBIYW5zc29uOgo+ID4gT24gTW9uLCAxMSBOb3YgMjAxOSBhdCAxNToxMywgTWFy
+a3VzIFJlaWNobCA8bS5yZWljaGxAZml2ZXRlY2huby5kZT4gd3JvdGU6Cj4gPj4KPiA+PiBBZGQg
+U0RSMTA0IGNhcGFiaWxpdHkgYW5kIHJlZ3VsYXRvcnMgdG8gU0QgY2FyZCBub2RlLgo+ID4+IFdo
+aWxlIGF0IGl0LCBmaXggYSB0eXBvIGluIGxjZCBwaW5jdHJsIGFuZCByZW1vdmUgdHdvCj4gPj4g
+dW5kb2N1bWVudGVkIGJpbmRpbmdzIGZyb20gcG1pYy4KPiA+Pgo+ID4+IFNpZ25lZC1vZmYtYnk6
+IE1hcmt1cyBSZWljaGwgPG0ucmVpY2hsQGZpdmV0ZWNobm8uZGU+Cj4gPj4gLS0tCj4gPj4gIC4u
+Li9ib290L2R0cy9yb2NrY2hpcC9yazMzOTktcm9jLXBjLmR0c2kgICAgICB8IDMxICsrKysrKysr
+KysrKysrKy0tLS0KPiA+PiAgMSBmaWxlIGNoYW5nZWQsIDI1IGluc2VydGlvbnMoKyksIDYgZGVs
+ZXRpb25zKC0pCj4gPj4KPiA+PiBkaWZmIC0tZ2l0IGEvYXJjaC9hcm02NC9ib290L2R0cy9yb2Nr
+Y2hpcC9yazMzOTktcm9jLXBjLmR0c2kgYi9hcmNoL2FybTY0L2Jvb3QvZHRzL3JvY2tjaGlwL3Jr
+MzM5OS1yb2MtcGMuZHRzaQo+ID4+IGluZGV4IDMzZGY5NWUzODRiNC4uZTg2YTZkYjU0NDk5IDEw
+MDY0NAo+ID4+IC0tLSBhL2FyY2gvYXJtNjQvYm9vdC9kdHMvcm9ja2NoaXAvcmszMzk5LXJvYy1w
+Yy5kdHNpCj4gPj4gKysrIGIvYXJjaC9hcm02NC9ib290L2R0cy9yb2NrY2hpcC9yazMzOTktcm9j
+LXBjLmR0c2kKPiA+PiBAQCAtMTM1LDYgKzEzNSwyMCBAQAo+ID4+ICAgICAgICAgICAgICAgICB2
+aW4tc3VwcGx5ID0gPCZ2Y2NfMXY4PjsKPiA+PiAgICAgICAgIH07Cj4gPj4KPiA+PiArICAgICAg
+IHZjYzN2MF9zZDogdmNjM3YwLXNkIHsKPiA+PiArICAgICAgICAgICAgICAgY29tcGF0aWJsZSA9
+ICJyZWd1bGF0b3ItZml4ZWQiOwo+ID4+ICsgICAgICAgICAgICAgICBlbmFibGUtYWN0aXZlLWhp
+Z2g7Cj4gPj4gKyAgICAgICAgICAgICAgIGdwaW8gPSA8JmdwaW80IFJLX1BENiBHUElPX0FDVElW
+RV9ISUdIPjsKPiA+PiArICAgICAgICAgICAgICAgcGluY3RybC1uYW1lcyA9ICJkZWZhdWx0IjsK
+PiA+PiArICAgICAgICAgICAgICAgcGluY3RybC0wID0gPCZ2Y2MzdjBfc2RfZW4+Owo+ID4+ICsg
+ICAgICAgICAgICAgICByZWd1bGF0b3ItbmFtZSA9ICJ2Y2MzdjBfc2QiOwo+ID4+ICsgICAgICAg
+ICAgICAgICByZWd1bGF0b3ItYWx3YXlzLW9uOwo+ID4KPiA+IFRoaXMgbG9va3Mgb2RkLiBBIEdQ
+SU8gcmVndWxhdG9yIGJlaW5nIGFsd2F5cyBvbj8KPgo+IFRoaXMgaXMgYSBzdGFuZGFyZCBtaWNy
+byBTRCBjYXJkIHNvY2tldCB0aGF0IGNhbiBhbHNvIGJlIHVzZWQgZm9yCj4gYm9vdGluZyB0aGUg
+Ym9hcmQuIEkgd2FudGVkIHRvIGJlIGNhdXRpb3VzIGFuZCBzdGFydAo+IHdvcmtpbmcgd2l0aCBp
+dCBhbmQgc2V2ZXJhbCBTRCBjYXJkcyBhbmQgZXhwbG9yZSB0aGUgY2FwYWJpbGl0aWVzLgo+Cj4g
+T24gdGhpcyBib2FyZCBuZWFybHkgYWxsIHJlZ3VsYXRvcnMgYXJlIHN0aWxsIGNvbnRpbm91c2x5
+Cj4gc3dpdGNoZWQgb24uIEkgcGxhbiB0byByZW1vdmUgdGhlIGFsd2F5cy1vbiBwcm9wZXJ0aWVz
+IHN0ZXAKPiBieSBzdGVwIGZyb20gdGhlIHJlZ3VsYXRvcnMgd2hlbiB0aGUgYm9hcmQgcnVucyBz
+dGFibGUgd2l0aCBpdCdzCj4gY29tcG9uZW50cyBhbGwgZW5ibGVkLgo+Cj4gPgo+ID4+ICsgICAg
+ICAgICAgICAgICByZWd1bGF0b3ItYm9vdC1vbjsKPiA+PiArICAgICAgICAgICAgICAgcmVndWxh
+dG9yLW1pbi1taWNyb3ZvbHQgPSA8MzAwMDAwMD47Cj4gPj4gKyAgICAgICAgICAgICAgIHJlZ3Vs
+YXRvci1tYXgtbWljcm92b2x0ID0gPDMwMDAwMDA+Owo+ID4+ICsgICAgICAgICAgICAgICB2aW4t
+c3VwcGx5ID0gPCZ2Y2MzdjNfc3lzPjsKPiA+PiArICAgICAgIH07Cj4gPgo+ID4gQXNzdW1lcyB0
+aGlzIHBvd2VycyBhbiBTRElPIGVtYmVkZGVkIGNhcmQuIE9mdGVuIHRob3NlIGhhdmUgYSBzcGVj
+aWZpYwo+ID4gcG93ZXIgc2VxdWVuY2UsIGp1c3Qgd2FudGVkIHRvIG1ha2Ugc3VyZSB0aGUgYWJv
+dmUgYXJlIHJlYWxseQo+ID4gc3VmZmljaWVudD8gTm8gZGVsYXlzIG9yIGV4dGVybmFsIGNsb2Nr
+IG5lZWRlZD8KPgo+IEl0J3Mgbm90IGVtYmVkZGVkLCBqdXN0IGEgc3RhbmRhcmQgwrVTRCBwbHVn
+LiBJdCBpcyBhbHJlYWR5IGVuYWJsZWQKPiBieSBtYWlubGluZSBVLUJvb3QgYW5kIGVqZWN0aW5n
+IGFuZCBpbnNlcnRpbmcgdGhlIGNhcmQgd29ya3MgZmluZS4KCkFoLCB0aGFua3MgZm9yIGNvbmZp
+cm1pbmcuCgpLaW5kIHJlZ2FyZHMKVWZmZQoKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX18KTGludXgtcm9ja2NoaXAgbWFpbGluZyBsaXN0CkxpbnV4LXJvY2tj
+aGlwQGxpc3RzLmluZnJhZGVhZC5vcmcKaHR0cDovL2xpc3RzLmluZnJhZGVhZC5vcmcvbWFpbG1h
+bi9saXN0aW5mby9saW51eC1yb2NrY2hpcAo=
