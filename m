@@ -1,69 +1,113 @@
 From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH] mmc: renesas_sdhi_internal_dmac: Add MMC_CAP_ERASE to
- Gen3 SoCs
-Date: Tue, 12 Nov 2019 21:49:52 +0100
-Message-ID: <20191112204952.GA2976@kunai>
-References: <20191112134808.23546-1-erosca@de.adit-jv.com>
+Subject: Re: [PATCH 1/3] dt-bindings: mmc: Add
+ 'fixed-emmc-driver-type-hs{200,400}'
+Date: Tue, 12 Nov 2019 22:19:50 +0100
+Message-ID: <20191112211950.GB3402@kunai>
+References: <20191105055015.23656-1-erosca@de.adit-jv.com>
+ <20191105062223.GB1048@kunai>
+ <20191105083213.GA24603@vmlxhi-102.adit-jv.com>
+ <20191107003907.GA22634@bogus>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="5mCyUwZo2JvN/JJP"
+        protocol="application/pgp-signature"; boundary="0eh6TmSyL6TZE2Uz"
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20191112134808.23546-1-erosca@de.adit-jv.com>
+In-Reply-To: <20191107003907.GA22634@bogus>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Eugeniu Rosca <erosca@de.adit-jv.com>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Niklas =?utf-8?Q?S=C3=B6derlund?= <niklas.soderlund@ragnatech.se>, Ulf Hansson <ulf.hansson@linaro.org>, Geert Uytterhoeven <geert@linux-m68k.org>, Simon Horman <horms+renesas@verge.net.au>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Eugeniu Rosca <roscaeugeniu@gmail.com>, Harish Jenny K N <harish_kandiga@mentor.com>, Andrew Gabbasov <andrew_gabbasov@mentor.com>
+To: Rob Herring <robh@kernel.org>
+Cc: Eugeniu Rosca <erosca@de.adit-jv.com>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, Mathieu Malaterre <malat@debian.org>, Pavel Machek <pavel@ucw.cz>, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, Eugeniu Rosca <roscaeugeniu@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
 
---5mCyUwZo2JvN/JJP
+--0eh6TmSyL6TZE2Uz
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-On Tue, Nov 12, 2019 at 02:48:08PM +0100, Eugeniu Rosca wrote:
-> From: Harish Jenny K N <harish_kandiga@mentor.com>
+Hi everyone,
+
+> > The first question which pops up in my mind is related to the meaning
+> > of each item. The option which I envision based on your proposal is:
+> >=20
+> >   * minItems: 1
+> >   * maxItems: 2
+> >   * Item[0]: Presumably equivalent to the current
+> >     "fixed-emmc-driver-type", i.e. the strength value applied in both
+> >     HS200 and HS400 modes.
+> >   * Item[1] (optional): Presumably equivalent to
+> >     "fixed-emmc-driver-type-hs400" proposed in this series. If this
+> >     element is provided, the first one should likely change its role
+> >     and become an equivalent of "fixed-emmc-driver-type-hs200" from
+> >     this series.
+> >   + Pro: Full backward compatibility. No need to touch the existing
+> >     users of "fixed-emmc-driver-type".
+> >   - Con: Not sure we have such DT bindings which dynamically change
+> >     their semantics based on the usage pattern.
+> >   - Con: Can't easily achieve the same flexibility as accomplished in
+> >     this series. For example, current implementation allows users to
+> >     define each of the three parameters (i.e. HSx00-agnostic drive
+> >     strength, HS200 and HS400 specific drive strengths) individually,
+> >     as well as in all possible combinations. This might be needed if,
+> >     in certain HSx00 mode, users still need to rely on the
+> >     RAW/unmodified drive strength. I am unsure if/how this can be
+> >     achieved with an array OF property with a constant or variable
+> >     number of elements (I try to sketch one solution below).
+> >=20
+> > One option to achieve a similar degree of flexibility by using an array
+> > OF property (instead of several u32 properties) would be to agree on a
+> > convention based on magic values, i.e. below DT one-liner could be an
+> > example of providing solely the "fixed-emmc-driver-type-hs200" value
+> > (based on the agreement that 0xFF values are discarded by the driver):
+> >=20
+> >     fixed-emmc-driver-type =3D <0xFF 0x1 0xFF>;
 >=20
-> Enable MMC_CAP_ERASE capability in the driver to allow
-> erase/discard/trim requests.
->=20
-> Suggested-by: Andrew Gabbasov <andrew_gabbasov@mentor.com>
-> Signed-off-by: Harish Jenny K N <harish_kandiga@mentor.com>
-> [erosca: Forward-port and test on v5.4-rc7 using H3ULCB-KF:
->          "blkdiscard /dev/mmcblk0" passes with this patch applied
->          and complains otherwise:
-> 	 "BLKDISCARD ioctl failed: Operation not supported"]
-> Signed-off-by: Eugeniu Rosca <erosca@de.adit-jv.com>
+> I don't understand why you have 3 values instead of 2.
 
-Looks good to me. Just a generic question, probably more for Ulf:
+Because he sketches maximum flexibility here. Have a non-HS (default)
+value, one for HS200, and one for HS400:
 
-Why does this CAP_ERASE exist? As I understand, the driver only needs to
-set the flag and no further handling is required. Why would a driver not
-set this flag and not support erase/trim commands?
+	fixed-emmc-driver-type =3D <[default] [HS200] [HS400]>;
 
-Kind regards,
+> I would just use -1 if you want to ignore an entry. If that's the common=
+=20
+
+'-1' sounds good to me, too.
+
+> case, then I'd stick with what you originally proposed. If rare, then I=
+=20
+> think an array is the better route.
+
+What I have seen so far: setting drive strength alone is more on the
+rare side. Setting specific values for default and HS200/400 seems even
+more rare to me. With this patchset, it is the first time I hear about
+it.
+
+Yet, my experience might be a bit limited, maybe others (Hi Ulf! ;)) can add
+their views, too?
+
+Regards,
 
    Wolfram
 
 
---5mCyUwZo2JvN/JJP
+--0eh6TmSyL6TZE2Uz
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAl3LGusACgkQFA3kzBSg
-KbYKkw//VxC8isy0WeY7yOM8Eu1mt8LljuDDozsi46StVWx608b6GQAsLW34WLCs
-sFTSRhYuQkld3iiYD+mFiQ/4X/W6Wj7c45SaIQ9doP+2EjT592pUMaSNhMTrPt84
-XP48vZKZa4SOyEkP/TUSkAXqgFZsqO3Kos/qceqJb02il5N+biuEmFQM6rwj71sx
-P71aDgWiq1eKVej8WEHn4t/A+UNsUbQpVmqvyyUXYm7KVgM5PZjogQBzc6Y8p+12
-gI6AlUm0h5Nl8o7NDM6jy1VgP+UgZ8qjTTylFcYr6wSKKiUvJNb+U0Imd+txY8DZ
-gtoWBuMDPQEAdngoX9jbw6Q9zFI41eJ6fM1LX5UnVO5VxopY+WRqiLfmp4u356tT
-T2e/VNX9ZnGTrYWazo3jmpDpL0DoAPhbfgRkrpAG98vtNujOb3xtejglxbPfUYx+
-8aXP3a0htCkgsaap34hHeAu4UiOyuZsh6Ie4iHukMP+S3m+5+vX9uXEi7ZQHgiLC
-t9ANcKGUki2syaauaCZSSon0E0offhnuNqb6SRHla3rKAptSKNwoqlnDz2LoIUIV
-Z+I/YUl2PNcHAJk1IkqIJwnBeMZKVUlMPdi38VlDdFQG0kXdCb6dABe7Km4kOr/e
-AgdIusuIpZxP90NAGtgBm3JPiDEzEHxOEVobI7kJNKMCISgWYto=
-=vVLb
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAl3LIfYACgkQFA3kzBSg
+KbZ6AxAAogqz/CwHCOeNP4khZeJ7sC5Ygz+6eicsFbLHeuwpOH0ISXnttpqbFDmy
+FIJxvL634Pqx5Cd9PsQG3S1V6prgKnnCLDZBX3KV1kYRtsAgvjx3w/AYotdeyitC
+MT1fazgM4JKJV7MOdmEqBZ9KtIH1/wRqYAD/sftTcy/0sPDsq3+aCsGiQnTcUEtC
+d6YA1ANOrnFYTxHFv2ze+Zo4ewaRBzFSBPNwzNL4Ps3IBB8z38iYBnq6OOgMnfub
+B8pTntxQeWLank+apB7nZYxH3w3qs7t0qkuVwz/7qyhHcGxpfU41VxwhceFH0fFe
+s//pE2DI1n4CwtRtNPryIoAW2PYuzMBGhNQ67oQQCQsWKjEgaQLGm29VQgEj3zYx
+1dUoJIrom9MOA3t0JGURhBSXtdOw5K8RNVcspidoGobn52f1WQcxr/dwOoArDEqo
+4hFZosQnzqcGkKksE74Jj7XZQON9ZnSV5t3IU8SpNaYjswPu/rWaysPZcVDSPMPa
+EMFp7JwHYBoJEuUoaulsHIRZphCu1z8Zb8JsXBExs1zps0K3EwRiK6KKNoR11j1c
+rhD40N2NSMMXoOLfMFYqVG/Kp/iAvD7p3fqMoL31vLPjgab2xnVHMEuXPgKaUISy
+CZWEyhzRZhZ80HuDaDnaLyWjeLqBaEhxvazgd2/caBUmZSjsZZE=
+=UCNR
 -----END PGP SIGNATURE-----
 
---5mCyUwZo2JvN/JJP--
+--0eh6TmSyL6TZE2Uz--
