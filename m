@@ -1,72 +1,115 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: arm64: dts: rockchip: Add SDR104 mode to SD-card I/F on
- rk3399-roc-pc
-Date: Tue, 12 Nov 2019 09:58:37 +0100
-Message-ID: <CAPDyKFrsQNMhDb3yh4M1EPGtftFrVmHY-pmpR7AbfrXW=xzyyg@mail.gmail.com>
-References: <f03c978c-86de-b8bb-22c2-177d7fafed94@fivetechno.de>
- <CAPDyKFqn06LZZMXLD2o-M6A0R6KU97PFUTN=NgYnMtf=ESULTA@mail.gmail.com>
- <e69268d2-4a3f-3cd8-fc2e-57ae52ad337a@fivetechno.de>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v2] arm64: dts: rockchip: Add SDR104 mode to SD-card I/F
+ on rk3399-roc-pc
+Date: Tue, 12 Nov 2019 09:59:32 +0100
+Message-ID: <CAPDyKFqo76wi0-7LQqSXuH3YOUSdTTLySzsxEGkEvZayAPuj6g@mail.gmail.com>
+References: <25466090-3b24-2695-10fb-88c59be3f149@fivetechno.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <e69268d2-4a3f-3cd8-fc2e-57ae52ad337a-SRyzfwRm/0rPTwkrwQOX7A@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
-List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Markus Reichl <m.reichl-SRyzfwRm/0rPTwkrwQOX7A@public.gmane.org>
-Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, DTML <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Jagan Teki <jagan-dyjBcgdgk7Pe9wHmmfpqLFaTQe2KTcn/@public.gmane.org>, Linux ARM <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <25466090-3b24-2695-10fb-88c59be3f149@fivetechno.de>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Markus Reichl <m.reichl@fivetechno.de>
+Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Heiko Stuebner <heiko@sntech.de>, Jagan Teki <jagan@amarulasolutions.com>, DTML <devicetree@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-T24gTW9uLCAxMSBOb3YgMjAxOSBhdCAyMDozMiwgTWFya3VzIFJlaWNobCA8bS5yZWljaGxAZml2
-ZXRlY2huby5kZT4gd3JvdGU6Cj4KPiBIaSBVbGYsCj4KPiBBbSAxMS4xMS4xOSB1bSAxODoyNyBz
-Y2hyaWViIFVsZiBIYW5zc29uOgo+ID4gT24gTW9uLCAxMSBOb3YgMjAxOSBhdCAxNToxMywgTWFy
-a3VzIFJlaWNobCA8bS5yZWljaGxAZml2ZXRlY2huby5kZT4gd3JvdGU6Cj4gPj4KPiA+PiBBZGQg
-U0RSMTA0IGNhcGFiaWxpdHkgYW5kIHJlZ3VsYXRvcnMgdG8gU0QgY2FyZCBub2RlLgo+ID4+IFdo
-aWxlIGF0IGl0LCBmaXggYSB0eXBvIGluIGxjZCBwaW5jdHJsIGFuZCByZW1vdmUgdHdvCj4gPj4g
-dW5kb2N1bWVudGVkIGJpbmRpbmdzIGZyb20gcG1pYy4KPiA+Pgo+ID4+IFNpZ25lZC1vZmYtYnk6
-IE1hcmt1cyBSZWljaGwgPG0ucmVpY2hsQGZpdmV0ZWNobm8uZGU+Cj4gPj4gLS0tCj4gPj4gIC4u
-Li9ib290L2R0cy9yb2NrY2hpcC9yazMzOTktcm9jLXBjLmR0c2kgICAgICB8IDMxICsrKysrKysr
-KysrKysrKy0tLS0KPiA+PiAgMSBmaWxlIGNoYW5nZWQsIDI1IGluc2VydGlvbnMoKyksIDYgZGVs
-ZXRpb25zKC0pCj4gPj4KPiA+PiBkaWZmIC0tZ2l0IGEvYXJjaC9hcm02NC9ib290L2R0cy9yb2Nr
-Y2hpcC9yazMzOTktcm9jLXBjLmR0c2kgYi9hcmNoL2FybTY0L2Jvb3QvZHRzL3JvY2tjaGlwL3Jr
-MzM5OS1yb2MtcGMuZHRzaQo+ID4+IGluZGV4IDMzZGY5NWUzODRiNC4uZTg2YTZkYjU0NDk5IDEw
-MDY0NAo+ID4+IC0tLSBhL2FyY2gvYXJtNjQvYm9vdC9kdHMvcm9ja2NoaXAvcmszMzk5LXJvYy1w
-Yy5kdHNpCj4gPj4gKysrIGIvYXJjaC9hcm02NC9ib290L2R0cy9yb2NrY2hpcC9yazMzOTktcm9j
-LXBjLmR0c2kKPiA+PiBAQCAtMTM1LDYgKzEzNSwyMCBAQAo+ID4+ICAgICAgICAgICAgICAgICB2
-aW4tc3VwcGx5ID0gPCZ2Y2NfMXY4PjsKPiA+PiAgICAgICAgIH07Cj4gPj4KPiA+PiArICAgICAg
-IHZjYzN2MF9zZDogdmNjM3YwLXNkIHsKPiA+PiArICAgICAgICAgICAgICAgY29tcGF0aWJsZSA9
-ICJyZWd1bGF0b3ItZml4ZWQiOwo+ID4+ICsgICAgICAgICAgICAgICBlbmFibGUtYWN0aXZlLWhp
-Z2g7Cj4gPj4gKyAgICAgICAgICAgICAgIGdwaW8gPSA8JmdwaW80IFJLX1BENiBHUElPX0FDVElW
-RV9ISUdIPjsKPiA+PiArICAgICAgICAgICAgICAgcGluY3RybC1uYW1lcyA9ICJkZWZhdWx0IjsK
-PiA+PiArICAgICAgICAgICAgICAgcGluY3RybC0wID0gPCZ2Y2MzdjBfc2RfZW4+Owo+ID4+ICsg
-ICAgICAgICAgICAgICByZWd1bGF0b3ItbmFtZSA9ICJ2Y2MzdjBfc2QiOwo+ID4+ICsgICAgICAg
-ICAgICAgICByZWd1bGF0b3ItYWx3YXlzLW9uOwo+ID4KPiA+IFRoaXMgbG9va3Mgb2RkLiBBIEdQ
-SU8gcmVndWxhdG9yIGJlaW5nIGFsd2F5cyBvbj8KPgo+IFRoaXMgaXMgYSBzdGFuZGFyZCBtaWNy
-byBTRCBjYXJkIHNvY2tldCB0aGF0IGNhbiBhbHNvIGJlIHVzZWQgZm9yCj4gYm9vdGluZyB0aGUg
-Ym9hcmQuIEkgd2FudGVkIHRvIGJlIGNhdXRpb3VzIGFuZCBzdGFydAo+IHdvcmtpbmcgd2l0aCBp
-dCBhbmQgc2V2ZXJhbCBTRCBjYXJkcyBhbmQgZXhwbG9yZSB0aGUgY2FwYWJpbGl0aWVzLgo+Cj4g
-T24gdGhpcyBib2FyZCBuZWFybHkgYWxsIHJlZ3VsYXRvcnMgYXJlIHN0aWxsIGNvbnRpbm91c2x5
-Cj4gc3dpdGNoZWQgb24uIEkgcGxhbiB0byByZW1vdmUgdGhlIGFsd2F5cy1vbiBwcm9wZXJ0aWVz
-IHN0ZXAKPiBieSBzdGVwIGZyb20gdGhlIHJlZ3VsYXRvcnMgd2hlbiB0aGUgYm9hcmQgcnVucyBz
-dGFibGUgd2l0aCBpdCdzCj4gY29tcG9uZW50cyBhbGwgZW5ibGVkLgo+Cj4gPgo+ID4+ICsgICAg
-ICAgICAgICAgICByZWd1bGF0b3ItYm9vdC1vbjsKPiA+PiArICAgICAgICAgICAgICAgcmVndWxh
-dG9yLW1pbi1taWNyb3ZvbHQgPSA8MzAwMDAwMD47Cj4gPj4gKyAgICAgICAgICAgICAgIHJlZ3Vs
-YXRvci1tYXgtbWljcm92b2x0ID0gPDMwMDAwMDA+Owo+ID4+ICsgICAgICAgICAgICAgICB2aW4t
-c3VwcGx5ID0gPCZ2Y2MzdjNfc3lzPjsKPiA+PiArICAgICAgIH07Cj4gPgo+ID4gQXNzdW1lcyB0
-aGlzIHBvd2VycyBhbiBTRElPIGVtYmVkZGVkIGNhcmQuIE9mdGVuIHRob3NlIGhhdmUgYSBzcGVj
-aWZpYwo+ID4gcG93ZXIgc2VxdWVuY2UsIGp1c3Qgd2FudGVkIHRvIG1ha2Ugc3VyZSB0aGUgYWJv
-dmUgYXJlIHJlYWxseQo+ID4gc3VmZmljaWVudD8gTm8gZGVsYXlzIG9yIGV4dGVybmFsIGNsb2Nr
-IG5lZWRlZD8KPgo+IEl0J3Mgbm90IGVtYmVkZGVkLCBqdXN0IGEgc3RhbmRhcmQgwrVTRCBwbHVn
-LiBJdCBpcyBhbHJlYWR5IGVuYWJsZWQKPiBieSBtYWlubGluZSBVLUJvb3QgYW5kIGVqZWN0aW5n
-IGFuZCBpbnNlcnRpbmcgdGhlIGNhcmQgd29ya3MgZmluZS4KCkFoLCB0aGFua3MgZm9yIGNvbmZp
-cm1pbmcuCgpLaW5kIHJlZ2FyZHMKVWZmZQoKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX18KTGludXgtcm9ja2NoaXAgbWFpbGluZyBsaXN0CkxpbnV4LXJvY2tj
-aGlwQGxpc3RzLmluZnJhZGVhZC5vcmcKaHR0cDovL2xpc3RzLmluZnJhZGVhZC5vcmcvbWFpbG1h
-bi9saXN0aW5mby9saW51eC1yb2NrY2hpcAo=
+On Tue, 12 Nov 2019 at 09:45, Markus Reichl <m.reichl@fivetechno.de> wrote:
+>
+> Add SDR104 capability and regulators to SD card node.
+> While at it, fix a typo in lcd pinctrl and remove two
+> undocumented bindings from pmic.
+>
+> Signed-off-by: Markus Reichl <m.reichl@fivetechno.de>
+
+FWIW:
+
+Reviewed-by: Ulf Hansson <ulf.hansson@linaro.org>
+
+Kind regards
+Uffe
+
+> ---
+> v2: Remove always-on from vcc3v0_sd
+> ---
+>  .../boot/dts/rockchip/rk3399-roc-pc.dtsi      | 30 +++++++++++++++----
+>  1 file changed, 24 insertions(+), 6 deletions(-)
+>
+> diff --git a/arch/arm64/boot/dts/rockchip/rk3399-roc-pc.dtsi b/arch/arm64/boot/dts/rockchip/rk3399-roc-pc.dtsi
+> index d1eb55c855b3..a31099f7620b 100644
+> --- a/arch/arm64/boot/dts/rockchip/rk3399-roc-pc.dtsi
+> +++ b/arch/arm64/boot/dts/rockchip/rk3399-roc-pc.dtsi
+> @@ -135,6 +135,19 @@
+>                 vin-supply = <&vcc_1v8>;
+>         };
+>
+> +       vcc3v0_sd: vcc3v0-sd {
+> +               compatible = "regulator-fixed";
+> +               enable-active-high;
+> +               gpio = <&gpio4 RK_PD6 GPIO_ACTIVE_HIGH>;
+> +               pinctrl-names = "default";
+> +               pinctrl-0 = <&vcc3v0_sd_en>;
+> +               regulator-name = "vcc3v0_sd";
+> +               regulator-boot-on;
+> +               regulator-min-microvolt = <3000000>;
+> +               regulator-max-microvolt = <3000000>;
+> +               vin-supply = <&vcc3v3_sys>;
+> +       };
+> +
+>         vcc3v3_sys: vcc3v3-sys {
+>                 compatible = "regulator-fixed";
+>                 regulator-name = "vcc3v3_sys";
+> @@ -293,8 +306,6 @@
+>                 vcc10-supply = <&vcc3v3_sys>;
+>                 vcc11-supply = <&vcc3v3_sys>;
+>                 vcc12-supply = <&vcc3v3_sys>;
+> -               vcc13-supply = <&vcc3v3_sys>;
+> -               vcc14-supply = <&vcc3v3_sys>;
+>                 vddio-supply = <&vcc_3v0>;
+>
+>                 regulators {
+> @@ -576,7 +587,7 @@
+>
+>         lcd-panel {
+>                 lcd_panel_reset: lcd-panel-reset {
+> -                       rockchip,pins = <4 RK_PD6 RK_FUNC_GPIO &pcfg_pull_up>;
+> +                       rockchip,pins = <4 RK_PD5 RK_FUNC_GPIO &pcfg_pull_up>;
+>                 };
+>         };
+>
+> @@ -602,6 +613,10 @@
+>                 vsel2_gpio: vsel2-gpio {
+>                         rockchip,pins = <1 RK_PB6 RK_FUNC_GPIO &pcfg_pull_down>;
+>                 };
+> +
+> +               pmic_int_l: pmic-int-l {
+> +                       rockchip,pins = <1 RK_PC5 RK_FUNC_GPIO &pcfg_pull_up>;
+> +               };
+>         };
+>
+>         sdio-pwrseq {
+> @@ -610,9 +625,9 @@
+>                 };
+>         };
+>
+> -       pmic {
+> -               pmic_int_l: pmic-int-l {
+> -                       rockchip,pins = <1 RK_PC5 RK_FUNC_GPIO &pcfg_pull_up>;
+> +       sdmmc {
+> +               vcc3v0_sd_en: vcc3v0-sd-en {
+> +                       rockchip,pins = <4 RK_PD6 RK_FUNC_GPIO &pcfg_pull_none>;
+>                 };
+>         };
+>
+> @@ -667,6 +682,9 @@
+>         cd-gpios = <&gpio0 RK_PA7 GPIO_ACTIVE_LOW>;
+>         disable-wp;
+>         max-frequency = <150000000>;
+> +       sd-uhs-sdr104;
+> +       vmmc-supply = <&vcc3v0_sd>;
+> +       vqmmc-supply = <&vcc_sdio>;
+>         pinctrl-names = "default";
+>         pinctrl-0 = <&sdmmc_clk &sdmmc_cmd &sdmmc_bus4>;
+>         status = "okay";
+> --
+> 2.20.1
+>
