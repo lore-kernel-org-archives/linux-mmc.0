@@ -1,8 +1,7 @@
 From: Linus Walleij <linus.walleij@linaro.org>
-Subject: [PATCH 1/3] mmc: mmci: Support odd block sizes for ux500v2 and qcom
- variant
-Date: Wed, 13 Nov 2019 08:53:33 +0100
-Message-ID: <20191113075335.31775-2-linus.walleij@linaro.org>
+Subject: [PATCH 2/3] mmc: mmci: Bail out from odd DMA on Ux500
+Date: Wed, 13 Nov 2019 08:53:34 +0100
+Message-ID: <20191113075335.31775-3-linus.walleij@linaro.org>
 References: <20191113075335.31775-1-linus.walleij@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -19,197 +18,117 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
 Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
 Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Stephan Gerhold <stephan@gerhold.net>
-Cc: Russell King <linux@arm.linux.org.uk>, Linus Walleij <linus.walleij@linaro.org>, Russell King <rmk+kernel@armlinux.org.uk>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, Niklas Cassel <niklas.cassel@linaro.org>, Ludovic Barre <ludovic.barre@st.com>, Brian Masney <masneyb@onstation.org>
+Cc: Russell King <linux@arm.linux.org.uk>, Linus Walleij <linus.walleij@linaro.org>, Russell King <rmk+kernel@armlinux.org.uk>, Niklas Cassel <niklas.cassel@linaro.org>, Ludovic Barre <ludovic.barre@st.com>, Brian Masney <masneyb@onstation.org>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Ulf Hansson <ulf.hansson@linaro.org>
+The Ux500 (at least) can only deal with DMA transactions
+starting and ending on an even 4-byte aligned address.
 
-This is something like the 5th time this patch is posted,
-so let's try to fix this now, once and for all.
+The problem isn't in the DMA engine of the system as such:
+the problem is in the state machine of the MMCI block that
+has some features to handle single bytes but it seems like
+it doesn't quite work.
 
-For the ux500v2 variant of the PL18x block, odd block sizes are
-supported. This is necessary to support some SDIO transfers
-such as single bytes. This also affects the QCOM MMCI variant.
+This problem is probably caused by most of the testing
+being done on mass storage, which will be 512-bytes aligned
+blocks placed neatly in pages and practically never run into
+this situation.
 
-This will work fine for PIO using IRQs: SDIO packets are
-accepted down to single bytes and the transfers go through
-just fine.
+On SDIO (for example in WiFi adapters) this situation is
+common.
 
-This patch has proven necessary for enabling SDIO for WLAN on
-PostmarketOS-based Ux500 platforms.
-
-This patch is based on Ulf Hansson's patch
-http://www.spinics.net/lists/linux-mmc/msg12160.html
-
-Ulf noted on an earlier iteration in:
-https://marc.info/?l=linux-mmc&m=140845189316370&w=2
-
-"There are some prerequisites of the data buffers to supports
-any block size, at least for ux500. (...) The conclusion from
-the above is that we need to adopt mmci_pio_write() to handle
-corner cases."
-
-This points back to a discussion in 2012. The main point was
-made by Russell in this message:
-https://marc.info/?l=linux-arm-kernel&m=135351237018301&w=2
-
-IIUC this pertains to this code (now gone from the patch):
-
-  if (data->sg->offset & 3) {
-      dev_err(...);
-      return -EINVAL;
-  }
-
-This hit Stephan as he noticed that DMA (DMA40) would not work
-with the MMCI driver, so this patch combined with disabling
-DMA would do the trick. That way we don't toss unaligned
-accesses at the DMA engine as SDIO apparently tends to
-do. (This is not a problem when writing ordinary block device
-blocks as these are always 512 bytes aligned on a 4-byte
-boundary.)
-
-As Ulf notes, odd SG offsets like this should be handled
-by the driver even if we run it in DMA mode. I conclude
-it must be the duty of the DMA driver to say NO to SG
-offsets it cannot handle, or otherwise bitstuff things
-around to avoid the situation.
-
-So as a first step make sure errors are propagated upward
-from the DMA engine, and assume the DMA engine will say no
-to things with weird SG offsets that it cannot handle, and
-then the driver will fall back to using PIO.
-
-It might be that some DMA engines (such as the Ux500
-DMA40) do not properly say no to sglists with uneven
-offsets, or ignore the offset altogether resulting in
-unpredictable behavior. That is in that case a bug in the
-DMA driver and needs to be fixed there. I got the impression
-that the Qualcomm DMA actually can handle these odd
-alignments without problems.
-
-(Make a drive-by fix for datactrl_blocksz, misspelled.)
+By avoiding any such transfers with a special vendor flag,
+we can bail out to PIO when an odd transfer is detected
+while keeping DMA for large transfers of evenly aligned
+packages also for SDIO.
 
 Cc: Ludovic Barre <ludovic.barre@st.com>
 Cc: Brian Masney <masneyb@onstation.org>
 Cc: Stephan Gerhold <stephan@gerhold.net>
 Cc: Niklas Cassel <niklas.cassel@linaro.org>
 Cc: Russell King <rmk+kernel@armlinux.org.uk>
-Tested-by: Stephan Gerhold <stephan@gerhold.net>
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
 ---
-ChangeLog v2->v3:
-- Repost with the inclusion of other patches.
-ChangeLog v1->v2:
-- Specify odd blocksize field to 1 bit (:1)
-- Specify that STMMC supports odd block sizes
-- Collect Stephan's test tag
+ChangeLog v1->v3:
+- New patch in v3 after discussion with Ulf
 ---
- drivers/mmc/host/mmci.c | 20 ++++++++++++++++----
- drivers/mmc/host/mmci.h |  6 +++++-
- 2 files changed, 21 insertions(+), 5 deletions(-)
+ drivers/mmc/host/mmci.c | 21 +++++++++++++++++++++
+ drivers/mmc/host/mmci.h | 10 ++++++++++
+ 2 files changed, 31 insertions(+)
 
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index c37e70dbe250..3ffcdf78a428 100644
+index 3ffcdf78a428..a08cd845dddc 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -168,6 +168,7 @@ static struct variant_data variant_ux500 = {
- 	.cmdreg_srsp		= MCI_CPSM_RESPONSE,
- 	.datalength_bits	= 24,
- 	.datactrl_blocksz	= 11,
-+	.datactrl_odd_blocksz	= true,
- 	.datactrl_mask_sdio	= MCI_DPSM_ST_SDIOEN,
- 	.st_sdio		= true,
- 	.st_clkdiv		= true,
-@@ -201,6 +202,7 @@ static struct variant_data variant_ux500v2 = {
- 	.datactrl_mask_ddrmode	= MCI_DPSM_ST_DDRMODE,
- 	.datalength_bits	= 24,
- 	.datactrl_blocksz	= 11,
-+	.datactrl_odd_blocksz	= true,
- 	.datactrl_mask_sdio	= MCI_DPSM_ST_SDIOEN,
- 	.st_sdio		= true,
- 	.st_clkdiv		= true,
-@@ -260,6 +262,7 @@ static struct variant_data variant_stm32_sdmmc = {
- 	.datacnt_useless	= true,
- 	.datalength_bits	= 25,
- 	.datactrl_blocksz	= 14,
-+	.datactrl_odd_blocksz	= true,
- 	.stm32_idmabsize_mask	= GENMASK(12, 5),
- 	.init			= sdmmc_variant_init,
+@@ -185,6 +185,7 @@ static struct variant_data variant_ux500 = {
+ 	.irq_pio_mask		= MCI_IRQ_PIO_MASK,
+ 	.start_err		= MCI_STARTBITERR,
+ 	.opendrain		= MCI_OD,
++	.only_long_aligned_dma	= true,
+ 	.init			= mmci_variant_init,
  };
-@@ -279,6 +282,7 @@ static struct variant_data variant_qcom = {
- 	.data_cmd_enable	= MCI_CPSM_QCOM_DATCMD,
- 	.datalength_bits	= 24,
- 	.datactrl_blocksz	= 11,
-+	.datactrl_odd_blocksz	= true,
- 	.pwrreg_powerup		= MCI_PWR_UP,
- 	.f_max			= 208000000,
- 	.explicit_mclk_control	= true,
-@@ -447,10 +451,11 @@ void mmci_dma_setup(struct mmci_host *host)
- static int mmci_validate_data(struct mmci_host *host,
- 			      struct mmc_data *data)
- {
-+	struct variant_data *variant = host->variant;
-+
- 	if (!data)
- 		return 0;
--
--	if (!is_power_of_2(data->blksz)) {
-+	if (!is_power_of_2(data->blksz) && !variant->datactrl_odd_blocksz) {
- 		dev_err(mmc_dev(host->mmc),
- 			"unsupported block size (%d bytes)\n", data->blksz);
+ 
+@@ -219,6 +220,7 @@ static struct variant_data variant_ux500v2 = {
+ 	.irq_pio_mask		= MCI_IRQ_PIO_MASK,
+ 	.start_err		= MCI_STARTBITERR,
+ 	.opendrain		= MCI_OD,
++	.only_long_aligned_dma	= true,
+ 	.init			= ux500v2_variant_init,
+ };
+ 
+@@ -829,6 +831,25 @@ static int _mmci_dmae_prep_data(struct mmci_host *host, struct mmc_data *data,
+ 	if (data->blksz * data->blocks <= variant->fifosize)
  		return -EINVAL;
-@@ -515,7 +520,9 @@ int mmci_dma_start(struct mmci_host *host, unsigned int datactrl)
- 		 "Submit MMCI DMA job, sglen %d blksz %04x blks %04x flags %08x\n",
- 		 data->sg_len, data->blksz, data->blocks, data->flags);
  
--	host->ops->dma_start(host, &datactrl);
-+	ret = host->ops->dma_start(host, &datactrl);
-+	if (ret)
-+		return ret;
- 
- 	/* Trigger the DMA transfer */
- 	mmci_write_datactrlreg(host, datactrl);
-@@ -872,9 +879,14 @@ int mmci_dmae_prep_data(struct mmci_host *host,
- int mmci_dmae_start(struct mmci_host *host, unsigned int *datactrl)
- {
- 	struct mmci_dmae_priv *dmae = host->dma_priv;
-+	int ret;
- 
- 	host->dma_in_progress = true;
--	dmaengine_submit(dmae->desc_current);
-+	ret = dma_submit_error(dmaengine_submit(dmae->desc_current));
-+	if (ret < 0) {
-+		host->dma_in_progress = false;
-+		return ret;
++	/*
++	 * Handle the variants with DMA that is broken such that start and
++	 * end address must be aligned on a long (32bit) boundary for the DMA
++	 * to work. If this occurs, fall back to PIO.
++	 */
++	if (host->variant->only_long_aligned_dma) {
++		struct scatterlist *sg;
++		int tmp;
++
++		for_each_sg(data->sg, sg, data->sg_len, tmp) {
++			/* We start in some odd place, that doesn't work */
++			if (sg->offset & 3)
++				return -EINVAL;
++			/* We end in some odd place, that doesn't work */
++			if (sg->length & 3)
++				return -EINVAL;
++		}
 +	}
- 	dma_async_issue_pending(dmae->cur);
- 
- 	*datactrl |= MCI_DPSM_DMAENABLE;
++
+ 	device = chan->device;
+ 	nr_sg = dma_map_sg(device->dev, data->sg, data->sg_len,
+ 			   mmc_get_dma_dir(data));
 diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-index 833236ecb31e..c7f94726eaa1 100644
+index c7f94726eaa1..e20af17bb313 100644
 --- a/drivers/mmc/host/mmci.h
 +++ b/drivers/mmc/host/mmci.h
-@@ -278,7 +278,10 @@ struct mmci_host;
-  * @stm32_clkdiv: true if using a STM32-specific clock divider algorithm
-  * @datactrl_mask_ddrmode: ddr mode mask in datactrl register.
-  * @datactrl_mask_sdio: SDIO enable mask in datactrl register
-- * @datactrl_blksz: block size in power of two
-+ * @datactrl_blocksz: block size in power of two
-+ * @datactrl_odd_blocksz: true if block any sizes are supported, such as one
-+ *		      single character, as is necessary when using some SDIO
-+ *		      devices.
-  * @datactrl_first: true if data must be setup before send command
-  * @datacnt_useless: true if you could not use datacnt register to read
-  *		     remaining data
-@@ -323,6 +326,7 @@ struct variant_data {
- 	unsigned int		datactrl_mask_ddrmode;
- 	unsigned int		datactrl_mask_sdio;
- 	unsigned int		datactrl_blocksz;
-+	u8			datactrl_odd_blocksz:1;
- 	u8			datactrl_first:1;
- 	u8			datacnt_useless:1;
- 	u8			st_sdio:1;
+@@ -307,6 +307,15 @@ struct mmci_host;
+  *	       register.
+  * @opendrain: bitmask identifying the OPENDRAIN bit inside MMCIPOWER register
+  * @dma_lli: true if variant has dma link list feature.
++ * @only_long_aligned_dma: it appears that the Ux500 has a broken DMA logic for
++ *	       single bytes when either the transfer starts at an odd offset or
++ *	       the final DMA burst is an odd (not divisible by 4) address.
++ *	       Reading must start and end on an even 4-byte boundary, i.e. an
++ *	       even 32bit word in memory. If this is not the case, we need to
++ *	       fall back to PIO for that request. For bulk transfers to mass
++ *	       storage we are almost exclusively dealing with 512-byte chunks
++ *	       allocated at an even address so this is usually only manifesting
++ *	       in SDIO.
+  * @stm32_idmabsize_mask: stm32 sdmmc idma buffer size.
+  */
+ struct variant_data {
+@@ -350,6 +359,7 @@ struct variant_data {
+ 	u32			start_err;
+ 	u32			opendrain;
+ 	u8			dma_lli:1;
++	u8			only_long_aligned_dma:1;
+ 	u32			stm32_idmabsize_mask;
+ 	void (*init)(struct mmci_host *host);
+ };
 -- 
 2.21.0
