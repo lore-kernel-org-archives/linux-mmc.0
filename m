@@ -1,16 +1,15 @@
-From: Ludovic BARRE <ludovic.barre@st.com>
-Subject: Re: [PATCH 1/3] mmc: mmci: Support odd block sizes for ux500v2 and
- qcom variant
-Date: Wed, 13 Nov 2019 11:08:56 +0100
-Message-ID: <e52b49cf-6f16-85f1-455c-3fe95bab5aef@st.com>
+From: Marc Gonzalez <marc.w.gonzalez@free.fr>
+Subject: Re: [PATCH 2/3] mmc: mmci: Bail out from odd DMA on Ux500
+Date: Wed, 13 Nov 2019 11:29:23 +0100
+Message-ID: <1f500a2b-5c81-5423-4e56-61566919cbb9@free.fr>
 References: <20191113075335.31775-1-linus.walleij@linaro.org>
- <20191113075335.31775-2-linus.walleij@linaro.org>
+ <20191113075335.31775-3-linus.walleij@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; Format="flowed"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20191113075335.31775-2-linus.walleij@linaro.org>
-Content-Language: fr
+In-Reply-To: <20191113075335.31775-3-linus.walleij@linaro.org>
+Content-Language: en-US
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -20,143 +19,84 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
 Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
 Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Linus Walleij <linus.walleij@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Stephan Gerhold <stephan@gerhold.net>
-Cc: Niklas Cassel <niklas.cassel@linaro.org>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, Russell King <rmk+kernel@armlinux.org.uk>, Russell King <linux@arm.linux.org.uk>, Brian Masney <masneyb@onstation.org>
+To: Linus Walleij <linus.walleij@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Stephan Gerhold <stephan@gerhold.net>, MMC <linux-mmc@vger.kernel.org>, Russell King <rmk+kernel@armlinux.org.uk>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Niklas Cassel <niklas.cassel@linaro.org>, Ludovic Barre <ludovic.barre@st.com>, Brian Masney <masneyb@onstation.org>
 List-Id: linux-mmc@vger.kernel.org
 
-VGVzdGVkLWJ5OiBMdWRvdmljIEJhcnJlIDxsdWRvdmljLmJhcnJlQHN0LmNvbT4KCkxlIDExLzEz
-LzE5IMOgIDg6NTMgQU0sIExpbnVzIFdhbGxlaWogYSDDqWNyaXTCoDoKPiBGcm9tOiBVbGYgSGFu
-c3NvbiA8dWxmLmhhbnNzb25AbGluYXJvLm9yZz4KPiAKPiBUaGlzIGlzIHNvbWV0aGluZyBsaWtl
-IHRoZSA1dGggdGltZSB0aGlzIHBhdGNoIGlzIHBvc3RlZCwKPiBzbyBsZXQncyB0cnkgdG8gZml4
-IHRoaXMgbm93LCBvbmNlIGFuZCBmb3IgYWxsLgo+IAo+IEZvciB0aGUgdXg1MDB2MiB2YXJpYW50
-IG9mIHRoZSBQTDE4eCBibG9jaywgb2RkIGJsb2NrIHNpemVzIGFyZQo+IHN1cHBvcnRlZC4gVGhp
-cyBpcyBuZWNlc3NhcnkgdG8gc3VwcG9ydCBzb21lIFNESU8gdHJhbnNmZXJzCj4gc3VjaCBhcyBz
-aW5nbGUgYnl0ZXMuIFRoaXMgYWxzbyBhZmZlY3RzIHRoZSBRQ09NIE1NQ0kgdmFyaWFudC4KPiAK
-PiBUaGlzIHdpbGwgd29yayBmaW5lIGZvciBQSU8gdXNpbmcgSVJRczogU0RJTyBwYWNrZXRzIGFy
-ZQo+IGFjY2VwdGVkIGRvd24gdG8gc2luZ2xlIGJ5dGVzIGFuZCB0aGUgdHJhbnNmZXJzIGdvIHRo
-cm91Z2gKPiBqdXN0IGZpbmUuCj4gCj4gVGhpcyBwYXRjaCBoYXMgcHJvdmVuIG5lY2Vzc2FyeSBm
-b3IgZW5hYmxpbmcgU0RJTyBmb3IgV0xBTiBvbgo+IFBvc3RtYXJrZXRPUy1iYXNlZCBVeDUwMCBw
-bGF0Zm9ybXMuCj4gCj4gVGhpcyBwYXRjaCBpcyBiYXNlZCBvbiBVbGYgSGFuc3NvbidzIHBhdGNo
-Cj4gaHR0cDovL3d3dy5zcGluaWNzLm5ldC9saXN0cy9saW51eC1tbWMvbXNnMTIxNjAuaHRtbAo+
-IAo+IFVsZiBub3RlZCBvbiBhbiBlYXJsaWVyIGl0ZXJhdGlvbiBpbjoKPiBodHRwczovL21hcmMu
-aW5mby8/bD1saW51eC1tbWMmbT0xNDA4NDUxODkzMTYzNzAmdz0yCj4gCj4gIlRoZXJlIGFyZSBz
-b21lIHByZXJlcXVpc2l0ZXMgb2YgdGhlIGRhdGEgYnVmZmVycyB0byBzdXBwb3J0cwo+IGFueSBi
-bG9jayBzaXplLCBhdCBsZWFzdCBmb3IgdXg1MDAuICguLi4pIFRoZSBjb25jbHVzaW9uIGZyb20K
-PiB0aGUgYWJvdmUgaXMgdGhhdCB3ZSBuZWVkIHRvIGFkb3B0IG1tY2lfcGlvX3dyaXRlKCkgdG8g
-aGFuZGxlCj4gY29ybmVyIGNhc2VzLiIKPiAKPiBUaGlzIHBvaW50cyBiYWNrIHRvIGEgZGlzY3Vz
-c2lvbiBpbiAyMDEyLiBUaGUgbWFpbiBwb2ludCB3YXMKPiBtYWRlIGJ5IFJ1c3NlbGwgaW4gdGhp
-cyBtZXNzYWdlOgo+IGh0dHBzOi8vbWFyYy5pbmZvLz9sPWxpbnV4LWFybS1rZXJuZWwmbT0xMzUz
-NTEyMzcwMTgzMDEmdz0yCj4gCj4gSUlVQyB0aGlzIHBlcnRhaW5zIHRvIHRoaXMgY29kZSAobm93
-IGdvbmUgZnJvbSB0aGUgcGF0Y2gpOgo+IAo+ICAgIGlmIChkYXRhLT5zZy0+b2Zmc2V0ICYgMykg
-ewo+ICAgICAgICBkZXZfZXJyKC4uLik7Cj4gICAgICAgIHJldHVybiAtRUlOVkFMOwo+ICAgIH0K
-PiAKPiBUaGlzIGhpdCBTdGVwaGFuIGFzIGhlIG5vdGljZWQgdGhhdCBETUEgKERNQTQwKSB3b3Vs
-ZCBub3Qgd29yawo+IHdpdGggdGhlIE1NQ0kgZHJpdmVyLCBzbyB0aGlzIHBhdGNoIGNvbWJpbmVk
-IHdpdGggZGlzYWJsaW5nCj4gRE1BIHdvdWxkIGRvIHRoZSB0cmljay4gVGhhdCB3YXkgd2UgZG9u
-J3QgdG9zcyB1bmFsaWduZWQKPiBhY2Nlc3NlcyBhdCB0aGUgRE1BIGVuZ2luZSBhcyBTRElPIGFw
-cGFyZW50bHkgdGVuZHMgdG8KPiBkby4gKFRoaXMgaXMgbm90IGEgcHJvYmxlbSB3aGVuIHdyaXRp
-bmcgb3JkaW5hcnkgYmxvY2sgZGV2aWNlCj4gYmxvY2tzIGFzIHRoZXNlIGFyZSBhbHdheXMgNTEy
-IGJ5dGVzIGFsaWduZWQgb24gYSA0LWJ5dGUKPiBib3VuZGFyeS4pCj4gCj4gQXMgVWxmIG5vdGVz
-LCBvZGQgU0cgb2Zmc2V0cyBsaWtlIHRoaXMgc2hvdWxkIGJlIGhhbmRsZWQKPiBieSB0aGUgZHJp
-dmVyIGV2ZW4gaWYgd2UgcnVuIGl0IGluIERNQSBtb2RlLiBJIGNvbmNsdWRlCj4gaXQgbXVzdCBi
-ZSB0aGUgZHV0eSBvZiB0aGUgRE1BIGRyaXZlciB0byBzYXkgTk8gdG8gU0cKPiBvZmZzZXRzIGl0
-IGNhbm5vdCBoYW5kbGUsIG9yIG90aGVyd2lzZSBiaXRzdHVmZiB0aGluZ3MKPiBhcm91bmQgdG8g
-YXZvaWQgdGhlIHNpdHVhdGlvbi4KPiAKPiBTbyBhcyBhIGZpcnN0IHN0ZXAgbWFrZSBzdXJlIGVy
-cm9ycyBhcmUgcHJvcGFnYXRlZCB1cHdhcmQKPiBmcm9tIHRoZSBETUEgZW5naW5lLCBhbmQgYXNz
-dW1lIHRoZSBETUEgZW5naW5lIHdpbGwgc2F5IG5vCj4gdG8gdGhpbmdzIHdpdGggd2VpcmQgU0cg
-b2Zmc2V0cyB0aGF0IGl0IGNhbm5vdCBoYW5kbGUsIGFuZAo+IHRoZW4gdGhlIGRyaXZlciB3aWxs
-IGZhbGwgYmFjayB0byB1c2luZyBQSU8uCj4gCj4gSXQgbWlnaHQgYmUgdGhhdCBzb21lIERNQSBl
-bmdpbmVzIChzdWNoIGFzIHRoZSBVeDUwMAo+IERNQTQwKSBkbyBub3QgcHJvcGVybHkgc2F5IG5v
-IHRvIHNnbGlzdHMgd2l0aCB1bmV2ZW4KPiBvZmZzZXRzLCBvciBpZ25vcmUgdGhlIG9mZnNldCBh
-bHRvZ2V0aGVyIHJlc3VsdGluZyBpbgo+IHVucHJlZGljdGFibGUgYmVoYXZpb3IuIFRoYXQgaXMg
-aW4gdGhhdCBjYXNlIGEgYnVnIGluIHRoZQo+IERNQSBkcml2ZXIgYW5kIG5lZWRzIHRvIGJlIGZp
-eGVkIHRoZXJlLiBJIGdvdCB0aGUgaW1wcmVzc2lvbgo+IHRoYXQgdGhlIFF1YWxjb21tIERNQSBh
-Y3R1YWxseSBjYW4gaGFuZGxlIHRoZXNlIG9kZAo+IGFsaWdubWVudHMgd2l0aG91dCBwcm9ibGVt
-cy4KPiAKPiAoTWFrZSBhIGRyaXZlLWJ5IGZpeCBmb3IgZGF0YWN0cmxfYmxvY2tzeiwgbWlzc3Bl
-bGxlZC4pCj4gCj4gQ2M6IEx1ZG92aWMgQmFycmUgPGx1ZG92aWMuYmFycmVAc3QuY29tPgo+IENj
-OiBCcmlhbiBNYXNuZXkgPG1hc25leWJAb25zdGF0aW9uLm9yZz4KPiBDYzogU3RlcGhhbiBHZXJo
-b2xkIDxzdGVwaGFuQGdlcmhvbGQubmV0Pgo+IENjOiBOaWtsYXMgQ2Fzc2VsIDxuaWtsYXMuY2Fz
-c2VsQGxpbmFyby5vcmc+Cj4gQ2M6IFJ1c3NlbGwgS2luZyA8cm1rK2tlcm5lbEBhcm1saW51eC5v
-cmcudWs+Cj4gVGVzdGVkLWJ5OiBTdGVwaGFuIEdlcmhvbGQgPHN0ZXBoYW5AZ2VyaG9sZC5uZXQ+
-Cj4gU2lnbmVkLW9mZi1ieTogVWxmIEhhbnNzb24gPHVsZi5oYW5zc29uQGxpbmFyby5vcmc+Cj4g
-U2lnbmVkLW9mZi1ieTogU3Jpbml2YXMgS2FuZGFnYXRsYSA8c3Jpbml2YXMua2FuZGFnYXRsYUBs
-aW5hcm8ub3JnPgo+IFNpZ25lZC1vZmYtYnk6IExpbnVzIFdhbGxlaWogPGxpbnVzLndhbGxlaWpA
-bGluYXJvLm9yZz4KPiAtLS0KPiBDaGFuZ2VMb2cgdjItPnYzOgo+IC0gUmVwb3N0IHdpdGggdGhl
-IGluY2x1c2lvbiBvZiBvdGhlciBwYXRjaGVzLgo+IENoYW5nZUxvZyB2MS0+djI6Cj4gLSBTcGVj
-aWZ5IG9kZCBibG9ja3NpemUgZmllbGQgdG8gMSBiaXQgKDoxKQo+IC0gU3BlY2lmeSB0aGF0IFNU
-TU1DIHN1cHBvcnRzIG9kZCBibG9jayBzaXplcwo+IC0gQ29sbGVjdCBTdGVwaGFuJ3MgdGVzdCB0
-YWcKPiAtLS0KPiAgIGRyaXZlcnMvbW1jL2hvc3QvbW1jaS5jIHwgMjAgKysrKysrKysrKysrKysr
-Ky0tLS0KPiAgIGRyaXZlcnMvbW1jL2hvc3QvbW1jaS5oIHwgIDYgKysrKystCj4gICAyIGZpbGVz
-IGNoYW5nZWQsIDIxIGluc2VydGlvbnMoKyksIDUgZGVsZXRpb25zKC0pCj4gCj4gZGlmZiAtLWdp
-dCBhL2RyaXZlcnMvbW1jL2hvc3QvbW1jaS5jIGIvZHJpdmVycy9tbWMvaG9zdC9tbWNpLmMKPiBp
-bmRleCBjMzdlNzBkYmUyNTAuLjNmZmNkZjc4YTQyOCAxMDA2NDQKPiAtLS0gYS9kcml2ZXJzL21t
-Yy9ob3N0L21tY2kuYwo+ICsrKyBiL2RyaXZlcnMvbW1jL2hvc3QvbW1jaS5jCj4gQEAgLTE2OCw2
-ICsxNjgsNyBAQCBzdGF0aWMgc3RydWN0IHZhcmlhbnRfZGF0YSB2YXJpYW50X3V4NTAwID0gewo+
-ICAgCS5jbWRyZWdfc3JzcAkJPSBNQ0lfQ1BTTV9SRVNQT05TRSwKPiAgIAkuZGF0YWxlbmd0aF9i
-aXRzCT0gMjQsCj4gICAJLmRhdGFjdHJsX2Jsb2Nrc3oJPSAxMSwKPiArCS5kYXRhY3RybF9vZGRf
-YmxvY2tzegk9IHRydWUsCj4gICAJLmRhdGFjdHJsX21hc2tfc2Rpbwk9IE1DSV9EUFNNX1NUX1NE
-SU9FTiwKPiAgIAkuc3Rfc2RpbwkJPSB0cnVlLAo+ICAgCS5zdF9jbGtkaXYJCT0gdHJ1ZSwKPiBA
-QCAtMjAxLDYgKzIwMiw3IEBAIHN0YXRpYyBzdHJ1Y3QgdmFyaWFudF9kYXRhIHZhcmlhbnRfdXg1
-MDB2MiA9IHsKPiAgIAkuZGF0YWN0cmxfbWFza19kZHJtb2RlCT0gTUNJX0RQU01fU1RfRERSTU9E
-RSwKPiAgIAkuZGF0YWxlbmd0aF9iaXRzCT0gMjQsCj4gICAJLmRhdGFjdHJsX2Jsb2Nrc3oJPSAx
-MSwKPiArCS5kYXRhY3RybF9vZGRfYmxvY2tzegk9IHRydWUsCj4gICAJLmRhdGFjdHJsX21hc2tf
-c2Rpbwk9IE1DSV9EUFNNX1NUX1NESU9FTiwKPiAgIAkuc3Rfc2RpbwkJPSB0cnVlLAo+ICAgCS5z
-dF9jbGtkaXYJCT0gdHJ1ZSwKPiBAQCAtMjYwLDYgKzI2Miw3IEBAIHN0YXRpYyBzdHJ1Y3QgdmFy
-aWFudF9kYXRhIHZhcmlhbnRfc3RtMzJfc2RtbWMgPSB7Cj4gICAJLmRhdGFjbnRfdXNlbGVzcwk9
-IHRydWUsCj4gICAJLmRhdGFsZW5ndGhfYml0cwk9IDI1LAo+ICAgCS5kYXRhY3RybF9ibG9ja3N6
-CT0gMTQsCj4gKwkuZGF0YWN0cmxfb2RkX2Jsb2Nrc3oJPSB0cnVlLAo+ICAgCS5zdG0zMl9pZG1h
-YnNpemVfbWFzawk9IEdFTk1BU0soMTIsIDUpLAo+ICAgCS5pbml0CQkJPSBzZG1tY192YXJpYW50
-X2luaXQsCj4gICB9Owo+IEBAIC0yNzksNiArMjgyLDcgQEAgc3RhdGljIHN0cnVjdCB2YXJpYW50
-X2RhdGEgdmFyaWFudF9xY29tID0gewo+ICAgCS5kYXRhX2NtZF9lbmFibGUJPSBNQ0lfQ1BTTV9R
-Q09NX0RBVENNRCwKPiAgIAkuZGF0YWxlbmd0aF9iaXRzCT0gMjQsCj4gICAJLmRhdGFjdHJsX2Js
-b2Nrc3oJPSAxMSwKPiArCS5kYXRhY3RybF9vZGRfYmxvY2tzegk9IHRydWUsCj4gICAJLnB3cnJl
-Z19wb3dlcnVwCQk9IE1DSV9QV1JfVVAsCj4gICAJLmZfbWF4CQkJPSAyMDgwMDAwMDAsCj4gICAJ
-LmV4cGxpY2l0X21jbGtfY29udHJvbAk9IHRydWUsCj4gQEAgLTQ0NywxMCArNDUxLDExIEBAIHZv
-aWQgbW1jaV9kbWFfc2V0dXAoc3RydWN0IG1tY2lfaG9zdCAqaG9zdCkKPiAgIHN0YXRpYyBpbnQg
-bW1jaV92YWxpZGF0ZV9kYXRhKHN0cnVjdCBtbWNpX2hvc3QgKmhvc3QsCj4gICAJCQkgICAgICBz
-dHJ1Y3QgbW1jX2RhdGEgKmRhdGEpCj4gICB7Cj4gKwlzdHJ1Y3QgdmFyaWFudF9kYXRhICp2YXJp
-YW50ID0gaG9zdC0+dmFyaWFudDsKPiArCj4gICAJaWYgKCFkYXRhKQo+ICAgCQlyZXR1cm4gMDsK
-PiAtCj4gLQlpZiAoIWlzX3Bvd2VyX29mXzIoZGF0YS0+Ymxrc3opKSB7Cj4gKwlpZiAoIWlzX3Bv
-d2VyX29mXzIoZGF0YS0+Ymxrc3opICYmICF2YXJpYW50LT5kYXRhY3RybF9vZGRfYmxvY2tzeikg
-ewo+ICAgCQlkZXZfZXJyKG1tY19kZXYoaG9zdC0+bW1jKSwKPiAgIAkJCSJ1bnN1cHBvcnRlZCBi
-bG9jayBzaXplICglZCBieXRlcylcbiIsIGRhdGEtPmJsa3N6KTsKPiAgIAkJcmV0dXJuIC1FSU5W
-QUw7Cj4gQEAgLTUxNSw3ICs1MjAsOSBAQCBpbnQgbW1jaV9kbWFfc3RhcnQoc3RydWN0IG1tY2lf
-aG9zdCAqaG9zdCwgdW5zaWduZWQgaW50IGRhdGFjdHJsKQo+ICAgCQkgIlN1Ym1pdCBNTUNJIERN
-QSBqb2IsIHNnbGVuICVkIGJsa3N6ICUwNHggYmxrcyAlMDR4IGZsYWdzICUwOHhcbiIsCj4gICAJ
-CSBkYXRhLT5zZ19sZW4sIGRhdGEtPmJsa3N6LCBkYXRhLT5ibG9ja3MsIGRhdGEtPmZsYWdzKTsK
-PiAgIAo+IC0JaG9zdC0+b3BzLT5kbWFfc3RhcnQoaG9zdCwgJmRhdGFjdHJsKTsKPiArCXJldCA9
-IGhvc3QtPm9wcy0+ZG1hX3N0YXJ0KGhvc3QsICZkYXRhY3RybCk7Cj4gKwlpZiAocmV0KQo+ICsJ
-CXJldHVybiByZXQ7Cj4gICAKPiAgIAkvKiBUcmlnZ2VyIHRoZSBETUEgdHJhbnNmZXIgKi8KPiAg
-IAltbWNpX3dyaXRlX2RhdGFjdHJscmVnKGhvc3QsIGRhdGFjdHJsKTsKPiBAQCAtODcyLDkgKzg3
-OSwxNCBAQCBpbnQgbW1jaV9kbWFlX3ByZXBfZGF0YShzdHJ1Y3QgbW1jaV9ob3N0ICpob3N0LAo+
-ICAgaW50IG1tY2lfZG1hZV9zdGFydChzdHJ1Y3QgbW1jaV9ob3N0ICpob3N0LCB1bnNpZ25lZCBp
-bnQgKmRhdGFjdHJsKQo+ICAgewo+ICAgCXN0cnVjdCBtbWNpX2RtYWVfcHJpdiAqZG1hZSA9IGhv
-c3QtPmRtYV9wcml2Owo+ICsJaW50IHJldDsKPiAgIAo+ICAgCWhvc3QtPmRtYV9pbl9wcm9ncmVz
-cyA9IHRydWU7Cj4gLQlkbWFlbmdpbmVfc3VibWl0KGRtYWUtPmRlc2NfY3VycmVudCk7Cj4gKwly
-ZXQgPSBkbWFfc3VibWl0X2Vycm9yKGRtYWVuZ2luZV9zdWJtaXQoZG1hZS0+ZGVzY19jdXJyZW50
-KSk7Cj4gKwlpZiAocmV0IDwgMCkgewo+ICsJCWhvc3QtPmRtYV9pbl9wcm9ncmVzcyA9IGZhbHNl
-Owo+ICsJCXJldHVybiByZXQ7Cj4gKwl9Cj4gICAJZG1hX2FzeW5jX2lzc3VlX3BlbmRpbmcoZG1h
-ZS0+Y3VyKTsKPiAgIAo+ICAgCSpkYXRhY3RybCB8PSBNQ0lfRFBTTV9ETUFFTkFCTEU7Cj4gZGlm
-ZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2hvc3QvbW1jaS5oIGIvZHJpdmVycy9tbWMvaG9zdC9tbWNp
-LmgKPiBpbmRleCA4MzMyMzZlY2IzMWUuLmM3Zjk0NzI2ZWFhMSAxMDA2NDQKPiAtLS0gYS9kcml2
-ZXJzL21tYy9ob3N0L21tY2kuaAo+ICsrKyBiL2RyaXZlcnMvbW1jL2hvc3QvbW1jaS5oCj4gQEAg
-LTI3OCw3ICsyNzgsMTAgQEAgc3RydWN0IG1tY2lfaG9zdDsKPiAgICAqIEBzdG0zMl9jbGtkaXY6
-IHRydWUgaWYgdXNpbmcgYSBTVE0zMi1zcGVjaWZpYyBjbG9jayBkaXZpZGVyIGFsZ29yaXRobQo+
-ICAgICogQGRhdGFjdHJsX21hc2tfZGRybW9kZTogZGRyIG1vZGUgbWFzayBpbiBkYXRhY3RybCBy
-ZWdpc3Rlci4KPiAgICAqIEBkYXRhY3RybF9tYXNrX3NkaW86IFNESU8gZW5hYmxlIG1hc2sgaW4g
-ZGF0YWN0cmwgcmVnaXN0ZXIKPiAtICogQGRhdGFjdHJsX2Jsa3N6OiBibG9jayBzaXplIGluIHBv
-d2VyIG9mIHR3bwo+ICsgKiBAZGF0YWN0cmxfYmxvY2tzejogYmxvY2sgc2l6ZSBpbiBwb3dlciBv
-ZiB0d28KPiArICogQGRhdGFjdHJsX29kZF9ibG9ja3N6OiB0cnVlIGlmIGJsb2NrIGFueSBzaXpl
-cyBhcmUgc3VwcG9ydGVkLCBzdWNoIGFzIG9uZQo+ICsgKgkJICAgICAgc2luZ2xlIGNoYXJhY3Rl
-ciwgYXMgaXMgbmVjZXNzYXJ5IHdoZW4gdXNpbmcgc29tZSBTRElPCj4gKyAqCQkgICAgICBkZXZp
-Y2VzLgo+ICAgICogQGRhdGFjdHJsX2ZpcnN0OiB0cnVlIGlmIGRhdGEgbXVzdCBiZSBzZXR1cCBi
-ZWZvcmUgc2VuZCBjb21tYW5kCj4gICAgKiBAZGF0YWNudF91c2VsZXNzOiB0cnVlIGlmIHlvdSBj
-b3VsZCBub3QgdXNlIGRhdGFjbnQgcmVnaXN0ZXIgdG8gcmVhZAo+ICAgICoJCSAgICAgcmVtYWlu
-aW5nIGRhdGEKPiBAQCAtMzIzLDYgKzMyNiw3IEBAIHN0cnVjdCB2YXJpYW50X2RhdGEgewo+ICAg
-CXVuc2lnbmVkIGludAkJZGF0YWN0cmxfbWFza19kZHJtb2RlOwo+ICAgCXVuc2lnbmVkIGludAkJ
-ZGF0YWN0cmxfbWFza19zZGlvOwo+ICAgCXVuc2lnbmVkIGludAkJZGF0YWN0cmxfYmxvY2tzejsK
-PiArCXU4CQkJZGF0YWN0cmxfb2RkX2Jsb2Nrc3o6MTsKPiAgIAl1OAkJCWRhdGFjdHJsX2ZpcnN0
-OjE7Cj4gICAJdTgJCQlkYXRhY250X3VzZWxlc3M6MTsKPiAgIAl1OAkJCXN0X3NkaW86MTsKPiAK
-Cl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCmxpbnV4LWFy
-bS1rZXJuZWwgbWFpbGluZyBsaXN0CmxpbnV4LWFybS1rZXJuZWxAbGlzdHMuaW5mcmFkZWFkLm9y
-ZwpodHRwOi8vbGlzdHMuaW5mcmFkZWFkLm9yZy9tYWlsbWFuL2xpc3RpbmZvL2xpbnV4LWFybS1r
-ZXJuZWwK
+On 13/11/2019 08:53, Linus Walleij wrote:
+
+> The Ux500 (at least) can only deal with DMA transactions
+> starting and ending on an even 4-byte aligned address.
+> 
+> The problem isn't in the DMA engine of the system as such:
+> the problem is in the state machine of the MMCI block that
+> has some features to handle single bytes but it seems like
+> it doesn't quite work.
+> 
+> This problem is probably caused by most of the testing
+> being done on mass storage, which will be 512-bytes aligned
+> blocks placed neatly in pages and practically never run into
+> this situation.
+> 
+> On SDIO (for example in WiFi adapters) this situation is
+> common.
+> 
+> By avoiding any such transfers with a special vendor flag,
+> we can bail out to PIO when an odd transfer is detected
+> while keeping DMA for large transfers of evenly aligned
+> packages also for SDIO.
+> 
+> Cc: Ludovic Barre <ludovic.barre@st.com>
+> Cc: Brian Masney <masneyb@onstation.org>
+> Cc: Stephan Gerhold <stephan@gerhold.net>
+> Cc: Niklas Cassel <niklas.cassel@linaro.org>
+> Cc: Russell King <rmk+kernel@armlinux.org.uk>
+> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+> ---
+> ChangeLog v1->v3:
+> - New patch in v3 after discussion with Ulf
+> ---
+>  drivers/mmc/host/mmci.c | 21 +++++++++++++++++++++
+>  drivers/mmc/host/mmci.h | 10 ++++++++++
+>  2 files changed, 31 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+> index 3ffcdf78a428..a08cd845dddc 100644
+> --- a/drivers/mmc/host/mmci.c
+> +++ b/drivers/mmc/host/mmci.c
+> @@ -185,6 +185,7 @@ static struct variant_data variant_ux500 = {
+>  	.irq_pio_mask		= MCI_IRQ_PIO_MASK,
+>  	.start_err		= MCI_STARTBITERR,
+>  	.opendrain		= MCI_OD,
+> +	.only_long_aligned_dma	= true,
+>  	.init			= mmci_variant_init,
+>  };
+>  
+> @@ -219,6 +220,7 @@ static struct variant_data variant_ux500v2 = {
+>  	.irq_pio_mask		= MCI_IRQ_PIO_MASK,
+>  	.start_err		= MCI_STARTBITERR,
+>  	.opendrain		= MCI_OD,
+> +	.only_long_aligned_dma	= true,
+>  	.init			= ux500v2_variant_init,
+>  };
+>  
+> @@ -829,6 +831,25 @@ static int _mmci_dmae_prep_data(struct mmci_host *host, struct mmc_data *data,
+>  	if (data->blksz * data->blocks <= variant->fifosize)
+>  		return -EINVAL;
+>  
+> +	/*
+> +	 * Handle the variants with DMA that is broken such that start and
+> +	 * end address must be aligned on a long (32bit) boundary for the DMA
+> +	 * to work. If this occurs, fall back to PIO.
+> +	 */
+
+Nit: why use 'long' as a synonym for "32 bits" ?
+
+Why not name the field "only_32b_aligned_dma" ?
+
+(The size of C's long int is implementation-defined; most 64-bit platforms
+have a 64-bit long int.)
+
+Perhaps the ship has already sailed -- what with readl/writel...
+
+Regards.
