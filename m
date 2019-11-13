@@ -1,238 +1,101 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 1/3] mmc: mmci: Support odd block sizes for ux500v2 and
- qcom variant
-Date: Wed, 13 Nov 2019 12:05:31 +0100
-Message-ID: <CAPDyKFqx-0J0ck-hyeJsX8LrOP+BWiS6PihLd1Y3EMoXX+qYiQ@mail.gmail.com>
-References: <20191113075335.31775-1-linus.walleij@linaro.org>
- <20191113075335.31775-2-linus.walleij@linaro.org>
+From: Georgi Djakov <georgi.djakov@linaro.org>
+Subject: Re: [RFC-v2 1/2] dt-bindings: mmc: sdhci-msm: Add Bus BW vote
+ supported strings
+Date: Wed, 13 Nov 2019 15:16:52 +0200
+Message-ID: <8d7f2a2f-1312-8983-4e58-80dc6939154c@linaro.org>
+References: <1573220319-4287-1-git-send-email-ppvk@codeaurora.org>
+ <1573220319-4287-2-git-send-email-ppvk@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20191113075335.31775-2-linus.walleij@linaro.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: Russell King <linux@arm.linux.org.uk>, Stephan Gerhold <stephan@gerhold.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Russell King <rmk+kernel@armlinux.org.uk>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Niklas Cassel <niklas.cassel@linaro.org>, Ludovic Barre <ludovic.barre@st.com>, Brian Masney <masneyb@onstation.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1573220319-4287-2-git-send-email-ppvk@codeaurora.org>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: Pradeep P V K <ppvk@codeaurora.org>, adrian.hunter@intel.com, robh+dt@kernel.org, ulf.hansson@linaro.org, asutoshd@codeaurora.org, vbadigan@codeaurora.org, stummala@codeaurora.org, sayalil@codeaurora.org, rampraka@codeaurora.org, sboyd@kernel.org
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org, agross@kernel.org, linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, 13 Nov 2019 at 08:53, Linus Walleij <linus.walleij@linaro.org> wrote:
->
-> From: Ulf Hansson <ulf.hansson@linaro.org>
->
-> This is something like the 5th time this patch is posted,
-> so let's try to fix this now, once and for all.
->
-> For the ux500v2 variant of the PL18x block, odd block sizes are
-> supported. This is necessary to support some SDIO transfers
-> such as single bytes. This also affects the QCOM MMCI variant.
->
-> This will work fine for PIO using IRQs: SDIO packets are
-> accepted down to single bytes and the transfers go through
-> just fine.
->
-> This patch has proven necessary for enabling SDIO for WLAN on
-> PostmarketOS-based Ux500 platforms.
->
-> This patch is based on Ulf Hansson's patch
-> http://www.spinics.net/lists/linux-mmc/msg12160.html
->
-> Ulf noted on an earlier iteration in:
-> https://marc.info/?l=linux-mmc&m=140845189316370&w=2
->
-> "There are some prerequisites of the data buffers to supports
-> any block size, at least for ux500. (...) The conclusion from
-> the above is that we need to adopt mmci_pio_write() to handle
-> corner cases."
->
-> This points back to a discussion in 2012. The main point was
-> made by Russell in this message:
-> https://marc.info/?l=linux-arm-kernel&m=135351237018301&w=2
->
-> IIUC this pertains to this code (now gone from the patch):
->
->   if (data->sg->offset & 3) {
->       dev_err(...);
->       return -EINVAL;
->   }
->
-> This hit Stephan as he noticed that DMA (DMA40) would not work
-> with the MMCI driver, so this patch combined with disabling
-> DMA would do the trick. That way we don't toss unaligned
-> accesses at the DMA engine as SDIO apparently tends to
-> do. (This is not a problem when writing ordinary block device
-> blocks as these are always 512 bytes aligned on a 4-byte
-> boundary.)
->
-> As Ulf notes, odd SG offsets like this should be handled
-> by the driver even if we run it in DMA mode. I conclude
-> it must be the duty of the DMA driver to say NO to SG
-> offsets it cannot handle, or otherwise bitstuff things
-> around to avoid the situation.
->
-> So as a first step make sure errors are propagated upward
-> from the DMA engine, and assume the DMA engine will say no
-> to things with weird SG offsets that it cannot handle, and
-> then the driver will fall back to using PIO.
->
-> It might be that some DMA engines (such as the Ux500
-> DMA40) do not properly say no to sglists with uneven
-> offsets, or ignore the offset altogether resulting in
-> unpredictable behavior. That is in that case a bug in the
-> DMA driver and needs to be fixed there. I got the impression
-> that the Qualcomm DMA actually can handle these odd
-> alignments without problems.
->
-> (Make a drive-by fix for datactrl_blocksz, misspelled.)
->
-> Cc: Ludovic Barre <ludovic.barre@st.com>
-> Cc: Brian Masney <masneyb@onstation.org>
-> Cc: Stephan Gerhold <stephan@gerhold.net>
-> Cc: Niklas Cassel <niklas.cassel@linaro.org>
-> Cc: Russell King <rmk+kernel@armlinux.org.uk>
-> Tested-by: Stephan Gerhold <stephan@gerhold.net>
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-> Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+Hi Pradeep,
 
-There is no need to keep my authorship of the patch, it's very much
-different than the original. I would rather replace it that with a
-suggested-by tag.
+Thanks for the patch!
 
+On 8.11.19 г. 15:38 ч., Pradeep P V K wrote:
+> Add Bus bandwidth voting supported strings for qcom-sdhci controller.
+> 
+> Signed-off-by: Pradeep P V K <ppvk@codeaurora.org>
 > ---
-> ChangeLog v2->v3:
-> - Repost with the inclusion of other patches.
-> ChangeLog v1->v2:
-> - Specify odd blocksize field to 1 bit (:1)
-> - Specify that STMMC supports odd block sizes
-> - Collect Stephan's test tag
-> ---
->  drivers/mmc/host/mmci.c | 20 ++++++++++++++++----
->  drivers/mmc/host/mmci.h |  6 +++++-
->  2 files changed, 21 insertions(+), 5 deletions(-)
->
-> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-> index c37e70dbe250..3ffcdf78a428 100644
-> --- a/drivers/mmc/host/mmci.c
-> +++ b/drivers/mmc/host/mmci.c
-> @@ -168,6 +168,7 @@ static struct variant_data variant_ux500 = {
->         .cmdreg_srsp            = MCI_CPSM_RESPONSE,
->         .datalength_bits        = 24,
->         .datactrl_blocksz       = 11,
-> +       .datactrl_odd_blocksz   = true,
->         .datactrl_mask_sdio     = MCI_DPSM_ST_SDIOEN,
->         .st_sdio                = true,
->         .st_clkdiv              = true,
-> @@ -201,6 +202,7 @@ static struct variant_data variant_ux500v2 = {
->         .datactrl_mask_ddrmode  = MCI_DPSM_ST_DDRMODE,
->         .datalength_bits        = 24,
->         .datactrl_blocksz       = 11,
-> +       .datactrl_odd_blocksz   = true,
->         .datactrl_mask_sdio     = MCI_DPSM_ST_SDIOEN,
->         .st_sdio                = true,
->         .st_clkdiv              = true,
-> @@ -260,6 +262,7 @@ static struct variant_data variant_stm32_sdmmc = {
->         .datacnt_useless        = true,
->         .datalength_bits        = 25,
->         .datactrl_blocksz       = 14,
-> +       .datactrl_odd_blocksz   = true,
->         .stm32_idmabsize_mask   = GENMASK(12, 5),
->         .init                   = sdmmc_variant_init,
->  };
-> @@ -279,6 +282,7 @@ static struct variant_data variant_qcom = {
->         .data_cmd_enable        = MCI_CPSM_QCOM_DATCMD,
->         .datalength_bits        = 24,
->         .datactrl_blocksz       = 11,
-> +       .datactrl_odd_blocksz   = true,
->         .pwrreg_powerup         = MCI_PWR_UP,
->         .f_max                  = 208000000,
->         .explicit_mclk_control  = true,
-> @@ -447,10 +451,11 @@ void mmci_dma_setup(struct mmci_host *host)
->  static int mmci_validate_data(struct mmci_host *host,
->                               struct mmc_data *data)
->  {
-> +       struct variant_data *variant = host->variant;
+>  .../devicetree/bindings/mmc/sdhci-msm.txt          | 32 ++++++++++++++++++++++
+>  1 file changed, 32 insertions(+)
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+> index da4edb1..22fb140 100644
+> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+> @@ -39,6 +39,25 @@ Required properties:
+>  	"cal"	- reference clock for RCLK delay calibration (optional)
+>  	"sleep"	- sleep clock for RCLK delay calibration (optional)
+>  
+> +Optional Properties:
+> +* Following bus parameters are required for bus bw voting:
+
+"bus bw voting" sounds a bit vague to me. I would say instead:
+
+The following DT properties are required for interconnect bandwidth scaling.
+
+> +- interconnects: Pairs of phandles and interconnect provider specifier
+> +		 to denote the edge source and destination ports of
+> +		 the interconnect path. Please refer to
+> +		 Documentation/devicetree/bindings/interconnect/
+> +		 for more details.
+> +- interconnect-names: List of interconnect path name strings sorted in the same
+> +		order as the interconnects property. Consumers drivers will use
+> +		interconnect-names to match interconnect paths with interconnect
+> +		specifiers. Please refer to Documentation/devicetree/bindings/
+> +		interconnect/ for more details.
+
+Please describe here what there are two paths are for sdhc and how they are
+expected to be named. You already responded to this question, so please include
+this information here.
+Hint: Refer to the Documentation for how we described it for other subsystems.
+
+> +- msm-bus,name: string describing the bus path
+> +- msm-bus,num-cases: number of configurations in which sdhc can operate in
+> +- msm-bus,num-paths: number of paths to vote for
+> +- msm-bus,vectors-KBps: Takes a tuple <ib ab>, <ib ab> (2 tuples for 2
+> +				num-paths) The number of these entries *must*
+> +				be same as num-cases.
+
+If it has to be in DT, could we use this [1] instead of the above? The patches
+are not merged yet, but this might be the direction we want to go.
+
+Thanks,
+Georgi
+
+[1] http://lore.kernel.org/r/20190807223111.230846-1-saravanak@google.com
+
 > +
->         if (!data)
->                 return 0;
-> -
-> -       if (!is_power_of_2(data->blksz)) {
-> +       if (!is_power_of_2(data->blksz) && !variant->datactrl_odd_blocksz) {
-
-This is too early in the series. You need to deal with the DMA and pio
-issues, before releasing this constraint.
-
-In other words, I would rather split this patch in two pieces. One
-patch dealing with dma submit error path, placed first in the series
-and another patch that adds the odd block sizes variant and releases
-the constraint, which should comes last.
-
-Makes sense?
-
->                 dev_err(mmc_dev(host->mmc),
->                         "unsupported block size (%d bytes)\n", data->blksz);
->                 return -EINVAL;
-> @@ -515,7 +520,9 @@ int mmci_dma_start(struct mmci_host *host, unsigned int datactrl)
->                  "Submit MMCI DMA job, sglen %d blksz %04x blks %04x flags %08x\n",
->                  data->sg_len, data->blksz, data->blocks, data->flags);
->
-> -       host->ops->dma_start(host, &datactrl);
-> +       ret = host->ops->dma_start(host, &datactrl);
-> +       if (ret)
-> +               return ret;
->
->         /* Trigger the DMA transfer */
->         mmci_write_datactrlreg(host, datactrl);
-> @@ -872,9 +879,14 @@ int mmci_dmae_prep_data(struct mmci_host *host,
->  int mmci_dmae_start(struct mmci_host *host, unsigned int *datactrl)
->  {
->         struct mmci_dmae_priv *dmae = host->dma_priv;
-> +       int ret;
->
->         host->dma_in_progress = true;
-> -       dmaengine_submit(dmae->desc_current);
-> +       ret = dma_submit_error(dmaengine_submit(dmae->desc_current));
-> +       if (ret < 0) {
-> +               host->dma_in_progress = false;
-> +               return ret;
-> +       }
->         dma_async_issue_pending(dmae->cur);
->
->         *datactrl |= MCI_DPSM_DMAENABLE;
-> diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-> index 833236ecb31e..c7f94726eaa1 100644
-> --- a/drivers/mmc/host/mmci.h
-> +++ b/drivers/mmc/host/mmci.h
-> @@ -278,7 +278,10 @@ struct mmci_host;
->   * @stm32_clkdiv: true if using a STM32-specific clock divider algorithm
->   * @datactrl_mask_ddrmode: ddr mode mask in datactrl register.
->   * @datactrl_mask_sdio: SDIO enable mask in datactrl register
-> - * @datactrl_blksz: block size in power of two
-> + * @datactrl_blocksz: block size in power of two
-> + * @datactrl_odd_blocksz: true if block any sizes are supported, such as one
-> + *                   single character, as is necessary when using some SDIO
-> + *                   devices.
->   * @datactrl_first: true if data must be setup before send command
->   * @datacnt_useless: true if you could not use datacnt register to read
->   *                  remaining data
-> @@ -323,6 +326,7 @@ struct variant_data {
->         unsigned int            datactrl_mask_ddrmode;
->         unsigned int            datactrl_mask_sdio;
->         unsigned int            datactrl_blocksz;
-> +       u8                      datactrl_odd_blocksz:1;
->         u8                      datactrl_first:1;
->         u8                      datacnt_useless:1;
->         u8                      st_sdio:1;
-> --
-> 2.21.0
->
-
-Kind regards
-Uffe
+>  Example:
+>  
+>  	sdhc_1: sdhci@f9824900 {
+> @@ -56,6 +75,19 @@ Example:
+>  
+>  		clocks = <&gcc GCC_SDCC1_APPS_CLK>, <&gcc GCC_SDCC1_AHB_CLK>;
+>  		clock-names = "core", "iface";
+> +		interconnects = <&qnoc 50 &qnoc 512>,
+> +				<&qnoc 1 &qnoc 544>;
+> +		interconnect-names = "sdhc-ddr","cpu-sdhc";
+> +		msm-bus,name = "sdhc1";
+> +		msm-bus,num-cases = <3>;
+> +		msm-bus,num-paths = <2>;
+> +		msm-bus,vectors-KBps =
+> +		/* No Vote */
+> +		<0 0>, <0 0>,
+> +		/* 50 MB/s */
+> +		<130718 200000>, <133320 133320>,
+> +		/* 200 MB/s */
+> +		<1338562 4096000>, <1338562 4096000>;
+>  	};
+>  
+>  	sdhc_2: sdhci@f98a4900 {
+> 
