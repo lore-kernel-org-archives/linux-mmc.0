@@ -1,13 +1,13 @@
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.14 115/115] mmc: tmio: fix SCC error handling to avoid false positive CRC error
-Date: Tue, 12 Nov 2019 20:56:22 -0500
-Message-ID: <20191113015622.11592-115-sashal@kernel.org>
-References: <20191113015622.11592-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.19 208/209] mmc: tmio: fix SCC error handling to avoid false positive CRC error
+Date: Tue, 12 Nov 2019 20:50:24 -0500
+Message-ID: <20191113015025.9685-208-sashal@kernel.org>
+References: <20191113015025.9685-1-sashal@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20191113015622.11592-1-sashal@kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <20191113015025.9685-1-sashal@kernel.org>
+Sender: stable-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc: Takeshi Saito <takeshi.saito.xv@renesas.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Simon Horman <horms+renesas@verge.net.au>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Ulf Hansson <ulf.hansson@linaro.org>, Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -42,10 +42,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 2 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
-index 01e51b7945750..2fd862dc97701 100644
+index 94c43c3d3ae58..35630ccbe9e5d 100644
 --- a/drivers/mmc/host/tmio_mmc_core.c
 +++ b/drivers/mmc/host/tmio_mmc_core.c
-@@ -914,8 +914,9 @@ static void tmio_mmc_finish_request(struct tmio_mmc_host *host)
+@@ -926,8 +926,9 @@ static void tmio_mmc_finish_request(struct tmio_mmc_host *host)
  	if (mrq->cmd->error || (mrq->data && mrq->data->error))
  		tmio_mmc_abort_dma(host);
  
