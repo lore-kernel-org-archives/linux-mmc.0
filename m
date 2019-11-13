@@ -1,27 +1,43 @@
 From: Ivan Mikhaylov <i.mikhaylov@yadro.com>
-Subject: [PATCH 0/2] add inversion signal presence support
-Date: Wed, 13 Nov 2019 18:52:35 +0300
-Message-ID: <20191113155237.30646-1-i.mikhaylov@yadro.com>
+Subject: [PATCH 1/2] aspeed: dts: add sd card for vesnin
+Date: Wed, 13 Nov 2019 18:52:36 +0300
+Message-ID: <20191113155237.30646-2-i.mikhaylov@yadro.com>
+References: <20191113155237.30646-1-i.mikhaylov@yadro.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20191113155237.30646-1-i.mikhaylov@yadro.com>
 Sender: linux-kernel-owner@vger.kernel.org
 Cc: Ivan Mikhaylov <i.mikhaylov@yadro.com>, Joel Stanley <joel@jms.id.au>, Andrew Jeffery <andrew@aj.id.au>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-aspeed@lists.ozlabs.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, openbmc@lists.ozlabs.org
 List-Id: linux-mmc@vger.kernel.org
 
-Vesnin BMC uses microSD with card presence signal inversion in the
-schematics. Change the .get_cd callback to detect 'cd-inverted' option
-in dts. There is no WP switch, due to this 'disable-wp' also was added
-into vesnin dts for sdhci.
+Presence signal is inverted for vesnin boards, 'cd-inverted' added
+for invertion signal enablement. Vesnin BMC uses microSD, there is
+no WP switch, 'disable-wp' is used for this purpose.
 
-Ivan Mikhaylov (2):
-  aspeed: dts: add sd card for vesnin
-  mmc: sdhci-of-aspeed: add inversion signal presence
+Signed-off-by: Ivan Mikhaylov <i.mikhaylov@yadro.com>
 
- arch/arm/boot/dts/aspeed-bmc-opp-vesnin.dts | 13 ++++++++++++
- drivers/mmc/host/sdhci-of-aspeed.c          | 23 +++++++++++++++++++++
- 2 files changed, 36 insertions(+)
-
+diff --git a/arch/arm/boot/dts/aspeed-bmc-opp-vesnin.dts b/arch/arm/boot/dts/aspeed-bmc-opp-vesnin.dts
+index a27c88d23056..7ae3436e0d99 100644
+--- a/arch/arm/boot/dts/aspeed-bmc-opp-vesnin.dts
++++ b/arch/arm/boot/dts/aspeed-bmc-opp-vesnin.dts
+@@ -232,3 +232,16 @@
+ &wdt2 {
+ 	aspeed,alt-boot;
+ };
++
++&sdmmc {
++	status = "okay";
++};
++
++&sdhci1 {
++	status = "okay";
++
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_sd2_default>;
++	cd-inverted;
++	disable-wp;
++};
 -- 
 2.20.1
