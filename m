@@ -1,60 +1,65 @@
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.19 208/209] mmc: tmio: fix SCC error handling to avoid false positive CRC error
-Date: Tue, 12 Nov 2019 20:50:24 -0500
-Message-ID: <20191113015025.9685-208-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.19 139/209] mmc: renesas_sdhi_internal_dmac: set scatter/gather max segment size
+Date: Tue, 12 Nov 2019 20:49:15 -0500
+Message-ID: <20191113015025.9685-139-sashal@kernel.org>
 References: <20191113015025.9685-1-sashal@kernel.org>
 Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Return-path: <stable-owner@vger.kernel.org>
 In-Reply-To: <20191113015025.9685-1-sashal@kernel.org>
 Sender: stable-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc: Takeshi Saito <takeshi.saito.xv@renesas.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Simon Horman <horms+renesas@verge.net.au>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Ulf Hansson <ulf.hansson@linaro.org>, Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org
+Cc: =?UTF-8?q?Niklas=20S=C3=B6derlund?= <niklas.soderlund+renesas@ragnatech.se>, Geert Uytterhoeven <geert+renesas@glider.be>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-From: Takeshi Saito <takeshi.saito.xv@renesas.com>
+From: Niklas Söderlund <niklas.soderlund+renesas@ragnatech.se>
 
-[ Upstream commit 51b72656bb39fdcb8f3174f4007bcc83ad1d275f ]
+[ Upstream commit 54541815b43f4e49c82628bf28bbb31d86d2f58a ]
 
-If an SCC error occurs during a read/write command execution, a false
-positive CRC error message is output.
+Fix warning when running with CONFIG_DMA_API_DEBUG_SG=y by allocating a
+device_dma_parameters structure and filling in the max segment size. The
+size used is the result of a discussion with Renesas hardware engineers
+and unfortunately not found in the datasheet.
 
-mmcblk0: response CRC error sending r/w cmd command, card status 0x900
+  renesas_sdhi_internal_dmac ee140000.sd: DMA-API: mapping sg segment
+  longer than device claims to support [len=126976] [max=65536]
 
-check_scc_error() checks SCC_RVSREQ.RVSERR bit. RVSERR detects a
-correction error in the next (up or down) delay tap position. However,
-since the command is successful, only retuning needs to be executed.
-This has been confirmed by HW engineers.
-
-Thus, on SCC error, set retuning flag instead of setting an error code.
-
-Fixes: b85fb0a1c8ae ("mmc: tmio: Fix SCC error detection")
-Signed-off-by: Takeshi Saito <takeshi.saito.xv@renesas.com>
-[wsa: updated comment and commit message, removed some braces]
+Reported-by: Geert Uytterhoeven <geert+renesas@glider.be>
+Signed-off-by: Niklas Söderlund <niklas.soderlund+renesas@ragnatech.se>
+[wsa: simplified some logic after validating intended dma_parms life cycle
+      and added comment]
 Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Reviewed-by: Simon Horman <horms+renesas@verge.net.au>
-Reviewed-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-Cc: stable@vger.kernel.org
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 Signed-off-by: Sasha Levin <sashal@kernel.org>
 ---
- drivers/mmc/host/tmio_mmc_core.c | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+ drivers/mmc/host/renesas_sdhi_internal_dmac.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
 
-diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
-index 94c43c3d3ae58..35630ccbe9e5d 100644
---- a/drivers/mmc/host/tmio_mmc_core.c
-+++ b/drivers/mmc/host/tmio_mmc_core.c
-@@ -926,8 +926,9 @@ static void tmio_mmc_finish_request(struct tmio_mmc_host *host)
- 	if (mrq->cmd->error || (mrq->data && mrq->data->error))
- 		tmio_mmc_abort_dma(host);
+diff --git a/drivers/mmc/host/renesas_sdhi_internal_dmac.c b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
+index f4aefa8954bfc..382172fb3da8f 100644
+--- a/drivers/mmc/host/renesas_sdhi_internal_dmac.c
++++ b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
+@@ -310,12 +310,20 @@ static const struct soc_device_attribute gen3_soc_whitelist[] = {
+ static int renesas_sdhi_internal_dmac_probe(struct platform_device *pdev)
+ {
+ 	const struct soc_device_attribute *soc = soc_device_match(gen3_soc_whitelist);
++	struct device *dev = &pdev->dev;
  
-+	/* SCC error means retune, but executed command was still successful */
- 	if (host->check_scc_error && host->check_scc_error(host))
--		mrq->cmd->error = -EILSEQ;
-+		mmc_retune_needed(host->mmc);
+ 	if (!soc)
+ 		return -ENODEV;
  
- 	/* If SET_BLOCK_COUNT, continue with main command */
- 	if (host->mrq && !mrq->cmd->error) {
+ 	global_flags |= (unsigned long)soc->data;
+ 
++	dev->dma_parms = devm_kzalloc(dev, sizeof(*dev->dma_parms), GFP_KERNEL);
++	if (!dev->dma_parms)
++		return -ENOMEM;
++
++	/* value is max of SD_SECCNT. Confirmed by HW engineers */
++	dma_set_max_seg_size(dev, 0xffffffff);
++
+ 	return renesas_sdhi_probe(pdev, &renesas_sdhi_internal_dmac_dma_ops);
+ }
+ 
 -- 
 2.20.1
