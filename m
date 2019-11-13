@@ -1,29 +1,55 @@
-From: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v3 01/12] Documentation: dt: wireless: update wl1251 for
- sdio
-Date: Wed, 13 Nov 2019 07:33:37 -0600
-Message-ID: <20191113133337.GA3987@bogus>
-References: <cover.1573122644.git.hns@goldelico.com>
- <17b12e91c878dcb74160e3df5f88bc8a9e3f7fce.1573122644.git.hns@goldelico.com>
+From: <Ludovic.Desroches@microchip.com>
+Subject: Re: [PATCH 1/2] mmc: atmel-mci: Use dma_request_chan() directly for
+ channel request
+Date: Wed, 13 Nov 2019 13:34:29 +0000
+Message-ID: <20191113133417.zrz5zcwuyxjskaes@M43218.corp.atmel.com>
+References: <20191113093616.32474-1-peter.ujfalusi@ti.com>
+ <20191113093616.32474-2-peter.ujfalusi@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <17b12e91c878dcb74160e3df5f88bc8a9e3f7fce.1573122644.git.hns-xXXSsgcRVICgSpxsJD1C4w@public.gmane.org>
-Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: =?iso-8859-1?Q?Beno=EEt?= Cousson <bcousson-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Russell King <linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Kalle Valo <kvalo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Mike Rapoport <rppt-tEXmvtCZX7AybS5Ee8rs3A@public.gmane.org>, David Sterba <dsterba-IBi9RG/b67k@public.gmane.org>, "Rafael J. Wysocki" <rafael.j.wysocki-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Petr Mladek <pmladek-IBi9RG/b67k@public.gmane.org>, Sakari Ailus <sakari.ailus-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, "H. Nikolaus Schaller" <hns-xXXSsgcRVICgSpxsJD1C4w@public.gmane.org>, Kefeng Wang <wangkefeng.wang-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>, Yangtao Li <tiny.windzz-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Alexios Zavras <alexios.zavras-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Allison Randal <allison-wcfNWazeolPR7s880joybQ@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, John Stultz <john.stultz@>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20191113093616.32474-2-peter.ujfalusi@ti.com>
+Content-Language: en-US
+Content-ID: <14F9A1929CF5AE40891E63ADE53B85E2@namprd11.prod.outlook.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: peter.ujfalusi@ti.com
+Cc: ulf.hansson@linaro.org, vkoul@kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, Nicolas.Ferre@microchip.com, alexandre.belloni@bootlin.com
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu,  7 Nov 2019 11:30:34 +0100, "H. Nikolaus Schaller" wrote:
-> The standard method for sdio devices connected to
-> an sdio interface is to define them as a child node
-> like we can see with wlcore.
-> 
-> Signed-off-by: H. Nikolaus Schaller <hns-xXXSsgcRVICgSpxsJD1C4w@public.gmane.org>
-> Acked-by: Kalle Valo <kvalo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-> ---
->  .../bindings/net/wireless/ti,wl1251.txt       | 26 +++++++++++++++++++
->  1 file changed, 26 insertions(+)
-> 
+On Wed, Nov 13, 2019 at 11:36:15AM +0200, Peter Ujfalusi wrote:
+>=20
+> dma_request_slave_channel_reason() is:
+> #define dma_request_slave_channel_reason(dev, name) \
+> 	dma_request_chan(dev, name)
+>=20
+> Signed-off-by: Peter Ujfalusi <peter.ujfalusi@ti.com>
+Acked-by: Ludovic Desroches <ludovic.desroches@microchip.com>
 
-Reviewed-by: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Thanks
+> ---
+>  drivers/mmc/host/atmel-mci.c | 3 +--
+>  1 file changed, 1 insertion(+), 2 deletions(-)
+>=20
+> diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+> index 34c992d87529..6f065bb5c55a 100644
+> --- a/drivers/mmc/host/atmel-mci.c
+> +++ b/drivers/mmc/host/atmel-mci.c
+> @@ -2347,8 +2347,7 @@ static void atmci_cleanup_slot(struct atmel_mci_slo=
+t *slot,
+> =20
+>  static int atmci_configure_dma(struct atmel_mci *host)
+>  {
+> -	host->dma.chan =3D dma_request_slave_channel_reason(&host->pdev->dev,
+> -							"rxtx");
+> +	host->dma.chan =3D dma_request_chan(&host->pdev->dev, "rxtx");
+> =20
+>  	if (PTR_ERR(host->dma.chan) =3D=3D -ENODEV) {
+>  		struct mci_platform_data *pdata =3D host->pdev->dev.platform_data;
+> --=20
+> Peter
+>=20
+> Texas Instruments Finland Oy, Porkkalankatu 22, 00180 Helsinki.
+> Y-tunnus/Business ID: 0615521-4. Kotipaikka/Domicile: Helsinki
+>=20
+>=20
