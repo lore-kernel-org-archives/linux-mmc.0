@@ -1,67 +1,29 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH 3/3] mmc: mmci: Proper PIO residue handling
-Date: Wed, 13 Nov 2019 14:24:27 +0100
-Message-ID: <CACRpkdZLiy4BSh1JYtQj0HjKk3=qdyKoj9tQv4HrthDi=4e-Bg@mail.gmail.com>
-References: <20191113075335.31775-1-linus.walleij@linaro.org>
- <20191113075335.31775-4-linus.walleij@linaro.org>
+From: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v3 01/12] Documentation: dt: wireless: update wl1251 for
+ sdio
+Date: Wed, 13 Nov 2019 07:33:37 -0600
+Message-ID: <20191113133337.GA3987@bogus>
+References: <cover.1573122644.git.hns@goldelico.com>
+ <17b12e91c878dcb74160e3df5f88bc8a9e3f7fce.1573122644.git.hns@goldelico.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20191113075335.31775-4-linus.walleij@linaro.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Stephan Gerhold <stephan@gerhold.net>
-Cc: Niklas Cassel <niklas.cassel@linaro.org>, Russell King <rmk+kernel@armlinux.org.uk>, Russell King <linux@arm.linux.org.uk>, Ludovic Barre <ludovic.barre@st.com>, Brian Masney <masneyb@onstation.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <17b12e91c878dcb74160e3df5f88bc8a9e3f7fce.1573122644.git.hns-xXXSsgcRVICgSpxsJD1C4w@public.gmane.org>
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: =?iso-8859-1?Q?Beno=EEt?= Cousson <bcousson-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Russell King <linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Kalle Valo <kvalo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Mike Rapoport <rppt-tEXmvtCZX7AybS5Ee8rs3A@public.gmane.org>, David Sterba <dsterba-IBi9RG/b67k@public.gmane.org>, "Rafael J. Wysocki" <rafael.j.wysocki-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Petr Mladek <pmladek-IBi9RG/b67k@public.gmane.org>, Sakari Ailus <sakari.ailus-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, "H. Nikolaus Schaller" <hns-xXXSsgcRVICgSpxsJD1C4w@public.gmane.org>, Kefeng Wang <wangkefeng.wang-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>, Yangtao Li <tiny.windzz-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Alexios Zavras <alexios.zavras-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Allison Randal <allison-wcfNWazeolPR7s880joybQ@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, John Stultz <john.stultz@>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, Nov 13, 2019 at 8:53 AM Linus Walleij <linus.walleij@linaro.org> wrote:
+On Thu,  7 Nov 2019 11:30:34 +0100, "H. Nikolaus Schaller" wrote:
+> The standard method for sdio devices connected to
+> an sdio interface is to define them as a child node
+> like we can see with wlcore.
+> 
+> Signed-off-by: H. Nikolaus Schaller <hns-xXXSsgcRVICgSpxsJD1C4w@public.gmane.org>
+> Acked-by: Kalle Valo <kvalo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+> ---
+>  .../bindings/net/wireless/ti,wl1251.txt       | 26 +++++++++++++++++++
+>  1 file changed, 26 insertions(+)
+> 
 
-> +               /* Pack the residue into a 32bit word */
-> +               for (i = 0; i < host->pio_write_residue_sz; i++) {
-> +                       val |= host->pio_write_residue[i];
-> +                       val <<= 8;
-> +               }
-> +               /* Top up with new data */
-> +               for (i = 0; i < fill; i++) {
-> +                       val |= *ptr;
-> +                       val <<= 8;
-> +                       ptr++;
-> +                       remain--;
-> +               }
-
-I'm worried that I might have gotten this wrong.
-
-iowrite32_rep() reads the data little-endian (native endianness)
-from memory does it not?
-
-Bytes  [0 1 2 3] end up in the FIFO like [3 2 1 0].
-
-So it will pack the first byte into the lowest 8 bits, second byte into
-bits 8-15 etc.
-
-So I should rewrite all the loops like this:
-
-for (i = 0; i < host->pio_write_residue_sz; i++) {
-        val |= (host->pio_write_residue[i] << 24);
-        val >>= 8;
-}
-
-So I shift the value down from the high bits instead of the
-other way around.
-
-This also gives a pretty plausible hint att what might be wrong with the
-DMA in non-divisible by 4.
-
-As suggested by Stephan in another context, I will try to set up my
-own test rig for this.
-
-Yours,
-Linus Walleij
+Reviewed-by: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
