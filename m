@@ -1,55 +1,72 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v3 1/3] mwifiex: Re-work support for SDIO HW reset
-Date: Thu, 14 Nov 2019 16:20:44 +0100
-Message-ID: <CAPDyKFrjEcsGKOwtRtns4a3dWExTvpbe2_16Gp9rwwxGbxynAg@mail.gmail.com>
-References: <20191112124021.8718-1-ulf.hansson@linaro.org> <20191112124021.8718-2-ulf.hansson@linaro.org>
- <87zhgybids.fsf@tynnyri.adurom.net>
+From: Ivan Mikhaylov <i.mikhaylov@yadro.com>
+Subject: Re: [PATCH v2 2/2] mmc: sdhci-of-aspeed: add inversion
+ sighttps://elixir.bootlin.com/linux/v4.6/ident/sdhci_opsnal presence
+Date: Thu, 14 Nov 2019 20:19:31 +0300
+Message-ID: <b443738f5e2a3c7ba96b329a8347374f7f934483.camel@yadro.com>
+References: <20191114125435.27756-1-i.mikhaylov@yadro.com>
+         <20191114125435.27756-3-i.mikhaylov@yadro.com>
+         <fcb5f8b5-40b9-6497-b24d-0b73e2525949@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <87zhgybids.fsf-R2sXevljlEEH1xkMTmwrwqxOck334EZe@public.gmane.org>
-Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Kalle Valo <kvalo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Cc: "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Matthias Kaehlcke <mka-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Wen Gong <wgong-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Erik Stromdahl <erik.stromdahl-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Eyal Reizer <eyalreizer-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-wireless <linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <fcb5f8b5-40b9-6497-b24d-0b73e2525949@intel.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Joel Stanley <joel@jms.id.au>, Andrew Jeffery <andrew@aj.id.au>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Ulf Hansson <ulf.hansson@linaro.org>, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-aspeed@lists.ozlabs.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, openbmc@lists.ozlabs.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, 14 Nov 2019 at 16:13, Kalle Valo <kvalo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org> wrote:
->
-> Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> writes:
->
-> > The SDIO HW reset procedure in mwifiex_sdio_card_reset_work() is broken,
-> > when the SDIO card is shared with another SDIO func driver. This is the
-> > case when the Bluetooth btmrvl driver is being used in combination with
-> > mwifiex. More precisely, when mwifiex_sdio_card_reset_work() runs to resets
-> > the SDIO card, the btmrvl driver doesn't get notified about it. Beyond that
-> > point, the btmrvl driver will fail to communicate with the SDIO card.
-> >
-> > This is a generic problem for SDIO func drivers sharing an SDIO card, which
-> > are about to be addressed in subsequent changes to the mmc core and the
-> > mmc_hw_reset() interface. In principle, these changes means the
-> > mmc_hw_reset() interface starts to return 1 if the are multiple drivers for
-> > the SDIO card, as to indicate to the caller that the reset needed to be
-> > scheduled asynchronously through a hotplug mechanism of the SDIO card.
-> >
-> > Let's prepare the mwifiex driver to support the upcoming new behaviour of
-> > mmc_hw_reset(), which means extending the mwifiex_sdio_card_reset_work() to
-> > support the asynchronous SDIO HW reset path. This also means, we need to
-> > allow the ->remove() callback to run, without waiting for the FW to be
-> > loaded. Additionally, during system suspend, mwifiex_sdio_suspend() may be
-> > called when a reset has been scheduled, but waiting to be executed. In this
-> > scenario let's simply return -EBUSY to abort the suspend process, as to
-> > allow the reset to be completed first.
-> >
-> > Reviewed-by: Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-> > Tested-by: Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-> > Signed-off-by: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->
-> Look good to me. Ulf, I assume you are going to take this so here's my
-> ack:
->
-> Acked-by: Kalle Valo <kvalo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+On Thu, 2019-11-14 at 15:10 +0200, Adrian Hunter wrote:
+> On 14/11/19 2:54 PM, Ivan Mikhaylov wrote:
+> > Change the default .get_cd callback. Add inverted signal card detection
+> > check.
+> > 
+> > Signed-off-by: Ivan Mikhaylov <i.mikhaylov@yadro.com>
+> > 
+> > diff --git a/drivers/mmc/host/sdhci-of-aspeed.c b/drivers/mmc/host/sdhci-of-
+> > aspeed.c
+> > index 8962f6664381..186559ee8fcc 100644
+> > --- a/drivers/mmc/host/sdhci-of-aspeed.c
+> > +++ b/drivers/mmc/host/sdhci-of-aspeed.c
+> > @@ -143,6 +143,19 @@ static inline int aspeed_sdhci_calculate_slot(struct
+> > aspeed_sdhci *dev,
+> >  	return (delta / 0x100) - 1;
+> >  }
+> >  
+> > +static int aspeed_get_cd(struct mmc_host *mmc)
+> > +{
+> > +	struct sdhci_host *host = mmc_priv(mmc);
+> > +
+> > +	int present = !!(sdhci_readl(host, SDHCI_PRESENT_STATE)
+> > +			 & SDHCI_CARD_PRESENT);
+> > +
+> > +	if (mmc->caps2 & MMC_CAP2_CD_ACTIVE_HIGH)
+> > +		present = !present;
+> 
+> Perhaps safer to flip the bit using CONFIG_MMC_SDHCI_IO_ACCESSORS and
+> ->readl() callback
+> 
 
-Thanks, I have queued it via my tree this time.
+Sorry, don't quite understand what you're saying. You want to instantiate
+'.read_l' callback instead of '.get_cd' in sdhci_ops and substitute the real
+value?
 
-Kind regards
-Uffe
+res = readl(base, reg);
+if (reg == SDHCI_PRESENT_STATE)
+	if (mmc->caps2 & MMC_CAP2_CD_ACTIVE_HIGH)
+		return !res;
+return res;
+
+Something like this?
+
+>  
+> > +	host->mmc_host_ops.get_cd = aspeed_get_cd;
+> > +	if (of_property_read_bool(pdev->dev.of_node, "cd-inverted"))
+> > +		dev_info(&pdev->dev, "aspeed: sdhci: presence signal inversion
+> > enabled\n");
+> 
+> Is this print really needed?
+> 
+I can remove it if you think it's redundant.
+
+Thanks.
