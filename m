@@ -1,141 +1,86 @@
-From: Ludovic Barre <ludovic.Barre@st.com>
-Subject: [PATCH 1/1] mmc: mmci: add threaded irq to abort DPSM of
- non-functional state
-Date: Wed, 13 Nov 2019 18:25:14 +0100
-Message-ID: <20191113172514.19052-1-ludovic.Barre@st.com>
+From: "Milton Miller II" <miltonm@us.ibm.com>
+Subject: Re:  [PATCH 2/2] mmc: sdhci-of-aspeed: add inversion signal presence
+Date: Thu, 14 Nov 2019 00:04:09 +0000
+Message-ID: <OF20F73C7F.F32D5A9E-ON002584B1.00836403-002584B2.0000614A@notes.na.collabserv.com>
+References: <20191113155237.30646-3-i.mikhaylov@yadro.com>,<20191113155237.30646-1-i.mikhaylov@yadro.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>
-Cc: devicetree@vger.kernel.org, Alexandre Torgue <alexandre.torgue@st.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, srinivas.kandagatla@linaro.org, Ludovic Barre <ludovic.barre@st.com>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, linux-stm32@st-md-mailman.stormreply.com, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20191113155237.30646-3-i.mikhaylov@yadro.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ivan Mikhaylov <i.mikhaylov@yadro.com>
+Cc: Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, linux-aspeed@lists.ozlabs.org, Andrew Jeffery <andrew@aj.id.au>, openbmc@lists.ozlabs.org, linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, linux-kernel@vger.kernel.org, Rob Herring <robh+dt@kernel.org>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-From: Ludovic Barre <ludovic.barre@st.com>
+On 11/13/2019 around 09:57AM in some time zone, Ivan Mikhaylov wrote:
+>Change the default .get_cd callback. Add inverted signal card
+>detection
+>check.
+>
+>Signed-off-by: Ivan Mikhaylov <i.mikhaylov@yadro.com>
+>
+>diff --git a/drivers/mmc/host/sdhci-of-aspeed.c
+>b/drivers/mmc/host/sdhci-of-aspeed.c
+>index 8962f6664381..8eded8a6ed8d 100644
+>--- a/drivers/mmc/host/sdhci-of-aspeed.c
+>+++ b/drivers/mmc/host/sdhci-of-aspeed.c
+>@@ -31,6 +31,7 @@ struct aspeed_sdc {
+> struct aspeed_sdhci {
+> 	struct aspeed_sdc *parent;
+> 	u32 width_mask;
+>+	u8 cd_inverted;
 
-If datatimeout occurs on R1B request, the Data Path State Machine stays
-in busy and is non-functional. Only a reset aborts the DPSM.
+The mmc core/host.c checks the device tree and stores the
+result as mmc->caps2 & MMC_CAP2_CD_ACTIVE_HIGH
 
-Like a reset must be outside of critical section, this patch adds
-threaded irq function to release state machine. In this case,
-the mmc_request_done is called at the end of threaded irq and
-skipped into irq handler.
+This appears to be accessale as sdhci_host->mmc->caps2.
 
-Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
----
- drivers/mmc/host/mmci.c | 44 ++++++++++++++++++++++++++++++++++++-----
- drivers/mmc/host/mmci.h |  1 +
- 2 files changed, 40 insertions(+), 5 deletions(-)
+Please reuse this bit like the other drivers.
 
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 40e72c30ea84..ec6e249c87ca 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -556,6 +556,9 @@ static void mmci_dma_error(struct mmci_host *host)
- static void
- mmci_request_end(struct mmci_host *host, struct mmc_request *mrq)
- {
-+	if (host->irq_action == IRQ_WAKE_THREAD)
-+		return;
-+
- 	writel(0, host->base + MMCICOMMAND);
- 
- 	BUG_ON(host->data);
-@@ -1321,6 +1324,7 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
- 	} else if (host->variant->busy_timeout && busy_resp &&
- 		   status & MCI_DATATIMEOUT) {
- 		cmd->error = -ETIMEDOUT;
-+		host->irq_action = IRQ_WAKE_THREAD;
- 	} else {
- 		cmd->resp[0] = readl(base + MMCIRESPONSE0);
- 		cmd->resp[1] = readl(base + MMCIRESPONSE1);
-@@ -1532,9 +1536,9 @@ static irqreturn_t mmci_irq(int irq, void *dev_id)
- {
- 	struct mmci_host *host = dev_id;
- 	u32 status;
--	int ret = 0;
- 
- 	spin_lock(&host->lock);
-+	host->irq_action = IRQ_HANDLED;
- 
- 	do {
- 		status = readl(host->base + MMCISTATUS);
-@@ -1574,12 +1578,41 @@ static irqreturn_t mmci_irq(int irq, void *dev_id)
- 		if (host->variant->busy_detect_flag)
- 			status &= ~host->variant->busy_detect_flag;
- 
--		ret = 1;
- 	} while (status);
- 
- 	spin_unlock(&host->lock);
- 
--	return IRQ_RETVAL(ret);
-+	return host->irq_action;
-+}
-+
-+/*
-+ * mmci_irq_threaded is call if the mmci host need to release state machines
-+ * before to terminate the request.
-+ * If datatimeout occurs on R1B request, the Data Path State Machine stays
-+ * in busy and is non-functional. Only a reset can to abort the DPSM.
-+ */
-+static irqreturn_t mmci_irq_threaded(int irq, void *dev_id)
-+{
-+	struct mmci_host *host = dev_id;
-+	unsigned long flags;
-+
-+	if (host->rst) {
-+		reset_control_assert(host->rst);
-+		udelay(2);
-+		reset_control_deassert(host->rst);
-+	}
-+
-+	spin_lock_irqsave(&host->lock, flags);
-+	writel(host->clk_reg, host->base + MMCICLOCK);
-+	writel(host->pwr_reg, host->base + MMCIPOWER);
-+	writel(MCI_IRQENABLE | host->variant->start_err,
-+	       host->base + MMCIMASK0);
-+
-+	host->irq_action = IRQ_HANDLED;
-+	mmci_request_end(host, host->mrq);
-+	spin_unlock_irqrestore(&host->lock, flags);
-+
-+	return host->irq_action;
- }
- 
- static void mmci_request(struct mmc_host *mmc, struct mmc_request *mrq)
-@@ -2071,8 +2104,9 @@ static int mmci_probe(struct amba_device *dev,
- 			goto clk_disable;
- 	}
- 
--	ret = devm_request_irq(&dev->dev, dev->irq[0], mmci_irq, IRQF_SHARED,
--			DRIVER_NAME " (cmd)", host);
-+	ret = devm_request_threaded_irq(&dev->dev, dev->irq[0], mmci_irq,
-+					mmci_irq_threaded, IRQF_SHARED,
-+					DRIVER_NAME " (cmd)", host);
- 	if (ret)
- 		goto clk_disable;
- 
-diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-index 158e1231aa23..5e63c0596364 100644
---- a/drivers/mmc/host/mmci.h
-+++ b/drivers/mmc/host/mmci.h
-@@ -412,6 +412,7 @@ struct mmci_host {
- 
- 	struct timer_list	timer;
- 	unsigned int		oldstat;
-+	u32			irq_action;
- 
- 	/* pio stuff */
- 	struct sg_mapping_iter	sg_miter;
--- 
-2.17.1
+> };
+> 
+> static void aspeed_sdc_configure_8bit_mode(struct aspeed_sdc *sdc,
+>@@ -143,6 +144,21 @@ static inline int
+>aspeed_sdhci_calculate_slot(struct aspeed_sdhci *dev,
+> 	return (delta / 0x100) - 1;
+> }
+> 
+>+static int aspeed_get_cd(struct mmc_host *mmc)
+>+{
+>+	struct aspeed_sdhci *aspeed_sdhci;
+>+	struct sdhci_pltfm_host *pltfm_priv;
+>+	struct sdhci_host *host = mmc_priv(mmc);
+>+
+>+	int presence = !!(sdhci_readl(host, SDHCI_PRESENT_STATE)
+>+			 & SDHCI_CARD_PRESENT);
+>+
+>+	pltfm_priv = sdhci_priv(host);
+>+	aspeed_sdhci = sdhci_pltfm_priv(pltfm_priv);
+>+
+>+	return presence ^ aspeed_sdhci->cd_inverted;
+>+}
+>+
+> static int aspeed_sdhci_probe(struct platform_device *pdev)
+> {
+> 	struct sdhci_pltfm_host *pltfm_host;
+>@@ -183,6 +199,13 @@ static int aspeed_sdhci_probe(struct
+>platform_device *pdev)
+> 		goto err_pltfm_free;
+> 	}
+> 
+>+	dev->cd_inverted = 0;
+>+	host->mmc_host_ops.get_cd = aspeed_get_cd;
+>+	if (of_property_read_bool(pdev->dev.of_node, "cd-inverted")) {
+>+		dev->cd_inverted = 1;
+>+		dev_info(&pdev->dev, "aspeed: sdhci: presence signal inversion
+>enabled\n");
+>+	}
+>+
+> 	ret = mmc_of_parse(host->mmc);
+> 	if (ret)
+> 		goto err_sdhci_add;
+>-- 
+>2.20.1
+>
+>
