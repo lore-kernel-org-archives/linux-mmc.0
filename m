@@ -1,38 +1,56 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 0/2] mms: Use dma_request_chan() directly for channel request
-Date: Thu, 14 Nov 2019 13:53:30 +0100
-Message-ID: <CAPDyKFp15ZMq1f_xwrPSRbhU4M4SXhRzigA9-QMNBGSZj-YtJA@mail.gmail.com>
-References: <20191113093616.32474-1-peter.ujfalusi@ti.com>
+From: Ivan Mikhaylov <i.mikhaylov@yadro.com>
+Subject: [PATCH v2 2/2] mmc: sdhci-of-aspeed: add inversion signal presence
+Date: Thu, 14 Nov 2019 15:54:35 +0300
+Message-ID: <20191114125435.27756-3-i.mikhaylov@yadro.com>
+References: <20191114125435.27756-1-i.mikhaylov@yadro.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20191113093616.32474-1-peter.ujfalusi@ti.com>
+In-Reply-To: <20191114125435.27756-1-i.mikhaylov@yadro.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Peter Ujfalusi <peter.ujfalusi@ti.com>
-Cc: Ludovic Desroches <ludovic.desroches@microchip.com>, vkoul@kernel.org, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Nicolas Ferre <nicolas.ferre@microchip.com>, Alexandre Belloni <alexandre.belloni@bootlin.com>
+Cc: Ivan Mikhaylov <i.mikhaylov@yadro.com>, Joel Stanley <joel@jms.id.au>, Andrew Jeffery <andrew@aj.id.au>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-aspeed@lists.ozlabs.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, openbmc@lists.ozlabs.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, 13 Nov 2019 at 10:35, Peter Ujfalusi <peter.ujfalusi@ti.com> wrote:
->
-> Hi,
->
-> I'm going through the tree to remove dma_request_slave_channel_reason() as it
-> is just:
-> #define dma_request_slave_channel_reason(dev, name) \
->         dma_request_chan(dev, name)
->
-> Regards,
-> Peter
-> ---
-> Peter Ujfalusi (2):
->   mmc: atmel-mci: Use dma_request_chan() directly for channel request
->   mmc: moxart: Use dma_request_chan() directly for channel request
->
->  drivers/mmc/host/atmel-mci.c  | 3 +--
->  drivers/mmc/host/moxart-mmc.c | 4 ++--
->  2 files changed, 3 insertions(+), 4 deletions(-)
+Change the default .get_cd callback. Add inverted signal card detection
+check.
 
-Applied for next, thanks!
+Signed-off-by: Ivan Mikhaylov <i.mikhaylov@yadro.com>
 
-Kind regards
-Uffe
+diff --git a/drivers/mmc/host/sdhci-of-aspeed.c b/drivers/mmc/host/sdhci-of-aspeed.c
+index 8962f6664381..186559ee8fcc 100644
+--- a/drivers/mmc/host/sdhci-of-aspeed.c
++++ b/drivers/mmc/host/sdhci-of-aspeed.c
+@@ -143,6 +143,19 @@ static inline int aspeed_sdhci_calculate_slot(struct aspeed_sdhci *dev,
+ 	return (delta / 0x100) - 1;
+ }
+ 
++static int aspeed_get_cd(struct mmc_host *mmc)
++{
++	struct sdhci_host *host = mmc_priv(mmc);
++
++	int present = !!(sdhci_readl(host, SDHCI_PRESENT_STATE)
++			 & SDHCI_CARD_PRESENT);
++
++	if (mmc->caps2 & MMC_CAP2_CD_ACTIVE_HIGH)
++		present = !present;
++
++	return present;
++}
++
+ static int aspeed_sdhci_probe(struct platform_device *pdev)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host;
+@@ -183,6 +196,10 @@ static int aspeed_sdhci_probe(struct platform_device *pdev)
+ 		goto err_pltfm_free;
+ 	}
+ 
++	host->mmc_host_ops.get_cd = aspeed_get_cd;
++	if (of_property_read_bool(pdev->dev.of_node, "cd-inverted"))
++		dev_info(&pdev->dev, "aspeed: sdhci: presence signal inversion enabled\n");
++
+ 	ret = mmc_of_parse(host->mmc);
+ 	if (ret)
+ 		goto err_sdhci_add;
+-- 
+2.20.1
