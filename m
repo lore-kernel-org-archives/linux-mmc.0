@@ -1,95 +1,54 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: renesas_sdhi_internal_dmac: Add MMC_CAP_ERASE to
- Gen3 SoCs
-Date: Thu, 14 Nov 2019 13:48:41 +0100
-Message-ID: <CAPDyKFp5iqrFDM1EWnYBwFmQAiAA5FADDLAyuVVBgMu4Sx=x5w@mail.gmail.com>
-References: <20191112134808.23546-1-erosca@de.adit-jv.com> <20191112204952.GA2976@kunai>
- <CAPDyKFq8oVk26ruNA_R8HDXhMGKhDeHnL0q82xi40g1aeo109A@mail.gmail.com> <20191114113743.GA19656@vmlxhi-102.adit-jv.com>
+Subject: Re: [PATCH] dt-bindings: mmc: fsl-imx-esdhc: add imx8m compatible string
+Date: Thu, 14 Nov 2019 13:53:23 +0100
+Message-ID: <CAPDyKFoL7oJ+2hvi77N9=1hBKFgCXRUppcte1u=eF4z+Fz8TQw@mail.gmail.com>
+References: <1572949321-8193-1-git-send-email-peng.fan@nxp.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20191114113743.GA19656@vmlxhi-102.adit-jv.com>
+In-Reply-To: <1572949321-8193-1-git-send-email-peng.fan@nxp.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Eugeniu Rosca <erosca@de.adit-jv.com>
-Cc: Wolfram Sang <wsa@the-dreams.de>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, =?UTF-8?Q?Niklas_S=C3=B6derlund?= <niklas.soderlund@ragnatech.se>, Geert Uytterhoeven <geert@linux-m68k.org>, Simon Horman <horms+renesas@verge.net.au>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Eugeniu Rosca <roscaeugeniu@gmail.com>, Harish Jenny K N <harish_kandiga@mentor.com>, Andrew Gabbasov <andrew_gabbasov@mentor.com>
+To: Peng Fan <peng.fan@nxp.com>
+Cc: "robh+dt@kernel.org" <robh+dt@kernel.org>, "mark.rutland@arm.com" <mark.rutland@arm.com>, "shawnguo@kernel.org" <shawnguo@kernel.org>, "s.hauer@pengutronix.de" <s.hauer@pengutronix.de>, "festevam@gmail.com" <festevam@gmail.com>, Abel Vesa <abel.vesa@nxp.com>, "kernel@pengutronix.de" <kernel@pengutronix.de>, dl-linux-imx <linux-imx@nxp.com>, Aisheng Dong <aisheng.dong@nxp.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, 14 Nov 2019 at 12:37, Eugeniu Rosca <erosca@de.adit-jv.com> wrote:
+On Tue, 5 Nov 2019 at 11:23, Peng Fan <peng.fan@nxp.com> wrote:
 >
-> Hi everyone,
+> From: Peng Fan <peng.fan@nxp.com>
 >
-> On Thu, Nov 14, 2019 at 11:56:23AM +0100, Ulf Hansson wrote:
-> > On Tue, 12 Nov 2019 at 21:49, Wolfram Sang <wsa@the-dreams.de> wrote:
-> > >
-> > > On Tue, Nov 12, 2019 at 02:48:08PM +0100, Eugeniu Rosca wrote:
-> > > > From: Harish Jenny K N <harish_kandiga@mentor.com>
-> > > >
-> > > > Enable MMC_CAP_ERASE capability in the driver to allow
-> > > > erase/discard/trim requests.
-> > > >
-> > > > Suggested-by: Andrew Gabbasov <andrew_gabbasov@mentor.com>
-> > > > Signed-off-by: Harish Jenny K N <harish_kandiga@mentor.com>
-> > > > [erosca: Forward-port and test on v5.4-rc7 using H3ULCB-KF:
-> > > >          "blkdiscard /dev/mmcblk0" passes with this patch applied
-> > > >          and complains otherwise:
-> > > >        "BLKDISCARD ioctl failed: Operation not supported"]
-> > > > Signed-off-by: Eugeniu Rosca <erosca@de.adit-jv.com>
-> > >
-> > > Looks good to me. Just a generic question, probably more for Ulf:
-> > >
-> > > Why does this CAP_ERASE exist? As I understand, the driver only needs to
-> > > set the flag and no further handling is required. Why would a driver not
-> > > set this flag and not support erase/trim commands?
-> >
-> > I am working on removing the cap, altogether. Step by step, this is
-> > getting closer now.
-> >
-> > The main problem has been about busy detect timeouts, as an erase
-> > command may have a very long busy timeout. On the host side, they
-> > typically need to respect the cmd->busy_timeout for the request, and
-> > if it can't because of some HW limitation, it needs to set
-> > mmc->max_busy_timeout.
+> Add imx8mq/m/n compatible string
 >
-> FWIW we've discussed such concerns internally, based on past commits
-> which either disable [1-2] busy timeouts or increase their value [3].
->
-> To get a feeling if this is relevant for R-Car3, I've run blkdiscard on
-> a 64 GiB eMMC without noticing any issues on v5.4-rc7. Hopefully this
-> is sufficient as testing?
+> Signed-off-by: Peng Fan <peng.fan@nxp.com>
 
-Let's first take a step back, because I don't know how the HW busy
-detection works for your controller.
-
-I have noticed there is TMIO_STAT_CMD_BUSY bit being set for some
-variants, which seems to cause renesas_sdhi_wait_idle() to loop for a
-pre-defined number of loops/timeout. This looks scary, but I can't
-tell if it's really a problem.
-
-BTW, do you know what TMIO_STAT_CMD_BUSY actually is monitoring?
-
-I have also noticed that MMC_CAP_WAIT_WHILE_BUSY isn't set for any of
-the renesas/tmio variant hosts. Is that simply because the HW doesn't
-support this? Or because implementation is missing?
-
-If you want to run a test that stretches the behaviour on the timeout
-path, I would rather use an SD-card (the older the better). For eMMCs
-the erase likely translates to a trim/discard, which is far more
-quicker than a real erase - as is what happens on an old SD card.
-
->
-> >
-> > Once that is fixed for all, we can drop CAP_ERASE.
-> >
-> > Kind regards
-> > Uffe
->
-> [1] 93caf8e69eac76 ("omap_hsmmc: add erase capability")
-> [2] b13d1f0f9ad64b ("mmc: omap: Add erase capability")
-> [3] ec30f11e821f2d ("mmc: rtsx_usb: Use the provided busy timeout from the mmc core")
->
-> --
-> Best Regards,
-> Eugeniu
+Applied for next, thanks!
 
 Kind regards
 Uffe
+
+
+> ---
+>
+> V1:
+>  imx8mq/m/n.dtsi already use this compatible string,
+>  but not listed in binding doc, so add it.
+>
+>  Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt | 3 +++
+>  1 file changed, 3 insertions(+)
+>
+> diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
+> index f707b8bee304..2fb466ca2a9d 100644
+> --- a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
+> +++ b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
+> @@ -18,6 +18,9 @@ Required properties:
+>                "fsl,imx6ull-usdhc"
+>                "fsl,imx7d-usdhc"
+>                "fsl,imx7ulp-usdhc"
+> +              "fsl,imx8mq-usdhc"
+> +              "fsl,imx8mm-usdhc"
+> +              "fsl,imx8mn-usdhc"
+>                "fsl,imx8qxp-usdhc"
+>
+>  Optional properties:
+> --
+> 2.16.4
+>
