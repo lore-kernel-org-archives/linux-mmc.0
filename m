@@ -1,53 +1,50 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 1/3] dt-bindings: mmc: Add 'fixed-emmc-driver-type-hs{200,400}'
-Date: Thu, 14 Nov 2019 11:46:26 +0100
-Message-ID: <CAPDyKFoXT-UtO05xbHRVJTJAg+yYJK9AM7KjK18QcaGM0Bqn9g@mail.gmail.com>
-References: <20191105055015.23656-1-erosca@de.adit-jv.com> <20191105062223.GB1048@kunai>
- <20191105083213.GA24603@vmlxhi-102.adit-jv.com> <20191107003907.GA22634@bogus>
- <20191112211950.GB3402@kunai>
+Subject: Re: [PATCH] mmc: renesas_sdhi_internal_dmac: Add MMC_CAP_ERASE to
+ Gen3 SoCs
+Date: Thu, 14 Nov 2019 11:56:23 +0100
+Message-ID: <CAPDyKFq8oVk26ruNA_R8HDXhMGKhDeHnL0q82xi40g1aeo109A@mail.gmail.com>
+References: <20191112134808.23546-1-erosca@de.adit-jv.com> <20191112204952.GA2976@kunai>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20191112211950.GB3402@kunai>
+In-Reply-To: <20191112204952.GA2976@kunai>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Wolfram Sang <wsa@the-dreams.de>
-Cc: Rob Herring <robh@kernel.org>, Eugeniu Rosca <erosca@de.adit-jv.com>, Adrian Hunter <adrian.hunter@intel.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linus Walleij <linus.walleij@linaro.org>, Mathieu Malaterre <malat@debian.org>, Pavel Machek <pavel@ucw.cz>, DTML <devicetree@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Eugeniu Rosca <roscaeugeniu@gmail.com>
+Cc: Eugeniu Rosca <erosca@de.adit-jv.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, =?UTF-8?Q?Niklas_S=C3=B6derlund?= <niklas.soderlund@ragnatech.se>, Geert Uytterhoeven <geert@linux-m68k.org>, Simon Horman <horms+renesas@verge.net.au>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Eugeniu Rosca <roscaeugeniu@gmail.com>, Harish Jenny K N <harish_kandiga@mentor.com>, Andrew Gabbasov <andrew_gabbasov@mentor.com>
 List-Id: linux-mmc@vger.kernel.org
 
-[...]
-
-> > >
-> > > One option to achieve a similar degree of flexibility by using an array
-> > > OF property (instead of several u32 properties) would be to agree on a
-> > > convention based on magic values, i.e. below DT one-liner could be an
-> > > example of providing solely the "fixed-emmc-driver-type-hs200" value
-> > > (based on the agreement that 0xFF values are discarded by the driver):
-> > >
-> > >     fixed-emmc-driver-type = <0xFF 0x1 0xFF>;
+On Tue, 12 Nov 2019 at 21:49, Wolfram Sang <wsa@the-dreams.de> wrote:
+>
+> On Tue, Nov 12, 2019 at 02:48:08PM +0100, Eugeniu Rosca wrote:
+> > From: Harish Jenny K N <harish_kandiga@mentor.com>
 > >
-> > I don't understand why you have 3 values instead of 2.
+> > Enable MMC_CAP_ERASE capability in the driver to allow
+> > erase/discard/trim requests.
+> >
+> > Suggested-by: Andrew Gabbasov <andrew_gabbasov@mentor.com>
+> > Signed-off-by: Harish Jenny K N <harish_kandiga@mentor.com>
+> > [erosca: Forward-port and test on v5.4-rc7 using H3ULCB-KF:
+> >          "blkdiscard /dev/mmcblk0" passes with this patch applied
+> >          and complains otherwise:
+> >        "BLKDISCARD ioctl failed: Operation not supported"]
+> > Signed-off-by: Eugeniu Rosca <erosca@de.adit-jv.com>
 >
-> Because he sketches maximum flexibility here. Have a non-HS (default)
-> value, one for HS200, and one for HS400:
+> Looks good to me. Just a generic question, probably more for Ulf:
 >
->         fixed-emmc-driver-type = <[default] [HS200] [HS400]>;
->
-> > I would just use -1 if you want to ignore an entry. If that's the common
->
-> '-1' sounds good to me, too.
->
-> > case, then I'd stick with what you originally proposed. If rare, then I
-> > think an array is the better route.
->
-> What I have seen so far: setting drive strength alone is more on the
-> rare side. Setting specific values for default and HS200/400 seems even
-> more rare to me. With this patchset, it is the first time I hear about
-> it.
->
-> Yet, my experience might be a bit limited, maybe others (Hi Ulf! ;)) can add
-> their views, too?
+> Why does this CAP_ERASE exist? As I understand, the driver only needs to
+> set the flag and no further handling is required. Why would a driver not
+> set this flag and not support erase/trim commands?
 
-My experience in this field is quite limited. No input from me, sorry.
+I am working on removing the cap, altogether. Step by step, this is
+getting closer now.
+
+The main problem has been about busy detect timeouts, as an erase
+command may have a very long busy timeout. On the host side, they
+typically need to respect the cmd->busy_timeout for the request, and
+if it can't because of some HW limitation, it needs to set
+mmc->max_busy_timeout.
+
+Once that is fixed for all, we can drop CAP_ERASE.
 
 Kind regards
 Uffe
