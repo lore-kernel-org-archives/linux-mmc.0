@@ -1,67 +1,130 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v2 2/2] mmc: sdhci-of-aspeed: add inversion signal
- presence
-Date: Thu, 14 Nov 2019 15:10:46 +0200
-Message-ID: <fcb5f8b5-40b9-6497-b24d-0b73e2525949@intel.com>
-References: <20191114125435.27756-1-i.mikhaylov@yadro.com>
- <20191114125435.27756-3-i.mikhaylov@yadro.com>
+From: Heiko Stuebner <heiko@sntech.de>
+Subject: Re: [PATCH v2] arm64: dts: rockchip: Add SDR104 mode to SD-card I/F on rk3399-roc-pc
+Date: Thu, 14 Nov 2019 14:25:56 +0100
+Message-ID: <1918981.kTmXGv9Lqf@phil>
+References: <25466090-3b24-2695-10fb-88c59be3f149@fivetechno.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20191114125435.27756-3-i.mikhaylov@yadro.com>
-Content-Language: en-US
+In-Reply-To: <25466090-3b24-2695-10fb-88c59be3f149@fivetechno.de>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ivan Mikhaylov <i.mikhaylov@yadro.com>
-Cc: Joel Stanley <joel@jms.id.au>, Andrew Jeffery <andrew@aj.id.au>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Ulf Hansson <ulf.hansson@linaro.org>, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-aspeed@lists.ozlabs.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, openbmc@lists.ozlabs.org
+To: Markus Reichl <m.reichl@fivetechno.de>
+Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Jagan Teki <jagan@amarulasolutions.com>, 'Ulf Hansson' <ulf.hansson@linaro.org>, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org, linux-kernel@vger.kernel.org, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 14/11/19 2:54 PM, Ivan Mikhaylov wrote:
-> Change the default .get_cd callback. Add inverted signal card detection
-> check.
+Hi Markus,
+
+Am Dienstag, 12. November 2019, 09:45:36 CET schrieb Markus Reichl:
+> Add SDR104 capability and regulators to SD card node.
+
+> While at it, fix a typo in lcd pinctrl and remove two
+> undocumented bindings from pmic.
+
+A commit message like this always is a good indicator that this wants to
+be multiple patches ;-) [Keywords: "While at it", "And", ...]
+
+
+> Signed-off-by: Markus Reichl <m.reichl@fivetechno.de>
+> ---
+> v2: Remove always-on from vcc3v0_sd
+> ---
+>  .../boot/dts/rockchip/rk3399-roc-pc.dtsi      | 30 +++++++++++++++----
+>  1 file changed, 24 insertions(+), 6 deletions(-)
 > 
-> Signed-off-by: Ivan Mikhaylov <i.mikhaylov@yadro.com>
-> 
-> diff --git a/drivers/mmc/host/sdhci-of-aspeed.c b/drivers/mmc/host/sdhci-of-aspeed.c
-> index 8962f6664381..186559ee8fcc 100644
-> --- a/drivers/mmc/host/sdhci-of-aspeed.c
-> +++ b/drivers/mmc/host/sdhci-of-aspeed.c
-> @@ -143,6 +143,19 @@ static inline int aspeed_sdhci_calculate_slot(struct aspeed_sdhci *dev,
->  	return (delta / 0x100) - 1;
->  }
+> diff --git a/arch/arm64/boot/dts/rockchip/rk3399-roc-pc.dtsi b/arch/arm64/boot/dts/rockchip/rk3399-roc-pc.dtsi
+> index d1eb55c855b3..a31099f7620b 100644
+> --- a/arch/arm64/boot/dts/rockchip/rk3399-roc-pc.dtsi
+> +++ b/arch/arm64/boot/dts/rockchip/rk3399-roc-pc.dtsi
+> @@ -135,6 +135,19 @@
+>  		vin-supply = <&vcc_1v8>;
+>  	};
 >  
-> +static int aspeed_get_cd(struct mmc_host *mmc)
-> +{
-> +	struct sdhci_host *host = mmc_priv(mmc);
+> +	vcc3v0_sd: vcc3v0-sd {
+> +		compatible = "regulator-fixed";
+> +		enable-active-high;
+> +		gpio = <&gpio4 RK_PD6 GPIO_ACTIVE_HIGH>;
+> +		pinctrl-names = "default";
+> +		pinctrl-0 = <&vcc3v0_sd_en>;
+> +		regulator-name = "vcc3v0_sd";
+> +		regulator-boot-on;
+> +		regulator-min-microvolt = <3000000>;
+> +		regulator-max-microvolt = <3000000>;
+> +		vin-supply = <&vcc3v3_sys>;
+> +	};
 > +
-> +	int present = !!(sdhci_readl(host, SDHCI_PRESENT_STATE)
-> +			 & SDHCI_CARD_PRESENT);
-> +
-> +	if (mmc->caps2 & MMC_CAP2_CD_ACTIVE_HIGH)
-> +		present = !present;
+>  	vcc3v3_sys: vcc3v3-sys {
+>  		compatible = "regulator-fixed";
+>  		regulator-name = "vcc3v3_sys";
+> @@ -293,8 +306,6 @@
+>  		vcc10-supply = <&vcc3v3_sys>;
+>  		vcc11-supply = <&vcc3v3_sys>;
+>  		vcc12-supply = <&vcc3v3_sys>;
+> -		vcc13-supply = <&vcc3v3_sys>;
+> -		vcc14-supply = <&vcc3v3_sys>;
 
-Perhaps safer to flip the bit using CONFIG_MMC_SDHCI_IO_ACCESSORS and
-->readl() callback
+Separate patch with nice description perhaps? (remove undocumented inputs)
 
-> +
-> +	return present;
-> +}
-> +
->  static int aspeed_sdhci_probe(struct platform_device *pdev)
->  {
->  	struct sdhci_pltfm_host *pltfm_host;
-> @@ -183,6 +196,10 @@ static int aspeed_sdhci_probe(struct platform_device *pdev)
->  		goto err_pltfm_free;
->  	}
+
+>  		vddio-supply = <&vcc_3v0>;
 >  
-> +	host->mmc_host_ops.get_cd = aspeed_get_cd;
-> +	if (of_property_read_bool(pdev->dev.of_node, "cd-inverted"))
-> +		dev_info(&pdev->dev, "aspeed: sdhci: presence signal inversion enabled\n");
+>  		regulators {
+> @@ -576,7 +587,7 @@
+>  
+>  	lcd-panel {
+>  		lcd_panel_reset: lcd-panel-reset {
+> -			rockchip,pins = <4 RK_PD6 RK_FUNC_GPIO &pcfg_pull_up>;
+> +			rockchip,pins = <4 RK_PD5 RK_FUNC_GPIO &pcfg_pull_up>;
 
-Is this print really needed?
+Separate patch please, "use correct pin for lcd-reset pinctrl" or so.
 
+>  		};
+>  	};
+>  
+> @@ -602,6 +613,10 @@
+>  		vsel2_gpio: vsel2-gpio {
+>  			rockchip,pins = <1 RK_PB6 RK_FUNC_GPIO &pcfg_pull_down>;
+>  		};
 > +
->  	ret = mmc_of_parse(host->mmc);
->  	if (ret)
->  		goto err_sdhci_add;
+> +		pmic_int_l: pmic-int-l {
+> +			rockchip,pins = <1 RK_PC5 RK_FUNC_GPIO &pcfg_pull_up>;
+> +		};
+>  	};
+>  
+>  	sdio-pwrseq {
+> @@ -610,9 +625,9 @@
+>  		};
+>  	};
+>  
+> -	pmic {
+> -		pmic_int_l: pmic-int-l {
+> -			rockchip,pins = <1 RK_PC5 RK_FUNC_GPIO &pcfg_pull_up>;
+
+separate patch please talking about regrouping the two
+separate pmic pin-groups.
+
+
+> +	sdmmc {
+> +		vcc3v0_sd_en: vcc3v0-sd-en {
+> +			rockchip,pins = <4 RK_PD6 RK_FUNC_GPIO &pcfg_pull_none>;
+>  		};
+>  	};
+>  
+> @@ -667,6 +682,9 @@
+>  	cd-gpios = <&gpio0 RK_PA7 GPIO_ACTIVE_LOW>;
+>  	disable-wp;
+>  	max-frequency = <150000000>;
+> +	sd-uhs-sdr104;
+> +	vmmc-supply = <&vcc3v0_sd>;
+> +	vqmmc-supply = <&vcc_sdio>;
+
+Alphabetical sorting of new properties please
+(status staying at the bottom though)
+
+>  	pinctrl-names = "default";
+>  	pinctrl-0 = <&sdmmc_clk &sdmmc_cmd &sdmmc_bus4>;
+>  	status = "okay";
 > 
+
+Thanks
+Heiko
