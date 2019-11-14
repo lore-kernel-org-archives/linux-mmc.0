@@ -1,54 +1,72 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2] mmc: core: Fix size overflow for mmc partitions
-Date: Thu, 14 Nov 2019 12:12:01 +0100
-Message-ID: <CAPDyKFokrmxu8CLOTVjtbzf3sMQcLahVqAtYP5X=wnqST5+Zdg@mail.gmail.com>
-References: <1573097159-3914-1-git-send-email-bradleybolen@gmail.com>
+From: Eugeniu Rosca <erosca@de.adit-jv.com>
+Subject: Re: [PATCH] mmc: renesas_sdhi_internal_dmac: Add MMC_CAP_ERASE to
+ Gen3 SoCs
+Date: Thu, 14 Nov 2019 12:37:43 +0100
+Message-ID: <20191114113743.GA19656@vmlxhi-102.adit-jv.com>
+References: <20191112134808.23546-1-erosca@de.adit-jv.com>
+ <20191112204952.GA2976@kunai>
+ <CAPDyKFq8oVk26ruNA_R8HDXhMGKhDeHnL0q82xi40g1aeo109A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="us-ascii"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1573097159-3914-1-git-send-email-bradleybolen@gmail.com>
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFq8oVk26ruNA_R8HDXhMGKhDeHnL0q82xi40g1aeo109A@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Bradley Bolen <bradleybolen@gmail.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Kate Stewart <kstewart@linuxfoundation.org>, Thomas Gleixner <tglx@linutronix.de>, Avri Altman <avri.altman@wdc.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, "yinbo.zhu" <yinbo.zhu@nxp.com>, Hongjie Fang <hongjiefang@asrmicro.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Wolfram Sang <wsa@the-dreams.de>, Eugeniu Rosca <erosca@de.adit-jv.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Niklas =?utf-8?Q?S=C3=B6derlund?= <niklas.soderlund@ragnatech.se>, Geert Uytterhoeven <geert@linux-m68k.org>, Simon Horman <horms+renesas@verge.net.au>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Eugeniu Rosca <roscaeugeniu@gmail.com>, Harish Jenny K N <harish_kandiga@mentor.com>, Andrew Gabbasov <andrew_gabbasov@mentor.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, 7 Nov 2019 at 04:26, Bradley Bolen <bradleybolen@gmail.com> wrote:
->
-> With large eMMC cards, it is possible to create general purpose
-> partitions that are bigger than 4GB.  The size member of the mmc_part
-> struct is only an unsigned int which overflows for gp partitions larger
-> than 4GB.  Change this to a u64 to handle the overflow.
->
-> Signed-off-by: Bradley Bolen <bradleybolen@gmail.com>
-> ---
->  drivers/mmc/core/mmc.c   | 6 +++---
->  include/linux/mmc/card.h | 2 +-
->  2 files changed, 4 insertions(+), 4 deletions(-)
->
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index c880489..fc02124 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -297,7 +297,7 @@ static void mmc_manage_enhanced_area(struct mmc_card *card, u8 *ext_csd)
->         }
->  }
->
-> -static void mmc_part_add(struct mmc_card *card, unsigned int size,
-> +static void mmc_part_add(struct mmc_card *card, u64 size,
->                          unsigned int part_cfg, char *name, int idx, bool ro,
->                          int area_type)
->  {
-> @@ -313,7 +313,7 @@ static void mmc_manage_gp_partitions(struct mmc_card *card, u8 *ext_csd)
->  {
->         int idx;
->         u8 hc_erase_grp_sz, hc_wp_grp_sz;
-> -       unsigned int part_size;
-> +       u64 part_size;
+Hi everyone,
 
-There is also a cast to a "size_t" while computing the part_size in
-mmc_manage_gp_partitions(). Should we remove that as well?
+On Thu, Nov 14, 2019 at 11:56:23AM +0100, Ulf Hansson wrote:
+> On Tue, 12 Nov 2019 at 21:49, Wolfram Sang <wsa@the-dreams.de> wrote:
+> >
+> > On Tue, Nov 12, 2019 at 02:48:08PM +0100, Eugeniu Rosca wrote:
+> > > From: Harish Jenny K N <harish_kandiga@mentor.com>
+> > >
+> > > Enable MMC_CAP_ERASE capability in the driver to allow
+> > > erase/discard/trim requests.
+> > >
+> > > Suggested-by: Andrew Gabbasov <andrew_gabbasov@mentor.com>
+> > > Signed-off-by: Harish Jenny K N <harish_kandiga@mentor.com>
+> > > [erosca: Forward-port and test on v5.4-rc7 using H3ULCB-KF:
+> > >          "blkdiscard /dev/mmcblk0" passes with this patch applied
+> > >          and complains otherwise:
+> > >        "BLKDISCARD ioctl failed: Operation not supported"]
+> > > Signed-off-by: Eugeniu Rosca <erosca@de.adit-jv.com>
+> >
+> > Looks good to me. Just a generic question, probably more for Ulf:
+> >
+> > Why does this CAP_ERASE exist? As I understand, the driver only needs to
+> > set the flag and no further handling is required. Why would a driver not
+> > set this flag and not support erase/trim commands?
+> 
+> I am working on removing the cap, altogether. Step by step, this is
+> getting closer now.
+> 
+> The main problem has been about busy detect timeouts, as an erase
+> command may have a very long busy timeout. On the host side, they
+> typically need to respect the cmd->busy_timeout for the request, and
+> if it can't because of some HW limitation, it needs to set
+> mmc->max_busy_timeout.
 
-[...]
+FWIW we've discussed such concerns internally, based on past commits
+which either disable [1-2] busy timeouts or increase their value [3].
 
-Kind regards
-Uffe
+To get a feeling if this is relevant for R-Car3, I've run blkdiscard on
+a 64 GiB eMMC without noticing any issues on v5.4-rc7. Hopefully this
+is sufficient as testing?
+
+> 
+> Once that is fixed for all, we can drop CAP_ERASE.
+> 
+> Kind regards
+> Uffe
+
+[1] 93caf8e69eac76 ("omap_hsmmc: add erase capability")
+[2] b13d1f0f9ad64b ("mmc: omap: Add erase capability")
+[3] ec30f11e821f2d ("mmc: rtsx_usb: Use the provided busy timeout from the mmc core")
+
+-- 
+Best Regards,
+Eugeniu
