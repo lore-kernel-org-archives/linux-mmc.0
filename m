@@ -1,43 +1,44 @@
-From: Ivan Mikhaylov <i.mikhaylov@yadro.com>
-Subject: [PATCH v2 1/2] aspeed: dts: add sd card for vesnin
-Date: Thu, 14 Nov 2019 15:54:34 +0300
-Message-ID: <20191114125435.27756-2-i.mikhaylov@yadro.com>
-References: <20191114125435.27756-1-i.mikhaylov@yadro.com>
+From: <Eugen.Hristev@microchip.com>
+Subject: [PATCH] mmc: sdhci-of-at91: fix quirk2 overwrite
+Date: Thu, 14 Nov 2019 12:59:26 +0000
+Message-ID: <1573736352-3597-1-git-send-email-eugen.hristev@microchip.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20191114125435.27756-1-i.mikhaylov@yadro.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-Cc: Ivan Mikhaylov <i.mikhaylov@yadro.com>, Joel Stanley <joel@jms.id.au>, Andrew Jeffery <andrew@aj.id.au>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-aspeed@lists.ozlabs.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, openbmc@lists.ozlabs.org
+To: adrian.hunter@intel.com, Ludovic.Desroches@microchip.com, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+Cc: Eugen.Hristev@microchip.com
 List-Id: linux-mmc@vger.kernel.org
 
-Presence signal is inverted for vesnin boards, 'cd-inverted' added
-for invertion signal enablement. Vesnin BMC uses microSD, there is
-no WP switch, 'disable-wp' is used for this purpose.
+From: Eugen Hristev <eugen.hristev@microchip.com>
 
-Signed-off-by: Ivan Mikhaylov <i.mikhaylov@yadro.com>
+The quirks2 are parsed and set (e.g. from DT) before the quirk for broken
+HS200 is set in the driver.
+The driver needs to enable just this flag, not rewrite the whole quirk set.
 
-diff --git a/arch/arm/boot/dts/aspeed-bmc-opp-vesnin.dts b/arch/arm/boot/dts/aspeed-bmc-opp-vesnin.dts
-index a27c88d23056..7ae3436e0d99 100644
---- a/arch/arm/boot/dts/aspeed-bmc-opp-vesnin.dts
-+++ b/arch/arm/boot/dts/aspeed-bmc-opp-vesnin.dts
-@@ -232,3 +232,16 @@
- &wdt2 {
- 	aspeed,alt-boot;
- };
-+
-+&sdmmc {
-+	status = "okay";
-+};
-+
-+&sdhci1 {
-+	status = "okay";
-+
-+	pinctrl-names = "default";
-+	pinctrl-0 = <&pinctrl_sd2_default>;
-+	cd-inverted;
-+	disable-wp;
-+};
--- 
-2.20.1
+Fixes: 7871aa60ae00 ("mmc: sdhci-of-at91: add quirk for broken HS200")
+Signed-off-by: Eugen Hristev <eugen.hristev@microchip.com>
+---
+
+ drivers/mmc/host/sdhci-of-at91.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-a=
+t91.c
+index 496844a..5fe6684 100644
+--- a/drivers/mmc/host/sdhci-of-at91.c
++++ b/drivers/mmc/host/sdhci-of-at91.c
+@@ -389,7 +389,7 @@ static int sdhci_at91_probe(struct platform_device *pde=
+v)
+ 	pm_runtime_use_autosuspend(&pdev->dev);
+=20
+ 	/* HS200 is broken at this moment */
+-	host->quirks2 =3D SDHCI_QUIRK2_BROKEN_HS200;
++	host->quirks2 |=3D SDHCI_QUIRK2_BROKEN_HS200;
+=20
+ 	ret =3D sdhci_add_host(host);
+ 	if (ret)
+--=20
+2.7.4
