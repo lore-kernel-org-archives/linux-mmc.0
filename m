@@ -1,24 +1,33 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] dt-bindings: mmc: fsl-imx-esdhc: add imx8m compatible string
-Date: Thu, 14 Nov 2019 13:53:23 +0100
-Message-ID: <CAPDyKFoL7oJ+2hvi77N9=1hBKFgCXRUppcte1u=eF4z+Fz8TQw@mail.gmail.com>
-References: <1572949321-8193-1-git-send-email-peng.fan@nxp.com>
+Subject: Re: [PATCH] mmc: mmc_spi: Use proper debounce time for CD GPIO
+Date: Thu, 14 Nov 2019 13:53:27 +0100
+Message-ID: <CAPDyKFpA6iYmTVt84CDics2pWdSnjwQhgW31aaH8sdDtXgyAnQ@mail.gmail.com>
+References: <20191108160900.3280960-1-thierry.reding@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1572949321-8193-1-git-send-email-peng.fan@nxp.com>
+In-Reply-To: <20191108160900.3280960-1-thierry.reding@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Peng Fan <peng.fan@nxp.com>
-Cc: "robh+dt@kernel.org" <robh+dt@kernel.org>, "mark.rutland@arm.com" <mark.rutland@arm.com>, "shawnguo@kernel.org" <shawnguo@kernel.org>, "s.hauer@pengutronix.de" <s.hauer@pengutronix.de>, "festevam@gmail.com" <festevam@gmail.com>, Abel Vesa <abel.vesa@nxp.com>, "kernel@pengutronix.de" <kernel@pengutronix.de>, dl-linux-imx <linux-imx@nxp.com>, Aisheng Dong <aisheng.dong@nxp.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Thierry Reding <thierry.reding@gmail.com>
+Cc: Linus Walleij <linus.walleij@linaro.org>, Pavel Machek <pavel@denx.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, 5 Nov 2019 at 11:23, Peng Fan <peng.fan@nxp.com> wrote:
+On Fri, 8 Nov 2019 at 17:09, Thierry Reding <thierry.reding@gmail.com> wrote:
 >
-> From: Peng Fan <peng.fan@nxp.com>
+> From: Thierry Reding <treding@nvidia.com>
 >
-> Add imx8mq/m/n compatible string
+> According to the comment, board files used to specify 1 ms for the
+> debounce time. gpiod_set_debounce() needs the debounce time to be
+> specified in units of microseconds, so make sure to multiply the value
+> by 1000.
 >
-> Signed-off-by: Peng Fan <peng.fan@nxp.com>
+> Note that, according to the git log, the board files actually did
+> specify 1 us for bounce times, but that seems really low. Device tree
+> bindings for this type of GPIO typically specify the debounce times in
+> milliseconds, so setting this default value to 1 ms seems like it would
+> be somewhat safer.
+>
+> Signed-off-by: Thierry Reding <treding@nvidia.com>
 
 Applied for next, thanks!
 
@@ -26,29 +35,24 @@ Kind regards
 Uffe
 
 
+
 > ---
+>  drivers/mmc/host/mmc_spi.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 >
-> V1:
->  imx8mq/m/n.dtsi already use this compatible string,
->  but not listed in binding doc, so add it.
->
->  Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt | 3 +++
->  1 file changed, 3 insertions(+)
->
-> diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
-> index f707b8bee304..2fb466ca2a9d 100644
-> --- a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
-> +++ b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
-> @@ -18,6 +18,9 @@ Required properties:
->                "fsl,imx6ull-usdhc"
->                "fsl,imx7d-usdhc"
->                "fsl,imx7ulp-usdhc"
-> +              "fsl,imx8mq-usdhc"
-> +              "fsl,imx8mm-usdhc"
-> +              "fsl,imx8mn-usdhc"
->                "fsl,imx8qxp-usdhc"
->
->  Optional properties:
+> diff --git a/drivers/mmc/host/mmc_spi.c b/drivers/mmc/host/mmc_spi.c
+> index 66e354d51ee9..74c6cfbf9172 100644
+> --- a/drivers/mmc/host/mmc_spi.c
+> +++ b/drivers/mmc/host/mmc_spi.c
+> @@ -1421,7 +1421,7 @@ static int mmc_spi_probe(struct spi_device *spi)
+>          * Index 0 is card detect
+>          * Old boardfiles were specifying 1 ms as debounce
+>          */
+> -       status = mmc_gpiod_request_cd(mmc, NULL, 0, false, 1, NULL);
+> +       status = mmc_gpiod_request_cd(mmc, NULL, 0, false, 1000, NULL);
+>         if (status == -EPROBE_DEFER)
+>                 goto fail_add_host;
+>         if (!status) {
 > --
-> 2.16.4
+> 2.23.0
 >
