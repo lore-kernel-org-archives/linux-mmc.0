@@ -1,58 +1,38 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: mmc_spi: Use proper debounce time for CD GPIO
-Date: Thu, 14 Nov 2019 13:53:27 +0100
-Message-ID: <CAPDyKFpA6iYmTVt84CDics2pWdSnjwQhgW31aaH8sdDtXgyAnQ@mail.gmail.com>
-References: <20191108160900.3280960-1-thierry.reding@gmail.com>
+Subject: Re: [PATCH 0/2] mms: Use dma_request_chan() directly for channel request
+Date: Thu, 14 Nov 2019 13:53:30 +0100
+Message-ID: <CAPDyKFp15ZMq1f_xwrPSRbhU4M4SXhRzigA9-QMNBGSZj-YtJA@mail.gmail.com>
+References: <20191113093616.32474-1-peter.ujfalusi@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20191108160900.3280960-1-thierry.reding@gmail.com>
+In-Reply-To: <20191113093616.32474-1-peter.ujfalusi@ti.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Thierry Reding <thierry.reding@gmail.com>
-Cc: Linus Walleij <linus.walleij@linaro.org>, Pavel Machek <pavel@denx.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: Peter Ujfalusi <peter.ujfalusi@ti.com>
+Cc: Ludovic Desroches <ludovic.desroches@microchip.com>, vkoul@kernel.org, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Nicolas Ferre <nicolas.ferre@microchip.com>, Alexandre Belloni <alexandre.belloni@bootlin.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, 8 Nov 2019 at 17:09, Thierry Reding <thierry.reding@gmail.com> wrote:
+On Wed, 13 Nov 2019 at 10:35, Peter Ujfalusi <peter.ujfalusi@ti.com> wrote:
 >
-> From: Thierry Reding <treding@nvidia.com>
+> Hi,
 >
-> According to the comment, board files used to specify 1 ms for the
-> debounce time. gpiod_set_debounce() needs the debounce time to be
-> specified in units of microseconds, so make sure to multiply the value
-> by 1000.
+> I'm going through the tree to remove dma_request_slave_channel_reason() as it
+> is just:
+> #define dma_request_slave_channel_reason(dev, name) \
+>         dma_request_chan(dev, name)
 >
-> Note that, according to the git log, the board files actually did
-> specify 1 us for bounce times, but that seems really low. Device tree
-> bindings for this type of GPIO typically specify the debounce times in
-> milliseconds, so setting this default value to 1 ms seems like it would
-> be somewhat safer.
+> Regards,
+> Peter
+> ---
+> Peter Ujfalusi (2):
+>   mmc: atmel-mci: Use dma_request_chan() directly for channel request
+>   mmc: moxart: Use dma_request_chan() directly for channel request
 >
-> Signed-off-by: Thierry Reding <treding@nvidia.com>
+>  drivers/mmc/host/atmel-mci.c  | 3 +--
+>  drivers/mmc/host/moxart-mmc.c | 4 ++--
+>  2 files changed, 3 insertions(+), 4 deletions(-)
 
 Applied for next, thanks!
 
 Kind regards
 Uffe
-
-
-
-> ---
->  drivers/mmc/host/mmc_spi.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/mmc_spi.c b/drivers/mmc/host/mmc_spi.c
-> index 66e354d51ee9..74c6cfbf9172 100644
-> --- a/drivers/mmc/host/mmc_spi.c
-> +++ b/drivers/mmc/host/mmc_spi.c
-> @@ -1421,7 +1421,7 @@ static int mmc_spi_probe(struct spi_device *spi)
->          * Index 0 is card detect
->          * Old boardfiles were specifying 1 ms as debounce
->          */
-> -       status = mmc_gpiod_request_cd(mmc, NULL, 0, false, 1, NULL);
-> +       status = mmc_gpiod_request_cd(mmc, NULL, 0, false, 1000, NULL);
->         if (status == -EPROBE_DEFER)
->                 goto fail_add_host;
->         if (!status) {
-> --
-> 2.23.0
->
