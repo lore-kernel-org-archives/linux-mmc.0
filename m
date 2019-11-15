@@ -1,101 +1,73 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v2 2/2] mmc: sdhci-of-aspeed: add inversion signal
- presence
-Date: Fri, 15 Nov 2019 15:17:14 +0200
-Message-ID: <5bd753c3-102b-d78c-c390-4f88ebb0e229@intel.com>
-References: <20191114125435.27756-1-i.mikhaylov@yadro.com>
- <20191114125435.27756-3-i.mikhaylov@yadro.com>
- <fcb5f8b5-40b9-6497-b24d-0b73e2525949@intel.com>
- <b443738f5e2a3c7ba96b329a8347374f7f934483.camel@yadro.com>
- <d177ef37-643e-442d-d536-750e0bb5e86d@intel.com>
- <221381ebad0236625775bda5655fcd7c78455e6f.camel@yadro.com>
+From: Eugeniu Rosca <erosca@de.adit-jv.com>
+Subject: [PATCH v2] mmc: tmio: Add MMC_CAP_ERASE to allow erase/discard/trim requests
+Date: Fri, 15 Nov 2019 14:44:30 +0100
+Message-ID: <20191115134430.12621-1-erosca@de.adit-jv.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <221381ebad0236625775bda5655fcd7c78455e6f.camel@yadro.com>
-Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ivan Mikhaylov <i.mikhaylov@yadro.com>
-Cc: Joel Stanley <joel@jms.id.au>, Andrew Jeffery <andrew@aj.id.au>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Ulf Hansson <ulf.hansson@linaro.org>, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-aspeed@lists.ozlabs.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Masahiro Yamada <yamada.masahiro@socionext.com>
+Cc: linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, linux-kernel@vger.kernel.org, Eugeniu Rosca <erosca@de.adit-jv.com>, Eugeniu Rosca <roscaeugeniu@gmail.com>, Andrew Gabbasov <andrew_gabbasov@mentor.com>, Harish Jenny K N <harish_kandiga@mentor.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 15/11/19 2:56 PM, Ivan Mikhaylov wrote:
-> On Fri, 2019-11-15 at 09:20 +0200, Adrian Hunter wrote:
->> On 14/11/19 7:19 PM, Ivan Mikhaylov wrote:
->>> On Thu, 2019-11-14 at 15:10 +0200, Adrian Hunter wrote:
->>> On 14/11/19 2:54 PM, Ivan Mikhaylov wrote:
->>>>> Change the default .get_cd callback. Add inverted signal card detection
->>>>> check.
->>>>>
->>>>> Signed-off-by: Ivan Mikhaylov <i.mikhaylov@yadro.com>
->>>>>
->>>>> diff --git a/drivers/mmc/host/sdhci-of-aspeed.c
->>>>> b/drivers/mmc/host/sdhci-of-
->>>>> aspeed.c
->>>>> index 8962f6664381..186559ee8fcc 100644
->>>>> --- a/drivers/mmc/host/sdhci-of-aspeed.c
->>>>> +++ b/drivers/mmc/host/sdhci-of-aspeed.c
->>>>> @@ -143,6 +143,19 @@ static inline int
->>>>> aspeed_sdhci_calculate_slot(struct
->>>>> aspeed_sdhci *dev,
->>>>>  	return (delta / 0x100) - 1;
->>>>>  }
->>>>>  
->>>>> +static int aspeed_get_cd(struct mmc_host *mmc)
->>>>> +{
->>>>> +	struct sdhci_host *host = mmc_priv(mmc);
->>>>> +
->>>>> +	int present = !!(sdhci_readl(host, SDHCI_PRESENT_STATE)
->>>>> +			 & SDHCI_CARD_PRESENT);
->>>>> +
->>>>> +	if (mmc->caps2 & MMC_CAP2_CD_ACTIVE_HIGH)
->>>>> +		present = !present;
->>>>
->>>> Perhaps safer to flip the bit using CONFIG_MMC_SDHCI_IO_ACCESSORS and
->>>> ->readl() callback
->>
->>
->>> Sorry, don't quite understand what you're saying. You want to instantiate
->>> '.read_l' callback instead of '.get_cd' in sdhci_ops and substitute the real
->>> value?
->>>
->>> res = readl(base, reg);
->>> if (reg == SDHCI_PRESENT_STATE)
->>> 	if (mmc->caps2 & MMC_CAP2_CD_ACTIVE_HIGH)
->>> 		return !res;
->>
->> Presumably just flip the SDHCI_CARD_PRESENT bit i.e.
->>
->> 		return res ^ SDHCI_CARD_PRESENT;
->>
->>> return res;
->>>
->>> Something like this?
->>
->> Yes
->>
-> 
-> Don't you think it will bring a little overhead on any sdhci_readl plus
+Isolated initially to renesas_sdhi_internal_dmac [1], Ulf suggested
+adding MMC_CAP_ERASE to the TMIO mmc core:
 
-Register accesses are usually slow (~1us) compared with logic.  Of course,
-I/O requests are even slower >100ms so it is unlikely that the overhead is
-significant.
+On Fri, Nov 15, 2019 at 10:27:25AM +0100, Ulf Hansson wrote:
+ -- snip --
+ This test and due to the discussions with Wolfram and you in this
+ thread, I would actually suggest that you enable MMC_CAP_ERASE for all
+ tmio variants, rather than just for this particular one.
 
-> sdhci_readl will not get the real value in case of inverted signal which seems
-> is not right from communication fairness between hw and sw? I took that approach
+ In other words, set the cap in tmio_mmc_host_probe() should be fine,
+ as it seems none of the tmio variants supports HW busy detection at
+ this point.
+ -- snip --
 
-One of the purposes of the accessors is to smooth over the difference
-between the SDHCI standard and actual hardware.  Given that
-SDHCI_PRESENT_STATE is also used in sdhci_set_card_detection() and
-sdhci_irq(), it is surprising that changing only ->get_cd() works correctly.
+Testing on R-Car H3ULCB-KF doesn't reveal any issues (v5.4-rc7):
 
-> with .get_cd from variety of drivers in host/mmc but if you think it will be
-> better and safer with .read_l - I'll do that way. 
-> 
-> Sorry for the link in subject, didn't notice that I put it in previous message
-> somehow.
-> 
-> Thanks.
-> 
-> 
+root@rcar-gen3:~# lsblk
+NAME         MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+mmcblk0      179:0    0 59.2G  0 disk  <--- eMMC
+mmcblk0boot0 179:8    0    4M  1 disk
+mmcblk0boot1 179:16   0    4M  1 disk
+mmcblk1      179:24   0   30G  0 disk  <--- SD card
+
+root@rcar-gen3:~# time blkdiscard /dev/mmcblk0
+real    0m8.659s
+user    0m0.001s
+sys     0m1.920s
+
+root@rcar-gen3:~# time blkdiscard /dev/mmcblk1
+real    0m1.176s
+user    0m0.001s
+sys     0m0.124s
+
+[1] https://lore.kernel.org/linux-renesas-soc/20191112134808.23546-1-erosca@de.adit-jv.com/
+
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc: Masahiro Yamada <yamada.masahiro@socionext.com>
+Cc: Andrew Gabbasov <andrew_gabbasov@mentor.com>
+Originally-by: Harish Jenny K N <harish_kandiga@mentor.com>
+Suggested-by: Ulf Hansson <ulf.hansson@linaro.org>
+Signed-off-by: Eugeniu Rosca <erosca@de.adit-jv.com>
+---
+ drivers/mmc/host/tmio_mmc_core.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
+index 9b6e1001e77c..dec5a99f52cf 100644
+--- a/drivers/mmc/host/tmio_mmc_core.c
++++ b/drivers/mmc/host/tmio_mmc_core.c
+@@ -1184,7 +1184,7 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host)
+ 	if (ret == -EPROBE_DEFER)
+ 		return ret;
+ 
+-	mmc->caps |= MMC_CAP_4_BIT_DATA | pdata->capabilities;
++	mmc->caps |= MMC_CAP_ERASE | MMC_CAP_4_BIT_DATA | pdata->capabilities;
+ 	mmc->caps2 |= pdata->capabilities2;
+ 	mmc->max_segs = pdata->max_segs ? : 32;
+ 	mmc->max_blk_size = TMIO_MAX_BLK_SIZE;
+-- 
+2.24.0
