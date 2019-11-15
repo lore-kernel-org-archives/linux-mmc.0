@@ -1,85 +1,43 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v2 2/2] mmc: sdhci-of-aspeed: add inversion
- sighttps://elixir.bootlin.com/linux/v4.6/ident/sdhci_opsnal presence
-Date: Fri, 15 Nov 2019 09:20:34 +0200
-Message-ID: <d177ef37-643e-442d-d536-750e0bb5e86d@intel.com>
-References: <20191114125435.27756-1-i.mikhaylov@yadro.com>
- <20191114125435.27756-3-i.mikhaylov@yadro.com>
- <fcb5f8b5-40b9-6497-b24d-0b73e2525949@intel.com>
- <b443738f5e2a3c7ba96b329a8347374f7f934483.camel@yadro.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC fixes for v5.4-rc8
+Date: Fri, 15 Nov 2019 09:12:52 +0100
+Message-ID: <20191115081252.20154-1-ulf.hansson@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <b443738f5e2a3c7ba96b329a8347374f7f934483.camel@yadro.com>
-Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ivan Mikhaylov <i.mikhaylov@yadro.com>
-Cc: Joel Stanley <joel@jms.id.au>, Andrew Jeffery <andrew@aj.id.au>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Ulf Hansson <ulf.hansson@linaro.org>, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-aspeed@lists.ozlabs.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, openbmc@lists.ozlabs.org
+To: Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 14/11/19 7:19 PM, Ivan Mikhaylov wrote:
-> On Thu, 2019-11-14 at 15:10 +0200, Adrian Hunter wrote:
->> On 14/11/19 2:54 PM, Ivan Mikhaylov wrote:
->>> Change the default .get_cd callback. Add inverted signal card detection
->>> check.
->>>
->>> Signed-off-by: Ivan Mikhaylov <i.mikhaylov@yadro.com>
->>>
->>> diff --git a/drivers/mmc/host/sdhci-of-aspeed.c b/drivers/mmc/host/sdhci-of-
->>> aspeed.c
->>> index 8962f6664381..186559ee8fcc 100644
->>> --- a/drivers/mmc/host/sdhci-of-aspeed.c
->>> +++ b/drivers/mmc/host/sdhci-of-aspeed.c
->>> @@ -143,6 +143,19 @@ static inline int aspeed_sdhci_calculate_slot(struct
->>> aspeed_sdhci *dev,
->>>  	return (delta / 0x100) - 1;
->>>  }
->>>  
->>> +static int aspeed_get_cd(struct mmc_host *mmc)
->>> +{
->>> +	struct sdhci_host *host = mmc_priv(mmc);
->>> +
->>> +	int present = !!(sdhci_readl(host, SDHCI_PRESENT_STATE)
->>> +			 & SDHCI_CARD_PRESENT);
->>> +
->>> +	if (mmc->caps2 & MMC_CAP2_CD_ACTIVE_HIGH)
->>> +		present = !present;
->>
->> Perhaps safer to flip the bit using CONFIG_MMC_SDHCI_IO_ACCESSORS and
->> ->readl() callback
->>
-> 
-> Sorry, don't quite understand what you're saying. You want to instantiate
-> '.read_l' callback instead of '.get_cd' in sdhci_ops and substitute the real
-> value?
-> 
-> res = readl(base, reg);
-> if (reg == SDHCI_PRESENT_STATE)
-> 	if (mmc->caps2 & MMC_CAP2_CD_ACTIVE_HIGH)
-> 		return !res;
+Hi Linus,
 
-Presumably just flip the SDHCI_CARD_PRESENT bit i.e.
+Here's a PR with one trivial MMC fix, intended for v5.4-rc8. Details about the
+highlights are as usual found in the signed tag.
 
-		return res ^ SDHCI_CARD_PRESENT;
+Please pull this in!
 
-> return res;
-> 
-> Something like this?
+Kind regards
+Ulf Hansson
 
-Yes
 
-> 
->>  
->>> +	host->mmc_host_ops.get_cd = aspeed_get_cd;
->>> +	if (of_property_read_bool(pdev->dev.of_node, "cd-inverted"))
->>> +		dev_info(&pdev->dev, "aspeed: sdhci: presence signal inversion
->>> enabled\n");
->>
->> Is this print really needed?
->>
-> I can remove it if you think it's redundant.
-> 
-> Thanks.
-> 
-> 
+The following changes since commit 31f4f5b495a62c9a8b15b1c3581acd5efeb9af8c:
+
+  Linux 5.4-rc7 (2019-11-10 16:17:15 -0800)
+
+are available in the Git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.4-rc7
+
+for you to fetch changes up to fed23c5829ecab4ddc712d7b0046e59610ca3ba4:
+
+  mmc: sdhci-of-at91: fix quirk2 overwrite (2019-11-14 14:57:53 +0100)
+
+----------------------------------------------------------------
+MMC host:
+- sdhci-of-at91: Don't overwrite quirk flags
+
+----------------------------------------------------------------
+Eugen Hristev (1):
+      mmc: sdhci-of-at91: fix quirk2 overwrite
+
+ drivers/mmc/host/sdhci-of-at91.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
