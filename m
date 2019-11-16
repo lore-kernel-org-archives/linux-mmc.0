@@ -1,12 +1,12 @@
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.9 10/99] mmc: mediatek: fix cannot receive new request when msdc_cmd_is_ready fail
-Date: Sat, 16 Nov 2019 10:49:33 -0500
-Message-ID: <20191116155103.10971-10-sashal@kernel.org>
-References: <20191116155103.10971-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.19 025/237] mmc: mediatek: fix cannot receive new request when msdc_cmd_is_ready fail
+Date: Sat, 16 Nov 2019 10:37:40 -0500
+Message-ID: <20191116154113.7417-25-sashal@kernel.org>
+References: <20191116154113.7417-1-sashal@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20191116155103.10971-1-sashal@kernel.org>
+In-Reply-To: <20191116154113.7417-1-sashal@kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc: Chaotian Jing <chaotian.jing@mediatek.com>, Ulf Hansson <ulf.hansson@linaro.org>, Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org
@@ -30,10 +30,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index 6f9535e5e584b..7fc6ce3811421 100644
+index 621c914dc5c01..673f6a9616cd9 100644
 --- a/drivers/mmc/host/mtk-sd.c
 +++ b/drivers/mmc/host/mtk-sd.c
-@@ -870,6 +870,7 @@ static void msdc_start_command(struct msdc_host *host,
+@@ -1056,6 +1056,7 @@ static void msdc_start_command(struct msdc_host *host,
  	WARN_ON(host->cmd);
  	host->cmd = cmd;
  
@@ -41,7 +41,7 @@ index 6f9535e5e584b..7fc6ce3811421 100644
  	if (!msdc_cmd_is_ready(host, mrq, cmd))
  		return;
  
-@@ -881,7 +882,6 @@ static void msdc_start_command(struct msdc_host *host,
+@@ -1067,7 +1068,6 @@ static void msdc_start_command(struct msdc_host *host,
  
  	cmd->error = 0;
  	rawcmd = msdc_cmd_prepare_raw_cmd(host, mrq, cmd);
