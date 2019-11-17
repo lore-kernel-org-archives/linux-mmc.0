@@ -1,91 +1,77 @@
-From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.19 024/237] mmc: mediatek: fill the actual clock for mmc debugfs
-Date: Sat, 16 Nov 2019 10:37:39 -0500
-Message-ID: <20191116154113.7417-24-sashal@kernel.org>
-References: <20191116154113.7417-1-sashal@kernel.org>
-Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
+From: Bradley Bolen <bradleybolen@gmail.com>
+Subject: [PATCH v3] mmc: core: Fix size overflow for mmc partitions
+Date: Sat, 16 Nov 2019 20:00:45 -0500
+Message-ID: <20191117010045.4902-1-bradleybolen@gmail.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20191116154113.7417-1-sashal@kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc: Chaotian Jing <chaotian.jing@mediatek.com>, Ulf Hansson <ulf.hansson@linaro.org>, Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, ulf.hansson@linaro.org, kstewart@linuxfoundation.org, tglx@linutronix.de, info@metux.net, hongjiefang@asrmicro.com, avri.altman@wdc.com, wsa+renesas@sang-engineering.com, yinbo.zhu@nxp.com, Bradley Bolen <bradleybolen@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Chaotian Jing <chaotian.jing@mediatek.com>
+With large eMMC cards, it is possible to create general purpose
+partitions that are bigger than 4GB.  The size member of the mmc_part
+struct is only an unsigned int which overflows for gp partitions larger
+than 4GB.  Change this to a u64 to handle the overflow.
 
-[ Upstream commit 56f6cbbed0463f1c78d602b17c315916cc1cd238 ]
-
-as the mmc core layer has the mmc->actual_clock, so fill it
-and drop msdc_host->sclk.
-
-Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-Signed-off-by: Sasha Levin <sashal@kernel.org>
+Signed-off-by: Bradley Bolen <bradleybolen@gmail.com>
 ---
- drivers/mmc/host/mtk-sd.c | 13 +++++++------
- 1 file changed, 7 insertions(+), 6 deletions(-)
+ drivers/mmc/core/mmc.c   | 9 ++++-----
+ include/linux/mmc/card.h | 2 +-
+ 2 files changed, 5 insertions(+), 6 deletions(-)
 
-diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index f171cce5197de..621c914dc5c01 100644
---- a/drivers/mmc/host/mtk-sd.c
-+++ b/drivers/mmc/host/mtk-sd.c
-@@ -390,7 +390,6 @@ struct msdc_host {
- 	struct clk *src_clk_cg; /* msdc source clock control gate */
- 	u32 mclk;		/* mmc subsystem clock frequency */
- 	u32 src_clk_freq;	/* source clock frequency */
--	u32 sclk;		/* SD/MS bus clock frequency */
- 	unsigned char timing;
- 	bool vqmmc_enabled;
- 	u32 latch_ck;
-@@ -635,10 +634,10 @@ static void msdc_set_timeout(struct msdc_host *host, u32 ns, u32 clks)
- 
- 	host->timeout_ns = ns;
- 	host->timeout_clks = clks;
--	if (host->sclk == 0) {
-+	if (host->mmc->actual_clock == 0) {
- 		timeout = 0;
- 	} else {
--		clk_ns  = 1000000000UL / host->sclk;
-+		clk_ns  = 1000000000UL / host->mmc->actual_clock;
- 		timeout = (ns + clk_ns - 1) / clk_ns + clks;
- 		/* in 1048576 sclk cycle unit */
- 		timeout = (timeout + (0x1 << 20) - 1) >> 20;
-@@ -683,6 +682,7 @@ static void msdc_set_mclk(struct msdc_host *host, unsigned char timing, u32 hz)
- 	if (!hz) {
- 		dev_dbg(host->dev, "set mclk to 0\n");
- 		host->mclk = 0;
-+		host->mmc->actual_clock = 0;
- 		sdr_clr_bits(host->base + MSDC_CFG, MSDC_CFG_CKPDN);
- 		return;
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index c8804895595f..f6912ded652d 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -297,7 +297,7 @@ static void mmc_manage_enhanced_area(struct mmc_card *card, u8 *ext_csd)
  	}
-@@ -761,7 +761,7 @@ static void msdc_set_mclk(struct msdc_host *host, unsigned char timing, u32 hz)
- 	while (!(readl(host->base + MSDC_CFG) & MSDC_CFG_CKSTB))
- 		cpu_relax();
- 	sdr_set_bits(host->base + MSDC_CFG, MSDC_CFG_CKPDN);
--	host->sclk = sclk;
-+	host->mmc->actual_clock = sclk;
- 	host->mclk = hz;
- 	host->timing = timing;
- 	/* need because clk changed. */
-@@ -772,7 +772,7 @@ static void msdc_set_mclk(struct msdc_host *host, unsigned char timing, u32 hz)
- 	 * mmc_select_hs400() will drop to 50Mhz and High speed mode,
- 	 * tune result of hs200/200Mhz is not suitable for 50Mhz
- 	 */
--	if (host->sclk <= 52000000) {
-+	if (host->mmc->actual_clock <= 52000000) {
- 		writel(host->def_tune_para.iocon, host->base + MSDC_IOCON);
- 		writel(host->def_tune_para.pad_tune, host->base + tune_reg);
- 	} else {
-@@ -787,7 +787,8 @@ static void msdc_set_mclk(struct msdc_host *host, unsigned char timing, u32 hz)
- 		sdr_set_field(host->base + tune_reg,
- 			      MSDC_PAD_TUNE_CMDRRDLY,
- 			      host->hs400_cmd_int_delay);
--	dev_dbg(host->dev, "sclk: %d, timing: %d\n", host->sclk, timing);
-+	dev_dbg(host->dev, "sclk: %d, timing: %d\n", host->mmc->actual_clock,
-+		timing);
  }
  
- static inline u32 msdc_cmd_find_resp(struct msdc_host *host,
+-static void mmc_part_add(struct mmc_card *card, unsigned int size,
++static void mmc_part_add(struct mmc_card *card, u64 size,
+ 			 unsigned int part_cfg, char *name, int idx, bool ro,
+ 			 int area_type)
+ {
+@@ -313,7 +313,7 @@ static void mmc_manage_gp_partitions(struct mmc_card *card, u8 *ext_csd)
+ {
+ 	int idx;
+ 	u8 hc_erase_grp_sz, hc_wp_grp_sz;
+-	unsigned int part_size;
++	u64 part_size;
+ 
+ 	/*
+ 	 * General purpose partition feature support --
+@@ -343,8 +343,7 @@ static void mmc_manage_gp_partitions(struct mmc_card *card, u8 *ext_csd)
+ 				(ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3 + 1]
+ 				<< 8) +
+ 				ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3];
+-			part_size *= (size_t)(hc_erase_grp_sz *
+-				hc_wp_grp_sz);
++			part_size *= (hc_erase_grp_sz * hc_wp_grp_sz);
+ 			mmc_part_add(card, part_size << 19,
+ 				EXT_CSD_PART_CONFIG_ACC_GP0 + idx,
+ 				"gp%d", idx, false,
+@@ -362,7 +361,7 @@ static void mmc_manage_gp_partitions(struct mmc_card *card, u8 *ext_csd)
+ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
+ {
+ 	int err = 0, idx;
+-	unsigned int part_size;
++	u64 part_size;
+ 	struct device_node *np;
+ 	bool broken_hpi = false;
+ 
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index 9b6336ad3266..b59d35bb50ba 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -226,7 +226,7 @@ struct mmc_queue_req;
+  * MMC Physical partitions
+  */
+ struct mmc_part {
+-	unsigned int	size;	/* partition size (in bytes) */
++	u64		size;	/* partition size (in bytes) */
+ 	unsigned int	part_cfg;	/* partition type */
+ 	char	name[MAX_MMC_PART_NAME_LEN];
+ 	bool	force_ro;	/* to make boot parts RO by default */
 -- 
-2.20.1
+2.17.1
