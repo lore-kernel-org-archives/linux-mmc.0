@@ -1,7 +1,7 @@
 From: Ivan Mikhaylov <i.mikhaylov@yadro.com>
-Subject: [PATCH v3 3/3] mmc: sdhci-of-aspeed: add inversion signal presence
-Date: Mon, 18 Nov 2019 13:46:46 +0300
-Message-ID: <20191118104646.3838-4-i.mikhaylov@yadro.com>
+Subject: [PATCH v3 1/3] aspeed: dts: add sd card for vesnin
+Date: Mon, 18 Nov 2019 13:46:44 +0300
+Message-ID: <20191118104646.3838-2-i.mikhaylov@yadro.com>
 References: <20191118104646.3838-1-i.mikhaylov@yadro.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,34 +12,32 @@ Sender: linux-kernel-owner@vger.kernel.org
 Cc: Ivan Mikhaylov <i.mikhaylov@yadro.com>, Joel Stanley <joel@jms.id.au>, Andrew Jeffery <andrew@aj.id.au>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-aspeed@lists.ozlabs.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, openbmc@lists.ozlabs.org
 List-Id: linux-mmc@vger.kernel.org
 
-Add read_l callback in sdhci_ops with flipping of SDHCI_CARD_PRESENT
-bit in case of inverted card detection signal.
+Presence signal is inverted for vesnin boards, 'cd-inverted' added
+for invertion signal enablement. Vesnin BMC uses microSD, there is
+no WP switch, 'disable-wp' is used for this purpose.
 
 Signed-off-by: Ivan Mikhaylov <i.mikhaylov@yadro.com>
 
-diff --git a/drivers/mmc/host/sdhci-of-aspeed.c b/drivers/mmc/host/sdhci-of-aspeed.c
-index 8962f6664381..56912e30c47e 100644
---- a/drivers/mmc/host/sdhci-of-aspeed.c
-+++ b/drivers/mmc/host/sdhci-of-aspeed.c
-@@ -111,7 +111,19 @@ static void aspeed_sdhci_set_bus_width(struct sdhci_host *host, int width)
- 	sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
- }
- 
-+static u32 aspeed_sdhci_readl(struct sdhci_host *host, int reg)
-+{
-+	u32 val = readl(host->ioaddr + reg);
+diff --git a/arch/arm/boot/dts/aspeed-bmc-opp-vesnin.dts b/arch/arm/boot/dts/aspeed-bmc-opp-vesnin.dts
+index a27c88d23056..7ae3436e0d99 100644
+--- a/arch/arm/boot/dts/aspeed-bmc-opp-vesnin.dts
++++ b/arch/arm/boot/dts/aspeed-bmc-opp-vesnin.dts
+@@ -232,3 +232,16 @@
+ &wdt2 {
+ 	aspeed,alt-boot;
+ };
 +
-+	if (unlikely(reg == SDHCI_PRESENT_STATE) &&
-+	    (host->mmc->caps2 & MMC_CAP2_CD_ACTIVE_HIGH))
-+		val ^= SDHCI_CARD_PRESENT;
++&sdmmc {
++	status = "okay";
++};
 +
-+	return val;
-+}
++&sdhci1 {
++	status = "okay";
 +
- static const struct sdhci_ops aspeed_sdhci_ops = {
-+	.read_l = aspeed_sdhci_readl,
- 	.set_clock = aspeed_sdhci_set_clock,
- 	.get_max_clock = aspeed_sdhci_get_max_clock,
- 	.set_bus_width = aspeed_sdhci_set_bus_width,
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_sd2_default>;
++	cd-inverted;
++	disable-wp;
++};
 -- 
 2.20.1
