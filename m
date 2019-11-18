@@ -1,90 +1,85 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3] mmc: core: Fix size overflow for mmc partitions
-Date: Mon, 18 Nov 2019 10:07:57 +0100
-Message-ID: <CAPDyKFreYm3EsLO=e97RCOqaKJxkYJ+fqJcgskO7PtO15Tj4fQ@mail.gmail.com>
-References: <20191117010045.4902-1-bradleybolen@gmail.com>
+Subject: Re: [PATCH v2] mmc: tmio: Add MMC_CAP_ERASE to allow
+ erase/discard/trim requests
+Date: Mon, 18 Nov 2019 10:08:04 +0100
+Message-ID: <CAPDyKFpGi+Eio-wkr_xmiq5axJohaZwg+etU9Y3b=uq-2WEiWQ@mail.gmail.com>
+References: <20191115134430.12621-1-erosca@de.adit-jv.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20191117010045.4902-1-bradleybolen@gmail.com>
+In-Reply-To: <20191115134430.12621-1-erosca@de.adit-jv.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Bradley Bolen <bradleybolen@gmail.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Kate Stewart <kstewart@linuxfoundation.org>, Thomas Gleixner <tglx@linutronix.de>, "Enrico Weigelt, metux IT consult" <info@metux.net>, Hongjie Fang <hongjiefang@asrmicro.com>, Avri Altman <avri.altman@wdc.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, "yinbo.zhu" <yinbo.zhu@nxp.com>
+To: Eugeniu Rosca <erosca@de.adit-jv.com>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Masahiro Yamada <yamada.masahiro@socionext.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Eugeniu Rosca <roscaeugeniu@gmail.com>, Andrew Gabbasov <andrew_gabbasov@mentor.com>, Harish Jenny K N <harish_kandiga@mentor.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Sun, 17 Nov 2019 at 02:00, Bradley Bolen <bradleybolen@gmail.com> wrote:
+On Fri, 15 Nov 2019 at 14:45, Eugeniu Rosca <erosca@de.adit-jv.com> wrote:
 >
-> With large eMMC cards, it is possible to create general purpose
-> partitions that are bigger than 4GB.  The size member of the mmc_part
-> struct is only an unsigned int which overflows for gp partitions larger
-> than 4GB.  Change this to a u64 to handle the overflow.
+> Isolated initially to renesas_sdhi_internal_dmac [1], Ulf suggested
+> adding MMC_CAP_ERASE to the TMIO mmc core:
 >
-> Signed-off-by: Bradley Bolen <bradleybolen@gmail.com>
+> On Fri, Nov 15, 2019 at 10:27:25AM +0100, Ulf Hansson wrote:
+>  -- snip --
+>  This test and due to the discussions with Wolfram and you in this
+>  thread, I would actually suggest that you enable MMC_CAP_ERASE for all
+>  tmio variants, rather than just for this particular one.
+>
+>  In other words, set the cap in tmio_mmc_host_probe() should be fine,
+>  as it seems none of the tmio variants supports HW busy detection at
+>  this point.
+>  -- snip --
+>
+> Testing on R-Car H3ULCB-KF doesn't reveal any issues (v5.4-rc7):
+>
+> root@rcar-gen3:~# lsblk
+> NAME         MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+> mmcblk0      179:0    0 59.2G  0 disk  <--- eMMC
+> mmcblk0boot0 179:8    0    4M  1 disk
+> mmcblk0boot1 179:16   0    4M  1 disk
+> mmcblk1      179:24   0   30G  0 disk  <--- SD card
+>
+> root@rcar-gen3:~# time blkdiscard /dev/mmcblk0
+> real    0m8.659s
+> user    0m0.001s
+> sys     0m1.920s
+>
+> root@rcar-gen3:~# time blkdiscard /dev/mmcblk1
+> real    0m1.176s
+> user    0m0.001s
+> sys     0m0.124s
+>
+> [1] https://lore.kernel.org/linux-renesas-soc/20191112134808.23546-1-erosca@de.adit-jv.com/
+>
+> Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> Cc: Masahiro Yamada <yamada.masahiro@socionext.com>
+> Cc: Andrew Gabbasov <andrew_gabbasov@mentor.com>
+> Originally-by: Harish Jenny K N <harish_kandiga@mentor.com>
+> Suggested-by: Ulf Hansson <ulf.hansson@linaro.org>
+> Signed-off-by: Eugeniu Rosca <erosca@de.adit-jv.com>
 
 Applied for next, thanks!
 
 Kind regards
 Uffe
 
+
 > ---
->  drivers/mmc/core/mmc.c   | 9 ++++-----
->  include/linux/mmc/card.h | 2 +-
->  2 files changed, 5 insertions(+), 6 deletions(-)
+>  drivers/mmc/host/tmio_mmc_core.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 >
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index c8804895595f..f6912ded652d 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -297,7 +297,7 @@ static void mmc_manage_enhanced_area(struct mmc_card *card, u8 *ext_csd)
->         }
->  }
+> diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
+> index 9b6e1001e77c..dec5a99f52cf 100644
+> --- a/drivers/mmc/host/tmio_mmc_core.c
+> +++ b/drivers/mmc/host/tmio_mmc_core.c
+> @@ -1184,7 +1184,7 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host)
+>         if (ret == -EPROBE_DEFER)
+>                 return ret;
 >
-> -static void mmc_part_add(struct mmc_card *card, unsigned int size,
-> +static void mmc_part_add(struct mmc_card *card, u64 size,
->                          unsigned int part_cfg, char *name, int idx, bool ro,
->                          int area_type)
->  {
-> @@ -313,7 +313,7 @@ static void mmc_manage_gp_partitions(struct mmc_card *card, u8 *ext_csd)
->  {
->         int idx;
->         u8 hc_erase_grp_sz, hc_wp_grp_sz;
-> -       unsigned int part_size;
-> +       u64 part_size;
->
->         /*
->          * General purpose partition feature support --
-> @@ -343,8 +343,7 @@ static void mmc_manage_gp_partitions(struct mmc_card *card, u8 *ext_csd)
->                                 (ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3 + 1]
->                                 << 8) +
->                                 ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3];
-> -                       part_size *= (size_t)(hc_erase_grp_sz *
-> -                               hc_wp_grp_sz);
-> +                       part_size *= (hc_erase_grp_sz * hc_wp_grp_sz);
->                         mmc_part_add(card, part_size << 19,
->                                 EXT_CSD_PART_CONFIG_ACC_GP0 + idx,
->                                 "gp%d", idx, false,
-> @@ -362,7 +361,7 @@ static void mmc_manage_gp_partitions(struct mmc_card *card, u8 *ext_csd)
->  static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
->  {
->         int err = 0, idx;
-> -       unsigned int part_size;
-> +       u64 part_size;
->         struct device_node *np;
->         bool broken_hpi = false;
->
-> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-> index 9b6336ad3266..b59d35bb50ba 100644
-> --- a/include/linux/mmc/card.h
-> +++ b/include/linux/mmc/card.h
-> @@ -226,7 +226,7 @@ struct mmc_queue_req;
->   * MMC Physical partitions
->   */
->  struct mmc_part {
-> -       unsigned int    size;   /* partition size (in bytes) */
-> +       u64             size;   /* partition size (in bytes) */
->         unsigned int    part_cfg;       /* partition type */
->         char    name[MAX_MMC_PART_NAME_LEN];
->         bool    force_ro;       /* to make boot parts RO by default */
+> -       mmc->caps |= MMC_CAP_4_BIT_DATA | pdata->capabilities;
+> +       mmc->caps |= MMC_CAP_ERASE | MMC_CAP_4_BIT_DATA | pdata->capabilities;
+>         mmc->caps2 |= pdata->capabilities2;
+>         mmc->max_segs = pdata->max_segs ? : 32;
+>         mmc->max_blk_size = TMIO_MAX_BLK_SIZE;
 > --
-> 2.17.1
+> 2.24.0
 >
