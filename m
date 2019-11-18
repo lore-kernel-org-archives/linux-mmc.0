@@ -1,68 +1,91 @@
-From: Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+From: Markus Reichl <m.reichl@fivetechno.de>
 Subject: Re: arm64: dts: rockchip: Disable HS400 for mmc on rk3399-roc-pc
-Date: Mon, 18 Nov 2019 08:08:37 -0800
-Message-ID: <CAD=FV=VnjyQJpRcW6P1f4+ZrSOzAe2Cnoej=it4aCz+F_ozukw@mail.gmail.com>
+Date: Mon, 18 Nov 2019 20:05:09 +0100
+Message-ID: <2db7a63f-a091-db8d-3414-cac289011878@fivetechno.de>
 References: <20190301153348.29870-1-christoph.muellner@theobroma-systems.com>
- <2766673.iMURPl8gB5@phil> <69472c06-8b21-c3d8-acad-1a0a292c0fa2@fivetechno.de>
+ <2766673.iMURPl8gB5@phil>
+ <69472c06-8b21-c3d8-acad-1a0a292c0fa2@fivetechno.de>
  <3460135.SDF8zhHPq4@diego>
+ <CAD=FV=VnjyQJpRcW6P1f4+ZrSOzAe2Cnoej=it4aCz+F_ozukw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <3460135.SDF8zhHPq4@diego>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
-List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
-Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Jeffy Chen <jeffy.chen-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Viresh Kumar <viresh.kumar-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Brian Norris <briannorris-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Vicente Bergas <vicencb-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>, Markus Reichl <m.reichl-SRyzfwRm/0rPTwkrwQOX7A@public.gmane.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Tony Xie <tony.xie-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Klaus Goger <klaus.goger-SN7IsUiht6C/RdPyistoZJqQE7yCjDx5@public.gmane.org>, Enric Balletbo i Serra <enric.balletbo-ZGY8ohtN/8qB+jHODAdFcQ@public.gmane.org>, Randy Li <ayaka-xPW3/0Ywev/iB9QmIjCX8w@public.gmane.org>, Philipp Tomsich <philipp.tomsich-SN7IsUiht6C/RdPyistoZJqQE7yCjDx5@public.gmane.org>, Ezequiel Garcia <ezequiel-ZGY8ohtN/8qB+jHODAdFcQ@public.gmane.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAD=FV=VnjyQJpRcW6P1f4+ZrSOzAe2Cnoej=it4aCz+F_ozukw@mail.gmail.com>
+Content-Language: de-DE
+Sender: linux-kernel-owner@vger.kernel.org
+To: Doug Anderson <dianders@chromium.org>, =?UTF-8?Q?Heiko_St=c3=bcbner?= <heiko@sntech.de>
+Cc: Mark Rutland <mark.rutland@arm.com>, "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" <devicetree@vger.kernel.org>, Brian Norris <briannorris@chromium.org>, Tony Xie <tony.xie@rock-chips.com>, Viresh Kumar <viresh.kumar@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Jeffy Chen <jeffy.chen@rock-chips.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>, Vicente Bergas <vicencb@gmail.com>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, Rob Herring <robh+dt@kernel.org>, Klaus Goger <klaus.goger@theobroma-systems.com>, Enric Balletbo i Serra <enric.balletbo@collabora.com>, Philipp Tomsich <philipp.tomsich@theobroma-systems.com>, Randy Li <ayaka@soulik.info>, Kishon
 List-Id: linux-mmc@vger.kernel.org
 
-SGksCgoKT24gRnJpLCBOb3YgMTUsIDIwMTkgYXQgMzoxOSBBTSBIZWlrbyBTdMO8Ym5lciA8aGVp
-a29Ac250ZWNoLmRlPiB3cm90ZToKPgo+IEhpIE1hcmt1cywKPgo+IEFtIEZyZWl0YWcsIDE1LiBO
-b3ZlbWJlciAyMDE5LCAxMTozNzo1OCBDRVQgc2NocmllYiBNYXJrdXMgUmVpY2hsOgo+ID4gQW0g
-MTQuMTEuMTkgdW0gMTQ6MTAgc2NocmllYiBIZWlrbyBTdHVlYm5lcjoKPiA+ID4gJHN1YmplY3Qg
-aXMgbWlzc2luZyB0aGUgW1BBVENIXSBwcmVmaXgKPiA+IHdpbGwgZml4Lgo+Cj4gbm8gbmVlZCB0
-byByZXNlbmQganVzdCBmb3IgdGhpcyAuLi4ganVzdCB0byBrZWVwIGluIG1pbmQgZm9yIGZ1dHVy
-ZSBwYXRjaGVzIDstKQo+Cj4KPiA+ID4gQW0gTW9udGFnLCAxMS4gTm92ZW1iZXIgMjAxOSwgMTA6
-NTE6MDQgQ0VUIHNjaHJpZWIgTWFya3VzIFJlaWNobDoKPiA+ID4+IFdvcmtpbmcgd2l0aCByb290
-ZnMgb24gdHdvIDEyOEdCIG1tY3Mgb24gcmszMzk5LXJvYy1wYy4KPiA+ID4+Cj4gPiA+PiBPbmUg
-KG1tYyBuYW1lIDEyOEc3Miwgb25lIHNjcmV3IGhvbGUpIHdvcmtzIGZpbmUgaW4gSFM0MDAgbW9k
-ZS4KPiA+ID4+IE90aGVyIChtbWMgbmFtZSBESk5CNFIsIGZpcmVmbHkgb24gcGNiLCB0d28gc2Ny
-ZXcgaG9sZXMpIGdldHMgbG90cyBvZgo+ID4gPj4gbW1jMTogInJ1bm5pbmcgQ1FFIHJlY292ZXJ5
-IiwgZXZlbiBoYW5ncyB3aXRoIGRhbWFnZWQgZnMsCj4gPiA+PiB3aGVuIHJ1bm5pbmcgdW5kZXIg
-aGVhdnkgbG9hZCwgZS5nLiBjb21waWxpbmcga2VybmVsLgo+ID4gPj4gQm90aCBydW4gZmluZSB3
-aXRoIEhTMjAwLgo+ID4gPj4KPiA+ID4+IERpc2FibGluZyBDUSB3aXRoIHBhdGNoIG1tYzogY29y
-ZTogQWRkIE1NQyBDb21tYW5kIFF1ZXVlIFN1cHBvcnQga2VybmVsIHBhcmFtZXRlciBbMF0gZGlk
-IG5vdCBoZWxwLgo+ID4gPj4gWzBdIGh0dHBzOi8vZ2l0bGFiLmNvbS9heXVmYW4tcmVwb3Mvcm9j
-azY0L2xpbnV4LW1haW5saW5lLWtlcm5lbC9jb21taXQvNTRlMjY0MTU0Yjg3ZGZlMzJhODM1OWIy
-NzI2ZTJkNTYxMWFkYmFmMwo+ID4gPgo+ID4gPiBJJ20gaG9waW5nIGZvciBzb21lIGlucHV0IGZy
-b20gb3RoZXIgcGVvcGxlIGluIENjIGJ1dCB5b3VyIG1haWwgaGVhZGVycwo+ID4gPiBhbHNvIHJl
-ZmVyZW5jZWQgdGhlIGRyaXZlLWltcGVuZGFuY2Ugc2VyaWVzIGZyb20gQ2hyaXN0b3BoIFswXSwg
-d2hpY2gKPiA+ID4gaXQgc2VlbXMgd2UgbmVlZCB0byBwb2tlIHRoZSBwaHkgbWFpbnRhaW5lciBh
-Z2Fpbi4KPiA+ID4KPiA+ID4gRGlkIHlvdSBjaGVjayBpZiBjaGFuZ2luZyB0aGUgaW1wZWRhbmNl
-IGhlbHBlZCAobGlrZSB0aGUgc2lnbmFsIGRhbXBlbmluZwo+ID4gPiBQaGlsaXBwIGRlc2NyaWJl
-ZCBpbiBvbmUgb2YgdGhlIHJlcGxpZXMgdGhlcmUpLgo+ID4KPiA+IGNoZWNrZWQgd2l0aAo+ID4K
-PiA+ICZlbW1jX3BoeSB7Cj4gPiArICAgICAgIGRyaXZlLWltcGVkYW5jZS1vaG0gPSA8MzM+Owo+
-ID4KPiA+IGdpdmVzIG5vIGltcHJvdmVtZW50Ogo+Cj4gVGhhdCBpcyBzYWQgLi4uIEkgZ3Vlc3Mg
-d2UgcmVhbGx5IHNob3VsZCBkaXNhYmxlIGhzNDAwIHRoZW4gLi4uCj4gdGhhdCBtYXkgZ2l2ZSBv
-dGhlcnMgbW9yZSBpbmNlbnRpdmUgdG8gZGl2ZSBkZWVwZXIgOy0pCgpKdXN0IG91dCBvZiBjdXJp
-b3NpdHksIGlzIHRoZSBwcm9ibGVtIHdpdGggdGhlIHN0cm9iZSBsaW5lLCBvciB3aXRoCmhzNDAw
-PyAgSGF2ZSB5b3UgdHJpZWQgdXNpbmcgdGhlIHNvbHV0aW9uIGZyb20gInJrMzM5OS1ncnUuZHRz
-aSI/Ck5hbWVseToKCiAgICAgICAgLyoKICAgICAgICAgKiBTaWduYWwgaW50ZWdyaXR5IGlzbid0
-IGdyZWF0IGF0IDIwMCBNSHogYW5kIDE1MCBNSHogKEREUikgZ2l2ZXMgdGhlCiAgICAgICAgICog
-c2FtZSAob3IgbmVhcmx5IHRoZSBzYW1lKSBwZXJmb3JtYW5jZSBmb3IgYWxsIGVNTUMgdGhhdCBh
-cmUgaW50ZW5kZWQKICAgICAgICAgKiB0byBiZSB1c2VkLgogICAgICAgICAqLwogICAgICAgIGFz
-c2lnbmVkLWNsb2NrLXJhdGVzID0gPDE1MDAwMDAwMD47CgpJSVJDIGhzNDAwIG9uIHJrMzM5OSB3
-YXMgYSBiaXQgaWZmeSBidXQgcnVubmluZyBhdCAxNTAgTUh6IG1hZGUgaXQKbXVjaCBtb3JlIHJl
-bGlhYmxlIGFuZCBzdGlsbCBnYXZlIHlvdSAzMDAgTUIvcyB0cmFuc2ZlciByYXRlIChzbyBtdWNo
-CmJldHRlciB0aGFuIGhzMjAwKS4gIEluIHJlYWxpdHkgbWFueSBlTU1DIGNoaXBzIGNhbid0IGRv
-ID4gMzAwIE1CL3MKYW55d2F5LgoKLURvdWcKCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fCkxpbnV4LXJvY2tjaGlwIG1haWxpbmcgbGlzdApMaW51eC1yb2Nr
-Y2hpcEBsaXN0cy5pbmZyYWRlYWQub3JnCmh0dHA6Ly9saXN0cy5pbmZyYWRlYWQub3JnL21haWxt
-YW4vbGlzdGluZm8vbGludXgtcm9ja2NoaXAK
+Hi Doug,
+
+Am 18.11.19 um 17:08 schrieb Doug Anderson:
+> Hi,
+> 
+> 
+> On Fri, Nov 15, 2019 at 3:19 AM Heiko Stübner <heiko@sntech.de> wrote:
+>>
+>> Hi Markus,
+>>
+>> Am Freitag, 15. November 2019, 11:37:58 CET schrieb Markus Reichl:
+>> > Am 14.11.19 um 14:10 schrieb Heiko Stuebner:
+>> > > $subject is missing the [PATCH] prefix
+>> > will fix.
+>>
+>> no need to resend just for this ... just to keep in mind for future patches ;-)
+>>
+>>
+>> > > Am Montag, 11. November 2019, 10:51:04 CET schrieb Markus Reichl:
+>> > >> Working with rootfs on two 128GB mmcs on rk3399-roc-pc.
+>> > >>
+>> > >> One (mmc name 128G72, one screw hole) works fine in HS400 mode.
+>> > >> Other (mmc name DJNB4R, firefly on pcb, two screw holes) gets lots of
+>> > >> mmc1: "running CQE recovery", even hangs with damaged fs,
+>> > >> when running under heavy load, e.g. compiling kernel.
+>> > >> Both run fine with HS200.
+>> > >>
+>> > >> Disabling CQ with patch mmc: core: Add MMC Command Queue Support kernel parameter [0] did not help.
+>> > >> [0] https://gitlab.com/ayufan-repos/rock64/linux-mainline-kernel/commit/54e264154b87dfe32a8359b2726e2d5611adbaf3
+>> > >
+>> > > I'm hoping for some input from other people in Cc but your mail headers
+>> > > also referenced the drive-impendance series from Christoph [0], which
+>> > > it seems we need to poke the phy maintainer again.
+>> > >
+>> > > Did you check if changing the impedance helped (like the signal dampening
+>> > > Philipp described in one of the replies there).
+>> >
+>> > checked with
+>> >
+>> > &emmc_phy {
+>> > +       drive-impedance-ohm = <33>;
+>> >
+>> > gives no improvement:
+>>
+>> That is sad ... I guess we really should disable hs400 then ...
+>> that may give others more incentive to dive deeper ;-)
+> 
+> Just out of curiosity, is the problem with the strobe line, or with
+> hs400?  Have you tried using the solution from "rk3399-gru.dtsi"?
+> Namely:
+> 
+>         /*
+>          * Signal integrity isn't great at 200 MHz and 150 MHz (DDR) gives the
+>          * same (or nearly the same) performance for all eMMC that are intended
+>          * to be used.
+>          */
+>         assigned-clock-rates = <150000000>;
+> 
+> IIRC hs400 on rk3399 was a bit iffy but running at 150 MHz made it
+> much more reliable and still gave you 300 MB/s transfer rate (so much
+> better than hs200).  In reality many eMMC chips can't do > 300 MB/s
+> anyway.
+> 
+I tried 150000000 and 100000000, but it did not help.
+
+Gruß,
+--
+Markus
+
+> -Doug
+> 
