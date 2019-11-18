@@ -1,186 +1,137 @@
-From: "(Exiting) Baolin Wang" <baolin.wang@linaro.org>
-Subject: Re: [PATCH v6 0/4] Add MMC software queue support
-Date: Mon, 18 Nov 2019 18:04:28 +0800
-Message-ID: <CAMz4kuK_3q4JY1vNXe6zGHDNF8Ep-SkcUq6Z25r790VSz4+Bjw@mail.gmail.com>
-References: <cover.1573456283.git.baolin.wang@linaro.org> <CAK8P3a1we9D5C2NOBww=cW-4L1PT3t0NnDRmknLwiLm652TmKg@mail.gmail.com>
- <CAMz4kuK9HEuGdhNqHO_qoy9jD=ccsPPhD_dKYwNRgQyWyYwqRA@mail.gmail.com>
- <CAK8P3a0rNhyxmUWLUV1js3FsuAESDOPX3E4b8ActtL4GRT4uTA@mail.gmail.com> <CADBw62pzV+5ZXBEbFvTQJ9essAd4cd7Xkz5j9AXB5rAQy0wLqA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+From: Baolin Wang <baolin.wang7@gmail.com>
+Subject: [PATCH v7 0/4] Add MMC software queue support
+Date: Mon, 18 Nov 2019 18:43:18 +0800
+Message-ID: <cover.1574073572.git.baolin.wang7@gmail.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CADBw62pzV+5ZXBEbFvTQJ9essAd4cd7Xkz5j9AXB5rAQy0wLqA@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Baolin Wang <baolin.wang7@gmail.com>
-Cc: Arnd Bergmann <arnd@arndb.de>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, asutoshd@codeaurora.org, Orson Zhai <orsonzhai@gmail.com>, Lyra Zhang <zhang.lyra@gmail.com>, Linus Walleij <linus.walleij@linaro.org>, Vincent Guittot <vincent.guittot@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Hannes Reinecke <hare@suse.com>, linux-block <linux-block@vger.kernel.org>
+To: adrian.hunter@intel.com, ulf.hansson@linaro.org, asutoshd@codeaurora.org
+Cc: orsonzhai@gmail.com, zhang.lyra@gmail.com, arnd@arndb.de, linus.walleij@linaro.org, vincent.guittot@linaro.org, baolin.wang@linaro.org, baolin.wang7@gmail.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Arnd,
+Hi All,
 
-On Tue, 12 Nov 2019 at 16:48, Baolin Wang <baolin.wang7@gmail.com> wrote:
->
-> On Tue, Nov 12, 2019 at 12:59 AM Arnd Bergmann <arnd@arndb.de> wrote:
-> >
-> > On Mon, Nov 11, 2019 at 1:58 PM Baolin Wang <baolin.wang@linaro.org> wrote:
-> > > On Mon, 11 Nov 2019 at 17:28, Arnd Bergmann <arnd@arndb.de> wrote:
-> > > > On Mon, Nov 11, 2019 at 8:35 AM Baolin Wang <baolin.wang@linaro.org> wrote:
-> > > > - Removing all the context switches and workqueues from the data submission
-> > > >   path is also the right idea. As you found, there is still a workqueue inside
-> > > >   of blk_mq that is used because it may get called from atomic context but
-> > > >   the submission may get blocked in __mmc_claim_host(). This really
-> > > >   needs to be changed as well, but not in the way I originally suggested:
-> > > >   As Hannes suggested, the host interrrupt handler should always use
-> > > >   request_threaded_irq() to have its own process context, and then pass a
-> > > >   flag to blk_mq to say that we never need another workqueue there.
-> > >
-> > > So you mean we should complete the request in the host driver irq
-> > > thread context, then issue another request in this context by calling
-> > > blk_mq_run_hw_queues()?
-> >
-> > Yes. I assumed there was already code that would always run
-> > blk_mq_run_hw_queue() at I/O completion, but I can't find where
-> > that happens today.
->
-> OK. Now we will complete a request in block softirq, which means the
-> irq thread of host driver should call blk_mq_complete_request() to
-> complete this request (triggering the block softirq) and call
-> blk_mq_run_hw_queues() to dispatch another request in this context.
->
-> >
-> > As I understand, the main difference to today is that
-> > __blk_mq_delay_run_hw_queue() can call into __blk_mq_run_hw_queue
-> > directly rather than using the delayed work queue once we
-> > can skip the BLK_MQ_F_BLOCKING check.
->
-> Right. Need to improve this as you suggested.
->
-> >
-> > > > - With that change in place calling a blocking __mmc_claim_host() is
-> > > >   still a problem, so there should still be a nonblocking mmc_try_claim_host()
-> > > >   for the submission path, leading to a BLK_STS_DEV_RESOURCE (?)
-> > > >   return code from mmc_mq_queue_rq(). Basically mmc_mq_queue_rq()
-> > > >   should always return right away, either after having queued the next I/O
-> > > >   or with an error, but not waiting for the device in any way.
-> > >
-> > > Actually not only the mmc_claim_host() will block the MMC request
-> > > processing, in this routine, the mmc_blk_part_switch() and
-> > > mmc_retune() can also block the request processing. Moreover the part
-> > > switching and tuning should be sync operations, and we can not move
-> > > them to a work or a thread.
-> >
-> > Ok, I see.
-> >
-> > Those would also cause requests to be sent to the device or the host
-> > controller, right? Maybe we can treat them as "a non-IO request
->
-> Right.
->
-> > has successfully been queued to the device" events, returning
-> > busy from the mmc_mq_queue_rq() function and then running
-> > the queue again when they complete?
->
-> Yes, seems reasonable to me.
->
-> >
-> > > > - For the packed requests, there is apparently a very simple way to implement
-> > > >   that without a software queue: mmc_mq_queue_rq() is allowed to look at
-> > > >   and dequeue all requests that are currently part of the request_queue,
-> > > >   so it should take out as many as it wants to submit at once and send
-> > > >   them all down to the driver together, avoiding the need for any further
-> > > >   round-trips to blk_mq or maintaining a queue in mmc.
-> > >
-> > > You mean we can dispatch a request directly from
-> > > elevator->type->ops.dispatch_request()?  but we still need some helper
-> > > functions to check if these requests can be packed (the package
-> > > condition), and need to invent new APIs to start a packed request (or
-> > > using cqe interfaces, which means we still need to implement some cqe
-> > > callbacks).
-> >
-> > I don't know how the dispatch_request() function fits in there,
-> > what Hannes told me is that in ->queue_rq() you can always
-> > look at the following requests that are already queued up
-> > and take the next ones off the list. Looking at bd->last
-> > tells you if there are additional requests. If there are, you can
-> > look at the next one from blk_mq_hw_ctx (not sure how, but
-> > should not be hard to find)
-> >
-> > I also see that there is a commit_rqs() callback that may
-> > go along with queue_rq(), implementing that one could make
-> > this easier as well.
->
-> Yes, we can use queue_rq()/commit_rqs() and bd->last (now bd->last may
-> can not work well, see [1]), but like we talked before, for packed
-> request, we still need some new interfaces (for example, a interface
-> used to start a packed request, and a interface used to complete a
-> packed request), but at last we got a consensus that we should re-use
-> the CQE interfaces instead of new invention.
->
-> [1] https://lore.kernel.org/patchwork/patch/1102897/
->
-> >
-> > > > - The DMA management (bounce buffer, map, unmap) that is currently
-> > > >   done in mmc_blk_mq_issue_rq() should ideally be done in the
-> > > >   init_request()/exit_request()  (?) callbacks from mmc_mq_ops so this
-> > > >   can be done asynchronously, out of the critical timing path for the
-> > > >   submission. With this, there won't be any need for a software queue.
-> > >
-> > > This is not true, now the blk-mq will allocate some static request
-> > > objects (usually the static requests number should be the same with
-> > > the hardware queue depth) saved in struct blk_mq_tags. So the
-> > > init_request() is used to initialize the static requests when
-> > > allocating them, and call exit_request to free the static requests
-> > > when freeing the 'struct blk_mq_tags', such as the queue is dead. So
-> > > we can not move the DMA management into the init_request/exit_request.
-> >
-> > Ok, I must have misremembered which callback that is then, but I guess
-> > there is some other place to do it.
->
-> I checked the 'struct blk_mq_ops', and I did not find a ops can be
-> used to do DMA management. And I also checked UFS driver, it also did
-> the DMA mapping in the queue_rq() (scsi_queue_rq() --->
-> ufshcd_queuecommand() ---> ufshcd_map_sg()). Maybe I missed something?
->
-> Moreover like I said above, for the packed request, we still need
-> implement something (like the software queue) based on the CQE
-> interfaces to help to handle packed requests.
+Now the MMC read/write stack will always wait for previous request is
+completed by mmc_blk_rw_wait(), before sending a new request to hardware,
+or queue a work to complete request, that will bring context switching
+overhead, especially for high I/O per second rates, to affect the IO
+performance.
 
-After some investigation and offline discussion with you, I still have
-some concerns about your suggestion.
+Thus this patch set will introduce the MMC software command queue support
+based on command queue engine's interfaces, and set the queue depth as 32
+to allow more requests can be be prepared, merged and inserted into IO
+scheduler, but we only allow 2 requests in flight, that is enough to let
+the irq handler always trigger the next request without a context switch,
+as well as avoiding a long latency.
 
-1) Now blk-mq have not supplied some ops to prepare a request, which is
-used to do some DMA management asynchronously. But yes, we can
-introduce new ops for blk-mq. But there are still some remaining
-preparation in mmc_mq_queue_rq(), like mmc part switch. For software
-queue, we can prepare a request totally after issuing one.
+Moreover we can expand the MMC software queue interface to support
+MMC packed request or packed command instead of adding new interfaces,
+according to previosus discussion.
 
-2) I wonder if it is appropriate that using the irq threaded context
-to dispatch next request, actually we will still introduce a context
-switch here. Now we will complete a request in the hard irq handler
-and kick the softirq to do time-consuming operations, like DMA
-unmapping , and will start next request in the hard irq handler
-without context switch. Moreover if we remove the BLK_MQ_F_BLOCKING in
-future like you suggested, then we can remove all context switch. And
-I think we can dispatch next request in the softirq context (actually
-the CQE already did).
+Below are some comparison data with fio tool. The fio command I used
+is like below with changing the '--rw' parameter and enabling the direct
+IO flag to measure the actual hardware transfer speed in 4K block size.
 
-3) For packed request support, I did not see an example that block
-driver can dispatch a request from the IO scheduler in queue_rq() and
-no APIs supported from blk-mq. And we do not know where can dispatch a
-request in queue_rq(), from IO scheduler? from ctx? or from
-hctx->dispatch list? and if this request can not be passed to host
-now, how to do it? Seems lots of complicated things.
+./fio --filename=/dev/mmcblk0p30 --direct=1 --iodepth=20 --rw=read --bs=4K --size=1G --group_reporting --numjobs=20 --name=test_read
 
-Moreover, we still need some interfaces for the packed request
-handling, from previous discussion, we still need something like MMC
-software queue based on  the CQE to help to handle the packed request.
+My eMMC card working at HS400 Enhanced strobe mode:
+[    2.229856] mmc0: new HS400 Enhanced strobe MMC card at address 0001
+[    2.237566] mmcblk0: mmc0:0001 HBG4a2 29.1 GiB 
+[    2.242621] mmcblk0boot0: mmc0:0001 HBG4a2 partition 1 4.00 MiB
+[    2.249110] mmcblk0boot1: mmc0:0001 HBG4a2 partition 2 4.00 MiB
+[    2.255307] mmcblk0rpmb: mmc0:0001 HBG4a2 partition 3 4.00 MiB, chardev (248:0)
 
-So I think I still need to introduce the MMC software queue, on the one
-hand is that it can really improve the performance from fio data and
-avoid a long latency, on the other hand we can expand it to support
-packed request easily in future. Thanks.
+1. Without MMC software queue
+I tested 5 times for each case and output a average speed.
 
-(Anyway I will still post the V7 to address Adrian's comments and to
-see if we can get a consensus there).
+1) Sequential read:
+Speed: 59.4MiB/s, 63.4MiB/s, 57.5MiB/s, 57.2MiB/s, 60.8MiB/s
+Average speed: 59.66MiB/s
+
+2) Random read:
+Speed: 26.9MiB/s, 26.9MiB/s, 27.1MiB/s, 27.1MiB/s, 27.2MiB/s
+Average speed: 27.04MiB/s
+
+3) Sequential write:
+Speed: 71.6MiB/s, 72.5MiB/s, 72.2MiB/s, 64.6MiB/s, 67.5MiB/s
+Average speed: 69.68MiB/s
+
+4) Random write:
+Speed: 36.3MiB/s, 35.4MiB/s, 38.6MiB/s, 34MiB/s, 35.5MiB/s
+Average speed: 35.96MiB/s
+
+2. With MMC software queue
+I tested 5 times for each case and output a average speed.
+
+1) Sequential read:
+Speed: 59.2MiB/s, 60.4MiB/s, 63.6MiB/s, 60.3MiB/s, 59.9MiB/s
+Average speed: 60.68MiB/s
+
+2) Random read:
+Speed: 31.3MiB/s, 31.4MiB/s, 31.5MiB/s, 31.3MiB/s, 31.3MiB/s
+Average speed: 31.36MiB/s
+
+3) Sequential write:
+Speed: 71MiB/s, 71.8MiB/s, 72.3MiB/s, 72.2MiB/s, 71MiB/s
+Average speed: 71.66MiB/s
+
+4) Random write:
+Speed: 68.9MiB/s, 68.7MiB/s, 68.8MiB/s, 68.6MiB/s, 68.8MiB/s
+Average speed: 68.76MiB/s
+
+Form above data, we can see the MMC software queue can help to improve some
+performance obviously for random read and write, though no obvious improvement
+for sequential read and write.
+
+Any comments are welcome. Thanks a lot.
+
+Changes from v6:
+ - Change the patch order and set host->always_defer_done = true for the
+ Spreadtrum host driver.
+
+Changes from v5:
+ - Modify the condition of defering to complete request suggested by Adrian.
+
+Changes from v4:
+ - Add a seperate patch to introduce a variable to defer to complete
+ data requests for some host drivers, when using host software queue.
+
+Changes from v3:
+ - Use host software queue instead of sqhci.
+ - Fix random config building issue.
+ - Change queue depth to 32, but still only allow 2 requests in flight.
+ - Update the testing data.
+
+Changes from v2:
+ - Remove reference to 'struct cqhci_host' and 'struct cqhci_slot',
+ instead adding 'struct sqhci_host', which is only used by software queue.
+
+Changes from v1:
+ - Add request_done ops for sdhci_ops.
+ - Replace virtual command queue with software queue for functions and
+ variables.
+ - Rename the software queue file and add sqhci.h header file.
+
+Baolin Wang (4):
+  mmc: Add MMC host software queue support
+  mmc: host: sdhci: Add request_done ops for struct sdhci_ops
+  mmc: host: sdhci: Add a variable to defer to complete requests if
+    needed
+  mmc: host: sdhci-sprd: Add software queue support
+
+ drivers/mmc/core/block.c      |   61 ++++++++
+ drivers/mmc/core/mmc.c        |   13 +-
+ drivers/mmc/core/queue.c      |   33 +++-
+ drivers/mmc/host/Kconfig      |    8 +
+ drivers/mmc/host/Makefile     |    1 +
+ drivers/mmc/host/mmc_hsq.c    |  344 +++++++++++++++++++++++++++++++++++++++++
+ drivers/mmc/host/mmc_hsq.h    |   30 ++++
+ drivers/mmc/host/sdhci-sprd.c |   28 ++++
+ drivers/mmc/host/sdhci.c      |   14 +-
+ drivers/mmc/host/sdhci.h      |    3 +
+ include/linux/mmc/host.h      |    3 +
+ 11 files changed, 525 insertions(+), 13 deletions(-)
+ create mode 100644 drivers/mmc/host/mmc_hsq.c
+ create mode 100644 drivers/mmc/host/mmc_hsq.h
 
 -- 
-Baolin Wang
-Best Regards
+1.7.9.5
