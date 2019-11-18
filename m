@@ -1,191 +1,68 @@
-From: Rob Herring <robh@kernel.org>
-Subject: Re: [PATCH v5 4/8] dt-bindings: mmc: Add optional generic properties
- for mmc
-Date: Mon, 18 Nov 2019 08:44:27 -0600
-Message-ID: <CAL_JsqJNFGi+X0XU449DE0SRMYaakAzKOuFqZdAT5pptrOZrbg@mail.gmail.com>
-References: <1572588353-110682-1-git-send-email-manish.narani@xilinx.com>
- <1572588353-110682-5-git-send-email-manish.narani@xilinx.com>
- <20191104231427.GA7606@bogus> <MN2PR02MB6029D371F580123CB32BE148C1740@MN2PR02MB6029.namprd02.prod.outlook.com>
+From: Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Subject: Re: arm64: dts: rockchip: Disable HS400 for mmc on rk3399-roc-pc
+Date: Mon, 18 Nov 2019 08:08:37 -0800
+Message-ID: <CAD=FV=VnjyQJpRcW6P1f4+ZrSOzAe2Cnoej=it4aCz+F_ozukw@mail.gmail.com>
+References: <20190301153348.29870-1-christoph.muellner@theobroma-systems.com>
+ <2766673.iMURPl8gB5@phil> <69472c06-8b21-c3d8-acad-1a0a292c0fa2@fivetechno.de>
+ <3460135.SDF8zhHPq4@diego>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <MN2PR02MB6029D371F580123CB32BE148C1740@MN2PR02MB6029.namprd02.prod.outlook.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Manish Narani <MNARANI@xilinx.com>
-Cc: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "mark.rutland@arm.com" <mark.rutland@arm.com>, "adrian.hunter@intel.com" <adrian.hunter@intel.com>, Michal Simek <michals@xilinx.com>, Jolly Shah <JOLLYS@xilinx.com>, Nava kishore Manne <navam@xilinx.com>, Rajan Vaja <RAJANV@xilinx.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, git <git@xilinx.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <3460135.SDF8zhHPq4@diego>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
+List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
+Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Jeffy Chen <jeffy.chen-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Viresh Kumar <viresh.kumar-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Brian Norris <briannorris-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Vicente Bergas <vicencb-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>, Markus Reichl <m.reichl-SRyzfwRm/0rPTwkrwQOX7A@public.gmane.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Tony Xie <tony.xie-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Klaus Goger <klaus.goger-SN7IsUiht6C/RdPyistoZJqQE7yCjDx5@public.gmane.org>, Enric Balletbo i Serra <enric.balletbo-ZGY8ohtN/8qB+jHODAdFcQ@public.gmane.org>, Randy Li <ayaka-xPW3/0Ywev/iB9QmIjCX8w@public.gmane.org>, Philipp Tomsich <philipp.tomsich-SN7IsUiht6C/RdPyistoZJqQE7yCjDx5@public.gmane.org>, Ezequiel Garcia <ezequiel-ZGY8ohtN/8qB+jHODAdFcQ@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, Nov 11, 2019 at 4:07 AM Manish Narani <MNARANI@xilinx.com> wrote:
->
-> Hi Rob,
->
->
-> > -----Original Message-----
-> > From: Rob Herring <robh@kernel.org>
-> > Sent: Tuesday, November 5, 2019 4:44 AM
-> > To: Manish Narani <MNARANI@xilinx.com>
-> > Cc: ulf.hansson@linaro.org; mark.rutland@arm.com;
-> > adrian.hunter@intel.com; Michal Simek <michals@xilinx.com>; Jolly Shah
-> > <JOLLYS@xilinx.com>; Nava kishore Manne <navam@xilinx.com>; Rajan Vaja
-> > <RAJANV@xilinx.com>; linux-mmc@vger.kernel.org;
-> > devicetree@vger.kernel.org; linux-kernel@vger.kernel.org; linux-arm-
-> > kernel@lists.infradead.org; git <git@xilinx.com>
-> > Subject: Re: [PATCH v5 4/8] dt-bindings: mmc: Add optional generic
-> > properties for mmc
-> >
-> > On Fri, Nov 01, 2019 at 11:35:49AM +0530, Manish Narani wrote:
-> > > Add optional properties for mmc hosts which are used to set clk delays
-> > > for different speed modes in the controller.
-> > >
-> > > Signed-off-by: Manish Narani <manish.narani@xilinx.com>
-> > > ---
-> > >  .../bindings/mmc/mmc-controller.yaml          | 92 +++++++++++++++++++
-> > >  1 file changed, 92 insertions(+)
-> > >
-> > > diff --git a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
-> > b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
-> > > index 080754e0ef35..87a83d966851 100644
-> > > --- a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
-> > > +++ b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
-> > > @@ -212,6 +212,98 @@ properties:
-> > >      description:
-> > >        eMMC HS400 enhanced strobe mode is supported
-> > >
-> > > +  # Below mentioned are the clock (phase) delays which are to be
-> > configured
-> > > +  # in the controller while switching to particular speed mode. The range
-> > > +  # of values are 0 to 359 degrees.
-> > > +
-> > > +  clk-phase-legacy:
-> > > +    allOf:
-> > > +      - $ref: /schemas/types.yaml#/definitions/uint32
-> > > +      - minimum: 0
-> > > +      - maximum: 359
-> > > +    description:
-> > > +      Input/Output Clock Delay pair in degrees for Legacy Mode.
-> > > +
-> > > +  clk-phase-mmc-hs:
-> > > +    allOf:
-> > > +      - $ref: /schemas/types.yaml#/definitions/uint32
-> > > +      - minimum: 0
-> > > +      - maximum: 359
-> > > +    description:
-> > > +      Input/Output Clock Delay pair degrees for MMC HS.
-> > > +
-> > > +  clk-phase-sd-hs:
-> > > +    allOf:
-> > > +      - $ref: /schemas/types.yaml#/definitions/uint32
-> > > +      - minimum: 0
-> > > +      - maximum: 359
-> > > +    description:
-> > > +      Input/Output Clock Delay pair in degrees for SD HS.
-> > > +
-> > > +  clk-phase-uhs-sdr12:
-> > > +    allOf:
-> > > +      - $ref: /schemas/types.yaml#/definitions/uint32
-> > > +      - minimum: 0
-> > > +      - maximum: 359
-> > > +    description:
-> > > +      Input/Output Clock Delay pair in degrees for SDR12.
-> > > +
-> > > +  clk-phase-uhs-sdr25:
-> > > +    allOf:
-> > > +      - $ref: /schemas/types.yaml#/definitions/uint32
-> > > +      - minimum: 0
-> > > +      - maximum: 359
-> > > +    description:
-> > > +      Input/Output Clock Delay pair in degrees for SDR25.
-> > > +
-> > > +  clk-phase-uhs-sdr50:
-> > > +    allOf:
-> > > +      - $ref: /schemas/types.yaml#/definitions/uint32
-> > > +      - minimum: 0
-> > > +      - maximum: 359
-> > > +    description:
-> > > +      Input/Output Clock Delay pair in degrees for SDR50.
-> > > +
-> > > +  clk-phase-uhs-sdr104:
-> > > +    allOf:
-> > > +      - $ref: /schemas/types.yaml#/definitions/uint32
-> > > +      - minimum: 0
-> > > +      - maximum: 359
-> > > +    description:
-> > > +      Input/Output Clock Delay pair in degrees for SDR104.
-> > > +
-> > > +  clk-phase-uhs-ddr50:
-> > > +    allOf:
-> > > +      - $ref: /schemas/types.yaml#/definitions/uint32
-> > > +      - minimum: 0
-> > > +      - maximum: 359
-> > > +    description:
-> > > +      Input/Output Clock Delay pair in degrees for SD DDR50.
-> > > +
-> > > +  clk-phase-mmc-ddr52:
-> > > +    allOf:
-> > > +      - $ref: /schemas/types.yaml#/definitions/uint32
-> > > +      - minimum: 0
-> > > +      - maximum: 359
-> > > +    description:
-> > > +      Input/Output Clock Delay pair in degrees for MMC DDR52.
-> > > +
-> > > +  clk-phase-mmc-hs200:
-> > > +    allOf:
-> > > +      - $ref: /schemas/types.yaml#/definitions/uint32
-> > > +      - minimum: 0
-> > > +      - maximum: 359
-> > > +    description:
-> > > +      Input/Output Clock Delay pair in degrees for MMC HS200.
-> > > +
-> > > +  clk-phase-mmc-hs400:
-> > > +    allOf:
-> > > +      - $ref: /schemas/types.yaml#/definitions/uint32
-> > > +      - minimum: 0
-> > > +      - maximum: 359
-> > > +    description:
-> > > +      Input/Output Clock Delay pair in degrees for MMC HS400.
-> >
-> > This can be condensed into:
-> >
-> > patternProperties:
-> >
-> > "^clk-phase-(legacy|sd-hs|mmc-(hs|hs[24]00|ddr52)|uhs-
-> > (sdr(12|25|50|104)|ddr50))$":
-> >
-> > Or if you want to divide them between SD and MMC ones, that would be
-> > fine for me.
->
-> Below change should work? Please review.
-
-Running 'make dt_binding_check' would tell you...
-
-> --- a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
-> @@ -333,6 +333,16 @@ patternProperties:
->      required:
->        - reg
->
-> +  "^clk-phase-(legacy|sd-hs|mmc-(hs|hs[24]00|ddr52)|uhs-(sdr(12|25|50|104)|ddr50))$":
-> +    allOf:
-> +      - $ref: /schemas/types.yaml#/definitions/uint32
-> +      - minimum: 0
-> +      - maximum: 359
-
-Drop the '-' on maximum so that minimum/maximum are 1 item in the list.
-
-> +    description:
-> +      Set the clock (phase) delays which are to be configured in the
-> +      controller while switching to particular speed mode. These values
-> +      are in pair of degrees.
-> +
->  dependencies:
->    cd-debounce-delay-ms: [ cd-gpios ]
->    fixed-emmc-driver-type: [ non-removable ]
-> @@ -351,6 +361,7 @@ examples:
->          keep-power-in-suspend;
->          wakeup-source;
->          mmc-pwrseq = <&sdhci0_pwrseq>;
-> +        clk-phase-sd-hs = <63>, <72>;
-
-This should fail because it is defined as a single int.
-
-Rob
+SGksCgoKT24gRnJpLCBOb3YgMTUsIDIwMTkgYXQgMzoxOSBBTSBIZWlrbyBTdMO8Ym5lciA8aGVp
+a29Ac250ZWNoLmRlPiB3cm90ZToKPgo+IEhpIE1hcmt1cywKPgo+IEFtIEZyZWl0YWcsIDE1LiBO
+b3ZlbWJlciAyMDE5LCAxMTozNzo1OCBDRVQgc2NocmllYiBNYXJrdXMgUmVpY2hsOgo+ID4gQW0g
+MTQuMTEuMTkgdW0gMTQ6MTAgc2NocmllYiBIZWlrbyBTdHVlYm5lcjoKPiA+ID4gJHN1YmplY3Qg
+aXMgbWlzc2luZyB0aGUgW1BBVENIXSBwcmVmaXgKPiA+IHdpbGwgZml4Lgo+Cj4gbm8gbmVlZCB0
+byByZXNlbmQganVzdCBmb3IgdGhpcyAuLi4ganVzdCB0byBrZWVwIGluIG1pbmQgZm9yIGZ1dHVy
+ZSBwYXRjaGVzIDstKQo+Cj4KPiA+ID4gQW0gTW9udGFnLCAxMS4gTm92ZW1iZXIgMjAxOSwgMTA6
+NTE6MDQgQ0VUIHNjaHJpZWIgTWFya3VzIFJlaWNobDoKPiA+ID4+IFdvcmtpbmcgd2l0aCByb290
+ZnMgb24gdHdvIDEyOEdCIG1tY3Mgb24gcmszMzk5LXJvYy1wYy4KPiA+ID4+Cj4gPiA+PiBPbmUg
+KG1tYyBuYW1lIDEyOEc3Miwgb25lIHNjcmV3IGhvbGUpIHdvcmtzIGZpbmUgaW4gSFM0MDAgbW9k
+ZS4KPiA+ID4+IE90aGVyIChtbWMgbmFtZSBESk5CNFIsIGZpcmVmbHkgb24gcGNiLCB0d28gc2Ny
+ZXcgaG9sZXMpIGdldHMgbG90cyBvZgo+ID4gPj4gbW1jMTogInJ1bm5pbmcgQ1FFIHJlY292ZXJ5
+IiwgZXZlbiBoYW5ncyB3aXRoIGRhbWFnZWQgZnMsCj4gPiA+PiB3aGVuIHJ1bm5pbmcgdW5kZXIg
+aGVhdnkgbG9hZCwgZS5nLiBjb21waWxpbmcga2VybmVsLgo+ID4gPj4gQm90aCBydW4gZmluZSB3
+aXRoIEhTMjAwLgo+ID4gPj4KPiA+ID4+IERpc2FibGluZyBDUSB3aXRoIHBhdGNoIG1tYzogY29y
+ZTogQWRkIE1NQyBDb21tYW5kIFF1ZXVlIFN1cHBvcnQga2VybmVsIHBhcmFtZXRlciBbMF0gZGlk
+IG5vdCBoZWxwLgo+ID4gPj4gWzBdIGh0dHBzOi8vZ2l0bGFiLmNvbS9heXVmYW4tcmVwb3Mvcm9j
+azY0L2xpbnV4LW1haW5saW5lLWtlcm5lbC9jb21taXQvNTRlMjY0MTU0Yjg3ZGZlMzJhODM1OWIy
+NzI2ZTJkNTYxMWFkYmFmMwo+ID4gPgo+ID4gPiBJJ20gaG9waW5nIGZvciBzb21lIGlucHV0IGZy
+b20gb3RoZXIgcGVvcGxlIGluIENjIGJ1dCB5b3VyIG1haWwgaGVhZGVycwo+ID4gPiBhbHNvIHJl
+ZmVyZW5jZWQgdGhlIGRyaXZlLWltcGVuZGFuY2Ugc2VyaWVzIGZyb20gQ2hyaXN0b3BoIFswXSwg
+d2hpY2gKPiA+ID4gaXQgc2VlbXMgd2UgbmVlZCB0byBwb2tlIHRoZSBwaHkgbWFpbnRhaW5lciBh
+Z2Fpbi4KPiA+ID4KPiA+ID4gRGlkIHlvdSBjaGVjayBpZiBjaGFuZ2luZyB0aGUgaW1wZWRhbmNl
+IGhlbHBlZCAobGlrZSB0aGUgc2lnbmFsIGRhbXBlbmluZwo+ID4gPiBQaGlsaXBwIGRlc2NyaWJl
+ZCBpbiBvbmUgb2YgdGhlIHJlcGxpZXMgdGhlcmUpLgo+ID4KPiA+IGNoZWNrZWQgd2l0aAo+ID4K
+PiA+ICZlbW1jX3BoeSB7Cj4gPiArICAgICAgIGRyaXZlLWltcGVkYW5jZS1vaG0gPSA8MzM+Owo+
+ID4KPiA+IGdpdmVzIG5vIGltcHJvdmVtZW50Ogo+Cj4gVGhhdCBpcyBzYWQgLi4uIEkgZ3Vlc3Mg
+d2UgcmVhbGx5IHNob3VsZCBkaXNhYmxlIGhzNDAwIHRoZW4gLi4uCj4gdGhhdCBtYXkgZ2l2ZSBv
+dGhlcnMgbW9yZSBpbmNlbnRpdmUgdG8gZGl2ZSBkZWVwZXIgOy0pCgpKdXN0IG91dCBvZiBjdXJp
+b3NpdHksIGlzIHRoZSBwcm9ibGVtIHdpdGggdGhlIHN0cm9iZSBsaW5lLCBvciB3aXRoCmhzNDAw
+PyAgSGF2ZSB5b3UgdHJpZWQgdXNpbmcgdGhlIHNvbHV0aW9uIGZyb20gInJrMzM5OS1ncnUuZHRz
+aSI/Ck5hbWVseToKCiAgICAgICAgLyoKICAgICAgICAgKiBTaWduYWwgaW50ZWdyaXR5IGlzbid0
+IGdyZWF0IGF0IDIwMCBNSHogYW5kIDE1MCBNSHogKEREUikgZ2l2ZXMgdGhlCiAgICAgICAgICog
+c2FtZSAob3IgbmVhcmx5IHRoZSBzYW1lKSBwZXJmb3JtYW5jZSBmb3IgYWxsIGVNTUMgdGhhdCBh
+cmUgaW50ZW5kZWQKICAgICAgICAgKiB0byBiZSB1c2VkLgogICAgICAgICAqLwogICAgICAgIGFz
+c2lnbmVkLWNsb2NrLXJhdGVzID0gPDE1MDAwMDAwMD47CgpJSVJDIGhzNDAwIG9uIHJrMzM5OSB3
+YXMgYSBiaXQgaWZmeSBidXQgcnVubmluZyBhdCAxNTAgTUh6IG1hZGUgaXQKbXVjaCBtb3JlIHJl
+bGlhYmxlIGFuZCBzdGlsbCBnYXZlIHlvdSAzMDAgTUIvcyB0cmFuc2ZlciByYXRlIChzbyBtdWNo
+CmJldHRlciB0aGFuIGhzMjAwKS4gIEluIHJlYWxpdHkgbWFueSBlTU1DIGNoaXBzIGNhbid0IGRv
+ID4gMzAwIE1CL3MKYW55d2F5LgoKLURvdWcKCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fCkxpbnV4LXJvY2tjaGlwIG1haWxpbmcgbGlzdApMaW51eC1yb2Nr
+Y2hpcEBsaXN0cy5pbmZyYWRlYWQub3JnCmh0dHA6Ly9saXN0cy5pbmZyYWRlYWQub3JnL21haWxt
+YW4vbGlzdGluZm8vbGludXgtcm9ja2NoaXAK
