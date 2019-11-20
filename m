@@ -1,24 +1,23 @@
-From: Heiko Stuebner <heiko@sntech.de>
-Subject: Re: [PATCH v3 2/2] arm64: dts: rockchip: Add SDR104 mode to SD-card I/F on rk3399-roc-pc
-Date: Tue, 19 Nov 2019 10:10:40 +0100
-Message-ID: <1847470.bs3PIdjKfZ@phil>
-References: <25466090-3b24-2695-10fb-88c59be3f149@fivetechno.de> <1918981.kTmXGv9Lqf@phil> <1b9b8314-8778-2d48-6f7a-3502c2146c42@fivetechno.de>
+From: "Andrew Jeffery" <andrew@aj.id.au>
+Subject: =?UTF-8?Q?Re:_[PATCH_v3_3/3]_mmc:_sdhci-of-aspeed:_add_inversion_signal_?=
+ =?UTF-8?Q?presence?=
+Date: Wed, 20 Nov 2019 16:36:55 +1030
+Message-ID: <b525ea84-aaa0-45b3-95fd-a1b3518511b3@www.fastmail.com>
+References: <20191118104646.3838-1-i.mikhaylov@yadro.com>
+ <20191118104646.3838-4-i.mikhaylov@yadro.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1b9b8314-8778-2d48-6f7a-3502c2146c42@fivetechno.de>
+In-Reply-To: <20191118104646.3838-4-i.mikhaylov@yadro.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Markus Reichl <m.reichl@fivetechno.de>
-Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Jagan Teki <jagan@amarulasolutions.com>, 'Ulf Hansson' <ulf.hansson@linaro.org>, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org, linux-kernel@vger.kernel.org, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Ivan Mikhaylov <i.mikhaylov@yadro.com>
+Cc: Joel Stanley <joel@jms.id.au>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-aspeed@lists.ozlabs.org, linux-kernel@vger.kernel.org, linux-mmc <linux-mmc@vger.kernel.org>, openbmc@lists.ozlabs.org
 List-Id: linux-mmc@vger.kernel.org
 
-Am Montag, 18. November 2019, 12:23:47 CET schrieb Markus Reichl:
-> Add SDR104 capability and regulators to SD card node.
+On Mon, 18 Nov 2019, at 21:16, Ivan Mikhaylov wrote:
+> Add read_l callback in sdhci_ops with flipping of SDHCI_CARD_PRESENT
+> bit in case of inverted card detection signal.
 > 
-> Signed-off-by: Markus Reichl <m.reichl@fivetechno.de>
+> Signed-off-by: Ivan Mikhaylov <i.mikhaylov@yadro.com>
 
-applied (yesterday evening already)
-
-Thanks
-Heiko
+Reviewed-by: Andrew Jeffery <andrew@aj.id.au>
