@@ -1,35 +1,25 @@
 From: "Andrew Jeffery" <andrew@aj.id.au>
-Subject: =?UTF-8?Q?Re:_[PATCH_v3_2/3]_mmc:_sdhci-of-aspeed:_enable_CONFIG=5FMMC=5F?=
- =?UTF-8?Q?SDHCI=5FIO=5FACCESSORS?=
-Date: Wed, 20 Nov 2019 16:38:32 +1030
-Message-ID: <794a7661-b4c1-46eb-bc78-79e7358ff999@www.fastmail.com>
+Subject: Re: [PATCH v3 1/3] aspeed: dts: add sd card for vesnin
+Date: Wed, 20 Nov 2019 16:39:25 +1030
+Message-ID: <ebe4c175-a1a0-47d3-9c01-1dfeeffc97e5@www.fastmail.com>
 References: <20191118104646.3838-1-i.mikhaylov@yadro.com>
- <20191118104646.3838-3-i.mikhaylov@yadro.com>
+ <20191118104646.3838-2-i.mikhaylov@yadro.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20191118104646.3838-3-i.mikhaylov@yadro.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+Content-Type: text/plain
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20191118104646.3838-2-i.mikhaylov@yadro.com>
+Sender: linux-kernel-owner@vger.kernel.org
 To: Ivan Mikhaylov <i.mikhaylov@yadro.com>
-Cc: Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, linux-aspeed@lists.ozlabs.org, openbmc@lists.ozlabs.org, linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-kernel@vger.kernel.org, Rob Herring <robh+dt@kernel.org>, Joel Stanley <joel@jms.id.au>, linux-arm-kernel@lists.infradead.org
+Cc: Joel Stanley <joel@jms.id.au>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-aspeed@lists.ozlabs.org, linux-kernel@vger.kernel.org, linux-mmc <linux-mmc@vger.kernel.org>, openbmc@lists.ozlabs.org
 List-Id: linux-mmc@vger.kernel.org
 
 
 
 On Mon, 18 Nov 2019, at 21:16, Ivan Mikhaylov wrote:
-> Enable CONFIG_MMC_SDHCI_IO_ACCESSORS on the aspeed board. 
+> Presence signal is inverted for vesnin boards, 'cd-inverted' added
+> for invertion signal enablement. Vesnin BMC uses microSD, there is
+> no WP switch, 'disable-wp' is used for this purpose.
+> 
+> Signed-off-by: Ivan Mikhaylov <i.mikhaylov@yadro.com>
 
-s/on the aspeed board/for the ASPEED MMC driver/
-
-but otherwise:
-
-Reviewed-by: Andrew Jeffery <andrew@aj.id.au>
+Acked-by: Andrew Jeffery <andrew@aj.id.au>
