@@ -1,86 +1,54 @@
-From: Kalle Valo <kvalo@codeaurora.org>
-Subject: Re: [PATCH v2 3/3] mmc: core: Re-work HW reset for SDIO cards
-Date: Wed, 20 Nov 2019 06:28:19 +0000
-Message-ID: <0101016e877f56b2-1dd9e926-2170-4c9d-bb4b-0116d39e5f96-000000@us-west-2.amazonses.com>
-References: <20191109103046.26445-1-ulf.hansson@linaro.org>
- <20191109103046.26445-4-ulf.hansson@linaro.org>
- <CAD=FV=VHReD5qnvcQLHvfgKHnHLbfDLZHwXtY-LV5uy_VCYpPA@mail.gmail.com>
- <CAPDyKFrCyJBz2=RzKPxqn0FSEq500=dEDsTUWYZeoFKWvSRAdA@mail.gmail.com>
+From: Manish Narani <manish.narani@xilinx.com>
+Subject: [PATCH v6 6/8] firmware: xilinx: Add SDIO Tap Delay nodes
+Date: Wed, 20 Nov 2019 12:17:27 +0530
+Message-ID: <1574232449-13570-7-git-send-email-manish.narani@xilinx.com>
+References: <1574232449-13570-1-git-send-email-manish.narani@xilinx.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ath10k-bounces+gldad-ath10k=m.gmane.org@lists.infradead.org>
-In-Reply-To: <CAPDyKFrCyJBz2=RzKPxqn0FSEq500=dEDsTUWYZeoFKWvSRAdA@mail.gmail.com>
- (Ulf Hansson's message of "Tue, 12 Nov 2019 13:19:55 +0100")
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/ath10k>,
- <mailto:ath10k-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/ath10k/>
-List-Post: <mailto:ath10k@lists.infradead.org>
-List-Help: <mailto:ath10k-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/ath10k>,
- <mailto:ath10k-request@lists.infradead.org?subject=subscribe>
-Sender: "ath10k" <ath10k-bounces@lists.infradead.org>
-Errors-To: ath10k-bounces+gldad-ath10k=m.gmane.org@lists.infradead.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Tony Lindgren <tony@atomide.com>, linux-wireless <linux-wireless@vger.kernel.org>, Brian Norris <briannorris@chromium.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Doug Anderson <dianders@chromium.org>, ath10k@lists.infradead.org, Adrian Hunter <adrian.hunter@intel.com>, Erik Stromdahl <erik.stromdahl@gmail.com>, Matthias Kaehlcke <mka@chromium.org>, Wen Gong <wgong@codeaurora.org>, Eyal Reizer <eyalreizer@gmail.com>
+Content-Type: text/plain
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1574232449-13570-1-git-send-email-manish.narani@xilinx.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, adrian.hunter@intel.com, michal.simek@xilinx.com, jolly.shah@xilinx.com, rajan.vaja@xilinx.com, nava.manne@xilinx.com, mdf@kernel.org, manish.narani@xilinx.com
+Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, git@xilinx.com
 List-Id: linux-mmc@vger.kernel.org
 
-+ wen, ath10k
+Add tap delay nodes for setting SDIO Tap Delays on ZynqMP platform.
 
-Ulf Hansson <ulf.hansson@linaro.org> writes:
+Signed-off-by: Manish Narani <manish.narani@xilinx.com>
+---
+ include/linux/firmware/xlnx-zynqmp.h | 13 ++++++++++++-
+ 1 file changed, 12 insertions(+), 1 deletion(-)
 
-> On Tue, 12 Nov 2019 at 01:33, Doug Anderson <dianders@chromium.org> wrote:
->>
->> Hi,
->>
->> On Sat, Nov 9, 2019 at 2:31 AM Ulf Hansson <ulf.hansson@linaro.org> wrote:
->> >
->> > diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
->> > index 6f8342702c73..abf8f5eb0a1c 100644
->> > --- a/drivers/mmc/core/core.c
->> > +++ b/drivers/mmc/core/core.c
->> > @@ -1469,8 +1469,7 @@ void mmc_detach_bus(struct mmc_host *host)
->> >         mmc_bus_put(host);
->> >  }
->> >
->> > -static void _mmc_detect_change(struct mmc_host *host, unsigned long delay,
->> > -                               bool cd_irq)
->> > +void _mmc_detect_change(struct mmc_host *host, unsigned long delay, bool cd_irq)
->> >  {
->> >         /*
->> >          * If the device is configured as wakeup, we prevent a new sleep for
->> > @@ -2129,7 +2128,7 @@ int mmc_hw_reset(struct mmc_host *host)
->> >         ret = host->bus_ops->hw_reset(host);
->> >         mmc_bus_put(host);
->> >
->> > -       if (ret)
->> > +       if (ret < 0)
->> >                 pr_warn("%s: tried to HW reset card, got error %d\n",
->> >                         mmc_hostname(host), ret);
->>
->> Other callers besides marvell need to be updated?  In theory only SDIO
->> should have positive return values so I guess we don't care about the
->> caller in drivers/mmc/core/block.c, right?
->
-> Correct, but maybe I should add some more information about that in a
-> function header of mmc_hw_reset(). Let me consider doing that as a
-> change on top.
->
->>  What about:
->>
->> drivers/net/wireless/ath/ath10k/sdio.c
->>
->> ...I guess I don't know if there is more than one function probed
->> there.  Maybe there's not and thus we're fine here too?
->
-> Well, honestly I don't know.
->
-> In any case, that would mean the driver is broken anyways and needs to
-> be fixed. At least that's my approach to doing this change.
-
-Wen, does QCA6174 or QCA9377 SDIO devices have other SDIO functions, for
-example bluetooth? I'm just wondering how should we handle this in
-ath10k.
-
+diff --git a/include/linux/firmware/xlnx-zynqmp.h b/include/linux/firmware/xlnx-zynqmp.h
+index 778abbbc7d94..df366f1a4cb4 100644
+--- a/include/linux/firmware/xlnx-zynqmp.h
++++ b/include/linux/firmware/xlnx-zynqmp.h
+@@ -91,7 +91,8 @@ enum pm_ret_status {
+ };
+ 
+ enum pm_ioctl_id {
+-	IOCTL_SET_PLL_FRAC_MODE = 8,
++	IOCTL_SET_SD_TAPDELAY = 7,
++	IOCTL_SET_PLL_FRAC_MODE,
+ 	IOCTL_GET_PLL_FRAC_MODE,
+ 	IOCTL_SET_PLL_FRAC_DATA,
+ 	IOCTL_GET_PLL_FRAC_DATA,
+@@ -250,6 +251,16 @@ enum zynqmp_pm_request_ack {
+ 	ZYNQMP_PM_REQUEST_ACK_NON_BLOCKING,
+ };
+ 
++enum pm_node_id {
++	NODE_SD_0 = 39,
++	NODE_SD_1,
++};
++
++enum tap_delay_type {
++	PM_TAPDELAY_INPUT = 0,
++	PM_TAPDELAY_OUTPUT,
++};
++
+ /**
+  * struct zynqmp_pm_query_data - PM query data
+  * @qid:	query ID
 -- 
-Kalle Valo
+2.17.1
