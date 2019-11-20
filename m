@@ -1,71 +1,74 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v6 0/8] Arasan SDHCI enhancements and ZynqMP Tap Delays Handling
-Date: Wed, 20 Nov 2019 13:59:12 +0100
-Message-ID: <CAPDyKFprcjgrcbT3jpT7pyM+FFWL8RAm5AtFAjVLcPMDiDzUvA@mail.gmail.com>
-References: <1574232449-13570-1-git-send-email-manish.narani@xilinx.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+From: Krzysztof Kozlowski <krzk@kernel.org>
+Subject: [PATCH] memstick: Fix Kconfig indentation
+Date: Wed, 20 Nov 2019 21:41:01 +0800
+Message-ID: <20191120134101.14738-1-krzk@kernel.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1574232449-13570-1-git-send-email-manish.narani@xilinx.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Manish Narani <manish.narani@xilinx.com>
-Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Adrian Hunter <adrian.hunter@intel.com>, Michal Simek <michal.simek@xilinx.com>, jolly.shah@xilinx.com, rajan.vaja@xilinx.com, nava.manne@xilinx.com, Moritz Fischer <mdf@kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, git@xilinx.com
+To: linux-kernel@vger.kernel.org
+Cc: Krzysztof Kozlowski <krzk@kernel.org>, Maxim Levitsky <maximlevitsky@gmail.com>, Alex Dubov <oakad@yahoo.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, 20 Nov 2019 at 07:47, Manish Narani <manish.narani@xilinx.com> wrote:
->
-> This patch series does the following:
->  - Reorganize the Clock Handling in Arasan SD driver
->  - Adds new sampling clock in Arasan SD driver
->  - Adds support to set Clock Delays in SD Arasan Driver
->  - Add SDIO Tap Delay handling in ZynqMP firmware driver
->  - Add support for ZynqMP Tap Delays setting in Arasan SD driver
->
-> Changes in v2:
->         - Replaced the deprecated calls to clock framework APIs
->         - Added support for dev_clk_get() call to work for SD card clock
->         - Separated the clock data struct
->         - Fragmented the patch series in smaller patches to make it more
->           readable
->
-> Changes in v3:
->         - Reverted "Replaced the deprecated calls to clock framework APIs"
->         - Removed devm_clk_get() call which was added in v2
->
-> Changes in v4:
->         - Made the Phase Delay properties Arasan specific
->
-> Changes in v5:
->         - Made Clock Phase Delay properties common
->         - Moved documentation of them to the common mmc documentation.
->
-> Changes in v6:
->         - Clubbed all Clk Phase Delay properties' into a pattern
->           Property
->
-> Manish Narani (8):
->   mmc: sdhci-of-arasan: Separate out clk related data to another
->     structure
->   dt-bindings: mmc: arasan: Update Documentation for the input clock
->   mmc: sdhci-of-arasan: Add sampling clock for a phy to use
->   dt-bindings: mmc: Add optional generic properties for mmc
->   mmc: sdhci-of-arasan: Add support to set clock phase delays for SD
->   firmware: xilinx: Add SDIO Tap Delay nodes
->   dt-bindings: mmc: arasan: Document 'xlnx,zynqmp-8.9a' controller
->   mmc: sdhci-of-arasan: Add support for ZynqMP Platform Tap Delays Setup
->
->  .../devicetree/bindings/mmc/arasan,sdhci.txt  |  25 +-
->  .../bindings/mmc/mmc-controller.yaml          |  13 +
->  drivers/mmc/host/sdhci-of-arasan.c            | 478 +++++++++++++++++-
->  include/linux/firmware/xlnx-zynqmp.h          |  13 +-
->  4 files changed, 497 insertions(+), 32 deletions(-)
->
-> --
-> 2.17.1
->
+Adjust indentation from spaces to tab (+optional two spaces) as in
+coding style with command like:
+	$ sed -e 's/^        /\t/' -i */Kconfig
 
-Applied for next, assuming Rob is okay with patch4, otherwise you need
-to send a fix on top, thanks!
+Signed-off-by: Krzysztof Kozlowski <krzk@kernel.org>
+---
+ drivers/memstick/core/Kconfig | 18 +++++++++---------
+ drivers/memstick/host/Kconfig |  4 ++--
+ 2 files changed, 11 insertions(+), 11 deletions(-)
 
-Kind regards
-Uffe
+diff --git a/drivers/memstick/core/Kconfig b/drivers/memstick/core/Kconfig
+index 516f454fde14..08192fd70eb4 100644
+--- a/drivers/memstick/core/Kconfig
++++ b/drivers/memstick/core/Kconfig
+@@ -6,16 +6,16 @@
+ comment "MemoryStick drivers"
+ 
+ config MEMSTICK_UNSAFE_RESUME
+-        bool "Allow unsafe resume (DANGEROUS)"
+-        help
+-          If you say Y here, the MemoryStick layer will assume that all
+-          cards stayed in their respective slots during the suspend. The
+-          normal behaviour is to remove them at suspend and
+-          redetecting them at resume. Breaking this assumption will
+-          in most cases result in data corruption.
++	bool "Allow unsafe resume (DANGEROUS)"
++	help
++	  If you say Y here, the MemoryStick layer will assume that all
++	  cards stayed in their respective slots during the suspend. The
++	  normal behaviour is to remove them at suspend and
++	  redetecting them at resume. Breaking this assumption will
++	  in most cases result in data corruption.
+ 
+-          This option is usually just for embedded systems which use
+-          a MemoryStick card for rootfs. Most people should say N here.
++	  This option is usually just for embedded systems which use
++	  a MemoryStick card for rootfs. Most people should say N here.
+ 
+ config MSPRO_BLOCK
+ 	tristate "MemoryStick Pro block device driver"
+diff --git a/drivers/memstick/host/Kconfig b/drivers/memstick/host/Kconfig
+index 446c93ecef8f..4113343da056 100644
+--- a/drivers/memstick/host/Kconfig
++++ b/drivers/memstick/host/Kconfig
+@@ -18,7 +18,7 @@ config MEMSTICK_TIFM_MS
+ 	  'Misc devices: TI Flash Media PCI74xx/PCI76xx host adapter support
+ 	  (TIFM_7XX1)'.
+ 
+-          To compile this driver as a module, choose M here: the
++	  To compile this driver as a module, choose M here: the
+ 	  module will be called tifm_ms.
+ 
+ config MEMSTICK_JMICRON_38X
+@@ -29,7 +29,7 @@ config MEMSTICK_JMICRON_38X
+ 	  Say Y here if you want to be able to access MemoryStick cards with
+ 	  the JMicron(R) JMB38X MemoryStick card reader.
+ 
+-          To compile this driver as a module, choose M here: the
++	  To compile this driver as a module, choose M here: the
+ 	  module will be called jmb38x_ms.
+ 
+ config MEMSTICK_R592
+-- 
+2.17.1
