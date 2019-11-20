@@ -1,7 +1,7 @@
 From: Manish Narani <manish.narani@xilinx.com>
-Subject: [PATCH v6 3/8] mmc: sdhci-of-arasan: Add sampling clock for a phy to use
-Date: Wed, 20 Nov 2019 12:17:24 +0530
-Message-ID: <1574232449-13570-4-git-send-email-manish.narani@xilinx.com>
+Subject: [PATCH v6 4/8] dt-bindings: mmc: Add optional generic properties for mmc
+Date: Wed, 20 Nov 2019 12:17:25 +0530
+Message-ID: <1574232449-13570-5-git-send-email-manish.narani@xilinx.com>
 References: <1574232449-13570-1-git-send-email-manish.narani@xilinx.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,225 +12,44 @@ To: ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, adrian.hun
 Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, git@xilinx.com
 List-Id: linux-mmc@vger.kernel.org
 
-There are some operations like setting the clock delays may need to have
-two clocks, one for output path and one for input path. Adding input
-path clock for some phys to use.
+Add optional properties for mmc hosts which are used to set clk delays
+for different speed modes in the controller.
 
 Signed-off-by: Manish Narani <manish.narani@xilinx.com>
 ---
- drivers/mmc/host/sdhci-of-arasan.c | 151 +++++++++++++++++++++++++----
- 1 file changed, 134 insertions(+), 17 deletions(-)
+ .../devicetree/bindings/mmc/mmc-controller.yaml     | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-index 701b6cc0f9a3..b75ba780f902 100644
---- a/drivers/mmc/host/sdhci-of-arasan.c
-+++ b/drivers/mmc/host/sdhci-of-arasan.c
-@@ -75,10 +75,14 @@ struct sdhci_arasan_soc_ctl_map {
-  * struct sdhci_arasan_clk_data
-  * @sdcardclk_hw:	Struct for the clock we might provide to a PHY.
-  * @sdcardclk:		Pointer to normal 'struct clock' for sdcardclk_hw.
-+ * @sampleclk_hw:	Struct for the clock we might provide to a PHY.
-+ * @sampleclk:		Pointer to normal 'struct clock' for sampleclk_hw.
-  */
- struct sdhci_arasan_clk_data {
- 	struct clk_hw	sdcardclk_hw;
- 	struct clk      *sdcardclk;
-+	struct clk_hw	sampleclk_hw;
-+	struct clk      *sampleclk;
- };
+diff --git a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
+index 080754e0ef35..305b2016bc17 100644
+--- a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
++++ b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
+@@ -333,6 +333,18 @@ patternProperties:
+     required:
+       - reg
  
- /**
-@@ -541,6 +545,33 @@ static const struct clk_ops arasan_sdcardclk_ops = {
- 	.recalc_rate = sdhci_arasan_sdcardclk_recalc_rate,
- };
++  "^clk-phase-(legacy|sd-hs|mmc-(hs|hs[24]00|ddr52)|uhs-(sdr(12|25|50|104)|ddr50))$":
++    minItems: 2
++    maxItems: 2
++    allOf:
++      - $ref: /schemas/types.yaml#/definitions/uint32
++      - minimum: 0
++        maximum: 359
++    description:
++      Set the clock (phase) delays which are to be configured in the
++      controller while switching to particular speed mode. These values
++      are in pair of degrees.
++
+ dependencies:
+   cd-debounce-delay-ms: [ cd-gpios ]
+   fixed-emmc-driver-type: [ non-removable ]
+@@ -351,6 +363,7 @@ examples:
+         keep-power-in-suspend;
+         wakeup-source;
+         mmc-pwrseq = <&sdhci0_pwrseq>;
++        clk-phase-sd-hs = <63>, <72>;
+     };
  
-+/**
-+ * sdhci_arasan_sampleclk_recalc_rate - Return the sampling clock rate
-+ *
-+ * Return the current actual rate of the sampling clock.  This can be used
-+ * to communicate with out PHY.
-+ *
-+ * @hw:			Pointer to the hardware clock structure.
-+ * @parent_rate		The parent rate (should be rate of clk_xin).
-+ * Returns the sample clock rate.
-+ */
-+static unsigned long sdhci_arasan_sampleclk_recalc_rate(struct clk_hw *hw,
-+						      unsigned long parent_rate)
-+
-+{
-+	struct sdhci_arasan_clk_data *clk_data =
-+		container_of(hw, struct sdhci_arasan_clk_data, sampleclk_hw);
-+	struct sdhci_arasan_data *sdhci_arasan =
-+		container_of(clk_data, struct sdhci_arasan_data, clk_data);
-+	struct sdhci_host *host = sdhci_arasan->host;
-+
-+	return host->mmc->actual_clock;
-+}
-+
-+static const struct clk_ops arasan_sampleclk_ops = {
-+	.recalc_rate = sdhci_arasan_sampleclk_recalc_rate,
-+};
-+
- /**
-  * sdhci_arasan_update_clockmultiplier - Set corecfg_clockmultiplier
-  *
-@@ -620,28 +651,21 @@ static void sdhci_arasan_update_baseclkfreq(struct sdhci_host *host)
- }
- 
- /**
-- * sdhci_arasan_register_sdclk - Register the sdclk for a PHY to use
-+ * sdhci_arasan_register_sdcardclk - Register the sdcardclk for a PHY to use
-  *
-  * Some PHY devices need to know what the actual card clock is.  In order for
-  * them to find out, we'll provide a clock through the common clock framework
-  * for them to query.
-  *
-- * Note: without seriously re-architecting SDHCI's clock code and testing on
-- * all platforms, there's no way to create a totally beautiful clock here
-- * with all clock ops implemented.  Instead, we'll just create a clock that can
-- * be queried and set the CLK_GET_RATE_NOCACHE attribute to tell common clock
-- * framework that we're doing things behind its back.  This should be sufficient
-- * to create nice clean device tree bindings and later (if needed) we can try
-- * re-architecting SDHCI if we see some benefit to it.
-- *
-  * @sdhci_arasan:	Our private data structure.
-  * @clk_xin:		Pointer to the functional clock
-  * @dev:		Pointer to our struct device.
-  * Returns 0 on success and error value on error
-  */
--static int sdhci_arasan_register_sdclk(struct sdhci_arasan_data *sdhci_arasan,
--				       struct clk *clk_xin,
--				       struct device *dev)
-+static int
-+sdhci_arasan_register_sdcardclk(struct sdhci_arasan_data *sdhci_arasan,
-+				struct clk *clk_xin,
-+				struct device *dev)
- {
- 	struct sdhci_arasan_clk_data *clk_data = &sdhci_arasan->clk_data;
- 	struct device_node *np = dev->of_node;
-@@ -649,10 +673,6 @@ static int sdhci_arasan_register_sdclk(struct sdhci_arasan_data *sdhci_arasan,
- 	const char *parent_clk_name;
- 	int ret;
- 
--	/* Providing a clock to the PHY is optional; no error if missing */
--	if (!of_find_property(np, "#clock-cells", NULL))
--		return 0;
--
- 	ret = of_property_read_string_index(np, "clock-output-names", 0,
- 					    &sdcardclk_init.name);
- 	if (ret) {
-@@ -674,7 +694,56 @@ static int sdhci_arasan_register_sdclk(struct sdhci_arasan_data *sdhci_arasan,
- 	ret = of_clk_add_provider(np, of_clk_src_simple_get,
- 				  clk_data->sdcardclk);
- 	if (ret)
--		dev_err(dev, "Failed to add clock provider\n");
-+		dev_err(dev, "Failed to add sdcard clock provider\n");
-+
-+	return ret;
-+}
-+
-+/**
-+ * sdhci_arasan_register_sampleclk - Register the sampleclk for a PHY to use
-+ *
-+ * Some PHY devices need to know what the actual card clock is.  In order for
-+ * them to find out, we'll provide a clock through the common clock framework
-+ * for them to query.
-+ *
-+ * @sdhci_arasan:	Our private data structure.
-+ * @clk_xin:		Pointer to the functional clock
-+ * @dev:		Pointer to our struct device.
-+ * Returns 0 on success and error value on error
-+ */
-+static int
-+sdhci_arasan_register_sampleclk(struct sdhci_arasan_data *sdhci_arasan,
-+				struct clk *clk_xin,
-+				struct device *dev)
-+{
-+	struct sdhci_arasan_clk_data *clk_data = &sdhci_arasan->clk_data;
-+	struct device_node *np = dev->of_node;
-+	struct clk_init_data sampleclk_init;
-+	const char *parent_clk_name;
-+	int ret;
-+
-+	ret = of_property_read_string_index(np, "clock-output-names", 1,
-+					    &sampleclk_init.name);
-+	if (ret) {
-+		dev_err(dev, "DT has #clock-cells but no clock-output-names\n");
-+		return ret;
-+	}
-+
-+	parent_clk_name = __clk_get_name(clk_xin);
-+	sampleclk_init.parent_names = &parent_clk_name;
-+	sampleclk_init.num_parents = 1;
-+	sampleclk_init.flags = CLK_GET_RATE_NOCACHE;
-+	sampleclk_init.ops = &arasan_sampleclk_ops;
-+
-+	clk_data->sampleclk_hw.init = &sampleclk_init;
-+	clk_data->sampleclk =
-+		devm_clk_register(dev, &clk_data->sampleclk_hw);
-+	clk_data->sampleclk_hw.init = NULL;
-+
-+	ret = of_clk_add_provider(np, of_clk_src_simple_get,
-+				  clk_data->sampleclk);
-+	if (ret)
-+		dev_err(dev, "Failed to add sample clock provider\n");
- 
- 	return ret;
- }
-@@ -697,6 +766,54 @@ static void sdhci_arasan_unregister_sdclk(struct device *dev)
- 	of_clk_del_provider(dev->of_node);
- }
- 
-+/**
-+ * sdhci_arasan_register_sdclk - Register the sdcardclk for a PHY to use
-+ *
-+ * Some PHY devices need to know what the actual card clock is.  In order for
-+ * them to find out, we'll provide a clock through the common clock framework
-+ * for them to query.
-+ *
-+ * Note: without seriously re-architecting SDHCI's clock code and testing on
-+ * all platforms, there's no way to create a totally beautiful clock here
-+ * with all clock ops implemented.  Instead, we'll just create a clock that can
-+ * be queried and set the CLK_GET_RATE_NOCACHE attribute to tell common clock
-+ * framework that we're doing things behind its back.  This should be sufficient
-+ * to create nice clean device tree bindings and later (if needed) we can try
-+ * re-architecting SDHCI if we see some benefit to it.
-+ *
-+ * @sdhci_arasan:	Our private data structure.
-+ * @clk_xin:		Pointer to the functional clock
-+ * @dev:		Pointer to our struct device.
-+ * Returns 0 on success and error value on error
-+ */
-+static int sdhci_arasan_register_sdclk(struct sdhci_arasan_data *sdhci_arasan,
-+				       struct clk *clk_xin,
-+				       struct device *dev)
-+{
-+	struct device_node *np = dev->of_node;
-+	u32 num_clks = 0;
-+	int ret;
-+
-+	/* Providing a clock to the PHY is optional; no error if missing */
-+	if (of_property_read_u32(np, "#clock-cells", &num_clks) < 0)
-+		return 0;
-+
-+	ret = sdhci_arasan_register_sdcardclk(sdhci_arasan, clk_xin, dev);
-+	if (ret)
-+		return ret;
-+
-+	if (num_clks) {
-+		ret = sdhci_arasan_register_sampleclk(sdhci_arasan, clk_xin,
-+						      dev);
-+		if (ret) {
-+			sdhci_arasan_unregister_sdclk(dev);
-+			return ret;
-+		}
-+	}
-+
-+	return 0;
-+}
-+
- static int sdhci_arasan_add_host(struct sdhci_arasan_data *sdhci_arasan)
- {
- 	struct sdhci_host *host = sdhci_arasan->host;
+   - |
 -- 
 2.17.1
