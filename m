@@ -1,99 +1,178 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v2 3/3] mmc: core: Re-work HW reset for SDIO cards
-Date: Wed, 20 Nov 2019 13:10:42 +0100
-Message-ID: <CAPDyKFoWxw9r=GZhvF=TxHxo=zRfKr0hknEeQNPdfwPx4ORxuQ@mail.gmail.com>
-References: <20191109103046.26445-1-ulf.hansson@linaro.org>
- <20191109103046.26445-4-ulf.hansson@linaro.org> <CAD=FV=VHReD5qnvcQLHvfgKHnHLbfDLZHwXtY-LV5uy_VCYpPA@mail.gmail.com>
- <CAPDyKFrCyJBz2=RzKPxqn0FSEq500=dEDsTUWYZeoFKWvSRAdA@mail.gmail.com>
- <87zhgr5af6.fsf@codeaurora.org> <6e6b53b28581a8f1a2944ca0bc65311e@codeaurora.org>
- <0101016e87aeb8b6-761ad812-5da7-4b0d-8cae-c69633d90de0-000000@us-west-2.amazonses.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v2] mmc: sdhci_am654: Add Support for Command Queuing
+ Engine to J721E
+Date: Wed, 20 Nov 2019 13:58:49 +0100
+Message-ID: <CAPDyKFrBakP8anTp4Uebq9oEJHPF+=HEuJZ-ezLD-P83+RRsMw@mail.gmail.com>
+References: <20191118073609.22921-1-faiz_abbas@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <0101016e87aeb8b6-761ad812-5da7-4b0d-8cae-c69633d90de0-000000-j0qUFrXf9azQVAzzCBYphlNw9kRHFGba@public.gmane.org>
-Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Kalle Valo <kvalo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Wen Gong <wgong-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Cc: Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matthias Kaehlcke <mka-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Erik Stromdahl <erik.stromdahl-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Eyal Reizer <eyalreizer-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-wireless <linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Brian Norris <briannorris-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, ath10k-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20191118073609.22921-1-faiz_abbas@ti.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Faiz Abbas <faiz_abbas@ti.com>
+Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, 20 Nov 2019 at 08:20, Kalle Valo <kvalo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org> wrote:
+On Mon, 18 Nov 2019 at 08:35, Faiz Abbas <faiz_abbas@ti.com> wrote:
 >
-> wgong-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org writes:
+> Add Support for CQHCI (Command Queuing Host Controller Interface)
+> for each of the host controllers present in TI's J721E devices.
+> Add cqhci_ops and a .irq() callback to handle cqhci specific interrupts.
 >
-> > On 2019-11-20 14:28, Kalle Valo wrote:
-> >> + wen, ath10k
-> >>
-> >> Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> writes:
-> >>
-> >>> On Tue, 12 Nov 2019 at 01:33, Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-> >>> wrote:
-> >>>>
-> >>>> Hi,
-> >>>>
-> >>>> On Sat, Nov 9, 2019 at 2:31 AM Ulf Hansson
-> >>>> <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> >>>> >
-> >>>> > diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> >>>> > index 6f8342702c73..abf8f5eb0a1c 100644
-> >>>> > --- a/drivers/mmc/core/core.c
-> >>>> > +++ b/drivers/mmc/core/core.c
-> >>>> > @@ -1469,8 +1469,7 @@ void mmc_detach_bus(struct mmc_host *host)
-> >>>> >         mmc_bus_put(host);
-> >>>> >  }
-> >>>> >
-> >>>> > -static void _mmc_detect_change(struct mmc_host *host, unsigned long delay,
-> >>>> > -                               bool cd_irq)
-> >>>> > +void _mmc_detect_change(struct mmc_host *host, unsigned long delay, bool cd_irq)
-> >>>> >  {
-> >>>> >         /*
-> >>>> >          * If the device is configured as wakeup, we prevent a new sleep for
-> >>>> > @@ -2129,7 +2128,7 @@ int mmc_hw_reset(struct mmc_host *host)
-> >>>> >         ret = host->bus_ops->hw_reset(host);
-> >>>> >         mmc_bus_put(host);
-> >>>> >
-> >>>> > -       if (ret)
-> >>>> > +       if (ret < 0)
-> >>>> >                 pr_warn("%s: tried to HW reset card, got error %d\n",
-> >>>> >                         mmc_hostname(host), ret);
-> >>>>
-> >>>> Other callers besides marvell need to be updated?  In theory only
-> >>>> SDIO
-> >>>> should have positive return values so I guess we don't care about the
-> >>>> caller in drivers/mmc/core/block.c, right?
-> >>>
-> >>> Correct, but maybe I should add some more information about that in a
-> >>> function header of mmc_hw_reset(). Let me consider doing that as a
-> >>> change on top.
-> >>>
-> >>>>  What about:
-> >>>>
-> >>>> drivers/net/wireless/ath/ath10k/sdio.c
-> >>>>
-> >>>> ...I guess I don't know if there is more than one function probed
-> >>>> there.  Maybe there's not and thus we're fine here too?
-> >>>
-> >>> Well, honestly I don't know.
-> >>>
-> >>> In any case, that would mean the driver is broken anyways and needs to
-> >>> be fixed. At least that's my approach to doing this change.
-> >>
-> >> Wen, does QCA6174 or QCA9377 SDIO devices have other SDIO functions,
-> >> for
-> >> example bluetooth? I'm just wondering how should we handle this in
-> >> ath10k.
-> >
-> > it does not have other SDIO functions for QCA6174 or QCA9377.
->
-> Thanks, then I don't think we need to change anything in ath10k.
->
-> --
-> Kalle Valo
+> Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
+> Reported-by: kbuild test robot <lkp@intel.com>
 
-Kalle, Wen - thanks for looking into this and for the confirmation.
-
-One thing though, perhaps it's worth to add this as a comment in the
-code for ath10k, where mmc_hw_reset() is called. Just to make it
-clear.
+Applied for next, dropping the reported-by tag, thanks!
 
 Kind regards
 Uffe
+
+
+> ---
+>
+> v2: Dropped CONFIG_ prefix from select MMC_CQHCI which led to build
+> failures. Successfully built with the .config provided by the kbuild test robot.
+>
+>  drivers/mmc/host/Kconfig       |  1 +
+>  drivers/mmc/host/sdhci_am654.c | 71 +++++++++++++++++++++++++++++++++-
+>  2 files changed, 71 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index 49ea02c467bf..7c1310ed26c6 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -1011,6 +1011,7 @@ config MMC_SDHCI_AM654
+>         tristate "Support for the SDHCI Controller in TI's AM654 SOCs"
+>         depends on MMC_SDHCI_PLTFM && OF && REGMAP_MMIO
+>         select MMC_SDHCI_IO_ACCESSORS
+> +       select MMC_CQHCI
+>         help
+>           This selects the Secure Digital Host Controller Interface (SDHCI)
+>           support present in TI's AM654 SOCs. The controller supports
+> diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
+> index bb90757ecace..b8e897e31e2e 100644
+> --- a/drivers/mmc/host/sdhci_am654.c
+> +++ b/drivers/mmc/host/sdhci_am654.c
+> @@ -12,6 +12,7 @@
+>  #include <linux/property.h>
+>  #include <linux/regmap.h>
+>
+> +#include "cqhci.h"
+>  #include "sdhci-pltfm.h"
+>
+>  /* CTL_CFG Registers */
+> @@ -68,6 +69,9 @@
+>
+>  #define CLOCK_TOO_SLOW_HZ      400000
+>
+> +/* Command Queue Host Controller Interface Base address */
+> +#define SDHCI_AM654_CQE_BASE_ADDR 0x200
+> +
+>  static struct regmap_config sdhci_am654_regmap_config = {
+>         .reg_bits = 32,
+>         .val_bits = 32,
+> @@ -259,6 +263,19 @@ static const struct sdhci_am654_driver_data sdhci_am654_drvdata = {
+>         .flags = IOMUX_PRESENT | FREQSEL_2_BIT | STRBSEL_4_BIT | DLL_PRESENT,
+>  };
+>
+> +static u32 sdhci_am654_cqhci_irq(struct sdhci_host *host, u32 intmask)
+> +{
+> +       int cmd_error = 0;
+> +       int data_error = 0;
+> +
+> +       if (!sdhci_cqe_irq(host, intmask, &cmd_error, &data_error))
+> +               return intmask;
+> +
+> +       cqhci_irq(host->mmc, intmask, cmd_error, data_error);
+> +
+> +       return 0;
+> +}
+> +
+>  static struct sdhci_ops sdhci_j721e_8bit_ops = {
+>         .get_max_clock = sdhci_pltfm_clk_get_max_clock,
+>         .get_timeout_clock = sdhci_pltfm_clk_get_max_clock,
+> @@ -267,6 +284,7 @@ static struct sdhci_ops sdhci_j721e_8bit_ops = {
+>         .set_power = sdhci_am654_set_power,
+>         .set_clock = sdhci_am654_set_clock,
+>         .write_b = sdhci_am654_write_b,
+> +       .irq = sdhci_am654_cqhci_irq,
+>         .reset = sdhci_reset,
+>  };
+>
+> @@ -290,6 +308,7 @@ static struct sdhci_ops sdhci_j721e_4bit_ops = {
+>         .set_power = sdhci_am654_set_power,
+>         .set_clock = sdhci_j721e_4bit_set_clock,
+>         .write_b = sdhci_am654_write_b,
+> +       .irq = sdhci_am654_cqhci_irq,
+>         .reset = sdhci_reset,
+>  };
+>
+> @@ -304,6 +323,40 @@ static const struct sdhci_am654_driver_data sdhci_j721e_4bit_drvdata = {
+>         .pdata = &sdhci_j721e_4bit_pdata,
+>         .flags = IOMUX_PRESENT,
+>  };
+> +
+> +static void sdhci_am654_dumpregs(struct mmc_host *mmc)
+> +{
+> +       sdhci_dumpregs(mmc_priv(mmc));
+> +}
+> +
+> +static const struct cqhci_host_ops sdhci_am654_cqhci_ops = {
+> +       .enable         = sdhci_cqe_enable,
+> +       .disable        = sdhci_cqe_disable,
+> +       .dumpregs       = sdhci_am654_dumpregs,
+> +};
+> +
+> +static int sdhci_am654_cqe_add_host(struct sdhci_host *host)
+> +{
+> +       struct cqhci_host *cq_host;
+> +       int ret;
+> +
+> +       cq_host = devm_kzalloc(host->mmc->parent, sizeof(struct cqhci_host),
+> +                              GFP_KERNEL);
+> +       if (!cq_host)
+> +               return -ENOMEM;
+> +
+> +       cq_host->mmio = host->ioaddr + SDHCI_AM654_CQE_BASE_ADDR;
+> +       cq_host->quirks |= CQHCI_QUIRK_SHORT_TXFR_DESC_SZ;
+> +       cq_host->caps |= CQHCI_TASK_DESC_SZ_128;
+> +       cq_host->ops = &sdhci_am654_cqhci_ops;
+> +
+> +       host->mmc->caps2 |= MMC_CAP2_CQE;
+> +
+> +       ret = cqhci_init(cq_host, host->mmc, 1);
+> +
+> +       return ret;
+> +}
+> +
+>  static int sdhci_am654_init(struct sdhci_host *host)
+>  {
+>         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> @@ -344,7 +397,23 @@ static int sdhci_am654_init(struct sdhci_host *host)
+>         regmap_update_bits(sdhci_am654->base, CTL_CFG_2, SLOTTYPE_MASK,
+>                            ctl_cfg_2);
+>
+> -       return sdhci_add_host(host);
+> +       ret = sdhci_setup_host(host);
+> +       if (ret)
+> +               return ret;
+> +
+> +       ret = sdhci_am654_cqe_add_host(host);
+> +       if (ret)
+> +               goto err_cleanup_host;
+> +
+> +       ret = __sdhci_add_host(host);
+> +       if (ret)
+> +               goto err_cleanup_host;
+> +
+> +       return 0;
+> +
+> +err_cleanup_host:
+> +       sdhci_cleanup_host(host);
+> +       return ret;
+>  }
+>
+>  static int sdhci_am654_get_of_property(struct platform_device *pdev,
+> --
+> 2.19.2
+>
