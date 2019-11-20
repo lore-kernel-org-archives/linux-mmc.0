@@ -1,74 +1,37 @@
-From: Krzysztof Kozlowski <krzk@kernel.org>
-Subject: [PATCH] memstick: Fix Kconfig indentation
-Date: Wed, 20 Nov 2019 21:41:01 +0800
-Message-ID: <20191120134101.14738-1-krzk@kernel.org>
+From: Faiz Abbas <faiz_abbas@ti.com>
+Subject: Re: [PATCH v2] mmc: sdhci_am654: Add Support for Command Queuing
+ Engine to J721E
+Date: Wed, 20 Nov 2019 21:41:14 +0530
+Message-ID: <1cdaf572-02ee-d3d8-beb3-c90e1cfd89fa@ti.com>
+References: <20191118073609.22921-1-faiz_abbas@ti.com>
+ <ea458eb9-f9a8-ab39-2df9-6284fef02105@intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <ea458eb9-f9a8-ab39-2df9-6284fef02105@intel.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: Krzysztof Kozlowski <krzk@kernel.org>, Maxim Levitsky <maximlevitsky@gmail.com>, Alex Dubov <oakad@yahoo.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: ulf.hansson@linaro.org
 List-Id: linux-mmc@vger.kernel.org
 
-Adjust indentation from spaces to tab (+optional two spaces) as in
-coding style with command like:
-	$ sed -e 's/^        /\t/' -i */Kconfig
+Adrian,
 
-Signed-off-by: Krzysztof Kozlowski <krzk@kernel.org>
----
- drivers/memstick/core/Kconfig | 18 +++++++++---------
- drivers/memstick/host/Kconfig |  4 ++--
- 2 files changed, 11 insertions(+), 11 deletions(-)
+On 20/11/19 1:29 PM, Adrian Hunter wrote:
+> On 18/11/19 9:36 AM, Faiz Abbas wrote:
+>> Add Support for CQHCI (Command Queuing Host Controller Interface)
+>> for each of the host controllers present in TI's J721E devices.
+>> Add cqhci_ops and a .irq() callback to handle cqhci specific interrupts.
+>>
+>> Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
+>> Reported-by: kbuild test robot <lkp@intel.com>
+> 
+> That "Reported-by" should not be there.
+> 
 
-diff --git a/drivers/memstick/core/Kconfig b/drivers/memstick/core/Kconfig
-index 516f454fde14..08192fd70eb4 100644
---- a/drivers/memstick/core/Kconfig
-+++ b/drivers/memstick/core/Kconfig
-@@ -6,16 +6,16 @@
- comment "MemoryStick drivers"
- 
- config MEMSTICK_UNSAFE_RESUME
--        bool "Allow unsafe resume (DANGEROUS)"
--        help
--          If you say Y here, the MemoryStick layer will assume that all
--          cards stayed in their respective slots during the suspend. The
--          normal behaviour is to remove them at suspend and
--          redetecting them at resume. Breaking this assumption will
--          in most cases result in data corruption.
-+	bool "Allow unsafe resume (DANGEROUS)"
-+	help
-+	  If you say Y here, the MemoryStick layer will assume that all
-+	  cards stayed in their respective slots during the suspend. The
-+	  normal behaviour is to remove them at suspend and
-+	  redetecting them at resume. Breaking this assumption will
-+	  in most cases result in data corruption.
- 
--          This option is usually just for embedded systems which use
--          a MemoryStick card for rootfs. Most people should say N here.
-+	  This option is usually just for embedded systems which use
-+	  a MemoryStick card for rootfs. Most people should say N here.
- 
- config MSPRO_BLOCK
- 	tristate "MemoryStick Pro block device driver"
-diff --git a/drivers/memstick/host/Kconfig b/drivers/memstick/host/Kconfig
-index 446c93ecef8f..4113343da056 100644
---- a/drivers/memstick/host/Kconfig
-+++ b/drivers/memstick/host/Kconfig
-@@ -18,7 +18,7 @@ config MEMSTICK_TIFM_MS
- 	  'Misc devices: TI Flash Media PCI74xx/PCI76xx host adapter support
- 	  (TIFM_7XX1)'.
- 
--          To compile this driver as a module, choose M here: the
-+	  To compile this driver as a module, choose M here: the
- 	  module will be called tifm_ms.
- 
- config MEMSTICK_JMICRON_38X
-@@ -29,7 +29,7 @@ config MEMSTICK_JMICRON_38X
- 	  Say Y here if you want to be able to access MemoryStick cards with
- 	  the JMicron(R) JMB38X MemoryStick card reader.
- 
--          To compile this driver as a module, choose M here: the
-+	  To compile this driver as a module, choose M here: the
- 	  module will be called jmb38x_ms.
- 
- config MEMSTICK_R592
--- 
-2.17.1
+The robot asked me to add the tag in its reply to v1. Not sure where
+they wanted me to add it.
+
+Thanks,
+Faiz
