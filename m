@@ -1,58 +1,71 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3 3/3] mmc: sdhci-of-aspeed: add inversion signal presence
-Date: Wed, 20 Nov 2019 13:59:04 +0100
-Message-ID: <CAPDyKFrshWd1P9dZGTSuU=5P0L6LSPz=v2nn+0SWi3ZZazKrRw@mail.gmail.com>
-References: <20191118104646.3838-1-i.mikhaylov@yadro.com> <20191118104646.3838-4-i.mikhaylov@yadro.com>
+Subject: Re: [PATCH v6 0/8] Arasan SDHCI enhancements and ZynqMP Tap Delays Handling
+Date: Wed, 20 Nov 2019 13:59:12 +0100
+Message-ID: <CAPDyKFprcjgrcbT3jpT7pyM+FFWL8RAm5AtFAjVLcPMDiDzUvA@mail.gmail.com>
+References: <1574232449-13570-1-git-send-email-manish.narani@xilinx.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20191118104646.3838-4-i.mikhaylov@yadro.com>
+In-Reply-To: <1574232449-13570-1-git-send-email-manish.narani@xilinx.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ivan Mikhaylov <i.mikhaylov@yadro.com>
-Cc: Joel Stanley <joel@jms.id.au>, Andrew Jeffery <andrew@aj.id.au>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Adrian Hunter <adrian.hunter@intel.com>, DTML <devicetree@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, linux-aspeed <linux-aspeed@lists.ozlabs.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, OpenBMC Maillist <openbmc@lists.ozlabs.org>
+To: Manish Narani <manish.narani@xilinx.com>
+Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Adrian Hunter <adrian.hunter@intel.com>, Michal Simek <michal.simek@xilinx.com>, jolly.shah@xilinx.com, rajan.vaja@xilinx.com, nava.manne@xilinx.com, Moritz Fischer <mdf@kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, git@xilinx.com
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, 18 Nov 2019 at 11:47, Ivan Mikhaylov <i.mikhaylov@yadro.com> wrote:
+On Wed, 20 Nov 2019 at 07:47, Manish Narani <manish.narani@xilinx.com> wrote:
 >
-> Add read_l callback in sdhci_ops with flipping of SDHCI_CARD_PRESENT
-> bit in case of inverted card detection signal.
+> This patch series does the following:
+>  - Reorganize the Clock Handling in Arasan SD driver
+>  - Adds new sampling clock in Arasan SD driver
+>  - Adds support to set Clock Delays in SD Arasan Driver
+>  - Add SDIO Tap Delay handling in ZynqMP firmware driver
+>  - Add support for ZynqMP Tap Delays setting in Arasan SD driver
 >
-> Signed-off-by: Ivan Mikhaylov <i.mikhaylov@yadro.com>
+> Changes in v2:
+>         - Replaced the deprecated calls to clock framework APIs
+>         - Added support for dev_clk_get() call to work for SD card clock
+>         - Separated the clock data struct
+>         - Fragmented the patch series in smaller patches to make it more
+>           readable
+>
+> Changes in v3:
+>         - Reverted "Replaced the deprecated calls to clock framework APIs"
+>         - Removed devm_clk_get() call which was added in v2
+>
+> Changes in v4:
+>         - Made the Phase Delay properties Arasan specific
+>
+> Changes in v5:
+>         - Made Clock Phase Delay properties common
+>         - Moved documentation of them to the common mmc documentation.
+>
+> Changes in v6:
+>         - Clubbed all Clk Phase Delay properties' into a pattern
+>           Property
+>
+> Manish Narani (8):
+>   mmc: sdhci-of-arasan: Separate out clk related data to another
+>     structure
+>   dt-bindings: mmc: arasan: Update Documentation for the input clock
+>   mmc: sdhci-of-arasan: Add sampling clock for a phy to use
+>   dt-bindings: mmc: Add optional generic properties for mmc
+>   mmc: sdhci-of-arasan: Add support to set clock phase delays for SD
+>   firmware: xilinx: Add SDIO Tap Delay nodes
+>   dt-bindings: mmc: arasan: Document 'xlnx,zynqmp-8.9a' controller
+>   mmc: sdhci-of-arasan: Add support for ZynqMP Platform Tap Delays Setup
+>
+>  .../devicetree/bindings/mmc/arasan,sdhci.txt  |  25 +-
+>  .../bindings/mmc/mmc-controller.yaml          |  13 +
+>  drivers/mmc/host/sdhci-of-arasan.c            | 478 +++++++++++++++++-
+>  include/linux/firmware/xlnx-zynqmp.h          |  13 +-
+>  4 files changed, 497 insertions(+), 32 deletions(-)
+>
+> --
+> 2.17.1
+>
 
-Applied for next, thanks!
-
-For clarity, I am leaving patch 1 for arm-soc.
+Applied for next, assuming Rob is okay with patch4, otherwise you need
+to send a fix on top, thanks!
 
 Kind regards
 Uffe
-
-
-
->
-> diff --git a/drivers/mmc/host/sdhci-of-aspeed.c b/drivers/mmc/host/sdhci-of-aspeed.c
-> index 8962f6664381..56912e30c47e 100644
-> --- a/drivers/mmc/host/sdhci-of-aspeed.c
-> +++ b/drivers/mmc/host/sdhci-of-aspeed.c
-> @@ -111,7 +111,19 @@ static void aspeed_sdhci_set_bus_width(struct sdhci_host *host, int width)
->         sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
->  }
->
-> +static u32 aspeed_sdhci_readl(struct sdhci_host *host, int reg)
-> +{
-> +       u32 val = readl(host->ioaddr + reg);
-> +
-> +       if (unlikely(reg == SDHCI_PRESENT_STATE) &&
-> +           (host->mmc->caps2 & MMC_CAP2_CD_ACTIVE_HIGH))
-> +               val ^= SDHCI_CARD_PRESENT;
-> +
-> +       return val;
-> +}
-> +
->  static const struct sdhci_ops aspeed_sdhci_ops = {
-> +       .read_l = aspeed_sdhci_readl,
->         .set_clock = aspeed_sdhci_set_clock,
->         .get_max_clock = aspeed_sdhci_get_max_clock,
->         .set_bus_width = aspeed_sdhci_set_bus_width,
-> --
-> 2.20.1
->
