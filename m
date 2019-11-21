@@ -1,115 +1,76 @@
-From: wgong@codeaurora.org
-Subject: Re: [PATCH v2 3/3] mmc: core: Re-work HW reset for SDIO cards
-Date: Thu, 21 Nov 2019 02:29:46 +0000
-Message-ID: <0101016e8bcb4b75-02a036fd-8635-4994-ba76-e3cacaa64a61-000000@us-west-2.amazonses.com>
-References: <20191109103046.26445-1-ulf.hansson@linaro.org>
- <20191109103046.26445-4-ulf.hansson@linaro.org>
- <CAD=FV=VHReD5qnvcQLHvfgKHnHLbfDLZHwXtY-LV5uy_VCYpPA@mail.gmail.com>
- <CAPDyKFrCyJBz2=RzKPxqn0FSEq500=dEDsTUWYZeoFKWvSRAdA@mail.gmail.com>
- <87zhgr5af6.fsf@codeaurora.org>
- <6e6b53b28581a8f1a2944ca0bc65311e@codeaurora.org>
- <0101016e87aeb8b6-761ad812-5da7-4b0d-8cae-c69633d90de0-000000@us-west-2.amazonses.com>
- <CAPDyKFoWxw9r=GZhvF=TxHxo=zRfKr0hknEeQNPdfwPx4ORxuQ@mail.gmail.com>
- <87zhgqmref.fsf@kamboji.qca.qualcomm.com>
+From: Manish Narani <MNARANI@xilinx.com>
+Subject: RE: [PATCH v6 0/8] Arasan SDHCI enhancements and ZynqMP Tap Delays
+ Handling
+Date: Thu, 21 Nov 2019 07:08:56 +0000
+Message-ID: <MN2PR02MB6029E25E0DC26BD79DA58A4EC14E0@MN2PR02MB6029.namprd02.prod.outlook.com>
+References: <1574232449-13570-1-git-send-email-manish.narani@xilinx.com>
+ <CAPDyKFprcjgrcbT3jpT7pyM+FFWL8RAm5AtFAjVLcPMDiDzUvA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
-Content-Transfer-Encoding: 7bit
-Return-path: <ath10k-bounces+gldad-ath10k=m.gmane.org@lists.infradead.org>
-In-Reply-To: <87zhgqmref.fsf@kamboji.qca.qualcomm.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/ath10k>,
- <mailto:ath10k-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/ath10k/>
-List-Post: <mailto:ath10k@lists.infradead.org>
-List-Help: <mailto:ath10k-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/ath10k>,
- <mailto:ath10k-request@lists.infradead.org?subject=subscribe>
-Sender: "ath10k" <ath10k-bounces@lists.infradead.org>
-Errors-To: ath10k-bounces+gldad-ath10k=m.gmane.org@lists.infradead.org
-To: Kalle Valo <kvalo@codeaurora.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Tony Lindgren <tony@atomide.com>, linux-wireless <linux-wireless@vger.kernel.org>, Brian Norris <briannorris@chromium.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Doug Anderson <dianders@chromium.org>, ath10k@lists.infradead.org, Adrian Hunter <adrian.hunter@intel.com>, Erik Stromdahl <erik.stromdahl@gmail.com>, Matthias Kaehlcke <mka@chromium.org>, Eyal Reizer <eyalreizer@gmail.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFprcjgrcbT3jpT7pyM+FFWL8RAm5AtFAjVLcPMDiDzUvA@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>
+Cc: Mark Rutland <mark.rutland@arm.com>, Adrian Hunter <adrian.hunter@intel.com>, Michal Simek <michals@xilinx.com>, Jolly Shah <JOLLYS@xilinx.com>, Rajan Vaja <RAJANV@xilinx.com>, Nava kishore Manne <navam@xilinx.com>, Moritz Fischer <mdf@kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, git <git@xilinx.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 2019-11-21 00:41, Kalle Valo wrote:
-> Ulf Hansson <ulf.hansson@linaro.org> writes:
-> 
->> On Wed, 20 Nov 2019 at 08:20, Kalle Valo <kvalo@codeaurora.org> wrote:
->>> 
->>> wgong@codeaurora.org writes:
->>> 
->>> > On 2019-11-20 14:28, Kalle Valo wrote:
->>> >> + wen, ath10k
->>> >>
->>> >> Ulf Hansson <ulf.hansson@linaro.org> writes:
->>> >>
->>> >>> On Tue, 12 Nov 2019 at 01:33, Doug Anderson <dianders@chromium.org>
->>> >>> wrote:
->>> >>>>
->>> >>>> Hi,
->>> >>>>
->>> >>>> On Sat, Nov 9, 2019 at 2:31 AM Ulf Hansson
->>> >>>> <ulf.hansson@linaro.org> wrote:
->>> >>>> >
->>> >>>> > diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
->>> >>>> > index 6f8342702c73..abf8f5eb0a1c 100644
->>> >>>> > --- a/drivers/mmc/core/core.c
->>> >>>> > +++ b/drivers/mmc/core/core.c
->>> >>>> > @@ -1469,8 +1469,7 @@ void mmc_detach_bus(struct mmc_host *host)
->>> >>>> >         mmc_bus_put(host);
->>> >>>> >  }
->>> >>>> >
->>> >>>> > -static void _mmc_detect_change(struct mmc_host *host, unsigned long delay,
->>> >>>> > -                               bool cd_irq)
->>> >>>> > +void _mmc_detect_change(struct mmc_host *host, unsigned long delay, bool cd_irq)
->>> >>>> >  {
->>> >>>> >         /*
->>> >>>> >          * If the device is configured as wakeup, we prevent a new sleep for
->>> >>>> > @@ -2129,7 +2128,7 @@ int mmc_hw_reset(struct mmc_host *host)
->>> >>>> >         ret = host->bus_ops->hw_reset(host);
->>> >>>> >         mmc_bus_put(host);
->>> >>>> >
->>> >>>> > -       if (ret)
->>> >>>> > +       if (ret < 0)
->>> >>>> >                 pr_warn("%s: tried to HW reset card, got error %d\n",
->>> >>>> >                         mmc_hostname(host), ret);
->>> >>>>
->>> >>>> Other callers besides marvell need to be updated?  In theory only
->>> >>>> SDIO
->>> >>>> should have positive return values so I guess we don't care about the
->>> >>>> caller in drivers/mmc/core/block.c, right?
->>> >>>
->>> >>> Correct, but maybe I should add some more information about that in a
->>> >>> function header of mmc_hw_reset(). Let me consider doing that as a
->>> >>> change on top.
->>> >>>
->>> >>>>  What about:
->>> >>>>
->>> >>>> drivers/net/wireless/ath/ath10k/sdio.c
->>> >>>>
->>> >>>> ...I guess I don't know if there is more than one function probed
->>> >>>> there.  Maybe there's not and thus we're fine here too?
->>> >>>
->>> >>> Well, honestly I don't know.
->>> >>>
->>> >>> In any case, that would mean the driver is broken anyways and needs to
->>> >>> be fixed. At least that's my approach to doing this change.
->>> >>
->>> >> Wen, does QCA6174 or QCA9377 SDIO devices have other SDIO functions,
->>> >> for
->>> >> example bluetooth? I'm just wondering how should we handle this in
->>> >> ath10k.
->>> >
->>> > it does not have other SDIO functions for QCA6174 or QCA9377.
->>> 
->>> Thanks, then I don't think we need to change anything in ath10k.
->>> 
->>> --
->>> Kalle Valo
->> 
->> Kalle, Wen - thanks for looking into this and for the confirmation.
->> 
->> One thing though, perhaps it's worth to add this as a comment in the
->> code for ath10k, where mmc_hw_reset() is called. Just to make it
->> clear.
-> 
-> Good point. Wen, can you send a patch, please?
-Kalle, sure, I will send the patch.
+SGkgVWZmZSwgUm9iIGFuZCBBZHJpYW4sDQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0N
+Cj4gRnJvbTogVWxmIEhhbnNzb24gPHVsZi5oYW5zc29uQGxpbmFyby5vcmc+DQo+IFNlbnQ6IFdl
+ZG5lc2RheSwgTm92ZW1iZXIgMjAsIDIwMTkgNjoyOSBQTQ0KPiBUbzogTWFuaXNoIE5hcmFuaSA8
+TU5BUkFOSUB4aWxpbnguY29tPg0KPiBDYzogUm9iIEhlcnJpbmcgPHJvYmgrZHRAa2VybmVsLm9y
+Zz47IE1hcmsgUnV0bGFuZA0KPiA8bWFyay5ydXRsYW5kQGFybS5jb20+OyBBZHJpYW4gSHVudGVy
+IDxhZHJpYW4uaHVudGVyQGludGVsLmNvbT47DQo+IE1pY2hhbCBTaW1layA8bWljaGFsc0B4aWxp
+bnguY29tPjsgSm9sbHkgU2hhaCA8Sk9MTFlTQHhpbGlueC5jb20+OyBSYWphbg0KPiBWYWphIDxS
+QUpBTlZAeGlsaW54LmNvbT47IE5hdmEga2lzaG9yZSBNYW5uZSA8bmF2YW1AeGlsaW54LmNvbT47
+DQo+IE1vcml0eiBGaXNjaGVyIDxtZGZAa2VybmVsLm9yZz47IGxpbnV4LW1tY0B2Z2VyLmtlcm5l
+bC5vcmc7IERUTUwNCj4gPGRldmljZXRyZWVAdmdlci5rZXJuZWwub3JnPjsgTGludXggS2VybmVs
+IE1haWxpbmcgTGlzdCA8bGludXgtDQo+IGtlcm5lbEB2Z2VyLmtlcm5lbC5vcmc+OyBMaW51eCBB
+Uk0gPGxpbnV4LWFybS0NCj4ga2VybmVsQGxpc3RzLmluZnJhZGVhZC5vcmc+OyBnaXQgPGdpdEB4
+aWxpbnguY29tPg0KPiBTdWJqZWN0OiBSZTogW1BBVENIIHY2IDAvOF0gQXJhc2FuIFNESENJIGVu
+aGFuY2VtZW50cyBhbmQgWnlucU1QIFRhcA0KPiBEZWxheXMgSGFuZGxpbmcNCj4gDQo+IE9uIFdl
+ZCwgMjAgTm92IDIwMTkgYXQgMDc6NDcsIE1hbmlzaCBOYXJhbmkgPG1hbmlzaC5uYXJhbmlAeGls
+aW54LmNvbT4NCj4gd3JvdGU6DQo+ID4NCj4gPiBUaGlzIHBhdGNoIHNlcmllcyBkb2VzIHRoZSBm
+b2xsb3dpbmc6DQo+ID4gIC0gUmVvcmdhbml6ZSB0aGUgQ2xvY2sgSGFuZGxpbmcgaW4gQXJhc2Fu
+IFNEIGRyaXZlcg0KPiA+ICAtIEFkZHMgbmV3IHNhbXBsaW5nIGNsb2NrIGluIEFyYXNhbiBTRCBk
+cml2ZXINCj4gPiAgLSBBZGRzIHN1cHBvcnQgdG8gc2V0IENsb2NrIERlbGF5cyBpbiBTRCBBcmFz
+YW4gRHJpdmVyDQo+ID4gIC0gQWRkIFNESU8gVGFwIERlbGF5IGhhbmRsaW5nIGluIFp5bnFNUCBm
+aXJtd2FyZSBkcml2ZXINCj4gPiAgLSBBZGQgc3VwcG9ydCBmb3IgWnlucU1QIFRhcCBEZWxheXMg
+c2V0dGluZyBpbiBBcmFzYW4gU0QgZHJpdmVyDQo+ID4NCj4gPiBDaGFuZ2VzIGluIHYyOg0KPiA+
+ICAgICAgICAgLSBSZXBsYWNlZCB0aGUgZGVwcmVjYXRlZCBjYWxscyB0byBjbG9jayBmcmFtZXdv
+cmsgQVBJcw0KPiA+ICAgICAgICAgLSBBZGRlZCBzdXBwb3J0IGZvciBkZXZfY2xrX2dldCgpIGNh
+bGwgdG8gd29yayBmb3IgU0QgY2FyZCBjbG9jaw0KPiA+ICAgICAgICAgLSBTZXBhcmF0ZWQgdGhl
+IGNsb2NrIGRhdGEgc3RydWN0DQo+ID4gICAgICAgICAtIEZyYWdtZW50ZWQgdGhlIHBhdGNoIHNl
+cmllcyBpbiBzbWFsbGVyIHBhdGNoZXMgdG8gbWFrZSBpdCBtb3JlDQo+ID4gICAgICAgICAgIHJl
+YWRhYmxlDQo+ID4NCj4gPiBDaGFuZ2VzIGluIHYzOg0KPiA+ICAgICAgICAgLSBSZXZlcnRlZCAi
+UmVwbGFjZWQgdGhlIGRlcHJlY2F0ZWQgY2FsbHMgdG8gY2xvY2sgZnJhbWV3b3JrIEFQSXMiDQo+
+ID4gICAgICAgICAtIFJlbW92ZWQgZGV2bV9jbGtfZ2V0KCkgY2FsbCB3aGljaCB3YXMgYWRkZWQg
+aW4gdjINCj4gPg0KPiA+IENoYW5nZXMgaW4gdjQ6DQo+ID4gICAgICAgICAtIE1hZGUgdGhlIFBo
+YXNlIERlbGF5IHByb3BlcnRpZXMgQXJhc2FuIHNwZWNpZmljDQo+ID4NCj4gPiBDaGFuZ2VzIGlu
+IHY1Og0KPiA+ICAgICAgICAgLSBNYWRlIENsb2NrIFBoYXNlIERlbGF5IHByb3BlcnRpZXMgY29t
+bW9uDQo+ID4gICAgICAgICAtIE1vdmVkIGRvY3VtZW50YXRpb24gb2YgdGhlbSB0byB0aGUgY29t
+bW9uIG1tYyBkb2N1bWVudGF0aW9uLg0KPiA+DQo+ID4gQ2hhbmdlcyBpbiB2NjoNCj4gPiAgICAg
+ICAgIC0gQ2x1YmJlZCBhbGwgQ2xrIFBoYXNlIERlbGF5IHByb3BlcnRpZXMnIGludG8gYSBwYXR0
+ZXJuDQo+ID4gICAgICAgICAgIFByb3BlcnR5DQo+ID4NCj4gPiBNYW5pc2ggTmFyYW5pICg4KToN
+Cj4gPiAgIG1tYzogc2RoY2ktb2YtYXJhc2FuOiBTZXBhcmF0ZSBvdXQgY2xrIHJlbGF0ZWQgZGF0
+YSB0byBhbm90aGVyDQo+ID4gICAgIHN0cnVjdHVyZQ0KPiA+ICAgZHQtYmluZGluZ3M6IG1tYzog
+YXJhc2FuOiBVcGRhdGUgRG9jdW1lbnRhdGlvbiBmb3IgdGhlIGlucHV0IGNsb2NrDQo+ID4gICBt
+bWM6IHNkaGNpLW9mLWFyYXNhbjogQWRkIHNhbXBsaW5nIGNsb2NrIGZvciBhIHBoeSB0byB1c2UN
+Cj4gPiAgIGR0LWJpbmRpbmdzOiBtbWM6IEFkZCBvcHRpb25hbCBnZW5lcmljIHByb3BlcnRpZXMg
+Zm9yIG1tYw0KPiA+ICAgbW1jOiBzZGhjaS1vZi1hcmFzYW46IEFkZCBzdXBwb3J0IHRvIHNldCBj
+bG9jayBwaGFzZSBkZWxheXMgZm9yIFNEDQo+ID4gICBmaXJtd2FyZTogeGlsaW54OiBBZGQgU0RJ
+TyBUYXAgRGVsYXkgbm9kZXMNCj4gPiAgIGR0LWJpbmRpbmdzOiBtbWM6IGFyYXNhbjogRG9jdW1l
+bnQgJ3hsbngsenlucW1wLTguOWEnIGNvbnRyb2xsZXINCj4gPiAgIG1tYzogc2RoY2ktb2YtYXJh
+c2FuOiBBZGQgc3VwcG9ydCBmb3IgWnlucU1QIFBsYXRmb3JtIFRhcCBEZWxheXMgU2V0dXANCj4g
+Pg0KPiA+ICAuLi4vZGV2aWNldHJlZS9iaW5kaW5ncy9tbWMvYXJhc2FuLHNkaGNpLnR4dCAgfCAg
+MjUgKy0NCj4gPiAgLi4uL2JpbmRpbmdzL21tYy9tbWMtY29udHJvbGxlci55YW1sICAgICAgICAg
+IHwgIDEzICsNCj4gPiAgZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1vZi1hcmFzYW4uYyAgICAgICAg
+ICAgIHwgNDc4ICsrKysrKysrKysrKysrKysrLQ0KPiA+ICBpbmNsdWRlL2xpbnV4L2Zpcm13YXJl
+L3hsbngtenlucW1wLmggICAgICAgICAgfCAgMTMgKy0NCj4gPiAgNCBmaWxlcyBjaGFuZ2VkLCA0
+OTcgaW5zZXJ0aW9ucygrKSwgMzIgZGVsZXRpb25zKC0pDQo+ID4NCj4gPiAtLQ0KPiA+IDIuMTcu
+MQ0KPiA+DQo+IA0KPiBBcHBsaWVkIGZvciBuZXh0LCBhc3N1bWluZyBSb2IgaXMgb2theSB3aXRo
+IHBhdGNoNCwgb3RoZXJ3aXNlIHlvdSBuZWVkDQo+IHRvIHNlbmQgYSBmaXggb24gdG9wLCB0aGFu
+a3MhDQo+IA0KPiBLaW5kIHJlZ2FyZHMNCj4gVWZmZQ0KDQpUaGFuayB5b3Ugc28gbXVjaCBmb3Ig
+eW91ciByZXZpZXdzIGFuZCBjb250aW51b3VzIHN1cHBvcnQhIDopDQpMb29raW5nIGZvcndhcmQg
+dG8gd29yayBtb3JlIHdpdGggeW91IG9uIHRoaXMuDQoNClJlZ2FyZHMsDQpNYW5pc2gNCg==
