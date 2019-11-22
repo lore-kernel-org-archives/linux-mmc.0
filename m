@@ -1,199 +1,61 @@
-From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.14 029/127] mmc: meson-gx: make sure the descriptor
- is stopped on errors
-Date: Fri, 22 Nov 2019 00:54:07 -0500
-Message-ID: <20191122055544.3299-28-sashal@kernel.org>
-References: <20191122055544.3299-1-sashal@kernel.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v6 4/8] dt-bindings: mmc: Add optional generic properties
+ for mmc
+Date: Fri, 22 Nov 2019 07:53:06 +0100
+Message-ID: <CAPDyKFrgC1nxe7NqmNHHibYmDfrdx6ubTpOE41bW2Ge796+N8w@mail.gmail.com>
+References: <1574232449-13570-1-git-send-email-manish.narani@xilinx.com>
+ <1574232449-13570-5-git-send-email-manish.narani@xilinx.com> <CAC=3edbHWA7gv-mTFVXXcMzN6hyzO4LPqkbcRZ-zDp5BAm8_Vw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20191122055544.3299-1-sashal@kernel.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc: Sasha Levin <sashal@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-amlogic@lists.infradead.org, linux-arm-kernel@lists.infradead.org, Jerome Brunet <jbrunet@baylibre.com>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAC=3edbHWA7gv-mTFVXXcMzN6hyzO4LPqkbcRZ-zDp5BAm8_Vw@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Rob Herring <rob.e.herring@gmail.com>, Manish Narani <manish.narani@xilinx.com>
+Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Adrian Hunter <adrian.hunter@intel.com>, Michal Simek <michal.simek@xilinx.com>, jolly.shah@xilinx.com, rajan.vaja@xilinx.com, nava.manne@xilinx.com, Moritz Fischer <mdf@kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, devicetree <devicetree@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, git@xilinx.com
 List-Id: linux-mmc@vger.kernel.org
 
-From: Jerome Brunet <jbrunet@baylibre.com>
+On Thu, 21 Nov 2019 at 20:01, Rob Herring <rob.e.herring@gmail.com> wrote:
+>
+> On Wed, Nov 20, 2019 at 12:49 AM Manish Narani <manish.narani@xilinx.com> wrote:
+> >
+> > Add optional properties for mmc hosts which are used to set clk delays
+> > for different speed modes in the controller.
+> >
+> > Signed-off-by: Manish Narani <manish.narani@xilinx.com>
+> > ---
+> >  .../devicetree/bindings/mmc/mmc-controller.yaml     | 13 +++++++++++++
+> >  1 file changed, 13 insertions(+)
+> >
+> > diff --git a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
+> > index 080754e0ef35..305b2016bc17 100644
+> > --- a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
+> > +++ b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
+> > @@ -333,6 +333,18 @@ patternProperties:
+> >      required:
+> >        - reg
+> >
+> > +  "^clk-phase-(legacy|sd-hs|mmc-(hs|hs[24]00|ddr52)|uhs-(sdr(12|25|50|104)|ddr50))$":
+> > +    minItems: 2
+> > +    maxItems: 2
+> > +    allOf:
+> > +      - $ref: /schemas/types.yaml#/definitions/uint32
+> > +      - minimum: 0
+> > +        maximum: 359
+>
+> This is wrong. It can't be both minItems of 2 and a single uint32.
+> What's needed is:
+>
+> allOf:
+>   - $ref: /schemas/types.yaml#/definitions/uint32-array
+> minItems: 2
+> maxItems: 2
+> items:
+>   minimum: 0
+>   maximum: 359
 
-[ Upstream commit 18f92bc02f1739b5c4d5b70009fbb7eada45bca3 ]
+Thanks Rob for clarifying!
 
-On errors, if we don't stop the descriptor chain, it may continue to
-run and raise IRQ after we have called mmc_request_done(). This is bad
-because we won't be able to get cmd anymore and properly deal with the
-IRQ.
+Manish, can you please send a fixup on top?
 
-This patch makes sure the descriptor chain is stopped before
-calling mmc_request_done()
-
-Fixes: 79ed05e329c3 ("mmc: meson-gx: add support for descriptor chain mode")
-Signed-off-by: Jerome Brunet <jbrunet@baylibre.com>
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-Signed-off-by: Sasha Levin <sashal@kernel.org>
----
- drivers/mmc/host/meson-gx-mmc.c | 73 ++++++++++++++++++++++++++++-----
- 1 file changed, 63 insertions(+), 10 deletions(-)
-
-diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-index 08a55c2e96e1b..53ce1bb83d2c5 100644
---- a/drivers/mmc/host/meson-gx-mmc.c
-+++ b/drivers/mmc/host/meson-gx-mmc.c
-@@ -21,6 +21,7 @@
- #include <linux/kernel.h>
- #include <linux/module.h>
- #include <linux/init.h>
-+#include <linux/delay.h>
- #include <linux/device.h>
- #include <linux/of_device.h>
- #include <linux/platform_device.h>
-@@ -74,9 +75,11 @@
- #define   CFG_CLK_ALWAYS_ON BIT(18)
- #define   CFG_CHK_DS BIT(20)
- #define   CFG_AUTO_CLK BIT(23)
-+#define   CFG_ERR_ABORT BIT(27)
- 
- #define SD_EMMC_STATUS 0x48
- #define   STATUS_BUSY BIT(31)
-+#define   STATUS_DESC_BUSY BIT(30)
- #define   STATUS_DATI GENMASK(23, 16)
- 
- #define SD_EMMC_IRQ_EN 0x4c
-@@ -905,6 +908,7 @@ static void meson_mmc_start_cmd(struct mmc_host *mmc, struct mmc_command *cmd)
- 
- 	cmd_cfg |= FIELD_PREP(CMD_CFG_CMD_INDEX_MASK, cmd->opcode);
- 	cmd_cfg |= CMD_CFG_OWNER;  /* owned by CPU */
-+	cmd_cfg |= CMD_CFG_ERROR; /* stop in case of error */
- 
- 	meson_mmc_set_response_bits(cmd, &cmd_cfg);
- 
-@@ -999,6 +1003,17 @@ static irqreturn_t meson_mmc_irq(int irq, void *dev_id)
- 	u32 irq_en, status, raw_status;
- 	irqreturn_t ret = IRQ_NONE;
- 
-+	irq_en = readl(host->regs + SD_EMMC_IRQ_EN);
-+	raw_status = readl(host->regs + SD_EMMC_STATUS);
-+	status = raw_status & irq_en;
-+
-+	if (!status) {
-+		dev_dbg(host->dev,
-+			"Unexpected IRQ! irq_en 0x%08x - status 0x%08x\n",
-+			 irq_en, raw_status);
-+		return IRQ_NONE;
-+	}
-+
- 	if (WARN_ON(!host) || WARN_ON(!host->cmd))
- 		return IRQ_NONE;
- 
-@@ -1006,22 +1021,18 @@ static irqreturn_t meson_mmc_irq(int irq, void *dev_id)
- 
- 	cmd = host->cmd;
- 	data = cmd->data;
--	irq_en = readl(host->regs + SD_EMMC_IRQ_EN);
--	raw_status = readl(host->regs + SD_EMMC_STATUS);
--	status = raw_status & irq_en;
--
- 	cmd->error = 0;
- 	if (status & IRQ_CRC_ERR) {
- 		dev_dbg(host->dev, "CRC Error - status 0x%08x\n", status);
- 		cmd->error = -EILSEQ;
--		ret = IRQ_HANDLED;
-+		ret = IRQ_WAKE_THREAD;
- 		goto out;
- 	}
- 
- 	if (status & IRQ_TIMEOUTS) {
- 		dev_dbg(host->dev, "Timeout - status 0x%08x\n", status);
- 		cmd->error = -ETIMEDOUT;
--		ret = IRQ_HANDLED;
-+		ret = IRQ_WAKE_THREAD;
- 		goto out;
- 	}
- 
-@@ -1046,17 +1057,49 @@ static irqreturn_t meson_mmc_irq(int irq, void *dev_id)
- 	/* ack all enabled interrupts */
- 	writel(irq_en, host->regs + SD_EMMC_STATUS);
- 
-+	if (cmd->error) {
-+		/* Stop desc in case of errors */
-+		u32 start = readl(host->regs + SD_EMMC_START);
-+
-+		start &= ~START_DESC_BUSY;
-+		writel(start, host->regs + SD_EMMC_START);
-+	}
-+
- 	if (ret == IRQ_HANDLED)
- 		meson_mmc_request_done(host->mmc, cmd->mrq);
--	else if (ret == IRQ_NONE)
--		dev_warn(host->dev,
--			 "Unexpected IRQ! status=0x%08x, irq_en=0x%08x\n",
--			 raw_status, irq_en);
- 
- 	spin_unlock(&host->lock);
- 	return ret;
- }
- 
-+static int meson_mmc_wait_desc_stop(struct meson_host *host)
-+{
-+	int loop;
-+	u32 status;
-+
-+	/*
-+	 * It may sometimes take a while for it to actually halt. Here, we
-+	 * are giving it 5ms to comply
-+	 *
-+	 * If we don't confirm the descriptor is stopped, it might raise new
-+	 * IRQs after we have called mmc_request_done() which is bad.
-+	 */
-+	for (loop = 50; loop; loop--) {
-+		status = readl(host->regs + SD_EMMC_STATUS);
-+		if (status & (STATUS_BUSY | STATUS_DESC_BUSY))
-+			udelay(100);
-+		else
-+			break;
-+	}
-+
-+	if (status & (STATUS_BUSY | STATUS_DESC_BUSY)) {
-+		dev_err(host->dev, "Timed out waiting for host to stop\n");
-+		return -ETIMEDOUT;
-+	}
-+
-+	return 0;
-+}
-+
- static irqreturn_t meson_mmc_irq_thread(int irq, void *dev_id)
- {
- 	struct meson_host *host = dev_id;
-@@ -1067,6 +1110,13 @@ static irqreturn_t meson_mmc_irq_thread(int irq, void *dev_id)
- 	if (WARN_ON(!cmd))
- 		return IRQ_NONE;
- 
-+	if (cmd->error) {
-+		meson_mmc_wait_desc_stop(host);
-+		meson_mmc_request_done(host->mmc, cmd->mrq);
-+
-+		return IRQ_HANDLED;
-+	}
-+
- 	data = cmd->data;
- 	if (meson_mmc_bounce_buf_read(data)) {
- 		xfer_bytes = data->blksz * data->blocks;
-@@ -1107,6 +1157,9 @@ static void meson_mmc_cfg_init(struct meson_host *host)
- 	cfg |= FIELD_PREP(CFG_RC_CC_MASK, ilog2(SD_EMMC_CFG_CMD_GAP));
- 	cfg |= FIELD_PREP(CFG_BLK_LEN_MASK, ilog2(SD_EMMC_CFG_BLK_SIZE));
- 
-+	/* abort chain on R/W errors */
-+	cfg |= CFG_ERR_ABORT;
-+
- 	writel(cfg, host->regs + SD_EMMC_CFG);
- }
- 
--- 
-2.20.1
+Kind regards
+Uffe
