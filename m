@@ -1,60 +1,85 @@
-From: Yinbo Zhu <yinbo.zhu@nxp.com>
-Subject: RE: [PATCH v1 1/4] arm64: dts: ls1028a-rdb: enable emmc hs400 mode
-Date: Fri, 22 Nov 2019 03:31:14 +0000
-Message-ID: <VI1PR04MB41589D01E1733E63E261CA2FE9490@VI1PR04MB4158.eurprd04.prod.outlook.com>
-References: <20190814072649.8237-1-yinbo.zhu@nxp.com>
+From: Sasha Levin <sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.19 196/219] mmc: core: align max segment size with logical block size
+Date: Fri, 22 Nov 2019 00:48:48 -0500
+Message-ID: <20191122054911.1750-189-sashal@kernel.org>
+References: <20191122054911.1750-1-sashal@kernel.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="gb2312"
-Content-Transfer-Encoding: base64
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20190814072649.8237-1-yinbo.zhu@nxp.com>
-Content-Language: en-US
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Yinbo Zhu <yinbo.zhu@nxp.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Leo Li <leoyang.li@nxp.com>, Claudiu Manoil <claudiu.manoil@nxp.com>, "Amit Jain (aj)" <amit.jain_1@nxp.com>, "Y.b. Lu" <yangbo.lu@nxp.com>, Vabhav Sharma <vabhav.sharma@nxp.com>, Rajesh Bhagat <rajesh.bhagat@nxp.com>, Ashish Kumar <ashish.kumar@nxp.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: Alison Wang <alison.wang@nxp.com>, Alexandru Marginean <alexandru.marginean@nxp.com>, Xiaobo Xie <xiaobo.xie@nxp.com>, Catalin Horghidan <catalin.horghidan@nxp.com>, Rajat Srivastava <rajat.srivastava@nxp.com>, Jiafei Pan <jiafei.pan@nxp.com>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20191122054911.1750-1-sashal@kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
+Cc: Ming Lei <ming.lei@redhat.com>, Naresh Kamboju <naresh.kamboju@linaro.org>, Christoph Hellwig <hch@lst.de>, Faiz Abbas <faiz_abbas@ti.com>, linux-block@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-SGkgDQoNCk15IGhzNDAwIHNlcmllcyBwYXRjaGVzIGZvciBsczEwMjggbmVlZCBkbyBhbnkgY2hh
-bmdlcz8gDQogIA0KUmVnYXJkcywNCllpbmJvIFpodS4NCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdl
-LS0tLS0NCkZyb206IFlpbmJvIFpodSA8eWluYm8uemh1QG54cC5jb20+IA0KU2VudDogMjAxOcTq
-ONTCMTTI1SAxNToyNw0KVG86IFJvYiBIZXJyaW5nIDxyb2JoK2R0QGtlcm5lbC5vcmc+OyBNYXJr
-IFJ1dGxhbmQgPG1hcmsucnV0bGFuZEBhcm0uY29tPjsgQ2F0YWxpbiBNYXJpbmFzIDxjYXRhbGlu
-Lm1hcmluYXNAYXJtLmNvbT47IFdpbGwgRGVhY29uIDx3aWxsLmRlYWNvbkBhcm0uY29tPjsgQWRy
-aWFuIEh1bnRlciA8YWRyaWFuLmh1bnRlckBpbnRlbC5jb20+OyBVbGYgSGFuc3NvbiA8dWxmLmhh
-bnNzb25AbGluYXJvLm9yZz47IExlbyBMaSA8bGVveWFuZy5saUBueHAuY29tPjsgQ2xhdWRpdSBN
-YW5vaWwgPGNsYXVkaXUubWFub2lsQG54cC5jb20+OyBBbWl0IEphaW4gKGFqKSA8YW1pdC5qYWlu
-XzFAbnhwLmNvbT47IFkuYi4gTHUgPHlhbmdiby5sdUBueHAuY29tPjsgVmFiaGF2IFNoYXJtYSA8
-dmFiaGF2LnNoYXJtYUBueHAuY29tPjsgUmFqZXNoIEJoYWdhdCA8cmFqZXNoLmJoYWdhdEBueHAu
-Y29tPjsgQXNoaXNoIEt1bWFyIDxhc2hpc2gua3VtYXJAbnhwLmNvbT47IGRldmljZXRyZWVAdmdl
-ci5rZXJuZWwub3JnOyBsaW51eC1hcm0ta2VybmVsQGxpc3RzLmluZnJhZGVhZC5vcmc7IGxpbnV4
-LWtlcm5lbEB2Z2VyLmtlcm5lbC5vcmc7IGxpbnV4LW1tY0B2Z2VyLmtlcm5lbC5vcmcNCkNjOiBZ
-aW5ibyBaaHUgPHlpbmJvLnpodUBueHAuY29tPjsgWGlhb2JvIFhpZSA8eGlhb2JvLnhpZUBueHAu
-Y29tPjsgSmlhZmVpIFBhbiA8amlhZmVpLnBhbkBueHAuY29tPjsgQWxpc29uIFdhbmcgPGFsaXNv
-bi53YW5nQG54cC5jb20+OyBBbGV4YW5kcnUgTWFyZ2luZWFuIDxhbGV4YW5kcnUubWFyZ2luZWFu
-QG54cC5jb20+OyBDYXRhbGluIEhvcmdoaWRhbiA8Y2F0YWxpbi5ob3JnaGlkYW5AbnhwLmNvbT47
-IFJhamF0IFNyaXZhc3RhdmEgPHJhamF0LnNyaXZhc3RhdmFAbnhwLmNvbT47IGxpbnV4cHBjLWRl
-dkBsaXN0cy5vemxhYnMub3JnDQpTdWJqZWN0OiBbUEFUQ0ggdjEgMS80XSBhcm02NDogZHRzOiBs
-czEwMjhhLXJkYjogZW5hYmxlIGVtbWMgaHM0MDAgbW9kZQ0KDQpUaGlzIHBhdGNoIGlzIHRvIGVu
-YWJsZSBlbW1jIGhzNDAwIG1vZGUgZm9yIGxzMTAyOGFyZGINCg0KU2lnbmVkLW9mZi1ieTogWWlu
-Ym8gWmh1IDx5aW5iby56aHVAbnhwLmNvbT4NCi0tLQ0KIGFyY2gvYXJtNjQvYm9vdC9kdHMvZnJl
-ZXNjYWxlL2ZzbC1sczEwMjhhLXJkYi5kdHMgfCA0ICsrKy0NCiAxIGZpbGUgY2hhbmdlZCwgMyBp
-bnNlcnRpb25zKCspLCAxIGRlbGV0aW9uKC0pDQoNCmRpZmYgLS1naXQgYS9hcmNoL2FybTY0L2Jv
-b3QvZHRzL2ZyZWVzY2FsZS9mc2wtbHMxMDI4YS1yZGIuZHRzIGIvYXJjaC9hcm02NC9ib290L2R0
-cy9mcmVlc2NhbGUvZnNsLWxzMTAyOGEtcmRiLmR0cw0KaW5kZXggOGE3MjU0MDllODgxLi5mMWU0
-NmNjNGNlYTEgMTAwNjQ0DQotLS0gYS9hcmNoL2FybTY0L2Jvb3QvZHRzL2ZyZWVzY2FsZS9mc2wt
-bHMxMDI4YS1yZGIuZHRzDQorKysgYi9hcmNoL2FybTY0L2Jvb3QvZHRzL2ZyZWVzY2FsZS9mc2wt
-bHMxMDI4YS1yZGIuZHRzDQpAQCAtOTIsOCArOTIsMTAgQEANCiAJfTsNCiANCiAmZXNkaGMxIHsN
-Ci0Jc3RhdHVzID0gIm9rYXkiOw0KIAltbWMtaHMyMDAtMV84djsNCisJbW1jLWhzNDAwLTFfOHY7
-DQorCWJ1cy13aWR0aCA9IDw4PjsNCisJc3RhdHVzID0gIm9rYXkiOw0KIAl9Ow0KIA0KICZpMmMw
-IHsNCi0tIA0KMi4xNy4xDQoNCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fCmxpbnV4LWFybS1rZXJuZWwgbWFpbGluZyBsaXN0CmxpbnV4LWFybS1rZXJuZWxA
-bGlzdHMuaW5mcmFkZWFkLm9yZwpodHRwOi8vbGlzdHMuaW5mcmFkZWFkLm9yZy9tYWlsbWFuL2xp
-c3RpbmZvL2xpbnV4LWFybS1rZXJuZWwK
+From: Ming Lei <ming.lei@redhat.com>
+
+[ Upstream commit c53336c8f5f29043fded57912cc06c24e12613d7 ]
+
+Logical block size is the lowest possible block size that the storage
+device can address. Max segment size is often related with controller's
+DMA capability. And it is reasonable to align max segment size with
+logical block size.
+
+SDHCI sets un-aligned max segment size, and causes ADMA error, so
+fix it by aligning max segment size with logical block size.
+
+Reported-by: Naresh Kamboju <naresh.kamboju@linaro.org>
+Cc: Christoph Hellwig <hch@lst.de>
+Cc: Naresh Kamboju <naresh.kamboju@linaro.org>
+Cc: Faiz Abbas <faiz_abbas@ti.com>
+Cc: linux-block@vger.kernel.org
+Signed-off-by: Ming Lei <ming.lei@redhat.com>
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+Signed-off-by: Sasha Levin <sashal@kernel.org>
+---
+ drivers/mmc/core/block.c | 6 ------
+ drivers/mmc/core/queue.c | 9 ++++++++-
+ 2 files changed, 8 insertions(+), 7 deletions(-)
+
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index eee004fb3c3e3..527ab15c421f9 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -2384,12 +2384,6 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
+ 	snprintf(md->disk->disk_name, sizeof(md->disk->disk_name),
+ 		 "mmcblk%u%s", card->host->index, subname ? subname : "");
+ 
+-	if (mmc_card_mmc(card))
+-		blk_queue_logical_block_size(md->queue.queue,
+-					     card->ext_csd.data_sector_size);
+-	else
+-		blk_queue_logical_block_size(md->queue.queue, 512);
+-
+ 	set_capacity(md->disk, size);
+ 
+ 	if (mmc_host_cmd23(card->host)) {
+diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
+index 18aae28845ec9..becc6594a8a47 100644
+--- a/drivers/mmc/core/queue.c
++++ b/drivers/mmc/core/queue.c
+@@ -355,6 +355,7 @@ static void mmc_setup_queue(struct mmc_queue *mq, struct mmc_card *card)
+ {
+ 	struct mmc_host *host = card->host;
+ 	u64 limit = BLK_BOUNCE_HIGH;
++	unsigned block_size = 512;
+ 
+ 	if (mmc_dev(host)->dma_mask && *mmc_dev(host)->dma_mask)
+ 		limit = (u64)dma_max_pfn(mmc_dev(host)) << PAGE_SHIFT;
+@@ -368,7 +369,13 @@ static void mmc_setup_queue(struct mmc_queue *mq, struct mmc_card *card)
+ 	blk_queue_max_hw_sectors(mq->queue,
+ 		min(host->max_blk_count, host->max_req_size / 512));
+ 	blk_queue_max_segments(mq->queue, host->max_segs);
+-	blk_queue_max_segment_size(mq->queue, host->max_seg_size);
++
++	if (mmc_card_mmc(card))
++		block_size = card->ext_csd.data_sector_size;
++
++	blk_queue_logical_block_size(mq->queue, block_size);
++	blk_queue_max_segment_size(mq->queue,
++			round_down(host->max_seg_size, block_size));
+ 
+ 	INIT_WORK(&mq->recovery_work, mmc_mq_recovery_handler);
+ 	INIT_WORK(&mq->complete_work, mmc_blk_mq_complete_work);
+-- 
+2.20.1
