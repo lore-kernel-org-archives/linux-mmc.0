@@ -1,255 +1,240 @@
-From: Hannes Reinecke <hare@suse.de>
-Subject: Re: [PATCH v6 0/4] Add MMC software queue support
-Date: Tue, 26 Nov 2019 12:17:15 +0100
-Message-ID: <f88856aa-9175-2a93-3747-c98215cb79c3@suse.de>
-References: <cover.1573456283.git.baolin.wang@linaro.org>
- <CAK8P3a1we9D5C2NOBww=cW-4L1PT3t0NnDRmknLwiLm652TmKg@mail.gmail.com>
- <CAMz4kuK9HEuGdhNqHO_qoy9jD=ccsPPhD_dKYwNRgQyWyYwqRA@mail.gmail.com>
- <CAK8P3a0rNhyxmUWLUV1js3FsuAESDOPX3E4b8ActtL4GRT4uTA@mail.gmail.com>
- <CADBw62pzV+5ZXBEbFvTQJ9essAd4cd7Xkz5j9AXB5rAQy0wLqA@mail.gmail.com>
- <CAMz4kuK_3q4JY1vNXe6zGHDNF8Ep-SkcUq6Z25r790VSz4+Bjw@mail.gmail.com>
- <CAK8P3a11vJb1riYseqPnF_5SuJA+YnYuGwC0XWx6_rk+eQ0Bmw@mail.gmail.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH v4 2/3] mmc: sdhci-of-at91: rework clocks management to
+ support SAM9x60 device
+Date: Tue, 26 Nov 2019 14:27:05 +0200
+Message-ID: <8d462d2d-353e-3466-1a90-fd0b97234a1f@intel.com>
+References: <1351fc1a-3d07-4a56-2622-07ea92727c4f@intel.com>
+ <20191125102415.11341-1-ludovic.desroches@microchip.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAK8P3a11vJb1riYseqPnF_5SuJA+YnYuGwC0XWx6_rk+eQ0Bmw@mail.gmail.com>
+In-Reply-To: <20191125102415.11341-1-ludovic.desroches@microchip.com>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>, "(Exiting) Baolin Wang" <baolin.wang@linaro.org>
-Cc: Baolin Wang <baolin.wang7@gmail.com>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, asutoshd@codeaurora.org, Orson Zhai <orsonzhai@gmail.com>, Lyra Zhang <zhang.lyra@gmail.com>, Linus Walleij <linus.walleij@linaro.org>, Vincent Guittot <vincent.guittot@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Hannes Reinecke <hare@suse.com>, linux-block <linux-block@vger.kernel.org>, Paolo Valente <paolo.valente@linaro.org>
+To: Ludovic Desroches <ludovic.desroches@microchip.com>, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org
+Cc: ulf.hansson@linaro.org, nicolas.ferre@microchip.com, linux-kernel@vger.kernel.org, robh+dt@kernel.org, mark.rutland@arm.com, claudiu.beznea@microchip.com, Eugen.Hristev@microchip.com, alexandre.belloni@bootlin.com
 List-Id: linux-mmc@vger.kernel.org
 
-On 11/22/19 10:50 AM, Arnd Bergmann wrote:
-> (adding Paolo as well, maybe he has some more insights)
+On 25/11/19 12:24 PM, Ludovic Desroches wrote:
+> In the SAM9x60 SoC, there are only two clocks instead of three for the
+> SDHCI device. The base clk is no longer provided, it is generated
+> internally from the mult clk.
 > 
-> On Mon, Nov 18, 2019 at 11:04 AM (Exiting) Baolin Wang
-> <baolin.wang@linaro.org> wrote:
->> On Tue, 12 Nov 2019 at 16:48, Baolin Wang <baolin.wang7@gmail.com> wrote:
->>> On Tue, Nov 12, 2019 at 12:59 AM Arnd Bergmann <arnd@arndb.de> wrote:
->>>> On Mon, Nov 11, 2019 at 1:58 PM Baolin Wang <baolin.wang@linaro.org> wrote:
->>>>>> - With that change in place calling a blocking __mmc_claim_host() is
->>>>>>   still a problem, so there should still be a nonblocking mmc_try_claim_host()
->>>>>>   for the submission path, leading to a BLK_STS_DEV_RESOURCE (?)
->>>>>>   return code from mmc_mq_queue_rq(). Basically mmc_mq_queue_rq()
->>>>>>   should always return right away, either after having queued the next I/O
->>>>>>   or with an error, but not waiting for the device in any way.
->>>>>
->>>>> Actually not only the mmc_claim_host() will block the MMC request
->>>>> processing, in this routine, the mmc_blk_part_switch() and
->>>>> mmc_retune() can also block the request processing. Moreover the part
->>>>> switching and tuning should be sync operations, and we can not move
->>>>> them to a work or a thread.
->>>>
->>>> Ok, I see.
->>>>
->>>> Those would also cause requests to be sent to the device or the host
->>>> controller, right? Maybe we can treat them as "a non-IO request
->>>
->>> Right.
->>>
->>>> has successfully been queued to the device" events, returning
->>>> busy from the mmc_mq_queue_rq() function and then running
->>>> the queue again when they complete?
->>>
->>> Yes, seems reasonable to me.
->>>
->>>>
->>>>>> - For the packed requests, there is apparently a very simple way to implement
->>>>>>   that without a software queue: mmc_mq_queue_rq() is allowed to look at
->>>>>>   and dequeue all requests that are currently part of the request_queue,
->>>>>>   so it should take out as many as it wants to submit at once and send
->>>>>>   them all down to the driver together, avoiding the need for any further
->>>>>>   round-trips to blk_mq or maintaining a queue in mmc.
->>>>>
->>>>> You mean we can dispatch a request directly from
->>>>> elevator->type->ops.dispatch_request()?  but we still need some helper
->>>>> functions to check if these requests can be packed (the package
->>>>> condition), and need to invent new APIs to start a packed request (or
->>>>> using cqe interfaces, which means we still need to implement some cqe
->>>>> callbacks).
->>>>
->>>> I don't know how the dispatch_request() function fits in there,
->>>> what Hannes told me is that in ->queue_rq() you can always
->>>> look at the following requests that are already queued up
->>>> and take the next ones off the list. Looking at bd->last
->>>> tells you if there are additional requests. If there are, you can
->>>> look at the next one from blk_mq_hw_ctx (not sure how, but
->>>> should not be hard to find)
->>>>
->>>> I also see that there is a commit_rqs() callback that may
->>>> go along with queue_rq(), implementing that one could make
->>>> this easier as well.
->>>
->>> Yes, we can use queue_rq()/commit_rqs() and bd->last (now bd->last may
->>> can not work well, see [1]), but like we talked before, for packed
->>> request, we still need some new interfaces (for example, a interface
->>> used to start a packed request, and a interface used to complete a
->>> packed request), but at last we got a consensus that we should re-use
->>> the CQE interfaces instead of new invention.
->>>
->>> [1] https://lore.kernel.org/patchwork/patch/1102897/
->>>
->>>>
->>>>>> - The DMA management (bounce buffer, map, unmap) that is currently
->>>>>>   done in mmc_blk_mq_issue_rq() should ideally be done in the
->>>>>>   init_request()/exit_request()  (?) callbacks from mmc_mq_ops so this
->>>>>>   can be done asynchronously, out of the critical timing path for the
->>>>>>   submission. With this, there won't be any need for a software queue.
->>>>>
->>>>> This is not true, now the blk-mq will allocate some static request
->>>>> objects (usually the static requests number should be the same with
->>>>> the hardware queue depth) saved in struct blk_mq_tags. So the
->>>>> init_request() is used to initialize the static requests when
->>>>> allocating them, and call exit_request to free the static requests
->>>>> when freeing the 'struct blk_mq_tags', such as the queue is dead. So
->>>>> we can not move the DMA management into the init_request/exit_request.
->>>>
->>>> Ok, I must have misremembered which callback that is then, but I guess
->>>> there is some other place to do it.
->>>
->>> I checked the 'struct blk_mq_ops', and I did not find a ops can be
->>> used to do DMA management. And I also checked UFS driver, it also did
->>> the DMA mapping in the queue_rq() (scsi_queue_rq() --->
->>> ufshcd_queuecommand() ---> ufshcd_map_sg()). Maybe I missed something?
->>>
->>> Moreover like I said above, for the packed request, we still need
->>> implement something (like the software queue) based on the CQE
->>> interfaces to help to handle packed requests.
->>
->> After some investigation and offline discussion with you, I still have
->> some concerns about your suggestion.
->>
->> 1) Now blk-mq have not supplied some ops to prepare a request, which is
->> used to do some DMA management asynchronously. But yes, we can
->> introduce new ops for blk-mq. But there are still some remaining
->> preparation in mmc_mq_queue_rq(), like mmc part switch. For software
->> queue, we can prepare a request totally after issuing one.
+> The values of the base clk and mul in the capabilities registers may not
+> reflect the reality as the mult clk is a programmable clock which can take
+> several rates. As we can't trust those values, take them from the clock
+> tree and update the capabilities according to.
 > 
-> I suppose to make the submission non-blocking, all operations that
-> currently block in the submission path may have to be changed first.
+> As we can have the same pitfall, in some cases, with the SAMA5D2 Soc,
+> stop relying on capabilities too.
 > 
-> For the case of a partition switch (same for retune), I suppose
-> something like this can be done:
+> Signed-off-by: Ludovic Desroches <ludovic.desroches@microchip.com>
+> ---
 > 
-> - in queue_rq() check whether a partition switch is needed. If not,
->   submit the current rq
-> - if a partition switch is needed, submit the partition switch cmd
->   instead, and return busy status
-> - when the completion arrives for the partition switch, call back into
->   blk_mq to have it call queue_rq again.
+> Thanks Adrian for pointing out the typo. It's fixed and re-tested.
 > 
-> Or possibly even (this might not be possible without signifcant
-> restructuring):
-> 
-> - when preparing a request that would require a partition switch,
->   insert another meta-request to switch the partition ahead of it.
-> 
-> I do realize that this is a significant departure from how it was done
-> in the past, but it seems cleaner that way to me.
-> 
-I would be treating the partition issue separate from the queued/batched
-submission.
+> Let me know if you want to me to resend the full serie or if it's ok.
 
-Aligning with the 'traditional' linux way for partition handling is
-definitely the way to go IMO; otherwise you'll end up having to worry
-about resource allocation between distinct queues (like you have to do
-now), and will be having a hard time trying to map it properly to the
-underlying hardware abstraction in blk-mq.
+This is fine for me, although one more very minor comment below.
+If you fix that you can add my ack:
 
-For starters I would keep a partition marker in the driver instance, and
-calculate the parition for each incoming request. If the partition is
-different you'll have to insert a partition switch request before
-submitting the actual one.
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-To do this efficiently it would be good to know if:
-a) How invasive is the partition switch? Would it be feasible to eg add
-a partition switch for every command? This might sound daft now, but if
-we get request batching going it might not the _that_ expensive after all...
-b) Can the request switch command batched together with the normal
-command? IE is is possible to have them both send in one go?
-If so it would make life _so_ much easier; we could submit both command
-at the same time, and won't have to worry about handling internal
-completions ...
-
->> 2) I wonder if it is appropriate that using the irq threaded context
->> to dispatch next request, actually we will still introduce a context
->> switch here. Now we will complete a request in the hard irq handler
->> and kick the softirq to do time-consuming operations, like DMA
->> unmapping , and will start next request in the hard irq handler
->> without context switch. Moreover if we remove the BLK_MQ_F_BLOCKING in
->> future like you suggested, then we can remove all context switch. And
->> I think we can dispatch next request in the softirq context (actually
->> the CQE already did).
 > 
-> I hope Hannes (or someone else) can comment here, as I don't
-> know exactly what his objection to kicking off the next cmd in the
-> hardirq was.
+> Regards
 > 
-The point being that you'll have to have a context switch anyway
-(between hardirq and softirq), and you'll be able to better handle
-recovery as the hardirq handler is pretty generic and the won't be any
-chance of that one becoming stuck.
-And, of course, modern software design :-)
-
-> I think generally, deferring all slow operations to an irqthread
-> rather than a softirq is a good idea, but I share your concern that
-> this can introduce an unnecessary latency between the the
-> the IRQ is signaled and the time the following cmd is sent to the
-> hardware.
-> > Doing everything in a single (irqthread) context is clearly simpler,
-> so this would need to be measured carefully to avoid unnecessary
-> complexity, but I think don't see anything stopping us from having
-> the fast-path where the low-level driver first checks for any possible
-> error conditions in hardirq context and the fires off a prepared cmd
-> right away whenever it can before triggering the irqthread that does
-> everything else. I think this has to be a per-driver optimization, so
-> the common case would just have an irqthread.
+> Ludovic
 > 
->> 3) For packed request support, I did not see an example that block
->> driver can dispatch a request from the IO scheduler in queue_rq() and
->> no APIs supported from blk-mq. And we do not know where can dispatch a
->> request in queue_rq(), from IO scheduler? from ctx? or from
->> hctx->dispatch list? and if this request can not be passed to host
->> now, how to do it? Seems lots of complicated things.
+>  drivers/mmc/host/sdhci-of-at91.c | 105 +++++++++++++++++--------------
+>  1 file changed, 58 insertions(+), 47 deletions(-)
 > 
-> The only way I can see is the ->last flag, so if blk_mq submits multiple
-> requests in a row to queue_rq() with this flag cleared and  calls
-> ->commit_rqs() after the last one. This seems to be what the scsi
-> disk driver and the nvme driver rely on, and we should be able to use
-> it the same way for packed cmds, by checking each time in queue_rq()
-> whether requests can/should be combined and reporting busy otherwise
-> (after preparing a combined mmc cmd).
-> blk_mq will then call commit_rqs, which should do the actual submission
-> to the hardware driver.
+> diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
+> index 5959e394b416..b95ac4b27f22 100644
+> --- a/drivers/mmc/host/sdhci-of-at91.c
+> +++ b/drivers/mmc/host/sdhci-of-at91.c
+> @@ -33,7 +33,14 @@
+>  
+>  #define SDHCI_AT91_PRESET_COMMON_CONF	0x400 /* drv type B, programmable clock mode */
+>  
+> +struct sdhci_at91_soc_data {
+> +	const struct sdhci_pltfm_data *pdata;
+> +	bool baseclk_is_generated_internally;
+> +	unsigned int divider_for_baseclk;
+> +};
+> +
+>  struct sdhci_at91_priv {
+> +	const struct sdhci_at91_soc_data *soc_data;
+>  	struct clk *hclock;
+>  	struct clk *gck;
+>  	struct clk *mainck;
+> @@ -141,12 +148,24 @@ static const struct sdhci_ops sdhci_at91_sama5d2_ops = {
+>  	.set_power		= sdhci_at91_set_power,
+>  };
+>  
+> -static const struct sdhci_pltfm_data soc_data_sama5d2 = {
+> +static const struct sdhci_pltfm_data sdhci_sama5d2_pdata = {
+>  	.ops = &sdhci_at91_sama5d2_ops,
+>  };
+>  
+> +static const struct sdhci_at91_soc_data soc_data_sama5d2 = {
+> +	.pdata = &sdhci_sama5d2_pdata,
+> +	.baseclk_is_generated_internally = false,
+> +};
+> +
+> +static const struct sdhci_at91_soc_data soc_data_sam9x60 = {
+> +	.pdata = &sdhci_sama5d2_pdata,
+> +	.baseclk_is_generated_internally = true,
+> +	.divider_for_baseclk = 2,
+> +};
+> +
+>  static const struct of_device_id sdhci_at91_dt_match[] = {
+>  	{ .compatible = "atmel,sama5d2-sdhci", .data = &soc_data_sama5d2 },
+> +	{ .compatible = "microchip,sam9x60-sdhci", .data = &soc_data_sam9x60 },
+>  	{}
+>  };
+>  MODULE_DEVICE_TABLE(of, sdhci_at91_dt_match);
+> @@ -156,50 +175,37 @@ static int sdhci_at91_set_clks_presets(struct device *dev)
+>  	struct sdhci_host *host = dev_get_drvdata(dev);
+>  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>  	struct sdhci_at91_priv *priv = sdhci_pltfm_priv(pltfm_host);
+> -	int ret;
+>  	unsigned int			caps0, caps1;
+>  	unsigned int			clk_base, clk_mul;
+> -	unsigned int			gck_rate, real_gck_rate;
+> +	unsigned int			gck_rate, clk_base_rate;
+>  	unsigned int			preset_div;
+>  
+> -	/*
+> -	 * The mult clock is provided by as a generated clock by the PMC
+> -	 * controller. In order to set the rate of gck, we have to get the
+> -	 * base clock rate and the clock mult from capabilities.
+> -	 */
+>  	clk_prepare_enable(priv->hclock);
+>  	caps0 = readl(host->ioaddr + SDHCI_CAPABILITIES);
+>  	caps1 = readl(host->ioaddr + SDHCI_CAPABILITIES_1);
+> -	clk_base = (caps0 & SDHCI_CLOCK_V3_BASE_MASK) >> SDHCI_CLOCK_BASE_SHIFT;
+> -	clk_mul = (caps1 & SDHCI_CLOCK_MUL_MASK) >> SDHCI_CLOCK_MUL_SHIFT;
+> -	gck_rate = clk_base * 1000000 * (clk_mul + 1);
+> -	ret = clk_set_rate(priv->gck, gck_rate);
+> -	if (ret < 0) {
+> -		dev_err(dev, "failed to set gck");
+> -		clk_disable_unprepare(priv->hclock);
+> -		return ret;
+> -	}
+> -	/*
+> -	 * We need to check if we have the requested rate for gck because in
+> -	 * some cases this rate could be not supported. If it happens, the rate
+> -	 * is the closest one gck can provide. We have to update the value
+> -	 * of clk mul.
+> -	 */
+> -	real_gck_rate = clk_get_rate(priv->gck);
+> -	if (real_gck_rate != gck_rate) {
+> -		clk_mul = real_gck_rate / (clk_base * 1000000) - 1;
+> -		caps1 &= (~SDHCI_CLOCK_MUL_MASK);
+> -		caps1 |= ((clk_mul << SDHCI_CLOCK_MUL_SHIFT) &
+> -			  SDHCI_CLOCK_MUL_MASK);
+> -		/* Set capabilities in r/w mode. */
+> -		writel(SDMMC_CACR_KEY | SDMMC_CACR_CAPWREN,
+> -		       host->ioaddr + SDMMC_CACR);
+> -		writel(caps1, host->ioaddr + SDHCI_CAPABILITIES_1);
+> -		/* Set capabilities in ro mode. */
+> -		writel(0, host->ioaddr + SDMMC_CACR);
+> -		dev_info(dev, "update clk mul to %u as gck rate is %u Hz\n",
+> -			 clk_mul, real_gck_rate);
+> -	}
+> +
+> +	gck_rate = clk_get_rate(priv->gck);
+> +	if (priv->soc_data->baseclk_is_generated_internally)
+> +		clk_base_rate = gck_rate / priv->soc_data->divider_for_baseclk;
+> +	else
+> +		clk_base_rate = clk_get_rate(priv->mainck);
+> +
+> +	clk_base = clk_base_rate / 1000000;
+> +	clk_mul = gck_rate / clk_base_rate - 1;
+> +
+> +	caps0 &= (~SDHCI_CLOCK_V3_BASE_MASK);
+> +	caps0 |= ((clk_base << SDHCI_CLOCK_BASE_SHIFT) & SDHCI_CLOCK_V3_BASE_MASK);
+> +	caps1 &= (~SDHCI_CLOCK_MUL_MASK);
+> +	caps1 |= ((clk_mul << SDHCI_CLOCK_MUL_SHIFT) & SDHCI_CLOCK_MUL_MASK);
+
+The 4 assignments above do not need extra parentheses i.e.
+
+	caps0 &= ~SDHCI_CLOCK_V3_BASE_MASK;
+	caps0 |= (clk_base << SDHCI_CLOCK_BASE_SHIFT) & SDHCI_CLOCK_V3_BASE_MASK;
+	caps1 &= ~SDHCI_CLOCK_MUL_MASK;
+	caps1 |= (clk_mul << SDHCI_CLOCK_MUL_SHIFT) & SDHCI_CLOCK_MUL_MASK;
+
+> +	/* Set capabilities in r/w mode. */
+> +	writel(SDMMC_CACR_KEY | SDMMC_CACR_CAPWREN, host->ioaddr + SDMMC_CACR);
+> +	writel(caps0, host->ioaddr + SDHCI_CAPABILITIES);
+> +	writel(caps1, host->ioaddr + SDHCI_CAPABILITIES_1);
+> +	/* Set capabilities in ro mode. */
+> +	writel(0, host->ioaddr + SDMMC_CACR);
+> +
+> +	dev_info(dev, "update clk mul to %u as gck rate is %u Hz and clk base is %u Hz\n",
+> +		 clk_mul, gck_rate, clk_base_rate);
+>  
+>  	/*
+>  	 * We have to set preset values because it depends on the clk_mul
+> @@ -207,19 +213,19 @@ static int sdhci_at91_set_clks_presets(struct device *dev)
+>  	 * maximum sd clock value is 120 MHz instead of 208 MHz. For that
+>  	 * reason, we need to use presets to support SDR104.
+>  	 */
+> -	preset_div = DIV_ROUND_UP(real_gck_rate, 24000000) - 1;
+> +	preset_div = DIV_ROUND_UP(gck_rate, 24000000) - 1;
+>  	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
+>  	       host->ioaddr + SDHCI_PRESET_FOR_SDR12);
+> -	preset_div = DIV_ROUND_UP(real_gck_rate, 50000000) - 1;
+> +	preset_div = DIV_ROUND_UP(gck_rate, 50000000) - 1;
+>  	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
+>  	       host->ioaddr + SDHCI_PRESET_FOR_SDR25);
+> -	preset_div = DIV_ROUND_UP(real_gck_rate, 100000000) - 1;
+> +	preset_div = DIV_ROUND_UP(gck_rate, 100000000) - 1;
+>  	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
+>  	       host->ioaddr + SDHCI_PRESET_FOR_SDR50);
+> -	preset_div = DIV_ROUND_UP(real_gck_rate, 120000000) - 1;
+> +	preset_div = DIV_ROUND_UP(gck_rate, 120000000) - 1;
+>  	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
+>  	       host->ioaddr + SDHCI_PRESET_FOR_SDR104);
+> -	preset_div = DIV_ROUND_UP(real_gck_rate, 50000000) - 1;
+> +	preset_div = DIV_ROUND_UP(gck_rate, 50000000) - 1;
+>  	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
+>  	       host->ioaddr + SDHCI_PRESET_FOR_DDR50);
+>  
+> @@ -314,7 +320,7 @@ static const struct dev_pm_ops sdhci_at91_dev_pm_ops = {
+>  static int sdhci_at91_probe(struct platform_device *pdev)
+>  {
+>  	const struct of_device_id	*match;
+> -	const struct sdhci_pltfm_data	*soc_data;
+> +	const struct sdhci_at91_soc_data	*soc_data;
+>  	struct sdhci_host		*host;
+>  	struct sdhci_pltfm_host		*pltfm_host;
+>  	struct sdhci_at91_priv		*priv;
+> @@ -325,17 +331,22 @@ static int sdhci_at91_probe(struct platform_device *pdev)
+>  		return -EINVAL;
+>  	soc_data = match->data;
+>  
+> -	host = sdhci_pltfm_init(pdev, soc_data, sizeof(*priv));
+> +	host = sdhci_pltfm_init(pdev, soc_data->pdata, sizeof(*priv));
+>  	if (IS_ERR(host))
+>  		return PTR_ERR(host);
+>  
+>  	pltfm_host = sdhci_priv(host);
+>  	priv = sdhci_pltfm_priv(pltfm_host);
+> +	priv->soc_data = soc_data;
+>  
+>  	priv->mainck = devm_clk_get(&pdev->dev, "baseclk");
+>  	if (IS_ERR(priv->mainck)) {
+> -		dev_err(&pdev->dev, "failed to get baseclk\n");
+> -		return PTR_ERR(priv->mainck);
+> +		if (soc_data->baseclk_is_generated_internally) {
+> +			priv->mainck = NULL;
+> +		} else {
+> +			dev_err(&pdev->dev, "failed to get baseclk\n");
+> +			return PTR_ERR(priv->mainck);
+> +		}
+>  	}
+>  
+>  	priv->hclock = devm_clk_get(&pdev->dev, "hclock");
 > 
-The ->last flag really depends on the submission thread, eg if something
-in the upper layers is using on-stack plugging.
-In my experience this is done only in some specific use-cases resp.
-filesystems, so this is not something you can rely on to make any decisions.
-
-> Now as you point out, the *big* problem with this is that we never
-> get multiple requests together in practice, i.e. the last flag is almost
-> always set, and any optimization around it has no effect.
-> 
-See above. I don't think the using the ->last flag is the way to go here.
-What you really need to do here is to inject some 'pushback' into the
-block layer so that is has a _chance_ of assembling more requests.
-
-But the actual design really needs to take hardware features into account.
-
-As mentioned above, initially I would concentrate on getting the
-partitioning working with a single request queue; once that is done we
-can look at request batching proper.
-
-And for that you could have a look at the S/390 DASD driver (right,
-Arndt?), which has a very similar concept.
-
-Cheers,
-
-Hannes
--- 
-Dr. Hannes Reinecke		      Teamlead Storage & Networking
-hare@suse.de			                  +49 911 74053 688
-SUSE Software Solutions Germany GmbH, Maxfeldstr. 5, 90409 Nürnberg
-HRB 36809 (AG Nürnberg), GF: Felix Imendörffer
