@@ -1,240 +1,284 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v4 2/3] mmc: sdhci-of-at91: rework clocks management to
- support SAM9x60 device
-Date: Tue, 26 Nov 2019 14:27:05 +0200
-Message-ID: <8d462d2d-353e-3466-1a90-fd0b97234a1f@intel.com>
-References: <1351fc1a-3d07-4a56-2622-07ea92727c4f@intel.com>
- <20191125102415.11341-1-ludovic.desroches@microchip.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC and MEMSTICK updates for v5.5
+Date: Tue, 26 Nov 2019 16:48:51 +0100
+Message-ID: <20191126154851.14737-1-ulf.hansson@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20191125102415.11341-1-ludovic.desroches@microchip.com>
-Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ludovic Desroches <ludovic.desroches@microchip.com>, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org
-Cc: ulf.hansson@linaro.org, nicolas.ferre@microchip.com, linux-kernel@vger.kernel.org, robh+dt@kernel.org, mark.rutland@arm.com, claudiu.beznea@microchip.com, Eugen.Hristev@microchip.com, alexandre.belloni@bootlin.com
+To: Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 25/11/19 12:24 PM, Ludovic Desroches wrote:
-> In the SAM9x60 SoC, there are only two clocks instead of three for the
-> SDHCI device. The base clk is no longer provided, it is generated
-> internally from the mult clk.
-> 
-> The values of the base clk and mul in the capabilities registers may not
-> reflect the reality as the mult clk is a programmable clock which can take
-> several rates. As we can't trust those values, take them from the clock
-> tree and update the capabilities according to.
-> 
-> As we can have the same pitfall, in some cases, with the SAMA5D2 Soc,
-> stop relying on capabilities too.
-> 
-> Signed-off-by: Ludovic Desroches <ludovic.desroches@microchip.com>
-> ---
-> 
-> Thanks Adrian for pointing out the typo. It's fixed and re-tested.
-> 
-> Let me know if you want to me to resend the full serie or if it's ok.
+Hi Linus,
 
-This is fine for me, although one more very minor comment below.
-If you fix that you can add my ack:
+Here's the PR with updates for MMC and MEMSTICK for v5.5. Details about the
+highlights are as usual found in the signed tag.
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+However, note at this time the PR contains quite some additional changes
+reaching beyond both the MMC and MEMSTICK subsystems. This is primarily because
+of fixing an old regression for a WiFi driver based on the SDIO interface on an
+OMAP openpandora board.
 
-> 
-> Regards
-> 
-> Ludovic
-> 
->  drivers/mmc/host/sdhci-of-at91.c | 105 +++++++++++++++++--------------
->  1 file changed, 58 insertions(+), 47 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
-> index 5959e394b416..b95ac4b27f22 100644
-> --- a/drivers/mmc/host/sdhci-of-at91.c
-> +++ b/drivers/mmc/host/sdhci-of-at91.c
-> @@ -33,7 +33,14 @@
->  
->  #define SDHCI_AT91_PRESET_COMMON_CONF	0x400 /* drv type B, programmable clock mode */
->  
-> +struct sdhci_at91_soc_data {
-> +	const struct sdhci_pltfm_data *pdata;
-> +	bool baseclk_is_generated_internally;
-> +	unsigned int divider_for_baseclk;
-> +};
-> +
->  struct sdhci_at91_priv {
-> +	const struct sdhci_at91_soc_data *soc_data;
->  	struct clk *hclock;
->  	struct clk *gck;
->  	struct clk *mainck;
-> @@ -141,12 +148,24 @@ static const struct sdhci_ops sdhci_at91_sama5d2_ops = {
->  	.set_power		= sdhci_at91_set_power,
->  };
->  
-> -static const struct sdhci_pltfm_data soc_data_sama5d2 = {
-> +static const struct sdhci_pltfm_data sdhci_sama5d2_pdata = {
->  	.ops = &sdhci_at91_sama5d2_ops,
->  };
->  
-> +static const struct sdhci_at91_soc_data soc_data_sama5d2 = {
-> +	.pdata = &sdhci_sama5d2_pdata,
-> +	.baseclk_is_generated_internally = false,
-> +};
-> +
-> +static const struct sdhci_at91_soc_data soc_data_sam9x60 = {
-> +	.pdata = &sdhci_sama5d2_pdata,
-> +	.baseclk_is_generated_internally = true,
-> +	.divider_for_baseclk = 2,
-> +};
-> +
->  static const struct of_device_id sdhci_at91_dt_match[] = {
->  	{ .compatible = "atmel,sama5d2-sdhci", .data = &soc_data_sama5d2 },
-> +	{ .compatible = "microchip,sam9x60-sdhci", .data = &soc_data_sam9x60 },
->  	{}
->  };
->  MODULE_DEVICE_TABLE(of, sdhci_at91_dt_match);
-> @@ -156,50 +175,37 @@ static int sdhci_at91_set_clks_presets(struct device *dev)
->  	struct sdhci_host *host = dev_get_drvdata(dev);
->  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->  	struct sdhci_at91_priv *priv = sdhci_pltfm_priv(pltfm_host);
-> -	int ret;
->  	unsigned int			caps0, caps1;
->  	unsigned int			clk_base, clk_mul;
-> -	unsigned int			gck_rate, real_gck_rate;
-> +	unsigned int			gck_rate, clk_base_rate;
->  	unsigned int			preset_div;
->  
-> -	/*
-> -	 * The mult clock is provided by as a generated clock by the PMC
-> -	 * controller. In order to set the rate of gck, we have to get the
-> -	 * base clock rate and the clock mult from capabilities.
-> -	 */
->  	clk_prepare_enable(priv->hclock);
->  	caps0 = readl(host->ioaddr + SDHCI_CAPABILITIES);
->  	caps1 = readl(host->ioaddr + SDHCI_CAPABILITIES_1);
-> -	clk_base = (caps0 & SDHCI_CLOCK_V3_BASE_MASK) >> SDHCI_CLOCK_BASE_SHIFT;
-> -	clk_mul = (caps1 & SDHCI_CLOCK_MUL_MASK) >> SDHCI_CLOCK_MUL_SHIFT;
-> -	gck_rate = clk_base * 1000000 * (clk_mul + 1);
-> -	ret = clk_set_rate(priv->gck, gck_rate);
-> -	if (ret < 0) {
-> -		dev_err(dev, "failed to set gck");
-> -		clk_disable_unprepare(priv->hclock);
-> -		return ret;
-> -	}
-> -	/*
-> -	 * We need to check if we have the requested rate for gck because in
-> -	 * some cases this rate could be not supported. If it happens, the rate
-> -	 * is the closest one gck can provide. We have to update the value
-> -	 * of clk mul.
-> -	 */
-> -	real_gck_rate = clk_get_rate(priv->gck);
-> -	if (real_gck_rate != gck_rate) {
-> -		clk_mul = real_gck_rate / (clk_base * 1000000) - 1;
-> -		caps1 &= (~SDHCI_CLOCK_MUL_MASK);
-> -		caps1 |= ((clk_mul << SDHCI_CLOCK_MUL_SHIFT) &
-> -			  SDHCI_CLOCK_MUL_MASK);
-> -		/* Set capabilities in r/w mode. */
-> -		writel(SDMMC_CACR_KEY | SDMMC_CACR_CAPWREN,
-> -		       host->ioaddr + SDMMC_CACR);
-> -		writel(caps1, host->ioaddr + SDHCI_CAPABILITIES_1);
-> -		/* Set capabilities in ro mode. */
-> -		writel(0, host->ioaddr + SDMMC_CACR);
-> -		dev_info(dev, "update clk mul to %u as gck rate is %u Hz\n",
-> -			 clk_mul, real_gck_rate);
-> -	}
-> +
-> +	gck_rate = clk_get_rate(priv->gck);
-> +	if (priv->soc_data->baseclk_is_generated_internally)
-> +		clk_base_rate = gck_rate / priv->soc_data->divider_for_baseclk;
-> +	else
-> +		clk_base_rate = clk_get_rate(priv->mainck);
-> +
-> +	clk_base = clk_base_rate / 1000000;
-> +	clk_mul = gck_rate / clk_base_rate - 1;
-> +
-> +	caps0 &= (~SDHCI_CLOCK_V3_BASE_MASK);
-> +	caps0 |= ((clk_base << SDHCI_CLOCK_BASE_SHIFT) & SDHCI_CLOCK_V3_BASE_MASK);
-> +	caps1 &= (~SDHCI_CLOCK_MUL_MASK);
-> +	caps1 |= ((clk_mul << SDHCI_CLOCK_MUL_SHIFT) & SDHCI_CLOCK_MUL_MASK);
+I haven't noticed any reports about merge conflicts in linux-next, but just let
+me know if you encounter any issues.
 
-The 4 assignments above do not need extra parentheses i.e.
+Please pull this in!
 
-	caps0 &= ~SDHCI_CLOCK_V3_BASE_MASK;
-	caps0 |= (clk_base << SDHCI_CLOCK_BASE_SHIFT) & SDHCI_CLOCK_V3_BASE_MASK;
-	caps1 &= ~SDHCI_CLOCK_MUL_MASK;
-	caps1 |= (clk_mul << SDHCI_CLOCK_MUL_SHIFT) & SDHCI_CLOCK_MUL_MASK;
+Kind regards
+Ulf Hansson
 
-> +	/* Set capabilities in r/w mode. */
-> +	writel(SDMMC_CACR_KEY | SDMMC_CACR_CAPWREN, host->ioaddr + SDMMC_CACR);
-> +	writel(caps0, host->ioaddr + SDHCI_CAPABILITIES);
-> +	writel(caps1, host->ioaddr + SDHCI_CAPABILITIES_1);
-> +	/* Set capabilities in ro mode. */
-> +	writel(0, host->ioaddr + SDMMC_CACR);
-> +
-> +	dev_info(dev, "update clk mul to %u as gck rate is %u Hz and clk base is %u Hz\n",
-> +		 clk_mul, gck_rate, clk_base_rate);
->  
->  	/*
->  	 * We have to set preset values because it depends on the clk_mul
-> @@ -207,19 +213,19 @@ static int sdhci_at91_set_clks_presets(struct device *dev)
->  	 * maximum sd clock value is 120 MHz instead of 208 MHz. For that
->  	 * reason, we need to use presets to support SDR104.
->  	 */
-> -	preset_div = DIV_ROUND_UP(real_gck_rate, 24000000) - 1;
-> +	preset_div = DIV_ROUND_UP(gck_rate, 24000000) - 1;
->  	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
->  	       host->ioaddr + SDHCI_PRESET_FOR_SDR12);
-> -	preset_div = DIV_ROUND_UP(real_gck_rate, 50000000) - 1;
-> +	preset_div = DIV_ROUND_UP(gck_rate, 50000000) - 1;
->  	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
->  	       host->ioaddr + SDHCI_PRESET_FOR_SDR25);
-> -	preset_div = DIV_ROUND_UP(real_gck_rate, 100000000) - 1;
-> +	preset_div = DIV_ROUND_UP(gck_rate, 100000000) - 1;
->  	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
->  	       host->ioaddr + SDHCI_PRESET_FOR_SDR50);
-> -	preset_div = DIV_ROUND_UP(real_gck_rate, 120000000) - 1;
-> +	preset_div = DIV_ROUND_UP(gck_rate, 120000000) - 1;
->  	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
->  	       host->ioaddr + SDHCI_PRESET_FOR_SDR104);
-> -	preset_div = DIV_ROUND_UP(real_gck_rate, 50000000) - 1;
-> +	preset_div = DIV_ROUND_UP(gck_rate, 50000000) - 1;
->  	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
->  	       host->ioaddr + SDHCI_PRESET_FOR_DDR50);
->  
-> @@ -314,7 +320,7 @@ static const struct dev_pm_ops sdhci_at91_dev_pm_ops = {
->  static int sdhci_at91_probe(struct platform_device *pdev)
->  {
->  	const struct of_device_id	*match;
-> -	const struct sdhci_pltfm_data	*soc_data;
-> +	const struct sdhci_at91_soc_data	*soc_data;
->  	struct sdhci_host		*host;
->  	struct sdhci_pltfm_host		*pltfm_host;
->  	struct sdhci_at91_priv		*priv;
-> @@ -325,17 +331,22 @@ static int sdhci_at91_probe(struct platform_device *pdev)
->  		return -EINVAL;
->  	soc_data = match->data;
->  
-> -	host = sdhci_pltfm_init(pdev, soc_data, sizeof(*priv));
-> +	host = sdhci_pltfm_init(pdev, soc_data->pdata, sizeof(*priv));
->  	if (IS_ERR(host))
->  		return PTR_ERR(host);
->  
->  	pltfm_host = sdhci_priv(host);
->  	priv = sdhci_pltfm_priv(pltfm_host);
-> +	priv->soc_data = soc_data;
->  
->  	priv->mainck = devm_clk_get(&pdev->dev, "baseclk");
->  	if (IS_ERR(priv->mainck)) {
-> -		dev_err(&pdev->dev, "failed to get baseclk\n");
-> -		return PTR_ERR(priv->mainck);
-> +		if (soc_data->baseclk_is_generated_internally) {
-> +			priv->mainck = NULL;
-> +		} else {
-> +			dev_err(&pdev->dev, "failed to get baseclk\n");
-> +			return PTR_ERR(priv->mainck);
-> +		}
->  	}
->  
->  	priv->hclock = devm_clk_get(&pdev->dev, "hclock");
-> 
+
+The following changes since commit fed23c5829ecab4ddc712d7b0046e59610ca3ba4:
+
+  mmc: sdhci-of-at91: fix quirk2 overwrite (2019-11-14 14:57:53 +0100)
+
+are available in the Git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.5
+
+for you to fetch changes up to def7bd940f8cceb41ec3d1383acd8ab937056dcb:
+
+  dt-bindings: mmc: Correct the type of the clk phase properties (2019-11-22 08:43:43 +0100)
+
+----------------------------------------------------------------
+MMC core:
+ - Add CMD13 polling for MMC IOCTLS with R1B response.
+ - Add common DT properties for clk-phase-delays for various speed modes.
+ - Fix size overflow for mmc gp-partitions.
+ - Re-work HW reset for SDIO cards, which also includes a re-work for
+   Marvell's WiFi mwifiex SDIO func driver.
+
+MMC host:
+ - jz4740: Add support for X1000 and JZ4760.
+ - jz4740: Add support for 8-bit bus and for low power mode.
+ - mmci: Add support for HW busy timeout for the stm32_sdmmc variant.
+ - owl-mmc: Add driver for Actions Semi Owl SoCs SD/MMC controller.
+ - renesas_sdhi: Add support for r8a774b1.
+ - sdhci_am654: Add support for Command Queuing Engine for J721E.
+ - sdhci-milbeaut: Add driver for the Milbeaut SD controller.
+ - sdhci-of-arasan: Add support for ZynqMP tap-delays.
+ - sdhci-of-arasan: Add support for clk-phase-delays for SD cards.
+ - sdhci-of-arasan: Add support for Intel LGM SDXC.
+ - sdhci-of-aspeed: Allow inversion of the internal card detect signal.
+ - sdhci-of-esdhc: Fixup workaround for erratum A-008171 for tunings.
+ - sdhci-of-at91: Improve support for calibration.
+ - sdhci-pci: Add support for Intel JSL.
+ - sdhci-pci: Add quirk for AMD SDHC Device 0x7906.
+ - tmio: Enable support for erase/discard/trim requests.
+
+MMC/OMAP/pandora/wl1251:
+The TI wl1251 WiFi driver for SDIO on the OMAP openpandora board has been
+broken since v4.7. To fix the problems, changes have been made cross
+subsystems, but also to OMAP2 machine code and to openpandora DTS files, as
+summarized below. Note that, relevant changes have been tagged for stable.
+
+ - mmc/wl1251: Re-introduce lost SDIO quirks and vendor-id for wl1251
+ - omap/omap_hsmmc: Remove redundant platform config for openpandora
+ - omap_hsmmc: Initialize non-std SDIO card for wl1251 for pandora
+ - omap/dts/pandora: Specify wl1251 through a child node of mmc3
+ - wl1251: Add devicetree support for TI wl1251 SDIO
+
+----------------------------------------------------------------
+Adrian Hunter (1):
+      mmc: sdhci-pci: Add support for Intel JSL
+
+Ben Dooks (2):
+      mmc: mmci: make unexported functions static
+      mmc: mmci: stm32: make sdmmc_idma_validate_data static
+
+Biju Das (2):
+      dt-bindings: mmc: renesas_sdhi: Add r8a774b1 support
+      mmc: renesas_sdhi_internal_dmac: Add r8a774b1 support
+
+Bradley Bolen (1):
+      mmc: core: Fix size overflow for mmc partitions
+
+Chaotian Jing (2):
+      mmc: block: Make card_busy_detect() a bit more generic
+      mmc: block: Add CMD13 polling for MMC IOCTLS with R1B response
+
+Colin Ian King (2):
+      memstick: jmb38x_ms: clean up indentation issue
+      mmc: dw_mmc: fix indentation issue
+
+Eugeniu Rosca (1):
+      mmc: tmio: Add MMC_CAP_ERASE to allow erase/discard/trim requests
+
+Fabio Estevam (1):
+      mmc: sdhci: Fix grammar in warning message
+
+Faiz Abbas (1):
+      mmc: sdhci_am654: Add Support for Command Queuing Engine to J721E
+
+H. Nikolaus Schaller (12):
+      Documentation: dt: wireless: update wl1251 for sdio
+      net: wireless: ti: wl1251 add device tree support
+      ARM: dts: pandora-common: define wl1251 as child node of mmc3
+      mmc: host: omap_hsmmc: add code for special init of wl1251 to get rid of pandora_wl1251_init_card
+      omap: pdata-quirks: revert pandora specific gpiod additions
+      omap: pdata-quirks: remove openpandora quirks for mmc3 and wl1251
+      omap: remove omap2_hsmmc_info in old hsmmc.[ch] and update Makefile
+      mmc: host: omap-hsmmc: remove init_card pdata callback from pdata
+      mmc: sdio: fix wl1251 vendor id
+      mmc: core: fix wl1251 sdio quirks
+      net: wireless: ti: wl1251 use new SDIO_VENDOR_ID_TI_WL1251 definition
+      net: wireless: ti: remove local VENDOR_ID and DEVICE_ID definitions
+
+Ivan Mikhaylov (2):
+      mmc: sdhci-of-aspeed: enable CONFIG_MMC_SDHCI_IO_ACCESSORS
+      mmc: sdhci-of-aspeed: add inversion signal presence
+
+Krzysztof Kozlowski (1):
+      memstick: Fix Kconfig indentation
+
+Ludovic Barre (3):
+      mmc: mmci: add hardware busy timeout feature
+      mmc: mmci: add busy_complete callback
+      mmc: mmci: sdmmc: add busy_complete callback
+
+Manish Narani (9):
+      mmc: sdhci-of-arasan: Separate out clk related data to another structure
+      dt-bindings: mmc: arasan: Update Documentation for the input clock
+      mmc: sdhci-of-arasan: Add sampling clock for a phy to use
+      dt-bindings: mmc: Add optional generic properties for mmc
+      mmc: sdhci-of-arasan: Add support to set clock phase delays for SD
+      firmware: xilinx: Add SDIO Tap Delay nodes
+      dt-bindings: mmc: arasan: Document 'xlnx,zynqmp-8.9a' controller
+      mmc: sdhci-of-arasan: Add support for ZynqMP Platform Tap Delays Setup
+      dt-bindings: mmc: Correct the type of the clk phase properties
+
+Manivannan Sadhasivam (3):
+      dt-bindings: mmc: Add Actions Semi SD/MMC/SDIO controller binding
+      mmc: Add Actions Semi Owl SoCs SD/MMC driver
+      MAINTAINERS: Add entry for Actions Semi SD/MMC driver and binding
+
+Markus Elfring (1):
+      mmc: cavium-octeon: Use devm_platform_ioremap_resource()
+
+Nicolas Ferre (2):
+      dt-bindings: sdhci-of-at91: add the microchip,sdcal-inverted property
+      mmc: sdhci-of-at91: add DT property to enable calibration on full reset
+
+Peng Fan (1):
+      dt-bindings: mmc: fsl-imx-esdhc: add imx8m compatible string
+
+Peter Ujfalusi (2):
+      mmc: atmel-mci: Use dma_request_chan() directly for channel request
+      mmc: moxart: Use dma_request_chan() directly for channel request
+
+Ramuthevar Vadivel Murugan (2):
+      dt-bindings: mmc: sdhci-of-arasan: Add new compatible for Intel LGM SDXC
+      mmc: sdhci-of-arasan: Add Support for Intel LGM SDXC
+
+Raul E Rangel (2):
+      mmc: sdhci: Check card status after reset
+      mmc: sdhci-pci: Quirk for AMD SDHC Device 0x7906
+
+Saiyam Doshi (1):
+      mmc: bcm2835: Use devm_platform_ioremap_resource wrapper
+
+Takao Orito (2):
+      dt-bindings: mmc: add DT bindings for Milbeaut SD controller
+      mmc: sdhci-milbeaut: add Milbeaut SD controller driver
+
+Thierry Reding (1):
+      mmc: mmc_spi: Use proper debounce time for CD GPIO
+
+Ulf Hansson (6):
+      mmc: vub300: Drop redundant host ops ->init_card()
+      MAINTAINERS: Mark vub300 mmc driver as orphan
+      mwifiex: Re-work support for SDIO HW reset
+      mmc: core: Drop check for mmc_card_is_removable() in mmc_rescan()
+      mmc: core: Re-work HW reset for SDIO cards
+      Merge branch 'fixes' into next
+
+Wolfram Sang (2):
+      mmc: tmio: remove workaround for NON_REMOVABLE
+      Revert "mmc: tmio: remove workaround for NON_REMOVABLE"
+
+Yangbo Lu (2):
+      mmc: sdhci-of-esdhc: poll ESDHC_FLUSH_ASYNC_FIFO bit until completion
+      mmc: sdhci-of-esdhc: fix up erratum A-008171 workaround
+
+Zhou Yanjie (6):
+      mmc: jz4740: Add 8bit mode support
+      dt-bindings: mmc: jz4740: Add bindings for JZ4760
+      mmc: jz4740: Add support for JZ4760
+      dt-bindings: mmc: jz4740: Add bindings for X1000
+      mmc: jz4740: Add support for X1000
+      mmc: jz4740: Add support for Low Power Mode (LPM)
+
+zhengbin (1):
+      mmc: sdhci-pci: Make function amd_sdhci_reset static
+
+ .../devicetree/bindings/mmc/arasan,sdhci.txt       |  42 +-
+ .../devicetree/bindings/mmc/fsl-imx-esdhc.txt      |   3 +
+ Documentation/devicetree/bindings/mmc/jz4740.txt   |   8 +-
+ .../devicetree/bindings/mmc/mmc-controller.yaml    |  14 +
+ Documentation/devicetree/bindings/mmc/owl-mmc.yaml |  59 ++
+ .../devicetree/bindings/mmc/renesas,sdhi.txt       |   1 +
+ .../devicetree/bindings/mmc/sdhci-atmel.txt        |   5 +
+ .../devicetree/bindings/mmc/sdhci-milbeaut.txt     |  30 +
+ .../devicetree/bindings/net/wireless/ti,wl1251.txt |  26 +
+ MAINTAINERS                                        |   6 +-
+ arch/arm/boot/dts/omap3-pandora-common.dtsi        |  36 +-
+ arch/arm/mach-omap2/Makefile                       |   3 -
+ arch/arm/mach-omap2/common.h                       |   1 -
+ arch/arm/mach-omap2/hsmmc.c                        | 171 -----
+ arch/arm/mach-omap2/hsmmc.h                        |  32 -
+ arch/arm/mach-omap2/pdata-quirks.c                 | 105 ----
+ drivers/memstick/core/Kconfig                      |  18 +-
+ drivers/memstick/host/Kconfig                      |   4 +-
+ drivers/memstick/host/jmb38x_ms.c                  |  12 +-
+ drivers/mmc/core/block.c                           | 151 ++---
+ drivers/mmc/core/core.c                            |  12 +-
+ drivers/mmc/core/core.h                            |   2 +
+ drivers/mmc/core/mmc.c                             |   9 +-
+ drivers/mmc/core/quirks.h                          |   7 +
+ drivers/mmc/core/sdio.c                            |  28 +-
+ drivers/mmc/core/sdio_bus.c                        |   9 +-
+ drivers/mmc/host/Kconfig                           |  21 +
+ drivers/mmc/host/Makefile                          |   2 +
+ drivers/mmc/host/atmel-mci.c                       |   3 +-
+ drivers/mmc/host/bcm2835.c                         |   4 +-
+ drivers/mmc/host/cavium-octeon.c                   |  15 +-
+ drivers/mmc/host/dw_mmc.c                          |   4 +-
+ drivers/mmc/host/jz4740_mmc.c                      |  41 +-
+ drivers/mmc/host/mmc_spi.c                         |   2 +-
+ drivers/mmc/host/mmci.c                            | 198 +++---
+ drivers/mmc/host/mmci.h                            |   5 +
+ drivers/mmc/host/mmci_stm32_sdmmc.c                |  46 +-
+ drivers/mmc/host/moxart-mmc.c                      |   4 +-
+ drivers/mmc/host/omap_hsmmc.c                      |  31 +-
+ drivers/mmc/host/owl-mmc.c                         | 696 +++++++++++++++++++++
+ drivers/mmc/host/renesas_sdhi_internal_dmac.c      |   1 +
+ drivers/mmc/host/sdhci-esdhc.h                     |  14 +
+ drivers/mmc/host/sdhci-milbeaut.c                  | 362 +++++++++++
+ drivers/mmc/host/sdhci-of-arasan.c                 | 493 ++++++++++++++-
+ drivers/mmc/host/sdhci-of-aspeed.c                 |  12 +
+ drivers/mmc/host/sdhci-of-at91.c                   |  19 +
+ drivers/mmc/host/sdhci-of-esdhc.c                  | 257 ++++++--
+ drivers/mmc/host/sdhci-pci-core.c                  |  53 +-
+ drivers/mmc/host/sdhci-pci.h                       |   2 +
+ drivers/mmc/host/sdhci.c                           |  15 +-
+ drivers/mmc/host/sdhci_am654.c                     |  71 ++-
+ drivers/mmc/host/sdhci_f_sdh30.c                   |  26 +-
+ drivers/mmc/host/sdhci_f_sdh30.h                   |  32 +
+ drivers/mmc/host/tmio_mmc_core.c                   |   2 +-
+ drivers/mmc/host/vub300.c                          |   7 -
+ drivers/net/wireless/marvell/mwifiex/main.c        |   5 +-
+ drivers/net/wireless/marvell/mwifiex/main.h        |   1 +
+ drivers/net/wireless/marvell/mwifiex/sdio.c        |  33 +-
+ drivers/net/wireless/ti/wl1251/sdio.c              |  25 +-
+ drivers/net/wireless/ti/wlcore/sdio.c              |   8 -
+ include/linux/firmware/xlnx-zynqmp.h               |  13 +-
+ include/linux/mmc/card.h                           |   3 +-
+ include/linux/mmc/sdio_ids.h                       |   2 +
+ include/linux/platform_data/hsmmc-omap.h           |   3 -
+ 64 files changed, 2631 insertions(+), 694 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/mmc/owl-mmc.yaml
+ create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-milbeaut.txt
+ delete mode 100644 arch/arm/mach-omap2/hsmmc.c
+ delete mode 100644 arch/arm/mach-omap2/hsmmc.h
+ create mode 100644 drivers/mmc/host/owl-mmc.c
+ create mode 100644 drivers/mmc/host/sdhci-milbeaut.c
+ create mode 100644 drivers/mmc/host/sdhci_f_sdh30.h
