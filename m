@@ -1,72 +1,115 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH v6 0/4] Add MMC software queue support
-Date: Tue, 26 Nov 2019 10:54:01 +0100
-Message-ID: <CAK8P3a27PLB_rXkxuyOuK_eKvSSi29fekebcwsoTRLSAOmRX+w@mail.gmail.com>
-References: <cover.1573456283.git.baolin.wang@linaro.org> <CAK8P3a1we9D5C2NOBww=cW-4L1PT3t0NnDRmknLwiLm652TmKg@mail.gmail.com>
- <CAMz4kuK9HEuGdhNqHO_qoy9jD=ccsPPhD_dKYwNRgQyWyYwqRA@mail.gmail.com>
- <CAK8P3a0rNhyxmUWLUV1js3FsuAESDOPX3E4b8ActtL4GRT4uTA@mail.gmail.com>
- <CADBw62pzV+5ZXBEbFvTQJ9essAd4cd7Xkz5j9AXB5rAQy0wLqA@mail.gmail.com>
- <CAMz4kuK_3q4JY1vNXe6zGHDNF8Ep-SkcUq6Z25r790VSz4+Bjw@mail.gmail.com>
- <CAK8P3a11vJb1riYseqPnF_5SuJA+YnYuGwC0XWx6_rk+eQ0Bmw@mail.gmail.com> <1C0831B6-CA26-4794-9686-E7384713C756@linaro.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+From: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+Subject: [PATCH] mmc: sdhci-msm: Correct the offset and value for DDR_CONFIG register
+Date: Tue, 26 Nov 2019 10:19:16 +0000
+Message-ID: <0101016ea738ec72-fa0f852d-20f8-474a-80b2-4b0ef63b132c-000000@us-west-2.amazonses.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1C0831B6-CA26-4794-9686-E7384713C756@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Paolo Valente <paolo.valente@linaro.org>
-Cc: "(Exiting) Baolin Wang" <baolin.wang@linaro.org>, Baolin Wang <baolin.wang7@gmail.com>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Asutosh Das <asutoshd@codeaurora.org>, Orson Zhai <orsonzhai@gmail.com>, Lyra Zhang <zhang.lyra@gmail.com>, Linus Walleij <linus.walleij@linaro.org>, Vincent Guittot <vincent.guittot@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Hannes Reinecke <hare@suse.com>, linux-block <linux-block@vger.kernel.org>
+To: ulf.hansson@linaro.org, adrian.hunter@intel.com
+Cc: asutoshd@codeaurora.org, stummala@codeaurora.org, sayalil@codeaurora.org, cang@codeaurora.org, rampraka@codeaurora.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Nov 26, 2019 at 8:41 AM Paolo Valente <paolo.valente@linaro.org> wrote:
-> > Il giorno 22 nov 2019, alle ore 10:50, Arnd Bergmann <arnd@arndb.de> ha scritto:
-> > On Mon, Nov 18, 2019 at 11:04 AM (Exiting) Baolin Wang <baolin.wang@linaro.org> wrote:
-> > Paolo, can you comment on why this is currently done, or if it can
-> > be changed? It seems to me that sending multiple requests at
-> > once would also have a significant benefit on the per-request overhead
-> > on NVMe devices with with bfq.
-> >
->
-> Hi,
-> actually, "one request dispatched at a time" is not a peculiarity of
-> bfq.  Any scheduler can provide only one request at a time, with the
-> current blk-mq API for I/O schedulers.
->
-> Yet, when it is time to refill an hardware queue, blk-mq pulls as many
-> requests as it deems appropriate from the scheduler, by invoking the
-> latter multiple times.  See blk_mq_do_dispatch_sched() in
-> block/blk-mq-sched.c.
->
-> I don't know where the glitch for MMC is with respect to this scheme.
+The DDR_CONFIG register offset got updated after a specific
+minor version of sdcc V4. This offset change has not been properly
+taken care of while updating register changes for sdcc V5.
 
-Right, this is what is puzzling me as well: in both blk_mq_do_dispatch_sched()
-and blk_mq_do_dispatch_ctx(), we seem to always take one request from
-the scheduler and dispatch it to the device, regardless of the driver or
-the scheduler, so there should only ever be one request in the local list.
+Correcting proper offset for this register.
+Also updating this register value to reflect the recommended RCLK
+delay.
 
-Yet, both the blk_mq_dispatch_rq_list() function and the NVMe driver
-appear to be written based on the idea that there are multiple entries
-in this list. The one place that I see putting multiple requests on the
-local list before dispatching them is the end of
-blk_mq_sched_dispatch_requests():
+Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+---
+ drivers/mmc/host/sdhci-msm.c | 28 +++++++++++++++++++---------
+ 1 file changed, 19 insertions(+), 9 deletions(-)
 
-        if (!list_empty(&rq_list)) {
-              ...
-                }
-        } else if (has_sched_dispatch) {
-                blk_mq_do_dispatch_sched(hctx);
-        } else if (hctx->dispatch_busy) {
-                /* dequeue request one by one from sw queue if queue is busy */
-                blk_mq_do_dispatch_ctx(hctx);
-        } else {
-->             blk_mq_flush_busy_ctxs(hctx, &rq_list);        <----
-                blk_mq_dispatch_rq_list(q, &rq_list, false);
-        }
-
-So as you said, if we use an elevator (has_sched_dispatch == true),
-we only get one request, but without an elevator, we get into this
-optimized path.
-
-Could we perhaps change the ops.dispatch_request() function to pass
-down the list as in https://paste.ubuntu.com/p/MfSRwKqFCs/ ?
-
-      Arnd
+diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+index b75c82d..3d0bb5e 100644
+--- a/drivers/mmc/host/sdhci-msm.c
++++ b/drivers/mmc/host/sdhci-msm.c
+@@ -99,7 +99,7 @@
+ 
+ #define CORE_PWRSAVE_DLL	BIT(3)
+ 
+-#define DDR_CONFIG_POR_VAL	0x80040853
++#define DDR_CONFIG_POR_VAL	0x80040873
+ 
+ 
+ #define INVALID_TUNING_PHASE	-1
+@@ -148,8 +148,9 @@ struct sdhci_msm_offset {
+ 	u32 core_ddr_200_cfg;
+ 	u32 core_vendor_spec3;
+ 	u32 core_dll_config_2;
++	u32 core_dll_config_3;
++	u32 core_ddr_config_old; /* Applicable to sdcc minor ver < 0x49 */
+ 	u32 core_ddr_config;
+-	u32 core_ddr_config_2;
+ };
+ 
+ static const struct sdhci_msm_offset sdhci_msm_v5_offset = {
+@@ -177,8 +178,8 @@ struct sdhci_msm_offset {
+ 	.core_ddr_200_cfg = 0x224,
+ 	.core_vendor_spec3 = 0x250,
+ 	.core_dll_config_2 = 0x254,
+-	.core_ddr_config = 0x258,
+-	.core_ddr_config_2 = 0x25c,
++	.core_dll_config_3 = 0x258,
++	.core_ddr_config = 0x25c,
+ };
+ 
+ static const struct sdhci_msm_offset sdhci_msm_mci_offset = {
+@@ -207,8 +208,8 @@ struct sdhci_msm_offset {
+ 	.core_ddr_200_cfg = 0x184,
+ 	.core_vendor_spec3 = 0x1b0,
+ 	.core_dll_config_2 = 0x1b4,
+-	.core_ddr_config = 0x1b8,
+-	.core_ddr_config_2 = 0x1bc,
++	.core_ddr_config_old = 0x1b8,
++	.core_ddr_config = 0x1bc,
+ };
+ 
+ struct sdhci_msm_variant_ops {
+@@ -253,6 +254,7 @@ struct sdhci_msm_host {
+ 	const struct sdhci_msm_offset *offset;
+ 	bool use_cdr;
+ 	u32 transfer_mode;
++	bool updated_ddr_cfg;
+ };
+ 
+ static const struct sdhci_msm_offset *sdhci_priv_msm_offset(struct sdhci_host *host)
+@@ -924,8 +926,10 @@ static int sdhci_msm_cdclp533_calibration(struct sdhci_host *host)
+ static int sdhci_msm_cm_dll_sdc4_calibration(struct sdhci_host *host)
+ {
+ 	struct mmc_host *mmc = host->mmc;
+-	u32 dll_status, config;
++	u32 dll_status, config, ddr_cfg_offset;
+ 	int ret;
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+ 	const struct sdhci_msm_offset *msm_offset =
+ 					sdhci_priv_msm_offset(host);
+ 
+@@ -938,8 +942,11 @@ static int sdhci_msm_cm_dll_sdc4_calibration(struct sdhci_host *host)
+ 	 * bootloaders. In the future, if this changes, then the desired
+ 	 * values will need to be programmed appropriately.
+ 	 */
+-	writel_relaxed(DDR_CONFIG_POR_VAL, host->ioaddr +
+-			msm_offset->core_ddr_config);
++	if (msm_host->updated_ddr_cfg)
++		ddr_cfg_offset = msm_offset->core_ddr_config;
++	else
++		ddr_cfg_offset = msm_offset->core_ddr_config_old;
++	writel_relaxed(DDR_CONFIG_POR_VAL, host->ioaddr + ddr_cfg_offset);
+ 
+ 	if (mmc->ios.enhanced_strobe) {
+ 		config = readl_relaxed(host->ioaddr +
+@@ -1899,6 +1906,9 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+ 				msm_offset->core_vendor_spec_capabilities0);
+ 	}
+ 
++	if (core_major == 1 && core_minor >= 0x49)
++		msm_host->updated_ddr_cfg = true;
++
+ 	/*
+ 	 * Power on reset state may trigger power irq if previous status of
+ 	 * PWRCTL was either BUS_ON or IO_HIGH_V. So before enabling pwr irq
+-- 
+Qualcomm India Private Limited, on behalf of Qualcomm Innovation Center, Inc., is a member of Code Aurora Forum, a Linux Foundation Collaborative Project
