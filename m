@@ -1,257 +1,42 @@
-From: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
-Subject: [PATCH V1 2/2] arm64: dts: qcom: sc7180: Add nodes for eMMC and SD card
-Date: Wed, 27 Nov 2019 11:50:06 +0000
-Message-ID: <0101016eacb27366-31803877-9137-4c0e-922b-6a71a0e63ab3-000000@us-west-2.amazonses.com>
-References: <1574855381-15193-1-git-send-email-vbadigan@codeaurora.org>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH v6 0/4] Add MMC software queue support
+Date: Wed, 27 Nov 2019 13:01:06 +0100
+Message-ID: <CAK8P3a0gUWf_+ZmscuFanvPG=wN09ELL-JpByjJJM4Lo1FYmrQ@mail.gmail.com>
+References: <cover.1573456283.git.baolin.wang@linaro.org> <CAK8P3a1we9D5C2NOBww=cW-4L1PT3t0NnDRmknLwiLm652TmKg@mail.gmail.com>
+ <CAMz4kuK9HEuGdhNqHO_qoy9jD=ccsPPhD_dKYwNRgQyWyYwqRA@mail.gmail.com>
+ <CAK8P3a0rNhyxmUWLUV1js3FsuAESDOPX3E4b8ActtL4GRT4uTA@mail.gmail.com>
+ <CADBw62pzV+5ZXBEbFvTQJ9essAd4cd7Xkz5j9AXB5rAQy0wLqA@mail.gmail.com>
+ <CAMz4kuK_3q4JY1vNXe6zGHDNF8Ep-SkcUq6Z25r790VSz4+Bjw@mail.gmail.com>
+ <CAK8P3a11vJb1riYseqPnF_5SuJA+YnYuGwC0XWx6_rk+eQ0Bmw@mail.gmail.com>
+ <f88856aa-9175-2a93-3747-c98215cb79c3@suse.de> <20191127090023.GA23040@infradead.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1574855381-15193-1-git-send-email-vbadigan@codeaurora.org>
+In-Reply-To: <20191127090023.GA23040@infradead.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: adrian.hunter@intel.com, ulf.hansson@linaro.org, robh+dt@kernel.org
-Cc: asutoshd@codeaurora.org, stummala@codeaurora.org, sayalil@codeaurora.org, cang@codeaurora.org, rampraka@codeaurora.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org, Veerabhadrarao Badiganti <vbadigan@codeaurora.org>, Andy Gross <agross@kernel.org>, Mark Rutland <mark.rutland@arm.com>
+To: Christoph Hellwig <hch@infradead.org>
+Cc: Hannes Reinecke <hare@suse.de>, "(Exiting) Baolin Wang" <baolin.wang@linaro.org>, Baolin Wang <baolin.wang7@gmail.com>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Asutosh Das <asutoshd@codeaurora.org>, Orson Zhai <orsonzhai@gmail.com>, Lyra Zhang <zhang.lyra@gmail.com>, Linus Walleij <linus.walleij@linaro.org>, Vincent Guittot <vincent.guittot@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Hannes Reinecke <hare@suse.com>, linux-block <linux-block@vger.kernel.org>, Paolo Valente <paolo.valente@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Add sdhc instances for supporting eMMC and SD-card on sc7180.
-The regulators should be in HPM state for proper functionality of
-eMMC and SD-card. Updating corresponding regulators accordingly.
+On Wed, Nov 27, 2019 at 10:00 AM Christoph Hellwig <hch@infradead.org> wrote:
+>
+> On Tue, Nov 26, 2019 at 12:17:15PM +0100, Hannes Reinecke wrote:
+>  If requests are batched enough we could just drain
+> and switch every time an other partition access comes in.  Especially
+> so if people only use partitions for boot partitions and other rarely
+> used areas.
 
-Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
----
+We only support a single user partition plus up to two boot partitions that
+are accessed rarely, I don't think there is any reason to optimize switching
+between them.
 
-This depends on the patch series (dt support for sc7180):
-https://lkml.org/lkml/2019/11/8/149
----
- arch/arm64/boot/dts/qcom/sc7180-idp.dts |  32 +++++++-
- arch/arm64/boot/dts/qcom/sc7180.dtsi    | 136 ++++++++++++++++++++++++++++++++
- 2 files changed, 164 insertions(+), 4 deletions(-)
+The only change that I think we need here is to change the partition switch
+from something that is done synchronously during ->queue_rq() to
+something that fits better into normal scheme of sending a cmd to
+the device, returning BLK_STS_RESOURCE from ->queue_rq.
+Possibly this could even be turned into a standard struct request that is
+added between two normal requests for different partitions at some
+point, if this simplifies the logic (I suspect it won't, but it may be worth
+a try).
 
-diff --git a/arch/arm64/boot/dts/qcom/sc7180-idp.dts b/arch/arm64/boot/dts/qcom/sc7180-idp.dts
-index 189254f..583c42c 100644
---- a/arch/arm64/boot/dts/qcom/sc7180-idp.dts
-+++ b/arch/arm64/boot/dts/qcom/sc7180-idp.dts
-@@ -11,6 +11,7 @@
- #include "sc7180.dtsi"
- #include "pm6150.dtsi"
- #include "pm6150l.dtsi"
-+#include <dt-bindings/gpio/gpio.h>
- 
- / {
- 	model = "Qualcomm Technologies, Inc. SC7180 IDP";
-@@ -103,7 +104,7 @@
- 		vreg_l12a_1p8: ldo12 {
- 			regulator-min-microvolt = <1696000>;
- 			regulator-max-microvolt = <1952000>;
--			regulator-initial-mode = <RPMH_REGULATOR_MODE_LPM>;
-+			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
- 		};
- 
- 		vreg_l13a_1p8: ldo13 {
-@@ -145,7 +146,7 @@
- 		vreg_l19a_2p9: ldo19 {
- 			regulator-min-microvolt = <2696000>;
- 			regulator-max-microvolt = <3304000>;
--			regulator-initial-mode = <RPMH_REGULATOR_MODE_LPM>;
-+			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
- 		};
- 	};
- 
-@@ -191,7 +192,7 @@
- 		vreg_l6c_2p9: ldo6 {
- 			regulator-min-microvolt = <2696000>;
- 			regulator-max-microvolt = <3304000>;
--			regulator-initial-mode = <RPMH_REGULATOR_MODE_LPM>;
-+			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
- 		};
- 
- 		vreg_l7c_3p0: ldo7 {
-@@ -209,7 +210,7 @@
- 		vreg_l9c_2p9: ldo9 {
- 			regulator-min-microvolt = <2952000>;
- 			regulator-max-microvolt = <3304000>;
--			regulator-initial-mode = <RPMH_REGULATOR_MODE_LPM>;
-+			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
- 		};
- 
- 		vreg_l10c_3p3: ldo10 {
-@@ -400,3 +401,26 @@
- 			bias-pull-up;
- 		};
- };
-+
-+&sdhc_1 {
-+	status = "ok";
-+
-+	pinctrl-names = "default", "sleep";
-+	pinctrl-0 = <&sdc1_on>;
-+	pinctrl-1 = <&sdc1_off>;
-+	vmmc-supply = <&vreg_l19a_2p9>;
-+	vqmmc-supply = <&vreg_l12a_1p8>;
-+
-+};
-+
-+&sdhc_2 {
-+	status = "ok";
-+
-+	pinctrl-names = "default","sleep";
-+	pinctrl-0 = <&sdc2_on>;
-+	pinctrl-1 = <&sdc2_off>;
-+	vmmc-supply  = <&vreg_l9c_2p9>;
-+	vqmmc-supply = <&vreg_l6c_2p9>;
-+
-+	cd-gpios = <&tlmm 69 GPIO_ACTIVE_LOW>;
-+};
-diff --git a/arch/arm64/boot/dts/qcom/sc7180.dtsi b/arch/arm64/boot/dts/qcom/sc7180.dtsi
-index 666e9b9..207d44f 100644
---- a/arch/arm64/boot/dts/qcom/sc7180.dtsi
-+++ b/arch/arm64/boot/dts/qcom/sc7180.dtsi
-@@ -897,6 +897,100 @@
- 					function = "qup15";
- 				};
- 			};
-+
-+			sdc1_on: sdc1-on {
-+				clk {
-+					pins = "sdc1_clk";
-+					bias-disable;
-+					drive-strength = <16>;
-+				};
-+
-+				cmd {
-+					pins = "sdc1_cmd";
-+					bias-pull-up;
-+					drive-strength = <10>;
-+				};
-+
-+				data {
-+					pins = "sdc1_data";
-+					bias-pull-up;
-+					drive-strength = <10>;
-+				};
-+
-+				rclk {
-+					pins = "sdc1_rclk";
-+					bias-pull-down;
-+				};
-+			};
-+
-+			sdc1_off: sdc1-off {
-+				clk {
-+					pins = "sdc1_clk";
-+					bias-disable;
-+					drive-strength = <2>;
-+				};
-+
-+				cmd {
-+					pins = "sdc1_cmd";
-+					bias-pull-up;
-+					drive-strength = <2>;
-+				};
-+
-+				data {
-+					pins = "sdc1_data";
-+					bias-pull-up;
-+					drive-strength = <2>;
-+				};
-+
-+				rclk {
-+					pins = "sdc1_rclk";
-+					bias-pull-down;
-+				};
-+			};
-+
-+			sdc2_on: sdc2_on {
-+				clk {
-+					pins = "sdc2_clk";
-+					bias-disable;
-+					drive-strength = <16>;
-+				};
-+				cmd {
-+					pins = "sdc2_cmd";
-+					bias-pull-up;
-+					drive-strength = <10>;
-+				};
-+				data {
-+					pins = "sdc2_data";
-+					bias-pull-up;
-+					drive-strength = <10>;
-+				};
-+				sd-cd {
-+					pins = "gpio69";
-+					bias-pull-down;
-+				};
-+			};
-+
-+			sdc2_off: sdc2_off {
-+				clk {
-+					pins = "sdc2_clk";
-+					bias-disable;
-+					drive-strength = <2>;
-+				};
-+				cmd {
-+					pins = "sdc2_cmd";
-+					bias-pull-up;
-+					drive-strength = <2>;
-+				};
-+				data {
-+					pins = "sdc2_data";
-+					bias-pull-up;
-+					drive-strength = <2>;
-+				};
-+				sd-cd {
-+					pins = "gpio69";
-+					bias-pull-down;
-+				};
-+			};
- 		};
- 
- 		qspi: spi@88dc000 {
-@@ -911,6 +1005,48 @@
- 			status = "disabled";
- 		};
- 
-+		sdhc_1: sdhci@7c4000 {
-+			compatible = "qcom,sc7180-sdhci", "qcom,sdhci-msm-v5";
-+			reg = <0 0x7c4000 0 0x1000>;
-+			reg-names = "hc_mem";
-+
-+			interrupts = <GIC_SPI 641 IRQ_TYPE_LEVEL_HIGH>,
-+					<GIC_SPI 644 IRQ_TYPE_LEVEL_HIGH>;
-+			interrupt-names = "hc_irq", "pwr_irq";
-+
-+			clocks = <&gcc GCC_SDCC1_APPS_CLK>,
-+					<&gcc GCC_SDCC1_AHB_CLK>;
-+			clock-names = "core", "iface";
-+
-+			bus-width = <8>;
-+			non-removable;
-+
-+			mmc-ddr-1_8v;
-+			mmc-hs200-1_8v;
-+			mmc-hs400-1_8v;
-+			mmc-hs400-enhanced-strobe;
-+
-+			status = "disabled";
-+		};
-+
-+		sdhc_2: sdhci@8804000 {
-+			compatible = "qcom,sc7180-sdhci", "qcom,sdhci-msm-v5";
-+			reg = <0 0x08804000 0 0x1000>;
-+			reg-names = "hc_mem";
-+
-+			interrupts = <GIC_SPI 204 IRQ_TYPE_LEVEL_HIGH>,
-+					<GIC_SPI 222 IRQ_TYPE_LEVEL_HIGH>;
-+			interrupt-names = "hc_irq", "pwr_irq";
-+
-+			clocks = <&gcc GCC_SDCC2_APPS_CLK>,
-+					<&gcc GCC_SDCC2_AHB_CLK>;
-+			clock-names = "core","iface";
-+
-+			bus-width = <4>;
-+
-+			status = "disabled";
-+		};
-+
- 		spmi_bus: spmi@c440000 {
- 			compatible = "qcom,spmi-pmic-arb";
- 			reg = <0 0x0c440000 0 0x1100>,
--- 
-Qualcomm India Private Limited, on behalf of Qualcomm Innovation Center, Inc., is a member of Code Aurora Forum, a Linux Foundation Collaborative Project
+      Arnd
