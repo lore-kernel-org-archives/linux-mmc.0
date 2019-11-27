@@ -1,284 +1,286 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [GIT PULL] MMC and MEMSTICK updates for v5.5
-Date: Tue, 26 Nov 2019 16:48:51 +0100
-Message-ID: <20191126154851.14737-1-ulf.hansson@linaro.org>
+From: Baolin Wang <baolin.wang7@gmail.com>
+Subject: Re: [PATCH v6 0/4] Add MMC software queue support
+Date: Wed, 27 Nov 2019 15:49:20 +0800
+Message-ID: <CADBw62o83ePHoveo1uKEbakQ+_i3-LLyJ22H0XEU11OqW88dOQ@mail.gmail.com>
+References: <cover.1573456283.git.baolin.wang@linaro.org> <CAK8P3a1we9D5C2NOBww=cW-4L1PT3t0NnDRmknLwiLm652TmKg@mail.gmail.com>
+ <CAMz4kuK9HEuGdhNqHO_qoy9jD=ccsPPhD_dKYwNRgQyWyYwqRA@mail.gmail.com>
+ <CAK8P3a0rNhyxmUWLUV1js3FsuAESDOPX3E4b8ActtL4GRT4uTA@mail.gmail.com>
+ <CADBw62pzV+5ZXBEbFvTQJ9essAd4cd7Xkz5j9AXB5rAQy0wLqA@mail.gmail.com>
+ <CAMz4kuK_3q4JY1vNXe6zGHDNF8Ep-SkcUq6Z25r790VSz4+Bjw@mail.gmail.com>
+ <CAK8P3a11vJb1riYseqPnF_5SuJA+YnYuGwC0XWx6_rk+eQ0Bmw@mail.gmail.com> <f88856aa-9175-2a93-3747-c98215cb79c3@suse.de>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <f88856aa-9175-2a93-3747-c98215cb79c3@suse.de>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
+To: Hannes Reinecke <hare@suse.de>
+Cc: Arnd Bergmann <arnd@arndb.de>, "(Exiting) Baolin Wang" <baolin.wang@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, asutoshd@codeaurora.org, Orson Zhai <orsonzhai@gmail.com>, Lyra Zhang <zhang.lyra@gmail.com>, Linus Walleij <linus.walleij@linaro.org>, Vincent Guittot <vincent.guittot@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Hannes Reinecke <hare@suse.com>, linux-block <linux-block@vger.kernel.org>, Paolo Valente <paolo.valente@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Linus,
+On Tue, Nov 26, 2019 at 7:17 PM Hannes Reinecke <hare@suse.de> wrote:
+>
+> On 11/22/19 10:50 AM, Arnd Bergmann wrote:
+> > (adding Paolo as well, maybe he has some more insights)
+> >
+> > On Mon, Nov 18, 2019 at 11:04 AM (Exiting) Baolin Wang
+> > <baolin.wang@linaro.org> wrote:
+> >> On Tue, 12 Nov 2019 at 16:48, Baolin Wang <baolin.wang7@gmail.com> wrote:
+> >>> On Tue, Nov 12, 2019 at 12:59 AM Arnd Bergmann <arnd@arndb.de> wrote:
+> >>>> On Mon, Nov 11, 2019 at 1:58 PM Baolin Wang <baolin.wang@linaro.org> wrote:
+> >>>>>> - With that change in place calling a blocking __mmc_claim_host() is
+> >>>>>>   still a problem, so there should still be a nonblocking mmc_try_claim_host()
+> >>>>>>   for the submission path, leading to a BLK_STS_DEV_RESOURCE (?)
+> >>>>>>   return code from mmc_mq_queue_rq(). Basically mmc_mq_queue_rq()
+> >>>>>>   should always return right away, either after having queued the next I/O
+> >>>>>>   or with an error, but not waiting for the device in any way.
+> >>>>>
+> >>>>> Actually not only the mmc_claim_host() will block the MMC request
+> >>>>> processing, in this routine, the mmc_blk_part_switch() and
+> >>>>> mmc_retune() can also block the request processing. Moreover the part
+> >>>>> switching and tuning should be sync operations, and we can not move
+> >>>>> them to a work or a thread.
+> >>>>
+> >>>> Ok, I see.
+> >>>>
+> >>>> Those would also cause requests to be sent to the device or the host
+> >>>> controller, right? Maybe we can treat them as "a non-IO request
+> >>>
+> >>> Right.
+> >>>
+> >>>> has successfully been queued to the device" events, returning
+> >>>> busy from the mmc_mq_queue_rq() function and then running
+> >>>> the queue again when they complete?
+> >>>
+> >>> Yes, seems reasonable to me.
+> >>>
+> >>>>
+> >>>>>> - For the packed requests, there is apparently a very simple way to implement
+> >>>>>>   that without a software queue: mmc_mq_queue_rq() is allowed to look at
+> >>>>>>   and dequeue all requests that are currently part of the request_queue,
+> >>>>>>   so it should take out as many as it wants to submit at once and send
+> >>>>>>   them all down to the driver together, avoiding the need for any further
+> >>>>>>   round-trips to blk_mq or maintaining a queue in mmc.
+> >>>>>
+> >>>>> You mean we can dispatch a request directly from
+> >>>>> elevator->type->ops.dispatch_request()?  but we still need some helper
+> >>>>> functions to check if these requests can be packed (the package
+> >>>>> condition), and need to invent new APIs to start a packed request (or
+> >>>>> using cqe interfaces, which means we still need to implement some cqe
+> >>>>> callbacks).
+> >>>>
+> >>>> I don't know how the dispatch_request() function fits in there,
+> >>>> what Hannes told me is that in ->queue_rq() you can always
+> >>>> look at the following requests that are already queued up
+> >>>> and take the next ones off the list. Looking at bd->last
+> >>>> tells you if there are additional requests. If there are, you can
+> >>>> look at the next one from blk_mq_hw_ctx (not sure how, but
+> >>>> should not be hard to find)
+> >>>>
+> >>>> I also see that there is a commit_rqs() callback that may
+> >>>> go along with queue_rq(), implementing that one could make
+> >>>> this easier as well.
+> >>>
+> >>> Yes, we can use queue_rq()/commit_rqs() and bd->last (now bd->last may
+> >>> can not work well, see [1]), but like we talked before, for packed
+> >>> request, we still need some new interfaces (for example, a interface
+> >>> used to start a packed request, and a interface used to complete a
+> >>> packed request), but at last we got a consensus that we should re-use
+> >>> the CQE interfaces instead of new invention.
+> >>>
+> >>> [1] https://lore.kernel.org/patchwork/patch/1102897/
+> >>>
+> >>>>
+> >>>>>> - The DMA management (bounce buffer, map, unmap) that is currently
+> >>>>>>   done in mmc_blk_mq_issue_rq() should ideally be done in the
+> >>>>>>   init_request()/exit_request()  (?) callbacks from mmc_mq_ops so this
+> >>>>>>   can be done asynchronously, out of the critical timing path for the
+> >>>>>>   submission. With this, there won't be any need for a software queue.
+> >>>>>
+> >>>>> This is not true, now the blk-mq will allocate some static request
+> >>>>> objects (usually the static requests number should be the same with
+> >>>>> the hardware queue depth) saved in struct blk_mq_tags. So the
+> >>>>> init_request() is used to initialize the static requests when
+> >>>>> allocating them, and call exit_request to free the static requests
+> >>>>> when freeing the 'struct blk_mq_tags', such as the queue is dead. So
+> >>>>> we can not move the DMA management into the init_request/exit_request.
+> >>>>
+> >>>> Ok, I must have misremembered which callback that is then, but I guess
+> >>>> there is some other place to do it.
+> >>>
+> >>> I checked the 'struct blk_mq_ops', and I did not find a ops can be
+> >>> used to do DMA management. And I also checked UFS driver, it also did
+> >>> the DMA mapping in the queue_rq() (scsi_queue_rq() --->
+> >>> ufshcd_queuecommand() ---> ufshcd_map_sg()). Maybe I missed something?
+> >>>
+> >>> Moreover like I said above, for the packed request, we still need
+> >>> implement something (like the software queue) based on the CQE
+> >>> interfaces to help to handle packed requests.
+> >>
+> >> After some investigation and offline discussion with you, I still have
+> >> some concerns about your suggestion.
+> >>
+> >> 1) Now blk-mq have not supplied some ops to prepare a request, which is
+> >> used to do some DMA management asynchronously. But yes, we can
+> >> introduce new ops for blk-mq. But there are still some remaining
+> >> preparation in mmc_mq_queue_rq(), like mmc part switch. For software
+> >> queue, we can prepare a request totally after issuing one.
+> >
+> > I suppose to make the submission non-blocking, all operations that
+> > currently block in the submission path may have to be changed first.
+> >
+> > For the case of a partition switch (same for retune), I suppose
+> > something like this can be done:
+> >
+> > - in queue_rq() check whether a partition switch is needed. If not,
+> >   submit the current rq
+> > - if a partition switch is needed, submit the partition switch cmd
+> >   instead, and return busy status
+> > - when the completion arrives for the partition switch, call back into
+> >   blk_mq to have it call queue_rq again.
+> >
+> > Or possibly even (this might not be possible without signifcant
+> > restructuring):
+> >
+> > - when preparing a request that would require a partition switch,
+> >   insert another meta-request to switch the partition ahead of it.
+> >
+> > I do realize that this is a significant departure from how it was done
+> > in the past, but it seems cleaner that way to me.
+> >
+> I would be treating the partition issue separate from the queued/batched
+> submission.
+>
+> Aligning with the 'traditional' linux way for partition handling is
+> definitely the way to go IMO; otherwise you'll end up having to worry
+> about resource allocation between distinct queues (like you have to do
+> now), and will be having a hard time trying to map it properly to the
+> underlying hardware abstraction in blk-mq.
+>
+> For starters I would keep a partition marker in the driver instance, and
+> calculate the parition for each incoming request. If the partition is
+> different you'll have to insert a partition switch request before
+> submitting the actual one.
+>
+> To do this efficiently it would be good to know if:
+> a) How invasive is the partition switch? Would it be feasible to eg add
+> a partition switch for every command? This might sound daft now, but if
+> we get request batching going it might not the _that_ expensive after all...
 
-Here's the PR with updates for MMC and MEMSTICK for v5.5. Details about the
-highlights are as usual found in the signed tag.
+This is expensive I think, now not all SD host controllers or cards
+can handle batching request, only for those which can support ADMA3 or
+packed command.
 
-However, note at this time the PR contains quite some additional changes
-reaching beyond both the MMC and MEMSTICK subsystems. This is primarily because
-of fixing an old regression for a WiFi driver based on the SDIO interface on an
-OMAP openpandora board.
+> b) Can the request switch command batched together with the normal
+> command? IE is is possible to have them both send in one go?
 
-I haven't noticed any reports about merge conflicts in linux-next, but just let
-me know if you encounter any issues.
+I do not think that the switch command can be batched together with
+the normal command. We must wait for the completion of the switch
+command before sending the normal command. It should be the SYNC
+command in MMC stack.
 
-Please pull this in!
+I think the first method suggested by Arnd can work.
 
-Kind regards
-Ulf Hansson
+> If so it would make life _so_ much easier; we could submit both command
+> at the same time, and won't have to worry about handling internal
+> completions ...
+>
+> >> 2) I wonder if it is appropriate that using the irq threaded context
+> >> to dispatch next request, actually we will still introduce a context
+> >> switch here. Now we will complete a request in the hard irq handler
+> >> and kick the softirq to do time-consuming operations, like DMA
+> >> unmapping , and will start next request in the hard irq handler
+> >> without context switch. Moreover if we remove the BLK_MQ_F_BLOCKING in
+> >> future like you suggested, then we can remove all context switch. And
+> >> I think we can dispatch next request in the softirq context (actually
+> >> the CQE already did).
+> >
+> > I hope Hannes (or someone else) can comment here, as I don't
+> > know exactly what his objection to kicking off the next cmd in the
+> > hardirq was.
+> >
+> The point being that you'll have to have a context switch anyway
+> (between hardirq and softirq), and you'll be able to better handle
+> recovery as the hardirq handler is pretty generic and the won't be any
+> chance of that one becoming stuck.
+> And, of course, modern software design :-)
+>
+> > I think generally, deferring all slow operations to an irqthread
+> > rather than a softirq is a good idea, but I share your concern that
+> > this can introduce an unnecessary latency between the the
+> > the IRQ is signaled and the time the following cmd is sent to the
+> > hardware.
+> > > Doing everything in a single (irqthread) context is clearly simpler,
+> > so this would need to be measured carefully to avoid unnecessary
+> > complexity, but I think don't see anything stopping us from having
+> > the fast-path where the low-level driver first checks for any possible
+> > error conditions in hardirq context and the fires off a prepared cmd
+> > right away whenever it can before triggering the irqthread that does
+> > everything else. I think this has to be a per-driver optimization, so
+> > the common case would just have an irqthread.
+> >
+> >> 3) For packed request support, I did not see an example that block
+> >> driver can dispatch a request from the IO scheduler in queue_rq() and
+> >> no APIs supported from blk-mq. And we do not know where can dispatch a
+> >> request in queue_rq(), from IO scheduler? from ctx? or from
+> >> hctx->dispatch list? and if this request can not be passed to host
+> >> now, how to do it? Seems lots of complicated things.
+> >
+> > The only way I can see is the ->last flag, so if blk_mq submits multiple
+> > requests in a row to queue_rq() with this flag cleared and  calls
+> > ->commit_rqs() after the last one. This seems to be what the scsi
+> > disk driver and the nvme driver rely on, and we should be able to use
+> > it the same way for packed cmds, by checking each time in queue_rq()
+> > whether requests can/should be combined and reporting busy otherwise
+> > (after preparing a combined mmc cmd).
+> > blk_mq will then call commit_rqs, which should do the actual submission
+> > to the hardware driver.
+> >
+> The ->last flag really depends on the submission thread, eg if something
+> in the upper layers is using on-stack plugging.
+> In my experience this is done only in some specific use-cases resp.
+> filesystems, so this is not something you can rely on to make any decisions.
 
+The on-stack plugging is enabled in my case, and from the commit
+message of introducing this structure, the ->last flag is used to
+indicate the last request in the chain, but seems work abnormally.
 
-The following changes since commit fed23c5829ecab4ddc712d7b0046e59610ca3ba4:
+"Since we have the notion of a 'last' request in a chain, we can use
+    this to have the hardware optimize the issuing of requests. Add
+    a list_head parameter to queue_rq that the driver can use to
+    temporarily store hw commands for issue when 'last' is true. If we
+    are doing a chain of requests, pass in a NULL list for the first
+    request to force issue of that immediately, then batch the remainder
+    for deferred issue until the last request has been sent."
 
-  mmc: sdhci-of-at91: fix quirk2 overwrite (2019-11-14 14:57:53 +0100)
+>
+> > Now as you point out, the *big* problem with this is that we never
+> > get multiple requests together in practice, i.e. the last flag is almost
+> > always set, and any optimization around it has no effect.
+> >
+> See above. I don't think the using the ->last flag is the way to go here.
+> What you really need to do here is to inject some 'pushback' into the
+> block layer so that is has a _chance_ of assembling more requests.
 
-are available in the Git repository at:
+How about Arnd's suggestion? looks reasonable to me that we can have a
+new API to handle batching request.
+https://paste.ubuntu.com/p/MfSRwKqFCs/
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.5
+>
+> But the actual design really needs to take hardware features into account.
+>
+> As mentioned above, initially I would concentrate on getting the
+> partitioning working with a single request queue; once that is done we
+> can look at request batching proper.
 
-for you to fetch changes up to def7bd940f8cceb41ec3d1383acd8ab937056dcb:
+OK.
 
-  dt-bindings: mmc: Correct the type of the clk phase properties (2019-11-22 08:43:43 +0100)
+>
+> And for that you could have a look at the S/390 DASD driver (right,
+> Arndt?), which has a very similar concept.
 
-----------------------------------------------------------------
-MMC core:
- - Add CMD13 polling for MMC IOCTLS with R1B response.
- - Add common DT properties for clk-phase-delays for various speed modes.
- - Fix size overflow for mmc gp-partitions.
- - Re-work HW reset for SDIO cards, which also includes a re-work for
-   Marvell's WiFi mwifiex SDIO func driver.
+Yes, I've looked at the dasd.c driver, and it used a list to link
+requests from blk-mq and handled them with a tasklet, but if this will
+cause a long latency if we linked more requests into the list and
+dispatched them to the controller slowly?
 
-MMC host:
- - jz4740: Add support for X1000 and JZ4760.
- - jz4740: Add support for 8-bit bus and for low power mode.
- - mmci: Add support for HW busy timeout for the stm32_sdmmc variant.
- - owl-mmc: Add driver for Actions Semi Owl SoCs SD/MMC controller.
- - renesas_sdhi: Add support for r8a774b1.
- - sdhci_am654: Add support for Command Queuing Engine for J721E.
- - sdhci-milbeaut: Add driver for the Milbeaut SD controller.
- - sdhci-of-arasan: Add support for ZynqMP tap-delays.
- - sdhci-of-arasan: Add support for clk-phase-delays for SD cards.
- - sdhci-of-arasan: Add support for Intel LGM SDXC.
- - sdhci-of-aspeed: Allow inversion of the internal card detect signal.
- - sdhci-of-esdhc: Fixup workaround for erratum A-008171 for tunings.
- - sdhci-of-at91: Improve support for calibration.
- - sdhci-pci: Add support for Intel JSL.
- - sdhci-pci: Add quirk for AMD SDHC Device 0x7906.
- - tmio: Enable support for erase/discard/trim requests.
-
-MMC/OMAP/pandora/wl1251:
-The TI wl1251 WiFi driver for SDIO on the OMAP openpandora board has been
-broken since v4.7. To fix the problems, changes have been made cross
-subsystems, but also to OMAP2 machine code and to openpandora DTS files, as
-summarized below. Note that, relevant changes have been tagged for stable.
-
- - mmc/wl1251: Re-introduce lost SDIO quirks and vendor-id for wl1251
- - omap/omap_hsmmc: Remove redundant platform config for openpandora
- - omap_hsmmc: Initialize non-std SDIO card for wl1251 for pandora
- - omap/dts/pandora: Specify wl1251 through a child node of mmc3
- - wl1251: Add devicetree support for TI wl1251 SDIO
-
-----------------------------------------------------------------
-Adrian Hunter (1):
-      mmc: sdhci-pci: Add support for Intel JSL
-
-Ben Dooks (2):
-      mmc: mmci: make unexported functions static
-      mmc: mmci: stm32: make sdmmc_idma_validate_data static
-
-Biju Das (2):
-      dt-bindings: mmc: renesas_sdhi: Add r8a774b1 support
-      mmc: renesas_sdhi_internal_dmac: Add r8a774b1 support
-
-Bradley Bolen (1):
-      mmc: core: Fix size overflow for mmc partitions
-
-Chaotian Jing (2):
-      mmc: block: Make card_busy_detect() a bit more generic
-      mmc: block: Add CMD13 polling for MMC IOCTLS with R1B response
-
-Colin Ian King (2):
-      memstick: jmb38x_ms: clean up indentation issue
-      mmc: dw_mmc: fix indentation issue
-
-Eugeniu Rosca (1):
-      mmc: tmio: Add MMC_CAP_ERASE to allow erase/discard/trim requests
-
-Fabio Estevam (1):
-      mmc: sdhci: Fix grammar in warning message
-
-Faiz Abbas (1):
-      mmc: sdhci_am654: Add Support for Command Queuing Engine to J721E
-
-H. Nikolaus Schaller (12):
-      Documentation: dt: wireless: update wl1251 for sdio
-      net: wireless: ti: wl1251 add device tree support
-      ARM: dts: pandora-common: define wl1251 as child node of mmc3
-      mmc: host: omap_hsmmc: add code for special init of wl1251 to get rid of pandora_wl1251_init_card
-      omap: pdata-quirks: revert pandora specific gpiod additions
-      omap: pdata-quirks: remove openpandora quirks for mmc3 and wl1251
-      omap: remove omap2_hsmmc_info in old hsmmc.[ch] and update Makefile
-      mmc: host: omap-hsmmc: remove init_card pdata callback from pdata
-      mmc: sdio: fix wl1251 vendor id
-      mmc: core: fix wl1251 sdio quirks
-      net: wireless: ti: wl1251 use new SDIO_VENDOR_ID_TI_WL1251 definition
-      net: wireless: ti: remove local VENDOR_ID and DEVICE_ID definitions
-
-Ivan Mikhaylov (2):
-      mmc: sdhci-of-aspeed: enable CONFIG_MMC_SDHCI_IO_ACCESSORS
-      mmc: sdhci-of-aspeed: add inversion signal presence
-
-Krzysztof Kozlowski (1):
-      memstick: Fix Kconfig indentation
-
-Ludovic Barre (3):
-      mmc: mmci: add hardware busy timeout feature
-      mmc: mmci: add busy_complete callback
-      mmc: mmci: sdmmc: add busy_complete callback
-
-Manish Narani (9):
-      mmc: sdhci-of-arasan: Separate out clk related data to another structure
-      dt-bindings: mmc: arasan: Update Documentation for the input clock
-      mmc: sdhci-of-arasan: Add sampling clock for a phy to use
-      dt-bindings: mmc: Add optional generic properties for mmc
-      mmc: sdhci-of-arasan: Add support to set clock phase delays for SD
-      firmware: xilinx: Add SDIO Tap Delay nodes
-      dt-bindings: mmc: arasan: Document 'xlnx,zynqmp-8.9a' controller
-      mmc: sdhci-of-arasan: Add support for ZynqMP Platform Tap Delays Setup
-      dt-bindings: mmc: Correct the type of the clk phase properties
-
-Manivannan Sadhasivam (3):
-      dt-bindings: mmc: Add Actions Semi SD/MMC/SDIO controller binding
-      mmc: Add Actions Semi Owl SoCs SD/MMC driver
-      MAINTAINERS: Add entry for Actions Semi SD/MMC driver and binding
-
-Markus Elfring (1):
-      mmc: cavium-octeon: Use devm_platform_ioremap_resource()
-
-Nicolas Ferre (2):
-      dt-bindings: sdhci-of-at91: add the microchip,sdcal-inverted property
-      mmc: sdhci-of-at91: add DT property to enable calibration on full reset
-
-Peng Fan (1):
-      dt-bindings: mmc: fsl-imx-esdhc: add imx8m compatible string
-
-Peter Ujfalusi (2):
-      mmc: atmel-mci: Use dma_request_chan() directly for channel request
-      mmc: moxart: Use dma_request_chan() directly for channel request
-
-Ramuthevar Vadivel Murugan (2):
-      dt-bindings: mmc: sdhci-of-arasan: Add new compatible for Intel LGM SDXC
-      mmc: sdhci-of-arasan: Add Support for Intel LGM SDXC
-
-Raul E Rangel (2):
-      mmc: sdhci: Check card status after reset
-      mmc: sdhci-pci: Quirk for AMD SDHC Device 0x7906
-
-Saiyam Doshi (1):
-      mmc: bcm2835: Use devm_platform_ioremap_resource wrapper
-
-Takao Orito (2):
-      dt-bindings: mmc: add DT bindings for Milbeaut SD controller
-      mmc: sdhci-milbeaut: add Milbeaut SD controller driver
-
-Thierry Reding (1):
-      mmc: mmc_spi: Use proper debounce time for CD GPIO
-
-Ulf Hansson (6):
-      mmc: vub300: Drop redundant host ops ->init_card()
-      MAINTAINERS: Mark vub300 mmc driver as orphan
-      mwifiex: Re-work support for SDIO HW reset
-      mmc: core: Drop check for mmc_card_is_removable() in mmc_rescan()
-      mmc: core: Re-work HW reset for SDIO cards
-      Merge branch 'fixes' into next
-
-Wolfram Sang (2):
-      mmc: tmio: remove workaround for NON_REMOVABLE
-      Revert "mmc: tmio: remove workaround for NON_REMOVABLE"
-
-Yangbo Lu (2):
-      mmc: sdhci-of-esdhc: poll ESDHC_FLUSH_ASYNC_FIFO bit until completion
-      mmc: sdhci-of-esdhc: fix up erratum A-008171 workaround
-
-Zhou Yanjie (6):
-      mmc: jz4740: Add 8bit mode support
-      dt-bindings: mmc: jz4740: Add bindings for JZ4760
-      mmc: jz4740: Add support for JZ4760
-      dt-bindings: mmc: jz4740: Add bindings for X1000
-      mmc: jz4740: Add support for X1000
-      mmc: jz4740: Add support for Low Power Mode (LPM)
-
-zhengbin (1):
-      mmc: sdhci-pci: Make function amd_sdhci_reset static
-
- .../devicetree/bindings/mmc/arasan,sdhci.txt       |  42 +-
- .../devicetree/bindings/mmc/fsl-imx-esdhc.txt      |   3 +
- Documentation/devicetree/bindings/mmc/jz4740.txt   |   8 +-
- .../devicetree/bindings/mmc/mmc-controller.yaml    |  14 +
- Documentation/devicetree/bindings/mmc/owl-mmc.yaml |  59 ++
- .../devicetree/bindings/mmc/renesas,sdhi.txt       |   1 +
- .../devicetree/bindings/mmc/sdhci-atmel.txt        |   5 +
- .../devicetree/bindings/mmc/sdhci-milbeaut.txt     |  30 +
- .../devicetree/bindings/net/wireless/ti,wl1251.txt |  26 +
- MAINTAINERS                                        |   6 +-
- arch/arm/boot/dts/omap3-pandora-common.dtsi        |  36 +-
- arch/arm/mach-omap2/Makefile                       |   3 -
- arch/arm/mach-omap2/common.h                       |   1 -
- arch/arm/mach-omap2/hsmmc.c                        | 171 -----
- arch/arm/mach-omap2/hsmmc.h                        |  32 -
- arch/arm/mach-omap2/pdata-quirks.c                 | 105 ----
- drivers/memstick/core/Kconfig                      |  18 +-
- drivers/memstick/host/Kconfig                      |   4 +-
- drivers/memstick/host/jmb38x_ms.c                  |  12 +-
- drivers/mmc/core/block.c                           | 151 ++---
- drivers/mmc/core/core.c                            |  12 +-
- drivers/mmc/core/core.h                            |   2 +
- drivers/mmc/core/mmc.c                             |   9 +-
- drivers/mmc/core/quirks.h                          |   7 +
- drivers/mmc/core/sdio.c                            |  28 +-
- drivers/mmc/core/sdio_bus.c                        |   9 +-
- drivers/mmc/host/Kconfig                           |  21 +
- drivers/mmc/host/Makefile                          |   2 +
- drivers/mmc/host/atmel-mci.c                       |   3 +-
- drivers/mmc/host/bcm2835.c                         |   4 +-
- drivers/mmc/host/cavium-octeon.c                   |  15 +-
- drivers/mmc/host/dw_mmc.c                          |   4 +-
- drivers/mmc/host/jz4740_mmc.c                      |  41 +-
- drivers/mmc/host/mmc_spi.c                         |   2 +-
- drivers/mmc/host/mmci.c                            | 198 +++---
- drivers/mmc/host/mmci.h                            |   5 +
- drivers/mmc/host/mmci_stm32_sdmmc.c                |  46 +-
- drivers/mmc/host/moxart-mmc.c                      |   4 +-
- drivers/mmc/host/omap_hsmmc.c                      |  31 +-
- drivers/mmc/host/owl-mmc.c                         | 696 +++++++++++++++++++++
- drivers/mmc/host/renesas_sdhi_internal_dmac.c      |   1 +
- drivers/mmc/host/sdhci-esdhc.h                     |  14 +
- drivers/mmc/host/sdhci-milbeaut.c                  | 362 +++++++++++
- drivers/mmc/host/sdhci-of-arasan.c                 | 493 ++++++++++++++-
- drivers/mmc/host/sdhci-of-aspeed.c                 |  12 +
- drivers/mmc/host/sdhci-of-at91.c                   |  19 +
- drivers/mmc/host/sdhci-of-esdhc.c                  | 257 ++++++--
- drivers/mmc/host/sdhci-pci-core.c                  |  53 +-
- drivers/mmc/host/sdhci-pci.h                       |   2 +
- drivers/mmc/host/sdhci.c                           |  15 +-
- drivers/mmc/host/sdhci_am654.c                     |  71 ++-
- drivers/mmc/host/sdhci_f_sdh30.c                   |  26 +-
- drivers/mmc/host/sdhci_f_sdh30.h                   |  32 +
- drivers/mmc/host/tmio_mmc_core.c                   |   2 +-
- drivers/mmc/host/vub300.c                          |   7 -
- drivers/net/wireless/marvell/mwifiex/main.c        |   5 +-
- drivers/net/wireless/marvell/mwifiex/main.h        |   1 +
- drivers/net/wireless/marvell/mwifiex/sdio.c        |  33 +-
- drivers/net/wireless/ti/wl1251/sdio.c              |  25 +-
- drivers/net/wireless/ti/wlcore/sdio.c              |   8 -
- include/linux/firmware/xlnx-zynqmp.h               |  13 +-
- include/linux/mmc/card.h                           |   3 +-
- include/linux/mmc/sdio_ids.h                       |   2 +
- include/linux/platform_data/hsmmc-omap.h           |   3 -
- 64 files changed, 2631 insertions(+), 694 deletions(-)
- create mode 100644 Documentation/devicetree/bindings/mmc/owl-mmc.yaml
- create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-milbeaut.txt
- delete mode 100644 arch/arm/mach-omap2/hsmmc.c
- delete mode 100644 arch/arm/mach-omap2/hsmmc.h
- create mode 100644 drivers/mmc/host/owl-mmc.c
- create mode 100644 drivers/mmc/host/sdhci-milbeaut.c
- create mode 100644 drivers/mmc/host/sdhci_f_sdh30.h
+Thanks for your input.
