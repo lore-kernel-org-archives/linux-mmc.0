@@ -2,95 +2,99 @@ Return-Path: <SRS0=3zNE=ZZ=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A00D8C432C0
-	for <linux-mmc@archiver.kernel.org>; Tue,  3 Dec 2019 03:33:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4FB75C432C3
+	for <linux-mmc@archiver.kernel.org>; Tue,  3 Dec 2019 07:27:50 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 787242071F
-	for <linux-mmc@archiver.kernel.org>; Tue,  3 Dec 2019 03:33:28 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="bIhJpDrr"
+	by mail.kernel.org (Postfix) with ESMTP id 22C052080F
+	for <linux-mmc@archiver.kernel.org>; Tue,  3 Dec 2019 07:27:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726469AbfLCDd1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 2 Dec 2019 22:33:27 -0500
-Received: from mail-io1-f67.google.com ([209.85.166.67]:44834 "EHLO
-        mail-io1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726449AbfLCDd1 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Dec 2019 22:33:27 -0500
-Received: by mail-io1-f67.google.com with SMTP id z23so2001093iog.11
-        for <linux-mmc@vger.kernel.org>; Mon, 02 Dec 2019 19:33:27 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=EvJt3gzlAO+oRtjqvbXcTygYaOTVm5IYaKaBT0d2KR0=;
-        b=bIhJpDrr0wMFIUzju9Z65IyQMHbQhuWnaYHrvLukSGvNKjOPQwY7jZ/Sp0sbWmyDAd
-         uFL8yMz5HZJn6WcB9VsIEVJBDXp+A6+o9Zvf1FQ9g9QGJtgmFskn/Px1iM+zJSNbiUU3
-         1+Dip6Lgl9LdIq63/gkOqlI5bDdnlimXBpSLLuUx+Ie5+mbF+8kfd7H4kzZUGURQPEGf
-         ZYI1StoNCDlzrvWCiI1xvedWy7IQz44/72KcxSBpTlp3eo+9uCHo232I58axeWKDnmX+
-         7Y5BZBmErQgx5zWdFMDPDVBzdyaoWttl7ZYYi2Pcf67xKXpn5edxbj0VdIDxcUTdeLZw
-         nkFQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=EvJt3gzlAO+oRtjqvbXcTygYaOTVm5IYaKaBT0d2KR0=;
-        b=j9tddWXBEpFju/B6ZFHk2o39RK+v3S3yXe0Eppn/PSCWMYVc+NUd7tjznHnTIDvfT0
-         ag40dANnuOf9iF3VlbAHdDqFE+qC8QuEty8WN04QLhZUXFbk3/TACGSpKk38rOTRWi4h
-         Lj17GKTT2MRFz1klAKQAnDK1GbiZ/1M2HnlXl3z3gIZasRNsyZ5uz0V5ZQ2bDCqdNuJ6
-         TlTnhcIii89vwGKtII0J1hVj4akRqqW9nl0xh3DnVKYXw/Bg4n8uj8NDbXfcSozYLXGm
-         qOhTDEs1G2cNd9L3YtIUSYYEEz/+YUTx85hpkL0XrKT7ZlvIZJBeVLkL2NgxJ1COq5AM
-         HmPw==
-X-Gm-Message-State: APjAAAV7w5VLVSHigHdtWsqKmrleMBWWzoixMauN9n/UTrD/qlG4A6u4
-        QJBpwGLP796HG9drTm99BjKsoPnrcU38vxB/0JQZFw==
-X-Google-Smtp-Source: APXvYqx5yVzLNaPqYrLRSFq+ahc8lvFvDSys1QX06Yk91gT/HgLu/uJBKD7Yp8n+VGgBSEQZksF6nDucKQ3kwhpqr7k=
-X-Received: by 2002:a5e:df06:: with SMTP id f6mr804124ioq.84.1575344006859;
- Mon, 02 Dec 2019 19:33:26 -0800 (PST)
+        id S1727403AbfLCH1t (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 3 Dec 2019 02:27:49 -0500
+Received: from mga07.intel.com ([134.134.136.100]:20359 "EHLO mga07.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1727389AbfLCH1t (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 3 Dec 2019 02:27:49 -0500
+X-Amp-Result: SKIPPED(no attachment in message)
+X-Amp-File-Uploaded: False
+Received: from orsmga003.jf.intel.com ([10.7.209.27])
+  by orsmga105.jf.intel.com with ESMTP/TLS/DHE-RSA-AES256-GCM-SHA384; 02 Dec 2019 23:27:48 -0800
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.69,272,1571727600"; 
+   d="scan'208";a="213328497"
+Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.95]) ([10.237.72.95])
+  by orsmga003.jf.intel.com with ESMTP; 02 Dec 2019 23:27:46 -0800
+Subject: Re: [PATCH 1/4] mmc: sdhci: Add delay after power off
+To:     Jun Nie <jun.nie@linaro.org>, ulf.hansson@linaro.org,
+        robh+dt@kernel.org, mark.rutland@arm.com,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org
+References: <20191202144104.5069-1-jun.nie@linaro.org>
+ <20191202144104.5069-2-jun.nie@linaro.org>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Message-ID: <7f95d66f-9d40-93ae-828d-ecae88463a9b@intel.com>
+Date:   Tue, 3 Dec 2019 09:26:52 +0200
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.2.1
 MIME-Version: 1.0
-References: <20191202144104.5069-1-jun.nie@linaro.org> <20191202144104.5069-5-jun.nie@linaro.org>
- <20191203103320.273a7309@xhacker.debian>
-In-Reply-To: <20191203103320.273a7309@xhacker.debian>
-From:   Jun Nie <jun.nie@linaro.org>
-Date:   Tue, 3 Dec 2019 11:33:15 +0800
-Message-ID: <CABymUCMVi_N2Mt82YDt7wrys4Z_vnXYEu15-YBa+S1CejT9iZw@mail.gmail.com>
-Subject: Re: [PATCH 4/4] mmc: sdhci: Add DMA memory boundary workaround
-To:     Jisheng Zhang <Jisheng.Zhang@synaptics.com>
-Cc:     "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        "robh+dt@kernel.org" <robh+dt@kernel.org>,
-        "mark.rutland@arm.com" <mark.rutland@arm.com>,
-        "adrian.hunter@intel.com" <adrian.hunter@intel.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+In-Reply-To: <20191202144104.5069-2-jun.nie@linaro.org>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Jisheng Zhang <Jisheng.Zhang@synaptics.com> =E4=BA=8E2019=E5=B9=B412=E6=9C=
-=883=E6=97=A5=E5=91=A8=E4=BA=8C =E4=B8=8A=E5=8D=8810:47=E5=86=99=E9=81=93=
-=EF=BC=9A
->
-> On Mon,  2 Dec 2019 22:41:04 +0800 Jun Nie wrote:
->
->
-> >
-> >
-> > DMA memory cannot cross specific boundary for some SDHCI controller,
-> > such as DesignWare SDHCI controller. Add DMA memory boundary dt
-> > property and workaround the limitation.
->
-> IMHO, the workaround could be implemented in each SDHCI host driver.
->
-> eg. drivers/mmc/host/sdhci-of-dwcmshc.c
->
-Thanks for the suggestion! Christoph's suggestion can prevent the the issue
-from the block layer, thus the code can be shared across all
-controllers. I prefer
-his suggestions.
+On 2/12/19 4:41 pm, Jun Nie wrote:
+> Add delay after power off to ensure that full power cycle is
+> successful. Otherwise, some controllers, at lease for Hisilicon
+> eMMC controller, may not be unstable sometimes for full power
+> cycle operation.
+> 
+> Signed-off-by: Jun Nie <jun.nie@linaro.org>
+> ---
+>  drivers/mmc/host/sdhci.c | 7 +++++++
+>  drivers/mmc/host/sdhci.h | 2 ++
+>  2 files changed, 9 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 3140fe2e5dba..a654f0aeb438 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1761,6 +1761,13 @@ void sdhci_set_power_noreg(struct sdhci_host *host, unsigned char mode,
+>  		sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
+>  		if (host->quirks2 & SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON)
+>  			sdhci_runtime_pm_bus_off(host);
+> +
+> +		/*
+> +		 * Some controllers need an extra 100ms delay to secure
+> +		 * full power cycle is successful.
+> +		 */
+> +		if (host->quirks2 & SDHCI_QUIRK2_DELAY_AFTER_POWER_OFF)
+> +			msleep(100);
 
-Jun
+Please use the ->set_power() callback and do this in your own driver.
+
+>  	} else {
+>  		/*
+>  		 * Spec says that we should clear the power reg before setting
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index 0ed3e0eaef5f..0e6f97eaa796 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -482,6 +482,8 @@ struct sdhci_host {
+>   * block count.
+>   */
+>  #define SDHCI_QUIRK2_USE_32BIT_BLK_CNT			(1<<18)
+> +/* Controllers need an extra 100ms delay to make sure power off completely */
+> +#define SDHCI_QUIRK2_DELAY_AFTER_POWER_OFF		(1<<19)
+>  
+>  	int irq;		/* Device IRQ */
+>  	void __iomem *ioaddr;	/* Mapped address */
+> 
+
