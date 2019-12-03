@@ -4,31 +4,32 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0B4BBC432C0
-	for <linux-mmc@archiver.kernel.org>; Tue,  3 Dec 2019 20:33:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 67421C33C9A
+	for <linux-mmc@archiver.kernel.org>; Tue,  3 Dec 2019 20:33:09 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id DC23C20848
+	by mail.kernel.org (Postfix) with ESMTP id 4540C20833
 	for <linux-mmc@archiver.kernel.org>; Tue,  3 Dec 2019 20:33:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726567AbfLCUdJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 3 Dec 2019 15:33:09 -0500
-Received: from sauhun.de ([88.99.104.3]:34624 "EHLO pokefinder.org"
+        id S1727339AbfLCUdI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 3 Dec 2019 15:33:08 -0500
+Received: from sauhun.de ([88.99.104.3]:34602 "EHLO pokefinder.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727249AbfLCUdJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 3 Dec 2019 15:33:09 -0500
+        id S1727118AbfLCUdI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 3 Dec 2019 15:33:08 -0500
 Received: from localhost (p54B33759.dip0.t-ipconnect.de [84.179.55.89])
-        by pokefinder.org (Postfix) with ESMTPSA id 604BC2C0678;
-        Tue,  3 Dec 2019 21:33:07 +0100 (CET)
+        by pokefinder.org (Postfix) with ESMTPSA id E7F892C064F;
+        Tue,  3 Dec 2019 21:33:05 +0100 (CET)
 From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
 To:     linux-mmc@vger.kernel.org
 Cc:     linux-renesas-soc@vger.kernel.org,
         Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        Takeshi Saito <takeshi.saito.xv@renesas.com>,
         Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: [RFC PATCH 3/2] mmc: renesas_sdhi: remove double clear of automatic correction
-Date:   Tue,  3 Dec 2019 21:33:01 +0100
-Message-Id: <20191203203301.2202-4-wsa+renesas@sang-engineering.com>
+Subject: [RFC PATCH 1/2] mmc: renesas_sdhi: Add manual correction
+Date:   Tue,  3 Dec 2019 21:32:59 +0100
+Message-Id: <20191203203301.2202-2-wsa+renesas@sang-engineering.com>
 X-Mailer: git-send-email 2.20.1
 In-Reply-To: <20191203203301.2202-1-wsa+renesas@sang-engineering.com>
 References: <20191203203301.2202-1-wsa+renesas@sang-engineering.com>
@@ -39,33 +40,157 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-hw_reset() clears the automatic correction bit twice. I couldn't find
-anything in the docs recommending that. Removing one of them didn't
-cause any regressions here, so keep it simple.
+From: Takeshi Saito <takeshi.saito.xv@renesas.com>
 
+This patch adds a manual correction mechanism for SDHI. Currently, SDHI
+uses automatic TAP position correction. However, TAP position can also
+be corrected manually via correction error status flags.
+
+Signed-off-by: Takeshi Saito <takeshi.saito.xv@renesas.com>
 Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 ---
 
-Last minute patch, sorry for the confusing numbering...
+Pretty much like the BSP patch. Just some rebasing, refactorization and
+updates of the commit message. I especially changed the original
+calculation from:
 
- drivers/mmc/host/renesas_sdhi_core.c | 4 ----
- 1 file changed, 4 deletions(-)
++               host->tap_set = (host->tap_set +
++                                host->tap_num + 1) % host->tap_num;
 
+ to:
+
++		host->tap_set = (host->tap_set + 1) % host->tap_num;
+
+(same for -1). Because "+ tap_num % tap_num" is a NOOP. Or did I miss
+something?
+
+
+ drivers/mmc/host/renesas_sdhi.h      |  1 +
+ drivers/mmc/host/renesas_sdhi_core.c | 62 +++++++++++++++++++++++-----
+ 2 files changed, 52 insertions(+), 11 deletions(-)
+
+diff --git a/drivers/mmc/host/renesas_sdhi.h b/drivers/mmc/host/renesas_sdhi.h
+index f524251d5113..11a0b2bca3aa 100644
+--- a/drivers/mmc/host/renesas_sdhi.h
++++ b/drivers/mmc/host/renesas_sdhi.h
+@@ -57,6 +57,7 @@ struct renesas_sdhi {
+ 	void __iomem *scc_ctl;
+ 	u32 scc_tappos;
+ 	u32 scc_tappos_hs400;
++	bool doing_tune;
+ };
+ 
+ #define host_to_priv(host) \
 diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-index a29290ee2051..10ccd90e5c64 100644
+index 282c133defd6..903da3ba399b 100644
 --- a/drivers/mmc/host/renesas_sdhi_core.c
 +++ b/drivers/mmc/host/renesas_sdhi_core.c
-@@ -578,10 +578,6 @@ static void renesas_sdhi_hw_reset(struct tmio_mmc_host *host)
- 		       ~SH_MOBILE_SDHI_SCC_RVSCNTL_RVSEN &
- 		       sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_RVSCNTL));
+@@ -263,6 +263,8 @@ static int renesas_sdhi_start_signal_voltage_switch(struct mmc_host *mmc,
+ #define SH_MOBILE_SDHI_SCC_RVSCNTL_RVSEN	BIT(0)
+ /* Definitions for values the SH_MOBILE_SDHI_SCC_RVSREQ register */
+ #define SH_MOBILE_SDHI_SCC_RVSREQ_RVSERR	BIT(2)
++#define SH_MOBILE_SDHI_SCC_RVSREQ_REQTAPUP	BIT(1)
++#define SH_MOBILE_SDHI_SCC_RVSREQ_REQTAPDOWN	BIT(0)
+ /* Definitions for values the SH_MOBILE_SDHI_SCC_TMPPORT2 register */
+ #define SH_MOBILE_SDHI_SCC_TMPPORT2_HS400OSEL	BIT(4)
+ #define SH_MOBILE_SDHI_SCC_TMPPORT2_HS400EN	BIT(31)
+@@ -321,6 +323,8 @@ static void renesas_sdhi_prepare_tuning(struct tmio_mmc_host *host,
+ {
+ 	struct renesas_sdhi *priv = host_to_priv(host);
  
--	sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_RVSCNTL,
--		       ~SH_MOBILE_SDHI_SCC_RVSCNTL_RVSEN &
--		       sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_RVSCNTL));
++	priv->doing_tune = true;
++
+ 	/* Set sampling clock position */
+ 	sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_TAPSET, tap);
+ }
+@@ -426,6 +430,8 @@ static int renesas_sdhi_select_tuning(struct tmio_mmc_host *host)
+ 	unsigned long ntap;     /* temporary counter of tuning success */
+ 	unsigned long i;
+ 
++	priv->doing_tune = false;
++
+ 	/* Clear SCC_RVSREQ */
+ 	sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_RVSREQ, 0);
+ 
+@@ -485,12 +491,52 @@ static int renesas_sdhi_select_tuning(struct tmio_mmc_host *host)
+ 	return 0;
+ }
+ 
++static bool renesas_sdhi_manual_correction(struct tmio_mmc_host *host, bool use_4tap)
++{
++	struct renesas_sdhi *priv = host_to_priv(host);
++	u32 val;
++
++	val = sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_RVSREQ);
++	if (!val)
++		return false;
++
++	sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_RVSREQ, 0);
++
++	/* Change TAP position according to correction status */
++	if (val & SH_MOBILE_SDHI_SCC_RVSREQ_RVSERR)
++		return true;    /* Need re-tune */
++	else if (val & SH_MOBILE_SDHI_SCC_RVSREQ_REQTAPUP)
++		host->tap_set = (host->tap_set + 1) % host->tap_num;
++	else if (val & SH_MOBILE_SDHI_SCC_RVSREQ_REQTAPDOWN)
++		host->tap_set = (host->tap_set - 1) % host->tap_num;
++	else
++		return false;
++
++	sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_TAPSET,
++		       host->tap_set / (use_4tap ? 2 : 1));
++
++	return false;
++}
++
++static bool renesas_sdhi_auto_correction(struct tmio_mmc_host *host)
++{
++	struct renesas_sdhi *priv = host_to_priv(host);
++
++	/* Check SCC error */
++	if (sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_RVSREQ) &
++	    SH_MOBILE_SDHI_SCC_RVSREQ_RVSERR) {
++		sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_RVSREQ, 0);
++		return true;
++	}
++
++	return false;
++}
++
+ static bool renesas_sdhi_check_scc_error(struct tmio_mmc_host *host)
+ {
+ 	struct renesas_sdhi *priv = host_to_priv(host);
+ 	bool use_4tap = priv->quirks && priv->quirks->hs400_4taps;
+ 
 -
- 	if (host->pdata->flags & TMIO_MMC_MIN_RCAR2)
- 		sd_ctrl_write32_as_16_and_16(host, CTL_IRQ_MASK,
- 					     TMIO_MASK_INIT_RCAR2);
+ 	/*
+ 	 * Skip checking SCC errors when running on 4 taps in HS400 mode as
+ 	 * any retuning would still result in the same 4 taps being used.
+@@ -500,20 +546,14 @@ static bool renesas_sdhi_check_scc_error(struct tmio_mmc_host *host)
+ 	    !(host->mmc->ios.timing == MMC_TIMING_MMC_HS400 && !use_4tap))
+ 		return false;
+ 
+-	if (mmc_doing_retune(host->mmc))
++	if (mmc_doing_retune(host->mmc) || priv->doing_tune)
+ 		return false;
+ 
+-	/* Check SCC error */
+ 	if (sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_RVSCNTL) &
+-	    SH_MOBILE_SDHI_SCC_RVSCNTL_RVSEN &&
+-	    sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_RVSREQ) &
+-	    SH_MOBILE_SDHI_SCC_RVSREQ_RVSERR) {
+-		/* Clear SCC error */
+-		sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_RVSREQ, 0);
+-		return true;
+-	}
++	    SH_MOBILE_SDHI_SCC_RVSCNTL_RVSEN)
++		return renesas_sdhi_auto_correction(host);
+ 
+-	return false;
++	return renesas_sdhi_manual_correction(host, use_4tap);
+ }
+ 
+ static void renesas_sdhi_hw_reset(struct tmio_mmc_host *host)
 -- 
 2.20.1
 
