@@ -7,43 +7,43 @@ X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 51463C432C3
-	for <linux-mmc@archiver.kernel.org>; Tue,  3 Dec 2019 12:54:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E5A2BC432C3
+	for <linux-mmc@archiver.kernel.org>; Tue,  3 Dec 2019 12:54:27 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 1F20A206EC
-	for <linux-mmc@archiver.kernel.org>; Tue,  3 Dec 2019 12:54:24 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B1CE5206EC
+	for <linux-mmc@archiver.kernel.org>; Tue,  3 Dec 2019 12:54:27 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=nxp.com header.i=@nxp.com header.b="SzgHGqq/"
+	dkim=pass (1024-bit key) header.d=nxp.com header.i=@nxp.com header.b="IRPDbhw7"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726098AbfLCMyX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 3 Dec 2019 07:54:23 -0500
-Received: from mail-eopbgr20072.outbound.protection.outlook.com ([40.107.2.72]:27264
+        id S1726105AbfLCMy1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 3 Dec 2019 07:54:27 -0500
+Received: from mail-eopbgr20070.outbound.protection.outlook.com ([40.107.2.70]:48773
         "EHLO EUR02-VE1-obe.outbound.protection.outlook.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1725957AbfLCMyX (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 3 Dec 2019 07:54:23 -0500
+        id S1725957AbfLCMy1 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 3 Dec 2019 07:54:27 -0500
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=EjtlW5n5z/x5Y5YKD5viGY9+mbcPaEN0ik2+ctKnyjLI92e01ph+nQMc7kzyWQE1Npg/xzbGHGRNXcawOq0IFnGjs4+PabpzcGNFXqpsBACmiQHmVCy0gOzQlyK0v3xDeGeX9gtH91mUkNYODqQ0N82e3z16s2M1Vk87rSNz9XkjZ7tQBp48C6/aVnUI3+kmF18SczRS5e1G19rbHuIv3oPZQjPg1qlD9HIS+sUUm3ZCUvkj0NHtLUFK24XUBH9ryQgbIhubOiea/uyqDvoWM3b3/l68Z73Ghc1+nUldgsap2NVfLz3o3XhqkP3PaQ/9bYbIrmE/er2SSiCmB6ozCg==
+ b=CTl9G+1czIEVihPBH7IYpXzLiHEOH/ET7fmURGglUKcDfAw9pbxK7b1bsfpiXwb7Pq4ofb54T63k7vjEKtIOkb9KdH8tuJJdaIcxBZb79OOATnf3q8elA+i+DTg2FuMIstcffP9oMbpXlfXoVCAnHblBi9Ga6aTdj4EGjV2xdKRh4RK6vxHZMslHsam9ID/Pm6G91XHvKpCTKUdCRxS9sezIRz7ShhFTQwwrpNRr2sWUO3778tjg7TnGOt1R3SEk2eioRgNPKNJSXQDnWXoN7asT1kcmsdUpmNNBIb4irKYpbhyoarwi8hmIglHDsTcCrxx7CZvLs8E7v+fJv6yc4A==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=Ji3acwXrQpjvGJKPK1p84rflglpGpDmJq0Sk3iGTXI8=;
- b=I7FTv55jSH7BV5sGd/lF69okzrETksG6RKGFvA/A7gxXAfFzllFvBBxeY/zkXeOK4iVZoM4H3W0CeIP1L0XLRMrhf3brhROtj78p266VEwrbzNI7ojdoL2rHELCU1pXA14TTiqGdvFciz9fTlvTQ9r50T1C3JTe5vdvLRGsH20o0zk/gXch1Ixmku8L1+KU9iVckCHZDIpTJQ8eVTh0iPyZYsYAlEqW1inKH25C/rLyB2w5jQrb57Cr/P3BLgXxJshyyy9Dcg3mZJ2muD+1oBSMBx3eUlgpx5CQUSy9SxbefM4LX4sYVtLz49QEzmdNaqSHlm7MxIP2vNVFwbnc/QQ==
+ bh=+G0/b+14UhZ0Btt2gn3FkOZ+8pIbfLojhCzwnqoKXXI=;
+ b=naZVFdHlknvyQtRr69256M1VJSLh6IGYbDcVZpv+I8OFbbko/CtXEEPAw1xHfKKszqZyrelL46jaGt6FHeeB6BraEF+YPCQM7QInZEpyqe1aSTIQ2+k+1EGOf/am5Gfgcdxcw7pwKolzt5505Pojm7LA6xrwOx+0daR4CGGU7NWUgV40ON7AFxFqQZHJNCritXUHUz19+CeGLmLFNZaSqTlSYpODCiOIrDyk/EZ8XPrcbxCCmSW5Lt/Alae+13F0X+LPqOMunD8EBVd8TOarl95CgBA4gPhOWrVfbZA19K9PwpP7bwLce/lZFvi1onLUXcSk+u08qvyQoPe3DhA+AQ==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=nxp.com; dmarc=pass action=none header.from=nxp.com; dkim=pass
  header.d=nxp.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nxp.com; s=selector2;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=Ji3acwXrQpjvGJKPK1p84rflglpGpDmJq0Sk3iGTXI8=;
- b=SzgHGqq/TPWbRPTy8CYJPhPQmKO209l5wf9a/zdGyZZqDtk5wNhzSOoNWcXI0K/L1iu2lJjn0fzFQh3ImZ/JaA2XJ17x49nTEotlKF2GsSBATJVAqqKPzLUDhpEGOV0tA6P2UT4IBTGNecH6R41mbIWwdTIKgLYv0ucU4Aflsw0=
+ bh=+G0/b+14UhZ0Btt2gn3FkOZ+8pIbfLojhCzwnqoKXXI=;
+ b=IRPDbhw7T3amufBVEqgIV+xly228jAYIaVcn0YW5EgFt6NOTYuq0MC8KGZJPKeUEmONpcraB2bjx2G0dOPm9c+hek5g3I9B3Y8xwavu1VH6ly4Ox0dxdWud63znATXUpcO8Vwc28nyTayKFfZ15RiglDb5arYAUPLX78lz5u2Pc=
 Received: from VI1PR04MB5040.eurprd04.prod.outlook.com (20.177.52.24) by
  VI1PR04MB4175.eurprd04.prod.outlook.com (52.133.12.19) with Microsoft SMTP
  Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.20.2495.17; Tue, 3 Dec 2019 12:54:20 +0000
+ 15.20.2495.17; Tue, 3 Dec 2019 12:54:23 +0000
 Received: from VI1PR04MB5040.eurprd04.prod.outlook.com
  ([fe80::c5f3:ba8e:2b17:1f28]) by VI1PR04MB5040.eurprd04.prod.outlook.com
  ([fe80::c5f3:ba8e:2b17:1f28%5]) with mapi id 15.20.2495.014; Tue, 3 Dec 2019
- 12:54:20 +0000
+ 12:54:23 +0000
 From:   BOUGH CHEN <haibo.chen@nxp.com>
 To:     "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
         "adrian.hunter@intel.com" <adrian.hunter@intel.com>
@@ -53,13 +53,13 @@ CC:     "shawnguo@kernel.org" <shawnguo@kernel.org>,
         BOUGH CHEN <haibo.chen@nxp.com>,
         "linus.walleij@linaro.org" <linus.walleij@linaro.org>,
         "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Subject: [PATCH v2 02/14] mmc: sdhci-esdhc-imx: no fail when no pinctrl
- available
-Thread-Topic: [PATCH v2 02/14] mmc: sdhci-esdhc-imx: no fail when no pinctrl
- available
-Thread-Index: AQHVqdjHL/Yu5f3AL0+NyHrCiy16WA==
-Date:   Tue, 3 Dec 2019 12:54:20 +0000
-Message-ID: <20191203130120.11511-3-haibo.chen@nxp.com>
+Subject: [PATCH v2 03/14] mmc: sdhci-esdhci-imx: retune needed for Mega/Mix
+ enabled SoCs
+Thread-Topic: [PATCH v2 03/14] mmc: sdhci-esdhci-imx: retune needed for
+ Mega/Mix enabled SoCs
+Thread-Index: AQHVqdjJV29nzvK6906nGa+BobsNyQ==
+Date:   Tue, 3 Dec 2019 12:54:23 +0000
+Message-ID: <20191203130120.11511-4-haibo.chen@nxp.com>
 References: <20191203130120.11511-1-haibo.chen@nxp.com>
 In-Reply-To: <20191203130120.11511-1-haibo.chen@nxp.com>
 Accept-Language: zh-CN, en-US
@@ -76,74 +76,135 @@ x-ms-exchange-messagesentrepresentingtype: 1
 x-originating-ip: [119.31.174.71]
 x-ms-publictraffictype: Email
 x-ms-office365-filtering-ht: Tenant
-x-ms-office365-filtering-correlation-id: 28d8639d-cafd-44a5-acc6-08d777efe9d9
+x-ms-office365-filtering-correlation-id: a3296471-4a26-45c3-9cda-08d777efebae
 x-ms-traffictypediagnostic: VI1PR04MB4175:|VI1PR04MB4175:
 x-ms-exchange-transport-forked: True
-x-microsoft-antispam-prvs: <VI1PR04MB41756226024208CA3BF7395290420@VI1PR04MB4175.eurprd04.prod.outlook.com>
-x-ms-oob-tlc-oobclassifiers: OLM:6108;
+x-microsoft-antispam-prvs: <VI1PR04MB41757314B3284624CC84810A90420@VI1PR04MB4175.eurprd04.prod.outlook.com>
+x-ms-oob-tlc-oobclassifiers: OLM:1122;
 x-forefront-prvs: 02408926C4
-x-forefront-antispam-report: SFV:NSPM;SFS:(10009020)(4636009)(346002)(366004)(396003)(136003)(39860400002)(376002)(189003)(199004)(316002)(54906003)(446003)(2616005)(26005)(110136005)(2906002)(11346002)(50226002)(8936002)(186003)(2501003)(102836004)(99286004)(386003)(305945005)(86362001)(76176011)(52116002)(6506007)(7736002)(6486002)(6436002)(6512007)(1076003)(5660300002)(66946007)(66556008)(66476007)(64756008)(66446008)(14454004)(36756003)(25786009)(478600001)(256004)(71190400001)(8676002)(81156014)(81166006)(14444005)(71200400001)(6116002)(3846002)(4326008);DIR:OUT;SFP:1101;SCL:1;SRVR:VI1PR04MB4175;H:VI1PR04MB5040.eurprd04.prod.outlook.com;FPR:;SPF:None;LANG:en;PTR:InfoNoRecords;MX:1;A:1;
+x-forefront-antispam-report: SFV:NSPM;SFS:(10009020)(6029001)(4636009)(346002)(366004)(396003)(136003)(39860400002)(376002)(189003)(199004)(316002)(54906003)(446003)(2616005)(26005)(110136005)(2906002)(11346002)(50226002)(8936002)(186003)(2501003)(102836004)(99286004)(386003)(305945005)(86362001)(76176011)(52116002)(6506007)(7736002)(6486002)(6436002)(6512007)(1076003)(5660300002)(66946007)(66556008)(66476007)(64756008)(66446008)(14454004)(36756003)(25786009)(478600001)(256004)(71190400001)(8676002)(81156014)(81166006)(14444005)(71200400001)(6116002)(3846002)(4326008);DIR:OUT;SFP:1101;SCL:1;SRVR:VI1PR04MB4175;H:VI1PR04MB5040.eurprd04.prod.outlook.com;FPR:;SPF:None;LANG:en;PTR:InfoNoRecords;MX:1;A:1;
 received-spf: None (protection.outlook.com: nxp.com does not designate
  permitted sender hosts)
 x-ms-exchange-senderadcheck: 1
 x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: aLef2JJ/Y6h7pS9jbE+4ffT+HL4mJZ06AV+UZZ/2RuIHCgUh8AwZdL1i3xG+awJmgWyOCCuf65Nh15S3mAMALe87/Ujc9vgxnkWnKh50WpmH4XYCZqQj8O1WZEAUKLXqoOvAr8WsU53yw02wBU4UhSC/EUSZIrLyB8/vm3DX7KEkRvPv9GzojY74GoYqw8OmvIIuBojWKV+EY+a51cZKdn51KvePUBlzVkT1WE6lG0fsHkDZ8kl0cjeknSlMsQ9UBQfLj+Kdw4L7U755itKQ9P31B2muXQwq3WK4Vo76HG4KC2B5O6Z1/nqthFK5ylw6GJWmI5g5e5LCSuIMpTUVx88rp9r0b1RqPTJVvX8Z5zZueEYYnx7CZ+p7oVvxoR/iSs6cQGOEpPGJ24DeqvOyRJeLK0paTBk6KVY2GRCDRaOSGRbtKeERe1nNtYNIk0/z
+x-microsoft-antispam-message-info: nBoorNkwNJ1NfVBseOp1wbIVlqMV9uKawbLyHu7d07AlYZGYiM6KaSqFaySi3U5GMiIk7Kur/bNAJLCIOIpwcMf08bMm6jYBLsVtcXyF2mvCAtNOaazpz4TmC2XhSgHkf9JF2dJ1eGVuOV2B9UdcI1IsDly24kmHnC0zUrthvfjbv3W6O/LHf4oXwioIGgxeScRq86/qOVE1iKNA5xRV1jAdodf+6gW107/Rd7mPw4oDZIdqS/Ep0VHF4TGixw2nBgWtdIwybGw4A8qTFhh/fIiH2tg3hXLn/nPShn3PcG6eJ1/Fnw4dbXmlDuEntF1eytTjNHDYKwCtKocwqy7dBDbzSpwBBzJg/FZf5ffWDwBGxfqkI+hENK16cWhBk6F65nxIw16/MXcWqWrObmhKsEU8kOReZLw6xwCkK/ZtU9fH9ZtxlwK/34Oja/unUt10
 Content-Type: text/plain; charset="iso-8859-1"
 Content-Transfer-Encoding: quoted-printable
 MIME-Version: 1.0
 X-OriginatorOrg: nxp.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 28d8639d-cafd-44a5-acc6-08d777efe9d9
-X-MS-Exchange-CrossTenant-originalarrivaltime: 03 Dec 2019 12:54:20.3938
+X-MS-Exchange-CrossTenant-Network-Message-Id: a3296471-4a26-45c3-9cda-08d777efebae
+X-MS-Exchange-CrossTenant-originalarrivaltime: 03 Dec 2019 12:54:23.3421
  (UTC)
 X-MS-Exchange-CrossTenant-fromentityheader: Hosted
 X-MS-Exchange-CrossTenant-id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
 X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: x3QpHt7BeZVpOrWuKZGcuR42yEPtJVlAJLWTMYqLsxW9UNpZXm0KbLbc+pafRWV/edGXd96E7ujcwJwfgg5Yfw==
+X-MS-Exchange-CrossTenant-userprincipalname: G88EsepaORr6nCjPzh+1yc5fJHwxGWUPmo7QV9MCOtLGFvz9uab0LyAPktP3Qnn6Ns3xSbSg+oso1hQaai3fWg==
 X-MS-Exchange-Transport-CrossTenantHeadersStamped: VI1PR04MB4175
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-When using jailhouse to support two Linux on i.MX8MQ EVK, we use the
-1st Linux to configure pinctrl for the 2nd Linux. Then the 2nd Linux
-could use the mmc without pinctrl driver.
+For Mega/Mix enabled SoCs like MX7D and MX6SX, uSDHC will lost power in
+LP mode no matter whether the MMC_KEEP_POWER flag is set or not.
+This may cause state misalign between kernel and HW, especially for
+SDIO3.0 WiFi cards.
+e.g. SDIO WiFi driver usually will keep power during system suspend.
+And after resume, no card re-enumeration called.
+But the tuning state is lost due to Mega/Mix.
+Then CRC error may happen during next data transfer.
 
-So give a warning message when no pinctrl available, but no fail probe.
+So we should always fire a mmc_retune_needed() for such type SoC
+to tell MMC core retuning is needed for next data transfer.
+mmc: sdhci-esdhci-imx: retune needed for Mega/Mix enabled SoCs
 
 Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
 Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/host/sdhci-esdhc-imx.c | 13 +++++++------
- 1 file changed, 7 insertions(+), 6 deletions(-)
+ drivers/mmc/host/sdhci-esdhc-imx.c | 25 ++++++++++++++++++++-----
+ 1 file changed, 20 insertions(+), 5 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-es=
 dhc-imx.c
-index 1c988d6a2433..3830f4dc8dfc 100644
+index 3830f4dc8dfc..0f281821a269 100644
 --- a/drivers/mmc/host/sdhci-esdhc-imx.c
 +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -1489,13 +1489,14 @@ static int sdhci_esdhc_imx_probe(struct platform_de=
-vice *pdev)
- 	imx_data->pinctrl =3D devm_pinctrl_get(&pdev->dev);
- 	if (IS_ERR(imx_data->pinctrl)) {
- 		err =3D PTR_ERR(imx_data->pinctrl);
--		goto disable_ahb_clk;
--	}
--
--	imx_data->pins_default =3D pinctrl_lookup_state(imx_data->pinctrl,
-+		dev_warn(mmc_dev(host->mmc), "could not get pinctrl\n");
-+		imx_data->pins_default =3D ERR_PTR(-EINVAL);
-+	} else {
-+		imx_data->pins_default =3D pinctrl_lookup_state(imx_data->pinctrl,
- 						PINCTRL_STATE_DEFAULT);
--	if (IS_ERR(imx_data->pins_default))
--		dev_warn(mmc_dev(host->mmc), "could not get default state\n");
-+		if (IS_ERR(imx_data->pins_default))
-+			dev_warn(mmc_dev(host->mmc), "could not get default state\n");
-+	}
+@@ -160,6 +160,8 @@
+ #define ESDHC_FLAG_CQHCI		BIT(12)
+ /* need request pmqos during low power */
+ #define ESDHC_FLAG_PMQOS		BIT(13)
++/* The IP state got lost in low power mode */
++#define ESDHC_FLAG_STATE_LOST_IN_LPMODE		BIT(14)
 =20
- 	if (esdhc_is_usdhc(imx_data)) {
- 		host->quirks2 |=3D SDHCI_QUIRK2_PRESET_VALUE_BROKEN;
+ struct esdhc_soc_data {
+ 	u32 flags;
+@@ -193,32 +195,37 @@ static const struct esdhc_soc_data usdhc_imx6sl_data =
+=3D {
+=20
+ static const struct esdhc_soc_data usdhc_imx6sx_data =3D {
+ 	.flags =3D ESDHC_FLAG_USDHC | ESDHC_FLAG_STD_TUNING
+-			| ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_HS200,
++			| ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_HS200
++			| ESDHC_FLAG_STATE_LOST_IN_LPMODE,
+ };
+=20
+ static const struct esdhc_soc_data usdhc_imx6ull_data =3D {
+ 	.flags =3D ESDHC_FLAG_USDHC | ESDHC_FLAG_STD_TUNING
+ 			| ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_HS200
+-			| ESDHC_FLAG_ERR010450,
++			| ESDHC_FLAG_ERR010450
++			| ESDHC_FLAG_STATE_LOST_IN_LPMODE,
+ };
+=20
+ static const struct esdhc_soc_data usdhc_imx7d_data =3D {
+ 	.flags =3D ESDHC_FLAG_USDHC | ESDHC_FLAG_STD_TUNING
+ 			| ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_HS200
+-			| ESDHC_FLAG_HS400,
++			| ESDHC_FLAG_HS400
++			| ESDHC_FLAG_STATE_LOST_IN_LPMODE,
+ };
+=20
+ static struct esdhc_soc_data usdhc_imx7ulp_data =3D {
+ 	.flags =3D ESDHC_FLAG_USDHC | ESDHC_FLAG_STD_TUNING
+ 			| ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_HS200
+-			| ESDHC_FLAG_PMQOS | ESDHC_FLAG_HS400,
++			| ESDHC_FLAG_PMQOS | ESDHC_FLAG_HS400
++			| ESDHC_FLAG_STATE_LOST_IN_LPMODE,
+ };
+=20
+ static struct esdhc_soc_data usdhc_imx8qxp_data =3D {
+ 	.flags =3D ESDHC_FLAG_USDHC | ESDHC_FLAG_STD_TUNING
+ 			| ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_HS200
+ 			| ESDHC_FLAG_HS400 | ESDHC_FLAG_HS400_ES
+-			| ESDHC_FLAG_CQHCI,
++			| ESDHC_FLAG_CQHCI
++			| ESDHC_FLAG_STATE_LOST_IN_LPMODE,
+ };
+=20
+ struct pltfm_imx_data {
+@@ -1613,6 +1620,8 @@ static int sdhci_esdhc_imx_remove(struct platform_dev=
+ice *pdev)
+ static int sdhci_esdhc_suspend(struct device *dev)
+ {
+ 	struct sdhci_host *host =3D dev_get_drvdata(dev);
++	struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host);
++	struct pltfm_imx_data *imx_data =3D sdhci_pltfm_priv(pltfm_host);
+ 	int ret;
+=20
+ 	if (host->mmc->caps2 & MMC_CAP2_CQE) {
+@@ -1621,6 +1630,12 @@ static int sdhci_esdhc_suspend(struct device *dev)
+ 			return ret;
+ 	}
+=20
++	if ((imx_data->socdata->flags & ESDHC_FLAG_STATE_LOST_IN_LPMODE) &&
++		(host->tuning_mode !=3D SDHCI_TUNING_MODE_1)) {
++		mmc_retune_timer_stop(host->mmc);
++		mmc_retune_needed(host->mmc);
++	}
++
+ 	if (host->tuning_mode !=3D SDHCI_TUNING_MODE_3)
+ 		mmc_retune_needed(host->mmc);
+=20
 --=20
 2.17.1
 
