@@ -2,152 +2,343 @@ Return-Path: <SRS0=1974=Z2=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.2 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-8.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A40BAC2BD09
-	for <linux-mmc@archiver.kernel.org>; Wed,  4 Dec 2019 18:26:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2F84FC2D0BE
+	for <linux-mmc@archiver.kernel.org>; Wed,  4 Dec 2019 22:25:43 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 79EC12073B
-	for <linux-mmc@archiver.kernel.org>; Wed,  4 Dec 2019 18:26:27 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 03A542077B
+	for <linux-mmc@archiver.kernel.org>; Wed,  4 Dec 2019 22:25:43 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=ragnatech-se.20150623.gappssmtp.com header.i=@ragnatech-se.20150623.gappssmtp.com header.b="WeN1DYFu"
+	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="hcGC+PTf"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729444AbfLDS00 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 4 Dec 2019 13:26:26 -0500
-Received: from mail-lf1-f68.google.com ([209.85.167.68]:43246 "EHLO
-        mail-lf1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729136AbfLDR7g (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Dec 2019 12:59:36 -0500
-Received: by mail-lf1-f68.google.com with SMTP id 9so252563lfq.10
-        for <linux-mmc@vger.kernel.org>; Wed, 04 Dec 2019 09:59:35 -0800 (PST)
+        id S1728436AbfLDWZm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 4 Dec 2019 17:25:42 -0500
+Received: from mail-pf1-f195.google.com ([209.85.210.195]:36904 "EHLO
+        mail-pf1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727989AbfLDWZl (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Dec 2019 17:25:41 -0500
+Received: by mail-pf1-f195.google.com with SMTP id s18so548197pfm.4
+        for <linux-mmc@vger.kernel.org>; Wed, 04 Dec 2019 14:25:41 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=ragnatech-se.20150623.gappssmtp.com; s=20150623;
+        d=chromium.org; s=google;
         h=date:from:to:cc:subject:message-id:references:mime-version
          :content-disposition:content-transfer-encoding:in-reply-to
          :user-agent;
-        bh=NnAlVzxQqhMroKn01NkSHhH1AiWzcz1PmI9bavfgrJc=;
-        b=WeN1DYFuz6qbTSF8zkhoLbKbzuVNfXk+eheYaSR5sl8l7VT6/FMYDWq5WGPRfvnH5J
-         H8MNUBNoQSqE+4vcLxWE/RWUdaD5IJYzcwo2JfK9YuWz41unCrfR+Qle48w3QCILjEWg
-         Ez8MnNPMhxsbPuMM85br73MnhlWzFpCKhze2qQ8EDeAAHJIQrD+3im361r2/IB+J/n2t
-         9igTyAlwpmR73SdwjOSYIC//gTGuSGn/CSdokQtjL7m+3KBVu3fK4kUDiDumG+jiva4h
-         AzZMu0hKHEdyM7AjQM9lk9YJfzTS8vCI0Z5Ib+M7uKWvqfRHH/Qqvyf7taVRTPVuB0cA
-         2BTQ==
+        bh=ZuactyN4A4dYRUXhDIHCeCkwIm9yVEkpFLsO07TsWMo=;
+        b=hcGC+PTfEADAtTpYV00IwDi7gGhJIwdIxxVncPtNp+naLQKD2GcpYgCONjuPUWGrJT
+         68ZVoPyMrQfOz2k71HZP7CWGXwSIi9yPcJgpbY2RRsxIlml5I+q7OjSqyRlL8dBmsImq
+         XxXOFa8gzp1XgaOyd1HtMn5Qm8zU6pqGmri1M=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:date:from:to:cc:subject:message-id:references
          :mime-version:content-disposition:content-transfer-encoding
          :in-reply-to:user-agent;
-        bh=NnAlVzxQqhMroKn01NkSHhH1AiWzcz1PmI9bavfgrJc=;
-        b=HB5KuhUI+ASojWL+0Ecce+PTkWRBqu+8oXCJvmlWPi6S6VOxnKBaQHRZWEe8ssITyK
-         T59uPf4SKl99gy2aUZcchSmvBW1FjnTFf89Mt6RQwCpVG/PogmHUcqZC4muLg2fvI2+s
-         AWNxbE+mc2w+Rc7A+Dton+YUXO1vVqwRjp6zr07jZCnG76VE+AaqtAdMN603z52vG/sx
-         z0hLvGRmb6geOsURE02xVePmqDe+VocMdxIjhkmeBE64sqn8j6ow0CspyUjMnSn/zxN1
-         SPNYUgAmsvfanon1K7MtLe9DnF5Z2AGYXw+InES7UE9zu6/zeY5ZaBYIN44aL2P5MPoF
-         5wOA==
-X-Gm-Message-State: APjAAAXemPsQRIcpu5L6GeDoHGwAs7c0txr0fA1LKmQngVdnJMEEMwZH
-        5O3gmKsylH617nHm8sVLF6BF7g==
-X-Google-Smtp-Source: APXvYqxAicaegGYqhgVeHIRwqaquF9yndaug/Pn5IjDuFHRTfXfishhbMH/UMK7nJZNlprMmTtCHBg==
-X-Received: by 2002:ac2:5310:: with SMTP id c16mr2918290lfh.101.1575482374477;
-        Wed, 04 Dec 2019 09:59:34 -0800 (PST)
-Received: from localhost (h-93-159.A463.priv.bahnhof.se. [46.59.93.159])
-        by smtp.gmail.com with ESMTPSA id q25sm3661450lji.7.2019.12.04.09.59.33
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 04 Dec 2019 09:59:33 -0800 (PST)
-Date:   Wed, 4 Dec 2019 18:59:33 +0100
-From:   Niklas =?iso-8859-1?Q?S=F6derlund?= 
-        <niklas.soderlund@ragnatech.se>
-To:     Wolfram Sang <wsa@the-dreams.de>
-Cc:     linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: Re: [PATCH] mmc: renesas_sdhi: remove whitelist for internal DMAC
-Message-ID: <20191204175933.GD28879@bigcity.dyn.berto.se>
-References: <20191203194859.917-1-wsa@the-dreams.de>
+        bh=ZuactyN4A4dYRUXhDIHCeCkwIm9yVEkpFLsO07TsWMo=;
+        b=I73vlhQ8S0Dg2tUhDi8ES/KDp0KWtevBQgE7KMqlilhHKFKqXak2MZ73qw0HnURPoE
+         w7vx0RRHIWxhgmqPnLhkVGU8iX1oNZQScycQRcM7iLrUKLC83f2IIPfObk6nc8vnrTTG
+         or6+d4MyVXcQqT13rkvTHseYAPxc6q6VqZL5Q/FX98q88gn2kyJefI0dZzh/GnoDivOM
+         rX5wiQi31A1vc+0Bm1GYv9bhsGjki5LQx6bsWQb4LaA/Z3kt4/dLCp7N7kN/iRf/1c+7
+         SyYiWPJDCfFXT95YvF0KO9TvdWArT2pY4dc9Q3AqtZcLKCguT4BUCLk2d98MUYUUd60N
+         7w2Q==
+X-Gm-Message-State: APjAAAVHHJxb7sCbfgLtqXpOKB2Us0qQLcAVFHA2+8in0X1iuftohB1+
+        vPxKIybyViv+HbQAn8DEkw1xqQ==
+X-Google-Smtp-Source: APXvYqxBaAsAuBqWN6ofTztH1Ft6RofDpKfxbvrSawqVadU1ETT+uPUdPcG4iBOR1iaX0suaxHQU4Q==
+X-Received: by 2002:a63:d748:: with SMTP id w8mr5349746pgi.334.1575498340922;
+        Wed, 04 Dec 2019 14:25:40 -0800 (PST)
+Received: from localhost ([2620:15c:202:1:4fff:7a6b:a335:8fde])
+        by smtp.gmail.com with ESMTPSA id j7sm9359067pgn.0.2019.12.04.14.25.39
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 04 Dec 2019 14:25:40 -0800 (PST)
+Date:   Wed, 4 Dec 2019 14:25:38 -0800
+From:   Matthias Kaehlcke <mka@chromium.org>
+To:     Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+Cc:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
+        robh+dt@kernel.org, asutoshd@codeaurora.org,
+        stummala@codeaurora.org, sayalil@codeaurora.org,
+        cang@codeaurora.org, rampraka@codeaurora.org,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
+        Andy Gross <agross@kernel.org>,
+        Mark Rutland <mark.rutland@arm.com>
+Subject: Re: [PATCH V1 2/2] arm64: dts: qcom: sc7180: Add nodes for eMMC and
+ SD card
+Message-ID: <20191204222538.GI228856@google.com>
+References: <1574855381-15193-1-git-send-email-vbadigan@codeaurora.org>
+ <0101016eacb27366-31803877-9137-4c0e-922b-6a71a0e63ab3-000000@us-west-2.amazonses.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
-In-Reply-To: <20191203194859.917-1-wsa@the-dreams.de>
-User-Agent: Mutt/1.12.1 (2019-06-15)
+In-Reply-To: <0101016eacb27366-31803877-9137-4c0e-922b-6a71a0e63ab3-000000@us-west-2.amazonses.com>
+User-Agent: Mutt/1.10.1 (2018-07-13)
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Wolfram,
+Hi,
 
-Thanks for your work.
+On Wed, Nov 27, 2019 at 11:50:06AM +0000, Veerabhadrarao Badiganti wrote:
 
-On 2019-12-03 20:48:59 +0100, Wolfram Sang wrote:
-> From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> Add sdhc instances for supporting eMMC and SD-card on sc7180.
+> The regulators should be in HPM state for proper functionality of
+> eMMC and SD-card. Updating corresponding regulators accordingly.
 > 
-> We know now that there won't be Gen3 SoCs with both, SYS-DMAC and
-> internal DMAC. We removed the blacklisting for SYS-DMAC already, so we
-> can remove the whitelisting for internal DMAC, too. This makes adding
-> new SoCs easier. We keep the quirk handling, of course.
-> 
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-
-Reviewed-by: Niklas Söderlund <niklas.soderlund+renesas@ragnatech.se>
-
+> Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
 > ---
->  drivers/mmc/host/renesas_sdhi_internal_dmac.c | 23 ++++---------------
->  1 file changed, 4 insertions(+), 19 deletions(-)
 > 
-> diff --git a/drivers/mmc/host/renesas_sdhi_internal_dmac.c b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-> index 68fb39a74b8b..47ac53e91241 100644
-> --- a/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-> +++ b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-> @@ -298,38 +298,23 @@ static const struct tmio_mmc_dma_ops renesas_sdhi_internal_dmac_dma_ops = {
->   * Whitelist of specific R-Car Gen3 SoC ES versions to use this DMAC
->   * implementation as others may use a different implementation.
->   */
-> -static const struct soc_device_attribute soc_whitelist[] = {
-> -	/* specific ones */
-> +static const struct soc_device_attribute soc_dma_quirks[] = {
->  	{ .soc_id = "r7s9210",
->  	  .data = (void *)BIT(SDHI_INTERNAL_DMAC_ADDR_MODE_FIXED_ONLY) },
->  	{ .soc_id = "r8a7795", .revision = "ES1.*",
->  	  .data = (void *)BIT(SDHI_INTERNAL_DMAC_ONE_RX_ONLY) },
->  	{ .soc_id = "r8a7796", .revision = "ES1.0",
->  	  .data = (void *)BIT(SDHI_INTERNAL_DMAC_ONE_RX_ONLY) },
-> -	/* generic ones */
-> -	{ .soc_id = "r8a774a1" },
-> -	{ .soc_id = "r8a774b1" },
-> -	{ .soc_id = "r8a774c0" },
-> -	{ .soc_id = "r8a77470" },
-> -	{ .soc_id = "r8a7795" },
-> -	{ .soc_id = "r8a7796" },
-> -	{ .soc_id = "r8a77965" },
-> -	{ .soc_id = "r8a77970" },
-> -	{ .soc_id = "r8a77980" },
-> -	{ .soc_id = "r8a77990" },
-> -	{ .soc_id = "r8a77995" },
->  	{ /* sentinel */ }
->  };
->  
->  static int renesas_sdhi_internal_dmac_probe(struct platform_device *pdev)
->  {
-> -	const struct soc_device_attribute *soc = soc_device_match(soc_whitelist);
-> +	const struct soc_device_attribute *soc = soc_device_match(soc_dma_quirks);
->  	struct device *dev = &pdev->dev;
->  
-> -	if (!soc)
-> -		return -ENODEV;
-> -
-> -	global_flags |= (unsigned long)soc->data;
-> +	if (soc)
-> +		global_flags |= (unsigned long)soc->data;
->  
->  	dev->dma_parms = devm_kzalloc(dev, sizeof(*dev->dma_parms), GFP_KERNEL);
->  	if (!dev->dma_parms)
-> -- 
-> 2.20.1
+> This depends on the patch series (dt support for sc7180):
+> https://lkml.org/lkml/2019/11/8/149
+> ---
+>  arch/arm64/boot/dts/qcom/sc7180-idp.dts |  32 +++++++-
+>  arch/arm64/boot/dts/qcom/sc7180.dtsi    | 136 ++++++++++++++++++++++++++++++++
+>  2 files changed, 164 insertions(+), 4 deletions(-)
 > 
+> diff --git a/arch/arm64/boot/dts/qcom/sc7180-idp.dts b/arch/arm64/boot/dts/qcom/sc7180-idp.dts
+> index 189254f..583c42c 100644
+> --- a/arch/arm64/boot/dts/qcom/sc7180-idp.dts
+> +++ b/arch/arm64/boot/dts/qcom/sc7180-idp.dts
+> @@ -11,6 +11,7 @@
+>  #include "sc7180.dtsi"
+>  #include "pm6150.dtsi"
+>  #include "pm6150l.dtsi"
+> +#include <dt-bindings/gpio/gpio.h>
 
--- 
-Regards,
-Niklas Söderlund
+I think this should be above, together with
+'dt-bindings/regulator/qcom,rpmh-regulator.h'
+
+>  
+>  / {
+>  	model = "Qualcomm Technologies, Inc. SC7180 IDP";
+> @@ -103,7 +104,7 @@
+>  		vreg_l12a_1p8: ldo12 {
+>  			regulator-min-microvolt = <1696000>;
+>  			regulator-max-microvolt = <1952000>;
+> -			regulator-initial-mode = <RPMH_REGULATOR_MODE_LPM>;
+> +			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
+>  		};
+>  
+>  		vreg_l13a_1p8: ldo13 {
+> @@ -145,7 +146,7 @@
+>  		vreg_l19a_2p9: ldo19 {
+>  			regulator-min-microvolt = <2696000>;
+>  			regulator-max-microvolt = <3304000>;
+> -			regulator-initial-mode = <RPMH_REGULATOR_MODE_LPM>;
+> +			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
+>  		};
+>  	};
+>  
+> @@ -191,7 +192,7 @@
+>  		vreg_l6c_2p9: ldo6 {
+>  			regulator-min-microvolt = <2696000>;
+>  			regulator-max-microvolt = <3304000>;
+> -			regulator-initial-mode = <RPMH_REGULATOR_MODE_LPM>;
+> +			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
+>  		};
+>  
+>  		vreg_l7c_3p0: ldo7 {
+> @@ -209,7 +210,7 @@
+>  		vreg_l9c_2p9: ldo9 {
+>  			regulator-min-microvolt = <2952000>;
+>  			regulator-max-microvolt = <3304000>;
+> -			regulator-initial-mode = <RPMH_REGULATOR_MODE_LPM>;
+> +			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
+>  		};
+>  
+>  		vreg_l10c_3p3: ldo10 {
+> @@ -400,3 +401,26 @@
+>  			bias-pull-up;
+>  		};
+>  };
+> +
+> +&sdhc_1 {
+> +	status = "ok";
+> +
+> +	pinctrl-names = "default", "sleep";
+> +	pinctrl-0 = <&sdc1_on>;
+> +	pinctrl-1 = <&sdc1_off>;
+> +	vmmc-supply = <&vreg_l19a_2p9>;
+> +	vqmmc-supply = <&vreg_l12a_1p8>;
+> +
+
+remove empty line
+
+> +};
+> +
+> +&sdhc_2 {
+> +	status = "ok";
+> +
+> +	pinctrl-names = "default","sleep";
+> +	pinctrl-0 = <&sdc2_on>;
+> +	pinctrl-1 = <&sdc2_off>;
+> +	vmmc-supply  = <&vreg_l9c_2p9>;
+> +	vqmmc-supply = <&vreg_l6c_2p9>;
+> +
+> +	cd-gpios = <&tlmm 69 GPIO_ACTIVE_LOW>;
+> +};
+> diff --git a/arch/arm64/boot/dts/qcom/sc7180.dtsi b/arch/arm64/boot/dts/qcom/sc7180.dtsi
+> index 666e9b9..207d44f 100644
+> --- a/arch/arm64/boot/dts/qcom/sc7180.dtsi
+> +++ b/arch/arm64/boot/dts/qcom/sc7180.dtsi
+> @@ -897,6 +897,100 @@
+>  					function = "qup15";
+>  				};
+>  			};
+> +
+> +			sdc1_on: sdc1-on {
+> +				clk {
+> +					pins = "sdc1_clk";
+> +					bias-disable;
+> +					drive-strength = <16>;
+> +				};
+> +
+> +				cmd {
+> +					pins = "sdc1_cmd";
+> +					bias-pull-up;
+> +					drive-strength = <10>;
+> +				};
+> +
+> +				data {
+> +					pins = "sdc1_data";
+> +					bias-pull-up;
+> +					drive-strength = <10>;
+> +				};
+> +
+> +				rclk {
+> +					pins = "sdc1_rclk";
+> +					bias-pull-down;
+> +				};
+> +			};
+> +
+> +			sdc1_off: sdc1-off {
+> +				clk {
+> +					pins = "sdc1_clk";
+> +					bias-disable;
+> +					drive-strength = <2>;
+> +				};
+> +
+> +				cmd {
+> +					pins = "sdc1_cmd";
+> +					bias-pull-up;
+> +					drive-strength = <2>;
+> +				};
+> +
+> +				data {
+> +					pins = "sdc1_data";
+> +					bias-pull-up;
+> +					drive-strength = <2>;
+> +				};
+> +
+> +				rclk {
+> +					pins = "sdc1_rclk";
+> +					bias-pull-down;
+> +				};
+> +			};
+> +
+> +			sdc2_on: sdc2_on {
+> +				clk {
+> +					pins = "sdc2_clk";
+> +					bias-disable;
+> +					drive-strength = <16>;
+> +				};
+
+nit: add blank lines, consistent with the other pinconf entries.
+
+> +				cmd {
+> +					pins = "sdc2_cmd";
+> +					bias-pull-up;
+> +					drive-strength = <10>;
+> +				};
+> +				data {
+> +					pins = "sdc2_data";
+> +					bias-pull-up;
+> +					drive-strength = <10>;
+> +				};
+> +				sd-cd {
+> +					pins = "gpio69";
+> +					bias-pull-down;
+> +				};
+> +			};
+> +
+> +			sdc2_off: sdc2_off {
+> +				clk {
+> +					pins = "sdc2_clk";
+> +					bias-disable;
+> +					drive-strength = <2>;
+> +				};
+> +				cmd {
+> +					pins = "sdc2_cmd";
+> +					bias-pull-up;
+> +					drive-strength = <2>;
+> +				};
+> +				data {
+> +					pins = "sdc2_data";
+> +					bias-pull-up;
+> +					drive-strength = <2>;
+> +				};
+> +				sd-cd {
+> +					pins = "gpio69";
+> +					bias-pull-down;
+> +				};
+> +			};
+>  		};
+>  
+>  		qspi: spi@88dc000 {
+> @@ -911,6 +1005,48 @@
+>  			status = "disabled";
+>  		};
+>  
+> +		sdhc_1: sdhci@7c4000 {
+
+IIUC the nodes are ordered by address, hence this one should be between
+'clock-controller@100000' and 'geniqup@8c0000'.
+
+> +			compatible = "qcom,sc7180-sdhci", "qcom,sdhci-msm-v5";
+> +			reg = <0 0x7c4000 0 0x1000>;
+> +			reg-names = "hc_mem";
+> +
+> +			interrupts = <GIC_SPI 641 IRQ_TYPE_LEVEL_HIGH>,
+> +					<GIC_SPI 644 IRQ_TYPE_LEVEL_HIGH>;
+> +			interrupt-names = "hc_irq", "pwr_irq";
+> +
+> +			clocks = <&gcc GCC_SDCC1_APPS_CLK>,
+> +					<&gcc GCC_SDCC1_AHB_CLK>;
+> +			clock-names = "core", "iface";
+> +
+> +			bus-width = <8>;
+> +			non-removable;
+> +
+> +			mmc-ddr-1_8v;
+> +			mmc-hs200-1_8v;
+> +			mmc-hs400-1_8v;
+> +			mmc-hs400-enhanced-strobe;
+> +
+> +			status = "disabled";
+> +		};
+> +
+> +		sdhc_2: sdhci@8804000 {
+
+nodes are ordered by address: this one should be between 'pinctrl@3500000'
+and 'spi@88dc000Â´.
+
+> +			compatible = "qcom,sc7180-sdhci", "qcom,sdhci-msm-v5";
+> +			reg = <0 0x08804000 0 0x1000>;
+> +			reg-names = "hc_mem";
+> +
+> +			interrupts = <GIC_SPI 204 IRQ_TYPE_LEVEL_HIGH>,
+> +					<GIC_SPI 222 IRQ_TYPE_LEVEL_HIGH>;
+> +			interrupt-names = "hc_irq", "pwr_irq";
+> +
+> +			clocks = <&gcc GCC_SDCC2_APPS_CLK>,
+> +					<&gcc GCC_SDCC2_AHB_CLK>;
+> +			clock-names = "core","iface";
+
+nit: add a blank after the comma.
+
+Thanks
+
+Matthias
