@@ -2,286 +2,143 @@ Return-Path: <SRS0=1974=Z2=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.4 required=3.0 tests=DKIMWL_WL_MED,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,USER_IN_DEF_DKIM_WL autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AEEFDC432C3
-	for <linux-mmc@archiver.kernel.org>; Wed,  4 Dec 2019 02:10:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 91A36C432C3
+	for <linux-mmc@archiver.kernel.org>; Wed,  4 Dec 2019 02:18:59 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 641F32073F
-	for <linux-mmc@archiver.kernel.org>; Wed,  4 Dec 2019 02:10:10 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 61CA12073C
+	for <linux-mmc@archiver.kernel.org>; Wed,  4 Dec 2019 02:18:59 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="bBeWPND6"
+	dkim=pass (1024-bit key) header.d=nxp.com header.i=@nxp.com header.b="Ig2PHB1M"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726291AbfLDCKJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 3 Dec 2019 21:10:09 -0500
-Received: from mail-il1-f194.google.com ([209.85.166.194]:35339 "EHLO
-        mail-il1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726162AbfLDCKJ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Dec 2019 21:10:09 -0500
-Received: by mail-il1-f194.google.com with SMTP id g12so5228923ild.2
-        for <linux-mmc@vger.kernel.org>; Tue, 03 Dec 2019 18:10:09 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=CcksHrnDnvCw+7cPZSrlt/H4ilYewkHtwZbwPDwidps=;
-        b=bBeWPND6kv9FMp5OE1CKADmvH0Mvtix+Wp7qsdAnZaLiqCAjo93NfmUHKxGfnYACab
-         3VNXSiFr/Etto47AMIByMYYcmrvOz9rnEpJiDhI6JXegMMXChCJP3FSyr0istRHRWJUi
-         a2omfRzO7ZCicvXfA2rc0mRkg7Ko6fwbLdjI/cXvwtmcIYhoaUPz5zL9EpVQ0+3ve9Hx
-         vQEjc3ehiySCt1R1nQ2ezpl17NN7yXtIifTYKtapY7Akrh+ydFmLq07Iu3epfoHY0UUn
-         cF3TPcQqR/VXYOuMB35CI5pjSPJXPGBnXfP0nvnfdgdUfMRv0Tv5u3KuHP+qLoCf2i2/
-         Zz3w==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=CcksHrnDnvCw+7cPZSrlt/H4ilYewkHtwZbwPDwidps=;
-        b=WoDzoz1L5sVFrozR59EOSpWLXf9Igt9G3r43liisXYGOrxm57jd1Rgs7rijXldPewv
-         s60xVM84bIoGmLk73oFSromgPhC1EUAV07bX2OtppjFOEDmPWbTuPTYNEZi7Aq0XnS7g
-         tJ6e13fR/a+0hiEuGJZq6ij7fMruUOcH/qC4bKb6Wg5ywYBOHviyVYAc+3mMZkvPt5M6
-         XrRXDeu4qJx9phZ1F76TBD+GM5R8NTtAyheiuhj+e0GQMLfyiBd/uvGYDifYgnVxpDZi
-         VJhXpmsx1/rH1KcpDXvzYNSMlGmq5qnBjd0zvpKRvUbGfrOiMcOSPRrtX68u+6gVh8uF
-         5Oow==
-X-Gm-Message-State: APjAAAWy3AWXQ7tpiq2Tud1nmA0NiOtJEK1UoSIucY5Admo/G+ekdoE+
-        YZLoBVOEoyp3e8Oo3iJ3yYUIsMB+uCC5dS5OCbW2mQ==
-X-Google-Smtp-Source: APXvYqzCZgn+KTJMjfGfBVGRFGUk1RS7lUrI4vWwPucNKhPjo/MAabpBRco4G6J359xprZ2xHp/LW9zVjUB0Eqlfn1o=
-X-Received: by 2002:a92:1547:: with SMTP id v68mr1331380ilk.58.1575425407814;
- Tue, 03 Dec 2019 18:10:07 -0800 (PST)
+        id S1726179AbfLDCS6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 3 Dec 2019 21:18:58 -0500
+Received: from mail-eopbgr40054.outbound.protection.outlook.com ([40.107.4.54]:1927
+        "EHLO EUR03-DB5-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1726162AbfLDCS6 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 3 Dec 2019 21:18:58 -0500
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=iwqzhNUJCXIJL+eyc6TZcIyPkMY2ZlRKv2mAs1z3J727bRFqfrvBez1Vk2+QaUY79aOIzvMgLjvt83BVjf5uuirc0K9Qi4siOHpEOmwGDUlwrBftt6I0bmLNwDw7feCNDgSfPyVpzJAe5Y8tR3oyOJIkEQoMVTRgPXnyExYgCOYNQSDZnNhET3QNBgHNHdpBWpXVbkikXxvTAs6oeWCiTr1rCEMNSIZaKk5IX4PiKNVqUelnJBaC0jKdrVXzx4iMAhFymfYTUJZ8bi92vgHe9X9/s7i4BmZIBmhKmr2SUzLbsJBy/da+A03gCmduc1NVIKcT9da4reEGaFMjtDun6Q==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=TjZ1kNn5QabcK8oPIrI9iZtZD8khhk/a53JAZfnKrys=;
+ b=mEv60Ou+4WBMsNvz9ZjUlSaNGuymWhZokzlXJWPbEgoY5ZxLsv9RjNtTz4xUXumMocpCJuPdMZg/XiZDAthxnIX2wTLPi7xJj1iwrbRXF67wm8mLN0AtlbbylDywV7eVhfAOgyjAvFEcfc7sARXJ+lD1OuJkSzky15hhNQWlgyYtfbljVlQoh+NHeIJWNHswSOyXvauoQW7SSQbvyVqiH+VDh8ZgMuSJWOJrl1h4DnllwHrq15PpN6p15VCFbOTJ8Dbc5lLbXNT4ajONgfsDuQgW4MV0BTlA7MtCa8639m5TLKmV3mbBmIAjYD29cNS4qDyDxZrT2V04I1xPPlHl3g==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=nxp.com; dmarc=pass action=none header.from=nxp.com; dkim=pass
+ header.d=nxp.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nxp.com; s=selector2;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=TjZ1kNn5QabcK8oPIrI9iZtZD8khhk/a53JAZfnKrys=;
+ b=Ig2PHB1Mq9bjow1R6JLBVbuxypXlSpRc0wwAcxVxTo5ANcD/BEYIWTdAnvQrNupvXQCcDvXRaP0r9FHCBeNPYtnPghU2XL33NG/JOltQ3acksHQmggkRw4Y1rki4rHUtBInJrtPjRVCvxFzN/TroA4G1yIqsRi9XObT9YI9YF5g=
+Received: from VI1PR04MB5040.eurprd04.prod.outlook.com (20.177.52.24) by
+ VI1PR04MB5056.eurprd04.prod.outlook.com (20.177.50.141) with Microsoft SMTP
+ Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.20.2495.18; Wed, 4 Dec 2019 02:18:53 +0000
+Received: from VI1PR04MB5040.eurprd04.prod.outlook.com
+ ([fe80::c5f3:ba8e:2b17:1f28]) by VI1PR04MB5040.eurprd04.prod.outlook.com
+ ([fe80::c5f3:ba8e:2b17:1f28%5]) with mapi id 15.20.2495.014; Wed, 4 Dec 2019
+ 02:18:53 +0000
+From:   BOUGH CHEN <haibo.chen@nxp.com>
+To:     "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+        "robh+dt@kernel.org" <robh+dt@kernel.org>,
+        "mark.rutland@arm.com" <mark.rutland@arm.com>,
+        "shawnguo@kernel.org" <shawnguo@kernel.org>,
+        "s.hauer@pengutronix.de" <s.hauer@pengutronix.de>
+CC:     "kernel@pengutronix.de" <kernel@pengutronix.de>,
+        "festevam@gmail.com" <festevam@gmail.com>,
+        dl-linux-imx <linux-imx@nxp.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Subject: [PATCH v2 09/14] doc: dt: fsl-imx-esdhc: add auto-cmd23-broken
+ binding
+Thread-Topic: [PATCH v2 09/14] doc: dt: fsl-imx-esdhc: add auto-cmd23-broken
+ binding
+Thread-Index: AQHVqkks78GOLEyThkiqDuMepXaJCA==
+Date:   Wed, 4 Dec 2019 02:18:53 +0000
+Message-ID: <20191204022537.15500-1-haibo.chen@nxp.com>
+Accept-Language: zh-CN, en-US
+Content-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+x-mailer: git-send-email 2.17.1
+x-clientproxiedby: HK2PR03CA0044.apcprd03.prod.outlook.com
+ (2603:1096:202:17::14) To VI1PR04MB5040.eurprd04.prod.outlook.com
+ (2603:10a6:803:60::24)
+authentication-results: spf=none (sender IP is )
+ smtp.mailfrom=haibo.chen@nxp.com; 
+x-ms-exchange-messagesentrepresentingtype: 1
+x-originating-ip: [119.31.174.71]
+x-ms-publictraffictype: Email
+x-ms-office365-filtering-ht: Tenant
+x-ms-office365-filtering-correlation-id: 0bfd63d3-c30f-403c-cca7-08d778604eba
+x-ms-traffictypediagnostic: VI1PR04MB5056:|VI1PR04MB5056:
+x-ms-exchange-transport-forked: True
+x-microsoft-antispam-prvs: <VI1PR04MB5056AB209E996648765227BF905D0@VI1PR04MB5056.eurprd04.prod.outlook.com>
+x-ms-oob-tlc-oobclassifiers: OLM:7219;
+x-forefront-prvs: 0241D5F98C
+x-forefront-antispam-report: SFV:NSPM;SFS:(10009020)(4636009)(346002)(366004)(136003)(396003)(376002)(39860400002)(43544003)(189003)(199004)(316002)(52116002)(102836004)(5660300002)(305945005)(256004)(478600001)(4326008)(14454004)(54906003)(81156014)(1076003)(7736002)(8936002)(110136005)(81166006)(99286004)(8676002)(50226002)(186003)(2906002)(25786009)(6506007)(26005)(386003)(2201001)(2616005)(66946007)(71200400001)(66446008)(64756008)(66476007)(66556008)(2501003)(6436002)(3846002)(6116002)(6512007)(86362001)(6486002)(36756003)(71190400001);DIR:OUT;SFP:1101;SCL:1;SRVR:VI1PR04MB5056;H:VI1PR04MB5040.eurprd04.prod.outlook.com;FPR:;SPF:None;LANG:en;PTR:InfoNoRecords;MX:1;A:1;
+received-spf: None (protection.outlook.com: nxp.com does not designate
+ permitted sender hosts)
+x-ms-exchange-senderadcheck: 1
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: HKWy4orlNeGyYNqMPK8Ji5eWxI+EKGtEC3AjJLkAslAhDppPksRexVf+A2D1i/V99x+qOowM49+uoejIs8xXqKUd+2XBJwzuNrzgBf+Evc5bAGsGUHEeQMC1miF85N8TKyc2t/JMI2B29KQP2bOnaB2Icc6XWdU68i/B8bzRSDHbULkumK12f8nc43r/dKMLgixyFv0tLC8XVRaBWXbWVImeJu8w/czWytt+uodqS64HHE8On+mpuUvrHx2vgLmajWcUsuWk2OVMdU/ThA6SFUVH4KTqP5gsaYLSqGRRs8OwrislZAI0I5fOpss1nW+BrBc0MSP3815F6Yze26+3G++37l1mZqKflYStBxvqO6uvRC9A3y6WIy7+5Si60zrt8tH1/+m99zInaBxtM/LCERzNQHYSGvO8BuGUmeIKCqTs78RsaptwNW0I4hJrHz2lff4kVS3Sh9uXP/4owoTw95t/rjLJL4oZZY6BQYLCesYFaQqi9ESlIYhMaI+tD8eB
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
 MIME-Version: 1.0
-References: <1571668177-3766-1-git-send-email-rampraka@codeaurora.org>
- <CAPDyKFoZEc-m7NMnaAa5bjtCSp4wyJqic3cLHk95xracoWcCUA@mail.gmail.com>
- <5c78cc29-deb1-4cea-5b30-6f7538ca4703@codeaurora.org> <CAD=FV=W+JbeF7yKk6Vup=5-MSbYC8qq5rm176hZk2WdiFwA3qg@mail.gmail.com>
- <0101016eb635d158-5e87498b-b906-4ec2-813f-83275cab3555-000000@us-west-2.amazonses.com>
-In-Reply-To: <0101016eb635d158-5e87498b-b906-4ec2-813f-83275cab3555-000000@us-west-2.amazonses.com>
-From:   Doug Anderson <dianders@google.com>
-Date:   Tue, 3 Dec 2019 18:09:54 -0800
-Message-ID: <CAD=FV=Xm2mAfnS2mvddxejgD1sV58FRaQmkO_sN8DxoJhOynUQ@mail.gmail.com>
-Subject: Re: [RFC 0/6] mmc: Add clock scaling support for mmc driver
-To:     Ram Prakash Gupta <rampraka@codeaurora.org>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Sahitya Tummala <stummala@codeaurora.org>,
-        Sayali Lokhande <sayalil@codeaurora.org>,
-        Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
-        cang@codeaurora.org, ppvk@codeaurora.org,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Rob Herring <robh+dt@kernel.org>,
-        Linux MMC List <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        DTML <devicetree@vger.kernel.org>,
-        Asutosh Das <asutoshd@codeaurora.org>,
-        Evan Green <evgreen@chromium.org>
-Content-Type: text/plain; charset="UTF-8"
+X-OriginatorOrg: nxp.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 0bfd63d3-c30f-403c-cca7-08d778604eba
+X-MS-Exchange-CrossTenant-originalarrivaltime: 04 Dec 2019 02:18:53.1331
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: We13iL4mnG22ZshZef2H0y+w8xaVMnGAo8eSPPCun/nb4Eab/LT97Tbn2FWvyi41GkhbHdmwQdTLkUZROYBmzQ==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: VI1PR04MB5056
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi,
+Add sdhci,auto-cmd23-broken binding.
 
-On Fri, Nov 29, 2019 at 12:10 AM <rampraka@codeaurora.org> wrote:
->
-> > I am slightly baffled about why this would save energy unless it
-> > allows you to lower the voltage to the controller.  I know you _can_
-> > sometimes lower the voltage to the controller on Qualcomm parts, but
-> > you are arguing that it is useful even on systems that can't lower the
-> > voltage.  That feels slightly questionable.  I would expect that
-> > racing to idle (with the right tuning parameters) would be a better
-> > way to go.
->
-> Sorry, if my explanation was misleading before. MMC driver is not
-> changing
-> card/controller voltage but by lowering clock frequency of card and
-> controller brings down _bus_ and _system_ voltage corners of device
-> which
-> helps in saving power consumption.
+Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
+---
+ Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt | 8 ++++++++
+ 1 file changed, 8 insertions(+)
 
-Yes, I understood.  You are able to lower the voltage supplied to the
-controller itself, not to the card.  ...but that is not something that
-all SoCs can do.  I think here you are arguing that your feature is
-useful to everyone--even if they can't ever lower the voltage of the
-controller.  I am questioning that.
+diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt b/Docu=
+mentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
+index 89b986a2f9d5..7ea8e0f14e5f 100644
+--- a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
++++ b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
+@@ -46,6 +46,14 @@ Optional properties:
+   property allows user to change the delay target for the strobe input rea=
+d clock.
+   If not use this property, driver default set the delay target to value 7=
+.
+   Only eMMC HS400 mode need to take care of this property.
++- sdhci,auto-cmd23-broken: disable the ACMD23 function of USDHC.
++  This is required for eMMC on imx6qpdl/imx6sx/imx7d when it use ADMA mode=
+. Because
++  for these SoC, it do not support the ACMD23 completely, only take the 16=
+ bit block
++  count from the 0x4 register (BLK_ATT) as argument for the ACMD23, the up=
+per 16 bit
++  of the CMD23's argument is ignored. This will impact the reliable write =
+operation
++  and the RPMB block write operation, because these operations need to set=
+ the bit 31
++  of the CMD23's argument. SDMA mode will default disable the ACMD23 mode.=
+ SD card do
++  not has this limitation on these SoCs.
+=20
+ Examples:
+=20
+--=20
+2.17.1
 
-
-> > As a specific example, let's imagine we want to transfer 1000 MB of
-> > data and we have 20 seconds with which to do it.  We can achieve this
-> > by transferring 50 MB/s for the whole 20 seconds.  Alternatively, we
-> > could transfer at 400 MB/s 2.5 seconds and then fully power gate the
-> > eMMC for the next 17.5 seconds.
-> >
-> > In that example, I'd wonder ask is more power efficient.  Presumably
-> > the 2nd.  This is the whole "race to idle" concept as I understand it.
-> >
-> > The "race to idle" is talked about a lot in the context of CPU
-> > frequency decisions.  Presumably you'll point out that "race to idle"
-> > is NOT the right thing to do for choosing a CPU frequency.  As I
-> > understand it, this is primarily true because we need to raise the CPU
-> > voltage to run at faster speeds.  This would lead me to believe that
-> > the only case you'd want to do frequency scaling like this is if it
-> > allows you to lower the voltage provided to the eMMC controller.  As
-> > you said, for Qualcomm it _does_ allow you to do this, but most other
-> > SoCs don't.  ...so unless there's a flaw in my logic (always
-> > possible!) this patch series should be amended to say it's only useful
-> > if it allows you to down-volt the controller.
-> >
-> > Just to think a little bit more about my logic: of course, you might
-> > argue that we can't just do a 1000 MB data transfer.  We can break
-> > that down into two cases:
-> >
-> > a) For writing, presumably the data is produced over time and you
-> > don't want to buffer the whole 1000 MB and delay 17.5 seconds before
-> > you start writing.  ...but presumably you could do _some_ buffering
-> > and then break things into chunks where you ungate the clock to the
-> > card, write a chunk out, and then re-gate the clock.  There will
-> > obviously be some overhead with each clock gate/ungate, but
-> > (hopefully) not too much.  ...and there will be time when data is in
-> > RAM and not on the disk so you'd worry about power failure, but if you
-> > want to get data on the disk ASAP why are you scaling the clock (and
-> > thus delaying the data from getting to the disk) at all?  Maybe some
-> > math?  How long does it take to ungate/gate the clocks.  1 ms?  It's
-> > just flipping a bit, right?  ...and does assuming we can allocate a 40
-> > MB write buffer seem sane?  So we eat 1 ms to ungate, 100 ms to
-> > transfer 40 MB, 1 ms to gate.  Compared to transferring at 50 MB/sec
-> > (w/ no gating), we'd transfer the same 40 MB in 800 ms.  So we either
-> > keep the clock on at 50 MHz for 800 ms or we keep it on at 200 MHz for
-> > 102 ms and gate it for 698 ms.
-> >
->
-> "race to idle" helps but this feature was implemented with focus on
-> video
-> playback case, where data transfer request to mmc driver spans over
-> entire
-> playback time of video. In this case, running device in low speed mode
-> helps.
-
-It doesn't matter if you've got a long playback.  A properly tuned
-"race to idle" should still be better unless you are seriously saving
-a lot of power by never bringing the voltage up.  The above example is
-with a fixed size transfer, but just imagine the same thing over and
-over again and you've got the video playback case.
-
-
-> > b) If you're reading data then hopefully the system has some sort of
-> > readahead going on.  In the "video playback" case the system should
-> > have no problem predicting that if you've just read bytes
-> > 1,000,000,000 - 2,000,000,000 of a file over the last 10 seconds that
-> > you're likely to keep reading the same file.  Presumably it wouldn't
-> > be totally insane to read 40 MB ahead of time and then we can do the
-> > same math as a).  If 40 MB is too much for readahead, then shrink it
-> > and redo the math.  Even with much smaller numbers the "race to idle"
-> > wins because gating / ungating clocks is fast.  ...or do you know some
-> > reason why gating / ungating clocks needs to be slow?  If so, how
-> > slow?
-> >
->
-> I have performed one experiment by increasing read ahead size, but that
-> is
-> not helping. And I don't observe much difference in data request pattern
-> generated in video playback case.
-
-You have to make sure that you are proactively gating the card clock
-in conjunction.  If you aren't gating the card clock quickly enough
-(and aren't lowering the controller voltage when the card clock is
-gated) then you won't notice the savings.
-
-
-> >> Test case used are 1080p and 4k video playback use case. Please find
-> >> below
-> >> test case information and power impact data. In both the below video
-> >> playback
-> >> cases, a considerable amount of power savings can be observed with
-> >> clock scaling
-> >> feature.
-> >>
-> >> Use cases Delta at battery (mA) Power impact %
-> >> 30 fps at HD 1080p decode 20 Mbps 10 mA 11%
-> >> 30 fps at UHD 8b H.264 42 Mbps 20.93 mA 19%
-> >
-> > Numbers like this are exactly what is needed to justify your patch
-> > series.  ...but I'd be super curious to how it would compare to:
-> >
-> > 1) Tuning the runtime PM auto-suspend delay.  If you have your
-> > auto-suspend delay set wrong (like 500 ms) then all the math above is
-> > totally wrong.  We'll keep clocking at 400 MHz needlessly even though
-> > there is no data to transfer.  If autosuspend is just gating clocks
-> > then it feels like you could set it to 1 ms, or 10 ms.  NOTE: if
-> > autosuspend for you is something more major (fully turning off power
-> > rails to the eMMC) then maybe you need another level where you just
-> > turn off the clocks.  Seems like we could find some way to make that
-> > work.
->
-> Gating / Ungating can be fine tuned to help bring down power consumption
-> too. I will share power numbers with tuned parameters in next
-> communication.
-
-Thanks, I think this is critical for the discussion.  Please make sure
-that when you are gating you code it up in a way that you can remove
-the vote for the higher controller voltage.
-
-
-> > 2) Tuning any readached mechanism in your system.  If your system
-> > somehow does zero readahead then obviously all my arguments don't work
-> > for reads.  ...but why would you not have readahead?
-> >
-> > 3) Tuning any write buffering in your system.  Same argument as #2.
->
-> This feature is specific to video playback use case from storage device.
-> Not sure, which buffering can be tuned. Can you point out any buffering
-> used?
-
-If you're only testing video playback then I guess you don't care so
-much here.  I was assuming you cared about video record too, but maybe
-that's not such an important use case for saving power.
-
-
-> > 4) Making sure that when the MMC card clock is gated that you request
-> > the lowest voltage level for the controller (and set the controller's
-> > bus clock to the lowest level since it's not doing anything).
-> >
-> >
-> > I would also be very interested to know how much of those savings are
-> > achieved if you keep the voltage to the MMC controller the same.  In
-> > other words do something that arbitrarily keeps the MMC controller
-> > requesting the same voltage level from the rest of the system and then
-> > do your power measurements.  How much do your savings change?
-> >
-> >
-> > I will also note that aggressive clock gating is exactly what the
-> > dw_mmc controller does automatically (except for SDIO, but that's a
-> > different story).  Seeing that the controller itself can stop the
-> > clock in dw_mmc gives further credence that gating / ungating the
-> > clock is a very lightweight operation and 1 ms is probably an
-> > over-estimation of how long it takes.
-> >
-> >
-> > I guess one very last note is that I spent most of the time above
-> > arguing that the clock scaling concept is probably not useful for any
-> > SoCs where you can't adjust the voltage provided to the MMC
-> > controller.  That doesn't necessarily mean that your patch series is
-> > useful for SoCs where you can.  Specifically you'd need to do math to
-> > see how much more power the MMC controller takes at the higher
-> > voltage.  Then you can calculate a "perf per watt".  If the watts to
-> > transfer data at 400 MB/s aren't 8 times more than the watts to
-> > transfer at 50 MB/s then that's a ding against your idea.  You'd also
-> > don't have a dedicated voltage rail, right?  So you'd have to see what
-> > percentage of the time the MMC controller was the only thing in the
-> > system that was requesting the higher voltage.  If it happened that
-> > something else in the system was keeping the voltage higher anyway
-> > then it would be better for you to run faster and race to idle.
-> > Really I guess the case you're most worried about is if the MMC
-> > controller is causing other components in the system to be at a higher
-> > voltage point (and thus take up more power)...
-> >
->
-> Rail is not dedicated for eMMC device. So during video playback its mmc
-> votes only, which keeps device in higher voltage corners. So for a three
-> hours of a video playback, power consumption due to mmc vote would be
-> quite
-> considerable.
-
-You should be able to remove your vote whenever the card clock is
-gated.  Maybe this is what you're missing?
-
--Doug
