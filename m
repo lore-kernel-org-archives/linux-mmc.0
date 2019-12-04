@@ -2,79 +2,117 @@ Return-Path: <SRS0=1974=Z2=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.4 required=3.0 tests=DKIMWL_WL_MED,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_IN_DEF_DKIM_WL autolearn=no
+X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 09D18C43603
-	for <linux-mmc@archiver.kernel.org>; Wed,  4 Dec 2019 08:12:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BF9B4C43603
+	for <linux-mmc@archiver.kernel.org>; Wed,  4 Dec 2019 08:54:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id B807820675
-	for <linux-mmc@archiver.kernel.org>; Wed,  4 Dec 2019 08:12:17 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 315E820675
+	for <linux-mmc@archiver.kernel.org>; Wed,  4 Dec 2019 08:54:53 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="Urf/A79c"
+	dkim=pass (1024-bit key) header.d=rasmusvillemoes.dk header.i=@rasmusvillemoes.dk header.b="JJaWHvYd"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726166AbfLDIMR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 4 Dec 2019 03:12:17 -0500
-Received: from mail-io1-f67.google.com ([209.85.166.67]:37688 "EHLO
-        mail-io1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725951AbfLDIMR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Dec 2019 03:12:17 -0500
-Received: by mail-io1-f67.google.com with SMTP id k24so7015798ioc.4
-        for <linux-mmc@vger.kernel.org>; Wed, 04 Dec 2019 00:12:16 -0800 (PST)
+        id S1725994AbfLDIyw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 4 Dec 2019 03:54:52 -0500
+Received: from mail-lf1-f68.google.com ([209.85.167.68]:39462 "EHLO
+        mail-lf1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725922AbfLDIyw (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Dec 2019 03:54:52 -0500
+Received: by mail-lf1-f68.google.com with SMTP id q6so5458766lfb.6
+        for <linux-mmc@vger.kernel.org>; Wed, 04 Dec 2019 00:54:50 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=I13QOM/XyZe4jexaUu6Tg14FjNQVNu2OzdTG+eKEvxs=;
-        b=Urf/A79crlroamjdZ/4jO0Ea3JsVS/HR0RS6j4Scbe/uESPEuIqzn1CISgZZ4M2O5Q
-         2IJ/bbCONVPXPx0UHdwldQBbY+glrYv9E+RAOFyiQlZhteyXjKfPhHoaC0lmBx818SVx
-         zrOFUawhELjFTUzvBv6ySv1v7pSJqYo2WdgONHIEbMLzMRuo7ZshWOT2URSNCCVm0tFs
-         dME9t6qUHmmDkcJ78hRUgtnH7QGqkW7K6X4NttTr2wqeRCOPQMcv/FfDYNUVmkpEpxui
-         EHybpT0WbT4GlKWVIlTpGBZ+k3S90J77Jjt72aKwVx2gqSklHM8p5i9ZFJGkKUFnam/Z
-         +fqQ==
+        d=rasmusvillemoes.dk; s=google;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=1owaEg/Q3EobHWa/P9ZQ3aJl+evoIYnoNwkMlvjjHb0=;
+        b=JJaWHvYdXZXSFNCwUGxfi4nXoRwMZ0oS5UnGMK+Scpgykfyh+J9OCfct5zkEH1Zfrh
+         Jvw+gAIOAu2P8Lf9SnbuNkGFSXxlGN7jTQdXmjtAVjjrgUB0fAV8i8igZe4UH+V3JoGU
+         n35GOhR/+wMuetD3quEL+6+FKHQi9qtz6hzdE=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=I13QOM/XyZe4jexaUu6Tg14FjNQVNu2OzdTG+eKEvxs=;
-        b=EuGL64l9kDWuMJ4hMoxvzonwWJI9CcPMZQBZB217ekIEzKsz9kzZyU1MlgZqBSLdi9
-         TqflSgXgYdXJpx/zgGk97XTzxvcYBonW1sml7zAeiGgQfloj6XzWvd59A5cyIqCE3ZIB
-         SxFRZlSzWWc7yLpayJnB3rJBvkREcuHZaK2bohAD37LsQezCBGCxg2zYopxuAeBBXrO3
-         GvzKR9jAGymgmFeLQOyY35ZbeidEVhofl5BdpOHs1rVUOGMrFMfC/bwm7aMid59BuMPK
-         AOGiP1q36n31f1lF2rdjJJ9oIXaPXSpyKyh88i7FDwXIGxEYnKPW/X/UK+iypb3LThsc
-         3nCw==
-X-Gm-Message-State: APjAAAXEhalP6Qj/piTgBNaYSR7ydTA8PmMqploUYcpmOjacc42RxZsn
-        7TWV35n6LWBlQkzAfFpPFa0Sagrm9fTNrfkmSpkj7w==
-X-Google-Smtp-Source: APXvYqwt6fIkH5aRFph0l1Lb7nTwjasXYcWkPzvXCdXqxUsHWhUIa0fRQNvSZ2zcwf47+j1kV/aNS9rzQoInjIAmU2g=
-X-Received: by 2002:a6b:c7c7:: with SMTP id x190mr1124939iof.123.1575447135988;
- Wed, 04 Dec 2019 00:12:15 -0800 (PST)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=1owaEg/Q3EobHWa/P9ZQ3aJl+evoIYnoNwkMlvjjHb0=;
+        b=i5TtNAg38OteLls0KfL3dnRj//unTHQvnNT3S8ZXt/uehH+KI6Jb4rMEaBhblVx2mL
+         NkMINfmvoOamkpdArjaWyxKPdWrJ0uCRXnxAtubtovXUIV6GX/Xch9XpdanB7N7ni32e
+         qhzM6F36VzERVlqXVNSFHTqY1fXITJJIAqPBPsxiox1Bm2vRWa3/nnBJEU6EpMAX6Ztj
+         FQsZ1fsrcpJcNNEfhj/fP1nvkNX/Ol4Tzt0SivZdsISFUiOiqIcBmz4Y+wUQwjvv7J0M
+         11rLhz29ABGxJurXp7Ls8XzxP81p0pYp0piv9bJrtwnuKs4t54kPay69dxjYtQEh83OX
+         +zvw==
+X-Gm-Message-State: APjAAAWz27TESvV4c3ON0y8AFxhCpECSHwlh2N2DGXET9qyzALEy0K0I
+        X0SB52wIH0pKA4C/PVx4/O5XNw==
+X-Google-Smtp-Source: APXvYqxQBYdHB2PyobYinLvVW1nEcg1acM+FtkltLUEzE1tjT3ZHwHaWkGyZ1Oy0DQ69aYcFZH9Lpw==
+X-Received: by 2002:a19:7b1a:: with SMTP id w26mr1281048lfc.17.1575449689914;
+        Wed, 04 Dec 2019 00:54:49 -0800 (PST)
+Received: from prevas-ravi.prevas.se ([81.216.59.226])
+        by smtp.gmail.com with ESMTPSA id q25sm2732011lji.7.2019.12.04.00.54.48
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 04 Dec 2019 00:54:49 -0800 (PST)
+From:   Rasmus Villemoes <linux@rasmusvillemoes.dk>
+To:     Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Yinbo Zhu <yinbo.zhu@nxp.com>,
+        Rasmus Villemoes <linux@rasmusvillemoes.dk>,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: [PATCH] mmc: sdhci-of-esdhc: Revert "mmc: sdhci-of-esdhc: add erratum A-009204 support"
+Date:   Wed,  4 Dec 2019 09:54:46 +0100
+Message-Id: <20191204085447.27491-1-linux@rasmusvillemoes.dk>
+X-Mailer: git-send-email 2.23.0
 MIME-Version: 1.0
-References: <20191204071958.18553-1-chaotian.jing@mediatek.com>
-In-Reply-To: <20191204071958.18553-1-chaotian.jing@mediatek.com>
-From:   Hsin-Yi Wang <hsinyi@google.com>
-Date:   Wed, 4 Dec 2019 16:11:50 +0800
-Message-ID: <CACb=7PWeW+aYx3Dah0CFj3cyG+Wr=gOe7pfo9a_jmfjvjJeFDg@mail.gmail.com>
-Subject: Re: [PATCH] mmc: mediatek: fix CMD_TA to 2 for MT8173 HS200/HS400 mode
-To:     Chaotian Jing <chaotian.jing@mediatek.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org,
-        srv_heupstream@mediatek.com
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Dec 4, 2019 at 3:20 PM Chaotian Jing <chaotian.jing@mediatek.com> wrote:
->
-> there is a chance that always get response CRC error after HS200 tuning,
-> the reason is that need set CMD_TA to 2. this modification is only for
-> MT8173.
->
-> Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
-Tested-by: Hsin-Yi Wang <hsinyi@chromium.org>
-> ---
+This reverts commit 5dd195522562542bc6ebe6e7bd47890d8b7ca93c.
+
+First, the fix seems to be plain wrong, since the erratum suggests
+waiting 5ms before setting setting SYSCTL[RSTD], but this msleep()
+happens after the call of sdhci_reset() which is where that bit gets
+set (if SDHCI_RESET_DATA is in mask).
+
+Second, walking the whole device tree to figure out if some node has a
+"fsl,p2020-esdhc" compatible string is hugely expensive - about 70 to
+100 us on our mpc8309 board. Walking the device tree is done under a
+raw_spin_lock, so this is obviously really bad on an -rt system, and a
+waste of time on all.
+
+In fact, since esdhc_reset() seems to get called around 100 times per
+second, that mpc8309 now spends 0.8% of its time determining that
+it is not a p2020. Whether those 100 calls/s are normal or due to some
+other bug or misconfiguration, regularly hitting a 100 us
+non-preemptible window is unacceptable.
+
+Signed-off-by: Rasmus Villemoes <linux@rasmusvillemoes.dk>
+---
+
+The errata sheet for mpc8309 also mentions A-009204, so I'm not at all
+opposed to having a fix for that. But it needs to be done properly
+without causing a huge performance or latency impact. We should
+probably just add a bit to struct sdhci_esdhc which gets initialized
+in esdhc_init.
+
+ drivers/mmc/host/sdhci-of-esdhc.c | 3 ---
+ 1 file changed, 3 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+index 5cca3fa4610b..7f87a90bf56a 100644
+--- a/drivers/mmc/host/sdhci-of-esdhc.c
++++ b/drivers/mmc/host/sdhci-of-esdhc.c
+@@ -764,9 +764,6 @@ static void esdhc_reset(struct sdhci_host *host, u8 mask)
+ 	sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
+ 	sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
+ 
+-	if (of_find_compatible_node(NULL, NULL, "fsl,p2020-esdhc"))
+-		mdelay(5);
+-
+ 	if (mask & SDHCI_RESET_ALL) {
+ 		val = sdhci_readl(host, ESDHC_TBCTL);
+ 		val &= ~ESDHC_TB_EN;
+-- 
+2.23.0
+
