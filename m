@@ -1,84 +1,139 @@
-Return-Path: <SRS0=6ao/=Z3=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=q/7Q=Z4=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.6 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.3 required=3.0 tests=DKIM_ADSP_CUSTOM_MED,
+	DKIM_INVALID,DKIM_SIGNED,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DAEB0C2D0C0
-	for <linux-mmc@archiver.kernel.org>; Thu,  5 Dec 2019 21:15:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4CEFBC43603
+	for <linux-mmc@archiver.kernel.org>; Fri,  6 Dec 2019 07:54:27 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id AEFEB24676
-	for <linux-mmc@archiver.kernel.org>; Thu,  5 Dec 2019 21:15:22 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1575580522;
-	bh=65qof+2pKIiDkdnbH27diEYSYggjj2e6fRn+s00UYrQ=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
-	b=yFeP/IMN1g4HutSxYMdLOpR5Mg7er8rhyNLJ1JYiEk0nr+QAXtWN6lXtBLNhr33JM
-	 CcfSylKojOO05fi2Mh6SYZgIQZGQxotQVdYUKVXn/F9X7XZ4gkX0j/1rBLKiSddxyR
-	 ZsYekv3RibiQbb3gFjlqxNJi1xbl79Cmctzw1ty8=
+	by mail.kernel.org (Postfix) with ESMTP id 204A12467B
+	for <linux-mmc@archiver.kernel.org>; Fri,  6 Dec 2019 07:54:27 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="cZy4v5tU"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729841AbfLEVPW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 5 Dec 2019 16:15:22 -0500
-Received: from mail-ot1-f67.google.com ([209.85.210.67]:42314 "EHLO
-        mail-ot1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729450AbfLEVPW (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Dec 2019 16:15:22 -0500
-Received: by mail-ot1-f67.google.com with SMTP id 66so3911410otd.9;
-        Thu, 05 Dec 2019 13:15:21 -0800 (PST)
+        id S1726225AbfLFHy0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 6 Dec 2019 02:54:26 -0500
+Received: from mail-pf1-f196.google.com ([209.85.210.196]:40992 "EHLO
+        mail-pf1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726184AbfLFHy0 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Dec 2019 02:54:26 -0500
+Received: by mail-pf1-f196.google.com with SMTP id s18so2920719pfd.8;
+        Thu, 05 Dec 2019 23:54:25 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=Hx0Dc0G+WpaLdiZbsrH+BmbfA0t0DBuGqouWtY55sH4=;
+        b=cZy4v5tUbC3xpWDc5GZvcFrePBeYct6b/5y1wSxnsa087k4NVqGDh8kFxN0jX4BwP6
+         QuascSIc2NmNi4S56acshPAEmU5hYWGPqrux+4n9LUVE3M80CKL1WkLiRhxP9Zy4r0vr
+         FuwHPbsJY9KlboGT95zH28tLw3Hb/B0hjo9BH6+MDLst2SOtTRMNvKwBJv0VBvzbefT+
+         CMQQ2pgUs9d56vT1qnCVsAU1rsZPgTLUx3SZPs2oMz59G8msO4/fiVJdwwhSsOWBXIpy
+         5bbDEGJbY9+q4YbEhTaa5Vw0aA5pcuS/rt3kwXnjlIxp08vEeI8wHEsq2vW62V9VjKFy
+         QHpg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to:user-agent;
-        bh=YJ9zindtieuDhe+7MeY3HR+ZIrhEnTYORFnF43Fjuuo=;
-        b=H8FjBmCGpKJ12wybDVkmrbxMQtMFXJnBNXpQu+uP8Bz+UET1zkLgd0Q4DSYX+K4lqs
-         R+xgMm3YJptsTUZMSWQsR5M4heft+hOXqhNLpUIQJaP0VXUjTxkju2wgpjUXR5U/lcwP
-         xatmqD6UYO+CDHy7qPT44ntLXzsu9FHi/fT625rP2MWeBUxaTTuJuEzIIcOw/YMHVbeh
-         Nap/78Zfq7KqNjbk/IuBi54arNETu7ZdQVTTLJWPLrx+Ay+Hv9Yka5irqYUiQ3tY78nX
-         gR/+3iGYyIveGWAdpKKnvZYka/N4nqg76aDUMcLua+q4cUK1uErDLG6mWXob2rrUwBgu
-         XH8Q==
-X-Gm-Message-State: APjAAAUm4GCX9FzepGahoB43GDh77p2X0lTPes0nv1xj7bnzVm8fdF7z
-        xA4jPz7euZzcG6PhEmgzsA==
-X-Google-Smtp-Source: APXvYqxZcyLjEEXrywjejvo3Fovq/Vj1ZK2rPKMOypHYm8vTPRNz4P37AyKMhs/HcKqGxOLJBudH/Q==
-X-Received: by 2002:a9d:58c9:: with SMTP id s9mr8001069oth.121.1575580520010;
-        Thu, 05 Dec 2019 13:15:20 -0800 (PST)
-Received: from localhost (24-155-109-49.dyn.grandenetworks.net. [24.155.109.49])
-        by smtp.gmail.com with ESMTPSA id f62sm3800001otf.23.2019.12.05.13.15.19
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=Hx0Dc0G+WpaLdiZbsrH+BmbfA0t0DBuGqouWtY55sH4=;
+        b=Evns+Md5aH9CNxlWEOJfspiw9HM2LaZmazC27KiW8bDDgEG8ZytEJ2Lv5aXuf4w/un
+         ybj4RmkbjTAT/LII7epdKMbdmNqmJ9WulChcGrU7wVZCI+5CFZhK5XQcGyEfstaMjl/p
+         Nr5wJjytu/WKD9bZ2QTKmqbQ3WrJYKUnLqKDyDbIvU5LlfPhQOvlWHoJ5KTmWKXvwUWo
+         nCRTEhcMH/FUwHH5rRz65L4a76CxYX8piFTk559O8G6CdWvyClxV5X6dMpOARrrPrnIB
+         nRusE37w9p6t+JQYEBh/PR+r+vlZIBGVX5erWD96MKkW4nZ7TGSDokdORbltDWTrnh/7
+         3cFQ==
+X-Gm-Message-State: APjAAAVhWgD6J8buELIY/fzlxQojRdN59/+0Vbl5ARSUufwP4IkSiNd6
+        vK0FwZQwVezNBS/LKMFP/M8=
+X-Google-Smtp-Source: APXvYqw/E1N8zRwj8QQCutTm6hKdpScwtunL8LQFur62/Zs24KXMKN8LZD1+jgsFOaIn84nkECvaNg==
+X-Received: by 2002:a63:36c4:: with SMTP id d187mr2082263pga.108.1575618865656;
+        Thu, 05 Dec 2019 23:54:25 -0800 (PST)
+Received: from suzukaze.ipads-lab.se.sjtu.edu.cn ([202.120.40.82])
+        by smtp.gmail.com with ESMTPSA id q41sm2178144pja.20.2019.12.05.23.54.18
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 05 Dec 2019 13:15:19 -0800 (PST)
-Date:   Thu, 5 Dec 2019 15:15:18 -0600
-From:   Rob Herring <robh@kernel.org>
-To:     Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
-Cc:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
-        robh+dt@kernel.org, asutoshd@codeaurora.org,
-        stummala@codeaurora.org, sayalil@codeaurora.org,
-        cang@codeaurora.org, rampraka@codeaurora.org,
+        Thu, 05 Dec 2019 23:54:25 -0800 (PST)
+From:   Chuhong Yuan <hslester96@gmail.com>
+Cc:     Jan Glauber <jglauber@cavium.com>,
+        David Daney <david.daney@cavium.com>,
+        "Steven J . Hill" <Steven.Hill@cavium.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
         linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
-        Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
-        Mark Rutland <mark.rutland@arm.com>
-Subject: Re: [PATCH V1 1/2] dt-bindings: mmc: sdhci-msm: Add compatible
- string for sc7180
-Message-ID: <20191205211518.GA30447@bogus>
-References: <0101016eacb255af-3985262d-9b7e-4813-88c2-61838406e12c-000000@us-west-2.amazonses.com>
+        Chuhong Yuan <hslester96@gmail.com>
+Subject: [PATCH] mmc: cavium: Add missed pci_release_regions
+Date:   Fri,  6 Dec 2019 15:54:08 +0800
+Message-Id: <20191206075408.18355-1-hslester96@gmail.com>
+X-Mailer: git-send-email 2.24.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <0101016eacb255af-3985262d-9b7e-4813-88c2-61838406e12c-000000@us-west-2.amazonses.com>
-User-Agent: Mutt/1.10.1 (2018-07-13)
+Content-Transfer-Encoding: 8bit
+To:     unlisted-recipients:; (no To-header on input)
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 27 Nov 2019 11:49:59 +0000, Veerabhadrarao Badiganti wrote:
-> Add sc7180 SoC specific compatible strings for qcom-sdhci controller.
-> 
-> Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
-> ---
->  Documentation/devicetree/bindings/mmc/sdhci-msm.txt | 1 +
->  1 file changed, 1 insertion(+)
-> 
+The driver forgets to call pci_release_regions() in probe failure
+and remove.
+Add the missed calls to fix it.
 
-Acked-by: Rob Herring <robh@kernel.org>
+Signed-off-by: Chuhong Yuan <hslester96@gmail.com>
+---
+ drivers/mmc/host/cavium-thunderx.c | 16 +++++++++++-----
+ 1 file changed, 11 insertions(+), 5 deletions(-)
+
+diff --git a/drivers/mmc/host/cavium-thunderx.c b/drivers/mmc/host/cavium-thunderx.c
+index eee08d81b242..76013bbbcff3 100644
+--- a/drivers/mmc/host/cavium-thunderx.c
++++ b/drivers/mmc/host/cavium-thunderx.c
+@@ -76,8 +76,10 @@ static int thunder_mmc_probe(struct pci_dev *pdev,
+ 		return ret;
+ 
+ 	host->base = pcim_iomap(pdev, 0, pci_resource_len(pdev, 0));
+-	if (!host->base)
+-		return -EINVAL;
++	if (!host->base) {
++		ret = -EINVAL;
++		goto error;
++	}
+ 
+ 	/* On ThunderX these are identical */
+ 	host->dma_base = host->base;
+@@ -86,12 +88,14 @@ static int thunder_mmc_probe(struct pci_dev *pdev,
+ 	host->reg_off_dma = 0x160;
+ 
+ 	host->clk = devm_clk_get(dev, NULL);
+-	if (IS_ERR(host->clk))
+-		return PTR_ERR(host->clk);
++	if (IS_ERR(host->clk)) {
++		ret = PTR_ERR(host->clk);
++		goto error;
++	}
+ 
+ 	ret = clk_prepare_enable(host->clk);
+ 	if (ret)
+-		return ret;
++		goto error;
+ 	host->sys_freq = clk_get_rate(host->clk);
+ 
+ 	spin_lock_init(&host->irq_handler_lock);
+@@ -157,6 +161,7 @@ static int thunder_mmc_probe(struct pci_dev *pdev,
+ 		}
+ 	}
+ 	clk_disable_unprepare(host->clk);
++	pci_release_regions(pdev);
+ 	return ret;
+ }
+ 
+@@ -175,6 +180,7 @@ static void thunder_mmc_remove(struct pci_dev *pdev)
+ 	writeq(dma_cfg, host->dma_base + MIO_EMM_DMA_CFG(host));
+ 
+ 	clk_disable_unprepare(host->clk);
++	pci_release_regions(pdev);
+ }
+ 
+ static const struct pci_device_id thunder_mmc_id_table[] = {
+-- 
+2.24.0
+
