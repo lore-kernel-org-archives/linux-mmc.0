@@ -7,59 +7,60 @@ X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 05684C2D0C2
-	for <linux-mmc@archiver.kernel.org>; Fri,  6 Dec 2019 17:08:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6059CC2BBE2
+	for <linux-mmc@archiver.kernel.org>; Fri,  6 Dec 2019 17:08:38 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id D1B9E24659
-	for <linux-mmc@archiver.kernel.org>; Fri,  6 Dec 2019 17:08:36 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3608F21835
+	for <linux-mmc@archiver.kernel.org>; Fri,  6 Dec 2019 17:08:38 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="aJl+9hkZ"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="dzqIxUO7"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726365AbfLFRIg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 6 Dec 2019 12:08:36 -0500
-Received: from mail-lf1-f67.google.com ([209.85.167.67]:33328 "EHLO
-        mail-lf1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726284AbfLFRIg (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Dec 2019 12:08:36 -0500
-Received: by mail-lf1-f67.google.com with SMTP id n25so5855943lfl.0
-        for <linux-mmc@vger.kernel.org>; Fri, 06 Dec 2019 09:08:34 -0800 (PST)
+        id S1726374AbfLFRIh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 6 Dec 2019 12:08:37 -0500
+Received: from mail-lj1-f195.google.com ([209.85.208.195]:37076 "EHLO
+        mail-lj1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726298AbfLFRIh (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Dec 2019 12:08:37 -0500
+Received: by mail-lj1-f195.google.com with SMTP id u17so8433661lja.4
+        for <linux-mmc@vger.kernel.org>; Fri, 06 Dec 2019 09:08:35 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=from:to:cc:subject:date:message-id:in-reply-to:references;
-        bh=P6wkq44hOUaRXToIbJJl7vWgcKUynxHObY8PwUP4zZ8=;
-        b=aJl+9hkZMeoYw7Sp+Ah8kASUSXs35gClU8Xj3C5zggbrGrUybRnN7qlpEHJDlF5Aub
-         6j9/pXLqhVpsmPFKj3A6G12TKeJ5nGQlILdr8UpaSUpN6VedW63FVN5GvAQJKwHtTl/m
-         blmWxjmifZV6TS7mSz8uWfOPxPD4bU5/ZR9Tw1cNZ9XWNRxK9CBH3ycpTHzDWrVGufwn
-         VAowJ+1E9apNmpsOSk20Csw67uK06DkinJeyvRVl92hS7XLCBOEnqPHlDIpN30dstq8p
-         8TmX+Lm2foRKawEsnJ/NVYBIE1yC/ZiGC3GaypYVJEFczjWA4HLWY+EAhYK3rQrQf91v
-         leRg==
+        bh=fTEyh8XCr6qWiWO+Sm26auA9jej3JxBZE/rL5aBzRVY=;
+        b=dzqIxUO7WxQk+plB0N+sxpgJHd9B7Gqjohrdy/hCB+cGg3rfhemNz+2LL8EssKd0MV
+         upCGcYGQYMVNMExbGvN7Qreozlys4r8Q/t+j3QoLCQiSB1xykzvEJ9SOmOISwrA1jlvp
+         4YqHPRHa85RcGLnuhvUzfCGVkvNFoPHGWUjCMMR7Bjm70zmoMVHvm9rSqeqBhF5pJYET
+         uu3CXmcUMAhftU9pWR0U+AkR1SxsikEKY2Lc1bWHLNgIODEP1QqxizVF1LdyzMUtxcHJ
+         gV5lyhhxeEnapF91t37e5JauaL/D9OqEQjGP+GtxsJTJJaE5TXiESw07H2QqV8NtezBg
+         RuGQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references;
-        bh=P6wkq44hOUaRXToIbJJl7vWgcKUynxHObY8PwUP4zZ8=;
-        b=rXmuVQ4c5o3+9hTxoL8u8pGZQqAqDlsSbU8cmHnThuLyHugdQdssji0a835JZTSsis
-         EubgX8VFfR437wNknRs5B4GxgXaxaq0sjAeXOw5Xo8WKJ0kQnjZkbY7apaeSBaHR1W2L
-         T4mnxRHkYI7zDahJ0Adk7eMi9aJm/0O8XUHlKoOk57xAeGFrx2O52ga4J1+fRlz1bAFC
-         AyfXh7eIujGAS+oWuKJ+iAehKC+LqSoxaLtJUHsOTbyB3mbMR0VspdTmgIzYQUY8gk0u
-         3Uo9M4zcQKQDxpzGfhMlyiosITQoVqC9CIiGeVlCnhvPfmu5VpK4Bdl0/4wsqFfnQ3d+
-         kDJg==
-X-Gm-Message-State: APjAAAWNHeuYtv0LzNAat2k7XHqaFezCiPRQuiJ7aXCITVRiVtWo5y2P
-        zyAhSifow9Tq8JfTda5BCJ0vRbO2rcg=
-X-Google-Smtp-Source: APXvYqyXQ/7aXhzLUKmtOFra4sQxFySjBivrm4MghpcnnI5es3eI5GzwgETumQKWJxEB5uEyttz3xg==
-X-Received: by 2002:ac2:5a43:: with SMTP id r3mr9042656lfn.150.1575652113906;
-        Fri, 06 Dec 2019 09:08:33 -0800 (PST)
+        bh=fTEyh8XCr6qWiWO+Sm26auA9jej3JxBZE/rL5aBzRVY=;
+        b=IvDy/yr3Sk49/OjVtqTvirOAyhP9yGFUJcTdslkXNCQpKNKkppmCPLfVcnL/6JU/Wj
+         dxUtukz1c8k6QdHXxG7QmJ7cQZv+rBbkq+0H/LzxS/ABU9uEp4goZSo2mKFAAziAo2eo
+         kPrO9p0r7oRUVDx8rsQ4EXDSZekOtlASxnhVq5VyMhE7MSXLTKZAlQnnf6D0FMj84yF0
+         mpQgUpEJ3FndCCX+tCfli/eIqJfn6N3hSOkaWwNfhnrBw1iDs0KmeSGwQDuihJwfQdLe
+         sf7ne7q8dWPjC5CmExWMkFveno5LaNj29xJ7OVu5bC48otjgMCIY3EA20Yyyw362xCmA
+         Oylg==
+X-Gm-Message-State: APjAAAWBjLX7hNyA+0kfbrh3f//x1Y8kf3FfbIB35IVHbKFcz4Gy+/PZ
+        8zYeBOtzO05Bpsk8u7t6A6Mi6g==
+X-Google-Smtp-Source: APXvYqx2YUEFT3CYqRkqrCF50CxYbiVYSIL4MAtnnjeQmuc33zVtu9572g9p4vEVQvm8MMy9E6jTOQ==
+X-Received: by 2002:a05:651c:1110:: with SMTP id d16mr9527832ljo.86.1575652115109;
+        Fri, 06 Dec 2019 09:08:35 -0800 (PST)
 Received: from localhost.localdomain (h-158-174-22-210.NA.cust.bahnhof.se. [158.174.22.210])
-        by smtp.gmail.com with ESMTPSA id z9sm6905283ljm.40.2019.12.06.09.08.32
+        by smtp.gmail.com with ESMTPSA id z9sm6905283ljm.40.2019.12.06.09.08.33
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 06 Dec 2019 09:08:32 -0800 (PST)
+        Fri, 06 Dec 2019 09:08:34 -0800 (PST)
 From:   Ulf Hansson <ulf.hansson@linaro.org>
 To:     linux-gpio@vger.kernel.org,
         Linus Walleij <linus.walleij@linaro.org>
-Cc:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH 5/9] mmc: omap_hsmmc: Convert to pinctrl_select_default_state()
-Date:   Fri,  6 Dec 2019 18:08:17 +0100
-Message-Id: <20191206170821.29711-6-ulf.hansson@linaro.org>
+Cc:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>
+Subject: [PATCH 6/9] mmc: sdhci-esdhc-imx: Convert to pinctrl_select_default_state()
+Date:   Fri,  6 Dec 2019 18:08:18 +0100
+Message-Id: <20191206170821.29711-7-ulf.hansson@linaro.org>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20191206170821.29711-1-ulf.hansson@linaro.org>
 References: <20191206170821.29711-1-ulf.hansson@linaro.org>
@@ -71,48 +72,62 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 Let's drop the boilerplate code for managing the default pinctrl state and
 convert into using the new pinctrl_select_default_state().
 
-Additionally, move away from using pinctrl_pm_select_default_state() as
-it's scheduled for removal and use pinctrl_select_default_state() instead.
-
+Cc: Adrian Hunter <adrian.hunter@intel.com>
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/mmc/host/omap_hsmmc.c | 10 ++--------
- 1 file changed, 2 insertions(+), 8 deletions(-)
+ drivers/mmc/host/sdhci-esdhc-imx.c | 11 ++---------
+ 1 file changed, 2 insertions(+), 9 deletions(-)
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 767e964ca5a2..a379c45b985c 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -1605,12 +1605,6 @@ static int omap_hsmmc_configure_wake_irq(struct omap_hsmmc_host *host)
- 			ret = PTR_ERR(p);
- 			goto err_free_irq;
- 		}
--		if (IS_ERR(pinctrl_lookup_state(p, PINCTRL_STATE_DEFAULT))) {
--			dev_info(host->dev, "missing default pinctrl state\n");
--			devm_pinctrl_put(p);
--			ret = -EINVAL;
--			goto err_free_irq;
--		}
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index 1c988d6a2433..43628c9c05ac 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -224,7 +224,6 @@ static struct esdhc_soc_data usdhc_imx8qxp_data = {
+ struct pltfm_imx_data {
+ 	u32 scratchpad;
+ 	struct pinctrl *pinctrl;
+-	struct pinctrl_state *pins_default;
+ 	struct pinctrl_state *pins_100mhz;
+ 	struct pinctrl_state *pins_200mhz;
+ 	const struct esdhc_soc_data *socdata;
+@@ -951,7 +950,6 @@ static int esdhc_change_pinstate(struct sdhci_host *host,
+ 	dev_dbg(mmc_dev(host->mmc), "change pinctrl state for uhs %d\n", uhs);
  
- 		if (IS_ERR(pinctrl_lookup_state(p, PINCTRL_STATE_IDLE))) {
- 			dev_info(host->dev, "missing idle pinctrl state\n");
-@@ -2153,14 +2147,14 @@ static int omap_hsmmc_runtime_resume(struct device *dev)
- 	if ((host->mmc->caps & MMC_CAP_SDIO_IRQ) &&
- 	    (host->flags & HSMMC_SDIO_IRQ_ENABLED)) {
- 
--		pinctrl_pm_select_default_state(host->dev);
-+		pinctrl_select_default_state(host->dev);
- 
- 		/* irq lost, if pinmux incorrect */
- 		OMAP_HSMMC_WRITE(host->base, STAT, STAT_CLEAR);
- 		OMAP_HSMMC_WRITE(host->base, ISE, CIRQ_EN);
- 		OMAP_HSMMC_WRITE(host->base, IE, CIRQ_EN);
- 	} else {
--		pinctrl_pm_select_default_state(host->dev);
-+		pinctrl_select_default_state(host->dev);
+ 	if (IS_ERR(imx_data->pinctrl) ||
+-		IS_ERR(imx_data->pins_default) ||
+ 		IS_ERR(imx_data->pins_100mhz) ||
+ 		IS_ERR(imx_data->pins_200mhz))
+ 		return -EINVAL;
+@@ -968,7 +966,7 @@ static int esdhc_change_pinstate(struct sdhci_host *host,
+ 		break;
+ 	default:
+ 		/* back to default state for other legacy timing */
+-		pinctrl = imx_data->pins_default;
++		return pinctrl_select_default_state(mmc_dev(host->mmc));
  	}
- 	spin_unlock_irqrestore(&host->irq_lock, flags);
- 	return 0;
+ 
+ 	return pinctrl_select_state(imx_data->pinctrl, pinctrl);
+@@ -1338,7 +1336,7 @@ sdhci_esdhc_imx_probe_dt(struct platform_device *pdev,
+ 
+ 	mmc_of_parse_voltage(np, &host->ocr_mask);
+ 
+-	if (esdhc_is_usdhc(imx_data) && !IS_ERR(imx_data->pins_default)) {
++	if (esdhc_is_usdhc(imx_data)) {
+ 		imx_data->pins_100mhz = pinctrl_lookup_state(imx_data->pinctrl,
+ 						ESDHC_PINCTRL_STATE_100MHZ);
+ 		imx_data->pins_200mhz = pinctrl_lookup_state(imx_data->pinctrl,
+@@ -1492,11 +1490,6 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+ 		goto disable_ahb_clk;
+ 	}
+ 
+-	imx_data->pins_default = pinctrl_lookup_state(imx_data->pinctrl,
+-						PINCTRL_STATE_DEFAULT);
+-	if (IS_ERR(imx_data->pins_default))
+-		dev_warn(mmc_dev(host->mmc), "could not get default state\n");
+-
+ 	if (esdhc_is_usdhc(imx_data)) {
+ 		host->quirks2 |= SDHCI_QUIRK2_PRESET_VALUE_BROKEN;
+ 		host->mmc->caps |= MMC_CAP_1_8V_DDR | MMC_CAP_3_3V_DDR;
 -- 
 2.17.1
 
