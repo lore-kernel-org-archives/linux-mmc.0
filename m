@@ -7,60 +7,61 @@ X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BD364C43603
-	for <linux-mmc@archiver.kernel.org>; Fri,  6 Dec 2019 17:08:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 273DDC2BBE2
+	for <linux-mmc@archiver.kernel.org>; Fri,  6 Dec 2019 17:08:36 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 96A8620706
-	for <linux-mmc@archiver.kernel.org>; Fri,  6 Dec 2019 17:08:34 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id EE7D020706
+	for <linux-mmc@archiver.kernel.org>; Fri,  6 Dec 2019 17:08:35 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="qatgVOSV"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="yuBt1Nz6"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726350AbfLFRId (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 6 Dec 2019 12:08:33 -0500
-Received: from mail-lj1-f193.google.com ([209.85.208.193]:35942 "EHLO
-        mail-lj1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726322AbfLFRId (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Dec 2019 12:08:33 -0500
-Received: by mail-lj1-f193.google.com with SMTP id r19so8439526ljg.3
-        for <linux-mmc@vger.kernel.org>; Fri, 06 Dec 2019 09:08:32 -0800 (PST)
+        id S1726336AbfLFRIf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 6 Dec 2019 12:08:35 -0500
+Received: from mail-lf1-f67.google.com ([209.85.167.67]:44206 "EHLO
+        mail-lf1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726321AbfLFRIf (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Dec 2019 12:08:35 -0500
+Received: by mail-lf1-f67.google.com with SMTP id v201so5779308lfa.11
+        for <linux-mmc@vger.kernel.org>; Fri, 06 Dec 2019 09:08:33 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=from:to:cc:subject:date:message-id:in-reply-to:references;
-        bh=37DobpBRHG+Arri5XimcII7cjm39P54Z6MB80sywBSk=;
-        b=qatgVOSVmLDVIp7XgklEyOrDj/rrXlD3wp53NTIRuEwUOcHm2tOXL1DzqXSD7Z7wrt
-         KM+uScEywd8QAeCfxvxV/aRUqrb2O4Vl3MgzlqI+EyJodTnO1i7wiVdjpjTuatbTMGMe
-         cMtJH2V5rMA2kFwCC3JgC7Vqgzgi/P9zR8ixpAZ+uNJbnUa5TLwtJDk6twqd8U/zzFE/
-         qGee7bOUpV8uaBGGP/Y88SYCCnWwB0bknzMjtm4DK84R5/p3UbnQuXM3Bgo3CeE4mZN6
-         vufKoWaUJyLHWP7un4AjgtF/JrEXV+RZeqkNterX5bq1pTRt0UFpf9ViTWLs9eWiHRmH
-         icNQ==
+        bh=rFMoiOb3bUP9LxJIzW1x3OJ7y3lUt3rITRuiEhSamMw=;
+        b=yuBt1Nz63ljeeTGifF8LW4UZodTP03zOMvHRkLXlCEc4hZgzUrIZaFmigouYuu/5QQ
+         yW2Wl3wSL6gGLxORyG6LdhioVtzqXg9caEL/Ryo/N24vFCPrG+ajtpk/gwAZibTAIolM
+         ZxNiwoBij19TremrALO0Mx0jMqS9xK3LxRVKlWrDZvOgpjv4zNRvLz8vu1LTr4SMPhjm
+         NH2bLJdJnbCKCWhS5H1DdQE7DKb/kraSjpB509FJqLGrxplNdsmayzsxhC2L8I6IH1RQ
+         BCo/Lh7tZ+yvheB2BEKy4cPrV8Bn90ITFcRxOUUnHwj4pFYVXxiF8ElIUz6a38jUwPPW
+         eXuQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references;
-        bh=37DobpBRHG+Arri5XimcII7cjm39P54Z6MB80sywBSk=;
-        b=tBk9jTP0Xn2BI+/PEAf79r1fw2bsTcATQ7UfLdM2/rN5UiN2CikgpSt4qMs5PKY4Su
-         q83I+37lbVElun3hWnDEvGFJSCrjMp/GfD9VRKwO2wL1x8KtKBFIVZBjZsuXw9m3EAkW
-         iqoDHQkPJQDyYlCl1RJYwbk+H6MV+K0o/HBRYePS0m6LbLfwg/BTySovlyuvMCMikWua
-         1LSUjfOqTMph6wQbX8QHFkvLnN5QQgMcHUMmtocKuCXvhnwyC0415oaiLynmYuOF7FCA
-         67KEWVbXpC4eqBLhK0FVDkYE3TUajrpo3vNdqtiMih3yNhYq0dHBVFtZAveXIBpxV7ud
-         HoVw==
-X-Gm-Message-State: APjAAAXjwMGUt/CBThnaCheDpuHfDy/Qi/FsEltkIgAeu2OHINWKFERV
-        dFP1bWwQMogoGs/2qkOIwA+uYw==
-X-Google-Smtp-Source: APXvYqyn0sVnGRizZai+AQWeTt9ieJhl8y01vZ/9+O7HbMDJ/P3f23zp74dIJYlEog1R0TX0hOvNUg==
-X-Received: by 2002:a05:651c:112d:: with SMTP id e13mr8015393ljo.99.1575652111308;
-        Fri, 06 Dec 2019 09:08:31 -0800 (PST)
+        bh=rFMoiOb3bUP9LxJIzW1x3OJ7y3lUt3rITRuiEhSamMw=;
+        b=E4Qd3xW1RhPF1+cx7C8pytJaDg7W94uzjDewWfh9MACgDoV9fr9PEoH3oBQflZdfUP
+         yawkPB1kRECB3qYV0Qq09pOulclaFWDnlNNJdPbauwF1Y1b/wH6chJKKx7WM1bav/Ujy
+         kEJVdFyBpUk5UvHW+r1otq1xCiSRgByAScwufDlDdOtL6V6juSSqRL5o7ibTO7sFaUmw
+         vsHUqdy8xAb7r2gPghq7q3KQ/al5nK1tXNHF1jZ5FCemiqFvRNm6ljklLQDvUgJc41rt
+         /hWDWX4Sp4g6gk37hN0yIfYkxKqDabuM5ErxF/cJS1Rq39LuF0ee4QXeXIqPlDRo0x4D
+         VvxQ==
+X-Gm-Message-State: APjAAAV4gbhhYIkyrKW+pjWC0eynMn1z8l6jHmFyBQZg/MmBFHGif8Yz
+        WfOJjwZN4xX43CzJkUmvW4nY8g==
+X-Google-Smtp-Source: APXvYqx0qpC5LT1rrt5Z6fK9f1Qoo58inkUhE1J56SLYUqKWNAX18lgbkzE7VWQhJDcOmtomKc3qAA==
+X-Received: by 2002:a05:6512:21d:: with SMTP id a29mr1570063lfo.186.1575652112299;
+        Fri, 06 Dec 2019 09:08:32 -0800 (PST)
 Received: from localhost.localdomain (h-158-174-22-210.NA.cust.bahnhof.se. [158.174.22.210])
-        by smtp.gmail.com with ESMTPSA id z9sm6905283ljm.40.2019.12.06.09.08.30
+        by smtp.gmail.com with ESMTPSA id z9sm6905283ljm.40.2019.12.06.09.08.31
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 06 Dec 2019 09:08:30 -0800 (PST)
+        Fri, 06 Dec 2019 09:08:31 -0800 (PST)
 From:   Ulf Hansson <ulf.hansson@linaro.org>
 To:     linux-gpio@vger.kernel.org,
         Linus Walleij <linus.walleij@linaro.org>
 Cc:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
-        Russell King <linux@armlinux.org.uk>
-Subject: [PATCH 3/9] mmc: mmci: Convert to pinctrl_select_default_state()
-Date:   Fri,  6 Dec 2019 18:08:15 +0100
-Message-Id: <20191206170821.29711-4-ulf.hansson@linaro.org>
+        Jesper Nilsson <jesper.nilsson@axis.com>,
+        Lars Persson <lars.persson@axis.com>
+Subject: [PATCH 4/9] mmc: usdhi6rol0: Convert to pinctrl_select_default_state()
+Date:   Fri,  6 Dec 2019 18:08:16 +0100
+Message-Id: <20191206170821.29711-5-ulf.hansson@linaro.org>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20191206170821.29711-1-ulf.hansson@linaro.org>
 References: <20191206170821.29711-1-ulf.hansson@linaro.org>
@@ -72,65 +73,53 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 Let's drop the boilerplate code for managing the default pinctrl state and
 convert into using the new pinctrl_select_default_state().
 
-Additionally, move away from using pinctrl_pm_select_default_state() as
-it's scheduled for removal and use pinctrl_select_default_state() instead.
-
-Cc: Russell King <linux@armlinux.org.uk>
+Cc: Jesper Nilsson <jesper.nilsson@axis.com>
+Cc: Lars Persson <lars.persson@axis.com>
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/mmc/host/mmci.c | 12 ++----------
- drivers/mmc/host/mmci.h |  1 -
- 2 files changed, 2 insertions(+), 11 deletions(-)
+ drivers/mmc/host/usdhi6rol0.c | 15 +--------------
+ 1 file changed, 1 insertion(+), 14 deletions(-)
 
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 40e72c30ea84..caaa4687de93 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -1704,7 +1704,7 @@ static void mmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 		if (ios->bus_mode == MMC_BUSMODE_OPENDRAIN)
- 			pinctrl_select_state(host->pinctrl, host->pins_opendrain);
- 		else
--			pinctrl_select_state(host->pinctrl, host->pins_default);
-+			pinctrl_select_default_state(mmc_dev(mmc));
+diff --git a/drivers/mmc/host/usdhi6rol0.c b/drivers/mmc/host/usdhi6rol0.c
+index b11ac2314328..969a34e698f2 100644
+--- a/drivers/mmc/host/usdhi6rol0.c
++++ b/drivers/mmc/host/usdhi6rol0.c
+@@ -199,7 +199,6 @@ struct usdhi6_host {
+ 
+ 	/* Pin control */
+ 	struct pinctrl *pinctrl;
+-	struct pinctrl_state *pins_default;
+ 	struct pinctrl_state *pins_uhs;
+ };
+ 
+@@ -1162,8 +1161,7 @@ static int usdhi6_set_pinstates(struct usdhi6_host *host, int voltage)
+ 					    host->pins_uhs);
+ 
+ 	default:
+-		return pinctrl_select_state(host->pinctrl,
+-					    host->pins_default);
++		return pinctrl_select_default_state(mmc_dev(host->mmc));
+ 	}
+ }
+ 
+@@ -1770,17 +1768,6 @@ static int usdhi6_probe(struct platform_device *pdev)
  	}
  
- 	/*
-@@ -1877,14 +1877,6 @@ static int mmci_probe(struct amba_device *dev,
- 			goto host_free;
- 		}
- 
+ 	host->pins_uhs = pinctrl_lookup_state(host->pinctrl, "state_uhs");
+-	if (!IS_ERR(host->pins_uhs)) {
 -		host->pins_default = pinctrl_lookup_state(host->pinctrl,
 -							  PINCTRL_STATE_DEFAULT);
--		if (IS_ERR(host->pins_default)) {
--			dev_err(mmc_dev(mmc), "Can't select default pins\n");
--			ret = PTR_ERR(host->pins_default);
--			goto host_free;
--		}
 -
- 		host->pins_opendrain = pinctrl_lookup_state(host->pinctrl,
- 							    MMCI_PINCTRL_STATE_OPENDRAIN);
- 		if (IS_ERR(host->pins_opendrain)) {
-@@ -2203,7 +2195,7 @@ static int mmci_runtime_resume(struct device *dev)
- 		struct mmci_host *host = mmc_priv(mmc);
- 		clk_prepare_enable(host->clk);
- 		mmci_restore(host);
--		pinctrl_pm_select_default_state(dev);
-+		pinctrl_select_default_state(dev);
- 	}
+-		if (IS_ERR(host->pins_default)) {
+-			dev_err(dev,
+-				"UHS pinctrl requires a default pin state.\n");
+-			ret = PTR_ERR(host->pins_default);
+-			goto e_free_mmc;
+-		}
+-	}
  
- 	return 0;
-diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-index 158e1231aa23..12d4ed8af88a 100644
---- a/drivers/mmc/host/mmci.h
-+++ b/drivers/mmc/host/mmci.h
-@@ -404,7 +404,6 @@ struct mmci_host {
- 	struct mmci_host_ops	*ops;
- 	struct variant_data	*variant;
- 	struct pinctrl		*pinctrl;
--	struct pinctrl_state	*pins_default;
- 	struct pinctrl_state	*pins_opendrain;
- 
- 	u8			hw_designer;
+ 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+ 	host->base = devm_ioremap_resource(dev, res);
 -- 
 2.17.1
 
