@@ -2,138 +2,98 @@ Return-Path: <SRS0=q/7Q=Z4=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.3 required=3.0 tests=DKIM_ADSP_CUSTOM_MED,
-	DKIM_INVALID,DKIM_SIGNED,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-9.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4CEFBC43603
-	for <linux-mmc@archiver.kernel.org>; Fri,  6 Dec 2019 07:54:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 65044C43603
+	for <linux-mmc@archiver.kernel.org>; Fri,  6 Dec 2019 11:42:18 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 204A12467B
-	for <linux-mmc@archiver.kernel.org>; Fri,  6 Dec 2019 07:54:27 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3923224659
+	for <linux-mmc@archiver.kernel.org>; Fri,  6 Dec 2019 11:42:18 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="cZy4v5tU"
+	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="Ri3f9kyD"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726225AbfLFHy0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 6 Dec 2019 02:54:26 -0500
-Received: from mail-pf1-f196.google.com ([209.85.210.196]:40992 "EHLO
-        mail-pf1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726184AbfLFHy0 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Dec 2019 02:54:26 -0500
-Received: by mail-pf1-f196.google.com with SMTP id s18so2920719pfd.8;
-        Thu, 05 Dec 2019 23:54:25 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=Hx0Dc0G+WpaLdiZbsrH+BmbfA0t0DBuGqouWtY55sH4=;
-        b=cZy4v5tUbC3xpWDc5GZvcFrePBeYct6b/5y1wSxnsa087k4NVqGDh8kFxN0jX4BwP6
-         QuascSIc2NmNi4S56acshPAEmU5hYWGPqrux+4n9LUVE3M80CKL1WkLiRhxP9Zy4r0vr
-         FuwHPbsJY9KlboGT95zH28tLw3Hb/B0hjo9BH6+MDLst2SOtTRMNvKwBJv0VBvzbefT+
-         CMQQ2pgUs9d56vT1qnCVsAU1rsZPgTLUx3SZPs2oMz59G8msO4/fiVJdwwhSsOWBXIpy
-         5bbDEGJbY9+q4YbEhTaa5Vw0aA5pcuS/rt3kwXnjlIxp08vEeI8wHEsq2vW62V9VjKFy
-         QHpg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=Hx0Dc0G+WpaLdiZbsrH+BmbfA0t0DBuGqouWtY55sH4=;
-        b=Evns+Md5aH9CNxlWEOJfspiw9HM2LaZmazC27KiW8bDDgEG8ZytEJ2Lv5aXuf4w/un
-         ybj4RmkbjTAT/LII7epdKMbdmNqmJ9WulChcGrU7wVZCI+5CFZhK5XQcGyEfstaMjl/p
-         Nr5wJjytu/WKD9bZ2QTKmqbQ3WrJYKUnLqKDyDbIvU5LlfPhQOvlWHoJ5KTmWKXvwUWo
-         nCRTEhcMH/FUwHH5rRz65L4a76CxYX8piFTk559O8G6CdWvyClxV5X6dMpOARrrPrnIB
-         nRusE37w9p6t+JQYEBh/PR+r+vlZIBGVX5erWD96MKkW4nZ7TGSDokdORbltDWTrnh/7
-         3cFQ==
-X-Gm-Message-State: APjAAAVhWgD6J8buELIY/fzlxQojRdN59/+0Vbl5ARSUufwP4IkSiNd6
-        vK0FwZQwVezNBS/LKMFP/M8=
-X-Google-Smtp-Source: APXvYqw/E1N8zRwj8QQCutTm6hKdpScwtunL8LQFur62/Zs24KXMKN8LZD1+jgsFOaIn84nkECvaNg==
-X-Received: by 2002:a63:36c4:: with SMTP id d187mr2082263pga.108.1575618865656;
-        Thu, 05 Dec 2019 23:54:25 -0800 (PST)
-Received: from suzukaze.ipads-lab.se.sjtu.edu.cn ([202.120.40.82])
-        by smtp.gmail.com with ESMTPSA id q41sm2178144pja.20.2019.12.05.23.54.18
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 05 Dec 2019 23:54:25 -0800 (PST)
-From:   Chuhong Yuan <hslester96@gmail.com>
-Cc:     Jan Glauber <jglauber@cavium.com>,
-        David Daney <david.daney@cavium.com>,
-        "Steven J . Hill" <Steven.Hill@cavium.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        Chuhong Yuan <hslester96@gmail.com>
-Subject: [PATCH] mmc: cavium: Add missed pci_release_regions
-Date:   Fri,  6 Dec 2019 15:54:08 +0800
-Message-Id: <20191206075408.18355-1-hslester96@gmail.com>
-X-Mailer: git-send-email 2.24.0
+        id S1726128AbfLFLmR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 6 Dec 2019 06:42:17 -0500
+Received: from lelv0142.ext.ti.com ([198.47.23.249]:36644 "EHLO
+        lelv0142.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726102AbfLFLmR (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Dec 2019 06:42:17 -0500
+Received: from fllv0034.itg.ti.com ([10.64.40.246])
+        by lelv0142.ext.ti.com (8.15.2/8.15.2) with ESMTP id xB6BgFIq054225;
+        Fri, 6 Dec 2019 05:42:15 -0600
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
+        s=ti-com-17Q1; t=1575632535;
+        bh=oQQWI05cs5ZZbMyfIpjlE+7PWlwHVVzIAHXpj5+znlE=;
+        h=From:To:CC:Subject:Date;
+        b=Ri3f9kyDt18kPeUNNtPOqcToR1BxZwGAgaXjEeIdVPsH6eHCGUonqcAo7ZNOoxTMP
+         +aC8DcK9nwzC4gakVZbuVNiXq6C3/zXQaz2k95fI3Oj6LAEvkmpObgs3kP6bb/0tHr
+         ncDPnR4mSE42HVZIjIGgMjsaMS88XXlpeGy4Qklg=
+Received: from DLEE109.ent.ti.com (dlee109.ent.ti.com [157.170.170.41])
+        by fllv0034.itg.ti.com (8.15.2/8.15.2) with ESMTPS id xB6BgF6c008805
+        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
+        Fri, 6 Dec 2019 05:42:15 -0600
+Received: from DLEE101.ent.ti.com (157.170.170.31) by DLEE109.ent.ti.com
+ (157.170.170.41) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.1847.3; Fri, 6 Dec
+ 2019 05:42:14 -0600
+Received: from fllv0040.itg.ti.com (10.64.41.20) by DLEE101.ent.ti.com
+ (157.170.170.31) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.1847.3 via
+ Frontend Transport; Fri, 6 Dec 2019 05:42:14 -0600
+Received: from a0230074-OptiPlex-7010.india.ti.com (ileax41-snat.itg.ti.com [10.172.224.153])
+        by fllv0040.itg.ti.com (8.15.2/8.15.2) with ESMTP id xB6Bg6JA079926;
+        Fri, 6 Dec 2019 05:42:11 -0600
+From:   Faiz Abbas <faiz_abbas@ti.com>
+To:     <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>
+CC:     <ulf.hansson@linaro.org>, <adrian.hunter@intel.com>,
+        <faiz_abbas@ti.com>
+Subject: [PATCH] mmc: sdhci: Update the tuning failed messages to pr_debug level
+Date:   Fri, 6 Dec 2019 17:13:26 +0530
+Message-ID: <20191206114326.15856-1-faiz_abbas@ti.com>
+X-Mailer: git-send-email 2.19.2
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-To:     unlisted-recipients:; (no To-header on input)
+Content-Type: text/plain
+X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The driver forgets to call pci_release_regions() in probe failure
-and remove.
-Add the missed calls to fix it.
+Tuning support in DDR50 speed mode was added in SD Specifications Part1
+Physical Layer Specification v3.01. Its not possible to distinguish
+between v3.00 and v3.01 from the SCR and that is why since
+commit 4324f6de6d2e ("mmc: core: enable CMD19 tuning for DDR50 mode")
+tuning failures are ignored in DDR50 speed mode.
 
-Signed-off-by: Chuhong Yuan <hslester96@gmail.com>
+Cards compatible with v3.00 don't respond to CMD19 in DDR50 and this
+error gets printed during enumeration and also if retune is triggered at
+any time during operation. Update the printk level to pr_debug so that
+these errors don't lead to false error reports.
+
+Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
 ---
- drivers/mmc/host/cavium-thunderx.c | 16 +++++++++++-----
- 1 file changed, 11 insertions(+), 5 deletions(-)
+ drivers/mmc/host/sdhci.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/host/cavium-thunderx.c b/drivers/mmc/host/cavium-thunderx.c
-index eee08d81b242..76013bbbcff3 100644
---- a/drivers/mmc/host/cavium-thunderx.c
-+++ b/drivers/mmc/host/cavium-thunderx.c
-@@ -76,8 +76,10 @@ static int thunder_mmc_probe(struct pci_dev *pdev,
- 		return ret;
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 296d955ede59..42a9c8179da7 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2417,8 +2417,8 @@ static int __sdhci_execute_tuning(struct sdhci_host *host, u32 opcode)
+ 		sdhci_send_tuning(host, opcode);
  
- 	host->base = pcim_iomap(pdev, 0, pci_resource_len(pdev, 0));
--	if (!host->base)
--		return -EINVAL;
-+	if (!host->base) {
-+		ret = -EINVAL;
-+		goto error;
-+	}
- 
- 	/* On ThunderX these are identical */
- 	host->dma_base = host->base;
-@@ -86,12 +88,14 @@ static int thunder_mmc_probe(struct pci_dev *pdev,
- 	host->reg_off_dma = 0x160;
- 
- 	host->clk = devm_clk_get(dev, NULL);
--	if (IS_ERR(host->clk))
--		return PTR_ERR(host->clk);
-+	if (IS_ERR(host->clk)) {
-+		ret = PTR_ERR(host->clk);
-+		goto error;
-+	}
- 
- 	ret = clk_prepare_enable(host->clk);
- 	if (ret)
--		return ret;
-+		goto error;
- 	host->sys_freq = clk_get_rate(host->clk);
- 
- 	spin_lock_init(&host->irq_handler_lock);
-@@ -157,6 +161,7 @@ static int thunder_mmc_probe(struct pci_dev *pdev,
+ 		if (!host->tuning_done) {
+-			pr_info("%s: Tuning timeout, falling back to fixed sampling clock\n",
+-				mmc_hostname(host->mmc));
++			pr_debug("%s: Tuning timeout, falling back to fixed sampling clock\n",
++				 mmc_hostname(host->mmc));
+ 			sdhci_abort_tuning(host, opcode);
+ 			return -ETIMEDOUT;
  		}
- 	}
- 	clk_disable_unprepare(host->clk);
-+	pci_release_regions(pdev);
- 	return ret;
- }
- 
-@@ -175,6 +180,7 @@ static void thunder_mmc_remove(struct pci_dev *pdev)
- 	writeq(dma_cfg, host->dma_base + MIO_EMM_DMA_CFG(host));
- 
- 	clk_disable_unprepare(host->clk);
-+	pci_release_regions(pdev);
- }
- 
- static const struct pci_device_id thunder_mmc_id_table[] = {
 -- 
-2.24.0
+2.19.2
 
