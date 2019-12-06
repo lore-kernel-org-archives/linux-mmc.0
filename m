@@ -2,98 +2,98 @@ Return-Path: <SRS0=q/7Q=Z4=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_GIT autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 65044C43603
-	for <linux-mmc@archiver.kernel.org>; Fri,  6 Dec 2019 11:42:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id ED812C43603
+	for <linux-mmc@archiver.kernel.org>; Fri,  6 Dec 2019 17:08:30 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 3923224659
-	for <linux-mmc@archiver.kernel.org>; Fri,  6 Dec 2019 11:42:18 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B952920706
+	for <linux-mmc@archiver.kernel.org>; Fri,  6 Dec 2019 17:08:30 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="Ri3f9kyD"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="ZKEdKFCN"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726128AbfLFLmR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 6 Dec 2019 06:42:17 -0500
-Received: from lelv0142.ext.ti.com ([198.47.23.249]:36644 "EHLO
-        lelv0142.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726102AbfLFLmR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Dec 2019 06:42:17 -0500
-Received: from fllv0034.itg.ti.com ([10.64.40.246])
-        by lelv0142.ext.ti.com (8.15.2/8.15.2) with ESMTP id xB6BgFIq054225;
-        Fri, 6 Dec 2019 05:42:15 -0600
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
-        s=ti-com-17Q1; t=1575632535;
-        bh=oQQWI05cs5ZZbMyfIpjlE+7PWlwHVVzIAHXpj5+znlE=;
-        h=From:To:CC:Subject:Date;
-        b=Ri3f9kyDt18kPeUNNtPOqcToR1BxZwGAgaXjEeIdVPsH6eHCGUonqcAo7ZNOoxTMP
-         +aC8DcK9nwzC4gakVZbuVNiXq6C3/zXQaz2k95fI3Oj6LAEvkmpObgs3kP6bb/0tHr
-         ncDPnR4mSE42HVZIjIGgMjsaMS88XXlpeGy4Qklg=
-Received: from DLEE109.ent.ti.com (dlee109.ent.ti.com [157.170.170.41])
-        by fllv0034.itg.ti.com (8.15.2/8.15.2) with ESMTPS id xB6BgF6c008805
-        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
-        Fri, 6 Dec 2019 05:42:15 -0600
-Received: from DLEE101.ent.ti.com (157.170.170.31) by DLEE109.ent.ti.com
- (157.170.170.41) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.1847.3; Fri, 6 Dec
- 2019 05:42:14 -0600
-Received: from fllv0040.itg.ti.com (10.64.41.20) by DLEE101.ent.ti.com
- (157.170.170.31) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.1847.3 via
- Frontend Transport; Fri, 6 Dec 2019 05:42:14 -0600
-Received: from a0230074-OptiPlex-7010.india.ti.com (ileax41-snat.itg.ti.com [10.172.224.153])
-        by fllv0040.itg.ti.com (8.15.2/8.15.2) with ESMTP id xB6Bg6JA079926;
-        Fri, 6 Dec 2019 05:42:11 -0600
-From:   Faiz Abbas <faiz_abbas@ti.com>
-To:     <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>
-CC:     <ulf.hansson@linaro.org>, <adrian.hunter@intel.com>,
-        <faiz_abbas@ti.com>
-Subject: [PATCH] mmc: sdhci: Update the tuning failed messages to pr_debug level
-Date:   Fri, 6 Dec 2019 17:13:26 +0530
-Message-ID: <20191206114326.15856-1-faiz_abbas@ti.com>
-X-Mailer: git-send-email 2.19.2
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
+        id S1726315AbfLFRIa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 6 Dec 2019 12:08:30 -0500
+Received: from mail-lj1-f196.google.com ([209.85.208.196]:39107 "EHLO
+        mail-lj1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726284AbfLFRI3 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Dec 2019 12:08:29 -0500
+Received: by mail-lj1-f196.google.com with SMTP id e10so8407746ljj.6
+        for <linux-mmc@vger.kernel.org>; Fri, 06 Dec 2019 09:08:28 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=from:to:cc:subject:date:message-id;
+        bh=RJvo8dm1C4RBvX1inxnpeI4gjWGaZu/lxsw87fYACSk=;
+        b=ZKEdKFCNBnvtG/sUsIn6WbE1agwFb7pAX0rX8oiyhTW2UVzDGNZ15Viw02DIoANhDH
+         ow/UceeMZwqdeZK09cLELLKiuToZgF7sq/5+i37Nb/4KgbqTZ3eEhZHE+KeJ/3XA4zpo
+         EElDnweCXYXoxMUOyM4fVseOnLlFpnvo8R1roTu5hLAirI6oSRFuLhBqdgyIKYw/GwvI
+         G/M+wEWPZLKq/T8uZuJeP1J0zjigSRl8p8Ksl7G7uzks1v//9fpOIcZPv28jTsAKwsSG
+         mBZBrLPveWioEqKqLgy4FhrZ3sB2Nl6BlkCrEMf8qOYXXr8840H89n7CdPL+hWK0Y3G+
+         rNFQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id;
+        bh=RJvo8dm1C4RBvX1inxnpeI4gjWGaZu/lxsw87fYACSk=;
+        b=hFTud+oU6fSg33oHs3wEivJ2yqMCEAXdlHHttxyVEkLK1jAoO0SyjyN34QLyfcL8L8
+         XWCJfO9RbGecHg8lurjCfcnTBAJpR5/OpFQ96rdxpfh+asc9CaBaG6JBi6zOY5lZUKYr
+         882k5u/ihxsrYz6bppTuH5auw+N2kczB9/xZeeESGJogfPCBaMnAtU+YYy/jYff13kdu
+         t5+VeUWV9/Q/snHAp95izf3K2xmlJUWgwHg4GIi62bDDZ3OA+/CBkdii0vRrF/Ejow1U
+         4Z9e88L0u/ZStmPhQTyjmoKeu/DrNsCmpzkN83U4T9D8LEN2NJbHMczUqXVvaeIBRkWp
+         672g==
+X-Gm-Message-State: APjAAAWS+c3pBVnPz4ffqBKdG/wD9ZEZ/vtT91dbaIAE56IyIJr4qoCJ
+        rUEsfYW4yleBdjM8Ul02EgECnw==
+X-Google-Smtp-Source: APXvYqzJt+YACb3a8Tl61TG8pgv8gqMLZ4+X330YLPAqOz0ACqmdzKUNe8U0rzCbkaa5XP9lXfTcUg==
+X-Received: by 2002:a2e:998a:: with SMTP id w10mr9545421lji.241.1575652107749;
+        Fri, 06 Dec 2019 09:08:27 -0800 (PST)
+Received: from localhost.localdomain (h-158-174-22-210.NA.cust.bahnhof.se. [158.174.22.210])
+        by smtp.gmail.com with ESMTPSA id z9sm6905283ljm.40.2019.12.06.09.08.26
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 06 Dec 2019 09:08:27 -0800 (PST)
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+To:     linux-gpio@vger.kernel.org,
+        Linus Walleij <linus.walleij@linaro.org>
+Cc:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [PATCH 0/9] pinctrl: Consolidate some pinctrl code for mmc
+Date:   Fri,  6 Dec 2019 18:08:12 +0100
+Message-Id: <20191206170821.29711-1-ulf.hansson@linaro.org>
+X-Mailer: git-send-email 2.17.1
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Tuning support in DDR50 speed mode was added in SD Specifications Part1
-Physical Layer Specification v3.01. Its not possible to distinguish
-between v3.00 and v3.01 from the SCR and that is why since
-commit 4324f6de6d2e ("mmc: core: enable CMD19 tuning for DDR50 mode")
-tuning failures are ignored in DDR50 speed mode.
+Some mmc host drivers, but perhaps also others drivers, needs to reset the
+pinctrl into the default state (PINCTRL_STATE_DEFAULT). However, they can't use
+the existing pinctrl_pm_select_default_state(), as that requires CONFIG_PM to
+be set. This leads to open coding, as they need to look up the default state
+themselves and then select it. This series attempt to address these problems.
 
-Cards compatible with v3.00 don't respond to CMD19 in DDR50 and this
-error gets printed during enumeration and also if retune is triggered at
-any time during operation. Update the printk level to pr_debug so that
-these errors don't lead to false error reports.
+Ulf Hansson (9):
+  pinctrl: core: Add pinctrl_select_default_state() and export it
+  mmc: meson-gx: Convert to pinctrl_select_default_state()
+  mmc: mmci: Convert to pinctrl_select_default_state()
+  mmc: usdhi6rol0: Convert to pinctrl_select_default_state()
+  mmc: omap_hsmmc: Convert to pinctrl_select_default_state()
+  mmc: sdhci-esdhc-imx: Convert to pinctrl_select_default_state()
+  mmc: atmel-mci: Convert to pinctrl_select_default_state()
+  mmc: jz4740: Convert to pinctrl_select_default_state()
+  mmc: uniphier-sd: Convert to pinctrl_select_default_state()
 
-Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
----
- drivers/mmc/host/sdhci.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ drivers/mmc/host/atmel-mci.c       |  2 +-
+ drivers/mmc/host/jz4740_mmc.c      |  2 +-
+ drivers/mmc/host/meson-gx-mmc.c    | 10 +--------
+ drivers/mmc/host/mmci.c            | 12 ++---------
+ drivers/mmc/host/mmci.h            |  1 -
+ drivers/mmc/host/omap_hsmmc.c      | 10 ++-------
+ drivers/mmc/host/sdhci-esdhc-imx.c | 11 ++--------
+ drivers/mmc/host/uniphier-sd.c     | 14 +++++--------
+ drivers/mmc/host/usdhi6rol0.c      | 15 +-------------
+ drivers/pinctrl/core.c             | 33 +++++++++++++++++-------------
+ include/linux/pinctrl/consumer.h   |  6 ++++++
+ 11 files changed, 40 insertions(+), 76 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 296d955ede59..42a9c8179da7 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2417,8 +2417,8 @@ static int __sdhci_execute_tuning(struct sdhci_host *host, u32 opcode)
- 		sdhci_send_tuning(host, opcode);
- 
- 		if (!host->tuning_done) {
--			pr_info("%s: Tuning timeout, falling back to fixed sampling clock\n",
--				mmc_hostname(host->mmc));
-+			pr_debug("%s: Tuning timeout, falling back to fixed sampling clock\n",
-+				 mmc_hostname(host->mmc));
- 			sdhci_abort_tuning(host, opcode);
- 			return -ETIMEDOUT;
- 		}
 -- 
-2.19.2
+2.17.1
 
