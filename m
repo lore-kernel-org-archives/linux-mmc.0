@@ -1,93 +1,80 @@
-Return-Path: <SRS0=6a2S=Z5=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=S1FC=Z6=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.5 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4F8CBC2D0BE
-	for <linux-mmc@archiver.kernel.org>; Sat,  7 Dec 2019 16:28:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6695DC2D0C0
+	for <linux-mmc@archiver.kernel.org>; Sun,  8 Dec 2019 23:56:46 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 1D04D24673
-	for <linux-mmc@archiver.kernel.org>; Sat,  7 Dec 2019 16:28:56 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2A660206E0
+	for <linux-mmc@archiver.kernel.org>; Sun,  8 Dec 2019 23:56:46 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (1024-bit key) header.d=crapouillou.net header.i=@crapouillou.net header.b="L4NqW+Je"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="jaP0lKZz"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726455AbfLGQ2z (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 7 Dec 2019 11:28:55 -0500
-Received: from outils.crapouillou.net ([89.234.176.41]:52938 "EHLO
-        crapouillou.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726414AbfLGQ2z (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 7 Dec 2019 11:28:55 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=crapouillou.net;
-        s=mail; t=1575736132; h=from:from:sender:reply-to:subject:subject:date:date:
-         message-id:message-id:to:to:cc:cc:mime-version:mime-version:
-         content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=IpyMBdwF5y8UNztBuEan4whDPj/FuBdwiixrnrTDE20=;
-        b=L4NqW+Jeqtj7p7rDomQ0Izq0nxzN3lqfek97EXOZ9d0eZV8J2zbYkoVl8ft0lXfAQZ79Gu
-        emYNqAIDca3I0+faYWGmqIZGaMyw9/Jd1z/cbu+UACAFgKXWLMZBGlTNcYnEOXJIYJjuuT
-        YNYDv1N/jfqLdLKSdobsizDOL/j8od8=
-Date:   Sat, 07 Dec 2019 17:28:47 +0100
-From:   Paul Cercueil <paul@crapouillou.net>
-Subject: Re: [PATCH 8/9] mmc: jz4740: Convert to
- pinctrl_select_default_state()
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     linux-gpio@vger.kernel.org,
-        Linus Walleij <linus.walleij@linaro.org>,
-        linux-mmc@vger.kernel.org
-Message-Id: <1575736127.3.1@crapouillou.net>
-In-Reply-To: <20191206170821.29711-9-ulf.hansson@linaro.org>
-References: <20191206170821.29711-1-ulf.hansson@linaro.org>
-        <20191206170821.29711-9-ulf.hansson@linaro.org>
+        id S1726911AbfLHX4p (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 8 Dec 2019 18:56:45 -0500
+Received: from mail-lf1-f67.google.com ([209.85.167.67]:37072 "EHLO
+        mail-lf1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726863AbfLHX4p (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 8 Dec 2019 18:56:45 -0500
+Received: by mail-lf1-f67.google.com with SMTP id b15so9242928lfc.4
+        for <linux-mmc@vger.kernel.org>; Sun, 08 Dec 2019 15:56:44 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=G98iQ4Xz1596icAZ7mOyKIsOKgGjMdou0zMqC7TfbVs=;
+        b=jaP0lKZzSBuq07uSKcJFRDfXUKQo0AVQBIHNFxx6la3qlyWukiqyuu2b6k7WWBtXiv
+         qLv7E+qDTwIVVCnnG6ulWj81HpEdvl7f293zntRt7i5Ot0JCQVBmVT1L+6Q33vFuaVBq
+         yHdGD6CSTwhkz5aCKq7TnyjRx9DqfNsgs++asIuoRnh64zevQ0vN+s7EMipU+pV1KnGT
+         XdU9fQHfPDYviHFTnT7Z5lxfyOFRgoa6ZqUVeT39nXcwX6cZbc+roGLBIYzexWndx1mI
+         dHMyfjt7nJD6xm8zGieTR0RFmq9RaKBFGVmtasmpup6ApzmcKv/a2ZDrEFW14AlUWc76
+         0Crg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=G98iQ4Xz1596icAZ7mOyKIsOKgGjMdou0zMqC7TfbVs=;
+        b=DWf2YEGNgwbqLEBWhmb9nKnNDgfGXd0y8MVIrhgF5N7uDxd6MGLBs+AUF7FD/tG1gk
+         v0kmlVYobvFzXyfI7KAisOyMoQVXI6niNZKrGPdwBQ1i7ch8PvUwujLwL6DdpC5c62bf
+         ldhnC3sEpyMPIe2RnvR7czGiu8tRptcKXccIWGpfzQzpRB8bmDsIqAlydBjiBspVkRqF
+         69lIpfvmQQ76IrcYTXGHf2ZbWzZJ0AJE6IgVqJMe9MdfXOVU1aspZOolM87pOi6FhsG2
+         h/tbY6ccS5NdyoAe6LB2gwTQSCy8XzPs4w0NR+MuQ7mfK5VZSY+MHnLB7qg21qnE53Oc
+         pDLA==
+X-Gm-Message-State: APjAAAWV+r8UuzLNFREGnz6nixO0YMQj436cMHUQiTRcBM6Ma38g0v0Q
+        a2SJjfueAj229mK2ktBurGugWFQZeR9z0KK+LEUneg==
+X-Google-Smtp-Source: APXvYqzVoNkq9pkmph0v2+xPiSjUlmLk/6GbSB0ueTQeLYHC7/MGvlWBMQmYVy24nsYfZn2LZ0YjErbZUliuhlouYrE=
+X-Received: by 2002:a19:c648:: with SMTP id w69mr9095069lff.44.1575849403347;
+ Sun, 08 Dec 2019 15:56:43 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1; format=flowed
-Content-Transfer-Encoding: quoted-printable
+References: <20191206170821.29711-1-ulf.hansson@linaro.org> <20191206170821.29711-9-ulf.hansson@linaro.org>
+In-Reply-To: <20191206170821.29711-9-ulf.hansson@linaro.org>
+From:   Linus Walleij <linus.walleij@linaro.org>
+Date:   Mon, 9 Dec 2019 00:56:31 +0100
+Message-ID: <CACRpkdZAUH9+f6zS1sxVSLDdUnynEhbB7XqBETzcM2S122kwtA@mail.gmail.com>
+Subject: Re: [PATCH 8/9] mmc: jz4740: Convert to pinctrl_select_default_state()
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Paul Cercueil <paul@crapouillou.net>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi,
+On Fri, Dec 6, 2019 at 6:08 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
 
-
-Le ven., d=E9c. 6, 2019 at 18:08, Ulf Hansson <ulf.hansson@linaro.org> a=20
-=E9crit :
 > Let's move away from using pinctrl_pm_select_default_state() as it's
 > scheduled for removal and use pinctrl_select_default_state() instead.
-
-Looks good to me,
-Acked-by: Paul Cercueil <paul@crapouillou.net>
-
-Cheers,
--Paul
-
+>
 > Cc: Paul Cercueil <paul@crapouillou.net>
 > Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-> ---
->  drivers/mmc/host/jz4740_mmc.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->=20
-> diff --git a/drivers/mmc/host/jz4740_mmc.c=20
-> b/drivers/mmc/host/jz4740_mmc.c
-> index 78383f60a3dc..fbae87d1f017 100644
-> --- a/drivers/mmc/host/jz4740_mmc.c
-> +++ b/drivers/mmc/host/jz4740_mmc.c
-> @@ -1108,7 +1108,7 @@ static int jz4740_mmc_suspend(struct device=20
-> *dev)
->=20
->  static int jz4740_mmc_resume(struct device *dev)
->  {
-> -	return pinctrl_pm_select_default_state(dev);
-> +	return pinctrl_select_default_state(dev);
->  }
->=20
->  static SIMPLE_DEV_PM_OPS(jz4740_mmc_pm_ops, jz4740_mmc_suspend,
-> --
-> 2.17.1
->=20
 
-=
+Acked-by: Linus Walleij <linus.walleij@linaro.org>
 
+Yours,
+Linus Walleij
