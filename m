@@ -1,80 +1,78 @@
-Return-Path: <SRS0=S1FC=Z6=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=IHUQ=Z7=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6695DC2D0C0
-	for <linux-mmc@archiver.kernel.org>; Sun,  8 Dec 2019 23:56:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 85438C2D0C0
+	for <linux-mmc@archiver.kernel.org>; Mon,  9 Dec 2019 05:13:15 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 2A660206E0
-	for <linux-mmc@archiver.kernel.org>; Sun,  8 Dec 2019 23:56:46 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4F36420721
+	for <linux-mmc@archiver.kernel.org>; Mon,  9 Dec 2019 05:13:15 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="jaP0lKZz"
+	dkim=pass (2048-bit key) header.d=nifty.com header.i=@nifty.com header.b="sHrlam1u"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726911AbfLHX4p (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 8 Dec 2019 18:56:45 -0500
-Received: from mail-lf1-f67.google.com ([209.85.167.67]:37072 "EHLO
-        mail-lf1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726863AbfLHX4p (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 8 Dec 2019 18:56:45 -0500
-Received: by mail-lf1-f67.google.com with SMTP id b15so9242928lfc.4
-        for <linux-mmc@vger.kernel.org>; Sun, 08 Dec 2019 15:56:44 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=G98iQ4Xz1596icAZ7mOyKIsOKgGjMdou0zMqC7TfbVs=;
-        b=jaP0lKZzSBuq07uSKcJFRDfXUKQo0AVQBIHNFxx6la3qlyWukiqyuu2b6k7WWBtXiv
-         qLv7E+qDTwIVVCnnG6ulWj81HpEdvl7f293zntRt7i5Ot0JCQVBmVT1L+6Q33vFuaVBq
-         yHdGD6CSTwhkz5aCKq7TnyjRx9DqfNsgs++asIuoRnh64zevQ0vN+s7EMipU+pV1KnGT
-         XdU9fQHfPDYviHFTnT7Z5lxfyOFRgoa6ZqUVeT39nXcwX6cZbc+roGLBIYzexWndx1mI
-         dHMyfjt7nJD6xm8zGieTR0RFmq9RaKBFGVmtasmpup6ApzmcKv/a2ZDrEFW14AlUWc76
-         0Crg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=G98iQ4Xz1596icAZ7mOyKIsOKgGjMdou0zMqC7TfbVs=;
-        b=DWf2YEGNgwbqLEBWhmb9nKnNDgfGXd0y8MVIrhgF5N7uDxd6MGLBs+AUF7FD/tG1gk
-         v0kmlVYobvFzXyfI7KAisOyMoQVXI6niNZKrGPdwBQ1i7ch8PvUwujLwL6DdpC5c62bf
-         ldhnC3sEpyMPIe2RnvR7czGiu8tRptcKXccIWGpfzQzpRB8bmDsIqAlydBjiBspVkRqF
-         69lIpfvmQQ76IrcYTXGHf2ZbWzZJ0AJE6IgVqJMe9MdfXOVU1aspZOolM87pOi6FhsG2
-         h/tbY6ccS5NdyoAe6LB2gwTQSCy8XzPs4w0NR+MuQ7mfK5VZSY+MHnLB7qg21qnE53Oc
-         pDLA==
-X-Gm-Message-State: APjAAAWV+r8UuzLNFREGnz6nixO0YMQj436cMHUQiTRcBM6Ma38g0v0Q
-        a2SJjfueAj229mK2ktBurGugWFQZeR9z0KK+LEUneg==
-X-Google-Smtp-Source: APXvYqzVoNkq9pkmph0v2+xPiSjUlmLk/6GbSB0ueTQeLYHC7/MGvlWBMQmYVy24nsYfZn2LZ0YjErbZUliuhlouYrE=
-X-Received: by 2002:a19:c648:: with SMTP id w69mr9095069lff.44.1575849403347;
- Sun, 08 Dec 2019 15:56:43 -0800 (PST)
+        id S1725936AbfLIFNO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 9 Dec 2019 00:13:14 -0500
+Received: from conssluserg-03.nifty.com ([210.131.2.82]:24579 "EHLO
+        conssluserg-03.nifty.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725854AbfLIFNO (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Dec 2019 00:13:14 -0500
+Received: from mail-vk1-f169.google.com (mail-vk1-f169.google.com [209.85.221.169]) (authenticated)
+        by conssluserg-03.nifty.com with ESMTP id xB95D6eM022154;
+        Mon, 9 Dec 2019 14:13:07 +0900
+DKIM-Filter: OpenDKIM Filter v2.10.3 conssluserg-03.nifty.com xB95D6eM022154
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nifty.com;
+        s=dec2015msa; t=1575868387;
+        bh=GTF6UD3GYv8Er8qBdaQM26T7zUbSphvd8n0MGPxzJy4=;
+        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+        b=sHrlam1ug+XAKmOiNnNH/w6Or1cM00bqCTkagGuzUv6ScGFyttQqv0gz4REQJi61h
+         xZ7BfgjymEWbPXCrQzRwkMJiOLddyGob9av0XeLp+0OMlBTskiwb49roDU2ScpZ/jA
+         MelRvM9B2Biy5PlO4RLGrA2Q22vwlxejgycY3ATLABZclN27MbK9tCV9vliuhRdU8/
+         m2EwjsfZvGg2wwe4ohayPYXBfOBUUp2vzud27TM0wJkHCgH7RyydACM00vCNQlgw5t
+         rfsALfCtrBG+TvyXbwiCHCWjx3BNSGAxZE0OJzEaatXr7L8sGzxEAIBWh8m6324wNO
+         50ckqM4tiha4w==
+X-Nifty-SrcIP: [209.85.221.169]
+Received: by mail-vk1-f169.google.com with SMTP id i4so4003434vkc.3;
+        Sun, 08 Dec 2019 21:13:07 -0800 (PST)
+X-Gm-Message-State: APjAAAVUpzz5r7A4rY5/0oYNz9LaHy2Z9RK2qswZiBM7lm++ux4Lyu/d
+        Qd14211qpStZbrHtrWiFJH9Rtv8kFhbMeWYzDBs=
+X-Google-Smtp-Source: APXvYqwu3z97Xto7Aw0zyY0/OicAagBB5SATn47eMNkysBLPaW+ssK6AAwzTGNMGpF5rJIohxNVjtU/p/k1cW8thYVk=
+X-Received: by 2002:a1f:6344:: with SMTP id x65mr11641934vkb.26.1575868386201;
+ Sun, 08 Dec 2019 21:13:06 -0800 (PST)
 MIME-Version: 1.0
-References: <20191206170821.29711-1-ulf.hansson@linaro.org> <20191206170821.29711-9-ulf.hansson@linaro.org>
-In-Reply-To: <20191206170821.29711-9-ulf.hansson@linaro.org>
-From:   Linus Walleij <linus.walleij@linaro.org>
-Date:   Mon, 9 Dec 2019 00:56:31 +0100
-Message-ID: <CACRpkdZAUH9+f6zS1sxVSLDdUnynEhbB7XqBETzcM2S122kwtA@mail.gmail.com>
-Subject: Re: [PATCH 8/9] mmc: jz4740: Convert to pinctrl_select_default_state()
+References: <20191206170821.29711-1-ulf.hansson@linaro.org> <20191206170821.29711-10-ulf.hansson@linaro.org>
+In-Reply-To: <20191206170821.29711-10-ulf.hansson@linaro.org>
+From:   Masahiro Yamada <yamada.masahiro@socionext.com>
+Date:   Mon, 9 Dec 2019 14:12:30 +0900
+X-Gmail-Original-Message-ID: <CAK7LNAQF3VeQz67tAxtRXX3VYoCJSNc+xLTu9Pn331kJXVB+QQ@mail.gmail.com>
+Message-ID: <CAK7LNAQF3VeQz67tAxtRXX3VYoCJSNc+xLTu9Pn331kJXVB+QQ@mail.gmail.com>
+Subject: Re: [PATCH 9/9] mmc: uniphier-sd: Convert to pinctrl_select_default_state()
 To:     Ulf Hansson <ulf.hansson@linaro.org>
 Cc:     "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        Paul Cercueil <paul@crapouillou.net>
+        Linus Walleij <linus.walleij@linaro.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, Dec 6, 2019 at 6:08 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
-
-> Let's move away from using pinctrl_pm_select_default_state() as it's
-> scheduled for removal and use pinctrl_select_default_state() instead.
+On Sat, Dec 7, 2019 at 2:08 AM Ulf Hansson <ulf.hansson@linaro.org> wrote:
 >
-> Cc: Paul Cercueil <paul@crapouillou.net>
+> Let's drop the boilerplate code for managing the default pinctrl state and
+> convert into using the new pinctrl_select_default_state().
+>
+> Cc: Masahiro Yamada <yamada.masahiro@socionext.com>
 > Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> ---
 
-Acked-by: Linus Walleij <linus.walleij@linaro.org>
+Acked-by: Masahiro Yamada <yamada.masahiro@socionext.com>
 
-Yours,
-Linus Walleij
+
+
+-- 
+Best Regards
+Masahiro Yamada
