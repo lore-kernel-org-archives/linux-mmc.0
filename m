@@ -2,169 +2,83 @@ Return-Path: <SRS0=IHUQ=Z7=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.4 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C3479C04E30
-	for <linux-mmc@archiver.kernel.org>; Mon,  9 Dec 2019 14:41:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 09E33C43603
+	for <linux-mmc@archiver.kernel.org>; Mon,  9 Dec 2019 14:48:06 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 9807420836
-	for <linux-mmc@archiver.kernel.org>; Mon,  9 Dec 2019 14:41:02 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9540F207FF
+	for <linux-mmc@archiver.kernel.org>; Mon,  9 Dec 2019 14:48:05 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="key not found in DNS" (0-bit key) header.d=codeaurora.org header.i=@codeaurora.org header.b="F3cBvfzc";
-	dkim=pass (1024-bit key) header.d=amazonses.com header.i=@amazonses.com header.b="T+0Or8QK"
+	dkim=pass (1024-bit key) header.d=rasmusvillemoes.dk header.i=@rasmusvillemoes.dk header.b="XlwlAish"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727300AbfLIOlB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 9 Dec 2019 09:41:01 -0500
-Received: from a27-55.smtp-out.us-west-2.amazonses.com ([54.240.27.55]:53264
-        "EHLO a27-55.smtp-out.us-west-2.amazonses.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726687AbfLIOlB (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Dec 2019 09:41:01 -0500
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/simple;
-        s=zsmsymrwgfyinv5wlfyidntwsjeeldzt; d=codeaurora.org; t=1575902460;
-        h=MIME-Version:Content-Type:Content-Transfer-Encoding:Date:From:To:Cc:Subject:In-Reply-To:References:Message-ID;
-        bh=FwsTN1S8xTUtsKIR4+YjOOPQ4UCSIVoYV0o+74vu/E8=;
-        b=F3cBvfzc2ApvC/q5bwfcQyj43+Tj+eIRKEaChXmnVPxJwVJ2c7749NjFbnUH/PDV
-        LwoNJjbCLyld1jKm9aqezrn+Omzi+5kJrwsVCJZi//xcrsAR3YQbQp9le2/8qY1xCgd
-        HCT0I1LWaOFfa32QkYq4oGUj69Y1qidZ9kjuuRAI=
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/simple;
-        s=gdwg2y3kokkkj5a55z2ilkup5wp5hhxx; d=amazonses.com; t=1575902460;
-        h=MIME-Version:Content-Type:Content-Transfer-Encoding:Date:From:To:Cc:Subject:In-Reply-To:References:Message-ID:Feedback-ID;
-        bh=FwsTN1S8xTUtsKIR4+YjOOPQ4UCSIVoYV0o+74vu/E8=;
-        b=T+0Or8QKRoFZbmCUBxgGRmn4/i55zayvWHGVRERk6T4dcMJUg+Isihj6UsyKYtwu
-        XLMMZePW++nPjIjkkuhMxfIg2jO5913lLuHYVs6iOINfG5AHCaYAEZrNC5Hr3Ifi1Wv
-        ADDbOWgMZq2Sc76xzwFGIc1mNVEe+1cICCyKEAlI=
+        id S1727591AbfLIOsF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 9 Dec 2019 09:48:05 -0500
+Received: from mail-lj1-f194.google.com ([209.85.208.194]:39958 "EHLO
+        mail-lj1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727307AbfLIOsE (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Dec 2019 09:48:04 -0500
+Received: by mail-lj1-f194.google.com with SMTP id s22so15946663ljs.7
+        for <linux-mmc@vger.kernel.org>; Mon, 09 Dec 2019 06:48:03 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=rasmusvillemoes.dk; s=google;
+        h=subject:to:cc:references:from:message-id:date:user-agent
+         :mime-version:in-reply-to:content-language:content-transfer-encoding;
+        bh=0HvN+3e+7om8qumnXzunxi56S61TczW41AS4hCzUgbE=;
+        b=XlwlAisha/IQ7vS/gPNErAprRksj1pwwuHY/qJSvFrQftdWih8AAn/4LDfkagAGmLA
+         sZR6bvN2z4ljSMIpTJi/Il6SofvgqRgEX78t/iRPfj2M2D+ks0ropUWEp3cqkqLB+Et2
+         sSqnzNYvkMhxhSpfXfdpygzs7CQVB0+tm1fxM=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=0HvN+3e+7om8qumnXzunxi56S61TczW41AS4hCzUgbE=;
+        b=WTp4wkKNWReuyFLHEoWTc4Hp6P9+7srJcQbTVPvj9NyRZ91B8czsQC+0054OiiTl6Z
+         S2vdFyyshLUh8jdjJfiKUoX0m2N4lrYZzTyso3CfAzpFx/Qs8K2LD2GYdL2hwLO0M+L9
+         zIJrkCaOxwgCOraAhzQkCYIrAxwONJPGL2C983PV+uaDleO/l4PyFCMQFShRIgvIodjq
+         TtjrZxS2OAzwFmENWqrPXW1mnQ69FYaPD2kvnMgcoMtzU8mt2DsevbeUz9Ah5Z68zjzs
+         bMEBfGGoI5i0httQ/DBRYpqqyhs0Qy2D/8+V72nwE6GX8Hw+cshS6YrrvSllBj87lKr0
+         bVJQ==
+X-Gm-Message-State: APjAAAWI91dBCVF53EudLsNuDxY6dJHYCcTQhgMvTa7qnQICDJB1Cwl3
+        hHCpnf2U/0+ewFJPozNSVomLIllM3+8lTNyC
+X-Google-Smtp-Source: APXvYqwnB1DDe+vJLnMUeAdtaqnv/hdl6VeHTg1Ng86FZHxtqmmJu4heJ3e9QqQCJC7P0kUcC7OWoQ==
+X-Received: by 2002:a2e:9b95:: with SMTP id z21mr14634556lji.112.1575902882749;
+        Mon, 09 Dec 2019 06:48:02 -0800 (PST)
+Received: from [172.16.11.28] ([81.216.59.226])
+        by smtp.gmail.com with ESMTPSA id h24sm21816ljl.80.2019.12.09.06.48.01
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Mon, 09 Dec 2019 06:48:01 -0800 (PST)
+Subject: Re: [PATCH] mmc: sdhci-of-esdhc: Revert "mmc: sdhci-of-esdhc: add
+ erratum A-009204 support"
+To:     Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Yinbo Zhu <yinbo.zhu@nxp.com>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+References: <20191204085447.27491-1-linux@rasmusvillemoes.dk>
+From:   Rasmus Villemoes <linux@rasmusvillemoes.dk>
+Message-ID: <4d61ffef-f325-e1f9-7d02-d546f2f3d2cb@rasmusvillemoes.dk>
+Date:   Mon, 9 Dec 2019 15:48:00 +0100
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101
+ Thunderbird/60.9.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
- format=flowed
-Content-Transfer-Encoding: 8bit
-Date:   Mon, 9 Dec 2019 14:41:00 +0000
-From:   ppvk@codeaurora.org
-To:     Georgi Djakov <georgi.djakov@linaro.org>
-Cc:     adrian.hunter@intel.com, robh+dt@kernel.org,
-        ulf.hansson@linaro.org, asutoshd@codeaurora.org,
-        vbadigan@codeaurora.org, stummala@codeaurora.org,
-        sayalil@codeaurora.org, rampraka@codeaurora.org, sboyd@kernel.org,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
-        agross@kernel.org, linux-mmc-owner@vger.kernel.org
-Subject: Re: [RFC-v2 1/2] dt-bindings: mmc: sdhci-msm: Add Bus BW vote
- supported strings
-In-Reply-To: <8d7f2a2f-1312-8983-4e58-80dc6939154c@linaro.org>
-References: <1573220319-4287-1-git-send-email-ppvk@codeaurora.org>
- <1573220319-4287-2-git-send-email-ppvk@codeaurora.org>
- <8d7f2a2f-1312-8983-4e58-80dc6939154c@linaro.org>
-Message-ID: <0101016eeb1b3894-fc246837-27f4-447b-b37a-6bc4dd1893dc-000000@us-west-2.amazonses.com>
-X-Sender: ppvk@codeaurora.org
-User-Agent: Roundcube Webmail/1.3.9
-X-SES-Outgoing: 2019.12.09-54.240.27.55
-Feedback-ID: 1.us-west-2.CZuq2qbDmUIuT3qdvXlRHZZCpfZqZ4GtG9v3VKgRyF0=:AmazonSES
+In-Reply-To: <20191204085447.27491-1-linux@rasmusvillemoes.dk>
+Content-Type: text/plain; charset=windows-1252
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 2019-11-13 18:46, Georgi Djakov wrote:
-> Hi Pradeep,
-> 
-> Thanks for the patch!
-> 
-> On 8.11.19 г. 15:38 ч., Pradeep P V K wrote:
->> Add Bus bandwidth voting supported strings for qcom-sdhci controller.
->> 
->> Signed-off-by: Pradeep P V K <ppvk@codeaurora.org>
->> ---
->>  .../devicetree/bindings/mmc/sdhci-msm.txt          | 32 
->> ++++++++++++++++++++++
->>  1 file changed, 32 insertions(+)
->> 
->> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt 
->> b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
->> index da4edb1..22fb140 100644
->> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
->> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
->> @@ -39,6 +39,25 @@ Required properties:
->>  	"cal"	- reference clock for RCLK delay calibration (optional)
->>  	"sleep"	- sleep clock for RCLK delay calibration (optional)
->> 
->> +Optional Properties:
->> +* Following bus parameters are required for bus bw voting:
-> 
-> "bus bw voting" sounds a bit vague to me. I would say instead:
-> 
-> The following DT properties are required for interconnect bandwidth 
-> scaling.
-> 
-  Thanks for the review. I will address this in my next patch set.
+ping, any comments on this revert?
 
->> +- interconnects: Pairs of phandles and interconnect provider 
->> specifier
->> +		 to denote the edge source and destination ports of
->> +		 the interconnect path. Please refer to
->> +		 Documentation/devicetree/bindings/interconnect/
->> +		 for more details.
->> +- interconnect-names: List of interconnect path name strings sorted 
->> in the same
->> +		order as the interconnects property. Consumers drivers will use
->> +		interconnect-names to match interconnect paths with interconnect
->> +		specifiers. Please refer to Documentation/devicetree/bindings/
->> +		interconnect/ for more details.
+On 04/12/2019 09.54, Rasmus Villemoes wrote:
+> This reverts commit 5dd195522562542bc6ebe6e7bd47890d8b7ca93c.
 > 
-> Please describe here what there are two paths are for sdhc and how they 
-> are
-> expected to be named. You already responded to this question, so please 
-> include
-> this information here.
-> Hint: Refer to the Documentation for how we described it for other 
-> subsystems.
-> 
-ok. I will address in my next patch set.
-
->> +- msm-bus,name: string describing the bus path
->> +- msm-bus,num-cases: number of configurations in which sdhc can 
->> operate in
->> +- msm-bus,num-paths: number of paths to vote for
->> +- msm-bus,vectors-KBps: Takes a tuple <ib ab>, <ib ab> (2 tuples for 
->> 2
->> +				num-paths) The number of these entries *must*
->> +				be same as num-cases.
-> 
-> If it has to be in DT, could we use this [1] instead of the above? The 
-> patches
-> are not merged yet, but this might be the direction we want to go.
-> 
-> Thanks,
-> Georgi
-> 
-> [1] 
-> http://lore.kernel.org/r/20190807223111.230846-1-saravanak@google.com
-> 
-
-Sure, i will make the change based on [1] in my next patch set.
-
->> +
->>  Example:
->> 
->>  	sdhc_1: sdhci@f9824900 {
->> @@ -56,6 +75,19 @@ Example:
->> 
->>  		clocks = <&gcc GCC_SDCC1_APPS_CLK>, <&gcc GCC_SDCC1_AHB_CLK>;
->>  		clock-names = "core", "iface";
->> +		interconnects = <&qnoc 50 &qnoc 512>,
->> +				<&qnoc 1 &qnoc 544>;
->> +		interconnect-names = "sdhc-ddr","cpu-sdhc";
->> +		msm-bus,name = "sdhc1";
->> +		msm-bus,num-cases = <3>;
->> +		msm-bus,num-paths = <2>;
->> +		msm-bus,vectors-KBps =
->> +		/* No Vote */
->> +		<0 0>, <0 0>,
->> +		/* 50 MB/s */
->> +		<130718 200000>, <133320 133320>,
->> +		/* 200 MB/s */
->> +		<1338562 4096000>, <1338562 4096000>;
->>  	};
->> 
->>  	sdhc_2: sdhci@f98a4900 {
->> 
+> First, the fix seems to be plain wrong, since the erratum suggests
+> waiting 5ms before setting setting SYSCTL[RSTD], but this msleep()
+> happens after the call of sdhci_reset() which is where that bit gets
+> set (if SDHCI_RESET_DATA is in mask).
