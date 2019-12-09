@@ -2,83 +2,82 @@ Return-Path: <SRS0=IHUQ=Z7=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.4 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 09E33C43603
-	for <linux-mmc@archiver.kernel.org>; Mon,  9 Dec 2019 14:48:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4779FC43603
+	for <linux-mmc@archiver.kernel.org>; Mon,  9 Dec 2019 18:37:12 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 9540F207FF
-	for <linux-mmc@archiver.kernel.org>; Mon,  9 Dec 2019 14:48:05 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 17C5F2080D
+	for <linux-mmc@archiver.kernel.org>; Mon,  9 Dec 2019 18:37:12 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=rasmusvillemoes.dk header.i=@rasmusvillemoes.dk header.b="XlwlAish"
+	dkim=pass (2048-bit key) header.d=rere.qmqm.pl header.i=@rere.qmqm.pl header.b="FDe0UB5c"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727591AbfLIOsF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 9 Dec 2019 09:48:05 -0500
-Received: from mail-lj1-f194.google.com ([209.85.208.194]:39958 "EHLO
-        mail-lj1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727307AbfLIOsE (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Dec 2019 09:48:04 -0500
-Received: by mail-lj1-f194.google.com with SMTP id s22so15946663ljs.7
-        for <linux-mmc@vger.kernel.org>; Mon, 09 Dec 2019 06:48:03 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=rasmusvillemoes.dk; s=google;
-        h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=0HvN+3e+7om8qumnXzunxi56S61TczW41AS4hCzUgbE=;
-        b=XlwlAisha/IQ7vS/gPNErAprRksj1pwwuHY/qJSvFrQftdWih8AAn/4LDfkagAGmLA
-         sZR6bvN2z4ljSMIpTJi/Il6SofvgqRgEX78t/iRPfj2M2D+ks0ropUWEp3cqkqLB+Et2
-         sSqnzNYvkMhxhSpfXfdpygzs7CQVB0+tm1fxM=
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=0HvN+3e+7om8qumnXzunxi56S61TczW41AS4hCzUgbE=;
-        b=WTp4wkKNWReuyFLHEoWTc4Hp6P9+7srJcQbTVPvj9NyRZ91B8czsQC+0054OiiTl6Z
-         S2vdFyyshLUh8jdjJfiKUoX0m2N4lrYZzTyso3CfAzpFx/Qs8K2LD2GYdL2hwLO0M+L9
-         zIJrkCaOxwgCOraAhzQkCYIrAxwONJPGL2C983PV+uaDleO/l4PyFCMQFShRIgvIodjq
-         TtjrZxS2OAzwFmENWqrPXW1mnQ69FYaPD2kvnMgcoMtzU8mt2DsevbeUz9Ah5Z68zjzs
-         bMEBfGGoI5i0httQ/DBRYpqqyhs0Qy2D/8+V72nwE6GX8Hw+cshS6YrrvSllBj87lKr0
-         bVJQ==
-X-Gm-Message-State: APjAAAWI91dBCVF53EudLsNuDxY6dJHYCcTQhgMvTa7qnQICDJB1Cwl3
-        hHCpnf2U/0+ewFJPozNSVomLIllM3+8lTNyC
-X-Google-Smtp-Source: APXvYqwnB1DDe+vJLnMUeAdtaqnv/hdl6VeHTg1Ng86FZHxtqmmJu4heJ3e9QqQCJC7P0kUcC7OWoQ==
-X-Received: by 2002:a2e:9b95:: with SMTP id z21mr14634556lji.112.1575902882749;
-        Mon, 09 Dec 2019 06:48:02 -0800 (PST)
-Received: from [172.16.11.28] ([81.216.59.226])
-        by smtp.gmail.com with ESMTPSA id h24sm21816ljl.80.2019.12.09.06.48.01
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 09 Dec 2019 06:48:01 -0800 (PST)
-Subject: Re: [PATCH] mmc: sdhci-of-esdhc: Revert "mmc: sdhci-of-esdhc: add
- erratum A-009204 support"
-To:     Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Yinbo Zhu <yinbo.zhu@nxp.com>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-References: <20191204085447.27491-1-linux@rasmusvillemoes.dk>
-From:   Rasmus Villemoes <linux@rasmusvillemoes.dk>
-Message-ID: <4d61ffef-f325-e1f9-7d02-d546f2f3d2cb@rasmusvillemoes.dk>
-Date:   Mon, 9 Dec 2019 15:48:00 +0100
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101
- Thunderbird/60.9.0
+        id S1726365AbfLIShL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 9 Dec 2019 13:37:11 -0500
+Received: from rere.qmqm.pl ([91.227.64.183]:45724 "EHLO rere.qmqm.pl"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726265AbfLIShL (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 9 Dec 2019 13:37:11 -0500
+Received: from remote.user (localhost [127.0.0.1])
+        by rere.qmqm.pl (Postfix) with ESMTPSA id 47WsL41VqKzCS;
+        Mon,  9 Dec 2019 19:34:36 +0100 (CET)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=rere.qmqm.pl; s=1;
+        t=1575916476; bh=or7Oj6xnUL/WDCELdOhIBVwh1AdCpOT9i9SKDT6ot5Y=;
+        h=Date:From:Subject:To:Cc:From;
+        b=FDe0UB5ceT51Pl4PG1WYMSGUL+PxNPgip6WXgT9/QRzRRYsdvHXw4n5/BTpKF0t+N
+         Aux17mYjRjlxjEBkXKeFqp2gBGKu6u+CyDX+9bk+c3c/0mz57OsqRWuFn01lmbVHL1
+         IEyyJ1ZcWCluRdTjLJtuY5iGdAesv2o0AKGIsUNxfPlOEMxg5AsiLkSXBLDJaKQwRw
+         2We52qw2vr0UO+YQ27mp+ngA5CJj3pojIQgZaAWd3DrO2h4YJegAxJiY6ENZHrjpLJ
+         7t9SqeQCbnXauSoWSiV0OGrYa3jt1k6Q89EwEW+r2z4dUgZsp7UvpF/S4yTKIExqQg
+         oASz5B8UKIDrA==
+X-Virus-Status: Clean
+X-Virus-Scanned: clamav-milter 0.101.4 at mail
+Date:   Mon, 09 Dec 2019 19:37:05 +0100
+Message-Id: <3f12c2deaae9e77a5e7ab8415db7751a27bc3b98.1575916477.git.mirq-linux@rere.qmqm.pl>
+From:   =?UTF-8?q?Micha=C5=82=20Miros=C5=82aw?= <mirq-linux@rere.qmqm.pl>
+Subject: [PATCH] mmc: sdhci-s3c: remove unused ext_cd_gpio field
 MIME-Version: 1.0
-In-Reply-To: <20191204085447.27491-1-linux@rasmusvillemoes.dk>
-Content-Type: text/plain; charset=windows-1252
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+To:     linux-mmc@vger.kernel.org
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Ben Dooks <ben-linux@fluff.org>,
+        Jaehoon Chung <jh80.chung@samsung.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        linux-kernel@vger.kernel.org
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-ping, any comments on this revert?
+Signed-off-by: Michał Mirosław <mirq-linux@rere.qmqm.pl>
+---
+ drivers/mmc/host/sdhci-s3c.c | 2 --
+ 1 file changed, 2 deletions(-)
 
-On 04/12/2019 09.54, Rasmus Villemoes wrote:
-> This reverts commit 5dd195522562542bc6ebe6e7bd47890d8b7ca93c.
-> 
-> First, the fix seems to be plain wrong, since the erratum suggests
-> waiting 5ms before setting setting SYSCTL[RSTD], but this msleep()
-> happens after the call of sdhci_reset() which is where that bit gets
-> set (if SDHCI_RESET_DATA is in mask).
+diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+index 51e096f27388..8b15945dd499 100644
+--- a/drivers/mmc/host/sdhci-s3c.c
++++ b/drivers/mmc/host/sdhci-s3c.c
+@@ -117,7 +117,6 @@ struct sdhci_s3c {
+ 	struct s3c_sdhci_platdata *pdata;
+ 	int			cur_clk;
+ 	int			ext_cd_irq;
+-	int			ext_cd_gpio;
+ 
+ 	struct clk		*clk_io;
+ 	struct clk		*clk_bus[MAX_BUS_CLK];
+@@ -512,7 +511,6 @@ static int sdhci_s3c_probe(struct platform_device *pdev)
+ 			goto err_pdata_io_clk;
+ 	} else {
+ 		memcpy(pdata, pdev->dev.platform_data, sizeof(*pdata));
+-		sc->ext_cd_gpio = -1; /* invalid gpio number */
+ 	}
+ 
+ 	drv_data = sdhci_s3c_get_driver_data(pdev);
+-- 
+2.20.1
+
