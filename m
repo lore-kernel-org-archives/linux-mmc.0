@@ -4,293 +4,114 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 73C43C2D0CB
-	for <linux-mmc@archiver.kernel.org>; Tue, 10 Dec 2019 09:51:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EC2ABC2D0C4
+	for <linux-mmc@archiver.kernel.org>; Tue, 10 Dec 2019 09:51:59 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 36BC320836
-	for <linux-mmc@archiver.kernel.org>; Tue, 10 Dec 2019 09:51:34 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B354A2073B
+	for <linux-mmc@archiver.kernel.org>; Tue, 10 Dec 2019 09:51:59 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="qg2idsjz"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="xggK1nB9"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727527AbfLJJv3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 10 Dec 2019 04:51:29 -0500
-Received: from mail-vs1-f66.google.com ([209.85.217.66]:34644 "EHLO
-        mail-vs1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727525AbfLJJv2 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Dec 2019 04:51:28 -0500
-Received: by mail-vs1-f66.google.com with SMTP id g15so12580903vsf.1
-        for <linux-mmc@vger.kernel.org>; Tue, 10 Dec 2019 01:51:28 -0800 (PST)
+        id S1727223AbfLJJv7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 10 Dec 2019 04:51:59 -0500
+Received: from mail-ua1-f65.google.com ([209.85.222.65]:41603 "EHLO
+        mail-ua1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727222AbfLJJv7 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Dec 2019 04:51:59 -0500
+Received: by mail-ua1-f65.google.com with SMTP id f7so6938959uaa.8
+        for <linux-mmc@vger.kernel.org>; Tue, 10 Dec 2019 01:51:58 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=KMORO6YLurGC9coObMxz6fn2NzFCAetPjibkmjGyJDQ=;
-        b=qg2idsjzuM2EuulQzs29kdk+EbcoL3LZeGdKFx4UZWJFOCsLHnmWc/hU73nthUZD+F
-         arcP1pp32UjqCNm5/aPyoOH3mVM9F3flbtbe9u2HpPhFyBb8uaFp/t15yLayWsAjvmVD
-         jjzXA5tO29AYwR82Qstx2Lg3ILrPBMLWlLGeXZje/PEVo0ei7BFhqpHzL5YUcHiQHETp
-         70wHWykRYkNsgx2wwiyVZ1/CQZ6O1/bAVaXArRu1qJ7kbtHyOUSxpVp8ZQr5+DsYCl1D
-         5mZwNwYGOE4o5is8DhOMS3vgfbp3OMflJ6d1pu44qdG5Ah4LWJYNN9dE08thuz4QrmkM
-         Ws+g==
+        bh=xUN3rGfqd0QTJZr6aZxtmVJn1us7qeeluWmJXj0Te7E=;
+        b=xggK1nB9ejv8RrFLLP7MF/oV73DlomCcEFt6HG/TCk2YTOnfjzU3+OzQE8gFIrWdVJ
+         TtWMwOMAm+lNOHbSBgqqfcWGtcvUCv75lA3LChaXWTTz0IACzZ6lxZQSbnTN3Fb3DP2O
+         IJuvDyC789CqjCdgQcDf5UoOTHebBGiol9I8m3u0iIMym5mvaHzTt67ZcXglu22tZM6l
+         vj4qeiLkVAYovR5jRIo0hNv66L1NOWtskL6JUwzFKzCajY4uwA3NIaWBXmgWfJSWKlEj
+         WWrieoWz89mX714X7EAYQ87oD6/+ERYpjZqPZoyFB1vPFlOGCcfg9yzMlnZJzgMAYDNB
+         /0XA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=KMORO6YLurGC9coObMxz6fn2NzFCAetPjibkmjGyJDQ=;
-        b=tl8J1XDYiw76L8KsOeoLG6y7wMv8aTuw1p4pXdtVhBC+GP0H6cykIJ52gldZ1S/mI8
-         vXt/+lRtLXWhe2NvGd25N/KyWUWj7hoX/HPGB/+36ss1YZ27iJrtnTfQ/+icgd5d+gA2
-         zg/Uit0lmZXftIuqBYtV1Ms2OsxHs3Nb3RXx7FQZU/IWPW9V3oWKQHolGaAu70IGVakV
-         ewahP0Zs/DN1XfDVNCggs0fc/VJCCN5K4reXAsEMl680Q7rZWju5URI0cvdN8J/4UjOa
-         6WIUIkC7wqj962AsjoHcGQV/mUVhJ+uNLeOd88Zqg+hKHUD0thtaTd8z59CFIvAEnsdQ
-         y6JA==
-X-Gm-Message-State: APjAAAWwtLIEugeoISQIKAkpvgDo/Zkhdx/m3CXb+fnW283dUtOu38uR
-        N+lyHZy3+8YW7oPluhh86zYP1Fje0vu8MK5VmE9FBQ==
-X-Google-Smtp-Source: APXvYqyqVsfloBxPx+OU7yT1yq+RRFLOjF9tbpSgQt+rFvvOjS8FfYO5WQc5l2AzCPayN08YsHD/0wd7QvMvEkOnnXY=
-X-Received: by 2002:a05:6102:5d1:: with SMTP id v17mr24239747vsf.200.1575971487761;
- Tue, 10 Dec 2019 01:51:27 -0800 (PST)
+        bh=xUN3rGfqd0QTJZr6aZxtmVJn1us7qeeluWmJXj0Te7E=;
+        b=YizXNx1f6FRfUXUTc5deBJpQDaonVplcKiSrplBFZivRTe6SFGnxwy2fOQeSRMIabn
+         DwV8rrsf0nkFHYsYmr6kuUAATBCqOvN7JcO0mmKDMvC3n2dtXrIWKxuIsVrQK/bbB8NM
+         5PtNz1xT6NKoxOyavasSGb3VjHd0bTd4lFiHCBUlgQiRFc5yxfo6Z7Tpdavr47K0hpJy
+         HKwc+X3w1hr4NsBNLCEapSln1q6pmYe3Tbmk7CjBmd9zfzRrq8Jwk8U6VLsOsT9MsFvz
+         Wqh4BMGSSfFVc1EMACi7BhKBonLQOTnD0DWjq0gUcqzYSGqi+a5QMwVqiQG95cUIZFE4
+         Vjvg==
+X-Gm-Message-State: APjAAAUPtXJpmYo5pZ05NgFh67oPsKS2iYLppBBxdCfcfuoE47bLg2p0
+        pB9JV8bv4Bk9NIb3FfnTha3tN0Syx7EogShhmf0PvQ==
+X-Google-Smtp-Source: APXvYqxI9QdLGOMqq6QaCpjOk+V2l3LXtFs7IfnhUjP0TmSsF2jOR5CpH0EuMu4/BYNbPnekTo3AHs1xkdV1CNj9hNE=
+X-Received: by 2002:ab0:2759:: with SMTP id c25mr2903677uap.104.1575971518126;
+ Tue, 10 Dec 2019 01:51:58 -0800 (PST)
 MIME-Version: 1.0
-References: <20191128074522.69706-1-ludovic.desroches@microchip.com> <20191128074522.69706-2-ludovic.desroches@microchip.com>
-In-Reply-To: <20191128074522.69706-2-ludovic.desroches@microchip.com>
+References: <20191204071958.18553-1-chaotian.jing@mediatek.com>
+In-Reply-To: <20191204071958.18553-1-chaotian.jing@mediatek.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 10 Dec 2019 10:50:51 +0100
-Message-ID: <CAPDyKFrJmWTtJGT+KuPSVb_ywQ3uwwdYzipK=B_1_dBeuM5dMg@mail.gmail.com>
-Subject: Re: [PATCH v4 2/3] mmc: sdhci-of-at91: rework clocks management to
- support SAM9x60 device
-To:     Ludovic Desroches <ludovic.desroches@microchip.com>
-Cc:     Linux ARM <linux-arm-kernel@lists.infradead.org>,
+Date:   Tue, 10 Dec 2019 10:51:22 +0100
+Message-ID: <CAPDyKFo9Z2yj7zC5VOS-iX_LyavPp1A4n73eAp7VD-Q+dpoqpw@mail.gmail.com>
+Subject: Re: [PATCH] mmc: mediatek: fix CMD_TA to 2 for MT8173 HS200/HS400 mode
+To:     Chaotian Jing <chaotian.jing@mediatek.com>
+Cc:     Matthias Brugger <matthias.bgg@gmail.com>,
         "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        DTML <devicetree@vger.kernel.org>,
-        Nicolas Ferre <nicolas.ferre@microchip.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        linux-mediatek@lists.infradead.org,
         Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Mark Rutland <mark.rutland@arm.com>,
-        claudiu.beznea@microchip.com, Eugen.Hristev@microchip.com,
-        Alexandre Belloni <alexandre.belloni@bootlin.com>
+        srv_heupstream <srv_heupstream@mediatek.com>, hsinyi@google.com
 Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 28 Nov 2019 at 08:45, Ludovic Desroches
-<ludovic.desroches@microchip.com> wrote:
+On Wed, 4 Dec 2019 at 08:20, Chaotian Jing <chaotian.jing@mediatek.com> wrote:
 >
-> In the SAM9x60 SoC, there are only two clocks instead of three for the
-> SDHCI device. The base clk is no longer provided, it is generated
-> internally from the mult clk.
+> there is a chance that always get response CRC error after HS200 tuning,
+> the reason is that need set CMD_TA to 2. this modification is only for
+> MT8173.
 >
-> The values of the base clk and mul in the capabilities registers may not
-> reflect the reality as the mult clk is a programmable clock which can take
-> several rates. As we can't trust those values, take them from the clock
-> tree and update the capabilities according to.
->
-> As we can have the same pitfall, in some cases, with the SAMA5D2 Soc,
-> stop relying on capabilities too.
->
-> Signed-off-by: Ludovic Desroches <ludovic.desroches@microchip.com>
-> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+> Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
 
+I have applied this for fixes, however it seems like this should also
+be tagged for stable, right?
 
-Applied for next, thanks!
+Is there a specific commit this fixes or should we just find the
+version it applies to?
 
 Kind regards
 Uffe
 
 
+
 > ---
+>  drivers/mmc/host/mtk-sd.c | 2 ++
+>  1 file changed, 2 insertions(+)
 >
-> Changes:
-> - v4: fix typo for the capabilities register and remove extra
->   parentheses
-> - v3: none
-> - v2: none
+> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+> index 189e42674d85..010fe29a4888 100644
+> --- a/drivers/mmc/host/mtk-sd.c
+> +++ b/drivers/mmc/host/mtk-sd.c
+> @@ -228,6 +228,7 @@
+>  #define MSDC_PATCH_BIT_SPCPUSH    (0x1 << 29)  /* RW */
+>  #define MSDC_PATCH_BIT_DECRCTMO   (0x1 << 30)  /* RW */
 >
->  drivers/mmc/host/sdhci-of-at91.c | 105 +++++++++++++++++--------------
->  1 file changed, 58 insertions(+), 47 deletions(-)
+> +#define MSDC_PATCH_BIT1_CMDTA     (0x7 << 3)    /* RW */
+>  #define MSDC_PATCH_BIT1_STOP_DLY  (0xf << 8)    /* RW */
 >
-> diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
-> index 5959e394b416..b2a8c45c9c23 100644
-> --- a/drivers/mmc/host/sdhci-of-at91.c
-> +++ b/drivers/mmc/host/sdhci-of-at91.c
-> @@ -33,7 +33,14 @@
+>  #define MSDC_PATCH_BIT2_CFGRESP   (0x1 << 15)   /* RW */
+> @@ -1881,6 +1882,7 @@ static int hs400_tune_response(struct mmc_host *mmc, u32 opcode)
 >
->  #define SDHCI_AT91_PRESET_COMMON_CONF  0x400 /* drv type B, programmable clock mode */
+>         /* select EMMC50 PAD CMD tune */
+>         sdr_set_bits(host->base + PAD_CMD_TUNE, BIT(0));
+> +       sdr_set_field(host->base + MSDC_PATCH_BIT1, MSDC_PATCH_BIT1_CMDTA, 2);
 >
-> +struct sdhci_at91_soc_data {
-> +       const struct sdhci_pltfm_data *pdata;
-> +       bool baseclk_is_generated_internally;
-> +       unsigned int divider_for_baseclk;
-> +};
-> +
->  struct sdhci_at91_priv {
-> +       const struct sdhci_at91_soc_data *soc_data;
->         struct clk *hclock;
->         struct clk *gck;
->         struct clk *mainck;
-> @@ -141,12 +148,24 @@ static const struct sdhci_ops sdhci_at91_sama5d2_ops = {
->         .set_power              = sdhci_at91_set_power,
->  };
->
-> -static const struct sdhci_pltfm_data soc_data_sama5d2 = {
-> +static const struct sdhci_pltfm_data sdhci_sama5d2_pdata = {
->         .ops = &sdhci_at91_sama5d2_ops,
->  };
->
-> +static const struct sdhci_at91_soc_data soc_data_sama5d2 = {
-> +       .pdata = &sdhci_sama5d2_pdata,
-> +       .baseclk_is_generated_internally = false,
-> +};
-> +
-> +static const struct sdhci_at91_soc_data soc_data_sam9x60 = {
-> +       .pdata = &sdhci_sama5d2_pdata,
-> +       .baseclk_is_generated_internally = true,
-> +       .divider_for_baseclk = 2,
-> +};
-> +
->  static const struct of_device_id sdhci_at91_dt_match[] = {
->         { .compatible = "atmel,sama5d2-sdhci", .data = &soc_data_sama5d2 },
-> +       { .compatible = "microchip,sam9x60-sdhci", .data = &soc_data_sam9x60 },
->         {}
->  };
->  MODULE_DEVICE_TABLE(of, sdhci_at91_dt_match);
-> @@ -156,50 +175,37 @@ static int sdhci_at91_set_clks_presets(struct device *dev)
->         struct sdhci_host *host = dev_get_drvdata(dev);
->         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->         struct sdhci_at91_priv *priv = sdhci_pltfm_priv(pltfm_host);
-> -       int ret;
->         unsigned int                    caps0, caps1;
->         unsigned int                    clk_base, clk_mul;
-> -       unsigned int                    gck_rate, real_gck_rate;
-> +       unsigned int                    gck_rate, clk_base_rate;
->         unsigned int                    preset_div;
->
-> -       /*
-> -        * The mult clock is provided by as a generated clock by the PMC
-> -        * controller. In order to set the rate of gck, we have to get the
-> -        * base clock rate and the clock mult from capabilities.
-> -        */
->         clk_prepare_enable(priv->hclock);
->         caps0 = readl(host->ioaddr + SDHCI_CAPABILITIES);
->         caps1 = readl(host->ioaddr + SDHCI_CAPABILITIES_1);
-> -       clk_base = (caps0 & SDHCI_CLOCK_V3_BASE_MASK) >> SDHCI_CLOCK_BASE_SHIFT;
-> -       clk_mul = (caps1 & SDHCI_CLOCK_MUL_MASK) >> SDHCI_CLOCK_MUL_SHIFT;
-> -       gck_rate = clk_base * 1000000 * (clk_mul + 1);
-> -       ret = clk_set_rate(priv->gck, gck_rate);
-> -       if (ret < 0) {
-> -               dev_err(dev, "failed to set gck");
-> -               clk_disable_unprepare(priv->hclock);
-> -               return ret;
-> -       }
-> -       /*
-> -        * We need to check if we have the requested rate for gck because in
-> -        * some cases this rate could be not supported. If it happens, the rate
-> -        * is the closest one gck can provide. We have to update the value
-> -        * of clk mul.
-> -        */
-> -       real_gck_rate = clk_get_rate(priv->gck);
-> -       if (real_gck_rate != gck_rate) {
-> -               clk_mul = real_gck_rate / (clk_base * 1000000) - 1;
-> -               caps1 &= (~SDHCI_CLOCK_MUL_MASK);
-> -               caps1 |= ((clk_mul << SDHCI_CLOCK_MUL_SHIFT) &
-> -                         SDHCI_CLOCK_MUL_MASK);
-> -               /* Set capabilities in r/w mode. */
-> -               writel(SDMMC_CACR_KEY | SDMMC_CACR_CAPWREN,
-> -                      host->ioaddr + SDMMC_CACR);
-> -               writel(caps1, host->ioaddr + SDHCI_CAPABILITIES_1);
-> -               /* Set capabilities in ro mode. */
-> -               writel(0, host->ioaddr + SDMMC_CACR);
-> -               dev_info(dev, "update clk mul to %u as gck rate is %u Hz\n",
-> -                        clk_mul, real_gck_rate);
-> -       }
-> +
-> +       gck_rate = clk_get_rate(priv->gck);
-> +       if (priv->soc_data->baseclk_is_generated_internally)
-> +               clk_base_rate = gck_rate / priv->soc_data->divider_for_baseclk;
-> +       else
-> +               clk_base_rate = clk_get_rate(priv->mainck);
-> +
-> +       clk_base = clk_base_rate / 1000000;
-> +       clk_mul = gck_rate / clk_base_rate - 1;
-> +
-> +       caps0 &= ~SDHCI_CLOCK_V3_BASE_MASK;
-> +       caps0 |= (clk_base << SDHCI_CLOCK_BASE_SHIFT) & SDHCI_CLOCK_V3_BASE_MASK;
-> +       caps1 &= ~SDHCI_CLOCK_MUL_MASK;
-> +       caps1 |= (clk_mul << SDHCI_CLOCK_MUL_SHIFT) & SDHCI_CLOCK_MUL_MASK;
-> +       /* Set capabilities in r/w mode. */
-> +       writel(SDMMC_CACR_KEY | SDMMC_CACR_CAPWREN, host->ioaddr + SDMMC_CACR);
-> +       writel(caps0, host->ioaddr + SDHCI_CAPABILITIES);
-> +       writel(caps1, host->ioaddr + SDHCI_CAPABILITIES_1);
-> +       /* Set capabilities in ro mode. */
-> +       writel(0, host->ioaddr + SDMMC_CACR);
-> +
-> +       dev_info(dev, "update clk mul to %u as gck rate is %u Hz and clk base is %u Hz\n",
-> +                clk_mul, gck_rate, clk_base_rate);
->
->         /*
->          * We have to set preset values because it depends on the clk_mul
-> @@ -207,19 +213,19 @@ static int sdhci_at91_set_clks_presets(struct device *dev)
->          * maximum sd clock value is 120 MHz instead of 208 MHz. For that
->          * reason, we need to use presets to support SDR104.
->          */
-> -       preset_div = DIV_ROUND_UP(real_gck_rate, 24000000) - 1;
-> +       preset_div = DIV_ROUND_UP(gck_rate, 24000000) - 1;
->         writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
->                host->ioaddr + SDHCI_PRESET_FOR_SDR12);
-> -       preset_div = DIV_ROUND_UP(real_gck_rate, 50000000) - 1;
-> +       preset_div = DIV_ROUND_UP(gck_rate, 50000000) - 1;
->         writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
->                host->ioaddr + SDHCI_PRESET_FOR_SDR25);
-> -       preset_div = DIV_ROUND_UP(real_gck_rate, 100000000) - 1;
-> +       preset_div = DIV_ROUND_UP(gck_rate, 100000000) - 1;
->         writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
->                host->ioaddr + SDHCI_PRESET_FOR_SDR50);
-> -       preset_div = DIV_ROUND_UP(real_gck_rate, 120000000) - 1;
-> +       preset_div = DIV_ROUND_UP(gck_rate, 120000000) - 1;
->         writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
->                host->ioaddr + SDHCI_PRESET_FOR_SDR104);
-> -       preset_div = DIV_ROUND_UP(real_gck_rate, 50000000) - 1;
-> +       preset_div = DIV_ROUND_UP(gck_rate, 50000000) - 1;
->         writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
->                host->ioaddr + SDHCI_PRESET_FOR_DDR50);
->
-> @@ -314,7 +320,7 @@ static const struct dev_pm_ops sdhci_at91_dev_pm_ops = {
->  static int sdhci_at91_probe(struct platform_device *pdev)
->  {
->         const struct of_device_id       *match;
-> -       const struct sdhci_pltfm_data   *soc_data;
-> +       const struct sdhci_at91_soc_data        *soc_data;
->         struct sdhci_host               *host;
->         struct sdhci_pltfm_host         *pltfm_host;
->         struct sdhci_at91_priv          *priv;
-> @@ -325,17 +331,22 @@ static int sdhci_at91_probe(struct platform_device *pdev)
->                 return -EINVAL;
->         soc_data = match->data;
->
-> -       host = sdhci_pltfm_init(pdev, soc_data, sizeof(*priv));
-> +       host = sdhci_pltfm_init(pdev, soc_data->pdata, sizeof(*priv));
->         if (IS_ERR(host))
->                 return PTR_ERR(host);
->
->         pltfm_host = sdhci_priv(host);
->         priv = sdhci_pltfm_priv(pltfm_host);
-> +       priv->soc_data = soc_data;
->
->         priv->mainck = devm_clk_get(&pdev->dev, "baseclk");
->         if (IS_ERR(priv->mainck)) {
-> -               dev_err(&pdev->dev, "failed to get baseclk\n");
-> -               return PTR_ERR(priv->mainck);
-> +               if (soc_data->baseclk_is_generated_internally) {
-> +                       priv->mainck = NULL;
-> +               } else {
-> +                       dev_err(&pdev->dev, "failed to get baseclk\n");
-> +                       return PTR_ERR(priv->mainck);
-> +               }
->         }
->
->         priv->hclock = devm_clk_get(&pdev->dev, "hclock");
+>         if (mmc->ios.timing == MMC_TIMING_MMC_HS200 ||
+>             mmc->ios.timing == MMC_TIMING_UHS_SDR104)
 > --
-> 2.24.0
->
+> 2.18.0
