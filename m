@@ -6,39 +6,34 @@ X-Spam-Status: No, score=-2.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7C2C2C2D0BF
-	for <linux-mmc@archiver.kernel.org>; Tue, 10 Dec 2019 22:28:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 02839C00454
+	for <linux-mmc@archiver.kernel.org>; Tue, 10 Dec 2019 22:32:41 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 5822F2077B
-	for <linux-mmc@archiver.kernel.org>; Tue, 10 Dec 2019 22:28:47 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CBC7820836
+	for <linux-mmc@archiver.kernel.org>; Tue, 10 Dec 2019 22:32:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726619AbfLJW2q (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 10 Dec 2019 17:28:46 -0500
-Received: from sauhun.de ([88.99.104.3]:42872 "EHLO pokefinder.org"
+        id S1729449AbfLJWcj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 10 Dec 2019 17:32:39 -0500
+Received: from sauhun.de ([88.99.104.3]:42960 "EHLO pokefinder.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726062AbfLJW2q (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 10 Dec 2019 17:28:46 -0500
+        id S1728109AbfLJWch (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 10 Dec 2019 17:32:37 -0500
 Received: from localhost (p54B330BE.dip0.t-ipconnect.de [84.179.48.190])
-        by pokefinder.org (Postfix) with ESMTPSA id D30092C0616;
-        Tue, 10 Dec 2019 23:28:44 +0100 (CET)
-Date:   Tue, 10 Dec 2019 23:28:44 +0100
+        by pokefinder.org (Postfix) with ESMTPSA id 637A22C0616;
+        Tue, 10 Dec 2019 23:32:34 +0100 (CET)
+Date:   Tue, 10 Dec 2019 23:32:34 +0100
 From:   Wolfram Sang <wsa@the-dreams.de>
-To:     Geert Uytterhoeven <geert@linux-m68k.org>
-Cc:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Linux MMC List <linux-mmc@vger.kernel.org>,
-        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        Takeshi Saito <takeshi.saito.xv@renesas.com>
-Subject: Re: [RFC PATCH 1/2] mmc: renesas_sdhi: Add manual correction
-Message-ID: <20191210222844.GD8683@kunai>
+To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc:     linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Subject: Re: [RFC PATCH 0/2] mmc: renesas_sdhi: add manual correction
+Message-ID: <20191210223234.GE8683@kunai>
 References: <20191203203301.2202-1-wsa+renesas@sang-engineering.com>
- <20191203203301.2202-2-wsa+renesas@sang-engineering.com>
- <CAMuHMdUnC=PM0iM7NwoeVLb2v=r4g-uUU3h4dBn9-St75fLyAw@mail.gmail.com>
 MIME-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="eqp4TxRxnD4KrmFZ"
+        protocol="application/pgp-signature"; boundary="N1GIdlSm9i+YlY4t"
 Content-Disposition: inline
-In-Reply-To: <CAMuHMdUnC=PM0iM7NwoeVLb2v=r4g-uUU3h4dBn9-St75fLyAw@mail.gmail.com>
+In-Reply-To: <20191203203301.2202-1-wsa+renesas@sang-engineering.com>
 User-Agent: Mutt/1.10.1 (2018-07-13)
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
@@ -46,41 +41,42 @@ List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 
---eqp4TxRxnD4KrmFZ
+--N1GIdlSm9i+YlY4t
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+On Tue, Dec 03, 2019 at 09:32:58PM +0100, Wolfram Sang wrote:
+> Add manual tap correction because the automatic one fails for HS400 on
+> Gen3.
+>=20
+> (Limited) testing on Renesas Salvator-XS with M3-N and H3 ES2.0. I want
+> to apply more testing before sending out the real versions. Yet, release
+> early...
+
+And to keep everyone updated: I think the BSP patch about ignoring DAT
+correction error status should be folded into this series. I hope I can
+finish RFC v2 this week.
 
 
-> BTW, why is tap_set unsigned long instead of unsigned int?
-
-Because we use bitmap functions on it, and those have all unsigned long
-as arguments.
-
-> And perhaps it should be moved from host to priv?
-
-That would be great, but other tap_* variables are still used in
-tmio_mmc_core.c. We maybe can refactor all tap handling into
-renesas_sdhi_core.c meanwhile, but this is a seperate issue.
-
-
---eqp4TxRxnD4KrmFZ
+--N1GIdlSm9i+YlY4t
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAl3wHBwACgkQFA3kzBSg
-KbbuKRAAqfD3i7udERBXmVc3CyprYC/uqLNmwwL9pFIQ+3FhIVEZSam41jBmp4xR
-Bu+ae4mCq4g3MMG8YhLq4q8rlUEBYwQTzu6xVQUy1JevmLliCcOwg++O0vwvyAtH
-u5CBp7nz8QkGrJzW+wwLI/4fXBm+RuxJMd+sOwi1Y7K0I0yCh4U3EADfoSLPVJSO
-BZ3myw/tzx0aMLzOHnb/SOcp9z0MGL2iP0LuV0h90eMlX9tVpcG5qTEcI+4p3TLN
-Qpe9Ido5ibp1bX3PNwNZRfPgrXuCWeXMbaVv+AqwyNul17R5RsObI3vBhas4vVAQ
-3qeBSs2WrLxBQE1UUICzK+R4xyNkm8D+Pa8SouVzZYDAh7VhKfuBJKihzWP208uq
-TVDFYdz8lO2KXwvffMuGXGaj057N6uUrr/NWkBPLNBjpbOnM8OkkCiJMoM4uIYLP
-7z1S/fMGJq1ZIor4VlfJMoxQB/3yvv/omne4PGBL//PFVU4zM4UrIU4h9cFSAjiW
-UKweT4ejPLZJvt5BRLTgAYh5emkzK6o6xCQ0tHd/UMZmASYlzH+YFOsV5LwLhf1d
-oXvA54HgoTwYutGudvXN/7dGzRlg2vzudhvP3ZFthd70IZkhFI2Li8e2TcBTND5G
-FBSYoqOlnxkVny6D7+VlA9iRi63JXB7/qFtvd3ksvjZlbjN7Img=
-=2Qi1
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAl3wHQIACgkQFA3kzBSg
+Kbb+VA/+PQCkj/2LeSJ2zCpq2e4mSDOzEg0kCAFiEbBn87ZWhjYGViPSfWrO0HcK
+kqoeDsozOrOFCcxcVdmVjILwRf/NtJEAovpJsTa8HGQDkLNZPZM0Nk+fBgv+Pfh7
+nugvOaih7JQYLDDMGIbjI+rSzW480NxtSF0FtigHkah5jT7cFWJInL+T4leEbukK
+pGB3Jmgck/nV3jENLexfbqczpZ551phHt0zOjjClNz5Uy5rkA7zdX1Iuo3ff6BJo
+ERdksHpCoAQSsqfQvB9e87/nIk94eZkQYfVp9zflpwF8CCZEN1gv2E1RUYZ5yVg4
+fUsynHwBe0SOhBIqFk3X5fwESrhUGsucVYy8T5eJ3w64vWCRsovYtRaECAFQwGjs
+ZgQ7nbTkUA3l9nVh8jGL5qffBxm8Rd/RCgVov+ztfNy6uroxzdiLLEHrULOmRftO
+arPfyzSZe+9ZsskTR0oaNGNhSe0meTWbefNn0Psx8P71658y1aiWu3w69m4w1fJU
+ej24QqECTG5crv7ZihX0Wj8Uu5zSJXZqR6gsflovsnPodsFe7Y3zYKZx8q6SxBJt
+qdPhdJTBIbNPX8gNqhXfZZTLbKv2NA3p9lTMBjFWscz+CU01L6DLMJ6jlSlMr1EK
+i+phn7QwBg0/PCICYGd0jr+DQ2cjIw2XO6u54XlP01dwxOEBfkU=
+=CsMG
 -----END PGP SIGNATURE-----
 
---eqp4TxRxnD4KrmFZ--
+--N1GIdlSm9i+YlY4t--
