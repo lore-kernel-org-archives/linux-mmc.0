@@ -8,139 +8,148 @@ X-Spam-Status: No, score=-8.1 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8B741C43603
-	for <linux-mmc@archiver.kernel.org>; Tue, 10 Dec 2019 14:32:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AF755C00454
+	for <linux-mmc@archiver.kernel.org>; Tue, 10 Dec 2019 14:32:49 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 539AC20838
-	for <linux-mmc@archiver.kernel.org>; Tue, 10 Dec 2019 14:32:21 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 79BE12073B
+	for <linux-mmc@archiver.kernel.org>; Tue, 10 Dec 2019 14:32:49 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="arH933MR"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="s6l7wP3a"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727407AbfLJOcU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 10 Dec 2019 09:32:20 -0500
-Received: from mail-lj1-f196.google.com ([209.85.208.196]:34515 "EHLO
-        mail-lj1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727272AbfLJOcU (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Dec 2019 09:32:20 -0500
-Received: by mail-lj1-f196.google.com with SMTP id m6so20161342ljc.1;
-        Tue, 10 Dec 2019 06:32:18 -0800 (PST)
+        id S1727345AbfLJOct (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 10 Dec 2019 09:32:49 -0500
+Received: from mail-wm1-f65.google.com ([209.85.128.65]:53165 "EHLO
+        mail-wm1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727272AbfLJOcs (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Dec 2019 09:32:48 -0500
+Received: by mail-wm1-f65.google.com with SMTP id p9so3482245wmc.2;
+        Tue, 10 Dec 2019 06:32:46 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=subject:from:to:cc:references:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=NtQLIixJvWLdOmT9WjBNSoTnwbz5rbhUufNkRo6kvMI=;
-        b=arH933MRe09aXDaXrf09Pixv4TtIu/KOyaICoCwJEjVF+jnr4jWbZNkD20PhNLy4bl
-         pyJWbh+mnbPUqUpRGtOocGeS+riWJaJvsi+TnMPrHUa9tl+Qna40PAmFw6DHyPxhwbBO
-         3RZSHOZLDzlMAWhajHBz0TwDjoMbEVGIvo3oa3wLSQKK2yQYK6CIFUzBpf5DJE4DRpI0
-         FO63VmtDLOJfsE6K0iynemMw+wqZzn533VYmd6FM1WBwtWSSTNKNnBiM4vTd7u2UxJdB
-         NfxALL3qe3MpOC5bkjM8Ky0pIbaZXxIaC0sdVljy9mA4ysKYPWcexSy6a/81kHiAsf+y
-         gtIA==
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to:user-agent;
+        bh=8PnM2dw8MRTspfQU2FH2nTY4Yp+htq+lxek13zyvDWc=;
+        b=s6l7wP3aOvtRFhklDNW30Xh8XxAomMKmhbZnN3rqbJH8Ve0x0bBsSSKH71GDgh+q02
+         3+wb8VkjrK38x152l2XkEWesBN3Rvh9zGoJk5XElrRuPpBRl1glCQZrg3UbXnEqQ1lBl
+         ZBVw8/QwRXy4QsuxwmkCf5GXVFV5rc1G5cgRcEjfn1ss0M1sACLruN1OVBrMQ6zak6PS
+         WLU6HoPbnUYqaDuJ8PbVD5YvLE0wJSjIysoW4972Mbie76zfM/5/V8GQBCe3uH/3z9RG
+         EColhIUeo9OLRHFFOKXDVjEOiNmVNlc88FAtujZjQ32UvnPZqOpEDlm2/Hg/oCUfvlL3
+         NyxQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:from:to:cc:references:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=NtQLIixJvWLdOmT9WjBNSoTnwbz5rbhUufNkRo6kvMI=;
-        b=nCfTU+amy8EgI1XM1gfJRFREsbj1ziHbS0vslTI+HRWAYAlkToVJBCVVihZ0FQVMkP
-         SeB2xKm4EAHz47qmFCgwPY8Vh53FUUq2DpXzo8KAGN3BPPx7B26A9/8h4O1nx/KAGtRR
-         N1PiUqbfFVYGNvtG127ERPbpI3W0o80QDHAWVpUygjYm2SmZ2VWsGfsZJGPG0HtuzjwJ
-         lp3ZLlGqDTw6yAkMLqXp5y6+F7b0rg4EW7OrLUTVntgheiwNIyFXx8LdbP0PIS8XYTo6
-         /Htg8gwkj46bjrpdsF4vDu2z3JW98nsMffNuvvtY3ZKjubDsDsJeEmi7tTX/2PdKmQH1
-         Tb8A==
-X-Gm-Message-State: APjAAAXgBEA0oj8x7uGme3DfyEt9p4CDMV0oUBP3XNo/L1YoY4oBooq3
-        uhecBjzVRqxl+/LxL608HruEgfie
-X-Google-Smtp-Source: APXvYqx8TeNe2BV8pHNQaaDHPaPYKKw7a50n8BOjI/SGqtlX0JK4+XeQcN4XjcJY6Uw6VLffz7JKEQ==
-X-Received: by 2002:a2e:93c9:: with SMTP id p9mr14285548ljh.136.1575988337287;
-        Tue, 10 Dec 2019 06:32:17 -0800 (PST)
-Received: from [192.168.2.145] (79-139-233-37.dynamic.spd-mgts.ru. [79.139.233.37])
-        by smtp.googlemail.com with ESMTPSA id m15sm2010376ljg.4.2019.12.10.06.32.16
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 10 Dec 2019 06:32:16 -0800 (PST)
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to:user-agent;
+        bh=8PnM2dw8MRTspfQU2FH2nTY4Yp+htq+lxek13zyvDWc=;
+        b=VqmExOTYdclkilsmLE6zOgsQ1D3Fzjr9oTN9o9cKkoxn213xJfUkrexwploXyGHgvm
+         dmh27EKR79LgJ3Mr9OiXTO1QhUhOkn644bt4U+V1Zxo0Kb79WPTa8OAzsgu4En23vjeI
+         s3nZ8Ny3IkNDcfl8UHRA4b03BA/tOCZY1GZJ8r3QmzlpalfGVN7PVdDWYtPrQsf0gYyc
+         BYepL8pSFi4AGpcT2ErT2WLthw2qjyKT62oDt2cpNRRuoDXI3fbEZWDnUTjVe6kHhJUl
+         FIFwuSXeRESs0qgMsdMHzCUSCSLwryBMsqoZ8hdwTzqUpzsw3Pd22LmrWqqPtiHXudeN
+         G+jg==
+X-Gm-Message-State: APjAAAXeI4ODe919fwRyqr7fYlRghNEIunzU0gKm6+h0WLesf8wPzjzJ
+        K7D3RPu9PwdXMS/uHndaBE8=
+X-Google-Smtp-Source: APXvYqzh7ft5dNdTNRMRMD8XNoSaN3LONf41io1Ow9wGoLjGAZEZh+UMJ7TEwf64le+Cx0yVNoCFTQ==
+X-Received: by 2002:a05:600c:24ce:: with SMTP id 14mr5755716wmu.122.1575988365516;
+        Tue, 10 Dec 2019 06:32:45 -0800 (PST)
+Received: from localhost (pD9E518ED.dip0.t-ipconnect.de. [217.229.24.237])
+        by smtp.gmail.com with ESMTPSA id b63sm3209097wmb.40.2019.12.10.06.32.43
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 10 Dec 2019 06:32:44 -0800 (PST)
+Date:   Tue, 10 Dec 2019 15:32:43 +0100
+From:   Thierry Reding <thierry.reding@gmail.com>
+To:     Dmitry Osipenko <digetx@gmail.com>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Jonathan Hunter <jonathanh@nvidia.com>,
+        linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org,
+        linux-kernel@vger.kernel.org
 Subject: Re: [PATCH v1] sdhci: tegra: Add workaround for Broadcom WiFi
-From:   Dmitry Osipenko <digetx@gmail.com>
-To:     Thierry Reding <thierry.reding@gmail.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Jonathan Hunter <jonathanh@nvidia.com>, linux-mmc@vger.kernel.org,
-        linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org
+Message-ID: <20191210143243.GH2703785@ulmo>
 References: <20191210014011.21987-1-digetx@gmail.com>
  <20191210125208.GD2703785@ulmo>
  <61b7a865-6a6f-5edf-7463-cfdd6b20f687@gmail.com>
-Message-ID: <bc0ebcd6-082a-7b2f-0dc7-c1dc04db12b0@gmail.com>
-Date:   Tue, 10 Dec 2019 17:32:15 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.3.0
 MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="0OWHXb1mYLuhj1Ox"
+Content-Disposition: inline
 In-Reply-To: <61b7a865-6a6f-5edf-7463-cfdd6b20f687@gmail.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+User-Agent: Mutt/1.12.2 (2019-09-21)
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-10.12.2019 17:15, Dmitry Osipenko пишет:
-> 10.12.2019 15:52, Thierry Reding пишет:
->> On Tue, Dec 10, 2019 at 04:40:11AM +0300, Dmitry Osipenko wrote:
->>> All Tegra20 boards that have embedded Broadcom WiFi SDIO chip are affected
->>> by a problem where WiFi chip reports CCCR v1.10, while it should v1.20.
->>> In a result high-speed mode isn't enabled for the WiFi card and this
->>> results in a malfunctioning SDIO communication.
->>>
->>>  brcmfmac: brcmf_sdio_readframes: read 304 bytes from channel 1 failed: -84
->>>  brcmfmac: brcmf_sdio_rxfail: abort command, terminate frame, send NAK
->>>
->>> Downstream kernels are overriding card's CCCR info in SDHCI driver to fix
->>> the problem, let's do the same in upstream.
->>>
->>> The change is inspired by omap_hsmmc_init_card() of OMAP's HSMMC driver,
->>> which overrides card's info for the TI wl1251 WiFi.
->>>
->>> Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
->>> ---
->>>  drivers/mmc/host/sdhci-tegra.c | 28 ++++++++++++++++++++++++++++
->>>  1 file changed, 28 insertions(+)
->>
->> This seems like the wrong place to do this. If this is specific to this
->> WiFi SDIO chip this should be handled at the SDIO card or function
->> level. It seems like the SDIO infrastructure doesn't currently allow
->> this because the OF nodes are attached to the card after
->> mmc_sdio_init_card(), whereas it seems like the quirk is already needed
->> during mmc_sdio_init_card().
->>
->> That said, I think we could have some common code that's executed as
->> part of mmc_attach_sdio() (and before mmc_sdio_init_card()).
->>
->> Actually, it looks like we already have something like that.
->> mmc_sdio_init_card() calls mmc_fixup_device() with sdio_fixup_methods
->> after doing some very basic initialization. Do you know if things start
->> to go wrong before or after that point? It might be worth looking at
->> that SDIO fixup array and add something that would override the CCCR
->> support. That would fix things in a more generic way rather than
->> requiring every host controller driver to duplicate this quirk.
-> 
+
+--0OWHXb1mYLuhj1Ox
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+On Tue, Dec 10, 2019 at 05:15:58PM +0300, Dmitry Osipenko wrote:
+> 10.12.2019 15:52, Thierry Reding =D0=BF=D0=B8=D1=88=D0=B5=D1=82:
+> > On Tue, Dec 10, 2019 at 04:40:11AM +0300, Dmitry Osipenko wrote:
+> >> All Tegra20 boards that have embedded Broadcom WiFi SDIO chip are affe=
+cted
+> >> by a problem where WiFi chip reports CCCR v1.10, while it should v1.20.
+> >> In a result high-speed mode isn't enabled for the WiFi card and this
+> >> results in a malfunctioning SDIO communication.
+> >>
+> >>  brcmfmac: brcmf_sdio_readframes: read 304 bytes from channel 1 failed=
+: -84
+> >>  brcmfmac: brcmf_sdio_rxfail: abort command, terminate frame, send NAK
+> >>
+> >> Downstream kernels are overriding card's CCCR info in SDHCI driver to =
+fix
+> >> the problem, let's do the same in upstream.
+> >>
+> >> The change is inspired by omap_hsmmc_init_card() of OMAP's HSMMC drive=
+r,
+> >> which overrides card's info for the TI wl1251 WiFi.
+> >>
+> >> Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
+> >> ---
+> >>  drivers/mmc/host/sdhci-tegra.c | 28 ++++++++++++++++++++++++++++
+> >>  1 file changed, 28 insertions(+)
+> >=20
+> > This seems like the wrong place to do this. If this is specific to this
+> > WiFi SDIO chip this should be handled at the SDIO card or function
+> > level. It seems like the SDIO infrastructure doesn't currently allow
+> > this because the OF nodes are attached to the card after
+> > mmc_sdio_init_card(), whereas it seems like the quirk is already needed
+> > during mmc_sdio_init_card().
+> >=20
+> > That said, I think we could have some common code that's executed as
+> > part of mmc_attach_sdio() (and before mmc_sdio_init_card()).
+> >=20
+> > Actually, it looks like we already have something like that.
+> > mmc_sdio_init_card() calls mmc_fixup_device() with sdio_fixup_methods
+> > after doing some very basic initialization. Do you know if things start
+> > to go wrong before or after that point? It might be worth looking at
+> > that SDIO fixup array and add something that would override the CCCR
+> > support. That would fix things in a more generic way rather than
+> > requiring every host controller driver to duplicate this quirk.
+>=20
 > Hello Thierry,
-> 
+>=20
 > Thank you very much for the suggestion, looks like indeed it is possible
 > to make workaround in a generic way.
-> 
+>=20
 > Ulf / Adrian, will something like this be acceptable:
-> 
+>=20
 > diff --git a/drivers/mmc/core/card.h b/drivers/mmc/core/card.h
 > index 7bd392d55cfa..a6001f210b9e 100644
 > --- a/drivers/mmc/core/card.h
 > +++ b/drivers/mmc/core/card.h
 > @@ -150,6 +150,12 @@ static inline void __maybe_unused
 > add_limit_rate_quirk(struct mmc_card *card,
->  	card->quirk_max_rate = data;
+>  	card->quirk_max_rate =3D data;
 >  }
-> 
+>=20
 > +static inline void __maybe_unused add_high_speed_quirk(struct mmc_card
 > *card,
 > +						       int data)
 > +{
-> +	card->cccr.high_speed = data;
+> +	card->cccr.high_speed =3D data;
 > +}
 > +
 >  /*
@@ -150,74 +159,40 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 > index 3dba15bccce2..a824c0caa7fb 100644
 > --- a/drivers/mmc/core/quirks.h
 > +++ b/drivers/mmc/core/quirks.h
-> @@ -142,6 +142,9 @@ static const struct mmc_fixup sdio_fixup_methods[] = {
+> @@ -142,6 +142,9 @@ static const struct mmc_fixup sdio_fixup_methods[] =
+=3D {
 >  	SDIO_FIXUP(SDIO_VENDOR_ID_MARVELL, SDIO_DEVICE_ID_MARVELL_8887WLAN,
 >  		   add_limit_rate_quirk, 150000000),
-> 
+>=20
 > +	SDIO_FIXUP(SDIO_VENDOR_ID_BROADCOM, SDIO_DEVICE_ID_BROADCOM_4329,
 > +		   add_high_speed_quirk, 1),
 > +
 >  	END_FIXUP
 >  };
-> 
-> [snip]
+>=20
 
-On second thought, perhaps it's not very universal to change card's CCCR
-and this should be a better variant:
+Looks good to me:
 
-diff --git a/drivers/mmc/core/card.h b/drivers/mmc/core/card.h
-index 7bd392d55cfa..b5e44fcda7fb 100644
---- a/drivers/mmc/core/card.h
-+++ b/drivers/mmc/core/card.h
-@@ -222,4 +222,9 @@ static inline int mmc_card_broken_hpi(const struct
-mmc_card *c)
- 	return c->quirks & MMC_QUIRK_BROKEN_HPI;
- }
+Reviewed-by: Thierry Reding <treding@nvidia.com>
 
-+static inline int mmc_card_need_high_speed_toggle(const struct mmc_card *c)
-+{
-+	return c->quirks & MMC_QUIRK_HIGH_SPEED_CARD;
-+}
-+
- #endif
-diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h
-index 3dba15bccce2..c9af62a1d44b 100644
---- a/drivers/mmc/core/quirks.h
-+++ b/drivers/mmc/core/quirks.h
-@@ -142,6 +142,9 @@ static const struct mmc_fixup sdio_fixup_methods[] = {
- 	SDIO_FIXUP(SDIO_VENDOR_ID_MARVELL, SDIO_DEVICE_ID_MARVELL_8887WLAN,
- 		   add_limit_rate_quirk, 150000000),
+--0OWHXb1mYLuhj1Ox
+Content-Type: application/pgp-signature; name="signature.asc"
 
-+	SDIO_FIXUP(SDIO_VENDOR_ID_BROADCOM, SDIO_DEVICE_ID_BROADCOM_4329,
-+		   add_quirk, MMC_QUIRK_HIGH_SPEED_CARD),
-+
- 	END_FIXUP
- };
+-----BEGIN PGP SIGNATURE-----
 
-diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-index ebb387aa5158..ac12c7631ec5 100644
---- a/drivers/mmc/core/sdio.c
-+++ b/drivers/mmc/core/sdio.c
-@@ -323,7 +323,7 @@ static int mmc_sdio_switch_hs(struct mmc_card *card,
-int enable)
- 	if (!(card->host->caps & MMC_CAP_SD_HIGHSPEED))
- 		return 0;
+iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAl3vrIgACgkQ3SOs138+
+s6EzRg//bnep9XJO8K7TeIDvFcLEtl3K1l0+f9fV5cDqNfwNx8Fv3IJCRX4HhfHO
+GkMnFAsfxPG7P/e9xD9FaaykAcOx2Jowfi7VZdxpPlgTLrGwqGqdSTQMkSyeXwIA
+oLK987art7xvUZtEJ0Dv5RNunT0OzNKY/11euzjfxQRrI3ZP2DaMoNFzC6MwCsFz
+iVMvfFNDXiwmUsRTRsLdx/kjAU6wf0qu9waOTlrQshGFaYQbU1LWWqUhrzBLKGhF
+S8QvZvYA+ZXA0mSlMzQQQMlMnZn9TA7iOhA/mBFpJ59YLYecOaHzcOjS2DHTl2eE
+g5CySU4FHSkLtLPWl83d7grmLF+aver+zys7KZs7pTRwGbPysu9FhdW3DXG6Mn/Y
+/PjdpT3n4L/TE2sn0hxeeLv0GmCN3FfQkqH7Dr/U7GRCqsJLVRaRFDr20UKwrDHc
+ZRqn36kIHh5oEioJKSGXBz4aG7Nd0505xJEmM430IPiPdbQfVPAxOytw8yX7GUKZ
+6f0gOmrqrSJ70oH9Mr5OUoEL50V/7rJclQLMvDTONPr2xbzSxapaE1YXOUoC5OMF
++iERtaVzjK4pczy6KAleZclCxWQsHz1Uj6MNWo4fkHFRLOiXnf+QHVYcm9KzlCzk
+6Aw3KN1odW6TZ9nrO8Pq+6MzsPX1tNS3EXlc7UhFBT7g0mzOKQM=
+=HiyQ
+-----END PGP SIGNATURE-----
 
--	if (!card->cccr.high_speed)
-+	if (!mmc_card_need_high_speed_toggle(card) && !card->cccr.high_speed)
- 		return 0;
-
- 	ret = mmc_io_rw_direct(card, 0, 0, SDIO_CCCR_SPEED, 0, &speed);
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index cf3780a6ccc4..06f697e6d002 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -269,6 +269,7 @@ struct mmc_card {
- #define MMC_QUIRK_BROKEN_IRQ_POLLING	(1<<11)	/* Polling SDIO_CCCR_INTx
-could create a fake interrupt */
- #define MMC_QUIRK_TRIM_BROKEN	(1<<12)		/* Skip trim */
- #define MMC_QUIRK_BROKEN_HPI	(1<<13)		/* Disable broken HPI support */
-+#define MMC_QUIRK_HIGH_SPEED_CARD	(1<<14)	/* Card is high-speed capable */
-
- 	bool			reenable_cmdq;	/* Re-enable Command Queue */
-
+--0OWHXb1mYLuhj1Ox--
