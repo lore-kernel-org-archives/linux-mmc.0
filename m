@@ -7,129 +7,124 @@ X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 63A8BC2D0CE
-	for <linux-mmc@archiver.kernel.org>; Tue, 10 Dec 2019 09:52:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7811AC43603
+	for <linux-mmc@archiver.kernel.org>; Tue, 10 Dec 2019 09:52:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 38BCE2077B
-	for <linux-mmc@archiver.kernel.org>; Tue, 10 Dec 2019 09:52:21 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 484262077B
+	for <linux-mmc@archiver.kernel.org>; Tue, 10 Dec 2019 09:52:35 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Bsr530Ds"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="p84JhS3g"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727185AbfLJJwU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 10 Dec 2019 04:52:20 -0500
-Received: from mail-vk1-f193.google.com ([209.85.221.193]:42218 "EHLO
-        mail-vk1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727177AbfLJJwU (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Dec 2019 04:52:20 -0500
-Received: by mail-vk1-f193.google.com with SMTP id u123so5383423vkb.9
-        for <linux-mmc@vger.kernel.org>; Tue, 10 Dec 2019 01:52:19 -0800 (PST)
+        id S1727018AbfLJJwe (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 10 Dec 2019 04:52:34 -0500
+Received: from mail-ua1-f67.google.com ([209.85.222.67]:37937 "EHLO
+        mail-ua1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727016AbfLJJwe (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Dec 2019 04:52:34 -0500
+Received: by mail-ua1-f67.google.com with SMTP id z17so6944632uac.5
+        for <linux-mmc@vger.kernel.org>; Tue, 10 Dec 2019 01:52:34 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=q5qrPSpMH9kYcCHhd4vcNsQAXKGsi2GWn3voKA1UcIU=;
-        b=Bsr530Ds9RR7OnrfepvBKHI1ZuAU27LqH5fz+tmCa0f+bwYgzsjYLRHghQLlvj++D2
-         e4byzHZR5S65DTcVaJSNquWjuXxn5AOlRP9Cz6zL1NZRCRSyEND4qfCxQiwKOeHY7jgp
-         YMUByo3To9g/oBBxqO+YwMqZnLiGAaQ9wuWIe3Tdy8SbjcTc01AeRbEWLyT+6x4PFM9Q
-         0aAab+UNMml8m3DvOlA8lo9M9Gn+uw7xKwxysHK+ImR8IRUK/lcIvcPmAVqVbRD93KBl
-         ghnSMoAYtvv57wUjsKe7iCBPgG/Ypkh+OMwn9anwcuetLLgxq31woSQ3xiWZvqMAVlUs
-         I2Lg==
+        bh=yXQm4XaShH7vDVUTEGAeMZToqWYQUJWAg/HCHyGvLf4=;
+        b=p84JhS3g5a0JzgG2JpcG7Mi9FmZPk7bAxfwC/oyBWsMyvc/NjEA9A1otgiLYHelPEo
+         54zDi70S8/58AFmo/e77Hji63uc8DeTyyCTff/2FesPTo15UUvrBubCuqLIxAHcu4yjS
+         ZcSxvo8jyhhqFHyTTkdpuSasA6tjBRBzhcyocJrcdGgMwehSldXT8kPWECdJ4Zwcn045
+         hJUKkkhTc8kiEMCflNvCBRm54pRnaIDri7AhAUHcpeiYh21PC7MnF8vj5bK+Rs2iP9fq
+         mal1Rmi8tcbo9Zm92KrUFP39TBkep5BSnDQkhwoZvSasrnnJctVJhAviREFGe2PT6veu
+         nKnw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=q5qrPSpMH9kYcCHhd4vcNsQAXKGsi2GWn3voKA1UcIU=;
-        b=lql+A99OmyyFc6rQaJHOIE1uRnMr2JgpIkmnUL+xQ5MFIcATZBdsmTef0sx5q/Pkq3
-         0kjIeU1Fq8gg39Wnyxistn006pROxECwPdemegVh/8UM66Zq/gdHxVRJAN9ORS15yG+i
-         oBO63HgoYNBQz1g+kj8gTdYNa4cZ+thwH12VrfyNXNgGg0QFg8J8RiibEsoiIj7FGSHL
-         yE+tTHnY4ShY2o4aUOf1jj1tyF+o/T6GhQCxV1r4bBby4hhZ7qnHaToOmiwnifTulg7j
-         LMkffQXM4uUXUxzdx1ismxZAYREAfrSEA+cQTQJufkdMxyaIpO0GLt8U1Y3PL32b/Ab7
-         +oAQ==
-X-Gm-Message-State: APjAAAXhvjUu0n0K89SCFqKrF8FBctMd+Ctpl3E8NeVxNRGSD2kGnSGh
-        YiF3GX9/4MBVzND2jVTVG1m+U3da+cqKP9MIPcjiGg==
-X-Google-Smtp-Source: APXvYqwMIyYSZ/6xd9tGeFm66CB+MLk55qt3XKWF3bgPCBTbvwZf/d7dwVdxPWTkVMuYa+XD0utnhDOgAM9dVAcHyqQ=
-X-Received: by 2002:a1f:4541:: with SMTP id s62mr8356089vka.59.1575971539446;
- Tue, 10 Dec 2019 01:52:19 -0800 (PST)
+        bh=yXQm4XaShH7vDVUTEGAeMZToqWYQUJWAg/HCHyGvLf4=;
+        b=iJfVSbGgwdEBJAIC4lFamPGuxZvg57yf87zMrqZR5bInaZ9l5O9g0B9pAc/oU8O5bX
+         k8WpjynwzCjrqjQ0m0JBtw19QuWPjZTyORGtqPUNdhiQn3b8EQbXa/l9zu94F64VmiDL
+         A1wB4ZuvcuHgF86OFtM5FZBKIfSF5vOex0tqruFwl56eze9oQ9REx9cRVkaWo9uHN91+
+         WTOQewuDqducuLv4WHFDjDldLuFYbRvOE9zNoHtaoexmjIDzzQF2xa98jTvh9CePEf1g
+         k7pelkjAjrnNv0Wq6FmYrrfYS6vi9ZtFLdcuxly9TbqS49bteIZpO9H0t3Ey2kDwTerZ
+         sXCg==
+X-Gm-Message-State: APjAAAXZZ3y1Tr+2hABUx5tbGJbHm9N++rVCqBiuahmqT4YrOOBfMmbJ
+        X+GcSVH3+ycLz76k/CB02rbncO/FqfgKIcEJ39SN9s+5
+X-Google-Smtp-Source: APXvYqza+Ix1SZeRmRyoVXMKSHvtZJGN0yTOCfS2WK4cCQlWwIzxi0J8vTLQd5ywpsBH0ewa5qs0zc1cPU73yJC2E0c=
+X-Received: by 2002:ab0:6894:: with SMTP id t20mr29138175uar.100.1575971553656;
+ Tue, 10 Dec 2019 01:52:33 -0800 (PST)
 MIME-Version: 1.0
-References: <20191204152749.12652-1-linus.walleij@linaro.org>
-In-Reply-To: <20191204152749.12652-1-linus.walleij@linaro.org>
+References: <20191114111814.35199-1-yangbo.lu@nxp.com>
+In-Reply-To: <20191114111814.35199-1-yangbo.lu@nxp.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 10 Dec 2019 10:51:43 +0100
-Message-ID: <CAPDyKFpECpWLCwvyFP7zeAmrOA4VK+NxPhc7jqvpenUKkgjWxQ@mail.gmail.com>
-Subject: Re: [PATCH] mmc: spi: Toggle SPI polarity, do not hardcode it
-To:     Linus Walleij <linus.walleij@linaro.org>
+Date:   Tue, 10 Dec 2019 10:51:57 +0100
+Message-ID: <CAPDyKFqfMzv1hFzPzS7w5BVHyXybu--7p11wHYa8WTQAVB7r4g@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci: fix up CMD12 sending
+To:     Yangbo Lu <yangbo.lu@nxp.com>
 Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Phil Elwell <phil@raspberrypi.org>,
-        Mark Brown <broonie@kernel.org>
+        Adrian Hunter <adrian.hunter@intel.com>
 Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 4 Dec 2019 at 16:29, Linus Walleij <linus.walleij@linaro.org> wrote:
+On Thu, 14 Nov 2019 at 12:18, Yangbo Lu <yangbo.lu@nxp.com> wrote:
 >
-> The code in mmc_spi_initsequence() tries to send a burst with
-> high chipselect and for this reason hardcodes the device into
-> SPI_CS_HIGH.
+> The STOP command is disabled for multiple blocks r/w commands
+> with auto CMD12, when start to send. However, if there is data
+> error, software still needs to send CMD12 according to SD spec.
+> This patch is to allow software CMD12 sending for this case.
 >
-> This is not good because the SPI_CS_HIGH flag indicates
-> logical "asserted" CS not always the physical level. In
-> some cases the signal is inverted in the GPIO library and
-> in that case SPI_CS_HIGH is already set, and enforcing
-> SPI_CS_HIGH again will actually drive it low.
->
-> Instead of hard-coding this, toggle the polarity so if the
-> default is LOW it goes high to assert chipselect but if it
-> is already high then toggle it low instead.
->
-> Cc: Phil Elwell <phil@raspberrypi.org>
-> Reported-by: Mark Brown <broonie@kernel.org>
-> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+> Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
 
-Seems like we should add a stable tag, right?
+Applied for next, thanks!
 
-In any case, I have applied this for next to let it cook for a while, thanks!
+Let's see how things go, then we can decide whether to add stable tag as well.
 
 Kind regards
 Uffe
 
 
-
 > ---
->  drivers/mmc/host/mmc_spi.c | 11 ++++++++---
->  1 file changed, 8 insertions(+), 3 deletions(-)
+>  drivers/mmc/host/sdhci.c | 17 +++--------------
+>  1 file changed, 3 insertions(+), 14 deletions(-)
 >
-> diff --git a/drivers/mmc/host/mmc_spi.c b/drivers/mmc/host/mmc_spi.c
-> index 74c6cfbf9172..1f02f54f09c0 100644
-> --- a/drivers/mmc/host/mmc_spi.c
-> +++ b/drivers/mmc/host/mmc_spi.c
-> @@ -1134,17 +1134,22 @@ static void mmc_spi_initsequence(struct mmc_spi_host *host)
->          * SPI protocol.  Another is that when chipselect is released while
->          * the card returns BUSY status, the clock must issue several cycles
->          * with chipselect high before the card will stop driving its output.
-> +        *
-> +        * SPI_CS_HIGH means "asserted" here. In some cases like when using
-> +        * GPIOs for chip select, SPI_CS_HIGH is set but this will be logically
-> +        * inverted by gpiolib, so if we want to ascertain to drive it high
-> +        * we should toggle the default with an XOR as we do here.
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 09cdbe8..3041c39 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1326,12 +1326,12 @@ static void sdhci_finish_data(struct sdhci_host *host)
+>
+>         /*
+>          * Need to send CMD12 if -
+> -        * a) open-ended multiblock transfer (no CMD23)
+> +        * a) open-ended multiblock transfer not using auto CMD12 (no CMD23)
+>          * b) error in multiblock transfer
 >          */
-> -       host->spi->mode |= SPI_CS_HIGH;
-> +       host->spi->mode ^= SPI_CS_HIGH;
->         if (spi_setup(host->spi) != 0) {
->                 /* Just warn; most cards work without it. */
->                 dev_warn(&host->spi->dev,
->                                 "can't change chip-select polarity\n");
-> -               host->spi->mode &= ~SPI_CS_HIGH;
-> +               host->spi->mode ^= SPI_CS_HIGH;
->         } else {
->                 mmc_spi_readbytes(host, 18);
+>         if (data->stop &&
+> -           (data->error ||
+> -            !data->mrq->sbc)) {
+> +           ((!data->mrq->sbc && !sdhci_auto_cmd12(host, data->mrq)) ||
+> +            data->error)) {
+>                 /*
+>                  * 'cap_cmd_during_tfr' request must not use the command line
+>                  * after mmc_command_done() has been called. It is upper layer's
+> @@ -1825,17 +1825,6 @@ void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
 >
-> -               host->spi->mode &= ~SPI_CS_HIGH;
-> +               host->spi->mode ^= SPI_CS_HIGH;
->                 if (spi_setup(host->spi) != 0) {
->                         /* Wot, we can't get the same setup we had before? */
->                         dev_err(&host->spi->dev,
+>         sdhci_led_activate(host);
+>
+> -       /*
+> -        * Ensure we don't send the STOP for non-SET_BLOCK_COUNTED
+> -        * requests if Auto-CMD12 is enabled.
+> -        */
+> -       if (sdhci_auto_cmd12(host, mrq)) {
+> -               if (mrq->stop) {
+> -                       mrq->data->stop = NULL;
+> -                       mrq->stop = NULL;
+> -               }
+> -       }
+> -
+>         if (!present || host->flags & SDHCI_DEVICE_DEAD) {
+>                 mrq->cmd->error = -ENOMEDIUM;
+>                 sdhci_finish_mrq(host, mrq);
 > --
-> 2.23.0
+> 2.7.4
 >
