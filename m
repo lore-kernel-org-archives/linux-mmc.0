@@ -2,200 +2,140 @@ Return-Path: <SRS0=vd7C=2A=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.1 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 40FBAC43603
-	for <linux-mmc@archiver.kernel.org>; Tue, 10 Dec 2019 12:52:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9F1FBC2D0BF
+	for <linux-mmc@archiver.kernel.org>; Tue, 10 Dec 2019 13:10:25 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 0B4282073D
-	for <linux-mmc@archiver.kernel.org>; Tue, 10 Dec 2019 12:52:20 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 75B7D20652
+	for <linux-mmc@archiver.kernel.org>; Tue, 10 Dec 2019 13:10:25 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="h7V07Whf"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="vFmxC2HF"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727335AbfLJMwQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 10 Dec 2019 07:52:16 -0500
-Received: from mail-wr1-f67.google.com ([209.85.221.67]:40472 "EHLO
-        mail-wr1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727131AbfLJMwP (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Dec 2019 07:52:15 -0500
-Received: by mail-wr1-f67.google.com with SMTP id c14so19941724wrn.7;
-        Tue, 10 Dec 2019 04:52:12 -0800 (PST)
+        id S1727535AbfLJNKZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 10 Dec 2019 08:10:25 -0500
+Received: from mail-vs1-f67.google.com ([209.85.217.67]:45438 "EHLO
+        mail-vs1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727415AbfLJNKY (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Dec 2019 08:10:24 -0500
+Received: by mail-vs1-f67.google.com with SMTP id l24so12933557vsr.12
+        for <linux-mmc@vger.kernel.org>; Tue, 10 Dec 2019 05:10:24 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to:user-agent;
-        bh=eP+biOEoPLLzGzoIDWqyl2DL6smvH4qJE/Q2QegbMVs=;
-        b=h7V07WhfzAKAE9G9y+Q+ZXDJVQ7r3ubI3/9KFgnD7+JpLLkhJU+UsYYDPigaZFqjg1
-         ad90wDKcE1pQGqbJctp9HPu6YFwAiYZEJKItJvhAwXeh1X+ROapFF3jA8WmS8kKFf4Mt
-         wk8EbwJkUghl9ilZcPQpamIYrjTImAgB3bGMeSMtyGRvwlsM6lC3zjOjXrmZa/yido03
-         64LlXuadoD1rT+NPcXhpqUsRPYBEICjhjRVDGxLzaroyfap9rX7eTV05iPm3mUTSfFrS
-         BLrXwrGAj82O3DRqCjEA6OeFKdPKqfN2Gn9WmO3WGQm8oarIrImSCT3wywEVeuGAbYPs
-         qSPA==
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=NSgXLY7zn19iKGK0lMSKicsXOogf2N1V6mwuOTacvso=;
+        b=vFmxC2HFI6hes3oDbNBxlB7e0dsTQISm/o7uGplKJlNntWAXykRoxseuGeOWfL8Nrc
+         oG/p72shYHiyVdWlxhO6k5FJoVVYtEOnQ/oOwC1IZJYxMaWvcP9KLStM+w8/cndN9zGi
+         tLT7zg6pSYI3ur0g9WtUFtQtQU4uP4H/wZKJxmCd2NXJOgwuAC2T9xrpNdmIN4Z8gdGj
+         XKfjT2CUSFAeSc1gdurBT2wT8zd69Q5XzAmAnFSayl3eHVccd5j3BxNiM84OJ6xYV4D/
+         n7vm3UR105hvKvKJnwuyoHOxI80UpeLwS00vidyxYxpm4iIf8BL0L0qHrd8F262G0OUI
+         YzCA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to:user-agent;
-        bh=eP+biOEoPLLzGzoIDWqyl2DL6smvH4qJE/Q2QegbMVs=;
-        b=HSirKafVLqgdVrDei06+FxwaYgPPqo5t/8coElmdSZl6IODUQmEXZ5WvHiI2+s+Qfq
-         IfDcg622q0wvfHeFmgfx3grIXRTKK89qaXgZWjLJmocFNHLtV05qA+cjqS2ThJsaoZe4
-         WeKin8OAh7LGaHEg7vYv+RPm2zaxYz7zWb9Td1PiUCCx5crZKvRC1j/l7O+5uF1r7ZtS
-         633LmJoIGicGAtPPeuy/xd+KXaDX2W0nPxRwdtrywP+aMPhLh3/UKzlxvdxuwMkidM9X
-         9StUAg8t+FIOtuGdKglda6R3TkZXPaFjG4w10FlpnKUQnEurno7ri/vSbKsGPApvsM9U
-         tdjA==
-X-Gm-Message-State: APjAAAUsC6a5c8Y2W/gdD8XNl/epUqbdHF7hh0tRUB9Eu6awUm4aUS+e
-        wqa+MqVeZoPTnALexRp7mvg=
-X-Google-Smtp-Source: APXvYqxItXYjICBNePYjyaPa8NX4kDtRSRvG7S+SO2ZAkjnxV70FvYFFJei5TlQ50iJb3Vwk+gk3LQ==
-X-Received: by 2002:a5d:480f:: with SMTP id l15mr3117484wrq.305.1575982332070;
-        Tue, 10 Dec 2019 04:52:12 -0800 (PST)
-Received: from localhost (pD9E518ED.dip0.t-ipconnect.de. [217.229.24.237])
-        by smtp.gmail.com with ESMTPSA id m3sm3172993wrs.53.2019.12.10.04.52.09
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 10 Dec 2019 04:52:10 -0800 (PST)
-Date:   Tue, 10 Dec 2019 13:52:08 +0100
-From:   Thierry Reding <thierry.reding@gmail.com>
-To:     Dmitry Osipenko <digetx@gmail.com>
-Cc:     Jonathan Hunter <jonathanh@nvidia.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v1] sdhci: tegra: Add workaround for Broadcom WiFi
-Message-ID: <20191210125208.GD2703785@ulmo>
-References: <20191210014011.21987-1-digetx@gmail.com>
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=NSgXLY7zn19iKGK0lMSKicsXOogf2N1V6mwuOTacvso=;
+        b=XI0miil7hgUiYu0VpURg+5his1Jvjcq6pNhv1KIAjeh0/Yivnq40er+1D/IvmLXARl
+         2NqaTJhW1KRc2LZkQWdIRhgdNMoTd8UNEQ9R9EjXS5DCRqTSCEyJmtr52q0mT4RTnlvu
+         Alv+DsnEW19lwcdNmHc9hdbLtiWkGmfsuBVFX4CXDg1cdGD/flxMAK15+eDBhJMoqbAr
+         jJgTp6eutpZsMnqysWMKJw3j8XSPK9UGA8ELsbxgi3pq8ro1joHvPBT+g4MyDklk3ZGo
+         SAmeS54kXTq5T5x6/X1Dogs6iaYmKPe/ns0Y+aquoHwm5XN3qQvdO/bAxcu4oYIc3Omh
+         9bkw==
+X-Gm-Message-State: APjAAAXJYe85gxHk1b/jI3C83iIZUZrGoA1pD10b0AH+KOLgLoFPSNLI
+        M4PiyoUHulHL7yQGsRH/qKkG9mFGe2IACHZBns8Y1Q==
+X-Google-Smtp-Source: APXvYqxJRyVUMS3rG+TK07GWx93zHpQLUw1qnfmkvDmlYwKOM2YcUVvarh+8ZagtE16HG1PSCyMugCWFPdBpVnbG1W8=
+X-Received: by 2002:a05:6102:5d1:: with SMTP id v17mr24811015vsf.200.1575983423704;
+ Tue, 10 Dec 2019 05:10:23 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="AkbCVLjbJ9qUtAXD"
-Content-Disposition: inline
-In-Reply-To: <20191210014011.21987-1-digetx@gmail.com>
-User-Agent: Mutt/1.12.2 (2019-09-21)
+References: <20191203194859.917-1-wsa@the-dreams.de>
+In-Reply-To: <20191203194859.917-1-wsa@the-dreams.de>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Tue, 10 Dec 2019 14:09:47 +0100
+Message-ID: <CAPDyKFrngFAOUF0QN7+yjAyo3XxS9asT0Q5350i8K9h2TBavwQ@mail.gmail.com>
+Subject: Re: [PATCH] mmc: renesas_sdhi: remove whitelist for internal DMAC
+To:     Wolfram Sang <wsa@the-dreams.de>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+On Tue, 3 Dec 2019 at 20:49, Wolfram Sang <wsa@the-dreams.de> wrote:
+>
+> From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+>
+> We know now that there won't be Gen3 SoCs with both, SYS-DMAC and
+> internal DMAC. We removed the blacklisting for SYS-DMAC already, so we
+> can remove the whitelisting for internal DMAC, too. This makes adding
+> new SoCs easier. We keep the quirk handling, of course.
+>
+> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
---AkbCVLjbJ9qUtAXD
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Applied for next, thanks!
 
-On Tue, Dec 10, 2019 at 04:40:11AM +0300, Dmitry Osipenko wrote:
-> All Tegra20 boards that have embedded Broadcom WiFi SDIO chip are affected
-> by a problem where WiFi chip reports CCCR v1.10, while it should v1.20.
-> In a result high-speed mode isn't enabled for the WiFi card and this
-> results in a malfunctioning SDIO communication.
->=20
->  brcmfmac: brcmf_sdio_readframes: read 304 bytes from channel 1 failed: -=
-84
->  brcmfmac: brcmf_sdio_rxfail: abort command, terminate frame, send NAK
->=20
-> Downstream kernels are overriding card's CCCR info in SDHCI driver to fix
-> the problem, let's do the same in upstream.
->=20
-> The change is inspired by omap_hsmmc_init_card() of OMAP's HSMMC driver,
-> which overrides card's info for the TI wl1251 WiFi.
->=20
-> Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
+Kind regards
+Uffe
+
+
 > ---
->  drivers/mmc/host/sdhci-tegra.c | 28 ++++++++++++++++++++++++++++
->  1 file changed, 28 insertions(+)
-
-This seems like the wrong place to do this. If this is specific to this
-WiFi SDIO chip this should be handled at the SDIO card or function
-level. It seems like the SDIO infrastructure doesn't currently allow
-this because the OF nodes are attached to the card after
-mmc_sdio_init_card(), whereas it seems like the quirk is already needed
-during mmc_sdio_init_card().
-
-That said, I think we could have some common code that's executed as
-part of mmc_attach_sdio() (and before mmc_sdio_init_card()).
-
-Actually, it looks like we already have something like that.
-mmc_sdio_init_card() calls mmc_fixup_device() with sdio_fixup_methods
-after doing some very basic initialization. Do you know if things start
-to go wrong before or after that point? It might be worth looking at
-that SDIO fixup array and add something that would override the CCCR
-support. That would fix things in a more generic way rather than
-requiring every host controller driver to duplicate this quirk.
-
-Thierry
-
-> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegr=
-a.c
-> index 7bc950520fd9..2ad87da98f2c 100644
-> --- a/drivers/mmc/host/sdhci-tegra.c
-> +++ b/drivers/mmc/host/sdhci-tegra.c
-> @@ -1501,6 +1501,32 @@ static int sdhci_tegra_add_host(struct sdhci_host =
-*host)
->  	return ret;
->  }
-> =20
-> +static void sdhci_tegra_init_card(struct mmc_host *mmc, struct mmc_card =
-*card)
-> +{
-> +	if (card->type =3D=3D MMC_TYPE_SDIO) {
-> +		struct device_node *np =3D mmc_dev(mmc)->of_node;
-> +
-> +		np =3D of_get_compatible_child(np, "brcm,bcm4329-fmac");
-> +		if (np) {
-> +			dev_info(mmc_dev(mmc), "found bcm4329\n");
-> +
-> +			/*
-> +			 * All Tegra20 boards that have embedded BCM4329
-> +			 * chip need to enable high speed for SDIO, otherwise
-> +			 * further communication with the card doesn't work
-> +			 * well.
-> +			 *
-> +			 * Later BCM43xx chips do not need this workaround,
-> +			 * but there is no good way to differentiate chip's
-> +			 * version at this stage and it doesn't cause any
-> +			 * harm for the later chips.
-> +			 */
-> +			card->cccr.high_speed =3D 1;
-> +			of_node_put(np);
-> +		}
-> +	}
-> +}
-> +
->  static int sdhci_tegra_probe(struct platform_device *pdev)
+>  drivers/mmc/host/renesas_sdhi_internal_dmac.c | 23 ++++---------------
+>  1 file changed, 4 insertions(+), 19 deletions(-)
+>
+> diff --git a/drivers/mmc/host/renesas_sdhi_internal_dmac.c b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
+> index 68fb39a74b8b..47ac53e91241 100644
+> --- a/drivers/mmc/host/renesas_sdhi_internal_dmac.c
+> +++ b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
+> @@ -298,38 +298,23 @@ static const struct tmio_mmc_dma_ops renesas_sdhi_internal_dmac_dma_ops = {
+>   * Whitelist of specific R-Car Gen3 SoC ES versions to use this DMAC
+>   * implementation as others may use a different implementation.
+>   */
+> -static const struct soc_device_attribute soc_whitelist[] = {
+> -       /* specific ones */
+> +static const struct soc_device_attribute soc_dma_quirks[] = {
+>         { .soc_id = "r7s9210",
+>           .data = (void *)BIT(SDHI_INTERNAL_DMAC_ADDR_MODE_FIXED_ONLY) },
+>         { .soc_id = "r8a7795", .revision = "ES1.*",
+>           .data = (void *)BIT(SDHI_INTERNAL_DMAC_ONE_RX_ONLY) },
+>         { .soc_id = "r8a7796", .revision = "ES1.0",
+>           .data = (void *)BIT(SDHI_INTERNAL_DMAC_ONE_RX_ONLY) },
+> -       /* generic ones */
+> -       { .soc_id = "r8a774a1" },
+> -       { .soc_id = "r8a774b1" },
+> -       { .soc_id = "r8a774c0" },
+> -       { .soc_id = "r8a77470" },
+> -       { .soc_id = "r8a7795" },
+> -       { .soc_id = "r8a7796" },
+> -       { .soc_id = "r8a77965" },
+> -       { .soc_id = "r8a77970" },
+> -       { .soc_id = "r8a77980" },
+> -       { .soc_id = "r8a77990" },
+> -       { .soc_id = "r8a77995" },
+>         { /* sentinel */ }
+>  };
+>
+>  static int renesas_sdhi_internal_dmac_probe(struct platform_device *pdev)
 >  {
->  	const struct of_device_id *match;
-> @@ -1545,6 +1571,8 @@ static int sdhci_tegra_probe(struct platform_device=
- *pdev)
->  		host->mmc_host_ops.execute_tuning =3D
->  				tegra_sdhci_execute_hw_tuning;
-> =20
-> +	host->mmc_host_ops.init_card =3D sdhci_tegra_init_card;
-> +
->  	rc =3D mmc_of_parse(host->mmc);
->  	if (rc)
->  		goto err_parse_dt;
-> --=20
-> 2.24.0
->=20
-
---AkbCVLjbJ9qUtAXD
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAl3vlPYACgkQ3SOs138+
-s6EEig/9G0UHUk7Bmvo/1xi3zh1yjTsm5ZG90FSCRQnrnd1QEHZ7beKfoyHh1ZyX
-YQLtTtZN0f5d6kAr69+1HTqUR22+AsM5XY5zWjWyUsySiPKwbx/hKcPl+PeHGPlS
-oUjEI3R9oq6XRlaOFYdFKO1l4JfUbO6SvPvCDLnf/SbiQm6qx9mfc21sYj9eyoA2
-XNlcJVthp5S/E3VcyNMx4YArblHPtrKRaZW4KnfboauU7PJwfwgCCn14FD/muF+M
-kKusUMsYKNWGvu9VofWyr2kg0Ms76nvzKbQJfgZNJejm+BzwcsJvqGasyGOI9mSp
-h0+ldVUl1mgGa+90iY9cpEE7AarfX0lfvX2ZFBOkmQP+LiG7/kMaxkNFTyKl+Nz8
-3+VUhEq3BIc64lv4k1/yiVcI6kdozo+Aa4gREaR23VpiXzRhT+q1uVoHxVg5MoEN
-YtN/LXuBXczfZHUnpmb1/pZKYGhF4DPrzLWqxS/xaKlWdw6Sjb/WPpYj9DOhLysG
-eVtYN7o8f1E22dEPOcV8PCa7X6SLMG6eY2PRS+QFQJdz/gbYEJDNsrE6n9zqcd5r
-Izun4caxrjgCZGszzsnavN61vRkxmJu9cFyl4s9knv8vnj6P3IN5bDpW5wOo9hVu
-PiwVybFkXCqO3mt0Zu4r4xkzlcbKRi7IxYLrdCceWI78zLvP128=
-=3qZu
------END PGP SIGNATURE-----
-
---AkbCVLjbJ9qUtAXD--
+> -       const struct soc_device_attribute *soc = soc_device_match(soc_whitelist);
+> +       const struct soc_device_attribute *soc = soc_device_match(soc_dma_quirks);
+>         struct device *dev = &pdev->dev;
+>
+> -       if (!soc)
+> -               return -ENODEV;
+> -
+> -       global_flags |= (unsigned long)soc->data;
+> +       if (soc)
+> +               global_flags |= (unsigned long)soc->data;
+>
+>         dev->dma_parms = devm_kzalloc(dev, sizeof(*dev->dma_parms), GFP_KERNEL);
+>         if (!dev->dma_parms)
+> --
+> 2.20.1
+>
