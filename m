@@ -2,140 +2,106 @@ Return-Path: <SRS0=vd7C=2A=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-5.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9F1FBC2D0BF
-	for <linux-mmc@archiver.kernel.org>; Tue, 10 Dec 2019 13:10:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7DB44C2D0C4
+	for <linux-mmc@archiver.kernel.org>; Tue, 10 Dec 2019 13:10:30 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 75B7D20652
-	for <linux-mmc@archiver.kernel.org>; Tue, 10 Dec 2019 13:10:25 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4C6EB207FF
+	for <linux-mmc@archiver.kernel.org>; Tue, 10 Dec 2019 13:10:30 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="vFmxC2HF"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="XR+Y4Vgw"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727535AbfLJNKZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 10 Dec 2019 08:10:25 -0500
-Received: from mail-vs1-f67.google.com ([209.85.217.67]:45438 "EHLO
-        mail-vs1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727415AbfLJNKY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Dec 2019 08:10:24 -0500
-Received: by mail-vs1-f67.google.com with SMTP id l24so12933557vsr.12
-        for <linux-mmc@vger.kernel.org>; Tue, 10 Dec 2019 05:10:24 -0800 (PST)
+        id S1727335AbfLJNK3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 10 Dec 2019 08:10:29 -0500
+Received: from mail-ua1-f66.google.com ([209.85.222.66]:34631 "EHLO
+        mail-ua1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727647AbfLJNK2 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Dec 2019 08:10:28 -0500
+Received: by mail-ua1-f66.google.com with SMTP id w20so7186984uap.1
+        for <linux-mmc@vger.kernel.org>; Tue, 10 Dec 2019 05:10:27 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=NSgXLY7zn19iKGK0lMSKicsXOogf2N1V6mwuOTacvso=;
-        b=vFmxC2HFI6hes3oDbNBxlB7e0dsTQISm/o7uGplKJlNntWAXykRoxseuGeOWfL8Nrc
-         oG/p72shYHiyVdWlxhO6k5FJoVVYtEOnQ/oOwC1IZJYxMaWvcP9KLStM+w8/cndN9zGi
-         tLT7zg6pSYI3ur0g9WtUFtQtQU4uP4H/wZKJxmCd2NXJOgwuAC2T9xrpNdmIN4Z8gdGj
-         XKfjT2CUSFAeSc1gdurBT2wT8zd69Q5XzAmAnFSayl3eHVccd5j3BxNiM84OJ6xYV4D/
-         n7vm3UR105hvKvKJnwuyoHOxI80UpeLwS00vidyxYxpm4iIf8BL0L0qHrd8F262G0OUI
-         YzCA==
+        bh=daPhyI3cnT8tqGxGW2b0FD9cbeC91mjEIUAmLAV7bvY=;
+        b=XR+Y4VgwLG/vZ+HXu2DETs8YXjJwzXlk1bjXQ9uttgPou3Xtmqnu35UV4zyfXGE0Ou
+         pFD8y2z8ye+VE+sHdTYTrm6IvoKrNcaVxJtNVnS6i9WexqvraU4OxdwyLffwRPmrbpHP
+         fyIDbE36bLR14W7cQxadTLgkBS7PqgUuYS6/nkxqcFvqAfq/86sR46c5pDm/UJJnv4BB
+         R/bMz8Sct1d0JXKagCiGNtgMh1KZaZJAiDqI5R/3UOwQdYRjjCZRFO/DJAW27qPuYP55
+         4gD39/81hCjcrTDBbV3tknUhfT/GCxX5b7FcKGtNSl5xn2E9Y82Ars2KOhUIMWXVSAoa
+         Ve4g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=NSgXLY7zn19iKGK0lMSKicsXOogf2N1V6mwuOTacvso=;
-        b=XI0miil7hgUiYu0VpURg+5his1Jvjcq6pNhv1KIAjeh0/Yivnq40er+1D/IvmLXARl
-         2NqaTJhW1KRc2LZkQWdIRhgdNMoTd8UNEQ9R9EjXS5DCRqTSCEyJmtr52q0mT4RTnlvu
-         Alv+DsnEW19lwcdNmHc9hdbLtiWkGmfsuBVFX4CXDg1cdGD/flxMAK15+eDBhJMoqbAr
-         jJgTp6eutpZsMnqysWMKJw3j8XSPK9UGA8ELsbxgi3pq8ro1joHvPBT+g4MyDklk3ZGo
-         SAmeS54kXTq5T5x6/X1Dogs6iaYmKPe/ns0Y+aquoHwm5XN3qQvdO/bAxcu4oYIc3Omh
-         9bkw==
-X-Gm-Message-State: APjAAAXJYe85gxHk1b/jI3C83iIZUZrGoA1pD10b0AH+KOLgLoFPSNLI
-        M4PiyoUHulHL7yQGsRH/qKkG9mFGe2IACHZBns8Y1Q==
-X-Google-Smtp-Source: APXvYqxJRyVUMS3rG+TK07GWx93zHpQLUw1qnfmkvDmlYwKOM2YcUVvarh+8ZagtE16HG1PSCyMugCWFPdBpVnbG1W8=
-X-Received: by 2002:a05:6102:5d1:: with SMTP id v17mr24811015vsf.200.1575983423704;
- Tue, 10 Dec 2019 05:10:23 -0800 (PST)
+        bh=daPhyI3cnT8tqGxGW2b0FD9cbeC91mjEIUAmLAV7bvY=;
+        b=BQbEs8bxAcPHL1GwMVi39cVS4e69EyIzjCZojUHWGf0MiWlm6CVLfeYjwcZuqLDOTX
+         xBzUObeorD92Zu3IU4BD27JGnEsVwSnLiT4oYfHWGWHUoPfqt3nYeM7qk/gkxa/E0/sH
+         7W/IkdVePAD7298ptNcdgqjiBfN+SNODqkz8Q071jq4nlMlBRMtNeHh9eJmxU23gPXJR
+         bQ6G9oijHjtvyevDG+c5FWv3snFAlp3eVppf0MfBGGrEwLtXcLkU+03vKA/aQPtlS4x2
+         rATDtJZzlyBXIxrspZeKqhI/f02NaZJ1LZoqfjS9AMxIexuxPlqDJyYIlI1pQ7qjOek/
+         r2ig==
+X-Gm-Message-State: APjAAAW0uKv9wEu9XkFHLjeVAod/SPIblqcwUwmHL2HLiv8jFWA+9tcI
+        jVXkfuo12P/XdJ4ifygyGouM8qaAMdrgMgrtDqGiXQ==
+X-Google-Smtp-Source: APXvYqzUPVdxhFTx/tArS0nYzpOnGbVRVUnFgJ9Tlw1eralfH4zj/yvRQnt3Qbr6MJ61MvlX4f2U/eHkVUxdKcxnYXc=
+X-Received: by 2002:ab0:20a:: with SMTP id 10mr8958300uas.19.1575983427326;
+ Tue, 10 Dec 2019 05:10:27 -0800 (PST)
 MIME-Version: 1.0
-References: <20191203194859.917-1-wsa@the-dreams.de>
-In-Reply-To: <20191203194859.917-1-wsa@the-dreams.de>
+References: <20191203200513.1758-1-wsa+renesas@sang-engineering.com>
+In-Reply-To: <20191203200513.1758-1-wsa+renesas@sang-engineering.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 10 Dec 2019 14:09:47 +0100
-Message-ID: <CAPDyKFrngFAOUF0QN7+yjAyo3XxS9asT0Q5350i8K9h2TBavwQ@mail.gmail.com>
-Subject: Re: [PATCH] mmc: renesas_sdhi: remove whitelist for internal DMAC
-To:     Wolfram Sang <wsa@the-dreams.de>
+Date:   Tue, 10 Dec 2019 14:09:51 +0100
+Message-ID: <CAPDyKFpXanmDQq-minnX4KNLVSMatOQRnuT59sDdAZC_MDkp8A@mail.gmail.com>
+Subject: Re: [PATCH 0/5] mmc: renesas_sdhi: prepare for recent HS400 updates
+To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
 Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
         Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
 Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 3 Dec 2019 at 20:49, Wolfram Sang <wsa@the-dreams.de> wrote:
+On Tue, 3 Dec 2019 at 21:05, Wolfram Sang
+<wsa+renesas@sang-engineering.com> wrote:
 >
-> From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> Due to recent datasheet updates and other internal documents, HS400
+> support for SDHI needs some refactoring. These patches are the
+> prerequisites for that. The first four patches only refactor code, the
+> last one does a minor update already.
 >
-> We know now that there won't be Gen3 SoCs with both, SYS-DMAC and
-> internal DMAC. We removed the blacklisting for SYS-DMAC already, so we
-> can remove the whitelisting for internal DMAC, too. This makes adding
-> new SoCs easier. We keep the quirk handling, of course.
+> This series has been tested on Renesas Salvator-XS with R-Car M3-N and
+> H3 ES2.0 with tests I was able to carry out locally here.
 >
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-
-Applied for next, thanks!
-
-Kind regards
-Uffe
-
-
-> ---
->  drivers/mmc/host/renesas_sdhi_internal_dmac.c | 23 ++++---------------
->  1 file changed, 4 insertions(+), 19 deletions(-)
+> I will send more advanced patches on top of this series as RFC later.
 >
-> diff --git a/drivers/mmc/host/renesas_sdhi_internal_dmac.c b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-> index 68fb39a74b8b..47ac53e91241 100644
-> --- a/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-> +++ b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-> @@ -298,38 +298,23 @@ static const struct tmio_mmc_dma_ops renesas_sdhi_internal_dmac_dma_ops = {
->   * Whitelist of specific R-Car Gen3 SoC ES versions to use this DMAC
->   * implementation as others may use a different implementation.
->   */
-> -static const struct soc_device_attribute soc_whitelist[] = {
-> -       /* specific ones */
-> +static const struct soc_device_attribute soc_dma_quirks[] = {
->         { .soc_id = "r7s9210",
->           .data = (void *)BIT(SDHI_INTERNAL_DMAC_ADDR_MODE_FIXED_ONLY) },
->         { .soc_id = "r8a7795", .revision = "ES1.*",
->           .data = (void *)BIT(SDHI_INTERNAL_DMAC_ONE_RX_ONLY) },
->         { .soc_id = "r8a7796", .revision = "ES1.0",
->           .data = (void *)BIT(SDHI_INTERNAL_DMAC_ONE_RX_ONLY) },
-> -       /* generic ones */
-> -       { .soc_id = "r8a774a1" },
-> -       { .soc_id = "r8a774b1" },
-> -       { .soc_id = "r8a774c0" },
-> -       { .soc_id = "r8a77470" },
-> -       { .soc_id = "r8a7795" },
-> -       { .soc_id = "r8a7796" },
-> -       { .soc_id = "r8a77965" },
-> -       { .soc_id = "r8a77970" },
-> -       { .soc_id = "r8a77980" },
-> -       { .soc_id = "r8a77990" },
-> -       { .soc_id = "r8a77995" },
->         { /* sentinel */ }
->  };
+> A branch with all the patches applied can be found here:
 >
->  static int renesas_sdhi_internal_dmac_probe(struct platform_device *pdev)
->  {
-> -       const struct soc_device_attribute *soc = soc_device_match(soc_whitelist);
-> +       const struct soc_device_attribute *soc = soc_device_match(soc_dma_quirks);
->         struct device *dev = &pdev->dev;
+> git://git.kernel.org/pub/scm/linux/kernel/git/wsa/linux.git renesas/sdhi/new_manual_calib
 >
-> -       if (!soc)
-> -               return -ENODEV;
-> -
-> -       global_flags |= (unsigned long)soc->data;
-> +       if (soc)
-> +               global_flags |= (unsigned long)soc->data;
+> Wolfram Sang (5):
+>   mmc: renesas_sdhi: keep sorting for quirk entries
+>   mmc: renesas_sdhi: make warning more precise
+>   mmc: renesas_sdhi: make quirks info accessible outside probe()
+>   mmc: renesas_sdhi: remove 4taps as a TMIO flag
+>   mmc: renesas_sdhi: use recent tap values for HS400
 >
->         dev->dma_parms = devm_kzalloc(dev, sizeof(*dev->dma_parms), GFP_KERNEL);
->         if (!dev->dma_parms)
+>  drivers/mmc/host/renesas_sdhi.h               | 10 ++++++--
+>  drivers/mmc/host/renesas_sdhi_core.c          | 23 ++++++++-----------
+>  drivers/mmc/host/renesas_sdhi_internal_dmac.c |  2 +-
+>  include/linux/mfd/tmio.h                      |  3 ---
+>  4 files changed, 19 insertions(+), 19 deletions(-)
+>
 > --
 > 2.20.1
 >
+
+Applied for next and by fixing up the comments for patch 4, thanks!
+
+Kind regards
+Uffe
