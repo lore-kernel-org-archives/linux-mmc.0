@@ -2,108 +2,146 @@ Return-Path: <SRS0=vd7C=2A=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-0.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7D994C2D0CA
-	for <linux-mmc@archiver.kernel.org>; Tue, 10 Dec 2019 09:36:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E6DCFC2D0C4
+	for <linux-mmc@archiver.kernel.org>; Tue, 10 Dec 2019 09:37:27 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 531D720836
-	for <linux-mmc@archiver.kernel.org>; Tue, 10 Dec 2019 09:36:20 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id BCD6520663
+	for <linux-mmc@archiver.kernel.org>; Tue, 10 Dec 2019 09:37:27 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="cy5BJsHX"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="lCHh5BlR"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727345AbfLJJgQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 10 Dec 2019 04:36:16 -0500
-Received: from lelv0142.ext.ti.com ([198.47.23.249]:45254 "EHLO
-        lelv0142.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727291AbfLJJgP (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Dec 2019 04:36:15 -0500
-Received: from fllv0034.itg.ti.com ([10.64.40.246])
-        by lelv0142.ext.ti.com (8.15.2/8.15.2) with ESMTP id xBA9aCG4130984;
-        Tue, 10 Dec 2019 03:36:12 -0600
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
-        s=ti-com-17Q1; t=1575970572;
-        bh=WGtf1IKDe8ENBK+5xcPhUCNaggU+OnMoFiPYYV9HOwg=;
-        h=Subject:To:CC:References:From:Date:In-Reply-To;
-        b=cy5BJsHXeyVzi7MYSE4OakI/GqWb15wr0Ov94TLB8vvbrvqe/ox0y75fFCIA1WEB6
-         HY6itZpz6VA7moWHJvTNC6P0D0Vhx6JGtn55Nj81PdJAZnpuuhXsRK5mWvJTXg2g2R
-         OQgxsTPZPFbYPId+LeHCUqFxh1TTH40CG6jw2ENc=
-Received: from DLEE114.ent.ti.com (dlee114.ent.ti.com [157.170.170.25])
-        by fllv0034.itg.ti.com (8.15.2/8.15.2) with ESMTPS id xBA9aCAi124687
-        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
-        Tue, 10 Dec 2019 03:36:12 -0600
-Received: from DLEE115.ent.ti.com (157.170.170.26) by DLEE114.ent.ti.com
- (157.170.170.25) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.1847.3; Tue, 10
- Dec 2019 03:36:11 -0600
-Received: from fllv0039.itg.ti.com (10.64.41.19) by DLEE115.ent.ti.com
- (157.170.170.26) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.1847.3 via
- Frontend Transport; Tue, 10 Dec 2019 03:36:11 -0600
-Received: from [172.24.190.215] (ileax41-snat.itg.ti.com [10.172.224.153])
-        by fllv0039.itg.ti.com (8.15.2/8.15.2) with ESMTP id xBA9a9qj023647;
-        Tue, 10 Dec 2019 03:36:10 -0600
-Subject: Re: [PATCH] mmc: sdhci: Update the tuning failed messages to pr_debug
- level
-To:     <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>
-CC:     <ulf.hansson@linaro.org>, <adrian.hunter@intel.com>
-References: <20191206114326.15856-1-faiz_abbas@ti.com>
-From:   Faiz Abbas <faiz_abbas@ti.com>
-Message-ID: <9199c781-399b-8b7e-8454-6d67f41f48bb@ti.com>
-Date:   Tue, 10 Dec 2019 15:07:25 +0530
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.2.1
+        id S1726957AbfLJJh1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 10 Dec 2019 04:37:27 -0500
+Received: from mail-ua1-f66.google.com ([209.85.222.66]:35527 "EHLO
+        mail-ua1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727003AbfLJJh1 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Dec 2019 04:37:27 -0500
+Received: by mail-ua1-f66.google.com with SMTP id y23so6949348ual.2
+        for <linux-mmc@vger.kernel.org>; Tue, 10 Dec 2019 01:37:26 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc:content-transfer-encoding;
+        bh=uCytU3M00vgppQHFdUfwUVTCWccLfFwVZT8F9TsGTdM=;
+        b=lCHh5BlRESGFd8IJw3pd1l7zQCwFYi9SIVuZFu2W54pNbR2iW2Ic1sRAzJQzShL+V8
+         FhndlgDjLhVagoGevcG/kw8XbnLp28EXuw2/Xg3DVYY3SagNVnO4Cn+FmvNTGYE5olT2
+         g1TXLaqWyF10MT3XiskpBKKxDaApmX0A/elIkUrQMpK1xVMvFR2hUc+8XTF0e9kJvvcH
+         U3MHLUQcu6nhmTRgP16una9achLbMN+1uc57r3BdGo3Ugy8I5nseuohBp2cFX8+NHq11
+         YNv9Fk4nAaJNRjJGET0HwK8mBFY+nJhevmfoHDEly0HWcp84CoabM7lydd4+l0wWh95x
+         VJ/A==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=uCytU3M00vgppQHFdUfwUVTCWccLfFwVZT8F9TsGTdM=;
+        b=li6SoxeBcO/nxs8hiJYhzOVraeP3cOt8wnrM+IebUcEM1pz7xpCzC2H5dO1gejdck1
+         F3pdVmiPDzaCiYpZgCmVBLTqd23SQsblgqsN/G4mQ/qOKQ5GUgehHnKpJNNcefR46iBI
+         HUxOLE9of1Fuj6XI6NEXq2cKMgviHK/vblcoP2n3C/qh/51Mncd0KBQj1WyddWcIFEXY
+         babtZSEs4XHNSkABoeNhWntFLLT246+1o8ERN1NgQIppOv3O5mqkfvg95uk5VF4UclTV
+         Jr8hbz8bUC58noFL+QvDbJuOkBf+BxCFwI4KJNlDozZmjEluZXrPEco+TdoKZs8lFZSj
+         CGyw==
+X-Gm-Message-State: APjAAAUNYNvzMnbIkLdmPdemNm56JVonRJSBcptOWg5+k2voCQu+otJx
+        b4/PxYtM9HUEq9NXnJEyoc/IZzFlQIdDgyYpNJEQvg==
+X-Google-Smtp-Source: APXvYqw8/vUxHXJk8srw/I46Ax82pbKgk3Cmvfv6WFW1zub4DRuJ6pt9rcaoDRoxeYXRCfvktNah3Ok5+A/sr3ZmrXw=
+X-Received: by 2002:ab0:4ea6:: with SMTP id l38mr28555420uah.129.1575970645669;
+ Tue, 10 Dec 2019 01:37:25 -0800 (PST)
 MIME-Version: 1.0
-In-Reply-To: <20191206114326.15856-1-faiz_abbas@ti.com>
-Content-Type: text/plain; charset="utf-8"
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
-X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
+References: <20191202144104.5069-1-jun.nie@linaro.org> <20191202144104.5069-5-jun.nie@linaro.org>
+ <20191202175202.GA6488@infradead.org> <CABymUCM09L3TfLsPhLWPkoYXJ6OVGhHvd9_o4FCO07_Z3Y6A8w@mail.gmail.com>
+ <20191203073620.GA360@infradead.org> <CABymUCNHMKvVCkKdwnOcDZC9rNhLTEHLfLoH_O+CEf9XuZY+_A@mail.gmail.com>
+ <20191204150043.3a82cec0@xhacker.debian>
+In-Reply-To: <20191204150043.3a82cec0@xhacker.debian>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Tue, 10 Dec 2019 10:36:49 +0100
+Message-ID: <CAPDyKFrreSgNfHX9hSKvYO7UxBEyqu0DSxX9NGp4phbR-F1fxQ@mail.gmail.com>
+Subject: Re: [PATCH 4/4] mmc: sdhci: Add DMA memory boundary workaround
+To:     Jisheng Zhang <Jisheng.Zhang@synaptics.com>,
+        Christoph Hellwig <hch@infradead.org>
+Cc:     Jun Nie <jun.nie@linaro.org>, Rob Herring <robh+dt@kernel.org>,
+        Mark Rutland <mark.rutland@arm.com>,
+        "adrian.hunter@intel.com" <adrian.hunter@intel.com>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi,
+On Wed, 4 Dec 2019 at 08:14, Jisheng Zhang <Jisheng.Zhang@synaptics.com> wr=
+ote:
+>
+> On Wed, 4 Dec 2019 14:00:08 +0800 Jun Nie wrote:
+>
+> >
+> >
+> > Christoph Hellwig <hch@infradead.org> =E4=BA=8E2019=E5=B9=B412=E6=9C=88=
+3=E6=97=A5=E5=91=A8=E4=BA=8C =E4=B8=8B=E5=8D=883:36=E5=86=99=E9=81=93=EF=BC=
+=9A
+> > >
+> > > On Tue, Dec 03, 2019 at 11:29:15AM +0800, Jun Nie wrote:
+> > > > Thanks for the reminder! So I need to parse the segment_boundary fr=
+om
+> > > > device tree and use below code to set it, right?
+> > > > For the max_segments accounting error, I did not see it so far thou=
+gh I
+> > > > believe it is true in theory. Maybe it is due to segment boundary v=
+alue is
+> > > > very large.
+> > > >
+> > > > +++ b/drivers/mmc/core/queue.c
+> > > > @@ -374,6 +374,7 @@ static void mmc_setup_queue(struct mmc_queue *m=
+q,
+> > > > struct mmc_card *card)
+> > > >                 WARN(!blk_queue_can_use_dma_map_merging(mq->queue,
+> > > >                                                         mmc_dev(hos=
+t)),
+> > > >                      "merging was advertised but not possible");
+> > > > +       blk_queue_segment_boundary(mq->queue, mmc->segment_boundary=
+);
+> > > >         blk_queue_max_segments(mq->queue, mmc_get_max_segments(host=
+));
+> > >
+> > > Yes, I think should do it.  Maybe modulo a check if the low-level
+> > > driver actually sets a segment boundary.
+> >
+> > For the block device, such as SD card, it is right solution. But I
+> > have concern on SDIO case. Maybe we should add workaround together
+> > with block layer segment boundary restriction. How do you think about
+> > it?
+> >
 
-On 06/12/19 5:13 pm, Faiz Abbas wrote:
-> Tuning support in DDR50 speed mode was added in SD Specifications Part1
-> Physical Layer Specification v3.01. Its not possible to distinguish
-> between v3.00 and v3.01 from the SCR and that is why since
-> commit 4324f6de6d2e ("mmc: core: enable CMD19 tuning for DDR50 mode")
-> tuning failures are ignored in DDR50 speed mode.
-> 
-> Cards compatible with v3.00 don't respond to CMD19 in DDR50 and this
-> error gets printed during enumeration and also if retune is triggered at
-> any time during operation. Update the printk level to pr_debug so that
-> these errors don't lead to false error reports.
-> 
-> Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
-> ---
->  drivers/mmc/host/sdhci.c | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 296d955ede59..42a9c8179da7 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -2417,8 +2417,8 @@ static int __sdhci_execute_tuning(struct sdhci_host *host, u32 opcode)
->  		sdhci_send_tuning(host, opcode);
->  
->  		if (!host->tuning_done) {
-> -			pr_info("%s: Tuning timeout, falling back to fixed sampling clock\n",
-> -				mmc_hostname(host->mmc));
-> +			pr_debug("%s: Tuning timeout, falling back to fixed sampling clock\n",
-> +				 mmc_hostname(host->mmc));
->  			sdhci_abort_tuning(host, opcode);
->  			return -ETIMEDOUT;
->  		}
-> 
+Yes, buffers for SDIO are a consern. Especially since those buffers
+are allocated by SDIO func drivers or even from upper layers, such as
+the network stacks, for example.
 
-Gentle ping.
+I think SDIO func drivers simply need to respect the constraints the
+host has set via the .segment_boundary, .max_seg_size, .max_segs, etc.
+We should export SDIO func APIs to make the information available for
+the SDIO func drivers.
 
-Thanks,
-Faiz
+>
+> Another trouble is how to workaround if the sg is constructed by mmc and
+> no block layer interactions at all. e.g __mmc_blk_ioctl_cmd(), and all
+> those sgs in mmc_test.c
+
+Those should be easier to fix, as the buffer/sg allocation can be
+fixed internally by mmc core. Just post some patches. :-)
+
+I am more worried about SDIO, as those buffers are not that easy to control=
+.
+
+Note that, there have been suggestions on adding an SDIO interface
+where an sg can be passed [1]. Unfurtunate those patches got stuck and
+didn't make it.
+
+Kind regards
+Uffe
+
+[1]
+https://patchwork.kernel.org/patch/10123143/
