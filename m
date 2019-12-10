@@ -2,129 +2,90 @@ Return-Path: <SRS0=vd7C=2A=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-9.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7811AC43603
-	for <linux-mmc@archiver.kernel.org>; Tue, 10 Dec 2019 09:52:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D1BDFC2D0D8
+	for <linux-mmc@archiver.kernel.org>; Tue, 10 Dec 2019 09:51:34 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 484262077B
-	for <linux-mmc@archiver.kernel.org>; Tue, 10 Dec 2019 09:52:35 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9D0D920836
+	for <linux-mmc@archiver.kernel.org>; Tue, 10 Dec 2019 09:51:34 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="p84JhS3g"
+	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="iJcaQcPf"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727018AbfLJJwe (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 10 Dec 2019 04:52:34 -0500
-Received: from mail-ua1-f67.google.com ([209.85.222.67]:37937 "EHLO
-        mail-ua1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727016AbfLJJwe (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Dec 2019 04:52:34 -0500
-Received: by mail-ua1-f67.google.com with SMTP id z17so6944632uac.5
-        for <linux-mmc@vger.kernel.org>; Tue, 10 Dec 2019 01:52:34 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=yXQm4XaShH7vDVUTEGAeMZToqWYQUJWAg/HCHyGvLf4=;
-        b=p84JhS3g5a0JzgG2JpcG7Mi9FmZPk7bAxfwC/oyBWsMyvc/NjEA9A1otgiLYHelPEo
-         54zDi70S8/58AFmo/e77Hji63uc8DeTyyCTff/2FesPTo15UUvrBubCuqLIxAHcu4yjS
-         ZcSxvo8jyhhqFHyTTkdpuSasA6tjBRBzhcyocJrcdGgMwehSldXT8kPWECdJ4Zwcn045
-         hJUKkkhTc8kiEMCflNvCBRm54pRnaIDri7AhAUHcpeiYh21PC7MnF8vj5bK+Rs2iP9fq
-         mal1Rmi8tcbo9Zm92KrUFP39TBkep5BSnDQkhwoZvSasrnnJctVJhAviREFGe2PT6veu
-         nKnw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=yXQm4XaShH7vDVUTEGAeMZToqWYQUJWAg/HCHyGvLf4=;
-        b=iJfVSbGgwdEBJAIC4lFamPGuxZvg57yf87zMrqZR5bInaZ9l5O9g0B9pAc/oU8O5bX
-         k8WpjynwzCjrqjQ0m0JBtw19QuWPjZTyORGtqPUNdhiQn3b8EQbXa/l9zu94F64VmiDL
-         A1wB4ZuvcuHgF86OFtM5FZBKIfSF5vOex0tqruFwl56eze9oQ9REx9cRVkaWo9uHN91+
-         WTOQewuDqducuLv4WHFDjDldLuFYbRvOE9zNoHtaoexmjIDzzQF2xa98jTvh9CePEf1g
-         k7pelkjAjrnNv0Wq6FmYrrfYS6vi9ZtFLdcuxly9TbqS49bteIZpO9H0t3Ey2kDwTerZ
-         sXCg==
-X-Gm-Message-State: APjAAAXZZ3y1Tr+2hABUx5tbGJbHm9N++rVCqBiuahmqT4YrOOBfMmbJ
-        X+GcSVH3+ycLz76k/CB02rbncO/FqfgKIcEJ39SN9s+5
-X-Google-Smtp-Source: APXvYqza+Ix1SZeRmRyoVXMKSHvtZJGN0yTOCfS2WK4cCQlWwIzxi0J8vTLQd5ywpsBH0ewa5qs0zc1cPU73yJC2E0c=
-X-Received: by 2002:ab0:6894:: with SMTP id t20mr29138175uar.100.1575971553656;
- Tue, 10 Dec 2019 01:52:33 -0800 (PST)
+        id S1727022AbfLJJvO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 10 Dec 2019 04:51:14 -0500
+Received: from fllv0015.ext.ti.com ([198.47.19.141]:37908 "EHLO
+        fllv0015.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727348AbfLJJvA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Dec 2019 04:51:00 -0500
+Received: from lelv0265.itg.ti.com ([10.180.67.224])
+        by fllv0015.ext.ti.com (8.15.2/8.15.2) with ESMTP id xBA9otj8055691;
+        Tue, 10 Dec 2019 03:50:55 -0600
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
+        s=ti-com-17Q1; t=1575971455;
+        bh=EW8lyngOZ0xu4oujP21x2gdJOB/XYSQJYaDt1najk+U=;
+        h=From:To:CC:Subject:Date:In-Reply-To:References;
+        b=iJcaQcPfRY4unXNhj4dJXZ6paaRn0uua8o7K2S5qv96q2+YIy1sUPjEL6ARSx0cbQ
+         Kwrxkn46m1s6uxKqTs/4XiL8pDY0YGIrcO+f1yBmZk/5OYag2PQ6Ksv+vWlBEL/wLB
+         xsZt2sn9LTt9TIZ48h5zPV1c3vrXya5Z1qGGG1LM=
+Received: from DLEE105.ent.ti.com (dlee105.ent.ti.com [157.170.170.35])
+        by lelv0265.itg.ti.com (8.15.2/8.15.2) with ESMTPS id xBA9otWE130509
+        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
+        Tue, 10 Dec 2019 03:50:55 -0600
+Received: from DLEE108.ent.ti.com (157.170.170.38) by DLEE105.ent.ti.com
+ (157.170.170.35) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.1847.3; Tue, 10
+ Dec 2019 03:50:54 -0600
+Received: from fllv0040.itg.ti.com (10.64.41.20) by DLEE108.ent.ti.com
+ (157.170.170.38) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.1847.3 via
+ Frontend Transport; Tue, 10 Dec 2019 03:50:54 -0600
+Received: from a0230074-OptiPlex-7010.india.ti.com (ileax41-snat.itg.ti.com [10.172.224.153])
+        by fllv0040.itg.ti.com (8.15.2/8.15.2) with ESMTP id xBA9oZVo048503;
+        Tue, 10 Dec 2019 03:50:52 -0600
+From:   Faiz Abbas <faiz_abbas@ti.com>
+To:     <linux-kernel@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-mmc@vger.kernel.org>
+CC:     <kishon@ti.com>, <adrian.hunter@intel.com>, <mark.rutland@arm.com>,
+        <robh+dt@kernel.org>, <ulf.hansson@linaro.org>,
+        <zhang.chunyan@linaro.org>, <tony@atomide.com>
+Subject: [PATCH v3 5/7] mmc: sdhci-omap: Add DISABLE_DTO_FOR_ERASE Quirk
+Date:   Tue, 10 Dec 2019 15:21:49 +0530
+Message-ID: <20191210095151.15441-6-faiz_abbas@ti.com>
+X-Mailer: git-send-email 2.19.2
+In-Reply-To: <20191210095151.15441-1-faiz_abbas@ti.com>
+References: <20191210095151.15441-1-faiz_abbas@ti.com>
 MIME-Version: 1.0
-References: <20191114111814.35199-1-yangbo.lu@nxp.com>
-In-Reply-To: <20191114111814.35199-1-yangbo.lu@nxp.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 10 Dec 2019 10:51:57 +0100
-Message-ID: <CAPDyKFqfMzv1hFzPzS7w5BVHyXybu--7p11wHYa8WTQAVB7r4g@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci: fix up CMD12 sending
-To:     Yangbo Lu <yangbo.lu@nxp.com>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 14 Nov 2019 at 12:18, Yangbo Lu <yangbo.lu@nxp.com> wrote:
->
-> The STOP command is disabled for multiple blocks r/w commands
-> with auto CMD12, when start to send. However, if there is data
-> error, software still needs to send CMD12 according to SD spec.
-> This patch is to allow software CMD12 sending for this case.
->
-> Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
+Add a Quirk to disable DTO during an erase command.
 
-Applied for next, thanks!
+Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
+---
+ drivers/mmc/host/sdhci-omap.c | 1 +
+ 1 file changed, 1 insertion(+)
 
-Let's see how things go, then we can decide whether to add stable tag as well.
+diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
+index 84d85aa743da..c54c864fe419 100644
+--- a/drivers/mmc/host/sdhci-omap.c
++++ b/drivers/mmc/host/sdhci-omap.c
+@@ -879,6 +879,7 @@ static const struct sdhci_pltfm_data sdhci_omap_pdata = {
+ 	.quirks2 = SDHCI_QUIRK2_ACMD23_BROKEN |
+ 		   SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
+ 		   SDHCI_QUIRK2_RSP_136_HAS_CRC |
++		   SDHCI_QUIRK2_DISABLE_DTO_FOR_ERASE |
+ 		   SDHCI_QUIRK2_DISABLE_HW_TIMEOUT,
+ 	.ops = &sdhci_omap_ops,
+ };
+-- 
+2.19.2
 
-Kind regards
-Uffe
-
-
-> ---
->  drivers/mmc/host/sdhci.c | 17 +++--------------
->  1 file changed, 3 insertions(+), 14 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 09cdbe8..3041c39 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -1326,12 +1326,12 @@ static void sdhci_finish_data(struct sdhci_host *host)
->
->         /*
->          * Need to send CMD12 if -
-> -        * a) open-ended multiblock transfer (no CMD23)
-> +        * a) open-ended multiblock transfer not using auto CMD12 (no CMD23)
->          * b) error in multiblock transfer
->          */
->         if (data->stop &&
-> -           (data->error ||
-> -            !data->mrq->sbc)) {
-> +           ((!data->mrq->sbc && !sdhci_auto_cmd12(host, data->mrq)) ||
-> +            data->error)) {
->                 /*
->                  * 'cap_cmd_during_tfr' request must not use the command line
->                  * after mmc_command_done() has been called. It is upper layer's
-> @@ -1825,17 +1825,6 @@ void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
->
->         sdhci_led_activate(host);
->
-> -       /*
-> -        * Ensure we don't send the STOP for non-SET_BLOCK_COUNTED
-> -        * requests if Auto-CMD12 is enabled.
-> -        */
-> -       if (sdhci_auto_cmd12(host, mrq)) {
-> -               if (mrq->stop) {
-> -                       mrq->data->stop = NULL;
-> -                       mrq->stop = NULL;
-> -               }
-> -       }
-> -
->         if (!present || host->flags & SDHCI_DEVICE_DEAD) {
->                 mrq->cmd->error = -ENOMEDIUM;
->                 sdhci_finish_mrq(host, mrq);
-> --
-> 2.7.4
->
