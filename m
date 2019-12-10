@@ -2,142 +2,108 @@ Return-Path: <SRS0=vd7C=2A=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-8.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 052E0C43603
-	for <linux-mmc@archiver.kernel.org>; Tue, 10 Dec 2019 01:41:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7D994C2D0CA
+	for <linux-mmc@archiver.kernel.org>; Tue, 10 Dec 2019 09:36:20 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id CC72A20637
-	for <linux-mmc@archiver.kernel.org>; Tue, 10 Dec 2019 01:40:59 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 531D720836
+	for <linux-mmc@archiver.kernel.org>; Tue, 10 Dec 2019 09:36:20 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="BmJF6Qvu"
+	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="cy5BJsHX"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726562AbfLJBk7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 9 Dec 2019 20:40:59 -0500
-Received: from mail-lj1-f196.google.com ([209.85.208.196]:39866 "EHLO
-        mail-lj1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726538AbfLJBk7 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Dec 2019 20:40:59 -0500
-Received: by mail-lj1-f196.google.com with SMTP id e10so17915288ljj.6;
-        Mon, 09 Dec 2019 17:40:57 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=vlZI4rEGeiq9jWtOY0aFxUeSEkD9VPU1bYTxW9kWFdQ=;
-        b=BmJF6QvuU9k+gicud6GQqh3PEAWQm7BMYysarKVmqLASdkf9Y2zuA2/X2c5UPAqrBq
-         5mt5MzpfDukUo5XlzsMHZp0F6wE+pX+BbqLCZm6TEB1VZoO4azosLsQlSNz5ohVmskmj
-         ofagIgmQ/nDydCKMIWjkDlHfEzb7L8sczSGADD4+vb8yE48LLcvdooCU0y86FL/HANB2
-         MrerD/9WjyqPPX3ggAw51HsaMZadtv6CN6NwZQc5bDRT6O6Yp9ZTz8+YjLDy7DcYIGCD
-         YfcWFZNUAB7DLa3YiqNQHpf5twwfAdxPCimo6doMmWi7emJuc5KK/wkQtxcPlaQ00Vn7
-         lNOQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=vlZI4rEGeiq9jWtOY0aFxUeSEkD9VPU1bYTxW9kWFdQ=;
-        b=a/NWDOy0x6j6279sDqva/SeQLCN4hd/7oMXEVuFptQt8srOYuabapS79gtTbaxpLD9
-         w8DqA7olQonq8OH2YhzCMAVfkwkn7ZR645pMpbu0F2cZlPCHkotiHHmG7L+VnkhWohOx
-         1qO2i3AMYQIhj9aAqNAM2IjL7aA6thsC52sYf8fNNGL3gKtJTuOZZphwwmgWYJgQqpCF
-         4qiYIxkMGD5xnuDZoXk5Z46lmRVXJneX/X5kDsJe6cLv5Wc6sFh/qZzXYnZuzv95gm30
-         82hzc4Uf8iYhuytmrIDTls1QofPmC2i5Za2rBKqjLHHPXY9b7kQ6ZLLqePJ75K4YxuHg
-         sRDg==
-X-Gm-Message-State: APjAAAUCObs5gkvzSCtchGqYp2eoHPwhy3VVyHcy8BKG4jy2a9/Y+j1h
-        xYGOomT8BHTvSx1hZgO0vyF5SEdW
-X-Google-Smtp-Source: APXvYqwq8U1I4QevksCt7+Ui2gdfuQtFkkgMtrKqkyij2iotR9ysDAJHihyh7B9qC1ZNBOAMNUsYEA==
-X-Received: by 2002:a2e:144b:: with SMTP id 11mr18625869lju.216.1575942056544;
-        Mon, 09 Dec 2019 17:40:56 -0800 (PST)
-Received: from localhost.localdomain (79-139-233-37.dynamic.spd-mgts.ru. [79.139.233.37])
-        by smtp.gmail.com with ESMTPSA id r125sm522813lff.70.2019.12.09.17.40.55
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 09 Dec 2019 17:40:56 -0800 (PST)
-From:   Dmitry Osipenko <digetx@gmail.com>
-To:     Thierry Reding <thierry.reding@gmail.com>,
-        Jonathan Hunter <jonathanh@nvidia.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Subject: [PATCH v1] sdhci: tegra: Add workaround for Broadcom WiFi
-Date:   Tue, 10 Dec 2019 04:40:11 +0300
-Message-Id: <20191210014011.21987-1-digetx@gmail.com>
-X-Mailer: git-send-email 2.24.0
+        id S1727345AbfLJJgQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 10 Dec 2019 04:36:16 -0500
+Received: from lelv0142.ext.ti.com ([198.47.23.249]:45254 "EHLO
+        lelv0142.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727291AbfLJJgP (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Dec 2019 04:36:15 -0500
+Received: from fllv0034.itg.ti.com ([10.64.40.246])
+        by lelv0142.ext.ti.com (8.15.2/8.15.2) with ESMTP id xBA9aCG4130984;
+        Tue, 10 Dec 2019 03:36:12 -0600
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
+        s=ti-com-17Q1; t=1575970572;
+        bh=WGtf1IKDe8ENBK+5xcPhUCNaggU+OnMoFiPYYV9HOwg=;
+        h=Subject:To:CC:References:From:Date:In-Reply-To;
+        b=cy5BJsHXeyVzi7MYSE4OakI/GqWb15wr0Ov94TLB8vvbrvqe/ox0y75fFCIA1WEB6
+         HY6itZpz6VA7moWHJvTNC6P0D0Vhx6JGtn55Nj81PdJAZnpuuhXsRK5mWvJTXg2g2R
+         OQgxsTPZPFbYPId+LeHCUqFxh1TTH40CG6jw2ENc=
+Received: from DLEE114.ent.ti.com (dlee114.ent.ti.com [157.170.170.25])
+        by fllv0034.itg.ti.com (8.15.2/8.15.2) with ESMTPS id xBA9aCAi124687
+        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
+        Tue, 10 Dec 2019 03:36:12 -0600
+Received: from DLEE115.ent.ti.com (157.170.170.26) by DLEE114.ent.ti.com
+ (157.170.170.25) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.1847.3; Tue, 10
+ Dec 2019 03:36:11 -0600
+Received: from fllv0039.itg.ti.com (10.64.41.19) by DLEE115.ent.ti.com
+ (157.170.170.26) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.1847.3 via
+ Frontend Transport; Tue, 10 Dec 2019 03:36:11 -0600
+Received: from [172.24.190.215] (ileax41-snat.itg.ti.com [10.172.224.153])
+        by fllv0039.itg.ti.com (8.15.2/8.15.2) with ESMTP id xBA9a9qj023647;
+        Tue, 10 Dec 2019 03:36:10 -0600
+Subject: Re: [PATCH] mmc: sdhci: Update the tuning failed messages to pr_debug
+ level
+To:     <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>
+CC:     <ulf.hansson@linaro.org>, <adrian.hunter@intel.com>
+References: <20191206114326.15856-1-faiz_abbas@ti.com>
+From:   Faiz Abbas <faiz_abbas@ti.com>
+Message-ID: <9199c781-399b-8b7e-8454-6d67f41f48bb@ti.com>
+Date:   Tue, 10 Dec 2019 15:07:25 +0530
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.2.1
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+In-Reply-To: <20191206114326.15856-1-faiz_abbas@ti.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-All Tegra20 boards that have embedded Broadcom WiFi SDIO chip are affected
-by a problem where WiFi chip reports CCCR v1.10, while it should v1.20.
-In a result high-speed mode isn't enabled for the WiFi card and this
-results in a malfunctioning SDIO communication.
+Hi,
 
- brcmfmac: brcmf_sdio_readframes: read 304 bytes from channel 1 failed: -84
- brcmfmac: brcmf_sdio_rxfail: abort command, terminate frame, send NAK
+On 06/12/19 5:13 pm, Faiz Abbas wrote:
+> Tuning support in DDR50 speed mode was added in SD Specifications Part1
+> Physical Layer Specification v3.01. Its not possible to distinguish
+> between v3.00 and v3.01 from the SCR and that is why since
+> commit 4324f6de6d2e ("mmc: core: enable CMD19 tuning for DDR50 mode")
+> tuning failures are ignored in DDR50 speed mode.
+> 
+> Cards compatible with v3.00 don't respond to CMD19 in DDR50 and this
+> error gets printed during enumeration and also if retune is triggered at
+> any time during operation. Update the printk level to pr_debug so that
+> these errors don't lead to false error reports.
+> 
+> Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
+> ---
+>  drivers/mmc/host/sdhci.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 296d955ede59..42a9c8179da7 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -2417,8 +2417,8 @@ static int __sdhci_execute_tuning(struct sdhci_host *host, u32 opcode)
+>  		sdhci_send_tuning(host, opcode);
+>  
+>  		if (!host->tuning_done) {
+> -			pr_info("%s: Tuning timeout, falling back to fixed sampling clock\n",
+> -				mmc_hostname(host->mmc));
+> +			pr_debug("%s: Tuning timeout, falling back to fixed sampling clock\n",
+> +				 mmc_hostname(host->mmc));
+>  			sdhci_abort_tuning(host, opcode);
+>  			return -ETIMEDOUT;
+>  		}
+> 
 
-Downstream kernels are overriding card's CCCR info in SDHCI driver to fix
-the problem, let's do the same in upstream.
+Gentle ping.
 
-The change is inspired by omap_hsmmc_init_card() of OMAP's HSMMC driver,
-which overrides card's info for the TI wl1251 WiFi.
-
-Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
----
- drivers/mmc/host/sdhci-tegra.c | 28 ++++++++++++++++++++++++++++
- 1 file changed, 28 insertions(+)
-
-diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-index 7bc950520fd9..2ad87da98f2c 100644
---- a/drivers/mmc/host/sdhci-tegra.c
-+++ b/drivers/mmc/host/sdhci-tegra.c
-@@ -1501,6 +1501,32 @@ static int sdhci_tegra_add_host(struct sdhci_host *host)
- 	return ret;
- }
- 
-+static void sdhci_tegra_init_card(struct mmc_host *mmc, struct mmc_card *card)
-+{
-+	if (card->type == MMC_TYPE_SDIO) {
-+		struct device_node *np = mmc_dev(mmc)->of_node;
-+
-+		np = of_get_compatible_child(np, "brcm,bcm4329-fmac");
-+		if (np) {
-+			dev_info(mmc_dev(mmc), "found bcm4329\n");
-+
-+			/*
-+			 * All Tegra20 boards that have embedded BCM4329
-+			 * chip need to enable high speed for SDIO, otherwise
-+			 * further communication with the card doesn't work
-+			 * well.
-+			 *
-+			 * Later BCM43xx chips do not need this workaround,
-+			 * but there is no good way to differentiate chip's
-+			 * version at this stage and it doesn't cause any
-+			 * harm for the later chips.
-+			 */
-+			card->cccr.high_speed = 1;
-+			of_node_put(np);
-+		}
-+	}
-+}
-+
- static int sdhci_tegra_probe(struct platform_device *pdev)
- {
- 	const struct of_device_id *match;
-@@ -1545,6 +1571,8 @@ static int sdhci_tegra_probe(struct platform_device *pdev)
- 		host->mmc_host_ops.execute_tuning =
- 				tegra_sdhci_execute_hw_tuning;
- 
-+	host->mmc_host_ops.init_card = sdhci_tegra_init_card;
-+
- 	rc = mmc_of_parse(host->mmc);
- 	if (rc)
- 		goto err_parse_dt;
--- 
-2.24.0
-
+Thanks,
+Faiz
