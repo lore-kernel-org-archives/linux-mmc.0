@@ -2,122 +2,98 @@ Return-Path: <SRS0=vd7C=2A=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.3 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,USER_AGENT_SANE_2
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C214FC2D0C5
-	for <linux-mmc@archiver.kernel.org>; Tue, 10 Dec 2019 10:06:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1D8A5C43603
+	for <linux-mmc@archiver.kernel.org>; Tue, 10 Dec 2019 12:03:47 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 975032073B
-	for <linux-mmc@archiver.kernel.org>; Tue, 10 Dec 2019 10:06:14 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B30D42073D
+	for <linux-mmc@archiver.kernel.org>; Tue, 10 Dec 2019 12:03:46 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=baylibre-com.20150623.gappssmtp.com header.i=@baylibre-com.20150623.gappssmtp.com header.b="ay8xBFol"
+	dkim=pass (1024-bit key) header.d=mediatek.com header.i=@mediatek.com header.b="LVKCFza6"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727063AbfLJKGO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 10 Dec 2019 05:06:14 -0500
-Received: from mail-wr1-f67.google.com ([209.85.221.67]:35439 "EHLO
-        mail-wr1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727032AbfLJKGN (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Dec 2019 05:06:13 -0500
-Received: by mail-wr1-f67.google.com with SMTP id g17so19328564wro.2
-        for <linux-mmc@vger.kernel.org>; Tue, 10 Dec 2019 02:06:12 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20150623.gappssmtp.com; s=20150623;
-        h=references:user-agent:from:to:cc:subject:in-reply-to:date
-         :message-id:mime-version;
-        bh=yWA8VuK4fbXWgl7ohEQh+n62QMSnzlWImVwiKu0V3pU=;
-        b=ay8xBFolpoZbEI0WIoC+oZXq9WoJqWUz/KTAkTpaMy4Tgc7Wz9t2HM6ZPg7QRC9SFy
-         30c+BofWslloaWCCK8mVqcOrrMXbY/jDq1ej6KZcqv8TawX51qgQR7UqaLOJ8zhjXbDs
-         L6QZ5Cl2g9lA/rDptk0Sb/cEQq1vKdOYOvderokk3AhS9NbkyVtpPJ096a30i0F6huqb
-         gGQ/xVyLvYlkhFDBxWv72bnbFSx7vEkc+V+rluB2GDYzHVfdQVAA4bNqPwCba/mi9HME
-         rLpYRLq9CrkXCQcvTjQblEpa6coyNP5V0yxOoWT7s9rXpaIZZ8j8JQrT5Go2g2Oi0KNs
-         ih6w==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:references:user-agent:from:to:cc:subject
-         :in-reply-to:date:message-id:mime-version;
-        bh=yWA8VuK4fbXWgl7ohEQh+n62QMSnzlWImVwiKu0V3pU=;
-        b=YUUb/nIdHQTIyWg8dA2OurZ6VIVwCjVvkw+YPOToUYczbwk8CVmZvd97VCIXkZe+J8
-         b6d2ZDmqKisHprvLUe3qulV/UB4on8m4EkIaHJmnUSSza3VcHDYWn6pav1nXqordE0tw
-         EA5eZF2m46A/wGcQigEasrgJDuQsmxHnBfnBbEUba0QStIDs5Us3H+sCqS9H4tcY8Ryb
-         7SnNeC3Ki/JIXiHqOUgoEnZwZx0EezmdUVog4Rg/WnixaMS2Znj1G0ybKZeLBNS7uasq
-         qQzpIJyiM4vJLD/t31DnEwhFcWhU12+RsCmfgfFA/cMjse/cWt6BW2DkkrJw59agEzws
-         qzQw==
-X-Gm-Message-State: APjAAAW2MzvCs2MgqEAbvOj+v9CAVpklr82/FVn3iwLsSa66mBI/H1q4
-        ByJ+L7hw0GRs8atEedHKp/JZPw==
-X-Google-Smtp-Source: APXvYqzRvBg9WoInjKPSS6kGkuYA+0mP75qg4hZ64I7fw/nPlmqw0YzWtInIDsLmMwZvk0LZtYBZhg==
-X-Received: by 2002:adf:fe12:: with SMTP id n18mr2166082wrr.158.1575972371615;
-        Tue, 10 Dec 2019 02:06:11 -0800 (PST)
-Received: from localhost (laubervilliers-658-1-213-31.w90-63.abo.wanadoo.fr. [90.63.244.31])
-        by smtp.gmail.com with ESMTPSA id k4sm2582166wmk.26.2019.12.10.02.06.10
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 10 Dec 2019 02:06:10 -0800 (PST)
-References: <20191206170821.29711-1-ulf.hansson@linaro.org> <20191206170821.29711-3-ulf.hansson@linaro.org>
-User-agent: mu4e 1.3.3; emacs 26.2
-From:   Jerome Brunet <jbrunet@baylibre.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>, linux-gpio@vger.kernel.org,
-        Linus Walleij <linus.walleij@linaro.org>
-Cc:     linux-mmc@vger.kernel.org, Kevin Hilman <khilman@baylibre.com>
-Subject: Re: [PATCH 2/9] mmc: meson-gx: Convert to pinctrl_select_default_state()
-In-reply-to: <20191206170821.29711-3-ulf.hansson@linaro.org>
-Date:   Tue, 10 Dec 2019 11:06:10 +0100
-Message-ID: <1jv9qowl4d.fsf@starbuckisacylon.baylibre.com>
+        id S1726957AbfLJMDq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 10 Dec 2019 07:03:46 -0500
+Received: from mailgw01.mediatek.com ([210.61.82.183]:33261 "EHLO
+        mailgw01.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1727398AbfLJMDq (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Dec 2019 07:03:46 -0500
+X-UUID: 42ddcc08682a4bf1b96141fa4e928936-20191210
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=mediatek.com; s=dk;
+        h=Content-Transfer-Encoding:MIME-Version:Content-Type:References:In-Reply-To:Date:CC:To:From:Subject:Message-ID; bh=2INHnv89DngP2q6S6QSycxepChudtOI9fx0i3gt9NlY=;
+        b=LVKCFza6ucdjA7jR+uQLT74Cl22YZro8IyNdueS+2CZEtspmhrN/HJWgSWUwZ+xzH8K9xGP2+0ylpfMJNxcR23vKSf2tGPoo7gQic62mQJVB3qjIYt3wE2estBHW2OJYLN+FXa7hOACaK0ETs/rDUKBnErmM3rdDMEiUbH17BNA=;
+X-UUID: 42ddcc08682a4bf1b96141fa4e928936-20191210
+Received: from mtkcas09.mediatek.inc [(172.21.101.178)] by mailgw01.mediatek.com
+        (envelope-from <chaotian.jing@mediatek.com>)
+        (Cellopoint E-mail Firewall v4.1.10 Build 0809 with TLS)
+        with ESMTP id 1116796004; Tue, 10 Dec 2019 20:03:41 +0800
+Received: from MTKCAS32.mediatek.inc (172.27.4.184) by mtkmbs07n1.mediatek.inc
+ (172.21.101.16) with Microsoft SMTP Server (TLS) id 15.0.1395.4; Tue, 10 Dec
+ 2019 20:03:32 +0800
+Received: from [10.17.3.153] (172.27.4.253) by MTKCAS32.mediatek.inc
+ (172.27.4.170) with Microsoft SMTP Server id 15.0.1395.4 via Frontend
+ Transport; Tue, 10 Dec 2019 20:03:29 +0800
+Message-ID: <1575979419.7714.1.camel@mhfsdcap03>
+Subject: Re: [PATCH] mmc: mediatek: fix CMD_TA to 2 for MT8173 HS200/HS400
+ mode
+From:   Chaotian Jing <chaotian.jing@mediatek.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+CC:     srv_heupstream <srv_heupstream@mediatek.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "Linux Kernel Mailing List" <linux-kernel@vger.kernel.org>,
+        <linux-mediatek@lists.infradead.org>,
+        Matthias Brugger <matthias.bgg@gmail.com>, <hsinyi@google.com>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>
+Date:   Tue, 10 Dec 2019 20:03:39 +0800
+In-Reply-To: <CAPDyKFo9Z2yj7zC5VOS-iX_LyavPp1A4n73eAp7VD-Q+dpoqpw@mail.gmail.com>
+References: <20191204071958.18553-1-chaotian.jing@mediatek.com>
+         <CAPDyKFo9Z2yj7zC5VOS-iX_LyavPp1A4n73eAp7VD-Q+dpoqpw@mail.gmail.com>
+Content-Type: text/plain; charset="UTF-8"
+X-Mailer: Evolution 3.10.4-0ubuntu2 
 MIME-Version: 1.0
-Content-Type: text/plain
+X-MTK:  N
+Content-Transfer-Encoding: base64
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-
-On Fri 06 Dec 2019 at 18:08, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-
-> Let's drop the boilerplate code for managing the default pinctrl state and
-> convert into using the new pinctrl_select_default_state().
->
-
-Reviewed-by: Jerome Brunet <jbrunet@baylibre.com>
-
-> Cc: Kevin Hilman <khilman@baylibre.com>
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-> ---
->  drivers/mmc/host/meson-gx-mmc.c | 10 +---------
->  1 file changed, 1 insertion(+), 9 deletions(-)
->
-> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-> index e712315c7e8d..35400cf2a2e4 100644
-> --- a/drivers/mmc/host/meson-gx-mmc.c
-> +++ b/drivers/mmc/host/meson-gx-mmc.c
-> @@ -161,7 +161,6 @@ struct meson_host {
->  	bool dram_access_quirk;
->  
->  	struct pinctrl *pinctrl;
-> -	struct pinctrl_state *pins_default;
->  	struct pinctrl_state *pins_clk_gate;
->  
->  	unsigned int bounce_buf_size;
-> @@ -327,7 +326,7 @@ static void meson_mmc_clk_ungate(struct meson_host *host)
->  	u32 cfg;
->  
->  	if (host->pins_clk_gate)
-> -		pinctrl_select_state(host->pinctrl, host->pins_default);
-> +		pinctrl_select_default_state(host->dev);
->  
->  	/* Make sure the clock is not stopped in the controller */
->  	cfg = readl(host->regs + SD_EMMC_CFG);
-> @@ -1101,13 +1100,6 @@ static int meson_mmc_probe(struct platform_device *pdev)
->  		goto free_host;
->  	}
->  
-> -	host->pins_default = pinctrl_lookup_state(host->pinctrl,
-> -						  PINCTRL_STATE_DEFAULT);
-> -	if (IS_ERR(host->pins_default)) {
-> -		ret = PTR_ERR(host->pins_default);
-> -		goto free_host;
-> -	}
-> -
->  	host->pins_clk_gate = pinctrl_lookup_state(host->pinctrl,
->  						   "clk-gate");
->  	if (IS_ERR(host->pins_clk_gate)) {
+T24gVHVlLCAyMDE5LTEyLTEwIGF0IDEwOjUxICswMTAwLCBVbGYgSGFuc3NvbiB3cm90ZToNCj4g
+T24gV2VkLCA0IERlYyAyMDE5IGF0IDA4OjIwLCBDaGFvdGlhbiBKaW5nIDxjaGFvdGlhbi5qaW5n
+QG1lZGlhdGVrLmNvbT4gd3JvdGU6DQo+ID4NCj4gPiB0aGVyZSBpcyBhIGNoYW5jZSB0aGF0IGFs
+d2F5cyBnZXQgcmVzcG9uc2UgQ1JDIGVycm9yIGFmdGVyIEhTMjAwIHR1bmluZywNCj4gPiB0aGUg
+cmVhc29uIGlzIHRoYXQgbmVlZCBzZXQgQ01EX1RBIHRvIDIuIHRoaXMgbW9kaWZpY2F0aW9uIGlz
+IG9ubHkgZm9yDQo+ID4gTVQ4MTczLg0KPiA+DQo+ID4gU2lnbmVkLW9mZi1ieTogQ2hhb3RpYW4g
+SmluZyA8Y2hhb3RpYW4uamluZ0BtZWRpYXRlay5jb20+DQo+IA0KPiBJIGhhdmUgYXBwbGllZCB0
+aGlzIGZvciBmaXhlcywgaG93ZXZlciBpdCBzZWVtcyBsaWtlIHRoaXMgc2hvdWxkIGFsc28NCj4g
+YmUgdGFnZ2VkIGZvciBzdGFibGUsIHJpZ2h0Pw0KPiBZZXMhIHNob3VsZCBiZSB0YWdnZWQgZm9y
+IHN0YWJsZS4NCj4gSXMgdGhlcmUgYSBzcGVjaWZpYyBjb21taXQgdGhpcyBmaXhlcyBvciBzaG91
+bGQgd2UganVzdCBmaW5kIHRoZQ0KPiB2ZXJzaW9uIGl0IGFwcGxpZXMgdG8/DQo+IA0KIHRoaXMg
+cGF0Y2ggc2hvdWxkIGJlIGEgZml4IHRvIGNvbW1pdDoNCjFlZGU1Y2I4OGEyOWJiYTFhYWQxYjY4
+OTY1YzVmYzhlMDBiMjBlZDkNCj4gS2luZCByZWdhcmRzDQo+IFVmZmUNCj4gDQo+IA0KPiANCj4g
+PiAtLS0NCj4gPiAgZHJpdmVycy9tbWMvaG9zdC9tdGstc2QuYyB8IDIgKysNCj4gPiAgMSBmaWxl
+IGNoYW5nZWQsIDIgaW5zZXJ0aW9ucygrKQ0KPiA+DQo+ID4gZGlmZiAtLWdpdCBhL2RyaXZlcnMv
+bW1jL2hvc3QvbXRrLXNkLmMgYi9kcml2ZXJzL21tYy9ob3N0L210ay1zZC5jDQo+ID4gaW5kZXgg
+MTg5ZTQyNjc0ZDg1Li4wMTBmZTI5YTQ4ODggMTAwNjQ0DQo+ID4gLS0tIGEvZHJpdmVycy9tbWMv
+aG9zdC9tdGstc2QuYw0KPiA+ICsrKyBiL2RyaXZlcnMvbW1jL2hvc3QvbXRrLXNkLmMNCj4gPiBA
+QCAtMjI4LDYgKzIyOCw3IEBADQo+ID4gICNkZWZpbmUgTVNEQ19QQVRDSF9CSVRfU1BDUFVTSCAg
+ICAoMHgxIDw8IDI5KSAgLyogUlcgKi8NCj4gPiAgI2RlZmluZSBNU0RDX1BBVENIX0JJVF9ERUNS
+Q1RNTyAgICgweDEgPDwgMzApICAvKiBSVyAqLw0KPiA+DQo+ID4gKyNkZWZpbmUgTVNEQ19QQVRD
+SF9CSVQxX0NNRFRBICAgICAoMHg3IDw8IDMpICAgIC8qIFJXICovDQo+ID4gICNkZWZpbmUgTVNE
+Q19QQVRDSF9CSVQxX1NUT1BfRExZICAoMHhmIDw8IDgpICAgIC8qIFJXICovDQo+ID4NCj4gPiAg
+I2RlZmluZSBNU0RDX1BBVENIX0JJVDJfQ0ZHUkVTUCAgICgweDEgPDwgMTUpICAgLyogUlcgKi8N
+Cj4gPiBAQCAtMTg4MSw2ICsxODgyLDcgQEAgc3RhdGljIGludCBoczQwMF90dW5lX3Jlc3BvbnNl
+KHN0cnVjdCBtbWNfaG9zdCAqbW1jLCB1MzIgb3Bjb2RlKQ0KPiA+DQo+ID4gICAgICAgICAvKiBz
+ZWxlY3QgRU1NQzUwIFBBRCBDTUQgdHVuZSAqLw0KPiA+ICAgICAgICAgc2RyX3NldF9iaXRzKGhv
+c3QtPmJhc2UgKyBQQURfQ01EX1RVTkUsIEJJVCgwKSk7DQo+ID4gKyAgICAgICBzZHJfc2V0X2Zp
+ZWxkKGhvc3QtPmJhc2UgKyBNU0RDX1BBVENIX0JJVDEsIE1TRENfUEFUQ0hfQklUMV9DTURUQSwg
+Mik7DQo+ID4NCj4gPiAgICAgICAgIGlmIChtbWMtPmlvcy50aW1pbmcgPT0gTU1DX1RJTUlOR19N
+TUNfSFMyMDAgfHwNCj4gPiAgICAgICAgICAgICBtbWMtPmlvcy50aW1pbmcgPT0gTU1DX1RJTUlO
+R19VSFNfU0RSMTA0KQ0KPiA+IC0tDQo+ID4gMi4xOC4wDQo+IA0KPiBfX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXw0KPiBMaW51eC1tZWRpYXRlayBtYWlsaW5n
+IGxpc3QNCj4gTGludXgtbWVkaWF0ZWtAbGlzdHMuaW5mcmFkZWFkLm9yZw0KPiBodHRwOi8vbGlz
+dHMuaW5mcmFkZWFkLm9yZy9tYWlsbWFuL2xpc3RpbmZvL2xpbnV4LW1lZGlhdGVrDQoNCg==
 
