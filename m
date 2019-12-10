@@ -7,37 +7,37 @@ X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D582CC43603
-	for <linux-mmc@archiver.kernel.org>; Tue, 10 Dec 2019 21:37:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 16ED6C2D0BF
+	for <linux-mmc@archiver.kernel.org>; Tue, 10 Dec 2019 22:05:21 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id A903E2073B
-	for <linux-mmc@archiver.kernel.org>; Tue, 10 Dec 2019 21:37:34 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E0A902053B
+	for <linux-mmc@archiver.kernel.org>; Tue, 10 Dec 2019 22:05:20 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1576013854;
-	bh=8Nar7KQyexigtXQZAEJ9QBpT9ro7aQBOAsTgfZ6PZ/8=;
+	s=default; t=1576015521;
+	bh=CgxRm216WmCX4Q2oMM5pdlUpclSLBREMLbPFvNdU3nE=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=kwVVFsP8lWehxWfIWlvcGHXr1U5fWG+8bNyccsuR4K6iSrnoBEIL36oDJudmR/MBr
-	 57TAcJJGGHXEtqKAejQ2Gy1FxjDkCny+z/Fx1l5IybonWpOyzk01sg1/U0aD4CTD+h
-	 1ueGmXPcUWkYFDgfhIZWdvdz9xahKYX0XXWsvuoc=
+	b=XFKV5nGV7koXbUdc1jYzheRLUW6ujjhK2Uo9pIFwseXdaDQfPN6l2MfFKQY/Z9zw+
+	 3WDYh8afObxXnKdqiOiCv8E1r14M8fHJfQm95xfc9WwRR/Mi0IXYZSnrLyb/7ZO2ag
+	 7gRfpganp+AFSc2TyVk+R0HzH3FDvBjl2zal/99E=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728214AbfLJVhd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 10 Dec 2019 16:37:33 -0500
-Received: from mail.kernel.org ([198.145.29.99]:41320 "EHLO mail.kernel.org"
+        id S1727054AbfLJWFT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 10 Dec 2019 17:05:19 -0500
+Received: from mail.kernel.org ([198.145.29.99]:36738 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1730276AbfLJVfb (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 10 Dec 2019 16:35:31 -0500
+        id S1727906AbfLJWFS (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 10 Dec 2019 17:05:18 -0500
 Received: from sasha-vm.mshome.net (c-73-47-72-35.hsd1.nh.comcast.net [73.47.72.35])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id DF25B2467C;
-        Tue, 10 Dec 2019 21:35:29 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id EDE132053B;
+        Tue, 10 Dec 2019 22:05:16 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1576013730;
-        bh=8Nar7KQyexigtXQZAEJ9QBpT9ro7aQBOAsTgfZ6PZ/8=;
+        s=default; t=1576015517;
+        bh=CgxRm216WmCX4Q2oMM5pdlUpclSLBREMLbPFvNdU3nE=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=gvcI/s+WOlPAp2QAOMOkDbEkCDDCt/2eINKuB60sC2qmEZk8I6haIYvZbgoVTLJun
-         A4YdzGcoM4C3OnG0saYRzYFNTAK7rLnfYpMlMmNIs85oVHhKmqnXzsht2H7frfiTmD
-         cmlgzSoUOJely4Ux2MDTu2A6ePTdDEVjBo3w+31A=
+        b=rxCSIY2NmxwxF/omFXewYyOIdrxefX+fVX8wicaDLvKzvY04juEBwH68RPqYV/oTQ
+         1rzUzFoiSiraxWiHNJAgy3lVzYEnMK5FgoqoYwhYi0f9byFUwFuzpetPP23UeRVQqz
+         lGS234HsnHK2dG0scyGxJT98rB1wynsnTcgcCZgQ=
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc:     Eugeniu Rosca <erosca@de.adit-jv.com>,
@@ -47,12 +47,12 @@ Cc:     Eugeniu Rosca <erosca@de.adit-jv.com>,
         Harish Jenny K N <harish_kandiga@mentor.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
         Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org
-Subject: [PATCH AUTOSEL 4.19 155/177] mmc: tmio: Add MMC_CAP_ERASE to allow erase/discard/trim requests
-Date:   Tue, 10 Dec 2019 16:31:59 -0500
-Message-Id: <20191210213221.11921-155-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.14 114/130] mmc: tmio: Add MMC_CAP_ERASE to allow erase/discard/trim requests
+Date:   Tue, 10 Dec 2019 17:02:45 -0500
+Message-Id: <20191210220301.13262-114-sashal@kernel.org>
 X-Mailer: git-send-email 2.20.1
-In-Reply-To: <20191210213221.11921-1-sashal@kernel.org>
-References: <20191210213221.11921-1-sashal@kernel.org>
+In-Reply-To: <20191210220301.13262-1-sashal@kernel.org>
+References: <20191210220301.13262-1-sashal@kernel.org>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
@@ -115,12 +115,12 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
-index 35630ccbe9e5d..33c9ca8f14a97 100644
+index 2fd862dc97701..a09aad9155a56 100644
 --- a/drivers/mmc/host/tmio_mmc_core.c
 +++ b/drivers/mmc/host/tmio_mmc_core.c
-@@ -1267,7 +1267,7 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host)
- 			return ret;
- 	}
+@@ -1220,7 +1220,7 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host,
+ 		_host->start_signal_voltage_switch;
+ 	mmc->ops = &tmio_mmc_ops;
  
 -	mmc->caps |= MMC_CAP_4_BIT_DATA | pdata->capabilities;
 +	mmc->caps |= MMC_CAP_ERASE | MMC_CAP_4_BIT_DATA | pdata->capabilities;
