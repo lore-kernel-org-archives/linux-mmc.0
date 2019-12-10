@@ -2,131 +2,76 @@ Return-Path: <SRS0=vd7C=2A=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-2.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 16ED6C2D0BF
-	for <linux-mmc@archiver.kernel.org>; Tue, 10 Dec 2019 22:05:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3B4A6C2D0BF
+	for <linux-mmc@archiver.kernel.org>; Tue, 10 Dec 2019 22:21:42 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id E0A902053B
-	for <linux-mmc@archiver.kernel.org>; Tue, 10 Dec 2019 22:05:20 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1576015521;
-	bh=CgxRm216WmCX4Q2oMM5pdlUpclSLBREMLbPFvNdU3nE=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=XFKV5nGV7koXbUdc1jYzheRLUW6ujjhK2Uo9pIFwseXdaDQfPN6l2MfFKQY/Z9zw+
-	 3WDYh8afObxXnKdqiOiCv8E1r14M8fHJfQm95xfc9WwRR/Mi0IXYZSnrLyb/7ZO2ag
-	 7gRfpganp+AFSc2TyVk+R0HzH3FDvBjl2zal/99E=
+	by mail.kernel.org (Postfix) with ESMTP id 1138120828
+	for <linux-mmc@archiver.kernel.org>; Tue, 10 Dec 2019 22:21:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727054AbfLJWFT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 10 Dec 2019 17:05:19 -0500
-Received: from mail.kernel.org ([198.145.29.99]:36738 "EHLO mail.kernel.org"
+        id S1726901AbfLJWVl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 10 Dec 2019 17:21:41 -0500
+Received: from sauhun.de ([88.99.104.3]:42794 "EHLO pokefinder.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727906AbfLJWFS (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 10 Dec 2019 17:05:18 -0500
-Received: from sasha-vm.mshome.net (c-73-47-72-35.hsd1.nh.comcast.net [73.47.72.35])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id EDE132053B;
-        Tue, 10 Dec 2019 22:05:16 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1576015517;
-        bh=CgxRm216WmCX4Q2oMM5pdlUpclSLBREMLbPFvNdU3nE=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=rxCSIY2NmxwxF/omFXewYyOIdrxefX+fVX8wicaDLvKzvY04juEBwH68RPqYV/oTQ
-         1rzUzFoiSiraxWiHNJAgy3lVzYEnMK5FgoqoYwhYi0f9byFUwFuzpetPP23UeRVQqz
-         lGS234HsnHK2dG0scyGxJT98rB1wynsnTcgcCZgQ=
-From:   Sasha Levin <sashal@kernel.org>
-To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc:     Eugeniu Rosca <erosca@de.adit-jv.com>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Masahiro Yamada <yamada.masahiro@socionext.com>,
-        Andrew Gabbasov <andrew_gabbasov@mentor.com>,
-        Harish Jenny K N <harish_kandiga@mentor.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org
-Subject: [PATCH AUTOSEL 4.14 114/130] mmc: tmio: Add MMC_CAP_ERASE to allow erase/discard/trim requests
-Date:   Tue, 10 Dec 2019 17:02:45 -0500
-Message-Id: <20191210220301.13262-114-sashal@kernel.org>
-X-Mailer: git-send-email 2.20.1
-In-Reply-To: <20191210220301.13262-1-sashal@kernel.org>
-References: <20191210220301.13262-1-sashal@kernel.org>
+        id S1727068AbfLJWVl (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 10 Dec 2019 17:21:41 -0500
+Received: from localhost (p54B330BE.dip0.t-ipconnect.de [84.179.48.190])
+        by pokefinder.org (Postfix) with ESMTPSA id A76B32C0616;
+        Tue, 10 Dec 2019 23:21:39 +0100 (CET)
+Date:   Tue, 10 Dec 2019 23:21:39 +0100
+From:   Wolfram Sang <wsa@the-dreams.de>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Subject: Re: [PATCH 0/5] mmc: renesas_sdhi: prepare for recent HS400 updates
+Message-ID: <20191210222139.GC8683@kunai>
+References: <20191203200513.1758-1-wsa+renesas@sang-engineering.com>
+ <CAPDyKFpXanmDQq-minnX4KNLVSMatOQRnuT59sDdAZC_MDkp8A@mail.gmail.com>
 MIME-Version: 1.0
-X-stable: review
-X-Patchwork-Hint: Ignore
-Content-Transfer-Encoding: 8bit
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="+nBD6E3TurpgldQp"
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFpXanmDQq-minnX4KNLVSMatOQRnuT59sDdAZC_MDkp8A@mail.gmail.com>
+User-Agent: Mutt/1.10.1 (2018-07-13)
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Eugeniu Rosca <erosca@de.adit-jv.com>
 
-[ Upstream commit c91843463e9e821dc3b48fe37e3155fa38299f6e ]
+--+nBD6E3TurpgldQp
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-Isolated initially to renesas_sdhi_internal_dmac [1], Ulf suggested
-adding MMC_CAP_ERASE to the TMIO mmc core:
 
-On Fri, Nov 15, 2019 at 10:27:25AM +0100, Ulf Hansson wrote:
- -- snip --
- This test and due to the discussions with Wolfram and you in this
- thread, I would actually suggest that you enable MMC_CAP_ERASE for all
- tmio variants, rather than just for this particular one.
+> Applied for next and by fixing up the comments for patch 4, thanks!
 
- In other words, set the cap in tmio_mmc_host_probe() should be fine,
- as it seems none of the tmio variants supports HW busy detection at
- this point.
- -- snip --
+Thanks for fixing it up, Ulf!
 
-Testing on R-Car H3ULCB-KF doesn't reveal any issues (v5.4-rc7):
 
-root@rcar-gen3:~# lsblk
-NAME         MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
-mmcblk0      179:0    0 59.2G  0 disk  <--- eMMC
-mmcblk0boot0 179:8    0    4M  1 disk
-mmcblk0boot1 179:16   0    4M  1 disk
-mmcblk1      179:24   0   30G  0 disk  <--- SD card
+--+nBD6E3TurpgldQp
+Content-Type: application/pgp-signature; name="signature.asc"
 
-root@rcar-gen3:~# time blkdiscard /dev/mmcblk0
-real    0m8.659s
-user    0m0.001s
-sys     0m1.920s
+-----BEGIN PGP SIGNATURE-----
 
-root@rcar-gen3:~# time blkdiscard /dev/mmcblk1
-real    0m1.176s
-user    0m0.001s
-sys     0m0.124s
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAl3wGnMACgkQFA3kzBSg
+KbY9JA//YKcg0TY5VmstRvyECWMbNg3r+7gnMK64TVUO7p1x6RwxG/bmDTWux9fv
+aVEaU6J/tEvu5F/nwSeWIdKwwPjvPn3BgLD8pkowztjXKUbGAVGNhVBRGx99WmLd
+QAM8zkkp2yQ4QeS7bq9y0ljbKhzIWETFRiU7w18CgRmJLKtIvGuyM+5mSdoe89AK
+fuX8kqtO5l9M6/j04fMNeVb3wkMX5hkk1eHvmBZ+MMCNAUwLaSk4UReX1OPtCGTL
+Lz87J+tgfvxrfBw1FmC2afvUV5cRyrY3NPN5eBAEndkamH2c1U8DSuyvBVvOGHVn
+fbfKmOWlCynGOFVaDiSq3tDYcVvODrAINTF6YUmECOuYr5Xt/rBmkk024Nzfl+VE
+eljvPO6OyHLt2K+Ayu777EMShfnm6IF9p9t/MZsOjaaO5vidUW3gyLg17XaqmouE
+foLituluMEGe7A6gTlqm9GUN+S4R5+8siDbk1/0JJ3Y4lbsUJ4QM0X7gl6XvIfzU
+gA/DE7uBQw4INBEJekUc/cSjnmyD8Z20eMXymDB+ebzXcrOMnSSkPKe6YR65/nGK
+vvG/cGCtI1L1R8h0q4fDotG3+Hl6+IPltC8hhO2eisGwl6ngF3eLAgtuwKhZGFRc
+EMgprYysU4KA4fc44AFN9oT/BeaC8sGam8WUe0aD4u5Ef+5WyDs=
+=r2E+
+-----END PGP SIGNATURE-----
 
-[1] https://lore.kernel.org/linux-renesas-soc/20191112134808.23546-1-erosca@de.adit-jv.com/
-
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc: Masahiro Yamada <yamada.masahiro@socionext.com>
-Cc: Andrew Gabbasov <andrew_gabbasov@mentor.com>
-Originally-by: Harish Jenny K N <harish_kandiga@mentor.com>
-Suggested-by: Ulf Hansson <ulf.hansson@linaro.org>
-Signed-off-by: Eugeniu Rosca <erosca@de.adit-jv.com>
-Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-Signed-off-by: Sasha Levin <sashal@kernel.org>
----
- drivers/mmc/host/tmio_mmc_core.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
-index 2fd862dc97701..a09aad9155a56 100644
---- a/drivers/mmc/host/tmio_mmc_core.c
-+++ b/drivers/mmc/host/tmio_mmc_core.c
-@@ -1220,7 +1220,7 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host,
- 		_host->start_signal_voltage_switch;
- 	mmc->ops = &tmio_mmc_ops;
- 
--	mmc->caps |= MMC_CAP_4_BIT_DATA | pdata->capabilities;
-+	mmc->caps |= MMC_CAP_ERASE | MMC_CAP_4_BIT_DATA | pdata->capabilities;
- 	mmc->caps2 |= pdata->capabilities2;
- 	mmc->max_segs = pdata->max_segs ? : 32;
- 	mmc->max_blk_size = 512;
--- 
-2.20.1
-
+--+nBD6E3TurpgldQp--
