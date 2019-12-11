@@ -2,92 +2,185 @@ Return-Path: <SRS0=rVnL=2B=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D8746C43603
-	for <linux-mmc@archiver.kernel.org>; Wed, 11 Dec 2019 00:40:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CAA75C43603
+	for <linux-mmc@archiver.kernel.org>; Wed, 11 Dec 2019 02:41:06 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id AE80A2073D
-	for <linux-mmc@archiver.kernel.org>; Wed, 11 Dec 2019 00:40:11 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 97E81208C3
+	for <linux-mmc@archiver.kernel.org>; Wed, 11 Dec 2019 02:41:06 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="DzWEDMV6"
+	dkim=pass (2048-bit key) header.d=rere.qmqm.pl header.i=@rere.qmqm.pl header.b="GmUFAfGT"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727113AbfLKAkH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 10 Dec 2019 19:40:07 -0500
-Received: from mail-lj1-f195.google.com ([209.85.208.195]:40081 "EHLO
-        mail-lj1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727093AbfLKAkH (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Dec 2019 19:40:07 -0500
-Received: by mail-lj1-f195.google.com with SMTP id s22so21957824ljs.7
-        for <linux-mmc@vger.kernel.org>; Tue, 10 Dec 2019 16:40:06 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=+6mwPhn94U0FJCp8N/iLCGyoYPPPkFesQi/ZLGlNabg=;
-        b=DzWEDMV6zFCN5CPxuB98wPU/lUNXV9fCtKG8vCaJDjqrBnuzhjUaeFZ1+la3wXQNbZ
-         8/1piJtHwCYSk/iJH2vOcrQprWHzccO/cVI8fc6j9HT3nMHYJPMp50W2ZbayjxlZafpm
-         OEJRafmYkmHflbQUtOlcyMahRvYz91/Hf3goXN6Zz+WIFvhQesbfOgF9knBF8WlES3+4
-         fSxUmiSMjXRfs+mEUZbI+ocT2kGtWBHBQ/Q7pfc/glkE9HXO7uVV1HvthjvSH71AzryA
-         0t0LBbJSLwDUNu6noDycU/vAunTwuYiBsh7EDK/8nri5y9zn1jgRN8DduJjuRD3zSQA6
-         fmiQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=+6mwPhn94U0FJCp8N/iLCGyoYPPPkFesQi/ZLGlNabg=;
-        b=QNeqQSUDZu3jffbKsqZPbtK2yMZG3VH85fTP2ICdcOtH65roJI97wewLdoLryNYwuX
-         PrSJ5kde81nJkM6xg8Uk3QplirCEzWjGubPhKiNklKtB5onubxRl7Gz0mPW8wTrbEwTi
-         DC7+NpaSw0sIvA0ljltGiLb0vd4WTG9Oh66qRCYI9bHzSNCVf4faLC1c70XXmfo5Drwa
-         8d6BNYo4xdS3OApcLGywuTBBMNu6Y5c/pEogi6bS6VPSL7idMPVVi4jxZxQc2/W2a3+1
-         Z5POkUPonlyESc9NxtTRPBUc7AhdqbXlvwPyn6ZxLaBug53GQL7aSbZWSog7vYueJs2G
-         GpMg==
-X-Gm-Message-State: APjAAAXUhXvakXBZK1VdPo0pcip5WsJiE1n1k5USlv3UmWlqsdavX2YB
-        9sZKD4JtIuX4vf5vTGodEJ9uVs4xzH9a936bc7phiw==
-X-Google-Smtp-Source: APXvYqz+5hSx8AyIO68PLEgCzJXxNiyGKQgrsukDLUqC8J76DV8xgyxi+ERIJqysr1OXhO0gL6QnXeuXk3A1jZ6O+EM=
-X-Received: by 2002:a2e:b4f6:: with SMTP id s22mr93491ljm.218.1576024805657;
- Tue, 10 Dec 2019 16:40:05 -0800 (PST)
+        id S1727749AbfLKClA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 10 Dec 2019 21:41:00 -0500
+Received: from rere.qmqm.pl ([91.227.64.183]:7700 "EHLO rere.qmqm.pl"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1727254AbfLKCk7 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 10 Dec 2019 21:40:59 -0500
+Received: from remote.user (localhost [127.0.0.1])
+        by rere.qmqm.pl (Postfix) with ESMTPSA id 47Xh4m14qHzW9;
+        Wed, 11 Dec 2019 03:40:56 +0100 (CET)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=rere.qmqm.pl; s=1;
+        t=1576032056; bh=ax8k3kdpX2PJMhw57PNrJBf75thucfVxSMfYkKFcdZ0=;
+        h=Date:In-Reply-To:References:From:Subject:To:Cc:From;
+        b=GmUFAfGTUaWBBb1cuoDRvtSup7FsnUnIj5EHQpIfEjHQHl/Y7ur5XUZijWR4PLpz9
+         8yvPn0B3xvSM+dhyCZ9BxUansATMwX4i8FZgIAQHkupR9dDl5fFrGTgXGxohwk5MZg
+         WpIgKYya1mbi+/4nKdTR9CYaZMPXoCTi50YGsdVZOYmYEc2XlfSk+n0ToAe9NZYWI7
+         CxnA6jsLPBxQ05r2Csgty+WgHoNrkMzCS9f4SX3lPkkGBOxkdkqicmR5TwHHPi76fe
+         XNUvZo4bd3FE9e0/dE1e6FLYNUZYp/aQxF1G3F2C1xUxJmrPhdj4y3bbUHNPK57jW+
+         BxQWfZ6VV7FCg==
+X-Virus-Status: Clean
+X-Virus-Scanned: clamav-milter 0.101.4 at mail
+Date:   Wed, 11 Dec 2019 03:40:55 +0100
+Message-Id: <a60f563f11bbff821da2fa2949ca82922b144860.1576031637.git.mirq-linux@rere.qmqm.pl>
+In-Reply-To: <cover.1576031636.git.mirq-linux@rere.qmqm.pl>
+References: <cover.1576031636.git.mirq-linux@rere.qmqm.pl>
+From:   =?UTF-8?q?Micha=C5=82=20Miros=C5=82aw?= <mirq-linux@rere.qmqm.pl>
+Subject: [PATCH v2 2/4] mmc: rework wp-gpio handling
 MIME-Version: 1.0
-References: <cover.1575925023.git.mirq-linux@rere.qmqm.pl> <56d2568cd45a13c738e2804d04348566a8ee8d03.1575925023.git.mirq-linux@rere.qmqm.pl>
-In-Reply-To: <56d2568cd45a13c738e2804d04348566a8ee8d03.1575925023.git.mirq-linux@rere.qmqm.pl>
-From:   Linus Walleij <linus.walleij@linaro.org>
-Date:   Wed, 11 Dec 2019 01:39:54 +0100
-Message-ID: <CACRpkdZ0mk2dWBnWh+mRmBy2t-ALONtvv23Hr-2o8LD8CPYtgg@mail.gmail.com>
-Subject: Re: [PATCH 1/4] gpio: add gpiod_toggle_active_low()
-To:     =?UTF-8?B?TWljaGHFgiBNaXJvc8WCYXc=?= <mirq-linux@rere.qmqm.pl>
-Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
-        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+To:     linux-mmc@vger.kernel.org
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Linus Walleij <linus.walleij@linaro.org>,
         Bartosz Golaszewski <bgolaszewski@baylibre.com>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Viresh Kumar <vireshk@kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+        Adrian Hunter <adrian.hunter@intel.com>,
+        linux-gpio@vger.kernel.org, linux-kernel@vger.kernel.org
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, Dec 9, 2019 at 10:09 PM Micha=C5=82 Miros=C5=82aw <mirq-linux@rere.=
-qmqm.pl> wrote:
+Use MMC_CAP2_RO_ACTIVE_HIGH flag as indicator if GPIO line is to be
+inverted compared to DT/platform-specified polarity. The flag is not
+used after init in GPIO mode anyway. No functional changes intended.
 
-> Add possibility to toggle active-low flag of a gpio descriptor. This is
-> useful for compatibility code, where defaults are inverted vs DT gpio
-> flags or the active-low flag is taken from elsewhere.
->
-> Signed-off-by: Micha=C5=82 Miros=C5=82aw <mirq-linux@rere.qmqm.pl>
+Signed-off-by: Michał Mirosław <mirq-linux@rere.qmqm.pl>
+---
+  v2: moved argument removal in sdhci-esdhc-imx to the right patch
+---
+ drivers/gpio/gpiolib-of.c          |  4 ----
+ drivers/mmc/core/host.c            | 11 ++++-------
+ drivers/mmc/core/slot-gpio.c       |  3 +++
+ drivers/mmc/host/pxamci.c          |  8 ++++----
+ drivers/mmc/host/sdhci-esdhc-imx.c |  3 ++-
+ 5 files changed, 13 insertions(+), 16 deletions(-)
 
-Acked-by: Linus Walleij <linus.walleij@linaro.org>
+diff --git a/drivers/gpio/gpiolib-of.c b/drivers/gpio/gpiolib-of.c
+index dc27b1a88e93..b0b77e52e261 100644
+--- a/drivers/gpio/gpiolib-of.c
++++ b/drivers/gpio/gpiolib-of.c
+@@ -120,10 +120,6 @@ static void of_gpio_flags_quirks(struct device_node *np,
+ 			if (of_property_read_bool(np, "cd-inverted"))
+ 				*flags ^= OF_GPIO_ACTIVE_LOW;
+ 		}
+-		if (!strcmp(propname, "wp-gpios")) {
+-			if (of_property_read_bool(np, "wp-inverted"))
+-				*flags ^= OF_GPIO_ACTIVE_LOW;
+-		}
+ 	}
+ 	/*
+ 	 * Some GPIO fixed regulator quirks.
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index 105b7a7c0251..b3484def0a8b 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -176,7 +176,6 @@ int mmc_of_parse(struct mmc_host *host)
+ 	u32 bus_width, drv_type, cd_debounce_delay_ms;
+ 	int ret;
+ 	bool cd_cap_invert, cd_gpio_invert = false;
+-	bool ro_cap_invert, ro_gpio_invert = false;
+ 
+ 	if (!dev || !dev_fwnode(dev))
+ 		return 0;
+@@ -255,9 +254,11 @@ int mmc_of_parse(struct mmc_host *host)
+ 	}
+ 
+ 	/* Parse Write Protection */
+-	ro_cap_invert = device_property_read_bool(dev, "wp-inverted");
+ 
+-	ret = mmc_gpiod_request_ro(host, "wp", 0, 0, &ro_gpio_invert);
++	if (device_property_read_bool(dev, "wp-inverted"))
++		host->caps2 |= MMC_CAP2_RO_ACTIVE_HIGH;
++
++	ret = mmc_gpiod_request_ro(host, "wp", 0, 0, NULL);
+ 	if (!ret)
+ 		dev_info(host->parent, "Got WP GPIO\n");
+ 	else if (ret != -ENOENT && ret != -ENOSYS)
+@@ -266,10 +267,6 @@ int mmc_of_parse(struct mmc_host *host)
+ 	if (device_property_read_bool(dev, "disable-wp"))
+ 		host->caps2 |= MMC_CAP2_NO_WRITE_PROTECT;
+ 
+-	/* See the comment on CD inversion above */
+-	if (ro_cap_invert ^ ro_gpio_invert)
+-		host->caps2 |= MMC_CAP2_RO_ACTIVE_HIGH;
+-
+ 	if (device_property_read_bool(dev, "cap-sd-highspeed"))
+ 		host->caps |= MMC_CAP_SD_HIGHSPEED;
+ 	if (device_property_read_bool(dev, "cap-mmc-highspeed"))
+diff --git a/drivers/mmc/core/slot-gpio.c b/drivers/mmc/core/slot-gpio.c
+index da2596c5fa28..582ec3d720f6 100644
+--- a/drivers/mmc/core/slot-gpio.c
++++ b/drivers/mmc/core/slot-gpio.c
+@@ -241,6 +241,9 @@ int mmc_gpiod_request_ro(struct mmc_host *host, const char *con_id,
+ 			return ret;
+ 	}
+ 
++	if (host->caps2 & MMC_CAP2_RO_ACTIVE_HIGH)
++		gpiod_toggle_active_low(desc);
++
+ 	if (gpio_invert)
+ 		*gpio_invert = !gpiod_is_active_low(desc);
+ 
+diff --git a/drivers/mmc/host/pxamci.c b/drivers/mmc/host/pxamci.c
+index 024acc1b0a2e..b2bbcb09a49e 100644
+--- a/drivers/mmc/host/pxamci.c
++++ b/drivers/mmc/host/pxamci.c
+@@ -740,16 +740,16 @@ static int pxamci_probe(struct platform_device *pdev)
+ 			goto out;
+ 		}
+ 
++		if (!host->pdata->gpio_card_ro_invert)
++			mmc->caps2 |= MMC_CAP2_RO_ACTIVE_HIGH;
++
+ 		ret = mmc_gpiod_request_ro(mmc, "wp", 0, 0, NULL);
+ 		if (ret && ret != -ENOENT) {
+ 			dev_err(dev, "Failed requesting gpio_ro\n");
+ 			goto out;
+ 		}
+-		if (!ret) {
++		if (!ret)
+ 			host->use_ro_gpio = true;
+-			mmc->caps2 |= host->pdata->gpio_card_ro_invert ?
+-				0 : MMC_CAP2_RO_ACTIVE_HIGH;
+-		}
+ 
+ 		if (host->pdata->init)
+ 			host->pdata->init(dev, pxamci_detect_irq, mmc);
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index 1c988d6a2433..dccb4df46512 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -1381,13 +1381,14 @@ static int sdhci_esdhc_imx_probe_nondt(struct platform_device *pdev,
+ 				host->mmc->parent->platform_data);
+ 	/* write_protect */
+ 	if (boarddata->wp_type == ESDHC_WP_GPIO) {
++		host->mmc->caps2 |= MMC_CAP2_RO_ACTIVE_HIGH;
++
+ 		err = mmc_gpiod_request_ro(host->mmc, "wp", 0, 0, NULL);
+ 		if (err) {
+ 			dev_err(mmc_dev(host->mmc),
+ 				"failed to request write-protect gpio!\n");
+ 			return err;
+ 		}
+-		host->mmc->caps2 |= MMC_CAP2_RO_ACTIVE_HIGH;
+ 	}
+ 
+ 	/* card_detect */
+-- 
+2.20.1
 
-Proliferating APIs isn't good but I think this is the lesser evil
-given the mess there is in the MMC subsystem for this stuff.
-
-Maybe I can make a second attempt to move all polarity
-toggling back to gpiolib-of.c and remove the API after this
-has landed, hehe ;)
-
-Yours,
-Linus Walleij
