@@ -2,181 +2,127 @@ Return-Path: <SRS0=rVnL=2B=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-0.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D2537C3F68F
-	for <linux-mmc@archiver.kernel.org>; Wed, 11 Dec 2019 15:51:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D3F6BC00454
+	for <linux-mmc@archiver.kernel.org>; Wed, 11 Dec 2019 16:10:51 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id A722B2077B
-	for <linux-mmc@archiver.kernel.org>; Wed, 11 Dec 2019 15:51:50 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1576079510;
-	bh=UV2G6q/DXBthsE3ae57WamEql2zCNb2Q2GjMnMRBGkw=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=dO27kvmMvzYbCaMxLtUTZSSyENmRx64+bjrzl0tY8RtCjkWQmQO1mZ1KM7m3swAgG
-	 Ehgx+YLk+yEHZdyeH/l7kwKWlLOdPkjOfNyEPT8CTk4p70BTr+gA0kGJAoWzRIo89z
-	 FTL2ogHE0N248aUEnyCzm6Lpm6sl3SlSX6dtO7A0=
+	by mail.kernel.org (Postfix) with ESMTP id A795720836
+	for <linux-mmc@archiver.kernel.org>; Wed, 11 Dec 2019 16:10:51 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="gqHvsIBL"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1732493AbfLKPVm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 11 Dec 2019 10:21:42 -0500
-Received: from mail.kernel.org ([198.145.29.99]:52050 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1731843AbfLKPVl (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 11 Dec 2019 10:21:41 -0500
-Received: from localhost (83-86-89-107.cable.dynamic.v4.ziggo.nl [83.86.89.107])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 0189322527;
-        Wed, 11 Dec 2019 15:21:39 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1576077700;
-        bh=UV2G6q/DXBthsE3ae57WamEql2zCNb2Q2GjMnMRBGkw=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=WVtOquf2oudfARqi89sn3/KsjQWYysEwZDWuXJ0m58z4Ma4JA/pzs8g/4gleSf+aL
-         PoKGktQ5kHpTbpK2d57QCM4Ql7yirxLMeQoLeAhuTibWRt4/w0pJdLilsGFa9KrfGa
-         iEVXNYCBkLO8JSwk5RBVkW335ePwd9fMuX2njb8Q=
-From:   Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-To:     linux-kernel@vger.kernel.org
-Cc:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        stable@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-gpio@vger.kernel.org,
-        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Sasha Levin <sashal@kernel.org>
-Subject: [PATCH 4.19 137/243] gpio: OF: Parse MMC-specific CD and WP properties
-Date:   Wed, 11 Dec 2019 16:04:59 +0100
-Message-Id: <20191211150348.405211936@linuxfoundation.org>
-X-Mailer: git-send-email 2.24.1
-In-Reply-To: <20191211150339.185439726@linuxfoundation.org>
-References: <20191211150339.185439726@linuxfoundation.org>
-User-Agent: quilt/0.66
+        id S1732156AbfLKQKp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 11 Dec 2019 11:10:45 -0500
+Received: from mail-vs1-f67.google.com ([209.85.217.67]:36033 "EHLO
+        mail-vs1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1731208AbfLKQKp (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Dec 2019 11:10:45 -0500
+Received: by mail-vs1-f67.google.com with SMTP id m5so16163221vsj.3
+        for <linux-mmc@vger.kernel.org>; Wed, 11 Dec 2019 08:10:44 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc:content-transfer-encoding;
+        bh=kgF0VJwJaoby2Qr1LSoRI08yHtezON+G5eeh4fnIRrc=;
+        b=gqHvsIBLULpFt1CrV8JQNqmX+fJCOrherZuDNq0bjRctmMIPjDngGtH2kiqRyFYVpa
+         a45jXETMo1DSdvdVMYg5zLfMwnTO6hvomPKQ7ut/aIWHf84ifkMVmZFFitbuJOVm6qQP
+         ldrWFZYCHZoFoP1c6DqUVvPLIIL5uUzKLaLxP3lU5/eiIgXnNohVLz9h83Dvofb33ibB
+         ZaSy7BOTxvNUwe60poj3bGD29/xkZudsxk4a1OhMIjAuoLK6JT2Z2vmzNLfD7qOG3sWI
+         DnSKfmJ/kda2KPyQaIgd3ruNWrfxVHxbOFSAmoZ9il9SujzqQCGcRs2miQd6/nq5Mdi1
+         RxDA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=kgF0VJwJaoby2Qr1LSoRI08yHtezON+G5eeh4fnIRrc=;
+        b=Fs/PQhMQDR+G4gvDppDF/pul8QBPKejbzyz/njl2rXWuS5V5MfqHGi3wecT6xZmEnr
+         RTvN7pvdkGjAIhNb/kLgudWpI/YSok0fHofd//jYwyHNE5LQXuyJBozZEZKmzsyNA6I5
+         Ns/HOb4nzEH4tg0h3KmNR/DDB72K2pshJ6KdrWonEhYEDNI5GzfylREKCZyZqPF3V+nm
+         Y2XG8yoj83LN/Jy+eqVXURB4XmyeiosDdBRz9xlB8GYXMuCeJwzdYYqjlSwO6l7u3CvV
+         Bal1iSzaQtl1DxJeqNNGXTYNj7uw6Sqf0bySVhPB4Wapo9e7HUDmXfENjbaSfyJeRVCY
+         e7dg==
+X-Gm-Message-State: APjAAAXqjYicNcfDtfHQqCX2cXYXYVGA8Ois2geLr526dEEtDk1mvp2x
+        ZvppsOwc1RvuMabdoJTWRwjX2HU9HiAKFfdaYw7EWQ==
+X-Google-Smtp-Source: APXvYqySYRxzOot5/V8md6qQBaCXP7aPmRYFmPocUh6OqZlEtGxOuxcN2QT47MGnRi7aJ+1JdLEpLYg4vmI9+M9lRR4=
+X-Received: by 2002:a05:6102:5d1:: with SMTP id v17mr3128024vsf.200.1576080643886;
+ Wed, 11 Dec 2019 08:10:43 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+References: <20191210014011.21987-1-digetx@gmail.com> <CAPDyKFpMe09PNQqinvvidF+wfASx2nuvgf7=Hx5+cGni8pdcRA@mail.gmail.com>
+ <28045442-6a1c-1e0b-0dfe-c36fa9de149a@gmail.com>
+In-Reply-To: <28045442-6a1c-1e0b-0dfe-c36fa9de149a@gmail.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Wed, 11 Dec 2019 17:10:07 +0100
+Message-ID: <CAPDyKFpWO_McZEoefX1T=SE=RYm_GU3S+LgYZrgJY_SJgv7egA@mail.gmail.com>
+Subject: Re: [PATCH v1] sdhci: tegra: Add workaround for Broadcom WiFi
+To:     Dmitry Osipenko <digetx@gmail.com>
+Cc:     Thierry Reding <thierry.reding@gmail.com>,
+        Jonathan Hunter <jonathanh@nvidia.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        linux-tegra <linux-tegra@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Linus Walleij <linus.walleij@linaro.org>
+On Wed, 11 Dec 2019 at 16:46, Dmitry Osipenko <digetx@gmail.com> wrote:
+>
+> Hello Ulf,
+>
+> 11.12.2019 11:11, Ulf Hansson =D0=BF=D0=B8=D1=88=D0=B5=D1=82:
+> > On Tue, 10 Dec 2019 at 02:40, Dmitry Osipenko <digetx@gmail.com> wrote:
+> >>
+> >> All Tegra20 boards that have embedded Broadcom WiFi SDIO chip are affe=
+cted
+> >> by a problem where WiFi chip reports CCCR v1.10, while it should v1.20=
+.
+> >> In a result high-speed mode isn't enabled for the WiFi card and this
+> >> results in a malfunctioning SDIO communication.
+> >
+> > Does that also mean SDIO_SPEED_SHS bit is set when reading SDIO_CCCR_SP=
+EED?
+>
+> Yes, the SDIO_SPEED_SHS bit is set.
+>
+> >>  brcmfmac: brcmf_sdio_readframes: read 304 bytes from channel 1 failed=
+: -84
+> >>  brcmfmac: brcmf_sdio_rxfail: abort command, terminate frame, send NAK
+> >>
+> >> Downstream kernels are overriding card's CCCR info in SDHCI driver to =
+fix
+> >> the problem, let's do the same in upstream.
+> >>
+> >> The change is inspired by omap_hsmmc_init_card() of OMAP's HSMMC drive=
+r,
+> >> which overrides card's info for the TI wl1251 WiFi.
+> >
+> > This is a temporary solution and should be replaced by doing the DT
+> > parsing during
+> >
+> > So, yes, let's see if we can use a card quirk instead. That's the first=
+ option.
+> >
+> > A second option is simply to parse the DT subnode for a new DT
+> > property during mmc_sdio_init_card(). Along the lines of what we do
+> > for the broken-hpi DT binding for eMMC.
+>
+> Let's try the first option. My understanding is that the problem affects
+> only the specific model of the WiFi chip and it's not a board-specific
+> problem. I'll add Broadcom driver people to CC for the next version of
+> the patch, maybe they'll have something to say.
 
-[ Upstream commit 81c85ec15a1946f2e347ec0bf66936121eb97ce7 ]
+Okay, sounds reasonable. By looking at your latest attempt for a fix,
+I have two minor nitpicks, otherwise it looks good.
 
-When retrieveing CD (card detect) and WP (write protect)
-GPIO handles from the device tree, make sure to assign
-them active low by default unless the "cd-inverted" or
-"wp-inverted" properties are set. These properties mean
-that respective signal is active HIGH since the SDHCI
-specification stipulates that this kind of signals
-should be treated as active LOW.
+The nitpicks:
+I suggest to rename MMC_QUIRK_HIGH_SPEED_CARD to MMC_QUIRK_HIGH_SPEED
+and mmc_card_need_high_speed_toggle() to mmc_card_quirk_hs().
 
-If the twocell GPIO flag is also specified as active
-low, well that's nice and we will silently ignore the
-tautological specification.
-
-If however the GPIO line is specified as active low
-in the GPIO flasg cell and "cd-inverted" or "wp-inverted"
-is also specified, the latter takes precedence and we
-print a warning.
-
-The current effect on the MMC slot-gpio core are as
-follows:
-
-For CD GPIOs: no effect. The current code in
-mmc/core/host.c calls mmc_gpiod_request_cd() with
-the "override_active_level" argument set to true,
-which means that whatever the GPIO descriptor
-thinks about active low/high will be ignored, the
-core will use the MMC_CAP2_CD_ACTIVE_HIGH to keep
-track of this and reads the raw value from the
-GPIO descriptor, totally bypassing gpiolibs inversion
-semantics. I plan to clean this up at a later point
-passing the handling of inversion semantics over
-to gpiolib, so this patch prepares the ground for
-that.
-
-Fow WP GPIOs: this is probably fixing a bug, because
-the code in mmc/core/host.c calls mmc_gpiod_request_ro()
-with the "override_active_level" argument set to false,
-which means it will respect the inversion semantics of
-the gpiolib and ignore the MMC_CAP2_RO_ACTIVE_HIGH
-flag for everyone using this through device tree.
-However the code in host.c confusingly goes to great
-lengths setting up the MMC_CAP2_RO_ACTIVE_HIGH flag
-from the GPIO descriptor and by reading the "wp-inverted"
-property of the node. As far as I can tell this is all
-in vain and the inversion is broken: device trees that
-use "wp-inverted" do not work as intended, instead the
-only way to actually get inversion on a line is by
-setting the second cell flag to GPIO_ACTIVE_HIGH (which
-will be the default) or GPIO_ACTIVE_LOW if they want
-the proper MMC semantics. Presumably all device trees do
-this right but we need to parse and handle this properly.
-
-Cc: linux-mmc@vger.kernel.org
-Cc: linux-gpio@vger.kernel.org
-Cc: Bartosz Golaszewski <bgolaszewski@baylibre.com>
-Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
-Signed-off-by: Sasha Levin <sashal@kernel.org>
----
- drivers/gpio/gpiolib-of.c | 39 +++++++++++++++++++++++++++++++++++++++
- 1 file changed, 39 insertions(+)
-
-diff --git a/drivers/gpio/gpiolib-of.c b/drivers/gpio/gpiolib-of.c
-index e0f149bdf98ff..1147ad968fd75 100644
---- a/drivers/gpio/gpiolib-of.c
-+++ b/drivers/gpio/gpiolib-of.c
-@@ -60,6 +60,45 @@ static struct gpio_desc *of_xlate_and_get_gpiod_flags(struct gpio_chip *chip,
- static void of_gpio_flags_quirks(struct device_node *np,
- 				 enum of_gpio_flags *flags)
- {
-+	/*
-+	 * Handle MMC "cd-inverted" and "wp-inverted" semantics.
-+	 */
-+	if (IS_ENABLED(CONFIG_MMC)) {
-+		if (of_property_read_bool(np, "cd-gpios")) {
-+			if (of_property_read_bool(np, "cd-inverted")) {
-+				if (*flags & OF_GPIO_ACTIVE_LOW) {
-+					/* "cd-inverted" takes precedence */
-+					*flags &= ~OF_GPIO_ACTIVE_LOW;
-+					pr_warn("%s GPIO handle specifies CD active low - ignored\n",
-+						of_node_full_name(np));
-+				}
-+			} else {
-+				/*
-+				 * Active low is the default according to the
-+				 * SDHCI specification. If the GPIO handle
-+				 * specifies the same thing - good.
-+				 */
-+				*flags |= OF_GPIO_ACTIVE_LOW;
-+			}
-+		}
-+		if (of_property_read_bool(np, "wp-gpios")) {
-+			if (of_property_read_bool(np, "wp-inverted")) {
-+				/* "wp-inverted" takes precedence */
-+				if (*flags & OF_GPIO_ACTIVE_LOW) {
-+					*flags &= ~OF_GPIO_ACTIVE_LOW;
-+					pr_warn("%s GPIO handle specifies WP active low - ignored\n",
-+						of_node_full_name(np));
-+				}
-+			} else {
-+				/*
-+				 * Active low is the default according to the
-+				 * SDHCI specification. If the GPIO handle
-+				 * specifies the same thing - good.
-+				 */
-+				*flags |= OF_GPIO_ACTIVE_LOW;
-+			}
-+		}
-+	}
- 	/*
- 	 * Some GPIO fixed regulator quirks.
- 	 * Note that active low is the default.
--- 
-2.20.1
-
-
-
+Kind regards
+Uffe
