@@ -7,193 +7,112 @@ X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D03CEC2D0BF
-	for <linux-mmc@archiver.kernel.org>; Wed, 11 Dec 2019 02:41:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 17E10C43603
+	for <linux-mmc@archiver.kernel.org>; Wed, 11 Dec 2019 02:41:14 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id A6641205ED
-	for <linux-mmc@archiver.kernel.org>; Wed, 11 Dec 2019 02:41:11 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E41E2205ED
+	for <linux-mmc@archiver.kernel.org>; Wed, 11 Dec 2019 02:41:13 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=rere.qmqm.pl header.i=@rere.qmqm.pl header.b="cHE9lspk"
+	dkim=pass (2048-bit key) header.d=rere.qmqm.pl header.i=@rere.qmqm.pl header.b="auUvtfGJ"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727741AbfLKCk7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 10 Dec 2019 21:40:59 -0500
-Received: from rere.qmqm.pl ([91.227.64.183]:49101 "EHLO rere.qmqm.pl"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727302AbfLKCk6 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        id S1727542AbfLKCk6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
         Tue, 10 Dec 2019 21:40:58 -0500
+Received: from rere.qmqm.pl ([91.227.64.183]:26840 "EHLO rere.qmqm.pl"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1727189AbfLKCk5 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 10 Dec 2019 21:40:57 -0500
 Received: from remote.user (localhost [127.0.0.1])
-        by rere.qmqm.pl (Postfix) with ESMTPSA id 47Xh4m5tZ8zr8;
-        Wed, 11 Dec 2019 03:40:56 +0100 (CET)
+        by rere.qmqm.pl (Postfix) with ESMTPSA id 47Xh4l2v79z7s;
+        Wed, 11 Dec 2019 03:40:55 +0100 (CET)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=rere.qmqm.pl; s=1;
-        t=1576032056; bh=2BKpvhlj6oD5VT84hyCgsMikUKEOtDXi13iL2FgPGJ4=;
+        t=1576032055; bh=TKPCPDFv5Qe3CPun5dmwtJtrXF4wM2Qt+HifF/eYo60=;
         h=Date:In-Reply-To:References:From:Subject:To:Cc:From;
-        b=cHE9lspkR9HZMXFL8xn2Qdj9P411LmykVfs5OpZegEp5BbBwYxGkMZ0wksLlHaZFX
-         zBOq3Qj3tP6jFCqsm+uqVtS5daRIshXocBIn539m6OKmSN3yZfzbKEb9WHznMpWish
-         7hoEjP3beQuQKkIf6mIH+pVNZsa3cKF95qqJJfVXKNw7kYznSz4IfDf/aRw8qcJlqb
-         lAUianzK9QU1N8jhOHBTuG0um1uLv8lVcpCrt/TGppT+3dF6eXcEQF7gnUcCDjxgyR
-         b+buP9wKZ3B4dyygzn6MDq0a3YeLaR7YuUhB+34ArrdAv/3SBZvyq6yqKUlAmtSJll
-         Y3wmGT4CzROOQ==
+        b=auUvtfGJr21LSQhX4VAkNmqkhqfDzOFLhik6BEYW0mpwAr2d7yeWMfcjWtAj5gkSD
+         XUTxSeLg69K3j+/rBQuoR2/VQaLAPW1JFCFZlCvIg287eia1DBUX4QvEeGpzpBkRFe
+         3OF/S60j2sn8go1mU62aSxS0ljK5AUAhaQmwCs7DwEg5Y4SLvBIKX+R/WocQ281vf9
+         00hYEDeL7xGqK7LUZe6r1R6e6Gy8CkRuNupliL0aTirOKak4xRjzuaQDPLXoD/izAf
+         O4opS9U+4u0dfoDpH++LCIlIW9Nf6zOQYglHWPvkz9fZ9xSGFqYxprVJnAIbP34wZw
+         BJt08hNJr8pow==
 X-Virus-Status: Clean
 X-Virus-Scanned: clamav-milter 0.101.4 at mail
-Date:   Wed, 11 Dec 2019 03:40:56 +0100
-Message-Id: <db189b715596d63caf8c6a088bddc71dd69a879b.1576031637.git.mirq-linux@rere.qmqm.pl>
+Date:   Wed, 11 Dec 2019 03:40:55 +0100
+Message-Id: <7ce0338e01ad17fa5a227176813941b41a7c35c1.1576031637.git.mirq-linux@rere.qmqm.pl>
 In-Reply-To: <cover.1576031636.git.mirq-linux@rere.qmqm.pl>
 References: <cover.1576031636.git.mirq-linux@rere.qmqm.pl>
 From:   =?UTF-8?q?Micha=C5=82=20Miros=C5=82aw?= <mirq-linux@rere.qmqm.pl>
-Subject: [PATCH v2 3/4] mmc: rework cd-gpio handling
+Subject: [PATCH v2 1/4] gpio: add gpiod_toggle_active_low()
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 To:     linux-mmc@vger.kernel.org
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
         Linus Walleij <linus.walleij@linaro.org>,
+        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
         linux-gpio@vger.kernel.org, linux-kernel@vger.kernel.org,
-        Ulf Hansson <ulf.hansson@linaro.org>
+        Adrian Hunter <adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-There are a few places around the code that invert inverted and possibly
-inverted CD line. That's really confusing. Squash them all into one
-place in mmc_gpiod_request_cd(). MMC_CAP2_CD_ACTIVE_HIGH is used
-analogously to WP line: in GPIO mode it is used only at probe time to
-switch polarity, for native mode it is left as is.
+Add possibility to toggle active-low flag of a gpio descriptor. This is
+useful for compatibility code, where defaults are inverted vs DT gpio
+flags or the active-low flag is taken from elsewhere.
 
+Acked-by: Linus Walleij <linus.walleij@linaro.org>
 Signed-off-by: Michał Mirosław <mirq-linux@rere.qmqm.pl>
 ---
- drivers/gpio/gpiolib-of.c    | 17 -----------------
- drivers/mmc/core/host.c      | 21 ++++-----------------
- drivers/mmc/core/slot-gpio.c | 17 ++++++++---------
- 3 files changed, 12 insertions(+), 43 deletions(-)
+ drivers/gpio/gpiolib.c        | 11 +++++++++++
+ include/linux/gpio/consumer.h |  7 +++++++
+ 2 files changed, 18 insertions(+)
 
-diff --git a/drivers/gpio/gpiolib-of.c b/drivers/gpio/gpiolib-of.c
-index b0b77e52e261..8310da48ba01 100644
---- a/drivers/gpio/gpiolib-of.c
-+++ b/drivers/gpio/gpiolib-of.c
-@@ -104,23 +104,6 @@ static void of_gpio_flags_quirks(struct device_node *np,
- 				 enum of_gpio_flags *flags,
- 				 int index)
+diff --git a/drivers/gpio/gpiolib.c b/drivers/gpio/gpiolib.c
+index 9913886ede90..6130691e2047 100644
+--- a/drivers/gpio/gpiolib.c
++++ b/drivers/gpio/gpiolib.c
+@@ -3363,6 +3363,17 @@ int gpiod_is_active_low(const struct gpio_desc *desc)
+ }
+ EXPORT_SYMBOL_GPL(gpiod_is_active_low);
+ 
++/**
++ * gpiod_toggle_active_low - toggle whether a GPIO is active-low or not
++ * @desc: the gpio descriptor to change
++ */
++void gpiod_toggle_active_low(struct gpio_desc *desc)
++{
++	VALIDATE_DESC_VOID(desc);
++	change_bit(FLAG_ACTIVE_LOW, &desc->flags);
++}
++EXPORT_SYMBOL_GPL(gpiod_toggle_active_low);
++
+ /* I/O calls are only valid after configuration completed; the relevant
+  * "is this a valid GPIO" error checks should already have been done.
+  *
+diff --git a/include/linux/gpio/consumer.h b/include/linux/gpio/consumer.h
+index 5215fdba6b9a..bf2d017dd7b7 100644
+--- a/include/linux/gpio/consumer.h
++++ b/include/linux/gpio/consumer.h
+@@ -158,6 +158,7 @@ int gpiod_set_raw_array_value_cansleep(unsigned int array_size,
+ 
+ int gpiod_set_debounce(struct gpio_desc *desc, unsigned debounce);
+ int gpiod_set_transitory(struct gpio_desc *desc, bool transitory);
++void gpiod_toggle_active_low(struct gpio_desc *desc);
+ 
+ int gpiod_is_active_low(const struct gpio_desc *desc);
+ int gpiod_cansleep(const struct gpio_desc *desc);
+@@ -483,6 +484,12 @@ static inline int gpiod_set_transitory(struct gpio_desc *desc, bool transitory)
+ 	return -ENOSYS;
+ }
+ 
++static inline void gpiod_toggle_active_low(struct gpio_desc *desc)
++{
++	/* GPIO can never have been requested */
++	WARN_ON(desc);
++}
++
+ static inline int gpiod_is_active_low(const struct gpio_desc *desc)
  {
--	/*
--	 * Handle MMC "cd-inverted" and "wp-inverted" semantics.
--	 */
--	if (IS_ENABLED(CONFIG_MMC)) {
--		/*
--		 * Active low is the default according to the
--		 * SDHCI specification and the device tree
--		 * bindings. However the code in the current
--		 * kernel was written such that the phandle
--		 * flags were always respected, and "cd-inverted"
--		 * would invert the flag from the device phandle.
--		 */
--		if (!strcmp(propname, "cd-gpios")) {
--			if (of_property_read_bool(np, "cd-inverted"))
--				*flags ^= OF_GPIO_ACTIVE_LOW;
--		}
--	}
- 	/*
- 	 * Some GPIO fixed regulator quirks.
- 	 * Note that active low is the default.
-diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index b3484def0a8b..e655dc1b5b85 100644
---- a/drivers/mmc/core/host.c
-+++ b/drivers/mmc/core/host.c
-@@ -175,7 +175,6 @@ int mmc_of_parse(struct mmc_host *host)
- 	struct device *dev = host->parent;
- 	u32 bus_width, drv_type, cd_debounce_delay_ms;
- 	int ret;
--	bool cd_cap_invert, cd_gpio_invert = false;
- 
- 	if (!dev || !dev_fwnode(dev))
- 		return 0;
-@@ -218,10 +217,12 @@ int mmc_of_parse(struct mmc_host *host)
- 	 */
- 
- 	/* Parse Card Detection */
-+
- 	if (device_property_read_bool(dev, "non-removable")) {
- 		host->caps |= MMC_CAP_NONREMOVABLE;
- 	} else {
--		cd_cap_invert = device_property_read_bool(dev, "cd-inverted");
-+		if (device_property_read_bool(dev, "cd-inverted"))
-+			host->caps2 |= MMC_CAP2_CD_ACTIVE_HIGH;
- 
- 		if (device_property_read_u32(dev, "cd-debounce-delay-ms",
- 					     &cd_debounce_delay_ms))
-@@ -232,25 +233,11 @@ int mmc_of_parse(struct mmc_host *host)
- 
- 		ret = mmc_gpiod_request_cd(host, "cd", 0, false,
- 					   cd_debounce_delay_ms * 1000,
--					   &cd_gpio_invert);
-+					   NULL);
- 		if (!ret)
- 			dev_info(host->parent, "Got CD GPIO\n");
- 		else if (ret != -ENOENT && ret != -ENOSYS)
- 			return ret;
--
--		/*
--		 * There are two ways to flag that the CD line is inverted:
--		 * through the cd-inverted flag and by the GPIO line itself
--		 * being inverted from the GPIO subsystem. This is a leftover
--		 * from the times when the GPIO subsystem did not make it
--		 * possible to flag a line as inverted.
--		 *
--		 * If the capability on the host AND the GPIO line are
--		 * both inverted, the end result is that the CD line is
--		 * not inverted.
--		 */
--		if (cd_cap_invert ^ cd_gpio_invert)
--			host->caps2 |= MMC_CAP2_CD_ACTIVE_HIGH;
- 	}
- 
- 	/* Parse Write Protection */
-diff --git a/drivers/mmc/core/slot-gpio.c b/drivers/mmc/core/slot-gpio.c
-index 582ec3d720f6..303e825ecfd8 100644
---- a/drivers/mmc/core/slot-gpio.c
-+++ b/drivers/mmc/core/slot-gpio.c
-@@ -19,7 +19,6 @@
- struct mmc_gpio {
- 	struct gpio_desc *ro_gpio;
- 	struct gpio_desc *cd_gpio;
--	bool override_cd_active_level;
- 	irqreturn_t (*cd_gpio_isr)(int irq, void *dev_id);
- 	char *ro_label;
- 	char *cd_label;
-@@ -80,13 +79,6 @@ int mmc_gpio_get_cd(struct mmc_host *host)
- 		return -ENOSYS;
- 
- 	cansleep = gpiod_cansleep(ctx->cd_gpio);
--	if (ctx->override_cd_active_level) {
--		int value = cansleep ?
--				gpiod_get_raw_value_cansleep(ctx->cd_gpio) :
--				gpiod_get_raw_value(ctx->cd_gpio);
--		return !value ^ !!(host->caps2 & MMC_CAP2_CD_ACTIVE_HIGH);
--	}
--
- 	return cansleep ?
- 		gpiod_get_value_cansleep(ctx->cd_gpio) :
- 		gpiod_get_value(ctx->cd_gpio);
-@@ -194,10 +186,17 @@ int mmc_gpiod_request_cd(struct mmc_host *host, const char *con_id,
- 			ctx->cd_debounce_delay_ms = debounce / 1000;
- 	}
- 
-+	/* override forces default (active-low) polarity ... */
-+	if (override_active_level && !gpiod_is_active_low(desc))
-+		gpiod_toggle_active_low(desc);
-+
-+	/* ... or active-high */
-+	if (host->caps2 & MMC_CAP2_CD_ACTIVE_HIGH)
-+		gpiod_toggle_active_low(desc);
-+
- 	if (gpio_invert)
- 		*gpio_invert = !gpiod_is_active_low(desc);
- 
--	ctx->override_cd_active_level = override_active_level;
- 	ctx->cd_gpio = desc;
- 
- 	return 0;
+ 	/* GPIO can never have been requested */
 -- 
 2.20.1
 
