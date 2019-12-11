@@ -2,135 +2,203 @@ Return-Path: <SRS0=rVnL=2B=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.7 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	FORGED_MUA_MOZILLA,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 40793C43603
-	for <linux-mmc@archiver.kernel.org>; Wed, 11 Dec 2019 08:49:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 14804C2D0C6
+	for <linux-mmc@archiver.kernel.org>; Wed, 11 Dec 2019 10:22:34 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 17AC922464
-	for <linux-mmc@archiver.kernel.org>; Wed, 11 Dec 2019 08:49:23 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id DD65B214D8
+	for <linux-mmc@archiver.kernel.org>; Wed, 11 Dec 2019 10:22:33 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="itSLkAue"
+	dkim=fail reason="key not found in DNS" (0-bit key) header.d=codeaurora.org header.i=@codeaurora.org header.b="pBWojAKI";
+	dkim=pass (1024-bit key) header.d=amazonses.com header.i=@amazonses.com header.b="WZ9kUw6y"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728376AbfLKItW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 11 Dec 2019 03:49:22 -0500
-Received: from mail-vs1-f68.google.com ([209.85.217.68]:43859 "EHLO
-        mail-vs1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727829AbfLKItV (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Dec 2019 03:49:21 -0500
-Received: by mail-vs1-f68.google.com with SMTP id x4so15174384vsx.10
-        for <linux-mmc@vger.kernel.org>; Wed, 11 Dec 2019 00:49:21 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=Ozb1AXUQbSxxmXr/qW2iWv6krsEgASVQKk8kJLaIj6I=;
-        b=itSLkAuepLnnXfXT3q4sqUphN7IVDBuCIFOOJktfIYvQ6qbcEYsoYgUP6xTut12JV4
-         fM5MUNeMyYHgBaRNQ8jpsldbdNd/V0ZfT8Q2fCdIm/zfd67fBhZXA1P6MXV5OQ5c7nuk
-         coLkTiY1s1eII5GaAAJHGT5wR4pAV8ns4PEgLOVoLROLcpclSTFOcCZNNyjyJYzpdm+W
-         L71sWmfcnv+K6obBIkRIA4B+K8Xs/CgYrj+zKxPcUZNQ/I7CjSa0Q2B+Sq3yrPpHFP1w
-         rYvB1/9kHam8y1bdsukyqqh64LRrw55hKdGyriuakB4uVX/Mn6xl1IwMkWkFeUpj+uGr
-         ej/g==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=Ozb1AXUQbSxxmXr/qW2iWv6krsEgASVQKk8kJLaIj6I=;
-        b=mgAskWuOR+vR9l4MA/e6OnW0uGoi+TwGQEN1HzRu4Amhc3VFqg806KvUWiLn/0sq/N
-         lAfaBAeUHY7/hr0JzQ8vAusW9VYnAwDNXObVp2JSD5TDLff0+TZVsFuaJEVVAwocJlmL
-         pvA1BNgdCITZBLGmI/2kkos1HBLvSOzpbBs9q6D47Oo428cRqfwdTSEK5oHG8mq1vGl+
-         1CwQ57myIyol329KkBW1Hw+JLavqqsHEJ7avOygWKdn/a7CYtoBonNW4i1Lac/b8l3Ow
-         8A4aKaezOPjBE4dw2QtrcOh1OboQchS8f0OKMtO67Fv0VBkFhZ+zQ5CIHrB0C1YuPGFY
-         f7DQ==
-X-Gm-Message-State: APjAAAXIpr3E2asqebvrJDlwNfitllvMXJ355nHPQLSUsFp5m+GW3S0m
-        SKe9xJ9vD96zo2vKJ3lkYmAnFBNheDDMHcHrTzlNhQ==
-X-Google-Smtp-Source: APXvYqyY1AGsQYlb3OCcajmL+tUEyHfP+9OR0ha/5jNG4MURWI9aZtpoUad6e4Zvvrr5fz3z/iRUkZaPPOQHpCLCBVg=
-X-Received: by 2002:a67:b649:: with SMTP id e9mr1525437vsm.34.1576054160719;
- Wed, 11 Dec 2019 00:49:20 -0800 (PST)
+        id S1728656AbfLKKWd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 11 Dec 2019 05:22:33 -0500
+Received: from a27-10.smtp-out.us-west-2.amazonses.com ([54.240.27.10]:33204
+        "EHLO a27-10.smtp-out.us-west-2.amazonses.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1727469AbfLKKWd (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Dec 2019 05:22:33 -0500
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/simple;
+        s=zsmsymrwgfyinv5wlfyidntwsjeeldzt; d=codeaurora.org; t=1576059751;
+        h=Subject:To:Cc:References:From:Message-ID:Date:MIME-Version:In-Reply-To:Content-Type:Content-Transfer-Encoding;
+        bh=vwcJjPcAeYtU95VIZmYe302qrrM4P5xyjn2TgM8BR0w=;
+        b=pBWojAKID6t1MT70uDdU6d7tIitE2SnvRIfCmEN2GdvxaBTKywbbXFp/sUsI2xVP
+        rv58o+xVcK56TL8bN0QJtZv8Td2nM6y4uCEFxjt1+fsp4d68G/heXw1uG+i6glC9K2D
+        6N6xwgeRMUlJXyFew9lmSKoEEWtUjRMXG1LlnolA=
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/simple;
+        s=gdwg2y3kokkkj5a55z2ilkup5wp5hhxx; d=amazonses.com; t=1576059751;
+        h=Subject:To:Cc:References:From:Message-ID:Date:MIME-Version:In-Reply-To:Content-Type:Content-Transfer-Encoding:Feedback-ID;
+        bh=vwcJjPcAeYtU95VIZmYe302qrrM4P5xyjn2TgM8BR0w=;
+        b=WZ9kUw6yPlA8q5sNqqTuBCF2d6Gge6HgabHEng10vUZQQbJLA0pDwWbCGjTlIEXe
+        EGa0ubI53SToeEgmUAXaKZx+IdjTKkbai2KzTuBF21kmUe6q9PPb9mj9v4BjTz0xVkn
+        UxOl73zgLR1JfN7Xnh3ddP2pVm1UJ3PJRue2SnqA=
+DMARC-Filter: OpenDMARC Filter v1.3.2 smtp.codeaurora.org BB6CBC36ED5
+Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
+Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=none smtp.mailfrom=vbadigan@codeaurora.org
+Subject: Re: [PATCH] mmc: sdhci-msm: Correct the offset and value for
+ DDR_CONFIG register
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        Asutosh Das <asutoshd@codeaurora.org>,
+        Sahitya Tummala <stummala@codeaurora.org>,
+        Sayali Lokhande <sayalil@codeaurora.org>, cang@codeaurora.org,
+        Ram Prakash Gupta <rampraka@codeaurora.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-arm-msm <linux-arm-msm@vger.kernel.org>
+References: <0101016ea738eb52-8c362755-205a-4383-9181-1a867e82eeed-000000@us-west-2.amazonses.com>
+ <CAPDyKFqdFc1RMNu38d7b+s2Bpr49v-w18frGsPSxsYf924HLWg@mail.gmail.com>
+From:   Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+Message-ID: <0101016ef47b4d25-49791932-586b-456e-b9a7-6f9a6f95babf-000000@us-west-2.amazonses.com>
+Date:   Wed, 11 Dec 2019 10:22:31 +0000
+User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:60.0) Gecko/20100101
+ Thunderbird/60.9.1
 MIME-Version: 1.0
-References: <20191202222853.28783-1-linus.walleij@linaro.org> <CAPDyKFrt8+NJSDzYuMjVdeo2xi45+=q8NU=6VLc1isvLxchckw@mail.gmail.com>
-In-Reply-To: <CAPDyKFrt8+NJSDzYuMjVdeo2xi45+=q8NU=6VLc1isvLxchckw@mail.gmail.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 11 Dec 2019 09:48:44 +0100
-Message-ID: <CAPDyKFpSrQY_0V0DM24Bamte5_8XqtAL_8J6SkwBC1-B2aNuvA@mail.gmail.com>
-Subject: Re: [PATCH v4] mmc: mmci: Support odd block sizes for ux500v2 and
- qcom variant
-To:     Linus Walleij <linus.walleij@linaro.org>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Ludovic Barre <ludovic.barre@st.com>,
-        Brian Masney <masneyb@onstation.org>,
-        Stephan Gerhold <stephan@gerhold.net>,
-        Niklas Cassel <niklas.cassel@linaro.org>,
-        Russell King <rmk+kernel@armlinux.org.uk>,
-        Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-Content-Type: text/plain; charset="UTF-8"
+In-Reply-To: <CAPDyKFqdFc1RMNu38d7b+s2Bpr49v-w18frGsPSxsYf924HLWg@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 8bit
+Content-Language: en-US
+X-SES-Outgoing: 2019.12.11-54.240.27.10
+Feedback-ID: 1.us-west-2.CZuq2qbDmUIuT3qdvXlRHZZCpfZqZ4GtG9v3VKgRyF0=:AmazonSES
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 11 Dec 2019 at 09:47, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->
-> On Mon, 2 Dec 2019 at 23:28, Linus Walleij <linus.walleij@linaro.org> wrote:
-> >
-> > For the ux500v2 variant of the PL18x block, odd block sizes
-> > are supported. This is necessary to support some SDIO
-> > transfers. This also affects the QCOM MMCI variant and the
-> > ST micro variant.
-> >
-> > For Ux500 an additional quirk only allowing DMA on blocks
-> > that are a power of two is needed. This might be a bug in
-> > the DMA engine (DMA40) or the MMCI or in the interconnect,
-> > but the most likely is the MMCI, as transfers of these
-> > sizes work fine for other devices using the same DMA
-> > engine. DMA works fine also with SDIO as long as the
-> > blocksize is a power of 2.
-> >
-> > This patch has proven necessary for enabling SDIO for WLAN on
-> > PostmarketOS-based Ux500 platforms.
-> >
-> > What we managed to test in practice is Broadcom WiFi over
-> > SDIO on the Ux500 based Samsung GT-I8190 and GT-S7710.
-> > This WiFi chip, BCM4334 works fine after the patch.
-> >
-> > Before this patch:
-> >
-> > brcmfmac: brcmf_fw_alloc_request: using brcm/brcmfmac4334-sdio
-> >           for chip BCM4334/3
-> > mmci-pl18x 80118000.sdi1_per2: unsupported block size (60 bytes)
-> > brcmfmac: brcmf_sdiod_ramrw: membytes transfer failed
-> > brcmfmac: brcmf_sdio_download_code_file: error -22 on writing
-> >           434236 membytes at 0x00000000
-> > brcmfmac: brcmf_sdio_download_firmware: dongle image file download
-> >           failed
-> >
-> > After this patch:
-> >
-> > brcmfmac: brcmf_c_preinit_dcmds: Firmware: BCM4334/3 wl0:
-> >           Nov 21 2012 00:21:28 version 6.10.58.813 (B2) FWID 01-0
-> >
-> > Bringing up networks, discovering networks with "iw dev wlan0 scan"
-> > and connecting works fine from this point.
-> >
-> > This patch is inspired by Ulf Hansson's patch
-> > http://www.spinics.net/lists/linux-mmc/msg12160.html
-> >
-> > As the DMA engines on these platforms may now get block sizes
-> > they were not used to before, make sure to also respect if
-> > the DMA engine says "no" to a transfer.
-> >
-> > Make a drive-by fix for datactrl_blocksz, misspelled.
->
-> Alright, I think this approach makes sense.
->
-> Especially, trying to make some changes in mmci_pio_read|write() that
-> we can trigger/test doesn't make sense.
 
-/s/can/can't
+On 12/10/2019 3:21 PM, Ulf Hansson wrote:
+> On Tue, 26 Nov 2019 at 11:19, Veerabhadrarao Badiganti
+> <vbadigan@codeaurora.org> wrote:
+>> The DDR_CONFIG register offset got updated after a specific
+>> minor version of sdcc V4. This offset change has not been properly
+>> taken care of while updating register changes for sdcc V5.
+>>
+>> Correcting proper offset for this register.
+>> Also updating this register value to reflect the recommended RCLK
+>> delay.
+>>
+>> Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+> I have applied this for fixes, however it seems like this should also
+> be tagged for stable, right?
 
-[...]
+  Thank you. Yes, I agree.
 
-Kind regards
-Uffe
+>
+> Is there a specific commit this fixes or should we just find the
+> version it applies to?
+
+It fixes the bug introduced by commit:
+
+f153588 (mmc: sdhci-msm: Define new Register address map)
+
+>
+> Kind regards
+> Uffe
+>
+>
+>
+>> ---
+>>   drivers/mmc/host/sdhci-msm.c | 28 +++++++++++++++++++---------
+>>   1 file changed, 19 insertions(+), 9 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+>> index b75c82d..3d0bb5e 100644
+>> --- a/drivers/mmc/host/sdhci-msm.c
+>> +++ b/drivers/mmc/host/sdhci-msm.c
+>> @@ -99,7 +99,7 @@
+>>
+>>   #define CORE_PWRSAVE_DLL       BIT(3)
+>>
+>> -#define DDR_CONFIG_POR_VAL     0x80040853
+>> +#define DDR_CONFIG_POR_VAL     0x80040873
+>>
+>>
+>>   #define INVALID_TUNING_PHASE   -1
+>> @@ -148,8 +148,9 @@ struct sdhci_msm_offset {
+>>          u32 core_ddr_200_cfg;
+>>          u32 core_vendor_spec3;
+>>          u32 core_dll_config_2;
+>> +       u32 core_dll_config_3;
+>> +       u32 core_ddr_config_old; /* Applicable to sdcc minor ver < 0x49 */
+>>          u32 core_ddr_config;
+>> -       u32 core_ddr_config_2;
+>>   };
+>>
+>>   static const struct sdhci_msm_offset sdhci_msm_v5_offset = {
+>> @@ -177,8 +178,8 @@ struct sdhci_msm_offset {
+>>          .core_ddr_200_cfg = 0x224,
+>>          .core_vendor_spec3 = 0x250,
+>>          .core_dll_config_2 = 0x254,
+>> -       .core_ddr_config = 0x258,
+>> -       .core_ddr_config_2 = 0x25c,
+>> +       .core_dll_config_3 = 0x258,
+>> +       .core_ddr_config = 0x25c,
+>>   };
+>>
+>>   static const struct sdhci_msm_offset sdhci_msm_mci_offset = {
+>> @@ -207,8 +208,8 @@ struct sdhci_msm_offset {
+>>          .core_ddr_200_cfg = 0x184,
+>>          .core_vendor_spec3 = 0x1b0,
+>>          .core_dll_config_2 = 0x1b4,
+>> -       .core_ddr_config = 0x1b8,
+>> -       .core_ddr_config_2 = 0x1bc,
+>> +       .core_ddr_config_old = 0x1b8,
+>> +       .core_ddr_config = 0x1bc,
+>>   };
+>>
+>>   struct sdhci_msm_variant_ops {
+>> @@ -253,6 +254,7 @@ struct sdhci_msm_host {
+>>          const struct sdhci_msm_offset *offset;
+>>          bool use_cdr;
+>>          u32 transfer_mode;
+>> +       bool updated_ddr_cfg;
+>>   };
+>>
+>>   static const struct sdhci_msm_offset *sdhci_priv_msm_offset(struct sdhci_host *host)
+>> @@ -924,8 +926,10 @@ static int sdhci_msm_cdclp533_calibration(struct sdhci_host *host)
+>>   static int sdhci_msm_cm_dll_sdc4_calibration(struct sdhci_host *host)
+>>   {
+>>          struct mmc_host *mmc = host->mmc;
+>> -       u32 dll_status, config;
+>> +       u32 dll_status, config, ddr_cfg_offset;
+>>          int ret;
+>> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>> +       struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+>>          const struct sdhci_msm_offset *msm_offset =
+>>                                          sdhci_priv_msm_offset(host);
+>>
+>> @@ -938,8 +942,11 @@ static int sdhci_msm_cm_dll_sdc4_calibration(struct sdhci_host *host)
+>>           * bootloaders. In the future, if this changes, then the desired
+>>           * values will need to be programmed appropriately.
+>>           */
+>> -       writel_relaxed(DDR_CONFIG_POR_VAL, host->ioaddr +
+>> -                       msm_offset->core_ddr_config);
+>> +       if (msm_host->updated_ddr_cfg)
+>> +               ddr_cfg_offset = msm_offset->core_ddr_config;
+>> +       else
+>> +               ddr_cfg_offset = msm_offset->core_ddr_config_old;
+>> +       writel_relaxed(DDR_CONFIG_POR_VAL, host->ioaddr + ddr_cfg_offset);
+>>
+>>          if (mmc->ios.enhanced_strobe) {
+>>                  config = readl_relaxed(host->ioaddr +
+>> @@ -1899,6 +1906,9 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+>>                                  msm_offset->core_vendor_spec_capabilities0);
+>>          }
+>>
+>> +       if (core_major == 1 && core_minor >= 0x49)
+>> +               msm_host->updated_ddr_cfg = true;
+>> +
+>>          /*
+>>           * Power on reset state may trigger power irq if previous status of
+>>           * PWRCTL was either BUS_ON or IO_HIGH_V. So before enabling pwr irq
+>> --
+>> Qualcomm India Private Limited, on behalf of Qualcomm Innovation Center, Inc., is a member of Code Aurora Forum, a Linux Foundation Collaborative Project
+
+Thanks,
+
+Veera
+
