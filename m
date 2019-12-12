@@ -2,276 +2,196 @@ Return-Path: <SRS0=OcmH=2C=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-0.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 43DC7C3F68F
-	for <linux-mmc@archiver.kernel.org>; Thu, 12 Dec 2019 15:00:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4507CC43603
+	for <linux-mmc@archiver.kernel.org>; Thu, 12 Dec 2019 15:08:03 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 0E74A206C3
-	for <linux-mmc@archiver.kernel.org>; Thu, 12 Dec 2019 15:00:18 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0D6DA2067C
+	for <linux-mmc@archiver.kernel.org>; Thu, 12 Dec 2019 15:08:03 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="GUCC284o"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="pkqrboVt"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728624AbfLLPAR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 12 Dec 2019 10:00:17 -0500
-Received: from userp2130.oracle.com ([156.151.31.86]:32934 "EHLO
-        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728605AbfLLPAR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Dec 2019 10:00:17 -0500
-Received: from pps.filterd (userp2130.oracle.com [127.0.0.1])
-        by userp2130.oracle.com (8.16.0.27/8.16.0.27) with SMTP id xBCEsM2Z074246;
-        Thu, 12 Dec 2019 15:00:14 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=subject : to : cc :
- references : from : message-id : date : mime-version : in-reply-to :
- content-type : content-transfer-encoding; s=corp-2019-08-05;
- bh=NP5r1uMexMX/0I+0uQ0RAMkaehg9mAbXkjByjTq4ouQ=;
- b=GUCC284oB1Fb0zDQ1PMSPXY5CmjIPMT0+5VUTr5IBqvcwD1v+juRPd4Tkndi4ZBjU8Kp
- YtMNk1bAhrSI4rjdzzNFtxxXbw1cxxTn5ZhD4OXtOt2MNxA4UiMDqaWiod3ztqdYXIoR
- N3Satv1O5MtLudzop0FxsndLCUcGJnc/ZXorRtN9KEA5rqIDX2LIZkm5QCooT8EKDBkd
- 1ZWF6k+4oLnzo1HYCxVLX96LrGExZyrAYYiM4S5LgGgrdkiRRWpD8OUl70n4v5PM4Auy
- Ij+N61VsP3sZS4YtHrEjHB189QyKkwrNYWlQzuOVDe7a7ABqcaXMCM8/tzCkr6vaZHEU Xg== 
-Received: from aserp3020.oracle.com (aserp3020.oracle.com [141.146.126.70])
-        by userp2130.oracle.com with ESMTP id 2wrw4ngd3b-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Thu, 12 Dec 2019 15:00:14 +0000
-Received: from pps.filterd (aserp3020.oracle.com [127.0.0.1])
-        by aserp3020.oracle.com (8.16.0.27/8.16.0.27) with SMTP id xBCEvvT6096399;
-        Thu, 12 Dec 2019 15:00:13 GMT
-Received: from userv0121.oracle.com (userv0121.oracle.com [156.151.31.72])
-        by aserp3020.oracle.com with ESMTP id 2wumvywfe8-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Thu, 12 Dec 2019 15:00:12 +0000
-Received: from abhmp0001.oracle.com (abhmp0001.oracle.com [141.146.116.7])
-        by userv0121.oracle.com (8.14.4/8.13.8) with ESMTP id xBCF0A7f029533;
-        Thu, 12 Dec 2019 15:00:11 GMT
-Received: from [10.135.79.145] (/10.135.79.145)
-        by default (Oracle Beehive Gateway v4.0)
-        with ESMTP ; Thu, 12 Dec 2019 07:00:10 -0800
-Subject: Re: mmc-utils changes for Erase commands.
-To:     Avri Altman <Avri.Altman@wdc.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc:     "chrisball@gmail.com" <chrisball@gmail.com>,
-        Nachi Nachiappan <nachi.nachiappan@oracle.com>
-References: <702f7830-5477-8024-4716-240e263375be@oracle.com>
- <MN2PR04MB69914177DD63B9DB59EDDFE7FC550@MN2PR04MB6991.namprd04.prod.outlook.com>
-From:   Kimito Sakata <kimito.sakata@oracle.com>
-Organization: Oracle Corporation
-Message-ID: <a02eca75-302d-1fd7-fd9d-389cd8861cff@oracle.com>
-Date:   Thu, 12 Dec 2019 08:00:05 -0700
-User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:60.0) Gecko/20100101
- Thunderbird/60.9.1
+        id S1728818AbfLLPIC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 12 Dec 2019 10:08:02 -0500
+Received: from mail-vs1-f67.google.com ([209.85.217.67]:36106 "EHLO
+        mail-vs1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728767AbfLLPIC (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Dec 2019 10:08:02 -0500
+Received: by mail-vs1-f67.google.com with SMTP id m5so1793257vsj.3
+        for <linux-mmc@vger.kernel.org>; Thu, 12 Dec 2019 07:08:01 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc:content-transfer-encoding;
+        bh=zbYuLohJ6uz9IV3uB+nuAd8APjXTFVTSFGSirgS84Fw=;
+        b=pkqrboVtNyI5GfSeksmn9z5PnU5TgHPwW8EtQ28nj33hzudbVH9SuoYaMsPTPRIgK5
+         Eqp/3oIW6uUE4++T9Mj7TzjbQVgb7UC+hw4/pxWH8PYZ5u0kbc6O8eVmn//rz5aTQjKV
+         LvnklEtIK4gpufnMuZelStusOrqeQFUhrVcDtUa2c5qB/zC2el+WhNR1eOvWGcC9SION
+         Hk0ue7RAmyWIELLCOGkDVdtEF4DVFtZUBK5v2mxCV3MXD6tPUmvejYAdc7Q4wp3f42D3
+         a3nwTSWD+upAi+wOj1E3pl5atpf7VUwWRmypPWUiCHH8mQFqEOqg/0K5HZcYFxqA92a2
+         4XyA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=zbYuLohJ6uz9IV3uB+nuAd8APjXTFVTSFGSirgS84Fw=;
+        b=GKTHNs1kXx7RxejkIajaj5FYzWZHs4fGoRM4OVHdZ0RlKH19YeVVY5Lbo+1kKrDl3S
+         ysSczWYUURZUdTcynqomnjFTWcf8DGHtJ60oe7s4W7tNA/5/QruLb04nUxZ63YOTOn1x
+         GShUQUXt/+eVMDmmBZFmr4FRDAg9lV/ceb9Sgs/Jp9qcHk7/Jct7NJMSFJ0Dx6NfcjiO
+         kNk1Inp8a2YRK+yEh5s3MNlfXOv87cmSvzhQu1Tn5m7wFWVccPj66tchWVrRSiS42d9W
+         jsNJtQFb4H/PDozKvEuHiwrOtBgj+1C37imI5JuRxGAKKykolnVvUEtGeCTWDiOifkyz
+         2gyA==
+X-Gm-Message-State: APjAAAUWvCYXjIRBLnBOmEdb4JYqO5v5w1ABnGJLLFjR9ceKe6kHXtiI
+        Sn85rS5ZrGVXjc7Q/P0nJfte/frR04KR2s+TyfqdDA==
+X-Google-Smtp-Source: APXvYqw8Cxw8goN18pz+XIVG0ArSx5rkSvWM5IzHtNml4ttcHm9tifgGxLAx++YkwezG41U68dvM6EO/SuWVRkgPtZ0=
+X-Received: by 2002:a67:b649:: with SMTP id e9mr7320111vsm.34.1576163280703;
+ Thu, 12 Dec 2019 07:08:00 -0800 (PST)
 MIME-Version: 1.0
-In-Reply-To: <MN2PR04MB69914177DD63B9DB59EDDFE7FC550@MN2PR04MB6991.namprd04.prod.outlook.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
-Content-Language: en-US
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9468 signatures=668685
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 suspectscore=0 malwarescore=0
- phishscore=0 bulkscore=0 spamscore=0 mlxscore=0 mlxlogscore=999
- adultscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.0.1-1911140001 definitions=main-1912120115
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9468 signatures=668685
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 priorityscore=1501 malwarescore=0
- suspectscore=0 phishscore=0 bulkscore=0 spamscore=0 clxscore=1011
- lowpriorityscore=0 mlxscore=0 impostorscore=0 mlxlogscore=999 adultscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.0.1-1911140001
- definitions=main-1912120115
+References: <20191210014011.21987-1-digetx@gmail.com> <CAPDyKFpMe09PNQqinvvidF+wfASx2nuvgf7=Hx5+cGni8pdcRA@mail.gmail.com>
+ <28045442-6a1c-1e0b-0dfe-c36fa9de149a@gmail.com> <CAPDyKFpWO_McZEoefX1T=SE=RYm_GU3S+LgYZrgJY_SJgv7egA@mail.gmail.com>
+ <44f99e56-468e-c3f9-3785-73c2cf8ba118@gmail.com> <d4933cb1-d2c1-8055-e0f4-f6fcbe9973bc@gmail.com>
+In-Reply-To: <d4933cb1-d2c1-8055-e0f4-f6fcbe9973bc@gmail.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Thu, 12 Dec 2019 16:07:24 +0100
+Message-ID: <CAPDyKFq26Wcd9f3VJ1afxv9TVDJQu4wi+yLS-4Pi1bYnFLyWsg@mail.gmail.com>
+Subject: Re: [PATCH v1] sdhci: tegra: Add workaround for Broadcom WiFi
+To:     Dmitry Osipenko <digetx@gmail.com>
+Cc:     Thierry Reding <thierry.reding@gmail.com>,
+        Jonathan Hunter <jonathanh@nvidia.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        linux-tegra <linux-tegra@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Avri
-
-Sorry new to this. Is there a doc on the "format" I can reference to?
-
-Kimito
-
-On 12/12/2019 6:43 AM, Avri Altman wrote:
-> Please send your patch in the appropriate format,
-> So it can be reviewed.
+On Thu, 12 Dec 2019 at 15:23, Dmitry Osipenko <digetx@gmail.com> wrote:
 >
-> Thanks,
-> Avri
+> 11.12.2019 19:29, Dmitry Osipenko =D0=BF=D0=B8=D1=88=D0=B5=D1=82:
+> > 11.12.2019 19:10, Ulf Hansson =D0=BF=D0=B8=D1=88=D0=B5=D1=82:
+> >> On Wed, 11 Dec 2019 at 16:46, Dmitry Osipenko <digetx@gmail.com> wrote=
+:
+> >>>
+> >>> Hello Ulf,
+> >>>
+> >>> 11.12.2019 11:11, Ulf Hansson =D0=BF=D0=B8=D1=88=D0=B5=D1=82:
+> >>>> On Tue, 10 Dec 2019 at 02:40, Dmitry Osipenko <digetx@gmail.com> wro=
+te:
+> >>>>>
+> >>>>> All Tegra20 boards that have embedded Broadcom WiFi SDIO chip are a=
+ffected
+> >>>>> by a problem where WiFi chip reports CCCR v1.10, while it should v1=
+.20.
+> >>>>> In a result high-speed mode isn't enabled for the WiFi card and thi=
+s
+> >>>>> results in a malfunctioning SDIO communication.
+> >>>>
+> >>>> Does that also mean SDIO_SPEED_SHS bit is set when reading SDIO_CCCR=
+_SPEED?
+> >>>
+> >>> Yes, the SDIO_SPEED_SHS bit is set.
+> >>>
+> >>>>>  brcmfmac: brcmf_sdio_readframes: read 304 bytes from channel 1 fai=
+led: -84
+> >>>>>  brcmfmac: brcmf_sdio_rxfail: abort command, terminate frame, send =
+NAK
+> >>>>>
+> >>>>> Downstream kernels are overriding card's CCCR info in SDHCI driver =
+to fix
+> >>>>> the problem, let's do the same in upstream.
+> >>>>>
+> >>>>> The change is inspired by omap_hsmmc_init_card() of OMAP's HSMMC dr=
+iver,
+> >>>>> which overrides card's info for the TI wl1251 WiFi.
+> >>>>
+> >>>> This is a temporary solution and should be replaced by doing the DT
+> >>>> parsing during
+> >>>>
+> >>>> So, yes, let's see if we can use a card quirk instead. That's the fi=
+rst option.
+> >>>>
+> >>>> A second option is simply to parse the DT subnode for a new DT
+> >>>> property during mmc_sdio_init_card(). Along the lines of what we do
+> >>>> for the broken-hpi DT binding for eMMC.
+> >>>
+> >>> Let's try the first option. My understanding is that the problem affe=
+cts
+> >>> only the specific model of the WiFi chip and it's not a board-specifi=
+c
+> >>> problem. I'll add Broadcom driver people to CC for the next version o=
+f
+> >>> the patch, maybe they'll have something to say.
+> >>
+> >> Okay, sounds reasonable. By looking at your latest attempt for a fix,
+> >> I have two minor nitpicks, otherwise it looks good.
+> >>
+> >> The nitpicks:
+> >> I suggest to rename MMC_QUIRK_HIGH_SPEED_CARD to MMC_QUIRK_HIGH_SPEED
+> >> and mmc_card_need_high_speed_toggle() to mmc_card_quirk_hs().
+> >
+> > I'll take it into account, thanks.
 >
->>
->> mmc.h
->> 36a37,45
->>   > #define MMC_ERASE_GROUP_START   35    /* ac   [31:0] data addr   R1  */
->>   > #define MMC_ERASE_GROUP_END     36    /* ac   [31:0] data addr   R1  */
->>   > #define MMC_ERASE               38    /* ac   [31] Secure request
->>   >                                               [30:16] set to 0  >                                               [15] Force
->> Garbage Collect request4  >                                               [14:2] set to 0
->>>                                                 [1] Discard Enable  >                                               [0]
->> Identify Write Blocks for Erase (or TRIM Enable)  > R1b */
->>
->> mmc_cmds.h
->> 33a34
->>   > int do_erase(int nargs, char **argv);
->>
->> mmc_cmds.c
->> 226a227,291
->>   > int erase(int fd, __u32 argin, __u32 start, __u32 end)  > {  >         int ret = 0;
->>   >     struct mmc_ioc_cmd idata;
->>   >     __u32  response;
->>   >
->>   >     // Set Start address
->>   >     memset(&idata, 0, sizeof(idata));
->>   >     idata.opcode = MMC_ERASE_GROUP_START;
->>   >     idata.arg = start;
->>   >     idata.flags = MMC_RSP_R1 | MMC_CMD_AC;
->>   >     ret = ioctl(fd, MMC_IOC_CMD, &idata);
->>   >     if (ret)  {
->>   >       perror("ioctl");
->>   >       printf("Erase Group Start Address command failed\n");
->>   >       return ret;
->>   >     }
->>   >     ret = send_status(fd, &response);
->>   >     if (response & 0xFFF900C0) {
->>   >       printf("CMD13 returns: 0x%08x during CMD35\n", response);
->>   >     }
->>   >
->>   >     // Set end address
->>   >     memset(&idata, 0, sizeof(idata));
->>   >     idata.opcode = MMC_ERASE_GROUP_END;
->>   >     idata.arg = end;
->>   >     idata.flags = MMC_RSP_R1 | MMC_CMD_AC;
->>   >     ret = ioctl(fd, MMC_IOC_CMD, &idata);
->>   >     if (ret) {
->>   >       perror("ioctl");
->>   >       printf("Erase Group End Address command failed\n");
->>   >       return ret;
->>   >     }
->>   >     ret = send_status(fd, &response);
->>   >     if (response & 0xFFF900C0)
->>   >       printf("CMD13 returns: 0x%08x during CMD36\n", response);
->>   >
->>   >     // Send Erase Command
->>   >     memset(&idata, 0, sizeof(idata));
->>   >     idata.opcode = MMC_ERASE;
->>   >     idata.arg = argin;
->>   >     idata.cmd_timeout_ms = 60000;
->>   >     idata.data_timeout_ns = 60000000;
->>   >     idata.flags = MMC_RSP_R1B | MMC_CMD_AC;
->>   >     ret = ioctl(fd, MMC_IOC_CMD, &idata);
->>   >     if (ret)  {
->>   >       perror("ioctl");
->>   >       printf("Erase command failed\n");
->>   >       return ret;
->>   >     }
->>   >
->>   >     // Send Status Command
->>   >     // 1098 7654 3210 9876 5432 1098 7654 3210
->>   >     // 3322 2222 2222 1111 1111 1100 0000 0000
->>   >     // 1111 1111 1111 1xx1 xxxx xxxx 11xx xxxx  Device Status Error bits
->>   >     // F    F    F    9    0    0    C    0     0xFFF900C0
->>   >     ret = send_status(fd, &response);
->>   >     if (response & 0xFFF900C0)
->>   >       printf("CMD13 returns: 0x%08x during CMD38\n", response);
->>   >     if (ret)
->>   >       printf("Send Status Command returned 0x%08X\n", response);
->>   >
->>   >     return ret;
->>   > }
->>   >
->> 1150a1216
->>   >
->> 1842a1909,1985
->>   >
->>   >
->>   >
->>   > int do_erase(int nargs, char **argv)
->>   > {
->>   >     int fd, ret;
->>   >     char *device;
->>   >     char **eptr=NULL;
->>   >     __u32  argin, start, end;
->>   >
->>   >
->>   >     if (nargs != 5) {
->>   >         fprintf(stderr, "Usage: mmc erase <arg> <start address> <end
->> address> </path/to/mmcblkX>\n");
->>   >         exit(1);
->>   >     }
->>   >
->>   >     if ((argv[1][0] == '0') && (argv[1][1] == 'x'))
->>   >       argin = strtol(argv[1], eptr, 16);
->>   >     else
->>   >       argin = strtol(argv[1], eptr, 10);
->>   >     if ((argv[2][0] == '0') && (argv[2][1] == 'x'))
->>   >       start = strtol(argv[2], eptr, 16);
->>   >     else
->>   >       start = strtol(argv[2], eptr, 10);
->>   >     if ((argv[3][0] == '0') && (argv[3][1] == 'x'))
->>   >       end   = strtol(argv[3], eptr, 16);
->>   >     else
->>   >       end   = strtol(argv[3], eptr, 10);
->>   >     device = argv[4];
->>   >
->>   >     fd = open(device, O_RDWR);
->>   >     if (fd < 0) {
->>   >         perror("open");
->>   >         exit(1);
->>   >     }
->>   >
->>   >     printf("Executing (0x%08X): ", argin);
->>   >     switch(argin)  {
->>   >     case 0x00000000:
->>   >       printf("Erase ");
->>   >       break;
->>   >     case 0x00000003:
->>   >       printf("Discard ");
->>   >       break;
->>   >     case 0x80000000:
->>   >       printf("Secure Erase ");
->>   >       break;
->>   >     case 0x80008000:
->>   >       printf("Secure Trim Step 2 ");
->>   >       break;
->>   >     case 0x80000001:
->>   >       printf("Secure Trim Step 1 ");
->>   >       break;
->>   >     case 0x00000001:
->>   >       printf("Trim ");
->>   >       break;
->>   >     default:
->>   >       printf("Unknown Argument ");
->>   >     }
->>   >     printf("From:0x%08X To:0x%08X\n", start, end);
->>   >
->>   >     ret = erase(fd, argin, start, end);
->>   >     if (ret) {
->>   >         fprintf(stderr, "Error in Erase Command to %s with Arg=0x%08X
->> Start=0x%08X End=0x%08X\n",
->>   >             device,
->>   >             argin,
->>   >             start,
->>   >             end);
->>   >         exit(1);
->>   >     }
->>   >
->>   >     return ret;
->>   >
->>   > }
->>   >
->>   >
->>   >
->>
->> mmc.c
->> 29c29
->> < #define MMC_VERSION    "0.1"
->> ---
->>   > #define MMC_VERSION    "0.1_KS"
->> 135a136,140
->>   >       NULL
->>   >     },
->>   >     { do_erase, -4,
->>   >       "erase", "<arg> " "<start address> " "<end address> " "<device>\n"
->>   >         "Send Erase command to the <device>.\nThis will delete all
->> user data in the specified region of the device.",
->>
->>
+> Looks like I managed to figure out what's really going on:
+>
+>   1. The BCM4329 doc clearly states that High Speed is supported, see
+> page 49 (Section 11: WLAN Interfaces, SDIO v1.2)
+>
+> https://www.cypress.com/file/298626/download
+>
+>   2. I googled for performance results of the BCM4329 SDIO WiFi and came
+> to a conclusion that ~40 Mbit/s is a realistic maximum of the WiFi-data
+> throughput for NVIDIA Tegra20 boards due to antenna configuration
+> limitations and whatever.
 
+Okay.
+
+>
+>   3. The Tegra's SDHCI clock is pre-configured to 48MHz at the time of
+> kernel's boot-up.
+>
+>   4. IIUC, the maximum clock rate for the legacy SD signaling mode is
+> ~25MHz and that is more than enough for a 4-lane SDIO data-bus that
+> allows up to 100 Mbit/s for the WiFi which is capped to 40 Mbit/s anyways=
+.
+
+Yes, I see.
+
+>
+>   5. Apparently MMC core doesn't limit the clock rate for the Normal
+> Speed cards.
+
+It should, else it's a bug (I would be really surprised if that's the
+case, but who knows).
+
+>
+>
+> So, I added "max-frequency =3D <25000000>;" to the SDHCI node of the
+> board's device-tree and ta-da! WiFi works absolutely fine without the
+> quirk! Thus the SDIO card quirk isn't really needed and I'm dropping it
+> for now.
+>
+> Ulf, do you know if it's a bug or a feature of the MMC core that it
+> doesn't limit clock rate for the Normal Speed cards?
+
+It should limit the speed, else it's a bug. Can you perhaps check what
+the requested clock rate is via some debug prints in the host ops
+->set_ios()? And also what the real rate becomes after dividers.
+
+If it's not a bug in the core, I suspect that there may be generic
+problem dealing with initialization frequencies for sdhci-tegra.
+
+For example, mmc_rescan_try_freq() tries to initialize the SDIO card
+at 400KHz, then 300, then 200 then 100 (in that order, and note
+*KHz*). When a frequency is successful, initialization continues and
+later on the clock rate should be increased to 25MHz, for legacy speed
+mode.
+
+Kind regards
+Uffe
