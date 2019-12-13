@@ -6,51 +6,102 @@ X-Spam-Status: No, score=-2.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 29230C341C2
-	for <linux-mmc@archiver.kernel.org>; Fri, 13 Dec 2019 20:36:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3C59DC3496A
+	for <linux-mmc@archiver.kernel.org>; Fri, 13 Dec 2019 20:39:11 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 6837F24725
-	for <linux-mmc@archiver.kernel.org>; Fri, 13 Dec 2019 20:36:49 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7A3E22470A
+	for <linux-mmc@archiver.kernel.org>; Fri, 13 Dec 2019 20:39:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726931AbfLMMVI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 13 Dec 2019 07:21:08 -0500
-Received: from mga12.intel.com ([192.55.52.136]:23203 "EHLO mga12.intel.com"
+        id S1728092AbfLMQSr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 13 Dec 2019 11:18:47 -0500
+Received: from sauhun.de ([88.99.104.3]:47994 "EHLO pokefinder.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726345AbfLMMVI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 13 Dec 2019 07:21:08 -0500
-X-Amp-Result: SKIPPED(no attachment in message)
-X-Amp-File-Uploaded: False
-Received: from fmsmga003.fm.intel.com ([10.253.24.29])
-  by fmsmga106.fm.intel.com with ESMTP/TLS/DHE-RSA-AES256-GCM-SHA384; 13 Dec 2019 04:21:08 -0800
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.69,309,1571727600"; 
-   d="scan'208";a="265516782"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.169]) ([10.237.72.169])
-  by FMSMGA003.fm.intel.com with ESMTP; 13 Dec 2019 04:21:06 -0800
-Subject: Re: [PATCH 1/2] mmc: sdhci-of-esdhc: convert to use
- esdhc_tuning_window_ptr()
-To:     Yangbo Lu <yangbo.lu@nxp.com>, Yinbo Zhu <yinbo.zhu@nxp.com>
-References: <20191212075219.48625-1-yangbo.lu@nxp.com>
-Cc:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
-        Rasmus Villemoes <linux@rasmusvillemoes.dk>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <3047c4ee-ad2f-f16f-a4d7-48a7bcd88ab9@intel.com>
-Date:   Fri, 13 Dec 2019 14:20:14 +0200
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.2.2
+        id S1728096AbfLMQSq (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 13 Dec 2019 11:18:46 -0500
+Received: from localhost (p54B3318D.dip0.t-ipconnect.de [84.179.49.141])
+        by pokefinder.org (Postfix) with ESMTPSA id CB5522C04D3;
+        Fri, 13 Dec 2019 17:18:44 +0100 (CET)
+Date:   Fri, 13 Dec 2019 17:18:41 +0100
+From:   Wolfram Sang <wsa@the-dreams.de>
+To:     Geert Uytterhoeven <geert@linux-m68k.org>
+Cc:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        Takeshi Saito <takeshi.saito.xv@renesas.com>
+Subject: Re: [RFC PATCH 1/2] mmc: renesas_sdhi: Add manual correction
+Message-ID: <20191213161841.GA1208@ninjato>
+References: <20191203203301.2202-1-wsa+renesas@sang-engineering.com>
+ <20191203203301.2202-2-wsa+renesas@sang-engineering.com>
+ <CAMuHMdUnC=PM0iM7NwoeVLb2v=r4g-uUU3h4dBn9-St75fLyAw@mail.gmail.com>
+ <20191210222844.GD8683@kunai>
+ <CAMuHMdV8+35xLVqAX1mpU1gBKhkw6nBRFwdJwBF0_UXJPh18+g@mail.gmail.com>
 MIME-Version: 1.0
-In-Reply-To: <20191212075219.48625-1-yangbo.lu@nxp.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="GvXjxJ+pjyke8COw"
+Content-Disposition: inline
+In-Reply-To: <CAMuHMdV8+35xLVqAX1mpU1gBKhkw6nBRFwdJwBF0_UXJPh18+g@mail.gmail.com>
+User-Agent: Mutt/1.10.1 (2018-07-13)
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Is there a fix for below coming?
 
-	https://lore.kernel.org/lkml/8afd0f53-eba8-e000-d8cc-b464e65850c3@rasmusvillemoes.dk/
+--GvXjxJ+pjyke8COw
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
+Hi Geert,
+
+> > > BTW, why is tap_set unsigned long instead of unsigned int?
+> >
+> > Because we use bitmap functions on it, and those have all unsigned long
+> > as arguments.
+>=20
+> Do we? I only see bitops on host->taps?
+
+Point taken on this one...
+
+>=20
+> > > And perhaps it should be moved from host to priv?
+> >
+> > That would be great, but other tap_* variables are still used in
+> > tmio_mmc_core.c. We maybe can refactor all tap handling into
+> > renesas_sdhi_core.c meanwhile, but this is a seperate issue.
+>=20
+> tap_num is shared by the Renesas and TMIO code.
+> tap_set is Renesas-specific.
+
+=2E.. here however, I think we should keep all tap_* related variables
+close together. The driver is messy enough as is. Investigation if all
+of that code could be moved to renesas_sdhi_core, though, seems very
+useful.
+
+Thanks for the comments!
+
+   Wolfram
+
+
+--GvXjxJ+pjyke8COw
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAl3zud4ACgkQFA3kzBSg
+KbbVbw/+P7nyvi+BkOHUztBGJxNsQNmcbTahuYyAAuF3MJAeFc1SPEDdwNcxmLww
+owyJRFWrlCuEpG4RqugMpEOvPaW7C5ueNSp6ShKe6Mu0HrZAlXBiVDoWPKkhSKNr
+aM2MGQ9wEpl6PyqcQrYAaneXhNm1cf/WBPzsK9YJR4JHApjSl9Tpy1t0BuLMqVnV
+jLpwybRn/Hys+Mhv7FCzE/KXlHxAo88Qamme3maQ3MWLd/nsD4xgtULNu4p1D0aQ
+WvKD9sPDoyC2DWZZ1NmsDn7qMUzqROBxr0Gif5gxi1ETJCAYZwVODsUtf9N/vTdM
+CYuUmw0RmadFcfCvMyk0Qru7x2fKFRBsRdqsFevmpJ1ZvZTxsB4Sl65vUEPeySYM
+AG5GU5dJNnEumduHFMO28RfTyX2l412AIMj8Hu9LO71DWVEspSzPI9dTo0/XBd5J
+T6HPHUIl+rVReeg+yKBvr3twBO0dUr+BdL/HtkqCBjlWKcF7lnfTqVQbxesszrWa
+/1/l/L78ggMM/j4wSRstJvBAVGiK7PAgTaH1L2mxUMvhjRYCZVpF+hbvIwkoZ0kn
+0BPmxaIYM2g7yAT0V3APCNUB9bmmrZrQf+has5zFf9kIP0JIQG3CsvDJUo6c7Kpg
+qfKaYBZxzJouPxtKtoy9dK8ZKwpuoIu4YlSOtgfnAcJiYYqjiX4=
+=/t5q
+-----END PGP SIGNATURE-----
+
+--GvXjxJ+pjyke8COw--
