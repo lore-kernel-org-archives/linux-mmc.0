@@ -1,110 +1,345 @@
-Return-Path: <SRS0=qhCx=2D=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=iaiu=2E=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.6 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham
+X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 79768C43603
-	for <linux-mmc@archiver.kernel.org>; Fri, 13 Dec 2019 23:01:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1E631C2D0CA
+	for <linux-mmc@archiver.kernel.org>; Sat, 14 Dec 2019 02:00:02 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 58FA9214D8
-	for <linux-mmc@archiver.kernel.org>; Fri, 13 Dec 2019 23:01:43 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1576278103;
-	bh=zDPv/9RxcSm5oTlvIS9ne5tb4tHAmwNZymPZG0Rt3eI=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
-	b=wRM/EiGFElQyoQskqS3LoAex3wrQxX1g3ZDsOGincyGnseWFkPDT7U258geFxywsu
-	 C1ZCT7IApotBP+VlJyLJ8Ffz314WnlKdladGh9Jg1M1xPMm8uA25QuA0VVUsU/YVKm
-	 H58wPNpLwQU7ILWPotCYBc5vvsW2f7ajzuS+bMNA=
+	by mail.kernel.org (Postfix) with ESMTP id F170121655
+	for <linux-mmc@archiver.kernel.org>; Sat, 14 Dec 2019 02:00:01 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=fail reason="key not found in DNS" (0-bit key) header.d=mg.codeaurora.org header.i=@mg.codeaurora.org header.b="I/V8n0RK"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726786AbfLMXBm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 13 Dec 2019 18:01:42 -0500
-Received: from mail-ot1-f67.google.com ([209.85.210.67]:35814 "EHLO
-        mail-ot1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726741AbfLMXBk (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Dec 2019 18:01:40 -0500
-Received: by mail-ot1-f67.google.com with SMTP id o9so1012271ote.2;
-        Fri, 13 Dec 2019 15:01:39 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to:user-agent;
-        bh=Xm+fbSPSrtSF+VAo9R4McLST/GPCqY57riiToMxZYhk=;
-        b=Z6EkM0OMpBqdrkUWxt8yxTu+GO2GHC2q7QZxg0RB2OlmOAm47PADXpHunO+4B+Fe5n
-         OkB5yKPBAdAAv3H8ZOqNwCjv3GL8/xHnbH9T90Ov36QA3ex8USbd9FRprwdqA7EKHor0
-         pDC/7M4hoOQhA5lK08DSgijmOdhATk2Y6ceCMIB6uLjA9Om6CmHAhqwMN/dy5oJ5iLQW
-         BXlD4IMcNWhystddBKPpXNzhuewRncpd2xS6ROjPCM3HyCftfSN9MN1rMbsggvDNDAQP
-         cIFc9F+z2yQ8934Rg5HuJMjGcWSAnOUdZbLuNl5ZvuSZXS2J8rlSVL7Vyk5kf30BEpit
-         VCrA==
-X-Gm-Message-State: APjAAAXi+rpAIxiga1RhHz8iSGI0Ck/7LKjuPk9LwUySJx1MgLB/NIUm
-        4x1SujnOm3p6+OkNadkRBA==
-X-Google-Smtp-Source: APXvYqzIiqaq+YQWjf3lNmJ6LHP6WcxhXoPUE2+l/x5bazKzbr6i8wjJ+zH26j5rSs1hAKNV6cutNQ==
-X-Received: by 2002:a05:6830:605:: with SMTP id w5mr16417678oti.298.1576278099402;
-        Fri, 13 Dec 2019 15:01:39 -0800 (PST)
-Received: from localhost (24-155-109-49.dyn.grandenetworks.net. [24.155.109.49])
-        by smtp.gmail.com with ESMTPSA id d136sm3799652oib.32.2019.12.13.15.01.38
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 13 Dec 2019 15:01:38 -0800 (PST)
-Date:   Fri, 13 Dec 2019 17:01:38 -0600
-From:   Rob Herring <robh@kernel.org>
-To:     Jun Nie <jun.nie@linaro.org>
-Cc:     ulf.hansson@linaro.org, mark.rutland@arm.com,
-        adrian.hunter@intel.com, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org
-Subject: Re: [PATCH 2/4] mmc: sdhci: dt: Add DMA boundary and HS400 properties
-Message-ID: <20191213230137.GA15696@bogus>
-References: <20191202144104.5069-1-jun.nie@linaro.org>
- <20191202144104.5069-3-jun.nie@linaro.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20191202144104.5069-3-jun.nie@linaro.org>
-User-Agent: Mutt/1.10.1 (2018-07-13)
+        id S1726739AbfLNB75 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 13 Dec 2019 20:59:57 -0500
+Received: from mail26.static.mailgun.info ([104.130.122.26]:29808 "EHLO
+        mail26.static.mailgun.info" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726334AbfLNB74 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Dec 2019 20:59:56 -0500
+DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
+ s=smtp; t=1576288795; h=Message-Id: Date: Subject: Cc: To: From:
+ Sender; bh=HZ2+FORy0LJouWVTz5kp4Nj+EV5Rk3gE2y6r8T20LU0=; b=I/V8n0RKDl4Gb5Yw/Crn3cBGQVID47MsjrwzKy8pffrqVBBxsYX4P1iKLjwdnS6IwTmLffhE
+ Z60d9YcDNj7rxx7Aspr7DRIUG/FgAv6/p7WOz0mUPmUW4ry6FKnrET/8SrXIfLMh2pIZT6ZF
+ Mjd1kH1ULc9gvbZ+e7CVz+1/RjY=
+X-Mailgun-Sending-Ip: 104.130.122.26
+X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
+Received: from smtp.codeaurora.org (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171])
+ by mxa.mailgun.org with ESMTP id 5df440eb.7f45213a97d8-smtp-out-n02;
+ Sat, 14 Dec 2019 01:54:51 -0000 (UTC)
+Received: by smtp.codeaurora.org (Postfix, from userid 1001)
+        id 24AC2C447A2; Sat, 14 Dec 2019 01:54:50 +0000 (UTC)
+Received: from vbadigan-linux.qualcomm.com (blr-c-bdr-fw-01_globalnat_allzones-outside.qualcomm.com [103.229.19.19])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-SHA256 (128/128 bits))
+        (No client certificate requested)
+        (Authenticated sender: vbadigan)
+        by smtp.codeaurora.org (Postfix) with ESMTPSA id C742EC433CB;
+        Sat, 14 Dec 2019 01:54:43 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.3.2 smtp.codeaurora.org C742EC433CB
+Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
+Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=none smtp.mailfrom=vbadigan@codeaurora.org
+From:   Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+To:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
+        robh+dt@kernel.org, mka@chromium.org
+Cc:     asutoshd@codeaurora.org, stummala@codeaurora.org,
+        sayalil@codeaurora.org, cang@codeaurora.org,
+        rampraka@codeaurora.org, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+        devicetree@vger.kernel.org,
+        Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
+        Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Mark Rutland <mark.rutland@arm.com>
+Subject: [PATCH V2] arm64: dts: qcom: sc7180: Add nodes for eMMC and SD card
+Date:   Sat, 14 Dec 2019 07:24:34 +0530
+Message-Id: <1576288475-7606-1-git-send-email-vbadigan@codeaurora.org>
+X-Mailer: git-send-email 1.9.1
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, Dec 02, 2019 at 10:41:02PM +0800, Jun Nie wrote:
-> DMA memory cannot cross specific boundary on some controller, such as 128MB
-> on SDHCI Designware. Add sdhci-dma-mem-boundary property to split DMA
-> operation in such case.
-> 
-> sdhci-ctrl-hs400 specify the HS400 mode setting for register
-> SDHCI_HOST_CONTROL2(offset 0x3E:bit[2:0]). Because this value is not
-> defined in SDHC Standard specification.
-> 
-> Signed-off-by: Jun Nie <jun.nie@linaro.org>
-> ---
->  Documentation/devicetree/bindings/mmc/sdhci.txt | 8 ++++++++
->  1 file changed, 8 insertions(+)
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/sdhci.txt b/Documentation/devicetree/bindings/mmc/sdhci.txt
-> index 0e9923a64024..e6d7feb9a741 100644
-> --- a/Documentation/devicetree/bindings/mmc/sdhci.txt
-> +++ b/Documentation/devicetree/bindings/mmc/sdhci.txt
-> @@ -11,3 +11,11 @@ Optional properties:
->  - sdhci-caps: The sdhci capabilities register is incorrect. This 64bit
->    property corresponds to the bits in the sdhci capability register. If the
->    bit is on in the property then the bit should be turned on.
-> +- sdhci-dma-mem-boundary: The sdhci controller DMA memory space boundary.
-> +  If the controller's DMA cannot cross a specific memory space boundary,
-> +  such as 128MB, set this value in dt and driver will split the DMA
-> +  operation when crossing such boundary.
+Add sdhc instances for supporting eMMC and SD-card on sc7180.
+The regulators should be in HPM state for proper functionality of
+eMMC and SD-card. Updating corresponding regulators accordingly.
 
-This should be implied by the compatible string.
+Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+---
 
-> +- sdhci-ctrl-hs400: The HS400 is not defined in SDHC Standard specification
-> +  for SDHCI_HOST_CONTROL2(offset 0x3E:bit[2:0]). Different controllers have
-> +  have different value for HS400 mode. If 0x5 is not the HS400 mode value
-> +  for your controller, you should specify the value with this property.
+This depends on the patch series (dt support for sc7180):
+https://lkml.org/lkml/2019/11/8/149
+Also depends on documentation commit 2078158 (Present on mmc-next)
 
-This too, unless it needs to be tuned per board.
+Changes since V1:
+	- Updated the regulator min, max voltages as per
+	  eMMC/SD-card voltage requirements
+	- Enabled IOMMU for eMMC and SD-card.
+	- Added pull and drive strength to SD-card cd-gpio.
+	- Incorporated review comments by Matthias Kaehlcke.
+---
+ arch/arm64/boot/dts/qcom/sc7180-idp.dts |  47 +++++++---
+ arch/arm64/boot/dts/qcom/sc7180.dtsi    | 148 ++++++++++++++++++++++++++++++++
+ 2 files changed, 183 insertions(+), 12 deletions(-)
 
-Can you be more specific as to what the possible values are and what 
-they do?
-
-Rob
+diff --git a/arch/arm64/boot/dts/qcom/sc7180-idp.dts b/arch/arm64/boot/dts/qcom/sc7180-idp.dts
+index 189254f..b6d4dc1 100644
+--- a/arch/arm64/boot/dts/qcom/sc7180-idp.dts
++++ b/arch/arm64/boot/dts/qcom/sc7180-idp.dts
+@@ -7,6 +7,7 @@
+ 
+ /dts-v1/;
+ 
++#include <dt-bindings/gpio/gpio.h>
+ #include <dt-bindings/regulator/qcom,rpmh-regulator.h>
+ #include "sc7180.dtsi"
+ #include "pm6150.dtsi"
+@@ -101,9 +102,9 @@
+ 		};
+ 
+ 		vreg_l12a_1p8: ldo12 {
+-			regulator-min-microvolt = <1696000>;
+-			regulator-max-microvolt = <1952000>;
+-			regulator-initial-mode = <RPMH_REGULATOR_MODE_LPM>;
++			regulator-min-microvolt = <1800000>;
++			regulator-max-microvolt = <1800000>;
++			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
+ 		};
+ 
+ 		vreg_l13a_1p8: ldo13 {
+@@ -143,9 +144,9 @@
+ 		};
+ 
+ 		vreg_l19a_2p9: ldo19 {
+-			regulator-min-microvolt = <2696000>;
+-			regulator-max-microvolt = <3304000>;
+-			regulator-initial-mode = <RPMH_REGULATOR_MODE_LPM>;
++			regulator-min-microvolt = <2960000>;
++			regulator-max-microvolt = <2960000>;
++			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
+ 		};
+ 	};
+ 
+@@ -189,9 +190,9 @@
+ 		};
+ 
+ 		vreg_l6c_2p9: ldo6 {
+-			regulator-min-microvolt = <2696000>;
+-			regulator-max-microvolt = <3304000>;
+-			regulator-initial-mode = <RPMH_REGULATOR_MODE_LPM>;
++			regulator-min-microvolt = <1800000>;
++			regulator-max-microvolt = <2950000>;
++			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
+ 		};
+ 
+ 		vreg_l7c_3p0: ldo7 {
+@@ -207,9 +208,9 @@
+ 		};
+ 
+ 		vreg_l9c_2p9: ldo9 {
+-			regulator-min-microvolt = <2952000>;
+-			regulator-max-microvolt = <3304000>;
+-			regulator-initial-mode = <RPMH_REGULATOR_MODE_LPM>;
++			regulator-min-microvolt = <2960000>;
++			regulator-max-microvolt = <2960000>;
++			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
+ 		};
+ 
+ 		vreg_l10c_3p3: ldo10 {
+@@ -400,3 +401,25 @@
+ 			bias-pull-up;
+ 		};
+ };
++
++&sdhc_1 {
++	status = "ok";
++
++	pinctrl-names = "default", "sleep";
++	pinctrl-0 = <&sdc1_on>;
++	pinctrl-1 = <&sdc1_off>;
++	vmmc-supply = <&vreg_l19a_2p9>;
++	vqmmc-supply = <&vreg_l12a_1p8>;
++};
++
++&sdhc_2 {
++	status = "ok";
++
++	pinctrl-names = "default","sleep";
++	pinctrl-0 = <&sdc2_on>;
++	pinctrl-1 = <&sdc2_off>;
++	vmmc-supply  = <&vreg_l9c_2p9>;
++	vqmmc-supply = <&vreg_l6c_2p9>;
++
++	cd-gpios = <&tlmm 69 GPIO_ACTIVE_LOW>;
++};
+diff --git a/arch/arm64/boot/dts/qcom/sc7180.dtsi b/arch/arm64/boot/dts/qcom/sc7180.dtsi
+index 666e9b9..16de9b8 100644
+--- a/arch/arm64/boot/dts/qcom/sc7180.dtsi
++++ b/arch/arm64/boot/dts/qcom/sc7180.dtsi
+@@ -182,6 +182,32 @@
+ 			#power-domain-cells = <1>;
+ 		};
+ 
++		sdhc_1: sdhci@7c4000 {
++			compatible = "qcom,sc7180-sdhci", "qcom,sdhci-msm-v5";
++			reg = <0 0x7c4000 0 0x1000>;
++			reg-names = "hc_mem";
++
++			interrupts = <GIC_SPI 641 IRQ_TYPE_LEVEL_HIGH>,
++					<GIC_SPI 644 IRQ_TYPE_LEVEL_HIGH>;
++			interrupt-names = "hc_irq", "pwr_irq";
++
++			clocks = <&gcc GCC_SDCC1_APPS_CLK>,
++					<&gcc GCC_SDCC1_AHB_CLK>;
++			clock-names = "core", "iface";
++
++			iommus = <&apps_smmu 0x60 0x0>;
++
++			bus-width = <8>;
++			non-removable;
++
++			mmc-ddr-1_8v;
++			mmc-hs200-1_8v;
++			mmc-hs400-1_8v;
++			mmc-hs400-enhanced-strobe;
++
++			status = "disabled";
++		};
++
+ 		qupv3_id_0: geniqup@8c0000 {
+ 			compatible = "qcom,geni-se-qup";
+ 			reg = <0 0x008c0000 0 0x6000>;
+@@ -897,6 +923,128 @@
+ 					function = "qup15";
+ 				};
+ 			};
++
++			sdc1_on: sdc1-on {
++				clk {
++					pins = "sdc1_clk";
++					bias-disable;
++					drive-strength = <16>;
++				};
++
++				cmd {
++					pins = "sdc1_cmd";
++					bias-pull-up;
++					drive-strength = <10>;
++				};
++
++				data {
++					pins = "sdc1_data";
++					bias-pull-up;
++					drive-strength = <10>;
++				};
++
++				rclk {
++					pins = "sdc1_rclk";
++					bias-pull-down;
++				};
++			};
++
++			sdc1_off: sdc1-off {
++				clk {
++					pins = "sdc1_clk";
++					bias-disable;
++					drive-strength = <2>;
++				};
++
++				cmd {
++					pins = "sdc1_cmd";
++					bias-pull-up;
++					drive-strength = <2>;
++				};
++
++				data {
++					pins = "sdc1_data";
++					bias-pull-up;
++					drive-strength = <2>;
++				};
++
++				rclk {
++					pins = "sdc1_rclk";
++					bias-pull-down;
++				};
++			};
++
++			sdc2_on: sdc2_on {
++				clk {
++					pins = "sdc2_clk";
++					bias-disable;
++					drive-strength = <16>;
++				};
++
++				cmd {
++					pins = "sdc2_cmd";
++					bias-pull-up;
++					drive-strength = <10>;
++				};
++
++				data {
++					pins = "sdc2_data";
++					bias-pull-up;
++					drive-strength = <10>;
++				};
++
++				sd-cd {
++					pins = "gpio69";
++					bias-pull-up;
++					drive-strength = <2>;
++				};
++			};
++
++			sdc2_off: sdc2_off {
++				clk {
++					pins = "sdc2_clk";
++					bias-disable;
++					drive-strength = <2>;
++				};
++
++				cmd {
++					pins = "sdc2_cmd";
++					bias-pull-up;
++					drive-strength = <2>;
++				};
++
++				data {
++					pins = "sdc2_data";
++					bias-pull-up;
++					drive-strength = <2>;
++				};
++
++				sd-cd {
++					pins = "gpio69";
++					bias-disable;
++					drive-strength = <2>;
++				};
++			};
++		};
++
++		sdhc_2: sdhci@8804000 {
++			compatible = "qcom,sc7180-sdhci", "qcom,sdhci-msm-v5";
++			reg = <0 0x08804000 0 0x1000>;
++			reg-names = "hc_mem";
++
++			interrupts = <GIC_SPI 204 IRQ_TYPE_LEVEL_HIGH>,
++					<GIC_SPI 222 IRQ_TYPE_LEVEL_HIGH>;
++			interrupt-names = "hc_irq", "pwr_irq";
++
++			clocks = <&gcc GCC_SDCC2_APPS_CLK>,
++					<&gcc GCC_SDCC2_AHB_CLK>;
++			clock-names = "core", "iface";
++
++			iommus = <&apps_smmu 0x80 0>;
++
++			bus-width = <4>;
++
++			status = "disabled";
+ 		};
+ 
+ 		qspi: spi@88dc000 {
+-- 
+Qualcomm India Private Limited, on behalf of Qualcomm Innovation Center, Inc., is a member of Code Aurora Forum, a Linux Foundation Collaborative Project
