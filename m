@@ -8,52 +8,52 @@ X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7B78DC2D0CB
-	for <linux-mmc@archiver.kernel.org>; Sun, 15 Dec 2019 17:52:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B0A37C2D0CB
+	for <linux-mmc@archiver.kernel.org>; Sun, 15 Dec 2019 17:52:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 57A322467A
-	for <linux-mmc@archiver.kernel.org>; Sun, 15 Dec 2019 17:52:10 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8E2092467A
+	for <linux-mmc@archiver.kernel.org>; Sun, 15 Dec 2019 17:52:17 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="eQhWosuw"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ID1AOj+6"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726955AbfLORwC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 15 Dec 2019 12:52:02 -0500
-Received: from mail-pf1-f194.google.com ([209.85.210.194]:44326 "EHLO
-        mail-pf1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726897AbfLORvs (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 15 Dec 2019 12:51:48 -0500
-Received: by mail-pf1-f194.google.com with SMTP id d199so4310608pfd.11;
-        Sun, 15 Dec 2019 09:51:48 -0800 (PST)
+        id S1726776AbfLORvj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 15 Dec 2019 12:51:39 -0500
+Received: from mail-pl1-f193.google.com ([209.85.214.193]:33334 "EHLO
+        mail-pl1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726757AbfLORvi (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 15 Dec 2019 12:51:38 -0500
+Received: by mail-pl1-f193.google.com with SMTP id c13so3468410pls.0;
+        Sun, 15 Dec 2019 09:51:37 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references;
-        bh=qIcZpVaq+iaWAioOWHH7QyZK8f/ao9N/kVPUnMEajrg=;
-        b=eQhWosuwmegDI3J/X1lPGlAItpCcpP+ZIhdz/qqbfb6orbQFKn4DWfrncu89r+aQbm
-         fwFbVih2JALiHfXd2X1+MCWrWH4RSC4JuF1cg1BlWTEtAfFqst8Rn+lRBAVP0tw0UWvP
-         X4ippjV15+9c/2NDDbj9OjZ4jfMQK2Mw/YkNFEHyUjYZTD77gd1eIeLya1FuM3vgF3P2
-         vjSaBoDB6iSDBMHfu1t+WBZHSPnVmfJXVymcmZy84YNbGOuXhINfETqsvsT8t0aBRps9
-         0QLO3Lcpmwi5QbvOItENts7vwfPBMP85HHs/BpSvycP+rHMksXVTnIYJDTKTPgTuhqWN
-         m6aw==
+        bh=WeP5mW5bX8FRuVYI+VlxgSACH3PZvZTDMYz0Hzl+V2E=;
+        b=ID1AOj+6c8Ogf0Hu5RDxzXewB10SEfdGb1Sv5+d7Jnh10f5Ti9G6Mnp7WYJ+JvHBMw
+         Shs1Qw8ygC1pEBmPk2Y8Kbi4K/5tjj43ezK5rIxZX07WPLIL6y6q4Gm0r6uStqVcyqfh
+         EvHvWDrU8OJVtLLoE5W9knOzkIQ0UYH+H6jiiy0H46OeG3zx2tI8brAeIsg7+8bxPk5N
+         +T14M+YvMTh+XtVxMyz3VyipChwVCEny8TyCnAQy3/4M2i9Bj4T2ne21MJkeuzf/TtaL
+         eeCY+E01S18KAYaAHH5Gi8UBpIY98wZIPbBCiydcMqnPLyS9sewsj2AahiOmtUINUxLi
+         MF9A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references;
-        bh=qIcZpVaq+iaWAioOWHH7QyZK8f/ao9N/kVPUnMEajrg=;
-        b=VHy+axx1EbyKheq6UEqK8943F2STVWEUelxn/Ezw8fqhsL3a49LYTFiWLzPAJ0wgrv
-         so6OB+CYVEaV2YXH+g17TkmVOqwuACdf8+FTOzF2xZVMGg9dk0Q+GzUQSPDr4LyL3Gy9
-         DouT2Z24HsEP499YzkJPWX2FtKxaM5n87yFBZQ7v7ve7O1Fcga8Y257Y1KmRCtKTJJ17
-         05OIWr/E2UTSi8mfkkRqPf1snYM79sDVq0nsXHc1aKnUgbD1yfz5GS1tJK9gT4dHnQnq
-         AB/whZeC8tBy+gVBFd4bGe+Ix/47ZsUUACLQL6un0sL+luc+ZIeD+9fyGX/YWgDfPQWv
-         7yCA==
-X-Gm-Message-State: APjAAAVfF1JonAMxjQczKA/7iZx8KzLr+mMYELk7Uub8mosf/jut59Et
-        R5wu8gRB65mW239DmfUbx+E=
-X-Google-Smtp-Source: APXvYqzMOkkvgyckqiTIpy5X7VqgwsZVaBxnJUyY/NoJodtBNikPzj1CKS0zJ3tx829QCCA+BuuTIA==
-X-Received: by 2002:a62:d444:: with SMTP id u4mr11821902pfl.153.1576432308269;
-        Sun, 15 Dec 2019 09:51:48 -0800 (PST)
+        bh=WeP5mW5bX8FRuVYI+VlxgSACH3PZvZTDMYz0Hzl+V2E=;
+        b=KxB9n5zLcZ3PqLHVXYawmVI001jZb5GrtYcWOHl32xb5M/Ud3DJskjuXmaRsVu519/
+         qGc7vA21rCgndS5ven96MPBZAn6VR4CZoqNnTGYMExs+WzIxcRO2QyFE21x2C+bKS0i5
+         32c7n4dnYksYKzujrpbmdVl2/1sP9iVK6CLTqcCgKeM0hldc8MitUkvCLGto+cqZB83J
+         fvY+v9aQQBHdwUW+0F7Xqy0xC3I1v2oIlaiGIItEybkll4Lxd6zOXd6MqsdVK/wDhbLk
+         xPIn6YJBDcOQaUZ1eBRhXLT6QTmWLNElNmYeNLkYQPx5uA1lF5E2T3kvcDfVOfUEtB/H
+         4OCw==
+X-Gm-Message-State: APjAAAWbqwYPsI6JmEwKV/0M+uPBiIR3Df3ZbliaUWvGvvXVkDAT+L20
+        IoQ2zd+0igi0su0jbClO2Sk=
+X-Google-Smtp-Source: APXvYqwb6x+cb5JVAvjSiuBW/F0DFFAQ4Dqz9YAQgQrWJMBNZDKKdDo/7lm7jAMWqNB+6idpMU7dww==
+X-Received: by 2002:a17:902:9682:: with SMTP id n2mr11535190plp.336.1576432297060;
+        Sun, 15 Dec 2019 09:51:37 -0800 (PST)
 Received: from localhost ([2001:19f0:6001:12c8:5400:2ff:fe72:6403])
-        by smtp.gmail.com with ESMTPSA id y76sm19858133pfc.87.2019.12.15.09.51.47
+        by smtp.gmail.com with ESMTPSA id m22sm12304608pgn.8.2019.12.15.09.51.36
         (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Sun, 15 Dec 2019 09:51:47 -0800 (PST)
+        Sun, 15 Dec 2019 09:51:36 -0800 (PST)
 From:   Yangtao Li <tiny.windzz@gmail.com>
 To:     manuel.lauss@gmail.com, ulf.hansson@linaro.org,
         khilman@baylibre.com, chaotian.jing@mediatek.com,
@@ -70,9 +70,9 @@ Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
         linux-amlogic@lists.infradead.org,
         linux-mediatek@lists.infradead.org, linux-arm-msm@vger.kernel.org,
         Yangtao Li <tiny.windzz@gmail.com>
-Subject: [PATCH 11/13] mmc: mvsdio: convert to devm_platform_ioremap_resource
-Date:   Sun, 15 Dec 2019 17:51:18 +0000
-Message-Id: <20191215175120.3290-11-tiny.windzz@gmail.com>
+Subject: [PATCH 05/13] mmc: sdhci-spear: convert to devm_platform_ioremap_resource
+Date:   Sun, 15 Dec 2019 17:51:12 +0000
+Message-Id: <20191215175120.3290-5-tiny.windzz@gmail.com>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20191215175120.3290-1-tiny.windzz@gmail.com>
 References: <20191215175120.3290-1-tiny.windzz@gmail.com>
@@ -85,40 +85,31 @@ Use devm_platform_ioremap_resource() to simplify code.
 
 Signed-off-by: Yangtao Li <tiny.windzz@gmail.com>
 ---
- drivers/mmc/host/mvsdio.c | 6 ++----
- 1 file changed, 2 insertions(+), 4 deletions(-)
+ drivers/mmc/host/sdhci-spear.c | 4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
 
-diff --git a/drivers/mmc/host/mvsdio.c b/drivers/mmc/host/mvsdio.c
-index 74a0a7fbbf7f..203b61712601 100644
---- a/drivers/mmc/host/mvsdio.c
-+++ b/drivers/mmc/host/mvsdio.c
-@@ -696,16 +696,14 @@ static int mvsd_probe(struct platform_device *pdev)
- 	struct mmc_host *mmc = NULL;
- 	struct mvsd_host *host = NULL;
- 	const struct mbus_dram_target_info *dram;
--	struct resource *r;
- 	int ret, irq;
- 
- 	if (!np) {
- 		dev_err(&pdev->dev, "no DT node\n");
- 		return -ENODEV;
+diff --git a/drivers/mmc/host/sdhci-spear.c b/drivers/mmc/host/sdhci-spear.c
+index 916b5b09c3d1..37f1c41c8a9c 100644
+--- a/drivers/mmc/host/sdhci-spear.c
++++ b/drivers/mmc/host/sdhci-spear.c
+@@ -43,7 +43,6 @@ static const struct sdhci_ops sdhci_pltfm_ops = {
+ static int sdhci_probe(struct platform_device *pdev)
+ {
+ 	struct sdhci_host *host;
+-	struct resource *iomem;
+ 	struct spear_sdhci *sdhci;
+ 	struct device *dev;
+ 	int ret;
+@@ -56,8 +55,7 @@ static int sdhci_probe(struct platform_device *pdev)
+ 		goto err;
  	}
--	r = platform_get_resource(pdev, IORESOURCE_MEM, 0);
- 	irq = platform_get_irq(pdev, 0);
--	if (!r || irq < 0)
-+	if (irq < 0)
- 		return -ENXIO;
  
- 	mmc = mmc_alloc_host(sizeof(struct mvsd_host), &pdev->dev);
-@@ -758,7 +756,7 @@ static int mvsd_probe(struct platform_device *pdev)
- 
- 	spin_lock_init(&host->lock);
- 
--	host->base = devm_ioremap_resource(&pdev->dev, r);
-+	host->base = devm_platform_ioremap_resource(pdev, 0);
- 	if (IS_ERR(host->base)) {
- 		ret = PTR_ERR(host->base);
- 		goto out;
+-	iomem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+-	host->ioaddr = devm_ioremap_resource(&pdev->dev, iomem);
++	host->ioaddr = devm_platform_ioremap_resource(pdev, 0);
+ 	if (IS_ERR(host->ioaddr)) {
+ 		ret = PTR_ERR(host->ioaddr);
+ 		dev_dbg(&pdev->dev, "unable to map iomem: %d\n", ret);
 -- 
 2.17.1
 
