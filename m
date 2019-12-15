@@ -8,52 +8,52 @@ X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E627FC43603
-	for <linux-mmc@archiver.kernel.org>; Sun, 15 Dec 2019 17:51:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2BA47C2D0CA
+	for <linux-mmc@archiver.kernel.org>; Sun, 15 Dec 2019 17:51:57 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id BF82A2465E
-	for <linux-mmc@archiver.kernel.org>; Sun, 15 Dec 2019 17:51:49 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 081022467A
+	for <linux-mmc@archiver.kernel.org>; Sun, 15 Dec 2019 17:51:57 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="fBKZq3B+"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="TDW2vMxn"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726260AbfLORvn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 15 Dec 2019 12:51:43 -0500
-Received: from mail-pf1-f194.google.com ([209.85.210.194]:39775 "EHLO
-        mail-pf1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726847AbfLORvn (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 15 Dec 2019 12:51:43 -0500
-Received: by mail-pf1-f194.google.com with SMTP id 2so4326020pfx.6;
-        Sun, 15 Dec 2019 09:51:42 -0800 (PST)
+        id S1726945AbfLORvv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 15 Dec 2019 12:51:51 -0500
+Received: from mail-pg1-f193.google.com ([209.85.215.193]:34226 "EHLO
+        mail-pg1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726939AbfLORvu (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 15 Dec 2019 12:51:50 -0500
+Received: by mail-pg1-f193.google.com with SMTP id r11so2341696pgf.1;
+        Sun, 15 Dec 2019 09:51:50 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references;
-        bh=A8oziVX0OVPNw7lU9FI+EUt433jdMUM01Z2ORYeAVas=;
-        b=fBKZq3B+UTdbWsi9+g8bdOFCHGpe7TR9sfAOlLy6zhHgToqYKI2okWlUO/wS9d6u+p
-         QObETgFmagku6GU1FlRQNb5t/Y9dhG0vMyt6zn/KGXslbl4lHP+yyMILKeUnZCONpcFn
-         nFk0ak5IMJLciJtTB9ij91nLomUhjmWlZ14uu6ohZjsqPZqXutI+9z1rnDlHxiPEPw6t
-         7YZThJj7UCNgkM0r2R80yHDaLx7hfnKGgi8f/DRlmtx1GVhlgdgpoz3UYxNu9ZDMXFcK
-         Yv+Xe0JZFl44GM/aIAmtJ/YQsFJ79OS2CDFVX3XxVQTVvTKoAvpv2bPHh+bVZJgQgtIs
-         BI3Q==
+        bh=JtOW+QPlUjdDS6TdBpSLjjaJL3b4V2DiQFsJEo2gjJA=;
+        b=TDW2vMxn40YMaoX+ioc+kFuwF0B5ob/A2CzICAPtb+qqwCs2/f86cDNY8GUpSPbLln
+         Hlo06+FCU6SOZq1/jo2ypmsAz1kxZQNuth6jJbt2oCV0LD5k1RF98BGMYORMcoQWEi32
+         DsyXmvip+22q618Yyx6PTaVobtsOUACZVWl1Hu4UU4SjTlgbBYW2kfmvA8+NyChEznJY
+         bLHGtt3S6OOvFEKXq2gfsHzRd5IqFFnkGurymO6w5udnrxokay7YnkmiVi5KyYyZX9tI
+         bdWt2j+oo+IR7Bl4IuHG4Btis2Hz0o09xIkeJi6Awngc1D4VJM4OzVkjHOyPNrPZPjfs
+         6xGQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references;
-        bh=A8oziVX0OVPNw7lU9FI+EUt433jdMUM01Z2ORYeAVas=;
-        b=MjyUi9WbzfXt2aUMIFBE+g4N6/Bi0dbHoU2aA73I3gWOdSizrbkUo6AZ3/IZzsSb/t
-         NbpdOdMJi3OmoBu5LzWPCdRRlPFbekNOFxVpOdapQPAkzlBxq18sd7AdTx0JwL0ScT9H
-         67pczMG0lXW4EMT82spSeNE0fT4aL4lPCa77jhhQsTTU9Uc572QT1cI6JCQ/4XkHOCd9
-         bwX6rzjdXI7JeCRzeAlNb29i0P1vDGswiCbvGvHWgp71nshh02AoOPAGTx3NyHgc6lji
-         9FY81oclNLw1mKuojY8urX+F91NSYNJsoRFBJWi77Ua65ltjem+ofU6s1uazZhG28fWo
-         Dhkw==
-X-Gm-Message-State: APjAAAW0iX78knivzw2kdtud5e4sQI25NmvtIwS8wj0XnMrz1ZNoqG/T
-        gfNXY+hDBFPuZcp9yA1RCuM=
-X-Google-Smtp-Source: APXvYqzRYb6wWnfYIhsx/jpaCv0k0FMwBhDH/4hA1EyERHMjQx3fHd7/IHnrk/B7nyDbivGMX1th5Q==
-X-Received: by 2002:a63:ea4b:: with SMTP id l11mr13127641pgk.357.1576432302424;
-        Sun, 15 Dec 2019 09:51:42 -0800 (PST)
+        bh=JtOW+QPlUjdDS6TdBpSLjjaJL3b4V2DiQFsJEo2gjJA=;
+        b=dldDmMc5pnOIXr40+8Ggoof9Ld4Glenj6ZoFlp9TBWBuKYD8LP4rXU/14AfpX3DyQ8
+         xvKcHmF7flrGzTAPDFhkOWoCVwbdGoYb+bXk06lV4kqlnLzUBdYAOx0FS5LPSNkwM4aQ
+         hl8yDmABNZdktDeickwI1lZjGy9yQcMDpx5x+TL2j+56GzNtD0QO6vlap4THM/DI7Gky
+         tvkuI7yvzcJaDRsadE7PFE/heSBFeUvzo8DqwPRGHDhyzhpJe3ZKmMwUVUNbLA4OTXar
+         4584L6l9QZUicaEgWh3gUujOrhJv4AYA1RokfZdY/8Fj0Q5nlaO5Xhzi1CHnyXqi/7Zb
+         T/Dg==
+X-Gm-Message-State: APjAAAXK1q74QUc2bZVjpEpCZ9QnZOxXtrluOAEAsWD/O+IXqVf4l9jv
+        c2Ks8epTGzbw/PL2bS7i6+A=
+X-Google-Smtp-Source: APXvYqxnu+iNgVmWSpd7t0baxtWXCgIAvh8wDpoGpNjO6fT2yXWyu/IonFOvxs5K2771DvIxbC2lQw==
+X-Received: by 2002:a05:6a00:de:: with SMTP id e30mr11358233pfj.243.1576432310186;
+        Sun, 15 Dec 2019 09:51:50 -0800 (PST)
 Received: from localhost ([2001:19f0:6001:12c8:5400:2ff:fe72:6403])
-        by smtp.gmail.com with ESMTPSA id i4sm16309004pjd.19.2019.12.15.09.51.41
+        by smtp.gmail.com with ESMTPSA id g8sm19007763pfh.43.2019.12.15.09.51.49
         (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Sun, 15 Dec 2019 09:51:42 -0800 (PST)
+        Sun, 15 Dec 2019 09:51:49 -0800 (PST)
 From:   Yangtao Li <tiny.windzz@gmail.com>
 To:     manuel.lauss@gmail.com, ulf.hansson@linaro.org,
         khilman@baylibre.com, chaotian.jing@mediatek.com,
@@ -70,9 +70,9 @@ Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
         linux-amlogic@lists.infradead.org,
         linux-mediatek@lists.infradead.org, linux-arm-msm@vger.kernel.org,
         Yangtao Li <tiny.windzz@gmail.com>
-Subject: [PATCH 08/13] mmc: sdhci_am654: convert to devm_platform_ioremap_resource
-Date:   Sun, 15 Dec 2019 17:51:15 +0000
-Message-Id: <20191215175120.3290-8-tiny.windzz@gmail.com>
+Subject: [PATCH 12/13] mmc: mtk-sd: convert to devm_platform_ioremap_resource
+Date:   Sun, 15 Dec 2019 17:51:19 +0000
+Message-Id: <20191215175120.3290-12-tiny.windzz@gmail.com>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20191215175120.3290-1-tiny.windzz@gmail.com>
 References: <20191215175120.3290-1-tiny.windzz@gmail.com>
@@ -85,31 +85,23 @@ Use devm_platform_ioremap_resource() to simplify code.
 
 Signed-off-by: Yangtao Li <tiny.windzz@gmail.com>
 ---
- drivers/mmc/host/sdhci_am654.c | 4 +---
- 1 file changed, 1 insertion(+), 3 deletions(-)
+ drivers/mmc/host/mtk-sd.c | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
-index b8e897e31e2e..aa237f565e23 100644
---- a/drivers/mmc/host/sdhci_am654.c
-+++ b/drivers/mmc/host/sdhci_am654.c
-@@ -491,7 +491,6 @@ static int sdhci_am654_probe(struct platform_device *pdev)
- 	struct sdhci_am654_data *sdhci_am654;
- 	const struct of_device_id *match;
- 	struct sdhci_host *host;
--	struct resource *res;
- 	struct clk *clk_xin;
- 	struct device *dev = &pdev->dev;
- 	void __iomem *base;
-@@ -524,8 +523,7 @@ static int sdhci_am654_probe(struct platform_device *pdev)
- 		goto pm_runtime_disable;
- 	}
+diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+index 010fe29a4888..7726dcf48f2c 100644
+--- a/drivers/mmc/host/mtk-sd.c
++++ b/drivers/mmc/host/mtk-sd.c
+@@ -2194,8 +2194,7 @@ static int msdc_drv_probe(struct platform_device *pdev)
+ 	if (ret)
+ 		goto host_free;
  
--	res = platform_get_resource(pdev, IORESOURCE_MEM, 1);
--	base = devm_ioremap_resource(dev, res);
-+	base = devm_platform_ioremap_resource(pdev, 1);
- 	if (IS_ERR(base)) {
- 		ret = PTR_ERR(base);
- 		goto pm_runtime_put;
+-	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+-	host->base = devm_ioremap_resource(&pdev->dev, res);
++	host->base = devm_platform_ioremap_resource(pdev, 0);
+ 	if (IS_ERR(host->base)) {
+ 		ret = PTR_ERR(host->base);
+ 		goto host_free;
 -- 
 2.17.1
 
