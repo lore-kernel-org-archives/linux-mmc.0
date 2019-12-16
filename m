@@ -6,105 +6,95 @@ X-Spam-Status: No, score=-3.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,
 	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A4104C43603
-	for <linux-mmc@archiver.kernel.org>; Mon, 16 Dec 2019 12:09:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 58F91C43603
+	for <linux-mmc@archiver.kernel.org>; Mon, 16 Dec 2019 12:09:51 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 7969820665
-	for <linux-mmc@archiver.kernel.org>; Mon, 16 Dec 2019 12:09:41 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2BE6920725
+	for <linux-mmc@archiver.kernel.org>; Mon, 16 Dec 2019 12:09:51 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="f9FsYCC6"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="I8JTE77L"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727453AbfLPMJl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 16 Dec 2019 07:09:41 -0500
-Received: from mail-vs1-f65.google.com ([209.85.217.65]:32821 "EHLO
-        mail-vs1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727495AbfLPMJk (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Dec 2019 07:09:40 -0500
-Received: by mail-vs1-f65.google.com with SMTP id n27so3967221vsa.0
-        for <linux-mmc@vger.kernel.org>; Mon, 16 Dec 2019 04:09:40 -0800 (PST)
+        id S1727564AbfLPMJu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 16 Dec 2019 07:09:50 -0500
+Received: from mail-vs1-f67.google.com ([209.85.217.67]:34243 "EHLO
+        mail-vs1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727509AbfLPMJu (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Dec 2019 07:09:50 -0500
+Received: by mail-vs1-f67.google.com with SMTP id g15so3954970vsf.1
+        for <linux-mmc@vger.kernel.org>; Mon, 16 Dec 2019 04:09:50 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=R41bi6yGX1iFZADmCtGFAtslTM1p//RJUgDUHlg61M4=;
-        b=f9FsYCC6hzMCeJ2TsROTECko+3MS0vbiOrA9N1RR5183cjmeTiP9e9Q7D3ysfb1CKi
-         GP4eeMR4lOF5HpP4h7G1gGF6Tozadvflj2EwnEY07TrIQRRU7xQd5BUlWKbP1khStots
-         TacxY60AnMM6HvZqiS4yy51nkGFlxH9T0CbirWXCaG2VU7yNUbXTRklnduKGN4so/r2Y
-         IjMmpJnQ8FMC8pK0+J9qhQJSNIhPFC4RBARtyLEdZvVcdpFTgFYshG1BMv4UKTHK6Y1s
-         7gHFfy9afxxhsdqnoi6mOTAXdietwZ6YK1kq+oJQVeR8QtFs0V1N1RP6Uf9a8xNHA5kG
-         unVg==
+        bh=R9c+fnPnsRk6SiwgsZ0toGXW5TY3Q9XMVKo/pWnhpN4=;
+        b=I8JTE77LApKuanmaH0xzwtdhHr20SXpZBPmkEIAFYk/2eHJuPDF6GVzbW3M643slCU
+         u0gjtPxzvU5WKwwicP25cpSVQ/BPjvlZGTUbTYXS/AzL7MFYi54tu0cSmQpVlpfD+eaE
+         zwxyj3XFRcYX3ld6Vv+OklL3dXKFbA4M+FCCrxfLrmXVQUqjh5xIdLlPX/2hs2C6/k9C
+         m8+2rDeH7Eh7zPhvOTCJQVseej+Vk2v7KZE8jxO/1lQkMyYMqw2xf0V940dqd2egYquI
+         M3y3HALux4STziCbll12ARmjtn0YpTB+pdVY3XgZmEjVXCixIgmxq6FN/WielbvACzln
+         DHXQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=R41bi6yGX1iFZADmCtGFAtslTM1p//RJUgDUHlg61M4=;
-        b=Qzt4QxUhJormB2xIC/iylLdbDRb210isLxYkEWRJ10i4CNC2TJOOGRDLp5/ZIGV0FX
-         s8pdcnu+OgxbVVjs4tOplO/9+N0X7DcDZwKHWeWevqrwLm7IczgK72Qrvu5IAAtRtSKy
-         AiKYm23rZ8CoT7w0kic7MKy6rOFidYgVAf4NNfAmNvY+/XT78UxjicjUr4JOWV+Saa3Z
-         dZZqDrNQiHnaWKcbO1L8cVToy1+dXE0E3q1JEPRASJRkcQSoO//9JLU5rDmV0JdOHZWf
-         5e+paoQiL/Mz+T3nut3kJuDyLzt8TMYADqRdkJzhnTyDDYTrO6uA/GTeYQJW6mZWmBr3
-         FUFQ==
-X-Gm-Message-State: APjAAAWa/JFgzXJlQuEdFkBSrz7oUmnR/X8HzVyGC9YWoNMCqJE4Gaqr
-        hOgz6RAj2d8cXxhqkWKEh8+p2mZmxoDnp4/Lm18b1A==
-X-Google-Smtp-Source: APXvYqyM+BFHKKpccM+ztT4sO4U92WldyDbTPLgrN1RbEanMHjp2bB6PAG89agGyNwpzRp5oUphcx23VDVg4tfX63sQ=
-X-Received: by 2002:a67:b649:: with SMTP id e9mr20077581vsm.34.1576498179745;
- Mon, 16 Dec 2019 04:09:39 -0800 (PST)
+        bh=R9c+fnPnsRk6SiwgsZ0toGXW5TY3Q9XMVKo/pWnhpN4=;
+        b=ODp9ig+/boQ8QRrKjEc4c4mwNJWYPuadUnHHJxbneaPIcdCRuF6ZZKBrCm/0oh1FZH
+         YaHV62kn16k7lRBvJTjntNb4wL5E+ex+O0WqNwB15gQr+cJ76htPhTRytBovwd6k9RGx
+         GXa1UDm2QX9Kgth+Q3wl7nX/ZqIziLRf8iLThMVU3BRszIO6BGU6DLID67wfLmLVjsMI
+         kNKyTyVtoc44Yhuwe0JOCYDwzCXIuy2ekZika/VhXqlNFfcg+ofodYMDY62ZAcTl3kj5
+         48SUrDizmIUauW42bXyh3e63KbhDOax4i6U1o5MU+M2iEli3yoDxOn16o4LQAT8pHSVM
+         4IaA==
+X-Gm-Message-State: APjAAAUty96SmKlp6rHgvX9l4OcWjNvjj7fDqDB8VuGzz2BJXqrkKYKa
+        Wc2fMH2wo6GGHIXRd4ynXTkVuPQZVngK0fJ/uAhvXQ==
+X-Google-Smtp-Source: APXvYqxF/1PC0JPvjLVA8Zwq8Uxye2doG5S83wznVhgfLyPeqKtQ62N89D/SnrRKbX2GGDQyjNSSt24Lw0p5ZrjG2Xo=
+X-Received: by 2002:a67:f499:: with SMTP id o25mr20031111vsn.165.1576498189601;
+ Mon, 16 Dec 2019 04:09:49 -0800 (PST)
 MIME-Version: 1.0
-References: <0101016ea738eb52-8c362755-205a-4383-9181-1a867e82eeed-000000@us-west-2.amazonses.com>
- <CAPDyKFqdFc1RMNu38d7b+s2Bpr49v-w18frGsPSxsYf924HLWg@mail.gmail.com> <0101016ef47b4d25-49791932-586b-456e-b9a7-6f9a6f95babf-000000@us-west-2.amazonses.com>
-In-Reply-To: <0101016ef47b4d25-49791932-586b-456e-b9a7-6f9a6f95babf-000000@us-west-2.amazonses.com>
+References: <20191204152749.12652-1-linus.walleij@linaro.org>
+ <CAPDyKFpECpWLCwvyFP7zeAmrOA4VK+NxPhc7jqvpenUKkgjWxQ@mail.gmail.com> <CACRpkdai6FwgwD7+BeF0_ORw4P1hoCv4dvoi_Uhyp21t5qCOjw@mail.gmail.com>
+In-Reply-To: <CACRpkdai6FwgwD7+BeF0_ORw4P1hoCv4dvoi_Uhyp21t5qCOjw@mail.gmail.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 16 Dec 2019 13:09:03 +0100
-Message-ID: <CAPDyKFqk75n9GE9JELgg=bnwjRHhTNkOMFLL01Y0X1NwgFgOYw@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-msm: Correct the offset and value for
- DDR_CONFIG register
-To:     Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        Asutosh Das <asutoshd@codeaurora.org>,
-        Sahitya Tummala <stummala@codeaurora.org>,
-        Sayali Lokhande <sayalil@codeaurora.org>, cang@codeaurora.org,
-        Ram Prakash Gupta <rampraka@codeaurora.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-arm-msm <linux-arm-msm@vger.kernel.org>
+Date:   Mon, 16 Dec 2019 13:09:12 +0100
+Message-ID: <CAPDyKFotLu_SxpKEPBWgPjrR0+57Ou6VRL=egPGvJVMSr4vCGw@mail.gmail.com>
+Subject: Re: [PATCH] mmc: spi: Toggle SPI polarity, do not hardcode it
+To:     Linus Walleij <linus.walleij@linaro.org>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Phil Elwell <phil@raspberrypi.org>,
+        Mark Brown <broonie@kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 11 Dec 2019 at 11:22, Veerabhadrarao Badiganti
-<vbadigan@codeaurora.org> wrote:
+On Wed, 11 Dec 2019 at 00:11, Linus Walleij <linus.walleij@linaro.org> wrote:
 >
->
-> On 12/10/2019 3:21 PM, Ulf Hansson wrote:
-> > On Tue, 26 Nov 2019 at 11:19, Veerabhadrarao Badiganti
-> > <vbadigan@codeaurora.org> wrote:
-> >> The DDR_CONFIG register offset got updated after a specific
-> >> minor version of sdcc V4. This offset change has not been properly
-> >> taken care of while updating register changes for sdcc V5.
-> >>
-> >> Correcting proper offset for this register.
-> >> Also updating this register value to reflect the recommended RCLK
-> >> delay.
-> >>
-> >> Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
-> > I have applied this for fixes, however it seems like this should also
-> > be tagged for stable, right?
->
->   Thank you. Yes, I agree.
->
+> On Tue, Dec 10, 2019 at 10:52 AM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> > On Wed, 4 Dec 2019 at 16:29, Linus Walleij <linus.walleij@linaro.org> wrote:
+> > >
+> > > The code in mmc_spi_initsequence() tries to send a burst with
+> > > high chipselect and for this reason hardcodes the device into
+> > > SPI_CS_HIGH.
+> > >
+> > > This is not good because the SPI_CS_HIGH flag indicates
+> > > logical "asserted" CS not always the physical level. In
+> > > some cases the signal is inverted in the GPIO library and
+> > > in that case SPI_CS_HIGH is already set, and enforcing
+> > > SPI_CS_HIGH again will actually drive it low.
+> > >
+> > > Instead of hard-coding this, toggle the polarity so if the
+> > > default is LOW it goes high to assert chipselect but if it
+> > > is already high then toggle it low instead.
+> > >
+> > > Cc: Phil Elwell <phil@raspberrypi.org>
+> > > Reported-by: Mark Brown <broonie@kernel.org>
+> > > Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
 > >
-> > Is there a specific commit this fixes or should we just find the
-> > version it applies to?
+> > Seems like we should add a stable tag, right?
 >
-> It fixes the bug introduced by commit:
->
-> f153588 (mmc: sdhci-msm: Define new Register address map)
+> Yeah I agree.
 
-Great, thanks added a fixes/stable tag.
-
-[...]
+Alright. I have amended the patch to add the tag.
 
 Kind regards
 Uffe
