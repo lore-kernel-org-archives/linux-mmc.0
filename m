@@ -2,84 +2,226 @@ Return-Path: <SRS0=4vPn=2G=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B3D7AC43603
-	for <linux-mmc@archiver.kernel.org>; Mon, 16 Dec 2019 08:03:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BADBFC2D0CF
+	for <linux-mmc@archiver.kernel.org>; Mon, 16 Dec 2019 08:26:31 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 83CC8206CB
-	for <linux-mmc@archiver.kernel.org>; Mon, 16 Dec 2019 08:03:09 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 850282075A
+	for <linux-mmc@archiver.kernel.org>; Mon, 16 Dec 2019 08:26:31 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="qwt0z/LD"
+	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="DZLHVKXk"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726718AbfLPIDI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 16 Dec 2019 03:03:08 -0500
-Received: from mail-vs1-f67.google.com ([209.85.217.67]:40813 "EHLO
-        mail-vs1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726664AbfLPIDI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Dec 2019 03:03:08 -0500
-Received: by mail-vs1-f67.google.com with SMTP id g23so3554021vsr.7
-        for <linux-mmc@vger.kernel.org>; Mon, 16 Dec 2019 00:03:08 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=djH4P6rJZ29fmLrYIiEBXgddCiM+F+NpoLnU2C5W0ic=;
-        b=qwt0z/LDUa3VNvkNIdC/63tkbfoyK0jXZJvA/wiLJjxOR3b5qhc6JaodJj9bOkRKwG
-         g3eBpO1p+ioTRY7g6pGvNoi6BdBzScu+cvGTBIK/k0R1xWxQaqr1UweirkYWeNcQDXti
-         aakgl0uwXh/ejXm76Y7SABdLL286aMbpCEU+qlGpGrvxRVd2s99obiVu9NY/qXHBc+Fo
-         +Z21ccz5GZZNU6mhaj0JFdUyGsw5esbcSgLLn+tCDLsAfXO57NE1zVZkfARXL6i5x3Zu
-         1ekV7sQAUUzqKdGXqgzjeLa4HQKpmw8mqc3DfA0WMyHxK3f2EMsA6OodJSfbY5IEXoyM
-         vJqA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=djH4P6rJZ29fmLrYIiEBXgddCiM+F+NpoLnU2C5W0ic=;
-        b=ZkW3TSczL6soA2kvQVveXGqme/bpsyZRqAtlxRZcTrzfn9vdwHhMx23ZP5U0+2d5W2
-         Hq1IHu/7IiTV6PX30MmYLtJzkUYWs8TKEcCYz5tVLc68Ydj1GlqNAGupLS3mlUtHC7n4
-         A9sddIjCwY3tEg/doBXVM31eB4WQhNpFj+CQUdCmZtmfgmHDXY1gvSPPVSEfXd28jQu+
-         hyTELzJJDhw9AVEs86CQVjkuijiYlcoga0D1r6I7p9uOnzt3ttv6wXtjoMrrppWrWg/O
-         xAREbmTY6fuFK9PHIWHy60DQua2Ck+q334zB2CYsFhdIXpThstdY67J620aKl0ro+da4
-         LTQA==
-X-Gm-Message-State: APjAAAWrCrhtx5uOgL2JS2+qSSgpuhqPn624Oot4+WAztgLFPbGXnAv8
-        i8swYIRLPlLSmIron6GPb+yAG8LMGiGpmf0duVBrsQ==
-X-Google-Smtp-Source: APXvYqxZxtF9uyW/0SNV6/rz9rMvjg9NIlP6IK+cGDZLXzWXTlUoLJrRiVnQ98z3asU2QxPF43pmYU0H04Ya09B4Yv4=
-X-Received: by 2002:a67:1447:: with SMTP id 68mr171823vsu.115.1576483387832;
- Mon, 16 Dec 2019 00:03:07 -0800 (PST)
+        id S1726756AbfLPI0b (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 16 Dec 2019 03:26:31 -0500
+Received: from lelv0143.ext.ti.com ([198.47.23.248]:47390 "EHLO
+        lelv0143.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726722AbfLPI0a (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Dec 2019 03:26:30 -0500
+Received: from fllv0034.itg.ti.com ([10.64.40.246])
+        by lelv0143.ext.ti.com (8.15.2/8.15.2) with ESMTP id xBG8QH4V073483;
+        Mon, 16 Dec 2019 02:26:17 -0600
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
+        s=ti-com-17Q1; t=1576484777;
+        bh=5LJD3BaNdpDqu2z7AYf9ZaOq2CWCjaTXL7atRrYN3cI=;
+        h=Subject:To:CC:References:From:Date:In-Reply-To;
+        b=DZLHVKXk810t3N8MZMb6HMv/0QUDWc3z+uzXBFx1qkTJhJQvSd8lwSwCsCUCUF6/s
+         cjwWCcNqn8Wl4pO5J6xRDORlm7LITd/VID4WHjwZYKu38umhAb5yuIIcxu/nLyHubP
+         OQJPupJvI/ZnjFbJhQddN8Cv6k5RwRrM938RHHUA=
+Received: from DFLE100.ent.ti.com (dfle100.ent.ti.com [10.64.6.21])
+        by fllv0034.itg.ti.com (8.15.2/8.15.2) with ESMTPS id xBG8QGYo039352
+        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
+        Mon, 16 Dec 2019 02:26:16 -0600
+Received: from DFLE107.ent.ti.com (10.64.6.28) by DFLE100.ent.ti.com
+ (10.64.6.21) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.1847.3; Mon, 16
+ Dec 2019 02:26:16 -0600
+Received: from lelv0326.itg.ti.com (10.180.67.84) by DFLE107.ent.ti.com
+ (10.64.6.28) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.1847.3 via
+ Frontend Transport; Mon, 16 Dec 2019 02:26:16 -0600
+Received: from [172.24.190.215] (ileax41-snat.itg.ti.com [10.172.224.153])
+        by lelv0326.itg.ti.com (8.15.2/8.15.2) with ESMTP id xBG8QCt3052187;
+        Mon, 16 Dec 2019 02:26:13 -0600
+Subject: Re: [PATCH v3 2/7] mmc: sdhci: add support for using external DMA
+ devices
+To:     Adrian Hunter <adrian.hunter@intel.com>,
+        <linux-kernel@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-mmc@vger.kernel.org>
+CC:     <kishon@ti.com>, <mark.rutland@arm.com>, <robh+dt@kernel.org>,
+        <ulf.hansson@linaro.org>, <zhang.chunyan@linaro.org>,
+        <tony@atomide.com>
+References: <20191210095151.15441-1-faiz_abbas@ti.com>
+ <20191210095151.15441-3-faiz_abbas@ti.com>
+ <92fd22bf-3024-928d-ebf5-e7382988a36b@intel.com>
+From:   Faiz Abbas <faiz_abbas@ti.com>
+Message-ID: <fdf1334a-39bc-9247-9934-df6e1562f4b8@ti.com>
+Date:   Mon, 16 Dec 2019 13:57:21 +0530
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.2.1
 MIME-Version: 1.0
-References: <20191206170821.29711-1-ulf.hansson@linaro.org>
-In-Reply-To: <20191206170821.29711-1-ulf.hansson@linaro.org>
-From:   Linus Walleij <linus.walleij@linaro.org>
-Date:   Mon, 16 Dec 2019 09:02:56 +0100
-Message-ID: <CACRpkdYsVBdbNQg=T94=HJUfJwcoMeeK=9Q_Dac18n3ae-K4sA@mail.gmail.com>
-Subject: Re: [PATCH 0/9] pinctrl: Consolidate some pinctrl code for mmc
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+In-Reply-To: <92fd22bf-3024-928d-ebf5-e7382988a36b@intel.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, Dec 6, 2019 at 6:08 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+Hi Adrian,
 
-> Ulf Hansson (9):
->   pinctrl: core: Add pinctrl_select_default_state() and export it
->   mmc: meson-gx: Convert to pinctrl_select_default_state()
->   mmc: mmci: Convert to pinctrl_select_default_state()
->   mmc: usdhi6rol0: Convert to pinctrl_select_default_state()
->   mmc: omap_hsmmc: Convert to pinctrl_select_default_state()
->   mmc: sdhci-esdhc-imx: Convert to pinctrl_select_default_state()
->   mmc: atmel-mci: Convert to pinctrl_select_default_state()
->   mmc: jz4740: Convert to pinctrl_select_default_state()
->   mmc: uniphier-sd: Convert to pinctrl_select_default_state()
+On 12/12/19 6:25 pm, Adrian Hunter wrote:
+> On 10/12/19 11:51 am, Faiz Abbas wrote:
+>> From: Chunyan Zhang <zhang.chunyan@linaro.org>
+>>
+>> Some standard SD host controllers can support both external dma
+>> controllers as well as ADMA/SDMA in which the SD host controller
+>> acts as DMA master. TI's omap controller is the case as an example.
+>>
+>> Currently the generic SDHCI code supports ADMA/SDMA integrated in
+>> the host controller but does not have any support for external DMA
+>> controllers implemented using dmaengine, meaning that custom code is
+>> needed for any systems that use an external DMA controller with SDHCI.
+>>
+>> Fixes by Faiz Abbas <faiz_abbas@ti.com>:
+>> 1. Map scatterlists before dmaengine_prep_slave_sg()
+>> 2. Use dma_async() functions inside of the send_command() path and call
+>> terminate_sync() in non-atomic context in case of an error.
+>>
+>> Signed-off-by: Chunyan Zhang <zhang.chunyan@linaro.org>
+>> Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
+>> ---
+...
+>>  {
+>> @@ -1379,12 +1562,19 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
+>>  	}
+>>  
+>>  	host->cmd = cmd;
+>> +	host->data_timeout = 0;
+>>  	if (sdhci_data_line_cmd(cmd)) {
+>>  		WARN_ON(host->data_cmd);
+>>  		host->data_cmd = cmd;
+>> +		sdhci_set_timeout(host, cmd);
+>>  	}
+>>  
+>> -	sdhci_prepare_data(host, cmd);
+>> +	if (cmd->data) {
+>> +		if (host->use_external_dma)
+>> +			sdhci_external_dma_prepare_data(host, cmd);
+>> +		else
+>> +			sdhci_prepare_data(host, cmd);
+>> +	}
+> 
+> Please make the 3 changes above and the corresponding changes
+> sdhci_prepare_data into a separate patch i.e.
 
-For patches 2-9:
-Acked-by: Linus Walleij <linus.walleij@linaro.org>
+Ok. And I agree with all your style change requests above this. Will fix
+in v4.
 
-Yours,
-Linus Walleij
+>> @@ -2652,6 +2845,18 @@ static bool sdhci_request_done(struct sdhci_host *host)
+>>  	if (host->flags & SDHCI_REQ_USE_DMA) {
+>>  		struct mmc_data *data = mrq->data;
+>>  
+>> +		spin_unlock_irqrestore(&host->lock, flags);
+>> +
+>> +		/* Terminate and synchronize dma in case of an error */
+>> +		if (data && (mrq->cmd->error || data->error) &&
+>> +		    host->use_external_dma) {
+>> +			struct dma_chan *chan = sdhci_external_dma_channel(host,
+>> +									  data);
+>> +			dmaengine_terminate_sync(chan);
+>> +		}
+>> +
+>> +		spin_lock_irqsave(&host->lock, flags);
+>> +
+> 
+> Need to take the mrq out of mrqs_done[] to ensure it is not processed again,
+> and put it back again to be consistent with the remaining code. Also put
+> host->use_external_dma as the first condition i.e.
+> 
+> 		if (host->use_external_dma && data &&
+> 		    (mrq->cmd->error || data->error)) {
+> 			struct dma_chan *chan = sdhci_external_dma_channel(host, data);
+> 
+> 			host->mrqs_done[i] = NULL;
+> 			spin_unlock_irqrestore(&host->lock, flags);
+> 			dmaengine_terminate_sync(chan);
+> 			spin_lock_irqsave(&host->lock, flags);
+> 			sdhci_set_mrq_done(host, mrq);
+> 		}
+> 
+> where sdhci_set_mrq_done() is factored out from __sdhci_finish_mrq() i.e.
+> 
+> static void sdhci_set_mrq_done(struct sdhci_host *host, struct mmc_request *mrq)
+> {
+> 	int i;
+> 
+> 	for (i = 0; i < SDHCI_MAX_MRQS; i++) {
+> 		if (host->mrqs_done[i] == mrq) {
+> 			WARN_ON(1);
+> 			return;
+> 		}
+> 	}
+> 
+> 	for (i = 0; i < SDHCI_MAX_MRQS; i++) {
+> 		if (!host->mrqs_done[i]) {
+> 			host->mrqs_done[i] = mrq;
+> 			break;
+> 		}
+> 	}
+> 
+> 	WARN_ON(i >= SDHCI_MAX_MRQS);
+> }
+> 
+> sdhci_set_mrq_done() can be made in the refactoring patch.
+Haven't we already done the sdhci_set_mrq_done() part in
+__sdhci_finish_mrq()?
+
+We are picking up an already "done" mrq, looking at whether it had any
+error and then sychronizing with external dma. Or at least that is my
+understanding.
+
+> 
+>>  		if (data && data->host_cookie == COOKIE_MAPPED) {
+>>  			if (host->bounce_buffer) {
+>>  				/*
+>> @@ -3758,12 +3963,28 @@ int sdhci_setup_host(struct sdhci_host *host)
+>>  		       mmc_hostname(mmc), host->version);
+>>  	}
+>>  
+>> -	if (host->quirks & SDHCI_QUIRK_FORCE_DMA)
+>> +	if (host->use_external_dma) {
+>> +		ret = sdhci_external_dma_init(host);
+>> +		if (ret == -EPROBE_DEFER)
+>> +			goto unreg;
+>> +
+>> +		/*
+>> +		 * Fall back to use the DMA/PIO integrated in standard SDHCI
+>> +		 * instead of external DMA devices.
+>> +		 */
+>> +		if (ret)
+>> +			sdhci_switch_external_dma(host, false);
+>> +	}
+>> +
+>> +	if (host->quirks & SDHCI_QUIRK_FORCE_DMA) {
+>>  		host->flags |= SDHCI_USE_SDMA;
+>> -	else if (!(host->caps & SDHCI_CAN_DO_SDMA))
+>> +	} else if (!(host->caps & SDHCI_CAN_DO_SDMA)) {
+>>  		DBG("Controller doesn't have SDMA capability\n");
+>> -	else
+>> +	} else if (host->use_external_dma) {
+>> +		/* Using dma-names to detect external dma capability */
+> 
+> What is this change for?  Do you expect for SDHCI_USE_SDMA and
+> SDHCI_USE_ADMA flags to be clear?
+
+Yes. Today the code enables SDMA by default (in the else part below
+this). I want it to not enable SDMA in the external dma case.
+
+Thanks,
+Faiz
