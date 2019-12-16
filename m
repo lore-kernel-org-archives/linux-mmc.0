@@ -2,52 +2,52 @@ Return-Path: <SRS0=4vPn=2G=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BADBFC2D0CF
-	for <linux-mmc@archiver.kernel.org>; Mon, 16 Dec 2019 08:26:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D9BBEC43603
+	for <linux-mmc@archiver.kernel.org>; Mon, 16 Dec 2019 08:41:24 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 850282075A
-	for <linux-mmc@archiver.kernel.org>; Mon, 16 Dec 2019 08:26:31 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id AB87A206A5
+	for <linux-mmc@archiver.kernel.org>; Mon, 16 Dec 2019 08:41:24 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="DZLHVKXk"
+	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="PkkVrt+q"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726756AbfLPI0b (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 16 Dec 2019 03:26:31 -0500
-Received: from lelv0143.ext.ti.com ([198.47.23.248]:47390 "EHLO
-        lelv0143.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726722AbfLPI0a (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Dec 2019 03:26:30 -0500
-Received: from fllv0034.itg.ti.com ([10.64.40.246])
-        by lelv0143.ext.ti.com (8.15.2/8.15.2) with ESMTP id xBG8QH4V073483;
-        Mon, 16 Dec 2019 02:26:17 -0600
+        id S1726840AbfLPIlY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 16 Dec 2019 03:41:24 -0500
+Received: from lelv0142.ext.ti.com ([198.47.23.249]:54592 "EHLO
+        lelv0142.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726777AbfLPIlY (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Dec 2019 03:41:24 -0500
+Received: from lelv0265.itg.ti.com ([10.180.67.224])
+        by lelv0142.ext.ti.com (8.15.2/8.15.2) with ESMTP id xBG8fDeg028547;
+        Mon, 16 Dec 2019 02:41:13 -0600
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
-        s=ti-com-17Q1; t=1576484777;
-        bh=5LJD3BaNdpDqu2z7AYf9ZaOq2CWCjaTXL7atRrYN3cI=;
+        s=ti-com-17Q1; t=1576485673;
+        bh=GQ0EO7q8Lqa3xSoXIC84Xc5lNVaeufWJSswA3pvWUWg=;
         h=Subject:To:CC:References:From:Date:In-Reply-To;
-        b=DZLHVKXk810t3N8MZMb6HMv/0QUDWc3z+uzXBFx1qkTJhJQvSd8lwSwCsCUCUF6/s
-         cjwWCcNqn8Wl4pO5J6xRDORlm7LITd/VID4WHjwZYKu38umhAb5yuIIcxu/nLyHubP
-         OQJPupJvI/ZnjFbJhQddN8Cv6k5RwRrM938RHHUA=
-Received: from DFLE100.ent.ti.com (dfle100.ent.ti.com [10.64.6.21])
-        by fllv0034.itg.ti.com (8.15.2/8.15.2) with ESMTPS id xBG8QGYo039352
+        b=PkkVrt+qL5LYRULFUkL/FepG6A+SwwwgV1+hEB3D2vdHT4J0FnY40thn6e3ldQL83
+         fL0RiSuSxSfae81A/YqNCD7fhto9Y+DCHgoZ/h4ie8tvj1E7I7n9DwJUnlLNXEJ0v8
+         hbWrUrv6+uYtVoE+gw5wDHcJuaK06IysXhoZ6ctw=
+Received: from DLEE100.ent.ti.com (dlee100.ent.ti.com [157.170.170.30])
+        by lelv0265.itg.ti.com (8.15.2/8.15.2) with ESMTPS id xBG8fDx6008225
         (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
-        Mon, 16 Dec 2019 02:26:16 -0600
-Received: from DFLE107.ent.ti.com (10.64.6.28) by DFLE100.ent.ti.com
- (10.64.6.21) with Microsoft SMTP Server (version=TLS1_2,
+        Mon, 16 Dec 2019 02:41:13 -0600
+Received: from DLEE103.ent.ti.com (157.170.170.33) by DLEE100.ent.ti.com
+ (157.170.170.30) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.1847.3; Mon, 16
- Dec 2019 02:26:16 -0600
-Received: from lelv0326.itg.ti.com (10.180.67.84) by DFLE107.ent.ti.com
- (10.64.6.28) with Microsoft SMTP Server (version=TLS1_2,
+ Dec 2019 02:41:13 -0600
+Received: from lelv0326.itg.ti.com (10.180.67.84) by DLEE103.ent.ti.com
+ (157.170.170.33) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.1847.3 via
- Frontend Transport; Mon, 16 Dec 2019 02:26:16 -0600
+ Frontend Transport; Mon, 16 Dec 2019 02:41:13 -0600
 Received: from [172.24.190.215] (ileax41-snat.itg.ti.com [10.172.224.153])
-        by lelv0326.itg.ti.com (8.15.2/8.15.2) with ESMTP id xBG8QCt3052187;
-        Mon, 16 Dec 2019 02:26:13 -0600
-Subject: Re: [PATCH v3 2/7] mmc: sdhci: add support for using external DMA
- devices
+        by lelv0326.itg.ti.com (8.15.2/8.15.2) with ESMTP id xBG8f9Sv078293;
+        Mon, 16 Dec 2019 02:41:10 -0600
+Subject: Re: [PATCH v3 4/7] mmc: sdhci: Add quirk for disabling DTO during
+ erase command
 To:     Adrian Hunter <adrian.hunter@intel.com>,
         <linux-kernel@vger.kernel.org>, <devicetree@vger.kernel.org>,
         <linux-mmc@vger.kernel.org>
@@ -55,15 +55,15 @@ CC:     <kishon@ti.com>, <mark.rutland@arm.com>, <robh+dt@kernel.org>,
         <ulf.hansson@linaro.org>, <zhang.chunyan@linaro.org>,
         <tony@atomide.com>
 References: <20191210095151.15441-1-faiz_abbas@ti.com>
- <20191210095151.15441-3-faiz_abbas@ti.com>
- <92fd22bf-3024-928d-ebf5-e7382988a36b@intel.com>
+ <20191210095151.15441-5-faiz_abbas@ti.com>
+ <003f7e7a-a762-5355-9404-4a6655754fb0@intel.com>
 From:   Faiz Abbas <faiz_abbas@ti.com>
-Message-ID: <fdf1334a-39bc-9247-9934-df6e1562f4b8@ti.com>
-Date:   Mon, 16 Dec 2019 13:57:21 +0530
+Message-ID: <09bb8f31-534d-c278-45c3-e0314286819c@ti.com>
+Date:   Mon, 16 Dec 2019 14:12:19 +0530
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
  Thunderbird/68.2.1
 MIME-Version: 1.0
-In-Reply-To: <92fd22bf-3024-928d-ebf5-e7382988a36b@intel.com>
+In-Reply-To: <003f7e7a-a762-5355-9404-4a6655754fb0@intel.com>
 Content-Type: text/plain; charset="utf-8"
 Content-Language: en-US
 Content-Transfer-Encoding: 7bit
@@ -75,153 +75,86 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 Hi Adrian,
 
-On 12/12/19 6:25 pm, Adrian Hunter wrote:
+
+On 13/12/19 3:10 pm, Adrian Hunter wrote:
 > On 10/12/19 11:51 am, Faiz Abbas wrote:
->> From: Chunyan Zhang <zhang.chunyan@linaro.org>
+>> Some controllers might prematurely issue a data timeout during an erase
+>> command. Add a quirk to disable the interrupt when an erase command is
+>> issued.
 >>
->> Some standard SD host controllers can support both external dma
->> controllers as well as ADMA/SDMA in which the SD host controller
->> acts as DMA master. TI's omap controller is the case as an example.
->>
->> Currently the generic SDHCI code supports ADMA/SDMA integrated in
->> the host controller but does not have any support for external DMA
->> controllers implemented using dmaengine, meaning that custom code is
->> needed for any systems that use an external DMA controller with SDHCI.
->>
->> Fixes by Faiz Abbas <faiz_abbas@ti.com>:
->> 1. Map scatterlists before dmaengine_prep_slave_sg()
->> 2. Use dma_async() functions inside of the send_command() path and call
->> terminate_sync() in non-atomic context in case of an error.
->>
->> Signed-off-by: Chunyan Zhang <zhang.chunyan@linaro.org>
 >> Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
 >> ---
-...
->>  {
->> @@ -1379,12 +1562,19 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
->>  	}
+>>  drivers/mmc/host/sdhci.c | 5 +++++
+>>  drivers/mmc/host/sdhci.h | 2 ++
+>>  2 files changed, 7 insertions(+)
+>>
+>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>> index 6f3d4991bee1..b8934c50b9c4 100644
+>> --- a/drivers/mmc/host/sdhci.c
+>> +++ b/drivers/mmc/host/sdhci.c
+>> @@ -1532,6 +1532,11 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
+>>  	/* Initially, a command has no error */
+>>  	cmd->error = 0;
 >>  
->>  	host->cmd = cmd;
->> +	host->data_timeout = 0;
->>  	if (sdhci_data_line_cmd(cmd)) {
->>  		WARN_ON(host->data_cmd);
->>  		host->data_cmd = cmd;
->> +		sdhci_set_timeout(host, cmd);
->>  	}
->>  
->> -	sdhci_prepare_data(host, cmd);
->> +	if (cmd->data) {
->> +		if (host->use_external_dma)
->> +			sdhci_external_dma_prepare_data(host, cmd);
->> +		else
->> +			sdhci_prepare_data(host, cmd);
+>> +	if (cmd->opcode == MMC_ERASE &&
+>> +	    (host->quirks2 & SDHCI_QUIRK2_DISABLE_DTO_FOR_ERASE)) {
+>> +		sdhci_set_data_timeout_irq(host, false);
 >> +	}
 > 
-> Please make the 3 changes above and the corresponding changes
-> sdhci_prepare_data into a separate patch i.e.
+> If you factor out __sdhci_set_timeout() like below then
+> you could implement ->set_timeout() to do this.
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index ad6d2f93aa0b..389e3239eadc 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1002,27 +1002,28 @@ static void sdhci_set_data_timeout_irq(struct sdhci_host *host, bool enable)
+>  	sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
+>  }
+>  
+> -static void sdhci_set_timeout(struct sdhci_host *host, struct mmc_command *cmd)
+> +void __sdhci_set_timeout(struct sdhci_host *host, struct mmc_command *cmd)
+>  {
+> -	u8 count;
+> -
+> -	if (host->ops->set_timeout) {
+> -		host->ops->set_timeout(host, cmd);
+> -	} else {
+> -		bool too_big = false;
+> -
+> -		count = sdhci_calc_timeout(host, cmd, &too_big);
+> +	bool too_big = false;
+> +	u8 count = sdhci_calc_timeout(host, cmd, &too_big);
+> +
+> +	if (too_big && host->quirks2 & SDHCI_QUIRK2_DISABLE_HW_TIMEOUT) {
+> +		sdhci_calc_sw_timeout(host, cmd);
+> +		sdhci_set_data_timeout_irq(host, false);
+> +	} else if (!(host->ier & SDHCI_INT_DATA_TIMEOUT)) {
+> +		sdhci_set_data_timeout_irq(host, true);
+> +	}
+>  
+> -		if (too_big &&
+> -		    host->quirks2 & SDHCI_QUIRK2_DISABLE_HW_TIMEOUT) {
+> -			sdhci_calc_sw_timeout(host, cmd);
+> -			sdhci_set_data_timeout_irq(host, false);
+> -		} else if (!(host->ier & SDHCI_INT_DATA_TIMEOUT)) {
+> -			sdhci_set_data_timeout_irq(host, true);
+> -		}
+> +	sdhci_writeb(host, count, SDHCI_TIMEOUT_CONTROL);
+> +}
+> +EXPORT_SYMBOL_GPL(__sdhci_set_timeout);
+>  
+> -		sdhci_writeb(host, count, SDHCI_TIMEOUT_CONTROL);
+> -	}
+> +static void sdhci_set_timeout(struct sdhci_host *host, struct mmc_command *cmd)
+> +{
+> +	if (host->ops->set_timeout)
+> +		host->ops->set_timeout(host, cmd);
+> +	else
+> +		__sdhci_set_timeout(host, cmd);
+>  }
 
-Ok. And I agree with all your style change requests above this. Will fix
-in v4.
-
->> @@ -2652,6 +2845,18 @@ static bool sdhci_request_done(struct sdhci_host *host)
->>  	if (host->flags & SDHCI_REQ_USE_DMA) {
->>  		struct mmc_data *data = mrq->data;
->>  
->> +		spin_unlock_irqrestore(&host->lock, flags);
->> +
->> +		/* Terminate and synchronize dma in case of an error */
->> +		if (data && (mrq->cmd->error || data->error) &&
->> +		    host->use_external_dma) {
->> +			struct dma_chan *chan = sdhci_external_dma_channel(host,
->> +									  data);
->> +			dmaengine_terminate_sync(chan);
->> +		}
->> +
->> +		spin_lock_irqsave(&host->lock, flags);
->> +
-> 
-> Need to take the mrq out of mrqs_done[] to ensure it is not processed again,
-> and put it back again to be consistent with the remaining code. Also put
-> host->use_external_dma as the first condition i.e.
-> 
-> 		if (host->use_external_dma && data &&
-> 		    (mrq->cmd->error || data->error)) {
-> 			struct dma_chan *chan = sdhci_external_dma_channel(host, data);
-> 
-> 			host->mrqs_done[i] = NULL;
-> 			spin_unlock_irqrestore(&host->lock, flags);
-> 			dmaengine_terminate_sync(chan);
-> 			spin_lock_irqsave(&host->lock, flags);
-> 			sdhci_set_mrq_done(host, mrq);
-> 		}
-> 
-> where sdhci_set_mrq_done() is factored out from __sdhci_finish_mrq() i.e.
-> 
-> static void sdhci_set_mrq_done(struct sdhci_host *host, struct mmc_request *mrq)
-> {
-> 	int i;
-> 
-> 	for (i = 0; i < SDHCI_MAX_MRQS; i++) {
-> 		if (host->mrqs_done[i] == mrq) {
-> 			WARN_ON(1);
-> 			return;
-> 		}
-> 	}
-> 
-> 	for (i = 0; i < SDHCI_MAX_MRQS; i++) {
-> 		if (!host->mrqs_done[i]) {
-> 			host->mrqs_done[i] = mrq;
-> 			break;
-> 		}
-> 	}
-> 
-> 	WARN_ON(i >= SDHCI_MAX_MRQS);
-> }
-> 
-> sdhci_set_mrq_done() can be made in the refactoring patch.
-Haven't we already done the sdhci_set_mrq_done() part in
-__sdhci_finish_mrq()?
-
-We are picking up an already "done" mrq, looking at whether it had any
-error and then sychronizing with external dma. Or at least that is my
-understanding.
-
-> 
->>  		if (data && data->host_cookie == COOKIE_MAPPED) {
->>  			if (host->bounce_buffer) {
->>  				/*
->> @@ -3758,12 +3963,28 @@ int sdhci_setup_host(struct sdhci_host *host)
->>  		       mmc_hostname(mmc), host->version);
->>  	}
->>  
->> -	if (host->quirks & SDHCI_QUIRK_FORCE_DMA)
->> +	if (host->use_external_dma) {
->> +		ret = sdhci_external_dma_init(host);
->> +		if (ret == -EPROBE_DEFER)
->> +			goto unreg;
->> +
->> +		/*
->> +		 * Fall back to use the DMA/PIO integrated in standard SDHCI
->> +		 * instead of external DMA devices.
->> +		 */
->> +		if (ret)
->> +			sdhci_switch_external_dma(host, false);
->> +	}
->> +
->> +	if (host->quirks & SDHCI_QUIRK_FORCE_DMA) {
->>  		host->flags |= SDHCI_USE_SDMA;
->> -	else if (!(host->caps & SDHCI_CAN_DO_SDMA))
->> +	} else if (!(host->caps & SDHCI_CAN_DO_SDMA)) {
->>  		DBG("Controller doesn't have SDMA capability\n");
->> -	else
->> +	} else if (host->use_external_dma) {
->> +		/* Using dma-names to detect external dma capability */
-> 
-> What is this change for?  Do you expect for SDHCI_USE_SDMA and
-> SDHCI_USE_ADMA flags to be clear?
-
-Yes. Today the code enables SDMA by default (in the else part below
-this). I want it to not enable SDMA in the external dma case.
+Ok. I'll add the refactoring as a separate patch.
 
 Thanks,
 Faiz
