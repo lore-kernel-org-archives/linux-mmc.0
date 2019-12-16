@@ -2,67 +2,106 @@ Return-Path: <SRS0=4vPn=2G=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	MENTIONS_GIT_HOSTING,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 774BAC43603
-	for <linux-mmc@archiver.kernel.org>; Mon, 16 Dec 2019 09:20:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7ABCAC2D0C0
+	for <linux-mmc@archiver.kernel.org>; Mon, 16 Dec 2019 12:09:38 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 4EDE7205ED
-	for <linux-mmc@archiver.kernel.org>; Mon, 16 Dec 2019 09:20:06 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4FF2A206CB
+	for <linux-mmc@archiver.kernel.org>; Mon, 16 Dec 2019 12:09:38 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="jXT0lsCm"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726875AbfLPJUF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 16 Dec 2019 04:20:05 -0500
-Received: from inva020.nxp.com ([92.121.34.13]:47258 "EHLO inva020.nxp.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726016AbfLPJUF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 16 Dec 2019 04:20:05 -0500
-Received: from inva020.nxp.com (localhost [127.0.0.1])
-        by inva020.eu-rdc02.nxp.com (Postfix) with ESMTP id 39C9E1A1848;
-        Mon, 16 Dec 2019 10:20:04 +0100 (CET)
-Received: from invc005.ap-rdc01.nxp.com (invc005.ap-rdc01.nxp.com [165.114.16.14])
-        by inva020.eu-rdc02.nxp.com (Postfix) with ESMTP id 173491A182B;
-        Mon, 16 Dec 2019 10:20:02 +0100 (CET)
-Received: from localhost.localdomain (mega.ap.freescale.net [10.192.208.232])
-        by invc005.ap-rdc01.nxp.com (Postfix) with ESMTP id E95B740296;
-        Mon, 16 Dec 2019 17:19:58 +0800 (SGT)
-From:   Yangbo Lu <yangbo.lu@nxp.com>
-To:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>
-Cc:     Yangbo Lu <yangbo.lu@nxp.com>
-Subject: [PATCH] mmc: sdhci-of-esdhc: use 1/2 periperhal clock for ls1088a
-Date:   Mon, 16 Dec 2019 17:19:11 +0800
-Message-Id: <20191216091911.14840-1-yangbo.lu@nxp.com>
-X-Mailer: git-send-email 2.17.1
-X-Virus-Scanned: ClamAV using ClamSMTP
+        id S1727443AbfLPMJh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 16 Dec 2019 07:09:37 -0500
+Received: from mail-vs1-f68.google.com ([209.85.217.68]:34236 "EHLO
+        mail-vs1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727453AbfLPMJh (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Dec 2019 07:09:37 -0500
+Received: by mail-vs1-f68.google.com with SMTP id g15so3954583vsf.1
+        for <linux-mmc@vger.kernel.org>; Mon, 16 Dec 2019 04:09:36 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=6A9SmGG2+bj/pD1xuwTAZLvQwqgF83kKhw0ox6vXN3k=;
+        b=jXT0lsCmRjPWBk1LGcpwql6bN+AbiN/lB+TY+O8wUE+pb1tql/TyWIpWSF+vqslejo
+         eR+ps1L7Mq8pvKmT52XDBnWGXcLw9eqJ/p3NhY/CFYbuaVDQferDt/vJ2rexIYb6hKuO
+         x0wPI6PEh96ejB2U9AzGcdP5SxpASQXQHBXIHCmxuiFyJqPGBp0ozDIz3B8pkSLHEo0l
+         Y7BHqC5etKHr970u+ZS+vL8HZcvj5/88LDJH1lIdIa0TrM+Zv2ZWiEchTa3g6l50BJXB
+         XCLNUPErLHUsn7jsv40n9fvbiq/MtGlk2h3dxFg2JJSPwHVQlyM2CqaLjd0LYYgnLt9z
+         840w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=6A9SmGG2+bj/pD1xuwTAZLvQwqgF83kKhw0ox6vXN3k=;
+        b=tcrH6kl9B0OakFZQA792YdV2HGcFmUeuBJYApO4bBDT85mB8nnNC9qn/9xwEdJU9n1
+         YAp1r0nKULg/Vrhjd8pmx3FwAKr99VgYCux0Ty2/NJCnOKLJLAwXDVSHtYe+qauY6ehQ
+         IZXwNxngBAmLwQ8cZd0Wxx5UC90Yob1FH7JKtv+yTJuO9dbXo/UwKfNmj9bMqD7UM7sA
+         QcAd8hxBsjityaqJHDxt1xTbCBmIO4lmDk9ZWANE8RJG3LsVGwVkp/2CcQhBn31yzjQt
+         kQHgkqniF2s3FYO+gblrDWUK2cdgqD7yIo8L3s/8EeTkYfshXN3yI5xoTneTdDLlUx5L
+         W9+Q==
+X-Gm-Message-State: APjAAAUUHcfl8ZKj/v8nYlpKevTwUrsO3AFg1HG9NSzeA6vN/KH3obmS
+        XgtyEnNnuJI+KAUqjE1Ar5fMpEQiG7mE9dSNjIFY2g==
+X-Google-Smtp-Source: APXvYqzXtD2dx+U34J2BlasQ73Om+g2qJaDU3dKObl0ufgdGzbHbhXxROItuw34IjZX3c1dnx1+spYkCWWPl4hbvSfE=
+X-Received: by 2002:a67:db8f:: with SMTP id f15mr6614165vsk.191.1576498176274;
+ Mon, 16 Dec 2019 04:09:36 -0800 (PST)
+MIME-Version: 1.0
+References: <20191206170821.29711-1-ulf.hansson@linaro.org>
+ <20191206170821.29711-2-ulf.hansson@linaro.org> <CACRpkdZmuvRbLrud86Jd-8w4pBx5u8L+TvNpWAOtyAvNw6OFnA@mail.gmail.com>
+In-Reply-To: <CACRpkdZmuvRbLrud86Jd-8w4pBx5u8L+TvNpWAOtyAvNw6OFnA@mail.gmail.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Mon, 16 Dec 2019 13:09:00 +0100
+Message-ID: <CAPDyKFp978kmfmadwPEUg1+hQON7u5=1et=OEBsykE=MRBZERw@mail.gmail.com>
+Subject: Re: [PATCH 1/9] pinctrl: core: Add pinctrl_select_default_state() and
+ export it
+To:     Linus Walleij <linus.walleij@linaro.org>
+Cc:     "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The eSDHC on LS1088A platform uses 1/2 peripheral clock as base
-clock.
+On Mon, 16 Dec 2019 at 09:02, Linus Walleij <linus.walleij@linaro.org> wrote:
+>
+> On Fri, Dec 6, 2019 at 6:08 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>
+> > It has turned out that some mmc host drivers, but perhaps also others
+> > drivers, needs to reset the pinctrl into the default state
+> > (PINCTRL_STATE_DEFAULT). However, they can't use the existing
+> > pinctrl_pm_select_default_state(), as that requires CONFIG_PM to be set.
+> > This leads to open coding, as they need to look up the default state
+> > themselves and then select it.
+> >
+> > To avoid the open coding, let's introduce pinctrl_select_default_state()
+> > and make it available independently of CONFIG_PM. As a matter of fact, this
+> > makes it more consistent with the behaviour of the driver core, as it
+> > already tries to looks up the default state during probe.
+> >
+> > Going forward, users of pinctrl_pm_select_default_state() are encouraged to
+> > move to pinctrl_select_default_state(), so the old API can be removed.
+> >
+> > Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+>
+> I have put this patch on an immutable branch so that you can pull it into your
+> tree:
+> https://git.kernel.org/pub/scm/linux/kernel/git/linusw/linux-pinctrl.git/log/?h=ib-pinctrl-default-state
+>
+> I also pulled this immutable branch into my "devel" branch for v5.6.
+>
+> I think other subsystems may need the same kind of stuff and I might need
+> to change code around here so I need to apply it to my tree.
 
-Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
----
- drivers/mmc/host/sdhci-of-esdhc.c | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+Thanks!
 
-diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-index 7f87a90..f43abcf 100644
---- a/drivers/mmc/host/sdhci-of-esdhc.c
-+++ b/drivers/mmc/host/sdhci-of-esdhc.c
-@@ -1228,7 +1228,8 @@ static void esdhc_init(struct platform_device *pdev, struct sdhci_host *host)
- 		 * 1/2 peripheral clock.
- 		 */
- 		if (of_device_is_compatible(np, "fsl,ls1046a-esdhc") ||
--		    of_device_is_compatible(np, "fsl,ls1028a-esdhc"))
-+		    of_device_is_compatible(np, "fsl,ls1028a-esdhc") ||
-+		    of_device_is_compatible(np, "fsl,ls1088a-esdhc"))
- 			esdhc->peripheral_clock = clk_get_rate(clk) / 2;
- 		else
- 			esdhc->peripheral_clock = clk_get_rate(clk);
--- 
-2.7.4
+I have pulled in the branch into my tree - and applied the mmc patches
+with your ack on top.
 
+Kind regards
+Uffe
