@@ -1,104 +1,82 @@
-Return-Path: <SRS0=BTiE=2F=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=4vPn=2G=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1888FC2D0CA
-	for <linux-mmc@archiver.kernel.org>; Sun, 15 Dec 2019 17:52:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 900AAC43603
+	for <linux-mmc@archiver.kernel.org>; Mon, 16 Dec 2019 03:19:38 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id E694724681
-	for <linux-mmc@archiver.kernel.org>; Sun, 15 Dec 2019 17:52:26 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="LD9i0Sz6"
+	by mail.kernel.org (Postfix) with ESMTP id 6CE562467A
+	for <linux-mmc@archiver.kernel.org>; Mon, 16 Dec 2019 03:19:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726282AbfLORva (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 15 Dec 2019 12:51:30 -0500
-Received: from mail-pl1-f195.google.com ([209.85.214.195]:44699 "EHLO
-        mail-pl1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726267AbfLORva (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 15 Dec 2019 12:51:30 -0500
-Received: by mail-pl1-f195.google.com with SMTP id az3so3442857plb.11;
-        Sun, 15 Dec 2019 09:51:29 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id;
-        bh=z1jBRqifD9uwR57sxHEm4IG5SvaRCOY1FJ5LXadeqP4=;
-        b=LD9i0Sz6s6XSzCMt0KxGg8AkP/88Gm29YgxJKl/PIqRJ29V1U4k/Q1BcW2j8KkXiun
-         oYLm5Oj4XhSh35ez2t6kOADhXR1IKCNrHdK9Tq2IoifZqzGaoUiYkTDOgVZVjEzxGucW
-         t0yMqBvCvtGLkldgOTt6EEETTw6diR2m8JWhrciDiz8t0r6oWa5FoiiSjOFWVrwjKVO1
-         3SculOLAtHzrOynoET+zghiGzyI5dGzUZlCNZ+YHnez/tYiMyMo2tB4pHUN2jVptR1lv
-         GPXHLuxviOJVUKzri0wyTsmwSmsOOjY0g7WapaSEIWGMR1TvUxQrPW9ddrdvJOARMD1R
-         OveQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id;
-        bh=z1jBRqifD9uwR57sxHEm4IG5SvaRCOY1FJ5LXadeqP4=;
-        b=ggzioMtNbpMoq+VRzANnHB1AwNYMCZBGHQTfpwvQeQSbsc3/wnVdD52okPWBpHvcut
-         qdLe6a3iR7la5xTZb5vwwy5vfoO7xAUP5T/0bXsVTp0Dy5zVp5CpJgflNis7Erj5YQj7
-         87EyaQ4KvdpHHQ54VvD8UfTfEWKRMdP70v0R+gMtpWTPjd1h5BG0HgWhQ0bOsJqckiaj
-         H5Z/ZCgDbpdvHiccaivaXwJa9iG9fpuugjr8j+G0xKlNVLtEbcAov4cOhRpz3/LINVHr
-         sPXfdsujqyQoqIBpTynkS+MAnrxsX+Zfl4Ju0/7N+bGtl8+PziOe2iPod+HBpdGI+m1d
-         Xsuw==
-X-Gm-Message-State: APjAAAXhPu4iMFAmWTQdmyt0AGeXKotiOfk36IFM3JlIhz5g4W0G07e5
-        ZrYebYDz4iwXvvzpSsp0g6Q=
-X-Google-Smtp-Source: APXvYqzWCydMHykUpEys8y8YK57hVRHOWOHSqS0Ui0zvmzlWq1mTCq8BkWpBBEPrjneRePs+lPMvMg==
-X-Received: by 2002:a17:902:59c9:: with SMTP id d9mr11602644plj.184.1576432289298;
-        Sun, 15 Dec 2019 09:51:29 -0800 (PST)
-Received: from localhost ([2001:19f0:6001:12c8:5400:2ff:fe72:6403])
-        by smtp.gmail.com with ESMTPSA id q6sm19291374pfl.140.2019.12.15.09.51.27
-        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Sun, 15 Dec 2019 09:51:28 -0800 (PST)
-From:   Yangtao Li <tiny.windzz@gmail.com>
-To:     manuel.lauss@gmail.com, ulf.hansson@linaro.org,
-        khilman@baylibre.com, chaotian.jing@mediatek.com,
-        matthias.bgg@gmail.com, nico@fluxnic.net, adrian.hunter@intel.com,
-        agross@kernel.org, bjorn.andersson@linaro.org, ben-linux@fluff.org,
-        jh80.chung@samsung.com, vireshk@kernel.org, mripard@kernel.org,
-        wens@csie.org, wsa+renesas@sang-engineering.com,
-        gregkh@linuxfoundation.org, kstewart@linuxfoundation.org,
-        yamada.masahiro@socionext.com, tglx@linutronix.de,
-        allison@lohutok.net, yoshihiro.shimoda.uh@renesas.com,
-        geert+renesas@glider.be, linus.walleij@linaro.org
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org,
-        linux-amlogic@lists.infradead.org,
-        linux-mediatek@lists.infradead.org, linux-arm-msm@vger.kernel.org,
-        Yangtao Li <tiny.windzz@gmail.com>
-Subject: [PATCH 01/13] mmc: sunxi-mmc: convert to devm_platform_ioremap_resource
-Date:   Sun, 15 Dec 2019 17:51:08 +0000
-Message-Id: <20191215175120.3290-1-tiny.windzz@gmail.com>
+        id S1726551AbfLPDTh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 15 Dec 2019 22:19:37 -0500
+Received: from inva020.nxp.com ([92.121.34.13]:58834 "EHLO inva020.nxp.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726528AbfLPDTh (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Sun, 15 Dec 2019 22:19:37 -0500
+Received: from inva020.nxp.com (localhost [127.0.0.1])
+        by inva020.eu-rdc02.nxp.com (Postfix) with ESMTP id 194B71A179D;
+        Mon, 16 Dec 2019 04:19:36 +0100 (CET)
+Received: from invc005.ap-rdc01.nxp.com (invc005.ap-rdc01.nxp.com [165.114.16.14])
+        by inva020.eu-rdc02.nxp.com (Postfix) with ESMTP id 824261A057A;
+        Mon, 16 Dec 2019 04:19:33 +0100 (CET)
+Received: from localhost.localdomain (mega.ap.freescale.net [10.192.208.232])
+        by invc005.ap-rdc01.nxp.com (Postfix) with ESMTP id F35D84028F;
+        Mon, 16 Dec 2019 11:19:29 +0800 (SGT)
+From:   Yangbo Lu <yangbo.lu@nxp.com>
+To:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Yinbo Zhu <yinbo.zhu@nxp.com>
+Cc:     Yangbo Lu <yangbo.lu@nxp.com>
+Subject: [PATCH] mmc: sdhci-of-esdhc: fix P2020 errata handling
+Date:   Mon, 16 Dec 2019 11:18:42 +0800
+Message-Id: <20191216031842.40068-1-yangbo.lu@nxp.com>
 X-Mailer: git-send-email 2.17.1
+X-Virus-Scanned: ClamAV using ClamSMTP
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Use devm_platform_ioremap_resource() to simplify code.
+Two previous patches introduced below quirks for P2020 platforms.
+- SDHCI_QUIRK_RESET_AFTER_REQUEST
+- SDHCI_QUIRK_BROKEN_TIMEOUT_VAL
 
-Signed-off-by: Yangtao Li <tiny.windzz@gmail.com>
+The patches made a mistake to add them in quirks2 of sdhci_host
+structure, while they were defined for quirks.
+	host->quirks2 |= SDHCI_QUIRK_RESET_AFTER_REQUEST;
+	host->quirks2 |= SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
+
+This patch is to fix them.
+	host->quirks |= SDHCI_QUIRK_RESET_AFTER_REQUEST;
+	host->quirks |= SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
+
+Fixes: 05cb6b2a66fa ("mmc: sdhci-of-esdhc: add erratum eSDHC-A001 and A-008358 support")
+Fixes: a46e42712596 ("mmc: sdhci-of-esdhc: add erratum eSDHC5 support")
+Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
 ---
- drivers/mmc/host/sunxi-mmc.c | 3 +--
- 1 file changed, 1 insertion(+), 2 deletions(-)
+ drivers/mmc/host/sdhci-of-esdhc.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-index d577a6b0ceae..f87d7967457f 100644
---- a/drivers/mmc/host/sunxi-mmc.c
-+++ b/drivers/mmc/host/sunxi-mmc.c
-@@ -1273,8 +1273,7 @@ static int sunxi_mmc_resource_request(struct sunxi_mmc_host *host,
- 	if (ret)
- 		return ret;
+diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+index 7f87a90..4ca640e 100644
+--- a/drivers/mmc/host/sdhci-of-esdhc.c
++++ b/drivers/mmc/host/sdhci-of-esdhc.c
+@@ -1300,8 +1300,8 @@ static int sdhci_esdhc_probe(struct platform_device *pdev)
+ 		host->quirks &= ~SDHCI_QUIRK_NO_BUSY_IRQ;
  
--	host->reg_base = devm_ioremap_resource(&pdev->dev,
--			      platform_get_resource(pdev, IORESOURCE_MEM, 0));
-+	host->reg_base = devm_platform_ioremap_resource(pdev, 0);
- 	if (IS_ERR(host->reg_base))
- 		return PTR_ERR(host->reg_base);
+ 	if (of_find_compatible_node(NULL, NULL, "fsl,p2020-esdhc")) {
+-		host->quirks2 |= SDHCI_QUIRK_RESET_AFTER_REQUEST;
+-		host->quirks2 |= SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
++		host->quirks |= SDHCI_QUIRK_RESET_AFTER_REQUEST;
++		host->quirks |= SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
+ 	}
  
+ 	if (of_device_is_compatible(np, "fsl,p5040-esdhc") ||
 -- 
-2.17.1
+2.7.4
 
