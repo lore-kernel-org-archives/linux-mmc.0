@@ -2,214 +2,284 @@ Return-Path: <SRS0=4vPn=2G=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1C239C43603
-	for <linux-mmc@archiver.kernel.org>; Mon, 16 Dec 2019 13:46:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5DD7DC43603
+	for <linux-mmc@archiver.kernel.org>; Mon, 16 Dec 2019 21:47:08 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id DF4A8206A5
-	for <linux-mmc@archiver.kernel.org>; Mon, 16 Dec 2019 13:46:34 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2498324655
+	for <linux-mmc@archiver.kernel.org>; Mon, 16 Dec 2019 21:47:08 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="EOVQisom"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727996AbfLPNqe (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 16 Dec 2019 08:46:34 -0500
-Received: from mga11.intel.com ([192.55.52.93]:60796 "EHLO mga11.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727986AbfLPNqe (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 16 Dec 2019 08:46:34 -0500
-X-Amp-Result: SKIPPED(no attachment in message)
-X-Amp-File-Uploaded: False
-Received: from orsmga005.jf.intel.com ([10.7.209.41])
-  by fmsmga102.fm.intel.com with ESMTP/TLS/DHE-RSA-AES256-GCM-SHA384; 16 Dec 2019 05:46:33 -0800
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.69,321,1571727600"; 
-   d="scan'208";a="389461898"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.169]) ([10.237.72.169])
-  by orsmga005.jf.intel.com with ESMTP; 16 Dec 2019 05:46:30 -0800
-Subject: Re: [PATCH v3 2/7] mmc: sdhci: add support for using external DMA
- devices
-To:     Faiz Abbas <faiz_abbas@ti.com>, linux-kernel@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-mmc@vger.kernel.org
-Cc:     kishon@ti.com, mark.rutland@arm.com, robh+dt@kernel.org,
-        ulf.hansson@linaro.org, zhang.chunyan@linaro.org, tony@atomide.com
-References: <20191210095151.15441-1-faiz_abbas@ti.com>
- <20191210095151.15441-3-faiz_abbas@ti.com>
- <92fd22bf-3024-928d-ebf5-e7382988a36b@intel.com>
- <fdf1334a-39bc-9247-9934-df6e1562f4b8@ti.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <ebfceaa6-a8a9-1df2-4c31-263f097b68bd@intel.com>
-Date:   Mon, 16 Dec 2019 15:45:36 +0200
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.2.2
+        id S1726764AbfLPVrH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 16 Dec 2019 16:47:07 -0500
+Received: from mail-lf1-f68.google.com ([209.85.167.68]:40127 "EHLO
+        mail-lf1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726275AbfLPVrH (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Dec 2019 16:47:07 -0500
+Received: by mail-lf1-f68.google.com with SMTP id i23so5380029lfo.7
+        for <linux-mmc@vger.kernel.org>; Mon, 16 Dec 2019 13:47:05 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=pehE/XEmXt42PybxGxL2f+rlsOLyO398u74/V0rOiW4=;
+        b=EOVQisomRAUu+oZLPs5McKH6ilhwQq2o8YRZmKXFJBaLb4Y3skAyftJbYMKViqh6QP
+         rggm0up7vOnPSsSo+0BwHzkZZnYquzJRx/UMI9NwSmPHi6ySd9VUDqU7E5Vfqf/Fv5ib
+         QdlEq1MInZLjubywE98voikOCZwjQByjB5tPzwARKayMfzao2jWLCj3L1xB4LIZzVWq3
+         ZoRmJSRBnvEOISiq2ASxY2v8s9ULtKGLdSzWxL9Sq8lCYfz9V8ZowZEdGGkAMw4RnBXX
+         WTyhGkqCrRQGliAWjsMAeJ2QR7t+JqA1oU/prmuPg2sJrorgoO/FzsUgUoNFBFwjdNtd
+         j+0A==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=pehE/XEmXt42PybxGxL2f+rlsOLyO398u74/V0rOiW4=;
+        b=EH7KZOtvQHzYEGN8VIXy9cb/d310lYaU62E5mWEaAjNw1X9KLlVljB87XFSZ+3V6Ef
+         2QqcqOjE7YiG/dX5oxuM1/5Se3vWs0JmyjFM7RVcS1kGhuNsX2ueYJSY8aFVCMvK5+sf
+         IF2HNuq+KRI6pJelRHCcr21VSTsS8Zb+kAe576rF0IRXHPIMscBtKRnaoo8VD0R/xEKz
+         Ot2+jVkMkbY67a5hgsxm7MfW8Qqbh9cnXhAxdDbQV9d6SQm3bO4LLxhH6QK0GDddMTRJ
+         ckFoiwPhT+39P7V+WyIeiAD7+ulKkcLsfV3Y4BI/W16pFUhhJb7DPrGkAFOAEA4k+axu
+         c9pg==
+X-Gm-Message-State: APjAAAW8Ls9qVDGtFh/8+gCghxhiUZ6S7Px9k6n0TN9HnUjmuNZzvml9
+        dDzGCq0oxBVFmv8Hj1JZan3CpsFpQ0z4Jg==
+X-Google-Smtp-Source: APXvYqyCgltgGwMKcY26OnerPwq7rUlBFmT+KiEh8baChcZJnQKndsSXXWpOELueeanq2O3fDyBYwQ==
+X-Received: by 2002:a05:6512:4c6:: with SMTP id w6mr728960lfq.157.1576532824014;
+        Mon, 16 Dec 2019 13:47:04 -0800 (PST)
+Received: from localhost.bredbandsbolaget (c-21cd225c.014-348-6c756e10.bbcust.telenor.se. [92.34.205.33])
+        by smtp.gmail.com with ESMTPSA id c20sm11358867ljj.55.2019.12.16.13.47.02
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 16 Dec 2019 13:47:02 -0800 (PST)
+From:   Linus Walleij <linus.walleij@linaro.org>
+To:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Linus Walleij <linus.walleij@linaro.org>,
+        Ludovic Barre <ludovic.barre@st.com>,
+        Brian Masney <masneyb@onstation.org>,
+        Stephan Gerhold <stephan@gerhold.net>,
+        Niklas Cassel <niklas.cassel@linaro.org>,
+        Russell King <rmk+kernel@armlinux.org.uk>,
+        Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+Subject: [PATCH v5] mmc: mmci: Support odd block sizes for ux500v2 and qcom variant
+Date:   Mon, 16 Dec 2019 22:46:59 +0100
+Message-Id: <20191216214659.29778-1-linus.walleij@linaro.org>
+X-Mailer: git-send-email 2.21.0
 MIME-Version: 1.0
-In-Reply-To: <fdf1334a-39bc-9247-9934-df6e1562f4b8@ti.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 16/12/19 10:27 am, Faiz Abbas wrote:
-> Hi Adrian,
-> 
-> On 12/12/19 6:25 pm, Adrian Hunter wrote:
->> On 10/12/19 11:51 am, Faiz Abbas wrote:
->>> From: Chunyan Zhang <zhang.chunyan@linaro.org>
->>>
->>> Some standard SD host controllers can support both external dma
->>> controllers as well as ADMA/SDMA in which the SD host controller
->>> acts as DMA master. TI's omap controller is the case as an example.
->>>
->>> Currently the generic SDHCI code supports ADMA/SDMA integrated in
->>> the host controller but does not have any support for external DMA
->>> controllers implemented using dmaengine, meaning that custom code is
->>> needed for any systems that use an external DMA controller with SDHCI.
->>>
->>> Fixes by Faiz Abbas <faiz_abbas@ti.com>:
->>> 1. Map scatterlists before dmaengine_prep_slave_sg()
->>> 2. Use dma_async() functions inside of the send_command() path and call
->>> terminate_sync() in non-atomic context in case of an error.
->>>
->>> Signed-off-by: Chunyan Zhang <zhang.chunyan@linaro.org>
->>> Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
->>> ---
-> ...
->>>  {
->>> @@ -1379,12 +1562,19 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
->>>  	}
->>>  
->>>  	host->cmd = cmd;
->>> +	host->data_timeout = 0;
->>>  	if (sdhci_data_line_cmd(cmd)) {
->>>  		WARN_ON(host->data_cmd);
->>>  		host->data_cmd = cmd;
->>> +		sdhci_set_timeout(host, cmd);
->>>  	}
->>>  
->>> -	sdhci_prepare_data(host, cmd);
->>> +	if (cmd->data) {
->>> +		if (host->use_external_dma)
->>> +			sdhci_external_dma_prepare_data(host, cmd);
->>> +		else
->>> +			sdhci_prepare_data(host, cmd);
->>> +	}
->>
->> Please make the 3 changes above and the corresponding changes
->> sdhci_prepare_data into a separate patch i.e.
-> 
-> Ok. And I agree with all your style change requests above this. Will fix
-> in v4.
-> 
->>> @@ -2652,6 +2845,18 @@ static bool sdhci_request_done(struct sdhci_host *host)
->>>  	if (host->flags & SDHCI_REQ_USE_DMA) {
->>>  		struct mmc_data *data = mrq->data;
->>>  
->>> +		spin_unlock_irqrestore(&host->lock, flags);
->>> +
->>> +		/* Terminate and synchronize dma in case of an error */
->>> +		if (data && (mrq->cmd->error || data->error) &&
->>> +		    host->use_external_dma) {
->>> +			struct dma_chan *chan = sdhci_external_dma_channel(host,
->>> +									  data);
->>> +			dmaengine_terminate_sync(chan);
->>> +		}
->>> +
->>> +		spin_lock_irqsave(&host->lock, flags);
->>> +
->>
->> Need to take the mrq out of mrqs_done[] to ensure it is not processed again,
->> and put it back again to be consistent with the remaining code. Also put
->> host->use_external_dma as the first condition i.e.
->>
->> 		if (host->use_external_dma && data &&
->> 		    (mrq->cmd->error || data->error)) {
->> 			struct dma_chan *chan = sdhci_external_dma_channel(host, data);
->>
->> 			host->mrqs_done[i] = NULL;
->> 			spin_unlock_irqrestore(&host->lock, flags);
->> 			dmaengine_terminate_sync(chan);
->> 			spin_lock_irqsave(&host->lock, flags);
->> 			sdhci_set_mrq_done(host, mrq);
->> 		}
->>
->> where sdhci_set_mrq_done() is factored out from __sdhci_finish_mrq() i.e.
->>
->> static void sdhci_set_mrq_done(struct sdhci_host *host, struct mmc_request *mrq)
->> {
->> 	int i;
->>
->> 	for (i = 0; i < SDHCI_MAX_MRQS; i++) {
->> 		if (host->mrqs_done[i] == mrq) {
->> 			WARN_ON(1);
->> 			return;
->> 		}
->> 	}
->>
->> 	for (i = 0; i < SDHCI_MAX_MRQS; i++) {
->> 		if (!host->mrqs_done[i]) {
->> 			host->mrqs_done[i] = mrq;
->> 			break;
->> 		}
->> 	}
->>
->> 	WARN_ON(i >= SDHCI_MAX_MRQS);
->> }
->>
->> sdhci_set_mrq_done() can be made in the refactoring patch.
-> Haven't we already done the sdhci_set_mrq_done() part in
-> __sdhci_finish_mrq()?
-> 
-> We are picking up an already "done" mrq, looking at whether it had any
-> error and then sychronizing with external dma. Or at least that is my
-> understanding.
+For the ux500v2 variant of the PL18x block, odd block sizes
+are supported. This is necessary to support some SDIO
+transfers. This also affects the QCOM MMCI variant and the
+ST micro variant.
 
-sdhci supports having 2 requests (1 data, 1 cmd) at a time, so there is an
-error case where 1 request will wait for the 2nd request before doing a
-reset.  That logic is further down in sdhci_request_done() so you have to
-put the mrq back into host->mrqs_done[] to make it work.
+For Ux500 an additional quirk only allowing DMA on blocks
+that are a power of two is needed. This might be a bug in
+the DMA engine (DMA40) or the MMCI or in the interconnect,
+but the most likely is the MMCI, as transfers of these
+sizes work fine for other devices using the same DMA
+engine. DMA works fine also with SDIO as long as the
+blocksize is a power of 2.
 
-> 
->>
->>>  		if (data && data->host_cookie == COOKIE_MAPPED) {
->>>  			if (host->bounce_buffer) {
->>>  				/*
->>> @@ -3758,12 +3963,28 @@ int sdhci_setup_host(struct sdhci_host *host)
->>>  		       mmc_hostname(mmc), host->version);
->>>  	}
->>>  
->>> -	if (host->quirks & SDHCI_QUIRK_FORCE_DMA)
->>> +	if (host->use_external_dma) {
->>> +		ret = sdhci_external_dma_init(host);
->>> +		if (ret == -EPROBE_DEFER)
->>> +			goto unreg;
->>> +
->>> +		/*
->>> +		 * Fall back to use the DMA/PIO integrated in standard SDHCI
->>> +		 * instead of external DMA devices.
->>> +		 */
->>> +		if (ret)
->>> +			sdhci_switch_external_dma(host, false);
->>> +	}
->>> +
->>> +	if (host->quirks & SDHCI_QUIRK_FORCE_DMA) {
->>>  		host->flags |= SDHCI_USE_SDMA;
->>> -	else if (!(host->caps & SDHCI_CAN_DO_SDMA))
->>> +	} else if (!(host->caps & SDHCI_CAN_DO_SDMA)) {
->>>  		DBG("Controller doesn't have SDMA capability\n");
->>> -	else
->>> +	} else if (host->use_external_dma) {
->>> +		/* Using dma-names to detect external dma capability */
->>
->> What is this change for?  Do you expect for SDHCI_USE_SDMA and
->> SDHCI_USE_ADMA flags to be clear?
-> 
-> Yes. Today the code enables SDMA by default (in the else part below
-> this). I want it to not enable SDMA in the external dma case.
+This patch has proven necessary for enabling SDIO for WLAN on
+PostmarketOS-based Ux500 platforms.
 
-What about moving the "if (host->use_external_dma) {" clause and explicitly
-clearing SDHCI_USE_SDMA and SDHCI_USE_ADMA?
+What we managed to test in practice is Broadcom WiFi over
+SDIO on the Ux500 based Samsung GT-I8190 and GT-S7710.
+This WiFi chip, BCM4334 works fine after the patch.
+
+Before this patch:
+
+brcmfmac: brcmf_fw_alloc_request: using brcm/brcmfmac4334-sdio
+	  for chip BCM4334/3
+mmci-pl18x 80118000.sdi1_per2: unsupported block size (60 bytes)
+brcmfmac: brcmf_sdiod_ramrw: membytes transfer failed
+brcmfmac: brcmf_sdio_download_code_file: error -22 on writing
+	  434236 membytes at 0x00000000
+brcmfmac: brcmf_sdio_download_firmware: dongle image file download
+	  failed
+
+After this patch:
+
+brcmfmac: brcmf_c_preinit_dcmds: Firmware: BCM4334/3 wl0:
+	  Nov 21 2012 00:21:28 version 6.10.58.813 (B2) FWID 01-0
+
+Bringing up networks, discovering networks with "iw dev wlan0 scan"
+and connecting works fine from this point.
+
+This patch is inspired by Ulf Hansson's patch
+http://www.spinics.net/lists/linux-mmc/msg12160.html
+
+As the DMA engines on these platforms may now get block sizes
+they were not used to before, make sure to also respect if
+the DMA engine says "no" to a transfer.
+
+Make a drive-by fix for datactrl_blocksz, misspelled.
+
+Cc: Ludovic Barre <ludovic.barre@st.com>
+Cc: Brian Masney <masneyb@onstation.org>
+Cc: Stephan Gerhold <stephan@gerhold.net>
+Cc: Niklas Cassel <niklas.cassel@linaro.org>
+Cc: Russell King <rmk+kernel@armlinux.org.uk>
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+---
+ChangeLog v4->v5:
+- Rename variant members as Ulf want them.
+ChangeLog v3->v4:
+- Rewrite the patch to accept odd packages but only
+  let power of two packages pass on to the DMA.
+- Drop the patches disallowing DMA not divisible by 4:
+  this doesn't work. Instead just push the whole
+  power of two criteria down to the DMA submission
+  phase.
+- Drop the patch handling odd sglist offsets and
+  passing of page boundaries in SG buffers when
+  using PIO: it just doesn't happen in practice, we
+  don't know why, but likely because all packets are
+  small.
+ChangeLog v2->v3:
+- Repost with the inclusion of other patches.
+ChangeLog v1->v2:
+- Specify odd blocksize field to 1 bit (:1)
+- Specify that STMMC supports odd block sizes
+- Collect Stephan's test tag
+---
+ drivers/mmc/host/mmci.c | 34 ++++++++++++++++++++++++++++++----
+ drivers/mmc/host/mmci.h |  8 +++++++-
+ 2 files changed, 37 insertions(+), 5 deletions(-)
+
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index c37e70dbe250..5afe9145f957 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -168,6 +168,8 @@ static struct variant_data variant_ux500 = {
+ 	.cmdreg_srsp		= MCI_CPSM_RESPONSE,
+ 	.datalength_bits	= 24,
+ 	.datactrl_blocksz	= 11,
++	.datactrl_odd_blocksz	= true,
++	.only_pow_2_dma		= true,
+ 	.datactrl_mask_sdio	= MCI_DPSM_ST_SDIOEN,
+ 	.st_sdio		= true,
+ 	.st_clkdiv		= true,
+@@ -201,6 +203,8 @@ static struct variant_data variant_ux500v2 = {
+ 	.datactrl_mask_ddrmode	= MCI_DPSM_ST_DDRMODE,
+ 	.datalength_bits	= 24,
+ 	.datactrl_blocksz	= 11,
++	.datactrl_odd_blocksz	= true,
++	.only_pow_2_dma		= true,
+ 	.datactrl_mask_sdio	= MCI_DPSM_ST_SDIOEN,
+ 	.st_sdio		= true,
+ 	.st_clkdiv		= true,
+@@ -260,6 +264,7 @@ static struct variant_data variant_stm32_sdmmc = {
+ 	.datacnt_useless	= true,
+ 	.datalength_bits	= 25,
+ 	.datactrl_blocksz	= 14,
++	.datactrl_odd_blocksz	= true,
+ 	.stm32_idmabsize_mask	= GENMASK(12, 5),
+ 	.init			= sdmmc_variant_init,
+ };
+@@ -279,6 +284,7 @@ static struct variant_data variant_qcom = {
+ 	.data_cmd_enable	= MCI_CPSM_QCOM_DATCMD,
+ 	.datalength_bits	= 24,
+ 	.datactrl_blocksz	= 11,
++	.datactrl_odd_blocksz	= true,
+ 	.pwrreg_powerup		= MCI_PWR_UP,
+ 	.f_max			= 208000000,
+ 	.explicit_mclk_control	= true,
+@@ -447,10 +453,11 @@ void mmci_dma_setup(struct mmci_host *host)
+ static int mmci_validate_data(struct mmci_host *host,
+ 			      struct mmc_data *data)
+ {
++	struct variant_data *variant = host->variant;
++
+ 	if (!data)
+ 		return 0;
+-
+-	if (!is_power_of_2(data->blksz)) {
++	if (!is_power_of_2(data->blksz) && !variant->datactrl_odd_blocksz) {
+ 		dev_err(mmc_dev(host->mmc),
+ 			"unsupported block size (%d bytes)\n", data->blksz);
+ 		return -EINVAL;
+@@ -515,7 +522,9 @@ int mmci_dma_start(struct mmci_host *host, unsigned int datactrl)
+ 		 "Submit MMCI DMA job, sglen %d blksz %04x blks %04x flags %08x\n",
+ 		 data->sg_len, data->blksz, data->blocks, data->flags);
+ 
+-	host->ops->dma_start(host, &datactrl);
++	ret = host->ops->dma_start(host, &datactrl);
++	if (ret)
++		return ret;
+ 
+ 	/* Trigger the DMA transfer */
+ 	mmci_write_datactrlreg(host, datactrl);
+@@ -822,6 +831,18 @@ static int _mmci_dmae_prep_data(struct mmci_host *host, struct mmc_data *data,
+ 	if (data->blksz * data->blocks <= variant->fifosize)
+ 		return -EINVAL;
+ 
++	/*
++	 * This is necessary to get SDIO working on the Ux500. We do not yet
++	 * know if this is a bug in:
++	 * - The Ux500 DMA controller (DMA40)
++	 * - The MMCI DMA interface on the Ux500
++	 * some power of two blocks (such as 64 bytes) are sent regularly
++	 * during SDIO traffic and those work fine so for these we enable DMA
++	 * transfers.
++	 */
++	if (host->variant->only_pow_2_dma && !is_power_of_2(data->blksz))
++		return -EINVAL;
++
+ 	device = chan->device;
+ 	nr_sg = dma_map_sg(device->dev, data->sg, data->sg_len,
+ 			   mmc_get_dma_dir(data));
+@@ -872,9 +893,14 @@ int mmci_dmae_prep_data(struct mmci_host *host,
+ int mmci_dmae_start(struct mmci_host *host, unsigned int *datactrl)
+ {
+ 	struct mmci_dmae_priv *dmae = host->dma_priv;
++	int ret;
+ 
+ 	host->dma_in_progress = true;
+-	dmaengine_submit(dmae->desc_current);
++	ret = dma_submit_error(dmaengine_submit(dmae->desc_current));
++	if (ret < 0) {
++		host->dma_in_progress = false;
++		return ret;
++	}
+ 	dma_async_issue_pending(dmae->cur);
+ 
+ 	*datactrl |= MCI_DPSM_DMAENABLE;
+diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
+index 833236ecb31e..89ab73343cf3 100644
+--- a/drivers/mmc/host/mmci.h
++++ b/drivers/mmc/host/mmci.h
+@@ -278,7 +278,11 @@ struct mmci_host;
+  * @stm32_clkdiv: true if using a STM32-specific clock divider algorithm
+  * @datactrl_mask_ddrmode: ddr mode mask in datactrl register.
+  * @datactrl_mask_sdio: SDIO enable mask in datactrl register
+- * @datactrl_blksz: block size in power of two
++ * @datactrl_blocksz: block size in power of two
++ * @datactrl_any_blocksz: true if block any block sizes are accepted by
++ *		  hardware, such as with some SDIO traffic that send
++ *		  odd packets.
++ * @dma_power_of_2: DMA only works with blocks that are a power of 2.
+  * @datactrl_first: true if data must be setup before send command
+  * @datacnt_useless: true if you could not use datacnt register to read
+  *		     remaining data
+@@ -323,6 +327,8 @@ struct variant_data {
+ 	unsigned int		datactrl_mask_ddrmode;
+ 	unsigned int		datactrl_mask_sdio;
+ 	unsigned int		datactrl_blocksz;
++	u8			datactrl_any_blocksz:1;
++	u8			dma_power_of_2:1;
+ 	u8			datactrl_first:1;
+ 	u8			datacnt_useless:1;
+ 	u8			st_sdio:1;
+-- 
+2.21.0
+
