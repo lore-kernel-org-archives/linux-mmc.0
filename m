@@ -4,31 +4,31 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2281DC3F68F
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4F56FC2D0D1
 	for <linux-mmc@archiver.kernel.org>; Tue, 17 Dec 2019 11:40:46 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 048672082E
+	by mail.kernel.org (Postfix) with ESMTP id 25AB821739
 	for <linux-mmc@archiver.kernel.org>; Tue, 17 Dec 2019 11:40:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727402AbfLQLkp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        id S1727407AbfLQLkp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
         Tue, 17 Dec 2019 06:40:45 -0500
-Received: from sauhun.de ([88.99.104.3]:52178 "EHLO pokefinder.org"
+Received: from sauhun.de ([88.99.104.3]:52208 "EHLO pokefinder.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726383AbfLQLko (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 17 Dec 2019 06:40:44 -0500
+        id S1727216AbfLQLkp (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 17 Dec 2019 06:40:45 -0500
 Received: from localhost (p54B330AA.dip0.t-ipconnect.de [84.179.48.170])
-        by pokefinder.org (Postfix) with ESMTPSA id EB4742C2D6D;
-        Tue, 17 Dec 2019 12:40:42 +0100 (CET)
+        by pokefinder.org (Postfix) with ESMTPSA id 343CB2C2D98;
+        Tue, 17 Dec 2019 12:40:44 +0100 (CET)
 From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
 To:     linux-mmc@vger.kernel.org
 Cc:     linux-renesas-soc@vger.kernel.org,
         Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
         Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: [RFC PATCH v2 1/5] mmc: renesas_sdhi: remove double clear of automatic correction
-Date:   Tue, 17 Dec 2019 12:40:30 +0100
-Message-Id: <20191217114034.13290-2-wsa+renesas@sang-engineering.com>
+Subject: [RFC PATCH v2 4/5] mmc: renesas_sdhi: enforce manual correction for Gen3
+Date:   Tue, 17 Dec 2019 12:40:33 +0100
+Message-Id: <20191217114034.13290-5-wsa+renesas@sang-engineering.com>
 X-Mailer: git-send-email 2.20.1
 In-Reply-To: <20191217114034.13290-1-wsa+renesas@sang-engineering.com>
 References: <20191217114034.13290-1-wsa+renesas@sang-engineering.com>
@@ -39,31 +39,33 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-hw_reset() clears the automatic correction bit twice. I couldn't find
-anything in the docs recommending that. Removing one of them didn't
-cause any regressions here, so keep it simple.
+HW engineers say that automatic tap correction cannot be used for HS400
+in all R-Car Gen3 SoCs. So, check for that SDHI variant and disable it
+when HS400 is about to be enabled.
 
 Reviewed-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
 Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 ---
- drivers/mmc/host/renesas_sdhi_core.c | 4 ----
- 1 file changed, 4 deletions(-)
+ drivers/mmc/host/renesas_sdhi_core.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
 
 diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-index 35cb24cd45b4..519d91ae3373 100644
+index e5db96fd0a69..04f502345b91 100644
 --- a/drivers/mmc/host/renesas_sdhi_core.c
 +++ b/drivers/mmc/host/renesas_sdhi_core.c
-@@ -531,10 +531,6 @@ static void renesas_sdhi_hw_reset(struct tmio_mmc_host *host)
- 		       ~SH_MOBILE_SDHI_SCC_RVSCNTL_RVSEN &
- 		       sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_RVSCNTL));
+@@ -348,6 +348,12 @@ static void renesas_sdhi_hs400_complete(struct tmio_mmc_host *host)
+ 	sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_DT2FF,
+ 		       priv->scc_tappos_hs400);
  
--	sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_RVSCNTL,
--		       ~SH_MOBILE_SDHI_SCC_RVSCNTL_RVSEN &
--		       sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_RVSCNTL));
--
- 	if (host->pdata->flags & TMIO_MMC_MIN_RCAR2)
- 		sd_ctrl_write32_as_16_and_16(host, CTL_IRQ_MASK,
- 					     TMIO_MASK_INIT_RCAR2);
++	/* Gen3 can't do automatic tap correction with HS400, so disable it */
++	if (sd_ctrl_read16(host, CTL_VERSION) == SDHI_VER_GEN3_SDMMC)
++		sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_RVSCNTL,
++			       ~SH_MOBILE_SDHI_SCC_RVSCNTL_RVSEN &
++			       sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_RVSCNTL));
++
+ 	sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_TMPPORT2,
+ 		       (SH_MOBILE_SDHI_SCC_TMPPORT2_HS400EN |
+ 			SH_MOBILE_SDHI_SCC_TMPPORT2_HS400OSEL) |
 -- 
 2.20.1
 
