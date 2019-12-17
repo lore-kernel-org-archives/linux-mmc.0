@@ -2,288 +2,333 @@ Return-Path: <SRS0=9I0v=2H=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.6 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 89344C43603
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Dec 2019 17:40:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 00B02C43603
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Dec 2019 22:21:24 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id B6D61206D8
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Dec 2019 17:40:04 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id BB5DF21582
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Dec 2019 22:21:23 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (2048-bit key) header.d=gerhold.net header.i=@gerhold.net header.b="kyJa5Xtq"
+	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="HltxYPne"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727310AbfLQRkE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 17 Dec 2019 12:40:04 -0500
-Received: from mo4-p01-ob.smtp.rzone.de ([85.215.255.53]:16912 "EHLO
-        mo4-p01-ob.smtp.rzone.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727743AbfLQRkE (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Dec 2019 12:40:04 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; t=1576604400;
-        s=strato-dkim-0002; d=gerhold.net;
-        h=In-Reply-To:References:Message-ID:Subject:Cc:To:From:Date:
-        X-RZG-CLASS-ID:X-RZG-AUTH:From:Subject:Sender;
-        bh=01CYengs1XNXWRZ3OSiPzPTir9J53j6GQKI93RZx6NQ=;
-        b=kyJa5XtqSOkNhdzxC6YRgQX3w+IJNebm1fHQraZoCNeLlap5RtdMGsfTw+Tno2YGme
-        nQPRG4SOzvjqymDFy6KONe7nAF+onFC8mo8tqay3uF/FJmaDTYPnRXgTLXahgIra3yEZ
-        94LvNvHTUzHYqeL65uoN4D92PiZtpNRsRRQ8L96P16714WRPyo13kejOqnE1i1hU7tuC
-        t3ah7d1I5ObhpQaFVJicKDBXk9s409TEUc4Tn8DBBLUsEBqQsdEnvEpg02+MotnxIiaU
-        94R86fFQvCjZahHJaMzZT4l4fn90IUnvBMei0GnRHBgO17p2DEtYdxSQj+nfvA/ZoFEX
-        k7tg==
-X-RZG-AUTH: ":P3gBZUipdd93FF5ZZvYFPugejmSTVR2nRPhVOQ/OcYgojyw4j34+u266EZF6ORJDdfbYtbb1Kg=="
-X-RZG-CLASS-ID: mo00
-Received: from gerhold.net
-        by smtp.strato.de (RZmta 46.0.7 AUTH)
-        with ESMTPSA id 9046ccvBHHdp3Hk
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256 bits))
-        (Client did not present a certificate);
-        Tue, 17 Dec 2019 18:39:51 +0100 (CET)
-Date:   Tue, 17 Dec 2019 18:39:50 +0100
-From:   Stephan Gerhold <stephan@gerhold.net>
-To:     Linus Walleij <linus.walleij@linaro.org>
-Cc:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
-        Ludovic Barre <ludovic.barre@st.com>,
-        Brian Masney <masneyb@onstation.org>,
-        Niklas Cassel <niklas.cassel@linaro.org>,
-        Russell King <rmk+kernel@armlinux.org.uk>,
-        Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-Subject: Re: [PATCH v6] mmc: mmci: Support odd block sizes for ux500v2 and
- qcom variant
-Message-ID: <20191217173950.GB866@gerhold.net>
-References: <20191217143952.2885-1-linus.walleij@linaro.org>
+        id S1726833AbfLQWVX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 17 Dec 2019 17:21:23 -0500
+Received: from mail-pl1-f196.google.com ([209.85.214.196]:44290 "EHLO
+        mail-pl1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726712AbfLQWVW (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Dec 2019 17:21:22 -0500
+Received: by mail-pl1-f196.google.com with SMTP id az3so1253plb.11
+        for <linux-mmc@vger.kernel.org>; Tue, 17 Dec 2019 14:21:22 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=chromium.org; s=google;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to:user-agent;
+        bh=YEuil02hQZyAp6FFykiAI8P1tEmF6Q53k3inDyTQNAA=;
+        b=HltxYPnev95gaQHD+9SuDk38YAlVI7EvNjw17S1vDZF3BOhADdSYFWpfgCotRlaqto
+         0wdjaBXBUBmhKTpidlfRVRcVMUxTnmLVZUJcWDLC/M677AWUSYGXy6LnV+aJox1oP0v+
+         VaybhKvcrn0zgrSM1s2YcnDTTGI6RdwOYimsc=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to:user-agent;
+        bh=YEuil02hQZyAp6FFykiAI8P1tEmF6Q53k3inDyTQNAA=;
+        b=fl+wq6D+QOKtigfLNGcT8HbDPYykIOmHGCoV0JE8he4+j9XYEDJdMFZ49nhKHTQOdO
+         gwu95Pj6ABNJalwqP2K28O3/YO9YDblbc0hlpjiZG0mKV7c0hrrmOY83yA9IWHE7QU7X
+         SOzk/HKhjyfLKuFQvXibpW7N+Y102UbVoNCnsIoFQYlGAXs8/lKm27CQdBBHTH0TrGO/
+         XPzFNPrIY8bCBvYYS4pA9xB9CsS580eqjyRpr3CGZvC8XXuWYEMDNMhRL22WWJ3ckroL
+         O+MYxm5oY3Hw6UKHxmRD7Ctd2/nkfCe2nxT4cbtl6QhFhU9JfEY6RW0jfYVyjf45LPua
+         RlnA==
+X-Gm-Message-State: APjAAAWUVSR0KoTkJlkGQy0kC4qwpvp7IHysr93g2GlAmpt6cYUX8OxN
+        0GJrr7ycdROdTdADapWQzm/lV9z+S2HCVw==
+X-Google-Smtp-Source: APXvYqy2QC7JgdjeoLynhtA4+c7a+vlT/yxbTdXbRLHFc+3RU3tXeCgTHQzrJPq6PGiwjAnLf5jEWg==
+X-Received: by 2002:a17:90a:f84:: with SMTP id 4mr9299424pjz.74.1576621281844;
+        Tue, 17 Dec 2019 14:21:21 -0800 (PST)
+Received: from localhost ([2620:15c:202:1:4fff:7a6b:a335:8fde])
+        by smtp.gmail.com with ESMTPSA id j21sm27680232pfe.175.2019.12.17.14.21.20
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 17 Dec 2019 14:21:21 -0800 (PST)
+Date:   Tue, 17 Dec 2019 14:21:19 -0800
+From:   Matthias Kaehlcke <mka@chromium.org>
+To:     Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+Cc:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
+        robh+dt@kernel.org, asutoshd@codeaurora.org,
+        stummala@codeaurora.org, sayalil@codeaurora.org,
+        cang@codeaurora.org, rampraka@codeaurora.org,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
+        Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Mark Rutland <mark.rutland@arm.com>
+Subject: Re: [PATCH V2] arm64: dts: qcom: sc7180: Add nodes for eMMC and SD
+ card
+Message-ID: <20191217222119.GW228856@google.com>
+References: <1576288475-7606-1-git-send-email-vbadigan@codeaurora.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <20191217143952.2885-1-linus.walleij@linaro.org>
+In-Reply-To: <1576288475-7606-1-git-send-email-vbadigan@codeaurora.org>
+User-Agent: Mutt/1.10.1 (2018-07-13)
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Dec 17, 2019 at 03:39:52PM +0100, Linus Walleij wrote:
-> For the ux500v2 variant of the PL18x block, odd block sizes
-> are supported. This is necessary to support some SDIO
-> transfers. This also affects the QCOM MMCI variant and the
-> ST micro variant.
+On Sat, Dec 14, 2019 at 07:24:34AM +0530, Veerabhadrarao Badiganti wrote:
+> Add sdhc instances for supporting eMMC and SD-card on sc7180.
+> The regulators should be in HPM state for proper functionality of
+> eMMC and SD-card. Updating corresponding regulators accordingly.
 > 
-> For Ux500 an additional quirk only allowing DMA on blocks
-> that are a power of two is needed. This might be a bug in
-> the DMA engine (DMA40) or the MMCI or in the interconnect,
-> but the most likely is the MMCI, as transfers of these
-> sizes work fine for other devices using the same DMA
-> engine. DMA works fine also with SDIO as long as the
-> blocksize is a power of 2.
-> 
-> This patch has proven necessary for enabling SDIO for WLAN on
-> PostmarketOS-based Ux500 platforms.
-> 
-> What we managed to test in practice is Broadcom WiFi over
-> SDIO on the Ux500 based Samsung GT-I8190 and GT-S7710.
-> This WiFi chip, BCM4334 works fine after the patch.
-> 
-> Before this patch:
-> 
-> brcmfmac: brcmf_fw_alloc_request: using brcm/brcmfmac4334-sdio
-> 	  for chip BCM4334/3
-> mmci-pl18x 80118000.sdi1_per2: unsupported block size (60 bytes)
-> brcmfmac: brcmf_sdiod_ramrw: membytes transfer failed
-> brcmfmac: brcmf_sdio_download_code_file: error -22 on writing
-> 	  434236 membytes at 0x00000000
-> brcmfmac: brcmf_sdio_download_firmware: dongle image file download
-> 	  failed
-> 
-> After this patch:
-> 
-> brcmfmac: brcmf_c_preinit_dcmds: Firmware: BCM4334/3 wl0:
-> 	  Nov 21 2012 00:21:28 version 6.10.58.813 (B2) FWID 01-0
-> 
-> Bringing up networks, discovering networks with "iw dev wlan0 scan"
-> and connecting works fine from this point.
-> 
-> This patch is inspired by Ulf Hansson's patch
-> http://www.spinics.net/lists/linux-mmc/msg12160.html
-> 
-> As the DMA engines on these platforms may now get block sizes
-> they were not used to before, make sure to also respect if
-> the DMA engine says "no" to a transfer.
-> 
-> Make a drive-by fix for datactrl_blocksz, misspelled.
-> 
-> Cc: Ludovic Barre <ludovic.barre@st.com>
-> Cc: Brian Masney <masneyb@onstation.org>
-> Cc: Stephan Gerhold <stephan@gerhold.net>
-> Cc: Niklas Cassel <niklas.cassel@linaro.org>
-> Cc: Russell King <rmk+kernel@armlinux.org.uk>
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-> Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+> Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
 
-Thanks for the patch!
-
-Tested this patch on samsung,golden (GT-I8190) and it seems to be
-working fine for brcmfmac with and without DMA:
-
-Tested-by: Stephan Gerhold <stephan@gerhold.net>
-
-Note: The patch does not seem to apply cleanly to mainline (5.5-rc2)
-or mmc/next at the moment, although git am --3way did the job without
-any conflicts.
+The patch doesn't apply against qcom/for-next, looks like you need to
+rebase it.
 
 > ---
-> ChangeLog v5->v6:
-> - Actually commit the changes I have in my tree
->   and resend...  We now have the config members
->   datactrl_any_blocksz and dma_power_of_2 as intended.
-> ChangeLog v4->v5:
-> - Rename variant members as Ulf want them.
-> ChangeLog v3->v4:
-> - Rewrite the patch to accept odd packages but only
->   let power of two packages pass on to the DMA.
-> - Drop the patches disallowing DMA not divisible by 4:
->   this doesn't work. Instead just push the whole
->   power of two criteria down to the DMA submission
->   phase.
-> - Drop the patch handling odd sglist offsets and
->   passing of page boundaries in SG buffers when
->   using PIO: it just doesn't happen in practice, we
->   don't know why, but likely because all packets are
->   small.
-> ChangeLog v2->v3:
-> - Repost with the inclusion of other patches.
-> ChangeLog v1->v2:
-> - Specify odd blocksize field to 1 bit (:1)
-> - Specify that STMMC supports odd block sizes
-> - Collect Stephan's test tag
-> ---
->  drivers/mmc/host/mmci.c | 34 ++++++++++++++++++++++++++++++----
->  drivers/mmc/host/mmci.h |  8 +++++++-
->  2 files changed, 37 insertions(+), 5 deletions(-)
 > 
-> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-> index c37e70dbe250..7e4bc9124efd 100644
-> --- a/drivers/mmc/host/mmci.c
-> +++ b/drivers/mmc/host/mmci.c
-> @@ -168,6 +168,8 @@ static struct variant_data variant_ux500 = {
->  	.cmdreg_srsp		= MCI_CPSM_RESPONSE,
->  	.datalength_bits	= 24,
->  	.datactrl_blocksz	= 11,
-> +	.datactrl_any_blocksz	= true,
-> +	.dma_power_of_2		= true,
->  	.datactrl_mask_sdio	= MCI_DPSM_ST_SDIOEN,
->  	.st_sdio		= true,
->  	.st_clkdiv		= true,
-> @@ -201,6 +203,8 @@ static struct variant_data variant_ux500v2 = {
->  	.datactrl_mask_ddrmode	= MCI_DPSM_ST_DDRMODE,
->  	.datalength_bits	= 24,
->  	.datactrl_blocksz	= 11,
-> +	.datactrl_any_blocksz	= true,
-> +	.dma_power_of_2		= true,
->  	.datactrl_mask_sdio	= MCI_DPSM_ST_SDIOEN,
->  	.st_sdio		= true,
->  	.st_clkdiv		= true,
-> @@ -260,6 +264,7 @@ static struct variant_data variant_stm32_sdmmc = {
->  	.datacnt_useless	= true,
->  	.datalength_bits	= 25,
->  	.datactrl_blocksz	= 14,
-> +	.datactrl_any_blocksz	= true,
->  	.stm32_idmabsize_mask	= GENMASK(12, 5),
->  	.init			= sdmmc_variant_init,
+> This depends on the patch series (dt support for sc7180):
+> https://lkml.org/lkml/2019/11/8/149
+> Also depends on documentation commit 2078158 (Present on mmc-next)
+> 
+> Changes since V1:
+> 	- Updated the regulator min, max voltages as per
+> 	  eMMC/SD-card voltage requirements
+> 	- Enabled IOMMU for eMMC and SD-card.
+> 	- Added pull and drive strength to SD-card cd-gpio.
+> 	- Incorporated review comments by Matthias Kaehlcke.
+> ---
+>  arch/arm64/boot/dts/qcom/sc7180-idp.dts |  47 +++++++---
+>  arch/arm64/boot/dts/qcom/sc7180.dtsi    | 148 ++++++++++++++++++++++++++++++++
+>  2 files changed, 183 insertions(+), 12 deletions(-)
+> 
+> diff --git a/arch/arm64/boot/dts/qcom/sc7180-idp.dts b/arch/arm64/boot/dts/qcom/sc7180-idp.dts
+> index 189254f..b6d4dc1 100644
+> --- a/arch/arm64/boot/dts/qcom/sc7180-idp.dts
+> +++ b/arch/arm64/boot/dts/qcom/sc7180-idp.dts
+> @@ -7,6 +7,7 @@
+>  
+>  /dts-v1/;
+>  
+> +#include <dt-bindings/gpio/gpio.h>
+>  #include <dt-bindings/regulator/qcom,rpmh-regulator.h>
+>  #include "sc7180.dtsi"
+>  #include "pm6150.dtsi"
+> @@ -101,9 +102,9 @@
+>  		};
+>  
+>  		vreg_l12a_1p8: ldo12 {
+> -			regulator-min-microvolt = <1696000>;
+> -			regulator-max-microvolt = <1952000>;
+> -			regulator-initial-mode = <RPMH_REGULATOR_MODE_LPM>;
+> +			regulator-min-microvolt = <1800000>;
+> +			regulator-max-microvolt = <1800000>;
+> +			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
+>  		};
+>  
+>  		vreg_l13a_1p8: ldo13 {
+> @@ -143,9 +144,9 @@
+>  		};
+>  
+>  		vreg_l19a_2p9: ldo19 {
+> -			regulator-min-microvolt = <2696000>;
+> -			regulator-max-microvolt = <3304000>;
+> -			regulator-initial-mode = <RPMH_REGULATOR_MODE_LPM>;
+> +			regulator-min-microvolt = <2960000>;
+> +			regulator-max-microvolt = <2960000>;
+> +			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
+>  		};
+>  	};
+>  
+> @@ -189,9 +190,9 @@
+>  		};
+>  
+>  		vreg_l6c_2p9: ldo6 {
+> -			regulator-min-microvolt = <2696000>;
+> -			regulator-max-microvolt = <3304000>;
+> -			regulator-initial-mode = <RPMH_REGULATOR_MODE_LPM>;
+> +			regulator-min-microvolt = <1800000>;
+> +			regulator-max-microvolt = <2950000>;
+> +			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
+>  		};
+>  
+>  		vreg_l7c_3p0: ldo7 {
+> @@ -207,9 +208,9 @@
+>  		};
+>  
+>  		vreg_l9c_2p9: ldo9 {
+> -			regulator-min-microvolt = <2952000>;
+> -			regulator-max-microvolt = <3304000>;
+> -			regulator-initial-mode = <RPMH_REGULATOR_MODE_LPM>;
+> +			regulator-min-microvolt = <2960000>;
+> +			regulator-max-microvolt = <2960000>;
+> +			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
+>  		};
+>  
+>  		vreg_l10c_3p3: ldo10 {
+> @@ -400,3 +401,25 @@
+>  			bias-pull-up;
+>  		};
 >  };
-> @@ -279,6 +284,7 @@ static struct variant_data variant_qcom = {
->  	.data_cmd_enable	= MCI_CPSM_QCOM_DATCMD,
->  	.datalength_bits	= 24,
->  	.datactrl_blocksz	= 11,
-> +	.datactrl_any_blocksz	= true,
->  	.pwrreg_powerup		= MCI_PWR_UP,
->  	.f_max			= 208000000,
->  	.explicit_mclk_control	= true,
-> @@ -447,10 +453,11 @@ void mmci_dma_setup(struct mmci_host *host)
->  static int mmci_validate_data(struct mmci_host *host,
->  			      struct mmc_data *data)
->  {
-> +	struct variant_data *variant = host->variant;
 > +
->  	if (!data)
->  		return 0;
-> -
-> -	if (!is_power_of_2(data->blksz)) {
-> +	if (!is_power_of_2(data->blksz) && !variant->datactrl_any_blocksz) {
->  		dev_err(mmc_dev(host->mmc),
->  			"unsupported block size (%d bytes)\n", data->blksz);
->  		return -EINVAL;
-> @@ -515,7 +522,9 @@ int mmci_dma_start(struct mmci_host *host, unsigned int datactrl)
->  		 "Submit MMCI DMA job, sglen %d blksz %04x blks %04x flags %08x\n",
->  		 data->sg_len, data->blksz, data->blocks, data->flags);
->  
-> -	host->ops->dma_start(host, &datactrl);
-> +	ret = host->ops->dma_start(host, &datactrl);
-> +	if (ret)
-> +		return ret;
->  
->  	/* Trigger the DMA transfer */
->  	mmci_write_datactrlreg(host, datactrl);
-> @@ -822,6 +831,18 @@ static int _mmci_dmae_prep_data(struct mmci_host *host, struct mmc_data *data,
->  	if (data->blksz * data->blocks <= variant->fifosize)
->  		return -EINVAL;
->  
-> +	/*
-> +	 * This is necessary to get SDIO working on the Ux500. We do not yet
-> +	 * know if this is a bug in:
-> +	 * - The Ux500 DMA controller (DMA40)
-> +	 * - The MMCI DMA interface on the Ux500
-> +	 * some power of two blocks (such as 64 bytes) are sent regularly
-> +	 * during SDIO traffic and those work fine so for these we enable DMA
-> +	 * transfers.
-> +	 */
-> +	if (host->variant->dma_power_of_2 && !is_power_of_2(data->blksz))
-> +		return -EINVAL;
+> +&sdhc_1 {
+> +	status = "ok";
 > +
->  	device = chan->device;
->  	nr_sg = dma_map_sg(device->dev, data->sg, data->sg_len,
->  			   mmc_get_dma_dir(data));
-> @@ -872,9 +893,14 @@ int mmci_dmae_prep_data(struct mmci_host *host,
->  int mmci_dmae_start(struct mmci_host *host, unsigned int *datactrl)
->  {
->  	struct mmci_dmae_priv *dmae = host->dma_priv;
-> +	int ret;
+> +	pinctrl-names = "default", "sleep";
+> +	pinctrl-0 = <&sdc1_on>;
+> +	pinctrl-1 = <&sdc1_off>;
+> +	vmmc-supply = <&vreg_l19a_2p9>;
+> +	vqmmc-supply = <&vreg_l12a_1p8>;
+> +};
+> +
+> +&sdhc_2 {
+> +	status = "ok";
+> +
+> +	pinctrl-names = "default","sleep";
+> +	pinctrl-0 = <&sdc2_on>;
+> +	pinctrl-1 = <&sdc2_off>;
+> +	vmmc-supply  = <&vreg_l9c_2p9>;
+> +	vqmmc-supply = <&vreg_l6c_2p9>;
+> +
+> +	cd-gpios = <&tlmm 69 GPIO_ACTIVE_LOW>;
+> +};
+
+You are adding these entries to the pinctrl section, they belong
+above the "/* PINCTRL - additions to nodes defined in sc7180.dtsi */"
+comment.
+
+> diff --git a/arch/arm64/boot/dts/qcom/sc7180.dtsi b/arch/arm64/boot/dts/qcom/sc7180.dtsi
+> index 666e9b9..16de9b8 100644
+> --- a/arch/arm64/boot/dts/qcom/sc7180.dtsi
+> +++ b/arch/arm64/boot/dts/qcom/sc7180.dtsi
+> @@ -182,6 +182,32 @@
+>  			#power-domain-cells = <1>;
+>  		};
 >  
->  	host->dma_in_progress = true;
-> -	dmaengine_submit(dmae->desc_current);
-> +	ret = dma_submit_error(dmaengine_submit(dmae->desc_current));
-> +	if (ret < 0) {
-> +		host->dma_in_progress = false;
-> +		return ret;
-> +	}
->  	dma_async_issue_pending(dmae->cur);
->  
->  	*datactrl |= MCI_DPSM_DMAENABLE;
-> diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-> index 833236ecb31e..89ab73343cf3 100644
-> --- a/drivers/mmc/host/mmci.h
-> +++ b/drivers/mmc/host/mmci.h
-> @@ -278,7 +278,11 @@ struct mmci_host;
->   * @stm32_clkdiv: true if using a STM32-specific clock divider algorithm
->   * @datactrl_mask_ddrmode: ddr mode mask in datactrl register.
->   * @datactrl_mask_sdio: SDIO enable mask in datactrl register
-> - * @datactrl_blksz: block size in power of two
-> + * @datactrl_blocksz: block size in power of two
-> + * @datactrl_any_blocksz: true if block any block sizes are accepted by
-> + *		  hardware, such as with some SDIO traffic that send
-> + *		  odd packets.
-> + * @dma_power_of_2: DMA only works with blocks that are a power of 2.
->   * @datactrl_first: true if data must be setup before send command
->   * @datacnt_useless: true if you could not use datacnt register to read
->   *		     remaining data
-> @@ -323,6 +327,8 @@ struct variant_data {
->  	unsigned int		datactrl_mask_ddrmode;
->  	unsigned int		datactrl_mask_sdio;
->  	unsigned int		datactrl_blocksz;
-> +	u8			datactrl_any_blocksz:1;
-> +	u8			dma_power_of_2:1;
->  	u8			datactrl_first:1;
->  	u8			datacnt_useless:1;
->  	u8			st_sdio:1;
-> -- 
-> 2.21.0
-> 
+> +		sdhc_1: sdhci@7c4000 {
+> +			compatible = "qcom,sc7180-sdhci", "qcom,sdhci-msm-v5";
+> +			reg = <0 0x7c4000 0 0x1000>;
+> +			reg-names = "hc_mem";
+> +
+> +			interrupts = <GIC_SPI 641 IRQ_TYPE_LEVEL_HIGH>,
+> +					<GIC_SPI 644 IRQ_TYPE_LEVEL_HIGH>;
+> +			interrupt-names = "hc_irq", "pwr_irq";
+> +
+> +			clocks = <&gcc GCC_SDCC1_APPS_CLK>,
+> +					<&gcc GCC_SDCC1_AHB_CLK>;
+> +			clock-names = "core", "iface";
+> +
+> +			iommus = <&apps_smmu 0x60 0x0>;
+> +
+> +			bus-width = <8>;
+> +			non-removable;
+> +
+> +			mmc-ddr-1_8v;
+> +			mmc-hs200-1_8v;
+> +			mmc-hs400-1_8v;
+> +			mmc-hs400-enhanced-strobe;
+> +
+> +			status = "disabled";
+> +		};
+> +
+>  		qupv3_id_0: geniqup@8c0000 {
+>  			compatible = "qcom,geni-se-qup";
+>  			reg = <0 0x008c0000 0 0x6000>;
+> @@ -897,6 +923,128 @@
+>  					function = "qup15";
+>  				};
+>  			};
+> +
+> +			sdc1_on: sdc1-on {
+> +				clk {
+
+judging from some other nodes the convention seems to be to call the
+nodes 'pinconf-<name>'.
+
+> +					pins = "sdc1_clk";
+> +					bias-disable;
+> +					drive-strength = <16>;
+> +				};
+> +
+> +				cmd {
+> +					pins = "sdc1_cmd";
+> +					bias-pull-up;
+> +					drive-strength = <10>;
+> +				};
+> +
+> +				data {
+> +					pins = "sdc1_data";
+> +					bias-pull-up;
+> +					drive-strength = <10>;
+> +				};
+
+cmd and data have the same configuration, in theory you could combine
+them in a single node. Not sure if it's strictly required, in this case
+with just two pins it doesn't make a big difference.
+
+> +
+> +				rclk {
+> +					pins = "sdc1_rclk";
+> +					bias-pull-down;
+> +				};
+> +			};
+> +
+> +			sdc1_off: sdc1-off {
+> +				clk {
+> +					pins = "sdc1_clk";
+> +					bias-disable;
+> +					drive-strength = <2>;
+> +				};
+> +
+> +				cmd {
+> +					pins = "sdc1_cmd";
+> +					bias-pull-up;
+> +					drive-strength = <2>;
+> +				};
+> +
+> +				data {
+> +					pins = "sdc1_data";
+> +					bias-pull-up;
+> +					drive-strength = <2>;
+> +				};
+> +
+> +				rclk {
+> +					pins = "sdc1_rclk";
+> +					bias-pull-down;
+> +				};
+> +			};
+> +
+> +			sdc2_on: sdc2_on {
+
+nit: sdc2_on: sdc2-on
+
+> +				clk {
+> +					pins = "sdc2_clk";
+> +					bias-disable;
+> +					drive-strength = <16>;
+> +				};
+> +
+> +				cmd {
+> +					pins = "sdc2_cmd";
+> +					bias-pull-up;
+> +					drive-strength = <10>;
+> +				};
+> +
+> +				data {
+> +					pins = "sdc2_data";
+> +					bias-pull-up;
+> +					drive-strength = <10>;
+> +				};
+> +
+> +				sd-cd {
+> +					pins = "gpio69";
+> +					bias-pull-up;
+> +					drive-strength = <2>;
+> +				};
+> +			};
+> +
+> +			sdc2_off: sdc2_off {
+
+nit: sdc2_off: sdc2-off
