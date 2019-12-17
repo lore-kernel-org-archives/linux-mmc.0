@@ -4,53 +4,55 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6D52FC43603
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Dec 2019 02:52:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8D942C43603
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Dec 2019 02:52:34 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 43CC924655
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Dec 2019 02:52:21 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5E89A206D3
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Dec 2019 02:52:34 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="key not found in DNS" (0-bit key) header.d=mg.codeaurora.org header.i=@mg.codeaurora.org header.b="ANgepo85"
+	dkim=fail reason="key not found in DNS" (0-bit key) header.d=mg.codeaurora.org header.i=@mg.codeaurora.org header.b="kLshkbie"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726616AbfLQCwU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 16 Dec 2019 21:52:20 -0500
+        id S1726887AbfLQCwe (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 16 Dec 2019 21:52:34 -0500
 Received: from mail25.static.mailgun.info ([104.130.122.25]:46181 "EHLO
         mail25.static.mailgun.info" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726695AbfLQCwS (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Dec 2019 21:52:18 -0500
+        by vger.kernel.org with ESMTP id S1726695AbfLQCwd (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Dec 2019 21:52:33 -0500
 DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
- s=smtp; t=1576551137; h=References: In-Reply-To: References:
+ s=smtp; t=1576551153; h=References: In-Reply-To: References:
  In-Reply-To: Message-Id: Date: Subject: Cc: To: From: Sender;
- bh=XqcWpfP2FAYmwHb7ctixO6eLZe+tGA9sizqXcSh3r3w=; b=ANgepo85CZZeFC2qd43XTMqMeA1dAstjCAOtBG4qGCZMnsg81fHYkb+jjbY9soE1EMrK6zbh
- 925Gkz5yEH9fonxuQLCwBBkeC6uWGAbGKuXlzLyOhBBJoWhGvfKm/S0F8PQtsDF+oINAw85+
- geYf9oDKiwQwqJ1cbmoZnt5FtMQ=
+ bh=ga4CL8oGqhYMCX/pJoNEL8bDtLlDEhOXVO1r46JdqYQ=; b=kLshkbie3+k9gAJhjw6zWOUWy+AwxCx+zrwajZkkVc72m19tqRczR/h731sZu09s0HKYTR48
+ RISR0eaRSVOhR9bGo3kuKfUSy5uK9dVUvlw9rFWdr7dMY81mJD6hEGE+9qALcBHHmxuUkT0j
+ vUxPOac/d8bo5wD0iz0S2Myge7o=
 X-Mailgun-Sending-Ip: 104.130.122.25
 X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
 Received: from smtp.codeaurora.org (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171])
- by mxa.mailgun.org with ESMTP id 5df842de.7f2d92f3cea0-smtp-out-n03;
- Tue, 17 Dec 2019 02:52:14 -0000 (UTC)
+ by mxa.mailgun.org with ESMTP id 5df842f0.7f94a45ce570-smtp-out-n01;
+ Tue, 17 Dec 2019 02:52:32 -0000 (UTC)
 Received: by smtp.codeaurora.org (Postfix, from userid 1001)
-        id 5857EC433A2; Tue, 17 Dec 2019 02:52:13 +0000 (UTC)
+        id 0FA12C4479C; Tue, 17 Dec 2019 02:52:32 +0000 (UTC)
 Received: from pacamara-linux.qualcomm.com (i-global254.qualcomm.com [199.106.103.254])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-SHA256 (128/128 bits))
         (No client certificate requested)
         (Authenticated sender: nguyenb)
-        by smtp.codeaurora.org (Postfix) with ESMTPSA id B3A0AC43383;
-        Tue, 17 Dec 2019 02:52:12 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.3.2 smtp.codeaurora.org B3A0AC43383
+        by smtp.codeaurora.org (Postfix) with ESMTPSA id 2BCDFC433A2;
+        Tue, 17 Dec 2019 02:52:31 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.3.2 smtp.codeaurora.org 2BCDFC433A2
 Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
 Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=none smtp.mailfrom=nguyenb@codeaurora.org
 From:   "Bao D. Nguyen" <nguyenb@codeaurora.org>
 To:     ulf.hansson@linaro.org, robh+dt@kernel.org
 Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
         asutoshd@codeaurora.org, cang@codeaurora.org,
+        Ziqi Chen <ziqichen@codeaurora.org>,
+        Sayali Lokhande <sayalil@codeaurora.org>,
         "Bao D. Nguyen" <nguyenb@codeaurora.org>
-Subject: [<PATCH v1> 1/9] mmc: core: Add a cap to use long discard size
-Date:   Mon, 16 Dec 2019 18:50:34 -0800
-Message-Id: <628141610bd44235b0cea04ff110dd4c67027aba.1576540907.git.nguyenb@codeaurora.org>
+Subject: [<PATCH v1> 2/9] mmc: core: allow hosts to specify a large discard size
+Date:   Mon, 16 Dec 2019 18:50:35 -0800
+Message-Id: <2d5981ed379f29a4def9710b7401c4b1dbe4fa6a.1576540907.git.nguyenb@codeaurora.org>
 X-Mailer: git-send-email 1.9.1
 In-Reply-To: <cover.1576540906.git.nguyenb@codeaurora.org>
 References: <cover.1576540906.git.nguyenb@codeaurora.org>
@@ -61,28 +63,37 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add MMC_CAP2_MAX_DISCARD_SIZE cap which allows setting the max
-discard size value if needed.
-Setting a high value for the max discard size is to fix an issue where
-some SD cards take a long time to perform the card format.
+From: Ziqi Chen <ziqichen@codeaurora.org>
 
+max_busy_timeout is used to decide whether R1B response should
+be used or a R1 response should be used. This is also used to
+decide what the discard size of mmc queue (registered with block
+layer) can be set to. In order to keep both the features in place,
+this change will allow for hosts to specify a larger discard size
+while still specifying max_busy_timeout.
+
+Signed-off-by: Ziqi Chen <ziqichen@codeaurora.org>
+Signed-off-by: Sayali Lokhande <sayalil@codeaurora.org>
 Signed-off-by: Bao D. Nguyen <nguyenb@codeaurora.org>
 ---
- include/linux/mmc/host.h | 1 +
- 1 file changed, 1 insertion(+)
+ drivers/mmc/core/core.c | 4 ++++
+ 1 file changed, 4 insertions(+)
 
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index ba70338..f1a767d 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -348,6 +348,7 @@ struct mmc_host {
- #define MMC_CAP2_FULL_PWR_CYCLE	(1 << 2)	/* Can do full power cycle */
- #define MMC_CAP2_HS200_1_8V_SDR	(1 << 5)        /* can support */
- #define MMC_CAP2_HS200_1_2V_SDR	(1 << 6)        /* can support */
-+#define MMC_CAP2_MAX_DISCARD_SIZE (1 << 8)      /* use max discard, ignoring max_busy_timeout parameter */
- #define MMC_CAP2_HS200		(MMC_CAP2_HS200_1_8V_SDR | \
- 				 MMC_CAP2_HS200_1_2V_SDR)
- #define MMC_CAP2_CD_ACTIVE_HIGH	(1 << 10)	/* Card-detect signal active high */
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index abf8f5e..1e37f78 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -2059,6 +2059,10 @@ unsigned int mmc_calc_max_discard(struct mmc_card *card)
+ 	struct mmc_host *host = card->host;
+ 	unsigned int max_discard, max_trim;
+ 
++	if (!host->max_busy_timeout ||
++			(host->caps2 & MMC_CAP2_MAX_DISCARD_SIZE))
++		return UINT_MAX;
++
+ 	/*
+ 	 * Without erase_group_def set, MMC erase timeout depends on clock
+ 	 * frequence which can change.  In that case, the best choice is
 -- 
 The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
 a Linux Foundation Collaborative Project
