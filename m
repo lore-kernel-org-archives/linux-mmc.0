@@ -7,52 +7,52 @@ X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8D942C43603
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Dec 2019 02:52:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7DA01C43603
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Dec 2019 02:52:41 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 5E89A206D3
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Dec 2019 02:52:34 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 501BF206D3
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Dec 2019 02:52:41 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="key not found in DNS" (0-bit key) header.d=mg.codeaurora.org header.i=@mg.codeaurora.org header.b="kLshkbie"
+	dkim=fail reason="key not found in DNS" (0-bit key) header.d=mg.codeaurora.org header.i=@mg.codeaurora.org header.b="JydyafUK"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726887AbfLQCwe (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 16 Dec 2019 21:52:34 -0500
+        id S1727024AbfLQCwk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 16 Dec 2019 21:52:40 -0500
 Received: from mail25.static.mailgun.info ([104.130.122.25]:46181 "EHLO
         mail25.static.mailgun.info" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726695AbfLQCwd (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Dec 2019 21:52:33 -0500
+        by vger.kernel.org with ESMTP id S1726446AbfLQCwk (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Dec 2019 21:52:40 -0500
 DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
- s=smtp; t=1576551153; h=References: In-Reply-To: References:
+ s=smtp; t=1576551160; h=References: In-Reply-To: References:
  In-Reply-To: Message-Id: Date: Subject: Cc: To: From: Sender;
- bh=ga4CL8oGqhYMCX/pJoNEL8bDtLlDEhOXVO1r46JdqYQ=; b=kLshkbie3+k9gAJhjw6zWOUWy+AwxCx+zrwajZkkVc72m19tqRczR/h731sZu09s0HKYTR48
- RISR0eaRSVOhR9bGo3kuKfUSy5uK9dVUvlw9rFWdr7dMY81mJD6hEGE+9qALcBHHmxuUkT0j
- vUxPOac/d8bo5wD0iz0S2Myge7o=
+ bh=IWOe5PsNdgKGqLtW5omXyBv5zFlS7VV8mc290wNfifs=; b=JydyafUKVGOI7XfG8gpRgJTcR4yjFHYlDrJmTsCe2z8XenihnpoffHg5/Fbx5c87Him2MRwf
+ PQStzyN2kPw+X6krwaX40qpU1PZ4KDw8+u3gJwriKaBFeUzXv520EvSTvkANGmIMDUJqYdjb
+ Wdlb5yX8QwJ732k/OuqnNAvi2fg=
 X-Mailgun-Sending-Ip: 104.130.122.25
 X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
 Received: from smtp.codeaurora.org (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171])
- by mxa.mailgun.org with ESMTP id 5df842f0.7f94a45ce570-smtp-out-n01;
- Tue, 17 Dec 2019 02:52:32 -0000 (UTC)
+ by mxa.mailgun.org with ESMTP id 5df842f7.7f65a87180d8-smtp-out-n02;
+ Tue, 17 Dec 2019 02:52:39 -0000 (UTC)
 Received: by smtp.codeaurora.org (Postfix, from userid 1001)
-        id 0FA12C4479C; Tue, 17 Dec 2019 02:52:32 +0000 (UTC)
+        id 206D3C433A2; Tue, 17 Dec 2019 02:52:39 +0000 (UTC)
 Received: from pacamara-linux.qualcomm.com (i-global254.qualcomm.com [199.106.103.254])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-SHA256 (128/128 bits))
         (No client certificate requested)
         (Authenticated sender: nguyenb)
-        by smtp.codeaurora.org (Postfix) with ESMTPSA id 2BCDFC433A2;
-        Tue, 17 Dec 2019 02:52:31 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.3.2 smtp.codeaurora.org 2BCDFC433A2
+        by smtp.codeaurora.org (Postfix) with ESMTPSA id C1CE0C43383;
+        Tue, 17 Dec 2019 02:52:37 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.3.2 smtp.codeaurora.org C1CE0C43383
 Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
 Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=none smtp.mailfrom=nguyenb@codeaurora.org
 From:   "Bao D. Nguyen" <nguyenb@codeaurora.org>
 To:     ulf.hansson@linaro.org, robh+dt@kernel.org
 Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
         asutoshd@codeaurora.org, cang@codeaurora.org,
-        Ziqi Chen <ziqichen@codeaurora.org>,
-        Sayali Lokhande <sayalil@codeaurora.org>,
+        Vijay Viswanath <vviswana@codeaurora.org>,
+        Ram Prakash Gupta <rampraka@codeaurora.org>,
         "Bao D. Nguyen" <nguyenb@codeaurora.org>
-Subject: [<PATCH v1> 2/9] mmc: core: allow hosts to specify a large discard size
-Date:   Mon, 16 Dec 2019 18:50:35 -0800
-Message-Id: <2d5981ed379f29a4def9710b7401c4b1dbe4fa6a.1576540907.git.nguyenb@codeaurora.org>
+Subject: [<PATCH v1> 3/9] mmc: host: Add device_prepare pm for mmc_host
+Date:   Mon, 16 Dec 2019 18:50:36 -0800
+Message-Id: <7dede0ae6c0574ea38cc71b166f3ca0b05856931.1576540907.git.nguyenb@codeaurora.org>
 X-Mailer: git-send-email 1.9.1
 In-Reply-To: <cover.1576540906.git.nguyenb@codeaurora.org>
 References: <cover.1576540906.git.nguyenb@codeaurora.org>
@@ -63,37 +63,82 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Ziqi Chen <ziqichen@codeaurora.org>
+From: Vijay Viswanath <vviswana@codeaurora.org>
 
-max_busy_timeout is used to decide whether R1B response should
-be used or a R1 response should be used. This is also used to
-decide what the discard size of mmc queue (registered with block
-layer) can be set to. In order to keep both the features in place,
-this change will allow for hosts to specify a larger discard size
-while still specifying max_busy_timeout.
+mmc_host is a virtual device and it doesn't have any pm ops and so during
+pm registration of device, no_pm_callback gets set as true. The
+mmc_host device is not runtime enabled as it is a virtual device and
+mmc_host is the parent device of mmc_card. As the mmc_host is runtime
+disabled, mmc_card can runtime suspend/resume without depending on
+state of mmc_host during normal operations. During system suspend, the
+direct_complete flag of mmc_host device gets set as it has no pm_ops.
+When mmc_card successfully suspends, it clears the direct_complete flag
+of its parent (mmc_host).
 
-Signed-off-by: Ziqi Chen <ziqichen@codeaurora.org>
-Signed-off-by: Sayali Lokhande <sayalil@codeaurora.org>
+But in certain cases during dpm_suspend, an async error can occur after
+suspend work for mmc_card is scheduled and before it gets executed. In
+that case, mmc_card suspend work will not clear the direct_complete flag
+of mmc_host. When mmc_host suspend comes after that of mmc_card,
+it too will skip all actions.
+
+But by this time, the mmc_host device has been added to device_suspended
+list. So during resume, mmc_host resume will do dpm resume of mmc_host.
+In dpm_resume, all devices which has direct_complete flag set will be
+runtime_enabled. This is because, in dpm_suspend, any device with
+direct_complete flag will be runtime_disabled. Thus, mmc_host which has
+direct_complete flag set, will get runtime enabled during dpm_resume.
+This is a problem in pm framework with direct_complete flag
+(runtime enabling a device in resume when it was not runtime disabled
+in suspend path).
+
+Now that mmc_host device is runtime enabled, to runtime resume the
+mmc_card, the pm framework will try to runtime resume the mmc_host
+device as well and will fail. This prevents mmc_card from runtime
+resuming after a runtime_suspend.
+
+Fix this by adding a dummy suspend_prepare() fn for mmc_host. This
+prevents the direct_complete flag of mmc_host device from getting set.
+
+Signed-off-by: Vijay Viswanath <vviswana@codeaurora.org>
+Signed-off-by: Ram Prakash Gupta <rampraka@codeaurora.org>
 Signed-off-by: Bao D. Nguyen <nguyenb@codeaurora.org>
 ---
- drivers/mmc/core/core.c | 4 ++++
- 1 file changed, 4 insertions(+)
+ drivers/mmc/core/host.c | 19 +++++++++++++++++++
+ 1 file changed, 19 insertions(+)
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index abf8f5e..1e37f78 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -2059,6 +2059,10 @@ unsigned int mmc_calc_max_discard(struct mmc_card *card)
- 	struct mmc_host *host = card->host;
- 	unsigned int max_discard, max_trim;
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index 105b7a7..242657b 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -40,9 +40,28 @@ static void mmc_host_classdev_release(struct device *dev)
+ 	kfree(host);
+ }
  
-+	if (!host->max_busy_timeout ||
-+			(host->caps2 & MMC_CAP2_MAX_DISCARD_SIZE))
-+		return UINT_MAX;
++static int mmc_host_prepare(struct device *dev)
++{
++	/*
++	 * Since mmc_host is a virtual device, we don't have to do anything.
++	 * If we return a positive value, the pm framework will consider that
++	 * the runtime suspend and system suspend of this device is same and
++	 * will set direct_complete flag as true. We don't want this as the
++	 * mmc_host always has positive disable_depth and setting the flag
++	 * will not speed up the suspend process.
++	 * So return 0.
++	 */
++	return 0;
++}
 +
- 	/*
- 	 * Without erase_group_def set, MMC erase timeout depends on clock
- 	 * frequence which can change.  In that case, the best choice is
++static const struct dev_pm_ops mmc_pm_ops = {
++	.prepare = mmc_host_prepare,
++};
++
+ static struct class mmc_host_class = {
+ 	.name		= "mmc_host",
+ 	.dev_release	= mmc_host_classdev_release,
++	.pm		= &mmc_pm_ops,
+ };
+ 
+ int mmc_register_host_class(void)
 -- 
 The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
 a Linux Foundation Collaborative Project
