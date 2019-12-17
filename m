@@ -7,57 +7,52 @@ X-Spam-Status: No, score=-9.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 67192C43603
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Dec 2019 11:26:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 498EAC43603
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Dec 2019 11:26:48 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 3AE43207FF
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Dec 2019 11:26:22 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1CA88207FF
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Dec 2019 11:26:48 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="YQBtTtAV"
+	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="WnSGRRC0"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726496AbfLQL0V (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 17 Dec 2019 06:26:21 -0500
-Received: from lelv0142.ext.ti.com ([198.47.23.249]:53846 "EHLO
+        id S1727151AbfLQL0r (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 17 Dec 2019 06:26:47 -0500
+Received: from lelv0142.ext.ti.com ([198.47.23.249]:53884 "EHLO
         lelv0142.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726487AbfLQL0V (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Dec 2019 06:26:21 -0500
-Received: from fllv0034.itg.ti.com ([10.64.40.246])
-        by lelv0142.ext.ti.com (8.15.2/8.15.2) with ESMTP id xBHBQEun095573;
-        Tue, 17 Dec 2019 05:26:14 -0600
+        with ESMTP id S1726487AbfLQL0r (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Dec 2019 06:26:47 -0500
+Received: from lelv0265.itg.ti.com ([10.180.67.224])
+        by lelv0142.ext.ti.com (8.15.2/8.15.2) with ESMTP id xBHBQh7t095669;
+        Tue, 17 Dec 2019 05:26:43 -0600
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
-        s=ti-com-17Q1; t=1576581974;
-        bh=TV6DPLpiJbdeCxYibVSSrCGCWxCe2/84Mhd8qwzutDw=;
+        s=ti-com-17Q1; t=1576582003;
+        bh=UcXYwCK20UsHhTPz8x7aYSI30oLjPmwYTl2MyT+hcGE=;
         h=From:To:CC:Subject:Date;
-        b=YQBtTtAVRR7QsrrvHWEnGNlid+N7hKrIwIlzQ4jtbHJJ9uNkNRAhid95vox+hbJ7q
-         541itjtDyGJof2KMxfZn+ciYPbyNvYYp/O9TF6kaOBQfScxrTPHyg01YyWI7yx2rBh
-         463MlG662TkPRIfqWvQWSrUfC+d8e3aZW4EhXwuk=
-Received: from DLEE104.ent.ti.com (dlee104.ent.ti.com [157.170.170.34])
-        by fllv0034.itg.ti.com (8.15.2/8.15.2) with ESMTPS id xBHBQEXp115620
+        b=WnSGRRC0w7Smlfn1eNmhbWeevy4dBEcqHLZznmKghrdmTZza8ERysPrvPnOXkBz6q
+         JRr/ff/Vl+C9g/d66j6+IJDCYui1N6Ps1cS2HxWFpF33DkbpD9seLxx1b7DQ1SPoWA
+         PjgUIUFM1uOLnVtu7CMJuZ8ZNl7ozSk3MIuweCLA=
+Received: from DLEE100.ent.ti.com (dlee100.ent.ti.com [157.170.170.30])
+        by lelv0265.itg.ti.com (8.15.2/8.15.2) with ESMTPS id xBHBQh2S066437
         (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
-        Tue, 17 Dec 2019 05:26:14 -0600
-Received: from DLEE107.ent.ti.com (157.170.170.37) by DLEE104.ent.ti.com
- (157.170.170.34) with Microsoft SMTP Server (version=TLS1_2,
+        Tue, 17 Dec 2019 05:26:43 -0600
+Received: from DLEE111.ent.ti.com (157.170.170.22) by DLEE100.ent.ti.com
+ (157.170.170.30) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.1847.3; Tue, 17
- Dec 2019 05:26:12 -0600
-Received: from lelv0327.itg.ti.com (10.180.67.183) by DLEE107.ent.ti.com
- (157.170.170.37) with Microsoft SMTP Server (version=TLS1_2,
+ Dec 2019 05:26:42 -0600
+Received: from fllv0040.itg.ti.com (10.64.41.20) by DLEE111.ent.ti.com
+ (157.170.170.22) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.1847.3 via
- Frontend Transport; Tue, 17 Dec 2019 05:26:12 -0600
+ Frontend Transport; Tue, 17 Dec 2019 05:26:42 -0600
 Received: from feketebors.ti.com (ileax41-snat.itg.ti.com [10.172.224.153])
-        by lelv0327.itg.ti.com (8.15.2/8.15.2) with ESMTP id xBHBQ9Qm086054;
-        Tue, 17 Dec 2019 05:26:10 -0600
+        by fllv0040.itg.ti.com (8.15.2/8.15.2) with ESMTP id xBHBQetu104681;
+        Tue, 17 Dec 2019 05:26:41 -0600
 From:   Peter Ujfalusi <peter.ujfalusi@ti.com>
-To:     <ulf.hansson@linaro.org>, <f.fainelli@gmail.com>,
-        <rjui@broadcom.com>, <sbranden@broadcom.com>,
-        <nsaenzjulienne@suse.de>
+To:     <ulf.hansson@linaro.org>, <jh80.chung@samsung.com>
 CC:     <vkoul@kernel.org>, <linux-mmc@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>,
-        <bcm-kernel-feedback-list@broadcom.com>,
-        <linux-rpi-kernel@lists.infradead.org>,
-        <linux-arm-kernel@lists.infradead.org>
-Subject: [PATCH] mmc: bcm2835: Use dma_request_chan() instead dma_request_slave_channel()
-Date:   Tue, 17 Dec 2019 13:26:25 +0200
-Message-ID: <20191217112625.30715-1-peter.ujfalusi@ti.com>
+        <linux-kernel@vger.kernel.org>
+Subject: [PATCH] mmc: dw_mmc: Use dma_request_chan() instead dma_request_slave_channel()
+Date:   Tue, 17 Dec 2019 13:26:56 +0200
+Message-ID: <20191217112656.30860-1-peter.ujfalusi@ti.com>
 X-Mailer: git-send-email 2.24.0
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -76,30 +71,31 @@ probing against DMA.
 
 Signed-off-by: Peter Ujfalusi <peter.ujfalusi@ti.com>
 ---
- drivers/mmc/host/bcm2835.c | 10 +++++++++-
- 1 file changed, 9 insertions(+), 1 deletion(-)
+ drivers/mmc/host/dw_mmc.c | 8 +++++---
+ 1 file changed, 5 insertions(+), 3 deletions(-)
 
-diff --git a/drivers/mmc/host/bcm2835.c b/drivers/mmc/host/bcm2835.c
-index 99f61fd2a658..3821f159d36d 100644
---- a/drivers/mmc/host/bcm2835.c
-+++ b/drivers/mmc/host/bcm2835.c
-@@ -1393,7 +1393,15 @@ static int bcm2835_probe(struct platform_device *pdev)
- 	host->dma_chan = NULL;
- 	host->dma_desc = NULL;
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index fc9d4d000f97..bc5278ab5707 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -833,12 +833,14 @@ static int dw_mci_edmac_init(struct dw_mci *host)
+ 	if (!host->dms)
+ 		return -ENOMEM;
  
--	host->dma_chan_rxtx = dma_request_slave_channel(dev, "rx-tx");
-+	host->dma_chan_rxtx = dma_request_chan(dev, "rx-tx");
-+	if (IS_ERR(host->dma_chan_rxtx)) {
-+		if (PTR_ERR(host->dma_chan_rxtx) == -EPROBE_DEFER)
-+			return -EPROBE_DEFER;
+-	host->dms->ch = dma_request_slave_channel(host->dev, "rx-tx");
+-	if (!host->dms->ch) {
++	host->dms->ch = dma_request_chan(host->dev, "rx-tx");
++	if (IS_ERR(host->dms->ch)) {
++		int ret = PTR_ERR(host->dms->ch);
 +
-+		/* Ignore errors to fall back to PIO mode */
-+		host->dma_chan_rxtx = NULL;
-+	}
-+
+ 		dev_err(host->dev, "Failed to get external DMA channel.\n");
+ 		kfree(host->dms);
+ 		host->dms = NULL;
+-		return -ENXIO;
++		return ret;
+ 	}
  
- 	clk = devm_clk_get(dev, NULL);
- 	if (IS_ERR(clk)) {
+ 	return 0;
 -- 
 Peter
 
