@@ -2,253 +2,233 @@ Return-Path: <SRS0=wLMj=2I=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.3 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 17A83C2D0BF
-	for <linux-mmc@archiver.kernel.org>; Wed, 18 Dec 2019 15:11:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0A63BC2D0CD
+	for <linux-mmc@archiver.kernel.org>; Wed, 18 Dec 2019 15:20:09 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id CE3D024676
-	for <linux-mmc@archiver.kernel.org>; Wed, 18 Dec 2019 15:11:51 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D3B3021582
+	for <linux-mmc@archiver.kernel.org>; Wed, 18 Dec 2019 15:20:08 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="sjxLPdqP"
+	dkim=pass (2048-bit key) header.d=st.com header.i=@st.com header.b="nT0CjEqd"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727513AbfLRPLr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 18 Dec 2019 10:11:47 -0500
-Received: from mail-ua1-f66.google.com ([209.85.222.66]:46080 "EHLO
-        mail-ua1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726913AbfLRPLq (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Dec 2019 10:11:46 -0500
-Received: by mail-ua1-f66.google.com with SMTP id l6so736428uap.13
-        for <linux-mmc@vger.kernel.org>; Wed, 18 Dec 2019 07:11:45 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=OG/pM/wl2nU75Ce+HHMv6RzUgI11FdyesZawxBUPdMo=;
-        b=sjxLPdqPMrWCiphZxrkk/aw+he+VCwR/j4xHVgnfx30c9y7WrySH0ZYfQ7gh3PREfX
-         wQRdWBaCujUPM62xcIlkuUyLa0wFeKzZkuUT86MuIDwLLJjvJu4Nfp0RXzU1KyHY+I7E
-         f+tfhzGksjrXSTjSfAGuLrf2FB1LywGABMos918G4y5Gi+dKniW7jLz2NdrfTBv/Sres
-         mKHEkeGAGqDurGMX0VzvKl87Ft5xhzwAVN37w2mxLek+aM4x8tCCyDuLs0U46a+F8bxn
-         CK8bNsy93M34jpcpDhqau5xatHXEBHjviqduADf0U+OP+/q4W9lRh697GWBgvPJr41X9
-         bvKA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=OG/pM/wl2nU75Ce+HHMv6RzUgI11FdyesZawxBUPdMo=;
-        b=iPism/ItOadBX/MMjrjluwTGnDu8izRMb5bJ6w097uJg9QHgvBIK1wmXDiSwzzROmp
-         NVSQuWc7B9NIIV/jyMIRMZlYiF+SVDk0YgWmWjnE3TjHL86YDKugpZQG08af1/WeupH/
-         nB29GzoI2bp5VXeHQuEseMz9MWKIaX4Q+4s0EtCtRoRtcLWVPgOG/jvh+pjfoeohnsfK
-         MkpMZNIVz8gazY0KSn7ROTzHyFY7V5mjcEHX2SL37Rp09Q+ZMMSgVK3BNcPaNrwxRevx
-         xWB8Cgs6l5PLIXu5c6g06DAsF+fozU0ZY1Q79mcvtbA+YOkD2/tmSUX5/84PTNYP2IaY
-         /rGA==
-X-Gm-Message-State: APjAAAV6o7l+Z9HQ+6njAjf8saaqG4otxlhVOICIhCN7pA6JfhjHl8lx
-        zCBJOJTQAvqpw+YB33aT6HmWjLCpQhupnGE6fFK6WQ==
-X-Google-Smtp-Source: APXvYqxIemSRkPQQlkOHIgb1DLI/F80ZGX0B3DDxjvdIfGtoGmFwb3OGpLHbe5uZsgnRUDNiscbxAsqS/SFF84Oq+ro=
-X-Received: by 2002:ab0:e16:: with SMTP id g22mr1660978uak.129.1576681904792;
- Wed, 18 Dec 2019 07:11:44 -0800 (PST)
-MIME-Version: 1.0
-References: <1571668177-3766-1-git-send-email-rampraka@codeaurora.org>
- <CAPDyKFoZEc-m7NMnaAa5bjtCSp4wyJqic3cLHk95xracoWcCUA@mail.gmail.com> <0101016eb6152d19-fa1453b7-ae71-49d7-b13b-8c4009375ee1-000000@us-west-2.amazonses.com>
-In-Reply-To: <0101016eb6152d19-fa1453b7-ae71-49d7-b13b-8c4009375ee1-000000@us-west-2.amazonses.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 18 Dec 2019 16:11:08 +0100
-Message-ID: <CAPDyKFoc-c23d4U6m3UMxtA7KhnHeeUN5u-Rpiwsbsz7PnyT+w@mail.gmail.com>
-Subject: Re: [RFC 0/6] mmc: Add clock scaling support for mmc driver
-To:     Ram Prakash Gupta <rampraka@codeaurora.org>
-Cc:     Asutosh Das <asutoshd@codeaurora.org>,
-        Sahitya Tummala <stummala@codeaurora.org>,
-        Sayali Lokhande <sayalil@codeaurora.org>,
-        Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
-        cang@codeaurora.org, ppvk@codeaurora.org,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Rob Herring <robh+dt@kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        id S1727150AbfLRPUI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 18 Dec 2019 10:20:08 -0500
+Received: from mx07-00178001.pphosted.com ([62.209.51.94]:3856 "EHLO
+        mx07-00178001.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726921AbfLRPUH (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Dec 2019 10:20:07 -0500
+Received: from pps.filterd (m0046037.ppops.net [127.0.0.1])
+        by mx07-00178001.pphosted.com (8.16.0.42/8.16.0.42) with SMTP id xBIFISIS017156;
+        Wed, 18 Dec 2019 16:19:48 +0100
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=st.com; h=subject : to : cc :
+ references : from : message-id : date : mime-version : in-reply-to :
+ content-type : content-transfer-encoding; s=STMicroelectronics;
+ bh=WneSex7HLvk1knfWmC+iWo4b9iXA1aE+DZZb+Ph0YE0=;
+ b=nT0CjEqdbNCGAEn8ad4RksgAUyfA4q5u1qVfyaiaiXV9YAkDPApm47cmN8PUcWYpBm1q
+ BWx03o7gK2FmI3+EChRlvi70Ru79DJ0pC4LcIsPRC+mLP1qFHl7DamP0vYxAJPZGmlxh
+ M7y8vhoZ2QYT04uUbKyO0OMoasjPP6CdO5f/ESlebwgjAszJNvHFhIm/lANHzilnj83W
+ R93vTVwKKxBeflkxarvyBuwcQe3KP5gD9g8x0RD2wdV6/bZhODqMaYh3onmq6M1/HgC0
+ 5IvTstSQBVlMWFuilPsYv/xfW3m1+w8Gs1mVUlxliu6azrck1/SbHzpNEZ0fdvGjzOQo Cw== 
+Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
+        by mx07-00178001.pphosted.com with ESMTP id 2wvpd1n0dd-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Wed, 18 Dec 2019 16:19:48 +0100
+Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
+        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 22D8C100038;
+        Wed, 18 Dec 2019 16:19:44 +0100 (CET)
+Received: from Webmail-eu.st.com (sfhdag6node1.st.com [10.75.127.16])
+        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id 0E9792B220D;
+        Wed, 18 Dec 2019 16:19:44 +0100 (CET)
+Received: from lmecxl0923.lme.st.com (10.75.127.49) by SFHDAG6NODE1.st.com
+ (10.75.127.16) with Microsoft SMTP Server (TLS) id 15.0.1473.3; Wed, 18 Dec
+ 2019 16:19:42 +0100
+Subject: Re: [PATCH V2] mmc: mmci: add threaded irq to abort DPSM of
+ non-functional state
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+CC:     Rob Herring <robh+dt@kernel.org>,
+        Srinivas Kandagatla <srinivas.kandagatla@linaro.org>,
+        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
+        Alexandre Torgue <alexandre.torgue@st.com>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
         Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
         DTML <devicetree@vger.kernel.org>,
-        Doug Anderson <dianders@google.com>
-Content-Type: text/plain; charset="UTF-8"
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        <linux-stm32@st-md-mailman.stormreply.com>
+References: <20191211133934.16932-1-ludovic.Barre@st.com>
+ <CAPDyKFpoqEXO1JvjF=0hX97PiwP=2c1eWORsacb8QvZM=1Tvjw@mail.gmail.com>
+From:   Ludovic BARRE <ludovic.barre@st.com>
+Message-ID: <7019a4b8-e7a4-0e3a-4c42-0d46c80e5126@st.com>
+Date:   Wed, 18 Dec 2019 16:19:42 +0100
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.1.0
+MIME-Version: 1.0
+In-Reply-To: <CAPDyKFpoqEXO1JvjF=0hX97PiwP=2c1eWORsacb8QvZM=1Tvjw@mail.gmail.com>
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Language: fr
+Content-Transfer-Encoding: 8bit
+X-Originating-IP: [10.75.127.49]
+X-ClientProxiedBy: SFHDAG8NODE1.st.com (10.75.127.22) To SFHDAG6NODE1.st.com
+ (10.75.127.16)
+X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.95,18.0.572
+ definitions=2019-12-18_04:2019-12-17,2019-12-18 signatures=0
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 29 Nov 2019 at 08:34, <rampraka@codeaurora.org> wrote:
->
-> Hi Ulf,
->
-> Seems some setting issue with my thunderbird application.
-> Sorry for spams, please ignore my last responses as unsupported
-> characters got added.
->
-> Typing my response again from browser and re-sending.
->
-> Thanks,
-> Ram
->
-> On 2019-10-22 14:10, Ulf Hansson wrote:
-> > On Mon, 21 Oct 2019 at 16:30, Ram Prakash Gupta
-> > <rampraka@codeaurora.org> wrote:
-> >>
-> >> This change adds the use of devfreq based clock scaling to MMC.
-> >> This applicable for eMMC and SDCard.
-> >> For some workloads, such as video playback, it isn't necessary
-> >> for these cards to run at high speed. Running at lower
-> >> frequency, in such cases can still meet the deadlines for data
-> >> transfers.
-> >>
-> >> Scaling down the clock frequency dynamically has power savings
-> >> not only because the bus is running at lower frequency but also
-> >> has an advantage of scaling down the system core voltage, if
-> >> supported. Provide an ondemand clock scaling support similar
-> >> to the cpufreq ondemand governor having two thresholds,
-> >> up_threshold and down_threshold to decide whether to increase
-> >> the frequency or scale it down respectively as per load.
-> >
-> > This sounds simple, but what the series is doing is far more
-> > complicated but scaling the bus clock, as it also re-negotiates the
-> > bus speed mode.
-> >
-> > Each time the triggering point for scaling up/down is hit, then a
-> > series of commands needs to be sent to the card, including running the
-> > tuning procedure. The point is, for sure, this doesn't come for free,
-> > both from a latency point of view, but also from an energy cost point
-> > of view. So, whether this really improves the behaviour, seems like
-> > very use case sensitive, right!?
->
-> Switching modes would incur some latency for sending commands to switch
-> modes, but tuning is not needed as most of the emmc devices used now a
-> days are with enhanced strobe support, so tuning would not add up any
-> latency as it is not required in hs400 enhanced strobe mode.
->
-> This feature is implemented for video playback case, where data transfer
-> request is less, where this feature helps with saving power consumption.
->
-> And when there is burst of data transfer request, load will remain
-> _high_
-> so there won't be any switching and hence it won't affect any existing
-> use cases from latency point of view.
->
-> Also if hw supports to switch clk frequency without changing mode. I
-> will
-> make change in code. For this I have seek input from hw team.
->
->  From collected data, I see this feature is helping in saving power
-> consumption. And no energy penalty is observed. Please share if I am
-> missing any specific. Power saving using this feature is quite good
-> and considerable. Please find the data below.
->
-> Use Case                             Delta at Battery  Power Impact
-> 30 fps at HD 1080p decode 20Mbps       10 mA               11%
-> 30 fps at UHD 8b H.264 42 Mbps         20.93 mA            19%
->
-> >
-> > Overall, when it comes to use cases, we have very limited knowledge
-> > about them at the mmc block layer level. I think it should remain like
-> > that. If at any place at all, this information is better maintained by
-> > the generic block layer and potentially the configured I/O scheduler.
->
-> I think, generic block layer do not have knowledge of use case for data
-> transfer request. And devfreq framework have been used to implement this
-> feature, which should be same in any layer.
+hi ulf
 
-Just to be clear, my main concern here is not using the devfreq framework.
+Le 12/18/19 à 3:01 PM, Ulf Hansson a écrit :
+> On Wed, 11 Dec 2019 at 14:40, Ludovic Barre <ludovic.Barre@st.com> wrote:
+>>
+>> From: Ludovic Barre <ludovic.barre@st.com>
+>>
+>> If datatimeout occurs on R1B request, the Data Path State Machine stays
+>> in busy and is non-functional. Only a reset aborts the DPSM.
+>>
+>> Like a reset must be outside of critical section, this patch adds
+>> threaded irq function to release state machine. In this case,
+>> the mmc_request_done is called at the end of threaded irq and
+>> skipped into irq handler.
+>>
+>> Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
+> 
+> Applied for next, thanks!
+> 
+> I took the liberty of doing some minor updates (changelog/comment),
+> please have a look and let me know if there is something you want me
+> to change.
+> 
 
-It's rather whether switching speed modes is really worth it, which
-Doug pointed out as well.
+I read the modifications (changelog and comment function),
+and it's ok for me.
 
->
-> Also mobile platforms comes mostly with emmc and ufs as storage media.
-> And clock scaling is already implemented in upstream ufs driver using
-> devfreq framework. On similar line, this feature is implemented for mmc
-> driver. So I believe, clk scaling implementation is better placed in mmc
-> driver rather in generic block layer.
+thanks
+Ludo
 
-At some point you want to trigger the clock to be scaled up/down,
-probably because of reaching some bandwidth threshold. This part seems
-like a generic block thing and not an mmc specific thing.
-
-Exactly how that would affect this approach is hard to say, but my
-point is, that I don't want to sprinkle the mmc subsystem with code
-that may belong in upper common layers.
-
->
-> >
-> > This brings me to a question about the tests you have you run. Can you
-> > share some information and data about that?
->
-> Test case used are 1080p and 4k video playback use case. As this feature
-> is implemented specifically for video playback use case.
-
-Right.
-
-It seems to me, that you are optimizing for only one particular use
-case. How do you make sure to not increase energy consumption, for
-other use cases that would gain from running at the highest speed mode
-and "race to idle"?
-
-I think you need to take a step back and think more general about this
-approach. More importantly, you need to provide more data to prove
-your approach, also according to suggestions from Dough.
-
-> >
-> >>
-> >>
-> >> Ram Prakash Gupta (6):
-> >>   mmc: core: Parse clk scaling dt entries
-> >>   mmc: core: Add core scaling support in driver
-> >>   mmc: core: Initialize clk scaling for mmc and SDCard
-> >>   mmc: core: Add debugfs entries for scaling support
-> >>   mmc: sdhci-msm: Add capability in platfrom host
-> >>   dt-bindings: mmc: sdhci-msm: Add clk scaling dt parameters
-> >>
-> >>  .../devicetree/bindings/mmc/sdhci-msm.txt          |  19 +
-> >
-> > I noticed that the DT patch was put last in the series, but the
-> > parsing is implemented in the first patch. Please flip this around. If
-> > you want to implement DT parsing of new bindings, please make sure to
-> > discuss the new bindings first.
->
-> I will update in next post.
->
-> >
-> >>  drivers/mmc/core/block.c                           |  19 +-
-> >>  drivers/mmc/core/core.c                            | 777
-> >> +++++++++++++++++++++
-> >>  drivers/mmc/core/core.h                            |  17 +
-> >>  drivers/mmc/core/debugfs.c                         |  90 +++
-> >>  drivers/mmc/core/host.c                            | 226 ++++++
-> >>  drivers/mmc/core/mmc.c                             | 246 ++++++-
-> >>  drivers/mmc/core/queue.c                           |   2 +
-> >>  drivers/mmc/core/sd.c                              |  84 ++-
-> >>  drivers/mmc/host/sdhci-msm.c                       |   2 +
-> >>  include/linux/mmc/card.h                           |   7 +
-> >>  include/linux/mmc/host.h                           |  66 ++
-> >>  12 files changed, 1550 insertions(+), 5 deletions(-)
-> >
-> > This is a lot of new code in the mmc core, which I would then need to
-> > maintain, of course. I have to admit, I am a bit concerned about that,
-> > so you have to convince me that there are good reasons for me to apply
-> > this.
-> >
-> > As I stated above, I think the approach looks quite questionable in
-> > general. And even if you can share measurement, that it improves the
-> > behaviour, I suspect (without a deeper code review) that some of the
-> > code better belongs in common block device layer.
->
->  From the collected power data, I see this as good reason to have this
-> feature in mmc driver as number is quite considerable.
->
-> For approach, it would be helpful if you share your inputs regarding
-> this
-> approach. And as you have stated, this can be further discussed after a
-> review from you.
-
-Besides my comments above, Doug has provided you with valuable
-feedback. Please follow up on that as well, if you still intend to
-pursue with this approach.
-
-Kind regards
-Uffe
+> And again, apologize for the delays!
+> 
+> Kind regards
+> Uffe
+> 
+> 
+>> ---
+>> change V2:
+>>   -check IRQ_WAKE_THREAD only in mmci_cmd_irq error part,
+>>    to avoid this test in mmci_request_end.
+>>
+>> ---
+>>   drivers/mmc/host/mmci.c | 46 +++++++++++++++++++++++++++++++++++------
+>>   drivers/mmc/host/mmci.h |  1 +
+>>   2 files changed, 41 insertions(+), 6 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+>> index 40e72c30ea84..2b91757e3e84 100644
+>> --- a/drivers/mmc/host/mmci.c
+>> +++ b/drivers/mmc/host/mmci.c
+>> @@ -1321,6 +1321,7 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
+>>          } else if (host->variant->busy_timeout && busy_resp &&
+>>                     status & MCI_DATATIMEOUT) {
+>>                  cmd->error = -ETIMEDOUT;
+>> +               host->irq_action = IRQ_WAKE_THREAD;
+>>          } else {
+>>                  cmd->resp[0] = readl(base + MMCIRESPONSE0);
+>>                  cmd->resp[1] = readl(base + MMCIRESPONSE1);
+>> @@ -1339,7 +1340,10 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
+>>                                  return;
+>>                          }
+>>                  }
+>> -               mmci_request_end(host, host->mrq);
+>> +
+>> +               if (host->irq_action != IRQ_WAKE_THREAD)
+>> +                       mmci_request_end(host, host->mrq);
+>> +
+>>          } else if (sbc) {
+>>                  mmci_start_command(host, host->mrq->cmd, 0);
+>>          } else if (!host->variant->datactrl_first &&
+>> @@ -1532,9 +1536,9 @@ static irqreturn_t mmci_irq(int irq, void *dev_id)
+>>   {
+>>          struct mmci_host *host = dev_id;
+>>          u32 status;
+>> -       int ret = 0;
+>>
+>>          spin_lock(&host->lock);
+>> +       host->irq_action = IRQ_HANDLED;
+>>
+>>          do {
+>>                  status = readl(host->base + MMCISTATUS);
+>> @@ -1574,12 +1578,41 @@ static irqreturn_t mmci_irq(int irq, void *dev_id)
+>>                  if (host->variant->busy_detect_flag)
+>>                          status &= ~host->variant->busy_detect_flag;
+>>
+>> -               ret = 1;
+>>          } while (status);
+>>
+>>          spin_unlock(&host->lock);
+>>
+>> -       return IRQ_RETVAL(ret);
+>> +       return host->irq_action;
+>> +}
+>> +
+>> +/*
+>> + * mmci_irq_threaded is call if the mmci host need to release state machines
+>> + * before to terminate the request.
+>> + * If datatimeout occurs on R1B request, the Data Path State Machine stays
+>> + * in busy and is non-functional. Only a reset can to abort the DPSM.
+>> + */
+>> +static irqreturn_t mmci_irq_threaded(int irq, void *dev_id)
+>> +{
+>> +       struct mmci_host *host = dev_id;
+>> +       unsigned long flags;
+>> +
+>> +       if (host->rst) {
+>> +               reset_control_assert(host->rst);
+>> +               udelay(2);
+>> +               reset_control_deassert(host->rst);
+>> +       }
+>> +
+>> +       spin_lock_irqsave(&host->lock, flags);
+>> +       writel(host->clk_reg, host->base + MMCICLOCK);
+>> +       writel(host->pwr_reg, host->base + MMCIPOWER);
+>> +       writel(MCI_IRQENABLE | host->variant->start_err,
+>> +              host->base + MMCIMASK0);
+>> +
+>> +       host->irq_action = IRQ_HANDLED;
+>> +       mmci_request_end(host, host->mrq);
+>> +       spin_unlock_irqrestore(&host->lock, flags);
+>> +
+>> +       return host->irq_action;
+>>   }
+>>
+>>   static void mmci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>> @@ -2071,8 +2104,9 @@ static int mmci_probe(struct amba_device *dev,
+>>                          goto clk_disable;
+>>          }
+>>
+>> -       ret = devm_request_irq(&dev->dev, dev->irq[0], mmci_irq, IRQF_SHARED,
+>> -                       DRIVER_NAME " (cmd)", host);
+>> +       ret = devm_request_threaded_irq(&dev->dev, dev->irq[0], mmci_irq,
+>> +                                       mmci_irq_threaded, IRQF_SHARED,
+>> +                                       DRIVER_NAME " (cmd)", host);
+>>          if (ret)
+>>                  goto clk_disable;
+>>
+>> diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
+>> index 158e1231aa23..5e63c0596364 100644
+>> --- a/drivers/mmc/host/mmci.h
+>> +++ b/drivers/mmc/host/mmci.h
+>> @@ -412,6 +412,7 @@ struct mmci_host {
+>>
+>>          struct timer_list       timer;
+>>          unsigned int            oldstat;
+>> +       u32                     irq_action;
+>>
+>>          /* pio stuff */
+>>          struct sg_mapping_iter  sg_miter;
+>> --
+>> 2.17.1
+>>
