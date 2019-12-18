@@ -6,22 +6,22 @@ X-Spam-Status: No, score=-5.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CC686C43603
-	for <linux-mmc@archiver.kernel.org>; Wed, 18 Dec 2019 09:48:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A926BC2D0CD
+	for <linux-mmc@archiver.kernel.org>; Wed, 18 Dec 2019 09:49:16 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id ACB52218AC
-	for <linux-mmc@archiver.kernel.org>; Wed, 18 Dec 2019 09:48:07 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 899FC24650
+	for <linux-mmc@archiver.kernel.org>; Wed, 18 Dec 2019 09:49:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726788AbfLRJsD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 18 Dec 2019 04:48:03 -0500
-Received: from sauhun.de ([88.99.104.3]:35298 "EHLO pokefinder.org"
+        id S1726754AbfLRJtM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 18 Dec 2019 04:49:12 -0500
+Received: from sauhun.de ([88.99.104.3]:35354 "EHLO pokefinder.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726551AbfLRJsD (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 18 Dec 2019 04:48:03 -0500
+        id S1726526AbfLRJtM (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 18 Dec 2019 04:49:12 -0500
 Received: from localhost (p54B33260.dip0.t-ipconnect.de [84.179.50.96])
-        by pokefinder.org (Postfix) with ESMTPSA id 192732C06A9;
-        Wed, 18 Dec 2019 10:48:01 +0100 (CET)
-Date:   Wed, 18 Dec 2019 10:47:57 +0100
+        by pokefinder.org (Postfix) with ESMTPSA id BFD992C2D9A;
+        Wed, 18 Dec 2019 10:49:09 +0100 (CET)
+Date:   Wed, 18 Dec 2019 10:49:09 +0100
 From:   Wolfram Sang <wsa@the-dreams.de>
 To:     Yangtao Li <tiny.windzz@gmail.com>
 Cc:     manuel.lauss@gmail.com, ulf.hansson@linaro.org,
@@ -38,16 +38,16 @@ Cc:     manuel.lauss@gmail.com, ulf.hansson@linaro.org,
         linux-arm-kernel@lists.infradead.org,
         linux-amlogic@lists.infradead.org,
         linux-mediatek@lists.infradead.org, linux-arm-msm@vger.kernel.org
-Subject: Re: [PATCH 02/13] mmc: tmio: convert to
+Subject: Re: [PATCH 06/13] mmc: sh_mmcif: convert to
  devm_platform_ioremap_resource
-Message-ID: <20191218094757.GA1054@ninjato>
+Message-ID: <20191218094909.GB1054@ninjato>
 References: <20191215175120.3290-1-tiny.windzz@gmail.com>
- <20191215175120.3290-2-tiny.windzz@gmail.com>
+ <20191215175120.3290-6-tiny.windzz@gmail.com>
 MIME-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="1yeeQ81UyVL57Vl7"
+        protocol="application/pgp-signature"; boundary="rS8CxjVDS/+yyDmU"
 Content-Disposition: inline
-In-Reply-To: <20191215175120.3290-2-tiny.windzz@gmail.com>
+In-Reply-To: <20191215175120.3290-6-tiny.windzz@gmail.com>
 User-Agent: Mutt/1.10.1 (2018-07-13)
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
@@ -55,43 +55,41 @@ List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 
---1yeeQ81UyVL57Vl7
+--rS8CxjVDS/+yyDmU
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-On Sun, Dec 15, 2019 at 05:51:09PM +0000, Yangtao Li wrote:
+On Sun, Dec 15, 2019 at 05:51:13PM +0000, Yangtao Li wrote:
 > Use devm_platform_ioremap_resource() to simplify code.
 >=20
 > Signed-off-by: Yangtao Li <tiny.windzz@gmail.com>
 
-I am not a big fan of this new function, but oh well...
-
-Tested on a Lager board (R-Car H2), SDHI gets recognized and SD cards
-are detected.
+Tested on a Lager board (R-Car H2), MMCIF gets recognized and the eMMC
+is detected.
 
 Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 Tested-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
 
---1yeeQ81UyVL57Vl7
+--rS8CxjVDS/+yyDmU
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAl359cgACgkQFA3kzBSg
-KbaFBw/+Np52ahaH5+TRKI/drXlFCXUL5HuWieFoxsd85DJHgxSXOTku4oSCDjSy
-tQ305gyE97P963NpUtrU9V2uovdl27ko/jA8kC9z0fxx7+DoDdTqw13JjTTBLOW9
-s3dELTr7BVx5j+UEWfFBGP0VbiM57oOm+qAiNMhjoY64Fkmkn/3oroDk9M7LY+kz
-GjvwgLpiDXeOylLKpHQzk4+pO1X0aGqtTncveQ8Oa/CKytN9UCDfUH7gI1HgXLeM
-FDqu3HGucRHbL52bLxnz71PrJWQ3Z6Cxm46Z8mKbWDFvnLJoCIegymSGdzawqzf0
-wWmBUh+LocMl6reuTeD4s5I0HDyt+LAU1Kx1R0LQMflXe9KIVukga9W20B1eh6dH
-r1PDsfj9Y0GQwyY9X7PEhV90B3t/rGHhmw/XMZAMqf2xkgkrD2rlLr1aO+xLv84D
-asn6q8ZYfgKF9tmN6lUnJTpP8hXKG017MOk1jS5R+2iaXi5Fp3rSmX0DpQTHye+x
-/wWU9IpJ1HBKTdGWZFnJwd1SCOVzYR4mlLwvOpjiw66ZbX00y5obr773NkgjG/iA
-p1mbF7OO/5MFOAZgpyM0zzCTSaWjh/GfbGEOfEVhcXErCZhS4WmQjJ3k+rg8JBn8
-Pwu2Sgz+1rwyeqOiHZJtY3QkffH3x1IsskLYbK2kSHs06L2t7O4=
-=XhTS
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAl359hQACgkQFA3kzBSg
+KbaiBQ/+JDGkJA7UaNpOTGoVuiePH3IUpTMrJxM1MmEK8YzOLg2VtaawBlH85BhM
+Ak/0IRYbspIV/cTS9KHqGuVTGzy7CBUZk0YzF+gVRKtzNc5YZarfxzJgcwdFprzw
+MARgKLO3726eNMwbR4F9qguUj9bJkwC3ANzmp6/qxlQr1R+LhXOGfFMo8I3nZVIR
+aVT4n9eYo/eNZhEZJIMJ+7BAW3v0rIXbBxHaJ2iCimRdFiOt5UnHHI+4NdRk2vQo
+HKqrKedwVBZ6xj+Ufmu1jaRaUoD9hdFUIshiiNZ5dKqEf5OTUyWsXKqUynXCZ0wi
+Dgjf6WRASYSG0CjGhMvyMS8LfWmWOy5u3jcTLvKDQeMhmGePZMchbQ4JlauUy+Vg
+t7uETcZRJzwhHZvGsv4oThYe2ucZsPWSt+rGrvabPY93cfxm+PZhcSAy6bYf08U3
+UjO3rGBaw2Ne563bPvPAduYx3gZ1hyF+mLk+SXeN7mnOdn0N/HK4BHmTeiS3RsuT
+4Y5QmLH1ytXo/o3yy8BRUzb+gBoOqoYoaspnz44rYeo03iQyzpssJ3+DInP/Rb3o
+Jz87kXD5TunphiWkHSSGeAcE5DMy/PJvz9m2VbrnDVwJkta7IZR57ypXXEhXWrnk
+gqke2OekVI1rCUiL8w6bo3jHVGbKM4hCczuiOFKwbbRNKtbADtc=
+=Qzgh
 -----END PGP SIGNATURE-----
 
---1yeeQ81UyVL57Vl7--
+--rS8CxjVDS/+yyDmU--
