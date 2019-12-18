@@ -7,132 +7,125 @@ X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2E884C2D0C3
-	for <linux-mmc@archiver.kernel.org>; Wed, 18 Dec 2019 08:33:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1FD6FC43603
+	for <linux-mmc@archiver.kernel.org>; Wed, 18 Dec 2019 08:34:11 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 050AE218AC
-	for <linux-mmc@archiver.kernel.org>; Wed, 18 Dec 2019 08:33:18 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E4AE420717
+	for <linux-mmc@archiver.kernel.org>; Wed, 18 Dec 2019 08:34:10 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1576657998;
-	bh=Junqz+6lLG0P4Dk4h48/gIhu7sjxQH/ijH2dR4doCNo=;
+	s=default; t=1576658051;
+	bh=4VCT67i+evtU3b+1NrYmjCFgfKrbwyawxotLanrLNAU=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
-	b=yWkEtXJkt0qJMcOh52Pp/AiIr0O33meffaF3COdIn7xZN4dLHJGW5gXG4HadPT+9O
-	 8dKEQX+B0iFUpAdRE1favdCSODg2vVqVQI+/PBr25osJOt7ResArT6aVpWrpQSf45L
-	 b8xhUjhrBz0dB1lNREhpBrxhKUfJxjKeBAdDMKVE=
+	b=tWN4DlUQ3SLqj6aUt0jONJyDMg8J2VVLVMFAvfQM6NYBwxNYrAN6cO3V6CFdHD+uZ
+	 QYoxdNeihibdspz/73OPcKBcF6PAPPm0AFe6YkKGPiiMkRRRcdjyX/ZkNoM9FYF3kv
+	 GySr4+O71piNTdKZiML7VcLJyLTJU69hfZ3JR/+0=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725535AbfLRIdR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 18 Dec 2019 03:33:17 -0500
-Received: from mail.kernel.org ([198.145.29.99]:57098 "EHLO mail.kernel.org"
+        id S1725785AbfLRIeK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 18 Dec 2019 03:34:10 -0500
+Received: from mail.kernel.org ([198.145.29.99]:57248 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726526AbfLRIdR (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 18 Dec 2019 03:33:17 -0500
+        id S1725535AbfLRIeK (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 18 Dec 2019 03:34:10 -0500
 Received: from localhost (83-86-89-107.cable.dynamic.v4.ziggo.nl [83.86.89.107])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 198B520717;
-        Wed, 18 Dec 2019 08:33:15 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 5547620717;
+        Wed, 18 Dec 2019 08:34:09 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1576657996;
-        bh=Junqz+6lLG0P4Dk4h48/gIhu7sjxQH/ijH2dR4doCNo=;
+        s=default; t=1576658049;
+        bh=4VCT67i+evtU3b+1NrYmjCFgfKrbwyawxotLanrLNAU=;
         h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=MKHi+R2smU7CRobl43ONtxand1FTWoqpps7XgNvkmXJOE02q2NlruTzfVwclvOUxh
-         rZESja1uhZsdRNiOcD2C7YluH0w+NBT7KhhvVmXgxJ2q7dQNMF5BB0hCJvLO0uwrNH
-         Lkp2D2agCnD1Bx9VjagbaZP4aZcEkxMFnrKaHTuU=
-Date:   Wed, 18 Dec 2019 09:33:14 +0100
+        b=fd+Q+Zs3jaPia+HO/AmBYGyQAwwixgXWmGSO/k7zY4RWO8eFHK2Gc7Hyz58Q0LNAX
+         AR4JlLdkQeOQtmofAAT3kvx5Wk071HU82ebvRi7R1uM7b3aaD38RKlPDfvnTu4ejni
+         hry7odHFOkZuHhbdoATx+SRTDanYl2nUEIGosGDk=
+Date:   Wed, 18 Dec 2019 09:34:07 +0100
 From:   Greg KH <gregkh@linuxfoundation.org>
 To:     "Bao D. Nguyen" <nguyenb@codeaurora.org>
 Cc:     ulf.hansson@linaro.org, robh+dt@kernel.org,
         linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
         asutoshd@codeaurora.org, cang@codeaurora.org,
-        Sayali Lokhande <sayalil@codeaurora.org>
-Subject: Re: [<PATCH v1> 4/9] mmc: core: fix SD card request queue refcount
- underflow during shutdown
-Message-ID: <20191218083314.GC1554871@kroah.com>
+        Sahitya Tummala <stummala@codeaurora.org>
+Subject: Re: [<PATCH v1> 6/9] mmc: sdhci-msm: Ignore data timeout error for
+ R1B commands
+Message-ID: <20191218083407.GD1554871@kroah.com>
 References: <cover.1576540906.git.nguyenb@codeaurora.org>
- <afdbf5eff1918f4004f2418e90bd08400d40ed1b.1576540907.git.nguyenb@codeaurora.org>
+ <22061d3479b876e8590b966162d6385a47f851b1.1576540908.git.nguyenb@codeaurora.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <afdbf5eff1918f4004f2418e90bd08400d40ed1b.1576540907.git.nguyenb@codeaurora.org>
+In-Reply-To: <22061d3479b876e8590b966162d6385a47f851b1.1576540908.git.nguyenb@codeaurora.org>
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, Dec 16, 2019 at 06:50:37PM -0800, Bao D. Nguyen wrote:
-> From: Can Guo <cang@codeaurora.org>
+On Mon, Dec 16, 2019 at 06:50:39PM -0800, Bao D. Nguyen wrote:
+> From: Sahitya Tummala <stummala@codeaurora.org>
 > 
-> When system shutdown, kernel shall call shutdown function of mmc to stop
-> its request queue and clean it up, during which the request queue's kobject
-> shall be put once. In normal cases, if the SD card is removed, the
-> mmc_blk_remove routine releases all the resources and kobjects related to
-> the disk and request queue by decreasing their kref counts to 0. But if the
-> SD card is removed after its shutdown function is called, below kref count
-> underflow error shall be thrown out because the kref count was decreased
-> once during request queue cleanup by the shutdown function in advance. This
-> change fixes it by skipping request queue cleanup in the mmc blk routine if
-> the queue has been marked as dead.
+> Ignore data timeout error for R1B commands as there will be no
+> data associated and the busy timeout value for these commands
+> could be lager than the maximum timeout value that controller
+> can handle.
 > 
-> [  166.187211] refcount_t: underflow; use-after-free.
-> [  166.187277] ------------[ cut here ]------------
-> [  166.187321] Internal error: Oops - BUG: 0 [#1] PREEMPT SMP
-> [  166.187542] Workqueue: events_freezable mmc_rescan
-> [  166.187558] task: ffffffe673b96680 task.stack: ffffff8008418000
-> [  166.187579] pc : refcount_sub_and_test+0x64/0x78
-> [  166.187593] lr : refcount_sub_and_test+0x64/0x78
-> [  166.187605] sp : ffffff800841ba20 pstate : 60c00145
-> [  166.188319] Call trace:
-> [  166.188331]  refcount_sub_and_test+0x64/0x78
-> [  166.188343]  refcount_dec_and_test+0x18/0x24
-> [  166.188355]  kobject_put+0x5c/0x74
-> [  166.188374]  blk_put_queue+0x1c/0x28
-> [  166.188388]  disk_release+0x70/0x90
-> [  166.188402]  device_release+0x38/0x90
-> [  166.188429]  kobject_cleanup+0xc4/0x1c0
-> [  166.188441]  kobject_put+0x68/0x74
-> [  166.188455]  put_disk+0x20/0x2c
-> [  166.188467]  mmc_blk_put+0x9c/0xdc
-> [  166.188480]  mmc_blk_remove_req+0x110/0x120
-> [  166.188493]  mmc_blk_remove+0x14c/0x22c
-> [  166.188505]  mmc_bus_remove+0x24/0x34
-> [  166.188517]  device_release_driver_internal+0x13c/0x1e0
-> [  166.188528]  device_release_driver+0x24/0x30
-> [  166.188540]  bus_remove_device+0xdc/0x120
-> [  166.188552]  device_del+0x1e0/0x284
-> [  166.188564]  mmc_remove_card+0x68/0x7c
-> [  166.188577]  mmc_sd_remove+0x24/0x48
-> [  166.188588]  mmc_sd_detect+0x120/0x1a4
-> [  166.188600]  mmc_rescan+0xf4/0x384
-> [  166.188613]  process_one_work+0x1c0/0x3d4
-> [  166.188625]  worker_thread+0x224/0x344
-> [  166.188637]  kthread+0x120/0x130
-> [  166.188649]  ret_from_fork+0x10/0x18.
-> 
-> Signed-off-by: Can Guo <cang@codeaurora.org>
-> Signed-off-by: Sayali Lokhande <sayalil@codeaurora.org>
+> Signed-off-by: Sahitya Tummala <stummala@codeaurora.org>
 > Signed-off-by: Bao D. Nguyen <nguyenb@codeaurora.org>
 > ---
->  drivers/mmc/core/queue.c | 3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
+>  drivers/mmc/host/sdhci.c | 15 +++++++++------
+>  drivers/mmc/host/sdhci.h |  7 +++++++
+>  2 files changed, 16 insertions(+), 6 deletions(-)
 > 
-> diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
-> index 9edc086..846557b 100644
-> --- a/drivers/mmc/core/queue.c
-> +++ b/drivers/mmc/core/queue.c
-> @@ -506,7 +506,8 @@ void mmc_cleanup_queue(struct mmc_queue *mq)
->  	if (blk_queue_quiesced(q))
->  		blk_mq_unquiesce_queue(q);
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index c04e1ac..0a05d74 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -2925,12 +2925,6 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
+>  		 * above in sdhci_cmd_irq().
+>  		 */
+>  		if (data_cmd && (data_cmd->flags & MMC_RSP_BUSY)) {
+> -			if (intmask & SDHCI_INT_DATA_TIMEOUT) {
+> -				host->data_cmd = NULL;
+> -				data_cmd->error = -ETIMEDOUT;
+> -				__sdhci_finish_mrq(host, data_cmd->mrq);
+> -				return;
+> -			}
+>  			if (intmask & SDHCI_INT_DATA_END) {
+>  				host->data_cmd = NULL;
+>  				/*
+> @@ -2944,6 +2938,15 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
+>  				__sdhci_finish_mrq(host, data_cmd->mrq);
+>  				return;
+>  			}
+> +			if (host->quirks2 &
+> +				SDHCI_QUIRK2_IGNORE_DATATOUT_FOR_R1BCMD)
+> +				return;
+> +			if (intmask & SDHCI_INT_DATA_TIMEOUT) {
+> +				host->data_cmd = NULL;
+> +				data_cmd->error = -ETIMEDOUT;
+> +				__sdhci_finish_mrq(host, data_cmd->mrq);
+> +				return;
+> +			}
+>  		}
 >  
-> -	blk_cleanup_queue(q);
-> +	if (likely(!blk_queue_dead(q)))
-> +		blk_cleanup_queue(q);
+>  		/*
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index 0ed3e0e..1a88f74 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -482,6 +482,13 @@ struct sdhci_host {
+>   * block count.
+>   */
+>  #define SDHCI_QUIRK2_USE_32BIT_BLK_CNT			(1<<18)
+> +/*
+> + * Ignore data timeout error for R1B commands as there will be no
+> + * data associated and the busy timeout value for these commands
+> + * could be lager than the maximum timeout value that controller
+> + * can handle.
+> + */
+> +#define SDHCI_QUIRK2_IGNORE_DATATOUT_FOR_R1BCMD         (1<<19)
 
-Unless you can measure the performance impact, never use unlikely/likely
-in kernel code.  The compiler and cpu will always do much better over
-time than you can.
+No tabs?
 
-That being said, what will cleanup the queue if it is not "dead" at this
-point in time, later on?  Isn't this a leak?
+And what about using BIT(19) instead?
 
 thanks,
 
