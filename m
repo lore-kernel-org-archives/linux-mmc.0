@@ -2,233 +2,308 @@ Return-Path: <SRS0=wLMj=2I=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.3 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.5 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0A63BC2D0CD
-	for <linux-mmc@archiver.kernel.org>; Wed, 18 Dec 2019 15:20:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D8087C2D0BF
+	for <linux-mmc@archiver.kernel.org>; Wed, 18 Dec 2019 20:16:34 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id D3B3021582
-	for <linux-mmc@archiver.kernel.org>; Wed, 18 Dec 2019 15:20:08 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A111621D7D
+	for <linux-mmc@archiver.kernel.org>; Wed, 18 Dec 2019 20:16:34 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=st.com header.i=@st.com header.b="nT0CjEqd"
+	dkim=fail reason="key not found in DNS" (0-bit key) header.d=mg.codeaurora.org header.i=@mg.codeaurora.org header.b="mSaEgJpQ"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727150AbfLRPUI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 18 Dec 2019 10:20:08 -0500
-Received: from mx07-00178001.pphosted.com ([62.209.51.94]:3856 "EHLO
-        mx07-00178001.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726921AbfLRPUH (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Dec 2019 10:20:07 -0500
-Received: from pps.filterd (m0046037.ppops.net [127.0.0.1])
-        by mx07-00178001.pphosted.com (8.16.0.42/8.16.0.42) with SMTP id xBIFISIS017156;
-        Wed, 18 Dec 2019 16:19:48 +0100
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=st.com; h=subject : to : cc :
- references : from : message-id : date : mime-version : in-reply-to :
- content-type : content-transfer-encoding; s=STMicroelectronics;
- bh=WneSex7HLvk1knfWmC+iWo4b9iXA1aE+DZZb+Ph0YE0=;
- b=nT0CjEqdbNCGAEn8ad4RksgAUyfA4q5u1qVfyaiaiXV9YAkDPApm47cmN8PUcWYpBm1q
- BWx03o7gK2FmI3+EChRlvi70Ru79DJ0pC4LcIsPRC+mLP1qFHl7DamP0vYxAJPZGmlxh
- M7y8vhoZ2QYT04uUbKyO0OMoasjPP6CdO5f/ESlebwgjAszJNvHFhIm/lANHzilnj83W
- R93vTVwKKxBeflkxarvyBuwcQe3KP5gD9g8x0RD2wdV6/bZhODqMaYh3onmq6M1/HgC0
- 5IvTstSQBVlMWFuilPsYv/xfW3m1+w8Gs1mVUlxliu6azrck1/SbHzpNEZ0fdvGjzOQo Cw== 
-Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
-        by mx07-00178001.pphosted.com with ESMTP id 2wvpd1n0dd-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Wed, 18 Dec 2019 16:19:48 +0100
-Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
-        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 22D8C100038;
-        Wed, 18 Dec 2019 16:19:44 +0100 (CET)
-Received: from Webmail-eu.st.com (sfhdag6node1.st.com [10.75.127.16])
-        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id 0E9792B220D;
-        Wed, 18 Dec 2019 16:19:44 +0100 (CET)
-Received: from lmecxl0923.lme.st.com (10.75.127.49) by SFHDAG6NODE1.st.com
- (10.75.127.16) with Microsoft SMTP Server (TLS) id 15.0.1473.3; Wed, 18 Dec
- 2019 16:19:42 +0100
-Subject: Re: [PATCH V2] mmc: mmci: add threaded irq to abort DPSM of
- non-functional state
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-CC:     Rob Herring <robh+dt@kernel.org>,
-        Srinivas Kandagatla <srinivas.kandagatla@linaro.org>,
-        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
-        Alexandre Torgue <alexandre.torgue@st.com>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        DTML <devicetree@vger.kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        <linux-stm32@st-md-mailman.stormreply.com>
-References: <20191211133934.16932-1-ludovic.Barre@st.com>
- <CAPDyKFpoqEXO1JvjF=0hX97PiwP=2c1eWORsacb8QvZM=1Tvjw@mail.gmail.com>
-From:   Ludovic BARRE <ludovic.barre@st.com>
-Message-ID: <7019a4b8-e7a4-0e3a-4c42-0d46c80e5126@st.com>
-Date:   Wed, 18 Dec 2019 16:19:42 +0100
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.1.0
+        id S1726695AbfLRUQb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 18 Dec 2019 15:16:31 -0500
+Received: from mail25.static.mailgun.info ([104.130.122.25]:54507 "EHLO
+        mail25.static.mailgun.info" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726454AbfLRUQb (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Dec 2019 15:16:31 -0500
+DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
+ s=smtp; t=1576700190; h=Message-ID: References: In-Reply-To: Subject:
+ Cc: To: From: Date: Content-Transfer-Encoding: Content-Type:
+ MIME-Version: Sender; bh=urQjn/00bgNAxxxkBcJASKKYTN1JbDukbPbY08bnWNY=;
+ b=mSaEgJpQwJ/3vjEUdmV9wfbk5F4ZnyYKMAA8sqekNl7FC7SiWMqu+FHesEBgb7onMroZOe1A
+ Ze0iKeibxs0eGnbVKCeQNmpVGZ92k5vdMkVKyx8zaIHUj6vzBKEZpJ8JdoWd9HsCKQI3gGTv
+ nO+E3efWOEyy/+nj441V93P8n7U=
+X-Mailgun-Sending-Ip: 104.130.122.25
+X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
+Received: from smtp.codeaurora.org (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171])
+ by mxa.mailgun.org with ESMTP id 5dfa891d.7f34234daf48-smtp-out-n02;
+ Wed, 18 Dec 2019 20:16:29 -0000 (UTC)
+Received: by smtp.codeaurora.org (Postfix, from userid 1001)
+        id 70B56C43383; Wed, 18 Dec 2019 20:16:29 +0000 (UTC)
+Received: from mail.codeaurora.org (localhost.localdomain [127.0.0.1])
+        (using TLSv1 with cipher ECDHE-RSA-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        (Authenticated sender: nguyenb)
+        by smtp.codeaurora.org (Postfix) with ESMTPSA id 51F1CC433CB;
+        Wed, 18 Dec 2019 20:16:28 +0000 (UTC)
 MIME-Version: 1.0
-In-Reply-To: <CAPDyKFpoqEXO1JvjF=0hX97PiwP=2c1eWORsacb8QvZM=1Tvjw@mail.gmail.com>
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Language: fr
-Content-Transfer-Encoding: 8bit
-X-Originating-IP: [10.75.127.49]
-X-ClientProxiedBy: SFHDAG8NODE1.st.com (10.75.127.22) To SFHDAG6NODE1.st.com
- (10.75.127.16)
-X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.95,18.0.572
- definitions=2019-12-18_04:2019-12-17,2019-12-18 signatures=0
+Content-Type: text/plain; charset=US-ASCII;
+ format=flowed
+Content-Transfer-Encoding: 7bit
+Date:   Wed, 18 Dec 2019 12:16:28 -0800
+From:   nguyenb@codeaurora.org
+To:     Greg KH <gregkh@linuxfoundation.org>
+Cc:     ulf.hansson@linaro.org, robh+dt@kernel.org,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        asutoshd@codeaurora.org, cang@codeaurora.org,
+        "Bao D. Nguyen" <nguyenb@quicinc.com>
+Subject: Re: [<PATCH v1> 9/9] mmc: sd: Fix trivial SD card issues
+In-Reply-To: <20191218082943.GB1554871@kroah.com>
+References: <cover.1576540906.git.nguyenb@codeaurora.org>
+ <25f3b41fb4950cad5cf075b245d0ac4010cd1aac.1576540908.git.nguyenb@codeaurora.org>
+ <20191218082943.GB1554871@kroah.com>
+Message-ID: <e8fe4566bbd9490f6244c80fb4c6e0ea@codeaurora.org>
+X-Sender: nguyenb@codeaurora.org
+User-Agent: Roundcube Webmail/1.3.9
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-hi ulf
-
-Le 12/18/19 à 3:01 PM, Ulf Hansson a écrit :
-> On Wed, 11 Dec 2019 at 14:40, Ludovic Barre <ludovic.Barre@st.com> wrote:
->>
->> From: Ludovic Barre <ludovic.barre@st.com>
->>
->> If datatimeout occurs on R1B request, the Data Path State Machine stays
->> in busy and is non-functional. Only a reset aborts the DPSM.
->>
->> Like a reset must be outside of critical section, this patch adds
->> threaded irq function to release state machine. In this case,
->> the mmc_request_done is called at the end of threaded irq and
->> skipped into irq handler.
->>
->> Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
+On 2019-12-18 00:29, Greg KH wrote:
+> On Mon, Dec 16, 2019 at 06:50:42PM -0800, Bao D. Nguyen wrote:
+>> From: "Bao D. Nguyen" <nguyenb@quicinc.com>
+>> 
+>> Fix various trivial SD card issues.
 > 
-> Applied for next, thanks!
+> There are a number of real bugfixes in here, please split these out and
+> put them at the beginning of the series so that they can be backported
+> to the stable kernel tree.  Specifics below:
 > 
-> I took the liberty of doing some minor updates (changelog/comment),
-> please have a look and let me know if there is something you want me
-> to change.
-> 
-
-I read the modifications (changelog and comment function),
-and it's ok for me.
-
-thanks
-Ludo
-
-> And again, apologize for the delays!
-> 
-> Kind regards
-> Uffe
-> 
-> 
+>> 
+>> Signed-off-by: Bao D. Nguyen <nguyenb@codeaurora.org>
 >> ---
->> change V2:
->>   -check IRQ_WAKE_THREAD only in mmci_cmd_irq error part,
->>    to avoid this test in mmci_request_end.
->>
->> ---
->>   drivers/mmc/host/mmci.c | 46 +++++++++++++++++++++++++++++++++++------
->>   drivers/mmc/host/mmci.h |  1 +
->>   2 files changed, 41 insertions(+), 6 deletions(-)
->>
->> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
->> index 40e72c30ea84..2b91757e3e84 100644
->> --- a/drivers/mmc/host/mmci.c
->> +++ b/drivers/mmc/host/mmci.c
->> @@ -1321,6 +1321,7 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
->>          } else if (host->variant->busy_timeout && busy_resp &&
->>                     status & MCI_DATATIMEOUT) {
->>                  cmd->error = -ETIMEDOUT;
->> +               host->irq_action = IRQ_WAKE_THREAD;
->>          } else {
->>                  cmd->resp[0] = readl(base + MMCIRESPONSE0);
->>                  cmd->resp[1] = readl(base + MMCIRESPONSE1);
->> @@ -1339,7 +1340,10 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
->>                                  return;
->>                          }
->>                  }
->> -               mmci_request_end(host, host->mrq);
+>>  drivers/mmc/core/block.c |  4 ++--
+>>  drivers/mmc/core/bus.c   | 13 +++++++++++++
+>>  drivers/mmc/core/core.c  | 13 ++++++++-----
+>>  drivers/mmc/core/sd.c    |  9 ++++++---
+>>  4 files changed, 29 insertions(+), 10 deletions(-)
+>> 
+>> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+>> index 95b41c0..200882d 100644
+>> --- a/drivers/mmc/core/block.c
+>> +++ b/drivers/mmc/core/block.c
+>> @@ -653,13 +653,13 @@ static int mmc_blk_ioctl_cmd(struct mmc_blk_data 
+>> *md,
+>>  	struct request *req;
+>> 
+>>  	idata = mmc_blk_ioctl_copy_from_user(ic_ptr);
+>> -	if (IS_ERR(idata))
+>> +	if (IS_ERR_OR_NULL(idata))
+> 
+> How can this function ever return NULL?
+> 
+>>  		return PTR_ERR(idata);
+> 
+> If NULL was returned, are you sure you can return 0 here?  That implies
+> that all went well, when obviously it did not.
+> 
+> But again, I do not see how mmc_blk_ioctl_copy_from_user() can return
+> NULL, do you?
+> 
+>>  	/* This will be NULL on non-RPMB ioctl():s */
+>>  	idata->rpmb = rpmb;
+>> 
+>>  	card = md->queue.card;
+>> -	if (IS_ERR(card)) {
+>> +	if (IS_ERR_OR_NULL(card)) {
+> 
+> How can card be NULL?
+> 
+>>  		err = PTR_ERR(card);
+> 
+> Again, returning "success" is ok?  Are you sure?
+> 
+>>  		goto cmd_done;
+>>  	}
+>> diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
+>> index 74de3f2..fb17d21 100644
+>> --- a/drivers/mmc/core/bus.c
+>> +++ b/drivers/mmc/core/bus.c
+>> @@ -131,6 +131,16 @@ static void mmc_bus_shutdown(struct device *dev)
+>>  	struct mmc_host *host = card->host;
+>>  	int ret;
+>> 
+>> +	if (!drv) {
+>> +		pr_debug("%s: %s: drv is NULL\n", dev_name(dev), __func__);
+> 
+> How can this ever happen?
+> 
+> And never use pr_* calls in a driver, you have a valid device, use
+> dev_dbg() and friends.
+> 
+>> +		return;
+>> +	}
 >> +
->> +               if (host->irq_action != IRQ_WAKE_THREAD)
->> +                       mmci_request_end(host, host->mrq);
+>> +	if (!card) {
+>> +		pr_debug("%s: %s: card is NULL\n", dev_name(dev), __func__);
+> 
+> Same here, how can this ever happen?
+> 
+>> +		return;
+>> +	}
 >> +
->>          } else if (sbc) {
->>                  mmci_start_command(host, host->mrq->cmd, 0);
->>          } else if (!host->variant->datactrl_first &&
->> @@ -1532,9 +1536,9 @@ static irqreturn_t mmci_irq(int irq, void *dev_id)
->>   {
->>          struct mmci_host *host = dev_id;
->>          u32 status;
->> -       int ret = 0;
->>
->>          spin_lock(&host->lock);
->> +       host->irq_action = IRQ_HANDLED;
->>
->>          do {
->>                  status = readl(host->base + MMCISTATUS);
->> @@ -1574,12 +1578,41 @@ static irqreturn_t mmci_irq(int irq, void *dev_id)
->>                  if (host->variant->busy_detect_flag)
->>                          status &= ~host->variant->busy_detect_flag;
->>
->> -               ret = 1;
->>          } while (status);
->>
->>          spin_unlock(&host->lock);
->>
->> -       return IRQ_RETVAL(ret);
->> +       return host->irq_action;
->> +}
->> +
->> +/*
->> + * mmci_irq_threaded is call if the mmci host need to release state machines
->> + * before to terminate the request.
->> + * If datatimeout occurs on R1B request, the Data Path State Machine stays
->> + * in busy and is non-functional. Only a reset can to abort the DPSM.
->> + */
->> +static irqreturn_t mmci_irq_threaded(int irq, void *dev_id)
->> +{
->> +       struct mmci_host *host = dev_id;
->> +       unsigned long flags;
->> +
->> +       if (host->rst) {
->> +               reset_control_assert(host->rst);
->> +               udelay(2);
->> +               reset_control_deassert(host->rst);
->> +       }
->> +
->> +       spin_lock_irqsave(&host->lock, flags);
->> +       writel(host->clk_reg, host->base + MMCICLOCK);
->> +       writel(host->pwr_reg, host->base + MMCIPOWER);
->> +       writel(MCI_IRQENABLE | host->variant->start_err,
->> +              host->base + MMCIMASK0);
->> +
->> +       host->irq_action = IRQ_HANDLED;
->> +       mmci_request_end(host, host->mrq);
->> +       spin_unlock_irqrestore(&host->lock, flags);
->> +
->> +       return host->irq_action;
->>   }
->>
->>   static void mmci_request(struct mmc_host *mmc, struct mmc_request *mrq)
->> @@ -2071,8 +2104,9 @@ static int mmci_probe(struct amba_device *dev,
->>                          goto clk_disable;
->>          }
->>
->> -       ret = devm_request_irq(&dev->dev, dev->irq[0], mmci_irq, IRQF_SHARED,
->> -                       DRIVER_NAME " (cmd)", host);
->> +       ret = devm_request_threaded_irq(&dev->dev, dev->irq[0], mmci_irq,
->> +                                       mmci_irq_threaded, IRQF_SHARED,
->> +                                       DRIVER_NAME " (cmd)", host);
->>          if (ret)
->>                  goto clk_disable;
->>
->> diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
->> index 158e1231aa23..5e63c0596364 100644
->> --- a/drivers/mmc/host/mmci.h
->> +++ b/drivers/mmc/host/mmci.h
->> @@ -412,6 +412,7 @@ struct mmci_host {
->>
->>          struct timer_list       timer;
->>          unsigned int            oldstat;
->> +       u32                     irq_action;
->>
->>          /* pio stuff */
->>          struct sg_mapping_iter  sg_miter;
->> --
->> 2.17.1
->>
+>>  	if (dev->driver && drv->shutdown)
+>>  		drv->shutdown(card);
+>> 
+>> @@ -247,12 +257,15 @@ void mmc_unregister_driver(struct mmc_driver 
+>> *drv)
+>>  static void mmc_release_card(struct device *dev)
+>>  {
+>>  	struct mmc_card *card = mmc_dev_to_card(dev);
+>> +	struct mmc_host *host = card->host;
+>> 
+>>  	sdio_free_common_cis(card);
+>> 
+>>  	kfree(card->info);
+>> 
+>>  	kfree(card);
+>> +	if (host)
+>> +		host->card = NULL;
+> 
+> Why are you setting this to null?  Does this solve some race condition
+> that you are then catching in the shutdown callback?  If so, this 
+> should
+> be broken out as a separate bugfix and put earlier in the series as 
+> that
+> should go to all stable kernels, right?
+> 
+>>  }
+>> 
+>>  /*
+>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+>> index 38b0cec..13d496e 100644
+>> --- a/drivers/mmc/core/core.c
+>> +++ b/drivers/mmc/core/core.c
+>> @@ -399,7 +399,7 @@ void mmc_wait_for_req_done(struct mmc_host *host, 
+>> struct mmc_request *mrq)
+>>  	struct mmc_command *cmd;
+>> 
+>>  	while (1) {
+>> -		wait_for_completion(&mrq->completion);
+>> +		wait_for_completion_io(&mrq->completion);
+> 
+> Why this change?  That seems like a big one.  Why is this not a 
+> separate
+> patch?
+> 
+>> 
+>>  		cmd = mrq->cmd;
+>> 
+>> @@ -666,6 +666,10 @@ void mmc_set_data_timeout(struct mmc_data *data, 
+>> const struct mmc_card *card)
+>>  {
+>>  	unsigned int mult;
+>> 
+>> +	if (!card) {
+>> +		WARN_ON(1);
+> 
+> And you just crashed systems that run with panic-on-warn :(
+> 
+> How can this ever happen?  If it is a real issue, catch it, log it, and
+> then move on, don't splat the kernel log with a full traceback and
+> reboot machines :(
+> 
+>> +		return;
+>> +	}
+>>  	/*
+>>  	 * SDIO cards only define an upper 1 s limit on access.
+>>  	 */
+>> @@ -2341,17 +2345,16 @@ void mmc_rescan(struct work_struct *work)
+>> 
+>>  void mmc_start_host(struct mmc_host *host)
+>>  {
+>> +	mmc_claim_host(host);
+> 
+> What?  This is a totally separate change, plaese break this out and
+> describe what you are fixing here.  Again, should be a bugfix for
+> earlier in the series.
+> 
+>>  	host->f_init = max(freqs[0], host->f_min);
+>>  	host->rescan_disable = 0;
+>>  	host->ios.power_mode = MMC_POWER_UNDEFINED;
+>> 
+>> -	if (!(host->caps2 & MMC_CAP2_NO_PRESCAN_POWERUP)) {
+>> -		mmc_claim_host(host);
+>> +	if (!(host->caps2 & MMC_CAP2_NO_PRESCAN_POWERUP))
+>>  		mmc_power_up(host, host->ocr_avail);
+>> -		mmc_release_host(host);
+>> -	}
+>> 
+>>  	mmc_gpiod_request_cd_irq(host);
+>> +	mmc_release_host(host);
+> 
+> And are you sure the reference counting is correct here?  Before this
+> patch, you dropped the reference above, now you are matching it.  
+> Either
+> this is wrong, or the original code is wrong.  Either way, you need to
+> describe it much better please.
+> 
+>>  	_mmc_detect_change(host, 0, false);
+>>  }
+>> 
+>> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+>> index 5938caf..e163f0e 100644
+>> --- a/drivers/mmc/core/sd.c
+>> +++ b/drivers/mmc/core/sd.c
+>> @@ -989,6 +989,7 @@ static int mmc_sd_init_card(struct mmc_host *host, 
+>> u32 ocr,
+>>  		err = mmc_send_relative_addr(host, &card->rca);
+>>  		if (err)
+>>  			goto free_card;
+>> +		host->card = card;
+> 
+> Why?
+> 
+>>  	}
+>> 
+>>  	if (!oldcard) {
+>> @@ -1090,13 +1091,13 @@ static int mmc_sd_init_card(struct mmc_host 
+>> *host, u32 ocr,
+>>  		goto free_card;
+>>  	}
+>>  done:
+>> -	host->card = card;
+>>  	return 0;
+>> 
+>>  free_card:
+>> -	if (!oldcard)
+>> +	if (!oldcard) {
+>> +		host->card = NULL;
+> 
+> Again, why?
+> 
+>>  		mmc_remove_card(card);
+>> -
+>> +	}
+>>  	return err;
+>>  }
+>> 
+>> @@ -1106,7 +1107,9 @@ static int mmc_sd_init_card(struct mmc_host 
+>> *host, u32 ocr,
+>>  static void mmc_sd_remove(struct mmc_host *host)
+>>  {
+>>  	mmc_remove_card(host->card);
+>> +	mmc_claim_host(host);
+>>  	host->card = NULL;
+>> +	mmc_release_host(host);
+> 
+> Huh?  What is this "fixing"?
+> 
+> Again, please break all of these out into logical bugfixes and describe
+> what you are doing.
+> 
+> thanks,
+> 
+> greg k-h
+
+Thank you for providing the feedback. There are a lot of good feedback 
+and it will take me a bit of time to review them and make changes 
+properly.
+
+Regards,
+Bao
