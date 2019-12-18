@@ -4,138 +4,109 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A9C23C2D0C3
-	for <linux-mmc@archiver.kernel.org>; Wed, 18 Dec 2019 11:49:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 11E1FC43603
+	for <linux-mmc@archiver.kernel.org>; Wed, 18 Dec 2019 11:53:06 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 801E821582
-	for <linux-mmc@archiver.kernel.org>; Wed, 18 Dec 2019 11:49:00 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D75952146E
+	for <linux-mmc@archiver.kernel.org>; Wed, 18 Dec 2019 11:53:05 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="LsfhdNno"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="F2eoiCRj"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726749AbfLRLs6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 18 Dec 2019 06:48:58 -0500
-Received: from mail-vs1-f68.google.com ([209.85.217.68]:44536 "EHLO
-        mail-vs1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726591AbfLRLs5 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Dec 2019 06:48:57 -0500
-Received: by mail-vs1-f68.google.com with SMTP id p6so1163075vsj.11
-        for <linux-mmc@vger.kernel.org>; Wed, 18 Dec 2019 03:48:57 -0800 (PST)
+        id S1726591AbfLRLxF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 18 Dec 2019 06:53:05 -0500
+Received: from mail-ua1-f67.google.com ([209.85.222.67]:40004 "EHLO
+        mail-ua1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726141AbfLRLxF (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Dec 2019 06:53:05 -0500
+Received: by mail-ua1-f67.google.com with SMTP id v18so518905uaq.7
+        for <linux-mmc@vger.kernel.org>; Wed, 18 Dec 2019 03:53:04 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=p1mHuB8yUnmQS9SpnJEkcOHQjoqYysF0srh4TVk8yKQ=;
-        b=LsfhdNnomA+RaZ39fgqS0Kqnx6OFiMGTmVA4ehQ0EOYu8i0rslntCqfKIY7CrpQqo8
-         HqGKZ1twIJXoKgwNOtSQJq1HL1yu4BwTpMsQc55gl3AbreV4pTzxmBuiwrc6crVj2+0z
-         ekCAL5nmr9Q3SRYlkRy4hL77GC8q8UgK1+aGc9oZTPjAS/4mNfVZBEMLtrG+JrLNJcTW
-         N2H/Yxt/tPlj9glYmnASKFo7T/V7ImuuBvRQLFQWGIrVPE47ZguZPpZLYNeaOkg1bdId
-         BXorMRB6S8WwnyywnTkuYyms4ak0SvxJnzsNyXLThU/1f7lZjqW1a1CEq1i5Eg8XS+8t
-         uv6A==
+        bh=o3mn+kJ178kZtOWDg2zTvnwyxAVrOywGSMty+AaHNEI=;
+        b=F2eoiCRjNchgbhQCkT7vV1Kmxm5nNZ6xSGL4Lj+OBYfiDioWYJMcunissFoUsV/Sir
+         +akukblcwPNcWSf4YMGr/L2j6FMFC2sA6h29CMco9Kj5h/BvpLz3G/OwxSJePOA+1CBs
+         8r+v6UuxeRfOotEIAtIpd1c0ZYEKoNDELVD2phJhJuOhX1f+xwGqveozrMSUBLKluM8t
+         8BhNKS0fQRN8ZCG4R6ku2mMnkyKEz0ijbWv01KH4t4va2Qd48f7QnB0F6p5fpn8/4BAa
+         vd/vc78cJgw0tdyX86fCsa/cy/smbPpbU48/CZg95Pc6GbLV4x26rGSADE3sR5Df8MEY
+         jR/g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=p1mHuB8yUnmQS9SpnJEkcOHQjoqYysF0srh4TVk8yKQ=;
-        b=WxBw3nroy0oLmoSELnofGYqMHSyGNavT3IdKpG+CUKfU/Q21NKQk954vCaawAOma9X
-         nxYUkqXVXJDyn/0RxUaf/FxyKUbwTIFpjFn98F6gHfiGdtYRlcZBFPG27ofw9xVZclxK
-         ZHtc3+6MzTQa9mkxG9xGRRcS78FxKkAfmym+0q1vOAvoU8x7T/s2XA4XPDMohb79viMv
-         7cr/r1jZD1+O8KwFA1/wQqeYqj+2nnih3atmiShU0V5EZBw39fQTTARKR/N8ynvmuoF6
-         jpQG4AfwrGt0e25CQ1ESTZzfvJMVAHS78iXY2R3uDs0n2GU8FMeGE+8cGwds9Tp+Ihrv
-         HgLg==
-X-Gm-Message-State: APjAAAVLQ+sFdf71EpeYNj8WA2XuajcfRczEnmxgRUemvg1NS/rlv3kh
-        U5YDqEJ7z8veRxrY8JT2ZJfwJOP+iODIGOrdd1erHA==
-X-Google-Smtp-Source: APXvYqyH0GBNeyTrGXQVb1OsOS5eB50xXlLvgb2rhAYmaBmDtlHg3pf7emYk+wUfgtEKJoE+sCeQkyONMe1gbqIh4w4=
-X-Received: by 2002:a67:b649:: with SMTP id e9mr1082793vsm.34.1576669736873;
- Wed, 18 Dec 2019 03:48:56 -0800 (PST)
+        bh=o3mn+kJ178kZtOWDg2zTvnwyxAVrOywGSMty+AaHNEI=;
+        b=Sk4Pne/deHCltrcF3y1VzDXelxo2fDqF+DBnCVCpiv6JoSBliAQKKRyT2dEjrTHrt0
+         e4wjP2gYkOd2sAdljbdPWMrU/3Rvw+8D610Zsz56h3rAWg9SQHB9n5mwy/jSVXi1ZWnz
+         0mSXgwm09SgN3JfoKVD+JP8Ht0z68aIBDYPoXNk832nWvy5R+fXJQ9MRUM2IGuOGYFSA
+         gW3O9V4nZEheHQPb8BzukRzAIh7fCHxpaJYnM2t21wtUr3L/f/o4Rq5wp/0JWGPDkABS
+         wZiqReoUskeEyGS3PX7F8rG+bdXUEH+aoq6pjz94A68qB5M+6oYoToI9u8xZoc9XgBn+
+         UMzQ==
+X-Gm-Message-State: APjAAAUj58rWlwKXKbAd+eaCrvQvZqqwdmf6TXafOZtAICy9rY2PA/YT
+        vmeS0E2U2ga6LI1bu3VsWj4gBoQxEiAeq+wuoq/Zyw==
+X-Google-Smtp-Source: APXvYqxAeqMZl5h12AA0LAKmFZXJfhgKleA32w3EKgAOwZARMefeWZnWf2d9TV9+5OLGFwMu86iu856ofVAW5N7gtk8=
+X-Received: by 2002:ab0:e16:: with SMTP id g22mr961195uak.129.1576669984262;
+ Wed, 18 Dec 2019 03:53:04 -0800 (PST)
 MIME-Version: 1.0
-References: <cover.1576540906.git.nguyenb@codeaurora.org> <68b936a67e67cd25597915cbd76b73ed046d1ce4.1576540908.git.nguyenb@codeaurora.org>
- <20191218083448.GE1554871@kroah.com>
-In-Reply-To: <20191218083448.GE1554871@kroah.com>
+References: <1576552672-22737-1-git-send-email-zhangpan26@huawei.com>
+In-Reply-To: <1576552672-22737-1-git-send-email-zhangpan26@huawei.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 18 Dec 2019 12:48:20 +0100
-Message-ID: <CAPDyKFr2t3w1wXY+DD27vHF23mSjnUwCh7iZyuQ=ua=s+KvyVA@mail.gmail.com>
-Subject: Re: [<PATCH v1> 7/9] mmc: core: Skip frequency retries for SDCC slots
-To:     "Bao D. Nguyen" <nguyenb@codeaurora.org>
-Cc:     Rob Herring <robh+dt@kernel.org>,
+Date:   Wed, 18 Dec 2019 12:52:28 +0100
+Message-ID: <CAPDyKFr8aVWVydT5U6mpuZr5_waH=bn6F8rjryfDJ15FDaAXUw@mail.gmail.com>
+Subject: Re: [PATCH] mmc: host: fix a possible null pointer access.
+To:     Pan Zhang <zhangpan26@huawei.com>
+Cc:     hushiyuan@huawei.com, Jaehoon Chung <jh80.chung@samsung.com>,
+        Philipp Zabel <p.zabel@pengutronix.de>,
         "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Asutosh Das <asutoshd@codeaurora.org>, cang@codeaurora.org,
-        Sujith Reddy Thumma <sthumma@codeaurora.org>,
-        Subhash Jadavani <subhashj@codeaurora.org>,
-        Xiaonian Wang <xiaonian@codeaurora.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 18 Dec 2019 at 09:34, Greg KH <gregkh@linuxfoundation.org> wrote:
+On Tue, 17 Dec 2019 at 04:18, Pan Zhang <zhangpan26@huawei.com> wrote:
 >
-> On Mon, Dec 16, 2019 at 06:50:40PM -0800, Bao D. Nguyen wrote:
-> > From: Sujith Reddy Thumma <sthumma@codeaurora.org>
-> >
-> > Qualcomm SDCC controller supports minimum SD clock frequency
-> > which is required for card initialization. This information is
-> > exported through platform data for each SDCC controller. There is
-> > no need of retrying higher frequencies than the minimum supported
-> > by controller for Qualcomm chipsets which inturn add delay in
-> > detection process if there is no card during suspend/resume cycles.
-> > Hence, skip multiple frequency retries.
-> >
-> > Signed-off-by: Sujith Reddy Thumma <sthumma@codeaurora.org>
-> > Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
-> > Signed-off-by: Xiaonian Wang <xiaonian@codeaurora.org>
-> > Signed-off-by: Bao D. Nguyen <nguyenb@codeaurora.org>
-> > ---
-> >  drivers/mmc/core/core.c | 9 +--------
-> >  1 file changed, 1 insertion(+), 8 deletions(-)
-> >
-> > diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> > index 1e37f78..38b0cec 100644
-> > --- a/drivers/mmc/core/core.c
-> > +++ b/drivers/mmc/core/core.c
-> > @@ -2281,7 +2281,6 @@ void mmc_rescan(struct work_struct *work)
-> >  {
-> >       struct mmc_host *host =
-> >               container_of(work, struct mmc_host, detect.work);
-> > -     int i;
-> >
-> >       if (host->rescan_disable)
-> >               return;
-> > @@ -2332,13 +2331,7 @@ void mmc_rescan(struct work_struct *work)
-> >               mmc_release_host(host);
-> >               goto out;
-> >       }
-> > -
-> > -     for (i = 0; i < ARRAY_SIZE(freqs); i++) {
-> > -             if (!mmc_rescan_try_freq(host, max(freqs[i], host->f_min)))
-> > -                     break;
-> > -             if (freqs[i] <= host->f_min)
-> > -                     break;
-> > -     }
-> > +     mmc_rescan_try_freq(host, host->f_min);
+> 3419     if (host->slot &&
+> 3420         (mmc_can_gpio_cd(host->slot->mmc) ||
+> 3421          !mmc_card_is_removable(host->slot->mmc))) {
+> 3422         ret = clk_prepare_enable(host->biu_clk);
+> 3423         if (ret)
+> 3424             return ret;
+> 3425     }
 >
-> What about for non-qualcomm controllers?  Did this just break their
-> functionality?
+> We previously assumed 'host->slot' could be null (see line 3419).
+>
+> The following situation is similar, so add a judgement.
+>
+> Signed-off-by: Pan Zhang <zhangpan26@huawei.com>
+> ---
+>  drivers/mmc/host/dw_mmc.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index fc9d4d0..8e27c52 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -3454,7 +3454,7 @@ int dw_mci_runtime_resume(struct device *dev)
+>         mci_writel(host, CTRL, SDMMC_CTRL_INT_ENABLE);
+>
+>
+> -       if (host->slot->mmc->pm_flags & MMC_PM_KEEP_POWER)
+> +       if (host->slot && (host->slot->mmc->pm_flags & MMC_PM_KEEP_POWER))
+>                 dw_mci_set_ios(host->slot->mmc, &host->slot->mmc->ios);
 
-Yes it does, obviously.
+This shouldn't be a problem as the ->runtime_resume() callback can't
+be invoked, unless there is a slot.
 
-Greg, thanks for providing some valuable feedback for Bao for a couple
-of the patches in this series.
-
-I have also browsed through the series, but stopped providing feedback
-after patch1, when I realized that these are all just downstream
-vendor specific hacks.
-
-Sure, I guess most of the patches can be reworked as upstreamable
-solutions, but rather than looking at them all at once, please post
-them separately. Additionally, in general I would appreciate more
-details in the changelogs to fully understand the problems your are
-solving.
+>
+>         /* Force setup bus to guarantee available clock output */
+> --
+> 2.7.4
+>
 
 Kind regards
 Uffe
