@@ -2,113 +2,129 @@ Return-Path: <SRS0=wLMj=2I=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.3 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6BF3CC3F68F
-	for <linux-mmc@archiver.kernel.org>; Wed, 18 Dec 2019 02:27:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7E4B2C43603
+	for <linux-mmc@archiver.kernel.org>; Wed, 18 Dec 2019 06:30:33 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 416AA24680
-	for <linux-mmc@archiver.kernel.org>; Wed, 18 Dec 2019 02:27:23 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1576636043;
-	bh=XXM1qIhv6mp83mUAwPbmy0ZfgUh12/5MVM64g+j5teY=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:List-ID:From;
-	b=ymJbJrFk3Sk6LfjzNnAjKSdn3Vzz10CthWZ7pH96b3A4iX43PxjCHT7kNaUvjnuqo
-	 29SR4Xt+bR4UwqP8k7L9MZ8BBRDvspZSHXAHj8z3FpXIj/I1nLnNug5MM1TClNjIgD
-	 E6S0+HVN60HvjWllT1+PtbeqNq3b/P1oxB5XpKu0=
+	by mail.kernel.org (Postfix) with ESMTP id 515AF218AC
+	for <linux-mmc@archiver.kernel.org>; Wed, 18 Dec 2019 06:30:33 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="WVTTapXo"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726494AbfLRC1W (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 17 Dec 2019 21:27:22 -0500
-Received: from mail.kernel.org ([198.145.29.99]:51182 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726401AbfLRC1W (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 17 Dec 2019 21:27:22 -0500
-Received: from mail-wr1-f53.google.com (mail-wr1-f53.google.com [209.85.221.53])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 8399124676;
-        Wed, 18 Dec 2019 02:27:21 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1576636041;
-        bh=XXM1qIhv6mp83mUAwPbmy0ZfgUh12/5MVM64g+j5teY=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=hCi55Za6H6EHQPAD6URE8PGJGj3b8jufgHzcpYxUrTf1oOUk0J+qMQUm0sPJCtc7r
-         6hqTkdqqH/VSIYUPWgFk0SWRXd5zDliUXY7JRQjWGD8UVI/Jkk3JvuQlCMV4fucBh3
-         b39jAE0qN9Y0vhBvTYjp72lV3E2ydN0Rtg9KqVu8=
-Received: by mail-wr1-f53.google.com with SMTP id w15so579920wru.4;
-        Tue, 17 Dec 2019 18:27:21 -0800 (PST)
-X-Gm-Message-State: APjAAAVY9VQiY9A3whG4YN9VxAkoWfER8wNrJX57xF5lQLYy4iXs3NUi
-        yS3/10cRL52kx+UdDtPrKgVfqsHKO0qVeDAME14=
-X-Google-Smtp-Source: APXvYqx5UqcfQ1FFJHQCZKd5vBjgfL46TLBnUHJQVj6I1P5C7P5qttyGdV5lMniGCCRpoGO06aEnPCSAImq8qwlk310=
-X-Received: by 2002:adf:81e3:: with SMTP id 90mr1054120wra.23.1576636040002;
- Tue, 17 Dec 2019 18:27:20 -0800 (PST)
-MIME-Version: 1.0
-References: <20191215175120.3290-1-tiny.windzz@gmail.com>
-In-Reply-To: <20191215175120.3290-1-tiny.windzz@gmail.com>
-From:   Chen-Yu Tsai <wens@kernel.org>
-Date:   Wed, 18 Dec 2019 10:27:08 +0800
-X-Gmail-Original-Message-ID: <CAGb2v64uQr6JKCbhY+iMd___bLedvSOMTffg=JDX-pOZHY+sbw@mail.gmail.com>
-Message-ID: <CAGb2v64uQr6JKCbhY+iMd___bLedvSOMTffg=JDX-pOZHY+sbw@mail.gmail.com>
-Subject: Re: [PATCH 01/13] mmc: sunxi-mmc: convert to devm_platform_ioremap_resource
-To:     Yangtao Li <tiny.windzz@gmail.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     manuel.lauss@gmail.com, Kevin Hilman <khilman@baylibre.com>,
-        chaotian.jing@mediatek.com,
-        Matthias Brugger <matthias.bgg@gmail.com>, nico@fluxnic.net,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>,
-        ben-linux@fluff.org, Jaehoon Chung <jh80.chung@samsung.com>,
-        Viresh Kumar <vireshk@kernel.org>,
-        Maxime Ripard <mripard@kernel.org>,
-        wsa+renesas@sang-engineering.com,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Kate Stewart <kstewart@linuxfoundation.org>,
-        Masahiro Yamada <yamada.masahiro@socionext.com>,
-        Thomas Gleixner <tglx@linutronix.de>, allison@lohutok.net,
+        id S1726526AbfLRGad (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 18 Dec 2019 01:30:33 -0500
+Received: from mail-pg1-f195.google.com ([209.85.215.195]:41200 "EHLO
+        mail-pg1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726496AbfLRGac (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Dec 2019 01:30:32 -0500
+Received: by mail-pg1-f195.google.com with SMTP id x8so699711pgk.8
+        for <linux-mmc@vger.kernel.org>; Tue, 17 Dec 2019 22:30:32 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to:user-agent;
+        bh=QUqCKPDBExCLLAwVtzgi61MYbDhx2OZCOHrZup6vycw=;
+        b=WVTTapXo9831RocflUB0ikHKFJuh9iAvfg6my6hM4pUeSOGR+cnsYT1tCVdopTiQHg
+         a9iyF7SBYSz9UrCG2ZhM5bNW2gpuyr4iZK+AREwohsVYFPGEm3aJRxhiJoNKRvDCWBHH
+         4E9e9gsfZo2EyGyj4UVSpFyMPwZKH/MGKHkN/6w3Dc+ayTlnFZSl8dy9UlJEuimtMebw
+         hR1PyhRC8cTn/D+OJt/V/RKflu+iF9f35hC5f/4d3DJNrgZ6hbymq2gc7V/5oso7HO6F
+         xqeBCMVDMd5B6szz4pJ9wsJuj00hJjcZf+ZH3dqw1+1/63XOgvTlvCVrQzT4/Etad3w1
+         4QYg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to:user-agent;
+        bh=QUqCKPDBExCLLAwVtzgi61MYbDhx2OZCOHrZup6vycw=;
+        b=c+LsDhxszXQqISgyX2jLwPJ+dCvQsnU4X3OHcgYLl0M/EYGX3qB/pLHdmALNpqnypH
+         dBzlOGp+vJckYsrTdhSZwf+MG9YAPlCub0eCnUXfsr5eSNfwiRmSr5Kb4CSn6cUZmJPm
+         s4MPfAM80Tsel4d5ZIj65f2Jq8yUKd3rwXRmaJaYdaw/czFLAQ6QLIN3pt2XcbZKwzZE
+         YaKyRHmTQ/mp4ocCIIudBqehont2LXD877bznkhDH7hF5EKDTtlC22wfwGK5jmtG/ObO
+         A/CGvRp55bpa3DIqB967bv8BOj+YHKBqlGIA4sjW0KYmbk37AW/cnF56wcTKYTVlkA6b
+         PCqQ==
+X-Gm-Message-State: APjAAAWqUEAN7mhM9ExqhTJLvDH6LvRyzusBt0MpSByijdvb0+Htl5aN
+        nVEWfSL3w8YWKvTv85JPfHX/hg==
+X-Google-Smtp-Source: APXvYqzIvX0pWBlNmYdcCxRQD7mXEfg6Upgu8h5ATMfO9O8MRrkIOt+XJa8qeUETe/PDXbEwm9iagA==
+X-Received: by 2002:aa7:848c:: with SMTP id u12mr1237038pfn.12.1576650631883;
+        Tue, 17 Dec 2019 22:30:31 -0800 (PST)
+Received: from builder (104-188-17-28.lightspeed.sndgca.sbcglobal.net. [104.188.17.28])
+        by smtp.gmail.com with ESMTPSA id p5sm1253789pgs.28.2019.12.17.22.30.29
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 17 Dec 2019 22:30:31 -0800 (PST)
+Date:   Tue, 17 Dec 2019 22:30:28 -0800
+From:   Bjorn Andersson <bjorn.andersson@linaro.org>
+To:     Yangtao Li <tiny.windzz@gmail.com>
+Cc:     manuel.lauss@gmail.com, ulf.hansson@linaro.org,
+        khilman@baylibre.com, chaotian.jing@mediatek.com,
+        matthias.bgg@gmail.com, nico@fluxnic.net, adrian.hunter@intel.com,
+        agross@kernel.org, ben-linux@fluff.org, jh80.chung@samsung.com,
+        vireshk@kernel.org, mripard@kernel.org, wens@csie.org,
+        wsa+renesas@sang-engineering.com, gregkh@linuxfoundation.org,
+        kstewart@linuxfoundation.org, yamada.masahiro@socionext.com,
+        tglx@linutronix.de, allison@lohutok.net,
         yoshihiro.shimoda.uh@renesas.com, geert+renesas@glider.be,
-        Linus Walleij <linus.walleij@linaro.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        linux-kernel <linux-kernel@vger.kernel.org>,
-        linux-arm-kernel <linux-arm-kernel@lists.infradead.org>,
-        "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>,
-        "moderated list:ARM/Mediatek SoC..." 
-        <linux-mediatek@lists.infradead.org>,
-        linux-arm-msm <linux-arm-msm@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+        linus.walleij@linaro.org, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-amlogic@lists.infradead.org,
+        linux-mediatek@lists.infradead.org, linux-arm-msm@vger.kernel.org
+Subject: Re: [PATCH 10/13] mmc: sdhci-msm: convert to
+ devm_platform_ioremap_resource
+Message-ID: <20191218063028.GC3755841@builder>
+References: <20191215175120.3290-1-tiny.windzz@gmail.com>
+ <20191215175120.3290-10-tiny.windzz@gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20191215175120.3290-10-tiny.windzz@gmail.com>
+User-Agent: Mutt/1.12.2 (2019-09-21)
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, Dec 16, 2019 at 1:51 AM Yangtao Li <tiny.windzz@gmail.com> wrote:
->
+On Sun 15 Dec 09:51 PST 2019, Yangtao Li wrote:
+
 > Use devm_platform_ioremap_resource() to simplify code.
->
+> 
 > Signed-off-by: Yangtao Li <tiny.windzz@gmail.com>
 > ---
+>  drivers/mmc/host/sdhci-msm.c | 5 +----
+>  1 file changed, 1 insertion(+), 4 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index 3d0bb5e2e09b..6daacef4ceec 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -1746,7 +1746,6 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+>  	struct sdhci_host *host;
+>  	struct sdhci_pltfm_host *pltfm_host;
+>  	struct sdhci_msm_host *msm_host;
+> -	struct resource *core_memres;
+>  	struct clk *clk;
+>  	int ret;
+>  	u16 host_version, core_minor;
+> @@ -1847,9 +1846,7 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+>  	}
+>  
+>  	if (!msm_host->mci_removed) {
+> -		core_memres = platform_get_resource(pdev, IORESOURCE_MEM, 1);
+> -		msm_host->core_mem = devm_ioremap_resource(&pdev->dev,
+> -				core_memres);
+> +		msm_host->core_mem = devm_platform_ioremap_resource(pdev, 1);
+>  
 
-Acked-by: Chen-Yu Tsai <wens@csie.org>
+This would now look better without this empty line.
 
->  drivers/mmc/host/sunxi-mmc.c | 3 +--
->  1 file changed, 1 insertion(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-> index d577a6b0ceae..f87d7967457f 100644
-> --- a/drivers/mmc/host/sunxi-mmc.c
-> +++ b/drivers/mmc/host/sunxi-mmc.c
-> @@ -1273,8 +1273,7 @@ static int sunxi_mmc_resource_request(struct sunxi_mmc_host *host,
->         if (ret)
->                 return ret;
->
-> -       host->reg_base = devm_ioremap_resource(&pdev->dev,
-> -                             platform_get_resource(pdev, IORESOURCE_MEM, 0));
-> +       host->reg_base = devm_platform_ioremap_resource(pdev, 0);
->         if (IS_ERR(host->reg_base))
->                 return PTR_ERR(host->reg_base);
->
-> --
+Reviewed-by: Bjorn Andersson <bjorn.andersson@linaro.org>
+
+Regards,
+Bjorn
+
+>  		if (IS_ERR(msm_host->core_mem)) {
+>  			ret = PTR_ERR(msm_host->core_mem);
+> -- 
 > 2.17.1
->
+> 
