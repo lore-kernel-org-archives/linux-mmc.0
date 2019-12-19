@@ -2,115 +2,98 @@ Return-Path: <SRS0=Rhqe=2J=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F3705C43603
-	for <linux-mmc@archiver.kernel.org>; Thu, 19 Dec 2019 14:47:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7053CC2D0C1
+	for <linux-mmc@archiver.kernel.org>; Thu, 19 Dec 2019 14:58:55 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id C4C2B21655
-	for <linux-mmc@archiver.kernel.org>; Thu, 19 Dec 2019 14:47:00 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4657A206D8
+	for <linux-mmc@archiver.kernel.org>; Thu, 19 Dec 2019 14:58:55 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="TYPOmbxA"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="NwdTe8q2"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726824AbfLSOrA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 19 Dec 2019 09:47:00 -0500
-Received: from mail-vs1-f66.google.com ([209.85.217.66]:33277 "EHLO
-        mail-vs1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726767AbfLSOrA (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Dec 2019 09:47:00 -0500
-Received: by mail-vs1-f66.google.com with SMTP id n27so3929781vsa.0
-        for <linux-mmc@vger.kernel.org>; Thu, 19 Dec 2019 06:46:59 -0800 (PST)
+        id S1726752AbfLSO6y (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 19 Dec 2019 09:58:54 -0500
+Received: from mail-wr1-f65.google.com ([209.85.221.65]:43406 "EHLO
+        mail-wr1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726701AbfLSO6y (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Dec 2019 09:58:54 -0500
+Received: by mail-wr1-f65.google.com with SMTP id d16so6262862wre.10;
+        Thu, 19 Dec 2019 06:58:52 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=NcNiQ0cWhumNV09gnKioIAlAsyp7P9+w7lSDB77wTFs=;
-        b=TYPOmbxAOSpkVMQFPeMGVI7syrRmzn0OGv0wVAItrvpCXTGq+pLoIF7VqdZ3YLp+7T
-         cMDQn1xvCRArNsAK5Ta0VhLWKT1nUGwTRvhfWLxLsRYT3g9qBx2zI6YeFairSuN/0llD
-         rMrmJlx8aMX/RpP0k6liplWW77NdrWZ3c/ZBpQlE7Lxae7wEqzoBpancuVGgTt02wv/8
-         I/gxM+5NE1w3Zrn5Kog7Y7y3AWY/p6coeu2U0yq9Xb692YubYBXR5FO4RPyUOAP5pcYR
-         8c+R2KV+36St6K+mgoalL0QFR6Jv/gnpkObJTUBsnfTMnVwXBaPN0bQxkOaVFFM00he9
-         4xHQ==
+        d=gmail.com; s=20161025;
+        h=from:to:cc:subject:date:message-id;
+        bh=2fgPMrd9C+AKftleHVnn57a7bDx3FxZOsu1zeqIFgxc=;
+        b=NwdTe8q2pdyU/zYMroacZdwZE6vgTCjOSl2QT0WdYpudW0Lz6rSolLyAs+63audr8x
+         t387tewbV0LhJdqe0ekA1EGpv+q4nFCReTGv81arfQH/qRxAj/nv902BHZAfxQSFP5Ag
+         gdZGwrq7X7Tq2YH7d4y6k1HliLLz3kXcnwL74ec7RGddd1Q8/IajfFX162tg/lRj0pzA
+         zdvOirkCCuYf0hrxd19ZhXaBOOd/Lz2WrSkOiO+D9twBYD0fMJR1MwL5JYAvwa6LRZnl
+         nRqm5sNlgIFP2tCHDh42ECss17vc6LmSX/QvQGpkveYX3cwQEf1Jl8lRuMHh7s++tXRL
+         zd7w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=NcNiQ0cWhumNV09gnKioIAlAsyp7P9+w7lSDB77wTFs=;
-        b=gj+IwItHOeGHUK/pBtQft10AuZenYEEB076sOXxIMS13LzR86XyD9Tvs8dj/LHs9bR
-         y1cKAD4mFE9BSxgS6GyezC+GsTc19KE+7wlc2MK4085irz6afsUX7+3HqFeiyMKaxqxW
-         sg4dC8YC+glA2/kvZowLUh/KOk6/Q1MBi6SUeDAKCexxBSnz6EASw1y3CRtDn6Fh4QRf
-         2KZpTWlh15XKwgfdGeAciyya6SyRghZ5nAw49RMFS+phypeAqX091BGxwTaWtg4F/jsQ
-         sFdicv0NJvpUSjrnM+iFT09m4uFsryWVT/bre1lQwRh1Vg1uWiUO6TA+UdxlrPyLlMeh
-         YByw==
-X-Gm-Message-State: APjAAAWnnXi9+y1tbzjZNn8pRU6o2YkpnQXOmuu/WrQwx9p5gec7xv+j
-        dohKyWrpC25YLYj6hnjkBYKGrdsW9sbEv+h1bxJFZg==
-X-Google-Smtp-Source: APXvYqxqzEukg9KN5GHlmroBpjR4+6Ip5jPb6XbXGjlqV3tuFpljJyCyIleM2UH5s5i1I3P3TTmElTKiqB6eZ9/FPKc=
-X-Received: by 2002:a05:6102:5d1:: with SMTP id v17mr4965249vsf.200.1576766819061;
- Thu, 19 Dec 2019 06:46:59 -0800 (PST)
-MIME-Version: 1.0
-References: <HK0PR01MB3521E416A9562724AC4A14EDFA520@HK0PR01MB3521.apcprd01.prod.exchangelabs.com>
-In-Reply-To: <HK0PR01MB3521E416A9562724AC4A14EDFA520@HK0PR01MB3521.apcprd01.prod.exchangelabs.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 19 Dec 2019 15:46:23 +0100
-Message-ID: <CAPDyKFq=Jg8Gs-QOS6OD1EJt=y_O4fieTvDhHTpeBYWCZ-r_ZA@mail.gmail.com>
-Subject: Re: Please review the patch "mmc: core: try to use an id from the
- devicetree " again
-To:     =?UTF-8?B?Sm9obnNvbiBDSCBDaGVuICjpmbPmmK3li7Mp?= 
-        <JohnsonCH.Chen@moxa.com>
-Cc:     "lkundrak@v3.sk" <lkundrak@v3.sk>,
-        "dianders@chromium.org" <dianders@chromium.org>,
-        =?UTF-8?B?VmljdG9yIFl1ICjmuLjli53nvqkp?= <victor.yu@moxa.com>,
-        linux-mmc <linux-mmc@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+        h=x-gm-message-state:from:to:cc:subject:date:message-id;
+        bh=2fgPMrd9C+AKftleHVnn57a7bDx3FxZOsu1zeqIFgxc=;
+        b=H2U2TfP0Hok4grpdzBEYw4DzhKDL21BdPh7/bRDuwtQtzWHv+AlcBUtST+KanT/BBz
+         yzliVaXO7kX944QEpoPSQcFzJd+x35dNkW2YIYH2v6OdVmPS12Umol2uu210W0s/SyV3
+         rY93bKMTNTzP7G/DK3sR2ylirI5Rmsi1RerVVLDb8KSwSgLIIE+j5dORfmtppyNmMlUH
+         8XcwNf6UE47ZdHQChr5VWpPUmlhUOdJO0TZcDABTtS7INF2msc2lJUX4y80jt3eFW/S8
+         JuxuLnOpI6WFQ0HBp7icctWkaCdqxN8tCz2tZDDeoWxdQ01ePughot6yQ74xV9bngA2E
+         et6A==
+X-Gm-Message-State: APjAAAW3sWQtVEuaN3cI8XJg1Bgwk4fbxTsA7wwl89EcNwZqPdzgCJ7A
+        xVM1XHE4Hk1rccAGm3wmoLc=
+X-Google-Smtp-Source: APXvYqwQG+ZpFPzQJF7IasX91H6w8GEyPcnxbOAAQ2nHd6IPilq17lB4KnK481iqBLiq5LMwx/cg1A==
+X-Received: by 2002:adf:ef92:: with SMTP id d18mr9652877wro.234.1576767531302;
+        Thu, 19 Dec 2019 06:58:51 -0800 (PST)
+Received: from debian.home (ip51ccf9cd.speed.planet.nl. [81.204.249.205])
+        by smtp.gmail.com with ESMTPSA id t1sm6457866wma.43.2019.12.19.06.58.50
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Thu, 19 Dec 2019 06:58:50 -0800 (PST)
+From:   Johan Jonker <jbx6244@gmail.com>
+To:     ulf.hansson@linaro.org
+Cc:     robh+dt@kernel.org, mark.rutland@arm.com,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Subject: [PATCH] dt-bindings: mmc: clarify disable-wp text
+Date:   Thu, 19 Dec 2019 15:58:43 +0100
+Message-Id: <20191219145843.3823-1-jbx6244@gmail.com>
+X-Mailer: git-send-email 2.11.0
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 19 Dec 2019 at 11:57, Johnson CH Chen (=E9=99=B3=E6=98=AD=E5=8B=B3)
-<JohnsonCH.Chen@moxa.com> wrote:
->
-> Dear Ulf,
->
-> We have a requirement to set a specific mmc's disk slot for a root path w=
-hen booting. I think a specific "slot" is different from a specific "device=
-". For example, When a platform has four mmc/sd slots, and we have ten mmc/=
-sd cards. We need to test some cards for booting in one slot, and other slo=
-ts can be filled with one card each for another use. Actually the order of =
-these four slots is not constant because it depends on the order of registe=
-ring mmc/sd drivers, and different platforms may have different situations.=
- Slot id can be related with block id, so it can be related with mmc id for=
- current linux kernel, too. We need to set a specific slot id to satisfy ou=
-r requirement.
->
-> I find the following patch: https://lkml.org/lkml/2019/6/20/638
-> This is Lubomir provides has a function we need. Actually I have a patch =
-with similar function without mmc alias and just set "mmc-id" in device tre=
-e, but I think Lubomir's is better than myself.
->
-> Someone think why not use "LABEL" or "UUID" for initramfs, or use "PARTLA=
-BEL" or "PARTUUID" for u-boot? I think they assign a specific numbers/chara=
-cters for mmc/sd cards, not for mmc/sd slots. Besides, if I set the same "L=
-ABEL" or "PARTLABEL" in some mmc/sd card, I think kernel will be confused h=
-ow to find a desired mmc/sd card.
->
-> So kindly review the patch "mmc: core: try to use an id from the devicetr=
-ee " if you are free, thanks!
+Clarify disable-wp text.
+Clean up and add that "disable-wp" is not used in combination
+with eMMC or SDIO.
 
-There have been several attempts to fix this and me personally don't
-have a problem with using aliases/labels in DT. I said that before as
-well.
+Signed-off-by: Johan Jonker <jbx6244@gmail.com>
+---
+ Documentation/devicetree/bindings/mmc/mmc-controller.yaml | 5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
 
-However, what is missing today, is that someone collects the proper
-arguments for *why* this is needed (and especially why UUID/LABEL
-doesn't work). I think all that information is available in the
-discussion here: https://lore.kernel.org/patchwork/cover/674381/
+diff --git a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
+index b130450c3..3c0df4016 100644
+--- a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
++++ b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
+@@ -96,11 +96,10 @@ properties:
+     description:
+       When set, no physical write-protect line is present. This
+       property should only be specified when the controller has a
+-      dedicated write-protect detection logic. If a GPIO is always
+-      used for the write-protect detection. If a GPIO is always used
++      dedicated write-protect detection logic. If a GPIO is always used
+       for the write-protect detection logic, it is sufficient to not
+       specify the wp-gpios property in the absence of a write-protect
+-      line.
++      line. Not used in combination with eMMC or SDIO.
+ 
+   wp-gpios:
+     description:
+-- 
+2.11.0
 
-When I see a new patch posted, that contains these arguments in the
-commit message of the patch, I am ready to review it again.
-
-Kind regards
-Uffe
