@@ -1,86 +1,98 @@
-Return-Path: <SRS0=wLMj=2I=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=Rhqe=2J=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.6 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B37F9C43603
-	for <linux-mmc@archiver.kernel.org>; Wed, 18 Dec 2019 21:39:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 846BCC43603
+	for <linux-mmc@archiver.kernel.org>; Thu, 19 Dec 2019 03:24:37 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 726AA21582
-	for <linux-mmc@archiver.kernel.org>; Wed, 18 Dec 2019 21:39:26 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1576705166;
-	bh=5U99pIQGHxWEneXBslwwBchIytDB/yGCxvdrUJzmLO4=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
-	b=s0Kxq5ourqPl9hKfdaYErDUGNGZ8mHol/4922pnG/1w1WKVK8ybW4QZ1XHPsBzfwY
-	 Y+n39MJp5K3+JedGLDQabaosqYc7NbkTdToDhn8qahunnvWnGAiiWSZWuAKIyhqS0h
-	 NiIPwC4qmgS9DtT+BDFQZ+Cu67znaJv2JdHPve68=
+	by mail.kernel.org (Postfix) with ESMTP id 6019C227BF
+	for <linux-mmc@archiver.kernel.org>; Thu, 19 Dec 2019 03:24:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726512AbfLRVj0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 18 Dec 2019 16:39:26 -0500
-Received: from mail-ot1-f66.google.com ([209.85.210.66]:45228 "EHLO
-        mail-ot1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726510AbfLRVjZ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Dec 2019 16:39:25 -0500
-Received: by mail-ot1-f66.google.com with SMTP id 59so4214647otp.12;
-        Wed, 18 Dec 2019 13:39:25 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to:user-agent;
-        bh=dBFxRKaaedwkP1g5MLnNuhRSUqWUfU6XqL2o6viIQT8=;
-        b=BIOxK6iR1YsJFkwFlOyxBKfatH0+Xt2LE4pcwkASXhQMD1ys81ozBnvwhRekaixNqV
-         5KV9RHj21rUT7ZST/gtuvURfgMnwYQIxVlMJTWr0+Hx7dLHM3ofK3Q7fKAaJKVxMQ2Id
-         Ovh1oUsxwrp7o+MSb9niSmY7lJE5ZzUI58jy8/b6GEQgEh7inURsHd1nCHlCg+oyXbgm
-         2J9YAc9LyeaSm9gtJSHhln/8QLPP5JGGzfWTROWBwUPwDnWv5vV7euPG5h8ivgDrwvq6
-         zrXcS5N9y4a7WaRzUyddsNdR2gVb5pLPx90vNalkDXGBE+mb4GR+XW5Eu/oD3ZMOH8ct
-         QS6A==
-X-Gm-Message-State: APjAAAXk0gGTkt7gIfq/xnkk3908DXcSgIKC/X1bIfaHb177IaKjjOcw
-        a/UrIkCotUhxkcQfq+jhNIaJm6+hKA==
-X-Google-Smtp-Source: APXvYqzDK7aog7i/C+mHwCkZW9atlbt2uwA+8aK1TlTW6VE80Vfah9nRZR9WuFj1CWR1TaUMDGZefg==
-X-Received: by 2002:a9d:21f4:: with SMTP id s107mr2532318otb.102.1576705165023;
-        Wed, 18 Dec 2019 13:39:25 -0800 (PST)
-Received: from localhost (24-155-109-49.dyn.grandenetworks.net. [24.155.109.49])
-        by smtp.gmail.com with ESMTPSA id c12sm1244305oic.27.2019.12.18.13.39.23
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 18 Dec 2019 13:39:23 -0800 (PST)
-Date:   Wed, 18 Dec 2019 15:39:23 -0600
-From:   Rob Herring <robh@kernel.org>
-To:     Faiz Abbas <faiz_abbas@ti.com>
-Cc:     linux-kernel@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-mmc@vger.kernel.org, kishon@ti.com, adrian.hunter@intel.com,
-        mark.rutland@arm.com, robh+dt@kernel.org, ulf.hansson@linaro.org,
-        zhang.chunyan@linaro.org, tony@atomide.com
-Subject: Re: [PATCH v3 1/7] dt-bindings: sdhci-omap: Add properties for using
- external dma
-Message-ID: <20191218213923.GA1879@bogus>
-References: <20191210095151.15441-1-faiz_abbas@ti.com>
- <20191210095151.15441-2-faiz_abbas@ti.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20191210095151.15441-2-faiz_abbas@ti.com>
-User-Agent: Mutt/1.10.1 (2018-07-13)
+        id S1726783AbfLSDYg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 18 Dec 2019 22:24:36 -0500
+Received: from inva020.nxp.com ([92.121.34.13]:48740 "EHLO inva020.nxp.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726771AbfLSDYg (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 18 Dec 2019 22:24:36 -0500
+Received: from inva020.nxp.com (localhost [127.0.0.1])
+        by inva020.eu-rdc02.nxp.com (Postfix) with ESMTP id 7C1801A01C0;
+        Thu, 19 Dec 2019 04:24:34 +0100 (CET)
+Received: from invc005.ap-rdc01.nxp.com (invc005.ap-rdc01.nxp.com [165.114.16.14])
+        by inva020.eu-rdc02.nxp.com (Postfix) with ESMTP id 8633D1A0181;
+        Thu, 19 Dec 2019 04:24:31 +0100 (CET)
+Received: from localhost.localdomain (mega.ap.freescale.net [10.192.208.232])
+        by invc005.ap-rdc01.nxp.com (Postfix) with ESMTP id 870104028B;
+        Thu, 19 Dec 2019 11:24:27 +0800 (SGT)
+From:   Yangbo Lu <yangbo.lu@nxp.com>
+To:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Rasmus Villemoes <linux@rasmusvillemoes.dk>,
+        Yinbo Zhu <yinbo.zhu@nxp.com>
+Cc:     Yangbo Lu <yangbo.lu@nxp.com>
+Subject: [PATCH] mmc: sdhci-of-esdhc: re-implement erratum A-009204 workaround
+Date:   Thu, 19 Dec 2019 11:23:35 +0800
+Message-Id: <20191219032335.26528-1-yangbo.lu@nxp.com>
+X-Mailer: git-send-email 2.17.1
+X-Virus-Scanned: ClamAV using ClamSMTP
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 10 Dec 2019 15:21:45 +0530, Faiz Abbas wrote:
-> From: Chunyan Zhang <zhang.chunyan@linaro.org>
-> 
-> sdhci-omap can support both external dma controller via dmaengine
-> framework as well as ADMA which standard SD host controller
-> provides. Add binding documentation for these external dma properties.
-> 
-> Signed-off-by: Chunyan Zhang <zhang.chunyan@linaro.org>
-> Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
-> ---
->  Documentation/devicetree/bindings/mmc/sdhci-omap.txt | 9 +++++++++
->  1 file changed, 9 insertions(+)
-> 
+The erratum A-009204 workaround patch was reverted because of
+incorrect implementation.
 
-Reviewed-by: Rob Herring <robh@kernel.org>
+8b6dc6b mmc: sdhci-of-esdhc: Revert "mmc: sdhci-of-esdhc: add
+        erratum A-009204 support"
+
+This patch is to re-implement the workaround (add a 5 ms delay
+before setting SYSCTL[RSTD] to make sure all the DMA transfers
+are finished).
+
+Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
+---
+ drivers/mmc/host/sdhci-of-esdhc.c | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+index 4abb781..cd3b676 100644
+--- a/drivers/mmc/host/sdhci-of-esdhc.c
++++ b/drivers/mmc/host/sdhci-of-esdhc.c
+@@ -80,6 +80,7 @@ struct sdhci_esdhc {
+ 	bool quirk_tuning_erratum_type1;
+ 	bool quirk_tuning_erratum_type2;
+ 	bool quirk_ignore_data_inhibit;
++	bool quirk_delay_before_data_reset;
+ 	bool in_sw_tuning;
+ 	unsigned int peripheral_clock;
+ 	const struct esdhc_clk_fixup *clk_fixup;
+@@ -759,6 +760,11 @@ static void esdhc_reset(struct sdhci_host *host, u8 mask)
+ 	struct sdhci_esdhc *esdhc = sdhci_pltfm_priv(pltfm_host);
+ 	u32 val;
+ 
++	if (esdhc->quirk_delay_before_data_reset &&
++	    (mask & SDHCI_RESET_DATA) &&
++	    (host->flags & SDHCI_REQ_USE_DMA))
++		mdelay(5);
++
+ 	sdhci_reset(host, mask);
+ 
+ 	sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
+@@ -1218,6 +1224,10 @@ static void esdhc_init(struct platform_device *pdev, struct sdhci_host *host)
+ 	if (match)
+ 		esdhc->clk_fixup = match->data;
+ 	np = pdev->dev.of_node;
++
++	if (of_device_is_compatible(np, "fsl,p2020-esdhc"))
++		esdhc->quirk_delay_before_data_reset = true;
++
+ 	clk = of_clk_get(np, 0);
+ 	if (!IS_ERR(clk)) {
+ 		/*
+-- 
+2.7.4
+
