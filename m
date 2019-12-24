@@ -2,268 +2,325 @@ Return-Path: <SRS0=inFY=2O=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
+	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 61757C2D0D0
-	for <linux-mmc@archiver.kernel.org>; Tue, 24 Dec 2019 08:42:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2F3BBC2D0CF
+	for <linux-mmc@archiver.kernel.org>; Tue, 24 Dec 2019 11:55:54 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 36D01206CB
-	for <linux-mmc@archiver.kernel.org>; Tue, 24 Dec 2019 08:42:33 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id EA3C320706
+	for <linux-mmc@archiver.kernel.org>; Tue, 24 Dec 2019 11:55:53 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=googlemail.com header.i=@googlemail.com header.b="iHAXl+Bp"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726068AbfLXImc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 24 Dec 2019 03:42:32 -0500
-Received: from inva021.nxp.com ([92.121.34.21]:39546 "EHLO inva021.nxp.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726160AbfLXImc (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 24 Dec 2019 03:42:32 -0500
-Received: from inva021.nxp.com (localhost [127.0.0.1])
-        by inva021.eu-rdc02.nxp.com (Postfix) with ESMTP id E25B120106B;
-        Tue, 24 Dec 2019 09:42:29 +0100 (CET)
-Received: from invc005.ap-rdc01.nxp.com (invc005.ap-rdc01.nxp.com [165.114.16.14])
-        by inva021.eu-rdc02.nxp.com (Postfix) with ESMTP id 50CE720106E;
-        Tue, 24 Dec 2019 09:42:27 +0100 (CET)
-Received: from localhost.localdomain (mega.ap.freescale.net [10.192.208.232])
-        by invc005.ap-rdc01.nxp.com (Postfix) with ESMTP id 05D0F402C1;
-        Tue, 24 Dec 2019 16:42:23 +0800 (SGT)
-From:   Yangbo Lu <yangbo.lu@nxp.com>
-To:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>
-Cc:     Yangbo Lu <yangbo.lu@nxp.com>
-Subject: [PATCH 2/2] mmc: sdhci-of-esdhc: fix clock setting for different controller versions
-Date:   Tue, 24 Dec 2019 16:41:22 +0800
-Message-Id: <20191224084122.25381-2-yangbo.lu@nxp.com>
-X-Mailer: git-send-email 2.17.1
-In-Reply-To: <20191224084122.25381-1-yangbo.lu@nxp.com>
-References: <20191224084122.25381-1-yangbo.lu@nxp.com>
-X-Virus-Scanned: ClamAV using ClamSMTP
+        id S1726140AbfLXLzx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 24 Dec 2019 06:55:53 -0500
+Received: from mail-ed1-f66.google.com ([209.85.208.66]:33609 "EHLO
+        mail-ed1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726102AbfLXLzx (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 24 Dec 2019 06:55:53 -0500
+Received: by mail-ed1-f66.google.com with SMTP id r21so17769712edq.0;
+        Tue, 24 Dec 2019 03:55:50 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=googlemail.com; s=20161025;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=aJ2izil5/Ji9uczN7PODLAoPu0cmIlffxlCHfxBk4YU=;
+        b=iHAXl+BpQqaZEBMzZbdUXlosjCxL5jAno6VWLklvHWuCe8aMA53uYU4F0sbvgp5dUv
+         Ior28A0rajF2amfreqMuC+0gfo2ydWFe6Jw8dg8f2mM+gA6XeZyL51lCkwAebklwRfte
+         b3Qd592BfHsz5CZQbbKbptQuEVq/Yb4qVRIYNu3cg8FqGo1EQD3HyAerf7lmWf0w9z8D
+         wqq6/XWIGmUn3Pll2GcvKUD6Tkx4qJxer4otmdZy2NTJ/vB7hZAYUIDMZ2JfxQbxB3sS
+         xx6ZOjX8UPif9qv3b5gwSj0kuhmDPh6vWGaVqpyGJXU1qASh0gS8oas7j/EX68Znk0y0
+         w8Og==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=aJ2izil5/Ji9uczN7PODLAoPu0cmIlffxlCHfxBk4YU=;
+        b=Dc+c9eQ1FygxZYBODJqejn2+I/66EoJzUnxj6z11yGYsD6vIdHQPvUfzJUfNDZe6by
+         6LPmCCXTXu9Wpr65InL38BpJb57tlAMSJSzsGLrlgUeWFRkPsDQc7BHlnKfKI+zugwuu
+         ZmRO5O6vKreD+/QxQXTfN+zw4trTs0D3ObYcRwI216jvDssoSmovArkTSZffRfqaGzpI
+         aK+aNGwVO0/f57rwQL8DmGtRv1hhO+iiANWUpp1+KbYXooDSm5Pi4uMHFqBuWhRx/fMy
+         mqS9gqz3qAJh18Cmtt+wYLd0FX/+PM7ZJzPl/bKf7uJjGVG1Vh76RZctreQQqn4Vi3Sb
+         zvew==
+X-Gm-Message-State: APjAAAWNW6+YFpInSVS0oA3nkJnUbjOgjIEL2PDfN4g25pZ/q2U4kRr3
+        kCQv7Gi3p+YTWqPGZjJT04zfXL8M3HrHWPQzayk=
+X-Google-Smtp-Source: APXvYqwF4VXjATyreWWoETi25OCKXR2YIWyiTrLgLo7qBh2ghWgNKAvKKtzuuDTuNWSV9ZMXyNcwqnOPXDKi9FhbuyM=
+X-Received: by 2002:aa7:d6d1:: with SMTP id x17mr1918096edr.57.1577188549568;
+ Tue, 24 Dec 2019 03:55:49 -0800 (PST)
+MIME-Version: 1.0
+References: <20191210200022.29696-1-martin.blumenstingl@googlemail.com>
+ <20191210200022.29696-3-martin.blumenstingl@googlemail.com> <CAPDyKFoMEjSJt2n3-XGbHwq_3zQ6MhPifUyOELLeTqFKPkAqYg@mail.gmail.com>
+In-Reply-To: <CAPDyKFoMEjSJt2n3-XGbHwq_3zQ6MhPifUyOELLeTqFKPkAqYg@mail.gmail.com>
+From:   Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+Date:   Tue, 24 Dec 2019 12:55:38 +0100
+Message-ID: <CAFBinCC84_fVsa5dS-04tQHjSEq2n-Hh=pmJXKh-aHj9SkTVzw@mail.gmail.com>
+Subject: Re: [PATCH v3 2/2] mmc: host: meson-mx-sdhc: new driver for the
+ Amlogic Meson SDHC host
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>,
+        DTML <devicetree@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Jianxin Pan <jianxin.pan@amlogic.com>,
+        Mark Rutland <mark.rutland@arm.com>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        lnykww@gmail.com, yinxin_1989@aliyun.com
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-This patch is to fix clock setting code for different controller
-versions. Two of HW changes after vendor version 2.2 are removing
-PEREN/HCKEN/IPGEN bits in system control register, and adding SD
-clock stable bit in present state register. This patch cleans up
-related code too.
+Hi Ulf,
 
-Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
----
- drivers/mmc/host/sdhci-of-esdhc.c | 125 +++++++++++++++++++++-----------------
- 1 file changed, 69 insertions(+), 56 deletions(-)
+On Thu, Dec 19, 2019 at 3:02 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+[...]
+> > +struct meson_mx_sdhc_host {
+> > +       struct mmc_host                 *mmc;
+> > +
+> > +       struct mmc_request              *mrq;
+> > +       struct mmc_command              *cmd;
+> > +       int                             error;
+> > +
+> > +       void __iomem                    *base;
+> > +
+> > +       struct clk_divider              clkc_clk_div;
+> > +       struct clk_gate                 clkc_tx_clk_on;
+> > +       struct clk_gate                 clkc_rx_clk_on;
+> > +       struct clk_gate                 clkc_sd_clk_on;
+> > +       struct clk_gate                 clkc_mod_clk_on;
+> > +       struct clk_mux                  clkc_clk_src_sel;
+> > +
+> > +       struct clk                      *pclk;
+> > +
+> > +       struct clk                      *tx_clk;
+> > +       struct clk                      *rx_clk;
+> > +       struct clk                      *sd_clk;
+> > +       struct clk                      *mod_clk;
+>
+> This is crazy. It's looks like the driver is a driver for a clock
+> provider rather than an mmc host driver. :-)
+that's the signature of many Amlogic IP blocks:
+they build a clock mux/divider/gate into the actual consumer IP block
 
-diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-index 502e317..58d4cbe 100644
---- a/drivers/mmc/host/sdhci-of-esdhc.c
-+++ b/drivers/mmc/host/sdhci-of-esdhc.c
-@@ -562,32 +562,44 @@ static unsigned int esdhc_of_get_min_clock(struct sdhci_host *host)
- 
- static void esdhc_clock_enable(struct sdhci_host *host, bool enable)
- {
--	u32 val;
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_esdhc *esdhc = sdhci_pltfm_priv(pltfm_host);
- 	ktime_t timeout;
-+	u32 val, clk_en;
-+
-+	clk_en = ESDHC_CLOCK_SDCLKEN;
-+
-+	/* IPGEN/HCKEN/PEREN bits exist on eSDHC whose vendor version
-+	 * is 2.2 or lower.
-+	 */
-+	if (esdhc->vendor_ver <= VENDOR_V_22)
-+		clk_en |= (ESDHC_CLOCK_IPGEN | ESDHC_CLOCK_HCKEN |
-+			   ESDHC_CLOCK_PEREN);
- 
- 	val = sdhci_readl(host, ESDHC_SYSTEM_CONTROL);
- 
- 	if (enable)
--		val |= ESDHC_CLOCK_SDCLKEN;
-+		val |= clk_en;
- 	else
--		val &= ~ESDHC_CLOCK_SDCLKEN;
-+		val &= ~clk_en;
- 
- 	sdhci_writel(host, val, ESDHC_SYSTEM_CONTROL);
- 
--	/* Wait max 20 ms */
-+	/* Wait max 20 ms. If vendor version is 2.2 or lower, do not
-+	 * wait clock stable bit which does not exist.
-+	 */
- 	timeout = ktime_add_ms(ktime_get(), 20);
--	val = ESDHC_CLOCK_STABLE;
--	while  (1) {
-+	while (esdhc->vendor_ver > VENDOR_V_22) {
- 		bool timedout = ktime_after(ktime_get(), timeout);
- 
--		if (sdhci_readl(host, ESDHC_PRSSTAT) & val)
-+		if (sdhci_readl(host, ESDHC_PRSSTAT) & ESDHC_CLOCK_STABLE)
- 			break;
- 		if (timedout) {
- 			pr_err("%s: Internal clock never stabilised.\n",
- 				mmc_hostname(host->mmc));
- 			break;
- 		}
--		udelay(10);
-+		usleep_range(10, 20);
- 	}
- }
- 
-@@ -621,77 +633,96 @@ static void esdhc_of_set_clock(struct sdhci_host *host, unsigned int clock)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
- 	struct sdhci_esdhc *esdhc = sdhci_pltfm_priv(pltfm_host);
--	int pre_div = 1;
--	int div = 1;
--	int division;
-+	unsigned int pre_div = 1, div = 1;
-+	unsigned int clock_fixup = 0;
- 	ktime_t timeout;
--	long fixup = 0;
- 	u32 temp;
- 
--	host->mmc->actual_clock = 0;
--
- 	if (clock == 0) {
-+		host->mmc->actual_clock = 0;
- 		esdhc_clock_enable(host, false);
- 		return;
- 	}
- 
--	/* Workaround to start pre_div at 2 for VNN < VENDOR_V_23 */
-+	/* Start pre_div at 2 for vendor version < 2.3. */
- 	if (esdhc->vendor_ver < VENDOR_V_23)
- 		pre_div = 2;
- 
-+	/* Fix clock value. */
- 	if (host->mmc->card && mmc_card_sd(host->mmc->card) &&
--		esdhc->clk_fixup && host->mmc->ios.timing == MMC_TIMING_LEGACY)
--		fixup = esdhc->clk_fixup->sd_dflt_max_clk;
-+	    esdhc->clk_fixup && host->mmc->ios.timing == MMC_TIMING_LEGACY)
-+		clock_fixup = esdhc->clk_fixup->sd_dflt_max_clk;
- 	else if (esdhc->clk_fixup)
--		fixup = esdhc->clk_fixup->max_clk[host->mmc->ios.timing];
--
--	if (fixup && clock > fixup)
--		clock = fixup;
-+		clock_fixup = esdhc->clk_fixup->max_clk[host->mmc->ios.timing];
- 
--	temp = sdhci_readl(host, ESDHC_SYSTEM_CONTROL);
--	temp &= ~(ESDHC_CLOCK_SDCLKEN | ESDHC_CLOCK_IPGEN | ESDHC_CLOCK_HCKEN |
--		  ESDHC_CLOCK_PEREN | ESDHC_CLOCK_MASK);
--	sdhci_writel(host, temp, ESDHC_SYSTEM_CONTROL);
-+	if (clock_fixup == 0 || clock < clock_fixup)
-+		clock_fixup = clock;
- 
--	while (host->max_clk / pre_div / 16 > clock && pre_div < 256)
-+	/* Calculate pre_div and div. */
-+	while (host->max_clk / pre_div / 16 > clock_fixup && pre_div < 256)
- 		pre_div *= 2;
- 
--	while (host->max_clk / pre_div / div > clock && div < 16)
-+	while (host->max_clk / pre_div / div > clock_fixup && div < 16)
- 		div++;
- 
-+	esdhc->div_ratio = pre_div * div;
-+
-+	/* Limit clock division for HS400 200MHz clock for quirk. */
- 	if (esdhc->quirk_limited_clk_division &&
- 	    clock == MMC_HS200_MAX_DTR &&
- 	    (host->mmc->ios.timing == MMC_TIMING_MMC_HS400 ||
- 	     host->flags & SDHCI_HS400_TUNING)) {
--		division = pre_div * div;
--		if (division <= 4) {
-+		if (esdhc->div_ratio <= 4) {
- 			pre_div = 4;
- 			div = 1;
--		} else if (division <= 8) {
-+		} else if (esdhc->div_ratio <= 8) {
- 			pre_div = 4;
- 			div = 2;
--		} else if (division <= 12) {
-+		} else if (esdhc->div_ratio <= 12) {
- 			pre_div = 4;
- 			div = 3;
- 		} else {
- 			pr_warn("%s: using unsupported clock division.\n",
- 				mmc_hostname(host->mmc));
- 		}
-+		esdhc->div_ratio = pre_div * div;
- 	}
- 
-+	host->mmc->actual_clock = host->max_clk / esdhc->div_ratio;
-+
- 	dev_dbg(mmc_dev(host->mmc), "desired SD clock: %d, actual: %d\n",
--		clock, host->max_clk / pre_div / div);
--	host->mmc->actual_clock = host->max_clk / pre_div / div;
--	esdhc->div_ratio = pre_div * div;
-+		clock, host->mmc->actual_clock);
-+
-+	/* Set clock division into register. */
- 	pre_div >>= 1;
- 	div--;
- 
-+	esdhc_clock_enable(host, false);
-+
- 	temp = sdhci_readl(host, ESDHC_SYSTEM_CONTROL);
--	temp |= (ESDHC_CLOCK_IPGEN | ESDHC_CLOCK_HCKEN | ESDHC_CLOCK_PEREN
--		| (div << ESDHC_DIVIDER_SHIFT)
--		| (pre_div << ESDHC_PREDIV_SHIFT));
-+	temp &= ~ESDHC_CLOCK_MASK;
-+	temp |= ((div << ESDHC_DIVIDER_SHIFT) |
-+		(pre_div << ESDHC_PREDIV_SHIFT));
- 	sdhci_writel(host, temp, ESDHC_SYSTEM_CONTROL);
- 
-+	/* Wait max 20 ms. If vendor version is 2.2 or lower, do not
-+	 * wait clock stable bit which does not exist.
-+	 */
-+	timeout = ktime_add_ms(ktime_get(), 20);
-+	while (esdhc->vendor_ver > VENDOR_V_22) {
-+		bool timedout = ktime_after(ktime_get(), timeout);
-+
-+		if (sdhci_readl(host, ESDHC_PRSSTAT) & ESDHC_CLOCK_STABLE)
-+			break;
-+		if (timedout) {
-+			pr_err("%s: Internal clock never stabilised.\n",
-+				mmc_hostname(host->mmc));
-+			break;
-+		}
-+		usleep_range(10, 20);
-+	}
-+
-+	/* Additional setting for HS400. */
- 	if (host->mmc->ios.timing == MMC_TIMING_MMC_HS400 &&
- 	    clock == MMC_HS200_MAX_DTR) {
- 		temp = sdhci_readl(host, ESDHC_TBCTL);
-@@ -711,25 +742,7 @@ static void esdhc_of_set_clock(struct sdhci_host *host, unsigned int clock)
- 		esdhc_clock_enable(host, false);
- 		esdhc_flush_async_fifo(host);
- 	}
--
--	/* Wait max 20 ms */
--	timeout = ktime_add_ms(ktime_get(), 20);
--	while (1) {
--		bool timedout = ktime_after(ktime_get(), timeout);
--
--		if (sdhci_readl(host, ESDHC_PRSSTAT) & ESDHC_CLOCK_STABLE)
--			break;
--		if (timedout) {
--			pr_err("%s: Internal clock never stabilised.\n",
--				mmc_hostname(host->mmc));
--			return;
--		}
--		udelay(10);
--	}
--
--	temp = sdhci_readl(host, ESDHC_SYSTEM_CONTROL);
--	temp |= ESDHC_CLOCK_SDCLKEN;
--	sdhci_writel(host, temp, ESDHC_SYSTEM_CONTROL);
-+	esdhc_clock_enable(host, false);
- }
- 
- static void esdhc_pltfm_set_bus_width(struct sdhci_host *host, int width)
--- 
-2.7.4
+> Can you please elaborate a bit on what all these different clocks are
+> needed for? Are really all of them needed?
+actually I don't know - the public S805 datasheet doesn't list these bits
+the vendor driver just calls the first three TX_CLK, RX_CLK, SD_CLK
+(that's bits[14:12])
+the last one (mod_clk) is documented as:
+  Clock Module Enable, Should set before bit[14:12] switch on,
+  and after bit[14:12] switch off
 
+so all I know is that the order is important
+
+[...]
+> > +static void meson_mx_sdhc_wait_cmd_ready(struct mmc_host *mmc)
+> > +{
+> > +       struct meson_mx_sdhc_host *host = mmc_priv(mmc);
+> > +       u32 stat, esta;
+> > +       int ret;
+> > +
+> > +       ret = readl_poll_timeout(host->base + MESON_SDHC_STAT, stat,
+> > +                                !(stat & MESON_SDHC_STAT_CMD_BUSY), 1,
+> > +                                100000);
+>
+> This looks quite inefficient. Isn't there a corresponding IRQ that you
+> can look for instead, no?
+not that I am aware of :-(
+
+> Can you perhaps also elaborate a bit on what kind of busy check you
+> are doing here? Maybe also add some comment about that in the code.
+the vendor driver documents this: [2]
+  wait sdhc controller cmd send
+and the public S805 datasheet states:
+  (0:Ready for command,1:busy)
+
+> > +       if (ret) {
+> > +               dev_warn(mmc_dev(mmc),
+> > +                        "Failed to poll for CMD_BUSY while processing CMD%d\n",
+> > +                        host->cmd->opcode);
+> > +               meson_mx_sdhc_hw_reset(mmc);
+> > +       }
+> > +
+> > +       ret = readl_poll_timeout(host->base + MESON_SDHC_ESTA, esta,
+> > +                                !(esta & MESON_SDHC_ESTA_11_13), 1, 100000);
+>
+> Another polling. Not possible to wait for an IRQ instead?
+unfortunately this is another "not that I'm aware of"
+
+> What are the polling about?
+and I don't know yet again :-(
+
+> > +       if (ret) {
+> > +               dev_warn(mmc_dev(mmc),
+> > +                        "Failed to poll for ESTA[13:11] while processing CMD%d\n",
+> > +                        host->cmd->opcode);
+>
+> What is ESTA[13:11]? If you are going to log a message, please make it
+> more understandable.
+the only other explanation I found in the vendor driver (which I used
+as reference) is this error print:
+  sdhc_err("Warning: DMA state is wrong! SDHC_ESTA=0x%x\n", esta);
+
+[...]
+> > +static void meson_mx_sdhc_disable_clks(struct mmc_host *mmc)
+> > +{
+> > +       struct meson_mx_sdhc_host *host = mmc_priv(mmc);
+> > +
+> > +       if (!host->clocks_enabled)
+> > +               return;
+> > +
+> > +       clk_disable_unprepare(host->tx_clk);
+> > +       clk_disable_unprepare(host->rx_clk);
+> > +       clk_disable_unprepare(host->sd_clk);
+> > +
+> > +       clk_disable_unprepare(host->mod_clk);
+>
+> clk_bulk_disable_unprepare() seems like a better option to use here.
+good point, thank you
+I'll update that while keeping the order of "mod_clk" right (see [0] and [1])
+
+[...]
+> > +static int meson_mx_sdhc_enable_clks(struct mmc_host *mmc)
+> > +{
+> > +       struct meson_mx_sdhc_host *host = mmc_priv(mmc);
+> > +       struct clk *clocks[] = {
+> > +               host->mod_clk,
+> > +               host->sd_clk,
+> > +               host->tx_clk,
+> > +               host->rx_clk,
+> > +       };
+> > +       int i, ret;
+> > +
+> > +       if (host->clocks_enabled)
+> > +               return 0;
+> > +
+> > +       for (i = 0; i < ARRAY_SIZE(clocks); i++) {
+> > +               ret = clk_prepare_enable(clocks[i]);
+> > +               if (ret) {
+> > +                       dev_err(mmc_dev(mmc), "Failed to enable clock %s\n",
+> > +                               __clk_get_name(clocks[i]));
+> > +                       goto err;
+> > +               }
+> > +       }
+>
+> clk_bulk_prepare_enable() seems like a better option to use here.
+ACK, same as above
+
+[...]
+> > +static int meson_mx_sdhc_set_clk(struct mmc_host *mmc, struct mmc_ios *ios)
+> > +{
+> > +       struct meson_mx_sdhc_host *host = mmc_priv(mmc);
+> > +       u32 rx_clk_phase, val;
+> > +       int ret;
+> > +
+> > +       meson_mx_sdhc_disable_clks(mmc);
+> > +
+> > +       if (ios->clock) {
+> > +               ret = clk_set_rate(host->sd_clk, ios->clock);
+> > +               if (ret) {
+> > +                       dev_warn(mmc_dev(mmc),
+> > +                                "Failed to set MMC clock to %uHz: %d\n",
+> > +                                ios->clock, host->error);
+> > +                       return ret;
+> > +               }
+> > +
+> > +               ret = meson_mx_sdhc_enable_clks(mmc);
+> > +               if (ret)
+> > +                       return ret;
+> > +
+> > +               mmc->actual_clock = clk_get_rate(host->sd_clk);
+> > +
+> > +               /*
+> > +                * according to Amlogic the following latching points are
+> > +                * selected with empirical values, there is no (known) formula
+> > +                * to calculate these.
+> > +                */
+> > +               if (mmc->actual_clock > 100000000) {
+> > +                       rx_clk_phase = 1;
+> > +               } else if (mmc->actual_clock > 45000000) {
+> > +                       if (ios->signal_voltage == MMC_SIGNAL_VOLTAGE_330)
+> > +                               rx_clk_phase = 15;
+> > +                       else
+> > +                               rx_clk_phase = 11;
+> > +               } else if (mmc->actual_clock >= 25000000) {
+> > +                       rx_clk_phase = 15;
+> > +               } else if (mmc->actual_clock > 5000000) {
+> > +                       rx_clk_phase = 23;
+> > +               } else if (mmc->actual_clock > 1000000) {
+> > +                       rx_clk_phase = 55;
+> > +               } else {
+> > +                       rx_clk_phase = 1061;
+> > +               }
+>
+> The latching points (in frequency) looks closely related to the bus
+> speed timing frequency.
+>
+> Perhaps that doesn't matter, but I am wondering whether you may want
+> to check "ios.timing" in conjunction with the clock rate?
+the Amlogic internal datasheet extract I got has them in a table with
+the clock settings (mux, divider). I rephrased this table into my own
+words - you can find it in the patch description
+what's implemented here is basically a translation of the datasheet into C
+if it's more consistent with the Linux MMC framework to check for
+"ios.timing" (either only checking the timing, or checking it in
+addition to the bus speed) then please let me know.
+
+[...]
+> > +static struct clk *meson_mx_sdhc_register_clk(struct device *dev,
+> > +                                             struct clk_hw *hw,
+> > +                                             const char *name,
+> > +                                             int num_parents,
+> > +                                             const struct clk_parent_data *pd,
+> > +                                             unsigned long flags,
+> > +                                             const struct clk_ops *ops)
+> > +{
+> > +       struct clk_init_data init;
+> > +
+> > +       init.name = devm_kasprintf(dev, GFP_KERNEL, "%s#%s", dev_name(dev),
+> > +                                  name);
+> > +       if (!init.name)
+> > +               return ERR_PTR(-ENOMEM);
+> > +
+> > +       init.num_parents = num_parents;
+> > +       init.parent_data = pd;
+> > +       init.flags = flags;
+> > +       init.ops = ops;
+> > +
+> > +       hw->init = &init;
+> > +
+> > +       return devm_clk_register(dev, hw);
+>
+> devm_clk_register() is deprecated. Please convert to
+> devm_clk_hw_register() instead.
+>
+> Note that, this may also lead to that you need to update the
+> corresponding DT bindings for the clocks.
+>
+> Additionally, in regards to the deployment of the clock support, this
+> leads to quite some more changes. In principle, the code managing the
+> clock provider parts should be quite independent of the clock consumer
+> part. I didn't look more closely, maybe this is already the case, then
+> the conversion is simple.
+just to confirm I understand you correctly:
+the dt-bindings should look similar to what others have been working
+on for the arasan SDHCI controller: [3]
+based on that I'll then go forward and implement the driver part(s)
+
+[...]
+> Besides the above comments, I think overall the code looks quite okay to me.
+great, thank you for taking the time to review this driver!
+
+
+Martin
+
+
+[0] https://github.com/endlessm/linux-meson/blob/d6e13c220931110fe676ede6da69fc61a7cb04b6/drivers/amlogic/mmc/aml_sdhc_m8.c#L1911
+[1] https://github.com/endlessm/linux-meson/blob/d6e13c220931110fe676ede6da69fc61a7cb04b6/drivers/amlogic/mmc/aml_sdhc_m8.c#L1933
+[2] https://github.com/endlessm/linux-meson/blob/d6e13c220931110fe676ede6da69fc61a7cb04b6/drivers/amlogic/mmc/aml_sdhc_m8.c#L577
+[3] https://lkml.org/lkml/2019/7/1/27
