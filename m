@@ -6,20 +6,20 @@ X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
 	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EB895C2D0D0
-	for <linux-mmc@archiver.kernel.org>; Tue, 24 Dec 2019 07:25:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D686AC2D0CF
+	for <linux-mmc@archiver.kernel.org>; Tue, 24 Dec 2019 07:25:30 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id C6C6420731
-	for <linux-mmc@archiver.kernel.org>; Tue, 24 Dec 2019 07:25:27 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B175A20722
+	for <linux-mmc@archiver.kernel.org>; Tue, 24 Dec 2019 07:25:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726287AbfLXHZX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 24 Dec 2019 02:25:23 -0500
-Received: from szxga05-in.huawei.com ([45.249.212.191]:7738 "EHLO huawei.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1725993AbfLXHZG (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        id S1726104AbfLXHZG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
         Tue, 24 Dec 2019 02:25:06 -0500
+Received: from szxga05-in.huawei.com ([45.249.212.191]:7742 "EHLO huawei.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1726043AbfLXHZF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 24 Dec 2019 02:25:05 -0500
 Received: from DGGEMS410-HUB.china.huawei.com (unknown [172.30.72.60])
-        by Forcepoint Email with ESMTP id 9C54F62673D311592F0D;
+        by Forcepoint Email with ESMTP id A7BFDD550042D61DF732;
         Tue, 24 Dec 2019 15:25:03 +0800 (CST)
 Received: from huawei.com (10.90.53.225) by DGGEMS410-HUB.china.huawei.com
  (10.3.19.210) with Microsoft SMTP Server id 14.3.439.0; Tue, 24 Dec 2019
@@ -28,9 +28,9 @@ From:   zhengbin <zhengbin13@huawei.com>
 To:     <ulf.hansson@linaro.org>, <linux-mmc@vger.kernel.org>,
         <linux-kernel@vger.kernel.org>
 CC:     <zhengbin13@huawei.com>
-Subject: [PATCH 6/6] mmc: owl: use true,false for bool variable
-Date:   Tue, 24 Dec 2019 15:32:15 +0800
-Message-ID: <1577172735-18869-7-git-send-email-zhengbin13@huawei.com>
+Subject: [PATCH 5/6] mmc: davinci: use true,false for bool variable
+Date:   Tue, 24 Dec 2019 15:32:14 +0800
+Message-ID: <1577172735-18869-6-git-send-email-zhengbin13@huawei.com>
 X-Mailer: git-send-email 2.7.4
 In-Reply-To: <1577172735-18869-1-git-send-email-zhengbin13@huawei.com>
 References: <1577172735-18869-1-git-send-email-zhengbin13@huawei.com>
@@ -45,33 +45,47 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 Fixes coccicheck warning:
 
-drivers/mmc/host/owl-mmc.c:519:2-18: WARNING: Assignment of 0/1 to bool variable
-drivers/mmc/host/owl-mmc.c:523:2-18: WARNING: Assignment of 0/1 to bool variable
+drivers/mmc/host/davinci_mmc.c:480:1-13: WARNING: Assignment of 0/1 to bool variable
+drivers/mmc/host/davinci_mmc.c:607:1-13: WARNING: Assignment of 0/1 to bool variable
+drivers/mmc/host/davinci_mmc.c:1270:3-16: WARNING: Assignment of 0/1 to bool variable
 
 Reported-by: Hulk Robot <hulkci@huawei.com>
 Signed-off-by: zhengbin <zhengbin13@huawei.com>
 ---
- drivers/mmc/host/owl-mmc.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ drivers/mmc/host/davinci_mmc.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
 
-diff --git a/drivers/mmc/host/owl-mmc.c b/drivers/mmc/host/owl-mmc.c
-index 771e3d0..d3b1653 100644
---- a/drivers/mmc/host/owl-mmc.c
-+++ b/drivers/mmc/host/owl-mmc.c
-@@ -516,11 +516,11 @@ static void owl_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-
- 	/* Enable DDR mode if requested */
- 	if (ios->timing == MMC_TIMING_UHS_DDR50) {
--		owl_host->ddr_50 = 1;
-+		owl_host->ddr_50 = true;
- 		owl_mmc_update_reg(owl_host->base + OWL_REG_SD_EN,
- 			       OWL_SD_EN_DDREN, true);
- 	} else {
--		owl_host->ddr_50 = 0;
-+		owl_host->ddr_50 = false;
+diff --git a/drivers/mmc/host/davinci_mmc.c b/drivers/mmc/host/davinci_mmc.c
+index f01fecd..fe94907 100644
+--- a/drivers/mmc/host/davinci_mmc.c
++++ b/drivers/mmc/host/davinci_mmc.c
+@@ -477,7 +477,7 @@ static int mmc_davinci_start_dma_transfer(struct mmc_davinci_host *host,
+ 		}
  	}
- }
 
+-	host->do_dma = 1;
++	host->do_dma = true;
+ 	ret = mmc_davinci_send_dma_request(host, data);
+
+ 	return ret;
+@@ -604,7 +604,7 @@ static void mmc_davinci_request(struct mmc_host *mmc, struct mmc_request *req)
+ 		return;
+ 	}
+
+-	host->do_dma = 0;
++	host->do_dma = false;
+ 	mmc_davinci_prepare_data(host, req);
+ 	mmc_davinci_start_command(host, req->cmd);
+ }
+@@ -1267,7 +1267,7 @@ static int davinci_mmcsd_probe(struct platform_device *pdev)
+ 		if (ret == -EPROBE_DEFER)
+ 			goto dma_probe_defer;
+ 		else if (ret)
+-			host->use_dma = 0;
++			host->use_dma = false;
+ 	}
+
+ 	mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY;
 --
 2.7.4
 
