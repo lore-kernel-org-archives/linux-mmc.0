@@ -8,62 +8,62 @@ X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2450DC2D0DA
-	for <linux-mmc@archiver.kernel.org>; Thu, 26 Dec 2019 11:30:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 51562C2D0DA
+	for <linux-mmc@archiver.kernel.org>; Thu, 26 Dec 2019 11:30:47 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id EE91C20828
-	for <linux-mmc@archiver.kernel.org>; Thu, 26 Dec 2019 11:30:43 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 218902080D
+	for <linux-mmc@archiver.kernel.org>; Thu, 26 Dec 2019 11:30:47 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="MoM3w92B"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ER38NVUi"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726475AbfLZLan (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 26 Dec 2019 06:30:43 -0500
-Received: from mail-pg1-f193.google.com ([209.85.215.193]:46274 "EHLO
-        mail-pg1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725954AbfLZLan (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Dec 2019 06:30:43 -0500
-Received: by mail-pg1-f193.google.com with SMTP id z124so12724294pgb.13;
-        Thu, 26 Dec 2019 03:30:42 -0800 (PST)
+        id S1726575AbfLZLaq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 26 Dec 2019 06:30:46 -0500
+Received: from mail-pj1-f65.google.com ([209.85.216.65]:51596 "EHLO
+        mail-pj1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725954AbfLZLaq (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Dec 2019 06:30:46 -0500
+Received: by mail-pj1-f65.google.com with SMTP id j11so3237649pjs.1;
+        Thu, 26 Dec 2019 03:30:45 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :in-reply-to:references;
-        bh=mm2k7kp3HTdwOQhCh2pHkzi/+UVQ/gaC7L55Fq1FQNY=;
-        b=MoM3w92BO547oVBPnswuh+PTu1hn4nzc8zzpd9beE/RYduyjptQhruEp5ndmYATr+T
-         9qRvLwVKYMCthogUgFsgVJHhxGP3rdOZvWusxsgIK2BjTH7otWAHeYUKAQpK7zowj4gH
-         sMUDLsl56y3kzPtRWX6wfMSrP1Jea52YzDD+CHnySzm6Rza8kjTKCB9XTwmMx2Bw8iPC
-         V1uYNqitItW18OkapeTh/z5KHwSIO9BQ7NYEIkZW996c3EE84x6zi1/PnoONZzp8aTTD
-         eRizdyCjIRVYJynuaDiNgqxudGeWDx3WKMpB30Nl4s3oBgK42r7cWFR5KMGqa8hepas2
-         oGLw==
+        bh=nVzp8rqaDTTY7sAFNAFLTve3VsfLdzj2ihK4V7/f3fA=;
+        b=ER38NVUikj9LKkO+PKHphFVhTpPNZ5RTvBMVH0/YW9i62NS6/mZDGt4rJ/Y6MvuV1N
+         rXbelOVjgErqyhsTRH473+kD2AjHsrt5TVMDFcNUOe3R63qdXt0YX3hnJMSQFvfKpoJg
+         IFogqTshY0PrLDK/LUx9+0jEqZGshmemI20uTosGBWgRv2sOlVGxtw3G7I402AwfMp66
+         MpLGlF+LBeamdovN+8Jk4AJPLj+03GAL3sso/Kra67melCCn4TYY1cTpoEXUiwu13CKz
+         MTnSSyU/wuXmanm8pX5RDfZC00TETsZ0DDUbDnzdaxy5GT5VQtyNxRPceRh23lkz4/k2
+         StGw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:in-reply-to:references;
-        bh=mm2k7kp3HTdwOQhCh2pHkzi/+UVQ/gaC7L55Fq1FQNY=;
-        b=lypu1UiVqERkU4m0BM7rnclTWjepGKVM5ROYK16LTUSwnB/Fojo6MsfJI1wW0IsQBA
-         mDQLNdBL7A0bUunkBfcZ9dj/FyfLZUN7GAuzIERWvWdLRYyLgXm8wEzB/bUofabGA/lo
-         N6A5QWAPOmJiAjXTIfOacHg3ks3V8kGSRz5Ny5FHW3FzCgy4IYpscWnUEw/4xw2RF5Qw
-         irbuQg9ushwBcUOkwC1suEsHWMxy8FXaURAVYAGoH54pbH+qV9kAqxJfhJdV5lEYwXV8
-         ZpIaJqsz0d5sgagW2FOykD5nlwHa8kQc7Mlnf0hg3OF6BLESTbMwSpWRgvkDLg0pVriA
-         QcZA==
-X-Gm-Message-State: APjAAAUh6QBJezzSRck/sYcyDLcffs1RL7i0yn6+4RBJg6n0OfUrSbky
-        mizcB/jLRt+GtR6GxCv3DbQ=
-X-Google-Smtp-Source: APXvYqwPD7c6kqCmEJeleqH3lpxPMRjj0Wg3xVLJFSqOh4Hy14u50VVImzApe6+etmKbOHrYywwJFw==
-X-Received: by 2002:a63:1418:: with SMTP id u24mr46242664pgl.279.1577359842447;
-        Thu, 26 Dec 2019 03:30:42 -0800 (PST)
+        bh=nVzp8rqaDTTY7sAFNAFLTve3VsfLdzj2ihK4V7/f3fA=;
+        b=PfswPEW1J7ZVbRnf4bcTpmVhJMYRnUjYY77n+MDc7RNlDAdg+SQFZNm+nUBWY5NS33
+         FBjeBE8Q5805+CDQUd1gP4Umfo0uVVLMUWuuJy65A5IOMZX38eQUF/aCeY+v7VAtV3dn
+         pD5xO0I6l1bIi7NbwAw7O97S5vnW6R5lGov7+jPn9OCKiB7NjuPrgONirFeGMX31EaOD
+         qFAZRL4FjdbiBfqwFD8/ipqPGLjbwse9qX/J/LtxGdHiryaK1bSvzldlaQDF6JcHFZSR
+         X01HPpZa23E5Lpoi0MactnPLtSBo1ngCqX4PPrcvsK3bMIzjlfhxDScaRHLaFGP2arEa
+         LgSw==
+X-Gm-Message-State: APjAAAXGqBmZ+VuCqDdloYpDvpeJamqKUovbx0QWz8/ynnI1jf1pjNHQ
+        aBAohcpP5mgym4a1aEhIff220uzcGIA=
+X-Google-Smtp-Source: APXvYqy1Bi9yFpB3OFRmVbEKE3dAhm789YqC2w7sTK/eEF5EhnQDlK81qMK0fiKUyYEBzr08Oiu4Tw==
+X-Received: by 2002:a17:90a:ec10:: with SMTP id l16mr18384302pjy.19.1577359845458;
+        Thu, 26 Dec 2019 03:30:45 -0800 (PST)
 Received: from baolinwangubtpc.spreadtrum.com ([117.18.48.82])
-        by smtp.gmail.com with ESMTPSA id y6sm33743287pgc.10.2019.12.26.03.30.39
+        by smtp.gmail.com with ESMTPSA id y6sm33743287pgc.10.2019.12.26.03.30.42
         (version=TLS1 cipher=ECDHE-RSA-AES128-SHA bits=128/128);
-        Thu, 26 Dec 2019 03:30:41 -0800 (PST)
+        Thu, 26 Dec 2019 03:30:45 -0800 (PST)
 From:   Baolin Wang <baolin.wang7@gmail.com>
 To:     adrian.hunter@intel.com, ulf.hansson@linaro.org
 Cc:     orsonzhai@gmail.com, zhang.lyra@gmail.com, arnd@arndb.de,
         linus.walleij@linaro.org, baolin.wang@linaro.org,
         baolin.wang7@gmail.com, linux-mmc@vger.kernel.org,
         linux-kernel@vger.kernel.org
-Subject: [PATCH 1/3] mmc: host: Introduce the request_atomic() for the host
-Date:   Thu, 26 Dec 2019 19:29:19 +0800
-Message-Id: <cb52e4e6c15e02f1fb233bd1488ce82741a38c05.1577358666.git.baolin.wang7@gmail.com>
+Subject: [PATCH 2/3] mmc: host: sdhci-sprd: Implement the request_atomic() API
+Date:   Thu, 26 Dec 2019 19:29:20 +0800
+Message-Id: <bbaf5843628c2f217fb857f3208693dd1914bc91.1577358666.git.baolin.wang7@gmail.com>
 X-Mailer: git-send-email 1.7.9.5
 In-Reply-To: <cover.1577358666.git.baolin.wang7@gmail.com>
 References: <cover.1577358666.git.baolin.wang7@gmail.com>
@@ -74,94 +74,68 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The SD host controller can process one request in the atomic context if
-the card is nonremovable, which means we can submit next request in the
-irq hard handler when using the MMC software queue to reduce the latency.
-Thus this patch adds a new API request_atomic() for the host controller
-and implement it for the SD host controller.
+Implement the request_atomic() API for nonremovable cards, that means
+we can submit next request in the irq hard handler context to reduce
+latency.
 
-Suggested-by: Adrian Hunter <adrian.hunter@intel.com>
 Signed-off-by: Baolin Wang <baolin.wang7@gmail.com>
 ---
- drivers/mmc/host/sdhci.c |   27 +++++++++++++++++++--------
- drivers/mmc/host/sdhci.h |    1 +
- include/linux/mmc/host.h |    3 +++
- 3 files changed, 23 insertions(+), 8 deletions(-)
+ drivers/mmc/host/sdhci-sprd.c |   28 ++++++++++++++++++++++++++--
+ 1 file changed, 26 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 64bef96..004f789 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1810,17 +1810,12 @@ void sdhci_set_power(struct sdhci_host *host, unsigned char mode,
-  *                                                                           *
- \*****************************************************************************/
- 
--void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
-+static void sdhci_start_request(struct mmc_host *mmc, struct mmc_request *mrq,
-+				int present)
- {
--	struct sdhci_host *host;
--	int present;
-+	struct sdhci_host *host = mmc_priv(mmc);
- 	unsigned long flags;
- 
--	host = mmc_priv(mmc);
--
--	/* Firstly check card presence */
--	present = mmc->ops->get_cd(mmc);
--
- 	spin_lock_irqsave(&host->lock, flags);
- 
- 	sdhci_led_activate(host);
-@@ -1848,6 +1843,22 @@ void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 
- 	spin_unlock_irqrestore(&host->lock, flags);
+diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
+index d346223..ae9acb8 100644
+--- a/drivers/mmc/host/sdhci-sprd.c
++++ b/drivers/mmc/host/sdhci-sprd.c
+@@ -426,6 +426,27 @@ static void sdhci_sprd_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ 	sdhci_request(mmc, mrq);
  }
-+
-+void sdhci_request_atomic(struct mmc_host *mmc, struct mmc_request *mrq)
-+{
-+	sdhci_start_request(mmc, mrq, 1);
-+}
-+EXPORT_SYMBOL_GPL(sdhci_request_atomic);
-+
-+void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
-+{
-+	int present;
-+
-+	/* Firstly check card presence */
-+	present = mmc->ops->get_cd(mmc);
-+
-+	sdhci_start_request(mmc, mrq, present);
-+}
- EXPORT_SYMBOL_GPL(sdhci_request);
  
- void sdhci_set_bus_width(struct sdhci_host *host, int width)
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index a73ce89..cecc64b 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -765,6 +765,7 @@ void sdhci_set_power(struct sdhci_host *host, unsigned char mode,
- void sdhci_set_power_noreg(struct sdhci_host *host, unsigned char mode,
- 			   unsigned short vdd);
- void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq);
-+void sdhci_request_atomic(struct mmc_host *mmc, struct mmc_request *mrq);
- void sdhci_set_bus_width(struct sdhci_host *host, int width);
- void sdhci_reset(struct sdhci_host *host, u8 mask);
- void sdhci_set_uhs_signaling(struct sdhci_host *host, unsigned timing);
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 3931aa3..cc1a79b 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -92,6 +92,9 @@ struct mmc_host_ops {
- 			    int err);
- 	void	(*pre_req)(struct mmc_host *host, struct mmc_request *req);
- 	void	(*request)(struct mmc_host *host, struct mmc_request *req);
-+	/* Submit one request to host in atomic context. */
-+	void	(*request_atomic)(struct mmc_host *host,
-+				  struct mmc_request *req);
++static void sdhci_sprd_request_atomic(struct mmc_host *mmc,
++				      struct mmc_request *mrq)
++{
++	struct sdhci_host *host = mmc_priv(mmc);
++	struct sdhci_sprd_host *sprd_host = TO_SPRD_HOST(host);
++
++	host->flags |= sprd_host->flags & SDHCI_AUTO_CMD23;
++
++	/*
++	 * From version 4.10 onward, ARGUMENT2 register is also as 32-bit
++	 * block count register which doesn't support stuff bits of
++	 * CMD23 argument on Spreadtrum's sd host controller.
++	 */
++	if (host->version >= SDHCI_SPEC_410 &&
++	    mrq->sbc && (mrq->sbc->arg & SDHCI_SPRD_ARG2_STUFF) &&
++	    (host->flags & SDHCI_AUTO_CMD23))
++		host->flags &= ~SDHCI_AUTO_CMD23;
++
++	sdhci_request_atomic(mmc, mrq);
++}
++
+ static int sdhci_sprd_voltage_switch(struct mmc_host *mmc, struct mmc_ios *ios)
+ {
+ 	struct sdhci_host *host = mmc_priv(mmc);
+@@ -561,6 +582,11 @@ static int sdhci_sprd_probe(struct platform_device *pdev)
+ 	if (ret)
+ 		goto pltfm_free;
  
- 	/*
- 	 * Avoid calling the next three functions too often or in a "fast
++	if (!mmc_card_is_removable(host->mmc))
++		host->mmc_host_ops.request_atomic = sdhci_sprd_request_atomic;
++	else
++		host->always_defer_done = true;
++
+ 	sprd_host = TO_SPRD_HOST(host);
+ 	sdhci_sprd_phy_param_parse(sprd_host, pdev->dev.of_node);
+ 
+@@ -654,8 +680,6 @@ static int sdhci_sprd_probe(struct platform_device *pdev)
+ 	if (ret)
+ 		goto err_cleanup_host;
+ 
+-	host->always_defer_done = true;
+-
+ 	ret = __sdhci_add_host(host);
+ 	if (ret)
+ 		goto err_cleanup_host;
 -- 
 1.7.9.5
 
