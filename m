@@ -2,65 +2,68 @@ Return-Path: <SRS0=NlIn=2X=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.1 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.1 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	MENTIONS_GIT_HOSTING,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 59493C2D0DC
-	for <linux-mmc@archiver.kernel.org>; Thu,  2 Jan 2020 11:30:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C23B9C2D0DC
+	for <linux-mmc@archiver.kernel.org>; Thu,  2 Jan 2020 12:32:05 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 1C4EC21655
-	for <linux-mmc@archiver.kernel.org>; Thu,  2 Jan 2020 11:30:55 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8E753215A4
+	for <linux-mmc@archiver.kernel.org>; Thu,  2 Jan 2020 12:32:05 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="key not found in DNS" (0-bit key) header.d=mg.codeaurora.org header.i=@mg.codeaurora.org header.b="MQSREi7i"
+	dkim=fail reason="key not found in DNS" (0-bit key) header.d=mg.codeaurora.org header.i=@mg.codeaurora.org header.b="ge0JOtzj"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728134AbgABLay (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 2 Jan 2020 06:30:54 -0500
-Received: from mail25.static.mailgun.info ([104.130.122.25]:13915 "EHLO
-        mail25.static.mailgun.info" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1728205AbgABLav (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Jan 2020 06:30:51 -0500
+        id S1728310AbgABMcE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 2 Jan 2020 07:32:04 -0500
+Received: from mail26.static.mailgun.info ([104.130.122.26]:26404 "EHLO
+        mail26.static.mailgun.info" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1728286AbgABMcD (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Jan 2020 07:32:03 -0500
 DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
- s=smtp; t=1577964650; h=Content-Transfer-Encoding: Content-Type:
- In-Reply-To: MIME-Version: Date: Message-ID: References: Cc: To:
- Subject: From: Sender; bh=SFlajEkHLlsUVLHVfmv2Qoe32uvgEMBTV5xvUKZ1oKY=;
- b=MQSREi7iEsYAi1U1W+LdvA8/5I1dGWJPu2Ram2A4TnxrHoBsQwa7xJGf7EOsRGJYb+hL+S1k
- pSyvyNqyBnUPkR4SvtRiI+aYqxWnYG9vsYw335BShiIlawJWMDT1093d8UhkEuXgOp/9ZdkG
- y5e7Rry+G9DtnnCvyEyYBCpnt4s=
-X-Mailgun-Sending-Ip: 104.130.122.25
+ s=smtp; t=1577968322; h=Content-Transfer-Encoding: Content-Type:
+ In-Reply-To: MIME-Version: Date: Message-ID: From: References: Cc: To:
+ Subject: Sender; bh=/E8TT9+0U3inh8FEr3+mV0x6CJy/08wdLhWGuFRpWjs=; b=ge0JOtzjzagw4V6uqmLQHe2GJ/FHrURGHcEEONCTnvs9l6rJQREt6NY6uBJN4iTKhU6tM1GE
+ w5VqS22w2nV8cpCTOhHMYf/TdldfXQT4+wHa68kBYcBT69LFUIrQ63TccuZkZq0QO1iFoh+a
+ 34+lTeDzWdp1o2YSeAZfivsstb4=
+X-Mailgun-Sending-Ip: 104.130.122.26
 X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
 Received: from smtp.codeaurora.org (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171])
- by mxa.mailgun.org with ESMTP id 5e0dd469.7fe1663a2810-smtp-out-n03;
- Thu, 02 Jan 2020 11:30:49 -0000 (UTC)
+ by mxa.mailgun.org with ESMTP id 5e0de2c0.7fee5968c768-smtp-out-n01;
+ Thu, 02 Jan 2020 12:32:00 -0000 (UTC)
 Received: by smtp.codeaurora.org (Postfix, from userid 1001)
-        id 31423C447A5; Thu,  2 Jan 2020 11:30:48 +0000 (UTC)
+        id 3C61CC447A4; Thu,  2 Jan 2020 12:31:59 +0000 (UTC)
 Received: from [10.206.25.108] (blr-c-bdr-fw-01_GlobalNAT_AllZones-Outside.qualcomm.com [103.229.19.19])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
         (Authenticated sender: vbadigan)
-        by smtp.codeaurora.org (Postfix) with ESMTPSA id 46D09C447A9;
-        Thu,  2 Jan 2020 11:30:42 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.3.2 smtp.codeaurora.org 46D09C447A9
+        by smtp.codeaurora.org (Postfix) with ESMTPSA id E5625C43383;
+        Thu,  2 Jan 2020 12:31:52 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.3.2 smtp.codeaurora.org E5625C43383
 Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
 Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=none smtp.mailfrom=vbadigan@codeaurora.org
+Subject: Re: [PATCH V2] arm64: dts: qcom: sc7180: Add nodes for eMMC and SD
+ card
+To:     Matthias Kaehlcke <mka@chromium.org>
+Cc:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
+        robh+dt@kernel.org, asutoshd@codeaurora.org,
+        stummala@codeaurora.org, sayalil@codeaurora.org,
+        cang@codeaurora.org, rampraka@codeaurora.org,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
+        Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Mark Rutland <mark.rutland@arm.com>
+References: <1576288475-7606-1-git-send-email-vbadigan@codeaurora.org>
+ <20191217222119.GW228856@google.com>
 From:   Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
-Subject: Re: [PATCH V1] mmc: sdhci-msm: Add CQHCI support for sdhci-msm
-To:     Adrian Hunter <adrian.hunter@intel.com>, ulf.hansson@linaro.org,
-        agross@kernel.org
-Cc:     asutoshd@codeaurora.org, stummala@codeaurora.org,
-        sayalil@codeaurora.org, cang@codeaurora.org,
-        rampraka@codeaurora.org, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        Ritesh Harjani <riteshh@codeaurora.org>
-References: <1576586233-28443-1-git-send-email-vbadigan@codeaurora.org>
- <1c6a6749-68c3-ee16-2c1b-e7534dee4791@intel.com>
-Message-ID: <9720d5fe-1bb0-8a88-1373-935a9abdb9e0@codeaurora.org>
-Date:   Thu, 2 Jan 2020 17:00:35 +0530
+Message-ID: <0dbc37f0-41dc-77fd-9bd4-0e4d81cbf6f7@codeaurora.org>
+Date:   Thu, 2 Jan 2020 18:01:50 +0530
 User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:60.0) Gecko/20100101
  Thunderbird/60.9.1
 MIME-Version: 1.0
-In-Reply-To: <1c6a6749-68c3-ee16-2c1b-e7534dee4791@intel.com>
+In-Reply-To: <20191217222119.GW228856@google.com>
 Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 8bit
 Content-Language: en-US
@@ -70,237 +73,270 @@ List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 
-On 12/20/2019 7:29 PM, Adrian Hunter wrote:
-> On 17/12/19 2:37 pm, Veerabhadrarao Badiganti wrote:
->> From: Ritesh Harjani<riteshh@codeaurora.org>
+On 12/18/2019 3:51 AM, Matthias Kaehlcke wrote:
+> On Sat, Dec 14, 2019 at 07:24:34AM +0530, Veerabhadrarao Badiganti wrote:
+>> Add sdhc instances for supporting eMMC and SD-card on sc7180.
+>> The regulators should be in HPM state for proper functionality of
+>> eMMC and SD-card. Updating corresponding regulators accordingly.
 >>
->> This adds CQHCI support for sdhci-msm platforms.
->>
->> Signed-off-by: Ritesh Harjani<riteshh@codeaurora.org>
->> Signed-off-by: Veerabhadrarao Badiganti<vbadigan@codeaurora.org>
->>
->> ---
->> This patch is based on RFC patch
->> https://lkml.org/lkml/2017/8/30/313
->>
->> Changes since RFC:
->> 	- Updated settings so that TDLBA won't get reset when
->> 	  CQE is enabled.
->> 	- Removed new compatible string and moved to supports-cqe
->> 	  dt flag to identify CQE support.
->> 	- Incorporated review comments.
->>
->> Tested on: qcs404, sc7180
->> ---
->>   drivers/mmc/host/sdhci-msm.c | 115 ++++++++++++++++++++++++++++++++++++++++++-
->>   1 file changed, 114 insertions(+), 1 deletion(-)
->>
->> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
->> index 3d0bb5e..a4e3507 100644
->> --- a/drivers/mmc/host/sdhci-msm.c
->> +++ b/drivers/mmc/host/sdhci-msm.c
->> @@ -15,6 +15,7 @@
->>   #include <linux/regulator/consumer.h>
->>   
->>   #include "sdhci-pltfm.h"
->> +#include "cqhci.h"
->>   
->>   #define CORE_MCI_VERSION		0x50
->>   #define CORE_VERSION_MAJOR_SHIFT	28
->> @@ -122,6 +123,10 @@
->>   #define msm_host_writel(msm_host, val, host, offset) \
->>   	msm_host->var_ops->msm_writel_relaxed(val, host, offset)
->>   
->> +/* CQHCI vendor specific registers */
->> +#define CQHCI_VENDOR_CFG1	0xA00
->> +#define DISABLE_RST_ON_CMDQ_EN	(0x3 << 13)
->> +
->>   struct sdhci_msm_offset {
->>   	u32 core_hc_mode;
->>   	u32 core_mci_data_cnt;
->> @@ -1567,6 +1572,109 @@ static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
->>   	__sdhci_msm_set_clock(host, clock);
->>   }
->>   
->> +/*****************************************************************************\
->> + *                                                                           *
->> + * MSM Command Queue Engine (CQE)                                            *
->> + *                                                                           *
->> +\*****************************************************************************/
->> +
->> +static u32 sdhci_msm_cqe_irq(struct sdhci_host *host, u32 intmask)
->> +{
->> +	int cmd_error = 0;
->> +	int data_error = 0;
->> +
->> +	if (!sdhci_cqe_irq(host, intmask, &cmd_error, &data_error))
->> +		return intmask;
->> +
->> +	cqhci_irq(host->mmc, intmask, cmd_error, data_error);
->> +	return 0;
->> +}
->> +
->> +void sdhci_msm_cqe_disable(struct mmc_host *mmc, bool recovery)
->> +{
->> +	struct sdhci_host *host = mmc_priv(mmc);
->> +	unsigned long flags;
->> +	u32 ctrl;
->> +
->> +	/*
->> +	 * When CQE is halted, the legacy SDHCI path operates only
->> +	 * on 128bit descriptors in 64bit mode.
->> +	 */
->> +	if (host->flags & SDHCI_USE_64_BIT_DMA)
->> +		host->desc_sz = 16;
-> The adma_table_sz depends on desc_sz, so it cannot be changed here.
-> If you do something like below, then you can set desc_sz before calling
-> sdhci_setup_host()
+>> Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+> The patch doesn't apply against qcom/for-next, looks like you need to
+> rebase it.
 >
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index f4540f9892ce..f1d3b70ff769 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -3825,9 +3825,10 @@ int sdhci_setup_host(struct sdhci_host *host)
->   		void *buf;
->   
->   		if (host->flags & SDHCI_USE_64_BIT_DMA) {
-> +			if (!host->desc_sz)
-> +				host->desc_sz = SDHCI_ADMA2_64_DESC_SZ(host);
->   			host->adma_table_sz = host->adma_table_cnt *
-> -					      SDHCI_ADMA2_64_DESC_SZ(host);
-> -			host->desc_sz = SDHCI_ADMA2_64_DESC_SZ(host);
-> +					      host->desc_sz;
->   		} else {
->   			host->adma_table_sz = host->adma_table_cnt *
->   					      SDHCI_ADMA2_32_DESC_SZ;
-
-Thanks Adrian for the suggestion. I will add this change.
-
-But even with this change, still i will have to override 'host->desc_sz' 
-variable since qcom sdhci controller expects/operates-on
-
-12-byte descriptor as long was CQE is not enabled. When CQE is enabled, 
-it operates only on 16-bype descriptors (even when CQE is halted).
-
-If i fix "host->desc_sz" to 16 then all the data transfer commands 
-during card initialization (till CQE is enabled) would fail.
-
-I may have to update as below:
-
-     host->desc_sz = 16;
-
-     sdhci_add_host()  ;
-
-    host->desc_sz = 12;
-
-And then cqhci_host_ops->enable() -> host->desc_sz = 16;
-
-Please let me know if this is fine or if you have any other suggestion 
-to support this limitation of qcom controller w.r.t ADMA descriptors 
-with CQE.
-
+>> ---
+>>
+>> This depends on the patch series (dt support for sc7180):
+>> https://lkml.org/lkml/2019/11/8/149
+>> Also depends on documentation commit 2078158 (Present on mmc-next)
+>>
+>> Changes since V1:
+>> 	- Updated the regulator min, max voltages as per
+>> 	  eMMC/SD-card voltage requirements
+>> 	- Enabled IOMMU for eMMC and SD-card.
+>> 	- Added pull and drive strength to SD-card cd-gpio.
+>> 	- Incorporated review comments by Matthias Kaehlcke.
+>> ---
+>>   arch/arm64/boot/dts/qcom/sc7180-idp.dts |  47 +++++++---
+>>   arch/arm64/boot/dts/qcom/sc7180.dtsi    | 148 ++++++++++++++++++++++++++++++++
+>>   2 files changed, 183 insertions(+), 12 deletions(-)
+>>
+>> diff --git a/arch/arm64/boot/dts/qcom/sc7180-idp.dts b/arch/arm64/boot/dts/qcom/sc7180-idp.dts
+>> index 189254f..b6d4dc1 100644
+>> --- a/arch/arm64/boot/dts/qcom/sc7180-idp.dts
+>> +++ b/arch/arm64/boot/dts/qcom/sc7180-idp.dts
+>> @@ -7,6 +7,7 @@
+>>   
+>>   /dts-v1/;
+>>   
+>> +#include <dt-bindings/gpio/gpio.h>
+>>   #include <dt-bindings/regulator/qcom,rpmh-regulator.h>
+>>   #include "sc7180.dtsi"
+>>   #include "pm6150.dtsi"
+>> @@ -101,9 +102,9 @@
+>>   		};
+>>   
+>>   		vreg_l12a_1p8: ldo12 {
+>> -			regulator-min-microvolt = <1696000>;
+>> -			regulator-max-microvolt = <1952000>;
+>> -			regulator-initial-mode = <RPMH_REGULATOR_MODE_LPM>;
+>> +			regulator-min-microvolt = <1800000>;
+>> +			regulator-max-microvolt = <1800000>;
+>> +			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
+>>   		};
+>>   
+>>   		vreg_l13a_1p8: ldo13 {
+>> @@ -143,9 +144,9 @@
+>>   		};
+>>   
+>>   		vreg_l19a_2p9: ldo19 {
+>> -			regulator-min-microvolt = <2696000>;
+>> -			regulator-max-microvolt = <3304000>;
+>> -			regulator-initial-mode = <RPMH_REGULATOR_MODE_LPM>;
+>> +			regulator-min-microvolt = <2960000>;
+>> +			regulator-max-microvolt = <2960000>;
+>> +			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
+>>   		};
+>>   	};
+>>   
+>> @@ -189,9 +190,9 @@
+>>   		};
+>>   
+>>   		vreg_l6c_2p9: ldo6 {
+>> -			regulator-min-microvolt = <2696000>;
+>> -			regulator-max-microvolt = <3304000>;
+>> -			regulator-initial-mode = <RPMH_REGULATOR_MODE_LPM>;
+>> +			regulator-min-microvolt = <1800000>;
+>> +			regulator-max-microvolt = <2950000>;
+>> +			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
+>>   		};
+>>   
+>>   		vreg_l7c_3p0: ldo7 {
+>> @@ -207,9 +208,9 @@
+>>   		};
+>>   
+>>   		vreg_l9c_2p9: ldo9 {
+>> -			regulator-min-microvolt = <2952000>;
+>> -			regulator-max-microvolt = <3304000>;
+>> -			regulator-initial-mode = <RPMH_REGULATOR_MODE_LPM>;
+>> +			regulator-min-microvolt = <2960000>;
+>> +			regulator-max-microvolt = <2960000>;
+>> +			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
+>>   		};
+>>   
+>>   		vreg_l10c_3p3: ldo10 {
+>> @@ -400,3 +401,25 @@
+>>   			bias-pull-up;
+>>   		};
+>>   };
 >> +
->> +	spin_lock_irqsave(&host->lock, flags);
+>> +&sdhc_1 {
+>> +	status = "ok";
 >> +
->> +	/*
->> +	 * During CQE operation command complete bit gets latched.
->> +	 * So s/w should clear command complete interrupt status when CQE is
->> +	 * halted. Otherwise unexpected SDCHI legacy interrupt gets
->> +	 * triggered when CQE is halted.
->> +	 */
->> +	ctrl = sdhci_readl(host, SDHCI_INT_ENABLE);
->> +	ctrl |= SDHCI_INT_RESPONSE;
->> +	sdhci_writel(host,  ctrl, SDHCI_INT_ENABLE);
->> +	sdhci_writel(host, SDHCI_INT_RESPONSE, SDHCI_INT_STATUS);
->> +
->> +	spin_unlock_irqrestore(&host->lock, flags);
->> +
->> +	sdhci_cqe_disable(mmc, recovery);
->> +}
->> +
->> +static const struct cqhci_host_ops sdhci_msm_cqhci_ops = {
->> +	.enable		= sdhci_cqe_enable,
->> +	.disable	= sdhci_msm_cqe_disable,
+>> +	pinctrl-names = "default", "sleep";
+>> +	pinctrl-0 = <&sdc1_on>;
+>> +	pinctrl-1 = <&sdc1_off>;
+>> +	vmmc-supply = <&vreg_l19a_2p9>;
+>> +	vqmmc-supply = <&vreg_l12a_1p8>;
 >> +};
 >> +
->> +static int sdhci_msm_cqe_add_host(struct sdhci_host *host,
->> +				struct platform_device *pdev)
->> +{
->> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->> +	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
->> +	struct cqhci_host *cq_host;
->> +	bool dma64;
->> +	int ret;
+>> +&sdhc_2 {
+>> +	status = "ok";
 >> +
->> +	ret = sdhci_setup_host(host);
->> +	if (ret)
->> +		return ret;
+>> +	pinctrl-names = "default","sleep";
+>> +	pinctrl-0 = <&sdc2_on>;
+>> +	pinctrl-1 = <&sdc2_off>;
+>> +	vmmc-supply  = <&vreg_l9c_2p9>;
+>> +	vqmmc-supply = <&vreg_l6c_2p9>;
 >> +
->> +	cq_host = cqhci_pltfm_init(pdev);
->> +	if (IS_ERR(cq_host)) {
->> +		ret = PTR_ERR(cq_host);
->> +		dev_err(&pdev->dev, "cqhci-pltfm init: failed: %d\n", ret);
->> +		goto cleanup;
->> +	}
->> +
->> +	msm_host->mmc->caps2 |= MMC_CAP2_CQE | MMC_CAP2_CQE_DCMD;
->> +	cq_host->ops = &sdhci_msm_cqhci_ops;
->> +
->> +	dma64 = host->flags & SDHCI_USE_64_BIT_DMA;
->> +
->> +	ret = cqhci_init(cq_host, host->mmc, dma64);
->> +	if (ret) {
->> +		dev_err(&pdev->dev, "%s: CQE init: failed (%d)\n",
->> +				mmc_hostname(host->mmc), ret);
->> +		goto cleanup;
->> +	}
->> +
->> +	/* Disable cqe reset due to cqe enable signal */
->> +	cqhci_writel(cq_host, cqhci_readl(cq_host, CQHCI_VENDOR_CFG1) |
->> +		       DISABLE_RST_ON_CMDQ_EN, CQHCI_VENDOR_CFG1);
->> +
->> +	ret = __sdhci_add_host(host);
->> +	if (ret)
->> +		goto cleanup;
->> +
->> +	dev_info(&pdev->dev, "%s: CQE init: success\n",
->> +			mmc_hostname(host->mmc));
->> +	return ret;
->> +
->> +cleanup:
->> +	sdhci_cleanup_host(host);
->> +	return ret;
->> +}
->> +
->>   /*
->>    * Platform specific register write functions. This is so that, if any
->>    * register write needs to be followed up by platform specific actions,
->> @@ -1731,6 +1839,7 @@ static void sdhci_msm_set_regulator_caps(struct sdhci_msm_host *msm_host)
->>   	.set_uhs_signaling = sdhci_msm_set_uhs_signaling,
->>   	.write_w = sdhci_msm_writew,
->>   	.write_b = sdhci_msm_writeb,
->> +	.irq	= sdhci_msm_cqe_irq,
->>   };
+>> +	cd-gpios = <&tlmm 69 GPIO_ACTIVE_LOW>;
+>> +};
+> You are adding these entries to the pinctrl section, they belong
+> above the "/* PINCTRL - additions to nodes defined in sc7180.dtsi */"
+> comment.
+>
+>> diff --git a/arch/arm64/boot/dts/qcom/sc7180.dtsi b/arch/arm64/boot/dts/qcom/sc7180.dtsi
+>> index 666e9b9..16de9b8 100644
+>> --- a/arch/arm64/boot/dts/qcom/sc7180.dtsi
+>> +++ b/arch/arm64/boot/dts/qcom/sc7180.dtsi
+>> @@ -182,6 +182,32 @@
+>>   			#power-domain-cells = <1>;
+>>   		};
 >>   
->>   static const struct sdhci_pltfm_data sdhci_msm_pdata = {
->> @@ -1754,6 +1863,7 @@ static int sdhci_msm_probe(struct platform_device *pdev)
->>   	u8 core_major;
->>   	const struct sdhci_msm_offset *msm_offset;
->>   	const struct sdhci_msm_variant_info *var_info;
->> +	struct device_node *node = pdev->dev.of_node;
->>   
->>   	host = sdhci_pltfm_init(pdev, &sdhci_msm_pdata, sizeof(*msm_host));
->>   	if (IS_ERR(host))
->> @@ -1952,7 +2062,10 @@ static int sdhci_msm_probe(struct platform_device *pdev)
->>   	pm_runtime_use_autosuspend(&pdev->dev);
->>   
->>   	host->mmc_host_ops.execute_tuning = sdhci_msm_execute_tuning;
->> -	ret = sdhci_add_host(host);
->> +	if (of_property_read_bool(node, "supports-cqe"))
->> +		ret = sdhci_msm_cqe_add_host(host, pdev);
->> +	else
->> +		ret = sdhci_add_host(host);
->>   	if (ret)
->>   		goto pm_runtime_disable;
->>   	sdhci_msm_set_regulator_caps(msm_host);
->>
+>> +		sdhc_1: sdhci@7c4000 {
+>> +			compatible = "qcom,sc7180-sdhci", "qcom,sdhci-msm-v5";
+>> +			reg = <0 0x7c4000 0 0x1000>;
+>> +			reg-names = "hc_mem";
+>> +
+>> +			interrupts = <GIC_SPI 641 IRQ_TYPE_LEVEL_HIGH>,
+>> +					<GIC_SPI 644 IRQ_TYPE_LEVEL_HIGH>;
+>> +			interrupt-names = "hc_irq", "pwr_irq";
+>> +
+>> +			clocks = <&gcc GCC_SDCC1_APPS_CLK>,
+>> +					<&gcc GCC_SDCC1_AHB_CLK>;
+>> +			clock-names = "core", "iface";
+>> +
+>> +			iommus = <&apps_smmu 0x60 0x0>;
+>> +
+>> +			bus-width = <8>;
+>> +			non-removable;
+>> +
+>> +			mmc-ddr-1_8v;
+>> +			mmc-hs200-1_8v;
+>> +			mmc-hs400-1_8v;
+>> +			mmc-hs400-enhanced-strobe;
+>> +
+>> +			status = "disabled";
+>> +		};
+>> +
+>>   		qupv3_id_0: geniqup@8c0000 {
+>>   			compatible = "qcom,geni-se-qup";
+>>   			reg = <0 0x008c0000 0 0x6000>;
+>> @@ -897,6 +923,128 @@
+>>   					function = "qup15";
+>>   				};
+>>   			};
+>> +
+>> +			sdc1_on: sdc1-on {
+>> +				clk {
+> judging from some other nodes the convention seems to be to call the
+> nodes 'pinconf-<name>'.
+>
+>> +					pins = "sdc1_clk";
+>> +					bias-disable;
+>> +					drive-strength = <16>;
+>> +				};
+>> +
+>> +				cmd {
+>> +					pins = "sdc1_cmd";
+>> +					bias-pull-up;
+>> +					drive-strength = <10>;
+>> +				};
+>> +
+>> +				data {
+>> +					pins = "sdc1_data";
+>> +					bias-pull-up;
+>> +					drive-strength = <10>;
+>> +				};
+> cmd and data have the same configuration, in theory you could combine
+> them in a single node. Not sure if it's strictly required, in this case
+> with just two pins it doesn't make a big difference.
+
+Though both have same configuration, each corresponds to different bit 
+fields in register
+
+for updating drive-strengths and pull.  It configures the right bit 
+field based on pin name.
+
+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/drivers/pinctrl/qcom/pinctrl-sc7180.c?h=v5.5-rc4#n1093
+
+So separate pins needed for cmd and data here.
+
+>> +
+>> +				rclk {
+>> +					pins = "sdc1_rclk";
+>> +					bias-pull-down;
+>> +				};
+>> +			};
+>> +
+>> +			sdc1_off: sdc1-off {
+>> +				clk {
+>> +					pins = "sdc1_clk";
+>> +					bias-disable;
+>> +					drive-strength = <2>;
+>> +				};
+>> +
+>> +				cmd {
+>> +					pins = "sdc1_cmd";
+>> +					bias-pull-up;
+>> +					drive-strength = <2>;
+>> +				};
+>> +
+>> +				data {
+>> +					pins = "sdc1_data";
+>> +					bias-pull-up;
+>> +					drive-strength = <2>;
+>> +				};
+>> +
+>> +				rclk {
+>> +					pins = "sdc1_rclk";
+>> +					bias-pull-down;
+>> +				};
+>> +			};
+>> +
+>> +			sdc2_on: sdc2_on {
+> nit: sdc2_on: sdc2-on
+>
+>> +				clk {
+>> +					pins = "sdc2_clk";
+>> +					bias-disable;
+>> +					drive-strength = <16>;
+>> +				};
+>> +
+>> +				cmd {
+>> +					pins = "sdc2_cmd";
+>> +					bias-pull-up;
+>> +					drive-strength = <10>;
+>> +				};
+>> +
+>> +				data {
+>> +					pins = "sdc2_data";
+>> +					bias-pull-up;
+>> +					drive-strength = <10>;
+>> +				};
+>> +
+>> +				sd-cd {
+>> +					pins = "gpio69";
+>> +					bias-pull-up;
+>> +					drive-strength = <2>;
+>> +				};
+>> +			};
+>> +
+>> +			sdc2_off: sdc2_off {
+> nit: sdc2_off: sdc2-off
+
+Will incorporate the rest of the changes that you commented.
+
+Thanks,
+
+Veera
+
