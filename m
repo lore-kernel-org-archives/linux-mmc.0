@@ -1,123 +1,90 @@
-Return-Path: <SRS0=sWu+=2Y=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=AFsj=2Z=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.3 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.6 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
+	SPF_PASS,UNPARSEABLE_RELAY,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C3175C3276C
-	for <linux-mmc@archiver.kernel.org>; Fri,  3 Jan 2020 00:44:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 82524C32771
+	for <linux-mmc@archiver.kernel.org>; Sat,  4 Jan 2020 21:55:28 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 9C6E321D56
-	for <linux-mmc@archiver.kernel.org>; Fri,  3 Jan 2020 00:44:04 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 49D52222C4
+	for <linux-mmc@archiver.kernel.org>; Sat,  4 Jan 2020 21:55:28 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1578174928;
+	bh=4rwrxHDZMaoY+4FKFXNSyCF1nY3IjkSJN4OoMAEv1iw=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
+	b=GCUAB/U62ZzZEhCHQ1XYegz36+Z841HoPxVqszlYzCpdOWoRPpHVSw37FsYIqOpKc
+	 VMuiHsmj9F1J44IYWTKZNZkHFcn5cX9kvHTd3qMG252mBu7mXlATNIRAc33jhtOXqW
+	 sQS1vXQpWTR/Y2qrWZdlia00b8VCmv4MpDXW1VR4=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725890AbgACAoE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 2 Jan 2020 19:44:04 -0500
-Received: from lucky1.263xmail.com ([211.157.147.132]:43348 "EHLO
-        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725872AbgACAoE (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Jan 2020 19:44:04 -0500
-X-Greylist: delayed 422 seconds by postgrey-1.27 at vger.kernel.org; Thu, 02 Jan 2020 19:44:02 EST
-Received: from localhost (unknown [192.168.167.209])
-        by lucky1.263xmail.com (Postfix) with ESMTP id 47AD286504;
-        Fri,  3 Jan 2020 08:36:56 +0800 (CST)
-X-MAIL-GRAY: 1
-X-MAIL-DELIVERY: 0
-X-ADDR-CHECKED4: 1
-X-ANTISPAM-LEVEL: 2
-X-SKE-CHECKED: 1
-X-ABS-CHECKED: 1
-Received: from [172.16.12.37] (unknown [58.22.7.114])
-        by smtp.263.net (postfix) whith ESMTP id P24155T140478920242944S1578011815672162_;
-        Fri, 03 Jan 2020 08:36:56 +0800 (CST)
-X-IP-DOMAINF: 1
-X-UNIQUE-TAG: <4c9a2c64a65767a833e6315775956551>
-X-RL-SENDER: shawn.lin@rock-chips.com
-X-SENDER: lintao@rock-chips.com
-X-LOGIN-NAME: shawn.lin@rock-chips.com
-X-FST-TO: adrian.hunter@intel.com
-X-SENDER-IP: 58.22.7.114
-X-ATTACHMENT-NUM: 0
-X-DNS-TYPE: 0
-Cc:     shawn.lin@rock-chips.com, ulf.hansson@linaro.org,
-        adrian.hunter@intel.com
-Subject: Re: [RFT PATCH 3/3] mmc: sdhci-of-arasan: Fix Command Queuing enable
- handling
-To:     Faiz Abbas <faiz_abbas@ti.com>, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org
-References: <20191230092343.30692-1-faiz_abbas@ti.com>
- <20191230092343.30692-4-faiz_abbas@ti.com>
-From:   Shawn Lin <shawn.lin@rock-chips.com>
-Message-ID: <5a7f96e5-58f0-083e-612f-7f5867d8eb66@rock-chips.com>
-Date:   Fri, 3 Jan 2020 08:36:55 +0800
-User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:68.0) Gecko/20100101
- Thunderbird/68.3.1
+        id S1726263AbgADVz1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 4 Jan 2020 16:55:27 -0500
+Received: from mail-il1-f194.google.com ([209.85.166.194]:37817 "EHLO
+        mail-il1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726207AbgADVz1 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 4 Jan 2020 16:55:27 -0500
+Received: by mail-il1-f194.google.com with SMTP id t8so39421076iln.4
+        for <linux-mmc@vger.kernel.org>; Sat, 04 Jan 2020 13:55:27 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to:user-agent;
+        bh=K/EnumApSDmaO9XbzKzz36+u0K1L2iTuLSdvygNUnhs=;
+        b=dlm9ozuKAVTusED21S2AcSbMw9MTvUb7YGLKdnXc8KfLreDx+G7wAGFnrlGp2CNzgA
+         rFToEV6WMyL+Fq0yIa7Wx/7XsMhhAEHG324aSz5Zt8Ytpaox9pFnPym2VwFcwy75yXxJ
+         To62fc/qwxoyhApJ1z58Wf8w8xWJz06llyCarXI26HEmk3AhpRvgbQI97EAzDridJGJB
+         BactXEThxhVFOE+tPkVhAwZ0OxZra4kOp5W3AGlJS2ypjvmwkuuwysjUdDMiMqJR9n06
+         p2c5Da7RmCzUnTOUknIY1NOz9Zu2x7w+8WwArUJ+RJ6HijO+ihbtsfnpoJ5B2dILPsTs
+         fc/g==
+X-Gm-Message-State: APjAAAUsvyr8/RugvXu73LDdrupEp0JvpUlKs9G5knUO/0zg35Y7Wf8r
+        c43j3Zf1XS5i3k4pVjK8qIvtlIA=
+X-Google-Smtp-Source: APXvYqyeCCbitdS4SjLSQtBhzZ22S8Irhcu0RL6SqDelLACsJRHfPf1BkhXcarDvtl6m0sl0uR64RQ==
+X-Received: by 2002:a92:c686:: with SMTP id o6mr55048337ilg.212.1578174926726;
+        Sat, 04 Jan 2020 13:55:26 -0800 (PST)
+Received: from rob-hp-laptop ([64.188.179.251])
+        by smtp.gmail.com with ESMTPSA id c23sm11429198iod.62.2020.01.04.13.55.25
+        for <linux-mmc@vger.kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sat, 04 Jan 2020 13:55:26 -0800 (PST)
+Received: from rob (uid 1000)
+        (envelope-from rob@rob-hp-laptop)
+        id 2219a3
+        by rob-hp-laptop (DragonFly Mail Agent v0.11);
+        Sat, 04 Jan 2020 14:55:24 -0700
+Date:   Sat, 4 Jan 2020 14:55:24 -0700
+From:   Rob Herring <robh@kernel.org>
+To:     Johan Jonker <jbx6244@gmail.com>
+Cc:     robh+dt@kernel.org, mark.rutland@arm.com, ulf.hansson@linaro.org,
+        linux-mmc@vger.kernel.org, linux-rockchip@lists.infradead.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH v2 1/2] dt-bindings: mmc: remove identical phrase in
+ disable-wp text
+Message-ID: <20200104215524.GA28188@bogus>
+References: <20191219145843.3823-1-jbx6244@gmail.com>
+ <20191228093059.2817-1-jbx6244@gmail.com>
 MIME-Version: 1.0
-In-Reply-To: <20191230092343.30692-4-faiz_abbas@ti.com>
-Content-Type: text/plain; charset=gbk; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20191228093059.2817-1-jbx6244@gmail.com>
+User-Agent: Mutt/1.10.1 (2018-07-13)
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-
-On 2019/12/30 17:23, Faiz Abbas wrote:
-> There is a need to dump data from the buffer before enabling command
-> queuing because of leftover data from tuning. Reset the data lines to
-> fix this at the source.
+On Sat, 28 Dec 2019 10:30:58 +0100, Johan Jonker wrote:
+> There are two identical phrases in the disable-wp text,
+> so remove one of them.
 > 
-
-It seems to work for my platform by porting it to 4.19 LTS.
-
-Tested-by: Shawn Lin <shawn.lin@rock-chips.com>
-
-> Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
+> Signed-off-by: Johan Jonker <jbx6244@gmail.com>
 > ---
->   drivers/mmc/host/sdhci-of-arasan.c | 21 ++++-----------------
->   1 file changed, 4 insertions(+), 17 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-> index e49b44b4d82e..1495ae72b902 100644
-> --- a/drivers/mmc/host/sdhci-of-arasan.c
-> +++ b/drivers/mmc/host/sdhci-of-arasan.c
-> @@ -376,22 +376,8 @@ static void sdhci_arasan_dumpregs(struct mmc_host *mmc)
->   	sdhci_dumpregs(mmc_priv(mmc));
->   }
->   
-> -static void sdhci_arasan_cqe_enable(struct mmc_host *mmc)
-> -{
-> -	struct sdhci_host *host = mmc_priv(mmc);
-> -	u32 reg;
-> -
-> -	reg = sdhci_readl(host, SDHCI_PRESENT_STATE);
-> -	while (reg & SDHCI_DATA_AVAILABLE) {
-> -		sdhci_readl(host, SDHCI_BUFFER);
-> -		reg = sdhci_readl(host, SDHCI_PRESENT_STATE);
-> -	}
-> -
-> -	sdhci_cqe_enable(mmc);
-> -}
-> -
->   static const struct cqhci_host_ops sdhci_arasan_cqhci_ops = {
-> -	.enable         = sdhci_arasan_cqe_enable,
-> +	.enable         = sdhci_cqe_enable,
->   	.disable        = sdhci_cqe_disable,
->   	.dumpregs       = sdhci_arasan_dumpregs,
->   };
-> @@ -410,8 +396,9 @@ static const struct sdhci_ops sdhci_arasan_cqe_ops = {
->   static const struct sdhci_pltfm_data sdhci_arasan_cqe_pdata = {
->   	.ops = &sdhci_arasan_cqe_ops,
->   	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
-> -	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
-> -			SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN,
-> +	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN	|
-> +		   SDHCI_QUIRK2_RESET_DATA_POST_TUNING	|
-> +		   SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN,
->   };
->   
->   static struct sdhci_arasan_of_data sdhci_arasan_rk3399_data = {
+>  Documentation/devicetree/bindings/mmc/mmc-controller.yaml | 3 +--
+>  1 file changed, 1 insertion(+), 2 deletions(-)
 > 
 
+Applied, thanks.
 
+Rob
