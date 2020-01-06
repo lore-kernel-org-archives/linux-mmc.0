@@ -1,94 +1,146 @@
-Return-Path: <SRS0=AFsj=2Z=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=NLoK=23=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.6 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
-	SPF_PASS,UNPARSEABLE_RELAY,USER_AGENT_SANE_1 autolearn=unavailable
+X-Spam-Status: No, score=-8.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B331BC3F68F
-	for <linux-mmc@archiver.kernel.org>; Sat,  4 Jan 2020 21:55:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DD355C3F68F
+	for <linux-mmc@archiver.kernel.org>; Mon,  6 Jan 2020 11:00:21 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 7FC6F24654
-	for <linux-mmc@archiver.kernel.org>; Sat,  4 Jan 2020 21:55:34 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1578174934;
-	bh=d8DC5PsHzB+CZJKJU3WrbaIjr67x6r0i/d5cJleFLMc=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
-	b=I32RK2KCCtFPkDNJk5BB86ohaFe3i1C/0zsncDyjYKlqaOxZhuto+42BCFa5BGRiR
-	 Q6SmlRl3xbrPWvYpvI/4KsFaM6yYdE5clsdhd9NGGw7WachWjL6qOKt0Jr2f5xo+57
-	 gQXMvzF/ZTVK3Dsh82GkJApAqLW2pOpAQUGI3H2g=
+	by mail.kernel.org (Postfix) with ESMTP id B1F7D207FD
+	for <linux-mmc@archiver.kernel.org>; Mon,  6 Jan 2020 11:00:21 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="Yk/Jylho"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726528AbgADVzd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 4 Jan 2020 16:55:33 -0500
-Received: from mail-io1-f68.google.com ([209.85.166.68]:37428 "EHLO
-        mail-io1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726240AbgADVzd (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 4 Jan 2020 16:55:33 -0500
-Received: by mail-io1-f68.google.com with SMTP id k24so14447005ioc.4
-        for <linux-mmc@vger.kernel.org>; Sat, 04 Jan 2020 13:55:33 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to:user-agent;
-        bh=DpHIoc7R3nvhDkYlx8d7RkRksbRX6Kou1+9AvQFNTV8=;
-        b=eK2liae3rg5Qr9UclDAAOC7c5JrjFrrRev4YhCr4rjVqkCUC2En5wn6lNp+VzJq8Ea
-         hPJrULCKAhlJ6Dg+KJSesOq/FFnt6Qpl/uwwdCJBCQe1AqW0DF0ktTU1aDZCE4qTl7Wt
-         7yOuCIoqY2XQiqMg7ebq9NijRFwIHAzOM0DY2L9jlRytG03HHG3j8icroEvZiSH+GLky
-         0142xrlU5kMP6euIA45M5VdetiqJLKL3+rND67axJUkrmDwzf8UwWJWVXmb53SMYOjJq
-         0CSdD5UHAFtW5zS4Cb6R7HiC85wfuu/v/5CiloS9uAjF9DkGfIkOJpxXEihJ3eNBtX8i
-         67zA==
-X-Gm-Message-State: APjAAAUihMNSzebHf/l2E5Qk5EbkVadrWQquUKWeAmOPMCPKG4CK81FX
-        IiPY43pA+aaO/LiUPXok1ukag6g=
-X-Google-Smtp-Source: APXvYqwN2VAp9XalmFoQCBqRmEq29HWAAy3yGPUz4XSH3ea4AFUA28lG+kwDIAVxq+cMa+BGbIdn8w==
-X-Received: by 2002:a02:864b:: with SMTP id e69mr73026403jai.83.1578174932795;
-        Sat, 04 Jan 2020 13:55:32 -0800 (PST)
-Received: from rob-hp-laptop ([64.188.179.251])
-        by smtp.gmail.com with ESMTPSA id s17sm10307385iob.81.2020.01.04.13.55.32
-        for <linux-mmc@vger.kernel.org>
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 04 Jan 2020 13:55:32 -0800 (PST)
-Received: from rob (uid 1000)
-        (envelope-from rob@rob-hp-laptop)
-        id 2219a3
-        by rob-hp-laptop (DragonFly Mail Agent v0.11);
-        Sat, 04 Jan 2020 14:55:31 -0700
-Date:   Sat, 4 Jan 2020 14:55:31 -0700
-From:   Rob Herring <robh@kernel.org>
-To:     Johan Jonker <jbx6244@gmail.com>
-Cc:     robh+dt@kernel.org, mark.rutland@arm.com, ulf.hansson@linaro.org,
-        linux-mmc@vger.kernel.org, linux-rockchip@lists.infradead.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v2 2/2] dt-bindings: mmc: clarify disable-wp text
-Message-ID: <20200104215531.GA28533@bogus>
-References: <20191219145843.3823-1-jbx6244@gmail.com>
- <20191228093059.2817-1-jbx6244@gmail.com>
- <20191228093059.2817-2-jbx6244@gmail.com>
+        id S1726368AbgAFLAR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 6 Jan 2020 06:00:17 -0500
+Received: from fllv0015.ext.ti.com ([198.47.19.141]:60418 "EHLO
+        fllv0015.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726173AbgAFLAR (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Jan 2020 06:00:17 -0500
+Received: from fllv0034.itg.ti.com ([10.64.40.246])
+        by fllv0015.ext.ti.com (8.15.2/8.15.2) with ESMTP id 006B08kv032657;
+        Mon, 6 Jan 2020 05:00:08 -0600
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
+        s=ti-com-17Q1; t=1578308408;
+        bh=rHHxnSNmoG0TpKHhfoDpiR+hC+hKper1pj6PfPbJugE=;
+        h=From:To:CC:Subject:Date;
+        b=Yk/JylhoNEEZ1OJCrK62AF0JJi+msYodaFoAFR1AV9PpL2hFsaL63sszFRaEgDeuS
+         i9UXt8qVwI+QqsvxTBs+PjT4ufL6a3WvSRuvHn7t6Br7a2u8qOuwH84oHNsfh3Mm9J
+         5fDm/m7c0ulC3/o66C1T+kUd0pXrBVPjXghOReko=
+Received: from DFLE115.ent.ti.com (dfle115.ent.ti.com [10.64.6.36])
+        by fllv0034.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 006B086O062609
+        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
+        Mon, 6 Jan 2020 05:00:08 -0600
+Received: from DFLE108.ent.ti.com (10.64.6.29) by DFLE115.ent.ti.com
+ (10.64.6.36) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.1847.3; Mon, 6 Jan
+ 2020 05:00:07 -0600
+Received: from fllv0039.itg.ti.com (10.64.41.19) by DFLE108.ent.ti.com
+ (10.64.6.29) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.1847.3 via
+ Frontend Transport; Mon, 6 Jan 2020 05:00:07 -0600
+Received: from a0230074-OptiPlex-7010.india.ti.com (ileax41-snat.itg.ti.com [10.172.224.153])
+        by fllv0039.itg.ti.com (8.15.2/8.15.2) with ESMTP id 006B00Jp007044;
+        Mon, 6 Jan 2020 05:00:01 -0600
+From:   Faiz Abbas <faiz_abbas@ti.com>
+To:     <linux-omap@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+        <devicetree@vger.kernel.org>, <linux-mmc@vger.kernel.org>
+CC:     <kishon@ti.com>, <adrian.hunter@intel.com>, <mark.rutland@arm.com>,
+        <robh+dt@kernel.org>, <ulf.hansson@linaro.org>, <tony@atomide.com>,
+        <faiz_abbas@ti.com>
+Subject: [PATCH v4 00/11] Port am335x and am437x devices to sdhci-omap
+Date:   Mon, 6 Jan 2020 16:31:22 +0530
+Message-ID: <20200106110133.13791-1-faiz_abbas@ti.com>
+X-Mailer: git-send-email 2.19.2
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20191228093059.2817-2-jbx6244@gmail.com>
-User-Agent: Mutt/1.10.1 (2018-07-13)
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sat, 28 Dec 2019 10:30:59 +0100, Johan Jonker wrote:
-> "disable-wp" has been removed from all Rockchip eMMC and SDIO dts nodes,
-> but people still continue to submit new patches with "disable-wp" added
-> to other nodes then for the SD card slot,
-> what it was designed for in the first place.
-> So clarify the "disable-wp" text by adding that this option should
-> not be used in combination with eMMC or SDIO.
-> 
-> Signed-off-by: Johan Jonker <jbx6244@gmail.com>
-> ---
->  Documentation/devicetree/bindings/mmc/mmc-controller.yaml | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
+The following add driver patches for porting TI's am335x and am437x devices to
+the sdhci-omap driver.
 
-Applied, thanks.
+Patches 1-4 Add Support for external DMA to the sdhci driver.
 
-Rob
+Patches 5-7 refactor the sdhci_set_timeout() function and use it disable
+data timeout interrupt for erase commands
+
+Patches 8-9 port the ti,needs-special-reset property from omap_hsmmc driver.
+
+Patches 10-11 add new compatibles for am335x and am43xx devices to the
+sdhci-omap driver.
+
+DT changes will be posted as a separate series.
+
+Tested on: am335x-evm, am335x-boneblack, am335x-bonegreen-wireless,
+am335x-sk, am335x-bone, am437x-idk, am43xx-gp-evm, am43xx-epos-evm.
+
+I need some help with testing all other am335x variants and SDIO cards.
+
+Here's a branch for testing: https://github.com/faizinator/linux/tree/sdhci-omap_v4_2
+
+RESEND ALERT: I sent these patches from a new computer yesterday but non
+of them appeared in any of the mailing lists. Apologies if you receive a
+duplicate series. Please ignore the previous one.
+
+v4:
+1. Made the factoring out of initialize_data, block_info and mrqs_done as a
+   separate patch
+2. Replaced the patch introducing the quirk to disable DTO during erase
+   operations to a set_timeout() callback in sdhci-omap
+3. Ported the ti,needs-special-reset property from omap_hsmmc to sdhci-omap.
+4. Minor style changes.
+
+v3:
+1. Dropped patch 1 because the tasklet was removed by Adrian in an
+   earlier series.
+2. Added dma bindings in sdhci-omap as optional properties.
+3. Rebased on top of latest mainline.
+
+v2:
+1. sdhci is using two bottom halves. One threaded_rq for card detect and a
+   tasklet for finishing mmc requests. Patch 1 removes the tasklet and
+   moves its function to the threaded_irq. This enables me to
+   terminate_sync() in sdhci_request_done()
+
+2. Factored out common code for between the normal adn external dma case
+
+3. Using existing API sdhci_data_timeout_irq for disabling DTO during
+   erase commands.
+
+4. Fixed subject line for dt-bindings patch.
+
+Chunyan Zhang (3):
+  dt-bindings: sdhci-omap: Add properties for using external dma
+  mmc: sdhci: add support for using external DMA devices
+  mmc: sdhci-omap: Add using external dma
+
+Faiz Abbas (8):
+  mmc: sdhci: Factor out some operations set to their own functions
+  mmc: sdhci: Convert sdhci_set_timeout_irq() to non-static
+  mmc: sdhci: Refactor sdhci_set_timeout()
+  mmc: sdhci-omap: Disable data timeout interrupt during erase
+  dt-bindings: sdhci-omap: Add documentation for ti,needs-special-reset
+    property
+  mmc: sdhci-omap: Add ti,needs-special-reset property
+  dt-bindings: sdhci-omap: Add am335x and am437x specific bindings
+  mmc: sdhci-omap: Add am335x and am437x specific compatibles
+
+ .../devicetree/bindings/mmc/sdhci-omap.txt    |  12 +
+ drivers/mmc/host/Kconfig                      |   4 +
+ drivers/mmc/host/sdhci-omap.c                 |  61 ++-
+ drivers/mmc/host/sdhci.c                      | 355 +++++++++++++++---
+ drivers/mmc/host/sdhci.h                      |  10 +
+ 5 files changed, 384 insertions(+), 58 deletions(-)
+
+-- 
+2.19.2
+
