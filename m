@@ -2,169 +2,99 @@ Return-Path: <SRS0=NLoK=23=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.1 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.6 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,USER_AGENT_SANE_1 autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DB6F2C33C8C
-	for <linux-mmc@archiver.kernel.org>; Mon,  6 Jan 2020 13:37:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E40B4C33C8C
+	for <linux-mmc@archiver.kernel.org>; Mon,  6 Jan 2020 22:03:18 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 9E3C02081E
-	for <linux-mmc@archiver.kernel.org>; Mon,  6 Jan 2020 13:37:09 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="VnuawsnT"
+	by mail.kernel.org (Postfix) with ESMTP id B01DE2072A
+	for <linux-mmc@archiver.kernel.org>; Mon,  6 Jan 2020 22:03:18 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1578348198;
+	bh=bbN1coMsrCtgwJgKNftw+t6ApkqIVC6uCeI70nz+qKs=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
+	b=FxkMyyatHgPIAEG8ceCwxeDr99TGLNFtPtQjrAX2IPL9tHXtcZcDiNVLI4mgxep3J
+	 i+vBtGFnjlNzds8udGlzl3ghLXE3ot2EsIDJfIOVOTUI0VF2XvwMfjG92b7Zx52Rac
+	 J7i7YXLt3K4CfoApzK4Ln6NSnOONHtRMqZx0iS00=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726294AbgAFNhJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 6 Jan 2020 08:37:09 -0500
-Received: from mail-wm1-f65.google.com ([209.85.128.65]:34351 "EHLO
-        mail-wm1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726292AbgAFNhI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Jan 2020 08:37:08 -0500
-Received: by mail-wm1-f65.google.com with SMTP id c127so11979851wme.1;
-        Mon, 06 Jan 2020 05:37:06 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to:user-agent;
-        bh=QOQNIAmP2EwBVCavZ0lFmSFnjBVk76326QHH2Q3kcmU=;
-        b=VnuawsnTf0Cd7zf4BmAy2YZKMN8+T2U2fEnGwrY7kdoQTrvBcljDa3+5uGsf5J07XH
-         wPvqtMi6exEC2pfkHwRNTimcbZTq6Wcny0eaccgE5xhSlGuAHyS/f5lu77WQnHMSVgtn
-         tRJRdS/zH+Ljx+KA6O85HOKMRCFvFMYoyUtZGfUipMbkJvD4FWqv7/P50/fAK5iZncT5
-         Q8ZEwPCTlT6R++dghR8MX75pnY86JlOwSJlwilVsmb8dvoirMCNJ8/zwuoRRyPVEY8MS
-         vPtcm/nlmMRXTOTom3L4CohdSPHaupLVC6B6zy/Ynxdr5accUgX91F3UCxjM7c1r6fr9
-         Woxw==
+        id S1726891AbgAFWDS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 6 Jan 2020 17:03:18 -0500
+Received: from mail-ot1-f66.google.com ([209.85.210.66]:44128 "EHLO
+        mail-ot1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726794AbgAFWDS (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Jan 2020 17:03:18 -0500
+Received: by mail-ot1-f66.google.com with SMTP id h9so70936367otj.11
+        for <linux-mmc@vger.kernel.org>; Mon, 06 Jan 2020 14:03:18 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:date:from:to:cc:subject:message-id:references
          :mime-version:content-disposition:in-reply-to:user-agent;
-        bh=QOQNIAmP2EwBVCavZ0lFmSFnjBVk76326QHH2Q3kcmU=;
-        b=uBoMH6TfIJzH5myS4dviGu5kSjBHWhnuDvcXDFzC9PuKyCYC8ng53GNBwfTS8XqDpJ
-         6EroxGjn/wj5r1Ehj1Yyw+Eyjrmof06DKJQQDBYsU5tr1XouScQXx59LguANIxJ60d0V
-         bDYbOpVSYr4CJ80Qr64zzATk6g6jgEJaJwsXbCrprUnfUoVe8DvtLteNEXgQVj9ILSTS
-         xNwlCYdWCgWQAxBB2cpESP0PX/xoCI0dL04MdIAqwy09mbNojMkpQEpLimSK1KEK9Alc
-         Yv8shYEZbaN1A16EYUEgvqY578lCCrhZ4e93ozwWulw8Rex4uK+kOdPYyWnzEgGDTelm
-         bz/g==
-X-Gm-Message-State: APjAAAUQfT8+ZDwho3d2cjcmU69tci4koBp69SnPMsRWGd77Uz1L2Rft
-        5CXGsaFBQOl3WDKP2F3RSsm3sVCv
-X-Google-Smtp-Source: APXvYqxVJYPFzO8K7RFO9Mbkl9yf3DcX5Yyfc46eQahs0rjbrZh4wXbwJ5UoOs/3egJCUyIihU7gEw==
-X-Received: by 2002:a1c:5f06:: with SMTP id t6mr34830155wmb.32.1578317825517;
-        Mon, 06 Jan 2020 05:37:05 -0800 (PST)
-Received: from localhost (p2E5BEF3F.dip0.t-ipconnect.de. [46.91.239.63])
-        by smtp.gmail.com with ESMTPSA id d16sm77467856wrg.27.2020.01.06.05.37.04
+        bh=whyVDgNs4KCm1yOjF/vWGK9b0ag3HJcP6pF9Jl+67Ao=;
+        b=bumiL6pHpnfx6CxyFcZsviaS2Kj0sQomVcJc6zVtoApMWM7xeHpyrN7Y97tj1z4xi0
+         rzMo5MjmzvumLOGDlpiRiL7UEFzXEjy25jfsFKtqtUmZK89pZNN7aEl6U1UlclKkQiX1
+         c8uA9myetkPD2KataszT+eFUfNKWJ8XUgxwOp/DlM0rMeYD8MFxBaWFRa4WIAuThjoFS
+         m35XeN0NN/nKGt/HZEVceeR4fcQNcPANmaolGjRFVTY1Qo8hHq4RjVM/j+loHaEcAVgc
+         c+nzQS8+jYdOWGrIzS0lB7w3wC8+FZtUPN4xypgTTR6gTfxl5YKvQdR1fegrfhp+lQjW
+         1R1g==
+X-Gm-Message-State: APjAAAVXUPftYR8X4abLKLitMZKClxlZUcRax5b65PBewxz4Qg+ftdF9
+        u6ecxATeVUrL6fsHGR6LwKdD5UQ=
+X-Google-Smtp-Source: APXvYqyObebDpTz3R1UI+pX+6iK1R81hkDNyoCvDnbdaFms6bODtxP38kQswv/TrgCVphQOChQ/Olw==
+X-Received: by 2002:a05:6830:1d5b:: with SMTP id p27mr96365142oth.263.1578348197176;
+        Mon, 06 Jan 2020 14:03:17 -0800 (PST)
+Received: from rob-hp-laptop (ip-70-5-121-225.ftwttx.spcsdns.net. [70.5.121.225])
+        by smtp.gmail.com with ESMTPSA id v21sm23309130otr.72.2020.01.06.14.03.15
+        for <linux-mmc@vger.kernel.org>
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 06 Jan 2020 05:37:04 -0800 (PST)
-Date:   Mon, 6 Jan 2020 14:37:03 +0100
-From:   Thierry Reding <thierry.reding@gmail.com>
-To:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Cc:     =?utf-8?B?TWljaGHFgiBNaXJvc8WCYXc=?= <mirq-linux@rere.qmqm.pl>,
-        linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Thierry Reding <treding@nvidia.com>,
-        Jonathan Hunter <jonathanh@nvidia.com>,
-        Lucas Stach <dev@lynxeye.de>, linux-tegra@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Subject: Re: [PATCH] mmc: tegra: fix SDR50 tuning override
-Message-ID: <20200106133703.GE1955714@ulmo>
-References: <245d569e4c258063dbd78bd30c7027638b30f059.1577960737.git.mirq-linux@rere.qmqm.pl>
- <20200106120718.GA1955714@ulmo>
- <20200106122745.GA3414443@kroah.com>
+        Mon, 06 Jan 2020 14:03:16 -0800 (PST)
+Received: from rob (uid 1000)
+        (envelope-from rob@rob-hp-laptop)
+        id 220d32
+        by rob-hp-laptop (DragonFly Mail Agent v0.11);
+        Mon, 06 Jan 2020 16:03:13 -0600
+Date:   Mon, 6 Jan 2020 16:03:13 -0600
+From:   Rob Herring <robh@kernel.org>
+To:     Faiz Abbas <faiz_abbas@ti.com>
+Cc:     linux-omap@vger.kernel.org, linux-kernel@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-mmc@vger.kernel.org,
+        kishon@ti.com, adrian.hunter@intel.com, mark.rutland@arm.com,
+        ulf.hansson@linaro.org, tony@atomide.com
+Subject: Re: [PATCH v4 08/11] dt-bindings: sdhci-omap: Add documentation for
+ ti,needs-special-reset property
+Message-ID: <20200106220313.GA6822@bogus>
+References: <20200106110133.13791-1-faiz_abbas@ti.com>
+ <20200106110133.13791-9-faiz_abbas@ti.com>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="+JUInw4efm7IfTNU"
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20200106122745.GA3414443@kroah.com>
-User-Agent: Mutt/1.13.1 (2019-12-14)
+In-Reply-To: <20200106110133.13791-9-faiz_abbas@ti.com>
+User-Agent: Mutt/1.10.1 (2018-07-13)
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+On Mon, Jan 06, 2020 at 04:31:30PM +0530, Faiz Abbas wrote:
+> Some controllers need a special software reset sequence. Document the
+> ti,needs-special-reset binding to indicate that a controller needs this.
+> 
+> Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
+> ---
+>  Documentation/devicetree/bindings/mmc/sdhci-omap.txt | 1 +
+>  1 file changed, 1 insertion(+)
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-omap.txt b/Documentation/devicetree/bindings/mmc/sdhci-omap.txt
+> index 97efb01617dd..0f5389c72bda 100644
+> --- a/Documentation/devicetree/bindings/mmc/sdhci-omap.txt
+> +++ b/Documentation/devicetree/bindings/mmc/sdhci-omap.txt
+> @@ -21,6 +21,7 @@ Optional properties:
+>  - dma-names:	List of DMA request names. These strings correspond 1:1 with the
+>  		DMA specifiers listed in dmas. The string naming is to be "tx"
+>  		and "rx" for TX and RX DMA requests, respectively.
+> +- ti,needs-special-reset: Requires a special softreset sequence
 
---+JUInw4efm7IfTNU
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Why can't this be implied by the compatible string?
 
-On Mon, Jan 06, 2020 at 01:27:45PM +0100, Greg Kroah-Hartman wrote:
-> On Mon, Jan 06, 2020 at 01:07:18PM +0100, Thierry Reding wrote:
-> > On Thu, Jan 02, 2020 at 11:30:50AM +0100, Micha=C5=82 Miros=C5=82aw wro=
-te:
-> > > Commit 7ad2ed1dfcbe inadvertently mixed up a quirk flag's name and
-> > > broke SDR50 tuning override. Use correct NVQUIRK_ name.
-> > >=20
-> > > Fixes: 7ad2ed1dfcbe ("mmc: tegra: enable UHS-I modes")
-> > > Depends-on: 4f6aa3264af4 ("mmc: tegra: Only advertise UHS modes if IO=
- regulator is present")
-> > > Signed-off-by: Micha=C5=82 Miros=C5=82aw <mirq-linux@rere.qmqm.pl>
-> > > ---
-> > >  drivers/mmc/host/sdhci-tegra.c | 2 +-
-> > >  1 file changed, 1 insertion(+), 1 deletion(-)
-> >=20
-> > Oh my... good catch!
-> >=20
-> > Reviewed-by: Thierry Reding <treding@nvidia.com>
-> >=20
-> > I also ran this through our internal test system and all tests pass, so
-> > also:
-> >=20
-> > Tested-by: Thierry Reding <treding@nvidia.com>
-> >=20
-> > I'm not sure if that "Depends-on:" tag is anything that's recognized
-> > anywhere. It might be better to turn that into an additional "Fixes:"
-> > line. Adding Greg to see if he has a standard way of dealing with this
-> > kind of dependency.
-> >=20
-> > Greg, what's your preferred way to handle these situations? I think the
-> > intention here was to describe that the original error was introduced by
-> > commit 7ad2ed1dfcbe ("mmc: tegra: enable UHS-I modes"), but then commit
-> > 4f6aa3264af4 ("mmc: tegra: Only advertise UHS modes if IO regulator is
-> > present") moved that code around, so this patch here will only be back-
-> > portable until the latter commit, but should be backported until the
-> > former.
->=20
-> The stable kernel rules document says how to handle this, but the
-> "depends on" commit id in the comment to the right of the stable@k.o cc:
-> line in the changelog area.
-
-That only mentions "static" prerequisites needed by the patch, but what
-if the prerequisites change depending on version?
-
-Could I do something like this:
-
-	Cc: <stable@vger.kernel.org> # 4.4.x: abcdef: ...
-	Cc: <stable@vger.kernel.org> # 4.9.x: bcdefa: ...
-	Cc: <stable@vger.kernel.org>
-
-Would that mean that the patch is selected for all stable releases
-(because of the last line with no version prerequisite) but when applied
-for stable-4.4 the abcdef patch gets pulled in and for stable-4.9 the
-bcdefa dependency is applied before the patch?
-
-I suppose this is perhaps a bit of an exotic case, but it might be good
-to document it specifically because it might be fairly rare. I can draft
-a change if you think this is useful to add.
-
-Thierry
-
---+JUInw4efm7IfTNU
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAl4TN/0ACgkQ3SOs138+
-s6Gf6A/8DvUkX7G3C3SRLThd/KInbrXQTvY5GaqwhZeQCwWJc+qXeyxc4SSbHOig
-90ipVBR0VmEtT5ti3g365UWoQf0hxFZ/+0nIU105pjbtCJ1JwUtF2mvBvRJ3906D
-fTtqJeb6FvdAVAeweLiifczATkfFQHqOy3k+ChfKyAauaDoBi/eErkwYFWvMywZo
-oLxEBMjiSdbPUxqJnzhEuoq64aGHxqsqOulRSvalGfAUwaFJCsqXx0zsW4TXMWwv
-q0Nm5qSnZ5zXVeNX2xHIXv+L7/a9FBFp4E5wY/awZvqH8EZIH3Ms6tlkwitG1WsW
-HHtjlJ1wgGPMeqoDBIkfoQLm+i8kDiei83fsQR3aIr+SR0RBVt8aisb4v/Jz4FMY
-TGiOY4ugVe8tQUUQlydJ3Wc5tN33/8kqYBDlxTLb6U5kYvapDg86S9ejWIUk3Qdj
-IhejPfTn14qSookBpUpAWp1C4uvAKiqEeVxf0hb1TJXP3ZekfVpOQSj71Poj4ybz
-X872X94OKhBJFvv654mMB34WfQ3WePQC0PqAU1Z8usrQAAWWUl6cvonD2LWKr6jK
-6YOoFuFHL6fhZoyahVvVAuYhX8HjJnCsP5k0HYc/enDHICTW5a1U2B0dSOpbHpjQ
-ZUjyyLiMaY14zDVzIVWJp7U5dT9YVks3cN9h2BqZ0RRzKdDBeBA=
-=GeZw
------END PGP SIGNATURE-----
-
---+JUInw4efm7IfTNU--
+Rob
