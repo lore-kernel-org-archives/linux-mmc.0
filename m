@@ -2,141 +2,87 @@ Return-Path: <SRS0=8m0a=24=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 11CF7C33C99
-	for <linux-mmc@archiver.kernel.org>; Tue,  7 Jan 2020 07:21:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9D720C33C99
+	for <linux-mmc@archiver.kernel.org>; Tue,  7 Jan 2020 07:24:16 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id DBE68207E0
-	for <linux-mmc@archiver.kernel.org>; Tue,  7 Jan 2020 07:21:00 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="sBK7wzvo"
+	by mail.kernel.org (Postfix) with ESMTP id 70567207E0
+	for <linux-mmc@archiver.kernel.org>; Tue,  7 Jan 2020 07:24:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727185AbgAGHU5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 7 Jan 2020 02:20:57 -0500
-Received: from lelv0143.ext.ti.com ([198.47.23.248]:54456 "EHLO
-        lelv0143.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725781AbgAGHU4 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Jan 2020 02:20:56 -0500
-Received: from lelv0265.itg.ti.com ([10.180.67.224])
-        by lelv0143.ext.ti.com (8.15.2/8.15.2) with ESMTP id 0077KiOm005644;
-        Tue, 7 Jan 2020 01:20:44 -0600
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
-        s=ti-com-17Q1; t=1578381644;
-        bh=BNhB0QYJdnTNKSIqndUpxLZ1sEMIsh0Psb5ghyCVu+M=;
-        h=Subject:To:CC:References:From:Date:In-Reply-To;
-        b=sBK7wzvoGwFHA11fk7gIMQf/8nPtBhOEfXzdpeK80AL7nNx3A3JaDNvy404X+kJNr
-         7bh7MZSm2xZXhiA7MaKoBELuu5n6P7KfVMIX6bEyj8qchymhrAX+HE1KjAq4OVlKUx
-         QnEIk8biuH+RnA33DcXM9kj2f7mUw79O9sccGXOw=
-Received: from DFLE100.ent.ti.com (dfle100.ent.ti.com [10.64.6.21])
-        by lelv0265.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 0077KiLJ097488
-        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
-        Tue, 7 Jan 2020 01:20:44 -0600
-Received: from DFLE115.ent.ti.com (10.64.6.36) by DFLE100.ent.ti.com
- (10.64.6.21) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.1847.3; Tue, 7 Jan
- 2020 01:20:44 -0600
-Received: from fllv0040.itg.ti.com (10.64.41.20) by DFLE115.ent.ti.com
- (10.64.6.36) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.1847.3 via
- Frontend Transport; Tue, 7 Jan 2020 01:20:44 -0600
-Received: from [172.24.190.4] (ileax41-snat.itg.ti.com [10.172.224.153])
-        by fllv0040.itg.ti.com (8.15.2/8.15.2) with ESMTP id 0077KeUj039368;
-        Tue, 7 Jan 2020 01:20:41 -0600
-Subject: Re: [PATCH v4 02/11] mmc: sdhci: Factor out some operations set to
- their own functions
-To:     Baolin Wang <baolin.wang7@gmail.com>
-CC:     <linux-omap@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>,
-        <devicetree@vger.kernel.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>, <kishon@ti.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        <mark.rutland@arm.com>, <robh+dt@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>, <tony@atomide.com>
-References: <20200106110133.13791-1-faiz_abbas@ti.com>
- <20200106110133.13791-3-faiz_abbas@ti.com>
- <CADBw62qR5F8h4YbpWfU2UESeoR3zXzS=eePMvQHuT7NQE5hdSA@mail.gmail.com>
-From:   Faiz Abbas <faiz_abbas@ti.com>
-Message-ID: <27fded85-d195-0a82-899a-bb6e727258dc@ti.com>
-Date:   Tue, 7 Jan 2020 12:52:13 +0530
+        id S1726651AbgAGHYQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 7 Jan 2020 02:24:16 -0500
+Received: from mga12.intel.com ([192.55.52.136]:3977 "EHLO mga12.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1725874AbgAGHYP (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 7 Jan 2020 02:24:15 -0500
+X-Amp-Result: SKIPPED(no attachment in message)
+X-Amp-File-Uploaded: False
+Received: from orsmga005.jf.intel.com ([10.7.209.41])
+  by fmsmga106.fm.intel.com with ESMTP/TLS/DHE-RSA-AES256-GCM-SHA384; 06 Jan 2020 23:24:15 -0800
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.69,404,1571727600"; 
+   d="scan'208";a="395269223"
+Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.167]) ([10.237.72.167])
+  by orsmga005.jf.intel.com with ESMTP; 06 Jan 2020 23:24:13 -0800
+Subject: Re: [PATCH v2] mmc: tegra: fix SDR50 tuning override
+To:     =?UTF-8?B?TWljaGHFgiBNaXJvc8WCYXc=?= <mirq-linux@rere.qmqm.pl>
+Cc:     linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
+        Thierry Reding <treding@nvidia.com>
+References: <b20c4847980c2c385ff0d7677fa5101c4d040749.1578314098.git.mirq-linux@rere.qmqm.pl>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Message-ID: <9ad68894-fe90-4fb1-47b9-2304dee5b902@intel.com>
+Date:   Tue, 7 Jan 2020 09:23:23 +0200
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.2.1
+ Thunderbird/68.2.2
 MIME-Version: 1.0
-In-Reply-To: <CADBw62qR5F8h4YbpWfU2UESeoR3zXzS=eePMvQHuT7NQE5hdSA@mail.gmail.com>
-Content-Type: text/plain; charset="utf-8"
+In-Reply-To: <b20c4847980c2c385ff0d7677fa5101c4d040749.1578314098.git.mirq-linux@rere.qmqm.pl>
+Content-Type: text/plain; charset=utf-8
 Content-Language: en-US
-Content-Transfer-Encoding: 7bit
-X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
+Content-Transfer-Encoding: 8bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Baolin,
+On 6/01/20 2:36 pm, Michał Mirosław wrote:
+> Commit 7ad2ed1dfcbe inadvertently mixed up a quirk flag's name and
+> broke SDR50 tuning override. Use correct NVQUIRK_ name.
+> 
+> Fixes: 7ad2ed1dfcbe ("mmc: tegra: enable UHS-I modes")
+> Cc: <stable@vger.kernel.org> # 4f6aa3264af4: mmc: tegra: Only advertise UHS modes if IO regulator is present
+> Cc: <stable@vger.kernel.org>
+> Signed-off-by: Michał Mirosław <mirq-linux@rere.qmqm.pl>
 
-On 07/01/20 12:04 pm, Baolin Wang wrote:
-> Hi Faiz,
-> 
-> On Mon, Jan 6, 2020 at 7:01 PM Faiz Abbas <faiz_abbas@ti.com> wrote:
->>
->> In preparation for adding external dma support, factor out data initialization,
->> block info and mrq_done to their own functions.
->>
->> Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
->> ---
->>  drivers/mmc/host/sdhci.c | 96 +++++++++++++++++++++++-----------------
->>  1 file changed, 55 insertions(+), 41 deletions(-)
->>
->> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->> index 1b1c26da3fe0..f6999054abcf 100644
->> --- a/drivers/mmc/host/sdhci.c
->> +++ b/drivers/mmc/host/sdhci.c
->> @@ -1025,18 +1025,9 @@ static void sdhci_set_timeout(struct sdhci_host *host, struct mmc_command *cmd)
->>         }
->>  }
->>
->> -static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
->> +static void sdhci_initialize_data(struct sdhci_host *host,
->> +                                 struct mmc_data *data)
->>  {
->> -       struct mmc_data *data = cmd->data;
->> -
->> -       host->data_timeout = 0;
->> -
->> -       if (sdhci_data_line_cmd(cmd))
->> -               sdhci_set_timeout(host, cmd);
->> -
->> -       if (!data)
->> -               return;
->> -
->>         WARN_ON(host->data);
->>
->>         /* Sanity checks */
->> @@ -1048,6 +1039,36 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
->>         host->data_early = 0;
->>         host->data->bytes_xfered = 0;
->>
-> 
-> Can you remove above redundant blank line?
-Ok.
-> 
->> +}
->> +
->> +static inline void sdhci_set_block_info(struct sdhci_host *host,
->> +                                       struct mmc_data *data)
->> +{
->> +
-> 
-> Ditto.
-Ok.
-> 
-> Otherwise, please add my tested tag if feel free.
-> 
-> Tested-by: Baolin Wang <baolin.wang7@gmail.com>
+You should have included Thierry's Reviewed-by and Tested-by
 
-Which platform did you test this on?
+Otherwise:
 
-Thanks,
-Faiz
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+
+> ---
+>  v2: converted 'Depends-On' tag to proper 'Cc: stable' lines
+> ---
+>  drivers/mmc/host/sdhci-tegra.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+> index 7bc950520fd9..403ac44a7378 100644
+> --- a/drivers/mmc/host/sdhci-tegra.c
+> +++ b/drivers/mmc/host/sdhci-tegra.c
+> @@ -386,7 +386,7 @@ static void tegra_sdhci_reset(struct sdhci_host *host, u8 mask)
+>  			misc_ctrl |= SDHCI_MISC_CTRL_ENABLE_DDR50;
+>  		if (soc_data->nvquirks & NVQUIRK_ENABLE_SDR104)
+>  			misc_ctrl |= SDHCI_MISC_CTRL_ENABLE_SDR104;
+> -		if (soc_data->nvquirks & SDHCI_MISC_CTRL_ENABLE_SDR50)
+> +		if (soc_data->nvquirks & NVQUIRK_ENABLE_SDR50)
+>  			clk_ctrl |= SDHCI_CLOCK_CTRL_SDR50_TUNING_OVERRIDE;
+>  	}
+>  
+> 
+
