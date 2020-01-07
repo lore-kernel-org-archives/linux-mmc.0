@@ -2,102 +2,135 @@ Return-Path: <SRS0=8m0a=24=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CC173C33C9E
-	for <linux-mmc@archiver.kernel.org>; Tue,  7 Jan 2020 11:16:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 37C5EC33C8C
+	for <linux-mmc@archiver.kernel.org>; Tue,  7 Jan 2020 12:24:19 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 9B9612087F
-	for <linux-mmc@archiver.kernel.org>; Tue,  7 Jan 2020 11:16:42 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="WOX+/1IM"
+	by mail.kernel.org (Postfix) with ESMTP id 126122081E
+	for <linux-mmc@archiver.kernel.org>; Tue,  7 Jan 2020 12:24:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727935AbgAGLQm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 7 Jan 2020 06:16:42 -0500
-Received: from fllv0016.ext.ti.com ([198.47.19.142]:50712 "EHLO
-        fllv0016.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726937AbgAGLQl (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Jan 2020 06:16:41 -0500
-Received: from lelv0265.itg.ti.com ([10.180.67.224])
-        by fllv0016.ext.ti.com (8.15.2/8.15.2) with ESMTP id 007BGXc2024300;
-        Tue, 7 Jan 2020 05:16:33 -0600
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
-        s=ti-com-17Q1; t=1578395793;
-        bh=HXqsa6+h9NoRNz+G1rKqdekJZz8yz8ren1fxTOBhDrY=;
-        h=Subject:To:CC:References:From:Date:In-Reply-To;
-        b=WOX+/1IMdd097RzhC/63SuwVfRY2EPkT94tkpqLfeFiD0SSKHvc+7xIDjiCXX8Cc+
-         m5e3/iqMlvEay2LILXYfaNoWFppmMtGLIxp+OXU1uE8wZhKxUIFONSvAPlAps/1Gng
-         HKztDIn7I6qsUaeycJIICpyO2HrTwh0EczMQMw2Y=
-Received: from DFLE102.ent.ti.com (dfle102.ent.ti.com [10.64.6.23])
-        by lelv0265.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 007BGX8L064520
-        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
-        Tue, 7 Jan 2020 05:16:33 -0600
-Received: from DFLE109.ent.ti.com (10.64.6.30) by DFLE102.ent.ti.com
- (10.64.6.23) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.1847.3; Tue, 7 Jan
- 2020 05:16:33 -0600
-Received: from lelv0327.itg.ti.com (10.180.67.183) by DFLE109.ent.ti.com
- (10.64.6.30) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.1847.3 via
- Frontend Transport; Tue, 7 Jan 2020 05:16:33 -0600
-Received: from [172.24.190.4] (ileax41-snat.itg.ti.com [10.172.224.153])
-        by lelv0327.itg.ti.com (8.15.2/8.15.2) with ESMTP id 007BGTRd027407;
-        Tue, 7 Jan 2020 05:16:30 -0600
-Subject: Re: [PATCH v4 08/11] dt-bindings: sdhci-omap: Add documentation for
- ti,needs-special-reset property
-To:     Rob Herring <robh@kernel.org>
-CC:     <linux-omap@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-        <devicetree@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
-        <kishon@ti.com>, <adrian.hunter@intel.com>, <mark.rutland@arm.com>,
-        <ulf.hansson@linaro.org>, <tony@atomide.com>
-References: <20200106110133.13791-1-faiz_abbas@ti.com>
- <20200106110133.13791-9-faiz_abbas@ti.com> <20200106220313.GA6822@bogus>
-From:   Faiz Abbas <faiz_abbas@ti.com>
-Message-ID: <fa2866cb-485a-9eed-47c2-fb3f6f260d31@ti.com>
-Date:   Tue, 7 Jan 2020 16:48:02 +0530
+        id S1727927AbgAGMYS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 7 Jan 2020 07:24:18 -0500
+Received: from mga11.intel.com ([192.55.52.93]:50699 "EHLO mga11.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1727896AbgAGMYS (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 7 Jan 2020 07:24:18 -0500
+X-Amp-Result: SKIPPED(no attachment in message)
+X-Amp-File-Uploaded: False
+Received: from fmsmga003.fm.intel.com ([10.253.24.29])
+  by fmsmga102.fm.intel.com with ESMTP/TLS/DHE-RSA-AES256-GCM-SHA384; 07 Jan 2020 04:24:18 -0800
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.69,406,1571727600"; 
+   d="scan'208";a="271486440"
+Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.167]) ([10.237.72.167])
+  by FMSMGA003.fm.intel.com with ESMTP; 07 Jan 2020 04:24:16 -0800
+Subject: Re: [PATCH 1/2] mmc: sdhci-of-esdhc: fix esdhc_reset() for different
+ controller versions
+To:     Yangbo Lu <yangbo.lu@nxp.com>, linux-mmc@vger.kernel.org,
+        Ulf Hansson <ulf.hansson@linaro.org>
+References: <20191224084122.25381-1-yangbo.lu@nxp.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Message-ID: <12d82268-4f94-41d3-e0e7-2a3ab8a6964f@intel.com>
+Date:   Tue, 7 Jan 2020 14:23:26 +0200
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.2.1
+ Thunderbird/68.2.2
 MIME-Version: 1.0
-In-Reply-To: <20200106220313.GA6822@bogus>
-Content-Type: text/plain; charset="utf-8"
+In-Reply-To: <20191224084122.25381-1-yangbo.lu@nxp.com>
+Content-Type: text/plain; charset=utf-8
 Content-Language: en-US
 Content-Transfer-Encoding: 7bit
-X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Rob,
-
-On 07/01/20 3:33 am, Rob Herring wrote:
-> On Mon, Jan 06, 2020 at 04:31:30PM +0530, Faiz Abbas wrote:
->> Some controllers need a special software reset sequence. Document the
->> ti,needs-special-reset binding to indicate that a controller needs this.
->>
->> Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
->> ---
->>  Documentation/devicetree/bindings/mmc/sdhci-omap.txt | 1 +
->>  1 file changed, 1 insertion(+)
->>
->> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-omap.txt b/Documentation/devicetree/bindings/mmc/sdhci-omap.txt
->> index 97efb01617dd..0f5389c72bda 100644
->> --- a/Documentation/devicetree/bindings/mmc/sdhci-omap.txt
->> +++ b/Documentation/devicetree/bindings/mmc/sdhci-omap.txt
->> @@ -21,6 +21,7 @@ Optional properties:
->>  - dma-names:	List of DMA request names. These strings correspond 1:1 with the
->>  		DMA specifiers listed in dmas. The string naming is to be "tx"
->>  		and "rx" for TX and RX DMA requests, respectively.
->> +- ti,needs-special-reset: Requires a special softreset sequence
+On 24/12/19 10:41 am, Yangbo Lu wrote:
+> This patch is to fix operating in esdhc_reset() for different
+> controller versions, and to add bus-width restoring after data
+> reset for eSDHC (verdor version <= 2.2).
 > 
-> Why can't this be implied by the compatible string?
+> Also add annotation for understanding.
+> 
+> Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
+
+One minor cosmetic comment below, otherwise:
+
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+
+> ---
+>  drivers/mmc/host/sdhci-of-esdhc.c | 38 ++++++++++++++++++++++++++++++++++----
+>  1 file changed, 34 insertions(+), 4 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+> index cd3b676..502e317 100644
+> --- a/drivers/mmc/host/sdhci-of-esdhc.c
+> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
+> @@ -758,23 +758,53 @@ static void esdhc_reset(struct sdhci_host *host, u8 mask)
+>  {
+>  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>  	struct sdhci_esdhc *esdhc = sdhci_pltfm_priv(pltfm_host);
+> -	u32 val;
+> +	u32 val, bus_width = 0;
+>  
+> +	/* Add delay to make sure all the DMA transfers are finished
+> +	 * for quirk.
+> +	 */
+
+sdhci-of-esdhc.c seems to have a mix of multi-line comment styles.
+The preferred style is documented in Documentation/process/coding-style.rst
+
+>  	if (esdhc->quirk_delay_before_data_reset &&
+>  	    (mask & SDHCI_RESET_DATA) &&
+>  	    (host->flags & SDHCI_REQ_USE_DMA))
+>  		mdelay(5);
+>  
+> +	/* Save bus-width for eSDHC whose vendor version is 2.2
+> +	 * or lower for data reset.
+> +	 */
+> +	if ((mask & SDHCI_RESET_DATA) &&
+> +	    (esdhc->vendor_ver <= VENDOR_V_22)) {
+> +		val = sdhci_readl(host, ESDHC_PROCTL);
+> +		bus_width = val & ESDHC_CTRL_BUSWIDTH_MASK;
+> +	}
+> +
+>  	sdhci_reset(host, mask);
+>  
+> -	sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
+> -	sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
+> +	/* Restore bus-width setting and interrupt registers for eSDHC
+> +	 * whose vendor version is 2.2 or lower for data reset.
+> +	 */
+> +	if ((mask & SDHCI_RESET_DATA) &&
+> +	    (esdhc->vendor_ver <= VENDOR_V_22)) {
+> +		val = sdhci_readl(host, ESDHC_PROCTL);
+> +		val &= ~ESDHC_CTRL_BUSWIDTH_MASK;
+> +		val |= bus_width;
+> +		sdhci_writel(host, val, ESDHC_PROCTL);
+> +
+> +		sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
+> +		sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
+> +	}
+>  
+> -	if (mask & SDHCI_RESET_ALL) {
+> +	/* Some bits have to be cleaned manually for eSDHC whose spec
+> +	 * version is higher than 3.0 for all reset.
+> +	 */
+> +	if ((mask & SDHCI_RESET_ALL) &&
+> +	    (esdhc->spec_ver >= SDHCI_SPEC_300)) {
+>  		val = sdhci_readl(host, ESDHC_TBCTL);
+>  		val &= ~ESDHC_TB_EN;
+>  		sdhci_writel(host, val, ESDHC_TBCTL);
+>  
+> +		/* Initialize eSDHC_DLLCFG1[DLL_PD_PULSE_STRETCH_SEL] to
+> +		 * 0 for quirk.
+> +		 */
+>  		if (esdhc->quirk_unreliable_pulse_detection) {
+>  			val = sdhci_readl(host, ESDHC_DLLCFG1);
+>  			val &= ~ESDHC_DLL_PD_PULSE_STRETCH_SEL;
 > 
 
-You are right. We can assign the special_reset flag in the next patch
-using compatible as well. Will drop this patch in next version.
-
-Thanks,
-Faiz
