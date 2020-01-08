@@ -2,84 +2,90 @@ Return-Path: <SRS0=QNIT=25=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+X-Spam-Status: No, score=-2.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8095AC3F68F
-	for <linux-mmc@archiver.kernel.org>; Wed,  8 Jan 2020 09:39:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2457BC33C9E
+	for <linux-mmc@archiver.kernel.org>; Wed,  8 Jan 2020 11:28:52 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 4D7EB2070E
-	for <linux-mmc@archiver.kernel.org>; Wed,  8 Jan 2020 09:39:12 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E8B632070E
+	for <linux-mmc@archiver.kernel.org>; Wed,  8 Jan 2020 11:28:51 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="YCUCtMPU"
+	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="E/y1Xc4d"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726079AbgAHJjL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 8 Jan 2020 04:39:11 -0500
-Received: from us-smtp-2.mimecast.com ([205.139.110.61]:34129 "EHLO
-        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1726098AbgAHJjL (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Jan 2020 04:39:11 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1578476350;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=y5Mnn5wX0vNSW7w6VGP+1iHmn8j5y7sqHokrvAxVOpU=;
-        b=YCUCtMPUIQu9/Xck+1bOfdLpVifgGohimBH7BgUG1Z9NFiDJzN9QG5SLVB+Wpv3gdJuu4f
-        9DzwjYks9fQ1PnO9KrE/XbcsI7tJI5CgGPG6MsC9ARbpIkqcFTD1beUj1nVZVbb2GJm7+j
-        PVoNXYqVqYIfttc+QPYhE0mae5d8wYI=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-282-f7WKcBJON-mbUAoqU535JA-1; Wed, 08 Jan 2020 04:39:06 -0500
-X-MC-Unique: f7WKcBJON-mbUAoqU535JA-1
-Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id ACE75184B1E3;
-        Wed,  8 Jan 2020 09:39:05 +0000 (UTC)
-Received: from shalem.localdomain.com (ovpn-117-178.ams2.redhat.com [10.36.117.178])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 959395D9E1;
-        Wed,  8 Jan 2020 09:39:04 +0000 (UTC)
-From:   Hans de Goede <hdegoede@redhat.com>
-To:     Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Hans de Goede <hdegoede@redhat.com>,
-        "russianneuromancer @ ya . ru" <russianneuromancer@ya.ru>,
-        linux-mmc@vger.kernel.org
-Subject: [PATCH 0/2] mmc: sdhci-acpi: Introduce device specific quirks, fix issues on 2 device models
-Date:   Wed,  8 Jan 2020 10:39:01 +0100
-Message-Id: <20200108093903.57620-1-hdegoede@redhat.com>
+        id S1726276AbgAHL2v (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 8 Jan 2020 06:28:51 -0500
+Received: from fllv0015.ext.ti.com ([198.47.19.141]:60162 "EHLO
+        fllv0015.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726252AbgAHL2v (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Jan 2020 06:28:51 -0500
+Received: from lelv0265.itg.ti.com ([10.180.67.224])
+        by fllv0015.ext.ti.com (8.15.2/8.15.2) with ESMTP id 008BSePi107657;
+        Wed, 8 Jan 2020 05:28:40 -0600
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
+        s=ti-com-17Q1; t=1578482920;
+        bh=4VlFsH0x4nyhfaCnO0v3sjcb4oaBGAFeq3JnlX2SVYM=;
+        h=Subject:To:CC:References:From:Date:In-Reply-To;
+        b=E/y1Xc4dBJ6FaL/brdE0+rP3R/FG7dVzVkw9u2sHH2sBnGAYsAlXGlnrVmJI+X01E
+         Isvfmo5V49gbVkhi0vzOZcHPsKOPSdB8bztiOqONtXiPI6bLwaHW7IEyx2lPJDeFqU
+         Smf7yIDQUoEQHa4jTdJJfW+auCjGC6TpMAHYv4uQ=
+Received: from DLEE100.ent.ti.com (dlee100.ent.ti.com [157.170.170.30])
+        by lelv0265.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 008BSebV049301
+        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
+        Wed, 8 Jan 2020 05:28:40 -0600
+Received: from DLEE107.ent.ti.com (157.170.170.37) by DLEE100.ent.ti.com
+ (157.170.170.30) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.1847.3; Wed, 8 Jan
+ 2020 05:28:39 -0600
+Received: from fllv0039.itg.ti.com (10.64.41.19) by DLEE107.ent.ti.com
+ (157.170.170.37) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.1847.3 via
+ Frontend Transport; Wed, 8 Jan 2020 05:28:39 -0600
+Received: from [172.24.190.4] (ileax41-snat.itg.ti.com [10.172.224.153])
+        by fllv0039.itg.ti.com (8.15.2/8.15.2) with ESMTP id 008BSbfv103074;
+        Wed, 8 Jan 2020 05:28:38 -0600
+Subject: Re: [PATCH 0/3] Fix issues with command queuing in arasan controllers
+To:     <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>
+CC:     <ulf.hansson@linaro.org>, <adrian.hunter@intel.com>,
+        <shawn.lin@rock-chips.com>
+References: <20191230092343.30692-1-faiz_abbas@ti.com>
+From:   Faiz Abbas <faiz_abbas@ti.com>
+Message-ID: <837996b2-c69f-1446-fda4-5577e28ba8e1@ti.com>
+Date:   Wed, 8 Jan 2020 17:00:11 +0530
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.2.2
 MIME-Version: 1.0
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.14
-Content-Transfer-Encoding: quoted-printable
+In-Reply-To: <20191230092343.30692-1-faiz_abbas@ti.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Adrian,
+Hi,
 
-I know you have sofar mostly resisted adding device specific (DMI based)
-quirks to the sdhci-acpi.c driver and I agree with you that whenever
-possible, those should be avoided.
+On 30/12/19 2:53 pm, Faiz Abbas wrote:
+> In some Arasan SDHCI controllers, after tuning, the tuning pattern data
+> is leftover in the sdhci buffer. This leads to issues with future data
+> commands, especially when command queuing is enabled. The following
+> patches help fix this issue by resetting data lines after tuning is
+> finished. The first two patches have been tested with TI's am65x and
+> j721e SoCs using the sdhci_am654 driver.
+> 
+> I have a strong suspicion that this is the same issue with
+> the sdhci-of-arasan driver where they are forced to dump data from the
+> buffer before enabling command queuing. I need help from someone with a
+> compatible platform to test this.
+> 
 
-But yesterday I was debugging an issue where using the microSD slot
-causes the LCD panel of a tablet to go black. This turns out to be a
-bug in the DSDT which gets triggered when using 1.8V modes, see the first
-patch for details. In this case I really so no other option then disablin=
-g
-1.8V modes and only doing so only on the affected device model.
+I had some discussions with our hardware team and they say we should be
+asserting both SRC and SRD reset after tuning to start from a clean
+state. Will update the patches to do that in v2.
 
-Another issue which I had on my TODO list of things to fix is the Acer
-SW5-012 version of the Acer Switch 10 models always reporting the microSD
-as being write-protected. Here too I see no other option then a model
-specific quirk, since some BYT devices may use a normal SD slot with
-actual write-protect capabilities and we do not want to disable
-write-protect checking everywhere just because it is broken on one model.
-The workaround for this is the second patch in this series.
-
-Regards,
-
-Hans
-
+Thanks,
+Faiz
