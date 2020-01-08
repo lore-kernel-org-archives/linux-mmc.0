@@ -1,104 +1,215 @@
-Return-Path: <SRS0=8m0a=24=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=QNIT=25=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7749CC33C8C
-	for <linux-mmc@archiver.kernel.org>; Tue,  7 Jan 2020 13:59:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A4B43C3F68F
+	for <linux-mmc@archiver.kernel.org>; Wed,  8 Jan 2020 01:28:49 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 50DDA2072A
-	for <linux-mmc@archiver.kernel.org>; Tue,  7 Jan 2020 13:59:34 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 784212081E
+	for <linux-mmc@archiver.kernel.org>; Wed,  8 Jan 2020 01:28:49 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="d+sdWsKi"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728005AbgAGN7d (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 7 Jan 2020 08:59:33 -0500
-Received: from mga14.intel.com ([192.55.52.115]:14022 "EHLO mga14.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727658AbgAGN7d (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 7 Jan 2020 08:59:33 -0500
-X-Amp-Result: SKIPPED(no attachment in message)
-X-Amp-File-Uploaded: False
-Received: from orsmga003.jf.intel.com ([10.7.209.27])
-  by fmsmga103.fm.intel.com with ESMTP/TLS/DHE-RSA-AES256-GCM-SHA384; 07 Jan 2020 05:59:33 -0800
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.69,406,1571727600"; 
-   d="scan'208";a="223185429"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.167]) ([10.237.72.167])
-  by orsmga003.jf.intel.com with ESMTP; 07 Jan 2020 05:59:31 -0800
-Subject: Re: [PATCH v1] mmc: sdhci: Increase sdhci_send_command timeout to
- 100ms
-To:     Peter Seiderer <ps.report@gmx.net>, linux-mmc@vger.kernel.org
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Philipp Zabel <p.zabel@pengutronix.de>
-References: <20191227151442.9240-1-ps.report@gmx.net>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <605838f7-be0f-5a78-15ef-33a5f425b241@intel.com>
-Date:   Tue, 7 Jan 2020 15:58:41 +0200
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.2.2
+        id S1725601AbgAHB2s (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 7 Jan 2020 20:28:48 -0500
+Received: from mail-qk1-f194.google.com ([209.85.222.194]:38208 "EHLO
+        mail-qk1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726462AbgAHB2s (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Jan 2020 20:28:48 -0500
+Received: by mail-qk1-f194.google.com with SMTP id k6so1280103qki.5;
+        Tue, 07 Jan 2020 17:28:47 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=nAwqjhRGqFXJzIg3lBkXFVNjftwBX4mw//gKj6RNvIE=;
+        b=d+sdWsKioaDMQfVwvM4js/xplepHEPSIMPFJ8ZWXTJm/gZ2PMbiB6qh5gEtr3KSxxI
+         JMfxaLVS99Z1VmXqQYdK10yd2HhLYleaPDcgmfsoboWnbLU7oiP+WyX3dqd6o4yWJjsY
+         nuEfqmH8gboGbQrabUwXIQo0426ODhG6I6IHOhlCLIqV7QuBJuUxZ7dVAsiiTEv9j7Qk
+         Sy1OzwU8gSKWDL/bBGX4PwKGhG8Kegnny4cb0Qqdxh816ER1fIEiFzra5Ypk2Pp3ZBzA
+         yDrgklTF+qMdsKdz2p+usEVM6i02Xt0rHvLos37LJcn/IlwhNoel0LRYPLJ4cpeKud6l
+         bFIA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=nAwqjhRGqFXJzIg3lBkXFVNjftwBX4mw//gKj6RNvIE=;
+        b=eSOXwFrB477NrzbPW5KCdGADxb8iV+qTRgQDEZUbIuBURTTbqYf0ClsnWup0l4pS7R
+         8uPUjFM7i4sVAW5WNUYMXwEQkgsbFmy+TU7vXHEVoBJKC1xLIoQoRgMkqty5dJgZtX4e
+         amndUl5+fzXx0kQ6NJyC3rE25o5OeKg+W9FF/TXXy5nXU8iR4xq+bepgZACh6Y1ENB5i
+         2HgffzaAbbnxrEv+6GxEMaUr8dryqqZRxhq9b7dek4iWsEyuFtsdTkIl728z51w4Fuxp
+         J3r2OVBogETv7dfJIQuXpY55kRcRFxwoKDPJigMlJtlTkh6NMfdfD+M9DVP5m+dZrhZQ
+         6TTA==
+X-Gm-Message-State: APjAAAWb68DJnaX2vsaDbKqFxZYX7kMIBhzo00hhwzNNYL9chJdhF+Qx
+        6TYqtJsOJLF3QdluVUjCIU9EnHwzrtdNpY2h7V8=
+X-Google-Smtp-Source: APXvYqzGDMvemNyQyj1kGMDw7M31RlDX86odL/bjLg+raDWg1MqtYcdX/WS4zMfQmnseQzZl7HebbITU8dG4JjiwmQo=
+X-Received: by 2002:a37:b601:: with SMTP id g1mr2158429qkf.114.1578446926868;
+ Tue, 07 Jan 2020 17:28:46 -0800 (PST)
 MIME-Version: 1.0
-In-Reply-To: <20191227151442.9240-1-ps.report@gmx.net>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+References: <20200106110133.13791-1-faiz_abbas@ti.com> <20200106110133.13791-4-faiz_abbas@ti.com>
+In-Reply-To: <20200106110133.13791-4-faiz_abbas@ti.com>
+From:   Baolin Wang <baolin.wang7@gmail.com>
+Date:   Wed, 8 Jan 2020 09:28:35 +0800
+Message-ID: <CADBw62onwxPmn=HmdL05hz+FOUe9crRPDO+CB5hDmaVeYMSTsQ@mail.gmail.com>
+Subject: Re: [PATCH v4 03/11] mmc: sdhci: add support for using external DMA devices
+To:     Faiz Abbas <faiz_abbas@ti.com>
+Cc:     linux-omap@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>,
+        devicetree@vger.kernel.org, linux-mmc <linux-mmc@vger.kernel.org>,
+        kishon@ti.com, Adrian Hunter <adrian.hunter@intel.com>,
+        mark.rutland@arm.com, robh+dt@kernel.org,
+        Ulf Hansson <ulf.hansson@linaro.org>, tony@atomide.com
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 27/12/19 5:14 pm, Peter Seiderer wrote:
-> Fixes:
-> 	$ mmc bootpart enable 1 1 /dev/mmcblk1
-> [ 2339.324062] mmc1: Controller never released inhibit bit(s).
-> [ 2339.329808] mmc1: sdhci: ============ SDHCI REGISTER DUMP ===========
-> [ 2339.336339] mmc1: sdhci: Sys addr:  0x11044000 | Version:  0x00000002
-> [ 2339.342933] mmc1: sdhci: Blk size:  0x00000200 | Blk cnt:  0x00000001
-> [ 2339.349460] mmc1: sdhci: Argument:  0x03b34801 | Trn mode: 0x00000013
-> [ 2339.356048] mmc1: sdhci: Present:   0x01fd8008 | Host ctl: 0x00000031
-> [ 2339.362637] mmc1: sdhci: Power:     0x00000002 | Blk gap:  0x00000080
-> [ 2339.369230] mmc1: sdhci: Wake-up:   0x00000008 | Clock:    0x0000001f
-> [ 2339.375943] mmc1: sdhci: Timeout:   0x0000000f | Int stat: 0x00000000
-> [ 2339.382542] mmc1: sdhci: Int enab:  0x117f100b | Sig enab: 0x117f100b
-> [ 2339.389257] mmc1: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000003
-> [ 2339.395856] mmc1: sdhci: Caps:      0x07eb0000 | Caps_1:   0x0000a000
-> [ 2339.402577] mmc1: sdhci: Cmd:       0x0000061b | Max curr: 0x00ffffff
-> [ 2339.409291] mmc1: sdhci: Resp[0]:   0x00000800 | Resp[1]:  0xffffffff
-> [ 2339.415889] mmc1: sdhci: Resp[2]:   0x328f5903 | Resp[3]:  0x00000900
-> [ 2339.422602] mmc1: sdhci: Host ctl2: 0x00000008
-> [ 2339.427203] mmc1: sdhci: ADMA Err:  0x00000000 | ADMA Ptr: 0x3fc79208
-> [ 2339.433913] mmc1: sdhci: ============================================
-> 
-> Suggested-by: Philipp Zabel <p.zabel@pengutronix.de>
-> Signed-off-by: Peter Seiderer <ps.report@gmx.net>
+Hi Faiz,
+
+On Mon, Jan 6, 2020 at 7:01 PM Faiz Abbas <faiz_abbas@ti.com> wrote:
+>
+> From: Chunyan Zhang <zhang.chunyan@linaro.org>
+>
+> Some standard SD host controllers can support both external dma
+> controllers as well as ADMA/SDMA in which the SD host controller
+> acts as DMA master. TI's omap controller is the case as an example.
+>
+> Currently the generic SDHCI code supports ADMA/SDMA integrated in
+> the host controller but does not have any support for external DMA
+> controllers implemented using dmaengine, meaning that custom code is
+> needed for any systems that use an external DMA controller with SDHCI.
+>
+> Fixes by Faiz Abbas <faiz_abbas@ti.com>:
+> 1. Map scatterlists before dmaengine_prep_slave_sg()
+> 2. Use dma_async() functions inside of the send_command() path and call
+> terminate_sync() in non-atomic context in case of an error.
+>
+> Signed-off-by: Chunyan Zhang <zhang.chunyan@linaro.org>
+> Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
 > ---
->  drivers/mmc/host/sdhci.c | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
-> 
+>  drivers/mmc/host/Kconfig |   3 +
+>  drivers/mmc/host/sdhci.c | 228 ++++++++++++++++++++++++++++++++++++++-
+>  drivers/mmc/host/sdhci.h |   8 ++
+>  3 files changed, 237 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index d06b2dfe3c95..adef971582a1 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -1040,3 +1040,6 @@ config MMC_OWL
+>         help
+>           This selects support for the SD/MMC Host Controller on
+>           Actions Semi Owl SoCs.
+> +
+> +config MMC_SDHCI_EXTERNAL_DMA
+> +       bool
 > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 275102c0a1bf..011b3d322826 100644
+> index f6999054abcf..8cc78c76bc3d 100644
 > --- a/drivers/mmc/host/sdhci.c
 > +++ b/drivers/mmc/host/sdhci.c
-> @@ -1364,8 +1364,8 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
->  	    cmd->opcode == MMC_STOP_TRANSMISSION)
->  		cmd->flags |= MMC_RSP_BUSY;
->  
-> -	/* Wait max 10 ms */
-> -	timeout = 10;
-> +	/* Wait max 100 ms */
-> +	timeout = 100;
+> @@ -10,6 +10,7 @@
+>   */
+>
+>  #include <linux/delay.h>
+> +#include <linux/dmaengine.h>
+>  #include <linux/ktime.h>
+>  #include <linux/highmem.h>
+>  #include <linux/io.h>
+> @@ -1157,6 +1158,188 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
+>         sdhci_set_block_info(host, data);
+>  }
+>
+> +#if IS_ENABLED(CONFIG_MMC_SDHCI_EXTERNAL_DMA)
+> +
+> +static int sdhci_external_dma_init(struct sdhci_host *host)
+> +{
+> +       int ret = 0;
+> +       struct mmc_host *mmc = host->mmc;
+> +
+> +       host->tx_chan = dma_request_chan(mmc->parent, "tx");
+> +       if (IS_ERR(host->tx_chan)) {
+> +               ret = PTR_ERR(host->tx_chan);
+> +               if (ret != -EPROBE_DEFER)
+> +                       pr_warn("Failed to request TX DMA channel.\n");
+> +               host->tx_chan = NULL;
+> +               return ret;
+> +       }
+> +
+> +       host->rx_chan = dma_request_chan(mmc->parent, "rx");
+> +       if (IS_ERR(host->rx_chan)) {
+> +               if (host->tx_chan) {
+> +                       dma_release_channel(host->tx_chan);
+> +                       host->tx_chan = NULL;
+> +               }
+> +
+> +               ret = PTR_ERR(host->rx_chan);
+> +               if (ret != -EPROBE_DEFER)
+> +                       pr_warn("Failed to request RX DMA channel.\n");
+> +               host->rx_chan = NULL;
+> +       }
+> +
+> +       return ret;
+> +}
+> +
+> +static struct dma_chan *sdhci_external_dma_channel(struct sdhci_host *host,
+> +                                                  struct mmc_data *data)
+> +{
+> +       return data->flags & MMC_DATA_WRITE ? host->tx_chan : host->rx_chan;
+> +}
+> +
+> +static int sdhci_external_dma_setup(struct sdhci_host *host,
+> +                                   struct mmc_command *cmd)
+> +{
+> +       int ret, i;
+> +       struct dma_async_tx_descriptor *desc;
+> +       struct mmc_data *data = cmd->data;
+> +       struct dma_chan *chan;
+> +       struct dma_slave_config cfg;
+> +       dma_cookie_t cookie;
+> +       int sg_cnt;
+> +
+> +       if (!host->mapbase)
+> +               return -EINVAL;
+> +
+> +       cfg.src_addr = host->mapbase + SDHCI_BUFFER;
+> +       cfg.dst_addr = host->mapbase + SDHCI_BUFFER;
+> +       cfg.src_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES;
+> +       cfg.dst_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES;
+> +       cfg.src_maxburst = data->blksz / 4;
+> +       cfg.dst_maxburst = data->blksz / 4;
+> +
+> +       /* Sanity check: all the SG entries must be aligned by block size. */
+> +       for (i = 0; i < data->sg_len; i++) {
+> +               if ((data->sg + i)->length % data->blksz)
+> +                       return -EINVAL;
+> +       }
+> +
+> +       chan = sdhci_external_dma_channel(host, data);
+> +
+> +       ret = dmaengine_slave_config(chan, &cfg);
+> +       if (ret)
+> +               return ret;
+> +
+> +       sg_cnt = sdhci_pre_dma_transfer(host, data, COOKIE_MAPPED);
+> +       if (sg_cnt <= 0)
+> +               return -EINVAL;
+> +
+> +       desc = dmaengine_prep_slave_sg(chan, data->sg, data->sg_len,
+> +                                      mmc_get_dma_dir(data),
+> +                                      DMA_PREP_INTERRUPT | DMA_CTRL_ACK);
+> +       if (!desc)
+> +               return -EINVAL;
+> +
+> +       desc->callback = NULL;
+> +       desc->callback_param = NULL;
+> +
+> +       cookie = dmaengine_submit(desc);
+> +       if (cookie < 0)
 
-The inhibits bits should not be set, so I am not sure if this is just
-papering over the real issue.  Did mmc (utils) return an error?  Was the
-eMMC useable after the error?  Any chance of getting a register dump without
-the very long console delays?  What device and host controller was it?  What
-kernel version?
-
->  
->  	mask = SDHCI_CMD_INHIBIT;
->  	if (sdhci_data_line_cmd(cmd))
-> 
-
+We usually use the DMA engine standard API: dma_submit_error() to
+validate the cookie.
