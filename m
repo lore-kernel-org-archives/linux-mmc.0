@@ -8,61 +8,61 @@ X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4516FC33CA2
-	for <linux-mmc@archiver.kernel.org>; Thu,  9 Jan 2020 09:14:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BD5EFC32771
+	for <linux-mmc@archiver.kernel.org>; Thu,  9 Jan 2020 09:14:43 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 1AF542072A
-	for <linux-mmc@archiver.kernel.org>; Thu,  9 Jan 2020 09:14:31 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9092820673
+	for <linux-mmc@archiver.kernel.org>; Thu,  9 Jan 2020 09:14:43 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Nq8THdEQ"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="OpQlpHWD"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729093AbgAIJOa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 9 Jan 2020 04:14:30 -0500
-Received: from mail-pg1-f196.google.com ([209.85.215.196]:38910 "EHLO
-        mail-pg1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728946AbgAIJOa (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Jan 2020 04:14:30 -0500
-Received: by mail-pg1-f196.google.com with SMTP id a33so2934090pgm.5;
-        Thu, 09 Jan 2020 01:14:29 -0800 (PST)
+        id S1729190AbgAIJOn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 9 Jan 2020 04:14:43 -0500
+Received: from mail-pf1-f195.google.com ([209.85.210.195]:35077 "EHLO
+        mail-pf1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728946AbgAIJOm (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Jan 2020 04:14:42 -0500
+Received: by mail-pf1-f195.google.com with SMTP id i23so3094906pfo.2;
+        Thu, 09 Jan 2020 01:14:42 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=0VofrN3+q3uvKqbzjcSavhsqfs4FtK6Er0QtEwgh9UA=;
-        b=Nq8THdEQ2t2y/zxif0NygOIQ5hZRzIemZdbBdXTh0KJlvMtswrJgQMUgDHnxRSI+F6
-         C8wV+hTNT3JfBzIZbukcChoPbMgFfo8cXAIDwu1ssjfdpo9YzxsXFs97HtOt3cmVTBbn
-         ArKJ/eZedzyuyMuDpjcAjg1/RppaQhJpPF7l+2clNImr7Riec8Xu3I6zMIxa+sPOjQh8
-         CB+tS6JRCB0oM2OrorNCwk15+q85SURkYR76KGYgtx0bzwrMapzA6a+F48KGkA7Lmy7x
-         0rej5pqPwenQsKWHaywpcYYe1b0cXb5s0g5XUu11RALnb8/nQ9g0tGIwE1qGUp+2lpbm
-         xKXQ==
+        bh=8Rg+d621Q/DEet6hos9ceAjmVBZFRndyzgA44fX7sKI=;
+        b=OpQlpHWDrQ3NowQTMT/QoXrY3uIcc7RTD1EZW8f+XFj8/fmX2zLuOzcNqFRwiISeXv
+         HC0WoVXt8Y3Xa/j7bKs8253Y9BAk9TjRb9U4j28DA5XIZcrL8i3WFQH6wu5YxSyMXyr+
+         c7FgYVZWTxtxZlzt7mCYoP5k6JObo68X1T+gIXDiHLYs/4Shc5QfF1DW1MVRHekqP//d
+         lMlDssGiLYv9bZOOFcaGw4aulmS0Pmc/PDLUUj5rGb+BelLR8/uCXvnp+Xq3ZxQ0V8Lg
+         5LRbWCzZaxR0K3IVXpIy1ZjEDzbQwF3sew3rUQzbiZqIiYUTXUbw3e9DYTBSKJgNFZNM
+         +M5Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=0VofrN3+q3uvKqbzjcSavhsqfs4FtK6Er0QtEwgh9UA=;
-        b=oEv9/gYMtc85jk+FsC8XnfSAK0WcGTjLBn2md+RVB/cTh2+agZn6keeb7tKnHKxJOk
-         +Lb6qfg2MXTjAySSasleC1uGDikuoxE4Geixr2CwQ/UnUcWV06Bj6IPhIYuUDGGpcXzZ
-         /Y0b1HgLziPxvbpnkkRHTeKqzfKmqHNTCtSjhzkT5wnmS5rXbUx1HuzZRR2qSNN4hf2+
-         IWp4VKdsMJpR+obaIrVK2oIW/+xJvp5uMZo0le2LJhVzW3NBUeNUk9lUpOMW7BMvpNOm
-         QZPqmHiDEd39KpQ4GTDs6xxAsmeE89BmsZ4JxJQcqyUIUvwLdx2udDA8lUNFSYz5KTpY
-         dNNA==
-X-Gm-Message-State: APjAAAU1F7hiIBL99XTMPppLxwZxZgLiaXdbj/dKFJ7713otZv8w/cQ1
-        1TMV9Enk4lxGcqGTWLwewEs=
-X-Google-Smtp-Source: APXvYqzc+xlyNpOtJx1Wu2SNalzXL3OqzSmyJIjvM/t/GObLS12JEpzMRuQQgpr1kOiD3+8ZiP46NA==
-X-Received: by 2002:a62:1857:: with SMTP id 84mr10156389pfy.257.1578561269445;
-        Thu, 09 Jan 2020 01:14:29 -0800 (PST)
+        bh=8Rg+d621Q/DEet6hos9ceAjmVBZFRndyzgA44fX7sKI=;
+        b=qWUwHLDSmc6gL0eIKRzNIGVq/p35a4Qbh5GGgvnUuEaTazjupKjQniNQuZGU/JFu10
+         sfFHPkAIlUV1Wh/PARhBfJhrKF2DAZKb438XzuqaAU1N/0KdjDCMiBNSorZ95V8bAard
+         2sjPr5J9P8a0n5Zo7Od40No1+vkDLidwRBS17YRIWiY3CocfpdIJ5mhAjnNQPrjyOxpP
+         hQinqZ8Anbmc+bQCeVE6L6BFOcuz6NTxZgdxucAIZ9OyQVmC5tqIf8Rk6C7izH427uZh
+         j3qDex0O++y2Ux8RhI/DZ04XqroYw2sgaQ6h0Va6FfsxlI1zbwT2YugKZ9MQvW3mm6sS
+         q8+Q==
+X-Gm-Message-State: APjAAAWfLG0bzr3vqOTAbA3t1jC6pKK93GHQvIED4zFhTcj/yMG5cYIa
+        gTxL4CsaygES31M1RNr5BdxhNIvh
+X-Google-Smtp-Source: APXvYqy2Atu64NbtrIZqmgOCvkwvwHSpVWIJOUl7Xhy5FKo6VJyzzLJv890Y3JmaOeZ3Y096SJbP6g==
+X-Received: by 2002:a62:78c1:: with SMTP id t184mr9908265pfc.222.1578561282121;
+        Thu, 09 Jan 2020 01:14:42 -0800 (PST)
 Received: from gli-arch.genesyslogic.com.tw (60-251-58-169.HINET-IP.hinet.net. [60.251.58.169])
-        by smtp.gmail.com with ESMTPSA id l21sm6978286pff.100.2020.01.09.01.14.27
+        by smtp.gmail.com with ESMTPSA id x65sm7380180pfb.171.2020.01.09.01.14.40
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 09 Jan 2020 01:14:28 -0800 (PST)
+        Thu, 09 Jan 2020 01:14:41 -0800 (PST)
 From:   Ben Chuang <benchuanggli@gmail.com>
 To:     adrian.hunter@intel.com, ulf.hansson@linaro.org
 Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
         greg.tu@genesyslogic.com.tw, ben.chuang@genesyslogic.com.tw,
         Ben Chuang <benchuanggli@gmail.com>
-Subject: [RFC PATCH v2 4/6] mmc: uhs2: Introduce a uhs2_post_attach_sd function
-Date:   Thu,  9 Jan 2020 17:14:53 +0800
-Message-Id: <974a2a211fa97a885ffbdedbb8d596cd4cb57e80.1578560282.git.benchuanggli@gmail.com>
+Subject: [RFC PATCH v2 5/6] mmc: sdhci-uhs2: Introduce a uhs2_pre_detect_init function
+Date:   Thu,  9 Jan 2020 17:15:05 +0800
+Message-Id: <cbbfc14fe23c9cd2541c5307f6a1356332e6bc35.1578560282.git.benchuanggli@gmail.com>
 X-Mailer: git-send-email 2.24.1
 In-Reply-To: <cover.1578560282.git.benchuanggli@gmail.com>
 References: <cover.1578560282.git.benchuanggli@gmail.com>
@@ -75,85 +75,40 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Ben Chuang <ben.chuang@genesyslogic.com.tw>
 
-Introduce a uhs2_post_attach_sd function after attach_sd on
-UHS-II mode.
+Introduce a uhs2_pre_detect_init function before detect uhs2 interface.
 
 Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
 ---
- drivers/mmc/core/uhs2.c       | 5 ++++-
- drivers/mmc/host/sdhci-core.c | 9 +++++++++
+ drivers/mmc/host/sdhci-uhs2.c | 3 +++
  drivers/mmc/host/sdhci.h      | 1 +
- include/linux/mmc/host.h      | 1 +
- 4 files changed, 15 insertions(+), 1 deletion(-)
+ 2 files changed, 4 insertions(+)
 
-diff --git a/drivers/mmc/core/uhs2.c b/drivers/mmc/core/uhs2.c
-index 43ea155ccc59..99aeeccd88e5 100644
---- a/drivers/mmc/core/uhs2.c
-+++ b/drivers/mmc/core/uhs2.c
-@@ -935,8 +935,11 @@ int mmc_uhs2_try_frequency(struct mmc_host *host, unsigned int freq)
- 	 */
- 	err = mmc_attach_sd(host, true);
+diff --git a/drivers/mmc/host/sdhci-uhs2.c b/drivers/mmc/host/sdhci-uhs2.c
+index e9c42894185a..9f53b7b938b9 100644
+--- a/drivers/mmc/host/sdhci-uhs2.c
++++ b/drivers/mmc/host/sdhci-uhs2.c
+@@ -506,6 +506,9 @@ int sdhci_uhs2_do_detect_init(struct sdhci_host *host)
+ 	DBG("%s: begin UHS2 init.\n", __func__);
+ 	spin_lock_irqsave(&host->lock, flags);
  
--	if (!err)
-+	if (!err) {
-+		if (host->ops->uhs2_post_attach_sd)
-+			host->ops->uhs2_post_attach_sd(host);
- 		return 0;
-+	}
- 
- init_fail:
- 	mmc_power_off(host);
-diff --git a/drivers/mmc/host/sdhci-core.c b/drivers/mmc/host/sdhci-core.c
-index 82184684f963..d7b2535a847a 100644
---- a/drivers/mmc/host/sdhci-core.c
-+++ b/drivers/mmc/host/sdhci-core.c
-@@ -2778,6 +2778,14 @@ void sdhci_uhs2_enable_clk(struct mmc_host *mmc)
- }
- EXPORT_SYMBOL_GPL(sdhci_uhs2_enable_clk);
- 
-+static void sdhci_uhs2_post_attach_sd(struct mmc_host *mmc)
-+{
-+	struct sdhci_host *host = mmc_priv(mmc);
++	if (host->ops && host->ops->uhs2_pre_detect_init)
++		host->ops->uhs2_pre_detect_init(host);
 +
-+	if (host->ops && host->ops->uhs2_post_attach_sd)
-+		host->ops->uhs2_post_attach_sd(host);
-+}
-+
- static const struct mmc_host_ops sdhci_ops = {
- 	.request	= sdhci_request,
- 	.post_req	= sdhci_post_req,
-@@ -2797,6 +2805,7 @@ static const struct mmc_host_ops sdhci_ops = {
- 	.uhs2_set_reg		= sdhci_uhs2_set_reg,
- 	.uhs2_disable_clk	= sdhci_uhs2_disable_clk,
- 	.uhs2_enable_clk	= sdhci_uhs2_enable_clk,
-+	.uhs2_post_attach_sd    = sdhci_uhs2_post_attach_sd,
- };
- 
- /*****************************************************************************\
+ 	if (sdhci_uhs2_interface_detect(host)) {
+ 		pr_warn("%s: cannot detect UHS2 interface.\n",
+ 				mmc_hostname(host->mmc));
 diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 2f7732f4bb75..7f779ac81931 100644
+index 7f779ac81931..08ee4c805474 100644
 --- a/drivers/mmc/host/sdhci.h
 +++ b/drivers/mmc/host/sdhci.h
 @@ -906,6 +906,7 @@ struct sdhci_ops {
  	void	(*voltage_switch)(struct sdhci_host *host);
  	void	(*adma_write_desc)(struct sdhci_host *host, void **desc,
  				   dma_addr_t addr, int len, unsigned int cmd);
-+	void    (*uhs2_post_attach_sd)(struct sdhci_host *host);
++	void    (*uhs2_pre_detect_init)(struct sdhci_host *host);
+ 	void    (*uhs2_post_attach_sd)(struct sdhci_host *host);
  };
  
- #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 3d6a7c9b534f..ed4ebe6bf68a 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -177,6 +177,7 @@ struct mmc_host_ops {
- 	int	(*uhs2_set_reg)(struct mmc_host *host, enum uhs2_act act);
- 	void    (*uhs2_disable_clk)(struct mmc_host *host);
- 	void    (*uhs2_enable_clk)(struct mmc_host *host);
-+	void    (*uhs2_post_attach_sd)(struct mmc_host *host);
- };
- 
- struct mmc_cqe_ops {
 -- 
 2.24.1
 
