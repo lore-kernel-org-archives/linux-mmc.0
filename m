@@ -2,319 +2,256 @@ Return-Path: <SRS0=mkSb=27=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.1 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F325CC33CA3
-	for <linux-mmc@archiver.kernel.org>; Fri, 10 Jan 2020 08:56:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7BA7FC33CA2
+	for <linux-mmc@archiver.kernel.org>; Fri, 10 Jan 2020 13:15:26 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id C09A721569
-	for <linux-mmc@archiver.kernel.org>; Fri, 10 Jan 2020 08:56:15 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 40CA32072E
+	for <linux-mmc@archiver.kernel.org>; Fri, 10 Jan 2020 13:15:26 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="key not found in DNS" (0-bit key) header.d=mg.codeaurora.org header.i=@mg.codeaurora.org header.b="IaWXr6Df"
+	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="ReAhOauY"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726801AbgAJI4P (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 10 Jan 2020 03:56:15 -0500
-Received: from mail26.static.mailgun.info ([104.130.122.26]:13336 "EHLO
-        mail26.static.mailgun.info" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726877AbgAJI4O (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Jan 2020 03:56:14 -0500
-DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
- s=smtp; t=1578646573; h=Content-Transfer-Encoding: Content-Type:
- In-Reply-To: MIME-Version: Date: Message-ID: References: Cc: To: From:
- Subject: Sender; bh=FmEMMMyiraqEJ+40hleNjIGpxBBbvnOEMyk9GHrCy7k=; b=IaWXr6DfdV/6W4kHXtsnCumrWuSxVbWpslJkQ5F1oCr6nW/gWDazD+1+bpHN5kRDQiFMXYrj
- TA8TYjH2C8K83OIMO8f9IPxXuFbjdR01cBzbr/deDzJ1XQee/XpSsuTxvyXwKnACaAT3TbMU
- 3k61TOx28YLK4dJdLhNIxvtdfBU=
-X-Mailgun-Sending-Ip: 104.130.122.26
-X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
-Received: from smtp.codeaurora.org (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171])
- by mxa.mailgun.org with ESMTP id 5e183c2a.7f82c5f1b928-smtp-out-n02;
- Fri, 10 Jan 2020 08:56:10 -0000 (UTC)
-Received: by smtp.codeaurora.org (Postfix, from userid 1001)
-        id 92E2EC433CB; Fri, 10 Jan 2020 08:56:10 +0000 (UTC)
-Received: from [10.206.25.140] (blr-c-bdr-fw-01_GlobalNAT_AllZones-Outside.qualcomm.com [103.229.19.19])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        (Authenticated sender: vbadigan)
-        by smtp.codeaurora.org (Postfix) with ESMTPSA id 34073C43383;
-        Fri, 10 Jan 2020 08:56:05 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.3.2 smtp.codeaurora.org 34073C43383
-Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
-Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=none smtp.mailfrom=vbadigan@codeaurora.org
-Subject: Re: [PATCH V1] mmc: sdhci-msm: Add CQHCI support for sdhci-msm
-From:   Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
-To:     Adrian Hunter <adrian.hunter@intel.com>, ulf.hansson@linaro.org,
-        agross@kernel.org
-Cc:     asutoshd@codeaurora.org, stummala@codeaurora.org,
-        sayalil@codeaurora.org, cang@codeaurora.org,
-        rampraka@codeaurora.org, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        Ritesh Harjani <riteshh@codeaurora.org>
-References: <1576586233-28443-1-git-send-email-vbadigan@codeaurora.org>
- <1c6a6749-68c3-ee16-2c1b-e7534dee4791@intel.com>
- <9720d5fe-1bb0-8a88-1373-935a9abdb9e0@codeaurora.org>
-Message-ID: <162d9ee1-2acf-f9ca-15e6-e8ab00c5c19e@codeaurora.org>
-Date:   Fri, 10 Jan 2020 14:26:03 +0530
-User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:68.0) Gecko/20100101
- Thunderbird/68.3.1
+        id S1727458AbgAJNPZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 10 Jan 2020 08:15:25 -0500
+Received: from fllv0015.ext.ti.com ([198.47.19.141]:37050 "EHLO
+        fllv0015.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727390AbgAJNPZ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Jan 2020 08:15:25 -0500
+Received: from fllv0034.itg.ti.com ([10.64.40.246])
+        by fllv0015.ext.ti.com (8.15.2/8.15.2) with ESMTP id 00ADFGFC000541;
+        Fri, 10 Jan 2020 07:15:16 -0600
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
+        s=ti-com-17Q1; t=1578662116;
+        bh=bc9/W7gwldHtN0LmN5RfpX4A5PrFRuNLHbUFLB2NFVQ=;
+        h=Subject:To:CC:References:From:Date:In-Reply-To;
+        b=ReAhOauYp4dad564kb5Kq0M53EIOkXO8BJ04ecVToP3M0VDCgVpzayHL2PhyaNH91
+         n5PYrz1FLG/h4PGwYeeogGvyI6lDXC6O2lyoMDKx32tJhmyXdCHXb/IxoSiGPbNzm6
+         OHPXRbAg2ZEfBcJ+E5s2Xt486TVA9rN0gWDzb9v8=
+Received: from DFLE105.ent.ti.com (dfle105.ent.ti.com [10.64.6.26])
+        by fllv0034.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 00ADFGm9080191
+        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
+        Fri, 10 Jan 2020 07:15:16 -0600
+Received: from DFLE101.ent.ti.com (10.64.6.22) by DFLE105.ent.ti.com
+ (10.64.6.26) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.1847.3; Fri, 10
+ Jan 2020 07:15:15 -0600
+Received: from lelv0327.itg.ti.com (10.180.67.183) by DFLE101.ent.ti.com
+ (10.64.6.22) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.1847.3 via
+ Frontend Transport; Fri, 10 Jan 2020 07:15:15 -0600
+Received: from [172.24.190.4] (ileax41-snat.itg.ti.com [10.172.224.153])
+        by lelv0327.itg.ti.com (8.15.2/8.15.2) with ESMTP id 00ADFBFL036726;
+        Fri, 10 Jan 2020 07:15:12 -0600
+Subject: Re: [PATCH v4 03/11] mmc: sdhci: add support for using external DMA
+ devices
+To:     Peter Ujfalusi <peter.ujfalusi@ti.com>,
+        Baolin Wang <baolin.wang7@gmail.com>
+CC:     <linux-omap@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>,
+        <devicetree@vger.kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>, <kishon@ti.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        <mark.rutland@arm.com>, <robh+dt@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>, <tony@atomide.com>
+References: <20200106110133.13791-1-faiz_abbas@ti.com>
+ <20200106110133.13791-4-faiz_abbas@ti.com>
+ <CADBw62onwxPmn=HmdL05hz+FOUe9crRPDO+CB5hDmaVeYMSTsQ@mail.gmail.com>
+ <48c10fdf-f2c7-a719-2f64-0f87895f3704@ti.com>
+ <CADBw62rK1a9K7cxf5ti7YkFsJJ5tJ+8yjuF2aYR3PnZnoK-r2g@mail.gmail.com>
+ <f599735e-83f7-5afc-ebe6-168f0157d2c3@ti.com>
+From:   Faiz Abbas <faiz_abbas@ti.com>
+Message-ID: <e80a051c-0095-dac0-2e2c-d994ffbf536c@ti.com>
+Date:   Fri, 10 Jan 2020 18:46:43 +0530
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.2.2
 MIME-Version: 1.0
-In-Reply-To: <9720d5fe-1bb0-8a88-1373-935a9abdb9e0@codeaurora.org>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
+In-Reply-To: <f599735e-83f7-5afc-ebe6-168f0157d2c3@ti.com>
+Content-Type: text/plain; charset="utf-8"
 Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Hi Peter,
 
-On 1/2/2020 5:00 PM, Veerabhadrarao Badiganti wrote:
->
-> On 12/20/2019 7:29 PM, Adrian Hunter wrote:
->> On 17/12/19 2:37 pm, Veerabhadrarao Badiganti wrote:
->>> From: Ritesh Harjani<riteshh@codeaurora.org>
->>>
->>> This adds CQHCI support for sdhci-msm platforms.
->>>
->>> Signed-off-by: Ritesh Harjani<riteshh@codeaurora.org>
->>> Signed-off-by: Veerabhadrarao Badiganti<vbadigan@codeaurora.org>
->>>
->>> ---
->>> This patch is based on RFC patch
->>> https://lkml.org/lkml/2017/8/30/313
->>>
->>> Changes since RFC:
->>>     - Updated settings so that TDLBA won't get reset when
->>>       CQE is enabled.
->>>     - Removed new compatible string and moved to supports-cqe
->>>       dt flag to identify CQE support.
->>>     - Incorporated review comments.
->>>
->>> Tested on: qcs404, sc7180
->>> ---
->>>   drivers/mmc/host/sdhci-msm.c | 115 
->>> ++++++++++++++++++++++++++++++++++++++++++-
->>>   1 file changed, 114 insertions(+), 1 deletion(-)
->>>
->>> diff --git a/drivers/mmc/host/sdhci-msm.c 
->>> b/drivers/mmc/host/sdhci-msm.c
->>> index 3d0bb5e..a4e3507 100644
->>> --- a/drivers/mmc/host/sdhci-msm.c
->>> +++ b/drivers/mmc/host/sdhci-msm.c
->>> @@ -15,6 +15,7 @@
->>>   #include <linux/regulator/consumer.h>
->>>     #include "sdhci-pltfm.h"
->>> +#include "cqhci.h"
->>>     #define CORE_MCI_VERSION        0x50
->>>   #define CORE_VERSION_MAJOR_SHIFT    28
->>> @@ -122,6 +123,10 @@
->>>   #define msm_host_writel(msm_host, val, host, offset) \
->>>       msm_host->var_ops->msm_writel_relaxed(val, host, offset)
->>>   +/* CQHCI vendor specific registers */
->>> +#define CQHCI_VENDOR_CFG1    0xA00
->>> +#define DISABLE_RST_ON_CMDQ_EN    (0x3 << 13)
->>> +
->>>   struct sdhci_msm_offset {
->>>       u32 core_hc_mode;
->>>       u32 core_mci_data_cnt;
->>> @@ -1567,6 +1572,109 @@ static void sdhci_msm_set_clock(struct 
->>> sdhci_host *host, unsigned int clock)
->>>       __sdhci_msm_set_clock(host, clock);
->>>   }
->>> +/*****************************************************************************\
->>> + * *
->>> + * MSM Command Queue Engine 
->>> (CQE)                                            *
->>> + * *
->>> +\*****************************************************************************/ 
->>>
->>> +
->>> +static u32 sdhci_msm_cqe_irq(struct sdhci_host *host, u32 intmask)
->>> +{
->>> +    int cmd_error = 0;
->>> +    int data_error = 0;
->>> +
->>> +    if (!sdhci_cqe_irq(host, intmask, &cmd_error, &data_error))
->>> +        return intmask;
->>> +
->>> +    cqhci_irq(host->mmc, intmask, cmd_error, data_error);
->>> +    return 0;
->>> +}
->>> +
->>> +void sdhci_msm_cqe_disable(struct mmc_host *mmc, bool recovery)
->>> +{
->>> +    struct sdhci_host *host = mmc_priv(mmc);
->>> +    unsigned long flags;
->>> +    u32 ctrl;
->>> +
->>> +    /*
->>> +     * When CQE is halted, the legacy SDHCI path operates only
->>> +     * on 128bit descriptors in 64bit mode.
->>> +     */
->>> +    if (host->flags & SDHCI_USE_64_BIT_DMA)
->>> +        host->desc_sz = 16;
->> The adma_table_sz depends on desc_sz, so it cannot be changed here.
->> If you do something like below, then you can set desc_sz before calling
->> sdhci_setup_host()
+On 08/01/20 7:05 pm, Peter Ujfalusi wrote:
+> Hi,
+> 
+> On 08/01/2020 11.29, Baolin Wang wrote:
+>> Hi Faiz,
 >>
->> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->> index f4540f9892ce..f1d3b70ff769 100644
->> --- a/drivers/mmc/host/sdhci.c
->> +++ b/drivers/mmc/host/sdhci.c
->> @@ -3825,9 +3825,10 @@ int sdhci_setup_host(struct sdhci_host *host)
->>           void *buf;
->>             if (host->flags & SDHCI_USE_64_BIT_DMA) {
->> +            if (!host->desc_sz)
->> +                host->desc_sz = SDHCI_ADMA2_64_DESC_SZ(host);
->>               host->adma_table_sz = host->adma_table_cnt *
->> -                          SDHCI_ADMA2_64_DESC_SZ(host);
->> -            host->desc_sz = SDHCI_ADMA2_64_DESC_SZ(host);
->> +                          host->desc_sz;
->>           } else {
->>               host->adma_table_sz = host->adma_table_cnt *
->>                             SDHCI_ADMA2_32_DESC_SZ;
->
-> Thanks Adrian for the suggestion. I will add this change.
->
-> But even with this change, still i will have to override 
-> 'host->desc_sz' variable since qcom sdhci controller expects/operates-on
->
-> 12-byte descriptor as long was CQE is not enabled. When CQE is 
-> enabled, it operates only on 16-bype descriptors (even when CQE is 
-> halted).
->
-> If i fix "host->desc_sz" to 16 then all the data transfer commands 
-> during card initialization (till CQE is enabled) would fail.
->
-> I may have to update as below:
->
->     host->desc_sz = 16;
->
->     sdhci_add_host()  ;
->
->    host->desc_sz = 12;
->
-> And then cqhci_host_ops->enable() -> host->desc_sz = 16;
->
-> Please let me know if this is fine or if you have any other suggestion 
-> to support this limitation of qcom controller w.r.t ADMA descriptors 
-> with CQE.
->
-Hi Adrian,
-
-Do you have any suggestions on the way to support both the descriptor sizes?
-
->>> +
->>> +    spin_lock_irqsave(&host->lock, flags);
->>> +
->>> +    /*
->>> +     * During CQE operation command complete bit gets latched.
->>> +     * So s/w should clear command complete interrupt status when 
->>> CQE is
->>> +     * halted. Otherwise unexpected SDCHI legacy interrupt gets
->>> +     * triggered when CQE is halted.
->>> +     */
->>> +    ctrl = sdhci_readl(host, SDHCI_INT_ENABLE);
->>> +    ctrl |= SDHCI_INT_RESPONSE;
->>> +    sdhci_writel(host,  ctrl, SDHCI_INT_ENABLE);
->>> +    sdhci_writel(host, SDHCI_INT_RESPONSE, SDHCI_INT_STATUS);
->>> +
->>> +    spin_unlock_irqrestore(&host->lock, flags);
->>> +
->>> +    sdhci_cqe_disable(mmc, recovery);
->>> +}
->>> +
->>> +static const struct cqhci_host_ops sdhci_msm_cqhci_ops = {
->>> +    .enable        = sdhci_cqe_enable,
->>> +    .disable    = sdhci_msm_cqe_disable,
->>> +};
->>> +
->>> +static int sdhci_msm_cqe_add_host(struct sdhci_host *host,
->>> +                struct platform_device *pdev)
->>> +{
->>> +    struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->>> +    struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
->>> +    struct cqhci_host *cq_host;
->>> +    bool dma64;
->>> +    int ret;
->>> +
->>> +    ret = sdhci_setup_host(host);
->>> +    if (ret)
->>> +        return ret;
->>> +
->>> +    cq_host = cqhci_pltfm_init(pdev);
->>> +    if (IS_ERR(cq_host)) {
->>> +        ret = PTR_ERR(cq_host);
->>> +        dev_err(&pdev->dev, "cqhci-pltfm init: failed: %d\n", ret);
->>> +        goto cleanup;
->>> +    }
->>> +
->>> +    msm_host->mmc->caps2 |= MMC_CAP2_CQE | MMC_CAP2_CQE_DCMD;
->>> +    cq_host->ops = &sdhci_msm_cqhci_ops;
->>> +
->>> +    dma64 = host->flags & SDHCI_USE_64_BIT_DMA;
->>> +
->>> +    ret = cqhci_init(cq_host, host->mmc, dma64);
->>> +    if (ret) {
->>> +        dev_err(&pdev->dev, "%s: CQE init: failed (%d)\n",
->>> +                mmc_hostname(host->mmc), ret);
->>> +        goto cleanup;
->>> +    }
->>> +
->>> +    /* Disable cqe reset due to cqe enable signal */
->>> +    cqhci_writel(cq_host, cqhci_readl(cq_host, CQHCI_VENDOR_CFG1) |
->>> +               DISABLE_RST_ON_CMDQ_EN, CQHCI_VENDOR_CFG1);
->>> +
->>> +    ret = __sdhci_add_host(host);
->>> +    if (ret)
->>> +        goto cleanup;
->>> +
->>> +    dev_info(&pdev->dev, "%s: CQE init: success\n",
->>> +            mmc_hostname(host->mmc));
->>> +    return ret;
->>> +
->>> +cleanup:
->>> +    sdhci_cleanup_host(host);
->>> +    return ret;
->>> +}
->>> +
->>>   /*
->>>    * Platform specific register write functions. This is so that, if 
->>> any
->>>    * register write needs to be followed up by platform specific 
->>> actions,
->>> @@ -1731,6 +1839,7 @@ static void 
->>> sdhci_msm_set_regulator_caps(struct sdhci_msm_host *msm_host)
->>>       .set_uhs_signaling = sdhci_msm_set_uhs_signaling,
->>>       .write_w = sdhci_msm_writew,
->>>       .write_b = sdhci_msm_writeb,
->>> +    .irq    = sdhci_msm_cqe_irq,
->>>   };
->>>     static const struct sdhci_pltfm_data sdhci_msm_pdata = {
->>> @@ -1754,6 +1863,7 @@ static int sdhci_msm_probe(struct 
->>> platform_device *pdev)
->>>       u8 core_major;
->>>       const struct sdhci_msm_offset *msm_offset;
->>>       const struct sdhci_msm_variant_info *var_info;
->>> +    struct device_node *node = pdev->dev.of_node;
->>>         host = sdhci_pltfm_init(pdev, &sdhci_msm_pdata, 
->>> sizeof(*msm_host));
->>>       if (IS_ERR(host))
->>> @@ -1952,7 +2062,10 @@ static int sdhci_msm_probe(struct 
->>> platform_device *pdev)
->>>       pm_runtime_use_autosuspend(&pdev->dev);
->>>         host->mmc_host_ops.execute_tuning = sdhci_msm_execute_tuning;
->>> -    ret = sdhci_add_host(host);
->>> +    if (of_property_read_bool(node, "supports-cqe"))
->>> +        ret = sdhci_msm_cqe_add_host(host, pdev);
->>> +    else
->>> +        ret = sdhci_add_host(host);
->>>       if (ret)
->>>           goto pm_runtime_disable;
->>>       sdhci_msm_set_regulator_caps(msm_host);
+>> On Wed, Jan 8, 2020 at 5:19 PM Faiz Abbas <faiz_abbas@ti.com> wrote:
 >>>
-Thanks
+>>> Hi Baolin,
+>>>
+>>> On 08/01/20 6:58 am, Baolin Wang wrote:
+>>>> Hi Faiz,
+>>>>
+>>>> On Mon, Jan 6, 2020 at 7:01 PM Faiz Abbas <faiz_abbas@ti.com> wrote:
+>>>>>
+>>>>> From: Chunyan Zhang <zhang.chunyan@linaro.org>
+>>>>>
+>>>>> Some standard SD host controllers can support both external dma
+>>>>> controllers as well as ADMA/SDMA in which the SD host controller
+>>>>> acts as DMA master. TI's omap controller is the case as an example.
+>>>>>
+>>>>> Currently the generic SDHCI code supports ADMA/SDMA integrated in
+>>>>> the host controller but does not have any support for external DMA
+>>>>> controllers implemented using dmaengine, meaning that custom code is
+>>>>> needed for any systems that use an external DMA controller with SDHCI.
+>>>>>
+>>>>> Fixes by Faiz Abbas <faiz_abbas@ti.com>:
+>>>>> 1. Map scatterlists before dmaengine_prep_slave_sg()
+>>>>> 2. Use dma_async() functions inside of the send_command() path and call
+>>>>> terminate_sync() in non-atomic context in case of an error.
+>>>>>
+>>>>> Signed-off-by: Chunyan Zhang <zhang.chunyan@linaro.org>
+>>>>> Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
+>>>>> ---
+>>>>>  drivers/mmc/host/Kconfig |   3 +
+>>>>>  drivers/mmc/host/sdhci.c | 228 ++++++++++++++++++++++++++++++++++++++-
+>>>>>  drivers/mmc/host/sdhci.h |   8 ++
+>>>>>  3 files changed, 237 insertions(+), 2 deletions(-)
+>>>>>
+>>>>> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+>>>>> index d06b2dfe3c95..adef971582a1 100644
+>>>>> --- a/drivers/mmc/host/Kconfig
+>>>>> +++ b/drivers/mmc/host/Kconfig
+>>>>> @@ -1040,3 +1040,6 @@ config MMC_OWL
+>>>>>         help
+>>>>>           This selects support for the SD/MMC Host Controller on
+>>>>>           Actions Semi Owl SoCs.
+>>>>> +
+>>>>> +config MMC_SDHCI_EXTERNAL_DMA
+>>>>> +       bool
+>>>>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>>>>> index f6999054abcf..8cc78c76bc3d 100644
+>>>>> --- a/drivers/mmc/host/sdhci.c
+>>>>> +++ b/drivers/mmc/host/sdhci.c
+>>>>> @@ -10,6 +10,7 @@
+>>>>>   */
+>>>>>
+>>>>>  #include <linux/delay.h>
+>>>>> +#include <linux/dmaengine.h>
+>>>>>  #include <linux/ktime.h>
+>>>>>  #include <linux/highmem.h>
+>>>>>  #include <linux/io.h>
+>>>>> @@ -1157,6 +1158,188 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
+>>>>>         sdhci_set_block_info(host, data);
+>>>>>  }
+>>>>>
+>>>>> +#if IS_ENABLED(CONFIG_MMC_SDHCI_EXTERNAL_DMA)
+>>>>> +
+>>>>> +static int sdhci_external_dma_init(struct sdhci_host *host)
+>>>>> +{
+>>>>> +       int ret = 0;
+>>>>> +       struct mmc_host *mmc = host->mmc;
+>>>>> +
+>>>>> +       host->tx_chan = dma_request_chan(mmc->parent, "tx");
+>>>>> +       if (IS_ERR(host->tx_chan)) {
+>>>>> +               ret = PTR_ERR(host->tx_chan);
+>>>>> +               if (ret != -EPROBE_DEFER)
+>>>>> +                       pr_warn("Failed to request TX DMA channel.\n");
+>>>>> +               host->tx_chan = NULL;
+>>>>> +               return ret;
+>>>>> +       }
+>>>>> +
+>>>>> +       host->rx_chan = dma_request_chan(mmc->parent, "rx");
+>>>>> +       if (IS_ERR(host->rx_chan)) {
+>>>>> +               if (host->tx_chan) {
+>>>>> +                       dma_release_channel(host->tx_chan);
+>>>>> +                       host->tx_chan = NULL;
+>>>>> +               }
+>>>>> +
+>>>>> +               ret = PTR_ERR(host->rx_chan);
+>>>>> +               if (ret != -EPROBE_DEFER)
+>>>>> +                       pr_warn("Failed to request RX DMA channel.\n");
+>>>>> +               host->rx_chan = NULL;
+>>>>> +       }
+>>>>> +
+>>>>> +       return ret;
+>>>>> +}
+>>>>> +
+>>>>> +static struct dma_chan *sdhci_external_dma_channel(struct sdhci_host *host,
+>>>>> +                                                  struct mmc_data *data)
+>>>>> +{
+>>>>> +       return data->flags & MMC_DATA_WRITE ? host->tx_chan : host->rx_chan;
+>>>>> +}
+>>>>> +
+>>>>> +static int sdhci_external_dma_setup(struct sdhci_host *host,
+>>>>> +                                   struct mmc_command *cmd)
+>>>>> +{
+>>>>> +       int ret, i;
+>>>>> +       struct dma_async_tx_descriptor *desc;
+>>>>> +       struct mmc_data *data = cmd->data;
+>>>>> +       struct dma_chan *chan;
+>>>>> +       struct dma_slave_config cfg;
+>>>>> +       dma_cookie_t cookie;
+>>>>> +       int sg_cnt;
+>>>>> +
+>>>>> +       if (!host->mapbase)
+>>>>> +               return -EINVAL;
+>>>>> +
+>>>>> +       cfg.src_addr = host->mapbase + SDHCI_BUFFER;
+>>>>> +       cfg.dst_addr = host->mapbase + SDHCI_BUFFER;
+>>>>> +       cfg.src_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES;
+>>>>> +       cfg.dst_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES;
+>>>>> +       cfg.src_maxburst = data->blksz / 4;
+>>>>> +       cfg.dst_maxburst = data->blksz / 4;
+>>>>> +
+>>>>> +       /* Sanity check: all the SG entries must be aligned by block size. */
+>>>>> +       for (i = 0; i < data->sg_len; i++) {
+>>>>> +               if ((data->sg + i)->length % data->blksz)
+>>>>> +                       return -EINVAL;
+>>>>> +       }
+>>>>> +
+>>>>> +       chan = sdhci_external_dma_channel(host, data);
+>>>>> +
+>>>>> +       ret = dmaengine_slave_config(chan, &cfg);
+>>>>> +       if (ret)
+>>>>> +               return ret;
+>>>>> +
+>>>>> +       sg_cnt = sdhci_pre_dma_transfer(host, data, COOKIE_MAPPED);
+>>>>> +       if (sg_cnt <= 0)
+>>>>> +               return -EINVAL;
+>>>>> +
+>>>>> +       desc = dmaengine_prep_slave_sg(chan, data->sg, data->sg_len,
+>>>>> +                                      mmc_get_dma_dir(data),
+>>>>> +                                      DMA_PREP_INTERRUPT | DMA_CTRL_ACK);
+>>>>> +       if (!desc)
+>>>>> +               return -EINVAL;
+>>>>> +
+>>>>> +       desc->callback = NULL;
+>>>>> +       desc->callback_param = NULL;
+>>>>> +
+>>>>> +       cookie = dmaengine_submit(desc);
+>>>>> +       if (cookie < 0)
+>>>>
+>>>> We usually use the DMA engine standard API: dma_submit_error() to
+>>>> validate the cookie.
+>>>>
+>>>
+>>> The if condition is doing the same thing as the API. Do we really
+>>> require it?
+>>
+>> Yes, now it did the same thing. But in future if the DMA engine expand
+>> the cookie indication, which may break your current condition, but use
+>> dma_submit_error() is more safe, that will help to cover the internal
+>> cookie things. So I recommend to use the standard API as far as
+>> possible.
+> 
+> dma_cookie_t is typedefed to s32 currently, but it could change. The
+> cookie is for DMA engine internal tracking.
+> Clients should not use it directly for doing arithmetic on it.
+> 
 
-Veera
+In that case, I'll fix it with correct API.
+
+Thanks,
+Faiz
