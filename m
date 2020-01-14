@@ -2,90 +2,94 @@ Return-Path: <SRS0=RtJ+=3D=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.4 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3E25CC33CB1
-	for <linux-mmc@archiver.kernel.org>; Tue, 14 Jan 2020 13:09:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 727D9C33C9E
+	for <linux-mmc@archiver.kernel.org>; Tue, 14 Jan 2020 15:53:42 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 0F2F024685
-	for <linux-mmc@archiver.kernel.org>; Tue, 14 Jan 2020 13:09:03 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 38CBD222C4
+	for <linux-mmc@archiver.kernel.org>; Tue, 14 Jan 2020 15:53:42 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=rere.qmqm.pl header.i=@rere.qmqm.pl header.b="HocCrJwo"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726014AbgANNJC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 14 Jan 2020 08:09:02 -0500
-Received: from mga05.intel.com ([192.55.52.43]:11756 "EHLO mga05.intel.com"
+        id S1728853AbgANPxl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 14 Jan 2020 10:53:41 -0500
+Received: from rere.qmqm.pl ([91.227.64.183]:29585 "EHLO rere.qmqm.pl"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725994AbgANNJC (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 14 Jan 2020 08:09:02 -0500
-X-Amp-Result: SKIPPED(no attachment in message)
-X-Amp-File-Uploaded: False
-Received: from fmsmga002.fm.intel.com ([10.253.24.26])
-  by fmsmga105.fm.intel.com with ESMTP/TLS/DHE-RSA-AES256-GCM-SHA384; 14 Jan 2020 05:09:02 -0800
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.69,432,1571727600"; 
-   d="scan'208";a="256295592"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.167]) ([10.237.72.167])
-  by fmsmga002.fm.intel.com with ESMTP; 14 Jan 2020 05:09:00 -0800
+        id S1726365AbgANPxl (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 14 Jan 2020 10:53:41 -0500
+Received: from remote.user (localhost [127.0.0.1])
+        by rere.qmqm.pl (Postfix) with ESMTPSA id 47xw3l0wKzz1p;
+        Tue, 14 Jan 2020 16:53:38 +0100 (CET)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=rere.qmqm.pl; s=1;
+        t=1579017219; bh=WJES05a9q/Yz+/GLxjqe+7uuVcSWzHk5zQpuYKeJNvA=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=HocCrJwo5pCvfNXW11D/biBMBOR3tsJQ9Ffa1+kPlqoUrQNfoiiCgwMw1uMNO0WQ+
+         bZXvvoiz6gz/kGZSiF3UeGMcIQyMNAqvyXHSbzo8Lv/GX3FMaZJK6piq3RXj83Vk+y
+         pYXke4w0o06OkSPFyVyvWau6j5WHIb1pD57He0So7d8BHqqACeyPeaqWXTCxj5zZrI
+         ttgajllrpHxqxFP9OL4BP9xB6OqrakEMsKUMzIn8723ckSI/4ALWfZjJ0YTtYz2nHD
+         CdQmkE4C92spzqwAQap2r5jeZL4/9PO9nMvCypgDZgRsTxhCZ09pZT9bmkvzfa81t2
+         JQcj+UgRdmw1A==
+X-Virus-Status: Clean
+X-Virus-Scanned: clamav-milter 0.101.4 at mail
+Date:   Tue, 14 Jan 2020 16:53:33 +0100
+From:   =?iso-8859-2?Q?Micha=B3_Miros=B3aw?= <mirq-linux@rere.qmqm.pl>
+To:     Adrian Hunter <adrian.hunter@intel.com>
+Cc:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-kernel@vger.kernel.org
 Subject: Re: [PATCH] mmc: sdhci: fix minimum clock rate for v3 controller
-To:     =?UTF-8?B?TWljaGHFgiBNaXJvc8WCYXc=?= <mirq-linux@rere.qmqm.pl>,
-        linux-mmc@vger.kernel.org
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>, linux-kernel@vger.kernel.org
+Message-ID: <20200114155333.GA29422@qmqm.qmqm.pl>
 References: <3f3b2ac4634802af591a20b1b98dc8d0158aec45.1577962196.git.mirq-linux@rere.qmqm.pl>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <4264051e-6126-83c3-e49e-3d9050ff35ce@intel.com>
-Date:   Tue, 14 Jan 2020 15:08:08 +0200
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.2.2
+ <4264051e-6126-83c3-e49e-3d9050ff35ce@intel.com>
 MIME-Version: 1.0
-In-Reply-To: <3f3b2ac4634802af591a20b1b98dc8d0158aec45.1577962196.git.mirq-linux@rere.qmqm.pl>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
+Content-Type: text/plain; charset=iso-8859-2
+Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
+In-Reply-To: <4264051e-6126-83c3-e49e-3d9050ff35ce@intel.com>
+User-Agent: Mutt/1.10.1 (2018-07-13)
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 2/01/20 12:51 pm, Micha≈Ç Miros≈Çaw wrote:
-> For SDHCIv3+ with programmable clock mode, minimal clock frequency is
-> still base clock / max(divider). Minimal programmable clock frequency is
-> always greater than minimal divided clock frequency. Without this patch,
-> SDHCI uses out-of-spec initial frequency when multiplier is big enough:
+On Tue, Jan 14, 2020 at 03:08:08PM +0200, Adrian Hunter wrote:
+> On 2/01/20 12:51 pm, Micha≥ Miros≥aw wrote:
+> > For SDHCIv3+ with programmable clock mode, minimal clock frequency is
+> > still base clock / max(divider). Minimal programmable clock frequency is
+> > always greater than minimal divided clock frequency. Without this patch,
+> > SDHCI uses out-of-spec initial frequency when multiplier is big enough:
+> > 
+> > mmc1: mmc_rescan_try_freq: trying to init card at 468750 Hz
+> > [for 480 MHz source clock divided by 1024]
 > 
-> mmc1: mmc_rescan_try_freq: trying to init card at 468750 Hz
-> [for 480 MHz source clock divided by 1024]
+> The maximum divisor in programmable clock mode is 1024.  So I do not
+> understand what is wrong.  Can you explain some more?
 
-The maximum divisor in programmable clock mode is 1024.  So I do not
-understand what is wrong.  Can you explain some more?
+This part of code misses the fact, that you can choose (switch) between
+base clock mode and programmable clock mode. The code in
+sdhci_calc_clk() already does the choosing part. This is actually
+required on high programmable clock base to get conformant frequency for
+the card initialization phase.
 
-> 
-> Cc: stable@vger.kernel.org
-> Fixes: c3ed3877625f ("mmc: sdhci: add support for programmable clock mode")
-> Signed-off-by: Micha≈Ç Miros≈Çaw <mirq-linux@rere.qmqm.pl>
-> ---
->  drivers/mmc/host/sdhci.c | 6 ++----
->  1 file changed, 2 insertions(+), 4 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 275102c0a1bf..0036ddf85674 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -3902,11 +3902,9 @@ int sdhci_setup_host(struct sdhci_host *host)
->  	if (host->ops->get_min_clock)
->  		mmc->f_min = host->ops->get_min_clock(host);
->  	else if (host->version >= SDHCI_SPEC_300) {
-> -		if (host->clk_mul) {
-> -			mmc->f_min = (host->max_clk * host->clk_mul) / 1024;
-> +		if (host->clk_mul)
->  			max_clk = host->max_clk * host->clk_mul;
-> -		} else
-> -			mmc->f_min = host->max_clk / SDHCI_MAX_DIV_SPEC_300;
-> +		mmc->f_min = host->max_clk / SDHCI_MAX_DIV_SPEC_300;
->  	} else
->  		mmc->f_min = host->max_clk / SDHCI_MAX_DIV_SPEC_200;
->  
-> 
+Best Regards,
+Micha≥†Miros≥aw
 
+[...]
+> > index 275102c0a1bf..0036ddf85674 100644
+> > --- a/drivers/mmc/host/sdhci.c
+> > +++ b/drivers/mmc/host/sdhci.c
+> > @@ -3902,11 +3902,9 @@ int sdhci_setup_host(struct sdhci_host *host)
+> >  	if (host->ops->get_min_clock)
+> >  		mmc->f_min = host->ops->get_min_clock(host);
+> >  	else if (host->version >= SDHCI_SPEC_300) {
+> > -		if (host->clk_mul) {
+> > -			mmc->f_min = (host->max_clk * host->clk_mul) / 1024;
+> > +		if (host->clk_mul)
+> >  			max_clk = host->max_clk * host->clk_mul;
+> > -		} else
+> > -			mmc->f_min = host->max_clk / SDHCI_MAX_DIV_SPEC_300;
+> > +		mmc->f_min = host->max_clk / SDHCI_MAX_DIV_SPEC_300;
+> >  	} else
+> >  		mmc->f_min = host->max_clk / SDHCI_MAX_DIV_SPEC_200;
