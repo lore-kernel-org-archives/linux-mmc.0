@@ -2,103 +2,98 @@ Return-Path: <SRS0=GOb8=3F=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.4 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 14525C33CB1
-	for <linux-mmc@archiver.kernel.org>; Thu, 16 Jan 2020 15:47:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6DDAEC33CB1
+	for <linux-mmc@archiver.kernel.org>; Thu, 16 Jan 2020 16:12:03 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id DEC7E2075B
-	for <linux-mmc@archiver.kernel.org>; Thu, 16 Jan 2020 15:47:10 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 442F120728
+	for <linux-mmc@archiver.kernel.org>; Thu, 16 Jan 2020 16:12:03 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="k2BorqGR"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="qdQEY1n8"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726864AbgAPPrJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 16 Jan 2020 10:47:09 -0500
-Received: from mail-vs1-f66.google.com ([209.85.217.66]:42504 "EHLO
-        mail-vs1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726410AbgAPPrJ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Jan 2020 10:47:09 -0500
-Received: by mail-vs1-f66.google.com with SMTP id b79so12941999vsd.9
-        for <linux-mmc@vger.kernel.org>; Thu, 16 Jan 2020 07:47:08 -0800 (PST)
+        id S1727005AbgAPQL7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 16 Jan 2020 11:11:59 -0500
+Received: from mail-wm1-f67.google.com ([209.85.128.67]:39013 "EHLO
+        mail-wm1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726974AbgAPQL6 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Jan 2020 11:11:58 -0500
+Received: by mail-wm1-f67.google.com with SMTP id 20so4411934wmj.4
+        for <linux-mmc@vger.kernel.org>; Thu, 16 Jan 2020 08:11:58 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=e8GCNZcg16saTrMZk9XDpdMaVZPA9De2RuDrXztHKIQ=;
-        b=k2BorqGRv1qecoewrZRof15MBjeX/nLBmpC89UNAKjqBpUv+vsGetaEEc4jezRDpdc
-         tlj4QgYXN3P22IEUxfsuDvBx37inTng/nxtGxBE0uDgAkYoys5WL44o6fJBqJZKzADl/
-         wRsNZ7d3SnQ+tO4x9wkExC9KeBWArdwGKnMYfESx1zC0Sc1O6zgxDycMQ72JyMIGlqPc
-         7tbyenglNkIrRS7BtwiS2TxSU0yE+SG+E1GdWaQol11w/7wje3jRk8+fbtn3OnpY54Ie
-         IbXpyQGy3tsPShbYWkAtOaOEHLh1RdWdaDJ1WEzaNuE1xOK7wydpA2OwNRJEGqTP5Ca9
-         ewng==
+        h=subject:to:cc:references:from:message-id:date:user-agent
+         :mime-version:in-reply-to:content-language:content-transfer-encoding;
+        bh=wq116TZAe0p40heVVDfMLRBuWEj6xKtwx1Np2GXHzlk=;
+        b=qdQEY1n8v+dLZaHvHfDyqgC04UQvFEYkL0iVEjWLFmsSkU3RdqM+lv6eJPlKsfZZJo
+         V2U5I8ZZfySoMK28rBSpL6Qi9hZ1hBksNdUKrrlpCgVLxMi5EXSi5jSaVoIKprkgosd5
+         tsDC/ZoH/IOGHUHa5cOqrpght5pR8sZ8tAU7KkBzmrV/NVIcLC4BYWkLn3qFk7vMY0dG
+         3cUuGjOTM7lrJfGCwT9DuQ2es9Hy/CCF+RThAtg047ML104Uh1CTu5cc9rYcPLtsT3GC
+         B/ZdafPWXHclyQ++k9xdn+0fxAl7T0KV1vSnNRH8BNknm6iXsf0sfW0O3mzquuFtLaDf
+         naeA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=e8GCNZcg16saTrMZk9XDpdMaVZPA9De2RuDrXztHKIQ=;
-        b=UqE+FcDpdJoAkI1oEHhFSB8dWlhGPzDNVR2u9n11BwLlpA1kbr9ob7PI9wo/ePXA88
-         jm3IxzkySs4J1rPFd42zOnjCVUkOzxCzIXn0hxcyA5yJ8ZIcjFrFhPDd3GxF18Ev+rA+
-         XxBtLNhG9OPuB5bstqxyIz50sBz4WKQp0xdKPpjZ/JoSaVIqlxfJBG7ZwbaalSF9EjGa
-         FgvV1/92VukxD/AbA+m1RhvvewugNuMWyatO8PyqDaDAiTTNA6Htc8OhJArsITwNr7Fn
-         CF8m+AKl5Ka8/hoOJqu0EF/4OfmXTfc5IOwaxYaI2GTubqGZCz37T6YISEdwIHxyluyx
-         NLHg==
-X-Gm-Message-State: APjAAAVWfObqHsNDW/0IyDj+qSJkcHTKJpduZOaFT1vdOEpwJO2zmzEA
-        N/kHic4YE0sZHT0iyOq6vT+2VUqdhcM+ZGnER9AGv49j
-X-Google-Smtp-Source: APXvYqyuDnkVyDWBsgR/JhVT3EpQFHRk0GcoPe4/kJeb0QWiOtiYIF2f+u6CXLSRJ5THanvBhvUpWQ7nIc+twQygCcY=
-X-Received: by 2002:a67:e9da:: with SMTP id q26mr1979547vso.34.1579189628280;
- Thu, 16 Jan 2020 07:47:08 -0800 (PST)
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=wq116TZAe0p40heVVDfMLRBuWEj6xKtwx1Np2GXHzlk=;
+        b=Hwk/qZSzbwQwze9hq80Y3vLAwSZ/1Zazhd8jhkkxAXH+CKgRIquj0Qhf9mlIhekRfG
+         JUZyZlcYDNKgoL6i6GALemFA3PTHIFsJsoer+lijRNhbT2aUR00LxxKBjKgBRD4qW6Sw
+         EIboTN4hh97/Q8oe8D4AhDukRQQGZliftAo/ek3sGrzmdvZCY2bMfiftSbh9pTzj2d35
+         NiP1nqwnpbCT5AKZd+M9+C+bQc3ea3DwlZBl3Pglq0tzxRgxZm8Jfco0bm02tNW2NRyD
+         Y+Nj6kh5eJrUbI26yXCDfaQhZ1qsQJ8yOQN9puq20xzieNYpnGBXjvK34zx5JiYPqTEg
+         gNzA==
+X-Gm-Message-State: APjAAAU4yYgUmtKf3OoCRlKE7GybEAKwv3C9pPjpBMcuBr+qrN9aMQ3y
+        0S655fBufpRffNCRG4AIU+GNPQ==
+X-Google-Smtp-Source: APXvYqxia/hYDamKXklRlZ4uVwwfWKaRzmR3+FORgkBCwOjEeD6jP03Gwc0fSu+Qsj8bDjor8a5sTA==
+X-Received: by 2002:a1c:a982:: with SMTP id s124mr6705085wme.132.1579191117317;
+        Thu, 16 Jan 2020 08:11:57 -0800 (PST)
+Received: from [192.168.86.34] (cpc89974-aztw32-2-0-cust43.18-1.cable.virginm.net. [86.30.250.44])
+        by smtp.googlemail.com with ESMTPSA id i5sm30424978wrv.34.2020.01.16.08.11.54
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Thu, 16 Jan 2020 08:11:55 -0800 (PST)
+Subject: Re: [PATCH V2 3/7] dt-bindings: imx-ocotp: Add i.MX8MP compatible
+To:     Anson Huang <Anson.Huang@nxp.com>, robh+dt@kernel.org,
+        mark.rutland@arm.com, vkoul@kernel.org, shawnguo@kernel.org,
+        s.hauer@pengutronix.de, kernel@pengutronix.de, festevam@gmail.com,
+        ulf.hansson@linaro.org, broonie@kernel.org,
+        manivannan.sadhasivam@linaro.org, andrew.smirnov@gmail.com,
+        rjones@gateworks.com, marcel.ziswiler@toradex.com,
+        sebastien.szymanski@armadeus.com, aisheng.dong@nxp.com,
+        richard.hu@technexion.com, angus@akkea.ca, cosmin.stoica@nxp.com,
+        l.stach@pengutronix.de, rabeeh@solid-run.com,
+        leonard.crestez@nxp.com, daniel.baluta@nxp.com, jun.li@nxp.com,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        dmaengine@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-mmc@vger.kernel.org, linux-spi@vger.kernel.org
+Cc:     Linux-imx@nxp.com
+References: <1578893602-14395-1-git-send-email-Anson.Huang@nxp.com>
+ <1578893602-14395-3-git-send-email-Anson.Huang@nxp.com>
+From:   Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+Message-ID: <c2c3d925-a69a-d7f8-a58a-5f4abe46960b@linaro.org>
+Date:   Thu, 16 Jan 2020 16:11:54 +0000
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101
+ Thunderbird/60.8.0
 MIME-Version: 1.0
-References: <20200108093903.57620-1-hdegoede@redhat.com> <20200108093903.57620-2-hdegoede@redhat.com>
- <61bc9265-ece0-eeb6-d4a1-4631138ecf29@intel.com> <8d67882d-04a8-0607-be4e-c1430b7fda21@redhat.com>
- <84a32714-ba08-74a0-0c76-3c36db44dd68@intel.com> <93446e09-5f12-800a-62fa-bf3ecea7273d@redhat.com>
- <399ac7d5-2518-799a-595e-f6b6878cf4ab@intel.com> <a9ab8946-c599-5f83-7527-2387a9e82e8a@xenosoft.de>
-In-Reply-To: <a9ab8946-c599-5f83-7527-2387a9e82e8a@xenosoft.de>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 16 Jan 2020 16:46:32 +0100
-Message-ID: <CAPDyKFoydOuSE=Eaq168=2_Ycouo7hzyw+RZXhGq7q4D4Qe8TQ@mail.gmail.com>
-Subject: Re: [FSL P5020 P5040 PPC] Onboard SD card doesn't work anymore after
- the 'mmc-v5.4-2' updates
-To:     Christian Zigotzky <chzigotzky@xenosoft.de>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        linuxppc-dev <linuxppc-dev@lists.ozlabs.org>,
-        Darren Stevens <darren@stevens-zone.net>,
-        mad skateman <madskateman@gmail.com>,
-        "R.T.Dickinson" <rtd2@xtra.co.nz>,
-        "contact@a-eon.com" <contact@a-eon.com>,
-        Julian Margetson <runaway@candw.ms>
-Content-Type: text/plain; charset="UTF-8"
+In-Reply-To: <1578893602-14395-3-git-send-email-Anson.Huang@nxp.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 16 Jan 2020 at 12:18, Christian Zigotzky <chzigotzky@xenosoft.de> wrote:
->
-> Hi All,
->
-> We still need the attached patch for our onboard SD card interface
-> [1,2]. Could you please add this patch to the tree?
 
-No, because according to previous discussion that isn't the correct
-solution and more importantly it will break other archs (if I recall
-correctly).
 
-Looks like someone from the ppc community needs to pick up the ball.
+On 13/01/2020 05:33, Anson Huang wrote:
+> Add compatible and description for i.MX8MP.
+> 
+> Signed-off-by: Anson Huang <Anson.Huang@nxp.com>
 
->
-> Thanks,
-> Christian
->
-> [1] https://www.spinics.net/lists/linux-mmc/msg56211.html
+Applied Thanks,
 
-I think this discussion even suggested some viable solutions, so it
-just be a matter of sending a patch :-)
-
-> [2]
-> http://forum.hyperion-entertainment.com/viewtopic.php?f=58&t=4349&start=20#p49012
->
-
-Kind regards
-Uffe
+--srini
