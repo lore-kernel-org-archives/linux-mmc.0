@@ -2,135 +2,143 @@ Return-Path: <SRS0=GOb8=3F=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.4 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 88354C33CB6
-	for <linux-mmc@archiver.kernel.org>; Thu, 16 Jan 2020 09:21:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6C2CFC33CB1
+	for <linux-mmc@archiver.kernel.org>; Thu, 16 Jan 2020 10:50:42 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 5E01820748
-	for <linux-mmc@archiver.kernel.org>; Thu, 16 Jan 2020 09:21:22 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 37DD8205F4
+	for <linux-mmc@archiver.kernel.org>; Thu, 16 Jan 2020 10:50:42 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=st.com header.i=@st.com header.b="LMueDRVN"
+	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="GNMuVgbB"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726883AbgAPJVV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 16 Jan 2020 04:21:21 -0500
-Received: from mx08-00178001.pphosted.com ([91.207.212.93]:35560 "EHLO
-        mx07-00178001.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1726684AbgAPJVV (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Jan 2020 04:21:21 -0500
-Received: from pps.filterd (m0046661.ppops.net [127.0.0.1])
-        by mx07-00178001.pphosted.com (8.16.0.42/8.16.0.42) with SMTP id 00G9CnvH019865;
-        Thu, 16 Jan 2020 10:21:03 +0100
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=st.com; h=subject : to : cc :
- references : from : message-id : date : mime-version : in-reply-to :
- content-type : content-transfer-encoding; s=STMicroelectronics;
- bh=oXdqzOpECkceymNrXiBm0gzyy2jK6pABw4YC8ToVezU=;
- b=LMueDRVNZKKBRk7fSc5+0a3lqbIPoJPBRTNrEgkh4C1ln5yOoQPN+tqH2sPOEu2EGXX7
- lRHlD9VVCTqquV6qsTeLW3QbpLkk2UxWKBtLOtZ2L1iqzSFXSZvyLsRFVdujE7J08L5I
- tQdLg9dbTxjs8mWkym5Y3Nqo49WhML66pez9GPL0cqdNSuAcDBLqMV6La8GbLAtfI+/u
- aTgHKn+fe5ebXVHPS5+8jOPZNnkwQMVzuEhX8r/ruGCpD5DbAV6KLFigrnZo9gN+CMta
- 20YLGfb5MbuGarnghgi6Uxqje3JdGYOU8rDJ8dU+cPokjeAKr3gPWWM43LnU2KxCHwXI yg== 
-Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
-        by mx07-00178001.pphosted.com with ESMTP id 2xf7jpr5pd-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Thu, 16 Jan 2020 10:21:03 +0100
-Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
-        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id DF267100034;
-        Thu, 16 Jan 2020 10:20:58 +0100 (CET)
-Received: from Webmail-eu.st.com (sfhdag6node1.st.com [10.75.127.16])
-        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id CB8B62A900B;
-        Thu, 16 Jan 2020 10:20:58 +0100 (CET)
-Received: from lmecxl0923.lme.st.com (10.75.127.46) by SFHDAG6NODE1.st.com
- (10.75.127.16) with Microsoft SMTP Server (TLS) id 15.0.1473.3; Thu, 16 Jan
- 2020 10:20:58 +0100
-Subject: Re: [PATCH 5/9] dt-bindings: mmc: mmci: add delay block base register
- for sdmmc
-To:     Rob Herring <robh@kernel.org>
-CC:     Ulf Hansson <ulf.hansson@linaro.org>,
-        <srinivas.kandagatla@linaro.org>,
-        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
-        Alexandre Torgue <alexandre.torgue@st.com>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <linux-kernel@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-mmc@vger.kernel.org>,
-        <linux-stm32@st-md-mailman.stormreply.com>
-References: <20200110134823.14882-1-ludovic.barre@st.com>
- <20200110134823.14882-6-ludovic.barre@st.com> <20200115145645.GA599@bogus>
-From:   Ludovic BARRE <ludovic.barre@st.com>
-Message-ID: <2ce63f11-8b0c-8261-63fa-cd19e874c537@st.com>
-Date:   Thu, 16 Jan 2020 10:20:26 +0100
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.1.0
+        id S1726045AbgAPKul (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 16 Jan 2020 05:50:41 -0500
+Received: from fllv0015.ext.ti.com ([198.47.19.141]:33360 "EHLO
+        fllv0015.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726018AbgAPKul (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Jan 2020 05:50:41 -0500
+Received: from fllv0034.itg.ti.com ([10.64.40.246])
+        by fllv0015.ext.ti.com (8.15.2/8.15.2) with ESMTP id 00GAoV3N006287;
+        Thu, 16 Jan 2020 04:50:31 -0600
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
+        s=ti-com-17Q1; t=1579171831;
+        bh=ARpeFSvEQvv2QH/Fv93pfZ16NpaDOAet0C0uZscJMv8=;
+        h=From:To:CC:Subject:Date;
+        b=GNMuVgbBqrGiszvnkqSj9Mw7YMJfGJbskpV4GwZTX59NBNyFSRpl15DHvbZ0mEFaK
+         bp9gc4SCdFeViIA52uGcpFeUXUUzDhXIGmILT8MEk4KM61WRQQWQ2ZeK/bvxA6mM+C
+         SLVFw4tP1gATVB+o9bkZKMlANn7Cb9Ir8KWV0UeI=
+Received: from DFLE105.ent.ti.com (dfle105.ent.ti.com [10.64.6.26])
+        by fllv0034.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 00GAoU9N088065
+        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
+        Thu, 16 Jan 2020 04:50:30 -0600
+Received: from DFLE107.ent.ti.com (10.64.6.28) by DFLE105.ent.ti.com
+ (10.64.6.26) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.1847.3; Thu, 16
+ Jan 2020 04:50:30 -0600
+Received: from fllv0040.itg.ti.com (10.64.41.20) by DFLE107.ent.ti.com
+ (10.64.6.28) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.1847.3 via
+ Frontend Transport; Thu, 16 Jan 2020 04:50:30 -0600
+Received: from a0230074-OptiPlex-7010.india.ti.com (ileax41-snat.itg.ti.com [10.172.224.153])
+        by fllv0040.itg.ti.com (8.15.2/8.15.2) with ESMTP id 00GAoRdS000589;
+        Thu, 16 Jan 2020 04:50:27 -0600
+From:   Faiz Abbas <faiz_abbas@ti.com>
+To:     <linux-omap@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+        <devicetree@vger.kernel.org>, <linux-mmc@vger.kernel.org>
+CC:     <adrian.hunter@intel.com>, <kishon@ti.com>, <mark.rutland@arm.com>,
+        <robh+dt@kernel.org>, <ulf.hansson@linaro.org>,
+        <faiz_abbas@ti.com>, <tony@atomide.com>
+Subject: [PATCH v5 00/10] Port am335x and am437x devices to sdhci-omap
+Date:   Thu, 16 Jan 2020 16:21:44 +0530
+Message-ID: <20200116105154.7685-1-faiz_abbas@ti.com>
+X-Mailer: git-send-email 2.19.2
 MIME-Version: 1.0
-In-Reply-To: <20200115145645.GA599@bogus>
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Language: fr
 Content-Transfer-Encoding: 8bit
-X-Originating-IP: [10.75.127.46]
-X-ClientProxiedBy: SFHDAG5NODE3.st.com (10.75.127.15) To SFHDAG6NODE1.st.com
- (10.75.127.16)
-X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.138,18.0.572
- definitions=2020-01-16_02:2020-01-16,2020-01-15 signatures=0
+Content-Type: text/plain
+X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Rob
+The following add driver patches for porting TI's am335x and am437x devices to
+the sdhci-omap driver.
 
-Le 1/15/20 à 3:56 PM, Rob Herring a écrit :
-> On Fri, Jan 10, 2020 at 02:48:19PM +0100, Ludovic Barre wrote:
->> To support the sdr104 mode, the sdmmc variant has a
->> hardware delay block to manage the clock phase when sampling
->> data received by the card.
->>
->> This patch adds a second base register (optional) for
->> sdmmc delay block.
->>
->> Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
->> ---
->>   Documentation/devicetree/bindings/mmc/mmci.txt | 2 ++
->>   1 file changed, 2 insertions(+)
->>
->> diff --git a/Documentation/devicetree/bindings/mmc/mmci.txt b/Documentation/devicetree/bindings/mmc/mmci.txt
->> index 6d3c626e017d..4ec921e4bf34 100644
->> --- a/Documentation/devicetree/bindings/mmc/mmci.txt
->> +++ b/Documentation/devicetree/bindings/mmc/mmci.txt
->> @@ -28,6 +28,8 @@ specific for ux500 variant:
->>   - st,sig-pin-fbclk       : feedback clock signal pin used.
->>   
->>   specific for sdmmc variant:
->> +- reg			 : a second base register may be defined if a delay
->> +                           block is present and used for tuning.
-> 
-> Which compatibles have a 2nd reg entry?
+Patches 1-4 Add Support for external DMA to the sdhci driver.
 
-In fact, mmci driver is ARM Amba driver (arm,primecell) and has only one
-compatible "arm,pl18x".
-The variants are identified by primecell-periphid property
-(discovered at runtime with HW block register or defined by
-device tree property "arm,primecell-periphid").
+Patches 5-7 refactor the sdhci_set_timeout() function and use it disable
+data timeout interrupt for erase commands
 
-The defaults "arm,pl18x" variants have only one base register,
-but the SDMMC need a second base register for these
-delay block registers.
+Patches 8-9 add new compatibles for am335x and am43xx devices to the
+sdhci-omap driver.
 
-example of sdmmc node:
-	sdmmc1: sdmmc@58005000 {
-		compatible = "arm,pl18x", "arm,primecell";
-		arm,primecell-periphid = <0x00253180>;
-		reg = <0x58005000 0x1000>, <0x58006000 0x1000>;
-	};
+Patch 10 implements special reset required for am335x and am437x
+devices.
 
-what do you advise?
+DT changes will be posted as a separate series.
 
-> 
->>   - st,sig-dir             : signal direction polarity used for cmd, dat0 dat123.
->>   - st,neg-edge            : data & command phase relation, generated on
->>                              sd clock falling edge.
->> -- 
->> 2.17.1
->>
+Tested on: am335x-evm, am335x-boneblack, am335x-bonegreen-wireless,
+am335x-sk, am335x-bone, am437x-idk, am43xx-gp-evm, am43xx-epos-evm.
+
+v5:
+1. Patch 3 now uses the dma_submit_error() API instead of checking the
+   cookie on its own.
+2. Dropped the patch adding ti,needs-special-reset property to
+   sdhci-omap. Using a flag in the driver instead.
+3. Minor spacing changes.
+
+v4:
+1. Made the factoring out of initialize_data, block_info and mrqs_done as a
+   separate patch
+2. Replaced the patch introducing the quirk to disable DTO during erase
+   operations to a set_timeout() callback in sdhci-omap
+3. Ported the ti,needs-special-reset property from omap_hsmmc to sdhci-omap.
+4. Minor style changes.
+
+v3:
+1. Dropped patch 1 because the tasklet was removed by Adrian in an
+   earlier series.
+2. Added dma bindings in sdhci-omap as optional properties.
+3. Rebased on top of latest mainline.
+
+v2:
+1. sdhci is using two bottom halves. One threaded_rq for card detect and a
+   tasklet for finishing mmc requests. Patch 1 removes the tasklet and
+   moves its function to the threaded_irq. This enables me to
+   terminate_sync() in sdhci_request_done()
+
+2. Factored out common code for between the normal adn external dma case
+
+3. Using existing API sdhci_data_timeout_irq for disabling DTO during
+   erase commands.
+
+4. Fixed subject line for dt-bindings patch
+
+Chunyan Zhang (3):
+  dt-bindings: sdhci-omap: Add properties for using external dma
+  mmc: sdhci: add support for using external DMA devices
+  mmc: sdhci-omap: Add using external dma
+
+Faiz Abbas (7):
+  mmc: sdhci: Factor out some operations set to their own functions
+  mmc: sdhci: Convert sdhci_set_timeout_irq() to non-static
+  mmc: sdhci: Refactor sdhci_set_timeout()
+  mmc: sdhci-omap: Disable data timeout interrupt during erase
+  dt-bindings: sdhci-omap: Add am335x and am437x specific bindings
+  mmc: sdhci-omap: Add am335x and am437x specific compatibles
+  mmc: sdhci-omap: Add special reset capability
+
+ .../devicetree/bindings/mmc/sdhci-omap.txt    |  11 +
+ drivers/mmc/host/Kconfig                      |   4 +
+ drivers/mmc/host/sdhci-omap.c                 |  60 ++-
+ drivers/mmc/host/sdhci.c                      | 353 +++++++++++++++---
+ drivers/mmc/host/sdhci.h                      |  10 +
+ 5 files changed, 380 insertions(+), 58 deletions(-)
+
+-- 
+2.19.2
+
