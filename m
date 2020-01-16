@@ -7,50 +7,48 @@ X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2FD83C33CAF
-	for <linux-mmc@archiver.kernel.org>; Thu, 16 Jan 2020 19:05:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5A27EC33CAF
+	for <linux-mmc@archiver.kernel.org>; Thu, 16 Jan 2020 19:22:32 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 01CB6206E6
-	for <linux-mmc@archiver.kernel.org>; Thu, 16 Jan 2020 19:05:06 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 340892081E
+	for <linux-mmc@archiver.kernel.org>; Thu, 16 Jan 2020 19:22:32 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1579201506;
-	bh=hbejOm8sc5vQB9Dn0jxr/R1aRYq57xznvqqEKeG02qo=;
+	s=default; t=1579202552;
+	bh=07HOz8UvqDas42y+05OFgSsqy9xaOjUJbCnbLMwnHdA=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=WGn4P6WZWku62uq1f/Tx/LlJrHv0tBNOjHSO4TuvXMcHa+HrLNrUrtAzxunWWaKsi
-	 V7BnwHx0As5pX2yheNRm7rMxidIra68QvnJVLmUkUcsqIrIGT5Aayb0gplELzjJaKi
-	 M6yIRu+qZtheVgdWCIWAs6yfJo5bVxdtRd9f99Eo=
+	b=fQQU5tgVQtqkjSLuzhvDjoMUluuY2LZyaNZrPO0RGDVHtQuYXD90ipqpSr8erbJB6
+	 y73/0Wgu26z9pbX/QW+929nUuUkCK/pR4rbHr/hbAVpe+sa2hmPD/9L/qFpv3uP7Ko
+	 iYt83Zp3TkI86Aoy1Vdixh9Ni+uxs8vxF2wq4Abo=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2388414AbgAPTE7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 16 Jan 2020 14:04:59 -0500
-Received: from mail.kernel.org ([198.145.29.99]:54396 "EHLO mail.kernel.org"
+        id S1730926AbgAPQx0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 16 Jan 2020 11:53:26 -0500
+Received: from mail.kernel.org ([198.145.29.99]:37274 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2388269AbgAPRCH (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 16 Jan 2020 12:02:07 -0500
+        id S1730917AbgAPQx0 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 16 Jan 2020 11:53:26 -0500
 Received: from sasha-vm.mshome.net (c-73-47-72-35.hsd1.nh.comcast.net [73.47.72.35])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id D7C582073A;
-        Thu, 16 Jan 2020 17:02:05 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 5BB1E208C3;
+        Thu, 16 Jan 2020 16:53:25 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1579194126;
-        bh=hbejOm8sc5vQB9Dn0jxr/R1aRYq57xznvqqEKeG02qo=;
+        s=default; t=1579193606;
+        bh=07HOz8UvqDas42y+05OFgSsqy9xaOjUJbCnbLMwnHdA=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=x7Vqz4YgbVCrN6YvBu205//6h12CuZFCcaytbpMOlFcF6vQ8uwETsObXsYDSPy18K
-         FUsX90/Y6bvwTRUL9b6wVLJKAQT8QTnvKyFzDngL426QUQ16WQm5SQnOo5sSRefENp
-         S9Krb/ACUqur24i9/rQpyPuWxT1yss+Jk/Npx9c4=
+        b=gtHX/fh8f840sICdUQazZeLf8PqkZu05msMP2LB34XybtiddDjP1HEuljJ+qWNQjq
+         OI6vC+lUjkGjfGlfFf0Y9V7U2nszwyxR1rl2TOzyCBzWWcp06F5hgEtV0ssuc9eS4i
+         JdzPSpFPRYT9P18idjpnSRo8K9a5ry0raLiP8/cI=
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc:     Stefan Wahren <stefan.wahren@i2se.com>,
+Cc:     "H. Nikolaus Schaller" <hns@goldelico.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org,
-        bcm-kernel-feedback-list@broadcom.com,
-        linux-arm-kernel@lists.infradead.org
-Subject: [PATCH AUTOSEL 4.19 218/671] mmc: sdhci-brcmstb: handle mmc_of_parse() errors during probe
-Date:   Thu, 16 Jan 2020 11:52:07 -0500
-Message-Id: <20200116165940.10720-101-sashal@kernel.org>
+        Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org
+Subject: [PATCH AUTOSEL 5.4 144/205] mmc: core: fix wl1251 sdio quirks
+Date:   Thu, 16 Jan 2020 11:41:59 -0500
+Message-Id: <20200116164300.6705-144-sashal@kernel.org>
 X-Mailer: git-send-email 2.20.1
-In-Reply-To: <20200116165940.10720-1-sashal@kernel.org>
-References: <20200116165940.10720-1-sashal@kernel.org>
+In-Reply-To: <20200116164300.6705-1-sashal@kernel.org>
+References: <20200116164300.6705-1-sashal@kernel.org>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
@@ -60,36 +58,41 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Stefan Wahren <stefan.wahren@i2se.com>
+From: "H. Nikolaus Schaller" <hns@goldelico.com>
 
-[ Upstream commit 1e20186e706da8446f9435f2924cd65ab1397e73 ]
+[ Upstream commit 16568b4a4f0c34bd35cfadac63303c7af7812764 ]
 
-We need to handle mmc_of_parse() errors during probe otherwise the
-MMC driver could start without proper initialization (e.g. power sequence).
+wl1251 and wl1271 have different vendor id and device id.
+So we need to handle both with sdio quirks.
 
-Fixes: 476bf3d62d5c ("mmc: sdhci-brcmstb: Add driver for Broadcom BRCMSTB SoCs")
-Signed-off-by: Stefan Wahren <stefan.wahren@i2se.com>
+Fixes: 884f38607897 ("mmc: core: move some sdio IDs out of quirks file")
+Signed-off-by: H. Nikolaus Schaller <hns@goldelico.com>
+Cc: <stable@vger.kernel.org> # v4.11+
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 Signed-off-by: Sasha Levin <sashal@kernel.org>
 ---
- drivers/mmc/host/sdhci-brcmstb.c | 4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
+ drivers/mmc/core/quirks.h | 7 +++++++
+ 1 file changed, 7 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci-brcmstb.c b/drivers/mmc/host/sdhci-brcmstb.c
-index 552bddc5096c..1cd10356fc14 100644
---- a/drivers/mmc/host/sdhci-brcmstb.c
-+++ b/drivers/mmc/host/sdhci-brcmstb.c
-@@ -55,7 +55,9 @@ static int sdhci_brcmstb_probe(struct platform_device *pdev)
- 	}
+diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h
+index 2d2d9ea8be4f..3dba15bccce2 100644
+--- a/drivers/mmc/core/quirks.h
++++ b/drivers/mmc/core/quirks.h
+@@ -119,7 +119,14 @@ static const struct mmc_fixup mmc_ext_csd_fixups[] = {
+ 	END_FIXUP
+ };
  
- 	sdhci_get_of_property(pdev);
--	mmc_of_parse(host->mmc);
-+	res = mmc_of_parse(host->mmc);
-+	if (res)
-+		goto err;
++
+ static const struct mmc_fixup sdio_fixup_methods[] = {
++	SDIO_FIXUP(SDIO_VENDOR_ID_TI_WL1251, SDIO_DEVICE_ID_TI_WL1251,
++		   add_quirk, MMC_QUIRK_NONSTD_FUNC_IF),
++
++	SDIO_FIXUP(SDIO_VENDOR_ID_TI_WL1251, SDIO_DEVICE_ID_TI_WL1251,
++		   add_quirk, MMC_QUIRK_DISABLE_CD),
++
+ 	SDIO_FIXUP(SDIO_VENDOR_ID_TI, SDIO_DEVICE_ID_TI_WL1271,
+ 		   add_quirk, MMC_QUIRK_NONSTD_FUNC_IF),
  
- 	/*
- 	 * Supply the existing CAPS, but clear the UHS modes. This
 -- 
 2.20.1
 
