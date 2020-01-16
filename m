@@ -4,48 +4,48 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5A27EC33CAF
-	for <linux-mmc@archiver.kernel.org>; Thu, 16 Jan 2020 19:22:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C899FC33CAF
+	for <linux-mmc@archiver.kernel.org>; Thu, 16 Jan 2020 19:22:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 340892081E
-	for <linux-mmc@archiver.kernel.org>; Thu, 16 Jan 2020 19:22:32 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 913522073A
+	for <linux-mmc@archiver.kernel.org>; Thu, 16 Jan 2020 19:22:35 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1579202552;
-	bh=07HOz8UvqDas42y+05OFgSsqy9xaOjUJbCnbLMwnHdA=;
+	s=default; t=1579202555;
+	bh=ZN3FHz/d8qAmPJ8meazGJB6yyASRZv5YcQU6R5IG9rk=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=fQQU5tgVQtqkjSLuzhvDjoMUluuY2LZyaNZrPO0RGDVHtQuYXD90ipqpSr8erbJB6
-	 y73/0Wgu26z9pbX/QW+929nUuUkCK/pR4rbHr/hbAVpe+sa2hmPD/9L/qFpv3uP7Ko
-	 iYt83Zp3TkI86Aoy1Vdixh9Ni+uxs8vxF2wq4Abo=
+	b=t5c4nqU3BcuLsF/mXcDwFRWwdtAqI/YQKwx/+o5bXpyXF8bI1O9QAQO3mdBaZuYEW
+	 1Ps4B7OAzKdZEzl1MMV+r3cJPrGfKHTZGWSw6ApJCmLebJ6tdqmR5JIwKOpO9UVKYR
+	 /V6eTTOTQWauRfFyv5Qd9QjQzxPgfpo6aVHyo/64=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730926AbgAPQx0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 16 Jan 2020 11:53:26 -0500
-Received: from mail.kernel.org ([198.145.29.99]:37274 "EHLO mail.kernel.org"
+        id S1730943AbgAPTWe (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 16 Jan 2020 14:22:34 -0500
+Received: from mail.kernel.org ([198.145.29.99]:37262 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1730917AbgAPQx0 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 16 Jan 2020 11:53:26 -0500
+        id S1730902AbgAPQxZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 16 Jan 2020 11:53:25 -0500
 Received: from sasha-vm.mshome.net (c-73-47-72-35.hsd1.nh.comcast.net [73.47.72.35])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 5BB1E208C3;
-        Thu, 16 Jan 2020 16:53:25 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 527E322522;
+        Thu, 16 Jan 2020 16:53:24 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1579193606;
-        bh=07HOz8UvqDas42y+05OFgSsqy9xaOjUJbCnbLMwnHdA=;
+        s=default; t=1579193605;
+        bh=ZN3FHz/d8qAmPJ8meazGJB6yyASRZv5YcQU6R5IG9rk=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=gtHX/fh8f840sICdUQazZeLf8PqkZu05msMP2LB34XybtiddDjP1HEuljJ+qWNQjq
-         OI6vC+lUjkGjfGlfFf0Y9V7U2nszwyxR1rl2TOzyCBzWWcp06F5hgEtV0ssuc9eS4i
-         JdzPSpFPRYT9P18idjpnSRo8K9a5ry0raLiP8/cI=
+        b=2aAdsYwl5C0oYo63AdtqGPE5QNBNhZsGfmRmbGOR5dEE9ITiAJ3g64NFOvCOPUEoF
+         ild9S/VJW+xxa7b11x43yEvp4WNZotxCAurz50IiR1HvWsaRzRLukWEmqqserGgwvG
+         OcqNOww5w6Z7AO7umFfBQnHmNiumx3n4weLivnH4=
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc:     "H. Nikolaus Schaller" <hns@goldelico.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
         Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org
-Subject: [PATCH AUTOSEL 5.4 144/205] mmc: core: fix wl1251 sdio quirks
-Date:   Thu, 16 Jan 2020 11:41:59 -0500
-Message-Id: <20200116164300.6705-144-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.4 143/205] mmc: sdio: fix wl1251 vendor id
+Date:   Thu, 16 Jan 2020 11:41:58 -0500
+Message-Id: <20200116164300.6705-143-sashal@kernel.org>
 X-Mailer: git-send-email 2.20.1
 In-Reply-To: <20200116164300.6705-1-sashal@kernel.org>
 References: <20200116164300.6705-1-sashal@kernel.org>
@@ -60,10 +60,17 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: "H. Nikolaus Schaller" <hns@goldelico.com>
 
-[ Upstream commit 16568b4a4f0c34bd35cfadac63303c7af7812764 ]
+[ Upstream commit e5db673e7fe2f971ec82039a28dc0811c2100e87 ]
 
-wl1251 and wl1271 have different vendor id and device id.
-So we need to handle both with sdio quirks.
+v4.11-rc1 did introduce a patch series that rearranged the
+sdio quirks into a header file. Unfortunately this did forget
+to handle SDIO_VENDOR_ID_TI differently between wl1251 and
+wl1271 with the result that although the wl1251 was found on
+the sdio bus, the firmware did not load any more and there was
+no interface registration.
+
+This patch defines separate constants to be used by sdio quirks
+and drivers.
 
 Fixes: 884f38607897 ("mmc: core: move some sdio IDs out of quirks file")
 Signed-off-by: H. Nikolaus Schaller <hns@goldelico.com>
@@ -71,28 +78,22 @@ Cc: <stable@vger.kernel.org> # v4.11+
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 Signed-off-by: Sasha Levin <sashal@kernel.org>
 ---
- drivers/mmc/core/quirks.h | 7 +++++++
- 1 file changed, 7 insertions(+)
+ include/linux/mmc/sdio_ids.h | 2 ++
+ 1 file changed, 2 insertions(+)
 
-diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h
-index 2d2d9ea8be4f..3dba15bccce2 100644
---- a/drivers/mmc/core/quirks.h
-+++ b/drivers/mmc/core/quirks.h
-@@ -119,7 +119,14 @@ static const struct mmc_fixup mmc_ext_csd_fixups[] = {
- 	END_FIXUP
- };
+diff --git a/include/linux/mmc/sdio_ids.h b/include/linux/mmc/sdio_ids.h
+index d1a5d5df02f5..08b25c02b5a1 100644
+--- a/include/linux/mmc/sdio_ids.h
++++ b/include/linux/mmc/sdio_ids.h
+@@ -71,6 +71,8 @@
  
-+
- static const struct mmc_fixup sdio_fixup_methods[] = {
-+	SDIO_FIXUP(SDIO_VENDOR_ID_TI_WL1251, SDIO_DEVICE_ID_TI_WL1251,
-+		   add_quirk, MMC_QUIRK_NONSTD_FUNC_IF),
-+
-+	SDIO_FIXUP(SDIO_VENDOR_ID_TI_WL1251, SDIO_DEVICE_ID_TI_WL1251,
-+		   add_quirk, MMC_QUIRK_DISABLE_CD),
-+
- 	SDIO_FIXUP(SDIO_VENDOR_ID_TI, SDIO_DEVICE_ID_TI_WL1271,
- 		   add_quirk, MMC_QUIRK_NONSTD_FUNC_IF),
+ #define SDIO_VENDOR_ID_TI			0x0097
+ #define SDIO_DEVICE_ID_TI_WL1271		0x4076
++#define SDIO_VENDOR_ID_TI_WL1251		0x104c
++#define SDIO_DEVICE_ID_TI_WL1251		0x9066
  
+ #define SDIO_VENDOR_ID_STE			0x0020
+ #define SDIO_DEVICE_ID_STE_CW1200		0x2280
 -- 
 2.20.1
 
