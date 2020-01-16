@@ -7,56 +7,57 @@ X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2F3DDC33CB1
-	for <linux-mmc@archiver.kernel.org>; Thu, 16 Jan 2020 14:40:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D31A3C33CB1
+	for <linux-mmc@archiver.kernel.org>; Thu, 16 Jan 2020 14:40:12 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 00AAD2077C
-	for <linux-mmc@archiver.kernel.org>; Thu, 16 Jan 2020 14:40:09 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A8B772077C
+	for <linux-mmc@archiver.kernel.org>; Thu, 16 Jan 2020 14:40:12 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="SSxgzq+7"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="M1Q6ohWV"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726160AbgAPOkI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 16 Jan 2020 09:40:08 -0500
-Received: from mail-vs1-f65.google.com ([209.85.217.65]:37992 "EHLO
+        id S1726370AbgAPOkM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 16 Jan 2020 09:40:12 -0500
+Received: from mail-vs1-f65.google.com ([209.85.217.65]:39654 "EHLO
         mail-vs1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726084AbgAPOkI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Jan 2020 09:40:08 -0500
-Received: by mail-vs1-f65.google.com with SMTP id v12so12810719vsv.5
-        for <linux-mmc@vger.kernel.org>; Thu, 16 Jan 2020 06:40:07 -0800 (PST)
+        with ESMTP id S1726084AbgAPOkM (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Jan 2020 09:40:12 -0500
+Received: by mail-vs1-f65.google.com with SMTP id y125so12795828vsb.6
+        for <linux-mmc@vger.kernel.org>; Thu, 16 Jan 2020 06:40:11 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=x3YIGHWT3fy1Veg+KzKBfZ19zyPNacmTccQTpa/treE=;
-        b=SSxgzq+7HrR3GDZkO0nRsy2X9FoHOe1J21IxuMfrHc3gVVeDEgAVM3JoDjjkSFA3P+
-         QlnhppC32iK6mAGhHVRodr7JDULhJo3H27+0r4OrXDoQmANTGgGm3B9vc7uT0BOYPqE6
-         Rt21jPuWmU3uVmxt4Hkc+oyYxFcQLqvbxHSrb7GG3L3P1gMiHawNoIbzdFykVZyzujKA
-         aoyD6bx77IWca8pCJOG4LP9BsDvN0B8szhXBiV8d6mmdAPLJbBD8f2zrLSecoc5SdYmV
-         L+uxus3h4dA5AdRLB1AgoAvq1BPkKi5YHQtfShkow7L6JLVlAfu56B2le7dJ6iVlCnnB
-         QmEw==
+        bh=XWfBK5b8xbjKGM4Ky9MDCp6ZllJaIuZTmxUmj1+vzV0=;
+        b=M1Q6ohWVxoVPjyMIV0rK2OgkKrhkJTpDSEKlpDQ5QW7D9fBZz7s6r49JYmQ5KwI2ZI
+         q/o5+qASJw4GhGTg6WK9BAL+jo8XjvAkEGc/M+e3+8YnSeSG7DYmTVwUV2JxI+vFjnYQ
+         hYL3ptDYMq8f7Z8XvyQSw7vmBfLOghokXA7dSc1LOlka2bCImd8EDzSeo6e14JuoC9q6
+         LzOFUgrldpXu5UudefW0DadE6xpRUMUr8DkdcrfiOu83vJ5Drzouzz2Y+aKdH95mns/A
+         +sWjNKgiOzpk4DUuJiyxOjIc74bwtFuyzYAE9O8RQDsQe0iruGfWfN4eEEbBf4X/n0c2
+         5WLg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=x3YIGHWT3fy1Veg+KzKBfZ19zyPNacmTccQTpa/treE=;
-        b=PScyRQSiG1660SUrslNkL4HpCH6Clpj9sU6eok7Boem6S6YDOToKNQnNvw3fKgWu3A
-         2C1LcxNU4jTqTCXABmR47WJls4vp2/rTl+mc6yh99/9S2W1JF8CpDr/njHxVP31+YH1z
-         XmOIF53HRGcYzzXZZqrTjPfME5TiEhozpCFLuSRZUm5TUvELcZa0QOMCgnk0SQSm5QWf
-         CsblmU4DfStDD71rvJh0/XzTOqv8fUpMAdW4+i5GEo/v1HZPUnf9sxGpKVeOOqotp8QE
-         mbYKhAc3CWPjwQEBXSW2lY5sjnnNbHoWCyC0KbzdyvkP0aZBOQHa71HwnyJuAQYNhJLi
-         SnIQ==
-X-Gm-Message-State: APjAAAVv6hi5rscxHnGHoL9FD50zbFB6+Eawh25fZvv2efrZ6gNA7xlt
-        FyKhyJ2CECY87S1j0VFgfIHhzMBwaKVHABrWnZ0i1km/
-X-Google-Smtp-Source: APXvYqzEwuNA7umNgS6Sl+Lk6g8/l+jRrZcp9a3JK/w7CFnkAEHVKqB6enB0wkQbS5W3bLUl8jC57/WkiDBbj1fYwdY=
-X-Received: by 2002:a67:cd96:: with SMTP id r22mr1629717vsl.165.1579185607354;
- Thu, 16 Jan 2020 06:40:07 -0800 (PST)
+        bh=XWfBK5b8xbjKGM4Ky9MDCp6ZllJaIuZTmxUmj1+vzV0=;
+        b=UO1f9t5H/N42i3fDpieJVdve1M4IqhCUqAe951IOSQF8kL8ju509t5dNwlPciAw3BB
+         zfhiztsk+cKYn2MPCbk+XE7gr+btbmcYo1brCJAY1OKogLOtcIysZx1U0HUNgz8I80Yk
+         maxj99FilbsSR2C3jQl1j+D3wysO/FCzcEe5rtPhoDCf71l7Gd6pTkI0F+6K89K0MBC0
+         ildEC/tIslYaz61D1Ltm4KlDy2SG+jgkjGYJpzsLGeTNNSRJgC0w4pSc0nEFmwFuf1Sb
+         XK+sAnB1v8tDkpDa8VesgpdT9li1KcDsfip3o+Ah9G0IS7+W0bpeeC7nb9UhrSFgwDV2
+         sW1A==
+X-Gm-Message-State: APjAAAUqCCHHsSaH1MTypWoX7gsIeqn+4RNSJvKjWMBkwuHDc5oar5e8
+        MLsl57Li+aYNdoFPkS8lXXPHIno7NBGNExqSM2Uw0w==
+X-Google-Smtp-Source: APXvYqw5+yoA4bjLrAFu0vR4x1xOyRoh+/qcdhkUy5E6uBIbH2PQP/Q0vabe/HQmUge1xlAoplfe0mlnslBKWrHK4Ws=
+X-Received: by 2002:a67:cc3:: with SMTP id 186mr1682601vsm.200.1579185611089;
+ Thu, 16 Jan 2020 06:40:11 -0800 (PST)
 MIME-Version: 1.0
-References: <20191212075219.48625-1-yangbo.lu@nxp.com> <20191212075219.48625-2-yangbo.lu@nxp.com>
-In-Reply-To: <20191212075219.48625-2-yangbo.lu@nxp.com>
+References: <20200108040713.38888-1-yangbo.lu@nxp.com>
+In-Reply-To: <20200108040713.38888-1-yangbo.lu@nxp.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 16 Jan 2020 15:39:31 +0100
-Message-ID: <CAPDyKFqdkvHvTHdGP4oBJz8tZBBU8Rv7NRzj7NhDKXPJAE6+sQ@mail.gmail.com>
-Subject: Re: [PATCH 2/2] mmc: sdhci-of-esdhc: update tuning erratum A-008171
+Date:   Thu, 16 Jan 2020 15:39:34 +0100
+Message-ID: <CAPDyKFr2k7j0PU5xOXqre_sQsEgMP13N9=sPgU15S_-=B_jyAw@mail.gmail.com>
+Subject: Re: [v2, 1/2] mmc: sdhci-of-esdhc: fix esdhc_reset() for different
+ controller versions
 To:     Yangbo Lu <yangbo.lu@nxp.com>
 Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
         Adrian Hunter <adrian.hunter@intel.com>
@@ -66,18 +67,16 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 12 Dec 2019 at 08:53, Yangbo Lu <yangbo.lu@nxp.com> wrote:
+On Wed, 8 Jan 2020 at 05:08, Yangbo Lu <yangbo.lu@nxp.com> wrote:
 >
-> There is an official update for eSDHC tuning erratum A-008171.
-> This patch is to implement the changes,
-> - Affect all revisions of SoC.
-> - Changes for tuning window checking.
-> - Hardware hits a new condition that tuning succeeds although
->   the eSDHC might not have tuned properly for type2 SoCs
->   (soc_tuning_erratum_type2[] array in driver). So check
->   tuning window after tuning succeeds.
+> This patch is to fix operating in esdhc_reset() for different
+> controller versions, and to add bus-width restoring after data
+> reset for eSDHC (verdor version <= 2.2).
+>
+> Also add annotation for understanding.
 >
 > Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
+> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
 Applied for next, thanks!
 
@@ -86,81 +85,80 @@ Uffe
 
 
 > ---
->  drivers/mmc/host/sdhci-of-esdhc.c | 39 ++++++++++++++++++++++++++-------------
->  1 file changed, 26 insertions(+), 13 deletions(-)
+> Changes for v2:
+>         - Added ACK from Adrian.
+>         - Used preferred style for comments.
+> ---
+>  drivers/mmc/host/sdhci-of-esdhc.c | 43 +++++++++++++++++++++++++++++++++++----
+>  1 file changed, 39 insertions(+), 4 deletions(-)
 >
 > diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-> index cd0f21e..a99c000d 100644
+> index cd3b676..1110f90 100644
 > --- a/drivers/mmc/host/sdhci-of-esdhc.c
 > +++ b/drivers/mmc/host/sdhci-of-esdhc.c
-> @@ -848,20 +848,20 @@ static int esdhc_signal_voltage_switch(struct mmc_host *mmc,
->  }
+> @@ -758,23 +758,58 @@ static void esdhc_reset(struct sdhci_host *host, u8 mask)
+>  {
+>         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>         struct sdhci_esdhc *esdhc = sdhci_pltfm_priv(pltfm_host);
+> -       u32 val;
+> +       u32 val, bus_width = 0;
 >
->  static struct soc_device_attribute soc_tuning_erratum_type1[] = {
-> -       { .family = "QorIQ T1023", .revision = "1.0", },
-> -       { .family = "QorIQ T1040", .revision = "1.0", },
-> -       { .family = "QorIQ T2080", .revision = "1.0", },
-> -       { .family = "QorIQ LS1021A", .revision = "1.0", },
-> +       { .family = "QorIQ T1023", },
-> +       { .family = "QorIQ T1040", },
-> +       { .family = "QorIQ T2080", },
-> +       { .family = "QorIQ LS1021A", },
->         { },
->  };
+> +       /*
+> +        * Add delay to make sure all the DMA transfers are finished
+> +        * for quirk.
+> +        */
+>         if (esdhc->quirk_delay_before_data_reset &&
+>             (mask & SDHCI_RESET_DATA) &&
+>             (host->flags & SDHCI_REQ_USE_DMA))
+>                 mdelay(5);
 >
->  static struct soc_device_attribute soc_tuning_erratum_type2[] = {
-> -       { .family = "QorIQ LS1012A", .revision = "1.0", },
-> -       { .family = "QorIQ LS1043A", .revision = "1.*", },
-> -       { .family = "QorIQ LS1046A", .revision = "1.0", },
-> -       { .family = "QorIQ LS1080A", .revision = "1.0", },
-> -       { .family = "QorIQ LS2080A", .revision = "1.0", },
-> -       { .family = "QorIQ LA1575A", .revision = "1.0", },
-> +       { .family = "QorIQ LS1012A", },
-> +       { .family = "QorIQ LS1043A", },
-> +       { .family = "QorIQ LS1046A", },
-> +       { .family = "QorIQ LS1080A", },
-> +       { .family = "QorIQ LS2080A", },
-> +       { .family = "QorIQ LA1575A", },
->         { },
->  };
->
-> @@ -929,13 +929,13 @@ static void esdhc_prepare_sw_tuning(struct sdhci_host *host, u8 *window_start,
->         /* Write 32'hFFFF_FFFF to IRQSTAT register */
->         sdhci_writel(host, 0xFFFFFFFF, SDHCI_INT_STATUS);
->
-> -       /* If TBSTAT[15:8]-TBSTAT[7:0] > 4 * div_ratio
-> -        * or TBSTAT[7:0]-TBSTAT[15:8] > 4 * div_ratio,
-> +       /* If TBSTAT[15:8]-TBSTAT[7:0] > (4 * div_ratio) + 2
-> +        * or TBSTAT[7:0]-TBSTAT[15:8] > (4 * div_ratio) + 2,
->          * then program TBPTR[TB_WNDW_END_PTR] = 4 * div_ratio
->          * and program TBPTR[TB_WNDW_START_PTR] = 8 * div_ratio.
->          */
->
-> -       if (abs(start_ptr - end_ptr) > (4 * esdhc->div_ratio)) {
-> +       if (abs(start_ptr - end_ptr) > (4 * esdhc->div_ratio + 2)) {
->                 *window_start = 8 * esdhc->div_ratio;
->                 *window_end = 4 * esdhc->div_ratio;
->         } else {
-> @@ -1008,6 +1008,19 @@ static int esdhc_execute_tuning(struct mmc_host *mmc, u32 opcode)
->                 if (ret)
->                         break;
->
-> +               /* For type2 affected platforms of the tuning erratum,
-> +                * tuning may succeed although eSDHC might not have
-> +                * tuned properly. Need to check tuning window.
-> +                */
-> +               if (esdhc->quirk_tuning_erratum_type2 &&
-> +                   !host->tuning_err) {
-> +                       esdhc_tuning_window_ptr(host, &window_start,
-> +                                               &window_end);
-> +                       if (abs(window_start - window_end) >
-> +                           (4 * esdhc->div_ratio + 2))
-> +                               host->tuning_err = -EAGAIN;
-> +               }
+> +       /*
+> +        * Save bus-width for eSDHC whose vendor version is 2.2
+> +        * or lower for data reset.
+> +        */
+> +       if ((mask & SDHCI_RESET_DATA) &&
+> +           (esdhc->vendor_ver <= VENDOR_V_22)) {
+> +               val = sdhci_readl(host, ESDHC_PROCTL);
+> +               bus_width = val & ESDHC_CTRL_BUSWIDTH_MASK;
+> +       }
 > +
->                 /* If HW tuning fails and triggers erratum,
->                  * try workaround.
->                  */
+>         sdhci_reset(host, mask);
+>
+> -       sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
+> -       sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
+> +       /*
+> +        * Restore bus-width setting and interrupt registers for eSDHC
+> +        * whose vendor version is 2.2 or lower for data reset.
+> +        */
+> +       if ((mask & SDHCI_RESET_DATA) &&
+> +           (esdhc->vendor_ver <= VENDOR_V_22)) {
+> +               val = sdhci_readl(host, ESDHC_PROCTL);
+> +               val &= ~ESDHC_CTRL_BUSWIDTH_MASK;
+> +               val |= bus_width;
+> +               sdhci_writel(host, val, ESDHC_PROCTL);
+> +
+> +               sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
+> +               sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
+> +       }
+>
+> -       if (mask & SDHCI_RESET_ALL) {
+> +       /*
+> +        * Some bits have to be cleaned manually for eSDHC whose spec
+> +        * version is higher than 3.0 for all reset.
+> +        */
+> +       if ((mask & SDHCI_RESET_ALL) &&
+> +           (esdhc->spec_ver >= SDHCI_SPEC_300)) {
+>                 val = sdhci_readl(host, ESDHC_TBCTL);
+>                 val &= ~ESDHC_TB_EN;
+>                 sdhci_writel(host, val, ESDHC_TBCTL);
+>
+> +               /*
+> +                * Initialize eSDHC_DLLCFG1[DLL_PD_PULSE_STRETCH_SEL] to
+> +                * 0 for quirk.
+> +                */
+>                 if (esdhc->quirk_unreliable_pulse_detection) {
+>                         val = sdhci_readl(host, ESDHC_DLLCFG1);
+>                         val &= ~ESDHC_DLL_PD_PULSE_STRETCH_SEL;
 > --
 > 2.7.4
 >
