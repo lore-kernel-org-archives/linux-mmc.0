@@ -7,45 +7,45 @@ X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 256E3C33CB6
-	for <linux-mmc@archiver.kernel.org>; Thu, 16 Jan 2020 17:26:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9A238C33CB3
+	for <linux-mmc@archiver.kernel.org>; Thu, 16 Jan 2020 17:30:58 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id E6843246D9
-	for <linux-mmc@archiver.kernel.org>; Thu, 16 Jan 2020 17:26:57 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 68D47246A8
+	for <linux-mmc@archiver.kernel.org>; Thu, 16 Jan 2020 17:30:58 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1579195618;
-	bh=k/giQLTQHP1E1fL/X5OrnR5YwPGCnPWgGQwz2XUq7mA=;
+	s=default; t=1579195858;
+	bh=sVAcU0U1Afdh1SDicf+4JPZiogWd5Q+c2pf+MC5Fx5o=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=W/L8iih8Dp06frivuFG/N6rh0eimU/wo9cTl9hP+NFcRM3UezQKlaBU2WBrDDGn7T
-	 Qoe58a8DC1kkmYGFHKx1OKH8XjFa3ATbiao12CAWqSRADfQyf0YJvLwJHOitw9kV5S
-	 /2W1X8YS2vsRWMzMZg3Nl5iQmgyl8HEjKtPUVHO8=
+	b=LxPRwWXk/UGGyUdHmJEaW7iu8rVwn3xr8zuvhzUKrcRoLCkG/U4HLfktpGyZtYR/1
+	 w2htzFlWVUTawg4VVjmJmoxm8mA5yQPBmrZ7WDTApWuWXoWxwrd5E1kHu8fyOEcndm
+	 TfwWQkSPH5dL+mBF4JwJjuxALlIMupuVaEQOBj0w=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2392351AbgAPR04 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 16 Jan 2020 12:26:56 -0500
-Received: from mail.kernel.org ([198.145.29.99]:36140 "EHLO mail.kernel.org"
+        id S2392734AbgAPRa4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 16 Jan 2020 12:30:56 -0500
+Received: from mail.kernel.org ([198.145.29.99]:43794 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2392343AbgAPR0z (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 16 Jan 2020 12:26:55 -0500
+        id S2404637AbgAPRaz (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 16 Jan 2020 12:30:55 -0500
 Received: from sasha-vm.mshome.net (c-73-47-72-35.hsd1.nh.comcast.net [73.47.72.35])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id A9607246D4;
-        Thu, 16 Jan 2020 17:26:53 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 55B60246A9;
+        Thu, 16 Jan 2020 17:30:54 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1579195614;
-        bh=k/giQLTQHP1E1fL/X5OrnR5YwPGCnPWgGQwz2XUq7mA=;
+        s=default; t=1579195855;
+        bh=sVAcU0U1Afdh1SDicf+4JPZiogWd5Q+c2pf+MC5Fx5o=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=T/OVRGSbb2t4OHUE+SbV9ZQo8KjxysCDZhO8IH81xGtQtyqcuGDX4qiBz4dE81qvJ
-         bV8owEcCZ2fAXhTN1vk5t0mz14jv6OWY3WqawCfryoz4lzQqa9WQ6oK/QoWls5vbAq
-         b30+PxUCpvQHHI73LZrUVYfAIGE/1jomSVkdTKhE=
+        b=m+gSBUJ86q8OS1Z0GRrqcj+4gbIpoDDGVAlexJX3OC4CxBjy4ckJ+kW2mFLdjpLrt
+         36nYAaOVJqttLiTvHFxsrH5GN25TkCrRsxU3n8lAonGud/JweSf1aeSKfl5nJly8vx
+         bxc6ZHp/ixWjSPV37SQpBoQyE0hNHwDI/DzRbH3k=
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc:     Pan Bian <bianpan2016@163.com>,
+Cc:     "H. Nikolaus Schaller" <hns@goldelico.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
         Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org
-Subject: [PATCH AUTOSEL 4.14 187/371] mmc: core: fix possible use after free of host
-Date:   Thu, 16 Jan 2020 12:20:59 -0500
-Message-Id: <20200116172403.18149-130-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.14 354/371] mmc: core: fix wl1251 sdio quirks
+Date:   Thu, 16 Jan 2020 12:23:46 -0500
+Message-Id: <20200116172403.18149-297-sashal@kernel.org>
 X-Mailer: git-send-email 2.20.1
 In-Reply-To: <20200116172403.18149-1-sashal@kernel.org>
 References: <20200116172403.18149-1-sashal@kernel.org>
@@ -58,37 +58,40 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Pan Bian <bianpan2016@163.com>
+From: "H. Nikolaus Schaller" <hns@goldelico.com>
 
-[ Upstream commit 8e1943af2986db42bee2b8dddf49a36cdb2e9219 ]
+[ Upstream commit 16568b4a4f0c34bd35cfadac63303c7af7812764 ]
 
-In the function mmc_alloc_host, the function put_device is called to
-release allocated resources when mmc_gpio_alloc fails. Finally, the
-function pointed by host->class_dev.class->dev_release (i.e.,
-mmc_host_classdev_release) is used to release resources including the
-host structure. However, after put_device, host is used and released
-again. Resulting in a use-after-free bug.
+wl1251 and wl1271 have different vendor id and device id.
+So we need to handle both with sdio quirks.
 
-Fixes: 1ed217194488 ("mmc: core: fix error path in mmc_host_alloc")
-Signed-off-by: Pan Bian <bianpan2016@163.com>
+Fixes: 884f38607897 ("mmc: core: move some sdio IDs out of quirks file")
+Signed-off-by: H. Nikolaus Schaller <hns@goldelico.com>
+Cc: <stable@vger.kernel.org> # v4.11+
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 Signed-off-by: Sasha Levin <sashal@kernel.org>
 ---
- drivers/mmc/core/host.c | 2 --
- 1 file changed, 2 deletions(-)
+ drivers/mmc/core/quirks.h | 7 +++++++
+ 1 file changed, 7 insertions(+)
 
-diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index ad88deb2e8f3..3740fb0052a4 100644
---- a/drivers/mmc/core/host.c
-+++ b/drivers/mmc/core/host.c
-@@ -376,8 +376,6 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
+diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h
+index 5153577754f0..09897abb79ed 100644
+--- a/drivers/mmc/core/quirks.h
++++ b/drivers/mmc/core/quirks.h
+@@ -119,7 +119,14 @@ static const struct mmc_fixup mmc_ext_csd_fixups[] = {
+ 	END_FIXUP
+ };
  
- 	if (mmc_gpio_alloc(host)) {
- 		put_device(&host->class_dev);
--		ida_simple_remove(&mmc_host_ida, host->index);
--		kfree(host);
- 		return NULL;
- 	}
++
+ static const struct mmc_fixup sdio_fixup_methods[] = {
++	SDIO_FIXUP(SDIO_VENDOR_ID_TI_WL1251, SDIO_DEVICE_ID_TI_WL1251,
++		   add_quirk, MMC_QUIRK_NONSTD_FUNC_IF),
++
++	SDIO_FIXUP(SDIO_VENDOR_ID_TI_WL1251, SDIO_DEVICE_ID_TI_WL1251,
++		   add_quirk, MMC_QUIRK_DISABLE_CD),
++
+ 	SDIO_FIXUP(SDIO_VENDOR_ID_TI, SDIO_DEVICE_ID_TI_WL1271,
+ 		   add_quirk, MMC_QUIRK_NONSTD_FUNC_IF),
  
 -- 
 2.20.1
