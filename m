@@ -2,176 +2,160 @@ Return-Path: <SRS0=GOb8=3F=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.1 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no
+X-Spam-Status: No, score=-2.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8CF15C33CB3
-	for <linux-mmc@archiver.kernel.org>; Thu, 16 Jan 2020 12:01:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 065AAC33CB1
+	for <linux-mmc@archiver.kernel.org>; Thu, 16 Jan 2020 13:26:34 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 63B7520663
-	for <linux-mmc@archiver.kernel.org>; Thu, 16 Jan 2020 12:01:01 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C2481207E0
+	for <linux-mmc@archiver.kernel.org>; Thu, 16 Jan 2020 13:26:33 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="qCzhhL1f"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="jHQfIQfO"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726151AbgAPMBA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 16 Jan 2020 07:01:00 -0500
-Received: from mail-wm1-f65.google.com ([209.85.128.65]:37789 "EHLO
-        mail-wm1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726535AbgAPMBA (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Jan 2020 07:01:00 -0500
-Received: by mail-wm1-f65.google.com with SMTP id f129so3513078wmf.2;
-        Thu, 16 Jan 2020 04:00:58 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=K45x8SHvjhN/SqzbB8kaaG/ZwA6tE8xnF2TMFaLqgWo=;
-        b=qCzhhL1fyhuF4uJ30kAHFGAgukb2dvuIkZZpSFnV9Bvopy1uHd2JmGaTH/DeCT9jyv
-         zEUV7VfHwdLK6lkcDTsPPilyk7vBAk66Hv5ZqEtNm5rvhSmQFJNwXylpl/1Bzs0Imv54
-         Rql4Hhs2Qoq6nyXXVoyhzL+DHoBZKRWba01HL4UK/mcUTyOescWybJpHAQgDx/pXVWSy
-         sJYb4yzMCfKhh+CdyHvrc37xdZ2akspJyGCpvLnT7IdhY/SV04oZpEBReXF04SJJVP6x
-         J28UY9KUlAdKPgt5lH0M4MEw2dkG7DX7hH3Y0T5ZXy89bOP8Cr4xXFmOEGzUCW/onAH+
-         sjIQ==
+        id S1726362AbgAPN0d (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 16 Jan 2020 08:26:33 -0500
+Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:43735 "EHLO
+        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1726329AbgAPN0d (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Jan 2020 08:26:33 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1579181191;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=+3AGmc0BahHufdHpF69iBoZFgq1eFHjpSf37Qonl1o8=;
+        b=jHQfIQfOQecxvHJNs5/PYWjzAleuIde329q/zrWWJDIX+Vh2Y1NpZKeLAv00JLygOIbEXR
+        65Pl7LfC8SNKQ//72L594yN2m9yI5K98BETDqUBEAns+lHXYv4d9uzgsSA8luNzTdPTORl
+        D8w/7T3i9EgGR/CMsW/6TeDDynDvn3k=
+Received: from mail-wm1-f72.google.com (mail-wm1-f72.google.com
+ [209.85.128.72]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-185-W0u2ZOnRNxWTej-4FEmxSA-1; Thu, 16 Jan 2020 08:26:30 -0500
+X-MC-Unique: W0u2ZOnRNxWTej-4FEmxSA-1
+Received: by mail-wm1-f72.google.com with SMTP id h130so1197201wme.7
+        for <linux-mmc@vger.kernel.org>; Thu, 16 Jan 2020 05:26:30 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:subject:to:cc:references:from:message-id:date
          :user-agent:mime-version:in-reply-to:content-language
          :content-transfer-encoding;
-        bh=K45x8SHvjhN/SqzbB8kaaG/ZwA6tE8xnF2TMFaLqgWo=;
-        b=IL5RZwnGKf5k5RqpSNUUj6fwEXdi3p/8leqEZtlTIYw5L/yKdUhCNaWXlF+NdiknrQ
-         3qqkeLcJSAt42pKIJwpGoSoQKsDMDToxuNJLDiUcXl3xxZ8HYIr1aaQkFPeZkffDo4zB
-         SGhZKljaYP2ucbidq7Zz1OJL50c0QsWZlM9aEYhjJKNKeij5OwcQ++GJcb8teYBNYPXs
-         INBjiSzCO41wD1iP2qTyNWOciFD1oMgPj6GBaWjJr1lUW9Tj2NRDkA9moREkxCeXPZCl
-         q7jhY2pZSYrq3DRJ85SR1is8lSfCqrxmlep8+xTUR2ro2Z3aIBSkJed7f5EGG9Nb8UzD
-         3djg==
-X-Gm-Message-State: APjAAAWKaNL9NS927ThJUawuLg/CbnUfFv/YDXnEUBvxSJIEGizrQCAo
-        3sc1ZuJbzWKEXosCmEMufbs=
-X-Google-Smtp-Source: APXvYqxSG6XX0qeAUXiXclajDgAqCIR4Vw2T5QnvgyIxq5EiuPtxzO1/xghNLthqCFKePTImdZDOOg==
-X-Received: by 2002:a7b:cb86:: with SMTP id m6mr5686130wmi.51.1579176057805;
-        Thu, 16 Jan 2020 04:00:57 -0800 (PST)
-Received: from [192.168.2.1] (ip51ccf9cd.speed.planet.nl. [81.204.249.205])
-        by smtp.gmail.com with ESMTPSA id n8sm28902799wrx.42.2020.01.16.04.00.56
+        bh=+3AGmc0BahHufdHpF69iBoZFgq1eFHjpSf37Qonl1o8=;
+        b=MSQZ2ahZCnnDJ8s2tdKK+M3RKswD4rZjc162x4knIb3sIeIy8SxiI4PJSUmVQTk6iA
+         E2EZGuqklqxs+lbCC0jiajI+59sZ35VTj4BjaMvaKDzJoI77xu0lE+f6g2SJ6eCERHRx
+         wJrVk7y2O7LSDLylOy7jUSDKZwsvJ3QwpGL6HqZWKet2DESDYvmRi5etgN9kCgxhQyJK
+         a5oZx2E+zlNQ+i9rBUyhu/Dx/kMIwwCxIuxftoRCbfGxJIudbW6uGCuDPaHMavK67tii
+         Tpu1Ayj3rllzcmTi8svsnFdpoBry0uq0NbUoYTuoqZlv171R6UDitqjDPCaa9ApC4V2K
+         rL/A==
+X-Gm-Message-State: APjAAAVLh+w9WCNu25w3yMrvxXqio8yfK1dmGy/7qdMZWCjXueU1fvy/
+        17GqAWb0gdhPqo+wYakFVVmzk9RrwbcF3g1XnHZpwrsu5kYAKk+OkYHaWnsS6wPuHIEODej7WMM
+        7Idt2cuOZRNZgn4NnGmAJ
+X-Received: by 2002:a5d:43c7:: with SMTP id v7mr3194508wrr.32.1579181189031;
+        Thu, 16 Jan 2020 05:26:29 -0800 (PST)
+X-Google-Smtp-Source: APXvYqw1iD4j1BsP7eJ2yZ0eF0yq23x+UsTMoWiCJ2tLhHjWn73VdOeAiDZOEFclxFTloAkQUqwQRQ==
+X-Received: by 2002:a5d:43c7:: with SMTP id v7mr3194488wrr.32.1579181188773;
+        Thu, 16 Jan 2020 05:26:28 -0800 (PST)
+Received: from shalem.localdomain (2001-1c00-0c0c-fe00-7e79-4dac-39d0-9c14.cable.dynamic.v6.ziggo.nl. [2001:1c00:c0c:fe00:7e79:4dac:39d0:9c14])
+        by smtp.gmail.com with ESMTPSA id v17sm29044845wrt.91.2020.01.16.05.26.28
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 16 Jan 2020 04:00:57 -0800 (PST)
-Subject: Re: [RFC PATCH v1 2/3] dt-bindings: mmc: convert synopsys dw-mshc
- bindings to yaml
-To:     Rob Herring <robh+dt@kernel.org>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Mark Rutland <mark.rutland@arm.com>,
-        "heiko@sntech.de" <heiko@sntech.de>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        devicetree@vger.kernel.org,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "moderated list:ARM/FREESCALE IMX / MXC ARM ARCHITECTURE" 
-        <linux-arm-kernel@lists.infradead.org>,
-        "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>
-References: <20200114213809.27166-1-jbx6244@gmail.com>
- <20200114213809.27166-2-jbx6244@gmail.com>
- <CAL_JsqJ0QJ9uG9NY7vMGG00G4Jfk2mXS4OPdUzEaRVaCP++GzQ@mail.gmail.com>
-From:   Johan Jonker <jbx6244@gmail.com>
-Message-ID: <203e9217-9aa8-b65e-4411-2d9b23c1362a@gmail.com>
-Date:   Thu, 16 Jan 2020 13:00:55 +0100
-User-Agent: Mozilla/5.0 (X11; Linux i686; rv:68.0) Gecko/20100101
- Thunderbird/68.3.0
+        Thu, 16 Jan 2020 05:26:28 -0800 (PST)
+Subject: Re: [PATCH 1/2] mmc: sdhci-acpi: Disable 1.8V modes on external
+ microSD on Lenovo Miix 320
+To:     Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     "russianneuromancer @ ya . ru" <russianneuromancer@ya.ru>,
+        linux-mmc@vger.kernel.org
+References: <20200108093903.57620-1-hdegoede@redhat.com>
+ <20200108093903.57620-2-hdegoede@redhat.com>
+ <61bc9265-ece0-eeb6-d4a1-4631138ecf29@intel.com>
+ <8d67882d-04a8-0607-be4e-c1430b7fda21@redhat.com>
+ <84a32714-ba08-74a0-0c76-3c36db44dd68@intel.com>
+ <93446e09-5f12-800a-62fa-bf3ecea7273d@redhat.com>
+ <399ac7d5-2518-799a-595e-f6b6878cf4ab@intel.com>
+From:   Hans de Goede <hdegoede@redhat.com>
+Message-ID: <4cdff7d3-47cf-1193-c413-036c3a2824bf@redhat.com>
+Date:   Thu, 16 Jan 2020 14:26:27 +0100
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.4.1
 MIME-Version: 1.0
-In-Reply-To: <CAL_JsqJ0QJ9uG9NY7vMGG00G4Jfk2mXS4OPdUzEaRVaCP++GzQ@mail.gmail.com>
-Content-Type: text/plain; charset=utf-8
+In-Reply-To: <399ac7d5-2518-799a-595e-f6b6878cf4ab@intel.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-See below.
+HI,
 
-On 1/15/20 4:18 PM, Rob Herring wrote:
-> On Tue, Jan 14, 2020 at 3:38 PM Johan Jonker <jbx6244@gmail.com> wrote:
+On 16-01-2020 08:59, Adrian Hunter wrote:
+> On 15/01/20 5:31 pm, Hans de Goede wrote:
+
+<snip>
+
+>>>> Note that the suspend/resume handling is broken also in the sense that
+>>>> it does not disable the signal voltage during suspend.
+>>>
+>>> The bus power gets switched off if the card is runtime suspended.  The host
+>>> controller should go to D3cold which means everything off.
 >>
-
-> [...]
+>> Right, what I mean is that the _PS3 method is broken in that it does
+>> not turn off the voltage-regulator providing the signal voltage, as
+>> it does do on other machines with a non buggy implementation.
 > 
->> diff --git a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.yaml b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.yaml
->> new file mode 100644
->> index 000000000..6f85a21d0
->> --- /dev/null
->> +++ b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.yaml
->> @@ -0,0 +1,88 @@
->> +# SPDX-License-Identifier: GPL-2.0
->> +%YAML 1.2
->> +---
->> +$id: http://devicetree.org/schemas/mmc/synopsys-dw-mshc.yaml#
->> +$schema: http://devicetree.org/meta-schemas/core.yaml#
->> +
->> +title: Synopsys Designware Mobile Storage Host Controller Binding
+> Is that different to what you would get with Windows?
 
-[..]
+No Windows has the same problem.
 
->> +examples:
->> +  # The MSHC controller node can be split into two portions, SoC specific and
->> +  # board specific portions as listed below.
-> 
+> Also, you could possibly build a custom DSDT and fix the _PS0 and _PS3
+> yourself.  That requires building it into a custom kernel also though.
 
+I have not tried, but yes that should work, but until we get some generic
+mechanism (*) in Linux / distro-s to provide DSDT overrides, that is not
+helpful for regular Linux users.
 
-> This split doesn't work because the examples are built and validated
-> now. It may happen to because all the props are optional, but the
-> board hunk goes unchecked. So please combine.
-> 
+*) which also has copyright issues, so the chances of this ever happening
+are slim
 
-Hi,
+<snip>
 
-I have no knowledge about this particular hardware to give a realistic
-example. Could someone advise here? Or should I just use the first
-example for now?
-
-Thanks
-
->> +  - |
->> +    dwmmc0@12200000 {
->> +      compatible = "snps,dw-mshc";
->> +      clocks = <&clock 351>, <&clock 132>;
->> +      clock-names = "biu", "ciu";
->> +      reg = <0x12200000 0x1000>;
->> +      interrupts = <0 75 0>;
->> +      #address-cells = <1>;
->> +      #size-cells = <0>;
->> +      data-addr = <0x200>;
->> +      fifo-watermark-aligned;
->> +      resets = <&rst 20>;
->> +      reset-names = "reset";
->> +    };
->> +  # [board specific internal DMA resources]
->> +  - |
->> +    dwmmc0@12200000 {
->> +      clock-frequency = <400000000>;
->> +      clock-freq-min-max = <400000 200000000>;
->> +      broken-cd;
->> +      fifo-depth = <0x80>;
->> +      card-detect-delay = <200>;
->> +      vmmc-supply = <&buck8>;
->> +      bus-width = <8>;
->> +      cap-mmc-highspeed;
->> +      cap-sd-highspeed;
->> +    };
->> +  # [board specific generic DMA request binding]
->> +  - |
->> +    dwmmc0@12200000 {
->> +      clock-frequency = <400000000>;
->> +      clock-freq-min-max = <400000 200000000>;
->> +      broken-cd;
->> +      fifo-depth = <0x80>;
->> +      card-detect-delay = <200>;
->> +      vmmc-supply = <&buck8>;
->> +      bus-width = <8>;
->> +      cap-mmc-highspeed;
->> +      cap-sd-highspeed;
->> +      dmas = <&pdma 12>;
->> +      dma-names = "rx-tx";
->> +    };
->> --
->> 2.11.0
+>>>>>> +static int quirks = -1;
+>>>>>> +module_param(quirks, int, 0444);
+>>>>>> +MODULE_PARM_DESC(quirks, "Override sdhci-acpi specific quirks");
+>>>>>
+>>>>> Why is a module parameter needed?
+>>>>
+>>>> The module parameter is purely to make testing if the same quirk(s)
+>>>> help on other devices easier. Like the debug_quirks[2] params in sdhci.c
+>>>
+>>> Mmm, but we already have SDHCI_QUIRK2_NO_1_8_V
 >>
+>> True, but this only applies to the sdcard slot and not to the eMMC,
+>> also you are asking for this to be changed to:
+>>
+>> SDHCI_ACPI_QUIRK_SD_SET_SIGNAL_3_3V_ON_SUSPEND
+>>
+>> Which is not duplicate. Anyways if you dislike the module parameter
+>> bits I can drop them and make this only available through the DMI quirks.
+>>
+> 
+> It isn't dislike, it is whether it will ever be needed.
+
+For this specific issue, chances are not that big we will need it
+on another device. The quirk added by the second patch, to disable
+(broken) read-only detection OTOH might very well be useful on some
+other devices.
+
+And adding the option to override the quirks from the kernel commandline
+requires very little extra code.
+
+Anyways, it is your call. Please let me know if you want to drop the
+module parameter for v2, or if you are ok with keeping it.
+
+Regards,
+
+Hans
 
