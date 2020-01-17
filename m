@@ -2,78 +2,90 @@ Return-Path: <SRS0=ySr4=3G=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.4 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.3 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B5B54C33CB1
-	for <linux-mmc@archiver.kernel.org>; Fri, 17 Jan 2020 14:11:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F1718C33CB1
+	for <linux-mmc@archiver.kernel.org>; Fri, 17 Jan 2020 14:16:10 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 7F99B2083E
-	for <linux-mmc@archiver.kernel.org>; Fri, 17 Jan 2020 14:11:49 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=rere.qmqm.pl header.i=@rere.qmqm.pl header.b="BW+cTQ8x"
+	by mail.kernel.org (Postfix) with ESMTP id CE84420842
+	for <linux-mmc@archiver.kernel.org>; Fri, 17 Jan 2020 14:16:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726688AbgAQOLt (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 17 Jan 2020 09:11:49 -0500
-Received: from rere.qmqm.pl ([91.227.64.183]:2136 "EHLO rere.qmqm.pl"
+        id S1727040AbgAQOQK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 17 Jan 2020 09:16:10 -0500
+Received: from mga11.intel.com ([192.55.52.93]:27960 "EHLO mga11.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726587AbgAQOLs (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 17 Jan 2020 09:11:48 -0500
-Received: from remote.user (localhost [127.0.0.1])
-        by rere.qmqm.pl (Postfix) with ESMTPSA id 47zjfp2SzTzJv;
-        Fri, 17 Jan 2020 15:11:46 +0100 (CET)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=rere.qmqm.pl; s=1;
-        t=1579270306; bh=XmEtgDG0oQyn3sFStAiiuxUsYkO0wEPHkuJs+F8ucvw=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=BW+cTQ8x5vNorbyo8Z9YUUvoj8OQUvY6DvyE5ZhRGTXoKj2jyQz5grz6N2ihuhJrU
-         Fj66MNklsymohTWe4x0dI1IzLMR0MadoMO7uGnpSk6Lo8svaAGZ77PmudPUpndUSmy
-         jEcC6ZIUmovIhJK5ccrwPrYq2i5pPuFWsJ6uE5JLqvgLs/X9RJJnC4jXqNiBig7Y63
-         vAm56mXPBkaMEbtwLW7fVs9fdr91CvzTorlpaye8J6GLI/Rf0e42TIlO1nX6c5XHUY
-         Qo0cOv0dKQOx/YniIRk8MUI8JYwHoPLjrDnpeyIkWky7QxWYEiVrToiwKKz+0C9mMX
-         sxEMafgp9SRzw==
-X-Virus-Status: Clean
-X-Virus-Scanned: clamav-milter 0.101.4 at mail
-Date:   Fri, 17 Jan 2020 15:11:45 +0100
-From:   =?iso-8859-2?Q?Micha=B3_Miros=B3aw?= <mirq-linux@rere.qmqm.pl>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        Thierry Reding <treding@nvidia.com>,
-        Jonathan Hunter <jonathanh@nvidia.com>,
-        Lucas Stach <dev@lynxeye.de>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        linux-tegra <linux-tegra@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-Subject: Re: [PATCH v3] mmc: tegra: fix SDR50 tuning override
-Message-ID: <20200117141145.GD26135@qmqm.qmqm.pl>
-References: <9aff1d859935e59edd81e4939e40d6c55e0b55f6.1578390388.git.mirq-linux@rere.qmqm.pl>
- <CAPDyKFqXmbnH_NWZZTHHCE+Lt-f3JHAhJ8-=aoKNEPyQed44YA@mail.gmail.com>
+        id S1726587AbgAQOQK (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 17 Jan 2020 09:16:10 -0500
+X-Amp-Result: SKIPPED(no attachment in message)
+X-Amp-File-Uploaded: False
+Received: from orsmga008.jf.intel.com ([10.7.209.65])
+  by fmsmga102.fm.intel.com with ESMTP/TLS/DHE-RSA-AES256-GCM-SHA384; 17 Jan 2020 06:16:09 -0800
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.70,330,1574150400"; 
+   d="scan'208";a="218919467"
+Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.167]) ([10.237.72.167])
+  by orsmga008.jf.intel.com with ESMTP; 17 Jan 2020 06:16:07 -0800
+Subject: Re: [PATCH] mmc: sdhci: fix up CMD12 sending
+To:     Ulf Hansson <ulf.hansson@linaro.org>, "Y.b. Lu" <yangbo.lu@nxp.com>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Sachin Miglani <sachin.miglani@nxp.com>
+References: <20191114111814.35199-1-yangbo.lu@nxp.com>
+ <CAPDyKFqfMzv1hFzPzS7w5BVHyXybu--7p11wHYa8WTQAVB7r4g@mail.gmail.com>
+ <AM7PR04MB68856B9D41A5867AB39D37F2F83E0@AM7PR04MB6885.eurprd04.prod.outlook.com>
+ <CAPDyKFq7VnfYAs=RcjUpskAfSC_fatksQ1_sJ6wEOinbPDKmkQ@mail.gmail.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Message-ID: <88442ced-8bf0-5f29-ad47-cc53162f157b@intel.com>
+Date:   Fri, 17 Jan 2020 16:15:13 +0200
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.2.2
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-2
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <CAPDyKFqXmbnH_NWZZTHHCE+Lt-f3JHAhJ8-=aoKNEPyQed44YA@mail.gmail.com>
-User-Agent: Mutt/1.10.1 (2018-07-13)
+In-Reply-To: <CAPDyKFq7VnfYAs=RcjUpskAfSC_fatksQ1_sJ6wEOinbPDKmkQ@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Jan 16, 2020 at 03:39:54PM +0100, Ulf Hansson wrote:
-> On Tue, 7 Jan 2020 at 10:47, Micha³ Miros³aw <mirq-linux@rere.qmqm.pl> wrote:
-> >
-> > Commit 7ad2ed1dfcbe inadvertently mixed up a quirk flag's name and
-> > broke SDR50 tuning override. Use correct NVQUIRK_ name.
-> >
-> > Fixes: 7ad2ed1dfcbe ("mmc: tegra: enable UHS-I modes")
-> > Cc: <stable@vger.kernel.org> # 4f6aa3264af4: mmc: tegra: Only advertise UHS modes if IO regulator is present
+On 16/01/20 5:36 pm, Ulf Hansson wrote:
+> On Wed, 8 Jan 2020 at 10:37, Y.b. Lu <yangbo.lu@nxp.com> wrote:
+>>
+>> Hi Uffe and Adrian,
+>>
+>> Back again on this topic. Actually we are trying to make the error recovery work after data error of CMD18 in linux-4.14.
+>> With this patch, when CMD18 data error got, manual CMD12 would be sent. And then went into mmc_blk_cmd_recovery(). (Should be mmc_blk_mq_rw_recovery() in latest linux-5.5-rc2.)
+>> In mmc_blk_cmd_recovery(), re-tuning would fail before sending CMD13 on our specific board.
+>> This may be some issue related to specific eMMC card we are investigating.
+>>
+>> The above is just background introduction, and you may not care about that:)
+>> I'd like to have some queries on CMD12 usage in MMC driver.
+>> 1. It seems CMD12 is always not using ABORT type for sending in sdhci.c. The SDHCI_CMD_ABORTCMD hasn't been used. Is this issue?
 > 
-> I am dropping this tag, simply because I don't understand what it should tell.
 
-It tells the maintainer that he needs to cherry-pick this commit if
-its not in particular stable version already. I guess this is only
-for v4.4, as v4.9+ already have it, and v3.16 does not include the
-Fixed commit.
+AFAIK it is not an issue, but support for it can be added if you need it.
 
-Best Regards,
-Micha³ Miros³aw
+> 
+>> 2. In block.c, CMD12 uses R1 response for data reading and R1B response for writing. Is it ok to use R1 response for SD? The SD spec mentions only R1B response for CMD12.
+> 
+> I think the specs isn't that clear on this. In this case, the R1B, is
+> an R1 with an *optional* busy signaling on DAT0, unless it has been
+> changed lately.
+
+Also SDHCI offers SDHCI_QUIRK2_STOP_WITH_TC to turn all CMD12 responses into R1B
+
+> 
+> Additionally, as far as can tell, there have been no reports about
+> problems with the current approach for "reads". Are you saying there
+> is?
+> 
+> [...]
+> 
+> Kind regards
+> Uffe
+> 
+
