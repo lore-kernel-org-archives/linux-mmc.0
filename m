@@ -1,129 +1,104 @@
-Return-Path: <SRS0=ySr4=3G=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=bclj=3I=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.4 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=ham
+X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 92C23C33CB1
-	for <linux-mmc@archiver.kernel.org>; Fri, 17 Jan 2020 16:14:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2648BC33CAF
+	for <linux-mmc@archiver.kernel.org>; Sun, 19 Jan 2020 03:50:07 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 645952072E
-	for <linux-mmc@archiver.kernel.org>; Fri, 17 Jan 2020 16:14:28 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A814720730
+	for <linux-mmc@archiver.kernel.org>; Sun, 19 Jan 2020 03:50:06 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=rere.qmqm.pl header.i=@rere.qmqm.pl header.b="NQB/Y04L"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="t4mtc3am"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729014AbgAQQO1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 17 Jan 2020 11:14:27 -0500
-Received: from rere.qmqm.pl ([91.227.64.183]:14541 "EHLO rere.qmqm.pl"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728977AbgAQQO1 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 17 Jan 2020 11:14:27 -0500
-Received: from remote.user (localhost [127.0.0.1])
-        by rere.qmqm.pl (Postfix) with ESMTPSA id 47zmNJ5xwVzJv;
-        Fri, 17 Jan 2020 17:14:24 +0100 (CET)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=rere.qmqm.pl; s=1;
-        t=1579277664; bh=ftJBWCYEwkPQyHNpwkWvXU/BQm+kqTZFwefLuQQlqwU=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=NQB/Y04LIGN2kKOJeMq1qO6oh4T2EbROfjtVwr3tOtTy1cMfjTXI9gL9jDNn4KlHt
-         ijDLc7xdYuM1Yd1LCgJXTqrq6ZdAnSAPVitzrL6FDqjlTMZkVUIyBemBrGu+R/WCvN
-         5wUPcL3MFVrWwrv/k8mAKCYMAuRxcS6rgw35TZA57JuamX+8yIq3Hw7uWQUyFMIvyQ
-         kgnk5Rl+IV+lVzKs5Im6XwNqGCRCMCxkgYMKUCM317mIGcgiZg+LIpBn5lCo+lzwsA
-         fUf/0fBKdMJsXaw9Ms3FkldFGi1qLPSkuMgdhHSEuS681H2OZuEpFwajexwcmgWZg8
-         5V33/UMV05DhQ==
-X-Virus-Status: Clean
-X-Virus-Scanned: clamav-milter 0.101.4 at mail
-Date:   Fri, 17 Jan 2020 17:14:22 +0100
-From:   =?iso-8859-2?Q?Micha=B3_Miros=B3aw?= <mirq-linux@rere.qmqm.pl>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-Subject: Re: [PATCH] mmc: core: limit probe clock frequency to configured
- f_max
-Message-ID: <20200117161422.GA11081@qmqm.qmqm.pl>
-References: <f471bceaf237d582d746bd289c4c4f3639cb7b45.1577962382.git.mirq-linux@rere.qmqm.pl>
- <CAPDyKFpZWnkK7UmCZ8M4UnM05wR3MQsPrpEjOJuwkKcN2gePSg@mail.gmail.com>
- <20200117140511.GC26135@qmqm.qmqm.pl>
- <CAPDyKFpkhwnzi5PAr_0bAriYteeBUVM5Qr1byiXtJkgYd=dKfw@mail.gmail.com>
+        id S1726046AbgASDuG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 18 Jan 2020 22:50:06 -0500
+Received: from mail-pf1-f196.google.com ([209.85.210.196]:45430 "EHLO
+        mail-pf1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725980AbgASDuF (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 18 Jan 2020 22:50:05 -0500
+Received: by mail-pf1-f196.google.com with SMTP id 2so13994764pfg.12;
+        Sat, 18 Jan 2020 19:50:05 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=uZ5T5UfJAQJwU5MzOJB4Yvh3UEefL9B9keDh3VxMHPs=;
+        b=t4mtc3amxopGywAWkZqoZtv/mHuTlllXRwI6sX52MewkHrKOOI5+rZHWRrRto3WjKN
+         cj5X3IhWIJ4WdVCLuF9sPjhXYbvIBM6XzylDFE9F0a7Vlj4ya/4D3B+Ujz5HVBFI52n3
+         iTPmt/c50xoQjhjXxke0+rNJGMmhkLowBvoXzUDmqJi6BW/tgC1mtBzsc3Z0NEdZC+sd
+         eeve8wGELp/UuiA4PiEz7x8IePkw3biEhYlOMGUg7HXxGQYFhDrWjnc3BhhrU602FBYM
+         QM1wx6Emk7X35rYg6alUeDnM8tLKB/C/WLmWOTTb8pqSQ8YlXODVVspdgtrp0lqrzmYS
+         wGGA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=uZ5T5UfJAQJwU5MzOJB4Yvh3UEefL9B9keDh3VxMHPs=;
+        b=gBVizkjPAII6TzmMC1pvNIDxlgLQnwNg6K4TYysjqpVq47xZAMJkXxKXceyesXI+Yp
+         6QgyPclIr2kAdHug41bmEx2sp8Z2NfOOTTqPvSCaBqCSTcenBjnwuoynEs2E2QeTF7ic
+         qmfDW7mgj+lqU7Xjvf903luoNVeMwcCNet7GgxgN9xAxsNN76Gug3OXbLnV27xbBEnoT
+         WUi7WvEmhBhMl8YwyhZTDnGswrcolAgdzKkK+gJ/yIZiHX15Sf4na0khlKVNE4lujjH7
+         YCNHwnWe3O3y6lrmVrwl2aVaOk8dFC1Lb7k97wYumzg0WAp9t0cVmUAZIN0TRHLfJt5I
+         oxaQ==
+X-Gm-Message-State: APjAAAXW2E342+5IRW6sr6yvyIfzHVcgJUuoRObvZy/UZbyehaF+1Rq0
+        ULdoSj9AGZE3PW+oc3GgOV0=
+X-Google-Smtp-Source: APXvYqzSlkpFIebImLyEI/U5zYhbjiRWFjKvEXDA8jNQCknif976ZwYQmGZnZs1hBpLhRizaVyPAuw==
+X-Received: by 2002:a65:4206:: with SMTP id c6mr54128856pgq.46.1579405805266;
+        Sat, 18 Jan 2020 19:50:05 -0800 (PST)
+Received: from ubt.spreadtrum.com ([117.18.48.82])
+        by smtp.gmail.com with ESMTPSA id 144sm36126980pfc.124.2020.01.18.19.50.01
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sat, 18 Jan 2020 19:50:04 -0800 (PST)
+From:   Chunyan Zhang <zhang.lyra@gmail.com>
+X-Google-Original-From: Chunyan Zhang <zhang.chunyan@linaro.org>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>
+Cc:     linux-mmc@vger.kernel.org, Faiz Abbas <faiz_abbas@ti.com>,
+        Chunyan Zhang <zhang.chunyan@linaro.org>,
+        linux-kernel@vger.kernel.org, Chunyan Zhang <zhang.lyra@gmail.com>,
+        kbuild test robot <lkp@intel.com>
+Subject: [PATCH] mmc: sdhci: fix an issue of mixing different types
+Date:   Sun, 19 Jan 2020 11:49:02 +0800
+Message-Id: <20200119034902.20688-1-zhang.chunyan@linaro.org>
+X-Mailer: git-send-email 2.20.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-2
-Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
-In-Reply-To: <CAPDyKFpkhwnzi5PAr_0bAriYteeBUVM5Qr1byiXtJkgYd=dKfw@mail.gmail.com>
-User-Agent: Mutt/1.10.1 (2018-07-13)
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, Jan 17, 2020 at 04:26:30PM +0100, Ulf Hansson wrote:
-> On Fri, 17 Jan 2020 at 15:05, Micha³ Miros³aw <mirq-linux@rere.qmqm.pl> wrote:
-> >
-> > On Thu, Jan 16, 2020 at 03:07:22PM +0100, Ulf Hansson wrote:
-> > > On Thu, 2 Jan 2020 at 11:54, Micha³ Miros³aw <mirq-linux@rere.qmqm.pl> wrote:
-> > > >
-> > > > Currently MMC core disregards host->f_max during card initialization
-> > > > phase. Obey upper boundary for the clock frequency and skip faster
-> > > > speeds when they are above the limit.
-> > >
-> > > Is this a hypothetical problem or a real problem?
-> >
-> > This is a problem on noisy or broken boards or cards - so needed for
-> > debugging such a combination. I wouldn't expect this is required for
-> > normal devices.
-> 
-> Alright.
-> 
-> >
-> > > > Signed-off-by: Micha³ Miros³aw <mirq-linux@rere.qmqm.pl>
-> > > > ---
-> > > >  drivers/mmc/core/core.c | 10 ++++++++--
-> > > >  1 file changed, 8 insertions(+), 2 deletions(-)
-> > > >
-> > > > diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> > > > index abf8f5eb0a1c..aa54d359dab7 100644
-> > > > --- a/drivers/mmc/core/core.c
-> > > > +++ b/drivers/mmc/core/core.c
-> > > > @@ -2330,7 +2330,13 @@ void mmc_rescan(struct work_struct *work)
-> > > >         }
-> > > >
-> > > >         for (i = 0; i < ARRAY_SIZE(freqs); i++) {
-> > > > -               if (!mmc_rescan_try_freq(host, max(freqs[i], host->f_min)))
-> > > > +               unsigned int freq = freqs[i];
-> > > > +               if (freq > host->f_max) {
-> > > > +                       if (i + 1 < ARRAY_SIZE(freqs))
-> > > > +                               continue;
-> > > > +                       freq = host->f_max;
-> > >
-> > > This looks wrong to me. For example, what if f_max = 250KHz and f_min = 50 KHz.
-> > >
-> > > Then we should try with 250KHz, then 200KHz and then 100KHz. This
-> > > isn't what the above code does, I think.
-> > >
-> > > Instead it will try with 200KHz and then 100KHz, thus skip 250KHz.
-> > >
-> > > Maybe we should figure out what index of freqs[] to start the loop for
-> > > (before actually starting the loop), depending on the value of f_max -
-> > > rather than always start at 0.
-> >
-> > Yes, it will skip higher frequencies. I didn't view it a problem,
-> > because the new code guarantees at least one frequency will be tried.
-> > The eMMC standard specifies only max init frequency (400kHz), so all we
-> > should try is something less whatever works.
-> >
-> > SD spec specifies minimal frequency (100kHz), but I wouldn't expect
-> > this to be enforced nor required to be anywhere.
-> 
-> Well, my point isn't so much about the specs, rather about providing a
-> consistent behaviour.
-> 
-> We deal with f_min constraints like I described above, then I think we
-> should make f_max behave the similar way.
+Fix an issue reported by sparse, since different type of parameter is
+used on calling dmaengine_prep_slave_sg().
 
-Okay, this would be a second fix as trying the same freq multiple times
-is not what this code is supposed to do.
+Fixes: 36e1da441fec (mmc: sdhci: add support for using external DMA devices)
+Reported-by: kbuild test robot <lkp@intel.com>
+Signed-off-by: Chunyan Zhang <zhang.chunyan@linaro.org>
+---
+ drivers/mmc/host/sdhci.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-Best Regards,
-Micha³ Miros³aw
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 30b5a624b50e..4503009f993b 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1235,8 +1235,8 @@ static int sdhci_external_dma_setup(struct sdhci_host *host,
+ 		return -EINVAL;
+ 
+ 	desc = dmaengine_prep_slave_sg(chan, data->sg, data->sg_len,
+-				       mmc_get_dma_dir(data),
+-				       DMA_PREP_INTERRUPT | DMA_CTRL_ACK);
++			(enum dma_transfer_direction) mmc_get_dma_dir(data),
++			DMA_PREP_INTERRUPT | DMA_CTRL_ACK);
+ 	if (!desc)
+ 		return -EINVAL;
+ 
+-- 
+2.20.1
+
