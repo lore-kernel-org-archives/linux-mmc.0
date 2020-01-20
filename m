@@ -2,103 +2,101 @@ Return-Path: <SRS0=gs89=3J=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.0 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-0.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 88786C33CB7
-	for <linux-mmc@archiver.kernel.org>; Mon, 20 Jan 2020 09:17:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 96519C33CB7
+	for <linux-mmc@archiver.kernel.org>; Mon, 20 Jan 2020 09:44:10 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id AB86D20684
-	for <linux-mmc@archiver.kernel.org>; Mon, 20 Jan 2020 09:17:39 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6D7DF207FF
+	for <linux-mmc@archiver.kernel.org>; Mon, 20 Jan 2020 09:44:10 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (2048-bit key) header.d=xenosoft.de header.i=@xenosoft.de header.b="I3QUfjzn"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="RZHZvJdK"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726775AbgATJRj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 20 Jan 2020 04:17:39 -0500
-Received: from mo4-p01-ob.smtp.rzone.de ([85.215.255.50]:33813 "EHLO
-        mo4-p01-ob.smtp.rzone.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725872AbgATJRj (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Jan 2020 04:17:39 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; t=1579511854;
-        s=strato-dkim-0002; d=xenosoft.de;
-        h=In-Reply-To:Date:Message-ID:From:References:Cc:To:Subject:
-        X-RZG-CLASS-ID:X-RZG-AUTH:From:Subject:Sender;
-        bh=qSUjC69zK2oDdbl4JMNMSrLxeZA2bP7y3B61tKmaYIY=;
-        b=I3QUfjznxzzsyZe4E1BjVftMMCv6WiKn7GzuMWk62s8EVBWIfHLODMktFzSxlXcAbk
-        jvj/V7Yg2monHUe8aY7rU+fZu5tER8qBOaYY2HG+Di0yUJrbl2LIiIwo7ihW2LXFL+Tm
-        6b4b2w5OqNO2XgrSaVivKt1ezVaMkuoksvbahaAZIHx+6Ag/tjgwlHd+PKyyn1dkFz1m
-        Z5qfcr0Bo5g2G4RybeEuU769aQkKkyHxI5xCj9p6LL5TwChY25+pnYejG0QetTy8KCZc
-        Ms6Om1SZgdqY6nsreNxaKpyM4U8TKsOSorlDW9mw0IIH+xnF+aggcvJgMinPZadB1SpV
-        rGfQ==
-X-RZG-AUTH: ":L2QefEenb+UdBJSdRCXu93KJ1bmSGnhMdmOod1DhGM4l4Hio94KKxRySd+h5FvloCR9QVidlQfU="
-X-RZG-CLASS-ID: mo00
-Received: from [192.168.178.37]
-        by smtp.strato.de (RZmta 46.1.4 DYNA|AUTH)
-        with ESMTPSA id c05c1aw0K9HVw9R
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256 bits))
-        (Client did not present a certificate);
-        Mon, 20 Jan 2020 10:17:31 +0100 (CET)
-Subject: [FSL P5020 P5040 PPC] Onboard SD card doesn't work anymore after the
- 'mmc-v5.4-2' updates
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        linuxppc-dev <linuxppc-dev@lists.ozlabs.org>,
-        Darren Stevens <darren@stevens-zone.net>,
-        mad skateman <madskateman@gmail.com>,
-        "R.T.Dickinson" <rtd2@xtra.co.nz>,
-        "contact@a-eon.com" <contact@a-eon.com>,
-        Julian Margetson <runaway@candw.ms>
-References: <20200108093903.57620-1-hdegoede@redhat.com>
- <20200108093903.57620-2-hdegoede@redhat.com>
- <61bc9265-ece0-eeb6-d4a1-4631138ecf29@intel.com>
- <8d67882d-04a8-0607-be4e-c1430b7fda21@redhat.com>
- <84a32714-ba08-74a0-0c76-3c36db44dd68@intel.com>
- <93446e09-5f12-800a-62fa-bf3ecea7273d@redhat.com>
- <399ac7d5-2518-799a-595e-f6b6878cf4ab@intel.com>
- <a9ab8946-c599-5f83-7527-2387a9e82e8a@xenosoft.de>
- <CAPDyKFoydOuSE=Eaq168=2_Ycouo7hzyw+RZXhGq7q4D4Qe8TQ@mail.gmail.com>
-From:   Christian Zigotzky <chzigotzky@xenosoft.de>
-Message-ID: <fda179eb-df5f-ba87-aaf0-524fffca745b@xenosoft.de>
-Date:   Mon, 20 Jan 2020 10:17:31 +0100
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.4.1
+        id S1726039AbgATJoJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 20 Jan 2020 04:44:09 -0500
+Received: from mail-vk1-f194.google.com ([209.85.221.194]:43284 "EHLO
+        mail-vk1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726901AbgATJoI (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Jan 2020 04:44:08 -0500
+Received: by mail-vk1-f194.google.com with SMTP id h13so8375134vkn.10
+        for <linux-mmc@vger.kernel.org>; Mon, 20 Jan 2020 01:44:07 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc:content-transfer-encoding;
+        bh=8WXD++puZRBDfX+XovxCYxezYIYsgF4bFnxytu5iD+I=;
+        b=RZHZvJdKK+liUUkELaYnw7PGaEroFf9bWYekXdHa0nKjOWN1cV6Cs1e09zCuchePzu
+         RijCqeXtUHanoE2AIw5XN23OfQwNyKbfztEp2OtpSMASCijrurE07e2dKXVxsyCWVEPs
+         FWZ+WLM/N+K0H92fquLbaCGqfEj23QyGNxICFJJN+fa9gGLppp/qEiQorEXFSC6szQDG
+         xGtnebS9HNjcCQiiFhJdJxZECbi+meO5SGl50HCnbJjPJFvhh5ru4R0X++MQ+sap0bVH
+         fqWYqYINlrp62H/fNGfi/JgDYS74n82ogq5FiUOnZ0de3oJZDIs57MqeT3ZH4AVoczYX
+         KuZg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=8WXD++puZRBDfX+XovxCYxezYIYsgF4bFnxytu5iD+I=;
+        b=gTAcwUxWjUCfHRUF9SV3ClOsdenmem17BRM7SHyuEb9m+vKMS3sy4vfva+y2pYS69u
+         K7c/FuzXlLbhL+4G8PxPGHwc9VdmDSZDJiDjl7fNIFeZZOutjlk7v+zUHxQeQfFhzF7E
+         b2J5Eoc25BtYlwsWcyUCqB1ltKQAyIzufRLQAGGCWyz6Lnq2IQ6zMj95zBfc4rk0fALI
+         AlViy1fWKPvY2XvEulLopOBu0Y8jcG77Q6lO66KeFdoAJEuRgVVAk1EC1R5AOK7MAzmu
+         urpoQpLZWVgsbFgraOMk57zScqOVpmo8QYw3ci4nZsQKCgt1tYDxZ5jbI1BXYVdmFUpo
+         HH1Q==
+X-Gm-Message-State: APjAAAUqEQAVZVZ7H80n500qP8YRSvSEH7fRNbEEnEpLw71g5trRX8Ea
+        FNMhZFd0OO1BN+D2/tpb1jDRru3VfaLRp/yYidd0FA==
+X-Google-Smtp-Source: APXvYqx+cHz8q5EP3Nl248rDH5+9yKyZOEZH6I3T1+KhPmpO6mTORqbQWVIORQg+2MtPoXgeClbCG0k4xhRdmPE3Nqc=
+X-Received: by 2002:ac5:cde3:: with SMTP id v3mr378521vkn.43.1579513446738;
+ Mon, 20 Jan 2020 01:44:06 -0800 (PST)
 MIME-Version: 1.0
-In-Reply-To: <CAPDyKFoydOuSE=Eaq168=2_Ycouo7hzyw+RZXhGq7q4D4Qe8TQ@mail.gmail.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Content-Language: de-DE
+References: <9aff1d859935e59edd81e4939e40d6c55e0b55f6.1578390388.git.mirq-linux@rere.qmqm.pl>
+ <CAPDyKFqXmbnH_NWZZTHHCE+Lt-f3JHAhJ8-=aoKNEPyQed44YA@mail.gmail.com> <20200117141145.GD26135@qmqm.qmqm.pl>
+In-Reply-To: <20200117141145.GD26135@qmqm.qmqm.pl>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Mon, 20 Jan 2020 10:43:28 +0100
+Message-ID: <CAPDyKFqmXiv75XCK6-tNJn5xTxyYpZcKRGKhvg-G0ycSZ_xw7g@mail.gmail.com>
+Subject: Re: [PATCH v3] mmc: tegra: fix SDR50 tuning override
+To:     =?UTF-8?B?TWljaGHFgiBNaXJvc8WCYXc=?= <mirq-linux@rere.qmqm.pl>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        Thierry Reding <treding@nvidia.com>,
+        Jonathan Hunter <jonathanh@nvidia.com>,
+        Lucas Stach <dev@lynxeye.de>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        linux-tegra <linux-tegra@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Am 16.01.20 um 16:46 schrieb Ulf Hansson:
-> On Thu, 16 Jan 2020 at 12:18, Christian Zigotzky <chzigotzky@xenosoft.de> wrote:
->> Hi All,
->>
->> We still need the attached patch for our onboard SD card interface
->> [1,2]. Could you please add this patch to the tree?
-> No, because according to previous discussion that isn't the correct
-> solution and more importantly it will break other archs (if I recall
-> correctly).
+On Fri, 17 Jan 2020 at 15:11, Micha=C5=82 Miros=C5=82aw <mirq-linux@rere.qm=
+qm.pl> wrote:
 >
-> Looks like someone from the ppc community needs to pick up the ball.
-I am not sure if the ppc community have to fix this issue because your 
-updates (mmc-v5.4-2) are responsible for this issue. If nobody wants to 
-fix this issue then we will lost the onboard SD card support in the 
-future. PLEASE check the 'mmc-v5.4-2' updates again.
+> On Thu, Jan 16, 2020 at 03:39:54PM +0100, Ulf Hansson wrote:
+> > On Tue, 7 Jan 2020 at 10:47, Micha=C5=82 Miros=C5=82aw <mirq-linux@rere=
+.qmqm.pl> wrote:
+> > >
+> > > Commit 7ad2ed1dfcbe inadvertently mixed up a quirk flag's name and
+> > > broke SDR50 tuning override. Use correct NVQUIRK_ name.
+> > >
+> > > Fixes: 7ad2ed1dfcbe ("mmc: tegra: enable UHS-I modes")
+> > > Cc: <stable@vger.kernel.org> # 4f6aa3264af4: mmc: tegra: Only adverti=
+se UHS modes if IO regulator is present
+> >
+> > I am dropping this tag, simply because I don't understand what it shoul=
+d tell.
 >
->> Thanks,
->> Christian
->>
->> [1] https://www.spinics.net/lists/linux-mmc/msg56211.html
-> I think this discussion even suggested some viable solutions, so it
-> just be a matter of sending a patch :-)
->
->> [2]
->> http://forum.hyperion-entertainment.com/viewtopic.php?f=58&t=4349&start=20#p49012
->>
-> Kind regards
-> Uffe
+> It tells the maintainer that he needs to cherry-pick this commit if
+> its not in particular stable version already. I guess this is only
+> for v4.4, as v4.9+ already have it, and v3.16 does not include the
+> Fixed commit.
 
+Alright, I updated myself on stable rules and found this, thanks!
+
+So I have amended the patch to add back the tag, let's give this a try.
+
+Kind regards
+Uffe
