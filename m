@@ -2,272 +2,103 @@ Return-Path: <SRS0=gs89=3J=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.0 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C9FF3C33CA1
-	for <linux-mmc@archiver.kernel.org>; Mon, 20 Jan 2020 08:59:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 88786C33CB7
+	for <linux-mmc@archiver.kernel.org>; Mon, 20 Jan 2020 09:17:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 9EDC22077C
-	for <linux-mmc@archiver.kernel.org>; Mon, 20 Jan 2020 08:59:33 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id AB86D20684
+	for <linux-mmc@archiver.kernel.org>; Mon, 20 Jan 2020 09:17:39 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=xenosoft.de header.i=@xenosoft.de header.b="I3QUfjzn"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726890AbgATI7d (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 20 Jan 2020 03:59:33 -0500
-Received: from mga18.intel.com ([134.134.136.126]:6919 "EHLO mga18.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726125AbgATI7d (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 20 Jan 2020 03:59:33 -0500
-X-Amp-Result: SKIPPED(no attachment in message)
-X-Amp-File-Uploaded: False
-Received: from fmsmga002.fm.intel.com ([10.253.24.26])
-  by orsmga106.jf.intel.com with ESMTP/TLS/DHE-RSA-AES256-GCM-SHA384; 20 Jan 2020 00:59:31 -0800
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.70,341,1574150400"; 
-   d="scan'208";a="258634541"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.167]) ([10.237.72.167])
-  by fmsmga002.fm.intel.com with ESMTP; 20 Jan 2020 00:59:25 -0800
-Subject: Re: [PATCH V2 2/2] mmc: sdhci-msm: Add CQHCI support for sdhci-msm
-To:     Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
-        ulf.hansson@linaro.org
-Cc:     asutoshd@codeaurora.org, stummala@codeaurora.org,
-        sayalil@codeaurora.org, cang@codeaurora.org,
-        rampraka@codeaurora.org, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        Ritesh Harjani <riteshh@codeaurora.org>,
-        Andy Gross <agross@kernel.org>,
-        Andrew Jeffery <andrew@aj.id.au>,
-        Faiz Abbas <faiz_abbas@ti.com>,
-        Thierry Reding <treding@nvidia.com>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        "Enrico Weigelt, metux IT consult" <info@metux.net>,
-        BOUGH CHEN <haibo.chen@nxp.com>,
-        Takao Orito <orito.takao@socionext.com>,
-        Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
-References: <1579194192-7942-1-git-send-email-vbadigan@codeaurora.org>
- <1579194192-7942-3-git-send-email-vbadigan@codeaurora.org>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <2d6be21b-deb3-9048-f44a-8a8d637f06e6@intel.com>
-Date:   Mon, 20 Jan 2020 10:58:30 +0200
+        id S1726775AbgATJRj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 20 Jan 2020 04:17:39 -0500
+Received: from mo4-p01-ob.smtp.rzone.de ([85.215.255.50]:33813 "EHLO
+        mo4-p01-ob.smtp.rzone.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725872AbgATJRj (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Jan 2020 04:17:39 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; t=1579511854;
+        s=strato-dkim-0002; d=xenosoft.de;
+        h=In-Reply-To:Date:Message-ID:From:References:Cc:To:Subject:
+        X-RZG-CLASS-ID:X-RZG-AUTH:From:Subject:Sender;
+        bh=qSUjC69zK2oDdbl4JMNMSrLxeZA2bP7y3B61tKmaYIY=;
+        b=I3QUfjznxzzsyZe4E1BjVftMMCv6WiKn7GzuMWk62s8EVBWIfHLODMktFzSxlXcAbk
+        jvj/V7Yg2monHUe8aY7rU+fZu5tER8qBOaYY2HG+Di0yUJrbl2LIiIwo7ihW2LXFL+Tm
+        6b4b2w5OqNO2XgrSaVivKt1ezVaMkuoksvbahaAZIHx+6Ag/tjgwlHd+PKyyn1dkFz1m
+        Z5qfcr0Bo5g2G4RybeEuU769aQkKkyHxI5xCj9p6LL5TwChY25+pnYejG0QetTy8KCZc
+        Ms6Om1SZgdqY6nsreNxaKpyM4U8TKsOSorlDW9mw0IIH+xnF+aggcvJgMinPZadB1SpV
+        rGfQ==
+X-RZG-AUTH: ":L2QefEenb+UdBJSdRCXu93KJ1bmSGnhMdmOod1DhGM4l4Hio94KKxRySd+h5FvloCR9QVidlQfU="
+X-RZG-CLASS-ID: mo00
+Received: from [192.168.178.37]
+        by smtp.strato.de (RZmta 46.1.4 DYNA|AUTH)
+        with ESMTPSA id c05c1aw0K9HVw9R
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256 bits))
+        (Client did not present a certificate);
+        Mon, 20 Jan 2020 10:17:31 +0100 (CET)
+Subject: [FSL P5020 P5040 PPC] Onboard SD card doesn't work anymore after the
+ 'mmc-v5.4-2' updates
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        linuxppc-dev <linuxppc-dev@lists.ozlabs.org>,
+        Darren Stevens <darren@stevens-zone.net>,
+        mad skateman <madskateman@gmail.com>,
+        "R.T.Dickinson" <rtd2@xtra.co.nz>,
+        "contact@a-eon.com" <contact@a-eon.com>,
+        Julian Margetson <runaway@candw.ms>
+References: <20200108093903.57620-1-hdegoede@redhat.com>
+ <20200108093903.57620-2-hdegoede@redhat.com>
+ <61bc9265-ece0-eeb6-d4a1-4631138ecf29@intel.com>
+ <8d67882d-04a8-0607-be4e-c1430b7fda21@redhat.com>
+ <84a32714-ba08-74a0-0c76-3c36db44dd68@intel.com>
+ <93446e09-5f12-800a-62fa-bf3ecea7273d@redhat.com>
+ <399ac7d5-2518-799a-595e-f6b6878cf4ab@intel.com>
+ <a9ab8946-c599-5f83-7527-2387a9e82e8a@xenosoft.de>
+ <CAPDyKFoydOuSE=Eaq168=2_Ycouo7hzyw+RZXhGq7q4D4Qe8TQ@mail.gmail.com>
+From:   Christian Zigotzky <chzigotzky@xenosoft.de>
+Message-ID: <fda179eb-df5f-ba87-aaf0-524fffca745b@xenosoft.de>
+Date:   Mon, 20 Jan 2020 10:17:31 +0100
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.2.2
+ Thunderbird/68.4.1
 MIME-Version: 1.0
-In-Reply-To: <1579194192-7942-3-git-send-email-vbadigan@codeaurora.org>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
+In-Reply-To: <CAPDyKFoydOuSE=Eaq168=2_Ycouo7hzyw+RZXhGq7q4D4Qe8TQ@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
+Content-Language: de-DE
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 16/01/20 7:03 pm, Veerabhadrarao Badiganti wrote:
-> From: Ritesh Harjani <riteshh@codeaurora.org>
-> 
-> This adds CQHCI support for sdhci-msm platforms.
-> 
-> Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
-> Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
-
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-
-> ---
->  drivers/mmc/host/Kconfig     |   1 +
->  drivers/mmc/host/sdhci-msm.c | 133 ++++++++++++++++++++++++++++++++++++++++++-
->  2 files changed, 133 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index d06b2df..7f2ae59 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -501,6 +501,7 @@ config MMC_SDHCI_MSM
->  	depends on ARCH_QCOM || (ARM && COMPILE_TEST)
->  	depends on MMC_SDHCI_PLTFM
->  	select MMC_SDHCI_IO_ACCESSORS
-> +	select MMC_CQHCI
->  	help
->  	  This selects the Secure Digital Host Controller Interface (SDHCI)
->  	  support present in Qualcomm SOCs. The controller supports
-> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> index 3d0bb5e..0b4d01f 100644
-> --- a/drivers/mmc/host/sdhci-msm.c
-> +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -15,6 +15,7 @@
->  #include <linux/regulator/consumer.h>
->  
->  #include "sdhci-pltfm.h"
-> +#include "cqhci.h"
->  
->  #define CORE_MCI_VERSION		0x50
->  #define CORE_VERSION_MAJOR_SHIFT	28
-> @@ -122,6 +123,10 @@
->  #define msm_host_writel(msm_host, val, host, offset) \
->  	msm_host->var_ops->msm_writel_relaxed(val, host, offset)
->  
-> +/* CQHCI vendor specific registers */
-> +#define CQHCI_VENDOR_CFG1	0xA00
-> +#define CQHCI_VENDOR_DIS_RST_ON_CQ_EN	(0x3 << 13)
-> +
->  struct sdhci_msm_offset {
->  	u32 core_hc_mode;
->  	u32 core_mci_data_cnt;
-> @@ -1567,6 +1572,127 @@ static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
->  	__sdhci_msm_set_clock(host, clock);
->  }
->  
-> +/*****************************************************************************\
-> + *                                                                           *
-> + * MSM Command Queue Engine (CQE)                                            *
-> + *                                                                           *
-> +\*****************************************************************************/
-> +
-> +static u32 sdhci_msm_cqe_irq(struct sdhci_host *host, u32 intmask)
-> +{
-> +	int cmd_error = 0;
-> +	int data_error = 0;
-> +
-> +	if (!sdhci_cqe_irq(host, intmask, &cmd_error, &data_error))
-> +		return intmask;
-> +
-> +	cqhci_irq(host->mmc, intmask, cmd_error, data_error);
-> +	return 0;
-> +}
-> +
-> +void sdhci_msm_cqe_disable(struct mmc_host *mmc, bool recovery)
-> +{
-> +	struct sdhci_host *host = mmc_priv(mmc);
-> +	unsigned long flags;
-> +	u32 ctrl;
-> +
-> +	/*
-> +	 * When CQE is halted, the legacy SDHCI path operates only
-> +	 * on 16-byte descriptors in 64bit mode.
-> +	 */
-> +	if (host->flags & SDHCI_USE_64_BIT_DMA)
-> +		host->desc_sz = 16;
-> +
-> +	spin_lock_irqsave(&host->lock, flags);
-> +
-> +	/*
-> +	 * During CQE command transfers, command complete bit gets latched.
-> +	 * So s/w should clear command complete interrupt status when CQE is
-> +	 * either halted or disabled. Otherwise unexpected SDCHI legacy
-> +	 * interrupt gets triggered when CQE is halted/disabled.
-> +	 */
-> +	ctrl = sdhci_readl(host, SDHCI_INT_ENABLE);
-> +	ctrl |= SDHCI_INT_RESPONSE;
-> +	sdhci_writel(host,  ctrl, SDHCI_INT_ENABLE);
-> +	sdhci_writel(host, SDHCI_INT_RESPONSE, SDHCI_INT_STATUS);
-> +
-> +	spin_unlock_irqrestore(&host->lock, flags);
-> +
-> +	sdhci_cqe_disable(mmc, recovery);
-> +}
-> +
-> +static const struct cqhci_host_ops sdhci_msm_cqhci_ops = {
-> +	.enable		= sdhci_cqe_enable,
-> +	.disable	= sdhci_msm_cqe_disable,
-> +};
-> +
-> +static int sdhci_msm_cqe_add_host(struct sdhci_host *host,
-> +				struct platform_device *pdev)
-> +{
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-> +	struct cqhci_host *cq_host;
-> +	bool dma64;
-> +	u32 cqcfg;
-> +	int ret;
-> +
-> +	/*
-> +	 * When CQE is halted, SDHC operates only on 16byte ADMA descriptors.
-> +	 * So ensure ADMA table is allocated for 16byte descriptors.
-> +	 */
-> +	if (host->caps & SDHCI_CAN_64BIT)
-> +		host->alloc_desc_sz = 16;
-> +
-> +	ret = sdhci_setup_host(host);
-> +	if (ret)
-> +		return ret;
-> +
-> +	cq_host = cqhci_pltfm_init(pdev);
-> +	if (IS_ERR(cq_host)) {
-> +		ret = PTR_ERR(cq_host);
-> +		dev_err(&pdev->dev, "cqhci-pltfm init: failed: %d\n", ret);
-> +		goto cleanup;
-> +	}
-> +
-> +	msm_host->mmc->caps2 |= MMC_CAP2_CQE | MMC_CAP2_CQE_DCMD;
-> +	cq_host->ops = &sdhci_msm_cqhci_ops;
-> +
-> +	dma64 = host->flags & SDHCI_USE_64_BIT_DMA;
-> +
-> +	ret = cqhci_init(cq_host, host->mmc, dma64);
-> +	if (ret) {
-> +		dev_err(&pdev->dev, "%s: CQE init: failed (%d)\n",
-> +				mmc_hostname(host->mmc), ret);
-> +		goto cleanup;
-> +	}
-> +
-> +	/* Disable cqe reset due to cqe enable signal */
-> +	cqcfg = cqhci_readl(cq_host, CQHCI_VENDOR_CFG1);
-> +	cqcfg |= CQHCI_VENDOR_DIS_RST_ON_CQ_EN;
-> +	cqhci_writel(cq_host, cqcfg, CQHCI_VENDOR_CFG1);
-> +
-> +	/*
-> +	 * SDHC expects 12byte ADMA descriptors till CQE is enabled.
-> +	 * So limit desc_sz to 12 so that the data commands that are sent
-> +	 * during card initialization (before CQE gets enabled) would
-> +	 * get executed without any issues.
-> +	 */
-> +	if (host->flags & SDHCI_USE_64_BIT_DMA)
-> +		host->desc_sz = 12;
-> +
-> +	ret = __sdhci_add_host(host);
-> +	if (ret)
-> +		goto cleanup;
-> +
-> +	dev_info(&pdev->dev, "%s: CQE init: success\n",
-> +			mmc_hostname(host->mmc));
-> +	return ret;
-> +
-> +cleanup:
-> +	sdhci_cleanup_host(host);
-> +	return ret;
-> +}
-> +
->  /*
->   * Platform specific register write functions. This is so that, if any
->   * register write needs to be followed up by platform specific actions,
-> @@ -1731,6 +1857,7 @@ static void sdhci_msm_set_regulator_caps(struct sdhci_msm_host *msm_host)
->  	.set_uhs_signaling = sdhci_msm_set_uhs_signaling,
->  	.write_w = sdhci_msm_writew,
->  	.write_b = sdhci_msm_writeb,
-> +	.irq	= sdhci_msm_cqe_irq,
->  };
->  
->  static const struct sdhci_pltfm_data sdhci_msm_pdata = {
-> @@ -1754,6 +1881,7 @@ static int sdhci_msm_probe(struct platform_device *pdev)
->  	u8 core_major;
->  	const struct sdhci_msm_offset *msm_offset;
->  	const struct sdhci_msm_variant_info *var_info;
-> +	struct device_node *node = pdev->dev.of_node;
->  
->  	host = sdhci_pltfm_init(pdev, &sdhci_msm_pdata, sizeof(*msm_host));
->  	if (IS_ERR(host))
-> @@ -1952,7 +2080,10 @@ static int sdhci_msm_probe(struct platform_device *pdev)
->  	pm_runtime_use_autosuspend(&pdev->dev);
->  
->  	host->mmc_host_ops.execute_tuning = sdhci_msm_execute_tuning;
-> -	ret = sdhci_add_host(host);
-> +	if (of_property_read_bool(node, "supports-cqe"))
-> +		ret = sdhci_msm_cqe_add_host(host, pdev);
-> +	else
-> +		ret = sdhci_add_host(host);
->  	if (ret)
->  		goto pm_runtime_disable;
->  	sdhci_msm_set_regulator_caps(msm_host);
-> 
+Am 16.01.20 um 16:46 schrieb Ulf Hansson:
+> On Thu, 16 Jan 2020 at 12:18, Christian Zigotzky <chzigotzky@xenosoft.de> wrote:
+>> Hi All,
+>>
+>> We still need the attached patch for our onboard SD card interface
+>> [1,2]. Could you please add this patch to the tree?
+> No, because according to previous discussion that isn't the correct
+> solution and more importantly it will break other archs (if I recall
+> correctly).
+>
+> Looks like someone from the ppc community needs to pick up the ball.
+I am not sure if the ppc community have to fix this issue because your 
+updates (mmc-v5.4-2) are responsible for this issue. If nobody wants to 
+fix this issue then we will lost the onboard SD card support in the 
+future. PLEASE check the 'mmc-v5.4-2' updates again.
+>
+>> Thanks,
+>> Christian
+>>
+>> [1] https://www.spinics.net/lists/linux-mmc/msg56211.html
+> I think this discussion even suggested some viable solutions, so it
+> just be a matter of sending a patch :-)
+>
+>> [2]
+>> http://forum.hyperion-entertainment.com/viewtopic.php?f=58&t=4349&start=20#p49012
+>>
+> Kind regards
+> Uffe
 
