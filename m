@@ -2,107 +2,108 @@ Return-Path: <SRS0=gs89=3J=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AF55EC2D0DB
-	for <linux-mmc@archiver.kernel.org>; Mon, 20 Jan 2020 11:26:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5924EC3F68F
+	for <linux-mmc@archiver.kernel.org>; Mon, 20 Jan 2020 11:26:29 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 7BB0E218AC
-	for <linux-mmc@archiver.kernel.org>; Mon, 20 Jan 2020 11:26:26 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2B7EA218AC
+	for <linux-mmc@archiver.kernel.org>; Mon, 20 Jan 2020 11:26:29 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="x9SLfMjB"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="zoiGWUQL"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727990AbgATL0X (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 20 Jan 2020 06:26:23 -0500
-Received: from mail-ua1-f66.google.com ([209.85.222.66]:39606 "EHLO
-        mail-ua1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726590AbgATL0W (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Jan 2020 06:26:22 -0500
-Received: by mail-ua1-f66.google.com with SMTP id 73so11354099uac.6
-        for <linux-mmc@vger.kernel.org>; Mon, 20 Jan 2020 03:26:21 -0800 (PST)
+        id S1727107AbgATL0Q (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 20 Jan 2020 06:26:16 -0500
+Received: from mail-vs1-f66.google.com ([209.85.217.66]:37059 "EHLO
+        mail-vs1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727045AbgATL0P (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Jan 2020 06:26:15 -0500
+Received: by mail-vs1-f66.google.com with SMTP id x18so18718630vsq.4
+        for <linux-mmc@vger.kernel.org>; Mon, 20 Jan 2020 03:26:15 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=iMltZyjqEXLKv+701Vx+gjP4V99Edn3VdTw2YKakZQU=;
-        b=x9SLfMjB7Joymxy2DJJcHt4fk9IEyF7qN97bzNCYwmpcDBqmg1SdTYWO+kyjnMwaO5
-         vlvUyp6xCkzLYG9znKaAlebIE6y7kK9X7Q68jdurP3WSoOblaPzDt5rgUmu/T7GzU//4
-         8FYdO/Lp7bFdhVWgWiCt3KdYFvC1hS2HDZQua1Ou3cx8/TA3PD+Pnezep0ywRPTZU5hs
-         8dzSXMy9v8ZNvyqKx0oB2Ll+5BGcLziuba5+Fb2Fhvp7gG6F7hP/g4O/lk4gQcQmiuPF
-         QIMd9M8CdpLh+4bjIqsnfgmhiGxHi/pBs7PV+EX3YYEbKz8KS4kwmKpoIh7nQqvfEwYr
-         IW2w==
+        bh=+QrjNjPG/DY5+TEdC5uJWY8ByCtGQfHlt+6TWxLSsd4=;
+        b=zoiGWUQLncvGKY1aPONfIIVo9eJD/fSbxnAqre/srpx1AIsJDP8FjgE7e3GNOo6Av5
+         /M2+iSTfyjh44HEBZLB41qjpf2AiUyagQS8CPwv9iImXbf9jDf7KiXWd3hfVZTZGgpkR
+         QOW1jHlxTMAQE15YHuWbSuH5FF40TTvlEO/8TYyjJBOj+dAdF9AWDUwIdfRjDe1RWqDH
+         CquW7dewJPQ9rbFJroufRB8QhV1RvqliTijL3g37FKxzWnbEWkXItiLMBCCgk9BFIAEL
+         Vdg+5CMdnTkOXnAPyQS91moWacc2LqFV4mJsWT1mAjsWklRbdA4xUtD0hIBwh77YJGHZ
+         hMVg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=iMltZyjqEXLKv+701Vx+gjP4V99Edn3VdTw2YKakZQU=;
-        b=pH3z3jlJl4yfXsF//kt6PvUYvd5BjLvlWWgDD2X9KnkUMbkDIobUfatbCZ5hslx+Dw
-         yyxLu+BO810j8TNG7zwNC1xbnHwCTIO7yTTTwDWialO81gK7qZed2jRgCZGz9Qb0jntx
-         pGXsJ7y+ex9/bkBrcbfLXPVDgjmvXLFxXzVvnBJi60dmBOJLBCkVzqmF4P/V4ynbboky
-         yp1/8YUonN0dlsv9kpoKDDsjKyGHkRKTyBNArJyv442fEvHnurXGP+35MA5GB7WV7qx+
-         ZyRRZmVnHrCANUdIg66SMja6hgtlOMpCM2cLqvngD12tPBWnX5N7MygnsV+rQzII6d2n
-         vkvQ==
-X-Gm-Message-State: APjAAAVz+lkTsG90aRqZx37QHV+8s/b8jkS/QuOtfCyKXvgbWNU0m461
-        WAEOABXeS1z2URiIoJ3E3Mh14eyfiPwIvLtl7ng3hQ==
-X-Google-Smtp-Source: APXvYqxKOg9xB8XfL4rfLGRcMxbyRFwMSCwEYJNga3Tv3rpmXA1r3UXHbtiJXS2hERZ8PkUrI2DpkswuNuzWn5p+4j4=
-X-Received: by 2002:ab0:6894:: with SMTP id t20mr28696691uar.100.1579519581204;
- Mon, 20 Jan 2020 03:26:21 -0800 (PST)
+        bh=+QrjNjPG/DY5+TEdC5uJWY8ByCtGQfHlt+6TWxLSsd4=;
+        b=hAE2n7Lm/s+3baB3goyAnVNEhCEETMH+1JFqTW8z1bYWgttv+2xddU0/cYgffRfU4C
+         naakUBWRrTAHx/SaDkMKB4AcSKJnxTwucmx4O0qua7vhj8ALPOQWtq6lFiqnLhVJ0Bd3
+         iN1pXKMO5tKTDqK2q8dCVc0keEwmnJluWnPQT/6e/fm7d/QxWy7IDn5sBr8yaqjC0YyA
+         o+k3on4AITOjjqNI7cbZVSYWomT6CZok/5mEV3sBPLtCH2ARXEcEzX3NQGo8inEKZtsA
+         UfvNDZRj4hzjLvbWvAC45Lp4E6Cm/EQBC2zU9/D+y4OIetNjut8iTeToq3ACSW1Fqbon
+         83Mw==
+X-Gm-Message-State: APjAAAW1237bxDzEx80kGM2pDcR13IXdKm2A26Bog4kgc7j2fpB8rGmL
+        cT01p4YcK6TUwQu/zOlWCMlWU4R8nQE+/NOUgrwd1lfQ
+X-Google-Smtp-Source: APXvYqzPrS1MXcvEuqxBLO8sPjfn2RusFoIONf4AdpYQaWU83tRuO628KtI5n/YR1Uw5+lIy2J5gBsGl7ibfC9txULI=
+X-Received: by 2002:a67:314e:: with SMTP id x75mr11583092vsx.35.1579519574713;
+ Mon, 20 Jan 2020 03:26:14 -0800 (PST)
 MIME-Version: 1.0
-References: <20200113210706.11972-1-alcooperx@gmail.com>
-In-Reply-To: <20200113210706.11972-1-alcooperx@gmail.com>
+References: <20200120031023.32482-1-zhang.chunyan@linaro.org>
+ <20200120033223.897-1-zhang.chunyan@linaro.org> <65f7272c-ecea-03de-433b-21ba2e672d20@intel.com>
+ <CAAfSe-vjmFGkK5Enj9Nj_qrERJbNQTLejpVL+JVJLG7tgNhT9w@mail.gmail.com>
+In-Reply-To: <CAAfSe-vjmFGkK5Enj9Nj_qrERJbNQTLejpVL+JVJLG7tgNhT9w@mail.gmail.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 20 Jan 2020 12:25:45 +0100
-Message-ID: <CAPDyKFr3mrkY5KNO8tnjD1Fuqbbbb_4s6vuJ4cyOrOHM1E5vQg@mail.gmail.com>
-Subject: Re: [PATCH 0/6] mmc: sdhci-brcmstb: Driver updates
-To:     Al Cooper <alcooperx@gmail.com>
-Cc:     Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Andrew Jeffery <andrew@aj.id.au>,
-        BCM Kernel Feedback <bcm-kernel-feedback-list@broadcom.com>,
-        DTML <devicetree@vger.kernel.org>,
-        "Enrico Weigelt, metux IT consult" <info@metux.net>,
+Date:   Mon, 20 Jan 2020 12:25:38 +0100
+Message-ID: <CAPDyKFq0PnCwcjENc+SJvkFKsuC-iWMX0t6QNqdo89JEGGk-=w@mail.gmail.com>
+Subject: Re: [PATCH v2] mmc: sdhci: fix an issue of mixing different types
+To:     Chunyan Zhang <zhang.lyra@gmail.com>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
         Faiz Abbas <faiz_abbas@ti.com>,
-        Florian Fainelli <f.fainelli@gmail.com>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        Nathan Chancellor <natechancellor@gmail.com>,
+        Chunyan Zhang <zhang.chunyan@linaro.org>,
         "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>,
-        Mark Rutland <mark.rutland@arm.com>,
-        Rob Herring <robh+dt@kernel.org>,
-        Sowjanya Komatineni <skomatineni@nvidia.com>,
-        Takao Orito <orito.takao@socionext.com>,
-        YueHaibing <yuehaibing@huawei.com>
+        clang-built-linux@googlegroups.com,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        kbuild test robot <lkp@intel.com>
 Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 13 Jan 2020 at 22:07, Al Cooper <alcooperx@gmail.com> wrote:
+On Mon, 20 Jan 2020 at 09:14, Chunyan Zhang <zhang.lyra@gmail.com> wrote:
 >
-> The latest BRCMSTB SoC's now use a new Arasan controller along
-> with a custom Broadcom PHY that supports HS200, HS400, SDR104,
-> HS400E-ES and CQE. This series of commits adds support for these
-> new features along with a few bug fixes. The 7216 is the first
-> SoC to have this new hardware.
+> On Mon, 20 Jan 2020 at 15:15, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> >
+> > On 20/01/20 5:32 am, Chunyan Zhang wrote:
+> > > Fix an issue reported by sparse, since mixed types of parameters are
+> > > used on calling dmaengine_prep_slave_sg().
+> > >
+> > > Fixes: 36e1da441fec (mmc: sdhci: add support for using external DMA devices)
+> >
+> > That commit number is only in next
 >
-> Al Cooper (6):
->   dt-bindings: mmc: brcm,sdhci-brcmstb: Add support for 7216b0
->   mmc: sdhci-brcmstb: Add ability to use HS400ES transfer mode
->   mmc: sdhci-brcmstb: Fix driver to defer on clk_get defer
->   mmc: sdhci-brcmstb: Add shutdown callback
->   mmc: sdhci-brcmstb: Add support for Command Queuing (CQE)
->   mmc: sdhci-brcmstb: Fix incorrect switch to HS mode
+> Ok, so should this line be removed?
+
+Normally yes, because I may rebase my next branch.
+
+However, at this point in time I am not planning for a rebase, so let's keep it.
+
 >
->  .../bindings/mmc/brcm,sdhci-brcmstb.txt       |  41 ++-
->  drivers/mmc/host/Kconfig                      |   1 +
->  drivers/mmc/host/sdhci-brcmstb.c              | 270 +++++++++++++++++-
->  3 files changed, 284 insertions(+), 28 deletions(-)
+> >
+> > > Reported-by: kbuild test robot <lkp@intel.com>
+> > > Signed-off-by: Chunyan Zhang <zhang.chunyan@linaro.org>
+> > > Reviewed-by: Nathan Chancellor <natechancellor@gmail.com>
+> >
+> > Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 >
-> --
-> 2.17.1
+> Thank you!
 >
+> Chunyan
+
+[...]
 
 Applied for next, thanks!
 
