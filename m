@@ -8,53 +8,53 @@ X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 15F0DC33CAF
-	for <linux-mmc@archiver.kernel.org>; Mon, 20 Jan 2020 03:10:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5FAB2C32771
+	for <linux-mmc@archiver.kernel.org>; Mon, 20 Jan 2020 03:32:32 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id CA707208CD
-	for <linux-mmc@archiver.kernel.org>; Mon, 20 Jan 2020 03:10:50 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 251BA2073D
+	for <linux-mmc@archiver.kernel.org>; Mon, 20 Jan 2020 03:32:32 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="GuVns5CM"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="FoJD4gJL"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729008AbgATDKu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 19 Jan 2020 22:10:50 -0500
-Received: from mail-pg1-f195.google.com ([209.85.215.195]:46520 "EHLO
-        mail-pg1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728949AbgATDKu (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 19 Jan 2020 22:10:50 -0500
-Received: by mail-pg1-f195.google.com with SMTP id z124so14776946pgb.13;
-        Sun, 19 Jan 2020 19:10:49 -0800 (PST)
+        id S1729015AbgATDcb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 19 Jan 2020 22:32:31 -0500
+Received: from mail-pg1-f193.google.com ([209.85.215.193]:44572 "EHLO
+        mail-pg1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1729011AbgATDcb (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 19 Jan 2020 22:32:31 -0500
+Received: by mail-pg1-f193.google.com with SMTP id x7so14804873pgl.11;
+        Sun, 19 Jan 2020 19:32:31 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=fKCZr7SPbdkR0t4be+CXKygxBqoOpm4Q6ztu7jbGjlc=;
-        b=GuVns5CMr7Qfwg4QsVwJic5Qd9NDweGkiZRpAP9Mi2h9qzBs++5Yjie4sieope2hiH
-         RhKy800d6kTRaphcyJG6SMK30KjIxV6lUFp7fiCW2dMZtIbvGmgnUaetnoQXXw7jdLX7
-         okY4SJP1HhQLvsrMDy4yEZepZ7mUPjdYYBSJ7PkFCsPH1xWm9GOofLJugAkCLo21D6pb
-         AxFFy3PKN01GiQzxTIkGznVSbD0mmAPdOOIPXmFnmBCXHmh/PVUK0qXSWXyrbrU3ammG
-         a7L9v6DrZegzJbYqoPdLBBbMCq0Db7zSL+rySutvuBDLuQuGMjBOy2AgjZgo6AfeD6AN
-         7wiQ==
+        h=from:to:cc:subject:date:message-id:in-reply-to:references
+         :mime-version:content-transfer-encoding;
+        bh=kaVyaqcx1+XyBwYscJJnTfM3SI5pH5G1DrO35gYdNN4=;
+        b=FoJD4gJL5PJkh212LMvylohSi2Pb6AWHmppyyaghq1/vQjhDr+LM984p7OCt0bSBJU
+         ZcLHbDukrD4zyoTRSkCJZWyqpp/pAT2VmDhseq1ttMG5TeMdfQVsuKt0CpjEY3plY4H/
+         KUF0zX8/wMbYUV+xaAHCfUH27nMPy+zL/sH/Nltm3atm3IpVSAfMR5ugoUuiSxZovJYb
+         qHnKPiLoNegSV9k9WmMIz8OHYUXJ8/rvWHfkntpqM4E+jrFBilAsqKdIihXVfZtdWA0q
+         u0b+swRvR4G8td2aTRGqdbYH+CLU1D+kZsdmG3x3ay9DZBlZA/miXsOFe9e6OMy5FkSo
+         Bdcg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=fKCZr7SPbdkR0t4be+CXKygxBqoOpm4Q6ztu7jbGjlc=;
-        b=GnqgS44QcbFcas4FVUayMm4dGyPaz9sZH8ECMVDvKsZS6nsTDjLZ/6HB8YE15qfELe
-         52vOuKJHINjCyt/1euQvoXhwZt5gDbli07DENvmhJ6dKm5akxrIZyjn4nCDXAmqYdp/j
-         Vjph3WKKsFbHKYVlSa2thGqdsGDVB/NqgipzVie5zCvkJHA4S+kchYIocYth0a6ph5zj
-         8yE1suX9D/aUbRYqDBmZaykgVBNyFqyDAe+EmuuEuRVBYbknJp1XsUKWXaS95EoAJJfV
-         xRJaC79skjOn8nh0RJcI5sKgU3fayaE/T9dngMt5+EA6z31FEuSF3kFG/L8Td5/I+nn2
-         ZOrA==
-X-Gm-Message-State: APjAAAVQbhrOstSkCfzV3zBB/6WhLpys3BdZmyXeddpVJsN0aUCM4vrk
-        EVIAA+s5J8xuJGtD54gTSyU=
-X-Google-Smtp-Source: APXvYqygJXviM1rFMRcrOikmwjaSQOKa7kFMmDO2et9m7seIpguNx9RI6BvTBxyEqU0kspEppTA4NQ==
-X-Received: by 2002:aa7:8687:: with SMTP id d7mr15122349pfo.164.1579489849577;
-        Sun, 19 Jan 2020 19:10:49 -0800 (PST)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=kaVyaqcx1+XyBwYscJJnTfM3SI5pH5G1DrO35gYdNN4=;
+        b=SU50LFMlaERkEimpW4tCvHiYUhzPIx5CPqNUHzWdUgi3O8GfA0CF2HLmnKyZSaVguB
+         vIC1H6rZzNbomS9fxXMHQdSNqMP3KLOMVc1gXYPD39SiajNggzKJdb9IKB7TD1fo4niv
+         fXsoF5ge5NFI2Ak01y1SD5ZBtPCT8Ew6Ga6tRrICtM5hmuj/lVfH8ZXi3fOON2/hxRz5
+         qZUPTBi2EHo3A7zupOAEzECn2CBgVe2QCU7p1uce6JzYS35ooajUzYX2jfupPA+2P+EJ
+         4BMCh5YS7iIPSrPohdUvXLvXaY6J2NgzQFL8wFkhBWH5QnpS0+8iGOcOftOCkZeiHxX1
+         LNwg==
+X-Gm-Message-State: APjAAAUAc3huAdwP8Yja/TbTyS39TwJJSdOIytAltTTe1Zox7Rf0iR3l
+        1/Q+1fF3//6B9DDqSv54gN2gBKA6
+X-Google-Smtp-Source: APXvYqySOgkid6AmSPFPjXJEhZ9w/R1sZ3Uc8tyKbT54CuTFc0wlYPuZ3eSoA/jw9fdxcpQkz9pBTA==
+X-Received: by 2002:a63:1204:: with SMTP id h4mr56608273pgl.288.1579491150642;
+        Sun, 19 Jan 2020 19:32:30 -0800 (PST)
 Received: from ubt.spreadtrum.com ([117.18.48.82])
-        by smtp.gmail.com with ESMTPSA id v10sm35462899pgk.24.2020.01.19.19.10.45
+        by smtp.gmail.com with ESMTPSA id d4sm14746798pjz.12.2020.01.19.19.32.27
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 19 Jan 2020 19:10:48 -0800 (PST)
+        Sun, 19 Jan 2020 19:32:29 -0800 (PST)
 From:   Chunyan Zhang <zhang.lyra@gmail.com>
 X-Google-Original-From: Chunyan Zhang <zhang.chunyan@linaro.org>
 To:     Ulf Hansson <ulf.hansson@linaro.org>,
@@ -66,9 +66,11 @@ Cc:     Faiz Abbas <faiz_abbas@ti.com>,
         linux-kernel@vger.kernel.org, Chunyan Zhang <zhang.lyra@gmail.com>,
         kbuild test robot <lkp@intel.com>
 Subject: [PATCH v2] mmc: sdhci: fix an issue of mixing different types
-Date:   Mon, 20 Jan 2020 11:10:23 +0800
-Message-Id: <20200120031023.32482-1-zhang.chunyan@linaro.org>
+Date:   Mon, 20 Jan 2020 11:32:23 +0800
+Message-Id: <20200120033223.897-1-zhang.chunyan@linaro.org>
 X-Mailer: git-send-email 2.20.1
+In-Reply-To: <20200120031023.32482-1-zhang.chunyan@linaro.org>
+References: <20200120031023.32482-1-zhang.chunyan@linaro.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Sender: linux-mmc-owner@vger.kernel.org
@@ -79,7 +81,7 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 Fix an issue reported by sparse, since mixed types of parameters are
 used on calling dmaengine_prep_slave_sg().
 
-Fixes: f9a7c2112165 (mmc: sdhci: Add using external dma)
+Fixes: 36e1da441fec (mmc: sdhci: add support for using external DMA devices)
 Reported-by: kbuild test robot <lkp@intel.com>
 Signed-off-by: Chunyan Zhang <zhang.chunyan@linaro.org>
 Reviewed-by: Nathan Chancellor <natechancellor@gmail.com>
