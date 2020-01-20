@@ -7,56 +7,56 @@ X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9CBCBC33CB8
-	for <linux-mmc@archiver.kernel.org>; Mon, 20 Jan 2020 11:26:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E911EC33CAA
+	for <linux-mmc@archiver.kernel.org>; Mon, 20 Jan 2020 11:26:26 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 726D421569
-	for <linux-mmc@archiver.kernel.org>; Mon, 20 Jan 2020 11:26:29 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id BE8FA21569
+	for <linux-mmc@archiver.kernel.org>; Mon, 20 Jan 2020 11:26:26 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="hsnB8D9b"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="A2511IgG"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726796AbgATL02 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 20 Jan 2020 06:26:28 -0500
-Received: from mail-vs1-f66.google.com ([209.85.217.66]:37915 "EHLO
-        mail-vs1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726589AbgATL02 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Jan 2020 06:26:28 -0500
-Received: by mail-vs1-f66.google.com with SMTP id v12so18728044vsv.5
-        for <linux-mmc@vger.kernel.org>; Mon, 20 Jan 2020 03:26:27 -0800 (PST)
+        id S1726860AbgATL00 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 20 Jan 2020 06:26:26 -0500
+Received: from mail-vs1-f68.google.com ([209.85.217.68]:37071 "EHLO
+        mail-vs1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726589AbgATL0Z (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Jan 2020 06:26:25 -0500
+Received: by mail-vs1-f68.google.com with SMTP id x18so18718904vsq.4
+        for <linux-mmc@vger.kernel.org>; Mon, 20 Jan 2020 03:26:25 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=6I7p0DYe3E0c2Sb2O38eIk7h2VsJf4W1B5fNXeVb4RU=;
-        b=hsnB8D9bQesYBIDfXaf3zegOKSq50RI1ZKvwor+1gXR+cAw0WugFZC5IoeiSqTGWM5
-         4OD7RBdlJvxZqGplbxnYUnBNoQCBErhk9nbVeGjaMxJiR8wSG/Sykw7feUMcQ3onRkfI
-         JbGaLnPjZyN4/uf34q2O2wmjutExgB4axIYiGfYi8aEp0wvOZm7/T9Ay4KGSK2Jfct/0
-         sXU1XlxayukjqHQsUY8dWbySA/SoT53ffhMPE+RsK6P9hFHwJ0dj1jf7G3IoTaZNZmig
-         1YBpbgY294/wPaqTNmbzKRTwJ/CtiUTKdKQn398rGFoTz/eD2mEmtjbCbbPZIsFYda9e
-         Bx3w==
+        bh=A7UThWdp1uXaZcw1/ZLNWeY2Tk0cs8ZTeK6ZI3loXCo=;
+        b=A2511IgGXqHiPBgn5UG2akcEgI8r0/gsE7QttEQt2zJGQ/ZJ6q/37/YGsbV8ixZt6m
+         kVWZRlRiHQvqB7oP50NGeAPGTwG3cXn+s+4ohgPkzjNfvawBtelq+dpNspXX5ASpxqNG
+         5THf1TdbFNOHbN2xTL3FNArnz5V9QFB9VhvnPp+K3aaOBLhbwmhxG3M19fhklJHxZ1Is
+         Qmm3PKKsJswTxrLb4evdcwTqZfFVoJtjLiLz8YgwdfyT3A2jwOz063vIuMWFke3FAXKR
+         3lHq7i9dXLNUL2FfQmHTn2PnEXnyybA3duEWiHMm0SzFTqOB5waF3AuXUHkAAf5h8H+6
+         2Fmw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=6I7p0DYe3E0c2Sb2O38eIk7h2VsJf4W1B5fNXeVb4RU=;
-        b=NmPky/j7GDfh7g03LZ/bcvPiX1vvSHka+Td7/kH6eo+TIJJMrvRf3plLXZgicnnbv+
-         ekiLzB1/60NZRfMpAw5ZozAbZ1t7lLqJet8nSOpvZul7NU4BBK8JUkpzZSlaIJCgm4Ia
-         nAhk27yhbptTxf9negl1Sm2B/xdnfxI3atk57IQHOXoTDaYYSyfHBeQJocA2sCVgOZVV
-         yPtrll1aOoBtqg8IbTWmKnN3p/xJcZSWNRFiTNTtZFAbFnFXE5CBX1CuRDmxz1br6ZJX
-         Y9Fc5sNu38yDy0lKv3unrFJ7wDFQKxhxkxJhZy58P2koDaZPnysXRxakUuM7vlnAOOzy
-         pOng==
-X-Gm-Message-State: APjAAAUrJLJGUiptS/wSGMAwamWymYrSW3FjMperIGOoiKJCzH1XAG6M
-        lM9T9l5gfJ1E4OdYJZgHHpDJCNoSC0C8440cACb6lDrr
-X-Google-Smtp-Source: APXvYqyHnxm1pa/shIOsEJ79faDatRSy6U6QXbX2srpmekxmDaXSgoQFzoSofg+n+6M3s+0MjXHITNuQ9v3BQMwC4lo=
-X-Received: by 2002:a67:e9da:: with SMTP id q26mr12060879vso.34.1579519586942;
- Mon, 20 Jan 2020 03:26:26 -0800 (PST)
+        bh=A7UThWdp1uXaZcw1/ZLNWeY2Tk0cs8ZTeK6ZI3loXCo=;
+        b=cZuelFh9ISA1WXmyQsjTdRrKMlDEskPlFZBvcgLeII7s70Q2vwhT/aovnuJbXGHzSd
+         Zuq1MHCKBtWs2CYRajtgf5Hwkckrs2RygihX+q0x4NStMg3mXznhnptRCS5S3BOliJ/l
+         NxPEuZ322ZhvQp2n8MKCM2Gx0n98+N5rJYNuUns2aMbElSffirUN/kMjbLOmD5UcBoNG
+         YN6tV7X8g9bImiIJoNA0A52fnRQdJURm6t+J0qPLT9O/18aEp2SZ+jwWfBIju99Ya+Oz
+         Q58ut2uxgc2OLgLptuwzvZq1qmND3NoLi5FMR0Khrzu69K8PX1qaHsX7pTY0R3U/4y/n
+         6Lxw==
+X-Gm-Message-State: APjAAAU8N6Osc6vYRyihcJZMaKmiV30E6n5YrFjqHEZi5mIu/WUmYuHS
+        fBM837k5Ag6tlo0/AcP3FjMt+rcms//ixXS4o4DKzwEE
+X-Google-Smtp-Source: APXvYqwOO0D+sXYm0LOG4TFymD1hgur6SeOjdCCIbAxoYk9ljqHsljxlagx5FtOUHPVc8ACOh4k2MCThYnM6L1Ogc2Y=
+X-Received: by 2002:a67:6282:: with SMTP id w124mr11972002vsb.191.1579519584474;
+ Mon, 20 Jan 2020 03:26:24 -0800 (PST)
 MIME-Version: 1.0
-References: <20200117063858.37296-1-yangbo.lu@nxp.com>
-In-Reply-To: <20200117063858.37296-1-yangbo.lu@nxp.com>
+References: <20200120094835.28050-1-yangbo.lu@nxp.com>
+In-Reply-To: <20200120094835.28050-1-yangbo.lu@nxp.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 20 Jan 2020 12:25:51 +0100
-Message-ID: <CAPDyKFrgY5u7hU1Bueujh4DjS8X5Vbutn6dMo3gX2Dfq6r1wYQ@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-of-esdhc: fix transfer mode register reading
+Date:   Mon, 20 Jan 2020 12:25:48 +0100
+Message-ID: <CAPDyKFr48-dVjmu8x-wbC6eQwrt9U_BCOHPqjcR3+R1BR=0cNA@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-of-esdhc: fix serious issue clock is always disabled
 To:     Yangbo Lu <yangbo.lu@nxp.com>
 Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
         Adrian Hunter <adrian.hunter@intel.com>
@@ -66,27 +66,12 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 17 Jan 2020 at 07:41, Yangbo Lu <yangbo.lu@nxp.com> wrote:
+On Mon, 20 Jan 2020 at 10:50, Yangbo Lu <yangbo.lu@nxp.com> wrote:
 >
-> The standard SD controller uses two 16-bit registers for
-> command sending.
-> 0xC: Transfer Mode Register
-> 0xE: Command Register
+> This patch is to fix a serious issue that clock is always disabled
+> in esdhc_of_set_clock().
 >
-> But the eSDHC controller uses one 32-bit register instead.
-> 0xC: XFERTYPE
->
-> For Transfer Mode Register and Command Register writing,
-> the eSDHC driver will store Transfer Mode Register value in
-> a variable first. When Command Register writing happens,
-> driver will directly write a 32-bit value into XFERTYPE
-> register.
->
-> But for Transfer Mode Register reading, driver just returns
-> a actual value. This may cause issue for some read-modify-write
-> operations. We should make both reading and write on that variable
-> for Transfer Mode Register.
->
+> Fixes: 1b21a701aed9 ("mmc: sdhci-of-esdhc: fix clock setting for different controller versions")
 > Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
 
 Applied for next, thanks!
@@ -96,23 +81,22 @@ Uffe
 
 
 > ---
->  drivers/mmc/host/sdhci-of-esdhc.c | 3 +++
->  1 file changed, 3 insertions(+)
+>  drivers/mmc/host/sdhci-of-esdhc.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 >
 > diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-> index 8c06017..3ef4973 100644
+> index 8c06017..2950ae2 100644
 > --- a/drivers/mmc/host/sdhci-of-esdhc.c
 > +++ b/drivers/mmc/host/sdhci-of-esdhc.c
-> @@ -173,6 +173,9 @@ static u16 esdhc_readw_fixup(struct sdhci_host *host,
->         u16 ret;
->         int shift = (spec_reg & 0x2) * 8;
+> @@ -745,7 +745,7 @@ static void esdhc_of_set_clock(struct sdhci_host *host, unsigned int clock)
+>                 esdhc_clock_enable(host, false);
+>                 esdhc_flush_async_fifo(host);
+>         }
+> -       esdhc_clock_enable(host, false);
+> +       esdhc_clock_enable(host, true);
+>  }
 >
-> +       if (spec_reg == SDHCI_TRANSFER_MODE)
-> +               return pltfm_host->xfer_mode_shadow;
-> +
->         if (spec_reg == SDHCI_HOST_VERSION)
->                 ret = value & 0xffff;
->         else
+>  static void esdhc_pltfm_set_bus_width(struct sdhci_host *host, int width)
 > --
 > 2.7.4
 >
