@@ -4,219 +4,108 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-8.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no version=3.4.0
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D8C5EC2D0DB
-	for <linux-mmc@archiver.kernel.org>; Mon, 20 Jan 2020 12:33:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 57572C2D0DB
+	for <linux-mmc@archiver.kernel.org>; Mon, 20 Jan 2020 13:34:30 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id AB7CA21D7E
-	for <linux-mmc@archiver.kernel.org>; Mon, 20 Jan 2020 12:33:14 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 351A821835
+	for <linux-mmc@archiver.kernel.org>; Mon, 20 Jan 2020 13:34:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726798AbgATMdL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 20 Jan 2020 07:33:11 -0500
-Received: from mga03.intel.com ([134.134.136.65]:61124 "EHLO mga03.intel.com"
+        id S1726897AbgATNe3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 20 Jan 2020 08:34:29 -0500
+Received: from foss.arm.com ([217.140.110.172]:60384 "EHLO foss.arm.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726589AbgATMdK (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 20 Jan 2020 07:33:10 -0500
-X-Amp-Result: SKIPPED(no attachment in message)
-X-Amp-File-Uploaded: False
-Received: from orsmga005.jf.intel.com ([10.7.209.41])
-  by orsmga103.jf.intel.com with ESMTP/TLS/DHE-RSA-AES256-GCM-SHA384; 20 Jan 2020 04:33:10 -0800
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.70,342,1574150400"; 
-   d="scan'208";a="399361694"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.167]) ([10.237.72.167])
-  by orsmga005.jf.intel.com with ESMTP; 20 Jan 2020 04:33:08 -0800
-Subject: Re: [PATCH 3/3] mmc: sdhci_am654: Enable DLL only for some speed
- modes
-To:     Faiz Abbas <faiz_abbas@ti.com>, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org
-Cc:     ulf.hansson@linaro.org, robh+dt@kernel.org
-References: <20200108150920.14547-1-faiz_abbas@ti.com>
- <20200108150920.14547-4-faiz_abbas@ti.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <d18a8c92-125e-cab4-ae74-8129fdf40da1@intel.com>
-Date:   Mon, 20 Jan 2020 14:32:13 +0200
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.2.2
+        id S1726728AbgATNe3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 20 Jan 2020 08:34:29 -0500
+Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
+        by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 5643430E;
+        Mon, 20 Jan 2020 05:34:29 -0800 (PST)
+Received: from [10.1.196.37] (e121345-lin.cambridge.arm.com [10.1.196.37])
+        by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 0B4F73F52E;
+        Mon, 20 Jan 2020 05:34:27 -0800 (PST)
+Subject: Re: [PATCH 2/3] mmc: sdhci-of-esdhc: set DMA snooping based on DMA
+ coherence
+To:     "Y.b. Lu" <yangbo.lu@nxp.com>,
+        Russell King <rmk+kernel@armlinux.org.uk>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        dann frazier <dann.frazier@canonical.com>,
+        Will Deacon <will.deacon@arm.com>,
+        Nicolin Chen <nicoleotsuka@gmail.com>,
+        Christoph Hellwig <hch@lst.de>
+References: <20190922102341.GO25745@shell.armlinux.org.uk>
+ <E1iBz50-0008Mc-8K@rmk-PC.armlinux.org.uk>
+ <AM7PR04MB688507B5B4D84EB266738891F8320@AM7PR04MB6885.eurprd04.prod.outlook.com>
+From:   Robin Murphy <robin.murphy@arm.com>
+Message-ID: <50fe98f2-9ee6-c0fb-d246-e3d6b4b2cec5@arm.com>
+Date:   Mon, 20 Jan 2020 13:34:26 +0000
+User-Agent: Mozilla/5.0 (X11; Linux aarch64; rv:60.0) Gecko/20100101
+ Thunderbird/60.9.0
 MIME-Version: 1.0
-In-Reply-To: <20200108150920.14547-4-faiz_abbas@ti.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
+In-Reply-To: <AM7PR04MB688507B5B4D84EB266738891F8320@AM7PR04MB6885.eurprd04.prod.outlook.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-GB
 Content-Transfer-Encoding: 7bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 8/01/20 5:09 pm, Faiz Abbas wrote:
-> Its recommended that DLL must only be enabled for SDR50, DDR50, DDR52,
-> SDR104, HS200 and HS400 speed modes. Move DLL configuration to its own
-> function and call it only in the above speed modes.
+On 20/01/2020 10:09 am, Y.b. Lu wrote:
+> Hi Russell,
 > 
-> Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
+> Recently I got eSDHC ADMA issue on PowerPC T2080 platform. After checking, the issue is related to this patch.
+> This patch was to make eSDHC DMA SNOOP bit set per dma-coherent. That resolved issue on LX2160A ARM64 platform.
+> However on T2080, we are facing similar issue again. It didn't have dma-coherent in dts.
+> Adding dma-coherent in dts, or reverting the patch could resolve the problem.
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Arguably updating the DTS would be the most accurate option, since it 
+would be describing the hardware more correctly, however if there are 
+reasons for that not being sufficient (e.g. DTBs baked into firmware, or 
+worries of confusing some other DT consumer) then something like the 
+below seems reasonable (albeit a little crude) IMO.
 
-> ---
->  drivers/mmc/host/sdhci_am654.c | 128 +++++++++++++++++----------------
->  1 file changed, 68 insertions(+), 60 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
-> index bb977de43f7d..575bbab1a6ed 100644
-> --- a/drivers/mmc/host/sdhci_am654.c
-> +++ b/drivers/mmc/host/sdhci_am654.c
-> @@ -119,16 +119,80 @@ static const struct timing_data td[] = {
->  	[MMC_TIMING_MMC_HS400] = {"ti,otap-del-sel-hs400", MMC_CAP2_HS400},
->  };
->  
-> +static void sdhci_am654_setup_dll(struct sdhci_host *host, unsigned int clock)
-> +{
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	struct sdhci_am654_data *sdhci_am654 = sdhci_pltfm_priv(pltfm_host);
-> +	int sel50, sel100, freqsel;
-> +	u32 mask, val;
-> +	int ret;
-> +
-> +	if (sdhci_am654->flags & FREQSEL_2_BIT) {
-> +		switch (clock) {
-> +		case 200000000:
-> +			sel50 = 0;
-> +			sel100 = 0;
-> +			break;
-> +		case 100000000:
-> +			sel50 = 0;
-> +			sel100 = 1;
-> +			break;
-> +		default:
-> +			sel50 = 1;
-> +			sel100 = 0;
-> +		}
-> +
-> +		/* Configure PHY DLL frequency */
-> +		mask = SEL50_MASK | SEL100_MASK;
-> +		val = (sel50 << SEL50_SHIFT) | (sel100 << SEL100_SHIFT);
-> +		regmap_update_bits(sdhci_am654->base, PHY_CTRL5, mask, val);
-> +
-> +	} else {
-> +		switch (clock) {
-> +		case 200000000:
-> +			freqsel = 0x0;
-> +			break;
-> +		default:
-> +			freqsel = 0x4;
-> +		}
-> +
-> +		regmap_update_bits(sdhci_am654->base, PHY_CTRL5, FREQSEL_MASK,
-> +				   freqsel << FREQSEL_SHIFT);
-> +	}
-> +	/* Configure DLL TRIM */
-> +	mask = DLL_TRIM_ICP_MASK;
-> +	val = sdhci_am654->trm_icp << DLL_TRIM_ICP_SHIFT;
-> +
-> +	/* Configure DLL driver strength */
-> +	mask |= DR_TY_MASK;
-> +	val |= sdhci_am654->drv_strength << DR_TY_SHIFT;
-> +	regmap_update_bits(sdhci_am654->base, PHY_CTRL1, mask, val);
-> +
-> +	/* Enable DLL */
-> +	regmap_update_bits(sdhci_am654->base, PHY_CTRL1, ENDLL_MASK,
-> +			   0x1 << ENDLL_SHIFT);
-> +	/*
-> +	 * Poll for DLL ready. Use a one second timeout.
-> +	 * Works in all experiments done so far
-> +	 */
-> +	ret = regmap_read_poll_timeout(sdhci_am654->base, PHY_STAT1, val,
-> +				       val & DLLRDY_MASK, 1000, 1000000);
-> +	if (ret) {
-> +		dev_err(mmc_dev(host->mmc), "DLL failed to relock\n");
-> +		return;
-> +	}
-> +
-> +	sdhci_am654->dll_on = true;
-> +}
-> +
->  static void sdhci_am654_set_clock(struct sdhci_host *host, unsigned int clock)
->  {
->  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->  	struct sdhci_am654_data *sdhci_am654 = sdhci_pltfm_priv(pltfm_host);
->  	unsigned char timing = host->mmc->ios.timing;
-> -	int sel50, sel100, freqsel;
->  	u32 otap_del_sel;
->  	u32 otap_del_ena;
->  	u32 mask, val;
-> -	int ret;
->  
->  	if (sdhci_am654->dll_on) {
->  		regmap_update_bits(sdhci_am654->base, PHY_CTRL1, ENDLL_MASK, 0);
-> @@ -163,64 +227,8 @@ static void sdhci_am654_set_clock(struct sdhci_host *host, unsigned int clock)
->  
->  		regmap_update_bits(sdhci_am654->base, PHY_CTRL4, mask, val);
->  
-> -		if (sdhci_am654->flags & FREQSEL_2_BIT) {
-> -			switch (clock) {
-> -			case 200000000:
-> -				sel50 = 0;
-> -				sel100 = 0;
-> -				break;
-> -			case 100000000:
-> -				sel50 = 0;
-> -				sel100 = 1;
-> -				break;
-> -			default:
-> -				sel50 = 1;
-> -				sel100 = 0;
-> -			}
-> -
-> -			/* Configure PHY DLL frequency */
-> -			mask = SEL50_MASK | SEL100_MASK;
-> -			val = (sel50 << SEL50_SHIFT) | (sel100 << SEL100_SHIFT);
-> -			regmap_update_bits(sdhci_am654->base, PHY_CTRL5, mask,
-> -					   val);
-> -		} else {
-> -			switch (clock) {
-> -			case 200000000:
-> -				freqsel = 0x0;
-> -				break;
-> -			default:
-> -				freqsel = 0x4;
-> -			}
-> -
-> -			regmap_update_bits(sdhci_am654->base, PHY_CTRL5,
-> -					   FREQSEL_MASK,
-> -					   freqsel << FREQSEL_SHIFT);
-> -		}
-> -
-> -		/* Configure DLL TRIM */
-> -		mask = DLL_TRIM_ICP_MASK;
-> -		val = sdhci_am654->trm_icp << DLL_TRIM_ICP_SHIFT;
-> -
-> -		/* Configure DLL driver strength */
-> -		mask |= DR_TY_MASK;
-> -		val |= sdhci_am654->drv_strength << DR_TY_SHIFT;
-> -		regmap_update_bits(sdhci_am654->base, PHY_CTRL1, mask, val);
-> -		/* Enable DLL */
-> -		regmap_update_bits(sdhci_am654->base, PHY_CTRL1, ENDLL_MASK,
-> -				   0x1 << ENDLL_SHIFT);
-> -		/*
-> -		 * Poll for DLL ready. Use a one second timeout.
-> -		 * Works in all experiments done so far
-> -		 */
-> -		ret = regmap_read_poll_timeout(sdhci_am654->base, PHY_STAT1,
-> -					       val, val & DLLRDY_MASK, 1000,
-> -					       1000000);
-> -		if (ret) {
-> -			dev_err(mmc_dev(host->mmc), "DLL failed to relock\n");
-> -			return;
-> -		}
-> -
-> -		sdhci_am654->dll_on = true;
-> +		if (timing > MMC_TIMING_UHS_SDR25)
-> +			sdhci_am654_setup_dll(host, clock);
->  	}
->  }
->  
-> 
+Robin.
 
+----->8-----
+ From fafad319893b4168fcccc5445543caf876a0be2d Mon Sep 17 00:00:00 2001
+Message-Id: 
+<fafad319893b4168fcccc5445543caf876a0be2d.1579526755.git.robin.murphy@arm.com>
+From: Robin Murphy <robin.murphy@arm.com>
+Date: Mon, 20 Jan 2020 13:11:59 +0000
+Subject: [PATCH] mmc: sdhci-of-esdhc: Restore coherency for PPC platforms
+
+Historically, not all PPC platforms have supported per-device coherency,
+and some may rely on platform-level assumptions rather than explicitly
+specifying the "dma-coherent" propert in their DT. Although the eSDHC
+driver needs to tie in to per-device coherency to work correctly on
+arm/arm64 platforms, this has apparently caused problems for PPC, so
+restore the previous behaviour there with a special case.
+
+Fixes: 121bd08b029e ("mmc: sdhci-of-esdhc: set DMA snooping based on DMA 
+coherence")
+Reported-by: Yangbo Lu <yangbo.lu@nxp.com>
+Signed-off-by: Robin Murphy <robin.murphy@arm.com>
+---
+  drivers/mmc/host/sdhci-of-esdhc.c | 3 ++-
+  1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/sdhci-of-esdhc.c 
+b/drivers/mmc/host/sdhci-of-esdhc.c
+index 500f70a6ee42..a2599368b2bd 100644
+--- a/drivers/mmc/host/sdhci-of-esdhc.c
++++ b/drivers/mmc/host/sdhci-of-esdhc.c
+@@ -527,7 +527,8 @@ static int esdhc_of_enable_dma(struct sdhci_host *host)
+
+  	value = sdhci_readl(host, ESDHC_DMA_SYSCTL);
+
+-	if (of_dma_is_coherent(dev->of_node))
++	/* Historically, PPC has always assumed coherency here */
++	if (IS_ENABLED(CONFIG_PPC) || of_dma_is_coherent(dev->of_node))
+  		value |= ESDHC_DMA_SNOOP;
+  	else
+  		value &= ~ESDHC_DMA_SNOOP;
+-- 
+2.23.0.dirty
