@@ -2,110 +2,131 @@ Return-Path: <SRS0=gs89=3J=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 57572C2D0DB
-	for <linux-mmc@archiver.kernel.org>; Mon, 20 Jan 2020 13:34:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E3951C33CA1
+	for <linux-mmc@archiver.kernel.org>; Mon, 20 Jan 2020 14:39:29 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 351A821835
-	for <linux-mmc@archiver.kernel.org>; Mon, 20 Jan 2020 13:34:30 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B90E122525
+	for <linux-mmc@archiver.kernel.org>; Mon, 20 Jan 2020 14:39:29 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=fail reason="key not found in DNS" (0-bit key) header.d=mg.codeaurora.org header.i=@mg.codeaurora.org header.b="KJm8BTuv"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726897AbgATNe3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 20 Jan 2020 08:34:29 -0500
-Received: from foss.arm.com ([217.140.110.172]:60384 "EHLO foss.arm.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726728AbgATNe3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 20 Jan 2020 08:34:29 -0500
-Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
-        by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 5643430E;
-        Mon, 20 Jan 2020 05:34:29 -0800 (PST)
-Received: from [10.1.196.37] (e121345-lin.cambridge.arm.com [10.1.196.37])
-        by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 0B4F73F52E;
-        Mon, 20 Jan 2020 05:34:27 -0800 (PST)
-Subject: Re: [PATCH 2/3] mmc: sdhci-of-esdhc: set DMA snooping based on DMA
- coherence
-To:     "Y.b. Lu" <yangbo.lu@nxp.com>,
-        Russell King <rmk+kernel@armlinux.org.uk>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        dann frazier <dann.frazier@canonical.com>,
-        Will Deacon <will.deacon@arm.com>,
-        Nicolin Chen <nicoleotsuka@gmail.com>,
-        Christoph Hellwig <hch@lst.de>
-References: <20190922102341.GO25745@shell.armlinux.org.uk>
- <E1iBz50-0008Mc-8K@rmk-PC.armlinux.org.uk>
- <AM7PR04MB688507B5B4D84EB266738891F8320@AM7PR04MB6885.eurprd04.prod.outlook.com>
-From:   Robin Murphy <robin.murphy@arm.com>
-Message-ID: <50fe98f2-9ee6-c0fb-d246-e3d6b4b2cec5@arm.com>
-Date:   Mon, 20 Jan 2020 13:34:26 +0000
-User-Agent: Mozilla/5.0 (X11; Linux aarch64; rv:60.0) Gecko/20100101
- Thunderbird/60.9.0
-MIME-Version: 1.0
-In-Reply-To: <AM7PR04MB688507B5B4D84EB266738891F8320@AM7PR04MB6885.eurprd04.prod.outlook.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-GB
-Content-Transfer-Encoding: 7bit
+        id S1726738AbgATOj2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 20 Jan 2020 09:39:28 -0500
+Received: from mail26.static.mailgun.info ([104.130.122.26]:22211 "EHLO
+        mail26.static.mailgun.info" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726642AbgATOj2 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Jan 2020 09:39:28 -0500
+DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
+ s=smtp; t=1579531168; h=References: In-Reply-To: Message-Id: Date:
+ Subject: Cc: To: From: Sender;
+ bh=BzDRV7ulYCXM+3B574lgGPBya371clGZvJ4IdiMMJzI=; b=KJm8BTuvbMsRwp9bj8MwsakuRbJZl4kIOkfbWJUuH7wx53z6o1c9SE7vJq2niTsmkIKGFgJb
+ rmdz5x9oTFQGBmAn5YDmiDMjXMutv66hVzqZXSZwbbbn2uj49EYt1vuGciBl2L842l7F0pAu
+ M+bk2MwtNKj/alo8yLs8Nkikg4k=
+X-Mailgun-Sending-Ip: 104.130.122.26
+X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
+Received: from smtp.codeaurora.org (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171])
+ by mxa.mailgun.org with ESMTP id 5e25bb9a.7fd55fd684c8-smtp-out-n01;
+ Mon, 20 Jan 2020 14:39:22 -0000 (UTC)
+Received: by smtp.codeaurora.org (Postfix, from userid 1001)
+        id 39AA4C4479C; Mon, 20 Jan 2020 14:39:22 +0000 (UTC)
+Received: from vbadigan-linux.qualcomm.com (blr-c-bdr-fw-01_GlobalNAT_AllZones-Outside.qualcomm.com [103.229.19.19])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-SHA256 (128/128 bits))
+        (No client certificate requested)
+        (Authenticated sender: vbadigan)
+        by smtp.codeaurora.org (Postfix) with ESMTPSA id 28D8AC433CB;
+        Mon, 20 Jan 2020 14:39:10 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.3.2 smtp.codeaurora.org 28D8AC433CB
+Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
+Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=none smtp.mailfrom=vbadigan@codeaurora.org
+From:   Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+To:     ulf.hansson@linaro.org, adrian.hunter@intel.com
+Cc:     asutoshd@codeaurora.org, stummala@codeaurora.org,
+        sayalil@codeaurora.org, cang@codeaurora.org,
+        rampraka@codeaurora.org, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+        Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+Subject: [PATCH V3] mmc: sdhci: Let a vendor driver supply and update ADMA descriptor size
+Date:   Mon, 20 Jan 2020 20:08:38 +0530
+Message-Id: <1579531122-28341-1-git-send-email-vbadigan@codeaurora.org>
+X-Mailer: git-send-email 1.9.1
+In-Reply-To: <1579519045-26467-1-git-send-email-vbadigan@codeaurora.org>
+References: <1579519045-26467-1-git-send-email-vbadigan@codeaurora.org>
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 20/01/2020 10:09 am, Y.b. Lu wrote:
-> Hi Russell,
-> 
-> Recently I got eSDHC ADMA issue on PowerPC T2080 platform. After checking, the issue is related to this patch.
-> This patch was to make eSDHC DMA SNOOP bit set per dma-coherent. That resolved issue on LX2160A ARM64 platform.
-> However on T2080, we are facing similar issue again. It didn't have dma-coherent in dts.
-> Adding dma-coherent in dts, or reverting the patch could resolve the problem.
+Let a vendor driver supply the maximum descriptor size that it
+can operate on. ADMA descriptor table would be allocated using this
+supplied size.
+If any SD Host controller is of version prior to v4.10 spec
+but supports 16byte descriptor, this change allows them to supply
+correct descriptor size for ADMA table allocation.
 
-Arguably updating the DTS would be the most accurate option, since it 
-would be describing the hardware more correctly, however if there are 
-reasons for that not being sufficient (e.g. DTBs baked into firmware, or 
-worries of confusing some other DT consumer) then something like the 
-below seems reasonable (albeit a little crude) IMO.
+Also let a vendor driver update the descriptor size by overriding
+sdhc_host->desc_size if it has to operates on a different descriptor
+sizes in different conditions.
 
-Robin.
+Suggested-by: Adrian Hunter <adrian.hunter@intel.com>
+Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+--
+Thanks Adrian.
 
------>8-----
- From fafad319893b4168fcccc5445543caf876a0be2d Mon Sep 17 00:00:00 2001
-Message-Id: 
-<fafad319893b4168fcccc5445543caf876a0be2d.1579526755.git.robin.murphy@arm.com>
-From: Robin Murphy <robin.murphy@arm.com>
-Date: Mon, 20 Jan 2020 13:11:59 +0000
-Subject: [PATCH] mmc: sdhci-of-esdhc: Restore coherency for PPC platforms
-
-Historically, not all PPC platforms have supported per-device coherency,
-and some may rely on platform-level assumptions rather than explicitly
-specifying the "dma-coherent" propert in their DT. Although the eSDHC
-driver needs to tie in to per-device coherency to work correctly on
-arm/arm64 platforms, this has apparently caused problems for PPC, so
-restore the previous behaviour there with a special case.
-
-Fixes: 121bd08b029e ("mmc: sdhci-of-esdhc: set DMA snooping based on DMA 
-coherence")
-Reported-by: Yangbo Lu <yangbo.lu@nxp.com>
-Signed-off-by: Robin Murphy <robin.murphy@arm.com>
+Hi Ulf,
+Can you pick this patch instead of earlier one? This is more clean
+change, sorry for the multiple interations.
+Otherwise let me know, I will make these changes as seperate patch.
 ---
-  drivers/mmc/host/sdhci-of-esdhc.c | 3 ++-
-  1 file changed, 2 insertions(+), 1 deletion(-)
+ drivers/mmc/host/sdhci.c | 16 +++++++---------
+ drivers/mmc/host/sdhci.h |  3 ++-
+ 2 files changed, 9 insertions(+), 10 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-of-esdhc.c 
-b/drivers/mmc/host/sdhci-of-esdhc.c
-index 500f70a6ee42..a2599368b2bd 100644
---- a/drivers/mmc/host/sdhci-of-esdhc.c
-+++ b/drivers/mmc/host/sdhci-of-esdhc.c
-@@ -527,7 +527,8 @@ static int esdhc_of_enable_dma(struct sdhci_host *host)
-
-  	value = sdhci_readl(host, ESDHC_DMA_SYSCTL);
-
--	if (of_dma_is_coherent(dev->of_node))
-+	/* Historically, PPC has always assumed coherency here */
-+	if (IS_ENABLED(CONFIG_PPC) || of_dma_is_coherent(dev->of_node))
-  		value |= ESDHC_DMA_SNOOP;
-  	else
-  		value &= ~ESDHC_DMA_SNOOP;
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 3140fe2..7a7a18e 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -3821,15 +3821,13 @@ int sdhci_setup_host(struct sdhci_host *host)
+ 		dma_addr_t dma;
+ 		void *buf;
+ 
+-		if (host->flags & SDHCI_USE_64_BIT_DMA) {
+-			host->adma_table_sz = host->adma_table_cnt *
+-					      SDHCI_ADMA2_64_DESC_SZ(host);
+-			host->desc_sz = SDHCI_ADMA2_64_DESC_SZ(host);
+-		} else {
+-			host->adma_table_sz = host->adma_table_cnt *
+-					      SDHCI_ADMA2_32_DESC_SZ;
+-			host->desc_sz = SDHCI_ADMA2_32_DESC_SZ;
+-		}
++		if (!(host->flags & SDHCI_USE_64_BIT_DMA))
++			host->alloc_desc_sz = SDHCI_ADMA2_32_DESC_SZ;
++		else if (!host->alloc_desc_sz)
++			host->alloc_desc_sz = SDHCI_ADMA2_64_DESC_SZ(host);
++
++		host->desc_sz = host->alloc_desc_sz;
++		host->adma_table_sz = host->adma_table_cnt * host->desc_sz;
+ 
+ 		host->align_buffer_sz = SDHCI_MAX_SEGS * SDHCI_ADMA2_ALIGN;
+ 		/*
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 0ed3e0e..10bda3a 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -554,7 +554,8 @@ struct sdhci_host {
+ 	dma_addr_t adma_addr;	/* Mapped ADMA descr. table */
+ 	dma_addr_t align_addr;	/* Mapped bounce buffer */
+ 
+-	unsigned int desc_sz;	/* ADMA descriptor size */
++	unsigned int desc_sz;	/* ADMA current descriptor size */
++	unsigned int alloc_desc_sz;	/* ADMA descr. max size host supports */
+ 
+ 	struct workqueue_struct *complete_wq;	/* Request completion wq */
+ 	struct work_struct	complete_work;	/* Request completion work */
 -- 
-2.23.0.dirty
+Qualcomm India Private Limited, on behalf of Qualcomm Innovation Center, Inc., is a member of Code Aurora Forum, a Linux Foundation Collaborative Project
