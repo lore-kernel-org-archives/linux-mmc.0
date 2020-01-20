@@ -2,106 +2,159 @@ Return-Path: <SRS0=gs89=3J=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5BC4BC2D0DB
-	for <linux-mmc@archiver.kernel.org>; Mon, 20 Jan 2020 11:19:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CD60EC2D0DB
+	for <linux-mmc@archiver.kernel.org>; Mon, 20 Jan 2020 11:26:12 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 2EE372087E
-	for <linux-mmc@archiver.kernel.org>; Mon, 20 Jan 2020 11:19:11 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9F9A120882
+	for <linux-mmc@archiver.kernel.org>; Mon, 20 Jan 2020 11:26:12 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="dO4kN0c5"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="kkZOpbNc"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726876AbgATLTK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 20 Jan 2020 06:19:10 -0500
-Received: from mail-vs1-f47.google.com ([209.85.217.47]:35111 "EHLO
-        mail-vs1-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726421AbgATLTK (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Jan 2020 06:19:10 -0500
-Received: by mail-vs1-f47.google.com with SMTP id x123so18723596vsc.2
-        for <linux-mmc@vger.kernel.org>; Mon, 20 Jan 2020 03:19:09 -0800 (PST)
+        id S1726775AbgATL0M (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 20 Jan 2020 06:26:12 -0500
+Received: from mail-vk1-f194.google.com ([209.85.221.194]:34294 "EHLO
+        mail-vk1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726573AbgATL0M (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Jan 2020 06:26:12 -0500
+Received: by mail-vk1-f194.google.com with SMTP id w67so8454177vkf.1
+        for <linux-mmc@vger.kernel.org>; Mon, 20 Jan 2020 03:26:11 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=gxSL5xhOZst+pCmxYqXG3YKuQuTkwZHSeWZWlmDk2HQ=;
-        b=dO4kN0c5Z35cMUG2zQrTTvrk7RGA1amnG3n9P90IImjqOjjDZjhvuNsBSQhiMMXNLE
-         CDMzF/9s8uqA4Df+Ru+q/8o6Ouxz8CivtgQKiNcmW5hnOdZ8mnY280zn88iNKXHA4HHx
-         v5zrMudqkmHMQsgJ+ZK6LDx/ugBBzSbxVlKmqeIoYtmGlsZNG3E1/Jp9qS/Vh+/O5REk
-         e1cfWSdt0nlct528AyTTlNPiUtRbL7oq0VMka5yYnWJqaw9p9UgOFniXL16lo6h50H4c
-         y7Ehogowgx0mQP8OD9KRCYSTcly0Uhmhx6kZVObbXxBKYt+GzA3udIsIzRADe0patW2A
-         Dy1Q==
+         :cc:content-transfer-encoding;
+        bh=/6h44apr/MBSH4phU83NTZvL9KJrwpMdL+9j2IrAWsY=;
+        b=kkZOpbNcTWORy2JfVELYofOW2Ah224v7M22T8SKH9T2lgF/Z1WoikTNktM+8c+QZ/A
+         HYsXAguAT8AodT0l3BObL8TLKAK9EfixNNwhb6tVdQMcCKGQWfb8iZw1rCZkKhc+kqz2
+         WRg+XE9V0hR0fSQ1pQLD51INKWNvveLYXukdQlp0RUd0cpaP9GG+dFWD/nVrt0Qs4FTi
+         M4wcty/2vh+DLzJMrX0feBXVNkft1LZ/zfUQpA3xrlsqm3O580b/Z2i/a5AaEpDBvRm/
+         +3tx/roNgqOPUIo+dbqDMRT4GKfnxLy4gWfp0n2xmRDpTjV0VBXDsBFJ10c6wpCfr1BY
+         kBCg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=gxSL5xhOZst+pCmxYqXG3YKuQuTkwZHSeWZWlmDk2HQ=;
-        b=gGOJTZ+Fi6R65tnpQHuoLvdnWgiapO5uLSuhNKX56HxrILirOaKwn0DvI9dMrFII90
-         rTkXlNz2L5F772L4PyEnoLCfLOQj7Qvs6TqePTymYgDcdgBtgT68g6I3+J9qdCXesr8/
-         f/aVRi0ZwX/SBRIc24FgB5rc9WNALuB4UIsrKTJPcUc4TRWWF8wOXD8KYYObhEJpaUOV
-         t+CG7pInXbiVoYFcBOg5SaBkqnFvPWaGnTITUaSgb47WC4zxlEojejL2E/L00QWnnyvG
-         OBCsn+o3S25ylTGqZAeS0vU+DmzqxXG58MZPnu7tUA2eDQQ+ZxYBHFBUFMJ5oo/NXjoK
-         HnAQ==
-X-Gm-Message-State: APjAAAW/MKLfzWvw1bBxuICqDzC/Km/C49pdcCfbh0Rdqf1XIe9LMJj9
-        572PNNpkCWVzUSyDXbeA6x8x8/M8MjL/r/etKNPquMazT88=
-X-Google-Smtp-Source: APXvYqwEK7V8CGTKtpdB2cbeBf8HgalOPvhYLB27hK6pTw6dPNJlNxuuxk0NzlvlQGtXVEkoS9slrLYLBvgzGRuZTI8=
-X-Received: by 2002:a67:6282:: with SMTP id w124mr11959722vsb.191.1579519149014;
- Mon, 20 Jan 2020 03:19:09 -0800 (PST)
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=/6h44apr/MBSH4phU83NTZvL9KJrwpMdL+9j2IrAWsY=;
+        b=HZ8akkk3wXb7CLphkH3enUQh2GKV6Gunq/3fZUnPPYmn60/fT/j7UyaeSRxwkhFrwF
+         Tq2WWMhBH4oX+a+O3JisDNDEoGtkka2ntBQ9nWq7CrfF9+pfT+Kd9B35lq8oc4iHFf+A
+         SBub8eFX82l0V69vjGUaUKCcAKHkLOBcaqnG2Tzxsa50cffTUpy4QcBGVgDPPtiNT4PC
+         ng03+GlDnQBCKph0bvDCp68TS/+vTTziTOaiTDICuN5Y4E/V/N+z8midNTEI6fFbSARc
+         pIEhvU21UCWWqhHdKVspWC5QKNRCF6suAhm5Y5xT6WfihLh/CenwiCR1XPMmbsji2/rK
+         8APg==
+X-Gm-Message-State: APjAAAXqBTIJr7HCsW66/LmljgN9/CYchVZwbymwTlev7/iq4/K9NB8D
+        z5v4oKYRuMpnHJjOPjihCKKp893xVFZq7w+F5eeUL2nE
+X-Google-Smtp-Source: APXvYqxI1iMU6cU9a4kyNfcT/7FhHDagumdwB9XVb3vIpFfPpgyU01bKZfDvZ/cqXO7oNV0JlnfKNItv19qv5BnlyOQ=
+X-Received: by 2002:ac5:cde3:: with SMTP id v3mr605857vkn.43.1579519570907;
+ Mon, 20 Jan 2020 03:26:10 -0800 (PST)
 MIME-Version: 1.0
-References: <20200108093903.57620-1-hdegoede@redhat.com> <20200108093903.57620-2-hdegoede@redhat.com>
- <61bc9265-ece0-eeb6-d4a1-4631138ecf29@intel.com> <8d67882d-04a8-0607-be4e-c1430b7fda21@redhat.com>
- <84a32714-ba08-74a0-0c76-3c36db44dd68@intel.com> <93446e09-5f12-800a-62fa-bf3ecea7273d@redhat.com>
- <399ac7d5-2518-799a-595e-f6b6878cf4ab@intel.com> <a9ab8946-c599-5f83-7527-2387a9e82e8a@xenosoft.de>
- <CAPDyKFoydOuSE=Eaq168=2_Ycouo7hzyw+RZXhGq7q4D4Qe8TQ@mail.gmail.com> <fda179eb-df5f-ba87-aaf0-524fffca745b@xenosoft.de>
-In-Reply-To: <fda179eb-df5f-ba87-aaf0-524fffca745b@xenosoft.de>
+References: <f471bceaf237d582d746bd289c4c4f3639cb7b45.1577962382.git.mirq-linux@rere.qmqm.pl>
+ <CAPDyKFpZWnkK7UmCZ8M4UnM05wR3MQsPrpEjOJuwkKcN2gePSg@mail.gmail.com>
+ <20200117140511.GC26135@qmqm.qmqm.pl> <CAPDyKFpkhwnzi5PAr_0bAriYteeBUVM5Qr1byiXtJkgYd=dKfw@mail.gmail.com>
+ <20200117161422.GA11081@qmqm.qmqm.pl>
+In-Reply-To: <20200117161422.GA11081@qmqm.qmqm.pl>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 20 Jan 2020 12:18:32 +0100
-Message-ID: <CAPDyKFoTuvrq8PYoXVaZoJN+zBUGVkQkYAhwber7rez32y3Sxg@mail.gmail.com>
-Subject: Re: [FSL P5020 P5040 PPC] Onboard SD card doesn't work anymore after
- the 'mmc-v5.4-2' updates
-To:     Christian Zigotzky <chzigotzky@xenosoft.de>
+Date:   Mon, 20 Jan 2020 12:25:35 +0100
+Message-ID: <CAPDyKFqdq_eizwgaKf=ZdohBY01K2RhVNZG2dyrLbQgVT+Miwg@mail.gmail.com>
+Subject: Re: [PATCH] mmc: core: limit probe clock frequency to configured f_max
+To:     =?UTF-8?B?TWljaGHFgiBNaXJvc8WCYXc=?= <mirq-linux@rere.qmqm.pl>
 Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        linuxppc-dev <linuxppc-dev@lists.ozlabs.org>,
-        Darren Stevens <darren@stevens-zone.net>,
-        mad skateman <madskateman@gmail.com>,
-        "R.T.Dickinson" <rtd2@xtra.co.nz>,
-        "contact@a-eon.com" <contact@a-eon.com>,
-        Julian Margetson <runaway@candw.ms>
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 20 Jan 2020 at 10:17, Christian Zigotzky <chzigotzky@xenosoft.de> wrote:
+On Fri, 17 Jan 2020 at 17:14, Micha=C5=82 Miros=C5=82aw <mirq-linux@rere.qm=
+qm.pl> wrote:
 >
-> Am 16.01.20 um 16:46 schrieb Ulf Hansson:
-> > On Thu, 16 Jan 2020 at 12:18, Christian Zigotzky <chzigotzky@xenosoft.de> wrote:
-> >> Hi All,
-> >>
-> >> We still need the attached patch for our onboard SD card interface
-> >> [1,2]. Could you please add this patch to the tree?
-> > No, because according to previous discussion that isn't the correct
-> > solution and more importantly it will break other archs (if I recall
-> > correctly).
+> On Fri, Jan 17, 2020 at 04:26:30PM +0100, Ulf Hansson wrote:
+> > On Fri, 17 Jan 2020 at 15:05, Micha=C5=82 Miros=C5=82aw <mirq-linux@rer=
+e.qmqm.pl> wrote:
+> > >
+> > > On Thu, Jan 16, 2020 at 03:07:22PM +0100, Ulf Hansson wrote:
+> > > > On Thu, 2 Jan 2020 at 11:54, Micha=C5=82 Miros=C5=82aw <mirq-linux@=
+rere.qmqm.pl> wrote:
+> > > > >
+> > > > > Currently MMC core disregards host->f_max during card initializat=
+ion
+> > > > > phase. Obey upper boundary for the clock frequency and skip faste=
+r
+> > > > > speeds when they are above the limit.
+> > > >
+> > > > Is this a hypothetical problem or a real problem?
+> > >
+> > > This is a problem on noisy or broken boards or cards - so needed for
+> > > debugging such a combination. I wouldn't expect this is required for
+> > > normal devices.
 > >
-> > Looks like someone from the ppc community needs to pick up the ball.
-> I am not sure if the ppc community have to fix this issue because your
-> updates (mmc-v5.4-2) are responsible for this issue. If nobody wants to
-> fix this issue then we will lost the onboard SD card support in the
-> future. PLEASE check the 'mmc-v5.4-2' updates again.
+> > Alright.
+> >
+> > >
+> > > > > Signed-off-by: Micha=C5=82 Miros=C5=82aw <mirq-linux@rere.qmqm.pl=
+>
+> > > > > ---
+> > > > >  drivers/mmc/core/core.c | 10 ++++++++--
+> > > > >  1 file changed, 8 insertions(+), 2 deletions(-)
+> > > > >
+> > > > > diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> > > > > index abf8f5eb0a1c..aa54d359dab7 100644
+> > > > > --- a/drivers/mmc/core/core.c
+> > > > > +++ b/drivers/mmc/core/core.c
+> > > > > @@ -2330,7 +2330,13 @@ void mmc_rescan(struct work_struct *work)
+> > > > >         }
+> > > > >
+> > > > >         for (i =3D 0; i < ARRAY_SIZE(freqs); i++) {
+> > > > > -               if (!mmc_rescan_try_freq(host, max(freqs[i], host=
+->f_min)))
+> > > > > +               unsigned int freq =3D freqs[i];
+> > > > > +               if (freq > host->f_max) {
+> > > > > +                       if (i + 1 < ARRAY_SIZE(freqs))
+> > > > > +                               continue;
+> > > > > +                       freq =3D host->f_max;
+> > > >
+> > > > This looks wrong to me. For example, what if f_max =3D 250KHz and f=
+_min =3D 50 KHz.
+> > > >
+> > > > Then we should try with 250KHz, then 200KHz and then 100KHz. This
+> > > > isn't what the above code does, I think.
+> > > >
+> > > > Instead it will try with 200KHz and then 100KHz, thus skip 250KHz.
+> > > >
+> > > > Maybe we should figure out what index of freqs[] to start the loop =
+for
+> > > > (before actually starting the loop), depending on the value of f_ma=
+x -
+> > > > rather than always start at 0.
+> > >
+> > > Yes, it will skip higher frequencies. I didn't view it a problem,
+> > > because the new code guarantees at least one frequency will be tried.
+> > > The eMMC standard specifies only max init frequency (400kHz), so all =
+we
+> > > should try is something less whatever works.
+> > >
+> > > SD spec specifies minimal frequency (100kHz), but I wouldn't expect
+> > > this to be enforced nor required to be anywhere.
+> >
+> > Well, my point isn't so much about the specs, rather about providing a
+> > consistent behaviour.
+> >
+> > We deal with f_min constraints like I described above, then I think we
+> > should make f_max behave the similar way.
+>
+> Okay, this would be a second fix as trying the same freq multiple times
+> is not what this code is supposed to do.
 
-Applying your suggested fix breaks other archs/boards. It's really not
-a good situation, but I will not take a step back when it's quite easy
-to take a step forward instead.
+Well, I think we want to allow to run a couple retries on failures,
+but I admit that it's kind of questionable to try the same freq
+multiple times. Anyway, that's what the code around f_min does.
 
-Someone just need to care and send a patch, it doesn't look that hard
-to me, but maybe I am wrong.
-
-Apologies if this isn't the answer you wanted, but that's all I can do
-for now, sorry.
+In any case, I have queued this is up for next, thanks!
 
 Kind regards
 Uffe
