@@ -2,147 +2,149 @@ Return-Path: <SRS0=t5qd=3K=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.4 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 558D3C2D0CE
-	for <linux-mmc@archiver.kernel.org>; Tue, 21 Jan 2020 16:53:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 98F60C2D0CE
+	for <linux-mmc@archiver.kernel.org>; Tue, 21 Jan 2020 23:26:01 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 1FDDC24653
-	for <linux-mmc@archiver.kernel.org>; Tue, 21 Jan 2020 16:53:31 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6149D24656
+	for <linux-mmc@archiver.kernel.org>; Tue, 21 Jan 2020 23:26:01 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=rere.qmqm.pl header.i=@rere.qmqm.pl header.b="MYBKieLc"
+	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="Gp5wngKj"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728904AbgAUQxa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 21 Jan 2020 11:53:30 -0500
-Received: from rere.qmqm.pl ([91.227.64.183]:34942 "EHLO rere.qmqm.pl"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726714AbgAUQxa (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 21 Jan 2020 11:53:30 -0500
-Received: from remote.user (localhost [127.0.0.1])
-        by rere.qmqm.pl (Postfix) with ESMTPSA id 482F3X43CXz5H;
-        Tue, 21 Jan 2020 17:53:28 +0100 (CET)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=rere.qmqm.pl; s=1;
-        t=1579625608; bh=QQRC2I5DURnaLust1GeWJy9Pgi9JtdPYp5gTXzxo4ts=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=MYBKieLcIkJWvMP9vVNmtmYIfZkVLIVwoFJ1KeD42gdX7J7FgEPnkXvBjnkHWTHSJ
-         y+wgWeSQuujRD9kHnPxNgj3jpaPxYCMFPhIR8G5mOTySqqn8JLhVU8fxvz4SlJ5pxs
-         WEXSGQLW6Y+HbAHCGbwG8K1PEEEx6xjdYG30ALSspm7w8x0SgrdiRg7ee5knhqGWfG
-         IpZ1aNeMq2RMwYufywD2nsCKcQODliXS+7WFk0KL+H82KKFPsjirOB1lViZCyCQG+G
-         Aqc18nPk2X7iINLfsRicGb9LwNRSQQ1hEH+HrT+4fd0G3tyJzDmTkTnLRE4pHmN7qX
-         sozThRbSyQ3Og==
-X-Virus-Status: Clean
-X-Virus-Scanned: clamav-milter 0.101.4 at mail
-Date:   Tue, 21 Jan 2020 17:53:27 +0100
-From:   =?iso-8859-2?Q?Micha=B3_Miros=B3aw?= <mirq-linux@rere.qmqm.pl>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-Subject: Re: [PATCH] mmc: core: avoid blocking CPU for long BKOPS
-Message-ID: <20200121165327.GB30699@qmqm.qmqm.pl>
-References: <fb942066b18940c863573ccb3fc09031d7f920d3.1576346084.git.mirq-linux@rere.qmqm.pl>
- <CAPDyKFqnj5=2jbZD+9V=NXt0JG4QxotzN=fUTBaiuk5c1eB-HA@mail.gmail.com>
+        id S1726584AbgAUX0B (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 21 Jan 2020 18:26:01 -0500
+Received: from mail-pg1-f196.google.com ([209.85.215.196]:41770 "EHLO
+        mail-pg1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725933AbgAUX0A (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Jan 2020 18:26:00 -0500
+Received: by mail-pg1-f196.google.com with SMTP id x8so2354402pgk.8
+        for <linux-mmc@vger.kernel.org>; Tue, 21 Jan 2020 15:26:00 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=chromium.org; s=google;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to:user-agent;
+        bh=fya0ETVWBsK5/pHiMBVCMTG0c4UO4fQFq/uw5FrlvKc=;
+        b=Gp5wngKjd2Dgmx6PzdIbrPwECnkAIVJNxGqMuUZzr0rEYmuit8y4Ot3ttQpAgp6Qu9
+         Y+8x+QpVRIjrcp+dLI7QD1Q2c+d26pgEFtZDDWI9hmaiADhtbThpYjB+9sOW1dZRNHfr
+         GCpZ+g0VIXXuBQVaqRK4xqCvhSkOZDkyGzqwo=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to:user-agent;
+        bh=fya0ETVWBsK5/pHiMBVCMTG0c4UO4fQFq/uw5FrlvKc=;
+        b=hqbKODn9ahuPZ39Q1V/JPU/j8rD3gHEz9W+jOWCKOEX62eearDacIlTmttsmSC7ExL
+         X0YOk9GhvBFdxvEtGy1Cz9ad45dMiGrfC/5EtJyuY68WBJPKOTk6CttyB7u4jUalsUzw
+         XWT5hllbwyw83zxclW0922L07wpB0OLAZnGcJIlvppb1ITHAGDLH+xGRXDWpuNwXJbCl
+         07JCnE0KnjK1fRPbCsNguM7sHrkIEWZkenG3bPhY0OM5l0wUtuXsFqrePeRn1hKD2F2h
+         Ui8vIl6k793aGz8Pe69ux+H6etbmhiTAK3QmMZsl23rza137BipVK76ivwRbAOPxvAPy
+         IDxQ==
+X-Gm-Message-State: APjAAAVEJjQKtxNGLbERXMIeZAfdzGlDcnuf8StuNJbw5ADcdviGJ0RA
+        qlS+SzrsO9aDPTFxnQu2ryu6/g==
+X-Google-Smtp-Source: APXvYqz3gfa3kyqLCQlJ5AYjH73VwhxuTnQbPEn6gYN0WLEi7728RPbNIzLfMAiZi11SXMIUjQjs0w==
+X-Received: by 2002:a62:e40e:: with SMTP id r14mr6686924pfh.115.1579649160249;
+        Tue, 21 Jan 2020 15:26:00 -0800 (PST)
+Received: from localhost ([2620:15c:202:1:4fff:7a6b:a335:8fde])
+        by smtp.gmail.com with ESMTPSA id 7sm45548660pfx.52.2020.01.21.15.25.59
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 21 Jan 2020 15:25:59 -0800 (PST)
+Date:   Tue, 21 Jan 2020 15:25:58 -0800
+From:   Matthias Kaehlcke <mka@chromium.org>
+To:     Shaik Sajida Bhanu <sbhanu@codeaurora.org>
+Cc:     ulf.hansson@linaro.org, adrian.hunter@intel.com,
+        asutoshd@codeaurora.org, stummala@codeaurora.org,
+        vbadigan@codeaurora.org, sayalil@codeaurora.org,
+        cang@codeaurora.org, rampraka@codeaurora.org,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-arm-msm@vger.kernel.org, agross@kernel.org,
+        bjorn.andersson@linaro.org
+Subject: Re: [PATCH V1] mmc: sdhci-msm: Add system suspend/resume callbacks
+Message-ID: <20200121232558.GV89495@google.com>
+References: <1579617022-13031-1-git-send-email-sbhanu@codeaurora.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-2
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <CAPDyKFqnj5=2jbZD+9V=NXt0JG4QxotzN=fUTBaiuk5c1eB-HA@mail.gmail.com>
+In-Reply-To: <1579617022-13031-1-git-send-email-sbhanu@codeaurora.org>
 User-Agent: Mutt/1.10.1 (2018-07-13)
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Jan 21, 2020 at 04:35:58PM +0100, Ulf Hansson wrote:
-> On Sat, 14 Dec 2019 at 18:59, Micha³ Miros³aw <mirq-linux@rere.qmqm.pl> wrote:
-> >
-> > Since the timeout for a command might be 10 minutes (fallback), don't
-> > eat all CPU power spinning for completion (triggering lockup detector).
-> > Implement delay with exponential backoff and a one second limit.
-> >
-> > [158480.011769] watchdog: BUG: soft lockup - CPU#3 stuck for 23s! [fsck.f2fs:962]
-> > [158480.014911] Modules linked in: brcmfmac brcmutil cfg80211 mmc_block sdhci_tegra cqhci sdhci_pltfm sdhci pwrseq_simple pwrseq_emmc mmc_core
-> > [158480.018291] CPU: 3 PID: 962 Comm: fsck.f2fs Not tainted 5.5.0-rc1-next-20191209mq-00173-g716e74177313-dirty #95
-> > [158480.021479] Hardware name: NVIDIA Tegra SoC (Flattened Device Tree)
-> > [158480.024934] PC is at sdhci_card_busy+0x28/0x44 [sdhci]
-> > [158480.028858] LR is at __mmc_switch+0x180/0x330 [mmc_core]
-> > [158480.032449] pc : [<af03b118>]    lr : [<af009fcc>]    psr: 60000013
-> > [158480.036004] sp : e79c9b38  ip : ee01dfd0  fp : 00f23d31
-> > [158480.039339] r10: 00000000  r9 : 0000e020  r8 : b0c04900
-> > [158480.042939] r7 : e763e000  r6 : 00000000  r5 : ee189000  r4 : ee189000
-> > [158480.044909] r3 : f002b600  r2 : af03b0f0  r1 : ee01db00  r0 : 1fe70000
-> > [158480.046857] Flags: nZCv  IRQs on  FIQs on  Mode SVC_32  ISA ARM  Segment user
-> > [158480.048870] Control: 10c5387d  Table: b76ac04a  DAC: 00000055
-> > [158480.050807] CPU: 3 PID: 962 Comm: fsck.f2fs Not tainted 5.5.0-rc1-next-20191209mq-00173-g716e74177313-dirty #95
-> > [158480.052913] Hardware name: NVIDIA Tegra SoC (Flattened Device Tree)
-> > [...]
-> > [158480.098604] [<b0101ab8>] (__irq_svc) from [<af03b118>] (sdhci_card_busy+0x28/0x44 [sdhci])
-> > [158480.101406] [<af03b118>] (sdhci_card_busy [sdhci]) from [<af009fcc>] (__mmc_switch+0x180/0x330 [mmc_core])
-> > [158480.104348] [<af009fcc>] (__mmc_switch [mmc_core]) from [<af00a3bc>] (mmc_run_bkops+0xdc/0x114 [mmc_core])
-> > [158480.107209] [<af00a3bc>] (mmc_run_bkops [mmc_core]) from [<af067d88>] (mmc_blk_mq_complete_prev_req.part.4+0x8c/0x21c [mmc_block])
-> > [158480.110043] [<af067d88>] (mmc_blk_mq_complete_prev_req.part.4 [mmc_block]) from [<af067f94>] (mmc_blk_rw_wait+0x7c/0x11c [mmc_block])
-> > [158480.112914] [<af067f94>] (mmc_blk_rw_wait [mmc_block]) from [<af068c34>] (mmc_blk_mq_issue_rq+0x318/0x898 [mmc_block])
-> > [158480.115733] [<af068c34>] (mmc_blk_mq_issue_rq [mmc_block]) from [<af069608>] (mmc_mq_queue_rq+0x124/0x244 [mmc_block])
-> > [158480.118466] [<af069608>] (mmc_mq_queue_rq [mmc_block]) from [<b04560b0>] (__blk_mq_try_issue_directly+0x118/0x1a0)
-> > [158480.121200] [<b04560b0>] (__blk_mq_try_issue_directly) from [<b04571c0>] (blk_mq_request_issue_directly+0x40/0x5c)
-> > [158480.123980] [<b04571c0>] (blk_mq_request_issue_directly) from [<b0457228>] (blk_mq_try_issue_list_directly+0x4c/0xc0)
-> > [158480.126780] [<b0457228>] (blk_mq_try_issue_list_directly) from [<b045bc70>] (blk_mq_sched_insert_requests+0x1b0/0x234)
-> > [158480.129601] [<b045bc70>] (blk_mq_sched_insert_requests) from [<b04570a8>] (blk_mq_flush_plug_list+0x318/0x3f0)
-> > [158480.132446] [<b04570a8>] (blk_mq_flush_plug_list) from [<b044bcb0>] (blk_flush_plug_list+0xc0/0xc8)
-> > [158480.135292] [<b044bcb0>] (blk_flush_plug_list) from [<b044bcec>] (blk_finish_plug+0x34/0x4c)
-> > [158480.138113] [<b044bcec>] (blk_finish_plug) from [<b024104c>] (read_pages+0x60/0x150)
-> > [158480.140988] [<b024104c>] (read_pages) from [<b0241338>] (__do_page_cache_readahead+0x1fc/0x20c)
-> > [158480.143893] [<b0241338>] (__do_page_cache_readahead) from [<b02361f8>] (generic_file_read_iter+0x9ac/0xd28)
-> > [158480.146818] [<b02361f8>] (generic_file_read_iter) from [<b02b6920>] (__vfs_read+0x128/0x1a8)
-> > [158480.149695] [<b02b6920>] (__vfs_read) from [<b02b6a34>] (vfs_read+0x94/0x11c)
-> > [158480.152638] [<b02b6a34>] (vfs_read) from [<b02b6d34>] (ksys_read+0x50/0xbc)
-> > [158480.155601] [<b02b6d34>] (ksys_read) from [<b0101000>] (ret_fast_syscall+0x0/0x50)
-> > [158480.158490] Exception stack(0xe79c9fa8 to 0xe79c9ff0)
-> > [158480.161430] 9fa0:                   00000003 01bec3b8 00000003 01bec3b8 00001000 00000000
-> > [158480.164422] 9fc0: 00000003 01bec3b8 00000000 00000003 01bec3b8 01bdf178 a6fc3f70 00000000
-> > [158480.167385] 9fe0: a6f95074 aecadaf8 a6f82c58 a6ef2284
-> 
-> Thanks for looking into this, it's been on my TODO list for quite a while.
-> 
-> Just so I understand correctly, the "soft lock up", gets released when
-> mmc_run_bkops() completes after 23s? Or are you triggering this via
-> some other "manual hacks"?
+Hi Shaik,
 
-No. The kernel warning is triggered after 23s, but the CPU is still
-spinning after that. In my case it was an eMMC recovering from power
-loss during write, and took a few reboots and a few minutes of waiting
-in the end to allow it to recover.
+On Tue, Jan 21, 2020 at 08:00:22PM +0530, Shaik Sajida Bhanu wrote:
+> Add system suspend/resume callbacks to sdhci-msm platform driver.
+> 
+> Signed-off-by: Shaik Sajida Bhanu <sbhanu@codeaurora.org>
+> ---
+>  drivers/mmc/host/sdhci-msm.c | 47 ++++++++++++++++++++++++++++++++++++++++++--
+>  1 file changed, 45 insertions(+), 2 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index 71f29ba..4984857 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -2028,9 +2028,52 @@ static __maybe_unused int sdhci_msm_runtime_resume(struct device *dev)
+>  	return 0;
+>  }
+>  
+> +static int sdhci_msm_suspend(struct device *dev)
+> +{
+> +	struct sdhci_host *host = dev_get_drvdata(dev);
+> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+> +	int ret = 0;
 
-[...]
-> > @@ -482,6 +485,11 @@ static int mmc_poll_for_busy(struct mmc_card *card, unsigned int timeout_ms,
-> >
-> >                 if (host->ops->card_busy) {
-> >                         busy = host->ops->card_busy(host);
-> > +                       if (busy && !expired) {
-> > +                               mmc_delay(wait_ms);
-> > +                               if (wait_ms < MMC_MAX_POLL_MS)
-> > +                                       wait_ms *= 2;
-> 
-> I am not sure a pure exponential method is the best solution, but
-> let's discuss this.
-> 
-> For example, let's assume timeout_ms is 250ms. The actual time it
-> takes for the card to stop signalling busy (in the ideal case), is
-> 50ms.
-> 
-> How far off would we then be from 50ms by using the above solution?
-> 
-> Another example is when timeout_ms is set to 60s, but we should hit as
-> close as possible to 5s. How far off would the solution above be from
-> that?
+initialization is not needed.
 
-Since the MMC_MAX_POLL_MS is around a second and total wait can exceed
-it by 2 orders of magnitude, I think there is no point in trying to make
-the wait that precise. The best solution would be to use interrupt from
-the host, but this is a fallback code for the case where we don't have
-the HW to wait (eg. it's broken).
+> +
+> +	if (host->mmc->caps2 & MMC_CAP2_CQE) {
+> +		ret = cqhci_suspend(host->mmc);
+> +		if (ret)
+> +			return ret;
+> +	}
+> +
+> +	disable_irq(msm_host->pwr_irq);
+> +	ret = sdhci_suspend_host(host);
+> +	if (ret)
+> +		return ret;
+> +
+> +	return sdhci_msm_runtime_suspend(dev);
+> +}
+> +
+> +static int sdhci_msm_resume(struct device *dev)
+> +{
+> +	struct sdhci_host *host = dev_get_drvdata(dev);
+> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+> +	int ret = 0;
 
-Best Regards,
-Micha³ Miros³aw
+initialization is not needed.
+
+> +	ret = sdhci_msm_runtime_resume(dev);
+> +	if (ret)
+> +		return ret;
+> +
+> +	ret = sdhci_resume_host(host);
+> +	if (ret < 0)
+> +		return ret;
+> +	enable_irq(msm_host->pwr_irq);
+> +
+> +	if (host->mmc->caps2 & MMC_CAP2_CQE)
+> +		ret = cqhci_resume(host->mmc);
+> +
+> +	return ret;
+> +}
+> +
+>  static const struct dev_pm_ops sdhci_msm_pm_ops = {
+> -	SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
+> -				pm_runtime_force_resume)
+> +	SET_SYSTEM_SLEEP_PM_OPS(sdhci_msm_suspend,
+> +				sdhci_msm_resume)
+>  	SET_RUNTIME_PM_OPS(sdhci_msm_runtime_suspend,
+>  			   sdhci_msm_runtime_resume,
+>  			   NULL)
