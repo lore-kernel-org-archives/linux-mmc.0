@@ -2,145 +2,222 @@ Return-Path: <SRS0=t5qd=3K=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	MIME_BASE64_TEXT,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,
-	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-4.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	UNWANTED_LANGUAGE_BODY autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 64373C33CB6
-	for <linux-mmc@archiver.kernel.org>; Tue, 21 Jan 2020 07:21:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D5C6FC33CB6
+	for <linux-mmc@archiver.kernel.org>; Tue, 21 Jan 2020 07:38:45 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 3072922522
-	for <linux-mmc@archiver.kernel.org>; Tue, 21 Jan 2020 07:21:51 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A172E24125
+	for <linux-mmc@archiver.kernel.org>; Tue, 21 Jan 2020 07:38:45 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=mediatek.com header.i=@mediatek.com header.b="G6GJ0WK0"
+	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="OmZPzAo9"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728931AbgAUHVu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 21 Jan 2020 02:21:50 -0500
-Received: from mailgw01.mediatek.com ([210.61.82.183]:12752 "EHLO
-        mailgw01.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1725789AbgAUHVu (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Jan 2020 02:21:50 -0500
-X-UUID: 7f0d56b122ea46fb82bc2fb160158317-20200121
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=mediatek.com; s=dk;
-        h=Content-Transfer-Encoding:Content-Type:MIME-Version:References:In-Reply-To:Message-ID:Date:Subject:CC:To:From; bh=RTFuTKew6Bbm3rHXc1VuNfPD8aZnX6svfZSE96XCyyo=;
-        b=G6GJ0WK0KJLZHBZHmKZEHKQeb4uL81/0+KuDml2kO3lqqls2rmeHT7qjXZCGRjvPPCKCT4yuve7e7RtrIj8s2Q1HHudI6Ir3vgdTqIpCLhM00xmyz7Tl5FAXsFJv1b42jxHrTD3hk6bWY/Wiub4o/g5n7iu2LLiTtMvEajDytCg=;
-X-UUID: 7f0d56b122ea46fb82bc2fb160158317-20200121
-Received: from mtkexhb01.mediatek.inc [(172.21.101.102)] by mailgw01.mediatek.com
-        (envelope-from <yong.mao@mediatek.com>)
-        (Cellopoint E-mail Firewall v4.1.10 Build 0809 with TLS)
-        with ESMTP id 1503164164; Tue, 21 Jan 2020 15:21:47 +0800
-Received: from MTKCAS06.mediatek.inc (172.21.101.30) by
- mtkmbs07n1.mediatek.inc (172.21.101.16) with Microsoft SMTP Server (TLS) id
- 15.0.1395.4; Tue, 21 Jan 2020 15:21:06 +0800
-Received: from localhost.localdomain (10.17.3.153) by MTKCAS06.mediatek.inc
- (172.21.101.73) with Microsoft SMTP Server id 15.0.1395.4 via Frontend
- Transport; Tue, 21 Jan 2020 15:19:25 +0800
-From:   Yong Mao <yong.mao@mediatek.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-CC:     Chaotian Jing <chaotian.jing@mediatek.com>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        <linux-mmc@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <linux-mediatek@lists.infradead.org>,
-        <linux-kernel@vger.kernel.org>, <srv_heupstream@mediatek.com>,
-        yong mao <yong.mao@mediatek.com>
-Subject: [PATCH] mmc: mediatek: fix SDIO irq issue
-Date:   Tue, 21 Jan 2020 15:20:58 +0800
-Message-ID: <1579591258-30940-2-git-send-email-yong.mao@mediatek.com>
-X-Mailer: git-send-email 1.9.1
-In-Reply-To: <1579591258-30940-1-git-send-email-yong.mao@mediatek.com>
-References: <1579591258-30940-1-git-send-email-yong.mao@mediatek.com>
+        id S1728205AbgAUHio (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 21 Jan 2020 02:38:44 -0500
+Received: from mail-il1-f194.google.com ([209.85.166.194]:39637 "EHLO
+        mail-il1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726911AbgAUHin (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Jan 2020 02:38:43 -0500
+Received: by mail-il1-f194.google.com with SMTP id x5so1600979ila.6
+        for <linux-mmc@vger.kernel.org>; Mon, 20 Jan 2020 23:38:43 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=chromium.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=PHqnHa0qnPxUWaLgWExp5NqTljru+b9BNhLxZoAb/74=;
+        b=OmZPzAo9u4wNIjBaj5by2YVmcHi3W3kGgYCDYkOeX/sRuk/d6Ip2urxBgwBs+p4qXb
+         e8Zs7A0p6K0Wk8LFpArEMZB0HpoKt8ZEe5W/8dqx6NDkhpINCAsFqIFoK90zejSFnGDE
+         aBHqhA3HVcybPa8j6B/zbVNuB+bYrd1EieCoI=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=PHqnHa0qnPxUWaLgWExp5NqTljru+b9BNhLxZoAb/74=;
+        b=mZqBRhXlTE0HT4evLNe/5pRrEnGfAdOc6/JAdyN8v00s2R/UVkVd0hUz99D3r5q6YA
+         0/yX2+eTBqsMcL+Zhdy01f2Kr937i+BOLl5dfANCcGHtFQRV5F653bwrVUmz3jk90l82
+         1XJROI1D84eNCCgbzxX2evQj9pnNxQVsWLy29KtPHD4WYKWI0r6ywVawIv8WU8WBeRlj
+         gIrtKRI1enIp7Plm57qvEDIEYTN67FOsHlLCdXqKgx2EW4NN730RsDlNcks5ulp5oTXk
+         99/30OVNjILesjaf6jakIdGrUiwY7QQiCnBQxyWpEdCvru7jd12Q5MPPbno5bjyLRCFh
+         uZ5g==
+X-Gm-Message-State: APjAAAUB678x7j2c5wScXlVbLWwz283s8Q29sT5K71GlBYkF6sFojZoq
+        l9t/BRKNNR7gpreHQt3YS4gb3msXx5BFISQ1/Nkmnw==
+X-Google-Smtp-Source: APXvYqxEVd7Ck/bfZE7f0wlCDxyO/nhb3EbNs4Jfex0sGWrSKDd8Cp4Mi2akPZAanOm7rhHv5BOnETqZi6iUQknYyWM=
+X-Received: by 2002:a92:af8e:: with SMTP id v14mr2485544ill.150.1579592322841;
+ Mon, 20 Jan 2020 23:38:42 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain
-X-MTK:  N
-Content-Transfer-Encoding: base64
+References: <1579591258-30940-1-git-send-email-yong.mao@mediatek.com> <1579591258-30940-2-git-send-email-yong.mao@mediatek.com>
+In-Reply-To: <1579591258-30940-2-git-send-email-yong.mao@mediatek.com>
+From:   Hsin-Yi Wang <hsinyi@chromium.org>
+Date:   Tue, 21 Jan 2020 15:38:16 +0800
+Message-ID: <CAJMQK-gZcvpQTSqM4kNsnNOXpcOfJw9u-X9uedQDM6W2soF_4w@mail.gmail.com>
+Subject: Re: [PATCH] mmc: mediatek: fix SDIO irq issue
+To:     Yong Mao <yong.mao@mediatek.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        linux-mmc@vger.kernel.org,
+        "moderated list:ARM/FREESCALE IMX / MXC ARM ARCHITECTURE" 
+        <linux-arm-kernel@lists.infradead.org>,
+        linux-mediatek@lists.infradead.org,
+        lkml <linux-kernel@vger.kernel.org>, srv_heupstream@mediatek.com
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-RnJvbTogeW9uZyBtYW8gPHlvbmcubWFvQG1lZGlhdGVrLmNvbT4NCg0KSG9zdCBjb250cm9sbGVy
-IG1heSBsb3N0IGludGVycnVwdCBpbiBzb21lIHNwZWNhaWwgY2FzZS4NCkFkZCBTRElPIGlycSBy
-ZWNoZWNrIG1lY2hhbmlzbSB0byBtYWtlIHN1cmUgYWxsIGludGVycnVwdHMNCmNhbiBiZSBwcm9j
-ZXNzZWQgaW1tZWRpYXRlbHkuDQoNClNpZ25lZC1vZmYtYnk6IFlvbmcgTWFvIDx5b25nLm1hb0Bt
-ZWRpYXRlay5jb20+DQotLS0NCiBkcml2ZXJzL21tYy9ob3N0L210ay1zZC5jIHwgMzggKysrKysr
-KysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysNCiAxIGZpbGUgY2hhbmdlZCwgMzggaW5z
-ZXJ0aW9ucygrKQ0KDQpkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvaG9zdC9tdGstc2QuYyBiL2Ry
-aXZlcnMvbW1jL2hvc3QvbXRrLXNkLmMNCmluZGV4IDc3MjZkY2YuLjE4YTFiODYgMTAwNjQ0DQot
-LS0gYS9kcml2ZXJzL21tYy9ob3N0L210ay1zZC5jDQorKysgYi9kcml2ZXJzL21tYy9ob3N0L210
-ay1zZC5jDQpAQCAtMTI4LDYgKzEyOCw3IEBADQogI2RlZmluZSBNU0RDX1BTX0NEU1RTICAgICAg
-ICAgICAoMHgxIDw8IDEpCS8qIFIgICovDQogI2RlZmluZSBNU0RDX1BTX0NEREVCT1VOQ0UgICAg
-ICAoMHhmIDw8IDEyKQkvKiBSVyAqLw0KICNkZWZpbmUgTVNEQ19QU19EQVQgICAgICAgICAgICAg
-KDB4ZmYgPDwgMTYpCS8qIFIgICovDQorI2RlZmluZSBNU0RDX1BTX0RBVEExICAgICAgICAgICAo
-MHgxIDw8IDE3KQkvKiBSICAqLw0KICNkZWZpbmUgTVNEQ19QU19DTUQgICAgICAgICAgICAgKDB4
-MSA8PCAyNCkJLyogUiAgKi8NCiAjZGVmaW5lIE1TRENfUFNfV1AgICAgICAgICAgICAgICgweDEg
-PDwgMzEpCS8qIFIgICovDQogDQpAQCAtMzYxLDYgKzM2Miw3IEBAIHN0cnVjdCBtc2RjX3NhdmVf
-cGFyYSB7DQogDQogc3RydWN0IG10a19tbWNfY29tcGF0aWJsZSB7DQogCXU4IGNsa19kaXZfYml0
-czsNCisJYm9vbCByZWNoZWNrX3NkaW9faXJxOw0KIAlib29sIGhzNDAwX3R1bmU7IC8qIG9ubHkg
-dXNlZCBmb3IgTVQ4MTczICovDQogCXUzMiBwYWRfdHVuZV9yZWc7DQogCWJvb2wgYXN5bmNfZmlm
-bzsNCkBAIC00MzYsNiArNDM4LDcgQEAgc3RydWN0IG1zZGNfaG9zdCB7DQogDQogc3RhdGljIGNv
-bnN0IHN0cnVjdCBtdGtfbW1jX2NvbXBhdGlibGUgbXQ4MTM1X2NvbXBhdCA9IHsNCiAJLmNsa19k
-aXZfYml0cyA9IDgsDQorCS5yZWNoZWNrX3NkaW9faXJxID0gZmFsc2UsDQogCS5oczQwMF90dW5l
-ID0gZmFsc2UsDQogCS5wYWRfdHVuZV9yZWcgPSBNU0RDX1BBRF9UVU5FLA0KIAkuYXN5bmNfZmlm
-byA9IGZhbHNlLA0KQEAgLTQ0OCw2ICs0NTEsNyBAQCBzdHJ1Y3QgbXNkY19ob3N0IHsNCiANCiBz
-dGF0aWMgY29uc3Qgc3RydWN0IG10a19tbWNfY29tcGF0aWJsZSBtdDgxNzNfY29tcGF0ID0gew0K
-IAkuY2xrX2Rpdl9iaXRzID0gOCwNCisJLnJlY2hlY2tfc2Rpb19pcnEgPSB0cnVlLA0KIAkuaHM0
-MDBfdHVuZSA9IHRydWUsDQogCS5wYWRfdHVuZV9yZWcgPSBNU0RDX1BBRF9UVU5FLA0KIAkuYXN5
-bmNfZmlmbyA9IGZhbHNlLA0KQEAgLTQ2MCw2ICs0NjQsNyBAQCBzdHJ1Y3QgbXNkY19ob3N0IHsN
-CiANCiBzdGF0aWMgY29uc3Qgc3RydWN0IG10a19tbWNfY29tcGF0aWJsZSBtdDgxODNfY29tcGF0
-ID0gew0KIAkuY2xrX2Rpdl9iaXRzID0gMTIsDQorCS5yZWNoZWNrX3NkaW9faXJxID0gZmFsc2Us
-DQogCS5oczQwMF90dW5lID0gZmFsc2UsDQogCS5wYWRfdHVuZV9yZWcgPSBNU0RDX1BBRF9UVU5F
-MCwNCiAJLmFzeW5jX2ZpZm8gPSB0cnVlLA0KQEAgLTQ3Miw2ICs0NzcsNyBAQCBzdHJ1Y3QgbXNk
-Y19ob3N0IHsNCiANCiBzdGF0aWMgY29uc3Qgc3RydWN0IG10a19tbWNfY29tcGF0aWJsZSBtdDI3
-MDFfY29tcGF0ID0gew0KIAkuY2xrX2Rpdl9iaXRzID0gMTIsDQorCS5yZWNoZWNrX3NkaW9faXJx
-ID0gZmFsc2UsDQogCS5oczQwMF90dW5lID0gZmFsc2UsDQogCS5wYWRfdHVuZV9yZWcgPSBNU0RD
-X1BBRF9UVU5FMCwNCiAJLmFzeW5jX2ZpZm8gPSB0cnVlLA0KQEAgLTQ4NCw2ICs0OTAsNyBAQCBz
-dHJ1Y3QgbXNkY19ob3N0IHsNCiANCiBzdGF0aWMgY29uc3Qgc3RydWN0IG10a19tbWNfY29tcGF0
-aWJsZSBtdDI3MTJfY29tcGF0ID0gew0KIAkuY2xrX2Rpdl9iaXRzID0gMTIsDQorCS5yZWNoZWNr
-X3NkaW9faXJxID0gZmFsc2UsDQogCS5oczQwMF90dW5lID0gZmFsc2UsDQogCS5wYWRfdHVuZV9y
-ZWcgPSBNU0RDX1BBRF9UVU5FMCwNCiAJLmFzeW5jX2ZpZm8gPSB0cnVlLA0KQEAgLTQ5Niw2ICs1
-MDMsNyBAQCBzdHJ1Y3QgbXNkY19ob3N0IHsNCiANCiBzdGF0aWMgY29uc3Qgc3RydWN0IG10a19t
-bWNfY29tcGF0aWJsZSBtdDc2MjJfY29tcGF0ID0gew0KIAkuY2xrX2Rpdl9iaXRzID0gMTIsDQor
-CS5yZWNoZWNrX3NkaW9faXJxID0gZmFsc2UsDQogCS5oczQwMF90dW5lID0gZmFsc2UsDQogCS5w
-YWRfdHVuZV9yZWcgPSBNU0RDX1BBRF9UVU5FMCwNCiAJLmFzeW5jX2ZpZm8gPSB0cnVlLA0KQEAg
-LTUwOCw2ICs1MTYsNyBAQCBzdHJ1Y3QgbXNkY19ob3N0IHsNCiANCiBzdGF0aWMgY29uc3Qgc3Ry
-dWN0IG10a19tbWNfY29tcGF0aWJsZSBtdDg1MTZfY29tcGF0ID0gew0KIAkuY2xrX2Rpdl9iaXRz
-ID0gMTIsDQorCS5yZWNoZWNrX3NkaW9faXJxID0gZmFsc2UsDQogCS5oczQwMF90dW5lID0gZmFs
-c2UsDQogCS5wYWRfdHVuZV9yZWcgPSBNU0RDX1BBRF9UVU5FMCwNCiAJLmFzeW5jX2ZpZm8gPSB0
-cnVlLA0KQEAgLTUxOCw2ICs1MjcsNyBAQCBzdHJ1Y3QgbXNkY19ob3N0IHsNCiANCiBzdGF0aWMg
-Y29uc3Qgc3RydWN0IG10a19tbWNfY29tcGF0aWJsZSBtdDc2MjBfY29tcGF0ID0gew0KIAkuY2xr
-X2Rpdl9iaXRzID0gOCwNCisJLnJlY2hlY2tfc2Rpb19pcnEgPSBmYWxzZSwNCiAJLmhzNDAwX3R1
-bmUgPSBmYWxzZSwNCiAJLnBhZF90dW5lX3JlZyA9IE1TRENfUEFEX1RVTkUsDQogCS5hc3luY19m
-aWZvID0gZmFsc2UsDQpAQCAtMTAwNyw2ICsxMDE3LDMwIEBAIHN0YXRpYyBpbnQgbXNkY19hdXRv
-X2NtZF9kb25lKHN0cnVjdCBtc2RjX2hvc3QgKmhvc3QsIGludCBldmVudHMsDQogCXJldHVybiBj
-bWQtPmVycm9yOw0KIH0NCiANCisvKioNCisgKiBtc2RjX3JlY2hlY2tfc2Rpb19pcnEgLSByZWNo
-ZWNrIHdoZXRoZXIgdGhlIFNESU8gaXJxIGlzIGxvc3QNCisgKg0KKyAqIEhvc3QgY29udHJvbGxl
-ciBtYXkgbG9zdCBpbnRlcnJ1cHQgaW4gc29tZSBzcGVjaWFsIGNhc2UuDQorICogQWRkIFNESU8g
-aXJxIHJlY2hlY2sgbWVjaGFuaXNtIHRvIG1ha2Ugc3VyZSBhbGwgaW50ZXJydXB0cw0KKyAqIGNh
-biBiZSBwcm9jZXNzZWQgaW1tZWRpYXRlbHkNCisgKg0KKyAqLw0KK3N0YXRpYyB2b2lkIG1zZGNf
-cmVjaGVja19zZGlvX2lycShzdHJ1Y3QgbXNkY19ob3N0ICpob3N0KQ0KK3sNCisJdTMyIHJlZ19p
-bnQsIHJlZ19pbnRlbiwgcmVnX3BzOw0KKw0KKwlpZiAoKGhvc3QtPm1tYy0+Y2FwcyAmIE1NQ19D
-QVBfU0RJT19JUlEpKSB7DQorCQlyZWdfaW50ZW4gPSByZWFkbChob3N0LT5iYXNlICsgTVNEQ19J
-TlRFTik7DQorCQlpZiAocmVnX2ludGVuICYgTVNEQ19JTlRFTl9TRElPSVJRKSB7DQorCQkJcmVn
-X2ludCA9IHJlYWRsKGhvc3QtPmJhc2UgKyBNU0RDX0lOVCk7DQorCQkJcmVnX3BzID0gcmVhZGwo
-aG9zdC0+YmFzZSArIE1TRENfUFMpOw0KKwkJCWlmICghKChyZWdfaW50ICYgTVNEQ19JTlRfU0RJ
-T0lSUSkgfHwNCisJCQkgICAgICAocmVnX3BzICYgTVNEQ19QU19EQVRBMSkpKQ0KKwkJCQlzZGlv
-X3NpZ25hbF9pcnEoaG9zdC0+bW1jKTsNCisJCX0NCisJfQ0KK30NCisNCiBzdGF0aWMgdm9pZCBt
-c2RjX3RyYWNrX2NtZF9kYXRhKHN0cnVjdCBtc2RjX2hvc3QgKmhvc3QsDQogCQkJCXN0cnVjdCBt
-bWNfY29tbWFuZCAqY21kLCBzdHJ1Y3QgbW1jX2RhdGEgKmRhdGEpDQogew0KQEAgLTEwMzUsNiAr
-MTA2OSw4IEBAIHN0YXRpYyB2b2lkIG1zZGNfcmVxdWVzdF9kb25lKHN0cnVjdCBtc2RjX2hvc3Qg
-Kmhvc3QsIHN0cnVjdCBtbWNfcmVxdWVzdCAqbXJxKQ0KIAlpZiAoaG9zdC0+ZXJyb3IpDQogCQlt
-c2RjX3Jlc2V0X2h3KGhvc3QpOw0KIAltbWNfcmVxdWVzdF9kb25lKGhvc3QtPm1tYywgbXJxKTsN
-CisJaWYgKGhvc3QtPmRldl9jb21wLT5yZWNoZWNrX3NkaW9faXJxKQ0KKwkJbXNkY19yZWNoZWNr
-X3NkaW9faXJxKGhvc3QpOw0KIH0NCiANCiAvKiByZXR1cm5zIHRydWUgaWYgY29tbWFuZCBpcyBm
-dWxseSBoYW5kbGVkOyByZXR1cm5zIGZhbHNlIG90aGVyd2lzZSAqLw0KQEAgLTEzOTMsNiArMTQy
-OSw4IEBAIHN0YXRpYyB2b2lkIF9fbXNkY19lbmFibGVfc2Rpb19pcnEoc3RydWN0IG1zZGNfaG9z
-dCAqaG9zdCwgaW50IGVuYikNCiAJaWYgKGVuYikgew0KIAkJc2RyX3NldF9iaXRzKGhvc3QtPmJh
-c2UgKyBNU0RDX0lOVEVOLCBNU0RDX0lOVEVOX1NESU9JUlEpOw0KIAkJc2RyX3NldF9iaXRzKGhv
-c3QtPmJhc2UgKyBTRENfQ0ZHLCBTRENfQ0ZHX1NESU9JREUpOw0KKwkJaWYgKGhvc3QtPmRldl9j
-b21wLT5yZWNoZWNrX3NkaW9faXJxKQ0KKwkJCW1zZGNfcmVjaGVja19zZGlvX2lycShob3N0KTsN
-CiAJfSBlbHNlIHsNCiAJCXNkcl9jbHJfYml0cyhob3N0LT5iYXNlICsgTVNEQ19JTlRFTiwgTVNE
-Q19JTlRFTl9TRElPSVJRKTsNCiAJCXNkcl9jbHJfYml0cyhob3N0LT5iYXNlICsgU0RDX0NGRywg
-U0RDX0NGR19TRElPSURFKTsNCi0tIA0KMS45LjENCg==
+On Tue, Jan 21, 2020 at 7:20 AM Yong Mao <yong.mao@mediatek.com> wrote:
+>
+> From: yong mao <yong.mao@mediatek.com>
+>
+> Host controller may lost interrupt in some specail case.
+> Add SDIO irq recheck mechanism to make sure all interrupts
+> can be processed immediately.
+>
+> Signed-off-by: Yong Mao <yong.mao@mediatek.com>
+> ---
 
+Thanks, mt8173 need this patch for cap-sdio-irq to work.
+
+Tested-by: Hsin-Yi Wang <hsinyi@chromium.org>
+
+
+>  drivers/mmc/host/mtk-sd.c | 38 ++++++++++++++++++++++++++++++++++++++
+>  1 file changed, 38 insertions(+)
+>
+> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+> index 7726dcf..18a1b86 100644
+> --- a/drivers/mmc/host/mtk-sd.c
+> +++ b/drivers/mmc/host/mtk-sd.c
+> @@ -128,6 +128,7 @@
+>  #define MSDC_PS_CDSTS           (0x1 << 1)     /* R  */
+>  #define MSDC_PS_CDDEBOUNCE      (0xf << 12)    /* RW */
+>  #define MSDC_PS_DAT             (0xff << 16)   /* R  */
+> +#define MSDC_PS_DATA1           (0x1 << 17)    /* R  */
+>  #define MSDC_PS_CMD             (0x1 << 24)    /* R  */
+>  #define MSDC_PS_WP              (0x1 << 31)    /* R  */
+>
+> @@ -361,6 +362,7 @@ struct msdc_save_para {
+>
+>  struct mtk_mmc_compatible {
+>         u8 clk_div_bits;
+> +       bool recheck_sdio_irq;
+>         bool hs400_tune; /* only used for MT8173 */
+>         u32 pad_tune_reg;
+>         bool async_fifo;
+> @@ -436,6 +438,7 @@ struct msdc_host {
+>
+>  static const struct mtk_mmc_compatible mt8135_compat = {
+>         .clk_div_bits = 8,
+> +       .recheck_sdio_irq = false,
+>         .hs400_tune = false,
+>         .pad_tune_reg = MSDC_PAD_TUNE,
+>         .async_fifo = false,
+> @@ -448,6 +451,7 @@ struct msdc_host {
+>
+>  static const struct mtk_mmc_compatible mt8173_compat = {
+>         .clk_div_bits = 8,
+> +       .recheck_sdio_irq = true,
+>         .hs400_tune = true,
+>         .pad_tune_reg = MSDC_PAD_TUNE,
+>         .async_fifo = false,
+> @@ -460,6 +464,7 @@ struct msdc_host {
+>
+>  static const struct mtk_mmc_compatible mt8183_compat = {
+>         .clk_div_bits = 12,
+> +       .recheck_sdio_irq = false,
+>         .hs400_tune = false,
+>         .pad_tune_reg = MSDC_PAD_TUNE0,
+>         .async_fifo = true,
+> @@ -472,6 +477,7 @@ struct msdc_host {
+>
+>  static const struct mtk_mmc_compatible mt2701_compat = {
+>         .clk_div_bits = 12,
+> +       .recheck_sdio_irq = false,
+>         .hs400_tune = false,
+>         .pad_tune_reg = MSDC_PAD_TUNE0,
+>         .async_fifo = true,
+> @@ -484,6 +490,7 @@ struct msdc_host {
+>
+>  static const struct mtk_mmc_compatible mt2712_compat = {
+>         .clk_div_bits = 12,
+> +       .recheck_sdio_irq = false,
+>         .hs400_tune = false,
+>         .pad_tune_reg = MSDC_PAD_TUNE0,
+>         .async_fifo = true,
+> @@ -496,6 +503,7 @@ struct msdc_host {
+>
+>  static const struct mtk_mmc_compatible mt7622_compat = {
+>         .clk_div_bits = 12,
+> +       .recheck_sdio_irq = false,
+>         .hs400_tune = false,
+>         .pad_tune_reg = MSDC_PAD_TUNE0,
+>         .async_fifo = true,
+> @@ -508,6 +516,7 @@ struct msdc_host {
+>
+>  static const struct mtk_mmc_compatible mt8516_compat = {
+>         .clk_div_bits = 12,
+> +       .recheck_sdio_irq = false,
+>         .hs400_tune = false,
+>         .pad_tune_reg = MSDC_PAD_TUNE0,
+>         .async_fifo = true,
+> @@ -518,6 +527,7 @@ struct msdc_host {
+>
+>  static const struct mtk_mmc_compatible mt7620_compat = {
+>         .clk_div_bits = 8,
+> +       .recheck_sdio_irq = false,
+>         .hs400_tune = false,
+>         .pad_tune_reg = MSDC_PAD_TUNE,
+>         .async_fifo = false,
+> @@ -1007,6 +1017,30 @@ static int msdc_auto_cmd_done(struct msdc_host *host, int events,
+>         return cmd->error;
+>  }
+>
+> +/**
+> + * msdc_recheck_sdio_irq - recheck whether the SDIO irq is lost
+> + *
+> + * Host controller may lost interrupt in some special case.
+> + * Add SDIO irq recheck mechanism to make sure all interrupts
+> + * can be processed immediately
+> + *
+> + */
+> +static void msdc_recheck_sdio_irq(struct msdc_host *host)
+> +{
+> +       u32 reg_int, reg_inten, reg_ps;
+> +
+> +       if ((host->mmc->caps & MMC_CAP_SDIO_IRQ)) {
+> +               reg_inten = readl(host->base + MSDC_INTEN);
+> +               if (reg_inten & MSDC_INTEN_SDIOIRQ) {
+> +                       reg_int = readl(host->base + MSDC_INT);
+> +                       reg_ps = readl(host->base + MSDC_PS);
+> +                       if (!((reg_int & MSDC_INT_SDIOIRQ) ||
+> +                             (reg_ps & MSDC_PS_DATA1)))
+> +                               sdio_signal_irq(host->mmc);
+> +               }
+> +       }
+> +}
+> +
+>  static void msdc_track_cmd_data(struct msdc_host *host,
+>                                 struct mmc_command *cmd, struct mmc_data *data)
+>  {
+> @@ -1035,6 +1069,8 @@ static void msdc_request_done(struct msdc_host *host, struct mmc_request *mrq)
+>         if (host->error)
+>                 msdc_reset_hw(host);
+>         mmc_request_done(host->mmc, mrq);
+> +       if (host->dev_comp->recheck_sdio_irq)
+> +               msdc_recheck_sdio_irq(host);
+>  }
+>
+>  /* returns true if command is fully handled; returns false otherwise */
+> @@ -1393,6 +1429,8 @@ static void __msdc_enable_sdio_irq(struct msdc_host *host, int enb)
+>         if (enb) {
+>                 sdr_set_bits(host->base + MSDC_INTEN, MSDC_INTEN_SDIOIRQ);
+>                 sdr_set_bits(host->base + SDC_CFG, SDC_CFG_SDIOIDE);
+> +               if (host->dev_comp->recheck_sdio_irq)
+> +                       msdc_recheck_sdio_irq(host);
+>         } else {
+>                 sdr_clr_bits(host->base + MSDC_INTEN, MSDC_INTEN_SDIOIRQ);
+>                 sdr_clr_bits(host->base + SDC_CFG, SDC_CFG_SDIOIDE);
