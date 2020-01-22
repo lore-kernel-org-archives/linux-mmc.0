@@ -2,106 +2,82 @@ Return-Path: <SRS0=yZYV=3L=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_GIT autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DCF81C33CAF
-	for <linux-mmc@archiver.kernel.org>; Wed, 22 Jan 2020 13:36:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 182A5C3F68F
+	for <linux-mmc@archiver.kernel.org>; Wed, 22 Jan 2020 14:27:56 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id B2A5B2071E
-	for <linux-mmc@archiver.kernel.org>; Wed, 22 Jan 2020 13:36:30 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D53372465B
+	for <linux-mmc@archiver.kernel.org>; Wed, 22 Jan 2020 14:27:55 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="P69vDtf9"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="nh2IUE2M"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729074AbgAVNg0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 22 Jan 2020 08:36:26 -0500
-Received: from mail-ed1-f66.google.com ([209.85.208.66]:46253 "EHLO
-        mail-ed1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725802AbgAVNgZ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Jan 2020 08:36:25 -0500
-Received: by mail-ed1-f66.google.com with SMTP id m8so6621743edi.13;
-        Wed, 22 Jan 2020 05:36:24 -0800 (PST)
+        id S1725870AbgAVO1z (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 22 Jan 2020 09:27:55 -0500
+Received: from mail-lf1-f66.google.com ([209.85.167.66]:41028 "EHLO
+        mail-lf1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726101AbgAVO1z (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Jan 2020 09:27:55 -0500
+Received: by mail-lf1-f66.google.com with SMTP id m30so5456352lfp.8
+        for <linux-mmc@vger.kernel.org>; Wed, 22 Jan 2020 06:27:53 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=rPi4ROFzsj9v9Yx3fg182Uf1p3zkTl0Xvf77j31SJxw=;
-        b=P69vDtf91B4HM/O3oFsfX2/LVUJ7YL0ol/zXhScdV8CW5lSOrViPcy7tmLzS+YfaZa
-         Dq0qRlPCYfhg1cHeUuKEystP04xuF9APw1yeTnbApLPGPozh2/BQRWInCGMRZsdrkNbN
-         ZUggkMe8zTZBy50n2xvLaywK4GZUsAYaX7Fn8ZKwe1YcH7SuV0rn8khurmzl/B1U8cSM
-         VIMUuaOxfVH4eohvY6vf0Vz8SiErqehjuvp+Kf0ItQOBngf/mkKaBaD1WRyLMhVesHWk
-         jc00XmmKdh4oZmWL/plV/ujY4knFUyDIdAQERWtSw8V6Uitr3twcDIeyoSVhA+/rpfC0
-         wSOA==
+        d=linaro.org; s=google;
+        h=from:to:cc:subject:date:message-id;
+        bh=ts1uyTmC70B3zgbOliuD1/15f5l4omJ+ePakmk26HAk=;
+        b=nh2IUE2MY1s6Y2a8zvdyS63aJeyxj+t9p8Pno9lRrHJNGlhWOkFmHqFSVranO9OLpj
+         fGgT3oT70mnmDett6pM5mp4l8fWfMk1YtmaFEEy1KDfUmIpxltnBjj11xB/w02GMTWeQ
+         306p1YYrm0vKlAGNFXLbDzqzaF5zMoRIWp3V8LrlDRZvxxXF/E9MmwZ3s7jvy2zd89av
+         7td3nX9UMVBFiVjidYm1cKDuENsPuKVh009CAaSv5453Rwu6iGuqy2QwUgzWws342vw6
+         RJoMr/Cqrd8cn7jnhch3xCQzQ6+hBrSxjBDWrCvQS0Wnl9HwJyn0fBGfPvXjLO7O/IVc
+         0Vvw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=rPi4ROFzsj9v9Yx3fg182Uf1p3zkTl0Xvf77j31SJxw=;
-        b=E5MNgcreRNEzSkhKBgOK2BJK4afJfV7wlcirGl2TzRsQOpXmFw8zCQpnr4N2L1jmwY
-         k5dXtPfA1I4r6TUzse5PXMnCqr4rTG+DFkKsM3Lv9u56QoogVY/a+Nn5MA7Twx0B9ieh
-         byqILnWo4O4FR7EoMjz9M85cMCIqH4tBHh42RN7MmLV4vpknEgposCjXIgXss5gbKF2z
-         sYYoUtvCF3lnWlYP+kz/gpnWuiMn7FBLlitJnmw4H/FAB3IFYuXlf3vz46OdK68x7CIG
-         UHv2pCZ5tBoHeUsXB++pcgGDi4THD7IfB3tMgY6AvtwUDaCGEtRDVsx8qvtGZ5LE03zP
-         n50A==
-X-Gm-Message-State: APjAAAXDXjdUde3oBFhLanv7ixOLRVSUZuoMlkrCBGDkx0Zm7SymiO62
-        CrFug8ZROn+DbyudyLjotf5X03vjK+k8gqTlKfU=
-X-Google-Smtp-Source: APXvYqybpwJk49J6SOt3Kqbx+6+Q1Nsz5SCFEvvBnm/8ce9xFmLSeYtDL4RduJx+fNImMpRWBAtjAZgnAPncZErPaG0=
-X-Received: by 2002:a17:906:3195:: with SMTP id 21mr2569283ejy.207.1579700183507;
- Wed, 22 Jan 2020 05:36:23 -0800 (PST)
-MIME-Version: 1.0
-References: <cover.1578560282.git.benchuanggli@gmail.com> <CACT4zj9B8BSebZgf5-nc3zGYhsAGQ6gTRvfFf9r1DBB_mpRtHA@mail.gmail.com>
- <CAPDyKFpVN1w7sRbcSAOezVYAkq0pq6kCFo0gjT3TO4FVqDCe=A@mail.gmail.com>
-In-Reply-To: <CAPDyKFpVN1w7sRbcSAOezVYAkq0pq6kCFo0gjT3TO4FVqDCe=A@mail.gmail.com>
-From:   Ben Chuang <benchuanggli@gmail.com>
-Date:   Wed, 22 Jan 2020 21:36:11 +0800
-Message-ID: <CACT4zj9ecfB==BhN7fm=0AmK3Y08ey4_7SYXeAtUg-3fcGhL-w@mail.gmail.com>
-Subject: Re: [RFC PATCH v2 0/6] Add support UHS-II for GL9755
-To:     Ulf Hansson <ulf.hansson@linaro.org>
+        h=x-gm-message-state:from:to:cc:subject:date:message-id;
+        bh=ts1uyTmC70B3zgbOliuD1/15f5l4omJ+ePakmk26HAk=;
+        b=J1FQzk25Vff7+xYQ/dQJSYPeN5cRMYAZBX+lh1exgHei8Eu4wCp+queB75B+CkvrJJ
+         EzLLZkQGiVo4P7Rfpq66U/1sdPL5p1MMLANioGj4Bzy5F0zUPs8AOVfpVUAjZ08vzEdG
+         GmIEp3W1Vl8zfrj3MPBRurYB9dugiBfOpJtnF0R0uzf8Y9V5w+7O3ihb7zILJYZRsjbT
+         XVM0wKjdkjR/EpGuOqkYBrxnDOHdSfZgv6Im4u9vsHCS+jx/AM4wKycmn5P4FrFYvEtK
+         vRsD1jFCq9z7cYQdlHwu0VJbDXorYNF/vdsvB3WIcMRX5etm3M8z/UaZhgj+EmDngHnb
+         1GJw==
+X-Gm-Message-State: APjAAAWovfc8CL6qYHzqzetz/07peZYj6XIEZ0oW1Lq7V7WXpy4xKmi6
+        djo4UQIgUmfs9GH4h+DY+zpbxT/PYuE=
+X-Google-Smtp-Source: APXvYqzAc0fE6fZPXT4LYq62AsCagh3IGhLZNPzVToTYlnWKjX2jBoFYzLuIWbEcRyDq4gnEkizhUw==
+X-Received: by 2002:a19:dc14:: with SMTP id t20mr1918545lfg.47.1579703271840;
+        Wed, 22 Jan 2020 06:27:51 -0800 (PST)
+Received: from uffe-XPS-13-9360.ideon.se ([85.235.10.227])
+        by smtp.gmail.com with ESMTPSA id u17sm20369548ljk.62.2020.01.22.06.27.50
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 22 Jan 2020 06:27:50 -0800 (PST)
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+To:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        greg.tu@genesyslogic.com.tw,
-        Ben Chuang <ben.chuang@genesyslogic.com.tw>
-Content-Type: text/plain; charset="UTF-8"
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        Shawn Lin <shawn.lin@rock-chips.com>, mirq-linux@rere.qmqm.pl
+Subject: [PATCH 0/3] mmc: core: Update timeouts for __mmc_switch()
+Date:   Wed, 22 Jan 2020 15:27:44 +0100
+Message-Id: <20200122142747.5690-1-ulf.hansson@linaro.org>
+X-Mailer: git-send-email 2.17.1
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Jan 21, 2020 at 8:02 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
->
-> On Tue, 21 Jan 2020 at 10:37, Ben Chuang <benchuanggli@gmail.com> wrote:
-> >
-> > Hi Uffe and Adrian,
-> >
-> > On Thu, Jan 9, 2020 at 5:13 PM Ben Chuang <benchuanggli@gmail.com> wrote:
-> > >
-> > > Hi Uffe and Adrian,
-> > >
-> > > These patches support UHS-II and fix GL9755 UHS-II compatibility.
-> > >
-> > > The parts of UHS-II are based on [1][2] and porting to Linux 5.5-rc5.
-> > > I have seen that Uffe comment that splitting the UHS-II parts into smaller
-> > > patches. Other than splitting into small patches, could you give me some
-> > > suggestions for refactoring/splitting files?
-> > >
-> > > Best regards,
-> > > Ben
-> >
-> > Gentle Ping, Any comments?
->
-> I coming to this, but I need some additional time. In any case, thanks
-> for posting this and for pinging!
->
-Thank you for taking the time and pinging back quickly. :-)
-I will wait patiently for the next reply.
+This small series updates timeouts used when sending CMD6 for eMMC, through the
+__mmc_switch() function.
 
-> [...]
->
-> Kind regards
-> Uffe
+Ulf Hansson (3):
+  mmc: core: Specify timeouts for BKOPS and CACHE_FLUSH for eMMC
+  mmc: block: Use generic_cmd6_time when modifying
+    INAND_CMD38_ARG_EXT_CSD
+  mmc: core: Default to generic_cmd6_time as timeout in __mmc_switch()
 
-Best regards,
-Ben
+ drivers/mmc/core/block.c   |  6 +++---
+ drivers/mmc/core/mmc_ops.c | 34 +++++++++++++++++-----------------
+ 2 files changed, 20 insertions(+), 20 deletions(-)
+
+-- 
+2.17.1
+
