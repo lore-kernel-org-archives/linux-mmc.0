@@ -7,50 +7,50 @@ X-Spam-Status: No, score=-5.6 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E7015C2D0DB
-	for <linux-mmc@archiver.kernel.org>; Wed, 22 Jan 2020 16:05:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D0172C33CB6
+	for <linux-mmc@archiver.kernel.org>; Wed, 22 Jan 2020 16:05:56 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id BD27124125
-	for <linux-mmc@archiver.kernel.org>; Wed, 22 Jan 2020 16:05:50 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9D22A24125
+	for <linux-mmc@archiver.kernel.org>; Wed, 22 Jan 2020 16:05:56 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1579709150;
-	bh=liTBeyBN+5snIlCvPH4ZinIcQWwSawPqLwrjOX0CEFU=;
+	s=default; t=1579709156;
+	bh=A2qxDcW2G6uX3eXzfrxqt30W86ms3Hvu1PnMA0pGDQs=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
-	b=w04KZDeT9VphSC5gEKMkajpg9ikl6Yy5SRFMupaSK+1Z0NVD9IXDSBW7O/yob5Ozb
-	 W4Tk06K4UaR1tOFtptIDMKL2KiEKUHyOHO/neTDSmRa6Je1WZJlixl1XciQgqdqxd1
-	 ki2/RZIte1PfngRo221A87+Vv6CaZK8Ry73gylnk=
+	b=N9NXoAYXTt9CsKXJ4U0CUKF6fuLyk1juvHjjryRI8li/PQE630m5OO5iJ/354VmuK
+	 6DU2V+kK8IJKUKUNCozjlOOPrBh3MNm1ZJVUVoZj+TP59P5QUb4LYdhp7AuUTek+hq
+	 oBm88fTUHuz/jpG8AU2HzZkJmX6Zwnmg33OV+dRE=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725972AbgAVQFq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 22 Jan 2020 11:05:46 -0500
-Received: from mail-oi1-f194.google.com ([209.85.167.194]:43052 "EHLO
-        mail-oi1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725802AbgAVQFq (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Jan 2020 11:05:46 -0500
-Received: by mail-oi1-f194.google.com with SMTP id p125so6509313oif.10;
-        Wed, 22 Jan 2020 08:05:45 -0800 (PST)
+        id S1726219AbgAVQF4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 22 Jan 2020 11:05:56 -0500
+Received: from mail-ot1-f68.google.com ([209.85.210.68]:45998 "EHLO
+        mail-ot1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725802AbgAVQFz (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Jan 2020 11:05:55 -0500
+Received: by mail-ot1-f68.google.com with SMTP id 59so6686109otp.12;
+        Wed, 22 Jan 2020 08:05:55 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:date:from:to:cc:subject:message-id:references
          :mime-version:content-disposition:in-reply-to:user-agent;
-        bh=OOZfg0AFYGJWh0pCwLs+lbCJjankCvcKcEp7OWZe5xk=;
-        b=tT7Wh5W4BzN/KI9aPxWbDunabn25jHwub2OLPWRkxd4mYHQBJRz4vknMyzjTr8g17A
-         j/hoeFDKhjHJJioMHQ4qxsiLDk/HLoUH9d/AncVXDejE/2+PocyFut2iS0YyL9h1q6hh
-         Ybg6yPtzjzhqnvptwLnMBHVjONQIdni4li2gny/bg2tovXtEbR04nMNZvFr+f4DD4Vih
-         XC6hWMjBKhccoKXq3AuUlyLLGdoXaKN5MV066DL/NQh0ePtdcdxzaoiEpmn+uusFB7DP
-         luQl+EU9yhXrx3BGz9KsANAs7l7Y9bFkenjuP7VxxL8Agp8lzv52L4rPmySGDuNsBg89
-         OABg==
-X-Gm-Message-State: APjAAAXpY/TXmRbhTXOW0c6irc5yaCWyyojvrIVuSJUS//VWcqUrQilP
-        a58Q8dExt2sdbNgQ0nald7e7qzE=
-X-Google-Smtp-Source: APXvYqzwaLmXI7rjVv06eVcOu9xvGZYDWVtvuuyQhzjMxlcVTBftNmxWpRN/xuSrOfQOYU/l0SEFMw==
-X-Received: by 2002:aca:5490:: with SMTP id i138mr7450180oib.69.1579709145237;
-        Wed, 22 Jan 2020 08:05:45 -0800 (PST)
+        bh=BADTgUineejOK2n1J7lKkTEFQH19K5N1CEhgckXRAeo=;
+        b=Xb2u4+JjpWuvbkSqc6C3uXRckfBpxtQgrx2kq4FdXuuDN/SY91dpzoMG9s9C2znemm
+         JGmgDagQOIBMYQxdkoPF67nM017xt+Mu7OuphrA2hCij4l+D5PVKTb06E+dIyiqJPGpQ
+         Ozc6+qtNzoTg4xxVCajzPEkwNHmTFD8iaFApaTe866nXTurfHgYtTjyhOF0S3mhBNmGV
+         VDNI66KpJ8fs0/f1Gd5xBs1TtijUTZoRKgAxrAGt7bVpEmOmJI8SflcS+9hUeGhsGsp0
+         S7GLGY6BsJhbDu7iBD058G6j3v0jL4lvvsMwqQ03B4Pv0SBDwqGc5k8OOqjW+DH6a+6h
+         oR2Q==
+X-Gm-Message-State: APjAAAW8VvTnkTfln/HglogrLIaU39aaMM6IhH6TZDgSaS1JLE3yC7m+
+        bCFqcwAVApKmgGNAweNgIA==
+X-Google-Smtp-Source: APXvYqzU2mv1jLT2PDfalGIskqeW8nSLgN1KpqimkaMRG6wWiRuYAxbX9pFvaWjoXG/gl6a0X2+rRw==
+X-Received: by 2002:a9d:75da:: with SMTP id c26mr7977313otl.40.1579709154723;
+        Wed, 22 Jan 2020 08:05:54 -0800 (PST)
 Received: from rob-hp-laptop (24-155-109-49.dyn.grandenetworks.net. [24.155.109.49])
-        by smtp.gmail.com with ESMTPSA id n22sm15062248otj.36.2020.01.22.08.05.44
+        by smtp.gmail.com with ESMTPSA id a17sm14694628otp.66.2020.01.22.08.05.53
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 22 Jan 2020 08:05:44 -0800 (PST)
-Received: (nullmailer pid 10486 invoked by uid 1000);
-        Wed, 22 Jan 2020 16:05:43 -0000
-Date:   Wed, 22 Jan 2020 10:05:43 -0600
+        Wed, 22 Jan 2020 08:05:54 -0800 (PST)
+Received: (nullmailer pid 10857 invoked by uid 1000);
+        Wed, 22 Jan 2020 16:05:53 -0000
+Date:   Wed, 22 Jan 2020 10:05:53 -0600
 From:   Rob Herring <robh@kernel.org>
 To:     Johan Jonker <jbx6244@gmail.com>
 Cc:     ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com,
@@ -58,38 +58,31 @@ Cc:     ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com,
         devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
         linux-arm-kernel@lists.infradead.org,
         linux-rockchip@lists.infradead.org
-Subject: Re: [PATCH v2 2/3] dt-bindings: mmc: convert rockchip dw-mshc
- bindings to yaml
-Message-ID: <20200122160543.GA10427@bogus>
+Subject: Re: [PATCH v2 3/3] dt-bindings: mmc: rockchip-dw-mshc: add
+ description for rk3308
+Message-ID: <20200122160553.GA10824@bogus>
 References: <20200116152230.29831-1-jbx6244@gmail.com>
- <20200116152230.29831-2-jbx6244@gmail.com>
+ <20200116152230.29831-3-jbx6244@gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20200116152230.29831-2-jbx6244@gmail.com>
+In-Reply-To: <20200116152230.29831-3-jbx6244@gmail.com>
 User-Agent: Mutt/1.10.1 (2018-07-13)
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 16 Jan 2020 16:22:29 +0100, Johan Jonker wrote:
-> Current dts files with 'dwmmc' nodes are manually verified.
-> In order to automate this process rockchip-dw-mshc.txt
-> has to be converted to yaml. In the new setup
-> rockchip-dw-mshc.yaml will inherit properties from
-> mmc-controller.yaml and synopsys-dw-mshc-common.yaml.
-> 'dwmmc' will no longer be a valid name for a node and
-> should be changed to 'mmc'.
+On Thu, 16 Jan 2020 16:22:30 +0100, Johan Jonker wrote:
+> The description below is already in use for rk3308.dtsi,
+> but was somehow never added to a document, so add
+> "rockchip,rk3308-dw-mshc", "rockchip,rk3288-dw-mshc"
+> for mmc nodes on a rk3308 platform to rockchip-dw-mshc.yaml.
 > 
 > Signed-off-by: Johan Jonker <jbx6244@gmail.com>
 > ---
->  .../devicetree/bindings/mmc/rockchip-dw-mshc.txt   |  49 --------
->  .../devicetree/bindings/mmc/rockchip-dw-mshc.yaml  | 123 +++++++++++++++++++++
->  MAINTAINERS                                        |   1 +
->  3 files changed, 124 insertions(+), 49 deletions(-)
->  delete mode 100644 Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
->  create mode 100644 Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml
+>  Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml | 2 ++
+>  1 file changed, 2 insertions(+)
 > 
 
-Reviewed-by: Rob Herring <robh@kernel.org>
+Acked-by: Rob Herring <robh@kernel.org>
