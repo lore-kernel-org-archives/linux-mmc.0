@@ -1,167 +1,145 @@
-Return-Path: <SRS0=yZYV=3L=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=fUFB=3M=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
+X-Spam-Status: No, score=-5.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 12DC3C33CAF
-	for <linux-mmc@archiver.kernel.org>; Wed, 22 Jan 2020 16:57:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5A52FC2D0DB
+	for <linux-mmc@archiver.kernel.org>; Thu, 23 Jan 2020 10:40:57 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id DCF5A24656
-	for <linux-mmc@archiver.kernel.org>; Wed, 22 Jan 2020 16:57:30 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="g5mzDL6d"
+	by mail.kernel.org (Postfix) with ESMTP id 3460E24125
+	for <linux-mmc@archiver.kernel.org>; Thu, 23 Jan 2020 10:40:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728927AbgAVQ5a (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 22 Jan 2020 11:57:30 -0500
-Received: from mail-pf1-f196.google.com ([209.85.210.196]:41794 "EHLO
-        mail-pf1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725883AbgAVQ5a (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Jan 2020 11:57:30 -0500
-Received: by mail-pf1-f196.google.com with SMTP id w62so118638pfw.8
-        for <linux-mmc@vger.kernel.org>; Wed, 22 Jan 2020 08:57:29 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=chromium.org; s=google;
-        h=message-id:mime-version:content-transfer-encoding:in-reply-to
-         :references:cc:to:subject:from:user-agent:date;
-        bh=9LNpISLBBtmZPXNKsiH0lufw2QrgHH3oOxpdWJdbgPM=;
-        b=g5mzDL6dVlGjCnPBzczWoxg5k4Yh5gc+T56tvHgovpgDUdYThPuIT0D0uBdiOhPJXy
-         X8GtFl/rC8JO/xwNRXhAChPXrR8k304gYvr12LD4euWJePnIuCGX9/wezUK7T86twNFl
-         61BHtu0trihkmhYsv3/EVWFi5ybajHZY2ZGwY=
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:message-id:mime-version
-         :content-transfer-encoding:in-reply-to:references:cc:to:subject:from
-         :user-agent:date;
-        bh=9LNpISLBBtmZPXNKsiH0lufw2QrgHH3oOxpdWJdbgPM=;
-        b=YOYM0pqwDQbj39kFqXcImkkCwXisQM2ai1BM6XRqHs3QQZdj7HkUh8lirvuS/zWDQM
-         yUAV0PDkfmeMldgxfEhPRXwUK0y4tuemknqRTaQj9xn79VlJOjTvK5w3xQJwHEfbTtf8
-         ypzMn2VPILlvQMwu5T8Pj+Ax/J1TE+a1iO6kiY4y9JD/7ibTm47KhtVJjmAQVneuRlwm
-         e1TSCwxHfWKalvIPff+fs3VgCVZ8iHQtg4+KfylxkSS3wj1fEc1aQMu4P2H1fplW+IZ9
-         +C7akVok9/wKzeCGptMDTcHtTRstns8Etf0wIcISDMDhrYkCdwaBtJcqgugzEgjTHJKR
-         PFOg==
-X-Gm-Message-State: APjAAAWz3mc21H21IPGjUsBvbJRkdXXvUU5lcDyfbme/Uepp45SMJNWc
-        q3GsS15vckZr30EYMflxAg/6Xg==
-X-Google-Smtp-Source: APXvYqwTvQymP17CF0MbRVMcbMrpGvYkD/WLGbAlHkqEbbOryCDsRTj2ir6Av/MFbAe390j8UEXyoQ==
-X-Received: by 2002:a63:1c5e:: with SMTP id c30mr12399716pgm.30.1579712249359;
-        Wed, 22 Jan 2020 08:57:29 -0800 (PST)
-Received: from chromium.org ([2620:15c:202:1:fa53:7765:582b:82b9])
-        by smtp.gmail.com with ESMTPSA id o23sm2480108pgn.17.2020.01.22.08.57.28
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 22 Jan 2020 08:57:28 -0800 (PST)
-Message-ID: <5e287ef8.1c69fb81.cacd.4c1b@mx.google.com>
-Content-Type: text/plain; charset="utf-8"
+        id S1726099AbgAWKk4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 23 Jan 2020 05:40:56 -0500
+Received: from mout.kundenserver.de ([212.227.126.135]:58825 "EHLO
+        mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726026AbgAWKk4 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Jan 2020 05:40:56 -0500
+Received: from localhost ([130.83.5.183]) by mrelayeu.kundenserver.de
+ (mreue010 [212.227.15.129]) with ESMTPSA (Nemesis) id
+ 1M42zo-1iuZus3MFU-0007o1; Thu, 23 Jan 2020 11:40:50 +0100
+Date:   Thu, 23 Jan 2020 11:40:47 +0100
+From:   Tim Schumacher <tim@timakro.de>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        pher1989@hotmail.com
+Subject: Re: Black screen while resuming a SDXC (UHS) card (_mmc_sd_resume)
+Message-ID: <20200123104047.GA1254@impa>
+References: <20190905200138.GA19037@impa.localdomain>
+ <CAPDyKFqo-LecRE5R4T+vrGgNs83WFmQr84oaieEUTCjLFOLXoA@mail.gmail.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: quoted-printable
-In-Reply-To: <1579617022-13031-1-git-send-email-sbhanu@codeaurora.org>
-References: <1579617022-13031-1-git-send-email-sbhanu@codeaurora.org>
-Cc:     asutoshd@codeaurora.org, stummala@codeaurora.org,
-        vbadigan@codeaurora.org, sayalil@codeaurora.org,
-        cang@codeaurora.org, rampraka@codeaurora.org,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-msm@vger.kernel.org, agross@kernel.org,
-        bjorn.andersson@linaro.org,
-        Shaik Sajida Bhanu <sbhanu@codeaurora.org>
-To:     Shaik Sajida Bhanu <sbhanu@codeaurora.org>,
-        adrian.hunter@intel.com, ulf.hansson@linaro.org
-Subject: Re: [PATCH V1] mmc: sdhci-msm: Add system suspend/resume callbacks
-From:   Stephen Boyd <swboyd@chromium.org>
-User-Agent: alot/0.8.1
-Date:   Wed, 22 Jan 2020 08:57:27 -0800
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <CAPDyKFqo-LecRE5R4T+vrGgNs83WFmQr84oaieEUTCjLFOLXoA@mail.gmail.com>
+X-Provags-ID: V03:K1:YaR1agyNP4kdGQZh9BVroY6O+tgWL3523f5OjH0j4Gj4I4NNwcl
+ FfWbhkcw96XnMkJfzfAujCBowxqD3QA1eQZ/t5T5gVmAM0VDvSnduEu+OG/M/0nuQMnXEIS
+ Sa3tlVfhQv5IJl8tJWA7ajPsBIjE5TwR9Q0qAHV81oUfkEC85m4CJuJYVKSd+vVyiw/hLAP
+ GHosxIZN3GQAsifGRwoAQ==
+X-UI-Out-Filterresults: notjunk:1;V03:K0:USqZWJ4TUUE=:dHwjDUn0OEtZxeyqgdKptw
+ ytm9ElY7EY4OmpyKJ+WUF8UCsk+zSj/Lm7bqON1wCE3AddpWVMdWp6HMRhss1cBKXF36oNXur
+ ECDyhPOVl5mAv+B9XXq70FchLSLh1vAB7JUARTGmAG2pMP46LVMdvZk7kpnVOMGiw/vfj5kQX
+ dLwbqNNb70tolzH4s0jNjX8aLCoF4gjZnf0yLrswCqynDs1YJhAmkQbLdmPRoTJ5NItgxVTYf
+ g1ZJvT98HmItuGCM2fnVUt3ZcwNUd2f5/VBYjtIbwHi6gyBoqN7brhTYbFORf1uco+GTKUnf6
+ MA/KUqoGNmylG0WRO6YHwI0PNnGZUdAKeeMQD6KwaMsUQJz4hz5VIpJQkNFQtnc8WuYVVxY39
+ NkOq/7hbzOsvrw2IErdb84dJZwGNHFfwRU8Z5oUifMJLAsOcJwXrWZOI/RXcCwtHM0uSxLum9
+ Scn3ErRFlpyjmxnwerXO+wuUTxs7YJBnDmf6wyDEh8ErZe8xyfY4IiLEV4agFLlR/4gPGTqWx
+ QDwU/etDtso5BQdZU2tGppFJhKHZ5rovXGZNznA1GXIA3ScBAQcVeYtRp6dt5JD0CIl0feSna
+ TYzO6a25OzYkEZvaIALnj1KqSlrjMpA0P1q302oVk/dsAyU09F6dW0HlqKsHYbBC9IqhRRcrd
+ iQVvktT2hdNkiWvBaA/sIo3dJGCH8MddYcEfxYxNfLIuyZ+LIyxa4t0F/3z0B2iVuZ0emoOEx
+ rbnLzlfQI61mCQOh/WG/OfnLzXaKe/Xygp+nIpuZeqa6wegENlws22bbEqDPyJIQIzQ/CpEfy
+ Jvl+zwReE10AN5J/UUARq9ghCyR5i4FK6+lcJDnwIsRzgfNEWc=
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Quoting Shaik Sajida Bhanu (2020-01-21 06:30:22)
-> Add system suspend/resume callbacks to sdhci-msm platform driver.
+On 2019-09-06, Ulf Hansson wrote:
+> On Thu, 5 Sep 2019 at 22:01, Tim Schumacher <tim@timakro.de> wrote:
+> >
+> > Hi,
+> >
+> > I'm sending this old bug by mail since a lot of developers don't use
+> > bugzilla.
+> >
+> > Original bug report on bugzilla by Pedro Rodrigues from 2019-01-30:
+> >
+> > https://bugzilla.kernel.org/show_bug.cgi?id=202459
+> >
+> > > This bug can be found on a Lenovo Miix 320-10ICR
+> > >
+> > > When using a SDXC (UHS) card, the screen becomes black if
+> > > _mmc_sd_resume() is called. After some investigation, I found that an
+> > > UHS card uses 1.8 V for signalling while a normal SD card uses 3.3 V. By
+> > > forcing the SDXC to use 3.3 V the black screen does not appear. It seems
+> > > that during a _mmc_sd_resume function call, while claiming the host, an
+> > > I2C resume function is called based on an existing supplier link between
+> > > the I2C bus and the card device.  The problem is that if the signalling
+> > > voltage is configured to 1.8 V, during the I2C resume call, the screen
+> > > turns black.  I was able to fix this issue by setting the initial signal
+> > > voltage (3.3 V) before suspending the card, so that when the card is
+> > > resumed, the voltage is in the original state. To do this I added a
+> > > function call to mmc_set_initial_signal_voltage() during mmc_power_off
+> > > routine (drivers/mmc/core/core.c).  As I’m not an expert on Linux,  I’m
+> > > posting the issue and possible solution so that it could be implemented
+> > > on a future release.
+> > >
+> > > Please, share your thoughts :)
+> >
+> > I can't provide further insight but I'm interested if this is possibly
+> > the cause for the general issues people are having with the SD card
+> > reader on Lenovo Miix 320 devices.
+> >
+> > Those issues described in posts like
+> >
+> > https://vincent-ventures.com/2018/12/arch-linux-on-lenovo-ideapad-miix-320/
+> > https://esc.sh/blog/linux-on-lenovo-miix-320/
+> >
+> > are (1) black screen when booting with an SD card installed and (2) when
+> > inserting an SD card after booting it shows up but upon trying to access
+> > it the screen turns black until the card is removed again.
+> >
+> > I can confirm (1) on my Lenovo Miix 320-10ICR with kernel version
+> > 5.2.11. I can also confirm that only SDXC cards are affected, SD and
+> > SDHC cards work as expected.
+> 
+> For the mmc community to help, you need to provide some kernel logs,
+> output from lspci, figure out what mmc host driver that is being used,
+> etc - in general collect more data. Then re-post the data to
+> linux-mmc, me and a potential mmc host driver maintainer (if there is
+> one). Yes, we can look into bugzilla as well, but first we need some
+> more overall info in an email.
+> 
+> Most likely, if there is any response, you will be asked to test
+> patches. So you need to be able build and boot a new kernel, but I
+> guess you already know that part.
+> 
+> Kind regards
+> Uffe
+> 
 
-Yes, but why? There are already suspend/resume callbacks so this is
-replacing them too.
+Hi, I'm coming back to this issue now. The issue is still present in
+kernel version 5.4.8.
 
->=20
-> Signed-off-by: Shaik Sajida Bhanu <sbhanu@codeaurora.org>
-> ---
->  drivers/mmc/host/sdhci-msm.c | 47 ++++++++++++++++++++++++++++++++++++++=
-++++--
->  1 file changed, 45 insertions(+), 2 deletions(-)
->=20
-> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> index 71f29ba..4984857 100644
-> --- a/drivers/mmc/host/sdhci-msm.c
-> +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -2028,9 +2028,52 @@ static __maybe_unused int sdhci_msm_runtime_resume=
-(struct device *dev)
->         return 0;
->  }
-> =20
-> +static int sdhci_msm_suspend(struct device *dev)
-> +{
-> +       struct sdhci_host *host =3D dev_get_drvdata(dev);
-> +       struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host);
-> +       struct sdhci_msm_host *msm_host =3D sdhci_pltfm_priv(pltfm_host);
-> +       int ret =3D 0;
-> +
-> +       if (host->mmc->caps2 & MMC_CAP2_CQE) {
+Kernel logs from boot with SD card and black screen: https://termbin.com/outp
+Kernel logs from boot without SD card: https://termbin.com/dc2y
 
-It would be nice if this if check was rolled into cqhci_suspend so that
-all the callers wouldn't have to check it.
+I couldn't find anything conspicuous in there, the card is working as
+expected. Only issue is the black screen (I'm doing these tests via SSH).
 
-> +               ret =3D cqhci_suspend(host->mmc);
-> +               if (ret)
-> +                       return ret;
-> +       }
-> +
-> +       disable_irq(msm_host->pwr_irq);
+lspci output: https://termbin.com/x452
 
-Why is the irq disabled? Please add a comment.
+How do I figure out which mmc host driver is in use? I assume I'm
+looking for one of these https://github.com/torvalds/linux/tree/master/drivers/mmc/host
+I couldn't find anything like it in the kernel logs or from lsmod.
 
-> +       ret =3D sdhci_suspend_host(host);
-> +       if (ret)
-> +               return ret;
-> +
-> +       return sdhci_msm_runtime_suspend(dev);
+Please read the original bug report by Pedro Rodrigues quoted above.
+He got to the technical core of the problem already and proposed a fix
+I assume could be understood, sanity checked and implemented by a mmc
+maintainer.
 
-pm_runtime_force_suspend() does different things than just call the
-runtime suspend function for the driver. For example, it disables
-runtime PM on the device. Can you explain in the commit text how this is
-a correct conversion?
-
-> +}
-> +
-> +static int sdhci_msm_resume(struct device *dev)
-> +{
-> +       struct sdhci_host *host =3D dev_get_drvdata(dev);
-> +       struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host);
-> +       struct sdhci_msm_host *msm_host =3D sdhci_pltfm_priv(pltfm_host);
-> +       int ret =3D 0;
-> +
-> +       ret =3D sdhci_msm_runtime_resume(dev);
-> +       if (ret)
-> +               return ret;
-> +
-> +       ret =3D sdhci_resume_host(host);
-> +       if (ret < 0)
-> +               return ret;
-> +       enable_irq(msm_host->pwr_irq);
-
-Same question here about irq. Deserves a comment.
-
-> +
-> +       if (host->mmc->caps2 & MMC_CAP2_CQE)
-> +               ret =3D cqhci_resume(host->mmc);
-> +
-> +       return ret;
-> +}
-> +
->  static const struct dev_pm_ops sdhci_msm_pm_ops =3D {
-> -       SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
-> -                               pm_runtime_force_resume)
-> +       SET_SYSTEM_SLEEP_PM_OPS(sdhci_msm_suspend,
-> +                               sdhci_msm_resume)
->         SET_RUNTIME_PM_OPS(sdhci_msm_runtime_suspend,
->                            sdhci_msm_runtime_resume,
->                            NULL)
+Regards
+Tim
