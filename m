@@ -2,90 +2,67 @@ Return-Path: <SRS0=bXXM=3N=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
+	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 19DAFC47409
-	for <linux-mmc@archiver.kernel.org>; Fri, 24 Jan 2020 13:20:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 15DDAC2D0DB
+	for <linux-mmc@archiver.kernel.org>; Fri, 24 Jan 2020 18:00:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id D58822077C
-	for <linux-mmc@archiver.kernel.org>; Fri, 24 Jan 2020 13:20:18 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="gins8z7J"
+	by mail.kernel.org (Postfix) with ESMTP id DF9C120838
+	for <linux-mmc@archiver.kernel.org>; Fri, 24 Jan 2020 18:00:16 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1579888816;
+	bh=G5wmcCJIZMdkTO6ZAzrVhDTigeLl3CYbvT4oM7gHOfM=;
+	h=Subject:From:In-Reply-To:References:Date:To:Cc:List-ID:From;
+	b=dRqIVYCxqSKBfFDNLI51M/1Gh5lNxkAp1BNh7Bk9oIdeP5orI50bTxvtHs1DF31Q2
+	 M/MexqHuq5gnmL+XoUW6wzO1+bjMqI2+OjMaIHVOkHCcIGf8DlT5ZGtyTF+aTPC2Jg
+	 2a52PeOhnapRQP5PK+hNY4l5AdbE+mpx/BF2yPhE=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2387550AbgAXNUS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 24 Jan 2020 08:20:18 -0500
-Received: from mail-vs1-f65.google.com ([209.85.217.65]:45836 "EHLO
-        mail-vs1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2387888AbgAXNUS (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Jan 2020 08:20:18 -0500
-Received: by mail-vs1-f65.google.com with SMTP id b4so1149619vsa.12
-        for <linux-mmc@vger.kernel.org>; Fri, 24 Jan 2020 05:20:17 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=t65RoraJ97XSNifH3nJWhcpZY1lN6qjNaU0+rNtB6VA=;
-        b=gins8z7JzejJQal9gDEbPpdg5XvecgftPkBOzZDn61Udldh3usgTviD1RSeTs/khVg
-         P6QL2wdgjepWpZPu2K07a0Gi2j30WxCH8luSM9XeXKn2a0tOlWNsCiBvesNyFuoRTa2l
-         l+vIULJyGGwlTBlM48w/mQcMBP9WP2/M/8BvfKaietFwyHD4quO4EfSzZuZDebmtJUKO
-         N78p+V3i2PTQYXQaBm9DxrHQdcBOrL5nyx5ZvfkLk7TND7MMNM/kXvpRBQCuqtQn+Mxh
-         S+P6c2mXdalbk8iIrd+uIIUDrn+lJsAfuy8AVqcNxmXZb29qZ7+MytSuK9cABHt20/c6
-         vbnA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=t65RoraJ97XSNifH3nJWhcpZY1lN6qjNaU0+rNtB6VA=;
-        b=jF6hieIzFReyOVru5O1sgqqvR7HSyMNgcTLTPEdsb2YcD2ZO4kGKchWBmu5F7vyleI
-         XsdABqilS0Feo+hx9ZfuWo/sXRZWe9iK/0G0AGFGM1hLDLkYMgGxYFxXqsl1/55yIDhK
-         Uq2Cyn1RQ6fy0M1ke5oSz0UvSbsCVmK1+HbPVFtB7T/GHt3+kujKn5Tj1u7qpj5bqoJm
-         bat02K/DQN3AGHkhePbmdbZPidycx6IyjfaqCOcz7batrq8Y70aazu3Hk54JmDtF0fWl
-         QzClxiyZwPIWqwHvjSHvPYUE0dmVVBZM00fR83as9RZtW8CXzUD+OwcSra8Qcopok0PO
-         sOWg==
-X-Gm-Message-State: APjAAAUvzN2EceZUCWBrHarOtPH8EkLG6WA4NLCOcMoF6fFOoDhIwtkB
-        n+kABN4HC99tdlRe7kM+O6jCug35GSt5fD/0h5c10g==
-X-Google-Smtp-Source: APXvYqwPiZbZvXR+rHIvNUYilWv/U2EOOXMt8apmM26fWaq/fAZpxuaFlhAeSj98ruAwNOVdB6HsKU61mDEy2b2ThPA=
-X-Received: by 2002:a67:cc3:: with SMTP id 186mr2203033vsm.200.1579872016966;
- Fri, 24 Jan 2020 05:20:16 -0800 (PST)
-MIME-Version: 1.0
-References: <20200110134823.14882-1-ludovic.barre@st.com> <6d859def-351e-abd7-0d5f-962ad935dff2@st.com>
-In-Reply-To: <6d859def-351e-abd7-0d5f-962ad935dff2@st.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 24 Jan 2020 14:19:40 +0100
-Message-ID: <CAPDyKFo+4qTZbE=4Zgj3VN9BPYUHGskPSnYEJRo1TpARzg5zJg@mail.gmail.com>
-Subject: Re: [PATCH 0/9] mmc: mmci: sdmmc: add sdr104 support
-To:     Ludovic BARRE <ludovic.barre@st.com>
-Cc:     Rob Herring <robh+dt@kernel.org>,
-        Srinivas Kandagatla <srinivas.kandagatla@linaro.org>,
-        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
-        Alexandre Torgue <alexandre.torgue@st.com>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        DTML <devicetree@vger.kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        linux-stm32@st-md-mailman.stormreply.com
-Content-Type: text/plain; charset="UTF-8"
+        id S2390563AbgAXSAE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 24 Jan 2020 13:00:04 -0500
+Received: from mail.kernel.org ([198.145.29.99]:41678 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S2390537AbgAXSAE (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 24 Jan 2020 13:00:04 -0500
+Subject: Re: [GIT PULL] MMC fixes for v5.5-rc8
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1579888803;
+        bh=G5wmcCJIZMdkTO6ZAzrVhDTigeLl3CYbvT4oM7gHOfM=;
+        h=From:In-Reply-To:References:Date:To:Cc:From;
+        b=cyX7/uyWtC87MjXBvRTBm+hAbRRY1W0+8jFue4Z5zr5T1nhf24nh6bRYVLA0fw7C4
+         0BbPC/Xo9I3AvY7ycHloKQMzxBjOgdHyAI+lm8tLwkKR4P/XJIDHiElLtzWdWMMEo9
+         zbR0olod1taXEdRHEOOkbyekZ5A7FTIalXRP2bxk=
+From:   pr-tracker-bot@kernel.org
+In-Reply-To: <20200123200257.17258-1-ulf.hansson@linaro.org>
+References: <20200123200257.17258-1-ulf.hansson@linaro.org>
+X-PR-Tracked-List-Id: <linux-kernel.vger.kernel.org>
+X-PR-Tracked-Message-Id: <20200123200257.17258-1-ulf.hansson@linaro.org>
+X-PR-Tracked-Remote: git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git
+ tags/mmc-v5.5-rc2-2
+X-PR-Tracked-Commit-Id: 2a187d03352086e300daa2044051db00044cd171
+X-PR-Merge-Tree: torvalds/linux.git
+X-PR-Merge-Refname: refs/heads/master
+X-PR-Merge-Commit-Id: 838a860a390547dc6f8bc9d0a77d4ebad1dc8ff1
+Message-Id: <157988880348.9531.8970732011194689582.pr-tracker-bot@kernel.org>
+Date:   Fri, 24 Jan 2020 18:00:03 +0000
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 24 Jan 2020 at 13:55, Ludovic BARRE <ludovic.barre@st.com> wrote:
->
-> hi Ulf
->
-> Just a "gentleman ping" on this series
-> https://lkml.org/lkml/2020/1/10/392
+The pull request you sent on Thu, 23 Jan 2020 21:02:57 +0100:
 
-I was just reviewing :-) Thanks for pinging!
+> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.5-rc2-2
 
-One overall comment is that I think you can try to work a bit on the
-changelogs. In some cases you described what the patch does, which is
-good, but it may lack information about *why* the change is wanted.
+has been merged into torvalds/linux.git:
+https://git.kernel.org/torvalds/c/838a860a390547dc6f8bc9d0a77d4ebad1dc8ff1
 
-Overall, the series looks nice.
+Thank you!
 
-Kind regards
-Uffe
+-- 
+Deet-doot-dot, I am a bot.
+https://korg.wiki.kernel.org/userdoc/prtracker
