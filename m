@@ -2,164 +2,109 @@ Return-Path: <SRS0=bXXM=3N=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-2.4 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B3750C2D0DB
-	for <linux-mmc@archiver.kernel.org>; Fri, 24 Jan 2020 11:42:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7DF03C2D0DB
+	for <linux-mmc@archiver.kernel.org>; Fri, 24 Jan 2020 12:55:41 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 8A36A20704
-	for <linux-mmc@archiver.kernel.org>; Fri, 24 Jan 2020 11:42:35 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 51AA020708
+	for <linux-mmc@archiver.kernel.org>; Fri, 24 Jan 2020 12:55:41 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=ellerman.id.au header.i=@ellerman.id.au header.b="V1JMWp+0"
+	dkim=pass (2048-bit key) header.d=st.com header.i=@st.com header.b="aqxG94s1"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2389695AbgAXLme (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 24 Jan 2020 06:42:34 -0500
-Received: from bilbo.ozlabs.org ([203.11.71.1]:44983 "EHLO ozlabs.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2388706AbgAXLmd (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 24 Jan 2020 06:42:33 -0500
-Received: from authenticated.ozlabs.org (localhost [127.0.0.1])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange ECDHE (P-256) server-signature RSA-PSS (4096 bits) server-digest SHA256)
-        (No client certificate requested)
-        by mail.ozlabs.org (Postfix) with ESMTPSA id 483y1J1HmQzB3tj;
-        Fri, 24 Jan 2020 22:42:28 +1100 (AEDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=ellerman.id.au;
-        s=201909; t=1579866150;
-        bh=XaZMz/ewQ8WVnUJd7DwXYe7WjqOD/WGfWhNKLiw8QQQ=;
-        h=From:To:Cc:Subject:In-Reply-To:References:Date:From;
-        b=V1JMWp+0dsJ2f3QmYFJcjDhHPizqFbFS3hAUoOBJcqaLytxd3C9jX04ajMBQoMCjy
-         gPnP+iyQ1qiwWQ5W11MhbrOQjOfrfdoDRUuQUUESHIeGINrHV+cELguNJXf2m7L1IY
-         A8RiCUpdjCVX0jciX26B/YpYc+jNt8Vjbh+8Tj9sE3oQIOkZ/Dxobk0uPSYJKejiJz
-         YvoBIZgRcDEyVkp2RtvV78dWumjWi0tjJCraXvrMcVoEMIRkcMAPqRO/8B/aHAiTVf
-         DXszYFKoYxPUnYHRjiPiDtPIEKpT4xYJSoTA6r+qDwO1NbTNGwo+Dbu5gGXzMK2RuM
-         n61wxB0rhvm2g==
-From:   Michael Ellerman <mpe@ellerman.id.au>
+        id S2387396AbgAXMzh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 24 Jan 2020 07:55:37 -0500
+Received: from mx07-00178001.pphosted.com ([62.209.51.94]:26578 "EHLO
+        mx07-00178001.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S2387393AbgAXMzh (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Jan 2020 07:55:37 -0500
+Received: from pps.filterd (m0046668.ppops.net [127.0.0.1])
+        by mx07-00178001.pphosted.com (8.16.0.42/8.16.0.42) with SMTP id 00OCsTCw012368;
+        Fri, 24 Jan 2020 13:55:24 +0100
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=st.com; h=subject : to : cc :
+ references : from : message-id : date : mime-version : in-reply-to :
+ content-type : content-transfer-encoding; s=STMicroelectronics;
+ bh=HsT5XOh0k0Oip5e4q1QwfFV3XVw3YKpi81ECZxj8y6Q=;
+ b=aqxG94s1vaUPEi7oDUwgOsYy3ksvsgGOaWryEalFEw+6Zgdpn66PA45Wk9YnaG06YC0O
+ aBklNAsLyjk63X/6JayBKfFWnPoajK64SDY5dhXmGZ5SYJXnDEuGIwkrxaDGKW7Lqoxu
+ 5imLP6Ba6rd3VLxeGfE5eELqunxfwIp/TEo6qOT1oIRrHt8ADdzIe97YYl01EGefCZ68
+ 8tbO7EMpd0mYn/mc8D923WscSRyQv2abfuiZbik1+S7JawA9NuI1C8Ct9ZKLLcp5B7N1
+ ApvOKGuEbrfLmwvcTx3KpafV0loMaKPLNCmf9fnU1DQyWTdhTUdaAVSVhzPPor7hJXBG Cw== 
+Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
+        by mx07-00178001.pphosted.com with ESMTP id 2xkrc5g12e-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Fri, 24 Jan 2020 13:55:24 +0100
+Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
+        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id CE8E310002A;
+        Fri, 24 Jan 2020 13:55:23 +0100 (CET)
+Received: from Webmail-eu.st.com (sfhdag6node1.st.com [10.75.127.16])
+        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id B75A72A847D;
+        Fri, 24 Jan 2020 13:55:23 +0100 (CET)
+Received: from lmecxl0923.lme.st.com (10.75.127.48) by SFHDAG6NODE1.st.com
+ (10.75.127.16) with Microsoft SMTP Server (TLS) id 15.0.1473.3; Fri, 24 Jan
+ 2020 13:55:23 +0100
+Subject: Re: [PATCH 0/9] mmc: mmci: sdmmc: add sdr104 support
 To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Christian Zigotzky <chzigotzky@xenosoft.de>
-Cc:     Darren Stevens <darren@stevens-zone.net>,
-        mad skateman <madskateman@gmail.com>,
-        "linux-mmc\@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Julian Margetson <runaway@candw.ms>,
-        "contact\@a-eon.com" <contact@a-eon.com>,
-        "R.T.Dickinson" <rtd2@xtra.co.nz>,
-        linuxppc-dev <linuxppc-dev@lists.ozlabs.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Christoph Hellwig <hch@infradead.org>
-Subject: Re: [FSL P5020 P5040 PPC] Onboard SD card doesn't work anymore after the 'mmc-v5.4-2' updates
-In-Reply-To: <CAPDyKFoydOuSE=Eaq168=2_Ycouo7hzyw+RZXhGq7q4D4Qe8TQ@mail.gmail.com>
-References: <20200108093903.57620-1-hdegoede@redhat.com> <20200108093903.57620-2-hdegoede@redhat.com> <61bc9265-ece0-eeb6-d4a1-4631138ecf29@intel.com> <8d67882d-04a8-0607-be4e-c1430b7fda21@redhat.com> <84a32714-ba08-74a0-0c76-3c36db44dd68@intel.com> <93446e09-5f12-800a-62fa-bf3ecea7273d@redhat.com> <399ac7d5-2518-799a-595e-f6b6878cf4ab@intel.com> <a9ab8946-c599-5f83-7527-2387a9e82e8a@xenosoft.de> <CAPDyKFoydOuSE=Eaq168=2_Ycouo7hzyw+RZXhGq7q4D4Qe8TQ@mail.gmail.com>
-Date:   Fri, 24 Jan 2020 22:42:24 +1100
-Message-ID: <8736c5hyhr.fsf@mpe.ellerman.id.au>
+        Rob Herring <robh+dt@kernel.org>
+CC:     <srinivas.kandagatla@linaro.org>,
+        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
+        Alexandre Torgue <alexandre.torgue@st.com>,
+        <linux-arm-kernel@lists.infradead.org>,
+        <linux-kernel@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-mmc@vger.kernel.org>,
+        <linux-stm32@st-md-mailman.stormreply.com>
+References: <20200110134823.14882-1-ludovic.barre@st.com>
+From:   Ludovic BARRE <ludovic.barre@st.com>
+Message-ID: <6d859def-351e-abd7-0d5f-962ad935dff2@st.com>
+Date:   Fri, 24 Jan 2020 13:55:22 +0100
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.1.0
 MIME-Version: 1.0
-Content-Type: text/plain
+In-Reply-To: <20200110134823.14882-1-ludovic.barre@st.com>
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Language: fr
+Content-Transfer-Encoding: 8bit
+X-Originating-IP: [10.75.127.48]
+X-ClientProxiedBy: SFHDAG1NODE2.st.com (10.75.127.2) To SFHDAG6NODE1.st.com
+ (10.75.127.16)
+X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.138,18.0.572
+ definitions=2020-01-24_03:2020-01-24,2020-01-24 signatures=0
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Ulf Hansson <ulf.hansson@linaro.org> writes:
-> On Thu, 16 Jan 2020 at 12:18, Christian Zigotzky <chzigotzky@xenosoft.de> wrote:
->>
->> Hi All,
->>
->> We still need the attached patch for our onboard SD card interface
->> [1,2]. Could you please add this patch to the tree?
->
-> No, because according to previous discussion that isn't the correct
-> solution and more importantly it will break other archs (if I recall
-> correctly).
->
-> Looks like someone from the ppc community needs to pick up the ball.
+hi Ulf
 
-That's a pretty small community these days :) :/
+Just a "gentleman ping" on this series
+https://lkml.org/lkml/2020/1/10/392
 
-Christian can you test this please? I think I got the polarity of all
-the tests right, but it's Friday night so maybe I'm wrong :)
+Regards
+Ludo
 
-cheers
-
-
-From 975ba6e8b52d6f5358e93c1f5a47adc4a0b5fb70 Mon Sep 17 00:00:00 2001
-From: Michael Ellerman <mpe@ellerman.id.au>
-Date: Fri, 24 Jan 2020 22:26:59 +1100
-Subject: [PATCH] of: Add OF_DMA_DEFAULT_COHERENT & select it on powerpc
-
-There's an OF helper called of_dma_is_coherent(), which checks if a
-device has a "dma-coherent" property to see if the device is coherent
-for DMA.
-
-But on some platforms devices are coherent by default, and on some
-platforms it's not possible to update existing device trees to add the
-"dma-coherent" property.
-
-So add a Kconfig symbol to allow arch code to tell
-of_dma_is_coherent() that devices are coherent by default, regardless
-of the presence of the property.
-
-Select that symbol on powerpc when NOT_COHERENT_CACHE is not set, ie.
-when the system has a coherent cache.
-
-Fixes: 92ea637edea3 ("of: introduce of_dma_is_coherent() helper")
-Cc: stable@vger.kernel.org # v3.16+
-Signed-off-by: Michael Ellerman <mpe@ellerman.id.au>
----
- arch/powerpc/Kconfig | 1 +
- drivers/of/Kconfig   | 4 ++++
- drivers/of/address.c | 6 +++++-
- 3 files changed, 10 insertions(+), 1 deletion(-)
-
-diff --git a/arch/powerpc/Kconfig b/arch/powerpc/Kconfig
-index 62752c3bfabf..460678ab2375 100644
---- a/arch/powerpc/Kconfig
-+++ b/arch/powerpc/Kconfig
-@@ -235,6 +235,7 @@ config PPC
- 	select NEED_DMA_MAP_STATE		if PPC64 || NOT_COHERENT_CACHE
- 	select NEED_SG_DMA_LENGTH
- 	select OF
-+	select OF_DMA_DEFAULT_COHERENT		if !NOT_COHERENT_CACHE
- 	select OF_EARLY_FLATTREE
- 	select OLD_SIGACTION			if PPC32
- 	select OLD_SIGSUSPEND
-diff --git a/drivers/of/Kconfig b/drivers/of/Kconfig
-index 37c2ccbefecd..d91618641be6 100644
---- a/drivers/of/Kconfig
-+++ b/drivers/of/Kconfig
-@@ -103,4 +103,8 @@ config OF_OVERLAY
- config OF_NUMA
- 	bool
- 
-+config OF_DMA_DEFAULT_COHERENT
-+	# arches should select this if DMA is coherent by default for OF devices
-+	bool
-+
- endif # OF
-diff --git a/drivers/of/address.c b/drivers/of/address.c
-index 99c1b8058559..e8a39c3ec4d4 100644
---- a/drivers/of/address.c
-+++ b/drivers/of/address.c
-@@ -995,12 +995,16 @@ int of_dma_get_range(struct device_node *np, u64 *dma_addr, u64 *paddr, u64 *siz
-  * @np:	device node
-  *
-  * It returns true if "dma-coherent" property was found
-- * for this device in DT.
-+ * for this device in the DT, or if DMA is coherent by
-+ * default for OF devices on the current platform.
-  */
- bool of_dma_is_coherent(struct device_node *np)
- {
- 	struct device_node *node = of_node_get(np);
- 
-+	if (IS_ENABLED(CONFIG_OF_DMA_DEFAULT_COHERENT))
-+		return true;
-+
- 	while (node) {
- 		if (of_property_read_bool(node, "dma-coherent")) {
- 			of_node_put(node);
--- 
-2.21.1
-
-
+Le 1/10/20 à 2:48 PM, Ludovic Barre a écrit :
+> To support the sdr104 mode, sdmmc variant needs:
+> -Hardware delay block support for sdmmc variant
+>   with tuning procedure
+> -Voltage switch callbacks
+> -sdmmc revision 2.0
+> 
+> Ludovic Barre (9):
+>    mmc: mmci: sdmmc: replace sg_dma_xxx macros
+>    mmc: mmci: sdmmc: rename sdmmc_priv struct to sdmmc_idma
+>    mmc: mmci: add a reference at mmc_host_ops in mmci struct
+>    mmc: mmci: add private pointer for variant
+>    dt-bindings: mmc: mmci: add delay block base register for sdmmc
+>    mmc: mmci: sdmmc: add execute tuning with delay block
+>    mmc: mmci: add volt_switch callbacks
+>    mmc: mmci: sdmmc: add voltage switch functions
+>    mmc: mmci: add sdmmc variant revision 2.0
+> 
+>   .../devicetree/bindings/mmc/mmci.txt          |   2 +
+>   drivers/mmc/host/mmci.c                       |  39 ++++
+>   drivers/mmc/host/mmci.h                       |   8 +
+>   drivers/mmc/host/mmci_stm32_sdmmc.c           | 199 +++++++++++++++++-
+>   4 files changed, 241 insertions(+), 7 deletions(-)
+> 
