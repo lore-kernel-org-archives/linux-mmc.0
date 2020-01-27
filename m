@@ -2,105 +2,220 @@ Return-Path: <SRS0=8dup=3Q=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.3 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-6.6 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,URIBL_SBL,
+	URIBL_SBL_A,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 938ABC33CB1
-	for <linux-mmc@archiver.kernel.org>; Mon, 27 Jan 2020 13:52:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5A42BC33CB7
+	for <linux-mmc@archiver.kernel.org>; Mon, 27 Jan 2020 14:08:44 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 65B22207FD
-	for <linux-mmc@archiver.kernel.org>; Mon, 27 Jan 2020 13:52:47 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1D87F2071E
+	for <linux-mmc@archiver.kernel.org>; Mon, 27 Jan 2020 14:08:44 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=st.com header.i=@st.com header.b="X/iiA29C"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="iwZ5sO1r"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727479AbgA0Nwr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 27 Jan 2020 08:52:47 -0500
-Received: from mx08-00178001.pphosted.com ([91.207.212.93]:54272 "EHLO
-        mx07-00178001.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1726303AbgA0Nwq (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Jan 2020 08:52:46 -0500
-Received: from pps.filterd (m0046661.ppops.net [127.0.0.1])
-        by mx07-00178001.pphosted.com (8.16.0.42/8.16.0.42) with SMTP id 00RDqbnt009301;
-        Mon, 27 Jan 2020 14:52:37 +0100
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=st.com; h=subject : to : cc :
- references : from : message-id : date : mime-version : in-reply-to :
- content-type : content-transfer-encoding; s=STMicroelectronics;
- bh=O6+dl2h2jXKNX+fyEpk/L/rLP8vjpdo1SJpvyPqDs8o=;
- b=X/iiA29CNOrjDNNUARjzkyJpC1jddl3AsBxKBhiHW+SWoftFjY8Gi4idGPQEkJG5183x
- krj9qylWMsE8A6gNOBlZqR6kDZrYQxmgYytDDj5hc2gFbkwdeZXnicL6BmcgfKUmlkS6
- 48/Ua5wooQ/Z1K5UN5otgsaMIwZSvUyBejfnvh2CuMlSiLWsNZLH0Cue+aWsDbs2G+xe
- AqvY1Wu2uxfxnMhZ+I30pSzC53NG16S6S8pYprESRWtO5t6nIIDl1SFxMtvJIWY4ugk4
- qa1FE1Yehgv2YPYf1ZJdHV3obXWB/iF8jmS4pOEK97Bk4ybbfI35+Hs/KWOhFRNnm3vu Zw== 
-Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
-        by mx07-00178001.pphosted.com with ESMTP id 2xrdek90x4-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Mon, 27 Jan 2020 14:52:37 +0100
-Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
-        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 15257100038;
-        Mon, 27 Jan 2020 14:52:30 +0100 (CET)
-Received: from Webmail-eu.st.com (sfhdag6node1.st.com [10.75.127.16])
-        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id 00C312B2F22;
-        Mon, 27 Jan 2020 14:52:29 +0100 (CET)
-Received: from lmecxl0923.lme.st.com (10.75.127.49) by SFHDAG6NODE1.st.com
- (10.75.127.16) with Microsoft SMTP Server (TLS) id 15.0.1473.3; Mon, 27 Jan
- 2020 14:52:29 +0100
-Subject: Re: [PATCH 0/9] mmc: mmci: sdmmc: add sdr104 support
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-CC:     Rob Herring <robh+dt@kernel.org>,
-        Srinivas Kandagatla <srinivas.kandagatla@linaro.org>,
-        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
-        Alexandre Torgue <alexandre.torgue@st.com>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        DTML <devicetree@vger.kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        <linux-stm32@st-md-mailman.stormreply.com>
-References: <20200110134823.14882-1-ludovic.barre@st.com>
- <6d859def-351e-abd7-0d5f-962ad935dff2@st.com>
- <CAPDyKFo+4qTZbE=4Zgj3VN9BPYUHGskPSnYEJRo1TpARzg5zJg@mail.gmail.com>
-From:   Ludovic BARRE <ludovic.barre@st.com>
-Message-ID: <cdc08d8d-ffb1-0fe9-377d-a1e5faf089ce@st.com>
-Date:   Mon, 27 Jan 2020 14:52:28 +0100
+        id S1726605AbgA0OIn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 27 Jan 2020 09:08:43 -0500
+Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:57411 "EHLO
+        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1726029AbgA0OIn (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Jan 2020 09:08:43 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1580134121;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=n1f7V4Lm8h3VC5dRtxR6XUol5wXkeCoJ8/gfoICghQU=;
+        b=iwZ5sO1rxuk4zF0dSb8h+PToFQ6FsbKdaHFpBkZMltDM6NjFIyNWKXBduxc60bBxv+g2oj
+        7QAq/aCu093MULCR6nPiisnWGGT2LXoq0y1EUxnTHxO7kHSPG9GxNZId7/W4y/iOxNKgW3
+        aAyZnOrwEo///BCS9OGJ60+gwvhnJO4=
+Received: from mail-wm1-f70.google.com (mail-wm1-f70.google.com
+ [209.85.128.70]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-143-HscnVPKjPb2QtjtHtzNDOQ-1; Mon, 27 Jan 2020 09:08:25 -0500
+X-MC-Unique: HscnVPKjPb2QtjtHtzNDOQ-1
+Received: by mail-wm1-f70.google.com with SMTP id b202so1399665wmb.2
+        for <linux-mmc@vger.kernel.org>; Mon, 27 Jan 2020 06:08:25 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=n1f7V4Lm8h3VC5dRtxR6XUol5wXkeCoJ8/gfoICghQU=;
+        b=LddZ1dBYaKt/7HhXmBfuYCEcVwGSie3pLOKOfevRRFOYiO5Wa3NDAFWTrNnWeeKTNR
+         yuUK8Xn/rHDXzM0m2iHGCPKiXNIyKthIsR9cbNbd6sOKM/ND9DIzJyPdNOxgQeHzzOz7
+         GXYgAcgPTeEwX8u1eeu03gLW4/BALPFFsv1vLhgZJsqBPhpTDul8sjDWVr5Q+BB3LjDl
+         xH6Vzvz/Bh6iGA7sVlpPzxGZi5hbUacn7DosdAoRNUC32KHa/8fVMc+678lgYBFJjra3
+         Mp+X33V0H3x7YPp8mJLULqv0BgMQKmwOi/OLae1neFchNMfu9Z119ZkEPby9rdM3uFYo
+         mimQ==
+X-Gm-Message-State: APjAAAXblRTeLlsOLqjmnz0T93A9Hdk6biQButyKZoCtASgvQcyPZKab
+        /kvzWaJyfWQPsDthON/zOmrIc9zRIvvvtLuQj3Ap0/cXKtB6pi9GcS80XLbhdR2jteNSvKmZmg/
+        miR7fXaSwTgQ77na4pMM5
+X-Received: by 2002:a1c:e246:: with SMTP id z67mr14659981wmg.52.1580134104037;
+        Mon, 27 Jan 2020 06:08:24 -0800 (PST)
+X-Google-Smtp-Source: APXvYqzqe6gHSuG/TDfMhFX4yaDux9HaNCnnUD11O3liGfsvzDBcA1k+HSCq3oXDRi5DCNmx9YdnDA==
+X-Received: by 2002:a1c:e246:: with SMTP id z67mr14659938wmg.52.1580134103705;
+        Mon, 27 Jan 2020 06:08:23 -0800 (PST)
+Received: from shalem.localdomain (2001-1c00-0c0c-fe00-7e79-4dac-39d0-9c14.cable.dynamic.v6.ziggo.nl. [2001:1c00:c0c:fe00:7e79:4dac:39d0:9c14])
+        by smtp.gmail.com with ESMTPSA id q11sm20895836wrp.24.2020.01.27.06.08.22
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 27 Jan 2020 06:08:23 -0800 (PST)
+Subject: Re: Black screen while resuming a SDXC (UHS) card (_mmc_sd_resume)
+To:     Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Tim Schumacher <tim@timakro.de>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        pher1989@hotmail.com
+References: <20190905200138.GA19037@impa.localdomain>
+ <CAPDyKFqo-LecRE5R4T+vrGgNs83WFmQr84oaieEUTCjLFOLXoA@mail.gmail.com>
+ <20200123104047.GA1254@impa>
+ <CAPDyKFqOC8OTZZ+emKNr44yBoFnkRjW6Wd0Osgw-k4d+mJK5zw@mail.gmail.com>
+ <15677b8f-feff-0375-f165-3a1987463040@intel.com>
+From:   Hans de Goede <hdegoede@redhat.com>
+Message-ID: <9eb50b05-dd8b-b6d1-b2cf-5b4689a0351d@redhat.com>
+Date:   Mon, 27 Jan 2020 15:08:22 +0100
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.1.0
+ Thunderbird/68.4.1
 MIME-Version: 1.0
-In-Reply-To: <CAPDyKFo+4qTZbE=4Zgj3VN9BPYUHGskPSnYEJRo1TpARzg5zJg@mail.gmail.com>
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Language: fr
+In-Reply-To: <15677b8f-feff-0375-f165-3a1987463040@intel.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
 Content-Transfer-Encoding: 8bit
-X-Originating-IP: [10.75.127.49]
-X-ClientProxiedBy: SFHDAG2NODE3.st.com (10.75.127.6) To SFHDAG6NODE1.st.com
- (10.75.127.16)
-X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.138,18.0.572
- definitions=2020-01-27_02:2020-01-24,2020-01-27 signatures=0
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-hi Ulf
+Hi,
 
-Le 1/24/20 à 2:19 PM, Ulf Hansson a écrit :
-> On Fri, 24 Jan 2020 at 13:55, Ludovic BARRE <ludovic.barre@st.com> wrote:
+On 27-01-2020 12:57, Adrian Hunter wrote:
+> On 27/01/20 1:37 pm, Ulf Hansson wrote:
+>> + Adrian
+> 
+> Is this the same as:
+> 
+> 	https://lore.kernel.org/linux-mmc/20200108093903.57620-2-hdegoede@redhat.com/
+
+Yes the device from:
+https://bugzilla.kernel.org/show_bug.cgi?id=202459
+
+Seems to be the exact same one as the one where I'm seeing this problem
+and presumably the fix I wrote should work for that one too.
+
+As discussed I still need to try an alternative fix. I hope to get around
+to that sometimes during the coming 2-3 days.
+
+Regards,
+
+Hans
+
+
+> 
 >>
->> hi Ulf
+>> On Thu, 23 Jan 2020 at 11:40, Tim Schumacher <tim@timakro.de> wrote:
+>>>
+>>> On 2019-09-06, Ulf Hansson wrote:
+>>>> On Thu, 5 Sep 2019 at 22:01, Tim Schumacher <tim@timakro.de> wrote:
+>>>>>
+>>>>> Hi,
+>>>>>
+>>>>> I'm sending this old bug by mail since a lot of developers don't use
+>>>>> bugzilla.
+>>>>>
+>>>>> Original bug report on bugzilla by Pedro Rodrigues from 2019-01-30:
+>>>>>
+>>>>> https://bugzilla.kernel.org/show_bug.cgi?id=202459
+>>>>>
+>>>>>> This bug can be found on a Lenovo Miix 320-10ICR
+>>>>>>
+>>>>>> When using a SDXC (UHS) card, the screen becomes black if
+>>>>>> _mmc_sd_resume() is called. After some investigation, I found that an
+>>>>>> UHS card uses 1.8 V for signalling while a normal SD card uses 3.3 V. By
+>>>>>> forcing the SDXC to use 3.3 V the black screen does not appear. It seems
+>>>>>> that during a _mmc_sd_resume function call, while claiming the host, an
+>>>>>> I2C resume function is called based on an existing supplier link between
+>>>>>> the I2C bus and the card device.  The problem is that if the signalling
+>>>>>> voltage is configured to 1.8 V, during the I2C resume call, the screen
+>>>>>> turns black.  I was able to fix this issue by setting the initial signal
+>>>>>> voltage (3.3 V) before suspending the card, so that when the card is
+>>>>>> resumed, the voltage is in the original state. To do this I added a
+>>>>>> function call to mmc_set_initial_signal_voltage() during mmc_power_off
+>>>>>> routine (drivers/mmc/core/core.c).  As I’m not an expert on Linux,  I’m
+>>>>>> posting the issue and possible solution so that it could be implemented
+>>>>>> on a future release.
+>>>>>>
+>>>>>> Please, share your thoughts :)
+>>>>>
+>>>>> I can't provide further insight but I'm interested if this is possibly
+>>>>> the cause for the general issues people are having with the SD card
+>>>>> reader on Lenovo Miix 320 devices.
+>>>>>
+>>>>> Those issues described in posts like
+>>>>>
+>>>>> https://vincent-ventures.com/2018/12/arch-linux-on-lenovo-ideapad-miix-320/
+>>>>> https://esc.sh/blog/linux-on-lenovo-miix-320/
+>>>>>
+>>>>> are (1) black screen when booting with an SD card installed and (2) when
+>>>>> inserting an SD card after booting it shows up but upon trying to access
+>>>>> it the screen turns black until the card is removed again.
+>>>>>
+>>>>> I can confirm (1) on my Lenovo Miix 320-10ICR with kernel version
+>>>>> 5.2.11. I can also confirm that only SDXC cards are affected, SD and
+>>>>> SDHC cards work as expected.
+>>>>
+>>>> For the mmc community to help, you need to provide some kernel logs,
+>>>> output from lspci, figure out what mmc host driver that is being used,
+>>>> etc - in general collect more data. Then re-post the data to
+>>>> linux-mmc, me and a potential mmc host driver maintainer (if there is
+>>>> one). Yes, we can look into bugzilla as well, but first we need some
+>>>> more overall info in an email.
+>>>>
+>>>> Most likely, if there is any response, you will be asked to test
+>>>> patches. So you need to be able build and boot a new kernel, but I
+>>>> guess you already know that part.
+>>>>
+>>>> Kind regards
+>>>> Uffe
+>>>>
+>>>
+>>> Hi, I'm coming back to this issue now. The issue is still present in
+>>> kernel version 5.4.8.
+>>>
+>>> Kernel logs from boot with SD card and black screen: https://termbin.com/outp
+>>> Kernel logs from boot without SD card: https://termbin.com/dc2y
+>>>
+>>> I couldn't find anything conspicuous in there, the card is working as
+>>> expected. Only issue is the black screen (I'm doing these tests via SSH).
+>>>
+>>> lspci output: https://termbin.com/x452
+>>>
+>>> How do I figure out which mmc host driver is in use? I assume I'm
+>>> looking for one of these https://github.com/torvalds/linux/tree/master/drivers/mmc/host
+>>> I couldn't find anything like it in the kernel logs or from lsmod.
+>>>
+>>> Please read the original bug report by Pedro Rodrigues quoted above.
+>>> He got to the technical core of the problem already and proposed a fix
+>>> I assume could be understood, sanity checked and implemented by a mmc
+>>> maintainer.
 >>
->> Just a "gentleman ping" on this series
->> https://lkml.org/lkml/2020/1/10/392
+>> I have read the reports and browsed the data you provided. It seems
+>> like this is an sdhci-acpi mmc/sd controller, Adrian Hunter (Intel
+>> maintains this variant). There is one eMMC, which seems to work fine
+>> and then the SD-card that you have inserted. The SD card looks like it
+>> gets detected properly.
+>>
+>> I don't see anything in the logs that stands out. However, I would try
+>> a couple of different SD-cards, just to see what happens (if you have
+>> more then one at hand). From that and going forward, I think I will
+>> need to defer to Adrian's help. Perhaps we can put together some debug
+>> patch for you to test, or so.
+>>
+>> I will keep monitoring the discussion and fold in if there is anything
+>> more I can help with.
+>>
+>> Kind regards
+>> Uffe
+>>
 > 
-> I was just reviewing :-) Thanks for pinging!
-> 
-> One overall comment is that I think you can try to work a bit on the
-> changelogs. In some cases you described what the patch does, which is
-> good, but it may lack information about *why* the change is wanted.
 
-Ok, I try to add a comment to *why*
-
-> 
-> Overall, the series looks nice.
-> 
-> Kind regards
-> Uffe
-> 
