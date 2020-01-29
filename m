@@ -2,34 +2,37 @@ Return-Path: <SRS0=tWKp=3S=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.7 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 97279C35246
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C7EA4C47409
 	for <linux-mmc@archiver.kernel.org>; Wed, 29 Jan 2020 20:37:27 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 7A4BC20716
+	by mail.kernel.org (Postfix) with ESMTP id 9B3062071E
 	for <linux-mmc@archiver.kernel.org>; Wed, 29 Jan 2020 20:37:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726742AbgA2Uh0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        id S1726751AbgA2Uh0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
         Wed, 29 Jan 2020 15:37:26 -0500
-Received: from sauhun.de ([88.99.104.3]:41348 "EHLO pokefinder.org"
+Received: from sauhun.de ([88.99.104.3]:41370 "EHLO pokefinder.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726317AbgA2Uh0 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        id S1726618AbgA2Uh0 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
         Wed, 29 Jan 2020 15:37:26 -0500
 Received: from localhost (p5486CF2C.dip0.t-ipconnect.de [84.134.207.44])
-        by pokefinder.org (Postfix) with ESMTPSA id 4E8292C06AB;
-        Wed, 29 Jan 2020 21:37:23 +0100 (CET)
+        by pokefinder.org (Postfix) with ESMTPSA id 427C62C28B0;
+        Wed, 29 Jan 2020 21:37:24 +0100 (CET)
 From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
 To:     linux-mmc@vger.kernel.org
 Cc:     linux-renesas-soc@vger.kernel.org,
         Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
         Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: [RFC PATCH 0/6] mmc: tmio: move TAP handling to SDHI driver
-Date:   Wed, 29 Jan 2020 21:37:03 +0100
-Message-Id: <20200129203709.30493-1-wsa+renesas@sang-engineering.com>
+Subject: [RFC PATCH 2/6] mmc: renesas_sdhi: complain loudly if driver needs update
+Date:   Wed, 29 Jan 2020 21:37:05 +0100
+Message-Id: <20200129203709.30493-3-wsa+renesas@sang-engineering.com>
 X-Mailer: git-send-email 2.20.1
+In-Reply-To: <20200129203709.30493-1-wsa+renesas@sang-engineering.com>
+References: <20200129203709.30493-1-wsa+renesas@sang-engineering.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Sender: linux-mmc-owner@vger.kernel.org
@@ -37,37 +40,39 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-TAP and SCC handling is Renesas specific, so it should be moved to the
-SDHI driver. After previous refactoring, this is possible now. And
-feasible, too, to simplify further HS400 corrections. IMHO it also makes
-the driver less complicated.
+When the tap array in the driver is too low, this is not a warning but
+an error. Also _once is not helpful, we should make sure it is
+prominently in the logs. It is safe to do this because this will only
+show up during SoC enablement when we a new SoCs needs more taps (if
+that ever will happen).
 
-See the patches why this series is still RFC.
+Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+---
 
-This is based on top of the series:
-[RFC PATCH v2 0/5] mmc: renesas_sdhi: add manual correction
+Note: 'unsigned long' seems big enough for a while. But, famous last
+words(tm). We could handle this at runtime by reallocating a bigger
+buffer. Very unsure if it is worth it, though.
 
-A branch can be found here:
-git://git.kernel.org/pub/scm/linux/kernel/git/wsa/linux.git renesas/sdhi/new_manual_calib
+ drivers/mmc/host/renesas_sdhi_core.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
 
-It has been tested with a Renesas Salvator-XS boards, one with a R-Car
-M3-N and one with H3-ES2.0. Tuning to HS400 still works.
-
-
-Wolfram Sang (6):
-  mmc: tmio: refactor tuning execution into SDHI driver
-  mmc: renesas_sdhi: complain loudly if driver needs update
-  mmc: tmio: give callback a generic name
-  mmc: tmio: enforce retune after runtime suspend
-  mmc: tmio: factor out TAP usage
-  mmc: tmio: remove superfluous callback wrappers
-
- drivers/mmc/host/renesas_sdhi.h      |  5 ++
- drivers/mmc/host/renesas_sdhi_core.c | 90 +++++++++++++++++-----------
- drivers/mmc/host/tmio_mmc.h          | 11 +---
- drivers/mmc/host/tmio_mmc_core.c     | 77 +++---------------------
- 4 files changed, 71 insertions(+), 112 deletions(-)
-
+diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
+index b3ab66f963f8..d63aeb35bd0b 100644
+--- a/drivers/mmc/host/renesas_sdhi_core.c
++++ b/drivers/mmc/host/renesas_sdhi_core.c
+@@ -499,9 +499,9 @@ static int renesas_sdhi_execute_tuning(struct tmio_mmc_host *host, u32 opcode)
+ 		return 0; /* Tuning is not supported */
+ 
+ 	if (host->tap_num * 2 >= sizeof(host->taps) * BITS_PER_BYTE) {
+-		dev_warn_once(&host->pdev->dev,
+-			"Too many taps, skipping tuning. Please consider updating size of taps field of tmio_mmc_host\n");
+-		return 0;
++		dev_err(&host->pdev->dev,
++			"Too many taps, please update 'taps' in tmio_mmc_host!\n");
++		return -EINVAL;
+ 	}
+ 
+ 	priv->doing_tune = true;
 -- 
 2.20.1
 
