@@ -2,37 +2,34 @@ Return-Path: <SRS0=tWKp=3S=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.7 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-8.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 28F00C35240
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 97279C35246
 	for <linux-mmc@archiver.kernel.org>; Wed, 29 Jan 2020 20:37:27 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 012DA20732
+	by mail.kernel.org (Postfix) with ESMTP id 7A4BC20716
 	for <linux-mmc@archiver.kernel.org>; Wed, 29 Jan 2020 20:37:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726683AbgA2Uh0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        id S1726742AbgA2Uh0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
         Wed, 29 Jan 2020 15:37:26 -0500
-Received: from sauhun.de ([88.99.104.3]:41378 "EHLO pokefinder.org"
+Received: from sauhun.de ([88.99.104.3]:41348 "EHLO pokefinder.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726672AbgA2Uh0 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        id S1726317AbgA2Uh0 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
         Wed, 29 Jan 2020 15:37:26 -0500
 Received: from localhost (p5486CF2C.dip0.t-ipconnect.de [84.134.207.44])
-        by pokefinder.org (Postfix) with ESMTPSA id B03932C28B4;
-        Wed, 29 Jan 2020 21:37:24 +0100 (CET)
+        by pokefinder.org (Postfix) with ESMTPSA id 4E8292C06AB;
+        Wed, 29 Jan 2020 21:37:23 +0100 (CET)
 From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
 To:     linux-mmc@vger.kernel.org
 Cc:     linux-renesas-soc@vger.kernel.org,
         Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
         Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: [RFC PATCH 3/6] mmc: tmio: give callback a generic name
-Date:   Wed, 29 Jan 2020 21:37:06 +0100
-Message-Id: <20200129203709.30493-4-wsa+renesas@sang-engineering.com>
+Subject: [RFC PATCH 0/6] mmc: tmio: move TAP handling to SDHI driver
+Date:   Wed, 29 Jan 2020 21:37:03 +0100
+Message-Id: <20200129203709.30493-1-wsa+renesas@sang-engineering.com>
 X-Mailer: git-send-email 2.20.1
-In-Reply-To: <20200129203709.30493-1-wsa+renesas@sang-engineering.com>
-References: <20200129203709.30493-1-wsa+renesas@sang-engineering.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Sender: linux-mmc-owner@vger.kernel.org
@@ -40,58 +37,37 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-check_scc_error() is too Renesas specific. Let's just call it
-check_retune() to make it also easier understandable what it does.
-Only a rename, no functional change.
+TAP and SCC handling is Renesas specific, so it should be moved to the
+SDHI driver. After previous refactoring, this is possible now. And
+feasible, too, to simplify further HS400 corrections. IMHO it also makes
+the driver less complicated.
 
-Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
----
- drivers/mmc/host/renesas_sdhi_core.c | 2 +-
- drivers/mmc/host/tmio_mmc.h          | 2 +-
- drivers/mmc/host/tmio_mmc_core.c     | 4 ++--
- 3 files changed, 4 insertions(+), 4 deletions(-)
+See the patches why this series is still RFC.
 
-diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-index d63aeb35bd0b..24ee8ac1fe21 100644
---- a/drivers/mmc/host/renesas_sdhi_core.c
-+++ b/drivers/mmc/host/renesas_sdhi_core.c
-@@ -899,7 +899,7 @@ int renesas_sdhi_probe(struct platform_device *pdev,
- 
- 		host->execute_tuning = renesas_sdhi_execute_tuning;
- 		host->select_tuning = renesas_sdhi_select_tuning;
--		host->check_scc_error = renesas_sdhi_check_scc_error;
-+		host->check_retune = renesas_sdhi_check_scc_error;
- 		host->prepare_hs400_tuning =
- 			renesas_sdhi_prepare_hs400_tuning;
- 		host->hs400_downgrade = renesas_sdhi_disable_scc;
-diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
-index bfebbe368f02..bdb9973981ff 100644
---- a/drivers/mmc/host/tmio_mmc.h
-+++ b/drivers/mmc/host/tmio_mmc.h
-@@ -176,7 +176,7 @@ struct tmio_mmc_host {
- 	int (*write16_hook)(struct tmio_mmc_host *host, int addr);
- 	void (*reset)(struct tmio_mmc_host *host);
- 	void (*hw_reset)(struct tmio_mmc_host *host);
--	bool (*check_scc_error)(struct tmio_mmc_host *host);
-+	bool (*check_retune)(struct tmio_mmc_host *host);
- 
- 	/*
- 	 * Mandatory callback for tuning to occur which is optional for SDR50
-diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
-index 593f88cafb6e..3cacb516a66e 100644
---- a/drivers/mmc/host/tmio_mmc_core.c
-+++ b/drivers/mmc/host/tmio_mmc_core.c
-@@ -818,8 +818,8 @@ static void tmio_mmc_finish_request(struct tmio_mmc_host *host)
- 	if (mrq->cmd->error || (mrq->data && mrq->data->error))
- 		tmio_mmc_abort_dma(host);
- 
--	/* SCC error means retune, but executed command was still successful */
--	if (host->check_scc_error && host->check_scc_error(host))
-+	/* Error means retune, but executed command was still successful */
-+	if (host->check_retune && host->check_retune(host))
- 		mmc_retune_needed(host->mmc);
- 
- 	/* If SET_BLOCK_COUNT, continue with main command */
+This is based on top of the series:
+[RFC PATCH v2 0/5] mmc: renesas_sdhi: add manual correction
+
+A branch can be found here:
+git://git.kernel.org/pub/scm/linux/kernel/git/wsa/linux.git renesas/sdhi/new_manual_calib
+
+It has been tested with a Renesas Salvator-XS boards, one with a R-Car
+M3-N and one with H3-ES2.0. Tuning to HS400 still works.
+
+
+Wolfram Sang (6):
+  mmc: tmio: refactor tuning execution into SDHI driver
+  mmc: renesas_sdhi: complain loudly if driver needs update
+  mmc: tmio: give callback a generic name
+  mmc: tmio: enforce retune after runtime suspend
+  mmc: tmio: factor out TAP usage
+  mmc: tmio: remove superfluous callback wrappers
+
+ drivers/mmc/host/renesas_sdhi.h      |  5 ++
+ drivers/mmc/host/renesas_sdhi_core.c | 90 +++++++++++++++++-----------
+ drivers/mmc/host/tmio_mmc.h          | 11 +---
+ drivers/mmc/host/tmio_mmc_core.c     | 77 +++---------------------
+ 4 files changed, 71 insertions(+), 112 deletions(-)
+
 -- 
 2.20.1
 
