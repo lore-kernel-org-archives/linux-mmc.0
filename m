@@ -2,138 +2,120 @@ Return-Path: <SRS0=Wkjf=3T=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 221E2C2D0DB
-	for <linux-mmc@archiver.kernel.org>; Thu, 30 Jan 2020 14:22:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2A5E4C2D0DB
+	for <linux-mmc@archiver.kernel.org>; Thu, 30 Jan 2020 21:38:18 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id ED0D9206F0
-	for <linux-mmc@archiver.kernel.org>; Thu, 30 Jan 2020 14:22:08 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0039F215A4
+	for <linux-mmc@archiver.kernel.org>; Thu, 30 Jan 2020 21:38:17 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="GK91sSM/"
+	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="P4GDqsD+"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727425AbgA3OWI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 30 Jan 2020 09:22:08 -0500
-Received: from mail-lj1-f195.google.com ([209.85.208.195]:34504 "EHLO
-        mail-lj1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727107AbgA3OWI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 30 Jan 2020 09:22:08 -0500
-Received: by mail-lj1-f195.google.com with SMTP id x7so3578074ljc.1
-        for <linux-mmc@vger.kernel.org>; Thu, 30 Jan 2020 06:22:06 -0800 (PST)
+        id S1727572AbgA3ViR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 30 Jan 2020 16:38:17 -0500
+Received: from mail-pj1-f68.google.com ([209.85.216.68]:40586 "EHLO
+        mail-pj1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727566AbgA3ViR (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 30 Jan 2020 16:38:17 -0500
+Received: by mail-pj1-f68.google.com with SMTP id 12so1900411pjb.5
+        for <linux-mmc@vger.kernel.org>; Thu, 30 Jan 2020 13:38:14 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=9U/q0/AZVShqwSIJ5XHbOARBIimDxx6cqWeMsQ9sFBA=;
-        b=GK91sSM/ycZt5/DrNcDL9wG6LE+kiK7XA9XtM4gmoW2HUbY0l2u310xuJVvySLCqwi
-         VxQjFSiEJvHRtL2ntJk0iEXPSvHBwzpsKHbqnIq+Gytl15B0UEVTkl4klFwQmHfSU6CJ
-         frIOMm0kVj0bHWOAkw6jvTXaH9OswGQtLexYPsiIDVHKmFRYtSD7yJ1WTRgqx9rf+2lt
-         9LYRRVXAQxhEuy8fxue8Eb1hl6Q6xizcihpwlKTlpoBzfyZPkKhosdh6G7vwuB6LHgKE
-         f4PUUD+174qo5G7YzjsrNu7McvJr0faT9xZDUI9Zm9dQIMAnGM6Q4jaKAD7YQWHdOx60
-         XMZA==
+        d=chromium.org; s=google;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to:user-agent;
+        bh=EwmsKAAR9EZeJAmAlDaaBhS2SFQYknZY+oQh1g/QCAE=;
+        b=P4GDqsD+SXwiCy9JUOoM9+wWOVmgS78wb+4/C1tpIyPq02GJCeJnxqEEgOF3HbYOlI
+         BYIwnDL/eJZrdTMcTFAD2q8tKn8VMgc3cJuZ7114rYY2Q4jvFczsJKWtGD8/t3cEmejm
+         KdnUWk62kKdW/GP9ZbtOEViVs9kyEz+QAaIfs=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=9U/q0/AZVShqwSIJ5XHbOARBIimDxx6cqWeMsQ9sFBA=;
-        b=ZTpQAjNCCQGQk7ARaPkrFC+43uUF0Fv0zqnZXDd94z0lGo5afjSpkmoIVxtQRWTjky
-         TGU4DV1yniidzQK9vyMYielVnNL+CCzt9MUF4AHuE5y4egdp6bp2QhtDMWR/dc25CfxE
-         nc4EFn4Krj3hCLu/Fi39kES3A4Or1YN/+Ex59LjDcF0GF3PHnUUatkogdNNXT4shAPkv
-         vrXV5xv7y3Dz8CPOA8f7a4EzRMMj8H9oERU9p4bjJbLex1pyGGNcVB9tqDvX8do/bZ+m
-         cLCH431i2pFDIK0WBadmA0ms9bz2q+QJuP6fM08TxqkO2S4DZMckwL/U15EV26NYchLn
-         qBEA==
-X-Gm-Message-State: APjAAAW+cyfcRkW83QbD309KOuBOytvArVTK56kyr3QHV3mq+Aop1s/N
-        UvYOnooP6wxNMYTHCYWWYIgnEHR6d70=
-X-Google-Smtp-Source: APXvYqwOByEWYs6HfBgE1yTgJFE0cJq1rDVa2Lps8ZCTb7np6fEqsf1X4etSY5HEIneQL9iuCAW4PQ==
-X-Received: by 2002:a2e:3504:: with SMTP id z4mr3012367ljz.273.1580394125476;
-        Thu, 30 Jan 2020 06:22:05 -0800 (PST)
-Received: from localhost.localdomain (h-158-174-22-210.NA.cust.bahnhof.se. [158.174.22.210])
-        by smtp.gmail.com with ESMTPSA id a28sm2882715lfg.86.2020.01.30.06.22.04
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 30 Jan 2020 06:22:04 -0800 (PST)
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-To:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        Shawn Lin <shawn.lin@rock-chips.com>, mirq-linux@rere.qmqm.pl
-Subject: [PATCH] mmc: core: Throttle polling rate for CMD6
-Date:   Thu, 30 Jan 2020 15:22:01 +0100
-Message-Id: <20200130142201.28492-1-ulf.hansson@linaro.org>
-X-Mailer: git-send-email 2.17.1
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to:user-agent;
+        bh=EwmsKAAR9EZeJAmAlDaaBhS2SFQYknZY+oQh1g/QCAE=;
+        b=qoF510lvej4RHbx2/6ToMYRLbObeGdMZb7sCjMrBS+zdC4U9plrkMBR2KeCr/4FtRk
+         Cqbh9MsgVf3u2rPsWH/mKb2Br70EqDctqkxkKeLL4bLLwXfNg0nJPTMQt/uD3vXxZccg
+         kw4oTv4uXXRm/qWMRhm1YOahJMGkAx/R5uuVSCJNOvNUQ5Vlgjiz21Bxq2AUJEZIpyU1
+         kxVxhzjsE4YgQVbrJ1TyOX29eKSk7OoblbyMSQAOo0m/Sr5D4Bg2m+NbOW/R6lm5KpMm
+         zZOGmpZiYJZZHegLVHoPWUJijXlEqmNFlM8Bk3s/hynxMOapBU/TIXZaKpw0D5S8xY8g
+         vM1g==
+X-Gm-Message-State: APjAAAV0GXWfbh/yepy59siIHmasjw2FcJrZIa8FWEWTvXLNZKHtJgYs
+        kixuuMgr1mET0kyX6I5EeJZNyg==
+X-Google-Smtp-Source: APXvYqxnGY0DZfQrEhOfeE54gwV7TiIH7kOdxAYEFz+gCUTbzfGMuGMB3HDD6dI8E1dq8Lsjv2ux8Q==
+X-Received: by 2002:a17:90a:a409:: with SMTP id y9mr8265577pjp.119.1580420294561;
+        Thu, 30 Jan 2020 13:38:14 -0800 (PST)
+Received: from localhost ([2620:15c:202:1:4fff:7a6b:a335:8fde])
+        by smtp.gmail.com with ESMTPSA id w8sm7883326pfj.20.2020.01.30.13.38.13
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 30 Jan 2020 13:38:13 -0800 (PST)
+Date:   Thu, 30 Jan 2020 13:38:12 -0800
+From:   Matthias Kaehlcke <mka@chromium.org>
+To:     Pradeep P V K <ppvk@codeaurora.org>
+Cc:     adrian.hunter@intel.com, georgi.djakov@linaro.org,
+        robh+dt@kernel.org, ulf.hansson@linaro.org,
+        asutoshd@codeaurora.org, vbadigan@codeaurora.org,
+        stummala@codeaurora.org, sayalil@codeaurora.org,
+        rampraka@codeaurora.org, sboyd@kernel.org,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
+        agross@kernel.org, linux-mmc-owner@vger.kernel.org,
+        Douglas Anderson <dianders@chromium.org>
+Subject: Re: [RFC-v2 0/2] Add Support for SDHC bus bandwidth voting
+Message-ID: <20200130213812.GK71044@google.com>
+References: <1573220319-4287-1-git-send-email-ppvk@codeaurora.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <1573220319-4287-1-git-send-email-ppvk@codeaurora.org>
+User-Agent: Mutt/1.10.1 (2018-07-13)
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-In mmc_poll_for_busy() we loop continuously, either by sending a CMD13 or
-by invoking the ->card_busy() host ops, as to detect when the card stops
-signaling busy. This behaviour is problematic as it may cause CPU hogging,
-especially when the busy signal time reaches beyond a few ms.
+Hi Pradeep,
 
-Let's fix the issue by adding a throttling mechanism, that inserts a
-usleep_range() in between the polling attempts. The sleep range starts at
-16-32us, but increases for each loop by a factor of 2, up until the range
-reaches ~32-64ms. In this way, we are able to keep the loop fine-grained
-enough for short busy signaling times, while also not hogging the CPU for
-longer times.
+what is the status of this series, do you plan to send v3 soon or
+is it abandonded?
 
-Note that, this change is inspired by the similar throttling mechanism that
-we already use for mmc_do_erase().
+Thanks
 
-Reported-by: Michał Mirosław <mirq-linux@rere.qmqm.pl>
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
----
+Matthias
 
-Hi all,
-
-I have tried this on a ux500 platform (using the mmci mmc host driver), which
-has two different eMMCs connected to the board. I manually checked that the busy
-loops during boot for the worst CMD6 case, dropped from around ~50 attempts to
-around 5-6 attempts, while the total loop time stayed to the similar numbers. In
-general the loop times I observed for all the CMD6 sent during boot, were in the
-range of 0 - 900us.
-
-Any feedback and of course tests are greatly appreciated!
-
-Kind regards
-Ulf Hansson
-
----
- drivers/mmc/core/mmc_ops.c | 8 ++++++++
- 1 file changed, 8 insertions(+)
-
-diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-index da425ee2d9bf..446a37cc2a86 100644
---- a/drivers/mmc/core/mmc_ops.c
-+++ b/drivers/mmc/core/mmc_ops.c
-@@ -456,6 +456,7 @@ static int mmc_poll_for_busy(struct mmc_card *card, unsigned int timeout_ms,
- 	struct mmc_host *host = card->host;
- 	int err;
- 	unsigned long timeout;
-+	unsigned int udelay = 32, udelay_max = 32768;
- 	u32 status = 0;
- 	bool expired = false;
- 	bool busy = false;
-@@ -500,6 +501,13 @@ static int mmc_poll_for_busy(struct mmc_card *card, unsigned int timeout_ms,
- 				mmc_hostname(host), __func__);
- 			return -ETIMEDOUT;
- 		}
-+
-+		/* Throttle the polling rate to avoid hogging the CPU. */
-+		if (busy) {
-+			usleep_range(udelay, udelay * 2);
-+			if (udelay < udelay_max)
-+				udelay *= 2;
-+		}
- 	} while (busy);
- 
- 	return 0;
--- 
-2.17.1
-
+On Fri, Nov 08, 2019 at 07:08:37PM +0530, Pradeep P V K wrote:
+> Vote for the MSM bus bandwidth required by SDHC driver
+> based on the clock speed and bus width of the card.
+> Otherwise, the system clocks may run at minimum clock
+> speed and thus affecting the performance.
+> 
+> Adapt to the new ICB framework for bus bandwidth voting.
+> 
+> This requires the source/destination port ids.
+> Also this requires a tuple of values.
+> 
+> The tuple is for two different paths - from SDHC master
+> to BIMC slave. The other is from CPU master to SDHC slave.
+> This tuple consists of the average and peak bandwidth.
+> 
+> This change is based on Georgi Djakov [RFC]
+> (https://lkml.org/lkml/2018/10/11/499)
+> 
+> ---
+> changed since v1:
+> * Addressed all the Review comments.
+> * Minor code rebasing.
+> 
+> Pradeep P V K (2):
+>   dt-bindings: mmc: sdhci-msm: Add Bus BW vote supported strings
+>   mmc: sdhci-msm: Add support for bus bandwidth voting
+> 
+>  .../devicetree/bindings/mmc/sdhci-msm.txt          |  32 ++
+>  drivers/mmc/host/sdhci-msm.c                       | 366 ++++++++++++++++++++-
+>  2 files changed, 395 insertions(+), 3 deletions(-)
+> 
+> -- 
+> 1.9.1
+> 
