@@ -2,113 +2,138 @@ Return-Path: <SRS0=Wkjf=3T=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BC310C33CB3
-	for <linux-mmc@archiver.kernel.org>; Thu, 30 Jan 2020 10:05:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 221E2C2D0DB
+	for <linux-mmc@archiver.kernel.org>; Thu, 30 Jan 2020 14:22:09 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 8C9F6214AF
-	for <linux-mmc@archiver.kernel.org>; Thu, 30 Jan 2020 10:05:48 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id ED0D9206F0
+	for <linux-mmc@archiver.kernel.org>; Thu, 30 Jan 2020 14:22:08 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=renesasgroup.onmicrosoft.com header.i=@renesasgroup.onmicrosoft.com header.b="Tphpj0jr"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="GK91sSM/"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726873AbgA3KFs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 30 Jan 2020 05:05:48 -0500
-Received: from mail-eopbgr1410102.outbound.protection.outlook.com ([40.107.141.102]:8301
-        "EHLO JPN01-OS2-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1727027AbgA3KFr (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 30 Jan 2020 05:05:47 -0500
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=Ld13QiA5NUZFQqbkQBiFxFll5ZJobvpENpnd3Nly7QbOGzjNehmSgnkOXdvCVktfukeSmLRzgj0ns8tNEPKS97F1DVwKcsEpfPySc4VPy53WLrNW6CYhiUlk4dCy6Br5Rp83v5ZdTWaW7bhsDBuZVyQ8TapZ86jn7FmdJ24uU/q8is7BHeT9BxpP9XifbVXybtmClykJ8i86oJl3ufLzfB+0GDcWYvR0aut1OV1CW2L/EMrOB4K7FBCUXLWpiqcc2qyZeeKLVF07hRXL24ICXhO8eayt9MCUzJy8Sh4QJw6txn9UyeS85SIUkxrL1eiGE6cJN89HeZecVaO4ALm1cQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=jn5+leikvrKcmZ821Z2WOAKc341nmVW7g4CC2ySB4+0=;
- b=LRpm9B9XKpOwQz+ZLs9U4w8scYYPIbIlf/jNIU++0idVYL4CqfI1k28tbysMtrY4S4jGMI/aOYV8oZtjqosYOFk8vEvUww1gPZo6rw9Q4y/Zbr+BYuVstBbMUKjwfGHtj1i1/eQM2ynuQP3VO/Bwx4VGE3D7V48+HbP3BcfCpTK+0ZFXYyRiQzkw06TkbG9tLBk1Dt0VmbK5+9MWyf5O0evEg+2H/0YwHW8wIQNbvm2YfLBiCG2QHO+i48q68X9zBUAma/qqljfUzH6bPJUig4JtnyYj9+VL438o3B9930cDhGiXeqPzzejVrEIlpjtfNwNjm0i5GYhxO7jKvxdWIw==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=renesas.com; dmarc=pass action=none header.from=renesas.com;
- dkim=pass header.d=renesas.com; arc=none
+        id S1727425AbgA3OWI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 30 Jan 2020 09:22:08 -0500
+Received: from mail-lj1-f195.google.com ([209.85.208.195]:34504 "EHLO
+        mail-lj1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727107AbgA3OWI (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 30 Jan 2020 09:22:08 -0500
+Received: by mail-lj1-f195.google.com with SMTP id x7so3578074ljc.1
+        for <linux-mmc@vger.kernel.org>; Thu, 30 Jan 2020 06:22:06 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=renesasgroup.onmicrosoft.com; s=selector2-renesasgroup-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=jn5+leikvrKcmZ821Z2WOAKc341nmVW7g4CC2ySB4+0=;
- b=Tphpj0jr+yR5TtFEYP6rsMYcwKKSYSHF9NKG7q66E6RS9SR+qq48PJqnYfIhkD/jiX21GIsyJHcUigtKML1niMndu36Ez7OpsYjtkC517NQthIVwlTrVhFvwcSVafe5H7Xj/pGM6Rg1kOAaCvTriwitFOnWm/Ucr6AXEBKns8O8=
-Received: from TYAPR01MB4544.jpnprd01.prod.outlook.com (20.179.175.203) by
- TYAPR01MB3390.jpnprd01.prod.outlook.com (20.178.140.86) with Microsoft SMTP
- Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.20.2665.21; Thu, 30 Jan 2020 10:05:40 +0000
-Received: from TYAPR01MB4544.jpnprd01.prod.outlook.com
- ([fe80::318b:31aa:4212:bd49]) by TYAPR01MB4544.jpnprd01.prod.outlook.com
- ([fe80::318b:31aa:4212:bd49%7]) with mapi id 15.20.2665.027; Thu, 30 Jan 2020
- 10:05:40 +0000
-From:   Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-To:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-CC:     "linux-renesas-soc@vger.kernel.org" 
-        <linux-renesas-soc@vger.kernel.org>
-Subject: RE: [RFC PATCH v2 5/5] mmc: renesas_sdhi: cleanup SCC defines
-Thread-Topic: [RFC PATCH v2 5/5] mmc: renesas_sdhi: cleanup SCC defines
-Thread-Index: AQHVtM7Vgp4j2fYRWUOgwYV0P7TevKgDP9uA
-Date:   Thu, 30 Jan 2020 10:05:40 +0000
-Message-ID: <TYAPR01MB4544745FB7765882F4EF5A2ED8040@TYAPR01MB4544.jpnprd01.prod.outlook.com>
-References: <20191217114034.13290-1-wsa+renesas@sang-engineering.com>
- <20191217114034.13290-6-wsa+renesas@sang-engineering.com>
-In-Reply-To: <20191217114034.13290-6-wsa+renesas@sang-engineering.com>
-Accept-Language: ja-JP, en-US
-Content-Language: ja-JP
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-authentication-results: spf=none (sender IP is )
- smtp.mailfrom=yoshihiro.shimoda.uh@renesas.com; 
-x-originating-ip: [124.210.22.195]
-x-ms-publictraffictype: Email
-x-ms-office365-filtering-ht: Tenant
-x-ms-office365-filtering-correlation-id: 16fc55a0-2f91-4489-d9a5-08d7a56bf5fb
-x-ms-traffictypediagnostic: TYAPR01MB3390:
-x-microsoft-antispam-prvs: <TYAPR01MB33901B6A6D5C8B97CD269E95D8040@TYAPR01MB3390.jpnprd01.prod.outlook.com>
-x-ms-oob-tlc-oobclassifiers: OLM:4303;
-x-forefront-prvs: 02981BE340
-x-forefront-antispam-report: SFV:NSPM;SFS:(10019020)(4636009)(39860400002)(396003)(136003)(366004)(346002)(376002)(199004)(189003)(4326008)(71200400001)(478600001)(86362001)(2906002)(186003)(55016002)(558084003)(81166006)(9686003)(8676002)(8936002)(81156014)(52536014)(76116006)(316002)(55236004)(26005)(5660300002)(7696005)(6506007)(66946007)(66446008)(110136005)(66476007)(66556008)(64756008)(33656002);DIR:OUT;SFP:1102;SCL:1;SRVR:TYAPR01MB3390;H:TYAPR01MB4544.jpnprd01.prod.outlook.com;FPR:;SPF:None;LANG:en;PTR:InfoNoRecords;A:1;MX:1;
-received-spf: None (protection.outlook.com: renesas.com does not designate
- permitted sender hosts)
-x-ms-exchange-senderadcheck: 1
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: +53lfFxWSjvYnvp16lBHR6pV48DsOtzFKoMnxxOlnEiG9pWocPZVsO7TynKB74fzH+P0tnj4KY5K5TgClJMlMK/HN9H1Jtd+LlOEXaxM2Xclvv2lqokaNRh9OnMv3kh4HNrWEPmLPBtKyVeUgylE86VCmB8lB1IKX90WZg5+G/j0//JBxbUllIPDNTDZsHluLIOoXZyVAt0adfIUkYbay+A87Cqk+hwClFdJaqBBs/ohWR+uaWl+TwkuZw598kTt1xb8ffBmj52JJd3Dda/SDsVPumNX+IcFmaB7bW75wO0Wb6WICOodQwzLARqlx0FYIF1MAnTNW2KxXY6puZnzNfyhXwNKgNmt5lNrxvQ5AFzKj5ij0tyPhkRYyTe30AlwywtaoeH9NalgTg4JSJJDZqpwwYIyhXwvMxYHnaxI/8dbhF0aVymrKs+iObsy/Zm9
-x-ms-exchange-antispam-messagedata: D89bsdY+jNRQV7td0GDP79yfU8VWe6+xnGrp/46+Ws68HiBPKBywjc4K3tjBxgUeWEHzLohNXJV3xnsT35wvaBSPX5yO2Jtg4sllNLppzHHkTiIfQwERkvHmCDCDrR3/W/W2xMY+hWPRSrDNG+yOoA==
-x-ms-exchange-transport-forked: True
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+        d=linaro.org; s=google;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=9U/q0/AZVShqwSIJ5XHbOARBIimDxx6cqWeMsQ9sFBA=;
+        b=GK91sSM/ycZt5/DrNcDL9wG6LE+kiK7XA9XtM4gmoW2HUbY0l2u310xuJVvySLCqwi
+         VxQjFSiEJvHRtL2ntJk0iEXPSvHBwzpsKHbqnIq+Gytl15B0UEVTkl4klFwQmHfSU6CJ
+         frIOMm0kVj0bHWOAkw6jvTXaH9OswGQtLexYPsiIDVHKmFRYtSD7yJ1WTRgqx9rf+2lt
+         9LYRRVXAQxhEuy8fxue8Eb1hl6Q6xizcihpwlKTlpoBzfyZPkKhosdh6G7vwuB6LHgKE
+         f4PUUD+174qo5G7YzjsrNu7McvJr0faT9xZDUI9Zm9dQIMAnGM6Q4jaKAD7YQWHdOx60
+         XMZA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=9U/q0/AZVShqwSIJ5XHbOARBIimDxx6cqWeMsQ9sFBA=;
+        b=ZTpQAjNCCQGQk7ARaPkrFC+43uUF0Fv0zqnZXDd94z0lGo5afjSpkmoIVxtQRWTjky
+         TGU4DV1yniidzQK9vyMYielVnNL+CCzt9MUF4AHuE5y4egdp6bp2QhtDMWR/dc25CfxE
+         nc4EFn4Krj3hCLu/Fi39kES3A4Or1YN/+Ex59LjDcF0GF3PHnUUatkogdNNXT4shAPkv
+         vrXV5xv7y3Dz8CPOA8f7a4EzRMMj8H9oERU9p4bjJbLex1pyGGNcVB9tqDvX8do/bZ+m
+         cLCH431i2pFDIK0WBadmA0ms9bz2q+QJuP6fM08TxqkO2S4DZMckwL/U15EV26NYchLn
+         qBEA==
+X-Gm-Message-State: APjAAAW+cyfcRkW83QbD309KOuBOytvArVTK56kyr3QHV3mq+Aop1s/N
+        UvYOnooP6wxNMYTHCYWWYIgnEHR6d70=
+X-Google-Smtp-Source: APXvYqwOByEWYs6HfBgE1yTgJFE0cJq1rDVa2Lps8ZCTb7np6fEqsf1X4etSY5HEIneQL9iuCAW4PQ==
+X-Received: by 2002:a2e:3504:: with SMTP id z4mr3012367ljz.273.1580394125476;
+        Thu, 30 Jan 2020 06:22:05 -0800 (PST)
+Received: from localhost.localdomain (h-158-174-22-210.NA.cust.bahnhof.se. [158.174.22.210])
+        by smtp.gmail.com with ESMTPSA id a28sm2882715lfg.86.2020.01.30.06.22.04
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 30 Jan 2020 06:22:04 -0800 (PST)
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+To:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        Shawn Lin <shawn.lin@rock-chips.com>, mirq-linux@rere.qmqm.pl
+Subject: [PATCH] mmc: core: Throttle polling rate for CMD6
+Date:   Thu, 30 Jan 2020 15:22:01 +0100
+Message-Id: <20200130142201.28492-1-ulf.hansson@linaro.org>
+X-Mailer: git-send-email 2.17.1
 MIME-Version: 1.0
-X-OriginatorOrg: renesas.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 16fc55a0-2f91-4489-d9a5-08d7a56bf5fb
-X-MS-Exchange-CrossTenant-originalarrivaltime: 30 Jan 2020 10:05:40.1472
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 53d82571-da19-47e4-9cb4-625a166a4a2a
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: BMfSMyJsk6o1J20QgT9rr9krAibt7S/C7DR1WyDzaAmySvOnuLmlM2h2kOioVAms1bIqaBo5qtZ5LKS36Dy7Xa45qNn/JcBM+sfq6/VfNyogrEXJnqXwWb+hkpNIU91f
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: TYAPR01MB3390
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Wolfram-san,
+In mmc_poll_for_busy() we loop continuously, either by sending a CMD13 or
+by invoking the ->card_busy() host ops, as to detect when the card stops
+signaling busy. This behaviour is problematic as it may cause CPU hogging,
+especially when the busy signal time reaches beyond a few ms.
 
-> From: Wolfram Sang, Sent: Tuesday, December 17, 2019 8:41 PM
->=20
-> Use increasing BIT numbers consistently and remove some superfluous
-> comments.
->=20
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Let's fix the issue by adding a throttling mechanism, that inserts a
+usleep_range() in between the polling attempts. The sleep range starts at
+16-32us, but increases for each loop by a factor of 2, up until the range
+reaches ~32-64ms. In this way, we are able to keep the loop fine-grained
+enough for short busy signaling times, while also not hogging the CPU for
+longer times.
 
-Thank you for the patch!
+Note that, this change is inspired by the similar throttling mechanism that
+we already use for mmc_do_erase().
 
-Reviewed-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Reported-by: Michał Mirosław <mirq-linux@rere.qmqm.pl>
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+---
 
-Best regards,
-Yoshihiro Shimoda
+Hi all,
+
+I have tried this on a ux500 platform (using the mmci mmc host driver), which
+has two different eMMCs connected to the board. I manually checked that the busy
+loops during boot for the worst CMD6 case, dropped from around ~50 attempts to
+around 5-6 attempts, while the total loop time stayed to the similar numbers. In
+general the loop times I observed for all the CMD6 sent during boot, were in the
+range of 0 - 900us.
+
+Any feedback and of course tests are greatly appreciated!
+
+Kind regards
+Ulf Hansson
+
+---
+ drivers/mmc/core/mmc_ops.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+index da425ee2d9bf..446a37cc2a86 100644
+--- a/drivers/mmc/core/mmc_ops.c
++++ b/drivers/mmc/core/mmc_ops.c
+@@ -456,6 +456,7 @@ static int mmc_poll_for_busy(struct mmc_card *card, unsigned int timeout_ms,
+ 	struct mmc_host *host = card->host;
+ 	int err;
+ 	unsigned long timeout;
++	unsigned int udelay = 32, udelay_max = 32768;
+ 	u32 status = 0;
+ 	bool expired = false;
+ 	bool busy = false;
+@@ -500,6 +501,13 @@ static int mmc_poll_for_busy(struct mmc_card *card, unsigned int timeout_ms,
+ 				mmc_hostname(host), __func__);
+ 			return -ETIMEDOUT;
+ 		}
++
++		/* Throttle the polling rate to avoid hogging the CPU. */
++		if (busy) {
++			usleep_range(udelay, udelay * 2);
++			if (udelay < udelay_max)
++				udelay *= 2;
++		}
+ 	} while (busy);
+ 
+ 	return 0;
+-- 
+2.17.1
 
