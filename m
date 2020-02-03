@@ -2,133 +2,103 @@ Return-Path: <SRS0=dEAU=3X=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-0.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 92BD2C33CAC
-	for <linux-mmc@archiver.kernel.org>; Mon,  3 Feb 2020 11:32:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D2BDDC35247
+	for <linux-mmc@archiver.kernel.org>; Mon,  3 Feb 2020 19:20:03 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 70F1F2084E
-	for <linux-mmc@archiver.kernel.org>; Mon,  3 Feb 2020 11:32:31 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A0DB62082E
+	for <linux-mmc@archiver.kernel.org>; Mon,  3 Feb 2020 19:20:03 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="lTUu1JKZ"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727866AbgBCLca (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 3 Feb 2020 06:32:30 -0500
-Received: from mga05.intel.com ([192.55.52.43]:6727 "EHLO mga05.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726224AbgBCLca (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 3 Feb 2020 06:32:30 -0500
-X-Amp-Result: SKIPPED(no attachment in message)
-X-Amp-File-Uploaded: False
-Received: from fmsmga008.fm.intel.com ([10.253.24.58])
-  by fmsmga105.fm.intel.com with ESMTP/TLS/DHE-RSA-AES256-GCM-SHA384; 03 Feb 2020 03:32:30 -0800
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.70,397,1574150400"; 
-   d="scan'208";a="225138976"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.167]) ([10.237.72.167])
-  by fmsmga008.fm.intel.com with ESMTP; 03 Feb 2020 03:32:27 -0800
-Subject: Re: [PATCH 3/4] mmc: sdhci-of-arasan: Add support for DLL reset for
- ZynqMP platforms
-To:     Manish Narani <manish.narani@xilinx.com>, michal.simek@xilinx.com,
-        ulf.hansson@linaro.org, jolly.shah@xilinx.com,
-        rajan.vaja@xilinx.com, nava.manne@xilinx.com,
-        tejas.patel@xilinx.com
-Cc:     linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org
-References: <1579602095-30060-1-git-send-email-manish.narani@xilinx.com>
- <1579602095-30060-4-git-send-email-manish.narani@xilinx.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <08d85f87-6180-2e59-5d71-d916a0e44603@intel.com>
-Date:   Mon, 3 Feb 2020 13:31:37 +0200
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.4.1
+        id S1727067AbgBCTUD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 3 Feb 2020 14:20:03 -0500
+Received: from mail-lj1-f182.google.com ([209.85.208.182]:39723 "EHLO
+        mail-lj1-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727023AbgBCTUC (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 3 Feb 2020 14:20:02 -0500
+Received: by mail-lj1-f182.google.com with SMTP id o15so10331014ljg.6
+        for <linux-mmc@vger.kernel.org>; Mon, 03 Feb 2020 11:20:00 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=mime-version:from:date:message-id:subject:to:cc;
+        bh=nslNUHlX7EIFDFgPaHrgVbpEWBtUd3831cJkStBtU+I=;
+        b=lTUu1JKZSt4xgIzEs9N8gfA2saROUBzQ0miGai6+hBgzfuwNWHwgf8nqSSmobAYzT9
+         7A/N52yVg3+/75muokcHAgBFZQv4bKgbiV0LjU/vQ3/ZcLm45pLwtnKeogCX06qxKRci
+         Xe/SPIiVRB9EesuLwyZnUjK9M1roNi7BBKMA/SaeBaNa/M06IQhhAnh2lDcsV1uZkOx6
+         oR7rySnkLTvhx9LR5c4TJD5FG0+naADZAyvlXeA9vb9QZ6HOF9nsX4+q92A81Sv+0K10
+         7CMq4b7mLNlFnMP5pLq297ZGI3NAeB6m4qekeJPF6b5cvGDbsDk1Z3/GBlj5jbl/E84u
+         rPYw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:from:date:message-id:subject:to:cc;
+        bh=nslNUHlX7EIFDFgPaHrgVbpEWBtUd3831cJkStBtU+I=;
+        b=iNJ3Ki/5TuwGPmGPC6IlAavJXuAyTFRs5hbYdgmHa489GcV6XonYkiD9AJDHY68cq3
+         LlQ7Zq5/KqN1yI0kxk5KcoMHtd/VPW7RcxIHjLWl3NcJoYZ3RpLkjRNGwwpF1CF59bTN
+         4f1XS5pa5rZZZxF1IThlEnbuOSpBdIze/A8LAZ7VmJ/zlh5cjdOQWmNb+toyx8i5+vph
+         7UYqL9COlpE8NTXcRzN/1AfqqkQpOOq4OuT34jlRfeu7dHzlVg6NEPSpI/RIsdrk8sW0
+         jY6Mz8Ujjl0jn8kO/DHfWveB1EihFmZ23RJf+UyfLllp5+lDvG+5xcZCyH4rZptfIWnJ
+         FLvg==
+X-Gm-Message-State: APjAAAWlQKFfft7kqZmf774zPVLGPYgAPyi9ftHvgtXeGL/TdsoJp5zH
+        EjCFwLyW6DULliz11Akm/BgVxSfFnVHcxFHMo1U=
+X-Google-Smtp-Source: APXvYqy9VZXDKV6EWHZytu77dkYEL5aEYN3h8uHqYAAxCABEFswLglssF50W2f+jmCtcbKoVjX5fElIjvVv3d3X7muQ=
+X-Received: by 2002:a2e:2e11:: with SMTP id u17mr14375443lju.117.1580757599170;
+ Mon, 03 Feb 2020 11:19:59 -0800 (PST)
 MIME-Version: 1.0
-In-Reply-To: <1579602095-30060-4-git-send-email-manish.narani@xilinx.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+From:   Fabio Estevam <festevam@gmail.com>
+Date:   Mon, 3 Feb 2020 16:19:50 -0300
+Message-ID: <CAOMZO5DMMCZPfwNbTaG8_iQhWg2K1XeO719nSA0Gsf2ywHy4jQ@mail.gmail.com>
+Subject: sdhci timeout on imx8mq
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>
+Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
+        NXP Linux Team <linux-imx@nxp.com>,
+        Sascha Hauer <kernel@pengutronix.de>,
+        =?UTF-8?Q?Guido_G=C3=BCnther?= <agx@sigxcpu.org>,
+        "moderated list:ARM/FREESCALE IMX / MXC ARM ARCHITECTURE" 
+        <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 21/01/20 12:21 pm, Manish Narani wrote:
-> The DLL resets are required while executing the auto tuning procedure in
-> ZynqMP. This patch adds code to support the same.
-> 
-> Signed-off-by: Manish Narani <manish.narani@xilinx.com>
+Hi,
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+I observe the following timeout on a imx8mq-evk running linux-next 20200203:
 
-> ---
->  drivers/mmc/host/sdhci-of-arasan.c | 46 ++++++++++++++++++++++++++++++
->  1 file changed, 46 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-> index e49b44b4d82e..39176ab5ca1f 100644
-> --- a/drivers/mmc/host/sdhci-of-arasan.c
-> +++ b/drivers/mmc/host/sdhci-of-arasan.c
-> @@ -757,6 +757,50 @@ static const struct clk_ops zynqmp_sampleclk_ops = {
->  	.set_phase = sdhci_zynqmp_sampleclk_set_phase,
->  };
->  
-> +static void arasan_zynqmp_dll_reset(struct sdhci_host *host, u32 deviceid)
-> +{
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
-> +	struct sdhci_arasan_zynqmp_clk_data *zynqmp_clk_data =
-> +		sdhci_arasan->clk_data.clk_of_data;
-> +	const struct zynqmp_eemi_ops *eemi_ops = zynqmp_clk_data->eemi_ops;
-> +	u16 clk;
-> +
-> +	clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-> +	clk &= ~(SDHCI_CLOCK_CARD_EN | SDHCI_CLOCK_INT_EN);
-> +	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
-> +
-> +	/* Issue DLL Reset */
-> +	eemi_ops->ioctl(deviceid, IOCTL_SD_DLL_RESET,
-> +			PM_DLL_RESET_PULSE, 0, NULL);
-> +
-> +	clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-> +
-> +	sdhci_enable_clk(host, clk);
-> +}
-> +
-> +static int arasan_zynqmp_execute_tuning(struct mmc_host *mmc, u32 opcode)
-> +{
-> +	struct sdhci_host *host = mmc_priv(mmc);
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
-> +	struct clk_hw *hw = &sdhci_arasan->clk_data.sdcardclk_hw;
-> +	const char *clk_name = clk_hw_get_name(hw);
-> +	u32 device_id = !strcmp(clk_name, "clk_out_sd0") ? NODE_SD_0 :
-> +							   NODE_SD_1;
-> +	int err;
-> +
-> +	arasan_zynqmp_dll_reset(host, device_id);
-> +
-> +	err = sdhci_execute_tuning(mmc, opcode);
-> +	if (err)
-> +		return err;
-> +
-> +	arasan_zynqmp_dll_reset(host, device_id);
-> +
-> +	return 0;
-> +}
-> +
->  /**
->   * sdhci_arasan_update_clockmultiplier - Set corecfg_clockmultiplier
->   *
-> @@ -1247,6 +1291,8 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
->  
->  		zynqmp_clk_data->eemi_ops = eemi_ops;
->  		sdhci_arasan->clk_data.clk_of_data = zynqmp_clk_data;
-> +		host->mmc_host_ops.execute_tuning =
-> +			arasan_zynqmp_execute_tuning;
->  	}
->  
->  	arasan_dt_parse_clk_phases(&pdev->dev, &sdhci_arasan->clk_data);
-> 
+# [   11.747858] mmc0: Timeout waiting for hardware interrupt.
+[   11.753264] mmc0: sdhci: ============ SDHCI REGISTER DUMP ===========
+[   11.759705] mmc0: sdhci: Sys addr:  0x00000800 | Version:  0x00000002
+[   11.766145] mmc0: sdhci: Blk size:  0x00000200 | Blk cnt:  0x00000001
+[   11.772584] mmc0: sdhci: Argument:  0x00000000 | Trn mode: 0x00000013
+[   11.779024] mmc0: sdhci: Present:   0x01f88a0a | Host ctl: 0x00000011
+[   11.785463] mmc0: sdhci: Power:     0x00000002 | Blk gap:  0x00000080
+[   11.791902] mmc0: sdhci: Wake-up:   0x00000008 | Clock:    0x000020ff
+[   11.798342] mmc0: sdhci: Timeout:   0x0000008f | Int stat: 0x00000000
+[   11.804781] mmc0: sdhci: Int enab:  0x117f100b | Sig enab: 0x117f100b
+[   11.811220] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00008402
+[   11.817660] mmc0: sdhci: Caps:      0x07eb0000 | Caps_1:   0x8000b407
+[   11.824100] mmc0: sdhci: Cmd:       0x0000083a | Max curr: 0x00ffffff
+[   11.830539] mmc0: sdhci: Resp[0]:   0x00000900 | Resp[1]:  0xffffffff
+[   11.836978] mmc0: sdhci: Resp[2]:   0x320f5913 | Resp[3]:  0x00d04f01
+[   11.843416] mmc0: sdhci: Host ctl2: 0x00000008
+[   11.847860] mmc0: sdhci: ADMA Err:  0x00000001 | ADMA Ptr: 0xf97d2200
+[   11.854297] mmc0: sdhci: ============================================
+[   11.860908] mmc0: error -110 whilst initialising MMC card
+[   12.027806] mmc0: new HS400 MMC card at address 0001
+[   12.033283] mmcblk0: mmc0:0001 R1J56L 13.8 GiB
+[   12.038007] mmcblk0boot0: mmc0:0001 R1J56L partition 1 4.00 MiB
+[   12.044112] mmcblk0boot1: mmc0:0001 R1J56L partition 2 4.00 MiB
+[   12.050172] mmcblk0rpmb: mmc0:0001 R1J56L partition 3 128 KiB,
+chardev (235:0)
+[   12.058210]  mmcblk0: p1 p2
 
+Haven't had a chance to debug this yet, but just reporting in case
+anyone has any ideas.
+
+Thanks
