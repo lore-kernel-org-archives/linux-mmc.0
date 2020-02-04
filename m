@@ -7,52 +7,52 @@ X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 51912C2D0B1
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D0659C3524B
 	for <linux-mmc@archiver.kernel.org>; Tue,  4 Feb 2020 08:55:26 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 27D7821744
+	by mail.kernel.org (Postfix) with ESMTP id A6EDA2087E
 	for <linux-mmc@archiver.kernel.org>; Tue,  4 Feb 2020 08:55:26 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="eHizTPsn"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="mRTuBhRB"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726513AbgBDIzZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 4 Feb 2020 03:55:25 -0500
-Received: from mail-lf1-f66.google.com ([209.85.167.66]:38821 "EHLO
-        mail-lf1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726362AbgBDIzZ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Feb 2020 03:55:25 -0500
-Received: by mail-lf1-f66.google.com with SMTP id r14so11636623lfm.5
-        for <linux-mmc@vger.kernel.org>; Tue, 04 Feb 2020 00:55:23 -0800 (PST)
+        id S1726362AbgBDIz0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 4 Feb 2020 03:55:26 -0500
+Received: from mail-lj1-f193.google.com ([209.85.208.193]:37802 "EHLO
+        mail-lj1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726506AbgBDIz0 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Feb 2020 03:55:26 -0500
+Received: by mail-lj1-f193.google.com with SMTP id v17so17690070ljg.4
+        for <linux-mmc@vger.kernel.org>; Tue, 04 Feb 2020 00:55:24 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=from:to:cc:subject:date:message-id:in-reply-to:references;
-        bh=4MoUz8e+cau8Xa7ChnTAxFphu0xbbPqaxCnfeEAChL0=;
-        b=eHizTPsnr1OuaxkljuFvA0GqC4CKdaPoYVpAxKqjyXiKJbjxcsyGVaNmHuM/aCVmSj
-         8EpJotdRKkCcFIiiwxWwQEVFid2SGGI8FeToEKXasAmZvM19XrNlHcTHEUEVTAvDDX30
-         OaAG+WFqy8A78zqMAMSUBu3WBPMtn4Zw7Rscsy1Am2ueocR/OTfm8LNiEUBXY4uEGFQO
-         BSTJno3fdP37LAIHlZsyBvFHVmihFR9Mpx1u7HF5gh85DJMA481xbRUs895qlrsqAfei
-         aRIQICJcNDcIrZCTifg3GSoc1NKyz//SRTsxcUXBEXpnIrxhIh2LyfODwRRbvTjuUTG0
-         x6bA==
+        bh=76qzmT2N+APJISrybQoaQycmewwxQpEPkoOAn/iBjYI=;
+        b=mRTuBhRBZ82PkPR7LXi/V9bxQp3U2BR2gSjOJVux+AEKQNVsxPOp1fXrgaQWGUBvRs
+         FPuJfvGjDQeUpv+X2frr21Oz/3aiaXuIGiqznJF7edUyw1w3hEYX2XTFV2Z9UA8wd/4D
+         mU6OHbfHnKKoPwXdA6h+GVJSbcjaxNFuOu6yC5bYNtZxqQ7KwGiOgLMt0xHxn2fvCt+6
+         ZjgwTrGw7UVMvVMoYjSStHvKUKRBEO2odeGKXsRK/biDa33GRLWKpGfe2cBAQqAKMBxC
+         Qt97cO9ASTdzjFpCN/mltO51UOc58eKmA9CfkuLW7vXKTQNAGb5Tof+mQlWl7LWkgLz5
+         AFdw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references;
-        bh=4MoUz8e+cau8Xa7ChnTAxFphu0xbbPqaxCnfeEAChL0=;
-        b=OqVwdMSc5XhJrQXiO/X7DnN3K7310VtEbzfSs6WRLked0hz4s+jDY2anmMg9uLyvpk
-         tFMfzQ9k9WnXirdPHCdjhRpdYCtf9wtw3N5O3cuIs3aVgorIllRbxW1xQan1jESuC0lf
-         plG13OiI9Pik2q7pjCMPXWshPQjeHaE98ZrZU0GKKnIM2wtkke0v7L/ZDl00uvFRWamn
-         KHY0RoyirNslkGgWowPvhO+ODsgJnSGwMAzT2RBLk3r15dMHU9RXTorljz6AON4m3/c4
-         jgckkdB1+nDaqWAnZ2hCIWEIqIi+rXB72g1w6DQm1u835KjBE2WsT95ICwINSMZJKExJ
-         Z4kg==
-X-Gm-Message-State: APjAAAWnPVgQQhuTf9uxCca+Vn6M0v3ahYfN84g3WecKA+4/KJgZ/sPa
-        dTSjoWshkuyrrJY2jfaQRn3FJbD960o=
-X-Google-Smtp-Source: APXvYqycLBF/cQ1QLZbuX0A3oqIaEhvd983hPS/2XotETjrWa0tuCjLI/wsSJfbiArTwQtN+brBGyw==
-X-Received: by 2002:ac2:485c:: with SMTP id 28mr14319585lfy.118.1580806522261;
-        Tue, 04 Feb 2020 00:55:22 -0800 (PST)
+        bh=76qzmT2N+APJISrybQoaQycmewwxQpEPkoOAn/iBjYI=;
+        b=jcWFnvmqe2y7EIgBHI5rzUrxfjtUloSfKyqGfuovolM3X7m1z2QP0kJHk9aIXH06Gm
+         REl1hLOuAEyxvQOVY86WvSYaVXGlAWN66AEC0WTnJ8s4Xld29AGUsrtZ0nyyqccvL+KS
+         kJgJkIH461V6JtR6PVtHvz5vozF+cP8jUktW82HdJYSCMaW9LyqdEngfBFlMR2CTzxBo
+         TebezobFnyg552aOGPrc9SQkqP778nGKrykde7MJScQFohObzjSBovWsGPTELMD+6UKT
+         Zr6oLb1W4CWMvJwmC543GPyN56ktvm1mHH/wMEnEyg2DpoNSTwhVk5M4fdAHbwXxIpXa
+         0Gkw==
+X-Gm-Message-State: APjAAAU5UG/0a9qx8uN0xkoXCncP7ogVUxjxActaNbClNYG7/iAkJl9h
+        0gam8m1mj4OfjPml+PEPEJy5X7AuX8o=
+X-Google-Smtp-Source: APXvYqyk36ZqUcx/HJiF7kdli1JGrsdOSnZT4EvHE34Z+OOUynosTyy8bF3k69/OJn9iK5jum8m1XQ==
+X-Received: by 2002:a2e:9b05:: with SMTP id u5mr16835282lji.59.1580806523679;
+        Tue, 04 Feb 2020 00:55:23 -0800 (PST)
 Received: from localhost.localdomain (h-158-174-22-210.NA.cust.bahnhof.se. [158.174.22.210])
-        by smtp.gmail.com with ESMTPSA id n2sm11156283ljj.1.2020.02.04.00.55.20
+        by smtp.gmail.com with ESMTPSA id n2sm11156283ljj.1.2020.02.04.00.55.22
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 04 Feb 2020 00:55:21 -0800 (PST)
+        Tue, 04 Feb 2020 00:55:23 -0800 (PST)
 From:   Ulf Hansson <ulf.hansson@linaro.org>
 To:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 Cc:     Adrian Hunter <adrian.hunter@intel.com>,
@@ -62,9 +62,9 @@ Cc:     Adrian Hunter <adrian.hunter@intel.com>,
         Linus Walleij <linus.walleij@linaro.org>,
         Chaotian Jing <chaotian.jing@mediatek.com>,
         Shawn Lin <shawn.lin@rock-chips.com>, mirq-linux@rere.qmqm.pl
-Subject: [PATCH 10/12] mmc: core: Convert to mmc_poll_for_busy() for HPI commands
-Date:   Tue,  4 Feb 2020 09:54:47 +0100
-Message-Id: <20200204085449.32585-11-ulf.hansson@linaro.org>
+Subject: [PATCH 11/12] mmc: core: Fixup support for HW busy detection for HPI commands
+Date:   Tue,  4 Feb 2020 09:54:48 +0100
+Message-Id: <20200204085449.32585-12-ulf.hansson@linaro.org>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20200204085449.32585-1-ulf.hansson@linaro.org>
 References: <20200204085449.32585-1-ulf.hansson@linaro.org>
@@ -73,94 +73,79 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Rather than open coding the polling loop in mmc_interrupt_hpi(), let's
-convert to use mmc_poll_for_busy().
+In case the host specify a max_busy_timeout, we need to validate that the
+needed timeout for the HPI command conforms to that requirement. If that's
+not the case, let's convert from a R1B response to a R1 response, as to
+instruct the host to avoid HW busy detection.
 
-Note that, moving to mmc_poll_for_busy() for HPI also improves the
-behaviour according to below.
+Additionally, when R1B is used we must also inform the host about the busy
+timeout for the command, so let's do that via updating cmd.busy_timeout.
 
-- Adds support for polling via the optional ->card_busy() host ops.
-- Require R1_READY_FOR_DATA to be set in the CMD13 response before exiting
-  the polling loop.
-- Adds a throttling mechanism to avoid CPU hogging when polling.
+Finally, when R1B is used and in case the host supports HW busy detection,
+there should be no need for doing polling, so then skip that.
 
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/mmc/core/mmc_ops.c | 20 +++++---------------
- drivers/mmc/core/mmc_ops.h |  1 +
- 2 files changed, 6 insertions(+), 15 deletions(-)
+ drivers/mmc/core/mmc_ops.c | 36 +++++++++++++++++++++++++-----------
+ 1 file changed, 25 insertions(+), 11 deletions(-)
 
 diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-index 4d8f90d01740..87d54a559b31 100644
+index 87d54a559b31..aa0cab190cd8 100644
 --- a/drivers/mmc/core/mmc_ops.c
 +++ b/drivers/mmc/core/mmc_ops.c
-@@ -471,6 +471,8 @@ static int mmc_busy_status(struct mmc_card *card, bool retry_crc_err,
- 	case MMC_BUSY_ERASE:
- 		err = R1_STATUS(status) ? -EIO : 0;
- 		break;
-+	case MMC_BUSY_HPI:
-+		break;
- 	default:
- 		err = -EINVAL;
- 	}
-@@ -829,6 +831,7 @@ int mmc_bus_test(struct mmc_card *card, u8 bus_width)
- 
+@@ -832,27 +832,41 @@ int mmc_bus_test(struct mmc_card *card, u8 bus_width)
  static int mmc_send_hpi_cmd(struct mmc_card *card)
  {
-+	unsigned int busy_timeout_ms = card->ext_csd.out_of_int_time;
+ 	unsigned int busy_timeout_ms = card->ext_csd.out_of_int_time;
++	struct mmc_host *host = card->host;
++	bool use_r1b_resp = true;
  	struct mmc_command cmd = {};
- 	unsigned int opcode;
+-	unsigned int opcode;
  	int err;
-@@ -850,7 +853,8 @@ static int mmc_send_hpi_cmd(struct mmc_card *card)
+ 
+-	opcode = card->ext_csd.hpi_cmd;
+-	if (opcode == MMC_STOP_TRANSMISSION)
++	cmd.opcode = card->ext_csd.hpi_cmd;
++	cmd.arg = card->rca << 16 | 1;
++
++	/*
++	 * Make sure the host's max_busy_timeout fit the needed timeout for HPI.
++	 * In case it doesn't, let's instruct the host to avoid HW busy
++	 * detection, by using a R1 response instead of R1B.
++	 */
++	if (host->max_busy_timeout && busy_timeout_ms > host->max_busy_timeout)
++		use_r1b_resp = false;
++
++	if (cmd.opcode == MMC_STOP_TRANSMISSION && use_r1b_resp) {
+ 		cmd.flags = MMC_RSP_R1B | MMC_CMD_AC;
+-	else if (opcode == MMC_SEND_STATUS)
++		cmd.busy_timeout = busy_timeout_ms;
++	} else {
+ 		cmd.flags = MMC_RSP_R1 | MMC_CMD_AC;
++		use_r1b_resp = false;
++	}
+ 
+-	cmd.opcode = opcode;
+-	cmd.arg = card->rca << 16 | 1;
+-
+-	err = mmc_wait_for_cmd(card->host, &cmd, 0);
++	err = mmc_wait_for_cmd(host, &cmd, 0);
+ 	if (err) {
+-		pr_warn("%s: error %d interrupting operation. "
+-			"HPI command response %#x\n", mmc_hostname(card->host),
+-			err, cmd.resp[0]);
++		pr_warn("%s: HPI error %d. Command response %#x\n",
++			mmc_hostname(host), err, cmd.resp[0]);
  		return err;
  	}
  
--	return 0;
-+	/* Let's poll to find out when the HPI request completes. */
-+	return mmc_poll_for_busy(card, busy_timeout_ms, MMC_BUSY_HPI);
++	/* No need to poll when using HW busy detection. */
++	if (host->caps & MMC_CAP_WAIT_WHILE_BUSY && use_r1b_resp)
++		return 0;
++
+ 	/* Let's poll to find out when the HPI request completes. */
+ 	return mmc_poll_for_busy(card, busy_timeout_ms, MMC_BUSY_HPI);
  }
- 
- /**
-@@ -864,7 +868,6 @@ int mmc_interrupt_hpi(struct mmc_card *card)
- {
- 	int err;
- 	u32 status;
--	unsigned long prg_wait;
- 
- 	if (!card->ext_csd.hpi_en) {
- 		pr_info("%s: HPI enable bit unset\n", mmc_hostname(card->host));
-@@ -898,19 +901,6 @@ int mmc_interrupt_hpi(struct mmc_card *card)
- 	}
- 
- 	err = mmc_send_hpi_cmd(card);
--	if (err)
--		goto out;
--
--	prg_wait = jiffies + msecs_to_jiffies(card->ext_csd.out_of_int_time);
--	do {
--		err = mmc_send_status(card, &status);
--
--		if (!err && R1_CURRENT_STATE(status) == R1_STATE_TRAN)
--			break;
--		if (time_after(jiffies, prg_wait))
--			err = -ETIMEDOUT;
--	} while (!err);
--
- out:
- 	return err;
- }
-diff --git a/drivers/mmc/core/mmc_ops.h b/drivers/mmc/core/mmc_ops.h
-index 8cd05fb583da..38dcfeeaf6d5 100644
---- a/drivers/mmc/core/mmc_ops.h
-+++ b/drivers/mmc/core/mmc_ops.h
-@@ -13,6 +13,7 @@
- enum mmc_busy_cmd {
- 	MMC_BUSY_CMD6,
- 	MMC_BUSY_ERASE,
-+	MMC_BUSY_HPI,
- };
- 
- struct mmc_host;
 -- 
 2.17.1
 
