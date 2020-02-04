@@ -1,104 +1,105 @@
-Return-Path: <SRS0=dEAU=3X=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=92ZL=3Y=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.3 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,URIBL_BLOCKED,
+	USER_AGENT_SANE_2 autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D2BDDC35247
-	for <linux-mmc@archiver.kernel.org>; Mon,  3 Feb 2020 19:20:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 47613C35247
+	for <linux-mmc@archiver.kernel.org>; Tue,  4 Feb 2020 00:44:25 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id A0DB62082E
-	for <linux-mmc@archiver.kernel.org>; Mon,  3 Feb 2020 19:20:03 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1D8622166E
+	for <linux-mmc@archiver.kernel.org>; Tue,  4 Feb 2020 00:44:24 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="lTUu1JKZ"
+	dkim=pass (1024-bit key) header.d=mediatek.com header.i=@mediatek.com header.b="fsToL9Vi"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727067AbgBCTUD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 3 Feb 2020 14:20:03 -0500
-Received: from mail-lj1-f182.google.com ([209.85.208.182]:39723 "EHLO
-        mail-lj1-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727023AbgBCTUC (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 3 Feb 2020 14:20:02 -0500
-Received: by mail-lj1-f182.google.com with SMTP id o15so10331014ljg.6
-        for <linux-mmc@vger.kernel.org>; Mon, 03 Feb 2020 11:20:00 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:from:date:message-id:subject:to:cc;
-        bh=nslNUHlX7EIFDFgPaHrgVbpEWBtUd3831cJkStBtU+I=;
-        b=lTUu1JKZSt4xgIzEs9N8gfA2saROUBzQ0miGai6+hBgzfuwNWHwgf8nqSSmobAYzT9
-         7A/N52yVg3+/75muokcHAgBFZQv4bKgbiV0LjU/vQ3/ZcLm45pLwtnKeogCX06qxKRci
-         Xe/SPIiVRB9EesuLwyZnUjK9M1roNi7BBKMA/SaeBaNa/M06IQhhAnh2lDcsV1uZkOx6
-         oR7rySnkLTvhx9LR5c4TJD5FG0+naADZAyvlXeA9vb9QZ6HOF9nsX4+q92A81Sv+0K10
-         7CMq4b7mLNlFnMP5pLq297ZGI3NAeB6m4qekeJPF6b5cvGDbsDk1Z3/GBlj5jbl/E84u
-         rPYw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:from:date:message-id:subject:to:cc;
-        bh=nslNUHlX7EIFDFgPaHrgVbpEWBtUd3831cJkStBtU+I=;
-        b=iNJ3Ki/5TuwGPmGPC6IlAavJXuAyTFRs5hbYdgmHa489GcV6XonYkiD9AJDHY68cq3
-         LlQ7Zq5/KqN1yI0kxk5KcoMHtd/VPW7RcxIHjLWl3NcJoYZ3RpLkjRNGwwpF1CF59bTN
-         4f1XS5pa5rZZZxF1IThlEnbuOSpBdIze/A8LAZ7VmJ/zlh5cjdOQWmNb+toyx8i5+vph
-         7UYqL9COlpE8NTXcRzN/1AfqqkQpOOq4OuT34jlRfeu7dHzlVg6NEPSpI/RIsdrk8sW0
-         jY6Mz8Ujjl0jn8kO/DHfWveB1EihFmZ23RJf+UyfLllp5+lDvG+5xcZCyH4rZptfIWnJ
-         FLvg==
-X-Gm-Message-State: APjAAAWlQKFfft7kqZmf774zPVLGPYgAPyi9ftHvgtXeGL/TdsoJp5zH
-        EjCFwLyW6DULliz11Akm/BgVxSfFnVHcxFHMo1U=
-X-Google-Smtp-Source: APXvYqy9VZXDKV6EWHZytu77dkYEL5aEYN3h8uHqYAAxCABEFswLglssF50W2f+jmCtcbKoVjX5fElIjvVv3d3X7muQ=
-X-Received: by 2002:a2e:2e11:: with SMTP id u17mr14375443lju.117.1580757599170;
- Mon, 03 Feb 2020 11:19:59 -0800 (PST)
-MIME-Version: 1.0
-From:   Fabio Estevam <festevam@gmail.com>
-Date:   Mon, 3 Feb 2020 16:19:50 -0300
-Message-ID: <CAOMZO5DMMCZPfwNbTaG8_iQhWg2K1XeO719nSA0Gsf2ywHy4jQ@mail.gmail.com>
-Subject: sdhci timeout on imx8mq
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>
-Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
-        NXP Linux Team <linux-imx@nxp.com>,
-        Sascha Hauer <kernel@pengutronix.de>,
-        =?UTF-8?Q?Guido_G=C3=BCnther?= <agx@sigxcpu.org>,
-        "moderated list:ARM/FREESCALE IMX / MXC ARM ARCHITECTURE" 
-        <linux-arm-kernel@lists.infradead.org>
+        id S1726561AbgBDAoU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 3 Feb 2020 19:44:20 -0500
+Received: from mailgw02.mediatek.com ([210.61.82.184]:30771 "EHLO
+        mailgw02.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1726928AbgBDAoU (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 3 Feb 2020 19:44:20 -0500
+X-UUID: 1a1ab3d8e5a645109859a7adbcd181ea-20200204
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=mediatek.com; s=dk;
+        h=Content-Transfer-Encoding:MIME-Version:Content-Type:References:In-Reply-To:Date:CC:To:From:Subject:Message-ID; bh=5GT0W0D4fp1R9e9GcyJmXd1HEmQL0ETrvY40fzATcrY=;
+        b=fsToL9ViJWcZIICJM27OSDhjNoyoImIJQbMjTeHViMESeY6WIzQhavCKcknZyTi8PCVd8zzUydDg6B1nIZgCvnB+d+t9ilhp1AuRPVw0/JAHXczEyfDpdrav7QwXJTk0i7Qk2gnxLNZgCXwd2iXmWtA43ZuGsEmYEKZ1/da68Is=;
+X-UUID: 1a1ab3d8e5a645109859a7adbcd181ea-20200204
+Received: from mtkcas09.mediatek.inc [(172.21.101.178)] by mailgw02.mediatek.com
+        (envelope-from <chun-hung.wu@mediatek.com>)
+        (Cellopoint E-mail Firewall v4.1.10 Build 0809 with TLS)
+        with ESMTP id 1633236549; Tue, 04 Feb 2020 08:44:15 +0800
+Received: from mtkcas09.mediatek.inc (172.21.101.178) by
+ mtkmbs07n2.mediatek.inc (172.21.101.141) with Microsoft SMTP Server (TLS) id
+ 15.0.1395.4; Tue, 4 Feb 2020 08:43:34 +0800
+Received: from [172.21.77.33] (172.21.77.33) by mtkcas09.mediatek.inc
+ (172.21.101.73) with Microsoft SMTP Server id 15.0.1395.4 via Frontend
+ Transport; Tue, 4 Feb 2020 08:44:29 +0800
+Message-ID: <1580777053.4621.1.camel@mtkswgap22>
+Subject: Re: [PATCH 1/3] [1/3] mmc: core: expose MMC_CAP2_CQE* to dt
+From:   Chun-Hung Wu <chun-hung.wu@mediatek.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+CC:     Chaotian Jing <chaotian.jing@mediatek.com>,
+        Rob Herring <robh+dt@kernel.org>,
+        Mark Rutland <mark.rutland@arm.com>,
+        "Matthias Brugger" <matthias.bgg@gmail.com>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Pavel Machek <pavel@ucw.cz>,
+        Kate Stewart <kstewart@linuxfoundation.org>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+        Pan Bian <bianpan2016@163.com>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Stanley Chu <stanley.chu@mediatek.com>,
+        Kuohong Wang <kuohong.wang@mediatek.com>,
+        "Linux Kernel Mailing List" <linux-kernel@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        <linux-mediatek@lists.infradead.org>,
+        DTML <devicetree@vger.kernel.org>, <wsd_upstream@mediatek.com>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>
+Date:   Tue, 4 Feb 2020 08:44:13 +0800
+In-Reply-To: <CAPDyKFropF-au2OTgyRL8-sO0MKXs3GtZGMqYpWpsKHtfdtpyw@mail.gmail.com>
+References: <1572590582-11056-1-git-send-email-chun-hung.wu@mediatek.com>
+         <CAPDyKFropF-au2OTgyRL8-sO0MKXs3GtZGMqYpWpsKHtfdtpyw@mail.gmail.com>
 Content-Type: text/plain; charset="UTF-8"
+X-Mailer: Evolution 3.2.3-0ubuntu6 
+MIME-Version: 1.0
+X-MTK:  N
+Content-Transfer-Encoding: base64
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi,
+VGhhbmtzIGZvciB0aGUgcmV2aWV3ICwgd2lsbCByZW1vdmUgdGhlIHRhZyBpbiB2MiBkcml2ZXIu
+DQoNCk9uIE1vbiwgMjAxOS0xMS0xMSBhdCAxNDowNCArMDEwMCwgVWxmIEhhbnNzb24gd3JvdGU6
+DQo+IE9uIEZyaSwgMSBOb3YgMjAxOSBhdCAwNzo0MywgQ2h1bi1IdW5nIFd1IDxjaHVuLWh1bmcu
+d3VAbWVkaWF0ZWsuY29tPiB3cm90ZToNCj4gPg0KPiA+IEV4cG9zZSBNTUNfQ0FQMl9DUUUgYW5k
+IE1NQ19DQVAyX0NRRV9EQ01EDQo+ID4gdG8gaG9zdC0+Y2FwczIgaWYNCj4gPiAxLiAic3VwcG9y
+dHMtY3FlIiBpcyBkZWZpbmVkIGluIGR0IGFuZA0KPiA+IDIuICJkaXNhYmxlLWNxZS1kY21kIiBp
+cyBub3QgZGVmaW5lZCBpbiBkdC4NCj4gPg0KPiA+IENoYW5nZS1JZDogSTNkMTcyZTZiY2ZhYzM0
+NTIwYzM5MzJhNmY4ZGYyZTIwZjJjMGQwNWINCj4gPiBDUi1JZDoNCj4gPiBGZWF0dXJlOg0KPiAN
+Cj4gUmVtb3ZlIHRoZXNlIHRhZ3MgcGxlYXNlLg0KPiANCj4gPiBTaWduZWQtb2ZmLWJ5OiBDaHVu
+LUh1bmcgV3UgPGNodW4taHVuZy53dUBtZWRpYXRlay5jb20+DQo+ID4gLS0tDQo+ID4gIGRyaXZl
+cnMvbW1jL2NvcmUvaG9zdC5jIHwgOCArKysrKysrKw0KPiA+ICAxIGZpbGUgY2hhbmdlZCwgOCBp
+bnNlcnRpb25zKCspDQo+ID4NCj4gPiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvY29yZS9ob3N0
+LmMgYi9kcml2ZXJzL21tYy9jb3JlL2hvc3QuYw0KPiA+IGluZGV4IDEwNWI3YTcuLmVmYjBkYmUg
+MTAwNjQ0DQo+ID4gLS0tIGEvZHJpdmVycy9tbWMvY29yZS9ob3N0LmMNCj4gPiArKysgYi9kcml2
+ZXJzL21tYy9jb3JlL2hvc3QuYw0KPiA+IEBAIC0zMTksNiArMzE5LDE0IEBAIGludCBtbWNfb2Zf
+cGFyc2Uoc3RydWN0IG1tY19ob3N0ICpob3N0KQ0KPiA+ICAgICAgICAgICAgICAgICBob3N0LT5j
+YXBzMiB8PSBNTUNfQ0FQMl9OT19TRDsNCj4gPiAgICAgICAgIGlmIChkZXZpY2VfcHJvcGVydHlf
+cmVhZF9ib29sKGRldiwgIm5vLW1tYyIpKQ0KPiA+ICAgICAgICAgICAgICAgICBob3N0LT5jYXBz
+MiB8PSBNTUNfQ0FQMl9OT19NTUM7DQo+ID4gKyAgICAgICBpZiAoZGV2aWNlX3Byb3BlcnR5X3Jl
+YWRfYm9vbChkZXYsICJzdXBwb3J0cy1jcWUiKSkNCj4gPiArICAgICAgICAgICAgICAgaG9zdC0+
+Y2FwczIgfD0gTU1DX0NBUDJfQ1FFOw0KPiA+ICsNCj4gPiArICAgICAgIC8qIE11c3QgYmUgYWZ0
+ZXIgInN1cHBvcnRzLWNxZSIgY2hlY2sgKi8NCj4gPiArICAgICAgIGlmICghZGV2aWNlX3Byb3Bl
+cnR5X3JlYWRfYm9vbChkZXYsICJkaXNhYmxlLWNxZS1kY21kIikpIHsNCj4gPiArICAgICAgICAg
+ICAgICAgaWYgKGhvc3QtPmNhcHMyICYgTU1DX0NBUDJfQ1FFKQ0KPiA+ICsgICAgICAgICAgICAg
+ICAgICAgICAgIGhvc3QtPmNhcHMyIHw9IE1NQ19DQVAyX0NRRV9EQ01EOw0KPiA+ICsgICAgICAg
+fQ0KPiA+DQo+ID4gICAgICAgICAvKiBNdXN0IGJlIGFmdGVyICJub24tcmVtb3ZhYmxlIiBjaGVj
+ayAqLw0KPiA+ICAgICAgICAgaWYgKGRldmljZV9wcm9wZXJ0eV9yZWFkX3UzMihkZXYsICJmaXhl
+ZC1lbW1jLWRyaXZlci10eXBlIiwgJmRydl90eXBlKSA9PSAwKSB7DQo+ID4gLS0NCj4gPiAxLjku
+MQ0KPiA+DQo+IA0KPiBPdGhlcndpc2UsIHRoaXMgbG9va3MgZ29vZCB0byBtZS4NCj4gDQo+IEtp
+bmQgcmVnYXJkcw0KPiBVZmZlDQoNCg==
 
-I observe the following timeout on a imx8mq-evk running linux-next 20200203:
-
-# [   11.747858] mmc0: Timeout waiting for hardware interrupt.
-[   11.753264] mmc0: sdhci: ============ SDHCI REGISTER DUMP ===========
-[   11.759705] mmc0: sdhci: Sys addr:  0x00000800 | Version:  0x00000002
-[   11.766145] mmc0: sdhci: Blk size:  0x00000200 | Blk cnt:  0x00000001
-[   11.772584] mmc0: sdhci: Argument:  0x00000000 | Trn mode: 0x00000013
-[   11.779024] mmc0: sdhci: Present:   0x01f88a0a | Host ctl: 0x00000011
-[   11.785463] mmc0: sdhci: Power:     0x00000002 | Blk gap:  0x00000080
-[   11.791902] mmc0: sdhci: Wake-up:   0x00000008 | Clock:    0x000020ff
-[   11.798342] mmc0: sdhci: Timeout:   0x0000008f | Int stat: 0x00000000
-[   11.804781] mmc0: sdhci: Int enab:  0x117f100b | Sig enab: 0x117f100b
-[   11.811220] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00008402
-[   11.817660] mmc0: sdhci: Caps:      0x07eb0000 | Caps_1:   0x8000b407
-[   11.824100] mmc0: sdhci: Cmd:       0x0000083a | Max curr: 0x00ffffff
-[   11.830539] mmc0: sdhci: Resp[0]:   0x00000900 | Resp[1]:  0xffffffff
-[   11.836978] mmc0: sdhci: Resp[2]:   0x320f5913 | Resp[3]:  0x00d04f01
-[   11.843416] mmc0: sdhci: Host ctl2: 0x00000008
-[   11.847860] mmc0: sdhci: ADMA Err:  0x00000001 | ADMA Ptr: 0xf97d2200
-[   11.854297] mmc0: sdhci: ============================================
-[   11.860908] mmc0: error -110 whilst initialising MMC card
-[   12.027806] mmc0: new HS400 MMC card at address 0001
-[   12.033283] mmcblk0: mmc0:0001 R1J56L 13.8 GiB
-[   12.038007] mmcblk0boot0: mmc0:0001 R1J56L partition 1 4.00 MiB
-[   12.044112] mmcblk0boot1: mmc0:0001 R1J56L partition 2 4.00 MiB
-[   12.050172] mmcblk0rpmb: mmc0:0001 R1J56L partition 3 128 KiB,
-chardev (235:0)
-[   12.058210]  mmcblk0: p1 p2
-
-Haven't had a chance to debug this yet, but just reporting in case
-anyone has any ideas.
-
-Thanks
