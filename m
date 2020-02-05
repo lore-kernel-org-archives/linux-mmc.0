@@ -2,111 +2,87 @@ Return-Path: <SRS0=4knG=3Z=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+X-Spam-Status: No, score=-0.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7AC77C47409
-	for <linux-mmc@archiver.kernel.org>; Wed,  5 Feb 2020 12:51:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E5A45C35254
+	for <linux-mmc@archiver.kernel.org>; Wed,  5 Feb 2020 13:18:19 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 5220E217F4
-	for <linux-mmc@archiver.kernel.org>; Wed,  5 Feb 2020 12:51:41 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B6173217F4
+	for <linux-mmc@archiver.kernel.org>; Wed,  5 Feb 2020 13:18:19 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="fbNGETkV"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="sTE7J6DQ"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728034AbgBEMvZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 5 Feb 2020 07:51:25 -0500
-Received: from mail-pj1-f65.google.com ([209.85.216.65]:50859 "EHLO
-        mail-pj1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726960AbgBEMvZ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Feb 2020 07:51:25 -0500
-Received: by mail-pj1-f65.google.com with SMTP id r67so954234pjb.0;
-        Wed, 05 Feb 2020 04:51:24 -0800 (PST)
+        id S1726748AbgBENST (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 5 Feb 2020 08:18:19 -0500
+Received: from mail-lf1-f49.google.com ([209.85.167.49]:47039 "EHLO
+        mail-lf1-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726961AbgBENST (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Feb 2020 08:18:19 -0500
+Received: by mail-lf1-f49.google.com with SMTP id z26so1437411lfg.13
+        for <linux-mmc@vger.kernel.org>; Wed, 05 Feb 2020 05:18:17 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :in-reply-to:references;
-        bh=p4o6nUOGxNPuRPSrNBregTBA8bwmvTg5CUl0u2z528Q=;
-        b=fbNGETkV3yePdfOPkkretpz/hHkJaTfR9FtEV44umuMjmWjiSP4KwUy85KHD5vWFMM
-         k08UG0ivgazlOCXXwx0uzSviXrifB+a1cvgQSXZpLuTQTDqR2SHs19Kx6HecK1J2Dksx
-         oCdml0BtSgbx+B5wK5EhnXCYYfFnYNhBBwnBpLFuQYMQjBnYGiw5eESm3HJBFoazO3oq
-         1mVsem66t2Izi8pvp9eP8o83i1aCKEx5GJn5VTy3w1yjIpdTgYz+34eOy/5fzNSKjbVC
-         qTm3dTiHbUyYtGn/LTfYkOItlGFeS3zq0LVexbdrwKyHzDVP9JCSzW+AmaSkvtXKKz1r
-         vH/w==
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc:content-transfer-encoding;
+        bh=EIOMLYphMJpNA+7/cnaMKo4NunF1Filqifru8THYp3U=;
+        b=sTE7J6DQIsGv0QoWvKETreLGv/z9NWRkt1ySeLStEXXNquRqTGI5xQkolWVEXK4XSN
+         2anrWWTg3/tF8e2gsqsz2I2lAHrkPDYr8dpECqPq+ZpDlZRVGeMJVX6+nLfTaA/RBvZc
+         2kWvSUP3ojXsh0P+Fo7p71Y3nu1cTQcQqys7obQzxOOweeJhPzzaJwpFgVovRiqzqDN+
+         cDi9BcXQ8+zVYP0S95/zt/UyD1QRCkigSM+bg3vg001YMpTtGXERdnWI7grWJJfEM7Vj
+         gyTRSjEIp1vyb6XGWiarxzW6/VNikU349eFyxeK40J236APIetGGBWtl5vncRIY6O+u0
+         TLjA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:in-reply-to:references;
-        bh=p4o6nUOGxNPuRPSrNBregTBA8bwmvTg5CUl0u2z528Q=;
-        b=GFZGkousOn9FrT0tUqIRWL5c/cq8kiWpaili6Evb72mv8/tmFndcC4h3gMuQGcADbK
-         ebi8AnkKkMLlAMiZHmyLryxw2Ky758WBY7eF1ClCvVyP1qGUc/dH6RV2BAVm2MI5Fz4I
-         WZ6vLKu8Nv0g3QLqNFZRiPcVuBWcBZP6fqcFB8u5jNODDIjg6fJG9IXgfmofTeiapFmB
-         gQgdKWUyAmL/gdcM9jgPn5ftRNlbvFILpkY5QyyJUOHI6rcOtJ1e5Mo9EnK3TJIiyUIr
-         NheXUpwrTXE+sNb1/1kIn2uA3kAHjPCTMKqi45Flw+qc2sTiasZtjQehupUim1lS0pkZ
-         z4hw==
-X-Gm-Message-State: APjAAAUH7UXTkDMBriet4paA0O1WqlwWfMlCcUoEsMvd1QNzbpFjFa0e
-        w/SnWLMfSJKSSpXYKe+od9o=
-X-Google-Smtp-Source: APXvYqzTrsVY+JCK2jDAhzccvTSDjze99dIgbA83iOUDSRGNMdW2P2/zXjPYHf1DwPAwSaRbU1O64w==
-X-Received: by 2002:a17:90a:9285:: with SMTP id n5mr5701197pjo.58.1580907084424;
-        Wed, 05 Feb 2020 04:51:24 -0800 (PST)
-Received: from baolinwangubtpc.spreadtrum.com ([117.18.48.82])
-        by smtp.gmail.com with ESMTPSA id y127sm22864784pfg.22.2020.02.05.04.51.21
-        (version=TLS1 cipher=ECDHE-RSA-AES128-SHA bits=128/128);
-        Wed, 05 Feb 2020 04:51:24 -0800 (PST)
-From:   Baolin Wang <baolin.wang7@gmail.com>
-To:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
-        asutoshd@codeaurora.org
-Cc:     orsonzhai@gmail.com, zhang.lyra@gmail.com, arnd@arndb.de,
-        linus.walleij@linaro.org, baolin.wang@linaro.org,
-        baolin.wang7@gmail.com, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Subject: [PATCH v8 2/5] mmc: core: Enable the MMC host software queue for the SD card
-Date:   Wed,  5 Feb 2020 20:50:29 +0800
-Message-Id: <0dc2be36722232c07ad9bd61ca285ed1553fe3c9.1580894083.git.baolin.wang7@gmail.com>
-X-Mailer: git-send-email 1.7.9.5
-In-Reply-To: <cover.1580894083.git.baolin.wang7@gmail.com>
-References: <cover.1580894083.git.baolin.wang7@gmail.com>
-In-Reply-To: <cover.1580894083.git.baolin.wang7@gmail.com>
-References: <cover.1580894083.git.baolin.wang7@gmail.com>
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=EIOMLYphMJpNA+7/cnaMKo4NunF1Filqifru8THYp3U=;
+        b=QO8OwiWaE19ECikNXzJIDvT9TT3uPC0Owdd4POX4IMesvuBaA9uTg/PPAlKb2YB9Vb
+         AwrX8LsMHBjdij9l5fA6uKtCqpkYoGTpVx4fEtymq61Hrh4w+e3BFHpKbizd7u/UvYfX
+         9R0753/b+V/sWeCunAiLphd9HKkkBNlIHFzbY3dJdYAoprax9xvPFw7ftLxnTZ+iLiZ0
+         WPiZwRP7+mQZVASM8UgWjjtlJ5yptHbqzn2+bFxhZyuWYAJCZEjut8xcrbvduP5tOwQ1
+         RHNGmr6QqvjttqAt9P0afyQ3DnquDBbAwPpkl4/TTI6kgXvsyS/syK3HqNQd1FjPx9/X
+         bbGg==
+X-Gm-Message-State: APjAAAUAAAiTfOL/XdUbj/q81nH5+fTcBS+KkGN4TbPM5lS4VrAOl8Lv
+        6HHHuV3ou4cZVLpgurzF2joQiUi6889OzEAxFsU=
+X-Google-Smtp-Source: APXvYqz7hg238lNYDFj0O0BaiuXgC/SGZ9yyGOhY3T6SKPMpUxvxkI0EumUC/b9aAUMMrIH1Q4mOqdZDvkQKc2KYa6I=
+X-Received: by 2002:a19:3f51:: with SMTP id m78mr17503275lfa.70.1580908696708;
+ Wed, 05 Feb 2020 05:18:16 -0800 (PST)
+MIME-Version: 1.0
+References: <CAOMZO5DMMCZPfwNbTaG8_iQhWg2K1XeO719nSA0Gsf2ywHy4jQ@mail.gmail.com>
+ <20200205092653.GB2737@bogon.m.sigxcpu.org>
+In-Reply-To: <20200205092653.GB2737@bogon.m.sigxcpu.org>
+From:   Fabio Estevam <festevam@gmail.com>
+Date:   Wed, 5 Feb 2020 10:18:10 -0300
+Message-ID: <CAOMZO5AAzK0QprHpKHaFOANjspJKd_4YaoMqAoGYG4KftcyiYw@mail.gmail.com>
+Subject: Re: sdhci timeout on imx8mq
+To:     =?UTF-8?Q?Guido_G=C3=BCnther?= <agx@sigxcpu.org>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        NXP Linux Team <linux-imx@nxp.com>,
+        Sascha Hauer <kernel@pengutronix.de>,
+        "moderated list:ARM/FREESCALE IMX / MXC ARM ARCHITECTURE" 
+        <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Baolin Wang <baolin.wang@linaro.org>
+Hi Guido,
 
-Enable the MMC host software queue for the SD card if the host controller
-supports the MMC host software queue.
+On Wed, Feb 5, 2020 at 6:26 AM Guido G=C3=BCnther <agx@sigxcpu.org> wrote:
 
-Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
-Signed-off-by: Baolin Wang <baolin.wang7@gmail.com>
----
- drivers/mmc/core/sd.c |   10 ++++++++++
- 1 file changed, 10 insertions(+)
+> I've seen the same occasionally on the librem 5 with older linux-next as
+> well. Do you have a good reproducer?
 
-diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index fe914ff..76c7add 100644
---- a/drivers/mmc/core/sd.c
-+++ b/drivers/mmc/core/sd.c
-@@ -1082,6 +1082,16 @@ static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
- 		}
- 	}
- 
-+	if (host->cqe_ops && !host->cqe_enabled) {
-+		err = host->cqe_ops->cqe_enable(host, card);
-+		if (!err) {
-+			host->cqe_enabled = true;
-+			host->hsq_enabled = true;
-+			pr_info("%s: Host Software Queue enabled\n",
-+				mmc_hostname(host));
-+		}
-+	}
-+
- 	if (host->caps2 & MMC_CAP2_AVOID_3_3V &&
- 	    host->ios.signal_voltage == MMC_SIGNAL_VOLTAGE_330) {
- 		pr_err("%s: Host failed to negotiate down from 3.3V\n",
--- 
-1.7.9.5
+Yes, with linux-next I always get this timeout by just booting the
+kernel and waiting 1 or 2 minutes without any activity.
 
+Regards,
+
+Fabio Estevam
