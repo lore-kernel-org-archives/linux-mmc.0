@@ -6,34 +6,34 @@ X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
 	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 66C32C3B185
-	for <linux-mmc@archiver.kernel.org>; Mon, 10 Feb 2020 08:55:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0E9E9C352A4
+	for <linux-mmc@archiver.kernel.org>; Mon, 10 Feb 2020 08:55:31 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 488C8214DB
-	for <linux-mmc@archiver.kernel.org>; Mon, 10 Feb 2020 08:55:29 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D885521775
+	for <linux-mmc@archiver.kernel.org>; Mon, 10 Feb 2020 08:55:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727436AbgBJIz2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 10 Feb 2020 03:55:28 -0500
-Received: from inva020.nxp.com ([92.121.34.13]:36260 "EHLO inva020.nxp.com"
+        id S1727121AbgBJIza (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 10 Feb 2020 03:55:30 -0500
+Received: from inva021.nxp.com ([92.121.34.21]:53328 "EHLO inva021.nxp.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727079AbgBJIz2 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 10 Feb 2020 03:55:28 -0500
-Received: from inva020.nxp.com (localhost [127.0.0.1])
-        by inva020.eu-rdc02.nxp.com (Postfix) with ESMTP id 207CF1BC5BD;
-        Mon, 10 Feb 2020 09:55:26 +0100 (CET)
+        id S1727431AbgBJIza (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 10 Feb 2020 03:55:30 -0500
+Received: from inva021.nxp.com (localhost [127.0.0.1])
+        by inva021.eu-rdc02.nxp.com (Postfix) with ESMTP id 696FE21AFF7;
+        Mon, 10 Feb 2020 09:55:27 +0100 (CET)
 Received: from invc005.ap-rdc01.nxp.com (invc005.ap-rdc01.nxp.com [165.114.16.14])
-        by inva020.eu-rdc02.nxp.com (Postfix) with ESMTP id 6A1B91BC5B8;
-        Mon, 10 Feb 2020 09:55:22 +0100 (CET)
+        by inva021.eu-rdc02.nxp.com (Postfix) with ESMTP id AF69721B033;
+        Mon, 10 Feb 2020 09:55:23 +0100 (CET)
 Received: from localhost.localdomain (shlinux2.ap.freescale.net [10.192.224.44])
-        by invc005.ap-rdc01.nxp.com (Postfix) with ESMTP id E2EFE402B0;
-        Mon, 10 Feb 2020 16:55:17 +0800 (SGT)
+        by invc005.ap-rdc01.nxp.com (Postfix) with ESMTP id 310E5402F3;
+        Mon, 10 Feb 2020 16:55:19 +0800 (SGT)
 From:   haibo.chen@nxp.com
 To:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
         linux-mmc@vger.kernel.org
 Cc:     linux-imx@nxp.com, haibo.chen@nxp.com, linus.walleij@linaro.org
-Subject: [PATCH v3 07/14] mmc: sdhci-esdhc-imx: optimize the clock setting
-Date:   Mon, 10 Feb 2020 16:49:50 +0800
-Message-Id: <1581324597-31031-2-git-send-email-haibo.chen@nxp.com>
+Subject: [PATCH v3 09/14] mmc: sdhci-esdhc-imx: add flag ESDHC_FLAG_BROKEN_AUTO_CMD23
+Date:   Mon, 10 Feb 2020 16:49:52 +0800
+Message-Id: <1581324597-31031-4-git-send-email-haibo.chen@nxp.com>
 X-Mailer: git-send-email 2.7.4
 In-Reply-To: <1581324597-31031-1-git-send-email-haibo.chen@nxp.com>
 References: <1581324597-31031-1-git-send-email-haibo.chen@nxp.com>
@@ -45,112 +45,120 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Haibo Chen <haibo.chen@nxp.com>
 
-When force clock off, check the SDOFF of register PRSSTAT to make sure
-the clock is gate off. Before force clock on, check the SDSTB of register
-PRSSTAT to make sure the clock is stable, this will eliminate the clock
-glitch.
+Since L4.15, community involve the commit 105819c8a545 ("mmc: core: use mrq->sbc
+when sending CMD23 for RPMB"), let the usdhc to decide whether to use ACMD23 for
+RPMB. This CMD23 for RPMB need to set the bit 31 to its argument, if not, the
+RPMB write operation will return general fail.
+
+According to the sdhci logic, SDMA mode will disable the ACMD23, and only in
+ADMA mode, it will chose to use ACMD23 if the host support. But according to
+debug, and confirm with IC, the imx6qpdl/imx6sx/imx6sl/imx7d do not support
+the ACMD23 feature completely. These SoCs only use the 16 bit block count of
+the register 0x4 (BLOCK_ATT) as the CMD23's argument in ACMD23 mode, which
+means it will ignore the upper 16 bit of the CMD23's argument. This will block
+the reliable write operation in RPMB, because RPMB reliable write need to set
+the bit31 of the CMD23's argument. This is the hardware limitation. So for
+imx6qpdl/imx6sx/imx6sl/imx7d, it need to broke the ACMD23 for eMMC, SD card do
+not has this limitation, because SD card do not support reliable write.
+
+For imx6ul/imx6ull/imx6sll/imx7ulp/imx8, it support the ACMD23 completely, it
+change to use the 0x0 register (DS_ADDR) to put the CMD23's argument in ADMA mode.
+
+This patch add a new flag ESDHC_FLAG_BROKEN_AUTO_CMD23, and add this flag to
+imx6q/imx6sx/imx6sl/imx7d, and due to the imx6sll share the same compatible string
+with imx6sx before, and imx6sll do not has this limitation, so add a new compatible
+string for imx6sll.
 
 Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/host/sdhci-esdhc-imx.c | 24 +++++++++++++++++++++++-
- drivers/mmc/host/sdhci-esdhc.h     |  1 +
- 2 files changed, 24 insertions(+), 1 deletion(-)
+ drivers/mmc/host/sdhci-esdhc-imx.c | 34 ++++++++++++++++++++++++++----
+ 1 file changed, 30 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index 3359153304a3..6ca01b766604 100644
+index 1ec35cc45fc5..98b91b6ff2a9 100644
 --- a/drivers/mmc/host/sdhci-esdhc-imx.c
 +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -9,6 +9,7 @@
-  */
+@@ -166,6 +166,18 @@
+ #define ESDHC_FLAG_STATE_LOST_IN_LPMODE		BIT(14)
+ /* The IP lost clock rate in PM_RUNTIME */
+ #define ESDHC_FLAG_CLK_RATE_LOST_IN_PM_RUNTIME	BIT(15)
++/*
++ * The IP do not support the ACMD23 feature completely when use ADMA mode.
++ * In ADMA mode, it only use the 16 bit block count of the register 0x4
++ * (BLOCK_ATT) as the CMD23's argument for ACMD23 mode, which means it will
++ * ignore the upper 16 bit of the CMD23's argument. This will block the reliable
++ * write operation in RPMB, because RPMB reliable write need to set the bit31
++ * of the CMD23's argument.
++ * imx6qpdl/imx6sx/imx6sl/imx7d has this limitation only for ADMA mode, SDMA
++ * do not has this limitation. so when these SoC use ADMA mode, it need to
++ * disable the ACMD23 feature.
++ */
++#define ESDHC_FLAG_BROKEN_AUTO_CMD23	BIT(16)
  
- #include <linux/io.h>
-+#include <linux/iopoll.h>
- #include <linux/delay.h>
- #include <linux/err.h>
- #include <linux/clk.h>
-@@ -312,6 +313,17 @@ static inline void esdhc_clrset_le(struct sdhci_host *host, u32 mask, u32 val, i
- 	writel(((readl(base) & ~(mask << shift)) | (val << shift)), base);
- }
+ struct esdhc_soc_data {
+ 	u32 flags;
+@@ -188,21 +200,30 @@ static const struct esdhc_soc_data esdhc_imx53_data = {
+ };
  
-+static inline void esdhc_wait_for_card_clock_gate_off(struct sdhci_host *host)
-+{
-+	u32 present_state;
-+	int ret;
+ static const struct esdhc_soc_data usdhc_imx6q_data = {
+-	.flags = ESDHC_FLAG_USDHC | ESDHC_FLAG_MAN_TUNING,
++	.flags = ESDHC_FLAG_USDHC | ESDHC_FLAG_MAN_TUNING
++			| ESDHC_FLAG_BROKEN_AUTO_CMD23,
+ };
+ 
+ static const struct esdhc_soc_data usdhc_imx6sl_data = {
+ 	.flags = ESDHC_FLAG_USDHC | ESDHC_FLAG_STD_TUNING
+ 			| ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_ERR004536
+-			| ESDHC_FLAG_HS200,
++			| ESDHC_FLAG_HS200
++			| ESDHC_FLAG_BROKEN_AUTO_CMD23,
+ };
+ 
+-static const struct esdhc_soc_data usdhc_imx6sx_data = {
++static const struct esdhc_soc_data usdhc_imx6sll_data = {
+ 	.flags = ESDHC_FLAG_USDHC | ESDHC_FLAG_STD_TUNING
+ 			| ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_HS200
+ 			| ESDHC_FLAG_STATE_LOST_IN_LPMODE,
+ };
+ 
++static const struct esdhc_soc_data usdhc_imx6sx_data = {
++	.flags = ESDHC_FLAG_USDHC | ESDHC_FLAG_STD_TUNING
++			| ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_HS200
++			| ESDHC_FLAG_STATE_LOST_IN_LPMODE
++			| ESDHC_FLAG_BROKEN_AUTO_CMD23,
++};
 +
-+	ret = readl_poll_timeout(host->ioaddr + ESDHC_PRSSTAT, present_state,
-+				(present_state & ESDHC_CLOCK_GATE_OFF), 2, 100);
-+	if (ret == -ETIMEDOUT)
-+		dev_warn(mmc_dev(host->mmc), "%s: card clock still not gate off in 100us!.\n", __func__);
-+}
+ static const struct esdhc_soc_data usdhc_imx6ull_data = {
+ 	.flags = ESDHC_FLAG_USDHC | ESDHC_FLAG_STD_TUNING
+ 			| ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_HS200
+@@ -214,7 +235,8 @@ static const struct esdhc_soc_data usdhc_imx7d_data = {
+ 	.flags = ESDHC_FLAG_USDHC | ESDHC_FLAG_STD_TUNING
+ 			| ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_HS200
+ 			| ESDHC_FLAG_HS400
+-			| ESDHC_FLAG_STATE_LOST_IN_LPMODE,
++			| ESDHC_FLAG_STATE_LOST_IN_LPMODE
++			| ESDHC_FLAG_BROKEN_AUTO_CMD23,
+ };
+ 
+ static struct esdhc_soc_data usdhc_imx7ulp_data = {
+@@ -276,6 +298,7 @@ static const struct of_device_id imx_esdhc_dt_ids[] = {
+ 	{ .compatible = "fsl,imx53-esdhc", .data = &esdhc_imx53_data, },
+ 	{ .compatible = "fsl,imx6sx-usdhc", .data = &usdhc_imx6sx_data, },
+ 	{ .compatible = "fsl,imx6sl-usdhc", .data = &usdhc_imx6sl_data, },
++	{ .compatible = "fsl,imx6sll-usdhc", .data = &usdhc_imx6sll_data, },
+ 	{ .compatible = "fsl,imx6q-usdhc", .data = &usdhc_imx6q_data, },
+ 	{ .compatible = "fsl,imx6ull-usdhc", .data = &usdhc_imx6ull_data, },
+ 	{ .compatible = "fsl,imx7d-usdhc", .data = &usdhc_imx7d_data, },
+@@ -1560,6 +1583,9 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+ 	if (imx_data->socdata->flags & ESDHC_FLAG_HS400)
+ 		host->quirks2 |= SDHCI_QUIRK2_CAPS_BIT63_FOR_HS400;
+ 
++	if (imx_data->socdata->flags & ESDHC_FLAG_BROKEN_AUTO_CMD23)
++		host->quirks2 |= SDHCI_QUIRK2_ACMD23_BROKEN;
 +
- static u32 esdhc_readl_le(struct sdhci_host *host, int reg)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-@@ -525,6 +537,8 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
- 		else
- 			new_val &= ~ESDHC_VENDOR_SPEC_FRC_SDCLK_ON;
- 		writel(new_val, host->ioaddr + ESDHC_VENDOR_SPEC);
-+		if (!(new_val & ESDHC_VENDOR_SPEC_FRC_SDCLK_ON))
-+			esdhc_wait_for_card_clock_gate_off(host);
- 		return;
- 	case SDHCI_HOST_CONTROL2:
- 		new_val = readl(host->ioaddr + ESDHC_VENDOR_SPEC);
-@@ -753,12 +767,14 @@ static inline void esdhc_pltfm_set_clock(struct sdhci_host *host,
- 	int ddr_pre_div = imx_data->is_ddr ? 2 : 1;
- 	int pre_div = 1;
- 	int div = 1;
-+	int ret;
- 	u32 temp, val;
- 
- 	if (esdhc_is_usdhc(imx_data)) {
- 		val = readl(host->ioaddr + ESDHC_VENDOR_SPEC);
- 		writel(val & ~ESDHC_VENDOR_SPEC_FRC_SDCLK_ON,
- 			host->ioaddr + ESDHC_VENDOR_SPEC);
-+		esdhc_wait_for_card_clock_gate_off(host);
- 	}
- 
- 	if (clock == 0) {
-@@ -813,13 +829,18 @@ static inline void esdhc_pltfm_set_clock(struct sdhci_host *host,
- 		| (pre_div << ESDHC_PREDIV_SHIFT));
- 	sdhci_writel(host, temp, ESDHC_SYSTEM_CONTROL);
- 
-+	/* need to wait the bit 3 of the PRSSTAT to be set, make sure card clock is stable */
-+	ret = readl_poll_timeout(host->ioaddr + ESDHC_PRSSTAT, temp,
-+				(temp & ESDHC_CLOCK_STABLE), 2, 100);
-+	if (ret == -ETIMEDOUT)
-+		dev_warn(mmc_dev(host->mmc), "card clock still not stable in 100us!.\n");
-+
- 	if (esdhc_is_usdhc(imx_data)) {
- 		val = readl(host->ioaddr + ESDHC_VENDOR_SPEC);
- 		writel(val | ESDHC_VENDOR_SPEC_FRC_SDCLK_ON,
- 			host->ioaddr + ESDHC_VENDOR_SPEC);
- 	}
- 
--	mdelay(1);
- }
- 
- static unsigned int esdhc_pltfm_get_ro(struct sdhci_host *host)
-@@ -1003,6 +1024,7 @@ static void esdhc_set_strobe_dll(struct sdhci_host *host)
- 	writel(readl(host->ioaddr + ESDHC_VENDOR_SPEC) &
- 		~ESDHC_VENDOR_SPEC_FRC_SDCLK_ON,
- 		host->ioaddr + ESDHC_VENDOR_SPEC);
-+	esdhc_wait_for_card_clock_gate_off(host);
- 
- 	/* force a reset on strobe dll */
- 	writel(ESDHC_STROBE_DLL_CTRL_RESET,
-diff --git a/drivers/mmc/host/sdhci-esdhc.h b/drivers/mmc/host/sdhci-esdhc.h
-index 9289bb4d633e..947212f16bc6 100644
---- a/drivers/mmc/host/sdhci-esdhc.h
-+++ b/drivers/mmc/host/sdhci-esdhc.h
-@@ -31,6 +31,7 @@
- 
- /* Present State Register */
- #define ESDHC_PRSSTAT			0x24
-+#define ESDHC_CLOCK_GATE_OFF		0x00000080
- #define ESDHC_CLOCK_STABLE		0x00000008
- 
- /* Protocol Control Register */
+ 	if (imx_data->socdata->flags & ESDHC_FLAG_HS400_ES) {
+ 		host->mmc->caps2 |= MMC_CAP2_HS400_ES;
+ 		host->mmc_host_ops.hs400_enhanced_strobe =
 -- 
 2.17.1
 
