@@ -2,125 +2,136 @@ Return-Path: <SRS0=yrVg=36=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 79808C352A3
-	for <linux-mmc@archiver.kernel.org>; Mon, 10 Feb 2020 13:31:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8E5CDC352A5
+	for <linux-mmc@archiver.kernel.org>; Mon, 10 Feb 2020 19:41:23 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 515D620714
-	for <linux-mmc@archiver.kernel.org>; Mon, 10 Feb 2020 13:31:11 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 546CF20842
+	for <linux-mmc@archiver.kernel.org>; Mon, 10 Feb 2020 19:41:23 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="VL6rdjHR"
+	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="e9afxVCB"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1731514AbgBJNbK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 10 Feb 2020 08:31:10 -0500
-Received: from mail-lj1-f194.google.com ([209.85.208.194]:44483 "EHLO
-        mail-lj1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728236AbgBJNbK (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Feb 2020 08:31:10 -0500
-Received: by mail-lj1-f194.google.com with SMTP id q8so7110713ljj.11
-        for <linux-mmc@vger.kernel.org>; Mon, 10 Feb 2020 05:31:09 -0800 (PST)
+        id S1727029AbgBJTlV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 10 Feb 2020 14:41:21 -0500
+Received: from mail-pf1-f195.google.com ([209.85.210.195]:35431 "EHLO
+        mail-pf1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727003AbgBJTlT (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Feb 2020 14:41:19 -0500
+Received: by mail-pf1-f195.google.com with SMTP id y73so4213271pfg.2
+        for <linux-mmc@vger.kernel.org>; Mon, 10 Feb 2020 11:41:18 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=jotdy8MFBLVhx1Sh9lfn9iHCiwkToMzUuUBAe2so+lM=;
-        b=VL6rdjHRHzCp8VBr7goiOi5MhKhTfcPYXJQcCbnZeLe2fP9veCP9EKXyewD8u3Y+Pe
-         ajyJtNKhro1mQqqCNn7I/9aTUVzH5VT4ZLKqiR5UN9u4NebAu1Rc0bEoCFAyamu0KQjq
-         XEIKmTf/GwjXlqgbn2FRefV9eW+1FsBJmXnrwNPqixamGdt43l0XkSM+UnmiITNaKd2k
-         fHDxA01+oUOK2+3agRGC4BTLfpBcMOqZ4ywjLtRs5K/hmHVIY/wyq6okmDTpb4kCgDkL
-         yUe7IAxBYOire+h9NlZXJQpSv33M5ZvQXh1vpCz9sUjfaWn1PlplzfMya1rCoc4tDVk5
-         s0oQ==
+        d=chromium.org; s=google;
+        h=mime-version:content-transfer-encoding:in-reply-to:references
+         :subject:from:cc:to:date:message-id:user-agent;
+        bh=7ivqNM+XNnF2NduI9XPvPsjcawkQDDIuJxxbUTZS70I=;
+        b=e9afxVCBltANlhIP0TTphK41BACkirOo7MmnkUOHrwI8/ONL4gUNJW+/jlutjgIyTM
+         m9iTPLTxC1GUGwK7rlEsp/ZfgE+POtAnN0+2wd/9XPHTH9R5VZ+NRsKBCVx9lYgoGZn9
+         sZmgX4+usRBPoE8eCS2k/9rH0l4pzMF+f4BL0=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=jotdy8MFBLVhx1Sh9lfn9iHCiwkToMzUuUBAe2so+lM=;
-        b=WVtJWb3YpLAG8W1yBKgm8A99xzmdY3lKbZDoIk2PCYHM8+U+EAuDBAA5tn0OGOBS/d
-         P7sjXiw5urXCfY6qADy3o+kDW+JOi8PL4gUtRTpQek1Ra5/zKAD9cF6PXRytt15YFLft
-         bKR3qefNyoIqusHaoE/8Y70DTB+W0mblkMG5pu16Q81LUjjpwmwWV/NztInykOMs1iUj
-         KoQBWiIaFyy7/o+cHgNvk0QCerh7D3zUsvz7mEE3ug9NgSK2nbgaCLkWLaIQMiaw60Ac
-         ae3ll9gxJc11NxgQ4ZkBDRbvM3PgEI10Qofl7Em70l/Eh5/28cErTsYAhdX4QU/9PApa
-         6XMw==
-X-Gm-Message-State: APjAAAUOiWYijsDXW/pHIqSCZWI3BQR1sYd/J4pLWggbcXcEebejxA8I
-        Q5Wr5i36QIVX+zgsEqzWUjyeg8RCoXsSjmd/q8ObsA==
-X-Google-Smtp-Source: APXvYqyBXvK6kUbSK2mLVarJegPD8AMBRjYLzYqfh+0LYUo2Cw4HBlcLsNvGNg52Ip/JWYIpW+L1IgWoXAfYZ138zSk=
-X-Received: by 2002:a2e:b6ce:: with SMTP id m14mr877477ljo.99.1581341468264;
- Mon, 10 Feb 2020 05:31:08 -0800 (PST)
+        h=x-gm-message-state:mime-version:content-transfer-encoding
+         :in-reply-to:references:subject:from:cc:to:date:message-id
+         :user-agent;
+        bh=7ivqNM+XNnF2NduI9XPvPsjcawkQDDIuJxxbUTZS70I=;
+        b=m/sC2HhT6Bn4ZN2Oy5BPk2d5iq1MQRmNgB7pU2aQjhvmdvr0+fXP+sM9Sf15Munfp6
+         zkofFIGxe+D0OXZ83qCDI2VfDK657E2Dmb5U29LychSrJCEvigX7Uo8o1uyqJ/iT6Lyx
+         IIfXR2HbDWhCY+kLPwyh+849OQrg1QTnIQITxrXRSSV3liwaHmuc9vcd8HEhiMok6gFU
+         zcuPS6Bb9FVZ3hF5UKytx94rJhUfOF3PZpuD/Wgx6pIM0sDn9flTY5MftNnf72ZvXDDW
+         Z+dxtUj87saxlD9QFCfBsLYv0xhGWU40F/3dYHcB4yZsW91cMEvoclKkmGyYHXrtXOw4
+         cXCw==
+X-Gm-Message-State: APjAAAWG8qWgmd3GH468oPfCAFlXwVDSAbSs4lc0kaH3VVUnzjcSy4in
+        5kSryK7Plf4hZgWJeqqSk29Zjg==
+X-Google-Smtp-Source: APXvYqyL3xU2GxC0ppxiK1j1x5dqjfCDDqBmdVXIr+06LB0Gb7x6nvbyw6kgjLFqdzL7dOSmuxanxA==
+X-Received: by 2002:a62:e91a:: with SMTP id j26mr2645081pfh.189.1581363677533;
+        Mon, 10 Feb 2020 11:41:17 -0800 (PST)
+Received: from chromium.org ([2620:15c:202:1:fa53:7765:582b:82b9])
+        by smtp.gmail.com with ESMTPSA id 199sm1276209pfv.81.2020.02.10.11.41.16
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 10 Feb 2020 11:41:17 -0800 (PST)
+Content-Type: text/plain; charset="utf-8"
 MIME-Version: 1.0
-References: <20191203130120.11511-1-haibo.chen@nxp.com> <20191203130120.11511-10-haibo.chen@nxp.com>
- <CACRpkdYN9rL9go68dyGgED0=atZMV7uAU3jfsT025e1NvB6brg@mail.gmail.com>
- <CACRpkdaU+KbKmKdB2bniGbG34qMD-EPbkBLG1x+ac24uzKrW9Q@mail.gmail.com> <VI1PR04MB5040F88333696C1C0DD64B2390190@VI1PR04MB5040.eurprd04.prod.outlook.com>
-In-Reply-To: <VI1PR04MB5040F88333696C1C0DD64B2390190@VI1PR04MB5040.eurprd04.prod.outlook.com>
-From:   Linus Walleij <linus.walleij@linaro.org>
-Date:   Mon, 10 Feb 2020 14:30:57 +0100
-Message-ID: <CACRpkdbHJ0mqG6fpo-TaqTKU3k+fd-SZNA8=Z0jq78qB1BYJvA@mail.gmail.com>
-Subject: Re: [PATCH v2 09/14] doc: dt: fsl-imx-esdhc: add auto-cmd23-broken binding
-To:     BOUGH CHEN <haibo.chen@nxp.com>
-Cc:     "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        "adrian.hunter@intel.com" <adrian.hunter@intel.com>,
-        "shawnguo@kernel.org" <shawnguo@kernel.org>,
-        "kernel@pengutronix.de" <kernel@pengutronix.de>,
-        dl-linux-imx <linux-imx@nxp.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+In-Reply-To: <1581081650-22228-1-git-send-email-sbhanu@codeaurora.org>
+References: <1581081650-22228-1-git-send-email-sbhanu@codeaurora.org>
+Subject: Re: [PATCH V2] mmc: sdhci-msm: Update system suspend/resume callbacks of sdhci-msm platform driver.
+From:   Stephen Boyd <swboyd@chromium.org>
+Cc:     asutoshd@codeaurora.org, stummala@codeaurora.org,
+        sayalil@codeaurora.org, cang@codeaurora.org,
+        rampraka@codeaurora.org, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+        devicetree@vger.kernel.org, agross@kernel.org,
+        bjorn.andersson@linaro.org,
+        Shaik Sajida Bhanu <sbhanu@codeaurora.org>
+To:     Shaik Sajida Bhanu <sbhanu@codeaurora.org>,
+        adrian.hunter@intel.com, mka@chromium.org, robh+dt@kernel.org,
+        ulf.hansson@linaro.org
+Date:   Mon, 10 Feb 2020 11:41:16 -0800
+Message-ID: <158136367603.121156.1867941302835915258@swboyd.mtv.corp.google.com>
+User-Agent: alot/0.9
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, Feb 10, 2020 at 4:08 AM BOUGH CHEN <haibo.chen@nxp.com> wrote:
-> > On Wed, Dec 11, 2019 at 12:32 AM Linus Walleij <linus.walleij@linaro.org>
-> > wrote:
-> > > On Tue, Dec 3, 2019 at 1:54 PM BOUGH CHEN <haibo.chen@nxp.com>
-> > wrote:
-> > >
-> > > > +- sdhci,auto-cmd23-broken: disable the ACMD23 function of USDHC.
-> > > > +  This is required for eMMC on imx6qpdl/imx6sx/imx7d when it use
-> > > > +ADMA mode. Because
-> > > > +  for these SoC, it do not support the ACMD23 completely, only take
-> > > > +the 16 bit block
-> > > > +  count from the 0x4 register (BLK_ATT) as argument for the ACMD23,
-> > > > +the upper 16 bit
-> > > > +  of the CMD23's argument is ignored. This will impact the reliable
-> > > > +write operation
-> > > > +  and the RPMB block write operation, because these operations need
-> > > > +to set the bit 31
-> > > > +  of the CMD23's argument. SDMA mode will default disable the
-> > > > +ACMD23 mode. SD card do
-> > > > +  not has this limitation on these SoCs.
-> > >
-> > > This looks weird.
-> > >
-> > > Is the bug in the *host controller* or in *the card*?
-> > >
-> > > It looks like the card.
-> >
-> > After looking at the next patch it looks like the host controller.
-> >
-> > In that case the compatible-string should indicate what version of the IP you
-> > are using and if it has this bug.
-> >
-> > No special flags needed for that.
->
-> Hi Linus,
->
-> Yes, this is host IP limitation. I did consider the method as you suggested,
->  use compatible-string to distinguish. But then I notice that this host limitation
-> only impact the eMMC device for RPMB reliable write, for SD card, it do not
-> support this mode, so this hardware limitation do not impact for sd card.
-> This is why I use "sdhci,auto-cmd23-broken" in devicetree, only the emmc
-> device need to contain this in dts file.
->
-> I double check this issue, since this auto-cmd23 will not impact the sd
-> performance, and it is the host IP limitation, I will chose to accept your
-> suggestion, will send a new patch.
+Quoting Shaik Sajida Bhanu (2020-02-07 05:20:50)
+> The existing suspend/resume callbacks of sdhci-msm driver are just
+> gating/un-gating the clocks. During suspend cycle more can be done
+> like disabling controller, interrupts and card detection.
+>=20
+> So updating the system pm callbacks for performing these extra
+> actions besides controlling the clocks.
+>=20
+> Signed-off-by: Shaik Sajida Bhanu <sbhanu@codeaurora.org>
+>=20
+> Changes since V1:
+>         Addressed review comments
 
-Should be fine, the code in the MMC core knows if what you are using
-is an eMMC or an SD card so you can just handle the quirk only in the
-eMMC case.
+Please don't write this. Instead, describe what's actually different so
+the reader doesn't have to go figure out what the review comments were.
 
-Yours,
-Linus Walleij
+> ---
+>  drivers/mmc/host/sdhci-msm.c | 50 ++++++++++++++++++++++++++++++++++++++=
+++++--
+>  1 file changed, 48 insertions(+), 2 deletions(-)
+>=20
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index c3a160c..e30c8a3 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -2159,9 +2159,55 @@ static __maybe_unused int sdhci_msm_runtime_resume=
+(struct device *dev)
+>         return 0;
+>  }
+> =20
+> +static int sdhci_msm_suspend(struct device *dev)
+> +{
+> +       struct sdhci_host *host =3D dev_get_drvdata(dev);
+> +       struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host);
+> +       struct sdhci_msm_host *msm_host =3D sdhci_pltfm_priv(pltfm_host);
+> +       int ret;
+> +
+> +       if (host->mmc->caps2 & MMC_CAP2_CQE) {
+> +               ret =3D cqhci_suspend(host->mmc);
+> +               if (ret)
+> +                       return ret;
+> +       }
+> +
+> +       ret =3D sdhci_suspend_host(host);
+> +       if (ret)
+> +               return ret;
+> +       /* Disable pwr-irq since SDHC would be inactive */
+> +       disable_irq(msm_host->pwr_irq);
+
+Why do we need to do this? If it's inactive then the irq won't be raised
+by the inactive hardware. Given that we're going to suspend the device,
+the irq won't matter unless it's marked for wakeup. Please remove this
+irq enable/disable logic, or explain why it's really needed.
+
+> +
+> +       return pm_runtime_force_suspend(dev);
+> +}
+> +
