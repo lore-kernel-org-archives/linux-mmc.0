@@ -2,136 +2,245 @@ Return-Path: <SRS0=yrVg=36=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8E5CDC352A5
-	for <linux-mmc@archiver.kernel.org>; Mon, 10 Feb 2020 19:41:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id ED866C3F68F
+	for <linux-mmc@archiver.kernel.org>; Mon, 10 Feb 2020 22:44:21 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 546CF20842
-	for <linux-mmc@archiver.kernel.org>; Mon, 10 Feb 2020 19:41:23 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B87AD2072C
+	for <linux-mmc@archiver.kernel.org>; Mon, 10 Feb 2020 22:44:21 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="e9afxVCB"
+	dkim=pass (2048-bit key) header.d=ragnatech-se.20150623.gappssmtp.com header.i=@ragnatech-se.20150623.gappssmtp.com header.b="YzsjI5w1"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727029AbgBJTlV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 10 Feb 2020 14:41:21 -0500
-Received: from mail-pf1-f195.google.com ([209.85.210.195]:35431 "EHLO
-        mail-pf1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727003AbgBJTlT (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Feb 2020 14:41:19 -0500
-Received: by mail-pf1-f195.google.com with SMTP id y73so4213271pfg.2
-        for <linux-mmc@vger.kernel.org>; Mon, 10 Feb 2020 11:41:18 -0800 (PST)
+        id S1727431AbgBJWoV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 10 Feb 2020 17:44:21 -0500
+Received: from mail-lf1-f68.google.com ([209.85.167.68]:39862 "EHLO
+        mail-lf1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727435AbgBJWoV (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Feb 2020 17:44:21 -0500
+Received: by mail-lf1-f68.google.com with SMTP id t23so5526580lfk.6
+        for <linux-mmc@vger.kernel.org>; Mon, 10 Feb 2020 14:44:18 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=chromium.org; s=google;
-        h=mime-version:content-transfer-encoding:in-reply-to:references
-         :subject:from:cc:to:date:message-id:user-agent;
-        bh=7ivqNM+XNnF2NduI9XPvPsjcawkQDDIuJxxbUTZS70I=;
-        b=e9afxVCBltANlhIP0TTphK41BACkirOo7MmnkUOHrwI8/ONL4gUNJW+/jlutjgIyTM
-         m9iTPLTxC1GUGwK7rlEsp/ZfgE+POtAnN0+2wd/9XPHTH9R5VZ+NRsKBCVx9lYgoGZn9
-         sZmgX4+usRBPoE8eCS2k/9rH0l4pzMF+f4BL0=
+        d=ragnatech-se.20150623.gappssmtp.com; s=20150623;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:content-transfer-encoding:in-reply-to;
+        bh=JdjT6OWmfWNg4+tGELhUvYLd74rHsrzybvKL1bpvgss=;
+        b=YzsjI5w1Z/4h6gD378/0zMRRZKP5XaBlb3C7PXt6LfGAI7BWbdJ0EDA0nuBIT6hfQz
+         IcHNqAmhDnmTs5NdgmvvOkP2NmDG16IH1RGvNJpQ9nL3ONoxSCqEbrKUi+akp79ZTtVQ
+         Te70fz+oHqLXqkGe2j62zzvp8r0KTXHyatVq6IGno7uRDi3sTjB6lcVI/AzKmDlTayEl
+         u1t7AGypbtIL1rTbUvGSBoKqMkMftOxpVuBgRLcVaaHDAONQAJvZ+QnJQm6DEswE+8od
+         MS0a9iFp+OVa3aUnhq2jSEsKFHgsw3vwGuLWdlvzkQc4nDvL6h7iJVjpKeuFeULG/kNW
+         jsZA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:content-transfer-encoding
-         :in-reply-to:references:subject:from:cc:to:date:message-id
-         :user-agent;
-        bh=7ivqNM+XNnF2NduI9XPvPsjcawkQDDIuJxxbUTZS70I=;
-        b=m/sC2HhT6Bn4ZN2Oy5BPk2d5iq1MQRmNgB7pU2aQjhvmdvr0+fXP+sM9Sf15Munfp6
-         zkofFIGxe+D0OXZ83qCDI2VfDK657E2Dmb5U29LychSrJCEvigX7Uo8o1uyqJ/iT6Lyx
-         IIfXR2HbDWhCY+kLPwyh+849OQrg1QTnIQITxrXRSSV3liwaHmuc9vcd8HEhiMok6gFU
-         zcuPS6Bb9FVZ3hF5UKytx94rJhUfOF3PZpuD/Wgx6pIM0sDn9flTY5MftNnf72ZvXDDW
-         Z+dxtUj87saxlD9QFCfBsLYv0xhGWU40F/3dYHcB4yZsW91cMEvoclKkmGyYHXrtXOw4
-         cXCw==
-X-Gm-Message-State: APjAAAWG8qWgmd3GH468oPfCAFlXwVDSAbSs4lc0kaH3VVUnzjcSy4in
-        5kSryK7Plf4hZgWJeqqSk29Zjg==
-X-Google-Smtp-Source: APXvYqyL3xU2GxC0ppxiK1j1x5dqjfCDDqBmdVXIr+06LB0Gb7x6nvbyw6kgjLFqdzL7dOSmuxanxA==
-X-Received: by 2002:a62:e91a:: with SMTP id j26mr2645081pfh.189.1581363677533;
-        Mon, 10 Feb 2020 11:41:17 -0800 (PST)
-Received: from chromium.org ([2620:15c:202:1:fa53:7765:582b:82b9])
-        by smtp.gmail.com with ESMTPSA id 199sm1276209pfv.81.2020.02.10.11.41.16
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:content-transfer-encoding
+         :in-reply-to;
+        bh=JdjT6OWmfWNg4+tGELhUvYLd74rHsrzybvKL1bpvgss=;
+        b=bcq5szwtdUmBXFQGrCZT7v0XQKhZ/UqAJjzXan93xuDX9TOmJUakO7jumC6nC1HWcA
+         44/LvPTZBJ2n91z7cTq7aj9UhRHBd3RKe+lIyS3J3WE0NFTGujchZy4gwUz06i71CRP3
+         kXhTKcUHWT9BwY9oG21q0iH+Y4nbEAJfRuiZLfobMxq3eX3HEEh3OSdwORQPs+r4/ku0
+         wSYA4kpbdrRafyIUK3yOsJd6zK2Jih5F27WVQFS07WVKX6CEfADwxVRUMJA4bz9cfS7f
+         NnK1CPW8QOz9oFleAR+lrJe+IzqoKXFwu1pR48MivrnTAA39FcfZRLGwG0rzjn21vT6j
+         iPDQ==
+X-Gm-Message-State: APjAAAXRdUQtSas+GhmX6QDcAjexnLc4Bu4irflFYnKbGQcZDJoeFxKH
+        hnH4QFdsJUrsspjFT0dhNUUb3sLa1EtGmw==
+X-Google-Smtp-Source: APXvYqyY4Bna8n1jvPeQwgAJ/9MxDYuhJQo2iEIi4PIYEzgcxhke01QNXOXDBl1F4vSSY6InN4nF6A==
+X-Received: by 2002:a19:5212:: with SMTP id m18mr1904226lfb.7.1581374657718;
+        Mon, 10 Feb 2020 14:44:17 -0800 (PST)
+Received: from localhost (h-200-138.A463.priv.bahnhof.se. [176.10.200.138])
+        by smtp.gmail.com with ESMTPSA id t29sm740504lfg.84.2020.02.10.14.44.16
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 10 Feb 2020 11:41:17 -0800 (PST)
-Content-Type: text/plain; charset="utf-8"
+        Mon, 10 Feb 2020 14:44:16 -0800 (PST)
+Date:   Mon, 10 Feb 2020 23:44:16 +0100
+From:   Niklas =?iso-8859-1?Q?S=F6derlund?= 
+        <niklas.soderlund@ragnatech.se>
+To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc:     linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Subject: Re: [RFC PATCH 1/6] mmc: tmio: refactor tuning execution into SDHI
+ driver
+Message-ID: <20200210224416.GA2443363@oden.dyn.berto.se>
+References: <20200129203709.30493-1-wsa+renesas@sang-engineering.com>
+ <20200129203709.30493-2-wsa+renesas@sang-engineering.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: quoted-printable
-In-Reply-To: <1581081650-22228-1-git-send-email-sbhanu@codeaurora.org>
-References: <1581081650-22228-1-git-send-email-sbhanu@codeaurora.org>
-Subject: Re: [PATCH V2] mmc: sdhci-msm: Update system suspend/resume callbacks of sdhci-msm platform driver.
-From:   Stephen Boyd <swboyd@chromium.org>
-Cc:     asutoshd@codeaurora.org, stummala@codeaurora.org,
-        sayalil@codeaurora.org, cang@codeaurora.org,
-        rampraka@codeaurora.org, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        devicetree@vger.kernel.org, agross@kernel.org,
-        bjorn.andersson@linaro.org,
-        Shaik Sajida Bhanu <sbhanu@codeaurora.org>
-To:     Shaik Sajida Bhanu <sbhanu@codeaurora.org>,
-        adrian.hunter@intel.com, mka@chromium.org, robh+dt@kernel.org,
-        ulf.hansson@linaro.org
-Date:   Mon, 10 Feb 2020 11:41:16 -0800
-Message-ID: <158136367603.121156.1867941302835915258@swboyd.mtv.corp.google.com>
-User-Agent: alot/0.9
+Content-Type: text/plain; charset=iso-8859-1
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <20200129203709.30493-2-wsa+renesas@sang-engineering.com>
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Quoting Shaik Sajida Bhanu (2020-02-07 05:20:50)
-> The existing suspend/resume callbacks of sdhci-msm driver are just
-> gating/un-gating the clocks. During suspend cycle more can be done
-> like disabling controller, interrupts and card detection.
->=20
-> So updating the system pm callbacks for performing these extra
-> actions besides controlling the clocks.
->=20
-> Signed-off-by: Shaik Sajida Bhanu <sbhanu@codeaurora.org>
->=20
-> Changes since V1:
->         Addressed review comments
+Hi Wolfram,
 
-Please don't write this. Instead, describe what's actually different so
-the reader doesn't have to go figure out what the review comments were.
+Thanks for your work.
 
+On 2020-01-29 21:37:04 +0100, Wolfram Sang wrote:
+> Move Renesas specific code for executing the tuning with a SCC into the
+> SDHI driver and leave only a generic call in the TMIO driver. Simplify
+> the code a little by removing init_tuning() and prepare_tuning()
+> callbacks. The latter is directly folded into the new execute_tuning()
+> callbacks.
+> 
+> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 > ---
->  drivers/mmc/host/sdhci-msm.c | 50 ++++++++++++++++++++++++++++++++++++++=
-++++--
->  1 file changed, 48 insertions(+), 2 deletions(-)
->=20
-> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> index c3a160c..e30c8a3 100644
-> --- a/drivers/mmc/host/sdhci-msm.c
-> +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -2159,9 +2159,55 @@ static __maybe_unused int sdhci_msm_runtime_resume=
-(struct device *dev)
->         return 0;
+>  drivers/mmc/host/renesas_sdhi_core.c | 45 ++++++++++++++++++++--------
+>  drivers/mmc/host/tmio_mmc.h          |  3 +-
+>  drivers/mmc/host/tmio_mmc_core.c     | 33 +++-----------------
+>  3 files changed, 37 insertions(+), 44 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
+> index 6a112454ca26..b3ab66f963f8 100644
+> --- a/drivers/mmc/host/renesas_sdhi_core.c
+> +++ b/drivers/mmc/host/renesas_sdhi_core.c
+> @@ -321,17 +321,6 @@ static unsigned int renesas_sdhi_init_tuning(struct tmio_mmc_host *host)
+>  		SH_MOBILE_SDHI_SCC_DTCNTL_TAPNUM_MASK;
 >  }
-> =20
-> +static int sdhci_msm_suspend(struct device *dev)
+>  
+> -static void renesas_sdhi_prepare_tuning(struct tmio_mmc_host *host,
+> -					unsigned long tap)
+> -{
+> -	struct renesas_sdhi *priv = host_to_priv(host);
+> -
+> -	priv->doing_tune = true;
+> -
+> -	/* Set sampling clock position */
+> -	sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_TAPSET, tap);
+> -}
+> -
+>  static void renesas_sdhi_hs400_complete(struct tmio_mmc_host *host)
+>  {
+>  	struct renesas_sdhi *priv = host_to_priv(host);
+> @@ -500,6 +489,37 @@ static int renesas_sdhi_select_tuning(struct tmio_mmc_host *host)
+>  	return 0;
+>  }
+>  
+> +static int renesas_sdhi_execute_tuning(struct tmio_mmc_host *host, u32 opcode)
 > +{
-> +       struct sdhci_host *host =3D dev_get_drvdata(dev);
-> +       struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host);
-> +       struct sdhci_msm_host *msm_host =3D sdhci_pltfm_priv(pltfm_host);
-> +       int ret;
+> +	struct renesas_sdhi *priv = host_to_priv(host);
+> +	int i, ret;
 > +
-> +       if (host->mmc->caps2 & MMC_CAP2_CQE) {
-> +               ret =3D cqhci_suspend(host->mmc);
-> +               if (ret)
-> +                       return ret;
-> +       }
+> +	host->tap_num = renesas_sdhi_init_tuning(host);
+> +	if (!host->tap_num)
+> +		return 0; /* Tuning is not supported */
 > +
-> +       ret =3D sdhci_suspend_host(host);
-> +       if (ret)
-> +               return ret;
-> +       /* Disable pwr-irq since SDHC would be inactive */
-> +       disable_irq(msm_host->pwr_irq);
+> +	if (host->tap_num * 2 >= sizeof(host->taps) * BITS_PER_BYTE) {
+> +		dev_warn_once(&host->pdev->dev,
+> +			"Too many taps, skipping tuning. Please consider updating size of taps field of tmio_mmc_host\n");
+> +		return 0;
+> +	}
+> +
+> +	priv->doing_tune = true;
+> +	bitmap_zero(host->taps, host->tap_num * 2);
+> +
+> +	/* Issue CMD19 twice for each tap */
+> +	for (i = 0; i < 2 * host->tap_num; i++) {
+> +		/* Set sampling clock position */
+> +		sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_TAPSET, i % host->tap_num);
+> +
+> +		ret = mmc_send_tuning(host->mmc, opcode, NULL);
+> +		if (ret == 0)
 
-Why do we need to do this? If it's inactive then the irq won't be raised
-by the inactive hardware. Given that we're going to suspend the device,
-the irq won't matter unless it's marked for wakeup. Please remove this
-irq enable/disable logic, or explain why it's really needed.
+The variable ret is only used here after the refactor so you could 
+possibly drop it and just check mmc_send_tuning() == 0. With or without 
+this small nit addressed,
 
+Reviewed-by: Niklas Söderlund <niklas.soderlund+renesas@ragnatech.se>
+
+> +			set_bit(i, host->taps);
+> +	}
 > +
-> +       return pm_runtime_force_suspend(dev);
+> +	return renesas_sdhi_select_tuning(host);
 > +}
 > +
+>  static bool renesas_sdhi_manual_correction(struct tmio_mmc_host *host, bool use_4tap)
+>  {
+>  	struct renesas_sdhi *priv = host_to_priv(host);
+> @@ -877,8 +897,7 @@ int renesas_sdhi_probe(struct platform_device *pdev,
+>  		if (!hit)
+>  			dev_warn(&host->pdev->dev, "Unknown clock rate for tuning\n");
+>  
+> -		host->init_tuning = renesas_sdhi_init_tuning;
+> -		host->prepare_tuning = renesas_sdhi_prepare_tuning;
+> +		host->execute_tuning = renesas_sdhi_execute_tuning;
+>  		host->select_tuning = renesas_sdhi_select_tuning;
+>  		host->check_scc_error = renesas_sdhi_check_scc_error;
+>  		host->prepare_hs400_tuning =
+> diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
+> index c5ba13fae399..bfebbe368f02 100644
+> --- a/drivers/mmc/host/tmio_mmc.h
+> +++ b/drivers/mmc/host/tmio_mmc.h
+> @@ -176,14 +176,13 @@ struct tmio_mmc_host {
+>  	int (*write16_hook)(struct tmio_mmc_host *host, int addr);
+>  	void (*reset)(struct tmio_mmc_host *host);
+>  	void (*hw_reset)(struct tmio_mmc_host *host);
+> -	void (*prepare_tuning)(struct tmio_mmc_host *host, unsigned long tap);
+>  	bool (*check_scc_error)(struct tmio_mmc_host *host);
+>  
+>  	/*
+>  	 * Mandatory callback for tuning to occur which is optional for SDR50
+>  	 * and mandatory for SDR104.
+>  	 */
+> -	unsigned int (*init_tuning)(struct tmio_mmc_host *host);
+> +	int (*execute_tuning)(struct tmio_mmc_host *host, u32 opcode);
+>  	int (*select_tuning)(struct tmio_mmc_host *host);
+>  
+>  	/* Tuning values: 1 for success, 0 for failure */
+> diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
+> index c4a1d49fbea4..593f88cafb6e 100644
+> --- a/drivers/mmc/host/tmio_mmc_core.c
+> +++ b/drivers/mmc/host/tmio_mmc_core.c
+> @@ -718,38 +718,13 @@ static int tmio_mmc_start_data(struct tmio_mmc_host *host,
+>  static int tmio_mmc_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>  {
+>  	struct tmio_mmc_host *host = mmc_priv(mmc);
+> -	int i, ret = 0;
+> -
+> -	if (!host->init_tuning || !host->select_tuning)
+> -		/* Tuning is not supported */
+> -		goto out;
+> -
+> -	host->tap_num = host->init_tuning(host);
+> -	if (!host->tap_num)
+> -		/* Tuning is not supported */
+> -		goto out;
+> -
+> -	if (host->tap_num * 2 >= sizeof(host->taps) * BITS_PER_BYTE) {
+> -		dev_warn_once(&host->pdev->dev,
+> -			"Too many taps, skipping tuning. Please consider updating size of taps field of tmio_mmc_host\n");
+> -		goto out;
+> -	}
+> -
+> -	bitmap_zero(host->taps, host->tap_num * 2);
+> -
+> -	/* Issue CMD19 twice for each tap */
+> -	for (i = 0; i < 2 * host->tap_num; i++) {
+> -		if (host->prepare_tuning)
+> -			host->prepare_tuning(host, i % host->tap_num);
+> +	int ret;
+>  
+> -		ret = mmc_send_tuning(mmc, opcode, NULL);
+> -		if (ret == 0)
+> -			set_bit(i, host->taps);
+> -	}
+> +	if (!host->execute_tuning)
+> +		return 0;
+>  
+> -	ret = host->select_tuning(host);
+> +	ret = host->execute_tuning(host, opcode);
+>  
+> -out:
+>  	if (ret < 0) {
+>  		dev_warn(&host->pdev->dev, "Tuning procedure failed\n");
+>  		tmio_mmc_hw_reset(mmc);
+> -- 
+> 2.20.1
+> 
+
+-- 
+Regards,
+Niklas Söderlund
