@@ -2,91 +2,85 @@ Return-Path: <SRS0=tDgF=37=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-0.6 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C9B1AC352A3
-	for <linux-mmc@archiver.kernel.org>; Tue, 11 Feb 2020 15:29:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CAADBC352A3
+	for <linux-mmc@archiver.kernel.org>; Tue, 11 Feb 2020 16:03:37 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id A112420873
-	for <linux-mmc@archiver.kernel.org>; Tue, 11 Feb 2020 15:29:54 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=fail reason="key not found in DNS" (0-bit key) header.d=mg.codeaurora.org header.i=@mg.codeaurora.org header.b="wVikGuB6"
+	by mail.kernel.org (Postfix) with ESMTP id 94A2420714
+	for <linux-mmc@archiver.kernel.org>; Tue, 11 Feb 2020 16:03:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729174AbgBKP3v (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 11 Feb 2020 10:29:51 -0500
-Received: from mail26.static.mailgun.info ([104.130.122.26]:14501 "EHLO
-        mail26.static.mailgun.info" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1728648AbgBKP3v (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Feb 2020 10:29:51 -0500
-DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
- s=smtp; t=1581434990; h=Message-Id: Date: Subject: Cc: To: From:
- Sender; bh=MvQaaE8N59wTtaXaPTPX5FkMiN1q6n99dukOzaIf5QU=; b=wVikGuB6pB5AJpkxiFnnAc54Ot+ZWH5G229pj/LYWUPV+3N0kaQA6OrFdq7AL8YcqZGLzvNr
- e89UJDbM7LJQlqv8NNJT3cfdUKNKsHEzedp7L11TRKmpL9Jajis6r3EFnnkQpCKf7GWH0H8l
- PhbVtYwouGcJFbr41J189TklP0w=
-X-Mailgun-Sending-Ip: 104.130.122.26
-X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
-Received: from smtp.codeaurora.org (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171])
- by mxa.mailgun.org with ESMTP id 5e42c86d.7fd1af5e4dc0-smtp-out-n02;
- Tue, 11 Feb 2020 15:29:49 -0000 (UTC)
-Received: by smtp.codeaurora.org (Postfix, from userid 1001)
-        id 7D14FC447A2; Tue, 11 Feb 2020 15:29:48 +0000 (UTC)
-Received: from vbadigan-linux.qualcomm.com (blr-c-bdr-fw-01_GlobalNAT_AllZones-Outside.qualcomm.com [103.229.19.19])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-SHA256 (128/128 bits))
-        (No client certificate requested)
-        (Authenticated sender: vbadigan)
-        by smtp.codeaurora.org (Postfix) with ESMTPSA id 412B7C447A0;
-        Tue, 11 Feb 2020 15:29:42 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.3.2 smtp.codeaurora.org 412B7C447A0
-Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
-Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=none smtp.mailfrom=vbadigan@codeaurora.org
-From:   Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
-To:     ulf.hansson@linaro.org, adrian.hunter@intel.com
-Cc:     asutoshd@codeaurora.org, stummala@codeaurora.org,
-        sayalil@codeaurora.org, cang@codeaurora.org,
-        rampraka@codeaurora.org, dianders@google.com,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-msm@vger.kernel.org,
-        Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Mark Rutland <mark.rutland@arm.com>,
-        devicetree@vger.kernel.org (open list:OPEN FIRMWARE AND FLATTENED
-        DEVICE TREE BINDINGS)
-Subject: [PATCH V1] dt-bindings: mmc: sdhci-msm: Add CQE reg map
-Date:   Tue, 11 Feb 2020 20:59:14 +0530
-Message-Id: <1581434955-11087-1-git-send-email-vbadigan@codeaurora.org>
-X-Mailer: git-send-email 1.9.1
+        id S1728389AbgBKQDh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 11 Feb 2020 11:03:37 -0500
+Received: from outils.crapouillou.net ([89.234.176.41]:35542 "EHLO
+        crapouillou.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728252AbgBKQDh (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Feb 2020 11:03:37 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=crapouillou.net;
+        s=mail; t=1581437015; h=from:from:sender:reply-to:subject:subject:date:date:
+         message-id:message-id:to:to:cc:cc:mime-version:mime-version:
+         content-type:content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:references; bh=QIF/b3NfggKNaEL58o6pSYat7ZveBie4he5kxLcTGPo=;
+        b=ZGUNhV0gfDvILhJn6bxsImZOYBaZCFmiSm8Ay4DW6RpyKqjHzD/VJwR2GNriuQ6iupPYpF
+        sYRhBzULovbnF0J3BAH8D+Mx39h+t6zFqZ2LCulyvj3Pcn04rcNmVSMWjaZaDbFBaeucum
+        UrVGIuWktfaQFSDz8YDFZK7y4FxTafo=
+From:   Paul Cercueil <paul@crapouillou.net>
+To:     "Rafael J . Wysocki" <rjw@rjwysocki.net>,
+        Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>, od@zcrc.me,
+        linux-pm@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, Paul Cercueil <paul@crapouillou.net>
+Subject: [RFC PATCH 0/3] Introduce pm_ptr() / pm_sleep_ptr()
+Date:   Tue, 11 Feb 2020 13:03:18 -0300
+Message-Id: <20200211160321.22124-1-paul@crapouillou.net>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-CQE feature has been enabled on sdhci-msm. Add CQE reg map
-that needs to be supplied for supporting CQE feature.
+Hi,
 
-Change-Id: I788c4bd5b7cbca16bc1030a410cc5550ed7204e1
-Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
----
- Documentation/devicetree/bindings/mmc/sdhci-msm.txt | 5 +++++
- 1 file changed, 5 insertions(+)
+I've seen many times things like:
 
-diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
-index 7ee639b..eaa0998 100644
---- a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
-+++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
-@@ -27,6 +27,11 @@ Required properties:
- - reg: Base address and length of the register in the following order:
- 	- Host controller register map (required)
- 	- SD Core register map (required for msm-v4 and below)
-+	- CQE register map (Optional, needed only for eMMC and msm-v4.2 above)
-+- reg-names: When CQE register map is supplied, below reg-names are required
-+	- "hc_mem" for Host controller register map
-+	- "core_mem" for SD cpre regoster map
-+	- "cqhci_mem" for CQE register map
- - interrupts: Should contain an interrupt-specifiers for the interrupts:
- 	- Host controller interrupt (required)
- - pinctrl-names: Should contain only one value - "default".
+#ifdef CONFIG_PM_SLEEP
+static SIMPLE_DEV_PM_OPS(foo_pm_ops, foo_suspend, foo_resume);
+#define FOO_PM_OPS (&foo_pm_ops)
+#else
+#define FOO_PM_OPS NULL
+#endif
+static struct platform_driver foo_driver = {
+		.driver.pm = FOO_PM_OPS,
+};
+
+And always wondered why there was no of-match-ptr-like macro to make
+things cleaner.
+
+So this RFC adds two macros, pm_ptr() and pm_sleep_ptr(), which resolve
+to their argument when CONFIG_PM or CONFIG_PM_SLEEP (respectively) are
+enabled, or NULL otherwise.
+
+Patch 3/3 is an example of what it would look like when used in a
+driver.
+
+Comments welcome.
+
+Cheers,
+-Paul
+
+
+Paul Cercueil (3):
+  PM: introduce pm_ptr() and pm_sleep_ptr()
+  PM: Make *_DEV_PM_OPS macros use __maybe_unused
+  mmc: jz4740: Use pm_sleep_ptr() macro
+
+ drivers/mmc/host/jz4740_mmc.c | 12 +++---------
+ include/linux/pm.h            | 16 ++++++++++++++--
+ 2 files changed, 17 insertions(+), 11 deletions(-)
+
 -- 
-Qualcomm India Private Limited, on behalf of Qualcomm Innovation Center, Inc., is a member of Code Aurora Forum, a Linux Foundation Collaborative Project
+2.25.0
+
