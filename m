@@ -2,141 +2,144 @@ Return-Path: <SRS0=tDgF=37=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.6 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-5.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,UNWANTED_LANGUAGE_BODY,USER_AGENT_SANE_1
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D9A68C352A3
-	for <linux-mmc@archiver.kernel.org>; Tue, 11 Feb 2020 14:38:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 20E48C3B186
+	for <linux-mmc@archiver.kernel.org>; Tue, 11 Feb 2020 14:44:45 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id AD1A820708
-	for <linux-mmc@archiver.kernel.org>; Tue, 11 Feb 2020 14:38:04 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E6B85208C3
+	for <linux-mmc@archiver.kernel.org>; Tue, 11 Feb 2020 14:44:44 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="key not found in DNS" (0-bit key) header.d=mg.codeaurora.org header.i=@mg.codeaurora.org header.b="WzAHk+uo"
+	dkim=pass (2048-bit key) header.d=st.com header.i=@st.com header.b="GtWzjgWp"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728508AbgBKOiE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 11 Feb 2020 09:38:04 -0500
-Received: from mail25.static.mailgun.info ([104.130.122.25]:61854 "EHLO
-        mail25.static.mailgun.info" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1728814AbgBKOiD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Feb 2020 09:38:03 -0500
-DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
- s=smtp; t=1581431883; h=Message-ID: References: In-Reply-To: Subject:
- Cc: To: From: Date: Content-Transfer-Encoding: Content-Type:
- MIME-Version: Sender; bh=+vv3RiTh5gPMeXyabn3BEheKnftpekx1k9kfKHh8wN4=;
- b=WzAHk+uopcKkLUwXo3K116xv0WV1c6bN3VV0MVBLoBIdd2Su2pEr2/RmMz3x4004PVGGWV8U
- hZn4ve14ao4s8p4AoHNNH0MYa+K/b81Uv44TyTen8EIJVEn/SbQuBQxB9IKccydquk45omOf
- JEnAifUYts07R10LywOzRf+4c7g=
-X-Mailgun-Sending-Ip: 104.130.122.25
-X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
-Received: from smtp.codeaurora.org (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171])
- by mxa.mailgun.org with ESMTP id 5e42bc4a.7f1e82a75b20-smtp-out-n03;
- Tue, 11 Feb 2020 14:38:02 -0000 (UTC)
-Received: by smtp.codeaurora.org (Postfix, from userid 1001)
-        id B9A39C447A3; Tue, 11 Feb 2020 14:38:02 +0000 (UTC)
-Received: from mail.codeaurora.org (localhost.localdomain [127.0.0.1])
-        (using TLSv1 with cipher ECDHE-RSA-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        (Authenticated sender: sbhanu)
-        by smtp.codeaurora.org (Postfix) with ESMTPSA id 0EF61C4479D;
-        Tue, 11 Feb 2020 14:38:02 +0000 (UTC)
+        id S1730230AbgBKOol (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 11 Feb 2020 09:44:41 -0500
+Received: from mx07-00178001.pphosted.com ([62.209.51.94]:31254 "EHLO
+        mx07-00178001.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1727728AbgBKOol (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Feb 2020 09:44:41 -0500
+Received: from pps.filterd (m0046668.ppops.net [127.0.0.1])
+        by mx07-00178001.pphosted.com (8.16.0.42/8.16.0.42) with SMTP id 01BEiRXu032757;
+        Tue, 11 Feb 2020 15:44:28 +0100
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=st.com; h=subject : to : cc :
+ references : from : message-id : date : mime-version : in-reply-to :
+ content-type : content-transfer-encoding; s=STMicroelectronics;
+ bh=zMrqEZqOCVnlA3/9d0Rc7Rgo4RLOby/Y5h96V1K6k5k=;
+ b=GtWzjgWpZQmghAi169LU0uuY4j7UF/y4Gxjub5zSHljucQ9SciIS1fLFx8NgjERgpEqd
+ wD2ePTUv/IS4QpFL9ashW1yofY0nK/2ZRkTrwnh5vpa39jIgJSyf0bP0MsxLWB3JnPwC
+ c1nSsQxR/ELJ1NNAZiSh6qB5VMdSGOdzJw/piJ0VJCKihyErlkdRkV9gaiGiZggHXRb3
+ JKG1oAfc3Pk3dP48IbxrRU1u7fZArbuL1j1hAOco7JtMhjlz4ZZv7pVn4VOAXp9fdizr
+ uotji9CPN2DDHDLLtx4hKF92yFf7FnBzwHslCu1jX0mj3fq8XgNV6R/j+ka/1TtPFeHt PA== 
+Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
+        by mx07-00178001.pphosted.com with ESMTP id 2y1ufh5xf0-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Tue, 11 Feb 2020 15:44:28 +0100
+Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
+        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 6748F100046;
+        Tue, 11 Feb 2020 15:44:18 +0100 (CET)
+Received: from Webmail-eu.st.com (sfhdag6node1.st.com [10.75.127.16])
+        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id 535752BD3FC;
+        Tue, 11 Feb 2020 15:44:18 +0100 (CET)
+Received: from lmecxl0923.lme.st.com (10.75.127.48) by SFHDAG6NODE1.st.com
+ (10.75.127.16) with Microsoft SMTP Server (TLS) id 15.0.1473.3; Tue, 11 Feb
+ 2020 15:44:17 +0100
+Subject: Re: [PATCH V2 9/9] mmc: mmci: add sdmmc variant revision 2.0
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>
+CC:     <srinivas.kandagatla@linaro.org>,
+        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
+        Alexandre Torgue <alexandre.torgue@st.com>,
+        <linux-arm-kernel@lists.infradead.org>,
+        <linux-kernel@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-mmc@vger.kernel.org>,
+        <linux-stm32@st-md-mailman.stormreply.com>
+References: <20200128090636.13689-1-ludovic.barre@st.com>
+ <20200128090636.13689-10-ludovic.barre@st.com>
+From:   Ludovic BARRE <ludovic.barre@st.com>
+Message-ID: <853f4b14-a188-f329-34e5-8e88fcafa775@st.com>
+Date:   Tue, 11 Feb 2020 15:44:17 +0100
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.1.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII;
- format=flowed
-Content-Transfer-Encoding: 7bit
-Date:   Tue, 11 Feb 2020 20:08:02 +0530
-From:   sbhanu@codeaurora.org
-To:     Stephen Boyd <swboyd@chromium.org>
-Cc:     adrian.hunter@intel.com, mka@chromium.org, robh+dt@kernel.org,
-        ulf.hansson@linaro.org, asutoshd@codeaurora.org,
-        stummala@codeaurora.org, sayalil@codeaurora.org,
-        cang@codeaurora.org, rampraka@codeaurora.org,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
-        agross@kernel.org, bjorn.andersson@linaro.org,
-        devicetree-owner@vger.kernel.org
-Subject: Re: [PATCH V2] mmc: sdhci-msm: Update system suspend/resume callbacks
- of sdhci-msm platform driver.
-In-Reply-To: <158136367603.121156.1867941302835915258@swboyd.mtv.corp.google.com>
-References: <1581081650-22228-1-git-send-email-sbhanu@codeaurora.org>
- <158136367603.121156.1867941302835915258@swboyd.mtv.corp.google.com>
-Message-ID: <1328455c7256f41f3f3bd9b96fb21d8d@codeaurora.org>
-X-Sender: sbhanu@codeaurora.org
-User-Agent: Roundcube Webmail/1.3.9
+In-Reply-To: <20200128090636.13689-10-ludovic.barre@st.com>
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Language: fr
+Content-Transfer-Encoding: 8bit
+X-Originating-IP: [10.75.127.48]
+X-ClientProxiedBy: SFHDAG7NODE2.st.com (10.75.127.20) To SFHDAG6NODE1.st.com
+ (10.75.127.16)
+X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.138,18.0.572
+ definitions=2020-02-11_04:2020-02-10,2020-02-11 signatures=0
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 2020-02-11 01:11, Stephen Boyd wrote:
-> Quoting Shaik Sajida Bhanu (2020-02-07 05:20:50)
->> The existing suspend/resume callbacks of sdhci-msm driver are just
->> gating/un-gating the clocks. During suspend cycle more can be done
->> like disabling controller, interrupts and card detection.
->> 
->> So updating the system pm callbacks for performing these extra
->> actions besides controlling the clocks.
->> 
->> Signed-off-by: Shaik Sajida Bhanu <sbhanu@codeaurora.org>
->> 
->> Changes since V1:
->>         Addressed review comments
-> 
-> Please don't write this. Instead, describe what's actually different so
-> the reader doesn't have to go figure out what the review comments were.
-> 
+hi Ulf
 
-sure
-
->> ---
->>  drivers/mmc/host/sdhci-msm.c | 50 
->> ++++++++++++++++++++++++++++++++++++++++++--
->>  1 file changed, 48 insertions(+), 2 deletions(-)
->> 
->> diff --git a/drivers/mmc/host/sdhci-msm.c 
->> b/drivers/mmc/host/sdhci-msm.c
->> index c3a160c..e30c8a3 100644
->> --- a/drivers/mmc/host/sdhci-msm.c
->> +++ b/drivers/mmc/host/sdhci-msm.c
->> @@ -2159,9 +2159,55 @@ static __maybe_unused int 
->> sdhci_msm_runtime_resume(struct device *dev)
->>         return 0;
->>  }
->> 
->> +static int sdhci_msm_suspend(struct device *dev)
->> +{
->> +       struct sdhci_host *host = dev_get_drvdata(dev);
->> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->> +       struct sdhci_msm_host *msm_host = 
->> sdhci_pltfm_priv(pltfm_host);
->> +       int ret;
->> +
->> +       if (host->mmc->caps2 & MMC_CAP2_CQE) {
->> +               ret = cqhci_suspend(host->mmc);
->> +               if (ret)
->> +                       return ret;
->> +       }
->> +
->> +       ret = sdhci_suspend_host(host);
->> +       if (ret)
->> +               return ret;
->> +       /* Disable pwr-irq since SDHC would be inactive */
->> +       disable_irq(msm_host->pwr_irq);
+Le 1/28/20 à 10:06 AM, Ludovic Barre a écrit :
+> This patch adds a sdmmc variant revision 2.0.
+> This revision is backward compatible with 1.1, and adds dma
+> link list support.
 > 
-> Why do we need to do this? If it's inactive then the irq won't be 
-> raised
-> by the inactive hardware. Given that we're going to suspend the device,
-> the irq won't matter unless it's marked for wakeup. Please remove this
-> irq enable/disable logic, or explain why it's really needed.
+> Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
+> ---
+>   drivers/mmc/host/mmci.c | 30 ++++++++++++++++++++++++++++++
+>   1 file changed, 30 insertions(+)
 > 
+> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+> index 24e630183ed4..a774c329c212 100644
+> --- a/drivers/mmc/host/mmci.c
+> +++ b/drivers/mmc/host/mmci.c
+> @@ -275,6 +275,31 @@ static struct variant_data variant_stm32_sdmmc = {
+>   	.init			= sdmmc_variant_init,
+>   };
+>   
+> +static struct variant_data variant_stm32_sdmmcv2 = {
+> +	.fifosize		= 16 * 4,
+> +	.fifohalfsize		= 8 * 4,
+> +	.f_max			= 208000000,
+> +	.stm32_clkdiv		= true,
+> +	.cmdreg_cpsm_enable	= MCI_CPSM_STM32_ENABLE,
+> +	.cmdreg_lrsp_crc	= MCI_CPSM_STM32_LRSP_CRC,
+> +	.cmdreg_srsp_crc	= MCI_CPSM_STM32_SRSP_CRC,
+> +	.cmdreg_srsp		= MCI_CPSM_STM32_SRSP,
+> +	.cmdreg_stop		= MCI_CPSM_STM32_CMDSTOP,
+> +	.data_cmd_enable	= MCI_CPSM_STM32_CMDTRANS,
+> +	.irq_pio_mask		= MCI_IRQ_PIO_STM32_MASK,
+> +	.datactrl_first		= true,
+> +	.datacnt_useless	= true,
+> +	.datalength_bits	= 25,
+> +	.datactrl_blocksz	= 14,
+> +	.datactrl_any_blocksz	= true,
+> +	.stm32_idmabsize_mask	= GENMASK(16, 5),
+> +	.dma_lli		= true,
+> +	.busy_timeout		= true,
 
-You are right. This is not needed.
-We have checked more on this and interrupt are getting disabled in 
-suspend_device_irqs().
-Will remove this.
+I forget "busy_detect		= true," property
+I add this in next patch set
 
->> +
->> +       return pm_runtime_force_suspend(dev);
->> +}
->> +
+> +	.busy_detect_flag	= MCI_STM32_BUSYD0,
+> +	.busy_detect_mask	= MCI_STM32_BUSYD0ENDMASK,
+> +	.init			= sdmmc_variant_init,
+> +};
+> +
+>   static struct variant_data variant_qcom = {
+>   	.fifosize		= 16 * 4,
+>   	.fifohalfsize		= 8 * 4,
+> @@ -2343,6 +2368,11 @@ static const struct amba_id mmci_ids[] = {
+>   		.mask	= 0xf0ffffff,
+>   		.data	= &variant_stm32_sdmmc,
+>   	},
+> +	{
+> +		.id     = 0x00253180,
+> +		.mask	= 0xf0ffffff,
+> +		.data	= &variant_stm32_sdmmcv2,
+> +	},
+>   	/* Qualcomm variants */
+>   	{
+>   		.id     = 0x00051180,
+> 
