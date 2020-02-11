@@ -2,202 +2,172 @@ Return-Path: <SRS0=tDgF=37=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
+X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 10ACBC3B186
-	for <linux-mmc@archiver.kernel.org>; Tue, 11 Feb 2020 09:37:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8C3FAC352A3
+	for <linux-mmc@archiver.kernel.org>; Tue, 11 Feb 2020 09:45:29 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id DC2D92070A
-	for <linux-mmc@archiver.kernel.org>; Tue, 11 Feb 2020 09:37:05 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 514992070A
+	for <linux-mmc@archiver.kernel.org>; Tue, 11 Feb 2020 09:45:29 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="key not found in DNS" (0-bit key) header.d=mg.codeaurora.org header.i=@mg.codeaurora.org header.b="Edmq+U5E"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="GLWoPZc1"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727802AbgBKJhF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 11 Feb 2020 04:37:05 -0500
-Received: from mail26.static.mailgun.info ([104.130.122.26]:10998 "EHLO
-        mail26.static.mailgun.info" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1727579AbgBKJhF (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Feb 2020 04:37:05 -0500
-DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
- s=smtp; t=1581413824; h=Message-Id: Date: Subject: Cc: To: From:
- Sender; bh=7qpxFdovXRdAYK1v5HFVJvvWNNAqIbXe3E+fy0MrN08=; b=Edmq+U5Eq97t6QdeJqk0Ym/VysStPgP4D/k/L0MwzNMKEPjUR6uRspWelawCZFfrl5MP0pUk
- 4uZTwLi7SVcnez1Aav++2itoEPd3xGxNvGwUxTV17UlyFnginPLjQnJUoe/V2Rt0aGxs7JA/
- gf+T0cnwRgyeATumSFoSI308xJU=
-X-Mailgun-Sending-Ip: 104.130.122.26
-X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
-Received: from smtp.codeaurora.org (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171])
- by mxa.mailgun.org with ESMTP id 5e4275ba.7f0a6aada068-smtp-out-n03;
- Tue, 11 Feb 2020 09:36:58 -0000 (UTC)
-Received: by smtp.codeaurora.org (Postfix, from userid 1001)
-        id 421BDC4479D; Tue, 11 Feb 2020 09:36:58 +0000 (UTC)
-Received: from vbadigan-linux.qualcomm.com (blr-c-bdr-fw-01_GlobalNAT_AllZones-Outside.qualcomm.com [103.229.19.19])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-SHA256 (128/128 bits))
-        (No client certificate requested)
-        (Authenticated sender: vbadigan)
-        by smtp.codeaurora.org (Postfix) with ESMTPSA id 1F96BC4479C;
-        Tue, 11 Feb 2020 09:36:52 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.3.2 smtp.codeaurora.org 1F96BC4479C
-Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
-Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=none smtp.mailfrom=vbadigan@codeaurora.org
-From:   Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
-To:     ulf.hansson@linaro.org, adrian.hunter@intel.com
-Cc:     asutoshd@codeaurora.org, stummala@codeaurora.org,
-        sayalil@codeaurora.org, cang@codeaurora.org,
-        rampraka@codeaurora.org, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Allison Randal <allison@lohutok.net>,
-        Thomas Gleixner <tglx@linutronix.de>
-Subject: [PATCH V1] mmc: mmc_test: Pass different sg lists for non-blocking requests
-Date:   Tue, 11 Feb 2020 15:06:08 +0530
-Message-Id: <1581413771-18005-1-git-send-email-vbadigan@codeaurora.org>
-X-Mailer: git-send-email 1.9.1
+        id S1727817AbgBKJp2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 11 Feb 2020 04:45:28 -0500
+Received: from mail-ua1-f65.google.com ([209.85.222.65]:47003 "EHLO
+        mail-ua1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727802AbgBKJp2 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Feb 2020 04:45:28 -0500
+Received: by mail-ua1-f65.google.com with SMTP id l6so3683002uap.13
+        for <linux-mmc@vger.kernel.org>; Tue, 11 Feb 2020 01:45:27 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=XBQbJL9w0L5FatKuuSiioztcIT23PXAGjfOfsR5LHQ0=;
+        b=GLWoPZc147lP/xTF0fGJFVcKYtRtXrc6DuzMpYKtI3EadsTAAiWVzxxgMaHKmHkK8j
+         7+AM/XrvL9i6J1EM/7OYgZuHjKkM9dHjzptJzvOgl7Is0pRr7OLt7ZPdzZxLXzwHs2HS
+         QfxQB12VUvh4O/K23mnlFwAYEtvLrZiW1ISCxGU8dwVEMKRjpkpSZFJyojKlcZCNy0zt
+         YBu5cuYF4SdATXcsgQH6LMteO6CpULe1XoMHXxFR1WvKPFcUQgEryilqPjarY3VxaXuA
+         rAALCdEfW16ssCkFa64jghPqHlhrxNZSZgLUtJqmdASGntKSOyu4W0WLnbbtsMukscWz
+         BLLw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=XBQbJL9w0L5FatKuuSiioztcIT23PXAGjfOfsR5LHQ0=;
+        b=k3D1CDDcykOfK05h8nKJSq8wCjTC0gEIW4GpJV4g/WcDaqPMO55HFzTdJGFdaszGq3
+         yFUww8DK603h97wndOp3euWiiLxhkIHJ065JmxG2Z6ahAqlaXI3Yr3L33wnuL+Vighrd
+         qzo9SCt9F4Z5PyCaHifN44ETieUBzzP280zB0vEcht9ZIS57lhO/wu200/0LfI6rtyK1
+         ENfnYlpCx4r4l/jMZ3TYh70Idw2qCV0+M7RBH15BTkVQ/9KMYCXARke51kSWsPAT2WYP
+         9abdytJ+0JdBea7eH4xQRmF4VtesGmCsBVqdqWcPSXQYEagmYJQ3FEDdm+3/wAz3oxt/
+         n+3w==
+X-Gm-Message-State: APjAAAWAxI0QTKSCaDUFRL73pHbkvTEsAJDHS4oy8zayd39lbLQ4kfg/
+        LCTNFlDmJIFs+WJunM+5CsETMYyQ5kwe+MF/uCtmGA==
+X-Google-Smtp-Source: APXvYqzmdkCShViJX/ZyLFGu/K7Xn2EJrE+6tTMoQXX3/NnRjF6msjPk1NRHlWi0GeGmIFBqRHj60c1+IbB+DnomAQE=
+X-Received: by 2002:a9f:3046:: with SMTP id i6mr1183158uab.15.1581414327096;
+ Tue, 11 Feb 2020 01:45:27 -0800 (PST)
+MIME-Version: 1.0
+References: <cover.1580894083.git.baolin.wang7@gmail.com> <3fd82478e82b19c72dddcc17c85313725aa13ff6.1580894083.git.baolin.wang7@gmail.com>
+In-Reply-To: <3fd82478e82b19c72dddcc17c85313725aa13ff6.1580894083.git.baolin.wang7@gmail.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Tue, 11 Feb 2020 10:44:51 +0100
+Message-ID: <CAPDyKFq_tj+2yYf3YLA2vQkHGWWrY_ULUP=6-anpSJ0q+YvkFw@mail.gmail.com>
+Subject: Re: [PATCH v8 1/5] mmc: Add MMC host software queue support
+To:     Baolin Wang <baolin.wang7@gmail.com>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        Asutosh Das <asutoshd@codeaurora.org>,
+        Orson Zhai <orsonzhai@gmail.com>,
+        Chunyan Zhang <zhang.lyra@gmail.com>,
+        Arnd Bergmann <arnd@arndb.de>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Baolin Wang <baolin.wang@linaro.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Supply a separate sg list for each of the request in non-blocking
-IO test cases where two requests will be issued at same time.
+On Wed, 5 Feb 2020 at 13:51, Baolin Wang <baolin.wang7@gmail.com> wrote:
+>
+> From: Baolin Wang <baolin.wang@linaro.org>
+>
+> Now the MMC read/write stack will always wait for previous request is
+> completed by mmc_blk_rw_wait(), before sending a new request to hardware,
+> or queue a work to complete request, that will bring context switching
+> overhead, especially for high I/O per second rates, to affect the IO
+> performance.
 
-Otherwise, sg memory may get unmapped when a request is done while
-same memory is being accessed by controller from the other request,
-and it leads to iommu errors with below call stack:
+Would you mind adding some more context about the mmc_blk_rw_wait()?
+Especially I want to make it clear that mmc_blk_rw_wait() is also used
+to poll the card for busy completion for I/O writes, via sending
+CMD13.
 
-	__arm_lpae_unmap+0x2e0/0x478
-	arm_lpae_unmap+0x54/0x70
-	arm_smmu_unmap+0x64/0xa4
-	__iommu_unmap+0xb8/0x1f0
-	iommu_unmap_fast+0x38/0x48
-	__iommu_dma_unmap+0x88/0x108
-	iommu_dma_unmap_sg+0x90/0xa4
-	sdhci_post_req+0x5c/0x78
-	mmc_test_start_areq+0x10c/0x120 [mmc_test]
-	mmc_test_area_io_seq+0x150/0x264 [mmc_test]
-	mmc_test_rw_multiple+0x174/0x1c0 [mmc_test]
-	mmc_test_rw_multiple_sg_len+0x44/0x6c [mmc_test]
-	mmc_test_profile_sglen_wr_nonblock_perf+0x6c/0x94 [mmc_test]
-	mtf_test_write+0x238/0x3cc [mmc_test]
+>
+> Thus this patch introduces MMC software queue interface based on the
+> hardware command queue engine's interfaces, which is similar with the
+> hardware command queue engine's idea, that can remove the context
+> switching. Moreover we set the default queue depth as 64 for software
+> queue, which allows more requests to be prepared, merged and inserted
+> into IO scheduler to improve performance, but we only allow 2 requests
+> in flight, that is enough to let the irq handler always trigger the
+> next request without a context switch, as well as avoiding a long latency.
 
-Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
----
- drivers/mmc/core/mmc_test.c | 38 ++++++++++++++++++++++++++++++++------
- 1 file changed, 32 insertions(+), 6 deletions(-)
+I think it's important to clarify that to use this new interface, hsq,
+the host controller/driver needs to support HW busy detection for I/O
+operations.
 
-diff --git a/drivers/mmc/core/mmc_test.c b/drivers/mmc/core/mmc_test.c
-index 492dd45..69bdf60 100644
---- a/drivers/mmc/core/mmc_test.c
-+++ b/drivers/mmc/core/mmc_test.c
-@@ -71,6 +71,7 @@ struct mmc_test_mem {
-  * @sg_len: length of currently mapped scatterlist @sg
-  * @mem: allocated memory
-  * @sg: scatterlist
-+ * @sg_areq: scatterlist for non blocking request
-  */
- struct mmc_test_area {
- 	unsigned long max_sz;
-@@ -82,6 +83,7 @@ struct mmc_test_area {
- 	unsigned int sg_len;
- 	struct mmc_test_mem *mem;
- 	struct scatterlist *sg;
-+	struct scatterlist *sg_areq;
- };
- 
- /**
-@@ -836,7 +838,9 @@ static int mmc_test_start_areq(struct mmc_test_card *test,
- }
- 
- static int mmc_test_nonblock_transfer(struct mmc_test_card *test,
--				      struct scatterlist *sg, unsigned sg_len,
-+				      struct scatterlist *sg,
-+				      struct scatterlist *sg_areq,
-+				      unsigned int sg_len,
- 				      unsigned dev_addr, unsigned blocks,
- 				      unsigned blksz, int write, int count)
- {
-@@ -867,6 +871,7 @@ static int mmc_test_nonblock_transfer(struct mmc_test_card *test,
- 			prev_mrq = &rq2->mrq;
- 
- 		swap(mrq, prev_mrq);
-+		swap(sg, sg_areq);
- 		dev_addr += blocks;
- 	}
- 
-@@ -1396,7 +1401,7 @@ static int mmc_test_no_highmem(struct mmc_test_card *test)
-  * Map sz bytes so that it can be transferred.
-  */
- static int mmc_test_area_map(struct mmc_test_card *test, unsigned long sz,
--			     int max_scatter, int min_sg_len)
-+			     int max_scatter, int min_sg_len, bool nonblock)
- {
- 	struct mmc_test_area *t = &test->area;
- 	int err;
-@@ -1411,6 +1416,20 @@ static int mmc_test_area_map(struct mmc_test_card *test, unsigned long sz,
- 		err = mmc_test_map_sg(t->mem, sz, t->sg, 1, t->max_segs,
- 				      t->max_seg_sz, &t->sg_len, min_sg_len);
- 	}
-+
-+	if (err || !nonblock)
-+		goto err;
-+
-+	if (max_scatter) {
-+		err = mmc_test_map_sg_max_scatter(t->mem, sz, t->sg_areq,
-+						  t->max_segs, t->max_seg_sz,
-+				       &t->sg_len);
-+	} else {
-+		err = mmc_test_map_sg(t->mem, sz, t->sg_areq, 1, t->max_segs,
-+				      t->max_seg_sz, &t->sg_len, min_sg_len);
-+	}
-+
-+err:
- 	if (err)
- 		pr_info("%s: Failed to map sg list\n",
- 		       mmc_hostname(test->card->host));
-@@ -1458,15 +1477,16 @@ static int mmc_test_area_io_seq(struct mmc_test_card *test, unsigned long sz,
- 			sz = max_tfr;
- 	}
- 
--	ret = mmc_test_area_map(test, sz, max_scatter, min_sg_len);
-+	ret = mmc_test_area_map(test, sz, max_scatter, min_sg_len, nonblock);
- 	if (ret)
- 		return ret;
- 
- 	if (timed)
- 		ktime_get_ts64(&ts1);
- 	if (nonblock)
--		ret = mmc_test_nonblock_transfer(test, t->sg, t->sg_len,
--				 dev_addr, t->blocks, 512, write, count);
-+		ret = mmc_test_nonblock_transfer(test, t->sg, t->sg_areq,
-+				 t->sg_len, dev_addr, t->blocks, 512, write,
-+				 count);
- 	else
- 		for (i = 0; i < count && ret == 0; i++) {
- 			ret = mmc_test_area_transfer(test, dev_addr, write);
-@@ -1584,6 +1604,12 @@ static int mmc_test_area_init(struct mmc_test_card *test, int erase, int fill)
- 		goto out_free;
- 	}
- 
-+	t->sg_areq = kmalloc_array(t->max_segs, sizeof(*t->sg), GFP_KERNEL);
-+	if (!t->sg_areq) {
-+		ret = -ENOMEM;
-+		goto out_free;
-+	}
-+
- 	t->dev_addr = mmc_test_capacity(test->card) / 2;
- 	t->dev_addr -= t->dev_addr % (t->max_sz >> 9);
- 
-@@ -2468,7 +2494,7 @@ static int __mmc_test_cmds_during_tfr(struct mmc_test_card *test,
- 	if (!(test->card->host->caps & MMC_CAP_CMD_DURING_TFR))
- 		return RESULT_UNSUP_HOST;
- 
--	ret = mmc_test_area_map(test, sz, 0, 0);
-+	ret = mmc_test_area_map(test, sz, 0, 0, use_areq);
- 	if (ret)
- 		return ret;
- 
--- 
-Qualcomm India Private Limited, on behalf of Qualcomm Innovation Center, Inc., is a member of Code Aurora Forum, a Linux Foundation Collaborative Project
+In other words, the host driver must not complete a data transfer
+request, until after the card stops signals busy. This behaviour is
+also required for "closed-ended-transmissions" with CMD23, as in this
+path there is no CMD12 sent to complete the transfer, thus no R1B
+response flag to trigger the HW busy detection behaviour in the
+driver.
+
+>
+> From the fio testing data in cover letter, we can see the software
+> queue can improve some performance with 4K block size, increasing
+> about 16% for random read, increasing about 90% for random write,
+> though no obvious improvement for sequential read and write.
+>
+> Moreover we can expand the software queue interface to support MMC
+> packed request or packed command in future.
+>
+> Reviewed-by: Arnd Bergmann <arnd@arndb.de>
+> Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
+> Signed-off-by: Baolin Wang <baolin.wang7@gmail.com>
+> ---
+
+[...]
+
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index f6912de..7a9976f 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -1851,15 +1851,22 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+>          */
+>         card->reenable_cmdq = card->ext_csd.cmdq_en;
+>
+> -       if (card->ext_csd.cmdq_en && !host->cqe_enabled) {
+> +       if (host->cqe_ops && !host->cqe_enabled) {
+>                 err = host->cqe_ops->cqe_enable(host, card);
+>                 if (err) {
+>                         pr_err("%s: Failed to enable CQE, error %d\n",
+>                                 mmc_hostname(host), err);
+
+This means we are going to start printing an error message for those
+eMMCs that doesn't support command queuing, but the host supports
+MMC_CAP2_CQE.
+
+Not sure how big of a problem this is, but another option is simply to
+leave the logging of the *failures* to the host driver, rather than
+doing it here.
+
+Oh well, feel free to change or leave this as is for now. We can
+always change it on top, if needed.
+
+>                 } else {
+>                         host->cqe_enabled = true;
+> -                       pr_info("%s: Command Queue Engine enabled\n",
+> -                               mmc_hostname(host));
+> +
+> +                       if (card->ext_csd.cmdq_en) {
+> +                               pr_info("%s: Command Queue Engine enabled\n",
+> +                                       mmc_hostname(host));
+> +                       } else {
+> +                               host->hsq_enabled = true;
+> +                               pr_info("%s: Host Software Queue enabled\n",
+> +                                       mmc_hostname(host));
+> +                       }
+>                 }
+>         }
+
+[...]
+
+Kind regards
+Uffe
