@@ -2,605 +2,247 @@ Return-Path: <SRS0=ptsr=4A=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.6 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1CF36C2BA83
-	for <linux-mmc@archiver.kernel.org>; Wed, 12 Feb 2020 15:15:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 59032C352A4
+	for <linux-mmc@archiver.kernel.org>; Wed, 12 Feb 2020 15:30:08 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id CA3EA21569
-	for <linux-mmc@archiver.kernel.org>; Wed, 12 Feb 2020 15:15:55 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 267C62082F
+	for <linux-mmc@archiver.kernel.org>; Wed, 12 Feb 2020 15:30:08 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="key not found in DNS" (0-bit key) header.d=mg.codeaurora.org header.i=@mg.codeaurora.org header.b="wIRVsuFd"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="I9DMVVFj"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728260AbgBLPPz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 12 Feb 2020 10:15:55 -0500
-Received: from mail27.static.mailgun.info ([104.130.122.27]:23612 "EHLO
-        mail27.static.mailgun.info" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1728514AbgBLPPy (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Feb 2020 10:15:54 -0500
-X-Greylist: delayed 301 seconds by postgrey-1.27 at vger.kernel.org; Wed, 12 Feb 2020 10:15:53 EST
-DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
- s=smtp; t=1581520553; h=Message-ID: References: In-Reply-To: Subject:
- Cc: To: From: Date: Content-Transfer-Encoding: Content-Type:
- MIME-Version: Sender; bh=Ni+JLp8EoEtBddmUoLajZkDu3J/LrxwTVR1Ba58IxTo=;
- b=wIRVsuFdxguVIqk9YqERh1eex+oRFIofJXQfbFahS/4gY0+AW2fUzUbw6lX+6R2HrVIjCItx
- uQerlRsGNMi01HiAAmtI9mlZBNWFAQBi9BGFDFJPb9erSEXJ/lVKxIpowtWrpuxPQE8WWxsn
- 3hZ1TfP3KXN89QFJxrMpO/arI+I=
-X-Mailgun-Sending-Ip: 104.130.122.27
-X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
-Received: from smtp.codeaurora.org (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171])
- by mxa.mailgun.org with ESMTP id 5e44157a.7ff3e2c16880-smtp-out-n01;
- Wed, 12 Feb 2020 15:10:50 -0000 (UTC)
-Received: by smtp.codeaurora.org (Postfix, from userid 1001)
-        id 29DFCC4479F; Wed, 12 Feb 2020 15:10:49 +0000 (UTC)
-Received: from mail.codeaurora.org (localhost.localdomain [127.0.0.1])
-        (using TLSv1 with cipher ECDHE-RSA-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        (Authenticated sender: ppvk)
-        by smtp.codeaurora.org (Postfix) with ESMTPSA id 7430DC43383;
-        Wed, 12 Feb 2020 15:10:47 +0000 (UTC)
+        id S1727680AbgBLPaH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 12 Feb 2020 10:30:07 -0500
+Received: from mail-ua1-f65.google.com ([209.85.222.65]:44059 "EHLO
+        mail-ua1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727519AbgBLPaG (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Feb 2020 10:30:06 -0500
+Received: by mail-ua1-f65.google.com with SMTP id a33so993177uad.11
+        for <linux-mmc@vger.kernel.org>; Wed, 12 Feb 2020 07:30:05 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=YdB4m3YVt1/fgLUY06qzQkSNebhsTU31mLLemG8LZmc=;
+        b=I9DMVVFjBIe+z3v1QY+Sc58CdPkSiZPh7ko0p+3zm8ZuigBNkLq/4VEWRbVVmRD26d
+         4QpsBOP8CSBylfyv9T9cE/7yc698GtUaseXwihqvSg92Zmwn36g5pEnGaH7x148lW3MW
+         qOxUdB21C35LOWLWtojRGSzwSTlE4rwL9cTVHF2MfEMMUzSL/C9DrZTsmez5SZVt2jTH
+         yZwCVtPhpy6YB6HZwUlWwQup94bl4rwKW3rGDWVO+omdx9APi9AKvY7b49TMOjfGrazx
+         DkV/PkO841l46AB27n1JqHa5fQ6z+cR+sYeqcEEvIHLIpq2DUCgRdjydoulLz95mov3C
+         qTfA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=YdB4m3YVt1/fgLUY06qzQkSNebhsTU31mLLemG8LZmc=;
+        b=SJCJ5jBaZlONL0+O33Zmtz8TvGFOjdOLTL6mDnyyNjIetkrszdIJ+uI7WX6ab338/I
+         DZ2idfywEdmRM94WzsReDu4EsNvstAJSO6Z+kE4r2UqvgFvHtLyLPkXAG71Ndx58mE4+
+         L/9QxHlalOlXM+ZTT7L1T7IZJipRdsWZXn7XC9POqq2RCbYu9c+T1/OP6MsuEh2yYYVn
+         CFZ0t6A/kD1bXdxNnDdSC5SbTz56wcv/SAUVzVEbwFuWBhvCarXIXai4ICu6IA8tYDWD
+         0PRik4QztIr5U4UVuS7Vqsq9++Wx/AbrhGLGL/jtjv87+qNoqG2xXZKXfuAL/is6o+Rc
+         9OcA==
+X-Gm-Message-State: APjAAAW+08GpjmXCq9gfIOO0Ma5CuPc+jj6yB7kAMvXrQtmOX89G8rxR
+        0N8AkjuBwMyNGC9OnQ6tjIlvI1dVWL6A39Rm6MAZCA==
+X-Google-Smtp-Source: APXvYqziFyeB60oVPm+ZwS4K8wVf+b/AOYtF0dmdo9RMhOEDdweGI8FdVnSG2tXn5RFSmjr7TEc5nAfAwV2+nde15lA=
+X-Received: by 2002:ab0:e16:: with SMTP id g22mr4862219uak.129.1581521404938;
+ Wed, 12 Feb 2020 07:30:04 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII;
- format=flowed
-Content-Transfer-Encoding: 7bit
-Date:   Wed, 12 Feb 2020 20:40:47 +0530
-From:   ppvk@codeaurora.org
-To:     Matthias Kaehlcke <mka@chromium.org>
-Cc:     adrian.hunter@intel.com, robh+dt@kernel.org,
-        ulf.hansson@linaro.org, asutoshd@codeaurora.org,
-        stummala@codeaurora.org, sayalil@codeaurora.org,
-        rampraka@codeaurora.org, vbadigan@codeaurora.org, sboyd@kernel.org,
-        georgi.djakov@linaro.org, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        devicetree@vger.kernel.org, agross@kernel.org,
-        linux-mmc-owner@vger.kernel.org,
-        Subhash Jadavani <subhashj@codeaurora.org>
-Subject: Re: [RFC v3 1/2] mmc: sdhci-msm: Add interconnect bus bandwidth
- scaling support
-In-Reply-To: <20200208004222.GC18972@google.com>
-References: <1581086695-16645-1-git-send-email-ppvk@codeaurora.org>
- <1581086695-16645-2-git-send-email-ppvk@codeaurora.org>
- <20200208004222.GC18972@google.com>
-Message-ID: <e25bd753fa1ae3bba6f35fb69f0bb98e@codeaurora.org>
-X-Sender: ppvk@codeaurora.org
-User-Agent: Roundcube Webmail/1.3.9
+References: <1579591258-30940-1-git-send-email-yong.mao@mediatek.com> <1579591258-30940-2-git-send-email-yong.mao@mediatek.com>
+In-Reply-To: <1579591258-30940-2-git-send-email-yong.mao@mediatek.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Wed, 12 Feb 2020 16:29:28 +0100
+Message-ID: <CAPDyKFqh17yRi2wQcu-UxdskRHKwXWhirn8gjCH5qx3i2n=EbQ@mail.gmail.com>
+Subject: Re: [PATCH] mmc: mediatek: fix SDIO irq issue
+To:     Yong Mao <yong.mao@mediatek.com>
+Cc:     Chaotian Jing <chaotian.jing@mediatek.com>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        "moderated list:ARM/Mediatek SoC support" 
+        <linux-mediatek@lists.infradead.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        srv_heupstream <srv_heupstream@mediatek.com>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Matthias,
+On Tue, 21 Jan 2020 at 08:21, Yong Mao <yong.mao@mediatek.com> wrote:
+>
+> From: yong mao <yong.mao@mediatek.com>
+>
+> Host controller may lost interrupt in some specail case.
 
-Thanks for the review !
+Please explain a bit more about the special cases. When and how often
+does it happen?
 
-On 2020-02-08 06:12, Matthias Kaehlcke wrote:
-> Hi Pradeep,
-> 
-> On Fri, Feb 07, 2020 at 08:14:54PM +0530, Pradeep P V K wrote:
->> Add interconnect bandwidths for SDHC driver using OPP framework that
->> is required by SDHC driver based on the clock frequency and bus width
->> of the card. Otherwise, the system clocks may run at minimum clock
->> speed and thus affecting the performance.
->> 
->> This change is based on Georgi Djakov [RFC]
->> (https://lkml.org/lkml/2018/10/11/499) and
->> 
->> Saravana Kannan [PATCH v6]
->> (https://lkml.org/lkml/2019/12/6/740)
->> 
->> change from RFC v2 -> v3 changes:
->> - Modified interconnect bandwidth support using OPP framework.
->> - Addressed review comments on v2.
->> 
->> Signed-off-by: Sahitya Tummala <stummala@codeaurora.org>
->> Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
->> Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
->> Co-developed-by: Pradeep P V K <ppvk@codeaurora.org>
->> Signed-off-by: Pradeep P V K <ppvk@codeaurora.org>
->> ---
->>  drivers/mmc/host/sdhci-msm.c | 251 
->> ++++++++++++++++++++++++++++++++++++++++++-
->>  1 file changed, 247 insertions(+), 4 deletions(-)
->> 
->> diff --git a/drivers/mmc/host/sdhci-msm.c 
->> b/drivers/mmc/host/sdhci-msm.c
->> index 71f29ba..f061cd8 100644
->> --- a/drivers/mmc/host/sdhci-msm.c
->> +++ b/drivers/mmc/host/sdhci-msm.c
->> @@ -11,8 +11,10 @@
->>  #include <linux/mmc/mmc.h>
->>  #include <linux/pm_runtime.h>
->>  #include <linux/slab.h>
->> +#include <linux/interconnect.h>
->>  #include <linux/iopoll.h>
->>  #include <linux/regulator/consumer.h>
->> +#include <linux/pm_opp.h>
->> 
->>  #include "sdhci-pltfm.h"
->> 
->> @@ -229,6 +231,14 @@ struct sdhci_msm_variant_info {
->>  	const struct sdhci_msm_offset *offset;
->>  };
->> 
->> +struct sdhci_msm_bus_vote_data {
->> +
->> +	struct icc_path *sdhc_to_ddr;
->> +	struct icc_path *cpu_to_sdhc;
->> +	bool skip_bus_bw_voting;
-> 
-> nit: the name is somewhat redundant given the name of the containing
-> struct. 'skip_vote' or 'skip_voting' would be sufficient IMO.
-> 
-ok. i will address in my next patch series.
+> Add SDIO irq recheck mechanism to make sure all interrupts
+> can be processed immediately.
+>
+> Signed-off-by: Yong Mao <yong.mao@mediatek.com>
+> ---
+>  drivers/mmc/host/mtk-sd.c | 38 ++++++++++++++++++++++++++++++++++++++
+>  1 file changed, 38 insertions(+)
+>
+> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+> index 7726dcf..18a1b86 100644
+> --- a/drivers/mmc/host/mtk-sd.c
+> +++ b/drivers/mmc/host/mtk-sd.c
+> @@ -128,6 +128,7 @@
+>  #define MSDC_PS_CDSTS           (0x1 << 1)     /* R  */
+>  #define MSDC_PS_CDDEBOUNCE      (0xf << 12)    /* RW */
+>  #define MSDC_PS_DAT             (0xff << 16)   /* R  */
+> +#define MSDC_PS_DATA1           (0x1 << 17)    /* R  */
+>  #define MSDC_PS_CMD             (0x1 << 24)    /* R  */
+>  #define MSDC_PS_WP              (0x1 << 31)    /* R  */
+>
+> @@ -361,6 +362,7 @@ struct msdc_save_para {
+>
+>  struct mtk_mmc_compatible {
+>         u8 clk_div_bits;
+> +       bool recheck_sdio_irq;
+>         bool hs400_tune; /* only used for MT8173 */
+>         u32 pad_tune_reg;
+>         bool async_fifo;
+> @@ -436,6 +438,7 @@ struct msdc_host {
+>
+>  static const struct mtk_mmc_compatible mt8135_compat = {
+>         .clk_div_bits = 8,
+> +       .recheck_sdio_irq = false,
+>         .hs400_tune = false,
+>         .pad_tune_reg = MSDC_PAD_TUNE,
+>         .async_fifo = false,
+> @@ -448,6 +451,7 @@ struct msdc_host {
+>
+>  static const struct mtk_mmc_compatible mt8173_compat = {
+>         .clk_div_bits = 8,
+> +       .recheck_sdio_irq = true,
+>         .hs400_tune = true,
+>         .pad_tune_reg = MSDC_PAD_TUNE,
+>         .async_fifo = false,
+> @@ -460,6 +464,7 @@ struct msdc_host {
+>
+>  static const struct mtk_mmc_compatible mt8183_compat = {
+>         .clk_div_bits = 12,
+> +       .recheck_sdio_irq = false,
+>         .hs400_tune = false,
+>         .pad_tune_reg = MSDC_PAD_TUNE0,
+>         .async_fifo = true,
+> @@ -472,6 +477,7 @@ struct msdc_host {
+>
+>  static const struct mtk_mmc_compatible mt2701_compat = {
+>         .clk_div_bits = 12,
+> +       .recheck_sdio_irq = false,
+>         .hs400_tune = false,
+>         .pad_tune_reg = MSDC_PAD_TUNE0,
+>         .async_fifo = true,
+> @@ -484,6 +490,7 @@ struct msdc_host {
+>
+>  static const struct mtk_mmc_compatible mt2712_compat = {
+>         .clk_div_bits = 12,
+> +       .recheck_sdio_irq = false,
+>         .hs400_tune = false,
+>         .pad_tune_reg = MSDC_PAD_TUNE0,
+>         .async_fifo = true,
+> @@ -496,6 +503,7 @@ struct msdc_host {
+>
+>  static const struct mtk_mmc_compatible mt7622_compat = {
+>         .clk_div_bits = 12,
+> +       .recheck_sdio_irq = false,
+>         .hs400_tune = false,
+>         .pad_tune_reg = MSDC_PAD_TUNE0,
+>         .async_fifo = true,
+> @@ -508,6 +516,7 @@ struct msdc_host {
+>
+>  static const struct mtk_mmc_compatible mt8516_compat = {
+>         .clk_div_bits = 12,
+> +       .recheck_sdio_irq = false,
+>         .hs400_tune = false,
+>         .pad_tune_reg = MSDC_PAD_TUNE0,
+>         .async_fifo = true,
+> @@ -518,6 +527,7 @@ struct msdc_host {
+>
+>  static const struct mtk_mmc_compatible mt7620_compat = {
+>         .clk_div_bits = 8,
+> +       .recheck_sdio_irq = false,
+>         .hs400_tune = false,
+>         .pad_tune_reg = MSDC_PAD_TUNE,
+>         .async_fifo = false,
+> @@ -1007,6 +1017,30 @@ static int msdc_auto_cmd_done(struct msdc_host *host, int events,
+>         return cmd->error;
+>  }
+>
+> +/**
+> + * msdc_recheck_sdio_irq - recheck whether the SDIO irq is lost
+> + *
+> + * Host controller may lost interrupt in some special case.
+> + * Add SDIO irq recheck mechanism to make sure all interrupts
+> + * can be processed immediately
+> + *
+> + */
+> +static void msdc_recheck_sdio_irq(struct msdc_host *host)
+> +{
+> +       u32 reg_int, reg_inten, reg_ps;
+> +
+> +       if ((host->mmc->caps & MMC_CAP_SDIO_IRQ)) {
+> +               reg_inten = readl(host->base + MSDC_INTEN);
+> +               if (reg_inten & MSDC_INTEN_SDIOIRQ) {
+> +                       reg_int = readl(host->base + MSDC_INT);
+> +                       reg_ps = readl(host->base + MSDC_PS);
+> +                       if (!((reg_int & MSDC_INT_SDIOIRQ) ||
+> +                             (reg_ps & MSDC_PS_DATA1)))
 
->> +	u32 curr_freq;
->> +};
->> +
->>  struct sdhci_msm_host {
->>  	struct platform_device *pdev;
->>  	void __iomem *core_mem;	/* MSM SDCC mapped address */
->> @@ -255,8 +265,11 @@ struct sdhci_msm_host {
->>  	bool use_cdr;
->>  	u32 transfer_mode;
->>  	bool updated_ddr_cfg;
->> +	struct sdhci_msm_bus_vote_data *bus_vote_data;
->>  };
->> 
->> +static void sdhci_msm_bus_voting(struct sdhci_host *host, u32 
->> enable);
->> +
->>  static const struct sdhci_msm_offset *sdhci_priv_msm_offset(struct 
->> sdhci_host *host)
->>  {
->>  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->> @@ -1564,6 +1577,7 @@ static void sdhci_msm_set_clock(struct 
->> sdhci_host *host, unsigned int clock)
->> 
->>  	msm_set_clock_rate_for_bus_mode(host, clock);
->>  out:
->> +	sdhci_msm_bus_voting(host, !!clock);
->>  	__sdhci_msm_set_clock(host, clock);
->>  }
->> 
->> @@ -1685,6 +1699,219 @@ static void 
->> sdhci_msm_set_regulator_caps(struct sdhci_msm_host *msm_host)
->>  	pr_debug("%s: supported caps: 0x%08x\n", mmc_hostname(mmc), caps);
->>  }
->> 
->> +/*
->> + * Returns required bandwidth in Bytes per Sec
->> + */
->> +static unsigned long sdhci_get_bw_required(struct sdhci_host *host,
->> +					struct mmc_ios *ios)
->> +{
->> +	unsigned long bw;
->> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->> +	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
->> +
->> +	bw = msm_host->clk_rate;
-> 
-> nit: you could declare 'bw' last and do the assignment together with 
-> the
-> declaration.
-> 
-ok. I will do it in my next patch.
->> +
->> +	if (ios->bus_width == MMC_BUS_WIDTH_4)
->> +		bw /= 2;
->> +	else if (ios->bus_width == MMC_BUS_WIDTH_1)
->> +		bw /= 8;
->> +
->> +	return bw;
->> +}
->> +
->> +/*
->> + * Helper function to parse the exact OPP node
->> + * Returns OPP pointer on success else NULL on error
->> + */
->> +static struct dev_pm_opp *find_opp_for_freq(struct sdhci_msm_host 
->> *msm_host,
->> +							unsigned long bw)
->> +{
->> +	struct dev_pm_opp *opp;
->> +	struct sdhci_host *host = mmc_priv(msm_host->mmc);
->> +	unsigned int freq = bw;
->> +	struct device *dev = &msm_host->pdev->dev;
->> +
->> +
->> +	if (!freq)
->> +		opp = dev_pm_opp_find_peak_bw_floor(dev, &freq);
->> +	else
->> +		opp = dev_pm_opp_find_peak_bw_exact(dev, freq, true);
->> +
->> +	/* Max Bandwidth vote */
-> 
-> s/Bandwidth/bandwidth/
-> 
-ok.
+This looks a bit unnecessary complicated and there are more
+parentheses than needed.
 
->> +	if (PTR_ERR(opp) == -ERANGE && freq > sdhci_msm_get_max_clock(host))
->> +		opp = dev_pm_opp_find_peak_bw_ceil(dev, &bw);
->> +
->> +	if (IS_ERR(opp)) {
->> +		dev_err(dev, "Failed to find OPP for freq:%u err:%ld\n",
->> +				freq, PTR_ERR(opp));
->> +		return NULL;
->> +	}
->> +	return opp;
->> +}
->> +
->> +/*
->> + * This function sets the interconnect bus bandwidth
->> + * vote based on bw (bandwidth) argument.
->> + */
->> +#define BUS_INTERCONNECT_PATHS 2 /* 1. sdhc -> ddr 2. cpu -> sdhc */
->> +static void sdhci_msm_bus_set_vote(struct sdhci_host *host,
->> +						unsigned int bw)
->> +{
->> +	int i;
->> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->> +	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
->> +	struct sdhci_msm_bus_vote_data *vote_data = msm_host->bus_vote_data;
->> +	struct dev_pm_opp *opp;
->> +	unsigned long freq = bw;
->> +	unsigned long ib[BUS_INTERCONNECT_PATHS], 
->> ab[BUS_INTERCONNECT_PATHS];
-> 
-> the names are not very expressive, how about peak_bw and avg_bw?
-> 
-hmm, ok. i will modify in my next patch set.
+I am also wondering about the logic. This looks like you want to
+signal an SDIO IRQ when both MSDC_INT_SDIOIRQ and MSDC_PS_DATA1 are
+cleared. Is that really correct?
 
->> +	int ddr_rc = 0, cpu_rc = 0;
-> 
-> initialization is not needed
-> 
-ok.
->> +
->> +	if (!msm_host->bus_vote_data->sdhc_to_ddr ||
->> +			!msm_host->bus_vote_data->cpu_to_sdhc)
->> +		return;
->> +
->> +	if (bw != vote_data->curr_freq) {
-> 
->   	if (bw == vote_data->curr_freq)
-> 		return;
-> 
-> 
->> +		for (i = 0; i < BUS_INTERCONNECT_PATHS; i++) {
->> +			opp = find_opp_for_freq(msm_host, freq);
->> +			if (opp) {
->> +				ab[i] =	dev_pm_opp_get_bw(opp, &ib[i]);
->> +				freq += 1; /* Next Band width vote */
-> 
-> s/Band width/bandwidth/
-> 
-ok.
->> +				dev_pm_opp_put(opp);
->> +			}
->> +		}
->> +		pr_debug("%s: freq:%d sdhc_to_ddr ab:%lu ib:%lu cpu_to_sdhc ab:%lu 
->> ib:%lu\n",
->> +				mmc_hostname(host->mmc), bw, ab[0], ib[0],
->> +				ab[1], ib[1]);
->> +		ddr_rc = icc_set_bw(vote_data->sdhc_to_ddr, 0, ib[0]);
->> +		cpu_rc = icc_set_bw(vote_data->cpu_to_sdhc, 0, ib[1]);
->> +		if (ddr_rc || cpu_rc) {
->> +			pr_err("%s: icc_set() failed ddr_rc_err:%d cpu_rc_err:%d\n",
->> +				mmc_hostname(host->mmc), ddr_rc, cpu_rc);
->> +			return;
->> +		}
->> +		vote_data->curr_freq = bw;
->> +	}
->> +}
->> +
->> +/*
->> + * This function registers the device to OPP framework and
->> + * parses few optional parameters from the device tree node.
->> + * Returns NULL bvd pointer on error else a valid bvd pointer.
->> + */
->> +static struct sdhci_msm_bus_vote_data 
->> *sdhci_msm_get_bus_vote_data(struct device
->> +				       *dev, struct sdhci_msm_host *host)
->> +
->> +{
->> +	struct platform_device *pdev = to_platform_device(dev);
->> +	struct sdhci_msm_bus_vote_data *vote_data = NULL;
->> +	int ret = 0;
-> 
-> initialization of 'vote_data' and 'ret' is not needed.
-> 
-ok. i will be removing this function and bring all the required to the 
-caller function
-that should address all the comments on this function.
->> +
->> +	if (!pdev) {
->> +		dev_err(dev, "Null platform device!\n");
->> +		return NULL;
->> +	}
-> 
-> It's probably safe to assume that the device is a platform device?
-> 
-same as above.
->> +	vote_data = devm_kzalloc(dev, sizeof(*vote_data), GFP_KERNEL);
->> +	if (!vote_data)
->> +		return vote_data;
-> 
->   		return ERR_PTR(-ENOMEM); ?
-> 
->> +
->> +	ret = dev_pm_opp_of_add_table(dev);
->> +	if (ret) {
->> +		if (ret == -ENODEV || ret == -ENODATA) {
->> +			dev_dbg(dev, "OPP not found. Skip bus voting!!:%d\n",
->> +					ret);
->> +			vote_data->skip_bus_bw_voting = true;
->> +		} else {
->> +			dev_dbg(dev, "OPP regestration failed:%d\n", ret);
-> 
-> s/regestration/registration/
-> 
-ok.
-> Depending on the consequences of this failure (e.g. probe() fails) you
-> probably want to use dev_warn() or dev_err() here.
-> 
-same as above.
->> +			goto err;
->> +		}
->> +	}
->> +
->> +	return vote_data;
->> +err:
->> +	devm_kfree(dev, vote_data);
->> +	vote_data = NULL;
-> 
-> not needed
-> 
-ok.
->> +	return vote_data;
-> 
->   	return NULL;
-> 
->> +}
->> +
->> +/*
->> + * Helper function to register for OPP and interconnect
->> + * frameworks.
->> + */
->> +static int sdhci_msm_bus_register(struct sdhci_msm_host *host,
->> +				struct platform_device *pdev)
->> +{
->> +	struct sdhci_msm_bus_vote_data *vote_data;
->> +	struct device *dev = &pdev->dev;
->> +	int ret = 0;
->> +
->> +	vote_data = sdhci_msm_get_bus_vote_data(dev, host);
->> +	if (!vote_data) {
->> +		dev_dbg(&pdev->dev, "Failed to get bus_scale data\n");
-> 
-> In general I'm not convinced about the use of dev_dbg() in the error
-> paths. Maybe there is some signal you can use to determine if there
-> should be a valid bus scaling information (e.g. some DT property
-> exists). If it exists you proceed with obtaining the necessary
-> information and complain loudly if something goes wrong, otherwise you
-> don't even try to obtain it and omit the debug logs.
-> 
-ok. i will modify accordingly, in my next patch series.
+Moreover, this means that you will be polling the registers for each
+every request you complete. This sounds quite inefficient and I wonder
+if it can be done more seldom, perhaps via a timer event instead. And,
+what if there is no request for a while, then this means the re-check
+doesn't gets to run. Could that be a problem?
 
->> +		host->bus_vote_data = NULL;
-> 
-> IIUC struct sdhci_msm_host is zero initialized by sdhci_pltfm_init(),
-> hence the assignment to NULL is not needed.
-> 
-ok.
->> +		return -EINVAL;
-> 
-> Use the error returned by sdhci_msm_get_bus_vote_data().
-> 
-ok. i will address in my next patch set.
->> +	}
->> +	host->bus_vote_data = vote_data;
->> +
->> +	vote_data->sdhc_to_ddr = of_icc_get(&pdev->dev, "sdhc-ddr");
-> 
-> This could be the signal I mentioned above. If this entry does not
-> exist it is pointless to proceed. You could check this before
-> sdhci_msm_get_bus_vote_data() and abort with a dev_info() message in
-> case it doesn't exist. If it exists any error afterwards will be
-> reported with dev_err().
-> 
-ok. i will modify the code accordingly in my next patch series.
+> +                               sdio_signal_irq(host->mmc);
 
->> +	if (!vote_data->sdhc_to_ddr) {
->> +		dev_dbg(&pdev->dev, "DT property for path %s missing\n",
->> +				"sdhc-ddr");
->> +		return -ENOENT;
->> +	} else if (IS_ERR(vote_data->sdhc_to_ddr) {
->> +		dev_dbg(&pdev->dev, "(%ld): failed getting %s path\n",
->> +				PTR_ERR(vote_data->sdhc_to_ddr), "sdhc-ddr");
->> +		ret = PTR_ERR(vote_data->sdhc_to_ddr);
->> +		vote_data->sdhc_to_ddr = NULL;
->> +		return ret;
-> 
-> if there is an error probe() should probably be aborted. If that's the
-> case you can replace the above three lines with 'return
-> PTR_ERR(vote_data->sdhc_to_ddr);'
-> 
-True but i added this for more cautious. Any how it is handled as error 
-probe().
-i will address this in my next patch series.
+Before calling sdio_signal_irq(), the SDIO IRQ needs to be temporarily
+disabled. In other words, looks like you should be calling
+__msdc_enable_sdio_irq(0) from here as well.
 
+> +               }
+> +       }
+> +}
+> +
+>  static void msdc_track_cmd_data(struct msdc_host *host,
+>                                 struct mmc_command *cmd, struct mmc_data *data)
+>  {
+> @@ -1035,6 +1069,8 @@ static void msdc_request_done(struct msdc_host *host, struct mmc_request *mrq)
+>         if (host->error)
+>                 msdc_reset_hw(host);
+>         mmc_request_done(host->mmc, mrq);
+> +       if (host->dev_comp->recheck_sdio_irq)
+> +               msdc_recheck_sdio_irq(host);
+>  }
+>
+>  /* returns true if command is fully handled; returns false otherwise */
+> @@ -1393,6 +1429,8 @@ static void __msdc_enable_sdio_irq(struct msdc_host *host, int enb)
+>         if (enb) {
+>                 sdr_set_bits(host->base + MSDC_INTEN, MSDC_INTEN_SDIOIRQ);
+>                 sdr_set_bits(host->base + SDC_CFG, SDC_CFG_SDIOIDE);
+> +               if (host->dev_comp->recheck_sdio_irq)
+> +                       msdc_recheck_sdio_irq(host);
+>         } else {
+>                 sdr_clr_bits(host->base + MSDC_INTEN, MSDC_INTEN_SDIOIRQ);
+>                 sdr_clr_bits(host->base + SDC_CFG, SDC_CFG_SDIOIDE);
+> --
+> 1.9.1
 
->> +	}
->> +	vote_data->cpu_to_sdhc = of_icc_get(&pdev->dev, "cpu-sdhc");
->> +	if (!vote_data->cpu_to_sdhc) {
->> +		dev_dbg(&pdev->dev, "DT property for path %s missing\n",
->> +					"cpu_to_sdhc");
->> +		return -ENOENT;
->> +	} else if (IS_ERR(vote_data->cpu_to_sdhc)) {
->> +		dev_dbg(&pdev->dev, "(%ld): failed getting %s path\n",
->> +				PTR_ERR(vote_data->cpu_to_sdhc), "cpu-sdhc");
->> +		ret = PTR_ERR(vote_data->cpu_to_sdhc);
->> +		vote_data->cpu_to_sdhc = NULL;
->> +		return ret;
-> 
-> same comment as above
-> 
-ok. i will take care this too.
-
->> +	}
->> +	return ret;
-> 
-> no error if we get to this point, hence:
-> 
-> 	return 0;
-> 
-ok.
-
->> +}
->> +
->> +static void sdhci_msm_bus_unregister(struct device *dev,
->> +				struct sdhci_msm_host *host)
->> +{
->> +	struct sdhci_msm_bus_vote_data *vote_data = host->bus_vote_data;
->> +
->> +	if (vote_data->skip_bus_bw_voting ||
->> +		!vote_data->sdhc_to_ddr ||
->> +		!vote_data->cpu_to_sdhc)
->> +		return;
->> +
->> +	icc_put(vote_data->sdhc_to_ddr);
->> +	icc_put(vote_data->cpu_to_sdhc);
->> +}
->> +
->> +#define MSM_MMC_BUS_VOTING_DELAY        200 /* msecs */
->> +
->> +static void sdhci_msm_bus_voting(struct sdhci_host *host, u32 enable)
-> 
-> s/u32/bool/ ?
-> 
-ok.
->> +{
->> +	struct mmc_ios *ios = &host->mmc->ios;
->> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->> +	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
->> +	unsigned int bw;
->> +
->> +	if (msm_host->bus_vote_data->skip_bus_bw_voting)
->> +		return;
->> +
->> +	if (enable) {
->> +		bw = sdhci_get_bw_required(host, ios);
->> +		sdhci_msm_bus_set_vote(host, bw);
->> +	} else
->> +		sdhci_msm_bus_set_vote(host, 0);
->> +}
->> +
->>  static const struct sdhci_msm_variant_ops mci_var_ops = {
->>  	.msm_readl_relaxed = sdhci_msm_mci_variant_readl_relaxed,
->>  	.msm_writel_relaxed = sdhci_msm_mci_variant_writel_relaxed,
->> @@ -1845,11 +2072,20 @@ static int sdhci_msm_probe(struct 
->> platform_device *pdev)
->>  		dev_warn(&pdev->dev, "TCXO clk not present (%d)\n", ret);
->>  	}
->> 
->> +	ret = sdhci_msm_bus_register(msm_host, pdev);
->> +	if (ret && msm_host->bus_vote_data &&
->> +			!msm_host->bus_vote_data->skip_bus_bw_voting) {
->> +		dev_err(&pdev->dev, "Bus registration failed (%d)\n", ret);
->> +		goto clk_disable;
->> +	}
->> +
->> +	sdhci_msm_bus_voting(host, 1);
-> 
-> s/1/true/
-> 
-ok.
->> +
->>  	if (!msm_host->mci_removed) {
->>  		msm_host->core_mem = devm_platform_ioremap_resource(pdev, 1);
->>  		if (IS_ERR(msm_host->core_mem)) {
->>  			ret = PTR_ERR(msm_host->core_mem);
->> -			goto clk_disable;
->> +			goto bus_unregister;
->>  		}
->>  	}
->> 
->> @@ -1924,7 +2160,7 @@ static int sdhci_msm_probe(struct 
->> platform_device *pdev)
->>  	msm_host->pwr_irq = platform_get_irq_byname(pdev, "pwr_irq");
->>  	if (msm_host->pwr_irq < 0) {
->>  		ret = msm_host->pwr_irq;
->> -		goto clk_disable;
->> +		goto bus_unregister;
->>  	}
->> 
->>  	sdhci_msm_init_pwr_irq_wait(msm_host);
->> @@ -1937,7 +2173,7 @@ static int sdhci_msm_probe(struct 
->> platform_device *pdev)
->>  					dev_name(&pdev->dev), host);
->>  	if (ret) {
->>  		dev_err(&pdev->dev, "Request IRQ failed (%d)\n", ret);
->> -		goto clk_disable;
->> +		goto bus_unregister;
->>  	}
->> 
->>  	pm_runtime_get_noresume(&pdev->dev);
->> @@ -1962,6 +2198,9 @@ static int sdhci_msm_probe(struct 
->> platform_device *pdev)
->>  	pm_runtime_disable(&pdev->dev);
->>  	pm_runtime_set_suspended(&pdev->dev);
->>  	pm_runtime_put_noidle(&pdev->dev);
->> +bus_unregister:
->> +	sdhci_msm_bus_voting(host, 0);
-> 
-> s/0/false/
-> 
-ok.
->> +	sdhci_msm_bus_unregister(&pdev->dev, msm_host);
->>  clk_disable:
->>  	clk_bulk_disable_unprepare(ARRAY_SIZE(msm_host->bulk_clks),
->>  				   msm_host->bulk_clks);
->> @@ -1991,6 +2230,9 @@ static int sdhci_msm_remove(struct 
->> platform_device *pdev)
->>  				   msm_host->bulk_clks);
->>  	if (!IS_ERR(msm_host->bus_clk))
->>  		clk_disable_unprepare(msm_host->bus_clk);
->> +
->> +	sdhci_msm_bus_voting(host, 0);
-> 
-> s/0/false/
-> 
-ok.
->> +	sdhci_msm_bus_unregister(&pdev->dev, msm_host);
->>  	sdhci_pltfm_free(pdev);
->>  	return 0;
->>  }
->> @@ -2003,7 +2245,7 @@ static __maybe_unused int 
->> sdhci_msm_runtime_suspend(struct device *dev)
->> 
->>  	clk_bulk_disable_unprepare(ARRAY_SIZE(msm_host->bulk_clks),
->>  				   msm_host->bulk_clks);
->> -
->> +	sdhci_msm_bus_voting(host, 0);
-> 
-> s/0/false/
-> 
-ok.
->>  	return 0;
->>  }
->> 
->> @@ -2025,6 +2267,7 @@ static __maybe_unused int 
->> sdhci_msm_runtime_resume(struct device *dev)
->>  	if (msm_host->restore_dll_config && msm_host->clk_rate)
->>  		return sdhci_msm_restore_sdr_dll_config(host);
->> 
->> +	sdhci_msm_bus_voting(host, 1);
-> 
-> s/0/true/
-> 
-ok. i will address all these in my next patch series.
-> Thanks
-> 
-> Matthias
+Kind regards
+Uffe
