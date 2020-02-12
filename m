@@ -8,53 +8,53 @@ X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 37605C2BA83
-	for <linux-mmc@archiver.kernel.org>; Wed, 12 Feb 2020 04:14:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 237D5C2BA83
+	for <linux-mmc@archiver.kernel.org>; Wed, 12 Feb 2020 04:14:23 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 0AC8A20842
-	for <linux-mmc@archiver.kernel.org>; Wed, 12 Feb 2020 04:14:18 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id EA30A2082F
+	for <linux-mmc@archiver.kernel.org>; Wed, 12 Feb 2020 04:14:22 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="hGdyka6/"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="RVG/j0Cf"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728053AbgBLEOR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 11 Feb 2020 23:14:17 -0500
-Received: from mail-pj1-f68.google.com ([209.85.216.68]:32921 "EHLO
-        mail-pj1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727602AbgBLEOQ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Feb 2020 23:14:16 -0500
-Received: by mail-pj1-f68.google.com with SMTP id m7so1428314pjs.0;
-        Tue, 11 Feb 2020 20:14:16 -0800 (PST)
+        id S1728072AbgBLEOW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 11 Feb 2020 23:14:22 -0500
+Received: from mail-pg1-f196.google.com ([209.85.215.196]:37443 "EHLO
+        mail-pg1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727602AbgBLEOV (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Feb 2020 23:14:21 -0500
+Received: by mail-pg1-f196.google.com with SMTP id z12so506740pgl.4;
+        Tue, 11 Feb 2020 20:14:19 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :in-reply-to:references;
-        bh=qXFSOdJFY54Rwc/1S4vXiFbbifW3bH93ZRFzyBvbEM0=;
-        b=hGdyka6/RmAXFjU841hEJJ21UrRKnW8Hoe1NIwqk5ipPXxuIf/fHKOJmpz7WjEuHeN
-         KEd11+a0oVSA02bOfHJ6tSz27iF2eT0inqjKAIW5O4OiAWiK8yn3B2JM9dmXB4+I904o
-         YEuCIL/co326mIIX0ijWC6UsSEcEULBNx/wX3LZz/HeLukOWWTJWX7CiR0SRlaBdkIBn
-         tsR/Ht/7Oup0k6ERXyeliBVtG/1YnfxTFTL/cHSE+ugv8q5Iv/929nfCy1M2KhWSzu5L
-         UoA/zzda6iE0ZyqyI9pMsvPcp8O8mh23l1LvourNMyMvIFuao+QFPWJCcJrl+MEcl9kl
-         FILg==
+        bh=z2rCwKhMPk5QQnDbc8O1zs9yu0JRS1NKgiYNty4j9ao=;
+        b=RVG/j0CfXEixN8CZ8SAYi908LXoH2BF8kl/2M/cr26tvVqTr/Kt2/b1wGtv7xy9o6s
+         CxJvczDWc+QdCVKB7RynwjiqUUNqYHzRtnxnmNUZ+j3Cv5dDTruoM65own1507cpu58t
+         L4JEG5eex/hZxthjXmFEN4w5v6o8TkMLiL4/ODwvZjnSVkU3uJXCHjO4f/h4/P+XQntC
+         jIfmFpc3uNpiLKyM3nwBhteCW7ISNoxsB04TvK1Q21ShcWMFAtInfPpfV1ggMVWdIqBE
+         DXmrnk6y0jXhJTx2fwU6Bm3LAKnrCjzNOUu+GjrS/NSo9r0mIXrrX2/ddS7mJ21lMMyD
+         VP/g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:in-reply-to:references;
-        bh=qXFSOdJFY54Rwc/1S4vXiFbbifW3bH93ZRFzyBvbEM0=;
-        b=XZfc22MlmEf9dalHvmyaDqQqguKHAvmNqdIsoxSz6jLgXvVl1hjgRydAF2IO91GxxB
-         gNAZBoD8rVpQZB4K1PnaGWT3qK/EV4iyC5+LMG3eh/xvnAAoRoN+BzGv51zAfk6rBt4J
-         LeE8GX/W5eLcFQGT93nMQCkTIX9s6uVp6+WU4r1QHX0dJ9q++Ll0zSpX43Zi4jFICmHb
-         /xohhdYKEc9aXxIhxi9SJHEMeKvPVkQMIiyDm9IO27qWYnm5CdgyO87iVI5GU+WbypMB
-         LJK43E320yJg4bkK1iB6zlnLevsucDbIHpWNFbE2t8MAqMrL4Ctypm3hvONpnCUHLTsF
-         wlaw==
-X-Gm-Message-State: APjAAAWmPhQC5ge3RffqlS8pw9cRKZZ0d5I0Gd9otzCFXhlhqImjHK5H
-        UnBTAcRwY50IyCpzmtF5LYg=
-X-Google-Smtp-Source: APXvYqxQVb2chEkGjnmYtilp53q3aLcRcGNzxL6C1uOMNe1G9W3h8QKkKvjRYhQy0HFmgd/lQZbfEQ==
-X-Received: by 2002:a17:902:ba8b:: with SMTP id k11mr6337872pls.208.1581480855883;
-        Tue, 11 Feb 2020 20:14:15 -0800 (PST)
+        bh=z2rCwKhMPk5QQnDbc8O1zs9yu0JRS1NKgiYNty4j9ao=;
+        b=GaTvxpRUmJdK5LK91CGF+AcPT8rt3qYuztSKCChGDx2ivvg4Vs8y+v8jr1PjBtDFtV
+         wJ7a7gSrOi7v4V/Ur5F61Xv49SHejYgsqsvdVjWzo5yTrMu1yYoEPsWamkgSbGSsauOI
+         dg/utwacN4QxlsUoNznujB2A0rBmA84sCPpnMbbJuDiJav7UoAQnzHmTL+E+vF+T+JNX
+         GZ7v3K/DZFuALk2bD7oWH4SDStejLmViDR3xbpm4WlHNop3dWoFcQfchDm+o5wXG0mnf
+         jEi6L02XThRwJ2fvriTbRScZ2ZPEq08gpu9Ubt0xJyuB+XiT/rLrn++3qfLKfzUbMHQM
+         W9Mw==
+X-Gm-Message-State: APjAAAVyx9WeZjkeCNYXugw9Dt13StL+R8uyoeoIx1Jowp5Jd5yGf4MY
+        Vyn7yWAWzLCAYtp9uKw0WUM=
+X-Google-Smtp-Source: APXvYqwBjdUCMQgPuJDDN3KIHiIyA2NWs27qtfj+B0Gt1zrb5E0hQOc+jlLjC1f577l+T5IMfnDchQ==
+X-Received: by 2002:a63:691:: with SMTP id 139mr10851354pgg.325.1581480859201;
+        Tue, 11 Feb 2020 20:14:19 -0800 (PST)
 Received: from baolinwangubtpc.spreadtrum.com ([117.18.48.82])
-        by smtp.gmail.com with ESMTPSA id q66sm6424762pfq.27.2020.02.11.20.14.13
+        by smtp.gmail.com with ESMTPSA id q66sm6424762pfq.27.2020.02.11.20.14.16
         (version=TLS1 cipher=ECDHE-RSA-AES128-SHA bits=128/128);
-        Tue, 11 Feb 2020 20:14:15 -0800 (PST)
+        Tue, 11 Feb 2020 20:14:18 -0800 (PST)
 From:   Baolin Wang <baolin.wang7@gmail.com>
 To:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
         asutoshd@codeaurora.org
@@ -62,9 +62,9 @@ Cc:     orsonzhai@gmail.com, zhang.lyra@gmail.com, arnd@arndb.de,
         linus.walleij@linaro.org, baolin.wang@linaro.org,
         baolin.wang7@gmail.com, linux-mmc@vger.kernel.org,
         linux-kernel@vger.kernel.org
-Subject: [PATCH v9 4/5] mmc: host: sdhci: Add a variable to defer to complete requests if needed
-Date:   Wed, 12 Feb 2020 12:12:59 +0800
-Message-Id: <e693e7a29beb3c1922b333f4603ea81f43d5c5b1.1581478568.git.baolin.wang7@gmail.com>
+Subject: [PATCH v9 5/5] mmc: host: sdhci-sprd: Add software queue support
+Date:   Wed, 12 Feb 2020 12:13:00 +0800
+Message-Id: <f629b32943aae9e30ffa17acf4af06c270417001.1581478569.git.baolin.wang7@gmail.com>
 X-Mailer: git-send-email 1.7.9.5
 In-Reply-To: <cover.1581478568.git.baolin.wang7@gmail.com>
 References: <cover.1581478568.git.baolin.wang7@gmail.com>
@@ -77,57 +77,108 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Baolin Wang <baolin.wang@linaro.org>
 
-When using the host software queue, it will trigger the next request in
-irq handler without a context switch. But the sdhci_request() can not be
-called in interrupt context when using host software queue for some host
-drivers, due to the get_cd() ops can be sleepable.
+Add software queue support to improve the performance.
 
-But for some host drivers, such as Spreadtrum host driver, the card is
-nonremovable, so the get_cd() ops is not sleepable, which means we can
-complete the data request and trigger the next request in irq handler
-to remove the context switch for the Spreadtrum host driver.
-
-As suggested by Adrian, we should introduce a request_atomic() API to
-indicate that a request can be called in interrupt context to remove
-the context switch when using mmc host software queue. But this should
-be done in another thread to convert the users of mmc host software queue.
-Thus we can introduce a variable in struct sdhci_host to indicate that
-we will always to defer to complete requests when using the host software
-queue.
-
-Suggested-by: Adrian Hunter <adrian.hunter@intel.com>
 Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
 Signed-off-by: Baolin Wang <baolin.wang7@gmail.com>
 ---
- drivers/mmc/host/sdhci.c |    2 +-
- drivers/mmc/host/sdhci.h |    1 +
- 2 files changed, 2 insertions(+), 1 deletion(-)
+ drivers/mmc/host/Kconfig      |    1 +
+ drivers/mmc/host/sdhci-sprd.c |   28 ++++++++++++++++++++++++++++
+ 2 files changed, 29 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 9761981..9c37451 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -3250,7 +3250,7 @@ static inline bool sdhci_defer_done(struct sdhci_host *host,
- {
- 	struct mmc_data *data = mrq->data;
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 65d3966..3ea45be 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -645,6 +645,7 @@ config MMC_SDHCI_SPRD
+ 	depends on ARCH_SPRD
+ 	depends on MMC_SDHCI_PLTFM
+ 	select MMC_SDHCI_IO_ACCESSORS
++	select MMC_HSQ
+ 	help
+ 	  This selects the SDIO Host Controller in Spreadtrum
+ 	  SoCs, this driver supports R11(IP version: R11P0).
+diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
+index d07b979..d346223 100644
+--- a/drivers/mmc/host/sdhci-sprd.c
++++ b/drivers/mmc/host/sdhci-sprd.c
+@@ -19,6 +19,7 @@
+ #include <linux/slab.h>
  
--	return host->pending_reset ||
-+	return host->pending_reset || host->always_defer_done ||
- 	       ((host->flags & SDHCI_REQ_USE_DMA) && data &&
- 		data->host_cookie == COOKIE_MAPPED);
+ #include "sdhci-pltfm.h"
++#include "mmc_hsq.h"
+ 
+ /* SDHCI_ARGUMENT2 register high 16bit */
+ #define SDHCI_SPRD_ARG2_STUFF		GENMASK(31, 16)
+@@ -379,6 +380,16 @@ static unsigned int sdhci_sprd_get_ro(struct sdhci_host *host)
+ 	return 0;
  }
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 3e95f74..cac2d97 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -537,6 +537,7 @@ struct sdhci_host {
- 	bool irq_wake_enabled;	/* IRQ wakeup is enabled */
- 	bool v4_mode;		/* Host Version 4 Enable */
- 	bool use_external_dma;	/* Host selects to use external DMA */
-+	bool always_defer_done;	/* Always defer to complete requests */
  
- 	struct mmc_request *mrqs_done[SDHCI_MAX_MRQS];	/* Requests done */
- 	struct mmc_command *cmd;	/* Current command */
++static void sdhci_sprd_request_done(struct sdhci_host *host,
++				    struct mmc_request *mrq)
++{
++	/* Validate if the request was from software queue firstly. */
++	if (mmc_hsq_finalize_request(host->mmc, mrq))
++		return;
++
++	 mmc_request_done(host->mmc, mrq);
++}
++
+ static struct sdhci_ops sdhci_sprd_ops = {
+ 	.read_l = sdhci_sprd_readl,
+ 	.write_l = sdhci_sprd_writel,
+@@ -392,6 +403,7 @@ static unsigned int sdhci_sprd_get_ro(struct sdhci_host *host)
+ 	.hw_reset = sdhci_sprd_hw_reset,
+ 	.get_max_timeout_count = sdhci_sprd_get_max_timeout_count,
+ 	.get_ro = sdhci_sprd_get_ro,
++	.request_done = sdhci_sprd_request_done,
+ };
+ 
+ static void sdhci_sprd_request(struct mmc_host *mmc, struct mmc_request *mrq)
+@@ -521,6 +533,7 @@ static int sdhci_sprd_probe(struct platform_device *pdev)
+ {
+ 	struct sdhci_host *host;
+ 	struct sdhci_sprd_host *sprd_host;
++	struct mmc_hsq *hsq;
+ 	struct clk *clk;
+ 	int ret = 0;
+ 
+@@ -631,6 +644,18 @@ static int sdhci_sprd_probe(struct platform_device *pdev)
+ 
+ 	sprd_host->flags = host->flags;
+ 
++	hsq = devm_kzalloc(&pdev->dev, sizeof(*hsq), GFP_KERNEL);
++	if (!hsq) {
++		ret = -ENOMEM;
++		goto err_cleanup_host;
++	}
++
++	ret = mmc_hsq_init(hsq, host->mmc);
++	if (ret)
++		goto err_cleanup_host;
++
++	host->always_defer_done = true;
++
+ 	ret = __sdhci_add_host(host);
+ 	if (ret)
+ 		goto err_cleanup_host;
+@@ -689,6 +714,7 @@ static int sdhci_sprd_runtime_suspend(struct device *dev)
+ 	struct sdhci_host *host = dev_get_drvdata(dev);
+ 	struct sdhci_sprd_host *sprd_host = TO_SPRD_HOST(host);
+ 
++	mmc_hsq_suspend(host->mmc);
+ 	sdhci_runtime_suspend_host(host);
+ 
+ 	clk_disable_unprepare(sprd_host->clk_sdio);
+@@ -717,6 +743,8 @@ static int sdhci_sprd_runtime_resume(struct device *dev)
+ 		goto clk_disable;
+ 
+ 	sdhci_runtime_resume_host(host, 1);
++	mmc_hsq_resume(host->mmc);
++
+ 	return 0;
+ 
+ clk_disable:
 -- 
 1.7.9.5
 
