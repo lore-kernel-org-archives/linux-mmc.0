@@ -2,101 +2,109 @@ Return-Path: <SRS0=ptsr=4A=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-3.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D7D16C2BA83
-	for <linux-mmc@archiver.kernel.org>; Wed, 12 Feb 2020 16:58:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B9753C352A4
+	for <linux-mmc@archiver.kernel.org>; Wed, 12 Feb 2020 21:34:56 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id B091721734
-	for <linux-mmc@archiver.kernel.org>; Wed, 12 Feb 2020 16:58:51 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 868EE24671
+	for <linux-mmc@archiver.kernel.org>; Wed, 12 Feb 2020 21:34:56 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="NlaN8NZn"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="nGD0hPLa"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726351AbgBLQ6v (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 12 Feb 2020 11:58:51 -0500
-Received: from mail-pf1-f194.google.com ([209.85.210.194]:43577 "EHLO
-        mail-pf1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728776AbgBLQ6v (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Feb 2020 11:58:51 -0500
-Received: by mail-pf1-f194.google.com with SMTP id s1so1515463pfh.10
-        for <linux-mmc@vger.kernel.org>; Wed, 12 Feb 2020 08:58:49 -0800 (PST)
+        id S1728185AbgBLVe4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 12 Feb 2020 16:34:56 -0500
+Received: from mail-il1-f170.google.com ([209.85.166.170]:45596 "EHLO
+        mail-il1-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727947AbgBLVez (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Feb 2020 16:34:55 -0500
+Received: by mail-il1-f170.google.com with SMTP id p8so3068175iln.12
+        for <linux-mmc@vger.kernel.org>; Wed, 12 Feb 2020 13:34:55 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=chromium.org; s=google;
-        h=mime-version:content-transfer-encoding:in-reply-to:references
-         :subject:from:cc:to:date:message-id:user-agent;
-        bh=bK+cvl8zl3lFOBR7bGFC49ixHUgxXY0M1LIjl6eCa7g=;
-        b=NlaN8NZnHVoC2MsosIgILZ3NWppGuVSUhrH+t3G+ZjgTaeU9geNHIZoJ4yrqViRc4S
-         GuvHMdMQsjB2d7o2umi7zud7ryWUw8IRQTdPeV3ucViDk0QkOJLkT0XQHyI9toUPWM1h
-         TlTmAY+Eu0E3f0YiwnQMZ3xGlVVIEQiapH5bg=
+        d=gmail.com; s=20161025;
+        h=mime-version:from:date:message-id:subject:to;
+        bh=w12Uk4zQnC+xm4GHXvQXhIjr4R0drGkqeHOjGRGVKRA=;
+        b=nGD0hPLaoWfm9SsNH9PIixjvigE0si+TTOJZSuPm9GakC0PsjP2+CromiBVJRJwXdr
+         Wf+QDToP8eLEw/BAbERoE0k0DTUWo54ksmpAKoDswmHBk6dgL1s+hd0qk0f2xMNNnMyq
+         oY/ZpKnTeIMk4w7dCjuNbOJKnwRYybEdiSznacKKFQci0NRXiLHiNVSMz3Aqt2TDf/lf
+         xqsBUlrXKQJ4DtBDPgzRJ8ZLB/Z81MsySrsbqDJJWoKN28efjrifveNddwG/06NqmPvF
+         /k+EivcEm4RZqZkkX0kZDL+QKlmSiVuhR1kUbpJ/Q473uMQ6o/2dMujmNaZjtYlsc9YI
+         014Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:content-transfer-encoding
-         :in-reply-to:references:subject:from:cc:to:date:message-id
-         :user-agent;
-        bh=bK+cvl8zl3lFOBR7bGFC49ixHUgxXY0M1LIjl6eCa7g=;
-        b=No0k3tKsyWFPWo/2qscXHbGFBhfk9gMcClcLjEHhnDdoIciqUWv6chyEm/BPqG/Wsh
-         Q4zR7A3nBKJwIKrCYs5g9nBVH6/1v5gtnr/DSdxyCk17LnDcvtm5qdYYq+UUrQ0umBbN
-         jO24qugSpXeYtmX1HNl20mp8YPnSdfHaD43gyWrJO47nPGwK/+X9RXm97b8VOlhlHLf1
-         VygqN6gE7soTZdesOan4AV9YsvrZ0/j1g6ZhQ/4X6zTQSY+iEm0fETOtKj0kxzhfRSdW
-         R0irmtj9HEPSWKSHOPZAaCO/bPy8uFjcJXdIsE7ffY9F2L+5hZwww08uDEMP9OXge8+0
-         46KA==
-X-Gm-Message-State: APjAAAVlr/86MId7f5gAdTkNg4q7hqznkMlzvKlQif8nVE0dDLK2kix0
-        axzOtXS7NSePmFqBTNa633vfOQ==
-X-Google-Smtp-Source: APXvYqydHiVqEawLuj0kN/UatDCVMzDQCKH2Edo9QUQTHOVoTBw6W167ZCYnwSPn4e1U0H9BAmp+Iw==
-X-Received: by 2002:aa7:951c:: with SMTP id b28mr9136009pfp.97.1581526728668;
-        Wed, 12 Feb 2020 08:58:48 -0800 (PST)
-Received: from chromium.org ([2620:15c:202:1:fa53:7765:582b:82b9])
-        by smtp.gmail.com with ESMTPSA id 13sm1497030pfj.68.2020.02.12.08.58.48
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 12 Feb 2020 08:58:48 -0800 (PST)
-Content-Type: text/plain; charset="utf-8"
+        h=x-gm-message-state:mime-version:from:date:message-id:subject:to;
+        bh=w12Uk4zQnC+xm4GHXvQXhIjr4R0drGkqeHOjGRGVKRA=;
+        b=PvHyCTQAm0AmxIS6CiT/ICDDtOM3NGTD4zHVuc5hz7VvulW0YmerisAA6v7kWuhRam
+         DBCzkFoc0XFUDidpuz1+YGOus9hxjUkK6onmGsctMpWQdtCaAl0UmPLf3o4d/t5kkxds
+         ZmaWQaVtg4nYtCmGKEVh2G+Z0vx3AwO9m7zTSqwvePBEminjY5ELB4zB8sccsDdMARBx
+         DE8/MgXMnHS96iiPIoEqmOVOEcg+L1VYhq63U1qqcaJubzfqgWesS28ym2A3KMxtcrEy
+         tX8hXjbm49dervKyT012t3EWO142aAyGl8/TYx99GNRqQrBZoMTGyJasqLMyqkZIduvU
+         WqFA==
+X-Gm-Message-State: APjAAAWWDnesm6dIuDzjNqvuwJxX44siNe67aPV2W/uhgMM7ItcS7f6I
+        uQSKf2ZECAUcx8bYJ2vbjDubjlWxj8o2Pt/nmy2cKGuq
+X-Google-Smtp-Source: APXvYqwxNhn/TKvKC6PNrZkWdLDtRBZtKFX4gCeAjjM39czv6n5yxbo1Y8awtBH3kVWiYJ3GSDsgrZ3AJzuNysP25yQ=
+X-Received: by 2002:a92:3cc3:: with SMTP id j64mr11824282ilf.160.1581543295070;
+ Wed, 12 Feb 2020 13:34:55 -0800 (PST)
 MIME-Version: 1.0
-Content-Transfer-Encoding: quoted-printable
-In-Reply-To: <1581492673-27295-1-git-send-email-sbhanu@codeaurora.org>
-References: <1581492673-27295-1-git-send-email-sbhanu@codeaurora.org>
-Subject: Re: [PATCH V3] mmc: sdhci-msm: Update system suspend/resume callbacks of sdhci-msm platform driver
-From:   Stephen Boyd <swboyd@chromium.org>
-Cc:     asutoshd@codeaurora.org, stummala@codeaurora.org,
-        sayalil@codeaurora.org, cang@codeaurora.org,
-        vbadigan@codeaurora.org, rampraka@codeaurora.org,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
-        agross@kernel.org, bjorn.andersson@linaro.org,
-        Shaik Sajida Bhanu <sbhanu@codeaurora.org>
-To:     Shaik Sajida Bhanu <sbhanu@codeaurora.org>,
-        adrian.hunter@intel.com, mka@chromium.org, robh+dt@kernel.org,
-        ulf.hansson@linaro.org
-Date:   Wed, 12 Feb 2020 08:58:47 -0800
-Message-ID: <158152672736.121156.11425666862560332951@swboyd.mtv.corp.google.com>
-User-Agent: alot/0.9
+From:   Patrick Oppenlander <patrick.oppenlander@gmail.com>
+Date:   Thu, 13 Feb 2020 08:34:43 +1100
+Message-ID: <CAEg67GnNdOBgq=gVH9fDTwT0-KM5+3g8Do5ZnW+y6Q0AY_302A@mail.gmail.com>
+Subject: mmc-utils mmc tool reports incorrect cache size
+To:     linux-mmc@vger.kernel.org
+Content-Type: multipart/mixed; boundary="0000000000004cf39f059e67be65"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Quoting Shaik Sajida Bhanu (2020-02-11 23:31:13)
-> The existing suspend/resume callbacks of sdhci-msm driver are just
-> gating/un-gating the clocks. During suspend cycle more can be done
-> like disabling controller, disabling card detection, enabling wake-up eve=
-nts.
->=20
-> So updating the system pm callbacks for performing these extra
-> actions besides controlling the clocks.
->=20
-> Signed-off-by: Shaik Sajida Bhanu <sbhanu@codeaurora.org>
+--0000000000004cf39f059e67be65
+Content-Type: text/plain; charset="UTF-8"
 
-Reviewed-by: Stephen Boyd <swboyd@chromium.org>
+Hi,
 
->=20
-> Changes since V2:
->     Removed disabling/enabling pwr-irq from system pm ops.
->=20
-> Changes since V1:
->     Invoking pm_runtime_force_suspend/resume instead of
->     sdhci_msm_runtime_suepend/resume.
-> ---
+I recently noticed that 'mmc' reports cache size incorrectly. The unit
+in the extended CSD is kilobits rather than kilobytes, so for a
+display unit of 'KiB' it needs to be scaled appropriately.
+Alternatively the unit could change to Kibit, but I think that's less
+helpful.
 
-This triple dash should come right after the SoB line.
+I've attached a patch which fixes the issue & includes references to
+the relevant parts of the JEDEC standard.
+
+Hope someone finds this helpful,
+
+Patrick
+
+--0000000000004cf39f059e67be65
+Content-Type: text/x-patch; charset="US-ASCII"; 
+	name="0001-Scale-ext_csd-cache-size-from-kilobits-to-kilobytes.patch"
+Content-Disposition: attachment; 
+	filename="0001-Scale-ext_csd-cache-size-from-kilobits-to-kilobytes.patch"
+Content-Transfer-Encoding: base64
+Content-ID: <f_k6jtzd6c0>
+X-Attachment-Id: f_k6jtzd6c0
+
+RnJvbSBmZDc0MTM3NDI3OGVjNjRiYjBjMjY3ODBkMDQzZmFiMGQ3YmNmNDBlIE1vbiBTZXAgMTcg
+MDA6MDA6MDAgMjAwMQpGcm9tOiBQYXRyaWNrIE9wcGVubGFuZGVyIDxwYXRyaWNrLm9wcGVubGFu
+ZGVyQGdtYWlsLmNvbT4KRGF0ZTogTW9uLCA0IE5vdiAyMDE5IDEzOjUxOjEyICsxMTAwClN1Ympl
+Y3Q6IFtQQVRDSF0gU2NhbGUgZXh0X2NzZCBjYWNoZSBzaXplIGZyb20ga2lsb2JpdHMgdG8ga2ls
+b2J5dGVzCgpKRVNEODQtQjUxIDcuNC4zMCBDQUNIRV9TSVpFIFsyNTI6MjQ5XSBzdGF0ZXMgdGhh
+dCAidGhlIHNpemUgaXMKaW5kaWNhdGVkIGFzIG11bHRpcGxlIG9mIGtpbG9iaXRzIi4gVGhpcyBp
+cyBhbHNvIHN1cHBvcnRlZCBieSBUYWJsZSAzOSwKImUuTU1DIGludGVybmFsIHNpemVzIGFuZCBy
+ZWxhdGVkIFVuaXRzIC8gR3JhbnVsYXJpdGllcyIgd2hpY2ggbGlzdHMKIjMyS2IgKD00S0IpIiBh
+cyB0aGUgY2FjaGUgc2l6ZSBncmFudWxhcml0eSBmb3IgNEtpQiBuYXRpdmUgZGV2aWNlcy4KLS0t
+CiBtbWNfY21kcy5jIHwgNCArKy0tCiAxIGZpbGUgY2hhbmdlZCwgMiBpbnNlcnRpb25zKCspLCAy
+IGRlbGV0aW9ucygtKQoKZGlmZiAtLWdpdCBhL21tY19jbWRzLmMgYi9tbWNfY21kcy5jCmluZGV4
+IGZiMzcxODkuLmExYjFkNzUgMTAwNjQ0Ci0tLSBhL21tY19jbWRzLmMKKysrIGIvbW1jX2NtZHMu
+YwpAQCAtMTQxOSw4ICsxNDE5LDggQEAgaW50IGRvX3JlYWRfZXh0Y3NkKGludCBuYXJncywgY2hh
+ciAqKmFyZ3YpCiAJCXByaW50ZigiUG93ZXIgb2ZmIG5vdGlmaWNhdGlvbiBbUE9XRVJfT0ZGX0xP
+TkdfVElNRTogMHglMDJ4XVxuIiwKIAkJCWV4dF9jc2RbMjQ3XSk7CiAJCXByaW50ZigiQ2FjaGUg
+U2l6ZSBbQ0FDSEVfU0laRV0gaXMgJWQgS2lCXG4iLAotCQkJZXh0X2NzZFsyNDldIDw8IDAgfCAo
+ZXh0X2NzZFsyNTBdIDw8IDgpIHwKLQkJCShleHRfY3NkWzI1MV0gPDwgMTYpIHwgKGV4dF9jc2Rb
+MjUyXSA8PCAyNCkpOworCQkJKGV4dF9jc2RbMjQ5XSA8PCAwIHwgKGV4dF9jc2RbMjUwXSA8PCA4
+KSB8CisJCQkoZXh0X2NzZFsyNTFdIDw8IDE2KSB8IChleHRfY3NkWzI1Ml0gPDwgMjQpKSAvIDgp
+OwogCX0KIAogCS8qIEE0NDE6IFJlc2VydmVkIFs1MDE6MjQ3XQotLSAKMi4yMy4wCgo=
+--0000000000004cf39f059e67be65--
