@@ -2,100 +2,111 @@ Return-Path: <SRS0=nQxR=4B=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+X-Spam-Status: No, score=-0.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
-	version=3.4.0
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 007B1C352A3
-	for <linux-mmc@archiver.kernel.org>; Thu, 13 Feb 2020 22:13:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 37ADAC352A3
+	for <linux-mmc@archiver.kernel.org>; Thu, 13 Feb 2020 22:14:22 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id C20862086A
-	for <linux-mmc@archiver.kernel.org>; Thu, 13 Feb 2020 22:13:39 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0774621734
+	for <linux-mmc@archiver.kernel.org>; Thu, 13 Feb 2020 22:14:22 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="i9P5Cklo"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="H8RISYd2"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727705AbgBMWNj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 13 Feb 2020 17:13:39 -0500
-Received: from mail-pj1-f66.google.com ([209.85.216.66]:51344 "EHLO
-        mail-pj1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726282AbgBMWNj (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Feb 2020 17:13:39 -0500
-Received: by mail-pj1-f66.google.com with SMTP id fa20so2980213pjb.1
-        for <linux-mmc@vger.kernel.org>; Thu, 13 Feb 2020 14:13:38 -0800 (PST)
+        id S1727519AbgBMWOV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 13 Feb 2020 17:14:21 -0500
+Received: from mail-io1-f52.google.com ([209.85.166.52]:36028 "EHLO
+        mail-io1-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726282AbgBMWOV (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Feb 2020 17:14:21 -0500
+Received: by mail-io1-f52.google.com with SMTP id d15so8369082iog.3
+        for <linux-mmc@vger.kernel.org>; Thu, 13 Feb 2020 14:14:21 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=X4lReZrHRNZcU7TXPUHMFgz8y78N2Sl25kCY1T5wMSo=;
-        b=i9P5Cklo8bk+cODxwc+lyyWxg4Oyb10lxwmTMouB5Ri/0DcdHNoDzXKZ2MSDtqkcQB
-         Stu/3P9GnhMFOfITgg9OVgnDYHXMomP6WUsyMlowoY8PCCcvn6YiOIwPs5m7MWx7r/Dm
-         yXwIeKIwkGnx8tam/zEOObva6WMxBGZBu9c2Rwzfsfkio6p5q3IpgqH/iiRdmCz6HFhI
-         a4x4AIP55+/O6B50FPfiUhwHyTx2Mw5JIbFscRTogA3tAIe53goADhilKzM47mawfEdt
-         AJUVXBddr2Ky3uwfyNQ1h6m+3Fmw/ch3+0CD6NbkJ7fnq8hWaKa+SrqoilZr/6p8wqLP
-         M49w==
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=C8clzNXcFBjg9TF/KNQ1s91WSlBbLttUW2klOOZow5Y=;
+        b=H8RISYd2xIq+1xk1nzJQiESTaUXHyc4c0AL4eSsjU34dYZL61HfKpyeiSTLnxMzxFt
+         ygA50FBAN6b3PuXK4bW6g4C/2/DLgyExxbL6UY/YxyasQ2c29Dn57widYu1YDjae9sMw
+         4PIhGyS40kUYkOzQInMJzTE3Nzo4Nes4mCQxXTZFJFER8Isfi6614nr7ruQtfAcXJSml
+         En2lYwwUTSV72dHX6VIilWSpu/SHOnnjjOTvQAn7TwmmsKy7UEEioLo5YgYpBb3qAZyQ
+         7TVSCKu14epurfXvdZoRwFIIgXABGZcSSmlAMbluGEBkvtMy6wfIE9+bokS4Jo7UWxjc
+         CA0A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=X4lReZrHRNZcU7TXPUHMFgz8y78N2Sl25kCY1T5wMSo=;
-        b=fKVwOga1WG4gIPsclJXZ4oNz8qaMIoPR+pcTbmQvcBslciMESGCrhUKf13JZXGGwYl
-         9VZXZeM6UTZSMS6wW08H2LVwY2f0vHJK+djswttlm5K3+3sXD17BkoZ9gnlhRN5Wdj0Q
-         kzMNWB9z0Q9VaPGEeeJrFNJ878comi4g+W31D8PbJt73+QCe0CCtpAhPnONVLnfwvw89
-         70QM7x1/lPCgxYtj4OgQYgHgcg9q+jHQX+XLHrgdu948E1fRNovd9yYgMyqPTP2yhFgU
-         y6U9Jym3R6OStFazWzTWCUodBZuPw/A98OLgYCek+cVdGfwrl+3cbN2BO/NMQETS00Aj
-         a11Q==
-X-Gm-Message-State: APjAAAW6JfCWv7j3SELsSsGzMmxLNMeD2L4nenvjM5kYgdcWp5FIQc2r
-        6COvAbzr7+uOsvILy7iSIjTNDa3c
-X-Google-Smtp-Source: APXvYqxTrnYFYae/nAAwkk3CoOKvGZ2m1TwAfYI2dL26jFYf0FBi8iyCWQKFAE8Vv/fOPKHFDBw4SA==
-X-Received: by 2002:a17:902:161:: with SMTP id 88mr43911plb.129.1581632018204;
-        Thu, 13 Feb 2020 14:13:38 -0800 (PST)
-Received: from gtr.motec.com.au (motec5.motec.com.au. [115.70.189.242])
-        by smtp.gmail.com with ESMTPSA id o12sm4123421pgk.35.2020.02.13.14.13.36
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 13 Feb 2020 14:13:37 -0800 (PST)
-From:   patrick.oppenlander@gmail.com
-To:     linux-mmc@vger.kernel.org
-Cc:     Patrick Oppenlander <patrick.oppenlander@gmail.com>
-Subject: [PATCH] mmc-utils: Fix scaling of cache size
-Date:   Fri, 14 Feb 2020 09:13:32 +1100
-Message-Id: <20200213221332.2228810-1-patrick.oppenlander@gmail.com>
-X-Mailer: git-send-email 2.25.0
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=C8clzNXcFBjg9TF/KNQ1s91WSlBbLttUW2klOOZow5Y=;
+        b=GioHxuBUVLHKbTt93Sa4TJbVrvMXR+42SnE95NgpkvsokCAulywLWcIhQ+EVYL9LsG
+         T8TUeybG5NWZvTDcSsAsBb2PSzsaz2jO1kf7Z93eXC6qCLrCfCIbhc/Zlyb20Q1xjKdx
+         7ShaqmfQF7B81x4CbsHN1xNO7Nx+o0/7IBoqIgPJ6vN/1vusrmY/ergI432gWxL4PtXA
+         i0zuDXQSM+QzZ72B7ysenxxY95e0biHkgmQ7Hc5DVapVPVNMTUw+J67Z0GfxxU/Cz9xW
+         YOanmQ76koH6QAIzHrV8rwc3FLaOC1npG3e+ZnV+UOEBGvfPdSU40KOM3WXoPeaBinrH
+         05wQ==
+X-Gm-Message-State: APjAAAXHpWO3YUADNExkinBoJ4SqyXnusZ64HrZxA8ORCMgDqYxZHZPi
+        SAMybxZ5bh49CbS2iysjk+9YCZRw1LLK3Zt6GhDLmA==
+X-Google-Smtp-Source: APXvYqx5KE6I/x9kgOUxEdtHIWEJqBrnixKe0gZ0TiDfx0cmlLbdnWe5wyPLK4fJ0C9fyoZjjpbUOQWflXTAfXfy76A=
+X-Received: by 2002:a05:6602:22d6:: with SMTP id e22mr23998994ioe.41.1581632060885;
+ Thu, 13 Feb 2020 14:14:20 -0800 (PST)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <CAEg67GnNdOBgq=gVH9fDTwT0-KM5+3g8Do5ZnW+y6Q0AY_302A@mail.gmail.com>
+ <MN2PR04MB6991B0F4431E56BA0C64927AFC1A0@MN2PR04MB6991.namprd04.prod.outlook.com>
+In-Reply-To: <MN2PR04MB6991B0F4431E56BA0C64927AFC1A0@MN2PR04MB6991.namprd04.prod.outlook.com>
+From:   Patrick Oppenlander <patrick.oppenlander@gmail.com>
+Date:   Fri, 14 Feb 2020 09:14:10 +1100
+Message-ID: <CAEg67GkTpaV9hbTx3Yt1EcXsPGwavwMiCw9ArM+qq5P0sE6bPg@mail.gmail.com>
+Subject: Re: mmc-utils mmc tool reports incorrect cache size
+To:     Avri Altman <Avri.Altman@wdc.com>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Patrick Oppenlander <patrick.oppenlander@gmail.com>
+Hi Avri,
 
-JESD84-B51 7.4.30 CACHE_SIZE [252:249] states that "the size is
-indicated as multiple of kilobits". This is also supported by Table 39,
-"e.MMC internal sizes and related Units / Granularities" which lists
-"32Kb (=4KB)" as the cache size granularity for 4KiB native devices.
+I have resent the patch. Hopefully it looks better now.
 
-Signed-off-by: Patrick Oppenlander <patrick.oppenlander@gmail.com>
----
- mmc_cmds.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+Thanks for the reference,
 
-diff --git a/mmc_cmds.c b/mmc_cmds.c
-index fb37189..a1b1d75 100644
---- a/mmc_cmds.c
-+++ b/mmc_cmds.c
-@@ -1419,8 +1419,8 @@ int do_read_extcsd(int nargs, char **argv)
- 		printf("Power off notification [POWER_OFF_LONG_TIME: 0x%02x]\n",
- 			ext_csd[247]);
- 		printf("Cache Size [CACHE_SIZE] is %d KiB\n",
--			ext_csd[249] << 0 | (ext_csd[250] << 8) |
--			(ext_csd[251] << 16) | (ext_csd[252] << 24));
-+			(ext_csd[249] << 0 | (ext_csd[250] << 8) |
-+			(ext_csd[251] << 16) | (ext_csd[252] << 24)) / 8);
- 	}
- 
- 	/* A441: Reserved [501:247]
--- 
-2.25.0
+Patrick
 
+On Thu, Feb 13, 2020 at 6:35 PM Avri Altman <Avri.Altman@wdc.com> wrote:
+>
+> Patrick hi,
+> Yes, it is helpful, but you need to submit your patch in a way it can be reviewed.
+> Maybe you can look in https://www.kernel.org/doc/html/v5.5/process/5.Posting.html?highlight=submit%20patches#
+> For more info.
+>
+> Thanks,
+> Avri
+>
+> > -----Original Message-----
+> > From: linux-mmc-owner@vger.kernel.org <linux-mmc-
+> > owner@vger.kernel.org> On Behalf Of Patrick Oppenlander
+> > Sent: Wednesday, February 12, 2020 11:35 PM
+> > To: linux-mmc@vger.kernel.org
+> > Subject: mmc-utils mmc tool reports incorrect cache size
+> >
+> > CAUTION: This email originated from outside of Western Digital. Do not click
+> > on links or open attachments unless you recognize the sender and know that
+> > the content is safe.
+> >
+> >
+> > Hi,
+> >
+> > I recently noticed that 'mmc' reports cache size incorrectly. The unit
+> > in the extended CSD is kilobits rather than kilobytes, so for a
+> > display unit of 'KiB' it needs to be scaled appropriately.
+> > Alternatively the unit could change to Kibit, but I think that's less
+> > helpful.
+> >
+> > I've attached a patch which fixes the issue & includes references to
+> > the relevant parts of the JEDEC standard.
+> >
+> > Hope someone finds this helpful,
+> >
+> > Patrick
