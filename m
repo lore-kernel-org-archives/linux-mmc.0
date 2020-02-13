@@ -2,154 +2,142 @@ Return-Path: <SRS0=nQxR=4B=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.3 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-5.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 905BEC2BA83
-	for <linux-mmc@archiver.kernel.org>; Thu, 13 Feb 2020 14:42:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E315AC2BA83
+	for <linux-mmc@archiver.kernel.org>; Thu, 13 Feb 2020 15:43:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 3D4882073C
-	for <linux-mmc@archiver.kernel.org>; Thu, 13 Feb 2020 14:42:30 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B6E8220661
+	for <linux-mmc@archiver.kernel.org>; Thu, 13 Feb 2020 15:43:17 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=st.com header.i=@st.com header.b="Q5Wn6q/3"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="f7L3GH7h"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727436AbgBMOm3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 13 Feb 2020 09:42:29 -0500
-Received: from mx07-00178001.pphosted.com ([62.209.51.94]:44352 "EHLO
-        mx07-00178001.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1725781AbgBMOm3 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Feb 2020 09:42:29 -0500
-Received: from pps.filterd (m0046668.ppops.net [127.0.0.1])
-        by mx07-00178001.pphosted.com (8.16.0.42/8.16.0.42) with SMTP id 01DESilX030559;
-        Thu, 13 Feb 2020 15:42:07 +0100
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=st.com; h=subject : to : cc :
- references : from : message-id : date : mime-version : in-reply-to :
- content-type : content-transfer-encoding; s=STMicroelectronics;
- bh=F1hCHr6bdW6m/n0eZT4RuE2/vXUEzJWVa6XvNXXYy0Y=;
- b=Q5Wn6q/3mZWoG1VWt+jORMULocgFj4tnLRJqIey1ifrPqHmn7RkfNaUrB+sap2FIshzv
- kUGi0NZgNg3FlICIGiZrl9uAQvO5uwBI2Fm8YRFfKCmNDhn1cGGfrjhJX4TrF7f1CJIt
- A7ZC8kyb4yGf5Iw2A47w0GTJ4pNv6a1s+C+GkaG62lV/WbJe5Vve7eTGBBEtMwA40sEQ
- eZVFzwYyCVddPvRrE360ZNVctRRXHJEWuBlyVOVAsymPsAjQZlMMe6E9DvOEvcCxVmX5
- GgCFwtJltW9vTuZ/avZGjWgk05iOuhNrPTARBIlTGNnjSn2z8HF+L97AL1Pl169CZbdr PQ== 
-Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
-        by mx07-00178001.pphosted.com with ESMTP id 2y1ufhnupd-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Thu, 13 Feb 2020 15:42:07 +0100
-Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
-        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id F25C8100034;
-        Thu, 13 Feb 2020 15:42:05 +0100 (CET)
-Received: from Webmail-eu.st.com (sfhdag6node1.st.com [10.75.127.16])
-        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id D89B42BAEF2;
-        Thu, 13 Feb 2020 15:42:05 +0100 (CET)
-Received: from lmecxl0923.lme.st.com (10.75.127.49) by SFHDAG6NODE1.st.com
- (10.75.127.16) with Microsoft SMTP Server (TLS) id 15.0.1473.3; Thu, 13 Feb
- 2020 15:42:05 +0100
-Subject: Re: [PATCH 00/12] mmc: core: Improve code for polling and HW busy
- detect
-To:     Baolin Wang <baolin.wang7@gmail.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-CC:     linux-mmc <linux-mmc@vger.kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        Shawn Lin <shawn.lin@rock-chips.com>, <mirq-linux@rere.qmqm.pl>
-References: <20200204085449.32585-1-ulf.hansson@linaro.org>
- <CADBw62o+9aasHDJtOLAXkhvV3DSVXHePwqy707DMQNo2O-+YmQ@mail.gmail.com>
- <CADBw62rXMEq2mE43aJn=rq8CKX=1sM6hMBKuiqUbwmsDGJM5pw@mail.gmail.com>
-From:   Ludovic BARRE <ludovic.barre@st.com>
-Message-ID: <69d3dff7-fd00-2c17-885f-785ecee573a3@st.com>
-Date:   Thu, 13 Feb 2020 15:42:04 +0100
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.1.0
+        id S2387611AbgBMPnN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 13 Feb 2020 10:43:13 -0500
+Received: from mail-lj1-f178.google.com ([209.85.208.178]:36676 "EHLO
+        mail-lj1-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1729381AbgBMPnM (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Feb 2020 10:43:12 -0500
+Received: by mail-lj1-f178.google.com with SMTP id r19so7140330ljg.3
+        for <linux-mmc@vger.kernel.org>; Thu, 13 Feb 2020 07:43:10 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:from:date:message-id:subject:to:cc;
+        bh=JwYIMGQOk6yTod1/avu+lWhhzqWkolvZorazJQ/e5vo=;
+        b=f7L3GH7hb8TxsVSZle5VHmgjCNBDMD/Jz+PugJqwS7bdt1lxNyYFQ6Y9sXKI4v26Qa
+         +Zw7oVpd7FI5ptlf36aIfLy34xPhlkXb48/epixfDzHfoSVS5Vk4ilHkupWTdHuSRITl
+         zM2geoM6gwjXXpHhkUcXkwXHJNCTSbc0aVyLDdWBIVnmuKqz3rUQtK3xqsYnHo+OpD2U
+         /z1U8rCw2fhJag15TRK8H4tvoktNOAAVa+/OpOJEHFtTJ5ME+twuxFsfcgVfeAGJlM1y
+         Ap3UEMA4CAe3LFeDchj1LmaaRAObnfZwc6gYZMWoflkVi5n1wIs2RJ9JiVZV8iIP9owA
+         FV+A==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:from:date:message-id:subject:to:cc;
+        bh=JwYIMGQOk6yTod1/avu+lWhhzqWkolvZorazJQ/e5vo=;
+        b=NckCMgZV6tYXI95Q+xJjYdlzHzTAyAg3Ak03fydnHhZ9m8OzEVwgNLZZ5enOhau6+p
+         SmwJ7CL9iihdB4eg1BCvefJc7IM2+H7zXVNfJpy22m5ZJZnlPV76W0Pb/UJcz5tcdQmP
+         gf7DqWZmE3Frw3tuh/OCqKIujvQMCkZoK1XWoDzKUmoLitT3ippTAVHZ1Ehte4eVJOW/
+         SrHSLOvsNn0KluWFCBzwHW3xA5HsdoMkpSl/ekPNlIJElqek75fzpnFOBoVm5rJyeeUH
+         w9SZXnUrgLu6rK1u0Y/24scd6xloPCgoNrmvrYjiYecuww1HsLS5Xwbz8SOdC1kq1G5U
+         aWvw==
+X-Gm-Message-State: APjAAAXZ8YeRtLG0mtRAuLf2uvzIXqQVFlpqaJ2rd7CBO+mK929n90kD
+        OAT0DIHYGqc2cqc5a3tPgSjcAvAvLzX1sI31vWk+fA==
+X-Google-Smtp-Source: APXvYqzmF34g0nZFr7DF1AKlt1QCmlxH+mSY9VRh9SQu0Ps7iRGt/qgCxg0xMvSqW7uqWDYnhFpJcDIiC4O2o2Zq+AA=
+X-Received: by 2002:a05:651c:1072:: with SMTP id y18mr11832537ljm.243.1581608589852;
+ Thu, 13 Feb 2020 07:43:09 -0800 (PST)
 MIME-Version: 1.0
-In-Reply-To: <CADBw62rXMEq2mE43aJn=rq8CKX=1sM6hMBKuiqUbwmsDGJM5pw@mail.gmail.com>
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Language: fr
-Content-Transfer-Encoding: 8bit
-X-Originating-IP: [10.75.127.49]
-X-ClientProxiedBy: SFHDAG6NODE1.st.com (10.75.127.16) To SFHDAG6NODE1.st.com
- (10.75.127.16)
-X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.138,18.0.572
- definitions=2020-02-13_04:2020-02-12,2020-02-13 signatures=0
+From:   Naresh Kamboju <naresh.kamboju@linaro.org>
+Date:   Thu, 13 Feb 2020 21:12:57 +0530
+Message-ID: <CA+G9fYuqAQfhzF2BzHr7vMHx68bo8-jT+ob_F3eHQ3=oFjgYdg@mail.gmail.com>
+Subject: LKFT: arm x15: mmc1: cache flush error -110
+To:     Jens Axboe <axboe@kernel.dk>, Alexei Starovoitov <ast@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     linux-block@vger.kernel.org, lkft-triage@lists.linaro.org,
+        open list <linux-kernel@vger.kernel.org>,
+        linux-mmc@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>,
+        John Stultz <john.stultz@linaro.org>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Ulf
+arm beagleboard x15 device failed to boot Linux mainline and
+linux-next kernel due
+to below error.
+This error occurred across all x15 device for these kernel version.
 
-Le 2/13/20 à 7:23 AM, Baolin Wang a écrit :
-> On Tue, Feb 11, 2020 at 9:17 PM Baolin Wang <baolin.wang7@gmail.com> wrote:
->>
->> Hi Ulf,
->>
->> On Tue, Feb 4, 2020 at 4:55 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
->>>
->>> There exists several separate variants of polling loops, used to detect when
->>> the card stop signals busy for various operations, in the mmc core. All of them
->>> have different issues that needs to be fixed.
->>>
->>> The intent with this series, is to address some of these problems, via first
->>> improving the mmc_poll_for_busy() function, then consolidate code by moving
->>> more users to it.
->>>
->>> While I was working on this, I stumbled over some code here and there, that
->>> deserved some cleanup, hence I also folded in a couple of patches for this.
->>>
->>> So far, I have only managed to extensively test the updated mmc_poll_for_busy()
->>> function for CMD6 commands. Some tests for erase/trim/discard and for
->>> HPI+sanitize are needed.
->>>
->>> Note that, there are still separate polling loops in the mmc block layer, but
->>> moving that to mmc_poll_for_busy() involves some additional work. I am looking
->>> into that as a next step.
->>>
->>> Please help review and test!
->>
->> That will be help if you can supply one git branch to fetch these
->> patches :), and I will help to do some testing on my platform.
-> 
-> I've tested on my platform, incuding reading, writing, mounting and
-> running all cases in mmc_test.c, and I did not find any problem. So
-> please feel free to add my test tag. Thanks.
-> 
+This regression started happening on x15 from this commit onwards (27th Jan)
+  git branch: master
+  git repo: https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
+  git commit: aae1464f46a2403565f75717438118691d31ccf1
+  git describe: v5.5-489-gaae1464f46a2
 
-Tested on mmci: sdmmc variant with/out MMC_CAP_WAIT_WHILE_BUSY
-and I see no regression.
-After series review, I've just a comment on patch 01/12
-(code/comment alignment 32-64)
 
-Tested-by: Ludovic Barre <ludovic.barre@st.com>
-Reviewed-by: Ludovic Barre <ludovic.barre@st.com>
+Test output log,
+[   37.606241] mmc1: Card stuck being busy! mmc_poll_for_busy
+[   37.611850] mmc1: cache flush error -110
+[   37.615883] blk_update_request: I/O error, dev mmcblk1, sector
+4302400 op 0x1:(WRITE) flags 0x20800 phys_seg 1 prio class 0
+[   37.627387] Aborting journal on device mmcblk1p9-8.
+[   37.635448] systemd[1]: Installed transient /etc/machine-id file.
+[   37.659283] systemd[1]: Couldn't move remaining userspace
+processes, ignoring: Input/output error
+[   37.744027] EXT4-fs error (device mmcblk1p9):
+ext4_journal_check_start:61: Detected aborted journal
+[   37.753322] EXT4-fs (mmcblk1p9): Remounting filesystem read-only
+[   37.917486] systemd-gpt-auto-generator[108]: Failed to dissect:
+Input/output error
+[   37.927825] systemd[104]:
+/lib/systemd/system-generators/systemd-gpt-auto-generator failed with
+exit status 1.
+<>
+[   68.856307] mmc1: Card stuck being busy! mmc_poll_for_busy
+[   68.861838] mmc1: cache flush error -110
+[   68.865812] blk_update_request: I/O error, dev mmcblk1, sector 0 op
+0x1:(WRITE) flags 0x800 phys_seg 0 prio class 0
+<>
+[   98.906243] mmc1: Card stuck being busy! mmc_poll_for_busy
+[   98.911774] mmc1: cache flush error -110
+[   98.915747] blk_update_request: I/O error, dev mmcblk1, sector 0 op
+0x1:(WRITE) flags 0x800 phys_seg 0 prio class 0
+<>
+Dependency failed for Serial Getty on ttyS2.
+[  128.946258] mmc1: Card stuck being busy! mmc_poll_for_busy
+[  128.951786] mmc1: cache flush error -110
+[  128.955756] blk_update_request: I/O error, dev mmcblk1, sector 0 op
+0x1:(WRITE) flags 0x800 phys_seg 0 prio class 0
+[FAILED] Failed to start File System Check on Root Device.
+See 'systemctl status systemd-fsck-root.service' for details.
+[  OK  ] Started Apply Kernel Variables.
+[  OK  ] Reached target Login Prompts.
+         Starting Remount Root and Kernel File Systems...
+[  OK  ] Reached target Timers.
+[  OK  ] Closed Syslog Socket.
+[  OK  ] Started Emergency Shell.
+[  129.227328] EXT4-fs error (device mmcblk1p9): ext4_remount:5354:
+Abort forced by user
+[  OK  ] Reached target Emergency Mode.
+[  OK  ] Reached target Sockets.
+[FAILED] Failed to start Remount Root and Kernel File Systems.
+<>
+You are in emergency mode. After logging in, type \"journalctl -xb\" to view
+system logs, \"systemctl reboot\" to reboot, \"systemctl default\" or \"exit\"
+to boot into default mode.
+Press Enter for maintenance
+auto-login-action timed out after 874 seconds
 
-> Tested-by: Baolin Wang <baolin.wang7@gmail.com>
-> 
->>> Ulf Hansson (12):
->>>    mmc: core: Throttle polling rate for CMD6
->>>    mmc: core: Drop unused define
->>>    mmc: core: Extend mmc_switch_status() to rid of __mmc_switch_status()
->>>    mmc: core: Drop redundant in-parameter to __mmc_switch()
->>>    mmc: core: Split up mmc_poll_for_busy()
->>>    mmc: core: Enable re-use of mmc_blk_in_tran_state()
->>>    mmc: core: Update CMD13 busy check for CMD6 commands
->>>    mmc: core: Convert to mmc_poll_for_busy() for erase/trim/discard
->>>    mmc: core: Drop redundant out-parameter to mmc_send_hpi_cmd()
->>>    mmc: core: Convert to mmc_poll_for_busy() for HPI commands
->>>    mmc: core: Fixup support for HW busy detection for HPI commands
->>>    mmc: core: Re-work the error path for the eMMC sanitize command
->>>
->>>   drivers/mmc/core/block.c   |  55 +++++--------
->>>   drivers/mmc/core/core.c    |  53 +------------
->>>   drivers/mmc/core/mmc.c     |  38 ++++-----
->>>   drivers/mmc/core/mmc_ops.c | 159 ++++++++++++++++++++++---------------
->>>   drivers/mmc/core/mmc_ops.h |  13 ++-
->>>   include/linux/mmc/core.h   |   3 -
->>>   include/linux/mmc/mmc.h    |  10 +++
->>>   7 files changed, 157 insertions(+), 174 deletions(-)
->>>
->>> --
->>> 2.17.1
->>>
+ref:
+https://lkft.validation.linaro.org/scheduler/job/1137693#L4034
+https://lkft.validation.linaro.org/scheduler/job/1158106#L4048
+https://lkft.validation.linaro.org/scheduler/job/1137690#L3985
+https://lkft.validation.linaro.org/scheduler/job/1137691#L4012
+https://lkft.validation.linaro.org/scheduler/job/1137696#L4043
+https://lkft.validation.linaro.org/scheduler/job/1137699#L4153
+
+-- 
+Linaro LKFT
+https://lkft.linaro.org
