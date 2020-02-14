@@ -1,112 +1,375 @@
-Return-Path: <SRS0=nQxR=4B=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=Uv9M=4C=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.3 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 37ADAC352A3
-	for <linux-mmc@archiver.kernel.org>; Thu, 13 Feb 2020 22:14:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1B449C3B18F
+	for <linux-mmc@archiver.kernel.org>; Fri, 14 Feb 2020 05:31:02 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 0774621734
-	for <linux-mmc@archiver.kernel.org>; Thu, 13 Feb 2020 22:14:22 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D46DA22314
+	for <linux-mmc@archiver.kernel.org>; Fri, 14 Feb 2020 05:31:01 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="H8RISYd2"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="ZSf2/sGO"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727519AbgBMWOV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 13 Feb 2020 17:14:21 -0500
-Received: from mail-io1-f52.google.com ([209.85.166.52]:36028 "EHLO
-        mail-io1-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726282AbgBMWOV (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Feb 2020 17:14:21 -0500
-Received: by mail-io1-f52.google.com with SMTP id d15so8369082iog.3
-        for <linux-mmc@vger.kernel.org>; Thu, 13 Feb 2020 14:14:21 -0800 (PST)
+        id S1728292AbgBNFbA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 14 Feb 2020 00:31:00 -0500
+Received: from mail-pg1-f195.google.com ([209.85.215.195]:35970 "EHLO
+        mail-pg1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725777AbgBNFa7 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Feb 2020 00:30:59 -0500
+Received: by mail-pg1-f195.google.com with SMTP id d9so4367521pgu.3
+        for <linux-mmc@vger.kernel.org>; Thu, 13 Feb 2020 21:30:58 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=C8clzNXcFBjg9TF/KNQ1s91WSlBbLttUW2klOOZow5Y=;
-        b=H8RISYd2xIq+1xk1nzJQiESTaUXHyc4c0AL4eSsjU34dYZL61HfKpyeiSTLnxMzxFt
-         ygA50FBAN6b3PuXK4bW6g4C/2/DLgyExxbL6UY/YxyasQ2c29Dn57widYu1YDjae9sMw
-         4PIhGyS40kUYkOzQInMJzTE3Nzo4Nes4mCQxXTZFJFER8Isfi6614nr7ruQtfAcXJSml
-         En2lYwwUTSV72dHX6VIilWSpu/SHOnnjjOTvQAn7TwmmsKy7UEEioLo5YgYpBb3qAZyQ
-         7TVSCKu14epurfXvdZoRwFIIgXABGZcSSmlAMbluGEBkvtMy6wfIE9+bokS4Jo7UWxjc
-         CA0A==
+        d=linaro.org; s=google;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to:user-agent;
+        bh=EFw2du6rZFRPkSdj9P0sIJ2N76IKO5MEY8qu/tBHDTE=;
+        b=ZSf2/sGO4VosqGWbhqIg9BURFt5AEw7U1ceHPx4xuB3St0pTtFSyAFl11OHhNkD+jG
+         yN3kiPsdW2HSg3pxQZG7Wwq5SxUKGCoyARoxlO3/kweb9iA+MVhrU4y62BKoo6Ca3mxX
+         F+N7ji1kMg+eFV/E/+NZjdocV4xUcO1ml9/q9YszTbaeJY8aE6RniJ2P9yHaoNoWf2s4
+         UNmZWMtUdynSBDX6wG5jpsvJG3Aq+uKnn84MUMk0+EEhV4/7b0tDvur6nd2iDVWuXcJw
+         f6ovHSaEMkOzCEAf9UfTTY/jz2RgGDevXXmBhfaAdriJz8OnuB8iAcIxiTzqV+5HNolg
+         8A1g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=C8clzNXcFBjg9TF/KNQ1s91WSlBbLttUW2klOOZow5Y=;
-        b=GioHxuBUVLHKbTt93Sa4TJbVrvMXR+42SnE95NgpkvsokCAulywLWcIhQ+EVYL9LsG
-         T8TUeybG5NWZvTDcSsAsBb2PSzsaz2jO1kf7Z93eXC6qCLrCfCIbhc/Zlyb20Q1xjKdx
-         7ShaqmfQF7B81x4CbsHN1xNO7Nx+o0/7IBoqIgPJ6vN/1vusrmY/ergI432gWxL4PtXA
-         i0zuDXQSM+QzZ72B7ysenxxY95e0biHkgmQ7Hc5DVapVPVNMTUw+J67Z0GfxxU/Cz9xW
-         YOanmQ76koH6QAIzHrV8rwc3FLaOC1npG3e+ZnV+UOEBGvfPdSU40KOM3WXoPeaBinrH
-         05wQ==
-X-Gm-Message-State: APjAAAXHpWO3YUADNExkinBoJ4SqyXnusZ64HrZxA8ORCMgDqYxZHZPi
-        SAMybxZ5bh49CbS2iysjk+9YCZRw1LLK3Zt6GhDLmA==
-X-Google-Smtp-Source: APXvYqx5KE6I/x9kgOUxEdtHIWEJqBrnixKe0gZ0TiDfx0cmlLbdnWe5wyPLK4fJ0C9fyoZjjpbUOQWflXTAfXfy76A=
-X-Received: by 2002:a05:6602:22d6:: with SMTP id e22mr23998994ioe.41.1581632060885;
- Thu, 13 Feb 2020 14:14:20 -0800 (PST)
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to:user-agent;
+        bh=EFw2du6rZFRPkSdj9P0sIJ2N76IKO5MEY8qu/tBHDTE=;
+        b=OKj/h6TsoNINvhMb3m0HQgmXgHUMT0p8KqBQOH5UdcgOO50K1/dvl5TMJGvj33ztyF
+         NMozQTwTjFphc393B4zW+j53F/4Ydxet2pyubARTCnK0cKFT67EIEKz4HT3kjEWeLZBr
+         34fQ3YiLg/kIEAtemNXCqRKytVbk2yzI8FBP+8TAVyq7XrPDocRmvtmPpm1NDaiv7Jw2
+         AJvJnQI3pEBn1GCa17VktWNMNV/oMDTlN9j/wZ06Gtv9zhrTvet0O5D7JjB1K+0lXKEp
+         PPj+sCB+hHnDbobj7+drUboCXHm4A4aqMdljCK3c9cwZKvDSRuJzHcYGGKo1zjX3r3nX
+         U3lw==
+X-Gm-Message-State: APjAAAUr/jgwdg1Qn3OtqTpuxr3syYmAQQpVeKffDd+nU/E0AoIiVsMg
+        vqNsZMB942B4dcAHUNNczOji4w==
+X-Google-Smtp-Source: APXvYqyWuLtjpfHoJG0Et4y2kDxaE5sl9XWYR/qheoXohBf/fiQf171wTxdxmPyYwEAJ35bIMlWhOA==
+X-Received: by 2002:a63:e65:: with SMTP id 37mr1575156pgo.171.1581658257501;
+        Thu, 13 Feb 2020 21:30:57 -0800 (PST)
+Received: from builder (104-188-17-28.lightspeed.sndgca.sbcglobal.net. [104.188.17.28])
+        by smtp.gmail.com with ESMTPSA id f43sm4741021pje.23.2020.02.13.21.30.56
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 13 Feb 2020 21:30:56 -0800 (PST)
+Date:   Thu, 13 Feb 2020 21:30:53 -0800
+From:   Bjorn Andersson <bjorn.andersson@linaro.org>
+To:     Shaik Sajida Bhanu <sbhanu@codeaurora.org>
+Cc:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
+        robh+dt@kernel.org, mka@chromium.org, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+        devicetree@vger.kernel.org,
+        Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
+        Andy Gross <agross@kernel.org>,
+        Mark Rutland <mark.rutland@arm.com>
+Subject: Re: [PATCH V3] arm64: dts: qcom: sc7180: Add nodes for eMMC and SD
+ card
+Message-ID: <20200214053053.GV3948@builder>
+References: <1578495250-10672-1-git-send-email-sbhanu@codeaurora.org>
 MIME-Version: 1.0
-References: <CAEg67GnNdOBgq=gVH9fDTwT0-KM5+3g8Do5ZnW+y6Q0AY_302A@mail.gmail.com>
- <MN2PR04MB6991B0F4431E56BA0C64927AFC1A0@MN2PR04MB6991.namprd04.prod.outlook.com>
-In-Reply-To: <MN2PR04MB6991B0F4431E56BA0C64927AFC1A0@MN2PR04MB6991.namprd04.prod.outlook.com>
-From:   Patrick Oppenlander <patrick.oppenlander@gmail.com>
-Date:   Fri, 14 Feb 2020 09:14:10 +1100
-Message-ID: <CAEg67GkTpaV9hbTx3Yt1EcXsPGwavwMiCw9ArM+qq5P0sE6bPg@mail.gmail.com>
-Subject: Re: mmc-utils mmc tool reports incorrect cache size
-To:     Avri Altman <Avri.Altman@wdc.com>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1578495250-10672-1-git-send-email-sbhanu@codeaurora.org>
+User-Agent: Mutt/1.12.2 (2019-09-21)
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Avri,
+On Wed 08 Jan 06:54 PST 2020, Shaik Sajida Bhanu wrote:
 
-I have resent the patch. Hopefully it looks better now.
+> From: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+> 
+> Add sdhc instances for supporting eMMC and SD-card on sc7180.
+> The regulators should be in HPM state for proper functionality of
+> eMMC and SD-card. Updating corresponding regulators accordingly.
+> 
+> Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+> Signed-off-by: Shaik Sajida Bhanu <sbhanu@codeaurora.org>
 
-Thanks for the reference,
+Applied
 
-Patrick
+Regards,
+Bjorn
 
-On Thu, Feb 13, 2020 at 6:35 PM Avri Altman <Avri.Altman@wdc.com> wrote:
->
-> Patrick hi,
-> Yes, it is helpful, but you need to submit your patch in a way it can be reviewed.
-> Maybe you can look in https://www.kernel.org/doc/html/v5.5/process/5.Posting.html?highlight=submit%20patches#
-> For more info.
->
-> Thanks,
-> Avri
->
-> > -----Original Message-----
-> > From: linux-mmc-owner@vger.kernel.org <linux-mmc-
-> > owner@vger.kernel.org> On Behalf Of Patrick Oppenlander
-> > Sent: Wednesday, February 12, 2020 11:35 PM
-> > To: linux-mmc@vger.kernel.org
-> > Subject: mmc-utils mmc tool reports incorrect cache size
-> >
-> > CAUTION: This email originated from outside of Western Digital. Do not click
-> > on links or open attachments unless you recognize the sender and know that
-> > the content is safe.
-> >
-> >
-> > Hi,
-> >
-> > I recently noticed that 'mmc' reports cache size incorrectly. The unit
-> > in the extended CSD is kilobits rather than kilobytes, so for a
-> > display unit of 'KiB' it needs to be scaled appropriately.
-> > Alternatively the unit could change to Kibit, but I think that's less
-> > helpful.
-> >
-> > I've attached a patch which fixes the issue & includes references to
-> > the relevant parts of the JEDEC standard.
-> >
-> > Hope someone finds this helpful,
-> >
-> > Patrick
+> ---
+> Changes since V2:
+> 	- Added cmdq register space and support-cqe flag.
+> 	- Incorporated review comments by Matthias Kaehlcke.
+> 
+> Changes since V1:
+> 	- Updated the regulator min, max voltages as per
+> 	  eMMC/SD-card voltage requirements
+> 	- Enabled IOMMU for eMMC and SD-card.
+> 	- Added pull and drive strength to SD-card cd-gpio.
+> 	- Incorporated review comments by Matthias Kaehlcke.
+> ---
+>  arch/arm64/boot/dts/qcom/sc7180-idp.dts |  47 +++++++---
+>  arch/arm64/boot/dts/qcom/sc7180.dtsi    | 148 ++++++++++++++++++++++++++++++++
+>  2 files changed, 183 insertions(+), 12 deletions(-)
+> 
+> diff --git a/arch/arm64/boot/dts/qcom/sc7180-idp.dts b/arch/arm64/boot/dts/qcom/sc7180-idp.dts
+> index 388f50a..a790d82 100644
+> --- a/arch/arm64/boot/dts/qcom/sc7180-idp.dts
+> +++ b/arch/arm64/boot/dts/qcom/sc7180-idp.dts
+> @@ -7,6 +7,7 @@
+>  
+>  /dts-v1/;
+>  
+> +#include <dt-bindings/gpio/gpio.h>
+>  #include <dt-bindings/regulator/qcom,rpmh-regulator.h>
+>  #include "sc7180.dtsi"
+>  #include "pm6150.dtsi"
+> @@ -101,9 +102,9 @@
+>  		};
+>  
+>  		vreg_l12a_1p8: ldo12 {
+> -			regulator-min-microvolt = <1696000>;
+> -			regulator-max-microvolt = <1952000>;
+> -			regulator-initial-mode = <RPMH_REGULATOR_MODE_LPM>;
+> +			regulator-min-microvolt = <1800000>;
+> +			regulator-max-microvolt = <1800000>;
+> +			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
+>  		};
+>  
+>  		vreg_l13a_1p8: ldo13 {
+> @@ -143,9 +144,9 @@
+>  		};
+>  
+>  		vreg_l19a_2p9: ldo19 {
+> -			regulator-min-microvolt = <2696000>;
+> -			regulator-max-microvolt = <3304000>;
+> -			regulator-initial-mode = <RPMH_REGULATOR_MODE_LPM>;
+> +			regulator-min-microvolt = <2960000>;
+> +			regulator-max-microvolt = <2960000>;
+> +			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
+>  		};
+>  	};
+>  
+> @@ -189,9 +190,9 @@
+>  		};
+>  
+>  		vreg_l6c_2p9: ldo6 {
+> -			regulator-min-microvolt = <2696000>;
+> -			regulator-max-microvolt = <3304000>;
+> -			regulator-initial-mode = <RPMH_REGULATOR_MODE_LPM>;
+> +			regulator-min-microvolt = <1800000>;
+> +			regulator-max-microvolt = <2950000>;
+> +			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
+>  		};
+>  
+>  		vreg_l7c_3p0: ldo7 {
+> @@ -207,9 +208,9 @@
+>  		};
+>  
+>  		vreg_l9c_2p9: ldo9 {
+> -			regulator-min-microvolt = <2952000>;
+> -			regulator-max-microvolt = <3304000>;
+> -			regulator-initial-mode = <RPMH_REGULATOR_MODE_LPM>;
+> +			regulator-min-microvolt = <2960000>;
+> +			regulator-max-microvolt = <2960000>;
+> +			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
+>  		};
+>  
+>  		vreg_l10c_3p3: ldo10 {
+> @@ -254,6 +255,28 @@
+>  	status = "okay";
+>  };
+>  
+> +&sdhc_1 {
+> +	status = "okay";
+> +
+> +	pinctrl-names = "default", "sleep";
+> +	pinctrl-0 = <&sdc1_on>;
+> +	pinctrl-1 = <&sdc1_off>;
+> +	vmmc-supply = <&vreg_l19a_2p9>;
+> +	vqmmc-supply = <&vreg_l12a_1p8>;
+> +};
+> +
+> +&sdhc_2 {
+> +	status = "okay";
+> +
+> +	pinctrl-names = "default","sleep";
+> +	pinctrl-0 = <&sdc2_on>;
+> +	pinctrl-1 = <&sdc2_off>;
+> +	vmmc-supply  = <&vreg_l9c_2p9>;
+> +	vqmmc-supply = <&vreg_l6c_2p9>;
+> +
+> +	cd-gpios = <&tlmm 69 GPIO_ACTIVE_LOW>;
+> +};
+> +
+>  &uart3 {
+>  	status = "okay";
+>  };
+> diff --git a/arch/arm64/boot/dts/qcom/sc7180.dtsi b/arch/arm64/boot/dts/qcom/sc7180.dtsi
+> index 3676bfd..525bc02 100644
+> --- a/arch/arm64/boot/dts/qcom/sc7180.dtsi
+> +++ b/arch/arm64/boot/dts/qcom/sc7180.dtsi
+> @@ -226,6 +226,33 @@
+>  			};
+>  		};
+>  
+> +		sdhc_1: sdhci@7c4000 {
+> +			compatible = "qcom,sc7180-sdhci", "qcom,sdhci-msm-v5";
+> +			reg = <0 0x7c4000 0 0x1000>,
+> +				<0 0x07c5000 0 0x1000>;
+> +			reg-names = "hc_mem", "cqhci_mem";
+> +
+> +			iommus = <&apps_smmu 0x60 0x0>;
+> +			interrupts = <GIC_SPI 641 IRQ_TYPE_LEVEL_HIGH>,
+> +					<GIC_SPI 644 IRQ_TYPE_LEVEL_HIGH>;
+> +			interrupt-names = "hc_irq", "pwr_irq";
+> +
+> +			clocks = <&gcc GCC_SDCC1_APPS_CLK>,
+> +					<&gcc GCC_SDCC1_AHB_CLK>;
+> +			clock-names = "core", "iface";
+> +
+> +			bus-width = <8>;
+> +			non-removable;
+> +			supports-cqe;
+> +
+> +			mmc-ddr-1_8v;
+> +			mmc-hs200-1_8v;
+> +			mmc-hs400-1_8v;
+> +			mmc-hs400-enhanced-strobe;
+> +
+> +			status = "disabled";
+> +		};
+> +
+>  		qupv3_id_0: geniqup@8c0000 {
+>  			compatible = "qcom,geni-se-qup";
+>  			reg = <0 0x008c0000 0 0x6000>;
+> @@ -929,6 +956,127 @@
+>  					function = "qup15";
+>  				};
+>  			};
+> +
+> +			sdc1_on: sdc1-on {
+> +				pinconf-clk {
+> +					pins = "sdc1_clk";
+> +					bias-disable;
+> +					drive-strength = <16>;
+> +				};
+> +
+> +				pinconf-cmd {
+> +					pins = "sdc1_cmd";
+> +					bias-pull-up;
+> +					drive-strength = <10>;
+> +				};
+> +
+> +				pinconf-data {
+> +					pins = "sdc1_data";
+> +					bias-pull-up;
+> +					drive-strength = <10>;
+> +				};
+> +
+> +				pinconf-rclk {
+> +					pins = "sdc1_rclk";
+> +					bias-pull-down;
+> +				};
+> +			};
+> +
+> +			sdc1_off: sdc1-off {
+> +				pinconf-clk {
+> +					pins = "sdc1_clk";
+> +					bias-disable;
+> +					drive-strength = <2>;
+> +				};
+> +
+> +				pinconf-cmd {
+> +					pins = "sdc1_cmd";
+> +					bias-pull-up;
+> +					drive-strength = <2>;
+> +				};
+> +
+> +				pinconf-data {
+> +					pins = "sdc1_data";
+> +					bias-pull-up;
+> +					drive-strength = <2>;
+> +				};
+> +
+> +				pinconf-rclk {
+> +					pins = "sdc1_rclk";
+> +					bias-pull-down;
+> +				};
+> +			};
+> +
+> +			sdc2_on: sdc2-on {
+> +				pinconf-clk {
+> +					pins = "sdc2_clk";
+> +					bias-disable;
+> +					drive-strength = <16>;
+> +				};
+> +
+> +				pinconf-cmd {
+> +					pins = "sdc2_cmd";
+> +					bias-pull-up;
+> +					drive-strength = <10>;
+> +				};
+> +
+> +				pinconf-data {
+> +					pins = "sdc2_data";
+> +					bias-pull-up;
+> +					drive-strength = <10>;
+> +				};
+> +
+> +				pinconf-sd-cd {
+> +					pins = "gpio69";
+> +					bias-pull-up;
+> +					drive-strength = <2>;
+> +				};
+> +			};
+> +
+> +			sdc2_off: sdc2-off {
+> +				pinconf-clk {
+> +					pins = "sdc2_clk";
+> +					bias-disable;
+> +					drive-strength = <2>;
+> +				};
+> +
+> +				pinconf-cmd {
+> +					pins = "sdc2_cmd";
+> +					bias-pull-up;
+> +					drive-strength = <2>;
+> +				};
+> +
+> +				pinconf-data {
+> +					pins = "sdc2_data";
+> +					bias-pull-up;
+> +					drive-strength = <2>;
+> +				};
+> +
+> +				pinconf-sd-cd {
+> +					pins = "gpio69";
+> +					bias-disable;
+> +					drive-strength = <2>;
+> +				};
+> +			};
+> +		};
+> +
+> +		sdhc_2: sdhci@8804000 {
+> +			compatible = "qcom,sc7180-sdhci", "qcom,sdhci-msm-v5";
+> +			reg = <0 0x08804000 0 0x1000>;
+> +			reg-names = "hc_mem";
+> +
+> +			iommus = <&apps_smmu 0x80 0>;
+> +			interrupts = <GIC_SPI 204 IRQ_TYPE_LEVEL_HIGH>,
+> +					<GIC_SPI 222 IRQ_TYPE_LEVEL_HIGH>;
+> +			interrupt-names = "hc_irq", "pwr_irq";
+> +
+> +			clocks = <&gcc GCC_SDCC2_APPS_CLK>,
+> +					<&gcc GCC_SDCC2_AHB_CLK>;
+> +			clock-names = "core", "iface";
+> +
+> +			bus-width = <4>;
+> +
+> +			status = "disabled";
+>  		};
+>  
+>  		qspi: spi@88dc000 {
+> -- 
+> QUALCOMM INDIA, on behalf of Qualcomm Innovation Center, Inc. is a member 
+> of Code Aurora Forum, hosted by The Linux Foundation
+> 
