@@ -2,99 +2,119 @@ Return-Path: <SRS0=Uv9M=4C=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
+X-Spam-Status: No, score=-7.6 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4D24CC3B196
-	for <linux-mmc@archiver.kernel.org>; Fri, 14 Feb 2020 11:46:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F2675C2BA83
+	for <linux-mmc@archiver.kernel.org>; Fri, 14 Feb 2020 12:09:07 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 2323424650
-	for <linux-mmc@archiver.kernel.org>; Fri, 14 Feb 2020 11:46:40 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=fail reason="key not found in DNS" (0-bit key) header.d=mg.codeaurora.org header.i=@mg.codeaurora.org header.b="skmTZ6dj"
+	by mail.kernel.org (Postfix) with ESMTP id C9D1E24650
+	for <linux-mmc@archiver.kernel.org>; Fri, 14 Feb 2020 12:09:07 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1581682147;
+	bh=TamJWj2dcsCw+v7sGhZboKQCnSDZVMI+YTkqD6uMsdc=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
+	b=zflkaA2/P7hb8Jc3+gO9a5vXXyF28/HCYy+mlonvojyQLdRR9KwkrCkE5Ou35HmWS
+	 SCuzdop27jE0RUoQx2i6ZwXC4+z9ZW60deLvd2ecTWG5v1YtqhDwfneXWkWJEtbQxu
+	 MLoTz0JEs6kya5jqiBj51uPusnn19v1Oug4Y64AU=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728689AbgBNLqc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 14 Feb 2020 06:46:32 -0500
-Received: from mail26.static.mailgun.info ([104.130.122.26]:41289 "EHLO
-        mail26.static.mailgun.info" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1728582AbgBNLqb (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Feb 2020 06:46:31 -0500
-DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
- s=smtp; t=1581680791; h=References: In-Reply-To: Message-Id: Date:
- Subject: Cc: To: From: Sender;
- bh=9jTfW1XPQOwc4d0N/VsPbHurk/PVtrMK9dryJbaZjb4=; b=skmTZ6djYhsyHGL6Dk72v5nwcsRvVGOsnMIARO4Enyk/DhtNHeUcP/opbhYpjjdqyGbhRhBi
- RYXUeFKNi1yuz5djWfb5ovcRIp3Ibax511OQttiSgyZ/5lGTh3wifkd+YKzdq3LZu/+YwI+u
- bsA37HfQWELLzBbNlQ1/V+9asHY=
-X-Mailgun-Sending-Ip: 104.130.122.26
-X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
-Received: from smtp.codeaurora.org (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171])
- by mxa.mailgun.org with ESMTP id 5e468896.7efdb8b75ab0-smtp-out-n01;
- Fri, 14 Feb 2020 11:46:30 -0000 (UTC)
-Received: by smtp.codeaurora.org (Postfix, from userid 1001)
-        id 6B1FCC447A0; Fri, 14 Feb 2020 11:46:29 +0000 (UTC)
-Received: from vbadigan-linux.qualcomm.com (blr-c-bdr-fw-01_GlobalNAT_AllZones-Outside.qualcomm.com [103.229.19.19])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-SHA256 (128/128 bits))
-        (No client certificate requested)
-        (Authenticated sender: vbadigan)
-        by smtp.codeaurora.org (Postfix) with ESMTPSA id B3352C433A2;
-        Fri, 14 Feb 2020 11:46:24 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.3.2 smtp.codeaurora.org B3352C433A2
-Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
-Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=none smtp.mailfrom=vbadigan@codeaurora.org
-From:   Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
-To:     ulf.hansson@linaro.org, robh+dt@kernel.org
-Cc:     asutoshd@codeaurora.org, stummala@codeaurora.org,
-        sayalil@codeaurora.org, cang@codeaurora.org,
-        rampraka@codeaurora.org, dianders@google.com,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-msm@vger.kernel.org,
-        Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
-        Mark Rutland <mark.rutland@arm.com>,
-        devicetree@vger.kernel.org (open list:OPEN FIRMWARE AND FLATTENED
-        DEVICE TREE BINDINGS)
-Subject: [PATCH V2] dt-bindings: mmc: sdhci-msm: Add CQE reg map
-Date:   Fri, 14 Feb 2020 17:15:52 +0530
-Message-Id: <1581680753-9067-1-git-send-email-vbadigan@codeaurora.org>
-X-Mailer: git-send-email 1.9.1
-In-Reply-To: <1581434955-11087-1-git-send-email-vbadigan@codeaurora.org>
-References: <1581434955-11087-1-git-send-email-vbadigan@codeaurora.org>
+        id S1727835AbgBNMJE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 14 Feb 2020 07:09:04 -0500
+Received: from foss.arm.com ([217.140.110.172]:60514 "EHLO foss.arm.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726220AbgBNMJD (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 14 Feb 2020 07:09:03 -0500
+Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
+        by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 5B0C71FB;
+        Fri, 14 Feb 2020 04:09:03 -0800 (PST)
+Received: from localhost (unknown [10.37.6.21])
+        by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id D2ABC3F68F;
+        Fri, 14 Feb 2020 04:09:02 -0800 (PST)
+Date:   Fri, 14 Feb 2020 12:09:01 +0000
+From:   Mark Brown <broonie@kernel.org>
+To:     Arnd Bergmann <arnd@arndb.de>
+Cc:     Naresh Kamboju <naresh.kamboju@linaro.org>,
+        Jens Axboe <axboe@kernel.dk>,
+        Alexei Starovoitov <ast@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-block <linux-block@vger.kernel.org>,
+        lkft-triage@lists.linaro.org,
+        open list <linux-kernel@vger.kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        John Stultz <john.stultz@linaro.org>
+Subject: Re: LKFT: arm x15: mmc1: cache flush error -110
+Message-ID: <20200214120901.GE4827@sirena.org.uk>
+References: <CA+G9fYuqAQfhzF2BzHr7vMHx68bo8-jT+ob_F3eHQ3=oFjgYdg@mail.gmail.com>
+ <CAK8P3a09YDtmOjpBWQEsKd09aotvUW6tOoxUE=CYxh1g8hNW7A@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="WK3l2KTTmXPVedZ6"
+Content-Disposition: inline
+In-Reply-To: <CAK8P3a09YDtmOjpBWQEsKd09aotvUW6tOoxUE=CYxh1g8hNW7A@mail.gmail.com>
+X-Cookie: Shipping not included.
+User-Agent: Mutt/1.10.1 (2018-07-13)
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-CQE feature has been enabled on sdhci-msm. Add CQE reg map
-that needs to be supplied for supporting CQE feature.
 
-Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
----
+--WK3l2KTTmXPVedZ6
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-Changes since V1:
-	- Updated description for more clarity & Fixed typos.
----
- Documentation/devicetree/bindings/mmc/sdhci-msm.txt | 8 +++++++-
- 1 file changed, 7 insertions(+), 1 deletion(-)
+On Fri, Feb 14, 2020 at 10:09:34AM +0100, Arnd Bergmann wrote:
+> On Thu, Feb 13, 2020 at 4:43 PM Naresh Kamboju
 
-diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
-index 7ee639b..ad0ee83 100644
---- a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
-+++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
-@@ -26,7 +26,13 @@ Required properties:
- 
- - reg: Base address and length of the register in the following order:
- 	- Host controller register map (required)
--	- SD Core register map (required for msm-v4 and below)
-+	- SD Core register map (required for controllers earlier than msm-v5)
-+	- CQE register map (Optional, CQE support is present on SDHC instance meant
-+	                    for eMMC and version v4.2 and above)
-+- reg-names: When CQE register map is supplied, below reg-names are required
-+	- "hc_mem" for Host controller register map
-+	- "core_mem" for SD core register map
-+	- "cqhci_mem" for CQE register map
- - interrupts: Should contain an interrupt-specifiers for the interrupts:
- 	- Host controller interrupt (required)
- - pinctrl-names: Should contain only one value - "default".
--- 
-Qualcomm India Private Limited, on behalf of Qualcomm Innovation Center, Inc., is a member of Code Aurora Forum, a Linux Foundation Collaborative Project
+> > arm beagleboard x15 device failed to boot Linux mainline and
+> > linux-next kernel due
+> > to below error.
+> > This error occurred across all x15 device for these kernel version.
+
+> > This regression started happening on x15 from this commit onwards (27th Jan)
+> >   git branch: master
+> >   git repo: https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
+> >   git commit: aae1464f46a2403565f75717438118691d31ccf1
+> >   git describe: v5.5-489-gaae1464f46a2
+
+That's Linus' commit:
+
+	Merge tag 'regulator-v5.6' of git://git.kernel.org/pub/scm/linux/kernel/git/broonie/regulator
+
+Please include human readable descriptions of things like commits and
+issues being discussed in e-mail in your mails, this makes them much
+easier for humans to read especially when they have no internet access.
+I do frequently catch up on my mail on flights or while otherwise
+travelling so this is even more pressing for me than just being about
+making things a bit easier to read.
+
+> Is it only the merge that introduced the issue, or is the branch that got
+> merged already broken?
+
+Or is this just the first commit where the problem happened to be
+noticed?  Commits done just before that on the same day include the
+dmaengine and MMC merges which seem potentially relevant:
+
+> > [   37.606241] mmc1: Card stuck being busy! mmc_poll_for_busy
+> > [   37.611850] mmc1: cache flush error -110
+> > [   37.615883] blk_update_request: I/O error, dev mmcblk1, sector
+> > 4302400 op 0x1:(WRITE) flags 0x20800 phys_seg 1 prio class 0
+
+--WK3l2KTTmXPVedZ6
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQEzBAABCgAdFiEEreZoqmdXGLWf4p/qJNaLcl1Uh9AFAl5GjdwACgkQJNaLcl1U
+h9AvCAf/dNif51L4NKZ71gq7xDibg/Hu9NUWD7LqMNzduUaeB40Fq+WubJqBcLk+
+5mCGCEcLMyx+DcVmO6g1RkyZ2OIRNGbIK7ebZRdOv+iiNo4/L7trEb3nN4Qh6CBo
+pWhcjz9EPAqY28y1eYU6l0itlyVFKfPcrNP7iGVqxZoHQgUHUjseRx+jxA60QACD
+zfwZ9O2qt9wkc0oTjUb4JMay7mV/C9BxUwEITTsGS8jxt42JZITUHM9vmaLDFGYC
+Tnzif/D3K3ohyXE+XeSuuQVXEtb/liTwuBWd5fqJQhpw3/tdzb1T7iDdP0xCvg2/
+ZEF3zDb9H8FddbrDCZWgytK6Xa37bg==
+=Juis
+-----END PGP SIGNATURE-----
+
+--WK3l2KTTmXPVedZ6--
