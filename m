@@ -2,374 +2,134 @@ Return-Path: <SRS0=Uv9M=4C=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.3 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-0.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1B449C3B18F
-	for <linux-mmc@archiver.kernel.org>; Fri, 14 Feb 2020 05:31:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F0888C35242
+	for <linux-mmc@archiver.kernel.org>; Fri, 14 Feb 2020 06:39:22 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id D46DA22314
-	for <linux-mmc@archiver.kernel.org>; Fri, 14 Feb 2020 05:31:01 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id BA798222C2
+	for <linux-mmc@archiver.kernel.org>; Fri, 14 Feb 2020 06:39:22 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="ZSf2/sGO"
+	dkim=pass (1024-bit key) header.d=xilinx.onmicrosoft.com header.i=@xilinx.onmicrosoft.com header.b="dzqR7OKj"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728292AbgBNFbA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 14 Feb 2020 00:31:00 -0500
-Received: from mail-pg1-f195.google.com ([209.85.215.195]:35970 "EHLO
-        mail-pg1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725777AbgBNFa7 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Feb 2020 00:30:59 -0500
-Received: by mail-pg1-f195.google.com with SMTP id d9so4367521pgu.3
-        for <linux-mmc@vger.kernel.org>; Thu, 13 Feb 2020 21:30:58 -0800 (PST)
+        id S1725828AbgBNGjW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 14 Feb 2020 01:39:22 -0500
+Received: from mail-mw2nam12on2083.outbound.protection.outlook.com ([40.107.244.83]:32353
+        "EHLO NAM12-MW2-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1725818AbgBNGjW (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 14 Feb 2020 01:39:22 -0500
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=SLXE+SiU5HnDTNFgLQKzdeFvLqXwR1jphCzFODWwczlVCjJ6zV+8PTr90e1ntn/6esipmsvnWZ7NNN+zApI42RyGhCYgDB72olUxJm2JMmWOIEGXV9vcMGGptfn7PISbVuBoKw2OyBC0ZeaXxdwspQojteSWuFufrxSVU+Kjc3P/VQMgoiq6j2TAPF32x7cHTYUdU2RBE2c6k7UdenVq2JVpzxSzZEX41iIfvnCbEe9ZZ5dzRvnc8937c+WBbpw4kDiIAM5Gq7xrm6/eKRT5yUA70OWLk/L9s83F9Iy9Xqd3581XKNr9p3bg87xgLwJxhhkVlf2zGjsVPBJU648UDA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=SCOWw4kJR57tBvwIESJdXqxfccJf4YrL41v/u6y0dpc=;
+ b=TuoEaCbZmmw3BEcJeeE0Wvej/ALOo9rY8VaX+emZhJaKKW3KUKg/I7+kjb8moF+oSQXH1AVMtYbMfHKwUL968UI/9gnQnAqDxFZGcgyHxBvyNnOSCbBKQ8sNaHTdYDrq7+S315bbZ8cmCF7j1xjqizzO4KX83Gkhr8eA9pO0EZRvbBVe000BwCfeaFnbO22smjUTjNpUwMQ7I4ed23Ebxhr3Ge+ah6t6EWIek20aHVzA2jvWW1nTi+zQIpHkok1Oog7sJz7pZwqBjDfY+65jkqfqVD10k8d6v2O87unfVszaI/nYWk+y3IlORNy23CbcFqWbqksx41oBtZETcZ9EdA==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=xilinx.com; dmarc=pass action=none header.from=xilinx.com;
+ dkim=pass header.d=xilinx.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to:user-agent;
-        bh=EFw2du6rZFRPkSdj9P0sIJ2N76IKO5MEY8qu/tBHDTE=;
-        b=ZSf2/sGO4VosqGWbhqIg9BURFt5AEw7U1ceHPx4xuB3St0pTtFSyAFl11OHhNkD+jG
-         yN3kiPsdW2HSg3pxQZG7Wwq5SxUKGCoyARoxlO3/kweb9iA+MVhrU4y62BKoo6Ca3mxX
-         F+N7ji1kMg+eFV/E/+NZjdocV4xUcO1ml9/q9YszTbaeJY8aE6RniJ2P9yHaoNoWf2s4
-         UNmZWMtUdynSBDX6wG5jpsvJG3Aq+uKnn84MUMk0+EEhV4/7b0tDvur6nd2iDVWuXcJw
-         f6ovHSaEMkOzCEAf9UfTTY/jz2RgGDevXXmBhfaAdriJz8OnuB8iAcIxiTzqV+5HNolg
-         8A1g==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to:user-agent;
-        bh=EFw2du6rZFRPkSdj9P0sIJ2N76IKO5MEY8qu/tBHDTE=;
-        b=OKj/h6TsoNINvhMb3m0HQgmXgHUMT0p8KqBQOH5UdcgOO50K1/dvl5TMJGvj33ztyF
-         NMozQTwTjFphc393B4zW+j53F/4Ydxet2pyubARTCnK0cKFT67EIEKz4HT3kjEWeLZBr
-         34fQ3YiLg/kIEAtemNXCqRKytVbk2yzI8FBP+8TAVyq7XrPDocRmvtmPpm1NDaiv7Jw2
-         AJvJnQI3pEBn1GCa17VktWNMNV/oMDTlN9j/wZ06Gtv9zhrTvet0O5D7JjB1K+0lXKEp
-         PPj+sCB+hHnDbobj7+drUboCXHm4A4aqMdljCK3c9cwZKvDSRuJzHcYGGKo1zjX3r3nX
-         U3lw==
-X-Gm-Message-State: APjAAAUr/jgwdg1Qn3OtqTpuxr3syYmAQQpVeKffDd+nU/E0AoIiVsMg
-        vqNsZMB942B4dcAHUNNczOji4w==
-X-Google-Smtp-Source: APXvYqyWuLtjpfHoJG0Et4y2kDxaE5sl9XWYR/qheoXohBf/fiQf171wTxdxmPyYwEAJ35bIMlWhOA==
-X-Received: by 2002:a63:e65:: with SMTP id 37mr1575156pgo.171.1581658257501;
-        Thu, 13 Feb 2020 21:30:57 -0800 (PST)
-Received: from builder (104-188-17-28.lightspeed.sndgca.sbcglobal.net. [104.188.17.28])
-        by smtp.gmail.com with ESMTPSA id f43sm4741021pje.23.2020.02.13.21.30.56
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 13 Feb 2020 21:30:56 -0800 (PST)
-Date:   Thu, 13 Feb 2020 21:30:53 -0800
-From:   Bjorn Andersson <bjorn.andersson@linaro.org>
-To:     Shaik Sajida Bhanu <sbhanu@codeaurora.org>
-Cc:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
-        robh+dt@kernel.org, mka@chromium.org, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        devicetree@vger.kernel.org,
-        Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
-        Andy Gross <agross@kernel.org>,
-        Mark Rutland <mark.rutland@arm.com>
-Subject: Re: [PATCH V3] arm64: dts: qcom: sc7180: Add nodes for eMMC and SD
- card
-Message-ID: <20200214053053.GV3948@builder>
-References: <1578495250-10672-1-git-send-email-sbhanu@codeaurora.org>
+ d=xilinx.onmicrosoft.com; s=selector2-xilinx-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=SCOWw4kJR57tBvwIESJdXqxfccJf4YrL41v/u6y0dpc=;
+ b=dzqR7OKj/03j84QNvjydr8QXO7s0IF9vFs/gDImLP3BK+UePx/opHUY+DmBmGcgrJOeDKKdgconspGrBEwJoMTOjP2kHzc/S5YPg6OeulFi6/Ky9OQt9383KgNWFCH/NXdcTbAhr78FBhdW+WtsQNvFUOYtiaV3z8H7lL0rVCiw=
+Received: from DM6PR02MB4426.namprd02.prod.outlook.com (20.176.106.156) by
+ DM6PR02MB4426.namprd02.prod.outlook.com (20.176.106.156) with Microsoft SMTP
+ Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.20.2729.25; Fri, 14 Feb 2020 06:39:17 +0000
+Received: from DM6PR02MB4426.namprd02.prod.outlook.com
+ ([fe80::c084:a7d0:ee5d:4673]) by DM6PR02MB4426.namprd02.prod.outlook.com
+ ([fe80::c084:a7d0:ee5d:4673%6]) with mapi id 15.20.2729.025; Fri, 14 Feb 2020
+ 06:39:17 +0000
+From:   Manish Narani <MNARANI@xilinx.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+CC:     Michal Simek <michals@xilinx.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Jolly Shah <JOLLYS@xilinx.com>, Rajan Vaja <RAJANV@xilinx.com>,
+        Nava kishore Manne <navam@xilinx.com>,
+        Tejas Patel <TEJASP@xilinx.com>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        git <git@xilinx.com>
+Subject: RE: [PATCH 0/4] Enhancements and Bug Fixes in ZynqMP SDHCI
+Thread-Topic: [PATCH 0/4] Enhancements and Bug Fixes in ZynqMP SDHCI
+Thread-Index: AQHV0ES+oJkeVmCLSEim2Z6Yhdi7uagZSiIAgAEX+cA=
+Date:   Fri, 14 Feb 2020 06:39:17 +0000
+Message-ID: <DM6PR02MB4426401AE6322FBC2D12B849C1150@DM6PR02MB4426.namprd02.prod.outlook.com>
+References: <1579602095-30060-1-git-send-email-manish.narani@xilinx.com>
+ <CAPDyKFqS+9j++9RugFxNS4gKWuH_TpgbL-RXuudg92b-j_kvtQ@mail.gmail.com>
+In-Reply-To: <CAPDyKFqS+9j++9RugFxNS4gKWuH_TpgbL-RXuudg92b-j_kvtQ@mail.gmail.com>
+Accept-Language: en-US
+Content-Language: en-US
+X-MS-Has-Attach: 
+X-Auto-Response-Suppress: DR, RN, NRN, OOF, AutoReply
+X-MS-TNEF-Correlator: 
+authentication-results: spf=none (sender IP is )
+ smtp.mailfrom=MNARANI@xilinx.com; 
+x-originating-ip: [149.199.50.133]
+x-ms-publictraffictype: Email
+x-ms-office365-filtering-ht: Tenant
+x-ms-office365-filtering-correlation-id: d6b12b72-98a1-48b3-29d1-08d7b1189d64
+x-ms-traffictypediagnostic: DM6PR02MB4426:|DM6PR02MB4426:
+x-ld-processed: 657af505-d5df-48d0-8300-c31994686c5c,ExtAddr
+x-ms-exchange-transport-forked: True
+x-microsoft-antispam-prvs: <DM6PR02MB44264EDCF7B0DF444F1E6712C1150@DM6PR02MB4426.namprd02.prod.outlook.com>
+x-ms-oob-tlc-oobclassifiers: OLM:8882;
+x-forefront-prvs: 03137AC81E
+x-forefront-antispam-report: SFV:NSPM;SFS:(10009020)(4636009)(346002)(376002)(136003)(396003)(39860400002)(366004)(189003)(199004)(2906002)(316002)(54906003)(5660300002)(7696005)(52536014)(8676002)(8936002)(107886003)(81156014)(81166006)(55016002)(86362001)(33656002)(66446008)(71200400001)(66556008)(478600001)(64756008)(4326008)(9686003)(53546011)(66946007)(66476007)(76116006)(6916009)(26005)(6506007)(186003);DIR:OUT;SFP:1101;SCL:1;SRVR:DM6PR02MB4426;H:DM6PR02MB4426.namprd02.prod.outlook.com;FPR:;SPF:None;LANG:en;PTR:InfoNoRecords;MX:1;A:1;
+received-spf: None (protection.outlook.com: xilinx.com does not designate
+ permitted sender hosts)
+x-ms-exchange-senderadcheck: 1
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: rc0yEmt9YpVn9kcH7y6XbbH+nKcY8hyHkZHe7n4DfxJzzCNueo3Tusaj7KO4FeK1ls83xDXwmkdp2o+T945I/PKOnYwezZFJZUGVe7+Mt3gN2mhK4hbuks2iDt8toUsNwHinwYs8/2PPeMIGYXLV7U8cKX49lzrloeiXkKq3r4QBCfTKbVFTp3peOwKV94IvR89pbr29qWTFBCMtYCUIXqzL8yQKWnjgZtPb2Q41zdoxuET+jNApfsxt0520/wAQAXfa9GJmmOK7g3XML8p+YqwotnH8/sRH+CVmF4FvacBFRYbAvP5ewLP7ZBXrYwhRDSlFzTV6vKY7CG6HEhsokIWBI+Q0YnuCSkfoeJ3nL/JuuFSN1iOov92D8qe7d4Sj4MFQkw8WUvlanBDIegKWZ0kIbrTcfXKdsaG29xFJOdcMMzLWaw+ghdhY7DRQGeyz
+x-ms-exchange-antispam-messagedata: h7eoWiHWnYA15A9E+E14ISfLwM2jyULsyQpfhAlwSTcW0QV6kRQF4pTuNqHIC2FaLIshZQjfLsr9/dd2O3bLqIOq0bMr/QjojoAaB1z3p9cqsOXqAn/4Hei3eCCHQqtmNeDQRteKaGhwPIu+t1i07Q==
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1578495250-10672-1-git-send-email-sbhanu@codeaurora.org>
-User-Agent: Mutt/1.12.2 (2019-09-21)
+X-OriginatorOrg: xilinx.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: d6b12b72-98a1-48b3-29d1-08d7b1189d64
+X-MS-Exchange-CrossTenant-originalarrivaltime: 14 Feb 2020 06:39:17.3469
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 657af505-d5df-48d0-8300-c31994686c5c
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: b1RsC6PaThaoR+J38O+oomXextg3zbqSVis8zqbqtP6vU+n5fM4QfaiVrx3gl63sT2lz6cpPkMMC6IUU6ZPjTg==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM6PR02MB4426
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed 08 Jan 06:54 PST 2020, Shaik Sajida Bhanu wrote:
-
-> From: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
-> 
-> Add sdhc instances for supporting eMMC and SD-card on sc7180.
-> The regulators should be in HPM state for proper functionality of
-> eMMC and SD-card. Updating corresponding regulators accordingly.
-> 
-> Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
-> Signed-off-by: Shaik Sajida Bhanu <sbhanu@codeaurora.org>
-
-Applied
-
-Regards,
-Bjorn
-
-> ---
-> Changes since V2:
-> 	- Added cmdq register space and support-cqe flag.
-> 	- Incorporated review comments by Matthias Kaehlcke.
-> 
-> Changes since V1:
-> 	- Updated the regulator min, max voltages as per
-> 	  eMMC/SD-card voltage requirements
-> 	- Enabled IOMMU for eMMC and SD-card.
-> 	- Added pull and drive strength to SD-card cd-gpio.
-> 	- Incorporated review comments by Matthias Kaehlcke.
-> ---
->  arch/arm64/boot/dts/qcom/sc7180-idp.dts |  47 +++++++---
->  arch/arm64/boot/dts/qcom/sc7180.dtsi    | 148 ++++++++++++++++++++++++++++++++
->  2 files changed, 183 insertions(+), 12 deletions(-)
-> 
-> diff --git a/arch/arm64/boot/dts/qcom/sc7180-idp.dts b/arch/arm64/boot/dts/qcom/sc7180-idp.dts
-> index 388f50a..a790d82 100644
-> --- a/arch/arm64/boot/dts/qcom/sc7180-idp.dts
-> +++ b/arch/arm64/boot/dts/qcom/sc7180-idp.dts
-> @@ -7,6 +7,7 @@
->  
->  /dts-v1/;
->  
-> +#include <dt-bindings/gpio/gpio.h>
->  #include <dt-bindings/regulator/qcom,rpmh-regulator.h>
->  #include "sc7180.dtsi"
->  #include "pm6150.dtsi"
-> @@ -101,9 +102,9 @@
->  		};
->  
->  		vreg_l12a_1p8: ldo12 {
-> -			regulator-min-microvolt = <1696000>;
-> -			regulator-max-microvolt = <1952000>;
-> -			regulator-initial-mode = <RPMH_REGULATOR_MODE_LPM>;
-> +			regulator-min-microvolt = <1800000>;
-> +			regulator-max-microvolt = <1800000>;
-> +			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
->  		};
->  
->  		vreg_l13a_1p8: ldo13 {
-> @@ -143,9 +144,9 @@
->  		};
->  
->  		vreg_l19a_2p9: ldo19 {
-> -			regulator-min-microvolt = <2696000>;
-> -			regulator-max-microvolt = <3304000>;
-> -			regulator-initial-mode = <RPMH_REGULATOR_MODE_LPM>;
-> +			regulator-min-microvolt = <2960000>;
-> +			regulator-max-microvolt = <2960000>;
-> +			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
->  		};
->  	};
->  
-> @@ -189,9 +190,9 @@
->  		};
->  
->  		vreg_l6c_2p9: ldo6 {
-> -			regulator-min-microvolt = <2696000>;
-> -			regulator-max-microvolt = <3304000>;
-> -			regulator-initial-mode = <RPMH_REGULATOR_MODE_LPM>;
-> +			regulator-min-microvolt = <1800000>;
-> +			regulator-max-microvolt = <2950000>;
-> +			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
->  		};
->  
->  		vreg_l7c_3p0: ldo7 {
-> @@ -207,9 +208,9 @@
->  		};
->  
->  		vreg_l9c_2p9: ldo9 {
-> -			regulator-min-microvolt = <2952000>;
-> -			regulator-max-microvolt = <3304000>;
-> -			regulator-initial-mode = <RPMH_REGULATOR_MODE_LPM>;
-> +			regulator-min-microvolt = <2960000>;
-> +			regulator-max-microvolt = <2960000>;
-> +			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
->  		};
->  
->  		vreg_l10c_3p3: ldo10 {
-> @@ -254,6 +255,28 @@
->  	status = "okay";
->  };
->  
-> +&sdhc_1 {
-> +	status = "okay";
-> +
-> +	pinctrl-names = "default", "sleep";
-> +	pinctrl-0 = <&sdc1_on>;
-> +	pinctrl-1 = <&sdc1_off>;
-> +	vmmc-supply = <&vreg_l19a_2p9>;
-> +	vqmmc-supply = <&vreg_l12a_1p8>;
-> +};
-> +
-> +&sdhc_2 {
-> +	status = "okay";
-> +
-> +	pinctrl-names = "default","sleep";
-> +	pinctrl-0 = <&sdc2_on>;
-> +	pinctrl-1 = <&sdc2_off>;
-> +	vmmc-supply  = <&vreg_l9c_2p9>;
-> +	vqmmc-supply = <&vreg_l6c_2p9>;
-> +
-> +	cd-gpios = <&tlmm 69 GPIO_ACTIVE_LOW>;
-> +};
-> +
->  &uart3 {
->  	status = "okay";
->  };
-> diff --git a/arch/arm64/boot/dts/qcom/sc7180.dtsi b/arch/arm64/boot/dts/qcom/sc7180.dtsi
-> index 3676bfd..525bc02 100644
-> --- a/arch/arm64/boot/dts/qcom/sc7180.dtsi
-> +++ b/arch/arm64/boot/dts/qcom/sc7180.dtsi
-> @@ -226,6 +226,33 @@
->  			};
->  		};
->  
-> +		sdhc_1: sdhci@7c4000 {
-> +			compatible = "qcom,sc7180-sdhci", "qcom,sdhci-msm-v5";
-> +			reg = <0 0x7c4000 0 0x1000>,
-> +				<0 0x07c5000 0 0x1000>;
-> +			reg-names = "hc_mem", "cqhci_mem";
-> +
-> +			iommus = <&apps_smmu 0x60 0x0>;
-> +			interrupts = <GIC_SPI 641 IRQ_TYPE_LEVEL_HIGH>,
-> +					<GIC_SPI 644 IRQ_TYPE_LEVEL_HIGH>;
-> +			interrupt-names = "hc_irq", "pwr_irq";
-> +
-> +			clocks = <&gcc GCC_SDCC1_APPS_CLK>,
-> +					<&gcc GCC_SDCC1_AHB_CLK>;
-> +			clock-names = "core", "iface";
-> +
-> +			bus-width = <8>;
-> +			non-removable;
-> +			supports-cqe;
-> +
-> +			mmc-ddr-1_8v;
-> +			mmc-hs200-1_8v;
-> +			mmc-hs400-1_8v;
-> +			mmc-hs400-enhanced-strobe;
-> +
-> +			status = "disabled";
-> +		};
-> +
->  		qupv3_id_0: geniqup@8c0000 {
->  			compatible = "qcom,geni-se-qup";
->  			reg = <0 0x008c0000 0 0x6000>;
-> @@ -929,6 +956,127 @@
->  					function = "qup15";
->  				};
->  			};
-> +
-> +			sdc1_on: sdc1-on {
-> +				pinconf-clk {
-> +					pins = "sdc1_clk";
-> +					bias-disable;
-> +					drive-strength = <16>;
-> +				};
-> +
-> +				pinconf-cmd {
-> +					pins = "sdc1_cmd";
-> +					bias-pull-up;
-> +					drive-strength = <10>;
-> +				};
-> +
-> +				pinconf-data {
-> +					pins = "sdc1_data";
-> +					bias-pull-up;
-> +					drive-strength = <10>;
-> +				};
-> +
-> +				pinconf-rclk {
-> +					pins = "sdc1_rclk";
-> +					bias-pull-down;
-> +				};
-> +			};
-> +
-> +			sdc1_off: sdc1-off {
-> +				pinconf-clk {
-> +					pins = "sdc1_clk";
-> +					bias-disable;
-> +					drive-strength = <2>;
-> +				};
-> +
-> +				pinconf-cmd {
-> +					pins = "sdc1_cmd";
-> +					bias-pull-up;
-> +					drive-strength = <2>;
-> +				};
-> +
-> +				pinconf-data {
-> +					pins = "sdc1_data";
-> +					bias-pull-up;
-> +					drive-strength = <2>;
-> +				};
-> +
-> +				pinconf-rclk {
-> +					pins = "sdc1_rclk";
-> +					bias-pull-down;
-> +				};
-> +			};
-> +
-> +			sdc2_on: sdc2-on {
-> +				pinconf-clk {
-> +					pins = "sdc2_clk";
-> +					bias-disable;
-> +					drive-strength = <16>;
-> +				};
-> +
-> +				pinconf-cmd {
-> +					pins = "sdc2_cmd";
-> +					bias-pull-up;
-> +					drive-strength = <10>;
-> +				};
-> +
-> +				pinconf-data {
-> +					pins = "sdc2_data";
-> +					bias-pull-up;
-> +					drive-strength = <10>;
-> +				};
-> +
-> +				pinconf-sd-cd {
-> +					pins = "gpio69";
-> +					bias-pull-up;
-> +					drive-strength = <2>;
-> +				};
-> +			};
-> +
-> +			sdc2_off: sdc2-off {
-> +				pinconf-clk {
-> +					pins = "sdc2_clk";
-> +					bias-disable;
-> +					drive-strength = <2>;
-> +				};
-> +
-> +				pinconf-cmd {
-> +					pins = "sdc2_cmd";
-> +					bias-pull-up;
-> +					drive-strength = <2>;
-> +				};
-> +
-> +				pinconf-data {
-> +					pins = "sdc2_data";
-> +					bias-pull-up;
-> +					drive-strength = <2>;
-> +				};
-> +
-> +				pinconf-sd-cd {
-> +					pins = "gpio69";
-> +					bias-disable;
-> +					drive-strength = <2>;
-> +				};
-> +			};
-> +		};
-> +
-> +		sdhc_2: sdhci@8804000 {
-> +			compatible = "qcom,sc7180-sdhci", "qcom,sdhci-msm-v5";
-> +			reg = <0 0x08804000 0 0x1000>;
-> +			reg-names = "hc_mem";
-> +
-> +			iommus = <&apps_smmu 0x80 0>;
-> +			interrupts = <GIC_SPI 204 IRQ_TYPE_LEVEL_HIGH>,
-> +					<GIC_SPI 222 IRQ_TYPE_LEVEL_HIGH>;
-> +			interrupt-names = "hc_irq", "pwr_irq";
-> +
-> +			clocks = <&gcc GCC_SDCC2_APPS_CLK>,
-> +					<&gcc GCC_SDCC2_AHB_CLK>;
-> +			clock-names = "core", "iface";
-> +
-> +			bus-width = <4>;
-> +
-> +			status = "disabled";
->  		};
->  
->  		qspi: spi@88dc000 {
-> -- 
-> QUALCOMM INDIA, on behalf of Qualcomm Innovation Center, Inc. is a member 
-> of Code Aurora Forum, hosted by The Linux Foundation
-> 
+SGkgVWZmZSwNCg0KPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBVbGYgSGFu
+c3NvbiA8dWxmLmhhbnNzb25AbGluYXJvLm9yZz4NCj4gU2VudDogVGh1cnNkYXksIEZlYnJ1YXJ5
+IDEzLCAyMDIwIDc6MjYgUE0NCj4gVG86IE1hbmlzaCBOYXJhbmkgPE1OQVJBTklAeGlsaW54LmNv
+bT4NCj4gQ2M6IE1pY2hhbCBTaW1layA8bWljaGFsc0B4aWxpbnguY29tPjsgQWRyaWFuIEh1bnRl
+cg0KPiA8YWRyaWFuLmh1bnRlckBpbnRlbC5jb20+OyBKb2xseSBTaGFoIDxKT0xMWVNAeGlsaW54
+LmNvbT47IFJhamFuIFZhamENCj4gPFJBSkFOVkB4aWxpbnguY29tPjsgTmF2YSBraXNob3JlIE1h
+bm5lIDxuYXZhbUB4aWxpbnguY29tPjsgVGVqYXMNCj4gUGF0ZWwgPFRFSkFTUEB4aWxpbnguY29t
+PjsgTGludXggQVJNIDxsaW51eC1hcm0tDQo+IGtlcm5lbEBsaXN0cy5pbmZyYWRlYWQub3JnPjsg
+TGludXggS2VybmVsIE1haWxpbmcgTGlzdCA8bGludXgtDQo+IGtlcm5lbEB2Z2VyLmtlcm5lbC5v
+cmc+OyBsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnDQo+IFN1YmplY3Q6IFJlOiBbUEFUQ0ggMC80
+XSBFbmhhbmNlbWVudHMgYW5kIEJ1ZyBGaXhlcyBpbiBaeW5xTVAgU0RIQ0kNCj4gDQo+IE9uIFR1
+ZSwgMjEgSmFuIDIwMjAgYXQgMTE6MjEsIE1hbmlzaCBOYXJhbmkgPG1hbmlzaC5uYXJhbmlAeGls
+aW54LmNvbT4NCj4gd3JvdGU6DQo+ID4NCj4gPiBUaGlzIHBhdGNoIHNlcmllcyBpbmNsdWRlczoN
+Cj4gPiAtPiBNYXJrIHRoZSBUYXAgRGVsYXkgTm9kZSBhcyB2YWxpZCBmb3IgaW9jdGwgY2FsbHMN
+Cj4gPiAtPiBBZGQgc3VwcG9ydCBmb3IgRExMIHJlc2V0IGluIGZpcm13YXJlIGRyaXZlcg0KPiA+
+IC0+IEFkZCBzdXBwb3J0IHRvIHJlc2V0IERMTCBmcm9tIEFyYXNhbiBTREhDSSBkcml2ZXIgZm9y
+IFp5bnFNUCBwbGF0Zm9ybQ0KPiA+IC0+IEZpeCBpbmNvcnJlY3QgYmFzZSBjbG9jayByZXBvcnRp
+bmcgaXNzdWUNCj4gPg0KPiA+IE1hbmlzaCBOYXJhbmkgKDQpOg0KPiA+ICAgZmlybXdhcmU6IHhp
+bGlueDogQWRkIFp5bnFNUCBUYXAgRGVsYXkgc2V0dXAgaW9jdGwgdG8gdGhlIHZhbGlkIGxpc3QN
+Cj4gPiAgIGZpcm13YXJlOiB4aWxpbng6IEFkZCBETEwgcmVzZXQgc3VwcG9ydA0KPiA+ICAgbW1j
+OiBzZGhjaS1vZi1hcmFzYW46IEFkZCBzdXBwb3J0IGZvciBETEwgcmVzZXQgZm9yIFp5bnFNUCBw
+bGF0Zm9ybXMNCj4gPiAgIHNkaGNpOiBhcmFzYW46IFJlbW92ZSBxdWlyayBmb3IgYnJva2VuIGJh
+c2UgY2xvY2sNCj4gPg0KPiA+ICBkcml2ZXJzL2Zpcm13YXJlL3hpbGlueC96eW5xbXAuYyAgICAg
+fCAgMiArDQo+ID4gIGRyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktb2YtYXJhc2FuLmMgICB8IDU5DQo+
+ICsrKysrKysrKysrKysrKysrKysrKysrKysrKy0NCj4gPiAgaW5jbHVkZS9saW51eC9maXJtd2Fy
+ZS94bG54LXp5bnFtcC5oIHwgIDkgKysrKy0NCj4gPiAgMyBmaWxlcyBjaGFuZ2VkLCA2OCBpbnNl
+cnRpb25zKCspLCAyIGRlbGV0aW9ucygtKQ0KPiA+DQo+ID4gLS0NCj4gPiAyLjE3LjENCj4gPg0K
+PiANCj4gQXBwbGllZCBmb3IgbmV4dCwgdGhhbmtzIQ0KVGhhbmtzIGEgbG90IQ0KDQotIE1hbmlz
+aA0K
