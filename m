@@ -2,139 +2,99 @@ Return-Path: <SRS0=Uv9M=4C=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6D38BC2BA83
-	for <linux-mmc@archiver.kernel.org>; Fri, 14 Feb 2020 10:57:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4D24CC3B196
+	for <linux-mmc@archiver.kernel.org>; Fri, 14 Feb 2020 11:46:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 38E9F2168B
-	for <linux-mmc@archiver.kernel.org>; Fri, 14 Feb 2020 10:57:04 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2323424650
+	for <linux-mmc@archiver.kernel.org>; Fri, 14 Feb 2020 11:46:40 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="mXEm+lHt"
+	dkim=fail reason="key not found in DNS" (0-bit key) header.d=mg.codeaurora.org header.i=@mg.codeaurora.org header.b="skmTZ6dj"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729026AbgBNK5D (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 14 Feb 2020 05:57:03 -0500
-Received: from fllv0016.ext.ti.com ([198.47.19.142]:39354 "EHLO
-        fllv0016.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726220AbgBNK5D (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Feb 2020 05:57:03 -0500
-Received: from lelv0265.itg.ti.com ([10.180.67.224])
-        by fllv0016.ext.ti.com (8.15.2/8.15.2) with ESMTP id 01EAuxwN010645;
-        Fri, 14 Feb 2020 04:56:59 -0600
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
-        s=ti-com-17Q1; t=1581677819;
-        bh=EeRATaYxdcRxaZf/STIKmJgNLsSYIwLxnYW0Mn3oVFg=;
-        h=Subject:From:To:CC:References:Date:In-Reply-To;
-        b=mXEm+lHtRF2V0hQ8YXefrLqX7pgEmya0nnZSBnqeEpC8+DKMw/WtQnxiZW42xFGVf
-         ODcEUJaTLKlIvSlcs3r6hAfdg/4bKR+T3bPQ+b0svWYItiDfP+ZFkMi0v1n7Hr6El8
-         qchZTWLyr2Vgfe7G7rNVmeKOyRrC2TlIZjbm19jM=
-Received: from DFLE105.ent.ti.com (dfle105.ent.ti.com [10.64.6.26])
-        by lelv0265.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 01EAuxqu011836
-        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
-        Fri, 14 Feb 2020 04:56:59 -0600
-Received: from DFLE101.ent.ti.com (10.64.6.22) by DFLE105.ent.ti.com
- (10.64.6.26) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.1847.3; Fri, 14
- Feb 2020 04:56:58 -0600
-Received: from fllv0039.itg.ti.com (10.64.41.19) by DFLE101.ent.ti.com
- (10.64.6.22) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.1847.3 via
- Frontend Transport; Fri, 14 Feb 2020 04:56:58 -0600
-Received: from [172.24.190.4] (ileax41-snat.itg.ti.com [10.172.224.153])
-        by fllv0039.itg.ti.com (8.15.2/8.15.2) with ESMTP id 01EAutb1049623;
-        Fri, 14 Feb 2020 04:56:56 -0600
-Subject: Re: [PATCH 1/3] dt-bindings: mmc: sdhci-am654: Update Output tap
- delay binding
-From:   Faiz Abbas <faiz_abbas@ti.com>
-To:     Rob Herring <robh@kernel.org>
-CC:     <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
-        <devicetree@vger.kernel.org>, <ulf.hansson@linaro.org>,
-        <adrian.hunter@intel.com>
-References: <20200108150920.14547-1-faiz_abbas@ti.com>
- <20200108150920.14547-2-faiz_abbas@ti.com> <20200115015037.GA26114@bogus>
- <a437675a-6a18-14bd-f316-77bdd2bc1efb@ti.com>
- <bff6f9d2-6713-e8c1-177e-f5d9ed5adbf1@ti.com>
-Message-ID: <24e6ac71-00c7-f140-86d8-fa5ec0dcaff0@ti.com>
-Date:   Fri, 14 Feb 2020 16:28:44 +0530
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.4.1
-MIME-Version: 1.0
-In-Reply-To: <bff6f9d2-6713-e8c1-177e-f5d9ed5adbf1@ti.com>
-Content-Type: text/plain; charset="utf-8"
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
-X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
+        id S1728689AbgBNLqc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 14 Feb 2020 06:46:32 -0500
+Received: from mail26.static.mailgun.info ([104.130.122.26]:41289 "EHLO
+        mail26.static.mailgun.info" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1728582AbgBNLqb (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Feb 2020 06:46:31 -0500
+DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
+ s=smtp; t=1581680791; h=References: In-Reply-To: Message-Id: Date:
+ Subject: Cc: To: From: Sender;
+ bh=9jTfW1XPQOwc4d0N/VsPbHurk/PVtrMK9dryJbaZjb4=; b=skmTZ6djYhsyHGL6Dk72v5nwcsRvVGOsnMIARO4Enyk/DhtNHeUcP/opbhYpjjdqyGbhRhBi
+ RYXUeFKNi1yuz5djWfb5ovcRIp3Ibax511OQttiSgyZ/5lGTh3wifkd+YKzdq3LZu/+YwI+u
+ bsA37HfQWELLzBbNlQ1/V+9asHY=
+X-Mailgun-Sending-Ip: 104.130.122.26
+X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
+Received: from smtp.codeaurora.org (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171])
+ by mxa.mailgun.org with ESMTP id 5e468896.7efdb8b75ab0-smtp-out-n01;
+ Fri, 14 Feb 2020 11:46:30 -0000 (UTC)
+Received: by smtp.codeaurora.org (Postfix, from userid 1001)
+        id 6B1FCC447A0; Fri, 14 Feb 2020 11:46:29 +0000 (UTC)
+Received: from vbadigan-linux.qualcomm.com (blr-c-bdr-fw-01_GlobalNAT_AllZones-Outside.qualcomm.com [103.229.19.19])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-SHA256 (128/128 bits))
+        (No client certificate requested)
+        (Authenticated sender: vbadigan)
+        by smtp.codeaurora.org (Postfix) with ESMTPSA id B3352C433A2;
+        Fri, 14 Feb 2020 11:46:24 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.3.2 smtp.codeaurora.org B3352C433A2
+Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
+Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=none smtp.mailfrom=vbadigan@codeaurora.org
+From:   Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+To:     ulf.hansson@linaro.org, robh+dt@kernel.org
+Cc:     asutoshd@codeaurora.org, stummala@codeaurora.org,
+        sayalil@codeaurora.org, cang@codeaurora.org,
+        rampraka@codeaurora.org, dianders@google.com,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-arm-msm@vger.kernel.org,
+        Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
+        Mark Rutland <mark.rutland@arm.com>,
+        devicetree@vger.kernel.org (open list:OPEN FIRMWARE AND FLATTENED
+        DEVICE TREE BINDINGS)
+Subject: [PATCH V2] dt-bindings: mmc: sdhci-msm: Add CQE reg map
+Date:   Fri, 14 Feb 2020 17:15:52 +0530
+Message-Id: <1581680753-9067-1-git-send-email-vbadigan@codeaurora.org>
+X-Mailer: git-send-email 1.9.1
+In-Reply-To: <1581434955-11087-1-git-send-email-vbadigan@codeaurora.org>
+References: <1581434955-11087-1-git-send-email-vbadigan@codeaurora.org>
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Rob,
+CQE feature has been enabled on sdhci-msm. Add CQE reg map
+that needs to be supplied for supporting CQE feature.
 
-On 07/02/20 3:07 pm, Faiz Abbas wrote:
-> Rob,
-> 
-> On 20/01/20 11:00 am, Faiz Abbas wrote:
->> Hi Rob,
->>
->> On 15/01/20 7:20 am, Rob Herring wrote:
->>> On Wed, Jan 08, 2020 at 08:39:18PM +0530, Faiz Abbas wrote:
->>>> According to latest AM65x Data Manual[1], a different output tap delay
->>>> value is recommended for all speed modes. Therefore, replace the
->>>> ti,otap-del-sel binding with one ti,otap-del-sel- for each MMC/SD speed
->>>> mode.
->>>>
->>>> [1] http://www.ti.com/lit/gpn/am6526
->>>>
->>>> Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
->>>> ---
->>>>  .../devicetree/bindings/mmc/sdhci-am654.txt   | 21 +++++++++++++++++--
->>>>  1 file changed, 19 insertions(+), 2 deletions(-)
->>>>
->>>> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-am654.txt b/Documentation/devicetree/bindings/mmc/sdhci-am654.txt
->>>> index 50e87df47971..c6ccecb9ae5a 100644
->>>> --- a/Documentation/devicetree/bindings/mmc/sdhci-am654.txt
->>>> +++ b/Documentation/devicetree/bindings/mmc/sdhci-am654.txt
->>>> @@ -18,7 +18,20 @@ Required Properties:
->>>>  	- clocks: Handles to the clock inputs.
->>>>  	- clock-names: Tuple including "clk_xin" and "clk_ahb"
->>>>  	- interrupts: Interrupt specifiers
->>>> -	- ti,otap-del-sel: Output Tap Delay select
->>>> +	Output tap delay for each speed mode:
->>>> +	- ti,otap-del-sel-legacy
->>>> +	- ti,otap-del-sel-mmc-hs
->>>> +	- ti,otap-del-sel-sd-hs
->>>> +	- ti,otap-del-sel-sdr12
->>>> +	- ti,otap-del-sel-sdr25
->>>> +	- ti,otap-del-sel-sdr50
->>>> +	- ti,otap-del-sel-sdr104
->>>> +	- ti,otap-del-sel-ddr50
->>>> +	- ti,otap-del-sel-ddr52
->>>> +	- ti,otap-del-sel-hs200
->>>> +	- ti,otap-del-sel-hs400
->>>> +	  These bindings must be provided otherwise the driver will disable the
->>>> +	  corresponding speed mode (i.e. all nodes must provide at least -legacy)
->>>
->>> Why not just extend the existing property to be an array. We already 
->>> have properties to enable/disable speed modes.
->>>
->>
->> Its hard to keep track of which modes have values and which don't when
->> you add an array. This scheme is just easier on anyone adding new values
->> or updating old values.
->>
->> We already disable speed modes based on platform specific properties in
->> other drivers. In sdhci-omap.c, the driver disables the corresponding
->> speed mode if the corresponding pinmux and iodelay values are not populated.
->>
-> 
-> Do you agree on above?
-> 
+Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+---
 
-Gentle ping.
+Changes since V1:
+	- Updated description for more clarity & Fixed typos.
+---
+ Documentation/devicetree/bindings/mmc/sdhci-msm.txt | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
 
-Thanks,
-Faiz
+diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+index 7ee639b..ad0ee83 100644
+--- a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
++++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+@@ -26,7 +26,13 @@ Required properties:
+ 
+ - reg: Base address and length of the register in the following order:
+ 	- Host controller register map (required)
+-	- SD Core register map (required for msm-v4 and below)
++	- SD Core register map (required for controllers earlier than msm-v5)
++	- CQE register map (Optional, CQE support is present on SDHC instance meant
++	                    for eMMC and version v4.2 and above)
++- reg-names: When CQE register map is supplied, below reg-names are required
++	- "hc_mem" for Host controller register map
++	- "core_mem" for SD core register map
++	- "cqhci_mem" for CQE register map
+ - interrupts: Should contain an interrupt-specifiers for the interrupts:
+ 	- Host controller interrupt (required)
+ - pinctrl-names: Should contain only one value - "default".
+-- 
+Qualcomm India Private Limited, on behalf of Qualcomm Innovation Center, Inc., is a member of Code Aurora Forum, a Linux Foundation Collaborative Project
