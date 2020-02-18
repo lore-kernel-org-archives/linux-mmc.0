@@ -2,158 +2,94 @@ Return-Path: <SRS0=YSSR=4G=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.6 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 42BADC34026
-	for <linux-mmc@archiver.kernel.org>; Tue, 18 Feb 2020 14:08:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A33E3C34031
+	for <linux-mmc@archiver.kernel.org>; Tue, 18 Feb 2020 21:29:58 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 16E9920722
-	for <linux-mmc@archiver.kernel.org>; Tue, 18 Feb 2020 14:08:44 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="ZQs3yrtv"
+	by mail.kernel.org (Postfix) with ESMTP id 72EBD2173E
+	for <linux-mmc@archiver.kernel.org>; Tue, 18 Feb 2020 21:29:58 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1582061398;
+	bh=HtBodpLnjDD/uilkpRi1NCIeKNmRMWICKcYnenWK4Hc=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
+	b=o13/H8IBKZ1CL56AqxkqFuYK2JkoAjuDGl+6Dv8HwcnyzsvJi0W/AZrpd1qYrAhVW
+	 f4XaWNRsd6NcFAa8mlG0Hb+ij+IVcgClKaWFDVCUG3BpE8je0SaY5ZUpVUg4WI7Epo
+	 PNRnXSZzGQkkI5gZnCJrZ0Xvsp21DiOCUpev7mCs=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726444AbgBROIn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 18 Feb 2020 09:08:43 -0500
-Received: from fllv0016.ext.ti.com ([198.47.19.142]:47640 "EHLO
-        fllv0016.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726373AbgBROIn (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Feb 2020 09:08:43 -0500
-Received: from lelv0265.itg.ti.com ([10.180.67.224])
-        by fllv0016.ext.ti.com (8.15.2/8.15.2) with ESMTP id 01IE8aTe072394;
-        Tue, 18 Feb 2020 08:08:36 -0600
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
-        s=ti-com-17Q1; t=1582034917;
-        bh=4BdW1JJPThl9i4+P6/loVm2QUGqngwrPUTpXVz+GMFI=;
-        h=From:To:CC:Subject:Date;
-        b=ZQs3yrtvLVTRF2HF+1U9f5fNjaCOdQwUWH7+mmvjg7di5RpeS3yZ+vogwfVnmWH+f
-         1Xrjj+HwGGjCn0MetPtQiQ4cN4knFTNR3jCD/bpCC1Tmtgz42JTNJbXqvxgLfoRlbp
-         kEGcIT4ufv893934slXJIA5iBygxezzZ0hqZHPAk=
-Received: from DFLE111.ent.ti.com (dfle111.ent.ti.com [10.64.6.32])
-        by lelv0265.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 01IE8aaE080194
-        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
-        Tue, 18 Feb 2020 08:08:36 -0600
-Received: from DFLE101.ent.ti.com (10.64.6.22) by DFLE111.ent.ti.com
- (10.64.6.32) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.1847.3; Tue, 18
- Feb 2020 08:08:36 -0600
-Received: from fllv0040.itg.ti.com (10.64.41.20) by DFLE101.ent.ti.com
- (10.64.6.22) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.1847.3 via
- Frontend Transport; Tue, 18 Feb 2020 08:08:36 -0600
-Received: from a0230074-OptiPlex-7010.india.ti.com (ileax41-snat.itg.ti.com [10.172.224.153])
-        by fllv0040.itg.ti.com (8.15.2/8.15.2) with ESMTP id 01IE8Xqr096183;
-        Tue, 18 Feb 2020 08:08:34 -0600
-From:   Faiz Abbas <faiz_abbas@ti.com>
-To:     <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
-        <linux-omap@vger.kernel.org>
-CC:     <ulf.hansson@linaro.org>, <adrian.hunter@intel.com>,
-        <kishon@ti.com>, <tony@atomide.com>, <faiz_abbas@ti.com>
-Subject: [PATCH] mmc: sdhci-omap: Add Support for Suspend/Resume
-Date:   Tue, 18 Feb 2020 19:40:18 +0530
-Message-ID: <20200218141018.24456-1-faiz_abbas@ti.com>
-X-Mailer: git-send-email 2.19.2
+        id S1727470AbgBRV3z (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 18 Feb 2020 16:29:55 -0500
+Received: from mail-oi1-f195.google.com ([209.85.167.195]:33190 "EHLO
+        mail-oi1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726339AbgBRV3z (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Feb 2020 16:29:55 -0500
+Received: by mail-oi1-f195.google.com with SMTP id q81so21707598oig.0;
+        Tue, 18 Feb 2020 13:29:54 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to:user-agent;
+        bh=8Pfah7bNbvhUUcDQljTX+t6XhrjRCKYEE9u9jUwdWpU=;
+        b=Jxb8OrCW7zjzNaVzOGy9snZ857DxvCxzridDfqCFbR/i8LYaNJKVytkHcxQFQYwYS0
+         JSZ87/cMHB5J+bwUomEZvZdtOlMQzisK3tRmmPrcrPBy5YxamnBAO3MclBMmg7xe2/n0
+         CamrSTNTObnuf6OPTWN08uWuJTQKGoce0f3QguRC/J8cQW2AuGFwWUAYTm7oxt39moes
+         4t/TgCzmTSN0BDtdaJllOdHDAOGVCJzREhGAGfagGxq1Y+NroMcNXld9b44pe04CMZ/v
+         /fJkSkDGcKtrXqYQctBEhYGWBejvHsZSEhrKDIu049TyBOu4bYEZzd/9+l3Lif2A5KL+
+         dSOA==
+X-Gm-Message-State: APjAAAX7UgAy90zkqEGZxSiAjf+qcqOKMKJB6/El9UgeVJ0pzYSnonPI
+        FWlfhpzWoqq5uWfL+PwbJg==
+X-Google-Smtp-Source: APXvYqytbRlMgGgrgPO+2HqbA0TyZyd5tEElZaT89Wxzwxo8TcLIUlbqG/Bs5uZz6Af6akmzhm8gcw==
+X-Received: by 2002:a05:6808:b22:: with SMTP id t2mr2582783oij.40.1582061394172;
+        Tue, 18 Feb 2020 13:29:54 -0800 (PST)
+Received: from rob-hp-laptop (24-155-109-49.dyn.grandenetworks.net. [24.155.109.49])
+        by smtp.gmail.com with ESMTPSA id r10sm1749580otn.37.2020.02.18.13.29.52
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 18 Feb 2020 13:29:53 -0800 (PST)
+Received: (nullmailer pid 6190 invoked by uid 1000);
+        Tue, 18 Feb 2020 21:29:52 -0000
+Date:   Tue, 18 Feb 2020 15:29:52 -0600
+From:   Rob Herring <robh@kernel.org>
+To:     Pradeep P V K <ppvk@codeaurora.org>
+Cc:     bjorn.andersson@linaro.org, adrian.hunter@intel.com,
+        robh+dt@kernel.org, ulf.hansson@linaro.org,
+        asutoshd@codeaurora.org, stummala@codeaurora.org,
+        sayalil@codeaurora.org, rampraka@codeaurora.org,
+        vbadigan@codeaurora.org, sboyd@kernel.org,
+        georgi.djakov@linaro.org, mka@chromium.org,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
+        agross@kernel.org, linux-mmc-owner@vger.kernel.org,
+        Pradeep P V K <ppvk@codeaurora.org>
+Subject: Re: [RFC v4 2/2] dt-bindings: mmc: sdhci-msm: Add interconnect BW
+ scaling strings
+Message-ID: <20200218212952.GA6132@bogus>
+References: <1582030833-12964-1-git-send-email-ppvk@codeaurora.org>
+ <1582030833-12964-3-git-send-email-ppvk@codeaurora.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1582030833-12964-3-git-send-email-ppvk@codeaurora.org>
+User-Agent: Mutt/1.10.1 (2018-07-13)
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add power management ops which save and restore the driver context and
-facilitate a system suspend and resume.
+On Tue, 18 Feb 2020 18:30:33 +0530, Pradeep P V K wrote:
+> Add interconnect bandwidth scaling supported strings for qcom-sdhci
+> controller.
+> 
+> Signed-off-by: Pradeep P V K <ppvk@codeaurora.org>
+> ---
+> 
+> changes from RFC v3 -> v4:
+> - No changes.
+> 
+>  Documentation/devicetree/bindings/mmc/sdhci-msm.txt | 18 ++++++++++++++++++
+>  1 file changed, 18 insertions(+)
+> 
 
-Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
----
- drivers/mmc/host/sdhci-omap.c | 59 +++++++++++++++++++++++++++++++++++
- 1 file changed, 59 insertions(+)
-
-diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
-index 882053151a47..a524c01da8de 100644
---- a/drivers/mmc/host/sdhci-omap.c
-+++ b/drivers/mmc/host/sdhci-omap.c
-@@ -108,6 +108,11 @@ struct sdhci_omap_host {
- 	struct pinctrl		*pinctrl;
- 	struct pinctrl_state	**pinctrl_state;
- 	bool			is_tuning;
-+	/* Omap specific context save */
-+	u32			con;
-+	u32			hctl;
-+	u32			sysctl;
-+	u32			capa;
- };
- 
- static void sdhci_omap_start_clock(struct sdhci_omap_host *omap_host);
-@@ -1233,11 +1238,65 @@ static int sdhci_omap_remove(struct platform_device *pdev)
- 	return 0;
- }
- 
-+static void sdhci_omap_context_save(struct sdhci_omap_host *omap_host)
-+{
-+	omap_host->con = sdhci_omap_readl(omap_host, SDHCI_OMAP_CON);
-+	omap_host->hctl = sdhci_omap_readl(omap_host, SDHCI_OMAP_HCTL);
-+	omap_host->sysctl = sdhci_omap_readl(omap_host, SDHCI_OMAP_SYSCTL);
-+	omap_host->capa = sdhci_omap_readl(omap_host, SDHCI_OMAP_CAPA);
-+}
-+
-+static void sdhci_omap_context_restore(struct sdhci_omap_host *omap_host)
-+{
-+	sdhci_omap_writel(omap_host, SDHCI_OMAP_CON, omap_host->con);
-+	sdhci_omap_writel(omap_host, SDHCI_OMAP_HCTL, omap_host->hctl);
-+	sdhci_omap_writel(omap_host, SDHCI_OMAP_SYSCTL, omap_host->sysctl);
-+	sdhci_omap_writel(omap_host, SDHCI_OMAP_CAPA, omap_host->capa);
-+}
-+
-+static int __maybe_unused sdhci_omap_suspend(struct device *dev)
-+{
-+	struct sdhci_host *host = dev_get_drvdata(dev);
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_omap_host *omap_host = sdhci_pltfm_priv(pltfm_host);
-+
-+	sdhci_suspend_host(host);
-+
-+	sdhci_omap_context_save(omap_host);
-+
-+	pinctrl_pm_select_idle_state(dev);
-+
-+	pm_runtime_put_sync(dev);
-+
-+	return 0;
-+}
-+
-+static int __maybe_unused sdhci_omap_resume(struct device *dev)
-+{
-+	struct sdhci_host *host = dev_get_drvdata(dev);
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_omap_host *omap_host = sdhci_pltfm_priv(pltfm_host);
-+
-+	pm_runtime_get_sync(dev);
-+
-+	pinctrl_pm_select_default_state(dev);
-+
-+	sdhci_omap_context_restore(omap_host);
-+
-+	sdhci_resume_host(host);
-+
-+	return 0;
-+}
-+
-+static SIMPLE_DEV_PM_OPS(sdhci_omap_dev_pm_ops, sdhci_omap_suspend,
-+			 sdhci_omap_resume);
-+
- static struct platform_driver sdhci_omap_driver = {
- 	.probe = sdhci_omap_probe,
- 	.remove = sdhci_omap_remove,
- 	.driver = {
- 		   .name = "sdhci-omap",
-+		   .pm = &sdhci_omap_dev_pm_ops,
- 		   .of_match_table = omap_sdhci_match,
- 		  },
- };
--- 
-2.19.2
-
+Acked-by: Rob Herring <robh@kernel.org>
