@@ -2,28 +2,28 @@ Return-Path: <SRS0=YSSR=4G=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=no
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B3CFAC3403B
-	for <linux-mmc@archiver.kernel.org>; Tue, 18 Feb 2020 13:01:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 46876C3403D
+	for <linux-mmc@archiver.kernel.org>; Tue, 18 Feb 2020 13:01:29 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 8C52824654
-	for <linux-mmc@archiver.kernel.org>; Tue, 18 Feb 2020 13:01:20 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 208D924656
+	for <linux-mmc@archiver.kernel.org>; Tue, 18 Feb 2020 13:01:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726556AbgBRNBU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 18 Feb 2020 08:01:20 -0500
-Received: from alexa-out-blr-01.qualcomm.com ([103.229.18.197]:1082 "EHLO
+        id S1726399AbgBRNBV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 18 Feb 2020 08:01:21 -0500
+Received: from alexa-out-blr-01.qualcomm.com ([103.229.18.197]:62303 "EHLO
         alexa-out-blr-01.qualcomm.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726399AbgBRNBT (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Feb 2020 08:01:19 -0500
+        by vger.kernel.org with ESMTP id S1726373AbgBRNBU (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Feb 2020 08:01:20 -0500
 Received: from ironmsg02-blr.qualcomm.com ([10.86.208.131])
   by alexa-out-blr-01.qualcomm.com with ESMTP/TLS/AES256-SHA; 18 Feb 2020 18:31:16 +0530
 Received: from c-ppvk-linux.qualcomm.com ([10.206.24.34])
-  by ironmsg02-blr.qualcomm.com with ESMTP; 18 Feb 2020 18:30:41 +0530
+  by ironmsg02-blr.qualcomm.com with ESMTP; 18 Feb 2020 18:30:44 +0530
 Received: by c-ppvk-linux.qualcomm.com (Postfix, from userid 2304101)
-        id A544A4C42; Tue, 18 Feb 2020 18:30:40 +0530 (IST)
+        id D3B324C42; Tue, 18 Feb 2020 18:30:43 +0530 (IST)
 From:   Pradeep P V K <ppvk@codeaurora.org>
 To:     bjorn.andersson@linaro.org, adrian.hunter@intel.com,
         robh+dt@kernel.org, ulf.hansson@linaro.org,
@@ -35,37 +35,65 @@ Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
         linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
         agross@kernel.org, linux-mmc-owner@vger.kernel.org,
         Pradeep P V K <ppvk@codeaurora.org>
-Subject: [RFC v4 0/2] Add SDHC interconnect bandwidth scaling
-Date:   Tue, 18 Feb 2020 18:30:31 +0530
-Message-Id: <1582030833-12964-1-git-send-email-ppvk@codeaurora.org>
+Subject: [RFC v4 2/2] dt-bindings: mmc: sdhci-msm: Add interconnect BW scaling strings
+Date:   Tue, 18 Feb 2020 18:30:33 +0530
+Message-Id: <1582030833-12964-3-git-send-email-ppvk@codeaurora.org>
 X-Mailer: git-send-email 1.9.1
+In-Reply-To: <1582030833-12964-1-git-send-email-ppvk@codeaurora.org>
+References: <1582030833-12964-1-git-send-email-ppvk@codeaurora.org>
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add interconnect bandwidths for SDHC driver using OPP framework that
-is required by SDHC driver based on the clock frequency and bus width
-of the card. Otherwise, the system clocks may run at minimum clock
-speed and thus affecting the performance.
+Add interconnect bandwidth scaling supported strings for qcom-sdhci
+controller.
 
-This change is based on
-[RFC] mmc: host: sdhci-msm: Use the interconnect API
-(https://lkml.org/lkml/2018/10/11/499) and
+Signed-off-by: Pradeep P V K <ppvk@codeaurora.org>
+---
 
-[PATCH v6] Introduce Bandwidth OPPs for interconnects
-(https://lkml.org/lkml/2019/12/6/740)
-
-Pradeep P V K (2):
-  mmc: sdhci-msm: Add interconnect bus bandwidth scaling support
-  dt-bindings: mmc: sdhci-msm: Add interconnect BW scaling strings
-
- .../devicetree/bindings/mmc/sdhci-msm.txt          |  18 ++
- drivers/mmc/host/sdhci-msm.c                       | 204 ++++++++++++++++++++-
- 2 files changed, 218 insertions(+), 4 deletions(-)
-
---
 changes from RFC v3 -> v4:
-- Addressed review comments from Bjorn and Matthias
+- No changes.
+
+ Documentation/devicetree/bindings/mmc/sdhci-msm.txt | 18 ++++++++++++++++++
+ 1 file changed, 18 insertions(+)
+
+diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+index 7ee639b..cbe97b8 100644
+--- a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
++++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+@@ -40,6 +40,21 @@ Required properties:
+ 	"cal"	- reference clock for RCLK delay calibration (optional)
+ 	"sleep"	- sleep clock for RCLK delay calibration (optional)
+ 
++Optional Properties:
++* Following bus parameters are required for interconnect bandwidth scaling:
++- interconnects: Pairs of phandles and interconnect provider specifier
++		 to denote the edge source and destination ports of
++		 the interconnect path.
++
++- interconnect-names: For sdhc, we have two main paths.
++		1. Data path : sdhc to ddr
++		2. Config path : cpu to sdhc
++		For Data interconnect path the name supposed to be
++		is "sdhc-ddr" and for config interconnect path it is
++		"cpu-sdhc".
++		Please refer to Documentation/devicetree/bindings/
++		interconnect/ for more details.
++
+ Example:
+ 
+ 	sdhc_1: sdhci@f9824900 {
+@@ -57,6 +72,9 @@ Example:
+ 
+ 		clocks = <&gcc GCC_SDCC1_APPS_CLK>, <&gcc GCC_SDCC1_AHB_CLK>;
+ 		clock-names = "core", "iface";
++		interconnects = <&qnoc MASTER_SDCC_ID &qnoc SLAVE_DDR_ID>,
++				<&qnoc MASTER_CPU_ID &qnoc SLAVE_SDCC_ID>;
++		interconnect-names = "sdhc-ddr","cpu-sdhc";
+ 	};
+ 
+ 	sdhc_2: sdhci@f98a4900 {
+-- 
 1.9.1
 
