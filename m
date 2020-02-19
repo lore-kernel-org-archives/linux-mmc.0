@@ -2,150 +2,132 @@ Return-Path: <SRS0=5cIg=4H=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-4.0 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,UNWANTED_LANGUAGE_BODY,URIBL_BLOCKED
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_GIT autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4002FC3404D
-	for <linux-mmc@archiver.kernel.org>; Wed, 19 Feb 2020 10:29:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EE687C34050
+	for <linux-mmc@archiver.kernel.org>; Wed, 19 Feb 2020 12:28:50 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 1995B24656
-	for <linux-mmc@archiver.kernel.org>; Wed, 19 Feb 2020 10:29:37 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C727F24677
+	for <linux-mmc@archiver.kernel.org>; Wed, 19 Feb 2020 12:28:50 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="zzcA9hwk"
+	dkim=pass (1024-bit key) header.d=xilinx.onmicrosoft.com header.i=@xilinx.onmicrosoft.com header.b="S8PEUFSC"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726707AbgBSK3g (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 19 Feb 2020 05:29:36 -0500
-Received: from mail-vs1-f66.google.com ([209.85.217.66]:37422 "EHLO
-        mail-vs1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726697AbgBSK3g (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Feb 2020 05:29:36 -0500
-Received: by mail-vs1-f66.google.com with SMTP id x18so15091196vsq.4
-        for <linux-mmc@vger.kernel.org>; Wed, 19 Feb 2020 02:29:35 -0800 (PST)
+        id S1727263AbgBSM2u (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 19 Feb 2020 07:28:50 -0500
+Received: from mail-mw2nam12on2081.outbound.protection.outlook.com ([40.107.244.81]:38650
+        "EHLO NAM12-MW2-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1726491AbgBSM2u (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 19 Feb 2020 07:28:50 -0500
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=eDKwHAOkR+LJg2dSDMNF3Hn7O4/wqqrh8nlp5yLr71ZzYzcOOffiio5JbZKyPv54SA5hDXnZRzJ7ANGyAjRK1dKe7Up/LJkcrcGd4oaSnKVnHS9kvbUoFpINLuKqI40z/jrYIcsGFSTM++7dnI/D5pUWHkgnj4In3hme6a9OkSs9cnAucOUJXdkPcRK8IA2Y/dZh8/p5jgPv8ZGugAWHxiTaeiKs44EAhpFWxrKi2ds5OfIO3Dp35MJga3YG5IsTX61/6JsWOznV87qlUc0BtNKJDefFmzEFjlJXmU+MALJxHkF2XzVwK6KnWTq3rogJaY14Pb0OKrH97znQKn1LsA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=E58wuQu/fKXuTAg0heh2qA0UF98tN3F9EFXdgWH5mOc=;
+ b=XnC54JcX+dBL4RUms/uK6Dclr72IlwxVEleBDfjGeJg2fLKdxFAr+G7mz3jlznjrXbdpm9oOLEZLpQ7zUOajAWgavRfAXb07bMX8qA+i8nGaXx+Hs0xoxEanpUz4fBYH9aJjaPVEcCAdBWyf1X9CF3cyVrxsNBwU4A/H3H++q8FeWOz3T3Ec5hnsYAtkyYRBfwBEp0NFj0aBZnCo65Q7w4GFc9YB0q2E7oZG7wGYaN7zzm/pUfkCfeuD84cP3xK25jfnntlmP3+QeA2XWzDolVlEuNjKSzIH+d5tKmHkyURNzI9USWCVfvM4rAfwUKEgMk5MBh9TCUWQ0lz5j4XadQ==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
+ 149.199.60.83) smtp.rcpttodomain=vger.kernel.org smtp.mailfrom=xilinx.com;
+ dmarc=bestguesspass action=none header.from=xilinx.com; dkim=none (message
+ not signed); arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=N/FWsOslLeWJ8wc9PPiLEWzxti0Lz4tyLMKB84GK8Qg=;
-        b=zzcA9hwk8oBqEzK/Sk5smaykWWWhkqLgdN2ggNaL0cspzNwa1q+GoinNOOoh2h9V51
-         Lv7ZUcQx+nj4ydcgo+MumePOIXyd+adldZYvoZGHUzMACLER4enSZC94mRb28MJr6c1A
-         J0zDWaHD7YQ525Kl6Y1gatEtQ406L9F6WgmgJkakqPk8Q+C9ZZgLDbcn0PVAxkoeaFBp
-         u1Zh99N7KbfqvYQDnfJFNmIip0HZ15FT2UcLc3U/w813BeSgu1q8swKVqPbRLuHM9XJ3
-         Uxz065dq2yY9KSl+injyEt5q+2tCcO4d067fxfYm7S/GKS+XZflxxlWeTWxnoNcErJqI
-         wpGA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=N/FWsOslLeWJ8wc9PPiLEWzxti0Lz4tyLMKB84GK8Qg=;
-        b=AHG16uwmyQXlR9uPYNb6ixLBIE07psKNmsn6wgt50wV70sr+FHGhXL+YTji3DPM9pJ
-         nqa+u3wJNZXdgJ0UwwJqVB3PQ73OdHFway0GgSbEHiu0cC+GWFZ50wOJmridHUSOm88m
-         D4oQOfkq895eY8K9WeHcwQo9ozsIYeTdx++9bJOn9Gsz1AEqW8Oo4Nwo21l6C2g0tFGg
-         5XBB+4clElW+c603q/hLoJ3zwT6YXGi0nwQ8GB963wNVMQtxwLCVZ7AxMBpFPinCFEQn
-         1RmuhNgtTXe9TZi+76vrNrh1kJxKP2Dk7Mk9ll+SASl00If3xsm4voISy+M+Dtf7V2OY
-         0GlQ==
-X-Gm-Message-State: APjAAAWZTNyGyOLzndnbMrT/zonjM/eT0+Pcd6Sgizx6aBbFpplK3jm/
-        fJ4w8nSAK4LesPf93+7U1yYq4dg902bWWn5FItkXtw==
-X-Google-Smtp-Source: APXvYqwdd1WVvropN/Ah9GWZ4j1iP+qWglk6pATFnqpFpANspIETm+lPq1ohJHYuPnh9a1IcHgjcTAcwzRPQ36OkB7Q=
-X-Received: by 2002:a67:5e45:: with SMTP id s66mr13897757vsb.200.1582108175469;
- Wed, 19 Feb 2020 02:29:35 -0800 (PST)
+ d=xilinx.onmicrosoft.com; s=selector2-xilinx-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=E58wuQu/fKXuTAg0heh2qA0UF98tN3F9EFXdgWH5mOc=;
+ b=S8PEUFSCRgBUFZPn+VcViIP6eYLa8xaiJVI77BinbSHfuEh36yylvEoycw2EFVwIiCY2ZMZ66lQ52EXoui+6zset3pi2c2s59D0cDAFdkOSQOo/DmCY9fQpvBn95aRRm/geB3BWsKcDH+d5F7GttWOr9m7aJl+GK0Q95jJTOtJ0=
+Received: from MWHPR02CA0010.namprd02.prod.outlook.com (2603:10b6:300:4b::20)
+ by BYAPR02MB5125.namprd02.prod.outlook.com (2603:10b6:a03:67::19) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.2729.24; Wed, 19 Feb
+ 2020 12:28:47 +0000
+Received: from BL2NAM02FT060.eop-nam02.prod.protection.outlook.com
+ (2a01:111:f400:7e46::206) by MWHPR02CA0010.outlook.office365.com
+ (2603:10b6:300:4b::20) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.2750.18 via Frontend
+ Transport; Wed, 19 Feb 2020 12:28:46 +0000
+Authentication-Results: spf=pass (sender IP is 149.199.60.83)
+ smtp.mailfrom=xilinx.com; vger.kernel.org; dkim=none (message not signed)
+ header.d=none;vger.kernel.org; dmarc=bestguesspass action=none
+ header.from=xilinx.com;
+Received-SPF: Pass (protection.outlook.com: domain of xilinx.com designates
+ 149.199.60.83 as permitted sender) receiver=protection.outlook.com;
+ client-ip=149.199.60.83; helo=xsj-pvapsmtpgw01;
+Received: from xsj-pvapsmtpgw01 (149.199.60.83) by
+ BL2NAM02FT060.mail.protection.outlook.com (10.152.76.124) with Microsoft SMTP
+ Server (version=TLS1_0, cipher=TLS_RSA_WITH_AES_256_CBC_SHA) id 15.20.2729.22
+ via Frontend Transport; Wed, 19 Feb 2020 12:28:46 +0000
+Received: from unknown-38-66.xilinx.com ([149.199.38.66] helo=xsj-pvapsmtp01)
+        by xsj-pvapsmtpgw01 with esmtp (Exim 4.63)
+        (envelope-from <manish.narani@xilinx.com>)
+        id 1j4OT7-0006bu-PM; Wed, 19 Feb 2020 04:28:45 -0800
+Received: from [127.0.0.1] (helo=localhost)
+        by xsj-pvapsmtp01 with smtp (Exim 4.63)
+        (envelope-from <manish.narani@xilinx.com>)
+        id 1j4OT2-00064S-Lk; Wed, 19 Feb 2020 04:28:40 -0800
+Received: from xsj-pvapsmtp01 (xsj-smtp.xilinx.com [149.199.38.66])
+        by xsj-smtp-dlp2.xlnx.xilinx.com (8.13.8/8.13.1) with ESMTP id 01JCSdA1016691;
+        Wed, 19 Feb 2020 04:28:39 -0800
+Received: from [172.23.64.106] (helo=xhdvnc125.xilinx.com)
+        by xsj-pvapsmtp01 with esmtp (Exim 4.63)
+        (envelope-from <mnarani@xilinx.com>)
+        id 1j4OT1-00064F-2Q; Wed, 19 Feb 2020 04:28:39 -0800
+Received: by xhdvnc125.xilinx.com (Postfix, from userid 16987)
+        id 419FE1211E6; Wed, 19 Feb 2020 17:58:38 +0530 (IST)
+From:   Manish Narani <manish.narani@xilinx.com>
+To:     ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com,
+        michal.simek@xilinx.com, adrian.hunter@intel.com
+Cc:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        git@xilinx.com, Manish Narani <manish.narani@xilinx.com>
+Subject: [PATCH 0/2] Add support for Xilinx Versal SDHCI in Arasan driver
+Date:   Wed, 19 Feb 2020 17:58:31 +0530
+Message-Id: <1582115313-115667-1-git-send-email-manish.narani@xilinx.com>
+X-Mailer: git-send-email 2.1.1
+X-RCIS-Action: ALLOW
+X-TM-AS-Product-Ver: IMSS-7.1.0.1224-8.2.0.1013-23620.005
+X-TM-AS-User-Approved-Sender: Yes;Yes
+X-EOPAttributedMessage: 0
+X-MS-Office365-Filtering-HT: Tenant
+X-Forefront-Antispam-Report: CIP:149.199.60.83;IPV:;CTRY:US;EFV:NLI;SFV:NSPM;SFS:(10009020)(4636009)(346002)(39860400002)(396003)(376002)(136003)(189003)(199004)(6666004)(356004)(81156014)(2616005)(8676002)(70586007)(4744005)(81166006)(316002)(186003)(4326008)(36756003)(44832011)(426003)(70206006)(5660300002)(8936002)(26005)(6266002)(336012)(107886003)(2906002)(478600001)(42186006);DIR:OUT;SFP:1101;SCL:1;SRVR:BYAPR02MB5125;H:xsj-pvapsmtpgw01;FPR:;SPF:Pass;LANG:en;PTR:unknown-60-83.xilinx.com;MX:1;A:1;
 MIME-Version: 1.0
-References: <20200128090636.13689-1-ludovic.barre@st.com> <20200128090636.13689-10-ludovic.barre@st.com>
- <853f4b14-a188-f329-34e5-8e88fcafa775@st.com>
-In-Reply-To: <853f4b14-a188-f329-34e5-8e88fcafa775@st.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 19 Feb 2020 11:28:59 +0100
-Message-ID: <CAPDyKFrKunZ1nDiSR-6ZgZNxkxs=_R-i3N9QWNovnZ4iY=DP=g@mail.gmail.com>
-Subject: Re: [PATCH V2 9/9] mmc: mmci: add sdmmc variant revision 2.0
-To:     Ludovic BARRE <ludovic.barre@st.com>
-Cc:     Rob Herring <robh+dt@kernel.org>,
-        Srinivas Kandagatla <srinivas.kandagatla@linaro.org>,
-        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
-        Alexandre Torgue <alexandre.torgue@st.com>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        DTML <devicetree@vger.kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        linux-stm32@st-md-mailman.stormreply.com
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain
+X-MS-PublicTrafficType: Email
+X-MS-Office365-Filtering-Correlation-Id: b5ce6b66-751b-43cf-a295-08d7b537440f
+X-MS-TrafficTypeDiagnostic: BYAPR02MB5125:
+X-Microsoft-Antispam-PRVS: <BYAPR02MB5125BF2ABB8D9E8E5215FB48C1100@BYAPR02MB5125.namprd02.prod.outlook.com>
+X-Auto-Response-Suppress: DR, RN, NRN, OOF, AutoReply
+X-MS-Oob-TLC-OOBClassifiers: OLM:3968;
+X-Forefront-PRVS: 0318501FAE
+X-MS-Exchange-SenderADCheck: 1
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: MRDCwsPLHXh7wmv9/C3lafIJal37aXotrPbphuVfqbxqxuCZ+F4bP6uddneRCkRxCR9MyF1DGtZKO+/cgIX6ApMMPPNblcz/QbnftSeonkkDQHR2vn8UGTxfMRbAiLSWFKW/t51uf23leNs2WvcdqYZmaNrfPeN3AFG1jLcKdzSn64I88id77K1b6cxTpxWXYopmsVi2j38vdQ8xwbxDH/iaL8j+x/UUmD5VdC3idFEuwTHThSaMVYJGB2EwsOiUQgp69XOLHkSBuKkoYVAIR537nmag62nO9ts5YB61ltE1hJwC2X9BvABImggLs0l7G0T+/fh3A5YafyaQI6DC5AhFYsaIJ9CRdVHA3PTWaUVUXJ7SKZfJl2KErEtSVuPHPB3DvbJ0DSacJICvrXG0eGdtfYz7R2cBqDAdF5ptfFWmspNuDJKuIXpI9TNeeQUJ
+X-OriginatorOrg: xilinx.com
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 19 Feb 2020 12:28:46.4187
+ (UTC)
+X-MS-Exchange-CrossTenant-Network-Message-Id: b5ce6b66-751b-43cf-a295-08d7b537440f
+X-MS-Exchange-CrossTenant-Id: 657af505-d5df-48d0-8300-c31994686c5c
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=657af505-d5df-48d0-8300-c31994686c5c;Ip=[149.199.60.83];Helo=[xsj-pvapsmtpgw01]
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: BYAPR02MB5125
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 11 Feb 2020 at 15:44, Ludovic BARRE <ludovic.barre@st.com> wrote:
->
-> hi Ulf
->
-> Le 1/28/20 =C3=A0 10:06 AM, Ludovic Barre a =C3=A9crit :
-> > This patch adds a sdmmc variant revision 2.0.
-> > This revision is backward compatible with 1.1, and adds dma
-> > link list support.
-> >
-> > Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
-> > ---
-> >   drivers/mmc/host/mmci.c | 30 ++++++++++++++++++++++++++++++
-> >   1 file changed, 30 insertions(+)
-> >
-> > diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-> > index 24e630183ed4..a774c329c212 100644
-> > --- a/drivers/mmc/host/mmci.c
-> > +++ b/drivers/mmc/host/mmci.c
-> > @@ -275,6 +275,31 @@ static struct variant_data variant_stm32_sdmmc =3D=
- {
-> >       .init                   =3D sdmmc_variant_init,
-> >   };
-> >
-> > +static struct variant_data variant_stm32_sdmmcv2 =3D {
-> > +     .fifosize               =3D 16 * 4,
-> > +     .fifohalfsize           =3D 8 * 4,
-> > +     .f_max                  =3D 208000000,
-> > +     .stm32_clkdiv           =3D true,
-> > +     .cmdreg_cpsm_enable     =3D MCI_CPSM_STM32_ENABLE,
-> > +     .cmdreg_lrsp_crc        =3D MCI_CPSM_STM32_LRSP_CRC,
-> > +     .cmdreg_srsp_crc        =3D MCI_CPSM_STM32_SRSP_CRC,
-> > +     .cmdreg_srsp            =3D MCI_CPSM_STM32_SRSP,
-> > +     .cmdreg_stop            =3D MCI_CPSM_STM32_CMDSTOP,
-> > +     .data_cmd_enable        =3D MCI_CPSM_STM32_CMDTRANS,
-> > +     .irq_pio_mask           =3D MCI_IRQ_PIO_STM32_MASK,
-> > +     .datactrl_first         =3D true,
-> > +     .datacnt_useless        =3D true,
-> > +     .datalength_bits        =3D 25,
-> > +     .datactrl_blocksz       =3D 14,
-> > +     .datactrl_any_blocksz   =3D true,
-> > +     .stm32_idmabsize_mask   =3D GENMASK(16, 5),
-> > +     .dma_lli                =3D true,
-> > +     .busy_timeout           =3D true,
->
-> I forget "busy_detect           =3D true," property
-> I add this in next patch set
+This patch series includes:
+ -> Document the Xilinx Versal SD controller
+ -> Add support for Versal SD Tap Delays
 
-No need for a re-send, I amended this when I applied it.
+Manish Narani (2):
+  dt-bindings: mmc: arasan: Document 'xlnx,versal-8.9a' controller
+  sdhci: arasan: Add support for Versal Tap Delays
 
->
-> > +     .busy_detect_flag       =3D MCI_STM32_BUSYD0,
-> > +     .busy_detect_mask       =3D MCI_STM32_BUSYD0ENDMASK,
-> > +     .init                   =3D sdmmc_variant_init,
-> > +};
-> > +
-> >   static struct variant_data variant_qcom =3D {
-> >       .fifosize               =3D 16 * 4,
-> >       .fifohalfsize           =3D 8 * 4,
-> > @@ -2343,6 +2368,11 @@ static const struct amba_id mmci_ids[] =3D {
-> >               .mask   =3D 0xf0ffffff,
-> >               .data   =3D &variant_stm32_sdmmc,
-> >       },
-> > +     {
-> > +             .id     =3D 0x00253180,
-> > +             .mask   =3D 0xf0ffffff,
-> > +             .data   =3D &variant_stm32_sdmmcv2,
-> > +     },
-> >       /* Qualcomm variants */
-> >       {
-> >               .id     =3D 0x00051180,
-> >
+ .../devicetree/bindings/mmc/arasan,sdhci.txt  |  15 ++
+ drivers/mmc/host/sdhci-of-arasan.c            | 176 +++++++++++++++++-
+ 2 files changed, 189 insertions(+), 2 deletions(-)
 
-Kind regards
-Uffe
+-- 
+2.17.1
+
