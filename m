@@ -6,34 +6,34 @@ X-Spam-Status: No, score=-9.7 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
 	URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3CF92C3404D
-	for <linux-mmc@archiver.kernel.org>; Wed, 19 Feb 2020 08:31:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8D9CEC3404D
+	for <linux-mmc@archiver.kernel.org>; Wed, 19 Feb 2020 08:31:55 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 1EBBF2464E
-	for <linux-mmc@archiver.kernel.org>; Wed, 19 Feb 2020 08:31:51 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6C25B24656
+	for <linux-mmc@archiver.kernel.org>; Wed, 19 Feb 2020 08:31:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726514AbgBSIbu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 19 Feb 2020 03:31:50 -0500
-Received: from inva021.nxp.com ([92.121.34.21]:38450 "EHLO inva021.nxp.com"
+        id S1726791AbgBSIby (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 19 Feb 2020 03:31:54 -0500
+Received: from inva021.nxp.com ([92.121.34.21]:38536 "EHLO inva021.nxp.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726495AbgBSIbu (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 19 Feb 2020 03:31:50 -0500
+        id S1726691AbgBSIbx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 19 Feb 2020 03:31:53 -0500
 Received: from inva021.nxp.com (localhost [127.0.0.1])
-        by inva021.eu-rdc02.nxp.com (Postfix) with ESMTP id D248A203957;
-        Wed, 19 Feb 2020 09:31:47 +0100 (CET)
+        by inva021.eu-rdc02.nxp.com (Postfix) with ESMTP id 178A9203957;
+        Wed, 19 Feb 2020 09:31:51 +0100 (CET)
 Received: from invc005.ap-rdc01.nxp.com (invc005.ap-rdc01.nxp.com [165.114.16.14])
-        by inva021.eu-rdc02.nxp.com (Postfix) with ESMTP id 2F77120054C;
-        Wed, 19 Feb 2020 09:31:44 +0100 (CET)
+        by inva021.eu-rdc02.nxp.com (Postfix) with ESMTP id 5DF22201296;
+        Wed, 19 Feb 2020 09:31:47 +0100 (CET)
 Received: from localhost.localdomain (shlinux2.ap.freescale.net [10.192.224.44])
-        by invc005.ap-rdc01.nxp.com (Postfix) with ESMTP id AF9EA402E1;
-        Wed, 19 Feb 2020 16:31:39 +0800 (SGT)
+        by invc005.ap-rdc01.nxp.com (Postfix) with ESMTP id 3ED4F402FB;
+        Wed, 19 Feb 2020 16:31:42 +0800 (SGT)
 From:   haibo.chen@nxp.com
 To:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
         linux-mmc@vger.kernel.org
 Cc:     linux-imx@nxp.com, haibo.chen@nxp.com, linus.walleij@linaro.org
-Subject: [PATCH v4 07/14] mmc: sdhci-esdhc-imx: optimize the clock setting
-Date:   Wed, 19 Feb 2020 16:25:50 +0800
-Message-Id: <1582100757-20683-2-git-send-email-haibo.chen@nxp.com>
+Subject: [PATCH v4 11/14] mmc: sdhci-esdhc-imx: clear pending interrupt and halt cqhci
+Date:   Wed, 19 Feb 2020 16:25:54 +0800
+Message-Id: <1582100757-20683-6-git-send-email-haibo.chen@nxp.com>
 X-Mailer: git-send-email 2.7.4
 In-Reply-To: <1582100757-20683-1-git-send-email-haibo.chen@nxp.com>
 References: <1582100757-20683-1-git-send-email-haibo.chen@nxp.com>
@@ -45,112 +45,91 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Haibo Chen <haibo.chen@nxp.com>
 
-When force clock off, check the SDOFF of register PRSSTAT to make sure
-the clock is gate off. Before force clock on, check the SDSTB of register
-PRSSTAT to make sure the clock is stable, this will eliminate the clock
-glitch.
+On i.MX8MM, we are running Dual Linux OS, with 1st Linux using SD Card
+as rootfs storage, 2nd Linux using eMMC as rootfs storage. We let the
+the 1st linux configure power/clock for the 2nd Linux.
+
+When the 2nd Linux is booting into rootfs stage, we let the 1st Linux
+to destroy the 2nd linux, then restart the 2nd linux, we met SDHCI dump
+as following, after we clear the pending interrupt and halt CQCTL, issue
+gone.
+
+[ 1.334594] mmc2: Got command interrupt 0x00000001 even though no command operation was in progress.
+[ 1.334595] mmc2: sdhci: ============ SDHCI REGISTER DUMP ===========
+[ 1.334599] mmc2: sdhci: Sys addr: 0xa05dcc00 | Version: 0x00000002
+[ 1.345538] mmc2: sdhci: Blk size: 0x00000200 | Blk cnt: 0x00000000
+[ 1.345541] mmc2: sdhci: Argument: 0x00018000 | Trn mode: 0x00000033
+[ 1.345543] mmc2: sdhci: Present: 0x01f88008 | Host ctl: 0x00000031
+[ 1.345547] mmc2: sdhci: Power: 0x00000002 | Blk gap: 0x00000080
+[ 1.357903] mmc2: sdhci: Wake-up: 0x00000008 | Clock: 0x0000003f
+[ 1.357905] mmc2: sdhci: Timeout: 0x0000008f | Int stat: 0x00000000
+[ 1.357908] mmc2: sdhci: Int enab: 0x107f100b | Sig enab: 0x107f100b
+[ 1.357911] mmc2: sdhci: AC12 err: 0x00000000 | Slot int: 0x00000502
+[ 1.370268] mmc2: sdhci: Caps: 0x07eb0000 | Caps_1: 0x0000b400
+[ 1.370270] mmc2: sdhci: Cmd: 0x00000d1a | Max curr: 0x00ffffff
+[ 1.370273] mmc2: sdhci: Resp[0]: 0x00000b00 | Resp[1]: 0xffffffff
+[ 1.370276] mmc2: sdhci: Resp[2]: 0x328f5903 | Resp[3]: 0x00d00f00
+[ 1.382132] mmc2: sdhci: Host ctl2: 0x00000000
+[ 1.382135] mmc2: sdhci: ADMA Err: 0x00000000 | ADMA Ptr: 0xa2040208
+
+[ 2.060932] mmc2: Unexpected interrupt 0x00004000.
+[ 2.065538] mmc2: sdhci: ============ SDHCI REGISTER DUMP ===========
+[ 2.071720] mmc2: sdhci: Sys addr: 0x00000000 | Version: 0x00000002
+[ 2.077902] mmc2: sdhci: Blk size: 0x00000200 | Blk cnt: 0x00000001
+[ 2.084083] mmc2: sdhci: Argument: 0x00000000 | Trn mode: 0x00000000
+[ 2.090264] mmc2: sdhci: Present: 0x01f88009 | Host ctl: 0x00000011
+[ 2.096446] mmc2: sdhci: Power: 0x00000002 | Blk gap: 0x00000080
+[ 2.102627] mmc2: sdhci: Wake-up: 0x00000008 | Clock: 0x000010ff
+[ 2.108809] mmc2: sdhci: Timeout: 0x0000008f | Int stat: 0x00004000
+[ 2.114990] mmc2: sdhci: Int enab: 0x007f1003 | Sig enab: 0x007f1003
+[ 2.121171] mmc2: sdhci: AC12 err: 0x00000000 | Slot int: 0x00000502
+[ 2.127353] mmc2: sdhci: Caps: 0x07eb0000 | Caps_1: 0x0000b400
+[ 2.133534] mmc2: sdhci: Cmd: 0x0000371a | Max curr: 0x00ffffff
+[ 2.139715] mmc2: sdhci: Resp[0]: 0x00000900 | Resp[1]: 0xffffffff
+[ 2.145896] mmc2: sdhci: Resp[2]: 0x328f5903 | Resp[3]: 0x00d00f00
+[ 2.152077] mmc2: sdhci: Host ctl2: 0x00000000
+[ 2.156342] mmc2: sdhci: ADMA Err: 0x00000000 | ADMA Ptr: 0x00000000
 
 Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
 Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/host/sdhci-esdhc-imx.c | 24 +++++++++++++++++++++++-
- drivers/mmc/host/sdhci-esdhc.h     |  1 +
- 2 files changed, 24 insertions(+), 1 deletion(-)
+ drivers/mmc/host/sdhci-esdhc-imx.c | 16 ++++++++++++++++
+ 1 file changed, 16 insertions(+)
 
 diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index 3359153304a3..6ca01b766604 100644
+index 100c081cfcae..106097cbd0d4 100644
 --- a/drivers/mmc/host/sdhci-esdhc-imx.c
 +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -9,6 +9,7 @@
-  */
- 
- #include <linux/io.h>
-+#include <linux/iopoll.h>
- #include <linux/delay.h>
- #include <linux/err.h>
- #include <linux/clk.h>
-@@ -312,6 +313,17 @@ static inline void esdhc_clrset_le(struct sdhci_host *host, u32 mask, u32 val, i
- 	writel(((readl(base) & ~(mask << shift)) | (val << shift)), base);
- }
- 
-+static inline void esdhc_wait_for_card_clock_gate_off(struct sdhci_host *host)
-+{
-+	u32 present_state;
-+	int ret;
-+
-+	ret = readl_poll_timeout(host->ioaddr + ESDHC_PRSSTAT, present_state,
-+				(present_state & ESDHC_CLOCK_GATE_OFF), 2, 100);
-+	if (ret == -ETIMEDOUT)
-+		dev_warn(mmc_dev(host->mmc), "%s: card clock still not gate off in 100us!.\n", __func__);
-+}
-+
- static u32 esdhc_readl_le(struct sdhci_host *host, int reg)
+@@ -1233,6 +1233,7 @@ static void sdhci_esdhc_imx_hwinit(struct sdhci_host *host)
  {
  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-@@ -525,6 +537,8 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
- 		else
- 			new_val &= ~ESDHC_VENDOR_SPEC_FRC_SDCLK_ON;
- 		writel(new_val, host->ioaddr + ESDHC_VENDOR_SPEC);
-+		if (!(new_val & ESDHC_VENDOR_SPEC_FRC_SDCLK_ON))
-+			esdhc_wait_for_card_clock_gate_off(host);
- 		return;
- 	case SDHCI_HOST_CONTROL2:
- 		new_val = readl(host->ioaddr + ESDHC_VENDOR_SPEC);
-@@ -753,12 +767,14 @@ static inline void esdhc_pltfm_set_clock(struct sdhci_host *host,
- 	int ddr_pre_div = imx_data->is_ddr ? 2 : 1;
- 	int pre_div = 1;
- 	int div = 1;
-+	int ret;
- 	u32 temp, val;
+ 	struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
++	struct cqhci_host *cq_host = host->mmc->cqe_private;
+ 	int tmp;
  
  	if (esdhc_is_usdhc(imx_data)) {
- 		val = readl(host->ioaddr + ESDHC_VENDOR_SPEC);
- 		writel(val & ~ESDHC_VENDOR_SPEC_FRC_SDCLK_ON,
- 			host->ioaddr + ESDHC_VENDOR_SPEC);
-+		esdhc_wait_for_card_clock_gate_off(host);
- 	}
- 
- 	if (clock == 0) {
-@@ -813,13 +829,18 @@ static inline void esdhc_pltfm_set_clock(struct sdhci_host *host,
- 		| (pre_div << ESDHC_PREDIV_SHIFT));
- 	sdhci_writel(host, temp, ESDHC_SYSTEM_CONTROL);
- 
-+	/* need to wait the bit 3 of the PRSSTAT to be set, make sure card clock is stable */
-+	ret = readl_poll_timeout(host->ioaddr + ESDHC_PRSSTAT, temp,
-+				(temp & ESDHC_CLOCK_STABLE), 2, 100);
-+	if (ret == -ETIMEDOUT)
-+		dev_warn(mmc_dev(host->mmc), "card clock still not stable in 100us!.\n");
+@@ -1309,6 +1310,21 @@ static void sdhci_esdhc_imx_hwinit(struct sdhci_host *host)
+ 			tmp &= ~ESDHC_STD_TUNING_EN;
+ 			writel(tmp, host->ioaddr + ESDHC_TUNING_CTRL);
+ 		}
 +
- 	if (esdhc_is_usdhc(imx_data)) {
- 		val = readl(host->ioaddr + ESDHC_VENDOR_SPEC);
- 		writel(val | ESDHC_VENDOR_SPEC_FRC_SDCLK_ON,
- 			host->ioaddr + ESDHC_VENDOR_SPEC);
++		/*
++		 * On i.MX8MM, we are running Dual Linux OS, with 1st Linux using SD Card
++		 * as rootfs storage, 2nd Linux using eMMC as rootfs storage. We let the
++		 * the 1st linux configure power/clock for the 2nd Linux.
++		 *
++		 * When the 2nd Linux is booting into rootfs stage, we let the 1st Linux
++		 * to destroy the 2nd linux, then restart the 2nd linux, we met SDHCI dump.
++		 * After we clear the pending interrupt and halt CQCTL, issue gone.
++		 */
++		if (cq_host) {
++			tmp = cqhci_readl(cq_host, CQHCI_IS);
++			cqhci_writel(cq_host, tmp, CQHCI_IS);
++			cqhci_writel(cq_host, CQHCI_HALT, CQHCI_CTL);
++		}
  	}
- 
--	mdelay(1);
  }
  
- static unsigned int esdhc_pltfm_get_ro(struct sdhci_host *host)
-@@ -1003,6 +1024,7 @@ static void esdhc_set_strobe_dll(struct sdhci_host *host)
- 	writel(readl(host->ioaddr + ESDHC_VENDOR_SPEC) &
- 		~ESDHC_VENDOR_SPEC_FRC_SDCLK_ON,
- 		host->ioaddr + ESDHC_VENDOR_SPEC);
-+	esdhc_wait_for_card_clock_gate_off(host);
- 
- 	/* force a reset on strobe dll */
- 	writel(ESDHC_STROBE_DLL_CTRL_RESET,
-diff --git a/drivers/mmc/host/sdhci-esdhc.h b/drivers/mmc/host/sdhci-esdhc.h
-index 9289bb4d633e..947212f16bc6 100644
---- a/drivers/mmc/host/sdhci-esdhc.h
-+++ b/drivers/mmc/host/sdhci-esdhc.h
-@@ -31,6 +31,7 @@
- 
- /* Present State Register */
- #define ESDHC_PRSSTAT			0x24
-+#define ESDHC_CLOCK_GATE_OFF		0x00000080
- #define ESDHC_CLOCK_STABLE		0x00000008
- 
- /* Protocol Control Register */
 -- 
 2.17.1
 
