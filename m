@@ -6,34 +6,34 @@ X-Spam-Status: No, score=-9.7 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
 	URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8D9CEC3404D
-	for <linux-mmc@archiver.kernel.org>; Wed, 19 Feb 2020 08:31:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4D370C34051
+	for <linux-mmc@archiver.kernel.org>; Wed, 19 Feb 2020 08:31:56 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 6C25B24656
-	for <linux-mmc@archiver.kernel.org>; Wed, 19 Feb 2020 08:31:55 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3003B2464E
+	for <linux-mmc@archiver.kernel.org>; Wed, 19 Feb 2020 08:31:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726791AbgBSIby (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        id S1726793AbgBSIby (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
         Wed, 19 Feb 2020 03:31:54 -0500
-Received: from inva021.nxp.com ([92.121.34.21]:38536 "EHLO inva021.nxp.com"
+Received: from inva021.nxp.com ([92.121.34.21]:38502 "EHLO inva021.nxp.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726691AbgBSIbx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        id S1726672AbgBSIbx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
         Wed, 19 Feb 2020 03:31:53 -0500
 Received: from inva021.nxp.com (localhost [127.0.0.1])
-        by inva021.eu-rdc02.nxp.com (Postfix) with ESMTP id 178A9203957;
-        Wed, 19 Feb 2020 09:31:51 +0100 (CET)
+        by inva021.eu-rdc02.nxp.com (Postfix) with ESMTP id 5832B204785;
+        Wed, 19 Feb 2020 09:31:50 +0100 (CET)
 Received: from invc005.ap-rdc01.nxp.com (invc005.ap-rdc01.nxp.com [165.114.16.14])
-        by inva021.eu-rdc02.nxp.com (Postfix) with ESMTP id 5DF22201296;
-        Wed, 19 Feb 2020 09:31:47 +0100 (CET)
+        by inva021.eu-rdc02.nxp.com (Postfix) with ESMTP id A60AC204781;
+        Wed, 19 Feb 2020 09:31:46 +0100 (CET)
 Received: from localhost.localdomain (shlinux2.ap.freescale.net [10.192.224.44])
-        by invc005.ap-rdc01.nxp.com (Postfix) with ESMTP id 3ED4F402FB;
-        Wed, 19 Feb 2020 16:31:42 +0800 (SGT)
+        by invc005.ap-rdc01.nxp.com (Postfix) with ESMTP id F0F6A402E6;
+        Wed, 19 Feb 2020 16:31:40 +0800 (SGT)
 From:   haibo.chen@nxp.com
 To:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
         linux-mmc@vger.kernel.org
 Cc:     linux-imx@nxp.com, haibo.chen@nxp.com, linus.walleij@linaro.org
-Subject: [PATCH v4 11/14] mmc: sdhci-esdhc-imx: clear pending interrupt and halt cqhci
-Date:   Wed, 19 Feb 2020 16:25:54 +0800
-Message-Id: <1582100757-20683-6-git-send-email-haibo.chen@nxp.com>
+Subject: [PATCH v4 09/14] mmc: sdhci-esdhc-imx: add flag ESDHC_FLAG_BROKEN_AUTO_CMD23
+Date:   Wed, 19 Feb 2020 16:25:52 +0800
+Message-Id: <1582100757-20683-4-git-send-email-haibo.chen@nxp.com>
 X-Mailer: git-send-email 2.7.4
 In-Reply-To: <1582100757-20683-1-git-send-email-haibo.chen@nxp.com>
 References: <1582100757-20683-1-git-send-email-haibo.chen@nxp.com>
@@ -45,91 +45,121 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Haibo Chen <haibo.chen@nxp.com>
 
-On i.MX8MM, we are running Dual Linux OS, with 1st Linux using SD Card
-as rootfs storage, 2nd Linux using eMMC as rootfs storage. We let the
-the 1st linux configure power/clock for the 2nd Linux.
+Since L4.15, community involve the commit 105819c8a545 ("mmc: core: use mrq->sbc
+when sending CMD23 for RPMB"), let the usdhc to decide whether to use ACMD23 for
+RPMB. This CMD23 for RPMB need to set the bit 31 to its argument, if not, the
+RPMB write operation will return general fail.
 
-When the 2nd Linux is booting into rootfs stage, we let the 1st Linux
-to destroy the 2nd linux, then restart the 2nd linux, we met SDHCI dump
-as following, after we clear the pending interrupt and halt CQCTL, issue
-gone.
+According to the sdhci logic, SDMA mode will disable the ACMD23, and only in
+ADMA mode, it will chose to use ACMD23 if the host support. But according to
+debug, and confirm with IC, the imx6qpdl/imx6sx/imx6sl/imx7d do not support
+the ACMD23 feature completely. These SoCs only use the 16 bit block count of
+the register 0x4 (BLOCK_ATT) as the CMD23's argument in ACMD23 mode, which
+means it will ignore the upper 16 bit of the CMD23's argument. This will block
+the reliable write operation in RPMB, because RPMB reliable write need to set
+the bit31 of the CMD23's argument. This is the hardware limitation. So for
+imx6qpdl/imx6sx/imx6sl/imx7d, it need to broke the ACMD23 for eMMC, SD card do
+not has this limitation, because SD card do not support reliable write.
 
-[ 1.334594] mmc2: Got command interrupt 0x00000001 even though no command operation was in progress.
-[ 1.334595] mmc2: sdhci: ============ SDHCI REGISTER DUMP ===========
-[ 1.334599] mmc2: sdhci: Sys addr: 0xa05dcc00 | Version: 0x00000002
-[ 1.345538] mmc2: sdhci: Blk size: 0x00000200 | Blk cnt: 0x00000000
-[ 1.345541] mmc2: sdhci: Argument: 0x00018000 | Trn mode: 0x00000033
-[ 1.345543] mmc2: sdhci: Present: 0x01f88008 | Host ctl: 0x00000031
-[ 1.345547] mmc2: sdhci: Power: 0x00000002 | Blk gap: 0x00000080
-[ 1.357903] mmc2: sdhci: Wake-up: 0x00000008 | Clock: 0x0000003f
-[ 1.357905] mmc2: sdhci: Timeout: 0x0000008f | Int stat: 0x00000000
-[ 1.357908] mmc2: sdhci: Int enab: 0x107f100b | Sig enab: 0x107f100b
-[ 1.357911] mmc2: sdhci: AC12 err: 0x00000000 | Slot int: 0x00000502
-[ 1.370268] mmc2: sdhci: Caps: 0x07eb0000 | Caps_1: 0x0000b400
-[ 1.370270] mmc2: sdhci: Cmd: 0x00000d1a | Max curr: 0x00ffffff
-[ 1.370273] mmc2: sdhci: Resp[0]: 0x00000b00 | Resp[1]: 0xffffffff
-[ 1.370276] mmc2: sdhci: Resp[2]: 0x328f5903 | Resp[3]: 0x00d00f00
-[ 1.382132] mmc2: sdhci: Host ctl2: 0x00000000
-[ 1.382135] mmc2: sdhci: ADMA Err: 0x00000000 | ADMA Ptr: 0xa2040208
+For imx6ul/imx6ull/imx6sll/imx7ulp/imx8, it support the ACMD23 completely, it
+change to use the 0x0 register (DS_ADDR) to put the CMD23's argument in ADMA mode.
 
-[ 2.060932] mmc2: Unexpected interrupt 0x00004000.
-[ 2.065538] mmc2: sdhci: ============ SDHCI REGISTER DUMP ===========
-[ 2.071720] mmc2: sdhci: Sys addr: 0x00000000 | Version: 0x00000002
-[ 2.077902] mmc2: sdhci: Blk size: 0x00000200 | Blk cnt: 0x00000001
-[ 2.084083] mmc2: sdhci: Argument: 0x00000000 | Trn mode: 0x00000000
-[ 2.090264] mmc2: sdhci: Present: 0x01f88009 | Host ctl: 0x00000011
-[ 2.096446] mmc2: sdhci: Power: 0x00000002 | Blk gap: 0x00000080
-[ 2.102627] mmc2: sdhci: Wake-up: 0x00000008 | Clock: 0x000010ff
-[ 2.108809] mmc2: sdhci: Timeout: 0x0000008f | Int stat: 0x00004000
-[ 2.114990] mmc2: sdhci: Int enab: 0x007f1003 | Sig enab: 0x007f1003
-[ 2.121171] mmc2: sdhci: AC12 err: 0x00000000 | Slot int: 0x00000502
-[ 2.127353] mmc2: sdhci: Caps: 0x07eb0000 | Caps_1: 0x0000b400
-[ 2.133534] mmc2: sdhci: Cmd: 0x0000371a | Max curr: 0x00ffffff
-[ 2.139715] mmc2: sdhci: Resp[0]: 0x00000900 | Resp[1]: 0xffffffff
-[ 2.145896] mmc2: sdhci: Resp[2]: 0x328f5903 | Resp[3]: 0x00d00f00
-[ 2.152077] mmc2: sdhci: Host ctl2: 0x00000000
-[ 2.156342] mmc2: sdhci: ADMA Err: 0x00000000 | ADMA Ptr: 0x00000000
+This patch add a new flag ESDHC_FLAG_BROKEN_AUTO_CMD23, and add this flag to
+imx6q/imx6sx/imx6sl/imx7d, and due to the imx6sll share the same compatible string
+with imx6sx before, and imx6sll do not has this limitation, so add a new compatible
+string for imx6sll.
 
 Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
 Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/host/sdhci-esdhc-imx.c | 16 ++++++++++++++++
- 1 file changed, 16 insertions(+)
+ drivers/mmc/host/sdhci-esdhc-imx.c | 34 ++++++++++++++++++++++++++----
+ 1 file changed, 30 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index 100c081cfcae..106097cbd0d4 100644
+index 1ec35cc45fc5..98b91b6ff2a9 100644
 --- a/drivers/mmc/host/sdhci-esdhc-imx.c
 +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -1233,6 +1233,7 @@ static void sdhci_esdhc_imx_hwinit(struct sdhci_host *host)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
- 	struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
-+	struct cqhci_host *cq_host = host->mmc->cqe_private;
- 	int tmp;
+@@ -166,6 +166,18 @@
+ #define ESDHC_FLAG_STATE_LOST_IN_LPMODE		BIT(14)
+ /* The IP lost clock rate in PM_RUNTIME */
+ #define ESDHC_FLAG_CLK_RATE_LOST_IN_PM_RUNTIME	BIT(15)
++/*
++ * The IP do not support the ACMD23 feature completely when use ADMA mode.
++ * In ADMA mode, it only use the 16 bit block count of the register 0x4
++ * (BLOCK_ATT) as the CMD23's argument for ACMD23 mode, which means it will
++ * ignore the upper 16 bit of the CMD23's argument. This will block the reliable
++ * write operation in RPMB, because RPMB reliable write need to set the bit31
++ * of the CMD23's argument.
++ * imx6qpdl/imx6sx/imx6sl/imx7d has this limitation only for ADMA mode, SDMA
++ * do not has this limitation. so when these SoC use ADMA mode, it need to
++ * disable the ACMD23 feature.
++ */
++#define ESDHC_FLAG_BROKEN_AUTO_CMD23	BIT(16)
  
- 	if (esdhc_is_usdhc(imx_data)) {
-@@ -1309,6 +1310,21 @@ static void sdhci_esdhc_imx_hwinit(struct sdhci_host *host)
- 			tmp &= ~ESDHC_STD_TUNING_EN;
- 			writel(tmp, host->ioaddr + ESDHC_TUNING_CTRL);
- 		}
+ struct esdhc_soc_data {
+ 	u32 flags;
+@@ -188,21 +200,30 @@ static const struct esdhc_soc_data esdhc_imx53_data = {
+ };
+ 
+ static const struct esdhc_soc_data usdhc_imx6q_data = {
+-	.flags = ESDHC_FLAG_USDHC | ESDHC_FLAG_MAN_TUNING,
++	.flags = ESDHC_FLAG_USDHC | ESDHC_FLAG_MAN_TUNING
++			| ESDHC_FLAG_BROKEN_AUTO_CMD23,
+ };
+ 
+ static const struct esdhc_soc_data usdhc_imx6sl_data = {
+ 	.flags = ESDHC_FLAG_USDHC | ESDHC_FLAG_STD_TUNING
+ 			| ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_ERR004536
+-			| ESDHC_FLAG_HS200,
++			| ESDHC_FLAG_HS200
++			| ESDHC_FLAG_BROKEN_AUTO_CMD23,
+ };
+ 
+-static const struct esdhc_soc_data usdhc_imx6sx_data = {
++static const struct esdhc_soc_data usdhc_imx6sll_data = {
+ 	.flags = ESDHC_FLAG_USDHC | ESDHC_FLAG_STD_TUNING
+ 			| ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_HS200
+ 			| ESDHC_FLAG_STATE_LOST_IN_LPMODE,
+ };
+ 
++static const struct esdhc_soc_data usdhc_imx6sx_data = {
++	.flags = ESDHC_FLAG_USDHC | ESDHC_FLAG_STD_TUNING
++			| ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_HS200
++			| ESDHC_FLAG_STATE_LOST_IN_LPMODE
++			| ESDHC_FLAG_BROKEN_AUTO_CMD23,
++};
 +
-+		/*
-+		 * On i.MX8MM, we are running Dual Linux OS, with 1st Linux using SD Card
-+		 * as rootfs storage, 2nd Linux using eMMC as rootfs storage. We let the
-+		 * the 1st linux configure power/clock for the 2nd Linux.
-+		 *
-+		 * When the 2nd Linux is booting into rootfs stage, we let the 1st Linux
-+		 * to destroy the 2nd linux, then restart the 2nd linux, we met SDHCI dump.
-+		 * After we clear the pending interrupt and halt CQCTL, issue gone.
-+		 */
-+		if (cq_host) {
-+			tmp = cqhci_readl(cq_host, CQHCI_IS);
-+			cqhci_writel(cq_host, tmp, CQHCI_IS);
-+			cqhci_writel(cq_host, CQHCI_HALT, CQHCI_CTL);
-+		}
- 	}
- }
+ static const struct esdhc_soc_data usdhc_imx6ull_data = {
+ 	.flags = ESDHC_FLAG_USDHC | ESDHC_FLAG_STD_TUNING
+ 			| ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_HS200
+@@ -214,7 +235,8 @@ static const struct esdhc_soc_data usdhc_imx7d_data = {
+ 	.flags = ESDHC_FLAG_USDHC | ESDHC_FLAG_STD_TUNING
+ 			| ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_HS200
+ 			| ESDHC_FLAG_HS400
+-			| ESDHC_FLAG_STATE_LOST_IN_LPMODE,
++			| ESDHC_FLAG_STATE_LOST_IN_LPMODE
++			| ESDHC_FLAG_BROKEN_AUTO_CMD23,
+ };
  
+ static struct esdhc_soc_data usdhc_imx7ulp_data = {
+@@ -276,6 +298,7 @@ static const struct of_device_id imx_esdhc_dt_ids[] = {
+ 	{ .compatible = "fsl,imx53-esdhc", .data = &esdhc_imx53_data, },
+ 	{ .compatible = "fsl,imx6sx-usdhc", .data = &usdhc_imx6sx_data, },
+ 	{ .compatible = "fsl,imx6sl-usdhc", .data = &usdhc_imx6sl_data, },
++	{ .compatible = "fsl,imx6sll-usdhc", .data = &usdhc_imx6sll_data, },
+ 	{ .compatible = "fsl,imx6q-usdhc", .data = &usdhc_imx6q_data, },
+ 	{ .compatible = "fsl,imx6ull-usdhc", .data = &usdhc_imx6ull_data, },
+ 	{ .compatible = "fsl,imx7d-usdhc", .data = &usdhc_imx7d_data, },
+@@ -1560,6 +1583,9 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+ 	if (imx_data->socdata->flags & ESDHC_FLAG_HS400)
+ 		host->quirks2 |= SDHCI_QUIRK2_CAPS_BIT63_FOR_HS400;
+ 
++	if (imx_data->socdata->flags & ESDHC_FLAG_BROKEN_AUTO_CMD23)
++		host->quirks2 |= SDHCI_QUIRK2_ACMD23_BROKEN;
++
+ 	if (imx_data->socdata->flags & ESDHC_FLAG_HS400_ES) {
+ 		host->mmc->caps2 |= MMC_CAP2_HS400_ES;
+ 		host->mmc_host_ops.hs400_enhanced_strobe =
 -- 
 2.17.1
 
