@@ -2,99 +2,118 @@ Return-Path: <SRS0=5xTW=4I=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-7.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 17AD7C11D18
-	for <linux-mmc@archiver.kernel.org>; Thu, 20 Feb 2020 17:54:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C5848C11D0C
+	for <linux-mmc@archiver.kernel.org>; Thu, 20 Feb 2020 18:02:56 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id D02CB2468A
-	for <linux-mmc@archiver.kernel.org>; Thu, 20 Feb 2020 17:54:47 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="LUdFldeg"
+	by mail.kernel.org (Postfix) with ESMTP id A3E0D2467E
+	for <linux-mmc@archiver.kernel.org>; Thu, 20 Feb 2020 18:02:56 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1582221776;
+	bh=37+6kRfe020nr3eTo55dbdOiwQoX7FUjUISiaAj1H6w=;
+	h=In-Reply-To:References:Subject:From:Cc:To:Date:List-ID:From;
+	b=N7Nd+FoWDei2fUmAa8uvoKi6iKQ8XKvIShduqJJbHpeVxm/4LHU2sbcSWFEduW0k0
+	 brJzybgVPAOND9qDHrwc4iB5uiqq7nGZ/vDt0QY3rr2R1tz2rubO4XSvnHl5qhcoIx
+	 gCGmGcVYrRyrBqJxlzm0+pvRFhZsXiXRHbok2/Mk=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726959AbgBTRyq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 20 Feb 2020 12:54:46 -0500
-Received: from mail-lf1-f41.google.com ([209.85.167.41]:41018 "EHLO
-        mail-lf1-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727868AbgBTRyp (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Feb 2020 12:54:45 -0500
-Received: by mail-lf1-f41.google.com with SMTP id m30so3799594lfp.8
-        for <linux-mmc@vger.kernel.org>; Thu, 20 Feb 2020 09:54:43 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=EqMQTNTqAScrbbjAL00quzcLbXeMUXLVbynXt4e9wxY=;
-        b=LUdFldegpwqvpb6jUZ3KgoQ8St6ComRy2Mt0QI/Aro5+InOuut6omXAr9nQF3o2TGT
-         t8Rje9zNPB+Y70s2ziwN6pzj+GBEpkV/rj+BJvNjdp28MIoeLj+1ryQVtLHF44L1cElj
-         Fdmcu69yfiRlkdgybwGqgcdsYCwE0oNwuTzqYSVh4hXy5w1LwfsVrzdSuetsLJ3bp19V
-         hcU3wPT47l5uUfH5g7uN61Kbwnu99/puDW/sAY+BQHCP2flbDaG/hTysnOcQcpaznGVy
-         pTNhgGAGraAd+K2mXoQ4sfXQO/MBsz3Cee7NH71g9WoS+6nu0/qKW7/EQ9Eu1DGgnsoT
-         Dl0Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=EqMQTNTqAScrbbjAL00quzcLbXeMUXLVbynXt4e9wxY=;
-        b=HarHpEBV7Ay8gVVmLmAO94+B8IqqhBcj4d8fGZByj26rp4ot0hKWZApqb8tQPz0CfO
-         Q36omXnXgFhRsmxtDYTkvp9sKyIjreR0ace1tWP/cZVSEvRl8vsEI6mfOdzNnxfXw8s3
-         HhDX7nnPWqHHu/gxVgdAO1MA+q/f/9e+t93K5EgS+X3SgVLSphOEec7rv5uVI37dNF7R
-         1vILRil1Tb46WPKmFA1rSDGjwU5fzviHhJ2thJCbo76wzvAT8SMbQreaXU1NkWk44/X1
-         4cymvYU05jdbbcSLh6o+DWXaKfWBVF7Lxc2mhpVWQPwokaWUHUlBPg5bGWjuE71vCJp9
-         +Z2Q==
-X-Gm-Message-State: APjAAAWNgzY2zkfK5qr6k+g80W3okG3NRsU1ojQcbFfhVlPqs6VYGhMi
-        d3O9FpY0sSv5QZe4lAbtRP7Iej7U+PuZZyWKZn4G+g==
-X-Google-Smtp-Source: APXvYqw4jx+ECCaEc3pF2ddqAmUhWLsxs2tPv4F4B0Csslzt7ukoQ1EBe4t/LuTxKaPi4aNtoc+oNcCIYcIDitOBvUg=
-X-Received: by 2002:a19:6d13:: with SMTP id i19mr16812579lfc.6.1582221282402;
- Thu, 20 Feb 2020 09:54:42 -0800 (PST)
+        id S1728688AbgBTSCx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 20 Feb 2020 13:02:53 -0500
+Received: from mail.kernel.org ([198.145.29.99]:44532 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1727298AbgBTSCw (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 20 Feb 2020 13:02:52 -0500
+Received: from kernel.org (unknown [104.132.0.74])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id 9CE1624673;
+        Thu, 20 Feb 2020 18:02:51 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1582221771;
+        bh=37+6kRfe020nr3eTo55dbdOiwQoX7FUjUISiaAj1H6w=;
+        h=In-Reply-To:References:Subject:From:Cc:To:Date:From;
+        b=m9xMxs8WLpZ1tJSTx12u4kJ78qow2BN0C/TsjYyITx052s7EDMb/8bu27UZaEaKQC
+         H7QOJcDNsK/KnboXjYJA7tTRsrQRUXUYO9KooPvCYVrO6GtCB9OR6Ad8q7QChfs8qv
+         gReuLai284/7HyoFHLCd3CtiEsSTtgxNdxqidEew=
+Content-Type: text/plain; charset="utf-8"
 MIME-Version: 1.0
-References: <CA+G9fYuqAQfhzF2BzHr7vMHx68bo8-jT+ob_F3eHQ3=oFjgYdg@mail.gmail.com>
- <CAPDyKFqqhxC-pmV_j8PLY-D=AbqCAbiipAAHXLpJ4N_BiYYOFw@mail.gmail.com>
-In-Reply-To: <CAPDyKFqqhxC-pmV_j8PLY-D=AbqCAbiipAAHXLpJ4N_BiYYOFw@mail.gmail.com>
-From:   Naresh Kamboju <naresh.kamboju@linaro.org>
-Date:   Thu, 20 Feb 2020 23:24:31 +0530
-Message-ID: <CA+G9fYugQuAERqp3VXUFG-3QxXoF8bz7OSMh6WGSZcrGkbfDSQ@mail.gmail.com>
-Subject: Re: LKFT: arm x15: mmc1: cache flush error -110
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Jens Axboe <axboe@kernel.dk>, Alexei Starovoitov <ast@kernel.org>,
-        linux-block <linux-block@vger.kernel.org>,
-        lkft-triage@lists.linaro.org,
-        open list <linux-kernel@vger.kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Arnd Bergmann <arnd@arndb.de>,
-        John Stultz <john.stultz@linaro.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+In-Reply-To: <1582190446-4778-2-git-send-email-sayalil@codeaurora.org>
+References: <1582190446-4778-1-git-send-email-sayalil@codeaurora.org> <1582190446-4778-2-git-send-email-sayalil@codeaurora.org>
+Subject: Re: [PATCH RFC] mmc: sdhci-msm: Toggle fifo write clk after ungating sdcc clk
+From:   Stephen Boyd <sboyd@kernel.org>
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
+        agross@kernel.org, linux-mmc-owner@vger.kernel.org,
+        Sayali Lokhande <sayalil@codeaurora.org>
+To:     Sayali Lokhande <sayalil@codeaurora.org>, adrian.hunter@intel.com,
+        asutoshd@codeaurora.org, bjorn.andersson@linaro.org,
+        georgi.djakov@linaro.org, mka@chromium.org, ppvk@codeaurora.org,
+        rampraka@codeaurora.org, robh+dt@kernel.org,
+        stummala@codeaurora.org, ulf.hansson@linaro.org,
+        vbadigan@codeaurora.org
+Date:   Thu, 20 Feb 2020 10:02:50 -0800
+Message-ID: <158222177078.184098.4974715009961694108@swboyd.mtv.corp.google.com>
+User-Agent: alot/0.9
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 19 Feb 2020 at 21:54, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->
-> On Thu, 13 Feb 2020 at 16:43, Naresh Kamboju <naresh.kamboju@linaro.org> wrote:
-> >
->
-> Try to restore the value for the cache flush timeout, by updating the
-> define MMC_CACHE_FLUSH_TIMEOUT_MS to 10 * 60 * 1000".
+Quoting Sayali Lokhande (2020-02-20 01:20:46)
+> From: Ram Prakash Gupta <rampraka@codeaurora.org>
+>=20
+> During GCC level clock gating of MCLK, the async FIFO
 
-I have increased the timeout to 10 minutes but it did not help.
-Same error found.
-[  608.679353] mmc1: Card stuck being busy! mmc_poll_for_busy
-[  608.684964] mmc1: cache flush error -110
-[  608.689005] blk_update_request: I/O error, dev mmcblk1, sector
-4302400 op 0x1:(WRITE) flags 0x20800 phys_seg 1 prio class 0
+Is this automatic hardware clock gating?
 
-OTOH, What best i could do for my own experiment to revert all three patches and
-now the reported error gone and device mount successfully [1].
+> gets into some hang condition, such that for the next
+> transfer after MCLK ungating, first bit of CMD response
+> doesn't get written in to the FIFO. This cause the CPSM
+> to hang eventually leading to SW timeout.
+>=20
+> To fix the issue, toggle the FIFO write clock after
+> MCLK ungated to get the FIFO pointers and flags to
+> valid states.
+>=20
+> Change-Id: Ibef2d1d283ac0b6983c609a4abc98bc574d31fa6
+> Signed-off-by: Ram Prakash Gupta <rampraka@codeaurora.org>
+> Signed-off-by: Sayali Lokhande <sayalil@codeaurora.org>
+> ---
+>  drivers/mmc/host/sdhci-msm.c | 43 ++++++++++++++++++++++++++++++++++++++=
++++++
+>  1 file changed, 43 insertions(+)
+>=20
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index c3a160c..eaa3e95 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -1554,6 +1556,43 @@ static void __sdhci_msm_set_clock(struct sdhci_hos=
+t *host, unsigned int clock)
+>         sdhci_enable_clk(host, clk);
+>  }
+> =20
+> +/*
+> + * After MCLK ugating, toggle the FIFO write clock to get
 
-List of patches reverted,
-  mmc: core: Specify timeouts for BKOPS and CACHE_FLUSH for eMMC
-  mmc: block: Use generic_cmd6_time when modifying
-    INAND_CMD38_ARG_EXT_CSD
-  mmc: core: Default to generic_cmd6_time as timeout in __mmc_switch()
+What is ugating?
 
-[1] https://lkft.validation.linaro.org/scheduler/job/1238275#L4346
-
-- Naresh
+> + * the FIFO pointers and flags to valid state.
+> + */
+> +static void sdhci_msm_toggle_fifo_write_clk(struct sdhci_host *host)
+> +{
+> +       struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host);
+> +       struct sdhci_msm_host *msm_host =3D sdhci_pltfm_priv(pltfm_host);
+> +       const struct sdhci_msm_offset *msm_offset =3D
+> +                                       msm_host->offset;
+> +       struct mmc_card *card =3D host->mmc->card;
+> +
+> +       if (msm_host->tuning_done ||
+> +                       (card && card->ext_csd.strobe_support &&
+> +                       card->host->ios.enhanced_strobe)) {
+> +               /*
+> +                * set HC_REG_DLL_CONFIG_3[1] to select MCLK as
+> +                * DLL input clock
+> +                */
