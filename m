@@ -2,132 +2,84 @@ Return-Path: <SRS0=5xTW=4I=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.1 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 745C2C34031
-	for <linux-mmc@archiver.kernel.org>; Thu, 20 Feb 2020 06:46:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C4BE7C11D00
+	for <linux-mmc@archiver.kernel.org>; Thu, 20 Feb 2020 07:51:56 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 5180924654
-	for <linux-mmc@archiver.kernel.org>; Thu, 20 Feb 2020 06:46:17 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 943AE24656
+	for <linux-mmc@archiver.kernel.org>; Thu, 20 Feb 2020 07:51:56 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="Z15g5taC"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726248AbgBTGqQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 20 Feb 2020 01:46:16 -0500
-Received: from alexa-out-blr-01.qualcomm.com ([103.229.18.197]:38743 "EHLO
-        alexa-out-blr-01.qualcomm.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1725962AbgBTGqQ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Feb 2020 01:46:16 -0500
-Received: from ironmsg02-blr.qualcomm.com ([10.86.208.131])
-  by alexa-out-blr-01.qualcomm.com with ESMTP/TLS/AES256-SHA; 20 Feb 2020 12:15:40 +0530
-Received: from c-sbhanu-linux.qualcomm.com ([10.242.50.201])
-  by ironmsg02-blr.qualcomm.com with ESMTP; 20 Feb 2020 12:15:06 +0530
-Received: by c-sbhanu-linux.qualcomm.com (Postfix, from userid 2344807)
-        id 7406E3B58; Thu, 20 Feb 2020 12:15:05 +0530 (IST)
-From:   Shaik Sajida Bhanu <sbhanu@codeaurora.org>
-To:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
-        robh+dt@kernel.org, mka@chromium.org
-Cc:     asutoshd@codeaurora.org, swboyd@chromium.org,
-        stummala@codeaurora.org, sayalil@codeaurora.org,
-        cang@codeaurora.org, vbadigan@codeaurora.org,
-        rampraka@codeaurora.org, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        devicetree@vger.kernel.org, agross@kernel.org,
-        bjorn.andersson@linaro.org,
-        Shaik Sajida Bhanu <sbhanu@codeaurora.org>
-Subject: [PATCH V4] mmc: sdhci-msm: Update system suspend/resume callbacks of sdhci-msm platform driver
-Date:   Thu, 20 Feb 2020 12:15:00 +0530
-Message-Id: <1582181100-29914-1-git-send-email-sbhanu@codeaurora.org>
-X-Mailer: git-send-email 2.7.4
+        id S1726817AbgBTHvw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 20 Feb 2020 02:51:52 -0500
+Received: from bombadil.infradead.org ([198.137.202.133]:35972 "EHLO
+        bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726248AbgBTHvw (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Feb 2020 02:51:52 -0500
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=bombadil.20170209; h=Content-Transfer-Encoding:
+        Content-Type:In-Reply-To:MIME-Version:Date:Message-ID:From:References:Cc:To:
+        Subject:Sender:Reply-To:Content-ID:Content-Description;
+        bh=fole7G1LoPJJ9Kcv9zicmaNbVVxxXaVUsyPoa8xBYzc=; b=Z15g5taCayUEDs5hVIno9ttZ01
+        PjaQ01TEtHw2ZaVVrn51LXxOguZLGkz7FDeYGEilWzrXtORRSpxVKFSv06iotvNL/vOBieIR0I+Ol
+        ANU+aEg/S5/LCz08yo6Rzd7dTzIr07sEPCXHd/kYbJUR+kBYXrgkmbv2V68x7XmmZ5qwc9BG73Ijo
+        mnrTye5wvV5jpbNKCULFQSaXHycid40JkkM1w1CwZpSOGgp/l54beXBGJYB2XDC8IkUZ7EVnerfHh
+        wYyKhavmQq4Ljp40JytCF1jcWeP3ZuH7FwfLisEvmFM8rDZHaqcJjQ108cpcACVUI1JTDmFRq71oK
+        iCByTUKA==;
+Received: from [2601:1c0:6280:3f0::19c2]
+        by bombadil.infradead.org with esmtpsa (Exim 4.92.3 #3 (Red Hat Linux))
+        id 1j4gch-0004qm-Kn; Thu, 20 Feb 2020 07:51:51 +0000
+Subject: Re: linux-next: Tree for Feb 20 (mmc/mmc_hsq.c)
+To:     Baolin Wang <baolin.wang7@gmail.com>
+Cc:     Stephen Rothwell <sfr@canb.auug.org.au>,
+        Linux Next Mailing List <linux-next@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        Baolin Wang <baolin.wang@linaro.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>
+References: <20200220144408.359a7e02@canb.auug.org.au>
+ <dba0c486-46e9-0b96-bd71-b9e81b362c85@infradead.org>
+ <CADBw62q08iYfm+g2y5GBUH74-TwTGRzforbuyZ_tTZQ6RQ9fzA@mail.gmail.com>
+From:   Randy Dunlap <rdunlap@infradead.org>
+Message-ID: <13aa04b3-c1d3-175d-bad7-a8ebd502f535@infradead.org>
+Date:   Wed, 19 Feb 2020 23:51:50 -0800
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.4.1
+MIME-Version: 1.0
+In-Reply-To: <CADBw62q08iYfm+g2y5GBUH74-TwTGRzforbuyZ_tTZQ6RQ9fzA@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The existing suspend/resume callbacks of sdhci-msm driver are just
-gating/un-gating the clocks. During suspend cycle more can be done
-like disabling controller, disabling card detection, enabling wake-up events.
+On 2/19/20 10:01 PM, Baolin Wang wrote:
+> Hi Randy,
+> 
+> On Thu, Feb 20, 2020 at 1:55 PM Randy Dunlap <rdunlap@infradead.org> wrote:
+>>
+>> On 2/19/20 7:44 PM, Stephen Rothwell wrote:
+>>> Hi all,
+>>>
+>>> Changes since 20200219:
+>>>
+>>
+>> on i386:
+>>
+>> WARNING: modpost: missing MODULE_LICENSE() in drivers/mmc/host/mmc_hsq.o
+> 
+> I've already sent out a patch to fix the warning, can you try it?
+> Sorry for troubles.
+> https://lore.kernel.org/patchwork/patch/1196938/
 
-So updating the system pm callbacks for performing these extra
-actions besides controlling the clocks.
+Yes, that works for me.  Thanks.
 
-Signed-off-by: Shaik Sajida Bhanu <sbhanu@codeaurora.org>
-Reviewed-by: Stephen Boyd <swboyd@chromium.org>
----
-Changes since V3:
-    Invoking sdhci & cqhci resume if sdhci_host_suspend fails.
-    Removed condition check before invoking cqhci_resume since its a dummy function.
-
-Changes since V2:
-    Removed disabling/enabling pwr-irq from system pm ops.
-
-Changes since V1:
-    Invoking pm_runtime_force_suspend/resume instead of
-    sdhci_msm_runtime_suepend/resume.
----
- drivers/mmc/host/sdhci-msm.c | 47 ++++++++++++++++++++++++++++++++++++++++++--
- 1 file changed, 45 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index 3955fa5d..3559b50 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -2159,9 +2159,52 @@ static __maybe_unused int sdhci_msm_runtime_resume(struct device *dev)
- 	return 0;
- }
- 
-+static int sdhci_msm_suspend(struct device *dev)
-+{
-+	struct sdhci_host *host = dev_get_drvdata(dev);
-+	int ret;
-+
-+	if (host->mmc->caps2 & MMC_CAP2_CQE) {
-+		ret = cqhci_suspend(host->mmc);
-+		if (ret)
-+			return ret;
-+	}
-+
-+	ret = sdhci_suspend_host(host);
-+	if (ret)
-+		goto resume_cqhci;
-+
-+	ret = pm_runtime_force_suspend(dev);
-+	if (!ret)
-+		return ret;
-+
-+	sdhci_resume_host(host);
-+
-+resume_cqhci:
-+	cqhci_resume(host->mmc);
-+	return ret;
-+}
-+
-+static int sdhci_msm_resume(struct device *dev)
-+{
-+	struct sdhci_host *host = dev_get_drvdata(dev);
-+	int ret;
-+
-+	ret = pm_runtime_force_resume(dev);
-+	if (ret)
-+		return ret;
-+
-+	ret = sdhci_resume_host(host);
-+	if (ret < 0)
-+		return ret;
-+
-+	ret = cqhci_resume(host->mmc);
-+	return ret;
-+}
-+
- static const struct dev_pm_ops sdhci_msm_pm_ops = {
--	SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
--				pm_runtime_force_resume)
-+	SET_SYSTEM_SLEEP_PM_OPS(sdhci_msm_suspend,
-+				sdhci_msm_resume)
- 	SET_RUNTIME_PM_OPS(sdhci_msm_runtime_suspend,
- 			   sdhci_msm_runtime_resume,
- 			   NULL)
 -- 
-QUALCOMM INDIA, on behalf of Qualcomm Innovation Center, Inc. is a member 
-of Code Aurora Forum, hosted by The Linux Foundation
+~Randy
 
