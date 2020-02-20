@@ -6,100 +6,95 @@ X-Spam-Status: No, score=-0.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
 	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 176F4C11D0C
-	for <linux-mmc@archiver.kernel.org>; Thu, 20 Feb 2020 15:52:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 17AD7C11D18
+	for <linux-mmc@archiver.kernel.org>; Thu, 20 Feb 2020 17:54:48 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id E108520659
-	for <linux-mmc@archiver.kernel.org>; Thu, 20 Feb 2020 15:52:26 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D02CB2468A
+	for <linux-mmc@archiver.kernel.org>; Thu, 20 Feb 2020 17:54:47 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="i4puWcdv"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="LUdFldeg"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728602AbgBTPwX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 20 Feb 2020 10:52:23 -0500
-Received: from mail-pj1-f68.google.com ([209.85.216.68]:52790 "EHLO
-        mail-pj1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728552AbgBTPwX (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Feb 2020 10:52:23 -0500
-Received: by mail-pj1-f68.google.com with SMTP id ep11so1045737pjb.2
-        for <linux-mmc@vger.kernel.org>; Thu, 20 Feb 2020 07:52:22 -0800 (PST)
+        id S1726959AbgBTRyq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 20 Feb 2020 12:54:46 -0500
+Received: from mail-lf1-f41.google.com ([209.85.167.41]:41018 "EHLO
+        mail-lf1-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727868AbgBTRyp (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Feb 2020 12:54:45 -0500
+Received: by mail-lf1-f41.google.com with SMTP id m30so3799594lfp.8
+        for <linux-mmc@vger.kernel.org>; Thu, 20 Feb 2020 09:54:43 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=+/WxyvwzefS6yg5iKEGluqHuzG/pj5Si1hZf4+0mRQQ=;
-        b=i4puWcdvj1CWZtYIbzpGUOtJ5pIC79iIjAxMWCCZXdxq6G24+mGBTIIpnPCBHn0GNK
-         WAdSvxkSCdvSQdp9mPapKBWY/kV3xMOpF+OhcGriTMhwNaieg2/upGs/gMBYJU7jUkYL
-         EJM8Zl2RHkroltyGpXo2njZr5wkKWBHs4jsNOJTjSwWhKOSrn4hK033+7URfqA6fASVo
-         VRqv1xhTq9t5LCC/tsHJlJc136PxLRUc2xF/eNLZvdLHA0mnMVcXzkvNAfTV7LBAAVVo
-         KsWWXFx7m/oM5aks9F1su6hIUUJ6k2wPyhaPNDTQQq0U2jSlzth3PkhHSVgDK9vsxiaY
-         bOtw==
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=EqMQTNTqAScrbbjAL00quzcLbXeMUXLVbynXt4e9wxY=;
+        b=LUdFldegpwqvpb6jUZ3KgoQ8St6ComRy2Mt0QI/Aro5+InOuut6omXAr9nQF3o2TGT
+         t8Rje9zNPB+Y70s2ziwN6pzj+GBEpkV/rj+BJvNjdp28MIoeLj+1ryQVtLHF44L1cElj
+         Fdmcu69yfiRlkdgybwGqgcdsYCwE0oNwuTzqYSVh4hXy5w1LwfsVrzdSuetsLJ3bp19V
+         hcU3wPT47l5uUfH5g7uN61Kbwnu99/puDW/sAY+BQHCP2flbDaG/hTysnOcQcpaznGVy
+         pTNhgGAGraAd+K2mXoQ4sfXQO/MBsz3Cee7NH71g9WoS+6nu0/qKW7/EQ9Eu1DGgnsoT
+         Dl0Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=+/WxyvwzefS6yg5iKEGluqHuzG/pj5Si1hZf4+0mRQQ=;
-        b=eqDnT2vJUVUw56D/tAaLWcCsLQ/jq3hbMzmADFq6xL0ZITuwjdBNmNqY+O9atRsEqS
-         aZFeyKdcsJrQgWJ4fXrHPoyeZiHmzs3Euf8ThCDrrXej8Os5S5A3wcugLcDx9vAyppOz
-         2ujR9z8RvynPGWIw7NjT/umXvnAC+T4zwj3yyRknx0R//d5qom2r3GByw9LO9Wu6L89B
-         /MCehFmlJjqnmAwjKdhMsay9/I8eM/c9cO6bd1sbWHFpQSLHCTcpY1bsHyd8hhVO1BGd
-         Ir1BPHH0fckkHPVvB5n8o4HXgD2DQIypLILCviCsgJQ4nFnVspzbAILSez/DWXPIiL1m
-         IALg==
-X-Gm-Message-State: APjAAAUS1Y0RWtRl6B5NWmOLQiRVq5JhRidewi+xHuVUy0qMxH32I1rm
-        iORI5KM3kWiKTqkFZtSM2sWvAQ==
-X-Google-Smtp-Source: APXvYqxJJRxwW5yt25an2UYEwvvA6N2u9Fzw+67nN1An6ph5EUR36LLQWDArLfHBLz9LPNR1QNd6LQ==
-X-Received: by 2002:a17:902:9b8b:: with SMTP id y11mr32790865plp.189.1582213942056;
-        Thu, 20 Feb 2020 07:52:22 -0800 (PST)
-Received: from ripper (104-188-17-28.lightspeed.sndgca.sbcglobal.net. [104.188.17.28])
-        by smtp.gmail.com with ESMTPSA id s23sm3774686pjq.17.2020.02.20.07.52.20
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 20 Feb 2020 07:52:21 -0800 (PST)
-Date:   Thu, 20 Feb 2020 07:51:26 -0800
-From:   Bjorn Andersson <bjorn.andersson@linaro.org>
-To:     Sayali Lokhande <sayalil@codeaurora.org>
-Cc:     adrian.hunter@intel.com, robh+dt@kernel.org,
-        ulf.hansson@linaro.org, asutoshd@codeaurora.org,
-        stummala@codeaurora.org, ppvk@codeaurora.org,
-        rampraka@codeaurora.org, vbadigan@codeaurora.org, sboyd@kernel.org,
-        georgi.djakov@linaro.org, mka@chromium.org,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
-        agross@kernel.org, linux-mmc-owner@vger.kernel.org
-Subject: Re: [PATCH RFC] Toggle fifo write clk after ungating sdcc clk
-Message-ID: <20200220155126.GC955802@ripper>
-References: <1582190446-4778-1-git-send-email-sayalil@codeaurora.org>
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=EqMQTNTqAScrbbjAL00quzcLbXeMUXLVbynXt4e9wxY=;
+        b=HarHpEBV7Ay8gVVmLmAO94+B8IqqhBcj4d8fGZByj26rp4ot0hKWZApqb8tQPz0CfO
+         Q36omXnXgFhRsmxtDYTkvp9sKyIjreR0ace1tWP/cZVSEvRl8vsEI6mfOdzNnxfXw8s3
+         HhDX7nnPWqHHu/gxVgdAO1MA+q/f/9e+t93K5EgS+X3SgVLSphOEec7rv5uVI37dNF7R
+         1vILRil1Tb46WPKmFA1rSDGjwU5fzviHhJ2thJCbo76wzvAT8SMbQreaXU1NkWk44/X1
+         4cymvYU05jdbbcSLh6o+DWXaKfWBVF7Lxc2mhpVWQPwokaWUHUlBPg5bGWjuE71vCJp9
+         +Z2Q==
+X-Gm-Message-State: APjAAAWNgzY2zkfK5qr6k+g80W3okG3NRsU1ojQcbFfhVlPqs6VYGhMi
+        d3O9FpY0sSv5QZe4lAbtRP7Iej7U+PuZZyWKZn4G+g==
+X-Google-Smtp-Source: APXvYqw4jx+ECCaEc3pF2ddqAmUhWLsxs2tPv4F4B0Csslzt7ukoQ1EBe4t/LuTxKaPi4aNtoc+oNcCIYcIDitOBvUg=
+X-Received: by 2002:a19:6d13:: with SMTP id i19mr16812579lfc.6.1582221282402;
+ Thu, 20 Feb 2020 09:54:42 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1582190446-4778-1-git-send-email-sayalil@codeaurora.org>
+References: <CA+G9fYuqAQfhzF2BzHr7vMHx68bo8-jT+ob_F3eHQ3=oFjgYdg@mail.gmail.com>
+ <CAPDyKFqqhxC-pmV_j8PLY-D=AbqCAbiipAAHXLpJ4N_BiYYOFw@mail.gmail.com>
+In-Reply-To: <CAPDyKFqqhxC-pmV_j8PLY-D=AbqCAbiipAAHXLpJ4N_BiYYOFw@mail.gmail.com>
+From:   Naresh Kamboju <naresh.kamboju@linaro.org>
+Date:   Thu, 20 Feb 2020 23:24:31 +0530
+Message-ID: <CA+G9fYugQuAERqp3VXUFG-3QxXoF8bz7OSMh6WGSZcrGkbfDSQ@mail.gmail.com>
+Subject: Re: LKFT: arm x15: mmc1: cache flush error -110
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Jens Axboe <axboe@kernel.dk>, Alexei Starovoitov <ast@kernel.org>,
+        linux-block <linux-block@vger.kernel.org>,
+        lkft-triage@lists.linaro.org,
+        open list <linux-kernel@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Arnd Bergmann <arnd@arndb.de>,
+        John Stultz <john.stultz@linaro.org>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu 20 Feb 01:20 PST 2020, Sayali Lokhande wrote:
+On Wed, 19 Feb 2020 at 21:54, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>
+> On Thu, 13 Feb 2020 at 16:43, Naresh Kamboju <naresh.kamboju@linaro.org> wrote:
+> >
+>
+> Try to restore the value for the cache flush timeout, by updating the
+> define MMC_CACHE_FLUSH_TIMEOUT_MS to 10 * 60 * 1000".
 
-> During GCC level clock gating of MCLK, the async FIFO
-> gets into some hang condition, such that for the next
-> transfer after MCLK ungating, first bit of CMD response
-> doesn't get written in to the FIFO. This cause the CPSM
-> to hang eventually leading to SW timeout.
-> 
-> To fix the issue, toggle the FIFO write clock after
-> MCLK ungated to get the FIFO pointers and flags to
-> valid states.
-> 
+I have increased the timeout to 10 minutes but it did not help.
+Same error found.
+[  608.679353] mmc1: Card stuck being busy! mmc_poll_for_busy
+[  608.684964] mmc1: cache flush error -110
+[  608.689005] blk_update_request: I/O error, dev mmcblk1, sector
+4302400 op 0x1:(WRITE) flags 0x20800 phys_seg 1 prio class 0
 
-Please don't provide cover letters for a single patch.
+OTOH, What best i could do for my own experiment to revert all three patches and
+now the reported error gone and device mount successfully [1].
 
-Regards,
-Bjorn
+List of patches reverted,
+  mmc: core: Specify timeouts for BKOPS and CACHE_FLUSH for eMMC
+  mmc: block: Use generic_cmd6_time when modifying
+    INAND_CMD38_ARG_EXT_CSD
+  mmc: core: Default to generic_cmd6_time as timeout in __mmc_switch()
 
-> Ram Prakash Gupta (1):
->   mmc: sdhci-msm: Toggle fifo write clk after ungating sdcc clk
-> 
->  drivers/mmc/host/sdhci-msm.c | 43 +++++++++++++++++++++++++++++++++++++++++++
->  1 file changed, 43 insertions(+)
-> 
-> -- 
-> The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
-> a Linux Foundation Collaborative Project
+[1] https://lkft.validation.linaro.org/scheduler/job/1238275#L4346
+
+- Naresh
