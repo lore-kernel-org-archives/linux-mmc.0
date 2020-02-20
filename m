@@ -2,156 +2,145 @@ Return-Path: <SRS0=5xTW=4I=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1D997C11D00
-	for <linux-mmc@archiver.kernel.org>; Thu, 20 Feb 2020 09:21:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9B2EDC11D04
+	for <linux-mmc@archiver.kernel.org>; Thu, 20 Feb 2020 11:22:25 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id E9CBB2465D
-	for <linux-mmc@archiver.kernel.org>; Thu, 20 Feb 2020 09:21:54 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7067424672
+	for <linux-mmc@archiver.kernel.org>; Thu, 20 Feb 2020 11:22:25 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (1024-bit key) header.d=mg.codeaurora.org header.i=@mg.codeaurora.org header.b="HqlCMKbE"
+	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="nc7wid8d"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727103AbgBTJVy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 20 Feb 2020 04:21:54 -0500
-Received: from mail27.static.mailgun.info ([104.130.122.27]:44339 "EHLO
-        mail27.static.mailgun.info" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726921AbgBTJVx (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Feb 2020 04:21:53 -0500
-DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
- s=smtp; t=1582190513; h=References: In-Reply-To: Message-Id: Date:
- Subject: Cc: To: From: Sender;
- bh=c85s8naSK3Xbvoo8BeI3imw+A0YDHtYgT9ZUdHxHtZM=; b=HqlCMKbE9yiYFB75LFvdxy6w7glnCkNRvtSySS0v14/LYTsAZb7nmo/YC0UPQynll3uPOdj1
- oIGfBsRUpefrUGUzOYKW0yFeKRzGjr5840eMGqIBBbwHccRVrhuxtOkyP4QH8t2ioNR9Lt5D
- HTsHPQoIw4InghEfOErWYxaij3Q=
-X-Mailgun-Sending-Ip: 104.130.122.27
-X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
-Received: from smtp.codeaurora.org (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171])
- by mxa.mailgun.org with ESMTP id 5e4e4fac.7fa66f6f9030-smtp-out-n02;
- Thu, 20 Feb 2020 09:21:48 -0000 (UTC)
-Received: by smtp.codeaurora.org (Postfix, from userid 1001)
-        id 9D67CC433A2; Thu, 20 Feb 2020 09:21:47 +0000 (UTC)
-Received: from sayalil-linux.qualcomm.com (blr-c-bdr-fw-01_GlobalNAT_AllZones-Outside.qualcomm.com [103.229.19.19])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-SHA256 (128/128 bits))
-        (No client certificate requested)
-        (Authenticated sender: sayalil)
-        by smtp.codeaurora.org (Postfix) with ESMTPSA id B1783C43383;
-        Thu, 20 Feb 2020 09:21:40 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.3.2 smtp.codeaurora.org B1783C43383
-Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
-Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=none smtp.mailfrom=sayalil@codeaurora.org
-From:   Sayali Lokhande <sayalil@codeaurora.org>
-To:     bjorn.andersson@linaro.org, adrian.hunter@intel.com,
-        robh+dt@kernel.org, ulf.hansson@linaro.org,
-        asutoshd@codeaurora.org, stummala@codeaurora.org,
-        ppvk@codeaurora.org, rampraka@codeaurora.org,
-        vbadigan@codeaurora.org, sboyd@kernel.org,
-        georgi.djakov@linaro.org, mka@chromium.org
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
-        agross@kernel.org, linux-mmc-owner@vger.kernel.org,
-        Sayali Lokhande <sayalil@codeaurora.org>
-Subject: [PATCH RFC] mmc: sdhci-msm: Toggle fifo write clk after ungating sdcc clk
-Date:   Thu, 20 Feb 2020 14:50:46 +0530
-Message-Id: <1582190446-4778-2-git-send-email-sayalil@codeaurora.org>
-X-Mailer: git-send-email 1.9.1
-In-Reply-To: <1582190446-4778-1-git-send-email-sayalil@codeaurora.org>
-References: <1582190446-4778-1-git-send-email-sayalil@codeaurora.org>
+        id S1726893AbgBTLWY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 20 Feb 2020 06:22:24 -0500
+Received: from lelv0143.ext.ti.com ([198.47.23.248]:34382 "EHLO
+        lelv0143.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726837AbgBTLWY (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Feb 2020 06:22:24 -0500
+Received: from fllv0035.itg.ti.com ([10.64.41.0])
+        by lelv0143.ext.ti.com (8.15.2/8.15.2) with ESMTP id 01KBMKba084599;
+        Thu, 20 Feb 2020 05:22:20 -0600
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
+        s=ti-com-17Q1; t=1582197740;
+        bh=7sz7UwaYZhfjapq4XXvQj1Y6KtkYa1bY7xLS+tvWAGI=;
+        h=Subject:From:To:CC:References:Date:In-Reply-To;
+        b=nc7wid8d9t08+Dan465M+ZZoUxq7lTo1+N4hTYNScWBMbsAwPhyi1dUwCzqbkYyTo
+         D1VqyqwHU7Q/DpAl8N87v2AF8RzW+3WJ8ypo57Wv4DKnPMWe0zvpoEzxmXKdTs0w9h
+         eRdFLNAeArVE7qO1SeWeaMSCUHEJ2FVO9N9YiZF8=
+Received: from DLEE113.ent.ti.com (dlee113.ent.ti.com [157.170.170.24])
+        by fllv0035.itg.ti.com (8.15.2/8.15.2) with ESMTP id 01KBMKmm092249;
+        Thu, 20 Feb 2020 05:22:20 -0600
+Received: from DLEE105.ent.ti.com (157.170.170.35) by DLEE113.ent.ti.com
+ (157.170.170.24) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.1847.3; Thu, 20
+ Feb 2020 05:22:20 -0600
+Received: from lelv0326.itg.ti.com (10.180.67.84) by DLEE105.ent.ti.com
+ (157.170.170.35) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.1847.3 via
+ Frontend Transport; Thu, 20 Feb 2020 05:22:20 -0600
+Received: from [172.24.190.4] (ileax41-snat.itg.ti.com [10.172.224.153])
+        by lelv0326.itg.ti.com (8.15.2/8.15.2) with ESMTP id 01KBMHn7048242;
+        Thu, 20 Feb 2020 05:22:18 -0600
+Subject: Re: [PATCH 1/3] dt-bindings: mmc: sdhci-am654: Update Output tap
+ delay binding
+From:   Faiz Abbas <faiz_abbas@ti.com>
+To:     Rob Herring <robh@kernel.org>
+CC:     <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
+        <devicetree@vger.kernel.org>, <ulf.hansson@linaro.org>,
+        <adrian.hunter@intel.com>
+References: <20200108150920.14547-1-faiz_abbas@ti.com>
+ <20200108150920.14547-2-faiz_abbas@ti.com> <20200115015037.GA26114@bogus>
+ <a437675a-6a18-14bd-f316-77bdd2bc1efb@ti.com>
+ <bff6f9d2-6713-e8c1-177e-f5d9ed5adbf1@ti.com>
+ <24e6ac71-00c7-f140-86d8-fa5ec0dcaff0@ti.com>
+Message-ID: <76a0c96a-b83d-ac21-1e24-6d68e2b70c9c@ti.com>
+Date:   Thu, 20 Feb 2020 16:54:00 +0530
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.4.1
+MIME-Version: 1.0
+In-Reply-To: <24e6ac71-00c7-f140-86d8-fa5ec0dcaff0@ti.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Ram Prakash Gupta <rampraka@codeaurora.org>
+Rob,
 
-During GCC level clock gating of MCLK, the async FIFO
-gets into some hang condition, such that for the next
-transfer after MCLK ungating, first bit of CMD response
-doesn't get written in to the FIFO. This cause the CPSM
-to hang eventually leading to SW timeout.
+On 14/02/20 4:28 pm, Faiz Abbas wrote:
+> Rob,
+> 
+> On 07/02/20 3:07 pm, Faiz Abbas wrote:
+>> Rob,
+>>
+>> On 20/01/20 11:00 am, Faiz Abbas wrote:
+>>> Hi Rob,
+>>>
+>>> On 15/01/20 7:20 am, Rob Herring wrote:
+>>>> On Wed, Jan 08, 2020 at 08:39:18PM +0530, Faiz Abbas wrote:
+>>>>> According to latest AM65x Data Manual[1], a different output tap delay
+>>>>> value is recommended for all speed modes. Therefore, replace the
+>>>>> ti,otap-del-sel binding with one ti,otap-del-sel- for each MMC/SD speed
+>>>>> mode.
+>>>>>
+>>>>> [1] http://www.ti.com/lit/gpn/am6526
+>>>>>
+>>>>> Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
+>>>>> ---
+>>>>>  .../devicetree/bindings/mmc/sdhci-am654.txt   | 21 +++++++++++++++++--
+>>>>>  1 file changed, 19 insertions(+), 2 deletions(-)
+>>>>>
+>>>>> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-am654.txt b/Documentation/devicetree/bindings/mmc/sdhci-am654.txt
+>>>>> index 50e87df47971..c6ccecb9ae5a 100644
+>>>>> --- a/Documentation/devicetree/bindings/mmc/sdhci-am654.txt
+>>>>> +++ b/Documentation/devicetree/bindings/mmc/sdhci-am654.txt
+>>>>> @@ -18,7 +18,20 @@ Required Properties:
+>>>>>  	- clocks: Handles to the clock inputs.
+>>>>>  	- clock-names: Tuple including "clk_xin" and "clk_ahb"
+>>>>>  	- interrupts: Interrupt specifiers
+>>>>> -	- ti,otap-del-sel: Output Tap Delay select
+>>>>> +	Output tap delay for each speed mode:
+>>>>> +	- ti,otap-del-sel-legacy
+>>>>> +	- ti,otap-del-sel-mmc-hs
+>>>>> +	- ti,otap-del-sel-sd-hs
+>>>>> +	- ti,otap-del-sel-sdr12
+>>>>> +	- ti,otap-del-sel-sdr25
+>>>>> +	- ti,otap-del-sel-sdr50
+>>>>> +	- ti,otap-del-sel-sdr104
+>>>>> +	- ti,otap-del-sel-ddr50
+>>>>> +	- ti,otap-del-sel-ddr52
+>>>>> +	- ti,otap-del-sel-hs200
+>>>>> +	- ti,otap-del-sel-hs400
+>>>>> +	  These bindings must be provided otherwise the driver will disable the
+>>>>> +	  corresponding speed mode (i.e. all nodes must provide at least -legacy)
+>>>>
+>>>> Why not just extend the existing property to be an array. We already 
+>>>> have properties to enable/disable speed modes.
+>>>>
+>>>
+>>> Its hard to keep track of which modes have values and which don't when
+>>> you add an array. This scheme is just easier on anyone adding new values
+>>> or updating old values.
+>>>
+>>> We already disable speed modes based on platform specific properties in
+>>> other drivers. In sdhci-omap.c, the driver disables the corresponding
+>>> speed mode if the corresponding pinmux and iodelay values are not populated.
+>>>
+>>
+>> Do you agree on above?
+>>
+> 
+> Gentle ping.
+> 
 
-To fix the issue, toggle the FIFO write clock after
-MCLK ungated to get the FIFO pointers and flags to
-valid states.
+Ping.
 
-Change-Id: Ibef2d1d283ac0b6983c609a4abc98bc574d31fa6
-Signed-off-by: Ram Prakash Gupta <rampraka@codeaurora.org>
-Signed-off-by: Sayali Lokhande <sayalil@codeaurora.org>
----
- drivers/mmc/host/sdhci-msm.c | 43 +++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 43 insertions(+)
-
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index c3a160c..eaa3e95 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -127,6 +127,8 @@
- #define CQHCI_VENDOR_CFG1	0xA00
- #define CQHCI_VENDOR_DIS_RST_ON_CQ_EN	(0x3 << 13)
- 
-+#define RCLK_TOGGLE 0x2
-+
- struct sdhci_msm_offset {
- 	u32 core_hc_mode;
- 	u32 core_mci_data_cnt;
-@@ -1554,6 +1556,43 @@ static void __sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
- 	sdhci_enable_clk(host, clk);
- }
- 
-+/*
-+ * After MCLK ugating, toggle the FIFO write clock to get
-+ * the FIFO pointers and flags to valid state.
-+ */
-+static void sdhci_msm_toggle_fifo_write_clk(struct sdhci_host *host)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-+	const struct sdhci_msm_offset *msm_offset =
-+					msm_host->offset;
-+	struct mmc_card *card = host->mmc->card;
-+
-+	if (msm_host->tuning_done ||
-+			(card && card->ext_csd.strobe_support &&
-+			card->host->ios.enhanced_strobe)) {
-+		/*
-+		 * set HC_REG_DLL_CONFIG_3[1] to select MCLK as
-+		 * DLL input clock
-+		 */
-+		writel_relaxed(((readl_relaxed(host->ioaddr +
-+			msm_offset->core_dll_config_3))
-+			| RCLK_TOGGLE), host->ioaddr +
-+			msm_offset->core_dll_config_3);
-+		/* ensure above write as toggling same bit quickly */
-+		wmb();
-+		udelay(2);
-+		/*
-+		 * clear HC_REG_DLL_CONFIG_3[1] to select RCLK as
-+		 * DLL input clock
-+		 */
-+		writel_relaxed(((readl_relaxed(host->ioaddr +
-+			msm_offset->core_dll_config_3))
-+			& ~RCLK_TOGGLE), host->ioaddr +
-+			msm_offset->core_dll_config_3);
-+	}
-+}
-+
- /* sdhci_msm_set_clock - Called with (host->lock) spinlock held. */
- static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
- {
-@@ -2149,6 +2188,10 @@ static __maybe_unused int sdhci_msm_runtime_resume(struct device *dev)
- 				       msm_host->bulk_clks);
- 	if (ret)
- 		return ret;
-+	if (host->mmc &&
-+			(host->mmc->ios.timing == MMC_TIMING_MMC_HS400))
-+		sdhci_msm_toggle_fifo_write_clk(host);
-+
- 	/*
- 	 * Whenever core-clock is gated dynamically, it's needed to
- 	 * restore the SDR DLL settings when the clock is ungated.
--- 
-The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
-a Linux Foundation Collaborative Project
+Thanks,
+Faiz
