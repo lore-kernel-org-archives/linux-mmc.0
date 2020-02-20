@@ -2,88 +2,132 @@ Return-Path: <SRS0=5xTW=4I=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D9651C761A1
-	for <linux-mmc@archiver.kernel.org>; Thu, 20 Feb 2020 06:02:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 745C2C34031
+	for <linux-mmc@archiver.kernel.org>; Thu, 20 Feb 2020 06:46:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 920D024672
-	for <linux-mmc@archiver.kernel.org>; Thu, 20 Feb 2020 06:02:00 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="J+cnH/SE"
+	by mail.kernel.org (Postfix) with ESMTP id 5180924654
+	for <linux-mmc@archiver.kernel.org>; Thu, 20 Feb 2020 06:46:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725988AbgBTGB7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 20 Feb 2020 01:01:59 -0500
-Received: from mail-qt1-f196.google.com ([209.85.160.196]:44256 "EHLO
-        mail-qt1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725942AbgBTGB7 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Feb 2020 01:01:59 -0500
-Received: by mail-qt1-f196.google.com with SMTP id j23so2083165qtr.11;
-        Wed, 19 Feb 2020 22:01:57 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=l1SAZDOfe5Y7UwUxWdEtrikDtP05tBKBkNevXDa5dmY=;
-        b=J+cnH/SERbHxksupMLfhAYoV7wgUA9KhEu3/k3sFwHlLgjzOd1FuAakTj7f+iJbJPg
-         ko01mzlYYf1Az04dqGNAYSKQt1wSZjq7t6kNviTj9QFec/DFbHxasFe2jzpspK2MXoXf
-         N1OHy1wBX7xyJA5VPxW3tUzNHHaTMI/VzwBxMfHAsQMnuH6a1IAlqUsdWS+kIaO1Wo9B
-         IV/Rmz0jetFxsUguYzYKM1mdzw5FTllDnizu85aO8bz3vFoPkHu5lRYJPKMxblPK0j1n
-         Y0FQD23GXf9S/8YqS1bRBeX0j70f/iUXapdLdj6FFchIg4prGqVoNFH6KC8WIy2h3Du7
-         H7Yg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=l1SAZDOfe5Y7UwUxWdEtrikDtP05tBKBkNevXDa5dmY=;
-        b=jVTdJXD31/X/UuaEdKXl1zkAklwZCkQocrwhg4Uj5KetTr4f6RcHwqi+bsBV6vq7Tp
-         3OSNDPCs5jDZNMuuQ6TPDHM8W3co0mtpYaZqPSMa+fPVnMivtO+qBfQC8UBr6SwrKc+D
-         yofzdSOs2vjFXP5s3zRkM+AU0CVxq3wlfMikPQ/zqVfPWJqCKOLBbMC3j7V4ghKuiNBp
-         dkAnXwUAbROYoLKIk7GwDmVrBwkbZdpcI8LdmTbJYOwDW7qCvln3n3P7Pqb5C7K97myw
-         Yz2FPHwE2S1obk77PTRaGFo6tWb2X7bBD4xDgM/O6ZyioeUYVnem2KdbK9QRNnTjcvXJ
-         hdGQ==
-X-Gm-Message-State: APjAAAVvDZcOSDIo3XAKhGzmIxBxKRwy1lzRJRLTD3AJ2jzeRi0wuBs5
-        ONkCoNw/4I+lvhGKzRAbHyweerCGmKcoCuf0YyM=
-X-Google-Smtp-Source: APXvYqy6qf9+0eM7IX9ftMMLUdcktph+/PL3yFpp5ozDn2XA2+ON0JFSKqzCw2XTxtKLMjy3xmEHq/EC446Vk9XjVn8=
-X-Received: by 2002:aed:2202:: with SMTP id n2mr26124272qtc.4.1582178517204;
- Wed, 19 Feb 2020 22:01:57 -0800 (PST)
-MIME-Version: 1.0
-References: <20200220144408.359a7e02@canb.auug.org.au> <dba0c486-46e9-0b96-bd71-b9e81b362c85@infradead.org>
-In-Reply-To: <dba0c486-46e9-0b96-bd71-b9e81b362c85@infradead.org>
-From:   Baolin Wang <baolin.wang7@gmail.com>
-Date:   Thu, 20 Feb 2020 14:01:45 +0800
-Message-ID: <CADBw62q08iYfm+g2y5GBUH74-TwTGRzforbuyZ_tTZQ6RQ9fzA@mail.gmail.com>
-Subject: Re: linux-next: Tree for Feb 20 (mmc/mmc_hsq.c)
-To:     Randy Dunlap <rdunlap@infradead.org>
-Cc:     Stephen Rothwell <sfr@canb.auug.org.au>,
-        Linux Next Mailing List <linux-next@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Baolin Wang <baolin.wang@linaro.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+        id S1726248AbgBTGqQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 20 Feb 2020 01:46:16 -0500
+Received: from alexa-out-blr-01.qualcomm.com ([103.229.18.197]:38743 "EHLO
+        alexa-out-blr-01.qualcomm.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1725962AbgBTGqQ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Feb 2020 01:46:16 -0500
+Received: from ironmsg02-blr.qualcomm.com ([10.86.208.131])
+  by alexa-out-blr-01.qualcomm.com with ESMTP/TLS/AES256-SHA; 20 Feb 2020 12:15:40 +0530
+Received: from c-sbhanu-linux.qualcomm.com ([10.242.50.201])
+  by ironmsg02-blr.qualcomm.com with ESMTP; 20 Feb 2020 12:15:06 +0530
+Received: by c-sbhanu-linux.qualcomm.com (Postfix, from userid 2344807)
+        id 7406E3B58; Thu, 20 Feb 2020 12:15:05 +0530 (IST)
+From:   Shaik Sajida Bhanu <sbhanu@codeaurora.org>
+To:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
+        robh+dt@kernel.org, mka@chromium.org
+Cc:     asutoshd@codeaurora.org, swboyd@chromium.org,
+        stummala@codeaurora.org, sayalil@codeaurora.org,
+        cang@codeaurora.org, vbadigan@codeaurora.org,
+        rampraka@codeaurora.org, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+        devicetree@vger.kernel.org, agross@kernel.org,
+        bjorn.andersson@linaro.org,
+        Shaik Sajida Bhanu <sbhanu@codeaurora.org>
+Subject: [PATCH V4] mmc: sdhci-msm: Update system suspend/resume callbacks of sdhci-msm platform driver
+Date:   Thu, 20 Feb 2020 12:15:00 +0530
+Message-Id: <1582181100-29914-1-git-send-email-sbhanu@codeaurora.org>
+X-Mailer: git-send-email 2.7.4
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Randy,
+The existing suspend/resume callbacks of sdhci-msm driver are just
+gating/un-gating the clocks. During suspend cycle more can be done
+like disabling controller, disabling card detection, enabling wake-up events.
 
-On Thu, Feb 20, 2020 at 1:55 PM Randy Dunlap <rdunlap@infradead.org> wrote:
->
-> On 2/19/20 7:44 PM, Stephen Rothwell wrote:
-> > Hi all,
-> >
-> > Changes since 20200219:
-> >
->
-> on i386:
->
-> WARNING: modpost: missing MODULE_LICENSE() in drivers/mmc/host/mmc_hsq.o
+So updating the system pm callbacks for performing these extra
+actions besides controlling the clocks.
 
-I've already sent out a patch to fix the warning, can you try it?
-Sorry for troubles.
-https://lore.kernel.org/patchwork/patch/1196938/
+Signed-off-by: Shaik Sajida Bhanu <sbhanu@codeaurora.org>
+Reviewed-by: Stephen Boyd <swboyd@chromium.org>
+---
+Changes since V3:
+    Invoking sdhci & cqhci resume if sdhci_host_suspend fails.
+    Removed condition check before invoking cqhci_resume since its a dummy function.
+
+Changes since V2:
+    Removed disabling/enabling pwr-irq from system pm ops.
+
+Changes since V1:
+    Invoking pm_runtime_force_suspend/resume instead of
+    sdhci_msm_runtime_suepend/resume.
+---
+ drivers/mmc/host/sdhci-msm.c | 47 ++++++++++++++++++++++++++++++++++++++++++--
+ 1 file changed, 45 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+index 3955fa5d..3559b50 100644
+--- a/drivers/mmc/host/sdhci-msm.c
++++ b/drivers/mmc/host/sdhci-msm.c
+@@ -2159,9 +2159,52 @@ static __maybe_unused int sdhci_msm_runtime_resume(struct device *dev)
+ 	return 0;
+ }
+ 
++static int sdhci_msm_suspend(struct device *dev)
++{
++	struct sdhci_host *host = dev_get_drvdata(dev);
++	int ret;
++
++	if (host->mmc->caps2 & MMC_CAP2_CQE) {
++		ret = cqhci_suspend(host->mmc);
++		if (ret)
++			return ret;
++	}
++
++	ret = sdhci_suspend_host(host);
++	if (ret)
++		goto resume_cqhci;
++
++	ret = pm_runtime_force_suspend(dev);
++	if (!ret)
++		return ret;
++
++	sdhci_resume_host(host);
++
++resume_cqhci:
++	cqhci_resume(host->mmc);
++	return ret;
++}
++
++static int sdhci_msm_resume(struct device *dev)
++{
++	struct sdhci_host *host = dev_get_drvdata(dev);
++	int ret;
++
++	ret = pm_runtime_force_resume(dev);
++	if (ret)
++		return ret;
++
++	ret = sdhci_resume_host(host);
++	if (ret < 0)
++		return ret;
++
++	ret = cqhci_resume(host->mmc);
++	return ret;
++}
++
+ static const struct dev_pm_ops sdhci_msm_pm_ops = {
+-	SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
+-				pm_runtime_force_resume)
++	SET_SYSTEM_SLEEP_PM_OPS(sdhci_msm_suspend,
++				sdhci_msm_resume)
+ 	SET_RUNTIME_PM_OPS(sdhci_msm_runtime_suspend,
+ 			   sdhci_msm_runtime_resume,
+ 			   NULL)
+-- 
+QUALCOMM INDIA, on behalf of Qualcomm Innovation Center, Inc. is a member 
+of Code Aurora Forum, hosted by The Linux Foundation
+
