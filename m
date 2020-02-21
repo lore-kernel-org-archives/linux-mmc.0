@@ -2,115 +2,163 @@ Return-Path: <SRS0=+wZv=4J=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	MSGID_FROM_MTA_HEADER,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=no
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1F31FC35656
-	for <linux-mmc@archiver.kernel.org>; Fri, 21 Feb 2020 16:32:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D80FDC35646
+	for <linux-mmc@archiver.kernel.org>; Fri, 21 Feb 2020 19:44:56 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id DD6C224650
-	for <linux-mmc@archiver.kernel.org>; Fri, 21 Feb 2020 16:32:06 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id ABB0A24650
+	for <linux-mmc@archiver.kernel.org>; Fri, 21 Feb 2020 19:44:56 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=silabs.onmicrosoft.com header.i=@silabs.onmicrosoft.com header.b="GM+69Gs8"
+	dkim=pass (2048-bit key) header.d=nvidia.com header.i=@nvidia.com header.b="a7VTt7wp"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726767AbgBUQcG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 21 Feb 2020 11:32:06 -0500
-Received: from mail-dm6nam12on2046.outbound.protection.outlook.com ([40.107.243.46]:6208
-        "EHLO NAM12-DM6-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1726710AbgBUQcG (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 21 Feb 2020 11:32:06 -0500
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=bUFUoKX5BXvfrTilKzmHC7UvJ/osY0FNtorEbhAODDIUqfC0L2f5opR1fcQ0Dg/mWlNOUZRK6SgLsxppPMgjsNvP5EzBj1oRcLR/gG49KcHfJu2sMuis8SDYXzlBHyU3sF+veknT3++HER/Et+zD/UkRz9Nh7iOjz/Xfr4XsoyXMSOYyhQIzVUBOEwnkZCU8895hp3CO3457zhWzjktOjug7GOWqd8TCPqbq/OzbawiV36IyUUywkbhJjPoCg2W0g41VvLG08Ir3zVdfaj/HDYjv5qZsHgMAbY3Tl9lJC3qjEdxI9BB9qxMiqniu7jVgKu2wAjrl7yK08na8dg2IcQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=f1d7SU74WxrWjz+LQ+cB0iMwuNx0+QLq05WnJof3gRI=;
- b=TRT3y3kRl22hxovnFUn03+3qrdhCJUVwyoPllOgZRGuMehfa90MI85YPdMvhDMfpW0j/9syXX05U9PFH0m7iAtgd4ONnvVL7U7Gj1i/m1kxqO/MLTqAMMseTfamwKxvgm/6S+SK2/seX+HW+twZiaFNefu2SzMgjG+9mhbAaNI7CtXvk9EDtyB4KlOwUhWHD51gDyc1NYQZp2q5WdzhQaCeAC3UywdmvAfICe3SrQXjo3jq2vDpHrpfQZS4DIkYs8dyD1IhOU1RKuvGhcRpueyJ3lhG7q58sa6jtyhZnifhdO5kGVWZlVDgN8R7NOAtNq5quFb2SovLe/ynFChIviw==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=silabs.com; dmarc=pass action=none header.from=silabs.com;
- dkim=pass header.d=silabs.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=silabs.onmicrosoft.com; s=selector2-silabs-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=f1d7SU74WxrWjz+LQ+cB0iMwuNx0+QLq05WnJof3gRI=;
- b=GM+69Gs8zbYLsJvAsp0q6evNV65k0aRimMjIgptn1hyvR4sKN9pzDnFbqRg/vWLEmI5FuWPcccJxiH/+VYVQc5oMA96n/q7Dh+Yf6m9iOloe1dcX7ueQr3YXS1+t76mNCQqjpGEi5XlTWybBvROIXwhT4ffFY/MC2sHNgwfpQ0g=
-Authentication-Results: spf=none (sender IP is )
- smtp.mailfrom=Jerome.Pouiller@silabs.com; 
-Received: from MN2PR11MB4063.namprd11.prod.outlook.com (2603:10b6:208:13f::22)
- by MN2PR11MB4351.namprd11.prod.outlook.com (2603:10b6:208:193::31) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.2750.17; Fri, 21 Feb
- 2020 16:32:03 +0000
-Received: from MN2PR11MB4063.namprd11.prod.outlook.com
- ([fe80::ade4:5702:1c8b:a2b3]) by MN2PR11MB4063.namprd11.prod.outlook.com
- ([fe80::ade4:5702:1c8b:a2b3%7]) with mapi id 15.20.2729.033; Fri, 21 Feb 2020
- 16:32:02 +0000
-From:   Jerome Pouiller <Jerome.Pouiller@silabs.com>
-To:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     linux-kernel@vger.kernel.org,
-        =?UTF-8?q?J=C3=A9r=C3=B4me=20Pouiller?= 
-        <jerome.pouiller@silabs.com>
-Subject: [PATCH v2] mmc: core: Fix indentation
-Date:   Fri, 21 Feb 2020 17:31:47 +0100
-Message-Id: <20200221163147.608677-1-Jerome.Pouiller@silabs.com>
-X-Mailer: git-send-email 2.25.1
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: base64
-X-ClientProxiedBy: PR0P264CA0047.FRAP264.PROD.OUTLOOK.COM
- (2603:10a6:100:1::35) To MN2PR11MB4063.namprd11.prod.outlook.com
- (2603:10b6:208:13f::22)
+        id S1726683AbgBUTox (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 21 Feb 2020 14:44:53 -0500
+Received: from hqnvemgate25.nvidia.com ([216.228.121.64]:4544 "EHLO
+        hqnvemgate25.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726443AbgBUTow (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Feb 2020 14:44:52 -0500
+Received: from hqpgpgate101.nvidia.com (Not Verified[216.228.121.13]) by hqnvemgate25.nvidia.com (using TLS: TLSv1.2, DES-CBC3-SHA)
+        id <B5e5033120000>; Fri, 21 Feb 2020 11:44:18 -0800
+Received: from hqmail.nvidia.com ([172.20.161.6])
+  by hqpgpgate101.nvidia.com (PGP Universal service);
+  Fri, 21 Feb 2020 11:44:51 -0800
+X-PGP-Universal: processed;
+        by hqpgpgate101.nvidia.com on Fri, 21 Feb 2020 11:44:51 -0800
+Received: from [10.19.66.63] (172.20.13.39) by HQMAIL107.nvidia.com
+ (172.20.187.13) with Microsoft SMTP Server (TLS) id 15.0.1473.3; Fri, 21 Feb
+ 2020 19:44:48 +0000
+Subject: Re: LKFT: arm x15: mmc1: cache flush error -110
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Naresh Kamboju <naresh.kamboju@linaro.org>
+CC:     Jens Axboe <axboe@kernel.dk>, Alexei Starovoitov <ast@kernel.org>,
+        linux-block <linux-block@vger.kernel.org>,
+        <lkft-triage@lists.linaro.org>,
+        open list <linux-kernel@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Arnd Bergmann <arnd@arndb.de>,
+        John Stultz <john.stultz@linaro.org>,
+        Thierry Reding <treding@nvidia.com>,
+        Jon Hunter <jonathanh@nvidia.com>
+References: <CA+G9fYuqAQfhzF2BzHr7vMHx68bo8-jT+ob_F3eHQ3=oFjgYdg@mail.gmail.com>
+ <CAPDyKFqqhxC-pmV_j8PLY-D=AbqCAbiipAAHXLpJ4N_BiYYOFw@mail.gmail.com>
+ <CA+G9fYugQuAERqp3VXUFG-3QxXoF8bz7OSMh6WGSZcrGkbfDSQ@mail.gmail.com>
+ <CAPDyKFo-vEO7zN_F+NqcKtnKmAo_deOZx3gYNiks3yTAQAjv-Q@mail.gmail.com>
+From:   Bitan Biswas <bbiswas@nvidia.com>
+Message-ID: <a602a27a-b960-ce56-c541-3b4b95f5dce2@nvidia.com>
+Date:   Fri, 21 Feb 2020 11:44:44 -0800
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101
+ Thunderbird/60.9.0
 MIME-Version: 1.0
-Received: from pc-42.silabs.com (37.71.187.125) by PR0P264CA0047.FRAP264.PROD.OUTLOOK.COM (2603:10a6:100:1::35) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.2750.18 via Frontend Transport; Fri, 21 Feb 2020 16:32:01 +0000
-X-Mailer: git-send-email 2.25.1
-X-Originating-IP: [37.71.187.125]
-X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: 1f92253c-5bc6-4fbc-4f10-08d7b6eb94a4
-X-MS-TrafficTypeDiagnostic: MN2PR11MB4351:
-X-MS-Exchange-Transport-Forked: True
-X-Microsoft-Antispam-PRVS: <MN2PR11MB435127A53537880437C8724693120@MN2PR11MB4351.namprd11.prod.outlook.com>
-X-MS-Oob-TLC-OOBClassifiers: OLM:1303;
-X-Forefront-PRVS: 0320B28BE1
-X-Forefront-Antispam-Report: SFV:NSPM;SFS:(10009020)(136003)(366004)(376002)(396003)(346002)(39850400004)(199004)(189003)(66946007)(86362001)(8936002)(4326008)(478600001)(81166006)(1076003)(81156014)(66556008)(16526019)(2906002)(107886003)(66476007)(186003)(26005)(8676002)(6916009)(316002)(956004)(5660300002)(6666004)(36756003)(6486002)(2616005)(52116002)(7696005);DIR:OUT;SFP:1101;SCL:1;SRVR:MN2PR11MB4351;H:MN2PR11MB4063.namprd11.prod.outlook.com;FPR:;SPF:None;LANG:en;PTR:InfoNoRecords;A:1;MX:1;
-Received-SPF: None (protection.outlook.com: silabs.com does not designate
- permitted sender hosts)
-X-MS-Exchange-SenderADCheck: 1
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: 95MnRCPAlpYxBD6onASDlpIq9/++OsVROe13KPIstYCHORsRVkynsuBeoQ14ntlOiQOxQN3McVsZbmerE2Ks+DHCzVp2+yhyeXQh/oNvhNVz0eI71fYXl7mCLwqKmctCCh8nuramBB9/AkIwbTKU/d/x7EK7v7COkJhBNx5usU3luKTCLDPp2d8ESTWntxmsq/BpCyhfcY0PB16M9ARywMz7gBY5ebmKj9IJpPxd3Vu8F9fc/gUGcpfNL+C/+gI0hReH8hiPnEq3l84m4EPvBR/LA6YjCijqoSFU1nXfp4GeQ5i6tewBvKJ4tp3jr4aMeJokUFYOz/UkD+oRHvLbDYnlwj6RTuBZ65TMZcxSVnZX1GFmp4wonxBtZ7JXp9QIY6GOS/I2GRV4/qs7Z5jfibtf+mTGlKPqQ0CHVjJQxNvfMbrXFP3Bb4FFEtVA5/G1
-X-MS-Exchange-AntiSpam-MessageData: 52QnGQHyqBTyJucdbCBxNVObq6tizMoIT6e9VDZ7w9F51+hsvTQ9dJcoSqsl9600/Smbva/xTMAqkw/n9A1TNoWO3quaSztMFUArN/SbGk1xvdHR+lR+9gA+Lazhuf29awVyyM2To94K7oA/ae1/Mg==
-X-OriginatorOrg: silabs.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 1f92253c-5bc6-4fbc-4f10-08d7b6eb94a4
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 21 Feb 2020 16:32:02.6788
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 54dbd822-5231-4b20-944d-6f4abcd541fb
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: 0C1Gn6OZd8wZun2H8VB2stglc7x8QYfX/imb9AXZ8lNTbXqZPbpeZdc4NlB70DWrO/12vSR5ipX+0TPxwoOPxQ==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: MN2PR11MB4351
+In-Reply-To: <CAPDyKFo-vEO7zN_F+NqcKtnKmAo_deOZx3gYNiks3yTAQAjv-Q@mail.gmail.com>
+X-Originating-IP: [172.20.13.39]
+X-ClientProxiedBy: HQMAIL107.nvidia.com (172.20.187.13) To
+ HQMAIL107.nvidia.com (172.20.187.13)
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nvidia.com; s=n1;
+        t=1582314258; bh=7shXhAKVgprX3db7vtD29I37u9MzanrNF1PL2vZ849Q=;
+        h=X-PGP-Universal:Subject:To:CC:References:From:Message-ID:Date:
+         User-Agent:MIME-Version:In-Reply-To:X-Originating-IP:
+         X-ClientProxiedBy:Content-Type:Content-Language:
+         Content-Transfer-Encoding;
+        b=a7VTt7wpU5aNVkKuGK6qVz4fq2LyufFJxJgeavB2kNlKkNGb8XQPD7gs/iIZIipLF
+         v6HdKUZHce4DkLZnOeRNRanlML/DlWI2rQA446bSGXlIA+b6+kHxc2WBiXj+aiWP1r
+         w/qijGjZO12R9ATf6TMQvgUUVIrD8T45ixk1XzVYGVzRAN/tdYXR9Eqn0a5THPu4+f
+         pT3kuZ9YeogIrWF+0iypHoYCeM1JloARB7oGBU5qZA+aTS/+zKVxeaW+gyc+jRfGxl
+         B9WnyAv/H29QAbFHaGP/zmD9x50NwX99MFc+s3WUqHURHxk2teovD4YHgchxIuAK8I
+         2NRGr48pndxkw==
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-RnJvbTogSsOpcsO0bWUgUG91aWxsZXIgPGplcm9tZS5wb3VpbGxlckBzaWxhYnMuY29tPgoKc2Rp
-b19zaW5nbGVfaXJxX3NldCgpIHdhcyBpbmRlbnRlZCB3aXRoIGEgbWl4IG9mIHRhYnMgYW5kIHNw
-YWNlcy4KClNpZ25lZC1vZmYtYnk6IErDqXLDtG1lIFBvdWlsbGVyIDxqZXJvbWUucG91aWxsZXJA
-c2lsYWJzLmNvbT4KLS0tCnYyOgogIC0gQWxzbyBhZGQgYnJhY2VzIGFyb3VuZiBmb3IgbG9vcCAo
-c3VnZ2VzdGVkIGJ5IEpvZSkKCiBkcml2ZXJzL21tYy9jb3JlL3NkaW9faXJxLmMgfCAxNSArKysr
-KysrKy0tLS0tLS0KIDEgZmlsZSBjaGFuZ2VkLCA4IGluc2VydGlvbnMoKyksIDcgZGVsZXRpb25z
-KC0pCgpkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvY29yZS9zZGlvX2lycS5jIGIvZHJpdmVycy9t
-bWMvY29yZS9zZGlvX2lycS5jCmluZGV4IDkwMDg3MTA3M2JkNy4uM2ZmZTRmZjQ5YWE3IDEwMDY0
-NAotLS0gYS9kcml2ZXJzL21tYy9jb3JlL3NkaW9faXJxLmMKKysrIGIvZHJpdmVycy9tbWMvY29y
-ZS9zZGlvX2lycS5jCkBAIC0yNzYsMTQgKzI3NiwxNSBAQCBzdGF0aWMgdm9pZCBzZGlvX3Npbmds
-ZV9pcnFfc2V0KHN0cnVjdCBtbWNfY2FyZCAqY2FyZCkKIAogCWNhcmQtPnNkaW9fc2luZ2xlX2ly
-cSA9IE5VTEw7CiAJaWYgKChjYXJkLT5ob3N0LT5jYXBzICYgTU1DX0NBUF9TRElPX0lSUSkgJiYK
-LQkgICAgY2FyZC0+aG9zdC0+c2Rpb19pcnFzID09IDEpCisJICAgIGNhcmQtPmhvc3QtPnNkaW9f
-aXJxcyA9PSAxKSB7CiAJCWZvciAoaSA9IDA7IGkgPCBjYXJkLT5zZGlvX2Z1bmNzOyBpKyspIHsK
-LQkJICAgICAgIGZ1bmMgPSBjYXJkLT5zZGlvX2Z1bmNbaV07Ci0JCSAgICAgICBpZiAoZnVuYyAm
-JiBmdW5jLT5pcnFfaGFuZGxlcikgewotCQkJICAgICAgIGNhcmQtPnNkaW9fc2luZ2xlX2lycSA9
-IGZ1bmM7Ci0JCQkgICAgICAgYnJlYWs7Ci0JCSAgICAgICB9Ci0JICAgICAgIH0KKwkJCWZ1bmMg
-PSBjYXJkLT5zZGlvX2Z1bmNbaV07CisJCQlpZiAoZnVuYyAmJiBmdW5jLT5pcnFfaGFuZGxlcikg
-eworCQkJCWNhcmQtPnNkaW9fc2luZ2xlX2lycSA9IGZ1bmM7CisJCQkJYnJlYWs7CisJCQl9CisJ
-CX0KKwl9CiB9CiAKIC8qKgotLSAKMi4yNS4xCgo=
+On 2/21/20 1:48 AM, Ulf Hansson wrote:
+> External email: Use caution opening links or attachments
+> 
+> 
+> On Thu, 20 Feb 2020 at 18:54, Naresh Kamboju <naresh.kamboju@linaro.org> wrote:
+>>
+>> On Wed, 19 Feb 2020 at 21:54, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>>>
+>>> On Thu, 13 Feb 2020 at 16:43, Naresh Kamboju <naresh.kamboju@linaro.org> wrote:
+>>>>
+>>>
+>>> Try to restore the value for the cache flush timeout, by updating the
+>>> define MMC_CACHE_FLUSH_TIMEOUT_MS to 10 * 60 * 1000".
+>>
+>> I have increased the timeout to 10 minutes but it did not help.
+>> Same error found.
+>> [  608.679353] mmc1: Card stuck being busy! mmc_poll_for_busy
+>> [  608.684964] mmc1: cache flush error -110
+>> [  608.689005] blk_update_request: I/O error, dev mmcblk1, sector
+>> 4302400 op 0x1:(WRITE) flags 0x20800 phys_seg 1 prio class 0
+>>
+>> OTOH, What best i could do for my own experiment to revert all three patches and
+>> now the reported error gone and device mount successfully [1].
+>>
+>> List of patches reverted,
+>>    mmc: core: Specify timeouts for BKOPS and CACHE_FLUSH for eMMC
+>>    mmc: block: Use generic_cmd6_time when modifying
+>>      INAND_CMD38_ARG_EXT_CSD
+>>    mmc: core: Default to generic_cmd6_time as timeout in __mmc_switch()
+>>
+>> [1] https://lkft.validation.linaro.org/scheduler/job/1238275#L4346
+>>
+>> - Naresh
+> 
+> Thanks for testing!
+> 
+> This sounds a bit weird, I must say. Also, while looking into the
+> logs, it seems like you are comparing a v5.5 kernel with v5.6-rc2, but
+> maybe I didn't read the logs carefully enough.
+> 
+>   In any case, I am looking into creating a debug patch so we can
+> narrow down the problem a bit further.
+> 
+> Kind regards
+> Uffe
+> 
+
+Hi Ulf,
+
+  I see that Jetson-TX2 / Jetson-Xavier suspend test is aborted and 
+below error is seen due to the commit 
+24ed3bd01d6a844fd5e8a75f48d0a3d10ed71bf9  ("mmc: core: Specify timeouts 
+for BKOPS and CACHE_FLUSH for eMMC"):
+
+##
+[  268.976197] Freezing user space processes ... (elapsed 0.001 seconds) 
+done.
+[  268.984414] OOM killer disabled.
+[  268.987635] Freezing remaining freezable tasks ... (elapsed 0.000 
+seconds) done.
+[  269.217471] PM: dpm_run_callback(): mmc_bus_suspend+0x0/0x58 returns -110
+[  269.224255] PM: Device mmc1:0001 failed to suspend: error -110
+[  269.230080] PM: Some devices failed to suspend, or early wake event 
+detected
+##
+
+  I find that from the commit the changes in mmc_flush_cache below is 
+the cause.
+
+##
+@@ -961,7 +963,8 @@ int mmc_flush_cache(struct mmc_card *card)
+                         (card->ext_csd.cache_size > 0) &&
+                         (card->ext_csd.cache_ctrl & 1)) {
+                 err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+-                               EXT_CSD_FLUSH_CACHE, 1, 0);
++                                EXT_CSD_FLUSH_CACHE, 1,
++                                MMC_CACHE_FLUSH_TIMEOUT_MS);
+
+##
+
+  Do you have suggestion to try for the suspend errors ?
+
+-regards,
+  Bitan
+
