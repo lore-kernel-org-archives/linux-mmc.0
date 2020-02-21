@@ -2,203 +2,321 @@ Return-Path: <SRS0=+wZv=4J=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CCB1AC11D25
-	for <linux-mmc@archiver.kernel.org>; Fri, 21 Feb 2020 01:25:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 01A48C11D24
+	for <linux-mmc@archiver.kernel.org>; Fri, 21 Feb 2020 03:44:50 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id A41DD2071E
-	for <linux-mmc@archiver.kernel.org>; Fri, 21 Feb 2020 01:25:58 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C0742208C4
+	for <linux-mmc@archiver.kernel.org>; Fri, 21 Feb 2020 03:44:49 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="KeLcOadt"
+	dkim=pass (2048-bit key) header.d=nifty.com header.i=@nifty.com header.b="sKSyyk3M"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729473AbgBUBZ6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 20 Feb 2020 20:25:58 -0500
-Received: from mail-pf1-f195.google.com ([209.85.210.195]:43269 "EHLO
-        mail-pf1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729476AbgBUBZ5 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Feb 2020 20:25:57 -0500
-Received: by mail-pf1-f195.google.com with SMTP id s1so321718pfh.10
-        for <linux-mmc@vger.kernel.org>; Thu, 20 Feb 2020 17:25:57 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=chromium.org; s=google;
-        h=mime-version:content-transfer-encoding:in-reply-to:references
-         :subject:from:cc:to:date:message-id:user-agent;
-        bh=J27tQOPYceXfH5oaFJMMhJDT732qIsb34aA7vP0bweA=;
-        b=KeLcOadtXcfeKufQnhfHWukRpP0rcjyigVh9n2QuBfFREEOJgQ9cERYSzBVO1H24bf
-         GslQJhgovU12DwmWhdY1905yRIetjAfxvF7MTGnZ2UE9m8YX3B2TXbn2ONVNoNQ+/ySK
-         CkCd9IBBjpBTwn/oXa+CPLoM/O9/n5cl7IGqM=
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:content-transfer-encoding
-         :in-reply-to:references:subject:from:cc:to:date:message-id
-         :user-agent;
-        bh=J27tQOPYceXfH5oaFJMMhJDT732qIsb34aA7vP0bweA=;
-        b=qlpf25VqUKHuonNpwEYBfT7+Cn2Ydvi5h0+ulZ0lHJ4AdBUm5yt6nAD8UeG1EkstwJ
-         MVFtzpdVHLX9rP7pjv7/nkvXsf9aslcUs0eq7y0phHQwHZ7OQa8OjKfInVVK0gThIE8S
-         NFUzM8LF3zwVQckMfOB8Bf3mj18U59lEjCD/gO0feyp7F0MHiz441G1rLHFw0HKC9hpS
-         5IZs3N5L/6pwMT2v2Poiv4XQQ07U/2KdUeTdA0ecN6JA/Q9cwyP1iwMBzCJFTiFVx04h
-         jld+iPL1P5RzJ2k0NirA3YkXltobuZffxdz4mHRO/xEPSqa5vPAl5FK99IK07kVq52Er
-         dR2g==
-X-Gm-Message-State: APjAAAVn6aqHOh3+jbCUBa7C8ZLdUV8HuiIUHsMSI17vUMBja1+gWxBI
-        OnEf8L+mrCJKg7tTq05L2T9HoQ==
-X-Google-Smtp-Source: APXvYqwnp1RJPUUY+xeDLnhF608PQs6KEBc6Qiwmq2RWYeRfku/XGkGrTRPkQ7mJPGNM+td+uYP8jA==
-X-Received: by 2002:a63:ed16:: with SMTP id d22mr8697865pgi.314.1582248356653;
-        Thu, 20 Feb 2020 17:25:56 -0800 (PST)
-Received: from chromium.org ([2620:15c:202:1:fa53:7765:582b:82b9])
-        by smtp.gmail.com with ESMTPSA id j17sm818392pfa.16.2020.02.20.17.25.55
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 20 Feb 2020 17:25:56 -0800 (PST)
-Content-Type: text/plain; charset="utf-8"
-MIME-Version: 1.0
-Content-Transfer-Encoding: quoted-printable
-In-Reply-To: <1582105474-27866-1-git-send-email-vbadigan@codeaurora.org>
-References: <1581413771-18005-1-git-send-email-vbadigan@codeaurora.org> <1582105474-27866-1-git-send-email-vbadigan@codeaurora.org>
-Subject: Re: [PATCH V2] mmc: mmc_test: Pass different sg lists for non-blocking requests
-From:   Stephen Boyd <swboyd@chromium.org>
-Cc:     asutoshd@codeaurora.org, stummala@codeaurora.org,
-        sayalil@codeaurora.org, cang@codeaurora.org,
-        rampraka@codeaurora.org, dianders@google.com,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-msm@vger.kernel.org,
-        Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Allison Randal <allison@lohutok.net>,
-        Thomas Gleixner <tglx@linutronix.de>
-To:     Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
-        robh+dt@kernel.org, ulf.hansson@linaro.org
-Date:   Thu, 20 Feb 2020 17:25:55 -0800
-Message-ID: <158224835519.184098.16667027079485274979@swboyd.mtv.corp.google.com>
-User-Agent: alot/0.9
+        id S1729630AbgBUDot (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 20 Feb 2020 22:44:49 -0500
+Received: from condef-10.nifty.com ([202.248.20.75]:27754 "EHLO
+        condef-10.nifty.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1729539AbgBUDot (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Feb 2020 22:44:49 -0500
+Received: from conuserg-09.nifty.com ([10.126.8.72])by condef-10.nifty.com with ESMTP id 01L3eYow010301
+        for <linux-mmc@vger.kernel.org>; Fri, 21 Feb 2020 12:40:34 +0900
+Received: from localhost.localdomain (p14092-ipngnfx01kyoto.kyoto.ocn.ne.jp [153.142.97.92]) (authenticated)
+        by conuserg-09.nifty.com with ESMTP id 01L3cSHA001563;
+        Fri, 21 Feb 2020 12:38:28 +0900
+DKIM-Filter: OpenDKIM Filter v2.10.3 conuserg-09.nifty.com 01L3cSHA001563
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nifty.com;
+        s=dec2015msa; t=1582256309;
+        bh=9fN7Ow7rqVeONqx0lv47MnGX/K8QzO8kQz42Q/AlqEY=;
+        h=From:To:Cc:Subject:Date:From;
+        b=sKSyyk3MdpVI9hgmbZBZCbe8knOjzRwkd1aM5Aq3/pCEL1TZ0qJl4sa8awPcFMNAY
+         OcFY4tgqfqmKSR5mXwGVw5nJvyAlC1Vbf2cs6bAKDLoPc0nM/ghXSxt8LKL31nHPXk
+         lpbmK06RWoeuNYWXUP5LAvJTaxODD9WgnydAlv8tilS8VhULiSHJMspbqGCat2unk9
+         Q3CI4xcLlv36JjuI2SDwvvx8KYzS5hMrCRCVxps2/bZ/tlEGtVgXGWnq3i9YwbwlBy
+         tIJRVz0+OlzL79B2fxIYNriSjWmo32SdG5jgo3eN+p0GCCqSvcCGI1qYVWF31Aw/Sy
+         Cu94nMTizwgYw==
+X-Nifty-SrcIP: [153.142.97.92]
+From:   Masahiro Yamada <yamada.masahiro@socionext.com>
+To:     devicetree@vger.kernel.org, Rob Herring <robh+dt@kernel.org>
+Cc:     Frank Rowand <frowand.list@gmail.com>,
+        Masahiro Yamada <yamada.masahiro@socionext.com>,
+        Piotr Sroka <piotrs@cadence.com>,
+        Mark Rutland <mark.rutland@arm.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+Subject: [PATCH] dt-bindings: mmc: Convert Cadence SD/SDIO/eMMC controller to json-schema
+Date:   Fri, 21 Feb 2020 12:38:19 +0900
+Message-Id: <20200221033819.2966-1-yamada.masahiro@socionext.com>
+X-Mailer: git-send-email 2.17.1
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Quoting Veerabhadrarao Badiganti (2020-02-19 01:44:31)
-> Supply a separate sg list for each of the request in non-blocking
-> IO test cases where two requests will be issued at same time.
->=20
-> Otherwise, sg memory may get unmapped when a request is done while
-> same memory is being accessed by controller from the other request,
-> and it leads to iommu errors with below call stack:
->=20
->         __arm_lpae_unmap+0x2e0/0x478
->         arm_lpae_unmap+0x54/0x70
->         arm_smmu_unmap+0x64/0xa4
->         __iommu_unmap+0xb8/0x1f0
->         iommu_unmap_fast+0x38/0x48
->         __iommu_dma_unmap+0x88/0x108
->         iommu_dma_unmap_sg+0x90/0xa4
->         sdhci_post_req+0x5c/0x78
->         mmc_test_start_areq+0x10c/0x120 [mmc_test]
->         mmc_test_area_io_seq+0x150/0x264 [mmc_test]
->         mmc_test_rw_multiple+0x174/0x1c0 [mmc_test]
->         mmc_test_rw_multiple_sg_len+0x44/0x6c [mmc_test]
->         mmc_test_profile_sglen_wr_nonblock_perf+0x6c/0x94 [mmc_test]
->         mtf_test_write+0x238/0x3cc [mmc_test]
->=20
-> Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
->=20
-> ---
+Convert the Cadence SD/SDIO/eMMC host controller IP (a.k.a. SD4HC)
+binding to DT schema format.
 
-Reviewed-by: Stephen Boyd <swboyd@chromium.org>
+Socionext UniPhier ARM 64-bit SoCs are integrated with this IP.
 
-> Changes since V1:
->         - Freeing-up sg_areq memory.
->         - Added check to ensure sg length is equal for both the sg-lists
->           supplied in case of non-blocking requests.
-> ---
->  drivers/mmc/core/mmc_test.c | 42 ++++++++++++++++++++++++++++++++++++---=
+Cc: Piotr Sroka <piotrs@cadence.com>
+Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
 ---
->  1 file changed, 36 insertions(+), 6 deletions(-)
->=20
-> diff --git a/drivers/mmc/core/mmc_test.c b/drivers/mmc/core/mmc_test.c
-> index 492dd45..f8f884a 100644
-> --- a/drivers/mmc/core/mmc_test.c
-> +++ b/drivers/mmc/core/mmc_test.c
-> @@ -1411,6 +1417,22 @@ static int mmc_test_area_map(struct mmc_test_card =
-*test, unsigned long sz,
->                 err =3D mmc_test_map_sg(t->mem, sz, t->sg, 1, t->max_segs,
->                                       t->max_seg_sz, &t->sg_len, min_sg_l=
-en);
->         }
-> +
-> +       if (err || !nonblock)
-> +               goto err;
-> +
-> +       if (max_scatter) {
-> +               err =3D mmc_test_map_sg_max_scatter(t->mem, sz, t->sg_are=
-q,
-> +                                                 t->max_segs, t->max_seg=
-_sz,
-> +                                                 &sg_len);
-> +       } else {
-> +               err =3D mmc_test_map_sg(t->mem, sz, t->sg_areq, 1, t->max=
-_segs,
 
-'repeat' is always set to 1. Why not remove that argument and update the
-code? As a follow up patch.
+I wanted to kept some precious comments, which apply to multiple
+properties.
 
-> +                                     t->max_seg_sz, &sg_len, min_sg_len);
-> +       }
-> +       if (!err && sg_len !=3D t->sg_len)
-> +               err =3D -EINVAL;
-> +
-> +err:
->         if (err)
->                 pr_info("%s: Failed to map sg list\n",
->                        mmc_hostname(test->card->host));
-> @@ -1458,15 +1480,16 @@ static int mmc_test_area_io_seq(struct mmc_test_c=
-ard *test, unsigned long sz,
->                         sz =3D max_tfr;
->         }
-> =20
-> -       ret =3D mmc_test_area_map(test, sz, max_scatter, min_sg_len);
-> +       ret =3D mmc_test_area_map(test, sz, max_scatter, min_sg_len, nonb=
-lock);
->         if (ret)
->                 return ret;
-> =20
->         if (timed)
->                 ktime_get_ts64(&ts1);
->         if (nonblock)
-> -               ret =3D mmc_test_nonblock_transfer(test, t->sg, t->sg_len,
-> -                                dev_addr, t->blocks, 512, write, count);
-> +               ret =3D mmc_test_nonblock_transfer(test, t->sg, t->sg_are=
-q,
-> +                                t->sg_len, dev_addr, t->blocks, 512, wri=
-te,
-> +                                count);
+I do not think 'description:' is a good fit for this.
 
-This is only called one time so it may be simpler to pass 't' instead of
-pick it apart and pass it as many arguments. Not a problem in this
-patch, besides that we're now passing even more arguments here making
-this harder to read. Also, the blksz could be hardcoded in the function
-instead of passing it as 512.
+I was searching for a way to insert a comment line that does not
+affect the schema.
 
->         else
->                 for (i =3D 0; i < count && ret =3D=3D 0; i++) {
->                         ret =3D mmc_test_area_transfer(test, dev_addr, wr=
-ite);
-> @@ -1584,6 +1608,12 @@ static int mmc_test_area_init(struct mmc_test_card=
- *test, int erase, int fill)
->                 goto out_free;
->         }
-> =20
-> +       t->sg_areq =3D kmalloc_array(t->max_segs, sizeof(*t->sg), GFP_KER=
-NEL);
+The $comment did not work. I just use '#', which is YAML comment.
+If there is a better way, please let me know.
 
-It's more idiomatic to use sizeof(*t->sq_areq) here.
 
-> +       if (!t->sg_areq) {
-> +               ret =3D -ENOMEM;
-> +               goto out_free;
-> +       }
-> +
->         t->dev_addr =3D mmc_test_capacity(test->card) / 2;
->         t->dev_addr -=3D t->dev_addr % (t->max_sz >> 9);
->
+ .../devicetree/bindings/mmc/cdns,sdhci.yaml   | 143 ++++++++++++++++++
+ .../devicetree/bindings/mmc/sdhci-cadence.txt |  80 ----------
+ 2 files changed, 143 insertions(+), 80 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
+ delete mode 100644 Documentation/devicetree/bindings/mmc/sdhci-cadence.txt
+
+diff --git a/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml b/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
+new file mode 100644
+index 000000000000..caf765721eb2
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
+@@ -0,0 +1,143 @@
++# SPDX-License-Identifier: GPL-2.0-only OR BSD-2-Clause
++%YAML 1.2
++---
++$id: http://devicetree.org/schemas/mmc/cdns,sdhci.yaml#
++$schema: http://devicetree.org/meta-schemas/core.yaml#
++
++title: Cadence SD/SDIO/eMMC Host Controller (SD4HC)
++
++maintainers:
++  - Masahiro Yamada <yamada.masahiro@socionext.com>
++  - Piotr Sroka <piotrs@cadence.com>
++
++allOf:
++  - $ref: mmc-controller.yaml
++
++properties:
++  compatible:
++    items:
++      - enum:
++         - socionext,uniphier-sd4hc
++      - const: cdns,sd4hc
++
++  reg:
++    maxItems: 1
++
++  interrupts:
++    maxItems: 1
++
++  clocks:
++    maxItems: 1
++
++  # PHY DLL input delays:
++  # They are used to delay the data valid window, and align the window to
++  # sampling clock. The delay starts from 5ns (for delay parameter equal to 0)
++  # and it is increased by 2.5ns in each step.
++
++  cdns,phy-input-delay-sd-highspeed:
++    description: Value of the delay in the input path for SD high-speed timing
++    allOf:
++      - $ref: "/schemas/types.yaml#/definitions/uint32"
++      - minimum: 0
++      - maximum: 0x1f
++
++  cdns,phy-input-delay-legacy:
++    description: Value of the delay in the input path for legacy timing
++    allOf:
++      - $ref: "/schemas/types.yaml#/definitions/uint32"
++      - minimum: 0
++      - maximum: 0x1f
++
++  cdns,phy-input-delay-sd-uhs-sdr12:
++    description: Value of the delay in the input path for SD UHS SDR12 timing
++    allOf:
++      - $ref: "/schemas/types.yaml#/definitions/uint32"
++      - minimum: 0
++      - maximum: 0x1f
++
++  cdns,phy-input-delay-sd-uhs-sdr25:
++    description: Value of the delay in the input path for SD UHS SDR25 timing
++    allOf:
++      - $ref: "/schemas/types.yaml#/definitions/uint32"
++      - minimum: 0
++      - maximum: 0x1f
++
++  cdns,phy-input-delay-sd-uhs-sdr50:
++    description: Value of the delay in the input path for SD UHS SDR50 timing
++    allOf:
++      - $ref: "/schemas/types.yaml#/definitions/uint32"
++      - minimum: 0
++      - maximum: 0x1f
++
++  cdns,phy-input-delay-sd-uhs-ddr50:
++    description: Value of the delay in the input path for SD UHS DDR50 timing
++    allOf:
++      - $ref: "/schemas/types.yaml#/definitions/uint32"
++      - minimum: 0
++      - maximum: 0x1f
++
++  cdns,phy-input-delay-mmc-highspeed:
++    description: Value of the delay in the input path for MMC high-speed timing
++    allOf:
++      - $ref: "/schemas/types.yaml#/definitions/uint32"
++      - minimum: 0
++      - maximum: 0x1f
++
++  cdns,phy-input-delay-mmc-ddr:
++    description: Value of the delay in the input path for eMMC high-speed DDR timing
++    allOf:
++      - $ref: "/schemas/types.yaml#/definitions/uint32"
++      - minimum: 0
++      - maximum: 0x1f
++
++  # PHY DLL clock delays:
++  # Each delay property represents the fraction of the clock period.
++  # The approximate delay value will be
++  # (<delay property value>/128)*sdmclk_clock_period.
++
++  cdns,phy-dll-delay-sdclk:
++    description: |
++      Value of the delay introduced on the sdclk output for all modes except
++      HS200, HS400 and HS400_ES.
++    allOf:
++      - $ref: "/schemas/types.yaml#/definitions/uint32"
++      - minimum: 0
++      - maximum: 0x7f
++
++  cdns,phy-dll-delay-sdclk-hsmmc:
++    description: |
++      Value of the delay introduced on the sdclk output for HS200, HS400 and
++      HS400_ES speed modes.
++    allOf:
++      - $ref: "/schemas/types.yaml#/definitions/uint32"
++      - minimum: 0
++      - maximum: 0x7f
++
++  cdns,phy-dll-delay-strobe:
++    description: |
++      Value of the delay introduced on the dat_strobe input used in
++      HS400 / HS400_ES speed modes.
++    allOf:
++      - $ref: "/schemas/types.yaml#/definitions/uint32"
++      - minimum: 0
++      - maximum: 0x7f
++
++required:
++  - compatible
++  - reg
++  - interrupts
++  - clocks
++
++examples:
++  - |
++    emmc: sdhci@5a000000 {
++        compatible = "socionext,uniphier-sd4hc", "cdns,sd4hc";
++        reg = <0x5a000000 0x400>;
++        interrupts = <0 78 4>;
++        clocks = <&clk 4>;
++        bus-width = <8>;
++        mmc-ddr-1_8v;
++        mmc-hs200-1_8v;
++        mmc-hs400-1_8v;
++        cdns,phy-dll-delay-sdclk = <0>;
++    };
+diff --git a/Documentation/devicetree/bindings/mmc/sdhci-cadence.txt b/Documentation/devicetree/bindings/mmc/sdhci-cadence.txt
+deleted file mode 100644
+index fa423c277853..000000000000
+--- a/Documentation/devicetree/bindings/mmc/sdhci-cadence.txt
++++ /dev/null
+@@ -1,80 +0,0 @@
+-* Cadence SD/SDIO/eMMC Host Controller
+-
+-Required properties:
+-- compatible: should be one of the following:
+-    "cdns,sd4hc"               - default of the IP
+-    "socionext,uniphier-sd4hc" - for Socionext UniPhier SoCs
+-- reg: offset and length of the register set for the device.
+-- interrupts: a single interrupt specifier.
+-- clocks: phandle to the input clock.
+-
+-Optional properties:
+-For eMMC configuration, supported speed modes are not indicated by the SDHCI
+-Capabilities Register.  Instead, the following properties should be specified
+-if supported.  See mmc.txt for details.
+-- mmc-ddr-1_8v
+-- mmc-ddr-1_2v
+-- mmc-hs200-1_8v
+-- mmc-hs200-1_2v
+-- mmc-hs400-1_8v
+-- mmc-hs400-1_2v
+-
+-Some PHY delays can be configured by following properties.
+-PHY DLL input delays:
+-They are used to delay the data valid window, and align the window
+-to sampling clock. The delay starts from 5ns (for delay parameter equal to 0)
+-and it is increased by 2.5ns in each step.
+-- cdns,phy-input-delay-sd-highspeed:
+-  Value of the delay in the input path for SD high-speed timing
+-  Valid range = [0:0x1F].
+-- cdns,phy-input-delay-legacy:
+-  Value of the delay in the input path for legacy timing
+-  Valid range = [0:0x1F].
+-- cdns,phy-input-delay-sd-uhs-sdr12:
+-  Value of the delay in the input path for SD UHS SDR12 timing
+-  Valid range = [0:0x1F].
+-- cdns,phy-input-delay-sd-uhs-sdr25:
+-  Value of the delay in the input path for SD UHS SDR25 timing
+-  Valid range = [0:0x1F].
+-- cdns,phy-input-delay-sd-uhs-sdr50:
+-  Value of the delay in the input path for SD UHS SDR50 timing
+-  Valid range = [0:0x1F].
+-- cdns,phy-input-delay-sd-uhs-ddr50:
+-  Value of the delay in the input path for SD UHS DDR50 timing
+-  Valid range = [0:0x1F].
+-- cdns,phy-input-delay-mmc-highspeed:
+-  Value of the delay in the input path for MMC high-speed timing
+-  Valid range = [0:0x1F].
+-- cdns,phy-input-delay-mmc-ddr:
+-  Value of the delay in the input path for eMMC high-speed DDR timing
+-  Valid range = [0:0x1F].
+-
+-PHY DLL clock delays:
+-Each delay property represents the fraction of the clock period.
+-The approximate delay value will be
+-(<delay property value>/128)*sdmclk_clock_period.
+-- cdns,phy-dll-delay-sdclk:
+-  Value of the delay introduced on the sdclk output
+-  for all modes except HS200, HS400 and HS400_ES.
+-  Valid range = [0:0x7F].
+-- cdns,phy-dll-delay-sdclk-hsmmc:
+-  Value of the delay introduced on the sdclk output
+-  for HS200, HS400 and HS400_ES speed modes.
+-  Valid range = [0:0x7F].
+-- cdns,phy-dll-delay-strobe:
+-  Value of the delay introduced on the dat_strobe input
+-  used in HS400 / HS400_ES speed modes.
+-  Valid range = [0:0x7F].
+-
+-Example:
+-	emmc: sdhci@5a000000 {
+-		compatible = "socionext,uniphier-sd4hc", "cdns,sd4hc";
+-		reg = <0x5a000000 0x400>;
+-		interrupts = <0 78 4>;
+-		clocks = <&clk 4>;
+-		bus-width = <8>;
+-		mmc-ddr-1_8v;
+-		mmc-hs200-1_8v;
+-		mmc-hs400-1_8v;
+-		cdns,phy-dll-delay-sdclk = <0>;
+-	};
+-- 
+2.17.1
+
