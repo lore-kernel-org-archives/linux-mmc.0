@@ -1,164 +1,239 @@
-Return-Path: <SRS0=+wZv=4J=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=hQtV=4K=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=no
+X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D80FDC35646
-	for <linux-mmc@archiver.kernel.org>; Fri, 21 Feb 2020 19:44:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 91C1AC35672
+	for <linux-mmc@archiver.kernel.org>; Sat, 22 Feb 2020 11:26:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id ABB0A24650
-	for <linux-mmc@archiver.kernel.org>; Fri, 21 Feb 2020 19:44:56 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 69ADA206EF
+	for <linux-mmc@archiver.kernel.org>; Sat, 22 Feb 2020 11:26:35 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=nvidia.com header.i=@nvidia.com header.b="a7VTt7wp"
+	dkim=pass (2048-bit key) header.d=nifty.com header.i=@nifty.com header.b="PNIDnbjh"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726683AbgBUTox (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 21 Feb 2020 14:44:53 -0500
-Received: from hqnvemgate25.nvidia.com ([216.228.121.64]:4544 "EHLO
-        hqnvemgate25.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726443AbgBUTow (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Feb 2020 14:44:52 -0500
-Received: from hqpgpgate101.nvidia.com (Not Verified[216.228.121.13]) by hqnvemgate25.nvidia.com (using TLS: TLSv1.2, DES-CBC3-SHA)
-        id <B5e5033120000>; Fri, 21 Feb 2020 11:44:18 -0800
-Received: from hqmail.nvidia.com ([172.20.161.6])
-  by hqpgpgate101.nvidia.com (PGP Universal service);
-  Fri, 21 Feb 2020 11:44:51 -0800
-X-PGP-Universal: processed;
-        by hqpgpgate101.nvidia.com on Fri, 21 Feb 2020 11:44:51 -0800
-Received: from [10.19.66.63] (172.20.13.39) by HQMAIL107.nvidia.com
- (172.20.187.13) with Microsoft SMTP Server (TLS) id 15.0.1473.3; Fri, 21 Feb
- 2020 19:44:48 +0000
-Subject: Re: LKFT: arm x15: mmc1: cache flush error -110
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Naresh Kamboju <naresh.kamboju@linaro.org>
-CC:     Jens Axboe <axboe@kernel.dk>, Alexei Starovoitov <ast@kernel.org>,
-        linux-block <linux-block@vger.kernel.org>,
-        <lkft-triage@lists.linaro.org>,
-        open list <linux-kernel@vger.kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Arnd Bergmann <arnd@arndb.de>,
-        John Stultz <john.stultz@linaro.org>,
-        Thierry Reding <treding@nvidia.com>,
-        Jon Hunter <jonathanh@nvidia.com>
-References: <CA+G9fYuqAQfhzF2BzHr7vMHx68bo8-jT+ob_F3eHQ3=oFjgYdg@mail.gmail.com>
- <CAPDyKFqqhxC-pmV_j8PLY-D=AbqCAbiipAAHXLpJ4N_BiYYOFw@mail.gmail.com>
- <CA+G9fYugQuAERqp3VXUFG-3QxXoF8bz7OSMh6WGSZcrGkbfDSQ@mail.gmail.com>
- <CAPDyKFo-vEO7zN_F+NqcKtnKmAo_deOZx3gYNiks3yTAQAjv-Q@mail.gmail.com>
-From:   Bitan Biswas <bbiswas@nvidia.com>
-Message-ID: <a602a27a-b960-ce56-c541-3b4b95f5dce2@nvidia.com>
-Date:   Fri, 21 Feb 2020 11:44:44 -0800
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101
- Thunderbird/60.9.0
-MIME-Version: 1.0
-In-Reply-To: <CAPDyKFo-vEO7zN_F+NqcKtnKmAo_deOZx3gYNiks3yTAQAjv-Q@mail.gmail.com>
-X-Originating-IP: [172.20.13.39]
-X-ClientProxiedBy: HQMAIL107.nvidia.com (172.20.187.13) To
- HQMAIL107.nvidia.com (172.20.187.13)
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nvidia.com; s=n1;
-        t=1582314258; bh=7shXhAKVgprX3db7vtD29I37u9MzanrNF1PL2vZ849Q=;
-        h=X-PGP-Universal:Subject:To:CC:References:From:Message-ID:Date:
-         User-Agent:MIME-Version:In-Reply-To:X-Originating-IP:
-         X-ClientProxiedBy:Content-Type:Content-Language:
-         Content-Transfer-Encoding;
-        b=a7VTt7wpU5aNVkKuGK6qVz4fq2LyufFJxJgeavB2kNlKkNGb8XQPD7gs/iIZIipLF
-         v6HdKUZHce4DkLZnOeRNRanlML/DlWI2rQA446bSGXlIA+b6+kHxc2WBiXj+aiWP1r
-         w/qijGjZO12R9ATf6TMQvgUUVIrD8T45ixk1XzVYGVzRAN/tdYXR9Eqn0a5THPu4+f
-         pT3kuZ9YeogIrWF+0iypHoYCeM1JloARB7oGBU5qZA+aTS/+zKVxeaW+gyc+jRfGxl
-         B9WnyAv/H29QAbFHaGP/zmD9x50NwX99MFc+s3WUqHURHxk2teovD4YHgchxIuAK8I
-         2NRGr48pndxkw==
+        id S1726821AbgBVL0c (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 22 Feb 2020 06:26:32 -0500
+Received: from conuserg-11.nifty.com ([210.131.2.78]:23006 "EHLO
+        conuserg-11.nifty.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726726AbgBVL0b (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 22 Feb 2020 06:26:31 -0500
+X-Greylist: delayed 114357 seconds by postgrey-1.27 at vger.kernel.org; Sat, 22 Feb 2020 06:26:30 EST
+Received: from grover.flets-west.jp (softbank126093102113.bbtec.net [126.93.102.113]) (authenticated)
+        by conuserg-11.nifty.com with ESMTP id 01MBPiNS007850;
+        Sat, 22 Feb 2020 20:25:44 +0900
+DKIM-Filter: OpenDKIM Filter v2.10.3 conuserg-11.nifty.com 01MBPiNS007850
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nifty.com;
+        s=dec2015msa; t=1582370745;
+        bh=eXDfPRFxogywQqOMeY/U+G4h/BSruC6jLHkszgzRqkE=;
+        h=From:To:Cc:Subject:Date:From;
+        b=PNIDnbjhGTxyWhYNsljipr3Yqg6frgIECAzLzYlcG0pdOioG+oCJmo97l9MlMxWXg
+         Zhf81tCfdaY5LMXuENpGh8Y2rku/dMVLor/DpuCiKTdkKJtiGIFF+nnfWSgHgxS2BI
+         UYuqEchS+8+XsD5d+1G41ZcvJTxDEq3X9hE/z1Aqq54sK7/cO6kTFLxB7r2rPotBl6
+         EjqNPjdzx6Ysb1OXz4c1E5weZFdeJscRXDiPq/UATQhU2duek/7yb0fjU9z30BqWNg
+         x4RMAiMg/UcstwWA7hRnhC+H/0ShSAZhStD2zrbrz1b2em4265Nn9mYghvggwILbtr
+         J9yvZe+oNr9vg==
+X-Nifty-SrcIP: [126.93.102.113]
+From:   Masahiro Yamada <yamada.masahiro@socionext.com>
+To:     Rob Herring <robh+dt@kernel.org>, devicetree@vger.kernel.org
+Cc:     linux-kernel@vger.kernel.org, masahiroy@kernel.org,
+        Masahiro Yamada <yamada.masahiro@socionext.com>,
+        Mark Rutland <mark.rutland@arm.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
+Subject: [PATCH] dt-bindings: mmc: Convert UniPhier SD controller to json-schema
+Date:   Sat, 22 Feb 2020 20:25:41 +0900
+Message-Id: <20200222112541.573-1-yamada.masahiro@socionext.com>
+X-Mailer: git-send-email 2.17.1
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 2/21/20 1:48 AM, Ulf Hansson wrote:
-> External email: Use caution opening links or attachments
-> 
-> 
-> On Thu, 20 Feb 2020 at 18:54, Naresh Kamboju <naresh.kamboju@linaro.org> wrote:
->>
->> On Wed, 19 Feb 2020 at 21:54, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->>>
->>> On Thu, 13 Feb 2020 at 16:43, Naresh Kamboju <naresh.kamboju@linaro.org> wrote:
->>>>
->>>
->>> Try to restore the value for the cache flush timeout, by updating the
->>> define MMC_CACHE_FLUSH_TIMEOUT_MS to 10 * 60 * 1000".
->>
->> I have increased the timeout to 10 minutes but it did not help.
->> Same error found.
->> [  608.679353] mmc1: Card stuck being busy! mmc_poll_for_busy
->> [  608.684964] mmc1: cache flush error -110
->> [  608.689005] blk_update_request: I/O error, dev mmcblk1, sector
->> 4302400 op 0x1:(WRITE) flags 0x20800 phys_seg 1 prio class 0
->>
->> OTOH, What best i could do for my own experiment to revert all three patches and
->> now the reported error gone and device mount successfully [1].
->>
->> List of patches reverted,
->>    mmc: core: Specify timeouts for BKOPS and CACHE_FLUSH for eMMC
->>    mmc: block: Use generic_cmd6_time when modifying
->>      INAND_CMD38_ARG_EXT_CSD
->>    mmc: core: Default to generic_cmd6_time as timeout in __mmc_switch()
->>
->> [1] https://lkft.validation.linaro.org/scheduler/job/1238275#L4346
->>
->> - Naresh
-> 
-> Thanks for testing!
-> 
-> This sounds a bit weird, I must say. Also, while looking into the
-> logs, it seems like you are comparing a v5.5 kernel with v5.6-rc2, but
-> maybe I didn't read the logs carefully enough.
-> 
->   In any case, I am looking into creating a debug patch so we can
-> narrow down the problem a bit further.
-> 
-> Kind regards
-> Uffe
-> 
+Convert the UniPhier SD controller binding to DT schema format.
 
-Hi Ulf,
+Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
+---
 
-  I see that Jetson-TX2 / Jetson-Xavier suspend test is aborted and 
-below error is seen due to the commit 
-24ed3bd01d6a844fd5e8a75f48d0a3d10ed71bf9  ("mmc: core: Specify timeouts 
-for BKOPS and CACHE_FLUSH for eMMC"):
+If there is a better way to describe reset-names,
+please let me know.
 
-##
-[  268.976197] Freezing user space processes ... (elapsed 0.001 seconds) 
-done.
-[  268.984414] OOM killer disabled.
-[  268.987635] Freezing remaining freezable tasks ... (elapsed 0.000 
-seconds) done.
-[  269.217471] PM: dpm_run_callback(): mmc_bus_suspend+0x0/0x58 returns -110
-[  269.224255] PM: Device mmc1:0001 failed to suspend: error -110
-[  269.230080] PM: Some devices failed to suspend, or early wake event 
-detected
-##
 
-  I find that from the commit the changes in mmc_flush_cache below is 
-the cause.
+ .../bindings/mmc/socionext,uniphier-sd.yaml   | 99 +++++++++++++++++++
+ .../devicetree/bindings/mmc/uniphier-sd.txt   | 55 -----------
+ 2 files changed, 99 insertions(+), 55 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/mmc/socionext,uniphier-sd.yaml
+ delete mode 100644 Documentation/devicetree/bindings/mmc/uniphier-sd.txt
 
-##
-@@ -961,7 +963,8 @@ int mmc_flush_cache(struct mmc_card *card)
-                         (card->ext_csd.cache_size > 0) &&
-                         (card->ext_csd.cache_ctrl & 1)) {
-                 err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
--                               EXT_CSD_FLUSH_CACHE, 1, 0);
-+                                EXT_CSD_FLUSH_CACHE, 1,
-+                                MMC_CACHE_FLUSH_TIMEOUT_MS);
-
-##
-
-  Do you have suggestion to try for the suspend errors ?
-
--regards,
-  Bitan
+diff --git a/Documentation/devicetree/bindings/mmc/socionext,uniphier-sd.yaml b/Documentation/devicetree/bindings/mmc/socionext,uniphier-sd.yaml
+new file mode 100644
+index 000000000000..cdfac9b4411b
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mmc/socionext,uniphier-sd.yaml
+@@ -0,0 +1,99 @@
++# SPDX-License-Identifier: GPL-2.0-only OR BSD-2-Clause
++%YAML 1.2
++---
++$id: http://devicetree.org/schemas/mmc/socionext,uniphier-sd.yaml#
++$schema: http://devicetree.org/meta-schemas/core.yaml#
++
++title: UniPhier SD/SDIO/eMMC controller
++
++maintainers:
++  - Masahiro Yamada <yamada.masahiro@socionext.com>
++
++properties:
++  compatible:
++    description: version 2.91, 3.1, 3.1.1, respectively
++    enum:
++      - socionext,uniphier-sd-v2.91
++      - socionext,uniphier-sd-v3.1
++      - socionext,uniphier-sd-v3.1.1
++
++  reg:
++    maxItems: 1
++
++  interrupts:
++    maxItems: 1
++
++  clocks:
++    maxItems: 1
++
++  reset-names:
++    description: |
++      There are three reset signals at maximum
++        host:   mandatory for all variants
++        bridge: exist only for version 2.91
++        hw:     optional. exist if eMMC hw reset line is available
++    oneOf:
++      - const: host
++      - items:
++        - const: host
++        - const: bridge
++      - items:
++        - const: host
++        - const: hw
++      - items:
++        - const: host
++        - const: bridge
++        - const: hw
++
++  resets:
++    minItems: 1
++    maxItems: 3
++
++allOf:
++  - $ref: mmc-controller.yaml
++
++  - if:
++      properties:
++        compatible:
++          contains:
++            const: socionext,uniphier-sd-v2.91
++    then:
++      properties:
++        reset-names:
++          contains:
++            const: bridge
++    else:
++      properties:
++        reset-names:
++          not:
++            contains:
++              const: bridge
++
++required:
++  - compatible
++  - reg
++  - interrupts
++  - clocks
++  - reset-names
++  - resets
++
++examples:
++  - |
++    sd: mmc@5a400000 {
++        compatible = "socionext,uniphier-sd-v2.91";
++        reg = <0x5a400000 0x200>;
++        interrupts = <0 76 4>;
++        pinctrl-names = "default", "uhs";
++        pinctrl-0 = <&pinctrl_sd>;
++        pinctrl-1 = <&pinctrl_sd_uhs>;
++        clocks = <&mio_clk 0>;
++        reset-names = "host", "bridge";
++        resets = <&mio_rst 0>, <&mio_rst 3>;
++        dma-names = "rx-tx";
++        dmas = <&dmac 4>;
++        bus-width = <4>;
++        cap-sd-highspeed;
++        sd-uhs-sdr12;
++        sd-uhs-sdr25;
++        sd-uhs-sdr50;
++    };
+diff --git a/Documentation/devicetree/bindings/mmc/uniphier-sd.txt b/Documentation/devicetree/bindings/mmc/uniphier-sd.txt
+deleted file mode 100644
+index e1d658755722..000000000000
+--- a/Documentation/devicetree/bindings/mmc/uniphier-sd.txt
++++ /dev/null
+@@ -1,55 +0,0 @@
+-UniPhier SD/eMMC controller
+-
+-Required properties:
+-- compatible: should be one of the following:
+-    "socionext,uniphier-sd-v2.91"  - IP version 2.91
+-    "socionext,uniphier-sd-v3.1"   - IP version 3.1
+-    "socionext,uniphier-sd-v3.1.1" - IP version 3.1.1
+-- reg: offset and length of the register set for the device.
+-- interrupts: a single interrupt specifier.
+-- clocks: a single clock specifier of the controller clock.
+-- reset-names: should contain the following:
+-    "host"   - mandatory for all versions
+-    "bridge" - should exist only for "socionext,uniphier-sd-v2.91"
+-    "hw"     - should exist if eMMC hw reset line is available
+-- resets: a list of reset specifiers, corresponding to the reset-names
+-
+-Optional properties:
+-- pinctrl-names: if present, should contain the following:
+-    "default" - should exist for all instances
+-    "uhs"     - should exist for SD instance with UHS support
+-- pinctrl-0: pin control state for the default mode
+-- pinctrl-1: pin control state for the UHS mode
+-- dma-names: should be "rx-tx" if present.
+-  This property can exist only for "socionext,uniphier-sd-v2.91".
+-- dmas: a single DMA channel specifier
+-  This property can exist only for "socionext,uniphier-sd-v2.91".
+-- bus-width: see mmc.txt
+-- cap-sd-highspeed: see mmc.txt
+-- cap-mmc-highspeed: see mmc.txt
+-- sd-uhs-sdr12: see mmc.txt
+-- sd-uhs-sdr25: see mmc.txt
+-- sd-uhs-sdr50: see mmc.txt
+-- cap-mmc-hw-reset: should exist if reset-names contains "hw". see mmc.txt
+-- non-removable: see mmc.txt
+-
+-Example:
+-
+-	sd: sdhc@5a400000 {
+-		compatible = "socionext,uniphier-sd-v2.91";
+-		reg = <0x5a400000 0x200>;
+-		interrupts = <0 76 4>;
+-		pinctrl-names = "default", "uhs";
+-		pinctrl-0 = <&pinctrl_sd>;
+-		pinctrl-1 = <&pinctrl_sd_uhs>;
+-		clocks = <&mio_clk 0>;
+-		reset-names = "host", "bridge";
+-		resets = <&mio_rst 0>, <&mio_rst 3>;
+-		dma-names = "rx-tx";
+-		dmas = <&dmac 4>;
+-		bus-width = <4>;
+-		cap-sd-highspeed;
+-		sd-uhs-sdr12;
+-		sd-uhs-sdr25;
+-		sd-uhs-sdr50;
+-	};
+-- 
+2.17.1
 
