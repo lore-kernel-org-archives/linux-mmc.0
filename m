@@ -2,101 +2,208 @@ Return-Path: <SRS0=UCfg=4M=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.3 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 14E7AC35671
-	for <linux-mmc@archiver.kernel.org>; Mon, 24 Feb 2020 11:58:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B571CC11D2F
+	for <linux-mmc@archiver.kernel.org>; Mon, 24 Feb 2020 13:00:22 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id DD20D2082F
-	for <linux-mmc@archiver.kernel.org>; Mon, 24 Feb 2020 11:58:34 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (1024-bit key) header.d=mg.codeaurora.org header.i=@mg.codeaurora.org header.b="lu2H0ig+"
+	by mail.kernel.org (Postfix) with ESMTP id 8DA3E2080D
+	for <linux-mmc@archiver.kernel.org>; Mon, 24 Feb 2020 13:00:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727329AbgBXL6d (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 24 Feb 2020 06:58:33 -0500
-Received: from mail26.static.mailgun.info ([104.130.122.26]:38204 "EHLO
-        mail26.static.mailgun.info" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1727326AbgBXL6d (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Feb 2020 06:58:33 -0500
-DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
- s=smtp; t=1582545512; h=References: In-Reply-To: Message-Id: Date:
- Subject: Cc: To: From: Sender;
- bh=m/EVAf0XIo2GAshIf8Zwsc9/slrvZ7lw/UTHXKbwTyA=; b=lu2H0ig+3bw7Sq0kJZD4bWtvu1OaJkecDqvTmAR9KvFUp9m4HEXsX0S/IrIZBnr7aW5IKBQw
- k2FDyLi5YPXphrgZCyjPwN7KvbLXXnLxb/qmuLrGIOL8uk3rh4D62PwsEjJGekDmpWibAV1w
- 9OStRF9v6+If7thUMTLhNgJ0aWA=
-X-Mailgun-Sending-Ip: 104.130.122.26
-X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
-Received: from smtp.codeaurora.org (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171])
- by mxa.mailgun.org with ESMTP id 5e53ba5b.7f964c51e998-smtp-out-n01;
- Mon, 24 Feb 2020 11:58:19 -0000 (UTC)
-Received: by smtp.codeaurora.org (Postfix, from userid 1001)
-        id CD826C433A2; Mon, 24 Feb 2020 11:58:19 +0000 (UTC)
-Received: from vbadigan-linux.qualcomm.com (blr-c-bdr-fw-01_GlobalNAT_AllZones-Outside.qualcomm.com [103.229.19.19])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-SHA256 (128/128 bits))
-        (No client certificate requested)
-        (Authenticated sender: vbadigan)
-        by smtp.codeaurora.org (Postfix) with ESMTPSA id 7925CC43383;
-        Mon, 24 Feb 2020 11:58:13 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.3.2 smtp.codeaurora.org 7925CC43383
-Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
-Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=none smtp.mailfrom=vbadigan@codeaurora.org
-From:   Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
-To:     ulf.hansson@linaro.org, robh+dt@kernel.org
-Cc:     asutoshd@codeaurora.org, stummala@codeaurora.org,
-        sayalil@codeaurora.org, cang@codeaurora.org,
-        rampraka@codeaurora.org, dianders@google.com,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-msm@vger.kernel.org,
-        Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
-        Mark Rutland <mark.rutland@arm.com>,
-        devicetree@vger.kernel.org (open list:OPEN FIRMWARE AND FLATTENED
-        DEVICE TREE BINDINGS)
-Subject: [PATCH V3] dt-bindings: mmc: sdhci-msm: Add CQE reg map
-Date:   Mon, 24 Feb 2020 17:27:50 +0530
-Message-Id: <1582545470-11530-1-git-send-email-vbadigan@codeaurora.org>
-X-Mailer: git-send-email 1.9.1
-In-Reply-To: <1581434955-11087-1-git-send-email-vbadigan@codeaurora.org>
-References: <1581434955-11087-1-git-send-email-vbadigan@codeaurora.org>
+        id S1727463AbgBXNAT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 24 Feb 2020 08:00:19 -0500
+Received: from mga18.intel.com ([134.134.136.126]:41866 "EHLO mga18.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1727405AbgBXNAS (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 24 Feb 2020 08:00:18 -0500
+X-Amp-Result: SKIPPED(no attachment in message)
+X-Amp-File-Uploaded: False
+Received: from orsmga005.jf.intel.com ([10.7.209.41])
+  by orsmga106.jf.intel.com with ESMTP/TLS/DHE-RSA-AES256-GCM-SHA384; 24 Feb 2020 05:00:17 -0800
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.70,480,1574150400"; 
+   d="scan'208";a="409867954"
+Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.167]) ([10.237.72.167])
+  by orsmga005.jf.intel.com with ESMTP; 24 Feb 2020 05:00:14 -0800
+Subject: Re: LKFT: arm x15: mmc1: cache flush error -110
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Bitan Biswas <bbiswas@nvidia.com>
+Cc:     Naresh Kamboju <naresh.kamboju@linaro.org>,
+        Jens Axboe <axboe@kernel.dk>,
+        Alexei Starovoitov <ast@kernel.org>,
+        linux-block <linux-block@vger.kernel.org>,
+        lkft-triage@lists.linaro.org,
+        open list <linux-kernel@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Arnd Bergmann <arnd@arndb.de>,
+        John Stultz <john.stultz@linaro.org>,
+        Thierry Reding <treding@nvidia.com>,
+        Jon Hunter <jonathanh@nvidia.com>
+References: <CA+G9fYuqAQfhzF2BzHr7vMHx68bo8-jT+ob_F3eHQ3=oFjgYdg@mail.gmail.com>
+ <CAPDyKFqqhxC-pmV_j8PLY-D=AbqCAbiipAAHXLpJ4N_BiYYOFw@mail.gmail.com>
+ <CA+G9fYugQuAERqp3VXUFG-3QxXoF8bz7OSMh6WGSZcrGkbfDSQ@mail.gmail.com>
+ <CAPDyKFo-vEO7zN_F+NqcKtnKmAo_deOZx3gYNiks3yTAQAjv-Q@mail.gmail.com>
+ <a602a27a-b960-ce56-c541-3b4b95f5dce2@nvidia.com>
+ <CAPDyKFrXQgtHa4gLaKUi_F0rs4FMBai3Y_+TcHZR_zpkb0B4QQ@mail.gmail.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Message-ID: <728e1782-74d7-7238-2b34-0410523c2160@intel.com>
+Date:   Mon, 24 Feb 2020 14:59:15 +0200
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.4.1
+MIME-Version: 1.0
+In-Reply-To: <CAPDyKFrXQgtHa4gLaKUi_F0rs4FMBai3Y_+TcHZR_zpkb0B4QQ@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-CQE feature has been enabled on sdhci-msm. Add CQE reg map
-and reg names that need to be supplied for supporting CQE feature.
+On 24/02/20 1:16 pm, Ulf Hansson wrote:
+> + Adrian
+> 
+> On Fri, 21 Feb 2020 at 20:44, Bitan Biswas <bbiswas@nvidia.com> wrote:
+>>
+>> On 2/21/20 1:48 AM, Ulf Hansson wrote:
+>>> External email: Use caution opening links or attachments
+>>>
+>>>
+>>> On Thu, 20 Feb 2020 at 18:54, Naresh Kamboju <naresh.kamboju@linaro.org> wrote:
+>>>>
+>>>> On Wed, 19 Feb 2020 at 21:54, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>>>>>
+>>>>> On Thu, 13 Feb 2020 at 16:43, Naresh Kamboju <naresh.kamboju@linaro.org> wrote:
+>>>>>>
+>>>>>
+>>>>> Try to restore the value for the cache flush timeout, by updating the
+>>>>> define MMC_CACHE_FLUSH_TIMEOUT_MS to 10 * 60 * 1000".
+>>>>
+>>>> I have increased the timeout to 10 minutes but it did not help.
+>>>> Same error found.
+>>>> [  608.679353] mmc1: Card stuck being busy! mmc_poll_for_busy
+>>>> [  608.684964] mmc1: cache flush error -110
+>>>> [  608.689005] blk_update_request: I/O error, dev mmcblk1, sector
+>>>> 4302400 op 0x1:(WRITE) flags 0x20800 phys_seg 1 prio class 0
+>>>>
+>>>> OTOH, What best i could do for my own experiment to revert all three patches and
+>>>> now the reported error gone and device mount successfully [1].
+>>>>
+>>>> List of patches reverted,
+>>>>    mmc: core: Specify timeouts for BKOPS and CACHE_FLUSH for eMMC
+>>>>    mmc: block: Use generic_cmd6_time when modifying
+>>>>      INAND_CMD38_ARG_EXT_CSD
+>>>>    mmc: core: Default to generic_cmd6_time as timeout in __mmc_switch()
+>>>>
+>>>> [1] https://lkft.validation.linaro.org/scheduler/job/1238275#L4346
+>>>>
+>>>> - Naresh
+>>>
+>>> Thanks for testing!
+>>>
+>>> This sounds a bit weird, I must say. Also, while looking into the
+>>> logs, it seems like you are comparing a v5.5 kernel with v5.6-rc2, but
+>>> maybe I didn't read the logs carefully enough.
+>>>
+>>>   In any case, I am looking into creating a debug patch so we can
+>>> narrow down the problem a bit further.
+>>>
+>>> Kind regards
+>>> Uffe
+>>>
+>>
+>> Hi Ulf,
+>>
+>>   I see that Jetson-TX2 / Jetson-Xavier suspend test is aborted and
+>> below error is seen due to the commit
+>> 24ed3bd01d6a844fd5e8a75f48d0a3d10ed71bf9  ("mmc: core: Specify timeouts
+>> for BKOPS and CACHE_FLUSH for eMMC"):
+>>
+>> ##
+>> [  268.976197] Freezing user space processes ... (elapsed 0.001 seconds)
+>> done.
+>> [  268.984414] OOM killer disabled.
+>> [  268.987635] Freezing remaining freezable tasks ... (elapsed 0.000
+>> seconds) done.
+>> [  269.217471] PM: dpm_run_callback(): mmc_bus_suspend+0x0/0x58 returns -110
+>> [  269.224255] PM: Device mmc1:0001 failed to suspend: error -110
+>> [  269.230080] PM: Some devices failed to suspend, or early wake event
+>> detected
+> 
+> Is there also a print in the log about "Card stuck being busy!"?
+> 
+> In any case, it seems like the timeout error (-110) is happening way
+> too soon. The cache flush timeout is now 30s, but the timeout seems to
+> fire only a few hundred ms (at most) after the cache flush command has
+> been sent.
+> 
+>> ##
+>>
+>>   I find that from the commit the changes in mmc_flush_cache below is
+>> the cause.
+>>
+>> ##
+>> @@ -961,7 +963,8 @@ int mmc_flush_cache(struct mmc_card *card)
+>>                          (card->ext_csd.cache_size > 0) &&
+>>                          (card->ext_csd.cache_ctrl & 1)) {
+>>                  err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+>> -                               EXT_CSD_FLUSH_CACHE, 1, 0);
+>> +                                EXT_CSD_FLUSH_CACHE, 1,
+>> +                                MMC_CACHE_FLUSH_TIMEOUT_MS);
+>>
+>> ##
+>>
+>>   Do you have suggestion to try for the suspend errors ?
+> 
+> Just as a quick sanity test, please try the below patch, which
+> restores the old cache flush timeout to 10min.
+> 
+> However, as I indicated above, this seems to be a problem that needs
+> to be fixed at in the host driver side. For the sdhci driver, there is
+> a bit of a tricky logic around how to deal with timeouts in
+> sdhci_send_command(). My best guess is that's where we should look
+> more closely (and I am doing that).
 
-Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
----
-Changes since V2:
-	- Dropped _mem suffix to reg names.
+Could be, but hard to narrow down without more debug.  I would enable
+dynamic debug and mmc messages e.g.
 
-Changes since V1:
-	- Updated description for more clarity & Fixed typos.
----
- Documentation/devicetree/bindings/mmc/sdhci-msm.txt | 8 +++++++-
- 1 file changed, 7 insertions(+), 1 deletion(-)
+kernel config
 
-diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
-index 7ee639b..5445931 100644
---- a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
-+++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
-@@ -26,7 +26,13 @@ Required properties:
- 
- - reg: Base address and length of the register in the following order:
- 	- Host controller register map (required)
--	- SD Core register map (required for msm-v4 and below)
-+	- SD Core register map (required for controllers earlier than msm-v5)
-+	- CQE register map (Optional, CQE support is present on SDHC instance meant
-+	                    for eMMC and version v4.2 and above)
-+- reg-names: When CQE register map is supplied, below reg-names are required
-+	- "hc" for Host controller register map
-+	- "core" for SD core register map
-+	- "cqhci" for CQE register map
- - interrupts: Should contain an interrupt-specifiers for the interrupts:
- 	- Host controller interrupt (required)
- - pinctrl-names: Should contain only one value - "default".
--- 
-Qualcomm India Private Limited, on behalf of Qualcomm Innovation Center, Inc., is a member of Code Aurora Forum, a Linux Foundation Collaborative Project
+	CONFIG_DYNAMIC_DEBUG=y
+
+kernel command line option
+
+	dyndbg="file drivers/mmc/core/* +p;file drivers/mmc/host/* +p"
+
+But that might lead to a very large number of messages.
+
+
+> 
+> From: Ulf Hansson <ulf.hansson@linaro.org>
+> Date: Mon, 24 Feb 2020 11:43:33 +0100
+> Subject: [PATCH] mmc: core: Restore busy timeout for eMMC cache flushing
+> 
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> ---
+>  drivers/mmc/core/mmc_ops.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+> index da425ee2d9bf..713e7dd6d028 100644
+> --- a/drivers/mmc/core/mmc_ops.c
+> +++ b/drivers/mmc/core/mmc_ops.c
+> @@ -21,7 +21,7 @@
+> 
+>  #define MMC_OPS_TIMEOUT_MS             (10 * 60 * 1000) /* 10min*/
+>  #define MMC_BKOPS_TIMEOUT_MS           (120 * 1000) /* 120s */
+> -#define MMC_CACHE_FLUSH_TIMEOUT_MS     (30 * 1000) /* 30s */
+> +#define MMC_CACHE_FLUSH_TIMEOUT_MS     (10 * 60 * 1000) /* 10min */
+> 
+>  static const u8 tuning_blk_pattern_4bit[] = {
+>         0xff, 0x0f, 0xff, 0x00, 0xff, 0xcc, 0xc3, 0xcc,
+> 
+
