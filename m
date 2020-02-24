@@ -2,169 +2,157 @@ Return-Path: <SRS0=UCfg=4M=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.1 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
+X-Spam-Status: No, score=-6.6 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable
-	autolearn_force=no version=3.4.0
+	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D69F8C11D30
-	for <linux-mmc@archiver.kernel.org>; Mon, 24 Feb 2020 13:50:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 78BF5C11D2F
+	for <linux-mmc@archiver.kernel.org>; Mon, 24 Feb 2020 15:41:31 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id AD80E2080D
-	for <linux-mmc@archiver.kernel.org>; Mon, 24 Feb 2020 13:50:31 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4FD782080D
+	for <linux-mmc@archiver.kernel.org>; Mon, 24 Feb 2020 15:41:31 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (1024-bit key) header.d=mg.codeaurora.org header.i=@mg.codeaurora.org header.b="WubLNSNE"
+	dkim=fail reason="signature verification failed" (1024-bit key) header.d=crapouillou.net header.i=@crapouillou.net header.b="v00QjoGL"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727310AbgBXNub (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 24 Feb 2020 08:50:31 -0500
-Received: from mail27.static.mailgun.info ([104.130.122.27]:44395 "EHLO
-        mail27.static.mailgun.info" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1727573AbgBXNua (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Feb 2020 08:50:30 -0500
-DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
- s=smtp; t=1582552229; h=Content-Transfer-Encoding: Content-Type:
- In-Reply-To: MIME-Version: Date: Message-ID: From: References: Cc: To:
- Subject: Sender; bh=W628OvkNRlX9E5Eh9zzngUI5dh1s51b264AW8MC+oWY=; b=WubLNSNEROf65VTh3YaVP1q7do2i8z09UxlH+hlOPrfa1/eK7cQ/snGZLj34mfCdcDUIMvJi
- ob6HjT0NMRFWmnS73qgXuf9zT/R4uQNsbqiCPzN+/HpmWIrxnrvZasOVgyrAq5CLvjBiy/Dp
- KRO66MmEZTwQsfSXt4YcIU7hx6o=
-X-Mailgun-Sending-Ip: 104.130.122.27
-X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
-Received: from smtp.codeaurora.org (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171])
- by mxa.mailgun.org with ESMTP id 5e53d498.7f1382beb7d8-smtp-out-n03;
- Mon, 24 Feb 2020 13:50:16 -0000 (UTC)
-Received: by smtp.codeaurora.org (Postfix, from userid 1001)
-        id 42017C4479F; Mon, 24 Feb 2020 13:50:15 +0000 (UTC)
-Received: from [10.206.25.140] (blr-c-bdr-fw-01_GlobalNAT_AllZones-Outside.qualcomm.com [103.229.19.19])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        (Authenticated sender: vbadigan)
-        by smtp.codeaurora.org (Postfix) with ESMTPSA id 9DBA9C43383;
-        Mon, 24 Feb 2020 13:50:00 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.3.2 smtp.codeaurora.org 9DBA9C43383
-Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
-Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=none smtp.mailfrom=vbadigan@codeaurora.org
-Subject: Re: [PATCH RFC] mmc: sdhci-msm: Toggle fifo write clk after ungating
- sdcc clk
-To:     Sayali Lokhande <sayalil@codeaurora.org>,
-        bjorn.andersson@linaro.org, adrian.hunter@intel.com,
-        robh+dt@kernel.org, ulf.hansson@linaro.org,
-        asutoshd@codeaurora.org, stummala@codeaurora.org,
-        ppvk@codeaurora.org, rampraka@codeaurora.org, sboyd@kernel.org,
-        georgi.djakov@linaro.org, mka@chromium.org
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
-        agross@kernel.org, linux-mmc-owner@vger.kernel.org
-References: <1582190446-4778-1-git-send-email-sayalil@codeaurora.org>
- <1582190446-4778-2-git-send-email-sayalil@codeaurora.org>
-From:   Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
-Message-ID: <4e4f1e44-8033-94e9-641c-a74232727895@codeaurora.org>
-Date:   Mon, 24 Feb 2020 19:19:58 +0530
-User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:68.0) Gecko/20100101
- Thunderbird/68.5.0
+        id S1727855AbgBXPl1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 24 Feb 2020 10:41:27 -0500
+Received: from outils.crapouillou.net ([89.234.176.41]:53416 "EHLO
+        crapouillou.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727693AbgBXPl1 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Feb 2020 10:41:27 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=crapouillou.net;
+        s=mail; t=1582558884; h=from:from:sender:reply-to:subject:subject:date:date:
+         message-id:message-id:to:to:cc:cc:mime-version:mime-version:
+         content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=fnPhE73HTy68X/79Rt5u8gCjBCrld9+dBbPxi+dCrNI=;
+        b=v00QjoGLGTqTESjdja8nQObk1SPFB5J2u9i/yBPFdYFCSvLTENiE2m77BTDMlSSagQnrnJ
+        EZC8oSS8wjLnETNhylVvbwntdHPOHX7WEf9bUT5ccoZJQsCNrBw7LZQTF70dNdG9ApXSdj
+        SsvEr6iZZsKab6ec4KH1AidT97EWpTA=
+Date:   Mon, 24 Feb 2020 12:41:09 -0300
+From:   Paul Cercueil <paul@crapouillou.net>
+Subject: Re: [RFC PATCH 3/3] mmc: jz4740: Use pm_sleep_ptr() macro
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     "Rafael J . Wysocki" <rjw@rjwysocki.net>,
+        Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>,
+        od@zcrc.me, Linux PM <linux-pm@vger.kernel.org>,
+        linux-mmc@vger.kernel.org,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Message-Id: <1582558869.3.4@crapouillou.net>
+In-Reply-To: <CAPDyKFquXSB+ztXZQS4MPV20dRN_-CKJkmCF0A97pG+vJYRsbg@mail.gmail.com>
+References: <20200211160321.22124-1-paul@crapouillou.net>
+        <20200211160321.22124-4-paul@crapouillou.net>
+        <CAPDyKFquXSB+ztXZQS4MPV20dRN_-CKJkmCF0A97pG+vJYRsbg@mail.gmail.com>
 MIME-Version: 1.0
-In-Reply-To: <1582190446-4778-2-git-send-email-sayalil@codeaurora.org>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Content-Language: en-US
+Content-Type: text/plain; charset=iso-8859-1; format=flowed
+Content-Transfer-Encoding: quoted-printable
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Hi Ulf,
 
-On 2/20/2020 2:50 PM, Sayali Lokhande wrote:
-> From: Ram Prakash Gupta <rampraka@codeaurora.org>
->
-> During GCC level clock gating of MCLK, the async FIFO
-> gets into some hang condition, such that for the next
-> transfer after MCLK ungating, first bit of CMD response
-> doesn't get written in to the FIFO. This cause the CPSM
-> to hang eventually leading to SW timeout.
->
-> To fix the issue, toggle the FIFO write clock after
-> MCLK ungated to get the FIFO pointers and flags to
-> valid states.
->
-> Change-Id: Ibef2d1d283ac0b6983c609a4abc98bc574d31fa6
-> Signed-off-by: Ram Prakash Gupta <rampraka@codeaurora.org>
-> Signed-off-by: Sayali Lokhande <sayalil@codeaurora.org>
-> ---
->   drivers/mmc/host/sdhci-msm.c | 43 +++++++++++++++++++++++++++++++++++++++++++
->   1 file changed, 43 insertions(+)
->
-> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> index c3a160c..eaa3e95 100644
-> --- a/drivers/mmc/host/sdhci-msm.c
-> +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -127,6 +127,8 @@
->   #define CQHCI_VENDOR_CFG1	0xA00
->   #define CQHCI_VENDOR_DIS_RST_ON_CQ_EN	(0x3 << 13)
->   
-> +#define RCLK_TOGGLE 0x2
-> +
->   struct sdhci_msm_offset {
->   	u32 core_hc_mode;
->   	u32 core_mci_data_cnt;
-> @@ -1554,6 +1556,43 @@ static void __sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
->   	sdhci_enable_clk(host, clk);
->   }
->   
-> +/*
-> + * After MCLK ugating, toggle the FIFO write clock to get
-> + * the FIFO pointers and flags to valid state.
-> + */
-> +static void sdhci_msm_toggle_fifo_write_clk(struct sdhci_host *host)
-> +{
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-> +	const struct sdhci_msm_offset *msm_offset =
-> +					msm_host->offset;
-> +	struct mmc_card *card = host->mmc->card;
-> +
-> +	if (msm_host->tuning_done ||
-> +			(card && card->ext_csd.strobe_support &&
-> +			card->host->ios.enhanced_strobe)) {
 
-This issue is present on only HS400ES mode.
+Le jeu., f=E9vr. 20, 2020 at 14:38, Ulf Hansson <ulf.hansson@linaro.org>=20
+a =E9crit :
+> On Tue, 11 Feb 2020 at 17:03, Paul Cercueil <paul@crapouillou.net>=20
+> wrote:
+>>=20
+>>  Use the newly introduced pm_sleep_ptr() macro to simplify the code.
+>>=20
+>>  Signed-off-by: Paul Cercueil <paul@crapouillou.net>
+>>  ---
+>>   drivers/mmc/host/jz4740_mmc.c | 12 +++---------
+>>   1 file changed, 3 insertions(+), 9 deletions(-)
+>>=20
+>>  diff --git a/drivers/mmc/host/jz4740_mmc.c=20
+>> b/drivers/mmc/host/jz4740_mmc.c
+>>  index fbae87d1f017..09554f9831de 100644
+>>  --- a/drivers/mmc/host/jz4740_mmc.c
+>>  +++ b/drivers/mmc/host/jz4740_mmc.c
+>>  @@ -1099,24 +1099,18 @@ static int jz4740_mmc_remove(struct=20
+>> platform_device *pdev)
+>>          return 0;
+>>   }
+>>=20
+>>  -#ifdef CONFIG_PM_SLEEP
+>>  -
+>>  -static int jz4740_mmc_suspend(struct device *dev)
+>>  +static int __maybe_unused jz4740_mmc_suspend(struct device *dev)
+>>   {
+>>          return pinctrl_pm_select_sleep_state(dev);
+>>   }
+>>=20
+>>  -static int jz4740_mmc_resume(struct device *dev)
+>>  +static int __maybe_unused jz4740_mmc_resume(struct device *dev)
+>>   {
+>>          return pinctrl_select_default_state(dev);
+>>   }
+>>=20
+>>   static SIMPLE_DEV_PM_OPS(jz4740_mmc_pm_ops, jz4740_mmc_suspend,
+>>          jz4740_mmc_resume);
+>>  -#define JZ4740_MMC_PM_OPS (&jz4740_mmc_pm_ops)
+>>  -#else
+>>  -#define JZ4740_MMC_PM_OPS NULL
+>>  -#endif
+>=20
+> All of the above code can be simplified in this way, without having to
+> convert into using the new pm_sleep_ptr() macro, below.
+>=20
+> The only "penalty" would be that, the struct dev_pm_ops
+> (jz4740_mmc_pm_ops) would then be referenced even when CONFIG_PM* is
+> unset, thus the compiler would be able to throw it away.
+>=20
+> Just wanted to point this out.
 
-If(host->ios.enhanced_strob) check should be sufficient, other checks 
-are not needed.
+Yes, what I had in mind with these macros is that in general the=20
+suspend/resume functions should not be conditionally compiled, as they=20
+might have errors which would only appear with specific configs, and=20
+instead should be always compiled but thrown away by the compiler if=20
+unused.
 
-> +		/*
-> +		 * set HC_REG_DLL_CONFIG_3[1] to select MCLK as
-> +		 * DLL input clock
-> +		 */
-> +		writel_relaxed(((readl_relaxed(host->ioaddr +
-> +			msm_offset->core_dll_config_3))
-> +			| RCLK_TOGGLE), host->ioaddr +
-> +			msm_offset->core_dll_config_3);
-> +		/* ensure above write as toggling same bit quickly */
-> +		wmb();
-> +		udelay(2);
-> +		/*
-> +		 * clear HC_REG_DLL_CONFIG_3[1] to select RCLK as
-> +		 * DLL input clock
-> +		 */
-> +		writel_relaxed(((readl_relaxed(host->ioaddr +
-> +			msm_offset->core_dll_config_3))
-> +			& ~RCLK_TOGGLE), host->ioaddr +
-> +			msm_offset->core_dll_config_3);
-> +	}
-> +}
-> +
->   /* sdhci_msm_set_clock - Called with (host->lock) spinlock held. */
->   static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
->   {
-> @@ -2149,6 +2188,10 @@ static __maybe_unused int sdhci_msm_runtime_resume(struct device *dev)
->   				       msm_host->bulk_clks);
->   	if (ret)
->   		return ret;
-> +	if (host->mmc &&
-> +			(host->mmc->ios.timing == MMC_TIMING_MMC_HS400))
-These checks are not needed. You can have these checks within 
-sdhci_msm_toggle_fifo_write_clk
-> +		sdhci_msm_toggle_fifo_write_clk(host);
-> +
->   	/*
->   	 * Whenever core-clock is gated dynamically, it's needed to
->   	 * restore the SDR DLL settings when the clock is ungated.
+>>=20
+>>   static struct platform_driver jz4740_mmc_driver =3D {
+>>          .probe =3D jz4740_mmc_probe,
+>>  @@ -1124,7 +1118,7 @@ static struct platform_driver=20
+>> jz4740_mmc_driver =3D {
+>>          .driver =3D {
+>>                  .name =3D "jz4740-mmc",
+>>                  .of_match_table =3D of_match_ptr(jz4740_mmc_of_match),
+>>  -               .pm =3D JZ4740_MMC_PM_OPS,
+>>  +               .pm =3D pm_sleep_ptr(&jz4740_mmc_pm_ops),
+>=20
+> If the driver would have runtime suspend/resume callbacks, then it
+> would need the use the pm_ptr() macro instead, I guess.
+>=20
+>>          },
+>>   };
+>>=20
+>>  --
+>>  2.25.0
+>>=20
+>=20
+> My overall feeling is that this series improves the code/behaviour,
+> but I am also a bit worried about adding yet another pair of macros
+> for dealing with CONFIG_PM* callbacks as it could add more confusion.
+>=20
+> An option could be to introduce only the pm_ptr() macro, then skip the
+> optimization that pm_sleep_ptr() gives. This could make it easier to
+> use, as you wouldn't need to decide between two macros. Just a
+> thought.
+
+One macro would be better than none.
+
+Cheers,
+-Paul
+
+> I don't know what Rafael's thinks about this, let's see if he has some
+> other ideas.
+>=20
+> Kind regards
+> Uffe
+
+=
+
