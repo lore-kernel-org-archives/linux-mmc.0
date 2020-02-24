@@ -2,157 +2,139 @@ Return-Path: <SRS0=UCfg=4M=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.6 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.4 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 78BF5C11D2F
-	for <linux-mmc@archiver.kernel.org>; Mon, 24 Feb 2020 15:41:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 11C97C11D30
+	for <linux-mmc@archiver.kernel.org>; Mon, 24 Feb 2020 16:20:44 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 4FD782080D
-	for <linux-mmc@archiver.kernel.org>; Mon, 24 Feb 2020 15:41:31 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id DCA6321927
+	for <linux-mmc@archiver.kernel.org>; Mon, 24 Feb 2020 16:20:43 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (1024-bit key) header.d=crapouillou.net header.i=@crapouillou.net header.b="v00QjoGL"
+	dkim=pass (2048-bit key) header.d=st.com header.i=@st.com header.b="IkyaGR4E"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727855AbgBXPl1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 24 Feb 2020 10:41:27 -0500
-Received: from outils.crapouillou.net ([89.234.176.41]:53416 "EHLO
-        crapouillou.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727693AbgBXPl1 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Feb 2020 10:41:27 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=crapouillou.net;
-        s=mail; t=1582558884; h=from:from:sender:reply-to:subject:subject:date:date:
-         message-id:message-id:to:to:cc:cc:mime-version:mime-version:
-         content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=fnPhE73HTy68X/79Rt5u8gCjBCrld9+dBbPxi+dCrNI=;
-        b=v00QjoGLGTqTESjdja8nQObk1SPFB5J2u9i/yBPFdYFCSvLTENiE2m77BTDMlSSagQnrnJ
-        EZC8oSS8wjLnETNhylVvbwntdHPOHX7WEf9bUT5ccoZJQsCNrBw7LZQTF70dNdG9ApXSdj
-        SsvEr6iZZsKab6ec4KH1AidT97EWpTA=
-Date:   Mon, 24 Feb 2020 12:41:09 -0300
-From:   Paul Cercueil <paul@crapouillou.net>
-Subject: Re: [RFC PATCH 3/3] mmc: jz4740: Use pm_sleep_ptr() macro
+        id S1727636AbgBXQUn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 24 Feb 2020 11:20:43 -0500
+Received: from mx07-00178001.pphosted.com ([62.209.51.94]:45024 "EHLO
+        mx07-00178001.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1727378AbgBXQUn (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Feb 2020 11:20:43 -0500
+Received: from pps.filterd (m0046668.ppops.net [127.0.0.1])
+        by mx07-00178001.pphosted.com (8.16.0.42/8.16.0.42) with SMTP id 01OGCfam007873;
+        Mon, 24 Feb 2020 17:20:28 +0100
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=st.com; h=subject : to : cc :
+ references : from : message-id : date : mime-version : in-reply-to :
+ content-type : content-transfer-encoding; s=STMicroelectronics;
+ bh=WOrB9zjTn0T7PtrYAJ4aCW7Dq+zTAEPFOtROr7XMOzo=;
+ b=IkyaGR4EFtaiGt7dPLgTYVNiT5WVp0abgnGKHqvs5vb7jFPFo9CCfx7MR6GyWcYI94Pp
+ vDjJlFTZxwfD7MgR7i+gIVXHFor29lRKAnyWX72QDjXyARdthSLlyUVR7OhnZdcm96nU
+ gTLUdZkFVPS5qIqh+Kj+IHMY/TYLweul/f3DeoUbZbvsSXdVHpxWJe+L39GKH8vDCd5E
+ jedIymmRP6bmhuo8z2+i2nkgF/8fGKuf3BH/8v2ZEcTYD0xQr72wxqPTBx6HiIdZArCU
+ J864vOCt2r1/Ct0L3qydZ6kIHJVk9s2gQc3505UGe7Onar2sg6qbeYX9cf1t0eD9ltPv Lw== 
+Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
+        by mx07-00178001.pphosted.com with ESMTP id 2yatn5ts7a-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Mon, 24 Feb 2020 17:20:28 +0100
+Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
+        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id D7BD410002A;
+        Mon, 24 Feb 2020 17:20:23 +0100 (CET)
+Received: from Webmail-eu.st.com (sfhdag6node1.st.com [10.75.127.16])
+        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id C73DE2A7B2C;
+        Mon, 24 Feb 2020 17:20:23 +0100 (CET)
+Received: from lmecxl0923.lme.st.com (10.75.127.45) by SFHDAG6NODE1.st.com
+ (10.75.127.16) with Microsoft SMTP Server (TLS) id 15.0.1473.3; Mon, 24 Feb
+ 2020 17:20:23 +0100
+Subject: Re: [PATCH V2 0/9] mmc: mmci: sdmmc: add sdr104 support
 To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     "Rafael J . Wysocki" <rjw@rjwysocki.net>,
-        Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>,
-        od@zcrc.me, Linux PM <linux-pm@vger.kernel.org>,
-        linux-mmc@vger.kernel.org,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-Message-Id: <1582558869.3.4@crapouillou.net>
-In-Reply-To: <CAPDyKFquXSB+ztXZQS4MPV20dRN_-CKJkmCF0A97pG+vJYRsbg@mail.gmail.com>
-References: <20200211160321.22124-1-paul@crapouillou.net>
-        <20200211160321.22124-4-paul@crapouillou.net>
-        <CAPDyKFquXSB+ztXZQS4MPV20dRN_-CKJkmCF0A97pG+vJYRsbg@mail.gmail.com>
+CC:     Rob Herring <robh+dt@kernel.org>,
+        Srinivas Kandagatla <srinivas.kandagatla@linaro.org>,
+        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
+        Alexandre Torgue <alexandre.torgue@st.com>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        DTML <devicetree@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        <linux-stm32@st-md-mailman.stormreply.com>
+References: <20200128090636.13689-1-ludovic.barre@st.com>
+ <CAPDyKFr+7SvRasPPjFDA2kwG0ERS-Qp3FGbVbRGLrscz5N=L2g@mail.gmail.com>
+From:   Ludovic BARRE <ludovic.barre@st.com>
+Message-ID: <86464a0a-d830-465e-b35b-8dd2e766db70@st.com>
+Date:   Mon, 24 Feb 2020 17:20:22 +0100
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.1.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1; format=flowed
-Content-Transfer-Encoding: quoted-printable
+In-Reply-To: <CAPDyKFr+7SvRasPPjFDA2kwG0ERS-Qp3FGbVbRGLrscz5N=L2g@mail.gmail.com>
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Language: fr
+Content-Transfer-Encoding: 8bit
+X-Originating-IP: [10.75.127.45]
+X-ClientProxiedBy: SFHDAG5NODE3.st.com (10.75.127.15) To SFHDAG6NODE1.st.com
+ (10.75.127.16)
+X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.138,18.0.572
+ definitions=2020-02-24_04:2020-02-21,2020-02-24 signatures=0
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Ulf,
+hi Ulf
 
+Le 2/19/20 à 11:28 AM, Ulf Hansson a écrit :
+> On Tue, 28 Jan 2020 at 10:06, Ludovic Barre <ludovic.barre@st.com> wrote:
+>>
+>> To support the sdr104 mode, sdmmc variant needs:
+>> -Hardware delay block support for sdmmc variant
+>>   with tuning procedure
+>> -Voltage switch callbacks
+>> -sdmmc revision 2.0
+>>
+>> V2:
+>> -regroup host->mmc_ops & mmc->ops assignment
+>> -add timeout define
+>> -rename prep_volt_switch to pre_sig_volt_switch
+>> -rename volt_switch to post_sig_volt_switch
+>> -add 'why' comment for "mmc: mmci: add volt_switch callbacks"
+>>
+>> Ludovic Barre (9):
+>>    mmc: mmci: sdmmc: replace sg_dma_xxx macros
+>>    mmc: mmci: sdmmc: rename sdmmc_priv struct to sdmmc_idma
+>>    mmc: mmci: add a reference at mmc_host_ops in mmci struct
+>>    mmc: mmci: add private pointer for variant
+>>    dt-bindings: mmc: mmci: add delay block base register for sdmmc
+>>    mmc: mmci: sdmmc: add execute tuning with delay block
+>>    mmc: mmci: add volt_switch callbacks
+>>    mmc: mmci: sdmmc: add voltage switch functions
+>>    mmc: mmci: add sdmmc variant revision 2.0
+>>
+>>   .../devicetree/bindings/mmc/mmci.txt          |   2 +
+>>   drivers/mmc/host/mmci.c                       |  42 +++-
+>>   drivers/mmc/host/mmci.h                       |   8 +
+>>   drivers/mmc/host/mmci_stm32_sdmmc.c           | 204 +++++++++++++++++-
+>>   4 files changed, 248 insertions(+), 8 deletions(-)
+>>
+>> --
+>> 2.17.1
+>>
+> 
+> Applied for next, thanks!
 
-Le jeu., f=E9vr. 20, 2020 at 14:38, Ulf Hansson <ulf.hansson@linaro.org>=20
-a =E9crit :
-> On Tue, 11 Feb 2020 at 17:03, Paul Cercueil <paul@crapouillou.net>=20
-> wrote:
->>=20
->>  Use the newly introduced pm_sleep_ptr() macro to simplify the code.
->>=20
->>  Signed-off-by: Paul Cercueil <paul@crapouillou.net>
->>  ---
->>   drivers/mmc/host/jz4740_mmc.c | 12 +++---------
->>   1 file changed, 3 insertions(+), 9 deletions(-)
->>=20
->>  diff --git a/drivers/mmc/host/jz4740_mmc.c=20
->> b/drivers/mmc/host/jz4740_mmc.c
->>  index fbae87d1f017..09554f9831de 100644
->>  --- a/drivers/mmc/host/jz4740_mmc.c
->>  +++ b/drivers/mmc/host/jz4740_mmc.c
->>  @@ -1099,24 +1099,18 @@ static int jz4740_mmc_remove(struct=20
->> platform_device *pdev)
->>          return 0;
->>   }
->>=20
->>  -#ifdef CONFIG_PM_SLEEP
->>  -
->>  -static int jz4740_mmc_suspend(struct device *dev)
->>  +static int __maybe_unused jz4740_mmc_suspend(struct device *dev)
->>   {
->>          return pinctrl_pm_select_sleep_state(dev);
->>   }
->>=20
->>  -static int jz4740_mmc_resume(struct device *dev)
->>  +static int __maybe_unused jz4740_mmc_resume(struct device *dev)
->>   {
->>          return pinctrl_select_default_state(dev);
->>   }
->>=20
->>   static SIMPLE_DEV_PM_OPS(jz4740_mmc_pm_ops, jz4740_mmc_suspend,
->>          jz4740_mmc_resume);
->>  -#define JZ4740_MMC_PM_OPS (&jz4740_mmc_pm_ops)
->>  -#else
->>  -#define JZ4740_MMC_PM_OPS NULL
->>  -#endif
->=20
-> All of the above code can be simplified in this way, without having to
-> convert into using the new pm_sleep_ptr() macro, below.
->=20
-> The only "penalty" would be that, the struct dev_pm_ops
-> (jz4740_mmc_pm_ops) would then be referenced even when CONFIG_PM* is
-> unset, thus the compiler would be able to throw it away.
->=20
-> Just wanted to point this out.
+thanks Ulf.
 
-Yes, what I had in mind with these macros is that in general the=20
-suspend/resume functions should not be conditionally compiled, as they=20
-might have errors which would only appear with specific configs, and=20
-instead should be always compiled but thrown away by the compiler if=20
-unused.
+> 
+> I took the liberty to do minor amendments to some of the changelogs,
+> but in particular I have change some of prefixes for the commit
+> message headers into "mmc: mmci_sdmmc:".
 
->>=20
->>   static struct platform_driver jz4740_mmc_driver =3D {
->>          .probe =3D jz4740_mmc_probe,
->>  @@ -1124,7 +1118,7 @@ static struct platform_driver=20
->> jz4740_mmc_driver =3D {
->>          .driver =3D {
->>                  .name =3D "jz4740-mmc",
->>                  .of_match_table =3D of_match_ptr(jz4740_mmc_of_match),
->>  -               .pm =3D JZ4740_MMC_PM_OPS,
->>  +               .pm =3D pm_sleep_ptr(&jz4740_mmc_pm_ops),
->=20
-> If the driver would have runtime suspend/resume callbacks, then it
-> would need the use the pm_ptr() macro instead, I guess.
->=20
->>          },
->>   };
->>=20
->>  --
->>  2.25.0
->>=20
->=20
-> My overall feeling is that this series improves the code/behaviour,
-> but I am also a bit worried about adding yet another pair of macros
-> for dealing with CONFIG_PM* callbacks as it could add more confusion.
->=20
-> An option could be to introduce only the pm_ptr() macro, then skip the
-> optimization that pm_sleep_ptr() gives. This could make it easier to
-> use, as you wouldn't need to decide between two macros. Just a
-> thought.
+Ok, I use this prefixe for next commit.
 
-One macro would be better than none.
+> 
+> Please tell, if there is anything that you want me to update.
 
-Cheers,
--Paul
+I tested your next branch, and it's ok for me.
+sdmmc upstream is almost finished, I just some recent fixes to send.
 
-> I don't know what Rafael's thinks about this, let's see if he has some
-> other ideas.
->=20
+> 
 > Kind regards
 > Uffe
-
-=
-
+> 
