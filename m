@@ -7,51 +7,56 @@ X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 145E7C11D2F
-	for <linux-mmc@archiver.kernel.org>; Mon, 24 Feb 2020 11:46:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 14E7AC35671
+	for <linux-mmc@archiver.kernel.org>; Mon, 24 Feb 2020 11:58:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id E0EE420838
-	for <linux-mmc@archiver.kernel.org>; Mon, 24 Feb 2020 11:46:51 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id DD20D2082F
+	for <linux-mmc@archiver.kernel.org>; Mon, 24 Feb 2020 11:58:34 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (1024-bit key) header.d=mg.codeaurora.org header.i=@mg.codeaurora.org header.b="SiVdSjrB"
+	dkim=fail reason="signature verification failed" (1024-bit key) header.d=mg.codeaurora.org header.i=@mg.codeaurora.org header.b="lu2H0ig+"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727282AbgBXLqv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 24 Feb 2020 06:46:51 -0500
-Received: from mail26.static.mailgun.info ([104.130.122.26]:39959 "EHLO
+        id S1727329AbgBXL6d (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 24 Feb 2020 06:58:33 -0500
+Received: from mail26.static.mailgun.info ([104.130.122.26]:38204 "EHLO
         mail26.static.mailgun.info" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1727735AbgBXLqv (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Feb 2020 06:46:51 -0500
+        by vger.kernel.org with ESMTP id S1727326AbgBXL6d (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Feb 2020 06:58:33 -0500
 DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
- s=smtp; t=1582544810; h=References: In-Reply-To: Message-Id: Date:
+ s=smtp; t=1582545512; h=References: In-Reply-To: Message-Id: Date:
  Subject: Cc: To: From: Sender;
- bh=RQyNQ3DFWtlsQXD4V++chr0ZTqGNZET5yxGQsVzgceo=; b=SiVdSjrBfO9YsxW303ohqNiTipuu7jddEbsemh7meVIKkOr1yMiFU4HacCwL/H68it9Yku+0
- 8m1adQ+rvw+Im9wFr0xUfa87FmsnP+oDwv2mFg1q29BvJ4gUSJHSbOELvQYs8ZVGsPb6l2sx
- Te//ylH8nzoXA3A8o/qFXC/UO5Q=
+ bh=m/EVAf0XIo2GAshIf8Zwsc9/slrvZ7lw/UTHXKbwTyA=; b=lu2H0ig+3bw7Sq0kJZD4bWtvu1OaJkecDqvTmAR9KvFUp9m4HEXsX0S/IrIZBnr7aW5IKBQw
+ k2FDyLi5YPXphrgZCyjPwN7KvbLXXnLxb/qmuLrGIOL8uk3rh4D62PwsEjJGekDmpWibAV1w
+ 9OStRF9v6+If7thUMTLhNgJ0aWA=
 X-Mailgun-Sending-Ip: 104.130.122.26
 X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
 Received: from smtp.codeaurora.org (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171])
- by mxa.mailgun.org with ESMTP id 5e53b7a1.7f963daa67a0-smtp-out-n01;
- Mon, 24 Feb 2020 11:46:41 -0000 (UTC)
+ by mxa.mailgun.org with ESMTP id 5e53ba5b.7f964c51e998-smtp-out-n01;
+ Mon, 24 Feb 2020 11:58:19 -0000 (UTC)
 Received: by smtp.codeaurora.org (Postfix, from userid 1001)
-        id 475DDC4479D; Mon, 24 Feb 2020 11:46:41 +0000 (UTC)
+        id CD826C433A2; Mon, 24 Feb 2020 11:58:19 +0000 (UTC)
 Received: from vbadigan-linux.qualcomm.com (blr-c-bdr-fw-01_GlobalNAT_AllZones-Outside.qualcomm.com [103.229.19.19])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-SHA256 (128/128 bits))
         (No client certificate requested)
         (Authenticated sender: vbadigan)
-        by smtp.codeaurora.org (Postfix) with ESMTPSA id 3C3B6C43383;
-        Mon, 24 Feb 2020 11:46:37 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.3.2 smtp.codeaurora.org 3C3B6C43383
+        by smtp.codeaurora.org (Postfix) with ESMTPSA id 7925CC43383;
+        Mon, 24 Feb 2020 11:58:13 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.3.2 smtp.codeaurora.org 7925CC43383
 Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
 Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=none smtp.mailfrom=vbadigan@codeaurora.org
 From:   Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
 To:     ulf.hansson@linaro.org, robh+dt@kernel.org
-Cc:     devicetree@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+Cc:     asutoshd@codeaurora.org, stummala@codeaurora.org,
+        sayalil@codeaurora.org, cang@codeaurora.org,
+        rampraka@codeaurora.org, dianders@google.com,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-arm-msm@vger.kernel.org,
         Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
-        Mark Rutland <mark.rutland@arm.com>
-Subject: [PATCH V2] dt-bindings: mmc: sdhci-msm: Add CQE reg map
-Date:   Mon, 24 Feb 2020 17:14:43 +0530
-Message-Id: <1582544683-9505-1-git-send-email-vbadigan@codeaurora.org>
+        Mark Rutland <mark.rutland@arm.com>,
+        devicetree@vger.kernel.org (open list:OPEN FIRMWARE AND FLATTENED
+        DEVICE TREE BINDINGS)
+Subject: [PATCH V3] dt-bindings: mmc: sdhci-msm: Add CQE reg map
+Date:   Mon, 24 Feb 2020 17:27:50 +0530
+Message-Id: <1582545470-11530-1-git-send-email-vbadigan@codeaurora.org>
 X-Mailer: git-send-email 1.9.1
 In-Reply-To: <1581434955-11087-1-git-send-email-vbadigan@codeaurora.org>
 References: <1581434955-11087-1-git-send-email-vbadigan@codeaurora.org>
@@ -65,9 +70,11 @@ and reg names that need to be supplied for supporting CQE feature.
 
 Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
 ---
+Changes since V2:
+	- Dropped _mem suffix to reg names.
 
 Changes since V1:
-	- Dropped _mem suffix to reg names.
+	- Updated description for more clarity & Fixed typos.
 ---
  Documentation/devicetree/bindings/mmc/sdhci-msm.txt | 8 +++++++-
  1 file changed, 7 insertions(+), 1 deletion(-)
