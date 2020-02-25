@@ -2,122 +2,174 @@ Return-Path: <SRS0=gc8k=4N=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.3 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-8.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 58CD6C35DEE
-	for <linux-mmc@archiver.kernel.org>; Tue, 25 Feb 2020 01:35:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 92901C35DFB
+	for <linux-mmc@archiver.kernel.org>; Tue, 25 Feb 2020 10:04:42 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 2E1CD222C2
-	for <linux-mmc@archiver.kernel.org>; Tue, 25 Feb 2020 01:35:30 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6346521744
+	for <linux-mmc@archiver.kernel.org>; Tue, 25 Feb 2020 10:04:42 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="MXbsLVZn"
+	dkim=pass (2048-bit key) header.d=nvidia.com header.i=@nvidia.com header.b="YmXZK+2W"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728728AbgBYBf0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 24 Feb 2020 20:35:26 -0500
-Received: from mail-lf1-f66.google.com ([209.85.167.66]:45625 "EHLO
-        mail-lf1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728682AbgBYBf0 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Feb 2020 20:35:26 -0500
-Received: by mail-lf1-f66.google.com with SMTP id z5so8303786lfd.12;
-        Mon, 24 Feb 2020 17:35:24 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=7KfeF9bj6ln8qqzpe7IEHDvXUKwiiT/ipxNgBi4uFME=;
-        b=MXbsLVZnsRrOiUyO+RyrtvqNQ3W25wfO2SG+jAz2GDo9XK5OnoEhcftf8feCiPrP/o
-         srGQYWWWGNYCr3om2YQsFdD/rsSHi+0A62kC+hkD9OMswCyO91Zwbx9y/juew9cNgOE3
-         rfSgxBlbT9XLepoOTw1IcnHpir7MQqP6TFzPtoJ6iOMDMJ1rhclVSwUxNNpJZyFt3b5x
-         815tKXst1OZnrsdAoD2iC/CIxTNOHV2BfXC2e9uvGXSgQOXIEmzB+lec7kHgADjMrr/U
-         qgGNLw1ts63mJJzZWy5EaDWPYdilzhuAS4p78kCVfOR1+hBuJDnDOUy7aqdaUd5o+Jgr
-         Y+jw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=7KfeF9bj6ln8qqzpe7IEHDvXUKwiiT/ipxNgBi4uFME=;
-        b=dNhHZuqg/8Qh2+QLqTdpDNknu6lsFN1VrntQK/wYG1494oxKNsDl+m5fOWSGtm25TS
-         OsRV599+/JUoo7luyIQY5FBFbJTgziQn+Hmr8EH9icypCJBe87hkAiD9TziroLwFeYZ7
-         nMKIHxLAthhpeKTxK61qaTPn5QF2BW3mb1v1ESjtNc6vRRnMG931CIFg8c4MUjBKQImj
-         OrbmDrtf5riqy2iJFlyN4Y+d7qeWbA9D+kik/FhBFgzpm/U5Veqo9Hwf2YpLjPvYckDH
-         GJSyVOdrb393gnNdtU5xtHuROaS+L46VoEQfwQRJl2nmHEh08HWZ/7loHWaXym+jlNxS
-         xfMQ==
-X-Gm-Message-State: APjAAAUPpZvdtq/X884aFFZIMPHbMie+y+5pmmlJE/GpG4hG7YlJtQtM
-        nW1PLhi9nUlYI2shjL7OeK42NBq3
-X-Google-Smtp-Source: APXvYqz/Z9/bQLbgH3q3d9zG8BlA3rujvO8lz+rf5xIvXdVWkiKCXHU2J1RhTI3+l112QMoW/cLkNQ==
-X-Received: by 2002:a19:48cf:: with SMTP id v198mr3243388lfa.68.1582594523870;
-        Mon, 24 Feb 2020 17:35:23 -0800 (PST)
-Received: from [192.168.2.145] (79-139-233-37.dynamic.spd-mgts.ru. [79.139.233.37])
-        by smtp.googlemail.com with ESMTPSA id 14sm6888501ljj.32.2020.02.24.17.35.22
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 24 Feb 2020 17:35:23 -0800 (PST)
-Subject: Re: [PATCH v1 3/3] partitions: Introduce NVIDIA Tegra Partition Table
-To:     Stephen Warren <swarren@wwwdotorg.org>
-Cc:     Jens Axboe <axboe@kernel.dk>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        Jonathan Hunter <jonathanh@nvidia.com>,
-        =?UTF-8?B?TWljaGHFgiBNaXJvc8WCYXc=?= <mirq-linux@rere.qmqm.pl>,
-        David Heidelberg <david@ixit.cz>,
-        Peter Geis <pgwipeout@gmail.com>,
-        Nicolas Chauvet <kwizart@gmail.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Billy Laws <blaws05@gmail.com>, linux-tegra@vger.kernel.org,
-        linux-block@vger.kernel.org, Andrey Danin <danindrey@mail.ru>,
-        Gilles Grandou <gilles@grandou.net>,
-        Ryan Grachek <ryan@edited.us>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-References: <20200224231841.26550-1-digetx@gmail.com>
- <20200224231841.26550-4-digetx@gmail.com>
- <44c22925-a14e-96d0-1f93-1979c0c60525@wwwdotorg.org>
-From:   Dmitry Osipenko <digetx@gmail.com>
-Message-ID: <69a76bbe-e088-6715-fefe-354dd4bc3ef2@gmail.com>
-Date:   Tue, 25 Feb 2020 04:35:21 +0300
+        id S1729883AbgBYKEi (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 25 Feb 2020 05:04:38 -0500
+Received: from hqnvemgate24.nvidia.com ([216.228.121.143]:16887 "EHLO
+        hqnvemgate24.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1729623AbgBYKEi (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Feb 2020 05:04:38 -0500
+Received: from hqpgpgate101.nvidia.com (Not Verified[216.228.121.13]) by hqnvemgate24.nvidia.com (using TLS: TLSv1.2, DES-CBC3-SHA)
+        id <B5e54f0e80000>; Tue, 25 Feb 2020 02:03:20 -0800
+Received: from hqmail.nvidia.com ([172.20.161.6])
+  by hqpgpgate101.nvidia.com (PGP Universal service);
+  Tue, 25 Feb 2020 02:04:37 -0800
+X-PGP-Universal: processed;
+        by hqpgpgate101.nvidia.com on Tue, 25 Feb 2020 02:04:37 -0800
+Received: from [10.21.133.51] (10.124.1.5) by HQMAIL107.nvidia.com
+ (172.20.187.13) with Microsoft SMTP Server (TLS) id 15.0.1473.3; Tue, 25 Feb
+ 2020 10:04:35 +0000
+From:   Jon Hunter <jonathanh@nvidia.com>
+Subject: Re: LKFT: arm x15: mmc1: cache flush error -110
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Bitan Biswas <bbiswas@nvidia.com>,
+        Adrian Hunter <adrian.hunter@intel.com>
+CC:     Naresh Kamboju <naresh.kamboju@linaro.org>,
+        Jens Axboe <axboe@kernel.dk>,
+        Alexei Starovoitov <ast@kernel.org>,
+        linux-block <linux-block@vger.kernel.org>,
+        <lkft-triage@lists.linaro.org>,
+        open list <linux-kernel@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Arnd Bergmann <arnd@arndb.de>,
+        John Stultz <john.stultz@linaro.org>,
+        Thierry Reding <treding@nvidia.com>
+References: <CA+G9fYuqAQfhzF2BzHr7vMHx68bo8-jT+ob_F3eHQ3=oFjgYdg@mail.gmail.com>
+ <CAPDyKFqqhxC-pmV_j8PLY-D=AbqCAbiipAAHXLpJ4N_BiYYOFw@mail.gmail.com>
+ <CA+G9fYugQuAERqp3VXUFG-3QxXoF8bz7OSMh6WGSZcrGkbfDSQ@mail.gmail.com>
+ <CAPDyKFo-vEO7zN_F+NqcKtnKmAo_deOZx3gYNiks3yTAQAjv-Q@mail.gmail.com>
+ <a602a27a-b960-ce56-c541-3b4b95f5dce2@nvidia.com>
+ <CAPDyKFrXQgtHa4gLaKUi_F0rs4FMBai3Y_+TcHZR_zpkb0B4QQ@mail.gmail.com>
+Message-ID: <6523119a-50ac-973a-d1cd-ab1569259411@nvidia.com>
+Date:   Tue, 25 Feb 2020 10:04:33 +0000
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.3.0
+ Thunderbird/68.4.1
 MIME-Version: 1.0
-In-Reply-To: <44c22925-a14e-96d0-1f93-1979c0c60525@wwwdotorg.org>
-Content-Type: text/plain; charset=utf-8
+In-Reply-To: <CAPDyKFrXQgtHa4gLaKUi_F0rs4FMBai3Y_+TcHZR_zpkb0B4QQ@mail.gmail.com>
+X-Originating-IP: [10.124.1.5]
+X-ClientProxiedBy: HQMAIL101.nvidia.com (172.20.187.10) To
+ HQMAIL107.nvidia.com (172.20.187.13)
+Content-Type: text/plain; charset="utf-8"
 Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7bit
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nvidia.com; s=n1;
+        t=1582625001; bh=DXvf4j96l957ii5IgxSstqBFHLUsNWzdiL/4ribmGBQ=;
+        h=X-PGP-Universal:From:Subject:To:CC:References:Message-ID:Date:
+         User-Agent:MIME-Version:In-Reply-To:X-Originating-IP:
+         X-ClientProxiedBy:Content-Type:Content-Language:
+         Content-Transfer-Encoding;
+        b=YmXZK+2Wxv4hJ3z1ofqFDa+CdPVumvTk7rk9zzFJ4nsH2sVpgrCIgkpLlbZmTbwwy
+         KWJDi1uXeivi46vK7RPEy60oyQ2Igq5bJ3pAvcrxxbkdHRI5eOBSu06CO9CdnPCSo4
+         uEx+TFt7QgwAT2UH14svOMSeb1vXqvuy6ZZx6rlm2WpnawaE0BqXhIj7eNHImOdaIb
+         jsTeJGCWSKV+uAc2lG+mrupgiBxd6ZeDpvEg9OQY64KG6RD6J2sJZHPhn6E+pk4Byh
+         lTmEvTxv0MbDlejw7aVjxEP0yBIbeqF5GmbvS+pmL43jkw3WEBTK0e3+n92/GsoZ1K
+         rXu4T/sni80xg==
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-25.02.2020 03:20, Stephen Warren пишет:
-> On 2/24/20 4:18 PM, Dmitry Osipenko wrote:
->> All NVIDIA Tegra devices use a special partition table format for the
->> internal storage partitioning. Most of Tegra devices have GPT partition
->> in addition to TegraPT, but some older Android consumer-grade devices do
->> not or GPT is placed in a wrong sector, and thus, the TegraPT is needed
->> in order to support these devices properly in the upstream kernel. This
->> patch adds support for NVIDIA Tegra Partition Table format that is used
->> at least by all NVIDIA Tegra20 and Tegra30 devices.
-> 
->> diff --git a/arch/arm/mach-tegra/tegra.c b/arch/arm/mach-tegra/tegra.c
-> 
->> +static void __init tegra_boot_config_table_init(void)
->> +{
->> +    void __iomem *bct_base;
->> +    u16 pt_addr, pt_size;
->> +
->> +    bct_base = IO_ADDRESS(TEGRA_IRAM_BASE) + TEGRA_IRAM_BCT_OFFSET;
-> 
-> This shouldn't be hard-coded. IIRC, the boot ROM writes a BIT (Boot
-> Information Table) to a fixed location in IRAM, and there's some value
-> in the BIT that points to where the BCT is in IRAM. In practice, it
-> might work out that the BCT is always at the same place in IRAM, but
-> this certainly isn't guaranteed. I think there's code in U-Boot which
-> extracts the BCT location from the BIT? Yes, see
-> arch/arm/mach-tegra/ap.c:get_odmdata().
 
-Thank you very much, I didn't know about that.
+On 24/02/2020 11:16, Ulf Hansson wrote:
+> + Adrian
+> 
+> On Fri, 21 Feb 2020 at 20:44, Bitan Biswas <bbiswas@nvidia.com> wrote:
+>>
+>> On 2/21/20 1:48 AM, Ulf Hansson wrote:
+>>> External email: Use caution opening links or attachments
+>>>
+>>>
+>>> On Thu, 20 Feb 2020 at 18:54, Naresh Kamboju <naresh.kamboju@linaro.org> wrote:
+>>>>
+>>>> On Wed, 19 Feb 2020 at 21:54, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>>>>>
+>>>>> On Thu, 13 Feb 2020 at 16:43, Naresh Kamboju <naresh.kamboju@linaro.org> wrote:
+>>>>>>
+>>>>>
+>>>>> Try to restore the value for the cache flush timeout, by updating the
+>>>>> define MMC_CACHE_FLUSH_TIMEOUT_MS to 10 * 60 * 1000".
+>>>>
+>>>> I have increased the timeout to 10 minutes but it did not help.
+>>>> Same error found.
+>>>> [  608.679353] mmc1: Card stuck being busy! mmc_poll_for_busy
+>>>> [  608.684964] mmc1: cache flush error -110
+>>>> [  608.689005] blk_update_request: I/O error, dev mmcblk1, sector
+>>>> 4302400 op 0x1:(WRITE) flags 0x20800 phys_seg 1 prio class 0
+>>>>
+>>>> OTOH, What best i could do for my own experiment to revert all three patches and
+>>>> now the reported error gone and device mount successfully [1].
+>>>>
+>>>> List of patches reverted,
+>>>>    mmc: core: Specify timeouts for BKOPS and CACHE_FLUSH for eMMC
+>>>>    mmc: block: Use generic_cmd6_time when modifying
+>>>>      INAND_CMD38_ARG_EXT_CSD
+>>>>    mmc: core: Default to generic_cmd6_time as timeout in __mmc_switch()
 
-I checked whether Nexus 7 and A500 have a correct pointer in the BIT and
-they have it. I'll take it into account in v2, thank you again.
+
+Reverting all the above also fixes the problem for me.
+
+>>   I find that from the commit the changes in mmc_flush_cache below is
+>> the cause.
+>>
+>> ##
+>> @@ -961,7 +963,8 @@ int mmc_flush_cache(struct mmc_card *card)
+>>                          (card->ext_csd.cache_size > 0) &&
+>>                          (card->ext_csd.cache_ctrl & 1)) {
+>>                  err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+>> -                               EXT_CSD_FLUSH_CACHE, 1, 0);
+>> +                                EXT_CSD_FLUSH_CACHE, 1,
+>> +                                MMC_CACHE_FLUSH_TIMEOUT_MS);
+
+
+I no longer see the issue on reverting the above hunk as Bitan suggested
+but now I see the following (which is expected) ...
+
+ WARNING KERN mmc1: unspecified timeout for CMD6 - use generic
+
+> Just as a quick sanity test, please try the below patch, which
+> restores the old cache flush timeout to 10min.
+> 
+> However, as I indicated above, this seems to be a problem that needs
+> to be fixed at in the host driver side. For the sdhci driver, there is
+> a bit of a tricky logic around how to deal with timeouts in
+> sdhci_send_command(). My best guess is that's where we should look
+> more closely (and I am doing that).
+> 
+> From: Ulf Hansson <ulf.hansson@linaro.org>
+> Date: Mon, 24 Feb 2020 11:43:33 +0100
+> Subject: [PATCH] mmc: core: Restore busy timeout for eMMC cache flushing
+> 
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> ---
+>  drivers/mmc/core/mmc_ops.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+> index da425ee2d9bf..713e7dd6d028 100644
+> --- a/drivers/mmc/core/mmc_ops.c
+> +++ b/drivers/mmc/core/mmc_ops.c
+> @@ -21,7 +21,7 @@
+> 
+>  #define MMC_OPS_TIMEOUT_MS             (10 * 60 * 1000) /* 10min*/
+>  #define MMC_BKOPS_TIMEOUT_MS           (120 * 1000) /* 120s */
+> -#define MMC_CACHE_FLUSH_TIMEOUT_MS     (30 * 1000) /* 30s */
+> +#define MMC_CACHE_FLUSH_TIMEOUT_MS     (10 * 60 * 1000) /* 10min */
+
+This does not fix the problem for me.
+
+Jon
+
+-- 
+nvpublic
