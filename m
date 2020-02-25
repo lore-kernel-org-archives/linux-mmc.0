@@ -2,129 +2,124 @@ Return-Path: <SRS0=gc8k=4N=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.4 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C0E60C35E04
-	for <linux-mmc@archiver.kernel.org>; Tue, 25 Feb 2020 15:46:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 16AB2C35E04
+	for <linux-mmc@archiver.kernel.org>; Tue, 25 Feb 2020 16:24:50 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 92A962082F
-	for <linux-mmc@archiver.kernel.org>; Tue, 25 Feb 2020 15:46:55 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id DEFA220CC7
+	for <linux-mmc@archiver.kernel.org>; Tue, 25 Feb 2020 16:24:49 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Fiz01y9c"
+	dkim=pass (2048-bit key) header.d=nvidia.com header.i=@nvidia.com header.b="kWdhcXQK"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730602AbgBYPqz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 25 Feb 2020 10:46:55 -0500
-Received: from mail-lf1-f66.google.com ([209.85.167.66]:41420 "EHLO
-        mail-lf1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726019AbgBYPqy (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Feb 2020 10:46:54 -0500
-Received: by mail-lf1-f66.google.com with SMTP id y17so6992880lfe.8;
-        Tue, 25 Feb 2020 07:46:53 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=xNinaEdvBrD29kIqkWAyPHB9SdoxJ8ycU201le/hisU=;
-        b=Fiz01y9cf2SUthjj3oaLENxEuUSpzQxFNWI5hOr/cL2h7HkApo1lImUAIgP5dcY8rO
-         RoHbH1fRR3EJ+WM1si/54m208q/FM1YJGTzEoTr7Mq2gvPn4i1xC5nlpYmiXwJx1H6IY
-         NMclvh2UCA/Tut2OKO+ndrY0Q/nJFneZ+PjhC1Tnf9nJ2qIT5Dl6yEY8/DCVflY48F+o
-         +EUGP/vTHVRIFO9hzD+d26b2b7hb+mwtiXF1jSa0HiPYyq5AsoQeiaBa0naQZt6Tzj6L
-         Bc+VKTT4K/ILMe0yBDoIWMsvVtuj2l7dhuqup8coym03xm1g3jZMf/wC+0RAFEGfrYBk
-         YD6g==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=xNinaEdvBrD29kIqkWAyPHB9SdoxJ8ycU201le/hisU=;
-        b=H4zQmj8cm0wYkPBW7G72AOkeZQGfj1wrfXyInq5YjVkLuTK0yguYoPjHHzucFQvbKD
-         dayvqSbdPHXO6gdNvQ6mbwKB3N/QwjHNL9ZPW3GrO24wPZSpZu8OjzQR00K3TxBMaGRd
-         vCQ4SYgiJwp81WBqQgIO0eFngjohngj1cVwGbDCqFvKk8Kw8As36oVBJV70fB83W67pB
-         RWwsrVqtPGtiOvH5QdAkRWMOza7+tFYPUm1JRzd28ZyE6NI1Yt3KLPGWv/FXM47R7RKI
-         /sI+adpLwn1L24NQ3gTiZ1lWRJHhWFgdVmbwhGZpq7XUo1abKlZNBx9Iiv6+MjroHVPT
-         0LTw==
-X-Gm-Message-State: APjAAAVip9xU5AywWeYJLcgvOe0lohfogRqYOESWMp+XPKvdnYNil+aN
-        eJnPm0cGjUvGYqL5oNs6DJzlXNyT
-X-Google-Smtp-Source: APXvYqxm0Hm8L4foYBZLswdA53J6fY2WU9UOSsqOY82N5bsjaQslmdPcu8HY2FBcsfPFLd5YJmba0A==
-X-Received: by 2002:ac2:489b:: with SMTP id x27mr30382322lfc.130.1582645612280;
-        Tue, 25 Feb 2020 07:46:52 -0800 (PST)
-Received: from [192.168.2.145] (79-139-233-37.dynamic.spd-mgts.ru. [79.139.233.37])
-        by smtp.googlemail.com with ESMTPSA id q13sm9690543ljj.63.2020.02.25.07.46.50
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 25 Feb 2020 07:46:51 -0800 (PST)
-Subject: Re: [PATCH v1 2/3] mmc: block: Add mmc_bdev_to_card() helper
-To:     Ulf Hansson <ulf.hansson@linaro.org>, Jens Axboe <axboe@kernel.dk>
-Cc:     Thierry Reding <thierry.reding@gmail.com>,
-        Jonathan Hunter <jonathanh@nvidia.com>,
-        =?UTF-8?B?TWljaGHFgiBNaXJvc8WCYXc=?= <mirq-linux@rere.qmqm.pl>,
-        David Heidelberg <david@ixit.cz>,
-        Peter Geis <pgwipeout@gmail.com>,
-        Stephen Warren <swarren@wwwdotorg.org>,
-        Nicolas Chauvet <kwizart@gmail.com>,
+        id S1728096AbgBYQYq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 25 Feb 2020 11:24:46 -0500
+Received: from hqnvemgate26.nvidia.com ([216.228.121.65]:14686 "EHLO
+        hqnvemgate26.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1729817AbgBYQYp (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Feb 2020 11:24:45 -0500
+Received: from hqpgpgate101.nvidia.com (Not Verified[216.228.121.13]) by hqnvemgate26.nvidia.com (using TLS: TLSv1.2, DES-CBC3-SHA)
+        id <B5e554a3f0000>; Tue, 25 Feb 2020 08:24:31 -0800
+Received: from hqmail.nvidia.com ([172.20.161.6])
+  by hqpgpgate101.nvidia.com (PGP Universal service);
+  Tue, 25 Feb 2020 08:24:44 -0800
+X-PGP-Universal: processed;
+        by hqpgpgate101.nvidia.com on Tue, 25 Feb 2020 08:24:44 -0800
+Received: from [10.21.133.51] (172.20.13.39) by HQMAIL107.nvidia.com
+ (172.20.187.13) with Microsoft SMTP Server (TLS) id 15.0.1473.3; Tue, 25 Feb
+ 2020 16:24:41 +0000
+Subject: Re: LKFT: arm x15: mmc1: cache flush error -110
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Faiz Abbas <faiz_abbas@ti.com>,
+        Sowjanya Komatineni <skomatineni@nvidia.com>
+CC:     Bitan Biswas <bbiswas@nvidia.com>,
         Adrian Hunter <adrian.hunter@intel.com>,
-        Billy Laws <blaws05@gmail.com>,
-        linux-tegra <linux-tegra@vger.kernel.org>,
+        Naresh Kamboju <naresh.kamboju@linaro.org>,
+        "Jens Axboe" <axboe@kernel.dk>,
+        Alexei Starovoitov <ast@kernel.org>,
         linux-block <linux-block@vger.kernel.org>,
-        Andrey Danin <danindrey@mail.ru>,
-        Gilles Grandou <gilles@grandou.net>,
-        Ryan Grachek <ryan@edited.us>,
+        <lkft-triage@lists.linaro.org>,
+        open list <linux-kernel@vger.kernel.org>,
         "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-References: <20200224231841.26550-1-digetx@gmail.com>
- <20200224231841.26550-3-digetx@gmail.com>
- <CAPDyKFoSwjkOX85jjA-Q-ScdC0aUozroOu3_-FO4yBE8pgtCow@mail.gmail.com>
-From:   Dmitry Osipenko <digetx@gmail.com>
-Message-ID: <62a4e5ac-40c2-7fb2-60eb-e465c665270f@gmail.com>
-Date:   Tue, 25 Feb 2020 18:46:44 +0300
+        Arnd Bergmann <arnd@arndb.de>,
+        John Stultz <john.stultz@linaro.org>,
+        Thierry Reding <treding@nvidia.com>
+References: <CA+G9fYuqAQfhzF2BzHr7vMHx68bo8-jT+ob_F3eHQ3=oFjgYdg@mail.gmail.com>
+ <CAPDyKFqqhxC-pmV_j8PLY-D=AbqCAbiipAAHXLpJ4N_BiYYOFw@mail.gmail.com>
+ <CA+G9fYugQuAERqp3VXUFG-3QxXoF8bz7OSMh6WGSZcrGkbfDSQ@mail.gmail.com>
+ <CAPDyKFo-vEO7zN_F+NqcKtnKmAo_deOZx3gYNiks3yTAQAjv-Q@mail.gmail.com>
+ <a602a27a-b960-ce56-c541-3b4b95f5dce2@nvidia.com>
+ <CAPDyKFrXQgtHa4gLaKUi_F0rs4FMBai3Y_+TcHZR_zpkb0B4QQ@mail.gmail.com>
+ <6523119a-50ac-973a-d1cd-ab1569259411@nvidia.com>
+ <f960aa98-5508-36fd-166d-7f41c7d85154@nvidia.com>
+ <CAPDyKFokE6x0mn+v5B9=so-SyrdTn0JBU8Mrp3Zdu6kSaCie2g@mail.gmail.com>
+From:   Jon Hunter <jonathanh@nvidia.com>
+Message-ID: <0963b60f-15e7-4bc6-10df-6fc8003e4d42@nvidia.com>
+Date:   Tue, 25 Feb 2020 16:24:38 +0000
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.3.0
+ Thunderbird/68.4.1
 MIME-Version: 1.0
-In-Reply-To: <CAPDyKFoSwjkOX85jjA-Q-ScdC0aUozroOu3_-FO4yBE8pgtCow@mail.gmail.com>
-Content-Type: text/plain; charset=utf-8
+In-Reply-To: <CAPDyKFokE6x0mn+v5B9=so-SyrdTn0JBU8Mrp3Zdu6kSaCie2g@mail.gmail.com>
+X-Originating-IP: [172.20.13.39]
+X-ClientProxiedBy: HQMAIL107.nvidia.com (172.20.187.13) To
+ HQMAIL107.nvidia.com (172.20.187.13)
+Content-Type: text/plain; charset="utf-8"
 Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7bit
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nvidia.com; s=n1;
+        t=1582647871; bh=d+k2oADQBKeJHCExPW9X42DfdEf4wTEDT/QfdHMU5IM=;
+        h=X-PGP-Universal:Subject:To:CC:References:From:Message-ID:Date:
+         User-Agent:MIME-Version:In-Reply-To:X-Originating-IP:
+         X-ClientProxiedBy:Content-Type:Content-Language:
+         Content-Transfer-Encoding;
+        b=kWdhcXQKSJH4GXa6xSkXVhbj0mroRtOyJ6fnisSE9GfHmcEkd+fFWgatHxHs9IYib
+         TIT861jiVMWct2KGXdBFUnuz93ncHEEos7SfypX0n4Lb8z+0RL8QGT5xJWD75wupir
+         yz0sPoHdlKRuA1JlUgef7zx/r24mxhiIiuTPFFT08JwydZt+Skpkum8t5c6F2IhzXz
+         jKEYhTQyc2xHXPD8GHsN18TntYROuk+3yZd/5IUGoCfMszcdk9oFv4u+4gyjxVaEeZ
+         0EFR+RoPiIATIToqWkAMtrrtqId6IKNMS08ObahXZPI9ib6XI09J9/cGGQcqlsu8zP
+         VP3GAeLJ37K4g==
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-25.02.2020 17:53, Ulf Hansson пишет:
-> On Tue, 25 Feb 2020 at 00:22, Dmitry Osipenko <digetx@gmail.com> wrote:
->>
->> NVIDIA Tegra Partition Table takes into account MMC card's BOOT_SIZE_MULT
->> parameter, and thus, the partition parser needs to retrieve that EXT_CSD
->> value from the block device. This patch introduces new helper which takes
->> block device for the input argument and returns corresponding MMC card.
+
+On 25/02/2020 14:26, Ulf Hansson wrote:
+
+...
+
+> However, from the core point of view, the response is still requested,
+> only that we don't want the driver to wait for the card to stop
+> signaling busy. Instead we want to deal with that via "polling" from
+> the core.
 > 
-> Rather than returning the card, why not return the value you are
-> looking for instead? That sound more straightforward, but also allows
-> mmc core code to stay closer to the mmc core.
+> This is a rather worrying behaviour, as it seems like the host driver
+> doesn't really follow this expectations from the core point of view.
+> And mmc_flush_cache() is not the only case, as we have erase, bkops,
+> sanitize, etc. Are all these working or not really well tested?
 
-Please take a look at patch #3, in particular see the
-tegra_partition_table_emmc_boot_offset(). We already need more than just
-the BOOT_SIZE_MULT from the struct mmc_card, in the the v2 of this
-series we will probably need even a bit more.
+I don't believe that they are well tested. We have a simple test to
+mount an eMMC partition, create a file, check the contents, remove the
+file and unmount. The timeouts always occur during unmounting.
 
-I'll adjust the commit's message of this patch in v2, saying that more
-than BOOT_SIZE_MULT is needed from the struct mmc_card. Are you okay
-with this variant?
+> Earlier, before my three patches, if the provided timeout_ms parameter
+> to __mmc_switch() was zero, which was the case for
+> mmc_mmc_flush_cache() - this lead to that __mmc_switch() simply
+> ignored validating host->max_busy_timeout, which was wrong. In any
+> case, this also meant that an R1B response was always used for
+> mmc_flush_cache(), as you also indicated above. Perhaps this is the
+> critical part where things can go wrong.
+> 
+> BTW, have you tried erase commands for sdhci tegra driver? If those
+> are working fine, do you have any special treatments for these?
 
-----
+That I am not sure, but I will check.
 
-BTW, do you have any idea how partition table scanning of MMC's boot0/1
-partitions potentially could be implemented?
+Cheers
+Jon
 
-It's not uncommon for Tegra devices that partition table could reside in
-one of the MMC's boot partitions (Nexus 7 is one example). For now I
-don't see how the scanning could be implemented easily because all
-boot0/boot1/main partitions are very separated from each other in the
-kernel's MMC_BLOCK.
-
-One potential hack that comes into my mind is that the boot0/1
-partitions could be always registered before the main MMC partition and
-then they always will be scanned first, i.e. before the main partition.
-This will allow to read out partition table from the boot partitions and
-stash it for the main.
+-- 
+nvpublic
