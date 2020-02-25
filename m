@@ -2,124 +2,119 @@ Return-Path: <SRS0=gc8k=4N=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-2.6 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FAKE_REPLY_C,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 16AB2C35E04
-	for <linux-mmc@archiver.kernel.org>; Tue, 25 Feb 2020 16:24:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2592FC35E01
+	for <linux-mmc@archiver.kernel.org>; Tue, 25 Feb 2020 19:15:27 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id DEFA220CC7
-	for <linux-mmc@archiver.kernel.org>; Tue, 25 Feb 2020 16:24:49 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=nvidia.com header.i=@nvidia.com header.b="kWdhcXQK"
+	by mail.kernel.org (Postfix) with ESMTP id 0133E2176D
+	for <linux-mmc@archiver.kernel.org>; Tue, 25 Feb 2020 19:15:26 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1582658127;
+	bh=me4bSWBpM9FpbQ7Hs5/OQBsgbx4rxsqreuBOjJJ2QUU=;
+	h=Date:From:To:Cc:Subject:In-Reply-To:List-ID:From;
+	b=O8qltvv6cDGJTTZvUxPOMuqIqEnr3yGv8vKNBXmKcfCTlmSb6F/ASr7zmvn6njn5X
+	 We6IT3+6WpCvb07syBLX/9cjAtoEw+ZGiQvMN1sspPQnpdQki+rY7uuomqQ7lB0qj2
+	 89lCbcFhfRpYGdBANWEYymE3bUN7Dp/UXcemu5Lo=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728096AbgBYQYq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 25 Feb 2020 11:24:46 -0500
-Received: from hqnvemgate26.nvidia.com ([216.228.121.65]:14686 "EHLO
-        hqnvemgate26.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729817AbgBYQYp (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Feb 2020 11:24:45 -0500
-Received: from hqpgpgate101.nvidia.com (Not Verified[216.228.121.13]) by hqnvemgate26.nvidia.com (using TLS: TLSv1.2, DES-CBC3-SHA)
-        id <B5e554a3f0000>; Tue, 25 Feb 2020 08:24:31 -0800
-Received: from hqmail.nvidia.com ([172.20.161.6])
-  by hqpgpgate101.nvidia.com (PGP Universal service);
-  Tue, 25 Feb 2020 08:24:44 -0800
-X-PGP-Universal: processed;
-        by hqpgpgate101.nvidia.com on Tue, 25 Feb 2020 08:24:44 -0800
-Received: from [10.21.133.51] (172.20.13.39) by HQMAIL107.nvidia.com
- (172.20.187.13) with Microsoft SMTP Server (TLS) id 15.0.1473.3; Tue, 25 Feb
- 2020 16:24:41 +0000
-Subject: Re: LKFT: arm x15: mmc1: cache flush error -110
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Faiz Abbas <faiz_abbas@ti.com>,
-        Sowjanya Komatineni <skomatineni@nvidia.com>
-CC:     Bitan Biswas <bbiswas@nvidia.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Naresh Kamboju <naresh.kamboju@linaro.org>,
-        "Jens Axboe" <axboe@kernel.dk>,
-        Alexei Starovoitov <ast@kernel.org>,
-        linux-block <linux-block@vger.kernel.org>,
-        <lkft-triage@lists.linaro.org>,
-        open list <linux-kernel@vger.kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Arnd Bergmann <arnd@arndb.de>,
-        John Stultz <john.stultz@linaro.org>,
-        Thierry Reding <treding@nvidia.com>
-References: <CA+G9fYuqAQfhzF2BzHr7vMHx68bo8-jT+ob_F3eHQ3=oFjgYdg@mail.gmail.com>
- <CAPDyKFqqhxC-pmV_j8PLY-D=AbqCAbiipAAHXLpJ4N_BiYYOFw@mail.gmail.com>
- <CA+G9fYugQuAERqp3VXUFG-3QxXoF8bz7OSMh6WGSZcrGkbfDSQ@mail.gmail.com>
- <CAPDyKFo-vEO7zN_F+NqcKtnKmAo_deOZx3gYNiks3yTAQAjv-Q@mail.gmail.com>
- <a602a27a-b960-ce56-c541-3b4b95f5dce2@nvidia.com>
- <CAPDyKFrXQgtHa4gLaKUi_F0rs4FMBai3Y_+TcHZR_zpkb0B4QQ@mail.gmail.com>
- <6523119a-50ac-973a-d1cd-ab1569259411@nvidia.com>
- <f960aa98-5508-36fd-166d-7f41c7d85154@nvidia.com>
- <CAPDyKFokE6x0mn+v5B9=so-SyrdTn0JBU8Mrp3Zdu6kSaCie2g@mail.gmail.com>
-From:   Jon Hunter <jonathanh@nvidia.com>
-Message-ID: <0963b60f-15e7-4bc6-10df-6fc8003e4d42@nvidia.com>
-Date:   Tue, 25 Feb 2020 16:24:38 +0000
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.4.1
+        id S1730436AbgBYTPX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 25 Feb 2020 14:15:23 -0500
+Received: from mail.kernel.org ([198.145.29.99]:51032 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1729894AbgBYTPX (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 25 Feb 2020 14:15:23 -0500
+Received: from localhost (mobile-166-175-186-165.mycingular.net [166.175.186.165])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id 5D5122082F;
+        Tue, 25 Feb 2020 19:15:21 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1582658121;
+        bh=me4bSWBpM9FpbQ7Hs5/OQBsgbx4rxsqreuBOjJJ2QUU=;
+        h=Date:From:To:Cc:Subject:In-Reply-To:From;
+        b=MEMBlK3ME6vljTGBdu9jyyZWwo+dkSGozqRIa4I2vEpJDdDdkSHGZjgnqPeSlNaTE
+         oXmpLbjTq9TSXk6Ls582/gNiUWv7PDnQjPY/Wh8CwRDzTpareneRzkkhvNDGB/2G4M
+         +FTLIRtV9CNfPxUBBxqM2XlnLry4a9tdUpk0FH9w=
+Date:   Tue, 25 Feb 2020 13:15:19 -0600
+From:   Bjorn Helgaas <helgaas@kernel.org>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     "Michael ." <keltoiboy@gmail.com>,
+        Dominik Brodowski <linux@dominikbrodowski.net>,
+        Linux PCI <linux-pci@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        Trevor Jacobs <trevor_jacobs@aol.com>,
+        Kris Cleveland <tridentperfusion@yahoo.com>,
+        Jeff <bluerocksaddles@willitsonline.com>,
+        Morgan Klym <moklym@gmail.com>,
+        Philip Langdale <philipl@overt.org>,
+        Pierre Ossman <pierre@ossman.eu>,
+        Maxim Levitsky <maximlevitsky@gmail.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Subject: Re: PCI device function not being enumerated [Was: PCMCIA not
+ working on Panasonic Toughbook CF-29]
+Message-ID: <20200225191519.GA172914@google.com>
 MIME-Version: 1.0
-In-Reply-To: <CAPDyKFokE6x0mn+v5B9=so-SyrdTn0JBU8Mrp3Zdu6kSaCie2g@mail.gmail.com>
-X-Originating-IP: [172.20.13.39]
-X-ClientProxiedBy: HQMAIL107.nvidia.com (172.20.187.13) To
- HQMAIL107.nvidia.com (172.20.187.13)
-Content-Type: text/plain; charset="utf-8"
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nvidia.com; s=n1;
-        t=1582647871; bh=d+k2oADQBKeJHCExPW9X42DfdEf4wTEDT/QfdHMU5IM=;
-        h=X-PGP-Universal:Subject:To:CC:References:From:Message-ID:Date:
-         User-Agent:MIME-Version:In-Reply-To:X-Originating-IP:
-         X-ClientProxiedBy:Content-Type:Content-Language:
-         Content-Transfer-Encoding;
-        b=kWdhcXQKSJH4GXa6xSkXVhbj0mroRtOyJ6fnisSE9GfHmcEkd+fFWgatHxHs9IYib
-         TIT861jiVMWct2KGXdBFUnuz93ncHEEos7SfypX0n4Lb8z+0RL8QGT5xJWD75wupir
-         yz0sPoHdlKRuA1JlUgef7zx/r24mxhiIiuTPFFT08JwydZt+Skpkum8t5c6F2IhzXz
-         jKEYhTQyc2xHXPD8GHsN18TntYROuk+3yZd/5IUGoCfMszcdk9oFv4u+4gyjxVaEeZ
-         0EFR+RoPiIATIToqWkAMtrrtqId6IKNMS08ObahXZPI9ib6XI09J9/cGGQcqlsu8zP
-         VP3GAeLJ37K4g==
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFq_exHufHyibFCjS78PTZ7duS9ZSt3vi18CNM6+jMmwnw@mail.gmail.com>
+User-Agent: Mutt/1.12.2 (2019-09-21)
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-
-On 25/02/2020 14:26, Ulf Hansson wrote:
-
-...
-
-> However, from the core point of view, the response is still requested,
-> only that we don't want the driver to wait for the card to stop
-> signaling busy. Instead we want to deal with that via "polling" from
-> the core.
+On Tue, Feb 25, 2020 at 04:03:32PM +0100, Ulf Hansson wrote:
+> On Sat, 22 Feb 2020 at 17:56, Bjorn Helgaas <helgaas@kernel.org> wrote:
+> >
+> > On Tue, Oct 29, 2019 at 12:02:50PM -0500, Bjorn Helgaas wrote:
+> > > [+cc Ulf, Philip, Pierre, Maxim, linux-mmc; see [1] for beginning of
+> > > thread, [2] for problem report and the patch Michael tested]
+> > >
+> > > On Tue, Oct 29, 2019 at 07:58:27PM +1100, Michael . wrote:
+> > > > Bjorn and Dominik.
+> > > > I am happy to let you know the patch did the trick, it compiled well
+> > > > on 5.4-rc4 and my friends in the CC list have tested the modified
+> > > > kernel and confirmed that both slots are now working as they should.
+> > > > As a group of dedicated Toughbook users and Linux users please accept
+> > > > our thanks your efforts and assistance is greatly appreciated.
+> > > >
+> > > > Now that we know this patch works what kernel do you think it will be
+> > > > released in? Will it make 5.4 or will it be put into 5.5 development
+> > > > for further testing?
+> > >
+> > > That patch was not intended to be a fix; it was just to test my guess
+> > > that the quirk might be related.
+> > >
+> > > Removing the quirk solved the problem *you're* seeing, but the quirk
+> > > was added in the first place to solve some other problem, and if we
+> > > simply remove the quirk, we may reintroduce the original problem.
+> > >
+> > > So we have to look at the history and figure out some way to solve
+> > > both problems.  I cc'd some people who might have insight.  Here are
+> > > some commits that look relevant:
+> > >
+> > >   5ae70296c85f ("mmc: Disabler for Ricoh MMC controller")
+> > >   03cd8f7ebe0c ("ricoh_mmc: port from driver to pci quirk")
+> > >
+> > >
+> > > [1] https://lore.kernel.org/r/CAFjuqNi+knSb9WVQOahCVFyxsiqoGgwoM7Z1aqDBebNzp_-jYw@mail.gmail.com/
+> > > [2] https://lore.kernel.org/r/20191021160952.GA229204@google.com/
+> >
+> > I guess this problem is still unfixed?  I hate the fact that we broke
+> > something that used to work.
+> >
+> > Maybe we need some sort of DMI check in ricoh_mmc_fixup_rl5c476() so
+> > we skip it for Toughbooks?  Or maybe we limit the quirk to the
+> > machines where it was originally needed?
 > 
-> This is a rather worrying behaviour, as it seems like the host driver
-> doesn't really follow this expectations from the core point of view.
-> And mmc_flush_cache() is not the only case, as we have erase, bkops,
-> sanitize, etc. Are all these working or not really well tested?
+> Both options seems reasonable to me. Do you have time to put
+> together a patch?
 
-I don't believe that they are well tested. We have a simple test to
-mount an eMMC partition, create a file, check the contents, remove the
-file and unmount. The timeouts always occur during unmounting.
+I don't really have time, and I'm not sure which way is best.  In
+general I like to avoid quirks, so I would lean toward applying the
+quirk only on the machines that we know need it.  But I'm not sure how
+to identify those.
 
-> Earlier, before my three patches, if the provided timeout_ms parameter
-> to __mmc_switch() was zero, which was the case for
-> mmc_mmc_flush_cache() - this lead to that __mmc_switch() simply
-> ignored validating host->max_busy_timeout, which was wrong. In any
-> case, this also meant that an R1B response was always used for
-> mmc_flush_cache(), as you also indicated above. Perhaps this is the
-> critical part where things can go wrong.
-> 
-> BTW, have you tried erase commands for sdhci tegra driver? If those
-> are working fine, do you have any special treatments for these?
-
-That I am not sure, but I will check.
-
-Cheers
-Jon
-
--- 
-nvpublic
+Bjorn
