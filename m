@@ -2,190 +2,93 @@ Return-Path: <SRS0=M0wQ=4O=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-5.6 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E848DC4BA24
-	for <linux-mmc@archiver.kernel.org>; Wed, 26 Feb 2020 19:46:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3F588C4BA24
+	for <linux-mmc@archiver.kernel.org>; Wed, 26 Feb 2020 22:19:42 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id B8D3F20838
-	for <linux-mmc@archiver.kernel.org>; Wed, 26 Feb 2020 19:46:53 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0AED32072D
+	for <linux-mmc@archiver.kernel.org>; Wed, 26 Feb 2020 22:19:42 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1582755582;
+	bh=Nmw5IJVhPO6uCM7Z4OhCEgNNwe0E1dUubp24Ke6R4Oo=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
+	b=TLR9typ3gCeQJmNk61QHnYhdDArxLkx4xTSLY8VwNtpgZui6wyStznZyannwEBda7
+	 cSkLoiRt8cKq0P1UKFFUo+fF3Wmjyu7X7wCdo1xx/ZICkby+fGZxZJYS9j3LIQonRl
+	 v7niw6L9uBVLnc9lqMXQDoHZCVh2icf1uydYlEbg=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727253AbgBZTqx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 26 Feb 2020 14:46:53 -0500
-Received: from mail.willitsonline.com ([216.7.65.54]:39486 "EHLO
-        mail.willitsonline.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727250AbgBZTqx (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 26 Feb 2020 14:46:53 -0500
-Received: from localhost (localhost.localdomain [127.0.0.1])
-        by mail.willitsonline.com (Postfix) with ESMTP id 59215111D89
-        for <linux-mmc@vger.kernel.org>; Wed, 26 Feb 2020 11:46:52 -0800 (PST)
-X-Virus-Scanned: Debian amavisd-new at iredmail2.willitsonline.com
-Received: from mail.willitsonline.com ([127.0.0.1])
-        by localhost (iredmail2.willitsonline.com [127.0.0.1]) (amavisd-new, port 10024)
-        with ESMTP id LY9dKP7ZBb8R for <linux-mmc@vger.kernel.org>;
-        Wed, 26 Feb 2020 11:46:52 -0800 (PST)
-Received: from _ (localhost.localdomain [127.0.0.1])
-        (Authenticated sender: bluerocksaddles@willitsonline.com)
-        by mail.willitsonline.com (Postfix) with ESMTPSA id AF76A111D7A;
-        Wed, 26 Feb 2020 11:46:36 -0800 (PST)
-MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII;
- format=flowed
-Content-Transfer-Encoding: 7bit
-Date:   Wed, 26 Feb 2020 11:46:36 -0800
-From:   bluerocksaddles@willitsonline.com
-To:     "Michael ." <keltoiboy@gmail.com>
-Cc:     Philip Langdale <philipl@overt.org>,
-        Arvind Sankar <nivedita@alum.mit.edu>,
-        Trevor Jacobs <trevor_jacobs@aol.com>,
+        id S1727742AbgBZWTl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 26 Feb 2020 17:19:41 -0500
+Received: from mail-ot1-f65.google.com ([209.85.210.65]:42573 "EHLO
+        mail-ot1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727715AbgBZWTl (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 26 Feb 2020 17:19:41 -0500
+Received: by mail-ot1-f65.google.com with SMTP id 66so999784otd.9;
+        Wed, 26 Feb 2020 14:19:40 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to:user-agent;
+        bh=sWyxiAEzeSmcElmr0LNMnTgSazdAG9/ZOCElmokQbC0=;
+        b=eCNQ1bdWelAWWtV12myftWYfi0mIzUn9TFdL12VQmYZL5pH9umxIaCdib3hWzerIVh
+         xd3sszSqbCDyPvFYL6T2ARhlNRaN8tfGlwxFDdUFL5O+A8FxJN72so5yBReAuLEuwaxj
+         Wm2cmwawaEj7KfNOFKQmp0vAXco9GUKyGtrYwCaqRG9tkI2dTSF2CE09D3C2g6Xc2chF
+         mkU9KiP9xSevUaNIm79qnePHOtcIIhAHgB7QmBKzbUkQ7yOJb8UJ6QbHkCciDuju524O
+         1dNQs95KXBgbS+UHc2WBLxfho603NCvy+IDzjiTsdUUI2CwYfJR3BfCRgEOMWYskbTIs
+         jPoQ==
+X-Gm-Message-State: APjAAAWJWMeRNEkmeicsfsS7u+qc0PIbFCJd/U8GqmPght53cUi8Xbks
+        VDVLKB5oZi7hYE+g504E9w==
+X-Google-Smtp-Source: APXvYqxcI1f7yAERZ6QtTzOxTYytk6rNbUmt2uL+TovzB/3tIvg04EuFZo6tZhS82ySexTPuu7HfIA==
+X-Received: by 2002:a9d:4d96:: with SMTP id u22mr690140otk.271.1582755580501;
+        Wed, 26 Feb 2020 14:19:40 -0800 (PST)
+Received: from rob-hp-laptop (24-155-109-49.dyn.grandenetworks.net. [24.155.109.49])
+        by smtp.gmail.com with ESMTPSA id h1sm1230129otm.34.2020.02.26.14.19.39
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 26 Feb 2020 14:19:39 -0800 (PST)
+Received: (nullmailer pid 3500 invoked by uid 1000);
+        Wed, 26 Feb 2020 22:19:39 -0000
+Date:   Wed, 26 Feb 2020 16:19:39 -0600
+From:   Rob Herring <robh@kernel.org>
+To:     Masahiro Yamada <yamada.masahiro@socionext.com>
+Cc:     devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        masahiroy@kernel.org,
+        Masahiro Yamada <yamada.masahiro@socionext.com>,
+        Mark Rutland <mark.rutland@arm.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Bjorn Helgaas <helgaas@kernel.org>,
-        Dominik Brodowski <linux@dominikbrodowski.net>,
-        Linux PCI <linux-pci@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Kris Cleveland <tridentperfusion@yahoo.com>,
-        Morgan Klym <moklym@gmail.com>,
-        Pierre Ossman <pierre@ossman.eu>,
-        Maxim Levitsky <maximlevitsky@gmail.com>,
-        linux-mmc@vger.kernel.org
-Subject: Re: PCI device function not being enumerated [Was: PCMCIA not working
- on Panasonic Toughbook CF-29]
-In-Reply-To: <CAFjuqNh8ja3maOFev4S9zOSi04yAvnyEo2GTTxjr1pbQvmAW=A@mail.gmail.com>
-References: <20191029170250.GA43972@google.com>
- <20200222165617.GA207731@google.com>
- <CAPDyKFq_exHufHyibFCjS78PTZ7duS9ZSt3vi18CNM6+jMmwnw@mail.gmail.com>
- <20200226011310.GA2116625@rani.riverdale.lan>
- <CAFjuqNg_NW7hcssWmMTtt=ioY143qn76ooT7GRhxEEe9ZVCqeQ@mail.gmail.com>
- <6e9db1f6-60c4-872b-c7c8-96ee411aa3ca@aol.com>
- <20200226045104.GA2191053@rani.riverdale.lan>
- <20200225212054.09865e0b@fido6>
- <CAFjuqNh8ja3maOFev4S9zOSi04yAvnyEo2GTTxjr1pbQvmAW=A@mail.gmail.com>
-Message-ID: <edab20f582d4402baeca9bb80e612ee2@willitsonline.com>
-X-Sender: bluerocksaddles@willitsonline.com
-User-Agent: Roundcube Webmail
+        linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
+Subject: Re: [PATCH] dt-bindings: mmc: Convert UniPhier SD controller to
+ json-schema
+Message-ID: <20200226221939.GA3373@bogus>
+References: <20200222112541.573-1-yamada.masahiro@socionext.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20200222112541.573-1-yamada.masahiro@socionext.com>
+User-Agent: Mutt/1.10.1 (2018-07-13)
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Somewhere in these messages is a clue....in that SD reader was involved.
+On Sat, 22 Feb 2020 20:25:41 +0900, Masahiro Yamada wrote:
+> Convert the UniPhier SD controller binding to DT schema format.
+> 
+> Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
+> ---
+> 
+> If there is a better way to describe reset-names,
+> please let me know.
+> 
+> 
+>  .../bindings/mmc/socionext,uniphier-sd.yaml   | 99 +++++++++++++++++++
+>  .../devicetree/bindings/mmc/uniphier-sd.txt   | 55 -----------
+>  2 files changed, 99 insertions(+), 55 deletions(-)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/socionext,uniphier-sd.yaml
+>  delete mode 100644 Documentation/devicetree/bindings/mmc/uniphier-sd.txt
+> 
 
-MK 4 and 5 have SD whilst MK 1, 2 and three do not.
+Applied, thanks.
 
-
-
-On 2020-02-25 22:10, Michael . wrote:
->> Someone with access to real hardware could
->> easily experiment with changing that magic value and seeing if it
->> changes which function is disabled.
-> 
-> One of our members has offered to supply a machine to a dev that can
-> use it to test any theory.
-> 
-> It is nearly beyond the scope of the majority of us to do much more
-> than just testing. We appreciate all the effort the devs put in and
-> are willing to help in anyway we can but we aren't kernel devs.
-> 
-> I, personally, use Debian. Others use Debian based distros such as MX
-> and Mint. We have been able to test many different distros such as
-> those listed in other comments but don't have the skills or expertise
-> to do much more. It is our hope that this discussion and subsequent
-> effort may enable others who prefer distros other than Debian based
-> distros can use a CF-29 (and possibly earlier) Toughbook with the
-> distro of their choice without having to rebuild a kernel so they can
-> use hardware that worked back in 2010. To do this the fix needs to be
-> at the kernel dev level not a local enthusiast level because while I
-> can rebuild a Debian kernel I can't rebuild a Fedora or Arch or
-> Slackware kernel.
-> 
-> I did a search about this issue before I made initial contact late
-> last year and the issue was discovered on more than Toughbooks and
-> posted about on various sites not long after distros moved from
-> 2.6.32. It seems back then people just got new machines that didn't
-> have a 2nd slot so the search for an answer stopped. Us Toughbook
-> users are a loyal group we use our machines because they are exactly
-> what we need and they take alot of "punishment" taht other machines
-> simply cannot handle. Our machines are used rather than recycled or
-> worse still just left to sit in waste management facilities in a
-> country that the western world dumps its rubbish in, we are Linux and
-> Toughbook enthusiasts and hope to be able to keep our machines running
-> for many years to come with all their native capabilities working as
-> they were designed to but using a modern Linux instead of Windows XP
-> or Windows 7. (that wasn't a pep talk, its just an explanation of why
-> we are passionate about this).
-> 
-> Let us know what you need us to do, we will let you know if we are
-> capable of it and give you any feedback you ask for. Over the weekend
-> I will try to rebuild a Debian kernel with the relevant option
-> disabled, provide it to my peers for testing and report back here what
-> the outcome is.
-> 
-> Thank you all for all your time and effort, it is truly appreciated.
-> Cheers.
-> Michael.
-> 
-> On 26/02/2020, Philip Langdale <philipl@overt.org> wrote:
->> On Tue, 25 Feb 2020 23:51:05 -0500
->> Arvind Sankar <nivedita@alum.mit.edu> wrote:
->> 
->>> On Tue, Feb 25, 2020 at 09:12:48PM -0600, Trevor Jacobs wrote:
->>> > That's correct, I tested a bunch of the old distros including
->>> > slackware, and 2.6.32 is where the problem began.
->>> >
->>> > Also, the Panasonic Toughbook CF-29s effected that we tested are
->>> > the later marks, MK4 and MK5 for certain. The MK2 CF-29 worked just
->>> > fine because it has different hardware supporting the PCMCIA slots.
->>> > I have not tested a MK3 but suspect it would work ok as it also
->>> > uses the older hardware.
->>> >
->>> > Thanks for your help guys!
->>> > Trevor
->>> >
->>> 
->>> Right, the distros probably all enabled MMC_RICOH_MMC earlier than
->>> upstream. Can you test a custom kernel based off your distro kernel
->>> but just disabling that config option? That's probably the easiest 
->>> fix
->>> currently, even though not ideal. Perhaps there should be a command
->>> line option to disable specific pci quirks to make this easier.
->>> 
->>> An ideal fix is I feel hard, given this quirk is based on 
->>> undocumented
->>> config registers -- it worked on Dell machines (that's where the
->>> original authors seem to have gotten their info from), perhaps they
->>> had only one Cardbus slot, but the code ends up disabling your second
->>> Cardbus slot instead of disabling the MMC controller.
->> 
->> Keeping in mind that this was 12+ years ago, you can at least still
->> read the original discussion in the archives. My original Dell laptop
->> (XPS m1330) had no cardbus slots at all, and used the r5c832
->> controller. There was a subsequent change that I was not involved with
->> which added support for the rl5c476, which is the problematic device 
->> in
->> this thread.
->> 
->> As a hypothesis, based on the observed behaviour, the quirk (keeping 
->> in
->> mind that these are magic configuration register values that are not
->> documented) probably disabled function 1, regardless of what it is, 
->> and
->> the original example that motivated adding the rl5c476 quirk probably
->> had one cardbus slot and the card reader functions were all moved up
->> one, or something along those lines.
->> 
->> Truly making this smart would then involve having the code enumerate
->> the pci functions and identify the one that is the unwanted mmc
->> controller, based on function ID or class or whatever, and then
->> disabling that (assuming the magic can be reverse engineered: eg, the
->> current magic ORs the disable flag with 0x02 - chances are, that's the
->> index of the function: 0x01 would be the 0th function, 0x04 would be
->> the 2nd function, etc). Someone with access to real hardware could
->> easily experiment with changing that magic value and seeing if it
->> changes which function is disabled.
->> 
->> Good luck.
->> 
->> --phil
->> 
+Rob
