@@ -2,257 +2,161 @@ Return-Path: <SRS0=M0wQ=4O=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-0.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 069E6C4BA0B
-	for <linux-mmc@archiver.kernel.org>; Wed, 26 Feb 2020 10:58:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9CFECC4BA15
+	for <linux-mmc@archiver.kernel.org>; Wed, 26 Feb 2020 15:22:22 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id B31F624688
-	for <linux-mmc@archiver.kernel.org>; Wed, 26 Feb 2020 10:58:24 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7496124688
+	for <linux-mmc@archiver.kernel.org>; Wed, 26 Feb 2020 15:22:22 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (1024-bit key) header.d=mg.codeaurora.org header.i=@mg.codeaurora.org header.b="AU9WY7wv"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="mXNFScEP"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727860AbgBZK6Y (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 26 Feb 2020 05:58:24 -0500
-Received: from mail26.static.mailgun.info ([104.130.122.26]:33513 "EHLO
-        mail26.static.mailgun.info" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726425AbgBZK6Y (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 26 Feb 2020 05:58:24 -0500
-DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
- s=smtp; t=1582714703; h=References: In-Reply-To: Message-Id: Date:
- Subject: Cc: To: From: Sender;
- bh=OfSsAupTVWfMR/Vnb306EBgKPtREPx2ttnB7Rk8POgc=; b=AU9WY7wvWJF1XkxXQkZ9fkolGbDKrDqlaIr7cO90eANHFmacDhIBSyun2DVar2ZOOYiR5hjE
- pbS5P5bqS3T0sxgmKQnoQ5KxX1OEEQHJmUpIjnbVMvxtA693e/aKqLk23aXLkC/EtIKa513N
- O6zpQ8cHYkj5WCrAXMet2c8GlIA=
-X-Mailgun-Sending-Ip: 104.130.122.26
-X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
-Received: from smtp.codeaurora.org (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171])
- by mxa.mailgun.org with ESMTP id 5e564f46.7efdad67db58-smtp-out-n03;
- Wed, 26 Feb 2020 10:58:14 -0000 (UTC)
-Received: by smtp.codeaurora.org (Postfix, from userid 1001)
-        id 47536C447A0; Wed, 26 Feb 2020 10:58:13 +0000 (UTC)
-Received: from vbadigan-linux.qualcomm.com (blr-c-bdr-fw-01_GlobalNAT_AllZones-Outside.qualcomm.com [103.229.19.19])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-SHA256 (128/128 bits))
-        (No client certificate requested)
-        (Authenticated sender: vbadigan)
-        by smtp.codeaurora.org (Postfix) with ESMTPSA id E520BC43383;
-        Wed, 26 Feb 2020 10:58:02 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.3.2 smtp.codeaurora.org E520BC43383
-Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
-Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=none smtp.mailfrom=vbadigan@codeaurora.org
-From:   Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
-To:     adrian.hunter@intel.com, ulf.hansson@linaro.org
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-msm@vger.kernel.org,
-        Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Allison Randal <allison@lohutok.net>,
-        Stephen Boyd <swboyd@chromium.org>,
-        Thomas Gleixner <tglx@linutronix.de>
-Subject: [PATCH V3] mmc: mmc_test: Pass different sg lists for non-blocking requests
-Date:   Wed, 26 Feb 2020 16:27:43 +0530
-Message-Id: <1582714668-17247-1-git-send-email-vbadigan@codeaurora.org>
-X-Mailer: git-send-email 1.9.1
-In-Reply-To: <1582105474-27866-1-git-send-email-vbadigan@codeaurora.org>
-References: <1582105474-27866-1-git-send-email-vbadigan@codeaurora.org>
+        id S1728037AbgBZPWV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 26 Feb 2020 10:22:21 -0500
+Received: from mail-vk1-f193.google.com ([209.85.221.193]:35072 "EHLO
+        mail-vk1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727023AbgBZPWU (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 26 Feb 2020 10:22:20 -0500
+Received: by mail-vk1-f193.google.com with SMTP id r5so355266vkf.2
+        for <linux-mmc@vger.kernel.org>; Wed, 26 Feb 2020 07:22:19 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=V8nWkCMD00cXwz4vSIcrFn9i/BES9/eV0AoGbar9kSU=;
+        b=mXNFScEPEXTZ4Y03CyiK+/TjkHLqnAjQPcxs+JNs+IyUVBpbdLw2mdhfel0dmuKPLk
+         W6OvSj/o0zdvXzCB9K+9m7F8SiVe1l183/R1TUoJcArgKBRRhoXq5crK7CUujf6EiXTA
+         PsnQ/ubtPHHwkYOhMOt3/D+OFo4vIsqkU3GrZh1Flo4rA1OijEUNJkjPl9z2qKTlgJIY
+         IE2tSomRkCv2tDlzf/anAOXlsMg+7A1wtK1hh+B9hCIcDrfBTNAYKxrpI8TS0hwqSio9
+         IQm2G/+ObyhefUuHtvD2xH8EEmoVoXNzjYR+CAhxeyhSzbk4rOgw2gQu8bs0ueut8kML
+         IoaQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=V8nWkCMD00cXwz4vSIcrFn9i/BES9/eV0AoGbar9kSU=;
+        b=s3TiU08YirUVxMMhiMSAt1QKDNzbYi6YO7FJNOkz3dixTZnEotoNR2tMx7mIax73AM
+         3+Cib6IetVCAUM6VDq7A3m4cnrSEcLAcXfp3Dc2Sy5s/XLHMOrOWTs7TtXG1KlgZYqTG
+         bG18nHglV4M8QnZcGfHEvyE4FpE8zu48fC3Y+johW+nfitkv4nksiQ7OZlb9ulUQLwW+
+         /qyPfyXf5zi8lAGPlfk4uuMOkvjf+ZD1lymBxCZtsnQPrTlzNSW5R6i6l9GcRIqQOdq/
+         fsVtyv428nUfYpmzMUebF5iRlms1VlxADerOoLPs7URJnNMuj4jQ9IWdW5+0cdSMfy0E
+         +rgQ==
+X-Gm-Message-State: APjAAAWe1fE3OV4jZbZTJeUIHeafIYl7Uig2E8+q+eawf6MyqZkpqAcv
+        24ht/X0ZoyLa/aUEVWvj9bcnKzli92nfJb074hk+vw==
+X-Google-Smtp-Source: APXvYqzF0V4RB8Y6fLHFPX/60gGn0XuOow45OeMPm8jjcH+gHUPO3SKB/DseAxYeF3stegFkmAxKJF8fZ82SZIMQzZc=
+X-Received: by 2002:a1f:914b:: with SMTP id t72mr4120155vkd.101.1582730538102;
+ Wed, 26 Feb 2020 07:22:18 -0800 (PST)
+MIME-Version: 1.0
+References: <CA+G9fYuqAQfhzF2BzHr7vMHx68bo8-jT+ob_F3eHQ3=oFjgYdg@mail.gmail.com>
+ <CAPDyKFqqhxC-pmV_j8PLY-D=AbqCAbiipAAHXLpJ4N_BiYYOFw@mail.gmail.com>
+ <CA+G9fYugQuAERqp3VXUFG-3QxXoF8bz7OSMh6WGSZcrGkbfDSQ@mail.gmail.com>
+ <CAPDyKFo-vEO7zN_F+NqcKtnKmAo_deOZx3gYNiks3yTAQAjv-Q@mail.gmail.com>
+ <a602a27a-b960-ce56-c541-3b4b95f5dce2@nvidia.com> <CAPDyKFrXQgtHa4gLaKUi_F0rs4FMBai3Y_+TcHZR_zpkb0B4QQ@mail.gmail.com>
+ <6523119a-50ac-973a-d1cd-ab1569259411@nvidia.com> <f960aa98-5508-36fd-166d-7f41c7d85154@nvidia.com>
+ <CAPDyKFokE6x0mn+v5B9=so-SyrdTn0JBU8Mrp3Zdu6kSaCie2g@mail.gmail.com> <0963b60f-15e7-4bc6-10df-6fc8003e4d42@nvidia.com>
+In-Reply-To: <0963b60f-15e7-4bc6-10df-6fc8003e4d42@nvidia.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Wed, 26 Feb 2020 16:21:42 +0100
+Message-ID: <CAPDyKFq5NoeHEBK3sv3yOSD2+pm9FueH1gaTyPq0j7GLfa6vnA@mail.gmail.com>
+Subject: Re: LKFT: arm x15: mmc1: cache flush error -110
+To:     Jon Hunter <jonathanh@nvidia.com>, Faiz Abbas <faiz_abbas@ti.com>,
+        Bitan Biswas <bbiswas@nvidia.com>
+Cc:     Sowjanya Komatineni <skomatineni@nvidia.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Naresh Kamboju <naresh.kamboju@linaro.org>,
+        Jens Axboe <axboe@kernel.dk>,
+        Alexei Starovoitov <ast@kernel.org>,
+        linux-block <linux-block@vger.kernel.org>,
+        lkft-triage@lists.linaro.org,
+        open list <linux-kernel@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Arnd Bergmann <arnd@arndb.de>,
+        John Stultz <john.stultz@linaro.org>,
+        Thierry Reding <treding@nvidia.com>,
+        Anders Roxell <anders.roxell@linaro.org>,
+        Kishon <kishon@ti.com>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Supply a separate sg list for each of the request in non-blocking
-IO test cases where two requests will be issued at same time.
++ Anders, Kishon
 
-Otherwise, sg memory may get unmapped when a request is done while
-same memory is being accessed by controller from the other request,
-and it leads to iommu errors with below call stack:
+On Tue, 25 Feb 2020 at 17:24, Jon Hunter <jonathanh@nvidia.com> wrote:
+>
+>
+> On 25/02/2020 14:26, Ulf Hansson wrote:
+>
+> ...
+>
+> > However, from the core point of view, the response is still requested,
+> > only that we don't want the driver to wait for the card to stop
+> > signaling busy. Instead we want to deal with that via "polling" from
+> > the core.
+> >
+> > This is a rather worrying behaviour, as it seems like the host driver
+> > doesn't really follow this expectations from the core point of view.
+> > And mmc_flush_cache() is not the only case, as we have erase, bkops,
+> > sanitize, etc. Are all these working or not really well tested?
+>
+> I don't believe that they are well tested. We have a simple test to
+> mount an eMMC partition, create a file, check the contents, remove the
+> file and unmount. The timeouts always occur during unmounting.
+>
+> > Earlier, before my three patches, if the provided timeout_ms parameter
+> > to __mmc_switch() was zero, which was the case for
+> > mmc_mmc_flush_cache() - this lead to that __mmc_switch() simply
+> > ignored validating host->max_busy_timeout, which was wrong. In any
+> > case, this also meant that an R1B response was always used for
+> > mmc_flush_cache(), as you also indicated above. Perhaps this is the
+> > critical part where things can go wrong.
+> >
+> > BTW, have you tried erase commands for sdhci tegra driver? If those
+> > are working fine, do you have any special treatments for these?
+>
+> That I am not sure, but I will check.
 
-	__arm_lpae_unmap+0x2e0/0x478
-	arm_lpae_unmap+0x54/0x70
-	arm_smmu_unmap+0x64/0xa4
-	__iommu_unmap+0xb8/0x1f0
-	iommu_unmap_fast+0x38/0x48
-	__iommu_dma_unmap+0x88/0x108
-	iommu_dma_unmap_sg+0x90/0xa4
-	sdhci_post_req+0x5c/0x78
-	mmc_test_start_areq+0x10c/0x120 [mmc_test]
-	mmc_test_area_io_seq+0x150/0x264 [mmc_test]
-	mmc_test_rw_multiple+0x174/0x1c0 [mmc_test]
-	mmc_test_rw_multiple_sg_len+0x44/0x6c [mmc_test]
-	mmc_test_profile_sglen_wr_nonblock_perf+0x6c/0x94 [mmc_test]
-	mtf_test_write+0x238/0x3cc [mmc_test]
+Great, thanks. Looking forward to your report.
 
-Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
-Reviewed-by: Stephen Boyd <swboyd@chromium.org>
-Tested-by: Sai Prakash Ranjan <saiprakash.ranjan@codeaurora.org>
----
-Changes since V2:
-	- Simplfied mmc_test_nonblock_transter() function aruguments.
+So, from my side, me and Anders Roxell, have been collaborating on
+testing the behaviour on a TI Beagleboard x15 (remotely with limited
+debug options), which is using the sdhci-omap variant. I am trying to
+get hold of an Nvidia jetson-TX2, but not found one yet. These are the
+conclusions from the observed behaviour on the Beagleboard for the
+CMD6 cache flush command.
 
-Changes since V1:
-	- Freeing-up sg_areq memory.                                        
-	- Added check to ensure sg length is equal for both the sg-lists    
-	  supplied in case of non-blocking requests.
----
- drivers/mmc/core/mmc_test.c | 52 ++++++++++++++++++++++++++++++++++-----------
- 1 file changed, 40 insertions(+), 12 deletions(-)
+First, the reported host->max_busy_timeout is 2581 (ms) for the
+sdhci-omap driver in this configuration.
 
-diff --git a/drivers/mmc/core/mmc_test.c b/drivers/mmc/core/mmc_test.c
-index 492dd45..c21b3cb 100644
---- a/drivers/mmc/core/mmc_test.c
-+++ b/drivers/mmc/core/mmc_test.c
-@@ -71,6 +71,7 @@ struct mmc_test_mem {
-  * @sg_len: length of currently mapped scatterlist @sg
-  * @mem: allocated memory
-  * @sg: scatterlist
-+ * @sg_areq: scatterlist for non-blocking request
-  */
- struct mmc_test_area {
- 	unsigned long max_sz;
-@@ -82,6 +83,7 @@ struct mmc_test_area {
- 	unsigned int sg_len;
- 	struct mmc_test_mem *mem;
- 	struct scatterlist *sg;
-+	struct scatterlist *sg_areq;
- };
- 
- /**
-@@ -836,14 +838,16 @@ static int mmc_test_start_areq(struct mmc_test_card *test,
- }
- 
- static int mmc_test_nonblock_transfer(struct mmc_test_card *test,
--				      struct scatterlist *sg, unsigned sg_len,
--				      unsigned dev_addr, unsigned blocks,
--				      unsigned blksz, int write, int count)
-+				      unsigned int dev_addr, int write,
-+				      int count)
- {
- 	struct mmc_test_req *rq1, *rq2;
- 	struct mmc_request *mrq, *prev_mrq;
- 	int i;
- 	int ret = RESULT_OK;
-+	struct mmc_test_area *t = &test->area;
-+	struct scatterlist *sg = t->sg;
-+	struct scatterlist *sg_areq = t->sg_areq;
- 
- 	rq1 = mmc_test_req_alloc();
- 	rq2 = mmc_test_req_alloc();
-@@ -857,8 +861,8 @@ static int mmc_test_nonblock_transfer(struct mmc_test_card *test,
- 
- 	for (i = 0; i < count; i++) {
- 		mmc_test_req_reset(container_of(mrq, struct mmc_test_req, mrq));
--		mmc_test_prepare_mrq(test, mrq, sg, sg_len, dev_addr, blocks,
--				     blksz, write);
-+		mmc_test_prepare_mrq(test, mrq, sg, t->sg_len, dev_addr,
-+				     t->blocks, 512, write);
- 		ret = mmc_test_start_areq(test, mrq, prev_mrq);
- 		if (ret)
- 			goto err;
-@@ -867,7 +871,8 @@ static int mmc_test_nonblock_transfer(struct mmc_test_card *test,
- 			prev_mrq = &rq2->mrq;
- 
- 		swap(mrq, prev_mrq);
--		dev_addr += blocks;
-+		swap(sg, sg_areq);
-+		dev_addr += t->blocks;
- 	}
- 
- 	ret = mmc_test_start_areq(test, NULL, prev_mrq);
-@@ -1396,10 +1401,11 @@ static int mmc_test_no_highmem(struct mmc_test_card *test)
-  * Map sz bytes so that it can be transferred.
-  */
- static int mmc_test_area_map(struct mmc_test_card *test, unsigned long sz,
--			     int max_scatter, int min_sg_len)
-+			     int max_scatter, int min_sg_len, bool nonblock)
- {
- 	struct mmc_test_area *t = &test->area;
- 	int err;
-+	unsigned int sg_len = 0;
- 
- 	t->blocks = sz >> 9;
- 
-@@ -1411,6 +1417,22 @@ static int mmc_test_area_map(struct mmc_test_card *test, unsigned long sz,
- 		err = mmc_test_map_sg(t->mem, sz, t->sg, 1, t->max_segs,
- 				      t->max_seg_sz, &t->sg_len, min_sg_len);
- 	}
-+
-+	if (err || !nonblock)
-+		goto err;
-+
-+	if (max_scatter) {
-+		err = mmc_test_map_sg_max_scatter(t->mem, sz, t->sg_areq,
-+						  t->max_segs, t->max_seg_sz,
-+						  &sg_len);
-+	} else {
-+		err = mmc_test_map_sg(t->mem, sz, t->sg_areq, 1, t->max_segs,
-+				      t->max_seg_sz, &sg_len, min_sg_len);
-+	}
-+	if (!err && sg_len != t->sg_len)
-+		err = -EINVAL;
-+
-+err:
- 	if (err)
- 		pr_info("%s: Failed to map sg list\n",
- 		       mmc_hostname(test->card->host));
-@@ -1440,7 +1462,6 @@ static int mmc_test_area_io_seq(struct mmc_test_card *test, unsigned long sz,
- 	struct timespec64 ts1, ts2;
- 	int ret = 0;
- 	int i;
--	struct mmc_test_area *t = &test->area;
- 
- 	/*
- 	 * In the case of a maximally scattered transfer, the maximum transfer
-@@ -1458,15 +1479,14 @@ static int mmc_test_area_io_seq(struct mmc_test_card *test, unsigned long sz,
- 			sz = max_tfr;
- 	}
- 
--	ret = mmc_test_area_map(test, sz, max_scatter, min_sg_len);
-+	ret = mmc_test_area_map(test, sz, max_scatter, min_sg_len, nonblock);
- 	if (ret)
- 		return ret;
- 
- 	if (timed)
- 		ktime_get_ts64(&ts1);
- 	if (nonblock)
--		ret = mmc_test_nonblock_transfer(test, t->sg, t->sg_len,
--				 dev_addr, t->blocks, 512, write, count);
-+		ret = mmc_test_nonblock_transfer(test, dev_addr, write, count);
- 	else
- 		for (i = 0; i < count && ret == 0; i++) {
- 			ret = mmc_test_area_transfer(test, dev_addr, write);
-@@ -1525,6 +1545,7 @@ static int mmc_test_area_cleanup(struct mmc_test_card *test)
- 	struct mmc_test_area *t = &test->area;
- 
- 	kfree(t->sg);
-+	kfree(t->sg_areq);
- 	mmc_test_free_mem(t->mem);
- 
- 	return 0;
-@@ -1584,6 +1605,13 @@ static int mmc_test_area_init(struct mmc_test_card *test, int erase, int fill)
- 		goto out_free;
- 	}
- 
-+	t->sg_areq = kmalloc_array(t->max_segs, sizeof(*t->sg_areq),
-+				   GFP_KERNEL);
-+	if (!t->sg_areq) {
-+		ret = -ENOMEM;
-+		goto out_free;
-+	}
-+
- 	t->dev_addr = mmc_test_capacity(test->card) / 2;
- 	t->dev_addr -= t->dev_addr % (t->max_sz >> 9);
- 
-@@ -2468,7 +2496,7 @@ static int __mmc_test_cmds_during_tfr(struct mmc_test_card *test,
- 	if (!(test->card->host->caps & MMC_CAP_CMD_DURING_TFR))
- 		return RESULT_UNSUP_HOST;
- 
--	ret = mmc_test_area_map(test, sz, 0, 0);
-+	ret = mmc_test_area_map(test, sz, 0, 0, use_areq);
- 	if (ret)
- 		return ret;
- 
--- 
-Qualcomm India Private Limited, on behalf of Qualcomm Innovation Center, Inc., is a member of Code Aurora Forum, a Linux Foundation Collaborative Project
+1. As we all know by now, the cache flush command (CMD6) fails with
+-110 currently. This is when MMC_CACHE_FLUSH_TIMEOUT_MS is set to 30 *
+1000 (30s), which means __mmc_switch() drops the MMC_RSP_BUSY flag
+from the command.
+
+2. Changing the MMC_CACHE_FLUSH_TIMEOUT_MS to 2000 (2s), means that
+the MMC_RSP_BUSY flag becomes set by __mmc_switch, because of the
+timeout_ms parameter is less than max_busy_timeout (2000 <  2581).
+Then everything works fine.
+
+3. Updating the code to again use 30s as the
+MMC_CACHE_FLUSH_TIMEOUT_MS, but instead forcing the MMC_RSP_BUSY to be
+set, even when the timeout_ms becomes greater than max_busy_timeout.
+This also works fine.
+
+Clearly this indicates a problem that I think needs to be addressed in
+the sdhci driver. However, of course I can revert the three discussed
+patches to fix the problem, but that would only hide the issues and I
+am sure we would then get back to this issue, sooner or later.
+
+To fix the problem in the sdhci driver, I would appreciate if someone
+from TI and Nvidia can step in to help, as I don't have the HW on my
+desk.
+
+Comments or other ideas of how to move forward?
+
+Kind regards
+Uffe
