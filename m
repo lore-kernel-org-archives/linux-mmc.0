@@ -2,175 +2,190 @@ Return-Path: <SRS0=M0wQ=4O=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
+X-Spam-Status: No, score=-0.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C7324C4BA13
-	for <linux-mmc@archiver.kernel.org>; Wed, 26 Feb 2020 17:05:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E848DC4BA24
+	for <linux-mmc@archiver.kernel.org>; Wed, 26 Feb 2020 19:46:54 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 95A9124687
-	for <linux-mmc@archiver.kernel.org>; Wed, 26 Feb 2020 17:05:07 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=nvidia.com header.i=@nvidia.com header.b="p/bZ0fff"
+	by mail.kernel.org (Postfix) with ESMTP id B8D3F20838
+	for <linux-mmc@archiver.kernel.org>; Wed, 26 Feb 2020 19:46:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728086AbgBZRFC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 26 Feb 2020 12:05:02 -0500
-Received: from hqnvemgate24.nvidia.com ([216.228.121.143]:17429 "EHLO
-        hqnvemgate24.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727470AbgBZRFC (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 26 Feb 2020 12:05:02 -0500
-Received: from hqpgpgate101.nvidia.com (Not Verified[216.228.121.13]) by hqnvemgate24.nvidia.com (using TLS: TLSv1.2, DES-CBC3-SHA)
-        id <B5e56a4ee0000>; Wed, 26 Feb 2020 09:03:42 -0800
-Received: from hqmail.nvidia.com ([172.20.161.6])
-  by hqpgpgate101.nvidia.com (PGP Universal service);
-  Wed, 26 Feb 2020 09:05:00 -0800
-X-PGP-Universal: processed;
-        by hqpgpgate101.nvidia.com on Wed, 26 Feb 2020 09:05:00 -0800
-Received: from [10.21.133.51] (10.124.1.5) by HQMAIL107.nvidia.com
- (172.20.187.13) with Microsoft SMTP Server (TLS) id 15.0.1473.3; Wed, 26 Feb
- 2020 17:04:56 +0000
-Subject: Re: LKFT: arm x15: mmc1: cache flush error -110
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Faiz Abbas <faiz_abbas@ti.com>,
-        Bitan Biswas <bbiswas@nvidia.com>
-CC:     Sowjanya Komatineni <skomatineni@nvidia.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Naresh Kamboju <naresh.kamboju@linaro.org>,
-        "Jens Axboe" <axboe@kernel.dk>,
-        Alexei Starovoitov <ast@kernel.org>,
-        linux-block <linux-block@vger.kernel.org>,
-        <lkft-triage@lists.linaro.org>,
-        open list <linux-kernel@vger.kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Arnd Bergmann <arnd@arndb.de>,
-        John Stultz <john.stultz@linaro.org>,
-        Thierry Reding <treding@nvidia.com>,
-        Anders Roxell <anders.roxell@linaro.org>,
-        Kishon <kishon@ti.com>
-References: <CA+G9fYuqAQfhzF2BzHr7vMHx68bo8-jT+ob_F3eHQ3=oFjgYdg@mail.gmail.com>
- <CAPDyKFqqhxC-pmV_j8PLY-D=AbqCAbiipAAHXLpJ4N_BiYYOFw@mail.gmail.com>
- <CA+G9fYugQuAERqp3VXUFG-3QxXoF8bz7OSMh6WGSZcrGkbfDSQ@mail.gmail.com>
- <CAPDyKFo-vEO7zN_F+NqcKtnKmAo_deOZx3gYNiks3yTAQAjv-Q@mail.gmail.com>
- <a602a27a-b960-ce56-c541-3b4b95f5dce2@nvidia.com>
- <CAPDyKFrXQgtHa4gLaKUi_F0rs4FMBai3Y_+TcHZR_zpkb0B4QQ@mail.gmail.com>
- <6523119a-50ac-973a-d1cd-ab1569259411@nvidia.com>
- <f960aa98-5508-36fd-166d-7f41c7d85154@nvidia.com>
- <CAPDyKFokE6x0mn+v5B9=so-SyrdTn0JBU8Mrp3Zdu6kSaCie2g@mail.gmail.com>
- <0963b60f-15e7-4bc6-10df-6fc8003e4d42@nvidia.com>
- <CAPDyKFq5NoeHEBK3sv3yOSD2+pm9FueH1gaTyPq0j7GLfa6vnA@mail.gmail.com>
-From:   Jon Hunter <jonathanh@nvidia.com>
-Message-ID: <f1711223-91ba-c567-2983-b4783aa7601b@nvidia.com>
-Date:   Wed, 26 Feb 2020 17:04:54 +0000
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.4.1
+        id S1727253AbgBZTqx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 26 Feb 2020 14:46:53 -0500
+Received: from mail.willitsonline.com ([216.7.65.54]:39486 "EHLO
+        mail.willitsonline.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727250AbgBZTqx (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 26 Feb 2020 14:46:53 -0500
+Received: from localhost (localhost.localdomain [127.0.0.1])
+        by mail.willitsonline.com (Postfix) with ESMTP id 59215111D89
+        for <linux-mmc@vger.kernel.org>; Wed, 26 Feb 2020 11:46:52 -0800 (PST)
+X-Virus-Scanned: Debian amavisd-new at iredmail2.willitsonline.com
+Received: from mail.willitsonline.com ([127.0.0.1])
+        by localhost (iredmail2.willitsonline.com [127.0.0.1]) (amavisd-new, port 10024)
+        with ESMTP id LY9dKP7ZBb8R for <linux-mmc@vger.kernel.org>;
+        Wed, 26 Feb 2020 11:46:52 -0800 (PST)
+Received: from _ (localhost.localdomain [127.0.0.1])
+        (Authenticated sender: bluerocksaddles@willitsonline.com)
+        by mail.willitsonline.com (Postfix) with ESMTPSA id AF76A111D7A;
+        Wed, 26 Feb 2020 11:46:36 -0800 (PST)
 MIME-Version: 1.0
-In-Reply-To: <CAPDyKFq5NoeHEBK3sv3yOSD2+pm9FueH1gaTyPq0j7GLfa6vnA@mail.gmail.com>
-X-Originating-IP: [10.124.1.5]
-X-ClientProxiedBy: HQMAIL101.nvidia.com (172.20.187.10) To
- HQMAIL107.nvidia.com (172.20.187.13)
-Content-Type: text/plain; charset="utf-8"
-Content-Language: en-US
+Content-Type: text/plain; charset=US-ASCII;
+ format=flowed
 Content-Transfer-Encoding: 7bit
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nvidia.com; s=n1;
-        t=1582736623; bh=6D+i0xe21mqqX6n5OUovAjoW11aRjUA9+tewaNzxrek=;
-        h=X-PGP-Universal:Subject:To:CC:References:From:Message-ID:Date:
-         User-Agent:MIME-Version:In-Reply-To:X-Originating-IP:
-         X-ClientProxiedBy:Content-Type:Content-Language:
-         Content-Transfer-Encoding;
-        b=p/bZ0fff0n82hLSAwmcx0IFIA2eqFqLqQpyfZXDEcFPIUummqVfxXcQTIuqyWF1/i
-         SK/uMll2Si5bisQfKYh75ukgPugxg8f5/KJxFg5Tvyqxit8Zt0NkpaME9B18VW1yuW
-         JS0E1SOHEMh+5MYI7tHYpzV4sOHKWFn5VCNdIRLYbxNidMpYk2T5S5Ys9L511i8e9C
-         /p/NOzHkP9Ju5PZj83rIjEHNOtbqWncEHAArlMGWO6iKfvDzpmcDdRWl7Guy+uXUQT
-         /ShWW4i3pz16zR9rs4UhROn0VeKrSGkYunKEGxUh6mwVYDBCjAseQt3DxiwjneA60T
-         GUOFOGxsNEouA==
+Date:   Wed, 26 Feb 2020 11:46:36 -0800
+From:   bluerocksaddles@willitsonline.com
+To:     "Michael ." <keltoiboy@gmail.com>
+Cc:     Philip Langdale <philipl@overt.org>,
+        Arvind Sankar <nivedita@alum.mit.edu>,
+        Trevor Jacobs <trevor_jacobs@aol.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Bjorn Helgaas <helgaas@kernel.org>,
+        Dominik Brodowski <linux@dominikbrodowski.net>,
+        Linux PCI <linux-pci@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        Kris Cleveland <tridentperfusion@yahoo.com>,
+        Morgan Klym <moklym@gmail.com>,
+        Pierre Ossman <pierre@ossman.eu>,
+        Maxim Levitsky <maximlevitsky@gmail.com>,
+        linux-mmc@vger.kernel.org
+Subject: Re: PCI device function not being enumerated [Was: PCMCIA not working
+ on Panasonic Toughbook CF-29]
+In-Reply-To: <CAFjuqNh8ja3maOFev4S9zOSi04yAvnyEo2GTTxjr1pbQvmAW=A@mail.gmail.com>
+References: <20191029170250.GA43972@google.com>
+ <20200222165617.GA207731@google.com>
+ <CAPDyKFq_exHufHyibFCjS78PTZ7duS9ZSt3vi18CNM6+jMmwnw@mail.gmail.com>
+ <20200226011310.GA2116625@rani.riverdale.lan>
+ <CAFjuqNg_NW7hcssWmMTtt=ioY143qn76ooT7GRhxEEe9ZVCqeQ@mail.gmail.com>
+ <6e9db1f6-60c4-872b-c7c8-96ee411aa3ca@aol.com>
+ <20200226045104.GA2191053@rani.riverdale.lan>
+ <20200225212054.09865e0b@fido6>
+ <CAFjuqNh8ja3maOFev4S9zOSi04yAvnyEo2GTTxjr1pbQvmAW=A@mail.gmail.com>
+Message-ID: <edab20f582d4402baeca9bb80e612ee2@willitsonline.com>
+X-Sender: bluerocksaddles@willitsonline.com
+User-Agent: Roundcube Webmail
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Somewhere in these messages is a clue....in that SD reader was involved.
 
-On 26/02/2020 15:21, Ulf Hansson wrote:
-> + Anders, Kishon
-> 
-> On Tue, 25 Feb 2020 at 17:24, Jon Hunter <jonathanh@nvidia.com> wrote:
->>
->>
->> On 25/02/2020 14:26, Ulf Hansson wrote:
->>
->> ...
->>
->>> However, from the core point of view, the response is still requested,
->>> only that we don't want the driver to wait for the card to stop
->>> signaling busy. Instead we want to deal with that via "polling" from
->>> the core.
->>>
->>> This is a rather worrying behaviour, as it seems like the host driver
->>> doesn't really follow this expectations from the core point of view.
->>> And mmc_flush_cache() is not the only case, as we have erase, bkops,
->>> sanitize, etc. Are all these working or not really well tested?
->>
->> I don't believe that they are well tested. We have a simple test to
->> mount an eMMC partition, create a file, check the contents, remove the
->> file and unmount. The timeouts always occur during unmounting.
->>
->>> Earlier, before my three patches, if the provided timeout_ms parameter
->>> to __mmc_switch() was zero, which was the case for
->>> mmc_mmc_flush_cache() - this lead to that __mmc_switch() simply
->>> ignored validating host->max_busy_timeout, which was wrong. In any
->>> case, this also meant that an R1B response was always used for
->>> mmc_flush_cache(), as you also indicated above. Perhaps this is the
->>> critical part where things can go wrong.
->>>
->>> BTW, have you tried erase commands for sdhci tegra driver? If those
->>> are working fine, do you have any special treatments for these?
->>
->> That I am not sure, but I will check.
-> 
-> Great, thanks. Looking forward to your report.
+MK 4 and 5 have SD whilst MK 1, 2 and three do not.
 
-So no I don't believe that we have explicitly tried erase commands and
-no there is nothing special that we are doing for erase.
 
-> So, from my side, me and Anders Roxell, have been collaborating on
-> testing the behaviour on a TI Beagleboard x15 (remotely with limited
-> debug options), which is using the sdhci-omap variant. I am trying to
-> get hold of an Nvidia jetson-TX2, but not found one yet. These are the
-> conclusions from the observed behaviour on the Beagleboard for the
-> CMD6 cache flush command.
-> 
-> First, the reported host->max_busy_timeout is 2581 (ms) for the
-> sdhci-omap driver in this configuration.
-> 
-> 1. As we all know by now, the cache flush command (CMD6) fails with
-> -110 currently. This is when MMC_CACHE_FLUSH_TIMEOUT_MS is set to 30 *
-> 1000 (30s), which means __mmc_switch() drops the MMC_RSP_BUSY flag
-> from the command.
-> 
-> 2. Changing the MMC_CACHE_FLUSH_TIMEOUT_MS to 2000 (2s), means that
-> the MMC_RSP_BUSY flag becomes set by __mmc_switch, because of the
-> timeout_ms parameter is less than max_busy_timeout (2000 <  2581).
-> Then everything works fine.
-> 
-> 3. Updating the code to again use 30s as the
-> MMC_CACHE_FLUSH_TIMEOUT_MS, but instead forcing the MMC_RSP_BUSY to be
-> set, even when the timeout_ms becomes greater than max_busy_timeout.
-> This also works fine.
-> 
-> Clearly this indicates a problem that I think needs to be addressed in
-> the sdhci driver. However, of course I can revert the three discussed
-> patches to fix the problem, but that would only hide the issues and I
-> am sure we would then get back to this issue, sooner or later.
-> 
-> To fix the problem in the sdhci driver, I would appreciate if someone
-> from TI and Nvidia can step in to help, as I don't have the HW on my
-> desk.
 
-OK, let me check to see who can help from our side.
-
-Cheers
-Jon
-
--- 
-nvpublic
+On 2020-02-25 22:10, Michael . wrote:
+>> Someone with access to real hardware could
+>> easily experiment with changing that magic value and seeing if it
+>> changes which function is disabled.
+> 
+> One of our members has offered to supply a machine to a dev that can
+> use it to test any theory.
+> 
+> It is nearly beyond the scope of the majority of us to do much more
+> than just testing. We appreciate all the effort the devs put in and
+> are willing to help in anyway we can but we aren't kernel devs.
+> 
+> I, personally, use Debian. Others use Debian based distros such as MX
+> and Mint. We have been able to test many different distros such as
+> those listed in other comments but don't have the skills or expertise
+> to do much more. It is our hope that this discussion and subsequent
+> effort may enable others who prefer distros other than Debian based
+> distros can use a CF-29 (and possibly earlier) Toughbook with the
+> distro of their choice without having to rebuild a kernel so they can
+> use hardware that worked back in 2010. To do this the fix needs to be
+> at the kernel dev level not a local enthusiast level because while I
+> can rebuild a Debian kernel I can't rebuild a Fedora or Arch or
+> Slackware kernel.
+> 
+> I did a search about this issue before I made initial contact late
+> last year and the issue was discovered on more than Toughbooks and
+> posted about on various sites not long after distros moved from
+> 2.6.32. It seems back then people just got new machines that didn't
+> have a 2nd slot so the search for an answer stopped. Us Toughbook
+> users are a loyal group we use our machines because they are exactly
+> what we need and they take alot of "punishment" taht other machines
+> simply cannot handle. Our machines are used rather than recycled or
+> worse still just left to sit in waste management facilities in a
+> country that the western world dumps its rubbish in, we are Linux and
+> Toughbook enthusiasts and hope to be able to keep our machines running
+> for many years to come with all their native capabilities working as
+> they were designed to but using a modern Linux instead of Windows XP
+> or Windows 7. (that wasn't a pep talk, its just an explanation of why
+> we are passionate about this).
+> 
+> Let us know what you need us to do, we will let you know if we are
+> capable of it and give you any feedback you ask for. Over the weekend
+> I will try to rebuild a Debian kernel with the relevant option
+> disabled, provide it to my peers for testing and report back here what
+> the outcome is.
+> 
+> Thank you all for all your time and effort, it is truly appreciated.
+> Cheers.
+> Michael.
+> 
+> On 26/02/2020, Philip Langdale <philipl@overt.org> wrote:
+>> On Tue, 25 Feb 2020 23:51:05 -0500
+>> Arvind Sankar <nivedita@alum.mit.edu> wrote:
+>> 
+>>> On Tue, Feb 25, 2020 at 09:12:48PM -0600, Trevor Jacobs wrote:
+>>> > That's correct, I tested a bunch of the old distros including
+>>> > slackware, and 2.6.32 is where the problem began.
+>>> >
+>>> > Also, the Panasonic Toughbook CF-29s effected that we tested are
+>>> > the later marks, MK4 and MK5 for certain. The MK2 CF-29 worked just
+>>> > fine because it has different hardware supporting the PCMCIA slots.
+>>> > I have not tested a MK3 but suspect it would work ok as it also
+>>> > uses the older hardware.
+>>> >
+>>> > Thanks for your help guys!
+>>> > Trevor
+>>> >
+>>> 
+>>> Right, the distros probably all enabled MMC_RICOH_MMC earlier than
+>>> upstream. Can you test a custom kernel based off your distro kernel
+>>> but just disabling that config option? That's probably the easiest 
+>>> fix
+>>> currently, even though not ideal. Perhaps there should be a command
+>>> line option to disable specific pci quirks to make this easier.
+>>> 
+>>> An ideal fix is I feel hard, given this quirk is based on 
+>>> undocumented
+>>> config registers -- it worked on Dell machines (that's where the
+>>> original authors seem to have gotten their info from), perhaps they
+>>> had only one Cardbus slot, but the code ends up disabling your second
+>>> Cardbus slot instead of disabling the MMC controller.
+>> 
+>> Keeping in mind that this was 12+ years ago, you can at least still
+>> read the original discussion in the archives. My original Dell laptop
+>> (XPS m1330) had no cardbus slots at all, and used the r5c832
+>> controller. There was a subsequent change that I was not involved with
+>> which added support for the rl5c476, which is the problematic device 
+>> in
+>> this thread.
+>> 
+>> As a hypothesis, based on the observed behaviour, the quirk (keeping 
+>> in
+>> mind that these are magic configuration register values that are not
+>> documented) probably disabled function 1, regardless of what it is, 
+>> and
+>> the original example that motivated adding the rl5c476 quirk probably
+>> had one cardbus slot and the card reader functions were all moved up
+>> one, or something along those lines.
+>> 
+>> Truly making this smart would then involve having the code enumerate
+>> the pci functions and identify the one that is the unwanted mmc
+>> controller, based on function ID or class or whatever, and then
+>> disabling that (assuming the magic can be reverse engineered: eg, the
+>> current magic ORs the disable flag with 0x02 - chances are, that's the
+>> index of the function: 0x01 would be the 0th function, 0x04 would be
+>> the 2nd function, etc). Someone with access to real hardware could
+>> easily experiment with changing that magic value and seeing if it
+>> changes which function is disabled.
+>> 
+>> Good luck.
+>> 
+>> --phil
+>> 
