@@ -7,52 +7,51 @@ X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6D8F9C3F2C0
-	for <linux-mmc@archiver.kernel.org>; Thu, 27 Feb 2020 22:06:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 78CDBC3F2C2
+	for <linux-mmc@archiver.kernel.org>; Thu, 27 Feb 2020 22:06:56 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 3E9E824677
-	for <linux-mmc@archiver.kernel.org>; Thu, 27 Feb 2020 22:06:55 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4E61B24677
+	for <linux-mmc@archiver.kernel.org>; Thu, 27 Feb 2020 22:06:56 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (1024-bit key) header.d=mg.codeaurora.org header.i=@mg.codeaurora.org header.b="S3jj8Bn1"
+	dkim=fail reason="signature verification failed" (1024-bit key) header.d=mg.codeaurora.org header.i=@mg.codeaurora.org header.b="PcbigOoi"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730149AbgB0WGy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 27 Feb 2020 17:06:54 -0500
-Received: from mail26.static.mailgun.info ([104.130.122.26]:22455 "EHLO
-        mail26.static.mailgun.info" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1730189AbgB0WGy (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Feb 2020 17:06:54 -0500
+        id S1730124AbgB0WGz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 27 Feb 2020 17:06:55 -0500
+Received: from mail27.static.mailgun.info ([104.130.122.27]:33694 "EHLO
+        mail27.static.mailgun.info" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1730193AbgB0WGz (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Feb 2020 17:06:55 -0500
 DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
- s=smtp; t=1582841213; h=References: In-Reply-To: References:
+ s=smtp; t=1582841215; h=References: In-Reply-To: References:
  In-Reply-To: Message-Id: Date: Subject: Cc: To: From: Sender;
- bh=KA5SegCo5AW0cExJCz9BWH9qh1K5CDu6sI3vMXYPwJc=; b=S3jj8Bn127oG/+b1JpXKOds8/FS8ZwYdRIasUENwuZL5nbgWk1sIn1W8+PVo44bOAXnhYemr
- ZEp3uaGkh1Jht5KZU5HbnL0Z4jJ8aSJSgfNVdOawrzOHnLMIpKHm0MdPHfx7bL1KBg1Fq6f8
- NlU38gBoBQF+LvuAHpP8HuXCy2c=
-X-Mailgun-Sending-Ip: 104.130.122.26
+ bh=L/9SUsWK5WY0wqLmzTMtMyIuQW4B95fp9pq2zAfiob4=; b=PcbigOoitxeSzyVso3c1lfByLTR3k09JYn2MarBjChR2UqcmAaZCHKtKceSEU02f3+ojFyi+
+ lXYt3C9MRAi2MQTnUjaNnlfYKKkFBi7AAqy6wkN8L2ObkOfURuUCN0i+VBmSXA38XlSFKZ/0
+ bdiSSeO/YuKD8B64HoJlR4t6Srk=
+X-Mailgun-Sending-Ip: 104.130.122.27
 X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
 Received: from smtp.codeaurora.org (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171])
- by mxa.mailgun.org with ESMTP id 5e583d71.7fb467084030-smtp-out-n03;
- Thu, 27 Feb 2020 22:06:41 -0000 (UTC)
+ by mxa.mailgun.org with ESMTP id 5e583d70.7f0c0f1d6880-smtp-out-n01;
+ Thu, 27 Feb 2020 22:06:40 -0000 (UTC)
 Received: by smtp.codeaurora.org (Postfix, from userid 1001)
-        id 16488C447A0; Thu, 27 Feb 2020 22:06:40 +0000 (UTC)
+        id 1380CC447A3; Thu, 27 Feb 2020 22:06:39 +0000 (UTC)
 Received: from pacamara-linux.qualcomm.com (i-global254.qualcomm.com [199.106.103.254])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-SHA256 (128/128 bits))
         (No client certificate requested)
         (Authenticated sender: nguyenb)
-        by smtp.codeaurora.org (Postfix) with ESMTPSA id 2ED8FC43383;
-        Thu, 27 Feb 2020 22:06:39 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.3.2 smtp.codeaurora.org 2ED8FC43383
+        by smtp.codeaurora.org (Postfix) with ESMTPSA id 7BAE5C43383;
+        Thu, 27 Feb 2020 22:06:37 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.3.2 smtp.codeaurora.org 7BAE5C43383
 Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
 Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=none smtp.mailfrom=nguyenb@codeaurora.org
 From:   "Bao D. Nguyen" <nguyenb@codeaurora.org>
 To:     ulf.hansson@linaro.org, robh+dt@kernel.org,
         linux-scsi@vger.kernel.org
 Cc:     linux-mmc@vger.kernel.org, asutoshd@codeaurora.org,
-        cang@codeaurora.org, Sahitya Tummala <stummala@codeaurora.org>,
-        linux-arm-msm@vger.kernel.org,
-        "Bao D. Nguyen" <nguyenb@codeaurora.org>
-Subject: [<PATCH v1> 4/4] mmc: core: update host->card after getting RCA for SD card
-Date:   Thu, 27 Feb 2020 14:05:42 -0800
-Message-Id: <630eb41f01456cd862495166b9cef2b36ae2861e.1582839544.git.nguyenb@codeaurora.org>
+        cang@codeaurora.org, "Bao D. Nguyen" <nguyenb@codeaurora.org>,
+        linux-arm-msm@vger.kernel.org
+Subject: [<PATCH v1> 1/4] mmc: core: Add check for NULL pointer access
+Date:   Thu, 27 Feb 2020 14:05:39 -0800
+Message-Id: <b328b981a785525b8424b4ab2197dc1ec54417d1.1582839544.git.nguyenb@codeaurora.org>
 X-Mailer: git-send-email 1.9.1
 In-Reply-To: <cover.1582839544.git.nguyenb@codeaurora.org>
 References: <cover.1582839544.git.nguyenb@codeaurora.org>
@@ -63,54 +62,47 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Sahitya Tummala <stummala@codeaurora.org>
+If the SD card is removed, the mmc_card pointer can be set to NULL
+by the mmc_sd_remove() function. Check mmc_card pointer to avoid NULL
+pointer access.
 
-Make the host->card available before tuning is invoked for SD card.
-In the sdhci_msm_execute_tuning(), we will send CMD13 only if
-host->card is present because it needs the card->rca as its
-argument to be sent. For emmc, host->card is already updated
-immediately after the mmc_alloc_card(). In the similar way,
-this change is for SD card. Without this change, tuning functionality
-will not be able to send CMD13 to make sure the card is ready
-for next data command. If the last tuning command failed
-and we did not send CMD13 to ensure card is in transfer state,
-the next read/write command will fail.
-
-Signed-off-by: Sahitya Tummala <stummala@codeaurora.org>
 Signed-off-by: Bao D. Nguyen <nguyenb@codeaurora.org>
 Signed-off-by: Asutosh Das <asutoshd@codeaurora.org>
 ---
- drivers/mmc/core/sd.c | 6 ++++--
- 1 file changed, 4 insertions(+), 2 deletions(-)
+ drivers/mmc/core/bus.c  | 5 +++++
+ drivers/mmc/core/core.c | 3 +++
+ 2 files changed, 8 insertions(+)
 
-diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index 76c7add..f0872e3 100644
---- a/drivers/mmc/core/sd.c
-+++ b/drivers/mmc/core/sd.c
-@@ -989,6 +989,7 @@ static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
- 		err = mmc_send_relative_addr(host, &card->rca);
- 		if (err)
- 			goto free_card;
-+		host->card = card;
- 	}
+diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
+index 74de3f2..4558f51 100644
+--- a/drivers/mmc/core/bus.c
++++ b/drivers/mmc/core/bus.c
+@@ -131,6 +131,11 @@ static void mmc_bus_shutdown(struct device *dev)
+ 	struct mmc_host *host = card->host;
+ 	int ret;
  
- 	if (!oldcard) {
-@@ -1100,12 +1101,13 @@ static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
- 		goto free_card;
- 	}
- done:
--	host->card = card;
- 	return 0;
- 
- free_card:
--	if (!oldcard)
-+	if (!oldcard) {
-+		host->card = NULL;
- 		mmc_remove_card(card);
++	if (!card) {
++		dev_dbg(dev, "%s: %s: card is NULL\n", dev_name(dev), __func__);
++		return;
 +	}
++
+ 	if (dev->driver && drv->shutdown)
+ 		drv->shutdown(card);
  
- 	return err;
- }
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 6b38c19..94441a0 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -666,6 +666,9 @@ void mmc_set_data_timeout(struct mmc_data *data, const struct mmc_card *card)
+ {
+ 	unsigned int mult;
+ 
++	if (!card)
++		return;
++
+ 	/*
+ 	 * SDIO cards only define an upper 1 s limit on access.
+ 	 */
 -- 
 The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
 a Linux Foundation Collaborative Project
