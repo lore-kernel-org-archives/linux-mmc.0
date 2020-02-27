@@ -2,81 +2,168 @@ Return-Path: <SRS0=OWc9=4P=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.3 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.1 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 33241C4BA2D
-	for <linux-mmc@archiver.kernel.org>; Thu, 27 Feb 2020 13:19:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1D978C52D21
+	for <linux-mmc@archiver.kernel.org>; Thu, 27 Feb 2020 14:31:02 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 0A395246A3
-	for <linux-mmc@archiver.kernel.org>; Thu, 27 Feb 2020 13:19:54 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E715B20801
+	for <linux-mmc@archiver.kernel.org>; Thu, 27 Feb 2020 14:31:01 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=fail reason="signature verification failed" (1024-bit key) header.d=mg.codeaurora.org header.i=@mg.codeaurora.org header.b="ZNuChyRI"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729114AbgB0NTx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 27 Feb 2020 08:19:53 -0500
-Received: from mga07.intel.com ([134.134.136.100]:50317 "EHLO mga07.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1729088AbgB0NTx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 27 Feb 2020 08:19:53 -0500
-X-Amp-Result: SKIPPED(no attachment in message)
-X-Amp-File-Uploaded: False
-Received: from orsmga008.jf.intel.com ([10.7.209.65])
-  by orsmga105.jf.intel.com with ESMTP/TLS/DHE-RSA-AES256-GCM-SHA384; 27 Feb 2020 05:19:52 -0800
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.70,492,1574150400"; 
-   d="scan'208";a="231836526"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.167]) ([10.237.72.167])
-  by orsmga008.jf.intel.com with ESMTP; 27 Feb 2020 05:19:50 -0800
-Subject: Re: [PATCH] mmc: host: sdhci-sprd: Set the missing
- MMC_CAP_WAIT_WHILE_BUSY flag
-To:     Baolin Wang <baolin.wang7@gmail.com>, ulf.hansson@linaro.org
-Cc:     orsonzhai@gmail.com, zhang.lyra@gmail.com,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-References: <96f16647f6a6e8cb058c44e46c61b122df027059.1582535202.git.baolin.wang7@gmail.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <d16d3eec-7ddc-0adc-20ca-95329a29e6b0@intel.com>
-Date:   Thu, 27 Feb 2020 15:19:10 +0200
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+        id S2387580AbgB0ObB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 27 Feb 2020 09:31:01 -0500
+Received: from mail26.static.mailgun.info ([104.130.122.26]:40895 "EHLO
+        mail26.static.mailgun.info" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S2387631AbgB0Oa4 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Feb 2020 09:30:56 -0500
+DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
+ s=smtp; t=1582813855; h=Content-Transfer-Encoding: Content-Type:
+ In-Reply-To: MIME-Version: Date: Message-ID: From: References: Cc: To:
+ Subject: Sender; bh=31Jyd0ydGwDjWftSsYoT2QGP7wSU/YQyP0VpNOmwFCQ=; b=ZNuChyRIVE4hcrZxwqmXoUnZFq4ky/0RNviTiCMHKDNFbOby/nQvdwjqXyblFwLYEbTRvSrh
+ uyzsHISZFmpCWxSpcL7qupz4ea0BBrZnquPzc16wmPlHendBLpPD21dbg0MdJJlEEvBwyY7i
+ vJWi7/qMenNwvK76gO/UHNjDDy4=
+X-Mailgun-Sending-Ip: 104.130.122.26
+X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
+Received: from smtp.codeaurora.org (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171])
+ by mxa.mailgun.org with ESMTP id 5e57d292.7fb093b93e30-smtp-out-n03;
+ Thu, 27 Feb 2020 14:30:42 -0000 (UTC)
+Received: by smtp.codeaurora.org (Postfix, from userid 1001)
+        id 3CA76C4479D; Thu, 27 Feb 2020 14:30:41 +0000 (UTC)
+Received: from [10.206.25.140] (blr-c-bdr-fw-01_GlobalNAT_AllZones-Outside.qualcomm.com [103.229.19.19])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        (Authenticated sender: vbadigan)
+        by smtp.codeaurora.org (Postfix) with ESMTPSA id 35321C433A2;
+        Thu, 27 Feb 2020 14:30:34 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.3.2 smtp.codeaurora.org 35321C433A2
+Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
+Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=none smtp.mailfrom=vbadigan@codeaurora.org
+Subject: Re: [PATCH V4] mmc: sdhci-msm: Update system suspend/resume callbacks
+ of sdhci-msm platform driver
+To:     Shaik Sajida Bhanu <sbhanu@codeaurora.org>,
+        adrian.hunter@intel.com, ulf.hansson@linaro.org,
+        robh+dt@kernel.org, mka@chromium.org
+Cc:     asutoshd@codeaurora.org, swboyd@chromium.org,
+        stummala@codeaurora.org, sayalil@codeaurora.org,
+        cang@codeaurora.org, rampraka@codeaurora.org,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
+        agross@kernel.org, bjorn.andersson@linaro.org
+References: <1582181100-29914-1-git-send-email-sbhanu@codeaurora.org>
+From:   Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+Message-ID: <d6c10b49-a12c-d17e-1ff9-90f12e98f624@codeaurora.org>
+Date:   Thu, 27 Feb 2020 20:00:32 +0530
+User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:68.0) Gecko/20100101
  Thunderbird/68.5.0
 MIME-Version: 1.0
-In-Reply-To: <96f16647f6a6e8cb058c44e46c61b122df027059.1582535202.git.baolin.wang7@gmail.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
+In-Reply-To: <1582181100-29914-1-git-send-email-sbhanu@codeaurora.org>
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 24/02/20 11:08 am, Baolin Wang wrote:
-> The Spreadtrum host controller supports HW busy detection for I/O
-> operations, which means when the host gets a transfer complete event,
-> that always indicates the busy signal is released. Thus we can set
-> the MMC_CAP_WAIT_WHILE_BUSY flag to remove some redundant software
-> busy polling.
-> 
-> Signed-off-by: Baolin Wang <baolin.wang7@gmail.com>
+Hi Sajida,
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+On 2/20/2020 12:15 PM, Shaik Sajida Bhanu wrote:
 
+> The existing suspend/resume callbacks of sdhci-msm driver are just
+> gating/un-gating the clocks. During suspend cycle more can be done
+> like disabling controller, disabling card detection, enabling wake-up events.
+>
+> So updating the system pm callbacks for performing these extra
+> actions besides controlling the clocks.
+>
+> Signed-off-by: Shaik Sajida Bhanu <sbhanu@codeaurora.org>
+> Reviewed-by: Stephen Boyd <swboyd@chromium.org>
 > ---
->  drivers/mmc/host/sdhci-sprd.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
-> index d346223..2ab42c5 100644
-> --- a/drivers/mmc/host/sdhci-sprd.c
-> +++ b/drivers/mmc/host/sdhci-sprd.c
-> @@ -556,7 +556,7 @@ static int sdhci_sprd_probe(struct platform_device *pdev)
->  		sdhci_sprd_voltage_switch;
->  
->  	host->mmc->caps = MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED |
-> -		MMC_CAP_ERASE | MMC_CAP_CMD23;
-> +		MMC_CAP_ERASE | MMC_CAP_CMD23 | MMC_CAP_WAIT_WHILE_BUSY;
->  	ret = mmc_of_parse(host->mmc);
->  	if (ret)
->  		goto pltfm_free;
-> 
+> Changes since V3:
+>      Invoking sdhci & cqhci resume if sdhci_host_suspend fails.
+>      Removed condition check before invoking cqhci_resume since its a dummy function.
+>
+> Changes since V2:
+>      Removed disabling/enabling pwr-irq from system pm ops.
+>
+> Changes since V1:
+>      Invoking pm_runtime_force_suspend/resume instead of
+>      sdhci_msm_runtime_suepend/resume.
+> ---
+>   drivers/mmc/host/sdhci-msm.c | 47 ++++++++++++++++++++++++++++++++++++++++++--
+>   1 file changed, 45 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index 3955fa5d..3559b50 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -2159,9 +2159,52 @@ static __maybe_unused int sdhci_msm_runtime_resume(struct device *dev)
+>   	return 0;
+>   }
+>   
+> +static int sdhci_msm_suspend(struct device *dev)
+> +{
+> +	struct sdhci_host *host = dev_get_drvdata(dev);
+> +	int ret;
+> +
+> +	if (host->mmc->caps2 & MMC_CAP2_CQE) {
+> +		ret = cqhci_suspend(host->mmc);
+> +		if (ret)
+> +			return ret;
+> +	}
+> +
+> +	ret = sdhci_suspend_host(host);
+> +	if (ret)
+> +		goto resume_cqhci;
+> +
+> +	ret = pm_runtime_force_suspend(dev);
+> +	if (!ret)
+> +		return ret;
+> +
+> +	sdhci_resume_host(host);
+> +
+> +resume_cqhci:
+> +	cqhci_resume(host->mmc);
+> +	return ret;
+> +}
+> +
+> +static int sdhci_msm_resume(struct device *dev)
+> +{
+> +	struct sdhci_host *host = dev_get_drvdata(dev);
+> +	int ret;
+> +
+> +	ret = pm_runtime_force_resume(dev);
+> +	if (ret)
+> +		return ret;
+> +
+> +	ret = sdhci_resume_host(host);
 
+I'm observing an issue with this change.
+
+After this step, i find interrupt enable register is zero (even though 
+it's getting set in sdhci_resume_host()) and
+
+resulting in request timeout for very first command in resume path.
+
+Until its root caused, please hold back this change.
+
+> +	if (ret < 0)
+> +		return ret;
+> +
+> +	ret = cqhci_resume(host->mmc);
+> +	return ret;
+> +}
+> +
+>   static const struct dev_pm_ops sdhci_msm_pm_ops = {
+> -	SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
+> -				pm_runtime_force_resume)
+> +	SET_SYSTEM_SLEEP_PM_OPS(sdhci_msm_suspend,
+> +				sdhci_msm_resume)
+>   	SET_RUNTIME_PM_OPS(sdhci_msm_runtime_suspend,
+>   			   sdhci_msm_runtime_resume,
+>   			   NULL)
