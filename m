@@ -2,168 +2,115 @@ Return-Path: <SRS0=OWc9=4P=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.1 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable
+X-Spam-Status: No, score=-11.4 required=3.0 tests=DKIMWL_WL_MED,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_IN_DEF_DKIM_WL autolearn=no
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1D978C52D21
-	for <linux-mmc@archiver.kernel.org>; Thu, 27 Feb 2020 14:31:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0A42AC35E1C
+	for <linux-mmc@archiver.kernel.org>; Thu, 27 Feb 2020 20:54:57 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id E715B20801
-	for <linux-mmc@archiver.kernel.org>; Thu, 27 Feb 2020 14:31:01 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D37C32468E
+	for <linux-mmc@archiver.kernel.org>; Thu, 27 Feb 2020 20:54:56 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (1024-bit key) header.d=mg.codeaurora.org header.i=@mg.codeaurora.org header.b="ZNuChyRI"
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="S7ZikkXj"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2387580AbgB0ObB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 27 Feb 2020 09:31:01 -0500
-Received: from mail26.static.mailgun.info ([104.130.122.26]:40895 "EHLO
-        mail26.static.mailgun.info" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S2387631AbgB0Oa4 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Feb 2020 09:30:56 -0500
-DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
- s=smtp; t=1582813855; h=Content-Transfer-Encoding: Content-Type:
- In-Reply-To: MIME-Version: Date: Message-ID: From: References: Cc: To:
- Subject: Sender; bh=31Jyd0ydGwDjWftSsYoT2QGP7wSU/YQyP0VpNOmwFCQ=; b=ZNuChyRIVE4hcrZxwqmXoUnZFq4ky/0RNviTiCMHKDNFbOby/nQvdwjqXyblFwLYEbTRvSrh
- uyzsHISZFmpCWxSpcL7qupz4ea0BBrZnquPzc16wmPlHendBLpPD21dbg0MdJJlEEvBwyY7i
- vJWi7/qMenNwvK76gO/UHNjDDy4=
-X-Mailgun-Sending-Ip: 104.130.122.26
-X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
-Received: from smtp.codeaurora.org (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171])
- by mxa.mailgun.org with ESMTP id 5e57d292.7fb093b93e30-smtp-out-n03;
- Thu, 27 Feb 2020 14:30:42 -0000 (UTC)
-Received: by smtp.codeaurora.org (Postfix, from userid 1001)
-        id 3CA76C4479D; Thu, 27 Feb 2020 14:30:41 +0000 (UTC)
-Received: from [10.206.25.140] (blr-c-bdr-fw-01_GlobalNAT_AllZones-Outside.qualcomm.com [103.229.19.19])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        (Authenticated sender: vbadigan)
-        by smtp.codeaurora.org (Postfix) with ESMTPSA id 35321C433A2;
-        Thu, 27 Feb 2020 14:30:34 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.3.2 smtp.codeaurora.org 35321C433A2
-Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
-Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=none smtp.mailfrom=vbadigan@codeaurora.org
-Subject: Re: [PATCH V4] mmc: sdhci-msm: Update system suspend/resume callbacks
- of sdhci-msm platform driver
-To:     Shaik Sajida Bhanu <sbhanu@codeaurora.org>,
-        adrian.hunter@intel.com, ulf.hansson@linaro.org,
-        robh+dt@kernel.org, mka@chromium.org
-Cc:     asutoshd@codeaurora.org, swboyd@chromium.org,
-        stummala@codeaurora.org, sayalil@codeaurora.org,
-        cang@codeaurora.org, rampraka@codeaurora.org,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
-        agross@kernel.org, bjorn.andersson@linaro.org
-References: <1582181100-29914-1-git-send-email-sbhanu@codeaurora.org>
-From:   Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
-Message-ID: <d6c10b49-a12c-d17e-1ff9-90f12e98f624@codeaurora.org>
-Date:   Thu, 27 Feb 2020 20:00:32 +0530
-User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:68.0) Gecko/20100101
- Thunderbird/68.5.0
+        id S1726758AbgB0Uy4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 27 Feb 2020 15:54:56 -0500
+Received: from mail-ua1-f67.google.com ([209.85.222.67]:44592 "EHLO
+        mail-ua1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728059AbgB0Uyz (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Feb 2020 15:54:55 -0500
+Received: by mail-ua1-f67.google.com with SMTP id a33so165456uad.11
+        for <linux-mmc@vger.kernel.org>; Thu, 27 Feb 2020 12:54:54 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=google.com; s=20161025;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=ktzdl5eoKPEHfEuFryFzhZR7Y8sf35Stxv0I9TC3om8=;
+        b=S7ZikkXjTCFqfTODdrBIRR4bjKV6vzJmi95TuJOiGc6qU7zDytV2WPccOPkdOwJZ/j
+         xli5qKpWBUJ5DazclKwIIfQ8qQMD4fHsNAqdGsEEL4fe3MO0gOR/KmwhvFgRCgvvNvHb
+         vijRWYbIUdJ6HmZd/RojRMwFkBppkvmsy5rbTLnwbctZAx6wUY1nJDyxeEApFNEB55Xb
+         U/d0YaxRhAe8wd8cADEZdNzur4hfxn5jgLkmh8HD1TUN6quVjk+WYUszsrJcPsODuhpU
+         y/6+8DOFTaL7D7XPV1o3rvMBHvAFVRiFIRT2SaijXF4iUNgMsMRkGs0kHJjdl+cTFTSs
+         f0ng==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=ktzdl5eoKPEHfEuFryFzhZR7Y8sf35Stxv0I9TC3om8=;
+        b=H92uZ2sDtcAXKtlub8cNLOervVpyex+Y7EYoohOSGcyzoBSuK8mo0qScZl6prk+iop
+         Gnr9YexAnKSCQp2M4WiWH+X6isyoXFt12V2QRBQf7oKBiQJbBKdN8oMdsOyOGCLp7+Hv
+         tTeWQ9Pq5IAjk1nvUvESooMbHZVYKzIhtWNS0HH7k3FdNPyKajC4SJJcm8EZ6Uky1uMu
+         ry0V+Wpp4Seg0U7N51x+ffSaucKzI9ZL0ODJdgaWhe5sD+iUxv0p6Nc+k1ua0ftiJocp
+         qyqSWR6IT9w0dal3w/z9erIh1mtWmtLZo54ldWWQSiTx6XOJmxh/FihO8L2inDTJYXtF
+         s8zw==
+X-Gm-Message-State: ANhLgQ39m+1vlbF4fvXM1UWnVwF3bh9lpt5//fu3uzPLnSK72BT8j/BM
+        D06UIJ+bd0zyqq6R7xE3SbWwVR8tB6+hEjyR0i3KRQ==
+X-Google-Smtp-Source: ADFU+vt5Eu/0Gf/mJjQWTqW8ukh7kOFSPWFoB1kOcBU0Lbg1MDkcSsM3OxPy3w+OIQUMQkvfoeEVgnNZxUT2k13A3Vg=
+X-Received: by 2002:ab0:6605:: with SMTP id r5mr363174uam.0.1582836893873;
+ Thu, 27 Feb 2020 12:54:53 -0800 (PST)
 MIME-Version: 1.0
-In-Reply-To: <1582181100-29914-1-git-send-email-sbhanu@codeaurora.org>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Content-Language: en-US
+References: <1581434955-11087-1-git-send-email-vbadigan@codeaurora.org> <1582545470-11530-1-git-send-email-vbadigan@codeaurora.org>
+In-Reply-To: <1582545470-11530-1-git-send-email-vbadigan@codeaurora.org>
+From:   Doug Anderson <dianders@google.com>
+Date:   Thu, 27 Feb 2020 12:54:41 -0800
+Message-ID: <CAD=FV=WjSC7h0Q1aQpF74KDpgjOPSKrUR5gBo1ZsFn_o4m5TyQ@mail.gmail.com>
+Subject: Re: [PATCH V3] dt-bindings: mmc: sdhci-msm: Add CQE reg map
+To:     Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Asutosh Das <asutoshd@codeaurora.org>,
+        Sahitya Tummala <stummala@codeaurora.org>,
+        Sayali Lokhande <sayalil@codeaurora.org>, cang@codeaurora.org,
+        Ram Prakash Gupta <rampraka@codeaurora.org>,
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        LKML <linux-kernel@vger.kernel.org>,
+        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
+        Mark Rutland <mark.rutland@arm.com>,
+        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
+        <devicetree@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Sajida,
+Hi,
 
-On 2/20/2020 12:15 PM, Shaik Sajida Bhanu wrote:
-
-> The existing suspend/resume callbacks of sdhci-msm driver are just
-> gating/un-gating the clocks. During suspend cycle more can be done
-> like disabling controller, disabling card detection, enabling wake-up events.
+On Mon, Feb 24, 2020 at 3:58 AM Veerabhadrarao Badiganti
+<vbadigan@codeaurora.org> wrote:
 >
-> So updating the system pm callbacks for performing these extra
-> actions besides controlling the clocks.
+> CQE feature has been enabled on sdhci-msm. Add CQE reg map
+> and reg names that need to be supplied for supporting CQE feature.
 >
-> Signed-off-by: Shaik Sajida Bhanu <sbhanu@codeaurora.org>
-> Reviewed-by: Stephen Boyd <swboyd@chromium.org>
+> Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
 > ---
-> Changes since V3:
->      Invoking sdhci & cqhci resume if sdhci_host_suspend fails.
->      Removed condition check before invoking cqhci_resume since its a dummy function.
->
 > Changes since V2:
->      Removed disabling/enabling pwr-irq from system pm ops.
+>         - Dropped _mem suffix to reg names.
 >
 > Changes since V1:
->      Invoking pm_runtime_force_suspend/resume instead of
->      sdhci_msm_runtime_suepend/resume.
+>         - Updated description for more clarity & Fixed typos.
 > ---
->   drivers/mmc/host/sdhci-msm.c | 47 ++++++++++++++++++++++++++++++++++++++++++--
->   1 file changed, 45 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> index 3955fa5d..3559b50 100644
-> --- a/drivers/mmc/host/sdhci-msm.c
-> +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -2159,9 +2159,52 @@ static __maybe_unused int sdhci_msm_runtime_resume(struct device *dev)
->   	return 0;
->   }
->   
-> +static int sdhci_msm_suspend(struct device *dev)
-> +{
-> +	struct sdhci_host *host = dev_get_drvdata(dev);
-> +	int ret;
-> +
-> +	if (host->mmc->caps2 & MMC_CAP2_CQE) {
-> +		ret = cqhci_suspend(host->mmc);
-> +		if (ret)
-> +			return ret;
-> +	}
-> +
-> +	ret = sdhci_suspend_host(host);
-> +	if (ret)
-> +		goto resume_cqhci;
-> +
-> +	ret = pm_runtime_force_suspend(dev);
-> +	if (!ret)
-> +		return ret;
-> +
-> +	sdhci_resume_host(host);
-> +
-> +resume_cqhci:
-> +	cqhci_resume(host->mmc);
-> +	return ret;
-> +}
-> +
-> +static int sdhci_msm_resume(struct device *dev)
-> +{
-> +	struct sdhci_host *host = dev_get_drvdata(dev);
-> +	int ret;
-> +
-> +	ret = pm_runtime_force_resume(dev);
-> +	if (ret)
-> +		return ret;
-> +
-> +	ret = sdhci_resume_host(host);
+>  Documentation/devicetree/bindings/mmc/sdhci-msm.txt | 8 +++++++-
+>  1 file changed, 7 insertions(+), 1 deletion(-)
 
-I'm observing an issue with this change.
+Reviewed-by: Douglas Anderson <dianders@chromium.org>
 
-After this step, i find interrupt enable register is zero (even though 
-it's getting set in sdhci_resume_host()) and
+I assume you'll have a follow-up fixing the driver since commit
+a4080225f51d ("mmc: cqhci: support for command queue enabled host")
+refers to "cqhci_mem".
 
-resulting in request timeout for very first command in resume path.
 
-Until its root caused, please hold back this change.
+Also something to keep in mind for future patches (no action needed
+for this patch): most maintainers frown on making v2 of a patch
+"In-Reply-To" v1 of a patch.  I notice that your v3 was in-reply-to v2
+and v2 was in-reply-to v1.  You probably don't want to do this.  One
+such reference to people not liking it [1] specifically said "they
+should not be replies to old versions of that patch; otherwise the
+threading looks really weird and confusing."
 
-> +	if (ret < 0)
-> +		return ret;
-> +
-> +	ret = cqhci_resume(host->mmc);
-> +	return ret;
-> +}
-> +
->   static const struct dev_pm_ops sdhci_msm_pm_ops = {
-> -	SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
-> -				pm_runtime_force_resume)
-> +	SET_SYSTEM_SLEEP_PM_OPS(sdhci_msm_suspend,
-> +				sdhci_msm_resume)
->   	SET_RUNTIME_PM_OPS(sdhci_msm_runtime_suspend,
->   			   sdhci_msm_runtime_resume,
->   			   NULL)
+[1] https://lore.kernel.org/r/CAJWu+oocs3T8orMNt6AmdVgWONzZg0vD=E8EdvzE9rOi_XatUw@mail.gmail.com
+
+
+-Doug
