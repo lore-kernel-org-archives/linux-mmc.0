@@ -2,52 +2,46 @@ Return-Path: <SRS0=OWc9=4P=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.3 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.3 required=3.0
+	tests=HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	MENTIONS_GIT_HOSTING,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 55591C4BA24
-	for <linux-mmc@archiver.kernel.org>; Thu, 27 Feb 2020 12:57:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 31929C4BA24
+	for <linux-mmc@archiver.kernel.org>; Thu, 27 Feb 2020 13:12:03 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 2864124698
-	for <linux-mmc@archiver.kernel.org>; Thu, 27 Feb 2020 12:57:45 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 043B62469D
+	for <linux-mmc@archiver.kernel.org>; Thu, 27 Feb 2020 13:12:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729099AbgB0M5o (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 27 Feb 2020 07:57:44 -0500
-Received: from mga06.intel.com ([134.134.136.31]:63124 "EHLO mga06.intel.com"
+        id S1729058AbgB0NMC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 27 Feb 2020 08:12:02 -0500
+Received: from mga03.intel.com ([134.134.136.65]:31938 "EHLO mga03.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1729033AbgB0M5o (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 27 Feb 2020 07:57:44 -0500
+        id S1729056AbgB0NMC (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 27 Feb 2020 08:12:02 -0500
 X-Amp-Result: SKIPPED(no attachment in message)
 X-Amp-File-Uploaded: False
 Received: from orsmga008.jf.intel.com ([10.7.209.65])
-  by orsmga104.jf.intel.com with ESMTP/TLS/DHE-RSA-AES256-GCM-SHA384; 27 Feb 2020 04:57:43 -0800
+  by orsmga103.jf.intel.com with ESMTP/TLS/DHE-RSA-AES256-GCM-SHA384; 27 Feb 2020 05:12:01 -0800
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="5.70,492,1574150400"; 
-   d="scan'208";a="231830321"
+   d="scan'208";a="231834432"
 Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.167]) ([10.237.72.167])
-  by orsmga008.jf.intel.com with ESMTP; 27 Feb 2020 04:57:40 -0800
-Subject: Re: [PATCH V3] mmc: mmc_test: Pass different sg lists for
- non-blocking requests
-To:     Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
-        ulf.hansson@linaro.org
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-msm@vger.kernel.org,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Allison Randal <allison@lohutok.net>,
-        Stephen Boyd <swboyd@chromium.org>,
-        Thomas Gleixner <tglx@linutronix.de>
-References: <1582105474-27866-1-git-send-email-vbadigan@codeaurora.org>
- <1582714668-17247-1-git-send-email-vbadigan@codeaurora.org>
+  by orsmga008.jf.intel.com with ESMTP; 27 Feb 2020 05:12:00 -0800
+Subject: Re: [PATCH] mmc: Replace zero-length array with flexible-array member
+To:     "Gustavo A. R. Silva" <gustavo@embeddedor.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+References: <20200226223125.GA20630@embeddedor>
 From:   Adrian Hunter <adrian.hunter@intel.com>
 Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
  Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <1a228a57-f15b-beb6-0991-d2ea0232faaa@intel.com>
-Date:   Thu, 27 Feb 2020 14:57:00 +0200
+Message-ID: <b472b3c0-b6a0-f67f-2628-6688b5e0e7f6@intel.com>
+Date:   Thu, 27 Feb 2020 15:11:19 +0200
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
  Thunderbird/68.5.0
 MIME-Version: 1.0
-In-Reply-To: <1582714668-17247-1-git-send-email-vbadigan@codeaurora.org>
+In-Reply-To: <20200226223125.GA20630@embeddedor>
 Content-Type: text/plain; charset=utf-8
 Content-Language: en-US
 Content-Transfer-Encoding: 7bit
@@ -56,200 +50,167 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 26/02/20 12:57 pm, Veerabhadrarao Badiganti wrote:
-> Supply a separate sg list for each of the request in non-blocking
-> IO test cases where two requests will be issued at same time.
+On 27/02/20 12:31 am, Gustavo A. R. Silva wrote:
+> The current codebase makes use of the zero-length array language
+> extension to the C90 standard, but the preferred mechanism to declare
+> variable-length types such as these ones is a flexible array member[1][2],
+> introduced in C99:
 > 
-> Otherwise, sg memory may get unmapped when a request is done while
-> same memory is being accessed by controller from the other request,
-> and it leads to iommu errors with below call stack:
+> struct foo {
+>         int stuff;
+>         struct boo array[];
+> };
 > 
-> 	__arm_lpae_unmap+0x2e0/0x478
-> 	arm_lpae_unmap+0x54/0x70
-> 	arm_smmu_unmap+0x64/0xa4
-> 	__iommu_unmap+0xb8/0x1f0
-> 	iommu_unmap_fast+0x38/0x48
-> 	__iommu_dma_unmap+0x88/0x108
-> 	iommu_dma_unmap_sg+0x90/0xa4
-> 	sdhci_post_req+0x5c/0x78
-> 	mmc_test_start_areq+0x10c/0x120 [mmc_test]
-> 	mmc_test_area_io_seq+0x150/0x264 [mmc_test]
-> 	mmc_test_rw_multiple+0x174/0x1c0 [mmc_test]
-> 	mmc_test_rw_multiple_sg_len+0x44/0x6c [mmc_test]
-> 	mmc_test_profile_sglen_wr_nonblock_perf+0x6c/0x94 [mmc_test]
-> 	mtf_test_write+0x238/0x3cc [mmc_test]
+> By making use of the mechanism above, we will get a compiler warning
+> in case the flexible array does not occur last in the structure, which
+> will help us prevent some kind of undefined behavior bugs from being
+> inadvertently introduced[3] to the codebase from now on.
 > 
-> Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
-> Reviewed-by: Stephen Boyd <swboyd@chromium.org>
-> Tested-by: Sai Prakash Ranjan <saiprakash.ranjan@codeaurora.org>
+> Also, notice that, dynamic memory allocations won't be affected by
+> this change:
+> 
+> "Flexible array members have incomplete type, and so the sizeof operator
+> may not be applied. As a quirk of the original implementation of
+> zero-length arrays, sizeof evaluates to zero."[1]
+> 
+> This issue was found with the help of Coccinelle.
+> 
+> [1] https://gcc.gnu.org/onlinedocs/gcc/Zero-Length.html
+> [2] https://github.com/KSPP/linux/issues/21
+> [3] commit 76497732932f ("cxgb3/l2t: Fix undefined behaviour")
+> 
+> Signed-off-by: Gustavo A. R. Silva <gustavo@embeddedor.com>
 
 Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
 > ---
-> Changes since V2:
-> 	- Simplfied mmc_test_nonblock_transter() function aruguments.
+>  drivers/mmc/host/sdhci-acpi.c    | 2 +-
+>  drivers/mmc/host/sdhci-cadence.c | 2 +-
+>  drivers/mmc/host/sdhci-pci.h     | 2 +-
+>  drivers/mmc/host/sdhci-pltfm.h   | 2 +-
+>  drivers/mmc/host/sdhci.h         | 2 +-
+>  drivers/mmc/host/vub300.c        | 2 +-
+>  include/linux/mmc/host.h         | 2 +-
+>  include/linux/mmc/sdio_func.h    | 2 +-
+>  include/uapi/linux/mmc/ioctl.h   | 2 +-
+>  9 files changed, 9 insertions(+), 9 deletions(-)
 > 
-> Changes since V1:
-> 	- Freeing-up sg_areq memory.                                        
-> 	- Added check to ensure sg length is equal for both the sg-lists    
-> 	  supplied in case of non-blocking requests.
-> ---
->  drivers/mmc/core/mmc_test.c | 52 ++++++++++++++++++++++++++++++++++-----------
->  1 file changed, 40 insertions(+), 12 deletions(-)
-> 
-> diff --git a/drivers/mmc/core/mmc_test.c b/drivers/mmc/core/mmc_test.c
-> index 492dd45..c21b3cb 100644
-> --- a/drivers/mmc/core/mmc_test.c
-> +++ b/drivers/mmc/core/mmc_test.c
-> @@ -71,6 +71,7 @@ struct mmc_test_mem {
->   * @sg_len: length of currently mapped scatterlist @sg
->   * @mem: allocated memory
->   * @sg: scatterlist
-> + * @sg_areq: scatterlist for non-blocking request
->   */
->  struct mmc_test_area {
->  	unsigned long max_sz;
-> @@ -82,6 +83,7 @@ struct mmc_test_area {
->  	unsigned int sg_len;
->  	struct mmc_test_mem *mem;
->  	struct scatterlist *sg;
-> +	struct scatterlist *sg_areq;
+> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+> index 9651dca6863e..ea0e4fda3a9e 100644
+> --- a/drivers/mmc/host/sdhci-acpi.c
+> +++ b/drivers/mmc/host/sdhci-acpi.c
+> @@ -72,7 +72,7 @@ struct sdhci_acpi_host {
+>  	const struct sdhci_acpi_slot	*slot;
+>  	struct platform_device		*pdev;
+>  	bool				use_runtime_pm;
+> -	unsigned long			private[0] ____cacheline_aligned;
+> +	unsigned long			private[] ____cacheline_aligned;
 >  };
 >  
->  /**
-> @@ -836,14 +838,16 @@ static int mmc_test_start_areq(struct mmc_test_card *test,
->  }
+>  static inline void *sdhci_acpi_priv(struct sdhci_acpi_host *c)
+> diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
+> index 5827d3751b81..9af3fe48d62f 100644
+> --- a/drivers/mmc/host/sdhci-cadence.c
+> +++ b/drivers/mmc/host/sdhci-cadence.c
+> @@ -67,7 +67,7 @@ struct sdhci_cdns_priv {
+>  	void __iomem *hrs_addr;
+>  	bool enhanced_strobe;
+>  	unsigned int nr_phy_params;
+> -	struct sdhci_cdns_phy_param phy_params[0];
+> +	struct sdhci_cdns_phy_param phy_params[];
+>  };
 >  
->  static int mmc_test_nonblock_transfer(struct mmc_test_card *test,
-> -				      struct scatterlist *sg, unsigned sg_len,
-> -				      unsigned dev_addr, unsigned blocks,
-> -				      unsigned blksz, int write, int count)
-> +				      unsigned int dev_addr, int write,
-> +				      int count)
->  {
->  	struct mmc_test_req *rq1, *rq2;
->  	struct mmc_request *mrq, *prev_mrq;
->  	int i;
->  	int ret = RESULT_OK;
-> +	struct mmc_test_area *t = &test->area;
-> +	struct scatterlist *sg = t->sg;
-> +	struct scatterlist *sg_areq = t->sg_areq;
+>  struct sdhci_cdns_phy_cfg {
+> diff --git a/drivers/mmc/host/sdhci-pci.h b/drivers/mmc/host/sdhci-pci.h
+> index 981bbbe63aff..42ccd123b046 100644
+> --- a/drivers/mmc/host/sdhci-pci.h
+> +++ b/drivers/mmc/host/sdhci-pci.h
+> @@ -163,7 +163,7 @@ struct sdhci_pci_slot {
+>  	bool			cd_override_level;
 >  
->  	rq1 = mmc_test_req_alloc();
->  	rq2 = mmc_test_req_alloc();
-> @@ -857,8 +861,8 @@ static int mmc_test_nonblock_transfer(struct mmc_test_card *test,
+>  	void (*hw_reset)(struct sdhci_host *host);
+> -	unsigned long		private[0] ____cacheline_aligned;
+> +	unsigned long		private[] ____cacheline_aligned;
+>  };
 >  
->  	for (i = 0; i < count; i++) {
->  		mmc_test_req_reset(container_of(mrq, struct mmc_test_req, mrq));
-> -		mmc_test_prepare_mrq(test, mrq, sg, sg_len, dev_addr, blocks,
-> -				     blksz, write);
-> +		mmc_test_prepare_mrq(test, mrq, sg, t->sg_len, dev_addr,
-> +				     t->blocks, 512, write);
->  		ret = mmc_test_start_areq(test, mrq, prev_mrq);
->  		if (ret)
->  			goto err;
-> @@ -867,7 +871,8 @@ static int mmc_test_nonblock_transfer(struct mmc_test_card *test,
->  			prev_mrq = &rq2->mrq;
+>  struct sdhci_pci_chip {
+> diff --git a/drivers/mmc/host/sdhci-pltfm.h b/drivers/mmc/host/sdhci-pltfm.h
+> index 2af445b8c325..6301b81cf573 100644
+> --- a/drivers/mmc/host/sdhci-pltfm.h
+> +++ b/drivers/mmc/host/sdhci-pltfm.h
+> @@ -25,7 +25,7 @@ struct sdhci_pltfm_host {
+>  	unsigned int clock;
+>  	u16 xfer_mode_shadow;
 >  
->  		swap(mrq, prev_mrq);
-> -		dev_addr += blocks;
-> +		swap(sg, sg_areq);
-> +		dev_addr += t->blocks;
->  	}
+> -	unsigned long private[0] ____cacheline_aligned;
+> +	unsigned long private[] ____cacheline_aligned;
+>  };
 >  
->  	ret = mmc_test_start_areq(test, NULL, prev_mrq);
-> @@ -1396,10 +1401,11 @@ static int mmc_test_no_highmem(struct mmc_test_card *test)
->   * Map sz bytes so that it can be transferred.
+>  #ifdef CONFIG_MMC_SDHCI_BIG_ENDIAN_32BIT_BYTE_SWAPPER
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index cac2d97782e6..249635692112 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -614,7 +614,7 @@ struct sdhci_host {
+>  
+>  	u64			data_timeout;
+>  
+> -	unsigned long private[0] ____cacheline_aligned;
+> +	unsigned long private[] ____cacheline_aligned;
+>  };
+>  
+>  struct sdhci_ops {
+> diff --git a/drivers/mmc/host/vub300.c b/drivers/mmc/host/vub300.c
+> index 6ced1b7f642f..a5a90d133f1f 100644
+> --- a/drivers/mmc/host/vub300.c
+> +++ b/drivers/mmc/host/vub300.c
+> @@ -95,7 +95,7 @@ struct sd_response_header {
+>  	u8 port_number;
+>  	u8 command_type;
+>  	u8 command_index;
+> -	u8 command_response[0];
+> +	u8 command_response[];
+>  } __packed;
+>  
+>  struct sd_status_header {
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index 562ed06881b0..2629329ab9f2 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -465,7 +465,7 @@ struct mmc_host {
+>  	/* Host Software Queue support */
+>  	bool			hsq_enabled;
+>  
+> -	unsigned long		private[0] ____cacheline_aligned;
+> +	unsigned long		private[] ____cacheline_aligned;
+>  };
+>  
+>  struct device_node;
+> diff --git a/include/linux/mmc/sdio_func.h b/include/linux/mmc/sdio_func.h
+> index 5a177f7a83c3..fa2aaab5e57a 100644
+> --- a/include/linux/mmc/sdio_func.h
+> +++ b/include/linux/mmc/sdio_func.h
+> @@ -25,7 +25,7 @@ struct sdio_func_tuple {
+>  	struct sdio_func_tuple *next;
+>  	unsigned char code;
+>  	unsigned char size;
+> -	unsigned char data[0];
+> +	unsigned char data[];
+>  };
+>  
+>  /*
+> diff --git a/include/uapi/linux/mmc/ioctl.h b/include/uapi/linux/mmc/ioctl.h
+> index 00c08120f3ba..98e29e7f54ac 100644
+> --- a/include/uapi/linux/mmc/ioctl.h
+> +++ b/include/uapi/linux/mmc/ioctl.h
+> @@ -57,7 +57,7 @@ struct mmc_ioc_cmd {
 >   */
->  static int mmc_test_area_map(struct mmc_test_card *test, unsigned long sz,
-> -			     int max_scatter, int min_sg_len)
-> +			     int max_scatter, int min_sg_len, bool nonblock)
->  {
->  	struct mmc_test_area *t = &test->area;
->  	int err;
-> +	unsigned int sg_len = 0;
+>  struct mmc_ioc_multi_cmd {
+>  	__u64 num_of_cmds;
+> -	struct mmc_ioc_cmd cmds[0];
+> +	struct mmc_ioc_cmd cmds[];
+>  };
 >  
->  	t->blocks = sz >> 9;
->  
-> @@ -1411,6 +1417,22 @@ static int mmc_test_area_map(struct mmc_test_card *test, unsigned long sz,
->  		err = mmc_test_map_sg(t->mem, sz, t->sg, 1, t->max_segs,
->  				      t->max_seg_sz, &t->sg_len, min_sg_len);
->  	}
-> +
-> +	if (err || !nonblock)
-> +		goto err;
-> +
-> +	if (max_scatter) {
-> +		err = mmc_test_map_sg_max_scatter(t->mem, sz, t->sg_areq,
-> +						  t->max_segs, t->max_seg_sz,
-> +						  &sg_len);
-> +	} else {
-> +		err = mmc_test_map_sg(t->mem, sz, t->sg_areq, 1, t->max_segs,
-> +				      t->max_seg_sz, &sg_len, min_sg_len);
-> +	}
-> +	if (!err && sg_len != t->sg_len)
-> +		err = -EINVAL;
-> +
-> +err:
->  	if (err)
->  		pr_info("%s: Failed to map sg list\n",
->  		       mmc_hostname(test->card->host));
-> @@ -1440,7 +1462,6 @@ static int mmc_test_area_io_seq(struct mmc_test_card *test, unsigned long sz,
->  	struct timespec64 ts1, ts2;
->  	int ret = 0;
->  	int i;
-> -	struct mmc_test_area *t = &test->area;
->  
->  	/*
->  	 * In the case of a maximally scattered transfer, the maximum transfer
-> @@ -1458,15 +1479,14 @@ static int mmc_test_area_io_seq(struct mmc_test_card *test, unsigned long sz,
->  			sz = max_tfr;
->  	}
->  
-> -	ret = mmc_test_area_map(test, sz, max_scatter, min_sg_len);
-> +	ret = mmc_test_area_map(test, sz, max_scatter, min_sg_len, nonblock);
->  	if (ret)
->  		return ret;
->  
->  	if (timed)
->  		ktime_get_ts64(&ts1);
->  	if (nonblock)
-> -		ret = mmc_test_nonblock_transfer(test, t->sg, t->sg_len,
-> -				 dev_addr, t->blocks, 512, write, count);
-> +		ret = mmc_test_nonblock_transfer(test, dev_addr, write, count);
->  	else
->  		for (i = 0; i < count && ret == 0; i++) {
->  			ret = mmc_test_area_transfer(test, dev_addr, write);
-> @@ -1525,6 +1545,7 @@ static int mmc_test_area_cleanup(struct mmc_test_card *test)
->  	struct mmc_test_area *t = &test->area;
->  
->  	kfree(t->sg);
-> +	kfree(t->sg_areq);
->  	mmc_test_free_mem(t->mem);
->  
->  	return 0;
-> @@ -1584,6 +1605,13 @@ static int mmc_test_area_init(struct mmc_test_card *test, int erase, int fill)
->  		goto out_free;
->  	}
->  
-> +	t->sg_areq = kmalloc_array(t->max_segs, sizeof(*t->sg_areq),
-> +				   GFP_KERNEL);
-> +	if (!t->sg_areq) {
-> +		ret = -ENOMEM;
-> +		goto out_free;
-> +	}
-> +
->  	t->dev_addr = mmc_test_capacity(test->card) / 2;
->  	t->dev_addr -= t->dev_addr % (t->max_sz >> 9);
->  
-> @@ -2468,7 +2496,7 @@ static int __mmc_test_cmds_during_tfr(struct mmc_test_card *test,
->  	if (!(test->card->host->caps & MMC_CAP_CMD_DURING_TFR))
->  		return RESULT_UNSUP_HOST;
->  
-> -	ret = mmc_test_area_map(test, sz, 0, 0);
-> +	ret = mmc_test_area_map(test, sz, 0, 0, use_areq);
->  	if (ret)
->  		return ret;
->  
+>  #define MMC_IOC_CMD _IOWR(MMC_BLOCK_MAJOR, 0, struct mmc_ioc_cmd)
 > 
 
