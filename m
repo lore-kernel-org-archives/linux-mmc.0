@@ -2,101 +2,95 @@ Return-Path: <SRS0=C2IL=4Q=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
+X-Spam-Status: No, score=-5.6 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
+	SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9A364C3F2D1
-	for <linux-mmc@archiver.kernel.org>; Fri, 28 Feb 2020 11:51:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D15F9C3F2D2
+	for <linux-mmc@archiver.kernel.org>; Fri, 28 Feb 2020 15:10:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 725062084E
-	for <linux-mmc@archiver.kernel.org>; Fri, 28 Feb 2020 11:51:25 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (1024-bit key) header.d=mg.codeaurora.org header.i=@mg.codeaurora.org header.b="u0VIClq5"
+	by mail.kernel.org (Postfix) with ESMTP id 9D9892469D
+	for <linux-mmc@archiver.kernel.org>; Fri, 28 Feb 2020 15:10:53 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1582902653;
+	bh=UejwP0M/4ErU8VwsIQa5l7GTzIH7rFjxTYgRAxGJics=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
+	b=jPILAxSYbLZKoVP6pnJJ1YzJALu9Qvh8z7CVW3UX6fc7dSeS/+yiTZlpjVha2gK7Y
+	 fMXOnHQDT+G5Jpn4yCBuKkucveZTynMhPuzTXd7a8F5c+/BfPqnjFaEbCNdw0lJvsg
+	 ISnVm8ZFbveLFTlJ2gnBNYvnC+uEkmmu4cSXnr08=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725805AbgB1LvZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 28 Feb 2020 06:51:25 -0500
-Received: from mail27.static.mailgun.info ([104.130.122.27]:45141 "EHLO
-        mail27.static.mailgun.info" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1725536AbgB1LvY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Feb 2020 06:51:24 -0500
-DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
- s=smtp; t=1582890684; h=Message-Id: Date: Subject: Cc: To: From:
- Sender; bh=QtBKCgEQ0CxITEJwVveTi/5MS0rgKf7c6wwhfsLlxqo=; b=u0VIClq5fRj9tdoVgfOfr25PYdYhVwdFXxpfMRkQRphsnDuofVJy/7ffFsSVQzLk3sy3dqrB
- xwqOSnI48W7Fsj3GlgrWWZfo6paGU2bmttaq2WYg4d+fQdnmh58UeXN7s0OUz0Zz1isLKDl6
- M5iVzRR1zPx3HWb22FPJQyOQQLo=
-X-Mailgun-Sending-Ip: 104.130.122.27
-X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
-Received: from smtp.codeaurora.org (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171])
- by mxa.mailgun.org with ESMTP id 5e58feab.7fdbe0aac570-smtp-out-n01;
- Fri, 28 Feb 2020 11:51:07 -0000 (UTC)
-Received: by smtp.codeaurora.org (Postfix, from userid 1001)
-        id CC5D3C433A2; Fri, 28 Feb 2020 11:51:07 +0000 (UTC)
-Received: from vbadigan-linux.qualcomm.com (blr-c-bdr-fw-01_GlobalNAT_AllZones-Outside.qualcomm.com [103.229.19.19])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-SHA256 (128/128 bits))
-        (No client certificate requested)
-        (Authenticated sender: vbadigan)
-        by smtp.codeaurora.org (Postfix) with ESMTPSA id 1759CC43383;
-        Fri, 28 Feb 2020 11:51:04 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.3.2 smtp.codeaurora.org 1759CC43383
-Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
-Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=none smtp.mailfrom=vbadigan@codeaurora.org
-From:   Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
-To:     adrian.hunter@intel.com, ulf.hansson@linaro.org
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        id S1726805AbgB1PKu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 28 Feb 2020 10:10:50 -0500
+Received: from mail-oi1-f193.google.com ([209.85.167.193]:35034 "EHLO
+        mail-oi1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726874AbgB1PKu (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Feb 2020 10:10:50 -0500
+Received: by mail-oi1-f193.google.com with SMTP id b18so3174029oie.2;
+        Fri, 28 Feb 2020 07:10:49 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to:user-agent;
+        bh=t0G3mflzMLYfHT/AnRWKVaX1lcvqOhj/G6xuPMWJ9SY=;
+        b=I0kO/nEhwgXNjI/WtwGuUpOVPQ6nODVEh3Pp0cRuslLF/p1rctUIzv3uuS2vrhc2GS
+         TqaJmxndsQNAfNgW5jYFQMxQ3dj/eNdULAmx303TRfJU4AV9Ny6moR6YeVhc0iN4U3BU
+         0jXDuNsgSi3vVWPj4mmvP0xfKITN1xJeC7np1fGbRJtUEtCd2mcOC1K5d7Ea/h84vKOH
+         v1Zfx3qFSmHp3AmhycqRFZ83w65EsTM0MQ/7jpLFQwUGIfKYm2PnoQFfHCoNGAZlAV2N
+         om5Ozv7DQmVf+6WUDwjp1nRs7cZVSiwvxnknKEdByQRGJzdhFY/El3hmuwQ7ar+KX8tn
+         9Rdg==
+X-Gm-Message-State: APjAAAUEeHWgyb5BXY1V4H8KjfZyE5KV2WP+gSbA0XkmxSSPLYyIeiz/
+        gsr3PSVWCFYR/MIjp6sHxQ==
+X-Google-Smtp-Source: APXvYqxtcZ6ZNm10DIZf0YYzfzgPghegW6SU51q8Yb4V2+TcrwQt6aZ/TOLwt19IL07IumO1NVtEqA==
+X-Received: by 2002:a05:6808:4d3:: with SMTP id a19mr3271213oie.119.1582902649140;
+        Fri, 28 Feb 2020 07:10:49 -0800 (PST)
+Received: from rob-hp-laptop (24-155-109-49.dyn.grandenetworks.net. [24.155.109.49])
+        by smtp.gmail.com with ESMTPSA id z3sm2010618oia.46.2020.02.28.07.10.47
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 28 Feb 2020 07:10:48 -0800 (PST)
+Received: (nullmailer pid 347 invoked by uid 1000);
+        Fri, 28 Feb 2020 15:10:47 -0000
+Date:   Fri, 28 Feb 2020 09:10:47 -0600
+From:   Rob Herring <robh@kernel.org>
+To:     Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+Cc:     ulf.hansson@linaro.org, robh+dt@kernel.org,
+        asutoshd@codeaurora.org, stummala@codeaurora.org,
+        sayalil@codeaurora.org, cang@codeaurora.org,
+        rampraka@codeaurora.org, dianders@google.com,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
         linux-arm-msm@vger.kernel.org,
         Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>
-Subject: [PATCH] mmc: sdhci-msm: Disable CQE during SDHC reset
-Date:   Fri, 28 Feb 2020 17:20:32 +0530
-Message-Id: <1582890639-32072-1-git-send-email-vbadigan@codeaurora.org>
-X-Mailer: git-send-email 1.9.1
+        Mark Rutland <mark.rutland@arm.com>,
+        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
+        <devicetree@vger.kernel.org>
+Subject: Re: [PATCH V3] dt-bindings: mmc: sdhci-msm: Add CQE reg map
+Message-ID: <20200228151047.GA32759@bogus>
+References: <1581434955-11087-1-git-send-email-vbadigan@codeaurora.org>
+ <1582545470-11530-1-git-send-email-vbadigan@codeaurora.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1582545470-11530-1-git-send-email-vbadigan@codeaurora.org>
+User-Agent: Mutt/1.10.1 (2018-07-13)
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-When SDHC gets reset (E.g. in suspend/resume path), CQE also gets
-reset and goes to disable state. But s/w state still points it as
-CQE is in enabled state. Since s/w and h/w states goes out of sync,
-it results in s/w request timeout for subsequent CQE requests.
+On Mon, 24 Feb 2020 17:27:50 +0530, Veerabhadrarao Badiganti wrote:
+> CQE feature has been enabled on sdhci-msm. Add CQE reg map
+> and reg names that need to be supplied for supporting CQE feature.
+> 
+> Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+> ---
+> Changes since V2:
+> 	- Dropped _mem suffix to reg names.
+> 
+> Changes since V1:
+> 	- Updated description for more clarity & Fixed typos.
+> ---
+>  Documentation/devicetree/bindings/mmc/sdhci-msm.txt | 8 +++++++-
+>  1 file changed, 7 insertions(+), 1 deletion(-)
+> 
 
-To synchronize CQE s/w and h/w state during SDHC reset,
-explicitly disable CQE after reset.
-
-Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
----
- drivers/mmc/host/sdhci-msm.c | 9 ++++++++-
- 1 file changed, 8 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index 53b79ee..d7ba3b2 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -1823,6 +1823,13 @@ static void sdhci_msm_set_regulator_caps(struct sdhci_msm_host *msm_host)
- 	pr_debug("%s: supported caps: 0x%08x\n", mmc_hostname(mmc), caps);
- }
- 
-+static void sdhci_msm_reset(struct sdhci_host *host, u8 mask)
-+{
-+	sdhci_reset(host, mask);
-+	if (host->mmc->caps2 & MMC_CAP2_CQE)
-+		cqhci_suspend(host->mmc);
-+}
-+
- static const struct sdhci_msm_variant_ops mci_var_ops = {
- 	.msm_readl_relaxed = sdhci_msm_mci_variant_readl_relaxed,
- 	.msm_writel_relaxed = sdhci_msm_mci_variant_writel_relaxed,
-@@ -1861,7 +1868,7 @@ static void sdhci_msm_set_regulator_caps(struct sdhci_msm_host *msm_host)
- MODULE_DEVICE_TABLE(of, sdhci_msm_dt_match);
- 
- static const struct sdhci_ops sdhci_msm_ops = {
--	.reset = sdhci_reset,
-+	.reset = sdhci_msm_reset,
- 	.set_clock = sdhci_msm_set_clock,
- 	.get_min_clock = sdhci_msm_get_min_clock,
- 	.get_max_clock = sdhci_msm_get_max_clock,
--- 
-Qualcomm India Private Limited, on behalf of Qualcomm Innovation Center, Inc., is a member of Code Aurora Forum, a Linux Foundation Collaborative Project
+Reviewed-by: Rob Herring <robh@kernel.org>
