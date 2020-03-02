@@ -2,120 +2,98 @@ Return-Path: <SRS0=XGfH=4T=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.1 required=3.0 tests=FSL_HELO_FAKE,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2ABB6C3F2D1
-	for <linux-mmc@archiver.kernel.org>; Mon,  2 Mar 2020 17:09:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 91C86C3F2CD
+	for <linux-mmc@archiver.kernel.org>; Mon,  2 Mar 2020 19:11:23 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 0C08E22B48
-	for <linux-mmc@archiver.kernel.org>; Mon,  2 Mar 2020 17:09:35 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 634BE2173E
+	for <linux-mmc@archiver.kernel.org>; Mon,  2 Mar 2020 19:11:23 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="k25nYhd+"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727261AbgCBRJe (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 2 Mar 2020 12:09:34 -0500
-Received: from mail-il1-f194.google.com ([209.85.166.194]:44989 "EHLO
-        mail-il1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727397AbgCBRJd (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Mar 2020 12:09:33 -0500
-Received: by mail-il1-f194.google.com with SMTP id x7so110748ilq.11
-        for <linux-mmc@vger.kernel.org>; Mon, 02 Mar 2020 09:09:31 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to:user-agent;
-        bh=pY7gYt6OotnqUFf5LH33Rx81o88vShjsNxCsLlJhYP4=;
-        b=dH9+7Tdgfb3yxJz8/iaILXZ/muBdKRpwxO+QHd61mBzEwvd+7hk839meonbF2NEKgA
-         UhflyvknVng7tAwaHjRzrr+qyRibYRbv8pTy058JFwnZp/4Nwm+WRbobYcBzboj7yG4G
-         MPqAVbYApZj1eKaqQCQN2EzJEjE0Lgge86y9dkCIHAjB38NHtmXmRf/XhOvQAVeFxRhH
-         sfG10ZdMXh4VIqMqvbUNeOVFLebpPjb6ua38d77cieJCR67TapccM2sgooSVCfZHgVK/
-         bmL/LngyRTDFCICD9EzUm5M12d7gDiUv4SFSG57H2DPQ4L8xijIYiiQxB1lSiBJ1mXi/
-         o3tA==
-X-Gm-Message-State: ANhLgQ2CtuJ8mGglzXKC6piNiVqn1WuDHN6jMXkA1TKVkDAkrXXk7mGM
-        XZZAq/dVYZVlawhS1ljvQb2Euw==
-X-Google-Smtp-Source: ADFU+vvLqUKxKaXlniz29wyCsSX4+Kp1o78dvk9pMAs2sRWuO4RBSRWjMfxc6G3wlV7VF6Vft4V9EA==
-X-Received: by 2002:a92:9c57:: with SMTP id h84mr594806ili.94.1583168970924;
-        Mon, 02 Mar 2020 09:09:30 -0800 (PST)
-Received: from google.com ([2620:15c:183:0:82e0:aef8:11bc:24c4])
-        by smtp.gmail.com with ESMTPSA id z63sm6813088ilk.44.2020.03.02.09.09.29
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 02 Mar 2020 09:09:30 -0800 (PST)
-Date:   Mon, 2 Mar 2020 10:09:26 -0700
-From:   Raul Rangel <rrangel@chromium.org>
-To:     Ben Chuang <benchuanggli@gmail.com>
-Cc:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        ben.chuang@genesyslogic.com.tw
-Subject: Re: [PATCH] mmc: sdhci-pci-gli: Enable MSI interrupt for GL975x
-Message-ID: <20200302170926.GA59937@google.com>
-References: <20200219092900.9151-1-benchuanggli@gmail.com>
+        id S1727534AbgCBTLW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 2 Mar 2020 14:11:22 -0500
+Received: from fllv0015.ext.ti.com ([198.47.19.141]:34888 "EHLO
+        fllv0015.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727234AbgCBTLW (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Mar 2020 14:11:22 -0500
+Received: from lelv0265.itg.ti.com ([10.180.67.224])
+        by fllv0015.ext.ti.com (8.15.2/8.15.2) with ESMTP id 022JBITB103346;
+        Mon, 2 Mar 2020 13:11:18 -0600
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
+        s=ti-com-17Q1; t=1583176278;
+        bh=z3LjQa/lvG261qfCTQihr6ev+Qd8qiUMnEg6eeQxmsU=;
+        h=Subject:To:CC:References:From:Date:In-Reply-To;
+        b=k25nYhd+7xWeA1M1Z5smp2xB+4qiEzgiU2lswKgrJOQb/8TGzJz8czFUsIACw7jbH
+         I6L76g3DAImkDdLGg59PwDFsfW1VFh46/xE9V9DvCiSl8ZUcZrqHaUJvRFxaXy4e/5
+         MJOPZGl2EgR/aowt8t1YPBw6gHLQ3rP+aQ1Jdr1Q=
+Received: from DFLE114.ent.ti.com (dfle114.ent.ti.com [10.64.6.35])
+        by lelv0265.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 022JBIoG071859
+        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
+        Mon, 2 Mar 2020 13:11:18 -0600
+Received: from DFLE111.ent.ti.com (10.64.6.32) by DFLE114.ent.ti.com
+ (10.64.6.35) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.1847.3; Mon, 2 Mar
+ 2020 13:11:18 -0600
+Received: from localhost.localdomain (10.64.41.19) by DFLE111.ent.ti.com
+ (10.64.6.32) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.1847.3 via
+ Frontend Transport; Mon, 2 Mar 2020 13:11:18 -0600
+Received: from [10.250.132.245] (ileax41-snat.itg.ti.com [10.172.224.153])
+        by localhost.localdomain (8.15.2/8.15.2) with ESMTP id 022JBFGB065948;
+        Mon, 2 Mar 2020 13:11:16 -0600
+Subject: Re: [PATCH 0/3] Update phy configuration for AM65x
+To:     <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
+        <devicetree@vger.kernel.org>
+CC:     <ulf.hansson@linaro.org>, <adrian.hunter@intel.com>,
+        <robh+dt@kernel.org>
+References: <20200108150920.14547-1-faiz_abbas@ti.com>
+From:   Faiz Abbas <faiz_abbas@ti.com>
+Message-ID: <7edb2c28-11fd-e282-a8d7-e61aad8cace2@ti.com>
+Date:   Tue, 3 Mar 2020 00:41:14 +0530
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.4.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20200219092900.9151-1-benchuanggli@gmail.com>
-User-Agent: Mutt/1.12.2 (2019-09-21)
+In-Reply-To: <20200108150920.14547-1-faiz_abbas@ti.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Feb 19, 2020 at 05:29:00PM +0800, Ben Chuang wrote:
-> From: Ben Chuang <ben.chuang@genesyslogic.com.tw>
-> 
-> Enable MSI interrupt for GL9750/GL9755. Some platforms
-> do not support PCI INTx and devices can not work without
-> interrupt. Like messages below:
-> 
-> [    4.487132] sdhci-pci 0000:01:00.0: SDHCI controller found [17a0:9755] (rev 0)
-> [    4.487198] ACPI BIOS Error (bug): Could not resolve symbol [\_SB.PCI0.PBR2._PRT.APS2], AE_NOT_FOUND (20190816/psargs-330)
-> [    4.487397] ACPI Error: Aborting method \_SB.PCI0.PBR2._PRT due to previous error (AE_NOT_FOUND) (20190816/psparse-529)
-> [    4.487707] pcieport 0000:00:01.3: can't derive routing for PCI INT A
-> [    4.487709] sdhci-pci 0000:01:00.0: PCI INT A: no GSI
-> 
-> Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
-> ---
->  drivers/mmc/host/sdhci-pci-gli.c | 17 +++++++++++++++++
->  1 file changed, 17 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
-> index 5eea8d70a85d..ce15a05f23d4 100644
-> --- a/drivers/mmc/host/sdhci-pci-gli.c
-> +++ b/drivers/mmc/host/sdhci-pci-gli.c
-> @@ -262,10 +262,26 @@ static int gl9750_execute_tuning(struct sdhci_host *host, u32 opcode)
->  	return 0;
->  }
->  
-> +static void gli_pcie_enable_msi(struct sdhci_pci_slot *slot)
-> +{
-> +	int ret;
-> +
-> +	ret = pci_alloc_irq_vectors(slot->chip->pdev, 1, 1,
-> +				    PCI_IRQ_MSI | PCI_IRQ_MSIX);
-> +	if (ret < 0) {
-> +		pr_warn("%s: enable PCI MSI failed, error=%d\n",
-> +		       mmc_hostname(slot->host->mmc), ret);
-> +		return;
-> +	}
-> +
-> +	slot->host->irq = pci_irq_vector(slot->chip->pdev, 0);
-> +}
-> +
->  static int gli_probe_slot_gl9750(struct sdhci_pci_slot *slot)
->  {
->  	struct sdhci_host *host = slot->host;
->  
-> +	gli_pcie_enable_msi(slot);
->  	slot->host->mmc->caps2 |= MMC_CAP2_NO_SDIO;
->  	sdhci_enable_v4_mode(host);
->  
-> @@ -276,6 +292,7 @@ static int gli_probe_slot_gl9755(struct sdhci_pci_slot *slot)
->  {
->  	struct sdhci_host *host = slot->host;
->  
-> +	gli_pcie_enable_msi(slot);
->  	slot->host->mmc->caps2 |= MMC_CAP2_NO_SDIO;
->  	sdhci_enable_v4_mode(host);
->  
-Tested-by: Raul E Rangel <rrangel@chromium.org>
+Uffe,
 
+On 08/01/20 8:39 pm, Faiz Abbas wrote:
+> The following patches update phy configurations for AM65x as given in
+> the latest data manual.
+> 
+> The patches depend on my fixes series posted just before this:
+> https://patchwork.kernel.org/project/linux-mmc/list/?series=225425
+> 
+> Device tree patch updating the actual otap values will be posted
+> separately.
+> 
+> Tested with Am65x-evm and J721e-evm.
+> 
+> Faiz Abbas (3):
+>   dt-bindings: mmc: sdhci-am654: Update Output tap delay binding
+>   mmc: sdhci_am654: Update OTAPDLY writes
+>   mmc: sdhci_am654: Enable DLL only for some speed modes
+> 
+>  .../devicetree/bindings/mmc/sdhci-am654.txt   |  21 +-
+>  drivers/mmc/host/sdhci_am654.c                | 247 ++++++++++++------
+>  include/linux/mmc/host.h                      |   2 +
+>  3 files changed, 192 insertions(+), 78 deletions(-)
+> 
+
+Can you help merge this?
+
+Thanks,
+Faiz
