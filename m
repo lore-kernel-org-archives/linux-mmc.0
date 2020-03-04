@@ -6,44 +6,44 @@ X-Spam-Status: No, score=-8.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
 	URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CF095C3F2CD
-	for <linux-mmc@archiver.kernel.org>; Wed,  4 Mar 2020 12:23:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 053EFC3F2D7
+	for <linux-mmc@archiver.kernel.org>; Wed,  4 Mar 2020 12:29:29 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id A701D2146E
-	for <linux-mmc@archiver.kernel.org>; Wed,  4 Mar 2020 12:23:53 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D405A21775
+	for <linux-mmc@archiver.kernel.org>; Wed,  4 Mar 2020 12:29:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2388011AbgCDMXx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 4 Mar 2020 07:23:53 -0500
-Received: from mga14.intel.com ([192.55.52.115]:5650 "EHLO mga14.intel.com"
+        id S1729232AbgCDM32 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 4 Mar 2020 07:29:28 -0500
+Received: from mga09.intel.com ([134.134.136.24]:29032 "EHLO mga09.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2387776AbgCDMXx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 4 Mar 2020 07:23:53 -0500
+        id S1729175AbgCDM32 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 4 Mar 2020 07:29:28 -0500
 X-Amp-Result: SKIPPED(no attachment in message)
 X-Amp-File-Uploaded: False
 Received: from fmsmga002.fm.intel.com ([10.253.24.26])
-  by fmsmga103.fm.intel.com with ESMTP/TLS/DHE-RSA-AES256-GCM-SHA384; 04 Mar 2020 04:23:52 -0800
+  by orsmga102.jf.intel.com with ESMTP/TLS/DHE-RSA-AES256-GCM-SHA384; 04 Mar 2020 04:29:27 -0800
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="5.70,514,1574150400"; 
-   d="scan'208";a="274649649"
+   d="scan'208";a="274651100"
 Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.167]) ([10.237.72.167])
-  by fmsmga002.fm.intel.com with ESMTP; 04 Mar 2020 04:23:50 -0800
-Subject: Re: [PATCH] mmc: cqhci: Update cqhci memory ioresource name
+  by fmsmga002.fm.intel.com with ESMTP; 04 Mar 2020 04:29:24 -0800
+Subject: Re: [PATCH V2] mmc: sdhci-msm: Disable CQE during SDHC reset
 To:     Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
         ulf.hansson@linaro.org
 Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-msm@vger.kernel.org, dianders@google.com,
-        mka@chromium.org, Ritesh Harjani <riteshh@codeaurora.org>,
-        Asutosh Das <asutoshd@codeaurora.org>
-References: <1583323250-23596-1-git-send-email-vbadigan@codeaurora.org>
+        linux-arm-msm@vger.kernel.org, Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>
+References: <1582890639-32072-1-git-send-email-vbadigan@codeaurora.org>
+ <1583322863-21790-1-git-send-email-vbadigan@codeaurora.org>
 From:   Adrian Hunter <adrian.hunter@intel.com>
 Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
  Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <e1bd6b82-01d1-ce71-d170-a891a18b8141@intel.com>
-Date:   Wed, 4 Mar 2020 14:23:07 +0200
+Message-ID: <da449444-1878-e387-6ebf-4ddb282a9b71@intel.com>
+Date:   Wed, 4 Mar 2020 14:28:42 +0200
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
  Thunderbird/68.5.0
 MIME-Version: 1.0
-In-Reply-To: <1583323250-23596-1-git-send-email-vbadigan@codeaurora.org>
+In-Reply-To: <1583322863-21790-1-git-send-email-vbadigan@codeaurora.org>
 Content-Type: text/plain; charset=utf-8
 Content-Language: en-US
 Content-Transfer-Encoding: 7bit
@@ -52,35 +52,53 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 4/03/20 2:00 pm, Veerabhadrarao Badiganti wrote:
-> Update cqhci memory ioresource name from cqhci_mem to cqhci since
-> suffix _mem is redundant.
+On 4/03/20 1:54 pm, Veerabhadrarao Badiganti wrote:
+> When SDHC gets reset (E.g. in suspend path), CQE also gets reset
+> and goes to disable state. But s/w state still points it as CQE
+> is in enabled state. Since s/w and h/w states goes out of sync,
+> it results in s/w request timeout for subsequent CQE requests.
+> 
+> To synchronize CQE s/w and h/w state during SDHC reset,
+> explicitly disable CQE after reset.
 
-Which is OK only because sdhci-msm is the only caller of cqhci_pltfm_init(),
-right?  So no one else could be using "cqhci_mem"? Some more explanation is
-needed here.
+Shouldn't you be calling cqhci_suspend() / cqhci_resume() in the suspend and
+resume paths?
 
 > 
 > Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
 > ---
-> Corresponding binding change:
-> https://lore.kernel.org/linux-arm-msm/1582545470-11530-1-git-send-email-vbadigan@codeaurora.org/
+> Changes since V1:
+> 	- Disable CQE only when SDHC undergoes s/w reset for all.
 > ---
->  drivers/mmc/host/cqhci.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+>  drivers/mmc/host/sdhci-msm.c | 9 ++++++++-
+>  1 file changed, 8 insertions(+), 1 deletion(-)
 > 
-> diff --git a/drivers/mmc/host/cqhci.c b/drivers/mmc/host/cqhci.c
-> index e2ea2c4..e24b8ff 100644
-> --- a/drivers/mmc/host/cqhci.c
-> +++ b/drivers/mmc/host/cqhci.c
-> @@ -1077,7 +1077,7 @@ struct cqhci_host *cqhci_pltfm_init(struct platform_device *pdev)
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index 53b79ee..75929d3 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -1823,6 +1823,13 @@ static void sdhci_msm_set_regulator_caps(struct sdhci_msm_host *msm_host)
+>  	pr_debug("%s: supported caps: 0x%08x\n", mmc_hostname(mmc), caps);
+>  }
 >  
->  	/* check and setup CMDQ interface */
->  	cqhci_memres = platform_get_resource_byname(pdev, IORESOURCE_MEM,
-> -						   "cqhci_mem");
-> +						   "cqhci");
->  	if (!cqhci_memres) {
->  		dev_dbg(&pdev->dev, "CMDQ not supported\n");
->  		return ERR_PTR(-EINVAL);
+> +static void sdhci_msm_reset(struct sdhci_host *host, u8 mask)
+> +{
+> +	sdhci_reset(host, mask);
+> +	if ((host->mmc->caps2 & MMC_CAP2_CQE) && (mask & SDHCI_RESET_ALL))
+> +		cqhci_suspend(host->mmc);
+> +}
+> +
+>  static const struct sdhci_msm_variant_ops mci_var_ops = {
+>  	.msm_readl_relaxed = sdhci_msm_mci_variant_readl_relaxed,
+>  	.msm_writel_relaxed = sdhci_msm_mci_variant_writel_relaxed,
+> @@ -1861,7 +1868,7 @@ static void sdhci_msm_set_regulator_caps(struct sdhci_msm_host *msm_host)
+>  MODULE_DEVICE_TABLE(of, sdhci_msm_dt_match);
+>  
+>  static const struct sdhci_ops sdhci_msm_ops = {
+> -	.reset = sdhci_reset,
+> +	.reset = sdhci_msm_reset,
+>  	.set_clock = sdhci_msm_set_clock,
+>  	.get_min_clock = sdhci_msm_get_min_clock,
+>  	.get_max_clock = sdhci_msm_get_max_clock,
 > 
 
