@@ -2,110 +2,124 @@ Return-Path: <SRS0=jYsQ=4V=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6359EC3F2CD
-	for <linux-mmc@archiver.kernel.org>; Wed,  4 Mar 2020 10:33:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6D566C3F2D1
+	for <linux-mmc@archiver.kernel.org>; Wed,  4 Mar 2020 11:09:37 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 3A4EF214D8
-	for <linux-mmc@archiver.kernel.org>; Wed,  4 Mar 2020 10:33:23 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4079E20705
+	for <linux-mmc@archiver.kernel.org>; Wed,  4 Mar 2020 11:09:37 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="mXT5WtUh"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="vLjKlhhp"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2387818AbgCDKdW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 4 Mar 2020 05:33:22 -0500
-Received: from mail-vs1-f67.google.com ([209.85.217.67]:36510 "EHLO
-        mail-vs1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2387772AbgCDKdU (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Mar 2020 05:33:20 -0500
-Received: by mail-vs1-f67.google.com with SMTP id n6so803574vsc.3
-        for <linux-mmc@vger.kernel.org>; Wed, 04 Mar 2020 02:33:18 -0800 (PST)
+        id S1728998AbgCDLJg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 4 Mar 2020 06:09:36 -0500
+Received: from mail-vk1-f193.google.com ([209.85.221.193]:38812 "EHLO
+        mail-vk1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726440AbgCDLJg (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Mar 2020 06:09:36 -0500
+Received: by mail-vk1-f193.google.com with SMTP id w4so424716vkd.5
+        for <linux-mmc@vger.kernel.org>; Wed, 04 Mar 2020 03:09:36 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=oavuclMu1bzFOooB6OMmYHMNvudw3zSMha1bvQGFwlM=;
-        b=mXT5WtUhyrlswngAqH6ya+Juu2LGtRuHOusP2nOG7HjjTZyzZfKHy5sBYZ+UyMuoGx
-         1C9UM1j6DPFWmzU6eIMdSEHuH+Daaw7KNhAnz1qsp7m07VGBy6UCuzNAvI17a0JARLr5
-         GgzJmucnCXZq06g5AKqMDKpJr9i7hC4NjXD4q4WNcTwQH74hs8uvjFZLDNsUPbfJMmxt
-         s1GseK3iVpTYMg6sEJYBbxI59Y0pC5dkMYM3Chc2dpMkt5ItQ3DUbPebklsY6xgSgAgc
-         sySj8ET3u8vjIpi8mF6gZAdbgHWwW4LPMW9oKEA8ygbzFx0BFAi+j7+ztl2Wdr8NNtWQ
-         7qsQ==
+        bh=LGgNDzFM9+pZsPJxkq/f++BDXhgoGaKxsldF5IOKGLc=;
+        b=vLjKlhhpEkXgDWiBCB0FFmFfnnl1pxnbZgdk62RSVMxiIQuRYNZK+C9swyOu+/aGCt
+         6J+O89yf6K1OFpovk86IvKwB/53g0gnXkUK+Y1u9pibpgHjGGvzLsRivdzC9XmTsR+10
+         AOR6TBHLTi1+4P2Xhm7FyGE2CQl+Y2dgXtpdphEkARt/IP2lt1mDKxvt2AOtB3Ch/ly3
+         ITa8EY40ug/GGqrm1zqfxnjge3zBfyDklTb2shBFaPuqQ+Ol8QpPTYJshUSEr9fAiCQW
+         IzGoJk71K3Mj+l14lENhmRTDlGW/ih/meG/EH44oSrYixv7JIIdwZgMjweQp0ZE78tqW
+         KLlQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=oavuclMu1bzFOooB6OMmYHMNvudw3zSMha1bvQGFwlM=;
-        b=kcwM0Q1nt7+EEk1sZ8rPi4LE8sZYojYOpf/p8ZYHg3lMpbzSoh83F96k3OOGbXC/SX
-         QmeS0tpvQ1B3ImibF5jgUAhbWtf3mmeJdzEvf66tBw2Q7bGqZX827Wmxkf33pu7VomKF
-         Q02Ab7vY8G+AlS7v7gJioh5YP+cbx0Hn8L3UEDyg1N8K6/qCLQvrlvrAaJ48GaV53d79
-         CSJY95X/G7DY2Hc6qtX6DFAKADtsyxWinHF1c4n9umwHuqCcAY7qeBr/eh/DgUir76fD
-         wiAPKAs3vcjhG5T913eQV0vUz2LcT78N4/qQEZ6GtI9lfF0/MrEiQTaHZp62hFXH1uA6
-         7H0g==
-X-Gm-Message-State: ANhLgQ18aGaWWA5po1nozWbarNuP1ZD9nNi/OOb6drvbkCXRezTbbxgT
-        u7Gm/SWuKg6XGYd/sKFiiomFTRPiJdVoz4dgLzzloQ==
-X-Google-Smtp-Source: ADFU+vt8lszpIIskiGB9+FhpTPR1wmM1HuQk0VGywmC3a/Ll2JBX9fYN7Go6GOFSjkphJhvCqF2NGIj6hT+js/1446k=
-X-Received: by 2002:a05:6102:4af:: with SMTP id r15mr1253954vsa.35.1583317997633;
- Wed, 04 Mar 2020 02:33:17 -0800 (PST)
+        bh=LGgNDzFM9+pZsPJxkq/f++BDXhgoGaKxsldF5IOKGLc=;
+        b=dBo9peQ6guWziwtSAIL5XO4gv0V5J2TT07zco3ki56w+GeB8dWsvcq2OMWlyQ4GH9u
+         3g1w1oZCI04wmtHjUZJxiVjtjSkjtZquEI7qLP3/vYWmpaYbZnYaDY0GvuRTA6WJxZpX
+         rhtgIU5A6Ci/FWBQjpldgIOT0MmlrWtGb5wSed5Kq8O2vm9vgsqA4CCldG7nJv+WjtkD
+         5ZOKBUlBri/em4MmVXa3JnRzO2MEGiygAXnJEufHVtf82OrUvf6nisIUFIJLSAXtvSO6
+         YPch+13z5bW+EjkUpV3ViDYTY0VWGa7LiiQqY4q4YSkAqC/PXmL9rz95mcWsQbE18Ll0
+         yZOg==
+X-Gm-Message-State: ANhLgQ1uVYJVC29TFMbkSG6MgFGRH80/NSsNl83HgWljlTdntOXZlulf
+        ULW4YMGu/gA9Mhsl+Xoc64tKCH21eugoad4qsgOAmA==
+X-Google-Smtp-Source: ADFU+vuZEa5rIaEwbGyzEV1W96822bRQFwK+BMvjTk+I/++e8CQ7jw9sUjRFKFVta8ECOqPDHKZ4l3a88vnAB0qpTOA=
+X-Received: by 2002:ac5:c4fc:: with SMTP id b28mr1021594vkl.101.1583320175432;
+ Wed, 04 Mar 2020 03:09:35 -0800 (PST)
 MIME-Version: 1.0
-References: <CA+G9fYuqAQfhzF2BzHr7vMHx68bo8-jT+ob_F3eHQ3=oFjgYdg@mail.gmail.com>
- <CAPDyKFqqhxC-pmV_j8PLY-D=AbqCAbiipAAHXLpJ4N_BiYYOFw@mail.gmail.com>
- <CA+G9fYugQuAERqp3VXUFG-3QxXoF8bz7OSMh6WGSZcrGkbfDSQ@mail.gmail.com>
- <CAPDyKFo-vEO7zN_F+NqcKtnKmAo_deOZx3gYNiks3yTAQAjv-Q@mail.gmail.com>
- <a602a27a-b960-ce56-c541-3b4b95f5dce2@nvidia.com> <CAPDyKFrXQgtHa4gLaKUi_F0rs4FMBai3Y_+TcHZR_zpkb0B4QQ@mail.gmail.com>
- <6523119a-50ac-973a-d1cd-ab1569259411@nvidia.com> <f960aa98-5508-36fd-166d-7f41c7d85154@nvidia.com>
- <CAPDyKFokE6x0mn+v5B9=so-SyrdTn0JBU8Mrp3Zdu6kSaCie2g@mail.gmail.com>
- <0963b60f-15e7-4bc6-10df-6fc8003e4d42@nvidia.com> <CAPDyKFq5NoeHEBK3sv3yOSD2+pm9FueH1gaTyPq0j7GLfa6vnA@mail.gmail.com>
- <34fd84d7-387b-b6f3-7fb3-aa490909e205@ti.com> <CAPDyKFrrO4noYqdxWL9Y8Nx75LopbDudKGMotkGbGcAF1oq==w@mail.gmail.com>
- <5e9b5646-bd48-e55b-54ee-1c2c41fc9218@nvidia.com> <CAPDyKFqpNo_4OePBR1KnJNO=kR8XEqbcsEd=icSceSdDH+Rk1Q@mail.gmail.com>
-In-Reply-To: <CAPDyKFqpNo_4OePBR1KnJNO=kR8XEqbcsEd=icSceSdDH+Rk1Q@mail.gmail.com>
+References: <20200212024220.GA32111@seokyung-mobl1>
+In-Reply-To: <20200212024220.GA32111@seokyung-mobl1>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 4 Mar 2020 11:32:41 +0100
-Message-ID: <CAPDyKFpPOA7VD0Qw3dnnSdF4i5pNK6buCNCV2izW6xr5Mr9ybA@mail.gmail.com>
-Subject: Re: LKFT: arm x15: mmc1: cache flush error -110
-To:     Sowjanya Komatineni <skomatineni@nvidia.com>
-Cc:     Jon Hunter <jonathanh@nvidia.com>,
-        Bitan Biswas <bbiswas@nvidia.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Naresh Kamboju <naresh.kamboju@linaro.org>,
-        Jens Axboe <axboe@kernel.dk>,
-        Alexei Starovoitov <ast@kernel.org>,
-        linux-block <linux-block@vger.kernel.org>,
-        lkft-triage@lists.linaro.org,
-        open list <linux-kernel@vger.kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Arnd Bergmann <arnd@arndb.de>,
-        John Stultz <john.stultz@linaro.org>,
-        Faiz Abbas <faiz_abbas@ti.com>,
-        Thierry Reding <treding@nvidia.com>,
-        Anders Roxell <anders.roxell@linaro.org>,
-        Kishon <kishon@ti.com>
+Date:   Wed, 4 Mar 2020 12:08:59 +0100
+Message-ID: <CAPDyKFr9H2XcgCk9AmHgJfHC+PySh66KxegMJ4yb4aqKSVt3kg@mail.gmail.com>
+Subject: Re: [PATCH] mmc: mmc: Fix the timing for clock changing in mmc
+To:     Kyungmin Seo <kyungmin.seo@intel.com>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-[...]
+On Wed, 12 Feb 2020 at 03:40, Kyungmin Seo <kyungmin.seo@intel.com> wrote:
+>
+> The clock has to be changed after sending CMD6 for HS mode selection in
+> mmc_hs400_to_hs200() function.
+>
+> The JEDEC 5.0 and 5.1 said that "High-speed" mode selection has to
+> enable the the high speed mode timing in the Device, before chaning the
+> clock frequency to a frequency between 26MHz and 52MHz.
 
- >
-> > Actually we always use R1B with CMD6 as per spec.
->
-> I fully agree that R1B is preferable, but it's not against the spec to
-> send CMD13 to poll for busy.
->
-> Moreover, we need to cope with the scenario when the host has
-> specified a maximum timeout that isn't sufficiently long enough for
-> the requested operation. Do you have another proposal for how to
-> manage this, but disabling MMC_RSP_BUSY?
->
-> Let's assume you driver would get a R1B for the CMD6 (we force it),
-> then what timeout would the driver be using if we would set
-> cmd.busy_timeout to 30ms?
+I think that is based upon the assumption that you are using a lower
+frequency to start with.
 
-/s/30ms/30s
+For example, assume that you are running with 400KHz during card
+initialization, then you want to send the CMD6 to switch to HS mode
+and that should be done, before updating the clock rate.
+
+mmc_hs400_to_hs200() goes the opposite direction, so I think the
+current code looks correct to me.
 
 Kind regards
 Uffe
+
+>
+> Signed-off-by: Kyungmin Seo <kyungmin.seo@intel.com>
+> ---
+>  drivers/mmc/core/mmc.c | 8 ++++----
+>  1 file changed, 4 insertions(+), 4 deletions(-)
+>
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 3486bc7fbb64..98640b51c73e 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -1196,10 +1196,6 @@ int mmc_hs400_to_hs200(struct mmc_card *card)
+>         int err;
+>         u8 val;
+>
+> -       /* Reduce frequency to HS */
+> -       max_dtr = card->ext_csd.hs_max_dtr;
+> -       mmc_set_clock(host, max_dtr);
+> -
+>         /* Switch HS400 to HS DDR */
+>         val = EXT_CSD_TIMING_HS;
+>         err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_HS_TIMING,
+> @@ -1210,6 +1206,10 @@ int mmc_hs400_to_hs200(struct mmc_card *card)
+>
+>         mmc_set_timing(host, MMC_TIMING_MMC_DDR52);
+>
+> +       /* Reduce frequency to HS */
+> +       max_dtr = card->ext_csd.hs_max_dtr;
+> +       mmc_set_clock(host, max_dtr);
+> +
+>         err = mmc_switch_status(card);
+>         if (err)
+>                 goto out_err;
+> --
+> 2.17.1
+>
