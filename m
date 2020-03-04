@@ -2,121 +2,146 @@ Return-Path: <SRS0=jYsQ=4V=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-8.0 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2513BC3F2D7
-	for <linux-mmc@archiver.kernel.org>; Wed,  4 Mar 2020 16:37:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 397EDC3F2D1
+	for <linux-mmc@archiver.kernel.org>; Wed,  4 Mar 2020 16:51:20 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id EF6DC24673
-	for <linux-mmc@archiver.kernel.org>; Wed,  4 Mar 2020 16:37:26 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0F09D21D56
+	for <linux-mmc@archiver.kernel.org>; Wed,  4 Mar 2020 16:51:20 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="b/h5yz5w"
+	dkim=fail reason="signature verification failed" (1024-bit key) header.d=mg.codeaurora.org header.i=@mg.codeaurora.org header.b="GkRpz5zO"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729752AbgCDQhY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 4 Mar 2020 11:37:24 -0500
-Received: from mail-vs1-f68.google.com ([209.85.217.68]:40540 "EHLO
-        mail-vs1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729675AbgCDQhY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Mar 2020 11:37:24 -0500
-Received: by mail-vs1-f68.google.com with SMTP id c18so1565826vsq.7
-        for <linux-mmc@vger.kernel.org>; Wed, 04 Mar 2020 08:37:23 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=hABaqSyYZLOUCpK2+i1NqdTSDdnUnv1VCEKCW00h9WI=;
-        b=b/h5yz5wlSBuj4Lbv+kbPLguRwtFdV5HC/ap61En5X/K6/4YD+4zRyFLn78H9qD27V
-         7GAA7Uuczidrny2Vt2luLVc9+Ex0aJ/lGNQ8tEBs+DmWPecQpoBQb9F4JV2uw2bgipSd
-         CAvK4wsRbKO/d+Z9hQUQmcLpGcMtuAroXiK2hFYLHgxsa0Ifiu+7sZ7f5dG1zniuK5l+
-         zPvvbaNW6IJT2P4KEmZdKgwZ2kGkOtvy8B3ZjXOvKK+D2Ptk8sh8yVy91lCEUh+rSHVp
-         1UwsYKyiQMqvc89tkSoFnVWGIhC5EDiBTZ9whQR4DYCLTFMHOLW8XrXJrII2HeibgVs6
-         W4NA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=hABaqSyYZLOUCpK2+i1NqdTSDdnUnv1VCEKCW00h9WI=;
-        b=S41uWRjTs5wdras5hW6N/IVw0p+LYJtjfCDciX82zBsbtLXyK+WYOIH3ZlZsfz15zK
-         k2vxpqeCe8UbFIvKrQG7MmCK4sA4tNcHsSyTUyh1phWTMUzH28W37VDXY4qtb33OUGfE
-         YkBL4DUVLMVosLk0Ih4Pi05FfcuN6LPKGNR7LARyRQxZj5k2DTiDdB9oGYfPCfXxdatH
-         f3iQgmttpaqwKlRamepcJcNXHk2R1ebv2KgxvCwLchl0HggK50gP6KbECUQHnmMKgDIi
-         qUjPXhSGYoddNtCqHv7IyiKzpzb8qmICPreL8Onp+31Cu3Bm/jWb36isOHiMTdx9CRUs
-         wXTg==
-X-Gm-Message-State: ANhLgQ1bZv5x4rDmuuzVpBAZDivBAwKUNYM+ri3Dv5IWck3e2epGTEpJ
-        Q/YYLXOlWfb8e0qAVBOBg4uX9jgPWiyAVmxwj5dZ3A==
-X-Google-Smtp-Source: ADFU+vsqaKb2RoRKxPcXhxp65L9DlvDybJ++9ZBqVDK57rvpHpGbRYrYO7V96B/Jdy+fc8mQrqBMgQDJ+jef4TTwT+Y=
-X-Received: by 2002:a67:7fd0:: with SMTP id a199mr2328053vsd.200.1583339842981;
- Wed, 04 Mar 2020 08:37:22 -0800 (PST)
+        id S2388019AbgCDQvT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 4 Mar 2020 11:51:19 -0500
+Received: from mail26.static.mailgun.info ([104.130.122.26]:62606 "EHLO
+        mail26.static.mailgun.info" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S2388040AbgCDQvR (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Mar 2020 11:51:17 -0500
+DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
+ s=smtp; t=1583340676; h=Content-Transfer-Encoding: Content-Type:
+ In-Reply-To: MIME-Version: Date: Message-ID: From: References: Cc: To:
+ Subject: Sender; bh=eo9hdQRKL5AB9EnJYvisoQiRMqmI+s0cT5VOh7DznOE=; b=GkRpz5zOb9x7Oz5bLkI8aH/dRhaOzVbPmLSvChgfNRuTYmQ5Jl6C8oO15peQXhUxCN2x6DDy
+ JzuGySf6gUqU0oQvvNztzwAMlSZfOqCBydYrGiZz0C5FYpjeFRe9aAvlXN23198IsPwfXxoj
+ Qv9+DIpuFk1f0kNYR1XAz9YWmwI=
+X-Mailgun-Sending-Ip: 104.130.122.26
+X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
+Received: from smtp.codeaurora.org (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171])
+ by mxa.mailgun.org with ESMTP id 5e5fdc73.7f15090ba570-smtp-out-n03;
+ Wed, 04 Mar 2020 16:50:59 -0000 (UTC)
+Received: by smtp.codeaurora.org (Postfix, from userid 1001)
+        id D9EDFC4479D; Wed,  4 Mar 2020 16:50:59 +0000 (UTC)
+Received: from [10.206.25.140] (blr-c-bdr-fw-01_GlobalNAT_AllZones-Outside.qualcomm.com [103.229.19.19])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        (Authenticated sender: vbadigan)
+        by smtp.codeaurora.org (Postfix) with ESMTPSA id 15DE2C43383;
+        Wed,  4 Mar 2020 16:50:56 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.3.2 smtp.codeaurora.org 15DE2C43383
+Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
+Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=none smtp.mailfrom=vbadigan@codeaurora.org
+Subject: Re: [PATCH V2] mmc: sdhci-msm: Disable CQE during SDHC reset
+To:     Adrian Hunter <adrian.hunter@intel.com>, ulf.hansson@linaro.org
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-arm-msm@vger.kernel.org, Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>
+References: <1582890639-32072-1-git-send-email-vbadigan@codeaurora.org>
+ <1583322863-21790-1-git-send-email-vbadigan@codeaurora.org>
+ <da449444-1878-e387-6ebf-4ddb282a9b71@intel.com>
+ <1430237a-9dc5-f046-1dfe-1d5c09c16ead@codeaurora.org>
+ <3a1783c2-e8bb-f5af-4d3e-f4a45b487f0e@intel.com>
+From:   Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+Message-ID: <0e737f52-767f-05d4-829b-4f76c084062c@codeaurora.org>
+Date:   Wed, 4 Mar 2020 22:20:52 +0530
+User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:68.0) Gecko/20100101
+ Thunderbird/68.5.0
 MIME-Version: 1.0
-References: <20200224231841.26550-1-digetx@gmail.com> <20200224231841.26550-4-digetx@gmail.com>
- <44c22925-a14e-96d0-1f93-1979c0c60525@wwwdotorg.org>
-In-Reply-To: <44c22925-a14e-96d0-1f93-1979c0c60525@wwwdotorg.org>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 4 Mar 2020 17:36:46 +0100
-Message-ID: <CAPDyKFoXnoukjH_2cM=f0DGHBHS6kVUQSYOa_5ffQppC7VOn2A@mail.gmail.com>
-Subject: Re: [PATCH v1 3/3] partitions: Introduce NVIDIA Tegra Partition Table
-To:     Stephen Warren <swarren@wwwdotorg.org>,
-        Dmitry Osipenko <digetx@gmail.com>
-Cc:     Jens Axboe <axboe@kernel.dk>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        Jonathan Hunter <jonathanh@nvidia.com>,
-        =?UTF-8?B?TWljaGHFgiBNaXJvc8WCYXc=?= <mirq-linux@rere.qmqm.pl>,
-        David Heidelberg <david@ixit.cz>,
-        Peter Geis <pgwipeout@gmail.com>,
-        Nicolas Chauvet <kwizart@gmail.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Billy Laws <blaws05@gmail.com>,
-        linux-tegra <linux-tegra@vger.kernel.org>,
-        linux-block <linux-block@vger.kernel.org>,
-        Andrey Danin <danindrey@mail.ru>,
-        Gilles Grandou <gilles@grandou.net>,
-        Ryan Grachek <ryan@edited.us>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+In-Reply-To: <3a1783c2-e8bb-f5af-4d3e-f4a45b487f0e@intel.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 8bit
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 25 Feb 2020 at 01:20, Stephen Warren <swarren@wwwdotorg.org> wrote:
->
-> On 2/24/20 4:18 PM, Dmitry Osipenko wrote:
-> > All NVIDIA Tegra devices use a special partition table format for the
-> > internal storage partitioning. Most of Tegra devices have GPT partition
-> > in addition to TegraPT, but some older Android consumer-grade devices do
-> > not or GPT is placed in a wrong sector, and thus, the TegraPT is needed
-> > in order to support these devices properly in the upstream kernel. This
-> > patch adds support for NVIDIA Tegra Partition Table format that is used
-> > at least by all NVIDIA Tegra20 and Tegra30 devices.
->
-> > diff --git a/arch/arm/mach-tegra/tegra.c b/arch/arm/mach-tegra/tegra.c
->
-> > +static void __init tegra_boot_config_table_init(void)
-> > +{
-> > +     void __iomem *bct_base;
-> > +     u16 pt_addr, pt_size;
-> > +
-> > +     bct_base = IO_ADDRESS(TEGRA_IRAM_BASE) + TEGRA_IRAM_BCT_OFFSET;
->
-> This shouldn't be hard-coded. IIRC, the boot ROM writes a BIT (Boot
-> Information Table) to a fixed location in IRAM, and there's some value
-> in the BIT that points to where the BCT is in IRAM. In practice, it
-> might work out that the BCT is always at the same place in IRAM, but
-> this certainly isn't guaranteed. I think there's code in U-Boot which
-> extracts the BCT location from the BIT? Yes, see
-> arch/arm/mach-tegra/ap.c:get_odmdata().
 
-So, have you considered using the command line partition option,
-rather than adding yet another partition scheme to the kernel?
+On 3/4/2020 7:40 PM, Adrian Hunter wrote:
+> On 4/03/20 3:10 pm, Veerabhadrarao Badiganti wrote:
+>> Hi Adrian
+>>
+>> On 3/4/2020 5:58 PM, Adrian Hunter wrote:
+>>> On 4/03/20 1:54 pm, Veerabhadrarao Badiganti wrote:
+>>>> When SDHC gets reset (E.g. in suspend path), CQE also gets reset
+>>>> and goes to disable state. But s/w state still points it as CQE
+>>>> is in enabled state. Since s/w and h/w states goes out of sync,
+>>>> it results in s/w request timeout for subsequent CQE requests.
+>>>>
+>>>> To synchronize CQE s/w and h/w state during SDHC reset,
+>>>> explicitly disable CQE after reset.
+>>> Shouldn't you be calling cqhci_suspend() / cqhci_resume() in the suspend and
+>>> resume paths?
+>> This issue is seen during mmc runtime suspend.  I can add it
+>> sdhci_msm_runtime_suspend
+>>
+>> but sdhci_msm runtime delay is aggressive, its 50ms. It may get invoked very
+>> frequently.
+>>
+>> So Im of the opinion that disabling CQE very often from platform runtime
+>> suspend is overkill.
+> It doesn't look like sdhci-msm calls any sdhci.c pm ops, so how does SDHC
+> get reset?
 
-In principle, you would let the boot loader scan for the partitions,
-likely from machine specific code in U-boot. Then you append these to
-the kernel command line and let block/partitions/cmdline.c scan for
-it.
+With MMC_CAP_AGGRESSIVE_PM flag enabled, it getting called from 
+mmc_runtime_suspend()
 
-Kind regards
-Uffe
+Below is the call stack()
+
+    sdhci_reset
+   sdhci_do_reset
+   sdhci_init
+   sdhci_set_ios
+   mmc_set_initial_state
+   mmc_power_off
+  _mmc_suspend
+   mmc_runtime_suspend
+
+>>>> Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+>>>> ---
+>>>> Changes since V1:
+>>>>      - Disable CQE only when SDHC undergoes s/w reset for all.
+>>>> ---
+>>>>    drivers/mmc/host/sdhci-msm.c | 9 ++++++++-
+>>>>    1 file changed, 8 insertions(+), 1 deletion(-)
+>>>>
+>>>> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+>>>> index 53b79ee..75929d3 100644
+>>>> --- a/drivers/mmc/host/sdhci-msm.c
+>>>> +++ b/drivers/mmc/host/sdhci-msm.c
+>>>> @@ -1823,6 +1823,13 @@ static void sdhci_msm_set_regulator_caps(struct
+>>>> sdhci_msm_host *msm_host)
+>>>>        pr_debug("%s: supported caps: 0x%08x\n", mmc_hostname(mmc), caps);
+>>>>    }
+>>>>    +static void sdhci_msm_reset(struct sdhci_host *host, u8 mask)
+>>>> +{
+>>>> +    sdhci_reset(host, mask);
+>>>> +    if ((host->mmc->caps2 & MMC_CAP2_CQE) && (mask & SDHCI_RESET_ALL))
+>>>> +        cqhci_suspend(host->mmc);
+>>>> +}
+>>>> +
+>>>>    static const struct sdhci_msm_variant_ops mci_var_ops = {
+>>>>        .msm_readl_relaxed = sdhci_msm_mci_variant_readl_relaxed,
+>>>>        .msm_writel_relaxed = sdhci_msm_mci_variant_writel_relaxed,
+>>>> @@ -1861,7 +1868,7 @@ static void sdhci_msm_set_regulator_caps(struct
+>>>> sdhci_msm_host *msm_host)
+>>>>    MODULE_DEVICE_TABLE(of, sdhci_msm_dt_match);
+>>>>      static const struct sdhci_ops sdhci_msm_ops = {
+>>>> -    .reset = sdhci_reset,
+>>>> +    .reset = sdhci_msm_reset,
+>>>>        .set_clock = sdhci_msm_set_clock,
+>>>>        .get_min_clock = sdhci_msm_get_min_clock,
+>>>>        .get_max_clock = sdhci_msm_get_max_clock,
+>>>>
