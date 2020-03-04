@@ -4,275 +4,111 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
-	autolearn_force=no version=3.4.0
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1F22AC3F2D7
-	for <linux-mmc@archiver.kernel.org>; Wed,  4 Mar 2020 15:35:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 36B81C3F2D7
+	for <linux-mmc@archiver.kernel.org>; Wed,  4 Mar 2020 15:35:31 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id E2DFA24687
-	for <linux-mmc@archiver.kernel.org>; Wed,  4 Mar 2020 15:35:27 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0EE6E2467F
+	for <linux-mmc@archiver.kernel.org>; Wed,  4 Mar 2020 15:35:31 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="nF+aXYXc"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="B9MoWggo"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2388204AbgCDPfY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 4 Mar 2020 10:35:24 -0500
-Received: from mail-vs1-f66.google.com ([209.85.217.66]:37389 "EHLO
-        mail-vs1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2388223AbgCDPfX (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Mar 2020 10:35:23 -0500
-Received: by mail-vs1-f66.google.com with SMTP id h5so1420140vsc.4
-        for <linux-mmc@vger.kernel.org>; Wed, 04 Mar 2020 07:35:23 -0800 (PST)
+        id S2388160AbgCDPfT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 4 Mar 2020 10:35:19 -0500
+Received: from mail-vs1-f65.google.com ([209.85.217.65]:38274 "EHLO
+        mail-vs1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S2388181AbgCDPfQ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Mar 2020 10:35:16 -0500
+Received: by mail-vs1-f65.google.com with SMTP id r18so1409901vso.5
+        for <linux-mmc@vger.kernel.org>; Wed, 04 Mar 2020 07:35:15 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=yJOWerAYEJjdAX3ZuFJFRLFmx2EwHLWwTWibHvMWIao=;
-        b=nF+aXYXcFjFuSNJLpn0XdDC6o2UhWxHXIzq07XPt5+4Ksc2BJmJknk5la2+lXokvPV
-         FFx/dkELcvFtZo93j+K8w2sP+TzkHBrXEnwTJcLn/PfEzQCXSwSfseDQ5129hTWlYRN/
-         5OdpGBWVuPaTID8ladQxVyMkkTCC9+1qUgfd0Bcza69f42nGBkp3mbmiINpQ+9XHHNfN
-         Nu3mktQam0HG9yVc+QU07rW7RawBWmYNeziC7L+oglg1DVPK0qat3xQztbt9HZSfaTDG
-         468W5v5oHdNgCBcyCJ39pDjJn4e7T1egV/BHJ7H0KP56gAAXKPCc3N6C642bhs1bFD/7
-         0hvA==
+        bh=Giq5UF1F/w38AbHK6DfEKwRi63lSe756DNZSfzRh6gc=;
+        b=B9MoWggoUREkbaq0Aww3Hd0IV/FZbz//+eDkWHFvrVyN1hNCb59mGB+n69EaUIyiFT
+         XInxog98hJoXhkPlCWuBh80LPvporHdZ6sAHxGAWoa9OCU1ncIOQEEf46h+CX9gBq6iT
+         MnX70EKAh4VGozk/sEH32c9LygkTgAcHneDxChqd6MnCqm0Jjp07yHyeKJ6vAmqnOjea
+         egqa0l8s0B0qd5x4bIQAx0KP2wbL2gfZlzmYfNWIXp1NX+IWbYeueZm6RMUb17HEiYQb
+         251NTxJzu0Lob8ZrUSK9cdqyUFrhc/wkmyOe7GhjN81WEPgIM6r22WSFgcOh3YKXE9C/
+         0FHg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=yJOWerAYEJjdAX3ZuFJFRLFmx2EwHLWwTWibHvMWIao=;
-        b=I1Wf40z8SPFaej67Y8QaaJ63aV6imLiMQ/Xu++sJRfdwpHS/Wp2HmaDghVzIp0DPCn
-         6Yg3Pw5LvS6H2mXWYzMf/EWbsGD5iksjQZ5h2+jMGOWNeYfkNl9IReVslg8QHeefB7yh
-         Ck2lJ2l/eRbUxfLDCYjYKX9UGSXtdALS/mXis996+1uq0arnjny+6uTCrnhRebEZBTPX
-         /NLy6niJgeA4ax/VK7cSIDEivsc1hOZkef4qQUvqrdHfGNA8YTOAK5kG1oxuPDdjqI/f
-         u/Xouf8/itQ0ZBTQY5D3hwta/2O5CcT5hPXQKD4xKxr/CNMAT8Pxr6lcw1F19+OHZMU4
-         SxQw==
-X-Gm-Message-State: ANhLgQ0C11j+M1mRdTibocIRPOSIHZW9SpXBBh5PGPlNF8C0JeppnHc0
-        OESyCDQIySc5reFh1Qgz08RtLb/2i8iW0ag+l0HQSQ==
-X-Google-Smtp-Source: ADFU+vvNNHeK3g4ohZSJ3ngU7x2ceHcSlbG0W/Gqbdn14NtNxxY48MecoczZOwnQVIiWshjLoJIutHRF++OYUBwNELA=
-X-Received: by 2002:a67:7fd0:: with SMTP id a199mr2130312vsd.200.1583336122487;
- Wed, 04 Mar 2020 07:35:22 -0800 (PST)
+        bh=Giq5UF1F/w38AbHK6DfEKwRi63lSe756DNZSfzRh6gc=;
+        b=jjLK+0NNrtlwsiEPc5WZBatcTC1d66Lav0+jsC7O1Y3a6JEnLI7TC/Iwbdyr1/13DK
+         23V9x/rMMa7o2vbjYmUseoJER6ZMevEvkxBQjlZ9J3KtEx22ShRJsBymmZ+kgj6OM7ap
+         xRDAWJhbYeC7TmcYEqGA593TPBsPBkYtVEMCV59EKHWA5GGDmemi8Qrm1XrYEb5nNvdU
+         cGPvKqbTeNhc+JTEb1AU20NVr5lyWnvd0XdpxkWjaxDF5KnD5Pmz1pMDVUvhJ91P4ktF
+         3ff0OHnVwGHr4DQ8j+45+2Hh41QgUgEj1xjPewcbUkzMEiW2LYqtM34k9r2Q2wqfPpLC
+         ZF1A==
+X-Gm-Message-State: ANhLgQ0GOoUu66s8TkvX5Hr41kFW+OuqQLJcWuVuSLOork/C6S8+keCf
+        dPwLEJ1rsRnzjUNcEmytUYA0iRSV1JfeUlx+5o/7DQ==
+X-Google-Smtp-Source: ADFU+vsb4+c9j0dv5e9XgeArN/34Z+PnfNpjvCDZOLbyY4rsxq8FgCgrfC7M5L0T2U0XF0QE/B0An2pW1WtcCZZclUQ=
+X-Received: by 2002:a05:6102:4af:: with SMTP id r15mr1988389vsa.35.1583336115345;
+ Wed, 04 Mar 2020 07:35:15 -0800 (PST)
 MIME-Version: 1.0
-References: <1582105474-27866-1-git-send-email-vbadigan@codeaurora.org> <1582714668-17247-1-git-send-email-vbadigan@codeaurora.org>
-In-Reply-To: <1582714668-17247-1-git-send-email-vbadigan@codeaurora.org>
+References: <96f16647f6a6e8cb058c44e46c61b122df027059.1582535202.git.baolin.wang7@gmail.com>
+In-Reply-To: <96f16647f6a6e8cb058c44e46c61b122df027059.1582535202.git.baolin.wang7@gmail.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 4 Mar 2020 16:34:46 +0100
-Message-ID: <CAPDyKFqxPPAs7ox75-aBefJi7DG_huxn5SCChP+M2Z2foJ6QBA@mail.gmail.com>
-Subject: Re: [PATCH V3] mmc: mmc_test: Pass different sg lists for
- non-blocking requests
-To:     Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+Date:   Wed, 4 Mar 2020 16:34:39 +0100
+Message-ID: <CAPDyKFr+BRhCQd70L8hMTtq8hfq8N-Z5+PAEmJhPy-rtuP3jMA@mail.gmail.com>
+Subject: Re: [PATCH] mmc: host: sdhci-sprd: Set the missing
+ MMC_CAP_WAIT_WHILE_BUSY flag
+To:     Baolin Wang <baolin.wang7@gmail.com>
 Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        Orson Zhai <orsonzhai@gmail.com>,
+        Chunyan Zhang <zhang.lyra@gmail.com>,
         "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Allison Randal <allison@lohutok.net>,
-        Stephen Boyd <swboyd@chromium.org>,
-        Thomas Gleixner <tglx@linutronix.de>
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 26 Feb 2020 at 11:58, Veerabhadrarao Badiganti
-<vbadigan@codeaurora.org> wrote:
+On Mon, 24 Feb 2020 at 10:09, Baolin Wang <baolin.wang7@gmail.com> wrote:
 >
-> Supply a separate sg list for each of the request in non-blocking
-> IO test cases where two requests will be issued at same time.
->
-> Otherwise, sg memory may get unmapped when a request is done while
-> same memory is being accessed by controller from the other request,
-> and it leads to iommu errors with below call stack:
->
->         __arm_lpae_unmap+0x2e0/0x478
->         arm_lpae_unmap+0x54/0x70
->         arm_smmu_unmap+0x64/0xa4
->         __iommu_unmap+0xb8/0x1f0
->         iommu_unmap_fast+0x38/0x48
->         __iommu_dma_unmap+0x88/0x108
->         iommu_dma_unmap_sg+0x90/0xa4
->         sdhci_post_req+0x5c/0x78
->         mmc_test_start_areq+0x10c/0x120 [mmc_test]
->         mmc_test_area_io_seq+0x150/0x264 [mmc_test]
->         mmc_test_rw_multiple+0x174/0x1c0 [mmc_test]
->         mmc_test_rw_multiple_sg_len+0x44/0x6c [mmc_test]
->         mmc_test_profile_sglen_wr_nonblock_perf+0x6c/0x94 [mmc_test]
->         mtf_test_write+0x238/0x3cc [mmc_test]
->
-> Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
-> Reviewed-by: Stephen Boyd <swboyd@chromium.org>
-> Tested-by: Sai Prakash Ranjan <saiprakash.ranjan@codeaurora.org>
+> The Spreadtrum host controller supports HW busy detection for I/O
+> operations, which means when the host gets a transfer complete event,
 
-Applied for next, thanks!
+I assume HW busy detection also works for R1B commands, so I am adding
+that information to changelog to clarify this.
+
+Please have a look at the next branch to see that it looks good to you.
+
+> that always indicates the busy signal is released. Thus we can set
+> the MMC_CAP_WAIT_WHILE_BUSY flag to remove some redundant software
+> busy polling.
+>
+> Signed-off-by: Baolin Wang <baolin.wang7@gmail.com>
+
+So, applied for next, thanks!
 
 Kind regards
 Uffe
 
 
 > ---
-> Changes since V2:
->         - Simplfied mmc_test_nonblock_transter() function aruguments.
+>  drivers/mmc/host/sdhci-sprd.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 >
-> Changes since V1:
->         - Freeing-up sg_areq memory.
->         - Added check to ensure sg length is equal for both the sg-lists
->           supplied in case of non-blocking requests.
-> ---
->  drivers/mmc/core/mmc_test.c | 52 ++++++++++++++++++++++++++++++++++-----------
->  1 file changed, 40 insertions(+), 12 deletions(-)
+> diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
+> index d346223..2ab42c5 100644
+> --- a/drivers/mmc/host/sdhci-sprd.c
+> +++ b/drivers/mmc/host/sdhci-sprd.c
+> @@ -556,7 +556,7 @@ static int sdhci_sprd_probe(struct platform_device *pdev)
+>                 sdhci_sprd_voltage_switch;
 >
-> diff --git a/drivers/mmc/core/mmc_test.c b/drivers/mmc/core/mmc_test.c
-> index 492dd45..c21b3cb 100644
-> --- a/drivers/mmc/core/mmc_test.c
-> +++ b/drivers/mmc/core/mmc_test.c
-> @@ -71,6 +71,7 @@ struct mmc_test_mem {
->   * @sg_len: length of currently mapped scatterlist @sg
->   * @mem: allocated memory
->   * @sg: scatterlist
-> + * @sg_areq: scatterlist for non-blocking request
->   */
->  struct mmc_test_area {
->         unsigned long max_sz;
-> @@ -82,6 +83,7 @@ struct mmc_test_area {
->         unsigned int sg_len;
->         struct mmc_test_mem *mem;
->         struct scatterlist *sg;
-> +       struct scatterlist *sg_areq;
->  };
->
->  /**
-> @@ -836,14 +838,16 @@ static int mmc_test_start_areq(struct mmc_test_card *test,
->  }
->
->  static int mmc_test_nonblock_transfer(struct mmc_test_card *test,
-> -                                     struct scatterlist *sg, unsigned sg_len,
-> -                                     unsigned dev_addr, unsigned blocks,
-> -                                     unsigned blksz, int write, int count)
-> +                                     unsigned int dev_addr, int write,
-> +                                     int count)
->  {
->         struct mmc_test_req *rq1, *rq2;
->         struct mmc_request *mrq, *prev_mrq;
->         int i;
->         int ret = RESULT_OK;
-> +       struct mmc_test_area *t = &test->area;
-> +       struct scatterlist *sg = t->sg;
-> +       struct scatterlist *sg_areq = t->sg_areq;
->
->         rq1 = mmc_test_req_alloc();
->         rq2 = mmc_test_req_alloc();
-> @@ -857,8 +861,8 @@ static int mmc_test_nonblock_transfer(struct mmc_test_card *test,
->
->         for (i = 0; i < count; i++) {
->                 mmc_test_req_reset(container_of(mrq, struct mmc_test_req, mrq));
-> -               mmc_test_prepare_mrq(test, mrq, sg, sg_len, dev_addr, blocks,
-> -                                    blksz, write);
-> +               mmc_test_prepare_mrq(test, mrq, sg, t->sg_len, dev_addr,
-> +                                    t->blocks, 512, write);
->                 ret = mmc_test_start_areq(test, mrq, prev_mrq);
->                 if (ret)
->                         goto err;
-> @@ -867,7 +871,8 @@ static int mmc_test_nonblock_transfer(struct mmc_test_card *test,
->                         prev_mrq = &rq2->mrq;
->
->                 swap(mrq, prev_mrq);
-> -               dev_addr += blocks;
-> +               swap(sg, sg_areq);
-> +               dev_addr += t->blocks;
->         }
->
->         ret = mmc_test_start_areq(test, NULL, prev_mrq);
-> @@ -1396,10 +1401,11 @@ static int mmc_test_no_highmem(struct mmc_test_card *test)
->   * Map sz bytes so that it can be transferred.
->   */
->  static int mmc_test_area_map(struct mmc_test_card *test, unsigned long sz,
-> -                            int max_scatter, int min_sg_len)
-> +                            int max_scatter, int min_sg_len, bool nonblock)
->  {
->         struct mmc_test_area *t = &test->area;
->         int err;
-> +       unsigned int sg_len = 0;
->
->         t->blocks = sz >> 9;
->
-> @@ -1411,6 +1417,22 @@ static int mmc_test_area_map(struct mmc_test_card *test, unsigned long sz,
->                 err = mmc_test_map_sg(t->mem, sz, t->sg, 1, t->max_segs,
->                                       t->max_seg_sz, &t->sg_len, min_sg_len);
->         }
-> +
-> +       if (err || !nonblock)
-> +               goto err;
-> +
-> +       if (max_scatter) {
-> +               err = mmc_test_map_sg_max_scatter(t->mem, sz, t->sg_areq,
-> +                                                 t->max_segs, t->max_seg_sz,
-> +                                                 &sg_len);
-> +       } else {
-> +               err = mmc_test_map_sg(t->mem, sz, t->sg_areq, 1, t->max_segs,
-> +                                     t->max_seg_sz, &sg_len, min_sg_len);
-> +       }
-> +       if (!err && sg_len != t->sg_len)
-> +               err = -EINVAL;
-> +
-> +err:
->         if (err)
->                 pr_info("%s: Failed to map sg list\n",
->                        mmc_hostname(test->card->host));
-> @@ -1440,7 +1462,6 @@ static int mmc_test_area_io_seq(struct mmc_test_card *test, unsigned long sz,
->         struct timespec64 ts1, ts2;
->         int ret = 0;
->         int i;
-> -       struct mmc_test_area *t = &test->area;
->
->         /*
->          * In the case of a maximally scattered transfer, the maximum transfer
-> @@ -1458,15 +1479,14 @@ static int mmc_test_area_io_seq(struct mmc_test_card *test, unsigned long sz,
->                         sz = max_tfr;
->         }
->
-> -       ret = mmc_test_area_map(test, sz, max_scatter, min_sg_len);
-> +       ret = mmc_test_area_map(test, sz, max_scatter, min_sg_len, nonblock);
+>         host->mmc->caps = MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED |
+> -               MMC_CAP_ERASE | MMC_CAP_CMD23;
+> +               MMC_CAP_ERASE | MMC_CAP_CMD23 | MMC_CAP_WAIT_WHILE_BUSY;
+>         ret = mmc_of_parse(host->mmc);
 >         if (ret)
->                 return ret;
->
->         if (timed)
->                 ktime_get_ts64(&ts1);
->         if (nonblock)
-> -               ret = mmc_test_nonblock_transfer(test, t->sg, t->sg_len,
-> -                                dev_addr, t->blocks, 512, write, count);
-> +               ret = mmc_test_nonblock_transfer(test, dev_addr, write, count);
->         else
->                 for (i = 0; i < count && ret == 0; i++) {
->                         ret = mmc_test_area_transfer(test, dev_addr, write);
-> @@ -1525,6 +1545,7 @@ static int mmc_test_area_cleanup(struct mmc_test_card *test)
->         struct mmc_test_area *t = &test->area;
->
->         kfree(t->sg);
-> +       kfree(t->sg_areq);
->         mmc_test_free_mem(t->mem);
->
->         return 0;
-> @@ -1584,6 +1605,13 @@ static int mmc_test_area_init(struct mmc_test_card *test, int erase, int fill)
->                 goto out_free;
->         }
->
-> +       t->sg_areq = kmalloc_array(t->max_segs, sizeof(*t->sg_areq),
-> +                                  GFP_KERNEL);
-> +       if (!t->sg_areq) {
-> +               ret = -ENOMEM;
-> +               goto out_free;
-> +       }
-> +
->         t->dev_addr = mmc_test_capacity(test->card) / 2;
->         t->dev_addr -= t->dev_addr % (t->max_sz >> 9);
->
-> @@ -2468,7 +2496,7 @@ static int __mmc_test_cmds_during_tfr(struct mmc_test_card *test,
->         if (!(test->card->host->caps & MMC_CAP_CMD_DURING_TFR))
->                 return RESULT_UNSUP_HOST;
->
-> -       ret = mmc_test_area_map(test, sz, 0, 0);
-> +       ret = mmc_test_area_map(test, sz, 0, 0, use_areq);
->         if (ret)
->                 return ret;
->
+>                 goto pltfm_free;
 > --
-> Qualcomm India Private Limited, on behalf of Qualcomm Innovation Center, Inc., is a member of Code Aurora Forum, a Linux Foundation Collaborative Project
+> 1.9.1
+>
