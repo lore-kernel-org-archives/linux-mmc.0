@@ -2,135 +2,126 @@ Return-Path: <SRS0=jYsQ=4V=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
+X-Spam-Status: No, score=-8.0 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CC203C3F2D1
-	for <linux-mmc@archiver.kernel.org>; Wed,  4 Mar 2020 13:05:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9710EC3F2D8
+	for <linux-mmc@archiver.kernel.org>; Wed,  4 Mar 2020 13:10:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id A4FC620870
-	for <linux-mmc@archiver.kernel.org>; Wed,  4 Mar 2020 13:05:33 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 707FE21775
+	for <linux-mmc@archiver.kernel.org>; Wed,  4 Mar 2020 13:10:17 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Kz3ZoEts"
+	dkim=fail reason="signature verification failed" (1024-bit key) header.d=mg.codeaurora.org header.i=@mg.codeaurora.org header.b="GYHTxFwO"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2388094AbgCDNFc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 4 Mar 2020 08:05:32 -0500
-Received: from mail-vs1-f67.google.com ([209.85.217.67]:40882 "EHLO
-        mail-vs1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729302AbgCDNFc (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Mar 2020 08:05:32 -0500
-Received: by mail-vs1-f67.google.com with SMTP id c18so1058503vsq.7
-        for <linux-mmc@vger.kernel.org>; Wed, 04 Mar 2020 05:05:30 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=y6V/ThFMEUQVv4pGKZWOlNFwrQHTHd/Cjm8+feJdCcI=;
-        b=Kz3ZoEtsx/w9PtpTfMWI8BfIvHJpdI9eqfduNdgSwzkFoNOvf5mynamxJMQ38s1scq
-         UG5FlR10x0pBG5V1AFPAdPmP0MOEpxBmXzWx7P7RmWNYCu4XmNn6TTtWxhX7VSYioDlK
-         wEcFWuz1KtLJRddXeMmM++EC+8fDJOiJlgk+zDB8nWuDmYPwY4OX5/qowiZ948/V+kxU
-         9IUoYDeOARIZkvwXc5m99BVtXs8ZzFhifpP2vb1byNKWfJ9JZBThXmMUnc6lTfQjIsKu
-         167dPumst3rTtZBc9uDOXmDzBFJItYEmLl1hwTjdK/BEIWqYTDx9KTbELZK9I7NV8XN+
-         RenA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=y6V/ThFMEUQVv4pGKZWOlNFwrQHTHd/Cjm8+feJdCcI=;
-        b=V0tbNk2o8ofZPvgFGVj6/LsA4dVjMIZ1g2wVEYP2HVToVP/HvGjpWN6le1JrapUQKd
-         ly3Sb3wINIPMKmU3MagUVbs7b/qUCZtrb+5Uz9eSNMWWspeDIskZccysdnmx3zad99pB
-         ella4fVOGNn/5WCNpjzsxNUvVM2yD6V1+1+cePTGMhI6j5Mf5DqbSSznJcgzmJ99Gesp
-         BeCWy01RgMgFMEiP4jOOPJT9CaWHGW0c506VO0+tECyudFpSu5Twn/UHIFlKlq80+yAl
-         PH1osNoPyjfs8E3ujRTGTAiTA+Y2WgonNxKA2RMlasamhPMc7D09/hApDkvBMoeXhEEI
-         G9oA==
-X-Gm-Message-State: ANhLgQ3g+lEwkBI1jx3Eo+x8l9nDI8/Skw+MJXcUF92FJwCTPEKURcws
-        CL8jMODgsdvdSv6bWsZ+Rg3US43P71jS5HYG75ySNQ==
-X-Google-Smtp-Source: ADFU+vutcotJyTUK5tPrXTH7n8AgfiQgisISlV0zrVV7kZWnuc9rR3DZfocZpWM1AQk8GeUV02RcRhWp4SBgvRUJOTA=
-X-Received: by 2002:a67:800e:: with SMTP id b14mr1606080vsd.191.1583327129997;
- Wed, 04 Mar 2020 05:05:29 -0800 (PST)
+        id S2388120AbgCDNKQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 4 Mar 2020 08:10:16 -0500
+Received: from mail26.static.mailgun.info ([104.130.122.26]:32264 "EHLO
+        mail26.static.mailgun.info" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S2388121AbgCDNKQ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Mar 2020 08:10:16 -0500
+DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
+ s=smtp; t=1583327415; h=Content-Transfer-Encoding: Content-Type:
+ In-Reply-To: MIME-Version: Date: Message-ID: From: References: Cc: To:
+ Subject: Sender; bh=09KH4danPPy1GXYTiRJtgclAiPC8KNirEOS/XScmEZI=; b=GYHTxFwOJiIuSxK8H2XuxqweeuakeH2Zvpfr9n8J0RmKtvEs/OVgj8+p2kVh03PPOfHpB7I2
+ nQv10Fk5gm5Ob8WP922vHhZJaUq0PL6TvI+0P7/vvfAGpGNk9sqwF+pw9e5LtQFR3J9XDBUh
+ 1vtFasfKhPzq3ChUMvAZPZxZLvk=
+X-Mailgun-Sending-Ip: 104.130.122.26
+X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
+Received: from smtp.codeaurora.org (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171])
+ by mxa.mailgun.org with ESMTP id 5e5fa8ae.7f8254ac53b0-smtp-out-n02;
+ Wed, 04 Mar 2020 13:10:06 -0000 (UTC)
+Received: by smtp.codeaurora.org (Postfix, from userid 1001)
+        id 893FDC447A2; Wed,  4 Mar 2020 13:10:05 +0000 (UTC)
+Received: from [10.206.25.140] (blr-c-bdr-fw-01_GlobalNAT_AllZones-Outside.qualcomm.com [103.229.19.19])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        (Authenticated sender: vbadigan)
+        by smtp.codeaurora.org (Postfix) with ESMTPSA id B78F2C43383;
+        Wed,  4 Mar 2020 13:10:02 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.3.2 smtp.codeaurora.org B78F2C43383
+Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
+Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=none smtp.mailfrom=vbadigan@codeaurora.org
+Subject: Re: [PATCH V2] mmc: sdhci-msm: Disable CQE during SDHC reset
+To:     Adrian Hunter <adrian.hunter@intel.com>, ulf.hansson@linaro.org
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-arm-msm@vger.kernel.org, Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>
+References: <1582890639-32072-1-git-send-email-vbadigan@codeaurora.org>
+ <1583322863-21790-1-git-send-email-vbadigan@codeaurora.org>
+ <da449444-1878-e387-6ebf-4ddb282a9b71@intel.com>
+From:   Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+Message-ID: <1430237a-9dc5-f046-1dfe-1d5c09c16ead@codeaurora.org>
+Date:   Wed, 4 Mar 2020 18:40:00 +0530
+User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:68.0) Gecko/20100101
+ Thunderbird/68.5.0
 MIME-Version: 1.0
-References: <1581922564-24914-1-git-send-email-chun-hung.wu@mediatek.com> <1581922564-24914-2-git-send-email-chun-hung.wu@mediatek.com>
-In-Reply-To: <1581922564-24914-2-git-send-email-chun-hung.wu@mediatek.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 4 Mar 2020 14:04:53 +0100
-Message-ID: <CAPDyKFpyah+oA-GtXNmdkrhwnGN_syU1JqRHn-9gk=HK0fV8EQ@mail.gmail.com>
-Subject: Re: [PATCH v3 1/4] mmc: core: expose MMC_CAP2_CQE* to dt
-To:     Chun-Hung Wu <chun-hung.wu@mediatek.com>
-Cc:     Chaotian Jing <chaotian.jing@mediatek.com>,
-        Rob Herring <robh+dt@kernel.org>,
-        Mark Rutland <mark.rutland@arm.com>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Pavel Machek <pavel@ucw.cz>,
-        Kate Stewart <kstewart@linuxfoundation.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
-        Pan Bian <bianpan2016@163.com>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Allison Randal <allison@lohutok.net>,
-        Mathieu Malaterre <malat@debian.org>,
-        Stanley Chu <stanley.chu@mediatek.com>,
-        Kuohong Wang <kuohong.wang@mediatek.com>,
-        Android Kernel Team <kernel-team@android.com>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "moderated list:ARM/Mediatek SoC support" 
-        <linux-mediatek@lists.infradead.org>,
-        DTML <devicetree@vger.kernel.org>, wsd_upstream@mediatek.com,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>
-Content-Type: text/plain; charset="UTF-8"
+In-Reply-To: <da449444-1878-e387-6ebf-4ddb282a9b71@intel.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 8bit
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 17 Feb 2020 at 07:56, Chun-Hung Wu <chun-hung.wu@mediatek.com> wrote:
->
-> Expose MMC_CAP2_CQE and MMC_CAP2_CQE_DCMD
-> to host->caps2 if
-> 1. "supports-cqe" is defined in dt and
-> 2. "disable-cqe-dcmd" is not defined in dt.
+Hi Adrian
 
-Both of these DT properties are defined as common mmc DT properties,
-so the above isn't really correct. Please clarify this.
+On 3/4/2020 5:58 PM, Adrian Hunter wrote:
+> On 4/03/20 1:54 pm, Veerabhadrarao Badiganti wrote:
+>> When SDHC gets reset (E.g. in suspend path), CQE also gets reset
+>> and goes to disable state. But s/w state still points it as CQE
+>> is in enabled state. Since s/w and h/w states goes out of sync,
+>> it results in s/w request timeout for subsequent CQE requests.
+>>
+>> To synchronize CQE s/w and h/w state during SDHC reset,
+>> explicitly disable CQE after reset.
+> Shouldn't you be calling cqhci_suspend() / cqhci_resume() in the suspend and
+> resume paths?
 
-Moreover, I suggest to update commit message header into "mmc: core:
-Extend mmc_of_parse() to parse CQE bindings", as I think it better
-describes the change.
+This issue is seen during mmc runtime suspend.  I can add it 
+sdhci_msm_runtime_suspend
 
->
-> Signed-off-by: Chun-Hung Wu <chun-hung.wu@mediatek.com>
-> ---
->  drivers/mmc/core/host.c | 8 ++++++++
->  1 file changed, 8 insertions(+)
->
-> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-> index 105b7a7..efb0dbe 100644
-> --- a/drivers/mmc/core/host.c
-> +++ b/drivers/mmc/core/host.c
-> @@ -319,6 +319,14 @@ int mmc_of_parse(struct mmc_host *host)
->                 host->caps2 |= MMC_CAP2_NO_SD;
->         if (device_property_read_bool(dev, "no-mmc"))
->                 host->caps2 |= MMC_CAP2_NO_MMC;
-> +       if (device_property_read_bool(dev, "supports-cqe"))
-> +               host->caps2 |= MMC_CAP2_CQE;
-> +
-> +       /* Must be after "supports-cqe" check */
-> +       if (!device_property_read_bool(dev, "disable-cqe-dcmd")) {
-> +               if (host->caps2 & MMC_CAP2_CQE)
+but sdhci_msm runtime delay is aggressive, its 50ms. It may get invoked 
+very frequently.
 
-Does it really doesn't matter if we set this cap, even if MMC_CAP2_CQE
-isn't set? You can probably skip the check above.
+So Im of the opinion that disabling CQE very often from platform runtime 
+suspend is overkill.
 
-> +                       host->caps2 |= MMC_CAP2_CQE_DCMD;
-> +       }
->
->         /* Must be after "non-removable" check */
->         if (device_property_read_u32(dev, "fixed-emmc-driver-type", &drv_type) == 0) {
-> --
-> 1.9.1
-
-Kind regards
-Uffe
+>> Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+>> ---
+>> Changes since V1:
+>> 	- Disable CQE only when SDHC undergoes s/w reset for all.
+>> ---
+>>   drivers/mmc/host/sdhci-msm.c | 9 ++++++++-
+>>   1 file changed, 8 insertions(+), 1 deletion(-)
+>>
+>> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+>> index 53b79ee..75929d3 100644
+>> --- a/drivers/mmc/host/sdhci-msm.c
+>> +++ b/drivers/mmc/host/sdhci-msm.c
+>> @@ -1823,6 +1823,13 @@ static void sdhci_msm_set_regulator_caps(struct sdhci_msm_host *msm_host)
+>>   	pr_debug("%s: supported caps: 0x%08x\n", mmc_hostname(mmc), caps);
+>>   }
+>>   
+>> +static void sdhci_msm_reset(struct sdhci_host *host, u8 mask)
+>> +{
+>> +	sdhci_reset(host, mask);
+>> +	if ((host->mmc->caps2 & MMC_CAP2_CQE) && (mask & SDHCI_RESET_ALL))
+>> +		cqhci_suspend(host->mmc);
+>> +}
+>> +
+>>   static const struct sdhci_msm_variant_ops mci_var_ops = {
+>>   	.msm_readl_relaxed = sdhci_msm_mci_variant_readl_relaxed,
+>>   	.msm_writel_relaxed = sdhci_msm_mci_variant_writel_relaxed,
+>> @@ -1861,7 +1868,7 @@ static void sdhci_msm_set_regulator_caps(struct sdhci_msm_host *msm_host)
+>>   MODULE_DEVICE_TABLE(of, sdhci_msm_dt_match);
+>>   
+>>   static const struct sdhci_ops sdhci_msm_ops = {
+>> -	.reset = sdhci_reset,
+>> +	.reset = sdhci_msm_reset,
+>>   	.set_clock = sdhci_msm_set_clock,
+>>   	.get_min_clock = sdhci_msm_get_min_clock,
+>>   	.get_max_clock = sdhci_msm_get_max_clock,
+>>
