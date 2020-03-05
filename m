@@ -2,140 +2,157 @@ Return-Path: <SRS0=i1XN=4W=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.1 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-0.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7E225C3F2D9
-	for <linux-mmc@archiver.kernel.org>; Thu,  5 Mar 2020 13:57:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 031A6C3F2D7
+	for <linux-mmc@archiver.kernel.org>; Thu,  5 Mar 2020 14:30:10 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 4AACD20848
-	for <linux-mmc@archiver.kernel.org>; Thu,  5 Mar 2020 13:57:16 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CC16220732
+	for <linux-mmc@archiver.kernel.org>; Thu,  5 Mar 2020 14:30:09 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (1024-bit key) header.d=mg.codeaurora.org header.i=@mg.codeaurora.org header.b="RWZmVKuu"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="HTPUACfn"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726211AbgCEN5P (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 5 Mar 2020 08:57:15 -0500
-Received: from mail26.static.mailgun.info ([104.130.122.26]:58076 "EHLO
-        mail26.static.mailgun.info" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726233AbgCEN5O (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Mar 2020 08:57:14 -0500
-DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
- s=smtp; t=1583416633; h=Content-Transfer-Encoding: Content-Type:
- In-Reply-To: MIME-Version: Date: Message-ID: From: References: Cc: To:
- Subject: Sender; bh=zOieWkAjoEw8P19n/t7PzYyxX8NrouzGC34JBMcgWuQ=; b=RWZmVKuuQa5FigmVqUE3yfGs4m268XW8blj8U9+yL4msM69r/1tcV5YMzLVRsNAxQrwNSaTf
- HdqB54SPFdz7rF3auNRCkDCA21R69b1Q6GwLEsfbzlLwSx9QltEepeqZ2g0TNd8wahbI82sS
- DL7pKThYciKKXPCGPE8B72ytkWc=
-X-Mailgun-Sending-Ip: 104.130.122.26
-X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
-Received: from smtp.codeaurora.org (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171])
- by mxa.mailgun.org with ESMTP id 5e610531.7f1308bc18f0-smtp-out-n03;
- Thu, 05 Mar 2020 13:57:05 -0000 (UTC)
-Received: by smtp.codeaurora.org (Postfix, from userid 1001)
-        id 35012C433A2; Thu,  5 Mar 2020 13:57:04 +0000 (UTC)
-Received: from [10.206.25.140] (blr-c-bdr-fw-01_GlobalNAT_AllZones-Outside.qualcomm.com [103.229.19.19])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        (Authenticated sender: vbadigan)
-        by smtp.codeaurora.org (Postfix) with ESMTPSA id 20689C43383;
-        Thu,  5 Mar 2020 13:56:56 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.3.2 smtp.codeaurora.org 20689C43383
-Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
-Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=none smtp.mailfrom=vbadigan@codeaurora.org
-Subject: Re: [PATCH V4] mmc: sdhci-msm: Update system suspend/resume callbacks
- of sdhci-msm platform driver
-To:     Stephen Boyd <swboyd@chromium.org>,
-        Shaik Sajida Bhanu <sbhanu@codeaurora.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        Rob Herring <robh+dt@kernel.org>,
-        Matthias Kaehlcke <mka@chromium.org>,
-        Asutosh Das <asutoshd@codeaurora.org>,
-        Sahitya Tummala <stummala@codeaurora.org>,
-        Sayali Lokhande <sayalil@codeaurora.org>, cang@codeaurora.org,
-        Ram Prakash Gupta <rampraka@codeaurora.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
-        DTML <devicetree@vger.kernel.org>,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>
-References: <1582181100-29914-1-git-send-email-sbhanu@codeaurora.org>
- <CAPDyKFqSJ4h7UvQfQzWmSq9gg97A0MXvdcuXXaY7b-YUHs=V2g@mail.gmail.com>
- <158334039680.7173.16159724456027777605@swboyd.mtv.corp.google.com>
-From:   Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
-Message-ID: <5f854baa-3bb1-8cea-b605-dfabae8d8b2a@codeaurora.org>
-Date:   Thu, 5 Mar 2020 19:26:54 +0530
-User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:68.0) Gecko/20100101
- Thunderbird/68.5.0
+        id S1726131AbgCEOaJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 5 Mar 2020 09:30:09 -0500
+Received: from mail-lj1-f193.google.com ([209.85.208.193]:37188 "EHLO
+        mail-lj1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726090AbgCEOaJ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Mar 2020 09:30:09 -0500
+Received: by mail-lj1-f193.google.com with SMTP id q23so6306347ljm.4
+        for <linux-mmc@vger.kernel.org>; Thu, 05 Mar 2020 06:30:07 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=VxUBayx3miFQBUYSiXLDadUCUGMzP0FF1VEQIy6N2lw=;
+        b=HTPUACfnW2AkKS6owAIK4ej9CZriQDbH2e6qbsRRcZD7WstthtSvrIllSRCwNF1LHY
+         UXx2EJDUABN8TufnjXrPadXZOoTD/GEe5y/NglhU159p72dTstnHnQo4VkxToB8RmrtD
+         RBJSvfZkiqEWfHegMjL3jf0LCTatQoJNXmTUhJnY5mndQD12aw1dWEBULRIiCeVVugDs
+         wuBS6mSskcHluevrWipymJi5534kUVQarlBbnoovO0bKackq1e/GYUoIxqpBz5OUKQ6x
+         LYfM0oLuDqNiPCQKmIB/yU0gCQ7aGrOTRh4I0JisqFhUhEsqe0EKm+y+m5spnAv4+Bjv
+         OqaA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=VxUBayx3miFQBUYSiXLDadUCUGMzP0FF1VEQIy6N2lw=;
+        b=KsMXM27y/bE/hg4vvnpOfGl+donVSgsX/gDc/uV70MkPQMOexcrK5099eVfrr8qA2t
+         sOmytZKbGsm9GngcjxouQBhr5dys87o3gGDj3o09lupVuWnJOWkL9BrG8oHxyW64/gdt
+         5ZsS87pmvPxd25gAcIiK3PzEWpleqnoPQh2FG3miIhyusTKf/DwSf22Pxv/ZljL/Q7vU
+         qzO9+f6rkpeJXrB2bXiphXL90efCWPQW0dnZ3eKQgNBOBpmQcaf6mRSSATyOsaTdSNpE
+         r/6Sopjx+dVRgcLZpv2PkfuFsvtKrcLFndS62JPRXkKHUPNA14VQBorVzM1aSXo2Yb1g
+         pPbQ==
+X-Gm-Message-State: ANhLgQ0CtjzZzJ8e5xUzTGi37++kbWFCJ9yNaLibl2HK3Pz+ZUNjBnm1
+        mJJeCxUltAXfgXamyNxvYTkS9plKLkRNBRkNRZQAsA==
+X-Google-Smtp-Source: ADFU+vvZWeUGDzUgG0VBJVg9MsfTilSSnj20aq4gDODOEP4a8APKzCkRINB95es+6PvdmtqMglrUJyNXy5nleXH3FcQ=
+X-Received: by 2002:a2e:9c8a:: with SMTP id x10mr5632884lji.277.1583418606485;
+ Thu, 05 Mar 2020 06:30:06 -0800 (PST)
 MIME-Version: 1.0
-In-Reply-To: <158334039680.7173.16159724456027777605@swboyd.mtv.corp.google.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Content-Language: en-US
+References: <1582100757-20683-1-git-send-email-haibo.chen@nxp.com>
+ <1582100757-20683-9-git-send-email-haibo.chen@nxp.com> <CAPDyKFrR3oawA0o8KJ1ZEP41Ydb+-QWFbtxLua5TLemHybQ6QQ@mail.gmail.com>
+ <20200304162844.GA11727@lst.de>
+In-Reply-To: <20200304162844.GA11727@lst.de>
+From:   Linus Walleij <linus.walleij@linaro.org>
+Date:   Thu, 5 Mar 2020 15:29:55 +0100
+Message-ID: <CACRpkdakLfH_bpU5W44HGZ8XBYGqNsH7B+zuVKs2AXuJLwDtPw@mail.gmail.com>
+Subject: Re: [PATCH v4 14/14] mmc: queue: create dev->dma_parms before call dma_set_max_seg_size()
+To:     Christoph Hellwig <hch@lst.de>,
+        Greg KH <gregkh@linuxfoundation.org>,
+        Arnd Bergmann <arnd@arndb.de>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Haibo Chen <haibo.chen@nxp.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        dl-linux-imx <linux-imx@nxp.com>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-
-On 3/4/2020 10:16 PM, Stephen Boyd wrote:
-> Quoting Ulf Hansson (2020-03-04 07:34:29)
->> On Thu, 20 Feb 2020 at 07:45, Shaik Sajida Bhanu <sbhanu@codeaurora.org> wrote:
->>> The existing suspend/resume callbacks of sdhci-msm driver are just
->>> gating/un-gating the clocks. During suspend cycle more can be done
->>> like disabling controller, disabling card detection, enabling wake-up events.
->>>
->>> So updating the system pm callbacks for performing these extra
->>> actions besides controlling the clocks.
->>>
->>> Signed-off-by: Shaik Sajida Bhanu <sbhanu@codeaurora.org>
->>> Reviewed-by: Stephen Boyd <swboyd@chromium.org>
->>> ---
->>> Changes since V3:
->>>      Invoking sdhci & cqhci resume if sdhci_host_suspend fails.
->>>      Removed condition check before invoking cqhci_resume since its a dummy function.
->>>
->>> Changes since V2:
->>>      Removed disabling/enabling pwr-irq from system pm ops.
->>>
->>> Changes since V1:
->>>      Invoking pm_runtime_force_suspend/resume instead of
->>>      sdhci_msm_runtime_suepend/resume.
->>> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
->>> index 3955fa5d..3559b50 100644
->>> --- a/drivers/mmc/host/sdhci-msm.c
->>> +++ b/drivers/mmc/host/sdhci-msm.c
->>> @@ -2159,9 +2159,52 @@ static __maybe_unused int sdhci_msm_runtime_resume(struct device *dev)
-> [...]
->>> +
->>> +       ret = sdhci_suspend_host(host);
->>> +       if (ret)
->>> +               goto resume_cqhci;
->> sdhci_suspend_host() can't be called on a device that has been runtime
->> suspended, as that would lead to accessing device registers when
->> clocks/PM domains are gated.
->>
->> Depending on how the corresponding cqhci device is managed from a
->> runtime PM point of view, it could also be problematic to call
->> cqhci_suspend().
-> There seems to be another patch floating around here[1] that is an
-> attempt at a fix to this patch. They should probably be combined so that
-> it's not confusing what's going on.
-
-The other fix is altogether different. It is the fix for the issue seen 
-with run-time pm.
-
-whereas this change is for system pm.
-
->>> +
->>> +       ret = pm_runtime_force_suspend(dev);
->> It looks to me that perhaps you could make use of solely
->> pm_runtime_force_suspend(), then just skip calling
->> sdhci_suspend|resume_host() altogether. Do you think that could work?
-> Does that do all the things the commit text mentions is desired for
-> system suspend?
+On Wed, Mar 4, 2020 at 5:28 PM Christoph Hellwig <hch@lst.de> wrote:
+> On Wed, Mar 04, 2020 at 02:32:42PM +0100, Ulf Hansson wrote:
+> > + Christoph, Arnd
+> >
+> > On Wed, 19 Feb 2020 at 09:31, <haibo.chen@nxp.com> wrote:
+> > >
+> > > From: Haibo Chen <haibo.chen@nxp.com>
+> > >
+> > > To make dma_set_max_seg_size() work, need to create dev->dma_parms.
+> > >
+> > > Find this issue on i.MX8QM mek board, this platform config the
+> > > max_segment_size to 65535, but this dma_set_max_seg_size do not
+> > > actuall work, find sometimes the segment size is 65536, exceed
+> > > the hardware max segment limitation, trigger ADMA error.
+> >
+> > Sounds like we want something along the lines of this to be tagged for
+> > stable as well.
 >
->>> like disabling controller, disabling card detection, enabling wake-up events.
-> [1] https://lore.kernel.org/linux-arm-msm/1583322863-21790-1-git-send-email-vbadigan@codeaurora.org/
+> It really is not the job of the upper level driver to allocate the
+> dma params.  This should be done by the bus driver.
+
+I agree. This relates to my reply to Greg K-H recently:
+https://lore.kernel.org/lkml/CACRpkdajhivkOkZ63v-hr7+6ObhTffYOx5uZP0P-MYvuVnyweA@mail.gmail.com/
+
+The core of the problem is that drivers/of/platform.c is
+very simple and has no idea what kind of bus it is populating
+with devices from Device Tree. It is just guessing.
+
+For example platform.c contains this:
+
+        dev->dev.coherent_dma_mask = DMA_BIT_MASK(32);
+        if (!dev->dev.dma_mask)
+                dev->dev.dma_mask = &dev->dev.coherent_dma_mask;
+
+And again part of the problem is that the device tree parser
+mostly just create struct platform_device's on the platform bus
+and has no real idea about any constraints on the bus where
+it will eventually end up after the platform device is probed and
+a new device on some other bus has been created.
+
+Assuming that most problematic MMC controllers (in this
+case) are probed from device tree (which I suspect,
+but IIUC ACPI devices have the same problem),
+my idea for a solution is to start to modify the platform.c
+parser to be able to populate devices on some buses
+directly, without using an intermediate platform device.
+
+Today MMC isn't using a bus for the host controllers,
+it is a class device, so I suppose the "real" solution would
+be:
+
+1. Move MMC hosts to a bus instead of a class named
+   say mmc_bus. If this is OK with the userspace ABI.
+
+2. Make everything necessary from the struct device
+    inside struct mmc_host (today called "class_device")
+    copied over from the parent and stop referencing
+    the struct device *parent field in struct mmc_host
+    directly for everything and its dog.
+
+3. Make struct mmc_host and mmc_alloc_host() and
+    mmc_add_host()
+    be created and called directly from the device tree in some
+    way (like a plug-in mechanism to of/platform.c)
+    without creating a platform_device that just end
+    up as the intermediary parent of the actual device
+    in mmc_host.
+
+4. Now we are creating the device directly on the right
+   bus and so we can start thinking about filling in the
+   right dma_params and dma_mask and dma_coherent_mask
+   when instantiating the device on the mmc_bus
+   rather than in every (platform_device) driver.
+
+This is no trivial task because the kernel has gone down
+the platform device for all stuff in the device tree for
+a while. (Copy/paste same resoning for ACPI I'm afraid.)
+
+I suppose people were looking for a simple solution to
+this problem but I can only see a really complicated
+solution.
+
+Yours,
+Linus Walleij
