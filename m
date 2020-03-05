@@ -2,162 +2,169 @@ Return-Path: <SRS0=i1XN=4W=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B2EE8C3F2D1
-	for <linux-mmc@archiver.kernel.org>; Thu,  5 Mar 2020 15:10:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CF656C3F2D7
+	for <linux-mmc@archiver.kernel.org>; Thu,  5 Mar 2020 15:18:36 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 898CA208C3
-	for <linux-mmc@archiver.kernel.org>; Thu,  5 Mar 2020 15:10:44 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A18B6208CD
+	for <linux-mmc@archiver.kernel.org>; Thu,  5 Mar 2020 15:18:36 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="dAuliF8Y"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="LydZnWZI"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726233AbgCEPKo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 5 Mar 2020 10:10:44 -0500
-Received: from lelv0143.ext.ti.com ([198.47.23.248]:36108 "EHLO
-        lelv0143.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726131AbgCEPKn (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Mar 2020 10:10:43 -0500
-Received: from lelv0266.itg.ti.com ([10.180.67.225])
-        by lelv0143.ext.ti.com (8.15.2/8.15.2) with ESMTP id 025FAbls002251;
-        Thu, 5 Mar 2020 09:10:37 -0600
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
-        s=ti-com-17Q1; t=1583421037;
-        bh=Ngro9zW0SsWLavCdH7X0E50umfW1jc4G742BvyvMTW8=;
-        h=From:To:CC:Subject:Date;
-        b=dAuliF8YGjjOIPKNYP59YdJ5jPdWIXQ4FoLt3M4L5sJ137gz53xW+VM0AQrhLA4Jd
-         0EUYrQXdcdrL/EY257ur8k2kWfitG7hFpNeHZI0W3Bai8KPEWuzyvUS4IV4xZwPQBX
-         AhHrUoYqwgz0aBDnc0+EpdhkiQFhu9HjFlgzUcl4=
-Received: from DLEE109.ent.ti.com (dlee109.ent.ti.com [157.170.170.41])
-        by lelv0266.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 025FAbrI082863
-        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
-        Thu, 5 Mar 2020 09:10:37 -0600
-Received: from DLEE109.ent.ti.com (157.170.170.41) by DLEE109.ent.ti.com
- (157.170.170.41) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.1847.3; Thu, 5 Mar
- 2020 09:10:36 -0600
-Received: from localhost.localdomain (10.64.41.19) by DLEE109.ent.ti.com
- (157.170.170.41) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.1847.3 via
- Frontend Transport; Thu, 5 Mar 2020 09:10:36 -0600
-Received: from a0230074-OptiPlex-7010.dhcp.ti.com (ileax41-snat.itg.ti.com [10.172.224.153])
-        by localhost.localdomain (8.15.2/8.15.2) with ESMTP id 025FAY45114541;
-        Thu, 5 Mar 2020 09:10:34 -0600
-From:   Faiz Abbas <faiz_abbas@ti.com>
-To:     <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>
-CC:     <ulf.hansson@linaro.org>, <kishon@ti.com>,
-        <adrian.hunter@intel.com>, <faiz_abbas@ti.com>,
-        <grygorii.strashko@ti.com>
-Subject: [PATCH v2] mmc: sdhci-omap: Add Support for Suspend/Resume
-Date:   Thu, 5 Mar 2020 20:42:28 +0530
-Message-ID: <20200305151228.24692-1-faiz_abbas@ti.com>
-X-Mailer: git-send-email 2.19.2
+        id S1726954AbgCEPSg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 5 Mar 2020 10:18:36 -0500
+Received: from mail-vs1-f65.google.com ([209.85.217.65]:43455 "EHLO
+        mail-vs1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726178AbgCEPSf (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Mar 2020 10:18:35 -0500
+Received: by mail-vs1-f65.google.com with SMTP id 7so3790419vsr.10
+        for <linux-mmc@vger.kernel.org>; Thu, 05 Mar 2020 07:18:34 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=phO1fjFkXHP5aJjwLHsIxyYf9QWL4a+ZWZL5UkWICQE=;
+        b=LydZnWZIWOS4wpTtuLtiaYTY/40HZEDPw/0VNCexamYkwKWR5oZWCAAClj/qdG7USz
+         PHIXMsf2PAjSDYO+Msw7jMTytfHZVJhbOV0awiORGVrrBFMlDru1xy6umOiB4UN6lAvJ
+         extns31knyFdUjRiXZQ9LOCDK1BJKtneAcCXwOnDbaVgtayOBeOod4uuEcknP9PTsMx4
+         6ct7acLNOVCVZSL2mGoen6qeqE+TS48cr7/IQQqwKK7YbfuGqqG5PHJc/VgzpESHk7DF
+         Vmx2TB09ECyaG4+DFTToAITpKV19qFGGY2m4DUUvTA33jvhBitnbm4/rBbSvmwpPE6P0
+         AHkg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=phO1fjFkXHP5aJjwLHsIxyYf9QWL4a+ZWZL5UkWICQE=;
+        b=WiZij3gSCfFebZ5iX4urEgXHLx9ZTNFxySBLgGA/Pr4aCSjf8LqeDnd1Ln0JQCo3pg
+         BysLe8Dz5dQxsCRTTC42h2tr6LMJQ4xVlNqGQEz5aeHkMomhKGMXe/GeOaMAvzzLwsZD
+         n87AMr+i7uU8Fph9KCOr2/WCQadzc7tFpR3/EKVy0IawnY5XbiSVuxaQdaWWt0hn06dc
+         c+bwTG9l6aQwWMOWM+Hi83tU1OVjQ4rCKDu6aPgwzktHZbVc8v9NjCZz29JjpE9qkA0l
+         taw6444DKRfgd26vWM8iRhB5EwJpj+C1z6EIS5tTcZ7paO9+rHDODeFV/GBLR7vMP+KE
+         R7nA==
+X-Gm-Message-State: ANhLgQ0HndgHYbygtkRW2lO/lkQ+AbYekjYdQPHfJ9VF1D/czZQan/zi
+        YOafzMM6GvGiAr2xGZvIatSWYRVuoU1BJAvU5HoKkQ==
+X-Google-Smtp-Source: ADFU+vvp1nUMnGB1rMTb5fKqa4fTspuLvjSjBhaseJ0iawjaPufKTvj5uW5Ajlu8u7x64uJVnuSdHUa+JVCrdDe1c9Y=
+X-Received: by 2002:a67:f4cf:: with SMTP id s15mr5356964vsn.165.1583421513606;
+ Thu, 05 Mar 2020 07:18:33 -0800 (PST)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
+References: <20200212024220.GA32111@seokyung-mobl1> <CAPDyKFr9H2XcgCk9AmHgJfHC+PySh66KxegMJ4yb4aqKSVt3kg@mail.gmail.com>
+ <BYAPR11MB269638142E2BF2C6E108B40A9CE20@BYAPR11MB2696.namprd11.prod.outlook.com>
+In-Reply-To: <BYAPR11MB269638142E2BF2C6E108B40A9CE20@BYAPR11MB2696.namprd11.prod.outlook.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Thu, 5 Mar 2020 16:17:57 +0100
+Message-ID: <CAPDyKFr=hE6diZmaVy-os3rFScHe+8OphBS+edkVGK+Z-J_=HA@mail.gmail.com>
+Subject: Re: [PATCH] mmc: mmc: Fix the timing for clock changing in mmc
+To:     "Seo, Kyungmin" <kyungmin.seo@intel.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Chaotian Jing <chaotian.jing@mediatek.com>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add power management ops which save and restore the driver context and
-facilitate a system suspend and resume.
++ Adrian, Chaotian
 
-Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
----
-v2:
-1. Save and restore only those registers which are not written to by
-   core
-2. Use force_suspend()/resume() APIs instead of runtime_resume()/suspend()
-   as the driver has no runtime PM support.
- drivers/mmc/host/sdhci-omap.c | 57 +++++++++++++++++++++++++++++++++++
- 1 file changed, 57 insertions(+)
+On Thu, 5 Mar 2020 at 09:57, Seo, Kyungmin <kyungmin.seo@intel.com> wrote:
+>
+> The mmc_hs400_to_hs200 function is called only in HS400 mode.
+> I saw the clock change from 200MHz to 52MHz via oscilloscope on real platform.
+>
+> I think CMD6 is sent in HS400 mode with 200MHz clock, but it's not.
+> First CMD6 in mmc_hs400_to_hs200 function is sent with 52MHz clock.
 
-diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
-index 882053151a47..989133ec74d6 100644
---- a/drivers/mmc/host/sdhci-omap.c
-+++ b/drivers/mmc/host/sdhci-omap.c
-@@ -108,6 +108,11 @@ struct sdhci_omap_host {
- 	struct pinctrl		*pinctrl;
- 	struct pinctrl_state	**pinctrl_state;
- 	bool			is_tuning;
-+	/* Omap specific context save */
-+	u32			con;
-+	u32			hctl;
-+	u32			sysctl;
-+	u32			capa;
- };
- 
- static void sdhci_omap_start_clock(struct sdhci_omap_host *omap_host);
-@@ -1232,12 +1237,64 @@ static int sdhci_omap_remove(struct platform_device *pdev)
- 
- 	return 0;
- }
-+#ifdef CONFIG_PM_SLEEP
-+static void sdhci_omap_context_save(struct sdhci_omap_host *omap_host)
-+{
-+	omap_host->con = sdhci_omap_readl(omap_host, SDHCI_OMAP_CON);
-+	omap_host->hctl = sdhci_omap_readl(omap_host, SDHCI_OMAP_HCTL);
-+	omap_host->capa = sdhci_omap_readl(omap_host, SDHCI_OMAP_CAPA);
-+}
-+
-+static void sdhci_omap_context_restore(struct sdhci_omap_host *omap_host)
-+{
-+	sdhci_omap_writel(omap_host, SDHCI_OMAP_CON, omap_host->con);
-+	sdhci_omap_writel(omap_host, SDHCI_OMAP_HCTL, omap_host->hctl);
-+	sdhci_omap_writel(omap_host, SDHCI_OMAP_CAPA, omap_host->capa);
-+}
-+
-+static int __maybe_unused sdhci_omap_suspend(struct device *dev)
-+{
-+	struct sdhci_host *host = dev_get_drvdata(dev);
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_omap_host *omap_host = sdhci_pltfm_priv(pltfm_host);
-+
-+	sdhci_suspend_host(host);
-+
-+	sdhci_omap_context_save(omap_host);
-+
-+	pinctrl_pm_select_idle_state(dev);
-+
-+	pm_runtime_force_suspend(dev);
-+
-+	return 0;
-+}
-+
-+static int __maybe_unused sdhci_omap_resume(struct device *dev)
-+{
-+	struct sdhci_host *host = dev_get_drvdata(dev);
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_omap_host *omap_host = sdhci_pltfm_priv(pltfm_host);
-+
-+	pm_runtime_force_resume(dev);
-+
-+	pinctrl_pm_select_default_state(dev);
-+
-+	sdhci_omap_context_restore(omap_host);
-+
-+	sdhci_resume_host(host);
-+
-+	return 0;
-+}
-+#endif
-+static SIMPLE_DEV_PM_OPS(sdhci_omap_dev_pm_ops, sdhci_omap_suspend,
-+			 sdhci_omap_resume);
- 
- static struct platform_driver sdhci_omap_driver = {
- 	.probe = sdhci_omap_probe,
- 	.remove = sdhci_omap_remove,
- 	.driver = {
- 		   .name = "sdhci-omap",
-+		   .pm = &sdhci_omap_dev_pm_ops,
- 		   .of_match_table = omap_sdhci_match,
- 		  },
- };
--- 
-2.19.2
+I had a vague memory that we have discussed a similar problem as your
+are pointing out on the mailing list already. And I was right.
 
+Please read up on the below references, [1], [2] for the earlier
+discussions. I suggested a solution for Chaotian to try, but it seems
+like he never managed to give it a go, as I don't recall new patch
+being posted.
+
+Perhaps you can pick up were Chaotian left and see if you can
+implement the suggested solution(s). My main concern is breaking other
+host drivers, as that seems quite likely to happen, if we aren't
+careful about this.
+
+Kind regards
+Uffe
+
+[1]
+https://lore.kernel.org/linux-mmc/1548921212-5219-1-git-send-email-chaotian.jing@mediatek.com/
+[2]
+https://lore.kernel.org/linux-mmc/CAPDyKFquyyXx1MqNLVXuFxcEDB9nKzN8LGGNUP2yxoVMQrWiUg@mail.gmail.com/
+
+
+
+>
+> Thanks
+> KM
+>
+> -----Original Message-----
+> From: Ulf Hansson <ulf.hansson@linaro.org>
+> Sent: Wednesday, March 4, 2020 8:09 PM
+> To: Seo, Kyungmin <kyungmin.seo@intel.com>
+> Cc: linux-mmc@vger.kernel.org; Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+> Subject: Re: [PATCH] mmc: mmc: Fix the timing for clock changing in mmc
+>
+> On Wed, 12 Feb 2020 at 03:40, Kyungmin Seo <kyungmin.seo@intel.com> wrote:
+> >
+> > The clock has to be changed after sending CMD6 for HS mode selection
+> > in
+> > mmc_hs400_to_hs200() function.
+> >
+> > The JEDEC 5.0 and 5.1 said that "High-speed" mode selection has to
+> > enable the the high speed mode timing in the Device, before chaning
+> > the clock frequency to a frequency between 26MHz and 52MHz.
+>
+> I think that is based upon the assumption that you are using a lower frequency to start with.
+>
+> For example, assume that you are running with 400KHz during card initialization, then you want to send the CMD6 to switch to HS mode and that should be done, before updating the clock rate.
+>
+> mmc_hs400_to_hs200() goes the opposite direction, so I think the current code looks correct to me.
+>
+> Kind regards
+> Uffe
+>
+> >
+> > Signed-off-by: Kyungmin Seo <kyungmin.seo@intel.com>
+> > ---
+> >  drivers/mmc/core/mmc.c | 8 ++++----
+> >  1 file changed, 4 insertions(+), 4 deletions(-)
+> >
+> > diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c index
+> > 3486bc7fbb64..98640b51c73e 100644
+> > --- a/drivers/mmc/core/mmc.c
+> > +++ b/drivers/mmc/core/mmc.c
+> > @@ -1196,10 +1196,6 @@ int mmc_hs400_to_hs200(struct mmc_card *card)
+> >         int err;
+> >         u8 val;
+> >
+> > -       /* Reduce frequency to HS */
+> > -       max_dtr = card->ext_csd.hs_max_dtr;
+> > -       mmc_set_clock(host, max_dtr);
+> > -
+> >         /* Switch HS400 to HS DDR */
+> >         val = EXT_CSD_TIMING_HS;
+> >         err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+> > EXT_CSD_HS_TIMING, @@ -1210,6 +1206,10 @@ int
+> > mmc_hs400_to_hs200(struct mmc_card *card)
+> >
+> >         mmc_set_timing(host, MMC_TIMING_MMC_DDR52);
+> >
+> > +       /* Reduce frequency to HS */
+> > +       max_dtr = card->ext_csd.hs_max_dtr;
+> > +       mmc_set_clock(host, max_dtr);
+> > +
+> >         err = mmc_switch_status(card);
+> >         if (err)
+> >                 goto out_err;
+> > --
+> > 2.17.1
+> >
