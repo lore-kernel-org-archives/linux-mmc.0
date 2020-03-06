@@ -2,209 +2,131 @@ Return-Path: <SRS0=VpFb=4X=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.4 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D5A32C10DCE
-	for <linux-mmc@archiver.kernel.org>; Fri,  6 Mar 2020 11:15:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E77A6C10DCE
+	for <linux-mmc@archiver.kernel.org>; Fri,  6 Mar 2020 11:35:46 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id A45332073B
-	for <linux-mmc@archiver.kernel.org>; Fri,  6 Mar 2020 11:15:06 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id ABE452073B
+	for <linux-mmc@archiver.kernel.org>; Fri,  6 Mar 2020 11:35:46 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="L1atKqdq"
+	dkim=pass (2048-bit key) header.d=raspberrypi.com header.i=@raspberrypi.com header.b="Jrlh2wIC"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726635AbgCFLPG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 6 Mar 2020 06:15:06 -0500
-Received: from mail-vs1-f50.google.com ([209.85.217.50]:38910 "EHLO
-        mail-vs1-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726359AbgCFLPF (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Mar 2020 06:15:05 -0500
-Received: by mail-vs1-f50.google.com with SMTP id k26so1265923vso.5
-        for <linux-mmc@vger.kernel.org>; Fri, 06 Mar 2020 03:15:04 -0800 (PST)
+        id S1726382AbgCFLfq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 6 Mar 2020 06:35:46 -0500
+Received: from mail-wm1-f65.google.com ([209.85.128.65]:53289 "EHLO
+        mail-wm1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726185AbgCFLfq (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Mar 2020 06:35:46 -0500
+Received: by mail-wm1-f65.google.com with SMTP id g134so2009650wme.3
+        for <linux-mmc@vger.kernel.org>; Fri, 06 Mar 2020 03:35:45 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=RALxsLUaehfVlQvSftzg+Fa2mm4tOh4KA3MkWJBS1Wg=;
-        b=L1atKqdq+Sd3Hdsm7/3Om3qiUD7MEXQHhdSIB02f2vHyUBzfwL2ntphoeKdPS7HqWu
-         GA1SbtTT3XMAjS8DIFx8wap0iOQBn1/esVAlZXpsMH+VnW1fczqEj/9jqaj7+yVI08Qh
-         qLTtmUC74LNea1rG+hK+S6YrvexWiAw8V1nZJtL0Ocb9uYyoIJePnirVSj9JDaP5+fYX
-         NbY8kq90JZkrsmJ01kQ7amgyp0caa+m58V0KYtLyujSkMOpNETuUbQxPDNEHB3KoeFGD
-         oRURHTtpkyxUfc+fFB2nuuvhIssCHI13ejkYu6GfL5Hu+jnvJGooTG2Tc+l98n0UgCke
-         hKiw==
+        d=raspberrypi.com; s=google;
+        h=subject:to:cc:references:from:message-id:date:user-agent
+         :mime-version:in-reply-to:content-language:content-transfer-encoding;
+        bh=YwwwLNX1CXOU0ZBHV3s8PDBeUJoPf7oJHgRV74rJjRQ=;
+        b=Jrlh2wICT5K5yhllPkFqI8nn/DvghAuGDmSj+88Z7Aa6urAm3LbbNc/+hMQVmZXSPS
+         NxxHP1UeQBTlypxj4gSDNgNYdU39JFSR8U6JxfipijIKpaJsLQbG1MKHgCc7y0sqx3bB
+         ivpXtFammEqcKh/d/KN/KiBgMsF0zt7Hs7pZu/2UptrxuvgQ0HR0dNk+us1H6BF/93OR
+         Kog68o3hYLqFv2Fy3wC31opvE/I6zPa0qT/SOSG0DXNPBXET7I+ZnM6IJ1tKXPpRl4Io
+         chyzuPo5DTHb5li2ynkuf5GKs8dPb8PruzQbgJ1Tcokg9m0fKSFGXYBjefuKqgyG1A+y
+         vmYA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=RALxsLUaehfVlQvSftzg+Fa2mm4tOh4KA3MkWJBS1Wg=;
-        b=CfXgdtBbIxNfE1p2A2JogYRxD7aO2LIN8HYJFutvWmed6EI2yKAA01RjUi4y1AUboH
-         zKsqUgfskAqXWZdKq0aXubSEdaXlebGx+D/NUbtrWptj3Ja9xnYGzR1tOSlz40QHnIBz
-         No/Ve85gtnPcRRQXPA+fFdGolgaFnBnYnhLMc7HZy8bErSbeGNvfHWGvf33/xL4UiyiA
-         ljCL17lKC37ztVC8oCw6NDPfRfPeLgjx/sSAwj1HrypLwSGMFBTqrjZEFb9z8kUIjtbA
-         f026gpPmegwWY2e4BU23wYAUgocbi4nkOUv8bObQSA8beCdnVwHIppPScDACi54HormU
-         7Swg==
-X-Gm-Message-State: ANhLgQ1LCJImvJyK5Eb6ZOI6fkqnaI1FchdAF8uQKnWUXIkwyOg/+vSW
-        MSMwcXVphXCxbG2wJpExGmyibufyXY8wibY5DeKrlQ==
-X-Google-Smtp-Source: ADFU+vu5ic0WXuqQCkTpsuPEoSJuLGAvJotbaObBa+yxHqWEywYiNwpxOLlyc0d5So2Sg6BN1yJw/KM7oGHOxKOCHCc=
-X-Received: by 2002:a67:7fd0:: with SMTP id a199mr1838473vsd.200.1583493304009;
- Fri, 06 Mar 2020 03:15:04 -0800 (PST)
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=YwwwLNX1CXOU0ZBHV3s8PDBeUJoPf7oJHgRV74rJjRQ=;
+        b=W9AqZdOWkw7IIFLjdNrGuansSOkGM/X8Z6/W5hLfDR8guCgaeKgQ530Xen1xMEQIJa
+         jQeO6uJ0y4uhk0kfRN5YfEpw1MqCc+QypMzTDc5zsq7w3Q3f5IaCGkwfYDtGD3Y9LmYU
+         9ULDiyU5+t4tkKpyTyZswPZYa8e/Hg3Kxu6J8ZLBAbZ4krTTmszoRfmbod5+h08mOTql
+         moTkHbKbfoOpYGrNOw/4uIRyRdcnlBWEhrkW6qMMj3KqbiLbv2a+YFjo8qGWv81obnnL
+         b7OjpQC76jQqRrH9yBvMvXTccu9nZOqGwk7zoMGQatO20LvUhymFeoPsZauDo47JRw/e
+         R0lA==
+X-Gm-Message-State: ANhLgQ3fnF/YHPbtoGX261YZSsL2oKuQBtlwtBCpVYJrxXjKtW6EY30U
+        czsmowdGSWbYFC22kJY9jO5oEw==
+X-Google-Smtp-Source: ADFU+vtajALTunRI9+k7Dx/6W5obCkqH7zM/5zlzYGwA7WqVEvNK3wjhMdZ71xpQPhSmqHFk3unyug==
+X-Received: by 2002:a1c:c2c5:: with SMTP id s188mr3535597wmf.162.1583494544504;
+        Fri, 06 Mar 2020 03:35:44 -0800 (PST)
+Received: from ?IPv6:2a00:1098:3142:14:3ca7:8f7d:279:5ab9? ([2a00:1098:3142:14:3ca7:8f7d:279:5ab9])
+        by smtp.gmail.com with ESMTPSA id u11sm600875wrb.10.2020.03.06.03.35.43
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 06 Mar 2020 03:35:44 -0800 (PST)
+Subject: Re: [PATCH 10/10] ARM: dts: bcm2711: Add vmmc regulator in emmc2
+To:     Stefan Wahren <stefan.wahren@i2se.com>,
+        Nicolas Saenz Julienne <nsaenzjulienne@suse.de>,
+        devicetree@vger.kernel.org, bcm-kernel-feedback-list@broadcom.com,
+        linux-rpi-kernel@lists.infradead.org,
+        linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org,
+        Rob Herring <robh+dt@kernel.org>
+Cc:     ulf.hansson@linaro.org, f.fainelli@gmail.com, phil@raspberrypi.org,
+        adrian.hunter@intel.com, linux-kernel@vger.kernel.org
+References: <20200306103857.23962-1-nsaenzjulienne@suse.de>
+ <20200306103857.23962-11-nsaenzjulienne@suse.de>
+ <408aa93f-b5c8-c4b3-384b-c8d018a8d549@i2se.com>
+From:   Phil Elwell <phil@raspberrypi.com>
+Message-ID: <714c41ef-85ea-da2b-1701-9132703a832c@raspberrypi.com>
+Date:   Fri, 6 Mar 2020 11:35:43 +0000
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101
+ Thunderbird/68.5.0
 MIME-Version: 1.0
-References: <CA+G9fYuqAQfhzF2BzHr7vMHx68bo8-jT+ob_F3eHQ3=oFjgYdg@mail.gmail.com>
- <6523119a-50ac-973a-d1cd-ab1569259411@nvidia.com> <f960aa98-5508-36fd-166d-7f41c7d85154@nvidia.com>
- <CAPDyKFokE6x0mn+v5B9=so-SyrdTn0JBU8Mrp3Zdu6kSaCie2g@mail.gmail.com>
- <0963b60f-15e7-4bc6-10df-6fc8003e4d42@nvidia.com> <CAPDyKFq5NoeHEBK3sv3yOSD2+pm9FueH1gaTyPq0j7GLfa6vnA@mail.gmail.com>
- <34fd84d7-387b-b6f3-7fb3-aa490909e205@ti.com> <CAPDyKFrrO4noYqdxWL9Y8Nx75LopbDudKGMotkGbGcAF1oq==w@mail.gmail.com>
- <5e9b5646-bd48-e55b-54ee-1c2c41fc9218@nvidia.com> <CAPDyKFqpNo_4OePBR1KnJNO=kR8XEqbcsEd=icSceSdDH+Rk1Q@mail.gmail.com>
- <757853cf-987e-f6b6-9259-b4560a031692@nvidia.com> <d12fe142-7e72-ab58-33ab-17817e35096f@nvidia.com>
- <c216f131-6f83-c9c9-9d17-8d44ec06972d@nvidia.com> <87ad7586-9569-4276-044a-adb64e84ca15@nvidia.com>
- <a0962e0b-0f1d-9f32-f6e9-92f69f93167f@nvidia.com> <57ddddc2-3ee8-d867-bba0-0dd9929ba37d@nvidia.com>
- <CAPDyKFqZSd9E3+16yFsmpee2JsbRJ-DGThxx7NJHu6UE00Xi1Q@mail.gmail.com> <26ee7225-9483-4664-c2d7-b5cefeadcd4b@nvidia.com>
-In-Reply-To: <26ee7225-9483-4664-c2d7-b5cefeadcd4b@nvidia.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 6 Mar 2020 12:14:27 +0100
-Message-ID: <CAPDyKFqwVQDEnPNi33mc9ycTxpaT1cRLejbR3Ja4c8dha4gFRw@mail.gmail.com>
-Subject: Re: LKFT: arm x15: mmc1: cache flush error -110
-To:     Sowjanya Komatineni <skomatineni@nvidia.com>
-Cc:     Jon Hunter <jonathanh@nvidia.com>,
-        Bitan Biswas <bbiswas@nvidia.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Naresh Kamboju <naresh.kamboju@linaro.org>,
-        Jens Axboe <axboe@kernel.dk>,
-        Alexei Starovoitov <ast@kernel.org>,
-        linux-block <linux-block@vger.kernel.org>,
-        lkft-triage@lists.linaro.org,
-        open list <linux-kernel@vger.kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Arnd Bergmann <arnd@arndb.de>,
-        John Stultz <john.stultz@linaro.org>,
-        Faiz Abbas <faiz_abbas@ti.com>,
-        Thierry Reding <treding@nvidia.com>,
-        Anders Roxell <anders.roxell@linaro.org>,
-        Kishon <kishon@ti.com>
-Content-Type: text/plain; charset="UTF-8"
+In-Reply-To: <408aa93f-b5c8-c4b3-384b-c8d018a8d549@i2se.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-GB
+Content-Transfer-Encoding: 7bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-[...]
+Nicolas, Stefan,
 
-> >>>>>>>>>
-> >>>>>>>>> Actually we always use R1B with CMD6 as per spec.
-> >>>>>>>> I fully agree that R1B is preferable, but it's not against the
-> >>>>>>>> spec to
-> >>>>>>>> send CMD13 to poll for busy.
-> >>>>>>>>
-> >>>>>>>> Moreover, we need to cope with the scenario when the host has
-> >>>>>>>> specified a maximum timeout that isn't sufficiently long enough for
-> >>>>>>>> the requested operation. Do you have another proposal for how to
-> >>>>>>>> manage this, but disabling MMC_RSP_BUSY?
-> >>>>>>>>
-> >>>>>>>> Let's assume you driver would get a R1B for the CMD6 (we force it),
-> >>>>>>>> then what timeout would the driver be using if we would set
-> >>>>>>>> cmd.busy_timeout to 30ms?
-> >>>>>>>>
-> >> Sorry didn't understood clearly. Are you asking with 30s timeout, whats
-> >> the data timeout counter used?
-> > Yes. It seems like it will pick the maximum, which is 11s?
-> yes
+On 06/03/2020 11:07, Stefan Wahren wrote:
+> Hi Nicolas,
+> 
+> On 06.03.20 11:38, Nicolas Saenz Julienne wrote:
+>> The SD card power can be controlled trough a pin routed into the board's
+>> external GPIO expander. Turn that into a regulator and provide it to
+>> emmc2.
+>>
+>> Signed-off-by: Nicolas Saenz Julienne <nsaenzjulienne@suse.de>
+>> ---
+>>   arch/arm/boot/dts/bcm2711-rpi-4-b.dts | 11 +++++++++++
+>>   1 file changed, 11 insertions(+)
+>>
+>> diff --git a/arch/arm/boot/dts/bcm2711-rpi-4-b.dts b/arch/arm/boot/dts/bcm2711-rpi-4-b.dts
+>> index e26ea9006378..8e98e917f9f4 100644
+>> --- a/arch/arm/boot/dts/bcm2711-rpi-4-b.dts
+>> +++ b/arch/arm/boot/dts/bcm2711-rpi-4-b.dts
+>> @@ -56,6 +56,16 @@ sd_io_1v8_reg: sd_io_1v8_reg {
+>>   			  3300000 0x0>;
+>>   		status = "okay";
+>>   	};
+>> +
+>> +	sd_vcc_reg: sd_vcc_reg {
+>> +		compatible = "regulator-fixed";
+>> +		regulator-name = "vcc-sd";
+>> +		regulator-min-microvolt = <3300000>;
+>> +		regulator-max-microvolt = <3300000>;
+>> +		regulator-boot-on;
+>> +		enable-active-high;
+>> +		gpio = <&expgpio 6 GPIO_ACTIVE_HIGH>;
+> this new GPIO has an empty GPIO label, please add it.
 
-Okay, thanks!
+The correct name would be "SD_PWR_ON".
 
-> >
-> >> Because of above mentioned issue on our host where CMD interrupt happens
-> >> after busy state, poll for busy returns right away as not busy.
-> > I see.
-> >
-> >> So issuing CMD13 after CMD6-R1 followed by busy poll should be working.
-> >> But weird that with small delay of 1ms or debug print before CMD13 it
-> >> doesn't timeout and works all the time.
-> > I have digested the information you provided in these emails. Let me
-> > summarize it, to see if I have understood correctly.
-> >
-> > 1.
-> > Your controller can't distinguish between R1 and R1B because of a
-> > limitation in the HW. So, in both cases you need to wait for the card
-> > to stop signal busy, before the controller can give an IRQ to notify
-> > that the R1 response has been received. Correct?
-> >
-> > In this context, I am wondering if sdhci_send_command(), really
-> > conforms to these requirements. For example, depending on if the CMD6
-> > has MMC_RSP_BUSY or not, it may pick either SDHCI_CMD_RESP_SHORT or
-> > SDHCI_CMD_RESP_SHORT_BUSY.
-> >
-> > Does this work as expected for your case?
-> Design team re-verified internally and bug where HW waits for busy state
-> before IRQ is only for R1B and R1 is spec compliant.
->
-> So, with R1, CMD complete is generated after response received.
-
-Okay.
-
-So, the issue we see for CMD6 with R1, is a software problem that we
-should be able to fix.
-
->
-> With R1B, CMD complete and xfer complete both are generated after
-> response received + device busy (max timeout of 11s)
-> DATA timeout interrupt will be asserted incase if HW busy detection fails.
->
-> With R1B we may see DATA Timeout if operation takes more than max busy
-> timeout of 11s.
-
-Okay, I see.
-
->
-> > 2.
-> > Assuming my interpretation of the above is somewhat correct. Then you
-> > always need to set a busy timeout for R1/R1B responses in the
-> > controller. The maximum timeout seems to be 11s long. Obviously, this
-> > isn't enough for all cases, such as cache flushing and erase, for
-> > example. So, what can we do to support a longer timeouts than 11s?
-> > Would it be possible to disable the HW timeout, if the requested
-> > timeout is longer than 11s and use a SW timeout instead?
-> >
-> > Kind regards
-> > Uffe
->
-> For erase long operations we have register bit to enable for infinite
-> busy wait mode where host controller would be monitoring until card is busy.
-
-Alright, that sounds great!
-
->
-> But so far for emmc devices we used on our platforms, we haven't seen
-> cache flush taking more than 11s.
-
-I understand that 11s is probably fine to use, for most cases.
-
-However, it's not spec compliant, as for some operations there are
-simply no timeout specified. BKOPS, cache flush, sanitize are cases
-like this - and then 11s is definitely not sufficient.
-
->
-> Will get back on possibility of disabling HW timeout and using SW timeout..
-
-Thanks!
-
-I would like to get the regression fixed asap, but I also would like
-to avoid reverting patches, unless really necessary. May I propose the
-following two options.
-
-1. Find out why polling with ->card_busy() or CMD13, for a CMD6 with
-an R1 response doesn't work - and then fix that behaviour.
-
-2. Set the mmc->max_busy_timeout to zero for sdhci-tegra, which makes
-the core to always use R1B for CMD6 (and erase). This also means that
-when the cmd->busy_timeout becomes longer than 11s, sdhci-tegra must
-disable the HW busy timeout and just wait "forever".
-
-If you decide for 2, you can add the software timeout support on top,
-but make that can be considered as a next step of an improvement,
-rather than needed as fix. Note that, I believe there are some support
-for software timeout already in the sdhci core, maybe you need to
-tweak it a bit for your case, I don't know.
-
-Kind regards
-Uffe
+>> +	};
+>>   };
+>>   
+>>   &firmware {
+>> @@ -174,6 +184,7 @@ brcmf: wifi@1 {
+>>   /* EMMC2 is used to drive the SD card */
+>>   &emmc2 {
+>>   	vqmmc-supply = <&sd_io_1v8_reg>;
+>> +	vmmc-supply = <&sd_vcc_reg>;
+>>   	broken-cd;
+>>   	status = "okay";
+>>   };
