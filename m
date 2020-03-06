@@ -8,53 +8,53 @@ X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1615DC3F2D2
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7A100C3F2D7
 	for <linux-mmc@archiver.kernel.org>; Fri,  6 Mar 2020 02:13:32 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id DB51C208C3
-	for <linux-mmc@archiver.kernel.org>; Fri,  6 Mar 2020 02:13:31 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 49B1B207FD
+	for <linux-mmc@archiver.kernel.org>; Fri,  6 Mar 2020 02:13:32 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="BrQ3TxdT"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="hsCV181M"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727069AbgCFCNX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 5 Mar 2020 21:13:23 -0500
-Received: from mail-lf1-f65.google.com ([209.85.167.65]:33239 "EHLO
-        mail-lf1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726957AbgCFCNI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Mar 2020 21:13:08 -0500
-Received: by mail-lf1-f65.google.com with SMTP id c20so630224lfb.0;
-        Thu, 05 Mar 2020 18:13:06 -0800 (PST)
+        id S1727050AbgCFCNH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 5 Mar 2020 21:13:07 -0500
+Received: from mail-lf1-f66.google.com ([209.85.167.66]:37382 "EHLO
+        mail-lf1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726958AbgCFCNG (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Mar 2020 21:13:06 -0500
+Received: by mail-lf1-f66.google.com with SMTP id j11so608109lfg.4;
+        Thu, 05 Mar 2020 18:13:03 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=MD6xGZ4xORI+tNtNZZDwyKjUfBMMQlzk74IcvklWY7A=;
-        b=BrQ3TxdTprBb4eSSxaLqFHnbM/+U/tPxgTJ0glnciTf2irzC04pjVRWt7vvn4hbJqz
-         R4F6J6rcZ7+l+ykEC+mQ3kO+Q3CoD6BxRy5tdG+YJYtrC3FOTCGkAF1WHNv/MXaqYpE6
-         VhE4e63Mrgm5Mtkfc69IJf9BRDMbRwN7RiM8jYSgA4+exS4J9/lb1RdC7JOe6oAj0b3X
-         O+PPZl4Dccgdc63LBnCBlkjQN6oquHz6yX0hJGkPAy1XB+L0dF+oiWnH5UFLDwRpTc4m
-         g0WGUL8HBLYuLueiE8jA2FyCiWw17MvCexPCeywvHs8B0tPYFjiStQZEuadWjYdBnW2R
-         nOCg==
+        bh=w0YlAmpluZ5D3NO8kHqv749YNcVtvXYMv+8BYDY6gX8=;
+        b=hsCV181MEGJLDvWFZgWaLAlN9Hm3d50nlxh66iesrGVhHMN/vPEJQCqd8pCEt89nZj
+         k9vnx8idWPoKXIuVKzj94SopvJdroGM4O78DMBVhgn0XUfPaF4UKLDEQCv4IYWeOZPmh
+         8p0dkM7QyNLUr6Ym7ytwv8hv8JliSDIZ/+jwgZrTIlugMk4SmZ87ieBMvaaYvUCuq1hL
+         IlCPwObpeVNxe/zYwj79BnOzV7BW2/x5vP4E3Dj5vWfR6blv6OuBfVTpb7GbrJme0S/w
+         sORm7nKocKEfJK1pp7iuUai5ACEJbonceSysClu2m1TbqtUE1pRm63UWMSu23UhVYkJs
+         QYCw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=MD6xGZ4xORI+tNtNZZDwyKjUfBMMQlzk74IcvklWY7A=;
-        b=GyYC1LiWJttDATKZbSfKPi4Rs1yVq+hjf21xhfRxOG5uLCUgYbbYxPw0aKaobIHNoT
-         vWq9FbZXZKLzjCs6LVuNJx0aKmBc5PhbeswkIkIB6iTWukyZaMvtbUx8y/d7KK04YKpq
-         FX7BPby1bMddElQEKxm048RY1Qd/+HXHCc0M07AaRiyfzCkqEaysjx8l74Dc13SVV1mw
-         QZI4kZDqG64oEGnB7wBpIeat8RR0RkxXJSCeh77I5Wi1qvZx2oTK8pwTkOrUixBg3Tk9
-         AulSTpkG+JJ/WRLTxlgxOTh8sPyF/lF7TxNinL+kgElG400/mIQjCYIlHrGVpSmsV1a/
-         1Xpg==
-X-Gm-Message-State: ANhLgQ0kHH3abbh/zmfHm7DGJn4OqI3OvlZgN+uyu5v9NxcF/cgAP/oP
-        K82or6v7RvVa86mUwhOWtEk=
-X-Google-Smtp-Source: ADFU+vveYHEwu/jjmm9qd6Po2zGPfAIH8wer39yJagxuJWLIFc8zFnHZhdGONFQQjYKpeMQxDY9Fcg==
-X-Received: by 2002:a05:6512:203c:: with SMTP id s28mr404120lfs.117.1583460785364;
-        Thu, 05 Mar 2020 18:13:05 -0800 (PST)
+        bh=w0YlAmpluZ5D3NO8kHqv749YNcVtvXYMv+8BYDY6gX8=;
+        b=gT4zwPCFTmkmjDAQPM0J9DDlc+V/P7gjek+G8p+5Vkth7iDVT/SLM/czKRqy0+hrT9
+         myRepiC37/o5qLx7RLa6+l/YpRex/4QZ9sxJyfOWQiBVRlTU8DmqS51o7I4FwCk1IT4X
+         1/OaVe/4cxQ/FzhEDWoqF5pl3nJGiehoQLAPZdiltuy/tEnqrrpdM31eDE1sPJ0XwwGZ
+         ut+EUV+0xX0gzDZb0Bvy+1y1Gf0cyIXa4OrwNuqjd/5+2OljlEhpFaAw+wAuRqDiRNca
+         yweDBtuwCf63TMP3WqriVIn6oO5+z31k/+YN92YkOg3C2Ad0PQ/R1nwuHIitdhL3WfOm
+         cCTA==
+X-Gm-Message-State: ANhLgQ1qK1duVFinpsIWlpKPicTKoeO3iyo9/okRU5DGuqBCVspIIQD9
+        3a0ttB1lxsG7dOTXO3N/+UM=
+X-Google-Smtp-Source: ADFU+vuGmr3S9NwjJoS2M2yUJSkaF54dmtDYx9pIkC8T+YfNRrdI6CbLbMiYb5BqQbR8gHCZiMAOKw==
+X-Received: by 2002:ac2:454f:: with SMTP id j15mr416289lfm.20.1583460782961;
+        Thu, 05 Mar 2020 18:13:02 -0800 (PST)
 Received: from localhost.localdomain (94-29-39-224.dynamic.spd-mgts.ru. [94.29.39.224])
-        by smtp.gmail.com with ESMTPSA id l11sm10592772lfg.87.2020.03.05.18.13.04
+        by smtp.gmail.com with ESMTPSA id l11sm10592772lfg.87.2020.03.05.18.13.01
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 05 Mar 2020 18:13:04 -0800 (PST)
+        Thu, 05 Mar 2020 18:13:02 -0800 (PST)
 From:   Dmitry Osipenko <digetx@gmail.com>
 To:     Jens Axboe <axboe@kernel.dk>,
         Thierry Reding <thierry.reding@gmail.com>,
@@ -72,9 +72,9 @@ Cc:     linux-tegra@vger.kernel.org, linux-block@vger.kernel.org,
         Gilles Grandou <gilles@grandou.net>,
         Ryan Grachek <ryan@edited.us>, linux-mmc@vger.kernel.org,
         linux-kernel@vger.kernel.org
-Subject: [PATCH v2 6/8] mmc: block: Add MMC_QUIRK_RESCAN_MAIN_BLKDEV
-Date:   Fri,  6 Mar 2020 05:12:18 +0300
-Message-Id: <20200306021220.22097-7-digetx@gmail.com>
+Subject: [PATCH v2 4/8] mmc: block: Add mmc_bdev_to_part_type() helper
+Date:   Fri,  6 Mar 2020 05:12:16 +0300
+Message-Id: <20200306021220.22097-5-digetx@gmail.com>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20200306021220.22097-1-digetx@gmail.com>
 References: <20200306021220.22097-1-digetx@gmail.com>
@@ -85,90 +85,59 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-NVIDIA Tegra Partition Table location isn't restricted by the main eMMC
-partition. This patch introduces new MMC-card quirk which is needed by
-some NVIDIA Tegra devices in order to set up partition table if it is
-stored on a eMMC boot partition.
+NVIDIA Tegra Partition Table parser needs to know eMMC boot partition ID
+that is associated with the block device in order to validate and parse
+partition table properly. This patch adds new mmc_bdev_to_part_type()
+helper which takes block device for the input and returns a corresponding
+MMC card partition ID (part_type).
 
-The tegra-partition parser will read out FS partition table from the eMMC
-boot partition and stash it for the main eMMC partition. In this case
-block device of the main eMMC partition needs to be re-scanned in order
-to assign the stashed partition table to the main MMC block device by
-tegra-partition parser.
-
-This patch adds new MMC card flag that is applied by tegra-partition
-parser to the scanned MMC card if partition table is found on a boot
-eMMC partition. This flag tells MMC_BLOCK core that main MMC partition
-needs to be re-scanned once all block devices of the MMC card are
-instantiated.
+This is needed by tegra-partition parser in order to distinguish boot0
+eMMC partition from boot1.
 
 Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
 ---
- drivers/mmc/core/block.c | 31 +++++++++++++++++++++++++++++++
- include/linux/mmc/card.h |  1 +
- 2 files changed, 32 insertions(+)
+ drivers/mmc/core/block.c   | 16 ++++++++++++++++
+ include/linux/mmc/blkdev.h |  1 +
+ 2 files changed, 17 insertions(+)
 
 diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index ec69b613ee92..2c2bec114fd6 100644
+index 36d84a8e182c..2cee57c7388d 100644
 --- a/drivers/mmc/core/block.c
 +++ b/drivers/mmc/core/block.c
-@@ -2955,6 +2955,27 @@ static void mmc_blk_remove_debugfs(struct mmc_card *card,
+@@ -321,6 +321,22 @@ struct mmc_card *mmc_bdev_to_card(struct block_device *bdev)
+ 	return md->queue.card;
+ }
  
- #endif /* CONFIG_DEBUG_FS */
- 
-+static int mmc_blk_rescan_disk(struct mmc_blk_data *md)
++int mmc_bdev_to_part_type(struct block_device *bdev)
 +{
-+	struct block_device *bdev;
++	struct mmc_blk_data *md;
++	struct mmc_card *card;
 +
-+	bdev = blkdev_get_by_dev(disk_devt(md->disk), FMODE_READ | FMODE_EXCL,
-+				 md);
-+	if (IS_ERR(bdev)) {
-+		pr_err("%s: %s: failed to get block device\n",
-+		       __func__, md->disk->disk_name);
-+		return PTR_ERR(bdev);
-+	}
++	card = mmc_bdev_to_card(bdev);
++	if (!card)
++		return -EINVAL;
 +
-+	mutex_lock(&bdev->bd_mutex);
-+	bdev_disk_changed(bdev, false);
-+	mutex_unlock(&bdev->bd_mutex);
++	md = mmc_blk_get(bdev->bd_disk);
++	if (!md)
++		return -EINVAL;
 +
-+	blkdev_put(bdev, FMODE_READ | FMODE_EXCL);
-+
-+	return 0;
++	return md->part_type;
 +}
 +
- static int mmc_blk_probe(struct mmc_card *card)
+ static int mmc_blk_open(struct block_device *bdev, fmode_t mode)
  {
- 	struct mmc_blk_data *md, *part_md;
-@@ -2998,6 +3019,16 @@ static int mmc_blk_probe(struct mmc_card *card)
- 			goto out;
- 	}
+ 	struct mmc_blk_data *md = mmc_blk_get(bdev->bd_disk);
+diff --git a/include/linux/mmc/blkdev.h b/include/linux/mmc/blkdev.h
+index 67608c58de70..24e73ac02b4b 100644
+--- a/include/linux/mmc/blkdev.h
++++ b/include/linux/mmc/blkdev.h
+@@ -9,5 +9,6 @@ struct block_device;
+ struct mmc_card;
  
-+	/*
-+	 * Quirk for NVIDIA Tegra devices that store FS partition table
-+	 * on a boot partition.  Tegra-partition scanner found partition
-+	 * table on a boot MMC partition and stashed it for the main MMC
-+	 * partition if MMC_QUIRK_RESCAN_MAIN_BLKDEV is set, and thus,
-+	 * the main partition needs to be re-scanned.
-+	 */
-+	if (card->quirks & MMC_QUIRK_RESCAN_MAIN_BLKDEV)
-+		mmc_blk_rescan_disk(md);
-+
- 	/* Add two debugfs entries */
- 	mmc_blk_add_debugfs(card, md);
+ struct mmc_card *mmc_bdev_to_card(struct block_device *bdev);
++int mmc_bdev_to_part_type(struct block_device *bdev);
  
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index 90b1d83ce675..550d50e57cc4 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -270,6 +270,7 @@ struct mmc_card {
- #define MMC_QUIRK_BROKEN_IRQ_POLLING	(1<<11)	/* Polling SDIO_CCCR_INTx could create a fake interrupt */
- #define MMC_QUIRK_TRIM_BROKEN	(1<<12)		/* Skip trim */
- #define MMC_QUIRK_BROKEN_HPI	(1<<13)		/* Disable broken HPI support */
-+#define MMC_QUIRK_RESCAN_MAIN_BLKDEV	(1<<14)	/* Main partition needs to be re-scanned after instantiating all partitions */
- 
- 	bool			reenable_cmdq;	/* Re-enable Command Queue */
- 
+ #endif /* LINUX_MMC_BLOCK_DEVICE_H */
 -- 
 2.25.1
 
