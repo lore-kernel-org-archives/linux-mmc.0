@@ -1,100 +1,148 @@
-Return-Path: <SRS0=i1XN=4W=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=VpFb=4X=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+X-Spam-Status: No, score=-3.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_GIT autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 343F4C3F2D1
-	for <linux-mmc@archiver.kernel.org>; Thu,  5 Mar 2020 20:56:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 820B7C3F2D2
+	for <linux-mmc@archiver.kernel.org>; Fri,  6 Mar 2020 02:13:01 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 0A18021556
-	for <linux-mmc@archiver.kernel.org>; Thu,  5 Mar 2020 20:56:35 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5049F2073D
+	for <linux-mmc@archiver.kernel.org>; Fri,  6 Mar 2020 02:13:01 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ZtvBAHkK"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="FVA0lJJ/"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726181AbgCEU4e (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 5 Mar 2020 15:56:34 -0500
-Received: from mail-qt1-f169.google.com ([209.85.160.169]:36982 "EHLO
-        mail-qt1-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726080AbgCEU4e (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Mar 2020 15:56:34 -0500
-Received: by mail-qt1-f169.google.com with SMTP id j34so153494qtk.4;
-        Thu, 05 Mar 2020 12:56:33 -0800 (PST)
+        id S1726317AbgCFCNA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 5 Mar 2020 21:13:00 -0500
+Received: from mail-lj1-f194.google.com ([209.85.208.194]:35032 "EHLO
+        mail-lj1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726243AbgCFCNA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Mar 2020 21:13:00 -0500
+Received: by mail-lj1-f194.google.com with SMTP id a12so536375ljj.2;
+        Thu, 05 Mar 2020 18:12:59 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=mime-version:from:date:message-id:subject:to:cc;
-        bh=WtPw0stoh3nCyfnoHQJntC/GNRmbWPKHGLa4u3rPj7Q=;
-        b=ZtvBAHkKETrMBnbu22gqYBsmB1fw4t35WFMaQViF8T1VChEiS7fB+Q77tYkJ95BrL9
-         K825QVlXQMLvUrSSieLtyqVRggX1gn4Srnry546Vi7XWvdxQ3wEY3RCgjnIbt2QADBdd
-         I+JjdYyh5oIZRF/DsVejlRbwu4QCp3AE96m76LythBXGVsxtQMCRNLzWM32rbkmiAeyR
-         56j5jdVFSGY34DDYFpRNslkUV4ldmd0dFwUStl/aOS7R0pQcMLmOqOijm13GWd9vAnis
-         Kd0PiyyKsWhnEC91c5xhhCCkO1gx+IUVmoghLY0jrtQilJ3rQhbdGGrkJ4gGYghGSS2R
-         zLlg==
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=ilcZWM8ZZGGzsQ121o7bnqr5ZHvlnSG+PwQOyk4WfUQ=;
+        b=FVA0lJJ/UVF87q0yNXAwBPx7jptqSU9gtmbRoB5DMSCQJxG95cN8UOHHOFYIrq+Hsa
+         z+X21Kzc/TtOQ873XNcm+O2OiGL0zIs06DHI5QHhmNcjdleNedFV6ShzXQXlSP8VCFOL
+         5CsiXHwdRoLu9OyR/jOyx0qr91JzZdzk6iOhBO78Wit9khoT5CuSttz6gpvRuhplCVsW
+         KWG+V5fXhr+FTiDbRh+9fyIQJdR9n8J2Z+OF41+djKK/vW/0JH3jJuVhZrTgJmkatBBM
+         LCNtN1s2b7bihRe/3railPiE/SSjtvcanGL6mTup07OsHuS8MglrykTNjASoFNTZFWaw
+         6wUw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:from:date:message-id:subject:to:cc;
-        bh=WtPw0stoh3nCyfnoHQJntC/GNRmbWPKHGLa4u3rPj7Q=;
-        b=BRE0AKeBedidanT2rp4AeuTH1gwBLXjhMBU4lRojtj9ReiD7Hj97Xx6hOTy4K2QsAC
-         jvWBI7Whc+SfoJCtD0LCOzyrKq9AeiLtipIs+hP2J6p3L/2XhC9cST7Ktk4tb0sK9Ofn
-         REOT9NRvL077Is/T7BjVHvSWY21CmgUqcoqkVYtSSTCcB6gcu2PdTXrBRmKicBCfELE+
-         5tQBWz5MTDDiG24eY36p0JF1n9x7mp0O6ApNjYybeqeksi/DeqaVSyovXZqEscyacoeH
-         3ltSebJeVvyRWIQIs6apw5DRGty6x4KTLg6Wk801zbxRmIemB5pFR2VX+ZBrBR+A37dI
-         0mrA==
-X-Gm-Message-State: ANhLgQ1yen6+a0JZD1yLtiDaWeCR751zoSyl09Utn0YiAIc4JpxIZApa
-        ywpHFdjvB67QFpwbYYdyngYSwdrf96GLaQr7zHuxuOvs
-X-Google-Smtp-Source: ADFU+vuieypY3p+x0i35TJ747jI6n6AD97ihAmQRC5IbKbB/eCdY7pM/mCkAtO4Acqv8hFMN1IdmSSrSpUoyazy7MdU=
-X-Received: by 2002:ac8:6753:: with SMTP id n19mr49512qtp.193.1583441792920;
- Thu, 05 Mar 2020 12:56:32 -0800 (PST)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=ilcZWM8ZZGGzsQ121o7bnqr5ZHvlnSG+PwQOyk4WfUQ=;
+        b=cvz8Lq/On2ybym2zML9hLejc1GD5lE4Dyh1+QRW5l/QZdUxc2m45IPjwIBe6uth7HR
+         5AvUi4cVRlJ33dkjugrMC75UTZZIxCplOXX5clysAPgeOn4TA7GusvCI5qZidjxwUzua
+         mY+hTFcTCcuu5Nfys+ar/YnRGkbu0mIOHTkfaw+9f3kHt7G6zaxi2uFHJ3FvNt7miAgU
+         ElnMfpN6Yh9S0oIman5a+tkTJLECyg5AaKi4IVcO9e7hxMJS8FNIAeQGHJd2tUayPzJE
+         5lSooNF/nhScyk7JyPsfPZkqrTuOoAtIIWjNkZdxV/nX6s7wMM/zOw4PTGjm7FrkGbn4
+         VQWw==
+X-Gm-Message-State: ANhLgQ1CMJgJwJJHrjW1OHrvecxSYUN7VMq6v84UhEusizXi+4ObEzyP
+        Ba7LYHCq5uDc9/2Om4+a2xY=
+X-Google-Smtp-Source: ADFU+vv89YsCSaHQES0hVkhZSZpx4D34syPpnu8JAalG97eto293yF2eAhv2e8yyVsHVRwybCLMlnQ==
+X-Received: by 2002:a2e:8597:: with SMTP id b23mr601458lji.181.1583460778246;
+        Thu, 05 Mar 2020 18:12:58 -0800 (PST)
+Received: from localhost.localdomain (94-29-39-224.dynamic.spd-mgts.ru. [94.29.39.224])
+        by smtp.gmail.com with ESMTPSA id l11sm10592772lfg.87.2020.03.05.18.12.56
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 05 Mar 2020 18:12:57 -0800 (PST)
+From:   Dmitry Osipenko <digetx@gmail.com>
+To:     Jens Axboe <axboe@kernel.dk>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        Jonathan Hunter <jonathanh@nvidia.com>,
+        =?UTF-8?q?Micha=C5=82=20Miros=C5=82aw?= <mirq-linux@rere.qmqm.pl>,
+        David Heidelberg <david@ixit.cz>,
+        Peter Geis <pgwipeout@gmail.com>,
+        Stephen Warren <swarren@wwwdotorg.org>,
+        Nicolas Chauvet <kwizart@gmail.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Billy Laws <blaws05@gmail.com>
+Cc:     linux-tegra@vger.kernel.org, linux-block@vger.kernel.org,
+        Andrey Danin <danindrey@mail.ru>,
+        Gilles Grandou <gilles@grandou.net>,
+        Ryan Grachek <ryan@edited.us>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Subject: [PATCH v2 0/8] Introduce NVIDIA Tegra Partition Tablex
+Date:   Fri,  6 Mar 2020 05:12:12 +0300
+Message-Id: <20200306021220.22097-1-digetx@gmail.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-From:   Peter Geis <pgwipeout@gmail.com>
-Date:   Thu, 5 Mar 2020 15:56:22 -0500
-Message-ID: <CAMdYzYoxsBAyBhp+S6LKE060qLLq=XioVVPUmOka0auOo8aXcg@mail.gmail.com>
-Subject: [BUG] 5.6-rc1 breaks sdhci on tegra-30 ouya
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     linux-mmc@vger.kernel.org, Dmitry Osipenko <digetx@gmail.com>,
-        linux-tegra@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Good Afternoon,
+Some NVIDIA Tegra devices have GPT entry at a wrong location and others may
+even not have it at all. So either a custom workaround for GPT parsing or
+TegraPT support is needed for those devices if we want to support them in
+upstream kernel. The former solution was already rejected [1], let's try
+the latter.
 
-I have been fighting a bug with sdhci on the tegra-30 based ouya since 5.6-rc1.
-I've traced it to the following commit:
+[1] https://patchwork.ozlabs.org/patch/1240809/
 
-mmc: core: Specify timeouts for BKOPS and CACHE_FLUSH for eMMC
-24ed3bd01d6a844fd5e8a75f48d0a3d10ed71bf9
+Big thanks to everyone who helped with figuring out the TegraPT format!
 
-[   51.401369] mmc0: Card stuck being busy! mmc_poll_for_busy
-[   51.407288] mmc0: cache flush error -110
-[   51.412347] blk_update_request: I/O error, dev mmcblk0, sector 0 op
-0x1:(WRITE) flags 0x800 phys_seg 0 prio class 0
+Changelog:
 
-It also caused issues with hitching with the bcm4330 sdio wifi chip.
+v2: - Addressed v1 review comments from Stephen Warren by using BIT for
+      locating BCT position in IRAM.
 
-Reverting this commit fixes the issue.
+    - Added more validations to the TegraPT parser: partition type is
+      verified, eMMC instance ID is verified.
 
-After reverting this commit, with the following commit still intact:
+    - TegraPT parser now doesn't touch any devices other than eMMC.
 
-mmc: core: Default to generic_cmd6_time as timeout in __mmc_switch()
+    - EKS (encrypted keys) partition is blacklisted now.
 
-I am seeing a lot of the following messages:
-[   22.626377] mmc0: unspecified timeout for CMD6 - use generic
-[   22.687349] mmc0: unspecified timeout for CMD6 - use generic
-[   23.362736] mmc0: unspecified timeout for CMD6 - use generic
-[   23.487824] mmc0: unspecified timeout for CMD6 - use generic
-[   23.547674] mmc0: unspecified timeout for CMD6 - use generic
-[   23.745527] mmc0: unspecified timeout for CMD6 - use generic
-[   23.817678] mmc0: unspecified timeout for CMD6 - use generic
-[   24.045600] mmc0: unspecified timeout for CMD6 - use generic
-[   24.155577] mmc0: unspecified timeout for CMD6 - use generic
-[   24.223448] mmc0: unspecified timeout for CMD6 - use generic
-[   24.286257] mmc0: unspecified timeout for CMD6 - use generic
+    - Implemented eMMC boot partitions scanning. These new patches are
+      added in a result:
 
-Very Respectfully,
-Peter Geis
+        mmc: block: Add mmc_bdev_to_part_type() helper
+        mmc: block: Add mmc_bdev_to_area_type() helper
+        mmc: block: Add MMC_QUIRK_RESCAN_MAIN_BLKDEV
+        mmc: block: Enable partition-table scanning for boot partitions
+        partitions/tegra: Implement eMMC boot partitions scanning
+
+Dmitry Osipenko (8):
+  mmc: core: Add raw_boot_mult field to mmc_ext_csd
+  mmc: block: Add mmc_bdev_to_card() helper
+  partitions: Introduce NVIDIA Tegra Partition Table
+  mmc: block: Add mmc_bdev_to_part_type() helper
+  mmc: block: Add mmc_bdev_to_area_type() helper
+  mmc: block: Add MMC_QUIRK_RESCAN_MAIN_BLKDEV
+  mmc: block: Enable partition-table scanning for boot partitions
+  partitions/tegra: Implement eMMC boot partitions scanning
+
+ arch/arm/mach-tegra/tegra.c   |  54 +++
+ block/partitions/Kconfig      |   9 +
+ block/partitions/Makefile     |   1 +
+ block/partitions/check.c      |   4 +
+ block/partitions/tegra.c      | 608 ++++++++++++++++++++++++++++++++++
+ block/partitions/tegra.h      |  83 +++++
+ drivers/mmc/core/block.c      |  85 ++++-
+ drivers/mmc/core/mmc.c        |   2 +
+ include/linux/mmc/blkdev.h    |  15 +
+ include/linux/mmc/card.h      |   2 +
+ include/soc/tegra/bootdata.h  |  46 +++
+ include/soc/tegra/common.h    |   9 +
+ include/soc/tegra/partition.h |  18 +
+ 13 files changed, 934 insertions(+), 2 deletions(-)
+ create mode 100644 block/partitions/tegra.c
+ create mode 100644 block/partitions/tegra.h
+ create mode 100644 include/linux/mmc/blkdev.h
+ create mode 100644 include/soc/tegra/bootdata.h
+ create mode 100644 include/soc/tegra/partition.h
+
+-- 
+2.25.1
+
