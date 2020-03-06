@@ -4,36 +4,35 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 32383C10DCE
-	for <linux-mmc@archiver.kernel.org>; Fri,  6 Mar 2020 10:39:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 04E68C10F00
+	for <linux-mmc@archiver.kernel.org>; Fri,  6 Mar 2020 10:39:31 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 10724208CD
+	by mail.kernel.org (Postfix) with ESMTP id D923C2072D
 	for <linux-mmc@archiver.kernel.org>; Fri,  6 Mar 2020 10:39:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727080AbgCFKj2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 6 Mar 2020 05:39:28 -0500
-Received: from mx2.suse.de ([195.135.220.15]:44144 "EHLO mx2.suse.de"
+        id S1727125AbgCFKja (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 6 Mar 2020 05:39:30 -0500
+Received: from mx2.suse.de ([195.135.220.15]:44310 "EHLO mx2.suse.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727067AbgCFKj1 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 6 Mar 2020 05:39:27 -0500
+        id S1727071AbgCFKj2 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 6 Mar 2020 05:39:28 -0500
 X-Virus-Scanned: by amavisd-new at test-mx.suse.de
 Received: from relay2.suse.de (unknown [195.135.220.254])
-        by mx2.suse.de (Postfix) with ESMTP id 987C7ADE8;
-        Fri,  6 Mar 2020 10:39:25 +0000 (UTC)
+        by mx2.suse.de (Postfix) with ESMTP id 7C308B230;
+        Fri,  6 Mar 2020 10:39:26 +0000 (UTC)
 From:   Nicolas Saenz Julienne <nsaenzjulienne@suse.de>
 To:     devicetree@vger.kernel.org, bcm-kernel-feedback-list@broadcom.com,
         linux-rpi-kernel@lists.infradead.org,
         linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org,
-        Hu Ziji <huziji@marvell.com>,
         Adrian Hunter <adrian.hunter@intel.com>
 Cc:     ulf.hansson@linaro.org, f.fainelli@gmail.com, phil@raspberrypi.org,
         Nicolas Saenz Julienne <nsaenzjulienne@suse.de>,
         linux-kernel@vger.kernel.org
-Subject: [PATCH 06/10] mmc: sdhci: xenon: Use quirk instead of custom set_power()
-Date:   Fri,  6 Mar 2020 11:38:51 +0100
-Message-Id: <20200306103857.23962-7-nsaenzjulienne@suse.de>
+Subject: [PATCH 07/10] mmc: sdhci: am654: Use quirk instead of custom set_power()
+Date:   Fri,  6 Mar 2020 11:38:52 +0100
+Message-Id: <20200306103857.23962-8-nsaenzjulienne@suse.de>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20200306103857.23962-1-nsaenzjulienne@suse.de>
 References: <20200306103857.23962-1-nsaenzjulienne@suse.de>
@@ -51,54 +50,85 @@ regulator.
 
 Signed-off-by: Nicolas Saenz Julienne <nsaenzjulienne@suse.de>
 ---
- drivers/mmc/host/sdhci-xenon.c | 20 +-------------------
- 1 file changed, 1 insertion(+), 19 deletions(-)
+ drivers/mmc/host/sdhci_am654.c | 23 ++++++-----------------
+ 1 file changed, 6 insertions(+), 17 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-xenon.c b/drivers/mmc/host/sdhci-xenon.c
-index 1dea1ba66f7b..5bca5f9e5660 100644
---- a/drivers/mmc/host/sdhci-xenon.c
-+++ b/drivers/mmc/host/sdhci-xenon.c
-@@ -213,24 +213,6 @@ static void xenon_set_uhs_signaling(struct sdhci_host *host,
- 	sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
+diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
+index 58183b5f4e82..4629596da86a 100644
+--- a/drivers/mmc/host/sdhci_am654.c
++++ b/drivers/mmc/host/sdhci_am654.c
+@@ -255,17 +255,6 @@ static void sdhci_j721e_4bit_set_clock(struct sdhci_host *host,
+ 	sdhci_set_clock(host, clock);
  }
  
--static void xenon_set_power(struct sdhci_host *host, unsigned char mode,
--		unsigned short vdd)
+-static void sdhci_am654_set_power(struct sdhci_host *host, unsigned char mode,
+-				  unsigned short vdd)
 -{
--	struct mmc_host *mmc = host->mmc;
--	u8 pwr = host->pwr;
+-	if (!IS_ERR(host->mmc->supply.vmmc)) {
+-		struct mmc_host *mmc = host->mmc;
 -
--	sdhci_set_power_noreg(host, mode, vdd);
--
--	if (host->pwr == pwr)
--		return;
--
--	if (host->pwr == 0)
--		vdd = 0;
--
--	if (!IS_ERR(mmc->supply.vmmc))
 -		mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, vdd);
+-	}
+-	sdhci_set_power_noreg(host, mode, vdd);
 -}
 -
- static void xenon_voltage_switch(struct sdhci_host *host)
+ static void sdhci_am654_write_b(struct sdhci_host *host, u8 val, int reg)
  {
- 	/* Wait for 5ms after set 1.8V signal enable bit */
-@@ -240,7 +222,6 @@ static void xenon_voltage_switch(struct sdhci_host *host)
- static const struct sdhci_ops sdhci_xenon_ops = {
- 	.voltage_switch		= xenon_voltage_switch,
- 	.set_clock		= sdhci_set_clock,
--	.set_power		= xenon_set_power,
- 	.set_bus_width		= sdhci_set_bus_width,
- 	.reset			= xenon_reset,
- 	.set_uhs_signaling	= xenon_set_uhs_signaling,
-@@ -252,6 +233,7 @@ static const struct sdhci_pltfm_data sdhci_xenon_pdata = {
- 	.quirks = SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC |
- 		  SDHCI_QUIRK_NO_SIMULT_VDD_AND_POWER |
- 		  SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
-+	.quirks2 = SDHCI_QUIRK2_SET_BUS_VOLTAGE,
+ 	unsigned char timing = host->mmc->ios.timing;
+@@ -321,7 +310,6 @@ static struct sdhci_ops sdhci_am654_ops = {
+ 	.get_timeout_clock = sdhci_pltfm_clk_get_max_clock,
+ 	.set_uhs_signaling = sdhci_set_uhs_signaling,
+ 	.set_bus_width = sdhci_set_bus_width,
+-	.set_power = sdhci_am654_set_power,
+ 	.set_clock = sdhci_am654_set_clock,
+ 	.write_b = sdhci_am654_write_b,
+ 	.irq = sdhci_am654_cqhci_irq,
+@@ -331,7 +319,8 @@ static struct sdhci_ops sdhci_am654_ops = {
+ static const struct sdhci_pltfm_data sdhci_am654_pdata = {
+ 	.ops = &sdhci_am654_ops,
+ 	.quirks = SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12,
+-	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
++	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
++		   SDHCI_QUIRK2_SET_BUS_VOLTAGE,
  };
  
- /*
+ static const struct sdhci_am654_driver_data sdhci_am654_drvdata = {
+@@ -344,7 +333,6 @@ static struct sdhci_ops sdhci_j721e_8bit_ops = {
+ 	.get_timeout_clock = sdhci_pltfm_clk_get_max_clock,
+ 	.set_uhs_signaling = sdhci_set_uhs_signaling,
+ 	.set_bus_width = sdhci_set_bus_width,
+-	.set_power = sdhci_am654_set_power,
+ 	.set_clock = sdhci_am654_set_clock,
+ 	.write_b = sdhci_am654_write_b,
+ 	.irq = sdhci_am654_cqhci_irq,
+@@ -354,7 +342,8 @@ static struct sdhci_ops sdhci_j721e_8bit_ops = {
+ static const struct sdhci_pltfm_data sdhci_j721e_8bit_pdata = {
+ 	.ops = &sdhci_j721e_8bit_ops,
+ 	.quirks = SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12,
+-	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
++	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
++		   SDHCI_QUIRK2_SET_BUS_VOLTAGE,
+ };
+ 
+ static const struct sdhci_am654_driver_data sdhci_j721e_8bit_drvdata = {
+@@ -367,7 +356,6 @@ static struct sdhci_ops sdhci_j721e_4bit_ops = {
+ 	.get_timeout_clock = sdhci_pltfm_clk_get_max_clock,
+ 	.set_uhs_signaling = sdhci_set_uhs_signaling,
+ 	.set_bus_width = sdhci_set_bus_width,
+-	.set_power = sdhci_am654_set_power,
+ 	.set_clock = sdhci_j721e_4bit_set_clock,
+ 	.write_b = sdhci_am654_write_b,
+ 	.irq = sdhci_am654_cqhci_irq,
+@@ -377,7 +365,8 @@ static struct sdhci_ops sdhci_j721e_4bit_ops = {
+ static const struct sdhci_pltfm_data sdhci_j721e_4bit_pdata = {
+ 	.ops = &sdhci_j721e_4bit_ops,
+ 	.quirks = SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12,
+-	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
++	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
++		   SDHCI_QUIRK2_SET_BUS_VOLTAGE,
+ };
+ 
+ static const struct sdhci_am654_driver_data sdhci_j721e_4bit_drvdata = {
 -- 
 2.25.1
 
