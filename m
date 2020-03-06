@@ -5,56 +5,56 @@ X-Spam-Level:
 X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
-	version=3.4.0
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 48D43C3F2D1
-	for <linux-mmc@archiver.kernel.org>; Fri,  6 Mar 2020 02:13:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CF4DFC3F2D7
+	for <linux-mmc@archiver.kernel.org>; Fri,  6 Mar 2020 02:13:19 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 1D72D2073D
-	for <linux-mmc@archiver.kernel.org>; Fri,  6 Mar 2020 02:13:07 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9F733207FD
+	for <linux-mmc@archiver.kernel.org>; Fri,  6 Mar 2020 02:13:19 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="GCoNJHXM"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="RPhQfe9q"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726970AbgCFCNG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 5 Mar 2020 21:13:06 -0500
-Received: from mail-lf1-f68.google.com ([209.85.167.68]:46486 "EHLO
-        mail-lf1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726915AbgCFCNE (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Mar 2020 21:13:04 -0500
-Received: by mail-lf1-f68.google.com with SMTP id v6so559696lfo.13;
-        Thu, 05 Mar 2020 18:13:01 -0800 (PST)
+        id S1727123AbgCFCNL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 5 Mar 2020 21:13:11 -0500
+Received: from mail-lj1-f196.google.com ([209.85.208.196]:39426 "EHLO
+        mail-lj1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727069AbgCFCNK (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Mar 2020 21:13:10 -0500
+Received: by mail-lj1-f196.google.com with SMTP id f10so517654ljn.6;
+        Thu, 05 Mar 2020 18:13:08 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=kWAeNpBn6fpU/PQ3w5gvOGDJx2Ia8b1U9luMqpJSJvQ=;
-        b=GCoNJHXMgArvxZ2kM/SXnSPoe6CuzS1zwwvfEYI1KlFYLoorrkITULJUx3Bh9GbnRX
-         VIRRkVVr7K9gbsfOJswpMD6cS20enbneC52QYoovNurXUspOU/zpy3asyICNHQ1ArnVB
-         fSBXH3nwDbRCJLt+hq9KcomdYHcWTkThHIKiugDQOvkTSmecJgx2a3mbNx2CrhYXnl76
-         Bo/wWyDdQY2WTxgi/sAGjsQRRw8W/2ERuIUMiFcYZBPPD3egIen+S1TjNkjTFvYpOcD+
-         Xav6wj7i0tGs4vmtA7Wt9Wz9/5U94HQQb44WriLSfgMqV/LubpewdG5Emy+RmwRK8eUC
-         0YxQ==
+        bh=wN+PxT1y6TdL2REZHdTdY6w1jaE17t+W6WihxJCIMPI=;
+        b=RPhQfe9q/A15UWU4QtbLkcnk36g8DCDblpMf04CYoPlYPQtGDFaXFa1QCTGcIdxlp/
+         yw2tpo3Tv5UVOv5fXTS8fMAUWhBtDhOUW76K+JgBSjAg7kKSIxGeWUy5x2meb8w1wViE
+         I/rY5gc88/ui/AX5oGeeGnH2lS/e7/MT2R4+7FZzMITJTWZSVpGlxo25qZK5bvGdHoNJ
+         sEyjro6FQ7wDjy+bqJ8Y5XUF2oRpLy5WX5MmPYmcw+Rz0lI0cUw443dh7GFbxqB623KT
+         W5ls6KE/nmzZa8NK8F1txM8q4npEyl3/OgZN4uEvSjhTvhpv6UwlCRYDg+mSrBWp3lR/
+         mIjg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=kWAeNpBn6fpU/PQ3w5gvOGDJx2Ia8b1U9luMqpJSJvQ=;
-        b=MtrofvkbVKly0gah2Z5vp1HKxq0Wc+2bOVA/SRV1t6OnnuZ9ikN25FYFB9BGzk1vJx
-         xQH3kdiOa79dKe0SGyvu418CGiy0fojKPZrkKqA50mHHB0Vrm7OZmltmIXcrrR3/3DRD
-         ubI0sHSEZ33V8j/nokMDu9nSlQy1047HxUyUkyX0ctCEKKPCIv7XYqNnvHQBr7SoXNu/
-         3FB5h2tcHW5Xl6f6Uk7UCu02XJhaCBslh9DLSaCkFeCdXFrGW1js3RL/DwgWD1YcJ7aX
-         sM3aTWmQUcwgoNl2WHiqPKg92iluNdTa0opPF+lynQNXl/a9i5OJD/X40/EXsU0rzZ1c
-         02Ww==
-X-Gm-Message-State: ANhLgQ1GOXE0oEbAUkImTfEWTsA9SZ/99dF8jQYa4Fe4W8llVwsZFxoX
-        /MvXsrJugPUIa2QMpKTv/QU=
-X-Google-Smtp-Source: ADFU+vsi8TcyLKDcJbRMBaRh8lMXYw471TYJmJyUORBjo/b50BvSewNmK3EH0JfzbLyyIuq3k9qLVA==
-X-Received: by 2002:a05:6512:3044:: with SMTP id b4mr435202lfb.10.1583460780575;
-        Thu, 05 Mar 2020 18:13:00 -0800 (PST)
+        bh=wN+PxT1y6TdL2REZHdTdY6w1jaE17t+W6WihxJCIMPI=;
+        b=hYcHXk4pcZx4ZbxqIC5o1EPLvA4TU6VVIqePOsXRs9COOTiEZecUIcmz4Zc9Jbq1xi
+         qTTLOIISSzodyz+X+oHzX1uAAst3tOpO0/0f0r8gH6oSjxEQljmWh9GJaiZOn8/nRAPl
+         GTpTCX414CL0h+wbBfAv1nsSVUebSLdzfEQeBQLU7tFmtfDlg9MXG6qzb8vOl2uBRcVt
+         DyO8yu0r7lObiee1MfhbPlTUAN7nMFywU+UX+8dcgBklSrOjtb+ECo3bDudhHg4J9DVb
+         9J7OW9x1YC5dtYarte0DfVxB9mQsOHBQRO/ZgPFWGDPGKP4esE9JcOTf6i4IMsAMy7yf
+         i7mw==
+X-Gm-Message-State: ANhLgQ0KfNknGuEhycA+Qd+CpjjHobh/+UPkTkP0bf3Xqe4UEGUCaTkv
+        qFfYu88vQfFGub2mNsKn+zg=
+X-Google-Smtp-Source: ADFU+vulm5XnfKC9jn0ksDTf+tOure9qy0t3uz9GiW6W37MrJWYpfgPl9mblri3rCCA1GWJY18JzyQ==
+X-Received: by 2002:a2e:b8c3:: with SMTP id s3mr603454ljp.84.1583460787730;
+        Thu, 05 Mar 2020 18:13:07 -0800 (PST)
 Received: from localhost.localdomain (94-29-39-224.dynamic.spd-mgts.ru. [94.29.39.224])
-        by smtp.gmail.com with ESMTPSA id l11sm10592772lfg.87.2020.03.05.18.12.59
+        by smtp.gmail.com with ESMTPSA id l11sm10592772lfg.87.2020.03.05.18.13.06
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 05 Mar 2020 18:13:00 -0800 (PST)
+        Thu, 05 Mar 2020 18:13:07 -0800 (PST)
 From:   Dmitry Osipenko <digetx@gmail.com>
 To:     Jens Axboe <axboe@kernel.dk>,
         Thierry Reding <thierry.reding@gmail.com>,
@@ -72,9 +72,9 @@ Cc:     linux-tegra@vger.kernel.org, linux-block@vger.kernel.org,
         Gilles Grandou <gilles@grandou.net>,
         Ryan Grachek <ryan@edited.us>, linux-mmc@vger.kernel.org,
         linux-kernel@vger.kernel.org
-Subject: [PATCH v2 2/8] mmc: block: Add mmc_bdev_to_card() helper
-Date:   Fri,  6 Mar 2020 05:12:14 +0300
-Message-Id: <20200306021220.22097-3-digetx@gmail.com>
+Subject: [PATCH v2 8/8] partitions/tegra: Implement eMMC boot partitions scanning
+Date:   Fri,  6 Mar 2020 05:12:20 +0300
+Message-Id: <20200306021220.22097-9-digetx@gmail.com>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20200306021220.22097-1-digetx@gmail.com>
 References: <20200306021220.22097-1-digetx@gmail.com>
@@ -85,73 +85,220 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-NVIDIA Tegra Partition Table takes into account MMC card's BOOT_SIZE_MULT
-parameter, and thus, the partition parser needs to retrieve that EXT_CSD
-value from the block device. There are also some other parts of struct
-mmc_card that are needed for the partition parser in order to calculate
-the eMMC offset and verify different things. This patch introduces new
-helper which takes block device for the input argument and returns the
-corresponding MMC card.
+Some NVIDIA Tegra devices store partition table on eMMC boot partition.
+In order to support this case, the tegra-partition parser will read out
+partition table from a boot partition and stash it for the main eMMC
+partition.
 
 Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
 ---
- drivers/mmc/core/block.c   | 15 +++++++++++++++
- include/linux/mmc/blkdev.h | 13 +++++++++++++
- 2 files changed, 28 insertions(+)
- create mode 100644 include/linux/mmc/blkdev.h
+ block/partitions/tegra.c | 122 +++++++++++++++++++++++++++++++++++----
+ 1 file changed, 110 insertions(+), 12 deletions(-)
 
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 7634894df853..36d84a8e182c 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -40,6 +40,7 @@
- #include <linux/debugfs.h>
- 
- #include <linux/mmc/ioctl.h>
-+#include <linux/mmc/blkdev.h>
+diff --git a/block/partitions/tegra.c b/block/partitions/tegra.c
+index 6f150a7e3275..153928eef60b 100644
+--- a/block/partitions/tegra.c
++++ b/block/partitions/tegra.c
+@@ -25,6 +25,7 @@
+ #include <linux/mmc/blkdev.h>
  #include <linux/mmc/card.h>
  #include <linux/mmc/host.h>
- #include <linux/mmc/mmc.h>
-@@ -306,6 +307,20 @@ static ssize_t force_ro_store(struct device *dev, struct device_attribute *attr,
- 	return ret;
- }
++#include <linux/mmc/mmc.h>
  
-+struct mmc_card *mmc_bdev_to_card(struct block_device *bdev)
-+{
-+	struct mmc_blk_data *md;
+ #include <soc/tegra/common.h>
+ #include <soc/tegra/partition.h>
+@@ -50,7 +51,10 @@
+ struct tegra_partition_table_parser {
+ 	struct tegra_partition_table *pt;
+ 	struct parsed_partitions *state;
++	struct mmc_card *card;
+ 	bool pt_entry_checked;
++	unsigned int boot_id;
++	bool snapshot_mode;
+ 	sector_t sector;
+ 	int boot_offset;
+ 	u32 dev_instance;
+@@ -67,6 +71,7 @@ struct tegra_partition_type {
+ 	char *name;
+ };
+ 
++static struct tegra_partition_table *scratch_pt;
+ static sector_t tegra_pt_sector_address;
+ static sector_t tegra_pt_sectors_num;
+ 
+@@ -224,6 +229,10 @@ static bool tegra_partition_valid(struct tegra_partition_table_parser *ptp,
+ 		return false;
+ 	}
+ 
++	/* size will be validated when ptp->snapshot_mode=false */
++	if (ptp->snapshot_mode && size)
++		return true;
 +
-+	if (bdev->bd_disk->major != MMC_BLOCK_MAJOR)
-+		return NULL;
-+
-+	md = mmc_blk_get(bdev->bd_disk);
-+	if (!md)
-+		return NULL;
-+
-+	return md->queue.card;
-+}
-+
- static int mmc_blk_open(struct block_device *bdev, fmode_t mode)
+ 	sect_end = get_capacity(ptp->state->bdev->bd_disk);
+ 
+ 	/* eMMC boot partitions are below ptp->boot_offset */
+@@ -369,6 +378,7 @@ tegra_partition_table_emmc_boot_offset(struct tegra_partition_table_parser *ptp)
  {
- 	struct mmc_blk_data *md = mmc_blk_get(bdev->bd_disk);
-diff --git a/include/linux/mmc/blkdev.h b/include/linux/mmc/blkdev.h
-new file mode 100644
-index 000000000000..67608c58de70
---- /dev/null
-+++ b/include/linux/mmc/blkdev.h
-@@ -0,0 +1,13 @@
-+/* SPDX-License-Identifier: GPL-2.0-only */
-+/*
-+ *  linux/include/linux/mmc/blkdev.h
-+ */
-+#ifndef LINUX_MMC_BLOCK_DEVICE_H
-+#define LINUX_MMC_BLOCK_DEVICE_H
+ 	struct mmc_card *card = mmc_bdev_to_card(ptp->state->bdev);
+ 	const struct of_device_id *matched;
++	int part_type, area_type;
+ 	const u32 *sdhci_bases;
+ 	u32 sdhci_base;
+ 	unsigned int i;
+@@ -404,6 +414,32 @@ tegra_partition_table_emmc_boot_offset(struct tegra_partition_table_parser *ptp)
+ 	ptp->dev_id       = TEGRA_PT_SDHCI_DEVICE_ID;
+ 	ptp->dev_instance = i;
+ 
++	area_type = mmc_bdev_to_area_type(ptp->state->bdev);
 +
-+struct block_device;
-+struct mmc_card;
++	if (WARN_ON(area_type < 0))
++		return -1;
 +
-+struct mmc_card *mmc_bdev_to_card(struct block_device *bdev);
++	switch (area_type) {
++	case MMC_BLK_DATA_AREA_BOOT:
++		part_type = mmc_bdev_to_part_type(ptp->state->bdev);
 +
-+#endif /* LINUX_MMC_BLOCK_DEVICE_H */
++		if (WARN_ON(part_type < 0))
++			return -1;
++
++		ptp->boot_id = part_type - EXT_CSD_PART_CONFIG_ACC_BOOT0;
++		ptp->snapshot_mode = true;
++		break;
++
++	case MMC_BLK_DATA_AREA_MAIN:
++		break;
++
++	default:
++		TEGRA_PT_ERR(ptp, "unexpected area_type: %u\n", area_type);
++		return -1;
++	}
++
++	ptp->card = card;
++
+ 	/*
+ 	 * eMMC storage has two special boot partitions in addition to the
+ 	 * main one.  NVIDIA's bootloader linearizes eMMC boot0->boot1->main
+@@ -427,6 +463,9 @@ static int tegra_read_partition_table(struct tegra_partition_table_parser *ptp)
+ 	Sector sect;
+ 	void *part;
+ 
++	if (scratch_pt)
++		return 1;
++
+ 	for (i = 0; i < ARRAY_SIZE(ptu->pt_parts); i++) {
+ 		/*
+ 		 * Partition table takes at maximum 4096 bytes, but
+@@ -449,29 +488,77 @@ static int tegra_read_partition_table(struct tegra_partition_table_parser *ptp)
+ 
+ int tegra_partition(struct parsed_partitions *state)
+ {
+-	struct tegra_partition_table_parser ptp = { .state = state };
++	struct tegra_partition_table_parser ptp = { 0 };
+ 	sector_t end_sector;
+ 	int ret = 0;
+ 
+ 	if (!soc_is_tegra())
+ 		return 0;
+ 
++	ptp.state = state;
++
+ 	ptp.boot_offset = tegra_partition_table_emmc_boot_offset(&ptp);
+ 	if (ptp.boot_offset < 0)
+ 		return 0;
+ 
+-	if (tegra_pt_sector_address < ptp.boot_offset) {
+-		TEGRA_PT_INFO(&ptp,
+-			      "scanning eMMC boot partitions unimplemented\n");
+-		return 0;
+-	}
++	/*
++	 * Some devices store partition table on boot MMC partition.
++	 * In this case a "snapshot mode" will be used, which will
++	 * only read->check->store partition table, the stored table
++	 * will be used for the main MMC partition later on.
++	 */
++	if (ptp.snapshot_mode) {
++		sector_t boot_start, boot_end, boot_size;
+ 
+-	ptp.pt = kmalloc(sizeof(*ptp.pt), GFP_KERNEL);
+-	if (!ptp.pt)
+-		return 0;
++		/* partition is already snapshoted, no need to proceed */
++		if (scratch_pt)
++			return 0;
++
++		boot_size  = ptp.boot_offset / MMC_NUM_BOOT_PARTITION;
++		boot_start = ptp.boot_id * boot_size;
++		boot_end   = boot_start + boot_size;
++
++		/*
++		 * Bail out if partition table isn't located here, at this MMC
++		 * partition.
++		 */
++		if (tegra_pt_sector_address < boot_start ||
++		    tegra_pt_sector_address >= boot_end)
++			return 0;
++
++		ptp.boot_offset = boot_start;
++
++		/*
++		 * Note that mmc_blk_probe() always registers boot partitions
++		 * after the main and we rely on this feature, otherwise
++		 * scratch_pt won't be released (although this is not a big
++		 * deal).
++		 */
++		ptp.pt = kmalloc(sizeof(*ptp.pt), GFP_KERNEL);
++		if (!ptp.pt)
++			return 0;
++
++		ptp.sector = tegra_pt_sector_address - ptp.boot_offset;
++		end_sector = ptp.sector + tegra_pt_sectors_num;
+ 
+-	ptp.sector = tegra_pt_sector_address - ptp.boot_offset;
+-	end_sector = ptp.sector + tegra_pt_sectors_num;
++	} else if (scratch_pt) {
++		TEGRA_PT_INFO(&ptp, "using stashed partition table\n");
++
++		ptp.pt     = scratch_pt;
++		ptp.sector = 0;
++		end_sector = 1;
++
++	} else {
++		if (tegra_pt_sector_address < ptp.boot_offset)
++			return 0;
++
++		ptp.pt = kmalloc(sizeof(*ptp.pt), GFP_KERNEL);
++		if (!ptp.pt)
++			return 0;
++
++		ptp.sector = tegra_pt_sector_address - ptp.boot_offset;
++		end_sector = ptp.sector + tegra_pt_sectors_num;
++	}
+ 
+ 	/*
+ 	 * Partition table is duplicated till the end_sector.
+@@ -501,9 +588,20 @@ int tegra_partition(struct parsed_partitions *state)
+ 		ptp.sector += TEGRA_PT_SECTOR_SZ;
+ 	}
+ 
+-	if (ret == 1)
++	if (ret == 1) {
++		if (ptp.snapshot_mode) {
++			ptp.card->quirks |= MMC_QUIRK_RESCAN_MAIN_BLKDEV;
++			scratch_pt = ptp.pt;
++
++			TEGRA_PT_INFO(&ptp, "stashed partition table\n");
++
++			return 0;
++		}
++
+ 		strlcat(state->pp_buf, "\n", PAGE_SIZE);
++	}
+ 
++	scratch_pt = NULL;
+ 	kfree(ptp.pt);
+ 
+ 	return ret;
 -- 
 2.25.1
 
