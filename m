@@ -2,118 +2,115 @@ Return-Path: <SRS0=VpFb=4X=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no
+X-Spam-Status: No, score=-2.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E2A95C10DCE
-	for <linux-mmc@archiver.kernel.org>; Fri,  6 Mar 2020 10:30:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 06255C10DCE
+	for <linux-mmc@archiver.kernel.org>; Fri,  6 Mar 2020 10:32:44 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id BA8552073D
-	for <linux-mmc@archiver.kernel.org>; Fri,  6 Mar 2020 10:30:36 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CF9972084E
+	for <linux-mmc@archiver.kernel.org>; Fri,  6 Mar 2020 10:32:43 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="V2SwrQ6Q"
+	dkim=pass (2048-bit key) header.d=nvidia.com header.i=@nvidia.com header.b="GqAuuiKv"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726368AbgCFKag (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 6 Mar 2020 05:30:36 -0500
-Received: from mail-vk1-f196.google.com ([209.85.221.196]:39813 "EHLO
-        mail-vk1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726171AbgCFKag (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Mar 2020 05:30:36 -0500
-Received: by mail-vk1-f196.google.com with SMTP id t129so463690vkg.6
-        for <linux-mmc@vger.kernel.org>; Fri, 06 Mar 2020 02:30:33 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=CiEHFDX5XCyqxsRPXe0c69an10+KUtnxfdeFDLtN22M=;
-        b=V2SwrQ6Q37K/It9fEqHQK6Y8UWzqPhz/RSVXNYUeuROPCNxIbb9/k4K6yvE4eVGDYW
-         iV5qCHDlAmewh4x9xJbTaCqzzGFohDhizaCy3ObP5BKdc2Upw4tDFyK06gIPelY16BA/
-         pCcRC0HOFVb4s+Mxl5/fqSGcObERGaK0Cde6iIlpL8Ptk4INIQVE6AHOfB7FpIKTwVXN
-         KZOdzUeKKvgu7YvJdD2VXAvAo0AJSTytWC5FSP7m6jVQKw/n6OOu7nUSh5Jyy6Y7gCGy
-         YMhm4rPm0cD974+PETJ2dT8uQZzjsAEiwHJpwNA+WOmlDkSXXMNDvJ2byLcd8jBCCwYn
-         qhZw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=CiEHFDX5XCyqxsRPXe0c69an10+KUtnxfdeFDLtN22M=;
-        b=Ee4RAHkZGaRzpFk7625DDyPdFnEnyk9bljGALSmailsq+Q7cJwald9cyz7Qmzxp9cL
-         fYxOESHrqrYzQHpZOa3hQFZffkAMEWcHci8QQ9NSMG846qc/d/uMG9vo8upS89fZJuQK
-         iYTVw+2ZBhLi5Y+5BgjQC7gR3898PaUUgyIzsOAYsMPOUp3lJD2Q/99rc08iVRt48ff5
-         8U4dE4aBEHvpmNyo8QKnwqEpwTM2du0EBYo6Ikorn1/fGzyK3paC0MsfNipsKCeX71mA
-         SCWvPisdXk8WrdBz7unzauphxoLG4Jhj2HO3Aec6Y7ws92HcXQPRa/LrDOWN/KOk5D6V
-         afhg==
-X-Gm-Message-State: ANhLgQ2iSkvz7mGPmZwkCzcCSjsr0OWJrEt+uxIL4uLi0HVTML7TWJpH
-        rDfDJo+ASuDiOtC6HMt00We1hY7i0ZzmdhlJgt9pdg==
-X-Google-Smtp-Source: ADFU+vuyitkE8/2HLqkIC9+fIzBUR+dCUhlIHfF2nPz3wi79/VK4ACp9VkezVy4BksFiUyzlY1gvtv0RTfFZQrrn6qY=
-X-Received: by 2002:a1f:434d:: with SMTP id q74mr1139900vka.59.1583490633314;
- Fri, 06 Mar 2020 02:30:33 -0800 (PST)
+        id S1726069AbgCFKcn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 6 Mar 2020 05:32:43 -0500
+Received: from hqnvemgate25.nvidia.com ([216.228.121.64]:5432 "EHLO
+        hqnvemgate25.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726010AbgCFKcn (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Mar 2020 05:32:43 -0500
+Received: from hqpgpgate102.nvidia.com (Not Verified[216.228.121.13]) by hqnvemgate25.nvidia.com (using TLS: TLSv1.2, DES-CBC3-SHA)
+        id <B5e6226a00002>; Fri, 06 Mar 2020 02:32:00 -0800
+Received: from hqmail.nvidia.com ([172.20.161.6])
+  by hqpgpgate102.nvidia.com (PGP Universal service);
+  Fri, 06 Mar 2020 02:32:42 -0800
+X-PGP-Universal: processed;
+        by hqpgpgate102.nvidia.com on Fri, 06 Mar 2020 02:32:42 -0800
+Received: from [10.26.11.221] (10.124.1.5) by HQMAIL107.nvidia.com
+ (172.20.187.13) with Microsoft SMTP Server (TLS) id 15.0.1473.3; Fri, 6 Mar
+ 2020 10:32:41 +0000
+Subject: Re: [BUG] 5.6-rc1 breaks sdhci on tegra-30 ouya
+To:     Peter Geis <pgwipeout@gmail.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+CC:     <linux-mmc@vger.kernel.org>, Dmitry Osipenko <digetx@gmail.com>,
+        <linux-tegra@vger.kernel.org>
+References: <CAMdYzYoxsBAyBhp+S6LKE060qLLq=XioVVPUmOka0auOo8aXcg@mail.gmail.com>
+From:   Jon Hunter <jonathanh@nvidia.com>
+Message-ID: <1ebbe390-68a6-84a2-8ff9-8dc0d263a69b@nvidia.com>
+Date:   Fri, 6 Mar 2020 10:32:38 +0000
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.4.1
 MIME-Version: 1.0
-References: <cover.1582839544.git.nguyenb@codeaurora.org> <b328b981a785525b8424b4ab2197dc1ec54417d1.1582839544.git.nguyenb@codeaurora.org>
- <CAPDyKFrGmXj8HWNz2irUd7i8Cb77U8rLM=V91vcrWE+r7Pqeyg@mail.gmail.com> <fd4bdb88d984a4095215347bc6e80afe@codeaurora.org>
-In-Reply-To: <fd4bdb88d984a4095215347bc6e80afe@codeaurora.org>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 6 Mar 2020 11:29:55 +0100
-Message-ID: <CAPDyKFq8MWW-3ys9OhQtFepohexD34e9_6X3suYPrAAKnATp6g@mail.gmail.com>
-Subject: Re: [<PATCH v1> 1/4] mmc: core: Add check for NULL pointer access
-To:     "Bao D. Nguyen" <nguyenb@codeaurora.org>
-Cc:     Rob Herring <robh+dt@kernel.org>,
-        linux-scsi <linux-scsi@vger.kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Asutosh Das <asutoshd@codeaurora.org>, cang@codeaurora.org,
-        linux-arm-msm <linux-arm-msm@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+In-Reply-To: <CAMdYzYoxsBAyBhp+S6LKE060qLLq=XioVVPUmOka0auOo8aXcg@mail.gmail.com>
+X-Originating-IP: [10.124.1.5]
+X-ClientProxiedBy: HQMAIL105.nvidia.com (172.20.187.12) To
+ HQMAIL107.nvidia.com (172.20.187.13)
+Content-Type: text/plain; charset="utf-8"
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nvidia.com; s=n1;
+        t=1583490720; bh=obtiUNt5NilhVBtsuredinw/EBtUAZg2XBPtzbtuZwQ=;
+        h=X-PGP-Universal:Subject:To:CC:References:From:Message-ID:Date:
+         User-Agent:MIME-Version:In-Reply-To:X-Originating-IP:
+         X-ClientProxiedBy:Content-Type:Content-Language:
+         Content-Transfer-Encoding;
+        b=GqAuuiKvD4okaApDoTU+swIgcAQdcx2enpyZxCq23MWHwMJ1+9lN5n0Mg9CdP2T6K
+         Xf63JymzKoyOE1gxmD0vOe3W0KKTY/x5qcCWjQpkDG9pyCQPjKpaPp3qfyQXWPUeeW
+         +MDn3efRFdzsq2CzEfjYxVwsFIAMKhCxySlgQwjCVhNpQY1dC9ismiBkNsAN4bMO4q
+         frB/33bTGoK9PZ6qQYwtCen/dBCvDLspyWPM+k3IeAKV+axHJnOA0lOY7DJFSpcCrj
+         lWCaX+rCbKyT7t+VUV84ZqusZ/Yp8FwRlE/BevbE9ulwy3fHb1LqznjEEr1TaQKc1p
+         9s/hlI7CVcmtA==
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 6 Mar 2020 at 04:38, <nguyenb@codeaurora.org> wrote:
->
-> On 2020-02-27 22:46, Ulf Hansson wrote:
-> > On Thu, 27 Feb 2020 at 23:06, Bao D. Nguyen <nguyenb@codeaurora.org>
-> > wrote:
-> >>
-> >> If the SD card is removed, the mmc_card pointer can be set to NULL
-> >> by the mmc_sd_remove() function. Check mmc_card pointer to avoid NULL
-> >> pointer access.
-> >>
-> >> Signed-off-by: Bao D. Nguyen <nguyenb@codeaurora.org>
-> >> Signed-off-by: Asutosh Das <asutoshd@codeaurora.org>
-> >> ---
-> >>  drivers/mmc/core/bus.c  | 5 +++++
-> >>  drivers/mmc/core/core.c | 3 +++
-> >>  2 files changed, 8 insertions(+)
-> >>
-> >> diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
-> >> index 74de3f2..4558f51 100644
-> >> --- a/drivers/mmc/core/bus.c
-> >> +++ b/drivers/mmc/core/bus.c
-> >> @@ -131,6 +131,11 @@ static void mmc_bus_shutdown(struct device *dev)
-> >>         struct mmc_host *host = card->host;
-> >>         int ret;
-> >
-> > This obviously doesn't solve anything as we have already dereferenced
-> > the card->host above. In other words we should hit a NULL pointer
-> > dereference bug then.
-> >
-> > More exactly, how do you trigger this problem?
-> I am porting this fix in the older kernel version 3.4. In that version
-> 3.4, the pointer check was needed.
-> Obviously, this NULL pointer check is not helping anything here as you
-> pointed out. I will remove this check and resubmit.
+Hi Peter,
 
-Don't get me wrong, we have had serious errors in the mmc core before,
-that we needed to fix. Perhaps, the series are addressing some issues
-like this, I don't know.
+On 05/03/2020 20:56, Peter Geis wrote:
+> Good Afternoon,
+> 
+> I have been fighting a bug with sdhci on the tegra-30 based ouya since 5.6-rc1.
+> I've traced it to the following commit:
+> 
+> mmc: core: Specify timeouts for BKOPS and CACHE_FLUSH for eMMC
+> 24ed3bd01d6a844fd5e8a75f48d0a3d10ed71bf9
+> 
+> [   51.401369] mmc0: Card stuck being busy! mmc_poll_for_busy
+> [   51.407288] mmc0: cache flush error -110
+> [   51.412347] blk_update_request: I/O error, dev mmcblk0, sector 0 op
+> 0x1:(WRITE) flags 0x800 phys_seg 0 prio class 0
+> 
+> It also caused issues with hitching with the bcm4330 sdio wifi chip.
+> 
+> Reverting this commit fixes the issue.
+> 
+> After reverting this commit, with the following commit still intact:
+> 
+> mmc: core: Default to generic_cmd6_time as timeout in __mmc_switch()
+> 
+> I am seeing a lot of the following messages:
+> [   22.626377] mmc0: unspecified timeout for CMD6 - use generic
+> [   22.687349] mmc0: unspecified timeout for CMD6 - use generic
+> [   23.362736] mmc0: unspecified timeout for CMD6 - use generic
+> [   23.487824] mmc0: unspecified timeout for CMD6 - use generic
+> [   23.547674] mmc0: unspecified timeout for CMD6 - use generic
+> [   23.745527] mmc0: unspecified timeout for CMD6 - use generic
+> [   23.817678] mmc0: unspecified timeout for CMD6 - use generic
+> [   24.045600] mmc0: unspecified timeout for CMD6 - use generic
+> [   24.155577] mmc0: unspecified timeout for CMD6 - use generic
+> [   24.223448] mmc0: unspecified timeout for CMD6 - use generic
+> [   24.286257] mmc0: unspecified timeout for CMD6 - use generic
 
-The point is, either you need to provide a detailed theoretical proof,
-or a description of how to reproduce the problem. If not, I don't see
-how I can pick any of your patches, sorry.
+Yes we are seeing this on other Tegra platforms. This is being triaged
+in the following thread ...
 
-[...]
+https://lkml.org/lkml/2020/2/13/781
 
-Kind regards
-Uffe
+Cheers
+Jon
+
+-- 
+nvpublic
