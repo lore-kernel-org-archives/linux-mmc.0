@@ -2,155 +2,183 @@ Return-Path: <SRS0=VpFb=4X=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-8.1 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 98ED9C10F00
-	for <linux-mmc@archiver.kernel.org>; Fri,  6 Mar 2020 10:08:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 834B3C10F00
+	for <linux-mmc@archiver.kernel.org>; Fri,  6 Mar 2020 10:14:27 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 6760C207FD
-	for <linux-mmc@archiver.kernel.org>; Fri,  6 Mar 2020 10:08:23 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 53E97207FD
+	for <linux-mmc@archiver.kernel.org>; Fri,  6 Mar 2020 10:14:27 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="nEcPiVzX"
+	dkim=fail reason="signature verification failed" (1024-bit key) header.d=mg.codeaurora.org header.i=@mg.codeaurora.org header.b="iEDUxzzh"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726397AbgCFKIW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 6 Mar 2020 05:08:22 -0500
-Received: from mail-ua1-f66.google.com ([209.85.222.66]:35238 "EHLO
-        mail-ua1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726382AbgCFKIV (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Mar 2020 05:08:21 -0500
-Received: by mail-ua1-f66.google.com with SMTP id c4so496841uaq.2
-        for <linux-mmc@vger.kernel.org>; Fri, 06 Mar 2020 02:08:19 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=uNKCod9HWXu3nxzrNq2A6yL231Mu94A886+59BwdSMs=;
-        b=nEcPiVzXVIU3Kib52ncsdTxiBqwhamhygdS+O38NTLUeFv61aJ1sn68iVJc6k7JB7r
-         o/j/pLXeg7SUehGbmsn/QpATLwr7LQLZHvZApBZRExxELPQt213sRW113dkv9Il0TbzN
-         ymGZ/uZahmlGI2HkF99JYMa5ZWivoDErDZL+qUPAeu9fb6lEsWWejI5H2DoH1SvahW8D
-         KVsWYpzheANfyigtJZ8q6TipmSY1e30WUruYvr3nRpgkGAKSYDPF4JeR3QLQ1UjITByX
-         QTyh6GXV7tFacA2/ugy49rkZl8Ute2lZfcgMiqmbpl1lmSPwNRJXlr3Jk+Zce1xc/4Fa
-         jzOQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=uNKCod9HWXu3nxzrNq2A6yL231Mu94A886+59BwdSMs=;
-        b=tQrvFNYuu8Az5aCjCKWWgnes90LbAaaH0/y9+aLZ7TrngPbVGymFrn2hpooNzRHO5X
-         BOMdkdzEBEW5o7IpS/fZPD5GNN3/hi+YXNSUwPnAX4xYm8nd/4J3KAYwX9dY5OqloXPV
-         Q9Oyx9+N1/lYnUmmZawX53PA1ywjq9zed90TSwDOdq4iLX5cTRv0FOdZJdvTH9UU9RfU
-         PTAmo2GCmQy2juaQibDliSzYr6xuT495O5LjleegaGHResMp5S76f2AA55D7sn/r7wl6
-         yEnCQo6xR47REZ69CE1aEwchdLrztvEAMDoL4I6s7WDbjqWZwGIfJ5eZqfii5sW8/7Oi
-         1W5A==
-X-Gm-Message-State: ANhLgQ1PIzJpfBnNvgAjEoL+20t5beivXCIxJxMcHmPclsWPpHZvJ2nj
-        d5wemPCmntCzAREAmeYm65EW5iVmWIGXq0gEpj5Ljg==
-X-Google-Smtp-Source: ADFU+vsPFcu0IamYO7zcUHclxL6+QOvOPAC3udRj76VGvSDRr2MgjVWcGiwDFu6MaHE/Uqw+4BybbwlP2HJccNuaWOc=
-X-Received: by 2002:ab0:7802:: with SMTP id x2mr1248889uaq.100.1583489298936;
- Fri, 06 Mar 2020 02:08:18 -0800 (PST)
+        id S1726674AbgCFKO0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 6 Mar 2020 05:14:26 -0500
+Received: from mail27.static.mailgun.info ([104.130.122.27]:43917 "EHLO
+        mail27.static.mailgun.info" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726359AbgCFKO0 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Mar 2020 05:14:26 -0500
+DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
+ s=smtp; t=1583489666; h=Content-Transfer-Encoding: Content-Type:
+ In-Reply-To: MIME-Version: Date: Message-ID: From: References: Cc: To:
+ Subject: Sender; bh=NtyrUOr8s94oXdyYaHt5f294dq+E37d+2TocPvyH+fA=; b=iEDUxzzh9/DS4EZ7KjHWj+69roTlQ/p3i4pZktMCYcFRJLOF8eRux9lXtcmOcB3y53duFkDH
+ y2fWNDUVVTkmOuAZJR+HUSJ5U3u2H6CNg0SbzFPeoA1/VcaNJ2gHK2A0qCW0wpfCVujw1vJb
+ zl4+G2Swj14X/7nF2dJEr6pjETQ=
+X-Mailgun-Sending-Ip: 104.130.122.27
+X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
+Received: from smtp.codeaurora.org (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171])
+ by mxa.mailgun.org with ESMTP id 5e62227d.7f5ac5ecd570-smtp-out-n02;
+ Fri, 06 Mar 2020 10:14:21 -0000 (UTC)
+Received: by smtp.codeaurora.org (Postfix, from userid 1001)
+        id 616F3C4478C; Fri,  6 Mar 2020 10:14:21 +0000 (UTC)
+Received: from [10.206.25.140] (blr-c-bdr-fw-01_GlobalNAT_AllZones-Outside.qualcomm.com [103.229.19.19])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        (Authenticated sender: vbadigan)
+        by smtp.codeaurora.org (Postfix) with ESMTPSA id 247A7C433D2;
+        Fri,  6 Mar 2020 10:14:16 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.3.2 smtp.codeaurora.org 247A7C433D2
+Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
+Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=none smtp.mailfrom=vbadigan@codeaurora.org
+Subject: Re: [PATCH V2] mmc: sdhci-msm: Disable CQE during SDHC reset
+To:     Adrian Hunter <adrian.hunter@intel.com>, ulf.hansson@linaro.org
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-arm-msm@vger.kernel.org, Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Faiz Abbas <faiz_abbas@ti.com>,
+        Sowjanya Komatineni <skomatineni@nvidia.com>,
+        Shawn Lin <shawn.lin@rock-chips.com>,
+        Ritesh Harjani <riteshh@codeaurora.org>,
+        Asutosh Das <asutoshd@codeaurora.org>
+References: <1582890639-32072-1-git-send-email-vbadigan@codeaurora.org>
+ <1583322863-21790-1-git-send-email-vbadigan@codeaurora.org>
+ <da449444-1878-e387-6ebf-4ddb282a9b71@intel.com>
+ <1430237a-9dc5-f046-1dfe-1d5c09c16ead@codeaurora.org>
+ <3a1783c2-e8bb-f5af-4d3e-f4a45b487f0e@intel.com>
+ <0e737f52-767f-05d4-829b-4f76c084062c@codeaurora.org>
+ <460b7cbe-71f5-4bea-673f-2075ee5c5d6a@intel.com>
+From:   Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+Message-ID: <cd306623-37a7-318e-8545-4b6a9c3765f4@codeaurora.org>
+Date:   Fri, 6 Mar 2020 15:44:14 +0530
+User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:68.0) Gecko/20100101
+ Thunderbird/68.5.0
 MIME-Version: 1.0
-References: <1582181100-29914-1-git-send-email-sbhanu@codeaurora.org>
- <CAPDyKFqSJ4h7UvQfQzWmSq9gg97A0MXvdcuXXaY7b-YUHs=V2g@mail.gmail.com> <158334039680.7173.16159724456027777605@swboyd.mtv.corp.google.com>
-In-Reply-To: <158334039680.7173.16159724456027777605@swboyd.mtv.corp.google.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 6 Mar 2020 11:07:41 +0100
-Message-ID: <CAPDyKFqecH=AsvtN+JMxdk6pY2dntWUrhUWF6LEq_DLCcPe6pw@mail.gmail.com>
-Subject: Re: [PATCH V4] mmc: sdhci-msm: Update system suspend/resume callbacks
- of sdhci-msm platform driver
-To:     Stephen Boyd <swboyd@chromium.org>,
-        Shaik Sajida Bhanu <sbhanu@codeaurora.org>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        Rob Herring <robh+dt@kernel.org>,
-        Matthias Kaehlcke <mka@chromium.org>,
-        Asutosh Das <asutoshd@codeaurora.org>,
-        Sahitya Tummala <stummala@codeaurora.org>,
-        Sayali Lokhande <sayalil@codeaurora.org>, cang@codeaurora.org,
-        Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
-        Ram Prakash Gupta <rampraka@codeaurora.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
-        DTML <devicetree@vger.kernel.org>,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>
-Content-Type: text/plain; charset="UTF-8"
+In-Reply-To: <460b7cbe-71f5-4bea-673f-2075ee5c5d6a@intel.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 8bit
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 4 Mar 2020 at 17:46, Stephen Boyd <swboyd@chromium.org> wrote:
->
-> Quoting Ulf Hansson (2020-03-04 07:34:29)
-> > On Thu, 20 Feb 2020 at 07:45, Shaik Sajida Bhanu <sbhanu@codeaurora.org> wrote:
-> > >
-> > > The existing suspend/resume callbacks of sdhci-msm driver are just
-> > > gating/un-gating the clocks. During suspend cycle more can be done
-> > > like disabling controller, disabling card detection, enabling wake-up events.
-> > >
-> > > So updating the system pm callbacks for performing these extra
-> > > actions besides controlling the clocks.
-> > >
-> > > Signed-off-by: Shaik Sajida Bhanu <sbhanu@codeaurora.org>
-> > > Reviewed-by: Stephen Boyd <swboyd@chromium.org>
-> > > ---
-> > > Changes since V3:
-> > >     Invoking sdhci & cqhci resume if sdhci_host_suspend fails.
-> > >     Removed condition check before invoking cqhci_resume since its a dummy function.
-> > >
-> > > Changes since V2:
-> > >     Removed disabling/enabling pwr-irq from system pm ops.
-> > >
-> > > Changes since V1:
-> > >     Invoking pm_runtime_force_suspend/resume instead of
-> > >     sdhci_msm_runtime_suepend/resume.
-> > > diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> > > index 3955fa5d..3559b50 100644
-> > > --- a/drivers/mmc/host/sdhci-msm.c
-> > > +++ b/drivers/mmc/host/sdhci-msm.c
-> > > @@ -2159,9 +2159,52 @@ static __maybe_unused int sdhci_msm_runtime_resume(struct device *dev)
-> [...]
-> > > +
-> > > +       ret = sdhci_suspend_host(host);
-> > > +       if (ret)
-> > > +               goto resume_cqhci;
-> >
-> > sdhci_suspend_host() can't be called on a device that has been runtime
-> > suspended, as that would lead to accessing device registers when
-> > clocks/PM domains are gated.
-> >
-> > Depending on how the corresponding cqhci device is managed from a
-> > runtime PM point of view, it could also be problematic to call
-> > cqhci_suspend().
->
-> There seems to be another patch floating around here[1] that is an
-> attempt at a fix to this patch. They should probably be combined so that
-> it's not confusing what's going on.
 
-Yeah, it would be easier if these are discussed together.
-
+On 3/5/2020 2:29 PM, Adrian Hunter wrote:
+> On 4/03/20 6:50 pm, Veerabhadrarao Badiganti wrote:
+>> On 3/4/2020 7:40 PM, Adrian Hunter wrote:
+>>> On 4/03/20 3:10 pm, Veerabhadrarao Badiganti wrote:
+>>>> Hi Adrian
+>>>>
+>>>> On 3/4/2020 5:58 PM, Adrian Hunter wrote:
+>>>>> On 4/03/20 1:54 pm, Veerabhadrarao Badiganti wrote:
+>>>>>> When SDHC gets reset (E.g. in suspend path), CQE also gets reset
+>>>>>> and goes to disable state. But s/w state still points it as CQE
+>>>>>> is in enabled state. Since s/w and h/w states goes out of sync,
+>>>>>> it results in s/w request timeout for subsequent CQE requests.
+>>>>>>
+>>>>>> To synchronize CQE s/w and h/w state during SDHC reset,
+>>>>>> explicitly disable CQE after reset.
+>>>>> Shouldn't you be calling cqhci_suspend() / cqhci_resume() in the suspend
+>>>>> and
+>>>>> resume paths?
+>>>> This issue is seen during mmc runtime suspend.  I can add it
+>>>> sdhci_msm_runtime_suspend
+>>>>
+>>>> but sdhci_msm runtime delay is aggressive, its 50ms. It may get invoked very
+>>>> frequently.
+>>>>
+>>>> So Im of the opinion that disabling CQE very often from platform runtime
+>>>> suspend is overkill.
+>>> It doesn't look like sdhci-msm calls any sdhci.c pm ops, so how does SDHC
+>>> get reset?
+>> With MMC_CAP_AGGRESSIVE_PM flag enabled, it getting called from
+>> mmc_runtime_suspend()
+>>
+>> Below is the call stack()
+>>
+>>     sdhci_reset
+>>    sdhci_do_reset
+>>    sdhci_init
+>>    sdhci_set_ios
+>>    mmc_set_initial_state
+>>    mmc_power_off
+>>   _mmc_suspend
+>>    mmc_runtime_suspend
+>>
+> OK, cqhci_suspend does the right thing, but it is not an
+> appropriate function for this.  I suggest introducing
+> cqhci_deactivate() as below.
 >
-> >
-> > > +
-> > > +       ret = pm_runtime_force_suspend(dev);
-> >
-> > It looks to me that perhaps you could make use of solely
-> > pm_runtime_force_suspend(), then just skip calling
-> > sdhci_suspend|resume_host() altogether. Do you think that could work?
+> From: Adrian Hunter <adrian.hunter@intel.com>
+> Date: Thu, 5 Mar 2020 10:42:09 +0200
+> Subject: [PATCH] mmc: cqhci: Add cqhci_deactivate()
 >
-> Does that do all the things the commit text mentions is desired for
-> system suspend?
-
-No. :-)
-
-But why is system wakeup needed for an eMMC card?
-
+> Host controllers can reset CQHCI either directly or as a consequence of
+> host controller reset. Add cqhci_deactivate() which puts the CQHCI
+> driver into a state that is consistent with that.
 >
-> > > like disabling controller, disabling card detection, enabling wake-up events.
+> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+> ---
+>   drivers/mmc/host/cqhci.c | 6 +++---
+>   drivers/mmc/host/cqhci.h | 5 ++++-
+>   2 files changed, 7 insertions(+), 4 deletions(-)
 >
-> [1] https://lore.kernel.org/linux-arm-msm/1583322863-21790-1-git-send-email-vbadigan@codeaurora.org/
+> diff --git a/drivers/mmc/host/cqhci.c b/drivers/mmc/host/cqhci.c
+> index e2ea2c4b6b94..d8d024a1682b 100644
+> --- a/drivers/mmc/host/cqhci.c
+> +++ b/drivers/mmc/host/cqhci.c
+> @@ -298,16 +298,16 @@ static void __cqhci_disable(struct cqhci_host *cq_host)
+>   	cq_host->activated = false;
+>   }
+>   
+> -int cqhci_suspend(struct mmc_host *mmc)
+> +int cqhci_deactivate(struct mmc_host *mmc)
+>   {
+>   	struct cqhci_host *cq_host = mmc->cqe_private;
+>   
+> -	if (cq_host->enabled)
+> +	if (cq_host->enabled && cq_host->activated)
+>   		__cqhci_disable(cq_host);
+>   
+>   	return 0;
+>   }
+> -EXPORT_SYMBOL(cqhci_suspend);
+> +EXPORT_SYMBOL(cqhci_deactivate);
+>   
+>   int cqhci_resume(struct mmc_host *mmc)
+>   {
+> diff --git a/drivers/mmc/host/cqhci.h b/drivers/mmc/host/cqhci.h
+> index def76e9b5cac..8648846a0213 100644
+> --- a/drivers/mmc/host/cqhci.h
+> +++ b/drivers/mmc/host/cqhci.h
+> @@ -230,7 +230,10 @@ irqreturn_t cqhci_irq(struct mmc_host *mmc, u32 intmask, int cmd_error,
+>   		      int data_error);
+>   int cqhci_init(struct cqhci_host *cq_host, struct mmc_host *mmc, bool dma64);
+>   struct cqhci_host *cqhci_pltfm_init(struct platform_device *pdev);
+> -int cqhci_suspend(struct mmc_host *mmc);
+> +static inline int cqhci_suspend(struct mmc_host *mmc)
+> +{
+> +	return cqhci_deactivate(mmc);
+> +}
+>   int cqhci_resume(struct mmc_host *mmc);
+>   
+>   #endif
 
-Kind regards
-Uffe
+Thanks Adrian for the suggestion. Will post this change and my updated fix.
+
+Thanks
+
+Veera
