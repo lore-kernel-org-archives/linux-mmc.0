@@ -2,115 +2,88 @@ Return-Path: <SRS0=VpFb=4X=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F21C8C3F2CD
-	for <linux-mmc@archiver.kernel.org>; Fri,  6 Mar 2020 04:59:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4B671C3F2D6
+	for <linux-mmc@archiver.kernel.org>; Fri,  6 Mar 2020 09:32:08 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id C6D9C20848
-	for <linux-mmc@archiver.kernel.org>; Fri,  6 Mar 2020 04:59:40 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (1024-bit key) header.d=mg.codeaurora.org header.i=@mg.codeaurora.org header.b="Od83nyLp"
+	by mail.kernel.org (Postfix) with ESMTP id 1EB672070A
+	for <linux-mmc@archiver.kernel.org>; Fri,  6 Mar 2020 09:32:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726382AbgCFE7k (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 5 Mar 2020 23:59:40 -0500
-Received: from mail27.static.mailgun.info ([104.130.122.27]:42897 "EHLO
-        mail27.static.mailgun.info" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726674AbgCFE7k (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Mar 2020 23:59:40 -0500
-DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
- s=smtp; t=1583470779; h=References: In-Reply-To: References:
- In-Reply-To: Message-Id: Date: Subject: Cc: To: From: Sender;
- bh=KA5SegCo5AW0cExJCz9BWH9qh1K5CDu6sI3vMXYPwJc=; b=Od83nyLpEy4vA0mjN01ouT7ktUVdANOgzOIvnGz3cFuvqnJXq0pTFFg3WjFPWY3w36zpDSXu
- kC6YMr9j2OWL3M1ijQGFqXpMF2PINOhreSZ1V0i2SmKZN7W0khPVbPUyr1cUbRRGuzVJ7rv9
- /zcrDP9j1BNTzgIv91kKNjKLqcA=
-X-Mailgun-Sending-Ip: 104.130.122.27
-X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
-Received: from smtp.codeaurora.org (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171])
- by mxa.mailgun.org with ESMTP id 5e61d8aa.7f0c1fbbc730-smtp-out-n05;
- Fri, 06 Mar 2020 04:59:22 -0000 (UTC)
-Received: by smtp.codeaurora.org (Postfix, from userid 1001)
-        id AB05DC4479F; Fri,  6 Mar 2020 04:59:21 +0000 (UTC)
-Received: from pacamara-linux.qualcomm.com (i-global254.qualcomm.com [199.106.103.254])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-SHA256 (128/128 bits))
-        (No client certificate requested)
-        (Authenticated sender: nguyenb)
-        by smtp.codeaurora.org (Postfix) with ESMTPSA id 7CFA7C4479C;
-        Fri,  6 Mar 2020 04:59:20 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.3.2 smtp.codeaurora.org 7CFA7C4479C
-Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
-Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=none smtp.mailfrom=nguyenb@codeaurora.org
-From:   "Bao D. Nguyen" <nguyenb@codeaurora.org>
-To:     ulf.hansson@linaro.org, robh+dt@kernel.org,
-        linux-scsi@vger.kernel.org
-Cc:     linux-mmc@vger.kernel.org, asutoshd@codeaurora.org,
-        cang@codeaurora.org, Sahitya Tummala <stummala@codeaurora.org>,
-        linux-arm-msm@vger.kernel.org,
-        "Bao D. Nguyen" <nguyenb@codeaurora.org>
-Subject: [PATCH v2 4/4] mmc: core: update host->card after getting RCA for SD card
-Date:   Thu,  5 Mar 2020 20:58:18 -0800
-Message-Id: <ca874be0c6eea046d82dc85d66d4665d266cf8c9.1583470026.git.nguyenb@codeaurora.org>
-X-Mailer: git-send-email 1.9.1
-In-Reply-To: <cover.1583470026.git.nguyenb@codeaurora.org>
-References: <cover.1583470026.git.nguyenb@codeaurora.org>
-In-Reply-To: <cover.1583470026.git.nguyenb@codeaurora.org>
-References: <cover.1583470026.git.nguyenb@codeaurora.org>
+        id S1726231AbgCFJcH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 6 Mar 2020 04:32:07 -0500
+Received: from sauhun.de ([88.99.104.3]:56008 "EHLO pokefinder.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726190AbgCFJcH (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 6 Mar 2020 04:32:07 -0500
+Received: from localhost (p54B33158.dip0.t-ipconnect.de [84.179.49.88])
+        by pokefinder.org (Postfix) with ESMTPSA id 456F22C1F5D;
+        Fri,  6 Mar 2020 10:32:06 +0100 (CET)
+From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
+To:     linux-mmc@vger.kernel.org
+Cc:     linux-renesas-soc@vger.kernel.org,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        =?UTF-8?q?Niklas=20S=C3=B6derlund?= <niklas.soderlund@ragnatech.se>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>
+Subject: [PATCH RFT 2/3] mmc: renesas_sdhi: clarify handling of selecting TAPs
+Date:   Fri,  6 Mar 2020 10:31:58 +0100
+Message-Id: <20200306093159.6155-3-wsa+renesas@sang-engineering.com>
+X-Mailer: git-send-email 2.20.1
+In-Reply-To: <20200306093159.6155-1-wsa+renesas@sang-engineering.com>
+References: <20200306093159.6155-1-wsa+renesas@sang-engineering.com>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Sahitya Tummala <stummala@codeaurora.org>
+The comment and the define about how TAPs are selected were confusing to
+me because the good TAP was only valid if it was bigger than a *_MAX_*
+value. Rename the define and adapt the comment to what really happens.
 
-Make the host->card available before tuning is invoked for SD card.
-In the sdhci_msm_execute_tuning(), we will send CMD13 only if
-host->card is present because it needs the card->rca as its
-argument to be sent. For emmc, host->card is already updated
-immediately after the mmc_alloc_card(). In the similar way,
-this change is for SD card. Without this change, tuning functionality
-will not be able to send CMD13 to make sure the card is ready
-for next data command. If the last tuning command failed
-and we did not send CMD13 to ensure card is in transfer state,
-the next read/write command will fail.
-
-Signed-off-by: Sahitya Tummala <stummala@codeaurora.org>
-Signed-off-by: Bao D. Nguyen <nguyenb@codeaurora.org>
-Signed-off-by: Asutosh Das <asutoshd@codeaurora.org>
+Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 ---
- drivers/mmc/core/sd.c | 6 ++++--
- 1 file changed, 4 insertions(+), 2 deletions(-)
+ drivers/mmc/host/renesas_sdhi_core.c | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
 
-diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index 76c7add..f0872e3 100644
---- a/drivers/mmc/core/sd.c
-+++ b/drivers/mmc/core/sd.c
-@@ -989,6 +989,7 @@ static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
- 		err = mmc_send_relative_addr(host, &card->rca);
- 		if (err)
- 			goto free_card;
-+		host->card = card;
- 	}
- 
- 	if (!oldcard) {
-@@ -1100,12 +1101,13 @@ static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
- 		goto free_card;
- 	}
- done:
--	host->card = card;
+diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
+index f3ef26e29e8f..beac70a0defb 100644
+--- a/drivers/mmc/host/renesas_sdhi_core.c
++++ b/drivers/mmc/host/renesas_sdhi_core.c
+@@ -422,7 +422,7 @@ static int renesas_sdhi_prepare_hs400_tuning(struct mmc_host *mmc, struct mmc_io
  	return 0;
- 
- free_card:
--	if (!oldcard)
-+	if (!oldcard) {
-+		host->card = NULL;
- 		mmc_remove_card(card);
-+	}
- 
- 	return err;
  }
+ 
+-#define SH_MOBILE_SDHI_MAX_TAP 3
++#define SH_MOBILE_SDHI_MIN_TAP_ROW 3
+ 
+ static int renesas_sdhi_select_tuning(struct tmio_mmc_host *host)
+ {
+@@ -446,9 +446,9 @@ static int renesas_sdhi_select_tuning(struct tmio_mmc_host *host)
+ 	}
+ 
+ 	/*
+-	 * Find the longest consecutive run of successful probes.  If that
+-	 * is more than SH_MOBILE_SDHI_MAX_TAP probes long then use the
+-	 * center index as the tap.
++	 * Find the longest consecutive run of successful probes. If that
++	 * is at least SH_MOBILE_SDHI_MIN_TAP_ROW probes long then use the
++	 * center index as the tap, otherwise bail out.
+ 	 */
+ 	bitmap_for_each_set_region(priv->taps, rs, re, 0, taps_size) {
+ 		if (re - 1 - rs > tap_cnt) {
+@@ -458,7 +458,7 @@ static int renesas_sdhi_select_tuning(struct tmio_mmc_host *host)
+ 		}
+ 	}
+ 
+-	if (tap_cnt >= SH_MOBILE_SDHI_MAX_TAP)
++	if (tap_cnt >= SH_MOBILE_SDHI_MIN_TAP_ROW)
+ 		priv->tap_set = (tap_start + tap_end) / 2 % priv->tap_num;
+ 	else
+ 		return -EIO;
 -- 
-The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
-a Linux Foundation Collaborative Project
+2.20.1
+
