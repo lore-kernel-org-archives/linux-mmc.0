@@ -6,33 +6,35 @@ X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
 	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B87CCC10F25
-	for <linux-mmc@archiver.kernel.org>; Fri,  6 Mar 2020 17:44:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 962E1C10F00
+	for <linux-mmc@archiver.kernel.org>; Fri,  6 Mar 2020 17:44:50 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 9B43120848
-	for <linux-mmc@archiver.kernel.org>; Fri,  6 Mar 2020 17:44:49 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 703B620848
+	for <linux-mmc@archiver.kernel.org>; Fri,  6 Mar 2020 17:44:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727079AbgCFRon (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        id S1727052AbgCFRon (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
         Fri, 6 Mar 2020 12:44:43 -0500
-Received: from mx2.suse.de ([195.135.220.15]:60562 "EHLO mx2.suse.de"
+Received: from mx2.suse.de ([195.135.220.15]:60580 "EHLO mx2.suse.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726846AbgCFRoc (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        id S1726956AbgCFRoc (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
         Fri, 6 Mar 2020 12:44:32 -0500
 X-Virus-Scanned: by amavisd-new at test-mx.suse.de
 Received: from relay2.suse.de (unknown [195.135.220.254])
-        by mx2.suse.de (Postfix) with ESMTP id 9759FAE95;
-        Fri,  6 Mar 2020 17:44:30 +0000 (UTC)
+        by mx2.suse.de (Postfix) with ESMTP id 9963FAC66;
+        Fri,  6 Mar 2020 17:44:31 +0000 (UTC)
 From:   Nicolas Saenz Julienne <nsaenzjulienne@suse.de>
-To:     adrian.hunter@intel.com, linux-kernel@vger.kernel.org
+To:     adrian.hunter@intel.com, linux-kernel@vger.kernel.org,
+        Ray Jui <rjui@broadcom.com>,
+        Scott Branden <sbranden@broadcom.com>,
+        bcm-kernel-feedback-list@broadcom.com
 Cc:     phil@raspberrypi.com, linux-mmc@vger.kernel.org,
         linux-arm-kernel@lists.infradead.org, f.fainelli@gmail.com,
-        stefan.wahren@i2se.com, bcm-kernel-feedback-list@broadcom.com,
-        linux-rpi-kernel@lists.infradead.org,
+        stefan.wahren@i2se.com, linux-rpi-kernel@lists.infradead.org,
         Nicolas Saenz Julienne <nsaenzjulienne@suse.de>,
         Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH v2 08/11] mmc: sdhci: Unexport sdhci_set_power_noreg()
-Date:   Fri,  6 Mar 2020 18:44:10 +0100
-Message-Id: <20200306174413.20634-9-nsaenzjulienne@suse.de>
+Subject: [PATCH v2 09/11] mmc: sdhci: iproc: Add custom set_power() callback for bcm2711
+Date:   Fri,  6 Mar 2020 18:44:11 +0100
+Message-Id: <20200306174413.20634-10-nsaenzjulienne@suse.de>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20200306174413.20634-1-nsaenzjulienne@suse.de>
 References: <20200306174413.20634-1-nsaenzjulienne@suse.de>
@@ -43,51 +45,49 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-There are no users left and, ideally, this isn't a function that should
-be called outside of core sdhci code.
+The controller needs a valid bus voltage in its power register
+regardless of whether an external regulator is taking care of the power
+supply.
+
+The sdhci core already provides a helper function for this,
+sdhci_set_power_and_bus_voltage(), so create a bcm2711 specific 'struct
+sdhci_ops' which makes use of it.
 
 Signed-off-by: Nicolas Saenz Julienne <nsaenzjulienne@suse.de>
 ---
- drivers/mmc/host/sdhci.c | 5 ++---
- drivers/mmc/host/sdhci.h | 2 --
- 2 files changed, 2 insertions(+), 5 deletions(-)
+ drivers/mmc/host/sdhci-iproc.c | 17 ++++++++++++++++-
+ 1 file changed, 16 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 6ed11f9554e8..37f0107fc276 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1926,8 +1926,8 @@ static void sdhci_set_power_reg(struct sdhci_host *host, unsigned char mode,
- 		sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
- }
+diff --git a/drivers/mmc/host/sdhci-iproc.c b/drivers/mmc/host/sdhci-iproc.c
+index f4f5f0a70cda..225603148d7d 100644
+--- a/drivers/mmc/host/sdhci-iproc.c
++++ b/drivers/mmc/host/sdhci-iproc.c
+@@ -261,9 +261,24 @@ static const struct sdhci_iproc_data bcm2835_data = {
+ 	.mmc_caps = 0x00000000,
+ };
  
--void sdhci_set_power_noreg(struct sdhci_host *host, unsigned char mode,
--			   unsigned short vdd)
-+static void sdhci_set_power_noreg(struct sdhci_host *host, unsigned char mode,
-+				  unsigned short vdd)
- {
- 	u8 pwr = 0;
++static const struct sdhci_ops sdhci_iproc_bcm2711_ops = {
++	.read_l = sdhci_iproc_readl,
++	.read_w = sdhci_iproc_readw,
++	.read_b = sdhci_iproc_readb,
++	.write_l = sdhci_iproc_writel,
++	.write_w = sdhci_iproc_writew,
++	.write_b = sdhci_iproc_writeb,
++	.set_clock = sdhci_set_clock,
++	.set_power = sdhci_set_power_and_bus_voltage,
++	.get_max_clock = sdhci_iproc_get_max_clock,
++	.set_bus_width = sdhci_set_bus_width,
++	.reset = sdhci_reset,
++	.set_uhs_signaling = sdhci_set_uhs_signaling,
++};
++
+ static const struct sdhci_pltfm_data sdhci_bcm2711_pltfm_data = {
+ 	.quirks = SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12,
+-	.ops = &sdhci_iproc_32only_ops,
++	.ops = &sdhci_iproc_bcm2711_ops,
+ };
  
-@@ -1998,7 +1998,6 @@ void sdhci_set_power_noreg(struct sdhci_host *host, unsigned char mode,
- 			mdelay(10);
- 	}
- }
--EXPORT_SYMBOL_GPL(sdhci_set_power_noreg);
- 
- void sdhci_set_power(struct sdhci_host *host, unsigned char mode,
- 		     unsigned short vdd)
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 1be7c18264cd..9bb84b0f87d5 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -775,8 +775,6 @@ void sdhci_set_power(struct sdhci_host *host, unsigned char mode,
- void sdhci_set_power_and_bus_voltage(struct sdhci_host *host,
- 				     unsigned char mode,
- 				     unsigned short vdd);
--void sdhci_set_power_noreg(struct sdhci_host *host, unsigned char mode,
--			   unsigned short vdd);
- void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq);
- void sdhci_set_bus_width(struct sdhci_host *host, int width);
- void sdhci_reset(struct sdhci_host *host, u8 mask);
+ static const struct sdhci_iproc_data bcm2711_data = {
 -- 
 2.25.1
 
