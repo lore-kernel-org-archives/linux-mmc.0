@@ -2,128 +2,171 @@ Return-Path: <SRS0=VpFb=4X=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 40510C3F2D6
-	for <linux-mmc@archiver.kernel.org>; Fri,  6 Mar 2020 12:41:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 88351C10F29
+	for <linux-mmc@archiver.kernel.org>; Fri,  6 Mar 2020 13:38:05 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 232992166E
-	for <linux-mmc@archiver.kernel.org>; Fri,  6 Mar 2020 12:41:20 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5C1A620848
+	for <linux-mmc@archiver.kernel.org>; Fri,  6 Mar 2020 13:38:05 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="o41Jqr5J"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726565AbgCFMlT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 6 Mar 2020 07:41:19 -0500
-Received: from mx2.suse.de ([195.135.220.15]:49620 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726490AbgCFMlT (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 6 Mar 2020 07:41:19 -0500
-X-Virus-Scanned: by amavisd-new at test-mx.suse.de
-Received: from relay2.suse.de (unknown [195.135.220.254])
-        by mx2.suse.de (Postfix) with ESMTP id CB939AF4E;
-        Fri,  6 Mar 2020 12:41:16 +0000 (UTC)
-Message-ID: <444a97c46126bb86ca37da9bf26a840c38176bbe.camel@suse.de>
-Subject: Re: [PATCH 01/10] mmc: sdhci: Add quirk SDHCI_QUIRK2_SET_BUS_VOLTAGE
-From:   Nicolas Saenz Julienne <nsaenzjulienne@suse.de>
-To:     Adrian Hunter <adrian.hunter@intel.com>,
-        devicetree@vger.kernel.org, bcm-kernel-feedback-list@broadcom.com,
-        linux-rpi-kernel@lists.infradead.org,
-        linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
-Cc:     ulf.hansson@linaro.org, f.fainelli@gmail.com, phil@raspberrypi.org,
-        linux-kernel@vger.kernel.org
-Date:   Fri, 06 Mar 2020 13:40:54 +0100
-In-Reply-To: <55ef25ae-5c73-7778-dfda-976809cf9fe6@intel.com>
-References: <20200306103857.23962-1-nsaenzjulienne@suse.de>
-         <20200306103857.23962-2-nsaenzjulienne@suse.de>
-         <55ef25ae-5c73-7778-dfda-976809cf9fe6@intel.com>
-Content-Type: multipart/signed; micalg="pgp-sha256";
-        protocol="application/pgp-signature"; boundary="=-1lAvgayd9GrTsqnjjrF7"
-User-Agent: Evolution 3.34.4 
+        id S1726382AbgCFNiE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 6 Mar 2020 08:38:04 -0500
+Received: from mail-vk1-f196.google.com ([209.85.221.196]:35255 "EHLO
+        mail-vk1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726650AbgCFNiD (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Mar 2020 08:38:03 -0500
+Received: by mail-vk1-f196.google.com with SMTP id r5so603803vkf.2
+        for <linux-mmc@vger.kernel.org>; Fri, 06 Mar 2020 05:38:01 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc:content-transfer-encoding;
+        bh=pRT33IXafqSAr33qlx5s+Y+vRzyqKbOBrTN3ps1thPQ=;
+        b=o41Jqr5JyVJfTo5kWfFMhZB6OVZvxSSgEV43vr8hiKBBdUTzzbSHcILHK7E46FqCV1
+         zGC+1sXbOK83HkqScxPrT6ygSj3chMcPk56a4HEO1Hp+bQXUDtH7V2yqvRnGeZW5pe9P
+         jZW98ry2S97rX+M3h+lwfREUocO47zlFRvfuZAsA4yxvw+5elom8/uXei4G2XdQr9NTQ
+         KXEg/Hceo7Z1r5ffwG0Aj+jD3m3pPpd818wWRijHKlVbTZn970ZtZdrv5e9UWWjnH9I5
+         EMuEM90i5rNHhgH7P/cUgCRy/H0vpyq37zemCZXiDEbx1/fl29EQtXHEes0aFeL5V+MZ
+         OW7Q==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=pRT33IXafqSAr33qlx5s+Y+vRzyqKbOBrTN3ps1thPQ=;
+        b=AAsI2YGsUPS/9PfDZ/boqaHvs0s6uanQQGYXZpXBTtizo6EFplOAkpcec/AX03zcnw
+         /90EOYEGpnmFt2N7yFvLeRJUYps7Xz/GMfvVsAKSJR3PG56q0QOmEIh/76jZBXJ6AonF
+         n37imBy7i7Qb/31trP2Ub5haD8X4wsKveWZ7dbnZtZEnSNsosrYz6800VNVBPrftrL1i
+         Uzyi9udOWhIh0R0o5fVRMpOw74dfPfeAAyobtG/mIh6D2ABjnkrNcpMAC0TKTdSMYX3F
+         DRmQGW/JI1N9HX33rFs51Kk789RSWPQM6PLBuOJFvqpEg+x8YYtYV1K7FzjHAd4VKuBL
+         3qlA==
+X-Gm-Message-State: ANhLgQ0OF2dctIIkbueKie+xfUitt/hSEryJ2OnYDV1UyIVgmPqKg00b
+        F4siWB8i3V2indQdiuZPfLzH/3BOu72I4MGdBBBrLA==
+X-Google-Smtp-Source: ADFU+vtBfU7t/GedoLeNXV1o80D5EdpGUw8N8UHHXFMxpqbi5jvG1O+FqFD5DalVaczgtf9BTkYBUVQZYJtuWD5NAnw=
+X-Received: by 2002:a1f:78c5:: with SMTP id t188mr1669349vkc.43.1583501881058;
+ Fri, 06 Mar 2020 05:38:01 -0800 (PST)
 MIME-Version: 1.0
+References: <20200224231841.26550-1-digetx@gmail.com> <20200224231841.26550-4-digetx@gmail.com>
+ <44c22925-a14e-96d0-1f93-1979c0c60525@wwwdotorg.org> <CAPDyKFoXnoukjH_2cM=f0DGHBHS6kVUQSYOa_5ffQppC7VOn2A@mail.gmail.com>
+ <824a4d5f-8280-8860-3e80-68188a13aa3d@gmail.com>
+In-Reply-To: <824a4d5f-8280-8860-3e80-68188a13aa3d@gmail.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Fri, 6 Mar 2020 14:37:24 +0100
+Message-ID: <CAPDyKFric6pZbJ5-2qkwAFoeJ0c0kcha99zHJ12AUrWO6FQmgg@mail.gmail.com>
+Subject: Re: [PATCH v1 3/3] partitions: Introduce NVIDIA Tegra Partition Table
+To:     Dmitry Osipenko <digetx@gmail.com>,
+        Stephen Warren <swarren@wwwdotorg.org>,
+        Jens Axboe <axboe@kernel.dk>
+Cc:     Thierry Reding <thierry.reding@gmail.com>,
+        Jonathan Hunter <jonathanh@nvidia.com>,
+        =?UTF-8?B?TWljaGHFgiBNaXJvc8WCYXc=?= <mirq-linux@rere.qmqm.pl>,
+        David Heidelberg <david@ixit.cz>,
+        Peter Geis <pgwipeout@gmail.com>,
+        Nicolas Chauvet <kwizart@gmail.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Billy Laws <blaws05@gmail.com>,
+        linux-tegra <linux-tegra@vger.kernel.org>,
+        linux-block <linux-block@vger.kernel.org>,
+        Andrey Danin <danindrey@mail.ru>,
+        Gilles Grandou <gilles@grandou.net>,
+        Ryan Grachek <ryan@edited.us>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+On Wed, 4 Mar 2020 at 18:09, Dmitry Osipenko <digetx@gmail.com> wrote:
+>
+> 04.03.2020 19:36, Ulf Hansson =D0=BF=D0=B8=D1=88=D0=B5=D1=82:
+> > On Tue, 25 Feb 2020 at 01:20, Stephen Warren <swarren@wwwdotorg.org> wr=
+ote:
+> >>
+> >> On 2/24/20 4:18 PM, Dmitry Osipenko wrote:
+> >>> All NVIDIA Tegra devices use a special partition table format for the
+> >>> internal storage partitioning. Most of Tegra devices have GPT partiti=
+on
+> >>> in addition to TegraPT, but some older Android consumer-grade devices=
+ do
+> >>> not or GPT is placed in a wrong sector, and thus, the TegraPT is need=
+ed
+> >>> in order to support these devices properly in the upstream kernel. Th=
+is
+> >>> patch adds support for NVIDIA Tegra Partition Table format that is us=
+ed
+> >>> at least by all NVIDIA Tegra20 and Tegra30 devices.
+> >>
+> >>> diff --git a/arch/arm/mach-tegra/tegra.c b/arch/arm/mach-tegra/tegra.=
+c
+> >>
+> >>> +static void __init tegra_boot_config_table_init(void)
+> >>> +{
+> >>> +     void __iomem *bct_base;
+> >>> +     u16 pt_addr, pt_size;
+> >>> +
+> >>> +     bct_base =3D IO_ADDRESS(TEGRA_IRAM_BASE) + TEGRA_IRAM_BCT_OFFSE=
+T;
+> >>
+> >> This shouldn't be hard-coded. IIRC, the boot ROM writes a BIT (Boot
+> >> Information Table) to a fixed location in IRAM, and there's some value
+> >> in the BIT that points to where the BCT is in IRAM. In practice, it
+> >> might work out that the BCT is always at the same place in IRAM, but
+> >> this certainly isn't guaranteed. I think there's code in U-Boot which
+> >> extracts the BCT location from the BIT? Yes, see
+> >> arch/arm/mach-tegra/ap.c:get_odmdata().
+> >
+> > So, have you considered using the command line partition option,
+> > rather than adding yet another partition scheme to the kernel?
+> >
+> > In principle, you would let the boot loader scan for the partitions,
+> > likely from machine specific code in U-boot. Then you append these to
+> > the kernel command line and let block/partitions/cmdline.c scan for
+> > it.
+>
+> The bootloader is usually locked-down on a consumer Tegra machines (it's
+> signed / encrypted).
 
---=-1lAvgayd9GrTsqnjjrF7
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Right, you are you talking about this from a developer point of view,
+not from an end product user?
 
-On Fri, 2020-03-06 at 14:34 +0200, Adrian Hunter wrote:
-> On 6/03/20 12:38 pm, Nicolas Saenz Julienne wrote:
-> > Adds quirk for controllers whose bus power select register has to be se=
-t
-> > even when powering SD cards from a regulator.
-> >=20
-> > Signed-off-by: Nicolas Saenz Julienne <nsaenzjulienne@suse.de>
-> > ---
-> >  drivers/mmc/host/sdhci.c | 5 +++++
-> >  drivers/mmc/host/sdhci.h | 2 ++
-> >  2 files changed, 7 insertions(+)
-> >=20
-> > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> > index c59566363a42..c7fd87447457 100644
-> > --- a/drivers/mmc/host/sdhci.c
-> > +++ b/drivers/mmc/host/sdhci.c
-> > @@ -1920,6 +1920,11 @@ static void sdhci_set_power_reg(struct sdhci_hos=
-t
-> > *host, unsigned char mode,
-> > =20
-> >  	mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, vdd);
-> > =20
-> > +	if (host->quirks2 & SDHCI_QUIRK2_SET_BUS_VOLTAGE) {
->=20
-> We don't really want to replace callbacks by quirks.
->=20
-> Replace sdhci_milbeaut_set_power() etc by a common fn in sdhci.c if you w=
-ant.
+I mean, for sure you can upgrade the bootloader on Nvidia products? No, rea=
+lly?
 
-Ok, fair enough.
+>
+> Technically, it should be possible to chain-load some custom secondary
+> bootloader instead of a kernel image, but this is not very practical
+> because now:
+>
+> 1. There is a need to make a custom bootloader and it is quite a lot of
+> work.
+>
+> 2. You'll have to tell everybody that a custom booloader may need to be
+> used in order to get a working eMMC.
 
-Regards,
-Nicolas
+Yeah, I get the point. It's not an optimal situation, but I assume
+it's about informing developers. They can cope with this, no?
 
->=20
-> > +		sdhci_set_power_noreg(host, mode, vdd);
-> > +		return;
-> > +	}
-> > +
-> >  	if (mode !=3D MMC_POWER_OFF)
-> >  		sdhci_writeb(host, SDHCI_POWER_ON, SDHCI_POWER_CONTROL);
-> >  	else
-> > diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> > index cac2d97782e6..9531a4e5b148 100644
-> > --- a/drivers/mmc/host/sdhci.h
-> > +++ b/drivers/mmc/host/sdhci.h
-> > @@ -484,6 +484,8 @@ struct sdhci_host {
-> >   * block count.
-> >   */
-> >  #define SDHCI_QUIRK2_USE_32BIT_BLK_CNT			(1<<18)
-> > +/* Set bus voltage even when powering from an external regulator */
-> > +#define SDHCI_QUIRK2_SET_BUS_VOLTAGE			(1<<19)
-> > =20
-> >  	int irq;		/* Device IRQ */
-> >  	void __iomem *ioaddr;	/* Mapped address */
-> >=20
+>
+> 3. NVIDIA's bootloader already passes a command line parameter to kernel
+> for locating GPT entry, but this hack is not acceptable for the upstream
+> kernel.
 
+Well, I am just worried that we will end up with one partition format
+per vendor/product, that wouldn't scale very well.
 
---=-1lAvgayd9GrTsqnjjrF7
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: This is a digitally signed message part
-Content-Transfer-Encoding: 7bit
+In any case, from mmc point of view I am less concerned, we can find a
+way to support the needed bits. I just need to review the series more
+carefully and provide some comments. :-)
 
------BEGIN PGP SIGNATURE-----
+However, before I do that, I would like to hear Jens opinion about
+adding a new partition format, so I don't waste my time here.
 
-iQEzBAABCAAdFiEErOkkGDHCg2EbPcGjlfZmHno8x/4FAl5iRNYACgkQlfZmHno8
-x/5h5Af8C26SwoE7s5IkeLA0S3BV9MJtqzvOsBo2x+myRwpvvktRc+f2sVpkjQT/
-lIpr4k4mxiaDiTaxmtYRIgXCtz4Hq9T6kfJXwVcnQeAVu3z9BAYqUVqsWG2uGQra
-j/mdMmNvuvJQsMds327CuCGyg/FTp0rFueCELZrMzTTO60chert7/bE85LZbeErF
-+xmR9+1JvMBTGx818rp3/SA95S9VlPf9z3dRqpKIvmSkSMom23GoGYa1/NFVzyi3
-q36vAQ7D074JsmbG0D3L7W8B1Bo6yvKihw0tnVzsy1MS5w1sIF6YZac3tpnxuFgt
-lSgKWktx6E+gN1k/1uujvRqyJ3MsOw==
-=jDxC
------END PGP SIGNATURE-----
-
---=-1lAvgayd9GrTsqnjjrF7--
-
+Kind regards
+Uffe
