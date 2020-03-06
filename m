@@ -6,34 +6,36 @@ X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
 	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EE04CC10DCE
-	for <linux-mmc@archiver.kernel.org>; Fri,  6 Mar 2020 17:44:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EEA23C10F00
+	for <linux-mmc@archiver.kernel.org>; Fri,  6 Mar 2020 17:44:51 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id C70552072D
-	for <linux-mmc@archiver.kernel.org>; Fri,  6 Mar 2020 17:44:50 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CA3F320848
+	for <linux-mmc@archiver.kernel.org>; Fri,  6 Mar 2020 17:44:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726947AbgCFRob (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 6 Mar 2020 12:44:31 -0500
-Received: from mx2.suse.de ([195.135.220.15]:60580 "EHLO mx2.suse.de"
+        id S1726860AbgCFRo3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 6 Mar 2020 12:44:29 -0500
+Received: from mx2.suse.de ([195.135.220.15]:60536 "EHLO mx2.suse.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726866AbgCFRoa (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 6 Mar 2020 12:44:30 -0500
+        id S1726846AbgCFRo2 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 6 Mar 2020 12:44:28 -0500
 X-Virus-Scanned: by amavisd-new at test-mx.suse.de
 Received: from relay2.suse.de (unknown [195.135.220.254])
-        by mx2.suse.de (Postfix) with ESMTP id E704DACC2;
-        Fri,  6 Mar 2020 17:44:28 +0000 (UTC)
+        by mx2.suse.de (Postfix) with ESMTP id 33318AC46;
+        Fri,  6 Mar 2020 17:44:26 +0000 (UTC)
 From:   Nicolas Saenz Julienne <nsaenzjulienne@suse.de>
 To:     adrian.hunter@intel.com, linux-kernel@vger.kernel.org,
-        Hu Ziji <huziji@marvell.com>
+        Ludovic Desroches <ludovic.desroches@microchip.com>,
+        Nicolas Ferre <nicolas.ferre@microchip.com>,
+        Alexandre Belloni <alexandre.belloni@bootlin.com>
 Cc:     phil@raspberrypi.com, linux-mmc@vger.kernel.org,
         linux-arm-kernel@lists.infradead.org, f.fainelli@gmail.com,
         stefan.wahren@i2se.com, bcm-kernel-feedback-list@broadcom.com,
         linux-rpi-kernel@lists.infradead.org,
         Nicolas Saenz Julienne <nsaenzjulienne@suse.de>,
         Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH v2 06/11] mmc: sdhci: xenon: Use sdhci_set_power_and_voltage()
-Date:   Fri,  6 Mar 2020 18:44:08 +0100
-Message-Id: <20200306174413.20634-7-nsaenzjulienne@suse.de>
+Subject: [PATCH v2 04/11] mmc: sdhci: at91: Use sdhci_set_power_and_voltage()
+Date:   Fri,  6 Mar 2020 18:44:06 +0100
+Message-Id: <20200306174413.20634-5-nsaenzjulienne@suse.de>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20200306174413.20634-1-nsaenzjulienne@suse.de>
 References: <20200306174413.20634-1-nsaenzjulienne@suse.de>
@@ -49,47 +51,45 @@ this controller's set_power() callback. Use it instead.
 
 Signed-off-by: Nicolas Saenz Julienne <nsaenzjulienne@suse.de>
 ---
- drivers/mmc/host/sdhci-xenon.c | 20 +-------------------
- 1 file changed, 1 insertion(+), 19 deletions(-)
+ drivers/mmc/host/sdhci-of-at91.c | 18 +-----------------
+ 1 file changed, 1 insertion(+), 17 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-xenon.c b/drivers/mmc/host/sdhci-xenon.c
-index 1dea1ba66f7b..1e9a7a76f2ba 100644
---- a/drivers/mmc/host/sdhci-xenon.c
-+++ b/drivers/mmc/host/sdhci-xenon.c
-@@ -213,24 +213,6 @@ static void xenon_set_uhs_signaling(struct sdhci_host *host,
- 	sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
+diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
+index ab2bd314a390..564a606f6729 100644
+--- a/drivers/mmc/host/sdhci-of-at91.c
++++ b/drivers/mmc/host/sdhci-of-at91.c
+@@ -101,22 +101,6 @@ static void sdhci_at91_set_clock(struct sdhci_host *host, unsigned int clock)
+ 	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
  }
  
--static void xenon_set_power(struct sdhci_host *host, unsigned char mode,
--		unsigned short vdd)
+-/*
+- * In this specific implementation of the SDHCI controller, the power register
+- * needs to have a valid voltage set even when the power supply is managed by
+- * an external regulator.
+- */
+-static void sdhci_at91_set_power(struct sdhci_host *host, unsigned char mode,
+-		     unsigned short vdd)
 -{
--	struct mmc_host *mmc = host->mmc;
--	u8 pwr = host->pwr;
+-	if (!IS_ERR(host->mmc->supply.vmmc)) {
+-		struct mmc_host *mmc = host->mmc;
 -
--	sdhci_set_power_noreg(host, mode, vdd);
--
--	if (host->pwr == pwr)
--		return;
--
--	if (host->pwr == 0)
--		vdd = 0;
--
--	if (!IS_ERR(mmc->supply.vmmc))
 -		mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, vdd);
+-	}
+-	sdhci_set_power_noreg(host, mode, vdd);
 -}
 -
- static void xenon_voltage_switch(struct sdhci_host *host)
+ static void sdhci_at91_set_uhs_signaling(struct sdhci_host *host,
+ 					 unsigned int timing)
  {
- 	/* Wait for 5ms after set 1.8V signal enable bit */
-@@ -240,7 +222,7 @@ static void xenon_voltage_switch(struct sdhci_host *host)
- static const struct sdhci_ops sdhci_xenon_ops = {
- 	.voltage_switch		= xenon_voltage_switch,
- 	.set_clock		= sdhci_set_clock,
--	.set_power		= xenon_set_power,
-+	.set_power		= sdhci_set_power_and_bus_voltage,
+@@ -145,7 +129,7 @@ static const struct sdhci_ops sdhci_at91_sama5d2_ops = {
  	.set_bus_width		= sdhci_set_bus_width,
- 	.reset			= xenon_reset,
- 	.set_uhs_signaling	= xenon_set_uhs_signaling,
+ 	.reset			= sdhci_at91_reset,
+ 	.set_uhs_signaling	= sdhci_at91_set_uhs_signaling,
+-	.set_power		= sdhci_at91_set_power,
++	.set_power		= sdhci_set_power_and_bus_voltage,
+ };
+ 
+ static const struct sdhci_pltfm_data sdhci_sama5d2_pdata = {
 -- 
 2.25.1
 
