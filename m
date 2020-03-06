@@ -6,34 +6,34 @@ X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
 	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DE2E5C10F00
-	for <linux-mmc@archiver.kernel.org>; Fri,  6 Mar 2020 10:39:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 32383C10DCE
+	for <linux-mmc@archiver.kernel.org>; Fri,  6 Mar 2020 10:39:30 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id BCDAB2166E
-	for <linux-mmc@archiver.kernel.org>; Fri,  6 Mar 2020 10:39:26 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 10724208CD
+	for <linux-mmc@archiver.kernel.org>; Fri,  6 Mar 2020 10:39:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727064AbgCFKjZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 6 Mar 2020 05:39:25 -0500
+        id S1727080AbgCFKj2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 6 Mar 2020 05:39:28 -0500
 Received: from mx2.suse.de ([195.135.220.15]:44144 "EHLO mx2.suse.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726998AbgCFKjY (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 6 Mar 2020 05:39:24 -0500
+        id S1727067AbgCFKj1 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 6 Mar 2020 05:39:27 -0500
 X-Virus-Scanned: by amavisd-new at test-mx.suse.de
 Received: from relay2.suse.de (unknown [195.135.220.254])
-        by mx2.suse.de (Postfix) with ESMTP id BAF70B1A6;
-        Fri,  6 Mar 2020 10:39:22 +0000 (UTC)
+        by mx2.suse.de (Postfix) with ESMTP id 987C7ADE8;
+        Fri,  6 Mar 2020 10:39:25 +0000 (UTC)
 From:   Nicolas Saenz Julienne <nsaenzjulienne@suse.de>
 To:     devicetree@vger.kernel.org, bcm-kernel-feedback-list@broadcom.com,
         linux-rpi-kernel@lists.infradead.org,
         linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org,
-        Michal Simek <michal.simek@xilinx.com>,
+        Hu Ziji <huziji@marvell.com>,
         Adrian Hunter <adrian.hunter@intel.com>
 Cc:     ulf.hansson@linaro.org, f.fainelli@gmail.com, phil@raspberrypi.org,
         Nicolas Saenz Julienne <nsaenzjulienne@suse.de>,
         linux-kernel@vger.kernel.org
-Subject: [PATCH 03/10] mmc: sdhci: arsan: Use quirk instead of custom set_power()
-Date:   Fri,  6 Mar 2020 11:38:48 +0100
-Message-Id: <20200306103857.23962-4-nsaenzjulienne@suse.de>
+Subject: [PATCH 06/10] mmc: sdhci: xenon: Use quirk instead of custom set_power()
+Date:   Fri,  6 Mar 2020 11:38:51 +0100
+Message-Id: <20200306103857.23962-7-nsaenzjulienne@suse.de>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20200306103857.23962-1-nsaenzjulienne@suse.de>
 References: <20200306103857.23962-1-nsaenzjulienne@suse.de>
@@ -51,77 +51,54 @@ regulator.
 
 Signed-off-by: Nicolas Saenz Julienne <nsaenzjulienne@suse.de>
 ---
- drivers/mmc/host/sdhci-of-arasan.c | 22 ++++++----------------
- 1 file changed, 6 insertions(+), 16 deletions(-)
+ drivers/mmc/host/sdhci-xenon.c | 20 +-------------------
+ 1 file changed, 1 insertion(+), 19 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-index 0146d7dd315b..928953bbdc10 100644
---- a/drivers/mmc/host/sdhci-of-arasan.c
-+++ b/drivers/mmc/host/sdhci-of-arasan.c
-@@ -325,17 +325,6 @@ static int sdhci_arasan_voltage_switch(struct mmc_host *mmc,
- 	return -EINVAL;
+diff --git a/drivers/mmc/host/sdhci-xenon.c b/drivers/mmc/host/sdhci-xenon.c
+index 1dea1ba66f7b..5bca5f9e5660 100644
+--- a/drivers/mmc/host/sdhci-xenon.c
++++ b/drivers/mmc/host/sdhci-xenon.c
+@@ -213,24 +213,6 @@ static void xenon_set_uhs_signaling(struct sdhci_host *host,
+ 	sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
  }
  
--static void sdhci_arasan_set_power(struct sdhci_host *host, unsigned char mode,
--		     unsigned short vdd)
+-static void xenon_set_power(struct sdhci_host *host, unsigned char mode,
+-		unsigned short vdd)
 -{
--	if (!IS_ERR(host->mmc->supply.vmmc)) {
--		struct mmc_host *mmc = host->mmc;
+-	struct mmc_host *mmc = host->mmc;
+-	u8 pwr = host->pwr;
 -
--		mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, vdd);
--	}
 -	sdhci_set_power_noreg(host, mode, vdd);
+-
+-	if (host->pwr == pwr)
+-		return;
+-
+-	if (host->pwr == 0)
+-		vdd = 0;
+-
+-	if (!IS_ERR(mmc->supply.vmmc))
+-		mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, vdd);
 -}
 -
- static const struct sdhci_ops sdhci_arasan_ops = {
- 	.set_clock = sdhci_arasan_set_clock,
- 	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
-@@ -343,7 +332,6 @@ static const struct sdhci_ops sdhci_arasan_ops = {
- 	.set_bus_width = sdhci_set_bus_width,
- 	.reset = sdhci_arasan_reset,
- 	.set_uhs_signaling = sdhci_set_uhs_signaling,
--	.set_power = sdhci_arasan_set_power,
+ static void xenon_voltage_switch(struct sdhci_host *host)
+ {
+ 	/* Wait for 5ms after set 1.8V signal enable bit */
+@@ -240,7 +222,6 @@ static void xenon_voltage_switch(struct sdhci_host *host)
+ static const struct sdhci_ops sdhci_xenon_ops = {
+ 	.voltage_switch		= xenon_voltage_switch,
+ 	.set_clock		= sdhci_set_clock,
+-	.set_power		= xenon_set_power,
+ 	.set_bus_width		= sdhci_set_bus_width,
+ 	.reset			= xenon_reset,
+ 	.set_uhs_signaling	= xenon_set_uhs_signaling,
+@@ -252,6 +233,7 @@ static const struct sdhci_pltfm_data sdhci_xenon_pdata = {
+ 	.quirks = SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC |
+ 		  SDHCI_QUIRK_NO_SIMULT_VDD_AND_POWER |
+ 		  SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
++	.quirks2 = SDHCI_QUIRK2_SET_BUS_VOLTAGE,
  };
  
- static const struct sdhci_pltfm_data sdhci_arasan_pdata = {
-@@ -351,7 +339,8 @@ static const struct sdhci_pltfm_data sdhci_arasan_pdata = {
- 	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
- 	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
- 			SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN |
--			SDHCI_QUIRK2_STOP_WITH_TC,
-+			SDHCI_QUIRK2_STOP_WITH_TC |
-+			SDHCI_QUIRK2_SET_BUS_VOLTAGE,
- };
- 
- static struct sdhci_arasan_of_data sdhci_arasan_data = {
-@@ -362,7 +351,8 @@ static const struct sdhci_pltfm_data sdhci_arasan_zynqmp_pdata = {
- 	.ops = &sdhci_arasan_ops,
- 	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
- 			SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN |
--			SDHCI_QUIRK2_STOP_WITH_TC,
-+			SDHCI_QUIRK2_STOP_WITH_TC |
-+			SDHCI_QUIRK2_SET_BUS_VOLTAGE,
- };
- 
- static struct sdhci_arasan_of_data sdhci_arasan_zynqmp_data = {
-@@ -414,7 +404,6 @@ static const struct sdhci_ops sdhci_arasan_cqe_ops = {
- 	.set_bus_width = sdhci_set_bus_width,
- 	.reset = sdhci_arasan_reset,
- 	.set_uhs_signaling = sdhci_set_uhs_signaling,
--	.set_power = sdhci_arasan_set_power,
- 	.irq = sdhci_arasan_cqhci_irq,
- };
- 
-@@ -422,7 +411,8 @@ static const struct sdhci_pltfm_data sdhci_arasan_cqe_pdata = {
- 	.ops = &sdhci_arasan_cqe_ops,
- 	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
- 	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
--			SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN,
-+		   SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN |
-+		   SDHCI_QUIRK2_SET_BUS_VOLTAGE,
- };
- 
- static struct sdhci_arasan_of_data sdhci_arasan_rk3399_data = {
+ /*
 -- 
 2.25.1
 
