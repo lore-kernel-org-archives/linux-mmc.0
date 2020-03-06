@@ -6,30 +6,32 @@ X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
 	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5A0EDC18E5B
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 37D55C10F28
 	for <linux-mmc@archiver.kernel.org>; Fri,  6 Mar 2020 09:32:09 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 3BF732070A
+	by mail.kernel.org (Postfix) with ESMTP id 193932084E
 	for <linux-mmc@archiver.kernel.org>; Fri,  6 Mar 2020 09:32:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726251AbgCFJcI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        id S1726185AbgCFJcI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
         Fri, 6 Mar 2020 04:32:08 -0500
-Received: from sauhun.de ([88.99.104.3]:55996 "EHLO pokefinder.org"
+Received: from sauhun.de ([88.99.104.3]:56030 "EHLO pokefinder.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726010AbgCFJcI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        id S1726212AbgCFJcI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
         Fri, 6 Mar 2020 04:32:08 -0500
 Received: from localhost (p54B33158.dip0.t-ipconnect.de [84.179.49.88])
-        by pokefinder.org (Postfix) with ESMTPSA id CD2F62C1F5A;
-        Fri,  6 Mar 2020 10:32:05 +0100 (CET)
+        by pokefinder.org (Postfix) with ESMTPSA id B283C2C1F5E;
+        Fri,  6 Mar 2020 10:32:06 +0100 (CET)
 From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
 To:     linux-mmc@vger.kernel.org
 Cc:     linux-renesas-soc@vger.kernel.org,
         Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
         =?UTF-8?q?Niklas=20S=C3=B6derlund?= <niklas.soderlund@ragnatech.se>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: [PATCH RFT 1/3] mmc: renesas_sdhi: refactor calculation of best TAP
-Date:   Fri,  6 Mar 2020 10:31:57 +0100
-Message-Id: <20200306093159.6155-2-wsa+renesas@sang-engineering.com>
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Masaharu Hayakawa <masaharu.hayakawa.ry@renesas.com>,
+        Takeshi Saito <takeshi.saito.xv@renesas.com>
+Subject: [PATCH RFT 3/3] mmc: renesas_sdhi: improve TAP selection if all TAPs are good
+Date:   Fri,  6 Mar 2020 10:31:59 +0100
+Message-Id: <20200306093159.6155-4-wsa+renesas@sang-engineering.com>
 X-Mailer: git-send-email 2.20.1
 In-Reply-To: <20200306093159.6155-1-wsa+renesas@sang-engineering.com>
 References: <20200306093159.6155-1-wsa+renesas@sang-engineering.com>
@@ -40,83 +42,104 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-To select the best TAP, we need to find the longest stream of set bits
-in a bit field. There is now a helper function for bitmaps which
-iterates over all region of set bits. Using it makes the code much more
-concise and easier to understand. Double so, because we need to handle
-two bitmaps in the near future. Remove a superfluous comment while here.
+When tuning HS400, if all TAPS are good, we can utilize the SMPCMP
+register to select the optimal TAP. For that, we populate a second
+bitmap with SMPCMP results and query it in case the regular bitmap is
+full (= all good).
 
+Signed-off-by: Masaharu Hayakawa <masaharu.hayakawa.ry@renesas.com>
+Signed-off-by: Takeshi Saito <takeshi.saito.xv@renesas.com>
 Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 ---
- drivers/mmc/host/renesas_sdhi_core.c | 36 +++++++---------------------
- 1 file changed, 8 insertions(+), 28 deletions(-)
+ drivers/mmc/host/renesas_sdhi.h      |  2 ++
+ drivers/mmc/host/renesas_sdhi_core.c | 26 +++++++++++++++++++++++---
+ 2 files changed, 25 insertions(+), 3 deletions(-)
 
+diff --git a/drivers/mmc/host/renesas_sdhi.h b/drivers/mmc/host/renesas_sdhi.h
+index 2a4c83a5f32e..12d8016672b0 100644
+--- a/drivers/mmc/host/renesas_sdhi.h
++++ b/drivers/mmc/host/renesas_sdhi.h
+@@ -61,6 +61,8 @@ struct renesas_sdhi {
+ 
+ 	/* Tuning values: 1 for success, 0 for failure */
+ 	DECLARE_BITMAP(taps, BITS_PER_LONG);
++	/* Sampling data comparison: 1 for match, 0 for mismatch */
++	DECLARE_BITMAP(smpcmp, BITS_PER_LONG);
+ 	unsigned int tap_num;
+ 	unsigned long tap_set;
+ };
 diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-index df826661366f..f3ef26e29e8f 100644
+index beac70a0defb..4a5abf28dee5 100644
 --- a/drivers/mmc/host/renesas_sdhi_core.c
 +++ b/drivers/mmc/host/renesas_sdhi_core.c
-@@ -427,15 +427,10 @@ static int renesas_sdhi_prepare_hs400_tuning(struct mmc_host *mmc, struct mmc_io
- static int renesas_sdhi_select_tuning(struct tmio_mmc_host *host)
+@@ -428,7 +428,8 @@ static int renesas_sdhi_select_tuning(struct tmio_mmc_host *host)
  {
  	struct renesas_sdhi *priv = host_to_priv(host);
--	unsigned long tap_cnt;  /* counter of tuning success */
--	unsigned long tap_start;/* start position of tuning success */
--	unsigned long tap_end;  /* end position of tuning success */
--	unsigned long ntap;     /* temporary counter of tuning success */
--	unsigned long i;
-+	unsigned int tap_start = 0, tap_end = 0, tap_cnt = 0, rs, re, i;
-+	unsigned int taps_size = priv->tap_num * 2;
+ 	unsigned int tap_start = 0, tap_end = 0, tap_cnt = 0, rs, re, i;
+-	unsigned int taps_size = priv->tap_num * 2;
++	unsigned int taps_size = priv->tap_num * 2, min_tap_row;
++	unsigned long *bitmap;
  
  	priv->doing_tune = false;
--
--	/* Clear SCC_RVSREQ */
  	sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_RVSREQ, 0);
- 
- 	/*
-@@ -443,7 +438,7 @@ static int renesas_sdhi_select_tuning(struct tmio_mmc_host *host)
- 	 * result requiring the tap to be good in both runs before
- 	 * considering it for tuning selection.
- 	 */
--	for (i = 0; i < priv->tap_num * 2; i++) {
-+	for (i = 0; i < taps_size; i++) {
- 		int offset = priv->tap_num * (i < priv->tap_num ? 1 : -1);
+@@ -443,6 +444,21 @@ static int renesas_sdhi_select_tuning(struct tmio_mmc_host *host)
  
  		if (!test_bit(i, priv->taps))
-@@ -455,29 +450,14 @@ static int renesas_sdhi_select_tuning(struct tmio_mmc_host *host)
- 	 * is more than SH_MOBILE_SDHI_MAX_TAP probes long then use the
- 	 * center index as the tap.
+ 			clear_bit(i + offset, priv->taps);
++
++		if (!test_bit(i, priv->smpcmp))
++			clear_bit(i + offset, priv->smpcmp);
++	}
++
++	/*
++	 * If all TAP are OK, the sampling clock position is selected by
++	 * identifying the change point of data.
++	 */
++	if (bitmap_full(priv->taps, taps_size)) {
++		bitmap = priv->smpcmp;
++		min_tap_row = 1;
++	} else {
++		bitmap = priv->taps;
++		min_tap_row = SH_MOBILE_SDHI_MIN_TAP_ROW;
+ 	}
+ 
+ 	/*
+@@ -450,7 +466,7 @@ static int renesas_sdhi_select_tuning(struct tmio_mmc_host *host)
+ 	 * is at least SH_MOBILE_SDHI_MIN_TAP_ROW probes long then use the
+ 	 * center index as the tap, otherwise bail out.
  	 */
--	tap_cnt = 0;
--	ntap = 0;
--	tap_start = 0;
--	tap_end = 0;
--	for (i = 0; i < priv->tap_num * 2; i++) {
--		if (test_bit(i, priv->taps)) {
--			ntap++;
--		} else {
--			if (ntap > tap_cnt) {
--				tap_start = i - ntap;
--				tap_end = i - 1;
--				tap_cnt = ntap;
--			}
--			ntap = 0;
-+	bitmap_for_each_set_region(priv->taps, rs, re, 0, taps_size) {
-+		if (re - 1 - rs > tap_cnt) {
-+			tap_end = re - 1;
-+			tap_start = rs;
-+			tap_cnt = tap_end - tap_start;
+-	bitmap_for_each_set_region(priv->taps, rs, re, 0, taps_size) {
++	bitmap_for_each_set_region(bitmap, rs, re, 0, taps_size) {
+ 		if (re - 1 - rs > tap_cnt) {
+ 			tap_end = re - 1;
+ 			tap_start = rs;
+@@ -458,7 +474,7 @@ static int renesas_sdhi_select_tuning(struct tmio_mmc_host *host)
  		}
  	}
  
--	if (ntap > tap_cnt) {
--		tap_start = i - ntap;
--		tap_end = i - 1;
--		tap_cnt = ntap;
--	}
--
- 	if (tap_cnt >= SH_MOBILE_SDHI_MAX_TAP)
+-	if (tap_cnt >= SH_MOBILE_SDHI_MIN_TAP_ROW)
++	if (tap_cnt >= min_tap_row)
  		priv->tap_set = (tap_start + tap_end) / 2 % priv->tap_num;
  	else
+ 		return -EIO;
+@@ -491,6 +507,7 @@ static int renesas_sdhi_execute_tuning(struct tmio_mmc_host *host, u32 opcode)
+ 
+ 	priv->doing_tune = true;
+ 	bitmap_zero(priv->taps, priv->tap_num * 2);
++	bitmap_zero(priv->smpcmp, priv->tap_num * 2);
+ 
+ 	/* Issue CMD19 twice for each tap */
+ 	for (i = 0; i < 2 * priv->tap_num; i++) {
+@@ -499,6 +516,9 @@ static int renesas_sdhi_execute_tuning(struct tmio_mmc_host *host, u32 opcode)
+ 
+ 		if (mmc_send_tuning(host->mmc, opcode, NULL) == 0)
+ 			set_bit(i, priv->taps);
++
++		if (sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_SMPCMP) == 0)
++			set_bit(i, priv->smpcmp);
+ 	}
+ 
+ 	return renesas_sdhi_select_tuning(host);
 -- 
 2.20.1
 
