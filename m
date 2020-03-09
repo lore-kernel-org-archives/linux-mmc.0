@@ -2,231 +2,128 @@ Return-Path: <SRS0=Ofta=42=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-8.4 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 697E4C10F27
-	for <linux-mmc@archiver.kernel.org>; Mon,  9 Mar 2020 17:33:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6BA87C10F27
+	for <linux-mmc@archiver.kernel.org>; Mon,  9 Mar 2020 18:30:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 3CCE524649
-	for <linux-mmc@archiver.kernel.org>; Mon,  9 Mar 2020 17:33:51 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 40EB3208C3
+	for <linux-mmc@archiver.kernel.org>; Mon,  9 Mar 2020 18:30:53 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=nvidia.com header.i=@nvidia.com header.b="E2ikta4r"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="EQLSmaWU"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727269AbgCIRdr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 9 Mar 2020 13:33:47 -0400
-Received: from hqnvemgate25.nvidia.com ([216.228.121.64]:12860 "EHLO
-        hqnvemgate25.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727254AbgCIRdr (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Mar 2020 13:33:47 -0400
-Received: from hqpgpgate101.nvidia.com (Not Verified[216.228.121.13]) by hqnvemgate25.nvidia.com (using TLS: TLSv1.2, DES-CBC3-SHA)
-        id <B5e667dca0000>; Mon, 09 Mar 2020 10:32:59 -0700
-Received: from hqmail.nvidia.com ([172.20.161.6])
-  by hqpgpgate101.nvidia.com (PGP Universal service);
-  Mon, 09 Mar 2020 10:33:42 -0700
-X-PGP-Universal: processed;
-        by hqpgpgate101.nvidia.com on Mon, 09 Mar 2020 10:33:42 -0700
-Received: from [10.2.175.232] (10.124.1.5) by HQMAIL107.nvidia.com
- (172.20.187.13) with Microsoft SMTP Server (TLS) id 15.0.1473.3; Mon, 9 Mar
- 2020 17:33:42 +0000
-Subject: Re: LKFT: arm x15: mmc1: cache flush error -110
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-CC:     Jon Hunter <jonathanh@nvidia.com>,
-        Bitan Biswas <bbiswas@nvidia.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Naresh Kamboju <naresh.kamboju@linaro.org>,
-        Jens Axboe <axboe@kernel.dk>,
-        Alexei Starovoitov <ast@kernel.org>,
-        linux-block <linux-block@vger.kernel.org>,
-        <lkft-triage@lists.linaro.org>,
-        open list <linux-kernel@vger.kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Arnd Bergmann <arnd@arndb.de>,
-        John Stultz <john.stultz@linaro.org>,
-        Faiz Abbas <faiz_abbas@ti.com>,
-        Thierry Reding <treding@nvidia.com>,
-        Anders Roxell <anders.roxell@linaro.org>,
-        Kishon <kishon@ti.com>
-References: <CA+G9fYuqAQfhzF2BzHr7vMHx68bo8-jT+ob_F3eHQ3=oFjgYdg@mail.gmail.com>
- <CAPDyKFokE6x0mn+v5B9=so-SyrdTn0JBU8Mrp3Zdu6kSaCie2g@mail.gmail.com>
- <0963b60f-15e7-4bc6-10df-6fc8003e4d42@nvidia.com>
- <CAPDyKFq5NoeHEBK3sv3yOSD2+pm9FueH1gaTyPq0j7GLfa6vnA@mail.gmail.com>
- <34fd84d7-387b-b6f3-7fb3-aa490909e205@ti.com>
- <CAPDyKFrrO4noYqdxWL9Y8Nx75LopbDudKGMotkGbGcAF1oq==w@mail.gmail.com>
- <5e9b5646-bd48-e55b-54ee-1c2c41fc9218@nvidia.com>
- <CAPDyKFqpNo_4OePBR1KnJNO=kR8XEqbcsEd=icSceSdDH+Rk1Q@mail.gmail.com>
- <757853cf-987e-f6b6-9259-b4560a031692@nvidia.com>
- <d12fe142-7e72-ab58-33ab-17817e35096f@nvidia.com>
- <c216f131-6f83-c9c9-9d17-8d44ec06972d@nvidia.com>
- <87ad7586-9569-4276-044a-adb64e84ca15@nvidia.com>
- <a0962e0b-0f1d-9f32-f6e9-92f69f93167f@nvidia.com>
- <57ddddc2-3ee8-d867-bba0-0dd9929ba37d@nvidia.com>
- <CAPDyKFqZSd9E3+16yFsmpee2JsbRJ-DGThxx7NJHu6UE00Xi1Q@mail.gmail.com>
- <26ee7225-9483-4664-c2d7-b5cefeadcd4b@nvidia.com>
- <CAPDyKFqwVQDEnPNi33mc9ycTxpaT1cRLejbR3Ja4c8dha4gFRw@mail.gmail.com>
-From:   Sowjanya Komatineni <skomatineni@nvidia.com>
-Message-ID: <0301bbd5-8d4d-4a77-42c7-8a1391c2d60a@nvidia.com>
-Date:   Mon, 9 Mar 2020 10:35:31 -0700
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101
- Thunderbird/60.9.0
+        id S1727357AbgCISaw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 9 Mar 2020 14:30:52 -0400
+Received: from mail-pf1-f196.google.com ([209.85.210.196]:46308 "EHLO
+        mail-pf1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727334AbgCISaw (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Mar 2020 14:30:52 -0400
+Received: by mail-pf1-f196.google.com with SMTP id c19so2910141pfo.13
+        for <linux-mmc@vger.kernel.org>; Mon, 09 Mar 2020 11:30:51 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to:user-agent;
+        bh=CgKKPr0xwtPbP32XtsKM4Pg2CezZujX8rIh5aLwqY9k=;
+        b=EQLSmaWU2q/bTK6Rz1P45GyBkBUFS3bk+2CbcMCpLyAq43eVc2WPreKL5a+i6z50IO
+         BR/zXDncKdn8muBymm9WU8GSDEM56XkkyORl7tIgBvKivwmAbhAmAHHB3ovqIRKKOshO
+         EtoXWfLN/L5BEe5k5H+RUPFvglpuGtZ1vk6/J0cJEcAdXRO6vZaJ+QrMbU10kyjDdDW+
+         ZuflQ1anPI1URnPeiwClBJyJKSLi8SWY4D4iX00Qp+5PLH7NZfgZtE7NdrBgxzhmmPr6
+         OLpFA3LMf/Q66PZmU+NuBJAXMbCJ40awnoImK4en1CTK0jPuUL/XqKcm0TVxut5RraVS
+         G69Q==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to:user-agent;
+        bh=CgKKPr0xwtPbP32XtsKM4Pg2CezZujX8rIh5aLwqY9k=;
+        b=paABwBmbv5wEKPuj0iT0fW1hdLnuViK4YhdwpVIf7WtTpvdRwXAV6/xuEMxK+L6zJ7
+         E1yoKtAvQg4pB/GINtsw6RDxup+Bo1I8Gnfrf+R8vysoCWOxA7Pj0Uph05ZJmzssYWCk
+         /3l7a4YvFSq7dcijaDOi+pc7rLRsT5Ixm5BP8AwEM/bcNazLDnWEegjUdyGRKg82QHDP
+         IL4iX+bHmSOigSv5hnFsrvBgPZ595eevII7+eAKB4C/o0nqwsngDLwYNE2KmvVHvq+BL
+         /C0pou9/kQaYdkPwLWtNifJZQBT58DZ6y3W/zLnYong+FuEczrb++2A4NnEDg52awHkG
+         PC0w==
+X-Gm-Message-State: ANhLgQ1hKV/4oK+KWKD27v8tPYic6jQ8toYiPzr21SbGPCd2hjcqASEx
+        NEonKpZRu3+HWcTiYx1AEDQXLA==
+X-Google-Smtp-Source: ADFU+vtOyOd1fQy9lpTnW6EA7iLOMrbyb2Fi2EGCNHqKSXzU/O1QZSHNMGuRlAmRob7bmFMt7xi8cg==
+X-Received: by 2002:a63:7783:: with SMTP id s125mr17195558pgc.214.1583778651239;
+        Mon, 09 Mar 2020 11:30:51 -0700 (PDT)
+Received: from builder (104-188-17-28.lightspeed.sndgca.sbcglobal.net. [104.188.17.28])
+        by smtp.gmail.com with ESMTPSA id d22sm249134pja.14.2020.03.09.11.30.50
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 09 Mar 2020 11:30:50 -0700 (PDT)
+Date:   Mon, 9 Mar 2020 11:30:48 -0700
+From:   Bjorn Andersson <bjorn.andersson@linaro.org>
+To:     Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+Cc:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-arm-msm@vger.kernel.org, dianders@google.com,
+        mka@chromium.org, Ritesh Harjani <riteshh@codeaurora.org>,
+        Asutosh Das <asutoshd@codeaurora.org>
+Subject: Re: [PATCH V2] mmc: cqhci: Update cqhci memory ioresource name
+Message-ID: <20200309183048.GB1098305@builder>
+References: <1583323250-23596-1-git-send-email-vbadigan@codeaurora.org>
+ <1583328320-9981-1-git-send-email-vbadigan@codeaurora.org>
 MIME-Version: 1.0
-In-Reply-To: <CAPDyKFqwVQDEnPNi33mc9ycTxpaT1cRLejbR3Ja4c8dha4gFRw@mail.gmail.com>
-X-Originating-IP: [10.124.1.5]
-X-ClientProxiedBy: HQMAIL105.nvidia.com (172.20.187.12) To
- HQMAIL107.nvidia.com (172.20.187.13)
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Transfer-Encoding: 7bit
-Content-Language: en-US
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nvidia.com; s=n1;
-        t=1583775179; bh=CYaifugh60g9oO62CRHXR8kHhNzWHbyTDaF0kgHrBPI=;
-        h=X-PGP-Universal:Subject:To:CC:References:From:Message-ID:Date:
-         User-Agent:MIME-Version:In-Reply-To:X-Originating-IP:
-         X-ClientProxiedBy:Content-Type:Content-Transfer-Encoding:
-         Content-Language;
-        b=E2ikta4rTotdZ9vdOIYMuaIOOfvDngHacwS6IlqPRUsxZweuaoG3VC/1Gs/3jaZsO
-         ddnzbKnqD2ckd79tq/qAMwzMYcsYOoL73Er4IYO7b89lc/Hb931hSi54+Eum1e5xtJ
-         dvoBWxSrJ3CTgTvobhl/Z9tKPh+cLuHJ2lnHtzgw4dJrjvsimdfplUK4S7hHrzX4hB
-         AnD+9fxTno86x/XJ19gd8GKflyH2jFX9+dRM/JFk3EFbjNAdDN3maGR41UHxbI/EJn
-         HDbUeTv0bzS8RFp0fboaWszYVGwJbhrObA2x7dsChfuK4ElohDYgrqWblNCAqyO9fX
-         wgQ1RWrxj3V2A==
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1583328320-9981-1-git-send-email-vbadigan@codeaurora.org>
+User-Agent: Mutt/1.12.2 (2019-09-21)
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+On Wed 04 Mar 05:25 PST 2020, Veerabhadrarao Badiganti wrote:
 
-On 3/6/20 3:14 AM, Ulf Hansson wrote:
-> External email: Use caution opening links or attachments
->
->
-> [...]
->
->>>>>>>>>>> Actually we always use R1B with CMD6 as per spec.
->>>>>>>>>> I fully agree that R1B is preferable, but it's not against the
->>>>>>>>>> spec to
->>>>>>>>>> send CMD13 to poll for busy.
->>>>>>>>>>
->>>>>>>>>> Moreover, we need to cope with the scenario when the host has
->>>>>>>>>> specified a maximum timeout that isn't sufficiently long enough for
->>>>>>>>>> the requested operation. Do you have another proposal for how to
->>>>>>>>>> manage this, but disabling MMC_RSP_BUSY?
->>>>>>>>>>
->>>>>>>>>> Let's assume you driver would get a R1B for the CMD6 (we force it),
->>>>>>>>>> then what timeout would the driver be using if we would set
->>>>>>>>>> cmd.busy_timeout to 30ms?
->>>>>>>>>>
->>>> Sorry didn't understood clearly. Are you asking with 30s timeout, whats
->>>> the data timeout counter used?
->>> Yes. It seems like it will pick the maximum, which is 11s?
->> yes
-> Okay, thanks!
->
->>>> Because of above mentioned issue on our host where CMD interrupt happens
->>>> after busy state, poll for busy returns right away as not busy.
->>> I see.
->>>
->>>> So issuing CMD13 after CMD6-R1 followed by busy poll should be working.
->>>> But weird that with small delay of 1ms or debug print before CMD13 it
->>>> doesn't timeout and works all the time.
->>> I have digested the information you provided in these emails. Let me
->>> summarize it, to see if I have understood correctly.
->>>
->>> 1.
->>> Your controller can't distinguish between R1 and R1B because of a
->>> limitation in the HW. So, in both cases you need to wait for the card
->>> to stop signal busy, before the controller can give an IRQ to notify
->>> that the R1 response has been received. Correct?
->>>
->>> In this context, I am wondering if sdhci_send_command(), really
->>> conforms to these requirements. For example, depending on if the CMD6
->>> has MMC_RSP_BUSY or not, it may pick either SDHCI_CMD_RESP_SHORT or
->>> SDHCI_CMD_RESP_SHORT_BUSY.
->>>
->>> Does this work as expected for your case?
->> Design team re-verified internally and bug where HW waits for busy state
->> before IRQ is only for R1B and R1 is spec compliant.
->>
->> So, with R1, CMD complete is generated after response received.
-> Okay.
->
-> So, the issue we see for CMD6 with R1, is a software problem that we
-> should be able to fix.
->
->> With R1B, CMD complete and xfer complete both are generated after
->> response received + device busy (max timeout of 11s)
->> DATA timeout interrupt will be asserted incase if HW busy detection fails.
->>
->> With R1B we may see DATA Timeout if operation takes more than max busy
->> timeout of 11s.
-> Okay, I see.
->
->>> 2.
->>> Assuming my interpretation of the above is somewhat correct. Then you
->>> always need to set a busy timeout for R1/R1B responses in the
->>> controller. The maximum timeout seems to be 11s long. Obviously, this
->>> isn't enough for all cases, such as cache flushing and erase, for
->>> example. So, what can we do to support a longer timeouts than 11s?
->>> Would it be possible to disable the HW timeout, if the requested
->>> timeout is longer than 11s and use a SW timeout instead?
->>>
->>> Kind regards
->>> Uffe
->> For erase long operations we have register bit to enable for infinite
->> busy wait mode where host controller would be monitoring until card is busy.
-> Alright, that sounds great!
->
->> But so far for emmc devices we used on our platforms, we haven't seen
->> cache flush taking more than 11s.
-> I understand that 11s is probably fine to use, for most cases.
->
-> However, it's not spec compliant, as for some operations there are
-> simply no timeout specified. BKOPS, cache flush, sanitize are cases
-> like this - and then 11s is definitely not sufficient.
->
->> Will get back on possibility of disabling HW timeout and using SW timeout..
-> Thanks!
->
-> I would like to get the regression fixed asap, but I also would like
-> to avoid reverting patches, unless really necessary. May I propose the
-> following two options.
->
-> 1. Find out why polling with ->card_busy() or CMD13, for a CMD6 with
-> an R1 response doesn't work - and then fix that behaviour.
->
-> 2. Set the mmc->max_busy_timeout to zero for sdhci-tegra, which makes
-> the core to always use R1B for CMD6 (and erase). This also means that
-> when the cmd->busy_timeout becomes longer than 11s, sdhci-tegra must
-> disable the HW busy timeout and just wait "forever".
->
-> If you decide for 2, you can add the software timeout support on top,
-> but make that can be considered as a next step of an improvement,
-> rather than needed as fix. Note that, I believe there are some support
-> for software timeout already in the sdhci core, maybe you need to
-> tweak it a bit for your case, I don't know.
->
-> Kind regards
-> Uffe
+> Update cqhci memory ioresource name from cqhci_mem to cqhci since
+> suffix _mem is redundant.
+> 
+> Only sdhci-msm driver is making use of this resource as of now.
+> No other vendor's driver is using it. So this update shouldn't affect
+> any other vendor's cqhci functionality.
+> 
+> Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
 
-Hi Uffe
+I do favor using names without the "_mem" suffix and it seems like the
+existing code only acquire the first two regions by index. So this
+should be fine.
 
-Will go with 2nd option and will send patches out when ready.
+Acked-by: Bjorn Andersson <bjorn.andersson@linaro.org>
 
-BTW, Tegra host also supports SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK for 
-data timeout based on host clock when using finite mode (HW busy 
-detection based on DATA TIMEOUT count value when cmd operation timeout 
-is < 11s for tegra host).
 
-So, looks like we cant set host max_busy_timeout to 0 for Tegra host to 
-force R1B during SWITCH and SLEEP_AWAKE.
+But I do expect to see some patches fixing up the 8 dts files that now
+has invalid reg-names.
 
-So, was thinking to introduce host capability MMC_CAP2_LONG_WAIT_HW_BUSY 
-which can be used for hosts supporting long or infinite HW busy wait 
-detection and will update mmc and mmc_ops drivers to not allow convert 
-R1B to R1B for hosts with this capability during SLEEP_AWAKE and SWITCH.
+Regards,
+Bjorn
 
-Thanks
-
-Sowjanya
-
+> ---
+> Corresponding binding change:
+> https://lore.kernel.org/linux-arm-msm/1582545470-11530-1-git-send-email-vbadigan@codeaurora.org/
+> 
+> Changes sicne V1:
+> 	- Updated commit text expalining this change affects *only*
+> 	  qcom cqhci functionality.
+> 
+> ---
+>  drivers/mmc/host/cqhci.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/cqhci.c b/drivers/mmc/host/cqhci.c
+> index e2ea2c4..e24b8ff 100644
+> --- a/drivers/mmc/host/cqhci.c
+> +++ b/drivers/mmc/host/cqhci.c
+> @@ -1077,7 +1077,7 @@ struct cqhci_host *cqhci_pltfm_init(struct platform_device *pdev)
+>  
+>  	/* check and setup CMDQ interface */
+>  	cqhci_memres = platform_get_resource_byname(pdev, IORESOURCE_MEM,
+> -						   "cqhci_mem");
+> +						   "cqhci");
+>  	if (!cqhci_memres) {
+>  		dev_dbg(&pdev->dev, "CMDQ not supported\n");
+>  		return ERR_PTR(-EINVAL);
+> -- 
+> Qualcomm India Private Limited, on behalf of Qualcomm Innovation Center, Inc., is a member of Code Aurora Forum, a Linux Foundation Collaborative Project
