@@ -2,128 +2,155 @@ Return-Path: <SRS0=Ofta=42=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.4 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.3 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6BA87C10F27
-	for <linux-mmc@archiver.kernel.org>; Mon,  9 Mar 2020 18:30:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7E5EDC10F27
+	for <linux-mmc@archiver.kernel.org>; Mon,  9 Mar 2020 20:00:16 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 40EB3208C3
-	for <linux-mmc@archiver.kernel.org>; Mon,  9 Mar 2020 18:30:53 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="EQLSmaWU"
+	by mail.kernel.org (Postfix) with ESMTP id 6074924671
+	for <linux-mmc@archiver.kernel.org>; Mon,  9 Mar 2020 20:00:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727357AbgCISaw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 9 Mar 2020 14:30:52 -0400
-Received: from mail-pf1-f196.google.com ([209.85.210.196]:46308 "EHLO
-        mail-pf1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727334AbgCISaw (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Mar 2020 14:30:52 -0400
-Received: by mail-pf1-f196.google.com with SMTP id c19so2910141pfo.13
-        for <linux-mmc@vger.kernel.org>; Mon, 09 Mar 2020 11:30:51 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to:user-agent;
-        bh=CgKKPr0xwtPbP32XtsKM4Pg2CezZujX8rIh5aLwqY9k=;
-        b=EQLSmaWU2q/bTK6Rz1P45GyBkBUFS3bk+2CbcMCpLyAq43eVc2WPreKL5a+i6z50IO
-         BR/zXDncKdn8muBymm9WU8GSDEM56XkkyORl7tIgBvKivwmAbhAmAHHB3ovqIRKKOshO
-         EtoXWfLN/L5BEe5k5H+RUPFvglpuGtZ1vk6/J0cJEcAdXRO6vZaJ+QrMbU10kyjDdDW+
-         ZuflQ1anPI1URnPeiwClBJyJKSLi8SWY4D4iX00Qp+5PLH7NZfgZtE7NdrBgxzhmmPr6
-         OLpFA3LMf/Q66PZmU+NuBJAXMbCJ40awnoImK4en1CTK0jPuUL/XqKcm0TVxut5RraVS
-         G69Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to:user-agent;
-        bh=CgKKPr0xwtPbP32XtsKM4Pg2CezZujX8rIh5aLwqY9k=;
-        b=paABwBmbv5wEKPuj0iT0fW1hdLnuViK4YhdwpVIf7WtTpvdRwXAV6/xuEMxK+L6zJ7
-         E1yoKtAvQg4pB/GINtsw6RDxup+Bo1I8Gnfrf+R8vysoCWOxA7Pj0Uph05ZJmzssYWCk
-         /3l7a4YvFSq7dcijaDOi+pc7rLRsT5Ixm5BP8AwEM/bcNazLDnWEegjUdyGRKg82QHDP
-         IL4iX+bHmSOigSv5hnFsrvBgPZ595eevII7+eAKB4C/o0nqwsngDLwYNE2KmvVHvq+BL
-         /C0pou9/kQaYdkPwLWtNifJZQBT58DZ6y3W/zLnYong+FuEczrb++2A4NnEDg52awHkG
-         PC0w==
-X-Gm-Message-State: ANhLgQ1hKV/4oK+KWKD27v8tPYic6jQ8toYiPzr21SbGPCd2hjcqASEx
-        NEonKpZRu3+HWcTiYx1AEDQXLA==
-X-Google-Smtp-Source: ADFU+vtOyOd1fQy9lpTnW6EA7iLOMrbyb2Fi2EGCNHqKSXzU/O1QZSHNMGuRlAmRob7bmFMt7xi8cg==
-X-Received: by 2002:a63:7783:: with SMTP id s125mr17195558pgc.214.1583778651239;
-        Mon, 09 Mar 2020 11:30:51 -0700 (PDT)
-Received: from builder (104-188-17-28.lightspeed.sndgca.sbcglobal.net. [104.188.17.28])
-        by smtp.gmail.com with ESMTPSA id d22sm249134pja.14.2020.03.09.11.30.50
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 09 Mar 2020 11:30:50 -0700 (PDT)
-Date:   Mon, 9 Mar 2020 11:30:48 -0700
-From:   Bjorn Andersson <bjorn.andersson@linaro.org>
-To:     Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
-Cc:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-msm@vger.kernel.org, dianders@google.com,
-        mka@chromium.org, Ritesh Harjani <riteshh@codeaurora.org>,
-        Asutosh Das <asutoshd@codeaurora.org>
-Subject: Re: [PATCH V2] mmc: cqhci: Update cqhci memory ioresource name
-Message-ID: <20200309183048.GB1098305@builder>
-References: <1583323250-23596-1-git-send-email-vbadigan@codeaurora.org>
- <1583328320-9981-1-git-send-email-vbadigan@codeaurora.org>
+        id S1726384AbgCIUAQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 9 Mar 2020 16:00:16 -0400
+Received: from mout.kundenserver.de ([212.227.17.10]:36757 "EHLO
+        mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725992AbgCIUAP (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Mar 2020 16:00:15 -0400
+Received: from [192.168.1.183] ([37.4.249.171]) by mrelayeu.kundenserver.de
+ (mreue108 [212.227.15.183]) with ESMTPSA (Nemesis) id
+ 1MKbXu-1iuygH0Nf2-00Kyiu; Mon, 09 Mar 2020 21:00:01 +0100
+Subject: Re: [PATCH v2 11/11] ARM: dts: bcm2711: Add vmmc regulator in emmc2
+To:     Nicolas Saenz Julienne <nsaenzjulienne@suse.de>,
+        adrian.hunter@intel.com, linux-kernel@vger.kernel.org,
+        Rob Herring <robh+dt@kernel.org>
+Cc:     phil@raspberrypi.com, linux-mmc@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, f.fainelli@gmail.com,
+        bcm-kernel-feedback-list@broadcom.com,
+        linux-rpi-kernel@lists.infradead.org, devicetree@vger.kernel.org
+References: <20200306174413.20634-1-nsaenzjulienne@suse.de>
+ <20200306174413.20634-12-nsaenzjulienne@suse.de>
+From:   Stefan Wahren <stefan.wahren@i2se.com>
+Openpgp: preference=signencrypt
+Autocrypt: addr=stefan.wahren@i2se.com; keydata=
+ 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 AQ==
+Message-ID: <3bd022a6-922f-c20a-8d07-383817549960@i2se.com>
+Date:   Mon, 9 Mar 2020 21:00:00 +0100
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101
+ Thunderbird/60.9.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1583328320-9981-1-git-send-email-vbadigan@codeaurora.org>
-User-Agent: Mutt/1.12.2 (2019-09-21)
+In-Reply-To: <20200306174413.20634-12-nsaenzjulienne@suse.de>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Content-Language: en-US
+X-Provags-ID: V03:K1:HLq74eK/5uYp9FuDYB8nlYhQ+L1Iy16XuKUVj0/NO++R6Vyw8bS
+ /mWXFYiUpH8XsOLxW+0Q1LUtIHfUZD10r1Tp2MjSKhLZBDDPCjHLSxAXnrYUr9LainLLHNE
+ 5zo32AxrZ87ogn3ujsQ9CcpsYr8c8gvPlpdXaBlkZ66zElrN0brGSZ8hZJNntE8qtzqDDtT
+ mGPm9nMSXh7b7TR4xQR8Q==
+X-UI-Out-Filterresults: notjunk:1;V03:K0:J0AK1UndQlM=:omVXShDsl6kG//to/aRKy4
+ zUEFAtmKVgE/H4EhRCHw9crOIH34eYeqXeOVqgSjUHo/xWwGt/mRrNGXdPzmdbzkAlPYHd8J0
+ xqSS25nm2ikaI54jHmWpJ3BQBTB0tq1fI0jMGiy6IVSWOSpSggAbYLMCtGFF9u1rDh5HtGWYP
+ RXTEuMbLKv0EDovM/usgo3RP5Ovab09P/NA0rPMZV9IX96b2q4lfy3HdyI4qHlx2VM/2irqUJ
+ g9MVTJV8155GnQQQTRSNEpTwOfIHbLYqO3H+8EqRLyB59ECuJH6EUZTvdOU6yxn7BDLqnX8hl
+ SAqWqIfaEQ76v3+PTnqYRPLQZPoWlbyBwSRE2iizh+sv6W75x8p+LRCHH2GudXBBFy/xpD+Uo
+ I7iw1PTMJCJ5SipvsJ2tBNKRpO9A3HUqaguqSNJQ6gfVg5EQYsZ+T2EGHogKjwcFqIEkWwl2j
+ xSIapX6eKh9JnSDmKrVwodAg4YM1q7WOgqtz5gVho5r4YpP5EGnNCUWWYcAp25ZS6v/s2WwPE
+ 59kptDoQvZeNxXLlWyDYLAHBs3yK23c76tpbJqGonsoT0qqamtdyT3gYF/tTsOPHRz9yZLCG2
+ SqMjbeA+HbEcCBZt5DuLtEqlzdlWnRgL7P93g29qHlQH8LPPqG4lq90BjQO2u68iNrT3dLQhq
+ q8bfLgyRv33NokTONt4u5ZUZ63JA+2qJodbONQxUmHnGKoYyzaoOIXhbz+f+2y+cAGM30LhRv
+ vMEY/wPM5yOt+rEoma4iLm8IE/+KCsi4W7nfFCEsXCedTnfS9rNuxkkDhK1UfWwIRCtXRTSoV
+ q0SWOsQGnkVx5VE4cyAXc7Zcp+vDBDQNGI2gdc6luPaxkG9KZCN9vnyuWRbE9vhZ+xSXnxg
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed 04 Mar 05:25 PST 2020, Veerabhadrarao Badiganti wrote:
+Hi Nicolas,
 
-> Update cqhci memory ioresource name from cqhci_mem to cqhci since
-> suffix _mem is redundant.
-> 
-> Only sdhci-msm driver is making use of this resource as of now.
-> No other vendor's driver is using it. So this update shouldn't affect
-> any other vendor's cqhci functionality.
-> 
-> Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
-
-I do favor using names without the "_mem" suffix and it seems like the
-existing code only acquire the first two regions by index. So this
-should be fine.
-
-Acked-by: Bjorn Andersson <bjorn.andersson@linaro.org>
-
-
-But I do expect to see some patches fixing up the 8 dts files that now
-has invalid reg-names.
-
-Regards,
-Bjorn
-
+Am 06.03.20 um 18:44 schrieb Nicolas Saenz Julienne:
+> The SD card power can be controlled trough a pin routed into the board's
+> external GPIO expander. Turn that into a regulator and provide it to
+> emmc2.
+>
+> Signed-off-by: Nicolas Saenz Julienne <nsaenzjulienne@suse.de>
 > ---
-> Corresponding binding change:
-> https://lore.kernel.org/linux-arm-msm/1582545470-11530-1-git-send-email-vbadigan@codeaurora.org/
-> 
-> Changes sicne V1:
-> 	- Updated commit text expalining this change affects *only*
-> 	  qcom cqhci functionality.
-> 
-> ---
->  drivers/mmc/host/cqhci.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/cqhci.c b/drivers/mmc/host/cqhci.c
-> index e2ea2c4..e24b8ff 100644
-> --- a/drivers/mmc/host/cqhci.c
-> +++ b/drivers/mmc/host/cqhci.c
-> @@ -1077,7 +1077,7 @@ struct cqhci_host *cqhci_pltfm_init(struct platform_device *pdev)
+>  arch/arm/boot/dts/bcm2711-rpi-4-b.dts | 11 +++++++++++
+>  1 file changed, 11 insertions(+)
+>
+> diff --git a/arch/arm/boot/dts/bcm2711-rpi-4-b.dts b/arch/arm/boot/dts/bcm2711-rpi-4-b.dts
+> index b0ea8233b636..a2da058396fe 100644
+> --- a/arch/arm/boot/dts/bcm2711-rpi-4-b.dts
+> +++ b/arch/arm/boot/dts/bcm2711-rpi-4-b.dts
+> @@ -55,6 +55,16 @@ sd_io_1v8_reg: sd_io_1v8_reg {
+>  			  3300000 0x0>;
+>  		status = "okay";
+>  	};
+> +
+> +	sd_vcc_reg: sd_vcc_reg {
+> +		compatible = "regulator-fixed";
+
+i think we need to enable CONFIG_REGULATOR_FIXED_VOLTAGE in
+bcm2835_defconfig
+
+Best regards
+Stefan
+
+> +		regulator-name = "vcc-sd";
+> +		regulator-min-microvolt = <3300000>;
+> +		regulator-max-microvolt = <3300000>;
+> +		regulator-boot-on;
+> +		enable-active-high;
+> +		gpio = <&expgpio 6 GPIO_ACTIVE_HIGH>;
+> +	};
+>  };
 >  
->  	/* check and setup CMDQ interface */
->  	cqhci_memres = platform_get_resource_byname(pdev, IORESOURCE_MEM,
-> -						   "cqhci_mem");
-> +						   "cqhci");
->  	if (!cqhci_memres) {
->  		dev_dbg(&pdev->dev, "CMDQ not supported\n");
->  		return ERR_PTR(-EINVAL);
-> -- 
-> Qualcomm India Private Limited, on behalf of Qualcomm Innovation Center, Inc., is a member of Code Aurora Forum, a Linux Foundation Collaborative Project
+>  &firmware {
+> @@ -173,6 +183,7 @@ brcmf: wifi@1 {
+>  /* EMMC2 is used to drive the SD card */
+>  &emmc2 {
+>  	vqmmc-supply = <&sd_io_1v8_reg>;
+> +	vmmc-supply = <&sd_vcc_reg>;
+>  	broken-cd;
+>  	status = "okay";
+>  };
