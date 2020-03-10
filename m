@@ -2,209 +2,121 @@ Return-Path: <SRS0=AZQG=43=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_GIT autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B2081C10F27
-	for <linux-mmc@archiver.kernel.org>; Tue, 10 Mar 2020 10:44:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 02059C10F27
+	for <linux-mmc@archiver.kernel.org>; Tue, 10 Mar 2020 15:33:50 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 88A7B2071B
-	for <linux-mmc@archiver.kernel.org>; Tue, 10 Mar 2020 10:44:52 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CB1D2215A4
+	for <linux-mmc@archiver.kernel.org>; Tue, 10 Mar 2020 15:33:49 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Wb8KLpem"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725937AbgCJKow (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 10 Mar 2020 06:44:52 -0400
-Received: from mga01.intel.com ([192.55.52.88]:10392 "EHLO mga01.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726170AbgCJKow (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 10 Mar 2020 06:44:52 -0400
-X-Amp-Result: SKIPPED(no attachment in message)
-X-Amp-File-Uploaded: False
-Received: from orsmga005.jf.intel.com ([10.7.209.41])
-  by fmsmga101.fm.intel.com with ESMTP/TLS/DHE-RSA-AES256-GCM-SHA384; 10 Mar 2020 03:44:51 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.70,536,1574150400"; 
-   d="scan'208";a="415149407"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.167]) ([10.237.72.167])
-  by orsmga005.jf.intel.com with ESMTP; 10 Mar 2020 03:44:49 -0700
-Subject: Re: [PATCH] mmc: mmc: Fix the timing for clock changing in mmc
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        "Seo, Kyungmin" <kyungmin.seo@intel.com>
-Cc:     Chaotian Jing <chaotian.jing@mediatek.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-References: <20200212024220.GA32111@seokyung-mobl1>
- <CAPDyKFr9H2XcgCk9AmHgJfHC+PySh66KxegMJ4yb4aqKSVt3kg@mail.gmail.com>
- <BYAPR11MB269638142E2BF2C6E108B40A9CE20@BYAPR11MB2696.namprd11.prod.outlook.com>
- <CAPDyKFr=hE6diZmaVy-os3rFScHe+8OphBS+edkVGK+Z-J_=HA@mail.gmail.com>
- <BYAPR11MB2696D160D6F5B7C98E0503E79CFF0@BYAPR11MB2696.namprd11.prod.outlook.com>
- <CAPDyKFqqDWMsHEb493p__FNzYaEzE6Ry0bkd-2ng7cdM886zjw@mail.gmail.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <5f3b8cb9-5e55-ee47-46e5-af019d6328b6@intel.com>
-Date:   Tue, 10 Mar 2020 12:44:04 +0200
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.5.0
+        id S1726420AbgCJPdt (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 10 Mar 2020 11:33:49 -0400
+Received: from mail-lj1-f173.google.com ([209.85.208.173]:35017 "EHLO
+        mail-lj1-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726315AbgCJPdt (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Mar 2020 11:33:49 -0400
+Received: by mail-lj1-f173.google.com with SMTP id u12so10445656ljo.2
+        for <linux-mmc@vger.kernel.org>; Tue, 10 Mar 2020 08:33:47 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=SfzE4jRtNpXlK2zcVo4+x24MTpsQQGPfGgY331EDlm4=;
+        b=Wb8KLpemWL6aZKZIvd5drXop5eVrNoye/DWGMSflGGiYkGqu1qxTjZAXE1DfDSEges
+         ZxDzle+f+T0eNqLspGsmwZksY1CSB6axTaq69BgZYPpUQoiXllQ3nmoI89O9N6YYBQVi
+         CiVIGtXaalg3F/U59zMSP0PamcWXyYllekkFnHqu6GnEgviqQ+TrftzvP/o01W5ZqRdn
+         TrUOiwKPya58MRF5A/OPXmb+8xQeW/+TJqGE+5tN/1SJKB46cncKDP1r90lLEhVpDYaF
+         gugHPYRRFsmErqkaCgsiM5AD1bhBh27DuDDqxK9ZvMqoEy3S2ADDfCTPBXn/TzEmo+2h
+         GZFw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=SfzE4jRtNpXlK2zcVo4+x24MTpsQQGPfGgY331EDlm4=;
+        b=FTOCoSR7M0MEcBy6LW3HIhJZzHN0oOJQDZc5pJRP3vwRGzCpNcy4gsyeJsVMKGoR+Y
+         cCTzIlO35YsFOQ8DEkyfS+c7rPTzAqg4hAZEj7PGnew7eQ/oMsqyHQHQuzaDrHID1Jsi
+         KjoX7WlrmORzfJLQcAl5yvbGgTJPKes8OId9PCKHS8d1Oaz3to9GRmEk7RcapBt85Mji
+         3vbZ7yEbwxenDwjw3XGd2ASX7ji+KBEe/RsmjSMpiBnw6rh7dcgeC+fWjFGQ+NA4M0D7
+         FKY65oxL9qmwG4sN44tQe+vBkqjrJIo6LZaK10nTXv5FdWLeWHIsLTGDDSvGFQvccoUA
+         oeXg==
+X-Gm-Message-State: ANhLgQ3RBBxhs4HC8StqG8+1MgJvREblhI26sQvrrL9JkoXNZu3VD9tK
+        MOYX1CwIwWdxX0pJmOr3bgWMFxub2lI=
+X-Google-Smtp-Source: ADFU+vtpyt0K8reug2l0vZQdbhE69a7PbIK3nSqOBLf1ny+S+rEJu4Qxo352IE0xLKVAgWE+VCL5GA==
+X-Received: by 2002:a2e:960b:: with SMTP id v11mr12948786ljh.115.1583854425673;
+        Tue, 10 Mar 2020 08:33:45 -0700 (PDT)
+Received: from localhost.localdomain (h-158-174-22-210.NA.cust.bahnhof.se. [158.174.22.210])
+        by smtp.gmail.com with ESMTPSA id c22sm17283776lfi.41.2020.03.10.08.33.43
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 10 Mar 2020 08:33:44 -0700 (PDT)
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+To:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Ludovic Barre <ludovic.barre@st.com>,
+        Baolin Wang <baolin.wang7@gmail.com>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        Shawn Lin <shawn.lin@rock-chips.com>, mirq-linux@rere.qmqm.pl,
+        Bitan Biswas <bbiswas@nvidia.com>,
+        Peter Geis <pgwipeout@gmail.com>,
+        Sowjanya Komatineni <skomatineni@nvidia.com>,
+        Faiz Abbas <faiz_abbas@ti.com>,
+        Anders Roxell <anders.roxell@linaro.org>,
+        Naresh Kamboju <naresh.kamboju@linaro.org>,
+        Jon Hunter <jonathanh@nvidia.com>
+Subject: [PATCH 0/4] mmc: Fix busy detection timeouts for some SDHCI variant
+Date:   Tue, 10 Mar 2020 16:33:36 +0100
+Message-Id: <20200310153340.5593-1-ulf.hansson@linaro.org>
+X-Mailer: git-send-email 2.20.1
 MIME-Version: 1.0
-In-Reply-To: <CAPDyKFqqDWMsHEb493p__FNzYaEzE6Ry0bkd-2ng7cdM886zjw@mail.gmail.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 10/03/20 11:05 am, Ulf Hansson wrote:
-> On Tue, 10 Mar 2020 at 05:28, Seo, Kyungmin <kyungmin.seo@intel.com> wrote:
->>
->> I read the link and patch of Chaotian Jing.
->> I also point out what Chaotian said.
->> Most host controllers have DLL tuning values for each mode. When host controller is set as HS400 mode with 50MHz clock, host controller uses DLL value which is tuned with 200MHz clock.
->>
->> If DLL value in HS400 mode doesn't have the pass range in HS mode, command transfer failing may fail.
->> In order to make robust sdhci driver, I think the patch needs to be considered.
-> 
-> I have, but I am not picking it up in its current form.
-> 
->> Of course, CMD6 with HS400 mode and 200MHz clock should not cause any problem because it's correct configuration.
-> 
-> Yes, but not for all cases, as I said in my reply in those email-threads.
-> 
-> What I had in mind, is that I I think we should inform
-> mmc_hs400_to_hs200() about under what situation it's getting called.
-> Depending on that, we should either decrease the clock rate before or
-> after we send the CMD6.
-> 
-> Would that work for your case?
+The mmc core may decide (for CMD6 and erase/trim/discard operations) to convert
+from using an R1B response into using an R1 response, in cases when the needed
+busy timeout exceeds the host's maximum supported HW max_busy_timeout. The core
+does this to prevent the host from doing HW busy detection and instead rely on
+polling, as to cope with the needed busy timeout.
 
-Ulf, would you consider a new call back e.g.
+However, it has turned out that some SDHCI variants (tegra, omap), really
+requires R1B for all commands that have this response associated with them. This
+became especially obvious when commit 24ed3bd01d6a ("mmc: core: Specify timeouts
+for BKOPS and CACHE_FLUSH for eMMC") (and a few other commits on top) got
+introduced in v5.6-rc1, as several people reported errors (thanks!). More
+precisely, the mentioned commit triggered the existing problems described above
+in the SDHCI variant drivers, when an eMMC cache flush command (CMD6) was
+issued.
 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index c2abd417a84a..1bc18fe2632f 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -1237,7 +1237,10 @@ int mmc_hs400_to_hs200(struct mmc_card *card)
- 
- 	/* Reduce frequency to HS */
- 	max_dtr = card->ext_csd.hs_max_dtr;
--	mmc_set_clock(host, max_dtr);
-+	if (host->ops->hs400_to_hs200_prep)
-+		host->ops->hs400_to_hs200_prep(host, max_dtr);
-+	else
-+		mmc_set_clock(host, max_dtr);
- 
- 	/* Switch HS400 to HS DDR */
- 	val = EXT_CSD_TIMING_HS;
+This series fixes these problems, but the changes are also targeted for stable
+releases as the problems have existed since a long time back.
+
+Please help out in testing this!
+
+Kind regards
+Ulf Hansson
 
 
-> 
-> Kind regards
-> Uffe
-> 
->>
->> Thanks
->>
->> -----Original Message-----
->> From: Ulf Hansson <ulf.hansson@linaro.org>
->> Sent: Friday, March 6, 2020 12:18 AM
->> To: Seo, Kyungmin <kyungmin.seo@intel.com>; Hunter, Adrian <adrian.hunter@intel.com>; Chaotian Jing <chaotian.jing@mediatek.com>
->> Cc: linux-mmc@vger.kernel.org; Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
->> Subject: Re: [PATCH] mmc: mmc: Fix the timing for clock changing in mmc
->>
->> + Adrian, Chaotian
->>
->> On Thu, 5 Mar 2020 at 09:57, Seo, Kyungmin <kyungmin.seo@intel.com> wrote:
->>>
->>> The mmc_hs400_to_hs200 function is called only in HS400 mode.
->>> I saw the clock change from 200MHz to 52MHz via oscilloscope on real platform.
->>>
->>> I think CMD6 is sent in HS400 mode with 200MHz clock, but it's not.
->>> First CMD6 in mmc_hs400_to_hs200 function is sent with 52MHz clock.
->>
->> I had a vague memory that we have discussed a similar problem as your are pointing out on the mailing list already. And I was right.
->>
->> Please read up on the below references, [1], [2] for the earlier discussions. I suggested a solution for Chaotian to try, but it seems like he never managed to give it a go, as I don't recall new patch being posted.
->>
->> Perhaps you can pick up were Chaotian left and see if you can implement the suggested solution(s). My main concern is breaking other host drivers, as that seems quite likely to happen, if we aren't careful about this.
->>
->> Kind regards
->> Uffe
->>
->> [1]
->> https://lore.kernel.org/linux-mmc/1548921212-5219-1-git-send-email-chaotian.jing@mediatek.com/
->> [2]
->> https://lore.kernel.org/linux-mmc/CAPDyKFquyyXx1MqNLVXuFxcEDB9nKzN8LGGNUP2yxoVMQrWiUg@mail.gmail.com/
->>
->>
->>
->>>
->>> Thanks
->>> KM
->>>
->>> -----Original Message-----
->>> From: Ulf Hansson <ulf.hansson@linaro.org>
->>> Sent: Wednesday, March 4, 2020 8:09 PM
->>> To: Seo, Kyungmin <kyungmin.seo@intel.com>
->>> Cc: linux-mmc@vger.kernel.org; Linux Kernel Mailing List
->>> <linux-kernel@vger.kernel.org>
->>> Subject: Re: [PATCH] mmc: mmc: Fix the timing for clock changing in
->>> mmc
->>>
->>> On Wed, 12 Feb 2020 at 03:40, Kyungmin Seo <kyungmin.seo@intel.com> wrote:
->>>>
->>>> The clock has to be changed after sending CMD6 for HS mode selection
->>>> in
->>>> mmc_hs400_to_hs200() function.
->>>>
->>>> The JEDEC 5.0 and 5.1 said that "High-speed" mode selection has to
->>>> enable the the high speed mode timing in the Device, before chaning
->>>> the clock frequency to a frequency between 26MHz and 52MHz.
->>>
->>> I think that is based upon the assumption that you are using a lower frequency to start with.
->>>
->>> For example, assume that you are running with 400KHz during card initialization, then you want to send the CMD6 to switch to HS mode and that should be done, before updating the clock rate.
->>>
->>> mmc_hs400_to_hs200() goes the opposite direction, so I think the current code looks correct to me.
->>>
->>> Kind regards
->>> Uffe
->>>
->>>>
->>>> Signed-off-by: Kyungmin Seo <kyungmin.seo@intel.com>
->>>> ---
->>>>  drivers/mmc/core/mmc.c | 8 ++++----
->>>>  1 file changed, 4 insertions(+), 4 deletions(-)
->>>>
->>>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c index
->>>> 3486bc7fbb64..98640b51c73e 100644
->>>> --- a/drivers/mmc/core/mmc.c
->>>> +++ b/drivers/mmc/core/mmc.c
->>>> @@ -1196,10 +1196,6 @@ int mmc_hs400_to_hs200(struct mmc_card *card)
->>>>         int err;
->>>>         u8 val;
->>>>
->>>> -       /* Reduce frequency to HS */
->>>> -       max_dtr = card->ext_csd.hs_max_dtr;
->>>> -       mmc_set_clock(host, max_dtr);
->>>> -
->>>>         /* Switch HS400 to HS DDR */
->>>>         val = EXT_CSD_TIMING_HS;
->>>>         err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
->>>> EXT_CSD_HS_TIMING, @@ -1210,6 +1206,10 @@ int
->>>> mmc_hs400_to_hs200(struct mmc_card *card)
->>>>
->>>>         mmc_set_timing(host, MMC_TIMING_MMC_DDR52);
->>>>
->>>> +       /* Reduce frequency to HS */
->>>> +       max_dtr = card->ext_csd.hs_max_dtr;
->>>> +       mmc_set_clock(host, max_dtr);
->>>> +
->>>>         err = mmc_switch_status(card);
->>>>         if (err)
->>>>                 goto out_err;
->>>> --
->>>> 2.17.1
->>>>
+Ulf Hansson (4):
+  mmc: core: Allow host controllers to require R1B for CMD6
+  mmc: core: Respect MMC_CAP_NEED_RSP_BUSY for erase/trim/discard
+  mmc: sdhci-omap: Fix busy detection by enabling MMC_CAP_NEED_RSP_BUSY
+  mmc: sdhci-tegra: Fix busy detection by enabling MMC_CAP_NEED_RSP_BUSY
+
+ drivers/mmc/core/core.c        | 5 ++++-
+ drivers/mmc/core/mmc_ops.c     | 6 ++++--
+ drivers/mmc/host/sdhci-omap.c  | 3 +++
+ drivers/mmc/host/sdhci-tegra.c | 3 +++
+ include/linux/mmc/host.h       | 1 +
+ 5 files changed, 15 insertions(+), 3 deletions(-)
+
+-- 
+2.20.1
 
