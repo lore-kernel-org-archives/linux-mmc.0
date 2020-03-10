@@ -2,200 +2,245 @@ Return-Path: <SRS0=AZQG=43=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-0.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3A8B3C18E5A
-	for <linux-mmc@archiver.kernel.org>; Tue, 10 Mar 2020 09:05:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 27E14C18E5A
+	for <linux-mmc@archiver.kernel.org>; Tue, 10 Mar 2020 09:47:38 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 0036924649
-	for <linux-mmc@archiver.kernel.org>; Tue, 10 Mar 2020 09:05:49 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E78212467D
+	for <linux-mmc@archiver.kernel.org>; Tue, 10 Mar 2020 09:47:37 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="FUIzwQPC"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="oJTgBwjl"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726205AbgCJJFs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 10 Mar 2020 05:05:48 -0400
-Received: from mail-vs1-f67.google.com ([209.85.217.67]:33925 "EHLO
-        mail-vs1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726325AbgCJJFs (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Mar 2020 05:05:48 -0400
-Received: by mail-vs1-f67.google.com with SMTP id y204so7920429vsy.1
-        for <linux-mmc@vger.kernel.org>; Tue, 10 Mar 2020 02:05:45 -0700 (PDT)
+        id S1726443AbgCJJrf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 10 Mar 2020 05:47:35 -0400
+Received: from mail-ua1-f67.google.com ([209.85.222.67]:46948 "EHLO
+        mail-ua1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726436AbgCJJrf (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Mar 2020 05:47:35 -0400
+Received: by mail-ua1-f67.google.com with SMTP id b2so1950408uas.13
+        for <linux-mmc@vger.kernel.org>; Tue, 10 Mar 2020 02:47:33 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=IDHNp0kW8UZ5wVwRVY7Vrr/1bl/yMtFsFyxPULVhd4I=;
-        b=FUIzwQPCeu8dBEpHx+yYi9CrbOu7d822Ma/8XKSFj5B1UjoSmkI6kkIPNbTsw5ATUy
-         A3ncpVnV0xTpdQIRlM3pKOmrUbSZfWjQTW8DPstw6sBqsP3U+somaNvfQUGfWcilrWGv
-         7VA9VtR5rjQYbWAfv2Kkp+jvj2/O/DU/e9w4H8TqadcsLJ/RhSWa20K5+UMEnqH9v/Sk
-         ss8FcDFWhI3F0IlztcY49V9LDuTk9vCT19bwgu7J2DeOh4WTyAEczlXch7IML4rWOFdh
-         FFgT9DBjaZ7sxNABFHIueqhOskdDNIuA62V9opzil0t8a14f09dyupylcYjUCAiaLMjk
-         7G3w==
+        bh=1GrBhJ3sYPhTyFLJxdqpea0j+CXCkiyKV2bVrjt+fe0=;
+        b=oJTgBwjlZwRJ40I3EYTtU3V2CtDXLkXbVX0zNTIUAWGdSymXvoHp/4+gJoexFOdg6l
+         rX5jEvtoDF4tmpvKf478/Rujy5k3qOSVGzPcuhNUb0IKmwhppoqaHXpWP2ou0mmJL5y7
+         ueVO+mHG+8Frz6KixBcLoY+n4MN+FIMdvroYbz3b7UdjQ7BkmggeB2xA2OApNlB2qugy
+         MNLxG3UFYaXwjttQXJHRtlqP43CF6E8fr+CqCoEnsVzLKqHJtANf7xnEz9Y7Nt2oS1Xf
+         qPfnVgjVH/S0g1hySeblK3z8UYrMBgawPinuQLKZrNUfot1Zrq/0YOEk1gxbVXj1B3Qh
+         5YTA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=IDHNp0kW8UZ5wVwRVY7Vrr/1bl/yMtFsFyxPULVhd4I=;
-        b=eYpUaKrvChCRmGG/bcmsnJU57pfQek9cAmT4pkbnHnqT9srpwGRRVVCsaNSglVlpan
-         tMHzMOyv8T81EEXgGStySlyCA4gMFc49nmZUj6V1h4HLB118wMunLQCue/2fU0B+DHSw
-         tXlqKJ/7PeBrBOn1JX0BzqeDv/oxGpMSxzEGifRZ7iDBhylNRK1jMmQr0ElzNTs1x6Fv
-         wUJcn42AlJFTQ8imhrte5nqYOFnLhzgeJtI8elZOgHU7KjHnUiMeORYIDQfYc2weX4Ye
-         LhYPxB9EjdF9onOay70LZLmrnZgxDbzzAblBkP1bZ0azoiyDJ5NJ+nBrsBbfJitzr44B
-         24Kg==
-X-Gm-Message-State: ANhLgQ07V/VtPj3jA6m3gS/wbK3Gy2AexK9gnBHqBMh2mXoUjg/97+1R
-        65Dn+zgxw/+FoBvH4KINjbAtBBBV6/V3Sp0UH8tHlA==
-X-Google-Smtp-Source: ADFU+vunNCxQSZEaoMl1wWz/zElJ7FMTKAkFt/FhteIaiycncpEItDFDrvaw1TyPvKFRON8mBab1sfe67lriT6kHLIg=
-X-Received: by 2002:a67:646:: with SMTP id 67mr12004425vsg.34.1583831144529;
- Tue, 10 Mar 2020 02:05:44 -0700 (PDT)
+        bh=1GrBhJ3sYPhTyFLJxdqpea0j+CXCkiyKV2bVrjt+fe0=;
+        b=Qy5a6sUWg75HHsuU3lxHXWNa9/FgXSWt0xWkVajIq91N3O5svVap9MIaTj35xorPyi
+         kPeW6sPtA7JXpw1uyKyhiDrO8R2EUOMnG+1H4N9WoPNSSwq3Swb4osYD3lLD89FfiFMu
+         MYbnIh1Y36zrhg13Wtfm3l9tNwap3bv7uMZielNtVE/ay721fjmcK183TzLyNecWyyFS
+         FOxBRJv/KLAC1TBrL4IoV+8xlnVHgs26DIG7hsDWB0dmeV0FqE0DePE54wf+5DwsfrGa
+         9azi9wi8e27R79bAZNtL0Em+h9/2PHAaJdzFBXRczcGA6G2Jc33m42DA/2lk7yBAXm75
+         PU5w==
+X-Gm-Message-State: ANhLgQ3FEdbplNokhD6bTvLf8bC5F9dfoHdS5aHVetWK27JYeG4wXBbZ
+        8e4JwYEaVyO4tUJpgrtdgZYlsmHGmn+ES6PUySx90A==
+X-Google-Smtp-Source: ADFU+vvtoiJgc8TJGK+oS5jVJmCejClnjhMmcnQ6XUIDSORdD/dv+QYgmtUJ5E16LLL1sVIbA/QMWiwUDmsyFCk1WXw=
+X-Received: by 2002:ab0:7802:: with SMTP id x2mr11627770uaq.100.1583833652861;
+ Tue, 10 Mar 2020 02:47:32 -0700 (PDT)
 MIME-Version: 1.0
-References: <20200212024220.GA32111@seokyung-mobl1> <CAPDyKFr9H2XcgCk9AmHgJfHC+PySh66KxegMJ4yb4aqKSVt3kg@mail.gmail.com>
- <BYAPR11MB269638142E2BF2C6E108B40A9CE20@BYAPR11MB2696.namprd11.prod.outlook.com>
- <CAPDyKFr=hE6diZmaVy-os3rFScHe+8OphBS+edkVGK+Z-J_=HA@mail.gmail.com> <BYAPR11MB2696D160D6F5B7C98E0503E79CFF0@BYAPR11MB2696.namprd11.prod.outlook.com>
-In-Reply-To: <BYAPR11MB2696D160D6F5B7C98E0503E79CFF0@BYAPR11MB2696.namprd11.prod.outlook.com>
+References: <CA+G9fYuqAQfhzF2BzHr7vMHx68bo8-jT+ob_F3eHQ3=oFjgYdg@mail.gmail.com>
+ <CAPDyKFokE6x0mn+v5B9=so-SyrdTn0JBU8Mrp3Zdu6kSaCie2g@mail.gmail.com>
+ <0963b60f-15e7-4bc6-10df-6fc8003e4d42@nvidia.com> <CAPDyKFq5NoeHEBK3sv3yOSD2+pm9FueH1gaTyPq0j7GLfa6vnA@mail.gmail.com>
+ <34fd84d7-387b-b6f3-7fb3-aa490909e205@ti.com> <CAPDyKFrrO4noYqdxWL9Y8Nx75LopbDudKGMotkGbGcAF1oq==w@mail.gmail.com>
+ <5e9b5646-bd48-e55b-54ee-1c2c41fc9218@nvidia.com> <CAPDyKFqpNo_4OePBR1KnJNO=kR8XEqbcsEd=icSceSdDH+Rk1Q@mail.gmail.com>
+ <757853cf-987e-f6b6-9259-b4560a031692@nvidia.com> <d12fe142-7e72-ab58-33ab-17817e35096f@nvidia.com>
+ <c216f131-6f83-c9c9-9d17-8d44ec06972d@nvidia.com> <87ad7586-9569-4276-044a-adb64e84ca15@nvidia.com>
+ <a0962e0b-0f1d-9f32-f6e9-92f69f93167f@nvidia.com> <57ddddc2-3ee8-d867-bba0-0dd9929ba37d@nvidia.com>
+ <CAPDyKFqZSd9E3+16yFsmpee2JsbRJ-DGThxx7NJHu6UE00Xi1Q@mail.gmail.com>
+ <26ee7225-9483-4664-c2d7-b5cefeadcd4b@nvidia.com> <CAPDyKFqwVQDEnPNi33mc9ycTxpaT1cRLejbR3Ja4c8dha4gFRw@mail.gmail.com>
+ <0301bbd5-8d4d-4a77-42c7-8a1391c2d60a@nvidia.com>
+In-Reply-To: <0301bbd5-8d4d-4a77-42c7-8a1391c2d60a@nvidia.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 10 Mar 2020 10:05:07 +0100
-Message-ID: <CAPDyKFqqDWMsHEb493p__FNzYaEzE6Ry0bkd-2ng7cdM886zjw@mail.gmail.com>
-Subject: Re: [PATCH] mmc: mmc: Fix the timing for clock changing in mmc
-To:     "Seo, Kyungmin" <kyungmin.seo@intel.com>
-Cc:     "Hunter, Adrian" <adrian.hunter@intel.com>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
+Date:   Tue, 10 Mar 2020 10:46:55 +0100
+Message-ID: <CAPDyKFp93H0=ttazofW9NMBtL5VnjB4PdkwN0FDCtWR0pMHrPA@mail.gmail.com>
+Subject: Re: LKFT: arm x15: mmc1: cache flush error -110
+To:     Sowjanya Komatineni <skomatineni@nvidia.com>
+Cc:     Jon Hunter <jonathanh@nvidia.com>,
+        Bitan Biswas <bbiswas@nvidia.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Naresh Kamboju <naresh.kamboju@linaro.org>,
+        Jens Axboe <axboe@kernel.dk>,
+        Alexei Starovoitov <ast@kernel.org>,
+        linux-block <linux-block@vger.kernel.org>,
+        lkft-triage@lists.linaro.org,
+        open list <linux-kernel@vger.kernel.org>,
         "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+        Arnd Bergmann <arnd@arndb.de>,
+        John Stultz <john.stultz@linaro.org>,
+        Faiz Abbas <faiz_abbas@ti.com>,
+        Thierry Reding <treding@nvidia.com>,
+        Anders Roxell <anders.roxell@linaro.org>,
+        Kishon <kishon@ti.com>
 Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 10 Mar 2020 at 05:28, Seo, Kyungmin <kyungmin.seo@intel.com> wrote:
+On Mon, 9 Mar 2020 at 18:33, Sowjanya Komatineni <skomatineni@nvidia.com> wrote:
 >
-> I read the link and patch of Chaotian Jing.
-> I also point out what Chaotian said.
-> Most host controllers have DLL tuning values for each mode. When host controller is set as HS400 mode with 50MHz clock, host controller uses DLL value which is tuned with 200MHz clock.
 >
-> If DLL value in HS400 mode doesn't have the pass range in HS mode, command transfer failing may fail.
-> In order to make robust sdhci driver, I think the patch needs to be considered.
-
-I have, but I am not picking it up in its current form.
-
-> Of course, CMD6 with HS400 mode and 200MHz clock should not cause any problem because it's correct configuration.
-
-Yes, but not for all cases, as I said in my reply in those email-threads.
-
-What I had in mind, is that I I think we should inform
-mmc_hs400_to_hs200() about under what situation it's getting called.
-Depending on that, we should either decrease the clock rate before or
-after we send the CMD6.
-
-Would that work for your case?
-
-Kind regards
-Uffe
-
->
-> Thanks
->
-> -----Original Message-----
-> From: Ulf Hansson <ulf.hansson@linaro.org>
-> Sent: Friday, March 6, 2020 12:18 AM
-> To: Seo, Kyungmin <kyungmin.seo@intel.com>; Hunter, Adrian <adrian.hunter@intel.com>; Chaotian Jing <chaotian.jing@mediatek.com>
-> Cc: linux-mmc@vger.kernel.org; Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-> Subject: Re: [PATCH] mmc: mmc: Fix the timing for clock changing in mmc
->
-> + Adrian, Chaotian
->
-> On Thu, 5 Mar 2020 at 09:57, Seo, Kyungmin <kyungmin.seo@intel.com> wrote:
+> On 3/6/20 3:14 AM, Ulf Hansson wrote:
+> > External email: Use caution opening links or attachments
 > >
-> > The mmc_hs400_to_hs200 function is called only in HS400 mode.
-> > I saw the clock change from 200MHz to 52MHz via oscilloscope on real platform.
 > >
-> > I think CMD6 is sent in HS400 mode with 200MHz clock, but it's not.
-> > First CMD6 in mmc_hs400_to_hs200 function is sent with 52MHz clock.
->
-> I had a vague memory that we have discussed a similar problem as your are pointing out on the mailing list already. And I was right.
->
-> Please read up on the below references, [1], [2] for the earlier discussions. I suggested a solution for Chaotian to try, but it seems like he never managed to give it a go, as I don't recall new patch being posted.
->
-> Perhaps you can pick up were Chaotian left and see if you can implement the suggested solution(s). My main concern is breaking other host drivers, as that seems quite likely to happen, if we aren't careful about this.
->
-> Kind regards
-> Uffe
->
-> [1]
-> https://lore.kernel.org/linux-mmc/1548921212-5219-1-git-send-email-chaotian.jing@mediatek.com/
-> [2]
-> https://lore.kernel.org/linux-mmc/CAPDyKFquyyXx1MqNLVXuFxcEDB9nKzN8LGGNUP2yxoVMQrWiUg@mail.gmail.com/
->
->
->
+> > [...]
 > >
-> > Thanks
-> > KM
+> >>>>>>>>>>> Actually we always use R1B with CMD6 as per spec.
+> >>>>>>>>>> I fully agree that R1B is preferable, but it's not against the
+> >>>>>>>>>> spec to
+> >>>>>>>>>> send CMD13 to poll for busy.
+> >>>>>>>>>>
+> >>>>>>>>>> Moreover, we need to cope with the scenario when the host has
+> >>>>>>>>>> specified a maximum timeout that isn't sufficiently long enough for
+> >>>>>>>>>> the requested operation. Do you have another proposal for how to
+> >>>>>>>>>> manage this, but disabling MMC_RSP_BUSY?
+> >>>>>>>>>>
+> >>>>>>>>>> Let's assume you driver would get a R1B for the CMD6 (we force it),
+> >>>>>>>>>> then what timeout would the driver be using if we would set
+> >>>>>>>>>> cmd.busy_timeout to 30ms?
+> >>>>>>>>>>
+> >>>> Sorry didn't understood clearly. Are you asking with 30s timeout, whats
+> >>>> the data timeout counter used?
+> >>> Yes. It seems like it will pick the maximum, which is 11s?
+> >> yes
+> > Okay, thanks!
 > >
-> > -----Original Message-----
-> > From: Ulf Hansson <ulf.hansson@linaro.org>
-> > Sent: Wednesday, March 4, 2020 8:09 PM
-> > To: Seo, Kyungmin <kyungmin.seo@intel.com>
-> > Cc: linux-mmc@vger.kernel.org; Linux Kernel Mailing List
-> > <linux-kernel@vger.kernel.org>
-> > Subject: Re: [PATCH] mmc: mmc: Fix the timing for clock changing in
-> > mmc
+> >>>> Because of above mentioned issue on our host where CMD interrupt happens
+> >>>> after busy state, poll for busy returns right away as not busy.
+> >>> I see.
+> >>>
+> >>>> So issuing CMD13 after CMD6-R1 followed by busy poll should be working.
+> >>>> But weird that with small delay of 1ms or debug print before CMD13 it
+> >>>> doesn't timeout and works all the time.
+> >>> I have digested the information you provided in these emails. Let me
+> >>> summarize it, to see if I have understood correctly.
+> >>>
+> >>> 1.
+> >>> Your controller can't distinguish between R1 and R1B because of a
+> >>> limitation in the HW. So, in both cases you need to wait for the card
+> >>> to stop signal busy, before the controller can give an IRQ to notify
+> >>> that the R1 response has been received. Correct?
+> >>>
+> >>> In this context, I am wondering if sdhci_send_command(), really
+> >>> conforms to these requirements. For example, depending on if the CMD6
+> >>> has MMC_RSP_BUSY or not, it may pick either SDHCI_CMD_RESP_SHORT or
+> >>> SDHCI_CMD_RESP_SHORT_BUSY.
+> >>>
+> >>> Does this work as expected for your case?
+> >> Design team re-verified internally and bug where HW waits for busy state
+> >> before IRQ is only for R1B and R1 is spec compliant.
+> >>
+> >> So, with R1, CMD complete is generated after response received.
+> > Okay.
 > >
-> > On Wed, 12 Feb 2020 at 03:40, Kyungmin Seo <kyungmin.seo@intel.com> wrote:
-> > >
-> > > The clock has to be changed after sending CMD6 for HS mode selection
-> > > in
-> > > mmc_hs400_to_hs200() function.
-> > >
-> > > The JEDEC 5.0 and 5.1 said that "High-speed" mode selection has to
-> > > enable the the high speed mode timing in the Device, before chaning
-> > > the clock frequency to a frequency between 26MHz and 52MHz.
+> > So, the issue we see for CMD6 with R1, is a software problem that we
+> > should be able to fix.
 > >
-> > I think that is based upon the assumption that you are using a lower frequency to start with.
+> >> With R1B, CMD complete and xfer complete both are generated after
+> >> response received + device busy (max timeout of 11s)
+> >> DATA timeout interrupt will be asserted incase if HW busy detection fails.
+> >>
+> >> With R1B we may see DATA Timeout if operation takes more than max busy
+> >> timeout of 11s.
+> > Okay, I see.
 > >
-> > For example, assume that you are running with 400KHz during card initialization, then you want to send the CMD6 to switch to HS mode and that should be done, before updating the clock rate.
+> >>> 2.
+> >>> Assuming my interpretation of the above is somewhat correct. Then you
+> >>> always need to set a busy timeout for R1/R1B responses in the
+> >>> controller. The maximum timeout seems to be 11s long. Obviously, this
+> >>> isn't enough for all cases, such as cache flushing and erase, for
+> >>> example. So, what can we do to support a longer timeouts than 11s?
+> >>> Would it be possible to disable the HW timeout, if the requested
+> >>> timeout is longer than 11s and use a SW timeout instead?
+> >>>
+> >>> Kind regards
+> >>> Uffe
+> >> For erase long operations we have register bit to enable for infinite
+> >> busy wait mode where host controller would be monitoring until card is busy.
+> > Alright, that sounds great!
 > >
-> > mmc_hs400_to_hs200() goes the opposite direction, so I think the current code looks correct to me.
+> >> But so far for emmc devices we used on our platforms, we haven't seen
+> >> cache flush taking more than 11s.
+> > I understand that 11s is probably fine to use, for most cases.
+> >
+> > However, it's not spec compliant, as for some operations there are
+> > simply no timeout specified. BKOPS, cache flush, sanitize are cases
+> > like this - and then 11s is definitely not sufficient.
+> >
+> >> Will get back on possibility of disabling HW timeout and using SW timeout..
+> > Thanks!
+> >
+> > I would like to get the regression fixed asap, but I also would like
+> > to avoid reverting patches, unless really necessary. May I propose the
+> > following two options.
+> >
+> > 1. Find out why polling with ->card_busy() or CMD13, for a CMD6 with
+> > an R1 response doesn't work - and then fix that behaviour.
+> >
+> > 2. Set the mmc->max_busy_timeout to zero for sdhci-tegra, which makes
+> > the core to always use R1B for CMD6 (and erase). This also means that
+> > when the cmd->busy_timeout becomes longer than 11s, sdhci-tegra must
+> > disable the HW busy timeout and just wait "forever".
+> >
+> > If you decide for 2, you can add the software timeout support on top,
+> > but make that can be considered as a next step of an improvement,
+> > rather than needed as fix. Note that, I believe there are some support
+> > for software timeout already in the sdhci core, maybe you need to
+> > tweak it a bit for your case, I don't know.
 > >
 > > Kind regards
 > > Uffe
-> >
-> > >
-> > > Signed-off-by: Kyungmin Seo <kyungmin.seo@intel.com>
-> > > ---
-> > >  drivers/mmc/core/mmc.c | 8 ++++----
-> > >  1 file changed, 4 insertions(+), 4 deletions(-)
-> > >
-> > > diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c index
-> > > 3486bc7fbb64..98640b51c73e 100644
-> > > --- a/drivers/mmc/core/mmc.c
-> > > +++ b/drivers/mmc/core/mmc.c
-> > > @@ -1196,10 +1196,6 @@ int mmc_hs400_to_hs200(struct mmc_card *card)
-> > >         int err;
-> > >         u8 val;
-> > >
-> > > -       /* Reduce frequency to HS */
-> > > -       max_dtr = card->ext_csd.hs_max_dtr;
-> > > -       mmc_set_clock(host, max_dtr);
-> > > -
-> > >         /* Switch HS400 to HS DDR */
-> > >         val = EXT_CSD_TIMING_HS;
-> > >         err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> > > EXT_CSD_HS_TIMING, @@ -1210,6 +1206,10 @@ int
-> > > mmc_hs400_to_hs200(struct mmc_card *card)
-> > >
-> > >         mmc_set_timing(host, MMC_TIMING_MMC_DDR52);
-> > >
-> > > +       /* Reduce frequency to HS */
-> > > +       max_dtr = card->ext_csd.hs_max_dtr;
-> > > +       mmc_set_clock(host, max_dtr);
-> > > +
-> > >         err = mmc_switch_status(card);
-> > >         if (err)
-> > >                 goto out_err;
-> > > --
-> > > 2.17.1
-> > >
+>
+> Hi Uffe
+>
+> Will go with 2nd option and will send patches out when ready.
+
+Okay, good.
+
+>
+> BTW, Tegra host also supports SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK for
+> data timeout based on host clock when using finite mode (HW busy
+> detection based on DATA TIMEOUT count value when cmd operation timeout
+> is < 11s for tegra host).
+>
+> So, looks like we cant set host max_busy_timeout to 0 for Tegra host to
+> force R1B during SWITCH and SLEEP_AWAKE.
+>
+> So, was thinking to introduce host capability MMC_CAP2_LONG_WAIT_HW_BUSY
+> which can be used for hosts supporting long or infinite HW busy wait
+> detection and will update mmc and mmc_ops drivers to not allow convert
+> R1B to R1B for hosts with this capability during SLEEP_AWAKE and SWITCH.
+
+That seems reasonable, it becomes probably both easier and clearer by
+adding a new host cap.
+
+In any case, let me help out and cook a patch for this for the core
+part (I leave the sdhci change to you). It may be a bit tricky,
+especially since I have currently queued a bunch of new changes for
+v5.7, that enables more users of mmc_poll_for_busy() in the core.
+Maybe I need to temporarily drop them, so we can fix these problems
+first. I will check.
+
+Probably, I would also name the cap MMC_CAP_HW_NEED_RSP_BUSY, as that
+seems to be describing the common problem we have for sdhci
+omap/tegra.
+
+Finally, it seems like MMC_CAP_WAIT_WHILE_BUSY should be set for
+sdhci- tegra, so while at it, perhaps you can cook a patch for that as
+well.
+
+Kind regards
+Uffe
