@@ -7,32 +7,35 @@ X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A6106C1975A
-	for <linux-mmc@archiver.kernel.org>; Fri, 13 Mar 2020 01:11:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AFF62C1975A
+	for <linux-mmc@archiver.kernel.org>; Fri, 13 Mar 2020 01:12:06 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 8B0CB20738
-	for <linux-mmc@archiver.kernel.org>; Fri, 13 Mar 2020 01:11:55 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9661B20724
+	for <linux-mmc@archiver.kernel.org>; Fri, 13 Mar 2020 01:12:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727206AbgCMBLv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 12 Mar 2020 21:11:51 -0400
-Received: from 97-93-29-23.dhcp.snlo.ca.charter.com ([97.93.29.23]:54476 "EHLO
+        id S1727225AbgCMBL0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 12 Mar 2020 21:11:26 -0400
+Received: from 97-93-29-23.dhcp.snlo.ca.charter.com ([97.93.29.23]:54446 "EHLO
         skomatineni-linux.nvidia.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1727154AbgCMBL1 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Mar 2020 21:11:27 -0400
+        by vger.kernel.org with ESMTP id S1727027AbgCMBL0 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Mar 2020 21:11:26 -0400
 Received: by skomatineni-linux.nvidia.com (Postfix, from userid 1000)
-        id 5D85A104008C; Wed, 11 Mar 2020 01:56:04 -0700 (PDT)
+        id 42B071040069; Mon,  9 Mar 2020 17:13:27 -0700 (PDT)
 From:   Sowjanya Komatineni <skomatineni@nvidia.com>
 To:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
         baolin.wang@linaro.org, kstewart@linuxfoundation.org,
         tglx@linutronix.de, bradleybolen@gmail.com,
         gregkh@linuxfoundation.org, thierry.reding@gmail.com,
-        jonathanh@nvidia.com, skomatineni@nvidia.com
-Cc:     anrao@nvidia.com, linux-tegra@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
-Subject: [PATCH v2 1/2] sdhci: tegra: Implement Tegra specific set_timeout callback
-Date:   Wed, 11 Mar 2020 01:56:01 -0700
-Message-Id: <1583916962-9467-1-git-send-email-skomatineni@nvidia.com>
+        jonathanh@nvidia.com
+Cc:     skomatineni@nvidia.com, anrao@nvidia.com,
+        linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org
+Subject: [PATCH v1 2/3] mmc: tegra: Implement HW busy wait timeout based on command busy time
+Date:   Mon,  9 Mar 2020 17:13:24 -0700
+Message-Id: <1583799205-8442-2-git-send-email-skomatineni@nvidia.com>
 X-Mailer: git-send-email 2.7.4
+In-Reply-To: <1583799205-8442-1-git-send-email-skomatineni@nvidia.com>
+References: <1583799205-8442-1-git-send-email-skomatineni@nvidia.com>
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
@@ -57,7 +60,7 @@ Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
  1 file changed, 31 insertions(+)
 
 diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-index a25c3a4..fa8f6a4 100644
+index 403ac44..40a221d 100644
 --- a/drivers/mmc/host/sdhci-tegra.c
 +++ b/drivers/mmc/host/sdhci-tegra.c
 @@ -45,6 +45,7 @@
