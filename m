@@ -2,121 +2,96 @@ Return-Path: <SRS0=h93R=44=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-0.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 271CEC18E5A
-	for <linux-mmc@archiver.kernel.org>; Wed, 11 Mar 2020 09:20:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EE798C10F27
+	for <linux-mmc@archiver.kernel.org>; Wed, 11 Mar 2020 09:31:55 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id ECFCE20848
-	for <linux-mmc@archiver.kernel.org>; Wed, 11 Mar 2020 09:20:45 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id BDDC62192A
+	for <linux-mmc@archiver.kernel.org>; Wed, 11 Mar 2020 09:31:55 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="uin1HPcf"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="mBEcC9GM"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726097AbgCKJUp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 11 Mar 2020 05:20:45 -0400
-Received: from mail-lf1-f66.google.com ([209.85.167.66]:33952 "EHLO
-        mail-lf1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728255AbgCKJUp (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Mar 2020 05:20:45 -0400
-Received: by mail-lf1-f66.google.com with SMTP id i19so1067866lfl.1
-        for <linux-mmc@vger.kernel.org>; Wed, 11 Mar 2020 02:20:43 -0700 (PDT)
+        id S1728787AbgCKJbq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 11 Mar 2020 05:31:46 -0400
+Received: from mail-vs1-f66.google.com ([209.85.217.66]:46874 "EHLO
+        mail-vs1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728905AbgCKJbo (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Mar 2020 05:31:44 -0400
+Received: by mail-vs1-f66.google.com with SMTP id z125so835507vsb.13
+        for <linux-mmc@vger.kernel.org>; Wed, 11 Mar 2020 02:31:42 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=gzGrKjx7T6bMEuJHSdVpyuDphTMIQkVy9Cv5wxaqPB0=;
-        b=uin1HPcfChLr7/kvEoXUMG9V77Sy64D58DUXUt5FD+Av68kNHXx9UzkxkTIB1ltLHF
-         OaFD1x9gaQ5czvUXMyDnPpzqfRqnOz5B9Rqz/Vq3dgFdikwcco9QWil5fV8G4xIMPSd6
-         F4N/NvlHdcBVzcsQtVpGzGLaaKcl+ij3EZKgtcP0dNAkZ5iiTpU/Y0eAJA9ZSbAcTCcE
-         URWRgtwwHzYDq/uu3tZHmiMxZavmxG+ngiSgFU3is365Q+FUsq5ffzHEjUbVS1P+ImVh
-         Q+HB4rGtanTTejopcUyemcUxlRiOhtDyUg4/TiKSvC/6TWDj/pxS8o+knypUNWLcag/h
-         lqFg==
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=0Hl0Jv3Oz8PPi8EkkFOWNauIj154EpD1JLm1YWqq4Z8=;
+        b=mBEcC9GMCt0x1SlaYAUWhcIiIJuCFfJ6JeCYV7K2D92bPB2OQkpsbqy1R4FuiJ6EPB
+         EjTrYITft/iCMGsWcQBKC7YKXuHooYUIkn6rkmyf1CXgV9PIXs60DGy51gBtCtaxjAEe
+         UJg96dHL8Jrqqssz7HaOaaV7WleEP1VAoWImhLv4PQ2P+bL0iW3AaG+Ly2L4h9wY4WxF
+         KUb/IXlpjlPDmJYCSSQkd25aezWkr4jDAxD65qenzzNV+zc5uhzJb9tcjDLIFroh5I+q
+         aFZcU4e2EdtWAyakGk0LDYyzSNBeOQdrO0QonaaHOzZLhrjCKM/iSsnDyVUYWbwKjLC9
+         0+5w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=gzGrKjx7T6bMEuJHSdVpyuDphTMIQkVy9Cv5wxaqPB0=;
-        b=fAmumrhUktTMDZYqylvhs1ePbTS3pfys9V7TR+YMU7AJoT+EyK0qUFeTNm3UbrGsfe
-         QrCr3s0D40kvFHMSZmUq+zg6/vnXIoQHG1ytiANzEej62l/wQEfJCUDi7g9a0aqRAhov
-         NG6u30p3Hmh4+9+LQFgSIueKJBuCFTs+EbzDQrtD+9re1qkcHKwjizJYm1ZQ60qrmGqF
-         vvVwqR+zSerJttMt75xZRFrilAy99BG6t9aGgaaujKpP7x+W5dlacn/73VQVcJXGJnR6
-         dUiAjU5qop0PLuBIvkr50FASQoUPhAotvjQ/b5uTnq07JyrwqZjQ8dDKlY1Pbq9aZIan
-         s4gw==
-X-Gm-Message-State: ANhLgQ35AcGbarla8iiPcx4fOSjsp9WxvnzLcJUrE2qLE8H9fvRII4UG
-        EsWfkXrh43+uKWvwiZPFjwzBnQ6wVYI=
-X-Google-Smtp-Source: ADFU+vtZ+9l/EWWD6Wh6gxr/y5f9nLAAX9h4wbaqzGjDjekloDtJQpTBZX60pH/YmP5E/up8uDrXTA==
-X-Received: by 2002:ac2:58ee:: with SMTP id v14mr1571246lfo.62.1583918442381;
-        Wed, 11 Mar 2020 02:20:42 -0700 (PDT)
-Received: from localhost.localdomain (h-158-174-22-210.NA.cust.bahnhof.se. [158.174.22.210])
-        by smtp.gmail.com with ESMTPSA id e2sm23169178ljp.55.2020.03.11.02.20.40
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 11 Mar 2020 02:20:41 -0700 (PDT)
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-To:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Ludovic Barre <ludovic.barre@st.com>,
-        Baolin Wang <baolin.wang7@gmail.com>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        Shawn Lin <shawn.lin@rock-chips.com>, mirq-linux@rere.qmqm.pl,
-        Bitan Biswas <bbiswas@nvidia.com>,
-        Peter Geis <pgwipeout@gmail.com>,
-        Sowjanya Komatineni <skomatineni@nvidia.com>,
-        Faiz Abbas <faiz_abbas@ti.com>,
-        Anders Roxell <anders.roxell@linaro.org>,
-        Naresh Kamboju <naresh.kamboju@linaro.org>,
-        Jon Hunter <jonathanh@nvidia.com>, stable@vger.kernel.org
-Subject: [PATCH] mmc: core: Respect MMC_CAP_NEED_RSP_BUSY for eMMC sleep command
-Date:   Wed, 11 Mar 2020 10:20:36 +0100
-Message-Id: <20200311092036.16084-1-ulf.hansson@linaro.org>
-X-Mailer: git-send-email 2.20.1
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=0Hl0Jv3Oz8PPi8EkkFOWNauIj154EpD1JLm1YWqq4Z8=;
+        b=iyIi7gdBM3D+FxTIPwcIGAF111u4gQm0vnReTjnrX9PwNPMO4v5cTukYFTLjBX3osV
+         zfYrfLeRtARS8FolQTI52U+7U4FQh721eTDBrdcvbfp6us1DpJtN8OwCvCKBZVtGPHPp
+         RPTLUmrB2gInWtQFb8zUIq1UkFIzG0YCtv9ZBSboQGSErplfpGtVzzzebL+3wLsI3xnw
+         7yRSSsPnhJCmQ9I78EMx7JXzK0gXuqNTCmVb68HMdreLJUEaqd9PxVP7gfTxgp7qi6tV
+         hTzo8ZDVKX93nG/Be886USC/xfip+06Z5pe/fhxPddu9zyTsyjoomhm3aG7fwA7jXQXG
+         4D8g==
+X-Gm-Message-State: ANhLgQ1ysvVxgAILF5ichFeSW1Azm/x8K39Q+hqtqVP2hg0JVGeX1n+U
+        GBJv06nrZ8oyvrtQwy4tqGOsvGJEyRq9/AEjTo6sOIMD
+X-Google-Smtp-Source: ADFU+vuH142ykWzbc0CwABfH5ut17ar0ugGTzGVVRIjEmTBLar4vfrWZahCNzj6oC/bVqBFRlyb27hcMfxbd8PoSf2Q=
+X-Received: by 2002:a67:d03:: with SMTP id 3mr654919vsn.35.1583919102205; Wed,
+ 11 Mar 2020 02:31:42 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <1582100757-20683-1-git-send-email-haibo.chen@nxp.com>
+ <1582100757-20683-9-git-send-email-haibo.chen@nxp.com> <CAPDyKFrR3oawA0o8KJ1ZEP41Ydb+-QWFbtxLua5TLemHybQ6QQ@mail.gmail.com>
+ <20200304162844.GA11727@lst.de> <CACRpkdakLfH_bpU5W44HGZ8XBYGqNsH7B+zuVKs2AXuJLwDtPw@mail.gmail.com>
+ <20200305152337.GC4870@lst.de> <CAPDyKFovCm5r7J4pQNfV21KiyAC+VGHvowddgkdzkSE4f3UnGA@mail.gmail.com>
+ <20200306141950.GA1017@lst.de>
+In-Reply-To: <20200306141950.GA1017@lst.de>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Wed, 11 Mar 2020 10:31:06 +0100
+Message-ID: <CAPDyKFqPzbsCJExbkhFzu=h9BXxeZWj342hZm35AJ6j2p_QLVg@mail.gmail.com>
+Subject: Re: [PATCH v4 14/14] mmc: queue: create dev->dma_parms before call dma_set_max_seg_size()
+To:     Christoph Hellwig <hch@lst.de>,
+        Greg KH <gregkh@linuxfoundation.org>
+Cc:     Linus Walleij <linus.walleij@linaro.org>,
+        Arnd Bergmann <arnd@arndb.de>, Haibo Chen <haibo.chen@nxp.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        dl-linux-imx <linux-imx@nxp.com>,
+        Ludovic Barre <ludovic.Barre@st.com>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The busy timeout for the CMD5 to put the eMMC into sleep state, is specific
-to the card. Potentially the timeout may exceed the host->max_busy_timeout.
-If that becomes the case, mmc_sleep() converts from using an R1B response
-to an R1 response, as to prevent the host from doing HW busy detection.
++ Ludovic Barre
 
-However, it has turned out that some hosts requires an R1B response no
-matter what, so let's respect that via checking MMC_CAP_NEED_RSP_BUSY. Note
-that, if the R1B gets enforced, the host becomes fully responsible of
-managing the needed busy timeout, in one way or the other.
+On Fri, 6 Mar 2020 at 15:19, Christoph Hellwig <hch@lst.de> wrote:
+>
+> On Fri, Mar 06, 2020 at 03:02:09PM +0100, Ulf Hansson wrote:
+> > That makes sense to me, but we also have other bus types to consider,
+> > like the amba bus for example.
+> >
+> > So, in principle, those buses that may get DMA capable devices
+> > attached, needs to do the allocation, that's what you are proposing?
+>
+> Having a dma_params allocated doesn't mean all devices are dma capable,
+> for example there are PCI devices that aren't as well.
 
-Suggested-by: Sowjanya Komatineni <skomatineni@nvidia.com>
-Cc: <stable@vger.kernel.org>
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
----
- drivers/mmc/core/mmc.c | 7 +++++--
- 1 file changed, 5 insertions(+), 2 deletions(-)
+Alright. I interpret the silence as that someone (me) should send a
+patch, to see if Greg is fine with it.
 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index f6912ded652d..de14b5845f52 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -1910,9 +1910,12 @@ static int mmc_sleep(struct mmc_host *host)
- 	 * If the max_busy_timeout of the host is specified, validate it against
- 	 * the sleep cmd timeout. A failure means we need to prevent the host
- 	 * from doing hw busy detection, which is done by converting to a R1
--	 * response instead of a R1B.
-+	 * response instead of a R1B. Note, some hosts requires R1B, which also
-+	 * means they are on their own when it comes to deal with the busy
-+	 * timeout.
- 	 */
--	if (host->max_busy_timeout && (timeout_ms > host->max_busy_timeout)) {
-+	if (!(host->caps & MMC_CAP_NEED_RSP_BUSY) && host->max_busy_timeout &&
-+	    (timeout_ms > host->max_busy_timeout)) {
- 		cmd.flags = MMC_RSP_R1 | MMC_CMD_AC;
- 	} else {
- 		cmd.flags = MMC_RSP_R1B | MMC_CMD_AC;
--- 
-2.20.1
+Please tell me, if you have other ideas of how to fix this.
 
+Kind regards
+Uffe
