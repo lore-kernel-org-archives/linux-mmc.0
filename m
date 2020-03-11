@@ -2,96 +2,105 @@ Return-Path: <SRS0=h93R=44=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EE798C10F27
-	for <linux-mmc@archiver.kernel.org>; Wed, 11 Mar 2020 09:31:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B6922C18E5A
+	for <linux-mmc@archiver.kernel.org>; Wed, 11 Mar 2020 09:37:24 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id BDDC62192A
-	for <linux-mmc@archiver.kernel.org>; Wed, 11 Mar 2020 09:31:55 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8CBA221D7E
+	for <linux-mmc@archiver.kernel.org>; Wed, 11 Mar 2020 09:37:24 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="mBEcC9GM"
+	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="UHB1vbWO"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728787AbgCKJbq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 11 Mar 2020 05:31:46 -0400
-Received: from mail-vs1-f66.google.com ([209.85.217.66]:46874 "EHLO
-        mail-vs1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728905AbgCKJbo (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Mar 2020 05:31:44 -0400
-Received: by mail-vs1-f66.google.com with SMTP id z125so835507vsb.13
-        for <linux-mmc@vger.kernel.org>; Wed, 11 Mar 2020 02:31:42 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=0Hl0Jv3Oz8PPi8EkkFOWNauIj154EpD1JLm1YWqq4Z8=;
-        b=mBEcC9GMCt0x1SlaYAUWhcIiIJuCFfJ6JeCYV7K2D92bPB2OQkpsbqy1R4FuiJ6EPB
-         EjTrYITft/iCMGsWcQBKC7YKXuHooYUIkn6rkmyf1CXgV9PIXs60DGy51gBtCtaxjAEe
-         UJg96dHL8Jrqqssz7HaOaaV7WleEP1VAoWImhLv4PQ2P+bL0iW3AaG+Ly2L4h9wY4WxF
-         KUb/IXlpjlPDmJYCSSQkd25aezWkr4jDAxD65qenzzNV+zc5uhzJb9tcjDLIFroh5I+q
-         aFZcU4e2EdtWAyakGk0LDYyzSNBeOQdrO0QonaaHOzZLhrjCKM/iSsnDyVUYWbwKjLC9
-         0+5w==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=0Hl0Jv3Oz8PPi8EkkFOWNauIj154EpD1JLm1YWqq4Z8=;
-        b=iyIi7gdBM3D+FxTIPwcIGAF111u4gQm0vnReTjnrX9PwNPMO4v5cTukYFTLjBX3osV
-         zfYrfLeRtARS8FolQTI52U+7U4FQh721eTDBrdcvbfp6us1DpJtN8OwCvCKBZVtGPHPp
-         RPTLUmrB2gInWtQFb8zUIq1UkFIzG0YCtv9ZBSboQGSErplfpGtVzzzebL+3wLsI3xnw
-         7yRSSsPnhJCmQ9I78EMx7JXzK0gXuqNTCmVb68HMdreLJUEaqd9PxVP7gfTxgp7qi6tV
-         hTzo8ZDVKX93nG/Be886USC/xfip+06Z5pe/fhxPddu9zyTsyjoomhm3aG7fwA7jXQXG
-         4D8g==
-X-Gm-Message-State: ANhLgQ1ysvVxgAILF5ichFeSW1Azm/x8K39Q+hqtqVP2hg0JVGeX1n+U
-        GBJv06nrZ8oyvrtQwy4tqGOsvGJEyRq9/AEjTo6sOIMD
-X-Google-Smtp-Source: ADFU+vuH142ykWzbc0CwABfH5ut17ar0ugGTzGVVRIjEmTBLar4vfrWZahCNzj6oC/bVqBFRlyb27hcMfxbd8PoSf2Q=
-X-Received: by 2002:a67:d03:: with SMTP id 3mr654919vsn.35.1583919102205; Wed,
- 11 Mar 2020 02:31:42 -0700 (PDT)
+        id S1728514AbgCKJhY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 11 Mar 2020 05:37:24 -0400
+Received: from fllv0016.ext.ti.com ([198.47.19.142]:46472 "EHLO
+        fllv0016.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726160AbgCKJhX (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Mar 2020 05:37:23 -0400
+Received: from fllv0034.itg.ti.com ([10.64.40.246])
+        by fllv0016.ext.ti.com (8.15.2/8.15.2) with ESMTP id 02B9atgq028018;
+        Wed, 11 Mar 2020 04:36:55 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
+        s=ti-com-17Q1; t=1583919415;
+        bh=0JRFgr4NmiP0aLkGZCbyApBsu2XHe2TVda8KoTp5/WU=;
+        h=Subject:To:CC:References:From:Date:In-Reply-To;
+        b=UHB1vbWOzaCZa45+8bo+Bp4jT9i7a8JJnbmPnkHUJPxMp7mtvHGEk3w2MuKiwDNF7
+         zR+8TIpzcharR8xCm/vC9+SsjIm8Q91GETZ5dDibWydoKRWgwi9wytOGWx1Z9ja5hC
+         Kjon5U3bGtbpVmo+1ERcW4GOOC4cL/w+VgeDoPKA=
+Received: from DLEE114.ent.ti.com (dlee114.ent.ti.com [157.170.170.25])
+        by fllv0034.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 02B9atoF062705
+        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
+        Wed, 11 Mar 2020 04:36:55 -0500
+Received: from DLEE109.ent.ti.com (157.170.170.41) by DLEE114.ent.ti.com
+ (157.170.170.25) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.1847.3; Wed, 11
+ Mar 2020 04:36:55 -0500
+Received: from localhost.localdomain (10.64.41.19) by DLEE109.ent.ti.com
+ (157.170.170.41) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.1847.3 via
+ Frontend Transport; Wed, 11 Mar 2020 04:36:54 -0500
+Received: from [10.24.69.157] (ileax41-snat.itg.ti.com [10.172.224.153])
+        by localhost.localdomain (8.15.2/8.15.2) with ESMTP id 02B9an1h047577;
+        Wed, 11 Mar 2020 04:36:50 -0500
+Subject: Re: [PATCH 3/4] mmc: sdhci-omap: Fix busy detection by enabling
+ MMC_CAP_NEED_RSP_BUSY
+To:     Ulf Hansson <ulf.hansson@linaro.org>, <linux-mmc@vger.kernel.org>
+CC:     Adrian Hunter <adrian.hunter@intel.com>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Ludovic Barre <ludovic.barre@st.com>,
+        Baolin Wang <baolin.wang7@gmail.com>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        Shawn Lin <shawn.lin@rock-chips.com>,
+        <mirq-linux@rere.qmqm.pl>, Bitan Biswas <bbiswas@nvidia.com>,
+        Peter Geis <pgwipeout@gmail.com>,
+        Sowjanya Komatineni <skomatineni@nvidia.com>,
+        Anders Roxell <anders.roxell@linaro.org>,
+        Naresh Kamboju <naresh.kamboju@linaro.org>,
+        Jon Hunter <jonathanh@nvidia.com>, <stable@vger.kernel.org>
+References: <20200310153340.5593-1-ulf.hansson@linaro.org>
+ <20200310153340.5593-4-ulf.hansson@linaro.org>
+From:   Faiz Abbas <faiz_abbas@ti.com>
+Message-ID: <caa76ea5-0f4e-6aac-5a3f-e2c9cd14a66f@ti.com>
+Date:   Wed, 11 Mar 2020 15:08:37 +0530
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.4.1
 MIME-Version: 1.0
-References: <1582100757-20683-1-git-send-email-haibo.chen@nxp.com>
- <1582100757-20683-9-git-send-email-haibo.chen@nxp.com> <CAPDyKFrR3oawA0o8KJ1ZEP41Ydb+-QWFbtxLua5TLemHybQ6QQ@mail.gmail.com>
- <20200304162844.GA11727@lst.de> <CACRpkdakLfH_bpU5W44HGZ8XBYGqNsH7B+zuVKs2AXuJLwDtPw@mail.gmail.com>
- <20200305152337.GC4870@lst.de> <CAPDyKFovCm5r7J4pQNfV21KiyAC+VGHvowddgkdzkSE4f3UnGA@mail.gmail.com>
- <20200306141950.GA1017@lst.de>
-In-Reply-To: <20200306141950.GA1017@lst.de>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 11 Mar 2020 10:31:06 +0100
-Message-ID: <CAPDyKFqPzbsCJExbkhFzu=h9BXxeZWj342hZm35AJ6j2p_QLVg@mail.gmail.com>
-Subject: Re: [PATCH v4 14/14] mmc: queue: create dev->dma_parms before call dma_set_max_seg_size()
-To:     Christoph Hellwig <hch@lst.de>,
-        Greg KH <gregkh@linuxfoundation.org>
-Cc:     Linus Walleij <linus.walleij@linaro.org>,
-        Arnd Bergmann <arnd@arndb.de>, Haibo Chen <haibo.chen@nxp.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        dl-linux-imx <linux-imx@nxp.com>,
-        Ludovic Barre <ludovic.Barre@st.com>
-Content-Type: text/plain; charset="UTF-8"
+In-Reply-To: <20200310153340.5593-4-ulf.hansson@linaro.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-+ Ludovic Barre
+Hi Uffe,
 
-On Fri, 6 Mar 2020 at 15:19, Christoph Hellwig <hch@lst.de> wrote:
->
-> On Fri, Mar 06, 2020 at 03:02:09PM +0100, Ulf Hansson wrote:
-> > That makes sense to me, but we also have other bus types to consider,
-> > like the amba bus for example.
-> >
-> > So, in principle, those buses that may get DMA capable devices
-> > attached, needs to do the allocation, that's what you are proposing?
->
-> Having a dma_params allocated doesn't mean all devices are dma capable,
-> for example there are PCI devices that aren't as well.
+On 10/03/20 9:03 pm, Ulf Hansson wrote:
+> It has turned out that the sdhci-omap controller requires the R1B response,
+> for commands that has this response associated with them. So, converting
+> from an R1B to an R1 response for a CMD6 for example, leads to problems
+> with the HW busy detection support.
+> 
+> Fix this by informing the mmc core about the requirement, via setting the
+> host cap, MMC_CAP_NEED_RSP_BUSY.
+> 
+> Reported-by: Naresh Kamboju <naresh.kamboju@linaro.org>
+> Reported-by: Anders Roxell <anders.roxell@linaro.org>
+> Reported-by: Faiz Abbas <faiz_abbas@ti.com>
+> Cc: <stable@vger.kernel.org>
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 
-Alright. I interpret the silence as that someone (me) should send a
-patch, to see if Greg is fine with it.
+Thanks for sending this fix. I will more look into the underlying
+behaviour once I'm back in office next week.
 
-Please tell me, if you have other ideas of how to fix this.
+Tested-by: Faiz Abbas <faiz_abbas@ti.com>
 
-Kind regards
-Uffe
+Regards,
+Faiz
