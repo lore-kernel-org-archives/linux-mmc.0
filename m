@@ -7,20 +7,20 @@ X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9134CC4CECE
-	for <linux-mmc@archiver.kernel.org>; Fri, 13 Mar 2020 01:11:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F36E9C1975A
+	for <linux-mmc@archiver.kernel.org>; Fri, 13 Mar 2020 01:11:49 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 7643520739
-	for <linux-mmc@archiver.kernel.org>; Fri, 13 Mar 2020 01:11:42 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D92322072F
+	for <linux-mmc@archiver.kernel.org>; Fri, 13 Mar 2020 01:11:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727297AbgCMBL3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 12 Mar 2020 21:11:29 -0400
-Received: from 97-93-29-23.dhcp.snlo.ca.charter.com ([97.93.29.23]:54466 "EHLO
+        id S1727363AbgCMBLq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 12 Mar 2020 21:11:46 -0400
+Received: from 97-93-29-23.dhcp.snlo.ca.charter.com ([97.93.29.23]:54468 "EHLO
         skomatineni-linux.nvidia.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1727161AbgCMBL2 (ORCPT
+        by vger.kernel.org with ESMTP id S1727156AbgCMBL2 (ORCPT
         <rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Mar 2020 21:11:28 -0400
 Received: by skomatineni-linux.nvidia.com (Postfix, from userid 1000)
-        id 61C19104008B; Wed, 11 Mar 2020 01:56:04 -0700 (PDT)
+        id C0E9C1040073; Wed, 11 Mar 2020 01:54:09 -0700 (PDT)
 From:   Sowjanya Komatineni <skomatineni@nvidia.com>
 To:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
         baolin.wang@linaro.org, kstewart@linuxfoundation.org,
@@ -29,40 +29,96 @@ To:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
         jonathanh@nvidia.com, skomatineni@nvidia.com
 Cc:     anrao@nvidia.com, linux-tegra@vger.kernel.org,
         linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
-Subject: [PATCH v2 2/2] sdhci: tegra: Enable MMC_CAP_WAIT_WHILE_BUSY host capability
-Date:   Wed, 11 Mar 2020 01:56:02 -0700
-Message-Id: <1583916962-9467-2-git-send-email-skomatineni@nvidia.com>
+Subject: [PATCH v2 1/2] sdhci: tegra: Implement Tegra specific set_timeout callback
+Date:   Wed, 11 Mar 2020 01:54:06 -0700
+Message-Id: <1583916847-30400-1-git-send-email-skomatineni@nvidia.com>
 X-Mailer: git-send-email 2.7.4
-In-Reply-To: <1583916962-9467-1-git-send-email-skomatineni@nvidia.com>
-References: <1583916962-9467-1-git-send-email-skomatineni@nvidia.com>
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Tegra sdhci host supports HW busy detection of the device busy
-signaling over data0 lane.
+Tegra host supports HW busy detection and timeouts based on the
+count programmed in SDHCI_TIMEOUT_CONTROL register and max busy
+timeout it supports is 11s in finite busy wait mode.
 
-So, this patch enables host capability MMC_CAP_wAIT_WHILE_BUSY.
+Some operations like SLEEP_AWAKE, ERASE and flush cache through
+SWITCH commands take longer than 11s and Tegra host supports
+infinite HW busy wait mode where HW waits forever till the card
+is busy without HW timeout.
+
+This patch implements Tegra specific set_timeout sdhci_ops to allow
+switching between finite and infinite HW busy detection wait modes
+based on the device command expected operation time.
 
 Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
 ---
- drivers/mmc/host/sdhci-tegra.c | 2 ++
- 1 file changed, 2 insertions(+)
+ drivers/mmc/host/sdhci-tegra.c | 31 +++++++++++++++++++++++++++++++
+ 1 file changed, 31 insertions(+)
 
 diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-index fa8f6a4..1c381f8 100644
+index a25c3a4..fa8f6a4 100644
 --- a/drivers/mmc/host/sdhci-tegra.c
 +++ b/drivers/mmc/host/sdhci-tegra.c
-@@ -1580,6 +1580,8 @@ static int sdhci_tegra_probe(struct platform_device *pdev)
- 	if (rc)
- 		goto err_parse_dt;
+@@ -45,6 +45,7 @@
+ #define SDHCI_TEGRA_CAP_OVERRIDES_DQS_TRIM_SHIFT	8
  
-+	host->mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY;
+ #define SDHCI_TEGRA_VENDOR_MISC_CTRL			0x120
++#define SDHCI_MISC_CTRL_ERASE_TIMEOUT_LIMIT		BIT(0)
+ #define SDHCI_MISC_CTRL_ENABLE_SDR104			0x8
+ #define SDHCI_MISC_CTRL_ENABLE_SDR50			0x10
+ #define SDHCI_MISC_CTRL_ENABLE_SDHCI_SPEC_300		0x20
+@@ -1227,6 +1228,34 @@ static u32 sdhci_tegra_cqhci_irq(struct sdhci_host *host, u32 intmask)
+ 	return 0;
+ }
+ 
++static void tegra_sdhci_set_timeout(struct sdhci_host *host,
++				    struct mmc_command *cmd)
++{
++	u32 val;
 +
- 	if (tegra_host->soc_data->nvquirks & NVQUIRK_ENABLE_DDR50)
- 		host->mmc->caps |= MMC_CAP_1_8V_DDR;
++	/*
++	 * HW busy detection timeout is based on programmed data timeout
++	 * counter and maximum supported timeout is 11s which may not be
++	 * enough for long operations like cache flush, sleep awake, erase.
++	 *
++	 * ERASE_TIMEOUT_LIMIT bit of VENDOR_MISC_CTRL register allows
++	 * host controller to wait for busy state until the card is busy
++	 * without HW timeout.
++	 *
++	 * So, use infinite busy wait mode for operations that may take
++	 * more than maximum HW busy timeout of 11s otherwise use finite
++	 * busy wait mode.
++	 */
++	val = sdhci_readl(host, SDHCI_TEGRA_VENDOR_MISC_CTRL);
++	if (cmd && cmd->busy_timeout >= 11 * HZ)
++		val |= SDHCI_MISC_CTRL_ERASE_TIMEOUT_LIMIT;
++	else
++		val &= ~SDHCI_MISC_CTRL_ERASE_TIMEOUT_LIMIT;
++	sdhci_writel(host, val, SDHCI_TEGRA_VENDOR_MISC_CTRL);
++
++	__sdhci_set_timeout(host, cmd);
++}
++
+ static const struct cqhci_host_ops sdhci_tegra_cqhci_ops = {
+ 	.write_l    = tegra_cqhci_writel,
+ 	.enable	= sdhci_tegra_cqe_enable,
+@@ -1366,6 +1395,7 @@ static const struct sdhci_ops tegra210_sdhci_ops = {
+ 	.set_uhs_signaling = tegra_sdhci_set_uhs_signaling,
+ 	.voltage_switch = tegra_sdhci_voltage_switch,
+ 	.get_max_clock = tegra_sdhci_get_max_clock,
++	.set_timeout = tegra_sdhci_set_timeout,
+ };
  
+ static const struct sdhci_pltfm_data sdhci_tegra210_pdata = {
+@@ -1403,6 +1433,7 @@ static const struct sdhci_ops tegra186_sdhci_ops = {
+ 	.voltage_switch = tegra_sdhci_voltage_switch,
+ 	.get_max_clock = tegra_sdhci_get_max_clock,
+ 	.irq = sdhci_tegra_cqhci_irq,
++	.set_timeout = tegra_sdhci_set_timeout,
+ };
+ 
+ static const struct sdhci_pltfm_data sdhci_tegra186_pdata = {
 -- 
 2.7.4
 
