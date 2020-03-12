@@ -2,114 +2,132 @@ Return-Path: <SRS0=Im6a=45=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=no
+X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 61C1FC10DCE
-	for <linux-mmc@archiver.kernel.org>; Thu, 12 Mar 2020 06:27:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3594FC1975A
+	for <linux-mmc@archiver.kernel.org>; Thu, 12 Mar 2020 10:43:29 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 57CBD20691
-	for <linux-mmc@archiver.kernel.org>; Thu, 12 Mar 2020 06:27:52 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id AFB1F20724
+	for <linux-mmc@archiver.kernel.org>; Thu, 12 Mar 2020 10:43:28 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=nifty.com header.i=@nifty.com header.b="nNTIzEET"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2387786AbgCLG1v (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 12 Mar 2020 02:27:51 -0400
-Received: from smtprelay0080.hostedemail.com ([216.40.44.80]:44926 "EHLO
-        smtprelay.hostedemail.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S2387784AbgCLG1v (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Mar 2020 02:27:51 -0400
-Received: from filter.hostedemail.com (clb03-v110.bra.tucows.net [216.40.38.60])
-        by smtprelay08.hostedemail.com (Postfix) with ESMTP id 72080182CED5B;
-        Thu, 12 Mar 2020 06:27:50 +0000 (UTC)
-X-Session-Marker: 6A6F6540706572636865732E636F6D
-X-HE-Tag: point06_441a962f90223
-X-Filterd-Recvd-Size: 3157
-Received: from XPS-9350.home (unknown [47.151.143.254])
-        (Authenticated sender: joe@perches.com)
-        by omf14.hostedemail.com (Postfix) with ESMTPA;
-        Thu, 12 Mar 2020 06:27:47 +0000 (UTC)
-Message-ID: <969ea500cfd66fa2fc32e8d1e9c6126710d16813.camel@perches.com>
-Subject: Re: [PATCH -next 013/491] INGENIC JZ47xx SoCs: Use fallthrough;
-From:   Joe Perches <joe@perches.com>
-To:     Miquel Raynal <miquel.raynal@bootlin.com>
-Cc:     Paul Cercueil <paul@crapouillou.net>,
-        Harvey Hunt <harveyhuntnexus@gmail.com>,
-        David Airlie <airlied@linux.ie>,
-        Daniel Vetter <daniel@ffwll.ch>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Richard Weinberger <richard@nod.at>,
-        Vignesh Raghavendra <vigneshr@ti.com>,
-        Liam Girdwood <lgirdwood@gmail.com>,
-        Mark Brown <broonie@kernel.org>,
-        Jaroslav Kysela <perex@perex.cz>,
-        Takashi Iwai <tiwai@suse.com>, dri-devel@lists.freedesktop.org,
-        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-mtd@lists.infradead.org, alsa-devel@alsa-project.org
-Date:   Wed, 11 Mar 2020 23:26:04 -0700
-In-Reply-To: <20200311084052.3ca3c331@xps13>
-References: <cover.1583896344.git.joe@perches.com>
-         <ad408ff8dc4e5fae0884312cb0aa618664e546e5.1583896348.git.joe@perches.com>
-         <20200311084052.3ca3c331@xps13>
-Content-Type: text/plain; charset="ISO-8859-1"
-User-Agent: Evolution 3.34.1-2 
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
+        id S1726851AbgCLKn2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 12 Mar 2020 06:43:28 -0400
+Received: from conuserg-08.nifty.com ([210.131.2.75]:50275 "EHLO
+        conuserg-08.nifty.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725268AbgCLKn2 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Mar 2020 06:43:28 -0400
+Received: from localhost.localdomain (p14092-ipngnfx01kyoto.kyoto.ocn.ne.jp [153.142.97.92]) (authenticated)
+        by conuserg-08.nifty.com with ESMTP id 02CAh4cj016228;
+        Thu, 12 Mar 2020 19:43:05 +0900
+DKIM-Filter: OpenDKIM Filter v2.10.3 conuserg-08.nifty.com 02CAh4cj016228
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nifty.com;
+        s=dec2015msa; t=1584009786;
+        bh=cUZIHu3WpQthGwKHqTfTR6+eqUmRT0xXwV9Ie8yoyFU=;
+        h=From:To:Cc:Subject:Date:From;
+        b=nNTIzEETvbJTWfCjfCJ09nCj2Z/kFOqzqEWTxJskoSFJn6XJkaJPq0crXYAxhHJ3N
+         p/uuqKfASY3y7q0pgFDHnaaw7YAlWFNtE1i0K0HSsCbNnyMHYqIB+27lVFQtc+CLGg
+         rTDwR7gKjLfaQW37M8Cx7Vqfp/Zfxamg/54NcFTP68R63aTRP2JhmpDy1GyKb+NW74
+         n51XS/ednndCiU33z39zNB6N3Kc4q6BlBvOoPeSmhGAhGvHNdxzdhS+YmOWWLXMiWm
+         qS8z2+9WGjKjFvLIQs8PHR8VpO0xKPDrEeNHR8JA33w7dhJVOHsLFfmQSck3Pn12Hl
+         yYwK70uMdPlKw==
+X-Nifty-SrcIP: [153.142.97.92]
+From:   Masahiro Yamada <yamada.masahiro@socionext.com>
+To:     linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Masahiro Yamada <yamada.masahiro@socionext.com>,
+        linux-kernel@vger.kernel.org
+Subject: [PATCH] mmc: sdhci-cadence: set SDHCI_QUIRK2_PRESET_VALUE_BROKEN for UniPhier
+Date:   Thu, 12 Mar 2020 19:42:57 +0900
+Message-Id: <20200312104257.21017-1-yamada.masahiro@socionext.com>
+X-Mailer: git-send-email 2.17.1
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 2020-03-11 at 08:40 +0100, Miquel Raynal wrote:
-> Hi Joe,
-> 
-> Joe Perches <joe@perches.com> wrote on Tue, 10 Mar 2020 21:51:27 -0700:
-> 
-> > Convert the various uses of fallthrough comments to fallthrough;
-> > 
-> > Done via script
-> > Link: https://lore.kernel.org/lkml/b56602fcf79f849e733e7b521bb0e17895d390fa.1582230379.git.joe.com/
-> > 
-> > Signed-off-by: Joe Perches <joe@perches.com>
-> > ---
-> >  drivers/gpu/drm/ingenic/ingenic-drm.c           | 2 +-
-> >  drivers/mmc/host/jz4740_mmc.c                   | 6 ++----
-> >  drivers/mtd/nand/raw/ingenic/ingenic_nand_drv.c | 2 +-
-> >  drivers/mtd/nand/raw/ingenic/jz4725b_bch.c      | 4 ++--
-> >  drivers/mtd/nand/raw/ingenic/jz4780_bch.c       | 4 ++--
-> >  sound/soc/codecs/jz4770.c                       | 2 +-
-> >  6 files changed, 9 insertions(+), 11 deletions(-)
-> 
-> I like very much the new way to advertise for fallthrough statements,
-> but I am not willing to take any patch converting a single driver
-> anymore. I had too many from Gustavo when these comments had to be
-> inserted. I would really prefer a MTD-wide or a NAND-wide or at least a
-> raw-NAND-wide single patch (anything inside drivers/mtd/nand/raw/).
+The SDHCI_PRESET_FOR_* registers are not set for the UniPhier platform
+integration. (They are all read as zeros).
 
-I understand completely.
+Set the SDHCI_QUIRK2_PRESET_VALUE_BROKEN quirk flag. Otherwise, the
+High Speed DDR mode on the eMMC controller (MMC_TIMING_MMC_DDR52)
+would not work.
 
-This set was done to generate patches by
-nominally maintained subsystems.
+I split the platform data to give no impact to other platforms,
+although the UniPhier platform is currently only the upstream user
+of this IP.
 
-If you want something else:
+The SDHCI_QUIRK2_PRESET_VALUE_BROKEN flag is set if the compatible
+string matches to "socionext,uniphier-sd4hc".
 
-The easiest thing for you to do would be to
-run the cvt_fallthrough.pl script yourself.
+Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
+---
 
-$ cvt_fallthrough.pl drivers/mtd/nand/raw/
+ drivers/mmc/host/sdhci-cadence.c | 18 ++++++++++++++++--
+ 1 file changed, 16 insertions(+), 2 deletions(-)
 
-That would produce:
-
-$ git diff --shortstat drivers/mtd/nand/raw
- 9 files changed, 18 insertions(+), 24 deletions(-)
-
-or
-
-$ cvt_fallthrough.pl drivers/mtd/
-
-which would produce:
-
-$ git diff --shortstat drivers/mtd/
- 22 files changed, 45 insertions(+), 60 deletions(-)
-
-cheers, Joe
+diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
+index 5827d3751b81..e573495f8726 100644
+--- a/drivers/mmc/host/sdhci-cadence.c
++++ b/drivers/mmc/host/sdhci-cadence.c
+@@ -11,6 +11,7 @@
+ #include <linux/mmc/host.h>
+ #include <linux/mmc/mmc.h>
+ #include <linux/of.h>
++#include <linux/of_device.h>
+ 
+ #include "sdhci-pltfm.h"
+ 
+@@ -235,6 +236,11 @@ static const struct sdhci_ops sdhci_cdns_ops = {
+ 	.set_uhs_signaling = sdhci_cdns_set_uhs_signaling,
+ };
+ 
++static const struct sdhci_pltfm_data sdhci_cdns_uniphier_pltfm_data = {
++	.ops = &sdhci_cdns_ops,
++	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
++};
++
+ static const struct sdhci_pltfm_data sdhci_cdns_pltfm_data = {
+ 	.ops = &sdhci_cdns_ops,
+ };
+@@ -334,6 +340,7 @@ static void sdhci_cdns_hs400_enhanced_strobe(struct mmc_host *mmc,
+ static int sdhci_cdns_probe(struct platform_device *pdev)
+ {
+ 	struct sdhci_host *host;
++	const struct sdhci_pltfm_data *data;
+ 	struct sdhci_pltfm_host *pltfm_host;
+ 	struct sdhci_cdns_priv *priv;
+ 	struct clk *clk;
+@@ -350,8 +357,12 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
+ 	if (ret)
+ 		return ret;
+ 
++	data = of_device_get_match_data(dev);
++	if (!data)
++		data = &sdhci_cdns_pltfm_data;
++
+ 	nr_phy_params = sdhci_cdns_phy_param_count(dev->of_node);
+-	host = sdhci_pltfm_init(pdev, &sdhci_cdns_pltfm_data,
++	host = sdhci_pltfm_init(pdev, data,
+ 				struct_size(priv, phy_params, nr_phy_params));
+ 	if (IS_ERR(host)) {
+ 		ret = PTR_ERR(host);
+@@ -431,7 +442,10 @@ static const struct dev_pm_ops sdhci_cdns_pm_ops = {
+ };
+ 
+ static const struct of_device_id sdhci_cdns_match[] = {
+-	{ .compatible = "socionext,uniphier-sd4hc" },
++	{
++		.compatible = "socionext,uniphier-sd4hc",
++		.data = &sdhci_cdns_uniphier_pltfm_data,
++	},
+ 	{ .compatible = "cdns,sd4hc" },
+ 	{ /* sentinel */ }
+ };
+-- 
+2.17.1
 
