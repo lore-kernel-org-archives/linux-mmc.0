@@ -2,128 +2,172 @@ Return-Path: <SRS0=Im6a=45=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9FA9BC10DCE
-	for <linux-mmc@archiver.kernel.org>; Thu, 12 Mar 2020 11:01:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C87CFC10DCE
+	for <linux-mmc@archiver.kernel.org>; Thu, 12 Mar 2020 13:08:49 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 6C0812071C
-	for <linux-mmc@archiver.kernel.org>; Thu, 12 Mar 2020 11:01:31 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A04B420663
+	for <linux-mmc@archiver.kernel.org>; Thu, 12 Mar 2020 13:08:49 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=nifty.com header.i=@nifty.com header.b="EPjbWq5S"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="FFA0e+6c"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726817AbgCLLBa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 12 Mar 2020 07:01:30 -0400
-Received: from conuserg-09.nifty.com ([210.131.2.76]:17232 "EHLO
-        conuserg-09.nifty.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726873AbgCLLBa (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Mar 2020 07:01:30 -0400
-Received: from localhost.localdomain (p14092-ipngnfx01kyoto.kyoto.ocn.ne.jp [153.142.97.92]) (authenticated)
-        by conuserg-09.nifty.com with ESMTP id 02CB0sYZ023841;
-        Thu, 12 Mar 2020 20:00:54 +0900
-DKIM-Filter: OpenDKIM Filter v2.10.3 conuserg-09.nifty.com 02CB0sYZ023841
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nifty.com;
-        s=dec2015msa; t=1584010854;
-        bh=FK3Dt+IairXqZAlzwKaf65fT4pceVw/ymV+lEzpyvwU=;
-        h=From:To:Cc:Subject:Date:From;
-        b=EPjbWq5S+60gnW/GYriRfzYFGC2zf6zQ5YieJb+cQ1Dq9ySFcxQEB1ryLpMJVpmKX
-         PlFchPDONqqgWYSmFqi0hQtKrSzErg+bON8yWo1z3RQpzC4rj+4+viBBWvSk3v/QIp
-         3JunNIcBKwZD4+sTnd3Ud5g91eHx6jz9mI5tzd5dnUKLBWhHN9KGByDMk0bUZ6BLLn
-         hSHn84Kiv91gk1urV9DhzdNlAmkt36BK9KXagq6P3+4P84A9++tXD7PraqTABNGemk
-         gZ4+xJeLJluiSq4XzDUavJmtAZad7s/FFJZuRMvc+RO31+PRzhY2bh9lqTnXOQGm1I
-         OuvsYkLU9a48g==
-X-Nifty-SrcIP: [153.142.97.92]
-From:   Masahiro Yamada <yamada.masahiro@socionext.com>
-To:     linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Masahiro Yamada <yamada.masahiro@socionext.com>,
-        linux-kernel@vger.kernel.org
-Subject: [PATCH] mmc: sdhci: use FIELD_GET for preset value bit masks
-Date:   Thu, 12 Mar 2020 20:00:50 +0900
-Message-Id: <20200312110050.21732-1-yamada.masahiro@socionext.com>
-X-Mailer: git-send-email 2.17.1
+        id S1727233AbgCLNIt (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 12 Mar 2020 09:08:49 -0400
+Received: from mail-ua1-f68.google.com ([209.85.222.68]:35566 "EHLO
+        mail-ua1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725268AbgCLNIs (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Mar 2020 09:08:48 -0400
+Received: by mail-ua1-f68.google.com with SMTP id y6so2077928ual.2
+        for <linux-mmc@vger.kernel.org>; Thu, 12 Mar 2020 06:08:48 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=615uTM0DnrncREOe2KMCqisaLBgj11Sr3HONWNz+aSc=;
+        b=FFA0e+6cg+LOma5AcX0rPtuPzExG8R49KllYxY8XJbVvagwzpy9nhwUHm5t9SIwSDy
+         bIzg+HNhDxnf6ntIDVKSACZilQ8647xb610y0PnN0o/9fG6oi2a0T0X/eRAW46ViGKz6
+         N/+r6mj2bo5SqTs4xFusTNw0mlF3J3Vgeyu6l6W8ylRpdonjlvQqi71TxR47PvvnY7BH
+         RGjFyIOKFeOYJR5bUqiJb+rgBnLLJlgXQb9Pszr1VbbXmNQyyRPd3n+Rj39QzqJKzidI
+         /cTQ90+22AWOQng+9JbvAkZJMaFdP139HdHJQTXrcUAfNkdFGXmDBXHVGsFVMlGaZ9o/
+         49zQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=615uTM0DnrncREOe2KMCqisaLBgj11Sr3HONWNz+aSc=;
+        b=sV/BNUGVs8djFkUU/bxxh4lEn4jNh7JmvTFyWt+huw0EDQnrwTdngfG/+4UvQxgp5r
+         WAAIWaEsiIJvo0YmaciRqwtsmHmfPhAX5YBKEPX13NWcFtPBB82U0kv4+lK/Plwa6uIF
+         b+OSEL4TcsKCMVMfVRQG9HG4x22p+pcJ130Y+FAxEmYLo46HYupfD6qDWdCs0LGnNHWd
+         XtFfs9wdXId5bczP5Af5gu2+fdhV3zq3+qpG39dtP7FzyNttTvPHWMcN3kyCqSxNgFsT
+         Trnj2UU4oJD2NkwavAh1Wai0Qxx0Y8bQ63RCy/1LxZ/OYthdsI6in5vkRH/TVXmUZZxs
+         ZwZA==
+X-Gm-Message-State: ANhLgQ11ipM8wb+o+fN3XmgJDlfpvcrRv/z1q4bzMZpJK6RglANbQG/W
+        FCV3XW26lv0rVD4sn0nCKIXbdPadX9/ztRXATChs0g==
+X-Google-Smtp-Source: ADFU+vtDr7w0rDYA7tLfhsh1VLaqV9dOvWkxWZQ1ep/cF52NPLjEf9RtpUKr5RXbY+RVuYJD1jc0bFBtl6R7KN9s2/o=
+X-Received: by 2002:a9f:3046:: with SMTP id i6mr4835277uab.15.1584018527825;
+ Thu, 12 Mar 2020 06:08:47 -0700 (PDT)
+MIME-Version: 1.0
+References: <1583886030-11339-1-git-send-email-skomatineni@nvidia.com>
+In-Reply-To: <1583886030-11339-1-git-send-email-skomatineni@nvidia.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Thu, 12 Mar 2020 14:08:11 +0100
+Message-ID: <CAPDyKFpAgk0uboGXdmA_m1-2=GK2oRXVv+97ZFFFAtT-ZZo4fw@mail.gmail.com>
+Subject: Re: [PATCH v2 1/2] sdhci: tegra: Implement Tegra specific set_timeout callback
+To:     Sowjanya Komatineni <skomatineni@nvidia.com>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        Bradley Bolen <bradleybolen@gmail.com>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        Jon Hunter <jonathanh@nvidia.com>,
+        Aniruddha Tvs Rao <anrao@nvidia.com>,
+        linux-tegra <linux-tegra@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Use the FIELD_GET macro to get access to the register fields.
-Delete the shift macros.
+-trimmed cc list
 
-Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
----
+On Thu, 12 Mar 2020 at 00:51, Sowjanya Komatineni
+<skomatineni@nvidia.com> wrote:
+>
+> Tegra host supports HW busy detection and timeouts based on the
+> count programmed in SDHCI_TIMEOUT_CONTROL register and max busy
+> timeout it supports is 11s in finite busy wait mode.
+>
+> Some operations like SLEEP_AWAKE, ERASE and flush cache through
+> SWITCH commands take longer than 11s and Tegra host supports
+> infinite HW busy wait mode where HW waits forever till the card
+> is busy without HW timeout.
+>
+> This patch implements Tegra specific set_timeout sdhci_ops to allow
+> switching between finite and infinite HW busy detection wait modes
+> based on the device command expected operation time.
+>
+> Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
 
- drivers/mmc/host/sdhci.c | 10 +++++-----
- drivers/mmc/host/sdhci.h | 10 ++++------
- 2 files changed, 9 insertions(+), 11 deletions(-)
+Applied for next, thanks!
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 63db84481dff..aec6692615c8 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -9,6 +9,7 @@
-  *     - JMicron (hardware and technical support)
-  */
- 
-+#include <linux/bitfield.h>
- #include <linux/delay.h>
- #include <linux/dmaengine.h>
- #include <linux/ktime.h>
-@@ -1766,10 +1767,9 @@ u16 sdhci_calc_clk(struct sdhci_host *host, unsigned int clock,
- 
- 			clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
- 			pre_val = sdhci_get_preset_value(host);
--			div = (pre_val & SDHCI_PRESET_SDCLK_FREQ_MASK)
--				>> SDHCI_PRESET_SDCLK_FREQ_SHIFT;
-+			div = FIELD_GET(SDHCI_PRESET_SDCLK_FREQ_MASK, pre_val);
- 			if (host->clk_mul &&
--				(pre_val & SDHCI_PRESET_CLKGEN_SEL_MASK)) {
-+				(pre_val & SDHCI_PRESET_CLKGEN_SEL)) {
- 				clk = SDHCI_PROG_CLOCK_MODE;
- 				real_div = div + 1;
- 				clk_mul = host->clk_mul;
-@@ -2227,8 +2227,8 @@ void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 
- 			sdhci_enable_preset_value(host, true);
- 			preset = sdhci_get_preset_value(host);
--			ios->drv_type = (preset & SDHCI_PRESET_DRV_MASK)
--				>> SDHCI_PRESET_DRV_SHIFT;
-+			ios->drv_type = FIELD_GET(SDHCI_PRESET_DRV_MASK,
-+						  preset);
- 		}
- 
- 		/* Re-enable SD Clock */
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index a6a3ddcf97e7..abdcefee24cb 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -9,6 +9,7 @@
- #ifndef __SDHCI_HW_H
- #define __SDHCI_HW_H
- 
-+#include <linux/bits.h>
- #include <linux/scatterlist.h>
- #include <linux/compiler.h>
- #include <linux/types.h>
-@@ -267,12 +268,9 @@
- #define SDHCI_PRESET_FOR_SDR104        0x6C
- #define SDHCI_PRESET_FOR_DDR50 0x6E
- #define SDHCI_PRESET_FOR_HS400 0x74 /* Non-standard */
--#define SDHCI_PRESET_DRV_MASK  0xC000
--#define SDHCI_PRESET_DRV_SHIFT  14
--#define SDHCI_PRESET_CLKGEN_SEL_MASK   0x400
--#define SDHCI_PRESET_CLKGEN_SEL_SHIFT	10
--#define SDHCI_PRESET_SDCLK_FREQ_MASK   0x3FF
--#define SDHCI_PRESET_SDCLK_FREQ_SHIFT	0
-+#define SDHCI_PRESET_DRV_MASK		GENMASK(15, 14)
-+#define SDHCI_PRESET_CLKGEN_SEL		BIT(10)
-+#define SDHCI_PRESET_SDCLK_FREQ_MASK	GENMASK(9, 0)
- 
- #define SDHCI_SLOT_INT_STATUS	0xFC
- 
--- 
-2.17.1
+We should probably tag this for stable as well, don't you think?
 
+Kind regards
+Uffe
+
+
+
+> ---
+>  drivers/mmc/host/sdhci-tegra.c | 31 +++++++++++++++++++++++++++++++
+>  1 file changed, 31 insertions(+)
+>
+> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+> index a25c3a4..fa8f6a4 100644
+> --- a/drivers/mmc/host/sdhci-tegra.c
+> +++ b/drivers/mmc/host/sdhci-tegra.c
+> @@ -45,6 +45,7 @@
+>  #define SDHCI_TEGRA_CAP_OVERRIDES_DQS_TRIM_SHIFT       8
+>
+>  #define SDHCI_TEGRA_VENDOR_MISC_CTRL                   0x120
+> +#define SDHCI_MISC_CTRL_ERASE_TIMEOUT_LIMIT            BIT(0)
+>  #define SDHCI_MISC_CTRL_ENABLE_SDR104                  0x8
+>  #define SDHCI_MISC_CTRL_ENABLE_SDR50                   0x10
+>  #define SDHCI_MISC_CTRL_ENABLE_SDHCI_SPEC_300          0x20
+> @@ -1227,6 +1228,34 @@ static u32 sdhci_tegra_cqhci_irq(struct sdhci_host *host, u32 intmask)
+>         return 0;
+>  }
+>
+> +static void tegra_sdhci_set_timeout(struct sdhci_host *host,
+> +                                   struct mmc_command *cmd)
+> +{
+> +       u32 val;
+> +
+> +       /*
+> +        * HW busy detection timeout is based on programmed data timeout
+> +        * counter and maximum supported timeout is 11s which may not be
+> +        * enough for long operations like cache flush, sleep awake, erase.
+> +        *
+> +        * ERASE_TIMEOUT_LIMIT bit of VENDOR_MISC_CTRL register allows
+> +        * host controller to wait for busy state until the card is busy
+> +        * without HW timeout.
+> +        *
+> +        * So, use infinite busy wait mode for operations that may take
+> +        * more than maximum HW busy timeout of 11s otherwise use finite
+> +        * busy wait mode.
+> +        */
+> +       val = sdhci_readl(host, SDHCI_TEGRA_VENDOR_MISC_CTRL);
+> +       if (cmd && cmd->busy_timeout >= 11 * HZ)
+> +               val |= SDHCI_MISC_CTRL_ERASE_TIMEOUT_LIMIT;
+> +       else
+> +               val &= ~SDHCI_MISC_CTRL_ERASE_TIMEOUT_LIMIT;
+> +       sdhci_writel(host, val, SDHCI_TEGRA_VENDOR_MISC_CTRL);
+> +
+> +       __sdhci_set_timeout(host, cmd);
+> +}
+> +
+>  static const struct cqhci_host_ops sdhci_tegra_cqhci_ops = {
+>         .write_l    = tegra_cqhci_writel,
+>         .enable = sdhci_tegra_cqe_enable,
+> @@ -1366,6 +1395,7 @@ static const struct sdhci_ops tegra210_sdhci_ops = {
+>         .set_uhs_signaling = tegra_sdhci_set_uhs_signaling,
+>         .voltage_switch = tegra_sdhci_voltage_switch,
+>         .get_max_clock = tegra_sdhci_get_max_clock,
+> +       .set_timeout = tegra_sdhci_set_timeout,
+>  };
+>
+>  static const struct sdhci_pltfm_data sdhci_tegra210_pdata = {
+> @@ -1403,6 +1433,7 @@ static const struct sdhci_ops tegra186_sdhci_ops = {
+>         .voltage_switch = tegra_sdhci_voltage_switch,
+>         .get_max_clock = tegra_sdhci_get_max_clock,
+>         .irq = sdhci_tegra_cqhci_irq,
+> +       .set_timeout = tegra_sdhci_set_timeout,
+>  };
+>
+>  static const struct sdhci_pltfm_data sdhci_tegra186_pdata = {
+> --
+> 2.7.4
+>
