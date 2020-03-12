@@ -2,163 +2,182 @@ Return-Path: <SRS0=Im6a=45=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.3 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-8.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 067D9C1975A
-	for <linux-mmc@archiver.kernel.org>; Thu, 12 Mar 2020 14:55:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 89B06C2BB1D
+	for <linux-mmc@archiver.kernel.org>; Thu, 12 Mar 2020 15:28:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 491332071B
-	for <linux-mmc@archiver.kernel.org>; Thu, 12 Mar 2020 14:55:30 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5133420674
+	for <linux-mmc@archiver.kernel.org>; Thu, 12 Mar 2020 15:28:40 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=microchiptechnology.onmicrosoft.com header.i=@microchiptechnology.onmicrosoft.com header.b="ZeUfR5IU"
+	dkim=pass (2048-bit key) header.d=nvidia.com header.i=@nvidia.com header.b="ADovG4BR"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727726AbgCLOz3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 12 Mar 2020 10:55:29 -0400
-Received: from esa5.microchip.iphmx.com ([216.71.150.166]:56969 "EHLO
-        esa5.microchip.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727225AbgCLOz2 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Mar 2020 10:55:28 -0400
-Received-SPF: Pass (esa5.microchip.iphmx.com: domain of
-  Ludovic.Desroches@microchip.com designates 198.175.253.82 as
-  permitted sender) identity=mailfrom;
-  client-ip=198.175.253.82; receiver=esa5.microchip.iphmx.com;
-  envelope-from="Ludovic.Desroches@microchip.com";
-  x-sender="Ludovic.Desroches@microchip.com";
-  x-conformance=spf_only; x-record-type="v=spf1";
-  x-record-text="v=spf1 mx a:ushub1.microchip.com
-  a:smtpout.microchip.com -exists:%{i}.spf.microchip.iphmx.com
-  include:servers.mcsv.net include:mktomail.com
-  include:spf.protection.outlook.com ~all"
-Received-SPF: None (esa5.microchip.iphmx.com: no sender
-  authenticity information available from domain of
-  postmaster@email.microchip.com) identity=helo;
-  client-ip=198.175.253.82; receiver=esa5.microchip.iphmx.com;
-  envelope-from="Ludovic.Desroches@microchip.com";
-  x-sender="postmaster@email.microchip.com";
-  x-conformance=spf_only
-Authentication-Results: esa5.microchip.iphmx.com; spf=Pass smtp.mailfrom=Ludovic.Desroches@microchip.com; spf=None smtp.helo=postmaster@email.microchip.com; dmarc=pass (p=none dis=none) d=microchip.com
-IronPort-SDR: /2LqKV2qybmAZOLZXIfMpa5QVhKA4AWQidxoERMzT6mzWPlt8DhF9kZIFMqgPwUW7aWnK430bu
- Geu0Oi368wPwPg0i1X/VHWAbI+j6nXHLmuQA/2yxGJRUt3xnBvc5TJEbcWplFYScLzWgDo7u42
- Wgzop+MvKg2OGgUw8GOLhQmErX1FiwhZEo7RVMfkzL8MuTyr3b56SK+1A+J0qQOJeV/jwb8WWJ
- 6jsa3wy6XYLtTHUBBrE6Okvn++xWxmBlnBU5Hq68cGFUaqgJwpz2+RJF0EbMKc6Lk1122vWaor
- sh8=
-X-IronPort-AV: E=Sophos;i="5.70,545,1574146800"; 
-   d="scan'208";a="68632617"
-Received: from smtpout.microchip.com (HELO email.microchip.com) ([198.175.253.82])
-  by esa5.microchip.iphmx.com with ESMTP/TLS/AES256-SHA256; 12 Mar 2020 07:55:27 -0700
-Received: from chn-vm-ex03.mchp-main.com (10.10.85.151) by
- chn-vm-ex03.mchp-main.com (10.10.85.151) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.1713.5; Thu, 12 Mar 2020 07:55:20 -0700
-Received: from NAM02-SN1-obe.outbound.protection.outlook.com (10.10.215.89) by
- email.microchip.com (10.10.87.152) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.1713.5
- via Frontend Transport; Thu, 12 Mar 2020 07:55:20 -0700
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=mHB9W0m1Do8Bxz7kOp7FVI9xzltpEVZDrPEtEYSo1g9EW3UFA9Uorftxj4itHcwm0l76OoKjvUtqlAxkdryl7sDnol38nzQ7ySvxVBkNKKwgU1UMohpDqpkN+vpaFHaxr76eWgEaL0ubIKpFkhVNybSdYatahOfQfiweRLXMIXco0YdC6OcBqIBZXvVWgcmtqjzTGKjng3gIO1fSCjH58DYNqN0kTYyG47Ge9L1jH+ffe6JXa4A+CAWnizht958NNXMzp7gUi+8gZuuea5O10zcXS93bTtzBkAotrOT2GMfugitUorpc1tDryz6pn6i97ctiVQjKaVd7CqJ1U3qXyQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=z+TobI91BvPcgD1zQGyl/Gwy9oZPqN9/Dah756QRSWo=;
- b=EqB5umjmHxBnsnX+ICmGQbGqdlKHOCnjs/HzfFkwtQBFrpooHZEJki5s9v6m+FoOLVXOp9ZJRYABWcbB2TKfUwxgzb6B8u5rpf8KwK5rglEx4qUOxZQe7ZFINP3LmIRTsFzt7dDNfN5a93zdwafTQYQawP34Yw4zezQle9wH9gYxSzwp93svU77Ocg/D8KghVv3YuPKsiixnt/QYhoVjcbOgBANF7lxC9DHhxkqqZRFah+IdrJIxXM9tkAto2NmxRy66zFqAgTSjGuXgYBwOUL5Q+BTOBAFxUbg+eBL2OJgPqdy/AGJXl4TqYpLNhe/1FbKSFoakrYHsqye+uq4NXw==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=microchip.com; dmarc=pass action=none
- header.from=microchip.com; dkim=pass header.d=microchip.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=microchiptechnology.onmicrosoft.com;
- s=selector2-microchiptechnology-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=z+TobI91BvPcgD1zQGyl/Gwy9oZPqN9/Dah756QRSWo=;
- b=ZeUfR5IUljyCC61KREJe4DiYvvBexfbJx2kqTRX3VKkxjoiHI+0LSppXTIGB1yUSerROTuRWNeIWUS7HmJmjdnPEXk+LET5GB4aDDJJPuNhS8LZeNojQJuu5gwvBKNhSSISiYv0BSVgWcn3fXZYaaFcrAqQdRafjs4mIGTHaECM=
-Received: from BY5PR11MB3895.namprd11.prod.outlook.com (2603:10b6:a03:18e::21)
- by BY5PR11MB4193.namprd11.prod.outlook.com (2603:10b6:a03:1c8::25) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.2793.17; Thu, 12 Mar
- 2020 14:55:15 +0000
-Received: from BY5PR11MB3895.namprd11.prod.outlook.com
- ([fe80::c09b:2e03:b941:13c5]) by BY5PR11MB3895.namprd11.prod.outlook.com
- ([fe80::c09b:2e03:b941:13c5%5]) with mapi id 15.20.2793.018; Thu, 12 Mar 2020
- 14:55:15 +0000
-From:   <Ludovic.Desroches@microchip.com>
-To:     <Tudor.Ambarus@microchip.com>, <adrian.hunter@intel.com>,
-        <ulf.hansson@linaro.org>
-CC:     <Nicolas.Ferre@microchip.com>, <alexandre.belloni@bootlin.com>,
-        <linux-mmc@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <Cristian.Birsan@microchip.com>
-Subject: Re: [PATCH] mmc: sdhci-of-at91: Display clock changes for debug
- purpose only
-Thread-Topic: [PATCH] mmc: sdhci-of-at91: Display clock changes for debug
- purpose only
-Thread-Index: AQHV+HqhVonJfj9ooEG0j49qskyYOKhFC4MA
-Date:   Thu, 12 Mar 2020 14:55:15 +0000
-Message-ID: <6291bd95-3d11-4b19-4346-9e1f06918993@microchip.com>
-References: <20200312142904.232822-1-tudor.ambarus@microchip.com>
-In-Reply-To: <20200312142904.232822-1-tudor.ambarus@microchip.com>
-Accept-Language: en-US
-Content-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-user-agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:68.0) Gecko/20100101
- Thunderbird/68.5.0
-x-originating-ip: [213.41.198.74]
-x-ms-publictraffictype: Email
-x-ms-office365-filtering-correlation-id: 33707f5e-78bb-450c-7771-08d7c6955fce
-x-ms-traffictypediagnostic: BY5PR11MB4193:
-x-ms-exchange-transport-forked: True
-x-microsoft-antispam-prvs: <BY5PR11MB4193DC2D36B47C8AC2182FB4EFFD0@BY5PR11MB4193.namprd11.prod.outlook.com>
-x-bypassexternaltag: True
-x-ms-oob-tlc-oobclassifiers: OLM:5797;
-x-forefront-prvs: 0340850FCD
-x-forefront-antispam-report: SFV:NSPM;SFS:(10009020)(346002)(396003)(376002)(366004)(39860400002)(136003)(199004)(66446008)(8936002)(110136005)(54906003)(76116006)(316002)(66476007)(5660300002)(81156014)(91956017)(31696002)(81166006)(64756008)(2906002)(66556008)(66946007)(8676002)(53546011)(6506007)(478600001)(31686004)(4326008)(86362001)(107886003)(71200400001)(36756003)(6512007)(6486002)(2616005)(186003)(26005);DIR:OUT;SFP:1101;SCL:1;SRVR:BY5PR11MB4193;H:BY5PR11MB3895.namprd11.prod.outlook.com;FPR:;SPF:None;LANG:en;PTR:InfoNoRecords;A:1;
-received-spf: None (protection.outlook.com: microchip.com does not designate
- permitted sender hosts)
-x-ms-exchange-senderadcheck: 1
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: 0MG9TA6T9jwhJXpGdsuPOBqlilo0tbXoeMmLOVLbCk05jAu0pA79AkSNvy8bUQh7ZgPC56VHS5AEnoj8cZ9n2YTrvDDUi5yVE2pmH+h+4CEVcFejGEAhGzo+rU5gZcigl/dxa1z+ckziWla74J6fs8ssNFqfBknXA4zdOhr2HzYH3BSmbauslwUm5LUBZjwqBfRtsCZG4vYtthihk4liN/eXiL2sivNluGM21DwhFGr7UsyTM5lf9YeCRE+f/e8p6NOUG4YUp+6H/kOKNwN1crnGnE2QJ+tUv1BYW4W5SESfbSB+aK3FvXRch/4WwKMM5sgHvWlM3HxiDhl7KHjuiaKGwvA+VA5yIs3EaWKGJexpdZIO/ejTECMlS9kFZNG3Sw/eBNJi1+UgTW7wuoU2XqWqG7zUwG9BWVdrX5IU3nFJdPlhrRxi3hP2+pHFbyeY
-x-ms-exchange-antispam-messagedata: 2PTHya+ZKnc9Wg3XL/6Hi1YDuVWDeKQnpCBhLDQGPsOPgDR17x/ZB1MuUCOho4BI9sF7OwS9no5F8m+99INXchlad2hbwdfp5W7N/HJzEbyZrx013DcpTih+Anml1Xk+XM9glg/rMxzL0CF4XodPkA==
-Content-Type: text/plain; charset="utf-8"
-Content-ID: <711D53F63E292640B160FC04CBDF5811@namprd11.prod.outlook.com>
-Content-Transfer-Encoding: base64
+        id S1727837AbgCLP2g (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 12 Mar 2020 11:28:36 -0400
+Received: from hqnvemgate24.nvidia.com ([216.228.121.143]:7878 "EHLO
+        hqnvemgate24.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727455AbgCLP2g (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Mar 2020 11:28:36 -0400
+Received: from hqpgpgate101.nvidia.com (Not Verified[216.228.121.13]) by hqnvemgate24.nvidia.com (using TLS: TLSv1.2, DES-CBC3-SHA)
+        id <B5e6a54c70002>; Thu, 12 Mar 2020 08:27:03 -0700
+Received: from hqmail.nvidia.com ([172.20.161.6])
+  by hqpgpgate101.nvidia.com (PGP Universal service);
+  Thu, 12 Mar 2020 08:28:35 -0700
+X-PGP-Universal: processed;
+        by hqpgpgate101.nvidia.com on Thu, 12 Mar 2020 08:28:35 -0700
+Received: from [10.2.172.79] (10.124.1.5) by HQMAIL107.nvidia.com
+ (172.20.187.13) with Microsoft SMTP Server (TLS) id 15.0.1473.3; Thu, 12 Mar
+ 2020 15:28:35 +0000
+Subject: Re: [PATCH v2 1/2] sdhci: tegra: Implement Tegra specific set_timeout
+ callback
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+CC:     Adrian Hunter <adrian.hunter@intel.com>,
+        Bradley Bolen <bradleybolen@gmail.com>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        "Jon Hunter" <jonathanh@nvidia.com>,
+        Aniruddha Tvs Rao <anrao@nvidia.com>,
+        linux-tegra <linux-tegra@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+References: <1583886030-11339-1-git-send-email-skomatineni@nvidia.com>
+ <CAPDyKFpAgk0uboGXdmA_m1-2=GK2oRXVv+97ZFFFAtT-ZZo4fw@mail.gmail.com>
+From:   Sowjanya Komatineni <skomatineni@nvidia.com>
+Message-ID: <7bf5bfb5-b07c-96d3-2c33-124085a36a65@nvidia.com>
+Date:   Thu, 12 Mar 2020 08:28:40 -0700
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101
+ Thunderbird/60.9.0
 MIME-Version: 1.0
-X-MS-Exchange-CrossTenant-Network-Message-Id: 33707f5e-78bb-450c-7771-08d7c6955fce
-X-MS-Exchange-CrossTenant-originalarrivaltime: 12 Mar 2020 14:55:15.4948
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 3f4057f3-b418-4d4e-ba84-d55b4e897d88
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: tA3KDyl+j1PNmCiIc3zDT5T+ipmdF6xLySgGbR6orFcNJiHg8/s6BXPSGcw9NbDM+p7YpAgsdGSDhnBunpUwJWUaOayf3jt67abt2CvzeAI=
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: BY5PR11MB4193
+In-Reply-To: <CAPDyKFpAgk0uboGXdmA_m1-2=GK2oRXVv+97ZFFFAtT-ZZo4fw@mail.gmail.com>
+X-Originating-IP: [10.124.1.5]
+X-ClientProxiedBy: HQMAIL101.nvidia.com (172.20.187.10) To
+ HQMAIL107.nvidia.com (172.20.187.13)
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+Content-Language: en-US
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nvidia.com; s=n1;
+        t=1584026823; bh=20CmxRXQV14NK/AWzN5cjVv0G+jcfKKJHsLGW1THEX0=;
+        h=X-PGP-Universal:Subject:To:CC:References:From:Message-ID:Date:
+         User-Agent:MIME-Version:In-Reply-To:X-Originating-IP:
+         X-ClientProxiedBy:Content-Type:Content-Transfer-Encoding:
+         Content-Language;
+        b=ADovG4BRKRpq/sgIlNDARFZ4ko1wfbqEB9VeDNZfevPxfK2VbKtn29YaHthii6+Un
+         XjYDb9qBqjmsO2Fa9DrOQYUn8NmKv1QqYZ/xREDcSA8Y1vUem9PwNTJosMSX7082CL
+         KryHBytg59ESxmiBhIY9XVI8V7MwiAu8eLFFD2Sov3efJEdp+Ji93cyS63BFnwm4P/
+         7BPumYrK6nha3M/Gk6HmAj4hckZzXRuSywOFvVRIeFWhva0UZLXPQ+1nSUSQvrV53p
+         ehmkoyigZ99w7cgnS8f1/Y9/ZD8TKa0du2G1QhJ8ZdmAQ95bz85JTxIT2xH+BoaZqg
+         rWTMAc57K3zXQ==
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-T24gMy8xMi8yMDIwIDM6MjkgUE0sIFR1ZG9yIEFtYmFydXMgLSBNMTgwNjQgd3JvdGU6DQo+IEZy
-b206IENyaXN0aWFuIEJpcnNhbiA8Y3Jpc3RpYW4uYmlyc2FuQG1pY3JvY2hpcC5jb20+DQo+DQo+
-IFRoZSBzZGhjaV9hdDkxX3NldF9jbGtzX3ByZXNldHMoKSBmdW5jdGlvbiBpcyBjYWxsZWQgbXVs
-dGlwbGUgdGltZXMNCj4gYXQgcnVudGltZSBhbmQgdGhlIG1lc3NhZ2VzIGFyZSBzaG93biBvbiB0
-aGUgY29uc29sZS4gRGlzcGxheSBjbGsgbXVsLA0KPiBnY2sgcmF0ZSBhbmQgY2xrIGJhc2UgZm9y
-IGRlYnVnIHBvcnBvc2Ugb25seS4NCg0Kcy9wb3Jwb3NlL3B1cnBvc2UNCg0KPg0KPiBTaWduZWQt
-b2ZmLWJ5OiBDcmlzdGlhbiBCaXJzYW4gPGNyaXN0aWFuLmJpcnNhbkBtaWNyb2NoaXAuY29tPg0K
-PiBTaWduZWQtb2ZmLWJ5OiBUdWRvciBBbWJhcnVzIDx0dWRvci5hbWJhcnVzQG1pY3JvY2hpcC5j
-b20+DQoNCkFja2VkLWJ5OiBMdWRvdmljIERlc3JvY2hlcyA8bHVkb3ZpYy5kZXNyb2NoZXNAbWlj
-cm9jaGlwLmNvbT4NCg0KVGhhbmtzDQoNCj4gLS0tDQo+ICAgZHJpdmVycy9tbWMvaG9zdC9zZGhj
-aS1vZi1hdDkxLmMgfCA0ICsrLS0NCj4gICAxIGZpbGUgY2hhbmdlZCwgMiBpbnNlcnRpb25zKCsp
-LCAyIGRlbGV0aW9ucygtKQ0KPg0KPiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvaG9zdC9zZGhj
-aS1vZi1hdDkxLmMgYi9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLW9mLWF0OTEuYw0KPiBpbmRleCBh
-YjJiZDMxNGEzOTAuLjg4ZjE3YWJiNjlhNyAxMDA2NDQNCj4gLS0tIGEvZHJpdmVycy9tbWMvaG9z
-dC9zZGhjaS1vZi1hdDkxLmMNCj4gKysrIGIvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1vZi1hdDkx
-LmMNCj4gQEAgLTIwNCw4ICsyMDQsOCBAQCBzdGF0aWMgaW50IHNkaGNpX2F0OTFfc2V0X2Nsa3Nf
-cHJlc2V0cyhzdHJ1Y3QgZGV2aWNlICpkZXYpDQo+ICAgCS8qIFNldCBjYXBhYmlsaXRpZXMgaW4g
-cm8gbW9kZS4gKi8NCj4gICAJd3JpdGVsKDAsIGhvc3QtPmlvYWRkciArIFNETU1DX0NBQ1IpOw0K
-PiAgIA0KPiAtCWRldl9pbmZvKGRldiwgInVwZGF0ZSBjbGsgbXVsIHRvICV1IGFzIGdjayByYXRl
-IGlzICV1IEh6IGFuZCBjbGsgYmFzZSBpcyAldSBIelxuIiwNCj4gLQkJIGNsa19tdWwsIGdja19y
-YXRlLCBjbGtfYmFzZV9yYXRlKTsNCj4gKwlkZXZfZGJnKGRldiwgInVwZGF0ZSBjbGsgbXVsIHRv
-ICV1IGFzIGdjayByYXRlIGlzICV1IEh6IGFuZCBjbGsgYmFzZSBpcyAldSBIelxuIiwNCj4gKwkJ
-Y2xrX211bCwgZ2NrX3JhdGUsIGNsa19iYXNlX3JhdGUpOw0KPiAgIA0KPiAgIAkvKg0KPiAgIAkg
-KiBXZSBoYXZlIHRvIHNldCBwcmVzZXQgdmFsdWVzIGJlY2F1c2UgaXQgZGVwZW5kcyBvbiB0aGUg
-Y2xrX211bA0KDQoNCg==
+
+On 3/12/20 6:08 AM, Ulf Hansson wrote:
+> External email: Use caution opening links or attachments
+>
+>
+> -trimmed cc list
+>
+> On Thu, 12 Mar 2020 at 00:51, Sowjanya Komatineni
+> <skomatineni@nvidia.com> wrote:
+>> Tegra host supports HW busy detection and timeouts based on the
+>> count programmed in SDHCI_TIMEOUT_CONTROL register and max busy
+>> timeout it supports is 11s in finite busy wait mode.
+>>
+>> Some operations like SLEEP_AWAKE, ERASE and flush cache through
+>> SWITCH commands take longer than 11s and Tegra host supports
+>> infinite HW busy wait mode where HW waits forever till the card
+>> is busy without HW timeout.
+>>
+>> This patch implements Tegra specific set_timeout sdhci_ops to allow
+>> switching between finite and infinite HW busy detection wait modes
+>> based on the device command expected operation time.
+>>
+>> Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
+> Applied for next, thanks!
+>
+> We should probably tag this for stable as well, don't you think?
+>
+> Kind regards
+> Uffe
+
+Yes, we need this for stable as well. As this is applied for next, looks 
+like can't re-send patch with tag.
+
+Can you please help to add tag if you don't mind?
+
+>
+>
+>> ---
+>>   drivers/mmc/host/sdhci-tegra.c | 31 +++++++++++++++++++++++++++++++
+>>   1 file changed, 31 insertions(+)
+>>
+>> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+>> index a25c3a4..fa8f6a4 100644
+>> --- a/drivers/mmc/host/sdhci-tegra.c
+>> +++ b/drivers/mmc/host/sdhci-tegra.c
+>> @@ -45,6 +45,7 @@
+>>   #define SDHCI_TEGRA_CAP_OVERRIDES_DQS_TRIM_SHIFT       8
+>>
+>>   #define SDHCI_TEGRA_VENDOR_MISC_CTRL                   0x120
+>> +#define SDHCI_MISC_CTRL_ERASE_TIMEOUT_LIMIT            BIT(0)
+>>   #define SDHCI_MISC_CTRL_ENABLE_SDR104                  0x8
+>>   #define SDHCI_MISC_CTRL_ENABLE_SDR50                   0x10
+>>   #define SDHCI_MISC_CTRL_ENABLE_SDHCI_SPEC_300          0x20
+>> @@ -1227,6 +1228,34 @@ static u32 sdhci_tegra_cqhci_irq(struct sdhci_host *host, u32 intmask)
+>>          return 0;
+>>   }
+>>
+>> +static void tegra_sdhci_set_timeout(struct sdhci_host *host,
+>> +                                   struct mmc_command *cmd)
+>> +{
+>> +       u32 val;
+>> +
+>> +       /*
+>> +        * HW busy detection timeout is based on programmed data timeout
+>> +        * counter and maximum supported timeout is 11s which may not be
+>> +        * enough for long operations like cache flush, sleep awake, erase.
+>> +        *
+>> +        * ERASE_TIMEOUT_LIMIT bit of VENDOR_MISC_CTRL register allows
+>> +        * host controller to wait for busy state until the card is busy
+>> +        * without HW timeout.
+>> +        *
+>> +        * So, use infinite busy wait mode for operations that may take
+>> +        * more than maximum HW busy timeout of 11s otherwise use finite
+>> +        * busy wait mode.
+>> +        */
+>> +       val = sdhci_readl(host, SDHCI_TEGRA_VENDOR_MISC_CTRL);
+>> +       if (cmd && cmd->busy_timeout >= 11 * HZ)
+>> +               val |= SDHCI_MISC_CTRL_ERASE_TIMEOUT_LIMIT;
+>> +       else
+>> +               val &= ~SDHCI_MISC_CTRL_ERASE_TIMEOUT_LIMIT;
+>> +       sdhci_writel(host, val, SDHCI_TEGRA_VENDOR_MISC_CTRL);
+>> +
+>> +       __sdhci_set_timeout(host, cmd);
+>> +}
+>> +
+>>   static const struct cqhci_host_ops sdhci_tegra_cqhci_ops = {
+>>          .write_l    = tegra_cqhci_writel,
+>>          .enable = sdhci_tegra_cqe_enable,
+>> @@ -1366,6 +1395,7 @@ static const struct sdhci_ops tegra210_sdhci_ops = {
+>>          .set_uhs_signaling = tegra_sdhci_set_uhs_signaling,
+>>          .voltage_switch = tegra_sdhci_voltage_switch,
+>>          .get_max_clock = tegra_sdhci_get_max_clock,
+>> +       .set_timeout = tegra_sdhci_set_timeout,
+>>   };
+>>
+>>   static const struct sdhci_pltfm_data sdhci_tegra210_pdata = {
+>> @@ -1403,6 +1433,7 @@ static const struct sdhci_ops tegra186_sdhci_ops = {
+>>          .voltage_switch = tegra_sdhci_voltage_switch,
+>>          .get_max_clock = tegra_sdhci_get_max_clock,
+>>          .irq = sdhci_tegra_cqhci_irq,
+>> +       .set_timeout = tegra_sdhci_set_timeout,
+>>   };
+>>
+>>   static const struct sdhci_pltfm_data sdhci_tegra186_pdata = {
+>> --
+>> 2.7.4
+>>
