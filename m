@@ -6,44 +6,45 @@ X-Spam-Status: No, score=-8.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
 	URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C601BC10DCE
-	for <linux-mmc@archiver.kernel.org>; Fri, 13 Mar 2020 07:19:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1BE1CC4CECE
+	for <linux-mmc@archiver.kernel.org>; Fri, 13 Mar 2020 09:53:37 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id A3E80206EB
-	for <linux-mmc@archiver.kernel.org>; Fri, 13 Mar 2020 07:19:33 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E7EA32074B
+	for <linux-mmc@archiver.kernel.org>; Fri, 13 Mar 2020 09:53:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726328AbgCMHTd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 13 Mar 2020 03:19:33 -0400
-Received: from mga12.intel.com ([192.55.52.136]:25776 "EHLO mga12.intel.com"
+        id S1726520AbgCMJxf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 13 Mar 2020 05:53:35 -0400
+Received: from mga04.intel.com ([192.55.52.120]:17196 "EHLO mga04.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726060AbgCMHTd (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 13 Mar 2020 03:19:33 -0400
+        id S1726216AbgCMJxf (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 13 Mar 2020 05:53:35 -0400
 X-Amp-Result: SKIPPED(no attachment in message)
 X-Amp-File-Uploaded: False
 Received: from orsmga008.jf.intel.com ([10.7.209.65])
-  by fmsmga106.fm.intel.com with ESMTP/TLS/DHE-RSA-AES256-GCM-SHA384; 13 Mar 2020 00:19:32 -0700
+  by fmsmga104.fm.intel.com with ESMTP/TLS/DHE-RSA-AES256-GCM-SHA384; 13 Mar 2020 02:53:34 -0700
 X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.70,547,1574150400"; 
-   d="scan'208";a="237126832"
+X-IronPort-AV: E=Sophos;i="5.70,548,1574150400"; 
+   d="scan'208";a="237169072"
 Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.167]) ([10.237.72.167])
-  by orsmga008.jf.intel.com with ESMTP; 13 Mar 2020 00:19:30 -0700
-Subject: Re: [PATCH] mmc: sdhci-of-at91: Display clock changes for debug
- purpose only
-To:     Tudor.Ambarus@microchip.com, Ludovic.Desroches@microchip.com,
-        ulf.hansson@linaro.org
-Cc:     Nicolas.Ferre@microchip.com, alexandre.belloni@bootlin.com,
-        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        Cristian.Birsan@microchip.com
-References: <20200312142904.232822-1-tudor.ambarus@microchip.com>
+  by orsmga008.jf.intel.com with ESMTP; 13 Mar 2020 02:53:32 -0700
+Subject: Re: [PATCH RFC 1/3] mmc: core: Try harder if transfer mode switch
+ fails
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Chaotian Jing <chaotian.jing@mediatek.com>,
+        Kyungmin Seo <kyungmin.seo@intel.com>,
+        linux-mmc <linux-mmc@vger.kernel.org>
+References: <20200312142501.9868-1-adrian.hunter@intel.com>
+ <20200312142501.9868-2-adrian.hunter@intel.com>
+ <CAPDyKFpHZDy3TvHdQBuKgu5k3QkE+Pqcu5jumWa=LAY+ixUheg@mail.gmail.com>
 From:   Adrian Hunter <adrian.hunter@intel.com>
 Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
  Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <975a35de-3c8a-2bad-8395-1c165fd1e66f@intel.com>
-Date:   Fri, 13 Mar 2020 09:18:43 +0200
+Message-ID: <5e2007ba-a090-b09b-6933-87c3548ed4f5@intel.com>
+Date:   Fri, 13 Mar 2020 11:52:44 +0200
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
  Thunderbird/68.5.0
 MIME-Version: 1.0
-In-Reply-To: <20200312142904.232822-1-tudor.ambarus@microchip.com>
+In-Reply-To: <CAPDyKFpHZDy3TvHdQBuKgu5k3QkE+Pqcu5jumWa=LAY+ixUheg@mail.gmail.com>
 Content-Type: text/plain; charset=utf-8
 Content-Language: en-US
 Content-Transfer-Encoding: 7bit
@@ -52,36 +53,121 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 12/03/20 4:29 pm, Tudor.Ambarus@microchip.com wrote:
-> From: Cristian Birsan <cristian.birsan@microchip.com>
+On 12/03/20 5:45 pm, Ulf Hansson wrote:
+> On Thu, 12 Mar 2020 at 15:25, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>
+>> Add extra busy wait and retries if transfer mode switch fails.
+>>
+>> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+>> ---
+>>  drivers/mmc/core/mmc_ops.c | 6 ++++++
+>>  1 file changed, 6 insertions(+)
+>>
+>> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+>> index aa0cab190cd8..619088a94688 100644
+>> --- a/drivers/mmc/core/mmc_ops.c
+>> +++ b/drivers/mmc/core/mmc_ops.c
+>> @@ -599,6 +599,12 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+>>                 cmd.sanitize_busy = true;
+>>
+>>         err = mmc_wait_for_cmd(host, &cmd, MMC_CMD_RETRIES);
+>> +       if (err && index == EXT_CSD_HS_TIMING) {
+>> +               /* Try harder for timing changes */
+>> +               __mmc_poll_for_busy(card, timeout_ms, send_status,
+>> +                                   retry_crc_err, MMC_BUSY_CMD6);
+>> +               err = mmc_wait_for_cmd(host, &cmd, MMC_CMD_RETRIES);
+>> +       }
 > 
-> The sdhci_at91_set_clks_presets() function is called multiple times
-> at runtime and the messages are shown on the console. Display clk mul,
-> gck rate and clk base for debug porpose only.
+> Hmm, what do you think of moving this to the caller(s) of
+> __mmc_switch() and in particular only at those places were we find it
+> useful. Me personally, would prefer that option.
 > 
-> Signed-off-by: Cristian Birsan <cristian.birsan@microchip.com>
-> Signed-off-by: Tudor Ambarus <tudor.ambarus@microchip.com>
+> To do that, we may need to have the possibility of specifying the
+> number of retries that should be used in the mmc_wait_for_cmd() call
+> to the caller can check the error code better.
+> 
+> Moreover, it looks a bit risky to do the polling for all kinds of
+> errors - shouldn't we do for CRC errors?
+> 
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+What about this then?
 
-> ---
->  drivers/mmc/host/sdhci-of-at91.c | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
-> index ab2bd314a390..88f17abb69a7 100644
-> --- a/drivers/mmc/host/sdhci-of-at91.c
-> +++ b/drivers/mmc/host/sdhci-of-at91.c
-> @@ -204,8 +204,8 @@ static int sdhci_at91_set_clks_presets(struct device *dev)
->  	/* Set capabilities in ro mode. */
->  	writel(0, host->ioaddr + SDMMC_CACR);
->  
-> -	dev_info(dev, "update clk mul to %u as gck rate is %u Hz and clk base is %u Hz\n",
-> -		 clk_mul, gck_rate, clk_base_rate);
-> +	dev_dbg(dev, "update clk mul to %u as gck rate is %u Hz and clk base is %u Hz\n",
-> +		clk_mul, gck_rate, clk_base_rate);
->  
->  	/*
->  	 * We have to set preset values because it depends on the clk_mul
-> 
+
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index c2abd417a84a..faa5d30ed891 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -1235,20 +1235,35 @@ int mmc_hs400_to_hs200(struct mmc_card *card)
+ 	int err;
+ 	u8 val;
+ 
+-	/* Reduce frequency to HS */
+-	max_dtr = card->ext_csd.hs_max_dtr;
+-	mmc_set_clock(host, max_dtr);
+-
+ 	/* Switch HS400 to HS DDR */
+ 	val = EXT_CSD_TIMING_HS;
+ 	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_HS_TIMING,
+ 			   val, card->ext_csd.generic_cmd6_time, 0,
+ 			   false, true);
+-	if (err)
+-		goto out_err;
++	if (err == -EILSEQ) {
++		__mmc_poll_for_busy(card, card->ext_csd.generic_cmd6_time,
++				    false, true, MMC_BUSY_CMD6);
++		err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
++				   EXT_CSD_HS_TIMING, val,
++				   card->ext_csd.generic_cmd6_time, 0, false,
++				   true);
++	}
+ 
+ 	mmc_set_timing(host, MMC_TIMING_MMC_DDR52);
+ 
++	/* Reduce frequency to HS */
++	max_dtr = card->ext_csd.hs_max_dtr;
++	mmc_set_clock(host, max_dtr);
++
++	if (err) {
++		err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
++				   EXT_CSD_HS_TIMING, val,
++				   card->ext_csd.generic_cmd6_time, 0, false,
++				   true);
++	}
++	if (err)
++		goto out_err;
++
+ 	err = mmc_switch_status(card, true);
+ 	if (err)
+ 		goto out_err;
+diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+index 6eb87833d478..54afee7c34ae 100644
+--- a/drivers/mmc/core/mmc_ops.c
++++ b/drivers/mmc/core/mmc_ops.c
+@@ -484,9 +484,9 @@ static int mmc_busy_status(struct mmc_card *card, bool retry_crc_err,
+ 	return 0;
+ }
+ 
+-static int __mmc_poll_for_busy(struct mmc_card *card, unsigned int timeout_ms,
+-			       bool send_status, bool retry_crc_err,
+-			       enum mmc_busy_cmd busy_cmd)
++int __mmc_poll_for_busy(struct mmc_card *card, unsigned int timeout_ms,
++			bool send_status, bool retry_crc_err,
++			enum mmc_busy_cmd busy_cmd)
+ {
+ 	struct mmc_host *host = card->host;
+ 	int err;
+diff --git a/drivers/mmc/core/mmc_ops.h b/drivers/mmc/core/mmc_ops.h
+index 38dcfeeaf6d5..649985507f87 100644
+--- a/drivers/mmc/core/mmc_ops.h
++++ b/drivers/mmc/core/mmc_ops.h
+@@ -36,6 +36,9 @@ int mmc_interrupt_hpi(struct mmc_card *card);
+ int mmc_can_ext_csd(struct mmc_card *card);
+ int mmc_get_ext_csd(struct mmc_card *card, u8 **new_ext_csd);
+ int mmc_switch_status(struct mmc_card *card, bool crc_err_fatal);
++int __mmc_poll_for_busy(struct mmc_card *card, unsigned int timeout_ms,
++			bool send_status, bool retry_crc_err,
++			enum mmc_busy_cmd busy_cmd);
+ int mmc_poll_for_busy(struct mmc_card *card, unsigned int timeout_ms,
+ 		      enum mmc_busy_cmd busy_cmd);
+ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
 
