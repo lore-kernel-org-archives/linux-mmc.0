@@ -2,198 +2,118 @@ Return-Path: <SRS0=lJwf=46=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PULL_REQUEST,
+	MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7B68BC10DCE
-	for <linux-mmc@archiver.kernel.org>; Fri, 13 Mar 2020 10:41:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A690CC10DCE
+	for <linux-mmc@archiver.kernel.org>; Fri, 13 Mar 2020 12:32:09 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 479762072C
-	for <linux-mmc@archiver.kernel.org>; Fri, 13 Mar 2020 10:41:21 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6E2B32074A
+	for <linux-mmc@archiver.kernel.org>; Fri, 13 Mar 2020 12:32:09 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="TFoDY6tq"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="jkW5cons"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726387AbgCMKlU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 13 Mar 2020 06:41:20 -0400
-Received: from mail-vs1-f66.google.com ([209.85.217.66]:46741 "EHLO
-        mail-vs1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726364AbgCMKlU (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Mar 2020 06:41:20 -0400
-Received: by mail-vs1-f66.google.com with SMTP id z125so5743288vsb.13
-        for <linux-mmc@vger.kernel.org>; Fri, 13 Mar 2020 03:41:18 -0700 (PDT)
+        id S1726674AbgCMMcI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 13 Mar 2020 08:32:08 -0400
+Received: from mail-lj1-f195.google.com ([209.85.208.195]:39783 "EHLO
+        mail-lj1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726395AbgCMMcH (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Mar 2020 08:32:07 -0400
+Received: by mail-lj1-f195.google.com with SMTP id f10so10305731ljn.6
+        for <linux-mmc@vger.kernel.org>; Fri, 13 Mar 2020 05:32:06 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=sl0meI3plL58jaw0Qn1AdAWhf8RIUGrDFYSMJvhelBw=;
-        b=TFoDY6tq1CclvO8EkOjepj4tylcaIF65pOAXcfAXxet0sVS5LUfme4mHmxBidw8h0L
-         BpzOjocK5m66RwzWVYkE/3+YEIWwy12trkPA6wi5hJcx9xdGjpnnJy88/BhaBlDVodh5
-         J/QJ47l+U9vxcbzxinpHuoPT81ucFdsPV+CsnKPL//WMAEKUTfjOtLuBCFaKQsGJZUAC
-         T8BMB+OTSkOYrR6zyucQ+awNRJeSRCa06pkD6N+rRPZaEIh0N6EG7kNRWBUaqu3H8ryt
-         QDH4+y8Q4l2dL1oPdUNz+Duk7WucEQlqkpjXRP7Jq+9ckUcKJi6JV5eN+BOYd5amxDkN
-         UpDg==
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=pBlq/kgkQyhz5z+kgPkCmkKYG8Mjt0ntSBe3WF4OdCY=;
+        b=jkW5consK0RByS6GU/4ZhlnhmYj7/yeW/UsEMuEtvTrZDAgRnD/y/i9kzpm2kNX9WV
+         3Gh61938BuefWmhxi/Z+KvJmDt8a3JlaQ/dqxENm+PSTnGk5MFBnM+9yYJJ7NpvFf5Rm
+         VMT+st2Irg5+W96HeMZDKA0oS2z6iRexVDV0LfNn4gVKPOq8Hqq9sns9GdMQh4TepN0/
+         SMdPcO90UR5bZ+wOV7udGPsGmkWiRcLJr0+HIX6fM1IerjT+bjmTFzV07OodCL6wDZqM
+         tI2Lw79XyPUg/HhX0eKEWjVrfDcwvxkKOmU2YmzQhWBo/uKBhaR+YBdZNjrg1NBDboZL
+         nLEQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=sl0meI3plL58jaw0Qn1AdAWhf8RIUGrDFYSMJvhelBw=;
-        b=T7qM2u7rSJLIygVD22IdIwgiHA56LZ5ZuDYIOC7WZ993V7JMXLAtDGkZOSRLxK0ByC
-         b5EFWgzW1MBmgR1FzwYW2TXhPKLp4TNAHd4yZr24zcE0IWwEGiuKk00boFKSN5JQkeNx
-         0jjKKSSjmqGLddHCz4gREmqZ9Pf5/g8v+puqDL3UPbGxtkATJGCc/u/Ss1rAzNmRLa7t
-         6ZVPofwVIgJYh9V1yucd9Qfsi2CFlOzNkxHB87sENvhdZw2yHwBFzNanK7UOkHxTi4ay
-         Wkt17ldGXQ0HkwmfbQ0bSDvqa5WDK8ieXU87+qNYISYH9kQKkjL0DUotUi28bAFneqy1
-         7QRg==
-X-Gm-Message-State: ANhLgQ1PBg/nIPvt9qx1wSWOaWvo+Az2I3HChr0+i4Mdv1NiYXBYBJ4E
-        4boidoqVGca2nefwTRwvm1nF7OMKGTai57JMgojeLw==
-X-Google-Smtp-Source: ADFU+vsGVajjIaVqV/6quFeoXB3Og6NXN/aEzj+rQ04GDqvDUUIbygdUrm5eDfdzRm1wavrQF14EtQutqbGwIBL2/xQ=
-X-Received: by 2002:a67:2ec6:: with SMTP id u189mr8782404vsu.200.1584096077691;
- Fri, 13 Mar 2020 03:41:17 -0700 (PDT)
-MIME-Version: 1.0
-References: <20200312142501.9868-1-adrian.hunter@intel.com>
- <20200312142501.9868-2-adrian.hunter@intel.com> <CAPDyKFpHZDy3TvHdQBuKgu5k3QkE+Pqcu5jumWa=LAY+ixUheg@mail.gmail.com>
- <5e2007ba-a090-b09b-6933-87c3548ed4f5@intel.com>
-In-Reply-To: <5e2007ba-a090-b09b-6933-87c3548ed4f5@intel.com>
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=pBlq/kgkQyhz5z+kgPkCmkKYG8Mjt0ntSBe3WF4OdCY=;
+        b=eP8j6bi+o43mE3VsQYiXn+ZUk9gfWN0dwD2qqc/3c2bp8XC1HE7J94L+cXk8uRwfJO
+         cTntmtuA1IsrjzvkUeeZ7HNbYXcTGD+bTJyYvfwg679e6OhHOJd9ritsKdKShJNaWSWE
+         K5s3vrwNnNqwpxRRRRULpDcqhOKR4elPeGZknRXJhS9qKLxus5fmzTDzXBQLSiaDOJyn
+         XvuKPrLCDdTEtGe9E7UKUB/g6MjQy8tKQEeGOlZ6J0rCFucbOaSJs/eFhb63QyJX6/hI
+         +DgIUtIZ9uO3oV6XTXTkgKbukqQMyqvZPk/nAg8RkPnOUDab59BAwsYPtfJdMN1ryZaj
+         7saw==
+X-Gm-Message-State: ANhLgQ1l8njXIvFZ9bEgitLmW4T8sfnQ1cUsElf+/2pnGNHv/BvMNzK7
+        RFBCmMoSVmRg0DV9M5Rn+ngpwKxa7uA=
+X-Google-Smtp-Source: ADFU+vs7HWPz2lfZBxaBCERnGMae9SB3J/PkZFnSFf+rUqekHZ8JoPmWsq2+8bG2XUqZij5Dk8cJFQ==
+X-Received: by 2002:a2e:9ac5:: with SMTP id p5mr8365764ljj.200.1584102725175;
+        Fri, 13 Mar 2020 05:32:05 -0700 (PDT)
+Received: from localhost.localdomain (h-158-174-22-210.NA.cust.bahnhof.se. [158.174.22.210])
+        by smtp.gmail.com with ESMTPSA id v17sm19194591lfn.64.2020.03.13.05.32.03
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 13 Mar 2020 05:32:03 -0700 (PDT)
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 13 Mar 2020 11:40:41 +0100
-Message-ID: <CAPDyKFrthSS+SMFMZUCPLY+QSUiO0w3pWij9aw3oh2f5jEMa_Q@mail.gmail.com>
-Subject: Re: [PATCH RFC 1/3] mmc: core: Try harder if transfer mode switch fails
-To:     Adrian Hunter <adrian.hunter@intel.com>
-Cc:     Chaotian Jing <chaotian.jing@mediatek.com>,
-        Kyungmin Seo <kyungmin.seo@intel.com>,
-        linux-mmc <linux-mmc@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+To:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC fixes for v5.6-rc6 take2
+Date:   Fri, 13 Mar 2020 13:32:02 +0100
+Message-Id: <20200313123202.23685-1-ulf.hansson@linaro.org>
+X-Mailer: git-send-email 2.20.1
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 13 Mar 2020 at 10:53, Adrian Hunter <adrian.hunter@intel.com> wrote:
->
-> On 12/03/20 5:45 pm, Ulf Hansson wrote:
-> > On Thu, 12 Mar 2020 at 15:25, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> >>
-> >> Add extra busy wait and retries if transfer mode switch fails.
-> >>
-> >> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
-> >> ---
-> >>  drivers/mmc/core/mmc_ops.c | 6 ++++++
-> >>  1 file changed, 6 insertions(+)
-> >>
-> >> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-> >> index aa0cab190cd8..619088a94688 100644
-> >> --- a/drivers/mmc/core/mmc_ops.c
-> >> +++ b/drivers/mmc/core/mmc_ops.c
-> >> @@ -599,6 +599,12 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
-> >>                 cmd.sanitize_busy = true;
-> >>
-> >>         err = mmc_wait_for_cmd(host, &cmd, MMC_CMD_RETRIES);
-> >> +       if (err && index == EXT_CSD_HS_TIMING) {
-> >> +               /* Try harder for timing changes */
-> >> +               __mmc_poll_for_busy(card, timeout_ms, send_status,
-> >> +                                   retry_crc_err, MMC_BUSY_CMD6);
-> >> +               err = mmc_wait_for_cmd(host, &cmd, MMC_CMD_RETRIES);
-> >> +       }
-> >
-> > Hmm, what do you think of moving this to the caller(s) of
-> > __mmc_switch() and in particular only at those places were we find it
-> > useful. Me personally, would prefer that option.
-> >
-> > To do that, we may need to have the possibility of specifying the
-> > number of retries that should be used in the mmc_wait_for_cmd() call
-> > to the caller can check the error code better.
-> >
-> > Moreover, it looks a bit risky to do the polling for all kinds of
-> > errors - shouldn't we do for CRC errors?
-> >
->
-> What about this then?
+Hi Linus,
 
-Looks good to me!
+Here's a PR with a couple of MMC fixes intended for v5.6-rc6. Details about the
+highlights are as usual found in the signed tag.
 
-Is the retry in __mmc_switch() with MMC_CMD_RETRIES okay for now you think?
+Please pull this in!
 
 Kind regards
-Uffe
+Ulf Hansson
 
->
->
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index c2abd417a84a..faa5d30ed891 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -1235,20 +1235,35 @@ int mmc_hs400_to_hs200(struct mmc_card *card)
->         int err;
->         u8 val;
->
-> -       /* Reduce frequency to HS */
-> -       max_dtr = card->ext_csd.hs_max_dtr;
-> -       mmc_set_clock(host, max_dtr);
-> -
->         /* Switch HS400 to HS DDR */
->         val = EXT_CSD_TIMING_HS;
->         err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_HS_TIMING,
->                            val, card->ext_csd.generic_cmd6_time, 0,
->                            false, true);
-> -       if (err)
-> -               goto out_err;
-> +       if (err == -EILSEQ) {
-> +               __mmc_poll_for_busy(card, card->ext_csd.generic_cmd6_time,
-> +                                   false, true, MMC_BUSY_CMD6);
-> +               err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> +                                  EXT_CSD_HS_TIMING, val,
-> +                                  card->ext_csd.generic_cmd6_time, 0, false,
-> +                                  true);
-> +       }
->
->         mmc_set_timing(host, MMC_TIMING_MMC_DDR52);
->
-> +       /* Reduce frequency to HS */
-> +       max_dtr = card->ext_csd.hs_max_dtr;
-> +       mmc_set_clock(host, max_dtr);
-> +
-> +       if (err) {
-> +               err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> +                                  EXT_CSD_HS_TIMING, val,
-> +                                  card->ext_csd.generic_cmd6_time, 0, false,
-> +                                  true);
-> +       }
-> +       if (err)
-> +               goto out_err;
-> +
->         err = mmc_switch_status(card, true);
->         if (err)
->                 goto out_err;
-> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-> index 6eb87833d478..54afee7c34ae 100644
-> --- a/drivers/mmc/core/mmc_ops.c
-> +++ b/drivers/mmc/core/mmc_ops.c
-> @@ -484,9 +484,9 @@ static int mmc_busy_status(struct mmc_card *card, bool retry_crc_err,
->         return 0;
->  }
->
-> -static int __mmc_poll_for_busy(struct mmc_card *card, unsigned int timeout_ms,
-> -                              bool send_status, bool retry_crc_err,
-> -                              enum mmc_busy_cmd busy_cmd)
-> +int __mmc_poll_for_busy(struct mmc_card *card, unsigned int timeout_ms,
-> +                       bool send_status, bool retry_crc_err,
-> +                       enum mmc_busy_cmd busy_cmd)
->  {
->         struct mmc_host *host = card->host;
->         int err;
-> diff --git a/drivers/mmc/core/mmc_ops.h b/drivers/mmc/core/mmc_ops.h
-> index 38dcfeeaf6d5..649985507f87 100644
-> --- a/drivers/mmc/core/mmc_ops.h
-> +++ b/drivers/mmc/core/mmc_ops.h
-> @@ -36,6 +36,9 @@ int mmc_interrupt_hpi(struct mmc_card *card);
->  int mmc_can_ext_csd(struct mmc_card *card);
->  int mmc_get_ext_csd(struct mmc_card *card, u8 **new_ext_csd);
->  int mmc_switch_status(struct mmc_card *card, bool crc_err_fatal);
-> +int __mmc_poll_for_busy(struct mmc_card *card, unsigned int timeout_ms,
-> +                       bool send_status, bool retry_crc_err,
-> +                       enum mmc_busy_cmd busy_cmd);
->  int mmc_poll_for_busy(struct mmc_card *card, unsigned int timeout_ms,
->                       enum mmc_busy_cmd busy_cmd);
->  int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
->
+
+The following changes since commit 31e43f31890ca6e909b27dcb539252b46aa465da:
+
+  mmc: sdhci-pci-gli: Enable MSI interrupt for GL975x (2020-03-04 15:41:22 +0100)
+
+are available in the Git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.6-rc1-2
+
+for you to fetch changes up to 18d200460cd73636d4f20674085c39e32b4e0097:
+
+  mmc: core: Respect MMC_CAP_NEED_RSP_BUSY for eMMC sleep command (2020-03-12 13:36:55 +0100)
+
+----------------------------------------------------------------
+MMC core:
+ - Fix HW busy detection support for host controllers requiring the
+   MMC_RSP_BUSY response flag (R1B) to be set for the command. In
+   particular for CMD6 (eMMC), erase/trim/discard (SD/eMMC) and CMD5
+   (eMMC sleep).
+
+MMC host:
+ - sdhci-omap|tegra: Fix support for HW busy detection
+
+----------------------------------------------------------------
+Ulf Hansson (5):
+      mmc: core: Allow host controllers to require R1B for CMD6
+      mmc: core: Respect MMC_CAP_NEED_RSP_BUSY for erase/trim/discard
+      mmc: sdhci-omap: Fix busy detection by enabling MMC_CAP_NEED_RSP_BUSY
+      mmc: sdhci-tegra: Fix busy detection by enabling MMC_CAP_NEED_RSP_BUSY
+      mmc: core: Respect MMC_CAP_NEED_RSP_BUSY for eMMC sleep command
+
+ drivers/mmc/core/core.c        | 5 ++++-
+ drivers/mmc/core/mmc.c         | 7 +++++--
+ drivers/mmc/core/mmc_ops.c     | 6 ++++--
+ drivers/mmc/host/sdhci-omap.c  | 3 +++
+ drivers/mmc/host/sdhci-tegra.c | 3 +++
+ include/linux/mmc/host.h       | 1 +
+ 6 files changed, 20 insertions(+), 5 deletions(-)
