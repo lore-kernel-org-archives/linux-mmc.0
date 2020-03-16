@@ -2,154 +2,188 @@ Return-Path: <SRS0=aPfc=5B=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.3 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5C800C0044D
-	for <linux-mmc@archiver.kernel.org>; Mon, 16 Mar 2020 13:09:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3B29DC2BB1D
+	for <linux-mmc@archiver.kernel.org>; Mon, 16 Mar 2020 14:17:41 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 369F72051A
-	for <linux-mmc@archiver.kernel.org>; Mon, 16 Mar 2020 13:09:15 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0AA8820575
+	for <linux-mmc@archiver.kernel.org>; Mon, 16 Mar 2020 14:17:41 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="wtJI4ofX"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1731095AbgCPNJO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 16 Mar 2020 09:09:14 -0400
-Received: from mga04.intel.com ([192.55.52.120]:25949 "EHLO mga04.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1731094AbgCPNJO (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 16 Mar 2020 09:09:14 -0400
-IronPort-SDR: VGinNkE0QJ8atWsdctpYzrxADn6puc7SHHqn32XUPbATYHrzEcvnQZKrARR0Imv1fq5ghv6r+E
- dq/2VlThmd7g==
-X-Amp-Result: SKIPPED(no attachment in message)
-X-Amp-File-Uploaded: False
-Received: from orsmga006.jf.intel.com ([10.7.209.51])
-  by fmsmga104.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 16 Mar 2020 06:09:13 -0700
-IronPort-SDR: 0CeY80JCmqMRFF8PRRwqjCJTuc1Tu7GsgKQr52YKi11iJStA/m1bmE/80Ik3TgXwgODzGweN8w
- O4YWoKhrBOMg==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.70,560,1574150400"; 
-   d="scan'208";a="247451195"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.87]) ([10.237.72.87])
-  by orsmga006.jf.intel.com with ESMTP; 16 Mar 2020 06:09:11 -0700
-Subject: Re: [RESEND PATCH 1/3] mmc: host: Introduce the request_atomic() for
- the host
-To:     Baolin Wang <baolin.wang7@gmail.com>, ulf.hansson@linaro.org
-Cc:     orsonzhai@gmail.com, zhang.lyra@gmail.com, arnd@arndb.de,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-References: <cover.1583307441.git.baolin.wang7@gmail.com>
- <ace53bca354e2846f19684bd33a9c0f3c2ee2c44.1583307441.git.baolin.wang7@gmail.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <dd44e606-3eb5-f7fc-5995-021705a9b5d9@intel.com>
-Date:   Mon, 16 Mar 2020 15:08:33 +0200
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.5.0
+        id S1731490AbgCPORk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 16 Mar 2020 10:17:40 -0400
+Received: from mail-vs1-f68.google.com ([209.85.217.68]:46130 "EHLO
+        mail-vs1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1729631AbgCPORj (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Mar 2020 10:17:39 -0400
+Received: by mail-vs1-f68.google.com with SMTP id z125so11334341vsb.13
+        for <linux-mmc@vger.kernel.org>; Mon, 16 Mar 2020 07:17:37 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=gfpSr29ntUR/I/as2FQq9j0zRov447y/exMSEoJfydg=;
+        b=wtJI4ofXmDD1A9SJtl2cHZNW4zEcI9mspR3pkgS9x6qsrxGVFTfgFNc+OslwPl0EWI
+         FikZg4a0YBL5Teyixuzvvwrl1nqV/blw7wNZKa59V5JP6hAqdoKzN69X7ppg6xXgsSAZ
+         VZwIL83qK9FxJp4n941qkyxBh9eA6Nxw+8Tk0XWB7I/0h5Qao0NVPVtQclnkOJ/pS1bH
+         ls3PQHPNO+NtJmdiSr9WOmzLi9pMSziQCQLzqOMtSy/YJtyN+bN/U0sh7ICYIZHJZ2l3
+         pZmNDlOS8FnYGKZM9CSrnM1rV4Unk++4zZL4iPsfpZOw+G3I5MNG+8VhYbvqbeqJHxTB
+         FOmg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=gfpSr29ntUR/I/as2FQq9j0zRov447y/exMSEoJfydg=;
+        b=URwcEGSHkWCsNvqDg4E+bxdB+6QXmZleBRVJKh9UGfMHlt776d6nCXa0kCRXCFqSHe
+         6SETPNWk7+8guhLZuC0BpUxX4X+i5PF3I2lNx1XPpUNiRSv9ZNIWIqUAVwI1OPBNFrRL
+         iNDIeXJSdtR4ycy0y4aDODilAEV1ylUIRDVARc6eJywHBjWjDKMKQCBIjBy6GFTrkDjF
+         cXWlor9g2qlayF+0DYlWuCM8mQOn1zoUfQBci4UCqi8oXT5fymyTh6q5ZmdPmSgDwwMf
+         2C1s4kINMSRHXFCwCoHRVuUIiAmsvCbkAQcAHGFASfgVW4dCuor2TTrdp7v90qzWowfL
+         7DVg==
+X-Gm-Message-State: ANhLgQ1tKcxjE5eyC2zuB40k4VQcADaYfHYl/f4VRdnDsgMo/4/jY1pT
+        0fWKzYVXl9TvWRQBqVJdBNkyLovXMJhHFcVcDGD4Kg==
+X-Google-Smtp-Source: ADFU+vsxkwXlJemW8aKdO41aOyBLa5RhNk7gSNyGUSH1YIJtaUWpgkkWDFYSXRhK6xqmc/5RnEQ6rEBKwKcHX3T5+bQ=
+X-Received: by 2002:a67:646:: with SMTP id 67mr17046878vsg.34.1584368256722;
+ Mon, 16 Mar 2020 07:17:36 -0700 (PDT)
 MIME-Version: 1.0
-In-Reply-To: <ace53bca354e2846f19684bd33a9c0f3c2ee2c44.1583307441.git.baolin.wang7@gmail.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+References: <20200316025232.1167-1-ricky_wu@realtek.com>
+In-Reply-To: <20200316025232.1167-1-ricky_wu@realtek.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Mon, 16 Mar 2020 15:16:59 +0100
+Message-ID: <CAPDyKFrWedEmZ=0trPEG8Z-11nyFX6_OB3cx7+SAdB5VW_vzgQ@mail.gmail.com>
+Subject: Re: [PATCH] mmc: rtsx: Fixed TX/RX register and optimized TX parameter
+To:     ricky_wu@realtek.com
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        Arnd Bergmann <arnd@arndb.de>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 4/03/20 9:42 am, Baolin Wang wrote:
-> The SD host controller can process one request in the atomic context if
-> the card is nonremovable, which means we can submit next request in the
-> irq hard handler when using the MMC software queue to reduce the latency.
-> Thus this patch adds a new API request_atomic() for the host controller
-> and implement it for the SD host controller.
-> 
-> Suggested-by: Adrian Hunter <adrian.hunter@intel.com>
-> Signed-off-by: Baolin Wang <baolin.wang7@gmail.com>
+On Mon, 16 Mar 2020 at 03:52, <ricky_wu@realtek.com> wrote:
+>
+> From: Ricky Wu <ricky_wu@realtek.com>
+>
+> Fixed sd_change_phase TX/RX register
+> Optimized rts522a rts524a rts525a rts5260 rts5261 TX initial parameter
+
+I don't understand what this actually fixes. Can you try to elaborate
+a bit on this, please?
+
+Do you think this is needed for stable, then why?
+
+Kind regards
+Uffe
+
+>
+> Signed-off-by: Ricky Wu <ricky_wu@realtek.com>
 > ---
->  drivers/mmc/host/sdhci.c | 27 +++++++++++++++++++--------
->  drivers/mmc/host/sdhci.h |  1 +
->  include/linux/mmc/host.h |  3 +++
->  3 files changed, 23 insertions(+), 8 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 9c37451..4febbcb 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -2016,17 +2016,12 @@ void sdhci_set_power(struct sdhci_host *host, unsigned char mode,
->   *                                                                           *
->  \*****************************************************************************/
->  
-> -void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
-> +static void sdhci_start_request(struct mmc_host *mmc, struct mmc_request *mrq,
-> +				int present)
+>  drivers/misc/cardreader/rts5227.c |  2 +-
+>  drivers/misc/cardreader/rts5249.c |  2 ++
+>  drivers/misc/cardreader/rts5260.c |  2 +-
+>  drivers/misc/cardreader/rts5261.c |  2 +-
+>  drivers/mmc/host/rtsx_pci_sdmmc.c | 13 ++++++++-----
+>  5 files changed, 13 insertions(+), 8 deletions(-)
+>
+> diff --git a/drivers/misc/cardreader/rts5227.c b/drivers/misc/cardreader/rts5227.c
+> index 4feed296a327..423fecc19fc4 100644
+> --- a/drivers/misc/cardreader/rts5227.c
+> +++ b/drivers/misc/cardreader/rts5227.c
+> @@ -394,7 +394,7 @@ static const struct pcr_ops rts522a_pcr_ops = {
+>  void rts522a_init_params(struct rtsx_pcr *pcr)
 >  {
-> -	struct sdhci_host *host;
-> -	int present;
-> +	struct sdhci_host *host = mmc_priv(mmc);
->  	unsigned long flags;
->  
-> -	host = mmc_priv(mmc);
+>         rts5227_init_params(pcr);
 > -
-> -	/* Firstly check card presence */
-> -	present = mmc->ops->get_cd(mmc);
+> +       pcr->tx_initial_phase = SET_CLOCK_PHASE(20, 20, 11);
+>         pcr->reg_pm_ctrl3 = RTS522A_PM_CTRL3;
+>
+>         pcr->option.ocp_en = 1;
+> diff --git a/drivers/misc/cardreader/rts5249.c b/drivers/misc/cardreader/rts5249.c
+> index db936e4d6e56..1a81cda948c1 100644
+> --- a/drivers/misc/cardreader/rts5249.c
+> +++ b/drivers/misc/cardreader/rts5249.c
+> @@ -618,6 +618,7 @@ static const struct pcr_ops rts524a_pcr_ops = {
+>  void rts524a_init_params(struct rtsx_pcr *pcr)
+>  {
+>         rts5249_init_params(pcr);
+> +       pcr->tx_initial_phase = SET_CLOCK_PHASE(27, 29, 11);
+>         pcr->option.ltr_l1off_sspwrgate = LTR_L1OFF_SSPWRGATE_5250_DEF;
+>         pcr->option.ltr_l1off_snooze_sspwrgate =
+>                 LTR_L1OFF_SNOOZE_SSPWRGATE_5250_DEF;
+> @@ -733,6 +734,7 @@ static const struct pcr_ops rts525a_pcr_ops = {
+>  void rts525a_init_params(struct rtsx_pcr *pcr)
+>  {
+>         rts5249_init_params(pcr);
+> +       pcr->tx_initial_phase = SET_CLOCK_PHASE(25, 29, 11);
+>         pcr->option.ltr_l1off_sspwrgate = LTR_L1OFF_SSPWRGATE_5250_DEF;
+>         pcr->option.ltr_l1off_snooze_sspwrgate =
+>                 LTR_L1OFF_SNOOZE_SSPWRGATE_5250_DEF;
+> diff --git a/drivers/misc/cardreader/rts5260.c b/drivers/misc/cardreader/rts5260.c
+> index 4214f02a17fd..711054ebad74 100644
+> --- a/drivers/misc/cardreader/rts5260.c
+> +++ b/drivers/misc/cardreader/rts5260.c
+> @@ -662,7 +662,7 @@ void rts5260_init_params(struct rtsx_pcr *pcr)
+>         pcr->sd30_drive_sel_1v8 = CFG_DRIVER_TYPE_B;
+>         pcr->sd30_drive_sel_3v3 = CFG_DRIVER_TYPE_B;
+>         pcr->aspm_en = ASPM_L1_EN;
+> -       pcr->tx_initial_phase = SET_CLOCK_PHASE(1, 29, 16);
+> +       pcr->tx_initial_phase = SET_CLOCK_PHASE(27, 29, 11);
+>         pcr->rx_initial_phase = SET_CLOCK_PHASE(24, 6, 5);
+>
+>         pcr->ic_version = rts5260_get_ic_version(pcr);
+> diff --git a/drivers/misc/cardreader/rts5261.c b/drivers/misc/cardreader/rts5261.c
+> index bc4967a6efa1..78c3b1d424c3 100644
+> --- a/drivers/misc/cardreader/rts5261.c
+> +++ b/drivers/misc/cardreader/rts5261.c
+> @@ -764,7 +764,7 @@ void rts5261_init_params(struct rtsx_pcr *pcr)
+>         pcr->sd30_drive_sel_1v8 = CFG_DRIVER_TYPE_B;
+>         pcr->sd30_drive_sel_3v3 = CFG_DRIVER_TYPE_B;
+>         pcr->aspm_en = ASPM_L1_EN;
+> -       pcr->tx_initial_phase = SET_CLOCK_PHASE(20, 27, 16);
+> +       pcr->tx_initial_phase = SET_CLOCK_PHASE(27, 27, 11);
+>         pcr->rx_initial_phase = SET_CLOCK_PHASE(24, 6, 5);
+>
+>         pcr->ic_version = rts5261_get_ic_version(pcr);
+> diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
+> index bd50935dc37d..11087976ab19 100644
+> --- a/drivers/mmc/host/rtsx_pci_sdmmc.c
+> +++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
+> @@ -606,19 +606,22 @@ static int sd_change_phase(struct realtek_pci_sdmmc *host,
+>                 u8 sample_point, bool rx)
+>  {
+>         struct rtsx_pcr *pcr = host->pcr;
 > -
->  	spin_lock_irqsave(&host->lock, flags);
->  
->  	sdhci_led_activate(host);
-> @@ -2043,6 +2038,22 @@ void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
->  
->  	spin_unlock_irqrestore(&host->lock, flags);
->  }
-> +
-> +void sdhci_request_atomic(struct mmc_host *mmc, struct mmc_request *mrq)
-> +{
-> +	sdhci_start_request(mmc, mrq, 1);
-> +}
-> +EXPORT_SYMBOL_GPL(sdhci_request_atomic);
-> +
-> +void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
-> +{
-> +	int present;
-> +
-> +	/* Firstly check card presence */
-> +	present = mmc->ops->get_cd(mmc);
-> +
-> +	sdhci_start_request(mmc, mrq, present);
-> +}
->  EXPORT_SYMBOL_GPL(sdhci_request);
->  
->  void sdhci_set_bus_width(struct sdhci_host *host, int width)
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index cac2d97..5507a73 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -775,6 +775,7 @@ void sdhci_set_power(struct sdhci_host *host, unsigned char mode,
->  void sdhci_set_power_noreg(struct sdhci_host *host, unsigned char mode,
->  			   unsigned short vdd);
->  void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq);
-> +void sdhci_request_atomic(struct mmc_host *mmc, struct mmc_request *mrq);
->  void sdhci_set_bus_width(struct sdhci_host *host, int width);
->  void sdhci_reset(struct sdhci_host *host, u8 mask);
->  void sdhci_set_uhs_signaling(struct sdhci_host *host, unsigned timing);
-> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index 562ed06..db5e59c 100644
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -92,6 +92,9 @@ struct mmc_host_ops {
->  			    int err);
->  	void	(*pre_req)(struct mmc_host *host, struct mmc_request *req);
->  	void	(*request)(struct mmc_host *host, struct mmc_request *req);
-> +	/* Submit one request to host in atomic context. */
-> +	void	(*request_atomic)(struct mmc_host *host,
-> +				  struct mmc_request *req);
-
-This doesn't have the flexibility to return "busy".  For example,
-sdhci_send_command() will potentially wait quite some time if the inhibit
-bits are set.  That is not good in interrupt context.  It would be better to
-return immediately in that case and have the caller fall back to a
-non-atomic context.  Thoughts?
-
->  
->  	/*
->  	 * Avoid calling the next three functions too often or in a "fast
-> 
-
+> +       u16 SD_VP_CTL = 0;
+>         dev_dbg(sdmmc_dev(host), "%s(%s): sample_point = %d\n",
+>                         __func__, rx ? "RX" : "TX", sample_point);
+>
+>         rtsx_pci_write_register(pcr, CLK_CTL, CHANGE_CLK, CHANGE_CLK);
+> -       if (rx)
+> +       if (rx) {
+> +               SD_VP_CTL = SD_VPRX_CTL;
+>                 rtsx_pci_write_register(pcr, SD_VPRX_CTL,
+>                         PHASE_SELECT_MASK, sample_point);
+> -       else
+> +       } else {
+> +               SD_VP_CTL = SD_VPTX_CTL;
+>                 rtsx_pci_write_register(pcr, SD_VPTX_CTL,
+>                         PHASE_SELECT_MASK, sample_point);
+> -       rtsx_pci_write_register(pcr, SD_VPCLK0_CTL, PHASE_NOT_RESET, 0);
+> -       rtsx_pci_write_register(pcr, SD_VPCLK0_CTL, PHASE_NOT_RESET,
+> +       }
+> +       rtsx_pci_write_register(pcr, SD_VP_CTL, PHASE_NOT_RESET, 0);
+> +       rtsx_pci_write_register(pcr, SD_VP_CTL, PHASE_NOT_RESET,
+>                                 PHASE_NOT_RESET);
+>         rtsx_pci_write_register(pcr, CLK_CTL, CHANGE_CLK, 0);
+>         rtsx_pci_write_register(pcr, SD_CFG1, SD_ASYNC_FIFO_NOT_RST, 0);
+> --
+> 2.17.1
+>
