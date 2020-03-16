@@ -1,99 +1,161 @@
-Return-Path: <SRS0=Qble=5A=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=aPfc=5B=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 628ACC10DCE
-	for <linux-mmc@archiver.kernel.org>; Sun, 15 Mar 2020 16:44:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D44F1C10DCE
+	for <linux-mmc@archiver.kernel.org>; Mon, 16 Mar 2020 02:52:51 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 21751206BE
-	for <linux-mmc@archiver.kernel.org>; Sun, 15 Mar 2020 16:44:31 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=rere.qmqm.pl header.i=@rere.qmqm.pl header.b="Xxpbxf4W"
+	by mail.kernel.org (Postfix) with ESMTP id B14B9206BE
+	for <linux-mmc@archiver.kernel.org>; Mon, 16 Mar 2020 02:52:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728692AbgCOQoa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 15 Mar 2020 12:44:30 -0400
-Received: from rere.qmqm.pl ([91.227.64.183]:24368 "EHLO rere.qmqm.pl"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728682AbgCOQoa (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Sun, 15 Mar 2020 12:44:30 -0400
-Received: from remote.user (localhost [127.0.0.1])
-        by rere.qmqm.pl (Postfix) with ESMTPSA id 48gQJB0NxHzw;
-        Sun, 15 Mar 2020 17:44:25 +0100 (CET)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=rere.qmqm.pl; s=1;
-        t=1584290667; bh=rDTNmlgOKsGBnZDD5q6xH86TjWk5Qvp64M67qrlPK+E=;
-        h=Date:From:Subject:To:Cc:From;
-        b=Xxpbxf4Wu71jB3LN3nRvdBs/GmMhw1LWS9arZEXadRnFeS0yrsmeLwztm3jNJiR+o
-         gykAXNXZf9B8y1PaqGP1mtV8lQbl/FSdX1VrEELtUF9DFn12bxA0wu/hjW2k3HAOAc
-         DiQ+02IDClw+fbF6L6GHSttwuY0ZHe+syGJ1Qa3tdx/cMVWAYWIpvicmy2Y5sWlifY
-         njeNRyBOR8CEb3OcH3v4WZNExyUFK8YC53Yb/ZAjDt3fJgaC8aoAZ1R7NAURGl1CZJ
-         M/90+5mHOLSaJ7C7XtO+zN42Jv9EMvIkpcf1XzTLvtEL550mHolkNysHEJknlEsRHX
-         1rHeTi7z1GwuA==
-X-Virus-Status: Clean
-X-Virus-Scanned: clamav-milter 0.102.2 at mail
-Date:   Sun, 15 Mar 2020 17:44:25 +0100
-Message-Id: <8d10950d9940468577daef4772b82a071b204716.1584290561.git.mirq-linux@rere.qmqm.pl>
-From:   =?UTF-8?q?Micha=C5=82=20Miros=C5=82aw?= <mirq-linux@rere.qmqm.pl>
-Subject: [PATCH] mmc: sdhci-of-at91: fix cd-gpios for SAMA5D2
+        id S1729348AbgCPCwv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 15 Mar 2020 22:52:51 -0400
+Received: from rtits2.realtek.com ([211.75.126.72]:38530 "EHLO
+        rtits2.realtek.com.tw" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1729387AbgCPCwv (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 15 Mar 2020 22:52:51 -0400
+Authenticated-By: 
+X-SpamFilter-By: BOX Solutions SpamTrap 5.62 with qID 02G2qeMr008854, This message is accepted by code: ctloc85258
+Received: from mail.realtek.com (RTEXMB06.realtek.com.tw[172.21.6.99])
+        by rtits2.realtek.com.tw (8.15.2/2.57/5.78) with ESMTPS id 02G2qeMr008854
+        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=NOT);
+        Mon, 16 Mar 2020 10:52:40 +0800
+Received: from RTEXMB01.realtek.com.tw (172.21.6.94) by
+ RTEXMB06.realtek.com.tw (172.21.6.99) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.1779.2; Mon, 16 Mar 2020 10:52:39 +0800
+Received: from localhost (172.22.88.222) by RTEXMB01.realtek.com.tw
+ (172.21.6.94) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.1779.2; Mon, 16 Mar
+ 2020 10:52:39 +0800
+From:   <ricky_wu@realtek.com>
+To:     <ulf.hansson@linaro.org>, <linux-mmc@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>, <arnd@arndb.de>,
+        <gregkh@linuxfoundation.org>
+CC:     Ricky Wu <ricky_wu@realtek.com>
+Subject: [PATCH] mmc: rtsx: Fixed TX/RX register and optimized TX parameter
+Date:   Mon, 16 Mar 2020 10:52:32 +0800
+Message-ID: <20200316025232.1167-1-ricky_wu@realtek.com>
+X-Mailer: git-send-email 2.17.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
-To:     Ludovic Desroches <ludovic.desroches@microchip.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Nicolas Ferre <nicolas.ferre@microchip.com>,
-        Alexandre Belloni <alexandre.belloni@bootlin.com>
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain
+X-Originating-IP: [172.22.88.222]
+X-ClientProxiedBy: RTEXMB02.realtek.com.tw (172.21.6.95) To
+ RTEXMB01.realtek.com.tw (172.21.6.94)
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-SAMA5D2x doesn't drive CMD line if GPIO is used as CD line (at least
-SAMA5D27 doesn't). Fix this by forcing card-detect in the module
-if module-controlled CD is not used.
+From: Ricky Wu <ricky_wu@realtek.com>
 
-Fixed commit addresses the problem only for non-removable cards. This
-amends it to also cover gpio-cd case.
+Fixed sd_change_phase TX/RX register
+Optimized rts522a rts524a rts525a rts5260 rts5261 TX initial parameter
 
-Cc: stable@vger.kernel.org
-Fixes: 7a1e3f143176 ("mmc: sdhci-of-at91: force card detect value for non removable devices")
-Signed-off-by: Michał Mirosław <mirq-linux@rere.qmqm.pl>
+Signed-off-by: Ricky Wu <ricky_wu@realtek.com>
 ---
- drivers/mmc/host/sdhci-of-at91.c | 8 ++++++--
- 1 file changed, 6 insertions(+), 2 deletions(-)
+ drivers/misc/cardreader/rts5227.c |  2 +-
+ drivers/misc/cardreader/rts5249.c |  2 ++
+ drivers/misc/cardreader/rts5260.c |  2 +-
+ drivers/misc/cardreader/rts5261.c |  2 +-
+ drivers/mmc/host/rtsx_pci_sdmmc.c | 13 ++++++++-----
+ 5 files changed, 13 insertions(+), 8 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
-index d90f4ed18283..8f8da2fe48a9 100644
---- a/drivers/mmc/host/sdhci-of-at91.c
-+++ b/drivers/mmc/host/sdhci-of-at91.c
-@@ -185,7 +185,8 @@ static void sdhci_at91_reset(struct sdhci_host *host, u8 mask)
+diff --git a/drivers/misc/cardreader/rts5227.c b/drivers/misc/cardreader/rts5227.c
+index 4feed296a327..423fecc19fc4 100644
+--- a/drivers/misc/cardreader/rts5227.c
++++ b/drivers/misc/cardreader/rts5227.c
+@@ -394,7 +394,7 @@ static const struct pcr_ops rts522a_pcr_ops = {
+ void rts522a_init_params(struct rtsx_pcr *pcr)
+ {
+ 	rts5227_init_params(pcr);
+-
++	pcr->tx_initial_phase = SET_CLOCK_PHASE(20, 20, 11);
+ 	pcr->reg_pm_ctrl3 = RTS522A_PM_CTRL3;
  
- 	sdhci_reset(host, mask);
+ 	pcr->option.ocp_en = 1;
+diff --git a/drivers/misc/cardreader/rts5249.c b/drivers/misc/cardreader/rts5249.c
+index db936e4d6e56..1a81cda948c1 100644
+--- a/drivers/misc/cardreader/rts5249.c
++++ b/drivers/misc/cardreader/rts5249.c
+@@ -618,6 +618,7 @@ static const struct pcr_ops rts524a_pcr_ops = {
+ void rts524a_init_params(struct rtsx_pcr *pcr)
+ {
+ 	rts5249_init_params(pcr);
++	pcr->tx_initial_phase = SET_CLOCK_PHASE(27, 29, 11);
+ 	pcr->option.ltr_l1off_sspwrgate = LTR_L1OFF_SSPWRGATE_5250_DEF;
+ 	pcr->option.ltr_l1off_snooze_sspwrgate =
+ 		LTR_L1OFF_SNOOZE_SSPWRGATE_5250_DEF;
+@@ -733,6 +734,7 @@ static const struct pcr_ops rts525a_pcr_ops = {
+ void rts525a_init_params(struct rtsx_pcr *pcr)
+ {
+ 	rts5249_init_params(pcr);
++	pcr->tx_initial_phase = SET_CLOCK_PHASE(25, 29, 11);
+ 	pcr->option.ltr_l1off_sspwrgate = LTR_L1OFF_SSPWRGATE_5250_DEF;
+ 	pcr->option.ltr_l1off_snooze_sspwrgate =
+ 		LTR_L1OFF_SNOOZE_SSPWRGATE_5250_DEF;
+diff --git a/drivers/misc/cardreader/rts5260.c b/drivers/misc/cardreader/rts5260.c
+index 4214f02a17fd..711054ebad74 100644
+--- a/drivers/misc/cardreader/rts5260.c
++++ b/drivers/misc/cardreader/rts5260.c
+@@ -662,7 +662,7 @@ void rts5260_init_params(struct rtsx_pcr *pcr)
+ 	pcr->sd30_drive_sel_1v8 = CFG_DRIVER_TYPE_B;
+ 	pcr->sd30_drive_sel_3v3 = CFG_DRIVER_TYPE_B;
+ 	pcr->aspm_en = ASPM_L1_EN;
+-	pcr->tx_initial_phase = SET_CLOCK_PHASE(1, 29, 16);
++	pcr->tx_initial_phase = SET_CLOCK_PHASE(27, 29, 11);
+ 	pcr->rx_initial_phase = SET_CLOCK_PHASE(24, 6, 5);
  
--	if (host->mmc->caps & MMC_CAP_NONREMOVABLE)
-+	if ((host->mmc->caps & MMC_CAP_NONREMOVABLE)
-+	    || mmc_gpio_get_cd(host->mmc) >= 0)
- 		sdhci_at91_set_force_card_detect(host);
+ 	pcr->ic_version = rts5260_get_ic_version(pcr);
+diff --git a/drivers/misc/cardreader/rts5261.c b/drivers/misc/cardreader/rts5261.c
+index bc4967a6efa1..78c3b1d424c3 100644
+--- a/drivers/misc/cardreader/rts5261.c
++++ b/drivers/misc/cardreader/rts5261.c
+@@ -764,7 +764,7 @@ void rts5261_init_params(struct rtsx_pcr *pcr)
+ 	pcr->sd30_drive_sel_1v8 = CFG_DRIVER_TYPE_B;
+ 	pcr->sd30_drive_sel_3v3 = CFG_DRIVER_TYPE_B;
+ 	pcr->aspm_en = ASPM_L1_EN;
+-	pcr->tx_initial_phase = SET_CLOCK_PHASE(20, 27, 16);
++	pcr->tx_initial_phase = SET_CLOCK_PHASE(27, 27, 11);
+ 	pcr->rx_initial_phase = SET_CLOCK_PHASE(24, 6, 5);
  
- 	if (priv->cal_always_on && (mask & SDHCI_RESET_ALL))
-@@ -487,8 +488,11 @@ static int sdhci_at91_probe(struct platform_device *pdev)
- 	 * detection procedure using the SDMCC_CD signal is bypassed.
- 	 * This bit is reset when a software reset for all command is performed
- 	 * so we need to implement our own reset function to set back this bit.
-+	 *
-+	 * WA: SAMA5D2 doesn't drive CMD if using CD GPIO line.
- 	 */
--	if (host->mmc->caps & MMC_CAP_NONREMOVABLE)
-+	if ((host->mmc->caps & MMC_CAP_NONREMOVABLE)
-+	    || mmc_gpio_get_cd(host->mmc) >= 0)
- 		sdhci_at91_set_force_card_detect(host);
+ 	pcr->ic_version = rts5261_get_ic_version(pcr);
+diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
+index bd50935dc37d..11087976ab19 100644
+--- a/drivers/mmc/host/rtsx_pci_sdmmc.c
++++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
+@@ -606,19 +606,22 @@ static int sd_change_phase(struct realtek_pci_sdmmc *host,
+ 		u8 sample_point, bool rx)
+ {
+ 	struct rtsx_pcr *pcr = host->pcr;
+-
++	u16 SD_VP_CTL = 0;
+ 	dev_dbg(sdmmc_dev(host), "%s(%s): sample_point = %d\n",
+ 			__func__, rx ? "RX" : "TX", sample_point);
  
- 	pm_runtime_put_autosuspend(&pdev->dev);
+ 	rtsx_pci_write_register(pcr, CLK_CTL, CHANGE_CLK, CHANGE_CLK);
+-	if (rx)
++	if (rx) {
++		SD_VP_CTL = SD_VPRX_CTL;
+ 		rtsx_pci_write_register(pcr, SD_VPRX_CTL,
+ 			PHASE_SELECT_MASK, sample_point);
+-	else
++	} else {
++		SD_VP_CTL = SD_VPTX_CTL;
+ 		rtsx_pci_write_register(pcr, SD_VPTX_CTL,
+ 			PHASE_SELECT_MASK, sample_point);
+-	rtsx_pci_write_register(pcr, SD_VPCLK0_CTL, PHASE_NOT_RESET, 0);
+-	rtsx_pci_write_register(pcr, SD_VPCLK0_CTL, PHASE_NOT_RESET,
++	}
++	rtsx_pci_write_register(pcr, SD_VP_CTL, PHASE_NOT_RESET, 0);
++	rtsx_pci_write_register(pcr, SD_VP_CTL, PHASE_NOT_RESET,
+ 				PHASE_NOT_RESET);
+ 	rtsx_pci_write_register(pcr, CLK_CTL, CHANGE_CLK, 0);
+ 	rtsx_pci_write_register(pcr, SD_CFG1, SD_ASYNC_FIFO_NOT_RST, 0);
 -- 
-2.20.1
+2.17.1
 
