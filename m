@@ -2,394 +2,430 @@ Return-Path: <SRS0=aPfc=5B=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.3 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 62F98C3F2CE
-	for <linux-mmc@archiver.kernel.org>; Mon, 16 Mar 2020 10:02:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CFD56C18E5B
+	for <linux-mmc@archiver.kernel.org>; Mon, 16 Mar 2020 11:09:13 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 39EA62073E
-	for <linux-mmc@archiver.kernel.org>; Mon, 16 Mar 2020 10:02:15 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Jr5xEAiM"
+	by mail.kernel.org (Postfix) with ESMTP id 95DFB20724
+	for <linux-mmc@archiver.kernel.org>; Mon, 16 Mar 2020 11:09:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730575AbgCPKB5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 16 Mar 2020 06:01:57 -0400
-Received: from mail-pl1-f193.google.com ([209.85.214.193]:38974 "EHLO
-        mail-pl1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1730570AbgCPKB4 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Mar 2020 06:01:56 -0400
-Received: by mail-pl1-f193.google.com with SMTP id j20so7767548pll.6;
-        Mon, 16 Mar 2020 03:01:54 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :in-reply-to:references;
-        bh=o1DIsdYS7ff4jJb5jCTI/tsP5spVoqhTKmmU077/da4=;
-        b=Jr5xEAiMjYgi7TOw021o1pEmQUbJ9AgMAYqAtB0HXbgBj/U4qKR5z3fnbBB4GLIWkb
-         XFlvpQRpaitJ+hDHvUQZ9JER5Ew3AtF46351sY5KpcRbQ0c7ke5DKR6OJ7qGiLby6bFh
-         ZHt2QbHsPCPDC4fjg15Md4YanbD7UvfXL2JmBwPRLmPKv1BpjqM2f4VGMvjrZVJMKfxz
-         OD603oxOD8Vn8Tlzs4GSDcVg8RwrVcyEX+NZ2oFKvtjdFuGMicQdNh14EO+GsqUOXW4v
-         kbbkDAe2oPydcRovbTYMmkfnSzegdSky90vp1gHDWldw2Zzpv4a88CwSX3wyqvLNr4Kn
-         S6aA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:in-reply-to:references;
-        bh=o1DIsdYS7ff4jJb5jCTI/tsP5spVoqhTKmmU077/da4=;
-        b=S9CxhPDfJNNo4Gnx01mc4YG3jcvEfLb632kbT40UHWjNRIpZxgWK+MZn4YWvb4IKOa
-         O7kmqyWRwxuPwRwZGdItHSjZCb/7kfZ9PtIKq1K/aZJnpn6C8Iq7tXowWBFuyH/pQRTK
-         EC0IpYYFzUyzmgE6afBJUdqF5RKADr6G7yPXBuvQ9wCzs13KIbNtavIX5WLAHj2j1hAG
-         fOAVotw9JXyol/m/l4t9vIzVeTVKg9LRDs9u/da8X9NxoG3EvBwS5W7RcBR6WeI/+E/w
-         f7cBw+Ej8FnUmAB758DC6pLdCy8/QKbJfkwed/l3Ay9doWGxmYY8gDfEnAMao285/b74
-         BAww==
-X-Gm-Message-State: ANhLgQ3q8aI59D+4aNAOJ8X/CnOqz1cDHcpvTm/XESf8EWFM9rcvk4Fd
-        ioAJKZHUaBAmCwuyJWbkuno=
-X-Google-Smtp-Source: ADFU+vvAIAXggVnK9BXVLESVBN4pJu4tsfGabg1WukYRfyJanyZ6iLhHpKnnELZbDfK8Q4We8pMlig==
-X-Received: by 2002:a17:90a:218e:: with SMTP id q14mr10943428pjc.37.1584352913547;
-        Mon, 16 Mar 2020 03:01:53 -0700 (PDT)
-Received: from sh03840pcu.spreadtrum.com ([117.18.48.82])
-        by smtp.gmail.com with ESMTPSA id 136sm63970411pgh.26.2020.03.16.03.01.50
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-SHA bits=128/128);
-        Mon, 16 Mar 2020 03:01:53 -0700 (PDT)
-From:   Baolin Wang <baolin.wang7@gmail.com>
-To:     axboe@kernel.dk, paolo.valente@linaro.org, ulf.hansson@linaro.org,
-        adrian.hunter@intel.com
-Cc:     ming.lei@redhat.com, arnd@arndb.de, linus.walleij@linaro.org,
-        baolin.wang7@gmail.com, orsonzhai@gmail.com, zhang.lyra@gmail.com,
-        linux-mmc@vger.kernel.org, linux-block@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Subject: [RESEND RFC PATCH 4/8] mmc: host: sdhci: Introduce ADMA3 transfer mode
-Date:   Mon, 16 Mar 2020 18:01:21 +0800
-Message-Id: <a1dcb9128356adf623c057b3c658de6dc5422742.1584350380.git.baolin.wang7@gmail.com>
-X-Mailer: git-send-email 1.9.1
-In-Reply-To: <cover.1584350380.git.baolin.wang7@gmail.com>
-References: <cover.1584350380.git.baolin.wang7@gmail.com>
-In-Reply-To: <cover.1584350380.git.baolin.wang7@gmail.com>
-References: <cover.1584350380.git.baolin.wang7@gmail.com>
+        id S1730789AbgCPLJN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 16 Mar 2020 07:09:13 -0400
+Received: from mga03.intel.com ([134.134.136.65]:44047 "EHLO mga03.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1730693AbgCPLJM (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 16 Mar 2020 07:09:12 -0400
+IronPort-SDR: QjLMXNzY2pd6BLHtE85CfoDqQ3h25pwzDD1fmNUWpvppl4roC3WIc0xQYk3oGOri8yxl68NHAp
+ u5FPSQIcHmVA==
+X-Amp-Result: SKIPPED(no attachment in message)
+X-Amp-File-Uploaded: False
+Received: from fmsmga005.fm.intel.com ([10.253.24.32])
+  by orsmga103.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 16 Mar 2020 04:09:11 -0700
+IronPort-SDR: uvOyjoJDDfi9BaetRR6AcrfV0NlTcY1UPlqsLOZFn0dEKio+PPLQ3mez+JFUfVr2Ue51XcRUsJ
+ v/lNUVysGkgw==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.70,560,1574150400"; 
+   d="scan'208";a="443293772"
+Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.167]) ([10.237.72.167])
+  by fmsmga005.fm.intel.com with ESMTP; 16 Mar 2020 04:09:09 -0700
+Subject: Re: [PATCH v2 1/2] mmc: sdhci-acpi: Switch signal voltage back to
+ 3.3V on suspend on external microSD on Lenovo Miix 320
+To:     Hans de Goede <hdegoede@redhat.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     "russianneuromancer @ ya . ru" <russianneuromancer@ya.ru>,
+        linux-mmc@vger.kernel.org
+References: <20200306143100.164975-1-hdegoede@redhat.com>
+ <1947780d-e2bf-1a3b-4603-a32c1b021e2f@intel.com>
+ <ddeaf983-3ca9-c808-5623-7e29dbd948a5@redhat.com>
+ <cbf40e3a-4879-8c13-8fc9-3f3a59d5a17c@intel.com>
+ <72e4369b-fb6a-28d2-97d1-21c8dd2a497b@redhat.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Message-ID: <25face79-4e15-5ee5-f501-69206141d88f@intel.com>
+Date:   Mon, 16 Mar 2020 13:08:21 +0200
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.5.0
+MIME-Version: 1.0
+In-Reply-To: <72e4369b-fb6a-28d2-97d1-21c8dd2a497b@redhat.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 8bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The standard SD host controller can support ADMA3 transfer mode optionally.
-The ADMA3 uses command descriptor to issue an SD command, and a multi-block
-data transfer is programmed by using a pair of command descriptor and ADMA2
-descriptor. ADMA3 performs multiple of multi-block data transfer by using
-integrated descriptor.
+On 16/03/20 11:34 am, Hans de Goede wrote:
+> Hi,
+> 
+> On 3/16/20 10:07 AM, Adrian Hunter wrote:
+>> On 14/03/20 3:59 pm, Hans de Goede wrote:
+>>> Hi,
+>>>
+>>> On 3/9/20 10:26 AM, Adrian Hunter wrote:
+>>>> Thanks for doing this.  A couple of questions below.
+>>>>
+>>>> On 6/03/20 4:30 pm, Hans de Goede wrote:
+>>>>> Based on a sample of 7 DSDTs from Cherry Trail devices using an AXP288
+>>>>> PMIC depending on the design one of 2 possible LDOs on the PMIC is used
+>>>>> for the MMC signalling voltage, either DLDO3 or GPIO1LDO (GPIO1 pin in
+>>>>> low noise LDO mode).
+>>>>>
+>>>>> The Lenovo Miix 320-10ICR uses GPIO1LDO in the SHC1 ACPI device's DSM
+>>>>> methods to set 3.3 or 1.8 signalling voltage and this appears to work
+>>>>> as advertised, so presumably the device is actually using GPIO1LDO for
+>>>>> the external microSD signalling voltage.
+>>>>>
+>>>>> But this device has a bug in the _PS0 method of the SHC1 ACPI device,
+>>>>> the DSM remembers the last set signalling voltage and the _PS0 restores
+>>>>> this after a (runtime) suspend-resume cycle, but it "restores" the voltage
+>>>>> on DLDO3 instead of setting it on GPIO1LDO as the DSM method does. DLDO3
+>>>>> is used for the LCD and setting it to 1.8V causes the LCD to go black.
+>>>>>
+>>>>> This commit works around this issue by calling the Intel DSM to reset the
+>>>>> signal voltage to 3.3V after the host has been runtime suspended.
+>>>>> This will make the _PS0 method reprogram the DLDO3 voltage to 3.3V, which
+>>>>> leaves it at its original setting fixing the LCD going black.
+>>>>>
+>>>>> And this commit then resets the signal voltage back to the original 1.8V
+>>>>> from the (runtime) resume handler, which runs after the ACPI _PS0 method
+>>>>> has run.
+>>>>
+>>>> Don't sdhci_resume_host, sdhci_runtime_resume_host do that anyway?
+>>>
+>>> It does not look like that, I've added the following debugging patch:
+>>>
+>>> --- a/drivers/mmc/host/sdhci-acpi.c
+>>> +++ b/drivers/mmc/host/sdhci-acpi.c
+>>> @@ -147,6 +147,10 @@ static int intel_dsm(struct intel_host *intel_host,
+>>> struct device *dev,
+>>>       if (fn > 31 || !(intel_host->dsm_fns & (1 << fn)))
+>>>           return -EOPNOTSUPP;
+>>>
+>>> +    if (fn == INTEL_DSM_V18_SWITCH || fn == INTEL_DSM_V33_SWITCH)
+>>> +        pr_err("Intel DSM switching to %s volt\n",
+>>> +            (fn == INTEL_DSM_V18_SWITCH) ? "1.8" : "3.3");
+>>> +
+>>>       return __intel_dsm(intel_host, dev, fn, result);
+>>>   }
+>>>
+>>> @@ -903,8 +907,9 @@ static void __maybe_unused
+>>> sdhci_acpi_restore_signal_voltage_if_needed(
+>>>           struct intel_host *intel_host = sdhci_acpi_priv(c);
+>>>           unsigned int fn = INTEL_DSM_V18_SWITCH;
+>>>           u32 result = 0;
+>>> -
+>>> +        pr_err("Calling Intel DSM from %s\n", __func__);
+>>>           intel_dsm(intel_host, dev, fn, &result);
+>>> +        pr_err("Calling Intel DSM from %s done\n", __func__);
+>>>       }
+>>>   }
+>>>
+>>>
+>>> And this gives the following output:
+>>>
+>>> [  368.079932] Intel DSM switching to 3.3 volt
+>>> [  368.414832] Intel DSM switching to 1.8 volt
+>>> [  371.989717] Intel DSM switching to 3.3 volt
+>>> [  407.176050] Calling Intel DSM from
+>>> sdhci_acpi_restore_signal_voltage_if_needed
+>>> [  407.176052] Intel DSM switching to 1.8 volt
+>>> [  407.200276] Calling Intel DSM from
+>>> sdhci_acpi_restore_signal_voltage_if_needed done
+>>> [  407.205846] Intel DSM switching to 3.3 volt
+>>> [  407.527003] Intel DSM switching to 1.8 volt
+>>> [  407.571991] Intel DSM switching to 3.3 volt
+>>> [  407.893990] Intel DSM switching to 1.8 volt
+>>>
+>>> [  412.242658] Intel DSM switching to 1.8 volt
+>>> [  412.289387] Intel DSM switching to 3.3 volt
+>>> [  412.606210] Intel DSM switching to 1.8 volt
+>>> [  423.292135] Intel DSM switching to 3.3 volt
+>>> [  424.520057] Calling Intel DSM from
+>>> sdhci_acpi_restore_signal_voltage_if_needed
+>>> [  424.520065] Intel DSM switching to 1.8 volt
+>>> [  424.546960] Calling Intel DSM from
+>>> sdhci_acpi_restore_signal_voltage_if_needed done
+>>> [  424.552940] Intel DSM switching to 3.3 volt
+>>> [  424.890483] Intel DSM switching to 1.8 volt
+>>>
+>>> Notice how the switch to 1.8 volt is not repeated.
+>>
+>> Because the card has been suspended i.e. it will be re-initialized
+>> completely.
+> 
+> Right.
+> 
+> What I was trying to say is:
+> 
+> Since the re-init starts with resetting the signal voltage
+> to 3.3 volt, couldn't we do the reset of the signal voltage
+> at the end of sdhci_[runtime_]suspend_host() or even deeper
+> in the stack (after the card has been suspended/turned off)?
+> That would remove the need for this patch.
+> 
+> I guess that would be a pretty major change, so perhaps it
+> is best to remove the sdhci_acpi_restore_signal_voltage_if_needed
+> function as you suggest and move forward with a v3 of this
+> patch with that changed?
 
-This is a preparation patch to add ADMA3 structures and help to expand the
-ADMA buffer for support ADMA3 transfer mode.
+Yes please
 
-Signed-off-by: Baolin Wang <baolin.wang7@gmail.com>
----
- drivers/mmc/host/sdhci.c | 106 +++++++++++++++++++++++++++++++++++++++--------
- drivers/mmc/host/sdhci.h |  48 +++++++++++++++++++++
- 2 files changed, 137 insertions(+), 17 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 4febbcb..6238b5c 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -772,7 +772,8 @@ static void sdhci_adma_table_pre(struct sdhci_host *host,
- 		 * If this triggers then we have a calculation bug
- 		 * somewhere. :/
- 		 */
--		WARN_ON((desc - host->adma_table) >= host->adma_table_sz);
-+		WARN_ON((desc - host->adma_table) >=
-+			host->adma_table_sz * host->adma3_table_cnt);
- 	}
- 
- 	if (host->quirks & SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC) {
-@@ -4012,10 +4013,17 @@ int sdhci_setup_host(struct sdhci_host *host)
- 		(host->caps & SDHCI_CAN_DO_ADMA2))
- 		host->flags |= SDHCI_USE_ADMA;
- 
-+	if ((host->quirks2 & SDHCI_QUIRK2_USE_ADMA3_SUPPORT) &&
-+	    (host->flags & SDHCI_USE_ADMA) &&
-+	    (host->caps1 & SDHCI_CAN_DO_ADMA3)) {
-+		DBG("Enable ADMA3 mode for data transfer\n");
-+		host->flags |= SDHCI_USE_ADMA3;
-+	}
-+
- 	if ((host->quirks & SDHCI_QUIRK_BROKEN_ADMA) &&
- 		(host->flags & SDHCI_USE_ADMA)) {
- 		DBG("Disabling ADMA as it is marked broken\n");
--		host->flags &= ~SDHCI_USE_ADMA;
-+		host->flags &= ~(SDHCI_USE_ADMA | SDHCI_USE_ADMA3);
- 	}
- 
- 	if (sdhci_can_64bit_dma(host))
-@@ -4048,7 +4056,7 @@ int sdhci_setup_host(struct sdhci_host *host)
- 		if (ret) {
- 			pr_warn("%s: No suitable DMA available - falling back to PIO\n",
- 				mmc_hostname(mmc));
--			host->flags &= ~(SDHCI_USE_SDMA | SDHCI_USE_ADMA);
-+			host->flags &= ~(SDHCI_USE_SDMA | SDHCI_USE_ADMA | SDHCI_USE_ADMA3);
- 
- 			ret = 0;
- 		}
-@@ -4070,31 +4078,68 @@ int sdhci_setup_host(struct sdhci_host *host)
- 		host->desc_sz = host->alloc_desc_sz;
- 		host->adma_table_sz = host->adma_table_cnt * host->desc_sz;
- 
-+		host->adma3_table_cnt = 1;
-+
-+		if (host->flags & SDHCI_USE_ADMA3) {
-+			/* We can package maximum 16 requests once */
-+			host->adma3_table_cnt = SDHCI_MAX_ADMA3_ENTRIES;
-+
-+			if (host->flags & SDHCI_USE_64_BIT_DMA)
-+				host->integr_desc_sz = SDHCI_INTEGR_64_DESC_SZ;
-+			else
-+				host->integr_desc_sz = SDHCI_INTEGR_32_DESC_SZ;
-+
-+			host->cmd_desc_sz = SDHCI_ADMA3_CMD_DESC_SZ;
-+			host->cmd_table_sz = host->adma3_table_cnt *
-+				SDHCI_ADMA3_CMD_DESC_SZ * SDHCI_ADMA3_CMD_DESC_ENTRIES;
-+
-+			buf = dma_alloc_coherent(mmc_dev(mmc),
-+						 host->adma3_table_cnt *
-+						 host->integr_desc_sz,
-+						 &dma, GFP_KERNEL);
-+			if (!buf) {
-+				pr_warn("%s: Unable to allocate ADMA3 integrated buffers - falling back to ADMA\n",
-+					mmc_hostname(mmc));
-+				host->flags &= ~SDHCI_USE_ADMA3;
-+				host->adma3_table_cnt = 1;
-+			} else {
-+				host->integr_table = buf;
-+				host->integr_addr = dma;
-+			}
-+		}
-+
- 		host->align_buffer_sz = SDHCI_MAX_SEGS * SDHCI_ADMA2_ALIGN;
- 		/*
- 		 * Use zalloc to zero the reserved high 32-bits of 128-bit
- 		 * descriptors so that they never need to be written.
- 		 */
- 		buf = dma_alloc_coherent(mmc_dev(mmc),
--					 host->align_buffer_sz + host->adma_table_sz,
-+					 host->align_buffer_sz *
-+					 host->adma3_table_cnt +
-+					 host->cmd_table_sz +
-+					 host->adma_table_sz *
-+					 host->adma3_table_cnt,
- 					 &dma, GFP_KERNEL);
- 		if (!buf) {
- 			pr_warn("%s: Unable to allocate ADMA buffers - falling back to standard DMA\n",
- 				mmc_hostname(mmc));
--			host->flags &= ~SDHCI_USE_ADMA;
--		} else if ((dma + host->align_buffer_sz) &
-+			host->flags &= ~(SDHCI_USE_ADMA | SDHCI_USE_ADMA3);
-+		} else if ((dma + host->align_buffer_sz * host->adma3_table_cnt) &
- 			   (SDHCI_ADMA2_DESC_ALIGN - 1)) {
- 			pr_warn("%s: unable to allocate aligned ADMA descriptor\n",
- 				mmc_hostname(mmc));
--			host->flags &= ~SDHCI_USE_ADMA;
--			dma_free_coherent(mmc_dev(mmc), host->align_buffer_sz +
--					  host->adma_table_sz, buf, dma);
-+			host->flags &= ~(SDHCI_USE_ADMA | SDHCI_USE_ADMA3);
-+			dma_free_coherent(mmc_dev(mmc), host->align_buffer_sz *
-+					  host->adma3_table_cnt +
-+					  host->cmd_table_sz +
-+					  host->adma_table_sz *
-+					  host->adma3_table_cnt, buf, dma);
- 		} else {
- 			host->align_buffer = buf;
- 			host->align_addr = dma;
- 
--			host->adma_table = buf + host->align_buffer_sz;
--			host->adma_addr = dma + host->align_buffer_sz;
-+			host->adma_table = buf + host->align_buffer_sz * host->adma3_table_cnt;
-+			host->adma_addr = dma + host->align_buffer_sz * host->adma3_table_cnt;
- 		}
- 	}
- 
-@@ -4495,12 +4540,21 @@ int sdhci_setup_host(struct sdhci_host *host)
- 		regulator_disable(mmc->supply.vqmmc);
- undma:
- 	if (host->align_buffer)
--		dma_free_coherent(mmc_dev(mmc), host->align_buffer_sz +
--				  host->adma_table_sz, host->align_buffer,
-+		dma_free_coherent(mmc_dev(mmc),
-+				  host->align_buffer_sz * host->adma3_table_cnt +
-+				  host->cmd_table_sz +
-+				  host->adma_table_sz * host->adma3_table_cnt,
-+				  host->align_buffer,
- 				  host->align_addr);
- 	host->adma_table = NULL;
- 	host->align_buffer = NULL;
- 
-+	if (host->integr_table)
-+		dma_free_coherent(mmc_dev(mmc),
-+				  host->adma3_table_cnt * host->integr_desc_sz,
-+				  host->integr_table, host->integr_addr);
-+	host->integr_table = NULL;
-+
- 	return ret;
- }
- EXPORT_SYMBOL_GPL(sdhci_setup_host);
-@@ -4513,8 +4567,11 @@ void sdhci_cleanup_host(struct sdhci_host *host)
- 		regulator_disable(mmc->supply.vqmmc);
- 
- 	if (host->align_buffer)
--		dma_free_coherent(mmc_dev(mmc), host->align_buffer_sz +
--				  host->adma_table_sz, host->align_buffer,
-+		dma_free_coherent(mmc_dev(mmc),
-+				  host->align_buffer_sz * host->adma3_table_cnt +
-+				  host->cmd_table_sz +
-+				  host->adma_table_sz * host->adma3_table_cnt,
-+				  host->align_buffer,
- 				  host->align_addr);
- 
- 	if (host->use_external_dma)
-@@ -4522,6 +4579,12 @@ void sdhci_cleanup_host(struct sdhci_host *host)
- 
- 	host->adma_table = NULL;
- 	host->align_buffer = NULL;
-+
-+	if (host->integr_table)
-+		dma_free_coherent(mmc_dev(mmc),
-+				  host->adma3_table_cnt * host->integr_desc_sz,
-+				  host->integr_table, host->integr_addr);
-+	host->integr_table = NULL;
- }
- EXPORT_SYMBOL_GPL(sdhci_cleanup_host);
- 
-@@ -4650,8 +4713,11 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
- 		regulator_disable(mmc->supply.vqmmc);
- 
- 	if (host->align_buffer)
--		dma_free_coherent(mmc_dev(mmc), host->align_buffer_sz +
--				  host->adma_table_sz, host->align_buffer,
-+		dma_free_coherent(mmc_dev(mmc),
-+				  host->align_buffer_sz * host->adma3_table_cnt +
-+				  host->cmd_table_sz +
-+				  host->adma_table_sz * host->adma3_table_cnt,
-+				  host->align_buffer,
- 				  host->align_addr);
- 
- 	if (host->use_external_dma)
-@@ -4659,6 +4725,12 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
- 
- 	host->adma_table = NULL;
- 	host->align_buffer = NULL;
-+
-+	if (host->integr_table)
-+		dma_free_coherent(mmc_dev(mmc),
-+				  host->adma3_table_cnt * host->integr_desc_sz,
-+				  host->integr_table, host->integr_addr);
-+	host->integr_table = NULL;
- }
- 
- EXPORT_SYMBOL_GPL(sdhci_remove_host);
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 5507a73..96aed99 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -274,6 +274,9 @@
- #define SDHCI_PRESET_SDCLK_FREQ_MASK   0x3FF
- #define SDHCI_PRESET_SDCLK_FREQ_SHIFT	0
- 
-+#define SDHCI_ADMA3_ADDRESS	0x78
-+#define SDHCI_ADMA3_ADDRESS_HI	0x7c
-+
- #define SDHCI_SLOT_INT_STATUS	0xFC
- 
- #define SDHCI_HOST_VERSION	0xFE
-@@ -346,6 +349,41 @@ struct sdhci_adma2_64_desc {
- #define ADMA2_NOP_END_VALID	0x3
- #define ADMA2_END		0x2
- 
-+#define SDHCI_MAX_ADMA3_ENTRIES	16
-+
-+/* ADMA3 command descriptor */
-+struct sdhci_adma3_cmd_desc {
-+	__le32	cmd;
-+	__le32	reg;
-+}  __packed __aligned(4);
-+
-+#define ADMA3_TRAN_VALID	0x9
-+#define ADMA3_TRAN_END		0xb
-+
-+/* ADMA3 command descriptor size */
-+#define SDHCI_ADMA3_CMD_DESC_ENTRIES	4
-+#define SDHCI_ADMA3_CMD_DESC_SZ		8
-+
-+/* ADMA3 integrated 32-bit descriptor */
-+struct sdhci_integr_32_desc {
-+	__le32	cmd;
-+	__le32	addr;
-+}  __packed __aligned(4);
-+
-+#define SDHCI_INTEGR_32_DESC_SZ		8
-+
-+/* ADMA3 integrated 64-bit descriptor. */
-+struct sdhci_integr_64_desc {
-+	__le32	cmd;
-+	__le32	addr_lo;
-+	__le32	addr_hi;
-+}  __packed __aligned(4);
-+
-+#define SDHCI_INTEGR_64_DESC_SZ		16
-+
-+#define ADMA3_INTEGR_TRAN_VALID		0x39
-+#define ADMA3_INTEGR_TRAN_END		0x3b
-+
- /*
-  * Maximum segments assuming a 512KiB maximum requisition size and a minimum
-  * 4KiB page size.
-@@ -484,6 +522,8 @@ struct sdhci_host {
-  * block count.
-  */
- #define SDHCI_QUIRK2_USE_32BIT_BLK_CNT			(1<<18)
-+/* use ADMA3 for data read/write if hardware supports */
-+#define SDHCI_QUIRK2_USE_ADMA3_SUPPORT			(1<<19)
- 
- 	int irq;		/* Device IRQ */
- 	void __iomem *ioaddr;	/* Mapped address */
-@@ -520,6 +560,7 @@ struct sdhci_host {
- #define SDHCI_SIGNALING_330	(1<<14)	/* Host is capable of 3.3V signaling */
- #define SDHCI_SIGNALING_180	(1<<15)	/* Host is capable of 1.8V signaling */
- #define SDHCI_SIGNALING_120	(1<<16)	/* Host is capable of 1.2V signaling */
-+#define SDHCI_USE_ADMA3		(1<<17)	/* Host is ADMA3 capable */
- 
- 	unsigned int version;	/* SDHCI spec. version */
- 
-@@ -552,15 +593,20 @@ struct sdhci_host {
- 
- 	void *adma_table;	/* ADMA descriptor table */
- 	void *align_buffer;	/* Bounce buffer */
-+	void *integr_table;	/* ADMA3 intergrate descriptor table */
- 
- 	size_t adma_table_sz;	/* ADMA descriptor table size */
- 	size_t align_buffer_sz;	/* Bounce buffer size */
-+	size_t cmd_table_sz;	/* ADMA3 command descriptor table size */
- 
- 	dma_addr_t adma_addr;	/* Mapped ADMA descr. table */
- 	dma_addr_t align_addr;	/* Mapped bounce buffer */
-+	dma_addr_t integr_addr;	/* Mapped ADMA3 intergrate descr. table */
- 
- 	unsigned int desc_sz;	/* ADMA current descriptor size */
- 	unsigned int alloc_desc_sz;	/* ADMA descr. max size host supports */
-+	unsigned int cmd_desc_sz;	/* ADMA3 command descriptor size */
-+	unsigned int integr_desc_sz;	/* ADMA3 intergrate descriptor size */
- 
- 	struct workqueue_struct *complete_wq;	/* Request completion wq */
- 	struct work_struct	complete_work;	/* Request completion work */
-@@ -611,6 +657,8 @@ struct sdhci_host {
- 
- 	/* Host ADMA table count */
- 	u32			adma_table_cnt;
-+	/* Host ADMA3 table count */
-+	u32			adma3_table_cnt;
- 
- 	u64			data_timeout;
- 
--- 
-1.9.1
+> 
+> Regards,
+> 
+> Hans
+> 
+> 
+> 
+>>
+>>>
+>>> It looks almost as if the voltage is being reset
+>>> to 3.3 volt by some higher level code, but only
+>>> after the sdhci_acpi_runtime_resume(), rather then
+>>> before the sdhci_acpi_runtime_suspend() completes.
+>>>
+>>> If that is indeed the case then indeed we might not
+>>> need the sdhci_acpi_restore_signal_voltage_if_needed()
+>>> function, since the first call to set the signal
+>>> voltage to 3.3V on resume would just be a no-op
+>>> because with the quirk we already do that on suspend.
+>>>
+>>> And then the second call to switch to 1.8 volt would
+>>> take care of switching to 1.8V for us.
+>>>
+>>> But if this is indeed what is happening, then wouldn't
+>>> it make more sense to switch back to 3.3V from somewhere
+>>> in higher-level code before sdhci_runtime_suspend_host()
+>>> completes, replacing the current switch-back done just
+>>> after resume?  If we move that switch-back to 3.3V
+>>> done just after resume to suspend time then this entire
+>>> model-specific patch will likely become unnecessary ?
+>>>
+>>> Note one more answer to some of your review remarks below.
+>>>
+>>>>> This commit adds and uses a DMI quirk mechanism to only trigger this
+>>>>> workaround on the Lenovo Miix 320 while leaving the behavior of the
+>>>>> driver unchanged on other devices.
+>>>>>
+>>>>> BugLink: https://bugs.freedesktop.org/show_bug.cgi?id=111294
+>>>>> BugLink: https://gitlab.freedesktop.org/drm/intel/issues/355
+>>>>> Reported-by: russianneuromancer <russianneuromancer@ya.ru>
+>>>>> Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+>>>>> ---
+>>>>> Changes in v2:
+>>>>> - Make the quirk reset the signal voltage to 3.3V at the end of the
+>>>>>     (runtime) suspend handler instead of disabling 1.8V modes
+>>>>> - Drop the module option to allow overridig the quirks
+>>>>> ---
+>>>>>    drivers/mmc/host/sdhci-acpi.c | 87 ++++++++++++++++++++++++++++++++++-
+>>>>>    1 file changed, 85 insertions(+), 2 deletions(-)
+>>>>>
+>>>>> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+>>>>> index 9651dca6863e..d54a3592f40f 100644
+>>>>> --- a/drivers/mmc/host/sdhci-acpi.c
+>>>>> +++ b/drivers/mmc/host/sdhci-acpi.c
+>>>>> @@ -23,6 +23,7 @@
+>>>>>    #include <linux/pm.h>
+>>>>>    #include <linux/pm_runtime.h>
+>>>>>    #include <linux/delay.h>
+>>>>> +#include <linux/dmi.h>
+>>>>>      #include <linux/mmc/host.h>
+>>>>>    #include <linux/mmc/pm.h>
+>>>>> @@ -72,9 +73,14 @@ struct sdhci_acpi_host {
+>>>>>        const struct sdhci_acpi_slot    *slot;
+>>>>>        struct platform_device        *pdev;
+>>>>>        bool                use_runtime_pm;
+>>>>> +    bool                reset_signal_volt_on_suspend;
+>>>>>        unsigned long            private[0] ____cacheline_aligned;
+>>>>>    };
+>>>>>    +enum {
+>>>>> +    DMI_QUIRK_RESET_SD_SIGNAL_VOLT_ON_SUSP            = BIT(0),
+>>>>> +};
+>>>>> +
+>>>>>    static inline void *sdhci_acpi_priv(struct sdhci_acpi_host *c)
+>>>>>    {
+>>>>>        return (void *)c->private;
+>>>>> @@ -647,6 +653,24 @@ static const struct acpi_device_id
+>>>>> sdhci_acpi_ids[] = {
+>>>>>    };
+>>>>>    MODULE_DEVICE_TABLE(acpi, sdhci_acpi_ids);
+>>>>>    +static const struct dmi_system_id sdhci_acpi_quirks[] = {
+>>>>> +    {
+>>>>> +        /*
+>>>>> +         * The Lenovo Miix 320-10ICR has a bug in the _PS0 method of
+>>>>> +         * the SHC1 ACPI device, this bug causes it to reprogram the
+>>>>> +         * wrong LDO (DLDO3) to 1.8V if 1.8V modes are used and the
+>>>>> +         * card is (runtime) suspended + resumed. DLDO3 is used for
+>>>>> +         * the LCD and setting it to 1.8V causes the LCD to go black.
+>>>>> +         */
+>>>>> +        .matches = {
+>>>>> +            DMI_MATCH(DMI_SYS_VENDOR, "LENOVO"),
+>>>>> +            DMI_MATCH(DMI_PRODUCT_VERSION, "Lenovo MIIX 320-10ICR"),
+>>>>> +        },
+>>>>> +        .driver_data = (void *)DMI_QUIRK_RESET_SD_SIGNAL_VOLT_ON_SUSP,
+>>>>> +    },
+>>>>> +    {} /* Terminating entry */
+>>>>> +};
+>>>>> +
+>>>>>    static const struct sdhci_acpi_slot *sdhci_acpi_get_slot(struct
+>>>>> acpi_device *adev)
+>>>>>    {
+>>>>>        const struct sdhci_acpi_uid_slot *u;
+>>>>> @@ -663,17 +687,23 @@ static int sdhci_acpi_probe(struct platform_device
+>>>>> *pdev)
+>>>>>        struct device *dev = &pdev->dev;
+>>>>>        const struct sdhci_acpi_slot *slot;
+>>>>>        struct acpi_device *device, *child;
+>>>>> +    const struct dmi_system_id *id;
+>>>>>        struct sdhci_acpi_host *c;
+>>>>>        struct sdhci_host *host;
+>>>>>        struct resource *iomem;
+>>>>>        resource_size_t len;
+>>>>>        size_t priv_size;
+>>>>> +    int quirks = 0;
+>>>>>        int err;
+>>>>>          device = ACPI_COMPANION(dev);
+>>>>>        if (!device)
+>>>>>            return -ENODEV;
+>>>>>    +    id = dmi_first_match(sdhci_acpi_quirks);
+>>>>> +    if (id)
+>>>>> +        quirks = (long)id->driver_data;
+>>>>> +
+>>>>>        slot = sdhci_acpi_get_slot(device);
+>>>>>          /* Power on the SDHCI controller and its children */
+>>>>> @@ -759,6 +789,9 @@ static int sdhci_acpi_probe(struct platform_device
+>>>>> *pdev)
+>>>>>                dev_warn(dev, "failed to setup card detect gpio\n");
+>>>>>                c->use_runtime_pm = false;
+>>>>>            }
+>>>>> +
+>>>>> +        if (quirks & DMI_QUIRK_RESET_SD_SIGNAL_VOLT_ON_SUSP)
+>>>>> +            c->reset_signal_volt_on_suspend = true;
+>>>>>        }
+>>>>>          err = sdhci_setup_host(host);
+>>>>> @@ -823,17 +856,59 @@ static int sdhci_acpi_remove(struct platform_device
+>>>>> *pdev)
+>>>>>        return 0;
+>>>>>    }
+>>>>>    +static void __maybe_unused sdhci_acpi_reset_signal_voltage_if_needed(
+>>>>> +    struct device *dev)
+>>>>> +{
+>>>>> +    struct sdhci_acpi_host *c = dev_get_drvdata(dev);
+>>>>> +    struct sdhci_host *host = c->host;
+>>>>> +
+>>>>> +    if (c->reset_signal_volt_on_suspend &&
+>>>>> +        host->mmc_host_ops.start_signal_voltage_switch ==
+>>>>> +                    intel_start_signal_voltage_switch &&
+>>>>
+>>>> This creates a unexpected dependency on
+>>>> host->mmc_host_ops.start_signal_voltage_switch.  Is it really necessary?
+>>>
+>>> Well we are directly invoking the intel_dsm here, although the
+>>> DMI match should only happen on a system which is using an
+>>> Intel SDHCI controller, I thought it would be better to check for
+>>> that rather then just assuming it.
+>>>
+>>> Also see the:
+>>>
+>>> +        struct intel_host *intel_host = sdhci_acpi_priv(c);
+>>>
+>>> Line, doing this on a non Intel SDHCI ACPI controller would be bad.
+>>
+>> Then you need to add a comment to intel_probe_slot() to explain that
+>> sdhci_acpi_reset_signal_voltage_if_needed() is dependent on:
+>>     host->mmc_host_ops.start_signal_voltage_switch =
+>>                     intel_start_signal_voltage_switch;
+>>
+>>
+>>>
+>>> Regards,
+>>>
+>>> Hans
+>>>
+>>>
+>>>>
+>>>>> +        host->mmc->ios.signal_voltage != MMC_SIGNAL_VOLTAGE_330) {
+>>>>> +        struct intel_host *intel_host = sdhci_acpi_priv(c);
+>>>>> +        unsigned int fn = INTEL_DSM_V33_SWITCH;
+>>>>> +        u32 result = 0;
+>>>>> +
+>>>>> +        intel_dsm(intel_host, dev, fn, &result);
+>>>>> +    }
+>>>>> +}
+>>>>> +
+>>>>> +static void __maybe_unused sdhci_acpi_restore_signal_voltage_if_needed(
+>>>>> +    struct device *dev)
+>>>>> +{
+>>>>> +    struct sdhci_acpi_host *c = dev_get_drvdata(dev);
+>>>>> +    struct sdhci_host *host = c->host;
+>>>>> +
+>>>>> +    if (c->reset_signal_volt_on_suspend &&
+>>>>> +        host->mmc_host_ops.start_signal_voltage_switch ==
+>>>>> +                    intel_start_signal_voltage_switch &&
+>>>>> +        host->mmc->ios.signal_voltage == MMC_SIGNAL_VOLTAGE_180) {
+>>>>> +        struct intel_host *intel_host = sdhci_acpi_priv(c);
+>>>>> +        unsigned int fn = INTEL_DSM_V18_SWITCH;
+>>>>> +        u32 result = 0;
+>>>>> +
+>>>>> +        intel_dsm(intel_host, dev, fn, &result);
+>>>>> +    }
+>>>>> +}
+>>>>> +
+>>>>>    #ifdef CONFIG_PM_SLEEP
+>>>>>      static int sdhci_acpi_suspend(struct device *dev)
+>>>>>    {
+>>>>>        struct sdhci_acpi_host *c = dev_get_drvdata(dev);
+>>>>>        struct sdhci_host *host = c->host;
+>>>>> +    int ret;
+>>>>>          if (host->tuning_mode != SDHCI_TUNING_MODE_3)
+>>>>>            mmc_retune_needed(host->mmc);
+>>>>>    -    return sdhci_suspend_host(host);
+>>>>> +    ret = sdhci_suspend_host(host);
+>>>>> +    if (ret)
+>>>>> +        return ret;
+>>>>> +
+>>>>> +    sdhci_acpi_reset_signal_voltage_if_needed(dev);
+>>>>> +    return 0;
+>>>>>    }
+>>>>>      static int sdhci_acpi_resume(struct device *dev)
+>>>>> @@ -841,6 +916,7 @@ static int sdhci_acpi_resume(struct device *dev)
+>>>>>        struct sdhci_acpi_host *c = dev_get_drvdata(dev);
+>>>>>          sdhci_acpi_byt_setting(&c->pdev->dev);
+>>>>> +    sdhci_acpi_restore_signal_voltage_if_needed(dev);
+>>>>>          return sdhci_resume_host(c->host);
+>>>>>    }
+>>>>> @@ -853,11 +929,17 @@ static int sdhci_acpi_runtime_suspend(struct device
+>>>>> *dev)
+>>>>>    {
+>>>>>        struct sdhci_acpi_host *c = dev_get_drvdata(dev);
+>>>>>        struct sdhci_host *host = c->host;
+>>>>> +    int ret;
+>>>>>          if (host->tuning_mode != SDHCI_TUNING_MODE_3)
+>>>>>            mmc_retune_needed(host->mmc);
+>>>>>    -    return sdhci_runtime_suspend_host(host);
+>>>>> +    ret = sdhci_runtime_suspend_host(host);
+>>>>> +    if (ret)
+>>>>> +        return ret;
+>>>>> +
+>>>>> +    sdhci_acpi_reset_signal_voltage_if_needed(dev);
+>>>>> +    return 0;
+>>>>>    }
+>>>>>      static int sdhci_acpi_runtime_resume(struct device *dev)
+>>>>> @@ -865,6 +947,7 @@ static int sdhci_acpi_runtime_resume(struct device
+>>>>> *dev)
+>>>>>        struct sdhci_acpi_host *c = dev_get_drvdata(dev);
+>>>>>          sdhci_acpi_byt_setting(&c->pdev->dev);
+>>>>> +    sdhci_acpi_restore_signal_voltage_if_needed(dev);
+>>>>>          return sdhci_runtime_resume_host(c->host, 0);
+>>>>>    }
+>>>>>
+>>>>
+>>>
+>>
+> 
 
