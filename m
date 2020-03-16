@@ -2,188 +2,301 @@ Return-Path: <SRS0=aPfc=5B=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+X-Spam-Status: No, score=-9.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no
-	version=3.4.0
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3B29DC2BB1D
-	for <linux-mmc@archiver.kernel.org>; Mon, 16 Mar 2020 14:17:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 114FDC0044D
+	for <linux-mmc@archiver.kernel.org>; Mon, 16 Mar 2020 15:22:14 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 0AA8820575
-	for <linux-mmc@archiver.kernel.org>; Mon, 16 Mar 2020 14:17:41 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B198220663
+	for <linux-mmc@archiver.kernel.org>; Mon, 16 Mar 2020 15:22:13 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="wtJI4ofX"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="IRrtw7HB"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1731490AbgCPORk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 16 Mar 2020 10:17:40 -0400
-Received: from mail-vs1-f68.google.com ([209.85.217.68]:46130 "EHLO
-        mail-vs1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729631AbgCPORj (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Mar 2020 10:17:39 -0400
-Received: by mail-vs1-f68.google.com with SMTP id z125so11334341vsb.13
-        for <linux-mmc@vger.kernel.org>; Mon, 16 Mar 2020 07:17:37 -0700 (PDT)
+        id S1729856AbgCPPWN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 16 Mar 2020 11:22:13 -0400
+Received: from mail-lf1-f66.google.com ([209.85.167.66]:39410 "EHLO
+        mail-lf1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1729541AbgCPPWM (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Mar 2020 11:22:12 -0400
+Received: by mail-lf1-f66.google.com with SMTP id j15so14443004lfk.6
+        for <linux-mmc@vger.kernel.org>; Mon, 16 Mar 2020 08:22:10 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=gfpSr29ntUR/I/as2FQq9j0zRov447y/exMSEoJfydg=;
-        b=wtJI4ofXmDD1A9SJtl2cHZNW4zEcI9mspR3pkgS9x6qsrxGVFTfgFNc+OslwPl0EWI
-         FikZg4a0YBL5Teyixuzvvwrl1nqV/blw7wNZKa59V5JP6hAqdoKzN69X7ppg6xXgsSAZ
-         VZwIL83qK9FxJp4n941qkyxBh9eA6Nxw+8Tk0XWB7I/0h5Qao0NVPVtQclnkOJ/pS1bH
-         ls3PQHPNO+NtJmdiSr9WOmzLi9pMSziQCQLzqOMtSy/YJtyN+bN/U0sh7ICYIZHJZ2l3
-         pZmNDlOS8FnYGKZM9CSrnM1rV4Unk++4zZL4iPsfpZOw+G3I5MNG+8VhYbvqbeqJHxTB
-         FOmg==
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=My6xvZz/fhkgy/uaLj1NERSiZJmHKnsEWA1q0ELN7mk=;
+        b=IRrtw7HBsj/l1UDoFCV247/O60PLsKVHlEL0I4OQudDcqNvosHJVeKqo2DghtPGRVF
+         tUmTuT3pHhb0al/NWy3VgTV58U6JgB6aA29XXtLZIZ5vCQ44VUND0VlqIgclJ7raOL59
+         ac9fTynI1OJeBGt4r8j1bqPDeURMgdDgE9LYIcaOk/7f86ax56CLndBsIlA4yCE1dPpI
+         3sVkmS4x2erg5Q6GSoU0DkppRezBIeRHZt4OA6cjLZLF+25DnfxF6nWUrBq3wGDDBb1n
+         pPWV3604ucJWN8vYFTexpW0KQJm8PWU4MQDa7Tlds4rwO4S7yvt8+Nb6OvL2WW9R2uSV
+         2pgw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=gfpSr29ntUR/I/as2FQq9j0zRov447y/exMSEoJfydg=;
-        b=URwcEGSHkWCsNvqDg4E+bxdB+6QXmZleBRVJKh9UGfMHlt776d6nCXa0kCRXCFqSHe
-         6SETPNWk7+8guhLZuC0BpUxX4X+i5PF3I2lNx1XPpUNiRSv9ZNIWIqUAVwI1OPBNFrRL
-         iNDIeXJSdtR4ycy0y4aDODilAEV1ylUIRDVARc6eJywHBjWjDKMKQCBIjBy6GFTrkDjF
-         cXWlor9g2qlayF+0DYlWuCM8mQOn1zoUfQBci4UCqi8oXT5fymyTh6q5ZmdPmSgDwwMf
-         2C1s4kINMSRHXFCwCoHRVuUIiAmsvCbkAQcAHGFASfgVW4dCuor2TTrdp7v90qzWowfL
-         7DVg==
-X-Gm-Message-State: ANhLgQ1tKcxjE5eyC2zuB40k4VQcADaYfHYl/f4VRdnDsgMo/4/jY1pT
-        0fWKzYVXl9TvWRQBqVJdBNkyLovXMJhHFcVcDGD4Kg==
-X-Google-Smtp-Source: ADFU+vsxkwXlJemW8aKdO41aOyBLa5RhNk7gSNyGUSH1YIJtaUWpgkkWDFYSXRhK6xqmc/5RnEQ6rEBKwKcHX3T5+bQ=
-X-Received: by 2002:a67:646:: with SMTP id 67mr17046878vsg.34.1584368256722;
- Mon, 16 Mar 2020 07:17:36 -0700 (PDT)
-MIME-Version: 1.0
-References: <20200316025232.1167-1-ricky_wu@realtek.com>
-In-Reply-To: <20200316025232.1167-1-ricky_wu@realtek.com>
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=My6xvZz/fhkgy/uaLj1NERSiZJmHKnsEWA1q0ELN7mk=;
+        b=a+7HBfasFJsgechwp+aSKQODrkjQ7dLu8J2Y/hlijanDj+u/HvO9mhWwWIMrxlZ60Z
+         ZnNXSJ1Buxbm3gG7TWNn65vkOBNjsMjUgY7xOF73Db2rCODVz8JlL4+FbtjKFusN2J6f
+         hxqJMuHJ9G44Oczi3493KOQHcZqsolYmH3EkzgPZAbl37ZX0+nNO70PMXG51QjpTWpuw
+         /HIqFxef5PnfXzWpKex/2Zs3iyfJgyD3WfMSNB77F7kiCzULyPJlu4nXvsmPkkbFsjhR
+         mEc6dJTg6i09e7DGRvqz6MvsdCv8kNZwJgUnzalof4FpcLg+hQhiVEf1SZpXvjeFDGHA
+         H8AA==
+X-Gm-Message-State: ANhLgQ1ABiQV03ocxX1BfVlhZHfC8IDb/9Q+hDjJN+CV2lk/lkwXrU+4
+        JceWJ36E2CIfSzCWDYvDUR5Lgx5jr9g=
+X-Google-Smtp-Source: ADFU+vsflTiKdroVx9dnVwEs6VQT1Y6X2K2lGJPXhuSD0OtAi/q7ozXCJVUeYVXi2wGv9OKQ8G69sA==
+X-Received: by 2002:a19:8ac1:: with SMTP id m184mr8228342lfd.181.1584372128667;
+        Mon, 16 Mar 2020 08:22:08 -0700 (PDT)
+Received: from localhost.localdomain (h-158-174-22-210.NA.cust.bahnhof.se. [158.174.22.210])
+        by smtp.gmail.com with ESMTPSA id w3sm173008lfe.9.2020.03.16.08.22.07
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 16 Mar 2020 08:22:07 -0700 (PDT)
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 16 Mar 2020 15:16:59 +0100
-Message-ID: <CAPDyKFrWedEmZ=0trPEG8Z-11nyFX6_OB3cx7+SAdB5VW_vzgQ@mail.gmail.com>
-Subject: Re: [PATCH] mmc: rtsx: Fixed TX/RX register and optimized TX parameter
-To:     ricky_wu@realtek.com
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Arnd Bergmann <arnd@arndb.de>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Content-Type: text/plain; charset="UTF-8"
+To:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Ludovic Barre <ludovic.barre@st.com>,
+        Baolin Wang <baolin.wang7@gmail.com>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        Shawn Lin <shawn.lin@rock-chips.com>,
+        Bitan Biswas <bbiswas@nvidia.com>,
+        Peter Geis <pgwipeout@gmail.com>,
+        Sowjanya Komatineni <skomatineni@nvidia.com>,
+        Faiz Abbas <faiz_abbas@ti.com>
+Subject: [PATCH] mmc: core: Re-work the code for eMMC sanitize
+Date:   Mon, 16 Mar 2020 16:21:52 +0100
+Message-Id: <20200316152152.15122-1-ulf.hansson@linaro.org>
+X-Mailer: git-send-email 2.20.1
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 16 Mar 2020 at 03:52, <ricky_wu@realtek.com> wrote:
->
-> From: Ricky Wu <ricky_wu@realtek.com>
->
-> Fixed sd_change_phase TX/RX register
-> Optimized rts522a rts524a rts525a rts5260 rts5261 TX initial parameter
+The error path for sanitize operations that completes with -ETIMEDOUT, is
+tightly coupled with the internal request handling code of the core. More
+precisely, mmc_wait_for_req_done() checks for specific sanitize errors.
+This is not only inefficient as it affects all types of requests, but also
+hackish.
 
-I don't understand what this actually fixes. Can you try to elaborate
-a bit on this, please?
+Therefore, let's improve the behaviour by moving the error path out of the
+mmc core. To do that, retuning needs to be held while running the sanitize
+operation.
 
-Do you think this is needed for stable, then why?
+Moreover, to avoid exporting unnecessary symbols to the mmc block module,
+let's move the code into the mmc_ops.c file. While updating the actual
+code, let's also take the opportunity to clean up some of the mess around
+it.
 
-Kind regards
-Uffe
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+---
+ drivers/mmc/core/block.c   | 40 ++------------------------------------
+ drivers/mmc/core/core.c    | 18 -----------------
+ drivers/mmc/core/mmc_ops.c | 38 +++++++++++++++++++++++++++++++++---
+ drivers/mmc/core/mmc_ops.h |  2 +-
+ include/linux/mmc/core.h   |  3 ---
+ 5 files changed, 38 insertions(+), 63 deletions(-)
 
->
-> Signed-off-by: Ricky Wu <ricky_wu@realtek.com>
-> ---
->  drivers/misc/cardreader/rts5227.c |  2 +-
->  drivers/misc/cardreader/rts5249.c |  2 ++
->  drivers/misc/cardreader/rts5260.c |  2 +-
->  drivers/misc/cardreader/rts5261.c |  2 +-
->  drivers/mmc/host/rtsx_pci_sdmmc.c | 13 ++++++++-----
->  5 files changed, 13 insertions(+), 8 deletions(-)
->
-> diff --git a/drivers/misc/cardreader/rts5227.c b/drivers/misc/cardreader/rts5227.c
-> index 4feed296a327..423fecc19fc4 100644
-> --- a/drivers/misc/cardreader/rts5227.c
-> +++ b/drivers/misc/cardreader/rts5227.c
-> @@ -394,7 +394,7 @@ static const struct pcr_ops rts522a_pcr_ops = {
->  void rts522a_init_params(struct rtsx_pcr *pcr)
->  {
->         rts5227_init_params(pcr);
-> -
-> +       pcr->tx_initial_phase = SET_CLOCK_PHASE(20, 20, 11);
->         pcr->reg_pm_ctrl3 = RTS522A_PM_CTRL3;
->
->         pcr->option.ocp_en = 1;
-> diff --git a/drivers/misc/cardreader/rts5249.c b/drivers/misc/cardreader/rts5249.c
-> index db936e4d6e56..1a81cda948c1 100644
-> --- a/drivers/misc/cardreader/rts5249.c
-> +++ b/drivers/misc/cardreader/rts5249.c
-> @@ -618,6 +618,7 @@ static const struct pcr_ops rts524a_pcr_ops = {
->  void rts524a_init_params(struct rtsx_pcr *pcr)
->  {
->         rts5249_init_params(pcr);
-> +       pcr->tx_initial_phase = SET_CLOCK_PHASE(27, 29, 11);
->         pcr->option.ltr_l1off_sspwrgate = LTR_L1OFF_SSPWRGATE_5250_DEF;
->         pcr->option.ltr_l1off_snooze_sspwrgate =
->                 LTR_L1OFF_SNOOZE_SSPWRGATE_5250_DEF;
-> @@ -733,6 +734,7 @@ static const struct pcr_ops rts525a_pcr_ops = {
->  void rts525a_init_params(struct rtsx_pcr *pcr)
->  {
->         rts5249_init_params(pcr);
-> +       pcr->tx_initial_phase = SET_CLOCK_PHASE(25, 29, 11);
->         pcr->option.ltr_l1off_sspwrgate = LTR_L1OFF_SSPWRGATE_5250_DEF;
->         pcr->option.ltr_l1off_snooze_sspwrgate =
->                 LTR_L1OFF_SNOOZE_SSPWRGATE_5250_DEF;
-> diff --git a/drivers/misc/cardreader/rts5260.c b/drivers/misc/cardreader/rts5260.c
-> index 4214f02a17fd..711054ebad74 100644
-> --- a/drivers/misc/cardreader/rts5260.c
-> +++ b/drivers/misc/cardreader/rts5260.c
-> @@ -662,7 +662,7 @@ void rts5260_init_params(struct rtsx_pcr *pcr)
->         pcr->sd30_drive_sel_1v8 = CFG_DRIVER_TYPE_B;
->         pcr->sd30_drive_sel_3v3 = CFG_DRIVER_TYPE_B;
->         pcr->aspm_en = ASPM_L1_EN;
-> -       pcr->tx_initial_phase = SET_CLOCK_PHASE(1, 29, 16);
-> +       pcr->tx_initial_phase = SET_CLOCK_PHASE(27, 29, 11);
->         pcr->rx_initial_phase = SET_CLOCK_PHASE(24, 6, 5);
->
->         pcr->ic_version = rts5260_get_ic_version(pcr);
-> diff --git a/drivers/misc/cardreader/rts5261.c b/drivers/misc/cardreader/rts5261.c
-> index bc4967a6efa1..78c3b1d424c3 100644
-> --- a/drivers/misc/cardreader/rts5261.c
-> +++ b/drivers/misc/cardreader/rts5261.c
-> @@ -764,7 +764,7 @@ void rts5261_init_params(struct rtsx_pcr *pcr)
->         pcr->sd30_drive_sel_1v8 = CFG_DRIVER_TYPE_B;
->         pcr->sd30_drive_sel_3v3 = CFG_DRIVER_TYPE_B;
->         pcr->aspm_en = ASPM_L1_EN;
-> -       pcr->tx_initial_phase = SET_CLOCK_PHASE(20, 27, 16);
-> +       pcr->tx_initial_phase = SET_CLOCK_PHASE(27, 27, 11);
->         pcr->rx_initial_phase = SET_CLOCK_PHASE(24, 6, 5);
->
->         pcr->ic_version = rts5261_get_ic_version(pcr);
-> diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
-> index bd50935dc37d..11087976ab19 100644
-> --- a/drivers/mmc/host/rtsx_pci_sdmmc.c
-> +++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
-> @@ -606,19 +606,22 @@ static int sd_change_phase(struct realtek_pci_sdmmc *host,
->                 u8 sample_point, bool rx)
->  {
->         struct rtsx_pcr *pcr = host->pcr;
-> -
-> +       u16 SD_VP_CTL = 0;
->         dev_dbg(sdmmc_dev(host), "%s(%s): sample_point = %d\n",
->                         __func__, rx ? "RX" : "TX", sample_point);
->
->         rtsx_pci_write_register(pcr, CLK_CTL, CHANGE_CLK, CHANGE_CLK);
-> -       if (rx)
-> +       if (rx) {
-> +               SD_VP_CTL = SD_VPRX_CTL;
->                 rtsx_pci_write_register(pcr, SD_VPRX_CTL,
->                         PHASE_SELECT_MASK, sample_point);
-> -       else
-> +       } else {
-> +               SD_VP_CTL = SD_VPTX_CTL;
->                 rtsx_pci_write_register(pcr, SD_VPTX_CTL,
->                         PHASE_SELECT_MASK, sample_point);
-> -       rtsx_pci_write_register(pcr, SD_VPCLK0_CTL, PHASE_NOT_RESET, 0);
-> -       rtsx_pci_write_register(pcr, SD_VPCLK0_CTL, PHASE_NOT_RESET,
-> +       }
-> +       rtsx_pci_write_register(pcr, SD_VP_CTL, PHASE_NOT_RESET, 0);
-> +       rtsx_pci_write_register(pcr, SD_VP_CTL, PHASE_NOT_RESET,
->                                 PHASE_NOT_RESET);
->         rtsx_pci_write_register(pcr, CLK_CTL, CHANGE_CLK, 0);
->         rtsx_pci_write_register(pcr, SD_CFG1, SD_ASYNC_FIFO_NOT_RST, 0);
-> --
-> 2.17.1
->
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index 7634894df853..8499b56a15a8 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -70,7 +70,6 @@ MODULE_ALIAS("mmc:block");
+  * ample.
+  */
+ #define MMC_BLK_TIMEOUT_MS  (10 * 1000)
+-#define MMC_SANITIZE_REQ_TIMEOUT 240000
+ #define MMC_EXTRACT_INDEX_FROM_ARG(x) ((x & 0x00FF0000) >> 16)
+ #define MMC_EXTRACT_VALUE_FROM_ARG(x) ((x & 0x0000FF00) >> 8)
+ 
+@@ -413,34 +412,6 @@ static int mmc_blk_ioctl_copy_to_user(struct mmc_ioc_cmd __user *ic_ptr,
+ 	return 0;
+ }
+ 
+-static int ioctl_do_sanitize(struct mmc_card *card)
+-{
+-	int err;
+-
+-	if (!mmc_can_sanitize(card)) {
+-			pr_warn("%s: %s - SANITIZE is not supported\n",
+-				mmc_hostname(card->host), __func__);
+-			err = -EOPNOTSUPP;
+-			goto out;
+-	}
+-
+-	pr_debug("%s: %s - SANITIZE IN PROGRESS...\n",
+-		mmc_hostname(card->host), __func__);
+-
+-	err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+-					EXT_CSD_SANITIZE_START, 1,
+-					MMC_SANITIZE_REQ_TIMEOUT);
+-
+-	if (err)
+-		pr_err("%s: %s - EXT_CSD_SANITIZE_START failed. err=%d\n",
+-		       mmc_hostname(card->host), __func__, err);
+-
+-	pr_debug("%s: %s - SANITIZE COMPLETED\n", mmc_hostname(card->host),
+-					     __func__);
+-out:
+-	return err;
+-}
+-
+ static int card_busy_detect(struct mmc_card *card, unsigned int timeout_ms,
+ 			    u32 *resp_errs)
+ {
+@@ -569,15 +540,8 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
+ 	}
+ 
+ 	if ((MMC_EXTRACT_INDEX_FROM_ARG(cmd.arg) == EXT_CSD_SANITIZE_START) &&
+-	    (cmd.opcode == MMC_SWITCH)) {
+-		err = ioctl_do_sanitize(card);
+-
+-		if (err)
+-			pr_err("%s: ioctl_do_sanitize() failed. err = %d",
+-			       __func__, err);
+-
+-		return err;
+-	}
++	    (cmd.opcode == MMC_SWITCH))
++		return mmc_sanitize(card);
+ 
+ 	mmc_wait_for_req(card->host, &mrq);
+ 
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 3f7a31456eb4..4c5de6d37ac7 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -403,23 +403,6 @@ void mmc_wait_for_req_done(struct mmc_host *host, struct mmc_request *mrq)
+ 
+ 		cmd = mrq->cmd;
+ 
+-		/*
+-		 * If host has timed out waiting for the sanitize
+-		 * to complete, card might be still in programming state
+-		 * so let's try to bring the card out of programming
+-		 * state.
+-		 */
+-		if (cmd->sanitize_busy && cmd->error == -ETIMEDOUT) {
+-			if (!mmc_interrupt_hpi(host->card)) {
+-				pr_warn("%s: %s: Interrupted sanitize\n",
+-					mmc_hostname(host), __func__);
+-				cmd->error = 0;
+-				break;
+-			} else {
+-				pr_err("%s: %s: Failed to interrupt sanitize\n",
+-				       mmc_hostname(host), __func__);
+-			}
+-		}
+ 		if (!cmd->error || !cmd->retries ||
+ 		    mmc_card_removed(host->card))
+ 			break;
+@@ -1925,7 +1908,6 @@ int mmc_can_sanitize(struct mmc_card *card)
+ 		return 1;
+ 	return 0;
+ }
+-EXPORT_SYMBOL(mmc_can_sanitize);
+ 
+ int mmc_can_secure_erase_trim(struct mmc_card *card)
+ {
+diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+index c75c00b5890d..5bd0ab8b236a 100644
+--- a/drivers/mmc/core/mmc_ops.c
++++ b/drivers/mmc/core/mmc_ops.c
+@@ -21,6 +21,7 @@
+ 
+ #define MMC_BKOPS_TIMEOUT_MS		(120 * 1000) /* 120s */
+ #define MMC_CACHE_FLUSH_TIMEOUT_MS	(30 * 1000) /* 30s */
++#define MMC_SANITIZE_TIMEOUT_MS		(240 * 1000) /* 240s */
+ 
+ static const u8 tuning_blk_pattern_4bit[] = {
+ 	0xff, 0x0f, 0xff, 0x00, 0xff, 0xcc, 0xc3, 0xcc,
+@@ -597,9 +598,6 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+ 		cmd.flags |= MMC_RSP_SPI_R1 | MMC_RSP_R1;
+ 	}
+ 
+-	if (index == EXT_CSD_SANITIZE_START)
+-		cmd.sanitize_busy = true;
+-
+ 	err = mmc_wait_for_cmd(host, &cmd, MMC_CMD_RETRIES);
+ 	if (err)
+ 		goto out;
+@@ -1032,3 +1030,37 @@ int mmc_cmdq_disable(struct mmc_card *card)
+ 	return mmc_cmdq_switch(card, false);
+ }
+ EXPORT_SYMBOL_GPL(mmc_cmdq_disable);
++
++int mmc_sanitize(struct mmc_card *card)
++{
++	struct mmc_host *host = card->host;
++	int err;
++
++	if (!mmc_can_sanitize(card)) {
++		pr_warn("%s: Sanitize not supported\n", mmc_hostname(host));
++		return -EOPNOTSUPP;
++	}
++
++	pr_debug("%s: Sanitize in progress...\n", mmc_hostname(host));
++
++	mmc_retune_hold(host);
++
++	err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_SANITIZE_START,
++			 1, MMC_SANITIZE_TIMEOUT_MS);
++	if (err)
++		pr_err("%s: Sanitize failed err=%d\n", mmc_hostname(host), err);
++
++	/*
++	 * If the sanitize operation timed out, the card is probably still busy
++	 * in the R1_STATE_PRG. Rather than continue to wait, let's try to abort
++	 * it with a HPI command to get back into R1_STATE_TRAN.
++	 */
++	if (err == -ETIMEDOUT && !mmc_interrupt_hpi(card))
++		pr_warn("%s: Sanitize aborted\n", mmc_hostname(host));
++
++	mmc_retune_release(host);
++
++	pr_debug("%s: Sanitize completed\n", mmc_hostname(host));
++	return err;
++}
++EXPORT_SYMBOL_GPL(mmc_sanitize);
+diff --git a/drivers/mmc/core/mmc_ops.h b/drivers/mmc/core/mmc_ops.h
+index 38dcfeeaf6d5..632009260e51 100644
+--- a/drivers/mmc/core/mmc_ops.h
++++ b/drivers/mmc/core/mmc_ops.h
+@@ -32,7 +32,6 @@ int mmc_send_cid(struct mmc_host *host, u32 *cid);
+ int mmc_spi_read_ocr(struct mmc_host *host, int highcap, u32 *ocrp);
+ int mmc_spi_set_crc(struct mmc_host *host, int use_crc);
+ int mmc_bus_test(struct mmc_card *card, u8 bus_width);
+-int mmc_interrupt_hpi(struct mmc_card *card);
+ int mmc_can_ext_csd(struct mmc_card *card);
+ int mmc_get_ext_csd(struct mmc_card *card, u8 **new_ext_csd);
+ int mmc_switch_status(struct mmc_card *card, bool crc_err_fatal);
+@@ -47,6 +46,7 @@ void mmc_run_bkops(struct mmc_card *card);
+ int mmc_flush_cache(struct mmc_card *card);
+ int mmc_cmdq_enable(struct mmc_card *card);
+ int mmc_cmdq_disable(struct mmc_card *card);
++int mmc_sanitize(struct mmc_card *card);
+ 
+ #endif
+ 
+diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+index b7ba8810a3b5..29aa50711626 100644
+--- a/include/linux/mmc/core.h
++++ b/include/linux/mmc/core.h
+@@ -107,9 +107,6 @@ struct mmc_command {
+  */
+ 
+ 	unsigned int		busy_timeout;	/* busy detect timeout in ms */
+-	/* Set this flag only for blocking sanitize request */
+-	bool			sanitize_busy;
+-
+ 	struct mmc_data		*data;		/* data segment associated with cmd */
+ 	struct mmc_request	*mrq;		/* associated request */
+ };
+-- 
+2.20.1
+
