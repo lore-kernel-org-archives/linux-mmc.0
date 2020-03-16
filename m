@@ -2,246 +2,449 @@ Return-Path: <SRS0=aPfc=5B=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.0 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	UNWANTED_LANGUAGE_BODY,USER_AGENT_GIT autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-8.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5F947C18E5B
-	for <linux-mmc@archiver.kernel.org>; Mon, 16 Mar 2020 09:13:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 227E6C0044D
+	for <linux-mmc@archiver.kernel.org>; Mon, 16 Mar 2020 09:34:57 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 348B520658
-	for <linux-mmc@archiver.kernel.org>; Mon, 16 Mar 2020 09:13:50 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C430420658
+	for <linux-mmc@archiver.kernel.org>; Mon, 16 Mar 2020 09:34:56 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="cqkfX9k0"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730349AbgCPJNt (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 16 Mar 2020 05:13:49 -0400
-Received: from mga14.intel.com ([192.55.52.115]:54785 "EHLO mga14.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1730076AbgCPJNt (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 16 Mar 2020 05:13:49 -0400
-IronPort-SDR: sEdhmeKfbo4pJuaxqxkIFBg0wO4DrUer03UU8DLSOMGfHji0NGSfweIYGqVyCkZl+yhk4vm+xE
- rXEQeS04e29w==
-X-Amp-Result: SKIPPED(no attachment in message)
-X-Amp-File-Uploaded: False
-Received: from fmsmga004.fm.intel.com ([10.253.24.48])
-  by fmsmga103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 16 Mar 2020 02:13:49 -0700
-IronPort-SDR: eqAnTIVGqYYhK2oLAAX14aiKjSzW87QJcXFfr41TTIekHXe/JXX7pb/qJA+YyynBGyRc4Wy814
- LtM0LalmJwEg==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.70,559,1574150400"; 
-   d="scan'208";a="267499682"
-Received: from wwanmoha-ilbpg2.png.intel.com ([10.88.227.42])
-  by fmsmga004.fm.intel.com with ESMTP; 16 Mar 2020 02:13:47 -0700
-From:   Wan Ahmad Zainie <wan.ahmad.zainie.wan.mohamad@intel.com>
-To:     ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com,
-        adrian.hunter@intel.com
-Cc:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        wan.ahmad.zainie.wan.mohamad@intel.com
-Subject: [PATCH 2/2] mmc: sdhci-of-arasan: Add support for Intel Keem Bay
-Date:   Mon, 16 Mar 2020 17:13:24 +0800
-Message-Id: <20200316091324.15968-3-wan.ahmad.zainie.wan.mohamad@intel.com>
-X-Mailer: git-send-email 2.17.1
-In-Reply-To: <20200316091324.15968-1-wan.ahmad.zainie.wan.mohamad@intel.com>
-References: <20200316091324.15968-1-wan.ahmad.zainie.wan.mohamad@intel.com>
+        id S1730248AbgCPJe4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 16 Mar 2020 05:34:56 -0400
+Received: from us-smtp-1.mimecast.com ([207.211.31.81]:53887 "EHLO
+        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1730025AbgCPJe4 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Mar 2020 05:34:56 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1584351292;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=RQNH+VRth05nfqcEO2K2Kujar3n0P6d9sWGjTOTMWww=;
+        b=cqkfX9k02qxWbxB88WZNr7vNOmjXEQ7QoQxlVkbuk7sR25gyfq+jzhzYzfweRtHHPixmu2
+        qY5flZFEYNH6tWfadat+XeM6GjoHKUU61j0ovu/eL6OtiLMWBqcs5A5SOhl1fEq3MD8oVY
+        60c6qgafRutDmmKz3uGlwUKV8CHrWs4=
+Received: from mail-wr1-f70.google.com (mail-wr1-f70.google.com
+ [209.85.221.70]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-481-YP0mXFE_MI-6UbFvo5b33Q-1; Mon, 16 Mar 2020 05:34:45 -0400
+X-MC-Unique: YP0mXFE_MI-6UbFvo5b33Q-1
+Received: by mail-wr1-f70.google.com with SMTP id s4so3331650wrb.19
+        for <linux-mmc@vger.kernel.org>; Mon, 16 Mar 2020 02:34:45 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=RQNH+VRth05nfqcEO2K2Kujar3n0P6d9sWGjTOTMWww=;
+        b=cliRI8abC+Yx2iRJ9e/CXC8hCuzGsn5hv6Wcc5F4F/ZPg3tY2vBKMbr8Ymk7nP5ZUn
+         dLNR1KcHfJQT+xQmhhB2QZRp0a5nw+hilbMdbMuQlpxu4eoQYVh+4gj7/Evn8071nWKm
+         s7o/tPgLPOu0YeZceLzv01/CVZDTepj2uFUv8Z1/i0aqf+tfPwhYpO92P8E1+0WChKBJ
+         XJZUEOTzz3ydK8uQE1whfCmaCB9tDMIOcLTj9ZSocsnh10yIwg24ee4A6TZ4zHfvcECX
+         ohQhp5Jc0DY3+EGS9jbuIfC3nx3Ft/f42YV5JaYqTlLhUpyly4tslPWKHIvHcsv5UYn3
+         6qUQ==
+X-Gm-Message-State: ANhLgQ3oyXih6dSQ7ESL9b/URZsvs8H/c9zgNZ+3n6RXSpf9YkDMlBnx
+        3Zkj3SPIGvCQL2m4M8kMeIfKuX5ZJhw3U8bX5hLFyrkXfcYEHMVCognAhRMEp05rMJsqL0/RToE
+        2cevkRpTrpJ5ktrEXcRI3
+X-Received: by 2002:adf:ecc7:: with SMTP id s7mr35485209wro.386.1584351283268;
+        Mon, 16 Mar 2020 02:34:43 -0700 (PDT)
+X-Google-Smtp-Source: ADFU+vubuqggQf+1Iq2ilTvTOaWRjSdJm2jkisy9kNG3nbDeu5x48GwjY1EeBoC7w+nb6ZM3uaTuIw==
+X-Received: by 2002:adf:ecc7:: with SMTP id s7mr35485175wro.386.1584351282846;
+        Mon, 16 Mar 2020 02:34:42 -0700 (PDT)
+Received: from x1.localdomain (2001-1c00-0c0c-fe00-fc7e-fd47-85c1-1ab3.cable.dynamic.v6.ziggo.nl. [2001:1c00:c0c:fe00:fc7e:fd47:85c1:1ab3])
+        by smtp.gmail.com with ESMTPSA id z22sm24272510wmi.1.2020.03.16.02.34.41
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 16 Mar 2020 02:34:42 -0700 (PDT)
+Subject: Re: [PATCH v2 1/2] mmc: sdhci-acpi: Switch signal voltage back to
+ 3.3V on suspend on external microSD on Lenovo Miix 320
+To:     Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     "russianneuromancer @ ya . ru" <russianneuromancer@ya.ru>,
+        linux-mmc@vger.kernel.org
+References: <20200306143100.164975-1-hdegoede@redhat.com>
+ <1947780d-e2bf-1a3b-4603-a32c1b021e2f@intel.com>
+ <ddeaf983-3ca9-c808-5623-7e29dbd948a5@redhat.com>
+ <cbf40e3a-4879-8c13-8fc9-3f3a59d5a17c@intel.com>
+From:   Hans de Goede <hdegoede@redhat.com>
+Message-ID: <72e4369b-fb6a-28d2-97d1-21c8dd2a497b@redhat.com>
+Date:   Mon, 16 Mar 2020 10:34:41 +0100
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.5.0
+MIME-Version: 1.0
+In-Reply-To: <cbf40e3a-4879-8c13-8fc9-3f3a59d5a17c@intel.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 8bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Intel Keem Bay SoC eMMC/SD/SDIO controller is based on
-Arasan SD 3.0 / eMMC 5.1 host controller IP.
+Hi,
 
-However, it does not support 64-bit access as its AXI interface
-has 32-bit address ports.
+On 3/16/20 10:07 AM, Adrian Hunter wrote:
+> On 14/03/20 3:59 pm, Hans de Goede wrote:
+>> Hi,
+>>
+>> On 3/9/20 10:26 AM, Adrian Hunter wrote:
+>>> Thanks for doing this.  A couple of questions below.
+>>>
+>>> On 6/03/20 4:30 pm, Hans de Goede wrote:
+>>>> Based on a sample of 7 DSDTs from Cherry Trail devices using an AXP288
+>>>> PMIC depending on the design one of 2 possible LDOs on the PMIC is used
+>>>> for the MMC signalling voltage, either DLDO3 or GPIO1LDO (GPIO1 pin in
+>>>> low noise LDO mode).
+>>>>
+>>>> The Lenovo Miix 320-10ICR uses GPIO1LDO in the SHC1 ACPI device's DSM
+>>>> methods to set 3.3 or 1.8 signalling voltage and this appears to work
+>>>> as advertised, so presumably the device is actually using GPIO1LDO for
+>>>> the external microSD signalling voltage.
+>>>>
+>>>> But this device has a bug in the _PS0 method of the SHC1 ACPI device,
+>>>> the DSM remembers the last set signalling voltage and the _PS0 restores
+>>>> this after a (runtime) suspend-resume cycle, but it "restores" the voltage
+>>>> on DLDO3 instead of setting it on GPIO1LDO as the DSM method does. DLDO3
+>>>> is used for the LCD and setting it to 1.8V causes the LCD to go black.
+>>>>
+>>>> This commit works around this issue by calling the Intel DSM to reset the
+>>>> signal voltage to 3.3V after the host has been runtime suspended.
+>>>> This will make the _PS0 method reprogram the DLDO3 voltage to 3.3V, which
+>>>> leaves it at its original setting fixing the LCD going black.
+>>>>
+>>>> And this commit then resets the signal voltage back to the original 1.8V
+>>>> from the (runtime) resume handler, which runs after the ACPI _PS0 method
+>>>> has run.
+>>>
+>>> Don't sdhci_resume_host, sdhci_runtime_resume_host do that anyway?
+>>
+>> It does not look like that, I've added the following debugging patch:
+>>
+>> --- a/drivers/mmc/host/sdhci-acpi.c
+>> +++ b/drivers/mmc/host/sdhci-acpi.c
+>> @@ -147,6 +147,10 @@ static int intel_dsm(struct intel_host *intel_host,
+>> struct device *dev,
+>>       if (fn > 31 || !(intel_host->dsm_fns & (1 << fn)))
+>>           return -EOPNOTSUPP;
+>>
+>> +    if (fn == INTEL_DSM_V18_SWITCH || fn == INTEL_DSM_V33_SWITCH)
+>> +        pr_err("Intel DSM switching to %s volt\n",
+>> +            (fn == INTEL_DSM_V18_SWITCH) ? "1.8" : "3.3");
+>> +
+>>       return __intel_dsm(intel_host, dev, fn, result);
+>>   }
+>>
+>> @@ -903,8 +907,9 @@ static void __maybe_unused
+>> sdhci_acpi_restore_signal_voltage_if_needed(
+>>           struct intel_host *intel_host = sdhci_acpi_priv(c);
+>>           unsigned int fn = INTEL_DSM_V18_SWITCH;
+>>           u32 result = 0;
+>> -
+>> +        pr_err("Calling Intel DSM from %s\n", __func__);
+>>           intel_dsm(intel_host, dev, fn, &result);
+>> +        pr_err("Calling Intel DSM from %s done\n", __func__);
+>>       }
+>>   }
+>>
+>>
+>> And this gives the following output:
+>>
+>> [  368.079932] Intel DSM switching to 3.3 volt
+>> [  368.414832] Intel DSM switching to 1.8 volt
+>> [  371.989717] Intel DSM switching to 3.3 volt
+>> [  407.176050] Calling Intel DSM from
+>> sdhci_acpi_restore_signal_voltage_if_needed
+>> [  407.176052] Intel DSM switching to 1.8 volt
+>> [  407.200276] Calling Intel DSM from
+>> sdhci_acpi_restore_signal_voltage_if_needed done
+>> [  407.205846] Intel DSM switching to 3.3 volt
+>> [  407.527003] Intel DSM switching to 1.8 volt
+>> [  407.571991] Intel DSM switching to 3.3 volt
+>> [  407.893990] Intel DSM switching to 1.8 volt
+>>
+>> [  412.242658] Intel DSM switching to 1.8 volt
+>> [  412.289387] Intel DSM switching to 3.3 volt
+>> [  412.606210] Intel DSM switching to 1.8 volt
+>> [  423.292135] Intel DSM switching to 3.3 volt
+>> [  424.520057] Calling Intel DSM from
+>> sdhci_acpi_restore_signal_voltage_if_needed
+>> [  424.520065] Intel DSM switching to 1.8 volt
+>> [  424.546960] Calling Intel DSM from
+>> sdhci_acpi_restore_signal_voltage_if_needed done
+>> [  424.552940] Intel DSM switching to 3.3 volt
+>> [  424.890483] Intel DSM switching to 1.8 volt
+>>
+>> Notice how the switch to 1.8 volt is not repeated.
+> 
+> Because the card has been suspended i.e. it will be re-initialized completely.
 
-Signed-off-by: Wan Ahmad Zainie <wan.ahmad.zainie.wan.mohamad@intel.com>
-Reviewed-by: Adrian Hunter <adrian.hunter@intel.com>
----
- drivers/mmc/host/sdhci-of-arasan.c | 124 +++++++++++++++++++++++++++++
- 1 file changed, 124 insertions(+)
+Right.
 
-diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-index e49b44b4d82e..de127afc7446 100644
---- a/drivers/mmc/host/sdhci-of-arasan.c
-+++ b/drivers/mmc/host/sdhci-of-arasan.c
-@@ -68,11 +68,13 @@ struct sdhci_arasan_soc_ctl_field {
-  *
-  * @baseclkfreq:	Where to find corecfg_baseclkfreq
-  * @clockmultiplier:	Where to find corecfg_clockmultiplier
-+ * @support64b:		Where to find SUPPORT_64B bit
-  * @hiword_update:	If true, use HIWORD_UPDATE to access the syscon
-  */
- struct sdhci_arasan_soc_ctl_map {
- 	struct sdhci_arasan_soc_ctl_field	baseclkfreq;
- 	struct sdhci_arasan_soc_ctl_field	clockmultiplier;
-+	struct sdhci_arasan_soc_ctl_field	support64b;
- 	bool					hiword_update;
- };
- 
-@@ -155,6 +157,13 @@ static const struct sdhci_arasan_soc_ctl_map intel_lgm_sdxc_soc_ctl_map = {
- 	.hiword_update = false,
- };
- 
-+static const struct sdhci_arasan_soc_ctl_map intel_keembay_soc_ctl_map = {
-+	.baseclkfreq = { .reg = 0x0, .width = 8, .shift = 14 },
-+	.clockmultiplier = { .reg = 0x4, .width = 8, .shift = 14 },
-+	.support64b = { .reg = 0x4, .width = 1, .shift = 24 },
-+	.hiword_update = false,
-+};
-+
- /**
-  * sdhci_arasan_syscon_write - Write to a field in soc_ctl registers
-  *
-@@ -414,6 +423,50 @@ static const struct sdhci_pltfm_data sdhci_arasan_cqe_pdata = {
- 			SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN,
- };
- 
-+static const struct sdhci_pltfm_data sdhci_keembay_emmc_pdata = {
-+	.ops = &sdhci_arasan_cqe_ops,
-+	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN |
-+		SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC |
-+		SDHCI_QUIRK_NO_LED |
-+		SDHCI_QUIRK_32BIT_DMA_ADDR |
-+		SDHCI_QUIRK_32BIT_DMA_SIZE |
-+		SDHCI_QUIRK_32BIT_ADMA_SIZE,
-+	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
-+		SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN |
-+		SDHCI_QUIRK2_CAPS_BIT63_FOR_HS400 |
-+		SDHCI_QUIRK2_STOP_WITH_TC |
-+		SDHCI_QUIRK2_BROKEN_64_BIT_DMA,
-+};
-+
-+static const struct sdhci_pltfm_data sdhci_keembay_sd_pdata = {
-+	.ops = &sdhci_arasan_ops,
-+	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN |
-+		SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC |
-+		SDHCI_QUIRK_NO_LED |
-+		SDHCI_QUIRK_32BIT_DMA_ADDR |
-+		SDHCI_QUIRK_32BIT_DMA_SIZE |
-+		SDHCI_QUIRK_32BIT_ADMA_SIZE,
-+	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
-+		SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN |
-+		SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON |
-+		SDHCI_QUIRK2_STOP_WITH_TC |
-+		SDHCI_QUIRK2_BROKEN_64_BIT_DMA,
-+};
-+
-+static const struct sdhci_pltfm_data sdhci_keembay_sdio_pdata = {
-+	.ops = &sdhci_arasan_ops,
-+	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN |
-+		SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC |
-+		SDHCI_QUIRK_NO_LED |
-+		SDHCI_QUIRK_32BIT_DMA_ADDR |
-+		SDHCI_QUIRK_32BIT_DMA_SIZE |
-+		SDHCI_QUIRK_32BIT_ADMA_SIZE,
-+	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
-+		SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN |
-+		SDHCI_QUIRK2_HOST_OFF_CARD_ON |
-+		SDHCI_QUIRK2_BROKEN_64_BIT_DMA,
-+};
-+
- static struct sdhci_arasan_of_data sdhci_arasan_rk3399_data = {
- 	.soc_ctl_map = &rk3399_soc_ctl_map,
- 	.pdata = &sdhci_arasan_cqe_pdata,
-@@ -429,6 +482,21 @@ static struct sdhci_arasan_of_data intel_lgm_sdxc_data = {
- 	.pdata = &sdhci_arasan_cqe_pdata,
- };
- 
-+static struct sdhci_arasan_of_data intel_keembay_emmc_data = {
-+	.soc_ctl_map = &intel_keembay_soc_ctl_map,
-+	.pdata = &sdhci_keembay_emmc_pdata,
-+};
-+
-+static struct sdhci_arasan_of_data intel_keembay_sd_data = {
-+	.soc_ctl_map = &intel_keembay_soc_ctl_map,
-+	.pdata = &sdhci_keembay_sd_pdata,
-+};
-+
-+static struct sdhci_arasan_of_data intel_keembay_sdio_data = {
-+	.soc_ctl_map = &intel_keembay_soc_ctl_map,
-+	.pdata = &sdhci_keembay_sdio_pdata,
-+};
-+
- #ifdef CONFIG_PM_SLEEP
- /**
-  * sdhci_arasan_suspend - Suspend method for the driver
-@@ -538,6 +606,18 @@ static const struct of_device_id sdhci_arasan_of_match[] = {
- 		.compatible = "intel,lgm-sdhci-5.1-sdxc",
- 		.data = &intel_lgm_sdxc_data,
- 	},
-+	{
-+		.compatible = "intel,keembay-sdhci-5.1-emmc",
-+		.data = &intel_keembay_emmc_data,
-+	},
-+	{
-+		.compatible = "intel,keembay-sdhci-5.1-sd",
-+		.data = &intel_keembay_sd_data,
-+	},
-+	{
-+		.compatible = "intel,keembay-sdhci-5.1-sdio",
-+		.data = &intel_keembay_sdio_data,
-+	},
- 	/* Generic compatible below here */
- 	{
- 		.compatible = "arasan,sdhci-8.9a",
-@@ -757,6 +837,41 @@ static const struct clk_ops zynqmp_sampleclk_ops = {
- 	.set_phase = sdhci_zynqmp_sampleclk_set_phase,
- };
- 
-+
-+/**
-+ * sdhci_arasan_update_support64b - Set SUPPORT_64B (64-bit System Bus Support)
-+ *
-+ * This should be set based on the System Address Bus.
-+ * 0: the Core supports only 32-bit System Address Bus.
-+ * 1: the Core supports 64-bit System Address Bus.
-+ *
-+ * NOTES:
-+ * - For Keem Bay, it is required to clear this bit. Its default value is 1'b1.
-+ *   Keem Bay does not support 64-bit access.
-+ *
-+ * @host		The sdhci_host
-+ */
-+static void sdhci_arasan_update_support64b(struct sdhci_host *host, u32 value)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
-+	const struct sdhci_arasan_soc_ctl_map *soc_ctl_map =
-+		sdhci_arasan->soc_ctl_map;
-+
-+	/* Having a map is optional */
-+	if (!soc_ctl_map)
-+		return;
-+
-+	/* If we have a map, we expect to have a syscon */
-+	if (!sdhci_arasan->soc_ctl_base) {
-+		pr_warn("%s: Have regmap, but no soc-ctl-syscon\n",
-+			mmc_hostname(host->mmc));
-+		return;
-+	}
-+
-+	sdhci_arasan_syscon_write(host, &soc_ctl_map->support64b, value);
-+}
-+
- /**
-  * sdhci_arasan_update_clockmultiplier - Set corecfg_clockmultiplier
-  *
-@@ -1226,6 +1341,15 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
- 				    "rockchip,rk3399-sdhci-5.1"))
- 		sdhci_arasan_update_clockmultiplier(host, 0x0);
- 
-+	if (of_device_is_compatible(np, "intel,keembay-sdhci-5.1-emmc") ||
-+	    of_device_is_compatible(np, "intel,keembay-sdhci-5.1-sd") ||
-+	    of_device_is_compatible(np, "intel,keembay-sdhci-5.1-sdio")) {
-+		sdhci_arasan_update_clockmultiplier(host, 0x0);
-+		sdhci_arasan_update_support64b(host, 0x0);
-+
-+		host->mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY;
-+	}
-+
- 	sdhci_arasan_update_baseclkfreq(host);
- 
- 	ret = sdhci_arasan_register_sdclk(sdhci_arasan, clk_xin, &pdev->dev);
--- 
-2.17.1
+What I was trying to say is:
+
+Since the re-init starts with resetting the signal voltage
+to 3.3 volt, couldn't we do the reset of the signal voltage
+at the end of sdhci_[runtime_]suspend_host() or even deeper
+in the stack (after the card has been suspended/turned off)?
+That would remove the need for this patch.
+
+I guess that would be a pretty major change, so perhaps it
+is best to remove the sdhci_acpi_restore_signal_voltage_if_needed
+function as you suggest and move forward with a v3 of this
+patch with that changed?
+
+Regards,
+
+Hans
+
+
+
+> 
+>>
+>> It looks almost as if the voltage is being reset
+>> to 3.3 volt by some higher level code, but only
+>> after the sdhci_acpi_runtime_resume(), rather then
+>> before the sdhci_acpi_runtime_suspend() completes.
+>>
+>> If that is indeed the case then indeed we might not
+>> need the sdhci_acpi_restore_signal_voltage_if_needed()
+>> function, since the first call to set the signal
+>> voltage to 3.3V on resume would just be a no-op
+>> because with the quirk we already do that on suspend.
+>>
+>> And then the second call to switch to 1.8 volt would
+>> take care of switching to 1.8V for us.
+>>
+>> But if this is indeed what is happening, then wouldn't
+>> it make more sense to switch back to 3.3V from somewhere
+>> in higher-level code before sdhci_runtime_suspend_host()
+>> completes, replacing the current switch-back done just
+>> after resume?  If we move that switch-back to 3.3V
+>> done just after resume to suspend time then this entire
+>> model-specific patch will likely become unnecessary ?
+>>
+>> Note one more answer to some of your review remarks below.
+>>
+>>>> This commit adds and uses a DMI quirk mechanism to only trigger this
+>>>> workaround on the Lenovo Miix 320 while leaving the behavior of the
+>>>> driver unchanged on other devices.
+>>>>
+>>>> BugLink: https://bugs.freedesktop.org/show_bug.cgi?id=111294
+>>>> BugLink: https://gitlab.freedesktop.org/drm/intel/issues/355
+>>>> Reported-by: russianneuromancer <russianneuromancer@ya.ru>
+>>>> Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+>>>> ---
+>>>> Changes in v2:
+>>>> - Make the quirk reset the signal voltage to 3.3V at the end of the
+>>>>     (runtime) suspend handler instead of disabling 1.8V modes
+>>>> - Drop the module option to allow overridig the quirks
+>>>> ---
+>>>>    drivers/mmc/host/sdhci-acpi.c | 87 ++++++++++++++++++++++++++++++++++-
+>>>>    1 file changed, 85 insertions(+), 2 deletions(-)
+>>>>
+>>>> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+>>>> index 9651dca6863e..d54a3592f40f 100644
+>>>> --- a/drivers/mmc/host/sdhci-acpi.c
+>>>> +++ b/drivers/mmc/host/sdhci-acpi.c
+>>>> @@ -23,6 +23,7 @@
+>>>>    #include <linux/pm.h>
+>>>>    #include <linux/pm_runtime.h>
+>>>>    #include <linux/delay.h>
+>>>> +#include <linux/dmi.h>
+>>>>      #include <linux/mmc/host.h>
+>>>>    #include <linux/mmc/pm.h>
+>>>> @@ -72,9 +73,14 @@ struct sdhci_acpi_host {
+>>>>        const struct sdhci_acpi_slot    *slot;
+>>>>        struct platform_device        *pdev;
+>>>>        bool                use_runtime_pm;
+>>>> +    bool                reset_signal_volt_on_suspend;
+>>>>        unsigned long            private[0] ____cacheline_aligned;
+>>>>    };
+>>>>    +enum {
+>>>> +    DMI_QUIRK_RESET_SD_SIGNAL_VOLT_ON_SUSP            = BIT(0),
+>>>> +};
+>>>> +
+>>>>    static inline void *sdhci_acpi_priv(struct sdhci_acpi_host *c)
+>>>>    {
+>>>>        return (void *)c->private;
+>>>> @@ -647,6 +653,24 @@ static const struct acpi_device_id sdhci_acpi_ids[] = {
+>>>>    };
+>>>>    MODULE_DEVICE_TABLE(acpi, sdhci_acpi_ids);
+>>>>    +static const struct dmi_system_id sdhci_acpi_quirks[] = {
+>>>> +    {
+>>>> +        /*
+>>>> +         * The Lenovo Miix 320-10ICR has a bug in the _PS0 method of
+>>>> +         * the SHC1 ACPI device, this bug causes it to reprogram the
+>>>> +         * wrong LDO (DLDO3) to 1.8V if 1.8V modes are used and the
+>>>> +         * card is (runtime) suspended + resumed. DLDO3 is used for
+>>>> +         * the LCD and setting it to 1.8V causes the LCD to go black.
+>>>> +         */
+>>>> +        .matches = {
+>>>> +            DMI_MATCH(DMI_SYS_VENDOR, "LENOVO"),
+>>>> +            DMI_MATCH(DMI_PRODUCT_VERSION, "Lenovo MIIX 320-10ICR"),
+>>>> +        },
+>>>> +        .driver_data = (void *)DMI_QUIRK_RESET_SD_SIGNAL_VOLT_ON_SUSP,
+>>>> +    },
+>>>> +    {} /* Terminating entry */
+>>>> +};
+>>>> +
+>>>>    static const struct sdhci_acpi_slot *sdhci_acpi_get_slot(struct
+>>>> acpi_device *adev)
+>>>>    {
+>>>>        const struct sdhci_acpi_uid_slot *u;
+>>>> @@ -663,17 +687,23 @@ static int sdhci_acpi_probe(struct platform_device
+>>>> *pdev)
+>>>>        struct device *dev = &pdev->dev;
+>>>>        const struct sdhci_acpi_slot *slot;
+>>>>        struct acpi_device *device, *child;
+>>>> +    const struct dmi_system_id *id;
+>>>>        struct sdhci_acpi_host *c;
+>>>>        struct sdhci_host *host;
+>>>>        struct resource *iomem;
+>>>>        resource_size_t len;
+>>>>        size_t priv_size;
+>>>> +    int quirks = 0;
+>>>>        int err;
+>>>>          device = ACPI_COMPANION(dev);
+>>>>        if (!device)
+>>>>            return -ENODEV;
+>>>>    +    id = dmi_first_match(sdhci_acpi_quirks);
+>>>> +    if (id)
+>>>> +        quirks = (long)id->driver_data;
+>>>> +
+>>>>        slot = sdhci_acpi_get_slot(device);
+>>>>          /* Power on the SDHCI controller and its children */
+>>>> @@ -759,6 +789,9 @@ static int sdhci_acpi_probe(struct platform_device
+>>>> *pdev)
+>>>>                dev_warn(dev, "failed to setup card detect gpio\n");
+>>>>                c->use_runtime_pm = false;
+>>>>            }
+>>>> +
+>>>> +        if (quirks & DMI_QUIRK_RESET_SD_SIGNAL_VOLT_ON_SUSP)
+>>>> +            c->reset_signal_volt_on_suspend = true;
+>>>>        }
+>>>>          err = sdhci_setup_host(host);
+>>>> @@ -823,17 +856,59 @@ static int sdhci_acpi_remove(struct platform_device
+>>>> *pdev)
+>>>>        return 0;
+>>>>    }
+>>>>    +static void __maybe_unused sdhci_acpi_reset_signal_voltage_if_needed(
+>>>> +    struct device *dev)
+>>>> +{
+>>>> +    struct sdhci_acpi_host *c = dev_get_drvdata(dev);
+>>>> +    struct sdhci_host *host = c->host;
+>>>> +
+>>>> +    if (c->reset_signal_volt_on_suspend &&
+>>>> +        host->mmc_host_ops.start_signal_voltage_switch ==
+>>>> +                    intel_start_signal_voltage_switch &&
+>>>
+>>> This creates a unexpected dependency on
+>>> host->mmc_host_ops.start_signal_voltage_switch.  Is it really necessary?
+>>
+>> Well we are directly invoking the intel_dsm here, although the
+>> DMI match should only happen on a system which is using an
+>> Intel SDHCI controller, I thought it would be better to check for
+>> that rather then just assuming it.
+>>
+>> Also see the:
+>>
+>> +        struct intel_host *intel_host = sdhci_acpi_priv(c);
+>>
+>> Line, doing this on a non Intel SDHCI ACPI controller would be bad.
+> 
+> Then you need to add a comment to intel_probe_slot() to explain that
+> sdhci_acpi_reset_signal_voltage_if_needed() is dependent on:
+> 	host->mmc_host_ops.start_signal_voltage_switch =
+> 					intel_start_signal_voltage_switch;
+> 
+> 
+>>
+>> Regards,
+>>
+>> Hans
+>>
+>>
+>>>
+>>>> +        host->mmc->ios.signal_voltage != MMC_SIGNAL_VOLTAGE_330) {
+>>>> +        struct intel_host *intel_host = sdhci_acpi_priv(c);
+>>>> +        unsigned int fn = INTEL_DSM_V33_SWITCH;
+>>>> +        u32 result = 0;
+>>>> +
+>>>> +        intel_dsm(intel_host, dev, fn, &result);
+>>>> +    }
+>>>> +}
+>>>> +
+>>>> +static void __maybe_unused sdhci_acpi_restore_signal_voltage_if_needed(
+>>>> +    struct device *dev)
+>>>> +{
+>>>> +    struct sdhci_acpi_host *c = dev_get_drvdata(dev);
+>>>> +    struct sdhci_host *host = c->host;
+>>>> +
+>>>> +    if (c->reset_signal_volt_on_suspend &&
+>>>> +        host->mmc_host_ops.start_signal_voltage_switch ==
+>>>> +                    intel_start_signal_voltage_switch &&
+>>>> +        host->mmc->ios.signal_voltage == MMC_SIGNAL_VOLTAGE_180) {
+>>>> +        struct intel_host *intel_host = sdhci_acpi_priv(c);
+>>>> +        unsigned int fn = INTEL_DSM_V18_SWITCH;
+>>>> +        u32 result = 0;
+>>>> +
+>>>> +        intel_dsm(intel_host, dev, fn, &result);
+>>>> +    }
+>>>> +}
+>>>> +
+>>>>    #ifdef CONFIG_PM_SLEEP
+>>>>      static int sdhci_acpi_suspend(struct device *dev)
+>>>>    {
+>>>>        struct sdhci_acpi_host *c = dev_get_drvdata(dev);
+>>>>        struct sdhci_host *host = c->host;
+>>>> +    int ret;
+>>>>          if (host->tuning_mode != SDHCI_TUNING_MODE_3)
+>>>>            mmc_retune_needed(host->mmc);
+>>>>    -    return sdhci_suspend_host(host);
+>>>> +    ret = sdhci_suspend_host(host);
+>>>> +    if (ret)
+>>>> +        return ret;
+>>>> +
+>>>> +    sdhci_acpi_reset_signal_voltage_if_needed(dev);
+>>>> +    return 0;
+>>>>    }
+>>>>      static int sdhci_acpi_resume(struct device *dev)
+>>>> @@ -841,6 +916,7 @@ static int sdhci_acpi_resume(struct device *dev)
+>>>>        struct sdhci_acpi_host *c = dev_get_drvdata(dev);
+>>>>          sdhci_acpi_byt_setting(&c->pdev->dev);
+>>>> +    sdhci_acpi_restore_signal_voltage_if_needed(dev);
+>>>>          return sdhci_resume_host(c->host);
+>>>>    }
+>>>> @@ -853,11 +929,17 @@ static int sdhci_acpi_runtime_suspend(struct device
+>>>> *dev)
+>>>>    {
+>>>>        struct sdhci_acpi_host *c = dev_get_drvdata(dev);
+>>>>        struct sdhci_host *host = c->host;
+>>>> +    int ret;
+>>>>          if (host->tuning_mode != SDHCI_TUNING_MODE_3)
+>>>>            mmc_retune_needed(host->mmc);
+>>>>    -    return sdhci_runtime_suspend_host(host);
+>>>> +    ret = sdhci_runtime_suspend_host(host);
+>>>> +    if (ret)
+>>>> +        return ret;
+>>>> +
+>>>> +    sdhci_acpi_reset_signal_voltage_if_needed(dev);
+>>>> +    return 0;
+>>>>    }
+>>>>      static int sdhci_acpi_runtime_resume(struct device *dev)
+>>>> @@ -865,6 +947,7 @@ static int sdhci_acpi_runtime_resume(struct device *dev)
+>>>>        struct sdhci_acpi_host *c = dev_get_drvdata(dev);
+>>>>          sdhci_acpi_byt_setting(&c->pdev->dev);
+>>>> +    sdhci_acpi_restore_signal_voltage_if_needed(dev);
+>>>>          return sdhci_runtime_resume_host(c->host, 0);
+>>>>    }
+>>>>
+>>>
+>>
+> 
 
