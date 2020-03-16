@@ -8,53 +8,53 @@ X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 00349C18E5B
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 62F98C3F2CE
 	for <linux-mmc@archiver.kernel.org>; Mon, 16 Mar 2020 10:02:15 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id C3C7120738
-	for <linux-mmc@archiver.kernel.org>; Mon, 16 Mar 2020 10:02:14 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 39EA62073E
+	for <linux-mmc@archiver.kernel.org>; Mon, 16 Mar 2020 10:02:15 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="YM5mP+2i"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Jr5xEAiM"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730618AbgCPKCH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 16 Mar 2020 06:02:07 -0400
-Received: from mail-pj1-f66.google.com ([209.85.216.66]:33020 "EHLO
-        mail-pj1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1730534AbgCPKCG (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Mar 2020 06:02:06 -0400
-Received: by mail-pj1-f66.google.com with SMTP id dw20so3886814pjb.0;
-        Mon, 16 Mar 2020 03:02:05 -0700 (PDT)
+        id S1730575AbgCPKB5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 16 Mar 2020 06:01:57 -0400
+Received: from mail-pl1-f193.google.com ([209.85.214.193]:38974 "EHLO
+        mail-pl1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1730570AbgCPKB4 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Mar 2020 06:01:56 -0400
+Received: by mail-pl1-f193.google.com with SMTP id j20so7767548pll.6;
+        Mon, 16 Mar 2020 03:01:54 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :in-reply-to:references;
-        bh=I0LdLqGPiKxYvJAfb6pGeFPkfbn8lz2wPqpXBWx4WLg=;
-        b=YM5mP+2iOYAqt8ZEZk3H12rJW/c0KcYvGiTVH0TTxg+Rbpjxj574Jg+1MQ7agrLEjz
-         UK057a9tm3iVLuht1612rjedx/Tzffic3OKgxPiN3Xo1fSKDzW5N5TEkBuX+0GIzdQvK
-         8DWRKTnYtGz5oFrKIzeSUUB5lnO+Oq8Pe5BtLA2C/2fWWnuOIXIQvXRqokdph2CkeYPy
-         jKeW0Zun9ldHTLJQLmzitB+9bHzPnKK/ipJDiZ70ciNWeCKCDF4qLH5nTbg8L97ib6Zk
-         Z34g/AogK/6P/gjlGqwbMOAczpxLxCVdbUDEzHXG2nvDNu33tY2yyPFkprsTjOaEwztE
-         Mdwg==
+        bh=o1DIsdYS7ff4jJb5jCTI/tsP5spVoqhTKmmU077/da4=;
+        b=Jr5xEAiMjYgi7TOw021o1pEmQUbJ9AgMAYqAtB0HXbgBj/U4qKR5z3fnbBB4GLIWkb
+         XFlvpQRpaitJ+hDHvUQZ9JER5Ew3AtF46351sY5KpcRbQ0c7ke5DKR6OJ7qGiLby6bFh
+         ZHt2QbHsPCPDC4fjg15Md4YanbD7UvfXL2JmBwPRLmPKv1BpjqM2f4VGMvjrZVJMKfxz
+         OD603oxOD8Vn8Tlzs4GSDcVg8RwrVcyEX+NZ2oFKvtjdFuGMicQdNh14EO+GsqUOXW4v
+         kbbkDAe2oPydcRovbTYMmkfnSzegdSky90vp1gHDWldw2Zzpv4a88CwSX3wyqvLNr4Kn
+         S6aA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:in-reply-to:references;
-        bh=I0LdLqGPiKxYvJAfb6pGeFPkfbn8lz2wPqpXBWx4WLg=;
-        b=GNc/vG7gI1KCublfjASjNLcCyVCdqd6jAs+jZ6ovPgYzUItM0aoJUqBytEZUA6trqb
-         5knC3OOWlpfKAkMXkapjzfm7ZByW1GdqMI/jiMdm5gq/WeYbydScN//fPaPYr3s00s0g
-         i6IFKKekDNQJG+GYLAwFX2wx8qE0XWOOukxXqy94iWNLLh805EqkLkQxMG+vtDvKsW16
-         sc/9kdjxCM8zlwgfV2QFfXVSHSWlGecQg5s7o4KIyIy8ZGuAGeXTUfV3vCN91aGAYM2m
-         z5Ivnlcqcfsfl9spqqTWHXZlr3az8whFWfGOChwM8uWg2qB6HMUy+XNs7b03vSOBRpT0
-         QYaA==
-X-Gm-Message-State: ANhLgQ3TxT5As8DPQYVRLhq2sVfCwDder4J7+rDkWXbdrX/kfR7QEcA7
-        7nMofSH66OYP5/IlwElKJ2w=
-X-Google-Smtp-Source: ADFU+vubWfRHng6wFVn6dni/xWntuWsR7ocB63fOrhS8OC/ZqkgkRxzUomeAmgKAxD1UdJpW0ObkdA==
-X-Received: by 2002:a17:902:70c4:: with SMTP id l4mr25239336plt.136.1584352924995;
-        Mon, 16 Mar 2020 03:02:04 -0700 (PDT)
+        bh=o1DIsdYS7ff4jJb5jCTI/tsP5spVoqhTKmmU077/da4=;
+        b=S9CxhPDfJNNo4Gnx01mc4YG3jcvEfLb632kbT40UHWjNRIpZxgWK+MZn4YWvb4IKOa
+         O7kmqyWRwxuPwRwZGdItHSjZCb/7kfZ9PtIKq1K/aZJnpn6C8Iq7tXowWBFuyH/pQRTK
+         EC0IpYYFzUyzmgE6afBJUdqF5RKADr6G7yPXBuvQ9wCzs13KIbNtavIX5WLAHj2j1hAG
+         fOAVotw9JXyol/m/l4t9vIzVeTVKg9LRDs9u/da8X9NxoG3EvBwS5W7RcBR6WeI/+E/w
+         f7cBw+Ej8FnUmAB758DC6pLdCy8/QKbJfkwed/l3Ay9doWGxmYY8gDfEnAMao285/b74
+         BAww==
+X-Gm-Message-State: ANhLgQ3q8aI59D+4aNAOJ8X/CnOqz1cDHcpvTm/XESf8EWFM9rcvk4Fd
+        ioAJKZHUaBAmCwuyJWbkuno=
+X-Google-Smtp-Source: ADFU+vvAIAXggVnK9BXVLESVBN4pJu4tsfGabg1WukYRfyJanyZ6iLhHpKnnELZbDfK8Q4We8pMlig==
+X-Received: by 2002:a17:90a:218e:: with SMTP id q14mr10943428pjc.37.1584352913547;
+        Mon, 16 Mar 2020 03:01:53 -0700 (PDT)
 Received: from sh03840pcu.spreadtrum.com ([117.18.48.82])
-        by smtp.gmail.com with ESMTPSA id 136sm63970411pgh.26.2020.03.16.03.02.00
+        by smtp.gmail.com with ESMTPSA id 136sm63970411pgh.26.2020.03.16.03.01.50
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-SHA bits=128/128);
-        Mon, 16 Mar 2020 03:02:04 -0700 (PDT)
+        Mon, 16 Mar 2020 03:01:53 -0700 (PDT)
 From:   Baolin Wang <baolin.wang7@gmail.com>
 To:     axboe@kernel.dk, paolo.valente@linaro.org, ulf.hansson@linaro.org,
         adrian.hunter@intel.com
@@ -62,9 +62,9 @@ Cc:     ming.lei@redhat.com, arnd@arndb.de, linus.walleij@linaro.org,
         baolin.wang7@gmail.com, orsonzhai@gmail.com, zhang.lyra@gmail.com,
         linux-mmc@vger.kernel.org, linux-block@vger.kernel.org,
         linux-kernel@vger.kernel.org
-Subject: [RESEND RFC PATCH 7/8] mmc: host: sdhci: Add MMC packed request support
-Date:   Mon, 16 Mar 2020 18:01:24 +0800
-Message-Id: <8eec1acda41e51706baab3b3e470539517c1fa7c.1584350380.git.baolin.wang7@gmail.com>
+Subject: [RESEND RFC PATCH 4/8] mmc: host: sdhci: Introduce ADMA3 transfer mode
+Date:   Mon, 16 Mar 2020 18:01:21 +0800
+Message-Id: <a1dcb9128356adf623c057b3c658de6dc5422742.1584350380.git.baolin.wang7@gmail.com>
 X-Mailer: git-send-email 1.9.1
 In-Reply-To: <cover.1584350380.git.baolin.wang7@gmail.com>
 References: <cover.1584350380.git.baolin.wang7@gmail.com>
@@ -75,517 +75,321 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-This patch adds MMC packed operations to support packed requests,
-and enables ADMA3 transfer mode to support this feature.
+The standard SD host controller can support ADMA3 transfer mode optionally.
+The ADMA3 uses command descriptor to issue an SD command, and a multi-block
+data transfer is programmed by using a pair of command descriptor and ADMA2
+descriptor. ADMA3 performs multiple of multi-block data transfer by using
+integrated descriptor.
 
-Enable ADMA3 transfer mode only for read and write commands, and
-we will disable command interrupt and data timeout interrupt,
-instead we will use software data timeout for ADMA3 fransfer mode.
-For other non-data commands, we still use the ADMA2 transfer, since
-no bebefits using ADMA3 transfer.
+This is a preparation patch to add ADMA3 structures and help to expand the
+ADMA buffer for support ADMA3 transfer mode.
 
 Signed-off-by: Baolin Wang <baolin.wang7@gmail.com>
 ---
- drivers/mmc/host/sdhci.c | 316 +++++++++++++++++++++++++++++++++++++++++++++--
- drivers/mmc/host/sdhci.h |  11 ++
- 2 files changed, 315 insertions(+), 12 deletions(-)
+ drivers/mmc/host/sdhci.c | 106 +++++++++++++++++++++++++++++++++++++++--------
+ drivers/mmc/host/sdhci.h |  48 +++++++++++++++++++++
+ 2 files changed, 137 insertions(+), 17 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 6d6f450..5f1f157 100644
+index 4febbcb..6238b5c 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -110,6 +110,19 @@ void sdhci_dumpregs(struct sdhci_host *host)
+@@ -772,7 +772,8 @@ static void sdhci_adma_table_pre(struct sdhci_host *host,
+ 		 * If this triggers then we have a calculation bug
+ 		 * somewhere. :/
+ 		 */
+-		WARN_ON((desc - host->adma_table) >= host->adma_table_sz);
++		WARN_ON((desc - host->adma_table) >=
++			host->adma_table_sz * host->adma3_table_cnt);
+ 	}
+ 
+ 	if (host->quirks & SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC) {
+@@ -4012,10 +4013,17 @@ int sdhci_setup_host(struct sdhci_host *host)
+ 		(host->caps & SDHCI_CAN_DO_ADMA2))
+ 		host->flags |= SDHCI_USE_ADMA;
+ 
++	if ((host->quirks2 & SDHCI_QUIRK2_USE_ADMA3_SUPPORT) &&
++	    (host->flags & SDHCI_USE_ADMA) &&
++	    (host->caps1 & SDHCI_CAN_DO_ADMA3)) {
++		DBG("Enable ADMA3 mode for data transfer\n");
++		host->flags |= SDHCI_USE_ADMA3;
++	}
++
+ 	if ((host->quirks & SDHCI_QUIRK_BROKEN_ADMA) &&
+ 		(host->flags & SDHCI_USE_ADMA)) {
+ 		DBG("Disabling ADMA as it is marked broken\n");
+-		host->flags &= ~SDHCI_USE_ADMA;
++		host->flags &= ~(SDHCI_USE_ADMA | SDHCI_USE_ADMA3);
+ 	}
+ 
+ 	if (sdhci_can_64bit_dma(host))
+@@ -4048,7 +4056,7 @@ int sdhci_setup_host(struct sdhci_host *host)
+ 		if (ret) {
+ 			pr_warn("%s: No suitable DMA available - falling back to PIO\n",
+ 				mmc_hostname(mmc));
+-			host->flags &= ~(SDHCI_USE_SDMA | SDHCI_USE_ADMA);
++			host->flags &= ~(SDHCI_USE_SDMA | SDHCI_USE_ADMA | SDHCI_USE_ADMA3);
+ 
+ 			ret = 0;
  		}
- 	}
+@@ -4070,31 +4078,68 @@ int sdhci_setup_host(struct sdhci_host *host)
+ 		host->desc_sz = host->alloc_desc_sz;
+ 		host->adma_table_sz = host->adma_table_cnt * host->desc_sz;
  
-+	if (host->adma3_enabled) {
-+		if (host->flags & SDHCI_USE_64_BIT_DMA) {
-+			SDHCI_DUMP("ADMA3 Err:  0x%08x | ADMA3 Ptr: 0x%08x%08x\n",
-+				   sdhci_readl(host, SDHCI_ADMA_ERROR),
-+				   sdhci_readl(host, SDHCI_ADMA3_ADDRESS_HI),
-+				   sdhci_readl(host, SDHCI_ADMA3_ADDRESS));
-+		} else {
-+			SDHCI_DUMP("ADMA3 Err:  0x%08x | ADMA3 Ptr: 0x%08x\n",
-+				   sdhci_readl(host, SDHCI_ADMA_ERROR),
-+				   sdhci_readl(host, SDHCI_ADMA3_ADDRESS));
-+		}
-+	}
++		host->adma3_table_cnt = 1;
 +
- 	SDHCI_DUMP("============================================\n");
- }
- EXPORT_SYMBOL_GPL(sdhci_dumpregs);
-@@ -287,7 +300,9 @@ static void sdhci_config_dma(struct sdhci_host *host)
- 		goto out;
- 
- 	/* Note if DMA Select is zero then SDMA is selected */
--	if (host->flags & SDHCI_USE_ADMA)
-+	if (host->adma3_enabled)
-+		ctrl |= SDHCI_CTRL_ADMA3;
-+	else if (host->flags & SDHCI_USE_ADMA)
- 		ctrl |= SDHCI_CTRL_ADMA32;
- 
- 	if (host->flags & SDHCI_USE_64_BIT_DMA) {
-@@ -457,7 +472,7 @@ static inline void sdhci_led_deactivate(struct sdhci_host *host)
- static void sdhci_mod_timer(struct sdhci_host *host, struct mmc_request *mrq,
- 			    unsigned long timeout)
- {
--	if (sdhci_data_line_cmd(mrq->cmd))
-+	if (host->prq || sdhci_data_line_cmd(mrq->cmd))
- 		mod_timer(&host->data_timer, timeout);
- 	else
- 		mod_timer(&host->timer, timeout);
-@@ -465,7 +480,7 @@ static void sdhci_mod_timer(struct sdhci_host *host, struct mmc_request *mrq,
- 
- static void sdhci_del_timer(struct sdhci_host *host, struct mmc_request *mrq)
- {
--	if (sdhci_data_line_cmd(mrq->cmd))
-+	if (host->prq || sdhci_data_line_cmd(mrq->cmd))
- 		del_timer(&host->data_timer);
- 	else
- 		del_timer(&host->timer);
-@@ -722,10 +737,16 @@ static void sdhci_adma_table_pre(struct sdhci_host *host,
- 	 * We currently guess that it is LE.
- 	 */
- 
--	desc = host->adma_table;
--	align = host->align_buffer;
--
--	align_addr = host->align_addr;
-+	if (host->adma3_enabled) {
-+		desc = host->adma3_pos;
-+		align = host->adma3_align_pos;
-+		align_addr = host->align_addr +
-+			host->adma3_align_pos - host->align_buffer;
-+	} else {
-+		desc = host->adma_table;
-+		align = host->align_buffer;
-+		align_addr = host->align_addr;
-+	}
- 
- 	for_each_sg(data->sg, sg, data->sg_count, i) {
- 		addr = sg_dma_address(sg);
-@@ -784,6 +805,11 @@ static void sdhci_adma_table_pre(struct sdhci_host *host,
- 		/* Add a terminating entry - nop, end, valid */
- 		__sdhci_adma_write_desc(host, &desc, 0, 0, ADMA2_NOP_END_VALID);
- 	}
++		if (host->flags & SDHCI_USE_ADMA3) {
++			/* We can package maximum 16 requests once */
++			host->adma3_table_cnt = SDHCI_MAX_ADMA3_ENTRIES;
 +
-+	if (host->adma3_enabled) {
-+		host->adma3_pos = desc;
-+		host->adma3_align_pos = align;
-+	}
- }
- 
- static void sdhci_adma_table_post(struct sdhci_host *host,
-@@ -809,7 +835,10 @@ static void sdhci_adma_table_post(struct sdhci_host *host,
- 			dma_sync_sg_for_cpu(mmc_dev(host->mmc), data->sg,
- 					    data->sg_len, DMA_FROM_DEVICE);
- 
--			align = host->align_buffer;
-+			if (host->adma3_enabled)
-+				align = host->adma3_align_pos;
++			if (host->flags & SDHCI_USE_64_BIT_DMA)
++				host->integr_desc_sz = SDHCI_INTEGR_64_DESC_SZ;
 +			else
-+				align = host->align_buffer;
- 
- 			for_each_sg(data->sg, sg, data->sg_count, i) {
- 				if (sg_dma_address(sg) & SDHCI_ADMA2_MASK) {
-@@ -823,6 +852,9 @@ static void sdhci_adma_table_post(struct sdhci_host *host,
- 					align += SDHCI_ADMA2_ALIGN;
- 				}
- 			}
++				host->integr_desc_sz = SDHCI_INTEGR_32_DESC_SZ;
 +
-+			if (host->adma3_enabled)
-+				host->adma3_align_pos = align;
- 		}
- 	}
- }
-@@ -1031,7 +1063,7 @@ static void sdhci_set_timeout(struct sdhci_host *host, struct mmc_command *cmd)
- static void sdhci_initialize_data(struct sdhci_host *host,
- 				  struct mmc_data *data)
- {
--	WARN_ON(host->data);
-+	WARN_ON(!host->prq && host->data);
- 
- 	/* Sanity checks */
- 	BUG_ON(data->blksz * data->blocks > 524288);
-@@ -1132,7 +1164,8 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
- 			host->flags &= ~SDHCI_REQ_USE_DMA;
- 		} else if (host->flags & SDHCI_USE_ADMA) {
- 			sdhci_adma_table_pre(host, data);
--			sdhci_set_adma_addr(host, host->adma_addr);
-+			if (!host->adma3_enabled)
-+				sdhci_set_adma_addr(host, host->adma_addr);
- 		} else {
- 			WARN_ON(sg_cnt != 1);
- 			sdhci_set_sdma_addr(host, sdhci_sdma_address(host));
-@@ -1155,6 +1188,9 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
- 
- 	sdhci_set_transfer_irqs(host);
- 
-+	if (host->adma3_enabled)
-+		return;
++			host->cmd_desc_sz = SDHCI_ADMA3_CMD_DESC_SZ;
++			host->cmd_table_sz = host->adma3_table_cnt *
++				SDHCI_ADMA3_CMD_DESC_SZ * SDHCI_ADMA3_CMD_DESC_ENTRIES;
 +
- 	sdhci_set_block_info(host, data);
- }
- 
-@@ -1485,6 +1521,36 @@ static void sdhci_finish_mrq(struct sdhci_host *host, struct mmc_request *mrq)
- 	queue_work(host->complete_wq, &host->complete_work);
- }
- 
-+static void sdhci_finish_packed_data(struct sdhci_host *host, int error)
-+{
-+	struct mmc_request *mrq;
-+
-+	host->data = NULL;
-+	/*
-+	 * Reset the align buffer pointer address for unaligned mappings after
-+	 * finishing the transfer.
-+	 */
-+	host->adma3_align_pos = host->align_buffer;
-+
-+	if (error)
-+		sdhci_do_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
-+
-+	list_for_each_entry(mrq, &host->prq->list, list) {
-+		struct mmc_data *data = mrq->data;
-+
-+		sdhci_adma_table_post(host, data);
-+		data->error = error;
-+
-+		if (data->error)
-+			data->bytes_xfered = 0;
-+		else
-+			data->bytes_xfered = data->blksz * data->blocks;
-+	}
-+
-+	sdhci_del_timer(host, NULL);
-+	sdhci_led_deactivate(host);
-+}
-+
- static void sdhci_finish_data(struct sdhci_host *host)
- {
- 	struct mmc_command *data_cmd = host->data_cmd;
-@@ -1620,7 +1686,7 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
- 
- 	host->cmd = cmd;
- 	host->data_timeout = 0;
--	if (sdhci_data_line_cmd(cmd)) {
-+	if (!host->prq && sdhci_data_line_cmd(cmd)) {
- 		WARN_ON(host->data_cmd);
- 		host->data_cmd = cmd;
- 		sdhci_set_timeout(host, cmd);
-@@ -2026,6 +2092,206 @@ void sdhci_set_power(struct sdhci_host *host, unsigned char mode,
-  *                                                                           *
- \*****************************************************************************/
- 
-+static void sdhci_adma3_write_cmd_desc(struct sdhci_host *host,
-+				       struct mmc_command *cmd)
-+{
-+	struct mmc_data *data = cmd->data;
-+	struct sdhci_adma3_cmd_desc *cmd_desc = host->adma3_pos;
-+	int blksz, command;
-+	u16 mode = 0;
-+
-+	/* Set block count */
-+	cmd_desc->cmd = cpu_to_le32(ADMA3_TRAN_VALID);
-+	cmd_desc->reg = cpu_to_le32(data->blocks);
-+	cmd_desc++;
-+
-+	/* Set block size */
-+	cmd_desc->cmd = cpu_to_le32(ADMA3_TRAN_VALID);
-+	blksz = SDHCI_MAKE_BLKSZ(host->sdma_boundary, data->blksz);
-+	cmd_desc->reg = cpu_to_le32(blksz);
-+	cmd_desc++;
-+
-+	/* Set argument */
-+	cmd_desc->cmd = cpu_to_le32(ADMA3_TRAN_VALID);
-+	cmd_desc->reg = cpu_to_le32(cmd->arg);
-+	cmd_desc++;
-+
-+	/* set command and transfer mode */
-+	if (data->flags & MMC_DATA_READ)
-+		mode |= SDHCI_TRNS_READ;
-+
-+	if (!(host->quirks2 & SDHCI_QUIRK2_SUPPORT_SINGLE))
-+		mode |= SDHCI_TRNS_BLK_CNT_EN;
-+
-+	if (mmc_op_multi(cmd->opcode) || data->blocks > 1)
-+		mode |= SDHCI_TRNS_MULTI;
-+
-+	sdhci_auto_cmd_select(host, cmd, &mode);
-+	mode |= SDHCI_TRNS_DMA;
-+
-+	command = sdhci_get_command(host, cmd);
-+	command = (command << 16) | mode;
-+	cmd_desc->cmd = cpu_to_le32(ADMA3_TRAN_END);
-+	cmd_desc->reg = cpu_to_le32(command);
-+
-+	host->adma3_pos +=
-+		SDHCI_ADMA3_CMD_DESC_SZ * SDHCI_ADMA3_CMD_DESC_ENTRIES;
-+}
-+
-+static void sdhci_adma3_write_integr_desc(struct sdhci_host *host,
-+					  dma_addr_t addr)
-+{
-+	struct sdhci_integr_64_desc *integr_desc = host->integr_table;
-+
-+	integr_desc->cmd = cpu_to_le32(ADMA3_INTEGR_TRAN_END);
-+	integr_desc->addr_lo = cpu_to_le32((u32)addr);
-+
-+	if (host->flags & SDHCI_USE_64_BIT_DMA)
-+		integr_desc->addr_hi = cpu_to_le32((u64)addr >> 32);
-+}
-+
-+static void sdhci_set_adma3_addr(struct sdhci_host *host, dma_addr_t addr)
-+{
-+	sdhci_writel(host, addr, SDHCI_ADMA3_ADDRESS);
-+	if (host->flags & SDHCI_USE_64_BIT_DMA)
-+		sdhci_writel(host, (u64)addr >> 32, SDHCI_ADMA3_ADDRESS_HI);
-+}
-+
-+int sdhci_prepare_packed(struct mmc_host *mmc)
-+{
-+	struct sdhci_host *host = mmc_priv(mmc);
-+	unsigned long timeout, flags;
-+	u32 mask;
-+
-+	spin_lock_irqsave(&host->lock, flags);
-+
-+	if (!(host->flags & SDHCI_USE_ADMA3) ||
-+	    !(host->flags & (SDHCI_AUTO_CMD23 | SDHCI_AUTO_CMD12))) {
-+		spin_unlock_irqrestore(&host->lock, flags);
-+		pr_err("%s: Unsupported packed request\n",
-+		       mmc_hostname(host->mmc));
-+		return -EOPNOTSUPP;
-+	}
-+
-+	/* Wait max 10 ms */
-+	timeout = 10;
-+	mask = SDHCI_CMD_INHIBIT | SDHCI_DATA_INHIBIT;
-+
-+	while (sdhci_readl(host, SDHCI_PRESENT_STATE) & mask) {
-+		if (timeout == 0) {
-+			sdhci_dumpregs(host);
-+			spin_unlock_irqrestore(&host->lock, flags);
-+
-+			pr_err("%s: Controller never released inhibit bit(s).\n",
-+			       mmc_hostname(host->mmc));
-+			return -EIO;
++			buf = dma_alloc_coherent(mmc_dev(mmc),
++						 host->adma3_table_cnt *
++						 host->integr_desc_sz,
++						 &dma, GFP_KERNEL);
++			if (!buf) {
++				pr_warn("%s: Unable to allocate ADMA3 integrated buffers - falling back to ADMA\n",
++					mmc_hostname(mmc));
++				host->flags &= ~SDHCI_USE_ADMA3;
++				host->adma3_table_cnt = 1;
++			} else {
++				host->integr_table = buf;
++				host->integr_addr = dma;
++			}
 +		}
 +
-+		timeout--;
-+		mdelay(1);
-+	}
-+
-+	/* Disable command complete event for ADMA3 mode */
-+	host->ier &= ~SDHCI_INT_RESPONSE;
-+	sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
-+	sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
-+
-+	/*
-+	 * Disable data timeout interrupt, and will use software timeout for
-+	 * packed request.
-+	 */
-+	sdhci_set_data_timeout_irq(host, false);
-+
-+	/* Enable ADMA3 mode for packed request */
-+	host->adma3_enabled = true;
-+
-+	spin_unlock_irqrestore(&host->lock, flags);
-+
-+	return 0;
-+}
-+
-+int sdhci_unprepare_packed(struct mmc_host *mmc)
-+{
-+	struct sdhci_host *host = mmc_priv(mmc);
-+	unsigned long flags;
-+
-+	spin_lock_irqsave(&host->lock, flags);
-+
-+	/* Disable ADMA3 mode after finishing packed request */
-+	host->adma3_enabled = false;
-+
-+	/* Re-enable command complete event after ADMA3 mode */
-+	host->ier |= SDHCI_INT_RESPONSE;
-+
-+	sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
-+	sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
-+	spin_unlock_irqrestore(&host->lock, flags);
-+
-+	return 0;
-+}
-+
-+int sdhci_packed_request(struct mmc_host *mmc,
-+			 struct mmc_packed_request *prq)
-+{
-+	struct sdhci_host *host = mmc_priv(mmc);
-+	struct mmc_request *mrq;
-+	unsigned long timeout, flags;
-+	u64 data_timeout = 0;
-+	dma_addr_t integr_addr;
-+	int present;
-+
-+	/* Firstly check card presence */
-+	present = mmc->ops->get_cd(mmc);
-+
-+	spin_lock_irqsave(&host->lock, flags);
-+
-+	sdhci_led_activate(host);
-+
-+	if (!present || host->flags & SDHCI_DEVICE_DEAD) {
-+		spin_unlock_irqrestore(&host->lock, flags);
-+		return -ENOMEDIUM;
-+	}
-+
-+	host->prq = prq;
-+	host->adma3_pos = host->adma_table;
-+	host->adma3_align_pos = host->align_buffer;
-+	integr_addr = host->adma_addr;
-+
-+	list_for_each_entry(mrq, &prq->list, list) {
-+		struct mmc_command *cmd = mrq->cmd;
-+
-+		/* Set command descriptor */
-+		sdhci_adma3_write_cmd_desc(host, cmd);
-+		/* Set ADMA2 descriptors */
-+		sdhci_prepare_data(host, cmd);
-+		/* Set integrated descriptor */
-+		sdhci_adma3_write_integr_desc(host, integr_addr);
-+
-+		/* Update the integrated descriptor address */
-+		integr_addr =
-+			host->adma_addr + (host->adma3_pos - host->adma_table);
-+
-+		/* Calculate each command's data timeout */
-+		sdhci_calc_sw_timeout(host, cmd);
-+		data_timeout += host->data_timeout;
-+	}
-+
-+	timeout = jiffies;
-+	if (data_timeout)
-+		timeout += nsecs_to_jiffies(data_timeout);
-+	else
-+		timeout += 10 * HZ * prq->nr_reqs;
-+	sdhci_mod_timer(host, NULL, timeout);
-+
-+	/* Start ADMA3 transfer */
-+	sdhci_set_adma3_addr(host, host->integr_addr);
-+
-+	spin_unlock_irqrestore(&host->lock, flags);
-+
-+	return 0;
-+}
-+EXPORT_SYMBOL_GPL(sdhci_packed_request);
-+
- static void sdhci_start_request(struct mmc_host *mmc, struct mmc_request *mrq,
- 				int present)
- {
-@@ -2854,9 +3120,19 @@ static bool sdhci_request_done(struct sdhci_host *host)
- {
- 	unsigned long flags;
- 	struct mmc_request *mrq;
-+	struct mmc_packed_request *prq;
- 	int i;
+ 		host->align_buffer_sz = SDHCI_MAX_SEGS * SDHCI_ADMA2_ALIGN;
+ 		/*
+ 		 * Use zalloc to zero the reserved high 32-bits of 128-bit
+ 		 * descriptors so that they never need to be written.
+ 		 */
+ 		buf = dma_alloc_coherent(mmc_dev(mmc),
+-					 host->align_buffer_sz + host->adma_table_sz,
++					 host->align_buffer_sz *
++					 host->adma3_table_cnt +
++					 host->cmd_table_sz +
++					 host->adma_table_sz *
++					 host->adma3_table_cnt,
+ 					 &dma, GFP_KERNEL);
+ 		if (!buf) {
+ 			pr_warn("%s: Unable to allocate ADMA buffers - falling back to standard DMA\n",
+ 				mmc_hostname(mmc));
+-			host->flags &= ~SDHCI_USE_ADMA;
+-		} else if ((dma + host->align_buffer_sz) &
++			host->flags &= ~(SDHCI_USE_ADMA | SDHCI_USE_ADMA3);
++		} else if ((dma + host->align_buffer_sz * host->adma3_table_cnt) &
+ 			   (SDHCI_ADMA2_DESC_ALIGN - 1)) {
+ 			pr_warn("%s: unable to allocate aligned ADMA descriptor\n",
+ 				mmc_hostname(mmc));
+-			host->flags &= ~SDHCI_USE_ADMA;
+-			dma_free_coherent(mmc_dev(mmc), host->align_buffer_sz +
+-					  host->adma_table_sz, buf, dma);
++			host->flags &= ~(SDHCI_USE_ADMA | SDHCI_USE_ADMA3);
++			dma_free_coherent(mmc_dev(mmc), host->align_buffer_sz *
++					  host->adma3_table_cnt +
++					  host->cmd_table_sz +
++					  host->adma_table_sz *
++					  host->adma3_table_cnt, buf, dma);
+ 		} else {
+ 			host->align_buffer = buf;
+ 			host->align_addr = dma;
  
- 	spin_lock_irqsave(&host->lock, flags);
-+	prq = host->prq;
-+
-+	if (prq) {
-+		host->prq = NULL;
-+		spin_unlock_irqrestore(&host->lock, flags);
-+
-+		host->ops->packed_request_done(host, prq);
-+		return true;
-+	}
- 
- 	for (i = 0; i < SDHCI_MAX_MRQS; i++) {
- 		mrq = host->mrqs_done[i];
-@@ -3012,6 +3288,17 @@ static void sdhci_timeout_data_timer(struct timer_list *t)
- 
- 	spin_lock_irqsave(&host->lock, flags);
- 
-+	if (host->prq) {
-+		pr_err("%s: Packed requests timeout for hardware interrupt.\n",
-+		       mmc_hostname(host->mmc));
-+		sdhci_dumpregs(host);
-+		sdhci_finish_packed_data(host, -ETIMEDOUT);
-+		queue_work(host->complete_wq, &host->complete_work);
-+		spin_unlock_irqrestore(&host->lock, flags);
-+
-+		return;
-+	}
-+
- 	if (host->data || host->data_cmd ||
- 	    (host->cmd && sdhci_data_line_cmd(host->cmd))) {
- 		pr_err("%s: Timeout waiting for hardware interrupt.\n",
-@@ -3219,7 +3506,9 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
- 			host->ops->adma_workaround(host, intmask);
- 	}
- 
--	if (host->data->error)
-+	if (host->prq)
-+		sdhci_finish_packed_data(host, host->data->error);
-+	else if (host->data->error)
- 		sdhci_finish_data(host);
- 	else {
- 		if (intmask & (SDHCI_INT_DATA_AVAIL | SDHCI_INT_SPACE_AVAIL))
-@@ -3391,6 +3680,9 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
- 			host->mrqs_done[i] = NULL;
+-			host->adma_table = buf + host->align_buffer_sz;
+-			host->adma_addr = dma + host->align_buffer_sz;
++			host->adma_table = buf + host->align_buffer_sz * host->adma3_table_cnt;
++			host->adma_addr = dma + host->align_buffer_sz * host->adma3_table_cnt;
  		}
  	}
-+
-+	if (host->prq)
-+		result = IRQ_WAKE_THREAD;
- out:
- 	spin_unlock(&host->lock);
  
+@@ -4495,12 +4540,21 @@ int sdhci_setup_host(struct sdhci_host *host)
+ 		regulator_disable(mmc->supply.vqmmc);
+ undma:
+ 	if (host->align_buffer)
+-		dma_free_coherent(mmc_dev(mmc), host->align_buffer_sz +
+-				  host->adma_table_sz, host->align_buffer,
++		dma_free_coherent(mmc_dev(mmc),
++				  host->align_buffer_sz * host->adma3_table_cnt +
++				  host->cmd_table_sz +
++				  host->adma_table_sz * host->adma3_table_cnt,
++				  host->align_buffer,
+ 				  host->align_addr);
+ 	host->adma_table = NULL;
+ 	host->align_buffer = NULL;
+ 
++	if (host->integr_table)
++		dma_free_coherent(mmc_dev(mmc),
++				  host->adma3_table_cnt * host->integr_desc_sz,
++				  host->integr_table, host->integr_addr);
++	host->integr_table = NULL;
++
+ 	return ret;
+ }
+ EXPORT_SYMBOL_GPL(sdhci_setup_host);
+@@ -4513,8 +4567,11 @@ void sdhci_cleanup_host(struct sdhci_host *host)
+ 		regulator_disable(mmc->supply.vqmmc);
+ 
+ 	if (host->align_buffer)
+-		dma_free_coherent(mmc_dev(mmc), host->align_buffer_sz +
+-				  host->adma_table_sz, host->align_buffer,
++		dma_free_coherent(mmc_dev(mmc),
++				  host->align_buffer_sz * host->adma3_table_cnt +
++				  host->cmd_table_sz +
++				  host->adma_table_sz * host->adma3_table_cnt,
++				  host->align_buffer,
+ 				  host->align_addr);
+ 
+ 	if (host->use_external_dma)
+@@ -4522,6 +4579,12 @@ void sdhci_cleanup_host(struct sdhci_host *host)
+ 
+ 	host->adma_table = NULL;
+ 	host->align_buffer = NULL;
++
++	if (host->integr_table)
++		dma_free_coherent(mmc_dev(mmc),
++				  host->adma3_table_cnt * host->integr_desc_sz,
++				  host->integr_table, host->integr_addr);
++	host->integr_table = NULL;
+ }
+ EXPORT_SYMBOL_GPL(sdhci_cleanup_host);
+ 
+@@ -4650,8 +4713,11 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
+ 		regulator_disable(mmc->supply.vqmmc);
+ 
+ 	if (host->align_buffer)
+-		dma_free_coherent(mmc_dev(mmc), host->align_buffer_sz +
+-				  host->adma_table_sz, host->align_buffer,
++		dma_free_coherent(mmc_dev(mmc),
++				  host->align_buffer_sz * host->adma3_table_cnt +
++				  host->cmd_table_sz +
++				  host->adma_table_sz * host->adma3_table_cnt,
++				  host->align_buffer,
+ 				  host->align_addr);
+ 
+ 	if (host->use_external_dma)
+@@ -4659,6 +4725,12 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
+ 
+ 	host->adma_table = NULL;
+ 	host->align_buffer = NULL;
++
++	if (host->integr_table)
++		dma_free_coherent(mmc_dev(mmc),
++				  host->adma3_table_cnt * host->integr_desc_sz,
++				  host->integr_table, host->integr_addr);
++	host->integr_table = NULL;
+ }
+ 
+ EXPORT_SYMBOL_GPL(sdhci_remove_host);
 diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index f33830b..bbc937b 100644
+index 5507a73..96aed99 100644
 --- a/drivers/mmc/host/sdhci.h
 +++ b/drivers/mmc/host/sdhci.h
-@@ -579,6 +579,7 @@ struct sdhci_host {
- 	bool v4_mode;		/* Host Version 4 Enable */
- 	bool use_external_dma;	/* Host selects to use external DMA */
- 	bool always_defer_done;	/* Always defer to complete requests */
-+	bool adma3_enabled;	/* ADMA3 mode enabled */
+@@ -274,6 +274,9 @@
+ #define SDHCI_PRESET_SDCLK_FREQ_MASK   0x3FF
+ #define SDHCI_PRESET_SDCLK_FREQ_SHIFT	0
  
- 	struct mmc_request *mrqs_done[SDHCI_MAX_MRQS];	/* Requests done */
- 	struct mmc_command *cmd;	/* Current command */
-@@ -586,12 +587,15 @@ struct sdhci_host {
- 	struct mmc_data *data;	/* Current data request */
- 	unsigned int data_early:1;	/* Data finished before cmd */
++#define SDHCI_ADMA3_ADDRESS	0x78
++#define SDHCI_ADMA3_ADDRESS_HI	0x7c
++
+ #define SDHCI_SLOT_INT_STATUS	0xFC
  
-+	struct mmc_packed_request *prq;	/* Current packed request */
- 	struct sg_mapping_iter sg_miter;	/* SG state for PIO */
- 	unsigned int blocks;	/* remaining PIO blocks */
+ #define SDHCI_HOST_VERSION	0xFE
+@@ -346,6 +349,41 @@ struct sdhci_adma2_64_desc {
+ #define ADMA2_NOP_END_VALID	0x3
+ #define ADMA2_END		0x2
+ 
++#define SDHCI_MAX_ADMA3_ENTRIES	16
++
++/* ADMA3 command descriptor */
++struct sdhci_adma3_cmd_desc {
++	__le32	cmd;
++	__le32	reg;
++}  __packed __aligned(4);
++
++#define ADMA3_TRAN_VALID	0x9
++#define ADMA3_TRAN_END		0xb
++
++/* ADMA3 command descriptor size */
++#define SDHCI_ADMA3_CMD_DESC_ENTRIES	4
++#define SDHCI_ADMA3_CMD_DESC_SZ		8
++
++/* ADMA3 integrated 32-bit descriptor */
++struct sdhci_integr_32_desc {
++	__le32	cmd;
++	__le32	addr;
++}  __packed __aligned(4);
++
++#define SDHCI_INTEGR_32_DESC_SZ		8
++
++/* ADMA3 integrated 64-bit descriptor. */
++struct sdhci_integr_64_desc {
++	__le32	cmd;
++	__le32	addr_lo;
++	__le32	addr_hi;
++}  __packed __aligned(4);
++
++#define SDHCI_INTEGR_64_DESC_SZ		16
++
++#define ADMA3_INTEGR_TRAN_VALID		0x39
++#define ADMA3_INTEGR_TRAN_END		0x3b
++
+ /*
+  * Maximum segments assuming a 512KiB maximum requisition size and a minimum
+  * 4KiB page size.
+@@ -484,6 +522,8 @@ struct sdhci_host {
+  * block count.
+  */
+ #define SDHCI_QUIRK2_USE_32BIT_BLK_CNT			(1<<18)
++/* use ADMA3 for data read/write if hardware supports */
++#define SDHCI_QUIRK2_USE_ADMA3_SUPPORT			(1<<19)
+ 
+ 	int irq;		/* Device IRQ */
+ 	void __iomem *ioaddr;	/* Mapped address */
+@@ -520,6 +560,7 @@ struct sdhci_host {
+ #define SDHCI_SIGNALING_330	(1<<14)	/* Host is capable of 3.3V signaling */
+ #define SDHCI_SIGNALING_180	(1<<15)	/* Host is capable of 1.8V signaling */
+ #define SDHCI_SIGNALING_120	(1<<16)	/* Host is capable of 1.2V signaling */
++#define SDHCI_USE_ADMA3		(1<<17)	/* Host is ADMA3 capable */
+ 
+ 	unsigned int version;	/* SDHCI spec. version */
+ 
+@@ -552,15 +593,20 @@ struct sdhci_host {
  
  	void *adma_table;	/* ADMA descriptor table */
  	void *align_buffer;	/* Bounce buffer */
- 	void *integr_table;	/* ADMA3 intergrate descriptor table */
-+	void *adma3_pos;	/* ADMA3 buffer position */
-+	void *adma3_align_pos;	/* ADMA3 Bounce buffer position */
++	void *integr_table;	/* ADMA3 intergrate descriptor table */
  
  	size_t adma_table_sz;	/* ADMA descriptor table size */
  	size_t align_buffer_sz;	/* Bounce buffer size */
-@@ -703,6 +707,8 @@ struct sdhci_ops {
- 				   dma_addr_t addr, int len, unsigned int cmd);
- 	void	(*request_done)(struct sdhci_host *host,
- 				struct mmc_request *mrq);
-+	void	(*packed_request_done)(struct sdhci_host *host,
-+				       struct mmc_packed_request *prq);
- };
++	size_t cmd_table_sz;	/* ADMA3 command descriptor table size */
  
- #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
-@@ -857,4 +863,9 @@ bool sdhci_cqe_irq(struct sdhci_host *host, u32 intmask, int *cmd_error,
- void sdhci_set_data_timeout_irq(struct sdhci_host *host, bool enable);
- void __sdhci_set_timeout(struct sdhci_host *host, struct mmc_command *cmd);
+ 	dma_addr_t adma_addr;	/* Mapped ADMA descr. table */
+ 	dma_addr_t align_addr;	/* Mapped bounce buffer */
++	dma_addr_t integr_addr;	/* Mapped ADMA3 intergrate descr. table */
  
-+int sdhci_prepare_packed(struct mmc_host *mmc);
-+int sdhci_unprepare_packed(struct mmc_host *mmc);
-+int sdhci_packed_request(struct mmc_host *mmc,
-+			 struct mmc_packed_request *prq);
-+
- #endif /* __SDHCI_HW_H */
+ 	unsigned int desc_sz;	/* ADMA current descriptor size */
+ 	unsigned int alloc_desc_sz;	/* ADMA descr. max size host supports */
++	unsigned int cmd_desc_sz;	/* ADMA3 command descriptor size */
++	unsigned int integr_desc_sz;	/* ADMA3 intergrate descriptor size */
+ 
+ 	struct workqueue_struct *complete_wq;	/* Request completion wq */
+ 	struct work_struct	complete_work;	/* Request completion work */
+@@ -611,6 +657,8 @@ struct sdhci_host {
+ 
+ 	/* Host ADMA table count */
+ 	u32			adma_table_cnt;
++	/* Host ADMA3 table count */
++	u32			adma3_table_cnt;
+ 
+ 	u64			data_timeout;
+ 
 -- 
 1.9.1
 
