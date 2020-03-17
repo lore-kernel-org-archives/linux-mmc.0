@@ -6,21 +6,21 @@ X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
 	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 64DE4C4CECE
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 09:41:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 49840C5ACC1
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 09:42:00 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 3EFC620714
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 09:41:54 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 29A0820724
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 09:42:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727213AbgCQJlK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 17 Mar 2020 05:41:10 -0400
-Received: from v6.sk ([167.172.42.174]:50756 "EHLO v6.sk"
+        id S1726812AbgCQJlH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 17 Mar 2020 05:41:07 -0400
+Received: from v6.sk ([167.172.42.174]:50718 "EHLO v6.sk"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727166AbgCQJlJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 17 Mar 2020 05:41:09 -0400
+        id S1726559AbgCQJlE (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 17 Mar 2020 05:41:04 -0400
 Received: from localhost (v6.sk [IPv6:::1])
-        by v6.sk (Postfix) with ESMTP id AE68D6109A;
-        Tue, 17 Mar 2020 09:41:06 +0000 (UTC)
+        by v6.sk (Postfix) with ESMTP id 61AF661098;
+        Tue, 17 Mar 2020 09:41:02 +0000 (UTC)
 From:   Lubomir Rintel <lkundrak@v3.sk>
 To:     Rob Herring <robh+dt@kernel.org>
 Cc:     Linus Walleij <linus.walleij@linaro.org>,
@@ -47,9 +47,9 @@ Cc:     Linus Walleij <linus.walleij@linaro.org>,
         linux-rtc@vger.kernel.org, linux-serial@vger.kernel.org,
         linux-spi@vger.kernel.org, linux-usb@vger.kernel.org,
         Lubomir Rintel <lkundrak@v3.sk>
-Subject: [PATCH 23/28] dt-bindings: interrupt-controller: Convert mrvl,intc to json-schema
-Date:   Tue, 17 Mar 2020 10:39:17 +0100
-Message-Id: <20200317093922.20785-24-lkundrak@v3.sk>
+Subject: [PATCH 22/28] dt-bindings: i2c: Convert i2c-pxa to json-schema
+Date:   Tue, 17 Mar 2020 10:39:16 +0100
+Message-Id: <20200317093922.20785-23-lkundrak@v3.sk>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20200317093922.20785-1-lkundrak@v3.sk>
 References: <20200317093922.20785-1-lkundrak@v3.sk>
@@ -60,233 +60,134 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Convert the mrvl,intc binding to DT schema format using json-schema.
+A conversion of the i2c-pxa binding to DT schema format using json-schema.
+
+This also cleans ups some errors in the binding: The compatible string
+description suggested that "mmp" in "mrvl,mmp-twsi" is to be substituted
+with a processor model, which wouldn't be a right thing to do and indeed
+nobody seems to have been doing that. There also was "Recommended
+properties" section that included optional as well as mandatory
+properties. Missing mandatory properties were added to the example.
 
 Signed-off-by: Lubomir Rintel <lkundrak@v3.sk>
 ---
- .../interrupt-controller/mrvl,intc.txt        |  64 --------
- .../interrupt-controller/mrvl,intc.yaml       | 144 ++++++++++++++++++
- 2 files changed, 144 insertions(+), 64 deletions(-)
- delete mode 100644 Documentation/devicetree/bindings/interrupt-controller/mrvl,intc.txt
- create mode 100644 Documentation/devicetree/bindings/interrupt-controller/mrvl,intc.yaml
+ .../devicetree/bindings/i2c/i2c-pxa.txt       | 31 --------
+ .../devicetree/bindings/i2c/i2c-pxa.yaml      | 71 +++++++++++++++++++
+ 2 files changed, 71 insertions(+), 31 deletions(-)
+ delete mode 100644 Documentation/devicetree/bindings/i2c/i2c-pxa.txt
+ create mode 100644 Documentation/devicetree/bindings/i2c/i2c-pxa.yaml
 
-diff --git a/Documentation/devicetree/bindings/interrupt-controller/mrvl,intc.txt b/Documentation/devicetree/bindings/interrupt-controller/mrvl,intc.txt
+diff --git a/Documentation/devicetree/bindings/i2c/i2c-pxa.txt b/Documentation/devicetree/bindings/i2c/i2c-pxa.txt
 deleted file mode 100644
-index a0ed02725a9d7..0000000000000
---- a/Documentation/devicetree/bindings/interrupt-controller/mrvl,intc.txt
+index c30783c0eca03..0000000000000
+--- a/Documentation/devicetree/bindings/i2c/i2c-pxa.txt
 +++ /dev/null
-@@ -1,64 +0,0 @@
--* Marvell MMP Interrupt controller
+@@ -1,31 +0,0 @@
+-* Marvell MMP I2C controller
 -
--Required properties:
--- compatible : Should be
--               "mrvl,mmp-intc" on Marvel MMP,
--               "mrvl,mmp2-intc" along with "mrvl,mmp2-mux-intc" on MMP2 or
--               "marvell,mmp3-intc" with "mrvl,mmp2-mux-intc" on MMP3
--- reg : Address and length of the register set of the interrupt controller.
--  If the interrupt controller is intc, address and length means the range
--  of the whole interrupt controller. The "marvell,mmp3-intc" controller
--  also has a secondary range for the second CPU core.  If the interrupt
--  controller is mux-intc, address and length means one register. Since
--  address of mux-intc is in the range of intc. mux-intc is secondary
--  interrupt controller.
--- reg-names : Name of the register set of the interrupt controller. It's
--  only required in mux-intc interrupt controller.
--- interrupts : Should be the port interrupt shared by mux interrupts. It's
--  only required in mux-intc interrupt controller.
--- interrupt-controller : Identifies the node as an interrupt controller.
--- #interrupt-cells : Specifies the number of cells needed to encode an
--  interrupt source.
--- mrvl,intc-nr-irqs : Specifies the number of interrupts in the interrupt
--  controller.
--- mrvl,clr-mfp-irq : Specifies the interrupt that needs to clear MFP edge
--  detection first.
+-Required properties :
 -
--Example:
--	intc: interrupt-controller@d4282000 {
--		compatible = "mrvl,mmp2-intc";
--		interrupt-controller;
--		#interrupt-cells = <1>;
--		reg = <0xd4282000 0x1000>;
--		mrvl,intc-nr-irqs = <64>;
+- - reg : Offset and length of the register set for the device
+- - compatible : should be "mrvl,mmp-twsi" where mmp is the name of a
+-   compatible processor, e.g. pxa168, pxa910, mmp2, mmp3.
+-   For the pxa2xx/pxa3xx, an additional node "mrvl,pxa-i2c" is required
+-   as shown in the example below.
+-   For the Armada 3700, the compatible should be "marvell,armada-3700-i2c".
+-
+-Recommended properties :
+-
+- - interrupts : the interrupt number
+- - mrvl,i2c-polling : Disable interrupt of i2c controller. Polling
+-   status register of i2c controller instead.
+- - mrvl,i2c-fast-mode : Enable fast mode of i2c controller.
+-
+-Examples:
+-	twsi1: i2c@d4011000 {
+-		compatible = "mrvl,mmp-twsi";
+-		reg = <0xd4011000 0x1000>;
+-		interrupts = <7>;
+-		mrvl,i2c-fast-mode;
 -	};
--
--	intcmux4@d4282150 {
--		compatible = "mrvl,mmp2-mux-intc";
--		interrupts = <4>;
--		interrupt-controller;
--		#interrupt-cells = <1>;
--		reg = <0x150 0x4>, <0x168 0x4>;
--		reg-names = "mux status", "mux mask";
--		mrvl,intc-nr-irqs = <2>;
+-	
+-	twsi2: i2c@d4025000 {
+-		compatible = "mrvl,mmp-twsi";
+-		reg = <0xd4025000 0x1000>;
+-		interrupts = <58>;
 -	};
--
--* Marvell Orion Interrupt controller
--
--Required properties
--- compatible :  Should be "marvell,orion-intc".
--- #interrupt-cells: Specifies the number of cells needed to encode an
--  interrupt source. Supported value is <1>.
--- interrupt-controller : Declare this node to be an interrupt controller.
--- reg : Interrupt mask address. A list of 4 byte ranges, one per controller.
--        One entry in the list represents 32 interrupts.
--
--Example:
--
--	intc: interrupt-controller {
--        	compatible = "marvell,orion-intc", "marvell,intc";
--		interrupt-controller;
--		#interrupt-cells = <1>;
--                reg = <0xfed20204 0x04>,
--		      <0xfed20214 0x04>;
--        };
-diff --git a/Documentation/devicetree/bindings/interrupt-controller/mrvl,intc.yaml b/Documentation/devicetree/bindings/interrupt-controller/mrvl,intc.yaml
+diff --git a/Documentation/devicetree/bindings/i2c/i2c-pxa.yaml b/Documentation/devicetree/bindings/i2c/i2c-pxa.yaml
 new file mode 100644
-index 0000000000000..f0644f7d7e1d2
+index 0000000000000..c04fb81927208
 --- /dev/null
-+++ b/Documentation/devicetree/bindings/interrupt-controller/mrvl,intc.yaml
-@@ -0,0 +1,144 @@
++++ b/Documentation/devicetree/bindings/i2c/i2c-pxa.yaml
+@@ -0,0 +1,71 @@
 +%YAML 1.2
 +---
-+$id: http://devicetree.org/schemas/interrupt-controller/mrvl,intc.yaml#
++$id: http://devicetree.org/schemas/i2c/i2c-pxa.yaml#
 +$schema: http://devicetree.org/meta-schemas/core.yaml#
 +
-+title: Marvell MMP/Orion Interrupt controller bindings
++title: Marvell MMP I2C controller bindings
 +
 +maintainers:
 +  - devicetree@vger.kernel.org
 +
 +allOf:
-+  - $ref: /schemas/interrupt-controller.yaml#
++  - $ref: /schemas/i2c/i2c-controller.yaml#
 +  - if:
-+      properties:
-+        compatible:
-+          not:
-+            contains:
-+              const: marvell,orion-intc
++      not:
++        required:
++          - mrvl,i2c-polling
 +    then:
-+      required:
-+        - mrvl,intc-nr-irqs
-+  - if:
-+      properties:
-+        compatible:
-+          contains:
-+            enum:
-+              - mrvl,mmp-intc
-+              - mrvl,mmp2-intc
-+    then:
-+      properties:
-+        reg:
-+          minItems: 1
-+          maxItems: 1
-+  - if:
-+      properties:
-+        compatible:
-+          contains:
-+            enum:
-+              - marvell,mmp3-intc
-+              - mrvl,mmp2-mux-intc
-+    then:
-+      properties:
-+        reg:
-+          minItems: 2
-+          maxItems: 2
-+  - if:
-+      properties:
-+        compatible:
-+          contains:
-+            const: marvell,orion-intc
-+    then:
-+      properties:
-+        reg:
-+          minItems: 1
-+          maxItems: 2
-+  - if:
-+      properties:
-+        compatible:
-+          contains:
-+            const: mrvl,mmp2-mux-intc
-+    then:
-+      properties:
-+        interrupts:
-+          minItems: 1
-+          maxItems: 1
-+        reg-names:
-+          minItems: 2
-+          maxItems: 2
-+          items:
-+            - const: 'mux status'
-+            - const: 'mux mask'
-+      required:
-+        - interrupts
-+    else:
-+      properties:
-+        interrupts: false
++        required:
++          - interrupts
 +
 +properties:
-+  '#interrupt-cells':
-+    const: 1
-+
 +  compatible:
 +    enum:
-+      - mrvl,mmp-intc
-+      - mrvl,mmp2-intc
-+      - marvell,mmp3-intc
-+      - marvell,orion-intc
-+      - mrvl,mmp2-mux-intc
++      - mrvl,mmp-twsi
++      - mrvl,pxa-i2c
++      - marvell,armada-3700-i2c
 +
-+  reg: true
++  reg:
++    maxItems: 1
 +
-+  reg-names: true
++  interrupts:
++    maxItems: 1
 +
-+  interrupts: true
++  clocks:
++    minItems: 1
 +
-+  interrupt-controller: true
++  resets:
++    minItems: 1
 +
-+  mrvl,intc-nr-irqs:
++  mrvl,i2c-polling:
++    $ref: /schemas/types.yaml#/definitions/flag
 +    description: |
-+      Specifies the number of interrupts in the interrupt controller.
-+    $ref: /schemas/types.yaml#/definitions/uint32
++      Disable interrupt of i2c controller. Polling status register of i2c
++      controller instead.
 +
-+  mrvl,clr-mfp-irq:
-+    description: |
-+      Specifies the interrupt that needs to clear MFP edge detection first.
-+    $ref: /schemas/types.yaml#/definitions/uint32
++  mrvl,i2c-fast-mode:
++    $ref: /schemas/types.yaml#/definitions/flag
++    description: Enable fast mode of i2c controller.
 +
 +required:
-+  - '#interrupt-cells'
 +  - compatible
 +  - reg
-+  - interrupt-controller
-+
-+additionalProperties: false
++  - interrupts
++  - clocks
++  - '#address-cells'
++  - '#size-cells'
 +
 +examples:
 +  - |
-+    interrupt-controller@d4282000 {
-+        compatible = "mrvl,mmp2-intc";
-+        interrupt-controller;
-+        #interrupt-cells = <1>;
-+        reg = <0xd4282000 0x1000>;
-+        mrvl,intc-nr-irqs = <64>;
-+    };
-+
-+    interrupt-controller@d4282150 {
-+        compatible = "mrvl,mmp2-mux-intc";
-+        interrupts = <4>;
-+        interrupt-controller;
-+        #interrupt-cells = <1>;
-+        reg = <0x150 0x4>, <0x168 0x4>;
-+        reg-names = "mux status", "mux mask";
-+        mrvl,intc-nr-irqs = <2>;
-+    };
-+  - |
-+    interrupt-controller@fed20204 {
-+        compatible = "marvell,orion-intc";
-+        interrupt-controller;
-+        #interrupt-cells = <1>;
-+        reg = <0xfed20204 0x04>,
-+              <0xfed20214 0x04>;
++    #include <dt-bindings/clock/marvell,mmp2.h>
++    i2c@d4011000 {
++        compatible = "mrvl,mmp-twsi";
++        reg = <0xd4011000 0x1000>;
++        interrupts = <7>;
++        clocks = <&soc_clocks MMP2_CLK_TWSI1>;
++        mrvl,i2c-fast-mode;
++        #address-cells = <1>;
++        #size-cells = <0>;
 +    };
 +
 +...
