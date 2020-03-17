@@ -6,21 +6,21 @@ X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
 	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 49840C5ACC1
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 09:42:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 47235C5ACD9
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 09:42:05 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 29A0820724
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 09:42:00 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 21D7A20736
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 09:42:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726812AbgCQJlH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 17 Mar 2020 05:41:07 -0400
-Received: from v6.sk ([167.172.42.174]:50718 "EHLO v6.sk"
+        id S1727093AbgCQJky (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 17 Mar 2020 05:40:54 -0400
+Received: from v6.sk ([167.172.42.174]:50606 "EHLO v6.sk"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726559AbgCQJlE (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 17 Mar 2020 05:41:04 -0400
+        id S1726287AbgCQJkx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 17 Mar 2020 05:40:53 -0400
 Received: from localhost (v6.sk [IPv6:::1])
-        by v6.sk (Postfix) with ESMTP id 61AF661098;
-        Tue, 17 Mar 2020 09:41:02 +0000 (UTC)
+        by v6.sk (Postfix) with ESMTP id D040861093;
+        Tue, 17 Mar 2020 09:40:49 +0000 (UTC)
 From:   Lubomir Rintel <lkundrak@v3.sk>
 To:     Rob Herring <robh+dt@kernel.org>
 Cc:     Linus Walleij <linus.walleij@linaro.org>,
@@ -47,9 +47,9 @@ Cc:     Linus Walleij <linus.walleij@linaro.org>,
         linux-rtc@vger.kernel.org, linux-serial@vger.kernel.org,
         linux-spi@vger.kernel.org, linux-usb@vger.kernel.org,
         Lubomir Rintel <lkundrak@v3.sk>
-Subject: [PATCH 22/28] dt-bindings: i2c: Convert i2c-pxa to json-schema
-Date:   Tue, 17 Mar 2020 10:39:16 +0100
-Message-Id: <20200317093922.20785-23-lkundrak@v3.sk>
+Subject: [PATCH 19/28] dt-bindings: mmc: Convert sdhci-pxa to json-schema
+Date:   Tue, 17 Mar 2020 10:39:13 +0100
+Message-Id: <20200317093922.20785-20-lkundrak@v3.sk>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20200317093922.20785-1-lkundrak@v3.sk>
 References: <20200317093922.20785-1-lkundrak@v3.sk>
@@ -60,134 +60,179 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-A conversion of the i2c-pxa binding to DT schema format using json-schema.
+Convert the sdhci-pxa binding to DT schema format using json-schema.
 
-This also cleans ups some errors in the binding: The compatible string
-description suggested that "mmp" in "mrvl,mmp-twsi" is to be substituted
-with a processor model, which wouldn't be a right thing to do and indeed
-nobody seems to have been doing that. There also was "Recommended
-properties" section that included optional as well as mandatory
-properties. Missing mandatory properties were added to the example.
+At the same time, fix a couple of issues with the examples discovered by
+the validation tool -- a semicolon instead of a comma and wrong node names.
 
 Signed-off-by: Lubomir Rintel <lkundrak@v3.sk>
 ---
- .../devicetree/bindings/i2c/i2c-pxa.txt       | 31 --------
- .../devicetree/bindings/i2c/i2c-pxa.yaml      | 71 +++++++++++++++++++
- 2 files changed, 71 insertions(+), 31 deletions(-)
- delete mode 100644 Documentation/devicetree/bindings/i2c/i2c-pxa.txt
- create mode 100644 Documentation/devicetree/bindings/i2c/i2c-pxa.yaml
+ .../devicetree/bindings/mmc/sdhci-pxa.txt     |  50 ---------
+ .../devicetree/bindings/mmc/sdhci-pxa.yaml    | 101 ++++++++++++++++++
+ 2 files changed, 101 insertions(+), 50 deletions(-)
+ delete mode 100644 Documentation/devicetree/bindings/mmc/sdhci-pxa.txt
+ create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-pxa.yaml
 
-diff --git a/Documentation/devicetree/bindings/i2c/i2c-pxa.txt b/Documentation/devicetree/bindings/i2c/i2c-pxa.txt
+diff --git a/Documentation/devicetree/bindings/mmc/sdhci-pxa.txt b/Documentation/devicetree/bindings/mmc/sdhci-pxa.txt
 deleted file mode 100644
-index c30783c0eca03..0000000000000
---- a/Documentation/devicetree/bindings/i2c/i2c-pxa.txt
+index 3d1b449d6097d..0000000000000
+--- a/Documentation/devicetree/bindings/mmc/sdhci-pxa.txt
 +++ /dev/null
-@@ -1,31 +0,0 @@
--* Marvell MMP I2C controller
+@@ -1,50 +0,0 @@
+-* Marvell sdhci-pxa v2/v3 controller
 -
--Required properties :
+-This file documents differences between the core properties in mmc.txt
+-and the properties used by the sdhci-pxav2 and sdhci-pxav3 drivers.
 -
-- - reg : Offset and length of the register set for the device
-- - compatible : should be "mrvl,mmp-twsi" where mmp is the name of a
--   compatible processor, e.g. pxa168, pxa910, mmp2, mmp3.
--   For the pxa2xx/pxa3xx, an additional node "mrvl,pxa-i2c" is required
--   as shown in the example below.
--   For the Armada 3700, the compatible should be "marvell,armada-3700-i2c".
+-Required properties:
+-- compatible: Should be "mrvl,pxav2-mmc", "mrvl,pxav3-mmc" or
+-  "marvell,armada-380-sdhci".
+-- reg:
+-  * for "mrvl,pxav2-mmc" and "mrvl,pxav3-mmc", one register area for
+-    the SDHCI registers.
 -
--Recommended properties :
+-  * for "marvell,armada-380-sdhci", three register areas. The first
+-    one for the SDHCI registers themselves, the second one for the
+-    AXI/Mbus bridge registers of the SDHCI unit, the third one for the
+-    SDIO3 Configuration register
+-- reg names: should be "sdhci", "mbus", "conf-sdio3". only mandatory
+-  for "marvell,armada-380-sdhci"
+-- clocks: Array of clocks required for SDHCI; requires at least one for
+-    I/O clock.
+-- clock-names: Array of names corresponding to clocks property; shall be
+-    "io" for I/O clock and "core" for optional core clock.
 -
-- - interrupts : the interrupt number
-- - mrvl,i2c-polling : Disable interrupt of i2c controller. Polling
--   status register of i2c controller instead.
-- - mrvl,i2c-fast-mode : Enable fast mode of i2c controller.
+-Optional properties:
+-- mrvl,clk-delay-cycles: Specify a number of cycles to delay for tuning.
 -
--Examples:
--	twsi1: i2c@d4011000 {
--		compatible = "mrvl,mmp-twsi";
--		reg = <0xd4011000 0x1000>;
--		interrupts = <7>;
--		mrvl,i2c-fast-mode;
--	};
--	
--	twsi2: i2c@d4025000 {
--		compatible = "mrvl,mmp-twsi";
--		reg = <0xd4025000 0x1000>;
--		interrupts = <58>;
--	};
-diff --git a/Documentation/devicetree/bindings/i2c/i2c-pxa.yaml b/Documentation/devicetree/bindings/i2c/i2c-pxa.yaml
+-Example:
+-
+-sdhci@d4280800 {
+-	compatible = "mrvl,pxav3-mmc";
+-	reg = <0xd4280800 0x800>;
+-	bus-width = <8>;
+-	interrupts = <27>;
+-	clocks = <&chip CLKID_SDIO1XIN>, <&chip CLKID_SDIO1>;
+-	clock-names = "io", "core";
+-	non-removable;
+-	mrvl,clk-delay-cycles = <31>;
+-};
+-
+-sdhci@d8000 {
+-	compatible = "marvell,armada-380-sdhci";
+-	reg-names = "sdhci", "mbus", "conf-sdio3";
+-	reg = <0xd8000 0x1000>,
+-		<0xdc000 0x100>;
+-		<0x18454 0x4>;
+-	interrupts = <0 25 0x4>;
+-	clocks = <&gateclk 17>;
+-	clock-names = "io";
+-	mrvl,clk-delay-cycles = <0x1F>;
+-};
+diff --git a/Documentation/devicetree/bindings/mmc/sdhci-pxa.yaml b/Documentation/devicetree/bindings/mmc/sdhci-pxa.yaml
 new file mode 100644
-index 0000000000000..c04fb81927208
+index 0000000000000..4ae0926ac294f
 --- /dev/null
-+++ b/Documentation/devicetree/bindings/i2c/i2c-pxa.yaml
-@@ -0,0 +1,71 @@
++++ b/Documentation/devicetree/bindings/mmc/sdhci-pxa.yaml
+@@ -0,0 +1,101 @@
 +%YAML 1.2
 +---
-+$id: http://devicetree.org/schemas/i2c/i2c-pxa.yaml#
++$id: http://devicetree.org/schemas/mmc/sdhci-pxa.yaml#
 +$schema: http://devicetree.org/meta-schemas/core.yaml#
 +
-+title: Marvell MMP I2C controller bindings
++title: Marvell PXA SDHCI v2/v3 bindings
 +
 +maintainers:
 +  - devicetree@vger.kernel.org
 +
 +allOf:
-+  - $ref: /schemas/i2c/i2c-controller.yaml#
++  - $ref: mmc-controller.yaml#
 +  - if:
-+      not:
-+        required:
-+          - mrvl,i2c-polling
++      properties:
++        compatible:
++          contains:
++            const: marvell,armada-380-sdhci
 +    then:
-+        required:
-+          - interrupts
++      properties:
++        regs:
++          minItems: 3
++          maxItems: 3
++        reg-names:
++          items:
++            - const: sdhci
++            - const: mbus
++            - const: conf-sdio3
++      required:
++        - reg-names
++    else:
++      properties:
++        regs:
++          minItems: 1
++          maxItems: 1
++        reg-names:
++          minItems: 1
++          maxItems: 1
 +
 +properties:
 +  compatible:
 +    enum:
-+      - mrvl,mmp-twsi
-+      - mrvl,pxa-i2c
-+      - marvell,armada-3700-i2c
++      - mrvl,pxav2-mmc
++      - mrvl,pxav3-mmc
++      - marvell,armada-380-sdhci
 +
-+  reg:
-+    maxItems: 1
++  reg: true
++
++  reg-names: true
 +
 +  interrupts:
 +    maxItems: 1
 +
 +  clocks:
 +    minItems: 1
++    maxItems: 2
 +
-+  resets:
++  clock-names:
 +    minItems: 1
++    maxItems: 2
++    items:
++      - const: io
++      - const: core
 +
-+  mrvl,i2c-polling:
-+    $ref: /schemas/types.yaml#/definitions/flag
-+    description: |
-+      Disable interrupt of i2c controller. Polling status register of i2c
-+      controller instead.
-+
-+  mrvl,i2c-fast-mode:
-+    $ref: /schemas/types.yaml#/definitions/flag
-+    description: Enable fast mode of i2c controller.
++  mrvl,clk-delay-cycles:
++    description: Specify a number of cycles to delay for tuning.
++    $ref: /schemas/types.yaml#/definitions/uint32
 +
 +required:
 +  - compatible
 +  - reg
 +  - interrupts
 +  - clocks
-+  - '#address-cells'
-+  - '#size-cells'
++  - clock-names
 +
 +examples:
 +  - |
-+    #include <dt-bindings/clock/marvell,mmp2.h>
-+    i2c@d4011000 {
-+        compatible = "mrvl,mmp-twsi";
-+        reg = <0xd4011000 0x1000>;
-+        interrupts = <7>;
-+        clocks = <&soc_clocks MMP2_CLK_TWSI1>;
-+        mrvl,i2c-fast-mode;
-+        #address-cells = <1>;
-+        #size-cells = <0>;
++    #include <dt-bindings/clock/berlin2.h>
++    mmc@d4280800 {
++        compatible = "mrvl,pxav3-mmc";
++        reg = <0xd4280800 0x800>;
++        bus-width = <8>;
++        interrupts = <27>;
++        clocks = <&chip CLKID_SDIO1XIN>, <&chip CLKID_SDIO1>;
++        clock-names = "io", "core";
++        non-removable;
++        mrvl,clk-delay-cycles = <31>;
++    };
++  - |
++    mmc@d8000 {
++        compatible = "marvell,armada-380-sdhci";
++        reg-names = "sdhci", "mbus", "conf-sdio3";
++        reg = <0xd8000 0x1000>,
++              <0xdc000 0x100>,
++              <0x18454 0x4>;
++        interrupts = <0 25 0x4>;
++        clocks = <&gateclk 17>;
++        clock-names = "io";
++        mrvl,clk-delay-cycles = <0x1F>;
 +    };
 +
 +...
