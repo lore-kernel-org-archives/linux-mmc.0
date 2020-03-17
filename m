@@ -6,90 +6,100 @@ X-Spam-Status: No, score=-8.3 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
 	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6C2E6C10F29
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 09:52:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 79862C3F2CE
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 09:57:57 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 4BED4206EC
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 09:52:32 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5BA3920719
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 09:57:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726016AbgCQJwb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 17 Mar 2020 05:52:31 -0400
-Received: from mga03.intel.com ([134.134.136.65]:11234 "EHLO mga03.intel.com"
+        id S1726637AbgCQJ54 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 17 Mar 2020 05:57:56 -0400
+Received: from mga14.intel.com ([192.55.52.115]:39045 "EHLO mga14.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725872AbgCQJwb (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 17 Mar 2020 05:52:31 -0400
-IronPort-SDR: 3gFeyB/sMtAXH5KgvDK4vJqCTYN2ML2o1fV2Hbt2t69CrfzhYhAfwC9f/98fVEMCgeaOFpXYV1
- SvgJzUEcUjtA==
+        id S1726626AbgCQJ5s (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 17 Mar 2020 05:57:48 -0400
+IronPort-SDR: Qltgi2wKZcZUeVY3mmRYUx3HSyLVptyixBkBuYfWsoaEj8GdxXQwaLIPAecT42LzJBwyO5sEsH
+ aMDK2mqPjz6w==
 X-Amp-Result: SKIPPED(no attachment in message)
 X-Amp-File-Uploaded: False
 Received: from fmsmga005.fm.intel.com ([10.253.24.32])
-  by orsmga103.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 17 Mar 2020 02:52:30 -0700
-IronPort-SDR: +azI8A9fKBjRQ58L4+ha8WqErnfAG+LfoivYULQdO/g/GXyyXzucTRi5GuxYPJzGwecRN6XO9x
- S0F1069bxh+Q==
+  by fmsmga103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 17 Mar 2020 02:57:47 -0700
+IronPort-SDR: AXxfFlexHGkT4CGeJ3felSJPRCzQqgJDsZxjRmIw7WSVV4bXyGvJvHF4z90wxa1j2H30mVKcrb
+ wH7I4dFTDQPg==
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="5.70,564,1574150400"; 
-   d="scan'208";a="443697708"
+   d="scan'208";a="443699264"
 Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.87]) ([10.237.72.87])
-  by fmsmga005.fm.intel.com with ESMTP; 17 Mar 2020 02:52:27 -0700
-Subject: Re: [PATCH v1 3/3] mmc: tegra: Enable host capability
- MMC_CAP2_LONG_WAIT_HW_BUSY
-To:     Sowjanya Komatineni <skomatineni@nvidia.com>,
-        ulf.hansson@linaro.org, baolin.wang@linaro.org,
-        kstewart@linuxfoundation.org, tglx@linutronix.de,
-        bradleybolen@gmail.com, gregkh@linuxfoundation.org,
-        thierry.reding@gmail.com, jonathanh@nvidia.com
-Cc:     anrao@nvidia.com, linux-tegra@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
-References: <1583799205-8442-1-git-send-email-skomatineni@nvidia.com>
- <1583799205-8442-3-git-send-email-skomatineni@nvidia.com>
+  by fmsmga005.fm.intel.com with ESMTP; 17 Mar 2020 02:57:45 -0700
+Subject: Re: [PATCH] mmc: sdhci-of-at91: fix cd-gpios for SAMA5D2
+To:     =?UTF-8?B?TWljaGHFgiBNaXJvc8WCYXc=?= <mirq-linux@rere.qmqm.pl>,
+        Ludovic Desroches <ludovic.desroches@microchip.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Nicolas Ferre <nicolas.ferre@microchip.com>,
+        Alexandre Belloni <alexandre.belloni@bootlin.com>
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+References: <8d10950d9940468577daef4772b82a071b204716.1584290561.git.mirq-linux@rere.qmqm.pl>
 From:   Adrian Hunter <adrian.hunter@intel.com>
 Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
  Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <c46fef86-ac9c-a921-1464-dbca58bc3169@intel.com>
-Date:   Tue, 17 Mar 2020 11:51:49 +0200
+Message-ID: <7b5c5f2e-a10f-88b5-907c-dfbf6eaa43c6@intel.com>
+Date:   Tue, 17 Mar 2020 11:57:07 +0200
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
  Thunderbird/68.5.0
 MIME-Version: 1.0
-In-Reply-To: <1583799205-8442-3-git-send-email-skomatineni@nvidia.com>
+In-Reply-To: <8d10950d9940468577daef4772b82a071b204716.1584290561.git.mirq-linux@rere.qmqm.pl>
 Content-Type: text/plain; charset=utf-8
 Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 10/03/20 2:13 am, Sowjanya Komatineni wrote:
-> Some mmc operations take longer than maximum HW busy detection and
-> mmc core driver converts R1B type to R1 type response for these
-> operations based on host max busy timeout and command operation time
-> and uses SW poll for busy.
+On 15/03/20 6:44 pm, Michał Mirosław wrote:
+> SAMA5D2x doesn't drive CMD line if GPIO is used as CD line (at least
+> SAMA5D27 doesn't). Fix this by forcing card-detect in the module
+> if module-controlled CD is not used.
 > 
-> Tegra host support long HW busy detection where host waits forever
-> till the card is busy.
+> Fixed commit addresses the problem only for non-removable cards. This
+> amends it to also cover gpio-cd case.
 > 
-> This patch enables MMC_CAP2_LONG_WAIT_HW_BUSY capability for Tegra
-> host.
-> 
-> Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
+> Cc: stable@vger.kernel.org
+> Fixes: 7a1e3f143176 ("mmc: sdhci-of-at91: force card detect value for non removable devices")
+> Signed-off-by: Michał Mirosław <mirq-linux@rere.qmqm.pl>
 
 Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
 > ---
->  drivers/mmc/host/sdhci-tegra.c | 1 +
->  1 file changed, 1 insertion(+)
+>  drivers/mmc/host/sdhci-of-at91.c | 8 ++++++--
+>  1 file changed, 6 insertions(+), 2 deletions(-)
 > 
-> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-> index 40a221d..9d0f371 100644
-> --- a/drivers/mmc/host/sdhci-tegra.c
-> +++ b/drivers/mmc/host/sdhci-tegra.c
-> @@ -1583,6 +1583,7 @@ static int sdhci_tegra_probe(struct platform_device *pdev)
->  	if (tegra_host->soc_data->nvquirks & NVQUIRK_ENABLE_DDR50)
->  		host->mmc->caps |= MMC_CAP_1_8V_DDR;
+> diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
+> index d90f4ed18283..8f8da2fe48a9 100644
+> --- a/drivers/mmc/host/sdhci-of-at91.c
+> +++ b/drivers/mmc/host/sdhci-of-at91.c
+> @@ -185,7 +185,8 @@ static void sdhci_at91_reset(struct sdhci_host *host, u8 mask)
 >  
-> +	host->mmc->caps2 |= MMC_CAP2_LONG_WAIT_HW_BUSY;
->  	tegra_sdhci_parse_dt(host);
+>  	sdhci_reset(host, mask);
 >  
->  	tegra_host->power_gpio = devm_gpiod_get_optional(&pdev->dev, "power",
+> -	if (host->mmc->caps & MMC_CAP_NONREMOVABLE)
+> +	if ((host->mmc->caps & MMC_CAP_NONREMOVABLE)
+> +	    || mmc_gpio_get_cd(host->mmc) >= 0)
+>  		sdhci_at91_set_force_card_detect(host);
+>  
+>  	if (priv->cal_always_on && (mask & SDHCI_RESET_ALL))
+> @@ -487,8 +488,11 @@ static int sdhci_at91_probe(struct platform_device *pdev)
+>  	 * detection procedure using the SDMCC_CD signal is bypassed.
+>  	 * This bit is reset when a software reset for all command is performed
+>  	 * so we need to implement our own reset function to set back this bit.
+> +	 *
+> +	 * WA: SAMA5D2 doesn't drive CMD if using CD GPIO line.
+>  	 */
+> -	if (host->mmc->caps & MMC_CAP_NONREMOVABLE)
+> +	if ((host->mmc->caps & MMC_CAP_NONREMOVABLE)
+> +	    || mmc_gpio_get_cd(host->mmc) >= 0)
+>  		sdhci_at91_set_force_card_detect(host);
+>  
+>  	pm_runtime_put_autosuspend(&pdev->dev);
 > 
 
