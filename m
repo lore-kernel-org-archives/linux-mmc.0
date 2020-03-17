@@ -6,53 +6,47 @@ X-Spam-Status: No, score=-8.3 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
 	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 792F2C18E5B
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 07:32:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EB5F3C10F29
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 07:42:45 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 4CC8320674
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 07:32:59 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B8A5920674
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 07:42:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726370AbgCQHc6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 17 Mar 2020 03:32:58 -0400
-Received: from mga14.intel.com ([192.55.52.115]:28533 "EHLO mga14.intel.com"
+        id S1725957AbgCQHmp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 17 Mar 2020 03:42:45 -0400
+Received: from mga01.intel.com ([192.55.52.88]:19147 "EHLO mga01.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725957AbgCQHc6 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 17 Mar 2020 03:32:58 -0400
-IronPort-SDR: BZ8ke6cDQvmw0R29DCVMJ5yxlsBjYe8k9ggI5hX+ijxxgUF/1RuWJSOpPv+SME2Y8SFXO4jjCh
- I8RHz4SFCriQ==
+        id S1725868AbgCQHmp (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 17 Mar 2020 03:42:45 -0400
+IronPort-SDR: 8ssllRdw8rql745GmASXDNLhW8RmSEjnkOHQVBL+KBoplaIrsbvRSnxZotNN1l/JKjpPInMvpQ
+ 0byvMSVEfzRg==
 X-Amp-Result: SKIPPED(no attachment in message)
 X-Amp-File-Uploaded: False
 Received: from fmsmga005.fm.intel.com ([10.253.24.32])
-  by fmsmga103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 17 Mar 2020 00:32:58 -0700
-IronPort-SDR: NA6fcj7hlzikUGXB/cbpVaqc5np2tQ3ndb4jl8/G7w+k5Snd2uTF+YddDkTjmRFkALd9YY+A5V
- hBndeU7tgJ+Q==
+  by fmsmga101.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 17 Mar 2020 00:42:44 -0700
+IronPort-SDR: ZWOxj/1v17GDvoVmW8yDS21r0RKdTP3BYcibzN+8zSouF4rO5RhZMtbFRuG/cjB7qI2Qg7vZBs
+ cT85qj23oU6A==
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="5.70,563,1574150400"; 
-   d="scan'208";a="443660878"
+   d="scan'208";a="443663235"
 Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.87]) ([10.237.72.87])
-  by fmsmga005.fm.intel.com with ESMTP; 17 Mar 2020 00:32:56 -0700
-Subject: Re: [RESEND PATCH 1/3] mmc: host: Introduce the request_atomic() for
- the host
-To:     Baolin Wang <baolin.wang7@gmail.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Orson Zhai <orsonzhai@gmail.com>,
-        Chunyan Zhang <zhang.lyra@gmail.com>,
-        Arnd Bergmann <arnd@arndb.de>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        LKML <linux-kernel@vger.kernel.org>
-References: <cover.1583307441.git.baolin.wang7@gmail.com>
- <ace53bca354e2846f19684bd33a9c0f3c2ee2c44.1583307441.git.baolin.wang7@gmail.com>
- <dd44e606-3eb5-f7fc-5995-021705a9b5d9@intel.com>
- <CADBw62ojVB7nvwE9OM8-A_HfVBBXz7tuaxfqDCmQ39b1YiDBag@mail.gmail.com>
+  by fmsmga005.fm.intel.com with ESMTP; 17 Mar 2020 00:42:43 -0700
+Subject: Re: [PATCH v3 1/2] mmc: sdhci-acpi: Switch signal voltage back to
+ 3.3V on suspend on external microSD on Lenovo Miix 320
+To:     Hans de Goede <hdegoede@redhat.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     linux-mmc@vger.kernel.org,
+        russianneuromancer <russianneuromancer@ya.ru>
+References: <20200316184753.393458-1-hdegoede@redhat.com>
 From:   Adrian Hunter <adrian.hunter@intel.com>
 Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
  Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <ea70f7a4-78cb-25b4-4363-c6493d885795@intel.com>
-Date:   Tue, 17 Mar 2020 09:32:18 +0200
+Message-ID: <12984ede-4115-9986-e704-33ca19b1bccd@intel.com>
+Date:   Tue, 17 Mar 2020 09:42:05 +0200
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
  Thunderbird/68.5.0
 MIME-Version: 1.0
-In-Reply-To: <CADBw62ojVB7nvwE9OM8-A_HfVBBXz7tuaxfqDCmQ39b1YiDBag@mail.gmail.com>
+In-Reply-To: <20200316184753.393458-1-hdegoede@redhat.com>
 Content-Type: text/plain; charset=utf-8
 Content-Language: en-US
 Content-Transfer-Encoding: 7bit
@@ -61,119 +55,208 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 17/03/20 5:36 am, Baolin Wang wrote:
-> On Mon, Mar 16, 2020 at 9:09 PM Adrian Hunter <adrian.hunter@intel.com> wrote:
->>
->> On 4/03/20 9:42 am, Baolin Wang wrote:
->>> The SD host controller can process one request in the atomic context if
->>> the card is nonremovable, which means we can submit next request in the
->>> irq hard handler when using the MMC software queue to reduce the latency.
->>> Thus this patch adds a new API request_atomic() for the host controller
->>> and implement it for the SD host controller.
->>>
->>> Suggested-by: Adrian Hunter <adrian.hunter@intel.com>
->>> Signed-off-by: Baolin Wang <baolin.wang7@gmail.com>
->>> ---
->>>  drivers/mmc/host/sdhci.c | 27 +++++++++++++++++++--------
->>>  drivers/mmc/host/sdhci.h |  1 +
->>>  include/linux/mmc/host.h |  3 +++
->>>  3 files changed, 23 insertions(+), 8 deletions(-)
->>>
->>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->>> index 9c37451..4febbcb 100644
->>> --- a/drivers/mmc/host/sdhci.c
->>> +++ b/drivers/mmc/host/sdhci.c
->>> @@ -2016,17 +2016,12 @@ void sdhci_set_power(struct sdhci_host *host, unsigned char mode,
->>>   *                                                                           *
->>>  \*****************************************************************************/
->>>
->>> -void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
->>> +static void sdhci_start_request(struct mmc_host *mmc, struct mmc_request *mrq,
->>> +                             int present)
->>>  {
->>> -     struct sdhci_host *host;
->>> -     int present;
->>> +     struct sdhci_host *host = mmc_priv(mmc);
->>>       unsigned long flags;
->>>
->>> -     host = mmc_priv(mmc);
->>> -
->>> -     /* Firstly check card presence */
->>> -     present = mmc->ops->get_cd(mmc);
->>> -
->>>       spin_lock_irqsave(&host->lock, flags);
->>>
->>>       sdhci_led_activate(host);
->>> @@ -2043,6 +2038,22 @@ void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
->>>
->>>       spin_unlock_irqrestore(&host->lock, flags);
->>>  }
->>> +
->>> +void sdhci_request_atomic(struct mmc_host *mmc, struct mmc_request *mrq)
->>> +{
->>> +     sdhci_start_request(mmc, mrq, 1);
->>> +}
->>> +EXPORT_SYMBOL_GPL(sdhci_request_atomic);
->>> +
->>> +void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
->>> +{
->>> +     int present;
->>> +
->>> +     /* Firstly check card presence */
->>> +     present = mmc->ops->get_cd(mmc);
->>> +
->>> +     sdhci_start_request(mmc, mrq, present);
->>> +}
->>>  EXPORT_SYMBOL_GPL(sdhci_request);
->>>
->>>  void sdhci_set_bus_width(struct sdhci_host *host, int width)
->>> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
->>> index cac2d97..5507a73 100644
->>> --- a/drivers/mmc/host/sdhci.h
->>> +++ b/drivers/mmc/host/sdhci.h
->>> @@ -775,6 +775,7 @@ void sdhci_set_power(struct sdhci_host *host, unsigned char mode,
->>>  void sdhci_set_power_noreg(struct sdhci_host *host, unsigned char mode,
->>>                          unsigned short vdd);
->>>  void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq);
->>> +void sdhci_request_atomic(struct mmc_host *mmc, struct mmc_request *mrq);
->>>  void sdhci_set_bus_width(struct sdhci_host *host, int width);
->>>  void sdhci_reset(struct sdhci_host *host, u8 mask);
->>>  void sdhci_set_uhs_signaling(struct sdhci_host *host, unsigned timing);
->>> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
->>> index 562ed06..db5e59c 100644
->>> --- a/include/linux/mmc/host.h
->>> +++ b/include/linux/mmc/host.h
->>> @@ -92,6 +92,9 @@ struct mmc_host_ops {
->>>                           int err);
->>>       void    (*pre_req)(struct mmc_host *host, struct mmc_request *req);
->>>       void    (*request)(struct mmc_host *host, struct mmc_request *req);
->>> +     /* Submit one request to host in atomic context. */
->>> +     void    (*request_atomic)(struct mmc_host *host,
->>> +                               struct mmc_request *req);
->>
->> This doesn't have the flexibility to return "busy".  For example,
->> sdhci_send_command() will potentially wait quite some time if the inhibit
->> bits are set.  That is not good in interrupt context.  It would be better to
->> return immediately in that case and have the caller fall back to a
->> non-atomic context.  Thoughts?
+On 16/03/20 8:47 pm, Hans de Goede wrote:
+> Based on a sample of 7 DSDTs from Cherry Trail devices using an AXP288
+> PMIC depending on the design one of 2 possible LDOs on the PMIC is used
+> for the MMC signalling voltage, either DLDO3 or GPIO1LDO (GPIO1 pin in
+> low noise LDO mode).
 > 
-> Yes, I unserstood your concern. But the sdhci_send_command() is
-> already under the spin_lock_irqsave() protection, which will also
-> disable the interrupt for some time if the inhibit bits are set. That
-> is same with moving it in interrupt context.
-
-It is, but I would like to fix that too.
-
+> The Lenovo Miix 320-10ICR uses GPIO1LDO in the SHC1 ACPI device's DSM
+> methods to set 3.3 or 1.8 signalling voltage and this appears to work
+> as advertised, so presumably the device is actually using GPIO1LDO for
+> the external microSD signalling voltage.
 > 
-> Moreover, if the previous command complete interrupt and transfer
-> complete interrupt are normal, we should not meet this issue of
-> polling inhibit bits (I have not met this issue on my platform). So I
-> think we can remove the polling here? If the inhibit bits are set, I
-> think the command complete interrupt or the transfer complete
-> interrupt have been abnormal, so we can just return the error here.
-> What do you think? Thanks.
+> But this device has a bug in the _PS0 method of the SHC1 ACPI device,
+> the DSM remembers the last set signalling voltage and the _PS0 restores
+> this after a (runtime) suspend-resume cycle, but it "restores" the voltage
+> on DLDO3 instead of setting it on GPIO1LDO as the DSM method does. DLDO3
+> is used for the LCD and setting it to 1.8V causes the LCD to go black.
 > 
+> This commit works around this issue by calling the Intel DSM to reset the
+> signal voltage to 3.3V after the host has been runtime suspended.
+> This will make the _PS0 method reprogram the DLDO3 voltage to 3.3V, which
+> leaves it at its original setting fixing the LCD going black.
+> 
+> This commit adds and uses a DMI quirk mechanism to only trigger this
+> workaround on the Lenovo Miix 320 while leaving the behavior of the
+> driver unchanged on other devices.
+> 
+> BugLink: https://bugs.freedesktop.org/show_bug.cgi?id=111294
+> BugLink: https://gitlab.freedesktop.org/drm/intel/issues/355
+> Reported-by: russianneuromancer <russianneuromancer@ya.ru>
+> Signed-off-by: Hans de Goede <hdegoede@redhat.com>
 
-I suspect the inhibit polling might be needed for some host controllers in
-some situations.  ie. taking it out would likely break things.
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+
+> ---
+> Changes in v3:
+> - Drop code to restore 1.8 signal voltage on suspend, this is not necessary
+> - Add an is_intel bool to sdhci_acpi_host instead of checking for:
+>   mmc_host_ops.start_signal_voltage_switch == intel_start_signal_voltage_switch
+> 
+> Changes in v2:
+> - Make the quirk reset the signal voltage to 3.3V at the end of the
+>   (runtime) suspend handler instead of disabling 1.8V modes
+> - Drop the module option to allow overridig the quirks
+> ---
+>  drivers/mmc/host/sdhci-acpi.c | 68 +++++++++++++++++++++++++++++++++--
+>  1 file changed, 66 insertions(+), 2 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+> index 9651dca6863e..b4c1b2367066 100644
+> --- a/drivers/mmc/host/sdhci-acpi.c
+> +++ b/drivers/mmc/host/sdhci-acpi.c
+> @@ -23,6 +23,7 @@
+>  #include <linux/pm.h>
+>  #include <linux/pm_runtime.h>
+>  #include <linux/delay.h>
+> +#include <linux/dmi.h>
+>  
+>  #include <linux/mmc/host.h>
+>  #include <linux/mmc/pm.h>
+> @@ -72,9 +73,15 @@ struct sdhci_acpi_host {
+>  	const struct sdhci_acpi_slot	*slot;
+>  	struct platform_device		*pdev;
+>  	bool				use_runtime_pm;
+> +	bool				is_intel;
+> +	bool				reset_signal_volt_on_suspend;
+>  	unsigned long			private[0] ____cacheline_aligned;
+>  };
+>  
+> +enum {
+> +	DMI_QUIRK_RESET_SD_SIGNAL_VOLT_ON_SUSP			= BIT(0),
+> +};
+> +
+>  static inline void *sdhci_acpi_priv(struct sdhci_acpi_host *c)
+>  {
+>  	return (void *)c->private;
+> @@ -391,6 +398,8 @@ static int intel_probe_slot(struct platform_device *pdev, struct acpi_device *ad
+>  	host->mmc_host_ops.start_signal_voltage_switch =
+>  					intel_start_signal_voltage_switch;
+>  
+> +	c->is_intel = true;
+> +
+>  	return 0;
+>  }
+>  
+> @@ -647,6 +656,24 @@ static const struct acpi_device_id sdhci_acpi_ids[] = {
+>  };
+>  MODULE_DEVICE_TABLE(acpi, sdhci_acpi_ids);
+>  
+> +static const struct dmi_system_id sdhci_acpi_quirks[] = {
+> +	{
+> +		/*
+> +		 * The Lenovo Miix 320-10ICR has a bug in the _PS0 method of
+> +		 * the SHC1 ACPI device, this bug causes it to reprogram the
+> +		 * wrong LDO (DLDO3) to 1.8V if 1.8V modes are used and the
+> +		 * card is (runtime) suspended + resumed. DLDO3 is used for
+> +		 * the LCD and setting it to 1.8V causes the LCD to go black.
+> +		 */
+> +		.matches = {
+> +			DMI_MATCH(DMI_SYS_VENDOR, "LENOVO"),
+> +			DMI_MATCH(DMI_PRODUCT_VERSION, "Lenovo MIIX 320-10ICR"),
+> +		},
+> +		.driver_data = (void *)DMI_QUIRK_RESET_SD_SIGNAL_VOLT_ON_SUSP,
+> +	},
+> +	{} /* Terminating entry */
+> +};
+> +
+>  static const struct sdhci_acpi_slot *sdhci_acpi_get_slot(struct acpi_device *adev)
+>  {
+>  	const struct sdhci_acpi_uid_slot *u;
+> @@ -663,17 +690,23 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
+>  	struct device *dev = &pdev->dev;
+>  	const struct sdhci_acpi_slot *slot;
+>  	struct acpi_device *device, *child;
+> +	const struct dmi_system_id *id;
+>  	struct sdhci_acpi_host *c;
+>  	struct sdhci_host *host;
+>  	struct resource *iomem;
+>  	resource_size_t len;
+>  	size_t priv_size;
+> +	int quirks = 0;
+>  	int err;
+>  
+>  	device = ACPI_COMPANION(dev);
+>  	if (!device)
+>  		return -ENODEV;
+>  
+> +	id = dmi_first_match(sdhci_acpi_quirks);
+> +	if (id)
+> +		quirks = (long)id->driver_data;
+> +
+>  	slot = sdhci_acpi_get_slot(device);
+>  
+>  	/* Power on the SDHCI controller and its children */
+> @@ -759,6 +792,9 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
+>  			dev_warn(dev, "failed to setup card detect gpio\n");
+>  			c->use_runtime_pm = false;
+>  		}
+> +
+> +		if (quirks & DMI_QUIRK_RESET_SD_SIGNAL_VOLT_ON_SUSP)
+> +			c->reset_signal_volt_on_suspend = true;
+>  	}
+>  
+>  	err = sdhci_setup_host(host);
+> @@ -823,17 +859,39 @@ static int sdhci_acpi_remove(struct platform_device *pdev)
+>  	return 0;
+>  }
+>  
+> +static void __maybe_unused sdhci_acpi_reset_signal_voltage_if_needed(
+> +	struct device *dev)
+> +{
+> +	struct sdhci_acpi_host *c = dev_get_drvdata(dev);
+> +	struct sdhci_host *host = c->host;
+> +
+> +	if (c->is_intel && c->reset_signal_volt_on_suspend &&
+> +	    host->mmc->ios.signal_voltage != MMC_SIGNAL_VOLTAGE_330) {
+> +		struct intel_host *intel_host = sdhci_acpi_priv(c);
+> +		unsigned int fn = INTEL_DSM_V33_SWITCH;
+> +		u32 result = 0;
+> +
+> +		intel_dsm(intel_host, dev, fn, &result);
+> +	}
+> +}
+> +
+>  #ifdef CONFIG_PM_SLEEP
+>  
+>  static int sdhci_acpi_suspend(struct device *dev)
+>  {
+>  	struct sdhci_acpi_host *c = dev_get_drvdata(dev);
+>  	struct sdhci_host *host = c->host;
+> +	int ret;
+>  
+>  	if (host->tuning_mode != SDHCI_TUNING_MODE_3)
+>  		mmc_retune_needed(host->mmc);
+>  
+> -	return sdhci_suspend_host(host);
+> +	ret = sdhci_suspend_host(host);
+> +	if (ret)
+> +		return ret;
+> +
+> +	sdhci_acpi_reset_signal_voltage_if_needed(dev);
+> +	return 0;
+>  }
+>  
+>  static int sdhci_acpi_resume(struct device *dev)
+> @@ -853,11 +911,17 @@ static int sdhci_acpi_runtime_suspend(struct device *dev)
+>  {
+>  	struct sdhci_acpi_host *c = dev_get_drvdata(dev);
+>  	struct sdhci_host *host = c->host;
+> +	int ret;
+>  
+>  	if (host->tuning_mode != SDHCI_TUNING_MODE_3)
+>  		mmc_retune_needed(host->mmc);
+>  
+> -	return sdhci_runtime_suspend_host(host);
+> +	ret = sdhci_runtime_suspend_host(host);
+> +	if (ret)
+> +		return ret;
+> +
+> +	sdhci_acpi_reset_signal_voltage_if_needed(dev);
+> +	return 0;
+>  }
+>  
+>  static int sdhci_acpi_runtime_resume(struct device *dev)
+> 
 
