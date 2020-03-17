@@ -6,21 +6,21 @@ X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
 	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 859F8C5ACBF
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 09:41:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 950F7C10F29
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 09:41:31 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 62A192074D
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 09:41:16 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6FDB120714
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 09:41:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727231AbgCQJlP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 17 Mar 2020 05:41:15 -0400
-Received: from v6.sk ([167.172.42.174]:50794 "EHLO v6.sk"
+        id S1727320AbgCQJl0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 17 Mar 2020 05:41:26 -0400
+Received: from v6.sk ([167.172.42.174]:50908 "EHLO v6.sk"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727224AbgCQJlN (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 17 Mar 2020 05:41:13 -0400
+        id S1727278AbgCQJlZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 17 Mar 2020 05:41:25 -0400
 Received: from localhost (v6.sk [IPv6:::1])
-        by v6.sk (Postfix) with ESMTP id A6A0D6109B;
-        Tue, 17 Mar 2020 09:41:10 +0000 (UTC)
+        by v6.sk (Postfix) with ESMTP id 42B8B61094;
+        Tue, 17 Mar 2020 09:41:23 +0000 (UTC)
 From:   Lubomir Rintel <lkundrak@v3.sk>
 To:     Rob Herring <robh+dt@kernel.org>
 Cc:     Linus Walleij <linus.walleij@linaro.org>,
@@ -47,9 +47,9 @@ Cc:     Linus Walleij <linus.walleij@linaro.org>,
         linux-rtc@vger.kernel.org, linux-serial@vger.kernel.org,
         linux-spi@vger.kernel.org, linux-usb@vger.kernel.org,
         Lubomir Rintel <lkundrak@v3.sk>
-Subject: [PATCH 24/28] dt-bindings: media: Convert marvell,mmp2-ccic to json-schema
-Date:   Tue, 17 Mar 2020 10:39:18 +0100
-Message-Id: <20200317093922.20785-25-lkundrak@v3.sk>
+Subject: [PATCH 27/28] dt-bindings: timer: Convert mrvl,mmp-timer to json-schema
+Date:   Tue, 17 Mar 2020 10:39:21 +0100
+Message-Id: <20200317093922.20785-28-lkundrak@v3.sk>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20200317093922.20785-1-lkundrak@v3.sk>
 References: <20200317093922.20785-1-lkundrak@v3.sk>
@@ -60,97 +60,62 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Convert the marvell,mmp2-ccic binding to DT schema format using
-json-schema.
+A straightforward conversion of the mrvl,mmp-timer binding to DT schema
+format using json-schema.
 
 Signed-off-by: Lubomir Rintel <lkundrak@v3.sk>
 ---
- .../bindings/media/marvell,mmp2-ccic.txt      |  50 ---------
- .../bindings/media/marvell,mmp2-ccic.yaml     | 102 ++++++++++++++++++
- 2 files changed, 102 insertions(+), 50 deletions(-)
- delete mode 100644 Documentation/devicetree/bindings/media/marvell,mmp2-ccic.txt
- create mode 100644 Documentation/devicetree/bindings/media/marvell,mmp2-ccic.yaml
+ .../bindings/timer/mrvl,mmp-timer.txt         | 17 --------
+ .../bindings/timer/mrvl,mmp-timer.yaml        | 43 +++++++++++++++++++
+ 2 files changed, 43 insertions(+), 17 deletions(-)
+ delete mode 100644 Documentation/devicetree/bindings/timer/mrvl,mmp-timer.txt
+ create mode 100644 Documentation/devicetree/bindings/timer/mrvl,mmp-timer.yaml
 
-diff --git a/Documentation/devicetree/bindings/media/marvell,mmp2-ccic.txt b/Documentation/devicetree/bindings/media/marvell,mmp2-ccic.txt
+diff --git a/Documentation/devicetree/bindings/timer/mrvl,mmp-timer.txt b/Documentation/devicetree/bindings/timer/mrvl,mmp-timer.txt
 deleted file mode 100644
-index 7ec2c8c8a3b98..0000000000000
---- a/Documentation/devicetree/bindings/media/marvell,mmp2-ccic.txt
+index b8f02c6635219..0000000000000
+--- a/Documentation/devicetree/bindings/timer/mrvl,mmp-timer.txt
 +++ /dev/null
-@@ -1,50 +0,0 @@
--Marvell MMP2 camera host interface
+@@ -1,17 +0,0 @@
+-* Marvell MMP Timer controller
 -
 -Required properties:
-- - compatible: Should be "marvell,mmp2-ccic".
-- - reg: Register base and size.
-- - interrupts: The interrupt number.
-- - #clock-cells: Must be 0.
+-- compatible : Should be "mrvl,mmp-timer".
+-- reg : Address and length of the register set of timer controller.
+-- interrupts : Should be the interrupt number.
 -
 -Optional properties:
-- - clocks: Reference to the input clock as specified by
--           Documentation/devicetree/bindings/clock/clock-bindings.txt.
-- - clock-names: Names of the clocks used; "axi" for the AXI bus interface,
--                "func" for the peripheral clock and "phy" for the parallel
--                video bus interface.
-- - clock-output-names: Optional clock source for sensors. Shall be "mclk".
--
--Required subnodes:
-- - port: The parallel bus interface port with a single endpoint linked to
--         the sensor's endpoint as described in
--         Documentation/devicetree/bindings/media/video-interfaces.txt.
--
--Required endpoint properties:
-- - bus-type: data bus type, <5> or <6> for Parallel or Bt.656 respectively
-- - pclk-sample: pixel clock polarity
-- - hsync-active: horizontal synchronization polarity (only required for
--   parallel bus)
-- - vsync-active: vertical synchronization polarity (only required for
--   parallel bus)
+-- clocks : Should contain a single entry describing the clock input.
 -
 -Example:
--
--	camera0: camera@d420a000 {
--		compatible = "marvell,mmp2-ccic";
--		reg = <0xd420a000 0x800>;
--		interrupts = <42>;
--		clocks = <&soc_clocks MMP2_CLK_CCIC0>;
--		clock-names = "axi";
--		#clock-cells = <0>;
--		clock-output-names = "mclk";
--
--		port {
--			camera0_0: endpoint {
--				remote-endpoint = <&ov7670_0>;
--                                bus-type = <5>;      /* Parallel */
--                                hsync-active = <1>;  /* Active high */
--                                vsync-active = <1>;  /* Active high */
--                                pclk-sample = <0>;   /* Falling */
--			};
--		};
+-	timer0: timer@d4014000 {
+-		compatible = "mrvl,mmp-timer";
+-		reg = <0xd4014000 0x100>;
+-		interrupts = <13>;
+-		clocks = <&coreclk 2>;
 -	};
-diff --git a/Documentation/devicetree/bindings/media/marvell,mmp2-ccic.yaml b/Documentation/devicetree/bindings/media/marvell,mmp2-ccic.yaml
+diff --git a/Documentation/devicetree/bindings/timer/mrvl,mmp-timer.yaml b/Documentation/devicetree/bindings/timer/mrvl,mmp-timer.yaml
 new file mode 100644
-index 0000000000000..890a3f9d0302f
+index 0000000000000..ebee0b862d493
 --- /dev/null
-+++ b/Documentation/devicetree/bindings/media/marvell,mmp2-ccic.yaml
-@@ -0,0 +1,102 @@
-+# SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
-+# Copyright 2019,2020 Lubomir Rintel <lkundrak@v3.sk>
++++ b/Documentation/devicetree/bindings/timer/mrvl,mmp-timer.yaml
+@@ -0,0 +1,43 @@
 +%YAML 1.2
 +---
-+$id: http://devicetree.org/schemas/media/marvell,mmp2-ccic.yaml#
++$id: http://devicetree.org/schemas/timer/mrvl,mmp-timer.yaml#
 +$schema: http://devicetree.org/meta-schemas/core.yaml#
 +
-+title: Marvell MMP2 camera host interface bindings
++title: Marvell MMP Timer bindings
 +
 +maintainers:
-+  - Lubomir Rintel <lkundrak@v3.sk>
++  - devicetree@vger.kernel.org
 +
 +properties:
 +  $nodename:
-+    pattern: '^camera@[a-f0-9]+$'
++    pattern: '^timer@[a-f0-9]+$'
 +
 +  compatible:
-+    const: marvell,mmp2-ccic
++    const: mrvl,mmp-timer
 +
 +  reg:
 +    maxItems: 1
@@ -158,80 +123,23 @@ index 0000000000000..890a3f9d0302f
 +  interrupts:
 +    maxItems: 1
 +
-+  port:
-+    type: object
-+    additionalProperties: false
-+
-+    properties:
-+       endpoint:
-+         type: object
-+         additionalProperties: false
-+
-+         # Properties described in
-+         # Documentation/devicetree/bindings/media/video-interfaces.txt
-+         properties:
-+           remote-endpoint: true
-+           hsync-active: true
-+           vsync-active: true
-+           pclk-sample: true
-+           bus-type: true
-+
-+         required:
-+           - remote-endpoint
-+
-+    required:
-+      - endpoint
-+
 +  clocks:
-+    minItems: 1
-+    maxItems: 3
-+    items:
-+      - description: AXI bus interface clock
-+      - description: Peripheral clock
-+      - description: Parallel video bus interface clock
-+
-+  clock-names:
-+    minItems: 1
-+    maxItems: 3
-+    items:
-+      - const: axi
-+      - const: func
-+      - const: phy
-+
-+  '#clock-cells':
-+    const: 0
-+
-+  clock-output-names:
-+    const: mclk
++    maxItems: 1
 +
 +required:
 +  - compatible
 +  - reg
 +  - interrupts
-+  - port
++
++additionalProperties: false
 +
 +examples:
 +  - |
-+    #include <dt-bindings/clock/marvell,mmp2.h>
-+
-+    camera@d420a000 {
-+      compatible = "marvell,mmp2-ccic";
-+      reg = <0xd420a000 0x800>;
-+      interrupts = <42>;
-+      clocks = <&soc_clocks MMP2_CLK_CCIC0>;
-+      clock-names = "axi";
-+      #clock-cells = <0>;
-+      clock-output-names = "mclk";
-+
-+      port {
-+        camera0_0: endpoint {
-+          remote-endpoint = <&ov7670_0>;
-+          bus-type = <5>;      /* Parallel */
-+          hsync-active = <1>;  /* Active high */
-+          vsync-active = <1>;  /* Active high */
-+          pclk-sample = <0>;   /* Falling */
-+        };
-+      };
++    timer@d4014000 {
++        compatible = "mrvl,mmp-timer";
++        reg = <0xd4014000 0x100>;
++        interrupts = <13>;
++        clocks = <&coreclk 2>;
 +    };
 +
 +...
