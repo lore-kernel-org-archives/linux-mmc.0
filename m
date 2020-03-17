@@ -2,174 +2,183 @@ Return-Path: <SRS0=U+Jx=5C=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E6555C0044D
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 02:45:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 504A6C10F29
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 03:36:24 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id B027620674
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 02:45:41 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 066CF20575
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 03:36:24 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="lrHgJw1p"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726530AbgCQCpl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 16 Mar 2020 22:45:41 -0400
-Received: from rtits2.realtek.com ([211.75.126.72]:54178 "EHLO
-        rtits2.realtek.com.tw" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726343AbgCQCpk (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Mar 2020 22:45:40 -0400
-Authenticated-By: 
-X-SpamFilter-By: BOX Solutions SpamTrap 5.62 with qID 02H2jR4H015573, This message is accepted by code: ctloc85258
-Received: from mail.realtek.com (RTEXMB06.realtek.com.tw[172.21.6.99])
-        by rtits2.realtek.com.tw (8.15.2/2.57/5.78) with ESMTPS id 02H2jR4H015573
-        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=NOT);
-        Tue, 17 Mar 2020 10:45:27 +0800
-Received: from RTEXMB02.realtek.com.tw (172.21.6.95) by
- RTEXMB06.realtek.com.tw (172.21.6.99) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.1779.2; Tue, 17 Mar 2020 10:45:27 +0800
-Received: from RTEXMB01.realtek.com.tw (172.21.6.94) by
- RTEXMB02.realtek.com.tw (172.21.6.95) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.1779.2; Tue, 17 Mar 2020 10:45:27 +0800
-Received: from RTEXMB01.realtek.com.tw ([fe80::1832:8abc:ec2d:974f]) by
- RTEXMB01.realtek.com.tw ([fe80::1832:8abc:ec2d:974f%6]) with mapi id
- 15.01.1779.005; Tue, 17 Mar 2020 10:45:27 +0800
-From:   =?utf-8?B?5ZCz5piK5r6EIFJpY2t5?= <ricky_wu@realtek.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-CC:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "Linux Kernel Mailing List" <linux-kernel@vger.kernel.org>,
-        Arnd Bergmann <arnd@arndb.de>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: RE: [PATCH] mmc: rtsx: Fixed TX/RX register and optimized TX parameter
-Thread-Topic: [PATCH] mmc: rtsx: Fixed TX/RX register and optimized TX
- parameter
-Thread-Index: AQHV+z30nU3JcV+G+EOJUvxdmVETS6hKvoSAgAFTfeA=
-Date:   Tue, 17 Mar 2020 02:45:26 +0000
-Message-ID: <6196929373bb43c8b8fbc550ad41e1fc@realtek.com>
-References: <20200316025232.1167-1-ricky_wu@realtek.com>
- <CAPDyKFrWedEmZ=0trPEG8Z-11nyFX6_OB3cx7+SAdB5VW_vzgQ@mail.gmail.com>
-In-Reply-To: <CAPDyKFrWedEmZ=0trPEG8Z-11nyFX6_OB3cx7+SAdB5VW_vzgQ@mail.gmail.com>
-Accept-Language: zh-TW, en-US
-Content-Language: zh-TW
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-x-originating-ip: [172.22.88.99]
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+        id S1725872AbgCQDgX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 16 Mar 2020 23:36:23 -0400
+Received: from mail-qv1-f65.google.com ([209.85.219.65]:46784 "EHLO
+        mail-qv1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725783AbgCQDgX (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Mar 2020 23:36:23 -0400
+Received: by mail-qv1-f65.google.com with SMTP id m2so10127149qvu.13;
+        Mon, 16 Mar 2020 20:36:22 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=mjiAdtObTq1i8iEGZu0YRcQBdqjfARm6EtegJA1BSV4=;
+        b=lrHgJw1pjqHP4PKy4tA8E44gsXQ9eqRiTl2y1BlMs+UHjamS20OvL/qDLkkh1fxz+u
+         vB6e7Ue1SIezOiYU1EbrPjVvu07+fCJlwJk83z58DrenGUMqsyJReWfMPCi1VwI9tFcy
+         RX+O2JYj22UWTWBHJsoFx4cXDsqjKuQN+rsSa3eXnVvTkMMdIwh0+UqM9LqRN9HuWm5e
+         7OaetI73Je3nSEZ1fv3Op2bEO5gf75QoXuxloVt8qOp+e6xx/Zjqgl+L+9WokrJeTIW6
+         SK4MqT9AVgLJYWkZmsx/GLC+OqprEDmB5F5KUfGnHX2PrgDhd60PxaYlgyWQw6nrtBsU
+         vgWQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=mjiAdtObTq1i8iEGZu0YRcQBdqjfARm6EtegJA1BSV4=;
+        b=Oy5IgRk39KgoZMYPD6CB97NE9dxdrTJh+npyBaGWATKCWBt2pURUa2JRsWXpf2gy1z
+         NwykkCfXU5GVftUsGNwYRj97jUoCm63XdWidxnBWkAUJQ0aEuLlMoMagcpjEWBfWfjgP
+         18RxF3QjqRRlV3VB0PTKYBCC4t3w7m/Fy0x8Ik4s407tqX4PaE8yEBx+tw3x5eFy7s01
+         CN+39ZlQTiZAYKQuwAN1ka9iks7Np8+Mvr1SRjrO//UVhwQUJtwF+Q8WwKXm7OTI3Wcq
+         IgikhqZXXHJNQe9thUPAByFd2j0yLkNwFg9obd2Mh0LLSmngUba4rTGEclND9vNWCDNp
+         e88A==
+X-Gm-Message-State: ANhLgQ0WicxO4nxRkV71z+0+4awSSk4WtE2phsho9BEiVeKky41ZIlQ2
+        uWEXqYzuRRx8E6N62HonIhSnMzrqYzanh+qbVf8=
+X-Google-Smtp-Source: ADFU+vulc9jdqb3yyvopd/5/JDZfJpLhtUH/KgZrRajTu9eHlrFNa1KBVCm4PMZZyuZ1sCNSpN1vdQMPzVGdyG9WBK4=
+X-Received: by 2002:ad4:4026:: with SMTP id q6mr3068958qvp.118.1584416181880;
+ Mon, 16 Mar 2020 20:36:21 -0700 (PDT)
 MIME-Version: 1.0
+References: <cover.1583307441.git.baolin.wang7@gmail.com> <ace53bca354e2846f19684bd33a9c0f3c2ee2c44.1583307441.git.baolin.wang7@gmail.com>
+ <dd44e606-3eb5-f7fc-5995-021705a9b5d9@intel.com>
+In-Reply-To: <dd44e606-3eb5-f7fc-5995-021705a9b5d9@intel.com>
+From:   Baolin Wang <baolin.wang7@gmail.com>
+Date:   Tue, 17 Mar 2020 11:36:10 +0800
+Message-ID: <CADBw62ojVB7nvwE9OM8-A_HfVBBXz7tuaxfqDCmQ39b1YiDBag@mail.gmail.com>
+Subject: Re: [RESEND PATCH 1/3] mmc: host: Introduce the request_atomic() for
+ the host
+To:     Adrian Hunter <adrian.hunter@intel.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Orson Zhai <orsonzhai@gmail.com>,
+        Chunyan Zhang <zhang.lyra@gmail.com>,
+        Arnd Bergmann <arnd@arndb.de>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        LKML <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-DQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IFVsZiBIYW5zc29uIFttYWls
-dG86dWxmLmhhbnNzb25AbGluYXJvLm9yZ10NCj4gU2VudDogTW9uZGF5LCBNYXJjaCAxNiwgMjAy
-MCAxMDoxNyBQTQ0KPiBUbzog5ZCz5piK5r6EIFJpY2t5DQo+IENjOiBsaW51eC1tbWNAdmdlci5r
-ZXJuZWwub3JnOyBMaW51eCBLZXJuZWwgTWFpbGluZyBMaXN0OyBBcm5kIEJlcmdtYW5uOyBHcmVn
-DQo+IEtyb2FoLUhhcnRtYW4NCj4gU3ViamVjdDogUmU6IFtQQVRDSF0gbW1jOiBydHN4OiBGaXhl
-ZCBUWC9SWCByZWdpc3RlciBhbmQgb3B0aW1pemVkIFRYDQo+IHBhcmFtZXRlcg0KPiANCj4gT24g
-TW9uLCAxNiBNYXIgMjAyMCBhdCAwMzo1MiwgPHJpY2t5X3d1QHJlYWx0ZWsuY29tPiB3cm90ZToN
-Cj4gPg0KPiA+IEZyb206IFJpY2t5IFd1IDxyaWNreV93dUByZWFsdGVrLmNvbT4NCj4gPg0KPiA+
-IEZpeGVkIHNkX2NoYW5nZV9waGFzZSBUWC9SWCByZWdpc3Rlcg0KPiA+IE9wdGltaXplZCBydHM1
-MjJhIHJ0czUyNGEgcnRzNTI1YSBydHM1MjYwIHJ0czUyNjEgVFggaW5pdGlhbCBwYXJhbWV0ZXIN
-Cj4gDQo+IEkgZG9uJ3QgdW5kZXJzdGFuZCB3aGF0IHRoaXMgYWN0dWFsbHkgZml4ZXMuIENhbiB5
-b3UgdHJ5IHRvIGVsYWJvcmF0ZQ0KPiBhIGJpdCBvbiB0aGlzLCBwbGVhc2U/DQo+IA0KPiBEbyB5
-b3UgdGhpbmsgdGhpcyBpcyBuZWVkZWQgZm9yIHN0YWJsZSwgdGhlbiB3aHk/DQoNClllcywgSSB0
-aGluayBpdCBuZWVkIHBhdGNoIHRvIHN0YWJsZQ0KDQpJbiBmdW5jdGlvbiBzZF9jaGFuZ2VfcGhh
-c2UoKSB3aGV0aGVyIGl0IGlzIFRYIG9yIFJYIGFsd2F5cyB3cml0ZSB0aGUgc2FtZSByZWdpc3Rl
-cihUWCksIHNvIHBhdGNoIHRoaXMgZnVuY3Rpb24gbWFrZSBSWCBhbmQgVFggY2FuIGNoYW5nZSB3
-ZWxsLg0KQXQgbW1jIHN0YWNrIG1lY2hhbmlzbSBkbyBub3QgdHVuaW5nIFRYIHBoYXNlLCBzbyBu
-ZWVkIGdpdmUgYSBzdGFibGUgcGFyYW1ldGVyIGZvciBUWCBwaGFzZShzZHIxMDQgc2RyNTAgZGRy
-NTApIGF0IGluaXRpYWwuIA0KDQo+IA0KPiBLaW5kIHJlZ2FyZHMNCj4gVWZmZQ0KPiANCj4gPg0K
-PiA+IFNpZ25lZC1vZmYtYnk6IFJpY2t5IFd1IDxyaWNreV93dUByZWFsdGVrLmNvbT4NCj4gPiAt
-LS0NCj4gPiAgZHJpdmVycy9taXNjL2NhcmRyZWFkZXIvcnRzNTIyNy5jIHwgIDIgKy0NCj4gPiAg
-ZHJpdmVycy9taXNjL2NhcmRyZWFkZXIvcnRzNTI0OS5jIHwgIDIgKysNCj4gPiAgZHJpdmVycy9t
-aXNjL2NhcmRyZWFkZXIvcnRzNTI2MC5jIHwgIDIgKy0NCj4gPiAgZHJpdmVycy9taXNjL2NhcmRy
-ZWFkZXIvcnRzNTI2MS5jIHwgIDIgKy0NCj4gPiAgZHJpdmVycy9tbWMvaG9zdC9ydHN4X3BjaV9z
-ZG1tYy5jIHwgMTMgKysrKysrKystLS0tLQ0KPiA+ICA1IGZpbGVzIGNoYW5nZWQsIDEzIGluc2Vy
-dGlvbnMoKyksIDggZGVsZXRpb25zKC0pDQo+ID4NCj4gPiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9t
-aXNjL2NhcmRyZWFkZXIvcnRzNTIyNy5jDQo+IGIvZHJpdmVycy9taXNjL2NhcmRyZWFkZXIvcnRz
-NTIyNy5jDQo+ID4gaW5kZXggNGZlZWQyOTZhMzI3Li40MjNmZWNjMTlmYzQgMTAwNjQ0DQo+ID4g
-LS0tIGEvZHJpdmVycy9taXNjL2NhcmRyZWFkZXIvcnRzNTIyNy5jDQo+ID4gKysrIGIvZHJpdmVy
-cy9taXNjL2NhcmRyZWFkZXIvcnRzNTIyNy5jDQo+ID4gQEAgLTM5NCw3ICszOTQsNyBAQCBzdGF0
-aWMgY29uc3Qgc3RydWN0IHBjcl9vcHMgcnRzNTIyYV9wY3Jfb3BzID0gew0KPiA+ICB2b2lkIHJ0
-czUyMmFfaW5pdF9wYXJhbXMoc3RydWN0IHJ0c3hfcGNyICpwY3IpDQo+ID4gIHsNCj4gPiAgICAg
-ICAgIHJ0czUyMjdfaW5pdF9wYXJhbXMocGNyKTsNCj4gPiAtDQo+ID4gKyAgICAgICBwY3ItPnR4
-X2luaXRpYWxfcGhhc2UgPSBTRVRfQ0xPQ0tfUEhBU0UoMjAsIDIwLCAxMSk7DQo+ID4gICAgICAg
-ICBwY3ItPnJlZ19wbV9jdHJsMyA9IFJUUzUyMkFfUE1fQ1RSTDM7DQo+ID4NCj4gPiAgICAgICAg
-IHBjci0+b3B0aW9uLm9jcF9lbiA9IDE7DQo+ID4gZGlmZiAtLWdpdCBhL2RyaXZlcnMvbWlzYy9j
-YXJkcmVhZGVyL3J0czUyNDkuYw0KPiBiL2RyaXZlcnMvbWlzYy9jYXJkcmVhZGVyL3J0czUyNDku
-Yw0KPiA+IGluZGV4IGRiOTM2ZTRkNmU1Ni4uMWE4MWNkYTk0OGMxIDEwMDY0NA0KPiA+IC0tLSBh
-L2RyaXZlcnMvbWlzYy9jYXJkcmVhZGVyL3J0czUyNDkuYw0KPiA+ICsrKyBiL2RyaXZlcnMvbWlz
-Yy9jYXJkcmVhZGVyL3J0czUyNDkuYw0KPiA+IEBAIC02MTgsNiArNjE4LDcgQEAgc3RhdGljIGNv
-bnN0IHN0cnVjdCBwY3Jfb3BzIHJ0czUyNGFfcGNyX29wcyA9IHsNCj4gPiAgdm9pZCBydHM1MjRh
-X2luaXRfcGFyYW1zKHN0cnVjdCBydHN4X3BjciAqcGNyKQ0KPiA+ICB7DQo+ID4gICAgICAgICBy
-dHM1MjQ5X2luaXRfcGFyYW1zKHBjcik7DQo+ID4gKyAgICAgICBwY3ItPnR4X2luaXRpYWxfcGhh
-c2UgPSBTRVRfQ0xPQ0tfUEhBU0UoMjcsIDI5LCAxMSk7DQo+ID4gICAgICAgICBwY3ItPm9wdGlv
-bi5sdHJfbDFvZmZfc3Nwd3JnYXRlID0NCj4gTFRSX0wxT0ZGX1NTUFdSR0FURV81MjUwX0RFRjsN
-Cj4gPiAgICAgICAgIHBjci0+b3B0aW9uLmx0cl9sMW9mZl9zbm9vemVfc3Nwd3JnYXRlID0NCj4g
-PiAgICAgICAgICAgICAgICAgTFRSX0wxT0ZGX1NOT09aRV9TU1BXUkdBVEVfNTI1MF9ERUY7DQo+
-ID4gQEAgLTczMyw2ICs3MzQsNyBAQCBzdGF0aWMgY29uc3Qgc3RydWN0IHBjcl9vcHMgcnRzNTI1
-YV9wY3Jfb3BzID0gew0KPiA+ICB2b2lkIHJ0czUyNWFfaW5pdF9wYXJhbXMoc3RydWN0IHJ0c3hf
-cGNyICpwY3IpDQo+ID4gIHsNCj4gPiAgICAgICAgIHJ0czUyNDlfaW5pdF9wYXJhbXMocGNyKTsN
-Cj4gPiArICAgICAgIHBjci0+dHhfaW5pdGlhbF9waGFzZSA9IFNFVF9DTE9DS19QSEFTRSgyNSwg
-MjksIDExKTsNCj4gPiAgICAgICAgIHBjci0+b3B0aW9uLmx0cl9sMW9mZl9zc3B3cmdhdGUgPQ0K
-PiBMVFJfTDFPRkZfU1NQV1JHQVRFXzUyNTBfREVGOw0KPiA+ICAgICAgICAgcGNyLT5vcHRpb24u
-bHRyX2wxb2ZmX3Nub296ZV9zc3B3cmdhdGUgPQ0KPiA+ICAgICAgICAgICAgICAgICBMVFJfTDFP
-RkZfU05PT1pFX1NTUFdSR0FURV81MjUwX0RFRjsNCj4gPiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9t
-aXNjL2NhcmRyZWFkZXIvcnRzNTI2MC5jDQo+IGIvZHJpdmVycy9taXNjL2NhcmRyZWFkZXIvcnRz
-NTI2MC5jDQo+ID4gaW5kZXggNDIxNGYwMmExN2ZkLi43MTEwNTRlYmFkNzQgMTAwNjQ0DQo+ID4g
-LS0tIGEvZHJpdmVycy9taXNjL2NhcmRyZWFkZXIvcnRzNTI2MC5jDQo+ID4gKysrIGIvZHJpdmVy
-cy9taXNjL2NhcmRyZWFkZXIvcnRzNTI2MC5jDQo+ID4gQEAgLTY2Miw3ICs2NjIsNyBAQCB2b2lk
-IHJ0czUyNjBfaW5pdF9wYXJhbXMoc3RydWN0IHJ0c3hfcGNyICpwY3IpDQo+ID4gICAgICAgICBw
-Y3ItPnNkMzBfZHJpdmVfc2VsXzF2OCA9IENGR19EUklWRVJfVFlQRV9COw0KPiA+ICAgICAgICAg
-cGNyLT5zZDMwX2RyaXZlX3NlbF8zdjMgPSBDRkdfRFJJVkVSX1RZUEVfQjsNCj4gPiAgICAgICAg
-IHBjci0+YXNwbV9lbiA9IEFTUE1fTDFfRU47DQo+ID4gLSAgICAgICBwY3ItPnR4X2luaXRpYWxf
-cGhhc2UgPSBTRVRfQ0xPQ0tfUEhBU0UoMSwgMjksIDE2KTsNCj4gPiArICAgICAgIHBjci0+dHhf
-aW5pdGlhbF9waGFzZSA9IFNFVF9DTE9DS19QSEFTRSgyNywgMjksIDExKTsNCj4gPiAgICAgICAg
-IHBjci0+cnhfaW5pdGlhbF9waGFzZSA9IFNFVF9DTE9DS19QSEFTRSgyNCwgNiwgNSk7DQo+ID4N
-Cj4gPiAgICAgICAgIHBjci0+aWNfdmVyc2lvbiA9IHJ0czUyNjBfZ2V0X2ljX3ZlcnNpb24ocGNy
-KTsNCj4gPiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9taXNjL2NhcmRyZWFkZXIvcnRzNTI2MS5jDQo+
-IGIvZHJpdmVycy9taXNjL2NhcmRyZWFkZXIvcnRzNTI2MS5jDQo+ID4gaW5kZXggYmM0OTY3YTZl
-ZmExLi43OGMzYjFkNDI0YzMgMTAwNjQ0DQo+ID4gLS0tIGEvZHJpdmVycy9taXNjL2NhcmRyZWFk
-ZXIvcnRzNTI2MS5jDQo+ID4gKysrIGIvZHJpdmVycy9taXNjL2NhcmRyZWFkZXIvcnRzNTI2MS5j
-DQo+ID4gQEAgLTc2NCw3ICs3NjQsNyBAQCB2b2lkIHJ0czUyNjFfaW5pdF9wYXJhbXMoc3RydWN0
-IHJ0c3hfcGNyICpwY3IpDQo+ID4gICAgICAgICBwY3ItPnNkMzBfZHJpdmVfc2VsXzF2OCA9IENG
-R19EUklWRVJfVFlQRV9COw0KPiA+ICAgICAgICAgcGNyLT5zZDMwX2RyaXZlX3NlbF8zdjMgPSBD
-RkdfRFJJVkVSX1RZUEVfQjsNCj4gPiAgICAgICAgIHBjci0+YXNwbV9lbiA9IEFTUE1fTDFfRU47
-DQo+ID4gLSAgICAgICBwY3ItPnR4X2luaXRpYWxfcGhhc2UgPSBTRVRfQ0xPQ0tfUEhBU0UoMjAs
-IDI3LCAxNik7DQo+ID4gKyAgICAgICBwY3ItPnR4X2luaXRpYWxfcGhhc2UgPSBTRVRfQ0xPQ0tf
-UEhBU0UoMjcsIDI3LCAxMSk7DQo+ID4gICAgICAgICBwY3ItPnJ4X2luaXRpYWxfcGhhc2UgPSBT
-RVRfQ0xPQ0tfUEhBU0UoMjQsIDYsIDUpOw0KPiA+DQo+ID4gICAgICAgICBwY3ItPmljX3ZlcnNp
-b24gPSBydHM1MjYxX2dldF9pY192ZXJzaW9uKHBjcik7DQo+ID4gZGlmZiAtLWdpdCBhL2RyaXZl
-cnMvbW1jL2hvc3QvcnRzeF9wY2lfc2RtbWMuYw0KPiBiL2RyaXZlcnMvbW1jL2hvc3QvcnRzeF9w
-Y2lfc2RtbWMuYw0KPiA+IGluZGV4IGJkNTA5MzVkYzM3ZC4uMTEwODc5NzZhYjE5IDEwMDY0NA0K
-PiA+IC0tLSBhL2RyaXZlcnMvbW1jL2hvc3QvcnRzeF9wY2lfc2RtbWMuYw0KPiA+ICsrKyBiL2Ry
-aXZlcnMvbW1jL2hvc3QvcnRzeF9wY2lfc2RtbWMuYw0KPiA+IEBAIC02MDYsMTkgKzYwNiwyMiBA
-QCBzdGF0aWMgaW50IHNkX2NoYW5nZV9waGFzZShzdHJ1Y3QNCj4gcmVhbHRla19wY2lfc2RtbWMg
-Kmhvc3QsDQo+ID4gICAgICAgICAgICAgICAgIHU4IHNhbXBsZV9wb2ludCwgYm9vbCByeCkNCj4g
-PiAgew0KPiA+ICAgICAgICAgc3RydWN0IHJ0c3hfcGNyICpwY3IgPSBob3N0LT5wY3I7DQo+ID4g
-LQ0KPiA+ICsgICAgICAgdTE2IFNEX1ZQX0NUTCA9IDA7DQo+ID4gICAgICAgICBkZXZfZGJnKHNk
-bW1jX2Rldihob3N0KSwgIiVzKCVzKTogc2FtcGxlX3BvaW50ID0gJWRcbiIsDQo+ID4gICAgICAg
-ICAgICAgICAgICAgICAgICAgX19mdW5jX18sIHJ4ID8gIlJYIiA6ICJUWCIsIHNhbXBsZV9wb2lu
-dCk7DQo+ID4NCj4gPiAgICAgICAgIHJ0c3hfcGNpX3dyaXRlX3JlZ2lzdGVyKHBjciwgQ0xLX0NU
-TCwgQ0hBTkdFX0NMSywgQ0hBTkdFX0NMSyk7DQo+ID4gLSAgICAgICBpZiAocngpDQo+ID4gKyAg
-ICAgICBpZiAocngpIHsNCj4gPiArICAgICAgICAgICAgICAgU0RfVlBfQ1RMID0gU0RfVlBSWF9D
-VEw7DQo+ID4gICAgICAgICAgICAgICAgIHJ0c3hfcGNpX3dyaXRlX3JlZ2lzdGVyKHBjciwgU0Rf
-VlBSWF9DVEwsDQo+ID4gICAgICAgICAgICAgICAgICAgICAgICAgUEhBU0VfU0VMRUNUX01BU0ss
-IHNhbXBsZV9wb2ludCk7DQo+ID4gLSAgICAgICBlbHNlDQo+ID4gKyAgICAgICB9IGVsc2Ugew0K
-PiA+ICsgICAgICAgICAgICAgICBTRF9WUF9DVEwgPSBTRF9WUFRYX0NUTDsNCj4gPiAgICAgICAg
-ICAgICAgICAgcnRzeF9wY2lfd3JpdGVfcmVnaXN0ZXIocGNyLCBTRF9WUFRYX0NUTCwNCj4gPiAg
-ICAgICAgICAgICAgICAgICAgICAgICBQSEFTRV9TRUxFQ1RfTUFTSywgc2FtcGxlX3BvaW50KTsN
-Cj4gPiAtICAgICAgIHJ0c3hfcGNpX3dyaXRlX3JlZ2lzdGVyKHBjciwgU0RfVlBDTEswX0NUTCwg
-UEhBU0VfTk9UX1JFU0VULCAwKTsNCj4gPiAtICAgICAgIHJ0c3hfcGNpX3dyaXRlX3JlZ2lzdGVy
-KHBjciwgU0RfVlBDTEswX0NUTCwgUEhBU0VfTk9UX1JFU0VULA0KPiA+ICsgICAgICAgfQ0KPiA+
-ICsgICAgICAgcnRzeF9wY2lfd3JpdGVfcmVnaXN0ZXIocGNyLCBTRF9WUF9DVEwsIFBIQVNFX05P
-VF9SRVNFVCwgMCk7DQo+ID4gKyAgICAgICBydHN4X3BjaV93cml0ZV9yZWdpc3RlcihwY3IsIFNE
-X1ZQX0NUTCwgUEhBU0VfTk9UX1JFU0VULA0KPiA+ICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgUEhBU0VfTk9UX1JFU0VUKTsNCj4gPiAgICAgICAgIHJ0c3hfcGNpX3dyaXRlX3JlZ2lz
-dGVyKHBjciwgQ0xLX0NUTCwgQ0hBTkdFX0NMSywgMCk7DQo+ID4gICAgICAgICBydHN4X3BjaV93
-cml0ZV9yZWdpc3RlcihwY3IsIFNEX0NGRzEsIFNEX0FTWU5DX0ZJRk9fTk9UX1JTVCwNCj4gMCk7
-DQo+ID4gLS0NCj4gPiAyLjE3LjENCj4gPg0KPiANCj4gLS0tLS0tUGxlYXNlIGNvbnNpZGVyIHRo
-ZSBlbnZpcm9ubWVudCBiZWZvcmUgcHJpbnRpbmcgdGhpcyBlLW1haWwuDQo=
+On Mon, Mar 16, 2020 at 9:09 PM Adrian Hunter <adrian.hunter@intel.com> wrote:
+>
+> On 4/03/20 9:42 am, Baolin Wang wrote:
+> > The SD host controller can process one request in the atomic context if
+> > the card is nonremovable, which means we can submit next request in the
+> > irq hard handler when using the MMC software queue to reduce the latency.
+> > Thus this patch adds a new API request_atomic() for the host controller
+> > and implement it for the SD host controller.
+> >
+> > Suggested-by: Adrian Hunter <adrian.hunter@intel.com>
+> > Signed-off-by: Baolin Wang <baolin.wang7@gmail.com>
+> > ---
+> >  drivers/mmc/host/sdhci.c | 27 +++++++++++++++++++--------
+> >  drivers/mmc/host/sdhci.h |  1 +
+> >  include/linux/mmc/host.h |  3 +++
+> >  3 files changed, 23 insertions(+), 8 deletions(-)
+> >
+> > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> > index 9c37451..4febbcb 100644
+> > --- a/drivers/mmc/host/sdhci.c
+> > +++ b/drivers/mmc/host/sdhci.c
+> > @@ -2016,17 +2016,12 @@ void sdhci_set_power(struct sdhci_host *host, unsigned char mode,
+> >   *                                                                           *
+> >  \*****************************************************************************/
+> >
+> > -void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+> > +static void sdhci_start_request(struct mmc_host *mmc, struct mmc_request *mrq,
+> > +                             int present)
+> >  {
+> > -     struct sdhci_host *host;
+> > -     int present;
+> > +     struct sdhci_host *host = mmc_priv(mmc);
+> >       unsigned long flags;
+> >
+> > -     host = mmc_priv(mmc);
+> > -
+> > -     /* Firstly check card presence */
+> > -     present = mmc->ops->get_cd(mmc);
+> > -
+> >       spin_lock_irqsave(&host->lock, flags);
+> >
+> >       sdhci_led_activate(host);
+> > @@ -2043,6 +2038,22 @@ void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+> >
+> >       spin_unlock_irqrestore(&host->lock, flags);
+> >  }
+> > +
+> > +void sdhci_request_atomic(struct mmc_host *mmc, struct mmc_request *mrq)
+> > +{
+> > +     sdhci_start_request(mmc, mrq, 1);
+> > +}
+> > +EXPORT_SYMBOL_GPL(sdhci_request_atomic);
+> > +
+> > +void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+> > +{
+> > +     int present;
+> > +
+> > +     /* Firstly check card presence */
+> > +     present = mmc->ops->get_cd(mmc);
+> > +
+> > +     sdhci_start_request(mmc, mrq, present);
+> > +}
+> >  EXPORT_SYMBOL_GPL(sdhci_request);
+> >
+> >  void sdhci_set_bus_width(struct sdhci_host *host, int width)
+> > diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> > index cac2d97..5507a73 100644
+> > --- a/drivers/mmc/host/sdhci.h
+> > +++ b/drivers/mmc/host/sdhci.h
+> > @@ -775,6 +775,7 @@ void sdhci_set_power(struct sdhci_host *host, unsigned char mode,
+> >  void sdhci_set_power_noreg(struct sdhci_host *host, unsigned char mode,
+> >                          unsigned short vdd);
+> >  void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq);
+> > +void sdhci_request_atomic(struct mmc_host *mmc, struct mmc_request *mrq);
+> >  void sdhci_set_bus_width(struct sdhci_host *host, int width);
+> >  void sdhci_reset(struct sdhci_host *host, u8 mask);
+> >  void sdhci_set_uhs_signaling(struct sdhci_host *host, unsigned timing);
+> > diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> > index 562ed06..db5e59c 100644
+> > --- a/include/linux/mmc/host.h
+> > +++ b/include/linux/mmc/host.h
+> > @@ -92,6 +92,9 @@ struct mmc_host_ops {
+> >                           int err);
+> >       void    (*pre_req)(struct mmc_host *host, struct mmc_request *req);
+> >       void    (*request)(struct mmc_host *host, struct mmc_request *req);
+> > +     /* Submit one request to host in atomic context. */
+> > +     void    (*request_atomic)(struct mmc_host *host,
+> > +                               struct mmc_request *req);
+>
+> This doesn't have the flexibility to return "busy".  For example,
+> sdhci_send_command() will potentially wait quite some time if the inhibit
+> bits are set.  That is not good in interrupt context.  It would be better to
+> return immediately in that case and have the caller fall back to a
+> non-atomic context.  Thoughts?
+
+Yes, I unserstood your concern. But the sdhci_send_command() is
+already under the spin_lock_irqsave() protection, which will also
+disable the interrupt for some time if the inhibit bits are set. That
+is same with moving it in interrupt context.
+
+Moreover, if the previous command complete interrupt and transfer
+complete interrupt are normal, we should not meet this issue of
+polling inhibit bits (I have not met this issue on my platform). So I
+think we can remove the polling here? If the inhibit bits are set, I
+think the command complete interrupt or the transfer complete
+interrupt have been abnormal, so we can just return the error here.
+What do you think? Thanks.
+
+-- 
+Baolin Wang
