@@ -6,33 +6,33 @@ X-Spam-Status: No, score=-3.6 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
 	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
 	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1C23EC10F29
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 13:28:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 139CAC2BB1D
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 13:29:13 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id E8E4920757
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 13:28:05 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D0E35205ED
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 13:29:12 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (1024-bit key) header.d=lunn.ch header.i=@lunn.ch header.b="c6tX9aUL"
+	dkim=fail reason="signature verification failed" (1024-bit key) header.d=lunn.ch header.i=@lunn.ch header.b="BTSd1jgR"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726550AbgCQN2C (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 17 Mar 2020 09:28:02 -0400
-Received: from vps0.lunn.ch ([185.16.172.187]:40402 "EHLO vps0.lunn.ch"
+        id S1726692AbgCQN3J (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 17 Mar 2020 09:29:09 -0400
+Received: from vps0.lunn.ch ([185.16.172.187]:40430 "EHLO vps0.lunn.ch"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725872AbgCQN2B (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 17 Mar 2020 09:28:01 -0400
+        id S1725872AbgCQN3J (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 17 Mar 2020 09:29:09 -0400
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=lunn.ch;
         s=20171124; h=In-Reply-To:Content-Type:MIME-Version:References:Message-ID:
         Subject:Cc:To:From:Date:Sender:Reply-To:Content-Transfer-Encoding:Content-ID:
         Content-Description:Resent-Date:Resent-From:Resent-Sender:Resent-To:Resent-Cc
         :Resent-Message-ID:List-Id:List-Help:List-Unsubscribe:List-Subscribe:
         List-Post:List-Owner:List-Archive;
-        bh=VAJNmJGDz7LxwkvAwdf4Cm01CfteTfdSaGSxNxZJLrc=; b=c6tX9aULtp/MTuaZ+y+tKr6lBy
-        lD+ZuLwcnOjBbrzAHUiolz6YZpNcNmt72H+rlcMsxU1wLfdIdM+jZ0p7gN1WMFNWjSFU6qBJBBQL+
-        DwTEyTbzbzcC/knvMWhll3K5IZfMnvv0CwmMGEmdesC+/0NRS7EYg+T8SkJWBLuna2Gc=;
+        bh=B7oARk/5eiM+WIQ3gbBRKIvQAvZ4eahOtnh7q+b3pCA=; b=BTSd1jgR9HLmTzEykAAesxMFmm
+        l//2BORsVYIeKO4p4V2NXplaranRPHkSM8vs/BKBTT4sR1IRdHe8K+7yed1UbnHpLttmiEBJOUVTe
+        +jOq3ecqLt1HGhzWh9qv7Pu2uRMaUBM8JOmtXX24v6a6BWmdiRRRFv7H+MKb6ukWgvkM=;
 Received: from andrew by vps0.lunn.ch with local (Exim 4.93)
         (envelope-from <andrew@lunn.ch>)
-        id 1jECG2-0006S1-BJ; Tue, 17 Mar 2020 14:27:46 +0100
-Date:   Tue, 17 Mar 2020 14:27:46 +0100
+        id 1jECH8-0006Sg-4X; Tue, 17 Mar 2020 14:28:54 +0100
+Date:   Tue, 17 Mar 2020 14:28:54 +0100
 From:   Andrew Lunn <andrew@lunn.ch>
 To:     Lubomir Rintel <lkundrak@v3.sk>
 Cc:     Rob Herring <robh+dt@kernel.org>,
@@ -58,23 +58,26 @@ Cc:     Rob Herring <robh+dt@kernel.org>,
         linux-media@vger.kernel.org, linux-mmc@vger.kernel.org,
         linux-rtc@vger.kernel.org, linux-serial@vger.kernel.org,
         linux-spi@vger.kernel.org, linux-usb@vger.kernel.org
-Subject: Re: [PATCH 04/28] ARM: dts: pxa168: Fix the gpio interrupt cell
- number
-Message-ID: <20200317132746.GE24270@lunn.ch>
+Subject: Re: [PATCH 05/28] ARM: dts: pxa3xx: Fix up encoding of the /gpio
+ interrupts property
+Message-ID: <20200317132854.GF24270@lunn.ch>
 References: <20200317093922.20785-1-lkundrak@v3.sk>
- <20200317093922.20785-5-lkundrak@v3.sk>
+ <20200317093922.20785-6-lkundrak@v3.sk>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20200317093922.20785-5-lkundrak@v3.sk>
+In-Reply-To: <20200317093922.20785-6-lkundrak@v3.sk>
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Mar 17, 2020 at 10:38:58AM +0100, Lubomir Rintel wrote:
-> gpio-pxa uses two cell to encode the interrupt source: the pin number
-> and the trigger type. Adjust the device node accordingly.
+On Tue, Mar 17, 2020 at 10:38:59AM +0100, Lubomir Rintel wrote:
+> This way the device tree validator learns that each cell of the property
+> constitutes a separate item. Otherwise it gets unnecessairly upset:
+> 
+>   pxa300-raumfeld-speaker-s.dt.yaml: gpio@40e00000: interrupts:
+>       [[8, 9, 10]] is too short
 > 
 > Signed-off-by: Lubomir Rintel <lkundrak@v3.sk>
 
