@@ -6,21 +6,21 @@ X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
 	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B0D9DC5ACBF
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 09:42:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D6A2BC5ACD6
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 09:42:21 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 9410220714
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 09:42:17 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B28A120738
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 09:42:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726943AbgCQJke (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 17 Mar 2020 05:40:34 -0400
-Received: from v6.sk ([167.172.42.174]:50412 "EHLO v6.sk"
+        id S1726890AbgCQJk2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 17 Mar 2020 05:40:28 -0400
+Received: from v6.sk ([167.172.42.174]:50380 "EHLO v6.sk"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726905AbgCQJkc (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 17 Mar 2020 05:40:32 -0400
+        id S1726872AbgCQJk1 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 17 Mar 2020 05:40:27 -0400
 Received: from localhost (v6.sk [IPv6:::1])
-        by v6.sk (Postfix) with ESMTP id F2DE56108E;
-        Tue, 17 Mar 2020 09:40:28 +0000 (UTC)
+        by v6.sk (Postfix) with ESMTP id 00A2C6108D;
+        Tue, 17 Mar 2020 09:40:25 +0000 (UTC)
 From:   Lubomir Rintel <lkundrak@v3.sk>
 To:     Rob Herring <robh+dt@kernel.org>
 Cc:     Linus Walleij <linus.walleij@linaro.org>,
@@ -47,9 +47,9 @@ Cc:     Linus Walleij <linus.walleij@linaro.org>,
         linux-rtc@vger.kernel.org, linux-serial@vger.kernel.org,
         linux-spi@vger.kernel.org, linux-usb@vger.kernel.org,
         Lubomir Rintel <lkundrak@v3.sk>
-Subject: [PATCH 14/28] dt-bindings: arm: l2x0: Tauros 3 is PL310 compatible
-Date:   Tue, 17 Mar 2020 10:39:08 +0100
-Message-Id: <20200317093922.20785-15-lkundrak@v3.sk>
+Subject: [PATCH 13/28] dt-bindings: serial: move Marvell compatible string to 8250 binding doc
+Date:   Tue, 17 Mar 2020 10:39:07 +0100
+Message-Id: <20200317093922.20785-14-lkundrak@v3.sk>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20200317093922.20785-1-lkundrak@v3.sk>
 References: <20200317093922.20785-1-lkundrak@v3.sk>
@@ -60,77 +60,40 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The validation is unhappy about mmp3-dell-ariel declaring its
-marvell,tauros3-cache node to be compatible with arm,pl310-cache:
-
-  mmp3-dell-ariel.dt.yaml: cache-controller@d0020000: compatible:
-       Additional items are not allowed ('arm,pl310-cache' was unexpected)
-  mmp3-dell-ariel.dt.yaml: cache-controller@d0020000: compatible:
-       ['marvell,tauros3-cache', 'arm,pl310-cache'] is too long
-
-Let's allow this -- Tauros 3 is designed to be compatible with PL310.
+These ports are compatible with NS8250 and handled by the same driver.
+Get rid of the extra document that fails to document the properties that
+are actually supported.
 
 Signed-off-by: Lubomir Rintel <lkundrak@v3.sk>
 ---
- .../devicetree/bindings/arm/l2c2x0.yaml       | 45 ++++++++++---------
- 1 file changed, 24 insertions(+), 21 deletions(-)
+ Documentation/devicetree/bindings/serial/8250.txt        | 2 ++
+ Documentation/devicetree/bindings/serial/mrvl-serial.txt | 4 ----
+ 2 files changed, 2 insertions(+), 4 deletions(-)
+ delete mode 100644 Documentation/devicetree/bindings/serial/mrvl-serial.txt
 
-diff --git a/Documentation/devicetree/bindings/arm/l2c2x0.yaml b/Documentation/devicetree/bindings/arm/l2c2x0.yaml
-index 913a8cd8b2c00..7e39088a9bed2 100644
---- a/Documentation/devicetree/bindings/arm/l2c2x0.yaml
-+++ b/Documentation/devicetree/bindings/arm/l2c2x0.yaml
-@@ -29,27 +29,30 @@ allOf:
- 
- properties:
-   compatible:
--    enum:
--      - arm,pl310-cache
--      - arm,l220-cache
--      - arm,l210-cache
--        # DEPRECATED by "brcm,bcm11351-a2-pl310-cache"
--      - bcm,bcm11351-a2-pl310-cache
--        # For Broadcom bcm11351 chipset where an
--        # offset needs to be added to the address before passing down to the L2
--        # cache controller
--      - brcm,bcm11351-a2-pl310-cache
--        # Marvell Controller designed to be
--        # compatible with the ARM one, with system cache mode (meaning
--        # maintenance operations on L1 are broadcasted to the L2 and L2
--        # performs the same operation).
--      - marvell,aurora-system-cache
--        # Marvell Controller designed to be
--        # compatible with the ARM one with outer cache mode.
--      - marvell,aurora-outer-cache
--        # Marvell Tauros3 cache controller, compatible
--        # with arm,pl310-cache controller.
--      - marvell,tauros3-cache
-+    oneOf:
-+      - enum:
-+        - arm,pl310-cache
-+        - arm,l220-cache
-+        - arm,l210-cache
-+          # DEPRECATED by "brcm,bcm11351-a2-pl310-cache"
-+        - bcm,bcm11351-a2-pl310-cache
-+          # For Broadcom bcm11351 chipset where an
-+          # offset needs to be added to the address before passing down to the L2
-+          # cache controller
-+        - brcm,bcm11351-a2-pl310-cache
-+          # Marvell Controller designed to be
-+          # compatible with the ARM one, with system cache mode (meaning
-+          # maintenance operations on L1 are broadcasted to the L2 and L2
-+          # performs the same operation).
-+        - marvell,aurora-system-cache
-+          # Marvell Controller designed to be
-+          # compatible with the ARM one with outer cache mode.
-+        - marvell,aurora-outer-cache
-+      - items:
-+         # Marvell Tauros3 cache controller, compatible
-+         # with arm,pl310-cache controller.
-+        - const: marvell,tauros3-cache
-+        - const: arm,pl310-cache
- 
-   cache-level:
-     const: 2
+diff --git a/Documentation/devicetree/bindings/serial/8250.txt b/Documentation/devicetree/bindings/serial/8250.txt
+index 55700f20f6ee8..a543702859e2f 100644
+--- a/Documentation/devicetree/bindings/serial/8250.txt
++++ b/Documentation/devicetree/bindings/serial/8250.txt
+@@ -26,6 +26,8 @@ Required properties:
+ 	- "aspeed,ast2400-vuart"
+ 	- "aspeed,ast2500-vuart"
+ 	- "nuvoton,npcm750-uart"
++	- "mrvl,mmp-uart"
++	- "mrvl,pxa-uart"
+ 	- "serial" if the port type is unknown.
+ - reg : offset and length of the register set for the device.
+ - interrupts : should contain uart interrupt.
+diff --git a/Documentation/devicetree/bindings/serial/mrvl-serial.txt b/Documentation/devicetree/bindings/serial/mrvl-serial.txt
+deleted file mode 100644
+index d744340de887c..0000000000000
+--- a/Documentation/devicetree/bindings/serial/mrvl-serial.txt
++++ /dev/null
+@@ -1,4 +0,0 @@
+-PXA UART controller
+-
+-Required properties:
+-- compatible : should be "mrvl,mmp-uart" or "mrvl,pxa-uart".
 -- 
 2.25.1
 
