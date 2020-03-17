@@ -6,33 +6,33 @@ X-Spam-Status: No, score=-3.6 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
 	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
 	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 11707C4CECE
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 13:30:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6D09DC10F29
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 13:31:08 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id D3810205ED
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 13:30:24 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3C58C205ED
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 13:31:08 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (1024-bit key) header.d=lunn.ch header.i=@lunn.ch header.b="xr5U8scH"
+	dkim=fail reason="signature verification failed" (1024-bit key) header.d=lunn.ch header.i=@lunn.ch header.b="CyaQBQ/3"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726730AbgCQNaU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 17 Mar 2020 09:30:20 -0400
-Received: from vps0.lunn.ch ([185.16.172.187]:40520 "EHLO vps0.lunn.ch"
+        id S1726763AbgCQNbF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 17 Mar 2020 09:31:05 -0400
+Received: from vps0.lunn.ch ([185.16.172.187]:40552 "EHLO vps0.lunn.ch"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726082AbgCQNaU (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 17 Mar 2020 09:30:20 -0400
+        id S1725872AbgCQNbE (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 17 Mar 2020 09:31:04 -0400
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=lunn.ch;
         s=20171124; h=In-Reply-To:Content-Type:MIME-Version:References:Message-ID:
         Subject:Cc:To:From:Date:Sender:Reply-To:Content-Transfer-Encoding:Content-ID:
         Content-Description:Resent-Date:Resent-From:Resent-Sender:Resent-To:Resent-Cc
         :Resent-Message-ID:List-Id:List-Help:List-Unsubscribe:List-Subscribe:
         List-Post:List-Owner:List-Archive;
-        bh=p40DK/xSrGFq9skXOr1+SxY51JPJaVZJV1BWz7pos5U=; b=xr5U8scHWrq+cOjcusovFJbc/b
-        FsARWGhpKvgz856AEoC2jwfmmW3+jhJ27TFOp2OLYCRoz62LYxjvZuWA1a1FRkrZJkd2cbMqpCaiH
-        7xewL2PTLSqhYdniIPMDWeekFFImYNswh5hul2wbpLOFSQ7YRDo8C/NTeNsgfGURyXg4=;
+        bh=p40DK/xSrGFq9skXOr1+SxY51JPJaVZJV1BWz7pos5U=; b=CyaQBQ/39t7QV80A6nN5lp/Qy+
+        QCSefDqKdqhbRntpEq1xNp6zrItH36CzcvP5YkMUjxcif2Ccu3ZJzNgRDXkrQXTREx/xjwkMDuolI
+        lnLEO4E+QD4SdoOBSqtk+OAoF9q8aQR7iAa6gjnzKmuu9AAeLs4zGJAi3BbB4oLEXzao=;
 Received: from andrew by vps0.lunn.ch with local (Exim 4.93)
         (envelope-from <andrew@lunn.ch>)
-        id 1jECIH-0006Uo-WE; Tue, 17 Mar 2020 14:30:06 +0100
-Date:   Tue, 17 Mar 2020 14:30:05 +0100
+        id 1jECIy-0006Vl-KJ; Tue, 17 Mar 2020 14:30:48 +0100
+Date:   Tue, 17 Mar 2020 14:30:48 +0100
 From:   Andrew Lunn <andrew@lunn.ch>
 To:     Lubomir Rintel <lkundrak@v3.sk>
 Cc:     Rob Herring <robh+dt@kernel.org>,
@@ -60,7 +60,7 @@ Cc:     Rob Herring <robh+dt@kernel.org>,
         linux-spi@vger.kernel.org, linux-usb@vger.kernel.org
 Subject: Re: [PATCH 08/28] ARM: dts: mmp*: Fix up encoding of the /rtc
  interrupts property
-Message-ID: <20200317133005.GI24270@lunn.ch>
+Message-ID: <20200317133048.GJ24270@lunn.ch>
 References: <20200317093922.20785-1-lkundrak@v3.sk>
  <20200317093922.20785-9-lkundrak@v3.sk>
 MIME-Version: 1.0
