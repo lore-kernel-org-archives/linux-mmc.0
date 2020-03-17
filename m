@@ -4,23 +4,23 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 94C73C4CECE
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 09:40:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 777F6C10F29
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 09:40:06 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 6A4522071C
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 09:40:00 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 593DC2073C
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 09:40:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726498AbgCQJjs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 17 Mar 2020 05:39:48 -0400
-Received: from v6.sk ([167.172.42.174]:50044 "EHLO v6.sk"
+        id S1726720AbgCQJkE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 17 Mar 2020 05:40:04 -0400
+Received: from v6.sk ([167.172.42.174]:50162 "EHLO v6.sk"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725916AbgCQJjr (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 17 Mar 2020 05:39:47 -0400
+        id S1726709AbgCQJkE (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 17 Mar 2020 05:40:04 -0400
 Received: from localhost (v6.sk [IPv6:::1])
-        by v6.sk (Postfix) with ESMTP id 9E15460EEE;
-        Tue, 17 Mar 2020 09:39:44 +0000 (UTC)
+        by v6.sk (Postfix) with ESMTP id 538ED60FF8;
+        Tue, 17 Mar 2020 09:40:01 +0000 (UTC)
 From:   Lubomir Rintel <lkundrak@v3.sk>
 To:     Rob Herring <robh+dt@kernel.org>
 Cc:     Linus Walleij <linus.walleij@linaro.org>,
@@ -47,9 +47,9 @@ Cc:     Linus Walleij <linus.walleij@linaro.org>,
         linux-rtc@vger.kernel.org, linux-serial@vger.kernel.org,
         linux-spi@vger.kernel.org, linux-usb@vger.kernel.org,
         Lubomir Rintel <lkundrak@v3.sk>
-Subject: [PATCH 03/28] ARM: dts: pxa168: Add missing address/size cells to i2c nodes
-Date:   Tue, 17 Mar 2020 10:38:57 +0100
-Message-Id: <20200317093922.20785-4-lkundrak@v3.sk>
+Subject: [PATCH 07/28] ARM: dts: pxa*: Fix up encoding of the /rtc interrupts property
+Date:   Tue, 17 Mar 2020 10:39:01 +0100
+Message-Id: <20200317093922.20785-8-lkundrak@v3.sk>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20200317093922.20785-1-lkundrak@v3.sk>
 References: <20200317093922.20785-1-lkundrak@v3.sk>
@@ -60,36 +60,44 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-This makes the nodes compatible with the generic i2c binding without the
-board DTS files having to supply the necessary properties themselves.
+This way the device tree validator learns that each cell of the property
+constitutes a separate item. Otherwise it gets unnecessairly upset:
+
+  pxa168-aspenite.dt.yaml: rtc@d4010000: interrupts: [[5, 6]] is too short
+  pxa910-dkb.dt.yaml: rtc@d4010000: interrupts: [[5, 6]] is too short
 
 Signed-off-by: Lubomir Rintel <lkundrak@v3.sk>
 ---
- arch/arm/boot/dts/pxa168.dtsi | 4 ++++
- 1 file changed, 4 insertions(+)
+ arch/arm/boot/dts/pxa168.dtsi | 2 +-
+ arch/arm/boot/dts/pxa910.dtsi | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/arch/arm/boot/dts/pxa168.dtsi b/arch/arm/boot/dts/pxa168.dtsi
-index 72f8cb60cb531..c39d00fe07982 100644
+index c6ac85e362d8a..ae2221a3f825f 100644
 --- a/arch/arm/boot/dts/pxa168.dtsi
 +++ b/arch/arm/boot/dts/pxa168.dtsi
-@@ -116,6 +116,8 @@ gcb3: gpio@d4019100 {
- 
- 			twsi1: i2c@d4011000 {
- 				compatible = "mrvl,mmp-twsi";
-+				#address-cells = <1>;
-+				#size-cells = <0>;
- 				reg = <0xd4011000 0x1000>;
- 				interrupts = <7>;
- 				clocks = <&soc_clocks PXA168_CLK_TWSI0>;
-@@ -126,6 +128,8 @@ twsi1: i2c@d4011000 {
- 
- 			twsi2: i2c@d4025000 {
- 				compatible = "mrvl,mmp-twsi";
-+				#address-cells = <1>;
-+				#size-cells = <0>;
- 				reg = <0xd4025000 0x1000>;
- 				interrupts = <58>;
- 				clocks = <&soc_clocks PXA168_CLK_TWSI1>;
+@@ -140,7 +140,7 @@ twsi2: i2c@d4025000 {
+ 			rtc: rtc@d4010000 {
+ 				compatible = "mrvl,mmp-rtc";
+ 				reg = <0xd4010000 0x1000>;
+-				interrupts = <5 6>;
++				interrupts = <5>, <6>;
+ 				interrupt-names = "rtc 1Hz", "rtc alarm";
+ 				clocks = <&soc_clocks PXA168_CLK_RTC>;
+ 				resets = <&soc_clocks PXA168_CLK_RTC>;
+diff --git a/arch/arm/boot/dts/pxa910.dtsi b/arch/arm/boot/dts/pxa910.dtsi
+index 5f8e208916b31..774e8e9730924 100644
+--- a/arch/arm/boot/dts/pxa910.dtsi
++++ b/arch/arm/boot/dts/pxa910.dtsi
+@@ -152,7 +152,7 @@ twsi2: i2c@d4037000 {
+ 			rtc: rtc@d4010000 {
+ 				compatible = "mrvl,mmp-rtc";
+ 				reg = <0xd4010000 0x1000>;
+-				interrupts = <5 6>;
++				interrupts = <5>, <6>;
+ 				interrupt-names = "rtc 1Hz", "rtc alarm";
+ 				clocks = <&soc_clocks PXA910_CLK_RTC>;
+ 				resets = <&soc_clocks PXA910_CLK_RTC>;
 -- 
 2.25.1
 
