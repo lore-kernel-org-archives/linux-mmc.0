@@ -6,21 +6,21 @@ X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
 	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 982BBC5ACBF
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 09:42:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 48A95C18E5B
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 09:42:52 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 6977920714
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 09:42:45 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2BB1B20714
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 09:42:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726757AbgCQJkM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 17 Mar 2020 05:40:12 -0400
-Received: from v6.sk ([167.172.42.174]:50192 "EHLO v6.sk"
+        id S1726626AbgCQJmr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 17 Mar 2020 05:42:47 -0400
+Received: from v6.sk ([167.172.42.174]:50134 "EHLO v6.sk"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726736AbgCQJkI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 17 Mar 2020 05:40:08 -0400
+        id S1726628AbgCQJkA (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 17 Mar 2020 05:40:00 -0400
 Received: from localhost (v6.sk [IPv6:::1])
-        by v6.sk (Postfix) with ESMTP id 8392560FF9;
-        Tue, 17 Mar 2020 09:40:05 +0000 (UTC)
+        by v6.sk (Postfix) with ESMTP id 6D10B60F22;
+        Tue, 17 Mar 2020 09:39:57 +0000 (UTC)
 From:   Lubomir Rintel <lkundrak@v3.sk>
 To:     Rob Herring <robh+dt@kernel.org>
 Cc:     Linus Walleij <linus.walleij@linaro.org>,
@@ -47,9 +47,9 @@ Cc:     Linus Walleij <linus.walleij@linaro.org>,
         linux-rtc@vger.kernel.org, linux-serial@vger.kernel.org,
         linux-spi@vger.kernel.org, linux-usb@vger.kernel.org,
         Lubomir Rintel <lkundrak@v3.sk>
-Subject: [PATCH 08/28] ARM: dts: mmp*: Fix up encoding of the /rtc interrupts property
-Date:   Tue, 17 Mar 2020 10:39:02 +0100
-Message-Id: <20200317093922.20785-9-lkundrak@v3.sk>
+Subject: [PATCH 06/28] ARM: dts: pxa910: Fix the gpio interrupt cell number
+Date:   Tue, 17 Mar 2020 10:39:00 +0100
+Message-Id: <20200317093922.20785-7-lkundrak@v3.sk>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20200317093922.20785-1-lkundrak@v3.sk>
 References: <20200317093922.20785-1-lkundrak@v3.sk>
@@ -60,43 +60,27 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-This way the device tree validator learns that each cell of the property
-constitutes a separate item. Otherwise it gets unnecessairly upset:
-
-  mmp3-dell-ariel.dt.yaml: rtc@d4010000: interrupts: [[1, 0]] is too short
+gpio-pxa uses two cell to encode the interrupt source: the pin number
+and the trigger type. Adjust the device node accordingly.
 
 Signed-off-by: Lubomir Rintel <lkundrak@v3.sk>
 ---
- arch/arm/boot/dts/mmp2.dtsi | 2 +-
- arch/arm/boot/dts/mmp3.dtsi | 2 +-
- 2 files changed, 2 insertions(+), 2 deletions(-)
+ arch/arm/boot/dts/pxa910.dtsi | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/arch/arm/boot/dts/mmp2.dtsi b/arch/arm/boot/dts/mmp2.dtsi
-index 6a2f072c1d0a8..173ee68e877fd 100644
---- a/arch/arm/boot/dts/mmp2.dtsi
-+++ b/arch/arm/boot/dts/mmp2.dtsi
-@@ -364,7 +364,7 @@ twsi6: i2c@d4034000 {
- 			rtc: rtc@d4010000 {
- 				compatible = "mrvl,mmp-rtc";
- 				reg = <0xd4010000 0x1000>;
--				interrupts = <1 0>;
-+				interrupts = <1>, <0>;
- 				interrupt-names = "rtc 1Hz", "rtc alarm";
- 				interrupt-parent = <&intcmux5>;
- 				clocks = <&soc_clocks MMP2_CLK_RTC>;
-diff --git a/arch/arm/boot/dts/mmp3.dtsi b/arch/arm/boot/dts/mmp3.dtsi
-index 59a108e49b41e..649aa74851257 100644
---- a/arch/arm/boot/dts/mmp3.dtsi
-+++ b/arch/arm/boot/dts/mmp3.dtsi
-@@ -474,7 +474,7 @@ twsi6: i2c@d4034000 {
- 			rtc: rtc@d4010000 {
- 				compatible = "mrvl,mmp-rtc";
- 				reg = <0xd4010000 0x1000>;
--				interrupts = <1 0>;
-+				interrupts = <1>, <0>;
- 				interrupt-names = "rtc 1Hz", "rtc alarm";
- 				interrupt-parent = <&rtc_mux>;
- 				clocks = <&soc_clocks MMP2_CLK_RTC>;
+diff --git a/arch/arm/boot/dts/pxa910.dtsi b/arch/arm/boot/dts/pxa910.dtsi
+index b3d6182d4de4a..5f8e208916b31 100644
+--- a/arch/arm/boot/dts/pxa910.dtsi
++++ b/arch/arm/boot/dts/pxa910.dtsi
+@@ -106,7 +106,7 @@ gpio@d4019000 {
+ 				clocks = <&soc_clocks PXA910_CLK_GPIO>;
+ 				resets = <&soc_clocks PXA910_CLK_GPIO>;
+ 				interrupt-controller;
+-				#interrupt-cells = <1>;
++				#interrupt-cells = <2>;
+ 				ranges;
+ 
+ 				gcb0: gpio@d4019000 {
 -- 
 2.25.1
 
