@@ -2,122 +2,100 @@ Return-Path: <SRS0=U+Jx=5C=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.3 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-3.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_GIT autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4C4A4C2BB1D
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 10:05:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id ECD62C18E5B
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 10:14:24 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id CF18A205ED
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 10:05:06 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C0792206EC
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 10:14:24 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=cogentembedded-com.20150623.gappssmtp.com header.i=@cogentembedded-com.20150623.gappssmtp.com header.b="hsHzKaLO"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Q+amxQSV"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726192AbgCQKFG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 17 Mar 2020 06:05:06 -0400
-Received: from mail-lj1-f194.google.com ([209.85.208.194]:37690 "EHLO
-        mail-lj1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726250AbgCQKFG (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Mar 2020 06:05:06 -0400
-Received: by mail-lj1-f194.google.com with SMTP id r24so22117706ljd.4
-        for <linux-mmc@vger.kernel.org>; Tue, 17 Mar 2020 03:05:03 -0700 (PDT)
+        id S1725794AbgCQKOY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 17 Mar 2020 06:14:24 -0400
+Received: from mail-pj1-f65.google.com ([209.85.216.65]:51658 "EHLO
+        mail-pj1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725730AbgCQKOX (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Mar 2020 06:14:23 -0400
+Received: by mail-pj1-f65.google.com with SMTP id hg10so5980717pjb.1;
+        Tue, 17 Mar 2020 03:14:21 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=cogentembedded-com.20150623.gappssmtp.com; s=20150623;
-        h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=n09seZt9zQSEmn7PnJzgCcHPTYjmqdsKfcWkGxOyoSw=;
-        b=hsHzKaLO8KEYIAs97rD1AMV6mMcqn8KvHqg4ovsIqvIqJsmunKOt1qYqCT5n50NIxg
-         5W5zLGTss9f2hdJk1xumbMBaQMEDyvjcEyPZ3jrVx+WFRbtYyH8TPSgzOsF/O0ZDV+R+
-         YjoSBTZStIUKJShmEh3hEBHRdVxm1SY6SdsdZnyJxUDVSUVZF76uON1MxQVFXMBzq7je
-         dlg8JkAxS2yIyOnnmUE/68pzDOxpbgCvnSFoZcOm6vs6rcpTxYbjby1S67f7NF/Fv36c
-         IE9PiIrFyxQp03l/Q0rCM6x04ylSD3FBrTKVotFLkqpNP2woyYPVF4wSIq4KiiZs1osm
-         q5YA==
+        d=gmail.com; s=20161025;
+        h=from:to:cc:subject:date:message-id;
+        bh=3msrbtEKUz5qDONy4j/OIQtRcSS3HiRJjn2E802O6AI=;
+        b=Q+amxQSVMSwiBr3htoM0Dybfb0UKgyhg2+8RhrMrzU0GzDG9+rHbyWRGE3aWRnHxEU
+         jboJHnq6P5KXzldJJwlcdFHryse3ryJltm7+YFiMaYTz//KO6aVBI5tD4ehQa4UGw0py
+         ZZB15WJ4STSa8VBFDuLw3u7+9oLoJY/9yL1B65R/nExiTZOLqFErwka8yKDxlxUpaEAm
+         xu5ZF4x80T6j/yO6SXhifmjStjR0tDRGI2fSZ7tU+kY0/g5M9eWq2QhT8Km2kCZNCGjc
+         Juysk+Nr5F3sMr7KwmcoXL+yLGyAMmbuC03HVcBElPkf5+oDABKLy3AuiOEBnVDuOlPD
+         NSnw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=n09seZt9zQSEmn7PnJzgCcHPTYjmqdsKfcWkGxOyoSw=;
-        b=LwKEQhYzZ2eBZphykTHoVs9FXWtZuBPh2Z0cFnacL5hWJtEj2uh+P/S7pQracUZobU
-         ybaOkNVWlogy+9xlWq2ZfcHauYpQQAzCOvno4P30TTR/jto+fDnMHX0whFxIsEpHHHqc
-         RHiG8bzXxv9F/yDY2vFRy6OFvMFy+IWJ7I36YBOhrcW9mAuQ36i5HnbOak2EZgiPz7a4
-         746ahw090M1/FKwUA33v1p/dw4G26Re28z2ive31kWCiYC7JXONXepOUkZkw1Rj5fKiZ
-         odI/4O0x2KyGEo0Aisf/eUoNK1l+7Z+eCKTK1y60QXN2sVKDa5+408Vn+mBBgrz+cRk4
-         kaTA==
-X-Gm-Message-State: ANhLgQ1o8vci/i2Wd12IZu+uebE3uKZFxEfOpRpLdVs6ZSRk9wDaq1Uu
-        kpqCi/vwBAX4X4g4TZwJPXveqA==
-X-Google-Smtp-Source: ADFU+vvDFgn0Sv1qdBbtE4XeAKrxupkPbSjYz/5IJ9Z1M/fD+IB/2XXNoyEDPpVkBc5aUWJYf1e6nA==
-X-Received: by 2002:a2e:8119:: with SMTP id d25mr2329766ljg.39.1584439502560;
-        Tue, 17 Mar 2020 03:05:02 -0700 (PDT)
-Received: from ?IPv6:2a00:1fa0:48ef:94a3:a481:5e62:4324:124b? ([2a00:1fa0:48ef:94a3:a481:5e62:4324:124b])
-        by smtp.gmail.com with ESMTPSA id r7sm1932099ljc.3.2020.03.17.03.05.00
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 17 Mar 2020 03:05:01 -0700 (PDT)
-Subject: Re: [PATCH 17/28] dt-bindings: mmc: Fix up clk-phase-sd-hs in an
- example
-To:     Lubomir Rintel <lkundrak@v3.sk>, Rob Herring <robh+dt@kernel.org>
-Cc:     Linus Walleij <linus.walleij@linaro.org>,
-        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Jason Cooper <jason@lakedaemon.net>,
-        Marc Zyngier <maz@kernel.org>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Kishon Vijay Abraham I <kishon@ti.com>,
-        Alessandro Zummo <a.zummo@towertech.it>,
-        Alexandre Belloni <alexandre.belloni@bootlin.com>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Mark Brown <broonie@kernel.org>,
-        Daniel Lezcano <daniel.lezcano@linaro.org>,
-        Andrew Lunn <andrew@lunn.ch>,
-        Gregory Clement <gregory.clement@bootlin.com>,
-        Daniel Mack <daniel@zonque.org>,
-        Haojian Zhuang <haojian.zhuang@gmail.com>,
-        Robert Jarzmik <robert.jarzmik@free.fr>,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-gpio@vger.kernel.org, linux-i2c@vger.kernel.org,
-        linux-media@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-rtc@vger.kernel.org, linux-serial@vger.kernel.org,
-        linux-spi@vger.kernel.org, linux-usb@vger.kernel.org
-References: <20200317093922.20785-1-lkundrak@v3.sk>
- <20200317093922.20785-18-lkundrak@v3.sk>
-From:   Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
-Message-ID: <d7ccf5c1-4bfa-2fd2-b32d-a520e96bdd1e@cogentembedded.com>
-Date:   Tue, 17 Mar 2020 13:04:55 +0300
-User-Agent: Mozilla/5.0 (Windows NT 6.3; WOW64; rv:68.0) Gecko/20100101
- Thunderbird/68.6.0
-MIME-Version: 1.0
-In-Reply-To: <20200317093922.20785-18-lkundrak@v3.sk>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+        h=x-gm-message-state:from:to:cc:subject:date:message-id;
+        bh=3msrbtEKUz5qDONy4j/OIQtRcSS3HiRJjn2E802O6AI=;
+        b=BMi3BvYmsO91PxIfvBQqBtT6NsEJbvbX6J9O4UWEJGoxWKlvEZgvq58EKyea1cda/m
+         wZaIcftDO7tvtDQMebR2DOQCgtoFCi1GgSGfaikjx9/EQywQYNq1J4U+8lHfB4RfWuhT
+         XdvxoOmnATUoqqyy95TgGptBbBg29jwZO4aWmcuKiFkvoOyausijJ1mhaACHqQ5sm/YE
+         wn4dkmkuwCsqcDoO1lRvoeb8MkpfSVUY2pwNFc5fN0iH4KRNo9GqlMmJR5zFdvu7mnE+
+         qkZsXOacYiH9iAbksI/YcJ9GGkzLOR5WOHiaNBbGOK2omxleUWzg7Uu+tQaKz/JuBF4F
+         Uedw==
+X-Gm-Message-State: ANhLgQ39CIVflrLmUxNzGWavRo1xGJw20puCGJfalEWS/ekDyu+hJea8
+        3u/iDONTHpOmmWrdbJO/2ko=
+X-Google-Smtp-Source: ADFU+vvIJOap+kOH8MutX+0wcPk49AUzJ9KUwWlY2rNxwhXFeUehi00/tI4x/7aEqui/x9FdZ1tbuA==
+X-Received: by 2002:a17:902:8d93:: with SMTP id v19mr3650093plo.327.1584440061168;
+        Tue, 17 Mar 2020 03:14:21 -0700 (PDT)
+Received: from sh03840pcu.spreadtrum.com ([117.18.48.82])
+        by smtp.gmail.com with ESMTPSA id s25sm2195487pgv.70.2020.03.17.03.14.17
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-SHA bits=128/128);
+        Tue, 17 Mar 2020 03:14:20 -0700 (PDT)
+From:   Baolin Wang <baolin.wang7@gmail.com>
+To:     adrian.hunter@intel.com, ulf.hansson@linaro.org
+Cc:     orsonzhai@gmail.com, zhang.lyra@gmail.com, baolin.wang7@gmail.com,
+        arnd@arndb.de, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Subject: [PATCH v2 0/3] Introduce the request_atomic() for the host
+Date:   Tue, 17 Mar 2020 18:14:08 +0800
+Message-Id: <cover.1584428736.git.baolin.wang7@gmail.com>
+X-Mailer: git-send-email 1.9.1
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hello!
+This patch set introduces a new request_atomic() interface for the
+MMC host controller, which is used to submit a request to host in
+the atomic context, such as in the irq hard handler, to reduce the
+request latency.
 
-On 17.03.2020 12:39, Lubomir Rintel wrote:
+Any comments are welcome. Thanks.
 
-> This way the validator can know that the two cells constitute a singlej
+Note: Adrian pointed out that it is not good if moving the polling of
+inhibit bits in sdhci_send_command() into the interrupt context, but
+now I have not found a better way to address Adrian's concern. Moveover
+this is an unusual abnormal case and the original code has the same
+problem, so I plan to create another patch set to talk about and fix
+this issue.
 
-    Single?
+Changes from v1:
+ - Re-split the changes to make them more clear suggested by Ulf.
+ - Factor out the auto CMD23 checking into a separate function.
 
-> pair of clock phase degrees value, not separate items Otherwise it is
+Baolin Wang (3):
+  mmc: host: Introduce the request_atomic() for the host
+  mmc: host: sdhci: Implement the request_atomic() API
+  mmc: host: sdhci-sprd: Implement the request_atomic() API
 
-    Forgot a period after "items"?
+ drivers/mmc/host/mmc_hsq.c    |  5 ++++-
+ drivers/mmc/host/sdhci-sprd.c | 23 ++++++++++++++++++++---
+ drivers/mmc/host/sdhci.c      | 27 +++++++++++++++++++--------
+ drivers/mmc/host/sdhci.h      |  1 +
+ include/linux/mmc/host.h      |  3 +++
+ 5 files changed, 47 insertions(+), 12 deletions(-)
 
-> unhappy:
-> 
->    mmc-controller.example.dt.yaml: mmc@ab000000: clk-phase-sd-hs:0:
->        [63] is too short
->    mmc-controller.example.dt.yaml: mmc@ab000000: clk-phase-sd-hs:1:
->        [72] is too short
-> 
-> Signed-off-by: Lubomir Rintel <lkundrak@v3.sk>
-[...]
+-- 
+1.9.1
 
-MBR, Sergei
