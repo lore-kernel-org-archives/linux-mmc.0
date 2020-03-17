@@ -4,23 +4,23 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 777F6C10F29
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 09:40:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0DFE1C18E5B
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 09:40:38 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 593DC2073C
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 09:40:06 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id DC1BE20714
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 09:40:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726720AbgCQJkE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 17 Mar 2020 05:40:04 -0400
-Received: from v6.sk ([167.172.42.174]:50162 "EHLO v6.sk"
+        id S1726976AbgCQJkg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 17 Mar 2020 05:40:36 -0400
+Received: from v6.sk ([167.172.42.174]:50448 "EHLO v6.sk"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726709AbgCQJkE (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 17 Mar 2020 05:40:04 -0400
+        id S1726917AbgCQJkf (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 17 Mar 2020 05:40:35 -0400
 Received: from localhost (v6.sk [IPv6:::1])
-        by v6.sk (Postfix) with ESMTP id 538ED60FF8;
-        Tue, 17 Mar 2020 09:40:01 +0000 (UTC)
+        by v6.sk (Postfix) with ESMTP id 2B9D16108F;
+        Tue, 17 Mar 2020 09:40:33 +0000 (UTC)
 From:   Lubomir Rintel <lkundrak@v3.sk>
 To:     Rob Herring <robh+dt@kernel.org>
 Cc:     Linus Walleij <linus.walleij@linaro.org>,
@@ -47,9 +47,9 @@ Cc:     Linus Walleij <linus.walleij@linaro.org>,
         linux-rtc@vger.kernel.org, linux-serial@vger.kernel.org,
         linux-spi@vger.kernel.org, linux-usb@vger.kernel.org,
         Lubomir Rintel <lkundrak@v3.sk>
-Subject: [PATCH 07/28] ARM: dts: pxa*: Fix up encoding of the /rtc interrupts property
-Date:   Tue, 17 Mar 2020 10:39:01 +0100
-Message-Id: <20200317093922.20785-8-lkundrak@v3.sk>
+Subject: [PATCH 15/28] dt-bindings: arm: mrvl: Add missing compatible strings
+Date:   Tue, 17 Mar 2020 10:39:09 +0100
+Message-Id: <20200317093922.20785-16-lkundrak@v3.sk>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20200317093922.20785-1-lkundrak@v3.sk>
 References: <20200317093922.20785-1-lkundrak@v3.sk>
@@ -60,44 +60,34 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-This way the device tree validator learns that each cell of the property
-constitutes a separate item. Otherwise it gets unnecessairly upset:
+Add compatible strings for the boards we have in tree. At the same time,
+fix the MMP3 compatible string: the preferred vendor name for Marvell is
+"marvell", not "mrvl", and indeed "marvell,mmp3" has been actively used,
+not "mrvl,mmp3".
 
-  pxa168-aspenite.dt.yaml: rtc@d4010000: interrupts: [[5, 6]] is too short
-  pxa910-dkb.dt.yaml: rtc@d4010000: interrupts: [[5, 6]] is too short
-
+Fixes: 95aecb71b84e ("dt-bindings: arm: mrvl: Document MMP3 compatible string")
 Signed-off-by: Lubomir Rintel <lkundrak@v3.sk>
 ---
- arch/arm/boot/dts/pxa168.dtsi | 2 +-
- arch/arm/boot/dts/pxa910.dtsi | 2 +-
- 2 files changed, 2 insertions(+), 2 deletions(-)
+ Documentation/devicetree/bindings/arm/mrvl/mrvl.yaml | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
 
-diff --git a/arch/arm/boot/dts/pxa168.dtsi b/arch/arm/boot/dts/pxa168.dtsi
-index c6ac85e362d8a..ae2221a3f825f 100644
---- a/arch/arm/boot/dts/pxa168.dtsi
-+++ b/arch/arm/boot/dts/pxa168.dtsi
-@@ -140,7 +140,7 @@ twsi2: i2c@d4025000 {
- 			rtc: rtc@d4010000 {
- 				compatible = "mrvl,mmp-rtc";
- 				reg = <0xd4010000 0x1000>;
--				interrupts = <5 6>;
-+				interrupts = <5>, <6>;
- 				interrupt-names = "rtc 1Hz", "rtc alarm";
- 				clocks = <&soc_clocks PXA168_CLK_RTC>;
- 				resets = <&soc_clocks PXA168_CLK_RTC>;
-diff --git a/arch/arm/boot/dts/pxa910.dtsi b/arch/arm/boot/dts/pxa910.dtsi
-index 5f8e208916b31..774e8e9730924 100644
---- a/arch/arm/boot/dts/pxa910.dtsi
-+++ b/arch/arm/boot/dts/pxa910.dtsi
-@@ -152,7 +152,7 @@ twsi2: i2c@d4037000 {
- 			rtc: rtc@d4010000 {
- 				compatible = "mrvl,mmp-rtc";
- 				reg = <0xd4010000 0x1000>;
--				interrupts = <5 6>;
-+				interrupts = <5>, <6>;
- 				interrupt-names = "rtc 1Hz", "rtc alarm";
- 				clocks = <&soc_clocks PXA910_CLK_RTC>;
- 				resets = <&soc_clocks PXA910_CLK_RTC>;
+diff --git a/Documentation/devicetree/bindings/arm/mrvl/mrvl.yaml b/Documentation/devicetree/bindings/arm/mrvl/mrvl.yaml
+index 818dfe6de5120..3235ec9e9bad1 100644
+--- a/Documentation/devicetree/bindings/arm/mrvl/mrvl.yaml
++++ b/Documentation/devicetree/bindings/arm/mrvl/mrvl.yaml
+@@ -28,8 +28,11 @@ properties:
+         items:
+           - enum:
+               - mrvl,mmp2-brownstone
++              - olpc,xo-1.75
+           - const: mrvl,mmp2
+       - description: MMP3 based boards
+         items:
+-          - const: mrvl,mmp3
++          - enum:
++              - dell,wyse-ariel
++          - const: marvell,mmp3
+ ...
 -- 
 2.25.1
 
