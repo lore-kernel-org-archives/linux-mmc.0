@@ -2,30 +2,39 @@ Return-Path: <SRS0=U+Jx=5C=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-0.6 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BC364C10F29
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 13:56:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E972FC5ACC1
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 14:00:16 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 90DBC20752
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 13:56:08 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B198E20767
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 14:00:16 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=fail reason="signature verification failed" (1024-bit key) header.d=lunn.ch header.i=@lunn.ch header.b="cGnLnBuV"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726817AbgCQN4F (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 17 Mar 2020 09:56:05 -0400
-Received: from relay9-d.mail.gandi.net ([217.70.183.199]:37681 "EHLO
-        relay9-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726386AbgCQN4F (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Mar 2020 09:56:05 -0400
-X-Originating-IP: 86.202.105.35
-Received: from localhost (lfbn-lyo-1-9-35.w86-202.abo.wanadoo.fr [86.202.105.35])
-        (Authenticated sender: alexandre.belloni@bootlin.com)
-        by relay9-d.mail.gandi.net (Postfix) with ESMTPSA id BF559FF809;
-        Tue, 17 Mar 2020 13:55:59 +0000 (UTC)
-Date:   Tue, 17 Mar 2020 14:55:59 +0100
-From:   Alexandre Belloni <alexandre.belloni@bootlin.com>
-To:     Andrew Lunn <andrew@lunn.ch>
+        id S1726682AbgCQOAM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 17 Mar 2020 10:00:12 -0400
+Received: from vps0.lunn.ch ([185.16.172.187]:40808 "EHLO vps0.lunn.ch"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726148AbgCQOAL (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 17 Mar 2020 10:00:11 -0400
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=lunn.ch;
+        s=20171124; h=In-Reply-To:Content-Type:MIME-Version:References:Message-ID:
+        Subject:Cc:To:From:Date:Sender:Reply-To:Content-Transfer-Encoding:Content-ID:
+        Content-Description:Resent-Date:Resent-From:Resent-Sender:Resent-To:Resent-Cc
+        :Resent-Message-ID:List-Id:List-Help:List-Unsubscribe:List-Subscribe:
+        List-Post:List-Owner:List-Archive;
+        bh=FrLx3+zGH3oU0Jo8/lq72eF8fifQc3xB2bQg8gY6tl8=; b=cGnLnBuVsp6fkYfQcJ+N0lP7Zi
+        1CQ0257uMP73Zssq480GqtOsiT6dtz3j4jFY4auOWYouzd6Noyy4GBuZ2grQ+9xBQnBkb7o8JyQgO
+        LYVpPM0bbhZnw1Ygcjk+w5hK1jV6VmA0mj+VI2m8UsxHjo1atAFpbrGsSPzlUpACujao=;
+Received: from andrew by vps0.lunn.ch with local (Exim 4.93)
+        (envelope-from <andrew@lunn.ch>)
+        id 1jEClA-0006j0-3H; Tue, 17 Mar 2020 14:59:56 +0100
+Date:   Tue, 17 Mar 2020 14:59:56 +0100
+From:   Andrew Lunn <andrew@lunn.ch>
+To:     Alexandre Belloni <alexandre.belloni@bootlin.com>
 Cc:     Lubomir Rintel <lkundrak@v3.sk>, Rob Herring <robh+dt@kernel.org>,
         Linus Walleij <linus.walleij@linaro.org>,
         Bartosz Golaszewski <bgolaszewski@baylibre.com>,
@@ -49,32 +58,38 @@ Cc:     Lubomir Rintel <lkundrak@v3.sk>, Rob Herring <robh+dt@kernel.org>,
         linux-rtc@vger.kernel.org, linux-serial@vger.kernel.org,
         linux-spi@vger.kernel.org, linux-usb@vger.kernel.org
 Subject: Re: [PATCH 00/28] DT: Improve validation for Marvell SoCs
-Message-ID: <20200317135551.GE3448@piout.net>
+Message-ID: <20200317135956.GQ24270@lunn.ch>
 References: <20200317093922.20785-1-lkundrak@v3.sk>
  <20200317134609.GN24270@lunn.ch>
+ <20200317135551.GE3448@piout.net>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20200317134609.GN24270@lunn.ch>
+In-Reply-To: <20200317135551.GE3448@piout.net>
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 17/03/2020 14:46:09+0100, Andrew Lunn wrote:
-> On Tue, Mar 17, 2020 at 10:38:54AM +0100, Lubomir Rintel wrote:
-> > Hello World,
+On Tue, Mar 17, 2020 at 02:55:59PM +0100, Alexandre Belloni wrote:
+> On 17/03/2020 14:46:09+0100, Andrew Lunn wrote:
+> > On Tue, Mar 17, 2020 at 10:38:54AM +0100, Lubomir Rintel wrote:
+> > > Hello World,
+> > 
+> > Yah, that is an issue here. Marvell have a few different SoC families,
+> > each with there own maintainers. Gregory and I tend to look after
+> > 'mvebu', aka orion5x, kirkwood, dove, berlin and a few others. All the
+> > others are 'Somebody elses' problem'.
+> > 
 > 
-> Yah, that is an issue here. Marvell have a few different SoC families,
-> each with there own maintainers. Gregory and I tend to look after
-> 'mvebu', aka orion5x, kirkwood, dove, berlin and a few others. All the
-> others are 'Somebody elses' problem'.
-> 
+> Hum, berlin is not mvebu, it was the same BU as the MMP and it has been
+> sold to synopsys a while ago.
 
-Hum, berlin is not mvebu, it was the same BU as the MMP and it has been
-sold to synopsys a while ago.
+Yes, the boundaries are a bit fluffy. At least the early work by
+Sebastian was merged via the mvebu maintainers, even if it is not
+technically part of mvebu.
 
--- 
-Alexandre Belloni, Bootlin
-Embedded Linux and Kernel engineering
-https://bootlin.com
+This is also part of the discussion about how this lot actually gets
+merged.
+
+	   Andrew
