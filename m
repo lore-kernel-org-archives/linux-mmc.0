@@ -2,104 +2,122 @@ Return-Path: <SRS0=U+Jx=5C=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.3 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.3 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 79862C3F2CE
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 09:57:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4C4A4C2BB1D
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 10:05:07 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 5BA3920719
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 09:57:57 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CF18A205ED
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 10:05:06 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=cogentembedded-com.20150623.gappssmtp.com header.i=@cogentembedded-com.20150623.gappssmtp.com header.b="hsHzKaLO"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726637AbgCQJ54 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 17 Mar 2020 05:57:56 -0400
-Received: from mga14.intel.com ([192.55.52.115]:39045 "EHLO mga14.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726626AbgCQJ5s (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 17 Mar 2020 05:57:48 -0400
-IronPort-SDR: Qltgi2wKZcZUeVY3mmRYUx3HSyLVptyixBkBuYfWsoaEj8GdxXQwaLIPAecT42LzJBwyO5sEsH
- aMDK2mqPjz6w==
-X-Amp-Result: SKIPPED(no attachment in message)
-X-Amp-File-Uploaded: False
-Received: from fmsmga005.fm.intel.com ([10.253.24.32])
-  by fmsmga103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 17 Mar 2020 02:57:47 -0700
-IronPort-SDR: AXxfFlexHGkT4CGeJ3felSJPRCzQqgJDsZxjRmIw7WSVV4bXyGvJvHF4z90wxa1j2H30mVKcrb
- wH7I4dFTDQPg==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.70,564,1574150400"; 
-   d="scan'208";a="443699264"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.87]) ([10.237.72.87])
-  by fmsmga005.fm.intel.com with ESMTP; 17 Mar 2020 02:57:45 -0700
-Subject: Re: [PATCH] mmc: sdhci-of-at91: fix cd-gpios for SAMA5D2
-To:     =?UTF-8?B?TWljaGHFgiBNaXJvc8WCYXc=?= <mirq-linux@rere.qmqm.pl>,
-        Ludovic Desroches <ludovic.desroches@microchip.com>,
+        id S1726192AbgCQKFG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 17 Mar 2020 06:05:06 -0400
+Received: from mail-lj1-f194.google.com ([209.85.208.194]:37690 "EHLO
+        mail-lj1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726250AbgCQKFG (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Mar 2020 06:05:06 -0400
+Received: by mail-lj1-f194.google.com with SMTP id r24so22117706ljd.4
+        for <linux-mmc@vger.kernel.org>; Tue, 17 Mar 2020 03:05:03 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=cogentembedded-com.20150623.gappssmtp.com; s=20150623;
+        h=subject:to:cc:references:from:message-id:date:user-agent
+         :mime-version:in-reply-to:content-language:content-transfer-encoding;
+        bh=n09seZt9zQSEmn7PnJzgCcHPTYjmqdsKfcWkGxOyoSw=;
+        b=hsHzKaLO8KEYIAs97rD1AMV6mMcqn8KvHqg4ovsIqvIqJsmunKOt1qYqCT5n50NIxg
+         5W5zLGTss9f2hdJk1xumbMBaQMEDyvjcEyPZ3jrVx+WFRbtYyH8TPSgzOsF/O0ZDV+R+
+         YjoSBTZStIUKJShmEh3hEBHRdVxm1SY6SdsdZnyJxUDVSUVZF76uON1MxQVFXMBzq7je
+         dlg8JkAxS2yIyOnnmUE/68pzDOxpbgCvnSFoZcOm6vs6rcpTxYbjby1S67f7NF/Fv36c
+         IE9PiIrFyxQp03l/Q0rCM6x04ylSD3FBrTKVotFLkqpNP2woyYPVF4wSIq4KiiZs1osm
+         q5YA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=n09seZt9zQSEmn7PnJzgCcHPTYjmqdsKfcWkGxOyoSw=;
+        b=LwKEQhYzZ2eBZphykTHoVs9FXWtZuBPh2Z0cFnacL5hWJtEj2uh+P/S7pQracUZobU
+         ybaOkNVWlogy+9xlWq2ZfcHauYpQQAzCOvno4P30TTR/jto+fDnMHX0whFxIsEpHHHqc
+         RHiG8bzXxv9F/yDY2vFRy6OFvMFy+IWJ7I36YBOhrcW9mAuQ36i5HnbOak2EZgiPz7a4
+         746ahw090M1/FKwUA33v1p/dw4G26Re28z2ive31kWCiYC7JXONXepOUkZkw1Rj5fKiZ
+         odI/4O0x2KyGEo0Aisf/eUoNK1l+7Z+eCKTK1y60QXN2sVKDa5+408Vn+mBBgrz+cRk4
+         kaTA==
+X-Gm-Message-State: ANhLgQ1o8vci/i2Wd12IZu+uebE3uKZFxEfOpRpLdVs6ZSRk9wDaq1Uu
+        kpqCi/vwBAX4X4g4TZwJPXveqA==
+X-Google-Smtp-Source: ADFU+vvDFgn0Sv1qdBbtE4XeAKrxupkPbSjYz/5IJ9Z1M/fD+IB/2XXNoyEDPpVkBc5aUWJYf1e6nA==
+X-Received: by 2002:a2e:8119:: with SMTP id d25mr2329766ljg.39.1584439502560;
+        Tue, 17 Mar 2020 03:05:02 -0700 (PDT)
+Received: from ?IPv6:2a00:1fa0:48ef:94a3:a481:5e62:4324:124b? ([2a00:1fa0:48ef:94a3:a481:5e62:4324:124b])
+        by smtp.gmail.com with ESMTPSA id r7sm1932099ljc.3.2020.03.17.03.05.00
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 17 Mar 2020 03:05:01 -0700 (PDT)
+Subject: Re: [PATCH 17/28] dt-bindings: mmc: Fix up clk-phase-sd-hs in an
+ example
+To:     Lubomir Rintel <lkundrak@v3.sk>, Rob Herring <robh+dt@kernel.org>
+Cc:     Linus Walleij <linus.walleij@linaro.org>,
+        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Jason Cooper <jason@lakedaemon.net>,
+        Marc Zyngier <maz@kernel.org>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Nicolas Ferre <nicolas.ferre@microchip.com>,
-        Alexandre Belloni <alexandre.belloni@bootlin.com>
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-References: <8d10950d9940468577daef4772b82a071b204716.1584290561.git.mirq-linux@rere.qmqm.pl>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <7b5c5f2e-a10f-88b5-907c-dfbf6eaa43c6@intel.com>
-Date:   Tue, 17 Mar 2020 11:57:07 +0200
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.5.0
+        Kishon Vijay Abraham I <kishon@ti.com>,
+        Alessandro Zummo <a.zummo@towertech.it>,
+        Alexandre Belloni <alexandre.belloni@bootlin.com>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Mark Brown <broonie@kernel.org>,
+        Daniel Lezcano <daniel.lezcano@linaro.org>,
+        Andrew Lunn <andrew@lunn.ch>,
+        Gregory Clement <gregory.clement@bootlin.com>,
+        Daniel Mack <daniel@zonque.org>,
+        Haojian Zhuang <haojian.zhuang@gmail.com>,
+        Robert Jarzmik <robert.jarzmik@free.fr>,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-gpio@vger.kernel.org, linux-i2c@vger.kernel.org,
+        linux-media@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-rtc@vger.kernel.org, linux-serial@vger.kernel.org,
+        linux-spi@vger.kernel.org, linux-usb@vger.kernel.org
+References: <20200317093922.20785-1-lkundrak@v3.sk>
+ <20200317093922.20785-18-lkundrak@v3.sk>
+From:   Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
+Message-ID: <d7ccf5c1-4bfa-2fd2-b32d-a520e96bdd1e@cogentembedded.com>
+Date:   Tue, 17 Mar 2020 13:04:55 +0300
+User-Agent: Mozilla/5.0 (Windows NT 6.3; WOW64; rv:68.0) Gecko/20100101
+ Thunderbird/68.6.0
 MIME-Version: 1.0
-In-Reply-To: <8d10950d9940468577daef4772b82a071b204716.1584290561.git.mirq-linux@rere.qmqm.pl>
-Content-Type: text/plain; charset=utf-8
+In-Reply-To: <20200317093922.20785-18-lkundrak@v3.sk>
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 15/03/20 6:44 pm, Michał Mirosław wrote:
-> SAMA5D2x doesn't drive CMD line if GPIO is used as CD line (at least
-> SAMA5D27 doesn't). Fix this by forcing card-detect in the module
-> if module-controlled CD is not used.
-> 
-> Fixed commit addresses the problem only for non-removable cards. This
-> amends it to also cover gpio-cd case.
-> 
-> Cc: stable@vger.kernel.org
-> Fixes: 7a1e3f143176 ("mmc: sdhci-of-at91: force card detect value for non removable devices")
-> Signed-off-by: Michał Mirosław <mirq-linux@rere.qmqm.pl>
+Hello!
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+On 17.03.2020 12:39, Lubomir Rintel wrote:
 
-> ---
->  drivers/mmc/host/sdhci-of-at91.c | 8 ++++++--
->  1 file changed, 6 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
-> index d90f4ed18283..8f8da2fe48a9 100644
-> --- a/drivers/mmc/host/sdhci-of-at91.c
-> +++ b/drivers/mmc/host/sdhci-of-at91.c
-> @@ -185,7 +185,8 @@ static void sdhci_at91_reset(struct sdhci_host *host, u8 mask)
->  
->  	sdhci_reset(host, mask);
->  
-> -	if (host->mmc->caps & MMC_CAP_NONREMOVABLE)
-> +	if ((host->mmc->caps & MMC_CAP_NONREMOVABLE)
-> +	    || mmc_gpio_get_cd(host->mmc) >= 0)
->  		sdhci_at91_set_force_card_detect(host);
->  
->  	if (priv->cal_always_on && (mask & SDHCI_RESET_ALL))
-> @@ -487,8 +488,11 @@ static int sdhci_at91_probe(struct platform_device *pdev)
->  	 * detection procedure using the SDMCC_CD signal is bypassed.
->  	 * This bit is reset when a software reset for all command is performed
->  	 * so we need to implement our own reset function to set back this bit.
-> +	 *
-> +	 * WA: SAMA5D2 doesn't drive CMD if using CD GPIO line.
->  	 */
-> -	if (host->mmc->caps & MMC_CAP_NONREMOVABLE)
-> +	if ((host->mmc->caps & MMC_CAP_NONREMOVABLE)
-> +	    || mmc_gpio_get_cd(host->mmc) >= 0)
->  		sdhci_at91_set_force_card_detect(host);
->  
->  	pm_runtime_put_autosuspend(&pdev->dev);
-> 
+> This way the validator can know that the two cells constitute a singlej
 
+    Single?
+
+> pair of clock phase degrees value, not separate items Otherwise it is
+
+    Forgot a period after "items"?
+
+> unhappy:
+> 
+>    mmc-controller.example.dt.yaml: mmc@ab000000: clk-phase-sd-hs:0:
+>        [63] is too short
+>    mmc-controller.example.dt.yaml: mmc@ab000000: clk-phase-sd-hs:1:
+>        [72] is too short
+> 
+> Signed-off-by: Lubomir Rintel <lkundrak@v3.sk>
+[...]
+
+MBR, Sergei
