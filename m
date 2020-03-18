@@ -1,112 +1,135 @@
-Return-Path: <SRS0=U+Jx=5C=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=6IoW=5D=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 94A63C1975A
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 19:09:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 616DCC10DCE
+	for <linux-mmc@archiver.kernel.org>; Wed, 18 Mar 2020 06:53:21 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 78BCA2073E
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Mar 2020 19:09:25 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3624F20724
+	for <linux-mmc@archiver.kernel.org>; Wed, 18 Mar 2020 06:53:21 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="orY+w5pW"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726726AbgCQTJV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 17 Mar 2020 15:09:21 -0400
-Received: from mail.v3.sk ([167.172.186.51]:46710 "EHLO shell.v3.sk"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1726388AbgCQTJV (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 17 Mar 2020 15:09:21 -0400
-Received: from localhost (localhost.localdomain [127.0.0.1])
-        by zimbra.v3.sk (Postfix) with ESMTP id 2340FE021B;
-        Tue, 17 Mar 2020 19:09:38 +0000 (UTC)
-Received: from shell.v3.sk ([127.0.0.1])
-        by localhost (zimbra.v3.sk [127.0.0.1]) (amavisd-new, port 10032)
-        with ESMTP id DLLls_Mq1N8K; Tue, 17 Mar 2020 19:09:36 +0000 (UTC)
-Received: from localhost (localhost.localdomain [127.0.0.1])
-        by zimbra.v3.sk (Postfix) with ESMTP id 44473E0116;
-        Tue, 17 Mar 2020 19:09:36 +0000 (UTC)
-X-Virus-Scanned: amavisd-new at zimbra.v3.sk
-Received: from shell.v3.sk ([127.0.0.1])
-        by localhost (zimbra.v3.sk [127.0.0.1]) (amavisd-new, port 10026)
-        with ESMTP id vjvflx8zMQmd; Tue, 17 Mar 2020 19:09:36 +0000 (UTC)
-Received: from localhost (unknown [109.183.109.54])
-        by zimbra.v3.sk (Postfix) with ESMTPSA id C22C4DFFBE;
-        Tue, 17 Mar 2020 19:09:35 +0000 (UTC)
-Date:   Tue, 17 Mar 2020 20:09:13 +0100
-From:   Lubomir Rintel <lkundrak@v3.sk>
-To:     Andrew Lunn <andrew@lunn.ch>
-Cc:     Rob Herring <robh+dt@kernel.org>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Jason Cooper <jason@lakedaemon.net>,
-        Marc Zyngier <maz@kernel.org>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Kishon Vijay Abraham I <kishon@ti.com>,
-        Alessandro Zummo <a.zummo@towertech.it>,
-        Alexandre Belloni <alexandre.belloni@bootlin.com>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Mark Brown <broonie@kernel.org>,
-        Daniel Lezcano <daniel.lezcano@linaro.org>,
-        Gregory Clement <gregory.clement@bootlin.com>,
-        Daniel Mack <daniel@zonque.org>,
-        Haojian Zhuang <haojian.zhuang@gmail.com>,
-        Robert Jarzmik <robert.jarzmik@free.fr>,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-gpio@vger.kernel.org, linux-i2c@vger.kernel.org,
-        linux-media@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-rtc@vger.kernel.org, linux-serial@vger.kernel.org,
-        linux-spi@vger.kernel.org, linux-usb@vger.kernel.org
-Subject: Re: [PATCH 13/28] dt-bindings: serial: move Marvell compatible
- string to 8250 binding doc
-Message-ID: <20200317190913.GA24359@furthur.local>
-References: <20200317093922.20785-1-lkundrak@v3.sk>
- <20200317093922.20785-14-lkundrak@v3.sk>
- <20200317134805.GO24270@lunn.ch>
+        id S1727102AbgCRGxU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 18 Mar 2020 02:53:20 -0400
+Received: from mail-qk1-f195.google.com ([209.85.222.195]:37184 "EHLO
+        mail-qk1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727004AbgCRGxU (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Mar 2020 02:53:20 -0400
+Received: by mail-qk1-f195.google.com with SMTP id z25so32142196qkj.4;
+        Tue, 17 Mar 2020 23:53:19 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=JIUU945tjKWn7G+uWGg7eqG/veZ5KU9jtb/2ZLYG2SI=;
+        b=orY+w5pWV/Z1rru//L4oMZleR46ybigSk519t/NT8ODjrzqN0iKGY3fsIKy0xLTzl5
+         IdNL50paLXTeHOk1UkqSXfvvdBCttWbGLY1+X7t8IzKo0HiALm8kp44W1BnqEnyDq542
+         8v5+DrK1CFN0pw+hyMwxOq+r34zRq9vYC93MaKCg0WbZYMgpPJIIMF+C5ceKrhzmFfk+
+         JrLVTwwxaiaMGcz6A2a3hK0fS5Ll73JDzeAK6F22skgeKcrrBQj5jAfpfv0xM1vQzKe7
+         /F7F8W4EY64HQtj8stzqxZjWxrfXm8F1VpP/7cwq6ksWlcsiwGEHMNX8nvBrCwQeIjsF
+         vDcg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=JIUU945tjKWn7G+uWGg7eqG/veZ5KU9jtb/2ZLYG2SI=;
+        b=tT8ztU3VKy57TaHTQmNvI594aBtzwAov+nGacP+UvLheO9+iRaYZ2xka92QN/XQOyn
+         WleAOG54Y3ekzzOPS+v8MsH+yl3CeenxkTeaWN4XIiX8CibmgoewRw4C3DPJWfk4sB6i
+         8qwCU4Kc4wgDz5o3QADyP9j7LiKz7Mw6JyJbvUDU7rnV25Qj51rAjLkCYoYjKE6agDAE
+         mcMc2yXVK+G1VpW7INKySJbW5YEhy/YwK/U4T0Y8wTOBDYx8594uPNnl861TY5KTOIvb
+         phQ/quSmm7CWuLPMx6cgC433wU2wZiyQN3A/heZB/u+ZTLNuuiXwfImGFIQmuAOjlMbf
+         SpOg==
+X-Gm-Message-State: ANhLgQ0NVtIjtdOC434/aCZq26qjTEcTxEYn97cW1533PViGTQ/zzmis
+        H8nN9rSmsCCM88GUAOD54oQpVlEqi9/1ZXat3Eg=
+X-Google-Smtp-Source: ADFU+vtGP9Ty7kCO4ONv73Nr7zNugirXg12VP1u3w7C+Ufpy9fPM+R053oz02WmqvcBe3SLlJ4igFy4Zf9q7wIDZHqE=
+X-Received: by 2002:a25:dc07:: with SMTP id y7mr3949038ybe.48.1584514399393;
+ Tue, 17 Mar 2020 23:53:19 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20200317134805.GO24270@lunn.ch>
+References: <cover.1578560282.git.benchuanggli@gmail.com> <9f861920380df9d7a6d52c905fc47643eb25f33f.1578560282.git.benchuanggli@gmail.com>
+ <add27a04-e018-d050-4d42-4fb5c532df8c@intel.com>
+In-Reply-To: <add27a04-e018-d050-4d42-4fb5c532df8c@intel.com>
+From:   Ben Chuang <benchuanggli@gmail.com>
+Date:   Wed, 18 Mar 2020 14:53:08 +0800
+Message-ID: <CACT4zj-M-BJKSwDNA7dRa88N8A4PBoX0GnMZiSMKum4GGiTiFA@mail.gmail.com>
+Subject: Re: [RFC PATCH v2 3/6] mmc: host: Add UHS-II support in host layer
+To:     Adrian Hunter <adrian.hunter@intel.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        greg.tu@genesyslogic.com.tw,
+        Ben Chuang <ben.chuang@genesyslogic.com.tw>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Mar 17, 2020 at 02:48:05PM +0100, Andrew Lunn wrote:
-> On Tue, Mar 17, 2020 at 10:39:07AM +0100, Lubomir Rintel wrote:
-> > These ports are compatible with NS8250 and handled by the same driver.
-> > Get rid of the extra document that fails to document the properties that
-> > are actually supported.
-> 
-> Hi Lubmir
-> 
-> This is needs a bit closer examination. By the PXA maintainers. It
-> appears there are two serial drivers, the 8250 and a PXA specific
-> driver.
+On Tue, Mar 17, 2020 at 4:18 PM Adrian Hunter <adrian.hunter@intel.com> wrote:
+>
+> On 9/01/20 11:14 am, Ben Chuang wrote:
+> > From: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+> >
+> > Add UHS-II support in host layer
+>
+> Split host layer changes from sdhci changes.
+>
+> >
+> > Reported-by: kbuild test robot <lkp@intel.com>
+>
+> Drop "Reported-by: kbuild test robot <lkp@intel.com>"
+>
+> > Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+> > ---
+> >  drivers/mmc/host/Makefile                  |   1 +
+> >  drivers/mmc/host/{sdhci.c => sdhci-core.c} | 276 ++++++--
+> >  drivers/mmc/host/sdhci-milbeaut.c          |   4 +-
+> >  drivers/mmc/host/sdhci-of-arasan.c         |   4 +-
+> >  drivers/mmc/host/sdhci-of-at91.c           |   4 +-
+> >  drivers/mmc/host/sdhci-omap.c              |   2 +-
+> >  drivers/mmc/host/sdhci-pci-core.c          |   4 +-
+> >  drivers/mmc/host/sdhci-pxav3.c             |   4 +-
+> >  drivers/mmc/host/sdhci-uhs2.c              | 751 +++++++++++++++++++++
+> >  drivers/mmc/host/sdhci-uhs2.h              |  34 +
+> >  drivers/mmc/host/sdhci-xenon.c             |   4 +-
+> >  drivers/mmc/host/sdhci.h                   | 284 +++++++-
+> >  drivers/mmc/host/sdhci_am654.c             |   4 +-
+> >  include/linux/mmc/uhs2.h                   | 270 ++++++++
+> >  14 files changed, 1583 insertions(+), 63 deletions(-)
+> >  rename drivers/mmc/host/{sdhci.c => sdhci-core.c} (94%)
+> >  create mode 100644 drivers/mmc/host/sdhci-uhs2.c
+> >  create mode 100644 drivers/mmc/host/sdhci-uhs2.h
+> >  create mode 100644 include/linux/mmc/uhs2.h
+>
+> Please make sdhci-uhs2 a module and do not rename sdhci.c.
+>
+> References in sdhci.c to sdhci-uhs2.c will need to be enclosed by
+> #if IS_REACHABLE(CONFIG_SDHCI_UHS2)
+>
+> Move all UHS-II definitions into sdhci-uhs2.h.  Things that are for V4 but
+> not necessarily UHS-II can be in sdhci.h
+>
+> Make the set_power parameter change into a separate patch
+>
+> Fix all spelling mistakes
+>
+> Make comment style correct.
+>
+> Review all checkpatch warnings and checks (i.e. --strict option)
+>
+> If possible provide a link to a tree that contains the patches.
+>
+> Re-base on Ulf's next branch
+>
+> The patch set could use an overview of how UHS-II is different from regular SD.
+>
+> In other patches there are a bunch of memory allocations on the I/O path.
+> That is a problem.  Memory needed should be allocated in advance.
 
-Well, for "mrvl,mmp-uart", there are three: SERIAL_OF_PLATFORM,
-SERIAL_8250_PXA and SERIAL_PXA:
-
-  drivers/tty/serial/8250/8250_of.c:      { .compatible = "mrvl,mmp-uart",
-  drivers/tty/serial/8250/8250_pxa.c:     { .compatible = "mrvl,mmp-uart", },
-  drivers/tty/serial/pxa.c:       { .compatible = "mrvl,mmp-uart", },
-
-For that matter, the hardware is also compatible with intel,xscale-uart
-and the mrvl,mmp-uart compatible string is perhaps entirely unnecessary.
-
-I guess the story is somewhat similar for mrvl,pxa-uart; I can not
-verify though.
-
-I suppose SERIAL_PXA is not really needed at this point and if support
-for mrvl,pxa-uart was added to SERIAL_OF_PLATFORM, then SERIAL_8250_PXA
-would only be useful for platforms that don't use DT and the DT bits
-could be stripped from it eventually. That is -- if PXA maintainers
-agree, of course.
-
-> 	Andrew
-
-Regards
-Lubo
+Thanks for your comments and guidance.
+There seems to be a lot of work to do. I will do my best to meet these.
