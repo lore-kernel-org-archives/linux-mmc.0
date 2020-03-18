@@ -2,150 +2,118 @@ Return-Path: <SRS0=6IoW=5D=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-5.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5FE12C5ACD6
-	for <linux-mmc@archiver.kernel.org>; Wed, 18 Mar 2020 11:08:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3DA4FC4332D
+	for <linux-mmc@archiver.kernel.org>; Wed, 18 Mar 2020 21:49:21 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 2CAB52076D
-	for <linux-mmc@archiver.kernel.org>; Wed, 18 Mar 2020 11:08:46 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="ULz4sod6"
+	by mail.kernel.org (Postfix) with ESMTP id 0E29220754
+	for <linux-mmc@archiver.kernel.org>; Wed, 18 Mar 2020 21:49:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727144AbgCRLIp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 18 Mar 2020 07:08:45 -0400
-Received: from mail-vs1-f65.google.com ([209.85.217.65]:34320 "EHLO
-        mail-vs1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726486AbgCRLIp (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Mar 2020 07:08:45 -0400
-Received: by mail-vs1-f65.google.com with SMTP id t10so16143530vsp.1
-        for <linux-mmc@vger.kernel.org>; Wed, 18 Mar 2020 04:08:44 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=9frSoSYLFCu0A/Mh7LPuKatr2O8xik/d01v55VOnyP4=;
-        b=ULz4sod6I+eklVNwP7hqM50Hd4vBJUS+Bpu5i+ryBoBCsPblh/ogw7XkFNmBbag3pM
-         H9UCyEd7er7GDNZk9U2VHBwy9SBc3G3Qo09kpO4/1Qzy4FGeu7WeyJcgSVbZYe1mCliZ
-         qHCXZKSOjuaq2zWNzBvcKuDAahQPSbz+Iacq5FcZD4T9xJgukS2Kk7IZe9Qp6ABIVa2A
-         +yc+0sidH02WbhvVA/Qp0EP184GW+NhZVCbdXXtnHtbEtw0bp4MiHoL7WLU0JtiVH+YV
-         +gcPxMhrL7qpZR/Kte1KBosjvuB2bpid4B7DY2r+I0Atb8lhNn3E3VLqSo3alkh2sBDA
-         4j4w==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=9frSoSYLFCu0A/Mh7LPuKatr2O8xik/d01v55VOnyP4=;
-        b=DMwqSMOlyfz/slFOH35uZdS7HqhhTheyxml/7QN/0hT0md95swXI8MRC+3s6t7bjZC
-         DCFoTmZ3OQQIPE5FAYZaIHwB46IZTvq6bf+nM9nb7bidmgHyu+sv8oaHFFEZho9eZi0t
-         samMN6gmQv2U5CHCe6+Zg3KFbaPwAw7pmD/xX7gO+BbhmWJiwqhAh4M6efIvA4Bp/bAN
-         Wt3lrIEgT56jDhv5V6bNQ4myqDOL10yXq2ir8wuVlsiXQHSXs9gt1sx5tjHuKTgItOuR
-         6mFqEjjRXtMnFR0114lKrdIifnoSBj30apYF1LaAl16px+KZmLC0W3t/Z9oHT+ru6yY/
-         e4/w==
-X-Gm-Message-State: ANhLgQ2/0zVNfmZzF8YNHDgizGoMnTKkGIjaQ51C+ZDBbmZkgriMRcU0
-        HR7ff0iPfcl0DykpYyUmpOM1z/thMiUsdolZaacWNg==
-X-Google-Smtp-Source: ADFU+vu2FC4mlTKSIEnZM8U/cxLci0q+mKGTSglQiVCEp3b3EISiorDyV2HOqWCmtAvl8B9z9jqXDCDKTBu1B75xgwU=
-X-Received: by 2002:a67:646:: with SMTP id 67mr2511025vsg.34.1584529724216;
- Wed, 18 Mar 2020 04:08:44 -0700 (PDT)
+        id S1726776AbgCRVtU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 18 Mar 2020 17:49:20 -0400
+Received: from static-213-198-238-194.adsl.eunet.rs ([213.198.238.194]:54994
+        "EHLO fx.arvanta.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726647AbgCRVtU (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Mar 2020 17:49:20 -0400
+Received: from arya.arvanta.net (arya.arvanta.net [10.5.1.6])
+        by fx.arvanta.net (Postfix) with ESMTP id 0EE5927672;
+        Wed, 18 Mar 2020 22:49:18 +0100 (CET)
+Date:   Wed, 18 Mar 2020 22:49:17 +0100
+From:   Milan =?utf-8?Q?P=2E_Stani=C4=87?= <mps@arvanta.net>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     linux-mmc@vger.kernel.org
+Subject: Re: PROBLEM: mmc_select_hs400es failed, error -110
+Message-ID: <20200318214917.GA9112@arya.arvanta.net>
+References: <20200301220242.GA8276@arya.arvanta.net>
 MIME-Version: 1.0
-References: <20200316091324.15968-1-wan.ahmad.zainie.wan.mohamad@intel.com> <20200316091324.15968-2-wan.ahmad.zainie.wan.mohamad@intel.com>
-In-Reply-To: <20200316091324.15968-2-wan.ahmad.zainie.wan.mohamad@intel.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 18 Mar 2020 12:08:08 +0100
-Message-ID: <CAPDyKFqpeCXqbMZi7cffKEQ1=2xZnUT4Jpi85Fqyfk2eaTU1gQ@mail.gmail.com>
-Subject: Re: [PATCH 1/2] dt-bindings: mmc: arasan: Add compatible strings for
- Intel Keem Bay
-To:     Wan Ahmad Zainie <wan.ahmad.zainie.wan.mohamad@intel.com>
-Cc:     Rob Herring <robh+dt@kernel.org>,
-        Mark Rutland <mark.rutland@arm.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        DTML <devicetree@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <20200301220242.GA8276@arya.arvanta.net>
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 16 Mar 2020 at 10:13, Wan Ahmad Zainie
-<wan.ahmad.zainie.wan.mohamad@intel.com> wrote:
->
-> Add new compatible strings in sdhci-of-arasan.c to support Intel Keem Bay
-> eMMC/SD/SDIO controller, based on Arasan SDHCI 5.1.
->
-> Signed-off-by: Wan Ahmad Zainie <wan.ahmad.zainie.wan.mohamad@intel.com>
-> ---
->  .../devicetree/bindings/mmc/arasan,sdhci.txt  | 39 +++++++++++++++++++
+Hello,
 
-We are starting to reach a point were I want to see people converting
-bindings into the yaml format, rather than extending the existing text
-based ones.
+Sorry to annoy again, but could you tell me if I sent this bug report
+to right mail address or I should send it somewhere else.
 
-Can you please have a look at the sdhci common bindings and the sdhci
-arasan variant, that would be a good start.
+Also, did I sent bug report correctly or I did some mistakes which
+caused it to be ignored.
 
-Kind regards
-Uffe
+-- 
+TIA
 
->  1 file changed, 39 insertions(+)
->
-> diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-> index 428685eb2ded..50f9cc0eff2a 100644
-> --- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-> +++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-> @@ -24,6 +24,10 @@ Required Properties:
->        For this device it is strongly suggested to include arasan,soc-ctl-syscon.
->      - "intel,lgm-sdhci-5.1-sdxc", "arasan,sdhci-5.1": Intel LGM SDXC PHY
->        For this device it is strongly suggested to include arasan,soc-ctl-syscon.
-> +    - "intel,keembay-sdhci-5.1-emmc", "arasan,sdhci-5.1": Keem Bay eMMC PHY
-> +      For this device it is strongly suggested to include arasan,soc-ctl-syscon.
-> +    - "intel,keembay-sdhci-5.1-sd": Keem Bay SD controller
-> +    - "intel,keembay-sdhci-5.1-sdio": Keem Bay SDIO controller
->
->    [5] Documentation/devicetree/bindings/mmc/sdhci-am654.txt
->
-> @@ -133,3 +137,38 @@ Example:
->                 phy-names = "phy_arasan";
->                 arasan,soc-ctl-syscon = <&sysconf>;
->         };
-> +
-> +       mmc: mmc@33000000 {
-> +               compatible = "intel,keembay-sdhci-5.1-emmc", "arasan,sdhci-5.1";
-> +               interrupts = <GIC_SPI 82 IRQ_TYPE_LEVEL_HIGH>;
-> +               reg = <0x0 0x33000000 0x0 0x300>;
-> +               clock-names = "clk_xin", "clk_ahb";
-> +               clocks = <&scmi_clk KEEM_BAY_PSS_AUX_EMMC>,
-> +                        <&scmi_clk KEEM_BAY_PSS_EMMC>;
-> +               phys = <&emmc_phy>;
-> +               phy-names = "phy_arasan";
-> +               assigned-clocks = <&scmi_clk KEEM_BAY_PSS_AUX_EMMC>;
-> +               clock-output-names = "emmc_cardclock";
-> +               #clock-cells = <0>;
-> +               arasan,soc-ctl-syscon = <&mmc_phy_syscon>;
-> +       };
-> +
-> +       sd0: sdhci@31000000 {
-> +               compatible = "intel,keembay-sdhci-5.1-sd";
-> +               interrupts = <GIC_SPI 83 IRQ_TYPE_LEVEL_HIGH>;
-> +               reg = <0x0 0x31000000 0x0 0x300>;
-> +               clock-names = "clk_xin", "clk_ahb";
-> +               clocks = <&scmi_clk KEEM_BAY_PSS_AUX_SD0>,
-> +                        <&scmi_clk KEEM_BAY_PSS_SD0>;
-> +               arasan,soc-ctl-syscon = <&sd0_phy_syscon>;
-> +       };
-> +
-> +       sd1: sdhci@32000000 {
-> +               compatible = "intel,keembay-sdhci-5.1-sdio";
-> +               interrupts = <GIC_SPI 84 IRQ_TYPE_LEVEL_HIGH>;
-> +               reg = <0x0 0x32000000 0x0 0x300>;
-> +               clock-names = "clk_xin", "clk_ahb";
-> +               clocks = <&scmi_clk KEEM_BAY_PSS_AUX_SD1>,
-> +                        <&scmi_clk KEEM_BAY_PSS_SD1>;
-> +               arasan,soc-ctl-syscon = <&sd1_phy_syscon>;
-> +       };
+On Sun, 2020-03-01 at 23:02, Milan P. Stanić wrote:
+> Hello,
+> 
+> I'm not native English speaker and I'm self taught in English so sorry
+> if do not write or express correctly. And sorry if I posted bug report
+> to wrong address.
+> 
+> I'm running linux 5.6.0-rc3 without any patches on Samsung chromebook
+> one plus, Arm64 rockchip rk3399 based model name:
+> Machine model: Google Kevin
+> 
+> I build kernels from upstream git.kernel.org for this machine for some
+> time (iirc, from 5.2.1 and up) but I'm getting error messages in kernel
+> after machine resumes from suspend-to-ram.
+> 
+> excerpt from dmesg output:
+> -----------------------------------------------------------------------
+> Restarting tasks ... done.
+> PM: suspend exit
+> mmc_host mmc0: Bus speed (slot 0) = 400000Hz (slot req 400000Hz, actual 400000HZ div = 0)
+> mmc1: mmc_select_hs400es failed, error -110
+> mmc1: error -110 doing runtime resume
+> mmc1: Got data interrupt 0x00000002 even though no data operation was in progress.
+> mmc1: sdhci: ============ SDHCI REGISTER DUMP ===========
+> mmc1: sdhci: Sys addr:  0x00000008 | Version:  0x00001002
+> mmc1: sdhci: Blk size:  0x00007200 | Blk cnt:  0x00000008
+> mmc1: sdhci: Argument:  0x00000000 | Trn mode: 0x00000023
+> mmc1: sdhci: Present:   0x1fff0001 | Host ctl: 0x00000035
+> mmc1: sdhci: Power:     0x0000000b | Blk gap:  0x00000080
+> mmc1: sdhci: Wake-up:   0x00000000 | Clock:    0x0000bc07
+> mmc1: sdhci: Timeout:   0x0000000d | Int stat: 0x00000000
+> mmc1: sdhci: Int enab:  0x03ff000b | Sig enab: 0x03ff000b
+> mmc1: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
+> mmc1: sdhci: Caps:      0x44edc880 | Caps_1:   0x801020f7
+> mmc1: sdhci: Cmd:       0x00000c1a | Max curr: 0x00000000
+> mmc1: sdhci: Resp[0]:   0x00000000 | Resp[1]:  0x373300bd
+> mmc1: sdhci: Resp[2]:   0x35303030 | Resp[3]:  0x00000000
+> mmc1: sdhci: Host ctl2: 0x00000000
+> mmc1: sdhci: ADMA Err:  0x00000000 | ADMA Ptr: 0xed41e200
+> -----------------------------------------------------------------------
+> 
+> I invoke suspend-to-ram by `echo mem > /sys/power/state` from ACPI power
+> and LID button handlers.
+> 
+> This only happens when I boot and use internal emmc card and never when
+> boot and use external mmc card.
+> 
+> If suspend-to-ram is not invoked (machine is always in normal state)
+> this problem never happen (or I missed it somehow).
+> 
+> I'm attaching kernel .config (file config-5.6.0-rc3-1-gru.conf) which
+> use to build kernel, output of the `awk -f scripts/ver_linux` as file
+> ver_linux.txt and  output of dmesg as file mmc-err.txt (from which I
+> deleted wifi connection logs).
+> 
+> Sorry if I did something bad or wrong with this bug report, I don't have
+> much experience with bug reporting, especially for kernel.
+> 
+> I'm ready to send you more data, and investigate this more, apply
+> patches and rebuild kernel or whatever you ask me (of course if my
+> understanding and knowledge is enough for this job).
+> 
+> Thank in advance
+> 
 > --
-> 2.17.1
->
+> Kind regards
+> 
+[...]
