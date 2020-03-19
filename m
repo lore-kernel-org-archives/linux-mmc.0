@@ -1,292 +1,155 @@
-Return-Path: <SRS0=6IoW=5D=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=dO/k=5E=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-7.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9ED89C55186
-	for <linux-mmc@archiver.kernel.org>; Wed, 18 Mar 2020 22:38:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A7951C4332B
+	for <linux-mmc@archiver.kernel.org>; Thu, 19 Mar 2020 03:11:38 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 655CE20776
-	for <linux-mmc@archiver.kernel.org>; Wed, 18 Mar 2020 22:38:19 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1584571099;
-	bh=h2tPbIwaFRFhQaSi75kDBvH4/tYSSRHaaEn6nhZmdr0=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:List-ID:From;
-	b=CniorICbnH8yomaqVxnwPd3i48XFFY14G4R1Wf0F8xxVQNIrPktUKAw8h+cBOJLdN
-	 FIk0TwqWz1l5V/2GDf0X5XrP4m8isAbp9aaFEFDaWILXHMZvPuQq74M1KBhU1YL0hW
-	 2nLoNAUN2iTnSRnfdxERhiULxcrgWC0EQGJcgLso=
+	by mail.kernel.org (Postfix) with ESMTP id 851FC20776
+	for <linux-mmc@archiver.kernel.org>; Thu, 19 Mar 2020 03:11:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726913AbgCRWiJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 18 Mar 2020 18:38:09 -0400
-Received: from mail.kernel.org ([198.145.29.99]:52118 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726619AbgCRWiJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 18 Mar 2020 18:38:09 -0400
-Received: from mail-qt1-f171.google.com (mail-qt1-f171.google.com [209.85.160.171])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 6F0A3208D6;
-        Wed, 18 Mar 2020 22:38:07 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1584571087;
-        bh=h2tPbIwaFRFhQaSi75kDBvH4/tYSSRHaaEn6nhZmdr0=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=kRfNA+9TdnyBzO10nx07GysVFZDKOEyZXyN8sBPtBgPClUs4D1pLwH1u86QGHRVLI
-         VhUv0WyTisoDnDbPIwbBadfuS+0br3IgNJYuxEyNep50K1HIzxTFFk4DSvdoP4Cc0a
-         lMfsOmO1OAURjbaxeaLs+C5fAoANSbhjfQwAzweA=
-Received: by mail-qt1-f171.google.com with SMTP id i26so154650qtq.8;
-        Wed, 18 Mar 2020 15:38:07 -0700 (PDT)
-X-Gm-Message-State: ANhLgQ1e37ELRDgpPS1nBHSGnpkzOYv2pzVidmM0gJBYMfBJOmpFX0W0
-        pDr4IxegCI+qzH9NqQ7O6GthVxvMxUIq/IuRoA==
-X-Google-Smtp-Source: ADFU+vvinsamjh03SlRMcAjEI9q54HjLWIwQqxaVLevloh2bB0C7//yNJi1GoxR+dLv32cxF/ysQBxwkILHfmpn8xBI=
-X-Received: by 2002:ac8:59:: with SMTP id i25mr5558qtg.110.1584571086256; Wed,
- 18 Mar 2020 15:38:06 -0700 (PDT)
-MIME-Version: 1.0
-References: <20200317093922.20785-1-lkundrak@v3.sk> <20200317093922.20785-20-lkundrak@v3.sk>
-In-Reply-To: <20200317093922.20785-20-lkundrak@v3.sk>
-From:   Rob Herring <robh+dt@kernel.org>
-Date:   Wed, 18 Mar 2020 16:37:55 -0600
-X-Gmail-Original-Message-ID: <CAL_JsqK-z+yx6vMv_vUCc-QCigDnN8K3zPkbWM_CgXj02FGY2w@mail.gmail.com>
-Message-ID: <CAL_JsqK-z+yx6vMv_vUCc-QCigDnN8K3zPkbWM_CgXj02FGY2w@mail.gmail.com>
-Subject: Re: [PATCH 19/28] dt-bindings: mmc: Convert sdhci-pxa to json-schema
-To:     Lubomir Rintel <lkundrak@v3.sk>
-Cc:     Linus Walleij <linus.walleij@linaro.org>,
-        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Jason Cooper <jason@lakedaemon.net>,
-        Marc Zyngier <maz@kernel.org>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        id S1726730AbgCSDLh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 18 Mar 2020 23:11:37 -0400
+Received: from lucky1.263xmail.com ([211.157.147.131]:45350 "EHLO
+        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726596AbgCSDLh (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Mar 2020 23:11:37 -0400
+Received: from localhost (unknown [192.168.167.69])
+        by lucky1.263xmail.com (Postfix) with ESMTP id 596EB8EBA9;
+        Thu, 19 Mar 2020 11:11:31 +0800 (CST)
+X-MAIL-GRAY: 1
+X-MAIL-DELIVERY: 0
+X-ADDR-CHECKED4: 1
+X-ANTISPAM-LEVEL: 2
+X-SKE-CHECKED: 1
+X-ABS-CHECKED: 1
+Received: from [172.16.12.37] (unknown [58.22.7.114])
+        by smtp.263.net (postfix) whith ESMTP id P20067T140595444037376S1584587490013192_;
+        Thu, 19 Mar 2020 11:11:30 +0800 (CST)
+X-IP-DOMAINF: 1
+X-UNIQUE-TAG: <0078fd1245032f134969b4d597bf7f7b>
+X-RL-SENDER: shawn.lin@rock-chips.com
+X-SENDER: lintao@rock-chips.com
+X-LOGIN-NAME: shawn.lin@rock-chips.com
+X-FST-TO: linux-rockchip@lists.infradead.org
+X-SENDER-IP: 58.22.7.114
+X-ATTACHMENT-NUM: 0
+X-DNS-TYPE: 0
+X-System-Flag: 0
+Cc:     shawn.lin@rock-chips.com, linux-mmc@vger.kernel.org,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Kishon Vijay Abraham I <kishon@ti.com>,
-        Alessandro Zummo <a.zummo@towertech.it>,
-        Alexandre Belloni <alexandre.belloni@bootlin.com>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Mark Brown <broonie@kernel.org>,
-        Daniel Lezcano <daniel.lezcano@linaro.org>,
-        Andrew Lunn <andrew@lunn.ch>,
-        Gregory Clement <gregory.clement@bootlin.com>,
-        Daniel Mack <daniel@zonque.org>,
-        Haojian Zhuang <haojian.zhuang@gmail.com>,
-        Robert Jarzmik <robert.jarzmik@free.fr>,
-        devicetree@vger.kernel.org,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
-        Linux I2C <linux-i2c@vger.kernel.org>,
-        Linux Media Mailing List <linux-media@vger.kernel.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        "open list:REAL TIME CLOCK (RTC) SUBSYSTEM" 
-        <linux-rtc@vger.kernel.org>,
-        "open list:SERIAL DRIVERS" <linux-serial@vger.kernel.org>,
-        linux-spi <linux-spi@vger.kernel.org>,
-        Linux USB List <linux-usb@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+        "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>
+Subject: =?UTF-8?Q?Re=3a_PROBLEM=3a_mmc=5fselect=5fhs400es_failed=2c_error_-?=
+ =?UTF-8?B?MTEw44CQ6K+35rOo5oSP77yM6YKu5Lu255SxbGludXgtbW1jLW93bmVyQHZnZXIu?=
+ =?UTF-8?B?a2VybmVsLm9yZ+S7o+WPkeOAkQ==?=
+To:     =?UTF-8?Q?Milan_P=2e_Stani=c4=87?= <mps@arvanta.net>
+References: <20200301220242.GA8276@arya.arvanta.net>
+ <20200318214917.GA9112@arya.arvanta.net>
+From:   Shawn Lin <shawn.lin@rock-chips.com>
+Message-ID: <5922bbd7-e91b-d144-6d44-2632cbd11c78@rock-chips.com>
+Date:   Thu, 19 Mar 2020 11:11:32 +0800
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:75.0) Gecko/20100101
+ Thunderbird/75.0
+MIME-Version: 1.0
+In-Reply-To: <20200318214917.GA9112@arya.arvanta.net>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 8bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Mar 17, 2020 at 3:40 AM Lubomir Rintel <lkundrak@v3.sk> wrote:
->
-> Convert the sdhci-pxa binding to DT schema format using json-schema.
+Hi Milan
 
-Ignore what my bot said, I see you addressed that earlier in the series.
+[+linux-rockchip to see if someone has a Samsung chromebook one plus
+and could confirm if it works]
 
-> At the same time, fix a couple of issues with the examples discovered by
-> the validation tool -- a semicolon instead of a comma and wrong node names.
->
-> Signed-off-by: Lubomir Rintel <lkundrak@v3.sk>
-> ---
->  .../devicetree/bindings/mmc/sdhci-pxa.txt     |  50 ---------
->  .../devicetree/bindings/mmc/sdhci-pxa.yaml    | 101 ++++++++++++++++++
->  2 files changed, 101 insertions(+), 50 deletions(-)
->  delete mode 100644 Documentation/devicetree/bindings/mmc/sdhci-pxa.txt
->  create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-pxa.yaml
->
-> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-pxa.txt b/Documentation/devicetree/bindings/mmc/sdhci-pxa.txt
-> deleted file mode 100644
-> index 3d1b449d6097d..0000000000000
-> --- a/Documentation/devicetree/bindings/mmc/sdhci-pxa.txt
-> +++ /dev/null
-> @@ -1,50 +0,0 @@
-> -* Marvell sdhci-pxa v2/v3 controller
-> -
-> -This file documents differences between the core properties in mmc.txt
-> -and the properties used by the sdhci-pxav2 and sdhci-pxav3 drivers.
-> -
-> -Required properties:
-> -- compatible: Should be "mrvl,pxav2-mmc", "mrvl,pxav3-mmc" or
-> -  "marvell,armada-380-sdhci".
-> -- reg:
-> -  * for "mrvl,pxav2-mmc" and "mrvl,pxav3-mmc", one register area for
-> -    the SDHCI registers.
-> -
-> -  * for "marvell,armada-380-sdhci", three register areas. The first
-> -    one for the SDHCI registers themselves, the second one for the
-> -    AXI/Mbus bridge registers of the SDHCI unit, the third one for the
-> -    SDIO3 Configuration register
-> -- reg names: should be "sdhci", "mbus", "conf-sdio3". only mandatory
-> -  for "marvell,armada-380-sdhci"
-> -- clocks: Array of clocks required for SDHCI; requires at least one for
-> -    I/O clock.
-> -- clock-names: Array of names corresponding to clocks property; shall be
-> -    "io" for I/O clock and "core" for optional core clock.
-> -
-> -Optional properties:
-> -- mrvl,clk-delay-cycles: Specify a number of cycles to delay for tuning.
-> -
-> -Example:
-> -
-> -sdhci@d4280800 {
-> -       compatible = "mrvl,pxav3-mmc";
-> -       reg = <0xd4280800 0x800>;
-> -       bus-width = <8>;
-> -       interrupts = <27>;
-> -       clocks = <&chip CLKID_SDIO1XIN>, <&chip CLKID_SDIO1>;
-> -       clock-names = "io", "core";
-> -       non-removable;
-> -       mrvl,clk-delay-cycles = <31>;
-> -};
-> -
-> -sdhci@d8000 {
-> -       compatible = "marvell,armada-380-sdhci";
-> -       reg-names = "sdhci", "mbus", "conf-sdio3";
-> -       reg = <0xd8000 0x1000>,
-> -               <0xdc000 0x100>;
-> -               <0x18454 0x4>;
-> -       interrupts = <0 25 0x4>;
-> -       clocks = <&gateclk 17>;
-> -       clock-names = "io";
-> -       mrvl,clk-delay-cycles = <0x1F>;
-> -};
-> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-pxa.yaml b/Documentation/devicetree/bindings/mmc/sdhci-pxa.yaml
-> new file mode 100644
-> index 0000000000000..4ae0926ac294f
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/mmc/sdhci-pxa.yaml
-> @@ -0,0 +1,101 @@
-> +%YAML 1.2
-> +---
-> +$id: http://devicetree.org/schemas/mmc/sdhci-pxa.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
-> +
-> +title: Marvell PXA SDHCI v2/v3 bindings
-> +
-> +maintainers:
-> +  - devicetree@vger.kernel.org
-> +
-> +allOf:
-> +  - $ref: mmc-controller.yaml#
-> +  - if:
-> +      properties:
-> +        compatible:
-> +          contains:
-> +            const: marvell,armada-380-sdhci
-> +    then:
-> +      properties:
-> +        regs:
-> +          minItems: 3
-> +          maxItems: 3
+On 2020/3/19 5:49, Milan P. Stanić wrote:
+> Hello,
+> 
+> Sorry to annoy again, but could you tell me if I sent this bug report
+> to right mail address or I should send it somewhere else.
+> 
+> Also, did I sent bug report correctly or I did some mistakes which
+> caused it to be ignored.
+> 
+> -- TIA On Sun, 2020-03-01 at 23:02, Milan P. Stanić wrote:
+>> Hello,
+>>
+>> I'm not native English speaker and I'm self taught in English so sorry
+>> if do not write or express correctly. And sorry if I posted bug report
+>> to wrong address.
+>>
+>> I'm running linux 5.6.0-rc3 without any patches on Samsung chromebook
+>> one plus, Arm64 rockchip rk3399 based model name:
+>> Machine model: Google Kevin
+>>
+>> I build kernels from upstream git.kernel.org for this machine for some
+>> time (iirc, from 5.2.1 and up) but I'm getting error messages in kernel
+>> after machine resumes from suspend-to-ram.
 
-Here, you just need minItems.
+It sounds to me suspend-to-ram never works for this machine, at least
+since 5.2.1. Am I right?
 
-> +        reg-names:
-> +          items:
-> +            - const: sdhci
-> +            - const: mbus
-> +            - const: conf-sdio3
+>>
+>> excerpt from dmesg output:
+>> -----------------------------------------------------------------------
+>> Restarting tasks ... done.
+>> PM: suspend exit
+>> mmc_host mmc0: Bus speed (slot 0) = 400000Hz (slot req 400000Hz, actual 400000HZ div = 0)
+>> mmc1: mmc_select_hs400es failed, error -110
+>> mmc1: error -110 doing runtime resume
+>> mmc1: Got data interrupt 0x00000002 even though no data operation was in progress.
+>> mmc1: sdhci: ============ SDHCI REGISTER DUMP ===========
+>> mmc1: sdhci: Sys addr:  0x00000008 | Version:  0x00001002
+>> mmc1: sdhci: Blk size:  0x00007200 | Blk cnt:  0x00000008
+>> mmc1: sdhci: Argument:  0x00000000 | Trn mode: 0x00000023
+>> mmc1: sdhci: Present:   0x1fff0001 | Host ctl: 0x00000035
+>> mmc1: sdhci: Power:     0x0000000b | Blk gap:  0x00000080
+>> mmc1: sdhci: Wake-up:   0x00000000 | Clock:    0x0000bc07
+>> mmc1: sdhci: Timeout:   0x0000000d | Int stat: 0x00000000
+>> mmc1: sdhci: Int enab:  0x03ff000b | Sig enab: 0x03ff000b
+>> mmc1: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
+>> mmc1: sdhci: Caps:      0x44edc880 | Caps_1:   0x801020f7
+>> mmc1: sdhci: Cmd:       0x00000c1a | Max curr: 0x00000000
+>> mmc1: sdhci: Resp[0]:   0x00000000 | Resp[1]:  0x373300bd
+>> mmc1: sdhci: Resp[2]:   0x35303030 | Resp[3]:  0x00000000
+>> mmc1: sdhci: Host ctl2: 0x00000000
+>> mmc1: sdhci: ADMA Err:  0x00000000 | ADMA Ptr: 0xed41e200
+>> -----------------------------------------------------------------------
+>>
+>> I invoke suspend-to-ram by `echo mem > /sys/power/state` from ACPI power
+>> and LID button handlers.
+>>
+>> This only happens when I boot and use internal emmc card and never when
+>> boot and use external mmc card.
+>>
+>> If suspend-to-ram is not invoked (machine is always in normal state)
+>> this problem never happen (or I missed it somehow).
+>>
+>> I'm attaching kernel .config (file config-5.6.0-rc3-1-gru.conf) which
+>> use to build kernel, output of the `awk -f scripts/ver_linux` as file
+>> ver_linux.txt and  output of dmesg as file mmc-err.txt (from which I
+>> deleted wifi connection logs).
+>>
+>> Sorry if I did something bad or wrong with this bug report, I don't have
+>> much experience with bug reporting, especially for kernel.
+>>
+>> I'm ready to send you more data, and investigate this more, apply
+>> patches and rebuild kernel or whatever you ask me (of course if my
+>> understanding and knowledge is enough for this job).
+>>
+>> Thank in advance
+>>
+>> --
+>> Kind regards
+>>
+> [...]
+> 
+> 
 
-This should be under the main definition of 'reg-names' and then just
-'minItems: 3' here.
 
-> +      required:
-> +        - reg-names
-> +    else:
-> +      properties:
-> +        regs:
-> +          minItems: 1
-> +          maxItems: 1
-
-Just 'maxItems' is sufficient.
-
-> +        reg-names:
-> +          minItems: 1
-> +          maxItems: 1
-> +
-> +properties:
-> +  compatible:
-> +    enum:
-> +      - mrvl,pxav2-mmc
-> +      - mrvl,pxav3-mmc
-> +      - marvell,armada-380-sdhci
-> +
-> +  reg: true
-
-Here you should have:
-
-minItems: 1
-maxItems: 3
-
-> +
-> +  reg-names: true
-> +
-> +  interrupts:
-> +    maxItems: 1
-> +
-> +  clocks:
-> +    minItems: 1
-> +    maxItems: 2
-> +
-> +  clock-names:
-> +    minItems: 1
-> +    maxItems: 2
-> +    items:
-> +      - const: io
-> +      - const: core
-> +
-> +  mrvl,clk-delay-cycles:
-> +    description: Specify a number of cycles to delay for tuning.
-> +    $ref: /schemas/types.yaml#/definitions/uint32
-
-No range of valid values?
-
-> +
-> +required:
-> +  - compatible
-> +  - reg
-> +  - interrupts
-> +  - clocks
-> +  - clock-names
-> +
-> +examples:
-> +  - |
-> +    #include <dt-bindings/clock/berlin2.h>
-> +    mmc@d4280800 {
-> +        compatible = "mrvl,pxav3-mmc";
-> +        reg = <0xd4280800 0x800>;
-> +        bus-width = <8>;
-> +        interrupts = <27>;
-> +        clocks = <&chip CLKID_SDIO1XIN>, <&chip CLKID_SDIO1>;
-> +        clock-names = "io", "core";
-> +        non-removable;
-> +        mrvl,clk-delay-cycles = <31>;
-> +    };
-> +  - |
-> +    mmc@d8000 {
-> +        compatible = "marvell,armada-380-sdhci";
-> +        reg-names = "sdhci", "mbus", "conf-sdio3";
-> +        reg = <0xd8000 0x1000>,
-> +              <0xdc000 0x100>,
-> +              <0x18454 0x4>;
-> +        interrupts = <0 25 0x4>;
-> +        clocks = <&gateclk 17>;
-> +        clock-names = "io";
-> +        mrvl,clk-delay-cycles = <0x1F>;
-> +    };
-> +
-> +...
-> --
-> 2.25.1
->
