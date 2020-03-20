@@ -2,119 +2,151 @@ Return-Path: <SRS0=jDUE=5F=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.8 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5BA93C43332
-	for <linux-mmc@archiver.kernel.org>; Fri, 20 Mar 2020 09:50:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D2A21C4332D
+	for <linux-mmc@archiver.kernel.org>; Fri, 20 Mar 2020 10:22:39 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 3249E20753
-	for <linux-mmc@archiver.kernel.org>; Fri, 20 Mar 2020 09:50:03 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1584697803;
-	bh=Z/kVjRw39UyG/6Q4s/JhfLJ7uXIoe8UKLT9/YqwjAtE=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
-	b=u7hnxgeGOrmb2ECH3Vf3R1SwN4LnztTeWXaFpF5StonVBKhDOsxNo6UPABuogr82e
-	 xXNiUws7WlyIAyEEsXY6B85I1SvlWAhLkCUJrsDLrsf8kqIde2GWOtpVIF2WseX2+y
-	 Fc7nXU/JB0ygmdnlw8mSvux0DCyY89Uh9SHBpVao=
+	by mail.kernel.org (Postfix) with ESMTP id 924062076C
+	for <linux-mmc@archiver.kernel.org>; Fri, 20 Mar 2020 10:22:39 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="pnQNW5h4"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727413AbgCTJt6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 20 Mar 2020 05:49:58 -0400
-Received: from mail.kernel.org ([198.145.29.99]:53724 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726791AbgCTJt5 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 20 Mar 2020 05:49:57 -0400
-Received: from localhost (83-86-89-107.cable.dynamic.v4.ziggo.nl [83.86.89.107])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 7D87220753;
-        Fri, 20 Mar 2020 09:49:56 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1584697797;
-        bh=Z/kVjRw39UyG/6Q4s/JhfLJ7uXIoe8UKLT9/YqwjAtE=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=chlaewNlYQdOzUTOC3qYgdOswN6BxXsLqo53aeb7c7rsULZQ/vXqPo3YUlEVmCviY
-         lJr/zl+X3ZU7deOr9TQ/UAuu7N0qk6wUHy4utKw561Ttt/G4NELDyJqjuVlce0lPZ6
-         RZ14vEKPtHmQbt7CbBextmieVskspDWd4uvgGVrE=
-Date:   Fri, 20 Mar 2020 10:49:54 +0100
-From:   Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Naresh Kamboju <naresh.kamboju@linaro.org>,
-        Sasha Levin <sashal@kernel.org>,
-        Sowjanya Komatineni <skomatineni@nvidia.com>,
-        Jon Hunter <jonathanh@nvidia.com>,
-        Bitan Biswas <bbiswas@nvidia.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Jens Axboe <axboe@kernel.dk>,
-        Alexei Starovoitov <ast@kernel.org>,
-        linux-block <linux-block@vger.kernel.org>,
-        lkft-triage@lists.linaro.org,
-        open list <linux-kernel@vger.kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Arnd Bergmann <arnd@arndb.de>,
-        John Stultz <john.stultz@linaro.org>,
-        Faiz Abbas <faiz_abbas@ti.com>,
-        Thierry Reding <treding@nvidia.com>,
-        Anders Roxell <anders.roxell@linaro.org>,
-        Kishon <kishon@ti.com>
-Subject: Re: LKFT: arm x15: mmc1: cache flush error -110
-Message-ID: <20200320094954.GB421650@kroah.com>
-References: <CAPDyKFp93H0=ttazofW9NMBtL5VnjB4PdkwN0FDCtWR0pMHrPA@mail.gmail.com>
- <f01b5533-124a-d978-a90a-9c9c6235fb65@nvidia.com>
- <CAPDyKFqJjsuHect-azQKO8cCoq5JJQrZ=eShsdLHq97NXgXnuQ@mail.gmail.com>
- <227d9f08-582e-fd79-e1dc-7695bddd162d@nvidia.com>
- <2456654f-2724-0b6d-8936-afa05f345344@nvidia.com>
- <df939962-2cb4-1c36-0baf-d82e3527d05a@nvidia.com>
- <41348c8f-6bc7-a5a3-e1ed-9143f60cbdae@nvidia.com>
- <CAPDyKFqWRGK6LCevwXQoZnRqfMkUDWNUMqbGqnqv+OopmhvBeg@mail.gmail.com>
- <CA+G9fYv+bhdmq9O5rmnOkigCossK5WX9AMr76AF57f8KKydV9g@mail.gmail.com>
- <CAPDyKFr_WjRA9Cr3htSAd+LqcZLorY6AwvS2KZ0_89H1pJfLLg@mail.gmail.com>
+        id S1726527AbgCTKWj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 20 Mar 2020 06:22:39 -0400
+Received: from mail-vk1-f196.google.com ([209.85.221.196]:37488 "EHLO
+        mail-vk1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726631AbgCTKWi (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Mar 2020 06:22:38 -0400
+Received: by mail-vk1-f196.google.com with SMTP id o124so1583294vkc.4
+        for <linux-mmc@vger.kernel.org>; Fri, 20 Mar 2020 03:22:37 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=8Ahg+K1LklBOYWBRqmStRbuNfs/FmsalbYYMIdthFUE=;
+        b=pnQNW5h4aMDIgh8RiTJcOrlLJPuG2Sy9cfcvjMPaQ7UYihYb1g1mZbvAvrxoa+Sbry
+         ZzZUm3jwhLJFzwiphhQOkznH3NY+RHCdBWCUmeyw+0NlzARUqQzVr9Ayq+0mVn7AFdIH
+         bpj0coq3pT7GieHK2dRjvUKLbWVasGg/BAvmXagNzJNKWni07lFLN0ckVK0ZS/sP3dAr
+         sVVky75+pEfM6wgXZS0hfZAWH2SptLcSJhDOPeoPOSZHU8hqDd+An/SiAa48K32BlJ06
+         K0TtrIPXZEAWP8bq3MZNQCyKOEVPGAavLqlmB+PRmvNDNDr6FHW/9mS4JN9hLfed0F2a
+         qQrA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=8Ahg+K1LklBOYWBRqmStRbuNfs/FmsalbYYMIdthFUE=;
+        b=KxfTXtOiJjflAg9uOmoG4VoR9WZ+unjN4bSUpOMSC5TUm3KsRAcXROstgTCzMBnOT+
+         56cgTtYFBbEeH4X+semCysAwhxRzs0O+quvu3Vu1zsbOxXExpyp3DZuVQ0bSaQntfGEf
+         8ocTTczWwGSIgmliappznyw1lRwItNcPunp0gKO78/vFZGhswt2PMJK3E7ffQxBI299t
+         cK7k3dBVYCFE3ra1I+FgNkJWMabM2690yVWkEYaO30lCRaI5BzlruedxgcZamLMrHlV7
+         gLN/VgmFwdoyuevwCa+olPJ0zO31sK7Ioknc1hpRTBAIGl5IDd1wZLJSpSiouzaUrJW1
+         VJWA==
+X-Gm-Message-State: ANhLgQ1SEwEHeG2qTXf6VaPAvX7QqLtV6Zl3HfcXEQNhi7T1Od1aoM5Y
+        GOo6uQvvHlAIoSVRdtJUJ3Kyb8Pu7S8vFhlpckNmtQ==
+X-Google-Smtp-Source: ADFU+vu54A/Qz9IrM4XdvkGAJ9wVr6A5ugW7FnZJwnfFEJmJccYTXWgPOZXeS7RZsCmmNsF4/LxwxKerSA7kqUU40r0=
+X-Received: by 2002:a1f:7f1d:: with SMTP id o29mr5723265vki.101.1584699757213;
+ Fri, 20 Mar 2020 03:22:37 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFr_WjRA9Cr3htSAd+LqcZLorY6AwvS2KZ0_89H1pJfLLg@mail.gmail.com>
+References: <1582181100-29914-1-git-send-email-sbhanu@codeaurora.org>
+ <CAPDyKFqSJ4h7UvQfQzWmSq9gg97A0MXvdcuXXaY7b-YUHs=V2g@mail.gmail.com>
+ <158334039680.7173.16159724456027777605@swboyd.mtv.corp.google.com>
+ <CAPDyKFqecH=AsvtN+JMxdk6pY2dntWUrhUWF6LEq_DLCcPe6pw@mail.gmail.com> <158463974696.152100.8345578995373250448@swboyd.mtv.corp.google.com>
+In-Reply-To: <158463974696.152100.8345578995373250448@swboyd.mtv.corp.google.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Fri, 20 Mar 2020 11:22:01 +0100
+Message-ID: <CAPDyKFrL6uWaKK1zkn6ag2ZqW7ro50VGq6DJnTNyoFS2yGMmRw@mail.gmail.com>
+Subject: Re: [PATCH V4] mmc: sdhci-msm: Update system suspend/resume callbacks
+ of sdhci-msm platform driver
+To:     Stephen Boyd <swboyd@chromium.org>
+Cc:     Shaik Sajida Bhanu <sbhanu@codeaurora.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Rob Herring <robh+dt@kernel.org>,
+        Matthias Kaehlcke <mka@chromium.org>,
+        Asutosh Das <asutoshd@codeaurora.org>,
+        Sahitya Tummala <stummala@codeaurora.org>,
+        Sayali Lokhande <sayalil@codeaurora.org>, cang@codeaurora.org,
+        Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
+        Ram Prakash Gupta <rampraka@codeaurora.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
+        DTML <devicetree@vger.kernel.org>,
+        Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, Mar 20, 2020 at 10:20:04AM +0100, Ulf Hansson wrote:
-> On Thu, 19 Mar 2020 at 20:12, Naresh Kamboju <naresh.kamboju@linaro.org> wrote:
+On Thu, 19 Mar 2020 at 18:42, Stephen Boyd <swboyd@chromium.org> wrote:
+>
+> Quoting Ulf Hansson (2020-03-06 02:07:41)
+> > On Wed, 4 Mar 2020 at 17:46, Stephen Boyd <swboyd@chromium.org> wrote:
+> > >
+> > > Quoting Ulf Hansson (2020-03-04 07:34:29)
+> > > > On Thu, 20 Feb 2020 at 07:45, Shaik Sajida Bhanu <sbhanu@codeaurora.org> wrote:
+> > > > >
+> > > > > The existing suspend/resume callbacks of sdhci-msm driver are just
+> > > > > gating/un-gating the clocks. During suspend cycle more can be done
+> > > > > like disabling controller, disabling card detection, enabling wake-up events.
+> > > > >
+> > > > > So updating the system pm callbacks for performing these extra
+> > > > > actions besides controlling the clocks.
+> > > > >
+> > > > > Signed-off-by: Shaik Sajida Bhanu <sbhanu@codeaurora.org>
+> > > > > Reviewed-by: Stephen Boyd <swboyd@chromium.org>
+> > > > > ---
+> [...]
 > >
-> > FYI,
+> > >
+> > > >
+> > > > > +
+> > > > > +       ret = pm_runtime_force_suspend(dev);
+> > > >
+> > > > It looks to me that perhaps you could make use of solely
+> > > > pm_runtime_force_suspend(), then just skip calling
+> > > > sdhci_suspend|resume_host() altogether. Do you think that could work?
+> > >
+> > > Does that do all the things the commit text mentions is desired for
+> > > system suspend?
 > >
-> > The arm device x15 running stable rc 4.19.112-rc1, 5.4.27-rc1 and 5.5.11-rc2
-> > kernel pops up the following messages on console log,
-> > Is this a problem ?
+> > No. :-)
 > >
-> > [ 0.000000] Linux version 4.19.112-rc1 (oe-user@oe-host) (gcc version
-> > 7.3.0 (GCC)) #1 SMP Thu Mar 19 12:55:45 UTC 2020
+> > But why is system wakeup needed for an eMMC card?
 > >
-> > [   15.737765] mmc1: unspecified timeout for CMD6 - use generic
-> > [   16.754248] mmc1: unspecified timeout for CMD6 - use generic
-> > [   16.842071] mmc1: unspecified timeout for CMD6 - use generic
-> > ...
-> > [   20.580541] mmc1: unspecified timeout for CMD6 - use generic
-> > [   20.588216] mmc1: unspecified timeout for CMD6 - use generic
-> > [   20.604011] mmc1: unspecified timeout for CMD6 - use generic
-> >
-> > ref:
-> > https://lkft.validation.linaro.org/scheduler/job/1298207#L4037
-> > https://lkft.validation.linaro.org/scheduler/job/1298945#L4132
-> > https://lkft.validation.linaro.org/scheduler/job/1299973#L4232
-> 
-> The commit below is the problem, it shouldn't be applied for stable.
-> 
-> commit 533a6cfe08f96a7b5c65e06d20916d552c11b256
-> Author: Ulf Hansson <ulf.hansson@linaro.org>
-> Date:   Wed Jan 22 15:27:47 2020 +0100
-> mmc: core: Default to generic_cmd6_time as timeout in __mmc_switch()
-> 
-> Let me sort it out with Greg/Sasha. I will keep you in the loop,
-> thanks for reporting!
+>
+> I don't know if system wakeup is needed for an eMMC card. Probably only
+> if you plug in a card and some daemon wants to wake up and probe the
+> card for auto-play or something like that? Seems possible so might as
+> well expose the CD gpio as a wakeup in that case and let userspace
+> decide if it wants to do that.
 
-Now dropped from the 4.19, 5.4, and 5.5 stable queues, sorry for the
-noise.
+Right, card detect IRQs could be useful for system wakeups.
 
-greg k-h
+I assume you are using a GPIO IRQ for that, which is easily managed,
+as the runtime PM status of the mmc controller is irrelevant when
+configuring the GPIO IRQ as wakeup.
+
+We even have a helper for doing this, mmc_gpio_set_cd_wake().
+
+>
+> Is runtime suspended state the same as system suspended state here
+> though? The commit text seems to imply that only clks are disabled when
+> it's desirable to disable the entire controller. I'm still fuzzy on how
+> runtime PM and system PM interact because it seems to have changed since
+> I looked last a few years ago. If the driver can stay in a runtime
+> suspended state across system suspend then I'm all for it. That would
+> save time for system PM transitions.
+
+In most cases this should be possible. And so far, for this case, I
+haven't found a good reason to why it shouldn't work.
+
+Although, perhaps we need to improve some of the sdhci's library
+functions for PM, to better support this.
+
+Kind regards
+Uffe
