@@ -2,56 +2,47 @@ Return-Path: <SRS0=jDUE=5F=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.8 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-0.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E33C0C41621
-	for <linux-mmc@archiver.kernel.org>; Fri, 20 Mar 2020 14:59:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 031E6C43332
+	for <linux-mmc@archiver.kernel.org>; Fri, 20 Mar 2020 20:25:20 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id A0F5820784
-	for <linux-mmc@archiver.kernel.org>; Fri, 20 Mar 2020 14:59:16 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1584716356;
-	bh=Hd3zAvAezuFSVlozOz44ullhVT1eSajSxemMLbZxlBE=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
-	b=nReH3Z8MuJRIkhlQrXbEI8sm7ulLoLcN6zlw/vBg9pXmvOGTtAwWjFbnCN+ngJZ2Z
-	 QfEqhHUbKE6Q21NNOFd/1uvemxmLgvqmiQdwVjWhLli5/OJ8US4EjE5NwAn8BhJM76
-	 QrgEL06YJxIypz875RfP8z29sF8r8ldT7fRcnLC4=
+	by mail.kernel.org (Postfix) with ESMTP id CB6AB20739
+	for <linux-mmc@archiver.kernel.org>; Fri, 20 Mar 2020 20:25:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727291AbgCTO7Q (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 20 Mar 2020 10:59:16 -0400
-Received: from mail.kernel.org ([198.145.29.99]:49012 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725446AbgCTO7P (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 20 Mar 2020 10:59:15 -0400
-Received: from localhost (83-86-89-107.cable.dynamic.v4.ziggo.nl [83.86.89.107])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 99F7A2072D;
-        Fri, 20 Mar 2020 14:59:13 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1584716354;
-        bh=Hd3zAvAezuFSVlozOz44ullhVT1eSajSxemMLbZxlBE=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=Ff33wKiw1HbXy93zCGoh1lWvVOk00lgxJdeoknvNzKnVdJSPvefa0ML3LysbJ4nTO
-         6rAp6ASm4qt4uUIq2mtTpgvdRMDHrrSeBb59UaWhHjcJKEKHYeRpe3xmrMj7LtAtPD
-         nmjVJ+xUohzhMq/MhLV3uoj+bRi4FVjkP6UigI8o=
-Date:   Fri, 20 Mar 2020 15:59:06 +0100
-From:   Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-To:     Thomas Gleixner <tglx@linutronix.de>
-Cc:     LKML <linux-kernel@vger.kernel.org>, x86@kernel.org,
+        id S1727177AbgCTUZQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 20 Mar 2020 16:25:16 -0400
+Received: from Galois.linutronix.de ([193.142.43.55]:37039 "EHLO
+        Galois.linutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726666AbgCTUZQ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Mar 2020 16:25:16 -0400
+Received: from p5de0bf0b.dip0.t-ipconnect.de ([93.224.191.11] helo=nanos.tec.linutronix.de)
+        by Galois.linutronix.de with esmtpsa (TLS1.2:DHE_RSA_AES_256_CBC_SHA256:256)
+        (Exim 4.80)
+        (envelope-from <tglx@linutronix.de>)
+        id 1jFOCA-0003F1-0T; Fri, 20 Mar 2020 21:24:42 +0100
+Received: by nanos.tec.linutronix.de (Postfix, from userid 1000)
+        id 7019C1039FC; Fri, 20 Mar 2020 21:24:41 +0100 (CET)
+From:   Thomas Gleixner <tglx@linutronix.de>
+To:     Andy Shevchenko <andy.shevchenko@gmail.com>
+Cc:     LKML <linux-kernel@vger.kernel.org>,
+        "maintainer\:X86 ARCHITECTURE \(32-BIT AND 64-BIT\)" <x86@kernel.org>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
         Mark Gross <mgross@linux.intel.com>,
         Tony Luck <tony.luck@intel.com>,
         Paolo Bonzini <pbonzini@redhat.com>,
         Darren Hart <dvhart@infradead.org>,
         Andy Shevchenko <andy@infradead.org>,
         "Rafael J. Wysocki" <rjw@rjwysocki.net>,
-        Len Brown <lenb@kernel.org>, linux-acpi@vger.kernel.org,
+        Len Brown <lenb@kernel.org>,
+        ACPI Devel Maling List <linux-acpi@vger.kernel.org>,
         Viresh Kumar <viresh.kumar@linaro.org>,
-        linux-pm@vger.kernel.org,
+        Linux PM <linux-pm@vger.kernel.org>,
         Srinivas Pandruvada <srinivas.pandruvada@linux.intel.com>,
-        linux-edac@vger.kernel.org, platform-driver-x86@vger.kernel.org,
+        linux-edac@vger.kernel.org,
+        Platform Driver <platform-driver-x86@vger.kernel.org>,
         Jean Delvare <jdelvare@suse.com>,
         Guenter Roeck <linux@roeck-us.net>,
         linux-hwmon@vger.kernel.org, Zhang Rui <rui.zhang@intel.com>,
@@ -61,73 +52,48 @@ Cc:     LKML <linux-kernel@vger.kernel.org>, x86@kernel.org,
         Jacob Pan <jacob.jun.pan@linux.intel.com>,
         Adrian Hunter <adrian.hunter@intel.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-mmc@vger.kernel.org, Bjorn Helgaas <bhelgaas@google.com>,
-        linux-pci@vger.kernel.org, Takashi Iwai <tiwai@suse.com>,
-        alsa-devel@alsa-project.org,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Bjorn Helgaas <bhelgaas@google.com>, linux-pci@vger.kernel.org,
+        Takashi Iwai <tiwai@suse.com>,
+        ALSA Development Mailing List <alsa-devel@alsa-project.org>,
         Herbert Xu <herbert@gondor.apana.org.au>,
         "David S. Miller" <davem@davemloft.net>,
-        linux-crypto@vger.kernel.org
-Subject: Re: [patch 00/22] x86/treewide: Consolidate CPU match macro maze and
- get rid of C89 (sic!) initializers
-Message-ID: <20200320145906.GA762057@kroah.com>
-References: <20200320131345.635023594@linutronix.de>
+        linux-crypto <linux-crypto@vger.kernel.org>
+Subject: Re: [patch 01/22] x86/devicetable: Move x86 specific macro out of generic code
+In-Reply-To: <CAHp75Vca0j0=EB2qdvGgFOq2s_ohHUEzY4OeNrv-oynLBVYh1w@mail.gmail.com>
+References: <20200320131345.635023594@linutronix.de> <20200320131508.736205164@linutronix.de> <CAHp75Vca0j0=EB2qdvGgFOq2s_ohHUEzY4OeNrv-oynLBVYh1w@mail.gmail.com>
+Date:   Fri, 20 Mar 2020 21:24:41 +0100
+Message-ID: <87k13epyeu.fsf@nanos.tec.linutronix.de>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20200320131345.635023594@linutronix.de>
+Content-Type: text/plain
+X-Linutronix-Spam-Score: -1.0
+X-Linutronix-Spam-Level: -
+X-Linutronix-Spam-Status: No , -1.0 points, 5.0 required,  ALL_TRUSTED=-1,SHORTCIRCUIT=-0.0001
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, Mar 20, 2020 at 02:13:45PM +0100, Thomas Gleixner wrote:
-> The x86 CPU matching based on struct x86_cpu_id:
-> 
->   - is using an inconsistent macro mess with pointlessly duplicated and
->     slightly different local macros. Finding the places is an art as there
->     is no consistent name space at all.
-> 
->   - is still mostly based on C89 struct initializers which rely on the
->     ordering of the struct members. That's proliferated forever as every
->     new driver just copies the mess from some exising one.
-> 
-> A recent offlist conversation about adding more match criteria to the CPU
-> matching logic instead of creating yet another set of horrors, reminded me
-> of a pile of scripts and patches which I hacked on a few years ago when I
-> tried to add something to struct x86_cpu_id.
-> 
-> That stuff was finally not needed and ended up in my ever growing todo list
-> and collected dust and cobwebs, but (un)surprisingly enough most of it
-> still worked out of the box. The copy & paste machinery still works as it
-> did years ago.
-> 
-> There are a few places which needed extra care due to new creative macros,
-> new check combinations etc. and surprisingly ONE open coded proper C99
-> initializer.
-> 
-> It was reasonably simple to make it at least compile and pass a quick
-> binary equivalence check.
-> 
-> The result is a X86_MATCH prefix based set of macros which are reflecting
-> the needs of the usage sites and shorten the base macro which takes all
-> possible parameters (vendor, family, model, feature, data) and uses proper
-> C99 initializers.
-> 
-> So extensions of the match logic are trivial after that.
-> 
-> The patch set is against Linus tree and has trivial conflicts against
-> linux-next.
-> 
-> The diffstat is:
->  71 files changed, 525 insertions(+), 472 deletions(-)
-> 
-> but the extra lines are pretty much kernel-doc documentation which I added
-> to each of the new macros. The usage sites diffstat is:
-> 
->  70 files changed, 393 insertions(+), 471 deletions(-)
-> 
-> Thoughts?
+Andy Shevchenko <andy.shevchenko@gmail.com> writes:
+> On Fri, Mar 20, 2020 at 3:17 PM Thomas Gleixner <tglx@linutronix.de> wrote:
+>> --- a/arch/x86/include/asm/cpu_device_id.h
+>> +++ b/arch/x86/include/asm/cpu_device_id.h
+>> @@ -6,10 +6,21 @@
+>>   * Declare drivers belonging to specific x86 CPUs
+>>   * Similar in spirit to pci_device_id and related PCI functions
+>>   */
+>
+>> -
+>
+> Seems you are going to remove below anyway in the next patches, so,
+> why not to do this also there?
+>
+>>  #include <linux/mod_devicetable.h>
 
-Much nicer looking, thanks for cleaning up this mess:
+No it stays, but yes I could do that comment change right here.
 
-Reviewed-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Thanks,
+
+        tglx
+
+
