@@ -2,114 +2,122 @@ Return-Path: <SRS0=kaON=5I=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.3 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.3 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 21091C54EEB
-	for <linux-mmc@archiver.kernel.org>; Mon, 23 Mar 2020 16:38:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 38C05C3F2CD
+	for <linux-mmc@archiver.kernel.org>; Mon, 23 Mar 2020 16:49:43 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 01CC420722
-	for <linux-mmc@archiver.kernel.org>; Mon, 23 Mar 2020 16:38:48 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 05A9020719
+	for <linux-mmc@archiver.kernel.org>; Mon, 23 Mar 2020 16:49:43 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="d5Mx9bup"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727479AbgCWQis (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 23 Mar 2020 12:38:48 -0400
-Received: from mga12.intel.com ([192.55.52.136]:30481 "EHLO mga12.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727234AbgCWQis (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 23 Mar 2020 12:38:48 -0400
-IronPort-SDR: Rriv0Z8hJsGqsw3IoOkPAtgtiPO6JHB23PHs7p4zPBv+48a/GJlbM73vt8QMk6fMAwnqRW4mjh
- p3JleAiIVMMg==
-X-Amp-Result: SKIPPED(no attachment in message)
-X-Amp-File-Uploaded: False
-Received: from fmsmga004.fm.intel.com ([10.253.24.48])
-  by fmsmga106.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 23 Mar 2020 09:38:46 -0700
-IronPort-SDR: BNtv86v3w8JwvH4wJojnjAtNBR5zND3RBh/ddNAj1/0KWdAuOS7J1X36McxoHrFDWlrsVZa05+
- xW30ri8rHyMA==
-X-IronPort-AV: E=Sophos;i="5.72,297,1580803200"; 
-   d="scan'208";a="269933222"
-Received: from smtp.ostc.intel.com ([10.54.29.231])
-  by fmsmga004-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 23 Mar 2020 09:38:45 -0700
-Received: from localhost (mtg-dev.jf.intel.com [10.54.74.10])
-        by smtp.ostc.intel.com (Postfix) with ESMTP id E3150636B;
-        Mon, 23 Mar 2020 16:38:43 +0000 (UTC)
-Date:   Mon, 23 Mar 2020 09:38:44 -0700
-From:   mark gross <mgross@linux.intel.com>
-To:     Thomas Gleixner <tglx@linutronix.de>
-Cc:     Andy Shevchenko <andy.shevchenko@gmail.com>,
-        LKML <linux-kernel@vger.kernel.org>,
-        "maintainer:X86 ARCHITECTURE (32-BIT AND 64-BIT)" <x86@kernel.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Tony Luck <tony.luck@intel.com>,
-        "Rafael J. Wysocki" <rjw@rjwysocki.net>,
-        Len Brown <lenb@kernel.org>,
-        ACPI Devel Maling List <linux-acpi@vger.kernel.org>,
-        Paolo Bonzini <pbonzini@redhat.com>,
-        Darren Hart <dvhart@infradead.org>,
-        Andy Shevchenko <andy@infradead.org>,
-        Viresh Kumar <viresh.kumar@linaro.org>,
-        Linux PM <linux-pm@vger.kernel.org>,
-        Srinivas Pandruvada <srinivas.pandruvada@linux.intel.com>,
-        linux-edac@vger.kernel.org,
-        Platform Driver <platform-driver-x86@vger.kernel.org>,
-        Jean Delvare <jdelvare@suse.com>,
-        Guenter Roeck <linux@roeck-us.net>,
-        linux-hwmon@vger.kernel.org, Zhang Rui <rui.zhang@intel.com>,
-        Daniel Lezcano <daniel.lezcano@linaro.org>,
-        Amit Kucheria <amit.kucheria@verdurent.com>,
-        Chanwoo Choi <cw00.choi@samsung.com>,
-        Jacob Pan <jacob.jun.pan@linux.intel.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
+        id S1727357AbgCWQtm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 23 Mar 2020 12:49:42 -0400
+Received: from mail-lj1-f195.google.com ([209.85.208.195]:41376 "EHLO
+        mail-lj1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727067AbgCWQtm (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Mar 2020 12:49:42 -0400
+Received: by mail-lj1-f195.google.com with SMTP id n17so5029452lji.8;
+        Mon, 23 Mar 2020 09:49:39 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=subject:from:to:cc:references:message-id:date:user-agent
+         :mime-version:in-reply-to:content-language:content-transfer-encoding;
+        bh=qhFCWeL+rFInk3bPHjEA9ZVNIShgAywBeYzVQNJyjnc=;
+        b=d5Mx9bupBBr8PrzmgTgsFR7/M+Ctng0M8cH49sMpfEoTyJ9lcR59HvKbWFdGlb6qoj
+         0cWox1slQ/osr/jLC0UjEHib0nVQZFIruWsiGOW3RxjxJhD+Xc2IkxpAOHS6htYXm/Wq
+         CNMRpGebCJhE5l4CPkpra8WbC/bme7CjFH/3Dg3zINHS+0JCW6xfTyph4hRpqG/IFzPw
+         8iMJ/8xkzVOBG1tFywGL12tolFxrxkw6+rnEBxGj2VLL3WTeypD0aaytJQLEX7FaiC+M
+         LH7G/EA1rA+Wssk/fYW4zSjIx6kwB2JMyoB83P2oJaDuQu/ymGogvurNmhRP9gL4/KUl
+         YeEg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:subject:from:to:cc:references:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=qhFCWeL+rFInk3bPHjEA9ZVNIShgAywBeYzVQNJyjnc=;
+        b=shAeDRzPPrLrvDAMi+vRtgXi0prn1LhbBBeiuOFaJCj0i0fSu7NymVMM5QxVs/tdD3
+         krdAqy2XYKlQbR6Sg8gtL2TahGLMvBawuzugdl8zdX2NHYtHitOg0SdRslRmwVtnpXed
+         iIJkxvvfHcq5Enpvpd104cxkKLwIhSLmVSFtWWpl7eXIN5Z3FXE5+v7RC/Cj6jHatp/c
+         OQgXDQBF6NjRBzvDosH9DhkZMVxMfob6mz9YgT1nnS/rQb+naqB5rd1oVG0RrJ2ZWUY3
+         r4W15/l3y9KWAbLCMqnbqHaeIc4umj7UJFKNFsHx1AbdzihS/52h2dInW1F9cV1EYJLh
+         /UMQ==
+X-Gm-Message-State: ANhLgQ3tnCwidfHshH0uGS0SUdfofn3+OHUGhN7EYJSWY5+hXWm8KXod
+        j2npXqlDBqZ/OJ0dMiKss0xjH82I
+X-Google-Smtp-Source: ADFU+vuDnRyR4TA0KiU8EGeB+376glc1HzjE04SBb5yigFJd8YWFX717LqkEyyYiDH/S57kVviYPdQ==
+X-Received: by 2002:a2e:94c8:: with SMTP id r8mr14569628ljh.28.1584982178682;
+        Mon, 23 Mar 2020 09:49:38 -0700 (PDT)
+Received: from [192.168.2.145] (94-29-39-224.dynamic.spd-mgts.ru. [94.29.39.224])
+        by smtp.googlemail.com with ESMTPSA id k23sm8661150ljk.40.2020.03.23.09.49.37
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 23 Mar 2020 09:49:38 -0700 (PDT)
+Subject: Re: [PATCH v3 00/10] Introduce NVIDIA Tegra Partition Table
+From:   Dmitry Osipenko <digetx@gmail.com>
+To:     Jens Axboe <axboe@kernel.dk>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        Jonathan Hunter <jonathanh@nvidia.com>,
+        =?UTF-8?B?TWljaGHFgiBNaXJvc8WCYXc=?= <mirq-linux@rere.qmqm.pl>,
+        David Heidelberg <david@ixit.cz>,
+        Peter Geis <pgwipeout@gmail.com>,
+        Stephen Warren <swarren@wwwdotorg.org>,
+        Nicolas Chauvet <kwizart@gmail.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        Bjorn Helgaas <bhelgaas@google.com>, linux-pci@vger.kernel.org,
-        Takashi Iwai <tiwai@suse.com>,
-        ALSA Development Mailing List <alsa-devel@alsa-project.org>,
-        Herbert Xu <herbert@gondor.apana.org.au>,
-        "David S. Miller" <davem@davemloft.net>,
-        linux-crypto <linux-crypto@vger.kernel.org>
-Subject: Re: [patch 08/22] ACPI: Convert to new X86 CPU match macros
-Message-ID: <20200323163844.GB123290@mtg-dev.jf.intel.com>
-Reply-To: mgross@linux.intel.com
-References: <20200320131345.635023594@linutronix.de>
- <20200320131509.467730627@linutronix.de>
- <CAHp75VcK3tL0YayjF=CSkSkHiOpg2zOV3rdkXQWJmLZ9fmevpg@mail.gmail.com>
- <87bloqpy1x.fsf@nanos.tec.linutronix.de>
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Billy Laws <blaws05@gmail.com>
+Cc:     linux-tegra@vger.kernel.org, linux-block@vger.kernel.org,
+        Andrey Danin <danindrey@mail.ru>,
+        Gilles Grandou <gilles@grandou.net>,
+        Ryan Grachek <ryan@edited.us>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+References: <20200323163431.7678-1-digetx@gmail.com>
+Message-ID: <021a340f-e289-b1ee-db4f-ef61ee2b4004@gmail.com>
+Date:   Mon, 23 Mar 2020 19:49:37 +0300
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.5.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <87bloqpy1x.fsf@nanos.tec.linutronix.de>
-User-Agent: Mutt/1.9.4 (2018-02-28)
+In-Reply-To: <20200323163431.7678-1-digetx@gmail.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 8bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, Mar 20, 2020 at 09:32:26PM +0100, Thomas Gleixner wrote:
-> Andy Shevchenko <andy.shevchenko@gmail.com> writes:
+23.03.2020 19:34, Dmitry Osipenko пишет:
+> Some NVIDIA Tegra devices have GPT entry at a wrong location and others may
+> even not have it at all. So either a custom workaround for GPT parsing or
+> TegraPT support is needed for those devices if we want to support them in
+> upstream kernel. The former solution was already rejected [1], let's try
+> the latter.
 > 
-> > On Fri, Mar 20, 2020 at 3:19 PM Thomas Gleixner <tglx@linutronix.de> wrote:
-> >>
-> >> The new macro set has a consistent namespace and uses C99 initializers
-> >> instead of the grufty C89 ones.
-> >>
-> >> Rename the local macro wrapper to X86_MATCH for consistency. It stays for
-> >> readability sake.
-> >
-> >> +       X86_MATCH_INTEL_FAM6_MODEL(ATOM_SILVERMONT,     NULL),
-> >> +       X86_MATCH_INTEL_FAM6_MODEL(ATOM_AIRMONT,        NULL),
-> >
-> >> -#define ICPU(model)    { X86_VENDOR_INTEL, 6, model, X86_FEATURE_ANY, }
-> >> +#define X86_MATCH(model)       X86_MATCH_INTEL_FAM6_MODEL(model, NULL)
-> >
-> > Maybe we can do a generic macro to avoid all these ', NULL' repetitions?
+> [1] https://patchwork.ozlabs.org/patch/1240809/
 > 
-> I opted for having the data argument everywhere to keep the macro maze
-> small. And we have enough places where data is actually used.
-+1
+> Big thanks to everyone who helped with figuring out the TegraPT format!
+> 
+> Changelog:
+> 
+> v3: - Fixed "BUG: KASAN: slab-out-of-bounds in tegra_partition". Thanks to
+>       Peter Geis for noticing the problem.
+> 
+>     - The MMC boot partitions scanning is now opt-in. See this patch:
+> 
+>         mmc: block: Support partition-table scanning on boot partitions
+> 
+>     - The found MMC boot partitions won't be assigned to the MMC boot
+>       block device ever due to the new GENHD_FL_PART_SCAN_ONCE flag.
+> 
+>       This makes us to ensure that the old behavior of the MMC core is
+>       preserved for a non-Tegra MMC-block users.
+> 
+>     New patches in v3:
+> 
+>         block: Introduce GENHD_FL_PART_SCAN_ONCE
+>         mmc: sdhci-tegra: Enable boot partitions scanning on Tegra20 and Tegra30
 
---mark
-
-> Thanks,
-> 
->         tglx
+I forgot to mention that the TegraPT Kconfig entry now depends on MMC,
+which was suggested by Randy Dunlap in the review comment to the v2.
