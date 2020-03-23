@@ -2,417 +2,183 @@ Return-Path: <SRS0=kaON=5I=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 52949C54FD0
-	for <linux-mmc@archiver.kernel.org>; Mon, 23 Mar 2020 14:26:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 266C7C54FCF
+	for <linux-mmc@archiver.kernel.org>; Mon, 23 Mar 2020 16:35:42 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 29F2C20753
-	for <linux-mmc@archiver.kernel.org>; Mon, 23 Mar 2020 14:26:33 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E538120722
+	for <linux-mmc@archiver.kernel.org>; Mon, 23 Mar 2020 16:35:41 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="LXue7MQ/"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727102AbgCWO03 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 23 Mar 2020 10:26:29 -0400
-Received: from alexa-out-blr-02.qualcomm.com ([103.229.18.198]:21245 "EHLO
-        alexa-out-blr-02.qualcomm.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726191AbgCWO01 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Mar 2020 10:26:27 -0400
-Received: from ironmsg01-blr.qualcomm.com ([10.86.208.130])
-  by alexa-out-blr-02.qualcomm.com with ESMTP/TLS/AES256-SHA; 23 Mar 2020 19:55:35 +0530
-Received: from c-ppvk-linux.qualcomm.com ([10.206.24.34])
-  by ironmsg01-blr.qualcomm.com with ESMTP; 23 Mar 2020 19:55:06 +0530
-Received: by c-ppvk-linux.qualcomm.com (Postfix, from userid 2304101)
-        id 90D7F4C7E; Mon, 23 Mar 2020 19:55:05 +0530 (IST)
-From:   Pradeep P V K <ppvk@codeaurora.org>
-To:     bjorn.andersson@linaro.org, adrian.hunter@intel.com,
-        robh+dt@kernel.org, ulf.hansson@linaro.org,
-        asutoshd@codeaurora.org, stummala@codeaurora.org,
-        sayalil@codeaurora.org, rampraka@codeaurora.org,
-        vbadigan@codeaurora.org, sboyd@kernel.org,
-        georgi.djakov@linaro.org, mka@chromium.org
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
-        agross@kernel.org, linux-mmc-owner@vger.kernel.org,
-        Pradeep P V K <ppvk@codeaurora.org>,
-        Subhash Jadavani <subhashj@codeaurora.org>
-Subject: [RFC v6 1/2] mmc: sdhci-msm: Add interconnect bus bandwidth scaling support
-Date:   Mon, 23 Mar 2020 19:55:01 +0530
-Message-Id: <1584973502-14775-2-git-send-email-ppvk@codeaurora.org>
-X-Mailer: git-send-email 1.9.1
-In-Reply-To: <1584973502-14775-1-git-send-email-ppvk@codeaurora.org>
-References: <1584973502-14775-1-git-send-email-ppvk@codeaurora.org>
+        id S1727635AbgCWQfl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 23 Mar 2020 12:35:41 -0400
+Received: from mail-lj1-f193.google.com ([209.85.208.193]:46681 "EHLO
+        mail-lj1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727564AbgCWQfk (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Mar 2020 12:35:40 -0400
+Received: by mail-lj1-f193.google.com with SMTP id v16so8281762ljk.13;
+        Mon, 23 Mar 2020 09:35:38 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=from:to:cc:subject:date:message-id:in-reply-to:references
+         :mime-version:content-transfer-encoding;
+        bh=0wrb1jawDZ/OoSKSRa4jhXauQnVpnBi/wzx5vJ7NjQo=;
+        b=LXue7MQ/ynT2Qwn4Q8TkmyOyQlQ4Cl2ZdMW1YqwqkG1D/M0wI9BzolDLdIaer31yzj
+         zOLwVklExyWur1HIb64j6GxGiZxeVjzi1a+yoLrxYoZ7xg6xoz2izPmpZPYWZCHCp+++
+         DMjQUZPfh+SkW0G0pPW/JHkwWA7sl8Ww9IM/Y5DGKxgIINsREoSx3aVyjswp6BAO51mp
+         25xipyCqLfeuv17YaDx2+uuQ2w+G1GT7u5dK0Wc9dEO0K2fc9dzxe3UZxs11U5SmFyHH
+         FHjet48tQUbsfS4oZYz/67kQ6em5slQ7Ya31tnTI6xza5GuCsXmToLM5AAGAZoghr2jY
+         MvWQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=0wrb1jawDZ/OoSKSRa4jhXauQnVpnBi/wzx5vJ7NjQo=;
+        b=ZwrcqWsJD9cslX1JBE9B7brD3mHOygumUCe4VDoKMl9iLAZlYYbXULzXQ7EVbF9rr/
+         qdN7SQL+2Axsfcy6p+d/v1K1bxjjTy+Ku6osWiRjW/TRp9P+nJaRrKUQXSaJYNumCciu
+         X10vdp+4MCjOOKKcyHKLNekZPmfDAsmUUyBVWrA2FhzhaixpFzzETZvtSAWd74FXxO4z
+         Xen1W88V0kz8vvZ4fiQol4MYbce3wjg+UVR/V4ltzIvs1X4yUe5qbCqvmOOfSAIasKIO
+         5feM3zEnUtA91IoVHq1F5h04z30LqAL/0JTBrqIEtBDl0qr9ggZVHDfHVYuXUOD1nils
+         eerA==
+X-Gm-Message-State: ANhLgQ1pCSNB4D2geBdF0Ny42nFZL7WSEoMYPLEaUVhJ/s9SFouEynby
+        nhLigY44/74h5Jx7qILNKbY=
+X-Google-Smtp-Source: ADFU+vstcQ7obgecuz7XRtqThNdaDgYd6CA+FmepLrt9ZGbs/ZU6P+XLZBTC9u7wsH0SAcNbkpBItg==
+X-Received: by 2002:a2e:90da:: with SMTP id o26mr14720812ljg.254.1584981338066;
+        Mon, 23 Mar 2020 09:35:38 -0700 (PDT)
+Received: from localhost.localdomain (94-29-39-224.dynamic.spd-mgts.ru. [94.29.39.224])
+        by smtp.gmail.com with ESMTPSA id m14sm4820017lfo.25.2020.03.23.09.35.36
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 23 Mar 2020 09:35:37 -0700 (PDT)
+From:   Dmitry Osipenko <digetx@gmail.com>
+To:     Jens Axboe <axboe@kernel.dk>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        Jonathan Hunter <jonathanh@nvidia.com>,
+        =?UTF-8?q?Micha=C5=82=20Miros=C5=82aw?= <mirq-linux@rere.qmqm.pl>,
+        David Heidelberg <david@ixit.cz>,
+        Peter Geis <pgwipeout@gmail.com>,
+        Stephen Warren <swarren@wwwdotorg.org>,
+        Nicolas Chauvet <kwizart@gmail.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Billy Laws <blaws05@gmail.com>
+Cc:     linux-tegra@vger.kernel.org, linux-block@vger.kernel.org,
+        Andrey Danin <danindrey@mail.ru>,
+        Gilles Grandou <gilles@grandou.net>,
+        Ryan Grachek <ryan@edited.us>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Subject: [PATCH v3 04/10] block: Introduce GENHD_FL_PART_SCAN_ONCE
+Date:   Mon, 23 Mar 2020 19:34:25 +0300
+Message-Id: <20200323163431.7678-5-digetx@gmail.com>
+X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20200323163431.7678-1-digetx@gmail.com>
+References: <20200323163431.7678-1-digetx@gmail.com>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add interconnect bandwidths for SDHC driver using OPP framework that
-is required by SDHC driver based on the clock frequency and bus width
-of the card. Otherwise, the system clocks may run at minimum clock
-speed and thus affecting the performance.
+Some NVIDIA Tegra devices store partition table on a boot eMMC partition,
+and thus, partition-scanner should read out partition table from the boot
+block device without assigning found partitions to the block device. The
+new disk flag allows MMC core to enable boot partitions scanning, without
+changing the old behavior.
 
-This change is based on
-[RFC] mmc: host: sdhci-msm: Use the interconnect API
-(https://lkml.org/lkml/2018/10/11/499) and
-
-[PATCH v6] Introduce Bandwidth OPPs for interconnects
-(https://lkml.org/lkml/2019/12/6/740)
-
-Co-developed-by: Sahitya Tummala <stummala@codeaurora.org>
-Signed-off-by: Sahitya Tummala <stummala@codeaurora.org>
-Co-developed-by: Subhash Jadavani <subhashj@codeaurora.org>
-Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
-Co-developed-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
-Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
-Co-developed-by: Pradeep P V K <ppvk@codeaurora.org>
-Signed-off-by: Pradeep P V K <ppvk@codeaurora.org>
+Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
 ---
+ block/genhd.c             |  2 +-
+ block/partition-generic.c | 13 ++++++++++++-
+ include/linux/genhd.h     | 12 ++++++++++++
+ 3 files changed, 25 insertions(+), 2 deletions(-)
 
-RFC v5 -> v6:
-- Added new goto jump tag to put both icc paths.
-- Removed bus vote data error check and added is_null check.
-- Addressed minor code style comments.
-
- drivers/mmc/host/sdhci-msm.c | 240 ++++++++++++++++++++++++++++++++++++++++++-
- 1 file changed, 236 insertions(+), 4 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index 09ff731..469db65 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -11,8 +11,10 @@
- #include <linux/mmc/mmc.h>
- #include <linux/pm_runtime.h>
- #include <linux/slab.h>
-+#include <linux/interconnect.h>
- #include <linux/iopoll.h>
- #include <linux/regulator/consumer.h>
-+#include <linux/pm_opp.h>
+diff --git a/block/genhd.c b/block/genhd.c
+index b210c12c4870..e66a8fcc963b 100644
+--- a/block/genhd.c
++++ b/block/genhd.c
+@@ -700,7 +700,7 @@ static void register_disk(struct device *parent, struct gendisk *disk,
+ 	}
  
- #include "sdhci-pltfm.h"
- #include "cqhci.h"
-@@ -234,6 +236,12 @@ struct sdhci_msm_variant_info {
- 	const struct sdhci_msm_offset *offset;
- };
+ 	/* No minors to use for partitions */
+-	if (!disk_part_scan_enabled(disk))
++	if (!disk_part_scan_enabled(disk) && !disk_part_scan_once(disk))
+ 		goto exit;
  
-+struct sdhci_msm_bus_vote_data {
-+	struct icc_path *sdhc_to_ddr;
-+	struct icc_path *cpu_to_sdhc;
-+	u32 curr_freq;
-+};
+ 	/* No such device (e.g., media were just removed) */
+diff --git a/block/partition-generic.c b/block/partition-generic.c
+index 564fae77711d..bd31b71f49f7 100644
+--- a/block/partition-generic.c
++++ b/block/partition-generic.c
+@@ -537,7 +537,7 @@ int blk_add_partitions(struct gendisk *disk, struct block_device *bdev)
+ 	struct parsed_partitions *state;
+ 	int ret = -EAGAIN, p, highest;
+ 
+-	if (!disk_part_scan_enabled(disk))
++	if (!disk_part_scan_enabled(disk) && !disk_part_scan_once(disk))
+ 		return 0;
+ 
+ 	state = check_partition(disk, bdev);
+@@ -580,6 +580,17 @@ int blk_add_partitions(struct gendisk *disk, struct block_device *bdev)
+ 			goto out_free_state;
+ 	}
+ 
++	/*
++	 * Partitions were found, but they should stay inactive for a
++	 * scan-only disk.
++	 */
++	if (disk_part_scan_once(disk)) {
++		pr_warn("%s: ignoring partition table on scan-only block device\n",
++			disk->disk_name);
++		ret = 0;
++		goto out_free_state;
++	}
 +
- struct sdhci_msm_host {
- 	struct platform_device *pdev;
- 	void __iomem *core_mem;	/* MSM SDCC mapped address */
-@@ -260,8 +268,11 @@ struct sdhci_msm_host {
- 	bool use_cdr;
- 	u32 transfer_mode;
- 	bool updated_ddr_cfg;
-+	struct sdhci_msm_bus_vote_data *bus_vote_data;
- };
+ 	/* tell userspace that the media / partition table may have changed */
+ 	kobject_uevent(&disk_to_dev(disk)->kobj, KOBJ_CHANGE);
  
-+static void sdhci_msm_bus_voting(struct sdhci_host *host, bool enable);
+diff --git a/include/linux/genhd.h b/include/linux/genhd.h
+index d5c75df64bba..79831481142f 100644
+--- a/include/linux/genhd.h
++++ b/include/linux/genhd.h
+@@ -179,6 +179,12 @@ struct hd_struct {
+  * Implies ``GENHD_FL_SUPPRESS_PARTITION_INFO`` and
+  * ``GENHD_FL_NO_PART_SCAN``.
+  * Used for multipath devices.
++ *
++ * ``GENHD_FL_PART_SCAN_ONCE`` (0x0800): the block device will be scanned for
++ * partition table presence, but found partition won't be assigned to the
++ * block device.
++ * Used for embedded devices with a non-standard partition table, where
++ * partition table is stored on a separate block device.
+  */
+ #define GENHD_FL_REMOVABLE			0x0001
+ /* 2 is unused (used to be GENHD_FL_DRIVERFS) */
+@@ -191,6 +197,7 @@ struct hd_struct {
+ #define GENHD_FL_BLOCK_EVENTS_ON_EXCL_WRITE	0x0100
+ #define GENHD_FL_NO_PART_SCAN			0x0200
+ #define GENHD_FL_HIDDEN				0x0400
++#define GENHD_FL_PART_SCAN_ONCE			0x0800
+ 
+ enum {
+ 	DISK_EVENT_MEDIA_CHANGE			= 1 << 0, /* media changed */
+@@ -292,6 +299,11 @@ static inline bool disk_part_scan_enabled(struct gendisk *disk)
+ 		!(disk->flags & GENHD_FL_NO_PART_SCAN);
+ }
+ 
++static inline bool disk_part_scan_once(struct gendisk *disk)
++{
++	return !!(disk->flags & GENHD_FL_PART_SCAN_ONCE);
++}
 +
- static const struct sdhci_msm_offset *sdhci_priv_msm_offset(struct sdhci_host *host)
+ static inline dev_t disk_devt(struct gendisk *disk)
  {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-@@ -1581,6 +1592,7 @@ static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
- 
- 	msm_set_clock_rate_for_bus_mode(host, clock);
- out:
-+	sdhci_msm_bus_voting(host, !!clock);
- 	__sdhci_msm_set_clock(host, clock);
- }
- 
-@@ -1823,6 +1835,210 @@ static void sdhci_msm_set_regulator_caps(struct sdhci_msm_host *msm_host)
- 	pr_debug("%s: supported caps: 0x%08x\n", mmc_hostname(mmc), caps);
- }
- 
-+/*
-+ * Returns required bandwidth in Bytes per Sec
-+ */
-+static unsigned long sdhci_get_bw_required(struct sdhci_host *host,
-+					struct mmc_ios *ios)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-+
-+	switch (ios->bus_width) {
-+	case MMC_BUS_WIDTH_1:
-+		return msm_host->clk_rate / 8;
-+	case MMC_BUS_WIDTH_4:
-+		return msm_host->clk_rate / 2;
-+	case MMC_BUS_WIDTH_8:
-+		break;
-+	}
-+	return msm_host->clk_rate;
-+}
-+
-+/*
-+ * Helper function to parse the exact OPP node
-+ * Returns OPP pointer on success else NULL on error
-+ */
-+static struct dev_pm_opp
-+		*sdhci_msm_find_opp_for_freq(struct sdhci_msm_host *msm_host,
-+							unsigned long bw)
-+{
-+	struct dev_pm_opp *opp;
-+	struct sdhci_host *host = mmc_priv(msm_host->mmc);
-+	unsigned int freq = bw;
-+	struct device *dev = &msm_host->pdev->dev;
-+
-+
-+	if (!freq)
-+		opp = dev_pm_opp_find_peak_bw_floor(dev, &freq);
-+	else
-+		opp = dev_pm_opp_find_peak_bw_exact(dev, freq, true);
-+
-+	/* Max bandwidth vote */
-+	if (PTR_ERR(opp) == -ERANGE && freq > sdhci_msm_get_max_clock(host))
-+		opp = dev_pm_opp_find_peak_bw_ceil(dev, &bw);
-+
-+	if (IS_ERR(opp)) {
-+		dev_err(dev, "Failed to find OPP for freq:%u err:%ld\n",
-+				freq, PTR_ERR(opp));
-+		return NULL;
-+	}
-+	return opp;
-+}
-+
-+/*
-+ * This function sets the interconnect bus bandwidth
-+ * vote based on bw (bandwidth) argument.
-+ */
-+#define BUS_INTERCONNECT_PATHS 2 /* 1. sdhc -> ddr 2. cpu -> sdhc */
-+static void sdhci_msm_bus_set_vote(struct sdhci_host *host,
-+						unsigned int bw)
-+{
-+	int i, err;
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-+	struct sdhci_msm_bus_vote_data *vote_data = msm_host->bus_vote_data;
-+	struct device *dev = &msm_host->pdev->dev;
-+	struct dev_pm_opp *opp;
-+	unsigned long freq = bw;
-+	unsigned long peak_bw[BUS_INTERCONNECT_PATHS] = {0};
-+	unsigned long avg_bw[BUS_INTERCONNECT_PATHS] = {0};
-+
-+	if (bw == vote_data->curr_freq)
-+		return;
-+
-+	for (i = 0; i < BUS_INTERCONNECT_PATHS; i++) {
-+		opp = sdhci_msm_find_opp_for_freq(msm_host, freq);
-+		if (opp) {
-+			avg_bw[i] = dev_pm_opp_get_bw(opp, &peak_bw[i]);
-+			freq += 1; /* Next bandwidth vote */
-+			dev_pm_opp_put(opp);
-+		}
-+	}
-+	pr_debug("%s: freq:%d sdhc_to_ddr avg_bw:%lu peak_bw:%lu cpu_to_sdhc avg_bw:%lu peak_bw:%lu\n",
-+			mmc_hostname(host->mmc), bw, avg_bw[0], peak_bw[0],
-+				avg_bw[1], peak_bw[1]);
-+	err = icc_set_bw(vote_data->sdhc_to_ddr, 0, peak_bw[0]);
-+	if (err) {
-+		dev_err(dev, "icc_set() failed for 'sdhc-ddr' path err:%d\n",
-+			err);
-+		return;
-+	}
-+	err = icc_set_bw(vote_data->cpu_to_sdhc, 0, peak_bw[1]);
-+	if (err) {
-+		dev_err(dev, "icc_set() failed for 'cpu-sdhc' path err:%d\n",
-+			err);
-+		return;
-+	}
-+	vote_data->curr_freq = bw;
-+}
-+
-+/*
-+ * Helper function to register for OPP and interconnect
-+ * frameworks.
-+ */
-+static struct sdhci_msm_bus_vote_data
-+		*sdhci_msm_bus_register(struct sdhci_msm_host *host,
-+				struct platform_device *pdev)
-+{
-+	struct sdhci_msm_bus_vote_data *vote_data;
-+	struct device *dev = &pdev->dev;
-+	int i, err;
-+	struct icc_path *icc_paths[BUS_INTERCONNECT_PATHS];
-+	const char *path_names[] = {
-+		"sdhc-ddr",
-+		"cpu-sdhc",
-+	};
-+
-+	for (i = 0; i < BUS_INTERCONNECT_PATHS; i++)
-+		icc_paths[i] = of_icc_get(&pdev->dev, path_names[i]);
-+
-+	if (!icc_paths[0] && !icc_paths[1]) {
-+		dev_info(&pdev->dev, "ICC DT property is missing.Skip vote!!\n");
-+		return NULL;
-+	}
-+
-+	for (i = 0; i < BUS_INTERCONNECT_PATHS; i++) {
-+		if (!icc_paths[i]) {
-+			dev_err(&pdev->dev, "interconnect path '%s' is not configured\n",
-+					path_names[i]);
-+			err = -EINVAL;
-+			goto handle_err;
-+		}
-+		if (IS_ERR(icc_paths[i])) {
-+			err = PTR_ERR(icc_paths[i]);
-+
-+			if (err != -EPROBE_DEFER)
-+				dev_err(&pdev->dev, "interconnect path '%s' is invalid:%d\n",
-+					path_names[i], err);
-+			goto handle_err;
-+		}
-+	}
-+
-+	err = dev_pm_opp_of_add_table(dev);
-+	if (err) {
-+		if (err == -ENODEV || err == -ENODATA)
-+			dev_err(dev, "OPP dt properties missing:%d\n", err);
-+		else
-+			dev_err(dev, "OPP registration failed:%d\n", err);
-+		goto put_icc;
-+	}
-+
-+	vote_data = devm_kzalloc(dev, sizeof(*vote_data), GFP_KERNEL);
-+	if (!vote_data) {
-+		err = -ENOMEM;
-+		goto put_icc;
-+	}
-+	vote_data->sdhc_to_ddr = icc_paths[0];
-+	vote_data->cpu_to_sdhc = icc_paths[1];
-+	return vote_data;
-+
-+handle_err:
-+	if (err) {
-+		int other = (i == 0) ? 1 : 0;
-+
-+		if (!IS_ERR_OR_NULL(icc_paths[other]))
-+			icc_put(icc_paths[other]);
-+	}
-+	return ERR_PTR(err);
-+
-+put_icc:
-+	if (err) {
-+		for (i = 0; i < BUS_INTERCONNECT_PATHS; i++)
-+			icc_put(icc_paths[i]);
-+	}
-+	return ERR_PTR(err);
-+}
-+
-+static void sdhci_msm_bus_unregister(struct device *dev,
-+				struct sdhci_msm_host *host)
-+{
-+	struct sdhci_msm_bus_vote_data *vote_data = host->bus_vote_data;
-+
-+	if (!vote_data)
-+		return;
-+
-+	icc_put(vote_data->sdhc_to_ddr);
-+	icc_put(vote_data->cpu_to_sdhc);
-+}
-+
-+static void sdhci_msm_bus_voting(struct sdhci_host *host, bool enable)
-+{
-+	struct mmc_ios *ios = &host->mmc->ios;
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-+	unsigned int bw;
-+
-+	if (!msm_host->bus_vote_data)
-+		return;
-+
-+	if (enable) {
-+		bw = sdhci_get_bw_required(host, ios);
-+		sdhci_msm_bus_set_vote(host, bw);
-+	} else
-+		sdhci_msm_bus_set_vote(host, 0);
-+}
-+
- static void sdhci_msm_reset(struct sdhci_host *host, u8 mask)
- {
- 	if ((host->mmc->caps2 & MMC_CAP2_CQE) && (mask & SDHCI_RESET_ALL))
-@@ -1992,11 +2208,20 @@ static int sdhci_msm_probe(struct platform_device *pdev)
- 		dev_warn(&pdev->dev, "TCXO clk not present (%d)\n", ret);
- 	}
- 
-+	msm_host->bus_vote_data = sdhci_msm_bus_register(msm_host, pdev);
-+	if (IS_ERR(msm_host->bus_vote_data)) {
-+		ret = PTR_ERR(msm_host->bus_vote_data);
-+		dev_err(&pdev->dev, "Bus registration failed (%d)\n", ret);
-+		goto clk_disable;
-+	}
-+
-+	sdhci_msm_bus_voting(host, true);
-+
- 	if (!msm_host->mci_removed) {
- 		msm_host->core_mem = devm_platform_ioremap_resource(pdev, 1);
- 		if (IS_ERR(msm_host->core_mem)) {
- 			ret = PTR_ERR(msm_host->core_mem);
--			goto clk_disable;
-+			goto bus_unregister;
- 		}
- 	}
- 
-@@ -2071,7 +2296,7 @@ static int sdhci_msm_probe(struct platform_device *pdev)
- 	msm_host->pwr_irq = platform_get_irq_byname(pdev, "pwr_irq");
- 	if (msm_host->pwr_irq < 0) {
- 		ret = msm_host->pwr_irq;
--		goto clk_disable;
-+		goto bus_unregister;
- 	}
- 
- 	sdhci_msm_init_pwr_irq_wait(msm_host);
-@@ -2084,7 +2309,7 @@ static int sdhci_msm_probe(struct platform_device *pdev)
- 					dev_name(&pdev->dev), host);
- 	if (ret) {
- 		dev_err(&pdev->dev, "Request IRQ failed (%d)\n", ret);
--		goto clk_disable;
-+		goto bus_unregister;
- 	}
- 
- 	pm_runtime_get_noresume(&pdev->dev);
-@@ -2112,6 +2337,9 @@ static int sdhci_msm_probe(struct platform_device *pdev)
- 	pm_runtime_disable(&pdev->dev);
- 	pm_runtime_set_suspended(&pdev->dev);
- 	pm_runtime_put_noidle(&pdev->dev);
-+bus_unregister:
-+	sdhci_msm_bus_voting(host, false);
-+	sdhci_msm_bus_unregister(&pdev->dev, msm_host);
- clk_disable:
- 	clk_bulk_disable_unprepare(ARRAY_SIZE(msm_host->bulk_clks),
- 				   msm_host->bulk_clks);
-@@ -2141,6 +2369,9 @@ static int sdhci_msm_remove(struct platform_device *pdev)
- 				   msm_host->bulk_clks);
- 	if (!IS_ERR(msm_host->bus_clk))
- 		clk_disable_unprepare(msm_host->bus_clk);
-+
-+	sdhci_msm_bus_voting(host, false);
-+	sdhci_msm_bus_unregister(&pdev->dev, msm_host);
- 	sdhci_pltfm_free(pdev);
- 	return 0;
- }
-@@ -2153,7 +2384,7 @@ static __maybe_unused int sdhci_msm_runtime_suspend(struct device *dev)
- 
- 	clk_bulk_disable_unprepare(ARRAY_SIZE(msm_host->bulk_clks),
- 				   msm_host->bulk_clks);
--
-+	sdhci_msm_bus_voting(host, false);
- 	return 0;
- }
- 
-@@ -2175,6 +2406,7 @@ static __maybe_unused int sdhci_msm_runtime_resume(struct device *dev)
- 	if (msm_host->restore_dll_config && msm_host->clk_rate)
- 		return sdhci_msm_restore_sdr_dll_config(host);
- 
-+	sdhci_msm_bus_voting(host, true);
- 	return 0;
- }
- 
+ 	return MKDEV(disk->major, disk->first_minor);
 -- 
-1.9.1
+2.25.1
 
