@@ -2,173 +2,114 @@ Return-Path: <SRS0=kaON=5I=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.3 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 41FA6C54FD1
-	for <linux-mmc@archiver.kernel.org>; Mon, 23 Mar 2020 16:36:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 21091C54EEB
+	for <linux-mmc@archiver.kernel.org>; Mon, 23 Mar 2020 16:38:49 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 1869920658
-	for <linux-mmc@archiver.kernel.org>; Mon, 23 Mar 2020 16:36:16 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="VnyrvGVC"
+	by mail.kernel.org (Postfix) with ESMTP id 01CC420722
+	for <linux-mmc@archiver.kernel.org>; Mon, 23 Mar 2020 16:38:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727521AbgCWQfg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 23 Mar 2020 12:35:36 -0400
-Received: from mail-lf1-f65.google.com ([209.85.167.65]:39575 "EHLO
-        mail-lf1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727277AbgCWQfg (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Mar 2020 12:35:36 -0400
-Received: by mail-lf1-f65.google.com with SMTP id j15so10759089lfk.6;
-        Mon, 23 Mar 2020 09:35:34 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=OG7ev3PfnRwui1aOSA4eOfAjJpP9r8Vxr1u3lQi47PA=;
-        b=VnyrvGVCK5HBB3jPYwNU2sp2uglOy3BPe4WA6HwqPJWfakC2ZclHqAy4w1bsnse6KE
-         OtHsutWPwXiQzLODen4ZpopPyZuSKEDAuFNQszGb8wKYISEs2DgMSp3cym8k5YNbVQjS
-         fJwvrTyHPZbkmHd1b74q1J6kVoZnIcPaT3t02vkY3EUPGInaYWzIpmD2DflTh726kO5P
-         BKxKZG8d3KBaJivo4N5PuIOsRPH1oD17bb+gkOcccaXUoGIm/vkEswQaIM/D+jX6ytcE
-         e/nHXXsvRWnavXabARJ5Ssr2tepiMythXGDoUJ/EeX6hup5IaFOcMjypFhldv8uQ0LZc
-         UfZA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=OG7ev3PfnRwui1aOSA4eOfAjJpP9r8Vxr1u3lQi47PA=;
-        b=kihCm9pIxsEDziZdLvuybwwlnHrHO8T5GGusUtTV+4yE2mdW1D+EPy6FZDSuWYmJTj
-         isOxEGAF6UTPdTTz938U0bhl1e8zYhMUnLNH4Bxra6jzi4QRi8nsQeEGXWPtg6XemCTK
-         NUOxB8id/DcVmjGtXXwRwvPWu7mE8dBu+aNWqJ8n/40Zdp/RjJnPR5w6vUOOa/stdgeR
-         ks8/48Tcnca/0ln8F0YaCgCRSYC41GYqE3RELNm23YZphtD1kxcy03oMYaB2bXh5rJtW
-         +QFi2xSZRUj6PwtG5IJcxHB3/I0FpSJhDYvJY9q/BpFtoWx3OOoirQshbnCpfIUfadMi
-         eW0g==
-X-Gm-Message-State: ANhLgQ2WTtWjOiRj9CBKK/NJIIEodeXJYoyRClw112VPEJ6o2Xy8X2b1
-        GssAB9P+gVnmJ0T2iMPbIU4=
-X-Google-Smtp-Source: ADFU+vtbJVUjxa13f27OLIshGqKLgoAj1VcGGKuWwdroxICf9Xx82puzL6/OOjSvH+ZJkuFp+a1CCg==
-X-Received: by 2002:a19:6746:: with SMTP id e6mr13508388lfj.43.1584981333245;
-        Mon, 23 Mar 2020 09:35:33 -0700 (PDT)
-Received: from localhost.localdomain (94-29-39-224.dynamic.spd-mgts.ru. [94.29.39.224])
-        by smtp.gmail.com with ESMTPSA id m14sm4820017lfo.25.2020.03.23.09.35.31
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 23 Mar 2020 09:35:32 -0700 (PDT)
-From:   Dmitry Osipenko <digetx@gmail.com>
-To:     Jens Axboe <axboe@kernel.dk>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        Jonathan Hunter <jonathanh@nvidia.com>,
-        =?UTF-8?q?Micha=C5=82=20Miros=C5=82aw?= <mirq-linux@rere.qmqm.pl>,
-        David Heidelberg <david@ixit.cz>,
-        Peter Geis <pgwipeout@gmail.com>,
-        Stephen Warren <swarren@wwwdotorg.org>,
-        Nicolas Chauvet <kwizart@gmail.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
+        id S1727479AbgCWQis (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 23 Mar 2020 12:38:48 -0400
+Received: from mga12.intel.com ([192.55.52.136]:30481 "EHLO mga12.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1727234AbgCWQis (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 23 Mar 2020 12:38:48 -0400
+IronPort-SDR: Rriv0Z8hJsGqsw3IoOkPAtgtiPO6JHB23PHs7p4zPBv+48a/GJlbM73vt8QMk6fMAwnqRW4mjh
+ p3JleAiIVMMg==
+X-Amp-Result: SKIPPED(no attachment in message)
+X-Amp-File-Uploaded: False
+Received: from fmsmga004.fm.intel.com ([10.253.24.48])
+  by fmsmga106.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 23 Mar 2020 09:38:46 -0700
+IronPort-SDR: BNtv86v3w8JwvH4wJojnjAtNBR5zND3RBh/ddNAj1/0KWdAuOS7J1X36McxoHrFDWlrsVZa05+
+ xW30ri8rHyMA==
+X-IronPort-AV: E=Sophos;i="5.72,297,1580803200"; 
+   d="scan'208";a="269933222"
+Received: from smtp.ostc.intel.com ([10.54.29.231])
+  by fmsmga004-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 23 Mar 2020 09:38:45 -0700
+Received: from localhost (mtg-dev.jf.intel.com [10.54.74.10])
+        by smtp.ostc.intel.com (Postfix) with ESMTP id E3150636B;
+        Mon, 23 Mar 2020 16:38:43 +0000 (UTC)
+Date:   Mon, 23 Mar 2020 09:38:44 -0700
+From:   mark gross <mgross@linux.intel.com>
+To:     Thomas Gleixner <tglx@linutronix.de>
+Cc:     Andy Shevchenko <andy.shevchenko@gmail.com>,
+        LKML <linux-kernel@vger.kernel.org>,
+        "maintainer:X86 ARCHITECTURE (32-BIT AND 64-BIT)" <x86@kernel.org>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Tony Luck <tony.luck@intel.com>,
+        "Rafael J. Wysocki" <rjw@rjwysocki.net>,
+        Len Brown <lenb@kernel.org>,
+        ACPI Devel Maling List <linux-acpi@vger.kernel.org>,
+        Paolo Bonzini <pbonzini@redhat.com>,
+        Darren Hart <dvhart@infradead.org>,
+        Andy Shevchenko <andy@infradead.org>,
+        Viresh Kumar <viresh.kumar@linaro.org>,
+        Linux PM <linux-pm@vger.kernel.org>,
+        Srinivas Pandruvada <srinivas.pandruvada@linux.intel.com>,
+        linux-edac@vger.kernel.org,
+        Platform Driver <platform-driver-x86@vger.kernel.org>,
+        Jean Delvare <jdelvare@suse.com>,
+        Guenter Roeck <linux@roeck-us.net>,
+        linux-hwmon@vger.kernel.org, Zhang Rui <rui.zhang@intel.com>,
+        Daniel Lezcano <daniel.lezcano@linaro.org>,
+        Amit Kucheria <amit.kucheria@verdurent.com>,
+        Chanwoo Choi <cw00.choi@samsung.com>,
+        Jacob Pan <jacob.jun.pan@linux.intel.com>,
         Adrian Hunter <adrian.hunter@intel.com>,
-        Billy Laws <blaws05@gmail.com>
-Cc:     linux-tegra@vger.kernel.org, linux-block@vger.kernel.org,
-        Andrey Danin <danindrey@mail.ru>,
-        Gilles Grandou <gilles@grandou.net>,
-        Ryan Grachek <ryan@edited.us>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Subject: [PATCH v3 00/10] Introduce NVIDIA Tegra Partition Table
-Date:   Mon, 23 Mar 2020 19:34:21 +0300
-Message-Id: <20200323163431.7678-1-digetx@gmail.com>
-X-Mailer: git-send-email 2.25.1
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Bjorn Helgaas <bhelgaas@google.com>, linux-pci@vger.kernel.org,
+        Takashi Iwai <tiwai@suse.com>,
+        ALSA Development Mailing List <alsa-devel@alsa-project.org>,
+        Herbert Xu <herbert@gondor.apana.org.au>,
+        "David S. Miller" <davem@davemloft.net>,
+        linux-crypto <linux-crypto@vger.kernel.org>
+Subject: Re: [patch 08/22] ACPI: Convert to new X86 CPU match macros
+Message-ID: <20200323163844.GB123290@mtg-dev.jf.intel.com>
+Reply-To: mgross@linux.intel.com
+References: <20200320131345.635023594@linutronix.de>
+ <20200320131509.467730627@linutronix.de>
+ <CAHp75VcK3tL0YayjF=CSkSkHiOpg2zOV3rdkXQWJmLZ9fmevpg@mail.gmail.com>
+ <87bloqpy1x.fsf@nanos.tec.linutronix.de>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <87bloqpy1x.fsf@nanos.tec.linutronix.de>
+User-Agent: Mutt/1.9.4 (2018-02-28)
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Some NVIDIA Tegra devices have GPT entry at a wrong location and others may
-even not have it at all. So either a custom workaround for GPT parsing or
-TegraPT support is needed for those devices if we want to support them in
-upstream kernel. The former solution was already rejected [1], let's try
-the latter.
+On Fri, Mar 20, 2020 at 09:32:26PM +0100, Thomas Gleixner wrote:
+> Andy Shevchenko <andy.shevchenko@gmail.com> writes:
+> 
+> > On Fri, Mar 20, 2020 at 3:19 PM Thomas Gleixner <tglx@linutronix.de> wrote:
+> >>
+> >> The new macro set has a consistent namespace and uses C99 initializers
+> >> instead of the grufty C89 ones.
+> >>
+> >> Rename the local macro wrapper to X86_MATCH for consistency. It stays for
+> >> readability sake.
+> >
+> >> +       X86_MATCH_INTEL_FAM6_MODEL(ATOM_SILVERMONT,     NULL),
+> >> +       X86_MATCH_INTEL_FAM6_MODEL(ATOM_AIRMONT,        NULL),
+> >
+> >> -#define ICPU(model)    { X86_VENDOR_INTEL, 6, model, X86_FEATURE_ANY, }
+> >> +#define X86_MATCH(model)       X86_MATCH_INTEL_FAM6_MODEL(model, NULL)
+> >
+> > Maybe we can do a generic macro to avoid all these ', NULL' repetitions?
+> 
+> I opted for having the data argument everywhere to keep the macro maze
+> small. And we have enough places where data is actually used.
++1
 
-[1] https://patchwork.ozlabs.org/patch/1240809/
+--mark
 
-Big thanks to everyone who helped with figuring out the TegraPT format!
-
-Changelog:
-
-v3: - Fixed "BUG: KASAN: slab-out-of-bounds in tegra_partition". Thanks to
-      Peter Geis for noticing the problem.
-
-    - The MMC boot partitions scanning is now opt-in. See this patch:
-
-        mmc: block: Support partition-table scanning on boot partitions
-
-    - The found MMC boot partitions won't be assigned to the MMC boot
-      block device ever due to the new GENHD_FL_PART_SCAN_ONCE flag.
-
-      This makes us to ensure that the old behavior of the MMC core is
-      preserved for a non-Tegra MMC-block users.
-
-    New patches in v3:
-
-        block: Introduce GENHD_FL_PART_SCAN_ONCE
-        mmc: sdhci-tegra: Enable boot partitions scanning on Tegra20 and Tegra30
-
-v2: - Addressed v1 review comments from Stephen Warren by using BIT for
-      locating BCT position in IRAM.
-
-    - Added more validations to the TegraPT parser: partition type is
-      verified, eMMC instance ID is verified.
-
-    - TegraPT parser now doesn't touch any devices other than eMMC.
-
-    - EKS (encrypted keys) partition is blacklisted now.
-
-    - Implemented eMMC boot partitions scanning. These new patches are
-      added in a result:
-
-        mmc: block: Add mmc_bdev_to_part_type() helper
-        mmc: block: Add mmc_bdev_to_area_type() helper
-        mmc: block: Add MMC_QUIRK_RESCAN_MAIN_BLKDEV
-        mmc: block: Enable partition-table scanning for boot partitions
-        partitions/tegra: Implement eMMC boot partitions scanning
-
-Dmitry Osipenko (10):
-  mmc: core: Add raw_boot_mult field to mmc_ext_csd
-  mmc: block: Add mmc_bdev_to_card() helper
-  partitions: Introduce NVIDIA Tegra Partition Table
-  block: Introduce GENHD_FL_PART_SCAN_ONCE
-  mmc: block: Add mmc_bdev_to_part_type() helper
-  mmc: block: Add mmc_bdev_to_area_type() helper
-  mmc: block: Add MMC_QUIRK_RESCAN_MAIN_BLKDEV
-  mmc: block: Support partition-table scanning on boot partitions
-  mmc: sdhci-tegra: Enable boot partitions scanning on Tegra20 and
-    Tegra30
-  partitions/tegra: Implement eMMC boot partitions scanning
-
- arch/arm/mach-tegra/tegra.c    |  54 +++
- block/genhd.c                  |   2 +-
- block/partition-generic.c      |  13 +-
- block/partitions/Kconfig       |  10 +
- block/partitions/Makefile      |   1 +
- block/partitions/check.c       |   4 +
- block/partitions/tegra.c       | 612 +++++++++++++++++++++++++++++++++
- block/partitions/tegra.h       |   8 +
- drivers/mmc/core/block.c       | 104 ++++++
- drivers/mmc/core/mmc.c         |   2 +
- drivers/mmc/host/sdhci-tegra.c |  10 +-
- include/linux/genhd.h          |  12 +
- include/linux/mmc/blkdev.h     |  15 +
- include/linux/mmc/card.h       |   2 +
- include/linux/mmc/host.h       |   2 +
- include/soc/tegra/bootdata.h   |  46 +++
- include/soc/tegra/common.h     |   9 +
- include/soc/tegra/partition.h  |  91 +++++
- 18 files changed, 993 insertions(+), 4 deletions(-)
- create mode 100644 block/partitions/tegra.c
- create mode 100644 block/partitions/tegra.h
- create mode 100644 include/linux/mmc/blkdev.h
- create mode 100644 include/soc/tegra/bootdata.h
- create mode 100644 include/soc/tegra/partition.h
-
--- 
-2.25.1
-
+> Thanks,
+> 
+>         tglx
