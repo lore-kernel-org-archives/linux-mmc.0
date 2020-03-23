@@ -8,53 +8,53 @@ X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 03E01C54FD2
-	for <linux-mmc@archiver.kernel.org>; Mon, 23 Mar 2020 16:36:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 58A36C3F2CD
+	for <linux-mmc@archiver.kernel.org>; Mon, 23 Mar 2020 16:36:06 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id CF5A020722
-	for <linux-mmc@archiver.kernel.org>; Mon, 23 Mar 2020 16:36:04 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 26EF920836
+	for <linux-mmc@archiver.kernel.org>; Mon, 23 Mar 2020 16:36:06 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="m2OUE5YV"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="CyNyeMKW"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727677AbgCWQfp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 23 Mar 2020 12:35:45 -0400
-Received: from mail-lj1-f193.google.com ([209.85.208.193]:34998 "EHLO
-        mail-lj1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727652AbgCWQfo (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Mar 2020 12:35:44 -0400
-Received: by mail-lj1-f193.google.com with SMTP id u12so15350976ljo.2;
-        Mon, 23 Mar 2020 09:35:41 -0700 (PDT)
+        id S1727658AbgCWQfo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 23 Mar 2020 12:35:44 -0400
+Received: from mail-lj1-f194.google.com ([209.85.208.194]:43052 "EHLO
+        mail-lj1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727507AbgCWQfm (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Mar 2020 12:35:42 -0400
+Received: by mail-lj1-f194.google.com with SMTP id g27so6507421ljn.10;
+        Mon, 23 Mar 2020 09:35:40 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=YN6wlr+SxSHAMt4dIT8x49SccG7CxZ44xau7TZEGR7U=;
-        b=m2OUE5YVVMVA0++Y1OYwALT15/EvoPyUi4xHb4jj/G033Qc4tP7oVxev1xyzMwCFIZ
-         5hMl9UKZI5avvD9l6uIIwTbVwKcpKYBIUCXsNAeWyPH6phcrMsucH7U4i38LY/ZU5/xT
-         9YFy3E8Z3OtHJ9h7SqzhAxeYiogxXSkwPFfrskfkBEScQGXWdoIlo12mUcrtLdlDbTVN
-         b7PYkiHUBlm42Jt8fe9OpbWBhm54g2bq5MsReESziQNUebeX9bJ9lGQ0Y3Oy7E+nWYTA
-         X2m4NYw/DnFWQfo/4HpvU56akoSMquuplCoTUke1FyT7ePQDX2ws1auWkTcp6v/3os82
-         ELmg==
+        bh=w0YlAmpluZ5D3NO8kHqv749YNcVtvXYMv+8BYDY6gX8=;
+        b=CyNyeMKW8PFLFOs7Bf7yjiDE4vIvnA+m7J9nEYRxdr+Gx1hmxopSIb5ynvJR2d9yYu
+         FYzHnpeLwnV7RWIcWnXZnyTP+PsSoYJ5rbQjBQ5kWKyzAeJgpJ8yjaureGlZGmefXBvh
+         EY+bpzSo2CeGLmzEfaVHgMJ9F/SalVmxfsm+vZouSgpfMu8I0HWYpK9c4dNMlk60iH2S
+         p/AnZlnl3PKdLdg1R6EfJiBS3XoSqkrtGMqe7AqPuh+JxJRNEkEe7UvpTE3HrtLrgJZI
+         sSWP/L9WQstfoR8glEAbL3+37AIMouj+vfXg5vc0e56Ltz+1BPzomgmMYe1cEv57J2Ap
+         4frA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=YN6wlr+SxSHAMt4dIT8x49SccG7CxZ44xau7TZEGR7U=;
-        b=hyqi4gWyt1797RBvDrzhXBMjSG92/YUcFuVwXDENny6h+YpMtHmksyy3fMNr5Rt/7g
-         dkfeXhU2jMmuoYNfTT3shpb0tuAC2vEuiXJRxFZIT+9E3AJKBTU7zdGNStqMnT89Guve
-         TRYjTcy+z+YdMurWAu0qXweKKZBp5hJb82b+CDfj0BsXowVBfQZZpv0W1xpW+Ma/2fDc
-         ztItvMWLs85GRPEYm3ixTaFQ3bwcoHdDWnQHaVRUNjuONjR60KDXVR2hpfP+l2r4HJrp
-         gg1iWU2rX2sVX/xDSM2gyTZHdeUNyecR5ZpCT2LOOUe9OEZhzRZY8VV7wqvEEY8hJ5dl
-         6QtQ==
-X-Gm-Message-State: ANhLgQ3awCzXmfLFcAY0Qt30vBtK3tJ5/2g6xfnAm8Okb/8TwXFOFYQn
-        h2w1kNBEL7PMpmmpEMswHYyOeYNA
-X-Google-Smtp-Source: ADFU+vsAVKfLP8wIKNQtB9y9of/X+P2shjDrovtop+vKqr+VzzqMO6JjwELSsjcYxmtIVFjb7DvKvw==
-X-Received: by 2002:a2e:b88b:: with SMTP id r11mr14425033ljp.116.1584981340449;
-        Mon, 23 Mar 2020 09:35:40 -0700 (PDT)
+        bh=w0YlAmpluZ5D3NO8kHqv749YNcVtvXYMv+8BYDY6gX8=;
+        b=Hb51vSoE5wnThK8bahflY4zf+i67/F8c9U88AQsl4zr50tR7sfBB63LfXkDkKtKJ21
+         1CY8fyH56PEKd7EeAgWmOzS3HfYLv/dG2c4qU/l+Yiu/Je3GkQYbOA8e/Mnb9Nyhq/LZ
+         cRaiSf3edZWLpWmSnqmcgePLdie5BJecOHjPptIV/IuhWba5jecIbSsw7L7Ir80Undo+
+         /QwazAYRfN5dMAhD/6Swvu8S1B2LUR+CZHo1hUQo+6HK/CbBbcVxMcnOXALoldxnPvHN
+         BR5fmR+MIY/+OCDbYKkOYhNDcfQ/4x6dRyOsVBIxUYdy6QQqSvZHyxXY1jjeHWxjD6TS
+         EKuw==
+X-Gm-Message-State: ANhLgQ2V88b/V4OCIlEVOYRxMZZ5NJCE+38nuEjy0PMn56sz5ULkius+
+        m1W5yxI04BIMSRjqtoRk6ik=
+X-Google-Smtp-Source: ADFU+vuaNbeMeWKlKJCFpCe6dFW/Y2Ycr+EGB6ZeJQNghi8JRS+awpjDqrGdi02SL38G0Vf4wvZl5w==
+X-Received: by 2002:a2e:984d:: with SMTP id e13mr13623932ljj.275.1584981339297;
+        Mon, 23 Mar 2020 09:35:39 -0700 (PDT)
 Received: from localhost.localdomain (94-29-39-224.dynamic.spd-mgts.ru. [94.29.39.224])
-        by smtp.gmail.com with ESMTPSA id m14sm4820017lfo.25.2020.03.23.09.35.39
+        by smtp.gmail.com with ESMTPSA id m14sm4820017lfo.25.2020.03.23.09.35.38
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 23 Mar 2020 09:35:40 -0700 (PDT)
+        Mon, 23 Mar 2020 09:35:38 -0700 (PDT)
 From:   Dmitry Osipenko <digetx@gmail.com>
 To:     Jens Axboe <axboe@kernel.dk>,
         Thierry Reding <thierry.reding@gmail.com>,
@@ -72,9 +72,9 @@ Cc:     linux-tegra@vger.kernel.org, linux-block@vger.kernel.org,
         Gilles Grandou <gilles@grandou.net>,
         Ryan Grachek <ryan@edited.us>, linux-mmc@vger.kernel.org,
         linux-kernel@vger.kernel.org
-Subject: [PATCH v3 06/10] mmc: block: Add mmc_bdev_to_area_type() helper
-Date:   Mon, 23 Mar 2020 19:34:27 +0300
-Message-Id: <20200323163431.7678-7-digetx@gmail.com>
+Subject: [PATCH v3 05/10] mmc: block: Add mmc_bdev_to_part_type() helper
+Date:   Mon, 23 Mar 2020 19:34:26 +0300
+Message-Id: <20200323163431.7678-6-digetx@gmail.com>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20200323163431.7678-1-digetx@gmail.com>
 References: <20200323163431.7678-1-digetx@gmail.com>
@@ -85,13 +85,14 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-NVIDIA Tegra Partition Table parser needs to know eMMC partition type
-in order to validate and parse partition table properly. This patch adds
-new mmc_bdev_to_area_type() helper which takes block device for the input
-and returns a corresponding MMC card partition type.
+NVIDIA Tegra Partition Table parser needs to know eMMC boot partition ID
+that is associated with the block device in order to validate and parse
+partition table properly. This patch adds new mmc_bdev_to_part_type()
+helper which takes block device for the input and returns a corresponding
+MMC card partition ID (part_type).
 
-This allows tegra-partition parser to distinguish boot eMMC partition from
-the main eMMC partition.
+This is needed by tegra-partition parser in order to distinguish boot0
+eMMC partition from boot1.
 
 Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
 ---
@@ -100,14 +101,14 @@ Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
  2 files changed, 17 insertions(+)
 
 diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 2cee57c7388d..ec69b613ee92 100644
+index 36d84a8e182c..2cee57c7388d 100644
 --- a/drivers/mmc/core/block.c
 +++ b/drivers/mmc/core/block.c
-@@ -337,6 +337,22 @@ int mmc_bdev_to_part_type(struct block_device *bdev)
- 	return md->part_type;
+@@ -321,6 +321,22 @@ struct mmc_card *mmc_bdev_to_card(struct block_device *bdev)
+ 	return md->queue.card;
  }
  
-+int mmc_bdev_to_area_type(struct block_device *bdev)
++int mmc_bdev_to_part_type(struct block_device *bdev)
 +{
 +	struct mmc_blk_data *md;
 +	struct mmc_card *card;
@@ -120,21 +121,21 @@ index 2cee57c7388d..ec69b613ee92 100644
 +	if (!md)
 +		return -EINVAL;
 +
-+	return md->area_type;
++	return md->part_type;
 +}
 +
  static int mmc_blk_open(struct block_device *bdev, fmode_t mode)
  {
  	struct mmc_blk_data *md = mmc_blk_get(bdev->bd_disk);
 diff --git a/include/linux/mmc/blkdev.h b/include/linux/mmc/blkdev.h
-index 24e73ac02b4b..5fa5ef35ac25 100644
+index 67608c58de70..24e73ac02b4b 100644
 --- a/include/linux/mmc/blkdev.h
 +++ b/include/linux/mmc/blkdev.h
-@@ -10,5 +10,6 @@ struct mmc_card;
+@@ -9,5 +9,6 @@ struct block_device;
+ struct mmc_card;
  
  struct mmc_card *mmc_bdev_to_card(struct block_device *bdev);
- int mmc_bdev_to_part_type(struct block_device *bdev);
-+int mmc_bdev_to_area_type(struct block_device *bdev);
++int mmc_bdev_to_part_type(struct block_device *bdev);
  
  #endif /* LINUX_MMC_BLOCK_DEVICE_H */
 -- 
