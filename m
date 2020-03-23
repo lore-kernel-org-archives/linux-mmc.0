@@ -2,112 +2,162 @@ Return-Path: <SRS0=kaON=5I=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.3 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.3 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 06FEFC43331
-	for <linux-mmc@archiver.kernel.org>; Mon, 23 Mar 2020 19:59:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4B919C54FD3
+	for <linux-mmc@archiver.kernel.org>; Mon, 23 Mar 2020 20:24:01 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id CF8BC206F9
-	for <linux-mmc@archiver.kernel.org>; Mon, 23 Mar 2020 19:59:57 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1056420753
+	for <linux-mmc@archiver.kernel.org>; Mon, 23 Mar 2020 20:24:01 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="VbyqDhdm"
+	dkim=pass (1024-bit key) header.d=microchiptechnology.onmicrosoft.com header.i=@microchiptechnology.onmicrosoft.com header.b="Z6QViM6p"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725899AbgCWT75 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 23 Mar 2020 15:59:57 -0400
-Received: from mail-lj1-f194.google.com ([209.85.208.194]:43166 "EHLO
-        mail-lj1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725877AbgCWT75 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Mar 2020 15:59:57 -0400
-Received: by mail-lj1-f194.google.com with SMTP id g27so7270501ljn.10;
-        Mon, 23 Mar 2020 12:59:54 -0700 (PDT)
+        id S1727589AbgCWUX4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 23 Mar 2020 16:23:56 -0400
+Received: from esa1.microchip.iphmx.com ([68.232.147.91]:43361 "EHLO
+        esa1.microchip.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727585AbgCWUX4 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Mar 2020 16:23:56 -0400
+IronPort-SDR: Mo/+0g6otTA08coDniAXKRG+93NmujylJh+THmCnYb4GRIB7d+ISaYeKJYMqVEZ8f8+UCgSh3K
+ nJhkCcKuyuKDO5S5UH71nGpI8jHzb+nk8NFeoLkliLFHXBSwliL84VszjyWyBifMiGAp2yUB5x
+ Jsi25IT719KqA0RSvJTPHX+pYYIN/htALH0yCPxgWfPh5/iFiSX2cJryUMwDpAF6sxkC5ud4Ll
+ +EnOKcvoeYxNECs8osYUjfCR/Wxfjb6m7smKIDpQg5pQLsYLGhF7Yf3E+XP8IQ6EYHizWUOrqj
+ MhI=
+X-IronPort-AV: E=Sophos;i="5.72,297,1580799600"; 
+   d="scan'208";a="73163869"
+Received: from smtpout.microchip.com (HELO email.microchip.com) ([198.175.253.82])
+  by esa1.microchip.iphmx.com with ESMTP/TLS/AES256-SHA256; 23 Mar 2020 13:23:55 -0700
+Received: from chn-vm-ex02.mchp-main.com (10.10.85.144) by
+ chn-vm-ex04.mchp-main.com (10.10.85.152) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.1713.5; Mon, 23 Mar 2020 13:23:55 -0700
+Received: from NAM04-BN3-obe.outbound.protection.outlook.com (10.10.215.89) by
+ email.microchip.com (10.10.87.72) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.1713.5 via Frontend
+ Transport; Mon, 23 Mar 2020 13:23:54 -0700
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=lAY6VEsCeEnoYfdk+IM7INjKcSo9NMikbhl8PyAE0Kqdx9z91VT57mjQ35tBhrbtgQEMIs/f+Ouskm1zMYG8Ym8RYmWl0nQ0hc4nKht+Ncr7/lopfY/0NCYttAzlOkS7iYw19NijGjIxdHeAAa7rOY83Kl6iAGwoyjtrn+9cAydyOMT893IC5M5T2oazN1otryJmMr/yLTXRnLuC8MNDlNoEvkocYcmr9obvBVCy9cM9xyQSSJLcIjJFs2aEE0qOW3aFgpZk7qDKvyzhE5uuEjqX92/gB0theHDjRHewvPfpykngc37iAKxb74xlX/QOAxjtLH44LLwyR31V+BbluA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=dZ2gNxs+86vOVeafta+VPnsE1sYt1XeZMeX4rDDk3ZE=;
+ b=axiMK3BtiOmB7MQVlqFQluT59H/LDxacexttAZyeHEF9enPbkdZ/2oY3mgeLwc2pxf0qoIXXD/aDrgA5MwNUdn18wlsODVBq1AXkBTYKW+LLvRqZIjMRlI5FYxDdrqsizFVOKPe1YK7WG3RUyC8RszvQwl7qnb3GLH5V4WI1fjdFWjD8mVDw/q8ualvUe/d4BELeHlbas3KbRqKwB0WOxknp4lxS9PTeSSk5iZCUsw7zGVUw/TeOgDZGwNLkkDsDzfzswbhQdcCKnV2RraqZW9apv+jJFlVMneQQxXnP7pMEdpeRrWcLv9v7j0H5wrxPAtrdWN3QGocQLpctbYC9mg==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=microchip.com; dmarc=pass action=none
+ header.from=microchip.com; dkim=pass header.d=microchip.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=dbO9AMgv2C3q3wUDDoD6CSYAM2+vrjv9y3H8u+4ZnFk=;
-        b=VbyqDhdmtu1qDNYwk412YWO11Exes5+3Tbpn9dyrqH8rA4FST2Mmw57mVUUdXqETrq
-         3czM7De1zTFuS3Mr3yve7kzyd4RBh5vHUsmtejnJA/REpAtlcpULSkKfJcGmdm3XO88l
-         X+d5o78Uk/LDxT2wpAPPjhbDgJm+9p/znfdteIDwCTTm9Baoi1SMRcLJBHY94Y08914a
-         ui8LDs/96Tu7ScP9kdocgm9eZ1TLrvVlWCCT0lCi2gRCpitCWvliYWGIr1uqEDqueWiB
-         UI+TPjxRMuiP+nGvb26XIDQn4dBrIYe5s5t6+mU4EZf2Cz+4B5m+GVd7TU/eoseddF7w
-         5+lQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=dbO9AMgv2C3q3wUDDoD6CSYAM2+vrjv9y3H8u+4ZnFk=;
-        b=l9PsH2Vji8B97O1gdsjfzQBzYSTQzBu35eVWZc5Kjfve6HPtj2lZg2WYolopB6keB8
-         +d/CXD1kF92VDCiV95dKhjqQQm6idC0e8xHussgag7MaJWCBGPXrDL8Y+cd+L3l3lA8i
-         LWh49B4RTYgrumY6YR5nf4GrrlutKdj/TJkiCZLseia8kezs3ebDw4SUAkS759lY1pj5
-         EVyLmDhpL2mxATHQIZZk2mMZtzBdjRW7t5R0hmnCizeXhjUBxqfa/waN5yXN56+YAGFW
-         eaDdLRjmnrP0DAvbhKT9A8AmGltCmF5O7iVNPn2lsEwyrR8wUG3QHbKkwsLUZ4GlZ61w
-         tuWQ==
-X-Gm-Message-State: ANhLgQ3GrbaQ+HQH2X9FiqFdsAL1ywo5i+askTgN8MTtlYl8VyYfPFG6
-        YjjeHJegwLLLyk//zc+61sWrI0GL
-X-Google-Smtp-Source: ADFU+vvxc3Pnf8dsypolZV8SPKqREwTrzUhihQIubesluJG79gKWfF5VhPPWmJ8InGnZv1b/rXQ7hA==
-X-Received: by 2002:a2e:94c8:: with SMTP id r8mr15041191ljh.28.1584993593897;
-        Mon, 23 Mar 2020 12:59:53 -0700 (PDT)
-Received: from [192.168.2.145] (94-29-39-224.dynamic.spd-mgts.ru. [94.29.39.224])
-        by smtp.googlemail.com with ESMTPSA id 127sm8831243lfl.29.2020.03.23.12.59.52
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 23 Mar 2020 12:59:53 -0700 (PDT)
-Subject: Re: [PATCH v3 03/10] partitions: Introduce NVIDIA Tegra Partition
- Table
-To:     =?UTF-8?B?TWljaGHFgiBNaXJvc8WCYXc=?= <mirq-linux@rere.qmqm.pl>
-Cc:     Jens Axboe <axboe@kernel.dk>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        Jonathan Hunter <jonathanh@nvidia.com>,
-        David Heidelberg <david@ixit.cz>,
-        Peter Geis <pgwipeout@gmail.com>,
-        Stephen Warren <swarren@wwwdotorg.org>,
-        Nicolas Chauvet <kwizart@gmail.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Billy Laws <blaws05@gmail.com>, linux-tegra@vger.kernel.org,
-        linux-block@vger.kernel.org, Andrey Danin <danindrey@mail.ru>,
-        Gilles Grandou <gilles@grandou.net>,
-        Ryan Grachek <ryan@edited.us>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-References: <20200323163431.7678-1-digetx@gmail.com>
- <20200323163431.7678-4-digetx@gmail.com>
- <20200323191748.GB30585@qmqm.qmqm.pl>
-From:   Dmitry Osipenko <digetx@gmail.com>
-Message-ID: <67140755-c829-5c58-3fbf-efd496e225df@gmail.com>
-Date:   Mon, 23 Mar 2020 22:59:52 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.5.0
-MIME-Version: 1.0
-In-Reply-To: <20200323191748.GB30585@qmqm.qmqm.pl>
-Content-Type: text/plain; charset=utf-8
+ d=microchiptechnology.onmicrosoft.com;
+ s=selector2-microchiptechnology-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=dZ2gNxs+86vOVeafta+VPnsE1sYt1XeZMeX4rDDk3ZE=;
+ b=Z6QViM6pOISwCDSLB8gWoGl1PFb2R1xcBeq05/59vV7+qrZdZwyIWKQCgWY2NBOVFZMe/n2ny4n1fFFo6CDSG0ZOWaMwvZ0PWYrbnlMCw15WEwGPqpHaNjwzSu94YlgZb4VGGpiqbZfVIYdFaz4XJ1pr2UGwAeBNAIBLX8/9ybc=
+Received: from BY5PR11MB3895.namprd11.prod.outlook.com (2603:10b6:a03:18e::21)
+ by BY5PR11MB4133.namprd11.prod.outlook.com (2603:10b6:a03:18f::21) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.2835.15; Mon, 23 Mar
+ 2020 20:23:51 +0000
+Received: from BY5PR11MB3895.namprd11.prod.outlook.com
+ ([fe80::c09b:2e03:b941:13c5]) by BY5PR11MB3895.namprd11.prod.outlook.com
+ ([fe80::c09b:2e03:b941:13c5%5]) with mapi id 15.20.2835.021; Mon, 23 Mar 2020
+ 20:23:51 +0000
+From:   <Ludovic.Desroches@microchip.com>
+To:     <mirq-linux@rere.qmqm.pl>, <ulf.hansson@linaro.org>,
+        <adrian.hunter@intel.com>, <Nicolas.Ferre@microchip.com>,
+        <alexandre.belloni@bootlin.com>
+CC:     <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>
+Subject: Re: [PATCH] mmc: sdhci-of-at91: fix cd-gpios for SAMA5D2
+Thread-Topic: [PATCH] mmc: sdhci-of-at91: fix cd-gpios for SAMA5D2
+Thread-Index: AQHV+ukG6vq+Dh/nIkKVG4ZfW2cXeqhWrCcA
+Date:   Mon, 23 Mar 2020 20:23:51 +0000
+Message-ID: <635a5f5f-fb52-d9ef-a905-3e09ee1f4f18@microchip.com>
+References: <8d10950d9940468577daef4772b82a071b204716.1584290561.git.mirq-linux@rere.qmqm.pl>
+In-Reply-To: <8d10950d9940468577daef4772b82a071b204716.1584290561.git.mirq-linux@rere.qmqm.pl>
+Accept-Language: en-US
 Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+user-agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:68.0) Gecko/20100101
+ Thunderbird/68.6.0
+authentication-results: spf=none (sender IP is )
+ smtp.mailfrom=Ludovic.Desroches@microchip.com; 
+x-originating-ip: [92.150.97.227]
+x-ms-publictraffictype: Email
+x-ms-office365-filtering-correlation-id: 7aef27e0-8aa2-432a-3af5-08d7cf681a0a
+x-ms-traffictypediagnostic: BY5PR11MB4133:
+x-ms-exchange-transport-forked: True
+x-microsoft-antispam-prvs: <BY5PR11MB4133162FBCD22FE5EC76C379EFF00@BY5PR11MB4133.namprd11.prod.outlook.com>
+x-bypassexternaltag: True
+x-ms-oob-tlc-oobclassifiers: OLM:1468;
+x-forefront-prvs: 0351D213B3
+x-forefront-antispam-report: SFV:NSPM;SFS:(10009020)(366004)(346002)(376002)(396003)(136003)(39860400002)(199004)(76116006)(36756003)(81156014)(81166006)(54906003)(8676002)(110136005)(6486002)(6506007)(316002)(31696002)(6512007)(4326008)(86362001)(31686004)(186003)(64756008)(26005)(5660300002)(8936002)(66946007)(66476007)(71200400001)(66574012)(2616005)(66556008)(478600001)(66446008)(2906002);DIR:OUT;SFP:1101;SCL:1;SRVR:BY5PR11MB4133;H:BY5PR11MB3895.namprd11.prod.outlook.com;FPR:;SPF:None;LANG:en;PTR:InfoNoRecords;A:1;
+received-spf: None (protection.outlook.com: microchip.com does not designate
+ permitted sender hosts)
+x-ms-exchange-senderadcheck: 1
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: 5Gx54myA7kilgOFdZdkhU/4tkPugiKeBmST47XMpj3/bZWKlk0CzKoDJbhjXoH67n4IfJV1iiRXdRPbYQFjGCayjd1zLPoURJsMeL9Wy687aNFKJEnlDA2wlc62EiBKIozdrSgy+sAQqWe7Trfp+WLwhKB+dddQ1ZeVPSpWCBOwA/52c88qG2n+ujzTppQaFcH8i1UVB054eJI556LTupwhW7t6vopZlVdQCK2oca0M39TVAFrryeothqnkS+loTC8EPPnuXj+PmY67DuVs2J9CS1gDcoPYv62bCuNeaYhs6tNI/Q7lrLW/s6Q6p9Ndfy3Dc48XwMU4sA2IvZQ30RKGO5XBBq9U4tzjDE90l68+0S3b6Rir3hcyojhui3TG24Gs/SmCVpYjG+pey1iHSCDyoay2z2h3bPFNiAzpd0fqWc8OeJwMpDtudmKjmcDW5
+x-ms-exchange-antispam-messagedata: +aJ478Xhn73toxHLML3dlAxUhqpZv963XNfb/nqBzSi4WFZsN5BRqVVm7nVAtW+rf+9WxJrbalwrg3tsKcN8sn3MJzSOR21nQxIs0KglMt+FTu7MAGfl+PRlJuvJqTOQzcAha7iPIBjOeR8rfWzfDw==
+Content-Type: text/plain; charset="utf-8"
+Content-ID: <00725C1259ABA94F9CED032BB20314D8@namprd11.prod.outlook.com>
+Content-Transfer-Encoding: base64
+MIME-Version: 1.0
+X-MS-Exchange-CrossTenant-Network-Message-Id: 7aef27e0-8aa2-432a-3af5-08d7cf681a0a
+X-MS-Exchange-CrossTenant-originalarrivaltime: 23 Mar 2020 20:23:51.4462
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 3f4057f3-b418-4d4e-ba84-d55b4e897d88
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: UBBHZHkjB25LpswcOgAYMv+ktTy57dUY4XA06i3Qmc0DTIw6tPDca9NPs99Tbk56GK6cAKfJg1RcEgi4/ZwxXkVr2RhQwN7P4E+d98rMRFM=
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: BY5PR11MB4133
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-23.03.2020 22:17, Michał Mirosław пишет:
-> On Mon, Mar 23, 2020 at 07:34:24PM +0300, Dmitry Osipenko wrote:
->> All NVIDIA Tegra devices use a special partition table format for the
->> internal storage partitioning. Most of Tegra devices have GPT partition
->> in addition to TegraPT, but some older Android consumer-grade devices do
->> not or GPT is placed in a wrong sector, and thus, the TegraPT is needed
->> in order to support these devices properly in the upstream kernel. This
->> patch adds support for NVIDIA Tegra Partition Table format that is used
->> at least by all NVIDIA Tegra20 and Tegra30 devices.
->>
->> Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
->> ---
->>  arch/arm/mach-tegra/tegra.c   |  54 ++++
-> [...]
-> 
-> Please split off this part and make the information available to
-> userspace (pt_addr + pt_size) if found. This would make it easier
-> to support use the partition table later in initrd instead.
-
-Please clarify what do you mean by "use the partition table later in
-initrd instead".
+SGksDQoNCg0KT24gMy8xNS8yMDIwIDU6NDQgUE0sIE1pY2hhxYIgTWlyb3PFgmF3IHdyb3RlDQo+
+IFNBTUE1RDJ4IGRvZXNuJ3QgZHJpdmUgQ01EIGxpbmUgaWYgR1BJTyBpcyB1c2VkIGFzIENEIGxp
+bmUgKGF0IGxlYXN0DQo+IFNBTUE1RDI3IGRvZXNuJ3QpLiBGaXggdGhpcyBieSBmb3JjaW5nIGNh
+cmQtZGV0ZWN0IGluIHRoZSBtb2R1bGUNCj4gaWYgbW9kdWxlLWNvbnRyb2xsZWQgQ0QgaXMgbm90
+IHVzZWQuDQo+DQo+IEZpeGVkIGNvbW1pdCBhZGRyZXNzZXMgdGhlIHByb2JsZW0gb25seSBmb3Ig
+bm9uLXJlbW92YWJsZSBjYXJkcy4gVGhpcw0KPiBhbWVuZHMgaXQgdG8gYWxzbyBjb3ZlciBncGlv
+LWNkIGNhc2UuDQo+DQo+IENjOiBzdGFibGVAdmdlci5rZXJuZWwub3JnDQo+IEZpeGVzOiA3YTFl
+M2YxNDMxNzYgKCJtbWM6IHNkaGNpLW9mLWF0OTE6IGZvcmNlIGNhcmQgZGV0ZWN0IHZhbHVlIGZv
+ciBub24gcmVtb3ZhYmxlIGRldmljZXMiKQ0KPiBTaWduZWQtb2ZmLWJ5OiBNaWNoYcWCIE1pcm9z
+xYJhdyA8bWlycS1saW51eEByZXJlLnFtcW0ucGw+DQoNCkV2ZW4gaWYgaXQncyB0b28gbGF0ZSwg
+SSBhZ3JlZSB3aXRoIHRoaXMgcGF0Y2guIFRoYW5rcywgSSBkaWRuJ3QgZXhwZWN0IA0Kc29tZW9u
+ZSB3aWxsIHVzZSBhIEdQSU8gQ0QgaW5zdGVhZCBvZiB0aGUNCg0Kb25lIG9mIHRoZSBjb250cm9s
+bGVyIHNvIHRoaXMgY2FzZSB3YXMgbWlzc2luZy4NCg0KSW4gZmFjdCwgdGhlIHdob2xlIFNBTUE1
+RDIgZmFtaWx5IGlzIGNvbmNlcm5lZCBkZXBlbmRpbmcgb24gdGhlIHJldmlzaW9uIA0Kb2YgdGhl
+IFNvQy4gRnJvbSB0aGUgdG9wIG9mIG15IGhlYWQsDQoNCmZvciByZXYgQSwgaWYgdGhlIHBpbiBp
+cyBtdXhlZCB0byBhbm90aGVyIGZ1bmN0aW9uIHRoYW4gdGhlIFNETU1DIA0KY29udHJvbGxlciwg
+dGhlIGRlZmF1bHQgdmFsdWUgaXMgY2FyZCBwcmVzZW50Lg0KDQpGb3IgcmV2IEIgYW5kIGxhdGVy
+LCB0aGUgZGVmYXVsdCB2YWx1ZSBpcyBubyBjYXJkIHByZXNlbnQsIHRoYXQncyB3aHkgDQp0aGUg
+Q01EIGxpbmUgaXMgbm90IGRyaXZlbi4NCg0KUmVnYXJkcw0KDQpMdWRvdmljDQoNCg0KPiAtLS0N
+Cj4gICBkcml2ZXJzL21tYy9ob3N0L3NkaGNpLW9mLWF0OTEuYyB8IDggKysrKysrLS0NCj4gICAx
+IGZpbGUgY2hhbmdlZCwgNiBpbnNlcnRpb25zKCspLCAyIGRlbGV0aW9ucygtKQ0KPg0KPiBkaWZm
+IC0tZ2l0IGEvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1vZi1hdDkxLmMgYi9kcml2ZXJzL21tYy9o
+b3N0L3NkaGNpLW9mLWF0OTEuYw0KPiBpbmRleCBkOTBmNGVkMTgyODMuLjhmOGRhMmZlNDhhOSAx
+MDA2NDQNCj4gLS0tIGEvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1vZi1hdDkxLmMNCj4gKysrIGIv
+ZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1vZi1hdDkxLmMNCj4gQEAgLTE4NSw3ICsxODUsOCBAQCBz
+dGF0aWMgdm9pZCBzZGhjaV9hdDkxX3Jlc2V0KHN0cnVjdCBzZGhjaV9ob3N0ICpob3N0LCB1OCBt
+YXNrKQ0KPg0KPiAgICAgICAgICBzZGhjaV9yZXNldChob3N0LCBtYXNrKTsNCj4NCj4gLSAgICAg
+ICBpZiAoaG9zdC0+bW1jLT5jYXBzICYgTU1DX0NBUF9OT05SRU1PVkFCTEUpDQo+ICsgICAgICAg
+aWYgKChob3N0LT5tbWMtPmNhcHMgJiBNTUNfQ0FQX05PTlJFTU9WQUJMRSkNCj4gKyAgICAgICAg
+ICAgfHwgbW1jX2dwaW9fZ2V0X2NkKGhvc3QtPm1tYykgPj0gMCkNCj4gICAgICAgICAgICAgICAg
+ICBzZGhjaV9hdDkxX3NldF9mb3JjZV9jYXJkX2RldGVjdChob3N0KTsNCj4NCj4gICAgICAgICAg
+aWYgKHByaXYtPmNhbF9hbHdheXNfb24gJiYgKG1hc2sgJiBTREhDSV9SRVNFVF9BTEwpKQ0KPiBA
+QCAtNDg3LDggKzQ4OCwxMSBAQCBzdGF0aWMgaW50IHNkaGNpX2F0OTFfcHJvYmUoc3RydWN0IHBs
+YXRmb3JtX2RldmljZSAqcGRldikNCj4gICAgICAgICAgICogZGV0ZWN0aW9uIHByb2NlZHVyZSB1
+c2luZyB0aGUgU0RNQ0NfQ0Qgc2lnbmFsIGlzIGJ5cGFzc2VkLg0KPiAgICAgICAgICAgKiBUaGlz
+IGJpdCBpcyByZXNldCB3aGVuIGEgc29mdHdhcmUgcmVzZXQgZm9yIGFsbCBjb21tYW5kIGlzIHBl
+cmZvcm1lZA0KPiAgICAgICAgICAgKiBzbyB3ZSBuZWVkIHRvIGltcGxlbWVudCBvdXIgb3duIHJl
+c2V0IGZ1bmN0aW9uIHRvIHNldCBiYWNrIHRoaXMgYml0Lg0KPiArICAgICAgICAqDQo+ICsgICAg
+ICAgICogV0E6IFNBTUE1RDIgZG9lc24ndCBkcml2ZSBDTUQgaWYgdXNpbmcgQ0QgR1BJTyBsaW5l
+Lg0KPiAgICAgICAgICAgKi8NCj4gLSAgICAgICBpZiAoaG9zdC0+bW1jLT5jYXBzICYgTU1DX0NB
+UF9OT05SRU1PVkFCTEUpDQo+ICsgICAgICAgaWYgKChob3N0LT5tbWMtPmNhcHMgJiBNTUNfQ0FQ
+X05PTlJFTU9WQUJMRSkNCj4gKyAgICAgICAgICAgfHwgbW1jX2dwaW9fZ2V0X2NkKGhvc3QtPm1t
+YykgPj0gMCkNCj4gICAgICAgICAgICAgICAgICBzZGhjaV9hdDkxX3NldF9mb3JjZV9jYXJkX2Rl
+dGVjdChob3N0KTsNCj4NCj4gICAgICAgICAgcG1fcnVudGltZV9wdXRfYXV0b3N1c3BlbmQoJnBk
+ZXYtPmRldik7DQo+IC0tDQo+IDIuMjAuMQ0KPg0KDQo=
