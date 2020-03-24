@@ -2,58 +2,57 @@ Return-Path: <SRS0=tDGl=5J=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_GIT autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 93204C2BAEE
-	for <linux-mmc@archiver.kernel.org>; Tue, 24 Mar 2020 18:07:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2B73BC54FCF
+	for <linux-mmc@archiver.kernel.org>; Tue, 24 Mar 2020 18:07:45 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 6F60A20719
-	for <linux-mmc@archiver.kernel.org>; Tue, 24 Mar 2020 18:07:11 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 06FE320719
+	for <linux-mmc@archiver.kernel.org>; Tue, 24 Mar 2020 18:07:45 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="TIel5Uag"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Bf1+yGdf"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727310AbgCXSHK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 24 Mar 2020 14:07:10 -0400
-Received: from mail-lf1-f68.google.com ([209.85.167.68]:37562 "EHLO
-        mail-lf1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727611AbgCXSHK (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 24 Mar 2020 14:07:10 -0400
-Received: by mail-lf1-f68.google.com with SMTP id j11so14019116lfg.4
-        for <linux-mmc@vger.kernel.org>; Tue, 24 Mar 2020 11:07:08 -0700 (PDT)
+        id S1727869AbgCXSHo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 24 Mar 2020 14:07:44 -0400
+Received: from mail-lj1-f193.google.com ([209.85.208.193]:33790 "EHLO
+        mail-lj1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727318AbgCXSHo (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 24 Mar 2020 14:07:44 -0400
+Received: by mail-lj1-f193.google.com with SMTP id f20so3771849ljm.0
+        for <linux-mmc@vger.kernel.org>; Tue, 24 Mar 2020 11:07:43 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=f8SsdXxw6WR8Wur1e28lt2OagUPIvgDuohaIqQCKjAs=;
-        b=TIel5Uag6dZ3G0P5rfvaRxHE+J6faOARtdYwQWa0o7ycd/GgSLvBZmXGfzUYoA3wCR
-         chLelbgWdGy0YTF6/9ycMDGKSUub/JCYmjc2JVNFkp6Cf6vDkWUDMRmlndg1zFYOXSOr
-         5V6elXA2S6f9Nmf0RqrO77kmdvuaN1Qad+WEHn/Dfra1Pq9pOhrYZBAbEHGQpbLnRrXb
-         1giw7FMuH6ECSXaE0gM2ElHm8kskRBz2SpCUv2VTYsjS9FJuULzLdyVT2KZ0KxMJrl8N
-         QvH11UsguqzJv36qR9I6ffVNRkhQbGZrA0/3LBceTHkbbARh4W41jHq4SJIqLS+CCu7q
-         W0wA==
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=qPTlvoqZxYaSsWLUlKp85khmY6NurtsqQgDSkrG+7e0=;
+        b=Bf1+yGdfLrsGJ6+JaogwSOUV0Vi7WwKZ+Cb5iYqxq+c0uY2CpetQ2VNbyVM+M8sWsK
+         zL25zQ+xc7lTghUek8g6mbW/DmIGmav25OcsQfcV5SmnUiNK5x65gEa8twh29GqzUact
+         jZxA6eyH0f2d6NVZKxi9GRRBahd0SC3JDEvZHDidgPV4/uZIp6GaY0kqVGYmDQRKe69F
+         McC5nUKNjhXo/saS0Dl3uHzLSUGdkRbE4naEAnbQTcamZXkueeNRI5bzbpkgCsFFVWYu
+         FBp9JmCCBqOXtA98yBgB/btHPGrO7C8vAlatAXtd131puXJtWynZF7WmA26mmtYpGp5F
+         NhLg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=f8SsdXxw6WR8Wur1e28lt2OagUPIvgDuohaIqQCKjAs=;
-        b=OX/WEsUWAwo12p23IJNTftdh7chDAtDbs7re1RztEEP2jt+7B9ZVgyU50MtQESFeMh
-         3xlCMF/ubNWxh7+/JvS0C01xcsXIrSq3mfp09I47ztIJzqagqr5kum2Qk0BfAPf5BV7Z
-         o4QHwVspqwh5T8+35NAXQOaSbzpvLhhjDsIiiirnAwvxvG0VmOwLISh+UtYwyj4Z8Dwp
-         GPGTb0mpFJDZRSvVhQOe4u+A4DJBeBPLPG3vUZho4r+2wTK8OZTK4uhsKl0MuXC8MrAD
-         eD1f50PypZQS++Grzrnb5NgO+il/XozU/42nn1rIhT7Jn8qmUX9ceLu4qD7vjIZ8jRU9
-         v44g==
-X-Gm-Message-State: ANhLgQ2qJLmxdHY5QLaFRiQ8CMIPJT2ZGkTNwJrAXbHZTpeNjyDW7FBR
-        k9FP0K1lCp53hz7jRtsvp1FS8Q==
-X-Google-Smtp-Source: ADFU+vs1iKgFEQHMKMWWpUIuZuzM5YuqIBxiTCl2JAnxIR+KDVwYeJ+0kD/ZNvy1xNOu0SxrTNAc4Q==
-X-Received: by 2002:a19:be11:: with SMTP id o17mr7367103lff.168.1585073227363;
-        Tue, 24 Mar 2020 11:07:07 -0700 (PDT)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=qPTlvoqZxYaSsWLUlKp85khmY6NurtsqQgDSkrG+7e0=;
+        b=gofIdQ/4Yc1G02byPkzEv0Mk2ivfni9kN9C2dhar2XOetRocSf31dHdnP4T5xx3v6e
+         Z6ZEOiS31DJ5JchVaCeHvENt8/L54+68TwkcVnw2Ont1/ciakiesNKksaJVQoRtV9pi4
+         FXQONup+FLbN2SbLtCVWEHMV0f+2WbQdCqWp6rsgFLb9DiXWXfWJUCbliHUXeHXhveQb
+         e/BQfnP6oQn56OmtWeyDuOBfinsoiafrBr54WHzKiNZ7D1/jyq4T72KIcMtoouplhg6T
+         2CEj8IlbXU+4AR0/hNYn6BkLcaZauI8mBqRLW4Snx7mnqTuetRyq1BmYzFi3+8QcF5Gg
+         fBiw==
+X-Gm-Message-State: ANhLgQ3sv6pHS8ufb3G9e9HCb773mKvTOR48PSTf2YFdFp7P5k1fTNJj
+        053Ki/6QBHhT6XKX8rr9v2tQmA==
+X-Google-Smtp-Source: ADFU+vsmiqtQhBKMKWssgrrK/lWoNR93iW5uPXpAPArpqGQeeABNK4dyIrGfgUB3Yob+0jpdRC3cVw==
+X-Received: by 2002:a2e:8608:: with SMTP id a8mr17888175lji.59.1585073262792;
+        Tue, 24 Mar 2020 11:07:42 -0700 (PDT)
 Received: from localhost.localdomain (h-158-174-22-210.NA.cust.bahnhof.se. [158.174.22.210])
-        by smtp.gmail.com with ESMTPSA id 203sm10519660ljf.65.2020.03.24.11.07.05
+        by smtp.gmail.com with ESMTPSA id 3sm12113809ljq.18.2020.03.24.11.07.41
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 24 Mar 2020 11:07:06 -0700 (PDT)
+        Tue, 24 Mar 2020 11:07:42 -0700 (PDT)
 From:   Ulf Hansson <ulf.hansson@linaro.org>
 To:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
         Sasha Levin <sashal@kernel.org>, stable@vger.kernel.org
@@ -61,15 +60,11 @@ Cc:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
         Sowjanya Komatineni <skomatineni@nvidia.com>,
         Faiz Abbas <faiz_abbas@ti.com>,
         Anders Roxell <anders.roxell@linaro.org>,
-        Naresh Kamboju <naresh.kamboju@linaro.org>,
-        Bitan Biswas <bbiswas@nvidia.com>,
-        Peter Geis <pgwipeout@gmail.com>
-Subject: [PATCH 5.5.12 5/5] mmc: sdhci-tegra: Fix busy detection by enabling MMC_CAP_NEED_RSP_BUSY
-Date:   Tue, 24 Mar 2020 19:06:50 +0100
-Message-Id: <20200324180650.28819-6-ulf.hansson@linaro.org>
+        Naresh Kamboju <naresh.kamboju@linaro.org>
+Subject: [PATCH 5.4.28 0/5] mmc: Fix some busy detect problems
+Date:   Tue, 24 Mar 2020 19:07:33 +0100
+Message-Id: <20200324180738.28892-1-ulf.hansson@linaro.org>
 X-Mailer: git-send-email 2.20.1
-In-Reply-To: <20200324180650.28819-1-ulf.hansson@linaro.org>
-References: <20200324180650.28819-1-ulf.hansson@linaro.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Sender: linux-mmc-owner@vger.kernel.org
@@ -77,41 +72,24 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-[ Upstream commit d2f8bfa4bff5028bc40ed56b4497c32e05b0178f ]
+This series provides a couple of manually backported mmc changes that fixes some
+busy detect issues, for a couple of mmc host drivers (sdhci-tegra|omap).
 
-It has turned out that the sdhci-tegra controller requires the R1B response,
-for commands that has this response associated with them. So, converting
-from an R1B to an R1 response for a CMD6 for example, leads to problems
-with the HW busy detection support.
+Ulf Hansson (5):
+  mmc: core: Allow host controllers to require R1B for CMD6
+  mmc: core: Respect MMC_CAP_NEED_RSP_BUSY for erase/trim/discard
+  mmc: core: Respect MMC_CAP_NEED_RSP_BUSY for eMMC sleep command
+  mmc: sdhci-omap: Fix busy detection by enabling MMC_CAP_NEED_RSP_BUSY
+  mmc: sdhci-tegra: Fix busy detection by enabling MMC_CAP_NEED_RSP_BUSY
 
-Fix this by informing the mmc core about the requirement, via setting the
-host cap, MMC_CAP_NEED_RSP_BUSY.
-
-Reported-by: Bitan Biswas <bbiswas@nvidia.com>
-Reported-by: Peter Geis <pgwipeout@gmail.com>
-Suggested-by: Sowjanya Komatineni <skomatineni@nvidia.com>
-Cc: <stable@vger.kernel.org>
-Tested-by: Sowjanya Komatineni <skomatineni@nvidia.com>
-Tested-By: Peter Geis <pgwipeout@gmail.com>
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
----
+ drivers/mmc/core/core.c        | 5 ++++-
+ drivers/mmc/core/mmc.c         | 7 +++++--
+ drivers/mmc/core/mmc_ops.c     | 8 +++++---
+ drivers/mmc/host/sdhci-omap.c  | 3 +++
  drivers/mmc/host/sdhci-tegra.c | 3 +++
- 1 file changed, 3 insertions(+)
+ include/linux/mmc/host.h       | 1 +
+ 6 files changed, 21 insertions(+), 6 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-index 403ac44a7378..a25c3a4d3f6c 100644
---- a/drivers/mmc/host/sdhci-tegra.c
-+++ b/drivers/mmc/host/sdhci-tegra.c
-@@ -1552,6 +1552,9 @@ static int sdhci_tegra_probe(struct platform_device *pdev)
- 	if (tegra_host->soc_data->nvquirks & NVQUIRK_ENABLE_DDR50)
- 		host->mmc->caps |= MMC_CAP_1_8V_DDR;
- 
-+	/* R1B responses is required to properly manage HW busy detection. */
-+	host->mmc->caps |= MMC_CAP_NEED_RSP_BUSY;
-+
- 	tegra_sdhci_parse_dt(host);
- 
- 	tegra_host->power_gpio = devm_gpiod_get_optional(&pdev->dev, "power",
 -- 
 2.20.1
 
