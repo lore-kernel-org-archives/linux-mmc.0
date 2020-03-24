@@ -7,53 +7,53 @@ X-Spam-Status: No, score=-9.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E1DEDC54EEB
-	for <linux-mmc@archiver.kernel.org>; Tue, 24 Mar 2020 18:08:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6CF30C54EEB
+	for <linux-mmc@archiver.kernel.org>; Tue, 24 Mar 2020 18:08:14 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id C0B702076E
-	for <linux-mmc@archiver.kernel.org>; Tue, 24 Mar 2020 18:08:11 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4AB2C20719
+	for <linux-mmc@archiver.kernel.org>; Tue, 24 Mar 2020 18:08:14 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="WzIwycBA"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="mecw7Z1k"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727382AbgCXSIL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 24 Mar 2020 14:08:11 -0400
-Received: from mail-lj1-f196.google.com ([209.85.208.196]:32813 "EHLO
-        mail-lj1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728024AbgCXSIK (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 24 Mar 2020 14:08:10 -0400
-Received: by mail-lj1-f196.google.com with SMTP id f20so3773353ljm.0
-        for <linux-mmc@vger.kernel.org>; Tue, 24 Mar 2020 11:08:10 -0700 (PDT)
+        id S1728024AbgCXSIN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 24 Mar 2020 14:08:13 -0400
+Received: from mail-lj1-f194.google.com ([209.85.208.194]:40417 "EHLO
+        mail-lj1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728035AbgCXSIN (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 24 Mar 2020 14:08:13 -0400
+Received: by mail-lj1-f194.google.com with SMTP id 19so19601536ljj.7
+        for <linux-mmc@vger.kernel.org>; Tue, 24 Mar 2020 11:08:11 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=W/YxNSIqnPUr4VjEbur5ld6du3CHk+yHVEsRun2OwXw=;
-        b=WzIwycBAI/Nyo5430Z+dYSHJe3138HP7s9AT/1sbgqUv8VU+d+5X8tWuSgs7Cxdimy
-         RynjsTaP+nifzo2kiJGn+veNYVo3jG3zwsm2FLLx9JJ+ZnueEq0V5wbwpQjenN2k1QpU
-         eDLsxL/Bn9OZoVZRae6lh4InQwVmXMVEbg3V9gT9n2AnqtPHvnzsVvmW6/Gdv0Rmi8o3
-         w1JVDgL0YKsSJEif1QEzbQ7CCEFrgV35pl24DAcfKCoJOx5QZCGxDwPizzboQJGsWhu2
-         UZ2a9cmvtSAaUSmc3PjW7XRQ02IanguDWkT9IHTl2qOlYJ8iRF1574mK5Ch4zF1e7YJg
-         9sRg==
+        bh=64ZAMpUJ5rH31akevtnc9j967RGejqJSPQFQwpUtFu8=;
+        b=mecw7Z1kjIP1pClqvR9MdTgWcQ4OaV74xHWC0Mpa+3eX/nDK6mi+qJwmLGJ39LQsrp
+         4fN1MCFaVMeu876vvPiEaQkHZQCGi0dnrT5ggddwnWOOtnmL16DPFVx3V27O54l7eHzy
+         Aan2G5o2A2VOZNXuEcynlZEzGCxmmPG5Sk1c8BtH+y5B2eeFYXIld1eo2CfBY4WcLlJx
+         UB0w6Th7Wdb5Jlj5bU+LWfkFToxGdyKvwslPt10i/9wbeluAUxc4JbWi0xhOI6QiWZqC
+         liBkw1MCsonHMstDrYRF0lvEblTdJ9YCt7k8mXTWhi6fYuO8s7B4bvM/s+lL1yNezVD5
+         IGAA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=W/YxNSIqnPUr4VjEbur5ld6du3CHk+yHVEsRun2OwXw=;
-        b=JzwYAPvCC7i6zPjOYWAmqjMVsB4ofGoIXPDH9bNw8/eRxtDY3BMUxWT3CaV5uiPHJT
-         1kTMP158UuwD9cTLfpGTbGJfjROO08fgVqL9tC6gHnMtxmze335FwYwbIGQhYJ+PNRa4
-         Oh/QGTd50M9QlLRVwkOlmGO0IOsP0UMGQNihEVI3GmehNiLS2rdjP0jp/Wzva9+yvbiS
-         0c/NFhsOy9TEz51YRCj+Vg2eem19wpgsxRYjQsofKqa+xCJe3pzT63tuTqzRYyCPaEWJ
-         BUHtCMONSNZwk/CuPMNNu5o4YyIziQNumBxrLiZ0/AQpfDpmD/yvsezQC0aYvdK5IOl9
-         mPnQ==
-X-Gm-Message-State: ANhLgQ22EbXwqLsr57ZmPQERda3z2sw2euiLgC2Iy3sHtguRt3fo3/4p
-        SyXWJ984gQWrUVbWbuBhnJT51g==
-X-Google-Smtp-Source: ADFU+vuKgIrcj8NzsvCDj7GQ1mhfxPF3wuWv58i9um0vFVuiWKd8MpP+JfmhjN+VWFrcHuBT1XlNQg==
-X-Received: by 2002:a2e:b801:: with SMTP id u1mr17057577ljo.84.1585073289261;
-        Tue, 24 Mar 2020 11:08:09 -0700 (PDT)
+        bh=64ZAMpUJ5rH31akevtnc9j967RGejqJSPQFQwpUtFu8=;
+        b=da47VPVKuHpuViiJFdwpzNjYJOsiiuzGfPZE882a5y4zehurbXJryuryex5EgawwmN
+         VZK1CuUKvKWa98I6k17/HOOQ6lG6Ipb789cLQqMKLus31hP+3jQUskRry1XKYSjDfdQW
+         NMqpFpeHRcFSHKA+/Ngfjpev3aRw++pAz5KrJroEcGjQEgV80rQixrTwPoRoCm4zFpvc
+         akM6PSNQ/c+3fVdPk1GtHBJ6K8P/O1g3NHeTI7GpMH+Rtt7sLVNzhNRzNk0TeFjPNmDh
+         5YfvdxgMzBcbfI6KQCUbn1pbKRzxaw/+bbJthTOAVKppiKJVvyLBsWxvz/z0LtBY0+d9
+         NHfA==
+X-Gm-Message-State: ANhLgQ2SIBnsidiaZXdyFH+3W3p5/MI3XycoVpPd8p41WjEF0Ov+Z3Cq
+        Gtnc+iQRSI5zgrYy0/eEtxHixg==
+X-Google-Smtp-Source: ADFU+vv12iDbrBNzBpnLat9A0w/VW62S5gPjD4IeUjL69XsldV1NErLUIRHTg4INORpQsC718BcKsg==
+X-Received: by 2002:a2e:a0d3:: with SMTP id f19mr17698199ljm.117.1585073290826;
+        Tue, 24 Mar 2020 11:08:10 -0700 (PDT)
 Received: from localhost.localdomain (h-158-174-22-210.NA.cust.bahnhof.se. [158.174.22.210])
-        by smtp.gmail.com with ESMTPSA id s10sm11029858ljp.87.2020.03.24.11.08.07
+        by smtp.gmail.com with ESMTPSA id s10sm11029858ljp.87.2020.03.24.11.08.09
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 24 Mar 2020 11:08:08 -0700 (PDT)
+        Tue, 24 Mar 2020 11:08:10 -0700 (PDT)
 From:   Ulf Hansson <ulf.hansson@linaro.org>
 To:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
         Sasha Levin <sashal@kernel.org>, stable@vger.kernel.org
@@ -62,9 +62,9 @@ Cc:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
         Faiz Abbas <faiz_abbas@ti.com>,
         Anders Roxell <anders.roxell@linaro.org>,
         Naresh Kamboju <naresh.kamboju@linaro.org>
-Subject: [PATCH 4.19.113 3/5] mmc: core: Respect MMC_CAP_NEED_RSP_BUSY for eMMC sleep command
-Date:   Tue, 24 Mar 2020 19:07:58 +0100
-Message-Id: <20200324180800.28953-4-ulf.hansson@linaro.org>
+Subject: [PATCH 4.19.113 4/5] mmc: sdhci-omap: Fix busy detection by enabling MMC_CAP_NEED_RSP_BUSY
+Date:   Tue, 24 Mar 2020 19:07:59 +0100
+Message-Id: <20200324180800.28953-5-ulf.hansson@linaro.org>
 X-Mailer: git-send-email 2.20.1
 In-Reply-To: <20200324180800.28953-1-ulf.hansson@linaro.org>
 References: <20200324180800.28953-1-ulf.hansson@linaro.org>
@@ -75,45 +75,41 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-[ Upstream commit 18d200460cd73636d4f20674085c39e32b4e0097 ]
+[ Upstream commit 055e04830d4544c57f2a5192a26c9e25915c29c0 ]
 
-The busy timeout for the CMD5 to put the eMMC into sleep state, is specific
-to the card. Potentially the timeout may exceed the host->max_busy_timeout.
-If that becomes the case, mmc_sleep() converts from using an R1B response
-to an R1 response, as to prevent the host from doing HW busy detection.
+It has turned out that the sdhci-omap controller requires the R1B response,
+for commands that has this response associated with them. So, converting
+from an R1B to an R1 response for a CMD6 for example, leads to problems
+with the HW busy detection support.
 
-However, it has turned out that some hosts requires an R1B response no
-matter what, so let's respect that via checking MMC_CAP_NEED_RSP_BUSY. Note
-that, if the R1B gets enforced, the host becomes fully responsible of
-managing the needed busy timeout, in one way or the other.
+Fix this by informing the mmc core about the requirement, via setting the
+host cap, MMC_CAP_NEED_RSP_BUSY.
 
-Suggested-by: Sowjanya Komatineni <skomatineni@nvidia.com>
+Reported-by: Naresh Kamboju <naresh.kamboju@linaro.org>
+Reported-by: Anders Roxell <anders.roxell@linaro.org>
+Reported-by: Faiz Abbas <faiz_abbas@ti.com>
 Cc: <stable@vger.kernel.org>
-Link: https://lore.kernel.org/r/20200311092036.16084-1-ulf.hansson@linaro.org
+Tested-by: Anders Roxell <anders.roxell@linaro.org>
+Tested-by: Faiz Abbas <faiz_abbas@ti.com>
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/mmc/core/mmc.c | 7 +++++--
- 1 file changed, 5 insertions(+), 2 deletions(-)
+ drivers/mmc/host/sdhci-omap.c | 3 +++
+ 1 file changed, 3 insertions(+)
 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index f1fe446eee66..5ca53e225382 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -1901,9 +1901,12 @@ static int mmc_sleep(struct mmc_host *host)
- 	 * If the max_busy_timeout of the host is specified, validate it against
- 	 * the sleep cmd timeout. A failure means we need to prevent the host
- 	 * from doing hw busy detection, which is done by converting to a R1
--	 * response instead of a R1B.
-+	 * response instead of a R1B. Note, some hosts requires R1B, which also
-+	 * means they are on their own when it comes to deal with the busy
-+	 * timeout.
- 	 */
--	if (host->max_busy_timeout && (timeout_ms > host->max_busy_timeout)) {
-+	if (!(host->caps & MMC_CAP_NEED_RSP_BUSY) && host->max_busy_timeout &&
-+	    (timeout_ms > host->max_busy_timeout)) {
- 		cmd.flags = MMC_RSP_R1 | MMC_CMD_AC;
- 	} else {
- 		cmd.flags = MMC_RSP_R1B | MMC_CMD_AC;
+diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
+index e9793d8e83a0..05ade7a2dd24 100644
+--- a/drivers/mmc/host/sdhci-omap.c
++++ b/drivers/mmc/host/sdhci-omap.c
+@@ -1147,6 +1147,9 @@ static int sdhci_omap_probe(struct platform_device *pdev)
+ 	host->mmc_host_ops.execute_tuning = sdhci_omap_execute_tuning;
+ 	host->mmc_host_ops.enable_sdio_irq = sdhci_omap_enable_sdio_irq;
+ 
++	/* R1B responses is required to properly manage HW busy detection. */
++	mmc->caps |= MMC_CAP_NEED_RSP_BUSY;
++
+ 	ret = sdhci_setup_host(host);
+ 	if (ret)
+ 		goto err_put_sync;
 -- 
 2.20.1
 
