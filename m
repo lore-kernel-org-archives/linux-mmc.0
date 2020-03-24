@@ -2,92 +2,101 @@ Return-Path: <SRS0=tDGl=5J=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=no
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-0.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A36B5C43331
-	for <linux-mmc@archiver.kernel.org>; Tue, 24 Mar 2020 19:31:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C0CDAC4332B
+	for <linux-mmc@archiver.kernel.org>; Tue, 24 Mar 2020 19:33:38 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 4BB112076E
-	for <linux-mmc@archiver.kernel.org>; Tue, 24 Mar 2020 19:31:51 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8F04720714
+	for <linux-mmc@archiver.kernel.org>; Tue, 24 Mar 2020 19:33:38 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="X1mH4818"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727132AbgCXTbt (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 24 Mar 2020 15:31:49 -0400
-Received: from mga14.intel.com ([192.55.52.115]:28777 "EHLO mga14.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725934AbgCXTbs (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 24 Mar 2020 15:31:48 -0400
-IronPort-SDR: SWAUlNmxPqaC/IYu6LoO96NdmH/12TO+OZ/Hzyjxpe7vdW+ly/YNvt3TJksHPFI6luqoVC4YNb
- yN7UXgm1Qrqg==
-X-Amp-Result: SKIPPED(no attachment in message)
-X-Amp-File-Uploaded: False
-Received: from orsmga005.jf.intel.com ([10.7.209.41])
-  by fmsmga103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 24 Mar 2020 12:31:47 -0700
-IronPort-SDR: 8/VWxHUZ8NY4RmIqej7yewcPHcwLNpP4scEJKK1G8flVXsWoOafuGEnpmA/GWWQR4A85a5Q5RF
- SBwJJ7+F7kKw==
-X-IronPort-AV: E=Sophos;i="5.72,301,1580803200"; 
-   d="scan'208";a="420008785"
-Received: from agluck-desk2.sc.intel.com (HELO agluck-desk2.amr.corp.intel.com) ([10.3.52.68])
-  by orsmga005-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 24 Mar 2020 12:31:46 -0700
-Date:   Tue, 24 Mar 2020 12:31:44 -0700
-From:   "Luck, Tony" <tony.luck@intel.com>
-To:     Thomas Gleixner <tglx@linutronix.de>
-Cc:     LKML <linux-kernel@vger.kernel.org>, x86@kernel.org,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Mark Gross <mgross@linux.intel.com>,
-        linux-edac@vger.kernel.org, Paolo Bonzini <pbonzini@redhat.com>,
-        Darren Hart <dvhart@infradead.org>,
-        Andy Shevchenko <andy@infradead.org>,
-        "Rafael J. Wysocki" <rjw@rjwysocki.net>,
-        Len Brown <lenb@kernel.org>, linux-acpi@vger.kernel.org,
-        Viresh Kumar <viresh.kumar@linaro.org>,
-        linux-pm@vger.kernel.org,
-        Srinivas Pandruvada <srinivas.pandruvada@linux.intel.com>,
-        platform-driver-x86@vger.kernel.org,
-        Jean Delvare <jdelvare@suse.com>,
-        Guenter Roeck <linux@roeck-us.net>,
-        linux-hwmon@vger.kernel.org, Zhang Rui <rui.zhang@intel.com>,
-        Daniel Lezcano <daniel.lezcano@linaro.org>,
-        Amit Kucheria <amit.kucheria@verdurent.com>,
-        Chanwoo Choi <cw00.choi@samsung.com>,
-        Jacob Pan <jacob.jun.pan@linux.intel.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-mmc@vger.kernel.org, Bjorn Helgaas <bhelgaas@google.com>,
-        linux-pci@vger.kernel.org, Takashi Iwai <tiwai@suse.com>,
-        alsa-devel@alsa-project.org,
-        Herbert Xu <herbert@gondor.apana.org.au>,
-        "David S. Miller" <davem@davemloft.net>,
-        linux-crypto@vger.kernel.org
-Subject: Re: [patch 10/22] EDAC: Convert to new X86 CPU match macros
-Message-ID: <20200324193144.GA4104@agluck-desk2.amr.corp.intel.com>
-References: <20200320131345.635023594@linutronix.de>
- <20200320131509.673579000@linutronix.de>
+        id S1725835AbgCXTdi (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 24 Mar 2020 15:33:38 -0400
+Received: from mail-lf1-f68.google.com ([209.85.167.68]:43471 "EHLO
+        mail-lf1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725877AbgCXTdi (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 24 Mar 2020 15:33:38 -0400
+Received: by mail-lf1-f68.google.com with SMTP id n20so14263227lfl.10
+        for <linux-mmc@vger.kernel.org>; Tue, 24 Mar 2020 12:33:35 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=6HwMKM8KRrL+In6hzaRGTJmiiuE30tt/i54WWDy2zpg=;
+        b=X1mH4818Nuc7tUpokWld/JdiOXe7Rs7x5uu7B9cAbKHsCkU5K3ARXW9ZPLovI371Tu
+         qPw2ENfUin3GqvM4xulQCI0FZnbaQ8/obc7KyCfo6hfmdt5TnVLnzt03GihqmjHYQ6us
+         ToKoYt/hVxSFkyXVozJ1I5JbsuaX6E39ROvTgyOYe/THieM6If28sSNmH+3HBDv3D6xw
+         ZapaigFUm608dw2Gt19lYVoiHq7uf10FyrUMwMShtXEqC95PvXR9Z609lu3PPVXljVub
+         Fi/hJnIQfegsLnDFkXIW2MoUpSBLxYg2oYmwj6yBWJpZoC2S2d5tY3OCpyT5whNnqqQO
+         XPOg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=6HwMKM8KRrL+In6hzaRGTJmiiuE30tt/i54WWDy2zpg=;
+        b=ttg2LOQee1/+PGsS6s0YvqaMZvAlMsg5PoGIei6rRLWpX9npdghqKvEJaUpqkW65f6
+         mevG5K4Nadd6BSirexQKaGFYkx3vfh+Cxfyz+9OTVzk7es26LkBioDfSQ3F96e+5Km36
+         d6qC0esg7oUTJ2Nbo8g+Bz5upTlgq4qj/MmXiCuvC+A+34MVy/LMaPzdoweL39+JRejM
+         PJ25dyUpaBFN7bw7+YMszDiKdtTIAOAsIqSch1BmbZAmBB3xbdaLaXR1qytH4Dx5omF9
+         MSWNfdwSVwBUyzkL20j4qJzPHloUbdP6M4/5ZgCW9CX3yBiujs1lb7WXkccCLPA6gKiF
+         HAoA==
+X-Gm-Message-State: ANhLgQ3qhU9oM5bfc5w8cmTDmRrO+bEJfZtvFMYomCjgj24EhnpS3Brd
+        j79CQUJdScCDJiQfXJmcmwpGg6BRAZ/1xdJv7BsTxQ==
+X-Google-Smtp-Source: ADFU+vu4cpZOlo6jp54+jfss6TXf+5d17promk+DinZo5kAignxOjo4HgAji1Uhblbjq022OiWVG6a01cLVmSk7G9xw=
+X-Received: by 2002:a05:6512:1106:: with SMTP id l6mr17705731lfg.12.1585078414650;
+ Tue, 24 Mar 2020 12:33:34 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20200320131509.673579000@linutronix.de>
+References: <20200324180738.28892-1-ulf.hansson@linaro.org>
+In-Reply-To: <20200324180738.28892-1-ulf.hansson@linaro.org>
+From:   Anders Roxell <anders.roxell@linaro.org>
+Date:   Tue, 24 Mar 2020 20:33:23 +0100
+Message-ID: <CADYN=9JNsOw9SqJOS4JwQvjxrp0OPx-RX1PTHtC3Kurgh7OUaQ@mail.gmail.com>
+Subject: Re: [PATCH 5.4.28 0/5] mmc: Fix some busy detect problems
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Sasha Levin <sashal@kernel.org>, stable@vger.kernel.org,
+        linux-mmc@vger.kernel.org,
+        Sowjanya Komatineni <skomatineni@nvidia.com>,
+        Faiz Abbas <faiz_abbas@ti.com>,
+        Naresh Kamboju <naresh.kamboju@linaro.org>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, Mar 20, 2020 at 02:13:55PM +0100, Thomas Gleixner wrote:
-> The new macro set has a consistent namespace and uses C99 initializers
-> instead of the grufty C89 ones.
-                 ^^^^^^
+On Tue, 24 Mar 2020 at 19:07, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>
+> This series provides a couple of manually backported mmc changes that fixes some
+> busy detect issues, for a couple of mmc host drivers (sdhci-tegra|omap).
+>
+> Ulf Hansson (5):
+>   mmc: core: Allow host controllers to require R1B for CMD6
+>   mmc: core: Respect MMC_CAP_NEED_RSP_BUSY for erase/trim/discard
+>   mmc: core: Respect MMC_CAP_NEED_RSP_BUSY for eMMC sleep command
+>   mmc: sdhci-omap: Fix busy detection by enabling MMC_CAP_NEED_RSP_BUSY
+>   mmc: sdhci-tegra: Fix busy detection by enabling MMC_CAP_NEED_RSP_BUSY
 
-grufty? Did you mean crufty?
+Tested-by: Anders Roxell <anders.roxell@linaro.org>
 
-Though I suppose grufty may work as well here:
+I tested it on a beagleboard x15.
 
-	gruft. Noun. (uncountable) (dialect) the particles of soil
-	that are spattered up onto grass by the rain.
-> 
-> Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+Cheers,
+Anders
 
-Tested the Broadwell EDAC driver. The other changes look
-good too.
-
-Acked-by: Tony Luck <tony.luck@intel.com>
+>
+>  drivers/mmc/core/core.c        | 5 ++++-
+>  drivers/mmc/core/mmc.c         | 7 +++++--
+>  drivers/mmc/core/mmc_ops.c     | 8 +++++---
+>  drivers/mmc/host/sdhci-omap.c  | 3 +++
+>  drivers/mmc/host/sdhci-tegra.c | 3 +++
+>  include/linux/mmc/host.h       | 1 +
+>  6 files changed, 21 insertions(+), 6 deletions(-)
+>
+> --
+> 2.20.1
+>
