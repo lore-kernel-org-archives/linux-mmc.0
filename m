@@ -2,124 +2,126 @@ Return-Path: <SRS0=y6Wy=5L=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
+X-Spam-Status: No, score=-8.3 required=3.0 tests=DKIMWL_WL_MED,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_IN_DEF_DKIM_WL autolearn=no
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 353BAC2D0E8
-	for <linux-mmc@archiver.kernel.org>; Thu, 26 Mar 2020 14:29:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 502F9C43331
+	for <linux-mmc@archiver.kernel.org>; Thu, 26 Mar 2020 18:34:24 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 0ED3C207FF
-	for <linux-mmc@archiver.kernel.org>; Thu, 26 Mar 2020 14:29:02 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 272382073E
+	for <linux-mmc@archiver.kernel.org>; Thu, 26 Mar 2020 18:34:24 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="d0Gbhldy"
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="D5KANnoU"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728327AbgCZO25 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 26 Mar 2020 10:28:57 -0400
-Received: from mail-vs1-f65.google.com ([209.85.217.65]:45827 "EHLO
-        mail-vs1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728314AbgCZO2z (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Mar 2020 10:28:55 -0400
-Received: by mail-vs1-f65.google.com with SMTP id x82so3915812vsc.12
-        for <linux-mmc@vger.kernel.org>; Thu, 26 Mar 2020 07:28:54 -0700 (PDT)
+        id S1727919AbgCZSeX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 26 Mar 2020 14:34:23 -0400
+Received: from mail-oi1-f196.google.com ([209.85.167.196]:38334 "EHLO
+        mail-oi1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727995AbgCZSeW (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Mar 2020 14:34:22 -0400
+Received: by mail-oi1-f196.google.com with SMTP id w2so6460718oic.5
+        for <linux-mmc@vger.kernel.org>; Thu, 26 Mar 2020 11:34:21 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
+        d=google.com; s=20161025;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=m96cR6V03dd7lbjAOl6gquDvXkdRzHGRSDXkk0VydMg=;
-        b=d0GbhldybAe0gmG8ZlfyrlQwNBKzrfy5JDwFDaOsHBBgGdMkw0TJb3XjhMtRqSbv7U
-         raadlG2wUvxjwaK8JQEXjXpEDrxdok4PtGhzk8vlvcx6tqX50JoBJjW9oeCcSufljH6d
-         zXUOtYr9xOurSTFj6t0Jo5XxpR4v0b0dQlHfJkM50DxfClQkvWEwr0+ZVMW14u+Ih3zr
-         bXT7WivtSYOhdHJnSZYPl0aXpH0+RKcAZCDkMR+fTMFW7uZMY/N5YrpJM+980D1BsBA0
-         B429AUyrl4jmmVgGSaDLzpQR41VY8fCcxS1hN7EuVUp7OYsa1cZg42gDGUtJY7L1P3No
-         T3ag==
+        bh=zvcRbO8JiiH8TflCF3JYY64FRuv850T5VBR+zKWVaAo=;
+        b=D5KANnoUgA813LQvHjIp5rAoPhY2gTJup4nP+xGLb5FNmM7+8RNwum/ue1O95T+xWb
+         5Ktbnl2iWEXVoCU3oOQg1rH6QozCfngfrmRO501JFNyUSHuo2dqvZagSkuCv/ZkCcdDy
+         9SNPpYOLAEHYsE4N1CYsv1lw2JsDmzr3bO5CAhprXa6CHmJ/wgf3TslEjhp5iWSPZbla
+         6EGwewp3bw3kVgK1ceZl6cCzyM58RIqxXE7Ece2gV1Bkyopg2Mdv5j42z6O1C0vGsEb+
+         xUlK8kqOpBq79qowMpVYE7dI2KBF+1Bmk+h2mEbeqaCTkXHdCSEol6R1AyJ6SpC3NLmt
+         slKg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=m96cR6V03dd7lbjAOl6gquDvXkdRzHGRSDXkk0VydMg=;
-        b=D2R9DP7rp/qfAkt+w3Scx6X1CkqCc7yignZSJKLmQZi60w3LXdyK0Ac+r1qIzk0z90
-         fE7gXxdok2o6U1ks8Lgo4m6MC0GqeNZjdaPW9Er7l5pJvcxu4J7ZUJ18J/Jlsqzj+5HR
-         wdUQHfsZsp8hD3Ua3a0lzGRKyycut4Crd3J7dZhPoYPvB1LUjFXToMVnyugxeGC/MwOt
-         HSrBHMY54UMj532l0K5wqS2SaP32slVRQOno33MJlcoJ4vb0vpmynsvc93GtsINdRNk5
-         Z1iPyfIHRhgFHSm0DzjuCgv12J3CxcG+vX7E/fkvwD1CI4rAXD8kPeQaINxdOCQCuhqm
-         Z4Jg==
-X-Gm-Message-State: ANhLgQ34ptlMfnmV9VB1gnH/rY1cy9ZpgdQuNqLAib3UbArwYM92ihvt
-        qLcrjSoioBJ+9gYYuhaDNkFSjnmrfjKdl12b8E6CYQ==
-X-Google-Smtp-Source: ADFU+vuWH5zQui20lK3L0xhEESoh9O6oNICswpYudGihwgeVkXw9INd4a0Qcv2xNvGUAEUT8yqdnif+9yZAdCYPExLo=
-X-Received: by 2002:a67:646:: with SMTP id 67mr6606515vsg.34.1585232933632;
- Thu, 26 Mar 2020 07:28:53 -0700 (PDT)
+        bh=zvcRbO8JiiH8TflCF3JYY64FRuv850T5VBR+zKWVaAo=;
+        b=FWgEzBId8ywhVsi80FGO828tDagLTXPb6NgpkYjPhwL3X34umNnMfw2DtdH4uHx5Df
+         KSdacC3bJq6ZL1Est0bxm3hK/OVGNQZJx3sjsSY3lDOhY4j5qroREQK28TIlEPXwbU5C
+         TGj3iBAFSNJ6IyrcgQln40GfvoDzxvg+BCUowQdVZLCJuB5X4OGxL6VjuudE5RAyVHkL
+         jXhkyf8n6WajBPPaY4NhLthCusV33ywsC9MyD05rx5vkc8rmS9lzh3vtgFYhw1IJ12RK
+         iHm85nGP5lvYhOW1OqtIhEp8naETShNdubWdmO6niQfZ0T9dhftpq7OMOfAArRgczuUc
+         4nkw==
+X-Gm-Message-State: ANhLgQ01gvNRNc/+bJFWEWmEMge6wP7/V9Lgi/oZUkuugyWWdw4uMEz1
+        nvArN8Mm64JHgVBeVkr8UIXDyvWCxGiLcf9qNKiLcQ==
+X-Google-Smtp-Source: ADFU+vuhr19j1Gh9BuMJvyrUH94cq/bHJXqm/DeIzQEZemccehjW6KDkcmRhHiQOfwXBWmMBVCeLo1LvtVagEPcJ2FU=
+X-Received: by 2002:aca:f541:: with SMTP id t62mr1218807oih.172.1585247660202;
+ Thu, 26 Mar 2020 11:34:20 -0700 (PDT)
 MIME-Version: 1.0
-References: <20200317093922.20785-1-lkundrak@v3.sk> <20200317093922.20785-19-lkundrak@v3.sk>
-In-Reply-To: <20200317093922.20785-19-lkundrak@v3.sk>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 26 Mar 2020 15:28:17 +0100
-Message-ID: <CAPDyKFrcrgMrd9Nv425XuzssBhd+GvSUu29hXoVShwS0GNyjtQ@mail.gmail.com>
-Subject: Re: [PATCH 18/28] dt-bindings: mmc: Fix node name in an example
-To:     Lubomir Rintel <lkundrak@v3.sk>
-Cc:     Rob Herring <robh+dt@kernel.org>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Jason Cooper <jason@lakedaemon.net>,
-        Marc Zyngier <maz@kernel.org>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Kishon Vijay Abraham I <kishon@ti.com>,
-        Alessandro Zummo <a.zummo@towertech.it>,
-        Alexandre Belloni <alexandre.belloni@bootlin.com>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Mark Brown <broonie@kernel.org>,
-        Daniel Lezcano <daniel.lezcano@linaro.org>,
-        Andrew Lunn <andrew@lunn.ch>,
-        Gregory Clement <gregory.clement@bootlin.com>,
-        Daniel Mack <daniel@zonque.org>,
-        Haojian Zhuang <haojian.zhuang@gmail.com>,
-        Robert Jarzmik <robert.jarzmik@free.fr>,
-        DTML <devicetree@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
-        linux-i2c@vger.kernel.org, linux-media@vger.kernel.org,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        linux-rtc@vger.kernel.org, linux-serial@vger.kernel.org,
-        linux-spi@vger.kernel.org,
-        Linux USB List <linux-usb@vger.kernel.org>
+References: <1584973502-14775-1-git-send-email-ppvk@codeaurora.org> <c17d8842-0e1d-0014-b909-3114952b350b@codeaurora.org>
+In-Reply-To: <c17d8842-0e1d-0014-b909-3114952b350b@codeaurora.org>
+From:   Saravana Kannan <saravanak@google.com>
+Date:   Thu, 26 Mar 2020 11:33:44 -0700
+Message-ID: <CAGETcx_GD4K9CKyUtJEHKtAjHFKdfrepT0ZdA9WfRoUCF+QKPg@mail.gmail.com>
+Subject: Re: [RFC v6 0/2] Add SDHC interconnect bandwidth scaling
+To:     Rajendra Nayak <rnayak@codeaurora.org>
+Cc:     Pradeep P V K <ppvk@codeaurora.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        adrian.hunter@intel.com, Rob Herring <robh+dt@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>, asutoshd@codeaurora.org,
+        stummala@codeaurora.org, sayalil@codeaurora.org,
+        rampraka@codeaurora.org, vbadigan@codeaurora.org,
+        Stephen Boyd <sboyd@kernel.org>,
+        Georgi Djakov <georgi.djakov@linaro.org>, mka@chromium.org,
+        linux-mmc@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>,
+        linux-arm-msm@vger.kernel.org,
+        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
+        <devicetree@vger.kernel.org>, Andy Gross <agross@kernel.org>,
+        linux-mmc-owner@vger.kernel.org,
+        Viresh Kumar <viresh.kumar@linaro.org>
 Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 17 Mar 2020 at 10:40, Lubomir Rintel <lkundrak@v3.sk> wrote:
+On Thu, Mar 26, 2020 at 2:22 AM Rajendra Nayak <rnayak@codeaurora.org> wrote:
 >
-> The $nodename allows only "mmc@*" whereas the example node is named
-> "sdhci".
+> Adding Viresh and Saravana,
 >
-> Signed-off-by: Lubomir Rintel <lkundrak@v3.sk>
-
-Applied for next, thanks!
-
-Kind regards
-Uffe
-
-
-> ---
->  Documentation/devicetree/bindings/mmc/mmc-controller.yaml | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+> On 3/23/2020 7:55 PM, Pradeep P V K wrote:
+> > Add interconnect bandwidths for SDHC driver using OPP framework that
+> > is required by SDHC driver based on the clock frequency and bus width
+> > of the card. Otherwise, the system clocks may run at minimum clock
+> > speed and thus affecting the performance.
+> >
+> > This change is based on
+> > [RFC] mmc: host: sdhci-msm: Use the interconnect API
+> > (https://lkml.org/lkml/2018/10/11/499) and
+> >
+> > [PATCH v6] Introduce Bandwidth OPPs for interconnects
+> > (https://lkml.org/lkml/2019/12/6/740)
 >
-> diff --git a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
-> index c9384ed685b8f..c03fe268c29a0 100644
-> --- a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
-> @@ -351,7 +351,7 @@ dependencies:
+> Pradeep, since your series seems to depend on the above proposed bw bindings,
+> can you post the DT changes for the platform that you are testing these
+> patches on?
 >
->  examples:
->    - |
-> -    sdhci@ab000000 {
-> +    mmc@ab000000 {
->          compatible = "sdhci";
->          reg = <0xab000000 0x200>;
->          interrupts = <23>;
+> Please note that the above series is currently deadlocked [1][2] with no clear path
+> forward for now, so looking at how you plan to use this might throw some light onto
+> the requirements
+>
+> [1] https://lkml.org/lkml/2020/1/14/511
+> [2] https://lkml.org/lkml/2020/3/20/106
+
+Sorry, not deadlocked. Just kinda busy. For [1] I believe I agreed
+with Viresh later on. I'll respond to [2] soon.
+
+-Saravana
+
+>
+> >
+> > Pradeep P V K (2):
+> >    mmc: sdhci-msm: Add interconnect bus bandwidth scaling support
+> >    dt-bindings: mmc: sdhci-msm: Add interconnect BW scaling strings
+> >
+> >   .../devicetree/bindings/mmc/sdhci-msm.txt          |  18 ++
+> >   drivers/mmc/host/sdhci-msm.c                       | 240 ++++++++++++++++++++-
+> >   2 files changed, 254 insertions(+), 4 deletions(-)
+> >
+>
 > --
-> 2.25.1
->
+> QUALCOMM INDIA, on behalf of Qualcomm Innovation Center, Inc. is a member
+> of Code Aurora Forum, hosted by The Linux Foundation
