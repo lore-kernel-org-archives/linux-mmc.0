@@ -4,60 +4,59 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C3B0BC43331
-	for <linux-mmc@archiver.kernel.org>; Thu, 26 Mar 2020 14:28:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2DBB4C2D0F0
+	for <linux-mmc@archiver.kernel.org>; Thu, 26 Mar 2020 14:28:52 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 944E32077D
-	for <linux-mmc@archiver.kernel.org>; Thu, 26 Mar 2020 14:28:04 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 073032082D
+	for <linux-mmc@archiver.kernel.org>; Thu, 26 Mar 2020 14:28:52 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="s0AYeRSm"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="A5cZNsK5"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727829AbgCZO2E (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 26 Mar 2020 10:28:04 -0400
-Received: from mail-vs1-f66.google.com ([209.85.217.66]:45758 "EHLO
-        mail-vs1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727798AbgCZO2E (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Mar 2020 10:28:04 -0400
-Received: by mail-vs1-f66.google.com with SMTP id x82so3913864vsc.12
-        for <linux-mmc@vger.kernel.org>; Thu, 26 Mar 2020 07:28:03 -0700 (PDT)
+        id S1728264AbgCZO2q (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 26 Mar 2020 10:28:46 -0400
+Received: from mail-ua1-f65.google.com ([209.85.222.65]:41889 "EHLO
+        mail-ua1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728100AbgCZO2q (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Mar 2020 10:28:46 -0400
+Received: by mail-ua1-f65.google.com with SMTP id f9so2171740uaq.8
+        for <linux-mmc@vger.kernel.org>; Thu, 26 Mar 2020 07:28:45 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=Nwrqr8fUwcczi1tkKbhoCAaTj0Lz9vANHD/lv6450Ik=;
-        b=s0AYeRSme5ZYMG5Hj00MtSphy+ZF1hJEIT/x2laNKAPH6uwyawibNxjdwbP2n3VcAz
-         csHlsS0gxGoa5DicQVyRyza5fvlnbU7gXob7YwmrF1iP6Arowk1BTPlr0kz4O3XeecgF
-         1zk9ZTQ+jv4zeHagRLkhqZrvKEFdH+oNeK135nUnNRS91hY2ue714O+FEjcV14/4YNSF
-         LfEKcr0FypAkSBknWreQBXQ7JbSB7qSlCdDz+6IHoDYmn4ebQwicF5K71DOR0GD0cCFh
-         bCHWHd0BIGOXrsyTGs9lNM+SLJBnuSpHOhufi/2mLRvJCbJQ5z5/y/CztJiv8Q92tTQi
-         xs6A==
+        bh=dpR7Oxz1qNUziJu9EkZNTQU3ukjyRpCe41037a5byCM=;
+        b=A5cZNsK5c5uZutnm0OIXGS+KX7eNfN7wqt28zszCZAhqy6YCJE5AXwTRTNuYDXqs6O
+         kVy906+0sjz7Ea81h3wXaysYdR1rk2YkZaFasf8szBzhyoNf2RhFmIDZJ7itRAwGsL6p
+         WNZ1EWZMpmNa1RW0Y3ztF9PD6W/8Tg1LWwKb/Dsx6bkaaASYPLcIsKa1lSndDFWS+ybG
+         vY5Q33UTJBetKrYcvjeakGfoc+euPMjtKyS/THQ2N6reNORXrSfKGjJesQFgGTNoI4U1
+         wHF6ka30AIQAMrzkrofwUZOiYP3y0tSwom2KGfmjP0/uZtxcc0DRdQQw0w++JfPFBHFp
+         PX6A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=Nwrqr8fUwcczi1tkKbhoCAaTj0Lz9vANHD/lv6450Ik=;
-        b=ErhvujkcIl0jAbTv23FTAxpbAHnXqeLjtHDBdLEjCOfG7ZmHApo9S2C5OOxDJK/42X
-         FtHAAJD76JRhQrluRSFNCHKH2MVrcsGFEMpNv4YmfI61wZz/1Pqg1B73aC8yol2qsk70
-         vo081QrGLHqAWvCtVkMdJBl7ZRixk/DUkId37Z1EqJmCQDnnrTq694Qi6ckRD2eQHSVh
-         FEAJh6GCvBYHKLy764PdBxmSj2ZNTrzPuT2SUisxuZxpGw8NalNvePOHsbTy6j4zescz
-         aLuVUJcGDytaIZWsgEz5a+/pZBAwiPjvBrx4MzJGahaVvdzjyiRxwrgN/M7SfC+MmsbC
-         J04A==
-X-Gm-Message-State: ANhLgQ2IETN/bIv3mE5Uqna+FemtAvqB6r/Er7lNnqKGDhcq06JVgp/P
-        SNi6H/U0rf9oiaxdlE7LPp7twpor7wgWW4bcuuQevV6P
-X-Google-Smtp-Source: ADFU+vsDl0E1ShxlqFNIKGgRphr3dXzKQ2BouqsiqJSyqwn2BTjEQZNw7vYZJmX1XaoteUXkIePuQWywtUNQtEW50KM=
-X-Received: by 2002:a67:2ec6:: with SMTP id u189mr7072856vsu.200.1585232883289;
- Thu, 26 Mar 2020 07:28:03 -0700 (PDT)
+        bh=dpR7Oxz1qNUziJu9EkZNTQU3ukjyRpCe41037a5byCM=;
+        b=UWe8ASWgdmX7avjr9iO/urSWedcWC58qCOqkW+C+fmkJytE7rFZIMLhPA70c3mHnKN
+         QXpjY2NcifpIyiarhJdR+yuycLyyA6pty5CdhJafUlad6sXREpA2EgyvjkyPQu5rRnJ1
+         8SAsKGsKXpS6E3triM2FXv8Koe0BU1D7mpab++FujiZIW1e4jwBfS6c2TMFHsOFhCZoB
+         ngB7vJ7+7xwCRtCRaB/bWNNYAiz/nwEtW+NKR4XUT1Dr5HiIrn19D3U14Fb0cwxgJmOB
+         T+BXCaoQ6U2Ccak+m+zCXOdJJ81W699UsXFRsIOow01waJuKwIMqbKg/9fu23DtYUHPW
+         pnNQ==
+X-Gm-Message-State: ANhLgQ0jjzTJZB4Ju8ucfBRCeLzyUZsVRCmmU1I7EgAs3A9PDo4hovVm
+        B07sMKDMBBwY1X1mldv/NxWrPSMdhd/hn6vTY5bmdA==
+X-Google-Smtp-Source: ADFU+vtSP1ZWeFS0v/IYE0yhokN9YWSHWu7abe9/C6yo19lM7d8FYypGhqrHHkutkPFQ/tySL6jnvOiMocB0QKtvN6g=
+X-Received: by 2002:ab0:6204:: with SMTP id m4mr6628927uao.15.1585232925473;
+ Thu, 26 Mar 2020 07:28:45 -0700 (PDT)
 MIME-Version: 1.0
-References: <20200325143409.13005-1-ludovic.barre@st.com> <20200325143409.13005-3-ludovic.barre@st.com>
-In-Reply-To: <20200325143409.13005-3-ludovic.barre@st.com>
+References: <20200325143409.13005-1-ludovic.barre@st.com> <20200325143409.13005-2-ludovic.barre@st.com>
+In-Reply-To: <20200325143409.13005-2-ludovic.barre@st.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 26 Mar 2020 15:27:27 +0100
-Message-ID: <CAPDyKFpO40Ois8pNwYOeqZrJbV9UeCLok=i8z4GWML+A7TP2-w@mail.gmail.com>
-Subject: Re: [PATCH V2 2/2] mmc: mmci: initialize pwr|clk|datactrl_reg with
- their hardware values
+Date:   Thu, 26 Mar 2020 15:28:09 +0100
+Message-ID: <CAPDyKFo-Lgikwf=PUAd1naXxiyn=z425sTXX9O39__Xi39oUYQ@mail.gmail.com>
+Subject: Re: [PATCH V2 1/2] mmc: mmci_sdmmc: fix clear busyd0end irq flag
 To:     Ludovic Barre <ludovic.barre@st.com>
 Cc:     Rob Herring <robh+dt@kernel.org>,
         Srini Kandagatla <srinivas.kandagatla@linaro.org>,
@@ -76,54 +75,39 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 On Wed, 25 Mar 2020 at 15:34, Ludovic Barre <ludovic.barre@st.com> wrote:
 >
-> In mmci_write_pwr|clk|datactrlreg functions, if the desired value
-> is equal to corresponding variable (pwr_reg|clk_reg|datactrl_reg),
-> the value is not written in the register.
+> The busyd0 line transition can be very fast. The busy request
+> may be completed by busy_d0end without wait the busy_d0 steps.
+> The busyd0end irq flag must be cleared even if no busy_status.
 >
-> At probe pwr|clk|datactrl_reg of mmci_host structure are initialized
-> to 0 (kzalloc of mmc_alloc_host). But they does not necessarily reflect
-> hardware value of these registers, if they are used while boot level.
-> This is problematic, if we want to write 0 in these registers.
+> Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
 
-It could be, but I don't see that we ever needs to do that - at least
-not before we have written some other non-zero values to them (through
-the helper functions).
-
->
-> This patch initializes pwr|clk|datactrl_reg variables with their
-> hardware values while probing.
-
-Hmm, so in principle this change seems quite okay, but I am hesitant
-to pick it up - unless it really addresses a problem that you have
-observed.
-
-The reason is, this change may lead to avoiding to re-write the
-register with the same value it got during boot - and who knows what
-is best here.
+Applied for next, by adding a fixes+stable tag, thanks!
 
 Kind regards
 Uffe
 
->
-> Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
+
 > ---
->  drivers/mmc/host/mmci.c | 4 ++++
->  1 file changed, 4 insertions(+)
+>  drivers/mmc/host/mmci_stm32_sdmmc.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
 >
-> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-> index 647567def612..f378ae18d5dc 100644
-> --- a/drivers/mmc/host/mmci.c
-> +++ b/drivers/mmc/host/mmci.c
-> @@ -2085,6 +2085,10 @@ static int mmci_probe(struct amba_device *dev,
->         else if (plat->ocr_mask)
->                 dev_warn(mmc_dev(mmc), "Platform OCR mask is ignored\n");
+> diff --git a/drivers/mmc/host/mmci_stm32_sdmmc.c b/drivers/mmc/host/mmci_stm32_sdmmc.c
+> index f76e82f8f12f..d33e62bd6153 100644
+> --- a/drivers/mmc/host/mmci_stm32_sdmmc.c
+> +++ b/drivers/mmc/host/mmci_stm32_sdmmc.c
+> @@ -358,11 +358,11 @@ static bool sdmmc_busy_complete(struct mmci_host *host, u32 status, u32 err_msk)
+>         if (host->busy_status) {
+>                 writel_relaxed(mask & ~host->variant->busy_detect_mask,
+>                                base + MMCIMASK0);
+> -               writel_relaxed(host->variant->busy_detect_mask,
+> -                              base + MMCICLEAR);
+>                 host->busy_status = 0;
+>         }
 >
-> +       host->pwr_reg = readl_relaxed(host->base + MMCIPOWER);
-> +       host->clk_reg = readl_relaxed(host->base + MMCICLOCK);
-> +       host->datactrl_reg = readl_relaxed(host->base + MMCIDATACTRL);
+> +       writel_relaxed(host->variant->busy_detect_mask, base + MMCICLEAR);
 > +
->         /* We support these capabilities. */
->         mmc->caps |= MMC_CAP_CMD23;
+>         return true;
+>  }
 >
 > --
 > 2.17.1
