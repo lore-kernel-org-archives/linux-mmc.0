@@ -2,121 +2,110 @@ Return-Path: <SRS0=y6Wy=5L=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.7 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+X-Spam-Status: No, score=-2.0 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
 	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+	URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5C386C2D0E8
-	for <linux-mmc@archiver.kernel.org>; Thu, 26 Mar 2020 08:38:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9C2E7C2D0E8
+	for <linux-mmc@archiver.kernel.org>; Thu, 26 Mar 2020 09:22:34 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 34E4C2078E
-	for <linux-mmc@archiver.kernel.org>; Thu, 26 Mar 2020 08:38:17 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 70C9E20719
+	for <linux-mmc@archiver.kernel.org>; Thu, 26 Mar 2020 09:22:34 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=renesasgroup.onmicrosoft.com header.i=@renesasgroup.onmicrosoft.com header.b="cit1LLkb"
+	dkim=fail reason="signature verification failed" (1024-bit key) header.d=mg.codeaurora.org header.i=@mg.codeaurora.org header.b="NJYlOLGV"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726298AbgCZIiQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 26 Mar 2020 04:38:16 -0400
-Received: from mail-eopbgr1410113.outbound.protection.outlook.com ([40.107.141.113]:41156
-        "EHLO JPN01-OS2-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1726210AbgCZIiQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 26 Mar 2020 04:38:16 -0400
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=PuSBIUDOrQ0DMBWF7GDgwFhzFOhO5XS8z6A3TpjmU/XF5tDAVkhAInKKT6h/S1439RcR+cYovGx3Vu44EjummKNnnXiqKHLeCOT1sv/kEhpsh9UrIwoH6MQae26wvH194mLkY+GN3hBMOoDBkqv1NfgOkxne70z8ChWHciEtP4lgVcgYG9VoaVrfV/EfhnLGBkDMZd3qqYMkq5VGquKP2s/wbibM3EyJRxT2gHPtIYUur61CvIcJpf2HLodDGMEjtf3SbgDRtPSGF/CejVZu49RCKVwY91OQ1vZLe63V/R/7ETk/5+VYDseyF6faj05V0vsOwuXu7hyhp85upk1cew==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=/sYLkeWg/bjS8C/VwKsTSYSK+5EB6M63CuIn7w2gCn8=;
- b=XhSvZa40927/lajgmeYoiUc08uTQKoQEdJzJtX6ryHJMZRaz7uSUXFiGnFCgWv0xJ/vbWF6DhdwxKtv91Uinj4HkHrIQqxnh156WY2oR1Oxb/dZ2zb3jIds7Osk0/RGb53N9EPxd5+omQuXCRRsPlLrmfveVafOy9LEgP9nS95PmZTlQ4JeNReBQCA43Nu95wUfGDDM4COV928R3jJYAmGeoTLsLcyWf22rn/3zgt0nyQf5jHYhzNfwK/g5RG/RFB/ykGgQCEFUIcvRGknqMAYz+JpR4/zJlZ761X3xdxyrnamHH4KlTTR8HoMfhYoLOWl80xyAdrdYAgQUYeZ8D5Q==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=renesas.com; dmarc=pass action=none header.from=renesas.com;
- dkim=pass header.d=renesas.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=renesasgroup.onmicrosoft.com; s=selector2-renesasgroup-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=/sYLkeWg/bjS8C/VwKsTSYSK+5EB6M63CuIn7w2gCn8=;
- b=cit1LLkb5VlwZAdQVb/OOOFe1yAmLUwNvCTTP5LEPZqyqovb5838315Sr9RdGhG00ZCU8AfnjEuNnb28zq2iXt/DfgwakqvIcJxBAqIoP52XPqUsXMVwxfX7La53klmwYFgnhPf7J97YyX8LHJpKEU4ml7OUoT5a3oqHrK+21vw=
-Received: from TYAPR01MB4544.jpnprd01.prod.outlook.com (20.179.175.203) by
- TYAPR01MB1997.jpnprd01.prod.outlook.com (52.133.178.15) with Microsoft SMTP
- Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.20.2835.22; Thu, 26 Mar 2020 08:38:12 +0000
-Received: from TYAPR01MB4544.jpnprd01.prod.outlook.com
- ([fe80::ed7f:1268:55a9:fc06]) by TYAPR01MB4544.jpnprd01.prod.outlook.com
- ([fe80::ed7f:1268:55a9:fc06%4]) with mapi id 15.20.2835.023; Thu, 26 Mar 2020
- 08:38:12 +0000
-From:   Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
-CC:     "linux-renesas-soc@vger.kernel.org" 
-        <linux-renesas-soc@vger.kernel.org>,
-        =?iso-8859-1?Q?Niklas_S=F6derlund?= <niklas.soderlund@ragnatech.se>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Subject: RE: [PATCH RFT 0/3] mmc: renesas_sdhi: improve TAP selection if all
- TAPs are good
-Thread-Topic: [PATCH RFT 0/3] mmc: renesas_sdhi: improve TAP selection if all
- TAPs are good
-Thread-Index: AQHV85ocDYPSQmJFaUynJAqGSQxpTqhaqovQ
-Date:   Thu, 26 Mar 2020 08:38:12 +0000
-Message-ID: <TYAPR01MB4544095698FB020DD81FD2B9D8CF0@TYAPR01MB4544.jpnprd01.prod.outlook.com>
-References: <20200306093159.6155-1-wsa+renesas@sang-engineering.com>
-In-Reply-To: <20200306093159.6155-1-wsa+renesas@sang-engineering.com>
-Accept-Language: ja-JP, en-US
-Content-Language: ja-JP
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-authentication-results: spf=none (sender IP is )
- smtp.mailfrom=yoshihiro.shimoda.uh@renesas.com; 
-x-originating-ip: [124.210.22.195]
-x-ms-publictraffictype: Email
-x-ms-office365-filtering-ht: Tenant
-x-ms-office365-filtering-correlation-id: 28087294-4598-479b-7457-08d7d161056f
-x-ms-traffictypediagnostic: TYAPR01MB1997:
-x-microsoft-antispam-prvs: <TYAPR01MB1997917A255A53683D14F4C1D8CF0@TYAPR01MB1997.jpnprd01.prod.outlook.com>
-x-ms-oob-tlc-oobclassifiers: OLM:9508;
-x-forefront-prvs: 0354B4BED2
-x-forefront-antispam-report: SFV:NSPM;SFS:(10019020)(4636009)(366004)(376002)(346002)(396003)(39860400002)(136003)(6506007)(81156014)(64756008)(66476007)(76116006)(2906002)(8676002)(66556008)(8936002)(55016002)(9686003)(66946007)(52536014)(55236004)(81166006)(33656002)(86362001)(186003)(4326008)(5660300002)(478600001)(7696005)(26005)(71200400001)(54906003)(4744005)(316002)(66446008);DIR:OUT;SFP:1102;SCL:1;SRVR:TYAPR01MB1997;H:TYAPR01MB4544.jpnprd01.prod.outlook.com;FPR:;SPF:None;LANG:en;PTR:InfoNoRecords;
-received-spf: None (protection.outlook.com: renesas.com does not designate
- permitted sender hosts)
-x-ms-exchange-senderadcheck: 1
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: HTe2JJMH3DuF0QdNv89sv5lwSMvrtvyZB6NC3BUnGr11yKnv53k39BpvEPZU3PsnCTMSfqBdbnCrZQz7zp/oIHYtdvF1RBzrZqSErFC/vK4otruJXDbUVkAIw7DQYBUSONK2nZdrj1hAPwrOq4IAqreWOjZ+BPIAovhhr44ANRDyicetY4FT3ZDctkB+V3IAMNtqm0j9kZx5sydtvjkU8hsHBRZDc4kExQeCFP4kK0E7kK/Desrjq1m39NCwM4DeU/XhDq4boUUXc0ecBFgjz4jGtBmELUp9FXC4Bi8TnLGffCHOWixhDPQXzSneTcGQGHdTqXXkdyzVg3vz2DGXsqtrLekzS+FB1R1g/z95LYKLz62SbdVNoiD8yPIZ3myjDuoQhKLaMdWPKh6eH+rC1GsSwdMxdDN6FrMPuS5yO8HrNsUyOrNFLqH6M70UJF5+
-x-ms-exchange-antispam-messagedata: hkxivUTZhVrb9GOXA8Ip7zfsLHGVW/4RS1wDZnV4dxqrpDdG5DxOE32iGdbZKQ0qYYTUthyK/h0DjucOuultSA3uTlyl64ZG34RxABRBYr43MSTYw3sGcXmgFQFhVlaC7kFhbaYJD+1+YgfVLeNVtQ==
-x-ms-exchange-transport-forked: True
-Content-Type: text/plain; charset="iso-8859-1"
-Content-Transfer-Encoding: quoted-printable
+        id S1727688AbgCZJWe (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 26 Mar 2020 05:22:34 -0400
+Received: from mail27.static.mailgun.info ([104.130.122.27]:46518 "EHLO
+        mail27.static.mailgun.info" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726298AbgCZJWd (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Mar 2020 05:22:33 -0400
+DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
+ s=smtp; t=1585214553; h=Content-Transfer-Encoding: Content-Type:
+ In-Reply-To: MIME-Version: Date: Message-ID: From: References: Cc: To:
+ Subject: Sender; bh=+OwM0HqMP4AbODh5vasra9NtQ7vqt8/GPNduIzrrTlg=; b=NJYlOLGVg7eqmvWzJKmvgZb2t85grmoij27fNeTkuhWs4TfphXaWinfX86dlHFVXKwhaxbDM
+ GRqn6F/GYSYksGIW1xy6q+9l5WciTl+77FiNy/DugpTJr1M4Fs/Y4aJX4yduwuHsXDZWf2y0
+ 5u6pCR4JLZGH0lj98ZyylD709UY=
+X-Mailgun-Sending-Ip: 104.130.122.27
+X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
+Received: from smtp.codeaurora.org (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171])
+ by mxa.mailgun.org with ESMTP id 5e7c7458.7fa94813c148-smtp-out-n02;
+ Thu, 26 Mar 2020 09:22:32 -0000 (UTC)
+Received: by smtp.codeaurora.org (Postfix, from userid 1001)
+        id 5A213C44788; Thu, 26 Mar 2020 09:22:32 +0000 (UTC)
+Received: from [192.168.0.103] (unknown [106.51.108.248])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        (Authenticated sender: rnayak)
+        by smtp.codeaurora.org (Postfix) with ESMTPSA id 61490C433BA;
+        Thu, 26 Mar 2020 09:22:25 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.3.2 smtp.codeaurora.org 61490C433BA
+Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
+Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=none smtp.mailfrom=rnayak@codeaurora.org
+Subject: Re: [RFC v6 0/2] Add SDHC interconnect bandwidth scaling
+To:     Pradeep P V K <ppvk@codeaurora.org>, bjorn.andersson@linaro.org,
+        adrian.hunter@intel.com, robh+dt@kernel.org,
+        ulf.hansson@linaro.org, asutoshd@codeaurora.org,
+        stummala@codeaurora.org, sayalil@codeaurora.org,
+        rampraka@codeaurora.org, vbadigan@codeaurora.org, sboyd@kernel.org,
+        georgi.djakov@linaro.org, mka@chromium.org
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
+        agross@kernel.org, linux-mmc-owner@vger.kernel.org,
+        Viresh Kumar <viresh.kumar@linaro.org>,
+        Saravana Kannan <saravanak@google.com>
+References: <1584973502-14775-1-git-send-email-ppvk@codeaurora.org>
+From:   Rajendra Nayak <rnayak@codeaurora.org>
+Message-ID: <c17d8842-0e1d-0014-b909-3114952b350b@codeaurora.org>
+Date:   Thu, 26 Mar 2020 14:52:22 +0530
+User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:68.0) Gecko/20100101
+ Thunderbird/68.6.0
 MIME-Version: 1.0
-X-OriginatorOrg: renesas.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 28087294-4598-479b-7457-08d7d161056f
-X-MS-Exchange-CrossTenant-originalarrivaltime: 26 Mar 2020 08:38:12.8198
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 53d82571-da19-47e4-9cb4-625a166a4a2a
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: SkzRRB1tR514Kbc3PJssNtmDHMoU1vP9DpMXA5w6D8DRT/5zICnDUXn+8Hhi9P7iJuGPUsEly7Q8MOJSsVxKP8wkPEzOfS6v1N1CxQDh/CxW6utjzVxqzuTUkZPa9u8N
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: TYAPR01MB1997
+In-Reply-To: <1584973502-14775-1-git-send-email-ppvk@codeaurora.org>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Wolfram-san,
+Adding Viresh and Saravana,
 
-Thank you for the patch!
+On 3/23/2020 7:55 PM, Pradeep P V K wrote:
+> Add interconnect bandwidths for SDHC driver using OPP framework that
+> is required by SDHC driver based on the clock frequency and bus width
+> of the card. Otherwise, the system clocks may run at minimum clock
+> speed and thus affecting the performance.
+> 
+> This change is based on
+> [RFC] mmc: host: sdhci-msm: Use the interconnect API
+> (https://lkml.org/lkml/2018/10/11/499) and
+> 
+> [PATCH v6] Introduce Bandwidth OPPs for interconnects
+> (https://lkml.org/lkml/2019/12/6/740)
 
-> From: Wolfram Sang, Sent: Friday, March 6, 2020 6:32 PM
-<snip>
-> It has been tested on a Renesas Salvator-XS board (R-Car M3-N). There
-> were no regressions detected. HS400 could be tuned the same way, and
-> checksumming large files still works. Note that I couldn't test the 'all
-> TAPs are good' case without hacking the code. So, maybe the BSP team has
-> a setup where this happens without tweaking? This is why the series is
-> marked as 'RFT' still.
+Pradeep, since your series seems to depend on the above proposed bw bindings,
+can you post the DT changes for the platform that you are testing these
+patches on?
 
-Fortunately, I found such an 'all TAPs are good' case board (R-Car H3).
-So, I tested this patch series with update tap_cnt on patch 1/3.
-And then, I didn't find any regression. So,
+Please note that the above series is currently deadlocked [1][2] with no clear path
+forward for now, so looking at how you plan to use this might throw some light onto
+the requirements
 
-Tested-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+[1] https://lkml.org/lkml/2020/1/14/511
+[2] https://lkml.org/lkml/2020/3/20/106
 
-Best regards,
-Yoshihiro Shimoda
+> 
+> Pradeep P V K (2):
+>    mmc: sdhci-msm: Add interconnect bus bandwidth scaling support
+>    dt-bindings: mmc: sdhci-msm: Add interconnect BW scaling strings
+> 
+>   .../devicetree/bindings/mmc/sdhci-msm.txt          |  18 ++
+>   drivers/mmc/host/sdhci-msm.c                       | 240 ++++++++++++++++++++-
+>   2 files changed, 254 insertions(+), 4 deletions(-)
+> 
 
+-- 
+QUALCOMM INDIA, on behalf of Qualcomm Innovation Center, Inc. is a member
+of Code Aurora Forum, hosted by The Linux Foundation
