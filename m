@@ -2,110 +2,103 @@ Return-Path: <SRS0=y6Wy=5L=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.0 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-0.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9C2E7C2D0E8
-	for <linux-mmc@archiver.kernel.org>; Thu, 26 Mar 2020 09:22:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 751E1C43331
+	for <linux-mmc@archiver.kernel.org>; Thu, 26 Mar 2020 10:52:00 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 70C9E20719
-	for <linux-mmc@archiver.kernel.org>; Thu, 26 Mar 2020 09:22:34 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4D1572070A
+	for <linux-mmc@archiver.kernel.org>; Thu, 26 Mar 2020 10:52:00 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (1024-bit key) header.d=mg.codeaurora.org header.i=@mg.codeaurora.org header.b="NJYlOLGV"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="bwW61sst"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727688AbgCZJWe (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 26 Mar 2020 05:22:34 -0400
-Received: from mail27.static.mailgun.info ([104.130.122.27]:46518 "EHLO
-        mail27.static.mailgun.info" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726298AbgCZJWd (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Mar 2020 05:22:33 -0400
-DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
- s=smtp; t=1585214553; h=Content-Transfer-Encoding: Content-Type:
- In-Reply-To: MIME-Version: Date: Message-ID: From: References: Cc: To:
- Subject: Sender; bh=+OwM0HqMP4AbODh5vasra9NtQ7vqt8/GPNduIzrrTlg=; b=NJYlOLGVg7eqmvWzJKmvgZb2t85grmoij27fNeTkuhWs4TfphXaWinfX86dlHFVXKwhaxbDM
- GRqn6F/GYSYksGIW1xy6q+9l5WciTl+77FiNy/DugpTJr1M4Fs/Y4aJX4yduwuHsXDZWf2y0
- 5u6pCR4JLZGH0lj98ZyylD709UY=
-X-Mailgun-Sending-Ip: 104.130.122.27
-X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
-Received: from smtp.codeaurora.org (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171])
- by mxa.mailgun.org with ESMTP id 5e7c7458.7fa94813c148-smtp-out-n02;
- Thu, 26 Mar 2020 09:22:32 -0000 (UTC)
-Received: by smtp.codeaurora.org (Postfix, from userid 1001)
-        id 5A213C44788; Thu, 26 Mar 2020 09:22:32 +0000 (UTC)
-Received: from [192.168.0.103] (unknown [106.51.108.248])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        (Authenticated sender: rnayak)
-        by smtp.codeaurora.org (Postfix) with ESMTPSA id 61490C433BA;
-        Thu, 26 Mar 2020 09:22:25 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.3.2 smtp.codeaurora.org 61490C433BA
-Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
-Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=none smtp.mailfrom=rnayak@codeaurora.org
-Subject: Re: [RFC v6 0/2] Add SDHC interconnect bandwidth scaling
-To:     Pradeep P V K <ppvk@codeaurora.org>, bjorn.andersson@linaro.org,
-        adrian.hunter@intel.com, robh+dt@kernel.org,
-        ulf.hansson@linaro.org, asutoshd@codeaurora.org,
-        stummala@codeaurora.org, sayalil@codeaurora.org,
-        rampraka@codeaurora.org, vbadigan@codeaurora.org, sboyd@kernel.org,
-        georgi.djakov@linaro.org, mka@chromium.org
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
-        agross@kernel.org, linux-mmc-owner@vger.kernel.org,
-        Viresh Kumar <viresh.kumar@linaro.org>,
-        Saravana Kannan <saravanak@google.com>
-References: <1584973502-14775-1-git-send-email-ppvk@codeaurora.org>
-From:   Rajendra Nayak <rnayak@codeaurora.org>
-Message-ID: <c17d8842-0e1d-0014-b909-3114952b350b@codeaurora.org>
-Date:   Thu, 26 Mar 2020 14:52:22 +0530
-User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:68.0) Gecko/20100101
- Thunderbird/68.6.0
+        id S1726338AbgCZKv7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 26 Mar 2020 06:51:59 -0400
+Received: from mail-lf1-f67.google.com ([209.85.167.67]:42399 "EHLO
+        mail-lf1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727773AbgCZKv7 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Mar 2020 06:51:59 -0400
+Received: by mail-lf1-f67.google.com with SMTP id t21so4383425lfe.9
+        for <linux-mmc@vger.kernel.org>; Thu, 26 Mar 2020 03:51:56 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=rIU/xURtDLn8PFigh0qvNQ4+V3T/fDVQQZYd8JhofKo=;
+        b=bwW61sstDbKkr/nUVOTF/i+ve5q3YImVYIpUJ7NdpBsb2hQNqKmATfrut8TgCdpN0I
+         6P+nYk0rSuiiKsFPDio/U5y2qk0J/Nq13fX1tbhwXczUjszuSSX7P7310txLNa7kqFNW
+         6ounHw6bF+toLDPHYN8Dgr4kyKzzoYC9ugHQuQuhJYEC14FsN5C2x52ZSOqifbtoDdRd
+         k+fOiAPlFg2WyLlotATTyDCdsn/3NpM8KZT64zh5sRGHFtGgW5q7aFeoZa4vxIWox/pD
+         ZaLxFowV4I6e7egotXJvScE2RvZ22GP15fgaEsQ4gHQJuMlqCpHSzG5LdO4X9pTavVAG
+         kwCA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=rIU/xURtDLn8PFigh0qvNQ4+V3T/fDVQQZYd8JhofKo=;
+        b=K6hQ75+f/mZu/Kgql0j1YCyQ6GZScH91iw94zAi1OGbIvO/J/zkCgP7BY2+86IH73+
+         W4xXFp3cIEkCEesTXEMj+tQLZLULBqpkAO6R8m5cFrbQHh9eh1i00P44g/K8sNs+CB7m
+         BKA0bkmRwqkprMnhMYs/jNbaPnZFIVeF5N2ep0OnxKPTy8F51s8R9QZOJaQzXiitMfEF
+         VPnLLs6JmGHvU9G10HrnER/9qlMbwanhB1fBGDEc2A5917uy/1WpznIRrg5hG/Lk75Rp
+         cUrgsGILq29Q1y3a1jgmFIOztuMlVZL77kHVUfizu8lJGh3XmeqtIRMXhloqzOuukthb
+         RHAA==
+X-Gm-Message-State: ANhLgQ1roQiRnyaWPkIWN1JBWGp9Hs+5iR6BXojrKXF9N47YNfBwQaCb
+        GiXUn3NxXAydCpSh7kNniM031imcWErbW4qGey4w7g==
+X-Google-Smtp-Source: ADFU+vuc4u7Qq9hYKCXaP8KUhEDGcotTGV7qQ007wzkMl1hiLyHact9qf+t2BAOgG8Q5wJOE3MAb0Zd1AmKzabFfN7E=
+X-Received: by 2002:a19:234f:: with SMTP id j76mr5401178lfj.105.1585219915896;
+ Thu, 26 Mar 2020 03:51:55 -0700 (PDT)
 MIME-Version: 1.0
-In-Reply-To: <1584973502-14775-1-git-send-email-ppvk@codeaurora.org>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+References: <20200324180650.28819-1-ulf.hansson@linaro.org> <20200326025132.GA4189@sasha-vm>
+In-Reply-To: <20200326025132.GA4189@sasha-vm>
+From:   Anders Roxell <anders.roxell@linaro.org>
+Date:   Thu, 26 Mar 2020 11:51:44 +0100
+Message-ID: <CADYN=9JS0fcM-B5XR9fCHiQGP1i7RSh2zUtJA+BSASGctDkJJg@mail.gmail.com>
+Subject: Re: [PATCH 5.5.12 0/5] mmc: Fix some busy detect problems
+To:     Sasha Levin <sashal@kernel.org>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        stable@vger.kernel.org, linux-mmc@vger.kernel.org,
+        Sowjanya Komatineni <skomatineni@nvidia.com>,
+        Faiz Abbas <faiz_abbas@ti.com>,
+        Naresh Kamboju <naresh.kamboju@linaro.org>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Adding Viresh and Saravana,
+On Thu, 26 Mar 2020 at 03:51, Sasha Levin <sashal@kernel.org> wrote:
+>
+> On Tue, Mar 24, 2020 at 07:06:45PM +0100, Ulf Hansson wrote:
+> >This series provides a couple of manually backported mmc changes that fixes some
+> >busy detect issues, for a couple of mmc host drivers (sdhci-tegra|omap).
+> >
+> >Ulf Hansson (5):
+> >  mmc: core: Allow host controllers to require R1B for CMD6
+> >  mmc: core: Respect MMC_CAP_NEED_RSP_BUSY for erase/trim/discard
+> >  mmc: core: Respect MMC_CAP_NEED_RSP_BUSY for eMMC sleep command
+> >  mmc: sdhci-omap: Fix busy detection by enabling MMC_CAP_NEED_RSP_BUSY
+> >  mmc: sdhci-tegra: Fix busy detection by enabling MMC_CAP_NEED_RSP_BUSY
+> >
+> > drivers/mmc/core/core.c        | 5 ++++-
+> > drivers/mmc/core/mmc.c         | 7 +++++--
+> > drivers/mmc/core/mmc_ops.c     | 8 +++++---
+> > drivers/mmc/host/sdhci-omap.c  | 3 +++
+> > drivers/mmc/host/sdhci-tegra.c | 3 +++
+> > include/linux/mmc/host.h       | 1 +
+> > 6 files changed, 21 insertions(+), 6 deletions(-)
+>
+> I've queued this, the 5.4, and the 4.19 series. Thanks!
 
-On 3/23/2020 7:55 PM, Pradeep P V K wrote:
-> Add interconnect bandwidths for SDHC driver using OPP framework that
-> is required by SDHC driver based on the clock frequency and bus width
-> of the card. Otherwise, the system clocks may run at minimum clock
-> speed and thus affecting the performance.
-> 
-> This change is based on
-> [RFC] mmc: host: sdhci-msm: Use the interconnect API
-> (https://lkml.org/lkml/2018/10/11/499) and
-> 
-> [PATCH v6] Introduce Bandwidth OPPs for interconnects
-> (https://lkml.org/lkml/2019/12/6/740)
+Hi Sasha,
 
-Pradeep, since your series seems to depend on the above proposed bw bindings,
-can you post the DT changes for the platform that you are testing these
-patches on?
+I've tested all three kernels, but replied to 5.5 and 5.4 with "Tested-by".
+I did not reply "Tested-by" on 4.19 because I did not get a good result there.
+I'm investigating why it did not boot. I'm not sure if you should
+apply the patches
+yet to 4.19, and if you do, please do not add my "Tested-by" on 4.19.
 
-Please note that the above series is currently deadlocked [1][2] with no clear path
-forward for now, so looking at how you plan to use this might throw some light onto
-the requirements
-
-[1] https://lkml.org/lkml/2020/1/14/511
-[2] https://lkml.org/lkml/2020/3/20/106
-
-> 
-> Pradeep P V K (2):
->    mmc: sdhci-msm: Add interconnect bus bandwidth scaling support
->    dt-bindings: mmc: sdhci-msm: Add interconnect BW scaling strings
-> 
->   .../devicetree/bindings/mmc/sdhci-msm.txt          |  18 ++
->   drivers/mmc/host/sdhci-msm.c                       | 240 ++++++++++++++++++++-
->   2 files changed, 254 insertions(+), 4 deletions(-)
-> 
-
--- 
-QUALCOMM INDIA, on behalf of Qualcomm Innovation Center, Inc. is a member
-of Code Aurora Forum, hosted by The Linux Foundation
+Cheers,
+Anders
