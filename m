@@ -2,103 +2,129 @@ Return-Path: <SRS0=y6Wy=5L=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 751E1C43331
-	for <linux-mmc@archiver.kernel.org>; Thu, 26 Mar 2020 10:52:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C3B0BC43331
+	for <linux-mmc@archiver.kernel.org>; Thu, 26 Mar 2020 14:28:04 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 4D1572070A
-	for <linux-mmc@archiver.kernel.org>; Thu, 26 Mar 2020 10:52:00 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 944E32077D
+	for <linux-mmc@archiver.kernel.org>; Thu, 26 Mar 2020 14:28:04 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="bwW61sst"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="s0AYeRSm"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726338AbgCZKv7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 26 Mar 2020 06:51:59 -0400
-Received: from mail-lf1-f67.google.com ([209.85.167.67]:42399 "EHLO
-        mail-lf1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727773AbgCZKv7 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Mar 2020 06:51:59 -0400
-Received: by mail-lf1-f67.google.com with SMTP id t21so4383425lfe.9
-        for <linux-mmc@vger.kernel.org>; Thu, 26 Mar 2020 03:51:56 -0700 (PDT)
+        id S1727829AbgCZO2E (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 26 Mar 2020 10:28:04 -0400
+Received: from mail-vs1-f66.google.com ([209.85.217.66]:45758 "EHLO
+        mail-vs1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727798AbgCZO2E (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Mar 2020 10:28:04 -0400
+Received: by mail-vs1-f66.google.com with SMTP id x82so3913864vsc.12
+        for <linux-mmc@vger.kernel.org>; Thu, 26 Mar 2020 07:28:03 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=rIU/xURtDLn8PFigh0qvNQ4+V3T/fDVQQZYd8JhofKo=;
-        b=bwW61sstDbKkr/nUVOTF/i+ve5q3YImVYIpUJ7NdpBsb2hQNqKmATfrut8TgCdpN0I
-         6P+nYk0rSuiiKsFPDio/U5y2qk0J/Nq13fX1tbhwXczUjszuSSX7P7310txLNa7kqFNW
-         6ounHw6bF+toLDPHYN8Dgr4kyKzzoYC9ugHQuQuhJYEC14FsN5C2x52ZSOqifbtoDdRd
-         k+fOiAPlFg2WyLlotATTyDCdsn/3NpM8KZT64zh5sRGHFtGgW5q7aFeoZa4vxIWox/pD
-         ZaLxFowV4I6e7egotXJvScE2RvZ22GP15fgaEsQ4gHQJuMlqCpHSzG5LdO4X9pTavVAG
-         kwCA==
+        bh=Nwrqr8fUwcczi1tkKbhoCAaTj0Lz9vANHD/lv6450Ik=;
+        b=s0AYeRSme5ZYMG5Hj00MtSphy+ZF1hJEIT/x2laNKAPH6uwyawibNxjdwbP2n3VcAz
+         csHlsS0gxGoa5DicQVyRyza5fvlnbU7gXob7YwmrF1iP6Arowk1BTPlr0kz4O3XeecgF
+         1zk9ZTQ+jv4zeHagRLkhqZrvKEFdH+oNeK135nUnNRS91hY2ue714O+FEjcV14/4YNSF
+         LfEKcr0FypAkSBknWreQBXQ7JbSB7qSlCdDz+6IHoDYmn4ebQwicF5K71DOR0GD0cCFh
+         bCHWHd0BIGOXrsyTGs9lNM+SLJBnuSpHOhufi/2mLRvJCbJQ5z5/y/CztJiv8Q92tTQi
+         xs6A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=rIU/xURtDLn8PFigh0qvNQ4+V3T/fDVQQZYd8JhofKo=;
-        b=K6hQ75+f/mZu/Kgql0j1YCyQ6GZScH91iw94zAi1OGbIvO/J/zkCgP7BY2+86IH73+
-         W4xXFp3cIEkCEesTXEMj+tQLZLULBqpkAO6R8m5cFrbQHh9eh1i00P44g/K8sNs+CB7m
-         BKA0bkmRwqkprMnhMYs/jNbaPnZFIVeF5N2ep0OnxKPTy8F51s8R9QZOJaQzXiitMfEF
-         VPnLLs6JmGHvU9G10HrnER/9qlMbwanhB1fBGDEc2A5917uy/1WpznIRrg5hG/Lk75Rp
-         cUrgsGILq29Q1y3a1jgmFIOztuMlVZL77kHVUfizu8lJGh3XmeqtIRMXhloqzOuukthb
-         RHAA==
-X-Gm-Message-State: ANhLgQ1roQiRnyaWPkIWN1JBWGp9Hs+5iR6BXojrKXF9N47YNfBwQaCb
-        GiXUn3NxXAydCpSh7kNniM031imcWErbW4qGey4w7g==
-X-Google-Smtp-Source: ADFU+vuc4u7Qq9hYKCXaP8KUhEDGcotTGV7qQ007wzkMl1hiLyHact9qf+t2BAOgG8Q5wJOE3MAb0Zd1AmKzabFfN7E=
-X-Received: by 2002:a19:234f:: with SMTP id j76mr5401178lfj.105.1585219915896;
- Thu, 26 Mar 2020 03:51:55 -0700 (PDT)
+        bh=Nwrqr8fUwcczi1tkKbhoCAaTj0Lz9vANHD/lv6450Ik=;
+        b=ErhvujkcIl0jAbTv23FTAxpbAHnXqeLjtHDBdLEjCOfG7ZmHApo9S2C5OOxDJK/42X
+         FtHAAJD76JRhQrluRSFNCHKH2MVrcsGFEMpNv4YmfI61wZz/1Pqg1B73aC8yol2qsk70
+         vo081QrGLHqAWvCtVkMdJBl7ZRixk/DUkId37Z1EqJmCQDnnrTq694Qi6ckRD2eQHSVh
+         FEAJh6GCvBYHKLy764PdBxmSj2ZNTrzPuT2SUisxuZxpGw8NalNvePOHsbTy6j4zescz
+         aLuVUJcGDytaIZWsgEz5a+/pZBAwiPjvBrx4MzJGahaVvdzjyiRxwrgN/M7SfC+MmsbC
+         J04A==
+X-Gm-Message-State: ANhLgQ2IETN/bIv3mE5Uqna+FemtAvqB6r/Er7lNnqKGDhcq06JVgp/P
+        SNi6H/U0rf9oiaxdlE7LPp7twpor7wgWW4bcuuQevV6P
+X-Google-Smtp-Source: ADFU+vsDl0E1ShxlqFNIKGgRphr3dXzKQ2BouqsiqJSyqwn2BTjEQZNw7vYZJmX1XaoteUXkIePuQWywtUNQtEW50KM=
+X-Received: by 2002:a67:2ec6:: with SMTP id u189mr7072856vsu.200.1585232883289;
+ Thu, 26 Mar 2020 07:28:03 -0700 (PDT)
 MIME-Version: 1.0
-References: <20200324180650.28819-1-ulf.hansson@linaro.org> <20200326025132.GA4189@sasha-vm>
-In-Reply-To: <20200326025132.GA4189@sasha-vm>
-From:   Anders Roxell <anders.roxell@linaro.org>
-Date:   Thu, 26 Mar 2020 11:51:44 +0100
-Message-ID: <CADYN=9JS0fcM-B5XR9fCHiQGP1i7RSh2zUtJA+BSASGctDkJJg@mail.gmail.com>
-Subject: Re: [PATCH 5.5.12 0/5] mmc: Fix some busy detect problems
-To:     Sasha Levin <sashal@kernel.org>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        stable@vger.kernel.org, linux-mmc@vger.kernel.org,
-        Sowjanya Komatineni <skomatineni@nvidia.com>,
-        Faiz Abbas <faiz_abbas@ti.com>,
-        Naresh Kamboju <naresh.kamboju@linaro.org>
+References: <20200325143409.13005-1-ludovic.barre@st.com> <20200325143409.13005-3-ludovic.barre@st.com>
+In-Reply-To: <20200325143409.13005-3-ludovic.barre@st.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Thu, 26 Mar 2020 15:27:27 +0100
+Message-ID: <CAPDyKFpO40Ois8pNwYOeqZrJbV9UeCLok=i8z4GWML+A7TP2-w@mail.gmail.com>
+Subject: Re: [PATCH V2 2/2] mmc: mmci: initialize pwr|clk|datactrl_reg with
+ their hardware values
+To:     Ludovic Barre <ludovic.barre@st.com>
+Cc:     Rob Herring <robh+dt@kernel.org>,
+        Srini Kandagatla <srinivas.kandagatla@linaro.org>,
+        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
+        Alexandre Torgue <alexandre.torgue@st.com>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        DTML <devicetree@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        linux-stm32@st-md-mailman.stormreply.com
 Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 26 Mar 2020 at 03:51, Sasha Levin <sashal@kernel.org> wrote:
+On Wed, 25 Mar 2020 at 15:34, Ludovic Barre <ludovic.barre@st.com> wrote:
 >
-> On Tue, Mar 24, 2020 at 07:06:45PM +0100, Ulf Hansson wrote:
-> >This series provides a couple of manually backported mmc changes that fixes some
-> >busy detect issues, for a couple of mmc host drivers (sdhci-tegra|omap).
-> >
-> >Ulf Hansson (5):
-> >  mmc: core: Allow host controllers to require R1B for CMD6
-> >  mmc: core: Respect MMC_CAP_NEED_RSP_BUSY for erase/trim/discard
-> >  mmc: core: Respect MMC_CAP_NEED_RSP_BUSY for eMMC sleep command
-> >  mmc: sdhci-omap: Fix busy detection by enabling MMC_CAP_NEED_RSP_BUSY
-> >  mmc: sdhci-tegra: Fix busy detection by enabling MMC_CAP_NEED_RSP_BUSY
-> >
-> > drivers/mmc/core/core.c        | 5 ++++-
-> > drivers/mmc/core/mmc.c         | 7 +++++--
-> > drivers/mmc/core/mmc_ops.c     | 8 +++++---
-> > drivers/mmc/host/sdhci-omap.c  | 3 +++
-> > drivers/mmc/host/sdhci-tegra.c | 3 +++
-> > include/linux/mmc/host.h       | 1 +
-> > 6 files changed, 21 insertions(+), 6 deletions(-)
+> In mmci_write_pwr|clk|datactrlreg functions, if the desired value
+> is equal to corresponding variable (pwr_reg|clk_reg|datactrl_reg),
+> the value is not written in the register.
 >
-> I've queued this, the 5.4, and the 4.19 series. Thanks!
+> At probe pwr|clk|datactrl_reg of mmci_host structure are initialized
+> to 0 (kzalloc of mmc_alloc_host). But they does not necessarily reflect
+> hardware value of these registers, if they are used while boot level.
+> This is problematic, if we want to write 0 in these registers.
 
-Hi Sasha,
+It could be, but I don't see that we ever needs to do that - at least
+not before we have written some other non-zero values to them (through
+the helper functions).
 
-I've tested all three kernels, but replied to 5.5 and 5.4 with "Tested-by".
-I did not reply "Tested-by" on 4.19 because I did not get a good result there.
-I'm investigating why it did not boot. I'm not sure if you should
-apply the patches
-yet to 4.19, and if you do, please do not add my "Tested-by" on 4.19.
+>
+> This patch initializes pwr|clk|datactrl_reg variables with their
+> hardware values while probing.
 
-Cheers,
-Anders
+Hmm, so in principle this change seems quite okay, but I am hesitant
+to pick it up - unless it really addresses a problem that you have
+observed.
+
+The reason is, this change may lead to avoiding to re-write the
+register with the same value it got during boot - and who knows what
+is best here.
+
+Kind regards
+Uffe
+
+>
+> Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
+> ---
+>  drivers/mmc/host/mmci.c | 4 ++++
+>  1 file changed, 4 insertions(+)
+>
+> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+> index 647567def612..f378ae18d5dc 100644
+> --- a/drivers/mmc/host/mmci.c
+> +++ b/drivers/mmc/host/mmci.c
+> @@ -2085,6 +2085,10 @@ static int mmci_probe(struct amba_device *dev,
+>         else if (plat->ocr_mask)
+>                 dev_warn(mmc_dev(mmc), "Platform OCR mask is ignored\n");
+>
+> +       host->pwr_reg = readl_relaxed(host->base + MMCIPOWER);
+> +       host->clk_reg = readl_relaxed(host->base + MMCICLOCK);
+> +       host->datactrl_reg = readl_relaxed(host->base + MMCIDATACTRL);
+> +
+>         /* We support these capabilities. */
+>         mmc->caps |= MMC_CAP_CMD23;
+>
+> --
+> 2.17.1
+>
