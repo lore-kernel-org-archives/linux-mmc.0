@@ -2,82 +2,101 @@ Return-Path: <SRS0=5iJr=5M=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.7 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-0.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 86318C43331
-	for <linux-mmc@archiver.kernel.org>; Fri, 27 Mar 2020 11:22:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4B3C8C43331
+	for <linux-mmc@archiver.kernel.org>; Fri, 27 Mar 2020 12:05:07 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 542DA20675
-	for <linux-mmc@archiver.kernel.org>; Fri, 27 Mar 2020 11:22:24 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1BC652074F
+	for <linux-mmc@archiver.kernel.org>; Fri, 27 Mar 2020 12:05:07 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="zhgIGlEo"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726937AbgC0LWX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 27 Mar 2020 07:22:23 -0400
-Received: from mx2.suse.de ([195.135.220.15]:38966 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726698AbgC0LWX (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 27 Mar 2020 07:22:23 -0400
-X-Virus-Scanned: by amavisd-new at test-mx.suse.de
-Received: from relay2.suse.de (unknown [195.135.220.254])
-        by mx2.suse.de (Postfix) with ESMTP id 4467AADF1;
-        Fri, 27 Mar 2020 11:22:22 +0000 (UTC)
-Message-ID: <6553f266f3c2a3fe2bdded5d4ca31e3720ea7ee3.camel@suse.de>
-Subject: Re: [PATCH v2 11/11] ARM: dts: bcm2711: Add vmmc regulator in emmc2
-From:   Nicolas Saenz Julienne <nsaenzjulienne@suse.de>
-To:     adrian.hunter@intel.com, linux-kernel@vger.kernel.org,
-        Rob Herring <robh+dt@kernel.org>
-Cc:     phil@raspberrypi.com, linux-mmc@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, f.fainelli@gmail.com,
-        stefan.wahren@i2se.com, bcm-kernel-feedback-list@broadcom.com,
-        linux-rpi-kernel@lists.infradead.org, devicetree@vger.kernel.org
-Date:   Fri, 27 Mar 2020 12:22:21 +0100
-In-Reply-To: <20200306174413.20634-12-nsaenzjulienne@suse.de>
-References: <20200306174413.20634-1-nsaenzjulienne@suse.de>
-         <20200306174413.20634-12-nsaenzjulienne@suse.de>
-Content-Type: multipart/signed; micalg="pgp-sha256";
-        protocol="application/pgp-signature"; boundary="=-vjSG4WH1xfhs1bTv2Qs6"
-User-Agent: Evolution 3.34.4 
+        id S1727115AbgC0MFG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 27 Mar 2020 08:05:06 -0400
+Received: from mail-lj1-f195.google.com ([209.85.208.195]:43730 "EHLO
+        mail-lj1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726540AbgC0MFG (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 27 Mar 2020 08:05:06 -0400
+Received: by mail-lj1-f195.google.com with SMTP id g27so9865469ljn.10
+        for <linux-mmc@vger.kernel.org>; Fri, 27 Mar 2020 05:05:05 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=nT2zhNwcOafFqnYFSpGatjejS7IxPAm8/yEh3CXdsPY=;
+        b=zhgIGlEoKw+cAWo+Jqd3KrqVzXRHeRu7li6fD3FIZl9qprJGaT3iCAZ67/cdKPtiIb
+         mR7RCwndFg527pbV4/+zyBPu6yi/0YvbYDo8bs2ZZkxf4GMNHNjDf9btkiFBMwO51PVZ
+         YnmxIC0noWv5cUyplQ+r2K0UdG++BdKmI4m8Hw3RV0aDPd2NkiE7hUxq/3vWLYSt2dFR
+         6G38LBfAQmVMca69AenhO4cVEApmKrLBPiGnH/02dMST8DJ3FwfVPY7rFA5Y8De++rHE
+         2ju3g1/id7xlMIKeX9WYXxNy2slqgwrKOEeGzONCJVJzcChc0v8H7RTXeHDMOXi3o+Ju
+         uFkw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=nT2zhNwcOafFqnYFSpGatjejS7IxPAm8/yEh3CXdsPY=;
+        b=sIe96wJ1S3VRVDzeMeSIFcKOaKAnGSP1wlGe9cu0SiZ3YzzFEZjHEJg2cbj5mxDbOm
+         5BHg0DFoyrQrUUutkvAAC99mtQ5xrIi4Vkk1i1LvWflgNgXViiF50q/Kw8Xf1s3OhsAZ
+         +4qpUhebaHG4hox9o0XqMA/uv7ZDmUKljl9f0sdKJBbj7p4VCUv6f5FxtcTh/fAjTXjZ
+         qzRwWVU08OoNAjgx6Vh4w6o2mIpnvn6GcrLyLrtc3JT2+6Gu55JabS/MWpETXQwxaaJB
+         egY2MxXzdGUDFcJ+1un5bZ5PotrriW1MPM59cNNBYnM3KXneI3vNinhmZStdt3kWWVu6
+         mcDQ==
+X-Gm-Message-State: ANhLgQ0CPoIgu312yKh36PoygxrHLfVHdOh9rFk3DoKMfbACRat3aCYo
+        WyAXHVf9xAaD2n6gGunQFIUi5LZQnAaAbMp8pvitfQ==
+X-Google-Smtp-Source: APiQypKSlosFwhcP547B9yyV+9v9debIRBcW1YFFA0onUjgxmdxNlnbTfv7Iblp6w8GJUuholDXQIJiebxlEJeeBkUw=
+X-Received: by 2002:a2e:730e:: with SMTP id o14mr8152197ljc.273.1585310704209;
+ Fri, 27 Mar 2020 05:05:04 -0700 (PDT)
 MIME-Version: 1.0
+References: <20200324180800.28953-1-ulf.hansson@linaro.org>
+In-Reply-To: <20200324180800.28953-1-ulf.hansson@linaro.org>
+From:   Anders Roxell <anders.roxell@linaro.org>
+Date:   Fri, 27 Mar 2020 13:04:53 +0100
+Message-ID: <CADYN=9JSbio1b5VuijifGSdA39-cf+J1hg5b3rcN5h4p0W2=xA@mail.gmail.com>
+Subject: Re: [PATCH 4.19.113 0/5] mmc: Fix some busy detect problems
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Sasha Levin <sashal@kernel.org>, stable@vger.kernel.org,
+        linux-mmc@vger.kernel.org,
+        Sowjanya Komatineni <skomatineni@nvidia.com>,
+        Faiz Abbas <faiz_abbas@ti.com>,
+        Naresh Kamboju <naresh.kamboju@linaro.org>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+On Tue, 24 Mar 2020 at 19:08, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>
+> This series provides a couple of manually backported mmc changes that fixes some
+> busy detect issues, for a couple of mmc host drivers (sdhci-tegra|omap).
+>
+> Ulf Hansson (5):
+>   mmc: core: Allow host controllers to require R1B for CMD6
+>   mmc: core: Respect MMC_CAP_NEED_RSP_BUSY for erase/trim/discard
+>   mmc: core: Respect MMC_CAP_NEED_RSP_BUSY for eMMC sleep command
+>   mmc: sdhci-omap: Fix busy detection by enabling MMC_CAP_NEED_RSP_BUSY
+>   mmc: sdhci-tegra: Fix busy detection by enabling MMC_CAP_NEED_RSP_BUSY
 
---=-vjSG4WH1xfhs1bTv2Qs6
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Tested-by: Anders Roxell <anders.roxell@linaro.org>
 
-On Fri, 2020-03-06 at 18:44 +0100, Nicolas Saenz Julienne wrote:
-> The SD card power can be controlled trough a pin routed into the board's
-> external GPIO expander. Turn that into a regulator and provide it to
-> emmc2.
->=20
-> Signed-off-by: Nicolas Saenz Julienne <nsaenzjulienne@suse.de>
+I tested it on a beagleboard x15.
 
-Applied for-next.
+Cheers,
+Anders
 
-Regards,
-Nicolas
-
-
---=-vjSG4WH1xfhs1bTv2Qs6
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: This is a digitally signed message part
-Content-Transfer-Encoding: 7bit
-
------BEGIN PGP SIGNATURE-----
-
-iQEzBAABCAAdFiEErOkkGDHCg2EbPcGjlfZmHno8x/4FAl594e0ACgkQlfZmHno8
-x/7mUwf+JdWXfDc6pDlSApWDA195aytcdvKfmu7Wsn5Cofww7VPbRaCr6aXiLF6O
-ir36AtHRiAlXnnhaAJDsriTs5FxD3VCQ7rDt9kxO9j1jSYCpsOlVTSY6MeoB4npT
-XEpL7nAoqKoWTTl7uB/vwT1aCeFsFVURMaMHGbhDXtCxahjpiyl4SOHy/dJzZGYR
-0LOn2gmk6DsKBLFuC0R0f1mDtVfLxyKOa27e7rGQS64bH4gQTc6DQ9Ta+FvZOSO7
-OGUDpcnmEVpwuqoxwskwr/nmn6ElGWWOpN9HvIPDBeasUwBlErFyNzNv22Sr+40N
-b0lEbOnZoX4UV1mMDWZXeaau39QZ6w==
-=iJaU
------END PGP SIGNATURE-----
-
---=-vjSG4WH1xfhs1bTv2Qs6--
-
+>
+>  drivers/mmc/core/core.c        | 5 ++++-
+>  drivers/mmc/core/mmc.c         | 7 +++++--
+>  drivers/mmc/core/mmc_ops.c     | 8 +++++---
+>  drivers/mmc/host/sdhci-omap.c  | 3 +++
+>  drivers/mmc/host/sdhci-tegra.c | 3 +++
+>  include/linux/mmc/host.h       | 1 +
+>  6 files changed, 21 insertions(+), 6 deletions(-)
+>
+> --
+> 2.20.1
+>
