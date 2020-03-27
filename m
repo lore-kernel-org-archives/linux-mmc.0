@@ -6,38 +6,37 @@ X-Spam-Status: No, score=-3.7 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
 	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 436A8C43331
-	for <linux-mmc@archiver.kernel.org>; Fri, 27 Mar 2020 11:21:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 86318C43331
+	for <linux-mmc@archiver.kernel.org>; Fri, 27 Mar 2020 11:22:24 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 24B9D2072F
-	for <linux-mmc@archiver.kernel.org>; Fri, 27 Mar 2020 11:21:59 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 542DA20675
+	for <linux-mmc@archiver.kernel.org>; Fri, 27 Mar 2020 11:22:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727185AbgC0LV4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 27 Mar 2020 07:21:56 -0400
-Received: from mx2.suse.de ([195.135.220.15]:38680 "EHLO mx2.suse.de"
+        id S1726937AbgC0LWX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 27 Mar 2020 07:22:23 -0400
+Received: from mx2.suse.de ([195.135.220.15]:38966 "EHLO mx2.suse.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726937AbgC0LV4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 27 Mar 2020 07:21:56 -0400
+        id S1726698AbgC0LWX (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 27 Mar 2020 07:22:23 -0400
 X-Virus-Scanned: by amavisd-new at test-mx.suse.de
 Received: from relay2.suse.de (unknown [195.135.220.254])
-        by mx2.suse.de (Postfix) with ESMTP id A486FADF1;
-        Fri, 27 Mar 2020 11:21:54 +0000 (UTC)
-Message-ID: <a4c38810b7cb10dcfadd2844320d1c9e5b6bc6f6.camel@suse.de>
-Subject: Re: [PATCH v2 10/11] ARM: dts: bcm2711: Update expgpio's GPIO labels
+        by mx2.suse.de (Postfix) with ESMTP id 4467AADF1;
+        Fri, 27 Mar 2020 11:22:22 +0000 (UTC)
+Message-ID: <6553f266f3c2a3fe2bdded5d4ca31e3720ea7ee3.camel@suse.de>
+Subject: Re: [PATCH v2 11/11] ARM: dts: bcm2711: Add vmmc regulator in emmc2
 From:   Nicolas Saenz Julienne <nsaenzjulienne@suse.de>
 To:     adrian.hunter@intel.com, linux-kernel@vger.kernel.org,
         Rob Herring <robh+dt@kernel.org>
-Cc:     stefan.wahren@i2se.com, devicetree@vger.kernel.org,
-        f.fainelli@gmail.com, linux-mmc@vger.kernel.org,
-        bcm-kernel-feedback-list@broadcom.com,
-        linux-rpi-kernel@lists.infradead.org, phil@raspberrypi.com,
-        linux-arm-kernel@lists.infradead.org
-Date:   Fri, 27 Mar 2020 12:21:53 +0100
-In-Reply-To: <20200306174413.20634-11-nsaenzjulienne@suse.de>
+Cc:     phil@raspberrypi.com, linux-mmc@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, f.fainelli@gmail.com,
+        stefan.wahren@i2se.com, bcm-kernel-feedback-list@broadcom.com,
+        linux-rpi-kernel@lists.infradead.org, devicetree@vger.kernel.org
+Date:   Fri, 27 Mar 2020 12:22:21 +0100
+In-Reply-To: <20200306174413.20634-12-nsaenzjulienne@suse.de>
 References: <20200306174413.20634-1-nsaenzjulienne@suse.de>
-         <20200306174413.20634-11-nsaenzjulienne@suse.de>
+         <20200306174413.20634-12-nsaenzjulienne@suse.de>
 Content-Type: multipart/signed; micalg="pgp-sha256";
-        protocol="application/pgp-signature"; boundary="=-6dBBE0GB6iAO/vrk1/4W"
+        protocol="application/pgp-signature"; boundary="=-vjSG4WH1xfhs1bTv2Qs6"
 User-Agent: Evolution 3.34.4 
 MIME-Version: 1.0
 Sender: linux-mmc-owner@vger.kernel.org
@@ -46,15 +45,16 @@ List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 
---=-6dBBE0GB6iAO/vrk1/4W
+--=-vjSG4WH1xfhs1bTv2Qs6
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
 On Fri, 2020-03-06 at 18:44 +0100, Nicolas Saenz Julienne wrote:
-> The 6th line of the GPIO expander is used to power the board's SD card.
+> The SD card power can be controlled trough a pin routed into the board's
+> external GPIO expander. Turn that into a regulator and provide it to
+> emmc2.
 >=20
 > Signed-off-by: Nicolas Saenz Julienne <nsaenzjulienne@suse.de>
-> ---
 
 Applied for-next.
 
@@ -62,22 +62,22 @@ Regards,
 Nicolas
 
 
---=-6dBBE0GB6iAO/vrk1/4W
+--=-vjSG4WH1xfhs1bTv2Qs6
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: This is a digitally signed message part
 Content-Transfer-Encoding: 7bit
 
 -----BEGIN PGP SIGNATURE-----
 
-iQEzBAABCAAdFiEErOkkGDHCg2EbPcGjlfZmHno8x/4FAl594dEACgkQlfZmHno8
-x/6u+wgAoZAyf4EZVgmQpaGO9pvDTSICjk4v7Buc27vRC/dI7eee8lpEKtHySjxS
-ZFUZvrVtkH+1nI31qTADGEUvfLfGeZuhsl3PopdYT1L4Ajl8Wl/TgB2/jBwArPmT
-FYjuPGIYtBXg4m9qzo/hWE1gPXZOTESW5dnu6zC2KkIadq4FtZl06U7PZTbQAggH
-9REu3TOdgTvUwKmnOpTYRbfE2f5ei0Sjdem42mzLBDW5hy6i/I2zqL7qr+MT/v99
-WaE0jbqdcRsAP7HwZRF2JGP63WiFWjkfNSpGd2/AE+ETi3BK+m3iufCX8FJBrgrt
-Y+wvAAMZXkhGdHtI+fh9suxi1j+VKA==
-=5tFi
+iQEzBAABCAAdFiEErOkkGDHCg2EbPcGjlfZmHno8x/4FAl594e0ACgkQlfZmHno8
+x/7mUwf+JdWXfDc6pDlSApWDA195aytcdvKfmu7Wsn5Cofww7VPbRaCr6aXiLF6O
+ir36AtHRiAlXnnhaAJDsriTs5FxD3VCQ7rDt9kxO9j1jSYCpsOlVTSY6MeoB4npT
+XEpL7nAoqKoWTTl7uB/vwT1aCeFsFVURMaMHGbhDXtCxahjpiyl4SOHy/dJzZGYR
+0LOn2gmk6DsKBLFuC0R0f1mDtVfLxyKOa27e7rGQS64bH4gQTc6DQ9Ta+FvZOSO7
+OGUDpcnmEVpwuqoxwskwr/nmn6ElGWWOpN9HvIPDBeasUwBlErFyNzNv22Sr+40N
+b0lEbOnZoX4UV1mMDWZXeaau39QZ6w==
+=iJaU
 -----END PGP SIGNATURE-----
 
---=-6dBBE0GB6iAO/vrk1/4W--
+--=-vjSG4WH1xfhs1bTv2Qs6--
 
