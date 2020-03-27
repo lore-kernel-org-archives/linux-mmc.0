@@ -2,111 +2,177 @@ Return-Path: <SRS0=5iJr=5M=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
+X-Spam-Status: No, score=-5.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AC6E0C43331
-	for <linux-mmc@archiver.kernel.org>; Fri, 27 Mar 2020 12:27:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BC482C2D0ED
+	for <linux-mmc@archiver.kernel.org>; Fri, 27 Mar 2020 17:14:21 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 85062208E0
-	for <linux-mmc@archiver.kernel.org>; Fri, 27 Mar 2020 12:27:56 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="jcKrGM7e"
+	by mail.kernel.org (Postfix) with ESMTP id 985A72073B
+	for <linux-mmc@archiver.kernel.org>; Fri, 27 Mar 2020 17:14:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726165AbgC0M1w (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 27 Mar 2020 08:27:52 -0400
-Received: from mail-vk1-f193.google.com ([209.85.221.193]:40526 "EHLO
-        mail-vk1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727115AbgC0M1v (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 27 Mar 2020 08:27:51 -0400
-Received: by mail-vk1-f193.google.com with SMTP id k63so2608093vka.7
-        for <linux-mmc@vger.kernel.org>; Fri, 27 Mar 2020 05:27:51 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=In6AkM11gvqmdb/KispfzpmD2iRwwXtrg0CmmoI1bFo=;
-        b=jcKrGM7exGuQiO1LjlslrdOoUNSre0tVMGa8X1rUwAJMoElMCXNRubZF5PwRCB95d6
-         aNcuWamXRntJBVslsOEVoKLAKW80FJyIIcBeL2f8cJ7R68fekIllxvdDUoAqQFvJymCx
-         XdCelLEQAo310iLDkU60a8lsWlVz2So8fqiQ9pqXZtANOavod0KBr5/IWIpeG7zlbFYv
-         zZNIGA51vu8GtL2Vkj0OwFJZD9VZR3UtFspqf32K3AE8zb7NWhQZWlYNwoK59k4R6ZDr
-         r82rokEhVSpUVN9wgvJdiPFRIUvHfjTd6XHGXxlAWbhBDiDpWOoZmKoWqdr8f14rRSk0
-         3HoQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=In6AkM11gvqmdb/KispfzpmD2iRwwXtrg0CmmoI1bFo=;
-        b=QG5iZKtOKLZ9+h50We7/5safj0Q2r14XcMvOKh58COD55Sq1xRjxjsbyTTlJ6q7jb3
-         2nbnMjY1IhtYQrbEHNoA23jG4Z3SNsdb90dPwgHik5mB6w0ql3AMqMhduFQXXF1o8OXR
-         ROuyrcEXppY0x1n4q7FOIifXTHyXzezgCBG3vaqwKzYqj9jaeX+WcFZxNL7vPjThCS+d
-         XrtrTnB/ANfx6WmF5A9UKkMawI9Y/OCjnCSaxD3trm43crJwvFC3+ESA3x+jLg4ze3vn
-         KEZFeEVv9zxs6oInjeP7TxqPx00LQlWvOVBweWsax/Den7Ie5xBp41ZL3839S6gktkkg
-         6IAw==
-X-Gm-Message-State: ANhLgQ3EC+VxUootUn4ACJdczjMmsiVsDDWEjI6yR9flQU74m/fnSFwu
-        8oiDvItg4q3I8m1319llEl4oxFPK9oqu0ts/Djt8Gw==
-X-Google-Smtp-Source: ADFU+vsj3gMKz6JTZIh07Yw64OuO/tMYwReAjM54epn6GbmNlPQc0JWJA4fDl48NwW284gLnlQsKXcRQ9cQhHYiWP+Q=
-X-Received: by 2002:a1f:d084:: with SMTP id h126mr10768426vkg.25.1585312070406;
- Fri, 27 Mar 2020 05:27:50 -0700 (PDT)
+        id S1726333AbgC0ROU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 27 Mar 2020 13:14:20 -0400
+Received: from static-213-198-238-194.adsl.eunet.rs ([213.198.238.194]:56234
+        "EHLO fx.arvanta.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727708AbgC0ROU (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 27 Mar 2020 13:14:20 -0400
+Received: from arya.arvanta.net (arya.arvanta.net [10.5.1.6])
+        by fx.arvanta.net (Postfix) with ESMTP id B42C73862;
+        Fri, 27 Mar 2020 18:14:17 +0100 (CET)
+Date:   Fri, 27 Mar 2020 18:14:17 +0100
+From:   Milan =?utf-8?Q?P=2E_Stani=C4=87?= <mps@arvanta.net>
+To:     Robin Murphy <robin.murphy@arm.com>
+Cc:     Shawn Lin <shawn.lin@rock-chips.com>,
+        "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>,
+        linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: PROBLEM: =?utf-8?Q?mmc=5Fselect=5Fhs40?=
+ =?utf-8?B?MGVzIGZhaWxlZCwgZXJyb3IgLTExMOOAkOivt+azqOaEj++8jOmCruS7tg==?=
+ =?utf-8?B?55SxbGludXgtbW1jLW93bmVyQHZnZXIua2VybmVsLm9yZ+S7o+WPkeOAkQ==?=
+Message-ID: <20200327171417.GA4387@arya.arvanta.net>
+References: <20200301220242.GA8276@arya.arvanta.net>
+ <20200318214917.GA9112@arya.arvanta.net>
+ <5922bbd7-e91b-d144-6d44-2632cbd11c78@rock-chips.com>
+ <158bd6f5-2430-19bd-28ef-e18d67becaf3@arm.com>
+ <20200321204652.GA21002@arya.arvanta.net>
 MIME-Version: 1.0
-References: <20200327043639.6564-1-tangbin@cmss.chinamobile.com>
-In-Reply-To: <20200327043639.6564-1-tangbin@cmss.chinamobile.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 27 Mar 2020 13:27:14 +0100
-Message-ID: <CAPDyKFpwJq5j0CwDN152bZkdPj4_xrL1p6raMPkHuBwWTXTTwQ@mail.gmail.com>
-Subject: Re: [PATCH] mmc:cavium-octeon: remove nonsense variable coercion
-To:     Tang Bin <tangbin@cmss.chinamobile.com>
-Cc:     rrichter@marvell.com,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <20200321204652.GA21002@arya.arvanta.net>
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 27 Mar 2020 at 05:36, Tang Bin <tangbin@cmss.chinamobile.com> wrote:
->
-> In this function, the variable 'base' is already 'void __iomem *base',
-> and the return function 'devm_platform_ioremap_resource()' also returns
-> this type, so the mandatory definition here is redundant.
->
-> Signed-off-by: Tang Bin <tangbin@cmss.chinamobile.com>
+Hi,
 
-Applied for next, thanks!
+Anyone looked at this problem?
 
-Kind regards
-Uffe
+Or, is there better url or mailing list where I should send this bug
+report?
 
+Or, could someone tell me what I could try to fix it, which file and
+parameters to change?
 
-> ---
->  drivers/mmc/host/cavium-octeon.c | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/host/cavium-octeon.c b/drivers/mmc/host/cavium-octeon.c
-> index 916746c6c..e299cdd1e 100644
-> --- a/drivers/mmc/host/cavium-octeon.c
-> +++ b/drivers/mmc/host/cavium-octeon.c
-> @@ -207,13 +207,13 @@ static int octeon_mmc_probe(struct platform_device *pdev)
->         base = devm_platform_ioremap_resource(pdev, 0);
->         if (IS_ERR(base))
->                 return PTR_ERR(base);
-> -       host->base = (void __iomem *)base;
-> +       host->base = base;
->         host->reg_off = 0;
->
->         base = devm_platform_ioremap_resource(pdev, 1);
->         if (IS_ERR(base))
->                 return PTR_ERR(base);
-> -       host->dma_base = (void __iomem *)base;
-> +       host->dma_base = base;
->         /*
->          * To keep the register addresses shared we intentionaly use
->          * a negative offset here, first register used on Octeon therefore
-> --
-> 2.20.1.windows.1
->
->
->
+On Sat, 2020-03-21 at 21:46, Milan P. Stanić wrote:
+> Hi,
+> 
+> On Thu, 2020-03-19 at 12:28, Robin Murphy wrote:
+> > Hi Shawn,
+> > 
+> > On 2020-03-19 3:11 am, Shawn Lin wrote:
+> > > Hi Milan
+> > > 
+> > > [+linux-rockchip to see if someone has a Samsung chromebook one plus
+> > > and could confirm if it works]
+> > 
+> > FWIW I've also tried suspend on my NanoPC-T4 and seen that the eMMC (also
+> > HS400-ES) fails to come back properly on resume (thus resume never completes
+> > due to the missing root filesystem). IIRC it might even have been
+> > reproducible with suspend-to-idle, but I'd have to double-check that.
+>  
+> I forgot to tell that emmc worked without problem on this machine with
+> ChromeOS kernel 4.4.xx downloaded from
+> https://chromium.googlesource.com/chromiumos/third_party/kernel/+/chromeos-4.4
+> and with patches from
+> https://github.com/archlinuxarm/PKGBUILDs/tree/master/core/linux-gru
+> for about two years (iirc).
+> Problem started when I switched to mainline kernels, somewhere around
+> 5.1.xx
+> 
+> > Robin.
+> > 
+> > > On 2020/3/19 5:49, Milan P. Stanić wrote:
+> > > > Hello,
+> > > > 
+> > > > Sorry to annoy again, but could you tell me if I sent this bug report
+> > > > to right mail address or I should send it somewhere else.
+> > > > 
+> > > > Also, did I sent bug report correctly or I did some mistakes which
+> > > > caused it to be ignored.
+> > > > 
+> > > > -- TIA On Sun, 2020-03-01 at 23:02, Milan P. Stanić wrote:
+> > > > > Hello,
+> > > > > 
+> > > > > I'm not native English speaker and I'm self taught in English so sorry
+> > > > > if do not write or express correctly. And sorry if I posted bug report
+> > > > > to wrong address.
+> > > > > 
+> > > > > I'm running linux 5.6.0-rc3 without any patches on Samsung chromebook
+> > > > > one plus, Arm64 rockchip rk3399 based model name:
+> > > > > Machine model: Google Kevin
+> > > > > 
+> > > > > I build kernels from upstream git.kernel.org for this machine for some
+> > > > > time (iirc, from 5.2.1 and up) but I'm getting error messages in kernel
+> > > > > after machine resumes from suspend-to-ram.
+> > > 
+> > > It sounds to me suspend-to-ram never works for this machine, at least
+> > > since 5.2.1. Am I right?
+> > > 
+> > > > > 
+> > > > > excerpt from dmesg output:
+> > > > > -----------------------------------------------------------------------
+> > > > > Restarting tasks ... done.
+> > > > > PM: suspend exit
+> > > > > mmc_host mmc0: Bus speed (slot 0) = 400000Hz (slot req 400000Hz,
+> > > > > actual 400000HZ div = 0)
+> > > > > mmc1: mmc_select_hs400es failed, error -110
+> > > > > mmc1: error -110 doing runtime resume
+> > > > > mmc1: Got data interrupt 0x00000002 even though no data
+> > > > > operation was in progress.
+> > > > > mmc1: sdhci: ============ SDHCI REGISTER DUMP ===========
+> > > > > mmc1: sdhci: Sys addr:  0x00000008 | Version:  0x00001002
+> > > > > mmc1: sdhci: Blk size:  0x00007200 | Blk cnt:  0x00000008
+> > > > > mmc1: sdhci: Argument:  0x00000000 | Trn mode: 0x00000023
+> > > > > mmc1: sdhci: Present:   0x1fff0001 | Host ctl: 0x00000035
+> > > > > mmc1: sdhci: Power:     0x0000000b | Blk gap:  0x00000080
+> > > > > mmc1: sdhci: Wake-up:   0x00000000 | Clock:    0x0000bc07
+> > > > > mmc1: sdhci: Timeout:   0x0000000d | Int stat: 0x00000000
+> > > > > mmc1: sdhci: Int enab:  0x03ff000b | Sig enab: 0x03ff000b
+> > > > > mmc1: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
+> > > > > mmc1: sdhci: Caps:      0x44edc880 | Caps_1:   0x801020f7
+> > > > > mmc1: sdhci: Cmd:       0x00000c1a | Max curr: 0x00000000
+> > > > > mmc1: sdhci: Resp[0]:   0x00000000 | Resp[1]:  0x373300bd
+> > > > > mmc1: sdhci: Resp[2]:   0x35303030 | Resp[3]:  0x00000000
+> > > > > mmc1: sdhci: Host ctl2: 0x00000000
+> > > > > mmc1: sdhci: ADMA Err:  0x00000000 | ADMA Ptr: 0xed41e200
+> > > > > -----------------------------------------------------------------------
+> > > > > 
+> > > > > I invoke suspend-to-ram by `echo mem > /sys/power/state` from ACPI power
+> > > > > and LID button handlers.
+> > > > > 
+> > > > > This only happens when I boot and use internal emmc card and never when
+> > > > > boot and use external mmc card.
+> > > > > 
+> > > > > If suspend-to-ram is not invoked (machine is always in normal state)
+> > > > > this problem never happen (or I missed it somehow).
+> > > > > 
+> > > > > I'm attaching kernel .config (file config-5.6.0-rc3-1-gru.conf) which
+> > > > > use to build kernel, output of the `awk -f scripts/ver_linux` as file
+> > > > > ver_linux.txt and  output of dmesg as file mmc-err.txt (from which I
+> > > > > deleted wifi connection logs).
+> > > > > 
+> > > > > Sorry if I did something bad or wrong with this bug report, I don't have
+> > > > > much experience with bug reporting, especially for kernel.
+> > > > > 
+> > > > > I'm ready to send you more data, and investigate this more, apply
+> > > > > patches and rebuild kernel or whatever you ask me (of course if my
+> > > > > understanding and knowledge is enough for this job).
+> > > > > 
+> > > > > Thank in advance
+> > > > > 
+> > > > > -- 
+> > > > > Kind regards
+> > > > > 
+> > > > [...]
+> > > > 
+> > > > 
+> > > 
+> > > 
+> > > 
+> > > _______________________________________________
+> > > Linux-rockchip mailing list
+> > > Linux-rockchip@lists.infradead.org
+> > > http://lists.infradead.org/mailman/listinfo/linux-rockchip
