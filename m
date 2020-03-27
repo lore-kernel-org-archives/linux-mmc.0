@@ -7,50 +7,50 @@ X-Spam-Status: No, score=-8.6 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 74EB2C43331
-	for <linux-mmc@archiver.kernel.org>; Fri, 27 Mar 2020 19:52:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A648FC2D0E5
+	for <linux-mmc@archiver.kernel.org>; Fri, 27 Mar 2020 19:53:54 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 51CE9206F6
-	for <linux-mmc@archiver.kernel.org>; Fri, 27 Mar 2020 19:52:48 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7C88B206F1
+	for <linux-mmc@archiver.kernel.org>; Fri, 27 Mar 2020 19:53:54 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1585338768;
-	bh=OXnGr4rM8UEmdRHOvHcT1Yp5JtXRPVmGLCh55kSC0W4=;
+	s=default; t=1585338834;
+	bh=gO993NR59k5SEpFjha5Cg6PSRC7dcMFkTKnzcdIgyWM=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
-	b=auJAvhMsx93hDokyGwwCbecaK1P9A6YlI+aWi5p0T90VjaANFFjyGWcpYUEd6i8Wk
-	 g6xT4iSlYB+xjelOGJgrxjQ4o9epjnkXE5mGtNolQpGV5P/8wO+qm6RhNPi67z1lNF
-	 lSOpXcGKFQRCRoX1t0+CGvfYkUvGMnuWFvRuTtGw=
+	b=0Jftv4vCM3Bll380pSxwlmOpeSgagxW1SBtKFLBBdNKwkiqZHWI8m+FJrwdO9p1F9
+	 WrVDYFR0hkgR7eKTJoy7xLgG5IsA01g6tN0AlS+20uSxI58yZRq5W7oXNmlU5y6sRU
+	 P+R2dRk6iPYw+GlgrdJebDSNRZTCa1K+8BzGK8D0=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727423AbgC0Two (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 27 Mar 2020 15:52:44 -0400
-Received: from mail-io1-f67.google.com ([209.85.166.67]:38051 "EHLO
-        mail-io1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726900AbgC0Two (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 27 Mar 2020 15:52:44 -0400
-Received: by mail-io1-f67.google.com with SMTP id m15so11143461iob.5;
-        Fri, 27 Mar 2020 12:52:42 -0700 (PDT)
+        id S1727423AbgC0Txx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 27 Mar 2020 15:53:53 -0400
+Received: from mail-il1-f194.google.com ([209.85.166.194]:38592 "EHLO
+        mail-il1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726900AbgC0Txx (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 27 Mar 2020 15:53:53 -0400
+Received: by mail-il1-f194.google.com with SMTP id n13so2594810ilm.5;
+        Fri, 27 Mar 2020 12:53:52 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:date:from:to:cc:subject:message-id:references
          :mime-version:content-disposition:in-reply-to:user-agent;
-        bh=+h5WiL9yDo8DkU2jbfgkSKoKNNnl8C3Rpuw/b0KqEYM=;
-        b=JglqOaLSpKvSgdQFkaB3fDD0EOtMWSRbMkR41B2VlNLEmD0e/ODBqAXfZI1BZa3gwR
-         cbUOQOYnylu5pHwIk9nB4mi5W5Q3dHs7j7jnHwLUD7tsAv7VFX4XavfHtsWHmtgLlIsK
-         dqEFqKgX9SpMPVn1AeD2HXg/Zl6Qki/7iEVbOB4nUEsSHn0EvKJB6WkwSUp8cYWj+5jA
-         JSacYCQ1mvvbUwn6HDkUmqvGyUjS7/HxU8jVyWHNen5GKDfvOKggtybKpMSIx5K/w++G
-         IbdNDJkgI+zwAYMmNS8kBQyDILnY9aC6xFgYik/vcmJU8mIg3rDjE2XwURNL6qJeVMzA
-         //Rg==
-X-Gm-Message-State: ANhLgQ0L3e1HgFZeRxMHIXsgIyC1ub4q6QlQpyPl8Uyt84GA5u7mQpD+
-        XJFZxq6CuTnuBvlkcKhShQ==
-X-Google-Smtp-Source: ADFU+vsK32F4dANjFY+gLtTfj1X809p0ibUbCDxQyexbLSei5QcyLHd/MOZ6eJsMkrpoSb0WgyDw3g==
-X-Received: by 2002:a02:856a:: with SMTP id g97mr500259jai.97.1585338762113;
-        Fri, 27 Mar 2020 12:52:42 -0700 (PDT)
+        bh=mJE/FmDo61k1Y1kMUmnrw+f/plh9UpOJw+NgcOKyCAM=;
+        b=Nl0RkAkg90RZyQqS9cu6gK7/QKNgAm2NkPeMQSz8Ub14RgVMM/0BOAV5clrvGWfZBo
+         YN9MWImB+ZRHIDErNSW89tHFa4i752oweOMDCeKBjWcl+h56SjjqWXWoD/wlHCBp3j0J
+         mgSye0mcUgDcS6Ez34gGWjeYKmPe3Dw+G7exOGJhUR4MfnGNJB+Tcssq3QkucbgqUX5R
+         PU0TdPt8B1azNXnGG8/snlTCYmsnH4/GhOoQEedTcpZhJ3ZbU2gM/Rg1NXr6LRH/4qxN
+         Rfv+8SIqRtHMENRd73ktN8fPFDcx+WHRqIny8nkuqjqoLLNJEuXrQRxoxkhU/jqZQkMh
+         sNHw==
+X-Gm-Message-State: ANhLgQ3pvpl0E6Zbd9/jP2OWfx1Gv7ljaY/w7e9orDqqsiP04wmA0E1F
+        9rA4seUD6zH2D5dpSGYOwg==
+X-Google-Smtp-Source: ADFU+vv7l6X4QqyDklk801ff+s7+6Bx+Yr+DsrSctVissFQbcxeD7iAKesA6K4k1zLa10W4Ji94BwQ==
+X-Received: by 2002:a92:d0c7:: with SMTP id y7mr841907ila.56.1585338831900;
+        Fri, 27 Mar 2020 12:53:51 -0700 (PDT)
 Received: from rob-hp-laptop ([64.188.179.250])
-        by smtp.gmail.com with ESMTPSA id i16sm2207096ils.40.2020.03.27.12.52.40
+        by smtp.gmail.com with ESMTPSA id w28sm2178668ill.69.2020.03.27.12.53.50
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 27 Mar 2020 12:52:41 -0700 (PDT)
-Received: (nullmailer pid 32723 invoked by uid 1000);
-        Fri, 27 Mar 2020 19:52:39 -0000
-Date:   Fri, 27 Mar 2020 13:52:39 -0600
+        Fri, 27 Mar 2020 12:53:51 -0700 (PDT)
+Received: (nullmailer pid 2012 invoked by uid 1000);
+        Fri, 27 Mar 2020 19:53:49 -0000
+Date:   Fri, 27 Mar 2020 13:53:49 -0600
 From:   Rob Herring <robh@kernel.org>
 To:     Lubomir Rintel <lkundrak@v3.sk>
 Cc:     Linus Walleij <linus.walleij@linaro.org>,
@@ -76,137 +76,111 @@ Cc:     Linus Walleij <linus.walleij@linaro.org>,
         linux-media@vger.kernel.org, linux-mmc@vger.kernel.org,
         linux-rtc@vger.kernel.org, linux-serial@vger.kernel.org,
         linux-spi@vger.kernel.org, linux-usb@vger.kernel.org
-Subject: Re: [PATCH 26/28] dt-bindings: spi: Convert spi-pxa2xx to json-schema
-Message-ID: <20200327195239.GA28087@bogus>
+Subject: Re: [PATCH 27/28] dt-bindings: timer: Convert mrvl,mmp-timer to
+ json-schema
+Message-ID: <20200327195349.GA459@bogus>
 References: <20200317093922.20785-1-lkundrak@v3.sk>
- <20200317093922.20785-27-lkundrak@v3.sk>
+ <20200317093922.20785-28-lkundrak@v3.sk>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20200317093922.20785-27-lkundrak@v3.sk>
+In-Reply-To: <20200317093922.20785-28-lkundrak@v3.sk>
 User-Agent: Mutt/1.10.1 (2018-07-13)
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Mar 17, 2020 at 10:39:20AM +0100, Lubomir Rintel wrote:
-> A straightforward conversion of the the spi-pxa2xx binding to DT schema
+On Tue, Mar 17, 2020 at 10:39:21AM +0100, Lubomir Rintel wrote:
+> A straightforward conversion of the mrvl,mmp-timer binding to DT schema
 > format using json-schema.
 > 
 > Signed-off-by: Lubomir Rintel <lkundrak@v3.sk>
 > ---
->  .../bindings/spi/marvell,mmp2-ssp.yaml        | 58 +++++++++++++++++++
->  .../devicetree/bindings/spi/spi-pxa2xx.txt    | 27 ---------
->  2 files changed, 58 insertions(+), 27 deletions(-)
->  create mode 100644 Documentation/devicetree/bindings/spi/marvell,mmp2-ssp.yaml
->  delete mode 100644 Documentation/devicetree/bindings/spi/spi-pxa2xx.txt
+>  .../bindings/timer/mrvl,mmp-timer.txt         | 17 --------
+>  .../bindings/timer/mrvl,mmp-timer.yaml        | 43 +++++++++++++++++++
+>  2 files changed, 43 insertions(+), 17 deletions(-)
+>  delete mode 100644 Documentation/devicetree/bindings/timer/mrvl,mmp-timer.txt
+>  create mode 100644 Documentation/devicetree/bindings/timer/mrvl,mmp-timer.yaml
 > 
-> diff --git a/Documentation/devicetree/bindings/spi/marvell,mmp2-ssp.yaml b/Documentation/devicetree/bindings/spi/marvell,mmp2-ssp.yaml
+> diff --git a/Documentation/devicetree/bindings/timer/mrvl,mmp-timer.txt b/Documentation/devicetree/bindings/timer/mrvl,mmp-timer.txt
+> deleted file mode 100644
+> index b8f02c6635219..0000000000000
+> --- a/Documentation/devicetree/bindings/timer/mrvl,mmp-timer.txt
+> +++ /dev/null
+> @@ -1,17 +0,0 @@
+> -* Marvell MMP Timer controller
+> -
+> -Required properties:
+> -- compatible : Should be "mrvl,mmp-timer".
+> -- reg : Address and length of the register set of timer controller.
+> -- interrupts : Should be the interrupt number.
+> -
+> -Optional properties:
+> -- clocks : Should contain a single entry describing the clock input.
+> -
+> -Example:
+> -	timer0: timer@d4014000 {
+> -		compatible = "mrvl,mmp-timer";
+> -		reg = <0xd4014000 0x100>;
+> -		interrupts = <13>;
+> -		clocks = <&coreclk 2>;
+> -	};
+> diff --git a/Documentation/devicetree/bindings/timer/mrvl,mmp-timer.yaml b/Documentation/devicetree/bindings/timer/mrvl,mmp-timer.yaml
 > new file mode 100644
-> index 0000000000000..de6b6a53b70d8
+> index 0000000000000..ebee0b862d493
 > --- /dev/null
-> +++ b/Documentation/devicetree/bindings/spi/marvell,mmp2-ssp.yaml
-> @@ -0,0 +1,58 @@
-> +# SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
+> +++ b/Documentation/devicetree/bindings/timer/mrvl,mmp-timer.yaml
+> @@ -0,0 +1,43 @@
 
-Same issue on license...
+License?
 
-> +# Copyright 2019,2020 Lubomir Rintel <lkundrak@v3.sk>
 > +%YAML 1.2
 > +---
-> +$id: http://devicetree.org/schemas/spi/marvell,mmp2-ssp.yaml#
+> +$id: http://devicetree.org/schemas/timer/mrvl,mmp-timer.yaml#
 > +$schema: http://devicetree.org/meta-schemas/core.yaml#
 > +
-> +title: PXA2xx SSP SPI Controller bindings
+> +title: Marvell MMP Timer bindings
 > +
 > +maintainers:
-> +  - Lubomir Rintel <lkundrak@v3.sk>
-> +
-> +allOf:
-> +  - $ref: spi-controller.yaml#
+> +  - devicetree@vger.kernel.org
+
+Real person?
+
 > +
 > +properties:
-> +  compatible:
-> +    const: marvell,mmp2-ssp
+> +  $nodename:
+> +    pattern: '^timer@[a-f0-9]+$'
 > +
-> +  interrupts:
-> +    maxItems: 1
+> +  compatible:
+> +    const: mrvl,mmp-timer
 > +
 > +  reg:
 > +    maxItems: 1
 > +
-> +  clocks:
+> +  interrupts:
 > +    maxItems: 1
 > +
-> +  ready-gpios:
-> +    description: |
-> +      GPIO used to signal a SPI master that the FIFO is filled and we're
-> +      ready to service a transfer. Only useful in slave mode.
+> +  clocks:
 > +    maxItems: 1
 > +
 > +required:
 > +  - compatible
 > +  - reg
 > +  - interrupts
-> +  - clocks
-
-> +  - '#address-cells'
-> +  - '#size-cells'
-
-spi-controller.yaml handles these being required and also that they 
-aren't for slave mode.
-
 > +
-> +dependencies:
-> +  ready-gpios: [ spi-slave ]
+> +additionalProperties: false
 > +
 > +examples:
 > +  - |
-> +    #include <dt-bindings/clock/marvell,mmp2.h>
-> +    spi@d4035000 {
-> +        compatible = "marvell,mmp2-ssp";
-> +        #address-cells = <1>;
-> +        #size-cells = <0>;
-> +        reg = <0xd4035000 0x1000>;
-> +        clocks = <&soc_clocks MMP2_CLK_SSP0>;
-> +        interrupts = <0>;
+> +    timer@d4014000 {
+> +        compatible = "mrvl,mmp-timer";
+> +        reg = <0xd4014000 0x100>;
+> +        interrupts = <13>;
+> +        clocks = <&coreclk 2>;
 > +    };
 > +
 > +...
-> diff --git a/Documentation/devicetree/bindings/spi/spi-pxa2xx.txt b/Documentation/devicetree/bindings/spi/spi-pxa2xx.txt
-> deleted file mode 100644
-> index e30e0c2a4bce1..0000000000000
-> --- a/Documentation/devicetree/bindings/spi/spi-pxa2xx.txt
-> +++ /dev/null
-> @@ -1,27 +0,0 @@
-> -PXA2xx SSP SPI Controller
-> -
-> -Required properties:
-> -- compatible: Must be "marvell,mmp2-ssp".
-> -- reg: Offset and length of the device's register set.
-> -- interrupts: Should be the interrupt number.
-> -- clocks: Should contain a single entry describing the clock input.
-> -- #address-cells:  Number of cells required to define a chip select address.
-> -- #size-cells: Should be zero.
-> -
-> -Optional properties:
-> -- cs-gpios: list of GPIO chip selects. See the SPI bus bindings,
-> -  Documentation/devicetree/bindings/spi/spi-bus.txt
-> -- spi-slave: Empty property indicating the SPI controller is used in slave mode.
-> -- ready-gpios: GPIO used to signal a SPI master that the FIFO is filled
-> -  and we're ready to service a transfer. Only useful in slave mode.
-> -
-> -Child nodes represent devices on the SPI bus
-> -  See ../spi/spi-bus.txt
-> -
-> -Example:
-> -	ssp1: spi@d4035000 {
-> -		compatible = "marvell,mmp2-ssp";
-> -		reg = <0xd4035000 0x1000>;
-> -		clocks = <&soc_clocks MMP2_CLK_SSP0>;
-> -		interrupts = <0>;
-> -	};
 > -- 
 > 2.25.1
 > 
