@@ -2,118 +2,82 @@ Return-Path: <SRS0=5iJr=5M=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.7 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 70973C43331
-	for <linux-mmc@archiver.kernel.org>; Fri, 27 Mar 2020 10:04:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 436A8C43331
+	for <linux-mmc@archiver.kernel.org>; Fri, 27 Mar 2020 11:21:59 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 474392073B
-	for <linux-mmc@archiver.kernel.org>; Fri, 27 Mar 2020 10:04:18 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="fm1BGbXw"
+	by mail.kernel.org (Postfix) with ESMTP id 24B9D2072F
+	for <linux-mmc@archiver.kernel.org>; Fri, 27 Mar 2020 11:21:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726427AbgC0KEQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 27 Mar 2020 06:04:16 -0400
-Received: from mail-lj1-f195.google.com ([209.85.208.195]:34895 "EHLO
-        mail-lj1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726439AbgC0KEO (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 27 Mar 2020 06:04:14 -0400
-Received: by mail-lj1-f195.google.com with SMTP id k21so9578019ljh.2
-        for <linux-mmc@vger.kernel.org>; Fri, 27 Mar 2020 03:04:12 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=qtl1Eialsdl3z7ZP76hLFrTUnrm/Xwed3O3Is0v5u2s=;
-        b=fm1BGbXw3YbyFJAFmqHvsEnrwOu7+/+ujtJ86z5Orejx852KLJeCDtQq+soYhGzfCj
-         2rAfF7PxQg2H2Sgjn2JBjFbILfIVHBT7QxDFDZh2R3HOuTeyVGc0fKnVbnrXO43QCj8x
-         cXlH+JS+Jobqck2T5KLCJ/QxbIlZUnxiWcd/WFLXFPVgiIHA/VQnYBo2xwwlOuCaoBNf
-         PV01d4t1H3eQqxbYRIT2/sc/hXgoikPd8X3chF1TEDLMvJhtp9ZecGoNxVyrMZXDYddu
-         VUti7wxKuFzjCVhJlxMkwTw2df/O1qZUfem6Ydt42/5xj5qm4D1YHiUkYri/dNaN3Cn1
-         sdLQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=qtl1Eialsdl3z7ZP76hLFrTUnrm/Xwed3O3Is0v5u2s=;
-        b=mN3heLjGZc1AQQ+Wml3fI31zjL4q6MoqKkM0bL0wUkdDWMmeE9N29y2f+3CX5odX0w
-         JtyHe6pNt94vCWQvsZXEsdJm/u6OH23VcaegbAG31HnHS06vWqu6A9PgpPFfKQB/w9Ur
-         4KO/xERnqafuWVU7dQfhDdud2Kf3W90uEymPd0ZSQRnpJvkNczssilxbPnFOolZeqX3D
-         8yiGXxB6RhgrHPhXpgGUy1SnDfzG/JAHSLGqy2AciWrtLNPVDdFd7sZ4yGsW/8LfAk6u
-         cXo9IhcWnNxwXmgJCyeCRAkO+CT/XFzoApa0OSuZ2ts43Gh2gh3m2eIne9FVr2FAxaCN
-         GF6w==
-X-Gm-Message-State: AGi0PuYq9wB2XGrCfJwZIGBEMjSJY+871MTKVfT0k/UrQ3lxbFKl4BWe
-        bRSCWWZXXzEKTWrx3dITqSdWWjdUmZM0gagMnZyk8g==
-X-Google-Smtp-Source: ADFU+vsLFzRSaI0mp4F0YlxEk/ZWtLbeZk2X0x8rIBWVbKHsUZE12xxYtPOS4x7TLee1muHrdP/vfqhKQcCaKg9I0tI=
-X-Received: by 2002:a2e:9605:: with SMTP id v5mr7696484ljh.258.1585303451336;
- Fri, 27 Mar 2020 03:04:11 -0700 (PDT)
+        id S1727185AbgC0LV4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 27 Mar 2020 07:21:56 -0400
+Received: from mx2.suse.de ([195.135.220.15]:38680 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726937AbgC0LV4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 27 Mar 2020 07:21:56 -0400
+X-Virus-Scanned: by amavisd-new at test-mx.suse.de
+Received: from relay2.suse.de (unknown [195.135.220.254])
+        by mx2.suse.de (Postfix) with ESMTP id A486FADF1;
+        Fri, 27 Mar 2020 11:21:54 +0000 (UTC)
+Message-ID: <a4c38810b7cb10dcfadd2844320d1c9e5b6bc6f6.camel@suse.de>
+Subject: Re: [PATCH v2 10/11] ARM: dts: bcm2711: Update expgpio's GPIO labels
+From:   Nicolas Saenz Julienne <nsaenzjulienne@suse.de>
+To:     adrian.hunter@intel.com, linux-kernel@vger.kernel.org,
+        Rob Herring <robh+dt@kernel.org>
+Cc:     stefan.wahren@i2se.com, devicetree@vger.kernel.org,
+        f.fainelli@gmail.com, linux-mmc@vger.kernel.org,
+        bcm-kernel-feedback-list@broadcom.com,
+        linux-rpi-kernel@lists.infradead.org, phil@raspberrypi.com,
+        linux-arm-kernel@lists.infradead.org
+Date:   Fri, 27 Mar 2020 12:21:53 +0100
+In-Reply-To: <20200306174413.20634-11-nsaenzjulienne@suse.de>
+References: <20200306174413.20634-1-nsaenzjulienne@suse.de>
+         <20200306174413.20634-11-nsaenzjulienne@suse.de>
+Content-Type: multipart/signed; micalg="pgp-sha256";
+        protocol="application/pgp-signature"; boundary="=-6dBBE0GB6iAO/vrk1/4W"
+User-Agent: Evolution 3.34.4 
 MIME-Version: 1.0
-References: <20200317093922.20785-1-lkundrak@v3.sk> <20200317093922.20785-22-lkundrak@v3.sk>
-In-Reply-To: <20200317093922.20785-22-lkundrak@v3.sk>
-From:   Linus Walleij <linus.walleij@linaro.org>
-Date:   Fri, 27 Mar 2020 11:04:00 +0100
-Message-ID: <CACRpkdaEnODObC7emg2M7Ayn_JkeLuc3HpV4VhJcwaZ+=sDLcg@mail.gmail.com>
-Subject: Re: [PATCH 21/28] dt-bindings: gpio: Convert mrvl-gpio to json-schema
-To:     Lubomir Rintel <lkundrak@v3.sk>,
-        Robert Jarzmik <robert.jarzmik@free.fr>
-Cc:     Rob Herring <robh+dt@kernel.org>,
-        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Jason Cooper <jason@lakedaemon.net>,
-        Marc Zyngier <maz@kernel.org>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Kishon Vijay Abraham I <kishon@ti.com>,
-        Alessandro Zummo <a.zummo@towertech.it>,
-        Alexandre Belloni <alexandre.belloni@bootlin.com>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Mark Brown <broonie@kernel.org>,
-        Daniel Lezcano <daniel.lezcano@linaro.org>,
-        Andrew Lunn <andrew@lunn.ch>,
-        Gregory Clement <gregory.clement@bootlin.com>,
-        Daniel Mack <daniel@zonque.org>,
-        Haojian Zhuang <haojian.zhuang@gmail.com>,
-        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
-        <devicetree@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
-        linux-i2c <linux-i2c@vger.kernel.org>,
-        linux-media@vger.kernel.org, linux-mmc <linux-mmc@vger.kernel.org>,
-        linux-rtc@vger.kernel.org,
-        "open list:SERIAL DRIVERS" <linux-serial@vger.kernel.org>,
-        linux-spi <linux-spi@vger.kernel.org>,
-        linux-usb <linux-usb@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Lubomir!
 
-Excellent work! Just nitpicks:
+--=-6dBBE0GB6iAO/vrk1/4W
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Tue, Mar 17, 2020 at 10:40 AM Lubomir Rintel <lkundrak@v3.sk> wrote:
+On Fri, 2020-03-06 at 18:44 +0100, Nicolas Saenz Julienne wrote:
+> The 6th line of the GPIO expander is used to power the board's SD card.
+>=20
+> Signed-off-by: Nicolas Saenz Julienne <nsaenzjulienne@suse.de>
+> ---
 
-> +++ b/Documentation/devicetree/bindings/gpio/mrvl-gpio.yaml
-> @@ -0,0 +1,173 @@
-> +%YAML 1.2
-> +---
-> +$id: http://devicetree.org/schemas/gpio/mrvl-gpio.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
-> +
-> +title: Marvell PXA GPIO controller
+Applied for-next.
 
-This binding is lacking a license. Please use the dual GPL+BSD license
-tag.
+Regards,
+Nicolas
 
-> +maintainers:
-> +  - devicetree@vger.kernel.org
 
-I don't know if Robert Jarzmik is in on maintaining this, would you accept
-it Robert?
+--=-6dBBE0GB6iAO/vrk1/4W
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: This is a digitally signed message part
+Content-Transfer-Encoding: 7bit
 
-Yours,
-Linus Walleij
+-----BEGIN PGP SIGNATURE-----
+
+iQEzBAABCAAdFiEErOkkGDHCg2EbPcGjlfZmHno8x/4FAl594dEACgkQlfZmHno8
+x/6u+wgAoZAyf4EZVgmQpaGO9pvDTSICjk4v7Buc27vRC/dI7eee8lpEKtHySjxS
+ZFUZvrVtkH+1nI31qTADGEUvfLfGeZuhsl3PopdYT1L4Ajl8Wl/TgB2/jBwArPmT
+FYjuPGIYtBXg4m9qzo/hWE1gPXZOTESW5dnu6zC2KkIadq4FtZl06U7PZTbQAggH
+9REu3TOdgTvUwKmnOpTYRbfE2f5ei0Sjdem42mzLBDW5hy6i/I2zqL7qr+MT/v99
+WaE0jbqdcRsAP7HwZRF2JGP63WiFWjkfNSpGd2/AE+ETi3BK+m3iufCX8FJBrgrt
+Y+wvAAMZXkhGdHtI+fh9suxi1j+VKA==
+=5tFi
+-----END PGP SIGNATURE-----
+
+--=-6dBBE0GB6iAO/vrk1/4W--
+
