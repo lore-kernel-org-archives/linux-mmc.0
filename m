@@ -2,158 +2,118 @@ Return-Path: <SRS0=5iJr=5M=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.0 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	MIME_BASE64_TEXT,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,
-	UNWANTED_LANGUAGE_BODY,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-0.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BA51BC2D0E7
-	for <linux-mmc@archiver.kernel.org>; Fri, 27 Mar 2020 08:51:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 70973C43331
+	for <linux-mmc@archiver.kernel.org>; Fri, 27 Mar 2020 10:04:18 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 84DC220716
-	for <linux-mmc@archiver.kernel.org>; Fri, 27 Mar 2020 08:51:47 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 474392073B
+	for <linux-mmc@archiver.kernel.org>; Fri, 27 Mar 2020 10:04:18 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=mediatek.com header.i=@mediatek.com header.b="g5kQspas"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="fm1BGbXw"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726937AbgC0Ivn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 27 Mar 2020 04:51:43 -0400
-Received: from mailgw02.mediatek.com ([210.61.82.184]:50351 "EHLO
-        mailgw02.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1726096AbgC0Ivm (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 27 Mar 2020 04:51:42 -0400
-X-UUID: 0675d05af8f645d18a0fd9820aede1fd-20200327
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=mediatek.com; s=dk;
-        h=Content-Transfer-Encoding:Content-Type:MIME-Version:References:In-Reply-To:Message-ID:Date:Subject:CC:To:From; bh=RTElbvSp69D6eg2X/2aEFPOteskF1Lk4j0eYNpyZIlc=;
-        b=g5kQspaskwNT4Xl27XcqPBa473/rVtQ1UsyC0YGTR+2HyzyTP1fqTlrVRb19PER/ILeveRziQJ5dNE4nUheqDmtV4grs61gQvaniC+pzWUDSKPMKvohPl4208WXw7zwbmpw6GmEHKr55YJzfZO7Nm1NP32ukFqFleuD0afRsGzo=;
-X-UUID: 0675d05af8f645d18a0fd9820aede1fd-20200327
-Received: from mtkcas08.mediatek.inc [(172.21.101.126)] by mailgw02.mediatek.com
-        (envelope-from <yong.mao@mediatek.com>)
-        (Cellopoint E-mail Firewall v4.1.10 Build 0809 with TLS)
-        with ESMTP id 471208784; Fri, 27 Mar 2020 16:51:35 +0800
-Received: from mtkcas08.mediatek.inc (172.21.101.126) by
- mtkmbs07n1.mediatek.inc (172.21.101.16) with Microsoft SMTP Server (TLS) id
- 15.0.1395.4; Fri, 27 Mar 2020 16:51:34 +0800
-Received: from localhost.localdomain (10.17.3.153) by mtkcas08.mediatek.inc
- (172.21.101.73) with Microsoft SMTP Server id 15.0.1395.4 via Frontend
- Transport; Fri, 27 Mar 2020 16:51:33 +0800
-From:   Yong Mao <yong.mao@mediatek.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-CC:     Chaotian Jing <chaotian.jing@mediatek.com>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        <linux-mmc@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <linux-mediatek@lists.infradead.org>,
-        <linux-kernel@vger.kernel.org>, <srv_heupstream@mediatek.com>,
-        yong mao <yong.mao@mediatek.com>
-Subject: [PATCH v2] mmc: mediatek: fix SDIO irq issue
-Date:   Fri, 27 Mar 2020 16:51:37 +0800
-Message-ID: <1585299097-6897-2-git-send-email-yong.mao@mediatek.com>
-X-Mailer: git-send-email 1.9.1
-In-Reply-To: <1585299097-6897-1-git-send-email-yong.mao@mediatek.com>
-References: <1585299097-6897-1-git-send-email-yong.mao@mediatek.com>
+        id S1726427AbgC0KEQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 27 Mar 2020 06:04:16 -0400
+Received: from mail-lj1-f195.google.com ([209.85.208.195]:34895 "EHLO
+        mail-lj1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726439AbgC0KEO (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 27 Mar 2020 06:04:14 -0400
+Received: by mail-lj1-f195.google.com with SMTP id k21so9578019ljh.2
+        for <linux-mmc@vger.kernel.org>; Fri, 27 Mar 2020 03:04:12 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=qtl1Eialsdl3z7ZP76hLFrTUnrm/Xwed3O3Is0v5u2s=;
+        b=fm1BGbXw3YbyFJAFmqHvsEnrwOu7+/+ujtJ86z5Orejx852KLJeCDtQq+soYhGzfCj
+         2rAfF7PxQg2H2Sgjn2JBjFbILfIVHBT7QxDFDZh2R3HOuTeyVGc0fKnVbnrXO43QCj8x
+         cXlH+JS+Jobqck2T5KLCJ/QxbIlZUnxiWcd/WFLXFPVgiIHA/VQnYBo2xwwlOuCaoBNf
+         PV01d4t1H3eQqxbYRIT2/sc/hXgoikPd8X3chF1TEDLMvJhtp9ZecGoNxVyrMZXDYddu
+         VUti7wxKuFzjCVhJlxMkwTw2df/O1qZUfem6Ydt42/5xj5qm4D1YHiUkYri/dNaN3Cn1
+         sdLQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=qtl1Eialsdl3z7ZP76hLFrTUnrm/Xwed3O3Is0v5u2s=;
+        b=mN3heLjGZc1AQQ+Wml3fI31zjL4q6MoqKkM0bL0wUkdDWMmeE9N29y2f+3CX5odX0w
+         JtyHe6pNt94vCWQvsZXEsdJm/u6OH23VcaegbAG31HnHS06vWqu6A9PgpPFfKQB/w9Ur
+         4KO/xERnqafuWVU7dQfhDdud2Kf3W90uEymPd0ZSQRnpJvkNczssilxbPnFOolZeqX3D
+         8yiGXxB6RhgrHPhXpgGUy1SnDfzG/JAHSLGqy2AciWrtLNPVDdFd7sZ4yGsW/8LfAk6u
+         cXo9IhcWnNxwXmgJCyeCRAkO+CT/XFzoApa0OSuZ2ts43Gh2gh3m2eIne9FVr2FAxaCN
+         GF6w==
+X-Gm-Message-State: AGi0PuYq9wB2XGrCfJwZIGBEMjSJY+871MTKVfT0k/UrQ3lxbFKl4BWe
+        bRSCWWZXXzEKTWrx3dITqSdWWjdUmZM0gagMnZyk8g==
+X-Google-Smtp-Source: ADFU+vsLFzRSaI0mp4F0YlxEk/ZWtLbeZk2X0x8rIBWVbKHsUZE12xxYtPOS4x7TLee1muHrdP/vfqhKQcCaKg9I0tI=
+X-Received: by 2002:a2e:9605:: with SMTP id v5mr7696484ljh.258.1585303451336;
+ Fri, 27 Mar 2020 03:04:11 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain
-X-MTK:  N
-Content-Transfer-Encoding: base64
+References: <20200317093922.20785-1-lkundrak@v3.sk> <20200317093922.20785-22-lkundrak@v3.sk>
+In-Reply-To: <20200317093922.20785-22-lkundrak@v3.sk>
+From:   Linus Walleij <linus.walleij@linaro.org>
+Date:   Fri, 27 Mar 2020 11:04:00 +0100
+Message-ID: <CACRpkdaEnODObC7emg2M7Ayn_JkeLuc3HpV4VhJcwaZ+=sDLcg@mail.gmail.com>
+Subject: Re: [PATCH 21/28] dt-bindings: gpio: Convert mrvl-gpio to json-schema
+To:     Lubomir Rintel <lkundrak@v3.sk>,
+        Robert Jarzmik <robert.jarzmik@free.fr>
+Cc:     Rob Herring <robh+dt@kernel.org>,
+        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Jason Cooper <jason@lakedaemon.net>,
+        Marc Zyngier <maz@kernel.org>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Kishon Vijay Abraham I <kishon@ti.com>,
+        Alessandro Zummo <a.zummo@towertech.it>,
+        Alexandre Belloni <alexandre.belloni@bootlin.com>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Mark Brown <broonie@kernel.org>,
+        Daniel Lezcano <daniel.lezcano@linaro.org>,
+        Andrew Lunn <andrew@lunn.ch>,
+        Gregory Clement <gregory.clement@bootlin.com>,
+        Daniel Mack <daniel@zonque.org>,
+        Haojian Zhuang <haojian.zhuang@gmail.com>,
+        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
+        <devicetree@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
+        linux-i2c <linux-i2c@vger.kernel.org>,
+        linux-media@vger.kernel.org, linux-mmc <linux-mmc@vger.kernel.org>,
+        linux-rtc@vger.kernel.org,
+        "open list:SERIAL DRIVERS" <linux-serial@vger.kernel.org>,
+        linux-spi <linux-spi@vger.kernel.org>,
+        linux-usb <linux-usb@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-RnJvbTogeW9uZyBtYW8gPHlvbmcubWFvQG1lZGlhdGVrLmNvbT4NCg0KU0RJTyBpcnEgaXMgbm90
-IHRyaWdnZXJlZCBieSBsb3cgbGV2ZWwsIGJ1dCBieSBmYWxsaW5nIGVkZ2UgaW4gb3VyDQpwcmV2
-aW91cyBJQy4gVGhpcyBtZWNoYW5pc20gb25seSBoYXZlIG9uZSBjaGFuY2UgdG8gY2F0Y2ggdGhl
-IFNESU8gaXJxDQppZiBhIFNESU8gaXJxIGNvbWVzIHdpdGhpbiB0aGUgbXVsdGlwbGUgYmxvY2sg
-dHJhbnNtaXNzaW9uLiBUaGlzIFNESU8NCmlycSBtYXkgYmUgZWFzaWx5IGxvc3QsIGJlY2F1c2Ug
-ZmFsbGluZyBlZGdlIGFwcGVhcnMgb25seSBvbmNlIHdpdGhpbiAyDQpjbG9jayBhZnRlciBkYXRh
-IHRyYW5zbWlzc2lvbiBpcyBjb21wbGV0ZWQuDQoNClNESU8gaXJxIHJlY2hlY2sgbWVjaGFuaXNt
-IHdpbGwgbWFrZSBzdXJlIGFsbCBpcnFzIGNhbiBiZQ0KcHJvY2Vzc2VkIGNvcnJlY3RseS4NCg0K
-U2lnbmVkLW9mZi1ieTogWW9uZyBNYW8gPHlvbmcubWFvQG1lZGlhdGVrLmNvbT4NCi0tLQ0KIGRy
-aXZlcnMvbW1jL2hvc3QvbXRrLXNkLmMgfCA0MSArKysrKysrKysrKysrKysrKysrKysrKysrKysr
-KysrKysrKysrKysrKw0KIDEgZmlsZSBjaGFuZ2VkLCA0MSBpbnNlcnRpb25zKCspDQoNCmRpZmYg
-LS1naXQgYS9kcml2ZXJzL21tYy9ob3N0L210ay1zZC5jIGIvZHJpdmVycy9tbWMvaG9zdC9tdGst
-c2QuYw0KaW5kZXggNzcyNmRjZi4uYjIyMWMwMiAxMDA2NDQNCi0tLSBhL2RyaXZlcnMvbW1jL2hv
-c3QvbXRrLXNkLmMNCisrKyBiL2RyaXZlcnMvbW1jL2hvc3QvbXRrLXNkLmMNCkBAIC0xMjgsNiAr
-MTI4LDcgQEANCiAjZGVmaW5lIE1TRENfUFNfQ0RTVFMgICAgICAgICAgICgweDEgPDwgMSkJLyog
-UiAgKi8NCiAjZGVmaW5lIE1TRENfUFNfQ0RERUJPVU5DRSAgICAgICgweGYgPDwgMTIpCS8qIFJX
-ICovDQogI2RlZmluZSBNU0RDX1BTX0RBVCAgICAgICAgICAgICAoMHhmZiA8PCAxNikJLyogUiAg
-Ki8NCisjZGVmaW5lIE1TRENfUFNfREFUQTEgICAgICAgICAgICgweDEgPDwgMTcpCS8qIFIgICov
-DQogI2RlZmluZSBNU0RDX1BTX0NNRCAgICAgICAgICAgICAoMHgxIDw8IDI0KQkvKiBSICAqLw0K
-ICNkZWZpbmUgTVNEQ19QU19XUCAgICAgICAgICAgICAgKDB4MSA8PCAzMSkJLyogUiAgKi8NCiAN
-CkBAIC0zNjEsNiArMzYyLDcgQEAgc3RydWN0IG1zZGNfc2F2ZV9wYXJhIHsNCiANCiBzdHJ1Y3Qg
-bXRrX21tY19jb21wYXRpYmxlIHsNCiAJdTggY2xrX2Rpdl9iaXRzOw0KKwlib29sIHJlY2hlY2tf
-c2Rpb19pcnE7DQogCWJvb2wgaHM0MDBfdHVuZTsgLyogb25seSB1c2VkIGZvciBNVDgxNzMgKi8N
-CiAJdTMyIHBhZF90dW5lX3JlZzsNCiAJYm9vbCBhc3luY19maWZvOw0KQEAgLTQzNiw2ICs0Mzgs
-NyBAQCBzdHJ1Y3QgbXNkY19ob3N0IHsNCiANCiBzdGF0aWMgY29uc3Qgc3RydWN0IG10a19tbWNf
-Y29tcGF0aWJsZSBtdDgxMzVfY29tcGF0ID0gew0KIAkuY2xrX2Rpdl9iaXRzID0gOCwNCisJLnJl
-Y2hlY2tfc2Rpb19pcnEgPSBmYWxzZSwNCiAJLmhzNDAwX3R1bmUgPSBmYWxzZSwNCiAJLnBhZF90
-dW5lX3JlZyA9IE1TRENfUEFEX1RVTkUsDQogCS5hc3luY19maWZvID0gZmFsc2UsDQpAQCAtNDQ4
-LDYgKzQ1MSw3IEBAIHN0cnVjdCBtc2RjX2hvc3Qgew0KIA0KIHN0YXRpYyBjb25zdCBzdHJ1Y3Qg
-bXRrX21tY19jb21wYXRpYmxlIG10ODE3M19jb21wYXQgPSB7DQogCS5jbGtfZGl2X2JpdHMgPSA4
-LA0KKwkucmVjaGVja19zZGlvX2lycSA9IHRydWUsDQogCS5oczQwMF90dW5lID0gdHJ1ZSwNCiAJ
-LnBhZF90dW5lX3JlZyA9IE1TRENfUEFEX1RVTkUsDQogCS5hc3luY19maWZvID0gZmFsc2UsDQpA
-QCAtNDYwLDYgKzQ2NCw3IEBAIHN0cnVjdCBtc2RjX2hvc3Qgew0KIA0KIHN0YXRpYyBjb25zdCBz
-dHJ1Y3QgbXRrX21tY19jb21wYXRpYmxlIG10ODE4M19jb21wYXQgPSB7DQogCS5jbGtfZGl2X2Jp
-dHMgPSAxMiwNCisJLnJlY2hlY2tfc2Rpb19pcnEgPSBmYWxzZSwNCiAJLmhzNDAwX3R1bmUgPSBm
-YWxzZSwNCiAJLnBhZF90dW5lX3JlZyA9IE1TRENfUEFEX1RVTkUwLA0KIAkuYXN5bmNfZmlmbyA9
-IHRydWUsDQpAQCAtNDcyLDYgKzQ3Nyw3IEBAIHN0cnVjdCBtc2RjX2hvc3Qgew0KIA0KIHN0YXRp
-YyBjb25zdCBzdHJ1Y3QgbXRrX21tY19jb21wYXRpYmxlIG10MjcwMV9jb21wYXQgPSB7DQogCS5j
-bGtfZGl2X2JpdHMgPSAxMiwNCisJLnJlY2hlY2tfc2Rpb19pcnEgPSBmYWxzZSwNCiAJLmhzNDAw
-X3R1bmUgPSBmYWxzZSwNCiAJLnBhZF90dW5lX3JlZyA9IE1TRENfUEFEX1RVTkUwLA0KIAkuYXN5
-bmNfZmlmbyA9IHRydWUsDQpAQCAtNDg0LDYgKzQ5MCw3IEBAIHN0cnVjdCBtc2RjX2hvc3Qgew0K
-IA0KIHN0YXRpYyBjb25zdCBzdHJ1Y3QgbXRrX21tY19jb21wYXRpYmxlIG10MjcxMl9jb21wYXQg
-PSB7DQogCS5jbGtfZGl2X2JpdHMgPSAxMiwNCisJLnJlY2hlY2tfc2Rpb19pcnEgPSBmYWxzZSwN
-CiAJLmhzNDAwX3R1bmUgPSBmYWxzZSwNCiAJLnBhZF90dW5lX3JlZyA9IE1TRENfUEFEX1RVTkUw
-LA0KIAkuYXN5bmNfZmlmbyA9IHRydWUsDQpAQCAtNDk2LDYgKzUwMyw3IEBAIHN0cnVjdCBtc2Rj
-X2hvc3Qgew0KIA0KIHN0YXRpYyBjb25zdCBzdHJ1Y3QgbXRrX21tY19jb21wYXRpYmxlIG10NzYy
-Ml9jb21wYXQgPSB7DQogCS5jbGtfZGl2X2JpdHMgPSAxMiwNCisJLnJlY2hlY2tfc2Rpb19pcnEg
-PSBmYWxzZSwNCiAJLmhzNDAwX3R1bmUgPSBmYWxzZSwNCiAJLnBhZF90dW5lX3JlZyA9IE1TRENf
-UEFEX1RVTkUwLA0KIAkuYXN5bmNfZmlmbyA9IHRydWUsDQpAQCAtNTA4LDYgKzUxNiw3IEBAIHN0
-cnVjdCBtc2RjX2hvc3Qgew0KIA0KIHN0YXRpYyBjb25zdCBzdHJ1Y3QgbXRrX21tY19jb21wYXRp
-YmxlIG10ODUxNl9jb21wYXQgPSB7DQogCS5jbGtfZGl2X2JpdHMgPSAxMiwNCisJLnJlY2hlY2tf
-c2Rpb19pcnEgPSBmYWxzZSwNCiAJLmhzNDAwX3R1bmUgPSBmYWxzZSwNCiAJLnBhZF90dW5lX3Jl
-ZyA9IE1TRENfUEFEX1RVTkUwLA0KIAkuYXN5bmNfZmlmbyA9IHRydWUsDQpAQCAtNTE4LDYgKzUy
-Nyw3IEBAIHN0cnVjdCBtc2RjX2hvc3Qgew0KIA0KIHN0YXRpYyBjb25zdCBzdHJ1Y3QgbXRrX21t
-Y19jb21wYXRpYmxlIG10NzYyMF9jb21wYXQgPSB7DQogCS5jbGtfZGl2X2JpdHMgPSA4LA0KKwku
-cmVjaGVja19zZGlvX2lycSA9IGZhbHNlLA0KIAkuaHM0MDBfdHVuZSA9IGZhbHNlLA0KIAkucGFk
-X3R1bmVfcmVnID0gTVNEQ19QQURfVFVORSwNCiAJLmFzeW5jX2ZpZm8gPSBmYWxzZSwNCkBAIC01
-OTEsNiArNjAxLDcgQEAgc3RhdGljIHZvaWQgbXNkY19yZXNldF9odyhzdHJ1Y3QgbXNkY19ob3N0
-ICpob3N0KQ0KIA0KIHN0YXRpYyB2b2lkIG1zZGNfY21kX25leHQoc3RydWN0IG1zZGNfaG9zdCAq
-aG9zdCwNCiAJCXN0cnVjdCBtbWNfcmVxdWVzdCAqbXJxLCBzdHJ1Y3QgbW1jX2NvbW1hbmQgKmNt
-ZCk7DQorc3RhdGljIHZvaWQgX19tc2RjX2VuYWJsZV9zZGlvX2lycShzdHJ1Y3QgbXNkY19ob3N0
-ICpob3N0LCBpbnQgZW5iKTsNCiANCiBzdGF0aWMgY29uc3QgdTMyIGNtZF9pbnRzX21hc2sgPSBN
-U0RDX0lOVEVOX0NNRFJEWSB8IE1TRENfSU5URU5fUlNQQ1JDRVJSIHwNCiAJCQlNU0RDX0lOVEVO
-X0NNRFRNTyB8IE1TRENfSU5URU5fQUNNRFJEWSB8DQpAQCAtMTAwNyw2ICsxMDE4LDMyIEBAIHN0
-YXRpYyBpbnQgbXNkY19hdXRvX2NtZF9kb25lKHN0cnVjdCBtc2RjX2hvc3QgKmhvc3QsIGludCBl
-dmVudHMsDQogCXJldHVybiBjbWQtPmVycm9yOw0KIH0NCiANCisvKioNCisgKiBtc2RjX3JlY2hl
-Y2tfc2Rpb19pcnEgLSByZWNoZWNrIHdoZXRoZXIgdGhlIFNESU8gaXJxIGlzIGxvc3QNCisgKg0K
-KyAqIEhvc3QgY29udHJvbGxlciBtYXkgbG9zdCBpbnRlcnJ1cHQgaW4gc29tZSBzcGVjaWFsIGNh
-c2UuDQorICogQWRkIFNESU8gaXJxIHJlY2hlY2sgbWVjaGFuaXNtIHRvIG1ha2Ugc3VyZSBhbGwg
-aW50ZXJydXB0cw0KKyAqIGNhbiBiZSBwcm9jZXNzZWQgaW1tZWRpYXRlbHkNCisgKg0KKyAqLw0K
-K3N0YXRpYyB2b2lkIG1zZGNfcmVjaGVja19zZGlvX2lycShzdHJ1Y3QgbXNkY19ob3N0ICpob3N0
-KQ0KK3sNCisJdTMyIHJlZ19pbnQsIHJlZ19pbnRlbiwgcmVnX3BzOw0KKw0KKwlpZiAoaG9zdC0+
-bW1jLT5jYXBzICYgTU1DX0NBUF9TRElPX0lSUSkgew0KKwkJcmVnX2ludGVuID0gcmVhZGwoaG9z
-dC0+YmFzZSArIE1TRENfSU5URU4pOw0KKwkJaWYgKHJlZ19pbnRlbiAmIE1TRENfSU5URU5fU0RJ
-T0lSUSkgew0KKwkJCXJlZ19pbnQgPSByZWFkbChob3N0LT5iYXNlICsgTVNEQ19JTlQpOw0KKwkJ
-CXJlZ19wcyA9IHJlYWRsKGhvc3QtPmJhc2UgKyBNU0RDX1BTKTsNCisJCQlpZiAoIShyZWdfaW50
-ICYgTVNEQ19JTlRfU0RJT0lSUSB8fA0KKwkJCSAgICAgIHJlZ19wcyAmIE1TRENfUFNfREFUQTEp
-KSB7DQorCQkJCV9fbXNkY19lbmFibGVfc2Rpb19pcnEoaG9zdCwgMCk7DQorCQkJCXNkaW9fc2ln
-bmFsX2lycShob3N0LT5tbWMpOw0KKwkJCX0NCisJCX0NCisJfQ0KK30NCisNCiBzdGF0aWMgdm9p
-ZCBtc2RjX3RyYWNrX2NtZF9kYXRhKHN0cnVjdCBtc2RjX2hvc3QgKmhvc3QsDQogCQkJCXN0cnVj
-dCBtbWNfY29tbWFuZCAqY21kLCBzdHJ1Y3QgbW1jX2RhdGEgKmRhdGEpDQogew0KQEAgLTEwMzUs
-NiArMTA3Miw4IEBAIHN0YXRpYyB2b2lkIG1zZGNfcmVxdWVzdF9kb25lKHN0cnVjdCBtc2RjX2hv
-c3QgKmhvc3QsIHN0cnVjdCBtbWNfcmVxdWVzdCAqbXJxKQ0KIAlpZiAoaG9zdC0+ZXJyb3IpDQog
-CQltc2RjX3Jlc2V0X2h3KGhvc3QpOw0KIAltbWNfcmVxdWVzdF9kb25lKGhvc3QtPm1tYywgbXJx
-KTsNCisJaWYgKGhvc3QtPmRldl9jb21wLT5yZWNoZWNrX3NkaW9faXJxKQ0KKwkJbXNkY19yZWNo
-ZWNrX3NkaW9faXJxKGhvc3QpOw0KIH0NCiANCiAvKiByZXR1cm5zIHRydWUgaWYgY29tbWFuZCBp
-cyBmdWxseSBoYW5kbGVkOyByZXR1cm5zIGZhbHNlIG90aGVyd2lzZSAqLw0KQEAgLTEzOTMsNiAr
-MTQzMiw4IEBAIHN0YXRpYyB2b2lkIF9fbXNkY19lbmFibGVfc2Rpb19pcnEoc3RydWN0IG1zZGNf
-aG9zdCAqaG9zdCwgaW50IGVuYikNCiAJaWYgKGVuYikgew0KIAkJc2RyX3NldF9iaXRzKGhvc3Qt
-PmJhc2UgKyBNU0RDX0lOVEVOLCBNU0RDX0lOVEVOX1NESU9JUlEpOw0KIAkJc2RyX3NldF9iaXRz
-KGhvc3QtPmJhc2UgKyBTRENfQ0ZHLCBTRENfQ0ZHX1NESU9JREUpOw0KKwkJaWYgKGhvc3QtPmRl
-dl9jb21wLT5yZWNoZWNrX3NkaW9faXJxKQ0KKwkJCW1zZGNfcmVjaGVja19zZGlvX2lycShob3N0
-KTsNCiAJfSBlbHNlIHsNCiAJCXNkcl9jbHJfYml0cyhob3N0LT5iYXNlICsgTVNEQ19JTlRFTiwg
-TVNEQ19JTlRFTl9TRElPSVJRKTsNCiAJCXNkcl9jbHJfYml0cyhob3N0LT5iYXNlICsgU0RDX0NG
-RywgU0RDX0NGR19TRElPSURFKTsNCi0tIA0KMS45LjENCg==
+Hi Lubomir!
 
+Excellent work! Just nitpicks:
+
+On Tue, Mar 17, 2020 at 10:40 AM Lubomir Rintel <lkundrak@v3.sk> wrote:
+
+> +++ b/Documentation/devicetree/bindings/gpio/mrvl-gpio.yaml
+> @@ -0,0 +1,173 @@
+> +%YAML 1.2
+> +---
+> +$id: http://devicetree.org/schemas/gpio/mrvl-gpio.yaml#
+> +$schema: http://devicetree.org/meta-schemas/core.yaml#
+> +
+> +title: Marvell PXA GPIO controller
+
+This binding is lacking a license. Please use the dual GPL+BSD license
+tag.
+
+> +maintainers:
+> +  - devicetree@vger.kernel.org
+
+I don't know if Robert Jarzmik is in on maintaining this, would you accept
+it Robert?
+
+Yours,
+Linus Walleij
