@@ -2,177 +2,170 @@ Return-Path: <SRS0=5iJr=5M=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS autolearn=ham
+X-Spam-Status: No, score=-8.6 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BC482C2D0ED
-	for <linux-mmc@archiver.kernel.org>; Fri, 27 Mar 2020 17:14:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8E17CC2D0F2
+	for <linux-mmc@archiver.kernel.org>; Fri, 27 Mar 2020 19:03:14 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 985A72073B
-	for <linux-mmc@archiver.kernel.org>; Fri, 27 Mar 2020 17:14:21 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6641E2072F
+	for <linux-mmc@archiver.kernel.org>; Fri, 27 Mar 2020 19:03:14 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1585335794;
+	bh=5PZQQkX9pqp1iK7C4WWS+jJPQco4LLjR9b/RFO3H+hM=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
+	b=vtDwj+08q7U1/BerRd+EJFfP8mHkAqEau6uXpTVGJp96t7BtLzDwv1ZvxneQ1pqor
+	 sap19bd5UJxZA3bzKFeCorxgW3zW2RF7Yi9dwUr5VT54d7zCa8/EQO97IxE4H7CpWR
+	 hZEN9fyNwMHQIVSX1tOz8vYD9bOW2UCBU4SrVdBM=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726333AbgC0ROU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 27 Mar 2020 13:14:20 -0400
-Received: from static-213-198-238-194.adsl.eunet.rs ([213.198.238.194]:56234
-        "EHLO fx.arvanta.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727708AbgC0ROU (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 27 Mar 2020 13:14:20 -0400
-Received: from arya.arvanta.net (arya.arvanta.net [10.5.1.6])
-        by fx.arvanta.net (Postfix) with ESMTP id B42C73862;
-        Fri, 27 Mar 2020 18:14:17 +0100 (CET)
-Date:   Fri, 27 Mar 2020 18:14:17 +0100
-From:   Milan =?utf-8?Q?P=2E_Stani=C4=87?= <mps@arvanta.net>
-To:     Robin Murphy <robin.murphy@arm.com>
-Cc:     Shawn Lin <shawn.lin@rock-chips.com>,
-        "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>,
-        linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: PROBLEM: =?utf-8?Q?mmc=5Fselect=5Fhs40?=
- =?utf-8?B?MGVzIGZhaWxlZCwgZXJyb3IgLTExMOOAkOivt+azqOaEj++8jOmCruS7tg==?=
- =?utf-8?B?55SxbGludXgtbW1jLW93bmVyQHZnZXIua2VybmVsLm9yZ+S7o+WPkeOAkQ==?=
-Message-ID: <20200327171417.GA4387@arya.arvanta.net>
-References: <20200301220242.GA8276@arya.arvanta.net>
- <20200318214917.GA9112@arya.arvanta.net>
- <5922bbd7-e91b-d144-6d44-2632cbd11c78@rock-chips.com>
- <158bd6f5-2430-19bd-28ef-e18d67becaf3@arm.com>
- <20200321204652.GA21002@arya.arvanta.net>
+        id S1727685AbgC0TDK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 27 Mar 2020 15:03:10 -0400
+Received: from mail-io1-f65.google.com ([209.85.166.65]:42399 "EHLO
+        mail-io1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726900AbgC0TDJ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 27 Mar 2020 15:03:09 -0400
+Received: by mail-io1-f65.google.com with SMTP id q128so10926611iof.9;
+        Fri, 27 Mar 2020 12:03:07 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to:user-agent;
+        bh=3ITt8Qtkvl5bWhH2ykH+DLle23U//GmXww0cEqt/CIY=;
+        b=CvCynFAZS4dMybHvxtHUziRZ36RAQk8WsTg4Ahx/3PxcK3bFi5w2lnQkx3VUN9YrFD
+         NWQenPDqZBOM5mkJYDucIeRM5V2OaOI3DHXIbEw3EqmyDYcnze9hV3grG+HNG8ihdTJ4
+         vLBA1VfDFT9jswcrsvdXzHC6XOzRDzDyarqB8BI8h0gq5ebWwO2TjGFWXMl0NBtan+Az
+         SDlQh0JUDAZIZHhJRfyd11UmluOC8HfS9ivtQxZobhH9gdrx6yu9gUMLkgAcw1ZR76U/
+         lcOEkM3MBqKiGMPLT5Ehl6ipFxWMrGSn/tFYMobRjGKSme0gTj/l2uZfsjAwOLvYgIyO
+         DiGg==
+X-Gm-Message-State: ANhLgQ0xuctvJK0voy9vg05a09pNYesrfPKo9u4fU6zWuT7J7AFZcraO
+        MX1q7B09Rd91iEY/IFQpsg==
+X-Google-Smtp-Source: ADFU+vsunpeTEtU3sJ3oVNdeonBxmAUzgtdZqJZ/EoRBD2F6QkitYdNkClMiUGGxNjFjEiNEshg0VQ==
+X-Received: by 2002:a6b:c8d4:: with SMTP id y203mr72705iof.111.1585335787129;
+        Fri, 27 Mar 2020 12:03:07 -0700 (PDT)
+Received: from rob-hp-laptop ([64.188.179.250])
+        by smtp.gmail.com with ESMTPSA id i6sm2148350ila.20.2020.03.27.12.03.05
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 27 Mar 2020 12:03:06 -0700 (PDT)
+Received: (nullmailer pid 28795 invoked by uid 1000);
+        Fri, 27 Mar 2020 19:03:04 -0000
+Date:   Fri, 27 Mar 2020 13:03:04 -0600
+From:   Rob Herring <robh@kernel.org>
+To:     Lubomir Rintel <lkundrak@v3.sk>
+Cc:     Linus Walleij <linus.walleij@linaro.org>,
+        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Jason Cooper <jason@lakedaemon.net>,
+        Marc Zyngier <maz@kernel.org>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Kishon Vijay Abraham I <kishon@ti.com>,
+        Alessandro Zummo <a.zummo@towertech.it>,
+        Alexandre Belloni <alexandre.belloni@bootlin.com>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Mark Brown <broonie@kernel.org>,
+        Daniel Lezcano <daniel.lezcano@linaro.org>,
+        Andrew Lunn <andrew@lunn.ch>,
+        Gregory Clement <gregory.clement@bootlin.com>,
+        Daniel Mack <daniel@zonque.org>,
+        Haojian Zhuang <haojian.zhuang@gmail.com>,
+        Robert Jarzmik <robert.jarzmik@free.fr>,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-gpio@vger.kernel.org, linux-i2c@vger.kernel.org,
+        linux-media@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-rtc@vger.kernel.org, linux-serial@vger.kernel.org,
+        linux-spi@vger.kernel.org, linux-usb@vger.kernel.org
+Subject: Re: [PATCH 14/28] dt-bindings: arm: l2x0: Tauros 3 is PL310
+ compatible
+Message-ID: <20200327190304.GA27639@bogus>
+References: <20200317093922.20785-1-lkundrak@v3.sk>
+ <20200317093922.20785-15-lkundrak@v3.sk>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <20200321204652.GA21002@arya.arvanta.net>
+In-Reply-To: <20200317093922.20785-15-lkundrak@v3.sk>
+User-Agent: Mutt/1.10.1 (2018-07-13)
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi,
-
-Anyone looked at this problem?
-
-Or, is there better url or mailing list where I should send this bug
-report?
-
-Or, could someone tell me what I could try to fix it, which file and
-parameters to change?
-
-On Sat, 2020-03-21 at 21:46, Milan P. Stanić wrote:
-> Hi,
+On Tue, Mar 17, 2020 at 10:39:08AM +0100, Lubomir Rintel wrote:
+> The validation is unhappy about mmp3-dell-ariel declaring its
+> marvell,tauros3-cache node to be compatible with arm,pl310-cache:
 > 
-> On Thu, 2020-03-19 at 12:28, Robin Murphy wrote:
-> > Hi Shawn,
-> > 
-> > On 2020-03-19 3:11 am, Shawn Lin wrote:
-> > > Hi Milan
-> > > 
-> > > [+linux-rockchip to see if someone has a Samsung chromebook one plus
-> > > and could confirm if it works]
-> > 
-> > FWIW I've also tried suspend on my NanoPC-T4 and seen that the eMMC (also
-> > HS400-ES) fails to come back properly on resume (thus resume never completes
-> > due to the missing root filesystem). IIRC it might even have been
-> > reproducible with suspend-to-idle, but I'd have to double-check that.
+>   mmp3-dell-ariel.dt.yaml: cache-controller@d0020000: compatible:
+>        Additional items are not allowed ('arm,pl310-cache' was unexpected)
+>   mmp3-dell-ariel.dt.yaml: cache-controller@d0020000: compatible:
+>        ['marvell,tauros3-cache', 'arm,pl310-cache'] is too long
+> 
+> Let's allow this -- Tauros 3 is designed to be compatible with PL310.
+> 
+> Signed-off-by: Lubomir Rintel <lkundrak@v3.sk>
+> ---
+>  .../devicetree/bindings/arm/l2c2x0.yaml       | 45 ++++++++++---------
+>  1 file changed, 24 insertions(+), 21 deletions(-)
+> 
+> diff --git a/Documentation/devicetree/bindings/arm/l2c2x0.yaml b/Documentation/devicetree/bindings/arm/l2c2x0.yaml
+> index 913a8cd8b2c00..7e39088a9bed2 100644
+> --- a/Documentation/devicetree/bindings/arm/l2c2x0.yaml
+> +++ b/Documentation/devicetree/bindings/arm/l2c2x0.yaml
+> @@ -29,27 +29,30 @@ allOf:
 >  
-> I forgot to tell that emmc worked without problem on this machine with
-> ChromeOS kernel 4.4.xx downloaded from
-> https://chromium.googlesource.com/chromiumos/third_party/kernel/+/chromeos-4.4
-> and with patches from
-> https://github.com/archlinuxarm/PKGBUILDs/tree/master/core/linux-gru
-> for about two years (iirc).
-> Problem started when I switched to mainline kernels, somewhere around
-> 5.1.xx
+>  properties:
+>    compatible:
+> -    enum:
+> -      - arm,pl310-cache
+> -      - arm,l220-cache
+> -      - arm,l210-cache
+> -        # DEPRECATED by "brcm,bcm11351-a2-pl310-cache"
+> -      - bcm,bcm11351-a2-pl310-cache
+> -        # For Broadcom bcm11351 chipset where an
+> -        # offset needs to be added to the address before passing down to the L2
+> -        # cache controller
+> -      - brcm,bcm11351-a2-pl310-cache
+> -        # Marvell Controller designed to be
+> -        # compatible with the ARM one, with system cache mode (meaning
+> -        # maintenance operations on L1 are broadcasted to the L2 and L2
+> -        # performs the same operation).
+> -      - marvell,aurora-system-cache
+> -        # Marvell Controller designed to be
+> -        # compatible with the ARM one with outer cache mode.
+> -      - marvell,aurora-outer-cache
+> -        # Marvell Tauros3 cache controller, compatible
+> -        # with arm,pl310-cache controller.
+> -      - marvell,tauros3-cache
+> +    oneOf:
+> +      - enum:
+> +        - arm,pl310-cache
+
+The list should be indented 2 more spaces. I'll fixup when applying.
+
+> +        - arm,l220-cache
+> +        - arm,l210-cache
+> +          # DEPRECATED by "brcm,bcm11351-a2-pl310-cache"
+> +        - bcm,bcm11351-a2-pl310-cache
+> +          # For Broadcom bcm11351 chipset where an
+> +          # offset needs to be added to the address before passing down to the L2
+> +          # cache controller
+> +        - brcm,bcm11351-a2-pl310-cache
+> +          # Marvell Controller designed to be
+> +          # compatible with the ARM one, with system cache mode (meaning
+> +          # maintenance operations on L1 are broadcasted to the L2 and L2
+> +          # performs the same operation).
+> +        - marvell,aurora-system-cache
+> +          # Marvell Controller designed to be
+> +          # compatible with the ARM one with outer cache mode.
+> +        - marvell,aurora-outer-cache
+> +      - items:
+> +         # Marvell Tauros3 cache controller, compatible
+> +         # with arm,pl310-cache controller.
+> +        - const: marvell,tauros3-cache
+> +        - const: arm,pl310-cache
+>  
+>    cache-level:
+>      const: 2
+> -- 
+> 2.25.1
 > 
-> > Robin.
-> > 
-> > > On 2020/3/19 5:49, Milan P. Stanić wrote:
-> > > > Hello,
-> > > > 
-> > > > Sorry to annoy again, but could you tell me if I sent this bug report
-> > > > to right mail address or I should send it somewhere else.
-> > > > 
-> > > > Also, did I sent bug report correctly or I did some mistakes which
-> > > > caused it to be ignored.
-> > > > 
-> > > > -- TIA On Sun, 2020-03-01 at 23:02, Milan P. Stanić wrote:
-> > > > > Hello,
-> > > > > 
-> > > > > I'm not native English speaker and I'm self taught in English so sorry
-> > > > > if do not write or express correctly. And sorry if I posted bug report
-> > > > > to wrong address.
-> > > > > 
-> > > > > I'm running linux 5.6.0-rc3 without any patches on Samsung chromebook
-> > > > > one plus, Arm64 rockchip rk3399 based model name:
-> > > > > Machine model: Google Kevin
-> > > > > 
-> > > > > I build kernels from upstream git.kernel.org for this machine for some
-> > > > > time (iirc, from 5.2.1 and up) but I'm getting error messages in kernel
-> > > > > after machine resumes from suspend-to-ram.
-> > > 
-> > > It sounds to me suspend-to-ram never works for this machine, at least
-> > > since 5.2.1. Am I right?
-> > > 
-> > > > > 
-> > > > > excerpt from dmesg output:
-> > > > > -----------------------------------------------------------------------
-> > > > > Restarting tasks ... done.
-> > > > > PM: suspend exit
-> > > > > mmc_host mmc0: Bus speed (slot 0) = 400000Hz (slot req 400000Hz,
-> > > > > actual 400000HZ div = 0)
-> > > > > mmc1: mmc_select_hs400es failed, error -110
-> > > > > mmc1: error -110 doing runtime resume
-> > > > > mmc1: Got data interrupt 0x00000002 even though no data
-> > > > > operation was in progress.
-> > > > > mmc1: sdhci: ============ SDHCI REGISTER DUMP ===========
-> > > > > mmc1: sdhci: Sys addr:  0x00000008 | Version:  0x00001002
-> > > > > mmc1: sdhci: Blk size:  0x00007200 | Blk cnt:  0x00000008
-> > > > > mmc1: sdhci: Argument:  0x00000000 | Trn mode: 0x00000023
-> > > > > mmc1: sdhci: Present:   0x1fff0001 | Host ctl: 0x00000035
-> > > > > mmc1: sdhci: Power:     0x0000000b | Blk gap:  0x00000080
-> > > > > mmc1: sdhci: Wake-up:   0x00000000 | Clock:    0x0000bc07
-> > > > > mmc1: sdhci: Timeout:   0x0000000d | Int stat: 0x00000000
-> > > > > mmc1: sdhci: Int enab:  0x03ff000b | Sig enab: 0x03ff000b
-> > > > > mmc1: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
-> > > > > mmc1: sdhci: Caps:      0x44edc880 | Caps_1:   0x801020f7
-> > > > > mmc1: sdhci: Cmd:       0x00000c1a | Max curr: 0x00000000
-> > > > > mmc1: sdhci: Resp[0]:   0x00000000 | Resp[1]:  0x373300bd
-> > > > > mmc1: sdhci: Resp[2]:   0x35303030 | Resp[3]:  0x00000000
-> > > > > mmc1: sdhci: Host ctl2: 0x00000000
-> > > > > mmc1: sdhci: ADMA Err:  0x00000000 | ADMA Ptr: 0xed41e200
-> > > > > -----------------------------------------------------------------------
-> > > > > 
-> > > > > I invoke suspend-to-ram by `echo mem > /sys/power/state` from ACPI power
-> > > > > and LID button handlers.
-> > > > > 
-> > > > > This only happens when I boot and use internal emmc card and never when
-> > > > > boot and use external mmc card.
-> > > > > 
-> > > > > If suspend-to-ram is not invoked (machine is always in normal state)
-> > > > > this problem never happen (or I missed it somehow).
-> > > > > 
-> > > > > I'm attaching kernel .config (file config-5.6.0-rc3-1-gru.conf) which
-> > > > > use to build kernel, output of the `awk -f scripts/ver_linux` as file
-> > > > > ver_linux.txt and  output of dmesg as file mmc-err.txt (from which I
-> > > > > deleted wifi connection logs).
-> > > > > 
-> > > > > Sorry if I did something bad or wrong with this bug report, I don't have
-> > > > > much experience with bug reporting, especially for kernel.
-> > > > > 
-> > > > > I'm ready to send you more data, and investigate this more, apply
-> > > > > patches and rebuild kernel or whatever you ask me (of course if my
-> > > > > understanding and knowledge is enough for this job).
-> > > > > 
-> > > > > Thank in advance
-> > > > > 
-> > > > > -- 
-> > > > > Kind regards
-> > > > > 
-> > > > [...]
-> > > > 
-> > > > 
-> > > 
-> > > 
-> > > 
-> > > _______________________________________________
-> > > Linux-rockchip mailing list
-> > > Linux-rockchip@lists.infradead.org
-> > > http://lists.infradead.org/mailman/listinfo/linux-rockchip
