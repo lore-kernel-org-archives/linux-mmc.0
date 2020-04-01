@@ -2,95 +2,116 @@ Return-Path: <SRS0=Vjr6=5R=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C643DC43331
-	for <linux-mmc@archiver.kernel.org>; Wed,  1 Apr 2020 08:20:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C7A84C43331
+	for <linux-mmc@archiver.kernel.org>; Wed,  1 Apr 2020 14:55:48 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 99170207FF
-	for <linux-mmc@archiver.kernel.org>; Wed,  1 Apr 2020 08:20:58 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9885D2078C
+	for <linux-mmc@archiver.kernel.org>; Wed,  1 Apr 2020 14:55:48 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="ZOGrrh+/"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="yE47rub6"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1732088AbgDAIU6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 1 Apr 2020 04:20:58 -0400
-Received: from mail-ua1-f68.google.com ([209.85.222.68]:41194 "EHLO
-        mail-ua1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728087AbgDAIU5 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Apr 2020 04:20:57 -0400
-Received: by mail-ua1-f68.google.com with SMTP id f9so8747274uaq.8
-        for <linux-mmc@vger.kernel.org>; Wed, 01 Apr 2020 01:20:57 -0700 (PDT)
+        id S1733062AbgDAOzs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 1 Apr 2020 10:55:48 -0400
+Received: from mail-lj1-f193.google.com ([209.85.208.193]:45464 "EHLO
+        mail-lj1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1732749AbgDAOzr (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Apr 2020 10:55:47 -0400
+Received: by mail-lj1-f193.google.com with SMTP id t17so26118738ljc.12
+        for <linux-mmc@vger.kernel.org>; Wed, 01 Apr 2020 07:55:45 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=YPnquYCxA0mlKyKmemCORNREdcXlUy+Jk8L71JyTre8=;
-        b=ZOGrrh+/dSBOmxgMPTqkfs+NChFy3OA1n00jxm/EH49SwmuTqtihuvPdDSkYgaBmlj
-         08JSzufH9hLY7tNEQbWtBWLoQE4IdFHMgJKUtBr3Tkxlej55aUhXN2bqDeGBCm8W+NMu
-         N4Sf9TX8naCuEtsWIkB6Yv+qDfP/rYJteb4rVpXGWDjuIM2YeXdC9gLo1nPBXFSzmA8t
-         ES9Ggfe9nma7n6xuUyIjnnkCqc12cBcu1unFDsCTs+VanH8fFJQfCpDc+FVuxwJObRQm
-         2vE5x1Jx22fCnwIkyxEasuJHLBjq6qrHHU/+/DNH3qeQURpwWcU3yeQ1wEbaVGEcyuOX
-         rAQA==
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=bYU7QeY1a7IIXFQO/jwmz3hXaskowVHLsLdG+qiYwio=;
+        b=yE47rub6AfkfEUMl+SpKqdMTGgl+0p76TgEdtp5Ofbcw7wjR4xDM7PcRLVinwIbXP1
+         SA1xppNMOD5JoztIV1GM4lE9/As0u8jt2v2qtv2MF0ZpfrPgsPkr6A1o80qRFsIkddjy
+         38wvMogUv1yg7JHLKK7HwV6Du1n7FqhHt41ZQ705VOF6WCFAOm8x/zl5uOjOoKhE8mqj
+         rSoPVj9gFgMEQ2O5pL3nNKNVGIO9GPtHpxWqmFsTt77psrwCicMemWOZGwFkshtWCWgh
+         Ui4hPXzI5Y5ULpOBgGYRTntj/G8FCB2+y/hnK243eQHLJ9vC79tHn0H0s0tOC5b1gVrR
+         pynw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=YPnquYCxA0mlKyKmemCORNREdcXlUy+Jk8L71JyTre8=;
-        b=r+05WEAaY/B8py0pFcoyIPy6taHq5rTbr5dOGRgtoEUgRPSt7Iqpr63gSUoIor7H1V
-         Zqmt+0vPLO+UQf4pbo2CizgWGlfoxt7IaFO+ysrlDN3KIC+2pFeFX5tvTFP429wvQEAF
-         fHRYIueS7wqYCWGdJdEVmoU7ec7VEN3XfpiJ+BmQIqnxLnRJXC/XnAEIKmb5A6YxN+Xw
-         4BkPtK5c2jtPz8/ab20smkyXtZdM73i1fca9Amob2pGydvNENpCiQol9RJVCRtzdzRR6
-         ip+zUFZATVXoMFmtq0pEdkags5BgnPoy2e2xKtWpxwBhYWLc9+GeniM5QGKZ9CkZJfsR
-         3k6Q==
-X-Gm-Message-State: AGi0PuZmguLc+Ueqa+8Dbvs7aQoe4wGoXUJet+5g/CxBSxypPS/Bun9e
-        lPVlFZCOGU0fx8vJAVbpXB+jaWtn8jwasU7zcG9krdo4
-X-Google-Smtp-Source: APiQypIEzOSxyTIiYPEQyc07Z4mde/nZwEi/5CgUgnzGxtJ9KUFCeSXxm0+2TglSNJULHWyxABvMUvCVdOZ0tBPtUtQ=
-X-Received: by 2002:ab0:7556:: with SMTP id k22mr15152808uaq.104.1585729256549;
- Wed, 01 Apr 2020 01:20:56 -0700 (PDT)
-MIME-Version: 1.0
-References: <20200213221332.2228810-1-patrick.oppenlander@gmail.com>
- <MN2PR04MB69915A49A1F17BD2DBBD5C29FC170@MN2PR04MB6991.namprd04.prod.outlook.com>
- <CAEg67GnUcAeM=XZteE7YjrchnUjNkZofXZ8oAeekEGxZFdgHsw@mail.gmail.com>
-In-Reply-To: <CAEg67GnUcAeM=XZteE7YjrchnUjNkZofXZ8oAeekEGxZFdgHsw@mail.gmail.com>
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=bYU7QeY1a7IIXFQO/jwmz3hXaskowVHLsLdG+qiYwio=;
+        b=YetvL6G7AHVIxVwi35LsthDYsuDhosJqwokH2EUCdtLz+fsd5RZTTXgB/8gIdx7lZW
+         W/Jwpg/XZGXXk7VP5624RNt2LRK5OeNdMdYR0v/Z9tBu05Ifp/YiQ4ogBkSVOfMZD7WJ
+         IGK3cS/HSmkZJ0ARe1ybhG7v+d5/1A19iHHD83Y/3A2WmTBIPc+Tol03u+q8i8KElKg7
+         SfpAVWo7j0DiV6BNBRDBHglIBbyjkUuB6MEpBUCi7eNNDhlkbwZQnQTmNPe6STHLOh+k
+         CYI+tQ7oW2hm1uev1FwRYjekyAQ0jqQbziPwo/YjgUbkF4yFvgM848PJl8626ZHSFw5B
+         LNgw==
+X-Gm-Message-State: AGi0Pua/Eh1+uUYL+1UKihmJ1MGrxBV56PXwIqIN0v0l9IvYGIw7M6Bb
+        PMC496/xI3lZ3+ba+78yGFw7vxjri88=
+X-Google-Smtp-Source: APiQypK3NvoBTUSYHtDbhiWyG29rdPPfQ0HucsRx29dy+taZIDIBEdhLZUv35IlXUFvm85nCebyEbw==
+X-Received: by 2002:a2e:8914:: with SMTP id d20mr12637025lji.148.1585752944615;
+        Wed, 01 Apr 2020 07:55:44 -0700 (PDT)
+Received: from localhost.localdomain (h-158-174-22-210.NA.cust.bahnhof.se. [158.174.22.210])
+        by smtp.gmail.com with ESMTPSA id f9sm1393485ljp.88.2020.04.01.07.55.43
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 01 Apr 2020 07:55:43 -0700 (PDT)
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 1 Apr 2020 10:20:20 +0200
-Message-ID: <CAPDyKFrW6tXMVa_P=iAPk4FurH9+MGOvJiT7m8B72kz7p0-BnQ@mail.gmail.com>
-Subject: Re: [PATCH] mmc-utils: Fix scaling of cache size
-To:     Patrick Oppenlander <patrick.oppenlander@gmail.com>,
-        Chris Ball <chris@printf.net>
-Cc:     Avri Altman <Avri.Altman@wdc.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+To:     linux-mmc@vger.kernel.org
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [PATCH] mmc: android-goldfish: Enable MMC_CAP2_NO_SDIO
+Date:   Wed,  1 Apr 2020 16:55:31 +0200
+Message-Id: <20200401145531.23247-1-ulf.hansson@linaro.org>
+X-Mailer: git-send-email 2.20.1
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-+ Chris
+Instead of explicitly checking for SDIO specific requests and then
+returning an error code, let's set MMC_CAP2_NO_SDIO to tell the mmc core to
+prevent them altogether.
 
-On Tue, 31 Mar 2020 at 23:11, Patrick Oppenlander
-<patrick.oppenlander@gmail.com> wrote:
->
-> On Sun, Feb 16, 2020 at 6:18 PM Avri Altman <Avri.Altman@wdc.com> wrote:
-> >
-> > > From: Patrick Oppenlander <patrick.oppenlander@gmail.com>
-> > >
-> > > JESD84-B51 7.4.30 CACHE_SIZE [252:249] states that "the size is
-> > > indicated as multiple of kilobits". This is also supported by Table 39,
-> > > "e.MMC internal sizes and related Units / Granularities" which lists
-> > > "32Kb (=4KB)" as the cache size granularity for 4KiB native devices.
-> > >
-> > > Signed-off-by: Patrick Oppenlander <patrick.oppenlander@gmail.com>
-> > Reviewed-by: Avri Altman <avri.altman@wdc.com>
-> >
->
-> Does anything else need to happen to get this applied?
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+---
+ drivers/mmc/host/android-goldfish.c | 10 +---------
+ 1 file changed, 1 insertion(+), 9 deletions(-)
 
-Chris Ball maintains mmc-utils. I have added him to the loop, but
-perhaps you should resend this to make sure he gets the patch.
+diff --git a/drivers/mmc/host/android-goldfish.c b/drivers/mmc/host/android-goldfish.c
+index 914e17bab3be..ceb4924e02d0 100644
+--- a/drivers/mmc/host/android-goldfish.c
++++ b/drivers/mmc/host/android-goldfish.c
+@@ -27,7 +27,6 @@
+ #include <linux/mutex.h>
+ #include <linux/scatterlist.h>
+ #include <linux/mmc/mmc.h>
+-#include <linux/mmc/sdio.h>
+ #include <linux/mmc/host.h>
+ #include <linux/mmc/card.h>
+ 
+@@ -404,14 +403,6 @@ static void goldfish_mmc_request(struct mmc_host *mmc, struct mmc_request *req)
+ 	host->mrq = req;
+ 	goldfish_mmc_prepare_data(host, req);
+ 	goldfish_mmc_start_command(host, req->cmd);
+-
+-	/*
+-	 * This is to avoid accidentally being detected as an SDIO card
+-	 * in mmc_attach_sdio().
+-	 */
+-	if (req->cmd->opcode == SD_IO_SEND_OP_COND &&
+-	    req->cmd->flags == (MMC_RSP_SPI_R4 | MMC_RSP_R4 | MMC_CMD_BCR))
+-		req->cmd->error = -EINVAL;
+ }
+ 
+ static void goldfish_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+@@ -482,6 +473,7 @@ static int goldfish_mmc_probe(struct platform_device *pdev)
+ 	mmc->f_max = 24000000;
+ 	mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
+ 	mmc->caps = MMC_CAP_4_BIT_DATA;
++	mmc->caps2 = MMC_CAP2_NO_SDIO;
+ 
+ 	/* Use scatterlist DMA to reduce per-transfer costs.
+ 	 * NOTE max_seg_size assumption that small blocks aren't
+-- 
+2.20.1
 
-Kind regards
-Uffe
