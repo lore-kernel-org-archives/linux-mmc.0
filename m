@@ -1,110 +1,77 @@
-Return-Path: <SRS0=Vjr6=5R=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=tKpl=5S=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.3 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 539C6C2D0F0
-	for <linux-mmc@archiver.kernel.org>; Wed,  1 Apr 2020 22:15:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4195DC43331
+	for <linux-mmc@archiver.kernel.org>; Thu,  2 Apr 2020 10:10:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 2920520678
-	for <linux-mmc@archiver.kernel.org>; Wed,  1 Apr 2020 22:15:25 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="dSJDrZBZ"
+	by mail.kernel.org (Postfix) with ESMTP id 21AA62077D
+	for <linux-mmc@archiver.kernel.org>; Thu,  2 Apr 2020 10:10:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1733248AbgDAWPX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 1 Apr 2020 18:15:23 -0400
-Received: from mail-pg1-f194.google.com ([209.85.215.194]:39404 "EHLO
-        mail-pg1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1733230AbgDAWPU (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Apr 2020 18:15:20 -0400
-Received: by mail-pg1-f194.google.com with SMTP id g32so828878pgb.6
-        for <linux-mmc@vger.kernel.org>; Wed, 01 Apr 2020 15:15:20 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=7+ihzztAtgevX2pVbVqkrTO5PlBAc8v+4lemqFm3pKA=;
-        b=dSJDrZBZu0KQdaASk83WjI/+C4PCoL2zeb/76ZMwgdbAElXlJH3pjA6V0ZF7Jq5W2R
-         8aFHWyFfC6c09UrkC1BJg/bqDciS7nJ+PgJQ4IzSqMqgwHwXPjEbnkMWbYkN5xtYRMA5
-         zEWYOidzhNIeC0mWSG5Xcq3VACduUj75w/Z6RFP2EYCHHxaMu6JLhp6QhoRQPtMqJ/4G
-         vOV5duxkRy/prmU3PHMguntpEhlKhp/OJt6fC9o0MXwtlPsgoEu21UGoU+Je+j+g/X3Z
-         EaxDGCyCXLExJHkb4cyy76333E1wEQi5aKP6nOEB1E1JYROzqMYBQiY1KmUHm2lhw73j
-         uRBA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=7+ihzztAtgevX2pVbVqkrTO5PlBAc8v+4lemqFm3pKA=;
-        b=SloGP59A0ad3hV7ohC0Zk2c35hl6S4A6sKtQhG9CJ3QKvB3PwXwmaOg3oID4qbErir
-         tqun0im4nWjmxnZQbpcGS5SyqxjkBFLBS6V/ZS+h7HrgQJ34VDe+MHPefejNVwmUEOL1
-         J2LiyPmHeNW8suVXlmKcHWo7mCfVU8+q25QCfIGcZ6qU8CixCK9Lldt2n1QbtVY2adOo
-         At2vG0S7nAmhRoK+aY/5c0wrpyIg/eCHa/38nxI5+QY30Z3taRUgGngR5i2t7xS1FCMt
-         lx/M+w2Wff6RG/n1R2iHC+aYFE666lW1P9iF7L5Y4dXMa/ImtewTQo2i1ApSOLgomHzX
-         FJig==
-X-Gm-Message-State: AGi0PuZKUnriLl33/0vqQJF5dM68LSNh7w8laalq0qsKF4e7YfdAKhz5
-        SkztbpdL/RzrG+zio+fcHLnkdoI7
-X-Google-Smtp-Source: APiQypKQ2mV9F9MqUntcVtvDk8k6OOwm3uvaqEJ6y/AToAKPeFQGnIKNn2uvBsacegPygKjIfWeQLA==
-X-Received: by 2002:a63:8b42:: with SMTP id j63mr327956pge.27.1585779319388;
-        Wed, 01 Apr 2020 15:15:19 -0700 (PDT)
-Received: from gtr.motec.com.au (motec5.motec.com.au. [115.70.189.242])
-        by smtp.gmail.com with ESMTPSA id e9sm2296436pfl.179.2020.04.01.15.15.17
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 01 Apr 2020 15:15:18 -0700 (PDT)
-From:   patrick.oppenlander@gmail.com
-To:     linux-mmc@vger.kernel.org
-Cc:     chris@printf.net,
-        Patrick Oppenlander <patrick.oppenlander@gmail.com>,
-        Avri Altman <avri.altman@wdc.com>
-Subject: [PATCH] mmc-utils: Fix scaling of cache size
-Date:   Thu,  2 Apr 2020 09:14:53 +1100
-Message-Id: <20200401221453.267360-1-patrick.oppenlander@gmail.com>
-X-Mailer: git-send-email 2.26.0
-In-Reply-To: <CAPDyKFrW6tXMVa_P=iAPk4FurH9+MGOvJiT7m8B72kz7p0-BnQ@mail.gmail.com>
-References: <CAPDyKFrW6tXMVa_P=iAPk4FurH9+MGOvJiT7m8B72kz7p0-BnQ@mail.gmail.com>
+        id S2387730AbgDBKKt (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 2 Apr 2020 06:10:49 -0400
+Received: from mga11.intel.com ([192.55.52.93]:63197 "EHLO mga11.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1728135AbgDBKKt (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 2 Apr 2020 06:10:49 -0400
+IronPort-SDR: itD9wn6NT9hQTs06qiPP5xWpqwNStMIhZ2ulF/mt1UjyFqqI+UAw3t4fKFH43dy1OzUlVOhkXV
+ D2Ac5qwFqFqg==
+X-Amp-Result: SKIPPED(no attachment in message)
+X-Amp-File-Uploaded: False
+Received: from fmsmga007.fm.intel.com ([10.253.24.52])
+  by fmsmga102.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 02 Apr 2020 03:10:49 -0700
+IronPort-SDR: njxA74UT8UgCTr4f31WYvi5VZ8n3XwFBOeGjrjpoMPE0vVi9/PUO6Oa+Zpjxqi6qZ9pVEIc+un
+ fVuUyfb2/ITQ==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.72,335,1580803200"; 
+   d="scan'208";a="240782454"
+Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.87]) ([10.237.72.87])
+  by fmsmga007.fm.intel.com with ESMTP; 02 Apr 2020 03:10:46 -0700
+Subject: Re: [PATCH v2 3/4] mmc: sdhci-of-arasan: Modify clock operations
+ handling
+To:     Manish Narani <manish.narani@xilinx.com>, ulf.hansson@linaro.org,
+        robh+dt@kernel.org, mark.rutland@arm.com, michal.simek@xilinx.com
+Cc:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        git@xilinx.com
+References: <1585546879-91037-1-git-send-email-manish.narani@xilinx.com>
+ <1585546879-91037-4-git-send-email-manish.narani@xilinx.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Message-ID: <34dffb3a-aa90-db27-7465-df840d148658@intel.com>
+Date:   Thu, 2 Apr 2020 13:10:02 +0300
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.5.0
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+In-Reply-To: <1585546879-91037-4-git-send-email-manish.narani@xilinx.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Patrick Oppenlander <patrick.oppenlander@gmail.com>
+On 30/03/20 8:41 am, Manish Narani wrote:
+> The SDHCI clock operations are platform specific. So it better to define
+> them separately for particular platform. This will prevent multiple
+> if..else conditions and will make it easy for user to add their own
+> clock operations handlers.
+> 
+> Signed-off-by: Manish Narani <manish.narani@xilinx.com>
+> ---
+>  drivers/mmc/host/sdhci-of-arasan.c | 208 +++++++++++++++++------------
+>  1 file changed, 119 insertions(+), 89 deletions(-)
 
-Resend requested by Uffe.
+Would you mind splitting this into a patch that moves the existing
+structures first, and then a second patch to make the changes.
 
-===8<===
-
-JESD84-B51 7.4.30 CACHE_SIZE [252:249] states that "the size is
-indicated as multiple of kilobits". This is also supported by Table 39,
-"e.MMC internal sizes and related Units / Granularities" which lists
-"32Kb (=4KB)" as the cache size granularity for 4KiB native devices.
-
-Signed-off-by: Patrick Oppenlander <patrick.oppenlander@gmail.com>
-Reviewed-by: Avri Altman <avri.altman@wdc.com>
----
- mmc_cmds.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
-
-diff --git a/mmc_cmds.c b/mmc_cmds.c
-index fb37189..a1b1d75 100644
---- a/mmc_cmds.c
-+++ b/mmc_cmds.c
-@@ -1419,8 +1419,8 @@ int do_read_extcsd(int nargs, char **argv)
- 		printf("Power off notification [POWER_OFF_LONG_TIME: 0x%02x]\n",
- 			ext_csd[247]);
- 		printf("Cache Size [CACHE_SIZE] is %d KiB\n",
--			ext_csd[249] << 0 | (ext_csd[250] << 8) |
--			(ext_csd[251] << 16) | (ext_csd[252] << 24));
-+			(ext_csd[249] << 0 | (ext_csd[250] << 8) |
-+			(ext_csd[251] << 16) | (ext_csd[252] << 24)) / 8);
- 	}
- 
- 	/* A441: Reserved [501:247]
--- 
-2.26.0
-
+Also, I notice there is 'struct sdhci_arasan_data' but also
+'struct sdhci_arasan_of_data sdhci_arasan_data'.  This is confusing, so
+perhaps a preparatory patch that renames the latter from sdhci_arasan_data
+to somethine else e.g. sdhci_arasan_generic_data
