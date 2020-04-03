@@ -5,64 +5,64 @@ X-Spam-Level:
 X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3BD11C43331
-	for <linux-mmc@archiver.kernel.org>; Fri,  3 Apr 2020 07:05:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A71EEC2BA15
+	for <linux-mmc@archiver.kernel.org>; Fri,  3 Apr 2020 07:05:56 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 08A2620787
-	for <linux-mmc@archiver.kernel.org>; Fri,  3 Apr 2020 07:05:47 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7AC162080C
+	for <linux-mmc@archiver.kernel.org>; Fri,  3 Apr 2020 07:05:56 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="MufWgAWf"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="KdqsOxJj"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2389087AbgDCHFq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 3 Apr 2020 03:05:46 -0400
-Received: from mail-pj1-f67.google.com ([209.85.216.67]:36280 "EHLO
+        id S2389654AbgDCHFw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 3 Apr 2020 03:05:52 -0400
+Received: from mail-pj1-f67.google.com ([209.85.216.67]:53357 "EHLO
         mail-pj1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2388472AbgDCHFq (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 3 Apr 2020 03:05:46 -0400
-Received: by mail-pj1-f67.google.com with SMTP id nu11so2564110pjb.1;
-        Fri, 03 Apr 2020 00:05:45 -0700 (PDT)
+        with ESMTP id S2388472AbgDCHFv (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 3 Apr 2020 03:05:51 -0400
+Received: by mail-pj1-f67.google.com with SMTP id l36so2609823pjb.3;
+        Fri, 03 Apr 2020 00:05:51 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :in-reply-to:references;
-        bh=CrZe3I4PBsnuaIeN4buPPytwyP1ByhSDiM4SeWiS8VM=;
-        b=MufWgAWfvPyyz50E4MGAbCI4cA4XL24r3qP/DblFxOdU59p/85Lge88T3t66lyfi+F
-         7R5fKLXAZAGk4aFAUGhBn7tDLKpYGaxtUrw0I2Qe5SZLaK/jmRVGnwEvYdiie0fWppQR
-         wd+k/eGSaD/pk638UPDO32UPEFfrilGKJsWDiBCN4R5PXPehOGuDnsaH9BO4wAKrflc+
-         pPixaPXAtJD+3FYFLnGpdw6PaheBWbzIzNDd+9/SjGUOALyu8jo7ra/rFdNG9LdlkE6y
-         bXn+4aGMxa425vrfnvkTn6cSMJUOr7Zl6WCzjWphryJhCz5d9OvWyp9Nv5Oq6IVEC4sy
-         8bGg==
+        bh=X5441Jy2VbGV6dbzgZxForefu3q50NuP2ovt+obRsE4=;
+        b=KdqsOxJj3jIJF8lvmWFsOWJuT3iH0IM4CfLsCNIkcwxFSzinWd8uE3DN7BpJq3d3dN
+         IAq7WUozAuBW9Peboj/muqESeRUcFALD9rl6eT7/iR5M2VMbEQRHIIvvcBrw8tDXSTQI
+         RcPpfTiS8YmXuFR9oYnxvINs1yiuGWa6z7YKilGNEWbYKqDf8rLcSQUK6O5d6z4fTrTn
+         Bdjxo49wflcMvAfa2J2qGe24WHEWHLz8UL1+Wi4+ZdN5F16kS9rtIwoK+me/pjwOP6JH
+         +w9jjhQ5NYAEvOXG573xY3NL/TP55I/mJ6CSnaT+PcrG6JmBbw+Y9ECCVTjxJ4ywjqNf
+         pZ4w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:in-reply-to:references;
-        bh=CrZe3I4PBsnuaIeN4buPPytwyP1ByhSDiM4SeWiS8VM=;
-        b=eTk/bvtwWrg2La6SNd2uKJcXx4g8nq6lIH4HHIrvrka636NPYnG3DrMRbjQn5vrO89
-         g//tEnbi+doV2TzBQkZ2vLElfMRPLSizD0pkzVAvXUNcaB5IMh11PZsNZEJ7cmw1VP1W
-         9gHCGT4r39Zj49CLnp+YSIMD1dLI07JV+UFgSt0Dfky+WKpPflt9lfiFS+IlCE63CT5C
-         FPgOW0GGV7yN8h3D8gitXVl8wEwuC1nbDEUKzQ5FZWmpOH8twToyDKFTfVSNssn89z1k
-         jxWnUX09y6vFeqaPbCKbPFNWAkDjCmYg+Qq5xuyg/kHGff/5KA9UmRzUmKSaXzw+dWGO
-         XwWQ==
-X-Gm-Message-State: AGi0PuYyP4xz36Jn0/HGP9WqkKefDowZaFkwYZO/8sjVRvEONf8P325h
-        CkjHZJW3VImQ0KNCBMSDnlk=
-X-Google-Smtp-Source: APiQypJvf9N/GAQ/pZeL8u+QLoEXYsFUpcobXFllMB4c0bcfvpd7djx+HyVORGQY98kg28CSl8uQSw==
-X-Received: by 2002:a17:90a:9f09:: with SMTP id n9mr7921682pjp.157.1585897544918;
-        Fri, 03 Apr 2020 00:05:44 -0700 (PDT)
+        bh=X5441Jy2VbGV6dbzgZxForefu3q50NuP2ovt+obRsE4=;
+        b=O1fdNSxCMjJIHtvZkpVaeBFdODKj0xi5TdzOy7HNY02OnyskeGOrWnOh/0JvuM+NlO
+         NN+xuueSBI//fEOmAYhvLvWcLNaSwPiE6nc4dqjnxRYDbCrZN6GyfKAhyEefIwGNkQ0g
+         Azm8tjZm12B4NJ3PJaFAQhv4YGxTHh2mqkM0/nMV+DEUlLUut+32gDotdlBuOsZgxpWR
+         AdDZ3CZFs8UpN7IlidlYLNZpGfVKC89RcS7UPpC4yuCs8zczhEtLB9slsOIN0CjUzhRf
+         lAzLzAaEh6EoVjONony1g1JpTqxbeLpdsWbHSs4EhyPsXmYFtNfaJilfO93P3Kd2MBNn
+         VkPw==
+X-Gm-Message-State: AGi0PuawP4WotobUgrfecBAHR9yIfLZe+d6iHv93mJSruzepwdUjB4LG
+        XcJst8ZrDetgDA4bow8d9rI=
+X-Google-Smtp-Source: APiQypJ5yGpiCWr3p8E88R3xUTg325QYKYDKW2LW0yQyyp0Mt2M+kRtW90UDBzb8GtYaMUPDsShSTQ==
+X-Received: by 2002:a17:902:8e84:: with SMTP id bg4mr6390446plb.11.1585897551311;
+        Fri, 03 Apr 2020 00:05:51 -0700 (PDT)
 Received: from sh03840pcu.spreadtrum.com ([117.18.48.82])
-        by smtp.gmail.com with ESMTPSA id u18sm5138701pfl.40.2020.04.03.00.05.42
+        by smtp.gmail.com with ESMTPSA id u18sm5138701pfl.40.2020.04.03.00.05.48
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-SHA bits=128/128);
-        Fri, 03 Apr 2020 00:05:44 -0700 (PDT)
+        Fri, 03 Apr 2020 00:05:50 -0700 (PDT)
 From:   Baolin Wang <baolin.wang7@gmail.com>
 To:     adrian.hunter@intel.com, ulf.hansson@linaro.org
 Cc:     orsonzhai@gmail.com, zhang.lyra@gmail.com, baolin.wang7@gmail.com,
         arnd@arndb.de, linux-mmc@vger.kernel.org,
         linux-kernel@vger.kernel.org
-Subject: [PATCH v4 1/3] mmc: host: Introduce the request_atomic() for the host
-Date:   Fri,  3 Apr 2020 15:05:26 +0800
-Message-Id: <04c25ff9f9b17d41d734c498e4be61dee745bb30.1585896945.git.baolin.wang7@gmail.com>
+Subject: [PATCH v4 3/3] mmc: host: sdhci-sprd: Implement the request_atomic() API
+Date:   Fri,  3 Apr 2020 15:05:28 +0800
+Message-Id: <a2cd8923c071881ddd121d24f89639e3ea8e671d.1585896945.git.baolin.wang7@gmail.com>
 X-Mailer: git-send-email 1.9.1
 In-Reply-To: <cover.1585896945.git.baolin.wang7@gmail.com>
 References: <cover.1585896945.git.baolin.wang7@gmail.com>
@@ -73,112 +73,77 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The SD host controller can process one request in the atomic context if
-the card is nonremovable, which means we can submit next request in the
-irq hard handler when using the MMC host software queue to reduce the
-latency. Thus this patch adds a new API request_atomic() for the host
-controller, as well as adding support for host software queue to submit
-a request by the new request_atomic() API.
+Implement the request_atomic() API for nonremovable cards, that means
+we can submit next request in the irq hard handler context to reduce
+latency.
 
-Moreover there is an unusual case that the card is busy when trying to
-send a command, and we can not polling the card status in interrupt
-context by using request_atomic() to dispatch requests. Thus we should
-queue a work to try again in the non-atomic context in case the host
-releases the busy signal later.
+Moreover factor out the AUTO CMD23 checking into a separate function
+to reduce duplicate code.
 
-Suggested-by: Adrian Hunter <adrian.hunter@intel.com>
 Signed-off-by: Baolin Wang <baolin.wang7@gmail.com>
 ---
- drivers/mmc/host/mmc_hsq.c | 29 ++++++++++++++++++++++++++++-
- drivers/mmc/host/mmc_hsq.h |  1 +
- include/linux/mmc/host.h   |  3 +++
- 3 files changed, 32 insertions(+), 1 deletion(-)
+ drivers/mmc/host/sdhci-sprd.c | 23 ++++++++++++++++++++---
+ 1 file changed, 20 insertions(+), 3 deletions(-)
 
-diff --git a/drivers/mmc/host/mmc_hsq.c b/drivers/mmc/host/mmc_hsq.c
-index b90b2c9..a57f802 100644
---- a/drivers/mmc/host/mmc_hsq.c
-+++ b/drivers/mmc/host/mmc_hsq.c
-@@ -16,11 +16,20 @@
- #define HSQ_NUM_SLOTS	64
- #define HSQ_INVALID_TAG	HSQ_NUM_SLOTS
+diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
+index 2ab42c5..bc7a8cb 100644
+--- a/drivers/mmc/host/sdhci-sprd.c
++++ b/drivers/mmc/host/sdhci-sprd.c
+@@ -406,7 +406,8 @@ static void sdhci_sprd_request_done(struct sdhci_host *host,
+ 	.request_done = sdhci_sprd_request_done,
+ };
  
-+static void mmc_hsq_retry_handler(struct work_struct *work)
-+{
-+	struct mmc_hsq *hsq = container_of(work, struct mmc_hsq, retry_work);
-+	struct mmc_host *mmc = hsq->mmc;
-+
-+	mmc->ops->request(mmc, hsq->mrq);
+-static void sdhci_sprd_request(struct mmc_host *mmc, struct mmc_request *mrq)
++static void sdhci_sprd_check_auto_cmd23(struct mmc_host *mmc,
++					struct mmc_request *mrq)
+ {
+ 	struct sdhci_host *host = mmc_priv(mmc);
+ 	struct sdhci_sprd_host *sprd_host = TO_SPRD_HOST(host);
+@@ -422,10 +423,23 @@ static void sdhci_sprd_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ 	    mrq->sbc && (mrq->sbc->arg & SDHCI_SPRD_ARG2_STUFF) &&
+ 	    (host->flags & SDHCI_AUTO_CMD23))
+ 		host->flags &= ~SDHCI_AUTO_CMD23;
 +}
 +
- static void mmc_hsq_pump_requests(struct mmc_hsq *hsq)
- {
- 	struct mmc_host *mmc = hsq->mmc;
- 	struct hsq_slot *slot;
- 	unsigned long flags;
-+	int ret = 0;
++static void sdhci_sprd_request(struct mmc_host *mmc, struct mmc_request *mrq)
++{
++	sdhci_sprd_check_auto_cmd23(mmc, mrq);
  
- 	spin_lock_irqsave(&hsq->lock, flags);
- 
-@@ -42,7 +51,24 @@ static void mmc_hsq_pump_requests(struct mmc_hsq *hsq)
- 
- 	spin_unlock_irqrestore(&hsq->lock, flags);
- 
--	mmc->ops->request(mmc, hsq->mrq);
-+	if (mmc->ops->request_atomic)
-+		ret = mmc->ops->request_atomic(mmc, hsq->mrq);
-+	else
-+		mmc->ops->request(mmc, hsq->mrq);
-+
-+	/*
-+	 * If returning BUSY from request_atomic(), which means the card
-+	 * may be busy now, and we should change to non-atomic context to
-+	 * try again for this unusual case, to avoid time-consuming operations
-+	 * in the atomic context.
-+	 *
-+	 * Note: we just give a warning for other error cases, since the host
-+	 * driver will handle them.
-+	 */
-+	if (ret == -EBUSY)
-+		schedule_work(&hsq->retry_work);
-+	else
-+		WARN_ON_ONCE(ret && ret != -EBUSY);
+ 	sdhci_request(mmc, mrq);
  }
  
- static void mmc_hsq_update_next_tag(struct mmc_hsq *hsq, int remains)
-@@ -325,6 +351,7 @@ int mmc_hsq_init(struct mmc_hsq *hsq, struct mmc_host *mmc)
- 	hsq->mmc->cqe_private = hsq;
- 	mmc->cqe_ops = &mmc_hsq_ops;
++static int sdhci_sprd_request_atomic(struct mmc_host *mmc,
++				      struct mmc_request *mrq)
++{
++	sdhci_sprd_check_auto_cmd23(mmc, mrq);
++
++	return sdhci_request_atomic(mmc, mrq);
++}
++
+ static int sdhci_sprd_voltage_switch(struct mmc_host *mmc, struct mmc_ios *ios)
+ {
+ 	struct sdhci_host *host = mmc_priv(mmc);
+@@ -561,6 +575,11 @@ static int sdhci_sprd_probe(struct platform_device *pdev)
+ 	if (ret)
+ 		goto pltfm_free;
  
-+	INIT_WORK(&hsq->retry_work, mmc_hsq_retry_handler);
- 	spin_lock_init(&hsq->lock);
- 	init_waitqueue_head(&hsq->wait_queue);
++	if (!mmc_card_is_removable(host->mmc))
++		host->mmc_host_ops.request_atomic = sdhci_sprd_request_atomic;
++	else
++		host->always_defer_done = true;
++
+ 	sprd_host = TO_SPRD_HOST(host);
+ 	sdhci_sprd_phy_param_parse(sprd_host, pdev->dev.of_node);
  
-diff --git a/drivers/mmc/host/mmc_hsq.h b/drivers/mmc/host/mmc_hsq.h
-index 18b9cf5..ffdd9cd 100644
---- a/drivers/mmc/host/mmc_hsq.h
-+++ b/drivers/mmc/host/mmc_hsq.h
-@@ -12,6 +12,7 @@ struct mmc_hsq {
- 	wait_queue_head_t wait_queue;
- 	struct hsq_slot *slot;
- 	spinlock_t lock;
-+	struct work_struct retry_work;
+@@ -654,8 +673,6 @@ static int sdhci_sprd_probe(struct platform_device *pdev)
+ 	if (ret)
+ 		goto err_cleanup_host;
  
- 	int next_tag;
- 	int num_slots;
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index c318fb5..d4a50e5d 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -92,6 +92,9 @@ struct mmc_host_ops {
- 			    int err);
- 	void	(*pre_req)(struct mmc_host *host, struct mmc_request *req);
- 	void	(*request)(struct mmc_host *host, struct mmc_request *req);
-+	/* Submit one request to host in atomic context. */
-+	int	(*request_atomic)(struct mmc_host *host,
-+				  struct mmc_request *req);
- 
- 	/*
- 	 * Avoid calling the next three functions too often or in a "fast
+-	host->always_defer_done = true;
+-
+ 	ret = __sdhci_add_host(host);
+ 	if (ret)
+ 		goto err_cleanup_host;
 -- 
 1.9.1
 
