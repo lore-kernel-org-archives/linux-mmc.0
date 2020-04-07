@@ -2,152 +2,101 @@ Return-Path: <SRS0=BwSF=5X=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 85FFEC2BB1D
-	for <linux-mmc@archiver.kernel.org>; Tue,  7 Apr 2020 10:15:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 38D27C2BA2B
+	for <linux-mmc@archiver.kernel.org>; Tue,  7 Apr 2020 14:39:14 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 5F69120644
-	for <linux-mmc@archiver.kernel.org>; Tue,  7 Apr 2020 10:15:08 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0C9252072A
+	for <linux-mmc@archiver.kernel.org>; Tue,  7 Apr 2020 14:39:14 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="K0EkQvBs"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728093AbgDGKPI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 7 Apr 2020 06:15:08 -0400
-Received: from mga17.intel.com ([192.55.52.151]:39649 "EHLO mga17.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726716AbgDGKPH (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 7 Apr 2020 06:15:07 -0400
-IronPort-SDR: x3U3uClDZd93FhwryB6KDY7jMud9//Hmk9LqydcA/4XTGWwSXlhkPU4TgtiA8/JpJp95dG3MHi
- LY8Df6UHJxhQ==
-X-Amp-Result: SKIPPED(no attachment in message)
-X-Amp-File-Uploaded: False
-Received: from orsmga001.jf.intel.com ([10.7.209.18])
-  by fmsmga107.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 07 Apr 2020 03:15:07 -0700
-IronPort-SDR: CjaCR8V+9ymL4ndQ8pNhtruwZmYMTt8pnFR7kZksUs4VylPAdNCQ1luRcDIUlm+WxD5T6W/hQ8
- +XPgDau0QbMQ==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.72,353,1580803200"; 
-   d="scan'208";a="330148961"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.87]) ([10.237.72.87])
-  by orsmga001.jf.intel.com with ESMTP; 07 Apr 2020 03:15:04 -0700
-Subject: Re: [PATCH v4 1/3] mmc: host: Introduce the request_atomic() for the
- host
-To:     Baolin Wang <baolin.wang7@gmail.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Orson Zhai <orsonzhai@gmail.com>,
-        Chunyan Zhang <zhang.lyra@gmail.com>,
-        Arnd Bergmann <arnd@arndb.de>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        LKML <linux-kernel@vger.kernel.org>
-References: <cover.1585896945.git.baolin.wang7@gmail.com>
- <04c25ff9f9b17d41d734c498e4be61dee745bb30.1585896945.git.baolin.wang7@gmail.com>
- <5a55947b-e920-4515-49cf-163f6d539421@intel.com>
- <CADBw62qXyQCO5s+8Ytg2VCn5tEXS6dPQarQW1mHWJMJm+jUiXQ@mail.gmail.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <5cc006fe-e5f5-b9bf-bb01-c425d943783c@intel.com>
-Date:   Tue, 7 Apr 2020 13:14:17 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.5.0
+        id S1729064AbgDGOjN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 7 Apr 2020 10:39:13 -0400
+Received: from mail-lj1-f196.google.com ([209.85.208.196]:33834 "EHLO
+        mail-lj1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728994AbgDGOjN (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Apr 2020 10:39:13 -0400
+Received: by mail-lj1-f196.google.com with SMTP id p10so4033083ljn.1
+        for <linux-mmc@vger.kernel.org>; Tue, 07 Apr 2020 07:39:11 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=F6FPcP9wCF9lbemCjzdObes0liRQcDYLDA7JXgfzHU8=;
+        b=K0EkQvBseSNAZnXSPoBDXsWwFnCefw2469Vsn5MdviQD0EwQtHBK3xfI+p3BK+HRof
+         /rgo1R5rvrqDCe30Fr1ldN7LLUzrb4WkSH2/RcqB5razJutC7W7rgZjiZ2fNgzDMjZcV
+         a/SwNBlT4BiOfODTfu8heNHKPso0FPXvG0Q1Vj2B6Ob1+YFgjxURs67OKC4Yg3+6bRrn
+         rtvWgq/tqd0INi/+Mayooul/EMvhJw0Q2twn6JjEpmJvrvPHv90I3YVvrnIRHV2EpyfQ
+         OgZPntCnerpjt86rj1up2GBla2WAOETakfWvGZ0+gJyYPWNkul7I6AMxq1BnBdmsGY82
+         8yvA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=F6FPcP9wCF9lbemCjzdObes0liRQcDYLDA7JXgfzHU8=;
+        b=n6L6gf9BEOeDkwjWfgJ1lw1q8vREHvXQmzQawvHE8Rm5alSRzVA0hflspeffD+Bpbl
+         GCiQEVXaCgfL6VczoVQNarnYZE3YTKJ+g922SKXoJZkPukiX6YNXt7TNhe/xlRkpPmSY
+         zRSwg6DmhzfGtkxKKStLizFbiU4dxq5LBzPwMGV1PNw0YjloqTbG22Bv51YLHR8Y7L/O
+         0BQiuJOyXUz5drEiLhX4fYK96/P18pzePzR9WWsueVoJEoiaRMQwIlJl6nBugFBkaWww
+         0amvmhJuOwzRsGdBSomgKUAAAzczEtymYC7L8Ofe7ckGvpmEBZypV2NsGRBaYXK8Z0c0
+         z2xA==
+X-Gm-Message-State: AGi0PuadyYntqhSrATLzmQcJgt6IOyULIY1pisPlmslji3JnKx5PfGnu
+        i9qo8FNxC1dlfQw8pZL9HRBSaxzwDMo=
+X-Google-Smtp-Source: APiQypIUdq4uWT93PKLlqfFoVnrilfjjNkV3KFoFxdwzdlhs9bq/HjbfYr1gHCaARcG678Of2NMQhQ==
+X-Received: by 2002:a2e:9912:: with SMTP id v18mr1851732lji.199.1586270350418;
+        Tue, 07 Apr 2020 07:39:10 -0700 (PDT)
+Received: from localhost.localdomain (h-158-174-22-210.NA.cust.bahnhof.se. [158.174.22.210])
+        by smtp.gmail.com with ESMTPSA id v21sm14585017lji.81.2020.04.07.07.39.09
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 07 Apr 2020 07:39:09 -0700 (PDT)
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+To:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Ben Dooks <ben-linux@fluff.org>,
+        Krzysztof Kozlowski <krzk@kernel.org>,
+        Kukjin Kim <kgene@kernel.org>
+Subject: [PATCH] mmc: s3cmci: Drop redundant code in s3cmci_setup_data()
+Date:   Tue,  7 Apr 2020 16:39:03 +0200
+Message-Id: <20200407143903.22477-1-ulf.hansson@linaro.org>
+X-Mailer: git-send-email 2.20.1
 MIME-Version: 1.0
-In-Reply-To: <CADBw62qXyQCO5s+8Ytg2VCn5tEXS6dPQarQW1mHWJMJm+jUiXQ@mail.gmail.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 7/04/20 10:21 am, Baolin Wang wrote:
-> On Tue, Apr 7, 2020 at 2:38 PM Adrian Hunter <adrian.hunter@intel.com> wrote:
->>
->> On 3/04/20 10:05 am, Baolin Wang wrote:
->>> The SD host controller can process one request in the atomic context if
->>> the card is nonremovable, which means we can submit next request in the
->>> irq hard handler when using the MMC host software queue to reduce the
->>> latency. Thus this patch adds a new API request_atomic() for the host
->>> controller, as well as adding support for host software queue to submit
->>> a request by the new request_atomic() API.
->>>
->>> Moreover there is an unusual case that the card is busy when trying to
->>> send a command, and we can not polling the card status in interrupt
->>> context by using request_atomic() to dispatch requests. Thus we should
->>> queue a work to try again in the non-atomic context in case the host
->>> releases the busy signal later.
->>>
->>> Suggested-by: Adrian Hunter <adrian.hunter@intel.com>
->>> Signed-off-by: Baolin Wang <baolin.wang7@gmail.com>
->>
->>
->> One minor point below, otherwise:
->>
->> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
->>
->>> ---
->>>  drivers/mmc/host/mmc_hsq.c | 29 ++++++++++++++++++++++++++++-
->>>  drivers/mmc/host/mmc_hsq.h |  1 +
->>>  include/linux/mmc/host.h   |  3 +++
->>>  3 files changed, 32 insertions(+), 1 deletion(-)
->>>
->>> diff --git a/drivers/mmc/host/mmc_hsq.c b/drivers/mmc/host/mmc_hsq.c
->>> index b90b2c9..a57f802 100644
->>> --- a/drivers/mmc/host/mmc_hsq.c
->>> +++ b/drivers/mmc/host/mmc_hsq.c
->>> @@ -16,11 +16,20 @@
->>>  #define HSQ_NUM_SLOTS        64
->>>  #define HSQ_INVALID_TAG      HSQ_NUM_SLOTS
->>>
->>> +static void mmc_hsq_retry_handler(struct work_struct *work)
->>> +{
->>> +     struct mmc_hsq *hsq = container_of(work, struct mmc_hsq, retry_work);
->>> +     struct mmc_host *mmc = hsq->mmc;
->>> +
->>> +     mmc->ops->request(mmc, hsq->mrq);
->>> +}
->>> +
->>>  static void mmc_hsq_pump_requests(struct mmc_hsq *hsq)
->>>  {
->>>       struct mmc_host *mmc = hsq->mmc;
->>>       struct hsq_slot *slot;
->>>       unsigned long flags;
->>> +     int ret = 0;
->>>
->>>       spin_lock_irqsave(&hsq->lock, flags);
->>>
->>> @@ -42,7 +51,24 @@ static void mmc_hsq_pump_requests(struct mmc_hsq *hsq)
->>>
->>>       spin_unlock_irqrestore(&hsq->lock, flags);
->>>
->>> -     mmc->ops->request(mmc, hsq->mrq);
->>> +     if (mmc->ops->request_atomic)
->>> +             ret = mmc->ops->request_atomic(mmc, hsq->mrq);
->>> +     else
->>> +             mmc->ops->request(mmc, hsq->mrq);
->>> +
->>> +     /*
->>> +      * If returning BUSY from request_atomic(), which means the card
->>> +      * may be busy now, and we should change to non-atomic context to
->>> +      * try again for this unusual case, to avoid time-consuming operations
->>> +      * in the atomic context.
->>> +      *
->>> +      * Note: we just give a warning for other error cases, since the host
->>> +      * driver will handle them.
->>> +      */
->>> +     if (ret == -EBUSY)
->>> +             schedule_work(&hsq->retry_work);
->>> +     else
->>> +             WARN_ON_ONCE(ret && ret != -EBUSY);
->>
->> 'ret != -EBUSY' is redundant because it is always true in the 'else' clause.
-> 
-> Ah, Yes, thanks for pointing this out and I will fix it ine next version.
-> 
-> By the way, could you help to review patch 2 and 3 in this patch set? Thanks.
-> 
+The in-parameter struct mmc_data *data is never NULL, because the caller
+always provides a valid pointer. Hence drop the corresponding redundant
+code.
 
-I'd like to handle the inhibit wait differently.  I will make some patches
-for that and send them out.
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+---
+ drivers/mmc/host/s3cmci.c | 7 -------
+ 1 file changed, 7 deletions(-)
+
+diff --git a/drivers/mmc/host/s3cmci.c b/drivers/mmc/host/s3cmci.c
+index 1e616ae56b13..444b2769ae2c 100644
+--- a/drivers/mmc/host/s3cmci.c
++++ b/drivers/mmc/host/s3cmci.c
+@@ -958,13 +958,6 @@ static int s3cmci_setup_data(struct s3cmci_host *host, struct mmc_data *data)
+ {
+ 	u32 dcon, imsk, stoptries = 3;
+ 
+-	/* write DCON register */
+-
+-	if (!data) {
+-		writel(0, host->base + S3C2410_SDIDCON);
+-		return 0;
+-	}
+-
+ 	if ((data->blksz & 3) != 0) {
+ 		/* We cannot deal with unaligned blocks with more than
+ 		 * one block being transferred. */
+-- 
+2.20.1
 
