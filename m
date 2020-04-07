@@ -2,101 +2,96 @@ Return-Path: <SRS0=BwSF=5X=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 38D27C2BA2B
-	for <linux-mmc@archiver.kernel.org>; Tue,  7 Apr 2020 14:39:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 371CBC2BB55
+	for <linux-mmc@archiver.kernel.org>; Tue,  7 Apr 2020 15:06:06 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 0C9252072A
-	for <linux-mmc@archiver.kernel.org>; Tue,  7 Apr 2020 14:39:14 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="K0EkQvBs"
+	by mail.kernel.org (Postfix) with ESMTP id 0D3DD2072A
+	for <linux-mmc@archiver.kernel.org>; Tue,  7 Apr 2020 15:06:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729064AbgDGOjN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 7 Apr 2020 10:39:13 -0400
-Received: from mail-lj1-f196.google.com ([209.85.208.196]:33834 "EHLO
-        mail-lj1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728994AbgDGOjN (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Apr 2020 10:39:13 -0400
-Received: by mail-lj1-f196.google.com with SMTP id p10so4033083ljn.1
-        for <linux-mmc@vger.kernel.org>; Tue, 07 Apr 2020 07:39:11 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=F6FPcP9wCF9lbemCjzdObes0liRQcDYLDA7JXgfzHU8=;
-        b=K0EkQvBseSNAZnXSPoBDXsWwFnCefw2469Vsn5MdviQD0EwQtHBK3xfI+p3BK+HRof
-         /rgo1R5rvrqDCe30Fr1ldN7LLUzrb4WkSH2/RcqB5razJutC7W7rgZjiZ2fNgzDMjZcV
-         a/SwNBlT4BiOfODTfu8heNHKPso0FPXvG0Q1Vj2B6Ob1+YFgjxURs67OKC4Yg3+6bRrn
-         rtvWgq/tqd0INi/+Mayooul/EMvhJw0Q2twn6JjEpmJvrvPHv90I3YVvrnIRHV2EpyfQ
-         OgZPntCnerpjt86rj1up2GBla2WAOETakfWvGZ0+gJyYPWNkul7I6AMxq1BnBdmsGY82
-         8yvA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=F6FPcP9wCF9lbemCjzdObes0liRQcDYLDA7JXgfzHU8=;
-        b=n6L6gf9BEOeDkwjWfgJ1lw1q8vREHvXQmzQawvHE8Rm5alSRzVA0hflspeffD+Bpbl
-         GCiQEVXaCgfL6VczoVQNarnYZE3YTKJ+g922SKXoJZkPukiX6YNXt7TNhe/xlRkpPmSY
-         zRSwg6DmhzfGtkxKKStLizFbiU4dxq5LBzPwMGV1PNw0YjloqTbG22Bv51YLHR8Y7L/O
-         0BQiuJOyXUz5drEiLhX4fYK96/P18pzePzR9WWsueVoJEoiaRMQwIlJl6nBugFBkaWww
-         0amvmhJuOwzRsGdBSomgKUAAAzczEtymYC7L8Ofe7ckGvpmEBZypV2NsGRBaYXK8Z0c0
-         z2xA==
-X-Gm-Message-State: AGi0PuadyYntqhSrATLzmQcJgt6IOyULIY1pisPlmslji3JnKx5PfGnu
-        i9qo8FNxC1dlfQw8pZL9HRBSaxzwDMo=
-X-Google-Smtp-Source: APiQypIUdq4uWT93PKLlqfFoVnrilfjjNkV3KFoFxdwzdlhs9bq/HjbfYr1gHCaARcG678Of2NMQhQ==
-X-Received: by 2002:a2e:9912:: with SMTP id v18mr1851732lji.199.1586270350418;
-        Tue, 07 Apr 2020 07:39:10 -0700 (PDT)
-Received: from localhost.localdomain (h-158-174-22-210.NA.cust.bahnhof.se. [158.174.22.210])
-        by smtp.gmail.com with ESMTPSA id v21sm14585017lji.81.2020.04.07.07.39.09
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 07 Apr 2020 07:39:09 -0700 (PDT)
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-To:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Ben Dooks <ben-linux@fluff.org>,
-        Krzysztof Kozlowski <krzk@kernel.org>,
-        Kukjin Kim <kgene@kernel.org>
-Subject: [PATCH] mmc: s3cmci: Drop redundant code in s3cmci_setup_data()
-Date:   Tue,  7 Apr 2020 16:39:03 +0200
-Message-Id: <20200407143903.22477-1-ulf.hansson@linaro.org>
-X-Mailer: git-send-email 2.20.1
+        id S1729196AbgDGPGF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 7 Apr 2020 11:06:05 -0400
+Received: from sauhun.de ([88.99.104.3]:54070 "EHLO pokefinder.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1728992AbgDGPGF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 7 Apr 2020 11:06:05 -0400
+Received: from localhost (p54B3320F.dip0.t-ipconnect.de [84.179.50.15])
+        by pokefinder.org (Postfix) with ESMTPSA id D07F92C07CD;
+        Tue,  7 Apr 2020 17:06:03 +0200 (CEST)
+Date:   Tue, 7 Apr 2020 17:06:03 +0200
+From:   Wolfram Sang <wsa@the-dreams.de>
+To:     Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Cc:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        "linux-renesas-soc@vger.kernel.org" 
+        <linux-renesas-soc@vger.kernel.org>,
+        Niklas =?utf-8?Q?S=C3=B6derlund?= <niklas.soderlund@ragnatech.se>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Subject: Re: [PATCH RFT 1/3] mmc: renesas_sdhi: refactor calculation of best
+ TAP
+Message-ID: <20200407150603.GB4308@ninjato>
+References: <20200306093159.6155-1-wsa+renesas@sang-engineering.com>
+ <20200306093159.6155-2-wsa+renesas@sang-engineering.com>
+ <TYAPR01MB4544AD566F267EB89F479C3CD8CF0@TYAPR01MB4544.jpnprd01.prod.outlook.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="WhfpMioaduB5tiZL"
+Content-Disposition: inline
+In-Reply-To: <TYAPR01MB4544AD566F267EB89F479C3CD8CF0@TYAPR01MB4544.jpnprd01.prod.outlook.com>
+User-Agent: Mutt/1.10.1 (2018-07-13)
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The in-parameter struct mmc_data *data is never NULL, because the caller
-always provides a valid pointer. Hence drop the corresponding redundant
-code.
 
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
----
- drivers/mmc/host/s3cmci.c | 7 -------
- 1 file changed, 7 deletions(-)
+--WhfpMioaduB5tiZL
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-diff --git a/drivers/mmc/host/s3cmci.c b/drivers/mmc/host/s3cmci.c
-index 1e616ae56b13..444b2769ae2c 100644
---- a/drivers/mmc/host/s3cmci.c
-+++ b/drivers/mmc/host/s3cmci.c
-@@ -958,13 +958,6 @@ static int s3cmci_setup_data(struct s3cmci_host *host, struct mmc_data *data)
- {
- 	u32 dcon, imsk, stoptries = 3;
- 
--	/* write DCON register */
--
--	if (!data) {
--		writel(0, host->base + S3C2410_SDIDCON);
--		return 0;
--	}
--
- 	if ((data->blksz & 3) != 0) {
- 		/* We cannot deal with unaligned blocks with more than
- 		 * one block being transferred. */
--- 
-2.20.1
+Hi Shimoda-san,
 
+> +		if (re - 1 - rs + 1 > tap_cnt) {	// "if (re - rs > tap_cnt)" is more better?
+
+Oops, looks really like an off-by-one error on my side :( Yes, I think
+'re - rs' is good here...
+
+> +			tap_end = re - 1;
+
+... plain 'tap_end = re;' here ...
+
+> +			tap_start = rs;
+> +			tap_cnt = tap_end - tap_start + 1;
+
+... and drop the '+ 1' here.
+
+I will double check, and resend soon.
+
+Thank you very much!
+
+   Wolfram
+
+
+--WhfpMioaduB5tiZL
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAl6MltcACgkQFA3kzBSg
+KbYDYA/8DjU47e7yKn2LDzde0lmuchoF4tyG3S69q6O1MuuLJwBCDS39Jvg2WQNc
+GNeXZwZYwgdee3N8FJFftJvwS8GfYA9jrvpgd+5ZRCQPH4RZo3ymOKUVC5H8ENmb
+6P8cD42LFdQCP7SQy6hCHPNwvJLhNomrwFf45++j0PMH+/PPvSNi4uVixacxmJdY
+RVst+ibpq2/EWXNAFVtDEsVKWz5GtiL68sX16VBgfaiKpLcLw03wMloTFJF7jZx4
+bJraeSlJWKkKLlKjc5XKJp3hRhkrdRHDsUTR8sAZCxAxhmfJrrJeX7D3ay/QRpKo
+QQ9ArM7SRS7o7/UgcKChPTIz8B7OUv2OoKKZRPT3mooXJMyrrpOajaS3mZvaO3Jh
+uQIs1Dd8j1YE2VVY8HBD1mm9DDvGxABhxbliECf+SBzCzUwb8/1+7WG4TnZRIORp
+jI0wDuEEHgIug61mk9AHCFziilPu30KDI8APvfR7+VeKluRfguW5GmAY1/WW2zQz
+tkteKCUapV8M1e0Cvv5UakJmvHBGOBUvPhegG0HXaOKJiRq3xTE/NfDo28yDa/vt
+AORRxeC2RbroMqfrH4N4dwIr6Yc8LZyhuDm4X/jubPSQdiRrMgL0uFmpNz7zpevb
+Tou9wFPjWUS9TfUa2aq7kIObhPNyC1h6OOrkY1iFS7c+XCrIBhQ=
+=Bg6V
+-----END PGP SIGNATURE-----
+
+--WhfpMioaduB5tiZL--
