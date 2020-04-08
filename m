@@ -2,36 +2,34 @@ Return-Path: <SRS0=F8Hu=5Y=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4F008C2BA80
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2F553C2BA1A
 	for <linux-mmc@archiver.kernel.org>; Wed,  8 Apr 2020 09:46:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 302CD20771
+	by mail.kernel.org (Postfix) with ESMTP id 084232082D
 	for <linux-mmc@archiver.kernel.org>; Wed,  8 Apr 2020 09:46:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727918AbgDHJqw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        id S1727917AbgDHJqw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
         Wed, 8 Apr 2020 05:46:52 -0400
-Received: from sauhun.de ([88.99.104.3]:39640 "EHLO pokefinder.org"
+Received: from sauhun.de ([88.99.104.3]:39634 "EHLO pokefinder.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726726AbgDHJqw (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        id S1726345AbgDHJqw (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
         Wed, 8 Apr 2020 05:46:52 -0400
 Received: from localhost (p54B334FE.dip0.t-ipconnect.de [84.179.52.254])
-        by pokefinder.org (Postfix) with ESMTPSA id 6382B2C1FD6;
-        Wed,  8 Apr 2020 11:46:50 +0200 (CEST)
+        by pokefinder.org (Postfix) with ESMTPSA id E6CED2C1F39;
+        Wed,  8 Apr 2020 11:46:49 +0200 (CEST)
 From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
 To:     linux-mmc@vger.kernel.org
 Cc:     linux-renesas-soc@vger.kernel.org,
         Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
         Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: [PATCH v2 1/3] mmc: renesas_sdhi: refactor calculation of best TAP
-Date:   Wed,  8 Apr 2020 11:46:36 +0200
-Message-Id: <20200408094638.10375-2-wsa+renesas@sang-engineering.com>
+Subject: [PATCH v2 0/3] mmc: renesas_sdhi: improve TAP selection if all TAPs are good
+Date:   Wed,  8 Apr 2020 11:46:35 +0200
+Message-Id: <20200408094638.10375-1-wsa+renesas@sang-engineering.com>
 X-Mailer: git-send-email 2.20.1
-In-Reply-To: <20200408094638.10375-1-wsa+renesas@sang-engineering.com>
-References: <20200408094638.10375-1-wsa+renesas@sang-engineering.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Sender: linux-mmc-owner@vger.kernel.org
@@ -39,87 +37,46 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-To select the best TAP, we need to find the longest stream of set bits
-in a bit field. There is now a helper function for bitmaps which
-iterates over all region of set bits. Using it makes the code much more
-concise and easier to understand. Double so, because we need to handle
-two bitmaps in the near future. Remove a superfluous comment while here.
+SDHI (with SCC) has a mechanism to select an optimal TAP even if all
+were considered good during the tuning process. This series implements
+support for it. Before that, some refactoring of 'best TAP selection' is
+done to avoid code duplication and get more understandable code.
 
-Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
----
+This work is based on BSP patches by Masaharu Hayakawa and Takeshi
+Saito. It is built on top of mmc/next. For convenience, a branch is
+here:
 
-Change since RFT/v1:
-* fix off by one error spotted by Shimoda-san
+git://git.kernel.org/pub/scm/linux/kernel/git/wsa/linux.git renesas/sdhi/new_manual_calib
 
- drivers/mmc/host/renesas_sdhi_core.c | 36 +++++++---------------------
- 1 file changed, 8 insertions(+), 28 deletions(-)
+It has been tested on Renesas Salvator-XS boards (R-Car M3-N and R-Car
+H3 ES2.0). There were no regressions detected. HS400 could be tuned the
+same way, and checksumming large files still works.
 
-diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-index df826661366f..f5d174d86117 100644
---- a/drivers/mmc/host/renesas_sdhi_core.c
-+++ b/drivers/mmc/host/renesas_sdhi_core.c
-@@ -427,15 +427,10 @@ static int renesas_sdhi_prepare_hs400_tuning(struct mmc_host *mmc, struct mmc_io
- static int renesas_sdhi_select_tuning(struct tmio_mmc_host *host)
- {
- 	struct renesas_sdhi *priv = host_to_priv(host);
--	unsigned long tap_cnt;  /* counter of tuning success */
--	unsigned long tap_start;/* start position of tuning success */
--	unsigned long tap_end;  /* end position of tuning success */
--	unsigned long ntap;     /* temporary counter of tuning success */
--	unsigned long i;
-+	unsigned int tap_start = 0, tap_end = 0, tap_cnt = 0, rs, re, i;
-+	unsigned int taps_size = priv->tap_num * 2;
- 
- 	priv->doing_tune = false;
--
--	/* Clear SCC_RVSREQ */
- 	sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_RVSREQ, 0);
- 
- 	/*
-@@ -443,7 +438,7 @@ static int renesas_sdhi_select_tuning(struct tmio_mmc_host *host)
- 	 * result requiring the tap to be good in both runs before
- 	 * considering it for tuning selection.
- 	 */
--	for (i = 0; i < priv->tap_num * 2; i++) {
-+	for (i = 0; i < taps_size; i++) {
- 		int offset = priv->tap_num * (i < priv->tap_num ? 1 : -1);
- 
- 		if (!test_bit(i, priv->taps))
-@@ -455,29 +450,14 @@ static int renesas_sdhi_select_tuning(struct tmio_mmc_host *host)
- 	 * is more than SH_MOBILE_SDHI_MAX_TAP probes long then use the
- 	 * center index as the tap.
- 	 */
--	tap_cnt = 0;
--	ntap = 0;
--	tap_start = 0;
--	tap_end = 0;
--	for (i = 0; i < priv->tap_num * 2; i++) {
--		if (test_bit(i, priv->taps)) {
--			ntap++;
--		} else {
--			if (ntap > tap_cnt) {
--				tap_start = i - ntap;
--				tap_end = i - 1;
--				tap_cnt = ntap;
--			}
--			ntap = 0;
-+	bitmap_for_each_set_region(priv->taps, rs, re, 0, taps_size) {
-+		if (re - rs > tap_cnt) {
-+			tap_end = re;
-+			tap_start = rs;
-+			tap_cnt = tap_end - tap_start;
- 		}
- 	}
- 
--	if (ntap > tap_cnt) {
--		tap_start = i - ntap;
--		tap_end = i - 1;
--		tap_cnt = ntap;
--	}
--
- 	if (tap_cnt >= SH_MOBILE_SDHI_MAX_TAP)
- 		priv->tap_set = (tap_start + tap_end) / 2 % priv->tap_num;
- 	else
+And while this series is useful by itself, it is also the last
+prerequisite to implement some 'bad tap avoidance' on top which is what
+we are originally aiming for.
+
+Note about backporting: The super useful iterator
+bitmap_for_each_set_region() is only available since v5.6. If you want
+that before, you need to backport the needed bits of e837dfde15a4
+("bitmap: genericize percpu bitmap region iterators"), too.
+
+Thank you to Shimoda-san for his valuable input since the RFT version
+of this patchset (see patch 1 for details)!
+
+Kind regards,
+
+   Wolfram
+
+Wolfram Sang (3):
+  mmc: renesas_sdhi: refactor calculation of best TAP
+  mmc: renesas_sdhi: clarify handling of selecting TAPs
+  mmc: renesas_sdhi: improve TAP selection if all TAPs are good
+
+ drivers/mmc/host/renesas_sdhi.h      |  2 +
+ drivers/mmc/host/renesas_sdhi_core.c | 64 ++++++++++++++--------------
+ 2 files changed, 34 insertions(+), 32 deletions(-)
+
 -- 
 2.20.1
 
