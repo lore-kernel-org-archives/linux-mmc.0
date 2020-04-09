@@ -2,123 +2,81 @@ Return-Path: <SRS0=EyEY=5Z=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.7 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.6 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C6FB1C2BB54
-	for <linux-mmc@archiver.kernel.org>; Thu,  9 Apr 2020 09:04:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E27F0C2BA2B
+	for <linux-mmc@archiver.kernel.org>; Thu,  9 Apr 2020 12:10:36 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 9DA5C20CC7
-	for <linux-mmc@archiver.kernel.org>; Thu,  9 Apr 2020 09:04:55 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=renesasgroup.onmicrosoft.com header.i=@renesasgroup.onmicrosoft.com header.b="agtKqCau"
+	by mail.kernel.org (Postfix) with ESMTP id AF5A520771
+	for <linux-mmc@archiver.kernel.org>; Thu,  9 Apr 2020 12:10:36 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1586434236;
+	bh=Rcql0G1zaTLlaXT50Qt+WXX+iAv8vAulksVHyNn6ZWE=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
+	b=InDyqgWztXg2QJwjCDwD1JgK1SeVONdh9zIWG5r7WgDtx7zhxU8IdQkIMv2BMFZL3
+	 9naD9JGv6MxCH73V4/fS0BEFozGdwjlTvzWOwCjHi4ayIoaT3Uq3JL5O0K7jDwBDWg
+	 fsMwkcVrYeWETHLjiYz0+/wRWzRhXJQ4QFrrFxXM=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726470AbgDIJEy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 9 Apr 2020 05:04:54 -0400
-Received: from mail-eopbgr1410110.outbound.protection.outlook.com ([40.107.141.110]:22867
-        "EHLO JPN01-OS2-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1726082AbgDIJEy (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 9 Apr 2020 05:04:54 -0400
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=HdzesV0x0w3IkVlWYF2JVebcMysWBvQIYiWUITYz8P6CKMlktTa/xTLQRqKlOoCFN5HVnkofuuGkdd0/ez8/IDSqru+Do5OPop/YYbMWXBbBlNg7sEJuxeYssCPd4a+4Bio3AMahoDmy+ZQABmblV8se0fkvwA1n9mzO8xLhOR1U3JeJfYzxFLhMbtNQQMKy/X1V0UB11/Yqn0SEzbHKhDhDVMZIJy62ZrHl0b3f7OlBn7OqPkcNqINIVrOMigWPR6mJaqzRU1JVGaTAzkscakZDo1lSj7aDGxECMkzeSqqh0tF2BiSqhVEPclGwGkE0cjH542xmH+BdiZsYfFTzjQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=ww832P34coEgXJgOdpSJ5VxLc9/oiD7CO0Y+y1E/j7E=;
- b=g4pbY+Fd9JDHEi7Qxu5vFyORtp8v3u+0gcj623C954w3HaBYaTd6GL7yl/dzxsnTVHPyz5Dve3TaQsfZ7QXQlfe+sbu5xOwDULe9lzYoZv/AXFf6iW3apUt+NkvJM7o14jhzGlQ9VzjARwzU0aM0XdMdYEeQm53pgBHfiwH9J0rsA4uYHTcKaOYo7Y+RPvbVR+9G7z/jT+cIsFAz6pHHyYnIjhINZayCX81OMacXcZUHoEhw4IYLMYVa9RY4fWCqlpFUUPGkH7jguxzuGgYJ/lQXwGmWyxpdfCAlTytXuCYin3Bxzc/b34sYXolbZcFNMOU8Xhm6D0L3R401YV394Q==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=renesas.com; dmarc=pass action=none header.from=renesas.com;
- dkim=pass header.d=renesas.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=renesasgroup.onmicrosoft.com; s=selector2-renesasgroup-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=ww832P34coEgXJgOdpSJ5VxLc9/oiD7CO0Y+y1E/j7E=;
- b=agtKqCauSY8d8veW9eRkQ63pR37KrucDWplJJ0Y09gfmd2u9kYQ2BOyA8WCYqSTSE5fd++/e0yAvCfdYl/3TMlw1nAMv8C51kgv28jczSuHloMxi4cv39wMImaeO2zAnLzg5LYPBAPz+6x77QXpdzWQoB3zHqw6GSSBnEpKQK80=
-Received: from TYAPR01MB4544.jpnprd01.prod.outlook.com (20.179.175.203) by
- TYAPR01MB4877.jpnprd01.prod.outlook.com (20.179.186.139) with Microsoft SMTP
- Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.20.2878.17; Thu, 9 Apr 2020 09:04:51 +0000
-Received: from TYAPR01MB4544.jpnprd01.prod.outlook.com
- ([fe80::ed7f:1268:55a9:fc06]) by TYAPR01MB4544.jpnprd01.prod.outlook.com
- ([fe80::ed7f:1268:55a9:fc06%4]) with mapi id 15.20.2900.015; Thu, 9 Apr 2020
- 09:04:51 +0000
-From:   Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-To:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-CC:     "linux-renesas-soc@vger.kernel.org" 
-        <linux-renesas-soc@vger.kernel.org>,
-        Masaharu Hayakawa <masaharu.hayakawa.ry@renesas.com>,
-        Takeshi Saito <takeshi.saito.xv@renesas.com>
-Subject: RE: [PATCH v2 3/3] mmc: renesas_sdhi: improve TAP selection if all
- TAPs are good
-Thread-Topic: [PATCH v2 3/3] mmc: renesas_sdhi: improve TAP selection if all
- TAPs are good
-Thread-Index: AQHWDYqjFNfM/x6O3kC+JTPWwOnZJahwgFNw
-Date:   Thu, 9 Apr 2020 09:04:50 +0000
-Message-ID: <TYAPR01MB4544D64D451700F97DAAF215D8C10@TYAPR01MB4544.jpnprd01.prod.outlook.com>
-References: <20200408094638.10375-1-wsa+renesas@sang-engineering.com>
- <20200408094638.10375-4-wsa+renesas@sang-engineering.com>
-In-Reply-To: <20200408094638.10375-4-wsa+renesas@sang-engineering.com>
-Accept-Language: ja-JP, en-US
-Content-Language: ja-JP
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-authentication-results: spf=none (sender IP is )
- smtp.mailfrom=yoshihiro.shimoda.uh@renesas.com; 
-x-originating-ip: [124.210.22.195]
-x-ms-publictraffictype: Email
-x-ms-office365-filtering-ht: Tenant
-x-ms-office365-filtering-correlation-id: a274e10a-a3fa-4d42-fa3a-08d7dc650fd6
-x-ms-traffictypediagnostic: TYAPR01MB4877:|TYAPR01MB4877:
-x-ms-exchange-transport-forked: True
-x-microsoft-antispam-prvs: <TYAPR01MB4877916901F449E12C06D6B7D8C10@TYAPR01MB4877.jpnprd01.prod.outlook.com>
-x-ms-oob-tlc-oobclassifiers: OLM:8273;
-x-forefront-prvs: 0368E78B5B
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TYAPR01MB4544.jpnprd01.prod.outlook.com;PTR:;CAT:NONE;SFTY:;SFS:(10019020)(4636009)(376002)(39860400002)(396003)(366004)(136003)(346002)(81156014)(2906002)(110136005)(54906003)(478600001)(8676002)(26005)(5660300002)(55016002)(9686003)(66446008)(7696005)(316002)(86362001)(66946007)(52536014)(66476007)(64756008)(8936002)(81166007)(4326008)(55236004)(4744005)(66556008)(6506007)(186003)(76116006)(33656002)(107886003)(71200400001);DIR:OUT;SFP:1102;
-received-spf: None (protection.outlook.com: renesas.com does not designate
- permitted sender hosts)
-x-ms-exchange-senderadcheck: 1
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: BYwqPqKF790j63jXwDF5A7sQbuMgJt4J31v4SHpkDAwbMcuwUOFfSZCGemgYt/SH2FEZbOwUrWENF4i7zIu9xDOeVCNAEt0ztPCcN/guhPbNldppIb28iXHfaJCfuXsCdioGA4E6wZOIe/R5369l3TqoOvcnd5OMTHddkLCV0TImOIa3VKzTPG0T6I14g633QaH9mXBvlmCsiBjpJafL+1I84JWxhPkbA9EEMFE8JMwmtc5hv49ZQQEZKsYgjyb+Jqteg58qN/gVX/+FUnrsvhgZ1Ir4tSelWS87FDZJg7etev+RR+i/Xujn4ADDqOhtenB6aByXySrlt9UdXmZ5pcv1R16ky1yz4I/GcJG4pOrVn9l8p1JL+MFmiJKxjQegJZQ7VtF2sK/EnH6JTqgkp814DGXiqtWJG6nlL2aM9y6LnEyV4feWUnXqPtXRUzbx
-x-ms-exchange-antispam-messagedata: JIpc8S8O7F/p6nLskVrrAcjbmJdaoLQXCyc8kdVF52nTVAUjZEqIUCmzyxcFbpH+3a5EX9Ir9YuK4/eckrfSHupJ9vuk0pP60KzjS/kfLZz3mzp7pD5yx8p9WatORQyshHCZqyFw1GmABQMxi9FTvg==
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+        id S1726538AbgDIMKf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 9 Apr 2020 08:10:35 -0400
+Received: from mail-ed1-f66.google.com ([209.85.208.66]:44403 "EHLO
+        mail-ed1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725971AbgDIMKf (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Apr 2020 08:10:35 -0400
+Received: by mail-ed1-f66.google.com with SMTP id cb27so1650274edb.11
+        for <linux-mmc@vger.kernel.org>; Thu, 09 Apr 2020 05:10:35 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to:user-agent;
+        bh=QcTbv4R3SMIJhOkQGuv2vupR8PXJgTGjWpmKYkmEOZg=;
+        b=XuFJdW47gxCZP+FLDU0jkYrakspvsHHm5cVC3qxvgPjy19PCMdB/+C4e9iG9TAce+/
+         6HaMD/fUEpTVvtW7269R7TxoYE7Y9ShH0hDxlPiaQFgQ1jGZD1PKZhlnrCCqrIAXf+LG
+         vRqkPajFMzNp6t92oMSPEatgD4E5LC9ePNYDixk3PP8/H2YHhm9/Fcnd57628Uj2iA7p
+         GF1Qadj8tx8VBK/B/eS2H0ckc1+/WthQPU36FK06lfK4ea6JZPJHCcQLJFN0uwgFdvoz
+         3PF9WXDI0w+5u/+AOfM4lTWLLAj9Uc6Merv3XdECm2jrEWJ6BI2ytYbT2YnPTOhq6P9+
+         g4SA==
+X-Gm-Message-State: AGi0PuaD9M6uhCnPIX3GEMncjEFe+ovsBCWcyPsuq0xVkb0a8TVSCY/k
+        Z3eSrwzEC/iFlFWF9sTOYK0=
+X-Google-Smtp-Source: APiQypLflLHY8KxVKbY32LMbCrMQxxkMw4tn1fzViDL2PxMKlTZZ1w2pVHO8Kdjg+plFuaik+Nhydw==
+X-Received: by 2002:a17:907:b17:: with SMTP id h23mr11009718ejl.40.1586434234405;
+        Thu, 09 Apr 2020 05:10:34 -0700 (PDT)
+Received: from kozik-lap ([194.230.155.125])
+        by smtp.googlemail.com with ESMTPSA id o33sm3079332eda.30.2020.04.09.05.10.33
+        (version=TLS1_2 cipher=ECDHE-ECDSA-CHACHA20-POLY1305 bits=256/256);
+        Thu, 09 Apr 2020 05:10:34 -0700 (PDT)
+Date:   Thu, 9 Apr 2020 14:10:32 +0200
+From:   Krzysztof Kozlowski <krzk@kernel.org>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     linux-mmc@vger.kernel.org, Ben Dooks <ben-linux@fluff.org>,
+        Kukjin Kim <kgene@kernel.org>
+Subject: Re: [PATCH] mmc: s3cmci: Drop redundant code in s3cmci_setup_data()
+Message-ID: <20200409121032.GA640@kozik-lap>
+References: <20200407143903.22477-1-ulf.hansson@linaro.org>
 MIME-Version: 1.0
-X-OriginatorOrg: renesas.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: a274e10a-a3fa-4d42-fa3a-08d7dc650fd6
-X-MS-Exchange-CrossTenant-originalarrivaltime: 09 Apr 2020 09:04:50.9880
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 53d82571-da19-47e4-9cb4-625a166a4a2a
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: t+ZIvVRVJRryL++EGkho8h/+hR0OErpIOLgh+EGrQDdg6gWA+b6OG4HB09m90UQN5haOZffqNp5tQBedI07MAvGdD6tJoWOnC2imrE6wcW3ZHaim+/Mbd8z9CLJji/93
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: TYAPR01MB4877
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <20200407143903.22477-1-ulf.hansson@linaro.org>
+User-Agent: Mutt/1.9.4 (2018-02-28)
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Wolfram-san,
+On Tue, Apr 07, 2020 at 04:39:03PM +0200, Ulf Hansson wrote:
+> The in-parameter struct mmc_data *data is never NULL, because the caller
+> always provides a valid pointer. Hence drop the corresponding redundant
+> code.
+> 
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> ---
+>  drivers/mmc/host/s3cmci.c | 7 -------
+>  1 file changed, 7 deletions(-)
 
-> From: Wolfram Sang, Sent: Wednesday, April 8, 2020 6:47 PM
->=20
-> When tuning HS400, if all TAPS are good, we can utilize the SMPCMP
-> register to select the optimal TAP. For that, we populate a second
-> bitmap with SMPCMP results and query it in case the regular bitmap is
-> full (=3D all good).
->=20
-> Signed-off-by: Masaharu Hayakawa <masaharu.hayakawa.ry@renesas.com>
-> Signed-off-by: Takeshi Saito <takeshi.saito.xv@renesas.com>
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-> Reviewed-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-
-Thank you for the patch! I tested on the my environment (R-Car H3)
-and then using this SMPCMP result works correctly. So,
-
-Tested-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Acked-by: Krzysztof Kozlowski <krzk@kernel.org>
 
 Best regards,
-Yoshihiro Shimoda
+Krzysztof
 
