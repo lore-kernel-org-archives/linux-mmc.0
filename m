@@ -1,107 +1,119 @@
-Return-Path: <SRS0=F8Hu=5Y=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=EyEY=5Z=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.7 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
+	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 71396C2D0EA
-	for <linux-mmc@archiver.kernel.org>; Wed,  8 Apr 2020 14:43:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 76976C2BB54
+	for <linux-mmc@archiver.kernel.org>; Thu,  9 Apr 2020 08:59:02 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 330A320692
-	for <linux-mmc@archiver.kernel.org>; Wed,  8 Apr 2020 14:43:10 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 463A520730
+	for <linux-mmc@archiver.kernel.org>; Thu,  9 Apr 2020 08:59:02 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="KTj0IrJ2"
+	dkim=pass (1024-bit key) header.d=renesasgroup.onmicrosoft.com header.i=@renesasgroup.onmicrosoft.com header.b="ena2zM79"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728750AbgDHOnJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 8 Apr 2020 10:43:09 -0400
-Received: from mail-vs1-f53.google.com ([209.85.217.53]:36038 "EHLO
-        mail-vs1-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728028AbgDHOnJ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Apr 2020 10:43:09 -0400
-Received: by mail-vs1-f53.google.com with SMTP id 184so4806167vsu.3
-        for <linux-mmc@vger.kernel.org>; Wed, 08 Apr 2020 07:43:08 -0700 (PDT)
+        id S1726695AbgDII7B (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 9 Apr 2020 04:59:01 -0400
+Received: from mail-eopbgr1400102.outbound.protection.outlook.com ([40.107.140.102]:5920
+        "EHLO JPN01-TY1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1726707AbgDII7A (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 9 Apr 2020 04:59:00 -0400
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=diLysHeWkTV7Cneu6zUb0kHCwUQx73RtE8enwLIbPfO3XQW+7kf8WM/T/TCHikGtggWDuz65j3KKW74bZ1WyDVAH2t+dwYQEIlictU8OBzlvsZ6eVR+aJhFW2P9uCV2fjhxpcDEZ/toD12/bT8Aq7NF62BuK8mr1fDja6oFf9JPmDK6quhS4g10LkiD/IjjQax1xpqOsdJk+hTcsdFrrt23WI27VXEC2Gu2bDi8pwyrJFMnHQfR1yarizD6vIeuoRKSSxK3y3bMWaJQQ+EahhcwL3jacqw5WEqzG7dKLfBXBBXwOuzsJlW8n15UyPXibnKBUPXAzqFybWPNVFkTVDw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=MuSl/j80HFnudn/Tbcr5KhXVHqOUfovlcJGMcjLTJXI=;
+ b=OCRNjwbnYE3ZlAL5GYAARiVyT4uX+x1ZvTojkFuu4aQHe+w+mCtWlq5kbXTPWCMG0TnHogSsyNwGWkzFts9F4IKCI2HmzoL7t4F/qw/eoJzyDFtwRmPjqybCpUAI4QeWXkgscBt2kT7C4aOSpdipIpwM4ypx1BspJDC3ttwc8OEoYXsv9bqjm2cgc56nzYZyaTxB6QV0kWIaJ1AbLesp7E8c+oXkGoF3vSmXPd/zYChRXJrT3KCwP6heWfCHmZ2QcK8qkRs1zLQhLj/dgADWhMg7Wyj6JP/rRKvbS1SFL3+6bXKH/oo7Fo0JV7AKqDNNYLymq3liywTHSubkcrCVMg==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=renesas.com; dmarc=pass action=none header.from=renesas.com;
+ dkim=pass header.d=renesas.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=chromium.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=2pDvcotqin9MFYotH20Ddvllc4oEen5KJQtcAktMMZs=;
-        b=KTj0IrJ2HYAK/59HA7DR7goXWRl3VWt+FPwtTBivhZGMOp5zfVeZ5FfDBBCByd5HJF
-         8y3lJWN/RC/xvlHZ4yDlKm3DAfqcRmuaryIa+n/7T4TZfvcTl/rjq3WRQ21OFXlh8HZ1
-         ALUtiRUJPWuVq7rJHIiMWgZCPemzlXjOqYQhI=
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=2pDvcotqin9MFYotH20Ddvllc4oEen5KJQtcAktMMZs=;
-        b=ODVFzacgNBS8hFn0lJKF9/YH5iAIU7583kVaTJJm86oh3WBaw87jxSV6zTsvm22Phr
-         yz3AlA2se+rIK1fglZdMjQ4LUN5NEioY2O4z0CX11BWj9vYi65dv6EZSjiEvGUj5lpM1
-         ViXF67+WMIZnRqO/4QT48mDQXzOCdTUA2CLAdKB074efGlSlfdBSRdY6QAUPMvdY5AHY
-         PdEKVz+qwrFi/Pa2fvB7UeNTR0zCT7V6+JCrCESDAHwM3c5K9Sbhaqb4STvU3Tx0SB5x
-         2Ye30zjsNB35PTujMCxK8D1vHAKdNyxl8JpvWWk7pakMk3kZRetqJ9+DF0WdwlJFlZCr
-         VNpw==
-X-Gm-Message-State: AGi0Pubg6oB32Dx5h55bXU6id1vr+zemrLVTaDdT/heXWey/8kbXHUb0
-        4OHTP1Z2x3+0DN+SrEaSfvXtYi/2CcE=
-X-Google-Smtp-Source: APiQypIWPkPKSk6OCkF6U3Tt3vlyAIezvItWdcJzah7cCSrNrRD77Skw516fZ7IoPMhWrL1nxi6zXA==
-X-Received: by 2002:a05:6102:1c8:: with SMTP id s8mr5901216vsq.11.1586356984738;
-        Wed, 08 Apr 2020 07:43:04 -0700 (PDT)
-Received: from mail-vk1-f176.google.com (mail-vk1-f176.google.com. [209.85.221.176])
-        by smtp.gmail.com with ESMTPSA id h1sm6401798vke.7.2020.04.08.07.43.04
-        for <linux-mmc@vger.kernel.org>
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 08 Apr 2020 07:43:04 -0700 (PDT)
-Received: by mail-vk1-f176.google.com with SMTP id n128so1880181vke.5
-        for <linux-mmc@vger.kernel.org>; Wed, 08 Apr 2020 07:43:04 -0700 (PDT)
-X-Received: by 2002:a67:2b07:: with SMTP id r7mr6540930vsr.169.1586356481775;
- Wed, 08 Apr 2020 07:34:41 -0700 (PDT)
+ d=renesasgroup.onmicrosoft.com; s=selector2-renesasgroup-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=MuSl/j80HFnudn/Tbcr5KhXVHqOUfovlcJGMcjLTJXI=;
+ b=ena2zM79i+WU3HOR3Jfsirj8v/4YM5I17I4pg7VGmeHejt+TYESmMu2iMziaUUl04LUJpjkm/TV0ijMH/L0o1AOdv1i0E19Nnt79a0uB86Xlucr5p+oaISdkAMPR7ZYqePei3kV90ZDOqx784euaex9nn6zkcxlsPIBG8yDHypI=
+Received: from TYAPR01MB4544.jpnprd01.prod.outlook.com (20.179.175.203) by
+ TYAPR01MB3725.jpnprd01.prod.outlook.com (20.178.138.20) with Microsoft SMTP
+ Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.20.2878.15; Thu, 9 Apr 2020 08:58:58 +0000
+Received: from TYAPR01MB4544.jpnprd01.prod.outlook.com
+ ([fe80::ed7f:1268:55a9:fc06]) by TYAPR01MB4544.jpnprd01.prod.outlook.com
+ ([fe80::ed7f:1268:55a9:fc06%4]) with mapi id 15.20.2900.015; Thu, 9 Apr 2020
+ 08:58:58 +0000
+From:   Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+To:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+CC:     "linux-renesas-soc@vger.kernel.org" 
+        <linux-renesas-soc@vger.kernel.org>
+Subject: RE: [PATCH v2 1/3] mmc: renesas_sdhi: refactor calculation of best
+ TAP
+Thread-Topic: [PATCH v2 1/3] mmc: renesas_sdhi: refactor calculation of best
+ TAP
+Thread-Index: AQHWDYqjLFOfg/E2dUWrWBJ2QLsz/ahwfvdw
+Date:   Thu, 9 Apr 2020 08:58:58 +0000
+Message-ID: <TYAPR01MB45440A401D341427694F9419D8C10@TYAPR01MB4544.jpnprd01.prod.outlook.com>
+References: <20200408094638.10375-1-wsa+renesas@sang-engineering.com>
+ <20200408094638.10375-2-wsa+renesas@sang-engineering.com>
+In-Reply-To: <20200408094638.10375-2-wsa+renesas@sang-engineering.com>
+Accept-Language: ja-JP, en-US
+Content-Language: ja-JP
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+authentication-results: spf=none (sender IP is )
+ smtp.mailfrom=yoshihiro.shimoda.uh@renesas.com; 
+x-originating-ip: [124.210.22.195]
+x-ms-publictraffictype: Email
+x-ms-office365-filtering-ht: Tenant
+x-ms-office365-filtering-correlation-id: 82319686-c8aa-4aff-0b10-08d7dc643d88
+x-ms-traffictypediagnostic: TYAPR01MB3725:
+x-microsoft-antispam-prvs: <TYAPR01MB3725E133B68F6426A72EFA8BD8C10@TYAPR01MB3725.jpnprd01.prod.outlook.com>
+x-ms-oob-tlc-oobclassifiers: OLM:7219;
+x-forefront-prvs: 0368E78B5B
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TYAPR01MB4544.jpnprd01.prod.outlook.com;PTR:;CAT:NONE;SFTY:;SFS:(10019020)(4636009)(39860400002)(136003)(346002)(366004)(396003)(376002)(478600001)(4744005)(8936002)(186003)(33656002)(81156014)(26005)(316002)(71200400001)(4326008)(66476007)(9686003)(5660300002)(64756008)(52536014)(55016002)(76116006)(110136005)(8676002)(2906002)(55236004)(66446008)(66556008)(81166007)(6506007)(7696005)(66946007)(86362001);DIR:OUT;SFP:1102;
+received-spf: None (protection.outlook.com: renesas.com does not designate
+ permitted sender hosts)
+x-ms-exchange-senderadcheck: 1
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: VE/LkcIdO000WfzBcQQAaLNEKn7K+19Fl3kps7/nwrhAtUX/TzOdp8lTZi8ohMA+Qf+Aiuvnv0ZlggiVDTr5kF/enGUgC9W4u01VAPQPaZXAxPqUcNG+runIPLOgW9rfod3Sc1yBmEEjEpGz2VhIOr1godhj+B9ejnB6x0Xhx3HVO1OR6SabByAFvv7cQ92rWvVLsEzSA+2StrqHtgF3K8CcU4PgyhiSdk6EBGAOIj2+DuEcQsPepgnSys1AqMjRgwp8e27I0SqoCTiV1y6J39W4yNvFJSS7O8G45NzA3UeHhSo8SMJcNjTUBjX1fEs+r93TwEXma2OVjsio6LcvUuhUtKEZX2YLYszaAlO2Hg88Jg9PVrnZMvVd/ZzNTxr9whyIgkD0KFo58gkEYbPBnlCzJIhUfFm/2Ct/PL9UeklE7yakyWQk2giSL76BB/kh
+x-ms-exchange-antispam-messagedata: j8pcVAW3+L0nZsq1v3ccDiy2o9YLIs5MqG7wtFm7by5MJstr8rVIHgaGaGLjDHwGfMz7w5pzT6A3k05uh1cul/1+MMMxkYdLATVN2Ulxq+2QWFFhy/7KYT4vIVEWH/VlNTAnqpx3pdRcgryCKTDw4w==
+x-ms-exchange-transport-forked: True
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 MIME-Version: 1.0
-References: <1573220319-4287-1-git-send-email-ppvk@codeaurora.org>
- <1573220319-4287-3-git-send-email-ppvk@codeaurora.org> <CAD=FV=WGUasS=UZxFeSS0Cg=9WxHPMWVFyYae7CFmOxV2_yhJw@mail.gmail.com>
- <001601d60da5$630168d0$29043a70$@codeaurora.org>
-In-Reply-To: <001601d60da5$630168d0$29043a70$@codeaurora.org>
-From:   Doug Anderson <dianders@chromium.org>
-Date:   Wed, 8 Apr 2020 07:34:30 -0700
-X-Gmail-Original-Message-ID: <CAD=FV=WR0YBp7ah82Kg7RzxHdO8Agf5uGNb=58iApShXqbum=A@mail.gmail.com>
-Message-ID: <CAD=FV=WR0YBp7ah82Kg7RzxHdO8Agf5uGNb=58iApShXqbum=A@mail.gmail.com>
-Subject: Re: [RFC-v2 2/2] mmc: sdhci-msm: Add support for bus bandwidth voting
-To:     Pradeep P V K <ppvk@codeaurora.org>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        Georgi Djakov <georgi.djakov@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Asutosh Das <asutoshd@codeaurora.org>,
-        Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
-        Sahitya Tummala <stummala@codeaurora.org>,
-        Sayali Lokhande <sayalil@codeaurora.org>,
-        Ram Prakash Gupta <rampraka@codeaurora.org>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Linux MMC List <linux-mmc@vger.kernel.org>,
-        LKML <linux-kernel@vger.kernel.org>,
-        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
-        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
-        <devicetree@vger.kernel.org>, Andy Gross <agross@kernel.org>,
-        linux-mmc-owner@vger.kernel.org, sbhanu@codeaurora.org
-Content-Type: text/plain; charset="UTF-8"
+X-OriginatorOrg: renesas.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 82319686-c8aa-4aff-0b10-08d7dc643d88
+X-MS-Exchange-CrossTenant-originalarrivaltime: 09 Apr 2020 08:58:58.1611
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 53d82571-da19-47e4-9cb4-625a166a4a2a
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: C6FJZ2HQydTAvd2WDCuigdEZNYEOx6SUSDYnqQiHrmE/+ooglpYE6epJQ9U76syRQWKgCA865IEV7lLhVUzO5De/9f/jh6i757ThPzDxOsRD0x9PGTnqbjAm+7VmFPDW
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: TYAPR01MB3725
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi,
+Hi Wolfram-san,
 
-On Wed, Apr 8, 2020 at 5:58 AM <ppvk@codeaurora.org> wrote:
->
-> Hi Doug,
->
-> You no longer seeing this warning stack with the latest patch set.
-> https://lkml.org/lkml/2020/3/23/407
->
-> The latest patch set is based on OPP framework and no workqueue's used to queue the work.
-> Can you give a try with the latest patch and check if this helps ?
+> From: Wolfram Sang, Sent: Wednesday, April 8, 2020 6:47 PM
+>=20
+> To select the best TAP, we need to find the longest stream of set bits
+> in a bit field. There is now a helper function for bitmaps which
+> iterates over all region of set bits. Using it makes the code much more
+> concise and easier to understand. Double so, because we need to handle
+> two bitmaps in the near future. Remove a superfluous comment while here.
+>=20
+> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-I was only analyzing an error log provided by someone else.  I will
-let them know that they should make sure they're on the latest patch
-series.
+Thank you for the patch!
 
--Doug
+Reviewed-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+
+Best regards,
+Yoshihiro Shimoda
+
