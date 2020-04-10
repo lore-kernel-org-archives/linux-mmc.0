@@ -1,126 +1,123 @@
-Return-Path: <SRS0=EyEY=5Z=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=BsGh=52=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.2 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	MSGID_FROM_MTA_HEADER,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_SANE_2 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7D3C1C2BA2B
-	for <linux-mmc@archiver.kernel.org>; Thu,  9 Apr 2020 12:54:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C1385C2BA2B
+	for <linux-mmc@archiver.kernel.org>; Fri, 10 Apr 2020 06:57:34 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 4D1162078E
-	for <linux-mmc@archiver.kernel.org>; Thu,  9 Apr 2020 12:54:30 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8170720757
+	for <linux-mmc@archiver.kernel.org>; Fri, 10 Apr 2020 06:57:34 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="DyL+LdxQ"
+	dkim=pass (1024-bit key) header.d=Synaptics.onmicrosoft.com header.i=@Synaptics.onmicrosoft.com header.b="Jbt1SNno"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726627AbgDIMy3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 9 Apr 2020 08:54:29 -0400
-Received: from mail-lj1-f195.google.com ([209.85.208.195]:36024 "EHLO
-        mail-lj1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726571AbgDIMy3 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Apr 2020 08:54:29 -0400
-Received: by mail-lj1-f195.google.com with SMTP id b1so11357609ljp.3
-        for <linux-mmc@vger.kernel.org>; Thu, 09 Apr 2020 05:54:28 -0700 (PDT)
+        id S1725991AbgDJG5d (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 10 Apr 2020 02:57:33 -0400
+Received: from mail-eopbgr750082.outbound.protection.outlook.com ([40.107.75.82]:62478
+        "EHLO NAM02-BL2-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1725858AbgDJG5d (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 10 Apr 2020 02:57:33 -0400
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=IJacz07x4lXTgVHDDXyxJb8vmg1YUnPBP/xwnvXLqzIZGwZJVEhrHGAvPmnWgWXorg6kXsL7mWwePICBg4or301YSdosM6WuZ3tb5Yyt2lht+se17enzzebiPs9MWDI+L5lQeKH7+QI21t0aem/OPYvMZSDhhOfYRKmv7ck80h/LkvOKfLNO95mh/4ViwZFcwLrCRt8+QMy2TtWN3S4FcVDyyEQUQv6RbXOPir+cLGd6jEegc45N+O4Np/s6BdgHGrXLIusEgY3E0efPgDwIJ0EvHkjY4dB/jG2lAmowf487CmryXWf0F22iVmPIkfInGC/kUL7eVa+tWgrrGzdm+g==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=dCCDBuxeoMLuySe7Kgg6v3LWqFCKhJcN/FtZK+jb4mc=;
+ b=hwW/AFREum6olPzqYjfo2B/bbw++jTTuj0SIz3I4mSr+H1peuIuhqwIYAhH3azyg40Pjv0yTF6ecZU19xF4fw8LpoAOeyrsLaw+J/Duox7RaB86v0g6S4lPb4jt/9CN3/+DCDz8JJRwHx2FxmXRDWQnDIPKeiQOnoBqzCmjKYa368Lx7TXSOLd4pQ0fOhB9fTzDeYraMUxQM/tgYDQn//9gnY5V//kdog6MVvtlhCZ3EtdbhVd+T1+CLlS2bDHMq+GwUwTzbopCyvL64sW/JCDITxnMepfULQSzo3QnknyfYgQc3TBKTWg2rVUoTSuCzMbRncuzvMxV5/JAmTIwSdA==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=synaptics.com; dmarc=pass action=none
+ header.from=synaptics.com; dkim=pass header.d=synaptics.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=AQ/aQRH3LCE5gpQTa4UpjP+P8PdojvoToFQt58CO2SQ=;
-        b=DyL+LdxQXdgjX6UF4nai/ilp4Qau4QxLusGPk7R3RPojNh6jNU8+4bC8E4TG7YMEwM
-         BAUPLzWfVtYStWvFfeazmvCjhVYQjex1PsNBToC7IxE4PZNUjVtL0ymjo7RxG0F2rHze
-         SOGR/yZAR2vywMlqAJfZl2Zqd6X9IQuP4rXuKFcXriJHd9ONnIkCyM7BHcIBveIVttW+
-         98tbrUWMMCcEayRcE36xrCHdgNQNa3VCJXZygIKe7H06mET/Qc/BkcIctfxez8E4gbUC
-         9PQD9LGz7B43m9NzxlWCZrRk3UuJdLXUr/6GbLxDGd3a8p7DYsBmo03IYxlOkG8jJmdL
-         21ag==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=AQ/aQRH3LCE5gpQTa4UpjP+P8PdojvoToFQt58CO2SQ=;
-        b=B5jmIqfmGY3eGj49Hajd0PzeuN0uI0JpXb+JYtA/6yOKSQe8yahgjyBFhDmFiyTA4t
-         HCArak9bYmPWX2bYNR2VElM/iNfrRlhyzIANZLBmymzEdTEgY+ZGChM4udBNeKc5Vcgm
-         uY5qc4aD7/3L/JJNp12wGWO6XmXyl1TroiHAaquU3iIp3CbamAESrrY8b47bs7y723cq
-         Rp0sI+5tT+QIYuIWDwvmGjGJDqKC1EzYd1PXUcNLQ297njbe8GtN25MOfBK5nE8ALsFJ
-         9Pwp8uelyPT8QyDjVpB4N4w+jvDyUIYapQUBjuOsk8frSBHuISoXnK4PzXgHhYToam5r
-         FRZg==
-X-Gm-Message-State: AGi0PuaSKwPiMUQAyuf/aXhODbAEiYxLu5FxJm9/y6UQ7yYaTAiO/d7c
-        9WL5IATE7PIDCpsbHEitvY+YFSAds74=
-X-Google-Smtp-Source: APiQypJnaS7moxjWVcXv3vfdEFDpuEw+zgSDhGoiD6Rct8JNwZt8v07tNN2uUaIByWsfgn3pRXHZoQ==
-X-Received: by 2002:a2e:a412:: with SMTP id p18mr8440329ljn.39.1586436867261;
-        Thu, 09 Apr 2020 05:54:27 -0700 (PDT)
-Received: from localhost.localdomain (h-98-128-181-131.NA.cust.bahnhof.se. [98.128.181.131])
-        by smtp.gmail.com with ESMTPSA id x67sm690205lfa.76.2020.04.09.05.54.26
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 09 Apr 2020 05:54:26 -0700 (PDT)
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-To:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Pierre Ossman <pierre@ossman.eu>
-Subject: [PATCH] mmc: wbsd: Replace hardcoded command numbers with existing defines
-Date:   Thu,  9 Apr 2020 14:54:22 +0200
-Message-Id: <20200409125422.21842-1-ulf.hansson@linaro.org>
-X-Mailer: git-send-email 2.20.1
+ d=Synaptics.onmicrosoft.com; s=selector2-Synaptics-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=dCCDBuxeoMLuySe7Kgg6v3LWqFCKhJcN/FtZK+jb4mc=;
+ b=Jbt1SNnoopuXjh5Hn4AaPhh+NZHwR8OCADpnbP7Omnzf9xegyqr97H1PowIsEVQdLEEOkhb7dBmBgwwrzV6F3HhvtAHe29tFXM5mooqIZrVV4l/jo3Av0Wi2cnx77Hvw/WoxipCQ/Q3P2XwOeEbUT7faVx/YpzsXsidxl674Zrs=
+Authentication-Results: spf=none (sender IP is )
+ smtp.mailfrom=Jisheng.Zhang@synaptics.com; 
+Received: from BYAPR03MB3573.namprd03.prod.outlook.com (2603:10b6:a02:ae::15)
+ by BYAPR03MB3525.namprd03.prod.outlook.com (2603:10b6:a02:ab::23) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.2900.17; Fri, 10 Apr
+ 2020 06:57:30 +0000
+Received: from BYAPR03MB3573.namprd03.prod.outlook.com
+ ([fe80::d8fb:de22:43b7:fcb7]) by BYAPR03MB3573.namprd03.prod.outlook.com
+ ([fe80::d8fb:de22:43b7:fcb7%7]) with mapi id 15.20.2900.015; Fri, 10 Apr 2020
+ 06:57:29 +0000
+Date:   Fri, 10 Apr 2020 14:57:12 +0800
+From:   Jisheng Zhang <Jisheng.Zhang@synaptics.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: [PATCH] mmc: sd: use HIGH_SPEED_BUS_SPEED in mmc_sd_switch_hs()
+Message-ID: <20200410145643.630b0731@xhacker.debian>
+X-Mailer: Claws Mail 3.17.5 (GTK+ 2.24.32; x86_64-pc-linux-gnu)
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+X-ClientProxiedBy: HK0PR03CA0120.apcprd03.prod.outlook.com
+ (2603:1096:203:b0::36) To BYAPR03MB3573.namprd03.prod.outlook.com
+ (2603:10b6:a02:ae::15)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+X-MS-Exchange-MessageSentRepresentingType: 1
+Received: from xhacker.debian (124.74.246.114) by HK0PR03CA0120.apcprd03.prod.outlook.com (2603:1096:203:b0::36) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.2900.16 via Frontend Transport; Fri, 10 Apr 2020 06:57:28 +0000
+X-Mailer: Claws Mail 3.17.5 (GTK+ 2.24.32; x86_64-pc-linux-gnu)
+X-Originating-IP: [124.74.246.114]
+X-MS-PublicTrafficType: Email
+X-MS-Office365-Filtering-Correlation-Id: 7776f193-9e55-4915-db22-08d7dd1c6f6f
+X-MS-TrafficTypeDiagnostic: BYAPR03MB3525:
+X-Microsoft-Antispam-PRVS: <BYAPR03MB3525524AE8DF95ABF14E952BEDDE0@BYAPR03MB3525.namprd03.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:3513;
+X-Forefront-PRVS: 0369E8196C
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:BYAPR03MB3573.namprd03.prod.outlook.com;PTR:;CAT:NONE;SFTY:;SFS:(10009020)(136003)(366004)(396003)(346002)(376002)(39860400002)(5660300002)(956004)(9686003)(1076003)(7696005)(8936002)(16526019)(8676002)(316002)(81156014)(66556008)(6916009)(186003)(52116002)(66476007)(66946007)(6506007)(86362001)(478600001)(4326008)(6666004)(26005)(4744005)(2906002)(55016002);DIR:OUT;SFP:1101;
+Received-SPF: None (protection.outlook.com: synaptics.com does not designate
+ permitted sender hosts)
+X-MS-Exchange-SenderADCheck: 1
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: TIuZnQ4erIMSAbFYG8xDCApQvzEtKpSzF/V8SNbDQkpxstX55rnGOdAwdxt8/8H1mlNEyNNDtLFsgPQuyksYcKH8/TJ2l5n/JXU2C2E9vfDu7ZVBF+lt4cN8DxFkEyZt/dz609qHVerxKQIvD7RiyaSb92DmhjWtiUrb2WaeOC7rSHTWS0esB25rKP7RtwpL3W99QcIcZQfSHWdd17umEb/IvwzpoGFY/QINosyF/Smmf8iLuoVBCSaKEGNLn5SKk7/tuWHzMgAPTpNShvC1CUACV1XlWvEdcP4FZY9gri/nCBGZk8L8Ir4qf1z6hZWzSXGlh4f1XycRXxkp6NmVjyXZNnIs+Tno+TFq3E+pWGG3jLVtXH4qoPvR9d/aMpDnCShnaXiSJ+9mvxdWrNnnCwGFRPofvtNyw7oSgB+S/MZkCpR52T8+EqTfz+rWHtYT
+X-MS-Exchange-AntiSpam-MessageData: ygsherBEcPaEu6NiEmHwsF4oq7/CiC5/X1n8BtqqYPh5OMYnEZGk0pPPWRqsIyYQ8N/7wDls3Ge7Jg+w07fnSjTLmhuHx9c7yrtbErAznLz8zlHWrqslvAU0vFWVxrxAhBkiKZf89IzJMy38ebY41Q==
+X-OriginatorOrg: synaptics.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 7776f193-9e55-4915-db22-08d7dd1c6f6f
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 10 Apr 2020 06:57:29.8406
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 335d1fbc-2124-4173-9863-17e7051a2a0e
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: nUG4cM5Mne9wCqisTnNTD8wf1ZBCkAS64M4RU9epwT6fZw1S51zLGGAYmo83IdH2tcWPU0PwgDRm8YDc26Gq6g==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: BYAPR03MB3525
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
----
- drivers/mmc/host/wbsd.c | 26 ++++++++++++++------------
- 1 file changed, 14 insertions(+), 12 deletions(-)
+Use the well defined HIGH_SPEED_BUS_SPEED macro in mmc_sd_switch_hs()
+to make code more readable.
 
-diff --git a/drivers/mmc/host/wbsd.c b/drivers/mmc/host/wbsd.c
-index 740179f42cf2..67f917d6ecd3 100644
---- a/drivers/mmc/host/wbsd.c
-+++ b/drivers/mmc/host/wbsd.c
-@@ -28,6 +28,8 @@
- #include <linux/pnp.h>
- #include <linux/highmem.h>
- #include <linux/mmc/host.h>
-+#include <linux/mmc/mmc.h>
-+#include <linux/mmc/sd.h>
- #include <linux/scatterlist.h>
- #include <linux/slab.h>
+Signed-off-by: Jisheng Zhang <Jisheng.Zhang@synaptics.com>
+---
+ drivers/mmc/core/sd.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+index 76c7add367d5..43de3190d718 100644
+--- a/drivers/mmc/core/sd.c
++++ b/drivers/mmc/core/sd.c
+@@ -376,11 +376,11 @@ int mmc_sd_switch_hs(struct mmc_card *card)
+ 	if (!status)
+ 		return -ENOMEM;
  
-@@ -770,22 +772,22 @@ static void wbsd_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 		 * interrupts.
- 		 */
- 		switch (cmd->opcode) {
--		case 11:
--		case 17:
--		case 18:
--		case 20:
--		case 24:
--		case 25:
--		case 26:
--		case 27:
--		case 30:
--		case 42:
--		case 56:
-+		case SD_SWITCH_VOLTAGE:
-+		case MMC_READ_SINGLE_BLOCK:
-+		case MMC_READ_MULTIPLE_BLOCK:
-+		case MMC_WRITE_DAT_UNTIL_STOP:
-+		case MMC_WRITE_BLOCK:
-+		case MMC_WRITE_MULTIPLE_BLOCK:
-+		case MMC_PROGRAM_CID:
-+		case MMC_PROGRAM_CSD:
-+		case MMC_SEND_WRITE_PROT:
-+		case MMC_LOCK_UNLOCK:
-+		case MMC_GEN_CMD:
- 			break;
+-	err = mmc_sd_switch(card, 1, 0, 1, status);
++	err = mmc_sd_switch(card, 1, 0, HIGH_SPEED_BUS_SPEED, status);
+ 	if (err)
+ 		goto out;
  
- 		/* ACMDs. We don't keep track of state, so we just treat them
- 		 * like any other command. */
--		case 51:
-+		case SD_APP_SEND_SCR:
- 			break;
- 
- 		default:
+-	if ((status[16] & 0xF) != 1) {
++	if ((status[16] & 0xF) != HIGH_SPEED_BUS_SPEED) {
+ 		pr_warn("%s: Problem switching card into high-speed mode!\n",
+ 			mmc_hostname(card->host));
+ 		err = 0;
 -- 
-2.20.1
+2.26.0
 
