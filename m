@@ -2,43 +2,42 @@ Return-Path: <SRS0=xqUN=54=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.0 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	UNWANTED_LANGUAGE_BODY,USER_AGENT_GIT autolearn=ham autolearn_force=no
-	version=3.4.0
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 30748C2BB85
-	for <linux-mmc@archiver.kernel.org>; Sun, 12 Apr 2020 09:04:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0F6D4C2BB86
+	for <linux-mmc@archiver.kernel.org>; Sun, 12 Apr 2020 09:04:43 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 0598220575
-	for <linux-mmc@archiver.kernel.org>; Sun, 12 Apr 2020 09:04:41 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D9EDD20575
+	for <linux-mmc@archiver.kernel.org>; Sun, 12 Apr 2020 09:04:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726043AbgDLJEk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 12 Apr 2020 05:04:40 -0400
+        id S1726102AbgDLJEl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 12 Apr 2020 05:04:41 -0400
 Received: from mga12.intel.com ([192.55.52.136]:20973 "EHLO mga12.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725832AbgDLJEj (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Sun, 12 Apr 2020 05:04:39 -0400
-IronPort-SDR: GNcQ+urhct/6fBMxL5K0UmWy+6p6DVEhYc+Rxy0uP1WsVi6WmIce+wtHd/xFxRqA3fG6C1SbWt
- igP0X0aeVhiQ==
+        id S1725832AbgDLJEl (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Sun, 12 Apr 2020 05:04:41 -0400
+IronPort-SDR: 7j1pYkWxitOyJhllMaqgVwtar4KYT9dbQb5UqVX3/xcymDzDygVroCzMPx2flwWUq4CFiUvE7t
+ iZq3NE4M0BcQ==
 X-Amp-Result: SKIPPED(no attachment in message)
 X-Amp-File-Uploaded: False
 Received: from fmsmga001.fm.intel.com ([10.253.24.23])
-  by fmsmga106.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 12 Apr 2020 02:04:40 -0700
-IronPort-SDR: fPiwfDBBxLDCIcmP8kszKGPvzWHe2kZyicc4CcE5c4tklHUPpTIV1IvzPbAR4nQ3Gk8jBW5Pre
- ZcZJ/478KGFg==
+  by fmsmga106.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 12 Apr 2020 02:04:41 -0700
+IronPort-SDR: 0Zj3ogToVenb45U/72QjFNW5dN1Wxk9rmWInloPQfkARyTY36oF75ZwGAUArYt6N6jICHlV8jS
+ HsC1e7slfZYw==
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="5.72,374,1580803200"; 
-   d="scan'208";a="362835152"
+   d="scan'208";a="362835159"
 Received: from ahunter-desktop.fi.intel.com ([10.237.72.87])
-  by fmsmga001.fm.intel.com with ESMTP; 12 Apr 2020 02:04:38 -0700
+  by fmsmga001.fm.intel.com with ESMTP; 12 Apr 2020 02:04:40 -0700
 From:   Adrian Hunter <adrian.hunter@intel.com>
 To:     Ulf Hansson <ulf.hansson@linaro.org>,
         Baolin Wang <baolin.wang7@gmail.com>
 Cc:     linux-mmc <linux-mmc@vger.kernel.org>
-Subject: [PATCH 1/5] mmc: sdhci: Add helpers for the auto-CMD23 flag
-Date:   Sun, 12 Apr 2020 12:03:45 +0300
-Message-Id: <20200412090349.1607-2-adrian.hunter@intel.com>
+Subject: [PATCH 2/5] mmc: sdhci: Stop exporting sdhci_send_command()
+Date:   Sun, 12 Apr 2020 12:03:46 +0300
+Message-Id: <20200412090349.1607-3-adrian.hunter@intel.com>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20200412090349.1607-1-adrian.hunter@intel.com>
 References: <20200412090349.1607-1-adrian.hunter@intel.com>
@@ -48,63 +47,57 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add 2 helper functions to make the use of the auto-CMD23 flag more
-readable.
+sdhci_send_command() has not been used outside of sdhci.c for many
+years. Stop exporting it.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/host/sdhci.c | 18 +++++++++++++++---
- 1 file changed, 15 insertions(+), 3 deletions(-)
+ drivers/mmc/host/sdhci.c | 5 +++--
+ drivers/mmc/host/sdhci.h | 1 -
+ 2 files changed, 3 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 3f716466fcfd..07548e5efd1f 100644
+index 07548e5efd1f..429e5b80f2fb 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -1350,13 +1350,25 @@ static inline bool sdhci_auto_cmd12(struct sdhci_host *host,
- 	       !mrq->cap_cmd_during_tfr;
+@@ -52,6 +52,8 @@ static void sdhci_finish_data(struct sdhci_host *);
+ 
+ static void sdhci_enable_preset_value(struct sdhci_host *host, bool enable);
+ 
++static void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd);
++
+ void sdhci_dumpregs(struct sdhci_host *host)
+ {
+ 	SDHCI_DUMP("============ SDHCI REGISTER DUMP ===========\n");
+@@ -1558,7 +1560,7 @@ static void sdhci_finish_data(struct sdhci_host *host)
+ 	}
  }
  
-+static inline bool sdhci_auto_cmd23(struct sdhci_host *host,
-+				    struct mmc_request *mrq)
-+{
-+	return mrq->sbc && (host->flags & SDHCI_AUTO_CMD23);
-+}
-+
-+static inline bool sdhci_manual_cmd23(struct sdhci_host *host,
-+				      struct mmc_request *mrq)
-+{
-+	return mrq->sbc && !(host->flags & SDHCI_AUTO_CMD23);
-+}
-+
- static inline void sdhci_auto_cmd_select(struct sdhci_host *host,
- 					 struct mmc_command *cmd,
- 					 u16 *mode)
+-void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
++static void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
  {
- 	bool use_cmd12 = sdhci_auto_cmd12(host, cmd->mrq) &&
- 			 (cmd->opcode != SD_IO_RW_EXTENDED);
--	bool use_cmd23 = cmd->mrq->sbc && (host->flags & SDHCI_AUTO_CMD23);
-+	bool use_cmd23 = sdhci_auto_cmd23(host, cmd->mrq);
- 	u16 ctrl2;
+ 	int flags;
+ 	u32 mask;
+@@ -1658,7 +1660,6 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
  
- 	/*
-@@ -1416,7 +1428,7 @@ static void sdhci_set_transfer_mode(struct sdhci_host *host,
- 	if (mmc_op_multi(cmd->opcode) || data->blocks > 1) {
- 		mode = SDHCI_TRNS_BLK_CNT_EN | SDHCI_TRNS_MULTI;
- 		sdhci_auto_cmd_select(host, cmd, &mode);
--		if (cmd->mrq->sbc && (host->flags & SDHCI_AUTO_CMD23))
-+		if (sdhci_auto_cmd23(host, cmd->mrq))
- 			sdhci_writel(host, cmd->mrq->sbc->arg, SDHCI_ARGUMENT2);
- 	}
+ 	sdhci_writew(host, SDHCI_MAKE_CMD(cmd->opcode, flags), SDHCI_COMMAND);
+ }
+-EXPORT_SYMBOL_GPL(sdhci_send_command);
  
-@@ -2054,7 +2066,7 @@ void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 		mrq->cmd->error = -ENOMEDIUM;
- 		sdhci_finish_mrq(host, mrq);
- 	} else {
--		if (mrq->sbc && !(host->flags & SDHCI_AUTO_CMD23))
-+		if (sdhci_manual_cmd23(host, mrq))
- 			sdhci_send_command(host, mrq->sbc);
- 		else
- 			sdhci_send_command(host, mrq->cmd);
+ static void sdhci_read_rsp_136(struct sdhci_host *host, struct mmc_command *cmd)
+ {
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 79dffbb731d3..47324feeba86 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -757,7 +757,6 @@ void sdhci_cleanup_host(struct sdhci_host *host);
+ int __sdhci_add_host(struct sdhci_host *host);
+ int sdhci_add_host(struct sdhci_host *host);
+ void sdhci_remove_host(struct sdhci_host *host, int dead);
+-void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd);
+ 
+ static inline void sdhci_read_caps(struct sdhci_host *host)
+ {
 -- 
 2.17.1
 
