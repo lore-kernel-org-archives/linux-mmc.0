@@ -7,56 +7,56 @@ X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D6025C2BA19
-	for <linux-mmc@archiver.kernel.org>; Tue, 14 Apr 2020 16:15:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3F61DC2BA19
+	for <linux-mmc@archiver.kernel.org>; Tue, 14 Apr 2020 16:15:33 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B2EC920678
-	for <linux-mmc@archiver.kernel.org>; Tue, 14 Apr 2020 16:15:20 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 13FF220678
+	for <linux-mmc@archiver.kernel.org>; Tue, 14 Apr 2020 16:15:33 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="ewtb/Sjv"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Qe5pJo5d"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728850AbgDNQPK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 14 Apr 2020 12:15:10 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55008 "EHLO
+        id S2390553AbgDNQOf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 14 Apr 2020 12:14:35 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54938 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-FAIL-OK-FAIL)
-        by vger.kernel.org with ESMTP id S2391331AbgDNQOq (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Apr 2020 12:14:46 -0400
-Received: from mail-lj1-x244.google.com (mail-lj1-x244.google.com [IPv6:2a00:1450:4864:20::244])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 48D4AC061A0E
-        for <linux-mmc@vger.kernel.org>; Tue, 14 Apr 2020 09:14:46 -0700 (PDT)
-Received: by mail-lj1-x244.google.com with SMTP id l14so404924ljj.5
-        for <linux-mmc@vger.kernel.org>; Tue, 14 Apr 2020 09:14:46 -0700 (PDT)
+        by vger.kernel.org with ESMTP id S2389811AbgDNQO0 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Apr 2020 12:14:26 -0400
+Received: from mail-lj1-x242.google.com (mail-lj1-x242.google.com [IPv6:2a00:1450:4864:20::242])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CC4AEC061A10
+        for <linux-mmc@vger.kernel.org>; Tue, 14 Apr 2020 09:14:24 -0700 (PDT)
+Received: by mail-lj1-x242.google.com with SMTP id k21so426341ljh.2
+        for <linux-mmc@vger.kernel.org>; Tue, 14 Apr 2020 09:14:24 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=/312L/upfEChd0s382iQNZQsylwgFpiUnUGKm/8Pqvw=;
-        b=ewtb/Sjv8qGxJkOLX8vFzllchdK+d63Agydpogc3xu9EWnW7sINf01LNLZr5F8lZ7m
-         VKx/mY1H0STlDsoXdidmIqKXssqv59IO3BKPS7vPf8WeK/2LEoT/REqBM5zoPOK8KSx4
-         hKzh3bTWZ7G9jFv33mXoUF9O8eFD2SpEjbItujfK2lcvzT8XdjC3Zp+oC/owtYVLIhkd
-         8wSbxrI0cSuqD/hqScIH0hts1KqMvhcUSau+VTEZFQPZxTBGB1Trbce0a85Ghy4MNHgN
-         poMPTZnQ/juiYaOjvLAKVzP1bn0QnZOUErsCG9jXqoHPzSsBeSa82hRjyem2wyIaptSS
-         SafA==
+        bh=/u7NC6yDRYNMvCAgPxU0HxDtYNDMqbE9FekEfbQcOQI=;
+        b=Qe5pJo5dEPudnBkoPikQMvE6hJ5ljLrOG38fGhfx5vrpBWxgRFNkeMDiieUT4RPMKa
+         5tTXHjKo6VeyWJDk8FlOCDwYNQzttV9GQEzosgU1ZSjFxvd+Dq26m5WuGJeOZ8f9NqzE
+         jaqiLnetGzYTiXYEo1xZkCXVigQlaMmQ2J7s8IEL4zGBbBWp2DPjlI8o6u97IGuaJp/8
+         Oc5ZmJSfEV2qR74c1BtvuVO8zmNBb41B6VdWHFJOTInSFFij49C0Cu7s7+ATtWogKlIJ
+         3aXD5TmWUp01eerr7G4uhVPyPv73AFEUABXEBFz7G0RZj12RgibE/4NZFBiqSYvAv1Ru
+         VKIA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=/312L/upfEChd0s382iQNZQsylwgFpiUnUGKm/8Pqvw=;
-        b=IELHO1qAWKPP5DC+pstroNeC6K0PKgk7IOzYAZ8xskjox/vOQphBmGdj2As+rm+CVQ
-         dyIfkMQo0xcWVoVZU84dhnga5RdXYKB2Lneaho+ilsA+X8DgZBs6Q+yQtwLZ5PVam0Jh
-         Jgp4hpf2y4moR0lr1IRyOak5rQVItIcL+OIllqSj4ixSsUDHTfvumdh718yzfT+C1epx
-         E0u6latxWEBq17KvCoqLfQSNjDIM9ausdUvK0mvTZtecwfAY9pZBjIH0maz5xd4HCLgv
-         RHpX1mNER/Ya1wwVUMeps4v/SPomVxVtBrT+LAemzMGF51AOPcwDOgcjcu3/6yS7svrJ
-         GQxw==
-X-Gm-Message-State: AGi0PuaEHMkw3yCtHYoqZ+DT2d1CXiV9zuM0FA3ACHFvXwmqPeK7XFUe
-        Zo8N270Rm3sAx8b9XQTok2ceNQVTeoQ=
-X-Google-Smtp-Source: APiQypK+AncAZzjPieY0AwSjLMdIGFpdociGqq4Q/Jmw54Oy3dhS1HYlzAy2E9ByK9t60IfuE7yAKQ==
-X-Received: by 2002:a05:651c:48a:: with SMTP id s10mr537009ljc.226.1586880883857;
-        Tue, 14 Apr 2020 09:14:43 -0700 (PDT)
+        bh=/u7NC6yDRYNMvCAgPxU0HxDtYNDMqbE9FekEfbQcOQI=;
+        b=BTZJoLUg5D4i/Gh8uWepeQSHw695cyIskjkXIxzmM7OOEgXcfZJanLcStfFIiISr4N
+         x7UZMnERAcB5T2iYggJ1yapvPl+BtOXjHHaFCU5dpGHvZNje0RhZztbGuWFnzKVwB7uw
+         zgjpR9crEAf2PlZrLGJN6zeuTFJOlbc0kFoNJHip3tpG+CXs3wNx4MLDgoLuAAoEZvXz
+         bHt0hvhfBJ4qwDoCAIINsY9YIt0yoLqiZO+CB819pQlXOdWIFCvQI7reSTHFSqI5DmLn
+         KTC0SdHa0YPepGm79Labwy9DnyFeDVlvS4k4+F42AFHuBu1DJetVWT4Os9ljxmrpcZzb
+         0Iaw==
+X-Gm-Message-State: AGi0PuYppaNcBfmqSOwygO878aHQtpfcGFoR7xqnr40DxS+sQSlYDqNw
+        J/PGWTFjiJ8w0jd+zRUdhpp33bAAjE4=
+X-Google-Smtp-Source: APiQypIgOtfZ87J/KQSZFiapD6CrLOavQOnvdrCDtYDXFD5vzNbytd1wC7vz/1FKmxXrpSQWSVJX1w==
+X-Received: by 2002:a2e:a179:: with SMTP id u25mr568229ljl.192.1586880862780;
+        Tue, 14 Apr 2020 09:14:22 -0700 (PDT)
 Received: from localhost.localdomain (h-98-128-181-131.NA.cust.bahnhof.se. [98.128.181.131])
-        by smtp.gmail.com with ESMTPSA id a26sm9330669ljn.22.2020.04.14.09.14.42
+        by smtp.gmail.com with ESMTPSA id a26sm9330669ljn.22.2020.04.14.09.14.21
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 14 Apr 2020 09:14:42 -0700 (PDT)
+        Tue, 14 Apr 2020 09:14:22 -0700 (PDT)
 From:   Ulf Hansson <ulf.hansson@linaro.org>
 To:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 Cc:     Adrian Hunter <adrian.hunter@intel.com>,
@@ -75,9 +75,9 @@ Cc:     Adrian Hunter <adrian.hunter@intel.com>,
         Paul Cercueil <paul@crapouillou.net>,
         Ludovic Desroches <ludovic.desroches@microchip.com>,
         Nicolas Ferre <nicolas.ferre@microchip.com>
-Subject: [PATCH 15/19] mmc: tifm_sd: Inform the mmc core about the maximum busy timeout
-Date:   Tue, 14 Apr 2020 18:14:09 +0200
-Message-Id: <20200414161413.3036-16-ulf.hansson@linaro.org>
+Subject: [PATCH 03/19] mmc: atmel-mci: Respect the cmd->busy_timeout from the mmc core
+Date:   Tue, 14 Apr 2020 18:13:57 +0200
+Message-Id: <20200414161413.3036-4-ulf.hansson@linaro.org>
 X-Mailer: git-send-email 2.20.1
 In-Reply-To: <20200414161413.3036-1-ulf.hansson@linaro.org>
 References: <20200414161413.3036-1-ulf.hansson@linaro.org>
@@ -88,55 +88,48 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Some commands uses R1B responses, which means the card may assert the DAT0
-line to signal busy for a period of time, after it has received the
-command. The mmc core normally specifies the busy period for the command in
-the cmd->busy_timeout. Ideally the driver should respect it, but that
-requires quite some update of the code, so let's defer that to someone with
-the HW at hand.
+Using a fixed 2s timeout for all commands is a bit problematic.
 
-Instead, let's inform the mmc core about the maximum supported busy timeout
-in ->max_busy_timeout during ->probe(). This value corresponds to the fixed
-1s timeout used by tifm_sd. In this way, we let the mmc core validate the
-needed timeout, which may lead to that it converts from a R1B into a R1
-response and then use CMD13 to poll for busy completion.
+For some commands it means waiting longer than needed for the timer to
+expire, which may not a big issue, but still. For other commands, like for
+an erase (CMD38) that uses a R1B response, may require longer timeouts than
+2s. In these cases, we may end up treating the command as it failed, while
+it just needed some more time to complete successfully.
 
-In other words, this change enables support for commands with longer busy
-periods than 1s, like erase (CMD38) for example.
+Fix the problem by respecting the cmd->busy_timeout, which is provided by
+the mmc core.
 
-Cc: Alex Dubov <oakad@yahoo.com>
+Cc: Ludovic Desroches <ludovic.desroches@microchip.com>
+Cc: Nicolas Ferre <nicolas.ferre@microchip.com>
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/mmc/host/tifm_sd.c | 9 ++++++++-
- 1 file changed, 8 insertions(+), 1 deletion(-)
+ drivers/mmc/host/atmel-mci.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/host/tifm_sd.c b/drivers/mmc/host/tifm_sd.c
-index 54271b92ee59..5987656e0474 100644
---- a/drivers/mmc/host/tifm_sd.c
-+++ b/drivers/mmc/host/tifm_sd.c
-@@ -73,6 +73,8 @@ module_param(fixed_timeout, bool, 0644);
- 
- #define TIFM_MMCSD_MAX_BLOCK_SIZE  0x0800UL
- 
-+#define TIFM_MMCSD_REQ_TIMEOUT_MS  1000
+diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+index 7292970065b6..5cb692687698 100644
+--- a/drivers/mmc/host/atmel-mci.c
++++ b/drivers/mmc/host/atmel-mci.c
+@@ -809,6 +809,9 @@ static u32 atmci_prepare_command(struct mmc_host *mmc,
+ static void atmci_send_command(struct atmel_mci *host,
+ 		struct mmc_command *cmd, u32 cmd_flags)
+ {
++	unsigned int timeout_ms = cmd->busy_timeout ? cmd->busy_timeout :
++		ATMCI_CMD_TIMEOUT_MS;
 +
- enum {
- 	CMD_READY    = 0x0001,
- 	FIFO_READY   = 0x0002,
-@@ -959,7 +961,12 @@ static int tifm_sd_probe(struct tifm_dev *sock)
- 	host = mmc_priv(mmc);
- 	tifm_set_drvdata(sock, mmc);
- 	host->dev = sock;
--	host->timeout_jiffies = msecs_to_jiffies(1000);
-+	host->timeout_jiffies = msecs_to_jiffies(TIFM_MMCSD_REQ_TIMEOUT_MS);
-+	/*
-+	 * We use a fixed request timeout of 1s, hence inform the core about it.
-+	 * A future improvement should instead respect the cmd->busy_timeout.
-+	 */
-+	mmc->max_busy_timeout = TIFM_MMCSD_REQ_TIMEOUT_MS;
+ 	WARN_ON(host->cmd);
+ 	host->cmd = cmd;
  
- 	tasklet_init(&host->finish_tasklet, tifm_sd_end_cmd,
- 		     (unsigned long)host);
+@@ -819,8 +822,7 @@ static void atmci_send_command(struct atmel_mci *host,
+ 	atmci_writel(host, ATMCI_ARGR, cmd->arg);
+ 	atmci_writel(host, ATMCI_CMDR, cmd_flags);
+ 
+-	mod_timer(&host->timer,
+-		  jiffies + msecs_to_jiffies(ATMCI_CMD_TIMEOUT_MS));
++	mod_timer(&host->timer, jiffies + msecs_to_jiffies(timeout_ms));
+ }
+ 
+ static void atmci_send_stop_cmd(struct atmel_mci *host, struct mmc_data *data)
 -- 
 2.20.1
 
