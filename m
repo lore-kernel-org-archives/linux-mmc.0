@@ -7,56 +7,56 @@ X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 59FD7C352BE
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DCB6FC2BB85
 	for <linux-mmc@archiver.kernel.org>; Tue, 14 Apr 2020 16:15:08 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3842620732
+	by mail.kernel.org (Postfix) with ESMTP id BA3C720732
 	for <linux-mmc@archiver.kernel.org>; Tue, 14 Apr 2020 16:15:08 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="m7tzsSdo"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="buxlIUSI"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2391335AbgDNQPB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 14 Apr 2020 12:15:01 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55030 "EHLO
+        id S2390521AbgDNQOp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 14 Apr 2020 12:14:45 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54988 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-FAIL-OK-FAIL)
-        by vger.kernel.org with ESMTP id S2390667AbgDNQOx (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Apr 2020 12:14:53 -0400
-Received: from mail-lf1-x144.google.com (mail-lf1-x144.google.com [IPv6:2a00:1450:4864:20::144])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BBEACC061A0F
-        for <linux-mmc@vger.kernel.org>; Tue, 14 Apr 2020 09:14:52 -0700 (PDT)
-Received: by mail-lf1-x144.google.com with SMTP id l11so204839lfc.5
-        for <linux-mmc@vger.kernel.org>; Tue, 14 Apr 2020 09:14:52 -0700 (PDT)
+        by vger.kernel.org with ESMTP id S2391331AbgDNQOj (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Apr 2020 12:14:39 -0400
+Received: from mail-lf1-x142.google.com (mail-lf1-x142.google.com [IPv6:2a00:1450:4864:20::142])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B8420C061A41
+        for <linux-mmc@vger.kernel.org>; Tue, 14 Apr 2020 09:14:38 -0700 (PDT)
+Received: by mail-lf1-x142.google.com with SMTP id x23so226942lfq.1
+        for <linux-mmc@vger.kernel.org>; Tue, 14 Apr 2020 09:14:38 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=Bpyge4k8Iz/MW6vpPqOyXsMz3UoNxf4ygGN/PrDN23s=;
-        b=m7tzsSdoqidUMOYYffWIVvNzzOkmdfg+BlltbgNDyDHYItaxuxu7vlYresXdqk6vQv
-         D1vtkIKdiPxe0VmBocbrJb8+RR2jsB5/PR4o9cSrD0CBQ+Deo18au7HngD4aapz8uN5s
-         wNrIqMOeMKLHkGPs6aTOR9HucmlEVNvLYIYwIWk+dcPCMXefe5E35RhttGIciUVbUY7R
-         w0mJd6ufoGcywW0DjWwpcn1mICnTQ7g9bhZpqe8Uw6i+m7KAsSDOvfNer0KNkWMFmjxy
-         Tz9cgFFhelwwDFL8Banrz9p9aK/Z7NLsgIRfpHDyQRvGg/VJqaFDWl9jXElVKKXXe6e4
-         36kQ==
+        bh=dn6VxHUGEp0h+lDNMYkyjs+eaTbjGnRrBr6whuUgNLQ=;
+        b=buxlIUSIrT5D15k/542DUXpz3fkzEN7p3nMlmm4+M9/tfJXHRqSt4i808UTYsF4ecC
+         b1iA3PBYRCEHvf8U9R5IJeFK+t77fe1e2XXP9XHyi41wic7CobmwoG2BKB2lCjL1eQmF
+         x4dhYhNI7Xg4mouw8mLpSdPYMz5nEAsWQfH3zTU6rsufrLnAQzey4+Lc92abqlBFlaoL
+         jDuNvlwK2tP9ecPGtAZBgzsL6dmm+/v59kxJw2+/I+USS4Kg/gg1kF7pe50/w3hTfeug
+         qF91C+pBuw1yRFAcOBrVctk22aqzDLKH8i/BP0476eHlxNmqMUDn9yLQQIsGNnVGIVRW
+         jIBg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=Bpyge4k8Iz/MW6vpPqOyXsMz3UoNxf4ygGN/PrDN23s=;
-        b=JTzbPbQAaipu96ts641SmoXOLcDUMZHetfomuqP5S6cqYQuiwRjsb9bxxWurW2fTN4
-         EfNoyw3wSn71dcPzk8G1PnEqDVz/L+0+q4qxzrx8yRhdKb5QBSbNtnGYeJoZgcCK83W/
-         2CbxLnN8si/vUDQW98BJsoAXyVOIYaTPjlxBVaL3xvGqE+QB+1DjNSxC3dzLtIrHihPV
-         +D1pUy99bD9gSx6oVwDMDc0GnGHmEnvW9TcwlHtdsuCW/7aSHvpwCSVYj1vpJKXqgkuL
-         SY/5DKlrbJGi5TYHnR2BTruHtwqM1PSkupEmNfMHLh2KYk/NAvMXnpNRA60sTX7kPtAL
-         G9QA==
-X-Gm-Message-State: AGi0PualjVE4AJUfGQHv8aA2/B5A40RaEymzO4KXfv708FXLGJiBp9v0
-        PW5ffw8qIfbODMdSbPKUUNDO5SKNhlw=
-X-Google-Smtp-Source: APiQypKs1XralZ2xpuJEJsfyXQSt7ex/4mhrOaimKzrhLIPk2A27zZq8+qJo3Rovpcol1PZ3P4LfzQ==
-X-Received: by 2002:ac2:550e:: with SMTP id j14mr349553lfk.188.1586880890888;
-        Tue, 14 Apr 2020 09:14:50 -0700 (PDT)
+        bh=dn6VxHUGEp0h+lDNMYkyjs+eaTbjGnRrBr6whuUgNLQ=;
+        b=VEGOIZCunXf1D+XET0icJsBtI8POGn1/nb3krs2bOHUh18CIh1iUhhjvhWtDadlnz/
+         46nN/BXmytsA0tDbp+QQOVgKqSTKcCVoXN3FYaEZpxrgtdEytfgMkuKC0N1ywYZ6bFKD
+         zghh75I7wR2SolxjcMdYGeNvyDzqV2dfMBXB2du6u4EjBFsMD4UiegvGtmtcvJ41n7m1
+         osySGLwzeflf1R6KZj7T8BwZ/AU08/kXusgFroYA22nK6IZUTiLUnr8RQIMp9mg13x5W
+         /VnTj8LP4ZJLfNlio2Jj38LH3LYNKPUx77iz7dQONbQop+dyFEWRoEyLFu/vSkrov6UV
+         pjxw==
+X-Gm-Message-State: AGi0PuZiWC6LZuAGg4X7FZQWkHE52WeBT63X1DBf731obQC7FIcPY2D0
+        7kEC2oUyvzRc5L/jEapk6OgQRtPeIyc=
+X-Google-Smtp-Source: APiQypKJTgim6xv0zsXWcwFDb65pajvh4mKxX6sFBD2V6xhmJiRhFw0cmT67s7GB4L7mKrTfgH0m5w==
+X-Received: by 2002:a19:dcc:: with SMTP id 195mr325522lfn.193.1586880876481;
+        Tue, 14 Apr 2020 09:14:36 -0700 (PDT)
 Received: from localhost.localdomain (h-98-128-181-131.NA.cust.bahnhof.se. [98.128.181.131])
-        by smtp.gmail.com with ESMTPSA id a26sm9330669ljn.22.2020.04.14.09.14.49
+        by smtp.gmail.com with ESMTPSA id a26sm9330669ljn.22.2020.04.14.09.14.34
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 14 Apr 2020 09:14:50 -0700 (PDT)
+        Tue, 14 Apr 2020 09:14:35 -0700 (PDT)
 From:   Ulf Hansson <ulf.hansson@linaro.org>
 To:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 Cc:     Adrian Hunter <adrian.hunter@intel.com>,
@@ -74,11 +74,10 @@ Cc:     Adrian Hunter <adrian.hunter@intel.com>,
         Lars Persson <lars.persson@axis.com>,
         Paul Cercueil <paul@crapouillou.net>,
         Ludovic Desroches <ludovic.desroches@microchip.com>,
-        Nicolas Ferre <nicolas.ferre@microchip.com>,
-        greybus-dev@lists.linaro.org
-Subject: [PATCH 19/19] staging: greybus: sdio: Respect the cmd->busy_timeout from the mmc core
-Date:   Tue, 14 Apr 2020 18:14:13 +0200
-Message-Id: <20200414161413.3036-20-ulf.hansson@linaro.org>
+        Nicolas Ferre <nicolas.ferre@microchip.com>
+Subject: [PATCH 11/19] mmc: sdricoh_cs: Drop redundant in-parameter to sdricoh_query_status()
+Date:   Tue, 14 Apr 2020 18:14:05 +0200
+Message-Id: <20200414161413.3036-12-ulf.hansson@linaro.org>
 X-Mailer: git-send-email 2.20.1
 In-Reply-To: <20200414161413.3036-1-ulf.hansson@linaro.org>
 References: <20200414161413.3036-1-ulf.hansson@linaro.org>
@@ -89,55 +88,65 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Using a fixed 1s timeout for all commands is a bit problematic.
+The in-parameter timeout is always set to TRANSFER_TIMEOUT by the callers
+of sdricoh_query_status(), hence let's drop it.
 
-For some commands it means waiting longer than needed for the timeout to
-expire, which may not a big issue, but still. For other commands, like for
-an erase (CMD38) that uses a R1B response, may require longer timeouts than
-1s. In these cases, we may end up treating the command as it failed, while
-it just needed some more time to complete successfully.
-
-Fix the problem by respecting the cmd->busy_timeout, which is provided by
-the mmc core.
-
-Cc: Rui Miguel Silva <rmfrfs@gmail.com>
-Cc: Johan Hovold <johan@kernel.org>
-Cc: Alex Elder <elder@kernel.org>
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Cc: greybus-dev@lists.linaro.org
+Cc: Sascha Sommer <saschasommer@freenet.de>
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/staging/greybus/sdio.c | 10 +++++++---
- 1 file changed, 7 insertions(+), 3 deletions(-)
+ drivers/mmc/host/sdricoh_cs.c | 15 +++++++--------
+ 1 file changed, 7 insertions(+), 8 deletions(-)
 
-diff --git a/drivers/staging/greybus/sdio.c b/drivers/staging/greybus/sdio.c
-index 68c5718be827..c4b16bb5c1a4 100644
---- a/drivers/staging/greybus/sdio.c
-+++ b/drivers/staging/greybus/sdio.c
-@@ -411,6 +411,7 @@ static int gb_sdio_command(struct gb_sdio_host *host, struct mmc_command *cmd)
- 	struct gb_sdio_command_request request = {0};
- 	struct gb_sdio_command_response response;
- 	struct mmc_data *data = host->mrq->data;
-+	unsigned int timeout_ms;
- 	u8 cmd_flags;
- 	u8 cmd_type;
- 	int i;
-@@ -469,9 +470,12 @@ static int gb_sdio_command(struct gb_sdio_host *host, struct mmc_command *cmd)
- 		request.data_blksz = cpu_to_le16(data->blksz);
- 	}
+diff --git a/drivers/mmc/host/sdricoh_cs.c b/drivers/mmc/host/sdricoh_cs.c
+index e7d74db95b57..97ef7d71375a 100644
+--- a/drivers/mmc/host/sdricoh_cs.c
++++ b/drivers/mmc/host/sdricoh_cs.c
+@@ -123,11 +123,13 @@ static inline unsigned int sdricoh_readb(struct sdricoh_host *host,
+ 	return value;
+ }
  
--	ret = gb_operation_sync(host->connection, GB_SDIO_TYPE_COMMAND,
--				&request, sizeof(request), &response,
--				sizeof(response));
-+	timeout_ms = cmd->busy_timeout ? cmd->busy_timeout :
-+		GB_OPERATION_TIMEOUT_DEFAULT;
+-static int sdricoh_query_status(struct sdricoh_host *host, unsigned int wanted,
+-				unsigned int timeout){
++static int sdricoh_query_status(struct sdricoh_host *host, unsigned int wanted)
++{
+ 	unsigned int loop;
+ 	unsigned int status = 0;
++	unsigned int timeout = TRANSFER_TIMEOUT;
+ 	struct device *dev = host->dev;
 +
-+	ret = gb_operation_sync_timeout(host->connection, GB_SDIO_TYPE_COMMAND,
-+					&request, sizeof(request), &response,
-+					sizeof(response), timeout_ms);
- 	if (ret < 0)
- 		goto out;
+ 	for (loop = 0; loop < timeout; loop++) {
+ 		status = sdricoh_readl(host, R21C_STATUS);
+ 		sdricoh_writel(host, R2E4_STATUS_RESP, status);
+@@ -215,8 +217,7 @@ static int sdricoh_blockio(struct sdricoh_host *host, int read,
+ 	u32 data = 0;
+ 	/* wait until the data is available */
+ 	if (read) {
+-		if (sdricoh_query_status(host, STATUS_READY_TO_READ,
+-						TRANSFER_TIMEOUT))
++		if (sdricoh_query_status(host, STATUS_READY_TO_READ))
+ 			return -ETIMEDOUT;
+ 		sdricoh_writel(host, R21C_STATUS, 0x18);
+ 		/* read data */
+@@ -232,8 +233,7 @@ static int sdricoh_blockio(struct sdricoh_host *host, int read,
+ 			}
+ 		}
+ 	} else {
+-		if (sdricoh_query_status(host, STATUS_READY_TO_WRITE,
+-						TRANSFER_TIMEOUT))
++		if (sdricoh_query_status(host, STATUS_READY_TO_WRITE))
+ 			return -ETIMEDOUT;
+ 		sdricoh_writel(host, R21C_STATUS, 0x18);
+ 		/* write data */
+@@ -323,8 +323,7 @@ static void sdricoh_request(struct mmc_host *mmc, struct mmc_request *mrq)
  
+ 		sdricoh_writel(host, R208_DATAIO, 1);
+ 
+-		if (sdricoh_query_status(host, STATUS_TRANSFER_FINISHED,
+-					TRANSFER_TIMEOUT)) {
++		if (sdricoh_query_status(host, STATUS_TRANSFER_FINISHED)) {
+ 			dev_err(dev, "sdricoh_request: transfer end error\n");
+ 			cmd->error = -EINVAL;
+ 		}
 -- 
 2.20.1
 
