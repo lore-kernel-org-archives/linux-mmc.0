@@ -2,252 +2,122 @@ Return-Path: <SRS0=Q6+y=57=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-0.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2D9D6C2BA19
-	for <linux-mmc@archiver.kernel.org>; Wed, 15 Apr 2020 09:35:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2C96DC2BA19
+	for <linux-mmc@archiver.kernel.org>; Wed, 15 Apr 2020 09:45:37 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0D97820771
-	for <linux-mmc@archiver.kernel.org>; Wed, 15 Apr 2020 09:35:22 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0D28020787
+	for <linux-mmc@archiver.kernel.org>; Wed, 15 Apr 2020 09:45:36 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="HlDX9VqN"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2895626AbgDOJfV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 15 Apr 2020 05:35:21 -0400
-Received: from mga06.intel.com ([134.134.136.31]:10350 "EHLO mga06.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2895613AbgDOJfT (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 15 Apr 2020 05:35:19 -0400
-IronPort-SDR: HOxahpQ08nuLL3rHiQN1oMTcqGy8j0ipai/oxjZ4grQpfLDjBfykxgGZgC7Ymij0JYk6fxATpp
- G7vlCt5WB4YA==
-X-Amp-Result: SKIPPED(no attachment in message)
-X-Amp-File-Uploaded: False
-Received: from orsmga001.jf.intel.com ([10.7.209.18])
-  by orsmga104.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 15 Apr 2020 02:35:18 -0700
-IronPort-SDR: k4rRel3jDwOX9z9ZY15vHKbdib2oiO1AyNV9W1xXF+YaVV8LKuXXH7IdhwsYYovzclndUvdm7d
- u5JZuYKtSOHA==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.72,386,1580803200"; 
-   d="scan'208";a="332447829"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.87]) ([10.237.72.87])
-  by orsmga001.jf.intel.com with ESMTP; 15 Apr 2020 02:35:14 -0700
-Subject: Re: [PATCH 2/2] mmc: sdhci: use FIELD_GET/PREP for capabilities bit
- masks
-To:     Masahiro Yamada <yamada.masahiro@socionext.com>,
-        linux-mmc@vger.kernel.org
-Cc:     linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
-        masahiroy@kernel.org,
-        Alexandre Belloni <alexandre.belloni@bootlin.com>,
-        Fabio Estevam <festevam@gmail.com>,
-        Ludovic Desroches <ludovic.desroches@microchip.com>,
-        NXP Linux Team <linux-imx@nxp.com>,
-        Nicolas Ferre <nicolas.ferre@microchip.com>,
-        Pengutronix Kernel Team <kernel@pengutronix.de>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        Shawn Guo <shawnguo@kernel.org>,
-        linux-arm-kernel@lists.infradead.org
-References: <20200408072105.422-1-yamada.masahiro@socionext.com>
- <20200408072105.422-2-yamada.masahiro@socionext.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <3cc8c9b8-b957-2fef-d6da-47980d1926aa@intel.com>
-Date:   Wed, 15 Apr 2020 12:34:25 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.5.0
+        id S2895785AbgDOJpd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 15 Apr 2020 05:45:33 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51190 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-FAIL-OK-FAIL)
+        by vger.kernel.org with ESMTP id S2895777AbgDOJp1 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Apr 2020 05:45:27 -0400
+Received: from mail-vs1-xe41.google.com (mail-vs1-xe41.google.com [IPv6:2607:f8b0:4864:20::e41])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0D119C061A0C
+        for <linux-mmc@vger.kernel.org>; Wed, 15 Apr 2020 02:45:27 -0700 (PDT)
+Received: by mail-vs1-xe41.google.com with SMTP id g184so654361vsc.0
+        for <linux-mmc@vger.kernel.org>; Wed, 15 Apr 2020 02:45:26 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=IKneV1QmlQeFe14d2ij+c/DrY29o4dYLg5OuU7iOZ00=;
+        b=HlDX9VqN/q1XOlTmbmOLIVOx/7tesuanSLl06t1gTwR9us6rzItr66I7aA8sWlwvEt
+         Na7MZjbi8HHUdZewMqSKPkCrWStLSVSxEKeGqQFcRPReLypSDYAQ1Oz2CSeHB3X4Yvz9
+         hz+1ueYW09VBx0IRIfCY/X9b9NOrrutAiU8r0A9kis4tmjqJbNto0YKC6wZewTGtdfH8
+         s6JYidkh7NYDf9LWC0g6QnKPdBTLZLLzFVa0Fd56XqptXrevZtj29JHEBTCV8VBlY32/
+         oG5L3M+X5qnucPyjFLgxx7fIIcv16/qBT28UnQqcDYjyMZBZdwIoLlhavP15Ytbix5rZ
+         w7OQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=IKneV1QmlQeFe14d2ij+c/DrY29o4dYLg5OuU7iOZ00=;
+        b=fTehVvCS5Okq56Of4wjzk5GxifR0Mml03FvgYkgFgEdCGcLiNztG0dBhtGQy6Askwh
+         xePPRyXQLSCM3ss2uFZ8Kh9ITtHSw/E4HlYHkYHREmd7ssdeU9nLh4lTFCkkEWtpQi7h
+         B3zrj+nWLbCQ89VpoEO+dIP1iL9IyfakVBTHB8c39AhdwT2B15+ZcJKDpop2txya5Q9r
+         eRRlZCrNNggz1tI83xTR7InD9s0MZsUW+0kUf+Wpvs08X18lueF926brJ22XNDm2UpFS
+         RQPCt7VC1jZ2J76wxDYIIguTeLwpkRen0/7cXptBcWMMGsfNXZWkeUaJeRDAgJfjQNKk
+         oQzQ==
+X-Gm-Message-State: AGi0PuaAb9W5q7/L0L0B3Tlqcc4ApLKewS6VZbSwGjWIHFUcQWpFCXMe
+        b41+h4T9heG1IkYQ0Qc+hEpLIP62jO2pj6Y/01fZYw==
+X-Google-Smtp-Source: APiQypK/eCTR6aPxe1VJ6fthD5zd+fP4epl+3QgyBuboiAKFXdVoJb/FjRC5Dv0EcwpOxHHLvsE+rKAnzhRmYHvHqxo=
+X-Received: by 2002:a67:11c4:: with SMTP id 187mr3694939vsr.34.1586943926106;
+ Wed, 15 Apr 2020 02:45:26 -0700 (PDT)
 MIME-Version: 1.0
-In-Reply-To: <20200408072105.422-2-yamada.masahiro@socionext.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+References: <1586165281-11888-1-git-send-email-chun-hung.wu@mediatek.com>
+In-Reply-To: <1586165281-11888-1-git-send-email-chun-hung.wu@mediatek.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Wed, 15 Apr 2020 11:44:50 +0200
+Message-ID: <CAPDyKFrTSzTmHwChytRe8YVzYZk8LUuXALK_zk8M4ZCH=Owtag@mail.gmail.com>
+Subject: Re: [PATCH v4 0/5] mmc: mediatek: add mmc cqhci support
+To:     Chun-Hung Wu <chun-hung.wu@mediatek.com>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        Yong Mao <yong.mao@mediatek.com>
+Cc:     Matthias Brugger <matthias.bgg@gmail.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 8/04/20 10:21 am, Masahiro Yamada wrote:
-> Use FIELD_GET and FIELD_PREP to get access to the register fields.
-> Delete the shift macros. I used GENMASK() for touched macros.
+- trimmed cc-list (please do so at your next submission, as to get a
+bigger chance of getting feedback)
++ Yong Mao (I would like Yong or Chaotian to at least ack this, before
+I can apply).
 
-That has the side-effect of changing the constants to 64-bit on 64-bit
-platforms, which needs to be mentioned in the commit message.
+On Mon, 6 Apr 2020 at 11:28, Chun-Hung Wu <chun-hung.wu@mediatek.com> wrote:
+>
+> This series provides MediaTek cqhci implementations as below:
+>   - Extend mmc_of_parse() to parse CQE bindings
+>   - Remove redundant host CQE bindings
+>   - Refine msdc timeout api to reduce redundant code
+>   - MediaTek command queue support
+>   - dt-bindings for mt6779
+>
+> v1 -> v2:
+>   - Add more patch details in commit message
+>   - Separate msdc timeout api refine to individual patch
+>
+> v2 -> v3:
+>   - Remove CR-Id, Change-Id and Feature in patches
+>   - Add Signed-off-by in patches
+>
+> v3 -> v4:
+>   - Refine CQE bindings in mmc_of_parse (Ulf Hansson)
+>   - Remove redundant host CQE bindings (Linux Walleij)
+>
+> Chun-Hung Wu (5):
+>   [1/5] mmc: core: Extend mmc_of_parse() to parse CQE bindings
+>   [2/5] mmc: host: Remove redundant CQE bindings
+>   [3/5] mmc: mediatek: refine msdc timeout api
+>   [4/5] mmc: mediatek: command queue support
+>   [5/5] dt-bindings: mmc: mediatek: Add document for mt6779
+>
+>  Documentation/devicetree/bindings/mmc/mtk-sd.txt |   1 +
+>  drivers/mmc/core/host.c                          |   5 +
+>  drivers/mmc/host/mtk-sd.c                        | 151 +++++++++++++++++++++--
+>  drivers/mmc/host/sdhci-brcmstb.c                 |  11 +-
+>  drivers/mmc/host/sdhci-msm.c                     |   3 +-
+>  drivers/mmc/host/sdhci-of-arasan.c               |   3 -
+>  drivers/mmc/host/sdhci-tegra.c                   |   2 +-
+>  7 files changed, 155 insertions(+), 21 deletions(-)
+>
+> --
+> 1.9.1
 
-> 
-> Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
+At the next submission, would you mind please stick to the following
+type of header format for each patch "[PATCH v4 2/4]....", as I think
+it's currently a bit confusing.
 
-Apart from above:
-
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-
-> ---
-> 
->  drivers/mmc/host/sdhci-esdhc-imx.c |  4 +++-
->  drivers/mmc/host/sdhci-of-at91.c   |  5 +++--
->  drivers/mmc/host/sdhci-pci-core.c  |  8 ++------
->  drivers/mmc/host/sdhci.c           | 19 +++++++------------
->  drivers/mmc/host/sdhci.h           | 17 ++++++-----------
->  5 files changed, 21 insertions(+), 32 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-> index 5ec8e4bf1ac7..38cd83118082 100644
-> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -8,6 +8,7 @@
->   *   Author: Wolfram Sang <kernel@pengutronix.de>
->   */
->  
-> +#include <linux/bitfield.h>
->  #include <linux/io.h>
->  #include <linux/iopoll.h>
->  #include <linux/delay.h>
-> @@ -399,7 +400,8 @@ static u32 esdhc_readl_le(struct sdhci_host *host, int reg)
->  				val = SDHCI_SUPPORT_DDR50 | SDHCI_SUPPORT_SDR104
->  					| SDHCI_SUPPORT_SDR50
->  					| SDHCI_USE_SDR50_TUNING
-> -					| (SDHCI_TUNING_MODE_3 << SDHCI_RETUNING_MODE_SHIFT);
-> +					| FIELD_PREP(SDHCI_RETUNING_MODE_MASK,
-> +						     SDHCI_TUNING_MODE_3);
->  
->  			if (imx_data->socdata->flags & ESDHC_FLAG_HS400)
->  				val |= SDHCI_SUPPORT_HS400;
-> diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
-> index c79bff5e2280..25f4e0f4f53b 100644
-> --- a/drivers/mmc/host/sdhci-of-at91.c
-> +++ b/drivers/mmc/host/sdhci-of-at91.c
-> @@ -6,6 +6,7 @@
->   *		 2015 Ludovic Desroches <ludovic.desroches@atmel.com>
->   */
->  
-> +#include <linux/bitfield.h>
->  #include <linux/clk.h>
->  #include <linux/delay.h>
->  #include <linux/err.h>
-> @@ -179,9 +180,9 @@ static int sdhci_at91_set_clks_presets(struct device *dev)
->  	clk_mul = gck_rate / clk_base_rate - 1;
->  
->  	caps0 &= ~SDHCI_CLOCK_V3_BASE_MASK;
-> -	caps0 |= (clk_base << SDHCI_CLOCK_BASE_SHIFT) & SDHCI_CLOCK_V3_BASE_MASK;
-> +	caps0 |= FIELD_PREP(SDHCI_CLOCK_V3_BASE_MASK, clk_base);
->  	caps1 &= ~SDHCI_CLOCK_MUL_MASK;
-> -	caps1 |= (clk_mul << SDHCI_CLOCK_MUL_SHIFT) & SDHCI_CLOCK_MUL_MASK;
-> +	caps1 |= FIELD_PREP(SDHCI_CLOCK_MUL_MASK, clk_mul);
->  	/* Set capabilities in r/w mode. */
->  	writel(SDMMC_CACR_KEY | SDMMC_CACR_CAPWREN, host->ioaddr + SDMMC_CACR);
->  	writel(caps0, host->ioaddr + SDHCI_CAPABILITIES);
-> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-> index 525de2454a4d..a98c9476bfc8 100644
-> --- a/drivers/mmc/host/sdhci-pci-core.c
-> +++ b/drivers/mmc/host/sdhci-pci-core.c
-> @@ -249,12 +249,8 @@ static int ricoh_probe(struct sdhci_pci_chip *chip)
->  static int ricoh_mmc_probe_slot(struct sdhci_pci_slot *slot)
->  {
->  	slot->host->caps =
-> -		((0x21 << SDHCI_TIMEOUT_CLK_SHIFT)
-> -			& SDHCI_TIMEOUT_CLK_MASK) |
-> -
-> -		((0x21 << SDHCI_CLOCK_BASE_SHIFT)
-> -			& SDHCI_CLOCK_BASE_MASK) |
-> -
-> +		FIELD_PREP(SDHCI_TIMEOUT_CLK_MASK, 0x21) |
-> +		FIELD_PREP(SDHCI_CLOCK_BASE_MASK, 0x21) |
->  		SDHCI_TIMEOUT_CLK_UNIT |
->  		SDHCI_CAN_VDD_330 |
->  		SDHCI_CAN_DO_HISPD |
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 3f716466fcfd..344a7e0e33fe 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -4117,11 +4117,9 @@ int sdhci_setup_host(struct sdhci_host *host)
->  	}
->  
->  	if (host->version >= SDHCI_SPEC_300)
-> -		host->max_clk = (host->caps & SDHCI_CLOCK_V3_BASE_MASK)
-> -			>> SDHCI_CLOCK_BASE_SHIFT;
-> +		host->max_clk = FIELD_GET(SDHCI_CLOCK_V3_BASE_MASK, host->caps);
->  	else
-> -		host->max_clk = (host->caps & SDHCI_CLOCK_BASE_MASK)
-> -			>> SDHCI_CLOCK_BASE_SHIFT;
-> +		host->max_clk = FIELD_GET(SDHCI_CLOCK_BASE_MASK, host->caps);
->  
->  	host->max_clk *= 1000000;
->  	if (host->max_clk == 0 || host->quirks &
-> @@ -4139,8 +4137,7 @@ int sdhci_setup_host(struct sdhci_host *host)
->  	 * In case of Host Controller v3.00, find out whether clock
->  	 * multiplier is supported.
->  	 */
-> -	host->clk_mul = (host->caps1 & SDHCI_CLOCK_MUL_MASK) >>
-> -			SDHCI_CLOCK_MUL_SHIFT;
-> +	host->clk_mul = FIELD_GET(SDHCI_CLOCK_MUL_MASK, host->caps1);
->  
->  	/*
->  	 * In case the value in Clock Multiplier is 0, then programmable
-> @@ -4173,8 +4170,7 @@ int sdhci_setup_host(struct sdhci_host *host)
->  		mmc->f_max = max_clk;
->  
->  	if (!(host->quirks & SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK)) {
-> -		host->timeout_clk = (host->caps & SDHCI_TIMEOUT_CLK_MASK) >>
-> -					SDHCI_TIMEOUT_CLK_SHIFT;
-> +		host->timeout_clk = FIELD_GET(SDHCI_TIMEOUT_CLK_MASK, host->caps);
->  
->  		if (host->caps & SDHCI_TIMEOUT_CLK_UNIT)
->  			host->timeout_clk *= 1000;
-> @@ -4326,8 +4322,8 @@ int sdhci_setup_host(struct sdhci_host *host)
->  		mmc->caps |= MMC_CAP_DRIVER_TYPE_D;
->  
->  	/* Initial value for re-tuning timer count */
-> -	host->tuning_count = (host->caps1 & SDHCI_RETUNING_TIMER_COUNT_MASK) >>
-> -			     SDHCI_RETUNING_TIMER_COUNT_SHIFT;
-> +	host->tuning_count = FIELD_GET(SDHCI_RETUNING_TIMER_COUNT_MASK,
-> +				       host->caps1);
->  
->  	/*
->  	 * In case Re-tuning Timer is not disabled, the actual value of
-> @@ -4337,8 +4333,7 @@ int sdhci_setup_host(struct sdhci_host *host)
->  		host->tuning_count = 1 << (host->tuning_count - 1);
->  
->  	/* Re-tuning mode supported by the Host Controller */
-> -	host->tuning_mode = (host->caps1 & SDHCI_RETUNING_MODE_MASK) >>
-> -			     SDHCI_RETUNING_MODE_SHIFT;
-> +	host->tuning_mode = FIELD_GET(SDHCI_RETUNING_MODE_MASK, host->caps1);
->  
->  	ocr_avail = 0;
->  
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index b786b68e0302..d7f1441b0fc3 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -200,12 +200,10 @@
->  #define  SDHCI_CTRL_PRESET_VAL_ENABLE	0x8000
->  
->  #define SDHCI_CAPABILITIES	0x40
-> -#define  SDHCI_TIMEOUT_CLK_MASK	0x0000003F
-> -#define  SDHCI_TIMEOUT_CLK_SHIFT 0
-> +#define  SDHCI_TIMEOUT_CLK_MASK		GENMASK(5, 0)
->  #define  SDHCI_TIMEOUT_CLK_UNIT	0x00000080
-> -#define  SDHCI_CLOCK_BASE_MASK	0x00003F00
-> -#define  SDHCI_CLOCK_V3_BASE_MASK	0x0000FF00
-> -#define  SDHCI_CLOCK_BASE_SHIFT	8
-> +#define  SDHCI_CLOCK_BASE_MASK		GENMASK(13, 8)
-> +#define  SDHCI_CLOCK_V3_BASE_MASK	GENMASK(15, 8)
->  #define  SDHCI_MAX_BLOCK_MASK	0x00030000
->  #define  SDHCI_MAX_BLOCK_SHIFT  16
->  #define  SDHCI_CAN_DO_8BIT	0x00040000
-> @@ -227,13 +225,10 @@
->  #define  SDHCI_DRIVER_TYPE_A	0x00000010
->  #define  SDHCI_DRIVER_TYPE_C	0x00000020
->  #define  SDHCI_DRIVER_TYPE_D	0x00000040
-> -#define  SDHCI_RETUNING_TIMER_COUNT_MASK	0x00000F00
-> -#define  SDHCI_RETUNING_TIMER_COUNT_SHIFT	8
-> +#define  SDHCI_RETUNING_TIMER_COUNT_MASK	GENMASK(11, 8)
->  #define  SDHCI_USE_SDR50_TUNING			0x00002000
-> -#define  SDHCI_RETUNING_MODE_MASK		0x0000C000
-> -#define  SDHCI_RETUNING_MODE_SHIFT		14
-> -#define  SDHCI_CLOCK_MUL_MASK	0x00FF0000
-> -#define  SDHCI_CLOCK_MUL_SHIFT	16
-> +#define  SDHCI_RETUNING_MODE_MASK		GENMASK(15, 14)
-> +#define  SDHCI_CLOCK_MUL_MASK			GENMASK(23, 16)
->  #define  SDHCI_CAN_DO_ADMA3	0x08000000
->  #define  SDHCI_SUPPORT_HS400	0x80000000 /* Non-standard */
->  
-> 
-
+Kind regards
+Uffe
