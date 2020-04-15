@@ -2,75 +2,220 @@ Return-Path: <SRS0=Q6+y=57=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.4 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.1 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 39D1CC2BB85
-	for <linux-mmc@archiver.kernel.org>; Wed, 15 Apr 2020 16:28:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 357DDC2BA19
+	for <linux-mmc@archiver.kernel.org>; Wed, 15 Apr 2020 16:44:10 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 19BA2206F9
-	for <linux-mmc@archiver.kernel.org>; Wed, 15 Apr 2020 16:28:52 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0BBB5208FE
+	for <linux-mmc@archiver.kernel.org>; Wed, 15 Apr 2020 16:44:10 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=rere.qmqm.pl header.i=@rere.qmqm.pl header.b="PAbQsHWp"
+	dkim=fail reason="signature verification failed" (1024-bit key) header.d=mg.codeaurora.org header.i=@mg.codeaurora.org header.b="TZOCBcXp"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1416013AbgDOQ2u (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 15 Apr 2020 12:28:50 -0400
-Received: from rere.qmqm.pl ([91.227.64.183]:12688 "EHLO rere.qmqm.pl"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1415786AbgDOQ2n (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 15 Apr 2020 12:28:43 -0400
-Received: from remote.user (localhost [127.0.0.1])
-        by rere.qmqm.pl (Postfix) with ESMTPSA id 492STj0yyrzCQ;
-        Wed, 15 Apr 2020 18:28:40 +0200 (CEST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=rere.qmqm.pl; s=1;
-        t=1586968121; bh=Rsasm2lhH1ZJqFeV4sB6sJTDdBy82LDRARlwkGNJNWs=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=PAbQsHWpbLD2Fo46RRsCnjnjAl/uJZvNeVFbsI4Dn2X8xsLouAhK+Nm42rC+0RS1l
-         ryd81UC0NcB2qSWxgV7cNM+luxbeNGj2KwDhTEk13m5zrRKZ+UMOjI46fCnKyBOSdg
-         4Ft6jkgljR6fRaSKTHT8lPTCkxCqZLnjDCjGtwv5kxQpQG3VtQ3UReeSbhooagqJ3t
-         BNmvdT0zjOxdhqRDWj1T9QszgHlYKtDKFRsELBhHc7cdgvilIuzkHnVjBJ+XmxDql8
-         NJloG6QxssZVgVZ/vCwgoxSyeloGRA5rhw7K8ot+1Gb2Jb8IAdc5xJmKzBoexgWKeR
-         6EBa6MjRMorcw==
-X-Virus-Status: Clean
-X-Virus-Scanned: clamav-milter 0.102.2 at mail
-Date:   Wed, 15 Apr 2020 18:28:39 +0200
-From:   =?iso-8859-2?Q?Micha=B3_Miros=B3aw?= <mirq-linux@rere.qmqm.pl>
-To:     Adrian Hunter <adrian.hunter@intel.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Kevin Liu <kliu5@marvell.com>,
-        Michal Simek <michal.simek@xilinx.com>,
-        Suneel Garapati <suneel.garapati@xilinx.com>,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH 1/7] mmc: sdhci: fix base clock usage in preset value
-Message-ID: <20200415162839.GD19897@qmqm.qmqm.pl>
-References: <cover.1585827904.git.mirq-linux@rere.qmqm.pl>
- <23c3fe72b0ff0eabdbf3a45023a76da1b18a7e90.1585827904.git.mirq-linux@rere.qmqm.pl>
- <218dd61b-48cc-a161-240f-b3823e8f48cb@intel.com>
+        id S1416178AbgDOQoH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 15 Apr 2020 12:44:07 -0400
+Received: from mail26.static.mailgun.info ([104.130.122.26]:62667 "EHLO
+        mail26.static.mailgun.info" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S2404596AbgDOQoA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Apr 2020 12:44:00 -0400
+DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
+ s=smtp; t=1586969039; h=Content-Transfer-Encoding: Content-Type:
+ In-Reply-To: MIME-Version: Date: Message-ID: From: References: Cc: To:
+ Subject: Sender; bh=S5OWgppMszTi73VbpoM9eu/98YhTDWaVCVkdl2z9VJM=; b=TZOCBcXpWTA1sC/p16X8btaz8KeaovIweBMKakEXi0tZ5grqzqTyPOpxYv9U0tD7km9sGT/H
+ wP8GcZ8xJOgE49KvyjY4wqrndhldgZIjdGfCv+BSQfsvifjzZrULiNFJCqIsgyW5QTUwYcrJ
+ pr7yW2IWGdZhm4zyIUmJVGksIwk=
+X-Mailgun-Sending-Ip: 104.130.122.26
+X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
+Received: from smtp.codeaurora.org (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171])
+ by mxa.mailgun.org with ESMTP id 5e9739b0.7ff5c5d787a0-smtp-out-n05;
+ Wed, 15 Apr 2020 16:43:28 -0000 (UTC)
+Received: by smtp.codeaurora.org (Postfix, from userid 1001)
+        id 93C68C433BA; Wed, 15 Apr 2020 16:43:27 +0000 (UTC)
+Received: from [10.111.193.245] (blr-bdr-fw-01_GlobalNAT_AllZones-Outside.qualcomm.com [103.229.18.19])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        (Authenticated sender: rnayak)
+        by smtp.codeaurora.org (Postfix) with ESMTPSA id BCE36C433F2;
+        Wed, 15 Apr 2020 16:43:22 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.3.2 smtp.codeaurora.org BCE36C433F2
+Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
+Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=none smtp.mailfrom=rnayak@codeaurora.org
+Subject: Re: [PATCH 13/21] mmc: sdhci-msm: Use OPP API to set clk/perf state
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Viresh Kumar <viresh.kumar@linaro.org>,
+        Stephen Boyd <sboyd@kernel.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Andy Gross <agross@kernel.org>,
+        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
+        DTML <devicetree@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        Pradeep P V K <ppvk@codeaurora.org>,
+        Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
+        Subhash Jadavani <subhashj@codeaurora.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+References: <1586353607-32222-1-git-send-email-rnayak@codeaurora.org>
+ <1586353607-32222-14-git-send-email-rnayak@codeaurora.org>
+ <CAPDyKFrOFOLCWHu8nE4i5t=d+Ei-kcJ15_42Ft3ROSUDe5jkpw@mail.gmail.com>
+From:   Rajendra Nayak <rnayak@codeaurora.org>
+Message-ID: <3e5f8e78-7cd1-30fb-e005-78c1e7111794@codeaurora.org>
+Date:   Wed, 15 Apr 2020 22:13:19 +0530
+User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:68.0) Gecko/20100101
+ Thunderbird/68.6.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-2
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <218dd61b-48cc-a161-240f-b3823e8f48cb@intel.com>
-User-Agent: Mutt/1.10.1 (2018-07-13)
+In-Reply-To: <CAPDyKFrOFOLCWHu8nE4i5t=d+Ei-kcJ15_42Ft3ROSUDe5jkpw@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Apr 15, 2020 at 03:25:52PM +0300, Adrian Hunter wrote:
-> On 2/04/20 2:54 pm, Micha³ Miros³aw wrote:
-> > Fixed commit added an unnecessary read of CLOCK_CONTROL. The value read
-> > is overwritten for programmable clock preset, but is carried over for
-> > divided clock preset. This can confuse sdhci_enable_clk() if the register
-> > has enable bits set for some reason at time time of clock calculation.
-> > value to be ORed with enable flags. Remove the read.
+
+
+On 4/15/2020 7:22 PM, Ulf Hansson wrote:
+> On Wed, 8 Apr 2020 at 15:48, Rajendra Nayak <rnayak@codeaurora.org> wrote:
+>>
+>> On some qualcomm SoCs we need to vote on a performance state of a power
+>> domain depending on the clock rates. Hence move to using OPP api to set
+>> the clock rate and performance state specified in the OPP table.
+>> On platforms without an OPP table, dev_pm_opp_set_rate() is eqvivalent to
+>> clk_set_rate()
+>>
+>> Signed-off-by: Rajendra Nayak <rnayak@codeaurora.org>
+>> Cc: Ulf Hansson <ulf.hansson@linaro.org>
+>> Cc: Pradeep P V K <ppvk@codeaurora.org>
+>> Cc: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+>> Cc: Subhash Jadavani <subhashj@codeaurora.org>
+>> Cc: linux-mmc@vger.kernel.org
 > 
-> The read is not needed, but drivers usually manage the enable bits,
-> especially disabling the clock before changing the frequency.  What driver
-> is it?
+> This looks good to me!
+> 
+> However, are there any of the other patches in the series that
+> $subject patch depends on - or can I apply this as a standalone mmc
+> patch?
 
-Hopefully no driver requires this. It's just removing a trap.
+Hey Ulf, thanks for the review. I'll just need to respin these to make
+sure I do not do a dev_pm_opp_of_remove_table() if dev_pm_opp_of_add_table()
+isn;t successful as discussed with Viresh on another thread [1]
 
-Best Regards,
-Micha³ Miros³aw
+As for the dependencies, its only PATCH 01/21 in this series and that's
+already been queued by Viresh [2]
+
+[1] https://lkml.org/lkml/2020/4/15/18
+[2] https://lkml.org/lkml/2020/4/14/98
+
+> 
+> Kind regards
+> Uffe
+> 
+>> ---
+>>   drivers/mmc/host/sdhci-msm.c | 20 ++++++++++++++++----
+>>   1 file changed, 16 insertions(+), 4 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+>> index 09ff731..d82075a 100644
+>> --- a/drivers/mmc/host/sdhci-msm.c
+>> +++ b/drivers/mmc/host/sdhci-msm.c
+>> @@ -10,6 +10,7 @@
+>>   #include <linux/delay.h>
+>>   #include <linux/mmc/mmc.h>
+>>   #include <linux/pm_runtime.h>
+>> +#include <linux/pm_opp.h>
+>>   #include <linux/slab.h>
+>>   #include <linux/iopoll.h>
+>>   #include <linux/regulator/consumer.h>
+>> @@ -242,6 +243,7 @@ struct sdhci_msm_host {
+>>          struct clk *xo_clk;     /* TCXO clk needed for FLL feature of cm_dll*/
+>>          struct clk_bulk_data bulk_clks[4]; /* core, iface, cal, sleep clocks */
+>>          unsigned long clk_rate;
+>> +       struct opp_table *opp;
+>>          struct mmc_host *mmc;
+>>          bool use_14lpp_dll_reset;
+>>          bool tuning_done;
+>> @@ -332,7 +334,7 @@ static void msm_set_clock_rate_for_bus_mode(struct sdhci_host *host,
+>>          int rc;
+>>
+>>          clock = msm_get_clock_rate_for_bus_mode(host, clock);
+>> -       rc = clk_set_rate(core_clk, clock);
+>> +       rc = dev_pm_opp_set_rate(mmc_dev(host->mmc), clock);
+>>          if (rc) {
+>>                  pr_err("%s: Failed to set clock at rate %u at timing %d\n",
+>>                         mmc_hostname(host->mmc), clock,
+>> @@ -1963,7 +1965,7 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+>>          msm_host->bulk_clks[0].clk = clk;
+>>
+>>          /* Vote for maximum clock rate for maximum performance */
+>> -       ret = clk_set_rate(clk, INT_MAX);
+>> +       ret = dev_pm_opp_set_rate(&pdev->dev, INT_MAX);
+>>          if (ret)
+>>                  dev_warn(&pdev->dev, "core clock boost failed\n");
+>>
+>> @@ -2087,6 +2089,9 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+>>                  goto clk_disable;
+>>          }
+>>
+>> +       msm_host->opp = dev_pm_opp_set_clkname(&pdev->dev, "core");
+>> +       dev_pm_opp_of_add_table(&pdev->dev);
+>> +
+>>          pm_runtime_get_noresume(&pdev->dev);
+>>          pm_runtime_set_active(&pdev->dev);
+>>          pm_runtime_enable(&pdev->dev);
+>> @@ -2109,10 +2114,12 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+>>          return 0;
+>>
+>>   pm_runtime_disable:
+>> +       dev_pm_opp_of_remove_table(&pdev->dev);
+>>          pm_runtime_disable(&pdev->dev);
+>>          pm_runtime_set_suspended(&pdev->dev);
+>>          pm_runtime_put_noidle(&pdev->dev);
+>>   clk_disable:
+>> +       dev_pm_opp_set_rate(&pdev->dev, 0);
+>>          clk_bulk_disable_unprepare(ARRAY_SIZE(msm_host->bulk_clks),
+>>                                     msm_host->bulk_clks);
+>>   bus_clk_disable:
+>> @@ -2133,10 +2140,12 @@ static int sdhci_msm_remove(struct platform_device *pdev)
+>>
+>>          sdhci_remove_host(host, dead);
+>>
+>> +       dev_pm_opp_of_remove_table(&pdev->dev);
+>>          pm_runtime_get_sync(&pdev->dev);
+>>          pm_runtime_disable(&pdev->dev);
+>>          pm_runtime_put_noidle(&pdev->dev);
+>>
+>> +       dev_pm_opp_set_rate(&pdev->dev, 0);
+>>          clk_bulk_disable_unprepare(ARRAY_SIZE(msm_host->bulk_clks),
+>>                                     msm_host->bulk_clks);
+>>          if (!IS_ERR(msm_host->bus_clk))
+>> @@ -2151,6 +2160,7 @@ static __maybe_unused int sdhci_msm_runtime_suspend(struct device *dev)
+>>          struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>>          struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+>>
+>> +       dev_pm_opp_set_rate(dev, 0);
+>>          clk_bulk_disable_unprepare(ARRAY_SIZE(msm_host->bulk_clks),
+>>                                     msm_host->bulk_clks);
+>>
+>> @@ -2173,9 +2183,11 @@ static __maybe_unused int sdhci_msm_runtime_resume(struct device *dev)
+>>           * restore the SDR DLL settings when the clock is ungated.
+>>           */
+>>          if (msm_host->restore_dll_config && msm_host->clk_rate)
+>> -               return sdhci_msm_restore_sdr_dll_config(host);
+>> +               ret = sdhci_msm_restore_sdr_dll_config(host);
+>>
+>> -       return 0;
+>> +       dev_pm_opp_set_rate(dev, msm_host->clk_rate);
+>> +
+>> +       return ret;
+>>   }
+>>
+>>   static const struct dev_pm_ops sdhci_msm_pm_ops = {
+>> --
+>> QUALCOMM INDIA, on behalf of Qualcomm Innovation Center, Inc. is a member
+>> of Code Aurora Forum, hosted by The Linux Foundation
+
+-- 
+QUALCOMM INDIA, on behalf of Qualcomm Innovation Center, Inc. is a member
+of Code Aurora Forum, hosted by The Linux Foundation
