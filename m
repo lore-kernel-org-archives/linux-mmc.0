@@ -2,138 +2,98 @@ Return-Path: <SRS0=Q6+y=57=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.3 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BF00CC2BA2B
-	for <linux-mmc@archiver.kernel.org>; Wed, 15 Apr 2020 06:41:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 753B4C38A2B
+	for <linux-mmc@archiver.kernel.org>; Wed, 15 Apr 2020 07:20:24 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9850020771
-	for <linux-mmc@archiver.kernel.org>; Wed, 15 Apr 2020 06:41:21 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=axis.com header.i=@axis.com header.b="MQZvE4nV"
+	by mail.kernel.org (Postfix) with ESMTP id 5580D20771
+	for <linux-mmc@archiver.kernel.org>; Wed, 15 Apr 2020 07:20:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2393581AbgDOGlU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 15 Apr 2020 02:41:20 -0400
-Received: from smtp2.axis.com ([195.60.68.18]:48431 "EHLO smtp2.axis.com"
+        id S2441171AbgDOHUW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 15 Apr 2020 03:20:22 -0400
+Received: from mga18.intel.com ([134.134.136.126]:60518 "EHLO mga18.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728535AbgDOGlR (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 15 Apr 2020 02:41:17 -0400
-X-Greylist: delayed 431 seconds by postgrey-1.27 at vger.kernel.org; Wed, 15 Apr 2020 02:41:15 EDT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-  d=axis.com; l=2270; q=dns/txt; s=axis-central1;
-  t=1586932876; x=1618468876;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=B17eEB4899W0+kA+fQXd+xbt+eJyLrMadTEPJoPvTAE=;
-  b=MQZvE4nVs/mgOAeL7lGZ5kztmHInaGzwL6YocZdJvGafeVV+i5C00xsO
-   qidShpUVYVr0uhqa3YElrI8OBzNnNzj4FgaQ3CkNdVFuujAJCPzh3d4xx
-   o5/YhhwHvdZ1wnxQZ1m+pVnlltrbAOI5ZDyT2SusGgHzsboHioZLzqqUM
-   pur1vE9E4sFsTeNCN2YYdSH2BLl7za540Qxty3BeAmbMV3GGwcfDniizU
-   dCHxfkb5yRdIUjEAD+f0dd/3WB4JRimz1uxz+1I/QTwKhggPbnvHVPuwt
-   oViUEVMqLALCIGKXqqXsnOkfD7WyqN2vaFxs6PdDqsssQJ80nqPZbsiSD
-   A==;
-IronPort-SDR: SrpZedr+JNCFoQyG9niN3gd4OISxEveaSvZ08PRT276Dz7sjjnYjEOJWuwC/WeDELyldYLH5X+
- 1ly05WDl8UKkGtWbF/wtyJDa6y3cF7Hz5DYk1FliXVi6G7XYhzazzsuvROGluqGwNdWaGazeIX
- lrqE1tRtifpVFJdoEmLCFCo2j6t61V1tF6g1UtVkdwUoBu6Yo24h1pQfG1DeC1/OVNuc63/AlS
- NJt3e8wVfUCKlP82H+nNMGbtt0bWvnGidu/1RHfk8XMZcyxbP6DusyV0pYQTrBS54ud8wJzFAs
- tzo=
-X-IronPort-AV: E=Sophos;i="5.72,386,1580770800"; 
-   d="scan'208";a="7431371"
-Date:   Wed, 15 Apr 2020 08:34:03 +0200
-From:   Jesper Nilsson <Jesper.Nilsson@axis.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-CC:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Rui Miguel Silva <rmfrfs@gmail.com>,
-        Johan Hovold <johan@kernel.org>, Alex Elder <elder@kernel.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Jonathan =?iso-8859-1?Q?Neusch=E4fer?= <j.neuschaefer@gmx.net>,
-        Bruce Chang <brucechang@via.com.tw>,
-        Harald Welte <HaraldWelte@viatech.com>,
-        Alex Dubov <oakad@yahoo.com>,
-        Sascha Sommer <saschasommer@freenet.de>,
-        Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>,
-        "mirq-linux@rere.qmqm.pl" <mirq-linux@rere.qmqm.pl>,
-        Jesper Nilsson <Jesper.Nilsson@axis.com>,
-        Lars Persson <Lars.Persson@axis.com>,
-        Paul Cercueil <paul@crapouillou.net>,
-        Ludovic Desroches <ludovic.desroches@microchip.com>,
-        Nicolas Ferre <nicolas.ferre@microchip.com>
-Subject: Re: [PATCH 05/19] mmc: usdhi6rol0: Inform the mmc core about the
- maximum busy timeout
-Message-ID: <20200415063403.d3e3auv5engh555b@axis.com>
-References: <20200414161413.3036-1-ulf.hansson@linaro.org>
- <20200414161413.3036-6-ulf.hansson@linaro.org>
+        id S2441149AbgDOHUT (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 15 Apr 2020 03:20:19 -0400
+IronPort-SDR: PaqZ+AhgjoUOcGbCRQoi83QTU4wBFrb6vn7ucmDOHh4+mEW/e2QutXMHLyEq3d0RtZxtoBDSVZ
+ pstsBaGYkw5A==
+X-Amp-Result: SKIPPED(no attachment in message)
+X-Amp-File-Uploaded: False
+Received: from fmsmga007.fm.intel.com ([10.253.24.52])
+  by orsmga106.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 15 Apr 2020 00:20:17 -0700
+IronPort-SDR: filQrUmefFZnsuI2X6HjURYn2GJAKFaqJdDUHDl1jbs6NDIyk22jUx+7DXjhQrFwuoD9Str+50
+ oTIdIdhXOLog==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.72,386,1580803200"; 
+   d="scan'208";a="244032687"
+Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.87]) ([10.237.72.87])
+  by fmsmga007.fm.intel.com with ESMTP; 15 Apr 2020 00:20:14 -0700
+Subject: Re: [PATCH 1/2] mmc: sdhci: move SDHCI_CAPABILITIES_1 to a more
+ suitable place
+To:     Masahiro Yamada <yamada.masahiro@socionext.com>,
+        linux-mmc@vger.kernel.org
+Cc:     linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
+        masahiroy@kernel.org
+References: <20200408072105.422-1-yamada.masahiro@socionext.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Message-ID: <af02a837-c5a9-4d0a-34a4-534e155ac968@intel.com>
+Date:   Wed, 15 Apr 2020 10:19:24 +0300
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.5.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Disposition: inline
-In-Reply-To: <20200414161413.3036-6-ulf.hansson@linaro.org>
-User-Agent: NeoMutt/20170113 (1.7.2)
+In-Reply-To: <20200408072105.422-1-yamada.masahiro@socionext.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Apr 14, 2020 at 06:13:59PM +0200, Ulf Hansson wrote:
-> Some commands uses R1B responses, which means the card may assert the DAT0
-> line to signal busy for a period of time, after it has received the
-> command. The mmc core normally specifies the busy period for the command in
-> the cmd->busy_timeout. Ideally the driver should respect it, but that
-> requires quite some update of the code, so let's defer that to someone with
-> the HW at hand.
+On 8/04/20 10:21 am, Masahiro Yamada wrote:
+> In the SDHCI specification, the Capabilities Register (Offset 0x40h)
+> is the 64-bit width register, but in Linux, it is represented as two
+> registers, SDHCI_CAPABILITIES and SDHCI_CAPABILITIES_1 so that drivers
+> can use 32-bit register accessors.
 > 
-> Instead, let's inform the mmc core about the maximum supported busy timeout
-> in ->max_busy_timeout during ->probe(). This value corresponds to the fixed
-> 4s timeout used by usdhi6rol0. In this way, we let the mmc core validate
-> the needed timeout, which may lead to that it converts from a R1B into a R1
-> response and then use CMD13 to poll for busy completion.
+> The upper 32-bit field is associated with SDHCI_CAPABILITIES_1.
 > 
-> In other words, this change enables support for commands with longer busy
-> periods than 4s, like erase (CMD38) for example.
+> Move the definition of SDHCI_CAPABILITIES_1 to the correct place.
+> 
+> Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
 
-Acked-by: Jesper Nilsson <jesper.nilsson@axis.com>
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-> Cc: Lars Persson <lars.persson@axis.com>
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 > ---
->  drivers/mmc/host/usdhi6rol0.c | 9 ++++++++-
->  1 file changed, 8 insertions(+), 1 deletion(-)
 > 
-> diff --git a/drivers/mmc/host/usdhi6rol0.c b/drivers/mmc/host/usdhi6rol0.c
-> index 9a0b1e4e405d..369b8dee2e3d 100644
-> --- a/drivers/mmc/host/usdhi6rol0.c
-> +++ b/drivers/mmc/host/usdhi6rol0.c
-> @@ -136,6 +136,8 @@
+>  drivers/mmc/host/sdhci.h | 3 +--
+>  1 file changed, 1 insertion(+), 2 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index 79dffbb731d3..b786b68e0302 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -220,6 +220,7 @@
+>  #define  SDHCI_CAN_64BIT_V4	0x08000000
+>  #define  SDHCI_CAN_64BIT	0x10000000
 >  
->  #define USDHI6_MIN_DMA 64
+> +#define SDHCI_CAPABILITIES_1	0x44
+>  #define  SDHCI_SUPPORT_SDR50	0x00000001
+>  #define  SDHCI_SUPPORT_SDR104	0x00000002
+>  #define  SDHCI_SUPPORT_DDR50	0x00000004
+> @@ -236,8 +237,6 @@
+>  #define  SDHCI_CAN_DO_ADMA3	0x08000000
+>  #define  SDHCI_SUPPORT_HS400	0x80000000 /* Non-standard */
 >  
-> +#define USDHI6_REQ_TIMEOUT_MS 4000
-> +
->  enum usdhi6_wait_for {
->  	USDHI6_WAIT_FOR_REQUEST,
->  	USDHI6_WAIT_FOR_CMD,
-> @@ -1763,7 +1765,12 @@ static int usdhi6_probe(struct platform_device *pdev)
->  	host		= mmc_priv(mmc);
->  	host->mmc	= mmc;
->  	host->wait	= USDHI6_WAIT_FOR_REQUEST;
-> -	host->timeout	= msecs_to_jiffies(4000);
-> +	host->timeout	= msecs_to_jiffies(USDHI6_REQ_TIMEOUT_MS);
-> +	/*
-> +	 * We use a fixed timeout of 4s, hence inform the core about it. A
-> +	 * future improvement should instead respect the cmd->busy_timeout.
-> +	 */
-> +	mmc->max_busy_timeout = USDHI6_REQ_TIMEOUT_MS;
->  
->  	host->pinctrl = devm_pinctrl_get(&pdev->dev);
->  	if (IS_ERR(host->pinctrl)) {
-> -- 
-> 2.20.1
+> -#define SDHCI_CAPABILITIES_1	0x44
+> -
+>  #define SDHCI_MAX_CURRENT		0x48
+>  #define  SDHCI_MAX_CURRENT_LIMIT	0xFF
+>  #define  SDHCI_MAX_CURRENT_330_MASK	0x0000FF
 > 
 
-/^JN - Jesper Nilsson
--- 
-               Jesper Nilsson -- jesper.nilsson@axis.com
