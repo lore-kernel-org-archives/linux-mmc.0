@@ -2,96 +2,72 @@ Return-Path: <SRS0=Q6+y=57=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=no
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 64761C3815B
-	for <linux-mmc@archiver.kernel.org>; Wed, 15 Apr 2020 12:45:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7FA22C2BA19
+	for <linux-mmc@archiver.kernel.org>; Wed, 15 Apr 2020 12:47:33 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4DAB3206D5
-	for <linux-mmc@archiver.kernel.org>; Wed, 15 Apr 2020 12:45:56 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 61328206A2
+	for <linux-mmc@archiver.kernel.org>; Wed, 15 Apr 2020 12:47:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S370187AbgDOMpr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 15 Apr 2020 08:45:47 -0400
-Received: from mga11.intel.com ([192.55.52.93]:38139 "EHLO mga11.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2898214AbgDOMpQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 15 Apr 2020 08:45:16 -0400
-IronPort-SDR: z/6xoj2ZU/4X0z5P3Z4Y9rRZzu2YznYM3L0KmvhZ26hUTbpLDGc1K7kQh5GkUkG3MVh/L3Bdop
- J4WfLQqV9rDw==
-X-Amp-Result: SKIPPED(no attachment in message)
-X-Amp-File-Uploaded: False
-Received: from orsmga004.jf.intel.com ([10.7.209.38])
-  by fmsmga102.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 15 Apr 2020 05:45:14 -0700
-IronPort-SDR: q1xBjxILhRQpAuAQ37RLJ2+p/+tMWl0yibVHrlAqFoKxKj+N4QMVKNnfxcIB+5B9fk71i+ZJ3U
- 2HwW4Yh2h3zg==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.72,386,1580803200"; 
-   d="scan'208";a="400302526"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.87]) ([10.237.72.87])
-  by orsmga004.jf.intel.com with ESMTP; 15 Apr 2020 05:45:10 -0700
-Subject: Re: [PATCH 2/7] mmc: sdhci: fix programmable clock config from preset
- value
-To:     =?UTF-8?B?TWljaGHFgiBNaXJvc8WCYXc=?= <mirq-linux@rere.qmqm.pl>,
-        Kevin Liu <kliu5@marvell.com>,
-        Michal Simek <michal.simek@xilinx.com>,
-        Suneel Garapati <suneel.garapati@xilinx.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
-References: <cover.1585827904.git.mirq-linux@rere.qmqm.pl>
- <0077b8bc2a4da024a3b985dd622674ebebe5b71b.1585827904.git.mirq-linux@rere.qmqm.pl>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <94e170c9-e4cd-2109-667c-f6c81f65acd3@intel.com>
-Date:   Wed, 15 Apr 2020 15:44:20 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.5.0
+        id S370256AbgDOMrX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 15 Apr 2020 08:47:23 -0400
+Received: from mail-oi1-f195.google.com ([209.85.167.195]:34782 "EHLO
+        mail-oi1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S370236AbgDOMrO (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Apr 2020 08:47:14 -0400
+Received: by mail-oi1-f195.google.com with SMTP id x10so3902444oie.1;
+        Wed, 15 Apr 2020 05:47:13 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=xLsRqGxN7CRUuHynugV/dOQpcFOuJNeks2tWDx1w9w0=;
+        b=lR6pyNQwB5djVCJyHqDC6n37DtK4XtXUjXI0S4fOtdeTpXI37leQdm8sjA6pY7okeZ
+         Lb/filwF82MoVkcGnM+mXeXSZDVrnqroGy37lQE2x0eiBNSgE+udNMZejpoo+wEl2xnU
+         Y2NtAJouGExnsep993KUpsEXfHHg3hqXSQ28dxZnaQxfVj1/H9Ly/iJsMYeHQrk4NEht
+         Hu91iwSeDivQyYTM6GZUt5Pk5zEVncxvURIpkYLa1D6dS+xuPBhcxg8KPC7BuR9VPtFe
+         vvGsbclzyb/SjQlfn2CkKjpt8w7Y1YrE9TLY9FkAhSxiCldJWsM0N0HNTrQvjYVjlCeh
+         XuIw==
+X-Gm-Message-State: AGi0PuYIAqctRXvBAocb80JpzOW0X+Hh6DCV2qN56lyGKl8cg+4adn0R
+        NFNztS3Er6L/G2yRZ8dHDhidj2gvONnzoT4hhYGjFQ==
+X-Google-Smtp-Source: APiQypKwQYj/IHMbKmL5uShl0HH0tk8mYpgEAj+clJJq0K27C2jUSWNt2RXa/FGflGN19821/Un3Az0+822tmhAKTeY=
+X-Received: by 2002:aca:f541:: with SMTP id t62mr4381212oih.148.1586954833052;
+ Wed, 15 Apr 2020 05:47:13 -0700 (PDT)
 MIME-Version: 1.0
-In-Reply-To: <0077b8bc2a4da024a3b985dd622674ebebe5b71b.1585827904.git.mirq-linux@rere.qmqm.pl>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+References: <20200408142252.21958-1-wsa+renesas@sang-engineering.com>
+In-Reply-To: <20200408142252.21958-1-wsa+renesas@sang-engineering.com>
+From:   Geert Uytterhoeven <geert@linux-m68k.org>
+Date:   Wed, 15 Apr 2020 14:47:01 +0200
+Message-ID: <CAMuHMdU1XRQpnf7Q6XRPBLC0u-H84qw6=N3Szn1E6f-B-EDXPw@mail.gmail.com>
+Subject: Re: [PATCH] mmc: renesas_sdhi: simplify summary output
+To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc:     Linux MMC List <linux-mmc@vger.kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 2/04/20 2:54 pm, Michał Mirosław wrote:
-> When host controller uses programmable clock presets but doesn't
-> advertise programmable clock support, we can only guess what frequency
-> it generates. Let's at least return correct SDHCI_PROG_CLOCK_MODE bit
-> value in this case.
+On Wed, Apr 8, 2020 at 5:17 PM Wolfram Sang
+<wsa+renesas@sang-engineering.com> wrote:
+> No need to call platform_get_resource twice when we still have the
+> pointer from before. Also, use '%pa' for a resource_size_t pointer.
+>
+> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-It sounds like the hardware is broken, so I tend to think a workaround
-should be in the relevant vendor driver, because that is where
-device-specific information really belongs.
+Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
 
-> 
-> Fixes: 52983382c74f ("mmc: sdhci: enhance preset value function")
-> Signed-off-by: Michał Mirosław <mirq-linux@rere.qmqm.pl>
-> ---
->  drivers/mmc/host/sdhci.c | 5 ++---
->  1 file changed, 2 insertions(+), 3 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 9aa3af5826df..b2dc4f1cfa5c 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -1767,11 +1767,10 @@ u16 sdhci_calc_clk(struct sdhci_host *host, unsigned int clock,
->  
->  			pre_val = sdhci_get_preset_value(host);
->  			div = FIELD_GET(SDHCI_PRESET_SDCLK_FREQ_MASK, pre_val);
-> -			if (host->clk_mul &&
-> -				(pre_val & SDHCI_PRESET_CLKGEN_SEL)) {
-> +			if (pre_val & SDHCI_PRESET_CLKGEN_SEL) {
->  				clk = SDHCI_PROG_CLOCK_MODE;
->  				real_div = div + 1;
-> -				clk_mul = host->clk_mul;
-> +				clk_mul = host->clk_mul ?: 1;
->  			} else {
->  				real_div = max_t(int, 1, div << 1);
->  			}
-> 
+Gr{oetje,eeting}s,
 
+                        Geert
+
+-- 
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
