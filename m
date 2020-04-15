@@ -2,206 +2,183 @@ Return-Path: <SRS0=Q6+y=57=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-4.0 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,UNWANTED_LANGUAGE_BODY,URIBL_BLOCKED
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 63EAEC38A29
-	for <linux-mmc@archiver.kernel.org>; Wed, 15 Apr 2020 13:53:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 81F82C2BA19
+	for <linux-mmc@archiver.kernel.org>; Wed, 15 Apr 2020 13:55:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3F7D02074F
-	for <linux-mmc@archiver.kernel.org>; Wed, 15 Apr 2020 13:53:11 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="uIExNdQ4"
+	by mail.kernel.org (Postfix) with ESMTP id 579E52074F
+	for <linux-mmc@archiver.kernel.org>; Wed, 15 Apr 2020 13:55:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2636294AbgDONxJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 15 Apr 2020 09:53:09 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33162 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-FAIL-OK-FAIL)
-        by vger.kernel.org with ESMTP id S2636288AbgDONxD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Apr 2020 09:53:03 -0400
-Received: from mail-ua1-x944.google.com (mail-ua1-x944.google.com [IPv6:2607:f8b0:4864:20::944])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0B03AC061A0F
-        for <linux-mmc@vger.kernel.org>; Wed, 15 Apr 2020 06:53:02 -0700 (PDT)
-Received: by mail-ua1-x944.google.com with SMTP id v24so1343384uak.0
-        for <linux-mmc@vger.kernel.org>; Wed, 15 Apr 2020 06:53:01 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=WHCUmJWsRphTQMxaENNbdAQ8mZO1bmk/JQwg7pzXYLk=;
-        b=uIExNdQ4eDHgkQSNrY2fvgEh4hIXIPfyBx05C2VaK7xb/YrRcn1YgAHbfBdK7HEzgL
-         LWazJ52HdKrYzPt6XMonzGT+zun68O0e2LUVAfsm79XhBwJTMAkoQL0qfJ6iOd7h8Ifi
-         3BkedvS0sV05KnqsEf+BE0BVqQhdeH9tE9rPahco8WIbllYDImHQBZ34rZ8Fx/yW7kfw
-         J9/Z/JhsZt0Ax+KV4sap3broTxi0VKtGNNqGwjG0YCDMCkKTU88nsyKHICBnFTXfnB+K
-         zV5iiQ67lTBUE1mlAxirZ9dYk+8PN8p03J/lEf5mMSNtjx5gIdPMWtATHxFR63dsazei
-         ESUg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=WHCUmJWsRphTQMxaENNbdAQ8mZO1bmk/JQwg7pzXYLk=;
-        b=JLMg1MibGEpBGamfN09MmjNOi/h7RDhuXXYEFjDNLMBq45vbU6PtL1E3ZA0xGzYlDZ
-         FKC2NjeCAer91RlLeJelPI9JfEFPr8OoUL1TYf84GplsPXZslpfpU9ZgQ6fLFh0fLavr
-         c4604yv8hVEmnVS+cEXsg6tcCu1DMiZPMSkyoT2p5oa2J6t4uJwj6+HHX5Pe4p6rpy3S
-         VPVpJM1/7RvdkLtHkdpQCvtE3rQ4rZlhR1/KhYNK3i7/baxOXyKOZpKbuOBYwrdOdQiZ
-         Bc0S0HGylbpGPfEzNPVjpVuxd9iIcMzzBBXcEIPHMXpByavy1D1BYTkDxZo3/gOvWcI/
-         0YKg==
-X-Gm-Message-State: AGi0PuYcns6mZuw5CuyVy3nVkqtXoj5x6/wcqEPfjCTW61H4b/M5BTsO
-        ymuPCwRqUfH04c9FJvGuROOVaBecc8NkFC+FjqqiYg==
-X-Google-Smtp-Source: APiQypJlPUxAUVcS2Scuc0G1A/D2knhA4TkV69Lh4+yTab+NixEnEzyNFUa1TwukmoylyxfV8hDoGYzeZywcp7jKtqU=
-X-Received: by 2002:ab0:6204:: with SMTP id m4mr4601656uao.15.1586958781042;
- Wed, 15 Apr 2020 06:53:01 -0700 (PDT)
+        id S2636318AbgDONzd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 15 Apr 2020 09:55:33 -0400
+Received: from mga04.intel.com ([192.55.52.120]:28170 "EHLO mga04.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S2633760AbgDONzb (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 15 Apr 2020 09:55:31 -0400
+IronPort-SDR: 9F9/ogCQ/wPBgOfbXmxotnNienVmICYhet8BKoSt/M/VySBpNTwZ8L/yjiArntWhtj7GImyCJI
+ tlUCZCFAz3kg==
+X-Amp-Result: SKIPPED(no attachment in message)
+X-Amp-File-Uploaded: False
+Received: from orsmga004.jf.intel.com ([10.7.209.38])
+  by fmsmga104.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 15 Apr 2020 06:55:27 -0700
+IronPort-SDR: f9TFseWEQrNrAtDl824wuoh2h/P/FEZtsT1/9F9U9AoqOJHGZLvYCpuKtTG1isC/fs983xh/fm
+ M1ciN3h2/gxg==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.72,387,1580803200"; 
+   d="scan'208";a="400320752"
+Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.87]) ([10.237.72.87])
+  by orsmga004.jf.intel.com with ESMTP; 15 Apr 2020 06:55:23 -0700
+Subject: Re: [PATCH 5/7] mmc: sdhci: simplify clock frequency calculation
+To:     =?UTF-8?B?TWljaGHFgiBNaXJvc8WCYXc=?= <mirq-linux@rere.qmqm.pl>,
+        Kevin Liu <kliu5@marvell.com>,
+        Michal Simek <michal.simek@xilinx.com>,
+        Suneel Garapati <suneel.garapati@xilinx.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+References: <cover.1585827904.git.mirq-linux@rere.qmqm.pl>
+ <1a7f7f0941314da66acda3c60f44b3d2417133e6.1585827904.git.mirq-linux@rere.qmqm.pl>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Message-ID: <7967c035-52e3-1ce7-a82f-47d28a3cf484@intel.com>
+Date:   Wed, 15 Apr 2020 16:54:33 +0300
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.5.0
 MIME-Version: 1.0
-References: <1586353607-32222-1-git-send-email-rnayak@codeaurora.org> <1586353607-32222-14-git-send-email-rnayak@codeaurora.org>
-In-Reply-To: <1586353607-32222-14-git-send-email-rnayak@codeaurora.org>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 15 Apr 2020 15:52:25 +0200
-Message-ID: <CAPDyKFrOFOLCWHu8nE4i5t=d+Ei-kcJ15_42Ft3ROSUDe5jkpw@mail.gmail.com>
-Subject: Re: [PATCH 13/21] mmc: sdhci-msm: Use OPP API to set clk/perf state
-To:     Rajendra Nayak <rnayak@codeaurora.org>
-Cc:     Viresh Kumar <viresh.kumar@linaro.org>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>,
-        Andy Gross <agross@kernel.org>,
-        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
-        DTML <devicetree@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Pradeep P V K <ppvk@codeaurora.org>,
-        Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
-        Subhash Jadavani <subhashj@codeaurora.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+In-Reply-To: <1a7f7f0941314da66acda3c60f44b3d2417133e6.1585827904.git.mirq-linux@rere.qmqm.pl>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 8bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 8 Apr 2020 at 15:48, Rajendra Nayak <rnayak@codeaurora.org> wrote:
->
-> On some qualcomm SoCs we need to vote on a performance state of a power
-> domain depending on the clock rates. Hence move to using OPP api to set
-> the clock rate and performance state specified in the OPP table.
-> On platforms without an OPP table, dev_pm_opp_set_rate() is eqvivalent to
-> clk_set_rate()
->
-> Signed-off-by: Rajendra Nayak <rnayak@codeaurora.org>
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: Pradeep P V K <ppvk@codeaurora.org>
-> Cc: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
-> Cc: Subhash Jadavani <subhashj@codeaurora.org>
-> Cc: linux-mmc@vger.kernel.org
+On 2/04/20 2:54 pm, Michał Mirosław wrote:
+> Make clock frequency calculations simpler by replacing loops
+> with divide-and-clamp.
 
-This looks good to me!
+I am sorry, but I am not really sure the simplification is worth the code
+churn, risk of introducing new bugs, or validation effort.
 
-However, are there any of the other patches in the series that
-$subject patch depends on - or can I apply this as a standalone mmc
-patch?
+IMO, the loops, while perhaps inefficient, are not hard to understand.
 
-Kind regards
-Uffe
-
+> 
+> Signed-off-by: Michał Mirosław <mirq-linux@rere.qmqm.pl>
 > ---
->  drivers/mmc/host/sdhci-msm.c | 20 ++++++++++++++++----
->  1 file changed, 16 insertions(+), 4 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> index 09ff731..d82075a 100644
-> --- a/drivers/mmc/host/sdhci-msm.c
-> +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -10,6 +10,7 @@
->  #include <linux/delay.h>
->  #include <linux/mmc/mmc.h>
->  #include <linux/pm_runtime.h>
-> +#include <linux/pm_opp.h>
->  #include <linux/slab.h>
->  #include <linux/iopoll.h>
->  #include <linux/regulator/consumer.h>
-> @@ -242,6 +243,7 @@ struct sdhci_msm_host {
->         struct clk *xo_clk;     /* TCXO clk needed for FLL feature of cm_dll*/
->         struct clk_bulk_data bulk_clks[4]; /* core, iface, cal, sleep clocks */
->         unsigned long clk_rate;
-> +       struct opp_table *opp;
->         struct mmc_host *mmc;
->         bool use_14lpp_dll_reset;
->         bool tuning_done;
-> @@ -332,7 +334,7 @@ static void msm_set_clock_rate_for_bus_mode(struct sdhci_host *host,
->         int rc;
->
->         clock = msm_get_clock_rate_for_bus_mode(host, clock);
-> -       rc = clk_set_rate(core_clk, clock);
-> +       rc = dev_pm_opp_set_rate(mmc_dev(host->mmc), clock);
->         if (rc) {
->                 pr_err("%s: Failed to set clock at rate %u at timing %d\n",
->                        mmc_hostname(host->mmc), clock,
-> @@ -1963,7 +1965,7 @@ static int sdhci_msm_probe(struct platform_device *pdev)
->         msm_host->bulk_clks[0].clk = clk;
->
->         /* Vote for maximum clock rate for maximum performance */
-> -       ret = clk_set_rate(clk, INT_MAX);
-> +       ret = dev_pm_opp_set_rate(&pdev->dev, INT_MAX);
->         if (ret)
->                 dev_warn(&pdev->dev, "core clock boost failed\n");
->
-> @@ -2087,6 +2089,9 @@ static int sdhci_msm_probe(struct platform_device *pdev)
->                 goto clk_disable;
->         }
->
-> +       msm_host->opp = dev_pm_opp_set_clkname(&pdev->dev, "core");
-> +       dev_pm_opp_of_add_table(&pdev->dev);
+>  drivers/mmc/host/sdhci.c | 56 +++++++++++++++++++---------------------
+>  drivers/mmc/host/sdhci.h |  4 +--
+>  2 files changed, 29 insertions(+), 31 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index ed88ac4e4cf3..d750c0997c3f 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1756,10 +1756,13 @@ static u16 sdhci_get_preset_value(struct sdhci_host *host)
+>  u16 sdhci_calc_clk(struct sdhci_host *host, unsigned int clock,
+>  		   unsigned int *actual_clock)
+>  {
+> -	int div = 0; /* Initialized for compiler warning */
+> +	unsigned int div = 0; /* Initialized for compiler warning */
+>  	int real_div = div, clk_mul = 1;
+>  	u16 clk = 0;
+> -	bool switch_base_clk = false;
+> +	bool use_base_clk;
 > +
->         pm_runtime_get_noresume(&pdev->dev);
->         pm_runtime_set_active(&pdev->dev);
->         pm_runtime_enable(&pdev->dev);
-> @@ -2109,10 +2114,12 @@ static int sdhci_msm_probe(struct platform_device *pdev)
->         return 0;
->
->  pm_runtime_disable:
-> +       dev_pm_opp_of_remove_table(&pdev->dev);
->         pm_runtime_disable(&pdev->dev);
->         pm_runtime_set_suspended(&pdev->dev);
->         pm_runtime_put_noidle(&pdev->dev);
->  clk_disable:
-> +       dev_pm_opp_set_rate(&pdev->dev, 0);
->         clk_bulk_disable_unprepare(ARRAY_SIZE(msm_host->bulk_clks),
->                                    msm_host->bulk_clks);
->  bus_clk_disable:
-> @@ -2133,10 +2140,12 @@ static int sdhci_msm_remove(struct platform_device *pdev)
->
->         sdhci_remove_host(host, dead);
->
-> +       dev_pm_opp_of_remove_table(&pdev->dev);
->         pm_runtime_get_sync(&pdev->dev);
->         pm_runtime_disable(&pdev->dev);
->         pm_runtime_put_noidle(&pdev->dev);
->
-> +       dev_pm_opp_set_rate(&pdev->dev, 0);
->         clk_bulk_disable_unprepare(ARRAY_SIZE(msm_host->bulk_clks),
->                                    msm_host->bulk_clks);
->         if (!IS_ERR(msm_host->bus_clk))
-> @@ -2151,6 +2160,7 @@ static __maybe_unused int sdhci_msm_runtime_suspend(struct device *dev)
->         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->         struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
->
-> +       dev_pm_opp_set_rate(dev, 0);
->         clk_bulk_disable_unprepare(ARRAY_SIZE(msm_host->bulk_clks),
->                                    msm_host->bulk_clks);
->
-> @@ -2173,9 +2183,11 @@ static __maybe_unused int sdhci_msm_runtime_resume(struct device *dev)
->          * restore the SDR DLL settings when the clock is ungated.
->          */
->         if (msm_host->restore_dll_config && msm_host->clk_rate)
-> -               return sdhci_msm_restore_sdr_dll_config(host);
-> +               ret = sdhci_msm_restore_sdr_dll_config(host);
->
-> -       return 0;
-> +       dev_pm_opp_set_rate(dev, msm_host->clk_rate);
+> +	if (clock == 0)
+> +		unreachable();
+>  
+>  	if (host->version >= SDHCI_SPEC_300) {
+>  		if (host->preset_enabled) {
+> @@ -1781,13 +1784,12 @@ u16 sdhci_calc_clk(struct sdhci_host *host, unsigned int clock,
+>  		 * Check if the Host Controller supports Programmable Clock
+>  		 * Mode.
+>  		 */
+> -		if (host->clk_mul) {
+> -			for (div = 1; div <= 1024; div++) {
+> -				if ((host->max_clk * host->clk_mul / div)
+> -					<= clock)
+> -					break;
+> -			}
+> -			if ((host->max_clk * host->clk_mul / div) <= clock) {
+> +		use_base_clk = !host->clk_mul;
 > +
-> +       return ret;
->  }
->
->  static const struct dev_pm_ops sdhci_msm_pm_ops = {
-> --
-> QUALCOMM INDIA, on behalf of Qualcomm Innovation Center, Inc. is a member
-> of Code Aurora Forum, hosted by The Linux Foundation
+> +		if (!use_base_clk) {
+> +			div = DIV_ROUND_UP(host->max_clk * host->clk_mul, clock);
+> +
+> +			if (div <= SDHCI_MAX_DIV_SPEC_300 / 2 + 1) {
+>  				/*
+>  				 * Set Programmable Clock Mode in the Clock
+>  				 * Control register.
+> @@ -1798,35 +1800,31 @@ u16 sdhci_calc_clk(struct sdhci_host *host, unsigned int clock,
+>  				div--;
+>  			} else {
+>  				/*
+> -				 * Divisor can be too small to reach clock
+> -				 * speed requirement. Then use the base clock.
+> +				 * Divisor is too big for requested clock rate.
+> +				 * Use the base clock, then.
+>  				 */
+> -				switch_base_clk = true;
+> +				use_base_clk = true;
+>  			}
+>  		}
+>  
+> -		if (!host->clk_mul || switch_base_clk) {
+> -			/* Version 3.00 divisors must be a multiple of 2. */
+> -			if (host->max_clk <= clock) {
+> -				div = 1;
+> -				if (host->quirks2 & SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN)
+> -					div = 2;
+> -			} else {
+> -				for (div = 2; div < SDHCI_MAX_DIV_SPEC_300;
+> -				     div += 2) {
+> -					if ((host->max_clk / div) <= clock)
+> -						break;
+> -				}
+> +		if (use_base_clk) {
+> +			/* Version 3.00 divisors must be 1 or a multiple of 2. */
+> +			div = DIV_ROUND_UP(host->max_clk, clock);
+> +			if (div > 1) {
+> +				div = min(div, SDHCI_MAX_DIV_SPEC_300);
+> +				div = round_up(div, 2);
+>  			}
+> -			real_div = div;
+>  			div >>= 1;
+> +			if (host->quirks2 & SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN)
+> +				div += !div;
+> +
+> +			real_div = div * 2 + !div;
+>  		}
+>  	} else {
+>  		/* Version 2.00 divisors must be a power of 2. */
+> -		for (div = 1; div < SDHCI_MAX_DIV_SPEC_200; div *= 2) {
+> -			if ((host->max_clk / div) <= clock)
+> -				break;
+> -		}
+> +		div = DIV_ROUND_UP(host->max_clk, clock);
+> +		div = min(div, SDHCI_MAX_DIV_SPEC_200);
+> +		div = roundup_pow_of_two(div);
+>  		real_div = div;
+>  		div >>= 1;
+>  	}
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index 79dffbb731d3..ea8aabb3bf16 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -290,8 +290,8 @@
+>   * End of controller registers.
+>   */
+>  
+> -#define SDHCI_MAX_DIV_SPEC_200	256
+> -#define SDHCI_MAX_DIV_SPEC_300	2046
+> +#define SDHCI_MAX_DIV_SPEC_200	256u
+> +#define SDHCI_MAX_DIV_SPEC_300	2046u
+>  
+>  /*
+>   * Host SDMA buffer boundary. Valid values from 4K to 512K in powers of 2.
+> 
+
