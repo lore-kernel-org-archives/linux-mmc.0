@@ -1,75 +1,84 @@
-Return-Path: <SRS0=djOR=56=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=Q6+y=57=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.4 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.3 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EECABC2BA19
-	for <linux-mmc@archiver.kernel.org>; Tue, 14 Apr 2020 18:40:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BF00CC2BA2B
+	for <linux-mmc@archiver.kernel.org>; Wed, 15 Apr 2020 06:41:21 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C96B820575
-	for <linux-mmc@archiver.kernel.org>; Tue, 14 Apr 2020 18:40:10 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9850020771
+	for <linux-mmc@archiver.kernel.org>; Wed, 15 Apr 2020 06:41:21 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=rere.qmqm.pl header.i=@rere.qmqm.pl header.b="qYgFsAsa"
+	dkim=pass (2048-bit key) header.d=axis.com header.i=@axis.com header.b="MQZvE4nV"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2504116AbgDNSkJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 14 Apr 2020 14:40:09 -0400
-Received: from rere.qmqm.pl ([91.227.64.183]:20322 "EHLO rere.qmqm.pl"
+        id S2393581AbgDOGlU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 15 Apr 2020 02:41:20 -0400
+Received: from smtp2.axis.com ([195.60.68.18]:48431 "EHLO smtp2.axis.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2504142AbgDNSkH (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 14 Apr 2020 14:40:07 -0400
-Received: from remote.user (localhost [127.0.0.1])
-        by rere.qmqm.pl (Postfix) with ESMTPSA id 491vRl26dgzZ5;
-        Tue, 14 Apr 2020 20:40:03 +0200 (CEST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=rere.qmqm.pl; s=1;
-        t=1586889605; bh=kAvGX9pOIPQrCzJXDeL1+Ys815lqtmHIeG4WQmjxbTM=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=qYgFsAsaQBvMFqmoUjH+bFcjyf2oq3kZYcG/AvFzD49Rq65miu4+/48so7Bcon/SU
-         o+ltd7JJMYHTSI2O84xQXbS1FyjO4uqFPfEecVpQ5xKW8cy4xkh4fmkCt3bHSD5xpi
-         sMrXjLQy+YNEiKdN1AUB2YBtgGbt1QNy4FMtowdMGNmJeK7igGYecEDbiUBKvAUp59
-         AZlGgT7bngA1ChHw0aF0jtzKJdP1/Dc84nF3x6YuTFP8zYChHM3cIiHao3zICXiUgR
-         isE3wX2MErPnEWUfbmymkou//Ho+sUnLBUhCGQ3in/6/AMBmuiF4m0xx1IHuTHdEYf
-         zTw6+ymiiDt7g==
-X-Virus-Status: Clean
-X-Virus-Scanned: clamav-milter 0.102.2 at mail
-Date:   Tue, 14 Apr 2020 20:39:59 +0200
-From:   =?iso-8859-2?Q?Micha=B3_Miros=B3aw?= <mirq-linux@rere.qmqm.pl>
+        id S1728535AbgDOGlR (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 15 Apr 2020 02:41:17 -0400
+X-Greylist: delayed 431 seconds by postgrey-1.27 at vger.kernel.org; Wed, 15 Apr 2020 02:41:15 EDT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+  d=axis.com; l=2270; q=dns/txt; s=axis-central1;
+  t=1586932876; x=1618468876;
+  h=date:from:to:cc:subject:message-id:references:
+   mime-version:in-reply-to;
+  bh=B17eEB4899W0+kA+fQXd+xbt+eJyLrMadTEPJoPvTAE=;
+  b=MQZvE4nVs/mgOAeL7lGZ5kztmHInaGzwL6YocZdJvGafeVV+i5C00xsO
+   qidShpUVYVr0uhqa3YElrI8OBzNnNzj4FgaQ3CkNdVFuujAJCPzh3d4xx
+   o5/YhhwHvdZ1wnxQZ1m+pVnlltrbAOI5ZDyT2SusGgHzsboHioZLzqqUM
+   pur1vE9E4sFsTeNCN2YYdSH2BLl7za540Qxty3BeAmbMV3GGwcfDniizU
+   dCHxfkb5yRdIUjEAD+f0dd/3WB4JRimz1uxz+1I/QTwKhggPbnvHVPuwt
+   oViUEVMqLALCIGKXqqXsnOkfD7WyqN2vaFxs6PdDqsssQJ80nqPZbsiSD
+   A==;
+IronPort-SDR: SrpZedr+JNCFoQyG9niN3gd4OISxEveaSvZ08PRT276Dz7sjjnYjEOJWuwC/WeDELyldYLH5X+
+ 1ly05WDl8UKkGtWbF/wtyJDa6y3cF7Hz5DYk1FliXVi6G7XYhzazzsuvROGluqGwNdWaGazeIX
+ lrqE1tRtifpVFJdoEmLCFCo2j6t61V1tF6g1UtVkdwUoBu6Yo24h1pQfG1DeC1/OVNuc63/AlS
+ NJt3e8wVfUCKlP82H+nNMGbtt0bWvnGidu/1RHfk8XMZcyxbP6DusyV0pYQTrBS54ud8wJzFAs
+ tzo=
+X-IronPort-AV: E=Sophos;i="5.72,386,1580770800"; 
+   d="scan'208";a="7431371"
+Date:   Wed, 15 Apr 2020 08:34:03 +0200
+From:   Jesper Nilsson <Jesper.Nilsson@axis.com>
 To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>,
+CC:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
         Linus Walleij <linus.walleij@linaro.org>,
         Rui Miguel Silva <rmfrfs@gmail.com>,
         Johan Hovold <johan@kernel.org>, Alex Elder <elder@kernel.org>,
         Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Jonathan =?iso-8859-2?Q?Neusch=E4fer?= <j.neuschaefer@gmx.net>,
+        Jonathan =?iso-8859-1?Q?Neusch=E4fer?= <j.neuschaefer@gmx.net>,
         Bruce Chang <brucechang@via.com.tw>,
         Harald Welte <HaraldWelte@viatech.com>,
         Alex Dubov <oakad@yahoo.com>,
         Sascha Sommer <saschasommer@freenet.de>,
         Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>,
-        Jesper Nilsson <jesper.nilsson@axis.com>,
-        Lars Persson <lars.persson@axis.com>,
+        "mirq-linux@rere.qmqm.pl" <mirq-linux@rere.qmqm.pl>,
+        Jesper Nilsson <Jesper.Nilsson@axis.com>,
+        Lars Persson <Lars.Persson@axis.com>,
         Paul Cercueil <paul@crapouillou.net>,
         Ludovic Desroches <ludovic.desroches@microchip.com>,
         Nicolas Ferre <nicolas.ferre@microchip.com>
-Subject: Re: [PATCH 06/19] mmc: cb710: Inform the mmc core about the maximum
- busy timeout
-Message-ID: <20200414183959.GA15141@qmqm.qmqm.pl>
+Subject: Re: [PATCH 05/19] mmc: usdhi6rol0: Inform the mmc core about the
+ maximum busy timeout
+Message-ID: <20200415063403.d3e3auv5engh555b@axis.com>
 References: <20200414161413.3036-1-ulf.hansson@linaro.org>
- <20200414161413.3036-7-ulf.hansson@linaro.org>
+ <20200414161413.3036-6-ulf.hansson@linaro.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-2
+Content-Type: text/plain; charset="us-ascii"
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <20200414161413.3036-7-ulf.hansson@linaro.org>
-User-Agent: Mutt/1.10.1 (2018-07-13)
+In-Reply-To: <20200414161413.3036-6-ulf.hansson@linaro.org>
+User-Agent: NeoMutt/20170113 (1.7.2)
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Apr 14, 2020 at 06:14:00PM +0200, Ulf Hansson wrote:
+On Tue, Apr 14, 2020 at 06:13:59PM +0200, Ulf Hansson wrote:
 > Some commands uses R1B responses, which means the card may assert the DAT0
 > line to signal busy for a period of time, after it has received the
 > command. The mmc core normally specifies the busy period for the command in
@@ -79,24 +88,52 @@ On Tue, Apr 14, 2020 at 06:14:00PM +0200, Ulf Hansson wrote:
 > 
 > Instead, let's inform the mmc core about the maximum supported busy timeout
 > in ->max_busy_timeout during ->probe(). This value corresponds to the fixed
-> ~2s timeout of the polling loop, implemented in cb710_wait_for_event(). In
-> this way, we let the mmc core validate the needed timeout, which may lead
-> to that it converts from a R1B into a R1 response and then use CMD13 to
-> poll for busy completion.
+> 4s timeout used by usdhi6rol0. In this way, we let the mmc core validate
+> the needed timeout, which may lead to that it converts from a R1B into a R1
+> response and then use CMD13 to poll for busy completion.
 > 
 > In other words, this change enables support for commands with longer busy
-> periods than 2s, like erase (CMD38) for example.
-[...]
+> periods than 4s, like erase (CMD38) for example.
+
+Acked-by: Jesper Nilsson <jesper.nilsson@axis.com>
+
+> Cc: Lars Persson <lars.persson@axis.com>
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> ---
+>  drivers/mmc/host/usdhi6rol0.c | 9 ++++++++-
+>  1 file changed, 8 insertions(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/usdhi6rol0.c b/drivers/mmc/host/usdhi6rol0.c
+> index 9a0b1e4e405d..369b8dee2e3d 100644
+> --- a/drivers/mmc/host/usdhi6rol0.c
+> +++ b/drivers/mmc/host/usdhi6rol0.c
+> @@ -136,6 +136,8 @@
+>  
+>  #define USDHI6_MIN_DMA 64
+>  
+> +#define USDHI6_REQ_TIMEOUT_MS 4000
+> +
+>  enum usdhi6_wait_for {
+>  	USDHI6_WAIT_FOR_REQUEST,
+>  	USDHI6_WAIT_FOR_CMD,
+> @@ -1763,7 +1765,12 @@ static int usdhi6_probe(struct platform_device *pdev)
+>  	host		= mmc_priv(mmc);
+>  	host->mmc	= mmc;
+>  	host->wait	= USDHI6_WAIT_FOR_REQUEST;
+> -	host->timeout	= msecs_to_jiffies(4000);
+> +	host->timeout	= msecs_to_jiffies(USDHI6_REQ_TIMEOUT_MS);
 > +	/*
-> +	 * In cb710_wait_for_event() we use a fixed timeout of ~2s, hence let's
-> +	 * inform the core about it. A future improvement should instead make
-> +	 * use of the cmd->busy_timeout.
+> +	 * We use a fixed timeout of 4s, hence inform the core about it. A
+> +	 * future improvement should instead respect the cmd->busy_timeout.
 > +	 */
-[...]
+> +	mmc->max_busy_timeout = USDHI6_REQ_TIMEOUT_MS;
+>  
+>  	host->pinctrl = devm_pinctrl_get(&pdev->dev);
+>  	if (IS_ERR(host->pinctrl)) {
+> -- 
+> 2.20.1
+> 
 
-I'm not sure whether the controller limits busy signalling time.
-Since this is rare HW now, I would just pass the timeout to
-cb710_wait_for_event() and see if someone reports a bug.
-
-Best Regards,
-Micha³ Miros³aw
+/^JN - Jesper Nilsson
+-- 
+               Jesper Nilsson -- jesper.nilsson@axis.com
