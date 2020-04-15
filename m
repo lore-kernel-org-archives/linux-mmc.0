@@ -2,164 +2,106 @@ Return-Path: <SRS0=Q6+y=57=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-0.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 30BABC2BB85
-	for <linux-mmc@archiver.kernel.org>; Wed, 15 Apr 2020 08:46:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1C44BC2BA19
+	for <linux-mmc@archiver.kernel.org>; Wed, 15 Apr 2020 08:53:01 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0F3CB206F9
-	for <linux-mmc@archiver.kernel.org>; Wed, 15 Apr 2020 08:46:56 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id EEA39206F9
+	for <linux-mmc@archiver.kernel.org>; Wed, 15 Apr 2020 08:53:00 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="vJIB27nn"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Ut9RWSaO"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2894969AbgDOIql (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 15 Apr 2020 04:46:41 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41936 "EHLO
+        id S2895172AbgDOIw5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 15 Apr 2020 04:52:57 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42916 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-FAIL-OK-FAIL)
-        by vger.kernel.org with ESMTP id S2894967AbgDOIqg (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Apr 2020 04:46:36 -0400
-Received: from mail-ua1-x942.google.com (mail-ua1-x942.google.com [IPv6:2607:f8b0:4864:20::942])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4DCC8C061A0C
-        for <linux-mmc@vger.kernel.org>; Wed, 15 Apr 2020 01:46:36 -0700 (PDT)
-Received: by mail-ua1-x942.google.com with SMTP id a10so1034168uad.7
-        for <linux-mmc@vger.kernel.org>; Wed, 15 Apr 2020 01:46:36 -0700 (PDT)
+        by vger.kernel.org with ESMTP id S2895165AbgDOIwr (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Apr 2020 04:52:47 -0400
+Received: from mail-ua1-x941.google.com (mail-ua1-x941.google.com [IPv6:2607:f8b0:4864:20::941])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 11604C061A0C
+        for <linux-mmc@vger.kernel.org>; Wed, 15 Apr 2020 01:52:47 -0700 (PDT)
+Received: by mail-ua1-x941.google.com with SMTP id i22so1044365uak.6
+        for <linux-mmc@vger.kernel.org>; Wed, 15 Apr 2020 01:52:47 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=pi2eGcMT6rMjNmHfTn+6C3a0PNU3Dbjr1+RHlUDbfdE=;
-        b=vJIB27nnx7NInYBYJNGhm545ijOXmPG5PJ+0Vf3NJpyxWQiPFS5/18D0/eVAL57jng
-         tlIfro/fzyefa7pzStFQS2+rHWQluG72uKIG4cVLU5AgRMje5I45jxIjNMQeETp8MZH2
-         qGQcpw8VturBpfuirdeqr9c124vzXTDw1zlq3NVQ/xx8sHPvrbNZmapL0k4MW7Tg1yrY
-         GrFUa4G6pRqtjxufOt86mHF/K7CarQ10IyDcYqRJyR4tfqsDatHAQRNGU/BifK5vfIyW
-         8qvfaHXLlcayByo/SR1fJAh9EiBha1jkpc7wZbduXAVsVSoZoj7O8IEMKhUYk/wu6+Pt
-         EXFg==
+         :cc:content-transfer-encoding;
+        bh=GffN4wdV1b8/+GP7bB7msfOG3SsTk4D9FpQBELdB7UQ=;
+        b=Ut9RWSaOq1yupMZbWU33o+RQiJm1VcNInX3xL0Qg2Yu12twvk6t/92Wf0Py1JaXBW7
+         seiwUhSnzZDeqIFK/o6vdQ1KzM/lWT9y7RRQNWbGx64yLdbrPQxDTAnsOWWnqXGKMOLL
+         GxFZhp0BptUY2s68S0lWCLTgEsrSz3e0BRd8KcU7xFSdUMqzK1yrr+JlURONDWZBNJZq
+         w1+L9MVjy0l/BwMUarAgZKemDe7WXlv7abAiHz9Kl9N7XQ5JE8Hcjk59ti4cK4THNy9D
+         HnotyGjdAwHUGgJi+IjmHnkpf/cHvijf63dA3kf0GXIeof5uub5vU+szxsj3JT1mQVlA
+         65jA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=pi2eGcMT6rMjNmHfTn+6C3a0PNU3Dbjr1+RHlUDbfdE=;
-        b=GmHK4gPagUyZbAq0JSwSHXplOxQ5CkOAjw8zoauf+DhFvLTdKDGqoLt7wbVKvCmc6w
-         EYmJag1e4ksRyYiUEhINEkHGKpviLiITHAzGQ14uBbQYyG7+/mQfJ4s6X4izuQq6cTq9
-         uWuPwHr1/VwmFbQGGdNeZpPtRIE8kU1LcVFyU8mhDQOPfo+2Z9wgZez7myQd3SZ0/O20
-         auVk2Y2hCmQH64uHsobufReGgWF/qRZ0Hu3liAAxSDSHdAc41K1BjbIYOrrbTtTaS1KZ
-         0/cn+phwTT3ukDKuI7m4VBAiOhNmm3cFU+o/3W2d/xR1J7W9JU11ZHMyjp9f6LQ3Tj8a
-         8mVA==
-X-Gm-Message-State: AGi0PuZ3v6Qg5KAffzsb7XgkW8yb+Zq+5vpDeluByVi9DSAaNmBbHl05
-        NlX/C6ApV0lVvw52NDaPQ6g27QwihD+mJF+WxQW6dQ==
-X-Google-Smtp-Source: APiQypKSnJq3GtI7I8370QcKOEbJus5EhyZKwcJPbeC4yoZidoU3fP1OuuptUIClEnTd5eWt4D57NVWQjScrvdMRcpQ=
-X-Received: by 2002:a9f:25af:: with SMTP id 44mr3566481uaf.104.1586940394324;
- Wed, 15 Apr 2020 01:46:34 -0700 (PDT)
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=GffN4wdV1b8/+GP7bB7msfOG3SsTk4D9FpQBELdB7UQ=;
+        b=bNrYTnqgHOutCRVTTGPo8MszdBXdQy5dJbSEzartwk5axqHUnTTHn9vdirNnahwyf+
+         2Pb2i0bCG3WHT0Wgq+uGU90t5GIk8Tl53lJkacECfysTWuQdnc+NqRTzdi1+ESdsfgIy
+         auXkJ5gl/5ZciHacCdsxFSlJtlZCt0OcAYO0xy/ZDoyegXcvSlbEUGU+ayuzABP09+X7
+         Nx3xwFMNCzHPCcezG5BXKwWD8vomgYuXZg8LltbTEth1ALXc2sZBJ130YS+qoRkRMv4T
+         5Hz73SxU9g+A3JXjg0dQ19VGZ8VciWda8myrNuhinH5XvmYYtlu5YfDvFFBG28DmGg1G
+         vg4Q==
+X-Gm-Message-State: AGi0PuY9xt7qAHC50ekkJ7pVvAbvIv5gfUsiRZhyl/YrgUHPPOUURRoL
+        78DU+Ry+hcq4ywak1l91w5DtLHf70eqLompGIv8+8w==
+X-Google-Smtp-Source: APiQypIR6ai89vFmGqUSNQjlgJoCsLY70k1gj1lY6weiIV/qNYMav0X7PqbmVlV4sZKnwV/apxkl2A0RgEkql85Izu8=
+X-Received: by 2002:a9f:20c6:: with SMTP id 64mr3823674uaa.100.1586940766283;
+ Wed, 15 Apr 2020 01:52:46 -0700 (PDT)
 MIME-Version: 1.0
-References: <20200401195722.208157-1-marex@denx.de> <20200401195722.208157-3-marex@denx.de>
-In-Reply-To: <20200401195722.208157-3-marex@denx.de>
+References: <cover.1585827904.git.mirq-linux@rere.qmqm.pl>
+In-Reply-To: <cover.1585827904.git.mirq-linux@rere.qmqm.pl>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 15 Apr 2020 10:45:58 +0200
-Message-ID: <CAPDyKFpzM5NWR3D5uEmNu3hdhtr-vkucWNsCb2npd1eyR+=T_w@mail.gmail.com>
-Subject: Re: [PATCH 3/3] mmc: mmci: Switch to mmc_set_signal_voltage()
-To:     Marek Vasut <marex@denx.de>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Alexandre Torgue <alexandre.torgue@st.com>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Ludovic Barre <ludovic.barre@st.com>,
-        Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>,
-        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
-        Patrice Chotard <patrice.chotard@st.com>,
-        Patrick Delaunay <patrick.delaunay@st.com>,
-        Russell King <linux@armlinux.org.uk>,
-        linux-stm32@st-md-mailman.stormreply.com
+Date:   Wed, 15 Apr 2020 10:52:10 +0200
+Message-ID: <CAPDyKFrWZN2pwdaJ3ctMP9Mb3W6d5Di5jt4F9u1AmqxSKFzboQ@mail.gmail.com>
+Subject: Re: [PATCH 0/7] SDHCI clock handling fixes and cleanups
+To:     =?UTF-8?B?TWljaGHFgiBNaXJvc8WCYXc=?= <mirq-linux@rere.qmqm.pl>,
+        Adrian Hunter <adrian.hunter@intel.com>
+Cc:     Kevin Liu <kliu5@marvell.com>,
+        Michal Simek <michal.simek@xilinx.com>,
+        Suneel Garapati <suneel.garapati@xilinx.com>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 1 Apr 2020 at 21:57, Marek Vasut <marex@denx.de> wrote:
+On Thu, 2 Apr 2020 at 13:54, Micha=C5=82 Miros=C5=82aw <mirq-linux@rere.qmq=
+m.pl> wrote:
 >
-> Instead of reimplementing the logic in mmc_set_signal_voltage(),
-> use the mmc code function directly.
-
-Again, this isn't about mmc_set_signal_voltage() but about
-mmc_regulator_set_vqmmc(). Please update the changelog to reflect
-that.
-
+> This patch set combines a few of code improvements for SDHCI clock handli=
+ng.
+> Besides small fixes, most value comes from simplifying the code, so it's
+> easier to understand.
 >
-> This fixes a real issue on STM32MP1 where, if the eMMC is supplied with
-> VccQ=1.8 V, the post voltage switch code will spin indefinitelly waiting
-> for the voltage switch to complete, even though no voltage switch really
-> happened. But since mmc_set_signal_voltage() would return 0, then the
-> condition for calling .post_sig_volt_switch() is not satisfied if the
-> switch did not happen.
+> Micha=C5=82 Miros=C5=82aw (7):
+>   mmc: sdhci: fix base clock usage in preset value
+>   mmc: sdhci: fix programmable clock config from preset value
+>   mmc: sdhci: fix SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN
+>   mmc: sdhci: move SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN frequency limit
+>   mmc: sdhci: simplify clock frequency calculation
+>   mmc: sdhci: squash v2/v3+ clock calculation differences
+>   mmc: sdhci: respect non-zero div quirk in programmable clock mode
 >
-> Signed-off-by: Marek Vasut <marex@denx.de>
-> Cc: Alexandre Torgue <alexandre.torgue@st.com>
-> Cc: Linus Walleij <linus.walleij@linaro.org>
-> Cc: Ludovic Barre <ludovic.barre@st.com>
-> Cc: Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
-> Cc: Maxime Coquelin <mcoquelin.stm32@gmail.com>
-> Cc: Patrice Chotard <patrice.chotard@st.com>
-> Cc: Patrick Delaunay <patrick.delaunay@st.com>
-> Cc: Russell King <linux@armlinux.org.uk>
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: linux-stm32@st-md-mailman.stormreply.com
-> To: linux-mmc@vger.kernel.org
-> ---
->  drivers/mmc/host/mmci.c | 28 ++++++----------------------
->  1 file changed, 6 insertions(+), 22 deletions(-)
+>  drivers/mmc/host/sdhci-of-arasan.c |   7 +-
+>  drivers/mmc/host/sdhci.c           | 126 +++++++++++++----------------
+>  drivers/mmc/host/sdhci.h           |   4 +-
+>  3 files changed, 64 insertions(+), 73 deletions(-)
 >
-> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-> index 647567def612..b8c8f0e623de 100644
-> --- a/drivers/mmc/host/mmci.c
-> +++ b/drivers/mmc/host/mmci.c
-> @@ -1861,31 +1861,15 @@ static int mmci_get_cd(struct mmc_host *mmc)
->  static int mmci_sig_volt_switch(struct mmc_host *mmc, struct mmc_ios *ios)
->  {
->         struct mmci_host *host = mmc_priv(mmc);
-> -       int ret = 0;
-> -
-> -       if (!IS_ERR(mmc->supply.vqmmc)) {
-> +       int ret;
->
-> -               switch (ios->signal_voltage) {
-> -               case MMC_SIGNAL_VOLTAGE_330:
-> -                       ret = regulator_set_voltage(mmc->supply.vqmmc,
-> -                                               2700000, 3600000);
-> -                       break;
-> -               case MMC_SIGNAL_VOLTAGE_180:
-> -                       ret = regulator_set_voltage(mmc->supply.vqmmc,
-> -                                               1700000, 1950000);
-> -                       break;
-> -               case MMC_SIGNAL_VOLTAGE_120:
-> -                       ret = regulator_set_voltage(mmc->supply.vqmmc,
-> -                                               1100000, 1300000);
-> -                       break;
-> -               }
-> +       ret = mmc_regulator_set_vqmmc(mmc, ios);
->
-> -               if (!ret && host->ops && host->ops->post_sig_volt_switch)
-> -                       ret = host->ops->post_sig_volt_switch(host, ios);
-> +       if (!ret && host->ops && host->ops->post_sig_volt_switch)
-
-I would suggest to add a comment here somewhere, that you explicitly
-want to avoid calling the ->post_sig_volt_switch() unless the voltage
-really changed. Just to make this clear.
-
-> +               ret = host->ops->post_sig_volt_switch(host, ios);
->
-> -               if (ret)
-> -                       dev_warn(mmc_dev(mmc), "Voltage switch failed\n");
-> -       }
-> +       if (ret < 0)
-> +               dev_warn(mmc_dev(mmc), "Voltage switch failed\n");
->
->         return ret;
->  }
 > --
-> 2.25.1
+> 2.20.1
 >
+
+Adrian, whenever you get the time, I would like to get your feedback
+on these, especially on patch1->patch3 as those may be targeted for
+fixes.
 
 Kind regards
 Uffe
