@@ -2,168 +2,108 @@ Return-Path: <SRS0=WBH1=6A=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E2A3CC2BB55
-	for <linux-mmc@archiver.kernel.org>; Thu, 16 Apr 2020 12:46:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E5D3BC352BE
+	for <linux-mmc@archiver.kernel.org>; Thu, 16 Apr 2020 14:45:50 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id CC31D208E4
-	for <linux-mmc@archiver.kernel.org>; Thu, 16 Apr 2020 12:46:43 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D092F206B9
+	for <linux-mmc@archiver.kernel.org>; Thu, 16 Apr 2020 14:45:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2636124AbgDPMoY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 16 Apr 2020 08:44:24 -0400
-Received: from asavdk4.altibox.net ([109.247.116.15]:33886 "EHLO
-        asavdk4.altibox.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2636077AbgDPMoR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Apr 2020 08:44:17 -0400
-Received: from ravnborg.org (unknown [158.248.194.18])
+        id S2394630AbgDPOpt (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 16 Apr 2020 10:45:49 -0400
+Received: from mail-out.m-online.net ([212.18.0.9]:59665 "EHLO
+        mail-out.m-online.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1730367AbgDPOp2 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Apr 2020 10:45:28 -0400
+Received: from frontend01.mail.m-online.net (unknown [192.168.8.182])
+        by mail-out.m-online.net (Postfix) with ESMTP id 4932855s3kz1qs0p;
+        Thu, 16 Apr 2020 16:45:25 +0200 (CEST)
+Received: from localhost (dynscan1.mnet-online.de [192.168.6.70])
+        by mail.m-online.net (Postfix) with ESMTP id 49328549w7z1qr41;
+        Thu, 16 Apr 2020 16:45:25 +0200 (CEST)
+X-Virus-Scanned: amavisd-new at mnet-online.de
+Received: from mail.mnet-online.de ([192.168.8.182])
+        by localhost (dynscan1.mail.m-online.net [192.168.6.70]) (amavisd-new, port 10024)
+        with ESMTP id t3tG6krWam4d; Thu, 16 Apr 2020 16:45:24 +0200 (CEST)
+X-Auth-Info: GYv5afvF6lwk4PgXwg2jbVatvzq66dJF1aHOuKPA3yc=
+Received: from [IPv6:::1] (unknown [195.140.253.167])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by asavdk4.altibox.net (Postfix) with ESMTPS id 924AA80487;
-        Thu, 16 Apr 2020 14:44:00 +0200 (CEST)
-Date:   Thu, 16 Apr 2020 14:43:59 +0200
-From:   Sam Ravnborg <sam@ravnborg.org>
-To:     Rob Herring <robh@kernel.org>
-Cc:     devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        Krzysztof Kozlowski <krzk@kernel.org>,
-        Maxime Ripard <mripard@kernel.org>,
-        Stephen Boyd <sboyd@kernel.org>,
+        by mail.mnet-online.de (Postfix) with ESMTPSA;
+        Thu, 16 Apr 2020 16:45:24 +0200 (CEST)
+Subject: Re: [PATCH 1/3] mmc: Prepare all code for mmc_set_signal_voltage()
+ returning > 0
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
         Alexandre Torgue <alexandre.torgue@st.com>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        Vinod Koul <vkoul@kernel.org>,
-        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
-        Guenter Roeck <linux@roeck-us.net>,
-        Jonathan Cameron <jic23@kernel.org>,
-        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
-        Jacek Anaszewski <jacek.anaszewski@gmail.com>,
-        Pavel Machek <pavel@ucw.cz>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Lee Jones <lee.jones@linaro.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Heiko Stuebner <heiko@sntech.de>, Andrew Lunn <andrew@lunn.ch>,
-        Florian Fainelli <f.fainelli@gmail.com>,
         Linus Walleij <linus.walleij@linaro.org>,
-        Fabio Estevam <festevam@gmail.com>,
-        Mark Brown <broonie@kernel.org>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>,
-        Alexandre Belloni <alexandre.belloni@bootlin.com>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Amit Kucheria <amit.kucheria@linaro.org>,
-        Daniel Lezcano <daniel.lezcano@linaro.org>,
-        linux-arm-kernel@lists.infradead.org, linux-clk@vger.kernel.org,
-        dri-devel@lists.freedesktop.org, linux-i2c@vger.kernel.org,
-        linux-hwmon@vger.kernel.org, linux-iio@vger.kernel.org,
-        linux-input@vger.kernel.org, linux-leds@vger.kernel.org,
-        linux-media@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-mtd@lists.infradead.org, linux-can@vger.kernel.org,
-        netdev@vger.kernel.org, linux-pci@vger.kernel.org,
-        linux-gpio@vger.kernel.org, linux-pwm@vger.kernel.org,
-        linux-remoteproc@vger.kernel.org, linux-riscv@lists.infradead.org,
-        linux-rtc@vger.kernel.org, linux-serial@vger.kernel.org,
-        alsa-devel@alsa-project.org, linux-spi@vger.kernel.org
-Subject: Re: [PATCH 1/2] dt-bindings: Clean-up schema indentation formatting
-Message-ID: <20200416124359.GB5785@ravnborg.org>
-References: <20200416005549.9683-1-robh@kernel.org>
+        Ludovic Barre <ludovic.barre@st.com>,
+        Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>,
+        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
+        Patrice Chotard <patrice.chotard@st.com>,
+        Patrick Delaunay <patrick.delaunay@st.com>,
+        Russell King <linux@armlinux.org.uk>,
+        linux-stm32@st-md-mailman.stormreply.com
+References: <20200401195722.208157-1-marex@denx.de>
+ <CAPDyKFoDB=d5B-2u_Y0e-XVzPQE46JBUTPwY_b_xzESm3NnjwQ@mail.gmail.com>
+ <58d6bc7a-b772-e8cc-6120-b0adeb128070@denx.de>
+ <CAPDyKFrAgLMUqU4oSRX64VoDQMMFZuM3KtUq6SL770XDSc+QbQ@mail.gmail.com>
+From:   Marek Vasut <marex@denx.de>
+Message-ID: <20d299ab-ea7e-be85-7c5b-fd10e21a117d@denx.de>
+Date:   Thu, 16 Apr 2020 16:45:23 +0200
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.5.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20200416005549.9683-1-robh@kernel.org>
-User-Agent: Mutt/1.10.1 (2018-07-13)
-X-CMAE-Score: 0
-X-CMAE-Analysis: v=2.3 cv=XpTUx2N9 c=1 sm=1 tr=0
-        a=UWs3HLbX/2nnQ3s7vZ42gw==:117 a=UWs3HLbX/2nnQ3s7vZ42gw==:17
-        a=jpOVt7BSZ2e4Z31A5e1TngXxSK0=:19 a=kj9zAlcOel0A:10
-        a=xJWM5Xtqm7-vkBAKM1YA:9 a=bxeknKLoBf6BnO7k:21 a=StjP_oZuoJ7ca4eH:21
-        a=CjuIK1q_8ugA:10
+In-Reply-To: <CAPDyKFrAgLMUqU4oSRX64VoDQMMFZuM3KtUq6SL770XDSc+QbQ@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Rob.
-
-On Wed, Apr 15, 2020 at 07:55:48PM -0500, Rob Herring wrote:
-> Fix various inconsistencies in schema indentation. Most of these are
-> list indentation which should be 2 spaces more than the start of the
-> enclosing keyword. This doesn't matter functionally, but affects running
-> scripts which do transforms on the schema files.
-
-Are there any plans to improve the tooling so we get warnigns for this?
-Otherwise I am afraid we will see a lot of patches that gets this wrong.
-
-As a follow-up patch it would be good if example-schema.yaml
-could gain some comments about the correct indentions.
-
-Some comments in the following.
-
-> diff --git a/Documentation/devicetree/bindings/arm/altera.yaml b/Documentation/devicetree/bindings/arm/altera.yaml
-> index 49e0362ddc11..b388c5aa7984 100644
-> --- a/Documentation/devicetree/bindings/arm/altera.yaml
-> +++ b/Documentation/devicetree/bindings/arm/altera.yaml
-> @@ -13,8 +13,8 @@ properties:
->    compatible:
->      items:
->        - enum:
-> -        - altr,socfpga-cyclone5
-> -        - altr,socfpga-arria5
-> -        - altr,socfpga-arria10
-> +          - altr,socfpga-cyclone5
-> +          - altr,socfpga-arria5
-> +          - altr,socfpga-arria10
->        - const: altr,socfpga
-
-So here "- enum" do not need the extra indent.
-Is it because this is not a list?
-
->  ...
-> diff --git a/Documentation/devicetree/bindings/arm/amlogic/amlogic,meson-gx-ao-secure.yaml b/Documentation/devicetree/bindings/arm/amlogic/amlogic,meson-gx-ao-secure.yaml
-> index 66213bd95e6e..6cc74523ebfd 100644
-> --- a/Documentation/devicetree/bindings/arm/amlogic/amlogic,meson-gx-ao-secure.yaml
-> +++ b/Documentation/devicetree/bindings/arm/amlogic/amlogic,meson-gx-ao-secure.yaml
-> @@ -25,7 +25,7 @@ select:
+On 4/16/20 2:07 PM, Ulf Hansson wrote:
+> On Thu, 16 Apr 2020 at 12:29, Marek Vasut <marex@denx.de> wrote:
+>>
+>> On 4/15/20 10:40 AM, Ulf Hansson wrote:
+>>> On Wed, 1 Apr 2020 at 21:57, Marek Vasut <marex@denx.de> wrote:
+>>>>
+>>>> Patch all drivers and core code which uses mmc_set_signal_voltage()
+>>>> and prepare it for the fact that mmc_set_signal_voltage() can return
+>>>> a value > 0, which would happen if the signal voltage switch did NOT
+>>>> happen, because the voltage was already set correctly.
+>>>
+>>> I am not sure why you want to change mmc_set_signal_voltage(), can you
+>>> elaborate on that?
+>>>
+>>> I thought we discussed changing mmc_regulator_set_vqmmc(), what am I missing?
+>>
+>> Because mmc_set_signal_voltage() optionally calls
+>> host->ops_>start_signal_voltage_switch() , which can now return value >
+>> 0 , so the rest of the core needs to be patched to cater for that.
 > 
->  properties:
->    compatible:
-> -   items:
-> +    items:
->        - const: amlogic,meson-gx-ao-secure
->        - const: syscon
+> The issue that you wanted to solve (at least by looking at the
+> original patch) was to understand whether the vqmmc regulator changes
+> voltage level and then take different actions based on that in the
+> mmci host driver.
+> 
+> You don't need to change anything related to mmc_set_signal_voltage()
+> to accomplish that, do you? Moreover, I am worried that it may affect
+> the host driver's expectations from when
+> ->start_signal_voltage_switch() may be called.
 
-This is something I had expected the tooling to notice.
-I had expected the two "- const" to be indented with 4 spaces, not two.
-So there is something I do not understand.
+So, shall I just patch all the sites which use mmc_regulator_set_vqmmc()
+with something like
 
+return mmc_regulator_set_vqmmc();
+becomes
+ret = mmc_regulator_set_vqmmc();
+if (ret > 0)
+	ret = 0;
+return ret;
 
-> diff --git a/Documentation/devicetree/bindings/arm/nxp/lpc32xx.yaml b/Documentation/devicetree/bindings/arm/nxp/lpc32xx.yaml
-> index 07f39d3eee7e..f7f024910e71 100644
-> --- a/Documentation/devicetree/bindings/arm/nxp/lpc32xx.yaml
-> +++ b/Documentation/devicetree/bindings/arm/nxp/lpc32xx.yaml
-> @@ -17,9 +17,8 @@ properties:
->            - nxp,lpc3230
->            - nxp,lpc3240
->        - items:
-> -        - enum:
-> -            - ea,ea3250
-> -            - phytec,phy3250
-> -        - const: nxp,lpc3250
-> -
-> +          - enum:
-> +              - ea,ea3250
-> +              - phytec,phy3250
-> +          - const: nxp,lpc3250
->  ...
-
-And here "- enum" receive extra indent.
-
-I trust you know what you are doing - but I do not get it.
-
-Some pointers or examples for the correct indention would be great.
-I cannot review this patch as long as I do not know the rules.
-
-My request to update example-schema.yaml was one way to teach me.
-(Some people will say that is difficult/impossible to teach me,
-but thats another story:-) ).
-
-	Sam
+?
