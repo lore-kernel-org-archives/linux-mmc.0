@@ -2,81 +2,73 @@ Return-Path: <SRS0=WBH1=6A=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.4 required=3.0 tests=FROM_LOCAL_HEX,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham autolearn_force=no
+X-Spam-Status: No, score=-2.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3C07FC2BA19
-	for <linux-mmc@archiver.kernel.org>; Thu, 16 Apr 2020 00:11:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C0F41C2BA19
+	for <linux-mmc@archiver.kernel.org>; Thu, 16 Apr 2020 00:30:37 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1C8412076D
-	for <linux-mmc@archiver.kernel.org>; Thu, 16 Apr 2020 00:11:12 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 94E43208E0
+	for <linux-mmc@archiver.kernel.org>; Thu, 16 Apr 2020 00:30:37 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="SU3jibVH"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2391381AbgDPALK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 15 Apr 2020 20:11:10 -0400
-Received: from mail-il1-f199.google.com ([209.85.166.199]:42347 "EHLO
-        mail-il1-f199.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2391360AbgDPALG (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Apr 2020 20:11:06 -0400
-Received: by mail-il1-f199.google.com with SMTP id l16so7311033ilf.9
-        for <linux-mmc@vger.kernel.org>; Wed, 15 Apr 2020 17:11:04 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:date:in-reply-to:message-id:subject
-         :from:to;
-        bh=fpoqVPhszf0NVg05C+Ce87uumBc0cG0RasYX5KRrK/A=;
-        b=sYp9XGddRrJMDS/UxOWAzdXCCSN0Kxk+WO6u4C2r/O1ROUDIYZoTgXMMmSlN9uLLs0
-         abpInjjnD3s9BAVm7B2R6WTqpkeHobL5UfSboznFPdjod68nFtfZ391DPqcB9wTPVgV1
-         uHTRCfY0fju47aAq88dchLqQgUCv7uu64XwFB66kk2hJ/w66hWNCuTAlFGcWp1+qnNTp
-         Tx1x6TX4PbLQhW4yR6PYcCDk2WyqZoQHIiySRWtxh9Hrw/rQmMYJa0uwrfecVUI7XtVw
-         11i/bnAGs+84P9UQMObcwPszBuLeJv1Pnnf8l/KCIcxA7NTjJb90532pBG+RHfo8K+NU
-         sWqg==
-X-Gm-Message-State: AGi0PuY0Isp7IN8DLFI/MHrZEpDO3BONyfCIlCCRJ3vouUfRqlAbN2Jk
-        UdnNPyS7/b2dVX3PpVpE4DwhdkoYmkDvTLAMv2RX7jnksxyw
-X-Google-Smtp-Source: APiQypKcCgI3/2owP+Ax+avsl/BzFIkiA31xvFAOZDOMymkWaDm+4dJSPNPqeM8Ut+RNphNBCe4mDPpNDLKfGAmGhhXHK5QOcm+K
-MIME-Version: 1.0
-X-Received: by 2002:a02:7b05:: with SMTP id q5mr28919026jac.105.1586995863913;
- Wed, 15 Apr 2020 17:11:03 -0700 (PDT)
-Date:   Wed, 15 Apr 2020 17:11:03 -0700
-In-Reply-To: <0000000000003ec128058c7624ec@google.com>
-X-Google-Appengine-App-Id: s~syzkaller
-X-Google-Appengine-App-Id-Alias: syzkaller
-Message-ID: <000000000000ba8e5605a35d4465@google.com>
+        id S2403987AbgDPAaf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 15 Apr 2020 20:30:35 -0400
+Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:35212 "EHLO
+        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S2403986AbgDPAab (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Apr 2020 20:30:31 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1586997028;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=s4rkdFZCt+CYPzp3/Qg70/GCXwWzZ5opTjJmcpHVXJY=;
+        b=SU3jibVH2pv07f2gzwNsghrxIE7KEa7LM3LllmhviWV/61yacEjU4ashWG6XxqrnPZy57l
+        rHJyBH1j9Ob/y/hiHUblkYJinRt99P6oC7b8ZSfpcMQS/gp3BXf+ydoxuI1JaZIR1JRp4Y
+        8yj80gSVlt6kTQSiliOPmdp7uZckBWM=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-441-u5im1Xo4PlegAf8ewrePhg-1; Wed, 15 Apr 2020 20:30:25 -0400
+X-MC-Unique: u5im1Xo4PlegAf8ewrePhg-1
+Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id B4F9C107ACC9;
+        Thu, 16 Apr 2020 00:30:21 +0000 (UTC)
+Received: from llong.remote.csb (ovpn-113-213.rdu2.redhat.com [10.10.113.213])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 041D15DA66;
+        Thu, 16 Apr 2020 00:30:09 +0000 (UTC)
 Subject: Re: WARNING in kernfs_create_dir_ns
-From:   syzbot <syzbot+38f5d5cf7ae88c46b11a@syzkaller.appspotmail.com>
-To:     a@unstable.cc, b.a.t.m.a.n@lists.open-mesh.org,
+To:     syzbot <syzbot+38f5d5cf7ae88c46b11a@syzkaller.appspotmail.com>,
+        a@unstable.cc, b.a.t.m.a.n@lists.open-mesh.org,
         davem@davemloft.net, gregkh@linuxfoundation.org, hdanton@sina.com,
         hongjiefang@asrmicro.com, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org, longman@redhat.com,
-        mareklindner@neomailbox.ch, mingo@kernel.org,
-        netdev@vger.kernel.org, peterz@infradead.org,
+        linux-mmc@vger.kernel.org, mareklindner@neomailbox.ch,
+        mingo@kernel.org, netdev@vger.kernel.org, peterz@infradead.org,
         sw@simonwunderlich.de, syzkaller-bugs@googlegroups.com,
         tj@kernel.org, ulf.hansson@linaro.org
-Content-Type: text/plain; charset="UTF-8"
+References: <000000000000ba8e5605a35d4465@google.com>
+From:   Waiman Long <longman@redhat.com>
+Organization: Red Hat
+Message-ID: <894635f4-772e-a28c-1078-be8a5093e351@redhat.com>
+Date:   Wed, 15 Apr 2020 20:30:09 -0400
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101
+ Thunderbird/60.7.2
+MIME-Version: 1.0
+In-Reply-To: <000000000000ba8e5605a35d4465@google.com>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Content-Language: en-US
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.14
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-syzbot suspects this bug was fixed by commit:
-
-commit 810507fe6fd5ff3de429121adff49523fabb643a
-Author: Waiman Long <longman@redhat.com>
-Date:   Thu Feb 6 15:24:08 2020 +0000
-
-    locking/lockdep: Reuse freed chain_hlocks entries
-
-bisection log:  https://syzkaller.appspot.com/x/bisect.txt?x=1008138be00000
-start commit:   72825454 Merge branch 'x86-urgent-for-linus' of git://git...
-git tree:       upstream
-kernel config:  https://syzkaller.appspot.com/x/.config?x=9a31528e58cc12e2
-dashboard link: https://syzkaller.appspot.com/bug?extid=38f5d5cf7ae88c46b11a
-syz repro:      https://syzkaller.appspot.com/x/repro.syz?x=12a6c439a00000
-C reproducer:   https://syzkaller.appspot.com/x/repro.c?x=1353c323a00000
-
-If the result looks correct, please mark the bug fixed by replying with:
-
 #syz fix: locking/lockdep: Reuse freed chain_hlocks entries
 
-For information about bisection process see: https://goo.gl/tpsmEJ#bisection
