@@ -2,123 +2,123 @@ Return-Path: <SRS0=WBH1=6A=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-4.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 748BFC2BB85
-	for <linux-mmc@archiver.kernel.org>; Thu, 16 Apr 2020 08:37:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CD999C2BB85
+	for <linux-mmc@archiver.kernel.org>; Thu, 16 Apr 2020 09:14:20 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4CC5F21973
-	for <linux-mmc@archiver.kernel.org>; Thu, 16 Apr 2020 08:37:58 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="YUjM35XZ"
+	by mail.kernel.org (Postfix) with ESMTP id AA21F214D8
+	for <linux-mmc@archiver.kernel.org>; Thu, 16 Apr 2020 09:14:20 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1587028460;
+	bh=+AtB2qrsVxt1QWCAagtuBV0iMzA+FqM4hoS9ArXVBXI=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
+	b=SgUDaVnNmEDVTdYqq3jp3oBDzjz4mgjXkUlNN8KrxseIkSukPRDgK0Poy/ARljVwK
+	 1qtlwmEWMkKvbKSieojRL8FinRvWafsNnE8uFld38DGQckcvr3GrZlpdEPSPsM9re8
+	 kfjLNbsY+tcWkmDlh2tmoahBVaiBeF4fchwGNEM0=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2502492AbgDPIhv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 16 Apr 2020 04:37:51 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38192 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2502481AbgDPIfW (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Apr 2020 04:35:22 -0400
-Received: from mail-vs1-xe43.google.com (mail-vs1-xe43.google.com [IPv6:2607:f8b0:4864:20::e43])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1F5D5C061A10
-        for <linux-mmc@vger.kernel.org>; Thu, 16 Apr 2020 01:24:26 -0700 (PDT)
-Received: by mail-vs1-xe43.google.com with SMTP id 1so1853025vsl.9
-        for <linux-mmc@vger.kernel.org>; Thu, 16 Apr 2020 01:24:26 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=/TaBcNBr0LmHmhCu1jIrvYkIUcv+feENwdQ/ZDbQJes=;
-        b=YUjM35XZNkCke18ASEVQzu3oQOeQ67Z70V6beRoVND6LL9BBZ+3//1papRDqvwu0ET
-         tQ4NufGIlbdwNCmPwdQqkrrAGiSSOTwPtFR2mLdFrRsMdTb/QsflO8TZ31VhqZvny3hN
-         2PY6Cv1TAFkYPf9Nq55TNDQPdM4CZR5yFLfriuIVACuwdRMuBTL30ZcSh7fdpzH/kx9O
-         RhlOJjOCIABO8hrrWqJxxEjlfDg6y8EUdm2J6ym3mBDh+tfwsoQsvgh9yO0sq1KeYq+5
-         uyrbZ/Ek1LmsVDH01d/yEhBpQbbbwwR/FtG9PpLOjjaRQWuShfKBQmS3yqjb/oBDsOgf
-         Vjkg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=/TaBcNBr0LmHmhCu1jIrvYkIUcv+feENwdQ/ZDbQJes=;
-        b=NRIRBcLj6d1zBqQZZUScEIXU/Vp40VitvgMpwwyoa+6B54MoIxBtsLiCVqwdiNCkpN
-         MTGL1zI2lA0NS83oE5q4/MoNUwPq93kaaVsleuMKih0TkwI8d6+sl+bj0Cvjfykd5zPn
-         qFraAbEq5wdjybso2dnUZJRgyEVfQSYiQ2kr5zNNEg47FdbQWsmfGOgq+sFgLGIbxxnw
-         gRO6dOk3Mk3kQDvof0v7EcuQfE/nkbPbcwvgBZVgSpzI40xpNXbFe2fRTa+as5K4PjP0
-         iOGN6PsJJbEriWC4jwkZr5k9DH4Mu4+eyrOjcdphRClW+41wYqJ3L7VYQFmQ3HtAGpA8
-         qbxg==
-X-Gm-Message-State: AGi0PuZngx8z5+Z2Ggop8hly79qFCkTELVAhX9ktyZ1Cun9EdW+L4HwO
-        bsoDx4/bs5rEDoeRw88A6lMZaMeCw1KAfstGRERfKA==
-X-Google-Smtp-Source: APiQypLB3ByHxPcUtZOdM+rFhnnuQHeltCT3o4Wld28Z33lBkBrgQXNCizCw/78zmL5SElkXmD9y+IsRZr/CeHWIJLY=
-X-Received: by 2002:a67:11c4:: with SMTP id 187mr8059654vsr.34.1587025465228;
- Thu, 16 Apr 2020 01:24:25 -0700 (PDT)
-MIME-Version: 1.0
-References: <1586353607-32222-1-git-send-email-rnayak@codeaurora.org>
- <1586353607-32222-14-git-send-email-rnayak@codeaurora.org>
- <CAPDyKFrOFOLCWHu8nE4i5t=d+Ei-kcJ15_42Ft3ROSUDe5jkpw@mail.gmail.com> <3e5f8e78-7cd1-30fb-e005-78c1e7111794@codeaurora.org>
-In-Reply-To: <3e5f8e78-7cd1-30fb-e005-78c1e7111794@codeaurora.org>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 16 Apr 2020 10:23:49 +0200
-Message-ID: <CAPDyKFrD7sh4gnbX8B2j22h18T=7ZRGCc_RYXd0ePm2fZwDcVA@mail.gmail.com>
-Subject: Re: [PATCH 13/21] mmc: sdhci-msm: Use OPP API to set clk/perf state
-To:     Rajendra Nayak <rnayak@codeaurora.org>
-Cc:     Viresh Kumar <viresh.kumar@linaro.org>,
+        id S2441393AbgDPIaZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 16 Apr 2020 04:30:25 -0400
+Received: from mail.kernel.org ([198.145.29.99]:38708 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S2439552AbgDPILF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 16 Apr 2020 04:11:05 -0400
+Received: from localhost (unknown [223.235.195.235])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id 1D38A206B9;
+        Thu, 16 Apr 2020 08:07:37 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1587024458;
+        bh=+AtB2qrsVxt1QWCAagtuBV0iMzA+FqM4hoS9ArXVBXI=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=2SDVAHMhpWjl2KgmMtDeMa4mCSN5E7syFhtD6nl+7e+uOtdm92iHSJh7of/HWeSKy
+         HDPx9eDy3/ziMPBERearhYxolH1rzEwouN2J1vLT/RYfJAdCvbbfyQVciDd7LjXhj3
+         Rm7XEVuyXLSwCmFC9enIFNjzAhrkqZPWIGTVc9wk=
+Date:   Thu, 16 Apr 2020 13:37:34 +0530
+From:   Vinod Koul <vkoul@kernel.org>
+To:     Rob Herring <robh@kernel.org>
+Cc:     devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Krzysztof Kozlowski <krzk@kernel.org>,
+        Maxime Ripard <mripard@kernel.org>,
         Stephen Boyd <sboyd@kernel.org>,
+        Alexandre Torgue <alexandre.torgue@st.com>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        Sam Ravnborg <sam@ravnborg.org>,
+        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
+        Guenter Roeck <linux@roeck-us.net>,
+        Jonathan Cameron <jic23@kernel.org>,
+        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
+        Jacek Anaszewski <jacek.anaszewski@gmail.com>,
+        Pavel Machek <pavel@ucw.cz>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        Lee Jones <lee.jones@linaro.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Heiko Stuebner <heiko@sntech.de>, Andrew Lunn <andrew@lunn.ch>,
+        Florian Fainelli <f.fainelli@gmail.com>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Fabio Estevam <festevam@gmail.com>,
+        Mark Brown <broonie@kernel.org>,
         Bjorn Andersson <bjorn.andersson@linaro.org>,
-        Andy Gross <agross@kernel.org>,
-        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
-        DTML <devicetree@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Pradeep P V K <ppvk@codeaurora.org>,
-        Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
-        Subhash Jadavani <subhashj@codeaurora.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+        Alexandre Belloni <alexandre.belloni@bootlin.com>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Amit Kucheria <amit.kucheria@linaro.org>,
+        Daniel Lezcano <daniel.lezcano@linaro.org>,
+        linux-arm-kernel@lists.infradead.org, linux-clk@vger.kernel.org,
+        dri-devel@lists.freedesktop.org, linux-i2c@vger.kernel.org,
+        linux-hwmon@vger.kernel.org, linux-iio@vger.kernel.org,
+        linux-input@vger.kernel.org, linux-leds@vger.kernel.org,
+        linux-media@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-mtd@lists.infradead.org, linux-can@vger.kernel.org,
+        netdev@vger.kernel.org, linux-pci@vger.kernel.org,
+        linux-gpio@vger.kernel.org, linux-pwm@vger.kernel.org,
+        linux-remoteproc@vger.kernel.org, linux-riscv@lists.infradead.org,
+        linux-rtc@vger.kernel.org, linux-serial@vger.kernel.org,
+        alsa-devel@alsa-project.org, linux-spi@vger.kernel.org
+Subject: Re: [PATCH 2/2] dt-bindings: Remove cases of 'allOf' containing a
+ '$ref'
+Message-ID: <20200416080734.GJ72691@vkoul-mobl>
+References: <20200416005549.9683-1-robh@kernel.org>
+ <20200416005549.9683-2-robh@kernel.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20200416005549.9683-2-robh@kernel.org>
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 15 Apr 2020 at 18:43, Rajendra Nayak <rnayak@codeaurora.org> wrote:
->
->
->
-> On 4/15/2020 7:22 PM, Ulf Hansson wrote:
-> > On Wed, 8 Apr 2020 at 15:48, Rajendra Nayak <rnayak@codeaurora.org> wrote:
-> >>
-> >> On some qualcomm SoCs we need to vote on a performance state of a power
-> >> domain depending on the clock rates. Hence move to using OPP api to set
-> >> the clock rate and performance state specified in the OPP table.
-> >> On platforms without an OPP table, dev_pm_opp_set_rate() is eqvivalent to
-> >> clk_set_rate()
-> >>
-> >> Signed-off-by: Rajendra Nayak <rnayak@codeaurora.org>
-> >> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> >> Cc: Pradeep P V K <ppvk@codeaurora.org>
-> >> Cc: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
-> >> Cc: Subhash Jadavani <subhashj@codeaurora.org>
-> >> Cc: linux-mmc@vger.kernel.org
-> >
-> > This looks good to me!
-> >
-> > However, are there any of the other patches in the series that
-> > $subject patch depends on - or can I apply this as a standalone mmc
-> > patch?
->
-> Hey Ulf, thanks for the review. I'll just need to respin these to make
-> sure I do not do a dev_pm_opp_of_remove_table() if dev_pm_opp_of_add_table()
-> isn;t successful as discussed with Viresh on another thread [1]
->
-> As for the dependencies, its only PATCH 01/21 in this series and that's
-> already been queued by Viresh [2]
+On 15-04-20, 19:55, Rob Herring wrote:
+> json-schema versions draft7 and earlier have a weird behavior in that
+> any keywords combined with a '$ref' are ignored (silently). The correct
+> form was to put a '$ref' under an 'allOf'. This behavior is now changed
+> in the 2019-09 json-schema spec and '$ref' can be mixed with other
+> keywords. The json-schema library doesn't yet support this, but the
+> tooling now does a fixup for this and either way works.
+> 
+> This has been a constant source of review comments, so let's change this
+> treewide so everyone copies the simpler syntax.
+> 
+> Signed-off-by: Rob Herring <robh@kernel.org>
+> ---
+>  .../devicetree/bindings/arm/cpus.yaml         |  81 +++---
+>  .../devicetree/bindings/arm/l2c2x0.yaml       |  87 +++---
+>  .../devicetree/bindings/arm/psci.yaml         |  15 +-
+>  .../bindings/arm/samsung/exynos-chipid.yaml   |   5 +-
+>  .../bus/allwinner,sun50i-a64-de2.yaml         |   5 +-
+>  .../bindings/clock/fixed-factor-clock.yaml    |   5 +-
+>  .../bindings/connector/usb-connector.yaml     |  28 +-
+>  .../bindings/crypto/st,stm32-hash.yaml        |   9 +-
+>  .../allwinner,sun4i-a10-display-engine.yaml   |   7 +-
+>  .../display/allwinner,sun4i-a10-tcon.yaml     |   5 +-
+>  .../bindings/display/panel/panel-common.yaml  |   5 +-
+>  .../devicetree/bindings/dma/dma-common.yaml   |   3 +-
+>  .../devicetree/bindings/dma/ti/k3-udma.yaml   |  18 +-
 
-I see, thanks!
+Acked-By: Vinod Koul <vkoul@kernel.org>
 
-Looks like Viresh is sending it to be included for v5.7-rc2, so I can
-pick your new version of $subject patch next week.
-
-[...]
-
-Kind regards
-Uffe
+-- 
+~Vinod
