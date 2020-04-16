@@ -2,190 +2,112 @@ Return-Path: <SRS0=WBH1=6A=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-0.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 435A0C352BE
-	for <linux-mmc@archiver.kernel.org>; Thu, 16 Apr 2020 11:39:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8A054C2BB55
+	for <linux-mmc@archiver.kernel.org>; Thu, 16 Apr 2020 12:07:43 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1D8E321D7F
-	for <linux-mmc@archiver.kernel.org>; Thu, 16 Apr 2020 11:39:49 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6A4BB20767
+	for <linux-mmc@archiver.kernel.org>; Thu, 16 Apr 2020 12:07:43 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="H1PRjyup"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="LSxq7bWj"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2506531AbgDPLjn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 16 Apr 2020 07:39:43 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60822 "EHLO
+        id S2634831AbgDPMHk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 16 Apr 2020 08:07:40 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43276 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2505917AbgDPK7n (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Apr 2020 06:59:43 -0400
-Received: from mail-ua1-x942.google.com (mail-ua1-x942.google.com [IPv6:2607:f8b0:4864:20::942])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5A0F0C025480
-        for <linux-mmc@vger.kernel.org>; Thu, 16 Apr 2020 03:59:43 -0700 (PDT)
-Received: by mail-ua1-x942.google.com with SMTP id x18so2635873uap.8
-        for <linux-mmc@vger.kernel.org>; Thu, 16 Apr 2020 03:59:43 -0700 (PDT)
+        with ESMTP id S2635002AbgDPMHh (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Apr 2020 08:07:37 -0400
+Received: from mail-vs1-xe41.google.com (mail-vs1-xe41.google.com [IPv6:2607:f8b0:4864:20::e41])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 60524C061A0C
+        for <linux-mmc@vger.kernel.org>; Thu, 16 Apr 2020 05:07:37 -0700 (PDT)
+Received: by mail-vs1-xe41.google.com with SMTP id y15so2229248vsm.5
+        for <linux-mmc@vger.kernel.org>; Thu, 16 Apr 2020 05:07:37 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=p/NQn3x2dQrPgmua+MkXZ2CPgsicQ89yPGaFimgDCmY=;
-        b=H1PRjyupkz+ecVblYlD5uZ6r4HV5zKCOh+pkNDaV9amQ+qoxu3nkqACQli5ciwIiPE
-         RZYTRcRro5ZMqNbQf4/M1vESYaAobmD4nNuC0g72XoFTuHA9BzE6oyn5+UZPvtNAlJEW
-         ie/Lt169KGZ57WHaUv2tfQZD62uiHLfBim1YFbVgseXfc9JvQkfriTgSS7/0211ybdZR
-         vY785wUltPwG3+Y3GOoKYBsPOR6lhKm25CiMM1z+OitCgs5fCmLii0es72sWXK7AhmWu
-         v4PzLn8cVZR22flguxUivk/kqmXVeFMLyegDsuJNhiW5y+CWuztKa+zfIYH2w41QuLYZ
-         TDog==
+        bh=zqK9vQ7uGVRX9EHsY2IXKQ2OQL2LPfO4oHpQbQH0pZ8=;
+        b=LSxq7bWjMbSX3AuwKUh3cNpQt/nN7PvEFYiQB9rgjEvR0+dRmCdIMIqoXYMhiblyaw
+         C91Dd7UOwgN9yPg5X/DFkqiTma1eDPP/rzOsCuPeMkzxgZiGADw9WtgpjP3VStN6KoY9
+         5yVRw/pcZ0V+nkcCVoJSLlDurwhMIRLW0fZxjK39nl69/FeO+zlWHm7JwOy3V1c1EyTt
+         0RxSo0ZXoA2X6qaG2cwa/s7hzBY9q7YhzY3gItlnxgDGMOd4Q+ak7m1zg+nQRtZOs8HM
+         K0BFFf1FAj9ZfenK+l2umXsqnuL8oqJWgb8HDX//7MOuvt4zQ21bC0uqbKs3Yz6TKu3I
+         tVqQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=p/NQn3x2dQrPgmua+MkXZ2CPgsicQ89yPGaFimgDCmY=;
-        b=RkAUglX94wQZxtkY3jtXkEL4Fu9no6z6uQMM5nYM8Z73hP6whIKDxXa9Uvm3YFjRL4
-         yD7nEiRkLHGkS4guXQBhC3x1w51GkQ77QajK1hNUrwoGUFdRgfhoLJLbzcIJxy7m1yHR
-         cjPFMZQeZiCjW8V4SfU8ChlrqWCwtsad1iNul1WZeewO+AItx7IffIA22WeotaNig5yK
-         SXOQNkNPiH9a0+fHyI1S6uMTKSdzfiK1nJ48KzaRsYX6qxKcx8jSKN87HhB+rekbqDOX
-         n4s7zU0eDTVRJfX3DBtgwL7ghZhZrysy+7bu3Yc18WK+fyS/Jb56Fz9zpruD8vRV52a1
-         Tj9g==
-X-Gm-Message-State: AGi0PuakD0WgyvAseNp2BsP3WUgzGT5zDyycv2aC2LBfYt5dyQzw6eP+
-        TcvaPdsbOaZnHoVSY752A+CtBwke3arSgGvY02b5fg==
-X-Google-Smtp-Source: APiQypIheC8zF+5u1sxqSHfIaGuYjJzSfh8tnXKmJeq8phNdy3w/AXb9wUOkMUHaVScHJYnzRhCpI5N5eo01eUkNqKU=
-X-Received: by 2002:ab0:2ea:: with SMTP id 97mr8516870uah.129.1587034782283;
- Thu, 16 Apr 2020 03:59:42 -0700 (PDT)
+        bh=zqK9vQ7uGVRX9EHsY2IXKQ2OQL2LPfO4oHpQbQH0pZ8=;
+        b=q744Sr4X4nrDJrpZLi7Ermlrgp9VdoxEwbJ+4Ts250jjaz88dJpt+u+9kiWKEkRSKN
+         HrNvO3TECp/3c1MyQOcIDgecpi43IUjM9e20wahTlERv166dIhuL1gYowHMvU5VLTbbB
+         UfU7pZcIkPwidYL+/P1jOIXDje9C0hs5nTIw/vlNf/0qZAqAxs0wGRbcwJCWa0rmOUf8
+         8Z2Xc8iM7bU4NEy2OQYicDUeLeMJVKBwTLL26qHmsYZfXw2Q/v6dITRo4xJABAc7dyry
+         GQ+tAni9DMwx5pEGUQjJvrGMAw4tpDWUdF29HbOrEixvstr5zFiG7fESLyQu05dJetFZ
+         mQoA==
+X-Gm-Message-State: AGi0Pub+Zutm+MrKNi636AiG/zO/M9easujFDI8c6lCL35N1ERgSrV1Y
+        oHDXWxt9lGquhVOoWyURDtI0fOZpJB7pjfD3aJnSEg==
+X-Google-Smtp-Source: APiQypIf2U2EaVxpSy4+oahhN3R6apIV7Qx6ZHTYZ7H9F80/bkUHDrRU90Fz1tgagdqlSZBnxZruBkF4YXlou7tk7Sk=
+X-Received: by 2002:a67:ead1:: with SMTP id s17mr1293841vso.200.1587038856541;
+ Thu, 16 Apr 2020 05:07:36 -0700 (PDT)
 MIME-Version: 1.0
-References: <1583886030-11339-1-git-send-email-skomatineni@nvidia.com> <CA+G9fYvreAv5HmZg0O4VvLvf_PYSvzD1rp08XONNQGExctgQ0Q@mail.gmail.com>
-In-Reply-To: <CA+G9fYvreAv5HmZg0O4VvLvf_PYSvzD1rp08XONNQGExctgQ0Q@mail.gmail.com>
+References: <20200401195722.208157-1-marex@denx.de> <CAPDyKFoDB=d5B-2u_Y0e-XVzPQE46JBUTPwY_b_xzESm3NnjwQ@mail.gmail.com>
+ <58d6bc7a-b772-e8cc-6120-b0adeb128070@denx.de>
+In-Reply-To: <58d6bc7a-b772-e8cc-6120-b0adeb128070@denx.de>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 16 Apr 2020 12:59:06 +0200
-Message-ID: <CAPDyKFpZEiqTdD6O-y6Sw7ifXF__MHAv0zKT=RFKs+Fmvr-K_Q@mail.gmail.com>
-Subject: Re: [PATCH v2 1/2] sdhci: tegra: Implement Tegra specific set_timeout callback
-To:     Naresh Kamboju <naresh.kamboju@linaro.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Sasha Levin <sashal@kernel.org>,
-        Sowjanya Komatineni <skomatineni@nvidia.com>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        "(Exiting) Baolin Wang" <baolin.wang@linaro.org>,
-        Kate Stewart <kstewart@linuxfoundation.org>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Bradley Bolen <bradleybolen@gmail.com>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        Jon Hunter <jonathanh@nvidia.com>,
-        Aniruddha Tvs Rao <anrao@nvidia.com>,
-        linux-tegra <linux-tegra@vger.kernel.org>,
-        open list <linux-kernel@vger.kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        lkft-triage@lists.linaro.org,
-        linux- stable <stable@vger.kernel.org>
+Date:   Thu, 16 Apr 2020 14:07:00 +0200
+Message-ID: <CAPDyKFrAgLMUqU4oSRX64VoDQMMFZuM3KtUq6SL770XDSc+QbQ@mail.gmail.com>
+Subject: Re: [PATCH 1/3] mmc: Prepare all code for mmc_set_signal_voltage()
+ returning > 0
+To:     Marek Vasut <marex@denx.de>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Alexandre Torgue <alexandre.torgue@st.com>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Ludovic Barre <ludovic.barre@st.com>,
+        Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>,
+        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
+        Patrice Chotard <patrice.chotard@st.com>,
+        Patrick Delaunay <patrick.delaunay@st.com>,
+        Russell King <linux@armlinux.org.uk>,
+        linux-stm32@st-md-mailman.stormreply.com
 Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 15 Apr 2020 at 19:55, Naresh Kamboju <naresh.kamboju@linaro.org> wrote:
+On Thu, 16 Apr 2020 at 12:29, Marek Vasut <marex@denx.de> wrote:
 >
-> On Fri, 13 Mar 2020 at 06:41, Sowjanya Komatineni
-> <skomatineni@nvidia.com> wrote:
+> On 4/15/20 10:40 AM, Ulf Hansson wrote:
+> > On Wed, 1 Apr 2020 at 21:57, Marek Vasut <marex@denx.de> wrote:
+> >>
+> >> Patch all drivers and core code which uses mmc_set_signal_voltage()
+> >> and prepare it for the fact that mmc_set_signal_voltage() can return
+> >> a value > 0, which would happen if the signal voltage switch did NOT
+> >> happen, because the voltage was already set correctly.
 > >
-> > Tegra host supports HW busy detection and timeouts based on the
-> > count programmed in SDHCI_TIMEOUT_CONTROL register and max busy
-> > timeout it supports is 11s in finite busy wait mode.
+> > I am not sure why you want to change mmc_set_signal_voltage(), can you
+> > elaborate on that?
 > >
-> > Some operations like SLEEP_AWAKE, ERASE and flush cache through
-> > SWITCH commands take longer than 11s and Tegra host supports
-> > infinite HW busy wait mode where HW waits forever till the card
-> > is busy without HW timeout.
-> >
-> > This patch implements Tegra specific set_timeout sdhci_ops to allow
-> > switching between finite and infinite HW busy detection wait modes
-> > based on the device command expected operation time.
-> >
-> > Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
-> > ---
-> >  drivers/mmc/host/sdhci-tegra.c | 31 +++++++++++++++++++++++++++++++
-> >  1 file changed, 31 insertions(+)
-> >
-> > diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-> > index a25c3a4..fa8f6a4 100644
-> > --- a/drivers/mmc/host/sdhci-tegra.c
-> > +++ b/drivers/mmc/host/sdhci-tegra.c
-> > @@ -45,6 +45,7 @@
-> >  #define SDHCI_TEGRA_CAP_OVERRIDES_DQS_TRIM_SHIFT       8
-> >
-> >  #define SDHCI_TEGRA_VENDOR_MISC_CTRL                   0x120
-> > +#define SDHCI_MISC_CTRL_ERASE_TIMEOUT_LIMIT            BIT(0)
-> >  #define SDHCI_MISC_CTRL_ENABLE_SDR104                  0x8
+> > I thought we discussed changing mmc_regulator_set_vqmmc(), what am I missing?
 >
-> >  #define SDHCI_MISC_CTRL_ENABLE_SDR50                   0x10
-> >  #define SDHCI_MISC_CTRL_ENABLE_SDHCI_SPEC_300          0x20
-> > @@ -1227,6 +1228,34 @@ static u32 sdhci_tegra_cqhci_irq(struct sdhci_host *host, u32 intmask)
-> >         return 0;
-> >  }
-> >
-> > +static void tegra_sdhci_set_timeout(struct sdhci_host *host,
-> > +                                   struct mmc_command *cmd)
-> > +{
-> > +       u32 val;
-> > +
-> > +       /*
-> > +        * HW busy detection timeout is based on programmed data timeout
-> > +        * counter and maximum supported timeout is 11s which may not be
-> > +        * enough for long operations like cache flush, sleep awake, erase.
-> > +        *
-> > +        * ERASE_TIMEOUT_LIMIT bit of VENDOR_MISC_CTRL register allows
-> > +        * host controller to wait for busy state until the card is busy
-> > +        * without HW timeout.
-> > +        *
-> > +        * So, use infinite busy wait mode for operations that may take
-> > +        * more than maximum HW busy timeout of 11s otherwise use finite
-> > +        * busy wait mode.
-> > +        */
-> > +       val = sdhci_readl(host, SDHCI_TEGRA_VENDOR_MISC_CTRL);
-> > +       if (cmd && cmd->busy_timeout >= 11 * HZ)
-> > +               val |= SDHCI_MISC_CTRL_ERASE_TIMEOUT_LIMIT;
-> > +       else
-> > +               val &= ~SDHCI_MISC_CTRL_ERASE_TIMEOUT_LIMIT;
-> > +       sdhci_writel(host, val, SDHCI_TEGRA_VENDOR_MISC_CTRL);
-> > +
-> > +       __sdhci_set_timeout(host, cmd);
->
-> kernel build on arm and arm64 architecture failed on stable-rc 4.19
-> (arm), 5.4 (arm64) and 5.5 (arm64)
->
-> drivers/mmc/host/sdhci-tegra.c: In function 'tegra_sdhci_set_timeout':
-> drivers/mmc/host/sdhci-tegra.c:1256:2: error: implicit declaration of
-> function '__sdhci_set_timeout'; did you mean
-> 'tegra_sdhci_set_timeout'? [-Werror=implicit-function-declaration]
->   __sdhci_set_timeout(host, cmd);
->   ^~~~~~~~~~~~~~~~~~~
->   tegra_sdhci_set_timeout
->
-> Full build log,
-> https://ci.linaro.org/view/lkft/job/openembedded-lkft-linux-stable-rc-5.5/DISTRO=lkft,MACHINE=am57xx-evm,label=docker-lkft/83/consoleText
-> https://ci.linaro.org/view/lkft/job/openembedded-lkft-linux-stable-rc-5.4/DISTRO=lkft,MACHINE=juno,label=docker-lkft/158/consoleText
-> https://ci.linaro.org/view/lkft/job/openembedded-lkft-linux-stable-rc-4.19/DISTRO=lkft,MACHINE=am57xx-evm,label=docker-lkft/511/consoleText
->
-> - Naresh
+> Because mmc_set_signal_voltage() optionally calls
+> host->ops_>start_signal_voltage_switch() , which can now return value >
+> 0 , so the rest of the core needs to be patched to cater for that.
 
-Thanks for reporting! What a mess.
+The issue that you wanted to solve (at least by looking at the
+original patch) was to understand whether the vqmmc regulator changes
+voltage level and then take different actions based on that in the
+mmci host driver.
 
-It turns out that the commit that was queued for stable that is
-causing the above errors, also requires another commit.
+You don't need to change anything related to mmc_set_signal_voltage()
+to accomplish that, do you? Moreover, I am worried that it may affect
+the host driver's expectations from when
+->start_signal_voltage_switch() may be called.
 
-The commit that was queued:
-5e958e4aacf4 ("sdhci: tegra: Implement Tegra specific set_timeout callback")
-
-The additional commit needed (which was added in v5.6-rc1):
-7d76ed77cfbd ("mmc: sdhci: Refactor sdhci_set_timeout()")
-
-However, the above commit needs a manual backport (quite trivial, but
-still) for the relevant stable kernels, to allow it to solve the build
-problems.
-
-Greg, Sasha - I suggest you to drop the offending commit from the
-stable kernels, for now. I think it's better to let Sowjanya deal with
-the backports, then send them in small series instead.
+[...]
 
 Kind regards
 Uffe
