@@ -2,126 +2,123 @@ Return-Path: <SRS0=NquR=6B=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 75369C38A2B
-	for <linux-mmc@archiver.kernel.org>; Fri, 17 Apr 2020 11:29:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3B9A9C38A2B
+	for <linux-mmc@archiver.kernel.org>; Fri, 17 Apr 2020 11:29:55 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4E98B21D94
-	for <linux-mmc@archiver.kernel.org>; Fri, 17 Apr 2020 11:29:52 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 16A5621D94
+	for <linux-mmc@archiver.kernel.org>; Fri, 17 Apr 2020 11:29:55 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="GtOmtytk"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="CRZ4C/5j"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730387AbgDQL3v (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 17 Apr 2020 07:29:51 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35628 "EHLO
+        id S1730403AbgDQL3y (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 17 Apr 2020 07:29:54 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35642 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-FAIL-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1730384AbgDQL3v (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Apr 2020 07:29:51 -0400
+        by vger.kernel.org with ESMTP id S1730324AbgDQL3y (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Apr 2020 07:29:54 -0400
 Received: from mail-ua1-x942.google.com (mail-ua1-x942.google.com [IPv6:2607:f8b0:4864:20::942])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EEA50C061A0C
-        for <linux-mmc@vger.kernel.org>; Fri, 17 Apr 2020 04:29:50 -0700 (PDT)
-Received: by mail-ua1-x942.google.com with SMTP id v24so529523uak.0
-        for <linux-mmc@vger.kernel.org>; Fri, 17 Apr 2020 04:29:50 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E0779C061A0C
+        for <linux-mmc@vger.kernel.org>; Fri, 17 Apr 2020 04:29:53 -0700 (PDT)
+Received: by mail-ua1-x942.google.com with SMTP id u12so511210uau.10
+        for <linux-mmc@vger.kernel.org>; Fri, 17 Apr 2020 04:29:53 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=Nu9WgdeKxKQdkeH1gR18VhD9u3Adn8tTkCVWam9LK94=;
-        b=GtOmtytk18kW8KTUJNTrqweEWV6cr1cr3C/OhLizV4J+D5OdrUqwJejcrqB2FP9K8z
-         PYBUxtD/ra0CuRjTRXYgtVHfo19zN25JtaWCwInr9o/VTm9a5UGDMuza4i1fm62ScXS9
-         rN1UfE+7fOrtV1M57/CovyL0iOHcIkByEFdhx60rxFxssfOvvpNEKzg+qeZ77hKtk4Ox
-         xVt/5BJUoLV64O9x2cO7jFh37MK9xhaDQ72/xf0AE4gyMTDGUKjJ1Y4uzvUspMGAIM2M
-         NyxlwU3fs+7X0QoBLrFQ2Cfq7u4S9qvjghwsf+EDLrQziUAaZuBQiycPE80POwx0JOgZ
-         b4DQ==
+        bh=YOtnGCLOffRDjVQMAjSBuDIal+6fxqleA+W9Lw8x8/E=;
+        b=CRZ4C/5jBGneL6ClhbdFF+/HtdSsizkg6ef8Ox/V2AGNQnjrGIK4FeCOjj28UGvJ/S
+         3aFy4TCzpaZOHvin5b2xrUK+d/TKahUBz8BI1vQO9BmxeQWNwoCiEZ+clMMf7c5HM6hX
+         5Ea/lxWVWzJmgR38iZhstXVKU3VSpmyUj3tPmOW4LTaKHI3k4oUPFfqM2qQQYKPDxn7l
+         UjWavC5QhIpU505x5jjhiytQvwh6fGubk4din+aCyTWVN7Z7BY/k4kT/MY0pfB5F1+r6
+         rZYk44om5G/O1VCEFb4KYfktODc36ozM5iVSLFxkAMOoOMAm4HQiyLatuuR21BRh5nUa
+         baDg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=Nu9WgdeKxKQdkeH1gR18VhD9u3Adn8tTkCVWam9LK94=;
-        b=eNV+d4OnwwORia9BKrdOATitBU+75Fsrflkrb+kAG4hM9nckUME4NjsQZYT6IWRWif
-         RmQbGhk5tIzdyN9HJPWnb87DNr7Q2aoPKkQAU2yUJG3AuJNor8C0MUWpzoEmWk41KMv5
-         /jCgdZS9VWtRA/MydJRY2tVusdWjW62rvU7VmH3MGaQqYr8PtcLCwAAMNkyQvfGyum0n
-         2nTf9+1aOpqnRHdvljjdvw7AILLo31kq04qQLZAoMvVI4Z0BVzQfBOAg/hRtbs2w9tib
-         ShZxdNlc2wwB1N7kHHmlsXV86pPF3D4xPLEaC9gfyEmQ+TrGEAW+2C4fAKjFq3PyNoM1
-         X6fg==
-X-Gm-Message-State: AGi0Pua6GiuZbh7MBQx4rvhp+++lEv1z7F7aC4JJkcFmFmWNKKEWlYUO
-        MwN3AgbJ7Gvc9uzRt4CkFYDGv4oHt3vKhuEtM/cYYg==
-X-Google-Smtp-Source: APiQypI99jsnL4mvQY9oQzsMieBqtAo29Y/8grH2oglO8FAd30vRx2tQcJkBygaMr5+Hv/S1jdj3f1P6K2qyFqAhHug=
-X-Received: by 2002:a9f:25af:: with SMTP id 44mr1989461uaf.104.1587122990039;
- Fri, 17 Apr 2020 04:29:50 -0700 (PDT)
+        bh=YOtnGCLOffRDjVQMAjSBuDIal+6fxqleA+W9Lw8x8/E=;
+        b=lD0hEz1sjK60elJzbH35oXeW7etA+/mKXqqXMkuFZUraIg/6K5Gh1JXqlLE7Z5AoO6
+         31DyL/J1BGARfAmau6Qos0NSlDOjc02ynpCmmJbd3uar2QHVfxJy/8ttS5RK0mw0ER7G
+         IW+IwTMR9/db7/bAhtjPeZHhERlvn7Caaa0WTeJ05tYeEmJcssglEHhp1RFwWA02Vivs
+         /Ko5HOt+g166sMVEtDdrpIfbogdCab4sZkFaeGqQVg7fEnkbPdWEZEYdXWbi+9xeYj7c
+         R0rbzxCt07IgO9OnNYXjS5LoQCV/H5iIeLPbrqCsJ6McneFoT53uz73hlTEvFRMHxaAO
+         jogA==
+X-Gm-Message-State: AGi0PuY5EIFJQrPZ8ERiY/NyGzAscxV8UCfAGDc1cFGLksplXXjGWFrL
+        tsbxgOPUK3OyymLoOhzxpg6E3312y9+YMmOtUb5/dHlJ
+X-Google-Smtp-Source: APiQypIq0pieNQfBvZCTfE7jFsOwqVd/+UrCeGcrx0khrWM1vo1vvMa59vVW+Ztb5TBHvez6OFVUpNDtjIohLWJrzAU=
+X-Received: by 2002:ab0:2ea:: with SMTP id 97mr1890385uah.129.1587122993064;
+ Fri, 17 Apr 2020 04:29:53 -0700 (PDT)
 MIME-Version: 1.0
-References: <cover.1586744073.git.baolin.wang7@gmail.com>
-In-Reply-To: <cover.1586744073.git.baolin.wang7@gmail.com>
+References: <1586941255-9237-1-git-send-email-haibo.chen@nxp.com>
+In-Reply-To: <1586941255-9237-1-git-send-email-haibo.chen@nxp.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 17 Apr 2020 13:29:14 +0200
-Message-ID: <CAPDyKFqfq_UMNfgdu8HioAa6+qy+JYrNkVDg8ARu1BpNKx9hgw@mail.gmail.com>
-Subject: Re: [PATCH v5 0/3] Introduce the request_atomic() for the host
-To:     Baolin Wang <baolin.wang7@gmail.com>
+Date:   Fri, 17 Apr 2020 13:29:17 +0200
+Message-ID: <CAPDyKFqyHmYgWEC1yD-beHdAQ3xCijr=DPHPHNdhBBpFwCp1=Q@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci: add spin lock for sdhci_set_default_irqs in sdhci_init
+To:     Haibo Chen <haibo.chen@nxp.com>
 Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        Arnd Bergmann <arnd@arndb.de>,
-        Orson Zhai <orsonzhai@gmail.com>,
-        Chunyan Zhang <zhang.lyra@gmail.com>,
         "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+        dl-linux-imx <linux-imx@nxp.com>
 Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 13 Apr 2020 at 04:46, Baolin Wang <baolin.wang7@gmail.com> wrote:
+On Wed, 15 Apr 2020 at 11:09, <haibo.chen@nxp.com> wrote:
 >
-> This patch set introduces a new request_atomic() interface for the
-> MMC host controller, which is used to submit a request to host in
-> the atomic context, such as in the irq hard handler, to reduce the
-> request latency.
+> From: Haibo Chen <haibo.chen@nxp.com>
 >
-> Note, this patch set is based on Adrian's patch set:
-> https://www.spinics.net/lists/linux-mmc/msg58529.html
+> When use one SDIO wifi which enable the runtime PM feature on i.MX6SX,
+> we meet system hang. This hang happened during the usdhc runtime resume,
+> in sdhci_init(), when call the sdhci_set_default_irqs. One interrupt
+> (SDHCI_INT_CARD_INT) triggered just after the host->ier update and before
+> the write of register SDHCI_SIGNAL_ENABLE. So in sdhci_irq, it will skip
+> the call of sdio_signal_irq() because current host->ier do not set the
+> SDHCI_INT_CARD_INT. So this SDIO wifi interrupt always keep triggered,
+> let the system stuck in irq handle, can't response any other thread.
 >
-> Any comments are welcome. Thanks.
+> This patch add spin lock for the sdhci_set_default_irqs to fix this issue.
 >
-> Changes from v4:
->  - Remove redundant checking when warning the return value of request_atomic().
->  - Add acked tag from Adrian for patch 1.
->  - Re-implement the request_atomic() based on the Adrian's patch set.
->
-> Changes from v3:
->  - Move patch 3 of V3 patch set into patch 1.
->  - Add a warning for unexpected return value of request_atomic().
->  - Remove redundant checking of ops->request().
->
-> Changes from v2:
->  - Return busy flag if encountering unusual card busy state
->  instead of polling in interrupt context.
->  - Add a work for HSQ to try again in non-atomic context if the host
->  returns busy flag.
->
-> Changes from v1:
->  - Re-split the changes to make them more clear suggested by Ulf.
->  - Factor out the auto CMD23 checking into a separate function.
->
-> Baolin Wang (3):
->   mmc: host: Introduce the request_atomic() for the host
->   mmc: host: sdhci: Implement the request_atomic() API
->   mmc: host: sdhci-sprd: Implement the request_atomic() API
->
->  drivers/mmc/host/mmc_hsq.c    | 29 ++++++++++++++++++++++++++++-
->  drivers/mmc/host/mmc_hsq.h    |  1 +
->  drivers/mmc/host/sdhci-sprd.c | 23 ++++++++++++++++++++---
->  drivers/mmc/host/sdhci.c      | 34 ++++++++++++++++++++++++++++++++++
->  drivers/mmc/host/sdhci.h      |  1 +
->  include/linux/mmc/host.h      |  3 +++
->  6 files changed, 87 insertions(+), 4 deletions(-)
->
-> --
-> 2.17.1
->
+> Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
 
 Applied for next, thanks!
 
 Kind regards
 Uffe
+
+
+> ---
+>  drivers/mmc/host/sdhci.c | 3 +++
+>  1 file changed, 3 insertions(+)
+>
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 3f716466fcfd..79b6324a500c 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -317,6 +317,7 @@ static void sdhci_config_dma(struct sdhci_host *host)
+>  static void sdhci_init(struct sdhci_host *host, int soft)
+>  {
+>         struct mmc_host *mmc = host->mmc;
+> +       unsigned long flags;
+>
+>         if (soft)
+>                 sdhci_do_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
+> @@ -326,7 +327,9 @@ static void sdhci_init(struct sdhci_host *host, int soft)
+>         if (host->v4_mode)
+>                 sdhci_do_enable_v4_mode(host);
+>
+> +       spin_lock_irqsave(&host->lock, flags);
+>         sdhci_set_default_irqs(host);
+> +       spin_unlock_irqrestore(&host->lock, flags);
+>
+>         host->cqe_on = false;
+>
+> --
+> 2.17.1
+>
