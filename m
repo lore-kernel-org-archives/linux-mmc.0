@@ -6,123 +6,119 @@ X-Spam-Status: No, score=-0.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
 	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B5B1FC38A29
-	for <linux-mmc@archiver.kernel.org>; Fri, 17 Apr 2020 11:29:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 75369C38A2B
+	for <linux-mmc@archiver.kernel.org>; Fri, 17 Apr 2020 11:29:52 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 91E17207FC
-	for <linux-mmc@archiver.kernel.org>; Fri, 17 Apr 2020 11:29:50 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4E98B21D94
+	for <linux-mmc@archiver.kernel.org>; Fri, 17 Apr 2020 11:29:52 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="jOmKcedf"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="GtOmtytk"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730381AbgDQL3u (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 17 Apr 2020 07:29:50 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35622 "EHLO
+        id S1730387AbgDQL3v (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 17 Apr 2020 07:29:51 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35628 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-FAIL-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1730324AbgDQL3s (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Apr 2020 07:29:48 -0400
-Received: from mail-ua1-x943.google.com (mail-ua1-x943.google.com [IPv6:2607:f8b0:4864:20::943])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 45038C061A0C
-        for <linux-mmc@vger.kernel.org>; Fri, 17 Apr 2020 04:29:48 -0700 (PDT)
-Received: by mail-ua1-x943.google.com with SMTP id v24so529483uak.0
-        for <linux-mmc@vger.kernel.org>; Fri, 17 Apr 2020 04:29:48 -0700 (PDT)
+        by vger.kernel.org with ESMTP id S1730384AbgDQL3v (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Apr 2020 07:29:51 -0400
+Received: from mail-ua1-x942.google.com (mail-ua1-x942.google.com [IPv6:2607:f8b0:4864:20::942])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EEA50C061A0C
+        for <linux-mmc@vger.kernel.org>; Fri, 17 Apr 2020 04:29:50 -0700 (PDT)
+Received: by mail-ua1-x942.google.com with SMTP id v24so529523uak.0
+        for <linux-mmc@vger.kernel.org>; Fri, 17 Apr 2020 04:29:50 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=Z5nFVKkWZ5xyTitKrY5QjzGiXnsITN8r7PQrHLIEfcA=;
-        b=jOmKcedfTITffCC9PTZIlMwhUW2bq5rlZdsTywtn/5ARqsk8RlDzGENJY8vfR52lRc
-         Htzdps7pBeAB1fi4oz7s1xNDrBibOaOa64ubhLfxKk7EcPtZvOEDNdsNd6mySn3mcyBl
-         Pi3u4TP+g19fRpi1Gr50O+2GuRXwron3S91NmYvdE9CJxzSWYD+FZcVV7QNmXW1H2YSD
-         0xLFxkNufYDhFhxDDGwPkdOeAxGmN9oB3YpcsR2d1eVJCRXj39qm64hyT9dglMW8eiW3
-         u8IoUIxkB0Xz81rGHIn09LVQJYW1awpS7A8Q5nG25u0g5fgtl+cigQRy/tJsS28gqJD3
-         uY5A==
+        bh=Nu9WgdeKxKQdkeH1gR18VhD9u3Adn8tTkCVWam9LK94=;
+        b=GtOmtytk18kW8KTUJNTrqweEWV6cr1cr3C/OhLizV4J+D5OdrUqwJejcrqB2FP9K8z
+         PYBUxtD/ra0CuRjTRXYgtVHfo19zN25JtaWCwInr9o/VTm9a5UGDMuza4i1fm62ScXS9
+         rN1UfE+7fOrtV1M57/CovyL0iOHcIkByEFdhx60rxFxssfOvvpNEKzg+qeZ77hKtk4Ox
+         xVt/5BJUoLV64O9x2cO7jFh37MK9xhaDQ72/xf0AE4gyMTDGUKjJ1Y4uzvUspMGAIM2M
+         NyxlwU3fs+7X0QoBLrFQ2Cfq7u4S9qvjghwsf+EDLrQziUAaZuBQiycPE80POwx0JOgZ
+         b4DQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=Z5nFVKkWZ5xyTitKrY5QjzGiXnsITN8r7PQrHLIEfcA=;
-        b=J/5qMNBedl6yIc3w6Ad2FjbRkbOnRE6HAqewY1Bvq0FdjNZEg7z63YUQd8Q7k33niw
-         LV2pXszn3SN2AFv6TliLdXHKkbX5B3Fm8buQxAT6OBTU2hmFColPRs7/OO/pJMgnuUSR
-         eNBGdUe3MW0wGJulAotwsQsz/nSfYTOAkclvpNcIAOd1cO0hFvm1QvnbyX7V3O79pf8y
-         hDENFhszNWEG0ksVtAR14nWJ86FYxf545lWpfXpbEFicSIo5W00snfw94Yh+4JI9obLO
-         nzclCkHS2YZGHpjvTPNbyTUZg+t1gquCOv0gtVPHemTsT1Ff/Z9wsoQpknDvENZDo29Q
-         WQcg==
-X-Gm-Message-State: AGi0PuaQBeKr3YidHSZQ2xWpsKcw1CHS8BhUW6bQcFTMihEaeb9188nI
-        R22NqeiN6J/ctCbfAEI9gag5AKN9g3XbG7HLpexGag==
-X-Google-Smtp-Source: APiQypIuhM3HBNXcvjyF/50pP+nD+6Cyse/reE4BBoOzfxTzz115Xj5qnR66MczhnuQ7UckQdy1ZlEma+1OtP5iraJA=
-X-Received: by 2002:ab0:6449:: with SMTP id j9mr1959667uap.19.1587122987396;
- Fri, 17 Apr 2020 04:29:47 -0700 (PDT)
+        bh=Nu9WgdeKxKQdkeH1gR18VhD9u3Adn8tTkCVWam9LK94=;
+        b=eNV+d4OnwwORia9BKrdOATitBU+75Fsrflkrb+kAG4hM9nckUME4NjsQZYT6IWRWif
+         RmQbGhk5tIzdyN9HJPWnb87DNr7Q2aoPKkQAU2yUJG3AuJNor8C0MUWpzoEmWk41KMv5
+         /jCgdZS9VWtRA/MydJRY2tVusdWjW62rvU7VmH3MGaQqYr8PtcLCwAAMNkyQvfGyum0n
+         2nTf9+1aOpqnRHdvljjdvw7AILLo31kq04qQLZAoMvVI4Z0BVzQfBOAg/hRtbs2w9tib
+         ShZxdNlc2wwB1N7kHHmlsXV86pPF3D4xPLEaC9gfyEmQ+TrGEAW+2C4fAKjFq3PyNoM1
+         X6fg==
+X-Gm-Message-State: AGi0Pua6GiuZbh7MBQx4rvhp+++lEv1z7F7aC4JJkcFmFmWNKKEWlYUO
+        MwN3AgbJ7Gvc9uzRt4CkFYDGv4oHt3vKhuEtM/cYYg==
+X-Google-Smtp-Source: APiQypI99jsnL4mvQY9oQzsMieBqtAo29Y/8grH2oglO8FAd30vRx2tQcJkBygaMr5+Hv/S1jdj3f1P6K2qyFqAhHug=
+X-Received: by 2002:a9f:25af:: with SMTP id 44mr1989461uaf.104.1587122990039;
+ Fri, 17 Apr 2020 04:29:50 -0700 (PDT)
 MIME-Version: 1.0
-References: <20200412090349.1607-1-adrian.hunter@intel.com>
-In-Reply-To: <20200412090349.1607-1-adrian.hunter@intel.com>
+References: <cover.1586744073.git.baolin.wang7@gmail.com>
+In-Reply-To: <cover.1586744073.git.baolin.wang7@gmail.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 17 Apr 2020 13:29:11 +0200
-Message-ID: <CAPDyKFqKk0uNUQm8SA3ETDXK60ssmcsDsZ0veHGnArWSw5E5Ow@mail.gmail.com>
-Subject: Re: [PATCH 0/5] mmc: sdhci: Reduce maximum time under spinlock in sdhci_send_command()
-To:     Adrian Hunter <adrian.hunter@intel.com>
-Cc:     Baolin Wang <baolin.wang7@gmail.com>,
-        linux-mmc <linux-mmc@vger.kernel.org>
+Date:   Fri, 17 Apr 2020 13:29:14 +0200
+Message-ID: <CAPDyKFqfq_UMNfgdu8HioAa6+qy+JYrNkVDg8ARu1BpNKx9hgw@mail.gmail.com>
+Subject: Re: [PATCH v5 0/3] Introduce the request_atomic() for the host
+To:     Baolin Wang <baolin.wang7@gmail.com>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        Arnd Bergmann <arnd@arndb.de>,
+        Orson Zhai <orsonzhai@gmail.com>,
+        Chunyan Zhang <zhang.lyra@gmail.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sun, 12 Apr 2020 at 11:04, Adrian Hunter <adrian.hunter@intel.com> wrote:
+On Mon, 13 Apr 2020 at 04:46, Baolin Wang <baolin.wang7@gmail.com> wrote:
 >
-> Hi
+> This patch set introduces a new request_atomic() interface for the
+> MMC host controller, which is used to submit a request to host in
+> the atomic context, such as in the irq hard handler, to reduce the
+> request latency.
 >
-> Here are some patches to reduce maximum time under spinlock in
-> sdhci_send_command(), but also pave the way for an atomic request
-> function.
+> Note, this patch set is based on Adrian's patch set:
+> https://www.spinics.net/lists/linux-mmc/msg58529.html
 >
-> I haven't tried it, but with these patches, something like below
-> should work.
+> Any comments are welcome. Thanks.
 >
+> Changes from v4:
+>  - Remove redundant checking when warning the return value of request_atomic().
+>  - Add acked tag from Adrian for patch 1.
+>  - Re-implement the request_atomic() based on the Adrian's patch set.
 >
+> Changes from v3:
+>  - Move patch 3 of V3 patch set into patch 1.
+>  - Add a warning for unexpected return value of request_atomic().
+>  - Remove redundant checking of ops->request().
 >
-> static int sdhci_atomic_request(struct mmc_host *mmc,
->                                 struct mmc_request *mrq)
-> {
->         struct sdhci_host *host = mmc_priv(mmc);
->         struct mmc_command *cmd;
->         unsigned long flags;
->         int ret = 0;
+> Changes from v2:
+>  - Return busy flag if encountering unusual card busy state
+>  instead of polling in interrupt context.
+>  - Add a work for HSQ to try again in non-atomic context if the host
+>  returns busy flag.
 >
->         spin_lock_irqsave(&host->lock, flags);
+> Changes from v1:
+>  - Re-split the changes to make them more clear suggested by Ulf.
+>  - Factor out the auto CMD23 checking into a separate function.
 >
->         if (sdhci_present_error(host, mrq->cmd, true))
->                 goto out_finish;
+> Baolin Wang (3):
+>   mmc: host: Introduce the request_atomic() for the host
+>   mmc: host: sdhci: Implement the request_atomic() API
+>   mmc: host: sdhci-sprd: Implement the request_atomic() API
 >
->         cmd = sdhci_manual_cmd23(host, mrq) ? mrq->sbc : mrq->cmd;
+>  drivers/mmc/host/mmc_hsq.c    | 29 ++++++++++++++++++++++++++++-
+>  drivers/mmc/host/mmc_hsq.h    |  1 +
+>  drivers/mmc/host/sdhci-sprd.c | 23 ++++++++++++++++++++---
+>  drivers/mmc/host/sdhci.c      | 34 ++++++++++++++++++++++++++++++++++
+>  drivers/mmc/host/sdhci.h      |  1 +
+>  include/linux/mmc/host.h      |  3 +++
+>  6 files changed, 87 insertions(+), 4 deletions(-)
 >
->         if (sdhci_send_command(host, cmd))
->                 sdhci_led_activate(host);
->         else
->                 ret = -EBUSY;
->
->         spin_unlock_irqrestore(&host->lock, flags);
->
->         return ret;
->
-> out_finish:
->         sdhci_finish_mrq(host, mrq);
->         spin_unlock_irqrestore(&host->lock, flags);
->         return 0;
-> }
->
->
->
-> Adrian Hunter (5):
->       mmc: sdhci: Add helpers for the auto-CMD23 flag
->       mmc: sdhci: Stop exporting sdhci_send_command()
->       mmc: sdhci: Remove unneeded forward declaration of sdhci_finish_data()
->       mmc: sdhci: Tidy sdhci_request() a bit
->       mmc: sdhci: Reduce maximum time under spinlock in sdhci_send_command()
->
->  drivers/mmc/host/sdhci.c | 182 +++++++++++++++++++++++++++++++++++------------
->  drivers/mmc/host/sdhci.h |   2 +-
->  2 files changed, 139 insertions(+), 45 deletions(-)
+> --
+> 2.17.1
 >
 
 Applied for next, thanks!
