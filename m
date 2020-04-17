@@ -2,123 +2,111 @@ Return-Path: <SRS0=NquR=6B=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-0.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3B9A9C38A2B
-	for <linux-mmc@archiver.kernel.org>; Fri, 17 Apr 2020 11:29:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CCE04C2D0EF
+	for <linux-mmc@archiver.kernel.org>; Fri, 17 Apr 2020 13:55:33 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 16A5621D94
-	for <linux-mmc@archiver.kernel.org>; Fri, 17 Apr 2020 11:29:55 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9B2AB214AF
+	for <linux-mmc@archiver.kernel.org>; Fri, 17 Apr 2020 13:55:33 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="CRZ4C/5j"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="tJpcmkBx"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730403AbgDQL3y (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 17 Apr 2020 07:29:54 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35642 "EHLO
+        id S1730732AbgDQNzd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 17 Apr 2020 09:55:33 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58156 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-FAIL-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1730324AbgDQL3y (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Apr 2020 07:29:54 -0400
-Received: from mail-ua1-x942.google.com (mail-ua1-x942.google.com [IPv6:2607:f8b0:4864:20::942])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E0779C061A0C
-        for <linux-mmc@vger.kernel.org>; Fri, 17 Apr 2020 04:29:53 -0700 (PDT)
-Received: by mail-ua1-x942.google.com with SMTP id u12so511210uau.10
-        for <linux-mmc@vger.kernel.org>; Fri, 17 Apr 2020 04:29:53 -0700 (PDT)
+        by vger.kernel.org with ESMTP id S1730731AbgDQNzc (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Apr 2020 09:55:32 -0400
+Received: from mail-il1-x141.google.com (mail-il1-x141.google.com [IPv6:2607:f8b0:4864:20::141])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 33EA5C061A0C;
+        Fri, 17 Apr 2020 06:55:31 -0700 (PDT)
+Received: by mail-il1-x141.google.com with SMTP id x2so833036ilp.13;
+        Fri, 17 Apr 2020 06:55:31 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
+        d=gmail.com; s=20161025;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=YOtnGCLOffRDjVQMAjSBuDIal+6fxqleA+W9Lw8x8/E=;
-        b=CRZ4C/5jBGneL6ClhbdFF+/HtdSsizkg6ef8Ox/V2AGNQnjrGIK4FeCOjj28UGvJ/S
-         3aFy4TCzpaZOHvin5b2xrUK+d/TKahUBz8BI1vQO9BmxeQWNwoCiEZ+clMMf7c5HM6hX
-         5Ea/lxWVWzJmgR38iZhstXVKU3VSpmyUj3tPmOW4LTaKHI3k4oUPFfqM2qQQYKPDxn7l
-         UjWavC5QhIpU505x5jjhiytQvwh6fGubk4din+aCyTWVN7Z7BY/k4kT/MY0pfB5F1+r6
-         rZYk44om5G/O1VCEFb4KYfktODc36ozM5iVSLFxkAMOoOMAm4HQiyLatuuR21BRh5nUa
-         baDg==
+         :cc:content-transfer-encoding;
+        bh=OzUUDoJadsiieg+ssnYgOj42UdsJ0RJ/vkPjDepgAS8=;
+        b=tJpcmkBxeQFfb1K1gqwBoimoekXBDdRQuWIdbNjxCM1mCXNZ3NuB+l5LLW1uPgQ05R
+         Ch/sL5FP+FBKpf9GeQ2Xxl2s78gHb/0P9Mijvq/9ainBn5wR0dgL31NJCv9jeqBgeLGr
+         p4k5oLVKZTnMq3vWzMBX5GNY+Fl9nGMWCkV+sFucBggm0XqBgEn2aiyGCJuhqWMCJtwz
+         fDyGdzMf/XS6s+J7TljmCeuDGYbAloXr+oWvZGq8OFDUn6atmJN5YEvXMeFpSK8Ccvh/
+         ++G2AbOyrG5sGXVMY9/0pOmHuraRDYvGspsM863OiTwJ7k5qG2F2SfAowocRjbozL3Ce
+         Lz4Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=YOtnGCLOffRDjVQMAjSBuDIal+6fxqleA+W9Lw8x8/E=;
-        b=lD0hEz1sjK60elJzbH35oXeW7etA+/mKXqqXMkuFZUraIg/6K5Gh1JXqlLE7Z5AoO6
-         31DyL/J1BGARfAmau6Qos0NSlDOjc02ynpCmmJbd3uar2QHVfxJy/8ttS5RK0mw0ER7G
-         IW+IwTMR9/db7/bAhtjPeZHhERlvn7Caaa0WTeJ05tYeEmJcssglEHhp1RFwWA02Vivs
-         /Ko5HOt+g166sMVEtDdrpIfbogdCab4sZkFaeGqQVg7fEnkbPdWEZEYdXWbi+9xeYj7c
-         R0rbzxCt07IgO9OnNYXjS5LoQCV/H5iIeLPbrqCsJ6McneFoT53uz73hlTEvFRMHxaAO
-         jogA==
-X-Gm-Message-State: AGi0PuY5EIFJQrPZ8ERiY/NyGzAscxV8UCfAGDc1cFGLksplXXjGWFrL
-        tsbxgOPUK3OyymLoOhzxpg6E3312y9+YMmOtUb5/dHlJ
-X-Google-Smtp-Source: APiQypIq0pieNQfBvZCTfE7jFsOwqVd/+UrCeGcrx0khrWM1vo1vvMa59vVW+Ztb5TBHvez6OFVUpNDtjIohLWJrzAU=
-X-Received: by 2002:ab0:2ea:: with SMTP id 97mr1890385uah.129.1587122993064;
- Fri, 17 Apr 2020 04:29:53 -0700 (PDT)
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=OzUUDoJadsiieg+ssnYgOj42UdsJ0RJ/vkPjDepgAS8=;
+        b=GcYm/LKnRhkJbGMULxir4zowj1ypwRm1tV9B7WEbhBHOF/0TwaPwR7oLqxXZyH9j7+
+         Gyf6Qq7/jjpyNEjOXphHfwWr+OfLaWRm/KpZWbxXj8AsJgbmDbzelREPm8NJ/2x6fJoB
+         blu2qe1bnb5cvEJsfiTJA2L3zIZhdXFttOr9aUzunCkWonotKS0fdKNLoy2iFp9Navfd
+         ATgOFcIANo+zQw5P6udr8pCFIVT6mz+Q769woEEqYpRxxc8VVvEsRC54EHq7vcYtqfvJ
+         eR6Z2XgrgNP7+WCSCYEFUWpZ8vZMM6TbFfsPZFnmxRok5vz1pFDZrDTgPRQATuizMPQj
+         stbg==
+X-Gm-Message-State: AGi0PuYUrXyWi8sIHRcaeBM7EglrwUTF6MQj9QGy3q5C9VATCCcrw7n8
+        PbP896wE29QiZZzrsJXRK03+ZxE8dV7EDMBZuL0=
+X-Google-Smtp-Source: APiQypJkZwCmAzmwzeVRASom5X4pM84AMdRVr4twxaMF4HzV++qpNsF2s19yLzLVSfHQ80dV5qm2CswcfjTs/APD7/k=
+X-Received: by 2002:a92:4896:: with SMTP id j22mr2956518ilg.158.1587131730396;
+ Fri, 17 Apr 2020 06:55:30 -0700 (PDT)
 MIME-Version: 1.0
-References: <1586941255-9237-1-git-send-email-haibo.chen@nxp.com>
-In-Reply-To: <1586941255-9237-1-git-send-email-haibo.chen@nxp.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 17 Apr 2020 13:29:17 +0200
-Message-ID: <CAPDyKFqyHmYgWEC1yD-beHdAQ3xCijr=DPHPHNdhBBpFwCp1=Q@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci: add spin lock for sdhci_set_default_irqs in sdhci_init
-To:     Haibo Chen <haibo.chen@nxp.com>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        dl-linux-imx <linux-imx@nxp.com>
+References: <cover.1585827904.git.mirq-linux@rere.qmqm.pl> <23c3fe72b0ff0eabdbf3a45023a76da1b18a7e90.1585827904.git.mirq-linux@rere.qmqm.pl>
+ <218dd61b-48cc-a161-240f-b3823e8f48cb@intel.com> <20200415162839.GD19897@qmqm.qmqm.pl>
+ <57b494b8-cae9-df10-2a4d-db02e7212f23@intel.com>
+In-Reply-To: <57b494b8-cae9-df10-2a4d-db02e7212f23@intel.com>
+From:   Alan Cooper <alcooperx@gmail.com>
+Date:   Fri, 17 Apr 2020 09:55:19 -0400
+Message-ID: <CAOGqxeVB2FTTi4DFynVj4hc+EcagMCg1j8F29L+9zRt1DKfbBQ@mail.gmail.com>
+Subject: Re: [PATCH 1/7] mmc: sdhci: fix base clock usage in preset value
+To:     Adrian Hunter <adrian.hunter@intel.com>
+Cc:     =?UTF-8?B?TWljaGHFgiBNaXJvc8WCYXc=?= <mirq-linux@rere.qmqm.pl>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Kevin Liu <kliu5@marvell.com>,
+        Michal Simek <michal.simek@xilinx.com>,
+        Suneel Garapati <suneel.garapati@xilinx.com>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        ": Linux Kernel Mailing List" <linux-kernel@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 15 Apr 2020 at 11:09, <haibo.chen@nxp.com> wrote:
+Acked-by: Al Cooper <alcooperx@gmail.com>On Thu, Apr 16, 2020 at 4:27
+AM Adrian Hunter <adrian.hunter@intel.com> wrote:
 >
-> From: Haibo Chen <haibo.chen@nxp.com>
+> On 15/04/20 7:28 pm, Micha=C5=82 Miros=C5=82aw wrote:
+> > On Wed, Apr 15, 2020 at 03:25:52PM +0300, Adrian Hunter wrote:
+> >> On 2/04/20 2:54 pm, Micha=C5=82 Miros=C5=82aw wrote:
+> >>> Fixed commit added an unnecessary read of CLOCK_CONTROL. The value re=
+ad
+> >>> is overwritten for programmable clock preset, but is carried over for
+> >>> divided clock preset. This can confuse sdhci_enable_clk() if the regi=
+ster
+> >>> has enable bits set for some reason at time time of clock calculation=
+.
+> >>> value to be ORed with enable flags. Remove the read.
+> >>
+> >> The read is not needed, but drivers usually manage the enable bits,
+> >> especially disabling the clock before changing the frequency.  What dr=
+iver
+> >> is it?
+> >
+> > Hopefully no driver requires this. It's just removing a trap.
 >
-> When use one SDIO wifi which enable the runtime PM feature on i.MX6SX,
-> we meet system hang. This hang happened during the usdhc runtime resume,
-> in sdhci_init(), when call the sdhci_set_default_irqs. One interrupt
-> (SDHCI_INT_CARD_INT) triggered just after the host->ier update and before
-> the write of register SDHCI_SIGNAL_ENABLE. So in sdhci_irq, it will skip
-> the call of sdio_signal_irq() because current host->ier do not set the
-> SDHCI_INT_CARD_INT. So this SDIO wifi interrupt always keep triggered,
-> let the system stuck in irq handle, can't response any other thread.
->
-> This patch add spin lock for the sdhci_set_default_irqs to fix this issue.
->
-> Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
+> The only driver that looks like it would benefit is sdhci-brcmstb because=
+ it
+> does not clear enable bits in sdhci_brcmstb_set_clock().  Adding Al Coope=
+r.
+> Al, can you ack this?
 
-Applied for next, thanks!
-
-Kind regards
-Uffe
-
-
-> ---
->  drivers/mmc/host/sdhci.c | 3 +++
->  1 file changed, 3 insertions(+)
->
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 3f716466fcfd..79b6324a500c 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -317,6 +317,7 @@ static void sdhci_config_dma(struct sdhci_host *host)
->  static void sdhci_init(struct sdhci_host *host, int soft)
->  {
->         struct mmc_host *mmc = host->mmc;
-> +       unsigned long flags;
->
->         if (soft)
->                 sdhci_do_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
-> @@ -326,7 +327,9 @@ static void sdhci_init(struct sdhci_host *host, int soft)
->         if (host->v4_mode)
->                 sdhci_do_enable_v4_mode(host);
->
-> +       spin_lock_irqsave(&host->lock, flags);
->         sdhci_set_default_irqs(host);
-> +       spin_unlock_irqrestore(&host->lock, flags);
->
->         host->cqe_on = false;
->
-> --
-> 2.17.1
->
+sdhci_brcmstb_set_clock() assumed that sdhci_calc_clk() would always
+return the divider value without the enable set, so this fixes a case
+for DDR52 where the enable was not being cleared when the divider
+value was changed.
+Acked-by: Al Cooper <alcooperx@gmail.com>
