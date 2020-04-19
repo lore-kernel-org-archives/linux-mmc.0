@@ -1,509 +1,110 @@
-Return-Path: <SRS0=eLSt=6C=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=MzXf=6D=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.6 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_2 autolearn=unavailable
+X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EC63FC54FCC
-	for <linux-mmc@archiver.kernel.org>; Sat, 18 Apr 2020 16:03:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 37BEDC2BA2B
+	for <linux-mmc@archiver.kernel.org>; Sun, 19 Apr 2020 05:37:54 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C13DE221F7
-	for <linux-mmc@archiver.kernel.org>; Sat, 18 Apr 2020 16:03:56 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1587225836;
-	bh=1De5fPfA8NlpQyTocewa07h9s/10o7DRNH2qDVFvqA8=;
-	h=Date:From:To:Cc:Subject:In-Reply-To:References:List-ID:From;
-	b=azyW5lFr/+BWDuQGWkAfAF7WdIkxhgvnEX9c2dum2asuUzyOvLBnVapHLzOu5mrIW
-	 yjVJkTLrEWbPxdcKmYmfukB1OmZjx+i0ByCuTzYQW/cvvi6saerr43tB45s3ZwHbz6
-	 HEAvt62eXCMcuvfN+6f8i+RC1FJ5qjbMwhu8QfLU=
+	by mail.kernel.org (Postfix) with ESMTP id CED082078A
+	for <linux-mmc@archiver.kernel.org>; Sun, 19 Apr 2020 05:37:53 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (1024-bit key) header.d=nic.cz header.i=@nic.cz header.b="DuPNGhMo"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726868AbgDRQDo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 18 Apr 2020 12:03:44 -0400
-Received: from mail.kernel.org ([198.145.29.99]:37362 "EHLO mail.kernel.org"
+        id S1725939AbgDSFhx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 19 Apr 2020 01:37:53 -0400
+Received: from lists.nic.cz ([217.31.204.67]:37384 "EHLO mail.nic.cz"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726471AbgDRQDn (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Sat, 18 Apr 2020 12:03:43 -0400
-Received: from archlinux (cpc149474-cmbg20-2-0-cust94.5-4.cable.virginm.net [82.4.196.95])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 265E021D93;
-        Sat, 18 Apr 2020 16:03:33 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1587225820;
-        bh=1De5fPfA8NlpQyTocewa07h9s/10o7DRNH2qDVFvqA8=;
-        h=Date:From:To:Cc:Subject:In-Reply-To:References:From;
-        b=hCjq0MAZUj3JKbCWIjnXWIz9oU3vpGOMvk/gvn814KBjM6utN9lAFJL+B2m6MmgOb
-         k0FKGfq6P773PBXkOofNwvIhcReneAEe9NcOSIdyxXFv35zQTjjLRM7pO4ATd9ITv9
-         kAdnoppSvnbrv7agegq0zfHzkamIw7ZjHlwMbaT8=
-Date:   Sat, 18 Apr 2020 17:03:30 +0100
-From:   Jonathan Cameron <jic23@kernel.org>
-To:     Rob Herring <robh@kernel.org>
-Cc:     devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        Krzysztof Kozlowski <krzk@kernel.org>,
-        Maxime Ripard <mripard@kernel.org>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Alexandre Torgue <alexandre.torgue@st.com>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        Sam Ravnborg <sam@ravnborg.org>, Vinod Koul <vkoul@kernel.org>,
-        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
-        Guenter Roeck <linux@roeck-us.net>,
-        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
-        Jacek Anaszewski <jacek.anaszewski@gmail.com>,
-        Pavel Machek <pavel@ucw.cz>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Lee Jones <lee.jones@linaro.org>,
+        id S1725446AbgDSFhx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Sun, 19 Apr 2020 01:37:53 -0400
+Received: from dellmb.labs.office.nic.cz (unknown [IPv6:2001:1488:fffe:6:cac7:3539:7f1f:463])
+        by mail.nic.cz (Postfix) with ESMTP id 44575140079;
+        Sun, 19 Apr 2020 07:37:51 +0200 (CEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=nic.cz; s=default;
+        t=1587274671; bh=zdZ5E6lSFk+r6arWOcn3KBR83L7Rdjb3OX60Z+CwHIU=;
+        h=From:To:Date;
+        b=DuPNGhMotHvxqZUGK2wDpRAJ3dLI4821ExzOHNC8PK6vm1PeYj2kjWm76NqlLT2xV
+         +psPBQjlDUMB8wqTwFuPVJmbLs48jDtF4oO0GkV/mIsYtS1SDPn+Yhn0wJK4UI9DC2
+         VRpRVYayWhaXJSYV8N+pQSd1hcO4HR5uFgB94cO4=
+From:   =?UTF-8?q?Marek=20Beh=C3=BAn?= <marek.behun@nic.cz>
+To:     linux-mmc@vger.kernel.org
+Cc:     =?UTF-8?q?Marek=20Beh=C3=BAn?= <marek.behun@nic.cz>,
+        Zhoujie Wu <zjwu@marvell.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Heiko Stuebner <heiko@sntech.de>, Andrew Lunn <andrew@lunn.ch>,
-        Florian Fainelli <f.fainelli@gmail.com>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Fabio Estevam <festevam@gmail.com>,
-        Mark Brown <broonie@kernel.org>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>,
-        Alexandre Belloni <alexandre.belloni@bootlin.com>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Amit Kucheria <amit.kucheria@linaro.org>,
-        Daniel Lezcano <daniel.lezcano@linaro.org>,
-        linux-arm-kernel@lists.infradead.org, linux-clk@vger.kernel.org,
-        dri-devel@lists.freedesktop.org, linux-i2c@vger.kernel.org,
-        linux-hwmon@vger.kernel.org, linux-iio@vger.kernel.org,
-        linux-input@vger.kernel.org, linux-leds@vger.kernel.org,
-        linux-media@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-mtd@lists.infradead.org, linux-can@vger.kernel.org,
-        netdev@vger.kernel.org, linux-pci@vger.kernel.org,
-        linux-gpio@vger.kernel.org, linux-pwm@vger.kernel.org,
-        linux-remoteproc@vger.kernel.org, linux-riscv@lists.infradead.org,
-        linux-rtc@vger.kernel.org, linux-serial@vger.kernel.org,
-        alsa-devel@alsa-project.org, linux-spi@vger.kernel.org
-Subject: Re: [PATCH 2/2] dt-bindings: Remove cases of 'allOf' containing a
- '$ref'
-Message-ID: <20200418170330.65bff80c@archlinux>
-In-Reply-To: <20200416005549.9683-2-robh@kernel.org>
-References: <20200416005549.9683-1-robh@kernel.org>
-        <20200416005549.9683-2-robh@kernel.org>
-X-Mailer: Claws Mail 3.17.5 (GTK+ 2.24.32; x86_64-pc-linux-gnu)
+        Gregory CLEMENT <gregory.clement@free-electrons.com>,
+        Vladimir Oltean <vladimir.oltean@nxp.com>
+Subject: [PATCH] mmc: sdhci-xenon: fix annoying 1.8V regulator warning
+Date:   Sun, 19 Apr 2020 07:37:46 +0200
+Message-Id: <20200419053746.22443-1-marek.behun@nic.cz>
+X-Mailer: git-send-email 2.24.1
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
+X-Spamd-Bar: /
+X-Virus-Scanned: clamav-milter 0.101.4 at mail
+X-Virus-Status: Clean
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 15 Apr 2020 19:55:49 -0500
-Rob Herring <robh@kernel.org> wrote:
+For some reason the Host Control2 register of the Xenon SDHCI controller
+sometimes reports the bit representing 1.8V signaling as 0 when read
+after it was written as 1. Subsequent read reports 1.
 
-> json-schema versions draft7 and earlier have a weird behavior in that
-> any keywords combined with a '$ref' are ignored (silently). The correct
-> form was to put a '$ref' under an 'allOf'. This behavior is now changed
-> in the 2019-09 json-schema spec and '$ref' can be mixed with other
-> keywords. The json-schema library doesn't yet support this, but the
-> tooling now does a fixup for this and either way works.
->=20
-> This has been a constant source of review comments, so let's change this
-> treewide so everyone copies the simpler syntax.
->=20
-> Signed-off-by: Rob Herring <robh@kernel.org>
+This causes the sdhci_start_signal_voltage_switch function to report
+  1.8V regulator output did not become stable
 
-A few unrelated white space changes in enums in the IIO chunks.
+When CONFIG_PM is enabled, the host is suspended and resumend many
+times, and in each resume the switch to 1.8V is called, and so the
+kernel log reports this message annoyingly often.
 
-Don't suppose they matter but maybe need the description to mention there
-may be some minor formatting changes as well in some cases.
+Do an empty read of the Host Control2 register in Xenon's
+.voltage_switch method to circumvent this.
 
-Acked-by: Jonathan Cameron <Jonathan.Cameron@huawei.com> #for-iio
+Signed-off-by: Marek Behún <marek.behun@nic.cz>
+Cc: Zhoujie Wu <zjwu@marvell.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Gregory CLEMENT <gregory.clement@free-electrons.com>
+Cc: Vladimir Oltean <vladimir.oltean@nxp.com>
+---
+ drivers/mmc/host/sdhci-xenon.c | 19 +++++++++++++++++++
+ 1 file changed, 19 insertions(+)
 
-> ---
->  .../devicetree/bindings/arm/cpus.yaml         |  81 +++---
->  .../devicetree/bindings/arm/l2c2x0.yaml       |  87 +++---
->  .../devicetree/bindings/arm/psci.yaml         |  15 +-
->  .../bindings/arm/samsung/exynos-chipid.yaml   |   5 +-
->  .../bus/allwinner,sun50i-a64-de2.yaml         |   5 +-
->  .../bindings/clock/fixed-factor-clock.yaml    |   5 +-
->  .../bindings/connector/usb-connector.yaml     |  28 +-
->  .../bindings/crypto/st,stm32-hash.yaml        |   9 +-
->  .../allwinner,sun4i-a10-display-engine.yaml   |   7 +-
->  .../display/allwinner,sun4i-a10-tcon.yaml     |   5 +-
->  .../bindings/display/panel/panel-common.yaml  |   5 +-
->  .../devicetree/bindings/dma/dma-common.yaml   |   3 +-
->  .../devicetree/bindings/dma/ti/k3-udma.yaml   |  18 +-
->  .../devicetree/bindings/eeprom/at24.yaml      |  11 +-
->  .../devicetree/bindings/example-schema.yaml   |  17 +-
->  .../bindings/hwmon/adi,ltc2947.yaml           |  32 +--
->  .../devicetree/bindings/hwmon/ti,tmp513.yaml  |  21 +-
->  .../devicetree/bindings/i2c/st,stm32-i2c.yaml |   9 +-
->  .../bindings/iio/adc/adi,ad7124.yaml          |   5 +-
->  .../bindings/iio/adc/lltc,ltc2496.yaml        |   3 +-
->  .../bindings/iio/adc/microchip,mcp3911.yaml   |   7 +-
->  .../bindings/iio/adc/st,stm32-dfsdm-adc.yaml  |  31 +-
->  .../bindings/iio/light/tsl2772.yaml           |  13 +-
->  .../bindings/iio/temperature/adi,ltc2983.yaml |  56 ++--
+diff --git a/drivers/mmc/host/sdhci-xenon.c b/drivers/mmc/host/sdhci-xenon.c
+index 1dea1ba66f7b..126ae723f8ab 100644
+--- a/drivers/mmc/host/sdhci-xenon.c
++++ b/drivers/mmc/host/sdhci-xenon.c
+@@ -235,6 +235,25 @@ static void xenon_voltage_switch(struct sdhci_host *host)
+ {
+ 	/* Wait for 5ms after set 1.8V signal enable bit */
+ 	usleep_range(5000, 5500);
++
++	/*
++	 * For some reason the controller's Host Control2 register reports
++	 * the bit representing 1.8V signaling as 0 when read after it was
++	 * written as 1. Subsequent read reports 1.
++	 *
++	 * This causes the sdhci_start_signal_voltage_switch function to
++	 * report
++	 *   "1.8V regulator output did not become stable"
++	 * in kernel log.
++	 *
++	 * When CONFIG_PM is enabled, the host is suspended and resumend many
++	 * times, and in each resume the switch to 1.8V is called, and so the
++	 * kernel log reports this message annoyingly often.
++	 *
++	 * Do an empty read of the Host Control2 register here to circumvent
++	 * this.
++	 */
++	sdhci_readw(host, SDHCI_HOST_CONTROL2);
+ }
+ 
+ static const struct sdhci_ops sdhci_xenon_ops = {
+-- 
+2.24.1
 
-...
-
-> diff --git a/Documentation/devicetree/bindings/iio/adc/adi,ad7124.yaml b/=
-Documentation/devicetree/bindings/iio/adc/adi,ad7124.yaml
-> index 97087a45ce54..deb34deff0e8 100644
-> --- a/Documentation/devicetree/bindings/iio/adc/adi,ad7124.yaml
-> +++ b/Documentation/devicetree/bindings/iio/adc/adi,ad7124.yaml
-> @@ -83,9 +83,8 @@ patternProperties:
->            1: REFIN2(+)/REFIN2(=E2=88=92).
->            3: AVDD
->            If this field is left empty, internal reference is selected.
-> -        allOf:
-> -          - $ref: /schemas/types.yaml#/definitions/uint32
-> -          - enum: [0, 1, 3]
-> +        $ref: /schemas/types.yaml#/definitions/uint32
-> +        enum: [0, 1, 3]
->=20
->        diff-channels:
->          description: see Documentation/devicetree/bindings/iio/adc/adc.t=
-xt
-> diff --git a/Documentation/devicetree/bindings/iio/adc/lltc,ltc2496.yaml =
-b/Documentation/devicetree/bindings/iio/adc/lltc,ltc2496.yaml
-> index 97f521d654ea..6a991e9f78e2 100644
-> --- a/Documentation/devicetree/bindings/iio/adc/lltc,ltc2496.yaml
-> +++ b/Documentation/devicetree/bindings/iio/adc/lltc,ltc2496.yaml
-> @@ -18,8 +18,7 @@ properties:
->=20
->    vref-supply:
->      description: phandle to an external regulator providing the referenc=
-e voltage
-> -    allOf:
-> -      - $ref: /schemas/types.yaml#/definitions/phandle
-> +    $ref: /schemas/types.yaml#/definitions/phandle
->=20
->    reg:
->      description: spi chipselect number according to the usual spi bindin=
-gs
-> diff --git a/Documentation/devicetree/bindings/iio/adc/microchip,mcp3911.=
-yaml b/Documentation/devicetree/bindings/iio/adc/microchip,mcp3911.yaml
-> index 8ffeceb6abae..95ab285f4eba 100644
-> --- a/Documentation/devicetree/bindings/iio/adc/microchip,mcp3911.yaml
-> +++ b/Documentation/devicetree/bindings/iio/adc/microchip,mcp3911.yaml
-> @@ -38,10 +38,9 @@ properties:
->=20
->    microchip,device-addr:
->      description: Device address when multiple MCP3911 chips are present =
-on the same SPI bus.
-> -    allOf:
-> -      - $ref: /schemas/types.yaml#/definitions/uint32
-> -      - enum: [0, 1, 2, 3]
-> -      - default: 0
-> +    $ref: /schemas/types.yaml#/definitions/uint32
-> +    enum: [0, 1, 2, 3]
-> +    default: 0
->=20
->    vref-supply:
->      description: |
-> diff --git a/Documentation/devicetree/bindings/iio/adc/st,stm32-dfsdm-adc=
-.yaml b/Documentation/devicetree/bindings/iio/adc/st,stm32-dfsdm-adc.yaml
-> index b1627441a0b2..d69ca492d020 100644
-> --- a/Documentation/devicetree/bindings/iio/adc/st,stm32-dfsdm-adc.yaml
-> +++ b/Documentation/devicetree/bindings/iio/adc/st,stm32-dfsdm-adc.yaml
-> @@ -95,16 +95,14 @@ patternProperties:
->            On stm32h7 and stm32mp1:
->            - For st,stm32-dfsdm-adc: up to 8 channels numbered from 0 to =
-7.
->            - For st,stm32-dfsdm-dmic: 1 channel numbered from 0 to 7.
-> -        allOf:
-> -          - $ref: /schemas/types.yaml#/definitions/uint32-array
-> -          - items:
-> -              minimum: 0
-> -              maximum: 7
-> +        $ref: /schemas/types.yaml#/definitions/uint32-array
-> +        items:
-> +          minimum: 0
-> +          maximum: 7
->=20
->        st,adc-channel-names:
->          description: List of single-ended channel names.
-> -        allOf:
-> -          - $ref: /schemas/types.yaml#/definitions/string-array
-> +        $ref: /schemas/types.yaml#/definitions/string-array
->=20
->        st,filter-order:
->          description: |
-> @@ -112,11 +110,10 @@ patternProperties:
->            - 0: FastSinC
->            - [1-5]: order 1 to 5.
->            For audio purpose it is recommended to use order 3 to 5.
-> -        allOf:
-> -          - $ref: /schemas/types.yaml#/definitions/uint32
-> -          - items:
-> -              minimum: 0
-> -              maximum: 5
-> +        $ref: /schemas/types.yaml#/definitions/uint32
-> +        items:
-> +          minimum: 0
-> +          maximum: 5
->=20
->        "#io-channel-cells":
->          const: 1
-> @@ -129,9 +126,8 @@ patternProperties:
->            - "MANCH_R": manchester codec, rising edge =3D logic 0, fallin=
-g edge =3D logic 1
->            - "MANCH_F": manchester codec, rising edge =3D logic 1, fallin=
-g edge =3D logic 0
->          items:
-> -          enum: [ SPI_R, SPI_F, MANCH_R, MANCH_F ]
-> -        allOf:
-> -          - $ref: /schemas/types.yaml#/definitions/non-unique-string-arr=
-ay
-> +          enum: [SPI_R, SPI_F, MANCH_R, MANCH_F]
-
-I don't suppose it matters much but unrelated change.
-
-> +        $ref: /schemas/types.yaml#/definitions/non-unique-string-array
->=20
->        st,adc-channel-clk-src:
->          description: |
-> @@ -141,9 +137,8 @@ patternProperties:
->            - "CLKOUT_F": internal SPI clock divided by 2 (falling edge).
->            - "CLKOUT_R": internal SPI clock divided by 2 (rising edge).
->          items:
-> -          enum: [ CLKIN, CLKOUT, CLKOUT_F, CLKOUT_R ]
-
-Unrelated change.
-
-> -        allOf:
-> -          - $ref: /schemas/types.yaml#/definitions/non-unique-string-arr=
-ay
-> +          enum: [CLKIN, CLKOUT, CLKOUT_F, CLKOUT_R]
-> +        $ref: /schemas/types.yaml#/definitions/non-unique-string-array
->=20
->        st,adc-alt-channel:
->          description:
-> diff --git a/Documentation/devicetree/bindings/iio/light/tsl2772.yaml b/D=
-ocumentation/devicetree/bindings/iio/light/tsl2772.yaml
-> index e8f7d1ada57b..d81229857944 100644
-> --- a/Documentation/devicetree/bindings/iio/light/tsl2772.yaml
-> +++ b/Documentation/devicetree/bindings/iio/light/tsl2772.yaml
-> @@ -33,13 +33,12 @@ properties:
->=20
->    amstaos,proximity-diodes:
->      description: Proximity diodes to enable
-> -    allOf:
-> -      - $ref: /schemas/types.yaml#/definitions/uint32-array
-> -      - minItems: 1
-> -        maxItems: 2
-> -        items:
-> -          minimum: 0
-> -          maximum: 1
-> +    $ref: /schemas/types.yaml#/definitions/uint32-array
-> +    minItems: 1
-> +    maxItems: 2
-> +    items:
-> +      minimum: 0
-> +      maximum: 1
->=20
->    interrupts:
->      maxItems: 1
-> diff --git a/Documentation/devicetree/bindings/iio/temperature/adi,ltc298=
-3.yaml b/Documentation/devicetree/bindings/iio/temperature/adi,ltc2983.yaml
-> index 8fb46de6641d..9480ede59c37 100644
-> --- a/Documentation/devicetree/bindings/iio/temperature/adi,ltc2983.yaml
-> +++ b/Documentation/devicetree/bindings/iio/temperature/adi,ltc2983.yaml
-> @@ -42,10 +42,9 @@ properties:
->        0 - 50/60Hz rejection
->        1 - 60Hz rejection
->        2 - 50Hz rejection
-> -    allOf:
-> -      - $ref: /schemas/types.yaml#/definitions/uint32
-> -      - minimum: 0
-> -        maximum: 2
-> +    $ref: /schemas/types.yaml#/definitions/uint32
-> +    minimum: 0
-> +    maximum: 2
->=20
->    '#address-cells':
->      const: 1
-> @@ -91,8 +90,7 @@ patternProperties:
->            7 - Type T Thermocouple
->            8 - Type B Thermocouple
->            9 - Custom Thermocouple
-> -        allOf:
-> -          - $ref: /schemas/types.yaml#/definitions/uint32
-> +        $ref: /schemas/types.yaml#/definitions/uint32
->          minimum: 1
->          maximum: 9
->=20
-> @@ -121,8 +119,7 @@ patternProperties:
->            more details look at table 69 and 70.
->            Note should be signed, but dtc doesn't currently maintain the
->            sign.
-> -        allOf:
-> -          - $ref: /schemas/types.yaml#/definitions/uint64-matrix
-> +        $ref: /schemas/types.yaml#/definitions/uint64-matrix
->          minItems: 3
->          maxItems: 64
->          items:
-> @@ -138,8 +135,7 @@ patternProperties:
->      properties:
->        adi,sensor-type:
->          description: Identifies the sensor as a diode.
-> -        allOf:
-> -          - $ref: /schemas/types.yaml#/definitions/uint32
-> +        $ref: /schemas/types.yaml#/definitions/uint32
->          const: 28
->=20
->        adi,single-ended:
-> @@ -196,8 +192,7 @@ patternProperties:
->            16 - RTD PT-1000 (0.00375)
->            17 - RTD NI-120
->            18 - RTD Custom
-> -        allOf:
-> -          - $ref: /schemas/types.yaml#/definitions/uint32
-> +        $ref: /schemas/types.yaml#/definitions/uint32
->          minimum: 10
->          maximum: 18
->=20
-> @@ -210,9 +205,8 @@ patternProperties:
->          description:
->            Identifies the number of wires used by the RTD. Setting this
->            property to 5 means 4 wires with Kelvin Rsense.
-> -        allOf:
-> -          - $ref: /schemas/types.yaml#/definitions/uint32
-> -          - enum: [2, 3, 4, 5]
-> +        $ref: /schemas/types.yaml#/definitions/uint32
-> +        enum: [2, 3, 4, 5]
->=20
->        adi,rsense-share:
->          description:
-> @@ -237,18 +231,16 @@ patternProperties:
->          description:
->            This property set the RTD curve used and the corresponding
->            Callendar-VanDusen constants. Look at table 30 of the datashee=
-t.
-> -        allOf:
-> -          - $ref: /schemas/types.yaml#/definitions/uint32
-> -          - minimum: 0
-> -            maximum: 3
-> +        $ref: /schemas/types.yaml#/definitions/uint32
-> +        minimum: 0
-> +        maximum: 3
->=20
->        adi,custom-rtd:
->          description:
->            This is a table, where each entry should be a pair of
->            resistance(ohm)-temperature(K). The entries added here are in =
-uohm
->            and uK. For more details values look at table 74 and 75.
-> -        allOf:
-> -          - $ref: /schemas/types.yaml#/definitions/uint64-matrix
-> +        $ref: /schemas/types.yaml#/definitions/uint64-matrix
->          items:
->            minItems: 3
->            maxItems: 64
-> @@ -280,8 +272,7 @@ patternProperties:
->            25 - Thermistor Spectrum 1003k 1kohm
->            26 - Thermistor Custom Steinhart-Hart
->            27 - Custom Thermistor
-> -        allOf:
-> -          - $ref: /schemas/types.yaml#/definitions/uint32
-> +        $ref: /schemas/types.yaml#/definitions/uint32
->          minimum: 19
->          maximum: 27
->=20
-> @@ -314,10 +305,9 @@ patternProperties:
->            This property controls the magnitude of the excitation current
->            applied to the thermistor. Value 0 set's the sensor in auto-ra=
-nge
->            mode.
-> -        allOf:
-> -          - $ref: /schemas/types.yaml#/definitions/uint32
-> -          - enum: [0, 250, 500, 1000, 5000, 10000, 25000, 50000, 100000,
-> -                   250000, 500000, 1000000]
-> +        $ref: /schemas/types.yaml#/definitions/uint32
-> +        enum: [0, 250, 500, 1000, 5000, 10000, 25000, 50000, 100000, 250=
-000,
-> +          500000, 1000000]
->=20
->        adi,custom-thermistor:
->          description:
-> @@ -325,8 +315,7 @@ patternProperties:
->            resistance(ohm)-temperature(K). The entries added here are in =
-uohm
->            and uK only for custom thermistors. For more details look at t=
-able
->            78 and 79.
-> -        allOf:
-> -          - $ref: /schemas/types.yaml#/definitions/uint64-matrix
-> +        $ref: /schemas/types.yaml#/definitions/uint64-matrix
->          minItems: 3
->          maxItems: 64
->          items:
-> @@ -339,8 +328,7 @@ patternProperties:
->            be programmed into the device memory using this property. For
->            Steinhart sensors the coefficients are given in the raw
->            format. Look at table 82 for more information.
-> -        allOf:
-> -          - $ref: /schemas/types.yaml#/definitions/uint32-array
-> +        $ref: /schemas/types.yaml#/definitions/uint32-array
->          items:
->            minItems: 6
->            maxItems: 6
-> @@ -358,8 +346,7 @@ patternProperties:
->      properties:
->        adi,sensor-type:
->          description: Identifies the sensor as a direct adc.
-> -        allOf:
-> -          - $ref: /schemas/types.yaml#/definitions/uint32
-> +        $ref: /schemas/types.yaml#/definitions/uint32
->          const: 30
->=20
->        adi,single-ended:
-> @@ -379,8 +366,7 @@ patternProperties:
->=20
->        adi,sensor-type:
->          description: Identifies the sensor as a rsense.
-> -        allOf:
-> -          - $ref: /schemas/types.yaml#/definitions/uint32
-> +        $ref: /schemas/types.yaml#/definitions/uint32
->          const: 29
->=20
->        adi,rsense-val-milli-ohms:
-> diff --git a/Documentation/devicetree/bindings/input/allwinner,sun4i-a10-=
-lradc-keys.yaml b/Documentation/devicetree/bindings/input/allwinner,sun4i-a=
-10-lradc-keys.yaml
-> index 512a6af5aa42..cffd02028d02 100644
-> --- a/Documentation/devicetree/bindings/input/allwinner,sun4i-a10-lradc-k=
-eys.yaml
-> +++ b/Documentation/devicetree/bindings/input/allwinner,sun4i-a10-lradc-k=
-eys.yaml
-> @@ -42,9 +42,8 @@ patternProperties:
->          description: Keycode to emit
->=20
->        channel:
-> -        allOf:
-> -          - $ref: /schemas/types.yaml#/definitions/uint32
-> -          - enum: [0, 1]
-> +        $ref: /schemas/types.yaml#/definitions/uint32
-> +        enum: [0, 1]
->          description: ADC Channel this key is attached to
->=20
->        voltage:
-> diff --git a/Documentation/devicetree/bindings/input/input.yaml b/Documen=
-tation/devicetree/bindings/input/input.yaml
-> index 6d519046b3af..8edcb3c31270 100644
-> --- a/Documentation/devicetree/bindings/input/input.yaml
-> +++ b/Documentation/devicetree/bindings/input/input.yaml
-> @@ -18,11 +18,10 @@ properties:
->      description:
->        Specifies an array of numeric keycode values to be used for report=
-ing
->        button presses.
-> -    allOf:
-> -      - $ref: /schemas/types.yaml#/definitions/uint32-array
-> -      - items:
-> -          minimum: 0
-> -          maximum: 0xff
-> +    $ref: /schemas/types.yaml#/definitions/uint32-array
-> +    items:
-> +      minimum: 0
-> +      maximum: 0xff
->=20
->    poll-interval:
->      description: Poll interval time in milliseconds.
-...
