@@ -2,75 +2,115 @@ Return-Path: <SRS0=uOye=6E=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.3 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_2 autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-8.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5BDDBC3815B
-	for <linux-mmc@archiver.kernel.org>; Mon, 20 Apr 2020 05:57:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8784FC3815B
+	for <linux-mmc@archiver.kernel.org>; Mon, 20 Apr 2020 06:09:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0C0952078E
-	for <linux-mmc@archiver.kernel.org>; Mon, 20 Apr 2020 05:57:46 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=nic.cz header.i=@nic.cz header.b="KBJD2wWf"
+	by mail.kernel.org (Postfix) with ESMTP id 6D362206F6
+	for <linux-mmc@archiver.kernel.org>; Mon, 20 Apr 2020 06:09:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725865AbgDTF5p (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 20 Apr 2020 01:57:45 -0400
-Received: from mail.nic.cz ([217.31.204.67]:40718 "EHLO mail.nic.cz"
+        id S1725872AbgDTGJf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 20 Apr 2020 02:09:35 -0400
+Received: from mga17.intel.com ([192.55.52.151]:43382 "EHLO mga17.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725825AbgDTF5p (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 20 Apr 2020 01:57:45 -0400
-Received: from localhost (unknown [172.20.6.135])
-        by mail.nic.cz (Postfix) with ESMTPSA id 55721140E72;
-        Mon, 20 Apr 2020 07:57:44 +0200 (CEST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=nic.cz; s=default;
-        t=1587362264; bh=ILuoSgtZOB2XYW8YGwMliQcV993u0Qd2YOIPZ7b7pdg=;
-        h=Date:From:To;
-        b=KBJD2wWfrxV2F9Qqc8Mk0dJwtlZFq9mhGaE0gapF1qFsnbiQx7SbBgklinsN5yLJL
-         R10qr7JglCpHivjQDedhuXzkSKI7m9DyS1PRSQBDPAEWTqIVdALR7GE/fPrzRtbgrb
-         2Fm6lTqS1EWMyDdjoZ3OXpJaU0xeDIfqVeem7hB8=
-Date:   Mon, 20 Apr 2020 07:57:43 +0200
-From:   Marek Behun <marek.behun@nic.cz>
-To:     linux-mmc@vger.kernel.org
-Cc:     Zhoujie Wu <zjwu@marvell.com>,
+        id S1725825AbgDTGJe (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 20 Apr 2020 02:09:34 -0400
+IronPort-SDR: Y14szW8yJPl79FSkXJsaNYGDij5VOG/lOrh9Zv9yFIapZqzcml8ARnpTaX6FxefIb7oudYUQcb
+ pU8B7q1VFSkw==
+X-Amp-Result: SKIPPED(no attachment in message)
+X-Amp-File-Uploaded: False
+Received: from fmsmga006.fm.intel.com ([10.253.24.20])
+  by fmsmga107.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 19 Apr 2020 23:09:34 -0700
+IronPort-SDR: SQHJ0sLBySw9ByQlKn3Z8vdXw2bZ5GeJdPCl37ICbWtL7AANdqyz4iwokbh8tzfH69f9t4qWmP
+ tXIB/qV2bqrg==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.72,405,1580803200"; 
+   d="scan'208";a="456275136"
+Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.87]) ([10.237.72.87])
+  by fmsmga006.fm.intel.com with ESMTP; 19 Apr 2020 23:09:31 -0700
+Subject: Re: [PATCH][next] sdhci: arasan: fix uninitialized value being
+ returned as error code
+To:     Colin King <colin.king@canonical.com>,
+        Michal Simek <michal.simek@xilinx.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Gregory CLEMENT <gregory.clement@free-electrons.com>,
-        Vladimir Oltean <vladimir.oltean@nxp.com>
-Subject: Re: [PATCH] mmc: sdhci-xenon: fix annoying 1.8V regulator warning
-Message-ID: <20200420075743.3b6ed229@nic.cz>
-In-Reply-To: <20200419053746.22443-1-marek.behun@nic.cz>
-References: <20200419053746.22443-1-marek.behun@nic.cz>
-X-Mailer: Claws Mail 3.17.3 (GTK+ 2.24.32; x86_64-pc-linux-gnu)
+        Manish Narani <manish.narani@xilinx.com>,
+        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Cc:     kernel-janitors@vger.kernel.org, linux-kernel@vger.kernel.org
+References: <20200417154901.112236-1-colin.king@canonical.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Message-ID: <49e93e7a-1f9e-ce5b-ca68-a088069ca2b0@intel.com>
+Date:   Mon, 20 Apr 2020 09:08:39 +0300
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.5.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-X-Virus-Scanned: clamav-milter 0.101.4 at mail
-X-Virus-Status: Clean
+In-Reply-To: <20200417154901.112236-1-colin.king@canonical.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sun, 19 Apr 2020 07:37:46 +0200
-Marek Beh=C3=BAn <marek.behun@nic.cz> wrote:
+On 17/04/20 6:49 pm, Colin King wrote:
+> From: Colin Ian King <colin.king@canonical.com>
+> 
+> Currently the error return value in variable ret is not being initialized
+> and so a successful return path is returning a garbage value. Since ret
+> is not being used the simple fix is just return 0 on a successful return.
+> 
+> Addresses-Coverity: ("Uninitialized scalar variable")
+> Fixes: f73e66a36772 ("sdhci: arasan: Add support for Versal Tap Delays")
+> Signed-off-by: Colin Ian King <colin.king@canonical.com>
+> ---
 
-> For some reason the Host Control2 register of the Xenon SDHCI controller
-> sometimes reports the bit representing 1.8V signaling as 0 when read
-> after it was written as 1. Subsequent read reports 1.
->=20
-> This causes the sdhci_start_signal_voltage_switch function to report
->   1.8V regulator output did not become stable
->=20
-> When CONFIG_PM is enabled, the host is suspended and resumend many
-> times, and in each resume the switch to 1.8V is called, and so the
-> kernel log reports this message annoyingly often.
->=20
-> Do an empty read of the Host Control2 register in Xenon's
-> .voltage_switch method to circumvent this.
->=20
-> Signed-off-by: Marek Beh=C3=BAn <marek.behun@nic.cz>
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-I should probably add a Fixes tag here so that it gets backported to
-stable versions.
-BTW this happens on Turris Mox.
+>  drivers/mmc/host/sdhci-of-arasan.c | 6 ++----
+>  1 file changed, 2 insertions(+), 4 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+> index 16e26c217a77..45603ba515b2 100644
+> --- a/drivers/mmc/host/sdhci-of-arasan.c
+> +++ b/drivers/mmc/host/sdhci-of-arasan.c
+> @@ -735,7 +735,6 @@ static int sdhci_versal_sdcardclk_set_phase(struct clk_hw *hw, int degrees)
+>  		container_of(clk_data, struct sdhci_arasan_data, clk_data);
+>  	struct sdhci_host *host = sdhci_arasan->host;
+>  	u8 tap_delay, tap_max = 0;
+> -	int ret;
+>  
+>  	/*
+>  	 * This is applicable for SDHCI_SPEC_300 and above
+> @@ -781,7 +780,7 @@ static int sdhci_versal_sdcardclk_set_phase(struct clk_hw *hw, int degrees)
+>  		sdhci_writel(host, regval, SDHCI_ARASAN_OTAPDLY_REGISTER);
+>  	}
+>  
+> -	return ret;
+> +	return 0;
+>  }
+>  
+>  static const struct clk_ops versal_sdcardclk_ops = {
+> @@ -807,7 +806,6 @@ static int sdhci_versal_sampleclk_set_phase(struct clk_hw *hw, int degrees)
+>  		container_of(clk_data, struct sdhci_arasan_data, clk_data);
+>  	struct sdhci_host *host = sdhci_arasan->host;
+>  	u8 tap_delay, tap_max = 0;
+> -	int ret;
+>  
+>  	/*
+>  	 * This is applicable for SDHCI_SPEC_300 and above
+> @@ -857,7 +855,7 @@ static int sdhci_versal_sampleclk_set_phase(struct clk_hw *hw, int degrees)
+>  		sdhci_writel(host, regval, SDHCI_ARASAN_ITAPDLY_REGISTER);
+>  	}
+>  
+> -	return ret;
+> +	return 0;
+>  }
+>  
+>  static const struct clk_ops versal_sampleclk_ops = {
+> 
+
