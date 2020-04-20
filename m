@@ -2,178 +2,129 @@ Return-Path: <SRS0=uOye=6E=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DDC59C3815B
-	for <linux-mmc@archiver.kernel.org>; Mon, 20 Apr 2020 09:29:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D6DF7C3815B
+	for <linux-mmc@archiver.kernel.org>; Mon, 20 Apr 2020 10:28:58 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id BCE3420CC7
-	for <linux-mmc@archiver.kernel.org>; Mon, 20 Apr 2020 09:29:46 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="s4jIYNmD"
+	by mail.kernel.org (Postfix) with ESMTP id C274B21473
+	for <linux-mmc@archiver.kernel.org>; Mon, 20 Apr 2020 10:28:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726161AbgDTJ3n (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 20 Apr 2020 05:29:43 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59534 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-FAIL-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1725959AbgDTJ3n (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Apr 2020 05:29:43 -0400
-Received: from mail-ua1-x943.google.com (mail-ua1-x943.google.com [IPv6:2607:f8b0:4864:20::943])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0ACB9C061A10
-        for <linux-mmc@vger.kernel.org>; Mon, 20 Apr 2020 02:29:43 -0700 (PDT)
-Received: by mail-ua1-x943.google.com with SMTP id a6so3348098uao.2
-        for <linux-mmc@vger.kernel.org>; Mon, 20 Apr 2020 02:29:42 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=+bXbV2G5yAsWPdoik74HL3zT7EvaYkbi6HLAip4kCPE=;
-        b=s4jIYNmDSCSre8L1fOBe4BKz3cwsdftChktN5JBQLZjCofDyAxUTDTCrR29bQ8dwx0
-         /UULMi3OKQNpg/O5WT4mJDqSI5Hk78M1a6nm2+fLJQyRjBbAfQNz/ioFJ7RxAG8dsQe2
-         HOv+Mde3TMlgY4x2WmVmPYgzvk8jN8pKNA7iRczjLE5el78RwB7Xddsct5dPQcj/nz85
-         zFiR2pBDqDB1AMP8msDaTcEmMj1fANeYRsk7sP3SyWpg9pD9/cptg1Hx8UJuzgV7ye2f
-         j04qjnuf2cPvH1WJr+/Uox3iREXQ9C4W9RHpflU+HXxQUURDtFXPr6Ee3zxVrTGNjEWd
-         Z32A==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=+bXbV2G5yAsWPdoik74HL3zT7EvaYkbi6HLAip4kCPE=;
-        b=l4L7jiH6ZccbEi+73Rx5/e2VFGSGX9oq+pro/VqCZ/B9SBLRi9kJ8rhwQ6GfQjkLdG
-         5SQyVROcifcUU9JcCHagF0xYrCWbMWpzO2ypxZDwOdgCWa+IefPVsgyBM+E1UnY/Wfty
-         uhI5r2LG5Pa0d3RMvvKoNWQInR/hTsUfbkGNOBSW14ajBjl4hEVZTozyndfSrH9hXzq+
-         7jAzxreF/Gns7c1j8uIvNVMiMVeOXHIdthotghW3PlF6B6/UdmbeLJMB2dwpx7yOtpEb
-         plMEdN0ZRi+eWB8n638W1aGCKWDPA7PQHTWzmox0Z06EV9Tt6X32HbPZ/xU5HP88iQTu
-         UNTw==
-X-Gm-Message-State: AGi0PubOIHQSmzSgr7m6ZRixHLsICxck20yj0IiDPH2/Pk+JjYyjmMNK
-        69Rm7NL02ZRSDnKK/oL7U1ReRPUISs5Bg9U0ilammg==
-X-Google-Smtp-Source: APiQypJSb26agvtaW3XUoWIUFAipBIghy203mcWakTXMxgBcN3TEPnxo9vAyT3jVrfHgyafMtr1eTIuTVfa92/Owf/U=
-X-Received: by 2002:ab0:3343:: with SMTP id h3mr517711uap.19.1587374982046;
- Mon, 20 Apr 2020 02:29:42 -0700 (PDT)
-MIME-Version: 1.0
-References: <1582181100-29914-1-git-send-email-sbhanu@codeaurora.org>
- <CAPDyKFqSJ4h7UvQfQzWmSq9gg97A0MXvdcuXXaY7b-YUHs=V2g@mail.gmail.com>
- <158334039680.7173.16159724456027777605@swboyd.mtv.corp.google.com>
- <CAPDyKFqecH=AsvtN+JMxdk6pY2dntWUrhUWF6LEq_DLCcPe6pw@mail.gmail.com>
- <158463974696.152100.8345578995373250448@swboyd.mtv.corp.google.com>
- <CAPDyKFrL6uWaKK1zkn6ag2ZqW7ro50VGq6DJnTNyoFS2yGMmRw@mail.gmail.com> <158690616084.105027.4255268086188981149@swboyd.mtv.corp.google.com>
-In-Reply-To: <158690616084.105027.4255268086188981149@swboyd.mtv.corp.google.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 20 Apr 2020 11:29:06 +0200
-Message-ID: <CAPDyKFqw42Vvu1n-MbL+DEr3wsk9bgrRHmOLS=t57A+1P-yLMg@mail.gmail.com>
-Subject: Re: [PATCH V4] mmc: sdhci-msm: Update system suspend/resume callbacks
- of sdhci-msm platform driver
-To:     Stephen Boyd <swboyd@chromium.org>
-Cc:     Shaik Sajida Bhanu <sbhanu@codeaurora.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Rob Herring <robh+dt@kernel.org>,
-        Matthias Kaehlcke <mka@chromium.org>,
-        Asutosh Das <asutoshd@codeaurora.org>,
-        Sahitya Tummala <stummala@codeaurora.org>,
-        Sayali Lokhande <sayalil@codeaurora.org>, cang@codeaurora.org,
-        Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
-        Ram Prakash Gupta <rampraka@codeaurora.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        id S1726209AbgDTK26 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 20 Apr 2020 06:28:58 -0400
+Received: from mga18.intel.com ([134.134.136.126]:24690 "EHLO mga18.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1725865AbgDTK25 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 20 Apr 2020 06:28:57 -0400
+IronPort-SDR: cxKonAg+3BbLhdUwiJZXNL2JnQ3xGeubqdBCn15JAaD1b8dOIAZejrvffOAlJaEr8trFGDRma/
+ CsADFAUIl2qg==
+X-Amp-Result: SKIPPED(no attachment in message)
+X-Amp-File-Uploaded: False
+Received: from orsmga007.jf.intel.com ([10.7.209.58])
+  by orsmga106.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 20 Apr 2020 03:28:56 -0700
+IronPort-SDR: iHULl3pxbtqQ1MqumC0TUlV1+InpWyde7JALFkMK93zTjHDxNzzjlKzi+4FW1T4iQh1UI5UnhB
+ XnHAlzl8Wzbg==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.72,406,1580803200"; 
+   d="scan'208";a="243766286"
+Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.157]) ([10.237.72.157])
+  by orsmga007.jf.intel.com with ESMTP; 20 Apr 2020 03:28:54 -0700
+Subject: Re: linux-next: Tree for Apr 17 (mmc/host/sdhci-of-at91.c)
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Randy Dunlap <rdunlap@infradead.org>,
+        Masahiro Yamada <yamada.masahiro@socionext.com>
+Cc:     Stephen Rothwell <sfr@canb.auug.org.au>,
+        Linux Next Mailing List <linux-next@vger.kernel.org>,
         Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
-        DTML <devicetree@vger.kernel.org>,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>
-Content-Type: text/plain; charset="UTF-8"
+        Ludovic Desroches <ludovic.desroches@atmel.com>,
+        linux-mmc <linux-mmc@vger.kernel.org>
+References: <20200417145017.3932443d@canb.auug.org.au>
+ <995a958c-15a1-cb05-e276-065c7f6e57fd@infradead.org>
+ <CAPDyKFqE7zfaKSbpBoBbrSCEnx+70dOrWs+=QG_x2G-Fpt6=ng@mail.gmail.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Message-ID: <ce11a0b5-22a6-dd18-f858-5d30f43e1128@intel.com>
+Date:   Mon, 20 Apr 2020 13:28:21 +0300
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.7.0
+MIME-Version: 1.0
+In-Reply-To: <CAPDyKFqE7zfaKSbpBoBbrSCEnx+70dOrWs+=QG_x2G-Fpt6=ng@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 8bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 15 Apr 2020 at 01:16, Stephen Boyd <swboyd@chromium.org> wrote:
->
-> Quoting Ulf Hansson (2020-03-20 03:22:01)
-> > On Thu, 19 Mar 2020 at 18:42, Stephen Boyd <swboyd@chromium.org> wrote:
-> > >
-> > > Quoting Ulf Hansson (2020-03-06 02:07:41)
-> > > > On Wed, 4 Mar 2020 at 17:46, Stephen Boyd <swboyd@chromium.org> wrote:
-> > > > >
-> > > > > Quoting Ulf Hansson (2020-03-04 07:34:29)
-> > > > > > On Thu, 20 Feb 2020 at 07:45, Shaik Sajida Bhanu <sbhanu@codeaurora.org> wrote:
-> > > > > > >
-> > > > > > > The existing suspend/resume callbacks of sdhci-msm driver are just
-> > > > > > > gating/un-gating the clocks. During suspend cycle more can be done
-> > > > > > > like disabling controller, disabling card detection, enabling wake-up events.
-> > > > > > >
-> > > > > > > So updating the system pm callbacks for performing these extra
-> > > > > > > actions besides controlling the clocks.
-> > > > > > >
-> > > > > > > Signed-off-by: Shaik Sajida Bhanu <sbhanu@codeaurora.org>
-> > > > > > > Reviewed-by: Stephen Boyd <swboyd@chromium.org>
-> > > > > > > ---
-> > > [...]
-> > > >
-> > > > >
-> > > > > >
-> > > > > > > +
-> > > > > > > +       ret = pm_runtime_force_suspend(dev);
-> > > > > >
-> > > > > > It looks to me that perhaps you could make use of solely
-> > > > > > pm_runtime_force_suspend(), then just skip calling
-> > > > > > sdhci_suspend|resume_host() altogether. Do you think that could work?
-> > > > >
-> > > > > Does that do all the things the commit text mentions is desired for
-> > > > > system suspend?
-> > > >
-> > > > No. :-)
-> > > >
-> > > > But why is system wakeup needed for an eMMC card?
-> > > >
-> > >
-> > > I don't know if system wakeup is needed for an eMMC card. Probably only
-> > > if you plug in a card and some daemon wants to wake up and probe the
-> > > card for auto-play or something like that? Seems possible so might as
-> > > well expose the CD gpio as a wakeup in that case and let userspace
-> > > decide if it wants to do that.
-> >
-> > Right, card detect IRQs could be useful for system wakeups.
-> >
-> > I assume you are using a GPIO IRQ for that, which is easily managed,
-> > as the runtime PM status of the mmc controller is irrelevant when
-> > configuring the GPIO IRQ as wakeup.
-> >
-> > We even have a helper for doing this, mmc_gpio_set_cd_wake().
->
-> Right. Maybe mmc_gpio_set_cd_wake() needs to be called from somewhere in
-> the sdhci core?
+On 20/04/20 12:12 pm, Ulf Hansson wrote:
+> + Masahiro Yamada, Adrian Hunter
+> 
+> On Fri, 17 Apr 2020 at 16:48, Randy Dunlap <rdunlap@infradead.org> wrote:
+>>
+>> On 4/16/20 9:50 PM, Stephen Rothwell wrote:
+>>> Hi all,
+>>>
+>>> Changes since 20200416:
+>>>
+>>
+>> on i386:
+>>
+>>   CC      drivers/mmc/host/sdhci-of-at91.o
+>> In file included from ../include/linux/build_bug.h:5:0,
+>>                  from ../include/linux/bitfield.h:10,
+>>                  from ../drivers/mmc/host/sdhci-of-at91.c:9:
+>> ../drivers/mmc/host/sdhci-of-at91.c: In function ‘sdhci_at91_set_clks_presets’:
+>> ../include/linux/compiler.h:394:38: error: call to ‘__compiletime_assert_63’ declared with attribute error: FIELD_PREP: value too large for the field
+>>   _compiletime_assert(condition, msg, __compiletime_assert_, __COUNTER__)
+>>                                       ^
+>> ../include/linux/compiler.h:375:4: note: in definition of macro ‘__compiletime_assert’
+>>     prefix ## suffix();    \
+>>     ^~~~~~
+>> ../include/linux/compiler.h:394:2: note: in expansion of macro ‘_compiletime_assert’
+>>   _compiletime_assert(condition, msg, __compiletime_assert_, __COUNTER__)
+>>   ^~~~~~~~~~~~~~~~~~~
+>> ../include/linux/build_bug.h:39:37: note: in expansion of macro ‘compiletime_assert’
+>>  #define BUILD_BUG_ON_MSG(cond, msg) compiletime_assert(!(cond), msg)
+>>                                      ^~~~~~~~~~~~~~~~~~
+>> ../include/linux/bitfield.h:49:3: note: in expansion of macro ‘BUILD_BUG_ON_MSG’
+>>    BUILD_BUG_ON_MSG(__builtin_constant_p(_val) ?  \
+>>    ^~~~~~~~~~~~~~~~
+>> ../include/linux/bitfield.h:94:3: note: in expansion of macro ‘__BF_FIELD_CHECK’
+>>    __BF_FIELD_CHECK(_mask, 0ULL, _val, "FIELD_PREP: "); \
+>>    ^~~~~~~~~~~~~~~~
+>> ../drivers/mmc/host/sdhci-of-at91.c:185:11: note: in expansion of macro ‘FIELD_PREP’
+>>   caps1 |= FIELD_PREP(SDHCI_CLOCK_MUL_MASK, clk_mul);
 
-Yes, that seems reasonable.
+My guess is the compiler has decided clk_mul is constant (probably (unsigned
+int)-1) because there is no CONFIG_COMMON_CLK i.e. clk_get_rate() is 0
 
->
-> >
-> > >
-> > > Is runtime suspended state the same as system suspended state here
-> > > though? The commit text seems to imply that only clks are disabled when
-> > > it's desirable to disable the entire controller. I'm still fuzzy on how
-> > > runtime PM and system PM interact because it seems to have changed since
-> > > I looked last a few years ago. If the driver can stay in a runtime
-> > > suspended state across system suspend then I'm all for it. That would
-> > > save time for system PM transitions.
-> >
-> > In most cases this should be possible. And so far, for this case, I
-> > haven't found a good reason to why it shouldn't work.
-> >
-> > Although, perhaps we need to improve some of the sdhci's library
-> > functions for PM, to better support this.
-> >
->
-> So does that mean it's all just working then? Nothing to do here except
-> make wakeup irqs for CD work?
+So maybe add to config MMC_SDHCI_OF_AT91
 
-Well, if it "works " or not, I am not really sure.
+	depends on COMMON_CLK
 
-My point is, I think most of the things that need to be managed at
-system suspend/resume are the same things that need to be managed
-during runtime suspend/resume (except wakeups). So, rather than
-implementing a whole bunch of system suspend/resume specific things,
-why not make use of the runtime suspend/resume callbacks instead.
+>>            ^~~~~~~~~~
+>>
+>>
+>> Full randconfig file is attached.
+>>
+>>
+>> --
+>> ~Randy
+>> Reported-by: Randy Dunlap <rdunlap@infradead.org>
+> 
+> Thanks for reporting! I have looped in the relevant people, let's see
+> how we move forward with this.
+> 
+> I assume the offending commit is this one:
+> Author: Masahiro Yamada <yamada.masahiro@socionext.com>
+> Date:   Wed Apr 8 16:21:05 2020 +0900
+> mmc: sdhci: use FIELD_GET/PREP for capabilities bit masks
+> 
+> Kind regards
+> Uffe
+> 
 
-Kind regards
-Uffe
