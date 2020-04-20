@@ -2,117 +2,141 @@ Return-Path: <SRS0=uOye=6E=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	MENTIONS_GIT_HOSTING,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-0.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2EAA0C3A5A0
-	for <linux-mmc@archiver.kernel.org>; Mon, 20 Apr 2020 08:18:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 236EDC54FCC
+	for <linux-mmc@archiver.kernel.org>; Mon, 20 Apr 2020 09:12:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 098EE206B8
-	for <linux-mmc@archiver.kernel.org>; Mon, 20 Apr 2020 08:18:51 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 04DB22145D
+	for <linux-mmc@archiver.kernel.org>; Mon, 20 Apr 2020 09:12:40 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="jb1MGt9S"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="SjvBif89"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725886AbgDTISu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 20 Apr 2020 04:18:50 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48582 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725773AbgDTISu (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Apr 2020 04:18:50 -0400
+        id S1725971AbgDTJMj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 20 Apr 2020 05:12:39 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56884 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-FAIL-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1725865AbgDTJMj (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Apr 2020 05:12:39 -0400
 Received: from mail-ua1-x944.google.com (mail-ua1-x944.google.com [IPv6:2607:f8b0:4864:20::944])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DCE75C061A0C
-        for <linux-mmc@vger.kernel.org>; Mon, 20 Apr 2020 01:18:48 -0700 (PDT)
-Received: by mail-ua1-x944.google.com with SMTP id v24so3287423uak.0
-        for <linux-mmc@vger.kernel.org>; Mon, 20 Apr 2020 01:18:48 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E098AC061A0C
+        for <linux-mmc@vger.kernel.org>; Mon, 20 Apr 2020 02:12:38 -0700 (PDT)
+Received: by mail-ua1-x944.google.com with SMTP id g10so3325761uae.5
+        for <linux-mmc@vger.kernel.org>; Mon, 20 Apr 2020 02:12:38 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=It2vA21CwHolWpfirZrNfml7BAn8xW9KliuigaVPmQc=;
-        b=jb1MGt9S2UQTTMPIjIj59TqFDBsCYHvXydQP1BV/FKasi9ecAniUpbEZyM4n0wyUBI
-         rEIVIB1SoIuUQ5/RtDynoWn+x9z6lPx8chOdzQDtQcF2OTurfPvimcChtZQhDoyth90s
-         dHKt9NIZkh4+iVw/+Lk17lOt/fj4pGvaPNBwaXS2CdhLeuei0Rcran3pkuRSZkRD84yA
-         G4yw7PpFjYRALt+krAtZvAHqMROyloyKUh6xdZtzQncj0wt8XZYtre6TCDpaM+K2ostp
-         2Owmu8mpy9iVy1UsL0gNXmRa2aIfHWNYANkVzvRTnLfpuqWqXBCNdvwvO9kA9PtNohDH
-         vPzg==
+         :cc:content-transfer-encoding;
+        bh=D5DA0AVUZZnTAM/ihh6DaspZ07iKnTCzkRsZBNpa07A=;
+        b=SjvBif89YfnXbxd7GMu3X4fKAtX67zD5cErAA7NiHKnyJkwnzfakr8aAAIV61e7w9Z
+         ERxCnvn1GrcWslAHcKeTA7asLTGzhcPZ4nCZNkGFF3JyR/VNAj2ernqKXumLcTEye6wA
+         5SgUPv/JoDvH1m4NcP+Tslfp4zsn+Obm0yQiberdVeuXLYZWbl1NWoPR49/rhM5mjE+b
+         0RoHnM7I1IduNjfr/cv888TzQ/f6uMb243BTOHRcgl9qtoF6nI/bqXjh51XjKq/7u2Dm
+         CDBEcI6SlHjjIiJVRhktMVjX8H3BOhlaOv+wBHBtjhcLKXL/QUgmCAXg8gw1lTMaBaKl
+         Pfjw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=It2vA21CwHolWpfirZrNfml7BAn8xW9KliuigaVPmQc=;
-        b=MXZu8kOPU/NBcfJbRkT/VbGASgLK9p9YgnIHMdKEaszn0kbRAzgyy3Ms/2dFB3QF4X
-         2quxmOau+6H1qxmjkclTttf9nLlmvzUgQuUlagTJ8FvYBqJA8QV/fyJZLQzsV735X6NY
-         2iLUHqq6b5h1AOycmHOpVuRqHapdqkDQWBeRoel2Bp/gpA07E6kFhXNP71ZzMIyj5LC0
-         BPhyPqJ6X+e80uRs9ROoawxDjJkz9jEJ+Qg+AvOUdGmNk1uZPp7DLTFsUXm5/w5HBoOH
-         HooHhcAUPEyyb6ILrxvoRfOKtWCjsN+97gl+yvXnI0y5kwNTEoRgKLijyEolQb45p+Lf
-         1DPg==
-X-Gm-Message-State: AGi0PuYUmjhdTI+w4V10w5Judr8aLDhSCi/37r0d2RoHVve+KUMOm5wL
-        1sRAzS1ZAm/B+EUq7vfQD6uDWlvZhzozWiEFuJF/BwXtaRI=
-X-Google-Smtp-Source: APiQypJtk77V1X8LIw0dAU5kX+wiqu7ySYUsJUq3LKsJR6m83qHiqqkP5jl/C3bqjnClwMvFKIlOPeqfCMfE1azjEhY=
-X-Received: by 2002:ab0:6588:: with SMTP id v8mr6243394uam.100.1587370728146;
- Mon, 20 Apr 2020 01:18:48 -0700 (PDT)
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=D5DA0AVUZZnTAM/ihh6DaspZ07iKnTCzkRsZBNpa07A=;
+        b=cIfyVcbiAYgctVX4wONv7w4EFIPK55A8XhF5cxQV8fLHq4JC8jk6pHJADp6N0o3jUo
+         bI9Vds68+HkDlCc6SfZofZRk2XE3dyY2Gn3GqaeIHno+lD20hX3NRLJ70v8Dw5vVLfwl
+         OJuyL+6RBN9jeFAVzHnDhWIjBmIbuy3GCRQI20TY6wEefuS2iX1P4fPWD7RHa5psJIa7
+         nz58aQB2ssjJs9k38gQd9VxhmGYYkV3+nln9D1alPBA0G+UxLXuV3SxaGGbSaWng68d+
+         TkptbLFjCxbv+m7VvRmiiEP6oRU2hZhEBP//y8AY90mwzLC1L1YhK6sOEAQhhyQvkWWO
+         bXwg==
+X-Gm-Message-State: AGi0Puaw3cNpRC4bziYD8YL2EDFXd61G5UL41S5nsEFF7MEYk6u48fqx
+        CLar0SZOOeVGBjL8qLNlVp9JVhaJbGFPvbhOzNdR6A==
+X-Google-Smtp-Source: APiQypLZ6PMekSmOqs+25OFvhsfT/B2tJOUATSybOBWpLf9Vtag2Vy3uH6+F6Ux4iwrWqEhjf4LFpwze/AE3L9GCJ8s=
+X-Received: by 2002:ab0:544a:: with SMTP id o10mr6973297uaa.15.1587373957934;
+ Mon, 20 Apr 2020 02:12:37 -0700 (PDT)
 MIME-Version: 1.0
-References: <20200416163649.336967-1-marex@denx.de> <CAPDyKFqztJDfTrc+1q9mdyf0f2s=gE91J3eM92rzmm+FJNBW9A@mail.gmail.com>
- <11a78052-6320-2986-42b0-3f5536b8c061@denx.de>
-In-Reply-To: <11a78052-6320-2986-42b0-3f5536b8c061@denx.de>
+References: <20200417145017.3932443d@canb.auug.org.au> <995a958c-15a1-cb05-e276-065c7f6e57fd@infradead.org>
+In-Reply-To: <995a958c-15a1-cb05-e276-065c7f6e57fd@infradead.org>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 20 Apr 2020 10:18:12 +0200
-Message-ID: <CAPDyKFpQXaQ+rOX7f+zLfG2Q6fX3FsDk8d+uBtxAcLNkKPhAxQ@mail.gmail.com>
-Subject: Re: [PATCH V2 1/3] mmc: Prepare all code for mmc_regulator_set_vqmmc()
- returning > 0
-To:     Marek Vasut <marex@denx.de>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Alexandre Torgue <alexandre.torgue@st.com>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Ludovic Barre <ludovic.barre@st.com>,
-        Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>,
-        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
-        Patrice Chotard <patrice.chotard@st.com>,
-        Patrick Delaunay <patrick.delaunay@st.com>,
-        Russell King <linux@armlinux.org.uk>,
-        linux-stm32@st-md-mailman.stormreply.com
+Date:   Mon, 20 Apr 2020 11:12:02 +0200
+Message-ID: <CAPDyKFqE7zfaKSbpBoBbrSCEnx+70dOrWs+=QG_x2G-Fpt6=ng@mail.gmail.com>
+Subject: Re: linux-next: Tree for Apr 17 (mmc/host/sdhci-of-at91.c)
+To:     Randy Dunlap <rdunlap@infradead.org>,
+        Masahiro Yamada <yamada.masahiro@socionext.com>,
+        Adrian Hunter <adrian.hunter@intel.com>
+Cc:     Stephen Rothwell <sfr@canb.auug.org.au>,
+        Linux Next Mailing List <linux-next@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        Ludovic Desroches <ludovic.desroches@atmel.com>,
+        linux-mmc <linux-mmc@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 17 Apr 2020 at 17:33, Marek Vasut <marex@denx.de> wrote:
->
-> On 4/17/20 11:30 AM, Ulf Hansson wrote:
-> > On Thu, 16 Apr 2020 at 18:36, Marek Vasut <marex@denx.de> wrote:
-> >>
-> >> Patch all drivers which use mmc_regulator_set_vqmmc() and prepare them for
-> >> the fact that mmc_regulator_set_vqmmc() can return a value > 0, which would
-> >> happen if the signal voltage switch did NOT happen, because the voltage was
-> >> already set correctly.
-> >>
-> >> Signed-off-by: Marek Vasut <marex@denx.de>
-> >> Cc: Alexandre Torgue <alexandre.torgue@st.com>
-> >> Cc: Linus Walleij <linus.walleij@linaro.org>
-> >> Cc: Ludovic Barre <ludovic.barre@st.com>
-> >> Cc: Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
-> >> Cc: Maxime Coquelin <mcoquelin.stm32@gmail.com>
-> >> Cc: Patrice Chotard <patrice.chotard@st.com>
-> >> Cc: Patrick Delaunay <patrick.delaunay@st.com>
-> >> Cc: Russell King <linux@armlinux.org.uk>
-> >> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> >> Cc: linux-stm32@st-md-mailman.stormreply.com
-> >> To: linux-mmc@vger.kernel.org
-> >
-> > Applied for next, thanks!
-> >
-> > I took the liberty to re-work and simplify some of the code, please
-> > have a look at my next branch to make sure I didn't screw something
-> > up.
->
-> Where is your next branch ?
++ Masahiro Yamada, Adrian Hunter
 
-It's listed in the MAINTAINERS file.
+On Fri, 17 Apr 2020 at 16:48, Randy Dunlap <rdunlap@infradead.org> wrote:
+>
+> On 4/16/20 9:50 PM, Stephen Rothwell wrote:
+> > Hi all,
+> >
+> > Changes since 20200416:
+> >
+>
+> on i386:
+>
+>   CC      drivers/mmc/host/sdhci-of-at91.o
+> In file included from ../include/linux/build_bug.h:5:0,
+>                  from ../include/linux/bitfield.h:10,
+>                  from ../drivers/mmc/host/sdhci-of-at91.c:9:
+> ../drivers/mmc/host/sdhci-of-at91.c: In function =E2=80=98sdhci_at91_set_=
+clks_presets=E2=80=99:
+> ../include/linux/compiler.h:394:38: error: call to =E2=80=98__compiletime=
+_assert_63=E2=80=99 declared with attribute error: FIELD_PREP: value too la=
+rge for the field
+>   _compiletime_assert(condition, msg, __compiletime_assert_, __COUNTER__)
+>                                       ^
+> ../include/linux/compiler.h:375:4: note: in definition of macro =E2=80=98=
+__compiletime_assert=E2=80=99
+>     prefix ## suffix();    \
+>     ^~~~~~
+> ../include/linux/compiler.h:394:2: note: in expansion of macro =E2=80=98_=
+compiletime_assert=E2=80=99
+>   _compiletime_assert(condition, msg, __compiletime_assert_, __COUNTER__)
+>   ^~~~~~~~~~~~~~~~~~~
+> ../include/linux/build_bug.h:39:37: note: in expansion of macro =E2=80=98=
+compiletime_assert=E2=80=99
+>  #define BUILD_BUG_ON_MSG(cond, msg) compiletime_assert(!(cond), msg)
+>                                      ^~~~~~~~~~~~~~~~~~
+> ../include/linux/bitfield.h:49:3: note: in expansion of macro =E2=80=98BU=
+ILD_BUG_ON_MSG=E2=80=99
+>    BUILD_BUG_ON_MSG(__builtin_constant_p(_val) ?  \
+>    ^~~~~~~~~~~~~~~~
+> ../include/linux/bitfield.h:94:3: note: in expansion of macro =E2=80=98__=
+BF_FIELD_CHECK=E2=80=99
+>    __BF_FIELD_CHECK(_mask, 0ULL, _val, "FIELD_PREP: "); \
+>    ^~~~~~~~~~~~~~~~
+> ../drivers/mmc/host/sdhci-of-at91.c:185:11: note: in expansion of macro =
+=E2=80=98FIELD_PREP=E2=80=99
+>   caps1 |=3D FIELD_PREP(SDHCI_CLOCK_MUL_MASK, clk_mul);
+>            ^~~~~~~~~~
+>
+>
+> Full randconfig file is attached.
+>
+>
+> --
+> ~Randy
+> Reported-by: Randy Dunlap <rdunlap@infradead.org>
 
-git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git
+Thanks for reporting! I have looped in the relevant people, let's see
+how we move forward with this.
+
+I assume the offending commit is this one:
+Author: Masahiro Yamada <yamada.masahiro@socionext.com>
+Date:   Wed Apr 8 16:21:05 2020 +0900
+mmc: sdhci: use FIELD_GET/PREP for capabilities bit masks
 
 Kind regards
 Uffe
