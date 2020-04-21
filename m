@@ -2,130 +2,142 @@ Return-Path: <SRS0=Yb6F=6F=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8471CC54FC9
-	for <linux-mmc@archiver.kernel.org>; Tue, 21 Apr 2020 09:39:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 54AF1C54FC9
+	for <linux-mmc@archiver.kernel.org>; Tue, 21 Apr 2020 10:40:03 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5D7AC21D79
-	for <linux-mmc@archiver.kernel.org>; Tue, 21 Apr 2020 09:39:25 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 348B42071C
+	for <linux-mmc@archiver.kernel.org>; Tue, 21 Apr 2020 10:40:03 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="wNADBHYf"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="sZb0j1AD"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725920AbgDUJjY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 21 Apr 2020 05:39:24 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60224 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-FAIL-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1726403AbgDUJjY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Apr 2020 05:39:24 -0400
-Received: from mail-vk1-xa42.google.com (mail-vk1-xa42.google.com [IPv6:2607:f8b0:4864:20::a42])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 01257C061A10
-        for <linux-mmc@vger.kernel.org>; Tue, 21 Apr 2020 02:39:24 -0700 (PDT)
-Received: by mail-vk1-xa42.google.com with SMTP id c23so3437019vkc.0
-        for <linux-mmc@vger.kernel.org>; Tue, 21 Apr 2020 02:39:23 -0700 (PDT)
+        id S1728584AbgDUKkC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 21 Apr 2020 06:40:02 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41274 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726628AbgDUKkB (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Apr 2020 06:40:01 -0400
+Received: from mail-vs1-xe44.google.com (mail-vs1-xe44.google.com [IPv6:2607:f8b0:4864:20::e44])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AD897C061A41
+        for <linux-mmc@vger.kernel.org>; Tue, 21 Apr 2020 03:39:59 -0700 (PDT)
+Received: by mail-vs1-xe44.google.com with SMTP id y185so8085297vsy.8
+        for <linux-mmc@vger.kernel.org>; Tue, 21 Apr 2020 03:39:59 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=J6xX4UX3gD4CgRlcECeL2t8r4Bb9qOAjl08Y9GivdCk=;
-        b=wNADBHYfBqrmYLagYMXhvkFyUT8BxHFDmwzkIw/FRVt1EftHXgipIT5yJYjq9ocehu
-         GrZB6OVK67pjdwBAL3ZpBnNYXCYFWesoXkeoHo0e+Ys2ree61WWYf4q1s6aM2pRu8zzE
-         AejCt13Zo1guyVsMD5GmA9rvmocxaeUAi4sNkPEfOLyZk1Y2qbJjkD6tKDgzsKIF5CWZ
-         bLLAKSp0UWZJvyvTPaV6DLqfwXjGE7lCNhM1KyduORgSrcceVXJfhY1vVq4+4BSaq4zN
-         YVaXK4yTyH5sWOKbHxJKYqWhedO0PsZU5jTNO2D9GxGo88EZ/BqFQXR4VHF3pC6Bn3an
-         zNPg==
+        bh=ZWOnko77txal0K7pJvRHJBebpvxdOfp3TVzw/ZvqiSM=;
+        b=sZb0j1ADnFw2pQCOR1I1/JAIJ2vP4Lj+6zzr6vrUr1JZpY+SKjo0VNeVwo35qRCV+F
+         1PPJMFAXIMfTGbxOXoZVrDf4gUZcRWtESA1GBPl60kn1gEdf5gq6fuwNsXgGh4eG28Yz
+         ZCr/66YuuY54OOylETzfZ17pWqnkCBWP/fxDWULm5idzduPopFhWtKSajwoZg2GehXJx
+         nbIQcoW8hWGVGSw73GXi1zBuTqJzyH0yKhBtjNENJlQ/1Hhp6xz73dZStiIjb+jT/Jkd
+         KedNNlRpRTAdqOhMd/jZ2wkg5Fv6T82MGFWxWfAM8S9LMNKw6ywmJ9bqrBm6MTtBi3tb
+         CRlg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=J6xX4UX3gD4CgRlcECeL2t8r4Bb9qOAjl08Y9GivdCk=;
-        b=bK3PXW145Vsjyns+qQJILb7NjvPB9rLbAOSi5T/TlC6JxEg93lfJF8HybWnF+eCTG1
-         obXPKOSV8NpaGQI2pd7hyMLSG4rhq3Dorzf9wCnTCPLiaO9e7TmMrwkkDpPXmMddO3vA
-         rxnf06udHvyewIFOdZ11KL0ZIR4xSWxGLXef7Qo/hoDxiOyQEjkRjoSx8oJ064Pdhga2
-         MltvjcqftB6a1JFCgaVenzUU0Qp0/quP3LqgFh/s6G0V95ZJPCBce4r+W/s2vpWXJn1C
-         41tzjXkD2AR2Iby0oIWheTT5LGAFQIfduRP16n34M2XOMN5B/f93Fh/Ia2l+8MTOIpvU
-         DJYA==
-X-Gm-Message-State: AGi0PubkiMShiWbpTtRue/HkI+YXhpu6idSwjwazVDgfYVvuaMuy+jNw
-        qUyWJybXHM9K1J18Ez0FTyGushRIK8ZXl+OrxMhVyA==
-X-Google-Smtp-Source: APiQypLnPZE96uN80G6KHYHQ5XnaUSopJzzVTgfYzGF7mgcTRi/zaOA8wN0KNmuIrTuTzZyPCglj01kkbBVX93uXS2o=
-X-Received: by 2002:a1f:31cf:: with SMTP id x198mr4295427vkx.101.1587461963161;
- Tue, 21 Apr 2020 02:39:23 -0700 (PDT)
+        bh=ZWOnko77txal0K7pJvRHJBebpvxdOfp3TVzw/ZvqiSM=;
+        b=ty9dXPQWFWEwJnlj79zQFo6C6CMy7+jqxzanRvwJU9m6tB8PSCKAWJ4svC3uKSq2i0
+         aqYgajO7farDEAyCmTU5oNx35mNdhQZ6s62kLYpV9QS8sR9Qhrnsq9Bjv7R6bMZSm3uG
+         2Wf/17KfsY6xAisiBfQ8E15L+/DWp8g7T6y9AbQTtdQV+rbuiMVsDGoVv6c6t3vQX9bm
+         6QOZUQ+AjFhbLx6A1DVux6AICySR6l/YvxGiSwgMlH6EEQfKe6/F+YDq/p9qESII69DE
+         Y5W/9iixA6+06Kp444ukhKytV7Mvd+RgM05DnOYhqlpId+Jy8k7N0JMUp5yxvvipWXRK
+         KcKw==
+X-Gm-Message-State: AGi0PubOUlaoEwzduy/OK/zmD0vbzG38F3P1VKF4F7WUB1KUh4t1Hi47
+        Xv0J7zo+lC9PNaWjYCEUk+iODzwBCxMP+CWjm9yMZQ==
+X-Google-Smtp-Source: APiQypKISV66Pw/5T+dsPNqBQ+0UbOK10keNAQzmOGZsGfLJ0yfsb04HQOYUoTZ32K7OtcDuVGegOMCuwdmU2fcyQrk=
+X-Received: by 2002:a67:ead1:: with SMTP id s17mr14820744vso.200.1587465598574;
+ Tue, 21 Apr 2020 03:39:58 -0700 (PDT)
 MIME-Version: 1.0
-References: <20200420161831.5043-1-ludovic.barre@st.com> <CAPDyKFqC3fdnQ9CMYhS-=5MiCET=r5Az2S5oFoA2v1gdDeGO3w@mail.gmail.com>
-In-Reply-To: <CAPDyKFqC3fdnQ9CMYhS-=5MiCET=r5Az2S5oFoA2v1gdDeGO3w@mail.gmail.com>
+References: <20200413123207.74552-1-paul@crapouillou.net> <20200413123207.74552-3-paul@crapouillou.net>
+In-Reply-To: <20200413123207.74552-3-paul@crapouillou.net>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 21 Apr 2020 11:38:47 +0200
-Message-ID: <CAPDyKFrHcoVd=GKPB70gOFE8STOnTJrJbcZzE_DEgFWh1Vhszg@mail.gmail.com>
-Subject: Re: [PATCH] mmc: mmci_sdmmc: fix power on issue due to pwr_reg initialization
-To:     Ludovic Barre <ludovic.barre@st.com>
-Cc:     Rob Herring <robh+dt@kernel.org>,
-        Srini Kandagatla <srinivas.kandagatla@linaro.org>,
-        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
-        Alexandre Torgue <alexandre.torgue@st.com>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        DTML <devicetree@vger.kernel.org>,
+Date:   Tue, 21 Apr 2020 12:39:22 +0200
+Message-ID: <CAPDyKFrRMzzodhWSC2tgMSSNBwLcowd7q48_6dFPGuHUD_CUZg@mail.gmail.com>
+Subject: Re: [PATCH v2 3/3] mmc: jz4740: Use pm_ptr() macro
+To:     Paul Cercueil <paul@crapouillou.net>,
+        "Rafael J . Wysocki" <rjw@rjwysocki.net>
+Cc:     Pavel Machek <pavel@ucw.cz>, Len Brown <len.brown@intel.com>,
+        od@zcrc.me,
         "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        linux-stm32@st-md-mailman.stormreply.com
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        Linux PM <linux-pm@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 21 Apr 2020 at 11:25, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+On Mon, 13 Apr 2020 at 14:32, Paul Cercueil <paul@crapouillou.net> wrote:
 >
-> On Mon, 20 Apr 2020 at 18:18, Ludovic Barre <ludovic.barre@st.com> wrote:
-> >
-> > This patch fix a power-on issue, and avoid to retry the power sequence.
-> >
-> > In power off sequence: sdmmc must set pwr_reg in "power-cycle" state
-> > (value 0x2), to prevent the card from being supplied through the signal
-> > lines (all the lines are driven low).
-> >
-> > In power on sequence: when the power is stable, sdmmc must set pwr_reg
-> > in "power-off" state (value 0x0) to drive all signal to high before to
-> > set "power-on".
+> Use the newly introduced pm_ptr() macro to simplify the code.
 >
-> Just a question to gain further understanding.
->
-> Let's assume that the controller is a power-on state, because it's
-> been initialized by the boot loader. When the mmc core then starts the
-> power-on sequence (not doing a power-off first), would $subject patch
-> then cause the
-> MMCIPOWER to remain as is, or is it going to be overwritten?
->
-> I am a little worried that we may start to rely on boot loader
-> conditions, which isn't really what we want either...
->
-> >
-> > To avoid writing the same value to the power register several times, this
-> > register is cached by the pwr_reg variable. At probe pwr_reg is initialized
-> > to 0 by kzalloc of mmc_alloc_host.
-> >
-> > Like pwr_reg value is 0 at probing, the power on sequence fail because
-> > the "power-off" state is not writes (value 0x0) and the lines
-> > remain drive to low.
-> >
-> > This patch initializes "pwr_reg" variable with power register value.
-> > This it done in sdmmc variant init to not disturb default mmci behavior.
-> >
-> > Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
->
-> Besides the comment, the code and the approach seems reasonable to me.
+> Signed-off-by: Paul Cercueil <paul@crapouillou.net>
 
-Another related question. I just realized why you probably haven't set
-.pwrreg_nopower for the variant_stm32_sdmmc and variant_stm32_sdmmcv2.
+To me, the series is a step in the right direction. Perhaps there is a
+better name than "pm_ptr", but that's just a nitpick.
 
-I guess it's because you need a slightly different way to restore the
-context of MMCIPOWER register at ->runtime_resume(), rather than just
-re-writing it with the saved register values. Is this something that
-you are looking into as well?
+That said, feel free to add (for all three patches in the series):
+Reviewed-by: Ulf Hansson <ulf.hansson@linaro.org>
 
-[...]
+Let's see what Rafael thinks about this.
 
 Kind regards
 Uffe
+
+> ---
+>
+> Notes:
+>     v2: Use pm_ptr() macro instead of pm_sleep_ptr()
+>
+>  drivers/mmc/host/jz4740_mmc.c | 12 +++---------
+>  1 file changed, 3 insertions(+), 9 deletions(-)
+>
+> diff --git a/drivers/mmc/host/jz4740_mmc.c b/drivers/mmc/host/jz4740_mmc.c
+> index fbae87d1f017..2d41e7e5ec43 100644
+> --- a/drivers/mmc/host/jz4740_mmc.c
+> +++ b/drivers/mmc/host/jz4740_mmc.c
+> @@ -1099,24 +1099,18 @@ static int jz4740_mmc_remove(struct platform_device *pdev)
+>         return 0;
+>  }
+>
+> -#ifdef CONFIG_PM_SLEEP
+> -
+> -static int jz4740_mmc_suspend(struct device *dev)
+> +static int __maybe_unused jz4740_mmc_suspend(struct device *dev)
+>  {
+>         return pinctrl_pm_select_sleep_state(dev);
+>  }
+>
+> -static int jz4740_mmc_resume(struct device *dev)
+> +static int __maybe_unused jz4740_mmc_resume(struct device *dev)
+>  {
+>         return pinctrl_select_default_state(dev);
+>  }
+>
+>  static SIMPLE_DEV_PM_OPS(jz4740_mmc_pm_ops, jz4740_mmc_suspend,
+>         jz4740_mmc_resume);
+> -#define JZ4740_MMC_PM_OPS (&jz4740_mmc_pm_ops)
+> -#else
+> -#define JZ4740_MMC_PM_OPS NULL
+> -#endif
+>
+>  static struct platform_driver jz4740_mmc_driver = {
+>         .probe = jz4740_mmc_probe,
+> @@ -1124,7 +1118,7 @@ static struct platform_driver jz4740_mmc_driver = {
+>         .driver = {
+>                 .name = "jz4740-mmc",
+>                 .of_match_table = of_match_ptr(jz4740_mmc_of_match),
+> -               .pm = JZ4740_MMC_PM_OPS,
+> +               .pm = pm_ptr(&jz4740_mmc_pm_ops),
+>         },
+>  };
+>
+> --
+> 2.25.1
+>
