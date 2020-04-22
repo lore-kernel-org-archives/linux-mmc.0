@@ -2,36 +2,34 @@ Return-Path: <SRS0=HGUj=6G=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 77B7EC55189
-	for <linux-mmc@archiver.kernel.org>; Wed, 22 Apr 2020 12:59:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 39014C5518A
+	for <linux-mmc@archiver.kernel.org>; Wed, 22 Apr 2020 12:59:25 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 6202C20857
-	for <linux-mmc@archiver.kernel.org>; Wed, 22 Apr 2020 12:59:24 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 20580206EC
+	for <linux-mmc@archiver.kernel.org>; Wed, 22 Apr 2020 12:59:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726590AbgDVM7X (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 22 Apr 2020 08:59:23 -0400
-Received: from sauhun.de ([88.99.104.3]:47586 "EHLO pokefinder.org"
+        id S1726752AbgDVM7Y (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 22 Apr 2020 08:59:24 -0400
+Received: from sauhun.de ([88.99.104.3]:47578 "EHLO pokefinder.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726604AbgDVM7X (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        id S1726731AbgDVM7X (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
         Wed, 22 Apr 2020 08:59:23 -0400
 Received: from localhost (p5486CD65.dip0.t-ipconnect.de [84.134.205.101])
-        by pokefinder.org (Postfix) with ESMTPSA id 40D4A2C2012;
-        Wed, 22 Apr 2020 14:59:20 +0200 (CEST)
+        by pokefinder.org (Postfix) with ESMTPSA id CA6A22C1F8B;
+        Wed, 22 Apr 2020 14:59:19 +0200 (CEST)
 From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
 To:     linux-mmc@vger.kernel.org
 Cc:     linux-renesas-soc@vger.kernel.org,
         Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
         Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: [PATCH 1/2] mmc: renesas_sdhi: handle M3-N ES1.2 and 1.3 revisions
-Date:   Wed, 22 Apr 2020 14:59:13 +0200
-Message-Id: <20200422125914.16590-2-wsa+renesas@sang-engineering.com>
+Subject: [PATCH 0/2] mmc: renesas_sdhi: avoid bad TAPs for Gen3
+Date:   Wed, 22 Apr 2020 14:59:12 +0200
+Message-Id: <20200422125914.16590-1-wsa+renesas@sang-engineering.com>
 X-Mailer: git-send-email 2.20.1
-In-Reply-To: <20200422125914.16590-1-wsa+renesas@sang-engineering.com>
-References: <20200422125914.16590-1-wsa+renesas@sang-engineering.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Sender: linux-mmc-owner@vger.kernel.org
@@ -39,36 +37,46 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-For ES1.2, add a comment explaining the situation. For ES1.3 (and
-later, although unlikely), add a new entry defining it as 4tap.
+Here is a series which avoids using TAPs on R-Car Gen3 SoCs which are
+bad to use according to HW engineers. The patch was originally for the
+BSP (Thanks, Saito-san) and has been upported for the upstream driver.
+Before we can apply this, we need to add some mising information for
+R-Car M3-W ES1.[23].
 
-Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
----
- drivers/mmc/host/renesas_sdhi_core.c | 6 ++++++
- 1 file changed, 6 insertions(+)
+Patches have been tested on Renesas Salvator-XS boards with R-Car H3
+ES2.0 (changing from TAP3 to TAP4 here) and R-Car M3-N (changing from
+TAP7 to TAP0 here).
 
-diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-index 28b0830c4251..33b51105c788 100644
---- a/drivers/mmc/host/renesas_sdhi_core.c
-+++ b/drivers/mmc/host/renesas_sdhi_core.c
-@@ -711,11 +711,17 @@ static const struct renesas_sdhi_quirks sdhi_quirks_nohs400 = {
- 	.hs400_disabled = true,
- };
- 
-+/*
-+ * Note for r8a7796 / r8a774a1: we can't distinguish ES1.1 and 1.2 as of now.
-+ * So, we want to treat them equally and only have a match for ES1.2 to enforce
-+ * this if there ever will be a way to distinguish ES1.2.
-+ */
- static const struct soc_device_attribute sdhi_quirks_match[]  = {
- 	{ .soc_id = "r8a774a1", .revision = "ES1.[012]", .data = &sdhi_quirks_4tap_nohs400 },
- 	{ .soc_id = "r8a7795", .revision = "ES1.*", .data = &sdhi_quirks_4tap_nohs400 },
- 	{ .soc_id = "r8a7795", .revision = "ES2.0", .data = &sdhi_quirks_4tap },
- 	{ .soc_id = "r8a7796", .revision = "ES1.[012]", .data = &sdhi_quirks_4tap_nohs400 },
-+	{ .soc_id = "r8a7796", .revision = "ES1.*", .data = &sdhi_quirks_4tap },
- 	{ .soc_id = "r8a77980", .data = &sdhi_quirks_nohs400 },
- 	{ /* Sentinel. */ },
- };
+A branch can be found here:
+
+git://git.kernel.org/pub/scm/linux/kernel/git/wsa/linux.git renesas/sdhi/new_manual_calib
+
+It is based on current mmc/next + "[PATCH] mmc: renesas_sdhi: shorten
+types after refactorization"
+
+One implementation detail: For now, I kept using a generic naming for
+the quirks, e.g. "sdhi_quirks_bad_taps2367". It is possible that we need
+to rename/add ones later which are SoC bound, e.g. "sdhi_quirks_m3w_30".
+Especially when we add manual calibration somewhen. But for now, the
+generic approach seems better to me, so I sticked to it.
+
+Looking forward to further comments and/or testing.
+
+Happy hacking,
+
+   Wolfram
+
+
+Takeshi Saito (1):
+  mmc: renesas_sdhi: Avoid bad TAP in HS400
+
+Wolfram Sang (1):
+  mmc: renesas_sdhi: handle M3-N ES1.2 and 1.3 revisions
+
+ drivers/mmc/host/renesas_sdhi.h      |  1 +
+ drivers/mmc/host/renesas_sdhi_core.c | 62 ++++++++++++++++++++++++----
+ 2 files changed, 55 insertions(+), 8 deletions(-)
+
 -- 
 2.20.1
 
