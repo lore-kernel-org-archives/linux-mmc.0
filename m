@@ -2,174 +2,80 @@ Return-Path: <SRS0=HGUj=6G=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-1.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0BC43C55189
-	for <linux-mmc@archiver.kernel.org>; Wed, 22 Apr 2020 10:55:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AF809C55185
+	for <linux-mmc@archiver.kernel.org>; Wed, 22 Apr 2020 11:17:08 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id DAAF020775
-	for <linux-mmc@archiver.kernel.org>; Wed, 22 Apr 2020 10:55:16 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1587552916;
-	bh=ww+numSu/sg6g0Gjghz4ZNx882LLLEiS7ZERHRm3QMc=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:List-ID:From;
-	b=AvcqBgWBz0BAY0m3YYCS9yi7CJQyt5zpdV55hoYWIQQsMBrYDrJqvItpiGEw4trSy
-	 fI0vRegcLX1iNUPWF1EF/L8LijyGS1rWh2/WFSZ8Pp98Ey0cAOy5r5YgAT+S5Qm1Lp
-	 MkPoMaeeFJLMoPYqd9qfXvli2dniHdPnFmPS6KsI=
+	by mail.kernel.org (Postfix) with ESMTP id 96FE32082E
+	for <linux-mmc@archiver.kernel.org>; Wed, 22 Apr 2020 11:17:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1731738AbgDVKzP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 22 Apr 2020 06:55:15 -0400
-Received: from conssluserg-04.nifty.com ([210.131.2.83]:63110 "EHLO
-        conssluserg-04.nifty.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728407AbgDVKzM (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Apr 2020 06:55:12 -0400
-Received: from mail-ua1-f46.google.com (mail-ua1-f46.google.com [209.85.222.46]) (authenticated)
-        by conssluserg-04.nifty.com with ESMTP id 03MAsqcF021330;
-        Wed, 22 Apr 2020 19:54:52 +0900
-DKIM-Filter: OpenDKIM Filter v2.10.3 conssluserg-04.nifty.com 03MAsqcF021330
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nifty.com;
-        s=dec2015msa; t=1587552893;
-        bh=jfh1cK7HJOI325fUjanL8XPRkeokyI4Z/JTzo0Sr8Do=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=B80hubZ2FF2o4Lwg7A6dE55/FK55YkMbcV5VTqzDz1p5tgc6FqY7550SeasM8YlVa
-         UeFowE8sIQje/lY6KdTEL1qbZJ6owtDuynRDgUTmLz+d4w1aeNgSMq8ZZXaISqggo5
-         76YxmS3GHJ7zI7LZpGzd7hAludfGdAmPOK/TZgxECxYUZ9xphINa8ghnvHm4Ji+tXI
-         vmm3ypw23fGahpMLiilRKm7Sco+SvpNAR1XVibyiCVOm7NS/nrEbA1LTCAXLpgLSiJ
-         8OPgg8iLjg11vKjgS70d7Ma/IEwcl9kg7oZQuw3WKTrD5c6am6hmR3w8ufAedh3kYe
-         XXabkjRAbua7g==
-X-Nifty-SrcIP: [209.85.222.46]
-Received: by mail-ua1-f46.google.com with SMTP id i5so1124855uaq.1;
-        Wed, 22 Apr 2020 03:54:52 -0700 (PDT)
-X-Gm-Message-State: AGi0PuZ0gepQY6A1cigEwLM0luW2OXuwH/xYgbHJooo9YdYEPC/byT99
-        fUb2wf/357qIyeQFKKcsl9vFV2GOozZDt3xdMjQ=
-X-Google-Smtp-Source: APiQypL30Nui5tPzkrGBdvSXz/n6jOoR3K76pfkfTXG9nIPiej9yLCr1V7+RXT0AY8ax3rsoJqDfvRVZu7IF2lj0zKA=
-X-Received: by 2002:a67:6542:: with SMTP id z63mr19799049vsb.179.1587552891425;
- Wed, 22 Apr 2020 03:54:51 -0700 (PDT)
-MIME-Version: 1.0
-References: <20200417145017.3932443d@canb.auug.org.au> <995a958c-15a1-cb05-e276-065c7f6e57fd@infradead.org>
- <CAPDyKFqE7zfaKSbpBoBbrSCEnx+70dOrWs+=QG_x2G-Fpt6=ng@mail.gmail.com>
- <ce11a0b5-22a6-dd18-f858-5d30f43e1128@intel.com> <CAK7LNARCT3YQEnVE0NMCphSuqvjLoG2EXdpdcAZuoEOD_mFyEw@mail.gmail.com>
- <CAPDyKFqCnUzHQ9+FKH-w_VLRNQ_UvK4nmxw+hROwXkxucjzrUw@mail.gmail.com>
-In-Reply-To: <CAPDyKFqCnUzHQ9+FKH-w_VLRNQ_UvK4nmxw+hROwXkxucjzrUw@mail.gmail.com>
-From:   Masahiro Yamada <masahiroy@kernel.org>
-Date:   Wed, 22 Apr 2020 19:54:15 +0900
-X-Gmail-Original-Message-ID: <CAK7LNASpn++MWTdBCvFbiu3WgHbNVFhDSm+Ts1CmnbmYL_84GA@mail.gmail.com>
-Message-ID: <CAK7LNASpn++MWTdBCvFbiu3WgHbNVFhDSm+Ts1CmnbmYL_84GA@mail.gmail.com>
-Subject: Re: linux-next: Tree for Apr 17 (mmc/host/sdhci-of-at91.c)
+        id S1726469AbgDVLRI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 22 Apr 2020 07:17:08 -0400
+Received: from mga05.intel.com ([192.55.52.43]:48144 "EHLO mga05.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726208AbgDVLRE (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 22 Apr 2020 07:17:04 -0400
+IronPort-SDR: T+DdBuc/T6mSb2pbZrpH3fiDwcaMZpg8VuepJfnB6jb/EtqkULhXu4RBCXK7DbUQy5yVtjSmuy
+ ggU3hNGOT6Hw==
+X-Amp-Result: SKIPPED(no attachment in message)
+X-Amp-File-Uploaded: False
+Received: from fmsmga004.fm.intel.com ([10.253.24.48])
+  by fmsmga105.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 22 Apr 2020 04:17:04 -0700
+IronPort-SDR: C2DUaIrZs/HXnunaSQvXMixT9WgjqJkrELSjw9u7o44wkaZwQKqj6GTqJJzK9LBIXqqA4joHHT
+ B03jscWATp4A==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.72,414,1580803200"; 
+   d="scan'208";a="279982003"
+Received: from ahunter-desktop.fi.intel.com ([10.237.72.157])
+  by fmsmga004.fm.intel.com with ESMTP; 22 Apr 2020 04:17:03 -0700
+From:   Adrian Hunter <adrian.hunter@intel.com>
 To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        Randy Dunlap <rdunlap@infradead.org>,
-        Stephen Rothwell <sfr@canb.auug.org.au>,
-        Linux Next Mailing List <linux-next@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Ludovic Desroches <ludovic.desroches@atmel.com>,
-        linux-mmc <linux-mmc@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Cc:     linux-mmc <linux-mmc@vger.kernel.org>
+Subject: [PATCH] mmc: sdhci-pci: Fix eMMC driver strength for BYT-based controllers
+Date:   Wed, 22 Apr 2020 14:16:29 +0300
+Message-Id: <20200422111629.4899-1-adrian.hunter@intel.com>
+X-Mailer: git-send-email 2.17.1
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki, Business Identity Code: 0357606 - 4, Domiciled in Helsinki
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Ulf,
+BIOS writers have begun the practice of setting 40 ohm eMMC driver strength
+even though the eMMC may not support it, on the assumption that the kernel
+will validate the value against the eMMC (Extended CSD DRIVER_STRENGTH
+[offset 197]) and revert to the default 50 ohm value if 40 ohm is invalid.
 
-On Wed, Apr 22, 2020 at 7:15 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
->
-> On Mon, 20 Apr 2020 at 14:28, Masahiro Yamada <masahiroy@kernel.org> wrot=
-e:
-> >
-> > On Mon, Apr 20, 2020 at 7:28 PM Adrian Hunter <adrian.hunter@intel.com>=
- wrote:
-> > >
-> > > On 20/04/20 12:12 pm, Ulf Hansson wrote:
-> > > > + Masahiro Yamada, Adrian Hunter
-> > > >
-> > > > On Fri, 17 Apr 2020 at 16:48, Randy Dunlap <rdunlap@infradead.org> =
-wrote:
-> > > >>
-> > > >> On 4/16/20 9:50 PM, Stephen Rothwell wrote:
-> > > >>> Hi all,
-> > > >>>
-> > > >>> Changes since 20200416:
-> > > >>>
-> > > >>
-> > > >> on i386:
-> > > >>
-> > > >>   CC      drivers/mmc/host/sdhci-of-at91.o
-> > > >> In file included from ../include/linux/build_bug.h:5:0,
-> > > >>                  from ../include/linux/bitfield.h:10,
-> > > >>                  from ../drivers/mmc/host/sdhci-of-at91.c:9:
-> > > >> ../drivers/mmc/host/sdhci-of-at91.c: In function =E2=80=98sdhci_at=
-91_set_clks_presets=E2=80=99:
-> > > >> ../include/linux/compiler.h:394:38: error: call to =E2=80=98__comp=
-iletime_assert_63=E2=80=99 declared with attribute error: FIELD_PREP: value=
- too large for the field
-> > > >>   _compiletime_assert(condition, msg, __compiletime_assert_, __COU=
-NTER__)
-> > > >>                                       ^
-> > > >> ../include/linux/compiler.h:375:4: note: in definition of macro =
-=E2=80=98__compiletime_assert=E2=80=99
-> > > >>     prefix ## suffix();    \
-> > > >>     ^~~~~~
-> > > >> ../include/linux/compiler.h:394:2: note: in expansion of macro =E2=
-=80=98_compiletime_assert=E2=80=99
-> > > >>   _compiletime_assert(condition, msg, __compiletime_assert_, __COU=
-NTER__)
-> > > >>   ^~~~~~~~~~~~~~~~~~~
-> > > >> ../include/linux/build_bug.h:39:37: note: in expansion of macro =
-=E2=80=98compiletime_assert=E2=80=99
-> > > >>  #define BUILD_BUG_ON_MSG(cond, msg) compiletime_assert(!(cond), m=
-sg)
-> > > >>                                      ^~~~~~~~~~~~~~~~~~
-> > > >> ../include/linux/bitfield.h:49:3: note: in expansion of macro =E2=
-=80=98BUILD_BUG_ON_MSG=E2=80=99
-> > > >>    BUILD_BUG_ON_MSG(__builtin_constant_p(_val) ?  \
-> > > >>    ^~~~~~~~~~~~~~~~
-> > > >> ../include/linux/bitfield.h:94:3: note: in expansion of macro =E2=
-=80=98__BF_FIELD_CHECK=E2=80=99
-> > > >>    __BF_FIELD_CHECK(_mask, 0ULL, _val, "FIELD_PREP: "); \
-> > > >>    ^~~~~~~~~~~~~~~~
-> > > >> ../drivers/mmc/host/sdhci-of-at91.c:185:11: note: in expansion of =
-macro =E2=80=98FIELD_PREP=E2=80=99
-> > > >>   caps1 |=3D FIELD_PREP(SDHCI_CLOCK_MUL_MASK, clk_mul);
-> > >
-> > > My guess is the compiler has decided clk_mul is constant (probably (u=
-nsigned
-> > > int)-1) because there is no CONFIG_COMMON_CLK i.e. clk_get_rate() is =
-0
-> > >
-> > > So maybe add to config MMC_SDHCI_OF_AT91
-> > >
-> > >         depends on COMMON_CLK
-> > >
-> > > >>            ^~~~~~~~~~
-> >
-> >
-> >
-> > I checked include/linux/clk.h
-> >
-> >
-> > clk_get_rate() is guarded by CONFIG_HAVE_CLK.
-> >
-> > I think
-> >
-> >     depends on HAVE_CLK
->
-> Do you have the possibility of sending a patch, asap. Otherwise I can
-> help to do it!?
+This is done to avoid changing the value for different boards.
 
+Putting aside the merits of this approach, it is clear the eMMC's mask
+of supported driver strengths is more reliable than the value provided
+by BIOS. Add validation accordingly.
 
-Sorry.
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+Fixes: 51ced59cc02e ("mmc: sdhci-pci: Use ACPI DSM to get driver strength for some Intel devices")
+Cc: stable@vger.kernel.org
+---
+ drivers/mmc/host/sdhci-pci-core.c | 3 +++
+ 1 file changed, 3 insertions(+)
 
-I can send a patch if it is preferred.
+diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+index a98c9476bfc8..af736afb4b91 100644
+--- a/drivers/mmc/host/sdhci-pci-core.c
++++ b/drivers/mmc/host/sdhci-pci-core.c
+@@ -597,6 +597,9 @@ static int intel_select_drive_strength(struct mmc_card *card,
+ 	struct sdhci_pci_slot *slot = sdhci_priv(host);
+ 	struct intel_host *intel_host = sdhci_pci_priv(slot);
+ 
++	if (!(mmc_driver_type_mask(intel_host->drv_strength) & card_drv))
++		return 0;
++
+ 	return intel_host->drv_strength;
+ }
+ 
+-- 
+2.17.1
 
-Do you need a separate patch, or
-do you want to squash the fix-up
-to keep the bisectability?
-
-
---=20
-Best Regards
-Masahiro Yamada
