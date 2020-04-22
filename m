@@ -2,100 +2,125 @@ Return-Path: <SRS0=HGUj=6G=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.0 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1FC70C54FCB
-	for <linux-mmc@archiver.kernel.org>; Wed, 22 Apr 2020 16:33:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BC9C1C5518B
+	for <linux-mmc@archiver.kernel.org>; Wed, 22 Apr 2020 16:33:41 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id EDB0021569
-	for <linux-mmc@archiver.kernel.org>; Wed, 22 Apr 2020 16:33:11 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9951C21569
+	for <linux-mmc@archiver.kernel.org>; Wed, 22 Apr 2020 16:33:41 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=nvidia.com header.i=@nvidia.com header.b="j8p0p6IW"
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="YToNmTSo"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726234AbgDVQdH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 22 Apr 2020 12:33:07 -0400
-Received: from hqnvemgate25.nvidia.com ([216.228.121.64]:19921 "EHLO
-        hqnvemgate25.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726806AbgDVQdD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Apr 2020 12:33:03 -0400
-Received: from hqpgpgate101.nvidia.com (Not Verified[216.228.121.13]) by hqnvemgate25.nvidia.com (using TLS: TLSv1.2, DES-CBC3-SHA)
-        id <B5ea071800005>; Wed, 22 Apr 2020 09:32:00 -0700
-Received: from hqmail.nvidia.com ([172.20.161.6])
-  by hqpgpgate101.nvidia.com (PGP Universal service);
-  Wed, 22 Apr 2020 09:33:03 -0700
-X-PGP-Universal: processed;
-        by hqpgpgate101.nvidia.com on Wed, 22 Apr 2020 09:33:03 -0700
-Received: from HQMAIL109.nvidia.com (172.20.187.15) by HQMAIL107.nvidia.com
- (172.20.187.13) with Microsoft SMTP Server (TLS) id 15.0.1473.3; Wed, 22 Apr
- 2020 16:33:03 +0000
-Received: from hqnvemgw03.nvidia.com (10.124.88.68) by HQMAIL109.nvidia.com
- (172.20.187.15) with Microsoft SMTP Server (TLS) id 15.0.1473.3 via Frontend
- Transport; Wed, 22 Apr 2020 16:33:02 +0000
-Received: from skomatineni-linux.nvidia.com (Not Verified[10.2.165.49]) by hqnvemgw03.nvidia.com with Trustwave SEG (v7,5,8,10121)
-        id <B5ea071be0001>; Wed, 22 Apr 2020 09:33:02 -0700
-From:   Sowjanya Komatineni <skomatineni@nvidia.com>
-To:     <adrian.hunter@intel.com>, <ulf.hansson@linaro.org>,
-        <baolin.wang@linaro.org>, <kstewart@linuxfoundation.org>,
-        <tglx@linutronix.de>, <bradleybolen@gmail.com>,
-        <gregkh@linuxfoundation.org>, <thierry.reding@gmail.com>,
-        <jonathanh@nvidia.com>, <skomatineni@nvidia.com>
-CC:     <anrao@nvidia.com>, <linux-tegra@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>
-Subject: [PATCH 5.5.18 2/2] sdhci: tegra: Enable MMC_CAP_WAIT_WHILE_BUSY host capability
-Date:   Wed, 22 Apr 2020 09:32:58 -0700
-Message-ID: <1587573178-30326-3-git-send-email-skomatineni@nvidia.com>
-X-Mailer: git-send-email 2.7.4
-In-Reply-To: <1587573178-30326-1-git-send-email-skomatineni@nvidia.com>
-References: <1587573178-30326-1-git-send-email-skomatineni@nvidia.com>
-X-NVConfidentiality: public
+        id S1726905AbgDVQdk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 22 Apr 2020 12:33:40 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36850 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726889AbgDVQdh (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Apr 2020 12:33:37 -0400
+Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:e::133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DC09CC03C1A9;
+        Wed, 22 Apr 2020 09:33:37 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=bombadil.20170209; h=Content-Transfer-Encoding:
+        Content-Type:In-Reply-To:MIME-Version:Date:Message-ID:From:References:Cc:To:
+        Subject:Sender:Reply-To:Content-ID:Content-Description;
+        bh=GhxXNkwIWL9QIK8tOJiZor+ArOGr/Ec9kz1wNtkTM0E=; b=YToNmTSoYuisnSyd35L7v7LRu0
+        A5ulwNzUkiUyT5V//tSQCKg2khb7bPmuUMiqHb9bvvdLhK74se9wL6GGnHREUs6ZxdcacCc/Jt5cZ
+        3TyV7N5ONiHlxAvsJAsIqc1u6QsqyNpK0Egy780p7nPsvnVUfYtVgG1j8QTN3EwIgoc98IDrjqgwU
+        0ru98OLbqxg6ReXMLvBZSL88XcJXoPvSH/LhVCa8WQw3BPjOQcj+cLFfeHv7HvBjjJuuHf3NlDXKV
+        5KXeivtJD1owtsgk0UiPbzAYMiL3vbmy+Nzq3hN3PaTeHRDWzU3OLI3KIKuVXNoooAki3uQon1big
+        X6OVO1/g==;
+Received: from [2601:1c0:6280:3f0::19c2]
+        by bombadil.infradead.org with esmtpsa (Exim 4.92.3 #3 (Red Hat Linux))
+        id 1jRIJa-0000D2-4q; Wed, 22 Apr 2020 16:33:34 +0000
+Subject: Re: [PATCH] mmc: sdhci-of-at91: make MMC_SDHCI_OF_AT91 depend on
+ HAVE_CLK
+To:     Masahiro Yamada <yamada.masahiro@socionext.com>,
+        linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        Andrew Jeffery <andrew@aj.id.au>,
+        Baolin Wang <baolin.wang@linaro.org>,
+        Chunyan Zhang <zhang.chunyan@linaro.org>,
+        Faiz Abbas <faiz_abbas@ti.com>,
+        Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>,
+        Takao Orito <orito.takao@socionext.com>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        YueHaibing <yuehaibing@huawei.com>, linux-kernel@vger.kernel.org
+References: <20200422153401.7913-1-yamada.masahiro@socionext.com>
+From:   Randy Dunlap <rdunlap@infradead.org>
+Message-ID: <38b856aa-47a1-7957-ba96-32272aa404c0@infradead.org>
+Date:   Wed, 22 Apr 2020 09:33:33 -0700
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.7.0
 MIME-Version: 1.0
-Content-Type: text/plain
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nvidia.com; s=n1;
-        t=1587573121; bh=AI2k/GeOJka+x5ydpwPpmWF5ssDecgtebTTmy/odja0=;
-        h=X-PGP-Universal:From:To:CC:Subject:Date:Message-ID:X-Mailer:
-         In-Reply-To:References:X-NVConfidentiality:MIME-Version:
-         Content-Type;
-        b=j8p0p6IW/XPOMnBnbZ20nxLQkB6pUxACULqpi+M4rWjBEM+TZm0ubcs4tf1V00THZ
-         /NemiVT+WRd2tzDUHTJiCMOubQuD68bNKMWaLLW0PTDyrFSGNkb3bNkwBG2HqcFfIU
-         D/1dxl/qXI1lTKHTSA0N/Ixenao4CYiaTtUSakXgZlMZvTlYmgv16B37BFmVXU93sU
-         +rG/8mVXTbTa4+qz98aERkSBnP9NSXxc1H++TZKJsynmvyL9EYJ2UT02a49y8u4Rmb
-         B71w2JiWyBwgmC6MjCUC0F2sUx9uditXt6RMUPHV7O59UhWgMkFEjFj66MCEEr8Td8
-         GCMk1e7DwKyCA==
+In-Reply-To: <20200422153401.7913-1-yamada.masahiro@socionext.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-commit ff124c31ccd7
-("sdhci: tegra: Enable MMC_CAP_WAIT_WHILE_BUSY host capability")
+On 4/22/20 8:34 AM, Masahiro Yamada wrote:
+> If sdhci-of-at91.c is compiled without CONFIG_HAVE_CLK, the line
+> 
+>   caps1 |= FIELD_PREP(SDHCI_CLOCK_MUL_MASK, clk_mul);
+> 
+> ... emits "FIELD_PREP: value too large for the field" warning.
+> 
+> The compiler seems to decide clk_mul is constant (unsigned int)-1,
+> because clk_get_rate() returns 0 when CONFIG_HAVE_CLK is disabled.
+> 
+> Add HAVE_CLK to the depenency since this driver does not work without
+> the clock APIs anyway.
+> 
+> Link: https://lkml.org/lkml/2020/4/17/613
+> Fixes: linux-next ("mmc: sdhci: use FIELD_GET/PREP for capabilities bit masks")
+> Reported-by: Randy Dunlap <rdunlap@infradead.org>
+> Suggested-by: Adrian Hunter <adrian.hunter@intel.com>
+> Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
 
-Tegra sdhci host supports HW busy detection of the device busy
-signaling over data0 lane.
+Acked-by: Randy Dunlap <rdunlap@infradead.org> # build-tested
 
-So, this patch enables host capability MMC_CAP_wAIT_WHILE_BUSY.
+Thanks.
 
-Cc: <stable@vger.kernel.org>
-Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
----
- drivers/mmc/host/sdhci-tegra.c | 2 ++
- 1 file changed, 2 insertions(+)
+> ---
+> 
+> Ulf,
+> 
+> I do not know how to fill the Fixes tag.
+> It is currently 8da1ff4f68a2 in linux-next, but I am not sure it is
+> stable. I just added 'linux-next'.
+> 
+> If you have a preferred way, please modify it.
+> 
+> 
+> 
+> 
+> 
+>  drivers/mmc/host/Kconfig | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index 462b5352fea7..2aee844722d6 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -171,7 +171,7 @@ config MMC_SDHCI_OF_ASPEED
+>  config MMC_SDHCI_OF_AT91
+>  	tristate "SDHCI OF support for the Atmel SDMMC controller"
+>  	depends on MMC_SDHCI_PLTFM
+> -	depends on OF
+> +	depends on OF && HAVE_CLK
+>  	help
+>  	  This selects the Atmel SDMMC driver
+>  
+> 
 
-diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-index fa8f6a4..1c381f8 100644
---- a/drivers/mmc/host/sdhci-tegra.c
-+++ b/drivers/mmc/host/sdhci-tegra.c
-@@ -1580,6 +1580,8 @@ static int sdhci_tegra_probe(struct platform_device *pdev)
- 	if (rc)
- 		goto err_parse_dt;
- 
-+	host->mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY;
-+
- 	if (tegra_host->soc_data->nvquirks & NVQUIRK_ENABLE_DDR50)
- 		host->mmc->caps |= MMC_CAP_1_8V_DDR;
- 
+
 -- 
-2.7.4
-
+~Randy
