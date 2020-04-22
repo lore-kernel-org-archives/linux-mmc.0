@@ -2,179 +2,111 @@ Return-Path: <SRS0=HGUj=6G=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.3 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable
+X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DC971C55185
-	for <linux-mmc@archiver.kernel.org>; Wed, 22 Apr 2020 13:40:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 26393C55185
+	for <linux-mmc@archiver.kernel.org>; Wed, 22 Apr 2020 15:36:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id BB81D215A4
-	for <linux-mmc@archiver.kernel.org>; Wed, 22 Apr 2020 13:40:42 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id AE88B2076E
+	for <linux-mmc@archiver.kernel.org>; Wed, 22 Apr 2020 15:36:16 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=st.com header.i=@st.com header.b="jO+y+5a3"
+	dkim=pass (2048-bit key) header.d=nifty.com header.i=@nifty.com header.b="EI1FRHPm"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726451AbgDVNkm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 22 Apr 2020 09:40:42 -0400
-Received: from mx08-00178001.pphosted.com ([91.207.212.93]:36246 "EHLO
-        mx07-00178001.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1726158AbgDVNkl (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Apr 2020 09:40:41 -0400
-Received: from pps.filterd (m0046661.ppops.net [127.0.0.1])
-        by mx07-00178001.pphosted.com (8.16.0.42/8.16.0.42) with SMTP id 03MDcOSJ007859;
-        Wed, 22 Apr 2020 15:40:09 +0200
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=st.com; h=subject : to : cc :
- references : from : message-id : date : mime-version : in-reply-to :
- content-type : content-transfer-encoding; s=STMicroelectronics;
- bh=ZeG5MEBElFGxvDwVRDIezNZHBbeSXf35WjhoaaZsj6A=;
- b=jO+y+5a32gAoEFM1QqBzK5iYTjSmrs7P8SuFYvtFR+W3OnGhd/4Gp2BDA+qrlTFbFTsJ
- BMn/lRxiRcbFnqblJhnf66LRE9O5sRx/AVwyDw4vAR9QnnI8f45cuFdhMWDmbuTrSvve
- r/QZ4eDjlMGNpiKxrPC7aMnHM/XUFDgUpURhbDLJNeg8kMRXvtNWCChZlPVwjRhCPwLr
- KsSAgre6hLBCL0tCNVVJTIRtjNULSb8E/g+FBEyovrkI4Gbgb3I/NKjZJhC+/UFoC6pi
- x+VoUY4+cq/cYppqFIlXllWqSMXhqt1SgXCeVltwpvaV7u0MUR8TDZYQ3JqT1dXmpTRW og== 
-Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
-        by mx07-00178001.pphosted.com with ESMTP id 30fregpq4d-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Wed, 22 Apr 2020 15:40:09 +0200
-Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
-        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 951D310002A;
-        Wed, 22 Apr 2020 15:40:07 +0200 (CEST)
-Received: from Webmail-eu.st.com (sfhdag6node1.st.com [10.75.127.16])
-        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id 8015C2B1889;
-        Wed, 22 Apr 2020 15:40:07 +0200 (CEST)
-Received: from lmecxl0923.lme.st.com (10.75.127.44) by SFHDAG6NODE1.st.com
- (10.75.127.16) with Microsoft SMTP Server (TLS) id 15.0.1473.3; Wed, 22 Apr
- 2020 15:40:06 +0200
-Subject: Re: [PATCH] mmc: mmci_sdmmc: fix power on issue due to pwr_reg
- initialization
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-CC:     Rob Herring <robh+dt@kernel.org>,
-        Srini Kandagatla <srinivas.kandagatla@linaro.org>,
-        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
-        Alexandre Torgue <alexandre.torgue@st.com>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        DTML <devicetree@vger.kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        <linux-stm32@st-md-mailman.stormreply.com>
-References: <20200420161831.5043-1-ludovic.barre@st.com>
- <CAPDyKFqC3fdnQ9CMYhS-=5MiCET=r5Az2S5oFoA2v1gdDeGO3w@mail.gmail.com>
- <CAPDyKFrHcoVd=GKPB70gOFE8STOnTJrJbcZzE_DEgFWh1Vhszg@mail.gmail.com>
-From:   Ludovic BARRE <ludovic.barre@st.com>
-Message-ID: <1d9cefd1-aaed-1eb5-92f2-b1f45b4da2ac@st.com>
-Date:   Wed, 22 Apr 2020 15:40:05 +0200
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.6.0
+        id S1726498AbgDVPgQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 22 Apr 2020 11:36:16 -0400
+Received: from conuserg-09.nifty.com ([210.131.2.76]:27616 "EHLO
+        conuserg-09.nifty.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726640AbgDVPgP (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Apr 2020 11:36:15 -0400
+Received: from oscar.flets-west.jp (softbank126090202047.bbtec.net [126.90.202.47]) (authenticated)
+        by conuserg-09.nifty.com with ESMTP id 03MFYGMY002287;
+        Thu, 23 Apr 2020 00:34:16 +0900
+DKIM-Filter: OpenDKIM Filter v2.10.3 conuserg-09.nifty.com 03MFYGMY002287
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nifty.com;
+        s=dec2015msa; t=1587569657;
+        bh=rwMSy1LovyBoYlWhrHE4Cpvn0tJcHVV/wU2hEdyXFiw=;
+        h=From:To:Cc:Subject:Date:From;
+        b=EI1FRHPm3J416v+tdT2D5RbGqEs7FhDqvNK4DzULdSb9NlSZaIAhw/ZYeKyFUVpnE
+         vpCTByjQopJcNJeiyOmoc1Qp+U31tMmEYeA3c5VJWqlhwzygRCkeDv+nUtM2iCrDRm
+         ZAeNzsRN80GsVjJm5hbqceL1Cs0/Zn8VaCKTNDrlqAjCkVIPMl6HWt8XOZ4folNF+K
+         3JYoc8kO5649Pz1pr3TgxIu03dbITTrUsr2xwHaZHR5AjTr6qPK1wIF5mVEehsMDpq
+         /8URmxYIb1yHn/t2QfsUhht2vrXqyPfX8h86cjgT19fevnhpwIkko9E56hgkp5XMVL
+         PE01Adq/kqq7Q==
+X-Nifty-SrcIP: [126.90.202.47]
+From:   Masahiro Yamada <yamada.masahiro@socionext.com>
+To:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Randy Dunlap <rdunlap@infradead.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Masahiro Yamada <yamada.masahiro@socionext.com>,
+        Andrew Jeffery <andrew@aj.id.au>,
+        Baolin Wang <baolin.wang@linaro.org>,
+        Chunyan Zhang <zhang.chunyan@linaro.org>,
+        Faiz Abbas <faiz_abbas@ti.com>,
+        Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>,
+        Takao Orito <orito.takao@socionext.com>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        YueHaibing <yuehaibing@huawei.com>, linux-kernel@vger.kernel.org
+Subject: [PATCH] mmc: sdhci-of-at91: make MMC_SDHCI_OF_AT91 depend on HAVE_CLK
+Date:   Thu, 23 Apr 2020 00:34:01 +0900
+Message-Id: <20200422153401.7913-1-yamada.masahiro@socionext.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-In-Reply-To: <CAPDyKFrHcoVd=GKPB70gOFE8STOnTJrJbcZzE_DEgFWh1Vhszg@mail.gmail.com>
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Language: fr
 Content-Transfer-Encoding: 8bit
-X-Originating-IP: [10.75.127.44]
-X-ClientProxiedBy: SFHDAG3NODE1.st.com (10.75.127.7) To SFHDAG6NODE1.st.com
- (10.75.127.16)
-X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.138,18.0.676
- definitions=2020-04-22_06:2020-04-22,2020-04-22 signatures=0
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-hi Ulf
+If sdhci-of-at91.c is compiled without CONFIG_HAVE_CLK, the line
 
-Le 4/21/20 à 11:38 AM, Ulf Hansson a écrit :
-> On Tue, 21 Apr 2020 at 11:25, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->>
->> On Mon, 20 Apr 2020 at 18:18, Ludovic Barre <ludovic.barre@st.com> wrote:
->>>
->>> This patch fix a power-on issue, and avoid to retry the power sequence.
->>>
->>> In power off sequence: sdmmc must set pwr_reg in "power-cycle" state
->>> (value 0x2), to prevent the card from being supplied through the signal
->>> lines (all the lines are driven low).
->>>
->>> In power on sequence: when the power is stable, sdmmc must set pwr_reg
->>> in "power-off" state (value 0x0) to drive all signal to high before to
->>> set "power-on".
->>
->> Just a question to gain further understanding.
->>
->> Let's assume that the controller is a power-on state, because it's
->> been initialized by the boot loader. When the mmc core then starts the
->> power-on sequence (not doing a power-off first), would $subject patch
->> then cause the
->> MMCIPOWER to remain as is, or is it going to be overwritten?
+  caps1 |= FIELD_PREP(SDHCI_CLOCK_MUL_MASK, clk_mul);
 
-On sdmmc controller, the PWRCTRL[1:0] field of MMCIPOWER register allow
-to manage sd lines and has a specific bahavior.
+... emits "FIELD_PREP: value too large for the field" warning.
 
-PWRCTRL value:
-  - 0x0: After reset, Reset: the SDMMC is disabled and the clock to the
-         Card is stopped, SDMMC_D[7:0], and SDMMC_CMD are HiZ and
-         SDMMC_CK is driven low.
-         When written 00, power-off: the SDMMC is disabled and the clock
-         to the card is stopped, SDMMC_D[7:0], SDMMC_CMD and SDMMC_CK
-         are driven high.
+The compiler seems to decide clk_mul is constant (unsigned int)-1,
+because clk_get_rate() returns 0 when CONFIG_HAVE_CLK is disabled.
 
-  - 0x2: Power-cycle, the SDMMC is disabled and the clock to the card is
-         stopped, SDMMC_D[7:0], SDMMC_CMD and SDMMC_CK are driven low.
+Add HAVE_CLK to the depenency since this driver does not work without
+the clock APIs anyway.
 
-  - 0x3: Power-on: the card is clocked, The first 74 SDMMC_CK cycles the
-         SDMMC is still disabled. After the 74 cycles the SDMMC is
-         enabled and the SDMMC_D[7:0], SDMMC_CMD and SDMMC_CK are
-         controlled according the SDMMC operation.
-         **Any further write will be ignored, PWRCTRL value
-         will keep 0x3**. when the SDMMC is ON (0x3) only a reset could
-         change pwrctrl value and the state of sdmmc lines.
+Link: https://lkml.org/lkml/2020/4/17/613
+Fixes: linux-next ("mmc: sdhci: use FIELD_GET/PREP for capabilities bit masks")
+Reported-by: Randy Dunlap <rdunlap@infradead.org>
+Suggested-by: Adrian Hunter <adrian.hunter@intel.com>
+Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
+---
 
-So if the lines are already "ON", the power-on sequence (decribed in
-commit message) not overwrite the pwctrl field and not disturb the sdmmc 
-lines.
+Ulf,
 
->>
->> I am a little worried that we may start to rely on boot loader
->> conditions, which isn't really what we want either...
->>
+I do not know how to fill the Fixes tag.
+It is currently 8da1ff4f68a2 in linux-next, but I am not sure it is
+stable. I just added 'linux-next'.
 
-We not depend of boot loader conditions.
+If you have a preferred way, please modify it.
 
-This patch simply allows to drive high the sd lines before to set
-"power-on" value (no effect if already power ON).
 
->>>
->>> To avoid writing the same value to the power register several times, this
->>> register is cached by the pwr_reg variable. At probe pwr_reg is initialized
->>> to 0 by kzalloc of mmc_alloc_host.
->>>
->>> Like pwr_reg value is 0 at probing, the power on sequence fail because
->>> the "power-off" state is not writes (value 0x0) and the lines
->>> remain drive to low.
->>>
->>> This patch initializes "pwr_reg" variable with power register value.
->>> This it done in sdmmc variant init to not disturb default mmci behavior.
->>>
->>> Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
->>
->> Besides the comment, the code and the approach seems reasonable to me.
-> 
-> Another related question. I just realized why you probably haven't set
-> .pwrreg_nopower for the variant_stm32_sdmmc and variant_stm32_sdmmcv2.
-> 
-> I guess it's because you need a slightly different way to restore the
-> context of MMCIPOWER register at ->runtime_resume(), rather than just
-> re-writing it with the saved register values. Is this something that
-> you are looking into as well?
 
-Yes exactly, the sequence is slightly different. I can't write 0 on 
-mmci_runtime_suspend, and can't just re-writing the saved register.
 
-Regards
-Ludo
 
-> 
-> [...]
-> 
-> Kind regards
-> Uffe
-> 
+ drivers/mmc/host/Kconfig | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 462b5352fea7..2aee844722d6 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -171,7 +171,7 @@ config MMC_SDHCI_OF_ASPEED
+ config MMC_SDHCI_OF_AT91
+ 	tristate "SDHCI OF support for the Atmel SDMMC controller"
+ 	depends on MMC_SDHCI_PLTFM
+-	depends on OF
++	depends on OF && HAVE_CLK
+ 	help
+ 	  This selects the Atmel SDMMC driver
+ 
+-- 
+2.25.1
+
