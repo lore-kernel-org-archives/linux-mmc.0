@@ -2,114 +2,109 @@ Return-Path: <SRS0=Q/yj=6H=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.3 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no
+X-Spam-Status: No, score=-0.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 24B88C54FCB
-	for <linux-mmc@archiver.kernel.org>; Thu, 23 Apr 2020 12:39:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4784BC55186
+	for <linux-mmc@archiver.kernel.org>; Thu, 23 Apr 2020 12:45:01 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0765F2077D
-	for <linux-mmc@archiver.kernel.org>; Thu, 23 Apr 2020 12:39:59 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 31C2D20781
+	for <linux-mmc@archiver.kernel.org>; Thu, 23 Apr 2020 12:45:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728175AbgDWMj6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 23 Apr 2020 08:39:58 -0400
-Received: from sauhun.de ([88.99.104.3]:34006 "EHLO pokefinder.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726117AbgDWMj6 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 23 Apr 2020 08:39:58 -0400
-Received: from localhost (p5486CE55.dip0.t-ipconnect.de [84.134.206.85])
-        by pokefinder.org (Postfix) with ESMTPSA id 5F81E2C1F65;
-        Thu, 23 Apr 2020 14:39:56 +0200 (CEST)
-Date:   Thu, 23 Apr 2020 14:39:56 +0200
-From:   Wolfram Sang <wsa@the-dreams.de>
-To:     Geert Uytterhoeven <geert@linux-m68k.org>
+        id S1726637AbgDWMo7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 23 Apr 2020 08:44:59 -0400
+Received: from mail-ot1-f65.google.com ([209.85.210.65]:45640 "EHLO
+        mail-ot1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726435AbgDWMo7 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Apr 2020 08:44:59 -0400
+Received: by mail-ot1-f65.google.com with SMTP id e20so5702468otk.12;
+        Thu, 23 Apr 2020 05:44:59 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=vgLBBECU6L20FSsFw9oZIVJjruq0LKQT73CZsFM/WCI=;
+        b=gCja0I+KPxPXuVfgbVazAPvOI4wyuwn1saWS1yk9h/hMPKF6xlYvwqu2qd2zJas8/M
+         +I815GzgD4RuOGZ64P/98XmsCZf2OqymsB+7cO5Zx+P2gHLYjez7XWOfiwhzQwoRN31d
+         9UzIvq/ZFXMbjCPo2s0ZSDpDOp/Eu/VE1YL/QIEltgu64dfjfv2Q9UNPwXdCa4QFcAEc
+         xoQrWvZ4if28gulRI6ArJpeuqQMJKc7q56MtsPVIws9p58DmdtVLL7vl5UVL/rpHcKZr
+         l+Hd6oqEvZeuGzneNCLSvcVOX/svKI+mSrftVRBwU+aXN9YjEd+qoCrzJ2nQVW82m6BT
+         OK2w==
+X-Gm-Message-State: AGi0PubEl8wk9rUez6e1usJj8caizud8nll0XqHopUBS8T56PDiFZIHG
+        mlqF8Ag091BnnXOawumkcW5iygAMjFfMu8gI9vw=
+X-Google-Smtp-Source: APiQypKY8csuscyjEgGrsDfD/lyKRZv2dK1Y1W6dDvKK13kaSUeDU44aEMWEtRCrpMFPQeuTioPoZJxwBUUnbbXSpfY=
+X-Received: by 2002:a9d:76c7:: with SMTP id p7mr3123764otl.145.1587645898643;
+ Thu, 23 Apr 2020 05:44:58 -0700 (PDT)
+MIME-Version: 1.0
+References: <20200423122448.8099-1-wsa+renesas@sang-engineering.com>
+ <20200423122448.8099-2-wsa+renesas@sang-engineering.com> <CAMuHMdW0OuHy4ikQz3oY+koqLskXtcXJkUVLZYqsW+niT1pLDQ@mail.gmail.com>
+ <20200423123955.GB1130@ninjato>
+In-Reply-To: <20200423123955.GB1130@ninjato>
+From:   Geert Uytterhoeven <geert@linux-m68k.org>
+Date:   Thu, 23 Apr 2020 14:44:47 +0200
+Message-ID: <CAMuHMdUC2w_7sBHUDQ5CHioqNbcc8CgedPzEJF2QgFo6dLF7vw@mail.gmail.com>
+Subject: Re: [PATCH v2 1/2] mmc: renesas_sdhi: handle M3-N ES1.2 and 1.3 revisions
+To:     Wolfram Sang <wsa@the-dreams.de>
 Cc:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
         Linux MMC List <linux-mmc@vger.kernel.org>,
         Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
         Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-Subject: Re: [PATCH v2 1/2] mmc: renesas_sdhi: handle M3-N ES1.2 and 1.3
- revisions
-Message-ID: <20200423123955.GB1130@ninjato>
-References: <20200423122448.8099-1-wsa+renesas@sang-engineering.com>
- <20200423122448.8099-2-wsa+renesas@sang-engineering.com>
- <CAMuHMdW0OuHy4ikQz3oY+koqLskXtcXJkUVLZYqsW+niT1pLDQ@mail.gmail.com>
-MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="qcHopEYAB45HaUaB"
-Content-Disposition: inline
-In-Reply-To: <CAMuHMdW0OuHy4ikQz3oY+koqLskXtcXJkUVLZYqsW+niT1pLDQ@mail.gmail.com>
-User-Agent: Mutt/1.10.1 (2018-07-13)
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Hi Wolfram,
 
---qcHopEYAB45HaUaB
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+On Thu, Apr 23, 2020 at 2:39 PM Wolfram Sang <wsa@the-dreams.de> wrote:
+> > Usually we don't add soc_device_match quirks for unknown future revisions.
+>
+> I was just following...
+>
+> > > --- a/drivers/mmc/host/renesas_sdhi_core.c
+> > > +++ b/drivers/mmc/host/renesas_sdhi_core.c
+> > > @@ -711,11 +711,17 @@ static const struct renesas_sdhi_quirks sdhi_quirks_nohs400 = {
+> > >         .hs400_disabled = true,
+> > >  };
+> > >
+> > > +/*
+> > > + * Note for r8a7796 / r8a774a1: we can't distinguish ES1.1 and 1.2 as of now.
+> > > + * So, we want to treat them equally and only have a match for ES1.2 to enforce
+> > > + * this if there ever will be a way to distinguish ES1.2.
+> > > + */
+> > >  static const struct soc_device_attribute sdhi_quirks_match[]  = {
+> > >         { .soc_id = "r8a774a1", .revision = "ES1.[012]", .data = &sdhi_quirks_4tap_nohs400 },
+> > >         { .soc_id = "r8a7795", .revision = "ES1.*", .data = &sdhi_quirks_4tap_nohs400 },
+>
+> ... this example here. This also applies to all future versions (not
+> that there will be any), no?
 
+Ah, but r8a7795 already moved to ES3.0, so it's very unlikely a newer
+ES1.x will be made. Hence "ES1.*" is assumed to cover all known existing
+ES1.x revisions.
 
-> Usually we don't add soc_device_match quirks for unknown future revisions.
+For M3-N, we're still at ES1.x, AFAIK.
 
-I was just following...
-
->=20
-> > --- a/drivers/mmc/host/renesas_sdhi_core.c
-> > +++ b/drivers/mmc/host/renesas_sdhi_core.c
-> > @@ -711,11 +711,17 @@ static const struct renesas_sdhi_quirks sdhi_quir=
-ks_nohs400 =3D {
-> >         .hs400_disabled =3D true,
-> >  };
+> > >         { .soc_id = "r8a7795", .revision = "ES2.0", .data = &sdhi_quirks_4tap },
+> > >         { .soc_id = "r8a7796", .revision = "ES1.[012]", .data = &sdhi_quirks_4tap_nohs400 },
+> > > +       { .soc_id = "r8a7796", .revision = "ES1.*", .data = &sdhi_quirks_4tap },
 > >
-> > +/*
-> > + * Note for r8a7796 / r8a774a1: we can't distinguish ES1.1 and 1.2 as =
-of now.
-> > + * So, we want to treat them equally and only have a match for ES1.2 t=
-o enforce
-> > + * this if there ever will be a way to distinguish ES1.2.
-> > + */
-> >  static const struct soc_device_attribute sdhi_quirks_match[]  =3D {
-> >         { .soc_id =3D "r8a774a1", .revision =3D "ES1.[012]", .data =3D =
-&sdhi_quirks_4tap_nohs400 },
-> >         { .soc_id =3D "r8a7795", .revision =3D "ES1.*", .data =3D &sdhi=
-_quirks_4tap_nohs400 },
+> > R-Car M3-N is r8a77965, not r8a7796?
+>
+> Right. $subject should be M3-W :(
 
-=2E.. this example here. This also applies to all future versions (not
-that there will be any), no?
+OK, that changes my point of view, as M3-W is also at ES3.0 (aka M3-W+ ;-),
+so using "ES1.*" is fine.
 
-> >         { .soc_id =3D "r8a7795", .revision =3D "ES2.0", .data =3D &sdhi=
-_quirks_4tap },
-> >         { .soc_id =3D "r8a7796", .revision =3D "ES1.[012]", .data =3D &=
-sdhi_quirks_4tap_nohs400 },
-> > +       { .soc_id =3D "r8a7796", .revision =3D "ES1.*", .data =3D &sdhi=
-_quirks_4tap },
->=20
-> R-Car M3-N is r8a77965, not r8a7796?
+Gr{oetje,eeting}s,
 
-Right. $subject should be M3-W :(
+                        Geert
 
+-- 
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
 
---qcHopEYAB45HaUaB
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAl6hjJsACgkQFA3kzBSg
-KbabIA/+N+yb0s8v0ZbJBAHGRiKa3m8F/eXWO83uV4BHwt3+TiRFhxmyg3CWCllq
-/XjAGPSX/cM5xxJpCVw46rfbTVvS1c7EnD8A+Gbx5BPCowYGBVTViXl62sAAmcG/
-tr4mSblRyk5ApNz9VTMH9vvumI6T4/3OGGCAG+BciHK/B3E9c0pVOmARjr7TLh/5
-iFQA6kyk13AXEhczqLjxDTxOjgES2qit41ruc0itkthbQ42Gup8D2Mc68xM1f6OJ
-a+klFUCpJmooJw+cJ0Q/AD0jd4m3mp/dO2j7z9TlRgmgZKgqKCRrcXKE93CVF3Yf
-I/MvdC3VacTNQCt96ajQFTcSAHR9Qv6LVvpkmombQ5g7YJub7tGZmeVnpirR+pfb
-B/cOkRZD/9iOIO/seg0qGzc21PQvHDbqQilNmxYmsjTcpkw+UrumyVJvtR16amEz
-yUybeeDXV7eM6qmX6YSP+UZQI+6p1SvHyrM5uutcPrPrluPGOkoq5KONqtgIkGqd
-LCpLwpIbXYvicjzel2PO6mfdut7ZN6eRJSETRon8K6ZV3fCRgNUY1Iww336ZVhQQ
-DvxurCiUdhYz9jvVRYDAVPTDWyTIckBltHJVmvnxVgoNsULNr3L6tuwqwyZJGSZm
-3XeAw+G9Q+C8YdnHPtblYlZJlO4J37W6peZ1jNQaqFsd5eJGyAc=
-=rd+I
------END PGP SIGNATURE-----
-
---qcHopEYAB45HaUaB--
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
