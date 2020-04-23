@@ -2,85 +2,115 @@ Return-Path: <SRS0=Q/yj=6H=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
+	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D0BC9C2BA19
-	for <linux-mmc@archiver.kernel.org>; Thu, 23 Apr 2020 09:09:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DC907C55192
+	for <linux-mmc@archiver.kernel.org>; Thu, 23 Apr 2020 10:31:05 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B1F442075A
-	for <linux-mmc@archiver.kernel.org>; Thu, 23 Apr 2020 09:09:19 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id BD9C920781
+	for <linux-mmc@archiver.kernel.org>; Thu, 23 Apr 2020 10:31:05 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (1024-bit key) header.d=renesasgroup.onmicrosoft.com header.i=@renesasgroup.onmicrosoft.com header.b="JrpRtn2Z"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726145AbgDWJJT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 23 Apr 2020 05:09:19 -0400
-Received: from szxga04-in.huawei.com ([45.249.212.190]:2878 "EHLO huawei.com"
+        id S1727014AbgDWKbF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 23 Apr 2020 06:31:05 -0400
+Received: from mail-eopbgr1400131.outbound.protection.outlook.com ([40.107.140.131]:28396
+        "EHLO JPN01-TY1-obe.outbound.protection.outlook.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1725884AbgDWJJS (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 23 Apr 2020 05:09:18 -0400
-Received: from DGGEMS406-HUB.china.huawei.com (unknown [172.30.72.59])
-        by Forcepoint Email with ESMTP id 9496F9BBF6822CF50185;
-        Thu, 23 Apr 2020 17:09:11 +0800 (CST)
-Received: from linux-lmwb.huawei.com (10.175.103.112) by
- DGGEMS406-HUB.china.huawei.com (10.3.19.206) with Microsoft SMTP Server id
- 14.3.487.0; Thu, 23 Apr 2020 17:09:01 +0800
-From:   Zou Wei <zou_wei@huawei.com>
-To:     <ulf.hansson@linaro.org>
-CC:     <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-        Zou Wei <zou_wei@huawei.com>
-Subject: [PATCH -next] mmc: core: Use DEFINE_DEBUGFS_ATTRIBUTE instead of DEFINE_SIMPLE_ATTRIBUTE
-Date:   Thu, 23 Apr 2020 17:15:19 +0800
-Message-ID: <1587633319-19835-1-git-send-email-zou_wei@huawei.com>
-X-Mailer: git-send-email 2.6.2
+        id S1726764AbgDWKbE (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 23 Apr 2020 06:31:04 -0400
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=fhshZhXRZdlzARO+Zp7lACWiYUc0BMkhw+oprG8AyAnI2uomyczkxIaUFu92xvFdmEQ8Xsr2Lo0Jw7mcO7Gwut3s6dij5R0bgtmHQNj4LVSK0nH7cVQ9C5sJcqlOCgbXC3SvoZa2gC/HJQD4FbVRDc2mXf6mHgTCf3GiXA4sUpgOUl5p6DnFhtGqbGO3XBtNq4QdRzr0HQJfq6BbS9yWUft3bnGq1K5A355VAH+iAU0Uwzs+KC4+l3+ZBzxLYLhuKjCIBIEp5xr1VStGXU78HbDff4QWyMga5x5jdi6biYxlWZ8Ng6yhhcq/sftBYknpQ7vspmEvri1qC9p412mV2Q==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=mZcRZr/2bw7QSOEfox28Kwm0YJhugriy/PDPN8yAuts=;
+ b=N1ObkpIVO3/9jNkgwbiwqF6VjbSbGiI5DDh1p8JmPQZM9dYxmabJqC3Vpxu9vswcGScU87fkHeCoeFVphr7i8sLesk0JCdgfYrt5CQ0E4g3X3iVb8TNflZnJVakjc/yf8xeQL2QgrIv+skzr2QgYbJvc0JM6GXNmDWpbL48tUEIFlY3IO7HniqeW374KUsL9Mn2uS8F4Ni3DVa6KagK47s0JokPbTobyC0+CR4MGruoz6mnxYfFWm406CjiTA5d89YE/T5wZ+ivud7qJmNV/MmdZv+bwglIuuPitfd+0JkOiZixgLZ9GWazO74Df0cc7ABzEkV0m4MZmy+QZSw9H6g==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=renesas.com; dmarc=pass action=none header.from=renesas.com;
+ dkim=pass header.d=renesas.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=renesasgroup.onmicrosoft.com; s=selector2-renesasgroup-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=mZcRZr/2bw7QSOEfox28Kwm0YJhugriy/PDPN8yAuts=;
+ b=JrpRtn2ZHhZqGdIj9+0rTspMfsDbLrGbAR4Z+KM/2ut+WYSQUccOu0dmKJAOej2NDb20jyRR0jnXzmYGvR/3ie+y1QlgmfHPDzW6Eej93S25NPboY2CKAWsHMuUYaXt6Zm/TMtC7ShLCod24zxEVK2A5ZoozyH2IWR35osemiOo=
+Received: from TYAPR01MB4544.jpnprd01.prod.outlook.com (20.179.175.203) by
+ TYAPR01MB4573.jpnprd01.prod.outlook.com (20.179.186.84) with Microsoft SMTP
+ Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.20.2921.27; Thu, 23 Apr 2020 10:31:02 +0000
+Received: from TYAPR01MB4544.jpnprd01.prod.outlook.com
+ ([fe80::ed7f:1268:55a9:fc06]) by TYAPR01MB4544.jpnprd01.prod.outlook.com
+ ([fe80::ed7f:1268:55a9:fc06%4]) with mapi id 15.20.2937.012; Thu, 23 Apr 2020
+ 10:31:01 +0000
+From:   Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+To:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+CC:     "linux-renesas-soc@vger.kernel.org" 
+        <linux-renesas-soc@vger.kernel.org>
+Subject: RE: [PATCH 1/2] mmc: renesas_sdhi: handle M3-N ES1.2 and 1.3
+ revisions
+Thread-Topic: [PATCH 1/2] mmc: renesas_sdhi: handle M3-N ES1.2 and 1.3
+ revisions
+Thread-Index: AQHWGKXZQ7S2Ji38PUWmlijczhWmW6iGgtNQ
+Date:   Thu, 23 Apr 2020 10:31:01 +0000
+Message-ID: <TYAPR01MB4544560675F1D41DF8BC8DB1D8D30@TYAPR01MB4544.jpnprd01.prod.outlook.com>
+References: <20200422125914.16590-1-wsa+renesas@sang-engineering.com>
+ <20200422125914.16590-2-wsa+renesas@sang-engineering.com>
+In-Reply-To: <20200422125914.16590-2-wsa+renesas@sang-engineering.com>
+Accept-Language: ja-JP, en-US
+Content-Language: ja-JP
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+authentication-results: spf=none (sender IP is )
+ smtp.mailfrom=yoshihiro.shimoda.uh@renesas.com; 
+x-originating-ip: [124.210.22.195]
+x-ms-publictraffictype: Email
+x-ms-office365-filtering-ht: Tenant
+x-ms-office365-filtering-correlation-id: d8cfba83-977c-4717-f3d2-08d7e7716ba3
+x-ms-traffictypediagnostic: TYAPR01MB4573:
+x-microsoft-antispam-prvs: <TYAPR01MB457340C9C993D892DEC662DFD8D30@TYAPR01MB4573.jpnprd01.prod.outlook.com>
+x-ms-oob-tlc-oobclassifiers: OLM:4502;
+x-forefront-prvs: 03827AF76E
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TYAPR01MB4544.jpnprd01.prod.outlook.com;PTR:;CAT:NONE;SFTY:;SFS:(10019020)(4636009)(39860400002)(396003)(376002)(136003)(366004)(346002)(5660300002)(33656002)(55236004)(186003)(71200400001)(86362001)(55016002)(316002)(7696005)(76116006)(9686003)(8676002)(4744005)(110136005)(4326008)(2906002)(6506007)(66446008)(66556008)(26005)(64756008)(66946007)(81156014)(8936002)(478600001)(52536014)(66476007);DIR:OUT;SFP:1102;
+received-spf: None (protection.outlook.com: renesas.com does not designate
+ permitted sender hosts)
+x-ms-exchange-senderadcheck: 1
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: cSSUbVnjaF8Qk4B+v13oF8EJPkYZMpOXMIz/uNNO+GSEZJufxpjVoPfR0WQvy7V3I/2GvBVXte1Syp7AphjwGiDDQPTkpX2vNsmTekcsm45hT0flH3Q1vqlUjuLxx3ikwAmvjqzlodgQ7Aj1UIjBBPpl9Nvnj5e51AGtLmPyjppyPT4EUqUx9KoZICnjrPXuSa9GrEaZnayd2CN/pWfmDDSynxcpmRI1qYV5aUHvo0dJexixO8a2/td/sxuuSyXSlhPchRG9CCouYFhyEpMvCh2nAWsU+x7zYB6W0KtOL91JRydHvA4dWXSdCwlU8JRyQ1dVlOvZxpyCjsidScumHzcDRw/IccRCdS0aqECZc4RPLGHL158/4fi745/9AhVwfu8wR33h3aZs8OhZ1A8//1DQlQ5Z82kRRK87gUhy1c+9jklvZgv5Yy1UXU7DCmmg
+x-ms-exchange-antispam-messagedata: 58ESDCJXh0CdtPvyWYvRW8IdqGVmnhznwqDg7TCkvh+npfvcdmEK0jWsAa5LLZcpsyhYPgYMFwch42IjkqwsPlGRNTOS2dn6Jg0WJ5+YXRJj4NbFXvVle1fDYKyBaOD/20f0vndxPjsmFrTt9I/5eg==
+x-ms-exchange-transport-forked: True
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 MIME-Version: 1.0
-Content-Type: text/plain
-X-Originating-IP: [10.175.103.112]
-X-CFilter-Loop: Reflected
+X-OriginatorOrg: renesas.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: d8cfba83-977c-4717-f3d2-08d7e7716ba3
+X-MS-Exchange-CrossTenant-originalarrivaltime: 23 Apr 2020 10:31:01.7803
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 53d82571-da19-47e4-9cb4-625a166a4a2a
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: k7yuMSij/oc9Bs54SV9MotUXIXcwqidDBdJF4JkdvhAcbqL0x0VjC/LNTE46XqJJzWtxzRKC1ornbYxxy432TdcKDTKDNRJDiw+l5UxadP5W79U3OkcioLOtMmlhrA6e
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: TYAPR01MB4573
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Fixes coccicheck warning:
+Hi Wolfram-san,
 
-drivers/mmc/core/debugfs.c:222:0-23: WARNING: mmc_clock_fops should be
-defined with DEFINE_DEBUGFS_ATTRIBUTE
+> From: Wolfram Sang, Sent: Wednesday, April 22, 2020 9:59 PM
+>=20
+> For ES1.2, add a comment explaining the situation. For ES1.3 (and
+> later, although unlikely), add a new entry defining it as 4tap.
+>=20
+> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-Use DEFINE_DEBUGFS_ATTRIBUTE rather than DEFINE_SIMPLE_ATTRIBUTE
-for debugfs files
+Thank you for the patch!
 
-Fixes: 703aae3d09a4b ("mmc: add a file to debugfs for changing host clock at runtime")
-Fixes: a04c50aaa916f ("mmc: core: no need to check return value of debugfs_create functions")
-Reported-by: Hulk Robot <hulkci@huawei.com>
-Signed-off-by: Zou Wei <zou_wei@huawei.com>
----
- drivers/mmc/core/debugfs.c | 6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
+Reviewed-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
 
-diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
-index 09e0c76..9ec84c8 100644
---- a/drivers/mmc/core/debugfs.c
-+++ b/drivers/mmc/core/debugfs.c
-@@ -219,7 +219,7 @@ static int mmc_clock_opt_set(void *data, u64 val)
- 	return 0;
- }
- 
--DEFINE_SIMPLE_ATTRIBUTE(mmc_clock_fops, mmc_clock_opt_get, mmc_clock_opt_set,
-+DEFINE_DEBUGFS_ATTRIBUTE(mmc_clock_fops, mmc_clock_opt_get, mmc_clock_opt_set,
- 	"%llu\n");
- 
- void mmc_add_host_debugfs(struct mmc_host *host)
-@@ -232,8 +232,8 @@ void mmc_add_host_debugfs(struct mmc_host *host)
- 	debugfs_create_file("ios", S_IRUSR, root, host, &mmc_ios_fops);
- 	debugfs_create_x32("caps", S_IRUSR, root, &host->caps);
- 	debugfs_create_x32("caps2", S_IRUSR, root, &host->caps2);
--	debugfs_create_file("clock", S_IRUSR | S_IWUSR, root, host,
--			    &mmc_clock_fops);
-+	debugfs_create_file_unsafe("clock", S_IRUSR | S_IWUSR, root, host,
-+				   &mmc_clock_fops);
- 
- #ifdef CONFIG_FAIL_MMC_REQUEST
- 	if (fail_request)
--- 
-2.6.2
+Best regards,
+Yoshihiro Shimoda
 
