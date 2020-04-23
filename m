@@ -2,246 +2,99 @@ Return-Path: <SRS0=Q/yj=6H=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-1.3 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	HK_RANDOM_FROM,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-0.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8B4BBC54FCB
-	for <linux-mmc@archiver.kernel.org>; Thu, 23 Apr 2020 12:29:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8DCEBC55192
+	for <linux-mmc@archiver.kernel.org>; Thu, 23 Apr 2020 12:35:28 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 6ACB2208E4
-	for <linux-mmc@archiver.kernel.org>; Thu, 23 Apr 2020 12:29:57 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 786AE2077D
+	for <linux-mmc@archiver.kernel.org>; Thu, 23 Apr 2020 12:35:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726502AbgDWM35 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 23 Apr 2020 08:29:57 -0400
-Received: from galileo.doth.eu ([213.133.100.131]:42320 "EHLO galileo.doth.eu"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726090AbgDWM34 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 23 Apr 2020 08:29:56 -0400
-X-Greylist: delayed 345 seconds by postgrey-1.27 at vger.kernel.org; Thu, 23 Apr 2020 08:29:54 EDT
-From:   Klaus Doth <kdlnx@doth.eu>
-Subject: Bug in rtsx_pci driver power management for RTS5260
-Autocrypt: addr=kdlnx@doth.eu; prefer-encrypt=mutual; keydata=
- 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
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     linux-mmc@vger.kernel.org
-Message-ID: <a575b82e-9b22-89d1-e615-a31824050427@doth.eu>
-Date:   Thu, 23 Apr 2020 14:24:04 +0200
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.7.0
+        id S1726435AbgDWMf2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 23 Apr 2020 08:35:28 -0400
+Received: from mail-ot1-f67.google.com ([209.85.210.67]:33301 "EHLO
+        mail-ot1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726090AbgDWMf1 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Apr 2020 08:35:27 -0400
+Received: by mail-ot1-f67.google.com with SMTP id j26so5720253ots.0;
+        Thu, 23 Apr 2020 05:35:27 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=4x6FTGCsrJ3hbA1mW2+NSyYwsMhG1J7BygmKTUppr0k=;
+        b=nPDWJFavyYa3i9NOvyP196SQFfqwLs3txv0FOhSkmmAyzqT692CFACksPmqCWqUEic
+         JA095zGyB8lchu1stTCupDplB3WSCHverX6PU9MMEQdrsUG7t9sm2+YatgCwFTJsSGMk
+         Wl8tV2r6vmRSRQ0GkZhTT7R6ZOAR9cr5QSqTznRadUrVGPWRrdkQWUftLa2Y2+oFx+KM
+         sq/qHDKxpvXHjflXYBm6+tLpXru0VX6vdLAQe2uMbHjnCs2yJ7NI1kziFdnGhBbaWWFk
+         KD54fOzFw7vwMvVERptAaAQ982g3Iw9KpyZ2O45DIXZmPiJ0YV+mIgK8J5g2GBtmx0MW
+         DRLQ==
+X-Gm-Message-State: AGi0PuYt2Ed2yA990cdl4G0HecJKhGr0TD8RdQOD2JITHy2YJiiqBmGG
+        Xez+uNwztAZG7lB8+7Mg8qvsXqdZ3II8vtWREBUhbA==
+X-Google-Smtp-Source: APiQypLwmLk6ZBbBkKuqE1Asu77jQ2nZxTw7kq7BBGrsXFSZbeNsYJL/WNMejote48n1dx2RdAwOFQAmqwjBsCOo7bE=
+X-Received: by 2002:a9d:564:: with SMTP id 91mr3211055otw.250.1587645326692;
+ Thu, 23 Apr 2020 05:35:26 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
-Content-Language: en-US
+References: <20200423122448.8099-1-wsa+renesas@sang-engineering.com> <20200423122448.8099-2-wsa+renesas@sang-engineering.com>
+In-Reply-To: <20200423122448.8099-2-wsa+renesas@sang-engineering.com>
+From:   Geert Uytterhoeven <geert@linux-m68k.org>
+Date:   Thu, 23 Apr 2020 14:35:15 +0200
+Message-ID: <CAMuHMdW0OuHy4ikQz3oY+koqLskXtcXJkUVLZYqsW+niT1pLDQ@mail.gmail.com>
+Subject: Re: [PATCH v2 1/2] mmc: renesas_sdhi: handle M3-N ES1.2 and 1.3 revisions
+To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc:     Linux MMC List <linux-mmc@vger.kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-There seems to be a bug in the power saving functions of the drivers for the RTS5260 PCIe Card Reader. 
+Hi Wolfram,
 
-The affacted file is /drivers/misc/cardreader/rtsx_pcr.c, so it would be part of /drivers/misc, as the cardreader subfolder does not have any specified maintainers according to the MAINTAINERS file in the kernel source tree.
-I tried contacting Arnd Bergmann and Greg Kroah-Hartman, as they are given as the maintainers of drivers/misc, however I got no reply from Arnd for several weeks, Gregs email bot keeps deleting my mails, and there is no mailing list given for drivers/misc
-As the result of this bug is a not working SD card reader, in particular, the rtsx_pci_sdmmc module, I am hoping someone here has time and knowledge to look into it.
+Thanks for your patch!
 
+On Thu, Apr 23, 2020 at 2:26 PM Wolfram Sang
+<wsa+renesas@sang-engineering.com> wrote:
+> For ES1.2, add a comment explaining the situation. For ES1.3 (and
+> later, although unlikely), add a new entry defining it as 4tap.
 
-About the bug:
+Usually we don't add soc_device_match quirks for unknown future revisions.
 
-Reading a card basically works, however the first command issued to the card after the chip goes into power saving fails. Due to the command timeout of 10 seconds inside the code, every new access takes 10 seconds before it is processed.
+> --- a/drivers/mmc/host/renesas_sdhi_core.c
+> +++ b/drivers/mmc/host/renesas_sdhi_core.c
+> @@ -711,11 +711,17 @@ static const struct renesas_sdhi_quirks sdhi_quirks_nohs400 = {
+>         .hs400_disabled = true,
+>  };
+>
+> +/*
+> + * Note for r8a7796 / r8a774a1: we can't distinguish ES1.1 and 1.2 as of now.
+> + * So, we want to treat them equally and only have a match for ES1.2 to enforce
+> + * this if there ever will be a way to distinguish ES1.2.
+> + */
+>  static const struct soc_device_attribute sdhi_quirks_match[]  = {
+>         { .soc_id = "r8a774a1", .revision = "ES1.[012]", .data = &sdhi_quirks_4tap_nohs400 },
+>         { .soc_id = "r8a7795", .revision = "ES1.*", .data = &sdhi_quirks_4tap_nohs400 },
+>         { .soc_id = "r8a7795", .revision = "ES2.0", .data = &sdhi_quirks_4tap },
+>         { .soc_id = "r8a7796", .revision = "ES1.[012]", .data = &sdhi_quirks_4tap_nohs400 },
+> +       { .soc_id = "r8a7796", .revision = "ES1.*", .data = &sdhi_quirks_4tap },
 
-It applies to at least PCI ID 10ec:5260 (rev 01), in case there are several revsisons of the chip.
+R-Car M3-N is r8a77965, not r8a7796?
 
-I tested this on Kernel 5.3.0 and 5.6.2, on a default Ubuntu 19.10, and a custom Gentoo installation. Both versions, Ubuntu using 5.3.0 kernel, and Gentoo using Kernel 5.6.2 have the same issue on both several Dell Precision 7530 and 7540 laptops.
+>         { .soc_id = "r8a77980", .data = &sdhi_quirks_nohs400 },
+>         { /* Sentinel. */ },
+>  };
 
+Gr{oetje,eeting}s,
 
-How to reproduce:
+                        Geert
 
-1) Insert SD-Card
+-- 
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
 
-2) Wait for one second or more where there is no access to the card
-
-3) dd if=/dev/mmblk0p1 of=/dev/null
-
-4) The dd command will hang for 10 seconds without transfering a single byte, and then resume. After resuming, full (correct) transfer speed is reached, until repeating from 2). The card can stay inserted for repeated reproduction of issue.
-
-
-
-The issue in detail:
-
-If the rtsx_pci_idle_work() function is called, in most cases (like 90% or more), the next call to rtsx_pci_dma_transfer (i.e. reading or writing to the card) runs into its timeout and fails.
-
-After that, the next, and all further command always succeeds and data transfer from and to the card is resumed and works correctly, until the next rtsx_pci_idle_work() call is issued. After that the same timeout happens again.
-
-It does not matter if reading or writing occurs using a file system or direct access to the block device using dd or similar.
-
-After some testing it looks like something how the driver or the chip itself handle leaving the power saving mode is wrong. It seems it needs a bit more delay for waking up. I do however not have the datasheet to that chip to see, if you would have to wait for some bit in a register, or if you just need a generic delay.
-
-If I modify the rtsx_comm_pm_full_on() function in /drivers/misc/cardreader/rtsx_pcr.c and add msleep(1); directly after the rtsx_disable_aspm(pcr); call, leaving power save always works, and the card does not fail on the first command after power saving mode.
-
-This is likely not the proper solution to the issue, however I hope it might help the current developer in identifying the correct solution.
-
-
-As this bug report was written beginning of april, I now had some time to test it. I did not find any case until now, where this fix did not help.
-
-
-If I can help further in any way in debugging this issue, let me know.
-
-
-
-Attached are the changed function in /drivers/misc/cardreader/rtsx_pcr.c, and kernel logs with and without the modification:
-
-
---------------------------------------------------------------------------
-
-Changed function in /drivers/misc/cardreader/rtsx_pcr.c (lines 139 - 151)
-Just the msleep(1) was added
-
-static void rtsx_comm_pm_full_on(struct rtsx_pcr *pcr)
-{
-        struct rtsx_cr_option *option = &pcr->option;
-
-        rtsx_disable_aspm(pcr);
-+      msleep(1);
-
-        if (option->ltr_enabled)
-                rtsx_set_ltr_latency(pcr, option->ltr_active_latency);
-
-        if (rtsx_check_dev_flag(pcr, LTR_L1SS_PWR_GATE_EN))
-                rtsx_set_l1off_sub_cfg_d0(pcr, 1);
-}
-
-
---------------------------------------------------------------------------
-
-Kernel 5.6.2 without modification:
-
-Apr  5 21:38:25 - kernel: rtsx_pci_sdmmc rtsx_pci_sdmmc.0: pre dma sg: 4
-Apr  5 21:38:25 - kernel: rtsx_pci 0000:6f:00.0: Switch card clock to 50MHz
-Apr  5 21:38:25 - kernel: rtsx_pci 0000:6f:00.0: Internal SSC clock: 100MHz (cur_clock = 100)
-Apr  5 21:38:25 - kernel: rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_long_data: SD/MMC CMD 18, arg = 0x00002000
-Apr  5 21:38:25 - kernel: rtsx_pci 0000:6f:00.0: DMA addr: 0xff054000, Len: 0x1000
-Apr  5 21:38:25 - kernel: rtsx_pci 0000:6f:00.0: DMA addr: 0xff055000, Len: 0x1000
-Apr  5 21:38:25 - kernel: rtsx_pci 0000:6f:00.0: DMA addr: 0xff056000, Len: 0x1000
-Apr  5 21:38:25 - kernel: rtsx_pci 0000:6f:00.0: DMA addr: 0xff057000, Len: 0x1000
-Apr  5 21:38:25 - kernel: rtsx_pci 0000:6f:00.0: --> rtsx_pci_idle_work
---- waiting for 10 seconds here
-Apr  5 21:38:35 - kernel: rtsx_pci 0000:6f:00.0: Timeout (rtsx_pci_dma_transfer 538)
-Apr  5 21:38:35 - kernel: rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFDA0(8): 11 01 04 08 00 1f 00 08
-Apr  5 21:38:35 - kernel: rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFDA8(8): 10 0c 00 00 0b 00 7f 00
-Apr  5 21:38:35 - kernel: rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFDB0(4): 02 00 00 68 00 00 00 00
-Apr  5 21:38:35 - kernel: rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFD52(8): 04 41 00 04 0f 00 f0 00
-Apr  5 21:38:35 - kernel: rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFD5A(8): 94 1f 52 ff 94 bb 66 aa
-Apr  5 21:38:35 - kernel: rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFD62(8): e9 aa aa aa 24 00 04 04
-Apr  5 21:38:35 - kernel: rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 12, arg = 0x00000000
-Apr  5 21:38:35 - kernel: rtsx_pci 0000:6f:00.0: Timeout (rtsx_pci_send_cmd 401)
-Apr  5 21:38:35 - kernel: rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFDA0(8): 11 01 04 08 00 1f 00 08
-Apr  5 21:38:35 - kernel: rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFDA8(8): 10 ff ff ff ff ff 7f 00
-Apr  5 21:38:35 - kernel: rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFDB0(4): 02 00 00 08 00 00 00 00
-Apr  5 21:38:35 - kernel: rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFD52(8): 04 41 00 04 0f 00 f0 00
-Apr  5 21:38:35 - kernel: rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFD5A(8): 94 1f 52 ff 94 bb 66 aa
-Apr  5 21:38:35 - kernel: rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFD62(8): e9 aa aa aa 24 00 04 04
-Apr  5 21:38:35 - kernel: rtsx_pci_sdmmc rtsx_pci_sdmmc.0: rtsx_pci_send_cmd error (err = -110)
-Apr  5 21:38:35 - kernel: rtsx_pci_sdmmc rtsx_pci_sdmmc.0: CMD 18 0x00002000 error(-110)
-Apr  5 21:38:35 - kernel: rtsx_pci 0000:6f:00.0: Switch card clock to 50MHz
-Apr  5 21:38:35 - kernel: rtsx_pci 0000:6f:00.0: Internal SSC clock: 100MHz (cur_clock = 100)
-Apr  5 21:38:35 - kernel: rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 13, arg = 0xe6240000
-Apr  5 21:38:35 - kernel: rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x00400900
-Apr  5 21:38:35 - kernel: rtsx_pci_sdmmc rtsx_pci_sdmmc.0: pre dma sg: 4
-Apr  5 21:38:35 - kernel: rtsx_pci 0000:6f:00.0: Switch card clock to 50MHz
-Apr  5 21:38:35 - kernel: rtsx_pci 0000:6f:00.0: Internal SSC clock: 100MHz (cur_clock = 100)
-Apr  5 21:38:35 - kernel: rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_long_data: SD/MMC CMD 18, arg = 0x00002000
-Apr  5 21:38:35 - kernel: rtsx_pci 0000:6f:00.0: DMA addr: 0xff050000, Len: 0x1000
-Apr  5 21:38:35 - kernel: rtsx_pci 0000:6f:00.0: DMA addr: 0xff051000, Len: 0x1000
-Apr  5 21:38:35 - kernel: rtsx_pci 0000:6f:00.0: DMA addr: 0xff052000, Len: 0x1000
-Apr  5 21:38:35 - kernel: rtsx_pci 0000:6f:00.0: DMA addr: 0xff053000, Len: 0x1000
-Apr  5 21:38:35 - kernel: rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 12, arg = 0x00000000
-Apr  5 21:38:35 - kernel: rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x00000b00
-Apr  5 21:38:35 - kernel: rtsx_pci 0000:6f:00.0: --> rtsx_pci_idle_work
-
---------------------------------------------------------------------------
-
-Kernel 5.6.2 with msleep(1); like described above:
-
-For testing i tried to read some bytes from the SD card using DD. dd is
-called every 2 seconds, and reads 10 bytes from the SD card. The delay
-between the reads is inserted, to allow the driver to go into power
-saving and issue a rtsx_pci_idle_work and trigger the issue.
-
-The 2 seconds delay between rtsx_pci_idle_work and the next log entry
-are therefore not from the issue itself, but from the way I read data.
-Access in file system mode, dd and everything else does not experience
-any noticeable delay anymore.
-
-
-Apr  5 21:42:46 - kernel: rtsx_pci_sdmmc rtsx_pci_sdmmc.0: pre dma sg: 4
-Apr  5 21:42:46 - kernel: rtsx_pci 0000:6f:00.0: Switch card clock to 50MHz
-Apr  5 21:42:46 - kernel: rtsx_pci 0000:6f:00.0: Internal SSC clock: 100MHz (cur_clock = 100)
-Apr  5 21:42:46 - kernel: rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_long_data: SD/MMC CMD 18, arg = 0x00002000
-Apr  5 21:42:46 - kernel: rtsx_pci 0000:6f:00.0: DMA addr: 0xffbbc000, Len: 0x1000
-Apr  5 21:42:46 - kernel: rtsx_pci 0000:6f:00.0: DMA addr: 0xffbbd000, Len: 0x1000
-Apr  5 21:42:46 - kernel: rtsx_pci 0000:6f:00.0: DMA addr: 0xffbbe000, Len: 0x1000
-Apr  5 21:42:46 - kernel: rtsx_pci 0000:6f:00.0: DMA addr: 0xffbbf000, Len: 0x1000
-Apr  5 21:42:46 - kernel: rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 12, arg = 0x00000000
-Apr  5 21:42:46 - kernel: rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x00000b00
-Apr  5 21:42:46 - kernel: rtsx_pci 0000:6f:00.0: --> rtsx_pci_idle_work 
--- no delay anymore
-Apr  5 21:42:48 - kernel: rtsx_pci_sdmmc rtsx_pci_sdmmc.0: pre dma sg: 4
-Apr  5 21:42:48 - kernel: rtsx_pci 0000:6f:00.0: Switch card clock to 50MHz
-Apr  5 21:42:48 - kernel: rtsx_pci 0000:6f:00.0: Internal SSC clock: 100MHz (cur_clock = 100)
-Apr  5 21:42:48 - kernel: rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_long_data: SD/MMC CMD 18, arg = 0x00002000
-Apr  5 21:42:48 - kernel: rtsx_pci 0000:6f:00.0: DMA addr: 0xffc3c000, Len: 0x1000
-Apr  5 21:42:48 - kernel: rtsx_pci 0000:6f:00.0: DMA addr: 0xffc3d000, Len: 0x1000
-Apr  5 21:42:48 - kernel: rtsx_pci 0000:6f:00.0: DMA addr: 0xffc3e000, Len: 0x1000
-Apr  5 21:42:48 - kernel: rtsx_pci 0000:6f:00.0: DMA addr: 0xffc3f000, Len: 0x1000
-Apr  5 21:42:48 - kernel: rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 12, arg = 0x00000000
-Apr  5 21:42:48 - kernel: rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x00000b00
-Apr  5 21:42:48 - kernel: rtsx_pci 0000:6f:00.0: --> rtsx_pci_idle_work
-
-
-
-
-
-
-
-
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
