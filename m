@@ -2,139 +2,82 @@ Return-Path: <SRS0=Q/yj=6H=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 46EC5C54FCB
-	for <linux-mmc@archiver.kernel.org>; Thu, 23 Apr 2020 12:22:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BA7ADC55186
+	for <linux-mmc@archiver.kernel.org>; Thu, 23 Apr 2020 12:24:55 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2789C2074F
-	for <linux-mmc@archiver.kernel.org>; Thu, 23 Apr 2020 12:22:51 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="ChWtq2qC"
+	by mail.kernel.org (Postfix) with ESMTP id A3D662074F
+	for <linux-mmc@archiver.kernel.org>; Thu, 23 Apr 2020 12:24:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726110AbgDWMWu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 23 Apr 2020 08:22:50 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52262 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-FAIL-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1726056AbgDWMWu (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Apr 2020 08:22:50 -0400
-Received: from mail-ua1-x944.google.com (mail-ua1-x944.google.com [IPv6:2607:f8b0:4864:20::944])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3A48AC08E859
-        for <linux-mmc@vger.kernel.org>; Thu, 23 Apr 2020 05:22:50 -0700 (PDT)
-Received: by mail-ua1-x944.google.com with SMTP id u12so5415472uau.10
-        for <linux-mmc@vger.kernel.org>; Thu, 23 Apr 2020 05:22:50 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=jyUQ7T8MwRaHdAPJI7abXp96xTwq2Ak4XCoyE0/mFoQ=;
-        b=ChWtq2qCG6vmtUnCPeAh/FqZWblKxfoNudH6cu384x+CsD7qz1RejBLCFeNJZdALHm
-         WLNytixc2qCta9LmMZR5Dkq+HF2jc6Ekb/Knpdm6GwiydKs1DezizCTb/+E+u7pnGZjR
-         ER81O0Jdx8+YTfl4m5cFYJB7hNhs60t7FBuAmXPk1DJVNSqMqmU13nHT0AKfoBf2THdl
-         s1fzInLdp9aZPAzN7pG/X0AM1CIelYrrpHBO4oOAtgxpXJQsvZ5RWfvgWx2YeUn1BeA2
-         0696F74qbe3DA0Ux+KfFTFFGabHUo9u39htTbgcRcbq8NsSNaTzLJ4ThO3RA29otxbdG
-         Pj1A==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=jyUQ7T8MwRaHdAPJI7abXp96xTwq2Ak4XCoyE0/mFoQ=;
-        b=DxpRR8UKWZ1ZmOpAs8pXbLDhXpua8ijiahC4zSqHPNjFZy1KTmVTRqt8MjFmU3p2g8
-         HvKuqrH+NauolZ0yS91OWUsxVbPcgMKytIHc/N02mRmGxljAmUQp7s6pfodJ0wLGHQFT
-         5zteleAxzqDM2Gkg6Q49L4bkvcmqCGnwwfNzWpPn9aBg5wPrNP6tG6VZi1lsJ5eonutS
-         XQmdT5GUgDJvUcYvKp9MxfRmTkzJbqmx+1G1ZbxEzRvx92pUTkINXqdjRZLnlVeBx7Vo
-         +OzW1lZcaoAC07qRNbhNa+XNVgWFxp1su7gUqTNYdRjUYkdGFegaWhAT/JZdfQD+V6FC
-         EYRQ==
-X-Gm-Message-State: AGi0PuakHs+D30mvjy425MVty0UK91wPMk9pwR1YT8b5185+0+TlPEdA
-        6Ajdd4yZiKr3mS1Z4Xh88m/wwF4lI4hAAU0/E8DGuw==
-X-Google-Smtp-Source: APiQypI27h2BwPBCTt2BxeblVULnXnm/xZO3WRP0gskCwfE0EhLH488F/9dK+nAA/BrI7RBNxa32nBsVgzlLXVu3nH8=
-X-Received: by 2002:ab0:3343:: with SMTP id h3mr2687570uap.19.1587644569030;
- Thu, 23 Apr 2020 05:22:49 -0700 (PDT)
+        id S1726426AbgDWMYz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 23 Apr 2020 08:24:55 -0400
+Received: from sauhun.de ([88.99.104.3]:33832 "EHLO pokefinder.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726105AbgDWMYz (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 23 Apr 2020 08:24:55 -0400
+Received: from localhost (p5486CE55.dip0.t-ipconnect.de [84.134.206.85])
+        by pokefinder.org (Postfix) with ESMTPSA id 34A382C1F65;
+        Thu, 23 Apr 2020 14:24:53 +0200 (CEST)
+From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
+To:     linux-mmc@vger.kernel.org
+Cc:     linux-renesas-soc@vger.kernel.org,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        Wolfram Sang <wsa@the-dreams.de>
+Subject: [PATCH v2 0/2] mmc: renesas_sdhi: avoid bad TAPs for Gen3
+Date:   Thu, 23 Apr 2020 14:24:46 +0200
+Message-Id: <20200423122448.8099-1-wsa+renesas@sang-engineering.com>
+X-Mailer: git-send-email 2.20.1
 MIME-Version: 1.0
-References: <1587624199-96926-1-git-send-email-zou_wei@huawei.com>
-In-Reply-To: <1587624199-96926-1-git-send-email-zou_wei@huawei.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 23 Apr 2020 14:22:13 +0200
-Message-ID: <CAPDyKFoOKFAH36CeuX8kBG_4iQFZCAGS02_WmkqFsYwWqMYeSQ@mail.gmail.com>
-Subject: Re: [PATCH -next] mmc: sdhci-pci-o2micro: Make some symbols static
-To:     Zou Wei <zou_wei@huawei.com>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 23 Apr 2020 at 08:37, Zou Wei <zou_wei@huawei.com> wrote:
->
-> Fix the following sparse warning:
->
-> drivers/mmc/host/sdhci-pci-o2micro.c:497:6: warning: symbol
-> 'sdhci_pci_o2_set_clock' was not declared. Should it be static?
-> drivers/mmc/host/sdhci-pci-o2micro.c:512:5: warning: symbol
-> 'sdhci_pci_o2_probe_slot' was not declared. Should it be static?
-> drivers/mmc/host/sdhci-pci-o2micro.c:581:5: warning: symbol
-> 'sdhci_pci_o2_probe' was not declared. Should it be static?
-> drivers/mmc/host/sdhci-pci-o2micro.c:786:5: warning: symbol
-> 'sdhci_pci_o2_resume' was not declared. Should it be static?
->
-> Reported-by: Hulk Robot <hulkci@huawei.com>
-> Signed-off-by: Zou Wei <zou_wei@huawei.com>
+From: Wolfram Sang <wsa@the-dreams.de>
 
-Applied for next, thanks!
+Here is a series which avoids using TAPs on R-Car Gen3 SoCs which are
+bad to use according to HW engineers. The patch was originally for the
+BSP (Thanks, Saito-san) and has been upported for the upstream driver.
+Before we can apply this, we need to add some mising information for
+R-Car M3-W ES1.[23].
 
-Kind regards
-Uffe
+Patches have been tested on Renesas Salvator-XS boards with R-Car H3
+ES2.0 (changing from TAP3 to TAP4 here) and R-Car M3-N (changing from
+TAP7 to TAP0 here).
 
-> ---
->  drivers/mmc/host/sdhci-pci-o2micro.c | 8 ++++----
->  1 file changed, 4 insertions(+), 4 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
-> index fa81050..e2a8468 100644
-> --- a/drivers/mmc/host/sdhci-pci-o2micro.c
-> +++ b/drivers/mmc/host/sdhci-pci-o2micro.c
-> @@ -494,7 +494,7 @@ static void sdhci_o2_enable_clk(struct sdhci_host *host, u16 clk)
->         }
->  }
->
-> -void sdhci_pci_o2_set_clock(struct sdhci_host *host, unsigned int clock)
-> +static void sdhci_pci_o2_set_clock(struct sdhci_host *host, unsigned int clock)
->  {
->         u16 clk;
->
-> @@ -509,7 +509,7 @@ void sdhci_pci_o2_set_clock(struct sdhci_host *host, unsigned int clock)
->         sdhci_o2_enable_clk(host, clk);
->  }
->
-> -int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
-> +static int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
->  {
->         struct sdhci_pci_chip *chip;
->         struct sdhci_host *host;
-> @@ -578,7 +578,7 @@ int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
->         return 0;
->  }
->
-> -int sdhci_pci_o2_probe(struct sdhci_pci_chip *chip)
-> +static int sdhci_pci_o2_probe(struct sdhci_pci_chip *chip)
->  {
->         int ret;
->         u8 scratch;
-> @@ -783,7 +783,7 @@ int sdhci_pci_o2_probe(struct sdhci_pci_chip *chip)
->  }
->
->  #ifdef CONFIG_PM_SLEEP
-> -int sdhci_pci_o2_resume(struct sdhci_pci_chip *chip)
-> +static int sdhci_pci_o2_resume(struct sdhci_pci_chip *chip)
->  {
->         sdhci_pci_o2_probe(chip);
->         return sdhci_pci_resume_host(chip);
-> --
-> 2.6.2
->
+A branch can be found here:
+
+git://git.kernel.org/pub/scm/linux/kernel/git/wsa/linux.git renesas/sdhi/new_manual_calib
+
+It is based on current mmc/next + "[PATCH] mmc: renesas_sdhi: shorten
+types after refactorization"
+
+One implementation detail: For now, I kept using a generic naming for
+the quirks, e.g. "sdhi_quirks_bad_taps2367". It is possible that we need
+to rename/add ones later which are SoC bound, e.g. "sdhi_quirks_m3w_30".
+Especially when we add manual calibration somewhen. But for now, the
+generic approach seems better to me, so I sticked to it.
+
+Looking forward to further comments and/or testing.
+
+Happy hacking,
+
+   Wolfram
+
+Takeshi Saito (1):
+  mmc: renesas_sdhi: Avoid bad TAP in HS400
+
+Wolfram Sang (1):
+  mmc: renesas_sdhi: handle M3-N ES1.2 and 1.3 revisions
+
+ drivers/mmc/host/renesas_sdhi.h      |  1 +
+ drivers/mmc/host/renesas_sdhi_core.c | 61 ++++++++++++++++++++++++----
+ 2 files changed, 54 insertions(+), 8 deletions(-)
+
+-- 
+2.20.1
+
