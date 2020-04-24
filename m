@@ -2,125 +2,124 @@ Return-Path: <SRS0=wlIT=6I=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
+X-Spam-Status: No, score=-2.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=no
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3CFD9C2BA1A
-	for <linux-mmc@archiver.kernel.org>; Fri, 24 Apr 2020 10:10:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C2BD8C54FD0
+	for <linux-mmc@archiver.kernel.org>; Fri, 24 Apr 2020 18:09:52 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1848C20767
-	for <linux-mmc@archiver.kernel.org>; Fri, 24 Apr 2020 10:10:15 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A5E68206B9
+	for <linux-mmc@archiver.kernel.org>; Fri, 24 Apr 2020 18:09:52 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="VpecBWsD"
+	dkim=pass (2048-bit key) header.d=nvidia.com header.i=@nvidia.com header.b="QEOZTeNn"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726699AbgDXKKO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 24 Apr 2020 06:10:14 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58384 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-FAIL-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1726614AbgDXKKO (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Apr 2020 06:10:14 -0400
-Received: from mail-ua1-x942.google.com (mail-ua1-x942.google.com [IPv6:2607:f8b0:4864:20::942])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0876AC09B045
-        for <linux-mmc@vger.kernel.org>; Fri, 24 Apr 2020 03:10:14 -0700 (PDT)
-Received: by mail-ua1-x942.google.com with SMTP id t8so8864012uap.3
-        for <linux-mmc@vger.kernel.org>; Fri, 24 Apr 2020 03:10:13 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=/7X2G22ItV4Y4N+eb7B9/IPLptDWVPPgxbfXxVm6c0U=;
-        b=VpecBWsDHCHHO0gD9i2Q+wOtC/bhPUTbFJumSZmGKAPLRyGV0WQNt+0aw3Fzkvd6Ky
-         YNnA3xcIN+JKDZPwlTndqmO/W3+X8T5EaIskhnIvK0+od9Dh2G1TpQoC2ex4NIFslEOK
-         wyph8U4lQiPX/EY1u7sdflAgmOPiWwOUC5I4uyYHIqebMO8tKeOL7F2+/v9KhWLuUlzp
-         NE9K5KuDRaimnnq1rVRW40PPCD+1dh4R6OYSlpPJAY32uxr2mOz79SVJP6ttVM5dm6cn
-         mf2rknK5IJWHhSWj3Gw8nyJLC3+q6iIszJNoLq7J7Ld+CRf3RvsCM8heQx0RJFLLcvN9
-         KAKQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=/7X2G22ItV4Y4N+eb7B9/IPLptDWVPPgxbfXxVm6c0U=;
-        b=pH65nW1XX8RDpBExXppbD1gm2oQJ7wFwT/f+btAhPYOUYel0Ixv2UAMm+Z8QBJNbp+
-         QJD/8vj/chOl8oHBC3nZjItZ4EoXR7PN7ozTxdu6696rD+2ABx/rhWy60Zzn2xGwvY00
-         E3a8HsLaEQJ4eEizhvWMA8fXIi5l8peE1oGC7j2Q8F+5vQsoaAoWPiTB6JaACqyRMNg+
-         NKMKdHkqvprZ2vmKVGgP5K/rpNlQaN5tnQhLPOulNODtQjgzAY7on4icuy6pgsTxaefE
-         GGT3Z2qVKvLpOQl9pLgLFifXgN7RmSQXg5k3QweidaPn7JdWP6jeRWGwrn/srdjDLlCD
-         PV4w==
-X-Gm-Message-State: AGi0PubxtpqVj8NiokOpppestjNujB+pgqzmoRaw9lwCw4tB1lCkcUO8
-        oBxMiysaXnCPeHm0NjmYV7JQiwuM4FSWCPfThbu4mg==
-X-Google-Smtp-Source: APiQypKPFxKbTuswyzazMAoKTL41AiVtC3nWpHcWL/JgaZTTZJKmyutS6k++bDb6ybJle6h4nW9ENAd6LSnZ1BI5+xw=
-X-Received: by 2002:a67:8b46:: with SMTP id n67mr6857957vsd.35.1587723013211;
- Fri, 24 Apr 2020 03:10:13 -0700 (PDT)
+        id S1727031AbgDXSJt (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 24 Apr 2020 14:09:49 -0400
+Received: from hqnvemgate26.nvidia.com ([216.228.121.65]:7067 "EHLO
+        hqnvemgate26.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726813AbgDXSJt (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Apr 2020 14:09:49 -0400
+Received: from hqpgpgate101.nvidia.com (Not Verified[216.228.121.13]) by hqnvemgate26.nvidia.com (using TLS: TLSv1.2, DES-CBC3-SHA)
+        id <B5ea32b600000>; Fri, 24 Apr 2020 11:09:36 -0700
+Received: from hqmail.nvidia.com ([172.20.161.6])
+  by hqpgpgate101.nvidia.com (PGP Universal service);
+  Fri, 24 Apr 2020 11:09:48 -0700
+X-PGP-Universal: processed;
+        by hqpgpgate101.nvidia.com on Fri, 24 Apr 2020 11:09:48 -0700
+Received: from DRHQMAIL107.nvidia.com (10.27.9.16) by HQMAIL109.nvidia.com
+ (172.20.187.15) with Microsoft SMTP Server (TLS) id 15.0.1473.3; Fri, 24 Apr
+ 2020 18:09:48 +0000
+Received: from [10.2.165.49] (10.124.1.5) by DRHQMAIL107.nvidia.com
+ (10.27.9.16) with Microsoft SMTP Server (TLS) id 15.0.1473.3; Fri, 24 Apr
+ 2020 18:09:47 +0000
+Subject: Re: [PATCH 5.4.33 0/2] Fix for long operation cmds busy detection
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+CC:     Greg KH <gregkh@linuxfoundation.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        "(Exiting) Baolin Wang" <baolin.wang@linaro.org>,
+        Kate Stewart <kstewart@linuxfoundation.org>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Bradley Bolen <bradleybolen@gmail.com>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        Jon Hunter <jonathanh@nvidia.com>,
+        "Aniruddha Tvs Rao" <anrao@nvidia.com>,
+        linux-tegra <linux-tegra@vger.kernel.org>,
+        "Linux Kernel Mailing List" <linux-kernel@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+References: <1587573149-30269-1-git-send-email-skomatineni@nvidia.com>
+ <20200423064755.GA3491005@kroah.com>
+ <fe49d36f-65c9-736f-791c-27c602cc3bb8@nvidia.com>
+ <CAPDyKFo0vx1=_j5M-X068n8Xp3wU9JVrXkADCDcGX0Q1oRBzRg@mail.gmail.com>
+From:   Sowjanya Komatineni <skomatineni@nvidia.com>
+Message-ID: <d19d40a9-2269-715d-05eb-7765bb11e406@nvidia.com>
+Date:   Fri, 24 Apr 2020 11:09:46 -0700
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101
+ Thunderbird/60.9.0
 MIME-Version: 1.0
-References: <1586835611-13857-1-git-send-email-yong.mao@mediatek.com> <1586835611-13857-2-git-send-email-yong.mao@mediatek.com>
-In-Reply-To: <1586835611-13857-2-git-send-email-yong.mao@mediatek.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 24 Apr 2020 12:09:37 +0200
-Message-ID: <CAPDyKFo40tBpowmWN3gxH8b=jMmCK8O5ALNQ7y6XZ5AosX=GUA@mail.gmail.com>
-Subject: Re: [PATCH 1/3] mmc: core: need do mmc_power_cycle in mmc_sdio_resend_if_cond
-To:     Yong Mao <yong.mao@mediatek.com>
-Cc:     Chaotian Jing <chaotian.jing@mediatek.com>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        "moderated list:ARM/Mediatek SoC support" 
-        <linux-mediatek@lists.infradead.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        srv_heupstream <srv_heupstream@mediatek.com>
-Content-Type: text/plain; charset="UTF-8"
+In-Reply-To: <CAPDyKFo0vx1=_j5M-X068n8Xp3wU9JVrXkADCDcGX0Q1oRBzRg@mail.gmail.com>
+X-Originating-IP: [10.124.1.5]
+X-ClientProxiedBy: HQMAIL111.nvidia.com (172.20.187.18) To
+ DRHQMAIL107.nvidia.com (10.27.9.16)
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+Content-Language: en-US
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nvidia.com; s=n1;
+        t=1587751776; bh=VpFfLRTzQGXO4uDv64krxQ78es1/hZFyrKiqoQCK8WE=;
+        h=X-PGP-Universal:Subject:To:CC:References:From:Message-ID:Date:
+         User-Agent:MIME-Version:In-Reply-To:X-Originating-IP:
+         X-ClientProxiedBy:Content-Type:Content-Transfer-Encoding:
+         Content-Language;
+        b=QEOZTeNnb2g0X/rXEYYWtacqEzjVvAOU8dDfYHNKmRQIV8wunu/7+aR1X5g5bTzGj
+         74ec025ZMn9KjhWo/bT7GaSaeJH3/idx86d/ajyGn+TuiY5mtHnDYgBNiPIGcnPyma
+         GMZ2Ah3pbLqL4CqZJsAdLZHWzZ5yQv1GnAJ4kUwzD0yv/eCOW/UgbN3zClKtuFf708
+         HU56UQN9aG0PoMpS3o/43JNW0SfyGx4KOvwoXWse8EO1Ec1ig2K9MPZ3tEJ67lDVpW
+         7G8JzLRudr52Y01OPpbyGHGwb+lMGXRFbh5s7qauxDwGfmbYlBpZrPnv3fLzisyU0f
+         Khd07KBOJ5vwQ==
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 14 Apr 2020 at 05:40, Yong Mao <yong.mao@mediatek.com> wrote:
+
+On 4/24/20 12:23 AM, Ulf Hansson wrote:
+> External email: Use caution opening links or attachments
 >
-> From: yong mao <yong.mao@mediatek.com>
 >
-> When mmc_sdio_resned_if_cond is invoked, it indicates the SDIO
-> device is not in the right state. In this condition, the previous
-> implementation of mmc_sdio_resend_if_cond can't make sure SDIO
-> device be back to idle state. mmc_power_cycle can reset the SDIO
-> device by HW and also make sure SDIO device enter to idle state
-> correctly.
+> On Thu, 23 Apr 2020 at 17:38, Sowjanya Komatineni
+> <skomatineni@nvidia.com> wrote:
+>>
+>> On 4/22/20 11:47 PM, Greg KH wrote:
+>>> External email: Use caution opening links or attachments
+>>>
+>>>
+>>> On Wed, Apr 22, 2020 at 09:32:27AM -0700, Sowjanya Komatineni wrote:
+>>>> This series is to backport the upstream patches that fixes busy detection
+>>>> for long operation mmc commands by implementing Tegra specific timeout
+>>>> callback to switch between finite and infinite HW busy detection wait
+>>>> modes.
+>>>>
+>>>>
+>>>> Sowjanya Komatineni (2):
+>>>>     sdhci: tegra: Implement Tegra specific set_timeout callback
+>>>>     sdhci: tegra: Enable MMC_CAP_WAIT_WHILE_BUSY host capability
+>>>>
+>>>>    drivers/mmc/host/sdhci-tegra.c | 33 +++++++++++++++++++++++++++++++++
+>>>>    1 file changed, 33 insertions(+)
+>>> Any specific reason you did not cc: the stable@vger list when asking for
+>>> stable patches to be merged?
+>> I added Cc: <stable@vger.kernel.org> in Signed-off area of patches
+> I think Greg meant you actually need to send manually backported
+> patches to stable@vger.kernel.org. This helps Greg and Sasha to pick
+> them up.
 >
-> Signed-off-by: Yong Mao <yong.mao@mediatek.com>
-> ---
->  drivers/mmc/core/sdio.c | 1 +
->  1 file changed, 1 insertion(+)
->
-> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-> index ebb387a..ada0a80 100644
-> --- a/drivers/mmc/core/sdio.c
-> +++ b/drivers/mmc/core/sdio.c
-> @@ -546,6 +546,7 @@ static int mmc_sdio_init_uhs_card(struct mmc_card *card)
->  static void mmc_sdio_resend_if_cond(struct mmc_host *host,
->                                     struct mmc_card *card)
->  {
-> +       mmc_power_cycle(host, host->card->ocr);
+> Kind regards
+> Uffe
 
-This looks wrong to me. mmc_sdio_resend_if_cond() is called from two places.
+Sorry. Thanks Uffe and Greg. Will resend...
 
-1. In the case when mmc_set_uhs_voltage() fails in
-mmc_sdio_init_card(), which means a call to mmc_power_cycle() has
-already been done.
+Thanks
 
-2. Wen sdio_read_cccr() fails and when we decide to retry the UHS-I
-voltage switch. Then perhaps it could make sense to run a power cycle.
-But if so, we better do it only for that path.
+Sowjanya
 
-I will continue to look a bit, as I think there are really more issues
-that we may want to look into while looking at this piece of code.
-However, allow me some more time before I can provide some more ideas
-of how to move forward.
-
->         sdio_reset(host);
->         mmc_go_idle(host);
->         mmc_send_if_cond(host, host->ocr_avail);
-> --
-> 1.9.1
-
-Kind regards
-Uffe
