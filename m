@@ -1,152 +1,78 @@
-Return-Path: <SRS0=wlIT=6I=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=TOBz=6J=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.6 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 84A35C54FCB
-	for <linux-mmc@archiver.kernel.org>; Fri, 24 Apr 2020 20:07:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 18080C55191
+	for <linux-mmc@archiver.kernel.org>; Sat, 25 Apr 2020 01:46:02 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 624292176D
-	for <linux-mmc@archiver.kernel.org>; Fri, 24 Apr 2020 20:07:09 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=nvidia.com header.i=@nvidia.com header.b="ZzIXx+YW"
+	by mail.kernel.org (Postfix) with ESMTP id EE1AD20857
+	for <linux-mmc@archiver.kernel.org>; Sat, 25 Apr 2020 01:46:01 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1587779162;
+	bh=Bsxnl2K3A5XAIn6prZzLDll+iJkvSiJDNO68VKWaOG0=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
+	b=qQ9/sfLL1mQiR6jhb6zkfqQ0D9qpYy9wOXL/ApOay5Fg+3S2CeyoepE+mHGypWxWF
+	 dtXqgHJBb8yeLiw+8/LS6/X2FJc9/yrgVnjwe+5c3ClKRuqp9IKvkSLVLtPwb+DTVB
+	 +8LfnL+HL9D2+8UylyR5wk8FL/8GYpmCTRjLWaP0=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729495AbgDXUHG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 24 Apr 2020 16:07:06 -0400
-Received: from hqnvemgate24.nvidia.com ([216.228.121.143]:3488 "EHLO
-        hqnvemgate24.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729434AbgDXUGz (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Apr 2020 16:06:55 -0400
-Received: from hqpgpgate101.nvidia.com (Not Verified[216.228.121.13]) by hqnvemgate24.nvidia.com (using TLS: TLSv1.2, DES-CBC3-SHA)
-        id <B5ea346690000>; Fri, 24 Apr 2020 13:04:57 -0700
-Received: from hqmail.nvidia.com ([172.20.161.6])
-  by hqpgpgate101.nvidia.com (PGP Universal service);
-  Fri, 24 Apr 2020 13:06:55 -0700
-X-PGP-Universal: processed;
-        by hqpgpgate101.nvidia.com on Fri, 24 Apr 2020 13:06:55 -0700
-Received: from HQMAIL111.nvidia.com (172.20.187.18) by HQMAIL109.nvidia.com
- (172.20.187.15) with Microsoft SMTP Server (TLS) id 15.0.1473.3; Fri, 24 Apr
- 2020 20:06:55 +0000
-Received: from hqnvemgw03.nvidia.com (10.124.88.68) by HQMAIL111.nvidia.com
- (172.20.187.18) with Microsoft SMTP Server (TLS) id 15.0.1473.3 via Frontend
- Transport; Fri, 24 Apr 2020 20:06:55 +0000
-Received: from skomatineni-linux.nvidia.com (Not Verified[10.2.165.152]) by hqnvemgw03.nvidia.com with Trustwave SEG (v7,5,8,10121)
-        id <B5ea346de0002>; Fri, 24 Apr 2020 13:06:55 -0700
-From:   Sowjanya Komatineni <skomatineni@nvidia.com>
-To:     <adrian.hunter@intel.com>, <ulf.hansson@linaro.org>,
-        <baolin.wang@linaro.org>, <kstewart@linuxfoundation.org>,
-        <tglx@linutronix.de>, <bradleybolen@gmail.com>,
-        <gregkh@linuxfoundation.org>, <thierry.reding@gmail.com>,
-        <jonathanh@nvidia.com>, <skomatineni@nvidia.com>
-CC:     <anrao@nvidia.com>, <linux-tegra@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
-        <stable@vger.kernel.org>
-Subject: [PATCH 4.19.113 1/3] mmc: sdhci: Refactor sdhci_set_timeout()
-Date:   Fri, 24 Apr 2020 13:06:50 -0700
-Message-ID: <1587758812-3331-2-git-send-email-skomatineni@nvidia.com>
-X-Mailer: git-send-email 2.7.4
-In-Reply-To: <1587758812-3331-1-git-send-email-skomatineni@nvidia.com>
-References: <1587758812-3331-1-git-send-email-skomatineni@nvidia.com>
-X-NVConfidentiality: public
+        id S1726059AbgDYBp6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 24 Apr 2020 21:45:58 -0400
+Received: from mail.kernel.org ([198.145.29.99]:43930 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726038AbgDYBp6 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 24 Apr 2020 21:45:58 -0400
+Received: from localhost (c-73-47-72-35.hsd1.nh.comcast.net [73.47.72.35])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id C8FC720776;
+        Sat, 25 Apr 2020 01:45:57 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1587779158;
+        bh=Bsxnl2K3A5XAIn6prZzLDll+iJkvSiJDNO68VKWaOG0=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=A6xJQGCHctBWbt0qg3tmipfzwSFl/LhY1h9HmPFtN+AURFrQ0SuKuJGoudCbVcPB2
+         +Lr7mG/FrKTLe528cp/UlqzbmYrrefFomy99fIorAT2Z8tkjQnXTuCbp5HLw/BfGmm
+         0XkxjTWUqVwn09sbQGA0wcCH/AsJDtbk1qt6NhMc=
+Date:   Fri, 24 Apr 2020 21:45:56 -0400
+From:   Sasha Levin <sashal@kernel.org>
+To:     Sowjanya Komatineni <skomatineni@nvidia.com>
+Cc:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
+        baolin.wang@linaro.org, kstewart@linuxfoundation.org,
+        tglx@linutronix.de, bradleybolen@gmail.com,
+        gregkh@linuxfoundation.org, thierry.reding@gmail.com,
+        jonathanh@nvidia.com, anrao@nvidia.com,
+        linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org, stable@vger.kernel.org
+Subject: Re: [PATCH 5.4.33 0/2] Fix for long operation cmds busy detection
+Message-ID: <20200425014556.GD13035@sasha-vm>
+References: <1587758766-3274-1-git-send-email-skomatineni@nvidia.com>
 MIME-Version: 1.0
-Content-Type: text/plain
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nvidia.com; s=n1;
-        t=1587758697; bh=YC4YvFj7wnCG+fm55jVe+LTRiqbi7dfas2ZLEtr2Hq4=;
-        h=X-PGP-Universal:From:To:CC:Subject:Date:Message-ID:X-Mailer:
-         In-Reply-To:References:X-NVConfidentiality:MIME-Version:
-         Content-Type;
-        b=ZzIXx+YWvfiWV+jUp5tq7K0sjejuIiq9dRrl22PFEHjtqCsuH9wOxfu9cJl6ux5TK
-         qYH7zDeUahxrnl7F+4g1EvflxA7IEGNmZe7FkSTmm7TMoQsvqYa7TsnQ0zt928Vbzw
-         6Vttz2V5csvDWAaFuVcw1Sn5GTlLuH9Pd0Cz5d9ny8crtrxAS1TIcEIFpCQjyKCv19
-         sySfYH5dEYlXLjyZAhTEguUi0hp636LUeL8khr/cJzYrRo/7tbo99qyfw/L6EW+j+X
-         4rFFnGN+xrbXWxwBy9jQWqDO1I4vdsH3CYv4eoziOQ9tT09+eo+U/HGHjxRJb2Tv81
-         d0bJXJKQ6PZdg==
+Content-Type: text/plain; charset=us-ascii; format=flowed
+Content-Disposition: inline
+In-Reply-To: <1587758766-3274-1-git-send-email-skomatineni@nvidia.com>
+User-Agent: Mutt/1.10.1 (2018-07-13)
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-commit 7d76ed77cfbd ("mmc: sdhci: Refactor sdhci_set_timeout()")
+On Fri, Apr 24, 2020 at 01:06:04PM -0700, Sowjanya Komatineni wrote:
+>This series is to backport the upstream patches that fixes busy detection
+>for long operation mmc commands by implementing Tegra specific timeout
+>callback to switch between finite and infinite HW busy detection wait
+>modes.
+>
+>
+>Sowjanya Komatineni (2):
+>  sdhci: tegra: Implement Tegra specific set_timeout callback
+>  sdhci: tegra: Enable MMC_CAP_WAIT_WHILE_BUSY host capability
 
-Refactor sdhci_set_timeout() such that platform drivers can do some
-functionality in a set_timeout() callback and then call
-__sdhci_set_timeout() to complete the operation.
+What regression do these patches fix?
 
-Cc: <stable@vger.kernel.org>
-Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
-Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
----
- drivers/mmc/host/sdhci.c | 38 ++++++++++++++++++++------------------
- drivers/mmc/host/sdhci.h |  1 +
- 2 files changed, 21 insertions(+), 18 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 5a7fd89..c941e81 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -860,27 +860,29 @@ static void sdhci_set_data_timeout_irq(struct sdhci_host *host, bool enable)
- 	sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
- }
- 
--static void sdhci_set_timeout(struct sdhci_host *host, struct mmc_command *cmd)
-+void __sdhci_set_timeout(struct sdhci_host *host, struct mmc_command *cmd)
- {
--	u8 count;
--
--	if (host->ops->set_timeout) {
--		host->ops->set_timeout(host, cmd);
--	} else {
--		bool too_big = false;
--
--		count = sdhci_calc_timeout(host, cmd, &too_big);
-+	bool too_big = false;
-+	u8 count = sdhci_calc_timeout(host, cmd, &too_big);
-+
-+	if (too_big &&
-+	    host->quirks2 & SDHCI_QUIRK2_DISABLE_HW_TIMEOUT) {
-+		sdhci_calc_sw_timeout(host, cmd);
-+		sdhci_set_data_timeout_irq(host, false);
-+	} else if (!(host->ier & SDHCI_INT_DATA_TIMEOUT)) {
-+		sdhci_set_data_timeout_irq(host, true);
-+	}
- 
--		if (too_big &&
--		    host->quirks2 & SDHCI_QUIRK2_DISABLE_HW_TIMEOUT) {
--			sdhci_calc_sw_timeout(host, cmd);
--			sdhci_set_data_timeout_irq(host, false);
--		} else if (!(host->ier & SDHCI_INT_DATA_TIMEOUT)) {
--			sdhci_set_data_timeout_irq(host, true);
--		}
-+	sdhci_writeb(host, count, SDHCI_TIMEOUT_CONTROL);
-+}
-+EXPORT_SYMBOL_GPL(__sdhci_set_timeout);
- 
--		sdhci_writeb(host, count, SDHCI_TIMEOUT_CONTROL);
--	}
-+static void sdhci_set_timeout(struct sdhci_host *host, struct mmc_command *cmd)
-+{
-+	if (host->ops->set_timeout)
-+		host->ops->set_timeout(host, cmd);
-+	else
-+		__sdhci_set_timeout(host, cmd);
- }
- 
- static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index c0372e3..15ef9c6 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -759,5 +759,6 @@ void sdhci_start_tuning(struct sdhci_host *host);
- void sdhci_end_tuning(struct sdhci_host *host);
- void sdhci_reset_tuning(struct sdhci_host *host);
- void sdhci_send_tuning(struct sdhci_host *host, u32 opcode);
-+void __sdhci_set_timeout(struct sdhci_host *host, struct mmc_command *cmd);
- 
- #endif /* __SDHCI_HW_H */
 -- 
-2.7.4
-
+Thanks,
+Sasha
