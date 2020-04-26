@@ -1,99 +1,175 @@
-Return-Path: <SRS0=TOBz=6J=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=cyGH=6K=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+X-Spam-Status: No, score=-3.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_GIT autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 233C0C54FCB
-	for <linux-mmc@archiver.kernel.org>; Sat, 25 Apr 2020 20:27:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4E062C55199
+	for <linux-mmc@archiver.kernel.org>; Sun, 26 Apr 2020 09:39:21 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0300C206D4
-	for <linux-mmc@archiver.kernel.org>; Sat, 25 Apr 2020 20:27:17 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 136F12080C
+	for <linux-mmc@archiver.kernel.org>; Sun, 26 Apr 2020 09:39:21 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=googlemail.com header.i=@googlemail.com header.b="NoqOhSgZ"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="jtx4Mp4g"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726220AbgDYU1N (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 25 Apr 2020 16:27:13 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39558 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726190AbgDYU1N (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 25 Apr 2020 16:27:13 -0400
-Received: from mail-ed1-x542.google.com (mail-ed1-x542.google.com [IPv6:2a00:1450:4864:20::542])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A7C40C09B04D;
-        Sat, 25 Apr 2020 13:27:11 -0700 (PDT)
-Received: by mail-ed1-x542.google.com with SMTP id l3so10224963edq.13;
-        Sat, 25 Apr 2020 13:27:11 -0700 (PDT)
+        id S1726125AbgDZJjU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 26 Apr 2020 05:39:20 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48590 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-FAIL-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1726112AbgDZJjU (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 26 Apr 2020 05:39:20 -0400
+Received: from mail-pl1-x641.google.com (mail-pl1-x641.google.com [IPv6:2607:f8b0:4864:20::641])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 15E4DC061A0C;
+        Sun, 26 Apr 2020 02:39:18 -0700 (PDT)
+Received: by mail-pl1-x641.google.com with SMTP id t4so427760plr.0;
+        Sun, 26 Apr 2020 02:39:17 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=googlemail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=IPXP9AG6CyMHwvhiLeR0KlplmUcjSJkUmZp77wk1l9g=;
-        b=NoqOhSgZhoRYluDHJHUFB+kauGxccJeVEPHUgz8N8fBKJFAd/GOfMrebVzOQYadHOS
-         DlyyXSCPLxaQdQ/XsKLePfS/8qguUJN9jsgFjzu7G3KJJXza69whjanHRB2KXhMddniw
-         Ya5GKJrAVP7QLjXcITtFOs8gQMUWa7iz4WeKXe/6Z/wQA8Aj51aSYKrlC9BX/b6voHqK
-         JAWBNoPRXGGsYcLssKYt6xyBoj6KtJqgL/GQOfA6H3Mn7QYqwmqorn7IHvS9f+yb3trI
-         p+LXosikOE8zhHI2/hKzUbfhmj59vZ8zpCK4nVc1A2IYhbGMhMU/8d7x//wnLTrPN6C7
-         FW9A==
+        d=gmail.com; s=20161025;
+        h=from:to:cc:subject:date:message-id;
+        bh=YVsxCnebxifmDBwxjT1fH4HMDs9oBu6XSeSoPFuESmw=;
+        b=jtx4Mp4gTuzQyxoO7zkNiYH6cfBfU58l9H3W6+KFourVv/nZdNRu8IpL8gIXLTrtI7
+         xY++WEqTRi32qBFF/Fh0HaUyMib8F8PS/9VslS9Y6P3X5EdpigAR/blaB3/8Bf7G3zQ1
+         HTLtIFAf7Da+Ha2WyqAPoFpxByFY/zB+YChtROfDbfoyBX9/NxQf0YKXNIuWD+YrXCdX
+         yf/AXhmWwWpzwP/GF7VrspNzWCT9WalV0GomfNY1daGBI3veN6a2v1mUOdkqMM0TzZkY
+         RHx4Q722sl+8Eqkhq0OG/0dC5pAYAoC35JJN8/fozgbYDZVw/9tlCbzSQUbb6wyH8kxb
+         OnGA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=IPXP9AG6CyMHwvhiLeR0KlplmUcjSJkUmZp77wk1l9g=;
-        b=jfl7f70KD92q5748CMipgCCRDVaLnPgsjR4H/WURnM8fTDe99a1XZmSG0RGz1EK9Mw
-         amcFs+TZSC3YvMB6TLfCSS3c/HqPx4TlNMMnUDdwqlmenN6UfZJaBYHGUAsuPgp+OXy3
-         GfiUvXYQWgL9EYVbYHycuZEe9UQk56j6XRJjWDvCmEk4S/j2UiMdGwQkoZWsmkzzTu5+
-         L+v+Bd6yeV96QviPNRrgHYdkcK+Tdl5ipv81UL9qmddKPaH9fOUvzypeHmMoAS3TqbJG
-         Owk1CLaLcVkm/Hz66moaIei25cV0MAgue6/XolkNE1QmdLDW8iz9QPnN/5SMi3Og7kja
-         q4zg==
-X-Gm-Message-State: AGi0Pua5xs7Y8ejvmi2C1XmuJga/IZ6hSgczEAIIvnKOFW9lB0Q/K1Rz
-        A8d/23FJ8PVpirzvDLiPRwv516KgajzW/WcOccQ=
-X-Google-Smtp-Source: APiQypIBtvX95XX9qITNRM1xgR8d73vnd6WA5gESMb4+LvaDjbdFZ/1FUtmDRTVkhas2VMNe8G2kSLrWfJjsR6sr6sE=
-X-Received: by 2002:a05:6402:1496:: with SMTP id e22mr13037214edv.301.1587846430298;
- Sat, 25 Apr 2020 13:27:10 -0700 (PDT)
-MIME-Version: 1.0
-References: <20200328003249.1248978-1-martin.blumenstingl@googlemail.com>
-In-Reply-To: <20200328003249.1248978-1-martin.blumenstingl@googlemail.com>
-From:   Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Date:   Sat, 25 Apr 2020 22:26:59 +0200
-Message-ID: <CAFBinCDCv-zNf1FX+8FHMxcNdJ_69yog+O_=QPz3Fzryg3ynAw@mail.gmail.com>
-Subject: Re: [PATCH v5 0/3] Amlogic 32-bit Meson SoC SDHC MMC controller driver
-To:     ulf.hansson@linaro.org
-Cc:     linux-amlogic@lists.infradead.org, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, robh+dt@kernel.org,
-        jianxin.pan@amlogic.com, mark.rutland@arm.com,
-        linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        lnykww@gmail.com, yinxin_1989@aliyun.com, jbrunet@baylibre.com
-Content-Type: text/plain; charset="UTF-8"
+        h=x-gm-message-state:from:to:cc:subject:date:message-id;
+        bh=YVsxCnebxifmDBwxjT1fH4HMDs9oBu6XSeSoPFuESmw=;
+        b=UThqFg7vziqYVbJroEAwfTWQSHH+aII2uc/yJay3gb+40ouDr8ejDe4B5A3K8J22L9
+         aina6c7N7/xhr+9B63d3vd69INoypf+Oqg+S/4LZfql/oZuvy7OAZs9h5Y4gQQwuXr6A
+         gM+nvgywTqyUao750VSkXxtdqOcqKZ2ViXxjvGruXVrGC2FUNkoFbuDKil2EO05z/0tO
+         bJNNrBCfIMUJIU9/y7XVU87F3tTGXDzfrIZCq1zQhH8Xr94ZMfgAYTSrpVD7drO4RNLY
+         1hSheGpG84N56mVpY85g2oAocfUvP4p2Ie6VKtaHGF7qt6vL7kaGBn6DC2+un3k9tDQ1
+         H+ag==
+X-Gm-Message-State: AGi0PuYqZEOHx9L1fpxzi6fMdtlzoHaEPL8f9u3dIsIY/sQCVinIDKjV
+        jhIkahaXO2ZxSl9KJ+8+6fU=
+X-Google-Smtp-Source: APiQypLwkX+HozorDPIzAYErvQqpXWR22PEjsHsIpDHCfNLEEVEbD686I5Olw3lY2GjIqQNdx7qW8Q==
+X-Received: by 2002:a17:90a:20ea:: with SMTP id f97mr17157742pjg.157.1587893957380;
+        Sun, 26 Apr 2020 02:39:17 -0700 (PDT)
+Received: from localhost.localdomain ([45.135.186.129])
+        by smtp.gmail.com with ESMTPSA id m129sm1835245pga.47.2020.04.26.02.39.10
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 26 Apr 2020 02:39:16 -0700 (PDT)
+From:   Baolin Wang <baolin.wang7@gmail.com>
+To:     axboe@kernel.dk, ulf.hansson@linaro.org, adrian.hunter@intel.com
+Cc:     arnd@arndb.de, linus.walleij@linaro.org, paolo.valente@linaro.org,
+        ming.lei@redhat.com, orsonzhai@gmail.com, zhang.lyra@gmail.com,
+        baolin.wang7@gmail.com, linux-mmc@vger.kernel.org,
+        linux-block@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: [RFC PATCH v2 0/7] Add MMC packed request support
+Date:   Sun, 26 Apr 2020 17:38:53 +0800
+Message-Id: <cover.1587888520.git.baolin.wang7@gmail.com>
+X-Mailer: git-send-email 2.17.1
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Ulf,
+Hi All,
 
-On Sat, Mar 28, 2020 at 1:33 AM Martin Blumenstingl
-<martin.blumenstingl@googlemail.com> wrote:
-[...]
-> Martin Blumenstingl (3):
->   dt-bindings: mmc: Document the Amlogic Meson SDHC MMC host controller
->   clk: meson: add a driver for the Meson8/8b/8m2 SDHC clock controller
->   mmc: host: meson-mx-sdhc: new driver for the Amlogic Meson SDHC host
-I have Rob's reviewed-by for the dt-bindings patch and three
-tested-by's for the MMC driver in patch #3 (which means that patch #2
-was implicitly tested as well)
-I tried to answer all your previous questions where possible, but for
-some of your questions I simply don't have an answer.
+Now some SD/MMC controllers can support packed command or packed request,
+that means it can package multiple requests to host controller to be handled
+at one time, which can improve the I/O performence. Thus this patch set
+tries to add the MMC packed request function to support packed request or
+packed command.
 
-is there anything from your side which is holding this driver back
-from being merged?
+In this patch set, I extanded commit_rqs() to do batch processing suggested
+by Ming, to allow dispatching a batch of requests to hardware and expanded
+the MMC software queue to support packed request. I also implemented the
+SD host ADMA3 transfer mode to support packed request. The ADMA3 transfer
+mode can process a multi-block data transfer by using a pair of command
+descriptor and ADMA2 descriptor. In future we can easily expand the MMC
+packed function to support packed command.
 
-+Cc Jerome, because he is the maintainer of the Amlogic clock
-controller drivers - where this series adds another one, so we need to
-coordinate where patches go.
+Below are some comparison data between packed request and non-packed request
+with fio tool. The fio command I used is like below with changing the
+'--rw' parameter and enabling the direct IO flag to measure the actual hardware
+transfer speed. I tested 5 times for each case and output a average speed.
 
+./fio --filename=/dev/mmcblk0p30 --direct=1 --iodepth=20 --rw=read --bs=4K --size=512M --group_reporting --numjobs=20 --name=test_read
 
-Thank you!
-Martin
+My eMMC card working at HS400 Enhanced strobe mode:
+[    2.229856] mmc0: new HS400 Enhanced strobe MMC card at address 0001
+[    2.237566] mmcblk0: mmc0:0001 HBG4a2 29.1 GiB
+[    2.242621] mmcblk0boot0: mmc0:0001 HBG4a2 partition 1 4.00 MiB
+[    2.249110] mmcblk0boot1: mmc0:0001 HBG4a2 partition 2 4.00 MiB
+[    2.255307] mmcblk0rpmb: mmc0:0001 HBG4a2 partition 3 4.00 MiB, chardev (248:0)
+
+1. Non-packed request
+1) Sequential read:
+Speed: 59.2MiB/s, 60.4MiB/s, 63.6MiB/s, 60.3MiB/s, 59.9MiB/s
+Average speed: 60.68MiB/s
+
+2) Random read:
+Speed: 31.3MiB/s, 31.4MiB/s, 31.5MiB/s, 31.3MiB/s, 31.3MiB/s
+Average speed: 31.36MiB/s
+
+3) Sequential write:
+Speed: 71MiB/s, 71.8MiB/s, 72.3MiB/s, 72.2MiB/s, 71MiB/s
+Average speed: 71.66MiB/s
+
+4) Random write:
+Speed: 68.9MiB/s, 68.7MiB/s, 68.8MiB/s, 68.6MiB/s, 68.8MiB/s
+Average speed: 68.76MiB/s
+
+2. Packed request
+1) Sequential read:
+Speed: 230MiB/s, 230MiB/s, 229MiB/s, 230MiB/s, 229MiB/s
+Average speed: 229.6MiB/s
+
+2) Random read:
+Speed: 181MiB/s, 181MiB/s, 181MiB/s, 180MiB/s, 181MiB/s
+Average speed: 180.8MiB/s
+
+3) Sequential write:
+Speed: 175MiB/s, 171MiB/s, 171MiB/s, 172MiB/s, 171MiB/s
+Average speed: 172MiB/s
+
+4) Random write:
+Speed: 169MiB/s, 169MiB/s, 171MiB/s, 167MiB/s, 170MiB/s
+Average speed: 169.2MiB/s
+
+From above data, we can see the packed request can improve the performance
+greatly. Any comments are welcome. Thanks a lot.
+
+Changes from RFC v1:
+ - Re-implement the batch processing according to Ming's suggestion
+ - Remove the bd.last validation in MMC block.c, since we always get bd.last == false
+ according to the new batch processing method.
+
+Baolin Wang (6):
+  mmc: Add MMC packed request support for MMC software queue
+  mmc: host: sdhci: Introduce ADMA3 transfer mode
+  mmc: host: sdhci: Factor out the command configuration
+  mmc: host: sdhci: Remove redundant sg_count member of struct
+    sdhci_host
+  mmc: host: sdhci: Add MMC packed request support
+  mmc: host: sdhci-sprd: Add MMC packed request support
+
+Ming Lei (1):
+  block: Extand commit_rqs() to do batch processing
+
+ block/blk-mq-sched.c          |  29 +-
+ block/blk-mq.c                |  15 +-
+ drivers/mmc/core/block.c      |  14 +
+ drivers/mmc/core/core.c       |  26 ++
+ drivers/mmc/core/core.h       |   2 +
+ drivers/mmc/core/queue.c      |  19 +-
+ drivers/mmc/host/mmc_hsq.c    | 292 +++++++++++++++++---
+ drivers/mmc/host/mmc_hsq.h    |  25 +-
+ drivers/mmc/host/sdhci-sprd.c |  30 +-
+ drivers/mmc/host/sdhci.c      | 504 +++++++++++++++++++++++++++++-----
+ drivers/mmc/host/sdhci.h      |  61 +++-
+ include/linux/blk-mq.h        |   1 +
+ include/linux/mmc/core.h      |   6 +
+ include/linux/mmc/host.h      |   9 +
+ 14 files changed, 900 insertions(+), 133 deletions(-)
+
+-- 
+2.17.1
+
