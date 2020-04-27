@@ -4,62 +4,64 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-0.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id ACD97C54FCB
-	for <linux-mmc@archiver.kernel.org>; Mon, 27 Apr 2020 16:24:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5A6DAC54FCB
+	for <linux-mmc@archiver.kernel.org>; Mon, 27 Apr 2020 16:33:59 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 841D7206B9
-	for <linux-mmc@archiver.kernel.org>; Mon, 27 Apr 2020 16:24:03 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 35B682075B
+	for <linux-mmc@archiver.kernel.org>; Mon, 27 Apr 2020 16:33:59 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=googlemail.com header.i=@googlemail.com header.b="C/UeX3V2"
+	dkim=pass (2048-bit key) header.d=googlemail.com header.i=@googlemail.com header.b="fEHgLHot"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726499AbgD0QYC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 27 Apr 2020 12:24:02 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52128 "EHLO
+        id S1727010AbgD0Qd6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 27 Apr 2020 12:33:58 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53698 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-FAIL-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1726229AbgD0QYC (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Apr 2020 12:24:02 -0400
-Received: from mail-ej1-x641.google.com (mail-ej1-x641.google.com [IPv6:2a00:1450:4864:20::641])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 22425C0610D5;
-        Mon, 27 Apr 2020 09:24:02 -0700 (PDT)
-Received: by mail-ej1-x641.google.com with SMTP id nv1so14649380ejb.0;
-        Mon, 27 Apr 2020 09:24:02 -0700 (PDT)
+        by vger.kernel.org with ESMTP id S1726499AbgD0Qd6 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Apr 2020 12:33:58 -0400
+Received: from mail-ej1-x642.google.com (mail-ej1-x642.google.com [IPv6:2a00:1450:4864:20::642])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1A467C0610D5;
+        Mon, 27 Apr 2020 09:33:58 -0700 (PDT)
+Received: by mail-ej1-x642.google.com with SMTP id e2so14581307eje.13;
+        Mon, 27 Apr 2020 09:33:58 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=googlemail.com; s=20161025;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=KWPoYwJEl9V5YJAC4WNuwBg/dxHA3IxOpuyKiILxznU=;
-        b=C/UeX3V22n4clKX0lidBg1wfTgyte141RHR4D/yMWPz4MmLO9VSKjxOGhfZUMvSxh5
-         lahhhGC1BnRLcRys8vkijyNhoC3ZriRyC34w1IELDASTlvq2yV7ZfrwIiYS72NBDmLDu
-         yaZl3kzdt+u9A/quzE5wJf2u6aJQ4ktAIJa87cuf1+MfjEeICkqJ44WBRN47Iy3Uswx6
-         ahFVmC+2xRhc80opYNR1EgJrlmOVOA3wuePis6UkUONHFv//rO7Cuqf3X12VTLz7xU0p
-         GkNxzuyjfUzFaHe7y1wNaVWkmcegsxROdx7l1tBryU73TvdBcHVdr/yKY9XSL8hzj0cR
-         Hyhg==
+        bh=cf6K3gKCGK+tevU6SOIQu2ZyhbrY799GzvMTpffec20=;
+        b=fEHgLHotmQ2/QZ9izNQI6Vaz8wS10CiCmWkvWWqUdsrKNl3IllAOIGjxPmPHDbKZmn
+         oRJ77Jcoq+oxmN+XLL6SJm0VlYl3X0Xl2ilO8OS3cK1T4w7BDCrYFwTmGr2HE1x96bZf
+         bIKAbQVM6yyXK8MHg4AUaJE3af9PkXwIl/27vAh64P3TZDA/SkshLtrD3ea1beLLX8EY
+         jCGatrJEfR8rnqop+kn5Ua6Jx4IAeIUwp9jsBSCDsSwa7r/FACxpEZRydrLYzbiZ7lAn
+         VxWYFeNWvvkQcsthLYaHlA+p+TKz0GViDKM/qP2boJDJITlanRqF5FgeT7wKGxOPC2kZ
+         EPhw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=KWPoYwJEl9V5YJAC4WNuwBg/dxHA3IxOpuyKiILxznU=;
-        b=Hkk1/1aBlR6m2oySy67fiJoFhERt4y3OebyXAfLTXtey2I3wgXkyBYu2uFDnNY5Jfm
-         8pTmEtr21c1jmshugRbPpx+kLZoS7waYPTKxLu21DmzF8yFvRLtKYdDBU/XDGlf9pOWh
-         Yf/JzliuhlsDNwoW/eYNIDASkVOlGdnrpNpbi84aK4W5A+39zLNfLmYi7uxYfv6pCft2
-         C/rk2LW+CeOT6X6ZkKzilvCFvlu3TSfeWxoRfyPxQyDbM0a5z7KiBMoI4q//API/Aenx
-         ufX7673RTqFe5PnNW3PORndrn+Er8Jhgdq2qtIpE3KHQ+zgvL18UKl9kS896qqEDf7/R
-         GwMA==
-X-Gm-Message-State: AGi0PuZNG483UKqmj9LRbvoAeKIJCflcyHleY1wblvJZ3ECcy0Qe9LfK
-        6Md9fGNHgXQXfZPigvqa/2thlKVicjuVbYZwHf0=
-X-Google-Smtp-Source: APiQypLMHO3pnC6/d3Uf/T8HCEFOxHwcaSjxBATefEkEjE6SvjUvYOMC854uurowtQ2fXp3sQqiBg2bcmRKVKa8jO68=
-X-Received: by 2002:a17:906:1a06:: with SMTP id i6mr19961325ejf.90.1588004640687;
- Mon, 27 Apr 2020 09:24:00 -0700 (PDT)
+        bh=cf6K3gKCGK+tevU6SOIQu2ZyhbrY799GzvMTpffec20=;
+        b=nLN2lFmLPGuTqTISDsyNlCaK2Ceuf8o1dBZrD+j2fLP3CjTgRW7sPJ+WsrpK8IPsKr
+         bhq4TbHZIH0lAjVPM9BuiQrZw6+6fH8Pk9XSgIJmCBGthslmcdKy5x+PLSEOfE5Xc7N5
+         Rh2WfFq647MPOo1c/YxJ5txbF+iUyqUbKd08n75A4qadIXZz80NF1s9CqcyPYMRvEW6t
+         IilsIGBPrp7GDSy1H3PzV0V6+BgzzpOauuyyy5DApvCCUTgLZLx6hHi0hOwR6G3k/Jw6
+         nixjPOutkgtigxb5ZUqDWThWRHC2K2TxiicNkWBuUypmI4ZCwteK5FV+R0Hb9Eo8wtH6
+         C4qA==
+X-Gm-Message-State: AGi0PuZq7Ai85fMaKtjkFH5nWd3JvZk8In8nli4EYaP7jtPDKIbS7ydv
+        CcbzZDfZB7pj9z5WfKiIOJhpfCUBWLi6LvVoi08=
+X-Google-Smtp-Source: APiQypIxi9PVa6BSrsdK7HKl/F5E9nNV2Zxh8LSFeUs6LEBcQQ6x7m+p/fR1cdSqN4+y8qa2TCS1gaPOrQrL2MFzQ2M=
+X-Received: by 2002:a17:906:1199:: with SMTP id n25mr21359264eja.30.1588005236702;
+ Mon, 27 Apr 2020 09:33:56 -0700 (PDT)
 MIME-Version: 1.0
-References: <20200328003249.1248978-1-martin.blumenstingl@googlemail.com> <1jblnd2tp3.fsf@starbuckisacylon.baylibre.com>
-In-Reply-To: <1jblnd2tp3.fsf@starbuckisacylon.baylibre.com>
+References: <20200328003249.1248978-1-martin.blumenstingl@googlemail.com>
+ <20200328003249.1248978-3-martin.blumenstingl@googlemail.com> <1jd07t2ucy.fsf@starbuckisacylon.baylibre.com>
+In-Reply-To: <1jd07t2ucy.fsf@starbuckisacylon.baylibre.com>
 From:   Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Date:   Mon, 27 Apr 2020 18:23:49 +0200
-Message-ID: <CAFBinCDzNw6nV3oBJs6C0sssW61GERBXq39DCM22BT9zS8M31A@mail.gmail.com>
-Subject: Re: [PATCH v5 0/3] Amlogic 32-bit Meson SoC SDHC MMC controller driver
+Date:   Mon, 27 Apr 2020 18:33:45 +0200
+Message-ID: <CAFBinCCRE9ceErVVQJ=prDp5+srpcSM6oqNkgwznYq8awNpQ3Q@mail.gmail.com>
+Subject: Re: [PATCH v5 2/3] clk: meson: add a driver for the Meson8/8b/8m2
+ SDHC clock controller
 To:     Jerome Brunet <jbrunet@baylibre.com>
 Cc:     linux-amlogic@lists.infradead.org, devicetree@vger.kernel.org,
         linux-mmc@vger.kernel.org, ulf.hansson@linaro.org,
@@ -74,32 +76,107 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 Hi Jerome,
 
-On Mon, Apr 27, 2020 at 10:56 AM Jerome Brunet <jbrunet@baylibre.com> wrote:
-[...]
-> > Changes since v3 at [3]:
-> > - split the clock bits into a separate clock controller driver because
-> >   of two reasons: 1) it keeps the MMC controller driver mostly clean of
-> >   the clock bits
->
-> If the register is in the MMC controller register space and the MMC
-> driver is the driver using these clocks, it is where the clocks belong.
-> I don't get why it could be an issue ?
->
-> Is the clock block is shared with another device, like on the Gx family ?
-no, it is not shared with another device (to my knowledge).
+thank you for looking into this!
 
-> > 2) the pure clock controller can use
-> >   devm_clk_hw_register() (instead of devm_clk_register(), which is
-> >   deprecated) and the MMC controller can act as a pure clock consumer.
+On Mon, Apr 27, 2020 at 10:41 AM Jerome Brunet <jbrunet@baylibre.com> wrote:
+[...]
+> > +#include "clk-regmap.h"
+> > +#include "clk-pll.h"
 >
-> Why can't you use devm_clk_hw_register in an MMC driver ?
-> Unless I missed something, it is provided by clk-provider.h, which can be
-> included by any driver.
-indeed, I could use devm_clk_hw_register in the MMC driver.
-Ulfs concern was that a lot of code was needed for managing the clocks
-and I agree with him. so this is my way of keeping those details away
-from the MMC driver and have two separate drivers which are better to
-understand overall.
+> If you need the pll clocks, it should probably appear in the Kconfig
+> deps as well
+this driver does not need "clk-pll.h"
+good catch - thank you
+
+> > +
+> > +#define MESON_SDHC_CLKC                      0x10
+> > +
+> > +static const struct clk_regmap meson_mx_sdhc_src_sel = {
+> > +     .data = &(struct clk_regmap_mux_data){
+> > +             .offset = MESON_SDHC_CLKC,
+> > +             .mask = 0x3,
+> > +             .shift = 16,
+> > +     },
+> > +     .hw.init = &(struct clk_init_data){
+> > +             .name = "sdhc_src_sel",
+> > +             .ops = &clk_regmap_mux_ops,
+> > +             .parent_data = (const struct clk_parent_data[]) {
+> > +                     { .fw_name = "clkin0", .index = -1, },
+> > +                     { .fw_name = "clkin1", .index = -1, },
+> > +                     { .fw_name = "clkin2", .index = -1, },
+> > +                     { .fw_name = "clkin3", .index = -1, },
+>
+> When fw_name is specified, setting the index is not necessary
+noted, will fix this
+
+[...]
+> > +     .hw.init = &(struct clk_init_data){
+> > +             .name = "sdhc_div",
+> > +             .ops = &clk_regmap_divider_ops,
+> > +             .parent_data = (const struct clk_parent_data[]) {
+> > +                     { .name = "sdhc_src_sel", .index = -1, },
+>
+> Any reason for using the lagacy names and not the clk_hw pointers ?
+> Same comment for the rest of the clocks
+indeed, there is a reason and it took me a while to figure out
+__clk_register will set hw->init = NULL;
+This means: if we unregister the driver and register it again all
+hw->init will be lost (as it's now NULL)
+This is why I am effectively cloning (devm_kzalloc + memcpy) these
+clocks which only serve as a template
+Due to this I can't easily use a reference to another clk_hw
+
+We don't have this problem in any of our other clock controller
+drivers because these cannot be unloaded
+
+[...]
+> > +     .hw.init = &(struct clk_init_data){
+> > +             .name = "sdhc_mod_clk_on",
+> > +             .ops = &clk_regmap_gate_ops,
+> > +             .parent_data = (const struct clk_parent_data[]) {
+> > +                     { .name = "sdhc_div", .index = -1, },
+> > +             },
+> > +             .num_parents = 1,
+> > +             .flags = CLK_SET_RATE_GATE,
+>
+> Why can't the clock change rate unless gated ? Maybe you prefer to
+> change the rate in the mmc while clock is gated, but this is the
+> handling of the clock by the mmc driver, not a constraint of the actual
+> clock HW, isn't it ?
+>
+> Also, this is a gate so I suppose the rate propagates through it ?
+> Can you explain why CLK_SET_RATE_PARENT is not set  ?
+[...]
+> Ok so apparently you only want to set the rate through the RX clock.
+> You are free to call set_rate() only on this clock in the mmc driver.
+> However, I don't think this should reflect as clock constraints.
+I think these two belong together
+looking back at this I believe that you are right:
+- CLK_SET_RATE_GATE should be dropped because that's not a constraint
+of the clock but of the clock consumer (MMC driver)
+- CLK_SET_RATE_PARENT should be added to all clocks because rate
+propagation will work for all clocks
+
+> > +     },
+> > +};
+> > +
+> > +static const struct clk_regmap meson_mx_sdhc_sd_clk_en = {
+> > +     .data = &(struct clk_regmap_gate_data){
+> > +             .offset = MESON_SDHC_CLKC,
+> > +             .bit_idx = 12,
+> > +     },
+> > +     .hw.init = &(struct clk_init_data){
+> > +             .name = "sdhc_sd_clk_on",
+> > +             .ops = &clk_regmap_gate_ops,
+> > +             .parent_data = (const struct clk_parent_data[]) {
+> > +                     { .name = "sdhc_div", .index = -1, },
+> > +             },
+> > +             .num_parents = 1,
+> > +             .flags = CLK_SET_RATE_PARENT | CLK_SET_RATE_GATE,
+>
+> ... now I lost with these flags. I'm sure there is an idea related to
+> the mmc driver. Clockwise, I don't get it.
+indeed, just like above I'll fix these
 
 
 Martin
