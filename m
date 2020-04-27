@@ -2,136 +2,104 @@ Return-Path: <SRS0=ssCU=6L=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.6 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-0.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6A6B2C54FCB
-	for <linux-mmc@archiver.kernel.org>; Mon, 27 Apr 2020 15:46:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id ACD97C54FCB
+	for <linux-mmc@archiver.kernel.org>; Mon, 27 Apr 2020 16:24:03 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 434FD206B6
-	for <linux-mmc@archiver.kernel.org>; Mon, 27 Apr 2020 15:46:55 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 841D7206B9
+	for <linux-mmc@archiver.kernel.org>; Mon, 27 Apr 2020 16:24:03 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="Rv9xl/0y"
+	dkim=pass (2048-bit key) header.d=googlemail.com header.i=@googlemail.com header.b="C/UeX3V2"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728119AbgD0Pqy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 27 Apr 2020 11:46:54 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46320 "EHLO
+        id S1726499AbgD0QYC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 27 Apr 2020 12:24:02 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52128 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-FAIL-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1727077AbgD0Pqy (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Apr 2020 11:46:54 -0400
-Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:e::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6973AC0610D5;
-        Mon, 27 Apr 2020 08:46:54 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=bombadil.20170209; h=In-Reply-To:Content-Type:MIME-Version
-        :References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-        Content-Transfer-Encoding:Content-ID:Content-Description;
-        bh=WJhX0gy4PLhLVzhkqKlPTRBI4F1++Yw2mgGmpA3PmDk=; b=Rv9xl/0yJAvArM66lMVoxSWEMQ
-        3Qh/ze4bgZMsEwvC5UUATGsA9ndC2ScJuPNo9xuctTBXRJo5vw9hJsy620rzuA+6fG7N0rMSJ4Ldg
-        57nntPN3w9G49xjrPcPPxzMKCxNlEAe5dlw5t04X/s4HsA/6UOTAAMAeik+Qz2XZPrxeEtp82fUtt
-        Jr7x3NcjgEjOVQnZyTTB8P0XwdhKAspRZ7sD9Td1qDK8ZIHp/jaGQ8LcNHFsUPCbu+Gtxz6TKMbAK
-        Awqyk3g/bsIaq4woSAzA3r6HJ5HmKsRwiyhFjY3dYtVOjI2t6CgFPy+oSNkQmF0hMXalSzMCMHzK4
-        8GhNKZnw==;
-Received: from hch by bombadil.infradead.org with local (Exim 4.92.3 #3 (Red Hat Linux))
-        id 1jT5y1-0007q0-PV; Mon, 27 Apr 2020 15:46:45 +0000
-Date:   Mon, 27 Apr 2020 08:46:45 -0700
-From:   Christoph Hellwig <hch@infradead.org>
-To:     Baolin Wang <baolin.wang7@gmail.com>
-Cc:     axboe@kernel.dk, ulf.hansson@linaro.org, adrian.hunter@intel.com,
-        arnd@arndb.de, linus.walleij@linaro.org, paolo.valente@linaro.org,
-        ming.lei@redhat.com, orsonzhai@gmail.com, zhang.lyra@gmail.com,
-        linux-mmc@vger.kernel.org, linux-block@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Subject: Re: [RFC PATCH v2 1/7] block: Extand commit_rqs() to do batch
- processing
-Message-ID: <20200427154645.GA1201@infradead.org>
-References: <cover.1587888520.git.baolin.wang7@gmail.com>
- <c8bd9e5ba815a3f1bc9dac0a4bc2fbadadbc0a43.1587888520.git.baolin.wang7@gmail.com>
+        by vger.kernel.org with ESMTP id S1726229AbgD0QYC (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Apr 2020 12:24:02 -0400
+Received: from mail-ej1-x641.google.com (mail-ej1-x641.google.com [IPv6:2a00:1450:4864:20::641])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 22425C0610D5;
+        Mon, 27 Apr 2020 09:24:02 -0700 (PDT)
+Received: by mail-ej1-x641.google.com with SMTP id nv1so14649380ejb.0;
+        Mon, 27 Apr 2020 09:24:02 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=googlemail.com; s=20161025;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=KWPoYwJEl9V5YJAC4WNuwBg/dxHA3IxOpuyKiILxznU=;
+        b=C/UeX3V22n4clKX0lidBg1wfTgyte141RHR4D/yMWPz4MmLO9VSKjxOGhfZUMvSxh5
+         lahhhGC1BnRLcRys8vkijyNhoC3ZriRyC34w1IELDASTlvq2yV7ZfrwIiYS72NBDmLDu
+         yaZl3kzdt+u9A/quzE5wJf2u6aJQ4ktAIJa87cuf1+MfjEeICkqJ44WBRN47Iy3Uswx6
+         ahFVmC+2xRhc80opYNR1EgJrlmOVOA3wuePis6UkUONHFv//rO7Cuqf3X12VTLz7xU0p
+         GkNxzuyjfUzFaHe7y1wNaVWkmcegsxROdx7l1tBryU73TvdBcHVdr/yKY9XSL8hzj0cR
+         Hyhg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=KWPoYwJEl9V5YJAC4WNuwBg/dxHA3IxOpuyKiILxznU=;
+        b=Hkk1/1aBlR6m2oySy67fiJoFhERt4y3OebyXAfLTXtey2I3wgXkyBYu2uFDnNY5Jfm
+         8pTmEtr21c1jmshugRbPpx+kLZoS7waYPTKxLu21DmzF8yFvRLtKYdDBU/XDGlf9pOWh
+         Yf/JzliuhlsDNwoW/eYNIDASkVOlGdnrpNpbi84aK4W5A+39zLNfLmYi7uxYfv6pCft2
+         C/rk2LW+CeOT6X6ZkKzilvCFvlu3TSfeWxoRfyPxQyDbM0a5z7KiBMoI4q//API/Aenx
+         ufX7673RTqFe5PnNW3PORndrn+Er8Jhgdq2qtIpE3KHQ+zgvL18UKl9kS896qqEDf7/R
+         GwMA==
+X-Gm-Message-State: AGi0PuZNG483UKqmj9LRbvoAeKIJCflcyHleY1wblvJZ3ECcy0Qe9LfK
+        6Md9fGNHgXQXfZPigvqa/2thlKVicjuVbYZwHf0=
+X-Google-Smtp-Source: APiQypLMHO3pnC6/d3Uf/T8HCEFOxHwcaSjxBATefEkEjE6SvjUvYOMC854uurowtQ2fXp3sQqiBg2bcmRKVKa8jO68=
+X-Received: by 2002:a17:906:1a06:: with SMTP id i6mr19961325ejf.90.1588004640687;
+ Mon, 27 Apr 2020 09:24:00 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <c8bd9e5ba815a3f1bc9dac0a4bc2fbadadbc0a43.1587888520.git.baolin.wang7@gmail.com>
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+References: <20200328003249.1248978-1-martin.blumenstingl@googlemail.com> <1jblnd2tp3.fsf@starbuckisacylon.baylibre.com>
+In-Reply-To: <1jblnd2tp3.fsf@starbuckisacylon.baylibre.com>
+From:   Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+Date:   Mon, 27 Apr 2020 18:23:49 +0200
+Message-ID: <CAFBinCDzNw6nV3oBJs6C0sssW61GERBXq39DCM22BT9zS8M31A@mail.gmail.com>
+Subject: Re: [PATCH v5 0/3] Amlogic 32-bit Meson SoC SDHC MMC controller driver
+To:     Jerome Brunet <jbrunet@baylibre.com>
+Cc:     linux-amlogic@lists.infradead.org, devicetree@vger.kernel.org,
+        linux-mmc@vger.kernel.org, ulf.hansson@linaro.org,
+        robh+dt@kernel.org, mark.rutland@arm.com, jianxin.pan@amlogic.com,
+        linux-kernel@vger.kernel.org, yinxin_1989@aliyun.com,
+        linux-arm-kernel@lists.infradead.org, lnykww@gmail.com
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-extand in the subject really shpuld be 'extend'
+Hi Jerome,
 
-On Sun, Apr 26, 2020 at 05:38:54PM +0800, Baolin Wang wrote:
-> From: Ming Lei <ming.lei@redhat.com>
-> 
-> Now some SD/MMC host controllers can support packed command or packed request,
-> that means we can package several requests to host controller at one time
-> to improve performence.
-> 
-> But the blk-mq always takes one request from the scheduler and dispatch it to
-> the device, regardless of the driver or the scheduler, so there should only
-> ever be one request in the local list in blk_mq_dispatch_rq_list(), that means
-> the bd.last is always true and the driver can not use bd.last to decide if
-> there are requests are pending now in hardware queue to help to package
-> requests.
-> 
-> Thus this patch introduces a new 'BLK_MQ_F_FORCE_COMMIT_RQS' flag to call
-> .commit_rqs() to do batch processing if necessary.
-> 
-> Signed-off-by: Ming Lei <ming.lei@redhat.com>
-> Tested-by: Baolin Wang <baolin.wang7@gmail.com>
-> Signed-off-by: Baolin Wang <baolin.wang7@gmail.com>
-> ---
->  block/blk-mq-sched.c   | 29 ++++++++++++++++++++---------
->  block/blk-mq.c         | 15 ++++++++++-----
->  include/linux/blk-mq.h |  1 +
->  3 files changed, 31 insertions(+), 14 deletions(-)
-> 
-> diff --git a/block/blk-mq-sched.c b/block/blk-mq-sched.c
-> index 74cedea56034..3429a71a7364 100644
-> --- a/block/blk-mq-sched.c
-> +++ b/block/blk-mq-sched.c
-> @@ -85,11 +85,12 @@ void blk_mq_sched_restart(struct blk_mq_hw_ctx *hctx)
->   * its queue by itself in its completion handler, so we don't need to
->   * restart queue if .get_budget() returns BLK_STS_NO_RESOURCE.
->   */
-> -static void blk_mq_do_dispatch_sched(struct blk_mq_hw_ctx *hctx)
-> +static bool blk_mq_do_dispatch_sched(struct blk_mq_hw_ctx *hctx)
+On Mon, Apr 27, 2020 at 10:56 AM Jerome Brunet <jbrunet@baylibre.com> wrote:
+[...]
+> > Changes since v3 at [3]:
+> > - split the clock bits into a separate clock controller driver because
+> >   of two reasons: 1) it keeps the MMC controller driver mostly clean of
+> >   the clock bits
+>
+> If the register is in the MMC controller register space and the MMC
+> driver is the driver using these clocks, it is where the clocks belong.
+> I don't get why it could be an issue ?
+>
+> Is the clock block is shared with another device, like on the Gx family ?
+no, it is not shared with another device (to my knowledge).
 
-This function already returns an int in the current for-5.8/block tree.
+> > 2) the pure clock controller can use
+> >   devm_clk_hw_register() (instead of devm_clk_register(), which is
+> >   deprecated) and the MMC controller can act as a pure clock consumer.
+>
+> Why can't you use devm_clk_hw_register in an MMC driver ?
+> Unless I missed something, it is provided by clk-provider.h, which can be
+> included by any driver.
+indeed, I could use devm_clk_hw_register in the MMC driver.
+Ulfs concern was that a lot of code was needed for managing the clocks
+and I agree with him. so this is my way of keeping those details away
+from the MMC driver and have two separate drivers which are better to
+understand overall.
 
-> +		if (!(hctx->flags & BLK_MQ_F_FORCE_COMMIT_RQS)) {
-> +			if (list_empty(list)) {
-> +				bd.last = true;
-> +			} else {
-> +				nxt = list_first_entry(list, struct request,
-> +						       queuelist);
-> +				bd.last = !blk_mq_get_driver_tag(nxt);
-> +			}
-> +		} else {
-> +			bd.last = false;
->  		}
 
-This seems a little odd in terms of code flow.  Why not:
-
-		if (hctx->flags & BLK_MQ_F_FORCE_COMMIT_RQS) {
-			bd.last = false;
-		} else if (list_empty(list)) {
-			bd.last = true;
-		} else {
-			nxt = list_first_entry(list, struct request, queuelist);
-			bd.last = !blk_mq_get_driver_tag(nxt);
-		}
-
-> diff --git a/include/linux/blk-mq.h b/include/linux/blk-mq.h
-> index f389d7c724bd..6a20f8e8eb85 100644
-> --- a/include/linux/blk-mq.h
-> +++ b/include/linux/blk-mq.h
-> @@ -391,6 +391,7 @@ struct blk_mq_ops {
->  enum {
->  	BLK_MQ_F_SHOULD_MERGE	= 1 << 0,
->  	BLK_MQ_F_TAG_SHARED	= 1 << 1,
-> +	BLK_MQ_F_FORCE_COMMIT_RQS = 1 << 3,
-
-Maybe BLK_MQ_F_ALWAYS_COMMIT might be a better name?  Also this
-flag (just like the existing ones..) could really use a comment
-explaining it.
+Martin
