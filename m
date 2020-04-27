@@ -2,136 +2,136 @@ Return-Path: <SRS0=ssCU=6L=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+X-Spam-Status: No, score=-6.6 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
-	version=3.4.0
+	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 137A1C54FD0
-	for <linux-mmc@archiver.kernel.org>; Mon, 27 Apr 2020 10:30:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6A6B2C54FCB
+	for <linux-mmc@archiver.kernel.org>; Mon, 27 Apr 2020 15:46:55 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E4435206D4
-	for <linux-mmc@archiver.kernel.org>; Mon, 27 Apr 2020 10:30:47 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 434FD206B6
+	for <linux-mmc@archiver.kernel.org>; Mon, 27 Apr 2020 15:46:55 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="qqAgyWF/"
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="Rv9xl/0y"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726507AbgD0Kar (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 27 Apr 2020 06:30:47 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53322 "EHLO
+        id S1728119AbgD0Pqy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 27 Apr 2020 11:46:54 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46320 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-FAIL-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1726485AbgD0Kar (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Apr 2020 06:30:47 -0400
-Received: from mail-pf1-x443.google.com (mail-pf1-x443.google.com [IPv6:2607:f8b0:4864:20::443])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E6EE8C0610D5;
-        Mon, 27 Apr 2020 03:30:46 -0700 (PDT)
-Received: by mail-pf1-x443.google.com with SMTP id x2so5103022pfx.7;
-        Mon, 27 Apr 2020 03:30:46 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=q+MBCNDaLw3uQE6AgVXdsrI4+m1caWL4Ufysj/pafog=;
-        b=qqAgyWF/2DUdL2/CJEqRS+BbSa4hMbmdEt/4d762uqgEWxO95ANdX62WbFLqETkM+X
-         kpART+tYOYWahFR+HiWtkeIOBirkpF95mgczf0nsw3BywtSk70q18FfgV/XIflprJ4m4
-         sMuJh0p74w/uno3rz/uMy5ETltHy/1P4Llkl9pFGwL1x2Ljoy+Vh6mIsjZMTscIPb0eO
-         nCt5Halq9amuWpOAqBoVH2jKIxIJt4sLm5h/uSnFukWGQnu/7vWtjCuXXjtwEYU75qdx
-         F/y3gOeRgnAhId4RLNvGACHEK/SJxIuFQTshJfKmaQjF1On/huwYYvVTvMv2rreN73A0
-         OcAg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=q+MBCNDaLw3uQE6AgVXdsrI4+m1caWL4Ufysj/pafog=;
-        b=OOfoJO2lGV8DPOYvAni+EeIMnQxOstfvtOY/Sqz18WSZQ5aS+QJHD+IhkDAd0mti6y
-         7QiKKXr0GNcRwklc5MrKREcyukVvsESuOxUBl1wnVbZXHrG4+8w8n4DyanOEx6bBahxZ
-         rD2Ajzr8tn86A7iyb9XoKtt1S9MMYbIbw00vZY6gKkDYVzM/JntkPBPdIxLfBtar7jVG
-         zzpYFc8FNw6Ez7hCKJlL21z8thhiGTKK90ABuVqIvPjcDFamPwI4xytRgwyV511t4gab
-         VJdhsUhL3SGi0jh4lfC8dM3PnC7GbqX2rxJEkG5O8Ez3JbVfxq0VEOM4nCK98CKHOlEi
-         SYdw==
-X-Gm-Message-State: AGi0PubU1IyMeRG8s1a+nKW1/h0QGzYD+SzBZ4bYS/2kZzI2xFhpj35i
-        sowWolp9hMwMpB6xx1sUVtwTNd82
-X-Google-Smtp-Source: APiQypJCwFXeuNCVc8cCXhqFJneZXNnH0wpU89wvK1KdOiPMhS5qG94Fl7kFk0wqde+yngVJAvavGA==
-X-Received: by 2002:a63:ce17:: with SMTP id y23mr21384308pgf.194.1587983446412;
-        Mon, 27 Apr 2020 03:30:46 -0700 (PDT)
-Received: from gli-arch.genesyslogic.com.tw (60-251-58-169.HINET-IP.hinet.net. [60.251.58.169])
-        by smtp.gmail.com with ESMTPSA id i25sm11867975pfo.196.2020.04.27.03.30.44
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 27 Apr 2020 03:30:46 -0700 (PDT)
-From:   Ben Chuang <benchuanggli@gmail.com>
-To:     adrian.hunter@intel.com, ulf.hansson@linaro.org
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        ben.chuang@genesyslogic.com.tw, Renius.Chen@genesyslogic.com.tw,
-        vineethrp@gmail.com, dflogeras2@gmail.com,
-        Ben Chuang <benchuanggli@gmail.com>,
-        Renius Chen <renius.chen@genesyslogic.com.tw>
-Subject: [PATCH] mmc: sdhci-pci-gli: Fix no irq handler from suspend
-Date:   Mon, 27 Apr 2020 18:30:48 +0800
-Message-Id: <20200427103048.20785-1-benchuanggli@gmail.com>
-X-Mailer: git-send-email 2.26.2
+        by vger.kernel.org with ESMTP id S1727077AbgD0Pqy (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Apr 2020 11:46:54 -0400
+Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:e::133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6973AC0610D5;
+        Mon, 27 Apr 2020 08:46:54 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=bombadil.20170209; h=In-Reply-To:Content-Type:MIME-Version
+        :References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+        Content-Transfer-Encoding:Content-ID:Content-Description;
+        bh=WJhX0gy4PLhLVzhkqKlPTRBI4F1++Yw2mgGmpA3PmDk=; b=Rv9xl/0yJAvArM66lMVoxSWEMQ
+        3Qh/ze4bgZMsEwvC5UUATGsA9ndC2ScJuPNo9xuctTBXRJo5vw9hJsy620rzuA+6fG7N0rMSJ4Ldg
+        57nntPN3w9G49xjrPcPPxzMKCxNlEAe5dlw5t04X/s4HsA/6UOTAAMAeik+Qz2XZPrxeEtp82fUtt
+        Jr7x3NcjgEjOVQnZyTTB8P0XwdhKAspRZ7sD9Td1qDK8ZIHp/jaGQ8LcNHFsUPCbu+Gtxz6TKMbAK
+        Awqyk3g/bsIaq4woSAzA3r6HJ5HmKsRwiyhFjY3dYtVOjI2t6CgFPy+oSNkQmF0hMXalSzMCMHzK4
+        8GhNKZnw==;
+Received: from hch by bombadil.infradead.org with local (Exim 4.92.3 #3 (Red Hat Linux))
+        id 1jT5y1-0007q0-PV; Mon, 27 Apr 2020 15:46:45 +0000
+Date:   Mon, 27 Apr 2020 08:46:45 -0700
+From:   Christoph Hellwig <hch@infradead.org>
+To:     Baolin Wang <baolin.wang7@gmail.com>
+Cc:     axboe@kernel.dk, ulf.hansson@linaro.org, adrian.hunter@intel.com,
+        arnd@arndb.de, linus.walleij@linaro.org, paolo.valente@linaro.org,
+        ming.lei@redhat.com, orsonzhai@gmail.com, zhang.lyra@gmail.com,
+        linux-mmc@vger.kernel.org, linux-block@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Subject: Re: [RFC PATCH v2 1/7] block: Extand commit_rqs() to do batch
+ processing
+Message-ID: <20200427154645.GA1201@infradead.org>
+References: <cover.1587888520.git.baolin.wang7@gmail.com>
+ <c8bd9e5ba815a3f1bc9dac0a4bc2fbadadbc0a43.1587888520.git.baolin.wang7@gmail.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <c8bd9e5ba815a3f1bc9dac0a4bc2fbadadbc0a43.1587888520.git.baolin.wang7@gmail.com>
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+extand in the subject really shpuld be 'extend'
 
-The kernel prints a message similar to
-"[   28.881959] do_IRQ: 5.36 No irq handler for vector"
-when GL975x resumes from suspend. Implement a resume callback to fix this.
+On Sun, Apr 26, 2020 at 05:38:54PM +0800, Baolin Wang wrote:
+> From: Ming Lei <ming.lei@redhat.com>
+> 
+> Now some SD/MMC host controllers can support packed command or packed request,
+> that means we can package several requests to host controller at one time
+> to improve performence.
+> 
+> But the blk-mq always takes one request from the scheduler and dispatch it to
+> the device, regardless of the driver or the scheduler, so there should only
+> ever be one request in the local list in blk_mq_dispatch_rq_list(), that means
+> the bd.last is always true and the driver can not use bd.last to decide if
+> there are requests are pending now in hardware queue to help to package
+> requests.
+> 
+> Thus this patch introduces a new 'BLK_MQ_F_FORCE_COMMIT_RQS' flag to call
+> .commit_rqs() to do batch processing if necessary.
+> 
+> Signed-off-by: Ming Lei <ming.lei@redhat.com>
+> Tested-by: Baolin Wang <baolin.wang7@gmail.com>
+> Signed-off-by: Baolin Wang <baolin.wang7@gmail.com>
+> ---
+>  block/blk-mq-sched.c   | 29 ++++++++++++++++++++---------
+>  block/blk-mq.c         | 15 ++++++++++-----
+>  include/linux/blk-mq.h |  1 +
+>  3 files changed, 31 insertions(+), 14 deletions(-)
+> 
+> diff --git a/block/blk-mq-sched.c b/block/blk-mq-sched.c
+> index 74cedea56034..3429a71a7364 100644
+> --- a/block/blk-mq-sched.c
+> +++ b/block/blk-mq-sched.c
+> @@ -85,11 +85,12 @@ void blk_mq_sched_restart(struct blk_mq_hw_ctx *hctx)
+>   * its queue by itself in its completion handler, so we don't need to
+>   * restart queue if .get_budget() returns BLK_STS_NO_RESOURCE.
+>   */
+> -static void blk_mq_do_dispatch_sched(struct blk_mq_hw_ctx *hctx)
+> +static bool blk_mq_do_dispatch_sched(struct blk_mq_hw_ctx *hctx)
 
-Fixes: 31e43f31890c ("mmc: sdhci-pci-gli: Enable MSI interrupt for GL975x")
-Co-developed-by: Renius Chen <renius.chen@genesyslogic.com.tw>
-Signed-off-by: Renius Chen <renius.chen@genesyslogic.com.tw>
-Tested-by: Dave Flogeras <dflogeras2@gmail.com>
-Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
----
- drivers/mmc/host/sdhci-pci-gli.c | 18 ++++++++++++++++++
- 1 file changed, 18 insertions(+)
+This function already returns an int in the current for-5.8/block tree.
 
-diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
-index ce15a05f23d4..7195dd33ac3d 100644
---- a/drivers/mmc/host/sdhci-pci-gli.c
-+++ b/drivers/mmc/host/sdhci-pci-gli.c
-@@ -334,6 +334,18 @@ static u32 sdhci_gl9750_readl(struct sdhci_host *host, int reg)
- 	return value;
- }
- 
-+#ifdef CONFIG_PM_SLEEP
-+int sdhci_pci_gli_resume(struct sdhci_pci_chip *chip)
-+{
-+	struct sdhci_pci_slot *slot = chip->slots[0];
-+
-+	pci_free_irq_vectors(slot->chip->pdev);
-+	gli_pcie_enable_msi(slot);
-+
-+	return sdhci_pci_resume_host(chip);
-+}
-+#endif
-+
- static const struct sdhci_ops sdhci_gl9755_ops = {
- 	.set_clock		= sdhci_set_clock,
- 	.enable_dma		= sdhci_pci_enable_dma,
-@@ -348,6 +360,9 @@ const struct sdhci_pci_fixes sdhci_gl9755 = {
- 	.quirks2	= SDHCI_QUIRK2_BROKEN_DDR50,
- 	.probe_slot	= gli_probe_slot_gl9755,
- 	.ops            = &sdhci_gl9755_ops,
-+#ifdef CONFIG_PM_SLEEP
-+	.resume         = sdhci_pci_gli_resume,
-+#endif
- };
- 
- static const struct sdhci_ops sdhci_gl9750_ops = {
-@@ -366,4 +381,7 @@ const struct sdhci_pci_fixes sdhci_gl9750 = {
- 	.quirks2	= SDHCI_QUIRK2_BROKEN_DDR50,
- 	.probe_slot	= gli_probe_slot_gl9750,
- 	.ops            = &sdhci_gl9750_ops,
-+#ifdef CONFIG_PM_SLEEP
-+	.resume         = sdhci_pci_gli_resume,
-+#endif
- };
--- 
-2.26.2
+> +		if (!(hctx->flags & BLK_MQ_F_FORCE_COMMIT_RQS)) {
+> +			if (list_empty(list)) {
+> +				bd.last = true;
+> +			} else {
+> +				nxt = list_first_entry(list, struct request,
+> +						       queuelist);
+> +				bd.last = !blk_mq_get_driver_tag(nxt);
+> +			}
+> +		} else {
+> +			bd.last = false;
+>  		}
 
+This seems a little odd in terms of code flow.  Why not:
+
+		if (hctx->flags & BLK_MQ_F_FORCE_COMMIT_RQS) {
+			bd.last = false;
+		} else if (list_empty(list)) {
+			bd.last = true;
+		} else {
+			nxt = list_first_entry(list, struct request, queuelist);
+			bd.last = !blk_mq_get_driver_tag(nxt);
+		}
+
+> diff --git a/include/linux/blk-mq.h b/include/linux/blk-mq.h
+> index f389d7c724bd..6a20f8e8eb85 100644
+> --- a/include/linux/blk-mq.h
+> +++ b/include/linux/blk-mq.h
+> @@ -391,6 +391,7 @@ struct blk_mq_ops {
+>  enum {
+>  	BLK_MQ_F_SHOULD_MERGE	= 1 << 0,
+>  	BLK_MQ_F_TAG_SHARED	= 1 << 1,
+> +	BLK_MQ_F_FORCE_COMMIT_RQS = 1 << 3,
+
+Maybe BLK_MQ_F_ALWAYS_COMMIT might be a better name?  Also this
+flag (just like the existing ones..) could really use a comment
+explaining it.
