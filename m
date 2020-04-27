@@ -2,191 +2,136 @@ Return-Path: <SRS0=ssCU=6L=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7FBD7C5519A
-	for <linux-mmc@archiver.kernel.org>; Mon, 27 Apr 2020 08:56:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 137A1C54FD0
+	for <linux-mmc@archiver.kernel.org>; Mon, 27 Apr 2020 10:30:48 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5C392218AC
-	for <linux-mmc@archiver.kernel.org>; Mon, 27 Apr 2020 08:56:13 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E4435206D4
+	for <linux-mmc@archiver.kernel.org>; Mon, 27 Apr 2020 10:30:47 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=baylibre-com.20150623.gappssmtp.com header.i=@baylibre-com.20150623.gappssmtp.com header.b="ZxAicqBE"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="qqAgyWF/"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726003AbgD0I4M (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 27 Apr 2020 04:56:12 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38512 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726539AbgD0I4M (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Apr 2020 04:56:12 -0400
-Received: from mail-wr1-x443.google.com (mail-wr1-x443.google.com [IPv6:2a00:1450:4864:20::443])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0FADDC0610D5
-        for <linux-mmc@vger.kernel.org>; Mon, 27 Apr 2020 01:56:12 -0700 (PDT)
-Received: by mail-wr1-x443.google.com with SMTP id d17so19545690wrg.11
-        for <linux-mmc@vger.kernel.org>; Mon, 27 Apr 2020 01:56:11 -0700 (PDT)
+        id S1726507AbgD0Kar (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 27 Apr 2020 06:30:47 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53322 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-FAIL-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1726485AbgD0Kar (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Apr 2020 06:30:47 -0400
+Received: from mail-pf1-x443.google.com (mail-pf1-x443.google.com [IPv6:2607:f8b0:4864:20::443])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E6EE8C0610D5;
+        Mon, 27 Apr 2020 03:30:46 -0700 (PDT)
+Received: by mail-pf1-x443.google.com with SMTP id x2so5103022pfx.7;
+        Mon, 27 Apr 2020 03:30:46 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20150623.gappssmtp.com; s=20150623;
-        h=references:user-agent:from:to:cc:subject:in-reply-to:date
-         :message-id:mime-version;
-        bh=lnRwjXbCLNSgqmF0eAVoEuS/w3gfoX8hHq6Rr+bVouI=;
-        b=ZxAicqBE7gtw4KlxJ6AGM4EEvTxs4P5QWqjTN/QP75l4jYbxhStBX5mNkEp5kiu8m1
-         MFnZyigewABW+VSPUWQolDAw6v9IVj+nJFatqky/wUAeJeSbF8CqrWCiUtOblkyW6dna
-         YCgGyMLANbV4OXkW8KxF0XTMa0iHgCLBPkNQWHpx/XV7/iGj/lmp69XFcM+iGliXQyMs
-         lLwhayZDtTD3yqPZzlaTTUKRMECVfI3OORRUeSyYil1GxMAisl/BrOAqqL7jMvgV+oPD
-         LtlKIJA91Bs2XS1TdnI6szBJ82MUm9DqBKJuJzmJuBzp2+p8I2Scmko96n9BbUUnkCBt
-         7cEw==
+        d=gmail.com; s=20161025;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=q+MBCNDaLw3uQE6AgVXdsrI4+m1caWL4Ufysj/pafog=;
+        b=qqAgyWF/2DUdL2/CJEqRS+BbSa4hMbmdEt/4d762uqgEWxO95ANdX62WbFLqETkM+X
+         kpART+tYOYWahFR+HiWtkeIOBirkpF95mgczf0nsw3BywtSk70q18FfgV/XIflprJ4m4
+         sMuJh0p74w/uno3rz/uMy5ETltHy/1P4Llkl9pFGwL1x2Ljoy+Vh6mIsjZMTscIPb0eO
+         nCt5Halq9amuWpOAqBoVH2jKIxIJt4sLm5h/uSnFukWGQnu/7vWtjCuXXjtwEYU75qdx
+         F/y3gOeRgnAhId4RLNvGACHEK/SJxIuFQTshJfKmaQjF1On/huwYYvVTvMv2rreN73A0
+         OcAg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:references:user-agent:from:to:cc:subject
-         :in-reply-to:date:message-id:mime-version;
-        bh=lnRwjXbCLNSgqmF0eAVoEuS/w3gfoX8hHq6Rr+bVouI=;
-        b=eBpCaDXEb7HeSGeJgrhnpKUJO90UUgGMZ42pImXXCzg0Oi2i+JCREpqbTZfuIc+mtC
-         sfus6UyORiyc2UGQUIIfpjmGGei1PE0KhyAAhoPUH1oSTtz96ghF8NE5t6F7+YOuzFr3
-         nb9Rtguet6J79JSiLFZATcRIt1HlG6hjU4fiot6BvD08LfuXC2dq0JgkJpAdoufWHl8g
-         kUV2fR+6z5lVqYNa/ZM6Ddi5cri3psWQXspiakyzgrs+8ZS3QLKoKl0gC++QrmzoMhas
-         FqVolVitWN1q3gf28bwgRea6kE1y6UdwrL6RyYEJK0PwKoTq8DWDqfdyE0Nm62GX6mTd
-         Jzlw==
-X-Gm-Message-State: AGi0PuZvam2S9aLa0qS+mQpR+37ySLcCib45uS+piCb+gA3T8ts/1lJ9
-        XjoIUBQ9a2nyR8vv6HK5MeZovA==
-X-Google-Smtp-Source: APiQypLhubdjTPL7ywGgfEzi/OUKoNJ/LWk7kYZWC+WQcIxs4uRm7LCF9Ze4GDVIaPy2SAZAs5y+XQ==
-X-Received: by 2002:a5d:4092:: with SMTP id o18mr26042449wrp.227.1587977770645;
-        Mon, 27 Apr 2020 01:56:10 -0700 (PDT)
-Received: from localhost (cag06-3-82-243-161-21.fbx.proxad.net. [82.243.161.21])
-        by smtp.gmail.com with ESMTPSA id e2sm20113767wrv.89.2020.04.27.01.56.09
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=q+MBCNDaLw3uQE6AgVXdsrI4+m1caWL4Ufysj/pafog=;
+        b=OOfoJO2lGV8DPOYvAni+EeIMnQxOstfvtOY/Sqz18WSZQ5aS+QJHD+IhkDAd0mti6y
+         7QiKKXr0GNcRwklc5MrKREcyukVvsESuOxUBl1wnVbZXHrG4+8w8n4DyanOEx6bBahxZ
+         rD2Ajzr8tn86A7iyb9XoKtt1S9MMYbIbw00vZY6gKkDYVzM/JntkPBPdIxLfBtar7jVG
+         zzpYFc8FNw6Ez7hCKJlL21z8thhiGTKK90ABuVqIvPjcDFamPwI4xytRgwyV511t4gab
+         VJdhsUhL3SGi0jh4lfC8dM3PnC7GbqX2rxJEkG5O8Ez3JbVfxq0VEOM4nCK98CKHOlEi
+         SYdw==
+X-Gm-Message-State: AGi0PubU1IyMeRG8s1a+nKW1/h0QGzYD+SzBZ4bYS/2kZzI2xFhpj35i
+        sowWolp9hMwMpB6xx1sUVtwTNd82
+X-Google-Smtp-Source: APiQypJCwFXeuNCVc8cCXhqFJneZXNnH0wpU89wvK1KdOiPMhS5qG94Fl7kFk0wqde+yngVJAvavGA==
+X-Received: by 2002:a63:ce17:: with SMTP id y23mr21384308pgf.194.1587983446412;
+        Mon, 27 Apr 2020 03:30:46 -0700 (PDT)
+Received: from gli-arch.genesyslogic.com.tw (60-251-58-169.HINET-IP.hinet.net. [60.251.58.169])
+        by smtp.gmail.com with ESMTPSA id i25sm11867975pfo.196.2020.04.27.03.30.44
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 27 Apr 2020 01:56:09 -0700 (PDT)
-References: <20200328003249.1248978-1-martin.blumenstingl@googlemail.com>
-User-agent: mu4e 1.3.3; emacs 26.3
-From:   Jerome Brunet <jbrunet@baylibre.com>
-To:     Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
-        linux-amlogic@lists.infradead.org, devicetree@vger.kernel.org,
-        linux-mmc@vger.kernel.org, ulf.hansson@linaro.org,
-        robh+dt@kernel.org
-Cc:     mark.rutland@arm.com, jianxin.pan@amlogic.com,
-        linux-kernel@vger.kernel.org, yinxin_1989@aliyun.com,
-        linux-arm-kernel@lists.infradead.org, lnykww@gmail.com
-Subject: Re: [PATCH v5 0/3] Amlogic 32-bit Meson SoC SDHC MMC controller driver
-In-reply-to: <20200328003249.1248978-1-martin.blumenstingl@googlemail.com>
-Date:   Mon, 27 Apr 2020 10:56:08 +0200
-Message-ID: <1jblnd2tp3.fsf@starbuckisacylon.baylibre.com>
+        Mon, 27 Apr 2020 03:30:46 -0700 (PDT)
+From:   Ben Chuang <benchuanggli@gmail.com>
+To:     adrian.hunter@intel.com, ulf.hansson@linaro.org
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        ben.chuang@genesyslogic.com.tw, Renius.Chen@genesyslogic.com.tw,
+        vineethrp@gmail.com, dflogeras2@gmail.com,
+        Ben Chuang <benchuanggli@gmail.com>,
+        Renius Chen <renius.chen@genesyslogic.com.tw>
+Subject: [PATCH] mmc: sdhci-pci-gli: Fix no irq handler from suspend
+Date:   Mon, 27 Apr 2020 18:30:48 +0800
+Message-Id: <20200427103048.20785-1-benchuanggli@gmail.com>
+X-Mailer: git-send-email 2.26.2
 MIME-Version: 1.0
-Content-Type: text/plain
+Content-Transfer-Encoding: 8bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+From: Ben Chuang <ben.chuang@genesyslogic.com.tw>
 
-On Sat 28 Mar 2020 at 01:32, Martin Blumenstingl <martin.blumenstingl@googlemail.com> wrote:
+The kernel prints a message similar to
+"[   28.881959] do_IRQ: 5.36 No irq handler for vector"
+when GL975x resumes from suspend. Implement a resume callback to fix this.
 
-> Hello,
->
-> this is the patchset for a driver for the Amlogic "SDHC" MMC controller
-> found on Meson6, Meson8, Meson8b and Meson8m2 SoCs.
->
-> The public S805 (Meson8b) datasheet has some documentation starting on
-> page 74: [0]
->
-> It's performance is still not as good as the driver from Amlogic's 3.10
-> kernel, but it does not corrupt data anymore (as RFC v1 did).
->
-> Special thanks to the people who supported me off-list - you are
-> amazing and deserve to be mentioned here:
-> - Xin Yin who helped me fix two more write corruption problems. I am
->   hoping that he will reply with Reviewed-by, Tested-by and Bug-fixed-by
-> - Jianxin Pan for sharing some of the internal workings of this MMC
->   controller with me
-> - Wei Wang for spotting the initial write corruption problem and helping
->   test this driver on his board. I have his permission to add his
->   Tested-by (off-list, he's Cc'ed so if there's any problem he can speak
->   up)
->
->
-> Changes since v4 at [4]:
-> - move the four clkin clock inputs to the start of the clock-names list
->   as suggested by Rob, affects patch #1
-> - fixed #include statement in dt-bindings example in patch #1
->
-> Changes since v3 at [3]:
-> - split the clock bits into a separate clock controller driver because
->   of two reasons: 1) it keeps the MMC controller driver mostly clean of
->   the clock bits
+Fixes: 31e43f31890c ("mmc: sdhci-pci-gli: Enable MSI interrupt for GL975x")
+Co-developed-by: Renius Chen <renius.chen@genesyslogic.com.tw>
+Signed-off-by: Renius Chen <renius.chen@genesyslogic.com.tw>
+Tested-by: Dave Flogeras <dflogeras2@gmail.com>
+Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+---
+ drivers/mmc/host/sdhci-pci-gli.c | 18 ++++++++++++++++++
+ 1 file changed, 18 insertions(+)
 
-If the register is in the MMC controller register space and the MMC
-driver is the driver using these clocks, it is where the clocks belong.
-I don't get why it could be an issue ?
-
-Is the clock block is shared with another device, like on the Gx family ?
-
-> 2) the pure clock controller can use
->   devm_clk_hw_register() (instead of devm_clk_register(), which is
->   deprecated) and the MMC controller can act as a pure clock consumer.
-
-Why can't you use devm_clk_hw_register in an MMC driver ?
-Unless I missed something, it is provided by clk-provider.h, which can be
-included by any driver.
-
-I'm not sure I understand why the support for this device is split in
-two drivers. Using CCF clocks out of "drivers/clk" is encouraged.
-
->   This also affects the dt-bindings which is why I dropped Rob's
->   Reviewed-by. Thanks to Ulf for the suggestions
->
-> Changes since v2 at [2]:
-> - rebased on top of v5.5-rc1
-> - added Rob's and Xin Yin's Reviewed-by and Tested-by (thank you!)
-> - (note: Kevin had v2 of this series in -next for a few days so the
->    build test robots could play with it. I haven't received any negative
->    feedback in that time)
->
-> Changes since RFC v1 at [1]:
-> - don't set MESON_SDHC_MISC_MANUAL_STOP to fix one of three write
->   corruption problems. the out-of-tree 3.10 "reference" driver doesn't
->   set it either
-> - check against data->flags instead of cmd->flags when testing for
->   MMC_DATA_WRITE as spotted by Xin Yin (many thanks!). This fixes
->   another write corruption problem
-> - clear the FIFOs after successfully transferring data as suggested by
->   Xin Yin (many thanks!). This is what the 3.10 driver did and fixes yet
->   another write corruption problem
-> - integrate the clock suggestions from Jianxin Pan so the driver is now
->   able to set up the clocks correctly for all known cases. documentation
->   is also added to the patch description. Thank you Jianxin for the
->   help!
-> - set the correct max_busy_timeout as suggested by Jianxin Pan (thanks!)
-> - convert the dt-bindings to .yaml (which is why I didn't add Rob's
->   Reviewed-by)
-> - switch to struct clk_parent_data as part of newer common clock
->   framework APIs to simplify the clock setup
-> - dropped CMD23 support because it seems to hurt read and write
->   performance by 10-20% in my tests. it's not clear why, but for now we
->   can live without this.
-> - use devm_platform_ioremap_resource instead of open-coding it
->
->
-> [0] https://dn.odroid.com/S805/Datasheet/S805_Datasheet%20V0.8%2020150126.pdf
-> [1] https://patchwork.kernel.org/cover/11035505/
-> [2] http://lists.infradead.org/pipermail/linux-amlogic/2019-November/014576.html
-> [3] https://patchwork.kernel.org/cover/11283179/
-> [4] https://patchwork.kernel.org/cover/11329017/
->
-> Martin Blumenstingl (3):
->   dt-bindings: mmc: Document the Amlogic Meson SDHC MMC host controller
->   clk: meson: add a driver for the Meson8/8b/8m2 SDHC clock controller
->   mmc: host: meson-mx-sdhc: new driver for the Amlogic Meson SDHC host
->
->  .../bindings/mmc/amlogic,meson-mx-sdhc.yaml   |   83 ++
->  drivers/clk/meson/Kconfig                     |    9 +
->  drivers/clk/meson/Makefile                    |    1 +
->  drivers/clk/meson/meson-mx-sdhc.c             |  212 ++++
->  drivers/mmc/host/Kconfig                      |   14 +
->  drivers/mmc/host/Makefile                     |    1 +
->  drivers/mmc/host/meson-mx-sdhc.c              | 1064 +++++++++++++++++
->  .../dt-bindings/clock/meson-mx-sdhc-clkc.h    |    8 +
->  8 files changed, 1392 insertions(+)
->  create mode 100644 Documentation/devicetree/bindings/mmc/amlogic,meson-mx-sdhc.yaml
->  create mode 100644 drivers/clk/meson/meson-mx-sdhc.c
->  create mode 100644 drivers/mmc/host/meson-mx-sdhc.c
->  create mode 100644 include/dt-bindings/clock/meson-mx-sdhc-clkc.h
+diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
+index ce15a05f23d4..7195dd33ac3d 100644
+--- a/drivers/mmc/host/sdhci-pci-gli.c
++++ b/drivers/mmc/host/sdhci-pci-gli.c
+@@ -334,6 +334,18 @@ static u32 sdhci_gl9750_readl(struct sdhci_host *host, int reg)
+ 	return value;
+ }
+ 
++#ifdef CONFIG_PM_SLEEP
++int sdhci_pci_gli_resume(struct sdhci_pci_chip *chip)
++{
++	struct sdhci_pci_slot *slot = chip->slots[0];
++
++	pci_free_irq_vectors(slot->chip->pdev);
++	gli_pcie_enable_msi(slot);
++
++	return sdhci_pci_resume_host(chip);
++}
++#endif
++
+ static const struct sdhci_ops sdhci_gl9755_ops = {
+ 	.set_clock		= sdhci_set_clock,
+ 	.enable_dma		= sdhci_pci_enable_dma,
+@@ -348,6 +360,9 @@ const struct sdhci_pci_fixes sdhci_gl9755 = {
+ 	.quirks2	= SDHCI_QUIRK2_BROKEN_DDR50,
+ 	.probe_slot	= gli_probe_slot_gl9755,
+ 	.ops            = &sdhci_gl9755_ops,
++#ifdef CONFIG_PM_SLEEP
++	.resume         = sdhci_pci_gli_resume,
++#endif
+ };
+ 
+ static const struct sdhci_ops sdhci_gl9750_ops = {
+@@ -366,4 +381,7 @@ const struct sdhci_pci_fixes sdhci_gl9750 = {
+ 	.quirks2	= SDHCI_QUIRK2_BROKEN_DDR50,
+ 	.probe_slot	= gli_probe_slot_gl9750,
+ 	.ops            = &sdhci_gl9750_ops,
++#ifdef CONFIG_PM_SLEEP
++	.resume         = sdhci_pci_gli_resume,
++#endif
+ };
+-- 
+2.26.2
 
