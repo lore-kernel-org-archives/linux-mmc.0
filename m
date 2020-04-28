@@ -2,189 +2,133 @@ Return-Path: <SRS0=tofm=6M=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+X-Spam-Status: No, score=-8.3 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,USER_AGENT_SANE_2
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F3921C83000
-	for <linux-mmc@archiver.kernel.org>; Tue, 28 Apr 2020 12:14:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 97DF2C83009
+	for <linux-mmc@archiver.kernel.org>; Tue, 28 Apr 2020 12:29:49 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D036E206D6
-	for <linux-mmc@archiver.kernel.org>; Tue, 28 Apr 2020 12:14:06 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 77B8C206E2
+	for <linux-mmc@archiver.kernel.org>; Tue, 28 Apr 2020 12:29:49 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="A5Sijg+k"
+	dkim=pass (1024-bit key) header.d=mediatek.com header.i=@mediatek.com header.b="fuyPALxL"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726554AbgD1MOG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 28 Apr 2020 08:14:06 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41118 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-FAIL-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1726448AbgD1MOG (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Apr 2020 08:14:06 -0400
-Received: from mail-ua1-x944.google.com (mail-ua1-x944.google.com [IPv6:2607:f8b0:4864:20::944])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0BCB2C03C1A9
-        for <linux-mmc@vger.kernel.org>; Tue, 28 Apr 2020 05:14:06 -0700 (PDT)
-Received: by mail-ua1-x944.google.com with SMTP id z16so21017522uae.11
-        for <linux-mmc@vger.kernel.org>; Tue, 28 Apr 2020 05:14:06 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=Si7QUx2lJaDXoOqwKRzvd/FqwJiW8O4bymVE3/8B3ns=;
-        b=A5Sijg+k44OBG56boCW5SC8UnJ7ex3iO/soWNrUQ5voF2m/ptYSQIKN71PHSiPPkoO
-         eigYpYxmn6IxQ9IL7wRTmGeXrXf71r2La7KtTzOtGIfY1YtExiSFtYxvPIXBiJfIovsD
-         VOcBL9NUzfeaw+ldYSjxbBxWl8FO3zJGE8Tt/4pjWZqRZFxEhgYYLmK1ornUQMBAqnm0
-         WTv3YzAb4txKP30dESYuDYf7O+vmvPoky1fidkQ52iKdlVE49UK6+Y9UvKgxjx7/kA8N
-         EbUWenpXx5R1hjPo4LxyJaRTmL4Hf2L1g/UGjW8rCflH6my2LPpxPAQpUjZoU2WNixyw
-         39aw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=Si7QUx2lJaDXoOqwKRzvd/FqwJiW8O4bymVE3/8B3ns=;
-        b=lXoNTcAh+P+Gr6rrOntgpn7I3ZKLCKHJPhCFxJpGTMoJGisC3NUqLOqsJXFWMxka6b
-         tRswRpwhsH/3I1isPK+DpIHyYPInqvb8XDgycDo8HpgcKOXghFT/GtIkyNJlMHQngmEC
-         4CsCbvbDR7Mn/RhUZuht+8CVSb3HknAvCSrOuSYnsOswvzFY290r7BlMhcxLvwpIEs1W
-         uAY2oLedIfMQALnLxriQ9pn7xEbOWOBpS4Km90td2d1OWsAcy5KiueoRKGqHbElO1lhK
-         Qsvk6WJ1Gjx/7164mAnR3lg5scdIphRD+5PGC8OTtFl1WfEtbLJlLN2GGvtJrq0U/VQN
-         ldlA==
-X-Gm-Message-State: AGi0PuY1OGvmMyA0TabYY6PKMSBl3lM104JA2wQMw6F/AGa55OkgrgJh
-        stBeI62QZpiAU2T9Yw+Wn7RefDd85NqRpjvMQyA9iHgDrpc=
-X-Google-Smtp-Source: APiQypLbHUMx3UMDbWJ6CNDiWmz1dbLLDJ3jr2Zb9fx7iExKVYW+P1I0WNBMwukiq/PNOP+qA0Yx6/Ewnd9S2sheWhk=
-X-Received: by 2002:a67:f24b:: with SMTP id y11mr20631794vsm.165.1588076045066;
- Tue, 28 Apr 2020 05:14:05 -0700 (PDT)
-MIME-Version: 1.0
-References: <1586835611-13857-1-git-send-email-yong.mao@mediatek.com>
- <1586835611-13857-2-git-send-email-yong.mao@mediatek.com> <CAPDyKFo40tBpowmWN3gxH8b=jMmCK8O5ALNQ7y6XZ5AosX=GUA@mail.gmail.com>
- <1588066038.30914.28.camel@mhfsdcap03>
-In-Reply-To: <1588066038.30914.28.camel@mhfsdcap03>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 28 Apr 2020 14:13:28 +0200
-Message-ID: <CAPDyKFrBd0E2Qy89JgTE3YH0iiXB7due0JmnSVAhYL5aubSczA@mail.gmail.com>
-Subject: Re: [PATCH 1/3] mmc: core: need do mmc_power_cycle in mmc_sdio_resend_if_cond
-To:     "yong.mao@mediatek.com" <yong.mao@mediatek.com>
-Cc:     Matthias Kaehlcke <mka@chromium.org>,
+        id S1726853AbgD1M3p (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 28 Apr 2020 08:29:45 -0400
+Received: from Mailgw01.mediatek.com ([1.203.163.78]:55674 "EHLO
+        mailgw01.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1726684AbgD1M3o (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Apr 2020 08:29:44 -0400
+X-UUID: 96c3c8ec85d2473d86a4d2a61570b222-20200428
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=mediatek.com; s=dk;
+        h=Content-Transfer-Encoding:MIME-Version:Content-Type:References:In-Reply-To:Date:CC:To:From:Subject:Message-ID; bh=x82FlLAEXLzeRSBYPB5msRYu1TSUP46MR6Ng6NKD4bQ=;
+        b=fuyPALxLcsRMw4yIfqMLHTANQi4nyKdZ1STTuHSyeLWdWnVqONsKGrIVq6QpkqMqJU65PXD/EUPehAcOK9ekYY6E58eLcXKb9xWi/p1fz/ZjC8UP98uYNqcSU7xmklNeZld12sJCec2ZoIiCxQyTyyWzjtbz4ETr8R5GkH6U8vs=;
+X-UUID: 96c3c8ec85d2473d86a4d2a61570b222-20200428
+Received: from mtkcas34.mediatek.inc [(172.27.4.253)] by mailgw01.mediatek.com
+        (envelope-from <yong.mao@mediatek.com>)
+        (mailgw01.mediatek.com ESMTP with TLS)
+        with ESMTP id 215005333; Tue, 28 Apr 2020 20:29:36 +0800
+Received: from MTKCAS36.mediatek.inc (172.27.4.186) by MTKMBS31N1.mediatek.inc
+ (172.27.4.69) with Microsoft SMTP Server (TLS) id 15.0.1497.2; Tue, 28 Apr
+ 2020 20:29:34 +0800
+Received: from [10.17.3.153] (10.17.3.153) by MTKCAS36.mediatek.inc
+ (172.27.4.170) with Microsoft SMTP Server id 15.0.1497.2 via Frontend
+ Transport; Tue, 28 Apr 2020 20:29:32 +0800
+Message-ID: <1588076927.730.2.camel@mhfsdcap03>
+Subject: Re: [PATCH v5 3/5] mmc: mediatek: refine msdc timeout api
+From:   "yong.mao@mediatek.com" <yong.mao@mediatek.com>
+To:     Chun-Hung Wu <chun-hung.wu@mediatek.com>
+CC:     <mirq-linux@rere.qmqm.pl>, Jonathan Hunter <jonathanh@nvidia.com>,
+        "Al Cooper" <alcooperx@gmail.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Florian Fainelli <f.fainelli@gmail.com>,
+        <bcm-kernel-feedback-list@broadcom.com>,
+        Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Michal Simek <michal.simek@xilinx.com>,
+        Thierry Reding <thierry.reding@gmail.com>,
         Chaotian Jing <chaotian.jing@mediatek.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Mark Rutland <mark.rutland@arm.com>,
         Matthias Brugger <matthias.bgg@gmail.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        "moderated list:ARM/Mediatek SoC support" 
+        "Linus Walleij" <linus.walleij@linaro.org>,
+        Pavel Machek <pavel@ucw.cz>,
+        "Kate Stewart" <kstewart@linuxfoundation.org>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+        Pan Bian <bianpan2016@163.com>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Allison Randal <allison@lohutok.net>,
+        Mathieu Malaterre <malat@debian.org>,
+        Stanley Chu <stanley.chu@mediatek.com>,
+        Kuohong Wang <kuohong.wang@mediatek.com>,
+        <devicetree@vger.kernel.org>, <wsd_upstream@mediatek.com>,
+        <linux-arm-msm@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>,
         <linux-mediatek@lists.infradead.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        srv_heupstream <srv_heupstream@mediatek.com>
+        <linux-tegra@vger.kernel.org>, <kernel-team@android.com>,
+        <linux-arm-kernel@lists.infradead.org>
+Date:   Tue, 28 Apr 2020 20:28:47 +0800
+In-Reply-To: <1588031768-23677-4-git-send-email-chun-hung.wu@mediatek.com>
+References: <1588031768-23677-1-git-send-email-chun-hung.wu@mediatek.com>
+         <1588031768-23677-4-git-send-email-chun-hung.wu@mediatek.com>
 Content-Type: text/plain; charset="UTF-8"
+X-Mailer: Evolution 3.10.4-0ubuntu2 
+MIME-Version: 1.0
+X-TM-SNTS-SMTP: E01AAD61AB5BB27155A77063CBEA1604E31F717DA3D8618061EF502A15332D7C2000:8
+X-MTK:  N
+Content-Transfer-Encoding: base64
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 28 Apr 2020 at 11:28, yong.mao@mediatek.com
-<yong.mao@mediatek.com> wrote:
->
->
-> On Fri, 2020-04-24 at 12:09 +0200, Ulf Hansson wrote:
-> > On Tue, 14 Apr 2020 at 05:40, Yong Mao <yong.mao@mediatek.com> wrote:
-> > >
-> > > From: yong mao <yong.mao@mediatek.com>
-> > >
-> > > When mmc_sdio_resned_if_cond is invoked, it indicates the SDIO
-> > > device is not in the right state. In this condition, the previous
-> > > implementation of mmc_sdio_resend_if_cond can't make sure SDIO
-> > > device be back to idle state. mmc_power_cycle can reset the SDIO
-> > > device by HW and also make sure SDIO device enter to idle state
-> > > correctly.
-> > >
-> > > Signed-off-by: Yong Mao <yong.mao@mediatek.com>
-> > > ---
-> > >  drivers/mmc/core/sdio.c | 1 +
-> > >  1 file changed, 1 insertion(+)
-> > >
-> > > diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-> > > index ebb387a..ada0a80 100644
-> > > --- a/drivers/mmc/core/sdio.c
-> > > +++ b/drivers/mmc/core/sdio.c
-> > > @@ -546,6 +546,7 @@ static int mmc_sdio_init_uhs_card(struct mmc_card *card)
-> > >  static void mmc_sdio_resend_if_cond(struct mmc_host *host,
-> > >                                     struct mmc_card *card)
-> > >  {
-> > > +       mmc_power_cycle(host, host->card->ocr);
-> >
-> > This looks wrong to me. mmc_sdio_resend_if_cond() is called from two places.
-> >
-> > 1. In the case when mmc_set_uhs_voltage() fails in
-> > mmc_sdio_init_card(), which means a call to mmc_power_cycle() has
-> > already been done.
-> >
->   Thanks for your comment.
->   Yes. It is right that mmc_power_cycle() has already been done when
->   mmc_sdio_resend_if_cond() is called. In normal re-initialization case,
->   this mmc_power_cycle() (currently in 1.8v voltage and 208Mhz clock)
->   can make SDIO device really back to idle state. Unfortunately, in some
->   special SDIO device, it will enter to unstable state.
->
->   At this unstable state, device may keep data0 always low after receiving CMD11.
->   And then every other SDIO CMD can't be sent to device any more due to card
->   is busy(data0 is low). Therefore, previous implementation can't save the
->   device. At this time, mmc_power_cycle() may be the final solution to make
->   sure SDIO device can back to idle state correctly.
+T24gVHVlLCAyMDIwLTA0LTI4IGF0IDA3OjU2ICswODAwLCBDaHVuLUh1bmcgV3Ugd3JvdGU6DQo+
+IEV4dHJhY3QgbXNkYyB0aW1lb3V0IGFwaSBjb21tb24gcGFydCB0byBoYXZlDQo+IGJldHRlciBj
+b2RlIGFyY2hpdGVjdHVyZSBhbmQgYXZvaWQgcmVkdW5kZW50DQpwbGVhc2UgY29ycmVjdCB0aGUg
+d29yZCAicmVkdW5kYW50IiBpbiBuZXh0IHZlcnNpb24NCj4gY29kZS4NCj4gDQo+IFNpZ25lZC1v
+ZmYtYnk6IENodW4tSHVuZyBXdSA8Y2h1bi1odW5nLnd1QG1lZGlhdGVrLmNvbT4NCkFja2VkLWJ5
+OiBZb25nIE1hbyA8eW9uZy5tYW9AbWVkaWF0ZWsuY29tPg0KPiAtLS0NCj4gIGRyaXZlcnMvbW1j
+L2hvc3QvbXRrLXNkLmMgfCAzMiArKysrKysrKysrKysrKysrKysrKysrLS0tLS0tLS0tLQ0KPiAg
+MSBmaWxlIGNoYW5nZWQsIDIyIGluc2VydGlvbnMoKyksIDEwIGRlbGV0aW9ucygtKQ0KPiANCj4g
+ZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2hvc3QvbXRrLXNkLmMgYi9kcml2ZXJzL21tYy9ob3N0
+L210ay1zZC5jDQo+IGluZGV4IDc3MjZkY2YuLmEyMzI4ZmIgMTAwNjQ0DQo+IC0tLSBhL2RyaXZl
+cnMvbW1jL2hvc3QvbXRrLXNkLmMNCj4gKysrIGIvZHJpdmVycy9tbWMvaG9zdC9tdGstc2QuYw0K
+PiBAQCAtNjk5LDIxICs2OTksMjEgQEAgc3RhdGljIHZvaWQgbXNkY191bnByZXBhcmVfZGF0YShz
+dHJ1Y3QgbXNkY19ob3N0ICpob3N0LCBzdHJ1Y3QgbW1jX3JlcXVlc3QgKm1ycSkNCj4gIAl9DQo+
+ICB9DQo+ICANCj4gLS8qIGNsb2NrIGNvbnRyb2wgcHJpbWl0aXZlcyAqLw0KPiAtc3RhdGljIHZv
+aWQgbXNkY19zZXRfdGltZW91dChzdHJ1Y3QgbXNkY19ob3N0ICpob3N0LCB1MzIgbnMsIHUzMiBj
+bGtzKQ0KPiArc3RhdGljIHU2NCBtc2RjX3RpbWVvdXRfY2FsKHN0cnVjdCBtc2RjX2hvc3QgKmhv
+c3QsIHU2NCBucywgdTY0IGNsa3MpDQo+ICB7DQo+IC0JdTMyIHRpbWVvdXQsIGNsa19uczsNCj4g
+Kwl1NjQgdGltZW91dCwgY2xrX25zOw0KPiAgCXUzMiBtb2RlID0gMDsNCj4gIA0KPiAtCWhvc3Qt
+PnRpbWVvdXRfbnMgPSBuczsNCj4gLQlob3N0LT50aW1lb3V0X2Nsa3MgPSBjbGtzOw0KPiAgCWlm
+IChob3N0LT5tbWMtPmFjdHVhbF9jbG9jayA9PSAwKSB7DQo+ICAJCXRpbWVvdXQgPSAwOw0KPiAg
+CX0gZWxzZSB7DQo+IC0JCWNsa19ucyAgPSAxMDAwMDAwMDAwVUwgLyBob3N0LT5tbWMtPmFjdHVh
+bF9jbG9jazsNCj4gLQkJdGltZW91dCA9IChucyArIGNsa19ucyAtIDEpIC8gY2xrX25zICsgY2xr
+czsNCj4gKwkJY2xrX25zICA9IDEwMDAwMDAwMDBVTEw7DQo+ICsJCWRvX2RpdihjbGtfbnMsIGhv
+c3QtPm1tYy0+YWN0dWFsX2Nsb2NrKTsNCj4gKwkJdGltZW91dCA9IG5zICsgY2xrX25zIC0gMTsN
+Cj4gKwkJZG9fZGl2KHRpbWVvdXQsIGNsa19ucyk7DQo+ICsJCXRpbWVvdXQgKz0gY2xrczsNCj4g
+IAkJLyogaW4gMTA0ODU3NiBzY2xrIGN5Y2xlIHVuaXQgKi8NCj4gLQkJdGltZW91dCA9ICh0aW1l
+b3V0ICsgKDB4MSA8PCAyMCkgLSAxKSA+PiAyMDsNCj4gKwkJdGltZW91dCA9IERJVl9ST1VORF9V
+UCh0aW1lb3V0LCAoMHgxIDw8IDIwKSk7DQo+ICAJCWlmIChob3N0LT5kZXZfY29tcC0+Y2xrX2Rp
+dl9iaXRzID09IDgpDQo+ICAJCQlzZHJfZ2V0X2ZpZWxkKGhvc3QtPmJhc2UgKyBNU0RDX0NGRywN
+Cj4gIAkJCQkgICAgICBNU0RDX0NGR19DS01PRCwgJm1vZGUpOw0KPiBAQCAtNzIzLDkgKzcyMywy
+MSBAQCBzdGF0aWMgdm9pZCBtc2RjX3NldF90aW1lb3V0KHN0cnVjdCBtc2RjX2hvc3QgKmhvc3Qs
+IHUzMiBucywgdTMyIGNsa3MpDQo+ICAJCS8qRERSIG1vZGUgd2lsbCBkb3VibGUgdGhlIGNsayBj
+eWNsZXMgZm9yIGRhdGEgdGltZW91dCAqLw0KPiAgCQl0aW1lb3V0ID0gbW9kZSA+PSAyID8gdGlt
+ZW91dCAqIDIgOiB0aW1lb3V0Ow0KPiAgCQl0aW1lb3V0ID0gdGltZW91dCA+IDEgPyB0aW1lb3V0
+IC0gMSA6IDA7DQo+IC0JCXRpbWVvdXQgPSB0aW1lb3V0ID4gMjU1ID8gMjU1IDogdGltZW91dDsN
+Cj4gIAl9DQo+IC0Jc2RyX3NldF9maWVsZChob3N0LT5iYXNlICsgU0RDX0NGRywgU0RDX0NGR19E
+VE9DLCB0aW1lb3V0KTsNCj4gKwlyZXR1cm4gdGltZW91dDsNCj4gK30NCj4gKw0KPiArLyogY2xv
+Y2sgY29udHJvbCBwcmltaXRpdmVzICovDQo+ICtzdGF0aWMgdm9pZCBtc2RjX3NldF90aW1lb3V0
+KHN0cnVjdCBtc2RjX2hvc3QgKmhvc3QsIHU2NCBucywgdTY0IGNsa3MpDQo+ICt7DQo+ICsJdTY0
+IHRpbWVvdXQ7DQo+ICsNCj4gKwlob3N0LT50aW1lb3V0X25zID0gbnM7DQo+ICsJaG9zdC0+dGlt
+ZW91dF9jbGtzID0gY2xrczsNCj4gKw0KPiArCXRpbWVvdXQgPSBtc2RjX3RpbWVvdXRfY2FsKGhv
+c3QsIG5zLCBjbGtzKTsNCj4gKwlzZHJfc2V0X2ZpZWxkKGhvc3QtPmJhc2UgKyBTRENfQ0ZHLCBT
+RENfQ0ZHX0RUT0MsDQo+ICsJCSAgICAgICh1MzIpKHRpbWVvdXQgPiAyNTUgPyAyNTUgOiB0aW1l
+b3V0KSk7DQo+ICB9DQo+ICANCj4gIHN0YXRpYyB2b2lkIG1zZGNfZ2F0ZV9jbG9jayhzdHJ1Y3Qg
+bXNkY19ob3N0ICpob3N0KQ0KDQo=
 
-Well, this still sounds a bit vague to me. I need to understand more
-exactly under what circumstances the problem occurs.
-
-What platform are you testing with and what SDIO card is being used?
-
-Is the problem happening during the system resume phase?
-
-Are the SDIO func driver using runtime PM and then is the host capable
-of MMC_CAP_POWER_OFF_CARD?
-
-Is it easy to reproduce the problem for you?
-
->
-> > 2. Wen sdio_read_cccr() fails and when we decide to retry the UHS-I
-> > voltage switch. Then perhaps it could make sense to run a power cycle.
-> > But if so, we better do it only for that path.
-> >
-> > I will continue to look a bit, as I think there are really more issues
-> > that we may want to look into while looking at this piece of code.
-> > However, allow me some more time before I can provide some more ideas
-> > of how to move forward.
->   In the actual project, we do encounter many relative issues about re-initialized card.
->   The following two categories are the most common issue we met before.
->   A. the SDIO card is initialized by UHS-I mode at the first time, but will be
->      re-initialized by High Speed mode at the second time.
->      ==> All this type of issues is relative with S18A in response of CMD5.
->          And most of the issues are related to the interval between powering off and
->          powering on card.
->   B. If there is something wrong in the flow of voltage switch(after CMD11), card will
->      always keep all data pins to low. And then it hangs up because data0 is always low.
->   Hope this information will be helpful for you.
-
-Thanks for sharing these details! I think we need to continue to debug
-this issue, to fully understand.
-
-In principle, it sounds to me that maybe mmc_power_cycle(), isn't
-really successfully power-cycling the SDIO card. Perhaps insert a few
-delays or so in that code to see how that would affect things?
-
-Anyway, how is the power to the SDIO card controlled in this case? Are
-you using a mmc-pwrseq?
-
->
->   Anyway, we will wait for your advises.
-> >
-> > >         sdio_reset(host);
-> > >         mmc_go_idle(host);
-> > >         mmc_send_if_cond(host, host->ocr_avail);
-> > > --
-> > > 1.9.1
-> >
-> > Kind regards
-> > Uffe
-
-I have a few patches in the pipe, which fixes some other problems in
-mmc_sdio_init_card(). Possibly those can be related, but I need a day
-or so to post them, let's see.
-
-Kind regards
-Uffe
