@@ -1,111 +1,177 @@
-Return-Path: <SRS0=ssCU=6L=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=tofm=6M=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	MIME_BASE64_TEXT,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,USER_AGENT_GIT
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5DEA7C83006
-	for <linux-mmc@archiver.kernel.org>; Mon, 27 Apr 2020 23:57:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AE804C83004
+	for <linux-mmc@archiver.kernel.org>; Tue, 28 Apr 2020 08:02:52 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3B7CA21974
-	for <linux-mmc@archiver.kernel.org>; Mon, 27 Apr 2020 23:57:45 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 88EE6206D7
+	for <linux-mmc@archiver.kernel.org>; Tue, 28 Apr 2020 08:02:52 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=mediatek.com header.i=@mediatek.com header.b="KE7SstV4"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="HIRU+1u8"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726478AbgD0X5S (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 27 Apr 2020 19:57:18 -0400
-Received: from mailgw02.mediatek.com ([210.61.82.184]:3807 "EHLO
-        mailgw02.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1726355AbgD0X5S (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Apr 2020 19:57:18 -0400
-X-UUID: d81cef179746473c9e5ea4be07c45f40-20200428
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=mediatek.com; s=dk;
-        h=Content-Transfer-Encoding:Content-Type:MIME-Version:Message-ID:Date:Subject:CC:To:From; bh=aI88OR5SoOs9oP8eEG6yM2tCCWEGm3PDTnuHvBFnmpg=;
-        b=KE7SstV4bwvN+YCOdoKCXfKRyg7mhOAKILQa7nJERn3w3DCd+1JUkMPcoofMTKi98F5oqmBOoIif1PsMkCfmb3IxGowaBYbB/PD0C9ZDFF4kf1q019cZI2Oexh+T7qOhvA0+dZS+40Wz95rhs9jltandraGtcAaUkoxZiQVWR2k=;
-X-UUID: d81cef179746473c9e5ea4be07c45f40-20200428
-Received: from mtkcas06.mediatek.inc [(172.21.101.30)] by mailgw02.mediatek.com
-        (envelope-from <chun-hung.wu@mediatek.com>)
-        (Cellopoint E-mail Firewall v4.1.10 Build 0809 with TLS)
-        with ESMTP id 1311210949; Tue, 28 Apr 2020 07:57:14 +0800
-Received: from mtkcas08.mediatek.inc (172.21.101.126) by
- mtkmbs07n2.mediatek.inc (172.21.101.141) with Microsoft SMTP Server (TLS) id
- 15.0.1497.2; Tue, 28 Apr 2020 07:57:08 +0800
-Received: from mtkswgap22.mediatek.inc (172.21.77.33) by mtkcas08.mediatek.inc
- (172.21.101.73) with Microsoft SMTP Server id 15.0.1497.2 via Frontend
- Transport; Tue, 28 Apr 2020 07:56:09 +0800
-From:   Chun-Hung Wu <chun-hung.wu@mediatek.com>
-To:     <mirq-linux@rere.qmqm.pl>, Jonathan Hunter <jonathanh@nvidia.com>,
-        Al Cooper <alcooperx@gmail.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Florian Fainelli <f.fainelli@gmail.com>,
-        <bcm-kernel-feedback-list@broadcom.com>,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>,
-        Michal Simek <michal.simek@xilinx.com>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Mark Rutland <mark.rutland@arm.com>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Pavel Machek <pavel@ucw.cz>,
-        Kate Stewart <kstewart@linuxfoundation.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
-        Pan Bian <bianpan2016@163.com>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Allison Randal <allison@lohutok.net>,
-        Mathieu Malaterre <malat@debian.org>,
-        Stanley Chu <stanley.chu@mediatek.com>,
-        Kuohong Wang <kuohong.wang@mediatek.com>,
-        Yong Mao <yong.mao@mediatek.com>
-CC:     <kernel-team@android.com>, <linux-kernel@vger.kernel.org>,
-        <linux-mmc@vger.kernel.org>, <linux-mediatek@lists.infradead.org>,
-        <devicetree@vger.kernel.org>, <wsd_upstream@mediatek.com>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <linux-arm-msm@vger.kernel.org>, <linux-tegra@vger.kernel.org>,
-        Chun-Hung Wu <chun-hung.wu@mediatek.com>
-Subject: [PATCH v5 0/5] mmc: mediatek: add mmc cqhci support
-Date:   Tue, 28 Apr 2020 07:56:03 +0800
-Message-ID: <1588031768-23677-1-git-send-email-chun-hung.wu@mediatek.com>
-X-Mailer: git-send-email 1.9.1
+        id S1726744AbgD1ICr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 28 Apr 2020 04:02:47 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58226 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726253AbgD1ICq (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Apr 2020 04:02:46 -0400
+Received: from mail-lj1-x241.google.com (mail-lj1-x241.google.com [IPv6:2a00:1450:4864:20::241])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 09E8EC03C1A9;
+        Tue, 28 Apr 2020 01:02:46 -0700 (PDT)
+Received: by mail-lj1-x241.google.com with SMTP id u15so20457439ljd.3;
+        Tue, 28 Apr 2020 01:02:45 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=qBq8MNvK8Nt/D5QT2/1GNIA89VYusPV5jUqjHtTptYc=;
+        b=HIRU+1u8K7IFC9dUiid10MpRqqgDfPiiEtdQn/F1C71TCCLM97SePIKpq/EHxpTTZL
+         aGij20mzHyxRZQDIcuu5OZl1n29WX6Z1WxlJmejBnQ/SouUBwehIHAMklCPffYHATqzA
+         +YiLUYoRlTvZVCkjGC8PhkhJDq4H2M72pr6qUAAxyUg7GONzh0/ZnNKeTbKeUUv43voW
+         OfZ0gWC/JooWIdAvUi0bi7ScveloLkpBgSktzyO/J5WIzssynK5TVVpPEm8wYciJBmxi
+         QDbYYiHB+dXDlwTe1aADpBT3NSwBVL5/UPqR1DEe7poZupXBcFgno4zj25nlz0GQwV6z
+         UFPw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=qBq8MNvK8Nt/D5QT2/1GNIA89VYusPV5jUqjHtTptYc=;
+        b=V1f9pDGr2t9IILDGVRruXcZzN1fj96OWtIGlRBT50yfFejgDXdi/u9K8n7lRFNy89n
+         xP/o+4UIXlSB96hhL60pGNxj5O5Da1qlYJXaB3MQK99KNAKH2VimXV0FAmMz02ANrrbb
+         FQmN14K+/rt0GHYqyxg8brrFCK15B4VjEPvQ8EV0vT0QmgkMSmKYEfrz15s2Ps95wy2+
+         tX70p1WrmTQYZsyA/dQfSXWv9v+TeSNn3Cg6EtJGA5yMjTd7B2SjTzmd6URPovIWEWnG
+         OO3Oxa4EWoLJThl+i3NH2DsZak4AAW6qDtwbBHluJXA5FDpvGxKejgTf6nSh1C9gKWO6
+         7MHA==
+X-Gm-Message-State: AGi0PuY63nb4DrUnpxov/iRMf+7DdwPc+TwtJVjufZVGzoUlcgOlfkxd
+        vkTqL5bG8GgUPgqQLCZ0mJTWh/rl0SiqkCXOj38=
+X-Google-Smtp-Source: APiQypKIDA7sLbwgIsOl28DhVoAQyjhVKdOdVrx7ZbmXpXqulpkql5QUkf/hSTUfwACFToV4UqilQZOJ0bPp2alcXFM=
+X-Received: by 2002:a2e:5746:: with SMTP id r6mr16464643ljd.15.1588060964488;
+ Tue, 28 Apr 2020 01:02:44 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain
-X-MTK:  N
-Content-Transfer-Encoding: base64
+References: <cover.1587888520.git.baolin.wang7@gmail.com> <c8bd9e5ba815a3f1bc9dac0a4bc2fbadadbc0a43.1587888520.git.baolin.wang7@gmail.com>
+ <20200427154645.GA1201@infradead.org>
+In-Reply-To: <20200427154645.GA1201@infradead.org>
+From:   Baolin Wang <baolin.wang7@gmail.com>
+Date:   Tue, 28 Apr 2020 16:02:33 +0800
+Message-ID: <CADBw62qrM2pjDXVGumTDsjvbNwN9S3kexxZemqkCf2JBynDOmQ@mail.gmail.com>
+Subject: Re: [RFC PATCH v2 1/7] block: Extand commit_rqs() to do batch processing
+To:     Christoph Hellwig <hch@infradead.org>
+Cc:     axboe@kernel.dk, Ulf Hansson <ulf.hansson@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Arnd Bergmann <arnd@arndb.de>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Paolo Valente <paolo.valente@linaro.org>,
+        Ming Lei <ming.lei@redhat.com>,
+        Orson Zhai <orsonzhai@gmail.com>,
+        Chunyan Zhang <zhang.lyra@gmail.com>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        linux-block <linux-block@vger.kernel.org>,
+        LKML <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-VGhpcyBzZXJpZXMgcHJvdmlkZXMgTWVkaWFUZWsgY3FoY2kgaW1wbGVtZW50YXRpb25zIGFzIGJl
-bG93Og0KICAtIEV4dGVuZCBtbWNfb2ZfcGFyc2UoKSB0byBwYXJzZSBDUUUgYmluZGluZ3MNCiAg
-LSBSZW1vdmUgcmVkdW5kYW50IGhvc3QgQ1FFIGJpbmRpbmdzDQogIC0gUmVmaW5lIG1zZGMgdGlt
-ZW91dCBhcGkgdG8gcmVkdWNlIHJlZHVuZGFudCBjb2RlDQogIC0gTWVkaWFUZWsgY29tbWFuZCBx
-dWV1ZSBzdXBwb3J0DQogIC0gZHQtYmluZGluZ3MgZm9yIG10Njc3OQ0KDQp2MSAtPiB2MjoNCiAg
-LSBBZGQgbW9yZSBwYXRjaCBkZXRhaWxzIGluIGNvbW1pdCBtZXNzYWdlDQogIC0gU2VwYXJhdGUg
-bXNkYyB0aW1lb3V0IGFwaSByZWZpbmUgdG8gaW5kaXZpZHVhbCBwYXRjaA0KDQp2MiAtPiB2MzoN
-CiAgLSBSZW1vdmUgQ1ItSWQsIENoYW5nZS1JZCBhbmQgRmVhdHVyZSBpbiBwYXRjaGVzDQogIC0g
-QWRkIFNpZ25lZC1vZmYtYnkgaW4gcGF0Y2hlcw0KDQp2MyAtPiB2NDoNCiAgLSBSZWZpbmUgQ1FF
-IGJpbmRpbmdzIGluIG1tY19vZl9wYXJzZSAoVWxmIEhhbnNzb24pDQogIC0gUmVtb3ZlIHJlZHVu
-ZGFudCBob3N0IENRRSBiaW5kaW5ncyAoTGludXggV2FsbGVpaikNCg0KdjQgLT4gdjU6DQogIC0g
-QWRkIEFja2VkLWJ5IGFuZCBtb3JlIG1haW50YWluZXJzDQoNCkNodW4tSHVuZyBXdSAoNSk6DQog
-IFsxLzVdIG1tYzogY29yZTogRXh0ZW5kIG1tY19vZl9wYXJzZSgpIHRvIHBhcnNlIENRRSBiaW5k
-aW5ncw0KICBbMi81XSBtbWM6IGhvc3Q6IFJlbW92ZSByZWR1bmRhbnQgQ1FFIGJpbmRpbmdzDQog
-IFszLzVdIG1tYzogbWVkaWF0ZWs6IHJlZmluZSBtc2RjIHRpbWVvdXQgYXBpDQogIFs0LzVdIG1t
-YzogbWVkaWF0ZWs6IGNvbW1hbmQgcXVldWUgc3VwcG9ydA0KICBbNS81XSBkdC1iaW5kaW5nczog
-bW1jOiBtZWRpYXRlazogQWRkIGRvY3VtZW50IGZvciBtdDY3NzkNCg0KIERvY3VtZW50YXRpb24v
-ZGV2aWNldHJlZS9iaW5kaW5ncy9tbWMvbXRrLXNkLnR4dCB8ICAgMSArDQogZHJpdmVycy9tbWMv
-Y29yZS9ob3N0LmMgICAgICAgICAgICAgICAgICAgICAgICAgIHwgICA1ICsNCiBkcml2ZXJzL21t
-Yy9ob3N0L210ay1zZC5jICAgICAgICAgICAgICAgICAgICAgICAgfCAxNTEgKysrKysrKysrKysr
-KysrKysrKysrLS0NCiBkcml2ZXJzL21tYy9ob3N0L3NkaGNpLWJyY21zdGIuYyAgICAgICAgICAg
-ICAgICAgfCAgMTEgKy0NCiBkcml2ZXJzL21tYy9ob3N0L3NkaGNpLW1zbS5jICAgICAgICAgICAg
-ICAgICAgICAgfCAgIDMgKy0NCiBkcml2ZXJzL21tYy9ob3N0L3NkaGNpLW9mLWFyYXNhbi5jICAg
-ICAgICAgICAgICAgfCAgIDMgLQ0KIGRyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktdGVncmEuYyAgICAg
-ICAgICAgICAgICAgICB8ICAgMiArLQ0KIDcgZmlsZXMgY2hhbmdlZCwgMTU1IGluc2VydGlvbnMo
-KyksIDIxIGRlbGV0aW9ucygtKQ0KDQotLSANCjIuNi40DQo=
+On Mon, Apr 27, 2020 at 11:46 PM Christoph Hellwig <hch@infradead.org> wrote:
+>
+> extand in the subject really shpuld be 'extend'
 
+Sorry for typo, and will fix in next version.
+
+>
+> On Sun, Apr 26, 2020 at 05:38:54PM +0800, Baolin Wang wrote:
+> > From: Ming Lei <ming.lei@redhat.com>
+> >
+> > Now some SD/MMC host controllers can support packed command or packed request,
+> > that means we can package several requests to host controller at one time
+> > to improve performence.
+> >
+> > But the blk-mq always takes one request from the scheduler and dispatch it to
+> > the device, regardless of the driver or the scheduler, so there should only
+> > ever be one request in the local list in blk_mq_dispatch_rq_list(), that means
+> > the bd.last is always true and the driver can not use bd.last to decide if
+> > there are requests are pending now in hardware queue to help to package
+> > requests.
+> >
+> > Thus this patch introduces a new 'BLK_MQ_F_FORCE_COMMIT_RQS' flag to call
+> > .commit_rqs() to do batch processing if necessary.
+> >
+> > Signed-off-by: Ming Lei <ming.lei@redhat.com>
+> > Tested-by: Baolin Wang <baolin.wang7@gmail.com>
+> > Signed-off-by: Baolin Wang <baolin.wang7@gmail.com>
+> > ---
+> >  block/blk-mq-sched.c   | 29 ++++++++++++++++++++---------
+> >  block/blk-mq.c         | 15 ++++++++++-----
+> >  include/linux/blk-mq.h |  1 +
+> >  3 files changed, 31 insertions(+), 14 deletions(-)
+> >
+> > diff --git a/block/blk-mq-sched.c b/block/blk-mq-sched.c
+> > index 74cedea56034..3429a71a7364 100644
+> > --- a/block/blk-mq-sched.c
+> > +++ b/block/blk-mq-sched.c
+> > @@ -85,11 +85,12 @@ void blk_mq_sched_restart(struct blk_mq_hw_ctx *hctx)
+> >   * its queue by itself in its completion handler, so we don't need to
+> >   * restart queue if .get_budget() returns BLK_STS_NO_RESOURCE.
+> >   */
+> > -static void blk_mq_do_dispatch_sched(struct blk_mq_hw_ctx *hctx)
+> > +static bool blk_mq_do_dispatch_sched(struct blk_mq_hw_ctx *hctx)
+>
+> This function already returns an int in the current for-5.8/block tree.
+
+Thanks for pointing this out, and seems I should re-modify the return
+values of the functions.
+
+>
+> > +             if (!(hctx->flags & BLK_MQ_F_FORCE_COMMIT_RQS)) {
+> > +                     if (list_empty(list)) {
+> > +                             bd.last = true;
+> > +                     } else {
+> > +                             nxt = list_first_entry(list, struct request,
+> > +                                                    queuelist);
+> > +                             bd.last = !blk_mq_get_driver_tag(nxt);
+> > +                     }
+> > +             } else {
+> > +                     bd.last = false;
+> >               }
+>
+> This seems a little odd in terms of code flow.  Why not:
+>
+>                 if (hctx->flags & BLK_MQ_F_FORCE_COMMIT_RQS) {
+>                         bd.last = false;
+>                 } else if (list_empty(list)) {
+>                         bd.last = true;
+>                 } else {
+>                         nxt = list_first_entry(list, struct request, queuelist);
+>                         bd.last = !blk_mq_get_driver_tag(nxt);
+>                 }
+
+Yes, looks better.
+
+> > diff --git a/include/linux/blk-mq.h b/include/linux/blk-mq.h
+> > index f389d7c724bd..6a20f8e8eb85 100644
+> > --- a/include/linux/blk-mq.h
+> > +++ b/include/linux/blk-mq.h
+> > @@ -391,6 +391,7 @@ struct blk_mq_ops {
+> >  enum {
+> >       BLK_MQ_F_SHOULD_MERGE   = 1 << 0,
+> >       BLK_MQ_F_TAG_SHARED     = 1 << 1,
+> > +     BLK_MQ_F_FORCE_COMMIT_RQS = 1 << 3,
+>
+> Maybe BLK_MQ_F_ALWAYS_COMMIT might be a better name?  Also this
+
+Looks reasonable to me, and will do.
+
+> flag (just like the existing ones..) could really use a comment
+> explaining it.
+
+OK, will add some comments. Thanks for your comments.
+
+-- 
+Baolin Wang
