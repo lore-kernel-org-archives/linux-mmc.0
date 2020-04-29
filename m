@@ -2,181 +2,178 @@ Return-Path: <SRS0=oXoI=6N=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.1 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,URI_HEX,
+	USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 89E8EC83004
-	for <linux-mmc@archiver.kernel.org>; Wed, 29 Apr 2020 14:09:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A3F29C83000
+	for <linux-mmc@archiver.kernel.org>; Wed, 29 Apr 2020 17:21:02 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 6402B208FE
-	for <linux-mmc@archiver.kernel.org>; Wed, 29 Apr 2020 14:09:26 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (1024-bit key) header.d=mg.codeaurora.org header.i=@mg.codeaurora.org header.b="O50usi51"
+	by mail.kernel.org (Postfix) with ESMTP id 7A8AE20787
+	for <linux-mmc@archiver.kernel.org>; Wed, 29 Apr 2020 17:21:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727062AbgD2OJY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 29 Apr 2020 10:09:24 -0400
-Received: from mail27.static.mailgun.info ([104.130.122.27]:62764 "EHLO
-        mail27.static.mailgun.info" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1727042AbgD2OJY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Apr 2020 10:09:24 -0400
-DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
- s=smtp; t=1588169362; h=Content-Transfer-Encoding: Content-Type:
- In-Reply-To: MIME-Version: Date: Message-ID: From: References: Cc: To:
- Subject: Sender; bh=oqkl5dyEFXLh5o1+jemKoDEKA7Qj+7kD+96nQn1zpQE=; b=O50usi51rkWy5/AH407Mzvo1MIZAITYMQXWJKQ5g9ERBklkB3FwuyrvJG6lkUc2Kp9sSn3aZ
- IeVRXSf9DSV2JlFIG12K0vLfCujktsV0ruu6ungXQiBrHIreLu53Z2WbOz22B8UKdfNqgE6N
- Yfm85mSfoASBZz2zEuqXT1bGSiQ=
-X-Mailgun-Sending-Ip: 104.130.122.27
-X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
-Received: from smtp.codeaurora.org (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171])
- by mxa.mailgun.org with ESMTP id 5ea98a86.7f33de13e458-smtp-out-n02;
- Wed, 29 Apr 2020 14:09:10 -0000 (UTC)
-Received: by smtp.codeaurora.org (Postfix, from userid 1001)
-        id CD247C433F2; Wed, 29 Apr 2020 14:09:09 +0000 (UTC)
-Received: from [10.131.182.194] (blr-bdr-fw-01_GlobalNAT_AllZones-Outside.qualcomm.com [103.229.18.19])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        (Authenticated sender: rnayak)
-        by smtp.codeaurora.org (Postfix) with ESMTPSA id E9BACC433CB;
-        Wed, 29 Apr 2020 14:09:05 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.3.2 smtp.codeaurora.org E9BACC433CB
-Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
-Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=none smtp.mailfrom=rnayak@codeaurora.org
-Subject: Re: [PATCH v3 09/17] mmc: sdhci-msm: Fix error handling for
- dev_pm_opp_of_add_table()
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Viresh Kumar <viresh.kumar@linaro.org>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>,
-        Andy Gross <agross@kernel.org>,
-        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
-        DTML <devicetree@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Matthias Kaehlcke <mka@chromium.org>,
-        Pradeep P V K <ppvk@codeaurora.org>,
-        Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-References: <1588080785-6812-1-git-send-email-rnayak@codeaurora.org>
- <1588080785-6812-10-git-send-email-rnayak@codeaurora.org>
- <CAPDyKFrGQvcCB1wfv=iqk66uja3faMRF1gGMSE2VhB8gJcO=sg@mail.gmail.com>
-From:   Rajendra Nayak <rnayak@codeaurora.org>
-Message-ID: <15efa375-cf1e-b793-1d3e-29ca0a547522@codeaurora.org>
-Date:   Wed, 29 Apr 2020 19:39:03 +0530
-User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:68.0) Gecko/20100101
- Thunderbird/68.7.0
+        id S1726524AbgD2RVC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 29 Apr 2020 13:21:02 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60166 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-FAIL-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1726456AbgD2RVB (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Apr 2020 13:21:01 -0400
+X-Greylist: delayed 301 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Wed, 29 Apr 2020 10:21:01 PDT
+Received: from baptiste.telenet-ops.be (baptiste.telenet-ops.be [IPv6:2a02:1800:120:4::f00:13])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 46DEBC03C1AE
+        for <linux-mmc@vger.kernel.org>; Wed, 29 Apr 2020 10:21:01 -0700 (PDT)
+Received: from ramsan ([IPv6:2a02:1810:ac12:ed60:182a:142e:a95f:66c2])
+        by baptiste.telenet-ops.be with bizsmtp
+        id YhFx2200E0w8ZL601hFxGf; Wed, 29 Apr 2020 19:15:57 +0200
+Received: from geert (helo=localhost)
+        by ramsan with local-esmtp (Exim 4.90_1)
+        (envelope-from <geert@linux-m68k.org>)
+        id 1jTqJR-0005gr-93; Wed, 29 Apr 2020 19:15:57 +0200
+Date:   Wed, 29 Apr 2020 19:15:57 +0200 (CEST)
+From:   Geert Uytterhoeven <geert@linux-m68k.org>
+To:     =?ISO-8859-15?Q?Niklas_S=F6derlund?= 
+        <niklas.soderlund+renesas@ragnatech.se>
+cc:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Masahiro Yamada <yamada.masahiro@socionext.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-mmc@vger.kernel.org, linux-pm@vger.kernel.org,
+        linux-renesas-soc@vger.kernel.org
+Subject: Re: [PATCH 1/2] mmc: tmio: undo PM autosuspend when removing the
+ host
+In-Reply-To: <20190109223452.11184-2-niklas.soderlund+renesas@ragnatech.se>
+Message-ID: <alpine.DEB.2.21.2004291630090.4052@ramsan.of.borg>
+References: <20190109223452.11184-1-niklas.soderlund+renesas@ragnatech.se> <20190109223452.11184-2-niklas.soderlund+renesas@ragnatech.se>
+User-Agent: Alpine 2.21 (DEB 202 2017-01-01)
 MIME-Version: 1.0
-In-Reply-To: <CAPDyKFrGQvcCB1wfv=iqk66uja3faMRF1gGMSE2VhB8gJcO=sg@mail.gmail.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/mixed; boundary="8323329-1654730921-1588180557=:4052"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-On 4/28/2020 11:59 PM, Ulf Hansson wrote:
-> On Tue, 28 Apr 2020 at 15:39, Rajendra Nayak <rnayak@codeaurora.org> wrote:
->>
->> Even though specifying OPP's in device tree is optional, ignoring all errors
->> reported by dev_pm_opp_of_add_table() means we can't distinguish between a
->> missing OPP table and a wrong/buggy OPP table. While missing OPP table
->> (dev_pm_opp_of_add_table() returns a -ENODEV in such case) can be ignored,
->> a wrong/buggy OPP table in device tree should make the driver error out.
->>
->> while we fix that, lets also fix the variable names for opp/opp_table to
->> avoid confusion and name them opp_table/has_opp_table instead.
->>
->> Suggested-by: Matthias Kaehlcke <matthias@chromium.org>
->> Signed-off-by: Rajendra Nayak <rnayak@codeaurora.org>
->> Cc: Ulf Hansson <ulf.hansson@linaro.org>
->> Cc: Pradeep P V K <ppvk@codeaurora.org>
->> Cc: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
->> Cc: linux-mmc@vger.kernel.org
-> 
-> Is this a standalone patch that I queue up via my mmc tree?
+--8323329-1654730921-1588180557=:4052
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 8BIT
 
-Hi Ulf, yes, its a standalone patch which applies on top of the one
-you already have in your tree. No other dependencies.
+ 	Hi Niklas,
 
-> 
-> Kind regards
-> Uffe
-> 
->> ---
->>   drivers/mmc/host/sdhci-msm.c | 27 ++++++++++++++++-----------
->>   1 file changed, 16 insertions(+), 11 deletions(-)
->>
->> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
->> index 8a055dd..97758fa 100644
->> --- a/drivers/mmc/host/sdhci-msm.c
->> +++ b/drivers/mmc/host/sdhci-msm.c
->> @@ -244,8 +244,8 @@ struct sdhci_msm_host {
->>          struct clk_bulk_data bulk_clks[4]; /* core, iface, cal, sleep clocks */
->>          unsigned long clk_rate;
->>          struct mmc_host *mmc;
->> -       struct opp_table *opp;
->> -       bool opp_table;
->> +       struct opp_table *opp_table;
->> +       bool has_opp_table;
->>          bool use_14lpp_dll_reset;
->>          bool tuning_done;
->>          bool calibration_done;
->> @@ -1967,15 +1967,20 @@ static int sdhci_msm_probe(struct platform_device *pdev)
->>          }
->>          msm_host->bulk_clks[0].clk = clk;
->>
->> -       msm_host->opp = dev_pm_opp_set_clkname(&pdev->dev, "core");
->> -       if (IS_ERR(msm_host->opp)) {
->> -               ret = PTR_ERR(msm_host->opp);
->> +       msm_host->opp_table = dev_pm_opp_set_clkname(&pdev->dev, "core");
->> +       if (IS_ERR(msm_host->opp_table)) {
->> +               ret = PTR_ERR(msm_host->opp_table);
->>                  goto bus_clk_disable;
->>          }
->>
->>          /* OPP table is optional */
->> -       if (!dev_pm_opp_of_add_table(&pdev->dev))
->> -               msm_host->opp_table = true;
->> +       ret = dev_pm_opp_of_add_table(&pdev->dev);
->> +       if (!ret) {
->> +               msm_host->has_opp_table = true;
->> +       } else if (ret != -ENODEV) {
->> +               dev_err(&pdev->dev, "Invalid OPP table in Device tree\n");
->> +               goto opp_cleanup;
->> +       }
->>
->>          /* Vote for maximum clock rate for maximum performance */
->>          ret = dev_pm_opp_set_rate(&pdev->dev, INT_MAX);
->> @@ -2133,9 +2138,9 @@ static int sdhci_msm_probe(struct platform_device *pdev)
->>          clk_bulk_disable_unprepare(ARRAY_SIZE(msm_host->bulk_clks),
->>                                     msm_host->bulk_clks);
->>   opp_cleanup:
->> -       if (msm_host->opp_table)
->> +       if (msm_host->has_opp_table)
->>                  dev_pm_opp_of_remove_table(&pdev->dev);
->> -       dev_pm_opp_put_clkname(msm_host->opp);
->> +       dev_pm_opp_put_clkname(msm_host->opp_table);
->>   bus_clk_disable:
->>          if (!IS_ERR(msm_host->bus_clk))
->>                  clk_disable_unprepare(msm_host->bus_clk);
->> @@ -2154,9 +2159,9 @@ static int sdhci_msm_remove(struct platform_device *pdev)
->>
->>          sdhci_remove_host(host, dead);
->>
->> -       if (msm_host->opp_table)
->> +       if (msm_host->has_opp_table)
->>                  dev_pm_opp_of_remove_table(&pdev->dev);
->> -       dev_pm_opp_put_clkname(msm_host->opp);
->> +       dev_pm_opp_put_clkname(msm_host->opp_table);
->>          pm_runtime_get_sync(&pdev->dev);
->>          pm_runtime_disable(&pdev->dev);
->>          pm_runtime_put_noidle(&pdev->dev);
->> --
->> QUALCOMM INDIA, on behalf of Qualcomm Innovation Center, Inc. is a member
->> of Code Aurora Forum, hosted by The Linux Foundation
+On Wed, 9 Jan 2019, Niklas Söderlund wrote:
+> When removing the driver make sure to undo the PM autosuspend configured
+> when probing the host.
+>
+> Signed-off-by: Niklas Söderlund <niklas.soderlund+renesas@ragnatech.se>
+> Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
--- 
-QUALCOMM INDIA, on behalf of Qualcomm Innovation Center, Inc. is a member
-of Code Aurora Forum, hosted by The Linux Foundation
+This is commit bb60023c6387842b ("mmc: tmio: undo PM autosuspend when
+removing the host"), and I've bisected a regression to it.
+Sorry for taking that long to discover this issue (by loading a DT
+overlay to enable SCIFA5 on Koelsch, which requires unbinding SHDI0
+first).
+
+> --- a/drivers/mmc/host/tmio_mmc_core.c
+> +++ b/drivers/mmc/host/tmio_mmc_core.c
+> @@ -1287,6 +1287,7 @@ void tmio_mmc_host_remove(struct tmio_mmc_host *host)
+> 	cancel_delayed_work_sync(&host->delayed_reset_work);
+> 	tmio_mmc_release_dma(host);
+>
+> +	pm_runtime_dont_use_autosuspend(&pdev->dev);
+> 	pm_runtime_put_sync(&pdev->dev);
+> 	pm_runtime_disable(&pdev->dev);
+> }
+
+When unbinding the sdhi driver on e.g. Koelsch or Salvator-XS:
+
+     echo ee100000.sd > /sys/bus/platform/drivers/sh_mobile_sdhi/unbind
+     echo ee100000.sd > /sys/bus/platform/drivers/renesas_sdhi_internal_dmac/unbind
+
+Two warnings are triggered:
+
+     WARNING: CPU: 0 PID: 586 at drivers/clk/clk.c:954 clk_core_disable+0x40/0x214
+     sdhi0 already disabled
+     CPU: 0 PID: 586 Comm: bash Not tainted 5.7.0-rc3-shmobile-00508-g3c2c87c467f1c34e-dirty #547
+     Hardware name: Generic R-Car Gen2 (Flattened Device Tree)
+     [<c010de5c>] (unwind_backtrace) from [<c0109cbc>] (show_stack+0x10/0x14)
+     [<c0109cbc>] (show_stack) from [<c072d5ac>] (dump_stack+0x88/0xa8)
+     [<c072d5ac>] (dump_stack) from [<c011c190>] (__warn+0xd0/0xec)
+     [<c011c190>] (__warn) from [<c011c21c>] (warn_slowpath_fmt+0x70/0x9c)
+     [<c011c21c>] (warn_slowpath_fmt) from [<c03a09e4>] (clk_core_disable+0x40/0x214)
+     [<c03a09e4>] (clk_core_disable) from [<c03a0bd0>] (clk_core_disable_lock+0x18/0x24)
+     [<c03a0bd0>] (clk_core_disable_lock) from [<c059e910>] (renesas_sdhi_clk_disable+0x14/0x34)
+     [<c059e910>] (renesas_sdhi_clk_disable) from [<c059f2fc>] (renesas_sdhi_remove+0x18/0x20)
+     [<c059f2fc>] (renesas_sdhi_remove) from [<c043c054>] (platform_drv_remove+0x24/0x3c)
+     [<c043c054>] (platform_drv_remove) from [<c043afb4>] (device_release_driver_internal+0xf0/0x198)
+     [<c043afb4>] (device_release_driver_internal) from [<c0439140>] (unbind_store+0x44/0x68)
+     [<c0439140>] (unbind_store) from [<c02941fc>] (kernfs_fop_write+0x128/0x1e4)
+     [<c02941fc>] (kernfs_fop_write) from [<c0225598>] (__vfs_write+0x28/0xe0)
+     [<c0225598>] (__vfs_write) from [<c0226664>] (vfs_write+0x98/0xbc)
+     [<c0226664>] (vfs_write) from [<c02267ec>] (ksys_write+0x68/0xb4)
+     [<c02267ec>] (ksys_write) from [<c0100060>] (ret_fast_syscall+0x0/0x54)
+
+     ...
+ 	WARNING: CPU: 0 PID: 586 at drivers/clk/clk.c:813 clk_core_unprepare+0x40/0x108
+     sdhi0 already unprepared
+     CPU: 0 PID: 586 Comm: bash Tainted: G        W         5.7.0-rc3-shmobile-00508-g3c2c87c467f1c34e-dirty #547
+     Hardware name: Generic R-Car Gen2 (Flattened Device Tree)
+     [<c010de5c>] (unwind_backtrace) from [<c0109cbc>] (show_stack+0x10/0x14)
+     [<c0109cbc>] (show_stack) from [<c072d5ac>] (dump_stack+0x88/0xa8)
+     [<c072d5ac>] (dump_stack) from [<c011c190>] (__warn+0xd0/0xec)
+     [<c011c190>] (__warn) from [<c011c21c>] (warn_slowpath_fmt+0x70/0x9c)
+     [<c011c21c>] (warn_slowpath_fmt) from [<c03a1150>] (clk_core_unprepare+0x40/0x108)
+     [<c03a1150>] (clk_core_unprepare) from [<c03a2d34>] (clk_unprepare+0x24/0x2c)
+     [<c03a2d34>] (clk_unprepare) from [<c044e244>] (__pm_clk_remove+0x38/0x54)
+     [<c044e244>] (__pm_clk_remove) from [<c044e6cc>] (pm_clk_destroy+0xc4/0xdc)
+     [<c044e6cc>] (pm_clk_destroy) from [<c044c4ec>] (genpd_remove_device+0x10c/0x128)
+     [<c044c4ec>] (genpd_remove_device) from [<c044c54c>] (genpd_dev_pm_detach+0x44/0xe4)
+     [<c044c54c>] (genpd_dev_pm_detach) from [<c043c064>] (platform_drv_remove+0x34/0x3c)
+     [<c043c064>] (platform_drv_remove) from [<c043afb4>] (device_release_driver_internal+0xf0/0x198)
+     [<c043afb4>] (device_release_driver_internal) from [<c0439140>] (unbind_store+0x44/0x68)
+     [<c0439140>] (unbind_store) from [<c02941fc>] (kernfs_fop_write+0x128/0x1e4)
+     [<c02941fc>] (kernfs_fop_write) from [<c0225598>] (__vfs_write+0x28/0xe0)
+     [<c0225598>] (__vfs_write) from [<c0226664>] (vfs_write+0x98/0xbc)
+     [<c0226664>] (vfs_write) from [<c02267ec>] (ksys_write+0x68/0xb4)
+     [<c02267ec>] (ksys_write) from [<c0100060>] (ret_fast_syscall+0x0/0x54)
+
+Removing the call to pm_runtime_dont_use_autosuspend() fixes that
+symptom.  But that is definitely not the right fix, as doing so causes
+genpd_stop_dev() to no longer being called on unbind.
+
+What seems to happen is:
+   - During driver probe, the clocks are enabled twice, by
+       1. renesas_sdhi_clk_enable(), called from renesas_sdhi_probe(),
+       2. pm_clk_resume(), called from tmio_mmc_host_probe().
+   - During driver unbind, the clocks are disabled thrice, by:
+       1. renesas_sdhi_clk_disable(), called from
+          tmio_mmc_host_runtime_suspend(),
+       2. pm_clk_suspend(), called from tmio_mmc_host_remove() through
+          pm_runtime_put_sync(),
+       3. renesas_sdhi_clk_disable(), called from renesas_sdhi_remove().
+     In addition, an extra clock unprepare happens in __pm_clk_remove(),
+     called from genpd_remove_device() through pm_clk_destroy().
+
+Note that tmio_mmc_host_runtime_suspend() is never called, so there is
+definitely an imbalance in the Runtime PM handling..
+
+Without the call to pm_runtime_dont_use_autosuspend(), the clocks are
+disabled twice during driver unbind, by:
+   1. renesas_sdhi_clk_disable(), called from renesas_sdhi_remove(),
+   2. __pm_clk_remove(), called from genpd_remove_device() through
+      pm_clk_destroy().
+Hence the warning is gone, by accident, as e.g. the pm_clk_resume() call is
+never balanced by its counterpart pm_clk_suspend().
+
+Thanks for your comments!
+
+Gr{oetje,eeting}s,
+
+ 						Geert
+
+--
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+ 							    -- Linus Torvalds
+--8323329-1654730921-1588180557=:4052--
