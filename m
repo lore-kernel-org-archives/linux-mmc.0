@@ -2,132 +2,101 @@ Return-Path: <SRS0=CLt1=6O=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PULL_REQUEST,
-	MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_GIT autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BDE47C83001
-	for <linux-mmc@archiver.kernel.org>; Thu, 30 Apr 2020 06:57:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EA269C8300A
+	for <linux-mmc@archiver.kernel.org>; Thu, 30 Apr 2020 09:16:58 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 989292173E
-	for <linux-mmc@archiver.kernel.org>; Thu, 30 Apr 2020 06:57:47 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C2642214D8
+	for <linux-mmc@archiver.kernel.org>; Thu, 30 Apr 2020 09:16:58 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="l+AJg1G4"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="zsgulO4d"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726466AbgD3G5r (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 30 Apr 2020 02:57:47 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46528 "EHLO
+        id S1726391AbgD3JQ6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 30 Apr 2020 05:16:58 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40086 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-FAIL-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1726337AbgD3G5q (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 30 Apr 2020 02:57:46 -0400
+        by vger.kernel.org with ESMTP id S1726127AbgD3JQ6 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 30 Apr 2020 05:16:58 -0400
 Received: from mail-lj1-x244.google.com (mail-lj1-x244.google.com [IPv6:2a00:1450:4864:20::244])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 68318C035494
-        for <linux-mmc@vger.kernel.org>; Wed, 29 Apr 2020 23:57:46 -0700 (PDT)
-Received: by mail-lj1-x244.google.com with SMTP id j3so5255101ljg.8
-        for <linux-mmc@vger.kernel.org>; Wed, 29 Apr 2020 23:57:46 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5ED56C035494
+        for <linux-mmc@vger.kernel.org>; Thu, 30 Apr 2020 02:16:56 -0700 (PDT)
+Received: by mail-lj1-x244.google.com with SMTP id b2so5687383ljp.4
+        for <linux-mmc@vger.kernel.org>; Thu, 30 Apr 2020 02:16:56 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=from:to:cc:subject:date:message-id:mime-version
          :content-transfer-encoding;
-        bh=6F+XndsIru6duR0CCwlaQ2qNG4XUe6rojDGrs09hMvY=;
-        b=l+AJg1G4eg8RVQ0OCKtowUmC2BD9hVyGr0Ni76WpLrv3E7LCD7I6ykogl0HvbX7a/x
-         b2zUy+xTgOhx/HikhevbV90OoEjhnmU8zKZqxe02y9VqkI9AQqpOHYOwm6rDCFMS6SeK
-         yC7CAusyyxm2XVbAmbI6qYRplSc/PmaSm9gMEyyO0WxZvOpqjgQG1y34H2jeugd8UJL3
-         XCMJ2xbKhcUGx1yZYSiOHlv3MFlStYIJYE4uKsP9grfQmnGgPW1Ys7UCtT/XaCrt4AZo
-         1rCyNmLfoowCIvBONCjqM0xo+8C5Mb1DPmalBYNpA1fAagJc94NDFmzyo25PVMVQlsGo
-         c5RA==
+        bh=5PLEzFtiTHiEFZcHjUWZsk1as7iY/+JvOpvH6h5KaAg=;
+        b=zsgulO4dH6Do3VLsT9f6zvu2dpTxiUxO2SFwYAi9HkkAAg4JSb1g4ZVe0twlUbfDpf
+         30bxNRvUrjtk83t9+fxVdVZoAbMzJF1dty37BByl6zDGYXYAVThgD/cDiKHRbPmg0FgA
+         h/JMcCi7C+k/Y7s5uY9oRkkncDrmydYcZJkzrHByCGXxdxl5G73VWtmt35kwVe53mEYc
+         syHyacn5KN8YRmuKCidwj5OXUfO9+sON6MJzAWJ2ARBrFEDwZsUMezwJTu1QZy/9ip7V
+         4TR257zdscbQ9mrz4jZn9QqRtMPH6Qh3BKkjTrOrt43GDzz4zQqsdVz8qPA3Lv8T2eRO
+         RqXA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
          :content-transfer-encoding;
-        bh=6F+XndsIru6duR0CCwlaQ2qNG4XUe6rojDGrs09hMvY=;
-        b=ZzgYZ2u5tv+MyYU4bH6s13bvygYpT2LSj7REOJ5MVx8FiNcu/7wHdFMEkJXMa2T78s
-         i349Gm7LetHuBx3YcN2cFGD1WDrc5fjHN5CKTTPXHG61nJMVfXawDV+1Ns2AcIoNkL4R
-         zK9fjCXk8hlI/B4n6+N/RYuWI8UKQS9ZZQy0Y4z823/FdW9PhRV6h/5JW4g4EyT3pJX2
-         yA2y+gzCr/496WtqROuXbCulvGGyHY/RcsVTrJ60KW53jopfVe2qq5kWfcrQ4rtueIhd
-         QnACnYBoqqgxM4sqGiZYQGA7L7mmausrgf1XfmofkAmyERdl/9ek/9OPfIXzAyi0Vl9O
-         iGpg==
-X-Gm-Message-State: AGi0PuYpDagQEO+VKdihGv1uGpRW6dMi+7hURkftYT4iDyIK4TrUKUOY
-        22I9DY+i76wCUIerLlgY2A8ULw==
-X-Google-Smtp-Source: APiQypIeFer/HL1t7w5DYHAubotVYeGojlmu3tPBDVbGwjXGJOqMQzNmvf/Is5cSyIwrW/tw9fE4Cg==
-X-Received: by 2002:a2e:81d5:: with SMTP id s21mr1200669ljg.258.1588229864883;
-        Wed, 29 Apr 2020 23:57:44 -0700 (PDT)
+        bh=5PLEzFtiTHiEFZcHjUWZsk1as7iY/+JvOpvH6h5KaAg=;
+        b=cQd0KfY431U3itc++0QlQ/1YX/hP8wGT4hviNlX2Kwsin35yQCMK+gj4xAw0N7wiel
+         2QtIF1uk41+UR9tUKr0SE8qDE4p78seNVcg0VL+VBj44TwcieMzMJRY5xsdek7EoR0zB
+         tCyVp12/RQWKLhVKpK/MI4lJVtDtrd5ICymTbm1P9N9ezt3YAdoZ1JsM41ICcGa0D4UO
+         DKQlKGb9F+dj+l5XTZf3fHdJKgGKPPiyHfgyBItpaL3MnQJkmyNGAAuE8yxUWg8S6P0N
+         PkOrz7SlJpTj2x8Ybe7RVTegFDv7aWS1lHSbv6v6gzdpadwuJukN0Dgp68kSfIDISyPs
+         dZyQ==
+X-Gm-Message-State: AGi0Pube9tyFsnBASw0bKm7PrGpAq8FCAjK1VeFF4elsjzE6sMNflHE6
+        skNJH0dzXXYgGPXoHKmKknTrc2unv24=
+X-Google-Smtp-Source: APiQypIk8S4FeWypTzc/IlTqJlvLuTOrnen4IjIj+4LjqQ6dgxQqQf3++gUkr7FL7gKDQPnm355s2Q==
+X-Received: by 2002:a2e:98c4:: with SMTP id s4mr1561552ljj.97.1588238214479;
+        Thu, 30 Apr 2020 02:16:54 -0700 (PDT)
 Received: from localhost.localdomain (h-98-128-181-7.NA.cust.bahnhof.se. [98.128.181.7])
-        by smtp.gmail.com with ESMTPSA id q7sm3923866ljp.20.2020.04.29.23.57.43
+        by smtp.gmail.com with ESMTPSA id x29sm4417818lfn.64.2020.04.30.02.16.53
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 29 Apr 2020 23:57:44 -0700 (PDT)
+        Thu, 30 Apr 2020 02:16:53 -0700 (PDT)
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-To:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [GIT PULL] MMC fixes for v5.7-rc4
-Date:   Thu, 30 Apr 2020 08:57:43 +0200
-Message-Id: <20200430065743.21952-1-ulf.hansson@linaro.org>
+To:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        Douglas Anderson <dianders@chromium.org>,
+        Matthias Kaehlcke <mka@chromium.org>,
+        Shawn Lin <shawn.lin@rock-chips.com>,
+        Yong Mao <yong.mao@mediatek.com>,
+        Chaotian Jing <chaotian.jing@mediatek.com>
+Subject: [PATCH 0/4] mmc: sdio: Fix various issues in mmc_sdio_init_card()
+Date:   Thu, 30 Apr 2020 11:16:36 +0200
+Message-Id: <20200430091640.455-1-ulf.hansson@linaro.org>
 X-Mailer: git-send-email 2.20.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Linus,
+Over the years, the code in mmc_sdio_init_card() has grown to become quite
+messy. Unfortunate also leading to several various errors.
 
-Here's a PR with a couple of MMC fixes intended for v5.7-rc4. Details about the
-highlights are as usual found in the signed tag.
+This series addresses some of them, but it's likely that there are even more
+things that needs to be fixed on top.
 
-Please pull this in!
+I have tested this on Hikey board, with an SDIO card corresponding to a WiFi
+chip from TI (wl1835). Additional tests and review comments, are usual much
+appreciated.
 
 Kind regards
-Ulf Hansson
+Uffe
 
+Ulf Hansson (4):
+  mmc: sdio: Fix potential NULL pointer error in mmc_sdio_init_card()
+  mmc: sdio: Fix several potential memory leaks in mmc_sdio_init_card()
+  mmc: sdio: Re-use negotiated OCR mask when re-sending CMD8
+  mmc: sdio: Align the initialization commands in retry path for UHS-I
 
-The following changes since commit ae83d0b416db002fe95601e7f97f64b59514d936:
+ drivers/mmc/core/sdio.c | 116 +++++++++++++++++++---------------------
+ 1 file changed, 55 insertions(+), 61 deletions(-)
 
-  Linux 5.7-rc2 (2020-04-19 14:35:30 -0700)
+-- 
+2.20.1
 
-are available in the Git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.7-rc2
-
-for you to fetch changes up to 1a8eb6b373c2af6533c13d1ea11f504e5010ed9a:
-
-  mmc: sdhci-pci: Fix eMMC driver strength for BYT-based controllers (2020-04-22 17:57:17 +0200)
-
-----------------------------------------------------------------
-MMC host:
- - meson-mx-sdio: Fix support for HW busy detection
- - sdhci-msm: Fix support for HW busy detection
- - cqhci: Fix polling loop by converting to readx_poll_timeout()
- - sdhci-xenon: Fix annoying 1.8V regulator warning
- - sdhci-pci: Fix eMMC driver strength for BYT-based controllers
-
-----------------------------------------------------------------
-Adrian Hunter (1):
-      mmc: sdhci-pci: Fix eMMC driver strength for BYT-based controllers
-
-Douglas Anderson (1):
-      mmc: cqhci: Avoid false "cqhci: CQE stuck on" by not open-coding timeout loop
-
-Jason Yan (1):
-      mmc: core: make mmc_interrupt_hpi() static
-
-Marek Behún (1):
-      mmc: sdhci-xenon: fix annoying 1.8V regulator warning
-
-Martin Blumenstingl (2):
-      mmc: meson-mx-sdio: Set MMC_CAP_WAIT_WHILE_BUSY
-      mmc: meson-mx-sdio: remove the broken ->card_busy() op
-
-Veerabhadrarao Badiganti (1):
-      mmc: sdhci-msm: Enable host capabilities pertains to R1b response
-
- drivers/mmc/core/mmc_ops.c        |  2 +-
- drivers/mmc/host/cqhci.c          | 21 ++++++++++-----------
- drivers/mmc/host/meson-mx-sdio.c  | 11 +----------
- drivers/mmc/host/sdhci-msm.c      |  2 ++
- drivers/mmc/host/sdhci-pci-core.c |  3 +++
- drivers/mmc/host/sdhci-xenon.c    | 10 ++++++++++
- 6 files changed, 27 insertions(+), 22 deletions(-)
