@@ -1,80 +1,67 @@
 Return-Path: <SRS0=CLt1=6O=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
-X-Spam-Level: **
-X-Spam-Status: No, score=2.8 required=3.0 tests=DEAR_FRIEND,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	SUBJ_ALL_CAPS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Level: 
+X-Spam-Status: No, score=-6.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
+	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B026BC8300A
-	for <linux-mmc@archiver.kernel.org>; Thu, 30 Apr 2020 12:10:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 42014C4724C
+	for <linux-mmc@archiver.kernel.org>; Thu, 30 Apr 2020 23:50:12 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 936C020775
-	for <linux-mmc@archiver.kernel.org>; Thu, 30 Apr 2020 12:10:23 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 16146208DB
+	for <linux-mmc@archiver.kernel.org>; Thu, 30 Apr 2020 23:50:12 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1588290612;
+	bh=JypEDT+bXowxBoNeuugDTapgYrfF5c6kq7f5VUmwqw8=;
+	h=Subject:From:In-Reply-To:References:Date:To:Cc:List-ID:From;
+	b=Ru5RSvDYNA5lbgnYwPI1JBagn3hSrxl0GDGs5/HVciIXtkjMAYd9nGD1zH1ksd8OJ
+	 1hbvNK8bENBJBGufj4Lu/S7x9cxgTMcRXgCcSN9ZmP2hoU6owMXqQnc3LVMB1il3fS
+	 45tyG2H9Zk4sbjAE6Vttil0mwXenh0/BGHJZI0aM=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726511AbgD3MKX convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 30 Apr 2020 08:10:23 -0400
-Received: from [116.62.10.213] ([116.62.10.213]:54732 "EHLO mail.qdztrk.com"
-        rhost-flags-FAIL-FAIL-OK-OK) by vger.kernel.org with ESMTP
-        id S1725280AbgD3MKX (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 30 Apr 2020 08:10:23 -0400
-Received: from localhost (localhost [127.0.0.1])
-        by mail.qdztrk.com (Postfix) with ESMTP id 909C71E92CA
-        for <linux-mmc@vger.kernel.org>; Sat, 25 Apr 2020 08:21:52 +0800 (CST)
-Received: from mail.qdztrk.com ([127.0.0.1])
-        by localhost (mail.qdztrk.com [127.0.0.1]) (amavisd-new, port 10032)
-        with ESMTP id 620PSubcW0gC for <linux-mmc@vger.kernel.org>;
-        Sat, 25 Apr 2020 08:21:51 +0800 (CST)
-Received: from localhost (localhost [127.0.0.1])
-        by mail.qdztrk.com (Postfix) with ESMTP id 6F6E31C3DCC
-        for <linux-mmc@vger.kernel.org>; Sat, 25 Apr 2020 08:03:47 +0800 (CST)
-X-Virus-Scanned: amavisd-new at mail.qdztrk.com
-Received: from mail.qdztrk.com ([127.0.0.1])
-        by localhost (mail.qdztrk.com [127.0.0.1]) (amavisd-new, port 10026)
-        with ESMTP id hD8xoqMHR9n6 for <linux-mmc@vger.kernel.org>;
-        Sat, 25 Apr 2020 08:03:47 +0800 (CST)
-Received: from coris.com (unknown [103.207.36.17])
-        by mail.qdztrk.com (Postfix) with ESMTP id D2B3A24117F
-        for <linux-mmc@vger.kernel.org>; Sat, 25 Apr 2020 07:46:26 +0800 (CST)
-Reply-To: kentpace@sina.com
-From:   Kent Pace <kentpace@coris.com>
-To:     linux-mmc@vger.kernel.org
-Subject: URGENT!! PLEASE READ
-Date:   24 Apr 2020 16:46:23 -0700
-Message-ID: <20200424164622.1BBE9AED66E1E9F6@coris.com>
-MIME-Version: 1.0
-Content-Type: text/plain;
-        charset="utf-8"
-Content-Transfer-Encoding: 8BIT
+        id S1726635AbgD3XuL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 30 Apr 2020 19:50:11 -0400
+Received: from mail.kernel.org ([198.145.29.99]:59870 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726435AbgD3XuL (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 30 Apr 2020 19:50:11 -0400
+Subject: Re: [GIT PULL] MMC fixes for v5.7-rc4
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1588290611;
+        bh=JypEDT+bXowxBoNeuugDTapgYrfF5c6kq7f5VUmwqw8=;
+        h=From:In-Reply-To:References:Date:To:Cc:From;
+        b=2iRp81rLgdSVE2ikNDVwLIsYsgqSzz/YvOhB7MnsJiDQUBfBG/Vd4+oK63b3rGF9s
+         qfpuZVFDG1Y159dJMGr2gO20iiMkmmCsUKtCGT5QyPXm0KFpClKnKIYDyv3a/rI/cH
+         9dRp9GLkPglHiOYEm9TdBCjAaZ7UXKsRGZT8lyDk=
+From:   pr-tracker-bot@kernel.org
+In-Reply-To: <20200430065743.21952-1-ulf.hansson@linaro.org>
+References: <20200430065743.21952-1-ulf.hansson@linaro.org>
+X-PR-Tracked-List-Id: <linux-kernel.vger.kernel.org>
+X-PR-Tracked-Message-Id: <20200430065743.21952-1-ulf.hansson@linaro.org>
+X-PR-Tracked-Remote: git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.7-rc2
+X-PR-Tracked-Commit-Id: 1a8eb6b373c2af6533c13d1ea11f504e5010ed9a
+X-PR-Merge-Tree: torvalds/linux.git
+X-PR-Merge-Refname: refs/heads/master
+X-PR-Merge-Commit-Id: af4a32ad21f83a0d093219c411e5a9f5b344e2ae
+Message-Id: <158829061112.2910.9344522246208958614.pr-tracker-bot@kernel.org>
+Date:   Thu, 30 Apr 2020 23:50:11 +0000
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Dear Friend,
+The pull request you sent on Thu, 30 Apr 2020 08:57:43 +0200:
 
+> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.7-rc2
 
-There is something very important I need to discuss with you.  I 
-am writing  this letter in tears and fear. In tears because I 
-will soon depart and in fear because I don't really know if you 
-will do this faithfully.
+has been merged into torvalds/linux.git:
+https://git.kernel.org/torvalds/c/af4a32ad21f83a0d093219c411e5a9f5b344e2ae
 
-I am COVID-19  patient and the doctor has already confirmed I may 
-not last for the next 7 days.
+Thank you!
 
-I have substantial amount of money deposited in a security vault 
-around your country. It is in trunk boxes and once  I receive 
-your response and see your readiness to claim the money 
-immediately, I will forward the needed documents and the contact 
-of the security vault where the consignment is deposited,
-I am not asking you to give me anything but I want you to help 
-people that has been infected with this deadly virus with 60% of 
-the money and 40% should be for you and your family.
-
-I will disclose exact amount in the boxes as soon as I 
-receive your response.
-
-
-Regards.
-
+-- 
+Deet-doot-dot, I am a bot.
+https://korg.wiki.kernel.org/userdoc/prtracker
