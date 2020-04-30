@@ -1,179 +1,133 @@
-Return-Path: <SRS0=oXoI=6N=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=CLt1=6O=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,URI_HEX,
-	USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PULL_REQUEST,
+	MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A3F29C83000
-	for <linux-mmc@archiver.kernel.org>; Wed, 29 Apr 2020 17:21:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BDE47C83001
+	for <linux-mmc@archiver.kernel.org>; Thu, 30 Apr 2020 06:57:47 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7A8AE20787
-	for <linux-mmc@archiver.kernel.org>; Wed, 29 Apr 2020 17:21:02 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 989292173E
+	for <linux-mmc@archiver.kernel.org>; Thu, 30 Apr 2020 06:57:47 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="l+AJg1G4"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726524AbgD2RVC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 29 Apr 2020 13:21:02 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60166 "EHLO
+        id S1726466AbgD3G5r (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 30 Apr 2020 02:57:47 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46528 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-FAIL-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1726456AbgD2RVB (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Apr 2020 13:21:01 -0400
-X-Greylist: delayed 301 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Wed, 29 Apr 2020 10:21:01 PDT
-Received: from baptiste.telenet-ops.be (baptiste.telenet-ops.be [IPv6:2a02:1800:120:4::f00:13])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 46DEBC03C1AE
-        for <linux-mmc@vger.kernel.org>; Wed, 29 Apr 2020 10:21:01 -0700 (PDT)
-Received: from ramsan ([IPv6:2a02:1810:ac12:ed60:182a:142e:a95f:66c2])
-        by baptiste.telenet-ops.be with bizsmtp
-        id YhFx2200E0w8ZL601hFxGf; Wed, 29 Apr 2020 19:15:57 +0200
-Received: from geert (helo=localhost)
-        by ramsan with local-esmtp (Exim 4.90_1)
-        (envelope-from <geert@linux-m68k.org>)
-        id 1jTqJR-0005gr-93; Wed, 29 Apr 2020 19:15:57 +0200
-Date:   Wed, 29 Apr 2020 19:15:57 +0200 (CEST)
-From:   Geert Uytterhoeven <geert@linux-m68k.org>
-To:     =?ISO-8859-15?Q?Niklas_S=F6derlund?= 
-        <niklas.soderlund+renesas@ragnatech.se>
-cc:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Masahiro Yamada <yamada.masahiro@socionext.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-mmc@vger.kernel.org, linux-pm@vger.kernel.org,
-        linux-renesas-soc@vger.kernel.org
-Subject: Re: [PATCH 1/2] mmc: tmio: undo PM autosuspend when removing the
- host
-In-Reply-To: <20190109223452.11184-2-niklas.soderlund+renesas@ragnatech.se>
-Message-ID: <alpine.DEB.2.21.2004291630090.4052@ramsan.of.borg>
-References: <20190109223452.11184-1-niklas.soderlund+renesas@ragnatech.se> <20190109223452.11184-2-niklas.soderlund+renesas@ragnatech.se>
-User-Agent: Alpine 2.21 (DEB 202 2017-01-01)
+        by vger.kernel.org with ESMTP id S1726337AbgD3G5q (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 30 Apr 2020 02:57:46 -0400
+Received: from mail-lj1-x244.google.com (mail-lj1-x244.google.com [IPv6:2a00:1450:4864:20::244])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 68318C035494
+        for <linux-mmc@vger.kernel.org>; Wed, 29 Apr 2020 23:57:46 -0700 (PDT)
+Received: by mail-lj1-x244.google.com with SMTP id j3so5255101ljg.8
+        for <linux-mmc@vger.kernel.org>; Wed, 29 Apr 2020 23:57:46 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=6F+XndsIru6duR0CCwlaQ2qNG4XUe6rojDGrs09hMvY=;
+        b=l+AJg1G4eg8RVQ0OCKtowUmC2BD9hVyGr0Ni76WpLrv3E7LCD7I6ykogl0HvbX7a/x
+         b2zUy+xTgOhx/HikhevbV90OoEjhnmU8zKZqxe02y9VqkI9AQqpOHYOwm6rDCFMS6SeK
+         yC7CAusyyxm2XVbAmbI6qYRplSc/PmaSm9gMEyyO0WxZvOpqjgQG1y34H2jeugd8UJL3
+         XCMJ2xbKhcUGx1yZYSiOHlv3MFlStYIJYE4uKsP9grfQmnGgPW1Ys7UCtT/XaCrt4AZo
+         1rCyNmLfoowCIvBONCjqM0xo+8C5Mb1DPmalBYNpA1fAagJc94NDFmzyo25PVMVQlsGo
+         c5RA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=6F+XndsIru6duR0CCwlaQ2qNG4XUe6rojDGrs09hMvY=;
+        b=ZzgYZ2u5tv+MyYU4bH6s13bvygYpT2LSj7REOJ5MVx8FiNcu/7wHdFMEkJXMa2T78s
+         i349Gm7LetHuBx3YcN2cFGD1WDrc5fjHN5CKTTPXHG61nJMVfXawDV+1Ns2AcIoNkL4R
+         zK9fjCXk8hlI/B4n6+N/RYuWI8UKQS9ZZQy0Y4z823/FdW9PhRV6h/5JW4g4EyT3pJX2
+         yA2y+gzCr/496WtqROuXbCulvGGyHY/RcsVTrJ60KW53jopfVe2qq5kWfcrQ4rtueIhd
+         QnACnYBoqqgxM4sqGiZYQGA7L7mmausrgf1XfmofkAmyERdl/9ek/9OPfIXzAyi0Vl9O
+         iGpg==
+X-Gm-Message-State: AGi0PuYpDagQEO+VKdihGv1uGpRW6dMi+7hURkftYT4iDyIK4TrUKUOY
+        22I9DY+i76wCUIerLlgY2A8ULw==
+X-Google-Smtp-Source: APiQypIeFer/HL1t7w5DYHAubotVYeGojlmu3tPBDVbGwjXGJOqMQzNmvf/Is5cSyIwrW/tw9fE4Cg==
+X-Received: by 2002:a2e:81d5:: with SMTP id s21mr1200669ljg.258.1588229864883;
+        Wed, 29 Apr 2020 23:57:44 -0700 (PDT)
+Received: from localhost.localdomain (h-98-128-181-7.NA.cust.bahnhof.se. [98.128.181.7])
+        by smtp.gmail.com with ESMTPSA id q7sm3923866ljp.20.2020.04.29.23.57.43
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 29 Apr 2020 23:57:44 -0700 (PDT)
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+To:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC fixes for v5.7-rc4
+Date:   Thu, 30 Apr 2020 08:57:43 +0200
+Message-Id: <20200430065743.21952-1-ulf.hansson@linaro.org>
+X-Mailer: git-send-email 2.20.1
 MIME-Version: 1.0
-Content-Type: multipart/mixed; boundary="8323329-1654730921-1588180557=:4052"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+Hi Linus,
 
---8323329-1654730921-1588180557=:4052
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8BIT
+Here's a PR with a couple of MMC fixes intended for v5.7-rc4. Details about the
+highlights are as usual found in the signed tag.
 
- 	Hi Niklas,
+Please pull this in!
 
-On Wed, 9 Jan 2019, Niklas Söderlund wrote:
-> When removing the driver make sure to undo the PM autosuspend configured
-> when probing the host.
->
-> Signed-off-by: Niklas Söderlund <niklas.soderlund+renesas@ragnatech.se>
-> Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Kind regards
+Ulf Hansson
 
-This is commit bb60023c6387842b ("mmc: tmio: undo PM autosuspend when
-removing the host"), and I've bisected a regression to it.
-Sorry for taking that long to discover this issue (by loading a DT
-overlay to enable SCIFA5 on Koelsch, which requires unbinding SHDI0
-first).
 
-> --- a/drivers/mmc/host/tmio_mmc_core.c
-> +++ b/drivers/mmc/host/tmio_mmc_core.c
-> @@ -1287,6 +1287,7 @@ void tmio_mmc_host_remove(struct tmio_mmc_host *host)
-> 	cancel_delayed_work_sync(&host->delayed_reset_work);
-> 	tmio_mmc_release_dma(host);
->
-> +	pm_runtime_dont_use_autosuspend(&pdev->dev);
-> 	pm_runtime_put_sync(&pdev->dev);
-> 	pm_runtime_disable(&pdev->dev);
-> }
+The following changes since commit ae83d0b416db002fe95601e7f97f64b59514d936:
 
-When unbinding the sdhi driver on e.g. Koelsch or Salvator-XS:
+  Linux 5.7-rc2 (2020-04-19 14:35:30 -0700)
 
-     echo ee100000.sd > /sys/bus/platform/drivers/sh_mobile_sdhi/unbind
-     echo ee100000.sd > /sys/bus/platform/drivers/renesas_sdhi_internal_dmac/unbind
+are available in the Git repository at:
 
-Two warnings are triggered:
+  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.7-rc2
 
-     WARNING: CPU: 0 PID: 586 at drivers/clk/clk.c:954 clk_core_disable+0x40/0x214
-     sdhi0 already disabled
-     CPU: 0 PID: 586 Comm: bash Not tainted 5.7.0-rc3-shmobile-00508-g3c2c87c467f1c34e-dirty #547
-     Hardware name: Generic R-Car Gen2 (Flattened Device Tree)
-     [<c010de5c>] (unwind_backtrace) from [<c0109cbc>] (show_stack+0x10/0x14)
-     [<c0109cbc>] (show_stack) from [<c072d5ac>] (dump_stack+0x88/0xa8)
-     [<c072d5ac>] (dump_stack) from [<c011c190>] (__warn+0xd0/0xec)
-     [<c011c190>] (__warn) from [<c011c21c>] (warn_slowpath_fmt+0x70/0x9c)
-     [<c011c21c>] (warn_slowpath_fmt) from [<c03a09e4>] (clk_core_disable+0x40/0x214)
-     [<c03a09e4>] (clk_core_disable) from [<c03a0bd0>] (clk_core_disable_lock+0x18/0x24)
-     [<c03a0bd0>] (clk_core_disable_lock) from [<c059e910>] (renesas_sdhi_clk_disable+0x14/0x34)
-     [<c059e910>] (renesas_sdhi_clk_disable) from [<c059f2fc>] (renesas_sdhi_remove+0x18/0x20)
-     [<c059f2fc>] (renesas_sdhi_remove) from [<c043c054>] (platform_drv_remove+0x24/0x3c)
-     [<c043c054>] (platform_drv_remove) from [<c043afb4>] (device_release_driver_internal+0xf0/0x198)
-     [<c043afb4>] (device_release_driver_internal) from [<c0439140>] (unbind_store+0x44/0x68)
-     [<c0439140>] (unbind_store) from [<c02941fc>] (kernfs_fop_write+0x128/0x1e4)
-     [<c02941fc>] (kernfs_fop_write) from [<c0225598>] (__vfs_write+0x28/0xe0)
-     [<c0225598>] (__vfs_write) from [<c0226664>] (vfs_write+0x98/0xbc)
-     [<c0226664>] (vfs_write) from [<c02267ec>] (ksys_write+0x68/0xb4)
-     [<c02267ec>] (ksys_write) from [<c0100060>] (ret_fast_syscall+0x0/0x54)
+for you to fetch changes up to 1a8eb6b373c2af6533c13d1ea11f504e5010ed9a:
 
-     ...
- 	WARNING: CPU: 0 PID: 586 at drivers/clk/clk.c:813 clk_core_unprepare+0x40/0x108
-     sdhi0 already unprepared
-     CPU: 0 PID: 586 Comm: bash Tainted: G        W         5.7.0-rc3-shmobile-00508-g3c2c87c467f1c34e-dirty #547
-     Hardware name: Generic R-Car Gen2 (Flattened Device Tree)
-     [<c010de5c>] (unwind_backtrace) from [<c0109cbc>] (show_stack+0x10/0x14)
-     [<c0109cbc>] (show_stack) from [<c072d5ac>] (dump_stack+0x88/0xa8)
-     [<c072d5ac>] (dump_stack) from [<c011c190>] (__warn+0xd0/0xec)
-     [<c011c190>] (__warn) from [<c011c21c>] (warn_slowpath_fmt+0x70/0x9c)
-     [<c011c21c>] (warn_slowpath_fmt) from [<c03a1150>] (clk_core_unprepare+0x40/0x108)
-     [<c03a1150>] (clk_core_unprepare) from [<c03a2d34>] (clk_unprepare+0x24/0x2c)
-     [<c03a2d34>] (clk_unprepare) from [<c044e244>] (__pm_clk_remove+0x38/0x54)
-     [<c044e244>] (__pm_clk_remove) from [<c044e6cc>] (pm_clk_destroy+0xc4/0xdc)
-     [<c044e6cc>] (pm_clk_destroy) from [<c044c4ec>] (genpd_remove_device+0x10c/0x128)
-     [<c044c4ec>] (genpd_remove_device) from [<c044c54c>] (genpd_dev_pm_detach+0x44/0xe4)
-     [<c044c54c>] (genpd_dev_pm_detach) from [<c043c064>] (platform_drv_remove+0x34/0x3c)
-     [<c043c064>] (platform_drv_remove) from [<c043afb4>] (device_release_driver_internal+0xf0/0x198)
-     [<c043afb4>] (device_release_driver_internal) from [<c0439140>] (unbind_store+0x44/0x68)
-     [<c0439140>] (unbind_store) from [<c02941fc>] (kernfs_fop_write+0x128/0x1e4)
-     [<c02941fc>] (kernfs_fop_write) from [<c0225598>] (__vfs_write+0x28/0xe0)
-     [<c0225598>] (__vfs_write) from [<c0226664>] (vfs_write+0x98/0xbc)
-     [<c0226664>] (vfs_write) from [<c02267ec>] (ksys_write+0x68/0xb4)
-     [<c02267ec>] (ksys_write) from [<c0100060>] (ret_fast_syscall+0x0/0x54)
+  mmc: sdhci-pci: Fix eMMC driver strength for BYT-based controllers (2020-04-22 17:57:17 +0200)
 
-Removing the call to pm_runtime_dont_use_autosuspend() fixes that
-symptom.  But that is definitely not the right fix, as doing so causes
-genpd_stop_dev() to no longer being called on unbind.
+----------------------------------------------------------------
+MMC host:
+ - meson-mx-sdio: Fix support for HW busy detection
+ - sdhci-msm: Fix support for HW busy detection
+ - cqhci: Fix polling loop by converting to readx_poll_timeout()
+ - sdhci-xenon: Fix annoying 1.8V regulator warning
+ - sdhci-pci: Fix eMMC driver strength for BYT-based controllers
 
-What seems to happen is:
-   - During driver probe, the clocks are enabled twice, by
-       1. renesas_sdhi_clk_enable(), called from renesas_sdhi_probe(),
-       2. pm_clk_resume(), called from tmio_mmc_host_probe().
-   - During driver unbind, the clocks are disabled thrice, by:
-       1. renesas_sdhi_clk_disable(), called from
-          tmio_mmc_host_runtime_suspend(),
-       2. pm_clk_suspend(), called from tmio_mmc_host_remove() through
-          pm_runtime_put_sync(),
-       3. renesas_sdhi_clk_disable(), called from renesas_sdhi_remove().
-     In addition, an extra clock unprepare happens in __pm_clk_remove(),
-     called from genpd_remove_device() through pm_clk_destroy().
+----------------------------------------------------------------
+Adrian Hunter (1):
+      mmc: sdhci-pci: Fix eMMC driver strength for BYT-based controllers
 
-Note that tmio_mmc_host_runtime_suspend() is never called, so there is
-definitely an imbalance in the Runtime PM handling..
+Douglas Anderson (1):
+      mmc: cqhci: Avoid false "cqhci: CQE stuck on" by not open-coding timeout loop
 
-Without the call to pm_runtime_dont_use_autosuspend(), the clocks are
-disabled twice during driver unbind, by:
-   1. renesas_sdhi_clk_disable(), called from renesas_sdhi_remove(),
-   2. __pm_clk_remove(), called from genpd_remove_device() through
-      pm_clk_destroy().
-Hence the warning is gone, by accident, as e.g. the pm_clk_resume() call is
-never balanced by its counterpart pm_clk_suspend().
+Jason Yan (1):
+      mmc: core: make mmc_interrupt_hpi() static
 
-Thanks for your comments!
+Marek Behún (1):
+      mmc: sdhci-xenon: fix annoying 1.8V regulator warning
 
-Gr{oetje,eeting}s,
+Martin Blumenstingl (2):
+      mmc: meson-mx-sdio: Set MMC_CAP_WAIT_WHILE_BUSY
+      mmc: meson-mx-sdio: remove the broken ->card_busy() op
 
- 						Geert
+Veerabhadrarao Badiganti (1):
+      mmc: sdhci-msm: Enable host capabilities pertains to R1b response
 
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
- 							    -- Linus Torvalds
---8323329-1654730921-1588180557=:4052--
+ drivers/mmc/core/mmc_ops.c        |  2 +-
+ drivers/mmc/host/cqhci.c          | 21 ++++++++++-----------
+ drivers/mmc/host/meson-mx-sdio.c  | 11 +----------
+ drivers/mmc/host/sdhci-msm.c      |  2 ++
+ drivers/mmc/host/sdhci-pci-core.c |  3 +++
+ drivers/mmc/host/sdhci-xenon.c    | 10 ++++++++++
+ 6 files changed, 27 insertions(+), 22 deletions(-)
