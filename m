@@ -2,69 +2,71 @@ Return-Path: <SRS0=yrb8=6P=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+X-Spam-Status: No, score=-9.7 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,UNWANTED_LANGUAGE_BODY,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A95BBC47256
-	for <linux-mmc@archiver.kernel.org>; Fri,  1 May 2020 23:54:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 25443C47258
+	for <linux-mmc@archiver.kernel.org>; Fri,  1 May 2020 23:54:44 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 860B62072E
-	for <linux-mmc@archiver.kernel.org>; Fri,  1 May 2020 23:54:39 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 014DB216FD
+	for <linux-mmc@archiver.kernel.org>; Fri,  1 May 2020 23:54:43 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=timesys-com.20150623.gappssmtp.com header.i=@timesys-com.20150623.gappssmtp.com header.b="Qa4iw/Lx"
+	dkim=pass (2048-bit key) header.d=timesys-com.20150623.gappssmtp.com header.i=@timesys-com.20150623.gappssmtp.com header.b="rEisY8R7"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726333AbgEAXyj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 1 May 2020 19:54:39 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36080 "EHLO
+        id S1726845AbgEAXyn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 1 May 2020 19:54:43 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36092 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726463AbgEAXyi (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 1 May 2020 19:54:38 -0400
-Received: from mail-wr1-x441.google.com (mail-wr1-x441.google.com [IPv6:2a00:1450:4864:20::441])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2B81EC08E859
-        for <linux-mmc@vger.kernel.org>; Fri,  1 May 2020 16:54:38 -0700 (PDT)
-Received: by mail-wr1-x441.google.com with SMTP id l18so2966245wrn.6
-        for <linux-mmc@vger.kernel.org>; Fri, 01 May 2020 16:54:38 -0700 (PDT)
+        with ESMTP id S1726524AbgEAXym (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 1 May 2020 19:54:42 -0400
+Received: from mail-wr1-x444.google.com (mail-wr1-x444.google.com [IPv6:2a00:1450:4864:20::444])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6CF92C061A0C
+        for <linux-mmc@vger.kernel.org>; Fri,  1 May 2020 16:54:41 -0700 (PDT)
+Received: by mail-wr1-x444.google.com with SMTP id x18so13724639wrq.2
+        for <linux-mmc@vger.kernel.org>; Fri, 01 May 2020 16:54:41 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=timesys-com.20150623.gappssmtp.com; s=20150623;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=vfX7XotTRbRZpU8qW6O6HOsTohRIT4UKSMXcugy5qWQ=;
-        b=Qa4iw/LxlEN1ZQnw94k6aygbsApt+5oy2zEsvEzWejoMJNJ9l/UIonwrbDpk52dq4X
-         M+uiSqfm6eeRvJCBEyzW6CPIQfP/POj1nB88vHeytjBuj3bAazfJNqzILZ320QZbB004
-         aYWiGab+wotQT1bhL5a//q9f4U8OnGFsOd4F1ZPx5u2jSPbwNKRVaOR3PChuiyDOuDWW
-         OpRUeBozviksY1asD3uiZdJqej9XW+MgJtg/kQMXefRUkeolJhXFn4m7a/7712Iuxq2G
-         +5br+V4N2vn/DcZ3PN7yfHNILvunt9ceRgcJLhA5T/nnkdhgpqGukTFW6EW9rBa6lnQy
-         HhVQ==
+        h=from:to:cc:subject:date:message-id:in-reply-to:references
+         :mime-version:content-transfer-encoding;
+        bh=HJeXKhqH1ChnCgVvBR4Vrdvm1BdwloRV+f5k24N69rQ=;
+        b=rEisY8R7QR6fqnfFC6QxWt4JwrUAWOYJRaYtgx5x/G3EmJmMoJ7CvjQxJeBXKZeADZ
+         XxCIcnZYikYz6qElJ9D4S8FB6df2Up/+w9voOurekw8UvNb0yfU4zC9bsXexzlewglv7
+         gtTUwy3F3edg/Dpf9xt9A6NY9AvFU8yqdnDLGatxmIot8gaj3sutbq1PYUxKGPHWr6Wx
+         FpTGOcfdqQeg0m89wPl+p6bxhJXSRK62c3Ui2jNCrw6RBhaCxWGPL9dYXrT9vBijLdO/
+         j/qObbIfl/rFEQ8jS5QY4B4j1zKM6snzlAPFe+VlKG7vZiPmfcEiAIFrim0yQOQsK+5R
+         fIfw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=vfX7XotTRbRZpU8qW6O6HOsTohRIT4UKSMXcugy5qWQ=;
-        b=Eqh8bo+J1i9Mu+XkXTB2bmVJviH+AykCT5wYzaNm0i6tincLFglsLcYgAwP8p+NPxm
-         YIameqUqqwQ485MAE6QPP0OjygBK7J8gRiij7TCVdi+6/pqxv5vUgh31PT0puo1ie8mv
-         fC7D2GtffJMU8INJqT70LvE1PHco5iAoMUn/pssWouZ4S6hz+E2CrnfcISxmvRXA3sNI
-         FlGyW1nQGYIiI84Ji5N3PZPz/SLQShsKXBQZPdAuZFQK2sSgHWQ1DFAmNMvtQb4tt+eo
-         Spt187AX8zh033g9vVqIgNvz+fMUbCoAH+ERMJAUmPKMm5UajN5BPpYzGEKH9HKpnADM
-         K41A==
-X-Gm-Message-State: AGi0PuZTE2EGQp2Hkw3lk1zWjqVOQkqZXI16aR1q728rQeC/JP5C5kgP
-        QF+Nqfu+ZDP4hftfLCAdVS1fPg==
-X-Google-Smtp-Source: APiQypLhq5mv4xFO/++RArfBBACcwgbhkakj7lSQllPofKe/pwiueZnYbdKvFLg7UaQdrc13Nrd52A==
-X-Received: by 2002:adf:f282:: with SMTP id k2mr6172310wro.133.1588377276656;
-        Fri, 01 May 2020 16:54:36 -0700 (PDT)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=HJeXKhqH1ChnCgVvBR4Vrdvm1BdwloRV+f5k24N69rQ=;
+        b=A3X8tlvVvGasdcS6/iLQnOEKFy0C9N99HF+XHFHEueDoom6bzKnIiR2tpUDaEy3YmY
+         pqRItGJPI/AoIqup9SH1huWoZlZH8/kUZubvqF5CpRdxVuqC4aQz3YLDYrwPkI4hMXJW
+         yb2O517loo1Jvu1u33hevPSeI/mLEhjiuEIUnI2smbEisgKGOiw1UWy0OoJVtF3KTfaT
+         54+VIfFn84DqHCIsv6CX1OPmNKZOhqO73s5xpLRZ4wwNhw3KgiNHoxIAM/iuwt90Ulbs
+         9s9e7X237y85+N7q+/2I0/6Yh8MlyrUl/LbNTYUVmI4/2Cjej6c42vblSilyof9Sa7nL
+         IeaQ==
+X-Gm-Message-State: AGi0Pua1TjyxsT1yBvZIvIIzwHlFzG22sejsTuoFshdJiOvfnvmlPorJ
+        sSnejWY2rYVBWqDvPU1GBjQVnjiRquU=
+X-Google-Smtp-Source: APiQypJQM/uXv1VqXW//Eu2c6BKWAJeQojrrrq3hOlCUW10k01rDT1A8sgUajT4vA5V/qC88kJn3AA==
+X-Received: by 2002:a5d:6844:: with SMTP id o4mr7078808wrw.392.1588377280186;
+        Fri, 01 May 2020 16:54:40 -0700 (PDT)
 Received: from localhost.localdomain (host142-13-dynamic.2-87-r.retail.telecomitalia.it. [87.2.13.142])
-        by smtp.gmail.com with ESMTPSA id r20sm1495155wmh.26.2020.05.01.16.54.35
+        by smtp.gmail.com with ESMTPSA id r20sm1495155wmh.26.2020.05.01.16.54.39
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 01 May 2020 16:54:35 -0700 (PDT)
+        Fri, 01 May 2020 16:54:39 -0700 (PDT)
 From:   Angelo Dureghello <angelo.dureghello@timesys.com>
 To:     adrian.hunter@intel.com
 Cc:     linux-mmc@vger.kernel.org, linux-m68k@vger.kernel.org,
         Angelo Dureghello <angelo.dureghello@timesys.com>
-Subject: [PATCH v3 1/3] m68k: mcf5441x: add support for esdhc mmc controller
-Date:   Sat,  2 May 2020 01:59:05 +0200
-Message-Id: <20200501235907.3978-1-angelo.dureghello@timesys.com>
+Subject: [PATCH v3 2/3] mmc: sdhci: add quirks for be to le byte swapping
+Date:   Sat,  2 May 2020 01:59:06 +0200
+Message-Id: <20200501235907.3978-2-angelo.dureghello@timesys.com>
 X-Mailer: git-send-email 2.26.0
+In-Reply-To: <20200501235907.3978-1-angelo.dureghello@timesys.com>
+References: <20200501235907.3978-1-angelo.dureghello@timesys.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Sender: linux-mmc-owner@vger.kernel.org
@@ -72,228 +74,49 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add support for sdhci-edshc mmc controller.
+Some controller as the ColdFire eshdc may require an endianness
+byte swap, becouse DMA read endianness is not configurable.
 
 Signed-off-by: Angelo Dureghello <angelo.dureghello@timesys.com>
 ---
 Changes for v3:
-- removed volatile cast from clk.c
+- add post request callback
 ---
- arch/m68k/coldfire/clk.c                    | 15 ++++++++++
- arch/m68k/coldfire/device.c                 | 33 +++++++++++++++++++--
- arch/m68k/coldfire/m5441x.c                 | 12 +++++++-
- arch/m68k/include/asm/m5441xsim.h           | 19 ++++++++++++
- arch/m68k/include/asm/mcfclk.h              |  2 ++
- include/linux/platform_data/mmc-esdhc-mcf.h | 17 +++++++++++
- 6 files changed, 95 insertions(+), 3 deletions(-)
- create mode 100644 include/linux/platform_data/mmc-esdhc-mcf.h
+ drivers/mmc/host/sdhci.c | 7 +++++++
+ drivers/mmc/host/sdhci.h | 2 ++
+ 2 files changed, 9 insertions(+)
 
-diff --git a/arch/m68k/coldfire/clk.c b/arch/m68k/coldfire/clk.c
-index 7bc666e482eb..8d048a72e173 100644
---- a/arch/m68k/coldfire/clk.c
-+++ b/arch/m68k/coldfire/clk.c
-@@ -73,6 +73,21 @@ struct clk_ops clk_ops1 = {
- #endif /* MCFPM_PPMCR1 */
- #endif /* MCFPM_PPMCR0 */
- 
-+static void __clk_enable2(struct clk *clk)
-+{
-+	__set_bit(clk->slot, MCFSDHC_CLK);
-+}
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 3f716466fcfd..d3bfbb6e11d5 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -637,6 +637,13 @@ static int sdhci_pre_dma_transfer(struct sdhci_host *host,
+ 			sg_copy_to_buffer(data->sg, data->sg_len,
+ 					  host->bounce_buffer,
+ 					  length);
 +
-+static void __clk_disable2(struct clk *clk)
-+{
-+	__clear_bit(clk->slot, MCFSDHC_CLK);
-+}
-+
-+struct clk_ops clk_ops2 = {
-+	.enable		= __clk_enable2,
-+	.disable	= __clk_disable2,
-+};
-+
- struct clk *clk_get(struct device *dev, const char *id)
- {
- 	const char *clk_name = dev ? dev_name(dev) : id ? id : NULL;
-diff --git a/arch/m68k/coldfire/device.c b/arch/m68k/coldfire/device.c
-index b4103b6bfdeb..9ef4ec0aea00 100644
---- a/arch/m68k/coldfire/device.c
-+++ b/arch/m68k/coldfire/device.c
-@@ -22,6 +22,7 @@
- #include <asm/mcfqspi.h>
- #include <linux/platform_data/edma.h>
- #include <linux/platform_data/dma-mcf-edma.h>
-+#include <linux/platform_data/mmc-esdhc-mcf.h>
- 
- /*
-  *	All current ColdFire parts contain from 2, 3, 4 or 10 UARTS.
-@@ -551,9 +552,35 @@ static struct platform_device mcf_edma = {
- 		.platform_data = &mcf_edma_data,
- 	}
++			/*
++			 * Endianness can't be swapped in the sg list,
++			 * since the sg list is processed again later on.
++			 */
++			if (host->ops->pre_dma_transfer)
++				host->ops->pre_dma_transfer(host, data);
+ 		}
+ 		/* Switch ownership to the DMA */
+ 		dma_sync_single_for_device(host->mmc->parent,
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 79dffbb731d3..076054308423 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -653,6 +653,8 @@ struct sdhci_ops {
+ 	void	(*voltage_switch)(struct sdhci_host *host);
+ 	void	(*adma_write_desc)(struct sdhci_host *host, void **desc,
+ 				   dma_addr_t addr, int len, unsigned int cmd);
++	void	(*pre_dma_transfer)(struct sdhci_host *host,
++				    struct mmc_data *data);
+ 	void	(*request_done)(struct sdhci_host *host,
+ 				struct mmc_request *mrq);
  };
--
- #endif /* IS_ENABLED(CONFIG_MCF_EDMA) */
- 
-+#if IS_ENABLED(CONFIG_MMC)
-+static struct mcf_esdhc_platform_data mcf_esdhc_data = {
-+	.max_bus_width = 4,
-+	.cd_type = ESDHC_CD_NONE,
-+};
-+
-+static struct resource mcf_esdhc_resources[] = {
-+	{
-+		.start = MCFSDHC_BASE,
-+		.end = MCFSDHC_BASE + MCFSDHC_SIZE - 1,
-+		.flags = IORESOURCE_MEM,
-+	}, {
-+		.start = MCF_IRQ_SDHC,
-+		.end = MCF_IRQ_SDHC,
-+		.flags = IORESOURCE_IRQ,
-+	},
-+};
-+
-+static struct platform_device mcf_esdhc = {
-+	.name			= "sdhci-esdhc-mcf",
-+	.id			= 0,
-+	.num_resources		= ARRAY_SIZE(mcf_esdhc_resources),
-+	.resource		= mcf_esdhc_resources,
-+	.dev.platform_data	= &mcf_esdhc_data,
-+};
-+#endif /* IS_ENABLED(CONFIG_MMC) */
-+
- static struct platform_device *mcf_devices[] __initdata = {
- 	&mcf_uart,
- #if IS_ENABLED(CONFIG_FEC)
-@@ -586,6 +613,9 @@ static struct platform_device *mcf_devices[] __initdata = {
- #if IS_ENABLED(CONFIG_MCF_EDMA)
- 	&mcf_edma,
- #endif
-+#if IS_ENABLED(CONFIG_MMC)
-+	&mcf_esdhc,
-+#endif
- };
- 
- /*
-@@ -614,4 +644,3 @@ static int __init mcf_init_devices(void)
- }
- 
- arch_initcall(mcf_init_devices);
--
-diff --git a/arch/m68k/coldfire/m5441x.c b/arch/m68k/coldfire/m5441x.c
-index 5bd24c9b865d..ffa02de1a3fb 100644
---- a/arch/m68k/coldfire/m5441x.c
-+++ b/arch/m68k/coldfire/m5441x.c
-@@ -52,7 +52,7 @@ DEFINE_CLK(0, "mcfssi.0", 47, MCF_CLK);
- DEFINE_CLK(0, "pll.0", 48, MCF_CLK);
- DEFINE_CLK(0, "mcfrng.0", 49, MCF_CLK);
- DEFINE_CLK(0, "mcfssi.1", 50, MCF_CLK);
--DEFINE_CLK(0, "mcfsdhc.0", 51, MCF_CLK);
-+DEFINE_CLK(0, "sdhci-esdhc-mcf.0", 51, MCF_CLK);
- DEFINE_CLK(0, "enet-fec.0", 53, MCF_CLK);
- DEFINE_CLK(0, "enet-fec.1", 54, MCF_CLK);
- DEFINE_CLK(0, "switch.0", 55, MCF_CLK);
-@@ -74,6 +74,10 @@ DEFINE_CLK(1, "mcfpwm.0", 34, MCF_BUSCLK);
- DEFINE_CLK(1, "sys.0", 36, MCF_BUSCLK);
- DEFINE_CLK(1, "gpio.0", 37, MCF_BUSCLK);
- 
-+DEFINE_CLK(2, "ipg.0", 0, MCF_CLK);
-+DEFINE_CLK(2, "ahb.0", 1, MCF_CLK);
-+DEFINE_CLK(2, "per.0", 2, MCF_CLK);
-+
- struct clk *mcf_clks[] = {
- 	&__clk_0_2,
- 	&__clk_0_8,
-@@ -131,6 +135,11 @@ struct clk *mcf_clks[] = {
- 	&__clk_1_34,
- 	&__clk_1_36,
- 	&__clk_1_37,
-+
-+	&__clk_2_0,
-+	&__clk_2_1,
-+	&__clk_2_2,
-+
- 	NULL,
- };
- 
-@@ -151,6 +160,7 @@ static struct clk * const enable_clks[] __initconst = {
- 	&__clk_0_33, /* pit.1 */
- 	&__clk_0_37, /* eport */
- 	&__clk_0_48, /* pll */
-+	&__clk_0_51, /* esdhc */
- 
- 	&__clk_1_36, /* CCM/reset module/Power management */
- 	&__clk_1_37, /* gpio */
-diff --git a/arch/m68k/include/asm/m5441xsim.h b/arch/m68k/include/asm/m5441xsim.h
-index 4892f314ff38..750555a6fa87 100644
---- a/arch/m68k/include/asm/m5441xsim.h
-+++ b/arch/m68k/include/asm/m5441xsim.h
-@@ -278,6 +278,17 @@
- #define MCFGPIO_IRQ_VECBASE	(MCFINT_VECBASE - MCFGPIO_IRQ_MIN)
- #define MCFGPIO_PIN_MAX		87
- 
-+/*********************************************************************
-+ *
-+ * Phase Locked Loop (PLL)
-+ *
-+ *********************************************************************/
-+
-+/* Register read/write macros */
-+#define MCF_PLL_CR		0xFC0C0000
-+#define MCF_PLL_DR		0xFC0C0004
-+#define MCF_PLL_SR		0xFC0C0008
-+
- /*
-  *  DSPI module.
-  */
-@@ -298,5 +309,13 @@
- #define MCFEDMA_IRQ_INTR16	(MCFINT1_VECBASE + MCFEDMA_EDMA_INTR16)
- #define MCFEDMA_IRQ_INTR56	(MCFINT2_VECBASE + MCFEDMA_EDMA_INTR56)
- #define MCFEDMA_IRQ_ERR	(MCFINT0_VECBASE + MCFINT0_EDMA_ERR)
-+/*
-+ *  esdhc module.
-+ */
-+#define MCFSDHC_BASE		0xfc0cc000
-+#define MCFSDHC_SIZE		256
-+#define MCFINT2_SDHC		31
-+#define MCF_IRQ_SDHC		(MCFINT2_VECBASE + MCFINT2_SDHC)
-+#define MCFSDHC_CLK		(MCFSDHC_BASE + 0x2c)
- 
- #endif /* m5441xsim_h */
-diff --git a/arch/m68k/include/asm/mcfclk.h b/arch/m68k/include/asm/mcfclk.h
-index 0aca504fae31..722627e06d66 100644
---- a/arch/m68k/include/asm/mcfclk.h
-+++ b/arch/m68k/include/asm/mcfclk.h
-@@ -30,6 +30,8 @@ extern struct clk_ops clk_ops0;
- extern struct clk_ops clk_ops1;
- #endif /* MCFPM_PPMCR1 */
- 
-+extern struct clk_ops clk_ops2;
-+
- #define DEFINE_CLK(clk_bank, clk_name, clk_slot, clk_rate) \
- static struct clk __clk_##clk_bank##_##clk_slot = { \
- 	.name = clk_name, \
-diff --git a/include/linux/platform_data/mmc-esdhc-mcf.h b/include/linux/platform_data/mmc-esdhc-mcf.h
-new file mode 100644
-index 000000000000..85cb786a62fe
---- /dev/null
-+++ b/include/linux/platform_data/mmc-esdhc-mcf.h
-@@ -0,0 +1,17 @@
-+/* SPDX-License-Identifier: GPL-2.0 */
-+
-+#ifndef __LINUX_PLATFORM_DATA_MCF_ESDHC_H__
-+#define __LINUX_PLATFORM_DATA_MCF_ESDHC_H__
-+
-+enum cd_types {
-+	ESDHC_CD_NONE,		/* no CD, neither controller nor gpio */
-+	ESDHC_CD_CONTROLLER,	/* mmc controller internal CD */
-+	ESDHC_CD_PERMANENT,	/* no CD, card permanently wired to host */
-+};
-+
-+struct mcf_esdhc_platform_data {
-+	int max_bus_width;
-+	int cd_type;
-+};
-+
-+#endif /* __LINUX_PLATFORM_DATA_MCF_ESDHC_H__ */
 -- 
 2.26.0
 
