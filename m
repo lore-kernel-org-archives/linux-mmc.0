@@ -2,131 +2,298 @@ Return-Path: <SRS0=yrb8=6P=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.1 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,UNWANTED_LANGUAGE_BODY,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 95E57C4724C
-	for <linux-mmc@archiver.kernel.org>; Fri,  1 May 2020 18:50:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A95BBC47256
+	for <linux-mmc@archiver.kernel.org>; Fri,  1 May 2020 23:54:39 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 72FCC20787
-	for <linux-mmc@archiver.kernel.org>; Fri,  1 May 2020 18:50:41 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 860B62072E
+	for <linux-mmc@archiver.kernel.org>; Fri,  1 May 2020 23:54:39 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=web.de header.i=@web.de header.b="Obli+T0t"
+	dkim=pass (2048-bit key) header.d=timesys-com.20150623.gappssmtp.com header.i=@timesys-com.20150623.gappssmtp.com header.b="Qa4iw/Lx"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730122AbgEASuk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 1 May 2020 14:50:40 -0400
-Received: from mout.web.de ([212.227.15.3]:48039 "EHLO mout.web.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1729767AbgEASuk (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 1 May 2020 14:50:40 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=web.de;
-        s=dbaedf251592; t=1588359028;
-        bh=KGj5kUIq0wb9zc+sr/PsxqDhfB9kBqi2Y4I1V3kh8wM=;
-        h=X-UI-Sender-Class:To:Cc:Subject:From:Date;
-        b=Obli+T0th8KGJMiDeEhiWa4idM6ObZEteOHASEXbCPIxA9l5mHiYcE+Sl3Tjofbvr
-         YT2TDmfWlypBaCMZUNPgkSwuGOzOVTi3KiadLG35dqJhpYo5o/FgL1PWHTDAXV18Ck
-         3Zhl5sRXACxpUzZUBz7W5MycEBGR7vo+VVYmePrA=
-X-UI-Sender-Class: c548c8c5-30a9-4db5-a2e7-cb6cb037b8f9
-Received: from [192.168.1.2] ([78.48.136.146]) by smtp.web.de (mrweb002
- [213.165.67.108]) with ESMTPSA (Nemesis) id 0LwI74-1j5sbq0Ie6-0182aA; Fri, 01
- May 2020 20:50:28 +0200
-To:     yanxiaoyong5@gmail.com, linux-mmc@vger.kernel.org
-Cc:     linux-kernel@vger.kernel.org, Avri Altman <avri.altman@wdc.com>,
-        Kate Stewart <kstewart@linuxfoundation.org>,
-        Raul E Rangel <rrangel@chromium.org>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc/core: Avoid oops in mmc_sd_runtime_resume()
-From:   Markus Elfring <Markus.Elfring@web.de>
-Autocrypt: addr=Markus.Elfring@web.de; prefer-encrypt=mutual; keydata=
- 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 FEE=
-Message-ID: <2085b083-42f0-5aaf-9810-f73195fa579c@web.de>
-Date:   Fri, 1 May 2020 20:50:26 +0200
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.7.0
+        id S1726333AbgEAXyj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 1 May 2020 19:54:39 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36080 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726463AbgEAXyi (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 1 May 2020 19:54:38 -0400
+Received: from mail-wr1-x441.google.com (mail-wr1-x441.google.com [IPv6:2a00:1450:4864:20::441])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2B81EC08E859
+        for <linux-mmc@vger.kernel.org>; Fri,  1 May 2020 16:54:38 -0700 (PDT)
+Received: by mail-wr1-x441.google.com with SMTP id l18so2966245wrn.6
+        for <linux-mmc@vger.kernel.org>; Fri, 01 May 2020 16:54:38 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=timesys-com.20150623.gappssmtp.com; s=20150623;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=vfX7XotTRbRZpU8qW6O6HOsTohRIT4UKSMXcugy5qWQ=;
+        b=Qa4iw/LxlEN1ZQnw94k6aygbsApt+5oy2zEsvEzWejoMJNJ9l/UIonwrbDpk52dq4X
+         M+uiSqfm6eeRvJCBEyzW6CPIQfP/POj1nB88vHeytjBuj3bAazfJNqzILZ320QZbB004
+         aYWiGab+wotQT1bhL5a//q9f4U8OnGFsOd4F1ZPx5u2jSPbwNKRVaOR3PChuiyDOuDWW
+         OpRUeBozviksY1asD3uiZdJqej9XW+MgJtg/kQMXefRUkeolJhXFn4m7a/7712Iuxq2G
+         +5br+V4N2vn/DcZ3PN7yfHNILvunt9ceRgcJLhA5T/nnkdhgpqGukTFW6EW9rBa6lnQy
+         HhVQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=vfX7XotTRbRZpU8qW6O6HOsTohRIT4UKSMXcugy5qWQ=;
+        b=Eqh8bo+J1i9Mu+XkXTB2bmVJviH+AykCT5wYzaNm0i6tincLFglsLcYgAwP8p+NPxm
+         YIameqUqqwQ485MAE6QPP0OjygBK7J8gRiij7TCVdi+6/pqxv5vUgh31PT0puo1ie8mv
+         fC7D2GtffJMU8INJqT70LvE1PHco5iAoMUn/pssWouZ4S6hz+E2CrnfcISxmvRXA3sNI
+         FlGyW1nQGYIiI84Ji5N3PZPz/SLQShsKXBQZPdAuZFQK2sSgHWQ1DFAmNMvtQb4tt+eo
+         Spt187AX8zh033g9vVqIgNvz+fMUbCoAH+ERMJAUmPKMm5UajN5BPpYzGEKH9HKpnADM
+         K41A==
+X-Gm-Message-State: AGi0PuZTE2EGQp2Hkw3lk1zWjqVOQkqZXI16aR1q728rQeC/JP5C5kgP
+        QF+Nqfu+ZDP4hftfLCAdVS1fPg==
+X-Google-Smtp-Source: APiQypLhq5mv4xFO/++RArfBBACcwgbhkakj7lSQllPofKe/pwiueZnYbdKvFLg7UaQdrc13Nrd52A==
+X-Received: by 2002:adf:f282:: with SMTP id k2mr6172310wro.133.1588377276656;
+        Fri, 01 May 2020 16:54:36 -0700 (PDT)
+Received: from localhost.localdomain (host142-13-dynamic.2-87-r.retail.telecomitalia.it. [87.2.13.142])
+        by smtp.gmail.com with ESMTPSA id r20sm1495155wmh.26.2020.05.01.16.54.35
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 01 May 2020 16:54:35 -0700 (PDT)
+From:   Angelo Dureghello <angelo.dureghello@timesys.com>
+To:     adrian.hunter@intel.com
+Cc:     linux-mmc@vger.kernel.org, linux-m68k@vger.kernel.org,
+        Angelo Dureghello <angelo.dureghello@timesys.com>
+Subject: [PATCH v3 1/3] m68k: mcf5441x: add support for esdhc mmc controller
+Date:   Sat,  2 May 2020 01:59:05 +0200
+Message-Id: <20200501235907.3978-1-angelo.dureghello@timesys.com>
+X-Mailer: git-send-email 2.26.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-GB
-X-Provags-ID: V03:K1:zNnPd0T9AKNn/cJFS4GZ/sjXWy8cXipIjgXLG0XMmL+q2DUCvyP
- CmJ+cyKGXhwZgubh/2bEK1tYbEcqOAV6DmZxnmh2afzKzgwcFo/G3rYDcYZ38h5ySljs/PI
- raXDZ8B8mHJWTRQjhiI2TcTbcM5qsNXnYJnrJw9BIDxkNExcClYc5iIHDepuEqqI3//6ACa
- aT57mdkoCga1jC5sn7ekw==
-X-UI-Out-Filterresults: notjunk:1;V03:K0:iVbTyEj7ryY=:96ecXnnSKpP+1hJ7uM5gcj
- aa5lIsW9od749RXGh05FYgRAQU0xRst3OCmYmpGVYVb+M0JMW3cSkaviD/YB/PJOdCK0+2MtE
- ZxY7K/y6DSk58TNzwSdS4YdQeK4sxCClP76/ymbAGxTslmNYwNb9Jcjgq/0bAI1iAcP00u6mb
- 76dw+h3wWhIF3I0yh53PMH6a7SzG1hq+Thx5SZGJNacEd0iiMk8MmH19k5Kd7hLdJZ1m4mj5O
- d4ExzuWGhxZGInO4lNesxO38PrDWdHiMZAfCt+cco5tsL8OdDfYMYn/thDDPzEEuWdNO8zrkr
- /oUqgXoM2Aau/vgvoUDMJpU0HmoB2cgPjYr9OpETfZENpwwX6Yo8eVhu6gqQZG2yUzdBmLh5z
- sYekw/HFg9P5sxGJ4faT2FeU/isLdbM1DkYH4vuJcqa+iNBszOUcs8PCMjXHuCXDV2cL/OWVQ
- 9hVU5I+Vd+4mpKzejqWQPmDHCyBy/SxhaDfQiexzOamGTr7IfHHxUY68Bytt+l3UHG8RQsL6N
- 2O1uuw2fja1wrDBo8B/XM23FTSYuFthLILqddxFBygpmuTrhIJPtxIKoZ5RB+o0s2MXu5SOUC
- BJ7teTYc2AZ5Ab7DlNoJsswdS8TrwsemIinDqhCI5a5NZjyHanUEKSUnCXqKkDZ+MZlzKs984
- nFObAXLoU8zpo3vOfS8AbZHH+6qCIYFBR0Q9+vueECdmA3Bd+GI+KbMXnGCDL0Wz2+D990lPp
- Wy9Ak6yvknhDp+b/NZ+HWLku/ohL9+kMp7jSTLf0zqgSX69Bxp4dzLG04LO+EOAFhJJDSccn1
- SnSg2jMJBhPTOqyjaU3w1Xa/vihjXwSNoRz67mdp+jd0Q5LNvWLwBkuYkaI9aWaCYySCKrtp1
- j3736YBQSPSYQbqHTaXq0ZbzA348gVF1Gt81ojHLGsWNrJK19pa5/EbU3L9I1p+QglrNqdnSi
- MQe2sVpixBvQ1YNXi/ow6tQ7EweZAcbgoHx5OrtsOYSJlFllfAaca1RuUCCbZ3ytzpSBuQd63
- 3F+1+MqcPk7obnVSksuL9fgd27aq3U3ER04wxXsrknXLvNJJKge3kVYOIPkE0oKFV9FGMQc97
- lIUf7/LWNYMzeK8lbFDlui8v4UOnojc5kxUSJO8Q7k2ABiny6PfKEdrpsW3c9j7Z0SotGKfrC
- vT/NsO6T6r62rCMoI8P0wFBmZ1r9vcYzNnFJRYhMGKziCJltMB7eJWrDhsZPeypNokcDDv4XC
- fCOz81xOSGFJrK+oW
+Content-Transfer-Encoding: 8bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Please send a patch with a corrected commit message.
-https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/Documentation/process/submitting-patches.rst?id=052c467cb58748e302a95546925928e637025acc#n102
+Add support for sdhci-edshc mmc controller.
 
-1. The patch subject was not succinct.
+Signed-off-by: Angelo Dureghello <angelo.dureghello@timesys.com>
+---
+Changes for v3:
+- removed volatile cast from clk.c
+---
+ arch/m68k/coldfire/clk.c                    | 15 ++++++++++
+ arch/m68k/coldfire/device.c                 | 33 +++++++++++++++++++--
+ arch/m68k/coldfire/m5441x.c                 | 12 +++++++-
+ arch/m68k/include/asm/m5441xsim.h           | 19 ++++++++++++
+ arch/m68k/include/asm/mcfclk.h              |  2 ++
+ include/linux/platform_data/mmc-esdhc-mcf.h | 17 +++++++++++
+ 6 files changed, 95 insertions(+), 3 deletions(-)
+ create mode 100644 include/linux/platform_data/mmc-esdhc-mcf.h
 
-2. The change description was missing.
+diff --git a/arch/m68k/coldfire/clk.c b/arch/m68k/coldfire/clk.c
+index 7bc666e482eb..8d048a72e173 100644
+--- a/arch/m68k/coldfire/clk.c
++++ b/arch/m68k/coldfire/clk.c
+@@ -73,6 +73,21 @@ struct clk_ops clk_ops1 = {
+ #endif /* MCFPM_PPMCR1 */
+ #endif /* MCFPM_PPMCR0 */
+ 
++static void __clk_enable2(struct clk *clk)
++{
++	__set_bit(clk->slot, MCFSDHC_CLK);
++}
++
++static void __clk_disable2(struct clk *clk)
++{
++	__clear_bit(clk->slot, MCFSDHC_CLK);
++}
++
++struct clk_ops clk_ops2 = {
++	.enable		= __clk_enable2,
++	.disable	= __clk_disable2,
++};
++
+ struct clk *clk_get(struct device *dev, const char *id)
+ {
+ 	const char *clk_name = dev ? dev_name(dev) : id ? id : NULL;
+diff --git a/arch/m68k/coldfire/device.c b/arch/m68k/coldfire/device.c
+index b4103b6bfdeb..9ef4ec0aea00 100644
+--- a/arch/m68k/coldfire/device.c
++++ b/arch/m68k/coldfire/device.c
+@@ -22,6 +22,7 @@
+ #include <asm/mcfqspi.h>
+ #include <linux/platform_data/edma.h>
+ #include <linux/platform_data/dma-mcf-edma.h>
++#include <linux/platform_data/mmc-esdhc-mcf.h>
+ 
+ /*
+  *	All current ColdFire parts contain from 2, 3, 4 or 10 UARTS.
+@@ -551,9 +552,35 @@ static struct platform_device mcf_edma = {
+ 		.platform_data = &mcf_edma_data,
+ 	}
+ };
+-
+ #endif /* IS_ENABLED(CONFIG_MCF_EDMA) */
+ 
++#if IS_ENABLED(CONFIG_MMC)
++static struct mcf_esdhc_platform_data mcf_esdhc_data = {
++	.max_bus_width = 4,
++	.cd_type = ESDHC_CD_NONE,
++};
++
++static struct resource mcf_esdhc_resources[] = {
++	{
++		.start = MCFSDHC_BASE,
++		.end = MCFSDHC_BASE + MCFSDHC_SIZE - 1,
++		.flags = IORESOURCE_MEM,
++	}, {
++		.start = MCF_IRQ_SDHC,
++		.end = MCF_IRQ_SDHC,
++		.flags = IORESOURCE_IRQ,
++	},
++};
++
++static struct platform_device mcf_esdhc = {
++	.name			= "sdhci-esdhc-mcf",
++	.id			= 0,
++	.num_resources		= ARRAY_SIZE(mcf_esdhc_resources),
++	.resource		= mcf_esdhc_resources,
++	.dev.platform_data	= &mcf_esdhc_data,
++};
++#endif /* IS_ENABLED(CONFIG_MMC) */
++
+ static struct platform_device *mcf_devices[] __initdata = {
+ 	&mcf_uart,
+ #if IS_ENABLED(CONFIG_FEC)
+@@ -586,6 +613,9 @@ static struct platform_device *mcf_devices[] __initdata = {
+ #if IS_ENABLED(CONFIG_MCF_EDMA)
+ 	&mcf_edma,
+ #endif
++#if IS_ENABLED(CONFIG_MMC)
++	&mcf_esdhc,
++#endif
+ };
+ 
+ /*
+@@ -614,4 +644,3 @@ static int __init mcf_init_devices(void)
+ }
+ 
+ arch_initcall(mcf_init_devices);
+-
+diff --git a/arch/m68k/coldfire/m5441x.c b/arch/m68k/coldfire/m5441x.c
+index 5bd24c9b865d..ffa02de1a3fb 100644
+--- a/arch/m68k/coldfire/m5441x.c
++++ b/arch/m68k/coldfire/m5441x.c
+@@ -52,7 +52,7 @@ DEFINE_CLK(0, "mcfssi.0", 47, MCF_CLK);
+ DEFINE_CLK(0, "pll.0", 48, MCF_CLK);
+ DEFINE_CLK(0, "mcfrng.0", 49, MCF_CLK);
+ DEFINE_CLK(0, "mcfssi.1", 50, MCF_CLK);
+-DEFINE_CLK(0, "mcfsdhc.0", 51, MCF_CLK);
++DEFINE_CLK(0, "sdhci-esdhc-mcf.0", 51, MCF_CLK);
+ DEFINE_CLK(0, "enet-fec.0", 53, MCF_CLK);
+ DEFINE_CLK(0, "enet-fec.1", 54, MCF_CLK);
+ DEFINE_CLK(0, "switch.0", 55, MCF_CLK);
+@@ -74,6 +74,10 @@ DEFINE_CLK(1, "mcfpwm.0", 34, MCF_BUSCLK);
+ DEFINE_CLK(1, "sys.0", 36, MCF_BUSCLK);
+ DEFINE_CLK(1, "gpio.0", 37, MCF_BUSCLK);
+ 
++DEFINE_CLK(2, "ipg.0", 0, MCF_CLK);
++DEFINE_CLK(2, "ahb.0", 1, MCF_CLK);
++DEFINE_CLK(2, "per.0", 2, MCF_CLK);
++
+ struct clk *mcf_clks[] = {
+ 	&__clk_0_2,
+ 	&__clk_0_8,
+@@ -131,6 +135,11 @@ struct clk *mcf_clks[] = {
+ 	&__clk_1_34,
+ 	&__clk_1_36,
+ 	&__clk_1_37,
++
++	&__clk_2_0,
++	&__clk_2_1,
++	&__clk_2_2,
++
+ 	NULL,
+ };
+ 
+@@ -151,6 +160,7 @@ static struct clk * const enable_clks[] __initconst = {
+ 	&__clk_0_33, /* pit.1 */
+ 	&__clk_0_37, /* eport */
+ 	&__clk_0_48, /* pll */
++	&__clk_0_51, /* esdhc */
+ 
+ 	&__clk_1_36, /* CCM/reset module/Power management */
+ 	&__clk_1_37, /* gpio */
+diff --git a/arch/m68k/include/asm/m5441xsim.h b/arch/m68k/include/asm/m5441xsim.h
+index 4892f314ff38..750555a6fa87 100644
+--- a/arch/m68k/include/asm/m5441xsim.h
++++ b/arch/m68k/include/asm/m5441xsim.h
+@@ -278,6 +278,17 @@
+ #define MCFGPIO_IRQ_VECBASE	(MCFINT_VECBASE - MCFGPIO_IRQ_MIN)
+ #define MCFGPIO_PIN_MAX		87
+ 
++/*********************************************************************
++ *
++ * Phase Locked Loop (PLL)
++ *
++ *********************************************************************/
++
++/* Register read/write macros */
++#define MCF_PLL_CR		0xFC0C0000
++#define MCF_PLL_DR		0xFC0C0004
++#define MCF_PLL_SR		0xFC0C0008
++
+ /*
+  *  DSPI module.
+  */
+@@ -298,5 +309,13 @@
+ #define MCFEDMA_IRQ_INTR16	(MCFINT1_VECBASE + MCFEDMA_EDMA_INTR16)
+ #define MCFEDMA_IRQ_INTR56	(MCFINT2_VECBASE + MCFEDMA_EDMA_INTR56)
+ #define MCFEDMA_IRQ_ERR	(MCFINT0_VECBASE + MCFINT0_EDMA_ERR)
++/*
++ *  esdhc module.
++ */
++#define MCFSDHC_BASE		0xfc0cc000
++#define MCFSDHC_SIZE		256
++#define MCFINT2_SDHC		31
++#define MCF_IRQ_SDHC		(MCFINT2_VECBASE + MCFINT2_SDHC)
++#define MCFSDHC_CLK		(MCFSDHC_BASE + 0x2c)
+ 
+ #endif /* m5441xsim_h */
+diff --git a/arch/m68k/include/asm/mcfclk.h b/arch/m68k/include/asm/mcfclk.h
+index 0aca504fae31..722627e06d66 100644
+--- a/arch/m68k/include/asm/mcfclk.h
++++ b/arch/m68k/include/asm/mcfclk.h
+@@ -30,6 +30,8 @@ extern struct clk_ops clk_ops0;
+ extern struct clk_ops clk_ops1;
+ #endif /* MCFPM_PPMCR1 */
+ 
++extern struct clk_ops clk_ops2;
++
+ #define DEFINE_CLK(clk_bank, clk_name, clk_slot, clk_rate) \
+ static struct clk __clk_##clk_bank##_##clk_slot = { \
+ 	.name = clk_name, \
+diff --git a/include/linux/platform_data/mmc-esdhc-mcf.h b/include/linux/platform_data/mmc-esdhc-mcf.h
+new file mode 100644
+index 000000000000..85cb786a62fe
+--- /dev/null
++++ b/include/linux/platform_data/mmc-esdhc-mcf.h
+@@ -0,0 +1,17 @@
++/* SPDX-License-Identifier: GPL-2.0 */
++
++#ifndef __LINUX_PLATFORM_DATA_MCF_ESDHC_H__
++#define __LINUX_PLATFORM_DATA_MCF_ESDHC_H__
++
++enum cd_types {
++	ESDHC_CD_NONE,		/* no CD, neither controller nor gpio */
++	ESDHC_CD_CONTROLLER,	/* mmc controller internal CD */
++	ESDHC_CD_PERMANENT,	/* no CD, card permanently wired to host */
++};
++
++struct mcf_esdhc_platform_data {
++	int max_bus_width;
++	int cd_type;
++};
++
++#endif /* __LINUX_PLATFORM_DATA_MCF_ESDHC_H__ */
+-- 
+2.26.0
 
-3. The real name is expected for the signature.
-
-Regards,
-Markus
