@@ -2,145 +2,138 @@ Return-Path: <SRS0=yrb8=6P=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-1.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6EFF7C47256
-	for <linux-mmc@archiver.kernel.org>; Fri,  1 May 2020 02:55:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8CB3EC4724C
+	for <linux-mmc@archiver.kernel.org>; Fri,  1 May 2020 13:54:11 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4F3E22137B
-	for <linux-mmc@archiver.kernel.org>; Fri,  1 May 2020 02:55:25 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1588301725;
-	bh=Qb8/Wobb5l8oQHHCrxRY724vqq/SS6qMPDvfwaXjGOQ=;
-	h=Date:From:To:To:To:Cc:Cc:Cc:Subject:In-Reply-To:References:
-	 List-ID:From;
-	b=kkBmuOR9b93zNlGglEqaGcdBUqTKaPJjQz6XBJjRD/ts5mTL+gphM0zIVIzYFvSaz
-	 p+0iNei47DGz+yCvQItGpMnBV+FVVQt1b59wKa92o3DOnI1ULUPwyEnV3qCf3CqMqv
-	 dUQrdvkLW7Y9ygialve67u885ZrCQAU/Ge7+Z6xQ=
+	by mail.kernel.org (Postfix) with ESMTP id 6C7AD2051A
+	for <linux-mmc@archiver.kernel.org>; Fri,  1 May 2020 13:54:11 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=fail reason="signature verification failed" (1024-bit key) header.d=mg.codeaurora.org header.i=@mg.codeaurora.org header.b="JgveDF12"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728167AbgEACzY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 30 Apr 2020 22:55:24 -0400
-Received: from mail.kernel.org ([198.145.29.99]:60230 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728173AbgEACzY (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 30 Apr 2020 22:55:24 -0400
-Received: from localhost (unknown [137.135.114.1])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        id S1730661AbgEANyK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 1 May 2020 09:54:10 -0400
+Received: from mail27.static.mailgun.info ([104.130.122.27]:24453 "EHLO
+        mail27.static.mailgun.info" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1731942AbgEANyJ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 1 May 2020 09:54:09 -0400
+DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
+ s=smtp; t=1588341248; h=Message-Id: Date: Subject: Cc: To: From:
+ Sender; bh=UyUTdX3ycZLsp/fRiUOxWmX80RtczvRBethpLLRPbxE=; b=JgveDF12HNG91V4cEsEyGx23uSp0Ura2yNjhk1ubISmciC25t82OIKZyajPQjKYcw3MBg8HA
+ 82ZTsXplC4qKAhdktVAklyTL7KfePyEGIXSNFYLVQPjYyAGYRjdfqLw+5K7O2nv9sSE9mwOt
+ ditPpRLV7biGExyWIGWTTPgmR/Q=
+X-Mailgun-Sending-Ip: 104.130.122.27
+X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
+Received: from smtp.codeaurora.org (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171])
+ by mxa.mailgun.org with ESMTP id 5eac29f2.7f0f27c2d3e8-smtp-out-n01;
+ Fri, 01 May 2020 13:53:54 -0000 (UTC)
+Received: by smtp.codeaurora.org (Postfix, from userid 1001)
+        id DC578C44795; Fri,  1 May 2020 13:53:52 +0000 (UTC)
+Received: from vbadigan-linux.qualcomm.com (blr-c-bdr-fw-01_GlobalNAT_AllZones-Outside.qualcomm.com [103.229.19.19])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 51641207DD;
-        Fri,  1 May 2020 02:55:23 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1588301723;
-        bh=Qb8/Wobb5l8oQHHCrxRY724vqq/SS6qMPDvfwaXjGOQ=;
-        h=Date:From:To:To:To:Cc:Cc:Cc:Subject:In-Reply-To:References:From;
-        b=Ir2SDGVn6sLy51qbj1gFLTAQAdw6LsjuDplVOVjs1JvDKLf0zI9hRgiMvwycDdXNS
-         pxArdrC1BarMjAKboBIsVzufS4YiZ6L7VE68rGmNdYgk+dPe6TwkMEXMfz2PXmFTi1
-         3K+cUWkuBlwzuJ0U9g8zNAIt6Z681M6YMMA4lKWg=
-Date:   Fri, 01 May 2020 02:55:22 +0000
-From:   Sasha Levin <sashal@kernel.org>
-To:     Sasha Levin <sashal@kernel.org>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-To:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>
-Cc:     <stable@vger.kernel.org>
-Cc:     stable@vger.kernel.org
-Subject: Re: [PATCH 2/4] mmc: sdio: Fix several potential memory leaks in mmc_sdio_init_card()
-In-Reply-To: <20200430091640.455-3-ulf.hansson@linaro.org>
-References: <20200430091640.455-3-ulf.hansson@linaro.org>
-Message-Id: <20200501025523.51641207DD@mail.kernel.org>
+        (Authenticated sender: vbadigan)
+        by smtp.codeaurora.org (Postfix) with ESMTPSA id AD883C432C2;
+        Fri,  1 May 2020 13:53:47 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.3.2 smtp.codeaurora.org AD883C432C2
+Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
+Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=none smtp.mailfrom=vbadigan@codeaurora.org
+From:   Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+To:     adrian.hunter@intel.com, ulf.hansson@linaro.org
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-arm-msm@vger.kernel.org,
+        Krishna Konda <kkonda@codeaurora.org>,
+        Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
+        Baolin Wang <baolin.wang@linaro.org>,
+        Ludovic Barre <ludovic.barre@st.com>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Bradley Bolen <bradleybolen@gmail.com>
+Subject: [PATCH V1] mmc: core: expose info about enhanced rpmb support
+Date:   Fri,  1 May 2020 19:23:01 +0530
+Message-Id: <1588341189-4371-1-git-send-email-vbadigan@codeaurora.org>
+X-Mailer: git-send-email 1.9.1
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi
+From: Krishna Konda <kkonda@codeaurora.org>
 
-[This is an automated email]
+Following eMMC JEDEC JESD84-B51 standard, an enhanced form of
+rpmb is supported. What this enhanced mode supports is in addition
+to be able to write one rpmb or two rpmb frames at a time,
+32 frames can be written at a time.
 
-This commit has been processed because it contains a -stable tag.
-The stable tag indicates that it's relevant for the following trees: all
+Expose this information present in ext csd field so that the
+user space application that wants to make use of this can do so.
 
-The bot has tested the following trees: v5.6.7, v5.4.35, v4.19.118, v4.14.177, v4.9.220, v4.4.220.
+Signed-off-by: Krishna Konda <kkonda@codeaurora.org>
+Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+---
+ drivers/mmc/core/mmc.c   | 6 ++++++
+ include/linux/mmc/card.h | 1 +
+ include/linux/mmc/mmc.h  | 1 +
+ 3 files changed, 8 insertions(+)
 
-v5.6.7: Build OK!
-v5.4.35: Build OK!
-v4.19.118: Failed to apply! Possible dependencies:
-    099b64811609 ("mmc: core: Add a debug print when the card may have been replaced")
-    3c30e73977e5 ("mmc: sdio: Drop unused in-parameter to mmc_sdio_reinit_card()")
-    4aaaf3ab1509 ("mmc: sdio: Drop unused in-parameter from mmc_sdio_init_card()")
-    6ebc581c3f9e ("mmc: sdio: Don't re-initialize powered-on removable SDIO cards at resume")
-    7fbbe725378d ("mmc: sdio: Drop powered-on re-init at runtime resume and HW reset")
-
-v4.14.177: Failed to apply! Possible dependencies:
-    099b64811609 ("mmc: core: Add a debug print when the card may have been replaced")
-    247cfe535575 ("mmc: core: Add capability to avoid 3.3V signaling")
-    3a3db6030b64 ("mmc: core: Rename ->reset() bus ops to ->hw_reset()")
-    3c30e73977e5 ("mmc: sdio: Drop unused in-parameter to mmc_sdio_reinit_card()")
-    4aaaf3ab1509 ("mmc: sdio: Drop unused in-parameter from mmc_sdio_init_card()")
-    6a11fc47f175 ("mmc: sd: Fix signal voltage when there is no power cycle")
-    6ebc581c3f9e ("mmc: sdio: Don't re-initialize powered-on removable SDIO cards at resume")
-    7405df4c79cd ("mmc: core: Implement ->sw_reset bus ops for SDIO")
-    7fbbe725378d ("mmc: sdio: Drop powered-on re-init at runtime resume and HW reset")
-    f690f4409ddd ("mmc: mmc: Enable CQE's")
-    fb09f44e290b ("mmc: core: Re-factor some code for SDIO re-initialization")
-
-v4.9.220: Failed to apply! Possible dependencies:
-    066185d69063 ("mmc: core: First step in cleaning up private mmc header files")
-    099b64811609 ("mmc: core: Add a debug print when the card may have been replaced")
-    20348d1981da ("mmc: core: Make mmc_switch_status() available for mmc core")
-    247cfe535575 ("mmc: core: Add capability to avoid 3.3V signaling")
-    2ed573b603f7 ("mmc: core: Clarify usage of mmc_set_signal_voltage()")
-    3a3db6030b64 ("mmc: core: Rename ->reset() bus ops to ->hw_reset()")
-    3c30e73977e5 ("mmc: sdio: Drop unused in-parameter to mmc_sdio_reinit_card()")
-    437590a123b6 ("mmc: core: Retry instead of ignore at CRC errors when polling for busy")
-    4aaaf3ab1509 ("mmc: sdio: Drop unused in-parameter from mmc_sdio_init_card()")
-    4facdde11394 ("mmc: core: Move public functions from card.h to private headers")
-    55244c5659b5 ("mmc: core: Move public functions from core.h to private headers")
-    625228fa3e01 ("mmc: core: Rename ignore_crc to retry_crc_err to reflect its purpose")
-    6ebc581c3f9e ("mmc: sdio: Don't re-initialize powered-on removable SDIO cards at resume")
-    70562644f4ee ("mmc: core: Don't use ->card_busy() and CMD13 in combination when polling")
-    716bdb8953c7 ("mmc: core: Factor out code related to polling in __mmc_switch()")
-    7405df4c79cd ("mmc: core: Implement ->sw_reset bus ops for SDIO")
-    7fbbe725378d ("mmc: sdio: Drop powered-on re-init at runtime resume and HW reset")
-    9d4579a85c84 ("mmc: mmc_test: Disable Command Queue while mmc_test is used")
-    aa33ce3c411a ("mmc: core: Enable __mmc_switch() to change bus speed timing for the host")
-    cb26ce069ffa ("mmc: core: Clarify code which deals with polling in __mmc_switch()")
-    f690f4409ddd ("mmc: mmc: Enable CQE's")
-    fb09f44e290b ("mmc: core: Re-factor some code for SDIO re-initialization")
-
-v4.4.220: Failed to apply! Possible dependencies:
-    066185d69063 ("mmc: core: First step in cleaning up private mmc header files")
-    099b64811609 ("mmc: core: Add a debug print when the card may have been replaced")
-    247cfe535575 ("mmc: core: Add capability to avoid 3.3V signaling")
-    29eb7bd01e80 ("mmc: card: do away with indirection pointer")
-    2ed573b603f7 ("mmc: core: Clarify usage of mmc_set_signal_voltage()")
-    3a3db6030b64 ("mmc: core: Rename ->reset() bus ops to ->hw_reset()")
-    3c30e73977e5 ("mmc: sdio: Drop unused in-parameter to mmc_sdio_reinit_card()")
-    48ab086d262e ("mmc: block: add missing header dependencies")
-    4aaaf3ab1509 ("mmc: sdio: Drop unused in-parameter from mmc_sdio_init_card()")
-    4e6c71788d6b ("mmc: core: Do regular power cycle when lacking eMMC HW reset support")
-    4facdde11394 ("mmc: core: Move public functions from card.h to private headers")
-    55244c5659b5 ("mmc: core: Move public functions from core.h to private headers")
-    5b96fea730ab ("mmc: pwrseq_simple: add to_pwrseq_simple() macro")
-    6ebc581c3f9e ("mmc: sdio: Don't re-initialize powered-on removable SDIO cards at resume")
-    7405df4c79cd ("mmc: core: Implement ->sw_reset bus ops for SDIO")
-    7fbbe725378d ("mmc: sdio: Drop powered-on re-init at runtime resume and HW reset")
-    81f351615772 ("xen/blkfront: separate per ring information out of device info")
-    9d4579a85c84 ("mmc: mmc_test: Disable Command Queue while mmc_test is used")
-    c2df40dfb8c0 ("drivers: use req op accessor")
-    d97a1e5d7cd2 ("mmc: pwrseq: convert to proper platform device")
-    f01b72d0fd53 ("mmc: pwrseq_emmc: add to_pwrseq_emmc() macro")
-    f690f4409ddd ("mmc: mmc: Enable CQE's")
-    fb09f44e290b ("mmc: core: Re-factor some code for SDIO re-initialization")
-    ffedbd2210f2 ("mmc: pwrseq: constify mmc_pwrseq_ops structures")
-
-
-NOTE: The patch will not be queued to stable trees until it is upstream.
-
-How should we proceed with this patch?
-
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index de94fbe..4203303 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -647,6 +647,9 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
+ 				 mmc_hostname(card->host),
+ 				 card->ext_csd.cmdq_depth);
+ 		}
++		card->ext_csd.enhanced_rpmb_supported =
++					(card->ext_csd.rel_param &
++					 EXT_CSD_WR_REL_PARAM_EN_RPMB_REL_WR);
+ 	}
+ out:
+ 	return err;
+@@ -786,6 +789,8 @@ static int mmc_compare_ext_csds(struct mmc_card *card, unsigned bus_width)
+ 		card->ext_csd.enhanced_area_offset);
+ MMC_DEV_ATTR(enhanced_area_size, "%u\n", card->ext_csd.enhanced_area_size);
+ MMC_DEV_ATTR(raw_rpmb_size_mult, "%#x\n", card->ext_csd.raw_rpmb_size_mult);
++MMC_DEV_ATTR(enhanced_rpmb_supported, "%#x\n",
++	card->ext_csd.enhanced_rpmb_supported);
+ MMC_DEV_ATTR(rel_sectors, "%#x\n", card->ext_csd.rel_sectors);
+ MMC_DEV_ATTR(ocr, "0x%08x\n", card->ocr);
+ MMC_DEV_ATTR(rca, "0x%04x\n", card->rca);
+@@ -843,6 +848,7 @@ static ssize_t mmc_dsr_show(struct device *dev,
+ 	&dev_attr_enhanced_area_offset.attr,
+ 	&dev_attr_enhanced_area_size.attr,
+ 	&dev_attr_raw_rpmb_size_mult.attr,
++	&dev_attr_enhanced_rpmb_supported.attr,
+ 	&dev_attr_rel_sectors.attr,
+ 	&dev_attr_ocr.attr,
+ 	&dev_attr_rca.attr,
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index cf3780a..7d46411 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -48,6 +48,7 @@ struct mmc_ext_csd {
+ 	u8			sec_feature_support;
+ 	u8			rel_sectors;
+ 	u8			rel_param;
++	bool			enhanced_rpmb_supported;
+ 	u8			part_config;
+ 	u8			cache_ctrl;
+ 	u8			rst_n_function;
+diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+index 4b85ef0..d9a65c6 100644
+--- a/include/linux/mmc/mmc.h
++++ b/include/linux/mmc/mmc.h
+@@ -325,6 +325,7 @@ static inline bool mmc_ready_for_data(u32 status)
+  */
+ 
+ #define EXT_CSD_WR_REL_PARAM_EN		(1<<2)
++#define EXT_CSD_WR_REL_PARAM_EN_RPMB_REL_WR	(1<<4)
+ 
+ #define EXT_CSD_BOOT_WP_B_PWR_WP_DIS	(0x40)
+ #define EXT_CSD_BOOT_WP_B_PERM_WP_DIS	(0x10)
 -- 
-Thanks
-Sasha
+Qualcomm India Private Limited, on behalf of Qualcomm Innovation Center, Inc., is a member of Code Aurora Forum, a Linux Foundation Collaborative Project
