@@ -7,63 +7,63 @@ X-Spam-Status: No, score=-9.7 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 25443C47258
-	for <linux-mmc@archiver.kernel.org>; Fri,  1 May 2020 23:54:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5A82EC47256
+	for <linux-mmc@archiver.kernel.org>; Fri,  1 May 2020 23:54:47 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 014DB216FD
-	for <linux-mmc@archiver.kernel.org>; Fri,  1 May 2020 23:54:43 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 37335206EB
+	for <linux-mmc@archiver.kernel.org>; Fri,  1 May 2020 23:54:47 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=timesys-com.20150623.gappssmtp.com header.i=@timesys-com.20150623.gappssmtp.com header.b="rEisY8R7"
+	dkim=pass (2048-bit key) header.d=timesys-com.20150623.gappssmtp.com header.i=@timesys-com.20150623.gappssmtp.com header.b="MwmDok71"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726845AbgEAXyn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 1 May 2020 19:54:43 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36092 "EHLO
+        id S1727815AbgEAXyq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 1 May 2020 19:54:46 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36108 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726524AbgEAXym (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 1 May 2020 19:54:42 -0400
+        with ESMTP id S1726524AbgEAXyq (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 1 May 2020 19:54:46 -0400
 Received: from mail-wr1-x444.google.com (mail-wr1-x444.google.com [IPv6:2a00:1450:4864:20::444])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6CF92C061A0C
-        for <linux-mmc@vger.kernel.org>; Fri,  1 May 2020 16:54:41 -0700 (PDT)
-Received: by mail-wr1-x444.google.com with SMTP id x18so13724639wrq.2
-        for <linux-mmc@vger.kernel.org>; Fri, 01 May 2020 16:54:41 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B4778C061A0E
+        for <linux-mmc@vger.kernel.org>; Fri,  1 May 2020 16:54:45 -0700 (PDT)
+Received: by mail-wr1-x444.google.com with SMTP id s8so3396238wrt.9
+        for <linux-mmc@vger.kernel.org>; Fri, 01 May 2020 16:54:45 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=timesys-com.20150623.gappssmtp.com; s=20150623;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=HJeXKhqH1ChnCgVvBR4Vrdvm1BdwloRV+f5k24N69rQ=;
-        b=rEisY8R7QR6fqnfFC6QxWt4JwrUAWOYJRaYtgx5x/G3EmJmMoJ7CvjQxJeBXKZeADZ
-         XxCIcnZYikYz6qElJ9D4S8FB6df2Up/+w9voOurekw8UvNb0yfU4zC9bsXexzlewglv7
-         gtTUwy3F3edg/Dpf9xt9A6NY9AvFU8yqdnDLGatxmIot8gaj3sutbq1PYUxKGPHWr6Wx
-         FpTGOcfdqQeg0m89wPl+p6bxhJXSRK62c3Ui2jNCrw6RBhaCxWGPL9dYXrT9vBijLdO/
-         j/qObbIfl/rFEQ8jS5QY4B4j1zKM6snzlAPFe+VlKG7vZiPmfcEiAIFrim0yQOQsK+5R
-         fIfw==
+        bh=C6wXkd0km/RcjQkUdWBnjZD6R8PeFGMPnvnQtEg6K9s=;
+        b=MwmDok71lK0L76VFTlYHKJ2qW0cm1pyjWHV/ytqkq+LJcHUkxqy2BcDO7qSBy8X3iI
+         CsdC2LvhlwaAPEbnTiKcdYQ1DblTH679wKF+QIzFdoGTmX86nP8HY0hMVeQgAR8P4wCL
+         7pxHGHy96ScpNeSt971Xx9xcejxKmrieUcYNh0qU0gKq+INUabejS5F2lKGwWxg5iLjc
+         oMs+LYrasGzrppYfz6I3lu8uBe7BoVnVaf+m2QDDCm3zQCMOLXQ43EkAiAFVklzw2W4t
+         DIwajw/wkPlUaQnY+S5dLkIMHKN9acFl6HoM369pUWEq58rYLGySkO16v4Zv0x5RX5wK
+         mDfQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=HJeXKhqH1ChnCgVvBR4Vrdvm1BdwloRV+f5k24N69rQ=;
-        b=A3X8tlvVvGasdcS6/iLQnOEKFy0C9N99HF+XHFHEueDoom6bzKnIiR2tpUDaEy3YmY
-         pqRItGJPI/AoIqup9SH1huWoZlZH8/kUZubvqF5CpRdxVuqC4aQz3YLDYrwPkI4hMXJW
-         yb2O517loo1Jvu1u33hevPSeI/mLEhjiuEIUnI2smbEisgKGOiw1UWy0OoJVtF3KTfaT
-         54+VIfFn84DqHCIsv6CX1OPmNKZOhqO73s5xpLRZ4wwNhw3KgiNHoxIAM/iuwt90Ulbs
-         9s9e7X237y85+N7q+/2I0/6Yh8MlyrUl/LbNTYUVmI4/2Cjej6c42vblSilyof9Sa7nL
-         IeaQ==
-X-Gm-Message-State: AGi0Pua1TjyxsT1yBvZIvIIzwHlFzG22sejsTuoFshdJiOvfnvmlPorJ
-        sSnejWY2rYVBWqDvPU1GBjQVnjiRquU=
-X-Google-Smtp-Source: APiQypJQM/uXv1VqXW//Eu2c6BKWAJeQojrrrq3hOlCUW10k01rDT1A8sgUajT4vA5V/qC88kJn3AA==
-X-Received: by 2002:a5d:6844:: with SMTP id o4mr7078808wrw.392.1588377280186;
-        Fri, 01 May 2020 16:54:40 -0700 (PDT)
+        bh=C6wXkd0km/RcjQkUdWBnjZD6R8PeFGMPnvnQtEg6K9s=;
+        b=Ynh7lmA3KCgVIduoWLXyWtyKMMm/qsVMuiaMrayTJWiVzoT0/0N6GRWA0yS3B7l76Y
+         +c8Smyx+4Sq94Fojn0sJzslYiEenrvnxGDyKrMZM7gR0OA/OBNAjxKUz7zvTkp+HtKp3
+         rA0y0M0vRAK0xhgcRHlb3cOruhFu1IUbKyVaV/8Of+o6agHZiNmnGrkDak+mHnkOmtYk
+         OnSeq5o6X2vNxnAY1xDddJHnVwJpICLxAPWB5THUGF8GO1zNLQ9BoEZq9vc4aIucbN9G
+         NYuD1Ny0FlPYeeeHgJribDnh9yN3iKkTg103TM126y34i5AwlQfQ1oWzPC9KgEHdQINs
+         1tGg==
+X-Gm-Message-State: AGi0PuasNRiR06M10xzrepSOTkTBTy71/pFnlrnMi2uBZzYqYc7+0nIz
+        3jdg/mQJo0Ac3QhQ9sXhNJmVtA==
+X-Google-Smtp-Source: APiQypJXQCnPPPZs2mjU36aZYdwllrOON0687LC/3s27SFKD5871K3EZOetGAMHeuYUjRjQuQrHxDQ==
+X-Received: by 2002:adf:9d8b:: with SMTP id p11mr6460007wre.322.1588377284230;
+        Fri, 01 May 2020 16:54:44 -0700 (PDT)
 Received: from localhost.localdomain (host142-13-dynamic.2-87-r.retail.telecomitalia.it. [87.2.13.142])
-        by smtp.gmail.com with ESMTPSA id r20sm1495155wmh.26.2020.05.01.16.54.39
+        by smtp.gmail.com with ESMTPSA id r20sm1495155wmh.26.2020.05.01.16.54.42
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 01 May 2020 16:54:39 -0700 (PDT)
+        Fri, 01 May 2020 16:54:43 -0700 (PDT)
 From:   Angelo Dureghello <angelo.dureghello@timesys.com>
 To:     adrian.hunter@intel.com
 Cc:     linux-mmc@vger.kernel.org, linux-m68k@vger.kernel.org,
         Angelo Dureghello <angelo.dureghello@timesys.com>
-Subject: [PATCH v3 2/3] mmc: sdhci: add quirks for be to le byte swapping
-Date:   Sat,  2 May 2020 01:59:06 +0200
-Message-Id: <20200501235907.3978-2-angelo.dureghello@timesys.com>
+Subject: [PATCH v3 3/3] mmc: host: add Coldfire esdhc support
+Date:   Sat,  2 May 2020 01:59:07 +0200
+Message-Id: <20200501235907.3978-3-angelo.dureghello@timesys.com>
 X-Mailer: git-send-email 2.26.0
 In-Reply-To: <20200501235907.3978-1-angelo.dureghello@timesys.com>
 References: <20200501235907.3978-1-angelo.dureghello@timesys.com>
@@ -74,49 +74,580 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Some controller as the ColdFire eshdc may require an endianness
-byte swap, becouse DMA read endianness is not configurable.
+This driver has been developed as a separate module starting
+from the similar sdhci-esdhc-imx.c.
+
+Reasons for a separate sdchi-esdhc-mcf driver:
+
+- m68K architecture does not support devicetrees, so modifying
+sdhci-of-esdhc.c that is devicetree-related adding platform data
+seems not appropriate,
+- clock-related part, has to be implemented specifically for
+mcf5441x family (see esdhc_mcf_pltfm_set_clock()),
+- this is a big endian cpu accessing a big endian controller,
+but about sdma, this controller does not support hw swap, which
+needs to be handled with specific code,
+- some other minor differences but mainly to avoid risks on
+tweaking inside largely used imx driver. Adding just a small
+size ColdFire-specific driver, with benefits in a further less
+risky maintenance.
 
 Signed-off-by: Angelo Dureghello <angelo.dureghello@timesys.com>
 ---
-Changes for v3:
-- add post request callback
+Changes in v3:
+- fix write support
 ---
- drivers/mmc/host/sdhci.c | 7 +++++++
- drivers/mmc/host/sdhci.h | 2 ++
- 2 files changed, 9 insertions(+)
+ drivers/mmc/host/Kconfig           |  13 +
+ drivers/mmc/host/Makefile          |   1 +
+ drivers/mmc/host/sdhci-esdhc-mcf.c | 503 +++++++++++++++++++++++++++++
+ 3 files changed, 517 insertions(+)
+ create mode 100644 drivers/mmc/host/sdhci-esdhc-mcf.c
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 3f716466fcfd..d3bfbb6e11d5 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -637,6 +637,13 @@ static int sdhci_pre_dma_transfer(struct sdhci_host *host,
- 			sg_copy_to_buffer(data->sg, data->sg_len,
- 					  host->bounce_buffer,
- 					  length);
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 462b5352fea7..da793fc95203 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -235,6 +235,19 @@ config MMC_SDHCI_CNS3XXX
+ 
+ 	  If unsure, say N.
+ 
++config MMC_SDHCI_ESDHC_MCF
++	tristate "SDHCI support for the Freescale eSDHC ColdFire controller"
++	depends on M5441x
++	depends on MMC_SDHCI_PLTFM
++	select MMC_SDHCI_IO_ACCESSORS
++	help
++	  This selects the Freescale eSDHC controller support for
++	  ColdFire mcf5441x devices.
 +
-+			/*
-+			 * Endianness can't be swapped in the sg list,
-+			 * since the sg list is processed again later on.
-+			 */
-+			if (host->ops->pre_dma_transfer)
-+				host->ops->pre_dma_transfer(host, data);
- 		}
- 		/* Switch ownership to the DMA */
- 		dma_sync_single_for_device(host->mmc->parent,
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 79dffbb731d3..076054308423 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -653,6 +653,8 @@ struct sdhci_ops {
- 	void	(*voltage_switch)(struct sdhci_host *host);
- 	void	(*adma_write_desc)(struct sdhci_host *host, void **desc,
- 				   dma_addr_t addr, int len, unsigned int cmd);
-+	void	(*pre_dma_transfer)(struct sdhci_host *host,
-+				    struct mmc_data *data);
- 	void	(*request_done)(struct sdhci_host *host,
- 				struct mmc_request *mrq);
- };
++	  If you have a controller with this interface, say Y or M here.
++
++	  If unsure, say N.
++
+ config MMC_SDHCI_ESDHC_IMX
+ 	tristate "SDHCI support for the Freescale eSDHC/uSDHC i.MX controller"
+ 	depends on ARCH_MXC
+diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+index b929ef941208..af2cdaadc4d3 100644
+--- a/drivers/mmc/host/Makefile
++++ b/drivers/mmc/host/Makefile
+@@ -82,6 +82,7 @@ obj-$(CONFIG_MMC_REALTEK_USB)	+= rtsx_usb_sdmmc.o
+ obj-$(CONFIG_MMC_SDHCI_PLTFM)		+= sdhci-pltfm.o
+ obj-$(CONFIG_MMC_SDHCI_CADENCE)		+= sdhci-cadence.o
+ obj-$(CONFIG_MMC_SDHCI_CNS3XXX)		+= sdhci-cns3xxx.o
++obj-$(CONFIG_MMC_SDHCI_ESDHC_MCF)       += sdhci-esdhc-mcf.o
+ obj-$(CONFIG_MMC_SDHCI_ESDHC_IMX)	+= sdhci-esdhc-imx.o
+ obj-$(CONFIG_MMC_SDHCI_DOVE)		+= sdhci-dove.o
+ obj-$(CONFIG_MMC_SDHCI_TEGRA)		+= sdhci-tegra.o
+diff --git a/drivers/mmc/host/sdhci-esdhc-mcf.c b/drivers/mmc/host/sdhci-esdhc-mcf.c
+new file mode 100644
+index 000000000000..658b687c7a51
+--- /dev/null
++++ b/drivers/mmc/host/sdhci-esdhc-mcf.c
+@@ -0,0 +1,503 @@
++// SPDX-License-Identifier: GPL-2.0
++/*
++ * Freescale eSDHC ColdFire family controller driver, platform bus.
++ *
++ * Copyright (c) 2020 Timesys Corporation
++ *   Author: Angelo Dureghello <angelo.dureghello@timesys.it>
++ */
++
++#include <linux/module.h>
++#include <linux/delay.h>
++#include <linux/platform_data/mmc-esdhc-mcf.h>
++#include <linux/mmc/mmc.h>
++#include "sdhci-pltfm.h"
++#include "sdhci-esdhc.h"
++
++#define	ESDHC_PROCTL_D3CD		0x08
++#define ESDHC_SYS_CTRL_DTOCV_MASK	0x0f
++#define ESDHC_DEFAULT_HOST_CONTROL	0x28
++
++/*
++ * Freescale eSDHC has DMA ERR flag at bit 28, not as std spec says, bit 25.
++ */
++#define ESDHC_INT_VENDOR_SPEC_DMA_ERR	(1 << 28)
++
++struct pltfm_mcf_data {
++	struct clk *clk_ipg;
++	struct clk *clk_ahb;
++	struct clk *clk_per;
++	int aside;
++	int current_bus_width;
++};
++
++static inline void esdhc_mcf_buffer_swap32(u32 *buf, int len)
++{
++	int i;
++	u32 temp;
++
++	len = (len + 3) >> 2;
++
++	for (i = 0; i < len;  i++) {
++		temp = swab32(*buf);
++		*buf++ = temp;
++	}
++}
++
++static inline void esdhc_clrset_be(struct sdhci_host *host,
++				   u32 mask, u32 val, int reg)
++{
++	void __iomem *base = host->ioaddr + (reg & ~3);
++	u8 shift = (reg & 3) << 3;
++
++	mask <<= shift;
++	val <<= shift;
++
++	if (reg == SDHCI_HOST_CONTROL)
++		val |= ESDHC_PROCTL_D3CD;
++
++	writel((readl(base) & ~mask) | val, base);
++}
++
++/*
++ * Note: mcf is big-endian, single bytes need to be accessed at big endian
++ * offsets.
++ */
++static void esdhc_mcf_writeb_be(struct sdhci_host *host, u8 val, int reg)
++{
++	void __iomem *base = host->ioaddr + (reg & ~3);
++	u8 shift = (reg & 3) << 3;
++	u32 mask = ~(0xff << shift);
++
++	if (reg == SDHCI_HOST_CONTROL) {
++		u32 host_ctrl = ESDHC_DEFAULT_HOST_CONTROL;
++		u8 dma_bits = (val & SDHCI_CTRL_DMA_MASK) >> 3;
++		u8 tmp = readb(host->ioaddr + SDHCI_HOST_CONTROL + 1);
++
++		tmp &= ~0x03;
++		tmp |= dma_bits;
++
++		/*
++		 * Recomposition needed, restore always endianness and
++		 * keep D3CD and AI, just setting bus width.
++		 */
++		host_ctrl |= val;
++		host_ctrl |= (dma_bits << 8);
++		writel(host_ctrl, host->ioaddr + SDHCI_HOST_CONTROL);
++
++		return;
++	}
++
++	writel((readl(base) & mask) | (val << shift), base);
++}
++
++static void esdhc_mcf_writew_be(struct sdhci_host *host, u16 val, int reg)
++{
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct pltfm_mcf_data *mcf_data = sdhci_pltfm_priv(pltfm_host);
++	void __iomem *base = host->ioaddr + (reg & ~3);
++	u8 shift = (reg & 3) << 3;
++	u32 mask = ~(0xffff << shift);
++
++	switch (reg) {
++	case SDHCI_TRANSFER_MODE:
++		mcf_data->aside = val;
++		return;
++	case SDHCI_COMMAND:
++		if (host->cmd->opcode == MMC_STOP_TRANSMISSION)
++			val |= SDHCI_CMD_ABORTCMD;
++
++		/*
++		 * As for the fsl driver,
++		 * we have to set the mode in a single write here.
++		 */
++		writel(val << 16 | mcf_data->aside,
++			       host->ioaddr + SDHCI_TRANSFER_MODE);
++		return;
++	}
++
++	writel((readl(base) & mask) | (val << shift), base);
++}
++
++static void esdhc_mcf_writel_be(struct sdhci_host *host, u32 val, int reg)
++{
++	writel(val, host->ioaddr + reg);
++}
++
++static u8 esdhc_mcf_readb_be(struct sdhci_host *host, int reg)
++{
++	if (reg == SDHCI_HOST_CONTROL) {
++		u8 __iomem *base = host->ioaddr + (reg & ~3);
++		u16 val = readw(base + 2);
++		u8 dma_bits = (val >> 5) & SDHCI_CTRL_DMA_MASK;
++		u8 host_ctrl = val & 0xff;
++
++		host_ctrl &= ~SDHCI_CTRL_DMA_MASK;
++		host_ctrl |= dma_bits;
++
++		return host_ctrl;
++	}
++
++	return readb(host->ioaddr + (reg ^ 0x3));
++}
++
++static u16 esdhc_mcf_readw_be(struct sdhci_host *host, int reg)
++{
++	/*
++	 * For SDHCI_HOST_VERSION, sdhci specs defines 0xFE,
++	 * a wrong offset for us, we are at 0xFC.
++	 */
++	if (reg == SDHCI_HOST_VERSION)
++		reg -= 2;
++
++	return readw(host->ioaddr + (reg ^ 0x2));
++}
++
++static u32 esdhc_mcf_readl_be(struct sdhci_host *host, int reg)
++{
++	u32 val;
++
++	val = readl(host->ioaddr + reg);
++
++	/*
++	 * RM (25.3.9) sd pin clock must never exceed 25Mhz.
++	 * So forcing legacy mode at 25Mhz.
++	 */
++	if (unlikely(reg == SDHCI_CAPABILITIES))
++		val &= ~SDHCI_CAN_DO_HISPD;
++
++	if (unlikely(reg == SDHCI_INT_STATUS)) {
++		if (val & ESDHC_INT_VENDOR_SPEC_DMA_ERR) {
++			val &= ~ESDHC_INT_VENDOR_SPEC_DMA_ERR;
++			val |= SDHCI_INT_ADMA_ERROR;
++		}
++	}
++
++	return val;
++}
++
++static unsigned int esdhc_mcf_get_max_timeout_count(struct sdhci_host *host)
++{
++	return 1 << 27;
++}
++
++static void esdhc_mcf_set_timeout(struct sdhci_host *host,
++				  struct mmc_command *cmd)
++{
++	/* Use maximum timeout counter */
++	esdhc_clrset_be(host, ESDHC_SYS_CTRL_DTOCV_MASK, 0xE,
++				SDHCI_TIMEOUT_CONTROL);
++}
++
++static void esdhc_mcf_reset(struct sdhci_host *host, u8 mask)
++{
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct pltfm_mcf_data *mcf_data = sdhci_pltfm_priv(pltfm_host);
++
++	sdhci_reset(host, mask);
++
++	esdhc_clrset_be(host, ESDHC_CTRL_BUSWIDTH_MASK,
++			mcf_data->current_bus_width, SDHCI_HOST_CONTROL);
++
++	sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
++	sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
++}
++
++static unsigned int esdhc_mcf_pltfm_get_max_clock(struct sdhci_host *host)
++{
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++
++	return pltfm_host->clock;
++}
++
++static unsigned int esdhc_mcf_pltfm_get_min_clock(struct sdhci_host *host)
++{
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++
++	return pltfm_host->clock / 256 / 16;
++}
++
++static void esdhc_mcf_pltfm_set_clock(struct sdhci_host *host,
++					 unsigned int clock)
++{
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	unsigned long *pll_dr = (unsigned long *)MCF_PLL_DR;
++	u32 fvco, fsys, fesdhc, temp;
++	const int sdclkfs[] = {2, 4, 8, 16, 32, 64, 128, 256};
++	int delta, old_delta = clock;
++	int i, q, ri, rq;
++
++	if (clock == 0) {
++		host->mmc->actual_clock = 0;
++		return;
++	}
++
++	/*
++	 * ColdFire eSDHC clock.s
++	 *
++	 * pll -+-> / outdiv1 --> fsys
++	 *      +-> / outdiv3 --> eSDHC clock ---> / SDCCLKFS / DVS
++	 *
++	 * mcf5441x datasheet says:
++	 * (8.1.2) eSDHC should be 40 MHz max
++	 * (25.3.9) eSDHC input is, as example, 96 Mhz ...
++	 * (25.3.9) sd pin clock must never exceed 25Mhz
++	 *
++	 * fvco = fsys * outdvi1 + 1
++	 * fshdc = fvco / outdiv3 + 1
++	 */
++	temp = readl(pll_dr);
++	fsys = pltfm_host->clock;
++	fvco = fsys * ((temp & 0x1f) + 1);
++	fesdhc = fvco / (((temp >> 10) & 0x1f) + 1);
++
++	for (i = 0; i < 8; ++i) {
++		int result = fesdhc / sdclkfs[i];
++
++		for (q = 1; q < 17; ++q) {
++			int finale = result / q;
++
++			delta = abs(clock - finale);
++
++			if (delta < old_delta) {
++				old_delta = delta;
++				ri = i;
++				rq = q;
++			}
++		}
++	}
++
++	/*
++	 * Apply divisors and re-enable all the clocks
++	 */
++	temp = ((sdclkfs[ri] >> 1) << 8) | ((rq - 1) << 4) |
++		(ESDHC_CLOCK_IPGEN | ESDHC_CLOCK_HCKEN | ESDHC_CLOCK_PEREN);
++	esdhc_clrset_be(host, 0x0000fff7, temp, SDHCI_CLOCK_CONTROL);
++
++	host->mmc->actual_clock = clock;
++
++	mdelay(1);
++}
++
++static void esdhc_mcf_pltfm_set_bus_width(struct sdhci_host *host, int width)
++{
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct pltfm_mcf_data *mcf_data = sdhci_pltfm_priv(pltfm_host);
++
++	switch (width) {
++	case MMC_BUS_WIDTH_4:
++		mcf_data->current_bus_width = ESDHC_CTRL_4BITBUS;
++		break;
++	default:
++		mcf_data->current_bus_width = 0;
++		break;
++	}
++
++	esdhc_clrset_be(host, ESDHC_CTRL_BUSWIDTH_MASK,
++			mcf_data->current_bus_width, SDHCI_HOST_CONTROL);
++}
++
++static void esdhc_mcf_request_done(struct sdhci_host *host,
++				   struct mmc_request *mrq)
++{
++	struct scatterlist *sg;
++	u32 *buffer;
++	int i;
++
++	if (!mrq->data || !mrq->data->bytes_xfered)
++		goto exit_done;
++
++	if (mmc_get_dma_dir(mrq->data) != DMA_FROM_DEVICE)
++		goto exit_done;
++
++	/*
++	 * On mcf5441x there is no hw sdma option/flag to select the dma
++	 * transfer endiannes. A swap after the transfer is needed.
++	 */
++	for_each_sg(mrq->data->sg, sg, mrq->data->sg_len, i) {
++		buffer = (u32 *)sg_virt(sg);
++		esdhc_mcf_buffer_swap32(buffer, sg->length);
++	}
++
++exit_done:
++	mmc_request_done(host->mmc, mrq);
++}
++
++static void esdhc_mcf_pre_dma_transfer(struct sdhci_host *host,
++	struct mmc_data *data)
++{
++	esdhc_mcf_buffer_swap32((u32 *)host->bounce_buffer,
++				data->blksz * data->blocks);
++}
++
++static struct sdhci_ops sdhci_esdhc_ops = {
++	.reset = esdhc_mcf_reset,
++	.set_clock = esdhc_mcf_pltfm_set_clock,
++	.get_max_clock = esdhc_mcf_pltfm_get_max_clock,
++	.get_min_clock = esdhc_mcf_pltfm_get_min_clock,
++	.set_bus_width = esdhc_mcf_pltfm_set_bus_width,
++	.get_max_timeout_count = esdhc_mcf_get_max_timeout_count,
++	.set_timeout = esdhc_mcf_set_timeout,
++	.write_b = esdhc_mcf_writeb_be,
++	.write_w = esdhc_mcf_writew_be,
++	.write_l = esdhc_mcf_writel_be,
++	.read_b = esdhc_mcf_readb_be,
++	.read_w = esdhc_mcf_readw_be,
++	.read_l = esdhc_mcf_readl_be,
++	.pre_dma_transfer = esdhc_mcf_pre_dma_transfer,
++	.request_done = esdhc_mcf_request_done,
++};
++
++static const struct sdhci_pltfm_data sdhci_esdhc_mcf_pdata = {
++	.ops = &sdhci_esdhc_ops,
++	.quirks = ESDHC_DEFAULT_QUIRKS | SDHCI_QUIRK_FORCE_DMA,
++		 /*
++		  * Mandatory quirk,
++		  * controller does not support cmd23,
++		  * without, on > 8G cards cmd23 is used, and
++		  * driver times out.
++		  */
++		  SDHCI_QUIRK2_HOST_NO_CMD23,
++};
++
++static int esdhc_mcf_plat_init(struct sdhci_host *host,
++				     struct pltfm_mcf_data *mcf_data)
++{
++	struct mcf_esdhc_platform_data *plat_data;
++
++	if (!host->mmc->parent->platform_data) {
++		dev_err(mmc_dev(host->mmc), "no platform data!\n");
++		return -EINVAL;
++	}
++
++	plat_data = ((struct mcf_esdhc_platform_data *)
++			host->mmc->parent->platform_data);
++
++	/* Card_detect */
++	switch (plat_data->cd_type) {
++	default:
++	case ESDHC_CD_CONTROLLER:
++		/* We have a working card_detect back */
++		host->quirks &= ~SDHCI_QUIRK_BROKEN_CARD_DETECTION;
++		break;
++	case ESDHC_CD_PERMANENT:
++		host->mmc->caps |= MMC_CAP_NONREMOVABLE;
++		break;
++	case ESDHC_CD_NONE:
++		break;
++	}
++
++	switch (plat_data->max_bus_width) {
++	case 4:
++		host->mmc->caps |= MMC_CAP_4_BIT_DATA;
++		break;
++	case 1:
++	default:
++		host->quirks |= SDHCI_QUIRK_FORCE_1_BIT_DATA;
++		break;
++	}
++
++	return 0;
++}
++
++static int sdhci_esdhc_mcf_probe(struct platform_device *pdev)
++{
++	struct sdhci_host *host;
++	struct sdhci_pltfm_host *pltfm_host;
++	struct pltfm_mcf_data *mcf_data;
++	int err;
++
++	host = sdhci_pltfm_init(pdev, &sdhci_esdhc_mcf_pdata,
++				sizeof(*mcf_data));
++
++	if (IS_ERR(host))
++		return PTR_ERR(host);
++
++	pltfm_host = sdhci_priv(host);
++	mcf_data = sdhci_pltfm_priv(pltfm_host);
++
++	host->sdma_boundary = 0;
++
++	host->flags |= SDHCI_AUTO_CMD12;
++
++	mcf_data->clk_ipg = devm_clk_get(&pdev->dev, "ipg");
++	if (IS_ERR(mcf_data->clk_ipg)) {
++		err = PTR_ERR(mcf_data->clk_ipg);
++		goto err_exit;
++	}
++
++	mcf_data->clk_ahb = devm_clk_get(&pdev->dev, "ahb");
++	if (IS_ERR(mcf_data->clk_ahb)) {
++		err = PTR_ERR(mcf_data->clk_ahb);
++		goto err_exit;
++	}
++
++	mcf_data->clk_per = devm_clk_get(&pdev->dev, "per");
++	if (IS_ERR(mcf_data->clk_per)) {
++		err = PTR_ERR(mcf_data->clk_per);
++		goto err_exit;
++	}
++
++	pltfm_host->clk = mcf_data->clk_per;
++	pltfm_host->clock = clk_get_rate(pltfm_host->clk);
++	err = clk_prepare_enable(mcf_data->clk_per);
++	if (err)
++		goto err_exit;
++
++	err = clk_prepare_enable(mcf_data->clk_ipg);
++	if (err) {
++		clk_disable_unprepare(mcf_data->clk_per);
++		goto err_exit;
++	}
++	err = clk_prepare_enable(mcf_data->clk_ahb);
++	if (err) {
++		clk_disable_unprepare(mcf_data->clk_per);
++		clk_disable_unprepare(mcf_data->clk_ipg);
++		goto err_exit;
++	}
++
++	err = esdhc_mcf_plat_init(host, mcf_data);
++	if (err)
++		goto err_exit;
++
++	err = sdhci_add_host(host);
++	if (err)
++		goto err_exit;
++
++	return 0;
++
++err_exit:
++	sdhci_pltfm_free(pdev);
++
++	return err;
++}
++
++static int sdhci_esdhc_mcf_remove(struct platform_device *pdev)
++{
++	struct sdhci_host *host = platform_get_drvdata(pdev);
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct pltfm_mcf_data *mcf_data = sdhci_pltfm_priv(pltfm_host);
++
++	sdhci_remove_host(host, 0);
++
++	clk_disable_unprepare(mcf_data->clk_ipg);
++	clk_disable_unprepare(mcf_data->clk_ahb);
++	clk_disable_unprepare(mcf_data->clk_per);
++
++	sdhci_pltfm_free(pdev);
++
++	return 0;
++}
++
++static struct platform_driver sdhci_esdhc_mcf_driver = {
++	.driver	= {
++		.name = "sdhci-esdhc-mcf",
++	},
++	.probe = sdhci_esdhc_mcf_probe,
++	.remove = sdhci_esdhc_mcf_remove,
++};
++
++module_platform_driver(sdhci_esdhc_mcf_driver);
++
++MODULE_DESCRIPTION("SDHCI driver for Freescale ColdFire eSDHC");
++MODULE_AUTHOR("Angelo Dureghello <angelo.dureghello@timesys.com>");
++MODULE_LICENSE("GPL v2");
 -- 
 2.26.0
 
