@@ -2,97 +2,157 @@ Return-Path: <SRS0=85Gt=6S=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.3 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=no
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7D562C47257
-	for <linux-mmc@archiver.kernel.org>; Mon,  4 May 2020 07:29:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 75D38C3A5A9
+	for <linux-mmc@archiver.kernel.org>; Mon,  4 May 2020 10:20:52 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 6627E215A4
-	for <linux-mmc@archiver.kernel.org>; Mon,  4 May 2020 07:29:36 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5CCCB206E6
+	for <linux-mmc@archiver.kernel.org>; Mon,  4 May 2020 10:20:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728047AbgEDH3f (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 4 May 2020 03:29:35 -0400
-Received: from mga09.intel.com ([134.134.136.24]:41622 "EHLO mga09.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726411AbgEDH3f (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 4 May 2020 03:29:35 -0400
-IronPort-SDR: /IHtxQzSY5XFbLBgxa2nVHWZbE5MsvliIEukanb50vOnyk3TS6SWL/4fth95te2hZMZS6YV0ld
- yKrV+gtiHbsA==
-X-Amp-Result: SKIPPED(no attachment in message)
-X-Amp-File-Uploaded: False
-Received: from orsmga003.jf.intel.com ([10.7.209.27])
-  by orsmga102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 04 May 2020 00:29:34 -0700
-IronPort-SDR: zNtXKyB4w4WjyC6WiVnuuzBAG4T3rPGYx2NUWFTtHfK//89qW4A/ilWT2H0QDxQmJyGU/g28gi
- Lj+lMnDnYtow==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.73,351,1583222400"; 
-   d="scan'208";a="259249561"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.157]) ([10.237.72.157])
-  by orsmga003.jf.intel.com with ESMTP; 04 May 2020 00:29:31 -0700
-Subject: Re: [PATCH] mmc: sdhci-esdhc: update contact email
-To:     Wolfram Sang <wsa@kernel.org>, linux-kernel@vger.kernel.org
-Cc:     kernel@pengutronix.de, Ulf Hansson <ulf.hansson@linaro.org>,
-        Shawn Guo <shawnguo@kernel.org>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        Fabio Estevam <festevam@gmail.com>,
-        NXP Linux Team <linux-imx@nxp.com>, linux-mmc@vger.kernel.org
-References: <20200502142840.19418-1-wsa@kernel.org>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <20f61d5b-74ab-a214-ec36-6e362ba3457b@intel.com>
-Date:   Mon, 4 May 2020 10:29:53 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.7.0
+        id S1727906AbgEDKUs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 4 May 2020 06:20:48 -0400
+Received: from mail-ot1-f67.google.com ([209.85.210.67]:36177 "EHLO
+        mail-ot1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726445AbgEDKUs (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 4 May 2020 06:20:48 -0400
+Received: by mail-ot1-f67.google.com with SMTP id t3so4583219otp.3;
+        Mon, 04 May 2020 03:20:45 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=aGRMnuTg/l5w0maHVGEcneYHQFdFGNPfiCYfIWkTR0o=;
+        b=JDi7a1+k4nDIQ2X2u7vfsWkL8tk/b85acH4ZTdmB1bwLUQNKhJfb//dPxIPNcgljhm
+         jOTigMo6x1Q5lEAD7ZYe8RvzVrD5gxmJVBT4HdxH2/GfjjOO7pdK2W7nxiSzaQy+FBN2
+         9npqFZe7t5nM4HsGGHyGb34zmXkN85egcixHyEtHSk4vnOEzAJEIjB5ZA9rYCijfGoGo
+         pfCHnTdi3gJZxDk64F0uW4fDZj0N9Zta0SjT0bzkKV4R817Fi21w0QWPWcqkYL4TSTlI
+         kJpuJQMc1HxwzuxCWoqjdKKwZ8ClEVc5HnnBnau4oEK2ZzAbDhuLvPLvVirzCvpn7Mz0
+         IQQw==
+X-Gm-Message-State: AGi0PubxR6DnC7gYGJtUCTCQGM/dXeVBj5JslidJOUZvwO/hrIYM7yr4
+        W23D8Z4SZGcHzxnb43AZySrW7wmi/hgiPJwwuWE=
+X-Google-Smtp-Source: APiQypKI/tnpEasz9c6NjgVI5Zv53OBORTXWD6v5yxAV42kvA/cHTjT9UpDrC7tAkI9k8UoXntXphLbQKxc99tQWof8=
+X-Received: by 2002:a9d:7d85:: with SMTP id j5mr12887666otn.107.1588587644541;
+ Mon, 04 May 2020 03:20:44 -0700 (PDT)
 MIME-Version: 1.0
-In-Reply-To: <20200502142840.19418-1-wsa@kernel.org>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+References: <1588542414-14826-1-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
+ <1588542414-14826-3-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
+In-Reply-To: <1588542414-14826-3-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
+From:   Geert Uytterhoeven <geert@linux-m68k.org>
+Date:   Mon, 4 May 2020 12:20:33 +0200
+Message-ID: <CAMuHMdXruqw2pb3pfXNfxNgtc24FmVA376DLBQgubEYSGO7LSA@mail.gmail.com>
+Subject: Re: [PATCH v2 02/10] pinctrl: sh-pfc: r8a7790: Add r8a7742 PFC support
+To:     Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+Cc:     Magnus Damm <magnus.damm@gmail.com>,
+        Rob Herring <robh+dt@kernel.org>,
+        Vinod Koul <vkoul@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
+        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
+        <devicetree@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        dmaengine <dmaengine@vger.kernel.org>,
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
+        "open list:SERIAL DRIVERS" <linux-serial@vger.kernel.org>,
+        Prabhakar <prabhakar.csengg@gmail.com>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 2/05/20 5:28 pm, Wolfram Sang wrote:
-> The 'pengutronix' address is defunct for years. Use the proper contact
-> address.
-> 
-> Signed-off-by: Wolfram Sang <wsa@kernel.org>
+Hi Prabhakar,
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Thanks for the update!
 
-> ---
->  drivers/mmc/host/sdhci-esdhc.h              | 2 +-
->  include/linux/platform_data/mmc-esdhc-imx.h | 2 +-
->  2 files changed, 2 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-esdhc.h b/drivers/mmc/host/sdhci-esdhc.h
-> index 947212f16bc6..a30796e79b1c 100644
-> --- a/drivers/mmc/host/sdhci-esdhc.h
-> +++ b/drivers/mmc/host/sdhci-esdhc.h
-> @@ -5,7 +5,7 @@
->   * Copyright (c) 2007 Freescale Semiconductor, Inc.
->   * Copyright (c) 2009 MontaVista Software, Inc.
->   * Copyright (c) 2010 Pengutronix e.K.
-> - *   Author: Wolfram Sang <w.sang@pengutronix.de>
-> + *   Author: Wolfram Sang <kernel@pengutronix.de>
->   */
->  
->  #ifndef _DRIVERS_MMC_SDHCI_ESDHC_H
-> diff --git a/include/linux/platform_data/mmc-esdhc-imx.h b/include/linux/platform_data/mmc-esdhc-imx.h
-> index 0434f68eda86..cba1184b364c 100644
-> --- a/include/linux/platform_data/mmc-esdhc-imx.h
-> +++ b/include/linux/platform_data/mmc-esdhc-imx.h
-> @@ -1,6 +1,6 @@
->  /* SPDX-License-Identifier: GPL-2.0-only */
->  /*
-> - * Copyright 2010 Wolfram Sang <w.sang@pengutronix.de>
-> + * Copyright 2010 Wolfram Sang <kernel@pengutronix.de>
->   */
->  
->  #ifndef __ASM_ARCH_IMX_ESDHC_H
-> 
+On Sun, May 3, 2020 at 11:47 PM Lad Prabhakar
+<prabhakar.mahadev-lad.rj@bp.renesas.com> wrote:
+> Renesas RZ/G1H (R8A7742) is pin compatible with R-Car H2 (R8A7790),
+> however it doesn't have several automotive specific peripherals. Add
+> a r8a7790 specific pin groups/functions along with common pin
 
+s/a r8a7790/automotive/?
+
+> groups/functions for supporting both r8a7790 and r8a7742 SoC.
+>
+> Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+> Reviewed-by: Marian-Cristian Rotariu <marian-cristian.rotariu.rb@bp.renesas.com>
+
+> --- a/drivers/pinctrl/sh-pfc/pfc-r8a7790.c
+> +++ b/drivers/pinctrl/sh-pfc/pfc-r8a7790.c
+
+> @@ -5736,6 +5750,7 @@ static const struct sh_pfc_soc_operations r8a7790_pinmux_ops = {
+>         .pin_to_pocctrl = r8a7790_pin_to_pocctrl,
+>  };
+>
+> +#ifdef CONFIG_PINCTRL_PFC_R8A7790
+>  const struct sh_pfc_soc_info r8a7790_pinmux_info = {
+>         .name = "r8a77900_pfc",
+>         .ops = &r8a7790_pinmux_ops,
+> @@ -5745,13 +5760,38 @@ const struct sh_pfc_soc_info r8a7790_pinmux_info = {
+>
+>         .pins = pinmux_pins,
+>         .nr_pins = ARRAY_SIZE(pinmux_pins),
+> -       .groups = pinmux_groups,
+> -       .nr_groups = ARRAY_SIZE(pinmux_groups),
+> -       .functions = pinmux_functions,
+> -       .nr_functions = ARRAY_SIZE(pinmux_functions),
+> +       .groups = pinmux_groups.common,
+> +       .nr_groups = ARRAY_SIZE(pinmux_groups.common) +
+> +               ARRAY_SIZE(pinmux_groups.automotive),
+> +       .functions = pinmux_functions.common,
+> +       .nr_functions = ARRAY_SIZE(pinmux_functions.common) +
+> +               ARRAY_SIZE(pinmux_functions.automotive),
+> +
+> +       .cfg_regs = pinmux_config_regs,
+> +
+> +       .pinmux_data = pinmux_data,
+> +       .pinmux_data_size = ARRAY_SIZE(pinmux_data),
+> +};
+> +#endif
+> +
+> +#ifdef CONFIG_PINCTRL_PFC_R8A7742
+> +const struct sh_pfc_soc_info r8a7742_pinmux_info = {
+> +       .name = "r8a77420_pfc",
+> +       .ops = &r8a7790_pinmux_ops,
+> +       .unlock_reg = 0xe6060000, /* PMMR */
+> +
+> +       .function = { PINMUX_FUNCTION_BEGIN, PINMUX_FUNCTION_END },
+> +
+> +       .pins = pinmux_pins,
+> +       .nr_pins = ARRAY_SIZE(pinmux_pins),
+> +       .groups = pinmux_groups.common,
+> +       .nr_groups = ARRAY_SIZE(pinmux_groups.common),
+> +       .functions = pinmux_functions.common,
+> +       .nr_functions = ARRAY_SIZE(pinmux_functions.common),
+>
+>         .cfg_regs = pinmux_config_regs,
+>
+>         .pinmux_data = pinmux_data,
+>         .pinmux_data_size = ARRAY_SIZE(pinmux_data),
+>  };
+> +#endif
+
+The r8a7742 section should be inserted before the r8a7790 section,
+to preserve sort order.
+
+No need to resend, will fix up while applying.
+
+Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
+i.e. will queue in sh-pfc-for-v5.8.
+
+Gr{oetje,eeting}s,
+
+                        Geert
+
+-- 
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
