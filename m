@@ -2,121 +2,124 @@ Return-Path: <SRS0=mOb4=6T=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3B811C47247
-	for <linux-mmc@archiver.kernel.org>; Tue,  5 May 2020 09:15:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 15238C47258
+	for <linux-mmc@archiver.kernel.org>; Tue,  5 May 2020 11:33:23 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 162EB2075A
-	for <linux-mmc@archiver.kernel.org>; Tue,  5 May 2020 09:15:14 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E626C206D7
+	for <linux-mmc@archiver.kernel.org>; Tue,  5 May 2020 11:33:22 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="uPwWy0x5"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="kAe1lcnh"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726551AbgEEJPN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 5 May 2020 05:15:13 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58200 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725915AbgEEJPN (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 5 May 2020 05:15:13 -0400
-Received: from mail-wr1-x442.google.com (mail-wr1-x442.google.com [IPv6:2a00:1450:4864:20::442])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0D864C061A0F;
-        Tue,  5 May 2020 02:15:13 -0700 (PDT)
-Received: by mail-wr1-x442.google.com with SMTP id l18so1796295wrn.6;
-        Tue, 05 May 2020 02:15:12 -0700 (PDT)
+        id S1728701AbgEELdV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 5 May 2020 07:33:21 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51560 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-FAIL-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1728233AbgEELdV (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 5 May 2020 07:33:21 -0400
+Received: from mail-vk1-xa41.google.com (mail-vk1-xa41.google.com [IPv6:2607:f8b0:4864:20::a41])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0D89FC061A10
+        for <linux-mmc@vger.kernel.org>; Tue,  5 May 2020 04:33:21 -0700 (PDT)
+Received: by mail-vk1-xa41.google.com with SMTP id p5so392283vke.1
+        for <linux-mmc@vger.kernel.org>; Tue, 05 May 2020 04:33:21 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
+        d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=RY7cDlpTuaGYvklt0tq/lt5rHTsOTKpcG4DTTLgRMho=;
-        b=uPwWy0x52Ah1Js8kGrNYWa1bV8vTY9V8wj/gnIm0oLsfc9a7C84/+siL9wcDzeQEvt
-         bR8g0PkRXmeef2fThZbJVBQuOPnnFaOQ25VrMRzv6UGroAkA9LAyibmAb+uk7r753nSw
-         rqsFlAK84KF/cvBfhqs6KfCX94ECh4MTwoMwyo5TpkNAR8+BfakNlbhRJzk/q2pGwM8i
-         4ldkI3q6KtNwS7VLGbbhyBNMRDON0KZ8C1gN3sczSWbdaCf6qRAp7YAks+mh49lSlNTo
-         NB/qoSCWJbyqWQECbaFqbKcTWlk752n/LuU7qZXeGOFNrvQL7znMOKzwh4G2b677k1hg
-         KEbg==
+        bh=XbyGoPJWVWnSDkRym+hO3GL3emx5VJ8UO1Iz7FkyzXo=;
+        b=kAe1lcnhk0AC+HNEKrxmbsfWWqiEmVJqjXXN1MxQazq3A4fEbFhoK9aUNx1U7rmAJ6
+         +toRCf4tLAp4Y8zT96gk0ZFUwLe0D848dQh1/6BIqxgiCPzp19vMbJO0nRs7O9gL+6Es
+         5dKiAG7bVfUm8wkwzvuHL7XrY9TYyxbLJ79LwefIeh8xwRja0m8oAG/aSpqAjA6+AmXw
+         DgXWQhfqfeM4ZT6RkcVxwzawcCIs51Ng1T7//WHx/qOGKSsilEEMxZGR7+ZCp2KHDy2Z
+         HB436HnMyTOw5bVHN294nVvnSD4P7FADwQ77H8IiSAZrj6vR+TzG7e4ZVdSf1ML42nN/
+         VDMw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=RY7cDlpTuaGYvklt0tq/lt5rHTsOTKpcG4DTTLgRMho=;
-        b=NucGvITl8OIyp66GdUvEYeH3xS2zadtgZg38muSIU8IE8sv+unuHUnCbzQq+WQ3Aov
-         Q9yzdNogzEzC3saPt/N6+YK/PlBanAref/8eOCDO4eZPWHl8hWOdKjAkf5GIn0PrTKHi
-         Wo+heMxj+g9uf/7Siknybpv6LpXs98w2b7B73slDOX6hFlh4AS+r4F+xjqvNdisZQeS5
-         GPdi7Ea/AEmO+I3TX3QFXQeVbbnDna76RMppAOgVrqS8yBLPGMYGIkrRjq5I70f4Z6Eq
-         tLsPqP1xncdgyjZO4Z3gegJINZwtgwQmXYTSjNAB4wDIzjfXDqX/OjVg4w1udEqMadsP
-         uX/w==
-X-Gm-Message-State: AGi0PuYaD2c00SMVwc5Jg47mMFDxo37KWdYXhDikifAKBGc2+2eBSrNE
-        c08XlqRNivYVDfv7RQcFZhsuP8vgnqBKG+IIaYs=
-X-Google-Smtp-Source: APiQypK1Bz/oNmOaxggxrm9bETwKta2RG7Wk+wv6HGAiMkRo8VQGFQ/b3ZHRf9FsHJ2/gSb44gZE0s5+6DRgoFISKOY=
-X-Received: by 2002:adf:eac6:: with SMTP id o6mr2475150wrn.297.1588670111614;
- Tue, 05 May 2020 02:15:11 -0700 (PDT)
+        bh=XbyGoPJWVWnSDkRym+hO3GL3emx5VJ8UO1Iz7FkyzXo=;
+        b=gXZWl6svYPr2iO4hNl6zdFF2f8u9XIiB2ft8/gzwqOub5hNNThiuDGKgzy69NaQc8G
+         OVdtLUToEs9r0kVDahhz6q7FIADnCFuTxSjmIbbUasryEexpwUfGv316SJtRAqdE5rAO
+         kIZnyHBhHLdSpW3rcQudh9l6/O90N6e9OGXOmH7kOfGHS9SXpYtnoL3BaKF5Af8SBtDa
+         nb8MixZW6rfmpADbRlG9UhDm6AQ82FexG0e+/gH1roS18idwsLVS6pWHUUcdjJ5+2h+t
+         eqAyBSIDqwCN1a882qLg78WblUOrH8R7RzVBITupaGIUmYM19+djWAHW6A98QpSSPzyC
+         mSlQ==
+X-Gm-Message-State: AGi0Pub8+Go34wUiqMKNJuQnrkXcunMeyAniS7GLxDP/UU99swj2qfM6
+        QRhmeuWAgTjNVypz10HZR0EMs6KJOXYaviCNNL0axyn+
+X-Google-Smtp-Source: APiQypLpbeypU4ki+UmD5JuIgl73+i/KYp2i1XhWJ1EL1TbPRT9iSb2h8h/xOs7g1rD6SJ9y0+P6/9yASt1/vFoSHTA=
+X-Received: by 2002:a1f:1a4c:: with SMTP id a73mr1887649vka.59.1588678400145;
+ Tue, 05 May 2020 04:33:20 -0700 (PDT)
 MIME-Version: 1.0
-References: <20200504063957.6638-1-benchuanggli@gmail.com> <21b55731-388f-91ef-3f38-5896f7da9121@intel.com>
-In-Reply-To: <21b55731-388f-91ef-3f38-5896f7da9121@intel.com>
-From:   Grzegorz Kowal <custos.mentis@gmail.com>
-Date:   Tue, 5 May 2020 06:15:00 -0300
-Message-ID: <CABmMA7tf4fUTd9uOP7z=XyR9ukfL+DAd2Ry7f1yKuTCmyZif_A@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-pci-gli: Fix can not access GL9750 after
- reboot from Windows 10
-To:     Adrian Hunter <adrian.hunter@intel.com>
-Cc:     Ben Chuang <benchuanggli@gmail.com>, ulf.hansson@linaro.org,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        Ben Chuang <ben.chuang@genesyslogic.com.tw>,
-        renius.chen@genesyslogic.com.tw
+References: <20200423130432.9990-1-wsa+renesas@sang-engineering.com>
+In-Reply-To: <20200423130432.9990-1-wsa+renesas@sang-engineering.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Tue, 5 May 2020 13:32:43 +0200
+Message-ID: <CAPDyKFpbNyEcyWpPCNNm_H4m204Kw8C2mHiRc3b4HZrOtSozzw@mail.gmail.com>
+Subject: Re: [PATCH v3 0/2] mmc: renesas_sdhi: avoid bad TAPs for Gen3
+To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        Wolfram Sang <wsa@the-dreams.de>
 Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Tested-by: Grzegorz Kowal <custos.mentis@gmail.com>
+On Thu, 23 Apr 2020 at 15:04, Wolfram Sang
+<wsa+renesas@sang-engineering.com> wrote:
+>
+> From: Wolfram Sang <wsa@the-dreams.de>
+>
+> Here is a series which avoids using TAPs on R-Car Gen3 SoCs which are
+> bad to use according to HW engineers. The patch was originally for the
+> BSP (Thanks, Saito-san) and has been upported for the upstream driver.
+> Before we can apply this, we need to add some mising information for
+> R-Car M3-W ES1.[23].
+>
+> Patches have been tested on Renesas Salvator-XS boards with R-Car H3
+> ES2.0 (changing from TAP3 to TAP4 here) and R-Car M3-N (changing from
+> TAP7 to TAP0 here).
+>
+> A branch can be found here:
+>
+> git://git.kernel.org/pub/scm/linux/kernel/git/wsa/linux.git renesas/sdhi/new_manual_calib
+>
+> It is based on current mmc/next + "[PATCH] mmc: renesas_sdhi: shorten
+> types after refactorization"
+>
+> One implementation detail: For now, I kept using a generic naming for
+> the quirks, e.g. "sdhi_quirks_bad_taps2367". It is possible that we need
+> to rename/add ones later which are SoC bound, e.g. "sdhi_quirks_m3w_30".
+> Especially when we add manual calibration somewhen. But for now, the
+> generic approach seems better to me, so I sticked to it.
+>
+> Looking forward to further comments and/or testing.
+>
+> Happy hacking,
+>
+>    Wolfram
+>
+> Takeshi Saito (1):
+>   mmc: renesas_sdhi: Avoid bad TAP in HS400
+>
+> Wolfram Sang (1):
+>   mmc: renesas_sdhi: handle M3-W ES1.2 and 1.3 revisions
+>
+>  drivers/mmc/host/renesas_sdhi.h      |  1 +
+>  drivers/mmc/host/renesas_sdhi_core.c | 61 ++++++++++++++++++++++++----
+>  2 files changed, 54 insertions(+), 8 deletions(-)
+>
+> --
+> 2.20.1
+>
 
-Thanks,
-Grzegorz
+Applied for next, thanks!
 
-On Mon, May 4, 2020 at 4:26 AM Adrian Hunter <adrian.hunter@intel.com> wrote:
->
-> On 4/05/20 9:39 am, Ben Chuang wrote:
-> > From: Ben Chuang <ben.chuang@genesyslogic.com.tw>
-> >
-> > Need to clear some bits in a vendor-defined register after reboot from
-> > Windows 10.
-> >
-> > Fixes: e51df6ce668a ("mmc: host: sdhci-pci: Add Genesys Logic GL975x support")
-> > Reported-by: Grzegorz Kowal <custos.mentis@gmail.com>
-> > Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
->
-> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
->
-> > ---
-> >  drivers/mmc/host/sdhci-pci-gli.c | 5 +++++
-> >  1 file changed, 5 insertions(+)
-> >
-> > diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
-> > index ce15a05f23d4..8170b659f2af 100644
-> > --- a/drivers/mmc/host/sdhci-pci-gli.c
-> > +++ b/drivers/mmc/host/sdhci-pci-gli.c
-> > @@ -26,6 +26,9 @@
-> >  #define   SDHCI_GLI_9750_DRIVING_2    GENMASK(27, 26)
-> >  #define   GLI_9750_DRIVING_1_VALUE    0xFFF
-> >  #define   GLI_9750_DRIVING_2_VALUE    0x3
-> > +#define   SDHCI_GLI_9750_SEL_1        BIT(29)
-> > +#define   SDHCI_GLI_9750_SEL_2        BIT(31)
-> > +#define   SDHCI_GLI_9750_ALL_RST      (BIT(24)|BIT(25)|BIT(28)|BIT(30))
-> >
-> >  #define SDHCI_GLI_9750_PLL         0x864
-> >  #define   SDHCI_GLI_9750_PLL_TX2_INV    BIT(23)
-> > @@ -122,6 +125,8 @@ static void gli_set_9750(struct sdhci_host *host)
-> >                                   GLI_9750_DRIVING_1_VALUE);
-> >       driving_value |= FIELD_PREP(SDHCI_GLI_9750_DRIVING_2,
-> >                                   GLI_9750_DRIVING_2_VALUE);
-> > +     driving_value &= ~(SDHCI_GLI_9750_SEL_1|SDHCI_GLI_9750_SEL_2|SDHCI_GLI_9750_ALL_RST);
-> > +     driving_value |= SDHCI_GLI_9750_SEL_2;
-> >       sdhci_writel(host, driving_value, SDHCI_GLI_9750_DRIVING);
-> >
-> >       sw_ctrl_value &= ~SDHCI_GLI_9750_SW_CTRL_4;
-> >
->
+Kind regards
+Uffe
