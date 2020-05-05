@@ -2,119 +2,154 @@ Return-Path: <SRS0=mOb4=6T=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.0 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-0.7 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 82E01C47258
-	for <linux-mmc@archiver.kernel.org>; Tue,  5 May 2020 13:33:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4C9FEC47254
+	for <linux-mmc@archiver.kernel.org>; Tue,  5 May 2020 16:05:57 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 61A872078C
-	for <linux-mmc@archiver.kernel.org>; Tue,  5 May 2020 13:33:08 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 235A42073B
+	for <linux-mmc@archiver.kernel.org>; Tue,  5 May 2020 16:05:57 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (1024-bit key) header.d=mg.codeaurora.org header.i=@mg.codeaurora.org header.b="snoCHSdY"
+	dkim=pass (2048-bit key) header.d=baylibre-com.20150623.gappssmtp.com header.i=@baylibre-com.20150623.gappssmtp.com header.b="pCbw8Q2D"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728608AbgEENdI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 5 May 2020 09:33:08 -0400
-Received: from mail27.static.mailgun.info ([104.130.122.27]:23410 "EHLO
-        mail27.static.mailgun.info" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1728990AbgEENdH (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 5 May 2020 09:33:07 -0400
-DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
- s=smtp; t=1588685587; h=Content-Transfer-Encoding: Content-Type:
- In-Reply-To: MIME-Version: Date: Message-ID: From: References: Cc: To:
- Subject: Sender; bh=QcmfgsQD27LgfznHzlYFE46yv5/bgTnf9gu//wV7tH8=; b=snoCHSdYh5l4srT1YzhCMVp4qeGIxSEN8MFEX5haLBOLowFRNbaqkIpuToopEr/1yyvB/Jww
- Q/UcbSwgMHnRyLqyeBHuyg2ZwQm/KCV7bujGRy5/OUSKW+7ZY9tPL9IFk4eJpNw7xKzeLMhr
- xadsXq884OiokDovO+ngIutvd90=
-X-Mailgun-Sending-Ip: 104.130.122.27
-X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
-Received: from smtp.codeaurora.org (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171])
- by mxa.mailgun.org with ESMTP id 5eb16b06.7f19bd6afc70-smtp-out-n04;
- Tue, 05 May 2020 13:32:54 -0000 (UTC)
-Received: by smtp.codeaurora.org (Postfix, from userid 1001)
-        id 2D324C433BA; Tue,  5 May 2020 13:32:54 +0000 (UTC)
-Received: from [10.131.199.84] (blr-bdr-fw-01_GlobalNAT_AllZones-Outside.qualcomm.com [103.229.18.19])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        (Authenticated sender: rnayak)
-        by smtp.codeaurora.org (Postfix) with ESMTPSA id 68929C433F2;
-        Tue,  5 May 2020 13:32:50 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.3.2 smtp.codeaurora.org 68929C433F2
-Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
-Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=none smtp.mailfrom=rnayak@codeaurora.org
-Subject: Re: [PATCH v3 09/17] mmc: sdhci-msm: Fix error handling for
- dev_pm_opp_of_add_table()
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Viresh Kumar <viresh.kumar@linaro.org>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>,
-        Andy Gross <agross@kernel.org>,
-        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
+        id S1729398AbgEEQF4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 5 May 2020 12:05:56 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38290 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727857AbgEEQF4 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 5 May 2020 12:05:56 -0400
+Received: from mail-wr1-x441.google.com (mail-wr1-x441.google.com [IPv6:2a00:1450:4864:20::441])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 19277C061A10
+        for <linux-mmc@vger.kernel.org>; Tue,  5 May 2020 09:05:56 -0700 (PDT)
+Received: by mail-wr1-x441.google.com with SMTP id y4so3172002wrm.11
+        for <linux-mmc@vger.kernel.org>; Tue, 05 May 2020 09:05:56 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=baylibre-com.20150623.gappssmtp.com; s=20150623;
+        h=references:user-agent:from:to:cc:subject:in-reply-to:date
+         :message-id:mime-version;
+        bh=njl+I1KZR8dAJRFqU7HOVFmyMwpktP+Payzdk7cqiZo=;
+        b=pCbw8Q2Djt96EsEtPl4Xwf9WOgp+W7CXvZgaxdqcpirmNYjSYs2lAQfYP/qBeN/imW
+         qVMnYbtAIPWG5WvEXKrE3XH56YcQ5PblSP5dxSicG19C+Fm9IHnOwcV3lDboZ/rahDZX
+         KaV7vV6svD+bncNQN5UeWvAx1zaJqLFE+x33f58dhDIhxEQ+WgOKmPKT3J6RZ8o0i06h
+         kf7BZ1v3yDpTlV6C7mQTqSZbNF8qq3GoMgdq9JlBFZzbejBN6FDDzVfxn08kDc2K1pZP
+         dwfSr/9J/i1UZKnhFzYWvndqFjCsIHYjOlxrqmpfh+pStSpfhfIEGQUBA5z85DMujbZr
+         MQUw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:references:user-agent:from:to:cc:subject
+         :in-reply-to:date:message-id:mime-version;
+        bh=njl+I1KZR8dAJRFqU7HOVFmyMwpktP+Payzdk7cqiZo=;
+        b=JOA+SYrZy/5m5RNhB4FDtSaJQWaHMDBvIZ0I5QdpHg8i+HcMnaLrsnjYEpKqs2WOMl
+         t18zEz4wpCGhQvDPzBKea0L/bWE797qvr3Crv2JHU5Beo+VkfhTN71pu7oe7LwrML71p
+         nA9UaJtSUeDZZ1DSkktKGkE93eMTrnl1WfNtRKmqsmLAxith/3DeqEcgqCzmJRAwsn3x
+         rfZEZO/zNzaSqBDxH96ODmowD3oAE75zhD2p73sMhjKjCiLr0K2z+QhQVqm5IrkLAcur
+         pG1YrHTqpxuPc1YRpcVPna5ujciMxYveiGin5iSV3CVKAaTG9yeDVll9Ebn8BH3jz1X+
+         oc2A==
+X-Gm-Message-State: AGi0PubC5i64sZkj30KnJksQgxE6hgB8iLYyqS03cspLsldUQa0Pkulp
+        jrxyKL3BcTyDlxebovvDIM+PVQ==
+X-Google-Smtp-Source: APiQypLoB4fjwTQJDOAaK7x/BgWoRefOlMYzgeBPm4DGbTUjdPo8UYmkhAaAStq6Y7TclKEt1oNfMQ==
+X-Received: by 2002:a5d:6107:: with SMTP id v7mr4240620wrt.270.1588694754820;
+        Tue, 05 May 2020 09:05:54 -0700 (PDT)
+Received: from localhost (cag06-3-82-243-161-21.fbx.proxad.net. [82.243.161.21])
+        by smtp.gmail.com with ESMTPSA id l19sm4636869wmj.14.2020.05.05.09.05.53
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 05 May 2020 09:05:54 -0700 (PDT)
+References: <20200428210229.703309-1-martin.blumenstingl@googlemail.com> <20200428210229.703309-3-martin.blumenstingl@googlemail.com> <1jlfmdi9uw.fsf@starbuckisacylon.baylibre.com> <CAPDyKFoEh8qKYFONo1SHnvwhDwjUa5bMnnT1Kbu8=4rd=T-8Kg@mail.gmail.com> <1jh7x1i3hj.fsf@starbuckisacylon.baylibre.com> <CAPDyKFq_USCNNps3s4+C_1hriycrxtRMKJvnPFcP59CZmLXbGw@mail.gmail.com>
+User-agent: mu4e 1.3.3; emacs 26.3
+From:   Jerome Brunet <jbrunet@baylibre.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+Cc:     Stephen Boyd <sboyd@kernel.org>,
+        "open list\:ARM\/Amlogic Meson..." 
+        <linux-amlogic@lists.infradead.org>,
+        "linux-mmc\@vger.kernel.org" <linux-mmc@vger.kernel.org>,
         DTML <devicetree@vger.kernel.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Jianxin Pan <jianxin.pan@amlogic.com>,
         Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Matthias Kaehlcke <mka@chromium.org>,
-        Pradeep P V K <ppvk@codeaurora.org>,
-        Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-References: <1588080785-6812-1-git-send-email-rnayak@codeaurora.org>
- <1588080785-6812-10-git-send-email-rnayak@codeaurora.org>
- <CAPDyKFrGQvcCB1wfv=iqk66uja3faMRF1gGMSE2VhB8gJcO=sg@mail.gmail.com>
- <15efa375-cf1e-b793-1d3e-29ca0a547522@codeaurora.org>
- <CAPDyKFoaJTXq2qN+HXoSUovun9+4gzLeVJ-88FKbZCSCKjByLw@mail.gmail.com>
-From:   Rajendra Nayak <rnayak@codeaurora.org>
-Message-ID: <fae2c6ba-62f0-7f35-5f71-b690532963f3@codeaurora.org>
-Date:   Tue, 5 May 2020 19:02:47 +0530
-User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:68.0) Gecko/20100101
- Thunderbird/68.7.0
+        yinxin_1989@aliyun.com,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        lnykww@gmail.com, Anand Moon <linux.amoon@gmail.com>
+Subject: Re: [PATCH v6 2/2] mmc: host: meson-mx-sdhc: new driver for the Amlogic Meson SDHC host
+In-reply-to: <CAPDyKFq_USCNNps3s4+C_1hriycrxtRMKJvnPFcP59CZmLXbGw@mail.gmail.com>
+Date:   Tue, 05 May 2020 18:05:53 +0200
+Message-ID: <1j1rnygye6.fsf@starbuckisacylon.baylibre.com>
 MIME-Version: 1.0
-In-Reply-To: <CAPDyKFoaJTXq2qN+HXoSUovun9+4gzLeVJ-88FKbZCSCKjByLw@mail.gmail.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 
-On 5/5/2020 5:03 PM, Ulf Hansson wrote:
-> On Wed, 29 Apr 2020 at 16:09, Rajendra Nayak <rnayak@codeaurora.org> wrote:
->>
->>
->> On 4/28/2020 11:59 PM, Ulf Hansson wrote:
->>> On Tue, 28 Apr 2020 at 15:39, Rajendra Nayak <rnayak@codeaurora.org> wrote:
->>>>
->>>> Even though specifying OPP's in device tree is optional, ignoring all errors
->>>> reported by dev_pm_opp_of_add_table() means we can't distinguish between a
->>>> missing OPP table and a wrong/buggy OPP table. While missing OPP table
->>>> (dev_pm_opp_of_add_table() returns a -ENODEV in such case) can be ignored,
->>>> a wrong/buggy OPP table in device tree should make the driver error out.
->>>>
->>>> while we fix that, lets also fix the variable names for opp/opp_table to
->>>> avoid confusion and name them opp_table/has_opp_table instead.
->>>>
->>>> Suggested-by: Matthias Kaehlcke <matthias@chromium.org>
->>>> Signed-off-by: Rajendra Nayak <rnayak@codeaurora.org>
->>>> Cc: Ulf Hansson <ulf.hansson@linaro.org>
->>>> Cc: Pradeep P V K <ppvk@codeaurora.org>
->>>> Cc: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
->>>> Cc: linux-mmc@vger.kernel.org
->>>
->>> Is this a standalone patch that I queue up via my mmc tree?
->>
->> Hi Ulf, yes, its a standalone patch which applies on top of the one
->> you already have in your tree. No other dependencies.
-> 
-> Thanks for confirming! Perhaps next time you could add this
-> information as part of a description to the patch (where we usually
-> add patch version information).
-> 
-> Anyway, applied for next!
+On Tue 05 May 2020 at 10:17, Ulf Hansson <ulf.hansson@linaro.org> wrote:
 
-Thanks Ulf, I should have sent this out as a standalone patch instead of including
-it with the reset of the series, which caused the confusion. Sorry about that :/
+> [...]
+>
+>> >> > +
+>> >> > +     return devm_of_clk_add_hw_provider(dev, of_clk_hw_onecell_get,
+>> >> > +                                        onecell_data);
+>> >>
+>> >> I think registering a provider for a module that does not provide clocks
+>> >> to any other device is a bit overkill.
+>> >>
+>> >> I understand the matter is getting the per-user clk* pointer.
+>> >> Since this is the module registering the clock, you can use clk_hw->clk
+>> >> to get it.
+>> >>
+>> >> Once you have the clk* of the leaf clocks, you don't even need to keep
+>> >> track of the clk_hw* since you are using devm_
+>> >>
+>> >> Afterward, we should propably discuss with Stephen if something should
+>> >> be added in CCF to get a struct clk* from struct clk_hw*.
+>> >>
+>> >
+>> > [...]
+>> >
+>> > Hmm.
+>> >
+>> > I am not sure the above is a good idea, at all. Unless, I am
+>> > misunderstanding your point, which may be the case.
+>> >
+>> > I think above "shortcuts" could lead to abuse of the clock framework
+>> > and its internal data structures. When going forward, this could make
+>> > it unnecessary harder to maintain the clock framework.
+>> >
+>> > I know, it's not my responsibility, but from my experience with MMC
+>> > and SDIO interfaces, is that those have been too easy abuse - since
+>> > most of the data structures and interfaces have been exported. Now,
+>> > it's hard to roll back that, if you see what I mean.
+>>
+>> Indeed, it worth clarifying this first.
+>>
+>> With clk_register deprecated in favor of clk_hw_register, we are likely
+>> to see that case rise elsewhere.
+>>
+>
+> So, according to the separate discussion [1], I think we can let
+> Martin decide what option to implement at this point.
+>
+> 1. Implement the "clk_hw_get_clk()" approach. The preferred option,
+> but requires wider changes of the clock subsystem as well.
+>
+> 2. Keep the existing approach, with devm_clk_get(). I am fine with
+> this as well, we can always switch to 1) later on.
 
--- 
-QUALCOMM INDIA, on behalf of Qualcomm Innovation Center, Inc. is a member
-of Code Aurora Forum, hosted by The Linux Foundation
+I have a problem with this approach.
+The dt-bindings would include "#clock-cells = <1>" for a device that
+does not actually provide and only needs it has a temporary work around.
+Those bindings are supposed to be stable ...
+
+I have proposed 2 other short term solutions, let's see how it goes
+
+>
+> [...]
+>
+> Kind regards
+> Uffe
+>
+> [1]
+> https://www.spinics.net/lists/linux-clk/msg48373.html
+
