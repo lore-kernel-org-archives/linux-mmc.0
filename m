@@ -1,157 +1,138 @@
-Return-Path: <SRS0=mOb4=6T=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=wp20=6U=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.1 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0931EC47247
-	for <linux-mmc@archiver.kernel.org>; Tue,  5 May 2020 17:31:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3829AC38A2A
+	for <linux-mmc@archiver.kernel.org>; Wed,  6 May 2020 13:01:05 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D928220721
-	for <linux-mmc@archiver.kernel.org>; Tue,  5 May 2020 17:31:38 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 123C52073A
+	for <linux-mmc@archiver.kernel.org>; Wed,  6 May 2020 13:01:05 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Ke1ddssf"
+	dkim=fail reason="signature verification failed" (1024-bit key) header.d=mg.codeaurora.org header.i=@mg.codeaurora.org header.b="kUOFuDGh"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730046AbgEERbi (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 5 May 2020 13:31:38 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51756 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-FAIL-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1726350AbgEERbh (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 5 May 2020 13:31:37 -0400
-Received: from mail-vs1-xe41.google.com (mail-vs1-xe41.google.com [IPv6:2607:f8b0:4864:20::e41])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BC4A9C061A0F
-        for <linux-mmc@vger.kernel.org>; Tue,  5 May 2020 10:31:37 -0700 (PDT)
-Received: by mail-vs1-xe41.google.com with SMTP id s11so1756267vsq.13
-        for <linux-mmc@vger.kernel.org>; Tue, 05 May 2020 10:31:37 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=EQsoLSVjLAyR/M3Ocg/DHLH6pm0RmX/436FGjF6WTao=;
-        b=Ke1ddssfTsxp0iPhblhR8uitz3u+NzVLxty3wGO22LNbm/oHweSwOoglBCDtTP/BIT
-         nV1QFq59DQfSmb6KnLtJ20O65z/eG/stUQHHvO8IH4EjGKYIUy9p4mmslme/tNVh5Flm
-         6cGsK5McFrzX89tb9oXS6LtVMITgWloKe3SwFt3NmJYkPMWNvHfXt2Ie7uhSd+23n+/8
-         ATV6FtzN+kcQJYmd3TQIVidF4Kn9qkk/B5Pp0RJ4v+8tQh2QN5nO4biP92tJ6VPwRAnT
-         Gj9H12bpBzqp+B/l/ZfQsusyeGTwkTsHyDvj43JP5reauKAVSHVR8hvyiuB885U4ug4L
-         ZUZA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=EQsoLSVjLAyR/M3Ocg/DHLH6pm0RmX/436FGjF6WTao=;
-        b=XC7WDW+a8jt5joExKfwLwCqLsWCx+OeUvANftYsFgJGdpYfdMaNV1zHeN9VU+dKYWf
-         LU8/clZcxJCnFVqGCdkMhJd0hhDxkIBrx/E7iosTl7vHzte41BKDoXRQCo91wGxguuhu
-         Le5MBRfvGqicWqMkljaTk3LTPJzOqlJ2oZvXftiUqmJVeIU9k8vI3cSbV6xtiXRsuYOp
-         wJ1AREB6XQN0UW2oUXFSQDJEme+GZbeGWP/ir/hQhu15Q4Q0IKMzWq5/+TZJZE2yk3gY
-         5g7489qaNlWiAI0MPwd2injfdcDn+8tzWIuJeb3Q7bNAQciAw0JMiwPu/4yGghPRfN0B
-         zcBA==
-X-Gm-Message-State: AGi0Puan4ZwJAY7Qrsw5Y/mUVlcEEu8AQjKHi+YhiNov1w6fMHme0hYG
-        9PYopVX09EcfJf6AQVnZl8e5DHDKX1UG14jplHrKtQ==
-X-Google-Smtp-Source: APiQypKY+Ec0L+QALIPDIkzOQ4WXjg5IcZuMySRts7hkgSJWNuiacaOPr1fNLfnrg/Vc3j1c0VN+v2jbTt5wryigOLM=
-X-Received: by 2002:a67:302:: with SMTP id 2mr3875137vsd.165.1588699896206;
- Tue, 05 May 2020 10:31:36 -0700 (PDT)
-MIME-Version: 1.0
-References: <20200428210229.703309-1-martin.blumenstingl@googlemail.com>
- <20200428210229.703309-3-martin.blumenstingl@googlemail.com>
- <1jlfmdi9uw.fsf@starbuckisacylon.baylibre.com> <CAPDyKFoEh8qKYFONo1SHnvwhDwjUa5bMnnT1Kbu8=4rd=T-8Kg@mail.gmail.com>
- <1jh7x1i3hj.fsf@starbuckisacylon.baylibre.com> <CAPDyKFq_USCNNps3s4+C_1hriycrxtRMKJvnPFcP59CZmLXbGw@mail.gmail.com>
- <1j1rnygye6.fsf@starbuckisacylon.baylibre.com>
-In-Reply-To: <1j1rnygye6.fsf@starbuckisacylon.baylibre.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 5 May 2020 19:30:59 +0200
-Message-ID: <CAPDyKFogZgX05mPgue4UT57cTM-KVPfmoPJPf1BNJurGN+qp-g@mail.gmail.com>
-Subject: Re: [PATCH v6 2/2] mmc: host: meson-mx-sdhc: new driver for the
- Amlogic Meson SDHC host
-To:     Jerome Brunet <jbrunet@baylibre.com>
-Cc:     Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
-        Stephen Boyd <sboyd@kernel.org>,
-        "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        DTML <devicetree@vger.kernel.org>,
+        id S1728154AbgEFNBE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 6 May 2020 09:01:04 -0400
+Received: from mail26.static.mailgun.info ([104.130.122.26]:14415 "EHLO
+        mail26.static.mailgun.info" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1728173AbgEFNBD (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 6 May 2020 09:01:03 -0400
+DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
+ s=smtp; t=1588770062; h=Content-Transfer-Encoding: Content-Type:
+ In-Reply-To: MIME-Version: Date: Message-ID: From: References: Cc: To:
+ Subject: Sender; bh=EEVpYpqQ1QRwHdkwdt5mqy1ieqOZLEZitiAbr0eLLME=; b=kUOFuDGhhKgCxFzxKfm1vuTPZqlPt6UTHSjgFfZKadV8Jp+YiqYDKy7B5SVoRq7O6xR4Pwb3
+ 6qx3aDQb2iMdiiinuqSgw8d5WlaCkq1XqYQSlDHH4RfJ4cHnvy6A/OXUjmHKwDxSFxjWshOG
+ LjluxZTjd8j8DjNQ2Gwxjrv8UeA=
+X-Mailgun-Sending-Ip: 104.130.122.26
+X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
+Received: from smtp.codeaurora.org (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171])
+ by mxa.mailgun.org with ESMTP id 5eb2b4e8.7fc83cd1fdf8-smtp-out-n03;
+ Wed, 06 May 2020 13:00:24 -0000 (UTC)
+Received: by smtp.codeaurora.org (Postfix, from userid 1001)
+        id 0BFC2C00456; Wed,  6 May 2020 13:00:20 +0000 (UTC)
+Received: from [192.168.43.57] (unknown [27.59.131.204])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        (Authenticated sender: vbadigan)
+        by smtp.codeaurora.org (Postfix) with ESMTPSA id B9225C433BA;
+        Wed,  6 May 2020 13:00:07 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.3.2 smtp.codeaurora.org B9225C433BA
+Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
+Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=none smtp.mailfrom=vbadigan@codeaurora.org
+Subject: Re: [PATCH v5 1/5] mmc: core: Extend mmc_of_parse() to parse CQE
+ bindings
+To:     Chun-Hung Wu <chun-hung.wu@mediatek.com>, mirq-linux@rere.qmqm.pl,
+        Jonathan Hunter <jonathanh@nvidia.com>,
+        Al Cooper <alcooperx@gmail.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Florian Fainelli <f.fainelli@gmail.com>,
+        bcm-kernel-feedback-list@broadcom.com,
+        Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Michal Simek <michal.simek@xilinx.com>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
         Rob Herring <robh+dt@kernel.org>,
-        Jianxin Pan <jianxin.pan@amlogic.com>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        yinxin_1989@aliyun.com,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        lnykww@gmail.com, Anand Moon <linux.amoon@gmail.com>
-Content-Type: text/plain; charset="UTF-8"
+        Mark Rutland <mark.rutland@arm.com>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Pavel Machek <pavel@ucw.cz>,
+        Kate Stewart <kstewart@linuxfoundation.org>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+        Pan Bian <bianpan2016@163.com>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Allison Randal <allison@lohutok.net>,
+        Mathieu Malaterre <malat@debian.org>,
+        Stanley Chu <stanley.chu@mediatek.com>,
+        Kuohong Wang <kuohong.wang@mediatek.com>,
+        Yong Mao <yong.mao@mediatek.com>
+Cc:     kernel-team@android.com, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-mediatek@lists.infradead.org,
+        devicetree@vger.kernel.org, wsd_upstream@mediatek.com,
+        linux-arm-kernel@lists.infradead.org,
+        linux-arm-msm@vger.kernel.org, linux-tegra@vger.kernel.org
+References: <1588031768-23677-1-git-send-email-chun-hung.wu@mediatek.com>
+ <1588031768-23677-2-git-send-email-chun-hung.wu@mediatek.com>
+From:   Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+Message-ID: <9bc2454f-0b42-e256-7927-2564b56f369f@codeaurora.org>
+Date:   Wed, 6 May 2020 18:30:04 +0530
+User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:68.0) Gecko/20100101
+ Thunderbird/68.7.0
+MIME-Version: 1.0
+In-Reply-To: <1588031768-23677-2-git-send-email-chun-hung.wu@mediatek.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 8bit
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 5 May 2020 at 18:05, Jerome Brunet <jbrunet@baylibre.com> wrote:
->
->
-> On Tue 05 May 2020 at 10:17, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->
-> > [...]
-> >
-> >> >> > +
-> >> >> > +     return devm_of_clk_add_hw_provider(dev, of_clk_hw_onecell_get,
-> >> >> > +                                        onecell_data);
-> >> >>
-> >> >> I think registering a provider for a module that does not provide clocks
-> >> >> to any other device is a bit overkill.
-> >> >>
-> >> >> I understand the matter is getting the per-user clk* pointer.
-> >> >> Since this is the module registering the clock, you can use clk_hw->clk
-> >> >> to get it.
-> >> >>
-> >> >> Once you have the clk* of the leaf clocks, you don't even need to keep
-> >> >> track of the clk_hw* since you are using devm_
-> >> >>
-> >> >> Afterward, we should propably discuss with Stephen if something should
-> >> >> be added in CCF to get a struct clk* from struct clk_hw*.
-> >> >>
-> >> >
-> >> > [...]
-> >> >
-> >> > Hmm.
-> >> >
-> >> > I am not sure the above is a good idea, at all. Unless, I am
-> >> > misunderstanding your point, which may be the case.
-> >> >
-> >> > I think above "shortcuts" could lead to abuse of the clock framework
-> >> > and its internal data structures. When going forward, this could make
-> >> > it unnecessary harder to maintain the clock framework.
-> >> >
-> >> > I know, it's not my responsibility, but from my experience with MMC
-> >> > and SDIO interfaces, is that those have been too easy abuse - since
-> >> > most of the data structures and interfaces have been exported. Now,
-> >> > it's hard to roll back that, if you see what I mean.
-> >>
-> >> Indeed, it worth clarifying this first.
-> >>
-> >> With clk_register deprecated in favor of clk_hw_register, we are likely
-> >> to see that case rise elsewhere.
-> >>
-> >
-> > So, according to the separate discussion [1], I think we can let
-> > Martin decide what option to implement at this point.
-> >
-> > 1. Implement the "clk_hw_get_clk()" approach. The preferred option,
-> > but requires wider changes of the clock subsystem as well.
-> >
-> > 2. Keep the existing approach, with devm_clk_get(). I am fine with
-> > this as well, we can always switch to 1) later on.
->
-> I have a problem with this approach.
-> The dt-bindings would include "#clock-cells = <1>" for a device that
-> does not actually provide and only needs it has a temporary work around.
-> Those bindings are supposed to be stable ...
 
-I agree, the bindings need to be stable.
-
-What is the problem of keeping "#clock-cells = <1>" around, when we
-move to a clk_hw_get_clk() approach in the next step?
-
+On 4/28/2020 5:26 AM, Chun-Hung Wu wrote:
+> Parse CQE bindings "supports-cqe" and "disable-cqe-dcmd"
+> in mmc_of_parse().
 >
-> I have proposed 2 other short term solutions, let's see how it goes
+> Signed-off-by: Chun-Hung Wu <chun-hung.wu@mediatek.com>
+> ---
+>   drivers/mmc/core/host.c | 5 +++++
+>   1 file changed, 5 insertions(+)
+>
+> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+> index c876872..47521c6 100644
+> --- a/drivers/mmc/core/host.c
+> +++ b/drivers/mmc/core/host.c
+> @@ -302,6 +302,11 @@ int mmc_of_parse(struct mmc_host *host)
+>   		host->caps2 |= MMC_CAP2_NO_SD;
+>   	if (device_property_read_bool(dev, "no-mmc"))
+>   		host->caps2 |= MMC_CAP2_NO_MMC;
+> +	if (device_property_read_bool(dev, "supports-cqe"))
+> +		host->caps2 |= MMC_CAP2_CQE;
 
-Yes, seems like we need to wait for Stephen's input then.
+This change is breaking emmc driver on qcom platforms where this dt 
+property is defined.
 
-Kind regards
-Uffe
+[    1.543453]  cqhci_deactivate+0xc/0x38
+[    1.545627]  sdhci_msm_reset+0x40/0x58
+[    1.549447]  sdhci_do_reset+0x48/0x7c
+[    1.553180]  __sdhci_read_caps+0x7c/0x214
+[    1.556913]  sdhci_setup_host+0x58/0xce8
+[    1.560905]  sdhci_msm_probe+0x588/0x8a4
+[    1.564900]  platform_drv_probe+0x4c/0xb0
+
+So, we cant have this flag defined before sdhci_setup_host().
+
+I will have to clear this cap and re-enable it in our initialization.
+
+> +	if (!device_property_read_bool(dev, "disable-cqe-dcmd")) {
+> +		host->caps2 |= MMC_CAP2_CQE_DCMD;
+> +	}
+>   
+>   	/* Must be after "non-removable" check */
+>   	if (device_property_read_u32(dev, "fixed-emmc-driver-type", &drv_type) == 0) {
