@@ -7,25 +7,25 @@ X-Spam-Status: No, score=-9.7 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D75ECC47261
-	for <linux-mmc@archiver.kernel.org>; Wed,  6 May 2020 19:52:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AFA6FC28CBC
+	for <linux-mmc@archiver.kernel.org>; Wed,  6 May 2020 19:52:42 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id AAA1E2075E
-	for <linux-mmc@archiver.kernel.org>; Wed,  6 May 2020 19:52:40 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8D3B52075E
+	for <linux-mmc@archiver.kernel.org>; Wed,  6 May 2020 19:52:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729535AbgEFTwO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 6 May 2020 15:52:14 -0400
+        id S1729122AbgEFTv5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 6 May 2020 15:51:57 -0400
 Received: from relmlor2.renesas.com ([210.160.252.172]:7384 "EHLO
         relmlie6.idc.renesas.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1725799AbgEFTwM (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 6 May 2020 15:52:12 -0400
+        by vger.kernel.org with ESMTP id S1725799AbgEFTv4 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 6 May 2020 15:51:56 -0400
 X-IronPort-AV: E=Sophos;i="5.73,360,1583161200"; 
-   d="scan'208";a="46218045"
+   d="scan'208";a="46218025"
 Received: from unknown (HELO relmlir5.idc.renesas.com) ([10.200.68.151])
-  by relmlie6.idc.renesas.com with ESMTP; 07 May 2020 04:52:11 +0900
+  by relmlie6.idc.renesas.com with ESMTP; 07 May 2020 04:51:54 +0900
 Received: from localhost.localdomain (unknown [10.226.36.204])
-        by relmlir5.idc.renesas.com (Postfix) with ESMTP id C9141400495A;
-        Thu,  7 May 2020 04:52:07 +0900 (JST)
+        by relmlir5.idc.renesas.com (Postfix) with ESMTP id B03F84003EC8;
+        Thu,  7 May 2020 04:51:50 +0900 (JST)
 From:   Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
 To:     Geert Uytterhoeven <geert+renesas@glider.be>,
         Magnus Damm <magnus.damm@gmail.com>,
@@ -42,9 +42,9 @@ Cc:     linux-renesas-soc@vger.kernel.org, devicetree@vger.kernel.org,
         linux-gpio@vger.kernel.org, linux-serial@vger.kernel.org,
         Prabhakar <prabhakar.csengg@gmail.com>,
         Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-Subject: [PATCH v2 5/9] dt-bindings: serial: renesas,scifb: Document r8a7742 bindings
-Date:   Wed,  6 May 2020 20:51:31 +0100
-Message-Id: <1588794695-27852-6-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
+Subject: [PATCH v2 1/9] dt-bindings: mmc: renesas,mmcif: Document r8a7742 DT bindings
+Date:   Wed,  6 May 2020 20:51:27 +0100
+Message-Id: <1588794695-27852-2-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
 X-Mailer: git-send-email 2.7.4
 In-Reply-To: <1588794695-27852-1-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
 References: <1588794695-27852-1-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
@@ -53,32 +53,42 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-RZ/G1H (R8A7742) SoC also has the R-Car gen2 compatible SCIFB ports,
-so document the SoC specific bindings.
+Add support for r8a7742 SoC. Renesas RZ/G1H (R8A7742) MMCIF is identical
+to the R-Car Gen2 family.
 
 Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
 Reviewed-by: Marian-Cristian Rotariu <marian-cristian.rotariu.rb@bp.renesas.com>
 Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
 ---
 v1->v2:
-* No change
+* Updated interrupts table to include r8a7742
 ---
+ Documentation/devicetree/bindings/mmc/renesas,mmcif.txt | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
 
- Documentation/devicetree/bindings/serial/renesas,scifb.yaml | 1 +
- 1 file changed, 1 insertion(+)
-
-diff --git a/Documentation/devicetree/bindings/serial/renesas,scifb.yaml b/Documentation/devicetree/bindings/serial/renesas,scifb.yaml
-index 57205cb1dcd4..b083970c16a9 100644
---- a/Documentation/devicetree/bindings/serial/renesas,scifb.yaml
-+++ b/Documentation/devicetree/bindings/serial/renesas,scifb.yaml
-@@ -24,6 +24,7 @@ properties:
+diff --git a/Documentation/devicetree/bindings/mmc/renesas,mmcif.txt b/Documentation/devicetree/bindings/mmc/renesas,mmcif.txt
+index c064af5838aa..291532ac0446 100644
+--- a/Documentation/devicetree/bindings/mmc/renesas,mmcif.txt
++++ b/Documentation/devicetree/bindings/mmc/renesas,mmcif.txt
+@@ -11,6 +11,7 @@ Required properties:
+ 	- "renesas,mmcif-r7s72100" for the MMCIF found in r7s72100 SoCs
+ 	- "renesas,mmcif-r8a73a4" for the MMCIF found in r8a73a4 SoCs
+ 	- "renesas,mmcif-r8a7740" for the MMCIF found in r8a7740 SoCs
++	- "renesas,mmcif-r8a7742" for the MMCIF found in r8a7742 SoCs
+ 	- "renesas,mmcif-r8a7743" for the MMCIF found in r8a7743 SoCs
+ 	- "renesas,mmcif-r8a7744" for the MMCIF found in r8a7744 SoCs
+ 	- "renesas,mmcif-r8a7745" for the MMCIF found in r8a7745 SoCs
+@@ -24,8 +25,8 @@ Required properties:
+ - interrupts: Some SoCs have only 1 shared interrupt, while others have either
+   2 or 3 individual interrupts (error, int, card detect). Below is the number
+   of interrupts for each SoC:
+-    1: r8a73a4, r8a7743, r8a7744, r8a7745, r8a7778, r8a7790, r8a7791, r8a7793,
+-       r8a7794
++    1: r8a73a4, r8a7742, r8a7743, r8a7744, r8a7745, r8a7778, r8a7790, r8a7791,
++       r8a7793, r8a7794
+     2: r8a7740, sh73a0
+     3: r7s72100
  
-       - items:
-           - enum:
-+              - renesas,scifb-r8a7742      # RZ/G1H
-               - renesas,scifb-r8a7743      # RZ/G1M
-               - renesas,scifb-r8a7744      # RZ/G1N
-               - renesas,scifb-r8a7745      # RZ/G1E
 -- 
 2.17.1
 
