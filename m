@@ -2,112 +2,89 @@ Return-Path: <SRS0=wp20=6U=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=no
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 272C5C4724C
-	for <linux-mmc@archiver.kernel.org>; Wed,  6 May 2020 17:06:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 61988C4725A
+	for <linux-mmc@archiver.kernel.org>; Wed,  6 May 2020 19:51:56 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1137E20A8B
-	for <linux-mmc@archiver.kernel.org>; Wed,  6 May 2020 17:06:13 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3E3F620870
+	for <linux-mmc@archiver.kernel.org>; Wed,  6 May 2020 19:51:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730227AbgEFRGM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 6 May 2020 13:06:12 -0400
-Received: from mga17.intel.com ([192.55.52.151]:50199 "EHLO mga17.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1729414AbgEFRGM (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 6 May 2020 13:06:12 -0400
-IronPort-SDR: jYsr5BRAERmabnP4Ig3OiKasNuJXhnWqOt/TNzbqMfhWRMi/9zj+lTLLNlAXxrtncWfFC4o8/v
- 0FIqeTHTy9Qw==
-X-Amp-Result: SKIPPED(no attachment in message)
-X-Amp-File-Uploaded: False
-Received: from fmsmga004.fm.intel.com ([10.253.24.48])
-  by fmsmga107.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 06 May 2020 10:06:11 -0700
-IronPort-SDR: GOq6sHbpWl0hAI7nnkFqSmoHpX//b2n4UHYnpCorexV8zj5K42CJn3V1ngkjLCgf8KsshSvoDw
- GY5zAWmQbzKQ==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.73,360,1583222400"; 
-   d="scan'208";a="284690915"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.157]) ([10.237.72.157])
-  by fmsmga004.fm.intel.com with ESMTP; 06 May 2020 10:06:08 -0700
-Subject: Re: [PATCH V1 1/2] mmc: core: Check request type before completing
- the request
-To:     Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
-        ulf.hansson@linaro.org
-Cc:     stummala@codeaurora.org, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        stable@vger.kernel.org, Baolin Wang <baolin.wang@linaro.org>,
-        Avri Altman <avri.altman@wdc.com>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        Arnd Bergmann <arnd@arndb.de>
-References: <1588775643-18037-1-git-send-email-vbadigan@codeaurora.org>
- <1588775643-18037-2-git-send-email-vbadigan@codeaurora.org>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <e4f7515c-e52e-f909-174a-8835d7e9e445@intel.com>
-Date:   Wed, 6 May 2020 20:06:29 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.7.0
-MIME-Version: 1.0
-In-Reply-To: <1588775643-18037-2-git-send-email-vbadigan@codeaurora.org>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+        id S1728049AbgEFTvw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 6 May 2020 15:51:52 -0400
+Received: from relmlor1.renesas.com ([210.160.252.171]:51023 "EHLO
+        relmlie5.idc.renesas.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1725799AbgEFTvw (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 6 May 2020 15:51:52 -0400
+X-IronPort-AV: E=Sophos;i="5.73,360,1583161200"; 
+   d="scan'208";a="46431211"
+Received: from unknown (HELO relmlir5.idc.renesas.com) ([10.200.68.151])
+  by relmlie5.idc.renesas.com with ESMTP; 07 May 2020 04:51:50 +0900
+Received: from localhost.localdomain (unknown [10.226.36.204])
+        by relmlir5.idc.renesas.com (Postfix) with ESMTP id 6DF984003EC8;
+        Thu,  7 May 2020 04:51:46 +0900 (JST)
+From:   Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+To:     Geert Uytterhoeven <geert+renesas@glider.be>,
+        Magnus Damm <magnus.damm@gmail.com>,
+        Rob Herring <robh+dt@kernel.org>,
+        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Jason Cooper <jason@lakedaemon.net>,
+        Marc Zyngier <maz@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc:     linux-renesas-soc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-gpio@vger.kernel.org, linux-serial@vger.kernel.org,
+        Prabhakar <prabhakar.csengg@gmail.com>,
+        Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+Subject: [PATCH v2 0/9] RZ/G1H describe IRQC, [H]SCIF{A|B} and GPIO nodes
+Date:   Wed,  6 May 2020 20:51:26 +0100
+Message-Id: <1588794695-27852-1-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
+X-Mailer: git-send-email 2.7.4
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 6/05/20 5:34 pm, Veerabhadrarao Badiganti wrote:
-> In the request completion path with CQE, request type is being checked
-> after the request is getting completed. This is resulting in returning
-> the wrong request type and leading to the IO hang issue.
-> 
-> ASYNC request type is getting returned for DCMD type requests.
-> Because of this mismatch, mq->cqe_busy flag is never getting cleared
-> and the driver is not invoking blk_mq_hw_run_queue. So requests are not
-> getting dispatched to the LLD from the block layer.
-> 
-> All these eventually leading to IO hang issues.
-> So, get the request type before completing the request.
-> 
-> Cc: <stable@vger.kernel.org> # v4.19+
+Hi All,
 
-The fixed commit was in 4.16
+This patch series describes irqc, serial and gpio controllers on
+R8A7742 SoC.
 
-> Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+* Patch 1/9 is from series [1], which added initial basic support for
+  iW-RainboW-G21D-Qseven development board.
+* Patches 2-9 are from series [2] ("Add R8A7742/RZG1H board support")
 
-Fixes: 1e8e55b67030 ("mmc: block: Add CQE support")
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Cheers,
+Prabhakar
 
-Thank you for finding this!
+[1] https://lkml.org/lkml/2020/5/3/294
+[2] https://lkml.org/lkml/2020/4/29/1300
 
-> ---
->  drivers/mmc/core/block.c | 3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> index 8499b56..c5367e2 100644
-> --- a/drivers/mmc/core/block.c
-> +++ b/drivers/mmc/core/block.c
-> @@ -1370,6 +1370,7 @@ static void mmc_blk_cqe_complete_rq(struct mmc_queue *mq, struct request *req)
->  	struct mmc_request *mrq = &mqrq->brq.mrq;
->  	struct request_queue *q = req->q;
->  	struct mmc_host *host = mq->card->host;
-> +	enum mmc_issue_type issue_type = mmc_issue_type(mq, req);
->  	unsigned long flags;
->  	bool put_card;
->  	int err;
-> @@ -1399,7 +1400,7 @@ static void mmc_blk_cqe_complete_rq(struct mmc_queue *mq, struct request *req)
->  
->  	spin_lock_irqsave(&mq->lock, flags);
->  
-> -	mq->in_flight[mmc_issue_type(mq, req)] -= 1;
-> +	mq->in_flight[issue_type] -= 1;
->  
->  	put_card = (mmc_tot_in_flight(mq) == 0);
->  
-> 
+Lad Prabhakar (9):
+  dt-bindings: mmc: renesas,mmcif: Document r8a7742 DT bindings
+  dt-bindings: irqchip: renesas-irqc: Document r8a7742 bindings
+  ARM: dts: r8a7742: Add IRQC support
+  dt-bindings: serial: renesas,scif: Document r8a7742 bindings
+  dt-bindings: serial: renesas,scifb: Document r8a7742 bindings
+  dt-bindings: serial: renesas,hscif: Document r8a7742 bindings
+  ARM: dts: r8a7742: Add [H]SCIF{A|B} support
+  dt-bindings: gpio: renesas,gpio-rcar: Add r8a7742 (RZ/G1H) support
+  ARM: dts: r8a7742: Add GPIO nodes
+
+ .../bindings/gpio/renesas,gpio-rcar.txt       |   1 +
+ .../interrupt-controller/renesas,irqc.yaml    |   1 +
+ .../devicetree/bindings/mmc/renesas,mmcif.txt |   5 +-
+ .../bindings/serial/renesas,hscif.yaml        |   1 +
+ .../bindings/serial/renesas,scif.yaml         |   1 +
+ .../bindings/serial/renesas,scifb.yaml        |   1 +
+ arch/arm/boot/dts/r8a7742.dtsi                | 259 ++++++++++++++++++
+ 7 files changed, 267 insertions(+), 2 deletions(-)
+
+-- 
+2.17.1
 
