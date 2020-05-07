@@ -6,35 +6,36 @@ X-Spam-Status: No, score=-9.7 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
 	URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B0C05C38A24
-	for <linux-mmc@archiver.kernel.org>; Thu,  7 May 2020 08:04:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4FB0EC47247
+	for <linux-mmc@archiver.kernel.org>; Thu,  7 May 2020 08:04:14 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 915932084D
-	for <linux-mmc@archiver.kernel.org>; Thu,  7 May 2020 08:04:10 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 31E6D207DD
+	for <linux-mmc@archiver.kernel.org>; Thu,  7 May 2020 08:04:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725862AbgEGIEJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 7 May 2020 04:04:09 -0400
+        id S1726761AbgEGIEN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 7 May 2020 04:04:13 -0400
 Received: from alexa-out-blr-01.qualcomm.com ([103.229.18.197]:9320 "EHLO
         alexa-out-blr-01.qualcomm.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1725849AbgEGIEG (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 7 May 2020 04:04:06 -0400
+        by vger.kernel.org with ESMTP id S1726750AbgEGIEN (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 7 May 2020 04:04:13 -0400
 Received: from ironmsg02-blr.qualcomm.com ([10.86.208.131])
-  by alexa-out-blr-01.qualcomm.com with ESMTP/TLS/AES256-SHA; 07 May 2020 13:34:04 +0530
+  by alexa-out-blr-01.qualcomm.com with ESMTP/TLS/AES256-SHA; 07 May 2020 13:32:57 +0530
 Received: from minint-dvc2thc.qualcomm.com (HELO sartgarg-linux.qualcomm.com) ([10.206.24.245])
-  by ironmsg02-blr.qualcomm.com with ESMTP; 07 May 2020 13:34:03 +0530
+  by ironmsg02-blr.qualcomm.com with ESMTP; 07 May 2020 13:32:53 +0530
 Received: by sartgarg-linux.qualcomm.com (Postfix, from userid 2339771)
-        id 8C678261C; Thu,  7 May 2020 13:34:02 +0530 (IST)
+        id 1AC47261C; Thu,  7 May 2020 13:32:53 +0530 (IST)
 From:   Sarthak Garg <sartgarg@codeaurora.org>
 To:     adrian.hunter@intel.com, ulf.hansson@linaro.org
 Cc:     vbadigan@codeaurora.org, stummala@codeaurora.org,
         linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
         linux-arm-msm@vger.kernel.org,
         Sarthak Garg <sartgarg@codeaurora.org>,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>
-Subject: [PATCH V1 7/7] mmc: sdhci-msm: dump vendor specific registers during error
-Date:   Thu,  7 May 2020 13:32:14 +0530
-Message-Id: <1588838535-6050-8-git-send-email-sartgarg@codeaurora.org>
+        Rob Herring <robh+dt@kernel.org>,
+        devicetree@vger.kernel.org (open list:OPEN FIRMWARE AND FLATTENED
+        DEVICE TREE BINDINGS)
+Subject: [PATCH V1 1/7] dt-bindings: mmc: Add information for DLL register properties
+Date:   Thu,  7 May 2020 13:32:08 +0530
+Message-Id: <1588838535-6050-2-git-send-email-sartgarg@codeaurora.org>
 X-Mailer: git-send-email 2.7.4
 In-Reply-To: <1588838535-6050-1-git-send-email-sartgarg@codeaurora.org>
 References: <1588838535-6050-1-git-send-email-sartgarg@codeaurora.org>
@@ -43,65 +44,61 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Implement dump_vendor_registers host operation to print the
-vendor specific registers in addition to standard SDHC
-register during error conditions.
+Add information regarding DLL register properties for getting target
+specific configurations. These DLL register settings may vary from
+target to target.
 
-Signed-off-by: Sahitya Tummala <stummala@codeaurora.org>
+Also new compatible string value for sm8250 target.
+
 Signed-off-by: Sarthak Garg <sartgarg@codeaurora.org>
 ---
- drivers/mmc/host/sdhci-msm.c | 31 +++++++++++++++++++++++++++++++
- 1 file changed, 31 insertions(+)
+ Documentation/devicetree/bindings/mmc/sdhci-msm.txt | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index 598880a..a9c2f9c 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -1874,6 +1874,36 @@ static void sdhci_msm_reset(struct sdhci_host *host, u8 mask)
- 	sdhci_reset(host, mask);
- }
+diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+index 5445931..b8e1d2b 100644
+--- a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
++++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+@@ -17,6 +17,7 @@ Required properties:
+ 		"qcom,msm8916-sdhci", "qcom,sdhci-msm-v4"
+ 		"qcom,msm8992-sdhci", "qcom,sdhci-msm-v4"
+ 		"qcom,msm8996-sdhci", "qcom,sdhci-msm-v4"
++		"qcom,sm8250-sdhci", "qcom,sdhci-msm-v5"
+ 		"qcom,sdm845-sdhci", "qcom,sdhci-msm-v5"
+ 		"qcom,qcs404-sdhci", "qcom,sdhci-msm-v5"
+ 		"qcom,sc7180-sdhci", "qcom,sdhci-msm-v5";
+@@ -46,6 +47,13 @@ Required properties:
+ 	"cal"	- reference clock for RCLK delay calibration (optional)
+ 	"sleep"	- sleep clock for RCLK delay calibration (optional)
  
-+#define DRIVER_NAME "sdhci_msm"
-+#define SDHCI_MSM_DUMP(f, x...) \
-+	pr_err("%s: " DRIVER_NAME ": " f, mmc_hostname(host->mmc), ## x)
++- qcom,ddr-config: Certain chipsets and platforms require particular settings
++	for the DDR_CONFIG register. Use this field to specify the register
++	value as per the Hardware Programming Guide.
 +
-+void sdhci_msm_dump_vendor_regs(struct sdhci_host *host)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-+	const struct sdhci_msm_offset *msm_offset = msm_host->offset;
++- qcom,dll-config: Chipset and Platform specific value. Use this field to
++	specify the DLL_CONFIG register value as per Hardware Programming Guide.
 +
-+	SDHCI_MSM_DUMP("----------- VENDOR REGISTER DUMP -----------\n");
-+
-+	SDHCI_MSM_DUMP(
-+			"DLL sts: 0x%08x | DLL cfg:  0x%08x | DLL cfg2: 0x%08x\n",
-+		readl_relaxed(host->ioaddr + msm_offset->core_dll_status),
-+		readl_relaxed(host->ioaddr + msm_offset->core_dll_config),
-+		readl_relaxed(host->ioaddr + msm_offset->core_dll_config_2));
-+	SDHCI_MSM_DUMP(
-+			"DLL cfg3: 0x%08x | DLL usr ctl:  0x%08x | DDR cfg: 0x%08x\n",
-+		readl_relaxed(host->ioaddr + msm_offset->core_dll_config_3),
-+		readl_relaxed(host->ioaddr + msm_offset->core_dll_usr_ctl),
-+		readl_relaxed(host->ioaddr + msm_offset->core_ddr_config));
-+	SDHCI_MSM_DUMP(
-+			"Vndr func: 0x%08x | Vndr func2 : 0x%08x Vndr func3: 0x%08x\n",
-+		readl_relaxed(host->ioaddr + msm_offset->core_vendor_spec),
-+		readl_relaxed(host->ioaddr +
-+			msm_offset->core_vendor_spec_func2),
-+		readl_relaxed(host->ioaddr + msm_offset->core_vendor_spec3));
-+}
-+
- static const struct sdhci_msm_variant_ops mci_var_ops = {
- 	.msm_readl_relaxed = sdhci_msm_mci_variant_readl_relaxed,
- 	.msm_writel_relaxed = sdhci_msm_mci_variant_writel_relaxed,
-@@ -1929,6 +1959,7 @@ static const struct sdhci_ops sdhci_msm_ops = {
- 	.write_w = sdhci_msm_writew,
- 	.write_b = sdhci_msm_writeb,
- 	.irq	= sdhci_msm_cqe_irq,
-+	.dump_vendor_regs = sdhci_msm_dump_vendor_regs,
- };
+ Example:
  
- static const struct sdhci_pltfm_data sdhci_msm_pdata = {
+ 	sdhc_1: sdhci@f9824900 {
+@@ -63,6 +71,9 @@ Example:
+ 
+ 		clocks = <&gcc GCC_SDCC1_APPS_CLK>, <&gcc GCC_SDCC1_AHB_CLK>;
+ 		clock-names = "core", "iface";
++
++		qcom,dll-config = <0x000f642c>;
++		qcom,ddr-config = <0x80040868>;
+ 	};
+ 
+ 	sdhc_2: sdhci@f98a4900 {
+@@ -80,4 +91,7 @@ Example:
+ 
+ 		clocks = <&gcc GCC_SDCC2_APPS_CLK>, <&gcc GCC_SDCC2_AHB_CLK>;
+ 		clock-names = "core", "iface";
++
++		qcom,dll-config = <0x0007642c>;
++		qcom,ddr-config = <0x80040868>;
+ 	};
 -- 
 2.7.4
 
