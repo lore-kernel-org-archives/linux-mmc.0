@@ -2,103 +2,136 @@ Return-Path: <SRS0=7UF0=6V=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-1.9 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED,URI_HEX,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
+X-Spam-Status: No, score=-8.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DF74FC38A24
-	for <linux-mmc@archiver.kernel.org>; Thu,  7 May 2020 11:23:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AB81CC38A2A
+	for <linux-mmc@archiver.kernel.org>; Thu,  7 May 2020 11:48:28 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id AFFEF20870
-	for <linux-mmc@archiver.kernel.org>; Thu,  7 May 2020 11:23:01 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (1024-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="pgCCX3wy"
+	by mail.kernel.org (Postfix) with ESMTP id 88DCB20735
+	for <linux-mmc@archiver.kernel.org>; Thu,  7 May 2020 11:48:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725910AbgEGLXB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 7 May 2020 07:23:01 -0400
-Received: from www.zeus03.de ([194.117.254.33]:50558 "EHLO mail.zeus03.de"
+        id S1726267AbgEGLs1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 7 May 2020 07:48:27 -0400
+Received: from mga06.intel.com ([134.134.136.31]:64619 "EHLO mga06.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725848AbgEGLXB (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 7 May 2020 07:23:01 -0400
-X-Greylist: delayed 399 seconds by postgrey-1.27 at vger.kernel.org; Thu, 07 May 2020 07:23:00 EDT
-DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
-        date:from:to:cc:subject:message-id:references:mime-version
-        :content-type:in-reply-to; s=k1; bh=SdKy8iDU7Alnp6uHDvNeGnGfcawE
-        GR6FnzZWKpyn6dg=; b=pgCCX3wysaFvf7kpSZVrWMeEMM5CTAwPw70VtzkleU4X
-        1A2W9LqUsFopN82LHv3dFDu4HAx3Nyf2c4sUPNI88eXD9lKzIBFtiA/cTyoRvhZU
-        Ydc6MKcKlmTzf+/+3/eSys/mpa/fVZcBYbaIf8l+rMiIuEhwcH6JvfQnN1JWZUU=
-Received: (qmail 1058357 invoked from network); 7 May 2020 13:16:18 +0200
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 7 May 2020 13:16:18 +0200
-X-UD-Smtp-Session: l3s3148p1@OVl+Ag2lANIgAwDPXwlDAElIrGE6fTK4
-Date:   Thu, 7 May 2020 13:16:10 +0200
-From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
-To:     Geert Uytterhoeven <geert@linux-m68k.org>
-Cc:     Niklas =?utf-8?Q?S=C3=B6derlund?= 
-        <niklas.soderlund+renesas@ragnatech.se>,
-        Masahiro Yamada <yamada.masahiro@socionext.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-mmc@vger.kernel.org, linux-pm@vger.kernel.org,
-        linux-renesas-soc@vger.kernel.org
-Subject: Re: [PATCH 1/2] mmc: tmio: undo PM autosuspend when removing the host
-Message-ID: <20200507111610.GA1598@ninjato>
-References: <20190109223452.11184-1-niklas.soderlund+renesas@ragnatech.se>
- <20190109223452.11184-2-niklas.soderlund+renesas@ragnatech.se>
- <alpine.DEB.2.21.2004291630090.4052@ramsan.of.borg>
+        id S1725903AbgEGLs0 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 7 May 2020 07:48:26 -0400
+IronPort-SDR: 0WDD4SYlelv/CMqDGbsa+Qd1M0WI661zriOKiJ/LvooJuDx2HTCleMYzxo4s8Xh6kVqvsU8E99
+ JqfAMf+jr5cw==
+X-Amp-Result: SKIPPED(no attachment in message)
+X-Amp-File-Uploaded: False
+Received: from orsmga001.jf.intel.com ([10.7.209.18])
+  by orsmga104.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 07 May 2020 04:48:24 -0700
+IronPort-SDR: i8kWrQpgWn75L4Fe2QfqwBPYtA7TVrOdZfwcIB8+RUtpWKVTAnVGtzTQxXUsavF0TyDLC53E6+
+ 81IX49BuWPHQ==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.73,363,1583222400"; 
+   d="scan'208";a="339328430"
+Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.157]) ([10.237.72.157])
+  by orsmga001.jf.intel.com with ESMTP; 07 May 2020 04:48:21 -0700
+Subject: Re: [PATCH V1 2/2] mmc: core: Fix recursive locking issue in CQE
+ recovery path
+To:     Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
+        ulf.hansson@linaro.org
+Cc:     stummala@codeaurora.org, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+        Sarthak Garg <sartgarg@codeaurora.org>, stable@vger.kernel.org,
+        Baolin Wang <baolin.wang@linaro.org>,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        Andreas Koop <andreas.koop@zf.com>,
+        Thomas Gleixner <tglx@linutronix.de>
+References: <1588775643-18037-1-git-send-email-vbadigan@codeaurora.org>
+ <1588775643-18037-3-git-send-email-vbadigan@codeaurora.org>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Message-ID: <b4a01f2c-479a-2a23-58b7-64f16cbc17a2@intel.com>
+Date:   Thu, 7 May 2020 14:48:42 +0300
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.7.0
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="6TrnltStXW4iwmi0"
-Content-Disposition: inline
-In-Reply-To: <alpine.DEB.2.21.2004291630090.4052@ramsan.of.borg>
-User-Agent: Mutt/1.10.1 (2018-07-13)
+In-Reply-To: <1588775643-18037-3-git-send-email-vbadigan@codeaurora.org>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+On 6/05/20 5:34 pm, Veerabhadrarao Badiganti wrote:
+> From: Sarthak Garg <sartgarg@codeaurora.org>
+> 
+> Consider the following stack trace
+> 
+> -001|raw_spin_lock_irqsave
+> -002|mmc_blk_cqe_complete_rq
+> -003|__blk_mq_complete_request(inline)
+> -003|blk_mq_complete_request(rq)
+> -004|mmc_cqe_timed_out(inline)
+> -004|mmc_mq_timed_out
+> 
+> mmc_mq_timed_out acquires the queue_lock for the first
+> time. The mmc_blk_cqe_complete_rq function also tries to acquire
+> the same queue lock resulting in recursive locking where the task
+> is spinning for the same lock which it has already acquired leading
+> to watchdog bark.
+> 
+> Fix this issue with the lock only for the required critical section.
+> 
+> Cc: <stable@vger.kernel.org> # v4.19+
+> Suggested-by: Sahitya Tummala <stummala@codeaurora.org>
+> Signed-off-by: Sarthak Garg <sartgarg@codeaurora.org>
+> ---
+>  drivers/mmc/core/queue.c | 11 ++++++-----
+>  1 file changed, 6 insertions(+), 5 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
+> index 25bee3d..72bef39 100644
+> --- a/drivers/mmc/core/queue.c
+> +++ b/drivers/mmc/core/queue.c
+> @@ -107,7 +107,7 @@ static enum blk_eh_timer_return mmc_cqe_timed_out(struct request *req)
+>  	case MMC_ISSUE_DCMD:
+>  		if (host->cqe_ops->cqe_timeout(host, mrq, &recovery_needed)) {
+>  			if (recovery_needed)
+> -				__mmc_cqe_recovery_notifier(mq);
+> +				mmc_cqe_recovery_notifier(mrq);
+>  			return BLK_EH_RESET_TIMER;
+>  		}
+>  		/* No timeout (XXX: huh? comment doesn't make much sense) */
+> @@ -131,12 +131,13 @@ static enum blk_eh_timer_return mmc_mq_timed_out(struct request *req,
+>  
+>  	spin_lock_irqsave(&mq->lock, flags);
+>  
+> -	if (mq->recovery_needed || !mq->use_cqe || host->hsq_enabled)
+> +	if (mq->recovery_needed || !mq->use_cqe || host->hsq_enabled) {
+>  		ret = BLK_EH_RESET_TIMER;
+> -	else
+> +		spin_unlock_irqrestore(&mq->lock, flags);
+> +	} else {
+> +		spin_unlock_irqrestore(&mq->lock, flags);
+>  		ret = mmc_cqe_timed_out(req);
+> -
+> -	spin_unlock_irqrestore(&mq->lock, flags);
+> +	}
 
---6TrnltStXW4iwmi0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+This looks good, but I think there needs to be another change also.  I will
+send a patch for that, but in the meantime maybe you could straighten up the
+code flow through the spinlock e.g.
 
+	spin_lock_irqsave(&mq->lock, flags);
+	ignore = mq->recovery_needed || !mq->use_cqe || host->hsq_enabled;
+	spin_unlock_irqrestore(&mq->lock, flags);
 
-> When unbinding the sdhi driver on e.g. Koelsch or Salvator-XS:
->=20
->     echo ee100000.sd > /sys/bus/platform/drivers/sh_mobile_sdhi/unbind
->     echo ee100000.sd > /sys/bus/platform/drivers/renesas_sdhi_internal_dm=
-ac/unbind
+	return ignore ? BLK_EH_RESET_TIMER : mmc_cqe_timed_out(req);
 
-Confirmed. Happens on my Lager and M3-N Salvator-XS, too.
+And add a fixes tag.
 
-> Removing the call to pm_runtime_dont_use_autosuspend() fixes that
-> symptom.  But that is definitely not the right fix, as doing so causes
-> genpd_stop_dev() to no longer being called on unbind.
+>  
+>  	return ret;
+>  }
+> 
 
-Yes. So, we agree that this commit seems correct but it just makes
-another problem visisble?
-
-I'll have a look. Thanks for the initial pointers!
-
-
---6TrnltStXW4iwmi0
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAl6z7fcACgkQFA3kzBSg
-KbYVaRAAm8fXa9GaBX2NPB0I6G45ymZZT/kgApfipevacUCny2wjrNoYTpWYE+2C
-WQaSruyIA7iwmrfpAVB3lCkYDQQQrGpDpUv9fxBjSIylSHc9PjrauqFvuweinRR2
-Y72UY0/S2OtPK8j1gYjmuRI/5LyTjw7gg0XUUJPDR7+2bEYUTQFhUNk/5YOZBMy9
-LZhsSjJZBoHZ+0sch2qMLnRRnctPn35d5yUwGu0IwwhqzLWRIWDr/bFIb87roF6g
-8/A6gjSdQfDcJcn2zGxdBFnpP2KT03EQg9v/4umlVj5jS2hNM3sV/hrnHBE92qcf
-LDgnfGKNjRsg1DhVkTtjaQzNl1bRcMnHqTtBSrgpsPaS+2UtZq9FI18fiztc4ed7
-KI3ip8okWGd8JiL0R0tbTfqAhDsU+PrFiiTS8jXmhW3qGNt+WY9cWyj+Vk1lNlAI
-OvukkYklhOhBefKlRXEeYLWb8oi1vV351w9s4+4S8sR1tmbB25wOtd0MUW/s+dU+
-VCKvqotlCuFNSdA48AY3Dr/qBG3tTVKGYllVY7HbWBxKA7fwerqXXqlyxxfwKa2P
-L+JK3T/v9wEhaXbwecwHd4PsnM37rfjfBxact+P2cZVNRxeuKJlMUB7MsjwAtRCK
-QoeV/HWLnDumezA7yX7wm0BvrYdOmx7leN3/29Xp5kvaWHwGjq4=
-=axug
------END PGP SIGNATURE-----
-
---6TrnltStXW4iwmi0--
