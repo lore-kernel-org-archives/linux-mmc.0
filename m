@@ -2,60 +2,87 @@ Return-Path: <SRS0=7UF0=6V=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=no
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.7 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 03830C47247
-	for <linux-mmc@archiver.kernel.org>; Thu,  7 May 2020 08:02:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C1C0CC38A24
+	for <linux-mmc@archiver.kernel.org>; Thu,  7 May 2020 08:03:41 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id DDBED20753
-	for <linux-mmc@archiver.kernel.org>; Thu,  7 May 2020 08:02:58 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 988522075E
+	for <linux-mmc@archiver.kernel.org>; Thu,  7 May 2020 08:03:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725802AbgEGIC4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 7 May 2020 04:02:56 -0400
-Received: from alexa-out-blr-01.qualcomm.com ([103.229.18.197]:9282 "EHLO
+        id S1725879AbgEGIDl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 7 May 2020 04:03:41 -0400
+Received: from alexa-out-blr-01.qualcomm.com ([103.229.18.197]:9303 "EHLO
         alexa-out-blr-01.qualcomm.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1725783AbgEGIC4 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 7 May 2020 04:02:56 -0400
+        by vger.kernel.org with ESMTP id S1725849AbgEGIDl (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 7 May 2020 04:03:41 -0400
 Received: from ironmsg02-blr.qualcomm.com ([10.86.208.131])
-  by alexa-out-blr-01.qualcomm.com with ESMTP/TLS/AES256-SHA; 07 May 2020 13:32:52 +0530
+  by alexa-out-blr-01.qualcomm.com with ESMTP/TLS/AES256-SHA; 07 May 2020 13:33:38 +0530
 Received: from minint-dvc2thc.qualcomm.com (HELO sartgarg-linux.qualcomm.com) ([10.206.24.245])
-  by ironmsg02-blr.qualcomm.com with ESMTP; 07 May 2020 13:32:38 +0530
+  by ironmsg02-blr.qualcomm.com with ESMTP; 07 May 2020 13:33:37 +0530
 Received: by sartgarg-linux.qualcomm.com (Postfix, from userid 2339771)
-        id 2D2C3261C; Thu,  7 May 2020 13:32:38 +0530 (IST)
+        id D4A9A261C; Thu,  7 May 2020 13:33:36 +0530 (IST)
 From:   Sarthak Garg <sartgarg@codeaurora.org>
 To:     adrian.hunter@intel.com, ulf.hansson@linaro.org
 Cc:     vbadigan@codeaurora.org, stummala@codeaurora.org,
         linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
         linux-arm-msm@vger.kernel.org,
-        Sarthak Garg <sartgarg@codeaurora.org>
-Subject: [PATCH V1 0/7] Target specific DLL configuration for qcom SDHC
-Date:   Thu,  7 May 2020 13:32:07 +0530
-Message-Id: <1588838535-6050-1-git-send-email-sartgarg@codeaurora.org>
+        Sarthak Garg <sartgarg@codeaurora.org>,
+        Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>
+Subject: [PATCH V1 3/7] mmc: sdhci-msm: Update dll_config_3 as per HSR
+Date:   Thu,  7 May 2020 13:32:10 +0530
+Message-Id: <1588838535-6050-4-git-send-email-sartgarg@codeaurora.org>
 X-Mailer: git-send-email 2.7.4
+In-Reply-To: <1588838535-6050-1-git-send-email-sartgarg@codeaurora.org>
+References: <1588838535-6050-1-git-send-email-sartgarg@codeaurora.org>
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Sarthak Garg (6):
-  dt-bindings: mmc: Add information for DLL register properties
-  mmc: sdhci-msm: Update dll_config_3 as per HSR
-  mmc: sdhci-msm: Update DDR_CONFIG as per device tree file
-  mmc: sdhci-msm: Read and use DLL Config property from device tree file
-  mmc: sdhci-msm: Introduce new ops to dump vendor specific registers
-  mmc: sdhci-msm: dump vendor specific registers during error
+Update dll_config_3 as per the host clock frequency as specified in the
+DLL Hardware Reference Guide.
 
-Veerabhadrarao Badiganti (1):
-  mmc: host: sdhci-msm: Configure dll-user-control in dll init sequence
+Signed-off-by: Sarthak Garg <sartgarg@codeaurora.org>
+---
+ drivers/mmc/host/sdhci-msm.c | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
 
- .../devicetree/bindings/mmc/sdhci-msm.txt          |  14 +++
- drivers/mmc/host/sdhci-msm.c                       | 103 ++++++++++++++++++++-
- drivers/mmc/host/sdhci.c                           |   3 +
- drivers/mmc/host/sdhci.h                           |   1 +
- 4 files changed, 118 insertions(+), 3 deletions(-)
-
+diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+index dad008e..0f7baaf 100644
+--- a/drivers/mmc/host/sdhci-msm.c
++++ b/drivers/mmc/host/sdhci-msm.c
+@@ -62,6 +62,9 @@
+ #define FINE_TUNE_MODE_EN	BIT(27)
+ #define BIAS_OK_SIGNAL		BIT(29)
+ 
++#define DLL_CONFIG_3_LOW_FREQ_VAL	0x08
++#define DLL_CONFIG_3_HIGH_FREQ_VAL	0x10
++
+ #define CORE_VENDOR_SPEC_POR_VAL 0xa9c
+ #define CORE_CLK_PWRSAVE	BIT(1)
+ #define CORE_HC_MCLK_SEL_DFLT	(2 << 8)
+@@ -695,6 +698,16 @@ static int msm_init_cm_dll(struct sdhci_host *host)
+ 			ENABLE_DLL_LOCK_STATUS | BIAS_OK_SIGNAL;
+ 		writel_relaxed(config, host->ioaddr +
+ 				msm_offset->core_dll_usr_ctl);
++
++		config = readl_relaxed(host->ioaddr +
++				msm_offset->core_dll_config_3);
++		config &= ~0xFF;
++		if (msm_host->clk_rate < 150000000)
++			config |= DLL_CONFIG_3_LOW_FREQ_VAL;
++		else
++			config |= DLL_CONFIG_3_HIGH_FREQ_VAL;
++		writel_relaxed(config, host->ioaddr +
++			msm_offset->core_dll_config_3);
+ 	}
+ 
+ 	config = readl_relaxed(host->ioaddr +
 -- 
 2.7.4
 
