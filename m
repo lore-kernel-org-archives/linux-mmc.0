@@ -2,136 +2,94 @@ Return-Path: <SRS0=7UF0=6V=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-0.7 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URI_HEX autolearn=no
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AB81CC38A2A
-	for <linux-mmc@archiver.kernel.org>; Thu,  7 May 2020 11:48:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9DB2FC38A24
+	for <linux-mmc@archiver.kernel.org>; Thu,  7 May 2020 11:49:42 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 88DCB20735
-	for <linux-mmc@archiver.kernel.org>; Thu,  7 May 2020 11:48:28 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 75A5520735
+	for <linux-mmc@archiver.kernel.org>; Thu,  7 May 2020 11:49:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726267AbgEGLs1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 7 May 2020 07:48:27 -0400
-Received: from mga06.intel.com ([134.134.136.31]:64619 "EHLO mga06.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725903AbgEGLs0 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 7 May 2020 07:48:26 -0400
-IronPort-SDR: 0WDD4SYlelv/CMqDGbsa+Qd1M0WI661zriOKiJ/LvooJuDx2HTCleMYzxo4s8Xh6kVqvsU8E99
- JqfAMf+jr5cw==
-X-Amp-Result: SKIPPED(no attachment in message)
-X-Amp-File-Uploaded: False
-Received: from orsmga001.jf.intel.com ([10.7.209.18])
-  by orsmga104.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 07 May 2020 04:48:24 -0700
-IronPort-SDR: i8kWrQpgWn75L4Fe2QfqwBPYtA7TVrOdZfwcIB8+RUtpWKVTAnVGtzTQxXUsavF0TyDLC53E6+
- 81IX49BuWPHQ==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.73,363,1583222400"; 
-   d="scan'208";a="339328430"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.157]) ([10.237.72.157])
-  by orsmga001.jf.intel.com with ESMTP; 07 May 2020 04:48:21 -0700
-Subject: Re: [PATCH V1 2/2] mmc: core: Fix recursive locking issue in CQE
- recovery path
-To:     Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
-        ulf.hansson@linaro.org
-Cc:     stummala@codeaurora.org, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        Sarthak Garg <sartgarg@codeaurora.org>, stable@vger.kernel.org,
-        Baolin Wang <baolin.wang@linaro.org>,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        Andreas Koop <andreas.koop@zf.com>,
-        Thomas Gleixner <tglx@linutronix.de>
-References: <1588775643-18037-1-git-send-email-vbadigan@codeaurora.org>
- <1588775643-18037-3-git-send-email-vbadigan@codeaurora.org>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <b4a01f2c-479a-2a23-58b7-64f16cbc17a2@intel.com>
-Date:   Thu, 7 May 2020 14:48:42 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.7.0
+        id S1726074AbgEGLtm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 7 May 2020 07:49:42 -0400
+Received: from mail-oi1-f195.google.com ([209.85.167.195]:42473 "EHLO
+        mail-oi1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725948AbgEGLtl (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 7 May 2020 07:49:41 -0400
+Received: by mail-oi1-f195.google.com with SMTP id i13so4890361oie.9;
+        Thu, 07 May 2020 04:49:39 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=k+aH1yBOOObNG5A6jSqvawJqChJjtjYvvgrlnPsFqdg=;
+        b=tOSZaMrvIeCuf89K5lKBxGjb8gTlSnghDKQRGHbKc0infE8pLWPUNkHiQpJPWU0IBy
+         ut5JH90l4oWVVbTURNZRpKU7ANzAhWQaNpXStjQmT8/l3YhhuwOUNHtAO2Ec8b6dzLU6
+         TpoQt+T9sVAGk9T6n6tOEyr70oNLNOY/wwMam9u1XNW8xjNUkx8iTaAAh7dDzvqfrc8i
+         DJSvAfWDLQsAjoTMgqtcceW6mYCJA16G9VR2Klu7RrY+uoetTST3csx3jk5L7orv4oip
+         8leme2k03IfS4LUHZrVkgksUGqL9SSJhV+q76XVmijOdVU7bRQNjzA5d0okCsCFZgfTL
+         APaQ==
+X-Gm-Message-State: AGi0PuaIFGZql261kbfnjb3WlRg/6yuPS89m5uISTuxhkCd773rWjI3G
+        NAP0Uk6FaJi/l53Of8lSjQ3kgtixX4PuoZzy6wTL+A==
+X-Google-Smtp-Source: APiQypKBxDEbsH83Yv0T0SNjuH3GFu34qDH49J6uOMcPFccKq+j0kkCa+vULradOgiIRYYQy8f0b5gEvedmQh+IHZ0Y=
+X-Received: by 2002:aca:d50f:: with SMTP id m15mr6194446oig.54.1588852179333;
+ Thu, 07 May 2020 04:49:39 -0700 (PDT)
 MIME-Version: 1.0
-In-Reply-To: <1588775643-18037-3-git-send-email-vbadigan@codeaurora.org>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+References: <20190109223452.11184-1-niklas.soderlund+renesas@ragnatech.se>
+ <20190109223452.11184-2-niklas.soderlund+renesas@ragnatech.se>
+ <alpine.DEB.2.21.2004291630090.4052@ramsan.of.borg> <20200507111610.GA1598@ninjato>
+In-Reply-To: <20200507111610.GA1598@ninjato>
+From:   Geert Uytterhoeven <geert@linux-m68k.org>
+Date:   Thu, 7 May 2020 13:49:28 +0200
+Message-ID: <CAMuHMdXMUUXkfMvEo7--MN7-fO2c7RDHuOyq2NSaWB+Lx9Bq6g@mail.gmail.com>
+Subject: Re: [PATCH 1/2] mmc: tmio: undo PM autosuspend when removing the host
+To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc:     =?UTF-8?Q?Niklas_S=C3=B6derlund?= 
+        <niklas.soderlund+renesas@ragnatech.se>,
+        Masahiro Yamada <yamada.masahiro@socionext.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        Linux PM list <linux-pm@vger.kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 6/05/20 5:34 pm, Veerabhadrarao Badiganti wrote:
-> From: Sarthak Garg <sartgarg@codeaurora.org>
-> 
-> Consider the following stack trace
-> 
-> -001|raw_spin_lock_irqsave
-> -002|mmc_blk_cqe_complete_rq
-> -003|__blk_mq_complete_request(inline)
-> -003|blk_mq_complete_request(rq)
-> -004|mmc_cqe_timed_out(inline)
-> -004|mmc_mq_timed_out
-> 
-> mmc_mq_timed_out acquires the queue_lock for the first
-> time. The mmc_blk_cqe_complete_rq function also tries to acquire
-> the same queue lock resulting in recursive locking where the task
-> is spinning for the same lock which it has already acquired leading
-> to watchdog bark.
-> 
-> Fix this issue with the lock only for the required critical section.
-> 
-> Cc: <stable@vger.kernel.org> # v4.19+
-> Suggested-by: Sahitya Tummala <stummala@codeaurora.org>
-> Signed-off-by: Sarthak Garg <sartgarg@codeaurora.org>
-> ---
->  drivers/mmc/core/queue.c | 11 ++++++-----
->  1 file changed, 6 insertions(+), 5 deletions(-)
-> 
-> diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
-> index 25bee3d..72bef39 100644
-> --- a/drivers/mmc/core/queue.c
-> +++ b/drivers/mmc/core/queue.c
-> @@ -107,7 +107,7 @@ static enum blk_eh_timer_return mmc_cqe_timed_out(struct request *req)
->  	case MMC_ISSUE_DCMD:
->  		if (host->cqe_ops->cqe_timeout(host, mrq, &recovery_needed)) {
->  			if (recovery_needed)
-> -				__mmc_cqe_recovery_notifier(mq);
-> +				mmc_cqe_recovery_notifier(mrq);
->  			return BLK_EH_RESET_TIMER;
->  		}
->  		/* No timeout (XXX: huh? comment doesn't make much sense) */
-> @@ -131,12 +131,13 @@ static enum blk_eh_timer_return mmc_mq_timed_out(struct request *req,
->  
->  	spin_lock_irqsave(&mq->lock, flags);
->  
-> -	if (mq->recovery_needed || !mq->use_cqe || host->hsq_enabled)
-> +	if (mq->recovery_needed || !mq->use_cqe || host->hsq_enabled) {
->  		ret = BLK_EH_RESET_TIMER;
-> -	else
-> +		spin_unlock_irqrestore(&mq->lock, flags);
-> +	} else {
-> +		spin_unlock_irqrestore(&mq->lock, flags);
->  		ret = mmc_cqe_timed_out(req);
-> -
-> -	spin_unlock_irqrestore(&mq->lock, flags);
-> +	}
+Hi Wolfram,
 
-This looks good, but I think there needs to be another change also.  I will
-send a patch for that, but in the meantime maybe you could straighten up the
-code flow through the spinlock e.g.
+On Thu, May 7, 2020 at 1:17 PM Wolfram Sang
+<wsa+renesas@sang-engineering.com> wrote:
+> > When unbinding the sdhi driver on e.g. Koelsch or Salvator-XS:
+> >
+> >     echo ee100000.sd > /sys/bus/platform/drivers/sh_mobile_sdhi/unbind
+> >     echo ee100000.sd > /sys/bus/platform/drivers/renesas_sdhi_internal_dmac/unbind
+>
+> Confirmed. Happens on my Lager and M3-N Salvator-XS, too.
+>
+> > Removing the call to pm_runtime_dont_use_autosuspend() fixes that
+> > symptom.  But that is definitely not the right fix, as doing so causes
+> > genpd_stop_dev() to no longer being called on unbind.
+>
+> Yes. So, we agree that this commit seems correct but it just makes
+> another problem visisble?
 
-	spin_lock_irqsave(&mq->lock, flags);
-	ignore = mq->recovery_needed || !mq->use_cqe || host->hsq_enabled;
-	spin_unlock_irqrestore(&mq->lock, flags);
+Indeed.
 
-	return ignore ? BLK_EH_RESET_TIMER : mmc_cqe_timed_out(req);
+> I'll have a look. Thanks for the initial pointers!
 
-And add a fixes tag.
+TIA!
 
->  
->  	return ret;
->  }
-> 
+Gr{oetje,eeting}s,
 
+                        Geert
+
+-- 
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
