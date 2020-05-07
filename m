@@ -2,113 +2,132 @@ Return-Path: <SRS0=7UF0=6V=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no
+X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8558BC54E49
-	for <linux-mmc@archiver.kernel.org>; Thu,  7 May 2020 14:06:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 43BE8C38A24
+	for <linux-mmc@archiver.kernel.org>; Thu,  7 May 2020 16:16:01 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 704522084D
-	for <linux-mmc@archiver.kernel.org>; Thu,  7 May 2020 14:06:03 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 17D182083B
+	for <linux-mmc@archiver.kernel.org>; Thu,  7 May 2020 16:16:01 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=fail reason="signature verification failed" (1024-bit key) header.d=mg.codeaurora.org header.i=@mg.codeaurora.org header.b="UhTFXu5u"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726579AbgEGOGA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 7 May 2020 10:06:00 -0400
-Received: from mga02.intel.com ([134.134.136.20]:59853 "EHLO mga02.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726267AbgEGOF7 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 7 May 2020 10:05:59 -0400
-IronPort-SDR: RP/Y2f1PV6Emv49xb6l2YoaXl7/QebIatPptIWObMuuctY/UK0QSHCdI1hudmEjixDfd464bDX
- /sPvo1RSme8g==
-X-Amp-Result: SKIPPED(no attachment in message)
-X-Amp-File-Uploaded: False
-Received: from orsmga001.jf.intel.com ([10.7.209.18])
-  by orsmga101.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 07 May 2020 07:05:58 -0700
-IronPort-SDR: 5tCBvfLrV57N2TTqBGhMqkkL/5QL+bUuW+LU44NCJSYKO4wgf/ixNS2eiWonlITIrNCWcGxFft
- bqNf61n2K5pA==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.73,363,1583222400"; 
-   d="scan'208";a="339361341"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.157]) ([10.237.72.157])
-  by orsmga001.jf.intel.com with ESMTP; 07 May 2020 07:05:55 -0700
-Subject: [PATCH] mmc: block: Fix request completion in the CQE timeout path
-From:   Adrian Hunter <adrian.hunter@intel.com>
-To:     Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
-        ulf.hansson@linaro.org
+        id S1726636AbgEGQQA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 7 May 2020 12:16:00 -0400
+Received: from mail26.static.mailgun.info ([104.130.122.26]:34024 "EHLO
+        mail26.static.mailgun.info" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726222AbgEGQQA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 7 May 2020 12:16:00 -0400
+DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
+ s=smtp; t=1588868159; h=References: In-Reply-To: Message-Id: Date:
+ Subject: Cc: To: From: Sender;
+ bh=w5NiSQ77D5gTRpc269gInIopQbtzyb+mp/b4/2QKUDE=; b=UhTFXu5ulu7Vd/LRB1gzux5OpXKN+1a7Fv7CPwPDaMddmIQr0hyuScgqlz+pIQW9In2PS7iS
+ 2JxXhAcbGH222aY+Rwub05XeKtkjJrWy3LbDQkTKaFIaqMH5OYPYETiDhpLAbONO/zg5U/p+
+ UyLq8aAhBWL+pnylPy/fdDxIMVA=
+X-Mailgun-Sending-Ip: 104.130.122.26
+X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
+Received: from smtp.codeaurora.org (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171])
+ by mxa.mailgun.org with ESMTP id 5eb43438.7f2b80073570-smtp-out-n04;
+ Thu, 07 May 2020 16:15:52 -0000 (UTC)
+Received: by smtp.codeaurora.org (Postfix, from userid 1001)
+        id 7F4DAC44793; Thu,  7 May 2020 16:15:51 +0000 (UTC)
+Received: from vbadigan-linux.qualcomm.com (blr-c-bdr-fw-01_GlobalNAT_AllZones-Outside.qualcomm.com [103.229.19.19])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-SHA256 (128/128 bits))
+        (No client certificate requested)
+        (Authenticated sender: vbadigan)
+        by smtp.codeaurora.org (Postfix) with ESMTPSA id 4D35DC433F2;
+        Thu,  7 May 2020 16:15:45 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.3.2 smtp.codeaurora.org 4D35DC433F2
+Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
+Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=none smtp.mailfrom=vbadigan@codeaurora.org
+From:   Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+To:     adrian.hunter@intel.com, ulf.hansson@linaro.org
 Cc:     stummala@codeaurora.org, linux-mmc@vger.kernel.org,
         linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        Sarthak Garg <sartgarg@codeaurora.org>, stable@vger.kernel.org,
-        Baolin Wang <baolin.wang@linaro.org>,
+        Sarthak Garg <sartgarg@codeaurora.org>,
+        <stable@vger.kernel.org>,
         Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        Baolin Wang <baolin.wang@linaro.org>,
+        Kate Stewart <kstewart@linuxfoundation.org>,
+        Allison Randal <allison@lohutok.net>,
+        Andreas Koop <andreas.koop@zf.com>,
         Thomas Gleixner <tglx@linutronix.de>,
-        Christoph Hellwig <hch@lst.de>
-References: <1588775643-18037-1-git-send-email-vbadigan@codeaurora.org>
- <1588775643-18037-3-git-send-email-vbadigan@codeaurora.org>
- <b4a01f2c-479a-2a23-58b7-64f16cbc17a2@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <66747f4c-e61f-509f-a3cc-7e3499a844e4@intel.com>
-Date:   Thu, 7 May 2020 17:06:15 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.7.0
-MIME-Version: 1.0
-In-Reply-To: <b4a01f2c-479a-2a23-58b7-64f16cbc17a2@intel.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+        Linus Walleij <linus.walleij@linaro.org>
+Subject: [PATCH V2] mmc: core: Fix recursive locking issue in CQE recovery path
+Date:   Thu,  7 May 2020 21:45:33 +0530
+Message-Id: <1588868135-31783-1-git-send-email-vbadigan@codeaurora.org>
+X-Mailer: git-send-email 1.9.1
+In-Reply-To: <1588775643-18037-3-git-send-email-vbadigan@codeaurora.org>
+References: <1588775643-18037-3-git-send-email-vbadigan@codeaurora.org>
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-First, it should be noted that the CQE timeout (60 seconds) is substantial
-so a CQE request that times out is really stuck, and the race between
-timeout and completion is extremely unlikely. Nevertheless this patch
-fixes an issue with it.
+From: Sarthak Garg <sartgarg@codeaurora.org>
 
-Commit ad73d6feadbd7b ("mmc: complete requests from ->timeout")
-preserved the existing functionality, to complete the request.
-However that had only been necessary because the block layer
-timeout handler had been marking the request to prevent it from being
-completed normally. That restriction was removed at the same time, the
-result being that a request that has gone will have been completed anyway.
-That is, the completion in the timeout handler became unnecessary.
+Consider the following stack trace
 
-At the time, the unnecessary completion was harmless because the block
-layer would ignore it, although that changed in kernel v5.0.
+-001|raw_spin_lock_irqsave
+-002|mmc_blk_cqe_complete_rq
+-003|__blk_mq_complete_request(inline)
+-003|blk_mq_complete_request(rq)
+-004|mmc_cqe_timed_out(inline)
+-004|mmc_mq_timed_out
 
-Note for stable, this patch will not apply cleanly without patch "mmc:
-core: Fix recursive locking issue in CQE recovery path"
+mmc_mq_timed_out acquires the queue_lock for the first
+time. The mmc_blk_cqe_complete_rq function also tries to acquire
+the same queue lock resulting in recursive locking where the task
+is spinning for the same lock which it has already acquired leading
+to watchdog bark.
 
-Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
-Fixes: ad73d6feadbd7b ("mmc: complete requests from ->timeout")
-Cc: stable@vger.kernel.org
+Fix this issue with the lock only for the required critical section.
+
+Cc: <stable@vger.kernel.org>
+Fixes: 1e8e55b67030 ("mmc: block: Add CQE support")
+Suggested-by: Sahitya Tummala <stummala@codeaurora.org>
+Signed-off-by: Sarthak Garg <sartgarg@codeaurora.org>
 ---
-
-
-This is the patch I alluded to when replying to "mmc: core: Fix recursive
-locking issue in CQE recovery path"
-
-
- drivers/mmc/core/queue.c | 3 +--
- 1 file changed, 1 insertion(+), 2 deletions(-)
+ drivers/mmc/core/queue.c | 13 ++++---------
+ 1 file changed, 4 insertions(+), 9 deletions(-)
 
 diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
-index 72bef39d7011..10ea67892b5f 100644
+index 25bee3d..b5fd3bc 100644
 --- a/drivers/mmc/core/queue.c
 +++ b/drivers/mmc/core/queue.c
-@@ -110,8 +110,7 @@ static enum blk_eh_timer_return mmc_cqe_timed_out(struct
-request *req)
- 				mmc_cqe_recovery_notifier(mrq);
+@@ -107,7 +107,7 @@ static enum blk_eh_timer_return mmc_cqe_timed_out(struct request *req)
+ 	case MMC_ISSUE_DCMD:
+ 		if (host->cqe_ops->cqe_timeout(host, mrq, &recovery_needed)) {
+ 			if (recovery_needed)
+-				__mmc_cqe_recovery_notifier(mq);
++				mmc_cqe_recovery_notifier(mrq);
  			return BLK_EH_RESET_TIMER;
  		}
--		/* No timeout (XXX: huh? comment doesn't make much sense) */
--		blk_mq_complete_request(req);
-+		/* The request has gone already */
- 		return BLK_EH_DONE;
- 	default:
- 		/* Timeout is handled by mmc core */
+ 		/* No timeout (XXX: huh? comment doesn't make much sense) */
+@@ -127,18 +127,13 @@ static enum blk_eh_timer_return mmc_mq_timed_out(struct request *req,
+ 	struct mmc_card *card = mq->card;
+ 	struct mmc_host *host = card->host;
+ 	unsigned long flags;
+-	int ret;
++	bool ignore_tout;
+ 
+ 	spin_lock_irqsave(&mq->lock, flags);
+-
+-	if (mq->recovery_needed || !mq->use_cqe || host->hsq_enabled)
+-		ret = BLK_EH_RESET_TIMER;
+-	else
+-		ret = mmc_cqe_timed_out(req);
+-
++	ignore_tout = mq->recovery_needed || !mq->use_cqe || host->hsq_enabled;
+ 	spin_unlock_irqrestore(&mq->lock, flags);
+ 
+-	return ret;
++	return ignore_tout ? BLK_EH_RESET_TIMER : mmc_cqe_timed_out(req);
+ }
+ 
+ static void mmc_mq_recovery_handler(struct work_struct *work)
 -- 
-2.17.1
-
+Qualcomm India Private Limited, on behalf of Qualcomm Innovation Center, Inc., is a member of Code Aurora Forum, a Linux Foundation Collaborative Project
