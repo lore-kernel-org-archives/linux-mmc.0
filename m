@@ -2,148 +2,182 @@ Return-Path: <SRS0=NqgV=6W=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E2316C47254
-	for <linux-mmc@archiver.kernel.org>; Fri,  8 May 2020 03:52:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CC9B6C4724C
+	for <linux-mmc@archiver.kernel.org>; Fri,  8 May 2020 05:06:37 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id BE37E2495C
-	for <linux-mmc@archiver.kernel.org>; Fri,  8 May 2020 03:52:59 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id AAC74208E4
+	for <linux-mmc@archiver.kernel.org>; Fri,  8 May 2020 05:06:37 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Ws3HSrFp"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="yOR+kZsO"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726907AbgEHDw6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 7 May 2020 23:52:58 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33240 "EHLO
+        id S1725897AbgEHFGH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 8 May 2020 01:06:07 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44564 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726618AbgEHDw6 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 7 May 2020 23:52:58 -0400
-Received: from mail-vs1-xe42.google.com (mail-vs1-xe42.google.com [IPv6:2607:f8b0:4864:20::e42])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8B994C05BD43
-        for <linux-mmc@vger.kernel.org>; Thu,  7 May 2020 20:52:56 -0700 (PDT)
-Received: by mail-vs1-xe42.google.com with SMTP id h30so284182vsr.5
-        for <linux-mmc@vger.kernel.org>; Thu, 07 May 2020 20:52:56 -0700 (PDT)
+        with ESMTP id S1725681AbgEHFGH (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 8 May 2020 01:06:07 -0400
+Received: from mail-ua1-x941.google.com (mail-ua1-x941.google.com [IPv6:2607:f8b0:4864:20::941])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EA7F9C05BD0A
+        for <linux-mmc@vger.kernel.org>; Thu,  7 May 2020 22:06:06 -0700 (PDT)
+Received: by mail-ua1-x941.google.com with SMTP id b6so206800uak.6
+        for <linux-mmc@vger.kernel.org>; Thu, 07 May 2020 22:06:06 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=AofEIL6YwXkUVr1SNl6pGav5cBT+5klZGSSb4tIGh2s=;
-        b=Ws3HSrFplgBdKEF0d6Ef/CDW5EwS0mXz/l1DIcB7Yh88VTMzo5MJ1/iiMYqJgvjIps
-         jZg+hxl63XPpkntjE6T09riZ2WW1K61v5WIqxg3xsIhYwQxmE9xabjYObXdDyEBG0BhN
-         8VAe1as355JZIKEi5T6z7jcGg7UCgngipOJMay+JgSZzBvvfdm/Y/HE6PGURFLejYcae
-         Qtj8iGyb6pngMMlDtfEwrZ0/7V8aPDpDm/HfLafQRWixtrEN1tg7Y1xjHAfOIXjAfH69
-         mCETeiAkyA5W7hcljWLKKIu1/rag+QSkJSJ+/oMXE9NhCaqWtxFh2DTEV+zJZmpiIx2X
-         Jxzw==
+        bh=GOyJCplE0htCyKO+7S6/vnX0Dv0M9OHzxvwXwcOQOP4=;
+        b=yOR+kZsOgcu3/Opchfd0y0C8bGMkBMGR0doFFK9FPvDPc7z8ErZvL7sKHTdw/qa/dz
+         vwQb7uq+1bBHAJitd7DHu33y1u5/2XWL6XeR7xIfarln2m0W5tyjJxIQtragP/eGPxSZ
+         QICFM4RGditudJKQTQrhmZJqvAMtj+Yli1q6nJY0g3+7l/ikFJYY48TWu6Mx7KHEHC/4
+         Ir622C0eVbJVEXEqtkrkjMVfd/sijw36iAinDFuIlOYVM2FNShq5zd9P1r0ydAMOBLn9
+         4G1Ez4KEljvtrT13T1s5DY74tCI1M7t50tW71tit6nh8LhN7AeyBuWfJIeLwQXONv5aQ
+         yQig==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=AofEIL6YwXkUVr1SNl6pGav5cBT+5klZGSSb4tIGh2s=;
-        b=OKMHbCqxynlw1KUurTwdECgtWP6ec4CvFz6KwTT+bXGMl8MGU5Zzm3jyETimQco5ff
-         tL5ybdelWxSjJfR1fZLFRMhl9k3PLW2JYZ41jc/E+kCdkJM9P2oXBQSUWMx+a13yutMh
-         Xk3N9ei+FeM4PWm91njT2zgujrXW0KX6HAnjfFwx5qZcDBFaxjtP6S9FCJ5eLwV7sfwj
-         v0gj11xc5U810Bb2U5oXMkBxEAF7ccJXj0FP+Efig0xXxl4pwKLSKEMnhvQXULB0BfNb
-         MTmjBYaK/JXgFTikZMGWSLJnt0LeCpmrwlIrkswN8kN7l5scXrU95EeFall2lb+t1ssZ
-         Msng==
-X-Gm-Message-State: AGi0PuYJuqTyEFg+icEepPEzfgDMvdmduN5iuAwh3W93AY5uS0OjPUu7
-        8a5K8fjZ8C7N4mBnNv5tRZsfvqwRXA2ViWe6c54tFg==
-X-Google-Smtp-Source: APiQypK0VwJrY4iB2MHXq8SKZlSKQAWMfhS/ZAicl7WYe0F28/ri1drVF8Qs2B+UBwYxgSQnt7BKpD8v0MZ88ZPq2H4=
-X-Received: by 2002:a67:302:: with SMTP id 2mr347325vsd.165.1588909975527;
- Thu, 07 May 2020 20:52:55 -0700 (PDT)
+        bh=GOyJCplE0htCyKO+7S6/vnX0Dv0M9OHzxvwXwcOQOP4=;
+        b=d4+pZZSGDfJOTUwpnQQwqAG2SllCbeitgavp648gKUXQQEfAY5xTWr9HbUPyNxaBUi
+         PfUgVFOSZqp3O0G/R8jXl2jJxfSSmjxJWr+/NOMJpwkUT4FSXCb4PczrkfufWWpiGabt
+         7sSHOOYnycvVeDImYIjdPAwp+hWvpHqjTi/ORMhABVI9QrsekaAILqKRYNk/Ig0Pl9Q/
+         XxJDIffMnzIYQrP70r8VyjC85iSw6+4mlieMA/G1ssadCXgYAyqLxl6GuMG//H3qL25I
+         A1D8gW3mbVFBFtWTP2yUCHMglhbyiPK12GnUOV9OahOk+1xEE2K3LLDamo0gUuAb5dF0
+         spMA==
+X-Gm-Message-State: AGi0Puamlpc1ilmWBXRPi0go0ya0QmFK0HfOQ6onUE4FHtI2iJredRz5
+        r6GIMPaQV4HNDsLqAxibNxXCKPXkxFwyRikDuE3rhA==
+X-Google-Smtp-Source: APiQypIV3sbG4ZSLW2R9RC7kszUeNGv4pTkPCpr++SJIgTpFreELrbQMO3vTo+toXhRCi6FYQeprQHSzN9Qws1pY5HQ=
+X-Received: by 2002:ab0:5ca:: with SMTP id e68mr505205uae.19.1588914365738;
+ Thu, 07 May 2020 22:06:05 -0700 (PDT)
 MIME-Version: 1.0
-References: <20200503222805.2668941-1-martin.blumenstingl@googlemail.com>
- <CAPDyKFrY0ApUCNL4gVHRc2FRcYaS0PKr_P4a18RUZHxcVceVWg@mail.gmail.com> <CAFBinCAhLiunUvw+BAHnv3XVmmU=Wxs1i=WLAAFL5=Hn0RPOvQ@mail.gmail.com>
-In-Reply-To: <CAFBinCAhLiunUvw+BAHnv3XVmmU=Wxs1i=WLAAFL5=Hn0RPOvQ@mail.gmail.com>
+References: <1588031768-23677-1-git-send-email-chun-hung.wu@mediatek.com>
+ <1588031768-23677-2-git-send-email-chun-hung.wu@mediatek.com>
+ <9bc2454f-0b42-e256-7927-2564b56f369f@codeaurora.org> <CAPDyKFq7ffHeWg-S41tLvScg_BXCUULig=G=EzD_to1TG0NhVg@mail.gmail.com>
+ <f9fa0232-3945-4e47-9238-0b51f6531199@codeaurora.org>
+In-Reply-To: <f9fa0232-3945-4e47-9238-0b51f6531199@codeaurora.org>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 8 May 2020 05:52:18 +0200
-Message-ID: <CAPDyKFqO8D-UUvq3Ebtnp73xfD_0kaWBq=75wvFL=4xbK5Zj-g@mail.gmail.com>
-Subject: Re: [PATCH] mmc: meson-mx-sdio: trigger a soft reset after a timeout
- or CRC error
-To:     Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Cc:     "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+Date:   Fri, 8 May 2020 07:05:29 +0200
+Message-ID: <CAPDyKFoAa3=Rg77Af7nNQOZN13m9NQYERosrqiK_kuL3s-YECA@mail.gmail.com>
+Subject: Re: [PATCH v5 1/5] mmc: core: Extend mmc_of_parse() to parse CQE bindings
+To:     Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
+        Chun-Hung Wu <chun-hung.wu@mediatek.com>
+Cc:     =?UTF-8?B?TWljaGHFgiBNaXJvc8WCYXc=?= <mirq-linux@rere.qmqm.pl>,
+        Jonathan Hunter <jonathanh@nvidia.com>,
+        Al Cooper <alcooperx@gmail.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Florian Fainelli <f.fainelli@gmail.com>,
+        BCM Kernel Feedback <bcm-kernel-feedback-list@broadcom.com>,
+        Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Michal Simek <michal.simek@xilinx.com>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        Rob Herring <robh+dt@kernel.org>,
+        Mark Rutland <mark.rutland@arm.com>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Pavel Machek <pavel@ucw.cz>,
+        Kate Stewart <kstewart@linuxfoundation.org>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+        Pan Bian <bianpan2016@163.com>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Allison Randal <allison@lohutok.net>,
+        Mathieu Malaterre <malat@debian.org>,
+        Stanley Chu <stanley.chu@mediatek.com>,
+        Kuohong Wang <kuohong.wang@mediatek.com>,
+        Yong Mao <yong.mao@mediatek.com>,
+        Android Kernel Team <kernel-team@android.com>,
         Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Tobias Baumann <017623705678@o2online.de>
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "moderated list:ARM/Mediatek SoC support" 
+        <linux-mediatek@lists.infradead.org>,
+        DTML <devicetree@vger.kernel.org>, wsd_upstream@mediatek.com,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
+        linux-tegra <linux-tegra@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 7 May 2020 at 23:14, Martin Blumenstingl
-<martin.blumenstingl@googlemail.com> wrote:
+On Thu, 7 May 2020 at 18:33, Veerabhadrarao Badiganti
+<vbadigan@codeaurora.org> wrote:
 >
-> Hi Ulf,
 >
-> On Thu, May 7, 2020 at 11:29 AM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On 5/6/2020 10:06 PM, Ulf Hansson wrote:
+> > On Wed, 6 May 2020 at 15:01, Veerabhadrarao Badiganti
+> > <vbadigan@codeaurora.org> wrote:
+> >>
+> >> On 4/28/2020 5:26 AM, Chun-Hung Wu wrote:
+> >>> Parse CQE bindings "supports-cqe" and "disable-cqe-dcmd"
+> >>> in mmc_of_parse().
+> >>>
+> >>> Signed-off-by: Chun-Hung Wu <chun-hung.wu@mediatek.com>
+> >>> ---
+> >>>    drivers/mmc/core/host.c | 5 +++++
+> >>>    1 file changed, 5 insertions(+)
+> >>>
+> >>> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+> >>> index c876872..47521c6 100644
+> >>> --- a/drivers/mmc/core/host.c
+> >>> +++ b/drivers/mmc/core/host.c
+> >>> @@ -302,6 +302,11 @@ int mmc_of_parse(struct mmc_host *host)
+> >>>                host->caps2 |= MMC_CAP2_NO_SD;
+> >>>        if (device_property_read_bool(dev, "no-mmc"))
+> >>>                host->caps2 |= MMC_CAP2_NO_MMC;
+> >>> +     if (device_property_read_bool(dev, "supports-cqe"))
+> >>> +             host->caps2 |= MMC_CAP2_CQE;
+> >> This change is breaking emmc driver on qcom platforms where this dt
+> >> property is defined.
+> >>
+> >> [    1.543453]  cqhci_deactivate+0xc/0x38
+> >> [    1.545627]  sdhci_msm_reset+0x40/0x58
+> >> [    1.549447]  sdhci_do_reset+0x48/0x7c
+> >> [    1.553180]  __sdhci_read_caps+0x7c/0x214
+> >> [    1.556913]  sdhci_setup_host+0x58/0xce8
+> >> [    1.560905]  sdhci_msm_probe+0x588/0x8a4
+> >> [    1.564900]  platform_drv_probe+0x4c/0xb0
+> >>
+> >> So, we cant have this flag defined before sdhci_setup_host().
+> >>
+> >> I will have to clear this cap and re-enable it in our initialization.
+> > Thanks for reporting! I have dropped all the four patches from
+> > Chun-Hung, so we can figure out how to fix this.
 > >
-> > On Mon, 4 May 2020 at 00:28, Martin Blumenstingl
-> > <martin.blumenstingl@googlemail.com> wrote:
-> > >
-> > > The vendor driver (from the 3.10 kernel) triggers a soft reset every
-> > > time before starting a new command. While this fixes a problem where
-> > > SDIO cards are not detected at all (because all commands simply
-> > > timed out) this hurts SD card read performance a bit (in my tests
-> > > between 10% to 20%).
-> > >
-> > > Trigger a soft reset after we got a CRC error or if the previous command
-> > > timed out (just like the vendor driver from the same 3.10 kernel for the
-> > > newer SDHC controller IP does). This fixes detection of SDIO cards and
-> > > doesn't hurt SD card read performance at the same time.
-> > >
-> > > With this patch the initialization of an RTL8723BS SDIO card looks like
-> > > this:
-> > >   req done (CMD52): -110: 00000000 00000000 00000000 00000000
-> > >   clock 400000Hz busmode 2 powermode 2 cs 1 Vdd 21 width 1 timing 0
-> > >   starting CMD0 arg 00000000 flags 000000c0
-> > >   req done (CMD0): 0: 00000000 00000000 00000000 00000000
-> > >   clock 400000Hz busmode 2 powermode 2 cs 0 Vdd 21 width 1 timing 0
-> > >   starting CMD8 arg 000001aa flags 000002f5
-> > >   req done (CMD8): -110: 00000000 00000000 00000000 00000000
-> > >   starting CMD5 arg 00000000 flags 000002e1
-> > >   req done (CMD5): 0: 90ff0000 00000000 00000000 00000000
-> > >   starting CMD5 arg 00200000 flags 000002e1
-> > >   req done (CMD5): 0: 90ff0000 00000000 00000000 00000000
-> > >   starting CMD3 arg 00000000 flags 00000075
-> > >   req done (CMD3): 0: 00010000 00000000 00000000 00000000
-> > >   starting CMD7 arg 00010000 flags 00000015
-> > >   req done (CMD7): 0: 00001e00 00000000 00000000 00000000
-> > >   starting CMD52 arg 00000000 flags 00000195
-> > >   req done (CMD52): 0: 00001032 00000000 00000000 00000000
-> > >   [... more CMD52 omitted ...]
-> > >   clock 400000Hz busmode 2 powermode 2 cs 0 Vdd 21 width 1 timing 2
-> > >   clock 50000000Hz busmode 2 powermode 2 cs 0 Vdd 21 width 1 timing 2
-> > >   starting CMD52 arg 00000e00 flags 00000195
-> > >   req done (CMD52): 0: 00001000 00000000 00000000 00000000
-> > >   starting CMD52 arg 80000e02 flags 00000195
-> > >   req done (CMD52): 0: 00001002 00000000 00000000 00000000
-> > >   clock 50000000Hz busmode 2 powermode 2 cs 0 Vdd 21 width 4 timing 2
-> > >   starting CMD52 arg 00020000 flags 00000195
-> > >   req done (CMD52): 0: 00001007 00000000 00000000 00000000
-> > >   [... more CMD52 omitted ...]
-> > >   new high speed SDIO card at address 0001
-> > >
-> > > Fixes: ed80a13bb4c4c9 ("mmc: meson-mx-sdio: Add a driver for the Amlogic Meson8 and Meson8b SoCs")
-> > > Signed-off-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-> > > ---
-> > > Ulf, I consider this non-critical because as long as the meson-mx-sdhc
-> > > driver is not merged we only have one MMC driver for these platforms.
-> > > I don't know anybody to prefer SDIO wifi over SD card access, so this
-> > > can go into -next (in my option at least).
-> > >
-> >
-> > Alright, applied for next, thanks!
-> thank you for taking this patch!
+> > Please help to review the next version of the series.
 >
-> I received a confirmation (off-list) saying that this patch works as it should.
-> Tobias was not Cc'ed on the original mail so he gave me to permission
-> (again, off-list - he's Cc'ed now) to add his:
-> Tested-by: Tobias Baumann <017623705678@o2online.de>
+> Thanks Ulf.
+>
+> Hi Chun-Hung,
+>
+> On qcom controller CQE also gets reset when SDHC is reset. So we have to
+> explicitly disable CQE
+> by invoking  cqhci_deactivate() during sdhc reset
+>
+> SDHC gets reset in sdhci_setup_host() even before cqe is initialized.
+> With MMC_CAP2_CQE_DCMD cap set even before sdhci_set_host(), we are
+> getting null pointer access with cqhci_deactivate().
+>
+> If CQE getting reset with SDHC reset is generic (applicable to other
+> controllers) then you have revisit your logic.
+> If its not the case then only qcom driver would get affected.
 
-I will add it next time I rebase my branch, probably on Monday, thanks!
+Thanks for clarifying the problem, much appreciated.
+
+To me, it looks like the DT parsing of the CQE properties are better
+suited to be managed by each sdhci variant, to continue to leave some
+room for flexibility.
+
+Chun-Hung, can you please drop patch 1 and patch2 from the series and
+adapt to this change in the mediatek variant?
+
+[...]
 
 Kind regards
 Uffe
