@@ -7,62 +7,62 @@ X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 92595C38A2A
-	for <linux-mmc@archiver.kernel.org>; Fri,  8 May 2020 09:52:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 98628C47247
+	for <linux-mmc@archiver.kernel.org>; Fri,  8 May 2020 09:52:36 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 71DDF20A8B
-	for <linux-mmc@archiver.kernel.org>; Fri,  8 May 2020 09:52:27 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 77FC8215A4
+	for <linux-mmc@archiver.kernel.org>; Fri,  8 May 2020 09:52:36 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="NMJTr4se"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="c7Msaojw"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726877AbgEHJw0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 8 May 2020 05:52:26 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:32960 "EHLO
+        id S1726612AbgEHJwf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 8 May 2020 05:52:35 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:32986 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725825AbgEHJwZ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 8 May 2020 05:52:25 -0400
+        with ESMTP id S1727071AbgEHJwe (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 8 May 2020 05:52:34 -0400
 Received: from mail-lj1-x244.google.com (mail-lj1-x244.google.com [IPv6:2a00:1450:4864:20::244])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8BAD2C05BD43
-        for <linux-mmc@vger.kernel.org>; Fri,  8 May 2020 02:52:24 -0700 (PDT)
-Received: by mail-lj1-x244.google.com with SMTP id u6so1018612ljl.6
-        for <linux-mmc@vger.kernel.org>; Fri, 08 May 2020 02:52:24 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8BCBCC05BD43
+        for <linux-mmc@vger.kernel.org>; Fri,  8 May 2020 02:52:34 -0700 (PDT)
+Received: by mail-lj1-x244.google.com with SMTP id u15so1033831ljd.3
+        for <linux-mmc@vger.kernel.org>; Fri, 08 May 2020 02:52:34 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=from:to:cc:subject:date:message-id:mime-version
          :content-transfer-encoding;
-        bh=oGYd9AQdlcl1pmEoCpIEqwK9BJV8M5Www8GEN3oe3Ig=;
-        b=NMJTr4seavNIw4MU48DBNqlL2h3DmB9iiou0clJEgkDlBHjlexF0pA4JwH2dtezgNj
-         qzN5yqpjoYCuEklNGZun92vnduKttdI8mQVj3zygoS4PsCBZfuddQxgJUriLuVnPSWG4
-         gOKf+WINBzHRjlC28YLZ+J5tnTeD4bTVTrolmIiLwbloDsAmjoJQ/DimqFjOLrARIGe/
-         qKhE13cy5BM32+8URt2LgIN69y14RjRB1evcfBPSHtBBf3fXUUqYxv8i0AYmywFPFqbt
-         Z0BfwYaX/LMeQ8dpNEvX5wf/sSFijmpkFM4/OV7GRED8Zx+fx9tTp0UcaS34EPBV5LQu
-         PWSg==
+        bh=4TJAm+9iRwtFh5TlrP2asksTQquFny7nfEfVBEpyuw8=;
+        b=c7Msaojwv00ZdbXSdNCabebkEe++MednrzhUl3DMwXQem1gVAmWmN6Q2nLJorbp0oo
+         AHJ7j0FrtapDVBhPj45nzqgECClW37RbnRtg1jTX/OcmzsmSEYoAEl+22drLA1L38h/F
+         V72ZlJLhZII3/g7z0QeCtuFNM5bpMBiJi8xXUabJ3YBsZPftogdGmZORQ0y4MCHkBqgt
+         0BbD6E9JThlpsClq+Jyy5nvZ267EmmiZG0NjkYb7w+2rmXVHEZ+A8gpIYbhGCIuwZWrG
+         qgesNSFmDk3tKa2qEGz174wyq8J1IDrzJ6ZfrvylCTxSzA02+39gPvP+SxHgutYYJ7ek
+         9p7Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
          :content-transfer-encoding;
-        bh=oGYd9AQdlcl1pmEoCpIEqwK9BJV8M5Www8GEN3oe3Ig=;
-        b=Kfj4RpKsgoqakSONx6lPiDtuPR+5W/N9ZtDpSIv2W+F0jeNWcQFtKwlz9afwUPrD3S
-         pVTQnbnVTGV6Uk/kinbZZ6cI1B19VcxMNF7ulxpzCDTUjYlAp6orMWpHM4QcYafEXkK2
-         pboc97xHPjeWdGAFcWGI6pum3WXv+WLZAOpSLtGnfx2JM4w8N9KE58oXbbru9uKPwU8F
-         L/kpVAs0Mj0eKKEkaa5YcXLd1CwB1NNyCnvkNjbXter6P2KQA/D02b2BmbwA6jrfll73
-         tV4Kd3JuINPJ5dGfX1kMy9ppTW8vfqDSb6XZ+D3PBpPkIBwBU4JAL6XYFzhWJ2DHpt5I
-         PB3g==
-X-Gm-Message-State: AOAM5333zItu2sLfRnc7hnwoQBOdOAjd5H6qUFCn7hMNIUYXjq6T2VSL
-        Y6lC7IHuyJpw3txk2KF9A4GtJHvPXT4=
-X-Google-Smtp-Source: ABdhPJwCCb++sgF0Td/juhrOMNNZRkLd9l8oaoFT7HL2UEXXsKf8Y5+u0M/vD6BBBablFsIbR883Cw==
-X-Received: by 2002:a2e:8017:: with SMTP id j23mr1094276ljg.22.1588931542491;
-        Fri, 08 May 2020 02:52:22 -0700 (PDT)
+        bh=4TJAm+9iRwtFh5TlrP2asksTQquFny7nfEfVBEpyuw8=;
+        b=G4xQMEOD5Apy7RlnRcZ0qgiynwpdBj7JyYXFuXw6KglIp3Gm5Mcurh1dAlJRgOEPM9
+         yfIXkTvBz5Uxq+/Fq+BiyhwyCFrTJreGjXzF//lxiMe2xpfLtzESI4W1g0xO4pMgKBtn
+         ocmuCKtlQC5dvYOaQZVx3Ks0eehe2vSg6qFj9dLWQYudXTncE3xgLytuIr7IARMiu2VJ
+         M/OhLuyZDyh5LH8CVI6apXUH2L5Rus/SWbFtveuI9GzX9EwzQ7cFTKrM7tRtb/e34oyd
+         VCVD5UntawYNDdVW5Hv626u5AqEBh/invqpc7H7zJqhysprsrlRPHemgXITCzre1ytok
+         u2uQ==
+X-Gm-Message-State: AOAM532G1epxlk88doB/Bd5zPf9WFQjUVHgoQHvMibBhxYj0LA5ral3N
+        IukFbfqVMzBOd8PWNozV5N+DVaN1dsY=
+X-Google-Smtp-Source: ABdhPJz4u10vEjx1Wn3f64pWzn2t909DNsFV/HrElxLnIrccwUZtWv9ihIG8S1A1PnzbPDg8o1x6QQ==
+X-Received: by 2002:a2e:9b0f:: with SMTP id u15mr1146568lji.272.1588931551949;
+        Fri, 08 May 2020 02:52:31 -0700 (PDT)
 Received: from localhost.localdomain (h-98-128-181-7.NA.cust.bahnhof.se. [98.128.181.7])
-        by smtp.gmail.com with ESMTPSA id j29sm902171lfp.90.2020.05.08.02.52.21
+        by smtp.gmail.com with ESMTPSA id t16sm882846lff.72.2020.05.08.02.52.30
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 08 May 2020 02:52:21 -0700 (PDT)
+        Fri, 08 May 2020 02:52:30 -0700 (PDT)
 From:   Ulf Hansson <ulf.hansson@linaro.org>
 To:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 Cc:     Sascha Sommer <saschasommer@freenet.de>
-Subject: [PATCH v2 13/19] mmc: sdricoh_cs: Throttle polling rate for commands
-Date:   Fri,  8 May 2020 11:52:18 +0200
-Message-Id: <20200508095218.14177-1-ulf.hansson@linaro.org>
+Subject: [PATCH v2 14/19] mmc: sdricoh_cs: Respect the cmd->busy_timeout from the mmc core
+Date:   Fri,  8 May 2020 11:52:28 +0200
+Message-Id: <20200508095228.14230-1-ulf.hansson@linaro.org>
 X-Mailer: git-send-email 2.20.1
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -71,89 +71,59 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Rather than to poll in a busy-loop, let's convert into using
-read_poll_timeout() and insert a small delay between each polling attempts.
-In particular, this avoids hogging the CPU.
+Using a fixed 1s polling timeout for all commands is a bit problematic.
 
-Additionally, to convert to read_poll_timeout() we also need to switch from
-using a specific number of polling attempts, into a specific timeout in us
-instead. The previous 100000 attempts, is translated into a total timeout
-of total 1s, as that seemed like reasonable value to pick.
+For some commands it means waiting longer than needed for the polling to be
+aborted, which may not a big issue, but still. For other commands, like for
+an erase (CMD38) that uses a R1B response, may require longer timeouts than
+1s. In these cases, we may end up treating the command as it failed, while
+it just needed some more time to complete successfully.
+
+Fix the problem by respecting the cmd->busy_timeout, which is provided by
+the mmc core.
+
+Note that, even if the sdricoh_cs driver may currently not support HW busy
+detection on DAT0, some comments in the code refer to that the HW may
+support it. Therefore, it seems better to be proactive in this case.
 
 Cc: Sascha Sommer <saschasommer@freenet.de>
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
 
 Changes in v2:
-	- Use read_poll_timeout() instead of readl_poll_timeout(), as to
-	preserve the debug print in sdricoh_readl().
+	- Rebased, no changes.
 
 ---
- drivers/mmc/host/sdricoh_cs.c | 33 ++++++++++++++++-----------------
- 1 file changed, 16 insertions(+), 17 deletions(-)
+ drivers/mmc/host/sdricoh_cs.c | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/mmc/host/sdricoh_cs.c b/drivers/mmc/host/sdricoh_cs.c
-index 8392158e2e9f..0594b5ffe151 100644
+index 0594b5ffe151..76a8cd3a186f 100644
 --- a/drivers/mmc/host/sdricoh_cs.c
 +++ b/drivers/mmc/host/sdricoh_cs.c
-@@ -59,7 +59,7 @@ static unsigned int switchlocked;
- #define STATUS_BUSY              0x40000000
+@@ -157,7 +157,7 @@ static int sdricoh_query_status(struct sdricoh_host *host, unsigned int wanted)
  
- /* timeouts */
--#define CMD_TIMEOUT       100000
-+#define SDRICOH_CMD_TIMEOUT_US	1000000
- #define SDRICOH_DATA_TIMEOUT_US	1000000
- 
- /* list of supported pcmcia devices */
-@@ -158,8 +158,7 @@ static int sdricoh_query_status(struct sdricoh_host *host, unsigned int wanted)
  static int sdricoh_mmc_cmd(struct sdricoh_host *host, struct mmc_command *cmd)
  {
- 	unsigned int status;
--	int result = 0;
--	unsigned int loop = 0;
-+	int ret;
+-	unsigned int status;
++	unsigned int status, timeout_us;
+ 	int ret;
  	unsigned char opcode = cmd->opcode;
  
- 	/* reset status reg? */
-@@ -175,24 +174,24 @@ static int sdricoh_mmc_cmd(struct sdricoh_host *host, struct mmc_command *cmd)
- 	/* fill parameters */
- 	sdricoh_writel(host, R204_CMD_ARG, cmd->arg);
- 	sdricoh_writel(host, R200_CMD, (0x10000 << 8) | opcode);
+@@ -179,9 +179,12 @@ static int sdricoh_mmc_cmd(struct sdricoh_host *host, struct mmc_command *cmd)
+ 	if (!opcode)
+ 		return 0;
+ 
++	timeout_us = cmd->busy_timeout ? cmd->busy_timeout * 1000 :
++		SDRICOH_CMD_TIMEOUT_US;
 +
- 	/* wait for command completion */
--	if (opcode) {
--		for (loop = 0; loop < CMD_TIMEOUT; loop++) {
--			status = sdricoh_readl(host, R21C_STATUS);
--			sdricoh_writel(host, R2E4_STATUS_RESP, status);
--			if (status  & STATUS_CMD_FINISHED)
--				break;
--		}
--		/* don't check for timeout in the loop it is not always
--		   reset correctly
--		*/
--		if (loop == CMD_TIMEOUT || status & STATUS_CMD_TIMEOUT)
--			result = -ETIMEDOUT;
-+	if (!opcode)
-+		return 0;
+ 	ret = read_poll_timeout(sdricoh_readl, status,
+ 			sdricoh_status_ok(host, status, STATUS_CMD_FINISHED),
+-			32, SDRICOH_CMD_TIMEOUT_US, false,
++			32, timeout_us, false,
+ 			host, R21C_STATUS);
  
--	}
-+	ret = read_poll_timeout(sdricoh_readl, status,
-+			sdricoh_status_ok(host, status, STATUS_CMD_FINISHED),
-+			32, SDRICOH_CMD_TIMEOUT_US, false,
-+			host, R21C_STATUS);
- 
--	return result;
-+	/*
-+	 * Don't check for timeout status in the loop, as it's not always reset
-+	 * correctly.
-+	 */
-+	if (ret || status & STATUS_CMD_TIMEOUT)
-+		return -ETIMEDOUT;
- 
-+	return 0;
- }
- 
- static int sdricoh_reset(struct sdricoh_host *host)
+ 	/*
 -- 
 2.20.1
 
