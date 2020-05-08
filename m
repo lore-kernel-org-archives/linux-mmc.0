@@ -2,49 +2,48 @@ Return-Path: <SRS0=NqgV=6W=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-2.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6766EC38A2A
-	for <linux-mmc@archiver.kernel.org>; Fri,  8 May 2020 21:47:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8CE8FC47255
+	for <linux-mmc@archiver.kernel.org>; Fri,  8 May 2020 22:19:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4439D21655
-	for <linux-mmc@archiver.kernel.org>; Fri,  8 May 2020 21:47:03 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="BYaACNZh"
+	by mail.kernel.org (Postfix) with ESMTP id 7371920731
+	for <linux-mmc@archiver.kernel.org>; Fri,  8 May 2020 22:19:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727095AbgEHVrC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 8 May 2020 17:47:02 -0400
-Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:45962 "EHLO
-        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1727778AbgEHVrB (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 8 May 2020 17:47:01 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1588974420;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=D2IduH1CF5NRPIpQWbLKTdLk97fqdqm/1QiS9bCgssc=;
-        b=BYaACNZhYUh99iR3p7ZXCfVknBiOQ/bs57BD/qT+kyCa8xAAGjgzt9HNWwS2g5hCZvSG3c
-        comQdY3QAX63R/H2MIMBZNCOBVpeylULumdbj2Egf32liKuXUhg1coJs3gQrIy1n3ui0ni
-        CY1yyezSsyRXL2WZ+kFOrpDWKVvHuVA=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-371-4mcOx4jwMjuckTDZW4qamQ-1; Fri, 08 May 2020 17:46:56 -0400
-X-MC-Unique: 4mcOx4jwMjuckTDZW4qamQ-1
-Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.phx2.redhat.com [10.5.11.11])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 6534E80183C;
-        Fri,  8 May 2020 21:46:54 +0000 (UTC)
-Received: from T590 (ovpn-8-16.pek2.redhat.com [10.72.8.16])
-        by smtp.corp.redhat.com (Postfix) with ESMTPS id 9E36C70467;
-        Fri,  8 May 2020 21:46:44 +0000 (UTC)
-Date:   Sat, 9 May 2020 05:46:39 +0800
-From:   Ming Lei <ming.lei@redhat.com>
-To:     Sagi Grimberg <sagi@grimberg.me>
+        id S1727828AbgEHWTu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 8 May 2020 18:19:50 -0400
+Received: from mail-pj1-f67.google.com ([209.85.216.67]:34454 "EHLO
+        mail-pj1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727082AbgEHWTt (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 8 May 2020 18:19:49 -0400
+Received: by mail-pj1-f67.google.com with SMTP id h12so5717752pjz.1;
+        Fri, 08 May 2020 15:19:49 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=agEiPPMNgwyK2BliOmzqFg2hxzKUzHpkr6vduFi84gQ=;
+        b=g009fLPX477tOlQmG7l4KRZh5Xah8g5B+/OID4YVwp9l4sl0JKY1w1QXORb6h9LIXc
+         we1Ls8BadeLgc8FTwgyWXFazXmXlDnmsWwQ62wyyxViWE6CnvIdalaOqaCzAx1Hd+05k
+         BGDHH+Qc+/8H+uFajj4pC3oizbPieoRxlft7KE2NBOL4w4ha1NY3Z2e/V6vyCrLAGfJh
+         1mX+/3sQuJngiGq3fHtUVF2U5dz+BvQid04+m+lzU0AC4wds/+1E4870KkqWDQupYKB1
+         0ES98w68POyEZBfZM6x+vXkycWNlAVozPfkpXfN/V8QFpF4XQn1m7lk73Nun+fqJhO9O
+         GrgA==
+X-Gm-Message-State: AGi0PuZ/o10RsWxwcPlYdjy58DZyPzq8IPkqZ5rtiU8WS+zpkw0Qjwhx
+        pt6GZg9OxdrhccVf1z0uTtU2jio7
+X-Google-Smtp-Source: APiQypJ8zZSznj1d26ER6zLx3yrkDj/sxZsgeiqPDzyEjy1E4wJ/TuYQ1jMjgC02OMGhy8Tw7rPAsA==
+X-Received: by 2002:a17:90a:730a:: with SMTP id m10mr8915600pjk.9.1588976388140;
+        Fri, 08 May 2020 15:19:48 -0700 (PDT)
+Received: from ?IPv6:2601:647:4802:9070:bc73:49fb:3114:443? ([2601:647:4802:9070:bc73:49fb:3114:443])
+        by smtp.gmail.com with ESMTPSA id a16sm2135918pgg.23.2020.05.08.15.19.46
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 08 May 2020 15:19:47 -0700 (PDT)
+Subject: Re: [RFC PATCH v2 1/7] block: Extand commit_rqs() to do batch
+ processing
+To:     Ming Lei <ming.lei@redhat.com>
 Cc:     Christoph Hellwig <hch@infradead.org>,
         Baolin Wang <baolin.wang7@gmail.com>, axboe@kernel.dk,
         ulf.hansson@linaro.org, adrian.hunter@intel.com, arnd@arndb.de,
@@ -52,65 +51,76 @@ Cc:     Christoph Hellwig <hch@infradead.org>,
         orsonzhai@gmail.com, zhang.lyra@gmail.com,
         linux-mmc@vger.kernel.org, linux-block@vger.kernel.org,
         linux-kernel@vger.kernel.org
-Subject: Re: [RFC PATCH v2 1/7] block: Extand commit_rqs() to do batch
- processing
-Message-ID: <20200508214639.GA1389136@T590>
 References: <cover.1587888520.git.baolin.wang7@gmail.com>
  <c8bd9e5ba815a3f1bc9dac0a4bc2fbadadbc0a43.1587888520.git.baolin.wang7@gmail.com>
  <20200427154645.GA1201@infradead.org>
  <e4d47000-f89c-a135-ae58-011f0e9cc39e@grimberg.me>
+ <20200508214639.GA1389136@T590>
+From:   Sagi Grimberg <sagi@grimberg.me>
+Message-ID: <fe6bd8b9-6ed9-b225-f80c-314746133722@grimberg.me>
+Date:   Fri, 8 May 2020 15:19:45 -0700
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Firefox/68.0 Thunderbird/68.7.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <e4d47000-f89c-a135-ae58-011f0e9cc39e@grimberg.me>
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.11
+In-Reply-To: <20200508214639.GA1389136@T590>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, May 08, 2020 at 02:35:35PM -0700, Sagi Grimberg wrote:
+Hey Ming,
+
+>> Would it make sense to elevate this flag to a request_queue flag
+>> (QUEUE_FLAG_ALWAYS_COMMIT)?
 > 
-> > > diff --git a/include/linux/blk-mq.h b/include/linux/blk-mq.h
-> > > index f389d7c724bd..6a20f8e8eb85 100644
-> > > --- a/include/linux/blk-mq.h
-> > > +++ b/include/linux/blk-mq.h
-> > > @@ -391,6 +391,7 @@ struct blk_mq_ops {
-> > >   enum {
-> > >   	BLK_MQ_F_SHOULD_MERGE	= 1 << 0,
-> > >   	BLK_MQ_F_TAG_SHARED	= 1 << 1,
-> > > +	BLK_MQ_F_FORCE_COMMIT_RQS = 1 << 3,
-> > 
-> > Maybe BLK_MQ_F_ALWAYS_COMMIT might be a better name?  Also this
-> > flag (just like the existing ones..) could really use a comment
-> > explaining it.
+> request queue flag usually is writable, however this case just needs
+> one read-only flag, so I think it may be better to make it as
+> tagset/hctx flag.
+
+I actually intended it to be writable.
+
+>> I'm thinking of a possibility that an I/O scheduler may be used
+>> to activate this functionality rather than having the driver set
+>> it necessarily...
 > 
-> Would it make sense to elevate this flag to a request_queue flag
-> (QUEUE_FLAG_ALWAYS_COMMIT)?
+> Could you explain a bit why I/O scheduler should activate this
+> functionality?
 
-request queue flag usually is writable, however this case just needs
-one read-only flag, so I think it may be better to make it as
-tagset/hctx flag.
+Sure, I've recently seen some academic work showing the benefits
+of batching in tcp/ip based block drivers. The problem with the
+approaches taken is that I/O scheduling is exercised deep down in the
+driver, which is not the direction I'd like to go if we are want
+to adopt some of the batching concepts.
 
-> 
-> I'm thinking of a possibility that an I/O scheduler may be used
-> to activate this functionality rather than having the driver set
-> it necessarily...
+I spent some (limited) time thinking about this, and it seems to
+me that there is an opportunity to implement this as a dedicated
+I/O scheduler, and tie it to driver specific LLD stack optimizations
+(net-stack for example) relying on the commit_rq/bd->last hints.
 
-Could you explain a bit why I/O scheduler should activate this
-functionality?
+When scanning the scheduler code, I noticed exactly the phenomenon that
+this patchset is attempting to solve and Christoph referred me to it.
+Now I'm thinking if we can extend this batching optimization for both
+use-cases.
 
-batching submission may be good for some drivers, and currently
-we only do it in limited way. One reason is that there is extra
-cost for full batching submission, such as this patch requires
-one extra .commit_rqs() for each dispatch, and lock is often needed
-in this callback.
+> batching submission may be good for some drivers, and currently
+> we only do it in limited way. One reason is that there is extra
+> cost for full batching submission, such as this patch requires
+> one extra .commit_rqs() for each dispatch, and lock is often needed
+> in this callback.
 
-IMO it can be a win for some slow driver or device, but may cause
-a little performance drop for fast driver/device especially in workload
-of not-batching submission.
+That is not necessarily the case at all.
 
+> IMO it can be a win for some slow driver or device, but may cause
+> a little performance drop for fast driver/device especially in workload
+> of not-batching submission.
 
-Thanks, 
-Ming
+You're mostly correct. This is exactly why an I/O scheduler may be
+applicable here IMO. Mostly because I/O schedulers tend to optimize for
+something specific and always present tradeoffs. Users need to
+understand what they are optimizing for.
 
+Hence I'd say this functionality can definitely be available to an I/O
+scheduler should one exist.
