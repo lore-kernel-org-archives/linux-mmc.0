@@ -2,116 +2,110 @@ Return-Path: <SRS0=NqgV=6W=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-0.8 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E8341C38A2A
-	for <linux-mmc@archiver.kernel.org>; Fri,  8 May 2020 18:53:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BF4F7C38A2A
+	for <linux-mmc@archiver.kernel.org>; Fri,  8 May 2020 20:31:31 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C64C8218AC
-	for <linux-mmc@archiver.kernel.org>; Fri,  8 May 2020 18:53:25 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9344D21775
+	for <linux-mmc@archiver.kernel.org>; Fri,  8 May 2020 20:31:31 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="m2Usgw6Z"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726767AbgEHSxZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 8 May 2020 14:53:25 -0400
-Received: from mga04.intel.com ([192.55.52.120]:45830 "EHLO mga04.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727083AbgEHSxZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 8 May 2020 14:53:25 -0400
-IronPort-SDR: t2NhjdtKD1C0ui0gvvbGc4l8+DP6coTvLiGfsadS+UsoHZftn4+Q9v7sKcpdIbvXNeHoyk9GCc
- Wjg2KeckmrwQ==
-X-Amp-Result: SKIPPED(no attachment in message)
-X-Amp-File-Uploaded: False
-Received: from fmsmga007.fm.intel.com ([10.253.24.52])
-  by fmsmga104.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 08 May 2020 11:53:25 -0700
-IronPort-SDR: zpYGNPvzGIadTMK2KjfsDTiMJipm2GatPIjTYYshXEV+5xjZqMyL7XO7CFkCxicC2VMo1rxd43
- dmXniXknVPeQ==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.73,368,1583222400"; 
-   d="scan'208";a="250546716"
-Received: from smile.fi.intel.com (HELO smile) ([10.237.68.40])
-  by fmsmga007.fm.intel.com with ESMTP; 08 May 2020 11:53:23 -0700
-Received: from andy by smile with local (Exim 4.93)
-        (envelope-from <andriy.shevchenko@linux.intel.com>)
-        id 1jX87i-005SnH-Et; Fri, 08 May 2020 21:53:26 +0300
-Date:   Fri, 8 May 2020 21:53:26 +0300
-From:   Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-To:     Raul Rangel <rrangel@chromium.org>
+        id S1726885AbgEHUbb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 8 May 2020 16:31:31 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48144 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-FAIL-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1726843AbgEHUba (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 8 May 2020 16:31:30 -0400
+Received: from mail-ed1-x542.google.com (mail-ed1-x542.google.com [IPv6:2a00:1450:4864:20::542])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3E669C061A0C
+        for <linux-mmc@vger.kernel.org>; Fri,  8 May 2020 13:31:30 -0700 (PDT)
+Received: by mail-ed1-x542.google.com with SMTP id f12so2328943edn.12
+        for <linux-mmc@vger.kernel.org>; Fri, 08 May 2020 13:31:30 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=chromium.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=GYXYNWrnw0dScJyw6USP6AxBibv0CM9pdguCkRq4Xcs=;
+        b=m2Usgw6ZygeRrGoiBrwRMuZLF4uIxyh8A2N2kY0wxhR69ClIkkQp3tuvVeNf0O+Okt
+         zeUqvCBpstXULKNFI+L6OHr0HdZG5VPpxE4n+U2HyE78lAO26L+vKRAtgD6WJvPMtDgE
+         SKoBwCUV6aIGHKNv3lMtfbKXve3XLzTye11Ys=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=GYXYNWrnw0dScJyw6USP6AxBibv0CM9pdguCkRq4Xcs=;
+        b=I82jP3nox/3EatWBIJyCDVrdCgjTMYGvzwpuDzrx6IIY3f1IAlrg8/W8n3Ppt81aMB
+         sOZF/23kdmGG+EfbBQoTmVh6K4DeGuHJMO0kUwjsRGlqYbZThu1sRcw64D73zxkvfVy3
+         +PF+B5Zj5Zsq5kbvFw8x/MIXwxOGB6QiA5lIV4faFoB8AZwGK09N+Wsfz5ciazVj2bvt
+         OWwRHZIelU19viQD8CMiGIxGGDCHRFOCaBwJHF57hOgtOetEZy8YF6fTtlY5D5GIrFiW
+         sRs/i3KO2TNEh54zBV65XJptjxtz48Ia9VG/9aEX4r/sa4UGhrUiM+c2VmR6h8uo90q9
+         mA7Q==
+X-Gm-Message-State: AGi0Pubx/jA6MEHYaOWYKSSE5eiytzr7YN4NSfihRbF3+E6joKhiZJbh
+        CsBCqRXCUAd4QBnWsi0VC8asLq5sRbQ=
+X-Google-Smtp-Source: APiQypKhvQzfSCF1D1EoVNaoi0D8lt4+iWH0BhVFI+VJIUMNktpZizKjDBg/wFENbOYBaIGtbK7jaw==
+X-Received: by 2002:a50:9e6a:: with SMTP id z97mr3602854ede.375.1588969887350;
+        Fri, 08 May 2020 13:31:27 -0700 (PDT)
+Received: from mail-ed1-f52.google.com (mail-ed1-f52.google.com. [209.85.208.52])
+        by smtp.gmail.com with ESMTPSA id sb17sm269214ejb.75.2020.05.08.13.31.26
+        for <linux-mmc@vger.kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 08 May 2020 13:31:26 -0700 (PDT)
+Received: by mail-ed1-f52.google.com with SMTP id l3so2331686edq.13
+        for <linux-mmc@vger.kernel.org>; Fri, 08 May 2020 13:31:26 -0700 (PDT)
+X-Received: by 2002:a05:6402:1587:: with SMTP id c7mr3579723edv.61.1588969886000;
+ Fri, 08 May 2020 13:31:26 -0700 (PDT)
+MIME-Version: 1.0
+References: <CAHQZ30CXW7W6Wv12u45Mpn4+_oQhcR=_hpu-gOv8PqvajnLC4Q@mail.gmail.com>
+ <20200508152236.GQ8135@suse.de> <CAHQZ30BkdaiTfCY0XsgTQW3g1n_BQoRtNnj0L4-EVAG1HZonUQ@mail.gmail.com>
+ <CAHQZ30CHSYYZS8TBrKXw_QTEUk+Afbazwko34fdjyi0+Xm+OHw@mail.gmail.com> <20200508185326.GN185537@smile.fi.intel.com>
+In-Reply-To: <20200508185326.GN185537@smile.fi.intel.com>
+From:   Raul Rangel <rrangel@chromium.org>
+Date:   Fri, 8 May 2020 14:31:14 -0600
+X-Gmail-Original-Message-ID: <CAHQZ30Cr=HgUN3uEe4J1GmpN1dUZw7uGKyMheYCWQ=J1_1TUSw@mail.gmail.com>
+Message-ID: <CAHQZ30Cr=HgUN3uEe4J1GmpN1dUZw7uGKyMheYCWQ=J1_1TUSw@mail.gmail.com>
+Subject: Re: Problems using AMD eMMC with AMD IOMMU
+To:     Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 Cc:     Joerg Roedel <jroedel@suse.de>, linux-mmc@vger.kernel.org,
         Tom Murphy <murphyt7@tcd.ie>,
         Douglas Anderson <dianders@chromium.org>, evgreen@chromium.org,
         Daniel Kurtz <djkurtz@chromium.org>
-Subject: Re: Problems using AMD eMMC with AMD IOMMU
-Message-ID: <20200508185326.GN185537@smile.fi.intel.com>
-References: <CAHQZ30CXW7W6Wv12u45Mpn4+_oQhcR=_hpu-gOv8PqvajnLC4Q@mail.gmail.com>
- <20200508152236.GQ8135@suse.de>
- <CAHQZ30BkdaiTfCY0XsgTQW3g1n_BQoRtNnj0L4-EVAG1HZonUQ@mail.gmail.com>
- <CAHQZ30CHSYYZS8TBrKXw_QTEUk+Afbazwko34fdjyi0+Xm+OHw@mail.gmail.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAHQZ30CHSYYZS8TBrKXw_QTEUk+Afbazwko34fdjyi0+Xm+OHw@mail.gmail.com>
-Organization: Intel Finland Oy - BIC 0357606-4 - Westendinkatu 7, 02160 Espoo
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, May 08, 2020 at 10:59:37AM -0600, Raul Rangel wrote:
-> It looks like the ACPI matching logic was changed.
-> 
-> With ToT we get:
-> ```
-> [   13.099631] platform AMDI0040:00: AMD-Vi: get_acpihid_device_id:
-> Checking ACPI HID Map.
-> [   13.108542] platform AMDI0040:00: AMD-Vi: get_acpihid_device_id:
-> p->hid: AMDI0040, p->uid: .
-> [   13.117936] platform AMDI0040:00: AMD-Vi: get_acpihid_device_id: No match!
-> ```
-> 
-> If I revert [iommu/amd: Switch to use
-> acpi_dev_hid_uid_match()](https://github.com/torvalds/linux/commit/ae5e6c6439c3d0ac8e9c71523790ba1ff6887894)
-> the matching works.
+> It seems the _UID() in case of matching is present and not empty ("0" vs. "").
+> The question is why we have no UID is not there?
 
-Thank you for report.
+Looking at the IOMMU IVRS spec:
+```
+Unique ID Format
+0= UID not present
+1= UID is an integer
+2= UID is a character string
+```
 
-It seems the _UID() in case of matching is present and not empty ("0" vs. "").
-The question is why we have no UID is not there?
+So it's optional. I added a bit of logging here:
+https://source.chromium.org/chromiumos/chromiumos/codesearch/+/master:src/third_party/kernel/v5.4/drivers/iommu/amd_iommu_init.c;l=1353
 
-I will look at it later.
+```
+[   11.730159] AMD-Vi: UID is not present.
+[   11.734422] AMD-Vi:   DEV_ACPI_HID(AMDI0040[])               devid: 00:13.1
+[   11.740913] AMD-Vi: ivrs, add hid:AMDI0040, uid:, rdevid:152
+```
 
-The quick fix looks like
+> The quick fix looks like
+>
+> -               if (acpi_dev_hid_uid_match(adev, p->hid, p->uid)) {
+> +               if (acpi_dev_hid_uid_match(adev, p->hid, *p->uid ? p->uid : NULL)) {
+>
+> Can you test it?
+>
 
--		if (acpi_dev_hid_uid_match(adev, p->hid, p->uid)) {
-+		if (acpi_dev_hid_uid_match(adev, p->hid, *p->uid ? p->uid : NULL)) {
-
-Can you test it?
-
-> ```
-> [   13.275305] platform AMDI0040:00: AMD-Vi: get_acpihid_device_id:
-> Checking ACPI HID Map.
-> [   13.284216] platform AMDI0040:00: AMD-Vi: get_acpihid_device_id:
-> p->hid: AMDI0040, p->uid: .
-> [   13.293610] platform AMDI0040:00: AMD-Vi: match_hid_uid: dev->hid:
-> AMDI0040, dev->uid: 0.
-> [   13.302715] platform AMDI0040:00: AMD-Vi: get_acpihid_device_id: Found match!
-> ```
-> 
-> We can see the device is now associated with a group:
-> 
-> ```
-> # find /sys/ -iname iommu
-> /sys/devices/platform/AMDI0040:00/iommu
-> ```
-> 
-> ```
-> # cat /sys/devices/platform/AMDI0040\:00/iommu_group/reserved_regions
-> 0x00000000fee00000 0x00000000feefffff msi
-> 0x000000fd00000000 0x000000ffffffffff reserved
-> ```
-
--- 
-With Best Regards,
-Andy Shevchenko
-
-
+Your patch works and fixes the matching. Thanks!
