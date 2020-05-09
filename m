@@ -2,107 +2,85 @@ Return-Path: <SRS0=X1IY=6X=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-1.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 47EDAC28CBC
-	for <linux-mmc@archiver.kernel.org>; Sat,  9 May 2020 11:26:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E34B5C28CBC
+	for <linux-mmc@archiver.kernel.org>; Sat,  9 May 2020 12:30:54 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2AB8B20A8B
-	for <linux-mmc@archiver.kernel.org>; Sat,  9 May 2020 11:26:20 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B917024958
+	for <linux-mmc@archiver.kernel.org>; Sat,  9 May 2020 12:30:54 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1589027454;
+	bh=seKJQxzEC9BDEm3+SirKDq/bgsaFHJesV2opJ9ejC1U=;
+	h=Date:From:To:To:To:To:Cc:Cc:Subject:In-Reply-To:References:
+	 List-ID:From;
+	b=K5IW7VB84Uuy8mdPK6Nju/8dlnDid2GurE6Jkd8q5FHg0ws4lrTECnObGPrAnkFvE
+	 eIKP+ZpxDK+EI3MJugFiinT/MKMCM3ZpSFtR4oX7IvCGn/iZc2b6gCgu8MzlHoGKcS
+	 qd/jjHiCgXPUcy3HMTwSQnyCcUPMZvleAAkEq/h8=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727820AbgEIL0T (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 9 May 2020 07:26:19 -0400
-Received: from mga12.intel.com ([192.55.52.136]:17673 "EHLO mga12.intel.com"
+        id S1728519AbgEIMax (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 9 May 2020 08:30:53 -0400
+Received: from mail.kernel.org ([198.145.29.99]:60248 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726600AbgEIL0T (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Sat, 9 May 2020 07:26:19 -0400
-IronPort-SDR: 9QtHlhUUo9/daZyv5ee5D114c8JYB9FggUKx7xkrnWEVYYXbUmdbyVmo8cQnpNPiml56Skk18r
- E0BBvq3nKhUw==
-X-Amp-Result: SKIPPED(no attachment in message)
-X-Amp-File-Uploaded: False
-Received: from orsmga006.jf.intel.com ([10.7.209.51])
-  by fmsmga106.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 May 2020 04:26:19 -0700
-IronPort-SDR: HKfzTQaPvRqLKCqudCd2lgZ/PweXKX8hSfKloSuKI+hUhI+5jFEd/k4l/PUhAu9/8nxpilruT8
- w+KyqFvC/ATw==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.73,371,1583222400"; 
-   d="scan'208";a="264656512"
-Received: from smile.fi.intel.com (HELO smile) ([10.237.68.40])
-  by orsmga006.jf.intel.com with ESMTP; 09 May 2020 04:26:16 -0700
-Received: from andy by smile with local (Exim 4.93)
-        (envelope-from <andriy.shevchenko@linux.intel.com>)
-        id 1jXNcZ-005aYr-Dx; Sat, 09 May 2020 14:26:19 +0300
-Date:   Sat, 9 May 2020 14:26:19 +0300
-From:   Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-To:     Raul E Rangel <rrangel@chromium.org>
-Cc:     Nehal-bakulchandra Shah <Nehal-bakulchandra.Shah@amd.com>,
-        linux-mmc@vger.kernel.org, evgreen@chromium.org,
-        Joerg Roedel <jroedel@suse.de>,
-        Daniel Kurtz <djkurtz@chromium.org>, dianders@chromium.org,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        linux-kernel@vger.kernel.org
-Subject: Re: [PATCH] mmc: sdhci-acpi: Add SDHCI_QUIRK2_BROKEN_64_BIT_DMA for
- AMDI0040
-Message-ID: <20200509112619.GC185537@smile.fi.intel.com>
-References: <20200508165344.1.Id5bb8b1ae7ea576f26f9d91c761df7ccffbf58c5@changeid>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20200508165344.1.Id5bb8b1ae7ea576f26f9d91c761df7ccffbf58c5@changeid>
-Organization: Intel Finland Oy - BIC 0357606-4 - Westendinkatu 7, 02160 Espoo
+        id S1728388AbgEIMaw (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Sat, 9 May 2020 08:30:52 -0400
+Received: from localhost (unknown [137.135.114.1])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id 6142521775;
+        Sat,  9 May 2020 12:30:52 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1589027452;
+        bh=seKJQxzEC9BDEm3+SirKDq/bgsaFHJesV2opJ9ejC1U=;
+        h=Date:From:To:To:To:To:Cc:Cc:Subject:In-Reply-To:References:From;
+        b=fsKNPdfTG+ts8xWAfIz8zsVV+/2EwcxkOhQBV5dYzu1ngXu43qbR3aJ+KciVKUCU2
+         v8Sy/YBXMkesNCALXdA6Ji0JRf7caOl6xxkJON7Ha+YrtQV1vjPMJwnWI095ViZaOC
+         1SxR4pdwZSOlPKxogl3II1y++2m6PB+7PtanGUIc=
+Date:   Sat, 09 May 2020 12:30:51 +0000
+From:   Sasha Levin <sashal@kernel.org>
+To:     Sasha Levin <sashal@kernel.org>
+To:     Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+To:     Sarthak Garg <sartgarg@codeaurora.org>
+To:     adrian.hunter@intel.com, ulf.hansson@linaro.org
+Cc:     stummala@codeaurora.org, linux-mmc@vger.kernel.org
+Cc:     stable@vger.kernel.org
+Subject: Re: [PATCH V1 2/2] mmc: core: Fix recursive locking issue in CQE recovery path
+In-Reply-To: <1588775643-18037-3-git-send-email-vbadigan@codeaurora.org>
+References: <1588775643-18037-3-git-send-email-vbadigan@codeaurora.org>
+Message-Id: <20200509123052.6142521775@mail.kernel.org>
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, May 08, 2020 at 04:54:21PM -0600, Raul E Rangel wrote:
-> The AMD eMMC 5.0 controller does not support 64 bit DMA.
-> 
-> See the discussion here: https://marc.info/?l=linux-mmc&m=158879884514552&w=2
+Hi
 
-Link: ...
+[This is an automated email]
 
-FWIW,
-Reviewed-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+This commit has been processed because it contains a -stable tag.
+The stable tag indicates that it's relevant for the following trees: 4.19+
 
-> 
-> Fixes: 34597a3f60b1 ("mmc: sdhci-acpi: Add support for ACPI HID of AMD Controller with HS400")
-> Signed-off-by: Raul E Rangel <rrangel@chromium.org>
-> ---
-> 
->  drivers/mmc/host/sdhci-acpi.c | 10 ++++++----
->  1 file changed, 6 insertions(+), 4 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-> index faba53cf139b..d8b76cb8698a 100644
-> --- a/drivers/mmc/host/sdhci-acpi.c
-> +++ b/drivers/mmc/host/sdhci-acpi.c
-> @@ -605,10 +605,12 @@ static int sdhci_acpi_emmc_amd_probe_slot(struct platform_device *pdev,
->  }
->  
->  static const struct sdhci_acpi_slot sdhci_acpi_slot_amd_emmc = {
-> -	.chip   = &sdhci_acpi_chip_amd,
-> -	.caps   = MMC_CAP_8_BIT_DATA | MMC_CAP_NONREMOVABLE,
-> -	.quirks = SDHCI_QUIRK_32BIT_DMA_ADDR | SDHCI_QUIRK_32BIT_DMA_SIZE |
-> -			SDHCI_QUIRK_32BIT_ADMA_SIZE,
-> +	.chip		= &sdhci_acpi_chip_amd,
-> +	.caps		= MMC_CAP_8_BIT_DATA | MMC_CAP_NONREMOVABLE,
-> +	.quirks		= SDHCI_QUIRK_32BIT_DMA_ADDR |
-> +			  SDHCI_QUIRK_32BIT_DMA_SIZE |
-> +			  SDHCI_QUIRK_32BIT_ADMA_SIZE,
-> +	.quirks2	= SDHCI_QUIRK2_BROKEN_64_BIT_DMA,
->  	.probe_slot     = sdhci_acpi_emmc_amd_probe_slot,
->  };
->  
-> -- 
-> 2.26.2.645.ge9eca65c58-goog
-> 
+The bot has tested the following trees: v5.6.11, v5.4.39, v4.19.121.
+
+v5.6.11: Failed to apply! Possible dependencies:
+    511ce378e16f ("mmc: Add MMC host software queue support")
+
+v5.4.39: Failed to apply! Possible dependencies:
+    511ce378e16f ("mmc: Add MMC host software queue support")
+
+v4.19.121: Failed to apply! Possible dependencies:
+    310df020cdd7 ("mmc: stop abusing the request queue_lock pointer")
+    511ce378e16f ("mmc: Add MMC host software queue support")
+    b061b326287d ("mmc: simplify queue initialization")
+    f5d72c5c55bc ("mmc: stop abusing the request queue_lock pointer")
+
+
+NOTE: The patch will not be queued to stable trees until it is upstream.
+
+How should we proceed with this patch?
 
 -- 
-With Best Regards,
-Andy Shevchenko
-
-
+Thanks
+Sasha
