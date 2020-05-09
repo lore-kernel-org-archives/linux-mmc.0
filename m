@@ -1,149 +1,168 @@
-Return-Path: <SRS0=NqgV=6W=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=X1IY=6X=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-0.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 619AFC47247
-	for <linux-mmc@archiver.kernel.org>; Fri,  8 May 2020 23:22:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 95A3CC47254
+	for <linux-mmc@archiver.kernel.org>; Sat,  9 May 2020 08:58:06 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4054224953
-	for <linux-mmc@archiver.kernel.org>; Fri,  8 May 2020 23:22:53 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 74A9D24957
+	for <linux-mmc@archiver.kernel.org>; Sat,  9 May 2020 08:58:06 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="YPxuMMDs"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="IvJi5Oqf"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728140AbgEHXWt (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 8 May 2020 19:22:49 -0400
-Received: from us-smtp-delivery-1.mimecast.com ([205.139.110.120]:45727 "EHLO
-        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1727983AbgEHXWq (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 8 May 2020 19:22:46 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1588980164;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=KpHdTC3gwhEr9wVRJUc1Ku1W95y0jfMFFIn5VnQTYpQ=;
-        b=YPxuMMDsjXhCkVZryFRIl7UNncb3uBLTFL+/EhRXm5yhMAG4Wb49ExIng+KqeglakidsQ5
-        6lGYe0hQw/D7xfpNipetBLXSDULj4LtJneofwHNWm/0YuVSQvVMJvT2AgSgXBb/iT73+As
-        d38kixAyDokOoXKevoIOfu7liPk0Ptw=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-412-C6J1zO2PN5WKjnTJY3LGGw-1; Fri, 08 May 2020 19:22:40 -0400
-X-MC-Unique: C6J1zO2PN5WKjnTJY3LGGw-1
-Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 38A09800687;
-        Fri,  8 May 2020 23:22:38 +0000 (UTC)
-Received: from T590 (ovpn-8-16.pek2.redhat.com [10.72.8.16])
-        by smtp.corp.redhat.com (Postfix) with ESMTPS id 5BCD41C8;
-        Fri,  8 May 2020 23:22:27 +0000 (UTC)
-Date:   Sat, 9 May 2020 07:22:22 +0800
-From:   Ming Lei <ming.lei@redhat.com>
-To:     Sagi Grimberg <sagi@grimberg.me>
-Cc:     Christoph Hellwig <hch@infradead.org>,
-        Baolin Wang <baolin.wang7@gmail.com>, axboe@kernel.dk,
-        ulf.hansson@linaro.org, adrian.hunter@intel.com, arnd@arndb.de,
-        linus.walleij@linaro.org, paolo.valente@linaro.org,
-        orsonzhai@gmail.com, zhang.lyra@gmail.com,
-        linux-mmc@vger.kernel.org, linux-block@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Subject: Re: [RFC PATCH v2 1/7] block: Extand commit_rqs() to do batch
- processing
-Message-ID: <20200508232222.GA1391368@T590>
-References: <cover.1587888520.git.baolin.wang7@gmail.com>
- <c8bd9e5ba815a3f1bc9dac0a4bc2fbadadbc0a43.1587888520.git.baolin.wang7@gmail.com>
- <20200427154645.GA1201@infradead.org>
- <e4d47000-f89c-a135-ae58-011f0e9cc39e@grimberg.me>
- <20200508214639.GA1389136@T590>
- <fe6bd8b9-6ed9-b225-f80c-314746133722@grimberg.me>
+        id S1726885AbgEII6D (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 9 May 2020 04:58:03 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51106 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-FAIL-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1725989AbgEII6D (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 9 May 2020 04:58:03 -0400
+Received: from mail-lj1-x244.google.com (mail-lj1-x244.google.com [IPv6:2a00:1450:4864:20::244])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6C65AC061A0C;
+        Sat,  9 May 2020 01:58:01 -0700 (PDT)
+Received: by mail-lj1-x244.google.com with SMTP id a21so4157685ljb.9;
+        Sat, 09 May 2020 01:58:01 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=6sBoYn3WeTZFCcqj57bcpCNR9WzBcjBDg78zlrXn2Bo=;
+        b=IvJi5OqftthYrAXQhCGJSEsNr2Ugk0p4lQGhUpMXBi99TyDjBaGPGU98kHtcygIgoM
+         dl7DoUhZYDjjoo87SDHBuPdevJlXBve6Oha7wQhCl6jYtbCM9UE4PSu5hV31mzRsSahr
+         wZLitRfkJMNIvWhTpo4PgkNHNQlioQYMslFX9wyHmSQJOAGx14vlZt3mu0MN/rl9nKqB
+         LtllpntMrN72NK9ou1yLBxOk7PovAncUkEPgztLCKA72CRBehtj6TjqznyxZ1s4vKPlo
+         VYrRD4vlhkowpqWcqeQ2wvZWrnBjVbZvy153zB4K8b+b+cYWX9DQzaiooNv3jWd+5ApN
+         a4pg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=6sBoYn3WeTZFCcqj57bcpCNR9WzBcjBDg78zlrXn2Bo=;
+        b=Z2HdyHLUexIeF46kIOIvH8nSiNWx6u1bznKgjg7v4Qb1r+iCnGMaeG3Qs39PB/cAsN
+         wgv8yHW2X+s/vd8C50QfHc5APz6nYPFzyWPDu9mUu0CVGK2NgN4anfP80+j0+hT/pxAh
+         MD5riivrw60279ShzSnqVET6Mgzi2BIHTvrJvZ2j02IxdiJdoDoI08SEzBK4F9BIBWnI
+         LZNq4E+EOJKZW///KMfgeEol5tzVWPA53dDeVx6hkJSQu0WFkBmun1Zaj/8kNCR+6kKU
+         ZX/dWNIjsqKB62NL59TPNe8fZaV8qXSOKrbEz+vNHJ/iNtAUbEva0W3SZZiRpvZKp7DC
+         29zA==
+X-Gm-Message-State: AOAM533XrzV8Nu4NUp+SKO2xsRiIC6+/oESGso3yeZGtJmuLwS41Z7pw
+        we9TuYNhI6aHUuM8myf395RYJyxx8o+m6coTfdg=
+X-Google-Smtp-Source: ABdhPJyRTtqcpC3jRUEkt6dyiDw0ymbF4WnirRlZbb3xJW+dnVzaS2G2GlylUAI5l/EqveHhvpmoQIn3N+E4jEcdptg=
+X-Received: by 2002:a2e:6c08:: with SMTP id h8mr4048684ljc.48.1589014679642;
+ Sat, 09 May 2020 01:57:59 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <fe6bd8b9-6ed9-b225-f80c-314746133722@grimberg.me>
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.13
+References: <cover.1587888520.git.baolin.wang7@gmail.com> <c8bd9e5ba815a3f1bc9dac0a4bc2fbadadbc0a43.1587888520.git.baolin.wang7@gmail.com>
+ <20200427154645.GA1201@infradead.org> <e4d47000-f89c-a135-ae58-011f0e9cc39e@grimberg.me>
+ <20200508214639.GA1389136@T590> <fe6bd8b9-6ed9-b225-f80c-314746133722@grimberg.me>
+ <20200508232222.GA1391368@T590>
+In-Reply-To: <20200508232222.GA1391368@T590>
+From:   Baolin Wang <baolin.wang7@gmail.com>
+Date:   Sat, 9 May 2020 16:57:48 +0800
+Message-ID: <CADBw62ooysT7TJ5CjpPBC6zs7pvpUQysg8QqP9oW5jN7BSYS7g@mail.gmail.com>
+Subject: Re: [RFC PATCH v2 1/7] block: Extand commit_rqs() to do batch processing
+To:     Ming Lei <ming.lei@redhat.com>
+Cc:     Sagi Grimberg <sagi@grimberg.me>,
+        Christoph Hellwig <hch@infradead.org>, axboe@kernel.dk,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Arnd Bergmann <arnd@arndb.de>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Paolo Valente <paolo.valente@linaro.org>,
+        Orson Zhai <orsonzhai@gmail.com>,
+        Chunyan Zhang <zhang.lyra@gmail.com>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        linux-block <linux-block@vger.kernel.org>,
+        LKML <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Sagi,
+On Sat, May 9, 2020 at 7:22 AM Ming Lei <ming.lei@redhat.com> wrote:
+>
+> Hi Sagi,
+>
+> On Fri, May 08, 2020 at 03:19:45PM -0700, Sagi Grimberg wrote:
+> > Hey Ming,
+> >
+> > > > Would it make sense to elevate this flag to a request_queue flag
+> > > > (QUEUE_FLAG_ALWAYS_COMMIT)?
+> > >
+> > > request queue flag usually is writable, however this case just needs
+> > > one read-only flag, so I think it may be better to make it as
+> > > tagset/hctx flag.
+> >
+> > I actually intended it to be writable.
+> >
+> > > > I'm thinking of a possibility that an I/O scheduler may be used
+> > > > to activate this functionality rather than having the driver set
+> > > > it necessarily...
+> > >
+> > > Could you explain a bit why I/O scheduler should activate this
+> > > functionality?
+> >
+> > Sure, I've recently seen some academic work showing the benefits
+> > of batching in tcp/ip based block drivers. The problem with the
+> > approaches taken is that I/O scheduling is exercised deep down in the
+> > driver, which is not the direction I'd like to go if we are want
+> > to adopt some of the batching concepts.
+> >
+> > I spent some (limited) time thinking about this, and it seems to
+> > me that there is an opportunity to implement this as a dedicated
+> > I/O scheduler, and tie it to driver specific LLD stack optimizations
+> > (net-stack for example) relying on the commit_rq/bd->last hints.
+> >
+> > When scanning the scheduler code, I noticed exactly the phenomenon that
+> > this patchset is attempting to solve and Christoph referred me to it.
+> > Now I'm thinking if we can extend this batching optimization for both
+> > use-cases.
+>
+> Got it, thanks for the sharing.
+>
+> >
+> > > batching submission may be good for some drivers, and currently
+> > > we only do it in limited way. One reason is that there is extra
+> > > cost for full batching submission, such as this patch requires
+> > > one extra .commit_rqs() for each dispatch, and lock is often needed
+> > > in this callback.
+> >
+> > That is not necessarily the case at all.
+>
+> So far, all in-tree .commit_rqs() implementation requires lock.
+>
+> >
+> > > IMO it can be a win for some slow driver or device, but may cause
+> > > a little performance drop for fast driver/device especially in workload
+> > > of not-batching submission.
+> >
+> > You're mostly correct. This is exactly why an I/O scheduler may be
+> > applicable here IMO. Mostly because I/O schedulers tend to optimize for
+> > something specific and always present tradeoffs. Users need to
+> > understand what they are optimizing for.
+> >
+> > Hence I'd say this functionality can definitely be available to an I/O
+> > scheduler should one exist.
+> >
+>
+> I guess it is just that there can be multiple requests available from
+> scheduler queue. Actually it can be so for other non-nvme drivers in
+> case of none, such as SCSI.
+>
+> Another way is to use one per-task list(such as plug list) to hold the
+> requests for dispatch, then every drivers may see real .last flag, so they
+> may get chance for optimizing batch queuing. I will think about the
+> idea further and see if it is really doable.
 
-On Fri, May 08, 2020 at 03:19:45PM -0700, Sagi Grimberg wrote:
-> Hey Ming,
-> 
-> > > Would it make sense to elevate this flag to a request_queue flag
-> > > (QUEUE_FLAG_ALWAYS_COMMIT)?
-> > 
-> > request queue flag usually is writable, however this case just needs
-> > one read-only flag, so I think it may be better to make it as
-> > tagset/hctx flag.
-> 
-> I actually intended it to be writable.
-> 
-> > > I'm thinking of a possibility that an I/O scheduler may be used
-> > > to activate this functionality rather than having the driver set
-> > > it necessarily...
-> > 
-> > Could you explain a bit why I/O scheduler should activate this
-> > functionality?
-> 
-> Sure, I've recently seen some academic work showing the benefits
-> of batching in tcp/ip based block drivers. The problem with the
-> approaches taken is that I/O scheduling is exercised deep down in the
-> driver, which is not the direction I'd like to go if we are want
-> to adopt some of the batching concepts.
-> 
-> I spent some (limited) time thinking about this, and it seems to
-> me that there is an opportunity to implement this as a dedicated
-> I/O scheduler, and tie it to driver specific LLD stack optimizations
-> (net-stack for example) relying on the commit_rq/bd->last hints.
-> 
-> When scanning the scheduler code, I noticed exactly the phenomenon that
-> this patchset is attempting to solve and Christoph referred me to it.
-> Now I'm thinking if we can extend this batching optimization for both
-> use-cases.
+How about my RFC v1 patch set[1], which allows dispatching more than
+one request from the scheduler to support batch requests?
 
-Got it, thanks for the sharing.
+[1]
+https://lore.kernel.org/patchwork/patch/1210034/
+https://lore.kernel.org/patchwork/patch/1210035/
 
-> 
-> > batching submission may be good for some drivers, and currently
-> > we only do it in limited way. One reason is that there is extra
-> > cost for full batching submission, such as this patch requires
-> > one extra .commit_rqs() for each dispatch, and lock is often needed
-> > in this callback.
-> 
-> That is not necessarily the case at all.
-
-So far, all in-tree .commit_rqs() implementation requires lock.
-
-> 
-> > IMO it can be a win for some slow driver or device, but may cause
-> > a little performance drop for fast driver/device especially in workload
-> > of not-batching submission.
-> 
-> You're mostly correct. This is exactly why an I/O scheduler may be
-> applicable here IMO. Mostly because I/O schedulers tend to optimize for
-> something specific and always present tradeoffs. Users need to
-> understand what they are optimizing for.
-> 
-> Hence I'd say this functionality can definitely be available to an I/O
-> scheduler should one exist.
-> 
-
-I guess it is just that there can be multiple requests available from
-scheduler queue. Actually it can be so for other non-nvme drivers in
-case of none, such as SCSI.
-
-Another way is to use one per-task list(such as plug list) to hold the
-requests for dispatch, then every drivers may see real .last flag, so they
-may get chance for optimizing batch queuing. I will think about the
-idea further and see if it is really doable.
-
-
-Thanks,
-Ming
-
+-- 
+Baolin Wang
