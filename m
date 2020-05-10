@@ -2,77 +2,56 @@ Return-Path: <SRS0=Fy1S=6Y=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.3 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.3 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 12536C54E49
-	for <linux-mmc@archiver.kernel.org>; Sun, 10 May 2020 07:44:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 161FAC38A2A
+	for <linux-mmc@archiver.kernel.org>; Sun, 10 May 2020 11:33:12 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D9F4720801
-	for <linux-mmc@archiver.kernel.org>; Sun, 10 May 2020 07:44:58 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id EA56D2082E
+	for <linux-mmc@archiver.kernel.org>; Sun, 10 May 2020 11:33:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725839AbgEJHo6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 10 May 2020 03:44:58 -0400
-Received: from mail-pf1-f194.google.com ([209.85.210.194]:34319 "EHLO
-        mail-pf1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725830AbgEJHo5 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 10 May 2020 03:44:57 -0400
-Received: by mail-pf1-f194.google.com with SMTP id x15so2621560pfa.1;
-        Sun, 10 May 2020 00:44:57 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=N8vEftalko3e/aSL2c6EH2GiC1/kTRGdDwSPX8vzJhg=;
-        b=iixYWzUgYkxtavgLVmsfKuomXANpQLY63kW6qXK5OOIlxEBbZQ18i2yQfc0QTlzfz1
-         53pjSV2cok3NCtpxi14+zhfKIFeFg6hETP9OIcabRNJKap+cl48dBQAQSzvjdfRNLH8p
-         oMaemyakFux7hPMEt+DdYCCi8AdeKxfEdOmGALR/rMGwSTSFeUe5JiNsdCIFiTHzjPRb
-         +CVbEXSnXXjJ9K/dbnc9CzK5LukZ5OIp/woZbezVu+UlUR1PFQZnoDFDJDeVdiUMX1HU
-         Kyz7qt0gmriM0xPidLBVExCmTfTq11ysRX4ciO5+HhlwwiVV8+DzT+CKa4BKhsvOrcqK
-         P04w==
-X-Gm-Message-State: AGi0PubF7yyS5IL0hFHQfRRIShvuuxy/AhZE2cFVF/eqrbsaoXyo+cyk
-        8kKsbRsV7p+BiK3KHnB943dHMK3O
-X-Google-Smtp-Source: APiQypK5Et3TG3oVbt6bqscsJwAt2oZBp9J+aYp03GcjOcqNfEAG0O/5M6TovGK2yKQkUipEQRxbgA==
-X-Received: by 2002:a63:d610:: with SMTP id q16mr9534050pgg.370.1589096696506;
-        Sun, 10 May 2020 00:44:56 -0700 (PDT)
-Received: from ?IPv6:2601:647:4802:9070:84d8:c040:9a38:e659? ([2601:647:4802:9070:84d8:c040:9a38:e659])
-        by smtp.gmail.com with ESMTPSA id a33sm2052000pgl.92.2020.05.10.00.44.54
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sun, 10 May 2020 00:44:55 -0700 (PDT)
-Subject: Re: [RFC PATCH v2 1/7] block: Extand commit_rqs() to do batch
- processing
-To:     Ming Lei <ming.lei@redhat.com>,
-        Baolin Wang <baolin.wang7@gmail.com>
-Cc:     Christoph Hellwig <hch@infradead.org>, axboe@kernel.dk,
+        id S1726863AbgEJLdL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 10 May 2020 07:33:11 -0400
+Received: from mga04.intel.com ([192.55.52.120]:47408 "EHLO mga04.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726629AbgEJLdL (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Sun, 10 May 2020 07:33:11 -0400
+IronPort-SDR: BM+WVCJ8YwxzliLot2NAsOYRTZdb0X2kGFOyR+DXOzo1vovkIH5fwJPwJxsP/kJHa7CjHy/7kb
+ st9sB4tPoxVQ==
+X-Amp-Result: SKIPPED(no attachment in message)
+X-Amp-File-Uploaded: False
+Received: from fmsmga004.fm.intel.com ([10.253.24.48])
+  by fmsmga104.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 10 May 2020 04:33:10 -0700
+IronPort-SDR: bbzTw6Pa4c8cK1P5xccWYNySBQ9KLEC0kVLkJC8mCxXwoSWnkfn6UM41eO++O7FBSCaC1w06LD
+ HcvAeU2Cjt1A==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.73,375,1583222400"; 
+   d="scan'208";a="285961094"
+Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.157]) ([10.237.72.157])
+  by fmsmga004.fm.intel.com with ESMTP; 10 May 2020 04:33:07 -0700
+Subject: Re: [PATCH] mmc: sdhci-acpi: Add SDHCI_QUIRK2_BROKEN_64_BIT_DMA for
+ AMDI0040
+To:     Raul E Rangel <rrangel@chromium.org>,
+        Nehal-bakulchandra Shah <Nehal-bakulchandra.Shah@amd.com>,
+        linux-mmc@vger.kernel.org
+Cc:     evgreen@chromium.org, Joerg Roedel <jroedel@suse.de>,
+        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+        Daniel Kurtz <djkurtz@chromium.org>, dianders@chromium.org,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Arnd Bergmann <arnd@arndb.de>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Paolo Valente <paolo.valente@linaro.org>,
-        Orson Zhai <orsonzhai@gmail.com>,
-        Chunyan Zhang <zhang.lyra@gmail.com>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        linux-block <linux-block@vger.kernel.org>,
-        LKML <linux-kernel@vger.kernel.org>
-References: <cover.1587888520.git.baolin.wang7@gmail.com>
- <c8bd9e5ba815a3f1bc9dac0a4bc2fbadadbc0a43.1587888520.git.baolin.wang7@gmail.com>
- <20200427154645.GA1201@infradead.org>
- <e4d47000-f89c-a135-ae58-011f0e9cc39e@grimberg.me>
- <20200508214639.GA1389136@T590>
- <fe6bd8b9-6ed9-b225-f80c-314746133722@grimberg.me>
- <20200508232222.GA1391368@T590>
- <CADBw62ooysT7TJ5CjpPBC6zs7pvpUQysg8QqP9oW5jN7BSYS7g@mail.gmail.com>
- <20200509094306.GA1414369@T590>
-From:   Sagi Grimberg <sagi@grimberg.me>
-Message-ID: <6579459b-aa98-78f2-f805-a6cd46f37b6c@grimberg.me>
-Date:   Sun, 10 May 2020 00:44:53 -0700
+        linux-kernel@vger.kernel.org
+References: <20200508165344.1.Id5bb8b1ae7ea576f26f9d91c761df7ccffbf58c5@changeid>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Message-ID: <698f2fca-c9f9-6019-3296-63c14b50a373@intel.com>
+Date:   Sun, 10 May 2020 14:33:27 +0300
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Firefox/68.0 Thunderbird/68.7.0
+ Thunderbird/68.7.0
 MIME-Version: 1.0
-In-Reply-To: <20200509094306.GA1414369@T590>
-Content-Type: text/plain; charset=utf-8; format=flowed
+In-Reply-To: <20200508165344.1.Id5bb8b1ae7ea576f26f9d91c761df7ccffbf58c5@changeid>
+Content-Type: text/plain; charset=utf-8
 Content-Language: en-US
 Content-Transfer-Encoding: 7bit
 Sender: linux-mmc-owner@vger.kernel.org
@@ -80,55 +59,41 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-
->>>> You're mostly correct. This is exactly why an I/O scheduler may be
->>>> applicable here IMO. Mostly because I/O schedulers tend to optimize for
->>>> something specific and always present tradeoffs. Users need to
->>>> understand what they are optimizing for.
->>>>
->>>> Hence I'd say this functionality can definitely be available to an I/O
->>>> scheduler should one exist.
->>>>
->>>
->>> I guess it is just that there can be multiple requests available from
->>> scheduler queue. Actually it can be so for other non-nvme drivers in
->>> case of none, such as SCSI.
->>>
->>> Another way is to use one per-task list(such as plug list) to hold the
->>> requests for dispatch, then every drivers may see real .last flag, so they
->>> may get chance for optimizing batch queuing. I will think about the
->>> idea further and see if it is really doable.
->>
->> How about my RFC v1 patch set[1], which allows dispatching more than
->> one request from the scheduler to support batch requests?
->>
->> [1]
->> https://lore.kernel.org/patchwork/patch/1210034/
->> https://lore.kernel.org/patchwork/patch/1210035/
+On 9/05/20 1:54 am, Raul E Rangel wrote:
+> The AMD eMMC 5.0 controller does not support 64 bit DMA.
 > 
-> Basically, my idea is to dequeue request one by one, and for each
-> dequeued request:
+> See the discussion here: https://marc.info/?l=linux-mmc&m=158879884514552&w=2
 > 
-> - we try to get a budget and driver tag, if both succeed, add the
-> request to one per-task list which can be stored in stack variable,
-> then continue to dequeue more request
+> Fixes: 34597a3f60b1 ("mmc: sdhci-acpi: Add support for ACPI HID of AMD Controller with HS400")
+> Signed-off-by: Raul E Rangel <rrangel@chromium.org>
+
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+
+> ---
 > 
-> - if either budget or driver tag can't be allocated for this request,
-> marks the last request in the per-task list as .last, and send the
-> batching requests stored in the list to LLD
+>  drivers/mmc/host/sdhci-acpi.c | 10 ++++++----
+>  1 file changed, 6 insertions(+), 4 deletions(-)
 > 
-> - when queueing batching requests to LLD, if one request isn't queued
-> to driver successfully, calling .commit_rqs() like before, meantime
-> adding the remained requests in the per-task list back to scheduler
-> queue or hctx->dispatch.
+> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+> index faba53cf139b..d8b76cb8698a 100644
+> --- a/drivers/mmc/host/sdhci-acpi.c
+> +++ b/drivers/mmc/host/sdhci-acpi.c
+> @@ -605,10 +605,12 @@ static int sdhci_acpi_emmc_amd_probe_slot(struct platform_device *pdev,
+>  }
+>  
+>  static const struct sdhci_acpi_slot sdhci_acpi_slot_amd_emmc = {
+> -	.chip   = &sdhci_acpi_chip_amd,
+> -	.caps   = MMC_CAP_8_BIT_DATA | MMC_CAP_NONREMOVABLE,
+> -	.quirks = SDHCI_QUIRK_32BIT_DMA_ADDR | SDHCI_QUIRK_32BIT_DMA_SIZE |
+> -			SDHCI_QUIRK_32BIT_ADMA_SIZE,
+> +	.chip		= &sdhci_acpi_chip_amd,
+> +	.caps		= MMC_CAP_8_BIT_DATA | MMC_CAP_NONREMOVABLE,
+> +	.quirks		= SDHCI_QUIRK_32BIT_DMA_ADDR |
+> +			  SDHCI_QUIRK_32BIT_DMA_SIZE |
+> +			  SDHCI_QUIRK_32BIT_ADMA_SIZE,
+> +	.quirks2	= SDHCI_QUIRK2_BROKEN_64_BIT_DMA,
+>  	.probe_slot     = sdhci_acpi_emmc_amd_probe_slot,
+>  };
+>  
+> 
 
-Sounds good to me.
-
-> One issue is that this way might degrade sequential IO performance if
-> the LLD just tells queue busy to blk-mq via return value of .queue_rq(),
-> so I guess we still may need one flag, such as BLK_MQ_F_BATCHING_SUBMISSION.
-
-Why is that degrading sequential I/O performance? because the specific
-device will do better without batching submissions? If so, the driver
-is not obligated to respect the bd->last/.commit_rqs, so if that is the
-case, it should just ignore it.
