@@ -1,88 +1,134 @@
-Return-Path: <SRS0=X1IY=6X=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=Fy1S=6Y=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-1.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.3 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 454EBC54E4A
-	for <linux-mmc@archiver.kernel.org>; Sat,  9 May 2020 12:30:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 12536C54E49
+	for <linux-mmc@archiver.kernel.org>; Sun, 10 May 2020 07:44:59 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1EFFF24958
-	for <linux-mmc@archiver.kernel.org>; Sat,  9 May 2020 12:30:58 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1589027458;
-	bh=0pINHCe149/hIGfHpl78LOiYhlqOZDIOygvNmvlot4E=;
-	h=Date:From:To:To:To:To:Cc:Cc:Cc:Subject:In-Reply-To:References:
-	 List-ID:From;
-	b=cwm8ZaGLojtOxsTUAuTKo9RzQUDw4Oo+emKdzzvaYgRPdwqqwnSewxyfgugAMfOiU
-	 fyhkKdNen9Yg4P7/1RmXnQEYrolCUDi79tmf6cREsUuHYZIsuyFWujA8j4d6nRZg1u
-	 SZmYbZYB287qVnTS91SoZaIpeyti1C9mFmUH35cM=
+	by mail.kernel.org (Postfix) with ESMTP id D9F4720801
+	for <linux-mmc@archiver.kernel.org>; Sun, 10 May 2020 07:44:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728556AbgEIMa4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 9 May 2020 08:30:56 -0400
-Received: from mail.kernel.org ([198.145.29.99]:60354 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726370AbgEIMaz (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Sat, 9 May 2020 08:30:55 -0400
-Received: from localhost (unknown [137.135.114.1])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 9C7E724956;
-        Sat,  9 May 2020 12:30:54 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1589027454;
-        bh=0pINHCe149/hIGfHpl78LOiYhlqOZDIOygvNmvlot4E=;
-        h=Date:From:To:To:To:To:Cc:Cc:Cc:Subject:In-Reply-To:References:
-         From;
-        b=gpo1x5ID3Yx6RBtuEwYTVyiqWXm6zUv8S/DIZ4GI9F+shHkz+BgZUcFHDFOIPHOFO
-         Jf/P3L1EGU6nK04xuPAYt/yPeVnTmiT7O2gHx9uXLY8lyWtUiusKLew2eJJaMw/dJc
-         3A/uPLa7i6iBgeQI/qBKBZlTjP8Yz1Glep3YRn2k=
-Date:   Sat, 09 May 2020 12:30:53 +0000
-From:   Sasha Levin <sashal@kernel.org>
-To:     Sasha Levin <sashal@kernel.org>
-To:     Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
-To:     Sarthak Garg <sartgarg@codeaurora.org>
-To:     adrian.hunter@intel.com, ulf.hansson@linaro.org
-Cc:     stummala@codeaurora.org, linux-mmc@vger.kernel.org
-Cc:     <stable@vger.kernel.org>
-Cc:     stable@vger.kernel.org
-Subject: Re: [PATCH V2] mmc: core: Fix recursive locking issue in CQE recovery path
-In-Reply-To: <1588868135-31783-1-git-send-email-vbadigan@codeaurora.org>
-References: <1588868135-31783-1-git-send-email-vbadigan@codeaurora.org>
-Message-Id: <20200509123054.9C7E724956@mail.kernel.org>
+        id S1725839AbgEJHo6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 10 May 2020 03:44:58 -0400
+Received: from mail-pf1-f194.google.com ([209.85.210.194]:34319 "EHLO
+        mail-pf1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725830AbgEJHo5 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 10 May 2020 03:44:57 -0400
+Received: by mail-pf1-f194.google.com with SMTP id x15so2621560pfa.1;
+        Sun, 10 May 2020 00:44:57 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=N8vEftalko3e/aSL2c6EH2GiC1/kTRGdDwSPX8vzJhg=;
+        b=iixYWzUgYkxtavgLVmsfKuomXANpQLY63kW6qXK5OOIlxEBbZQ18i2yQfc0QTlzfz1
+         53pjSV2cok3NCtpxi14+zhfKIFeFg6hETP9OIcabRNJKap+cl48dBQAQSzvjdfRNLH8p
+         oMaemyakFux7hPMEt+DdYCCi8AdeKxfEdOmGALR/rMGwSTSFeUe5JiNsdCIFiTHzjPRb
+         +CVbEXSnXXjJ9K/dbnc9CzK5LukZ5OIp/woZbezVu+UlUR1PFQZnoDFDJDeVdiUMX1HU
+         Kyz7qt0gmriM0xPidLBVExCmTfTq11ysRX4ciO5+HhlwwiVV8+DzT+CKa4BKhsvOrcqK
+         P04w==
+X-Gm-Message-State: AGi0PubF7yyS5IL0hFHQfRRIShvuuxy/AhZE2cFVF/eqrbsaoXyo+cyk
+        8kKsbRsV7p+BiK3KHnB943dHMK3O
+X-Google-Smtp-Source: APiQypK5Et3TG3oVbt6bqscsJwAt2oZBp9J+aYp03GcjOcqNfEAG0O/5M6TovGK2yKQkUipEQRxbgA==
+X-Received: by 2002:a63:d610:: with SMTP id q16mr9534050pgg.370.1589096696506;
+        Sun, 10 May 2020 00:44:56 -0700 (PDT)
+Received: from ?IPv6:2601:647:4802:9070:84d8:c040:9a38:e659? ([2601:647:4802:9070:84d8:c040:9a38:e659])
+        by smtp.gmail.com with ESMTPSA id a33sm2052000pgl.92.2020.05.10.00.44.54
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Sun, 10 May 2020 00:44:55 -0700 (PDT)
+Subject: Re: [RFC PATCH v2 1/7] block: Extand commit_rqs() to do batch
+ processing
+To:     Ming Lei <ming.lei@redhat.com>,
+        Baolin Wang <baolin.wang7@gmail.com>
+Cc:     Christoph Hellwig <hch@infradead.org>, axboe@kernel.dk,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Arnd Bergmann <arnd@arndb.de>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Paolo Valente <paolo.valente@linaro.org>,
+        Orson Zhai <orsonzhai@gmail.com>,
+        Chunyan Zhang <zhang.lyra@gmail.com>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        linux-block <linux-block@vger.kernel.org>,
+        LKML <linux-kernel@vger.kernel.org>
+References: <cover.1587888520.git.baolin.wang7@gmail.com>
+ <c8bd9e5ba815a3f1bc9dac0a4bc2fbadadbc0a43.1587888520.git.baolin.wang7@gmail.com>
+ <20200427154645.GA1201@infradead.org>
+ <e4d47000-f89c-a135-ae58-011f0e9cc39e@grimberg.me>
+ <20200508214639.GA1389136@T590>
+ <fe6bd8b9-6ed9-b225-f80c-314746133722@grimberg.me>
+ <20200508232222.GA1391368@T590>
+ <CADBw62ooysT7TJ5CjpPBC6zs7pvpUQysg8QqP9oW5jN7BSYS7g@mail.gmail.com>
+ <20200509094306.GA1414369@T590>
+From:   Sagi Grimberg <sagi@grimberg.me>
+Message-ID: <6579459b-aa98-78f2-f805-a6cd46f37b6c@grimberg.me>
+Date:   Sun, 10 May 2020 00:44:53 -0700
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Firefox/68.0 Thunderbird/68.7.0
+MIME-Version: 1.0
+In-Reply-To: <20200509094306.GA1414369@T590>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi
 
-[This is an automated email]
+>>>> You're mostly correct. This is exactly why an I/O scheduler may be
+>>>> applicable here IMO. Mostly because I/O schedulers tend to optimize for
+>>>> something specific and always present tradeoffs. Users need to
+>>>> understand what they are optimizing for.
+>>>>
+>>>> Hence I'd say this functionality can definitely be available to an I/O
+>>>> scheduler should one exist.
+>>>>
+>>>
+>>> I guess it is just that there can be multiple requests available from
+>>> scheduler queue. Actually it can be so for other non-nvme drivers in
+>>> case of none, such as SCSI.
+>>>
+>>> Another way is to use one per-task list(such as plug list) to hold the
+>>> requests for dispatch, then every drivers may see real .last flag, so they
+>>> may get chance for optimizing batch queuing. I will think about the
+>>> idea further and see if it is really doable.
+>>
+>> How about my RFC v1 patch set[1], which allows dispatching more than
+>> one request from the scheduler to support batch requests?
+>>
+>> [1]
+>> https://lore.kernel.org/patchwork/patch/1210034/
+>> https://lore.kernel.org/patchwork/patch/1210035/
+> 
+> Basically, my idea is to dequeue request one by one, and for each
+> dequeued request:
+> 
+> - we try to get a budget and driver tag, if both succeed, add the
+> request to one per-task list which can be stored in stack variable,
+> then continue to dequeue more request
+> 
+> - if either budget or driver tag can't be allocated for this request,
+> marks the last request in the per-task list as .last, and send the
+> batching requests stored in the list to LLD
+> 
+> - when queueing batching requests to LLD, if one request isn't queued
+> to driver successfully, calling .commit_rqs() like before, meantime
+> adding the remained requests in the per-task list back to scheduler
+> queue or hctx->dispatch.
 
-This commit has been processed because it contains a "Fixes:" tag
-fixing commit: 1e8e55b67030 ("mmc: block: Add CQE support").
+Sounds good to me.
 
-The bot has tested the following trees: v5.6.11, v5.4.39, v4.19.121.
+> One issue is that this way might degrade sequential IO performance if
+> the LLD just tells queue busy to blk-mq via return value of .queue_rq(),
+> so I guess we still may need one flag, such as BLK_MQ_F_BATCHING_SUBMISSION.
 
-v5.6.11: Failed to apply! Possible dependencies:
-    511ce378e16f ("mmc: Add MMC host software queue support")
-
-v5.4.39: Failed to apply! Possible dependencies:
-    511ce378e16f ("mmc: Add MMC host software queue support")
-
-v4.19.121: Failed to apply! Possible dependencies:
-    310df020cdd7 ("mmc: stop abusing the request queue_lock pointer")
-    511ce378e16f ("mmc: Add MMC host software queue support")
-    b061b326287d ("mmc: simplify queue initialization")
-    f5d72c5c55bc ("mmc: stop abusing the request queue_lock pointer")
-
-
-NOTE: The patch will not be queued to stable trees until it is upstream.
-
-How should we proceed with this patch?
-
--- 
-Thanks
-Sasha
+Why is that degrading sequential I/O performance? because the specific
+device will do better without batching submissions? If so, the driver
+is not obligated to respect the bd->last/.commit_rqs, so if that is the
+case, it should just ignore it.
