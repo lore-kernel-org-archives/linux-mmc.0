@@ -1,203 +1,151 @@
-Return-Path: <SRS0=Fy1S=6Y=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=e9Nt=6Z=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-0.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AE27BC54E8E
-	for <linux-mmc@archiver.kernel.org>; Sun, 10 May 2020 20:52:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BB214C54E4B
+	for <linux-mmc@archiver.kernel.org>; Mon, 11 May 2020 01:30:04 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8E8462098B
-	for <linux-mmc@archiver.kernel.org>; Sun, 10 May 2020 20:52:43 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 97C05207FF
+	for <linux-mmc@archiver.kernel.org>; Mon, 11 May 2020 01:30:04 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=googlemail.com header.i=@googlemail.com header.b="l8bxUB+O"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="im2FUEp8"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729477AbgEJUwj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 10 May 2020 16:52:39 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45228 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-FAIL-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1729377AbgEJUwi (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 10 May 2020 16:52:38 -0400
-Received: from mail-ej1-x644.google.com (mail-ej1-x644.google.com [IPv6:2a00:1450:4864:20::644])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 20E50C061A0C;
-        Sun, 10 May 2020 13:52:38 -0700 (PDT)
-Received: by mail-ej1-x644.google.com with SMTP id n17so6169548ejh.7;
-        Sun, 10 May 2020 13:52:38 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=googlemail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=XN9HVfx2Nq8ELSLfKqyYdBqRcQTahj+sAQBqI9rxLfw=;
-        b=l8bxUB+OrW+TcvrPvGlUmvJXPn//BVuK9BnU2b1VBHsgiYWVYgOMxZ0VzOrllgvIn/
-         99E02MCrZNtOycINWxbpLqzL1nJh8mgIGGZKezFiejkQ62ae3u6kZ/VBXRwzbbyXJKTs
-         wSseBhqSkgQwTG5qaUTYI63lji6hBJU47bfO56CtufPSsTXriT4bBCRlxosqIB27hVf8
-         EM4xsKQFqq6jBv1V5qBjWaitxMrVNFR0MIS+cr7T/x4ilLFGZwM0vUsb6+jdaIyMpueQ
-         OjLER+XdxGM50xXwbhnnu9XApbJxAifm+KFKEHOqAQwopk50CnoWfOOlEM81B43SwUqo
-         BV8g==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=XN9HVfx2Nq8ELSLfKqyYdBqRcQTahj+sAQBqI9rxLfw=;
-        b=tfvyab2HN7bPDTC+jNlsibE0HQVmqWSP/PK/rz62BhHs71M/jPmDWSnDZ0KzRHyRCX
-         tLAyUqDQC8KPLFdsMA915TsJKcUq1ZDpmIbW9msx/9zKj++Frm/OYJ8/OIzO5Af71xIw
-         MCQDdhIaD9Lqy8Wgw2O/iFh8CX+eTM1VEDOQxqOvHaSYRS9n4X0bR+XAZdORo94iZFIE
-         LMmT1B0UoModlRE/bVnIbaL1mSO4X7M4KSINa6O7tq8hnIXgKMjBEOajXCoEwxLHxzYd
-         9+bOhBD0/a0nWNAOHci+NKOxQlU0F+cRA+mBRyUGYOl9wkIFTKCIuU8bJPwhrBlmx+R8
-         Kt7w==
-X-Gm-Message-State: AGi0PuZAYtOtjz8kQ6K7Zjd4xPj0PepXdsewaUMODgShnm7DHjV83YKk
-        yRimFr+gqXtCXnF5MJLp5vKDgLfPNQwL0HEFB3w=
-X-Google-Smtp-Source: APiQypIdnABmp04ng7WPsf9YyXLEhUeTIbLwh5QFHCckGD97WlwESUQk7tqPdySBT967r2TZPgbM1PTFvacacdeQ72k=
-X-Received: by 2002:a17:906:4048:: with SMTP id y8mr10685706ejj.258.1589143956392;
- Sun, 10 May 2020 13:52:36 -0700 (PDT)
+        id S1728681AbgEKBaE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 10 May 2020 21:30:04 -0400
+Received: from us-smtp-delivery-1.mimecast.com ([205.139.110.120]:59842 "EHLO
+        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1728381AbgEKBaD (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 10 May 2020 21:30:03 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1589160602;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=dC309k+ibsw/3VjV9/ejnOFqXLiqMyJIRDkc+VSBHTM=;
+        b=im2FUEp83BBZWIpaKy8lyQOT/K0aVZnVArLn/pEv94CqB8DD9hZMHccVp9mXSJpvRqiLN5
+        ZT26q3Fl0/zEBzWE5X46GgUKqrLxPoLIkM2dXtkP5ZhpT7Cbo+rt88Csv86Fd+7teF+11D
+        yFEv/MMMRZbEu3X9KAM9LJ+UnKaYpnM=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-350-L0Dlu4ofNQ2Eftgkm3b_uA-1; Sun, 10 May 2020 21:29:58 -0400
+X-MC-Unique: L0Dlu4ofNQ2Eftgkm3b_uA-1
+Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.phx2.redhat.com [10.5.11.15])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 65B2880058A;
+        Mon, 11 May 2020 01:29:56 +0000 (UTC)
+Received: from T590 (ovpn-13-75.pek2.redhat.com [10.72.13.75])
+        by smtp.corp.redhat.com (Postfix) with ESMTPS id CEB425D77B;
+        Mon, 11 May 2020 01:29:46 +0000 (UTC)
+Date:   Mon, 11 May 2020 09:29:42 +0800
+From:   Ming Lei <ming.lei@redhat.com>
+To:     Sagi Grimberg <sagi@grimberg.me>
+Cc:     Baolin Wang <baolin.wang7@gmail.com>,
+        Christoph Hellwig <hch@infradead.org>, axboe@kernel.dk,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Arnd Bergmann <arnd@arndb.de>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Paolo Valente <paolo.valente@linaro.org>,
+        Orson Zhai <orsonzhai@gmail.com>,
+        Chunyan Zhang <zhang.lyra@gmail.com>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        linux-block <linux-block@vger.kernel.org>,
+        LKML <linux-kernel@vger.kernel.org>
+Subject: Re: [RFC PATCH v2 1/7] block: Extand commit_rqs() to do batch
+ processing
+Message-ID: <20200511012942.GA1418834@T590>
+References: <cover.1587888520.git.baolin.wang7@gmail.com>
+ <c8bd9e5ba815a3f1bc9dac0a4bc2fbadadbc0a43.1587888520.git.baolin.wang7@gmail.com>
+ <20200427154645.GA1201@infradead.org>
+ <e4d47000-f89c-a135-ae58-011f0e9cc39e@grimberg.me>
+ <20200508214639.GA1389136@T590>
+ <fe6bd8b9-6ed9-b225-f80c-314746133722@grimberg.me>
+ <20200508232222.GA1391368@T590>
+ <CADBw62ooysT7TJ5CjpPBC6zs7pvpUQysg8QqP9oW5jN7BSYS7g@mail.gmail.com>
+ <20200509094306.GA1414369@T590>
+ <6579459b-aa98-78f2-f805-a6cd46f37b6c@grimberg.me>
 MIME-Version: 1.0
-References: <20200428210229.703309-1-martin.blumenstingl@googlemail.com>
- <20200428210229.703309-3-martin.blumenstingl@googlemail.com>
- <1jlfmdi9uw.fsf@starbuckisacylon.baylibre.com> <CAPDyKFoEh8qKYFONo1SHnvwhDwjUa5bMnnT1Kbu8=4rd=T-8Kg@mail.gmail.com>
- <1jh7x1i3hj.fsf@starbuckisacylon.baylibre.com> <CAPDyKFq_USCNNps3s4+C_1hriycrxtRMKJvnPFcP59CZmLXbGw@mail.gmail.com>
- <1j1rnygye6.fsf@starbuckisacylon.baylibre.com>
-In-Reply-To: <1j1rnygye6.fsf@starbuckisacylon.baylibre.com>
-From:   Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Date:   Sun, 10 May 2020 22:52:25 +0200
-Message-ID: <CAFBinCAPGwb4YKJvUSyvzSC7hpVO0z-Ju_pBWx-06QzYXc0orw@mail.gmail.com>
-Subject: Re: [PATCH v6 2/2] mmc: host: meson-mx-sdhc: new driver for the
- Amlogic Meson SDHC host
-To:     Jerome Brunet <jbrunet@baylibre.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Stephen Boyd <sboyd@kernel.org>,
-        "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        DTML <devicetree@vger.kernel.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Jianxin Pan <jianxin.pan@amlogic.com>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        yinxin_1989@aliyun.com,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        lnykww@gmail.com, Anand Moon <linux.amoon@gmail.com>
-Content-Type: multipart/mixed; boundary="00000000000004a71b05a55169bf"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <6579459b-aa98-78f2-f805-a6cd46f37b6c@grimberg.me>
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.15
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
---00000000000004a71b05a55169bf
-Content-Type: text/plain; charset="UTF-8"
+On Sun, May 10, 2020 at 12:44:53AM -0700, Sagi Grimberg wrote:
+> 
+> > > > > You're mostly correct. This is exactly why an I/O scheduler may be
+> > > > > applicable here IMO. Mostly because I/O schedulers tend to optimize for
+> > > > > something specific and always present tradeoffs. Users need to
+> > > > > understand what they are optimizing for.
+> > > > > 
+> > > > > Hence I'd say this functionality can definitely be available to an I/O
+> > > > > scheduler should one exist.
+> > > > > 
+> > > > 
+> > > > I guess it is just that there can be multiple requests available from
+> > > > scheduler queue. Actually it can be so for other non-nvme drivers in
+> > > > case of none, such as SCSI.
+> > > > 
+> > > > Another way is to use one per-task list(such as plug list) to hold the
+> > > > requests for dispatch, then every drivers may see real .last flag, so they
+> > > > may get chance for optimizing batch queuing. I will think about the
+> > > > idea further and see if it is really doable.
+> > > 
+> > > How about my RFC v1 patch set[1], which allows dispatching more than
+> > > one request from the scheduler to support batch requests?
+> > > 
+> > > [1]
+> > > https://lore.kernel.org/patchwork/patch/1210034/
+> > > https://lore.kernel.org/patchwork/patch/1210035/
+> > 
+> > Basically, my idea is to dequeue request one by one, and for each
+> > dequeued request:
+> > 
+> > - we try to get a budget and driver tag, if both succeed, add the
+> > request to one per-task list which can be stored in stack variable,
+> > then continue to dequeue more request
+> > 
+> > - if either budget or driver tag can't be allocated for this request,
+> > marks the last request in the per-task list as .last, and send the
+> > batching requests stored in the list to LLD
+> > 
+> > - when queueing batching requests to LLD, if one request isn't queued
+> > to driver successfully, calling .commit_rqs() like before, meantime
+> > adding the remained requests in the per-task list back to scheduler
+> > queue or hctx->dispatch.
+> 
+> Sounds good to me.
+> 
+> > One issue is that this way might degrade sequential IO performance if
+> > the LLD just tells queue busy to blk-mq via return value of .queue_rq(),
+> > so I guess we still may need one flag, such as BLK_MQ_F_BATCHING_SUBMISSION.
+> 
+> Why is that degrading sequential I/O performance? because the specific
 
-Hi Jerome,
+Some devices may only return BLK_STS_RESOURCE from .queue_rq(), then more
+requests are dequeued from scheduler queue if we always queue batching IOs
+to LLD, and chance of IO merge is reduced, so sequential IO performance will
+be effected.
 
-On Tue, May 5, 2020 at 6:05 PM Jerome Brunet <jbrunet@baylibre.com> wrote:
-[...]
-> > 2. Keep the existing approach, with devm_clk_get(). I am fine with
-> > this as well, we can always switch to 1) later on.
->
-> I have a problem with this approach.
-> The dt-bindings would include "#clock-cells = <1>" for a device that
-> does not actually provide and only needs it has a temporary work around.
-> Those bindings are supposed to be stable ...
-actually I don't see a problem here because this specific MMC
-controller has a clock controller built into it.
-Rob also didn't see any problem with this when he reviewed the dt-bindings
+Such as some scsi device which doesn't use sdev->queue_depth for
+throttling IOs.
 
-> I have proposed 2 other short term solutions, let's see how it goes
-since I was also curious how this turns out I first implemented your
-suggestion to use a similar clk_hw registration style as
-dwmac-meson8b.
-That made the code easier to read - thank you for the suggestion!
+For virtio-scsi or virtio-blk, we may stop queue for avoiding the
+potential affect.
 
-On top of that I switched from clk_hw_onecell_data to directly
-accessing "clk_hw.clk".
-Unfortunately the diffstat is not as great as I hoped, it saves 21
-lines (11 in the driver code, 6 in the soc.dtsi, 5 in the dt-bindings)
-Once devm_clk_hw_get_clk() is implemented 8 lines have to be added
-again for error checking.
-I attached the patch for the drivers/mmc/host/meson-mx-sdhc* parts if
-you are curious (it'll apply only on top of my github branch, not on
-this series).
+> device will do better without batching submissions? If so, the driver
 
-Please let me know if you want me to submit an updated series where I
-directly access "clk_hw.clk" to get the "struct clk" or if I should
-keep clk_hw_onecell_data.
-If it's the former then I'll also add a TODO comment for the
-conversion to devm_clk_hw_get_clk() so it's easy to find.
+It isn't related with batching submission, IMO.
 
 
-Regards,
-Martin
+Thanks,
+Ming
 
---00000000000004a71b05a55169bf
-Content-Type: text/x-patch; charset="US-ASCII"; name="temp.diff"
-Content-Disposition: attachment; filename="temp.diff"
-Content-Transfer-Encoding: base64
-Content-ID: <f_ka1j1f5g0>
-X-Attachment-Id: f_ka1j1f5g0
-
-ZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2hvc3QvbWVzb24tbXgtc2RoYy1jbGtjLmMgYi9kcml2
-ZXJzL21tYy9ob3N0L21lc29uLW14LXNkaGMtY2xrYy5jCmluZGV4IGEzNjQ4M2Q4NTlmOC4uZDJl
-MzY1MTdlMGY2IDEwMDY0NAotLS0gYS9kcml2ZXJzL21tYy9ob3N0L21lc29uLW14LXNkaGMtY2xr
-Yy5jCisrKyBiL2RyaXZlcnMvbW1jL2hvc3QvbWVzb24tbXgtc2RoYy1jbGtjLmMKQEAgLTcsNiAr
-Nyw3IEBACiAKICNpbmNsdWRlIDxkdC1iaW5kaW5ncy9jbG9jay9tZXNvbi1teC1zZGhjLWNsa2Mu
-aD4KIAorI2luY2x1ZGUgPGxpbnV4L2Nsay5oPgogI2luY2x1ZGUgPGxpbnV4L2Nsay1wcm92aWRl
-ci5oPgogI2luY2x1ZGUgPGxpbnV4L2RldmljZS5oPgogI2luY2x1ZGUgPGxpbnV4L3BsYXRmb3Jt
-X2RldmljZS5oPgpAQCAtMjIsNyArMjMsNiBAQCBzdHJ1Y3QgbWVzb25fbXhfc2RoY19jbGtjIHsK
-IAlzdHJ1Y3QgY2xrX2dhdGUJCQl0eF9jbGtfZW47CiAJc3RydWN0IGNsa19nYXRlCQkJcnhfY2xr
-X2VuOwogCXN0cnVjdCBjbGtfZ2F0ZQkJCXNkX2Nsa19lbjsKLQlzdHJ1Y3QgY2xrX2h3X29uZWNl
-bGxfZGF0YQlod19vbmVjZWxsX2RhdGE7CiB9OwogCiBzdGF0aWMgY29uc3Qgc3RydWN0IGNsa19w
-YXJlbnRfZGF0YSBtZXNvbl9teF9zZGhjX3NyY19zZWxfcGFyZW50c1s0XSA9IHsKQEAgLTgzLDE3
-ICs4MywxNCBAQCBzdGF0aWMgaW50IG1lc29uX214X3NkaGNfZ2F0ZV9jbGtfaHdfcmVnaXN0ZXIo
-c3RydWN0IGRldmljZSAqZGV2LAogCQkJCQkgICAgICZjbGtfZ2F0ZV9vcHMsIGh3KTsKIH0KIAot
-aW50IG1lc29uX214X3NkaGNfcmVnaXN0ZXJfY2xrYyhzdHJ1Y3QgZGV2aWNlICpkZXYsIHZvaWQg
-X19pb21lbSAqYmFzZSkKK2ludCBtZXNvbl9teF9zZGhjX3JlZ2lzdGVyX2Nsa2Moc3RydWN0IGRl
-dmljZSAqZGV2LCB2b2lkIF9faW9tZW0gKmJhc2UsCisJCQkJc3RydWN0IGNsa19idWxrX2RhdGEg
-KmNsa19idWxrX2RhdGEpCiB7CiAJc3RydWN0IGNsa19wYXJlbnRfZGF0YSBkaXZfcGFyZW50ID0g
-eyAwIH07Ci0Jc3RydWN0IGNsa19od19vbmVjZWxsX2RhdGEgKm9uZWNlbGxfZGF0YTsKIAlzdHJ1
-Y3QgbWVzb25fbXhfc2RoY19jbGtjICpjbGtjX2RhdGE7CiAJaW50IHJldDsKIAotCWNsa2NfZGF0
-YSA9IGRldm1fa3phbGxvYyhkZXYsIHN0cnVjdF9zaXplKGNsa2NfZGF0YSwKLQkJCQkJCSAgaHdf
-b25lY2VsbF9kYXRhLmh3cywKLQkJCQkJCSAgTUVTT05fU0RIQ19OVU1fQlVJTFRJTl9DTEtTKSwK
-LQkJCQkgR0ZQX0tFUk5FTCk7CisJY2xrY19kYXRhID0gZGV2bV9remFsbG9jKGRldiwgc2l6ZW9m
-KCpjbGtjX2RhdGEpLCBHRlBfS0VSTkVMKTsKIAlpZiAoIWNsa2NfZGF0YSkKIAkJcmV0dXJuIC1F
-Tk9NRU07CiAKQEAgLTE1MCwxNiArMTQ3LDE0IEBAIGludCBtZXNvbl9teF9zZGhjX3JlZ2lzdGVy
-X2Nsa2Moc3RydWN0IGRldmljZSAqZGV2LCB2b2lkIF9faW9tZW0gKmJhc2UpCiAJaWYgKHJldCkK
-IAkJcmV0dXJuIHJldDsKIAotCW9uZWNlbGxfZGF0YSA9ICZjbGtjX2RhdGEtPmh3X29uZWNlbGxf
-ZGF0YTsKLQlvbmVjZWxsX2RhdGEtPmh3c1tTREhDX0NMS0lEX1NSQ19TRUxdID0gJmNsa2NfZGF0
-YS0+c3JjX3NlbC5odzsKLQlvbmVjZWxsX2RhdGEtPmh3c1tTREhDX0NMS0lEX0RJVl0gPSAmY2xr
-Y19kYXRhLT5kaXYuaHc7Ci0Jb25lY2VsbF9kYXRhLT5od3NbU0RIQ19DTEtJRF9NT0RfQ0xLXSA9
-ICZjbGtjX2RhdGEtPm1vZF9jbGtfZW4uaHc7Ci0Jb25lY2VsbF9kYXRhLT5od3NbU0RIQ19DTEtJ
-RF9TRF9DTEtdID0gJmNsa2NfZGF0YS0+c2RfY2xrX2VuLmh3OwotCW9uZWNlbGxfZGF0YS0+aHdz
-W1NESENfQ0xLSURfVFhfQ0xLXSA9ICZjbGtjX2RhdGEtPnR4X2Nsa19lbi5odzsKLQlvbmVjZWxs
-X2RhdGEtPmh3c1tTREhDX0NMS0lEX1JYX0NMS10gPSAmY2xrY19kYXRhLT5yeF9jbGtfZW4uaHc7
-CisJLyoKKwkgKiBUT0RPOiBSZXBsYWNlIGNsa19ody5jbGsgd2l0aCBkZXZtX2Nsa19od19nZXRf
-Y2xrKCkgb25jZSB0aGF0IGlzCisJICogYXZhaWxhYmxlLgorCSAqLworCWNsa19idWxrX2RhdGFb
-MF0uY2xrID0gY2xrY19kYXRhLT5tb2RfY2xrX2VuLmh3LmNsazsKKwljbGtfYnVsa19kYXRhWzFd
-LmNsayA9IGNsa2NfZGF0YS0+c2RfY2xrX2VuLmh3LmNsazsKKwljbGtfYnVsa19kYXRhWzJdLmNs
-ayA9IGNsa2NfZGF0YS0+dHhfY2xrX2VuLmh3LmNsazsKKwljbGtfYnVsa19kYXRhWzNdLmNsayA9
-IGNsa2NfZGF0YS0+cnhfY2xrX2VuLmh3LmNsazsKIAotCW9uZWNlbGxfZGF0YS0+bnVtID0gTUVT
-T05fU0RIQ19OVU1fQlVJTFRJTl9DTEtTOwotCi0JcmV0dXJuIGRldm1fb2ZfY2xrX2FkZF9od19w
-cm92aWRlcihkZXYsIG9mX2Nsa19od19vbmVjZWxsX2dldCwKLQkJCQkJICAgb25lY2VsbF9kYXRh
-KTsKKwlyZXR1cm4gMDsKIH0KZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2hvc3QvbWVzb24tbXgt
-c2RoYy5jIGIvZHJpdmVycy9tbWMvaG9zdC9tZXNvbi1teC1zZGhjLmMKaW5kZXggM2M1NGQ1Zjkx
-ZmJjLi4zMjI1NzA1NzBjOTggMTAwNjQ0Ci0tLSBhL2RyaXZlcnMvbW1jL2hvc3QvbWVzb24tbXgt
-c2RoYy5jCisrKyBiL2RyaXZlcnMvbW1jL2hvc3QvbWVzb24tbXgtc2RoYy5jCkBAIC04MDMsMTYg
-KzgwMyw3IEBAIHN0YXRpYyBpbnQgbWVzb25fbXhfc2RoY19wcm9iZShzdHJ1Y3QgcGxhdGZvcm1f
-ZGV2aWNlICpwZGV2KQogCiAJbWVzb25fbXhfc2RoY19pbml0X2h3KG1tYyk7CiAKLQlyZXQgPSBt
-ZXNvbl9teF9zZGhjX3JlZ2lzdGVyX2Nsa2MoZGV2LCBiYXNlKTsKLQlpZiAocmV0KQotCQlnb3Rv
-IGVycl9kaXNhYmxlX3BjbGs7Ci0KLQlob3N0LT5idWxrX2Nsa3NbMF0uaWQgPSAibW9kX2NsayI7
-Ci0JaG9zdC0+YnVsa19jbGtzWzFdLmlkID0gInNkX2NsayI7Ci0JaG9zdC0+YnVsa19jbGtzWzJd
-LmlkID0gInR4X2NsayI7Ci0JaG9zdC0+YnVsa19jbGtzWzNdLmlkID0gInJ4X2NsayI7Ci0JcmV0
-ID0gZGV2bV9jbGtfYnVsa19nZXQoZGV2LCBNRVNPTl9TREhDX05VTV9CVUxLX0NMS1MsCi0JCQkJ
-aG9zdC0+YnVsa19jbGtzKTsKKwlyZXQgPSBtZXNvbl9teF9zZGhjX3JlZ2lzdGVyX2Nsa2MoZGV2
-LCBiYXNlLCBob3N0LT5idWxrX2Nsa3MpOwogCWlmIChyZXQpCiAJCWdvdG8gZXJyX2Rpc2FibGVf
-cGNsazsKIApkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvaG9zdC9tZXNvbi1teC1zZGhjLmggYi9k
-cml2ZXJzL21tYy9ob3N0L21lc29uLW14LXNkaGMuaAppbmRleCAyYWExZTQ0MDExNzMuLjIzMGU4
-ZmJlNmIzZiAxMDA2NDQKLS0tIGEvZHJpdmVycy9tbWMvaG9zdC9tZXNvbi1teC1zZGhjLmgKKysr
-IGIvZHJpdmVycy9tbWMvaG9zdC9tZXNvbi1teC1zZGhjLmgKQEAgLTEzMyw2ICsxMzMsOSBAQAog
-CSNkZWZpbmUgTUVTT05fU0RIQ19DTEsyX1JYX0NMS19QSEFTRQkJCUdFTk1BU0soMTEsIDApCiAJ
-I2RlZmluZSBNRVNPTl9TREhDX0NMSzJfU0RfQ0xLX1BIQVNFCQkJR0VOTUFTSygyMywgMTIpCiAK
-LWludCBtZXNvbl9teF9zZGhjX3JlZ2lzdGVyX2Nsa2Moc3RydWN0IGRldmljZSAqZGV2LCB2b2lk
-IF9faW9tZW0gKmJhc2UpOworc3RydWN0IGNsa19idWxrX2RhdGE7CisKK2ludCBtZXNvbl9teF9z
-ZGhjX3JlZ2lzdGVyX2Nsa2Moc3RydWN0IGRldmljZSAqZGV2LCB2b2lkIF9faW9tZW0gKmJhc2Us
-CisJCQkJc3RydWN0IGNsa19idWxrX2RhdGEgKmNsa19idWxrX2RhdGEpOwogCiAjZW5kaWYgLyog
-X01FU09OX01YX1NESENfSF8gKi8K
---00000000000004a71b05a55169bf--
