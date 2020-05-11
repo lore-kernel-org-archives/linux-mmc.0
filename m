@@ -2,150 +2,105 @@ Return-Path: <SRS0=e9Nt=6Z=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BB214C54E4B
-	for <linux-mmc@archiver.kernel.org>; Mon, 11 May 2020 01:30:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E97A1C47255
+	for <linux-mmc@archiver.kernel.org>; Mon, 11 May 2020 06:23:15 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 97C05207FF
-	for <linux-mmc@archiver.kernel.org>; Mon, 11 May 2020 01:30:04 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B63EE2080C
+	for <linux-mmc@archiver.kernel.org>; Mon, 11 May 2020 06:23:15 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="im2FUEp8"
+	dkim=pass (2048-bit key) header.d=nifty.com header.i=@nifty.com header.b="VxSEeN8B"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728681AbgEKBaE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 10 May 2020 21:30:04 -0400
-Received: from us-smtp-delivery-1.mimecast.com ([205.139.110.120]:59842 "EHLO
-        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1728381AbgEKBaD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 10 May 2020 21:30:03 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1589160602;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=dC309k+ibsw/3VjV9/ejnOFqXLiqMyJIRDkc+VSBHTM=;
-        b=im2FUEp83BBZWIpaKy8lyQOT/K0aVZnVArLn/pEv94CqB8DD9hZMHccVp9mXSJpvRqiLN5
-        ZT26q3Fl0/zEBzWE5X46GgUKqrLxPoLIkM2dXtkP5ZhpT7Cbo+rt88Csv86Fd+7teF+11D
-        yFEv/MMMRZbEu3X9KAM9LJ+UnKaYpnM=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-350-L0Dlu4ofNQ2Eftgkm3b_uA-1; Sun, 10 May 2020 21:29:58 -0400
-X-MC-Unique: L0Dlu4ofNQ2Eftgkm3b_uA-1
-Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.phx2.redhat.com [10.5.11.15])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 65B2880058A;
-        Mon, 11 May 2020 01:29:56 +0000 (UTC)
-Received: from T590 (ovpn-13-75.pek2.redhat.com [10.72.13.75])
-        by smtp.corp.redhat.com (Postfix) with ESMTPS id CEB425D77B;
-        Mon, 11 May 2020 01:29:46 +0000 (UTC)
-Date:   Mon, 11 May 2020 09:29:42 +0800
-From:   Ming Lei <ming.lei@redhat.com>
-To:     Sagi Grimberg <sagi@grimberg.me>
-Cc:     Baolin Wang <baolin.wang7@gmail.com>,
-        Christoph Hellwig <hch@infradead.org>, axboe@kernel.dk,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Arnd Bergmann <arnd@arndb.de>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Paolo Valente <paolo.valente@linaro.org>,
-        Orson Zhai <orsonzhai@gmail.com>,
-        Chunyan Zhang <zhang.lyra@gmail.com>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        linux-block <linux-block@vger.kernel.org>,
-        LKML <linux-kernel@vger.kernel.org>
-Subject: Re: [RFC PATCH v2 1/7] block: Extand commit_rqs() to do batch
- processing
-Message-ID: <20200511012942.GA1418834@T590>
-References: <cover.1587888520.git.baolin.wang7@gmail.com>
- <c8bd9e5ba815a3f1bc9dac0a4bc2fbadadbc0a43.1587888520.git.baolin.wang7@gmail.com>
- <20200427154645.GA1201@infradead.org>
- <e4d47000-f89c-a135-ae58-011f0e9cc39e@grimberg.me>
- <20200508214639.GA1389136@T590>
- <fe6bd8b9-6ed9-b225-f80c-314746133722@grimberg.me>
- <20200508232222.GA1391368@T590>
- <CADBw62ooysT7TJ5CjpPBC6zs7pvpUQysg8QqP9oW5jN7BSYS7g@mail.gmail.com>
- <20200509094306.GA1414369@T590>
- <6579459b-aa98-78f2-f805-a6cd46f37b6c@grimberg.me>
+        id S1728030AbgEKGXP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 11 May 2020 02:23:15 -0400
+Received: from conuserg-10.nifty.com ([210.131.2.77]:52770 "EHLO
+        conuserg-10.nifty.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726661AbgEKGXP (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 11 May 2020 02:23:15 -0400
+Received: from oscar.flets-west.jp (softbank126090202047.bbtec.net [126.90.202.47]) (authenticated)
+        by conuserg-10.nifty.com with ESMTP id 04B6M5C5023979;
+        Mon, 11 May 2020 15:22:06 +0900
+DKIM-Filter: OpenDKIM Filter v2.10.3 conuserg-10.nifty.com 04B6M5C5023979
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nifty.com;
+        s=dec2015msa; t=1589178126;
+        bh=lWEEk/UB9W3ReMXixlbRZ9stMPWNA/9DV2LRsKm7SiI=;
+        h=From:To:Cc:Subject:Date:From;
+        b=VxSEeN8BYA9+zhkFuXUrgVQ7dqnZw4w133yzIG24bjpADHkLL5yVEsPF1l1BvqQWA
+         bHB4u40jjq8xa3TaIYpFcpv/9fL7K21qUSBeli/9UE7P/OVemWihFEBXnKhMYRe3PO
+         8625aMG6dnE6z/H8Ao4kqKx3fEb2jIiHPngGjfphMX8qi73WUuB3dcqorB4bw3iKXq
+         82/FUlPlzxJogQWBx2NM2F+Btq/FWsZj+/Y6V7wOKbyCPgHSXNi72qjr+VN5VyX8dS
+         BpUeu11FFNsADGIcHgVaiQEr62rmrSmRA0QOzzilExU8iz0Yes0AiYGkXaQ/o+bagT
+         eN6YzL3IzO59Q==
+X-Nifty-SrcIP: [126.90.202.47]
+From:   Masahiro Yamada <yamada.masahiro@socionext.com>
+To:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc:     Masahiro Yamada <yamada.masahiro@socionext.com>,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+Subject: [PATCH] mmc: uniphier-sd: call devm_request_irq() after tmio_mmc_host_probe()
+Date:   Mon, 11 May 2020 15:21:58 +0900
+Message-Id: <20200511062158.1790924-1-yamada.masahiro@socionext.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <6579459b-aa98-78f2-f805-a6cd46f37b6c@grimberg.me>
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.15
+Content-Transfer-Encoding: 8bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sun, May 10, 2020 at 12:44:53AM -0700, Sagi Grimberg wrote:
-> 
-> > > > > You're mostly correct. This is exactly why an I/O scheduler may be
-> > > > > applicable here IMO. Mostly because I/O schedulers tend to optimize for
-> > > > > something specific and always present tradeoffs. Users need to
-> > > > > understand what they are optimizing for.
-> > > > > 
-> > > > > Hence I'd say this functionality can definitely be available to an I/O
-> > > > > scheduler should one exist.
-> > > > > 
-> > > > 
-> > > > I guess it is just that there can be multiple requests available from
-> > > > scheduler queue. Actually it can be so for other non-nvme drivers in
-> > > > case of none, such as SCSI.
-> > > > 
-> > > > Another way is to use one per-task list(such as plug list) to hold the
-> > > > requests for dispatch, then every drivers may see real .last flag, so they
-> > > > may get chance for optimizing batch queuing. I will think about the
-> > > > idea further and see if it is really doable.
-> > > 
-> > > How about my RFC v1 patch set[1], which allows dispatching more than
-> > > one request from the scheduler to support batch requests?
-> > > 
-> > > [1]
-> > > https://lore.kernel.org/patchwork/patch/1210034/
-> > > https://lore.kernel.org/patchwork/patch/1210035/
-> > 
-> > Basically, my idea is to dequeue request one by one, and for each
-> > dequeued request:
-> > 
-> > - we try to get a budget and driver tag, if both succeed, add the
-> > request to one per-task list which can be stored in stack variable,
-> > then continue to dequeue more request
-> > 
-> > - if either budget or driver tag can't be allocated for this request,
-> > marks the last request in the per-task list as .last, and send the
-> > batching requests stored in the list to LLD
-> > 
-> > - when queueing batching requests to LLD, if one request isn't queued
-> > to driver successfully, calling .commit_rqs() like before, meantime
-> > adding the remained requests in the per-task list back to scheduler
-> > queue or hctx->dispatch.
-> 
-> Sounds good to me.
-> 
-> > One issue is that this way might degrade sequential IO performance if
-> > the LLD just tells queue busy to blk-mq via return value of .queue_rq(),
-> > so I guess we still may need one flag, such as BLK_MQ_F_BATCHING_SUBMISSION.
-> 
-> Why is that degrading sequential I/O performance? because the specific
+Currently, tmio_mmc_irq() handler is registered before the host is
+fully initialized by tmio_mmc_host_probe(). I did not previously notice
+this problem.
 
-Some devices may only return BLK_STS_RESOURCE from .queue_rq(), then more
-requests are dequeued from scheduler queue if we always queue batching IOs
-to LLD, and chance of IO merge is reduced, so sequential IO performance will
-be effected.
+The boot ROM of a new Socionext SoC unmasks interrupts (CTL_IRQ_MASK)
+somehow. The handler is invoked before tmio_mmc_host_probe(), then
+emits noisy call trace.
 
-Such as some scsi device which doesn't use sdev->queue_depth for
-throttling IOs.
+Move devm_request_irq() below tmio_mmc_host_probe().
 
-For virtio-scsi or virtio-blk, we may stop queue for avoiding the
-potential affect.
+Fixes: 3fd784f745dd ("mmc: uniphier-sd: add UniPhier SD/eMMC controller driver")
+Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
+---
 
-> device will do better without batching submissions? If so, the driver
+ drivers/mmc/host/uniphier-sd.c | 12 +++++++-----
+ 1 file changed, 7 insertions(+), 5 deletions(-)
 
-It isn't related with batching submission, IMO.
-
-
-Thanks,
-Ming
+diff --git a/drivers/mmc/host/uniphier-sd.c b/drivers/mmc/host/uniphier-sd.c
+index a1683c49cb90..f82baf99fd69 100644
+--- a/drivers/mmc/host/uniphier-sd.c
++++ b/drivers/mmc/host/uniphier-sd.c
+@@ -610,11 +610,6 @@ static int uniphier_sd_probe(struct platform_device *pdev)
+ 		}
+ 	}
+ 
+-	ret = devm_request_irq(dev, irq, tmio_mmc_irq, IRQF_SHARED,
+-			       dev_name(dev), host);
+-	if (ret)
+-		goto free_host;
+-
+ 	if (priv->caps & UNIPHIER_SD_CAP_EXTENDED_IP)
+ 		host->dma_ops = &uniphier_sd_internal_dma_ops;
+ 	else
+@@ -642,8 +637,15 @@ static int uniphier_sd_probe(struct platform_device *pdev)
+ 	if (ret)
+ 		goto free_host;
+ 
++	ret = devm_request_irq(dev, irq, tmio_mmc_irq, IRQF_SHARED,
++			       dev_name(dev), host);
++	if (ret)
++		goto remove_host;
++
+ 	return 0;
+ 
++remove_host:
++	tmio_mmc_host_remove(host);
+ free_host:
+ 	tmio_mmc_host_free(host);
+ 
+-- 
+2.25.1
 
