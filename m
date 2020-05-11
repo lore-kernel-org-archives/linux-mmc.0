@@ -2,328 +2,122 @@ Return-Path: <SRS0=e9Nt=6Z=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,HK_RANDOM_FROM,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham
+X-Spam-Status: No, score=-2.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 714F7C54E8D
-	for <linux-mmc@archiver.kernel.org>; Mon, 11 May 2020 08:19:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0F30BC47255
+	for <linux-mmc@archiver.kernel.org>; Mon, 11 May 2020 09:23:25 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 47234207DD
-	for <linux-mmc@archiver.kernel.org>; Mon, 11 May 2020 08:19:49 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="IrrFKaqP"
+	by mail.kernel.org (Postfix) with ESMTP id E7D6B20720
+	for <linux-mmc@archiver.kernel.org>; Mon, 11 May 2020 09:23:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728937AbgEKITs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 11 May 2020 04:19:48 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38310 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728556AbgEKITs (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 11 May 2020 04:19:48 -0400
-Received: from mail-wm1-x342.google.com (mail-wm1-x342.google.com [IPv6:2a00:1450:4864:20::342])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 24AE9C061A0C
-        for <linux-mmc@vger.kernel.org>; Mon, 11 May 2020 01:19:48 -0700 (PDT)
-Received: by mail-wm1-x342.google.com with SMTP id z72so8478367wmc.2
-        for <linux-mmc@vger.kernel.org>; Mon, 11 May 2020 01:19:48 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=GpFxugKX0VOaKpjeZ5E3CGUm9jUxbKoxq55ig8mOX3U=;
-        b=IrrFKaqPUaLwFkn4wFsSJAFHmbfDSGInvOhJN+tigHcljOGXS38Fr9pVS2Kwo2ZtoS
-         YRrF+/l5hjt8tV/Ys6WoAUEwTFrrIeRaJ1f9XiuG9eigjWh/Tv7Bwj3ynfEqJQHdDZrs
-         F964vVKkWdnKbGkrEkPERurQDYoPGf9xKCBSQNksNtYC0PgiVavSm+v0iHO5S5G2B6tm
-         4pvyAEwRA17LPmx7RgVZknrVn92NmrynAHnKmwLnbkoi5k8CJcjbqNDOgKnQXMGIr6Fe
-         ery/whkC6Fp6of9Ntnefga0HkJdHl2c+zASVCpUFv2eapmeirZwLuwdLxU9mIFYdgBWX
-         e3hA==
+        id S1728613AbgEKJXY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 11 May 2020 05:23:24 -0400
+Received: from mail-wr1-f68.google.com ([209.85.221.68]:36334 "EHLO
+        mail-wr1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725790AbgEKJXY (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 11 May 2020 05:23:24 -0400
+Received: by mail-wr1-f68.google.com with SMTP id y16so2803524wrs.3;
+        Mon, 11 May 2020 02:23:22 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=GpFxugKX0VOaKpjeZ5E3CGUm9jUxbKoxq55ig8mOX3U=;
-        b=cQ5xgdgyfILsDkfexMuYvwZsyptV+HD74Dg1L+6gDWCrWEEfYqg5bALjMtLseiA8Mu
-         xzTjTdP6Cnc476cZzF7tntwgMyFbWOfWkc7TLlVMdwpL3/SI8yzr/A//XW/oX010hhiY
-         kxbLDumXltIwAJu4ZYlQe64mJ7NQ4+2VXdCsjL5x6F45mPAKXb/zy0wofOq7Wy6jznux
-         DP6qYJrcqR+vovOeyDjxknJKnX9j6GFn6+1tlBgQ2wFD0VVRLidI3UJIghRiz4SP0SUb
-         6+0K6+octvOnimu5iKue8J8Co/ueMx3C7F/qnJq98rt5MSv8HbuypMSIj1XDta182OHj
-         ilpg==
-X-Gm-Message-State: AGi0PuawrqzdQgRAthmVbiOnBSrl/54QeVsG9+ICEpq9dJGsyFbHD5mv
-        ecCxhACh77LKod+bQrdfdmq4r0SF
-X-Google-Smtp-Source: APiQypIBSbxyQPTWtrpbffxauxdJo0PwjdMphBk6tvfnajQTzWuXvVtV5PlPt9ftxDD81SaBiSLxsQ==
-X-Received: by 2002:a1c:3c08:: with SMTP id j8mr29913764wma.30.1589185186806;
-        Mon, 11 May 2020 01:19:46 -0700 (PDT)
-Received: from arch-thunder.localdomain (a109-49-46-234.cpe.netcabo.pt. [109.49.46.234])
-        by smtp.gmail.com with ESMTPSA id v205sm7909330wmg.11.2020.05.11.01.19.45
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 11 May 2020 01:19:45 -0700 (PDT)
-Date:   Mon, 11 May 2020 09:19:43 +0100
-From:   Rui Miguel Silva <rmfrfs@gmail.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>,
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=YMRVaoGd7XDxLJTKtDh7pUXdfydxobundGlGWCD7a4s=;
+        b=nTOc/m/J4picsnNW86nkUrTZ4oLjvFNmsnyHLZRuu5IFv7smiG+k54AKFI86cp7iDI
+         j/6Fi3ZuXZzVEuC+Fzwr/1jEGuWLY70fb2jwurQzVH90htd9TSiRBTIYkVIRq9CtN+GB
+         C9u9L9xuUxzBofMsXG2QVVwpXVOELjlkcYN+AtWZHxSSGH/4rAkc9Eo4sVaYfMAfBRuX
+         PCXqJ5csLMtCAefIFR+DXCeyFHCbf4dbV9C+A0abLavXOu2Rc0Ldv6brcjvuHFHva0+K
+         hd9QpyHmkhibLXbcjYKQovb7Ou+JKDtFF8pn4v4ToyM9gd1NqI/UnQ9ez7slmf3xLYrH
+         qZEQ==
+X-Gm-Message-State: AGi0Pub7sUR5FuqGzGaxzboguMY0MF5TJbop6s6BcncnF74sVesvy7KL
+        C/+SXEeYVrg2DMXP42VwRJFlKuBG
+X-Google-Smtp-Source: APiQypLBIua8zxmeT5qFYH3i8hqZ1S42D3OK4AlQWsCNzA868V57dR2WcHbSh+kV/mErfE7rcxTTEQ==
+X-Received: by 2002:adf:e38b:: with SMTP id e11mr18080351wrm.343.1589189001351;
+        Mon, 11 May 2020 02:23:21 -0700 (PDT)
+Received: from ?IPv6:2601:647:4802:9070:59c:65b4:1d66:e6e? ([2601:647:4802:9070:59c:65b4:1d66:e6e])
+        by smtp.gmail.com with ESMTPSA id b12sm5741106wrq.82.2020.05.11.02.23.17
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 11 May 2020 02:23:20 -0700 (PDT)
+Subject: Re: [RFC PATCH v2 1/7] block: Extand commit_rqs() to do batch
+ processing
+To:     Ming Lei <ming.lei@redhat.com>
+Cc:     Baolin Wang <baolin.wang7@gmail.com>,
+        Christoph Hellwig <hch@infradead.org>, axboe@kernel.dk,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Arnd Bergmann <arnd@arndb.de>,
         Linus Walleij <linus.walleij@linaro.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: Re: [PATCH 2/2] mmc: host: Drop redundant MMC_CAP_ERASE
-Message-ID: <20200511081943.5z4b5t2swhwphghc@arch-thunder.localdomain>
-References: <20200508112902.23575-1-ulf.hansson@linaro.org>
+        Paolo Valente <paolo.valente@linaro.org>,
+        Orson Zhai <orsonzhai@gmail.com>,
+        Chunyan Zhang <zhang.lyra@gmail.com>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        linux-block <linux-block@vger.kernel.org>,
+        LKML <linux-kernel@vger.kernel.org>
+References: <cover.1587888520.git.baolin.wang7@gmail.com>
+ <c8bd9e5ba815a3f1bc9dac0a4bc2fbadadbc0a43.1587888520.git.baolin.wang7@gmail.com>
+ <20200427154645.GA1201@infradead.org>
+ <e4d47000-f89c-a135-ae58-011f0e9cc39e@grimberg.me>
+ <20200508214639.GA1389136@T590>
+ <fe6bd8b9-6ed9-b225-f80c-314746133722@grimberg.me>
+ <20200508232222.GA1391368@T590>
+ <CADBw62ooysT7TJ5CjpPBC6zs7pvpUQysg8QqP9oW5jN7BSYS7g@mail.gmail.com>
+ <20200509094306.GA1414369@T590>
+ <6579459b-aa98-78f2-f805-a6cd46f37b6c@grimberg.me>
+ <20200511012942.GA1418834@T590>
+From:   Sagi Grimberg <sagi@grimberg.me>
+Message-ID: <8f2ddabc-01d0-dae9-f958-1b26a6bdf58c@grimberg.me>
+Date:   Mon, 11 May 2020 02:23:14 -0700
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Firefox/68.0 Thunderbird/68.7.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20200508112902.23575-1-ulf.hansson@linaro.org>
+In-Reply-To: <20200511012942.GA1418834@T590>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Ulf,
-On Fri, May 08, 2020 at 01:29:02PM +0200, Ulf Hansson wrote:
-> The MMC_CAP_ERASE bit is no longer used by the mmc core as erase, discard
-> and trim operations are now always supported. Therefore, drop the bit and
-> move all mmc hosts away from using it.
+
+>>> Basically, my idea is to dequeue request one by one, and for each
+>>> dequeued request:
+>>>
+>>> - we try to get a budget and driver tag, if both succeed, add the
+>>> request to one per-task list which can be stored in stack variable,
+>>> then continue to dequeue more request
+>>>
+>>> - if either budget or driver tag can't be allocated for this request,
+>>> marks the last request in the per-task list as .last, and send the
+>>> batching requests stored in the list to LLD
+>>>
+>>> - when queueing batching requests to LLD, if one request isn't queued
+>>> to driver successfully, calling .commit_rqs() like before, meantime
+>>> adding the remained requests in the per-task list back to scheduler
+>>> queue or hctx->dispatch.
+>>
+>> Sounds good to me.
+>>
+>>> One issue is that this way might degrade sequential IO performance if
+>>> the LLD just tells queue busy to blk-mq via return value of .queue_rq(),
+>>> so I guess we still may need one flag, such as BLK_MQ_F_BATCHING_SUBMISSION.
+>>
+>> Why is that degrading sequential I/O performance? because the specific
 > 
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-
-For the greybus/sdio change:
-
-Reviewed-by: Rui Miguel Silva <rmfrfs@gmail.com>
-
-------
-Cheers,
-     Rui
-
-> ---
->  drivers/mmc/host/bcm2835.c        | 3 +--
->  drivers/mmc/host/cavium.c         | 3 +--
->  drivers/mmc/host/dw_mmc.c         | 6 ------
->  drivers/mmc/host/meson-mx-sdio.c  | 2 +-
->  drivers/mmc/host/mtk-sd.c         | 2 +-
->  drivers/mmc/host/mvsdio.c         | 2 --
->  drivers/mmc/host/mxs-mmc.c        | 3 +--
->  drivers/mmc/host/omap.c           | 2 +-
->  drivers/mmc/host/omap_hsmmc.c     | 2 +-
->  drivers/mmc/host/rtsx_pci_sdmmc.c | 2 +-
->  drivers/mmc/host/rtsx_usb_sdmmc.c | 2 +-
->  drivers/mmc/host/sdhci.c          | 2 +-
->  drivers/mmc/host/sunxi-mmc.c      | 2 +-
->  drivers/mmc/host/tmio_mmc_core.c  | 2 +-
->  drivers/staging/greybus/sdio.c    | 1 -
->  include/linux/mmc/host.h          | 1 -
->  16 files changed, 12 insertions(+), 25 deletions(-)
+> Some devices may only return BLK_STS_RESOURCE from .queue_rq(), then more
+> requests are dequeued from scheduler queue if we always queue batching IOs
+> to LLD, and chance of IO merge is reduced, so sequential IO performance will
+> be effected.
 > 
-> diff --git a/drivers/mmc/host/bcm2835.c b/drivers/mmc/host/bcm2835.c
-> index c3d949847cbd..a0767790a826 100644
-> --- a/drivers/mmc/host/bcm2835.c
-> +++ b/drivers/mmc/host/bcm2835.c
-> @@ -1280,8 +1280,7 @@ static int bcm2835_add_host(struct bcm2835_host *host)
->  
->  	/* host controller capabilities */
->  	mmc->caps |= MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED |
-> -		     MMC_CAP_NEEDS_POLL | MMC_CAP_HW_RESET | MMC_CAP_ERASE |
-> -		     MMC_CAP_CMD23;
-> +		     MMC_CAP_NEEDS_POLL | MMC_CAP_HW_RESET | MMC_CAP_CMD23;
->  
->  	spin_lock_init(&host->lock);
->  	mutex_init(&host->mutex);
-> diff --git a/drivers/mmc/host/cavium.c b/drivers/mmc/host/cavium.c
-> index 89deb451e0ac..c5da3aaee334 100644
-> --- a/drivers/mmc/host/cavium.c
-> +++ b/drivers/mmc/host/cavium.c
-> @@ -1038,8 +1038,7 @@ int cvm_mmc_of_slot_probe(struct device *dev, struct cvm_mmc_host *host)
->  	 * Disable bounce buffers for max_segs = 1
->  	 */
->  	mmc->caps |= MMC_CAP_MMC_HIGHSPEED | MMC_CAP_SD_HIGHSPEED |
-> -		     MMC_CAP_ERASE | MMC_CAP_CMD23 | MMC_CAP_POWER_OFF_CARD |
-> -		     MMC_CAP_3_3V_DDR;
-> +		     MMC_CAP_CMD23 | MMC_CAP_POWER_OFF_CARD | MMC_CAP_3_3V_DDR;
->  
->  	if (host->use_sg)
->  		mmc->max_segs = 16;
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 5d1f8a3ec3a5..35ae5737c622 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -2751,12 +2751,6 @@ static int dw_mci_init_slot_caps(struct dw_mci_slot *slot)
->  	if (host->pdata->caps)
->  		mmc->caps = host->pdata->caps;
->  
-> -	/*
-> -	 * Support MMC_CAP_ERASE by default.
-> -	 * It needs to use trim/discard/erase commands.
-> -	 */
-> -	mmc->caps |= MMC_CAP_ERASE;
-> -
->  	if (host->pdata->pm_caps)
->  		mmc->pm_caps = host->pdata->pm_caps;
->  
-> diff --git a/drivers/mmc/host/meson-mx-sdio.c b/drivers/mmc/host/meson-mx-sdio.c
-> index 3813b544f571..9b2cf7afc246 100644
-> --- a/drivers/mmc/host/meson-mx-sdio.c
-> +++ b/drivers/mmc/host/meson-mx-sdio.c
-> @@ -564,7 +564,7 @@ static int meson_mx_mmc_add_host(struct meson_mx_mmc_host *host)
->  	mmc->f_max = clk_round_rate(host->cfg_div_clk,
->  				    clk_get_rate(host->parent_clk));
->  
-> -	mmc->caps |= MMC_CAP_ERASE | MMC_CAP_CMD23 | MMC_CAP_WAIT_WHILE_BUSY;
-> +	mmc->caps |= MMC_CAP_CMD23 | MMC_CAP_WAIT_WHILE_BUSY;
->  	mmc->ops = &meson_mx_mmc_ops;
->  
->  	ret = mmc_of_parse(mmc);
-> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-> index 53819ae9f271..39e7fc54c438 100644
-> --- a/drivers/mmc/host/mtk-sd.c
-> +++ b/drivers/mmc/host/mtk-sd.c
-> @@ -2326,7 +2326,7 @@ static int msdc_drv_probe(struct platform_device *pdev)
->  	if (mmc->caps & MMC_CAP_SDIO_IRQ)
->  		mmc->caps2 |= MMC_CAP2_SDIO_IRQ_NOTHREAD;
->  
-> -	mmc->caps |= MMC_CAP_ERASE | MMC_CAP_CMD23;
-> +	mmc->caps |= MMC_CAP_CMD23;
->  	/* MMC core transfer sizes tunable parameters */
->  	mmc->max_segs = MAX_BD_NUM;
->  	if (host->dev_comp->support_64g)
-> diff --git a/drivers/mmc/host/mvsdio.c b/drivers/mmc/host/mvsdio.c
-> index 203b61712601..cc0752a9df6d 100644
-> --- a/drivers/mmc/host/mvsdio.c
-> +++ b/drivers/mmc/host/mvsdio.c
-> @@ -752,8 +752,6 @@ static int mvsd_probe(struct platform_device *pdev)
->  	if (maxfreq)
->  		mmc->f_max = maxfreq;
->  
-> -	mmc->caps |= MMC_CAP_ERASE;
-> -
->  	spin_lock_init(&host->lock);
->  
->  	host->base = devm_platform_ioremap_resource(pdev, 0);
-> diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
-> index d82674aed447..b1820def36c0 100644
-> --- a/drivers/mmc/host/mxs-mmc.c
-> +++ b/drivers/mmc/host/mxs-mmc.c
-> @@ -634,8 +634,7 @@ static int mxs_mmc_probe(struct platform_device *pdev)
->  	/* set mmc core parameters */
->  	mmc->ops = &mxs_mmc_ops;
->  	mmc->caps = MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED |
-> -		    MMC_CAP_SDIO_IRQ | MMC_CAP_NEEDS_POLL | MMC_CAP_CMD23 |
-> -		    MMC_CAP_ERASE;
-> +		    MMC_CAP_SDIO_IRQ | MMC_CAP_NEEDS_POLL | MMC_CAP_CMD23;
->  
->  	host->broken_cd = of_property_read_bool(np, "broken-cd");
->  
-> diff --git a/drivers/mmc/host/omap.c b/drivers/mmc/host/omap.c
-> index d74e73c95fdf..33d7af7c7762 100644
-> --- a/drivers/mmc/host/omap.c
-> +++ b/drivers/mmc/host/omap.c
-> @@ -1244,7 +1244,7 @@ static int mmc_omap_new_slot(struct mmc_omap_host *host, int id)
->  
->  	mmc->caps = 0;
->  	if (host->pdata->slots[id].wires >= 4)
-> -		mmc->caps |= MMC_CAP_4_BIT_DATA | MMC_CAP_ERASE;
-> +		mmc->caps |= MMC_CAP_4_BIT_DATA;
->  
->  	mmc->ops = &mmc_omap_ops;
->  	mmc->f_min = 400000;
-> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-> index a379c45b985c..37b8740513f5 100644
-> --- a/drivers/mmc/host/omap_hsmmc.c
-> +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -1922,7 +1922,7 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
->  	mmc->max_req_size = mmc->max_blk_size * mmc->max_blk_count;
->  
->  	mmc->caps |= MMC_CAP_MMC_HIGHSPEED | MMC_CAP_SD_HIGHSPEED |
-> -		     MMC_CAP_WAIT_WHILE_BUSY | MMC_CAP_ERASE | MMC_CAP_CMD23;
-> +		     MMC_CAP_WAIT_WHILE_BUSY | MMC_CAP_CMD23;
->  
->  	mmc->caps |= mmc_pdata(host)->caps;
->  	if (mmc->caps & MMC_CAP_8_BIT_DATA)
-> diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
-> index 11087976ab19..5a71f6678fd3 100644
-> --- a/drivers/mmc/host/rtsx_pci_sdmmc.c
-> +++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
-> @@ -1347,7 +1347,7 @@ static void realtek_init_host(struct realtek_pci_sdmmc *host)
->  	mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34 | MMC_VDD_165_195;
->  	mmc->caps = MMC_CAP_4_BIT_DATA | MMC_CAP_SD_HIGHSPEED |
->  		MMC_CAP_MMC_HIGHSPEED | MMC_CAP_BUS_WIDTH_TEST |
-> -		MMC_CAP_UHS_SDR12 | MMC_CAP_UHS_SDR25 | MMC_CAP_ERASE;
-> +		MMC_CAP_UHS_SDR12 | MMC_CAP_UHS_SDR25;
->  	mmc->caps2 = MMC_CAP2_NO_PRESCAN_POWERUP | MMC_CAP2_FULL_PWR_CYCLE;
->  	mmc->max_current_330 = 400;
->  	mmc->max_current_180 = 800;
-> diff --git a/drivers/mmc/host/rtsx_usb_sdmmc.c b/drivers/mmc/host/rtsx_usb_sdmmc.c
-> index 81d0dfe553a8..a7084c50ad65 100644
-> --- a/drivers/mmc/host/rtsx_usb_sdmmc.c
-> +++ b/drivers/mmc/host/rtsx_usb_sdmmc.c
-> @@ -1314,7 +1314,7 @@ static void rtsx_usb_init_host(struct rtsx_usb_sdmmc *host)
->  	mmc->caps = MMC_CAP_4_BIT_DATA | MMC_CAP_SD_HIGHSPEED |
->  		MMC_CAP_MMC_HIGHSPEED | MMC_CAP_BUS_WIDTH_TEST |
->  		MMC_CAP_UHS_SDR12 | MMC_CAP_UHS_SDR25 | MMC_CAP_UHS_SDR50 |
-> -		MMC_CAP_ERASE | MMC_CAP_SYNC_RUNTIME_PM;
-> +		MMC_CAP_SYNC_RUNTIME_PM;
->  	mmc->caps2 = MMC_CAP2_NO_PRESCAN_POWERUP | MMC_CAP2_FULL_PWR_CYCLE |
->  		MMC_CAP2_NO_SDIO;
->  
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 1bb6b6796318..95cc08c1fed9 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -4331,7 +4331,7 @@ int sdhci_setup_host(struct sdhci_host *host)
->  	    !host->ops->get_max_timeout_count)
->  		mmc->max_busy_timeout = 0;
->  
-> -	mmc->caps |= MMC_CAP_SDIO_IRQ | MMC_CAP_ERASE | MMC_CAP_CMD23;
-> +	mmc->caps |= MMC_CAP_SDIO_IRQ | MMC_CAP_CMD23;
->  	mmc->caps2 |= MMC_CAP2_SDIO_IRQ_NOTHREAD;
->  
->  	if (host->quirks & SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12)
-> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-> index 3bfbd89bd4ab..5e95bbc51644 100644
-> --- a/drivers/mmc/host/sunxi-mmc.c
-> +++ b/drivers/mmc/host/sunxi-mmc.c
-> @@ -1394,7 +1394,7 @@ static int sunxi_mmc_probe(struct platform_device *pdev)
->  	mmc->f_min		=   400000;
->  	mmc->f_max		= 52000000;
->  	mmc->caps	       |= MMC_CAP_MMC_HIGHSPEED | MMC_CAP_SD_HIGHSPEED |
-> -				  MMC_CAP_ERASE | MMC_CAP_SDIO_IRQ;
-> +				  MMC_CAP_SDIO_IRQ;
->  
->  	/*
->  	 * Some H5 devices do not have signal traces precise enough to
-> diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
-> index 9520bd94cf43..f31afd1c2671 100644
-> --- a/drivers/mmc/host/tmio_mmc_core.c
-> +++ b/drivers/mmc/host/tmio_mmc_core.c
-> @@ -1128,7 +1128,7 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host)
->  	if (ret == -EPROBE_DEFER)
->  		return ret;
->  
-> -	mmc->caps |= MMC_CAP_ERASE | MMC_CAP_4_BIT_DATA | pdata->capabilities;
-> +	mmc->caps |= MMC_CAP_4_BIT_DATA | pdata->capabilities;
->  	mmc->caps2 |= pdata->capabilities2;
->  	mmc->max_segs = pdata->max_segs ? : 32;
->  	mmc->max_blk_size = TMIO_MAX_BLK_SIZE;
-> diff --git a/drivers/staging/greybus/sdio.c b/drivers/staging/greybus/sdio.c
-> index c4b16bb5c1a4..0939f4a4c963 100644
-> --- a/drivers/staging/greybus/sdio.c
-> +++ b/drivers/staging/greybus/sdio.c
-> @@ -67,7 +67,6 @@ static void _gb_sdio_set_host_caps(struct gb_sdio_host *host, u32 r)
->  		((r & GB_SDIO_CAP_8_BIT_DATA) ? MMC_CAP_8_BIT_DATA : 0) |
->  		((r & GB_SDIO_CAP_MMC_HS) ? MMC_CAP_MMC_HIGHSPEED : 0) |
->  		((r & GB_SDIO_CAP_SD_HS) ? MMC_CAP_SD_HIGHSPEED : 0) |
-> -		((r & GB_SDIO_CAP_ERASE) ? MMC_CAP_ERASE : 0) |
->  		((r & GB_SDIO_CAP_1_2V_DDR) ? MMC_CAP_1_2V_DDR : 0) |
->  		((r & GB_SDIO_CAP_1_8V_DDR) ? MMC_CAP_1_8V_DDR : 0) |
->  		((r & GB_SDIO_CAP_POWER_OFF_CARD) ? MMC_CAP_POWER_OFF_CARD : 0) |
-> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index d4a50e5dc111..7149bab555d7 100644
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -321,7 +321,6 @@ struct mmc_host {
->  #define MMC_CAP_AGGRESSIVE_PM	(1 << 7)	/* Suspend (e)MMC/SD at idle  */
->  #define MMC_CAP_NONREMOVABLE	(1 << 8)	/* Nonremovable e.g. eMMC */
->  #define MMC_CAP_WAIT_WHILE_BUSY	(1 << 9)	/* Waits while card is busy */
-> -#define MMC_CAP_ERASE		(1 << 10)	/* Allow erase/trim commands */
->  #define MMC_CAP_3_3V_DDR	(1 << 11)	/* Host supports eMMC DDR 3.3V */
->  #define MMC_CAP_1_8V_DDR	(1 << 12)	/* Host supports eMMC DDR 1.8V */
->  #define MMC_CAP_1_2V_DDR	(1 << 13)	/* Host supports eMMC DDR 1.2V */
-> -- 
-> 2.20.1
+> Such as some scsi device which doesn't use sdev->queue_depth for
+> throttling IOs.
 > 
+> For virtio-scsi or virtio-blk, we may stop queue for avoiding the
+> potential affect.
+
+Do we have a way to characterize such devices? I'd assume that most
+devices will benefit from the batching so maybe the flag needs to be
+inverted? BLK_MQ_F_DONT_BATCHING_SUBMISSION?
