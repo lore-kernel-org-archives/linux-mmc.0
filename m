@@ -2,166 +2,328 @@ Return-Path: <SRS0=e9Nt=6Z=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.7 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
+X-Spam-Status: No, score=-5.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,HK_RANDOM_FROM,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9D8AAC47255
-	for <linux-mmc@archiver.kernel.org>; Mon, 11 May 2020 06:30:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 714F7C54E8D
+	for <linux-mmc@archiver.kernel.org>; Mon, 11 May 2020 08:19:49 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 696D9207DD
-	for <linux-mmc@archiver.kernel.org>; Mon, 11 May 2020 06:30:25 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 47234207DD
+	for <linux-mmc@archiver.kernel.org>; Mon, 11 May 2020 08:19:49 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=nifty.com header.i=@nifty.com header.b="uSuUlZR1"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="IrrFKaqP"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726310AbgEKGaZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 11 May 2020 02:30:25 -0400
-Received: from conuserg-08.nifty.com ([210.131.2.75]:64257 "EHLO
-        conuserg-08.nifty.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725854AbgEKGaY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 11 May 2020 02:30:24 -0400
-Received: from oscar.flets-west.jp (softbank126090202047.bbtec.net [126.90.202.47]) (authenticated)
-        by conuserg-08.nifty.com with ESMTP id 04B6SiJ4024114;
-        Mon, 11 May 2020 15:28:45 +0900
-DKIM-Filter: OpenDKIM Filter v2.10.3 conuserg-08.nifty.com 04B6SiJ4024114
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nifty.com;
-        s=dec2015msa; t=1589178525;
-        bh=UZ9iiUxPKBmS0Mn31e7Z5LXfKunX+kDfVEaBQd1XIlg=;
-        h=From:To:Cc:Subject:Date:From;
-        b=uSuUlZR12aW+cvaMThllo+l65i/jh1c6+2jL1BLJwgQVM4KfqexvMG5ymvOeyCH2k
-         WJnDjgmDDjvHX6yettUn7zWfG7eMZgwpZcLHyLJ9cQ+1LrKYETAfIbfmNIZWPNSekp
-         QekYq6dyw3NHR5L/nWmvYA+WP3J35giy7wOibU93C+Scdd8NtzAUFtezZEVnAq715O
-         awaBlks8RzY4Vv84+fOlJxCITct7lik2PpypQPcuQd2fH2HbAgPqMYfhP95+2mgWp/
-         JmCTpehBKpHWCJSGMdsYMo/JAuBjuZaaGfknapx0o2KfUTbIFNayKHwonyUW/5I3IY
-         n0BxULFplT3ZA==
-X-Nifty-SrcIP: [126.90.202.47]
-From:   Masahiro Yamada <yamada.masahiro@socionext.com>
-To:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>
-Cc:     Masahiro Yamada <yamada.masahiro@socionext.com>,
-        Fabio Estevam <festevam@gmail.com>,
-        NXP Linux Team <linux-imx@nxp.com>,
-        Pengutronix Kernel Team <kernel@pengutronix.de>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        Shawn Guo <shawnguo@kernel.org>,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
-Subject: [PATCH] mmc: sdhci: use FIELD_GET/PREP for current capabilities bit masks
-Date:   Mon, 11 May 2020 15:28:27 +0900
-Message-Id: <20200511062828.1791484-1-yamada.masahiro@socionext.com>
-X-Mailer: git-send-email 2.25.1
+        id S1728937AbgEKITs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 11 May 2020 04:19:48 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38310 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728556AbgEKITs (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 11 May 2020 04:19:48 -0400
+Received: from mail-wm1-x342.google.com (mail-wm1-x342.google.com [IPv6:2a00:1450:4864:20::342])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 24AE9C061A0C
+        for <linux-mmc@vger.kernel.org>; Mon, 11 May 2020 01:19:48 -0700 (PDT)
+Received: by mail-wm1-x342.google.com with SMTP id z72so8478367wmc.2
+        for <linux-mmc@vger.kernel.org>; Mon, 11 May 2020 01:19:48 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=GpFxugKX0VOaKpjeZ5E3CGUm9jUxbKoxq55ig8mOX3U=;
+        b=IrrFKaqPUaLwFkn4wFsSJAFHmbfDSGInvOhJN+tigHcljOGXS38Fr9pVS2Kwo2ZtoS
+         YRrF+/l5hjt8tV/Ys6WoAUEwTFrrIeRaJ1f9XiuG9eigjWh/Tv7Bwj3ynfEqJQHdDZrs
+         F964vVKkWdnKbGkrEkPERurQDYoPGf9xKCBSQNksNtYC0PgiVavSm+v0iHO5S5G2B6tm
+         4pvyAEwRA17LPmx7RgVZknrVn92NmrynAHnKmwLnbkoi5k8CJcjbqNDOgKnQXMGIr6Fe
+         ery/whkC6Fp6of9Ntnefga0HkJdHl2c+zASVCpUFv2eapmeirZwLuwdLxU9mIFYdgBWX
+         e3hA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=GpFxugKX0VOaKpjeZ5E3CGUm9jUxbKoxq55ig8mOX3U=;
+        b=cQ5xgdgyfILsDkfexMuYvwZsyptV+HD74Dg1L+6gDWCrWEEfYqg5bALjMtLseiA8Mu
+         xzTjTdP6Cnc476cZzF7tntwgMyFbWOfWkc7TLlVMdwpL3/SI8yzr/A//XW/oX010hhiY
+         kxbLDumXltIwAJu4ZYlQe64mJ7NQ4+2VXdCsjL5x6F45mPAKXb/zy0wofOq7Wy6jznux
+         DP6qYJrcqR+vovOeyDjxknJKnX9j6GFn6+1tlBgQ2wFD0VVRLidI3UJIghRiz4SP0SUb
+         6+0K6+octvOnimu5iKue8J8Co/ueMx3C7F/qnJq98rt5MSv8HbuypMSIj1XDta182OHj
+         ilpg==
+X-Gm-Message-State: AGi0PuawrqzdQgRAthmVbiOnBSrl/54QeVsG9+ICEpq9dJGsyFbHD5mv
+        ecCxhACh77LKod+bQrdfdmq4r0SF
+X-Google-Smtp-Source: APiQypIBSbxyQPTWtrpbffxauxdJo0PwjdMphBk6tvfnajQTzWuXvVtV5PlPt9ftxDD81SaBiSLxsQ==
+X-Received: by 2002:a1c:3c08:: with SMTP id j8mr29913764wma.30.1589185186806;
+        Mon, 11 May 2020 01:19:46 -0700 (PDT)
+Received: from arch-thunder.localdomain (a109-49-46-234.cpe.netcabo.pt. [109.49.46.234])
+        by smtp.gmail.com with ESMTPSA id v205sm7909330wmg.11.2020.05.11.01.19.45
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 11 May 2020 01:19:45 -0700 (PDT)
+Date:   Mon, 11 May 2020 09:19:43 +0100
+From:   Rui Miguel Silva <rmfrfs@gmail.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Subject: Re: [PATCH 2/2] mmc: host: Drop redundant MMC_CAP_ERASE
+Message-ID: <20200511081943.5z4b5t2swhwphghc@arch-thunder.localdomain>
+References: <20200508112902.23575-1-ulf.hansson@linaro.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20200508112902.23575-1-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Use FIELD_GET and FIELD_PREP to get access to the register fields. Delete
-the shift macros and use GENMASK() for the touched macros.
+Hi Ulf,
+On Fri, May 08, 2020 at 01:29:02PM +0200, Ulf Hansson wrote:
+> The MMC_CAP_ERASE bit is no longer used by the mmc core as erase, discard
+> and trim operations are now always supported. Therefore, drop the bit and
+> move all mmc hosts away from using it.
+> 
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 
-Note that, this has the side-effect of changing the constants to 64-bit on
-64-bit platforms.
+For the greybus/sdio change:
 
-Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
----
+Reviewed-by: Rui Miguel Silva <rmfrfs@gmail.com>
 
- drivers/mmc/host/sdhci-esdhc-imx.c |  6 +++---
- drivers/mmc/host/sdhci.c           | 27 ++++++++++++---------------
- drivers/mmc/host/sdhci.h           | 11 ++++-------
- 3 files changed, 19 insertions(+), 25 deletions(-)
+------
+Cheers,
+     Rui
 
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index 38cd83118082..9896e03fce71 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -419,9 +419,9 @@ static u32 esdhc_readl_le(struct sdhci_host *host, int reg)
- 
- 	if (unlikely(reg == SDHCI_MAX_CURRENT) && esdhc_is_usdhc(imx_data)) {
- 		val = 0;
--		val |= 0xFF << SDHCI_MAX_CURRENT_330_SHIFT;
--		val |= 0xFF << SDHCI_MAX_CURRENT_300_SHIFT;
--		val |= 0xFF << SDHCI_MAX_CURRENT_180_SHIFT;
-+		val |= FIELD_PREP(SDHCI_MAX_CURRENT_330_MASK, 0xFF);
-+		val |= FIELD_PREP(SDHCI_MAX_CURRENT_300_MASK, 0xFF);
-+		val |= FIELD_PREP(SDHCI_MAX_CURRENT_180_MASK, 0xFF);
- 	}
- 
- 	if (unlikely(reg == SDHCI_INT_STATUS)) {
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 344a7e0e33fe..7818e650f974 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -4355,35 +4355,32 @@ int sdhci_setup_host(struct sdhci_host *host)
- 
- 			curr = min_t(u32, curr, SDHCI_MAX_CURRENT_LIMIT);
- 			max_current_caps =
--				(curr << SDHCI_MAX_CURRENT_330_SHIFT) |
--				(curr << SDHCI_MAX_CURRENT_300_SHIFT) |
--				(curr << SDHCI_MAX_CURRENT_180_SHIFT);
-+				FIELD_PREP(SDHCI_MAX_CURRENT_330_MASK, curr) |
-+				FIELD_PREP(SDHCI_MAX_CURRENT_300_MASK, curr) |
-+				FIELD_PREP(SDHCI_MAX_CURRENT_180_MASK, curr);
- 		}
- 	}
- 
- 	if (host->caps & SDHCI_CAN_VDD_330) {
- 		ocr_avail |= MMC_VDD_32_33 | MMC_VDD_33_34;
- 
--		mmc->max_current_330 = ((max_current_caps &
--				   SDHCI_MAX_CURRENT_330_MASK) >>
--				   SDHCI_MAX_CURRENT_330_SHIFT) *
--				   SDHCI_MAX_CURRENT_MULTIPLIER;
-+		mmc->max_current_330 = FIELD_GET(SDHCI_MAX_CURRENT_330_MASK,
-+						 max_current_caps) *
-+						SDHCI_MAX_CURRENT_MULTIPLIER;
- 	}
- 	if (host->caps & SDHCI_CAN_VDD_300) {
- 		ocr_avail |= MMC_VDD_29_30 | MMC_VDD_30_31;
- 
--		mmc->max_current_300 = ((max_current_caps &
--				   SDHCI_MAX_CURRENT_300_MASK) >>
--				   SDHCI_MAX_CURRENT_300_SHIFT) *
--				   SDHCI_MAX_CURRENT_MULTIPLIER;
-+		mmc->max_current_300 = FIELD_GET(SDHCI_MAX_CURRENT_300_MASK,
-+						 max_current_caps) *
-+						SDHCI_MAX_CURRENT_MULTIPLIER;
- 	}
- 	if (host->caps & SDHCI_CAN_VDD_180) {
- 		ocr_avail |= MMC_VDD_165_195;
- 
--		mmc->max_current_180 = ((max_current_caps &
--				   SDHCI_MAX_CURRENT_180_MASK) >>
--				   SDHCI_MAX_CURRENT_180_SHIFT) *
--				   SDHCI_MAX_CURRENT_MULTIPLIER;
-+		mmc->max_current_180 = FIELD_GET(SDHCI_MAX_CURRENT_180_MASK,
-+						 max_current_caps) *
-+						SDHCI_MAX_CURRENT_MULTIPLIER;
- 	}
- 
- 	/* If OCR set by host, use it instead. */
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index d7f1441b0fc3..2ff98891bf25 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -233,13 +233,10 @@
- #define  SDHCI_SUPPORT_HS400	0x80000000 /* Non-standard */
- 
- #define SDHCI_MAX_CURRENT		0x48
--#define  SDHCI_MAX_CURRENT_LIMIT	0xFF
--#define  SDHCI_MAX_CURRENT_330_MASK	0x0000FF
--#define  SDHCI_MAX_CURRENT_330_SHIFT	0
--#define  SDHCI_MAX_CURRENT_300_MASK	0x00FF00
--#define  SDHCI_MAX_CURRENT_300_SHIFT	8
--#define  SDHCI_MAX_CURRENT_180_MASK	0xFF0000
--#define  SDHCI_MAX_CURRENT_180_SHIFT	16
-+#define  SDHCI_MAX_CURRENT_LIMIT	GENMASK(7, 0)
-+#define  SDHCI_MAX_CURRENT_330_MASK	GENMASK(7, 0)
-+#define  SDHCI_MAX_CURRENT_300_MASK	GENMASK(15, 8)
-+#define  SDHCI_MAX_CURRENT_180_MASK	GENMASK(23, 16)
- #define   SDHCI_MAX_CURRENT_MULTIPLIER	4
- 
- /* 4C-4F reserved for more max current */
--- 
-2.25.1
-
+> ---
+>  drivers/mmc/host/bcm2835.c        | 3 +--
+>  drivers/mmc/host/cavium.c         | 3 +--
+>  drivers/mmc/host/dw_mmc.c         | 6 ------
+>  drivers/mmc/host/meson-mx-sdio.c  | 2 +-
+>  drivers/mmc/host/mtk-sd.c         | 2 +-
+>  drivers/mmc/host/mvsdio.c         | 2 --
+>  drivers/mmc/host/mxs-mmc.c        | 3 +--
+>  drivers/mmc/host/omap.c           | 2 +-
+>  drivers/mmc/host/omap_hsmmc.c     | 2 +-
+>  drivers/mmc/host/rtsx_pci_sdmmc.c | 2 +-
+>  drivers/mmc/host/rtsx_usb_sdmmc.c | 2 +-
+>  drivers/mmc/host/sdhci.c          | 2 +-
+>  drivers/mmc/host/sunxi-mmc.c      | 2 +-
+>  drivers/mmc/host/tmio_mmc_core.c  | 2 +-
+>  drivers/staging/greybus/sdio.c    | 1 -
+>  include/linux/mmc/host.h          | 1 -
+>  16 files changed, 12 insertions(+), 25 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/bcm2835.c b/drivers/mmc/host/bcm2835.c
+> index c3d949847cbd..a0767790a826 100644
+> --- a/drivers/mmc/host/bcm2835.c
+> +++ b/drivers/mmc/host/bcm2835.c
+> @@ -1280,8 +1280,7 @@ static int bcm2835_add_host(struct bcm2835_host *host)
+>  
+>  	/* host controller capabilities */
+>  	mmc->caps |= MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED |
+> -		     MMC_CAP_NEEDS_POLL | MMC_CAP_HW_RESET | MMC_CAP_ERASE |
+> -		     MMC_CAP_CMD23;
+> +		     MMC_CAP_NEEDS_POLL | MMC_CAP_HW_RESET | MMC_CAP_CMD23;
+>  
+>  	spin_lock_init(&host->lock);
+>  	mutex_init(&host->mutex);
+> diff --git a/drivers/mmc/host/cavium.c b/drivers/mmc/host/cavium.c
+> index 89deb451e0ac..c5da3aaee334 100644
+> --- a/drivers/mmc/host/cavium.c
+> +++ b/drivers/mmc/host/cavium.c
+> @@ -1038,8 +1038,7 @@ int cvm_mmc_of_slot_probe(struct device *dev, struct cvm_mmc_host *host)
+>  	 * Disable bounce buffers for max_segs = 1
+>  	 */
+>  	mmc->caps |= MMC_CAP_MMC_HIGHSPEED | MMC_CAP_SD_HIGHSPEED |
+> -		     MMC_CAP_ERASE | MMC_CAP_CMD23 | MMC_CAP_POWER_OFF_CARD |
+> -		     MMC_CAP_3_3V_DDR;
+> +		     MMC_CAP_CMD23 | MMC_CAP_POWER_OFF_CARD | MMC_CAP_3_3V_DDR;
+>  
+>  	if (host->use_sg)
+>  		mmc->max_segs = 16;
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 5d1f8a3ec3a5..35ae5737c622 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -2751,12 +2751,6 @@ static int dw_mci_init_slot_caps(struct dw_mci_slot *slot)
+>  	if (host->pdata->caps)
+>  		mmc->caps = host->pdata->caps;
+>  
+> -	/*
+> -	 * Support MMC_CAP_ERASE by default.
+> -	 * It needs to use trim/discard/erase commands.
+> -	 */
+> -	mmc->caps |= MMC_CAP_ERASE;
+> -
+>  	if (host->pdata->pm_caps)
+>  		mmc->pm_caps = host->pdata->pm_caps;
+>  
+> diff --git a/drivers/mmc/host/meson-mx-sdio.c b/drivers/mmc/host/meson-mx-sdio.c
+> index 3813b544f571..9b2cf7afc246 100644
+> --- a/drivers/mmc/host/meson-mx-sdio.c
+> +++ b/drivers/mmc/host/meson-mx-sdio.c
+> @@ -564,7 +564,7 @@ static int meson_mx_mmc_add_host(struct meson_mx_mmc_host *host)
+>  	mmc->f_max = clk_round_rate(host->cfg_div_clk,
+>  				    clk_get_rate(host->parent_clk));
+>  
+> -	mmc->caps |= MMC_CAP_ERASE | MMC_CAP_CMD23 | MMC_CAP_WAIT_WHILE_BUSY;
+> +	mmc->caps |= MMC_CAP_CMD23 | MMC_CAP_WAIT_WHILE_BUSY;
+>  	mmc->ops = &meson_mx_mmc_ops;
+>  
+>  	ret = mmc_of_parse(mmc);
+> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+> index 53819ae9f271..39e7fc54c438 100644
+> --- a/drivers/mmc/host/mtk-sd.c
+> +++ b/drivers/mmc/host/mtk-sd.c
+> @@ -2326,7 +2326,7 @@ static int msdc_drv_probe(struct platform_device *pdev)
+>  	if (mmc->caps & MMC_CAP_SDIO_IRQ)
+>  		mmc->caps2 |= MMC_CAP2_SDIO_IRQ_NOTHREAD;
+>  
+> -	mmc->caps |= MMC_CAP_ERASE | MMC_CAP_CMD23;
+> +	mmc->caps |= MMC_CAP_CMD23;
+>  	/* MMC core transfer sizes tunable parameters */
+>  	mmc->max_segs = MAX_BD_NUM;
+>  	if (host->dev_comp->support_64g)
+> diff --git a/drivers/mmc/host/mvsdio.c b/drivers/mmc/host/mvsdio.c
+> index 203b61712601..cc0752a9df6d 100644
+> --- a/drivers/mmc/host/mvsdio.c
+> +++ b/drivers/mmc/host/mvsdio.c
+> @@ -752,8 +752,6 @@ static int mvsd_probe(struct platform_device *pdev)
+>  	if (maxfreq)
+>  		mmc->f_max = maxfreq;
+>  
+> -	mmc->caps |= MMC_CAP_ERASE;
+> -
+>  	spin_lock_init(&host->lock);
+>  
+>  	host->base = devm_platform_ioremap_resource(pdev, 0);
+> diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
+> index d82674aed447..b1820def36c0 100644
+> --- a/drivers/mmc/host/mxs-mmc.c
+> +++ b/drivers/mmc/host/mxs-mmc.c
+> @@ -634,8 +634,7 @@ static int mxs_mmc_probe(struct platform_device *pdev)
+>  	/* set mmc core parameters */
+>  	mmc->ops = &mxs_mmc_ops;
+>  	mmc->caps = MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED |
+> -		    MMC_CAP_SDIO_IRQ | MMC_CAP_NEEDS_POLL | MMC_CAP_CMD23 |
+> -		    MMC_CAP_ERASE;
+> +		    MMC_CAP_SDIO_IRQ | MMC_CAP_NEEDS_POLL | MMC_CAP_CMD23;
+>  
+>  	host->broken_cd = of_property_read_bool(np, "broken-cd");
+>  
+> diff --git a/drivers/mmc/host/omap.c b/drivers/mmc/host/omap.c
+> index d74e73c95fdf..33d7af7c7762 100644
+> --- a/drivers/mmc/host/omap.c
+> +++ b/drivers/mmc/host/omap.c
+> @@ -1244,7 +1244,7 @@ static int mmc_omap_new_slot(struct mmc_omap_host *host, int id)
+>  
+>  	mmc->caps = 0;
+>  	if (host->pdata->slots[id].wires >= 4)
+> -		mmc->caps |= MMC_CAP_4_BIT_DATA | MMC_CAP_ERASE;
+> +		mmc->caps |= MMC_CAP_4_BIT_DATA;
+>  
+>  	mmc->ops = &mmc_omap_ops;
+>  	mmc->f_min = 400000;
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+> index a379c45b985c..37b8740513f5 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -1922,7 +1922,7 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+>  	mmc->max_req_size = mmc->max_blk_size * mmc->max_blk_count;
+>  
+>  	mmc->caps |= MMC_CAP_MMC_HIGHSPEED | MMC_CAP_SD_HIGHSPEED |
+> -		     MMC_CAP_WAIT_WHILE_BUSY | MMC_CAP_ERASE | MMC_CAP_CMD23;
+> +		     MMC_CAP_WAIT_WHILE_BUSY | MMC_CAP_CMD23;
+>  
+>  	mmc->caps |= mmc_pdata(host)->caps;
+>  	if (mmc->caps & MMC_CAP_8_BIT_DATA)
+> diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
+> index 11087976ab19..5a71f6678fd3 100644
+> --- a/drivers/mmc/host/rtsx_pci_sdmmc.c
+> +++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
+> @@ -1347,7 +1347,7 @@ static void realtek_init_host(struct realtek_pci_sdmmc *host)
+>  	mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34 | MMC_VDD_165_195;
+>  	mmc->caps = MMC_CAP_4_BIT_DATA | MMC_CAP_SD_HIGHSPEED |
+>  		MMC_CAP_MMC_HIGHSPEED | MMC_CAP_BUS_WIDTH_TEST |
+> -		MMC_CAP_UHS_SDR12 | MMC_CAP_UHS_SDR25 | MMC_CAP_ERASE;
+> +		MMC_CAP_UHS_SDR12 | MMC_CAP_UHS_SDR25;
+>  	mmc->caps2 = MMC_CAP2_NO_PRESCAN_POWERUP | MMC_CAP2_FULL_PWR_CYCLE;
+>  	mmc->max_current_330 = 400;
+>  	mmc->max_current_180 = 800;
+> diff --git a/drivers/mmc/host/rtsx_usb_sdmmc.c b/drivers/mmc/host/rtsx_usb_sdmmc.c
+> index 81d0dfe553a8..a7084c50ad65 100644
+> --- a/drivers/mmc/host/rtsx_usb_sdmmc.c
+> +++ b/drivers/mmc/host/rtsx_usb_sdmmc.c
+> @@ -1314,7 +1314,7 @@ static void rtsx_usb_init_host(struct rtsx_usb_sdmmc *host)
+>  	mmc->caps = MMC_CAP_4_BIT_DATA | MMC_CAP_SD_HIGHSPEED |
+>  		MMC_CAP_MMC_HIGHSPEED | MMC_CAP_BUS_WIDTH_TEST |
+>  		MMC_CAP_UHS_SDR12 | MMC_CAP_UHS_SDR25 | MMC_CAP_UHS_SDR50 |
+> -		MMC_CAP_ERASE | MMC_CAP_SYNC_RUNTIME_PM;
+> +		MMC_CAP_SYNC_RUNTIME_PM;
+>  	mmc->caps2 = MMC_CAP2_NO_PRESCAN_POWERUP | MMC_CAP2_FULL_PWR_CYCLE |
+>  		MMC_CAP2_NO_SDIO;
+>  
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 1bb6b6796318..95cc08c1fed9 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -4331,7 +4331,7 @@ int sdhci_setup_host(struct sdhci_host *host)
+>  	    !host->ops->get_max_timeout_count)
+>  		mmc->max_busy_timeout = 0;
+>  
+> -	mmc->caps |= MMC_CAP_SDIO_IRQ | MMC_CAP_ERASE | MMC_CAP_CMD23;
+> +	mmc->caps |= MMC_CAP_SDIO_IRQ | MMC_CAP_CMD23;
+>  	mmc->caps2 |= MMC_CAP2_SDIO_IRQ_NOTHREAD;
+>  
+>  	if (host->quirks & SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12)
+> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
+> index 3bfbd89bd4ab..5e95bbc51644 100644
+> --- a/drivers/mmc/host/sunxi-mmc.c
+> +++ b/drivers/mmc/host/sunxi-mmc.c
+> @@ -1394,7 +1394,7 @@ static int sunxi_mmc_probe(struct platform_device *pdev)
+>  	mmc->f_min		=   400000;
+>  	mmc->f_max		= 52000000;
+>  	mmc->caps	       |= MMC_CAP_MMC_HIGHSPEED | MMC_CAP_SD_HIGHSPEED |
+> -				  MMC_CAP_ERASE | MMC_CAP_SDIO_IRQ;
+> +				  MMC_CAP_SDIO_IRQ;
+>  
+>  	/*
+>  	 * Some H5 devices do not have signal traces precise enough to
+> diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
+> index 9520bd94cf43..f31afd1c2671 100644
+> --- a/drivers/mmc/host/tmio_mmc_core.c
+> +++ b/drivers/mmc/host/tmio_mmc_core.c
+> @@ -1128,7 +1128,7 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host)
+>  	if (ret == -EPROBE_DEFER)
+>  		return ret;
+>  
+> -	mmc->caps |= MMC_CAP_ERASE | MMC_CAP_4_BIT_DATA | pdata->capabilities;
+> +	mmc->caps |= MMC_CAP_4_BIT_DATA | pdata->capabilities;
+>  	mmc->caps2 |= pdata->capabilities2;
+>  	mmc->max_segs = pdata->max_segs ? : 32;
+>  	mmc->max_blk_size = TMIO_MAX_BLK_SIZE;
+> diff --git a/drivers/staging/greybus/sdio.c b/drivers/staging/greybus/sdio.c
+> index c4b16bb5c1a4..0939f4a4c963 100644
+> --- a/drivers/staging/greybus/sdio.c
+> +++ b/drivers/staging/greybus/sdio.c
+> @@ -67,7 +67,6 @@ static void _gb_sdio_set_host_caps(struct gb_sdio_host *host, u32 r)
+>  		((r & GB_SDIO_CAP_8_BIT_DATA) ? MMC_CAP_8_BIT_DATA : 0) |
+>  		((r & GB_SDIO_CAP_MMC_HS) ? MMC_CAP_MMC_HIGHSPEED : 0) |
+>  		((r & GB_SDIO_CAP_SD_HS) ? MMC_CAP_SD_HIGHSPEED : 0) |
+> -		((r & GB_SDIO_CAP_ERASE) ? MMC_CAP_ERASE : 0) |
+>  		((r & GB_SDIO_CAP_1_2V_DDR) ? MMC_CAP_1_2V_DDR : 0) |
+>  		((r & GB_SDIO_CAP_1_8V_DDR) ? MMC_CAP_1_8V_DDR : 0) |
+>  		((r & GB_SDIO_CAP_POWER_OFF_CARD) ? MMC_CAP_POWER_OFF_CARD : 0) |
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index d4a50e5dc111..7149bab555d7 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -321,7 +321,6 @@ struct mmc_host {
+>  #define MMC_CAP_AGGRESSIVE_PM	(1 << 7)	/* Suspend (e)MMC/SD at idle  */
+>  #define MMC_CAP_NONREMOVABLE	(1 << 8)	/* Nonremovable e.g. eMMC */
+>  #define MMC_CAP_WAIT_WHILE_BUSY	(1 << 9)	/* Waits while card is busy */
+> -#define MMC_CAP_ERASE		(1 << 10)	/* Allow erase/trim commands */
+>  #define MMC_CAP_3_3V_DDR	(1 << 11)	/* Host supports eMMC DDR 3.3V */
+>  #define MMC_CAP_1_8V_DDR	(1 << 12)	/* Host supports eMMC DDR 1.8V */
+>  #define MMC_CAP_1_2V_DDR	(1 << 13)	/* Host supports eMMC DDR 1.2V */
+> -- 
+> 2.20.1
+> 
