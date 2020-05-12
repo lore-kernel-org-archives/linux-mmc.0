@@ -7,88 +7,87 @@ X-Spam-Status: No, score=-5.8 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 37483C2D0FA
-	for <linux-mmc@archiver.kernel.org>; Tue, 12 May 2020 22:21:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B86EDC2D0FB
+	for <linux-mmc@archiver.kernel.org>; Tue, 12 May 2020 22:44:20 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0FB5B23129
-	for <linux-mmc@archiver.kernel.org>; Tue, 12 May 2020 22:21:54 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8EF0B20784
+	for <linux-mmc@archiver.kernel.org>; Tue, 12 May 2020 22:44:20 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1589322114;
-	bh=3fXJ+sEAJrKWSwmwKCHn1JgfPNWRgDrPMHlffB1MGss=;
+	s=default; t=1589323460;
+	bh=4F6QFsajeKzJn03KqzBxlJWS/kGOU/ReZu7YZTM9lFk=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
-	b=r/HrTUBGTm7AZp7EtsREzVOs8HTIlxhx3LQ5AqSNphhtSPaj1uTUoU3uWrLnQppPk
-	 VK5WUur9Z5eO6JHI5dKKiZPkTmsUGK+vNcBLhEtR1+GfhzYzYERtnqMTBMgoF9EBwY
-	 ZwlVsI5tYovjxCTGNiCGZm4iY91GAu6+aEHE+FDo=
+	b=dePqEprX0qkujAke50eRsxPLztShVdg6v5PKv+T03KdqMrJafqZ7stv7B74T87zzD
+	 ba5WQAIAbiUdi1UV1E5CqwMQlpMrgAMYoP3UjzI91xxFaP7VAroDsn5oXnisSH8EIb
+	 aaHUb1foJC8Bw/nzSivjC022MX+i6aabXURWVi2Q=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1731541AbgELWVu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 12 May 2020 18:21:50 -0400
-Received: from mail-ot1-f68.google.com ([209.85.210.68]:44170 "EHLO
-        mail-ot1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1730208AbgELWVt (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 12 May 2020 18:21:49 -0400
-Received: by mail-ot1-f68.google.com with SMTP id j4so11857291otr.11;
-        Tue, 12 May 2020 15:21:48 -0700 (PDT)
+        id S1726885AbgELWoU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 12 May 2020 18:44:20 -0400
+Received: from mail-ot1-f67.google.com ([209.85.210.67]:39909 "EHLO
+        mail-ot1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725938AbgELWoT (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 12 May 2020 18:44:19 -0400
+Received: by mail-ot1-f67.google.com with SMTP id m13so11902708otf.6;
+        Tue, 12 May 2020 15:44:19 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:date:from:to:cc:subject:message-id:references
          :mime-version:content-disposition:in-reply-to:user-agent;
-        bh=aI2YRGhYgKbm+SOd+W2xRJ/1uor/7vyi1g5Td1LZl/c=;
-        b=LZlxV+xE+axqIVKbeqp5nyg9tqDXRPSAtA5iMuOwb65OCMFLUJgrkfxFRM5W4XwehY
-         xSiCzN/L6YjMEaP2zwiLjCgFJQGOIZ/rieWjc/JMjukavEY/ZXH8yxk+4fs1e92Fep7v
-         MTvGbuXgfvkeYgoCnoN+TwzGHGM3k+I0qIST7VPGOJk99/bA/YfhVVMjtvJOxfr4qjdw
-         wbKO4WMh87T5icQSzSX64BoY6iTnsvUgOA8mj8PESBGdJdDoOfUUHqsxGN858plRqcf4
-         7VaTqe6U5OIvIV2x0z7q31SWAkLHqyT8gWFP2hOGD/qKKtj9j7RRxZGC+xGI1yGA7X+P
-         y7Ag==
-X-Gm-Message-State: AGi0PuYAPlfX975ENrwwD5BkGYusfFP1jE5jw1UPqg85qAu0iJGoJUg6
-        LBQMCdnyznRXcDJPEODRFA==
-X-Google-Smtp-Source: APiQypIbYAt7h1/ABNVeIx8QPnyWkap/X0BFQt/FS3aiaRSTm0AImbkDARk+GurtgZ+SRhH+VQ1yog==
-X-Received: by 2002:a05:6830:2386:: with SMTP id l6mr19264727ots.128.1589322108504;
-        Tue, 12 May 2020 15:21:48 -0700 (PDT)
+        bh=uumrDYsgwLaDX3HJhkdtaUmDr4MtGqDPU0CrAV2rD6U=;
+        b=fPoCX/hhbrhSy5yZwtpIiJfDR0sAPxnf2YxEkHYmaoyU1YSQZfPeBsOd8tKJ05VNE9
+         RX+oCe61gf27bCSA97qPM9et9p5dNza8B3xo1EqzxKT+oKmmpsg33vjbU0M1Wi1eb4jd
+         vnvTD3IM8g/LW7+2/9xLd3eHj9tnKcIP1xLS1k0UHq0kYXVWms2nLVQ4hjg0zxUvQRIk
+         REyWw1u6aqOp2OAJrOFFpLZTlMOAzgObCm1Vzeaw9+7BNZUYZDVklx8GsRjW327NeCD5
+         oAUOJ52MF8B6kD3ayJL1rZ7rInhdpDSV0yBsMCQavxGQNeFZIFudePdw2MO7wtkLLvUQ
+         mghA==
+X-Gm-Message-State: AGi0Pua8gq73Thaf5SN84lAb2TIrBy/u7gKrS9Aw0MGu+1ZWfBhVcGjs
+        cv9ZjIkQD6f8nqXkjOoT/g==
+X-Google-Smtp-Source: APiQypLudLaDx5Hvkugopv+ecKjUtr8tCweVHIWbZyoNgK4NPkO3hFmOEWUVAp12V5dMbReJH6+0XQ==
+X-Received: by 2002:a9d:69c9:: with SMTP id v9mr19153655oto.267.1589323458777;
+        Tue, 12 May 2020 15:44:18 -0700 (PDT)
 Received: from rob-hp-laptop (24-155-109-49.dyn.grandenetworks.net. [24.155.109.49])
-        by smtp.gmail.com with ESMTPSA id v207sm5606637oie.3.2020.05.12.15.21.47
+        by smtp.gmail.com with ESMTPSA id w3sm3779500otg.24.2020.05.12.15.44.17
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 12 May 2020 15:21:47 -0700 (PDT)
-Received: (nullmailer pid 8829 invoked by uid 1000);
-        Tue, 12 May 2020 22:21:46 -0000
-Date:   Tue, 12 May 2020 17:21:46 -0500
+        Tue, 12 May 2020 15:44:18 -0700 (PDT)
+Received: (nullmailer pid 11405 invoked by uid 1000);
+        Tue, 12 May 2020 22:44:17 -0000
+Date:   Tue, 12 May 2020 17:44:17 -0500
 From:   Rob Herring <robh@kernel.org>
-To:     Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-Cc:     dmaengine@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-renesas-soc@vger.kernel.org,
-        Prabhakar <prabhakar.csengg@gmail.com>,
-        Magnus Damm <magnus.damm@gmail.com>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        linux-mmc@vger.kernel.org,
-        Geert Uytterhoeven <geert+renesas@glider.be>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-serial@vger.kernel.org, Rob Herring <robh+dt@kernel.org>,
-        devicetree@vger.kernel.org, Vinod Koul <vkoul@kernel.org>,
-        linux-gpio@vger.kernel.org
-Subject: Re: [PATCH v2 08/10] dt-bindings: arm: Document
- iW-RainboW-G21D-Qseven-RZG1H board
-Message-ID: <20200512222146.GA8782@bogus>
-References: <1588542414-14826-1-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
- <1588542414-14826-9-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
+To:     Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+Cc:     linux-amlogic@lists.infradead.org, ulf.hansson@linaro.org,
+        linux-mmc@vger.kernel.org, jbrunet@baylibre.com,
+        robh+dt@kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, yinxin_1989@aliyun.com,
+        lnykww@gmail.com, jianxin.pan@amlogic.com,
+        linux-arm-kernel@lists.infradead.org, linux.amoon@gmail.com
+Subject: Re: [PATCH v7 1/2] dt-bindings: mmc: Document the Amlogic Meson SDHC
+ MMC host controller
+Message-ID: <20200512224417.GA11220@bogus>
+References: <20200512204147.504087-1-martin.blumenstingl@googlemail.com>
+ <20200512204147.504087-2-martin.blumenstingl@googlemail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1588542414-14826-9-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
+In-Reply-To: <20200512204147.504087-2-martin.blumenstingl@googlemail.com>
 User-Agent: Mutt/1.10.1 (2018-07-13)
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sun,  3 May 2020 22:46:52 +0100, Lad Prabhakar wrote:
-> Document the iW-RainboW-G21D-Qseven-RZG1H device tree bindings,
-> listing it as a supported board.
+On Tue, 12 May 2020 22:41:46 +0200, Martin Blumenstingl wrote:
+> This documents the devicetree bindings for the SDHC MMC host controller
+> found in Meson6, Meson8, Meson8b and Meson8m2 SoCs. It can use a
+> bus-width of 1/4/8-bit and it supports eMMC spec 4.4x/4.5x including
+> HS200 mode (up to 100MHz clock). It embeds an internal clock controller
+> which outputs four clocks (mod_clk, sd_clk, tx_clk and rx_clk) and is
+> fed by four external input clocks (clkin[0-3]). "pclk" is the module
+> register clock, it has to be enabled to access the registers.
 > 
-> Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-> Reviewed-by: Marian-Cristian Rotariu <marian-cristian.rotariu.rb@bp.renesas.com>
+> Signed-off-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
 > ---
->  Documentation/devicetree/bindings/arm/renesas.yaml | 7 +++++++
->  1 file changed, 7 insertions(+)
+>  .../bindings/mmc/amlogic,meson-mx-sdhc.yaml   | 68 +++++++++++++++++++
+>  1 file changed, 68 insertions(+)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/amlogic,meson-mx-sdhc.yaml
 > 
 
-Acked-by: Rob Herring <robh@kernel.org>
+Reviewed-by: Rob Herring <robh@kernel.org>
