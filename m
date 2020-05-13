@@ -2,51 +2,42 @@ Return-Path: <SRS0=M0Y2=63=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.3 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
+X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 50150C433DF
-	for <linux-mmc@archiver.kernel.org>; Wed, 13 May 2020 17:12:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9C7B2C433E1
+	for <linux-mmc@archiver.kernel.org>; Wed, 13 May 2020 17:31:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B1EF0205CB
-	for <linux-mmc@archiver.kernel.org>; Wed, 13 May 2020 17:12:18 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1589389938;
-	bh=t+svHDI2LEgtKLTdSO4kWJrbAf71gAmoo+hkov3X/1o=;
-	h=From:To:Cc:Subject:Date:List-ID:From;
-	b=GqnjT275Pfs7BhXXE6GimWUjliZ8EvOehTtdpeMP0bqCUg4wJGtbNBKrdNfneyVHm
-	 vvqW6F49AK3q3CBH+HPpq1D1tXglyR372IrZ+uAz0ymJ/VpuBEJwi+mqw8MJ44ly40
-	 8RfZsLXTIv3wzv8YaRfxrO8bvbVBXXuq2zt8U7f8=
+	by mail.kernel.org (Postfix) with ESMTP id 229332065D
+	for <linux-mmc@archiver.kernel.org>; Wed, 13 May 2020 17:31:41 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=fail reason="signature verification failed" (1024-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="lX48X8IE"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2389830AbgEMRMR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 13 May 2020 13:12:17 -0400
-Received: from mail.kernel.org ([198.145.29.99]:46090 "EHLO mail.kernel.org"
+        id S2389804AbgEMRbj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 13 May 2020 13:31:39 -0400
+Received: from www.zeus03.de ([194.117.254.33]:39790 "EHLO mail.zeus03.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2389826AbgEMRMR (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 13 May 2020 13:12:17 -0400
-Received: from localhost (p5486CF35.dip0.t-ipconnect.de [84.134.207.53])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 3C351205ED;
-        Wed, 13 May 2020 17:12:17 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1589389937;
-        bh=t+svHDI2LEgtKLTdSO4kWJrbAf71gAmoo+hkov3X/1o=;
-        h=From:To:Cc:Subject:Date:From;
-        b=0gSVQxP3wSUdmiBR9C1XXV0cigIVKqBg2kgpi3xhmO8lNDtxgAE1OmKOEmv/8Ufzh
-         Q5ZqKohzSQtvSIXG9RTukdgTfzJlkcxaRlwOJh7htAIcAd9gdeUDpC8UdAxzOlP8S6
-         715562B0EBjGqR9rSOThcwTzN3aLoBLhcCn9PX6E=
-From:   Wolfram Sang <wsa@kernel.org>
+        id S1732834AbgEMRbj (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 13 May 2020 13:31:39 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
+        from:to:cc:subject:date:message-id:mime-version
+        :content-transfer-encoding; s=k1; bh=lTJV8O7kx6trRAlxnD5NwiE752V
+        EX9ct9iVA4/E+mdA=; b=lX48X8IEg02bQqHvGf/Ej/H8Sc0rinhn2zolcOuZNMj
+        0cA4S+sNFqG2FpVtcYfZTiL5f3eoIkHBaOlzdS294xuTcpjcjll5mpwGfCuVnO0h
+        B4F6z4DnseJlg0274Vm6z2M1POJrffbjL5PV8UjUMGkPu/A7EHwID3IJOCG34xgs
+        =
+Received: (qmail 3435993 invoked from network); 13 May 2020 19:31:37 +0200
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 13 May 2020 19:31:37 +0200
+X-UD-Smtp-Session: l3s3148p1@1N3B84qlFt0gAwDPXwcWAIZZjypw6UMc
+From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
 To:     linux-mmc@vger.kernel.org
 Cc:     linux-renesas-soc@vger.kernel.org,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Geert Uytterhoeven <geert+renesas@glider.be>
-Subject: [RFC PATCH] mmc: tmio: properly balance RPM on remove
-Date:   Wed, 13 May 2020 19:12:06 +0200
-Message-Id: <20200513171206.6600-1-wsa@kernel.org>
+        Wolfram Sang <wsa+renesas@sang-engineering.com>
+Subject: [PATCH] mmc: renesas_sdhi: don't lose RPM savings because of manual clk handling
+Date:   Wed, 13 May 2020 19:31:31 +0200
+Message-Id: <20200513173131.11200-1-wsa+renesas@sang-engineering.com>
 X-Mailer: git-send-email 2.20.1
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -55,49 +46,101 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+The SDHI driver en-/disabled clocks on its own during probe() and
+remove(). This basically killed all potential RPM power savings. Now, we
+just enable the clocks for a short time when we access registers in
+probe(). We otherwise leave all handling to RPM. That means, we need to
+shift the RPM enabling code in the TMIO core a bit up, so we can access
+registers there, too.
 
-Because we enabled the device with _noresume, we should disable it with
-_noidle to match the ref counting of the clocks during remove().
+clk_summary before:
+sd0                   1        1        0    12480000          0     0  50000
+   sdif0              2        2        0    12480000          0     0  50000
 
-Reported-by: Geert Uytterhoeven <geert+renesas@glider.be>
+clk_summary after:
+sd0                   1        1        0    12480000          0     0  50000
+   sdif0              1        1        0    12480000          0     0  50000
+
 Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 ---
 
-I think this is the proper fix to the problem Geert reported [1]. I am
-not sure about a proper Fixes-tag, though. The corresponding _noidle
-call in the probe()-error-path was added with:
+Tested on a Salvator-XS board with R-Car M3-N.
 
-aa86f1a38875 ("mmc: tmio: Fixup runtime PM management during probe")
+ drivers/mmc/host/renesas_sdhi_core.c |  7 +++----
+ drivers/mmc/host/tmio_mmc_core.c     | 14 +++++++-------
+ 2 files changed, 10 insertions(+), 11 deletions(-)
 
-However, from my understanding this is more fitting?
-
-1b32999e205b ("mmc: tmio: Avoid boilerplate code in ->runtime_suspend()")
-
-But maybe my understanding of the situation is still not perfect and
-even the commit message is bogus? Ulf, since both mentioned commits are
-from you, could you have a look? Thanks in advance!
-
-   Wolfram
-
-[1] Message-ID: <alpine.DEB.2.21.2004291630090.4052@ramsan.of.borg>
-
- drivers/mmc/host/tmio_mmc_core.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
+diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
+index ff72b381a6b3..d581142634f8 100644
+--- a/drivers/mmc/host/renesas_sdhi_core.c
++++ b/drivers/mmc/host/renesas_sdhi_core.c
+@@ -910,6 +910,8 @@ int renesas_sdhi_probe(struct platform_device *pdev,
+ 		goto efree;
+ 
+ 	ver = sd_ctrl_read16(host, CTL_VERSION);
++	renesas_sdhi_clk_disable(host);
++
+ 	/* GEN2_SDR104 is first known SDHI to use 32bit block count */
+ 	if (ver < SDHI_VER_GEN2_SDR104 && mmc_data->max_blk_count > U16_MAX)
+ 		mmc_data->max_blk_count = U16_MAX;
+@@ -920,7 +922,7 @@ int renesas_sdhi_probe(struct platform_device *pdev,
+ 
+ 	ret = tmio_mmc_host_probe(host);
+ 	if (ret < 0)
+-		goto edisclk;
++		goto efree;
+ 
+ 	/* Enable tuning iff we have an SCC and a supported mode */
+ 	if (of_data && of_data->scc_offset &&
+@@ -985,8 +987,6 @@ int renesas_sdhi_probe(struct platform_device *pdev,
+ 
+ eirq:
+ 	tmio_mmc_host_remove(host);
+-edisclk:
+-	renesas_sdhi_clk_disable(host);
+ efree:
+ 	tmio_mmc_host_free(host);
+ 
+@@ -999,7 +999,6 @@ int renesas_sdhi_remove(struct platform_device *pdev)
+ 	struct tmio_mmc_host *host = platform_get_drvdata(pdev);
+ 
+ 	tmio_mmc_host_remove(host);
+-	renesas_sdhi_clk_disable(host);
+ 
+ 	return 0;
+ }
 diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
-index 9520bd94cf43..9a4ae954553b 100644
+index 9a4ae954553b..6968177dd1cd 100644
 --- a/drivers/mmc/host/tmio_mmc_core.c
 +++ b/drivers/mmc/host/tmio_mmc_core.c
-@@ -1235,7 +1235,7 @@ void tmio_mmc_host_remove(struct tmio_mmc_host *host)
- 	pm_runtime_dont_use_autosuspend(&pdev->dev);
- 	if (host->native_hotplug)
- 		pm_runtime_put_noidle(&pdev->dev);
--	pm_runtime_put_sync(&pdev->dev);
-+	pm_runtime_put_noidle(&pdev->dev);
- 	pm_runtime_disable(&pdev->dev);
- }
- EXPORT_SYMBOL_GPL(tmio_mmc_host_remove);
+@@ -1116,6 +1116,13 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host)
+ 
+ 	_host->set_pwr = pdata->set_pwr;
+ 
++	dev_pm_domain_start(&pdev->dev);
++	pm_runtime_get_noresume(&pdev->dev);
++	pm_runtime_set_active(&pdev->dev);
++	pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
++	pm_runtime_use_autosuspend(&pdev->dev);
++	pm_runtime_enable(&pdev->dev);
++
+ 	ret = tmio_mmc_init_ocr(_host);
+ 	if (ret < 0)
+ 		return ret;
+@@ -1192,13 +1199,6 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host)
+ 	/* See if we also get DMA */
+ 	tmio_mmc_request_dma(_host, pdata);
+ 
+-	dev_pm_domain_start(&pdev->dev);
+-	pm_runtime_get_noresume(&pdev->dev);
+-	pm_runtime_set_active(&pdev->dev);
+-	pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
+-	pm_runtime_use_autosuspend(&pdev->dev);
+-	pm_runtime_enable(&pdev->dev);
+-
+ 	ret = mmc_add_host(mmc);
+ 	if (ret)
+ 		goto remove_host;
 -- 
 2.20.1
 
