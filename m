@@ -2,155 +2,120 @@ Return-Path: <SRS0=M0Y2=63=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.2 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	MSGID_FROM_MTA_HEADER,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_2
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5E475CA90AF
-	for <linux-mmc@archiver.kernel.org>; Wed, 13 May 2020 10:26:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CB49BC2D0FE
+	for <linux-mmc@archiver.kernel.org>; Wed, 13 May 2020 11:59:49 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 34B60205ED
-	for <linux-mmc@archiver.kernel.org>; Wed, 13 May 2020 10:26:16 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A7DEC23126
+	for <linux-mmc@archiver.kernel.org>; Wed, 13 May 2020 11:59:49 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=Synaptics.onmicrosoft.com header.i=@Synaptics.onmicrosoft.com header.b="ORzVkcRD"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="dFf/OB1L"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1731466AbgEMK0P (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 13 May 2020 06:26:15 -0400
-Received: from mail-eopbgr690080.outbound.protection.outlook.com ([40.107.69.80]:9031
-        "EHLO NAM04-CO1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1728049AbgEMK0O (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 13 May 2020 06:26:14 -0400
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=GHdXK6LWI3TH02OX3tkMbmrhi4Jmd5MCDEvW4hhKbFO9Ku7mg6quG8F/UEYf30tuciY9wH32rih9XXiNswU87AaiT/ubxpty1B0KJQNOxN6v/M8CVbyS/AOCV+KS/Mw1E6sCmtWoufuUFh0Y9CB/QfFJx3GfO92TqFwovaWfTbHq/gnA3jQptOBsExRkO73eBxeZG9SzfNEasUsX8BUH9n1wWyXaRpevs/37+G9yLSOFrDA7BMuwDWpVf4KN9DKil9gi2HOKqX5o+jTG4HG5Aulv1uT3Uzr77ijbFt34tX11q1jKKdWcBBtgsU8HisVl51O3Qq9PyIJt5RhnWgH7jg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=f79+y+kLzPv220hJvbm+ATvjbwvjH6rsPrWhoYr0XNY=;
- b=MudsFdzEZ25wJtA4jRN/LPMHhkYnfVPvabvW0t9OMWEFy+AiztkGe+eAPwVzy4cAAhCjO1pYzYq2TfmxTMe5IswKSzhxBOg+gumyWmBAWmKgXvtBQ1s0EdZJIHZgOWXrn8xtVZTIMNN+1zpYai5MDsNgpGLK8lzQat77W/968KUKfMCqgFXjleHCBTeXMBP6bZMjAG/YNYKFRVdgzfAWEYE0ZkJbS3BU1OjHO4WGuFOvUmUeDe8sJqgyhmptvSaH19o7bBqndv9Vj64eWR1OBR6K1giShSNSgWn4Ml5tJiwnll8xO7ZC4GLwIxV6SiHiWp0V8ogsL30U8E47eIVs+Q==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=synaptics.com; dmarc=pass action=none
- header.from=synaptics.com; dkim=pass header.d=synaptics.com; arc=none
+        id S1732310AbgEML7s (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 13 May 2020 07:59:48 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41258 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1732283AbgEML7r (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 13 May 2020 07:59:47 -0400
+Received: from mail-ua1-x943.google.com (mail-ua1-x943.google.com [IPv6:2607:f8b0:4864:20::943])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 964B9C061A0E
+        for <linux-mmc@vger.kernel.org>; Wed, 13 May 2020 04:59:47 -0700 (PDT)
+Received: by mail-ua1-x943.google.com with SMTP id z16so5940105uae.11
+        for <linux-mmc@vger.kernel.org>; Wed, 13 May 2020 04:59:47 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=Synaptics.onmicrosoft.com; s=selector2-Synaptics-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=f79+y+kLzPv220hJvbm+ATvjbwvjH6rsPrWhoYr0XNY=;
- b=ORzVkcRDt3PHwtf/Vi+LfFqr4UIAuBTsSbvWiI/OS9aZ2PaoSJou3uk+PJ2EKvS7Yn1fVp+C5lMy5/nHk7Hh+5lTUm0NMaZwXshwagGg15D731YrNJpq+IUSe8tyQe4iD5N+6tGbAhEkMkLmgeS5ZQ7z/rbi7SFvFCxN4ZaBTdc=
-Authentication-Results: intel.com; dkim=none (message not signed)
- header.d=none;intel.com; dmarc=none action=none header.from=synaptics.com;
-Received: from BYAPR03MB3573.namprd03.prod.outlook.com (2603:10b6:a02:ae::15)
- by BYAPR03MB4472.namprd03.prod.outlook.com (2603:10b6:a03:d2::26) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.2979.35; Wed, 13 May
- 2020 10:26:12 +0000
-Received: from BYAPR03MB3573.namprd03.prod.outlook.com
- ([fe80::d8fb:de22:43b7:fcb7]) by BYAPR03MB3573.namprd03.prod.outlook.com
- ([fe80::d8fb:de22:43b7:fcb7%7]) with mapi id 15.20.2979.033; Wed, 13 May 2020
- 10:26:11 +0000
-Date:   Wed, 13 May 2020 18:26:02 +0800
-From:   Jisheng Zhang <Jisheng.Zhang@synaptics.com>
-To:     Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: [PATCH] mmc: sdhci-of-dwcmshc: implement specific set_uhs_signaling
-Message-ID: <20200513182602.3636a551@xhacker.debian>
-X-Mailer: Claws Mail 3.17.5 (GTK+ 2.24.32; x86_64-pc-linux-gnu)
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: TYXPR01CA0063.jpnprd01.prod.outlook.com
- (2603:1096:403:a::33) To BYAPR03MB3573.namprd03.prod.outlook.com
- (2603:10b6:a02:ae::15)
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=aKC3e9/aFqEyQsi12nQO5SZTFP347yzWMoN1Uw5P0XQ=;
+        b=dFf/OB1LlPqedz0aREfzsOdKso/hLi6bsb9ljL0ID5x7NfxheZ4plN4kDvtTFqBmJj
+         ftyzA1yRF1oTq6+Vws4q6Dx3Q4vh7jjFKXqRSBigEBdZs4N+X1HY1KbMfUAWtuj+BMcS
+         hCQaECK9o+YX7iZ/aISrMhW5inwFdzFrSCkhkhq7KbIdBW5uScuDf5yqQ9+DyMgYhQu1
+         MuZxs62XSeTKguK5HDeSINt/r6yA9PwLigqJQDWxPt13oQ0KmeI6UgydFnsfl/0492Hg
+         JxpNHPTjZNhX2ofF86U6ES9rqm5dWwKpE0nBTP2PyJRrxcDzift9UG30X+y2Bm38Mu0M
+         cdmw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=aKC3e9/aFqEyQsi12nQO5SZTFP347yzWMoN1Uw5P0XQ=;
+        b=Xd7XAxPnEcyEzWk5Ks2isri4yQLtdF7iklCQ5nkBUEP1zsetm2Tlxc37Oiqb1zUYwW
+         2AG0oePe73+GJAWgsZowplLecTN7zLxxV92yavLXOmGc42GFykbjcuCR+QKtVt1J/HW2
+         nW6ikTp7q7yuN71jKtW5p3znTu2TrTF+44DHamPcSLUZywJF3zWyRMvG0yzgi26Xx6Le
+         e/pTeKe3gLHC9mZ+6yvICNB8NeQfta/F0rTFuCecKDKEDbFf2dJO4f4ukqcsAE6Tpkfp
+         Gqe+Lz1aqg4oVi7E8/CvUh3BVu5pDEiZeoG6qvPeACOJxEWGAJwgoQVozcwyXGIDGjBR
+         OEWw==
+X-Gm-Message-State: AGi0PubJ+DChX/Feh2/3g86jkSPeabBWrOiYkFH7ObXkMZFx1raGP5o/
+        Qhd5bpzamjQYlOMhL2fJeKL2cuAWahlfv1OJ+lQ/oQ==
+X-Google-Smtp-Source: APiQypKquxL983aiOC1tqFBK1O0zfe8L4/l43OGtnDQgDfiBulRzZUqGmA95yyD1TqedEmzM8ovER+L2jUxyHzOwBOo=
+X-Received: by 2002:ab0:544a:: with SMTP id o10mr18877138uaa.15.1589371186638;
+ Wed, 13 May 2020 04:59:46 -0700 (PDT)
 MIME-Version: 1.0
-X-MS-Exchange-MessageSentRepresentingType: 1
-Received: from xhacker.debian (124.74.246.114) by TYXPR01CA0063.jpnprd01.prod.outlook.com (2603:1096:403:a::33) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.2979.33 via Frontend Transport; Wed, 13 May 2020 10:26:10 +0000
-X-Mailer: Claws Mail 3.17.5 (GTK+ 2.24.32; x86_64-pc-linux-gnu)
-X-Originating-IP: [124.74.246.114]
-X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: 2c01aee5-fbca-4d5b-83c2-08d7f7280ec2
-X-MS-TrafficTypeDiagnostic: BYAPR03MB4472:
-X-Microsoft-Antispam-PRVS: <BYAPR03MB4472BFAE0C791D892ACE586CEDBF0@BYAPR03MB4472.namprd03.prod.outlook.com>
-X-MS-Oob-TLC-OOBClassifiers: OLM:1443;
-X-Forefront-PRVS: 0402872DA1
-X-MS-Exchange-SenderADCheck: 1
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: WUtsvfH1L8IcoWEUCNllFFQHJx6OZb3q1i6QvESGSf47v0GVOt7G549c+aKRDLaK9rYs9kClCo4V6th5oegnBECJdR9ichDrGjiigG0uYF6sFtrJUjlRnlxyUwfvD42HtFE2f1z221zn+A/SkYMsgyOrYjzODidGlYTtdOfHPjXS5D61pi1ZMWhWYNs0hK+CRcYyj5YrIWh8CZ2J0cyQkgTPnXyz+JoCeyxX/TEFTTOKCoRFvQQSTekCvHL28RX0gV/Ylk0jMRkV/Ut9CBKGcfKlqSwfYwHsrW8C4BHonPlbWmIpkYKiPSPWuowin1OHWcMj1hQsyrV0QjjENwTDj7mGcderMaScbMTmwDXgvcAsmIKt2CtRCdZrm1T8xeKp+v4ZvsamCNr+dp9TcRhC29P8apJ7q6KrJqW0/xl148NQHD8eo25UYYdYKJHNFxsDDN6QQvVD+qUAYaeLOKf6E7524udMeVcUoLK0jjKwPvh/rKWRM710TL5bIqvdWZlSuEoRgRZKuG16NvT4WvPm1DogAE5JxcQ1qb183e9PET0roVtaM1Exg8rH6bx9ZYaX
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:BYAPR03MB3573.namprd03.prod.outlook.com;PTR:;CAT:NONE;SFTY:;SFS:(396003)(136003)(376002)(366004)(39850400004)(346002)(33430700001)(66556008)(316002)(55016002)(6506007)(6666004)(478600001)(9686003)(956004)(7696005)(110136005)(52116002)(33440700001)(16526019)(26005)(186003)(8676002)(1076003)(2906002)(66476007)(8936002)(4326008)(66946007)(86362001)(5660300002)(133343001);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData: tEBK+BbSzXCljPcK8YnRCdjmxdhkFs93mf8yhoITSCz+YOIq9pKbLMANvWHBnRLtjQshjz7bfrRpIMbg8mmYWEywKQxBkkyPhMAn+FPCOdz22kSVyLh1A9wOX17ndyfo17uQ9z8kRYD6sdd8s4uZU8ObTwYyjvRKfgfrMDhCOAMWvrk03i+S45OIJkzSlHIeC9vGXXVkWnxmkplkjjMt1E+mNwot9kCm0C9UK1esml1ljGGBYZaGyirvzoUg+E42G0gc+bXxV+Bozglz1UnGFBE3HIziBxqvZq3tIbEQnmhqrPdjeU7kuyj0Qsy+NXSbXwTIzHy+yp/1hv0XpSVt4Mjg5NC+YQgS6nBQCZJzyq+rWXHceVt4e95qaQUwmj9pZk3gJ/lBR9w5o9VrtGDVKVJ3tpZkmSVVbMy0f/Eph2iX6MtWM43F5KcLCLRKqee40Xyn3fXXJMwaHU7EUTFENQDjHt6jbsd6VwScS9KzcuS0um74gUI79HHqrnaHUEWv
-X-OriginatorOrg: synaptics.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 2c01aee5-fbca-4d5b-83c2-08d7f7280ec2
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 13 May 2020 10:26:11.8363
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 335d1fbc-2124-4173-9863-17e7051a2a0e
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: 2XNewtEEbW0ly7LFmn1bVGEA3cNjUYk5Q/D3kkckKNBzT1W0qVr7R1V3dfH+fMdGsNeYXrLzbpCejT7ekt4/Og==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: BYAPR03MB4472
+References: <20200501235907.3978-1-angelo.dureghello@timesys.com>
+ <CAPDyKFoLpMTQD+3SnXBNnqVLBMKDf6y=3X+MoPep42SCiQ6+TQ@mail.gmail.com> <bde7080c-298d-c28b-5986-dbabc95985bf@westnet.com.au>
+In-Reply-To: <bde7080c-298d-c28b-5986-dbabc95985bf@westnet.com.au>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Wed, 13 May 2020 13:59:10 +0200
+Message-ID: <CAPDyKFqdGGfCurSRG8poO2aCbOmRb9so7-zarKEb1yUnBP=GXA@mail.gmail.com>
+Subject: Re: [PATCH v3 1/3] m68k: mcf5441x: add support for esdhc mmc controller
+To:     Greg Ungerer <gregungerer@westnet.com.au>,
+        Angelo Dureghello <angelo.dureghello@timesys.com>
+Cc:     Geert Uytterhoeven <geert@linux-m68k.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        linux-m68k@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-We need a different set_uhs_signaling implementation for
-MMC_TIMING_MMC_HS and MMC_TIMING_MMC_HS400.
+On Tue, 12 May 2020 at 17:09, Greg Ungerer <gregungerer@westnet.com.au> wrote:
+>
+> Hi Ulf,
+>
+> On 7/5/20 7:13 pm, Ulf Hansson wrote:
+> > + Geert
+> >
+> > On Sat, 2 May 2020 at 01:54, Angelo Dureghello
+> > <angelo.dureghello@timesys.com> wrote:
+> >>
+> >> Add support for sdhci-edshc mmc controller.
+> >>
+> >> Signed-off-by: Angelo Dureghello <angelo.dureghello@timesys.com>
+> >> ---
+> >> Changes for v3:
+> >> - removed volatile cast from clk.c
+> >> ---
+> >>   arch/m68k/coldfire/clk.c                    | 15 ++++++++++
+> >>   arch/m68k/coldfire/device.c                 | 33 +++++++++++++++++++--
+> >>   arch/m68k/coldfire/m5441x.c                 | 12 +++++++-
+> >>   arch/m68k/include/asm/m5441xsim.h           | 19 ++++++++++++
+> >>   arch/m68k/include/asm/mcfclk.h              |  2 ++
+> >>   include/linux/platform_data/mmc-esdhc-mcf.h | 17 +++++++++++
+> >>   6 files changed, 95 insertions(+), 3 deletions(-)
+> >>   create mode 100644 include/linux/platform_data/mmc-esdhc-mcf.h
+> >
+> > Not sure what's the best way to deal with this patch. I looped in
+> > Geert to get some input.
+> >
+> > If it looks okay and the risk is minimal for conflicts, I can carry it
+> > via my tree, but then I need an ack from Geert.
+>
+> I can carry just this patch in the m68knommu git tree it you prefer.
+> Should be no conflicts that way. But really if you want to carry it
+> with all the others I don't have a problem with that either.
 
-Signed-off-by: Jisheng Zhang <Jisheng.Zhang@synaptics.com>
----
- drivers/mmc/host/sdhci-of-dwcmshc.c | 31 ++++++++++++++++++++++++++++-
- 1 file changed, 30 insertions(+), 1 deletion(-)
+It looks like the new platform data header file is being used by the
+mmc patch in 3/3, so it's probably easiest if I take them all via my
+mmc tree.
 
-diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-index a5137845a1c7..a9ed0e006e06 100644
---- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-+++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-@@ -16,6 +16,9 @@
- 
- #include "sdhci-pltfm.h"
- 
-+/* DWCMSHC specific Mode Select value */
-+#define DWCMSHC_CTRL_HS400		0x7
-+
- #define BOUNDARY_OK(addr, len) \
- 	((addr | (SZ_128M - 1)) == ((addr + len - 1) | (SZ_128M - 1)))
- 
-@@ -46,10 +49,36 @@ static void dwcmshc_adma_write_desc(struct sdhci_host *host, void **desc,
- 	sdhci_adma_write_desc(host, desc, addr, len, cmd);
- }
- 
-+static void dwcmshc_set_uhs_signaling(struct sdhci_host *host,
-+				      unsigned int timing)
-+{
-+	u16 ctrl_2;
-+
-+	ctrl_2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-+	/* Select Bus Speed Mode for host */
-+	ctrl_2 &= ~SDHCI_CTRL_UHS_MASK;
-+	if ((timing == MMC_TIMING_MMC_HS200) ||
-+	    (timing == MMC_TIMING_UHS_SDR104))
-+		ctrl_2 |= SDHCI_CTRL_UHS_SDR104;
-+	else if (timing == MMC_TIMING_UHS_SDR12)
-+		ctrl_2 |= SDHCI_CTRL_UHS_SDR12;
-+	else if ((timing == MMC_TIMING_UHS_SDR25) ||
-+		 (timing == MMC_TIMING_MMC_HS))
-+		ctrl_2 |= SDHCI_CTRL_UHS_SDR25;
-+	else if (timing == MMC_TIMING_UHS_SDR50)
-+		ctrl_2 |= SDHCI_CTRL_UHS_SDR50;
-+	else if ((timing == MMC_TIMING_UHS_DDR50) ||
-+		 (timing == MMC_TIMING_MMC_DDR52))
-+		ctrl_2 |= SDHCI_CTRL_UHS_DDR50;
-+	else if (timing == MMC_TIMING_MMC_HS400)
-+		ctrl_2 |= DWCMSHC_CTRL_HS400;
-+	sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
-+}
-+
- static const struct sdhci_ops sdhci_dwcmshc_ops = {
- 	.set_clock		= sdhci_set_clock,
- 	.set_bus_width		= sdhci_set_bus_width,
--	.set_uhs_signaling	= sdhci_set_uhs_signaling,
-+	.set_uhs_signaling	= dwcmshc_set_uhs_signaling,
- 	.get_max_clock		= sdhci_pltfm_clk_get_max_clock,
- 	.reset			= sdhci_reset,
- 	.adma_write_desc	= dwcmshc_adma_write_desc,
--- 
-2.26.2
+Anyway, I will wait for a v4 from Angelo to address the comments.
 
+[...]
+
+Kind regards
+Uffe
