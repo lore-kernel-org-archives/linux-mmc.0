@@ -2,128 +2,127 @@ Return-Path: <SRS0=Uo47=64=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A81C0C433E0
-	for <linux-mmc@archiver.kernel.org>; Thu, 14 May 2020 10:19:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7E835C433DF
+	for <linux-mmc@archiver.kernel.org>; Thu, 14 May 2020 10:24:03 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7FEC22065D
-	for <linux-mmc@archiver.kernel.org>; Thu, 14 May 2020 10:19:38 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5CEAF20722
+	for <linux-mmc@archiver.kernel.org>; Thu, 14 May 2020 10:24:03 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="a3xqgdqL"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="YerK+7uA"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726190AbgENKTh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 14 May 2020 06:19:37 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52876 "EHLO
+        id S1726614AbgENKX6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 14 May 2020 06:23:58 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53540 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726011AbgENKTg (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 14 May 2020 06:19:36 -0400
-Received: from mail-vk1-xa41.google.com (mail-vk1-xa41.google.com [IPv6:2607:f8b0:4864:20::a41])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0D426C061A0C
-        for <linux-mmc@vger.kernel.org>; Thu, 14 May 2020 03:19:36 -0700 (PDT)
-Received: by mail-vk1-xa41.google.com with SMTP id p5so634390vke.1
-        for <linux-mmc@vger.kernel.org>; Thu, 14 May 2020 03:19:36 -0700 (PDT)
+        with ESMTP id S1726199AbgENKXt (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 14 May 2020 06:23:49 -0400
+Received: from mail-vs1-xe41.google.com (mail-vs1-xe41.google.com [IPv6:2607:f8b0:4864:20::e41])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9CE97C061A0C
+        for <linux-mmc@vger.kernel.org>; Thu, 14 May 2020 03:23:49 -0700 (PDT)
+Received: by mail-vs1-xe41.google.com with SMTP id a5so1620501vsm.7
+        for <linux-mmc@vger.kernel.org>; Thu, 14 May 2020 03:23:49 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=F9G3dflweaHDPQ+DS1CDjH+ihEsjNaelVa9NdojUt1E=;
-        b=a3xqgdqLwtQ2GtV4uxSscMi3XPr4JXvwBDE9qNvMFMDrFxbMEMFHXxxmX2ScvvYnW2
-         mgpfQbZLAERGYpSvOdPbdKx5bWFfrQcTSAbIjLBLFFo8Ck8sw/im0O/73LKOcLecUY0X
-         7VEMA0I3XKJUVkSmUWj3sY36IYpvgkvUZAzgxsM1ipfsnyLHEt881StGmwi8uXBaENG8
-         Qr8Mkv+u+Dje+bWINIQg+P1uQGZPJ9t5SJwa4wuX0+kO2b+fa3/3OT5haesXj2AXxUDD
-         cZEADroHyXXkmQA8yln7dwFDwWbwAIAqovrj9RXf4wUOZREniJ9FTo7JbDwL/ceRUL/q
-         QDRw==
+        bh=XxbOGht0ye1sBhbrPpYfKMbU4OenacQ3DVBFGFBOWNg=;
+        b=YerK+7uAGjzbxEDFGas94+8RT+RnBHxvH0m0CCnPIH20UBUcG6Q/8RNS+ltZ8pts0+
+         Wgaz4bdQjtXQIss/SBLsYEjuP9SSKzxlSdBHxDTuDO4ZB/pfe3rlZtS5pWFrRl2KAd1C
+         UeZB7oSdEJD/dWKHLP0NhcRPcGdPmiJKw96P//cLlTtoEDPshJfEXMMKnhQAvPlmRqf6
+         v1tGdxJyTrhtsAMFxBxh5q+CQQRWhKm8mi/XZs2HSI0U7cvUOorDXC6VwzpWkXarr9oo
+         VgrsaucyRlaRYVJBzQ2/iiEvfwhLw1qPcrqwFAb1VhvHKDZqqvPqyQw/lSyG8M+fTH+E
+         SeyA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=F9G3dflweaHDPQ+DS1CDjH+ihEsjNaelVa9NdojUt1E=;
-        b=N0N/7Wv40i5cDiyF9VLHEF/eneXv5OKpTuHG6lglaxnQJp5V2hzMq/udf2rzA7d0HN
-         cA8Who3vcSWN8BaHR9yR31ev852UcK4X6MGLw9cFggPg4sGeoTTxRv4xvgnBCkaecreT
-         15sgLnqU6Ww7b6+LRSpo4eW0L6TZUm4gcbPEdZGck0APccnuv8NWfUt/JT0RsI/gl0b5
-         C6Aclbkk0uYHq20YFrNewnpwClPPEqYMAK16CXiPvLTyQf86ciBCjXKQjihMBA27c+7s
-         jqiNx9szTidse40qJPru2n5/siRZ+saVmYZPM9ArLwUKCxNqz4gX/3gQLla3vYix9sp4
-         lskA==
-X-Gm-Message-State: AOAM531khj1jrCYo/yTZ08MtkL0cdhPOuscUkZU3SkbcPJG4NPrgVjAE
-        uvVlZsST8uD2Z2XYinw/+tyIbCCFxoz3/fpNw3PvCA==
-X-Google-Smtp-Source: ABdhPJw/cbscMUafVNEDWx0LEt3Ufyo0rEx2MYE2HsdQpv4OQkUp3OpkBIOV7zGBHKw2YpLTymVJKWt7oI5hIJIImhs=
-X-Received: by 2002:a1f:25d7:: with SMTP id l206mr2770124vkl.53.1589451575120;
- Thu, 14 May 2020 03:19:35 -0700 (PDT)
+        bh=XxbOGht0ye1sBhbrPpYfKMbU4OenacQ3DVBFGFBOWNg=;
+        b=P4HPOLOTMFucvWQL2rOet/ybCGLMMwHO1Zw3BXmt5HVA05tNUdcfdUsA0tYLVegwBf
+         s3/IqLUWUaK4M6egetAzmWO2SbypljpBuH4HVuKMjI2fr/8Y+7GN/3NPWRU3R3GvzWER
+         j5oSVoMS2Z0mRMO1ul7rrjZdWm1kh9hlJ+lJYaycCfjaUD+6H8P606Rut098vgcwE4yt
+         uNEKhw7lzfnvRs9Oz+fbts6/96E4q8lUVXQYgpR4CwsHy2r2/dycWatbKwA5rdi7Q36H
+         u3NRD7W6hJz4DBGnEZtrXIE75SEWGca7TcOKgqRxLwLB6dsPTHGYk7cK3E+bzBd2SHOL
+         uFBA==
+X-Gm-Message-State: AOAM5311VCpK9Xzoqc3puHcMiZ4g8wx5wDJijDlUxwopEK6nlo0kDF5I
+        GzLPtFRAZU6esxVXvcv//6q/Z/RmEVdr3IIT9phmUw==
+X-Google-Smtp-Source: ABdhPJx9SsaDNYVhRKAhbE4YI3L0urHBK6RzWpOcLD+Bxst8lM9k6Fc8LRYApFv0pPBVyWo8KWsr/QuwaI8ffs8/R5M=
+X-Received: by 2002:a67:d71a:: with SMTP id p26mr2823673vsj.34.1589451828803;
+ Thu, 14 May 2020 03:23:48 -0700 (PDT)
 MIME-Version: 1.0
-References: <20200513174706.3eeddb2b@xhacker.debian> <CAPDyKFpE_uqiNQ22Fq9hDfb5pzMBdgmwgUbasEsEdXFkEOmq6A@mail.gmail.com>
- <20200514134507.54c17936@xhacker.debian>
-In-Reply-To: <20200514134507.54c17936@xhacker.debian>
+References: <20200513171206.6600-1-wsa@kernel.org>
+In-Reply-To: <20200513171206.6600-1-wsa@kernel.org>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 14 May 2020 12:18:58 +0200
-Message-ID: <CAPDyKFpUv=HGBAEchH25tdnRdUSAvbCgGGCgN8uuvPCQ92xwZg@mail.gmail.com>
-Subject: Re: [PATCH] Revert "mmc: sdhci-xenon: add runtime pm support and
- reimplement standby"
-To:     Jisheng Zhang <Jisheng.Zhang@synaptics.com>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Date:   Thu, 14 May 2020 12:23:12 +0200
+Message-ID: <CAPDyKFrgsZ7z=tvfpg6q0ofurneTQMo3Y5CnXRZXX4fmDQ=YOA@mail.gmail.com>
+Subject: Re: [RFC PATCH] mmc: tmio: properly balance RPM on remove
+To:     Wolfram Sang <wsa@kernel.org>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Geert Uytterhoeven <geert+renesas@glider.be>
 Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 14 May 2020 at 07:45, Jisheng Zhang <Jisheng.Zhang@synaptics.com> wrote:
+On Wed, 13 May 2020 at 19:12, Wolfram Sang <wsa@kernel.org> wrote:
 >
-> On Wed, 13 May 2020 14:15:21 +0200 Ulf Hansson wrote:
+> From: Wolfram Sang <wsa+renesas@sang-engineering.com>
 >
-> >
-> >
-> > On Wed, 13 May 2020 at 11:47, Jisheng Zhang <Jisheng.Zhang@synaptics.com> wrote:
-> > >
-> > > This reverts commit a027b2c5fed78851e69fab395b02d127a7759fc7.
-> > >
-> > > The HW supports auto clock gating, so it's useless to do runtime pm
-> > > in software.
-> >
-> > Runtime PM isn't soley about clock gating. Moreover it manages the
+> Because we enabled the device with _noresume, we should disable it with
+> _noidle to match the ref counting of the clocks during remove().
 >
-> Per my understanding, current xenon rpm implementation is just clock gating.
+> Reported-by: Geert Uytterhoeven <geert+renesas@glider.be>
+> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> ---
 >
-> > "pltfm_host->clk", which means even if the controller supports auto
-> > clock gating, gating/ungating the externally provided clock still
-> > makes sense.
+> I think this is the proper fix to the problem Geert reported [1]. I am
+> not sure about a proper Fixes-tag, though. The corresponding _noidle
+> call in the probe()-error-path was added with:
 >
->        clock -----------  xenon IP
->       |___ rpm           |__ HW Auto clock gate
+> aa86f1a38875 ("mmc: tmio: Fixup runtime PM management during probe")
 >
-> Per my understanding, with rpm, both clock and IP is clock gated; while with
-> Auto clock gate, the IP is clock gated. So the only difference is clock itself.
-> Considering the gain(suspect we have power consumption gain, see below), the
-> pay -- 56 LoCs and latency doesn't deserve gain.
+> However, from my understanding this is more fitting?
 >
-> Even if considering from power consumption POV, sdhci_runtime_suspend_host(),
-> sdhci_runtime_resume_host(), and the retune process could be more than the clock
-> itself.
+> 1b32999e205b ("mmc: tmio: Avoid boilerplate code in ->runtime_suspend()")
+>
+> But maybe my understanding of the situation is still not perfect and
+> even the commit message is bogus? Ulf, since both mentioned commits are
+> from you, could you have a look? Thanks in advance!
 
-Right.
-
-The re-tune may be costly, yes. However, whether the re-tune is
-*really* needed actually varies depending on the sdhci variant and the
-SoC. Additionally, re-tune isn't done for all types of (e)MMC/SD/SDIO
-cards.
-
-I see a few options that you can explore.
-
-1. There is no requirement to call sdhci_runtime_suspend|resume_host()
-from sdhci-xenon's ->runtime_suspend|resume() callbacks - if that's
-not explicitly needed. The point is, you can do other things there,
-that suits your variant/SoC better.
-
-2. Perhaps for embedded eMMCs, with a non-removable slot, the
-re-tuning is costly. If you want to prevent the device from entering
-runtime suspend for that slot, for example, just do an additional
-pm_runtime_get_noresume() during ->probe().
-
-[...]
+I did start to look at it, but got sidetracked with other things.
+Anyway, I will check in the next couple of days.
 
 Kind regards
 Uffe
+
+>
+>    Wolfram
+>
+> [1] Message-ID: <alpine.DEB.2.21.2004291630090.4052@ramsan.of.borg>
+>
+>  drivers/mmc/host/tmio_mmc_core.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
+> index 9520bd94cf43..9a4ae954553b 100644
+> --- a/drivers/mmc/host/tmio_mmc_core.c
+> +++ b/drivers/mmc/host/tmio_mmc_core.c
+> @@ -1235,7 +1235,7 @@ void tmio_mmc_host_remove(struct tmio_mmc_host *host)
+>         pm_runtime_dont_use_autosuspend(&pdev->dev);
+>         if (host->native_hotplug)
+>                 pm_runtime_put_noidle(&pdev->dev);
+> -       pm_runtime_put_sync(&pdev->dev);
+> +       pm_runtime_put_noidle(&pdev->dev);
+>         pm_runtime_disable(&pdev->dev);
+>  }
+>  EXPORT_SYMBOL_GPL(tmio_mmc_host_remove);
+> --
+> 2.20.1
+>
