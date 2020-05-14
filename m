@@ -1,656 +1,309 @@
-Return-Path: <SRS0=M0Y2=63=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=Uo47=64=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.2 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	MSGID_FROM_MTA_HEADER,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_2
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DF5CDC433E0
-	for <linux-mmc@archiver.kernel.org>; Wed, 13 May 2020 20:36:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1C81AC433DF
+	for <linux-mmc@archiver.kernel.org>; Thu, 14 May 2020 05:45:28 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 202B4205ED
-	for <linux-mmc@archiver.kernel.org>; Wed, 13 May 2020 20:36:37 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D1562206B6
+	for <linux-mmc@archiver.kernel.org>; Thu, 14 May 2020 05:45:27 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=timesys-com.20150623.gappssmtp.com header.i=@timesys-com.20150623.gappssmtp.com header.b="IBKEASca"
+	dkim=pass (1024-bit key) header.d=Synaptics.onmicrosoft.com header.i=@Synaptics.onmicrosoft.com header.b="e6yV7w5+"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727958AbgEMUgf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 13 May 2020 16:36:35 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37540 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727891AbgEMUge (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 13 May 2020 16:36:34 -0400
-Received: from mail-qk1-x743.google.com (mail-qk1-x743.google.com [IPv6:2607:f8b0:4864:20::743])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 92863C061A0C
-        for <linux-mmc@vger.kernel.org>; Wed, 13 May 2020 13:36:34 -0700 (PDT)
-Received: by mail-qk1-x743.google.com with SMTP id f13so812306qkh.2
-        for <linux-mmc@vger.kernel.org>; Wed, 13 May 2020 13:36:34 -0700 (PDT)
+        id S1725794AbgENFp1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 14 May 2020 01:45:27 -0400
+Received: from mail-mw2nam10on2062.outbound.protection.outlook.com ([40.107.94.62]:6171
+        "EHLO NAM10-MW2-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1725788AbgENFp0 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 14 May 2020 01:45:26 -0400
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=BzI0Hcronl/c8q2u5fLDE7Oo3lncHNmiE1ntxNUEcOfXhr3XtVODHj05GoRKWAmMtR8SU6X9yMvG1u0yOYIRZWzpYcMUVoXOqnyjPzwLp6We2QoXV9jOAPX42uLxenAtX7CFwLO5fdjoFC9MpIkRmpV0QgrtVFbDsWIyCW9R5XFzd1I9+klWt5MZw5yjRsc+oUJ1br8YOTbhza0cdKQMuweHkRCG1993rqlbE9wtrTZIPQZWIvj6WoWO2aqcetcfbuL0r/L7J0AwaVj2Ofi43+UfDGJcRrdEo5dVQ3AACparFglkX0PR/80Oq8/FFSKAqC2ZkLeldGfYugIZFvKasg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=ArkW/HFMb27nayLDxyZKBgq93jVJk6WQt1UUtfOHKWo=;
+ b=gSyVosgqjPQ/qLxdpRTjtnBu4CcJv0NICdvXab++Uqyd1RKez1BhcgfkM5Cp6KYaDGWXbEWHJURV5na8dJWZqwR30meSkVjMT81kFMkBxf0MVxJYxPyfvhThT0T8jRQaNg8t2uBwCVMXs43UHnwU57UDP1/taGGcY58iuwCEZ+YRKdY8bE/CzSHB6CVRXZ+iz6IYDTBTIGxURL4GqX1gbBitYLxnyLe3w90k+AewlHc8T9G0uxhVE1BPoPmCa2CNyjUWYlJ2xztbVnofa5Tx2Agn6HZxlCRVa/L1e3Uz7KCREtXoICB1bmTdukGSsPPbo5u4U9T+3Zzfs18o1d4fmA==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=synaptics.com; dmarc=pass action=none
+ header.from=synaptics.com; dkim=pass header.d=synaptics.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=timesys-com.20150623.gappssmtp.com; s=20150623;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=Iz8tki6P7fC0vryQY5MN7CllxFluLaFsKktt0JIfjKE=;
-        b=IBKEAScaOaXlgRTUn/MnUVB14+J0IgoIAx8rgsOvTkkWFDaDFiWPuj9ANkDdRuMUYI
-         zalq38TOpLVSqc/jdvcZMhpWdvApV1grjPdSOhoSZSuQ1JxyPgz2rxKXJfHGOrBBMOEb
-         tJEEnIwunxuBAR0SHFZl4lxC1fGbw2XdGN4w3SsMqPEJDVBBzPGu3CbQfxae581fFSFh
-         u6nqfgbiaTcTcqg8Lk2ICx49ne32LnMVg6Ac+Y72AULBwr9R5I2gV2SzPxLkN2pnQ+6L
-         zo7VGgiq03tGRvaB5NaErbaKg8UgyCq77qJWTKHAL7+rlzr8SbxyEM3pfgJal/a9TyLj
-         NALg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=Iz8tki6P7fC0vryQY5MN7CllxFluLaFsKktt0JIfjKE=;
-        b=JmTSJTgXJDX2Ma3I0jaOY+HDV/25X/MIkRfizrYv028ltSF81D9aH56uK6kzn/6nH3
-         VAf9qcIpKW/fhR0i7ndZbCBmUJf21fgMdyrchcJW9FlFHrKvcfwhChZeKf6Fy7RUPtfY
-         +mi3+xM5eUkmus3aYiPxf6VKdrUMN4ucNpZtI45G+Z3qZldsZABcz9uINHd5NR1DiPjO
-         JXqYzqHaSeYPwuJrGbPETi6FymH9jPTWmy6JBQkIPW4fT2i31shMbwYcGNOSlQ4BceeP
-         GoWW9hduhBNgcVFfx0z+RXDjo3NHunodf3XMxKLRngSZSZqwatAtsIudkEPIG/oiY7e2
-         m+/A==
-X-Gm-Message-State: AOAM5330iXOBnyoIkNW9ChIrj5H7rivl8mash4WQxppHmmNW8CBsl+Es
-        vdFTAZBEn93HePL/FSI2FaZ5e/t82/c=
-X-Google-Smtp-Source: ABdhPJwNIFrxWz6WvpF3ukoq89s1CqV89X7IHBenqLJVfsjOdcZchuOPyNtoslC2qO0m0B+cAcnfrg==
-X-Received: by 2002:a37:5ac2:: with SMTP id o185mr1481727qkb.461.1589402193558;
-        Wed, 13 May 2020 13:36:33 -0700 (PDT)
-Received: from dfj.bfc.timesys.com (host203-36-dynamic.30-79-r.retail.telecomitalia.it. [79.30.36.203])
-        by smtp.gmail.com with ESMTPSA id a16sm754528qko.92.2020.05.13.13.36.31
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 13 May 2020 13:36:33 -0700 (PDT)
-From:   Angelo Dureghello <angelo.dureghello@timesys.com>
-To:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
-        gerg@linux-m68k.org
-Cc:     linux-mmc@vger.kernel.org, linux-m68k@vger.kernel.org,
-        Angelo Dureghello <angelo.dureghello@timesys.com>
-Subject: [PATCH v4 3/3] mmc: host: add Coldfire esdhc support
-Date:   Wed, 13 May 2020 22:41:33 +0200
-Message-Id: <20200513204133.2540568-3-angelo.dureghello@timesys.com>
-X-Mailer: git-send-email 2.26.2
-In-Reply-To: <20200513204133.2540568-1-angelo.dureghello@timesys.com>
-References: <20200513204133.2540568-1-angelo.dureghello@timesys.com>
+ d=Synaptics.onmicrosoft.com; s=selector2-Synaptics-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=ArkW/HFMb27nayLDxyZKBgq93jVJk6WQt1UUtfOHKWo=;
+ b=e6yV7w5+dUqZrqFaJVFwx/dejrOE2yCgCUBzyRnKo7cLZMK8b8u7AdtC/C9NV2FOCoZNEZapCgmOZ79kzJe0bS9XZhySf6oa1g7rsQrz0VQZ2Fope2kRjY+WNVgLBWPjenc/eUbdJI4HnEmxRDjUwRPEB2FtmDAr2dgQ4wZ9+5U=
+Authentication-Results: linaro.org; dkim=none (message not signed)
+ header.d=none;linaro.org; dmarc=none action=none header.from=synaptics.com;
+Received: from BYAPR03MB3573.namprd03.prod.outlook.com (2603:10b6:a02:ae::15)
+ by BYAPR03MB3573.namprd03.prod.outlook.com (2603:10b6:a02:ae::15) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.2979.27; Thu, 14 May
+ 2020 05:45:22 +0000
+Received: from BYAPR03MB3573.namprd03.prod.outlook.com
+ ([fe80::d8fb:de22:43b7:fcb7]) by BYAPR03MB3573.namprd03.prod.outlook.com
+ ([fe80::d8fb:de22:43b7:fcb7%7]) with mapi id 15.20.2979.033; Thu, 14 May 2020
+ 05:45:22 +0000
+Date:   Thu, 14 May 2020 13:45:07 +0800
+From:   Jisheng Zhang <Jisheng.Zhang@synaptics.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Subject: Re: [PATCH] Revert "mmc: sdhci-xenon: add runtime pm support and
+ reimplement standby"
+Message-ID: <20200514134507.54c17936@xhacker.debian>
+In-Reply-To: <CAPDyKFpE_uqiNQ22Fq9hDfb5pzMBdgmwgUbasEsEdXFkEOmq6A@mail.gmail.com>
+References: <20200513174706.3eeddb2b@xhacker.debian>
+        <CAPDyKFpE_uqiNQ22Fq9hDfb5pzMBdgmwgUbasEsEdXFkEOmq6A@mail.gmail.com>
+X-Mailer: Claws Mail 3.17.5 (GTK+ 2.24.32; x86_64-pc-linux-gnu)
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+X-ClientProxiedBy: TY2PR04CA0015.apcprd04.prod.outlook.com
+ (2603:1096:404:f6::27) To BYAPR03MB3573.namprd03.prod.outlook.com
+ (2603:10b6:a02:ae::15)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+X-MS-Exchange-MessageSentRepresentingType: 1
+Received: from xhacker.debian (124.74.246.114) by TY2PR04CA0015.apcprd04.prod.outlook.com (2603:1096:404:f6::27) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3000.25 via Frontend Transport; Thu, 14 May 2020 05:45:20 +0000
+X-Mailer: Claws Mail 3.17.5 (GTK+ 2.24.32; x86_64-pc-linux-gnu)
+X-Originating-IP: [124.74.246.114]
+X-MS-PublicTrafficType: Email
+X-MS-Office365-Filtering-Correlation-Id: f51e4e1c-b680-426d-af11-08d7f7c9fe2c
+X-MS-TrafficTypeDiagnostic: BYAPR03MB3573:
+X-Microsoft-Antispam-PRVS: <BYAPR03MB3573D6CFE583C338A36CCE0CEDBC0@BYAPR03MB3573.namprd03.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:2276;
+X-Forefront-PRVS: 040359335D
+X-MS-Exchange-SenderADCheck: 1
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: Zj7/kpX33SiZZYRu1KO37tUpC4iTWV7zL4HDJllMEhOUDAepOyz3chXWsBTJ5Lyt4POSXcJqprmJNPobnp/XhUR2XfTR0mY38ZyhYRv34oJvBKk2WPLQvFjQ1ZErvmGy9CbAJCDKXwIfnfhVNPcaOpBCHuHYu2TpYY3ZC0Uo6X0fIcRyCKyHtEYAmG8uaZ1HY1RPDbG4IjQcEjWVGbivwCyQxe1wUFjkbKE+tBr1vGi5bh/+jlBOXsVWcmmVkweJOVPmSsqDxkYwU7xyDjjJQ0imU+3ltQKzIpWROrrUmenvCekKJMUJD0pHoXC8BON7BHttztVYQUbqOprVWoL0hU7MY+4/THGmee8FaG+dn4fr9rQx7k0U3T6VoZxhLebljDY/femrtOXYXYCsNDKWjANpTSRRWnCQulTTHHDBlRQk3OpmT/yJVMn1G7fQlED4
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:BYAPR03MB3573.namprd03.prod.outlook.com;PTR:;CAT:NONE;SFTY:;SFS:(396003)(136003)(346002)(376002)(366004)(39860400002)(7696005)(52116002)(6666004)(54906003)(9686003)(2906002)(55016002)(316002)(6916009)(478600001)(86362001)(1076003)(66476007)(5660300002)(26005)(66946007)(8676002)(6506007)(16526019)(956004)(4326008)(8936002)(66556008)(186003);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData: xjK5rixhy/7oezfD/Bl9G7Y+lhegjZG77zv/61Qy5dMai+ggq5Hx1J/2n0c0e7GYKYA5wAfUnxpiDWYb4Ztqulv0tv6suofJ9s5D89Rk8ZDQCDYO1MhkuzDQCSKM2jWBl9lZk4+ixcUnZGev3OIMwqMMHAnCTFhkAwKUK/Re6Ny0qp+IzRbsAgHuqKVa67nQQyBqHlgv/o1bPh/7KaE/KZNM9aQWIEB+/kma6fsr5+q9mc4RaW/buEmLnlpYbYGwwdg92z/9Z71qUrflJyvqL245wFOlNcMivywBOvP/muQBeN3amE/nwMArcaQEwyeYzLvIZdActC+uTtm9g7+VE3Z0WbEtNbigF3Nl05yv/A0gInoNZM7p13cqe2RTCCL1diDtPRIboqQvmg5hrMs52wxOWJBp+koAiq+uwGDYF2pfBUWbMxXEmpukHZuPjXGqnSZImsM7ZJ06Udv6fyab7a/7aRy27F2VfF0D1MH7zVLWb8Y7KsGP84L4xA+v4JiJ
+X-OriginatorOrg: synaptics.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: f51e4e1c-b680-426d-af11-08d7f7c9fe2c
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 14 May 2020 05:45:22.3411
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 335d1fbc-2124-4173-9863-17e7051a2a0e
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: QymwCzVsAt7wG4gG2uRwKcM/TVdV+7I3pthS/uu0c73AmX2xSriItsaxlOjaTzCGYzA4VM0Bs6nVljZMVHFHgA==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: BYAPR03MB3573
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-This driver has been developed as a separate module starting
-from the similar sdhci-esdhc-imx.c.
+On Wed, 13 May 2020 14:15:21 +0200 Ulf Hansson wrote:
 
-Reasons for a separate sdchi-esdhc-mcf driver:
+> 
+> 
+> On Wed, 13 May 2020 at 11:47, Jisheng Zhang <Jisheng.Zhang@synaptics.com> wrote:
+> >
+> > This reverts commit a027b2c5fed78851e69fab395b02d127a7759fc7.
+> >
+> > The HW supports auto clock gating, so it's useless to do runtime pm
+> > in software.  
+> 
+> Runtime PM isn't soley about clock gating. Moreover it manages the
 
-- m68K architecture does not support devicetrees, so modifying
-sdhci-of-esdhc.c that is devicetree-related adding platform data
-seems not appropriate,
-- clock-related part, has to be implemented specifically for
-mcf5441x family (see esdhc_mcf_pltfm_set_clock()),
-- this is a big endian cpu accessing a big endian controller,
-but about sdma, this controller does not support hw swap, which
-needs to be handled with specific code,
-- some other minor differences but mainly to avoid risks on
-tweaking inside largely used imx driver. Adding just a small
-size ColdFire-specific driver, with benefits in a further less
-risky maintenance.
+Per my understanding, current xenon rpm implementation is just clock gating.
 
-Signed-off-by: Angelo Dureghello <angelo.dureghello@timesys.com>
----
-Changes for v3:
-- fix write support
-Changes for v4:
-none
----
- drivers/mmc/host/Kconfig           |  13 +
- drivers/mmc/host/Makefile          |   1 +
- drivers/mmc/host/sdhci-esdhc-mcf.c | 503 +++++++++++++++++++++++++++++
- 3 files changed, 517 insertions(+)
- create mode 100644 drivers/mmc/host/sdhci-esdhc-mcf.c
+> "pltfm_host->clk", which means even if the controller supports auto
+> clock gating, gating/ungating the externally provided clock still
+> makes sense.
 
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index 462b5352fea7..da793fc95203 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -235,6 +235,19 @@ config MMC_SDHCI_CNS3XXX
- 
- 	  If unsure, say N.
- 
-+config MMC_SDHCI_ESDHC_MCF
-+	tristate "SDHCI support for the Freescale eSDHC ColdFire controller"
-+	depends on M5441x
-+	depends on MMC_SDHCI_PLTFM
-+	select MMC_SDHCI_IO_ACCESSORS
-+	help
-+	  This selects the Freescale eSDHC controller support for
-+	  ColdFire mcf5441x devices.
-+
-+	  If you have a controller with this interface, say Y or M here.
-+
-+	  If unsure, say N.
-+
- config MMC_SDHCI_ESDHC_IMX
- 	tristate "SDHCI support for the Freescale eSDHC/uSDHC i.MX controller"
- 	depends on ARCH_MXC
-diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-index b929ef941208..af2cdaadc4d3 100644
---- a/drivers/mmc/host/Makefile
-+++ b/drivers/mmc/host/Makefile
-@@ -82,6 +82,7 @@ obj-$(CONFIG_MMC_REALTEK_USB)	+= rtsx_usb_sdmmc.o
- obj-$(CONFIG_MMC_SDHCI_PLTFM)		+= sdhci-pltfm.o
- obj-$(CONFIG_MMC_SDHCI_CADENCE)		+= sdhci-cadence.o
- obj-$(CONFIG_MMC_SDHCI_CNS3XXX)		+= sdhci-cns3xxx.o
-+obj-$(CONFIG_MMC_SDHCI_ESDHC_MCF)       += sdhci-esdhc-mcf.o
- obj-$(CONFIG_MMC_SDHCI_ESDHC_IMX)	+= sdhci-esdhc-imx.o
- obj-$(CONFIG_MMC_SDHCI_DOVE)		+= sdhci-dove.o
- obj-$(CONFIG_MMC_SDHCI_TEGRA)		+= sdhci-tegra.o
-diff --git a/drivers/mmc/host/sdhci-esdhc-mcf.c b/drivers/mmc/host/sdhci-esdhc-mcf.c
-new file mode 100644
-index 000000000000..658b687c7a51
---- /dev/null
-+++ b/drivers/mmc/host/sdhci-esdhc-mcf.c
-@@ -0,0 +1,503 @@
-+// SPDX-License-Identifier: GPL-2.0
-+/*
-+ * Freescale eSDHC ColdFire family controller driver, platform bus.
-+ *
-+ * Copyright (c) 2020 Timesys Corporation
-+ *   Author: Angelo Dureghello <angelo.dureghello@timesys.it>
-+ */
-+
-+#include <linux/module.h>
-+#include <linux/delay.h>
-+#include <linux/platform_data/mmc-esdhc-mcf.h>
-+#include <linux/mmc/mmc.h>
-+#include "sdhci-pltfm.h"
-+#include "sdhci-esdhc.h"
-+
-+#define	ESDHC_PROCTL_D3CD		0x08
-+#define ESDHC_SYS_CTRL_DTOCV_MASK	0x0f
-+#define ESDHC_DEFAULT_HOST_CONTROL	0x28
-+
-+/*
-+ * Freescale eSDHC has DMA ERR flag at bit 28, not as std spec says, bit 25.
-+ */
-+#define ESDHC_INT_VENDOR_SPEC_DMA_ERR	(1 << 28)
-+
-+struct pltfm_mcf_data {
-+	struct clk *clk_ipg;
-+	struct clk *clk_ahb;
-+	struct clk *clk_per;
-+	int aside;
-+	int current_bus_width;
-+};
-+
-+static inline void esdhc_mcf_buffer_swap32(u32 *buf, int len)
-+{
-+	int i;
-+	u32 temp;
-+
-+	len = (len + 3) >> 2;
-+
-+	for (i = 0; i < len;  i++) {
-+		temp = swab32(*buf);
-+		*buf++ = temp;
-+	}
-+}
-+
-+static inline void esdhc_clrset_be(struct sdhci_host *host,
-+				   u32 mask, u32 val, int reg)
-+{
-+	void __iomem *base = host->ioaddr + (reg & ~3);
-+	u8 shift = (reg & 3) << 3;
-+
-+	mask <<= shift;
-+	val <<= shift;
-+
-+	if (reg == SDHCI_HOST_CONTROL)
-+		val |= ESDHC_PROCTL_D3CD;
-+
-+	writel((readl(base) & ~mask) | val, base);
-+}
-+
-+/*
-+ * Note: mcf is big-endian, single bytes need to be accessed at big endian
-+ * offsets.
-+ */
-+static void esdhc_mcf_writeb_be(struct sdhci_host *host, u8 val, int reg)
-+{
-+	void __iomem *base = host->ioaddr + (reg & ~3);
-+	u8 shift = (reg & 3) << 3;
-+	u32 mask = ~(0xff << shift);
-+
-+	if (reg == SDHCI_HOST_CONTROL) {
-+		u32 host_ctrl = ESDHC_DEFAULT_HOST_CONTROL;
-+		u8 dma_bits = (val & SDHCI_CTRL_DMA_MASK) >> 3;
-+		u8 tmp = readb(host->ioaddr + SDHCI_HOST_CONTROL + 1);
-+
-+		tmp &= ~0x03;
-+		tmp |= dma_bits;
-+
-+		/*
-+		 * Recomposition needed, restore always endianness and
-+		 * keep D3CD and AI, just setting bus width.
-+		 */
-+		host_ctrl |= val;
-+		host_ctrl |= (dma_bits << 8);
-+		writel(host_ctrl, host->ioaddr + SDHCI_HOST_CONTROL);
-+
-+		return;
-+	}
-+
-+	writel((readl(base) & mask) | (val << shift), base);
-+}
-+
-+static void esdhc_mcf_writew_be(struct sdhci_host *host, u16 val, int reg)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct pltfm_mcf_data *mcf_data = sdhci_pltfm_priv(pltfm_host);
-+	void __iomem *base = host->ioaddr + (reg & ~3);
-+	u8 shift = (reg & 3) << 3;
-+	u32 mask = ~(0xffff << shift);
-+
-+	switch (reg) {
-+	case SDHCI_TRANSFER_MODE:
-+		mcf_data->aside = val;
-+		return;
-+	case SDHCI_COMMAND:
-+		if (host->cmd->opcode == MMC_STOP_TRANSMISSION)
-+			val |= SDHCI_CMD_ABORTCMD;
-+
-+		/*
-+		 * As for the fsl driver,
-+		 * we have to set the mode in a single write here.
-+		 */
-+		writel(val << 16 | mcf_data->aside,
-+			       host->ioaddr + SDHCI_TRANSFER_MODE);
-+		return;
-+	}
-+
-+	writel((readl(base) & mask) | (val << shift), base);
-+}
-+
-+static void esdhc_mcf_writel_be(struct sdhci_host *host, u32 val, int reg)
-+{
-+	writel(val, host->ioaddr + reg);
-+}
-+
-+static u8 esdhc_mcf_readb_be(struct sdhci_host *host, int reg)
-+{
-+	if (reg == SDHCI_HOST_CONTROL) {
-+		u8 __iomem *base = host->ioaddr + (reg & ~3);
-+		u16 val = readw(base + 2);
-+		u8 dma_bits = (val >> 5) & SDHCI_CTRL_DMA_MASK;
-+		u8 host_ctrl = val & 0xff;
-+
-+		host_ctrl &= ~SDHCI_CTRL_DMA_MASK;
-+		host_ctrl |= dma_bits;
-+
-+		return host_ctrl;
-+	}
-+
-+	return readb(host->ioaddr + (reg ^ 0x3));
-+}
-+
-+static u16 esdhc_mcf_readw_be(struct sdhci_host *host, int reg)
-+{
-+	/*
-+	 * For SDHCI_HOST_VERSION, sdhci specs defines 0xFE,
-+	 * a wrong offset for us, we are at 0xFC.
-+	 */
-+	if (reg == SDHCI_HOST_VERSION)
-+		reg -= 2;
-+
-+	return readw(host->ioaddr + (reg ^ 0x2));
-+}
-+
-+static u32 esdhc_mcf_readl_be(struct sdhci_host *host, int reg)
-+{
-+	u32 val;
-+
-+	val = readl(host->ioaddr + reg);
-+
-+	/*
-+	 * RM (25.3.9) sd pin clock must never exceed 25Mhz.
-+	 * So forcing legacy mode at 25Mhz.
-+	 */
-+	if (unlikely(reg == SDHCI_CAPABILITIES))
-+		val &= ~SDHCI_CAN_DO_HISPD;
-+
-+	if (unlikely(reg == SDHCI_INT_STATUS)) {
-+		if (val & ESDHC_INT_VENDOR_SPEC_DMA_ERR) {
-+			val &= ~ESDHC_INT_VENDOR_SPEC_DMA_ERR;
-+			val |= SDHCI_INT_ADMA_ERROR;
-+		}
-+	}
-+
-+	return val;
-+}
-+
-+static unsigned int esdhc_mcf_get_max_timeout_count(struct sdhci_host *host)
-+{
-+	return 1 << 27;
-+}
-+
-+static void esdhc_mcf_set_timeout(struct sdhci_host *host,
-+				  struct mmc_command *cmd)
-+{
-+	/* Use maximum timeout counter */
-+	esdhc_clrset_be(host, ESDHC_SYS_CTRL_DTOCV_MASK, 0xE,
-+				SDHCI_TIMEOUT_CONTROL);
-+}
-+
-+static void esdhc_mcf_reset(struct sdhci_host *host, u8 mask)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct pltfm_mcf_data *mcf_data = sdhci_pltfm_priv(pltfm_host);
-+
-+	sdhci_reset(host, mask);
-+
-+	esdhc_clrset_be(host, ESDHC_CTRL_BUSWIDTH_MASK,
-+			mcf_data->current_bus_width, SDHCI_HOST_CONTROL);
-+
-+	sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
-+	sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
-+}
-+
-+static unsigned int esdhc_mcf_pltfm_get_max_clock(struct sdhci_host *host)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+
-+	return pltfm_host->clock;
-+}
-+
-+static unsigned int esdhc_mcf_pltfm_get_min_clock(struct sdhci_host *host)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+
-+	return pltfm_host->clock / 256 / 16;
-+}
-+
-+static void esdhc_mcf_pltfm_set_clock(struct sdhci_host *host,
-+					 unsigned int clock)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	unsigned long *pll_dr = (unsigned long *)MCF_PLL_DR;
-+	u32 fvco, fsys, fesdhc, temp;
-+	const int sdclkfs[] = {2, 4, 8, 16, 32, 64, 128, 256};
-+	int delta, old_delta = clock;
-+	int i, q, ri, rq;
-+
-+	if (clock == 0) {
-+		host->mmc->actual_clock = 0;
-+		return;
-+	}
-+
-+	/*
-+	 * ColdFire eSDHC clock.s
-+	 *
-+	 * pll -+-> / outdiv1 --> fsys
-+	 *      +-> / outdiv3 --> eSDHC clock ---> / SDCCLKFS / DVS
-+	 *
-+	 * mcf5441x datasheet says:
-+	 * (8.1.2) eSDHC should be 40 MHz max
-+	 * (25.3.9) eSDHC input is, as example, 96 Mhz ...
-+	 * (25.3.9) sd pin clock must never exceed 25Mhz
-+	 *
-+	 * fvco = fsys * outdvi1 + 1
-+	 * fshdc = fvco / outdiv3 + 1
-+	 */
-+	temp = readl(pll_dr);
-+	fsys = pltfm_host->clock;
-+	fvco = fsys * ((temp & 0x1f) + 1);
-+	fesdhc = fvco / (((temp >> 10) & 0x1f) + 1);
-+
-+	for (i = 0; i < 8; ++i) {
-+		int result = fesdhc / sdclkfs[i];
-+
-+		for (q = 1; q < 17; ++q) {
-+			int finale = result / q;
-+
-+			delta = abs(clock - finale);
-+
-+			if (delta < old_delta) {
-+				old_delta = delta;
-+				ri = i;
-+				rq = q;
-+			}
-+		}
-+	}
-+
-+	/*
-+	 * Apply divisors and re-enable all the clocks
-+	 */
-+	temp = ((sdclkfs[ri] >> 1) << 8) | ((rq - 1) << 4) |
-+		(ESDHC_CLOCK_IPGEN | ESDHC_CLOCK_HCKEN | ESDHC_CLOCK_PEREN);
-+	esdhc_clrset_be(host, 0x0000fff7, temp, SDHCI_CLOCK_CONTROL);
-+
-+	host->mmc->actual_clock = clock;
-+
-+	mdelay(1);
-+}
-+
-+static void esdhc_mcf_pltfm_set_bus_width(struct sdhci_host *host, int width)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct pltfm_mcf_data *mcf_data = sdhci_pltfm_priv(pltfm_host);
-+
-+	switch (width) {
-+	case MMC_BUS_WIDTH_4:
-+		mcf_data->current_bus_width = ESDHC_CTRL_4BITBUS;
-+		break;
-+	default:
-+		mcf_data->current_bus_width = 0;
-+		break;
-+	}
-+
-+	esdhc_clrset_be(host, ESDHC_CTRL_BUSWIDTH_MASK,
-+			mcf_data->current_bus_width, SDHCI_HOST_CONTROL);
-+}
-+
-+static void esdhc_mcf_request_done(struct sdhci_host *host,
-+				   struct mmc_request *mrq)
-+{
-+	struct scatterlist *sg;
-+	u32 *buffer;
-+	int i;
-+
-+	if (!mrq->data || !mrq->data->bytes_xfered)
-+		goto exit_done;
-+
-+	if (mmc_get_dma_dir(mrq->data) != DMA_FROM_DEVICE)
-+		goto exit_done;
-+
-+	/*
-+	 * On mcf5441x there is no hw sdma option/flag to select the dma
-+	 * transfer endiannes. A swap after the transfer is needed.
-+	 */
-+	for_each_sg(mrq->data->sg, sg, mrq->data->sg_len, i) {
-+		buffer = (u32 *)sg_virt(sg);
-+		esdhc_mcf_buffer_swap32(buffer, sg->length);
-+	}
-+
-+exit_done:
-+	mmc_request_done(host->mmc, mrq);
-+}
-+
-+static void esdhc_mcf_pre_dma_transfer(struct sdhci_host *host,
-+	struct mmc_data *data)
-+{
-+	esdhc_mcf_buffer_swap32((u32 *)host->bounce_buffer,
-+				data->blksz * data->blocks);
-+}
-+
-+static struct sdhci_ops sdhci_esdhc_ops = {
-+	.reset = esdhc_mcf_reset,
-+	.set_clock = esdhc_mcf_pltfm_set_clock,
-+	.get_max_clock = esdhc_mcf_pltfm_get_max_clock,
-+	.get_min_clock = esdhc_mcf_pltfm_get_min_clock,
-+	.set_bus_width = esdhc_mcf_pltfm_set_bus_width,
-+	.get_max_timeout_count = esdhc_mcf_get_max_timeout_count,
-+	.set_timeout = esdhc_mcf_set_timeout,
-+	.write_b = esdhc_mcf_writeb_be,
-+	.write_w = esdhc_mcf_writew_be,
-+	.write_l = esdhc_mcf_writel_be,
-+	.read_b = esdhc_mcf_readb_be,
-+	.read_w = esdhc_mcf_readw_be,
-+	.read_l = esdhc_mcf_readl_be,
-+	.pre_dma_transfer = esdhc_mcf_pre_dma_transfer,
-+	.request_done = esdhc_mcf_request_done,
-+};
-+
-+static const struct sdhci_pltfm_data sdhci_esdhc_mcf_pdata = {
-+	.ops = &sdhci_esdhc_ops,
-+	.quirks = ESDHC_DEFAULT_QUIRKS | SDHCI_QUIRK_FORCE_DMA,
-+		 /*
-+		  * Mandatory quirk,
-+		  * controller does not support cmd23,
-+		  * without, on > 8G cards cmd23 is used, and
-+		  * driver times out.
-+		  */
-+		  SDHCI_QUIRK2_HOST_NO_CMD23,
-+};
-+
-+static int esdhc_mcf_plat_init(struct sdhci_host *host,
-+				     struct pltfm_mcf_data *mcf_data)
-+{
-+	struct mcf_esdhc_platform_data *plat_data;
-+
-+	if (!host->mmc->parent->platform_data) {
-+		dev_err(mmc_dev(host->mmc), "no platform data!\n");
-+		return -EINVAL;
-+	}
-+
-+	plat_data = ((struct mcf_esdhc_platform_data *)
-+			host->mmc->parent->platform_data);
-+
-+	/* Card_detect */
-+	switch (plat_data->cd_type) {
-+	default:
-+	case ESDHC_CD_CONTROLLER:
-+		/* We have a working card_detect back */
-+		host->quirks &= ~SDHCI_QUIRK_BROKEN_CARD_DETECTION;
-+		break;
-+	case ESDHC_CD_PERMANENT:
-+		host->mmc->caps |= MMC_CAP_NONREMOVABLE;
-+		break;
-+	case ESDHC_CD_NONE:
-+		break;
-+	}
-+
-+	switch (plat_data->max_bus_width) {
-+	case 4:
-+		host->mmc->caps |= MMC_CAP_4_BIT_DATA;
-+		break;
-+	case 1:
-+	default:
-+		host->quirks |= SDHCI_QUIRK_FORCE_1_BIT_DATA;
-+		break;
-+	}
-+
-+	return 0;
-+}
-+
-+static int sdhci_esdhc_mcf_probe(struct platform_device *pdev)
-+{
-+	struct sdhci_host *host;
-+	struct sdhci_pltfm_host *pltfm_host;
-+	struct pltfm_mcf_data *mcf_data;
-+	int err;
-+
-+	host = sdhci_pltfm_init(pdev, &sdhci_esdhc_mcf_pdata,
-+				sizeof(*mcf_data));
-+
-+	if (IS_ERR(host))
-+		return PTR_ERR(host);
-+
-+	pltfm_host = sdhci_priv(host);
-+	mcf_data = sdhci_pltfm_priv(pltfm_host);
-+
-+	host->sdma_boundary = 0;
-+
-+	host->flags |= SDHCI_AUTO_CMD12;
-+
-+	mcf_data->clk_ipg = devm_clk_get(&pdev->dev, "ipg");
-+	if (IS_ERR(mcf_data->clk_ipg)) {
-+		err = PTR_ERR(mcf_data->clk_ipg);
-+		goto err_exit;
-+	}
-+
-+	mcf_data->clk_ahb = devm_clk_get(&pdev->dev, "ahb");
-+	if (IS_ERR(mcf_data->clk_ahb)) {
-+		err = PTR_ERR(mcf_data->clk_ahb);
-+		goto err_exit;
-+	}
-+
-+	mcf_data->clk_per = devm_clk_get(&pdev->dev, "per");
-+	if (IS_ERR(mcf_data->clk_per)) {
-+		err = PTR_ERR(mcf_data->clk_per);
-+		goto err_exit;
-+	}
-+
-+	pltfm_host->clk = mcf_data->clk_per;
-+	pltfm_host->clock = clk_get_rate(pltfm_host->clk);
-+	err = clk_prepare_enable(mcf_data->clk_per);
-+	if (err)
-+		goto err_exit;
-+
-+	err = clk_prepare_enable(mcf_data->clk_ipg);
-+	if (err) {
-+		clk_disable_unprepare(mcf_data->clk_per);
-+		goto err_exit;
-+	}
-+	err = clk_prepare_enable(mcf_data->clk_ahb);
-+	if (err) {
-+		clk_disable_unprepare(mcf_data->clk_per);
-+		clk_disable_unprepare(mcf_data->clk_ipg);
-+		goto err_exit;
-+	}
-+
-+	err = esdhc_mcf_plat_init(host, mcf_data);
-+	if (err)
-+		goto err_exit;
-+
-+	err = sdhci_add_host(host);
-+	if (err)
-+		goto err_exit;
-+
-+	return 0;
-+
-+err_exit:
-+	sdhci_pltfm_free(pdev);
-+
-+	return err;
-+}
-+
-+static int sdhci_esdhc_mcf_remove(struct platform_device *pdev)
-+{
-+	struct sdhci_host *host = platform_get_drvdata(pdev);
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct pltfm_mcf_data *mcf_data = sdhci_pltfm_priv(pltfm_host);
-+
-+	sdhci_remove_host(host, 0);
-+
-+	clk_disable_unprepare(mcf_data->clk_ipg);
-+	clk_disable_unprepare(mcf_data->clk_ahb);
-+	clk_disable_unprepare(mcf_data->clk_per);
-+
-+	sdhci_pltfm_free(pdev);
-+
-+	return 0;
-+}
-+
-+static struct platform_driver sdhci_esdhc_mcf_driver = {
-+	.driver	= {
-+		.name = "sdhci-esdhc-mcf",
-+	},
-+	.probe = sdhci_esdhc_mcf_probe,
-+	.remove = sdhci_esdhc_mcf_remove,
-+};
-+
-+module_platform_driver(sdhci_esdhc_mcf_driver);
-+
-+MODULE_DESCRIPTION("SDHCI driver for Freescale ColdFire eSDHC");
-+MODULE_AUTHOR("Angelo Dureghello <angelo.dureghello@timesys.com>");
-+MODULE_LICENSE("GPL v2");
--- 
-2.26.2
+       clock -----------  xenon IP
+      |___ rpm           |__ HW Auto clock gate
+
+Per my understanding, with rpm, both clock and IP is clock gated; while with
+Auto clock gate, the IP is clock gated. So the only difference is clock itself.
+Considering the gain(suspect we have power consumption gain, see below), the
+pay -- 56 LoCs and latency doesn't deserve gain.
+
+Even if considering from power consumption POV, sdhci_runtime_suspend_host(),
+sdhci_runtime_resume_host(), and the retune process could be more than the clock
+itself.
+
+
+> 
+> Kind regards
+> Uffe
+> 
+> >
+> > Signed-off-by: Jisheng Zhang <Jisheng.Zhang@synaptics.com>
+> > ---
+> >  drivers/mmc/host/sdhci-xenon.c | 87 +++++++---------------------------
+> >  drivers/mmc/host/sdhci-xenon.h |  1 -
+> >  2 files changed, 16 insertions(+), 72 deletions(-)
+> >
+> > diff --git a/drivers/mmc/host/sdhci-xenon.c b/drivers/mmc/host/sdhci-xenon.c
+> > index 4703cd540c7f..85414e13e7ea 100644
+> > --- a/drivers/mmc/host/sdhci-xenon.c
+> > +++ b/drivers/mmc/host/sdhci-xenon.c
+> > @@ -15,8 +15,6 @@
+> >  #include <linux/ktime.h>
+> >  #include <linux/module.h>
+> >  #include <linux/of.h>
+> > -#include <linux/pm.h>
+> > -#include <linux/pm_runtime.h>
+> >
+> >  #include "sdhci-pltfm.h"
+> >  #include "sdhci-xenon.h"
+> > @@ -539,24 +537,13 @@ static int xenon_probe(struct platform_device *pdev)
+> >         if (err)
+> >                 goto err_clk_axi;
+> >
+> > -       pm_runtime_get_noresume(&pdev->dev);
+> > -       pm_runtime_set_active(&pdev->dev);
+> > -       pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
+> > -       pm_runtime_use_autosuspend(&pdev->dev);
+> > -       pm_runtime_enable(&pdev->dev);
+> > -       pm_suspend_ignore_children(&pdev->dev, 1);
+> > -
+> >         err = sdhci_add_host(host);
+> >         if (err)
+> >                 goto remove_sdhc;
+> >
+> > -       pm_runtime_put_autosuspend(&pdev->dev);
+> > -
+> >         return 0;
+> >
+> >  remove_sdhc:
+> > -       pm_runtime_disable(&pdev->dev);
+> > -       pm_runtime_put_noidle(&pdev->dev);
+> >         xenon_sdhc_unprepare(host);
+> >  err_clk_axi:
+> >         clk_disable_unprepare(priv->axi_clk);
+> > @@ -573,10 +560,6 @@ static int xenon_remove(struct platform_device *pdev)
+> >         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> >         struct xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
+> >
+> > -       pm_runtime_get_sync(&pdev->dev);
+> > -       pm_runtime_disable(&pdev->dev);
+> > -       pm_runtime_put_noidle(&pdev->dev);
+> > -
+> >         sdhci_remove_host(host, 0);
+> >
+> >         xenon_sdhc_unprepare(host);
+> > @@ -593,78 +576,40 @@ static int xenon_suspend(struct device *dev)
+> >  {
+> >         struct sdhci_host *host = dev_get_drvdata(dev);
+> >         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> > -       struct xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
+> >         int ret;
+> >
+> > -       ret = pm_runtime_force_suspend(dev);
+> > +       ret = sdhci_suspend_host(host);
+> > +       if (ret)
+> > +               return ret;
+> >
+> > -       priv->restore_needed = true;
+> > +       clk_disable_unprepare(pltfm_host->clk);
+> >         return ret;
+> >  }
+> > -#endif
+> >
+> > -#ifdef CONFIG_PM
+> > -static int xenon_runtime_suspend(struct device *dev)
+> > +static int xenon_resume(struct device *dev)
+> >  {
+> >         struct sdhci_host *host = dev_get_drvdata(dev);
+> >         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> > -       struct xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
+> >         int ret;
+> >
+> > -       ret = sdhci_runtime_suspend_host(host);
+> > +       ret = clk_prepare_enable(pltfm_host->clk);
+> >         if (ret)
+> >                 return ret;
+> >
+> > -       if (host->tuning_mode != SDHCI_TUNING_MODE_3)
+> > -               mmc_retune_needed(host->mmc);
+> > -
+> > -       clk_disable_unprepare(pltfm_host->clk);
+> >         /*
+> > -        * Need to update the priv->clock here, or when runtime resume
+> > -        * back, phy don't aware the clock change and won't adjust phy
+> > -        * which will cause cmd err
+> > +        * If SoCs power off the entire Xenon, registers setting will
+> > +        * be lost.
+> > +        * Re-configure Xenon specific register to enable current SDHC
+> >          */
+> > -       priv->clock = 0;
+> > -       return 0;
+> > -}
+> > -
+> > -static int xenon_runtime_resume(struct device *dev)
+> > -{
+> > -       struct sdhci_host *host = dev_get_drvdata(dev);
+> > -       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> > -       struct xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
+> > -       int ret;
+> > -
+> > -       ret = clk_prepare_enable(pltfm_host->clk);
+> > -       if (ret) {
+> > -               dev_err(dev, "can't enable mainck\n");
+> > +       ret = xenon_sdhc_prepare(host);
+> > +       if (ret)
+> >                 return ret;
+> > -       }
+> > -
+> > -       if (priv->restore_needed) {
+> > -               ret = xenon_sdhc_prepare(host);
+> > -               if (ret)
+> > -                       goto out;
+> > -               priv->restore_needed = false;
+> > -       }
+> >
+> > -       ret = sdhci_runtime_resume_host(host, 0);
+> > -       if (ret)
+> > -               goto out;
+> > -       return 0;
+> > -out:
+> > -       clk_disable_unprepare(pltfm_host->clk);
+> > -       return ret;
+> > +       return sdhci_resume_host(host);
+> >  }
+> > -#endif /* CONFIG_PM */
+> > -
+> > -static const struct dev_pm_ops sdhci_xenon_dev_pm_ops = {
+> > -       SET_SYSTEM_SLEEP_PM_OPS(xenon_suspend,
+> > -                               pm_runtime_force_resume)
+> > -       SET_RUNTIME_PM_OPS(xenon_runtime_suspend,
+> > -                          xenon_runtime_resume,
+> > -                          NULL)
+> > -};
+> > +#endif
+> > +
+> > +static SIMPLE_DEV_PM_OPS(xenon_pmops, xenon_suspend, xenon_resume);
+> >
+> >  static const struct of_device_id sdhci_xenon_dt_ids[] = {
+> >         { .compatible = "marvell,armada-ap806-sdhci",},
+> > @@ -678,7 +623,7 @@ static struct platform_driver sdhci_xenon_driver = {
+> >         .driver = {
+> >                 .name   = "xenon-sdhci",
+> >                 .of_match_table = sdhci_xenon_dt_ids,
+> > -               .pm = &sdhci_xenon_dev_pm_ops,
+> > +               .pm = &xenon_pmops,
+> >         },
+> >         .probe  = xenon_probe,
+> >         .remove = xenon_remove,
+> > diff --git a/drivers/mmc/host/sdhci-xenon.h b/drivers/mmc/host/sdhci-xenon.h
+> > index 593b82d7b68a..2b9b96e51261 100644
+> > --- a/drivers/mmc/host/sdhci-xenon.h
+> > +++ b/drivers/mmc/host/sdhci-xenon.h
+> > @@ -89,7 +89,6 @@ struct xenon_priv {
+> >          */
+> >         void            *phy_params;
+> >         struct xenon_emmc_phy_regs *emmc_phy_regs;
+> > -       bool restore_needed;
+> >  };
+> >
+> >  int xenon_phy_adj(struct sdhci_host *host, struct mmc_ios *ios);
+> > --
+> > 2.26.2
+> >  
 
