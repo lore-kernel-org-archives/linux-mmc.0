@@ -2,123 +2,112 @@ Return-Path: <SRS0=CGCI=65=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.1 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-8.6 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2E936C433DF
-	for <linux-mmc@archiver.kernel.org>; Fri, 15 May 2020 02:02:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F3F3AC433E0
+	for <linux-mmc@archiver.kernel.org>; Fri, 15 May 2020 02:50:50 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0E2C220748
-	for <linux-mmc@archiver.kernel.org>; Fri, 15 May 2020 02:02:48 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="b6VnSZ3s"
+	by mail.kernel.org (Postfix) with ESMTP id CD4F720748
+	for <linux-mmc@archiver.kernel.org>; Fri, 15 May 2020 02:50:50 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1589511050;
+	bh=RzJEhITZbWZpNq+mY9foajRd7R6ugOd0UfGm2M8BNsk=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
+	b=hEuY7q+TUdfheS3HPmSTHoCYNBobBtVojSu8VsKseGvPm+aQXADJ+T0Apvd6LZ0hd
+	 bWsYqm1WtEtqxDVtA2WXSno4EJSHjv3+KOc9AASis4qokfv7frx0L2Wekfw/sd2c1z
+	 gmwErtIBC4ci5Yj3NnDvb7cjt9KhqMmwkL2Ea44U=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727832AbgEOCCp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 14 May 2020 22:02:45 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58900 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726122AbgEOCCo (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 14 May 2020 22:02:44 -0400
-Received: from mail-lj1-x243.google.com (mail-lj1-x243.google.com [IPv6:2a00:1450:4864:20::243])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3FFDAC061A0C;
-        Thu, 14 May 2020 19:02:44 -0700 (PDT)
-Received: by mail-lj1-x243.google.com with SMTP id j3so494764ljg.8;
-        Thu, 14 May 2020 19:02:44 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=9J3xZ+0hufAZY8Q946Gd5z6inR3BlFb/SIlC7L1t+/U=;
-        b=b6VnSZ3s0qXEVWpWflklrszaWqi+X8HiHVvHebezL/NDw6O4YIBSaA+q/JJpe5hJge
-         WJsK9j99q81170CK8u0FIZWL4Elck7U17wxih3SGCMROyyi4rB5jxtVhbp9GwBmLQ8TC
-         kkuM7oXK+h2Uuf4X6FFQr25xQlVBHtwPnORfeLkX0REbs4U4W3La+M3eWSHTcoodpi2C
-         k5RxXJOQzKYDn50H5erRSvBtoL889M1d6iy17JqBgzJo9awiQr6h9cCDe8Hv+tuiZgHS
-         zzT45O2rrcgYZ7hn7cag4r4arbnkzQGTh+pvwOQkax/GCtUWz7zINPX3DK/2RZtMibBb
-         EgMQ==
+        id S1727944AbgEOCuu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 14 May 2020 22:50:50 -0400
+Received: from mail-ot1-f66.google.com ([209.85.210.66]:39987 "EHLO
+        mail-ot1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726345AbgEOCut (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 14 May 2020 22:50:49 -0400
+Received: by mail-ot1-f66.google.com with SMTP id d26so779867otc.7;
+        Thu, 14 May 2020 19:50:49 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=9J3xZ+0hufAZY8Q946Gd5z6inR3BlFb/SIlC7L1t+/U=;
-        b=pNqhfP1lGGGgJYU2jIaDddzolkTrw2y2Y8Lx2iL3bCESD/Ciw7u6qUnm3ZeNkv6BSk
-         kqUjQnoGVq1K6v+LYDwyQIWhFxkwVcVh0lj7MitVFSqoq6YD/Upj7XXbPNRpry5zYfBM
-         sgL07Swfisf0n5yxRoFouw8b++bPt9oJQ5TBhUgIX33DSG0pz4IgrSrFbl1GrDFNucOY
-         FBpDRMrRRxhuejyOxfKUMyXN50h19H86Hlw6gohFbdciqp4G167uHFvCxhxa4Rlggu8V
-         Vl4zeg2sIRMk3y8XeXQyQkhVCk7RxZmkfFcGPR+/B1qyrJOFynZqaYnvN071DszThqgw
-         mUrg==
-X-Gm-Message-State: AOAM532K7rAyRmvKuhpmq6tKFd5YAhr9TKwrNuXY/cz3HIMGv8afW/qn
-        crTik2xaQBZ1Ip3vzzkaG2r6ka/Z
-X-Google-Smtp-Source: ABdhPJxrA7JYJ7efiuq7ExKigt85VerS+c/wP3Mq06cQYJVvJyK2fp5UJIRAD8VCub9PBoBE2qjyVQ==
-X-Received: by 2002:a2e:700b:: with SMTP id l11mr674278ljc.255.1589508162351;
-        Thu, 14 May 2020 19:02:42 -0700 (PDT)
-Received: from [192.168.2.145] (ppp91-78-208-152.pppoe.mtu-net.ru. [91.78.208.152])
-        by smtp.googlemail.com with ESMTPSA id z17sm382496ljc.81.2020.05.14.19.02.40
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 14 May 2020 19:02:41 -0700 (PDT)
-Subject: Re: [PATCH v4 3/6] partitions: Introduce NVIDIA Tegra Partition Table
-To:     Randy Dunlap <rdunlap@infradead.org>, Jens Axboe <axboe@kernel.dk>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        Jonathan Hunter <jonathanh@nvidia.com>,
-        =?UTF-8?B?TWljaGHFgiBNaXJvc8WCYXc=?= <mirq-linux@rere.qmqm.pl>,
-        David Heidelberg <david@ixit.cz>,
-        Peter Geis <pgwipeout@gmail.com>,
-        Stephen Warren <swarren@wwwdotorg.org>,
-        Nicolas Chauvet <kwizart@gmail.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Billy Laws <blaws05@gmail.com>,
-        =?UTF-8?Q?Nils_=c3=96stlund?= <nils@naltan.com>,
-        Christoph Hellwig <hch@infradead.org>,
-        Ard Biesheuvel <ard.biesheuvel@linaro.org>,
-        Davidlohr Bueso <dave@stgolabs.net>
-Cc:     linux-tegra@vger.kernel.org, linux-block@vger.kernel.org,
-        Andrey Danin <danindrey@mail.ru>,
-        Gilles Grandou <gilles@grandou.net>,
-        Ryan Grachek <ryan@edited.us>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-efi <linux-efi@vger.kernel.org>
-References: <20200515014143.12984-1-digetx@gmail.com>
- <20200515014143.12984-4-digetx@gmail.com>
- <055fc187-6181-6ccb-04a8-ab4324270ed7@infradead.org>
-From:   Dmitry Osipenko <digetx@gmail.com>
-Message-ID: <821ae388-07b2-5883-95b8-c551ddc7bdea@gmail.com>
-Date:   Fri, 15 May 2020 05:02:40 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.7.0
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to:user-agent;
+        bh=ozglBc+sLmCi94fyi9hM4nMjLfjck0uiAKDPMtJ/ktQ=;
+        b=ECr0/UAyKyFFDJ2ku3XmPI+IYNoD1zjVfsHkXTU2ANlRVHZ7cWvSfbHLwLqLA5cUjY
+         vKdcBSdLDbpY2qiojfBzO5Jvu6FcYhDmwPi6YOpUlgIo9wJ8RJcSr6F4p9T0QKAalWob
+         yFpd0XwOpIHnTRoZqAS1QQR70nfhZ98klOnUFf4FILfn4QKiiXxStBtctn+rmTQ8lHcj
+         H34xjdQA/aAV5Kp1CmtaO6INa3715cnwGMFGg6/pBpMKygs1vVSDQU1kJNyLNbx03cvD
+         ZiomcyYOdIdjCexPmshbyprfnu1HfHe+RAqg6O+s9x8975NhwsrVGv40zE1v15kGeLNb
+         MPlQ==
+X-Gm-Message-State: AOAM531svvF5TG5dhnjmLUyBgVQRJZqOpJbqQbsDQcoj/lkOIRkppxiL
+        qvWrbtwzjIaOW0YAyZrW1w==
+X-Google-Smtp-Source: ABdhPJyf3I3BEvGznd2LmPlqdpXGJf9rz4M+SJAOYC+ZrQGj/mDBIoUotlVom7IQ3onC2yi+Xbff4w==
+X-Received: by 2002:a9d:7414:: with SMTP id n20mr773057otk.61.1589511048634;
+        Thu, 14 May 2020 19:50:48 -0700 (PDT)
+Received: from rob-hp-laptop (24-155-109-49.dyn.grandenetworks.net. [24.155.109.49])
+        by smtp.gmail.com with ESMTPSA id o17sm237457otp.79.2020.05.14.19.50.47
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 14 May 2020 19:50:48 -0700 (PDT)
+Received: (nullmailer pid 30844 invoked by uid 1000);
+        Fri, 15 May 2020 02:50:47 -0000
+Date:   Thu, 14 May 2020 21:50:47 -0500
+From:   Rob Herring <robh@kernel.org>
+To:     Sarthak Garg <sartgarg@codeaurora.org>
+Cc:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
+        vbadigan@codeaurora.org, stummala@codeaurora.org,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-arm-msm@vger.kernel.org,
+        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
+        <devicetree@vger.kernel.org>
+Subject: Re: [PATCH V1 1/7] dt-bindings: mmc: Add information for DLL
+ register properties
+Message-ID: <20200515025047.GA27895@bogus>
+References: <1588838535-6050-1-git-send-email-sartgarg@codeaurora.org>
+ <1588838535-6050-2-git-send-email-sartgarg@codeaurora.org>
 MIME-Version: 1.0
-In-Reply-To: <055fc187-6181-6ccb-04a8-ab4324270ed7@infradead.org>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1588838535-6050-2-git-send-email-sartgarg@codeaurora.org>
+User-Agent: Mutt/1.10.1 (2018-07-13)
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-15.05.2020 04:58, Randy Dunlap пишет:
-> On 5/14/20 6:41 PM, Dmitry Osipenko wrote:
->> diff --git a/block/partitions/Kconfig b/block/partitions/Kconfig
->> index 702689a628f0..2c1408cba1a6 100644
->> --- a/block/partitions/Kconfig
->> +++ b/block/partitions/Kconfig
->> @@ -268,3 +268,11 @@ config CMDLINE_PARTITION
->>  	help
->>  	  Say Y here if you want to read the partition table from bootargs.
->>  	  The format for the command line is just like mtdparts.
->> +
->> +config TEGRA_PARTITION
->> +	bool "NVIDIA Tegra Partition support" if PARTITION_ADVANCED
->> +	default y if ARCH_TEGRA
->> +	depends on (ARCH_TEGRA && MMC_BLOCK) || COMPILE_TEST
+On Thu, May 07, 2020 at 01:32:08PM +0530, Sarthak Garg wrote:
+> Add information regarding DLL register properties for getting target
+> specific configurations. These DLL register settings may vary from
+> target to target.
 > 
-> That looks odd. Such depends are more often like:
-> 	depends on MMC_BLOCK && (ARCH_TEGRA || COMPILE_TEST)
+> Also new compatible string value for sm8250 target.
 > 
-> but that's just my experience. If this works when ARCH_TEGRA and MMC_BLOCK
-> are not set and COMPILE_TEST is set, that's fine.
+> Signed-off-by: Sarthak Garg <sartgarg@codeaurora.org>
+> ---
+>  Documentation/devicetree/bindings/mmc/sdhci-msm.txt | 14 ++++++++++++++
+>  1 file changed, 14 insertions(+)
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+> index 5445931..b8e1d2b 100644
+> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+> @@ -17,6 +17,7 @@ Required properties:
+>  		"qcom,msm8916-sdhci", "qcom,sdhci-msm-v4"
+>  		"qcom,msm8992-sdhci", "qcom,sdhci-msm-v4"
+>  		"qcom,msm8996-sdhci", "qcom,sdhci-msm-v4"
+> +		"qcom,sm8250-sdhci", "qcom,sdhci-msm-v5"
+>  		"qcom,sdm845-sdhci", "qcom,sdhci-msm-v5"
+>  		"qcom,qcs404-sdhci", "qcom,sdhci-msm-v5"
+>  		"qcom,sc7180-sdhci", "qcom,sdhci-msm-v5";
+> @@ -46,6 +47,13 @@ Required properties:
+>  	"cal"	- reference clock for RCLK delay calibration (optional)
+>  	"sleep"	- sleep clock for RCLK delay calibration (optional)
+>  
+> +- qcom,ddr-config: Certain chipsets and platforms require particular settings
+> +	for the DDR_CONFIG register. Use this field to specify the register
+> +	value as per the Hardware Programming Guide.
+> +
+> +- qcom,dll-config: Chipset and Platform specific value. Use this field to
+> +	specify the DLL_CONFIG register value as per Hardware Programming Guide.
 
-Ah, right! It shouldn't work since mmc_bdev_to_card() will be undefined
-if MMC_BLOCK=n. Good catch, thank you! :)
+Board specific or SoC specific? If the latter, imply this from the 
+compatible string.
