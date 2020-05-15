@@ -2,53 +2,69 @@ Return-Path: <SRS0=CGCI=65=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-7.0 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,UNWANTED_LANGUAGE_BODY,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E13F0C433E2
-	for <linux-mmc@archiver.kernel.org>; Fri, 15 May 2020 20:50:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7BFC1C433E0
+	for <linux-mmc@archiver.kernel.org>; Fri, 15 May 2020 22:22:16 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A4AB22065C
-	for <linux-mmc@archiver.kernel.org>; Fri, 15 May 2020 20:50:41 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1589575841;
-	bh=1e5UpyXyOVQ2roaAqLYWD/RlEY2d4JJDJJ17tmmKfIc=;
-	h=From:To:Cc:Subject:Date:List-ID:From;
-	b=Mnf/Jrf6JDo/EdR9CqiHiSemC45GIDEVAGDLMAItIxKfXUzNqh4HsJG3Ypm3FPMH4
-	 aBKpiBOuk6KTiTl5uFORlFPpsAx1ItcP7yWb7Vf5a3n2IZYP6aM+8yvPrX5FcenOdE
-	 qmWF2ibHuG9ldSIfrCzvhQB1Rthg1qBShosmO1js=
+	by mail.kernel.org (Postfix) with ESMTP id 578AF20787
+	for <linux-mmc@archiver.kernel.org>; Fri, 15 May 2020 22:22:16 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=timesys-com.20150623.gappssmtp.com header.i=@timesys-com.20150623.gappssmtp.com header.b="DDhnzIdQ"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726278AbgEOUuk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 15 May 2020 16:50:40 -0400
-Received: from mail.kernel.org ([198.145.29.99]:43718 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726183AbgEOUuj (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 15 May 2020 16:50:39 -0400
-Received: from sol.hsd1.ca.comcast.net (c-107-3-166-239.hsd1.ca.comcast.net [107.3.166.239])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 91FBE205CB;
-        Fri, 15 May 2020 20:50:37 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1589575837;
-        bh=1e5UpyXyOVQ2roaAqLYWD/RlEY2d4JJDJJ17tmmKfIc=;
-        h=From:To:Cc:Subject:Date:From;
-        b=tCmI6VqGbf6hwa3/FMO9MeNnenXiEjCb3/Tj3dz6OvPetJwKnGmjQb6mq0zTuqAXP
-         loN7Ou2EHg84XReiF/X8M/OVesZv3IbXs8DdEOBus0omHV8kDhS2qWSk1UNkv9qTX2
-         ONsrdifGVhLv3OoPIoX8yw838L8+DxIc+3yd6U/c=
-From:   Eric Biggers <ebiggers@kernel.org>
-To:     linux-fscrypt@vger.kernel.org
-Cc:     linux-f2fs-devel@lists.sourceforge.net, linux-ext4@vger.kernel.org,
-        linux-fsdevel@vger.kernel.org, linux-crypto@vger.kernel.org,
-        linux-mmc@vger.kernel.org, "Theodore Y . Ts'o" <tytso@mit.edu>,
-        Satya Tangirala <satyat@google.com>,
-        Jaegeuk Kim <jaegeuk@kernel.org>,
-        Paul Crowley <paulcrowley@google.com>
-Subject: [PATCH] fscrypt: add support for IV_INO_LBLK_32 policies
-Date:   Fri, 15 May 2020 13:41:41 -0700
-Message-Id: <20200515204141.251098-1-ebiggers@kernel.org>
+        id S1726183AbgEOWWP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 15 May 2020 18:22:15 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52502 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726212AbgEOWWP (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 15 May 2020 18:22:15 -0400
+Received: from mail-qt1-x844.google.com (mail-qt1-x844.google.com [IPv6:2607:f8b0:4864:20::844])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0E798C05BD09
+        for <linux-mmc@vger.kernel.org>; Fri, 15 May 2020 15:22:15 -0700 (PDT)
+Received: by mail-qt1-x844.google.com with SMTP id t25so3413959qtc.0
+        for <linux-mmc@vger.kernel.org>; Fri, 15 May 2020 15:22:14 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=timesys-com.20150623.gappssmtp.com; s=20150623;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=fZPj5RtVoBDyPcIcQQy/IwxNC3fWk1lZThfdaTJvTUA=;
+        b=DDhnzIdQVnlM+fJ3ZiIDXYDW/R51fLF7ULYd4hfqUCXiYZf/nWq+vmgmg4WZ+ClBok
+         ySIK1Su7RVM+AO9OzZhNKBLpF/omB0oDU1onaFnLFoj2+gc4nPj+qH32x5Gf44CIehV2
+         rndeyP46Z8deVLaUz7MCxQGvOugW7mgA/nHhNrj468McGxUK0s91enbIlRKSWCTpcyts
+         34ech2FzCFheaV/jqSv7mPyzdjzzFFfQpj5KmuNr/dOZhJNs5ND5e0d18vwuUfoGp3z+
+         78/RBLhcuP8TTYZq9TqKGL7v5RG0oDkLmtP4UOODQs3wrZPeKRBSq+bFkj+wTxSD98nV
+         wImg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=fZPj5RtVoBDyPcIcQQy/IwxNC3fWk1lZThfdaTJvTUA=;
+        b=goJ0LbMR9Xn5PDzaXkTJABCQKa5g8eZw7e2YQIbckXaQhDG/7nz1QDuEtfWCF0JcPQ
+         7K58zmWYCxHh3WhOQDQEkLxJEr21F0dKqY6NKmjkN2YzCOOq+p4f2ydKnmYrk/xFMxOw
+         gd/PC4HyHNya4PahKapK4oGdfD+T5ADEkbZ2G5M/zFomq7B0TsS25UNaQlrXHWQEOqYG
+         wHGi51zvoeN2enC1aApbi1T6l6kerAYriq0PnsYfcQaby8569ZRxMLSOM+ToBoXRYZm3
+         690N1flz90a2EI8hIFwiEMFEIXYrzMC6Kh/SFW01DN8K2/kAJUVO9O1VtPXDu56yLY3P
+         1qpQ==
+X-Gm-Message-State: AOAM533yr0Rtv0Q2Z4dGurgqvh/lx/JiPY2C/KyVKC3m3CYkkwp5rswa
+        3AWwwDJiC1qhJG8kEJNx/poQJ9m6W3w=
+X-Google-Smtp-Source: ABdhPJxd2cs1Pj5+MYZhvZ8DQcbzEgt+Y1IDvNBBPWqHxUCvUyE2joh2buAWOZwG70mNaFePnItTgw==
+X-Received: by 2002:aed:2142:: with SMTP id 60mr4388370qtc.177.1589581334072;
+        Fri, 15 May 2020 15:22:14 -0700 (PDT)
+Received: from dfj.bfc.timesys.com (host203-36-dynamic.30-79-r.retail.telecomitalia.it. [79.30.36.203])
+        by smtp.gmail.com with ESMTPSA id h134sm2607072qke.6.2020.05.15.15.22.11
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 15 May 2020 15:22:13 -0700 (PDT)
+From:   Angelo Dureghello <angelo.dureghello@timesys.com>
+To:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
+        gerg@linux-m68k.org
+Cc:     linux-mmc@vger.kernel.org, linux-m68k@vger.kernel.org,
+        Angelo Dureghello <angelo.dureghello@timesys.com>
+Subject: [PATCH v5 1/3] m68k: mcf5441x: add support for esdhc mmc controller
+Date:   Sat, 16 May 2020 00:27:28 +0200
+Message-Id: <20200515222730.967105-1-angelo.dureghello@timesys.com>
 X-Mailer: git-send-email 2.26.2
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -57,447 +73,228 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Eric Biggers <ebiggers@google.com>
+Add support for sdhci-edshc mmc controller.
 
-The eMMC inline crypto standard will only specify 32 DUN bits (a.k.a. IV
-bits), unlike UFS's 64.  IV_INO_LBLK_64 is therefore not applicable, but
-an encryption format which uses one key per policy and permits the
-moving of encrypted file contents (as f2fs's garbage collector requires)
-is still desirable.
-
-To support such hardware, add a new encryption format IV_INO_LBLK_32
-that makes the best use of the 32 bits: the IV is set to
-'SipHash-2-4(inode_number) + file_logical_block_number mod 2^32', where
-the SipHash key is derived from the fscrypt master key.  We hash only
-the inode number and not also the block number, because we need to
-maintain contiguity of DUNs to merge bios.
-
-Unlike with IV_INO_LBLK_64, with this format IV reuse is possible; this
-is unavoidable given the size of the DUN.  This means this format should
-only be used where the requirements of the first paragraph apply.
-However, the hash spreads out the IVs in the whole usable range, and the
-use of a keyed hash makes it difficult for an attacker to determine
-which files use which IVs.
-
-Besides the above differences, this flag works like IV_INO_LBLK_64 in
-that on ext4 it is only allowed if the stable_inodes feature has been
-enabled to prevent inode numbers and the filesystem UUID from changing.
-
-Signed-off-by: Eric Biggers <ebiggers@google.com>
+Signed-off-by: Angelo Dureghello <angelo.dureghello@timesys.com>
 ---
- Documentation/filesystems/fscrypt.rst | 33 +++++++++--
- fs/crypto/crypto.c                    |  6 +-
- fs/crypto/fscrypt_private.h           | 20 +++++--
- fs/crypto/keyring.c                   |  5 +-
- fs/crypto/keysetup.c                  | 85 +++++++++++++++++++++------
- fs/crypto/policy.c                    | 51 +++++++++++-----
- include/uapi/linux/fscrypt.h          |  3 +-
- 7 files changed, 157 insertions(+), 46 deletions(-)
+Changes for v3:
+- removed volatile cast from clk.c
+Changes for v4:
+- comment style fix in m5441xsim.h
+Changes for v5:
+- fix compilation warnings from __clk_enable2 and __clk_disable2
+---
+ arch/m68k/coldfire/clk.c                    | 15 ++++++++++
+ arch/m68k/coldfire/device.c                 | 33 +++++++++++++++++++--
+ arch/m68k/coldfire/m5441x.c                 | 12 +++++++-
+ arch/m68k/include/asm/m5441xsim.h           | 15 ++++++++++
+ arch/m68k/include/asm/mcfclk.h              |  2 ++
+ include/linux/platform_data/mmc-esdhc-mcf.h | 17 +++++++++++
+ 6 files changed, 91 insertions(+), 3 deletions(-)
+ create mode 100644 include/linux/platform_data/mmc-esdhc-mcf.h
 
-diff --git a/Documentation/filesystems/fscrypt.rst b/Documentation/filesystems/fscrypt.rst
-index aa072112cfff2eb..f517af8ec11c884 100644
---- a/Documentation/filesystems/fscrypt.rst
-+++ b/Documentation/filesystems/fscrypt.rst
-@@ -292,8 +292,22 @@ files' data differently, inode numbers are included in the IVs.
- Consequently, shrinking the filesystem may not be allowed.
+diff --git a/arch/m68k/coldfire/clk.c b/arch/m68k/coldfire/clk.c
+index 7bc666e482eb..75a057445472 100644
+--- a/arch/m68k/coldfire/clk.c
++++ b/arch/m68k/coldfire/clk.c
+@@ -73,6 +73,21 @@ struct clk_ops clk_ops1 = {
+ #endif /* MCFPM_PPMCR1 */
+ #endif /* MCFPM_PPMCR0 */
  
- This format is optimized for use with inline encryption hardware
--compliant with the UFS or eMMC standards, which support only 64 IV
--bits per I/O request and may have only a small number of keyslots.
-+compliant with the UFS standard, which supports only 64 IV bits per
-+I/O request and may have only a small number of keyslots.
-+
-+IV_INO_LBLK_32 policies
-+-----------------------
-+
-+IV_INO_LBLK_32 policies work like IV_INO_LBLK_64, except that for
-+IV_INO_LBLK_32, the inode number is hashed with SipHash-2-4 (where the
-+SipHash key is derived from the master key) and added to the file
-+logical block number mod 2^32 to produce a 32-bit IV.
-+
-+This format is optimized for use with inline encryption hardware
-+compliant with the eMMC v5.2 standard, which supports only 32 IV bits
-+per I/O request and may have only a small number of keyslots.  This
-+format results in some level of IV reuse, so it should only be used
-+when necessary due to hardware limitations.
- 
- Key identifiers
- ---------------
-@@ -369,6 +383,10 @@ a little endian number, except that:
-   to 32 bits and is placed in bits 0-31 of the IV.  The inode number
-   (which is also limited to 32 bits) is placed in bits 32-63.
- 
-+- With `IV_INO_LBLK_32 policies`_, the logical block number is limited
-+  to 32 bits and is placed in bits 0-31 of the IV.  The inode number
-+  is then hashed and added mod 2^32.
-+
- Note that because file logical block numbers are included in the IVs,
- filesystems must enforce that blocks are never shifted around within
- encrypted files, e.g. via "collapse range" or "insert range".
-@@ -465,8 +483,15 @@ This structure must be initialized as follows:
-     (0x3).
-   - FSCRYPT_POLICY_FLAG_DIRECT_KEY: See `DIRECT_KEY policies`_.
-   - FSCRYPT_POLICY_FLAG_IV_INO_LBLK_64: See `IV_INO_LBLK_64
--    policies`_.  This is mutually exclusive with DIRECT_KEY and is not
--    supported on v1 policies.
-+    policies`_.
-+  - FSCRYPT_POLICY_FLAG_IV_INO_LBLK_32: See `IV_INO_LBLK_32
-+    policies`_.
-+
-+  v1 encryption policies only support the PAD_* and DIRECT_KEY flags.
-+  The other flags are only supported by v2 encryption policies.
-+
-+  The DIRECT_KEY, IV_INO_LBLK_64, and IV_INO_LBLK_32 flags are
-+  mutually exclusive.
- 
- - For v2 encryption policies, ``__reserved`` must be zeroed.
- 
-diff --git a/fs/crypto/crypto.c b/fs/crypto/crypto.c
-index 1ecaac7ee3cb8e0..97dc694dca8ce8f 100644
---- a/fs/crypto/crypto.c
-+++ b/fs/crypto/crypto.c
-@@ -76,8 +76,12 @@ void fscrypt_generate_iv(union fscrypt_iv *iv, u64 lblk_num,
- 	memset(iv, 0, ci->ci_mode->ivsize);
- 
- 	if (flags & FSCRYPT_POLICY_FLAG_IV_INO_LBLK_64) {
--		WARN_ON_ONCE((u32)lblk_num != lblk_num);
-+		WARN_ON_ONCE(lblk_num > U32_MAX);
-+		WARN_ON_ONCE(ci->ci_inode->i_ino > U32_MAX);
- 		lblk_num |= (u64)ci->ci_inode->i_ino << 32;
-+	} else if (flags & FSCRYPT_POLICY_FLAG_IV_INO_LBLK_32) {
-+		WARN_ON_ONCE(lblk_num > U32_MAX);
-+		lblk_num = (u32)(ci->ci_hashed_ino + lblk_num);
- 	} else if (flags & FSCRYPT_POLICY_FLAG_DIRECT_KEY) {
- 		memcpy(iv->nonce, ci->ci_nonce, FS_KEY_DERIVATION_NONCE_SIZE);
- 	}
-diff --git a/fs/crypto/fscrypt_private.h b/fs/crypto/fscrypt_private.h
-index dbced2937ec8954..fff9c0df5f7233c 100644
---- a/fs/crypto/fscrypt_private.h
-+++ b/fs/crypto/fscrypt_private.h
-@@ -222,6 +222,9 @@ struct fscrypt_info {
- 
- 	/* This inode's nonce, copied from the fscrypt_context */
- 	u8 ci_nonce[FS_KEY_DERIVATION_NONCE_SIZE];
-+
-+	/* Hashed inode number.  Only set for IV_INO_LBLK_32 */
-+	u32 ci_hashed_ino;
- };
- 
- typedef enum {
-@@ -293,6 +296,8 @@ extern int fscrypt_init_hkdf(struct fscrypt_hkdf *hkdf, const u8 *master_key,
- #define HKDF_CONTEXT_DIRECT_KEY		3
- #define HKDF_CONTEXT_IV_INO_LBLK_64_KEY	4
- #define HKDF_CONTEXT_DIRHASH_KEY	5
-+#define HKDF_CONTEXT_IV_INO_LBLK_32_KEY	6
-+#define HKDF_CONTEXT_INODE_HASH_KEY	7
- 
- extern int fscrypt_hkdf_expand(const struct fscrypt_hkdf *hkdf, u8 context,
- 			       const u8 *info, unsigned int infolen,
-@@ -389,14 +394,17 @@ struct fscrypt_master_key {
- 	struct list_head	mk_decrypted_inodes;
- 	spinlock_t		mk_decrypted_inodes_lock;
- 
--	/* Crypto API transforms for DIRECT_KEY policies, allocated on-demand */
--	struct crypto_skcipher	*mk_direct_tfms[__FSCRYPT_MODE_MAX + 1];
--
- 	/*
--	 * Crypto API transforms for filesystem-layer implementation of
--	 * IV_INO_LBLK_64 policies, allocated on-demand.
-+	 * Per-mode encryption keys for the various types of encryption policies
-+	 * that use them.  Allocated and derived on-demand.
- 	 */
--	struct crypto_skcipher	*mk_iv_ino_lblk_64_tfms[__FSCRYPT_MODE_MAX + 1];
-+	struct crypto_skcipher *mk_direct_keys[__FSCRYPT_MODE_MAX + 1];
-+	struct crypto_skcipher *mk_iv_ino_lblk_64_keys[__FSCRYPT_MODE_MAX + 1];
-+	struct crypto_skcipher *mk_iv_ino_lblk_32_keys[__FSCRYPT_MODE_MAX + 1];
-+
-+	/* Hash key for inode numbers.  Initialized only when needed. */
-+	siphash_key_t		mk_ino_hash_key;
-+	bool			mk_ino_hash_key_initialized;
- 
- } __randomize_layout;
- 
-diff --git a/fs/crypto/keyring.c b/fs/crypto/keyring.c
-index ab41b25d4fa1ba3..ae0e111c4199fa4 100644
---- a/fs/crypto/keyring.c
-+++ b/fs/crypto/keyring.c
-@@ -44,8 +44,9 @@ static void free_master_key(struct fscrypt_master_key *mk)
- 	wipe_master_key_secret(&mk->mk_secret);
- 
- 	for (i = 0; i <= __FSCRYPT_MODE_MAX; i++) {
--		crypto_free_skcipher(mk->mk_direct_tfms[i]);
--		crypto_free_skcipher(mk->mk_iv_ino_lblk_64_tfms[i]);
-+		crypto_free_skcipher(mk->mk_direct_keys[i]);
-+		crypto_free_skcipher(mk->mk_iv_ino_lblk_64_keys[i]);
-+		crypto_free_skcipher(mk->mk_iv_ino_lblk_32_keys[i]);
- 	}
- 
- 	key_put(mk->mk_users);
-diff --git a/fs/crypto/keysetup.c b/fs/crypto/keysetup.c
-index 302375e9f719ebb..5f26095edd93de8 100644
---- a/fs/crypto/keysetup.c
-+++ b/fs/crypto/keysetup.c
-@@ -46,6 +46,8 @@ struct fscrypt_mode fscrypt_modes[] = {
- 	},
- };
- 
-+static DEFINE_MUTEX(fscrypt_mode_key_setup_mutex);
-+
- static struct fscrypt_mode *
- select_encryption_mode(const union fscrypt_policy *policy,
- 		       const struct inode *inode)
-@@ -130,7 +132,7 @@ static int setup_per_mode_enc_key(struct fscrypt_info *ci,
- 	const struct super_block *sb = inode->i_sb;
- 	struct fscrypt_mode *mode = ci->ci_mode;
- 	const u8 mode_num = mode - fscrypt_modes;
--	struct crypto_skcipher *tfm, *prev_tfm;
-+	struct crypto_skcipher *tfm;
- 	u8 mode_key[FSCRYPT_MAX_KEY_SIZE];
- 	u8 hkdf_info[sizeof(mode_num) + sizeof(sb->s_uuid)];
- 	unsigned int hkdf_infolen = 0;
-@@ -139,10 +141,17 @@ static int setup_per_mode_enc_key(struct fscrypt_info *ci,
- 	if (WARN_ON(mode_num > __FSCRYPT_MODE_MAX))
- 		return -EINVAL;
- 
--	/* pairs with cmpxchg() below */
-+	/* pairs with smp_store_release() below */
- 	tfm = READ_ONCE(tfms[mode_num]);
--	if (likely(tfm != NULL))
--		goto done;
-+	if (likely(tfm != NULL)) {
-+		ci->ci_ctfm = tfm;
-+		return 0;
-+	}
-+
-+	mutex_lock(&fscrypt_mode_key_setup_mutex);
-+
-+	if (tfms[mode_num])
-+		goto done_unlock;
- 
- 	BUILD_BUG_ON(sizeof(mode_num) != 1);
- 	BUILD_BUG_ON(sizeof(sb->s_uuid) != 16);
-@@ -157,21 +166,21 @@ static int setup_per_mode_enc_key(struct fscrypt_info *ci,
- 				  hkdf_context, hkdf_info, hkdf_infolen,
- 				  mode_key, mode->keysize);
- 	if (err)
--		return err;
-+		goto out_unlock;
- 	tfm = fscrypt_allocate_skcipher(mode, mode_key, inode);
- 	memzero_explicit(mode_key, mode->keysize);
--	if (IS_ERR(tfm))
--		return PTR_ERR(tfm);
--
--	/* pairs with READ_ONCE() above */
--	prev_tfm = cmpxchg(&tfms[mode_num], NULL, tfm);
--	if (prev_tfm != NULL) {
--		crypto_free_skcipher(tfm);
--		tfm = prev_tfm;
-+	if (IS_ERR(tfm)) {
-+		err = PTR_ERR(tfm);
-+		goto out_unlock;
- 	}
--done:
-+	/* pairs with READ_ONCE() above */
-+	smp_store_release(&tfms[mode_num], tfm);
-+done_unlock:
- 	ci->ci_ctfm = tfm;
--	return 0;
-+	err = 0;
-+out_unlock:
-+	mutex_unlock(&fscrypt_mode_key_setup_mutex);
-+	return err;
- }
- 
- int fscrypt_derive_dirhash_key(struct fscrypt_info *ci,
-@@ -189,6 +198,43 @@ int fscrypt_derive_dirhash_key(struct fscrypt_info *ci,
- 	return 0;
- }
- 
-+static int fscrypt_setup_iv_ino_lblk_32_key(struct fscrypt_info *ci,
-+					    struct fscrypt_master_key *mk)
++static void __clk_enable2(struct clk *clk)
 +{
-+	int err;
-+
-+	err = setup_per_mode_enc_key(ci, mk, mk->mk_iv_ino_lblk_32_keys,
-+				     HKDF_CONTEXT_IV_INO_LBLK_32_KEY, true);
-+	if (err)
-+		return err;
-+
-+	/* pairs with smp_store_release() below */
-+	if (!smp_load_acquire(&mk->mk_ino_hash_key_initialized)) {
-+
-+		mutex_lock(&fscrypt_mode_key_setup_mutex);
-+
-+		if (mk->mk_ino_hash_key_initialized)
-+			goto unlock;
-+
-+		err = fscrypt_hkdf_expand(&mk->mk_secret.hkdf,
-+					  HKDF_CONTEXT_INODE_HASH_KEY, NULL, 0,
-+					  (u8 *)&mk->mk_ino_hash_key,
-+					  sizeof(mk->mk_ino_hash_key));
-+		if (err)
-+			goto unlock;
-+		/* pairs with smp_load_acquire() above */
-+		smp_store_release(&mk->mk_ino_hash_key_initialized, true);
-+unlock:
-+		mutex_unlock(&fscrypt_mode_key_setup_mutex);
-+		if (err)
-+			return err;
-+	}
-+
-+	ci->ci_hashed_ino = (u32)siphash_1u64(ci->ci_inode->i_ino,
-+					      &mk->mk_ino_hash_key);
-+	return 0;
++	__raw_writel(__raw_readl(MCFSDHC_CLK) | (1 << clk->slot), MCFSDHC_CLK);
 +}
 +
- static int fscrypt_setup_v2_file_key(struct fscrypt_info *ci,
- 				     struct fscrypt_master_key *mk)
++static void __clk_disable2(struct clk *clk)
++{
++	__raw_writel(__raw_readl(MCFSDHC_CLK) & ~(1 << clk->slot), MCFSDHC_CLK);
++}
++
++struct clk_ops clk_ops2 = {
++	.enable		= __clk_enable2,
++	.disable	= __clk_disable2,
++};
++
+ struct clk *clk_get(struct device *dev, const char *id)
  {
-@@ -203,7 +249,7 @@ static int fscrypt_setup_v2_file_key(struct fscrypt_info *ci,
- 		 * encryption key.  This ensures that the master key is
- 		 * consistently used only for HKDF, avoiding key reuse issues.
- 		 */
--		err = setup_per_mode_enc_key(ci, mk, mk->mk_direct_tfms,
-+		err = setup_per_mode_enc_key(ci, mk, mk->mk_direct_keys,
- 					     HKDF_CONTEXT_DIRECT_KEY, false);
- 	} else if (ci->ci_policy.v2.flags &
- 		   FSCRYPT_POLICY_FLAG_IV_INO_LBLK_64) {
-@@ -211,11 +257,14 @@ static int fscrypt_setup_v2_file_key(struct fscrypt_info *ci,
- 		 * IV_INO_LBLK_64: encryption keys are derived from (master_key,
- 		 * mode_num, filesystem_uuid), and inode number is included in
- 		 * the IVs.  This format is optimized for use with inline
--		 * encryption hardware compliant with the UFS or eMMC standards.
-+		 * encryption hardware compliant with the UFS standard.
- 		 */
--		err = setup_per_mode_enc_key(ci, mk, mk->mk_iv_ino_lblk_64_tfms,
-+		err = setup_per_mode_enc_key(ci, mk, mk->mk_iv_ino_lblk_64_keys,
- 					     HKDF_CONTEXT_IV_INO_LBLK_64_KEY,
- 					     true);
-+	} else if (ci->ci_policy.v2.flags &
-+		   FSCRYPT_POLICY_FLAG_IV_INO_LBLK_32) {
-+		err = fscrypt_setup_iv_ino_lblk_32_key(ci, mk);
- 	} else {
- 		u8 derived_key[FSCRYPT_MAX_KEY_SIZE];
+ 	const char *clk_name = dev ? dev_name(dev) : id ? id : NULL;
+diff --git a/arch/m68k/coldfire/device.c b/arch/m68k/coldfire/device.c
+index b4103b6bfdeb..9ef4ec0aea00 100644
+--- a/arch/m68k/coldfire/device.c
++++ b/arch/m68k/coldfire/device.c
+@@ -22,6 +22,7 @@
+ #include <asm/mcfqspi.h>
+ #include <linux/platform_data/edma.h>
+ #include <linux/platform_data/dma-mcf-edma.h>
++#include <linux/platform_data/mmc-esdhc-mcf.h>
  
-diff --git a/fs/crypto/policy.c b/fs/crypto/policy.c
-index 10ccf945020ce5e..04d2f531a3a1954 100644
---- a/fs/crypto/policy.c
-+++ b/fs/crypto/policy.c
-@@ -66,18 +66,14 @@ static bool supported_direct_key_modes(const struct inode *inode,
- 	return true;
+ /*
+  *	All current ColdFire parts contain from 2, 3, 4 or 10 UARTS.
+@@ -551,9 +552,35 @@ static struct platform_device mcf_edma = {
+ 		.platform_data = &mcf_edma_data,
+ 	}
+ };
+-
+ #endif /* IS_ENABLED(CONFIG_MCF_EDMA) */
+ 
++#if IS_ENABLED(CONFIG_MMC)
++static struct mcf_esdhc_platform_data mcf_esdhc_data = {
++	.max_bus_width = 4,
++	.cd_type = ESDHC_CD_NONE,
++};
++
++static struct resource mcf_esdhc_resources[] = {
++	{
++		.start = MCFSDHC_BASE,
++		.end = MCFSDHC_BASE + MCFSDHC_SIZE - 1,
++		.flags = IORESOURCE_MEM,
++	}, {
++		.start = MCF_IRQ_SDHC,
++		.end = MCF_IRQ_SDHC,
++		.flags = IORESOURCE_IRQ,
++	},
++};
++
++static struct platform_device mcf_esdhc = {
++	.name			= "sdhci-esdhc-mcf",
++	.id			= 0,
++	.num_resources		= ARRAY_SIZE(mcf_esdhc_resources),
++	.resource		= mcf_esdhc_resources,
++	.dev.platform_data	= &mcf_esdhc_data,
++};
++#endif /* IS_ENABLED(CONFIG_MMC) */
++
+ static struct platform_device *mcf_devices[] __initdata = {
+ 	&mcf_uart,
+ #if IS_ENABLED(CONFIG_FEC)
+@@ -586,6 +613,9 @@ static struct platform_device *mcf_devices[] __initdata = {
+ #if IS_ENABLED(CONFIG_MCF_EDMA)
+ 	&mcf_edma,
+ #endif
++#if IS_ENABLED(CONFIG_MMC)
++	&mcf_esdhc,
++#endif
+ };
+ 
+ /*
+@@ -614,4 +644,3 @@ static int __init mcf_init_devices(void)
  }
  
--static bool supported_iv_ino_lblk_64_policy(
--					const struct fscrypt_policy_v2 *policy,
--					const struct inode *inode)
-+static bool supported_iv_ino_lblk_policy(const struct fscrypt_policy_v2 *policy,
-+					 const struct inode *inode,
-+					 const char *type,
-+					 int max_ino_bits, int max_lblk_bits)
- {
- 	struct super_block *sb = inode->i_sb;
- 	int ino_bits = 64, lblk_bits = 64;
+ arch_initcall(mcf_init_devices);
+-
+diff --git a/arch/m68k/coldfire/m5441x.c b/arch/m68k/coldfire/m5441x.c
+index 5bd24c9b865d..ffa02de1a3fb 100644
+--- a/arch/m68k/coldfire/m5441x.c
++++ b/arch/m68k/coldfire/m5441x.c
+@@ -52,7 +52,7 @@ DEFINE_CLK(0, "mcfssi.0", 47, MCF_CLK);
+ DEFINE_CLK(0, "pll.0", 48, MCF_CLK);
+ DEFINE_CLK(0, "mcfrng.0", 49, MCF_CLK);
+ DEFINE_CLK(0, "mcfssi.1", 50, MCF_CLK);
+-DEFINE_CLK(0, "mcfsdhc.0", 51, MCF_CLK);
++DEFINE_CLK(0, "sdhci-esdhc-mcf.0", 51, MCF_CLK);
+ DEFINE_CLK(0, "enet-fec.0", 53, MCF_CLK);
+ DEFINE_CLK(0, "enet-fec.1", 54, MCF_CLK);
+ DEFINE_CLK(0, "switch.0", 55, MCF_CLK);
+@@ -74,6 +74,10 @@ DEFINE_CLK(1, "mcfpwm.0", 34, MCF_BUSCLK);
+ DEFINE_CLK(1, "sys.0", 36, MCF_BUSCLK);
+ DEFINE_CLK(1, "gpio.0", 37, MCF_BUSCLK);
  
--	if (policy->flags & FSCRYPT_POLICY_FLAG_DIRECT_KEY) {
--		fscrypt_warn(inode,
--			     "The DIRECT_KEY and IV_INO_LBLK_64 flags are mutually exclusive");
--		return false;
--	}
- 	/*
- 	 * It's unsafe to include inode numbers in the IVs if the filesystem can
- 	 * potentially renumber inodes, e.g. via filesystem shrinking.
-@@ -85,16 +81,22 @@ static bool supported_iv_ino_lblk_64_policy(
- 	if (!sb->s_cop->has_stable_inodes ||
- 	    !sb->s_cop->has_stable_inodes(sb)) {
- 		fscrypt_warn(inode,
--			     "Can't use IV_INO_LBLK_64 policy on filesystem '%s' because it doesn't have stable inode numbers",
--			     sb->s_id);
-+			     "Can't use %s policy on filesystem '%s' because it doesn't have stable inode numbers",
-+			     type, sb->s_id);
- 		return false;
- 	}
- 	if (sb->s_cop->get_ino_and_lblk_bits)
- 		sb->s_cop->get_ino_and_lblk_bits(sb, &ino_bits, &lblk_bits);
--	if (ino_bits > 32 || lblk_bits > 32) {
-+	if (ino_bits > max_ino_bits) {
-+		fscrypt_warn(inode,
-+			     "Can't use %s policy on filesystem '%s' because its inode numbers are too long",
-+			     type, sb->s_id);
-+		return false;
-+	}
-+	if (lblk_bits > max_lblk_bits) {
- 		fscrypt_warn(inode,
--			     "Can't use IV_INO_LBLK_64 policy on filesystem '%s' because it doesn't use 32-bit inode and block numbers",
--			     sb->s_id);
-+			     "Can't use %s policy on filesystem '%s' because its block numbers are too long",
-+			     type, sb->s_id);
- 		return false;
- 	}
- 	return true;
-@@ -137,6 +139,8 @@ static bool fscrypt_supported_v1_policy(const struct fscrypt_policy_v1 *policy,
- static bool fscrypt_supported_v2_policy(const struct fscrypt_policy_v2 *policy,
- 					const struct inode *inode)
- {
-+	int count = 0;
++DEFINE_CLK(2, "ipg.0", 0, MCF_CLK);
++DEFINE_CLK(2, "ahb.0", 1, MCF_CLK);
++DEFINE_CLK(2, "per.0", 2, MCF_CLK);
 +
- 	if (!fscrypt_valid_enc_modes(policy->contents_encryption_mode,
- 				     policy->filenames_encryption_mode)) {
- 		fscrypt_warn(inode,
-@@ -152,13 +156,29 @@ static bool fscrypt_supported_v2_policy(const struct fscrypt_policy_v2 *policy,
- 		return false;
- 	}
- 
-+	count += !!(policy->flags & FSCRYPT_POLICY_FLAG_DIRECT_KEY);
-+	count += !!(policy->flags & FSCRYPT_POLICY_FLAG_IV_INO_LBLK_64);
-+	count += !!(policy->flags & FSCRYPT_POLICY_FLAG_IV_INO_LBLK_32);
-+	if (count > 1) {
-+		fscrypt_warn(inode, "Mutually exclusive encryption flags (0x%02x)",
-+			     policy->flags);
-+		return false;
-+	}
+ struct clk *mcf_clks[] = {
+ 	&__clk_0_2,
+ 	&__clk_0_8,
+@@ -131,6 +135,11 @@ struct clk *mcf_clks[] = {
+ 	&__clk_1_34,
+ 	&__clk_1_36,
+ 	&__clk_1_37,
 +
- 	if ((policy->flags & FSCRYPT_POLICY_FLAG_DIRECT_KEY) &&
- 	    !supported_direct_key_modes(inode, policy->contents_encryption_mode,
- 					policy->filenames_encryption_mode))
- 		return false;
- 
- 	if ((policy->flags & FSCRYPT_POLICY_FLAG_IV_INO_LBLK_64) &&
--	    !supported_iv_ino_lblk_64_policy(policy, inode))
-+	    !supported_iv_ino_lblk_policy(policy, inode, "IV_INO_LBLK_64",
-+					  32, 32))
-+		return false;
++	&__clk_2_0,
++	&__clk_2_1,
++	&__clk_2_2,
 +
-+	if ((policy->flags & FSCRYPT_POLICY_FLAG_IV_INO_LBLK_32) &&
-+	    /* This uses hashed inode numbers, so ino_bits doesn't matter. */
-+	    !supported_iv_ino_lblk_policy(policy, inode, "IV_INO_LBLK_32",
-+					  INT_MAX, 32))
- 		return false;
+ 	NULL,
+ };
  
- 	if (memchr_inv(policy->__reserved, 0, sizeof(policy->__reserved))) {
-@@ -354,6 +374,9 @@ static int set_encryption_policy(struct inode *inode,
- 					       policy->v2.master_key_identifier);
- 		if (err)
- 			return err;
-+		if (policy->v2.flags & FSCRYPT_POLICY_FLAG_IV_INO_LBLK_32)
-+			pr_warn_once("%s (pid %d) is setting an IV_INO_LBLK_32 encryption policy.  This should only be used if there are certain hardware limitations.\n",
-+				     current->comm, current->pid);
- 		break;
- 	default:
- 		WARN_ON(1);
-diff --git a/include/uapi/linux/fscrypt.h b/include/uapi/linux/fscrypt.h
-index a10e3cdc2839489..7875709ccfebff2 100644
---- a/include/uapi/linux/fscrypt.h
-+++ b/include/uapi/linux/fscrypt.h
-@@ -19,7 +19,8 @@
- #define FSCRYPT_POLICY_FLAGS_PAD_MASK		0x03
- #define FSCRYPT_POLICY_FLAG_DIRECT_KEY		0x04
- #define FSCRYPT_POLICY_FLAG_IV_INO_LBLK_64	0x08
--#define FSCRYPT_POLICY_FLAGS_VALID		0x0F
-+#define FSCRYPT_POLICY_FLAG_IV_INO_LBLK_32	0x10
-+#define FSCRYPT_POLICY_FLAGS_VALID		0x1F
+@@ -151,6 +160,7 @@ static struct clk * const enable_clks[] __initconst = {
+ 	&__clk_0_33, /* pit.1 */
+ 	&__clk_0_37, /* eport */
+ 	&__clk_0_48, /* pll */
++	&__clk_0_51, /* esdhc */
  
- /* Encryption algorithms */
- #define FSCRYPT_MODE_AES_256_XTS		1
+ 	&__clk_1_36, /* CCM/reset module/Power management */
+ 	&__clk_1_37, /* gpio */
+diff --git a/arch/m68k/include/asm/m5441xsim.h b/arch/m68k/include/asm/m5441xsim.h
+index 4892f314ff38..e091e36d3464 100644
+--- a/arch/m68k/include/asm/m5441xsim.h
++++ b/arch/m68k/include/asm/m5441xsim.h
+@@ -278,6 +278,13 @@
+ #define MCFGPIO_IRQ_VECBASE	(MCFINT_VECBASE - MCFGPIO_IRQ_MIN)
+ #define MCFGPIO_PIN_MAX		87
+ 
++/*
++ * Phase Locked Loop (PLL)
++ */
++#define MCF_PLL_CR		0xFC0C0000
++#define MCF_PLL_DR		0xFC0C0004
++#define MCF_PLL_SR		0xFC0C0008
++
+ /*
+  *  DSPI module.
+  */
+@@ -298,5 +305,13 @@
+ #define MCFEDMA_IRQ_INTR16	(MCFINT1_VECBASE + MCFEDMA_EDMA_INTR16)
+ #define MCFEDMA_IRQ_INTR56	(MCFINT2_VECBASE + MCFEDMA_EDMA_INTR56)
+ #define MCFEDMA_IRQ_ERR	(MCFINT0_VECBASE + MCFINT0_EDMA_ERR)
++/*
++ *  esdhc module.
++ */
++#define MCFSDHC_BASE		0xfc0cc000
++#define MCFSDHC_SIZE		256
++#define MCFINT2_SDHC		31
++#define MCF_IRQ_SDHC		(MCFINT2_VECBASE + MCFINT2_SDHC)
++#define MCFSDHC_CLK		(MCFSDHC_BASE + 0x2c)
+ 
+ #endif /* m5441xsim_h */
+diff --git a/arch/m68k/include/asm/mcfclk.h b/arch/m68k/include/asm/mcfclk.h
+index 0aca504fae31..722627e06d66 100644
+--- a/arch/m68k/include/asm/mcfclk.h
++++ b/arch/m68k/include/asm/mcfclk.h
+@@ -30,6 +30,8 @@ extern struct clk_ops clk_ops0;
+ extern struct clk_ops clk_ops1;
+ #endif /* MCFPM_PPMCR1 */
+ 
++extern struct clk_ops clk_ops2;
++
+ #define DEFINE_CLK(clk_bank, clk_name, clk_slot, clk_rate) \
+ static struct clk __clk_##clk_bank##_##clk_slot = { \
+ 	.name = clk_name, \
+diff --git a/include/linux/platform_data/mmc-esdhc-mcf.h b/include/linux/platform_data/mmc-esdhc-mcf.h
+new file mode 100644
+index 000000000000..85cb786a62fe
+--- /dev/null
++++ b/include/linux/platform_data/mmc-esdhc-mcf.h
+@@ -0,0 +1,17 @@
++/* SPDX-License-Identifier: GPL-2.0 */
++
++#ifndef __LINUX_PLATFORM_DATA_MCF_ESDHC_H__
++#define __LINUX_PLATFORM_DATA_MCF_ESDHC_H__
++
++enum cd_types {
++	ESDHC_CD_NONE,		/* no CD, neither controller nor gpio */
++	ESDHC_CD_CONTROLLER,	/* mmc controller internal CD */
++	ESDHC_CD_PERMANENT,	/* no CD, card permanently wired to host */
++};
++
++struct mcf_esdhc_platform_data {
++	int max_bus_width;
++	int cd_type;
++};
++
++#endif /* __LINUX_PLATFORM_DATA_MCF_ESDHC_H__ */
 -- 
 2.26.2
 
