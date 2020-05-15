@@ -2,135 +2,92 @@ Return-Path: <SRS0=CGCI=65=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=no
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 11CA7C433DF
-	for <linux-mmc@archiver.kernel.org>; Fri, 15 May 2020 15:02:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6E3D6C433E0
+	for <linux-mmc@archiver.kernel.org>; Fri, 15 May 2020 15:09:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id DD8E6207BB
-	for <linux-mmc@archiver.kernel.org>; Fri, 15 May 2020 15:02:50 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="MgEDHPIk"
+	by mail.kernel.org (Postfix) with ESMTP id 4F477207C3
+	for <linux-mmc@archiver.kernel.org>; Fri, 15 May 2020 15:09:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726295AbgEOPCu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 15 May 2020 11:02:50 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39670 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-FAIL-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1726144AbgEOPCu (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 15 May 2020 11:02:50 -0400
-Received: from mail-vs1-xe44.google.com (mail-vs1-xe44.google.com [IPv6:2607:f8b0:4864:20::e44])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DE58FC061A0C
-        for <linux-mmc@vger.kernel.org>; Fri, 15 May 2020 08:02:48 -0700 (PDT)
-Received: by mail-vs1-xe44.google.com with SMTP id g2so1406307vsb.4
-        for <linux-mmc@vger.kernel.org>; Fri, 15 May 2020 08:02:48 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=z80bmdCOaUy0IuTAv6MAjJEqIXKZVI9he/f6Sa92Qhw=;
-        b=MgEDHPIkTLkknXlmuTunpKO8ZpHeOLPkX7M0BlbjptYUvZOkRVYNlEviCFxxYJJD8r
-         QKfQSn/L+LCN3jSqudpQotgsQiK+scN7OxEKlU4Mo6Slfdy019o2hzVvwNj6JhZUMzPQ
-         ZrVSawUj0/SjcxfcIdM7Fapa6eobh0r1EAbVywrlPKIQUbo0I2ZV2ZgvoPo+sMxWBkqO
-         Po/qpL7IhWcIFc/oRYrOcEli52ZHuvI9pRqY8jqacRUWNrifSbz+Q8y9w0Smr2liexXp
-         HP3TUqUB2culF1Iw7IBIW1Kx61/a2cfD4CGMimSyjjqrxJ9e5EnaqwvofhQ57mOuHr7T
-         m9xw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=z80bmdCOaUy0IuTAv6MAjJEqIXKZVI9he/f6Sa92Qhw=;
-        b=fXBF1zsbe/JaJkwI26XmPTxnR4zWMSYkRAUiBjOrfnzgpnSEU+nhxk809mSUtj7gHC
-         U1PUMxxYt28/hxo0j71Jv8tLgnZbmM8zIhpn6gJ7jeMo1yKQd5n2myWRQ9E+EVQc9+W1
-         /MXjUSh0cYOcRqhbihEx3eJtkaxVeeFKbC8NCqMUKf/2ztWaBTNyAXBQbtRkaVroXh88
-         +iTM1NSfL7EBX2zJpzxVdZOtxmwOXvpDgFxNEwpcwObT8YY6wTs4qFIk7pXhu+ZBiV9o
-         NTd24kkw35/M4E+mNIk+Eq8XLgfLnhnxYxM8MxP97j06Ht91C2+OMvyi4XcAgnYI7M9T
-         2BoA==
-X-Gm-Message-State: AOAM530nYjJHP6sxFKrhKzVajnE049XFjl0+USFWsNJ0Y5A9kJpDDhb8
-        /quZp3eLQVfaEkyoniRZWgUtltlBN7TBclFJvn9snTlyS2w=
-X-Google-Smtp-Source: ABdhPJynuhF2lD3tjDNAkcAPzOrN8gRuqOI01TCvqn7tirBMmvXODObuOGr+8Xc35OtUplrHB+nF6dhCFpZb35G3eQU=
-X-Received: by 2002:a67:8b46:: with SMTP id n67mr2733279vsd.35.1589554965931;
- Fri, 15 May 2020 08:02:45 -0700 (PDT)
-MIME-Version: 1.0
-References: <20200515140445.15218-1-ulf.hansson@linaro.org>
-In-Reply-To: <20200515140445.15218-1-ulf.hansson@linaro.org>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 15 May 2020 17:02:08 +0200
-Message-ID: <CAPDyKFr-7OkMW0UU_M78igBScOXiY784_TkqeHHwmVdZViRw6w@mail.gmail.com>
-Subject: Re: [PATCH 1/2] mmc: tmio: Further fixup runtime PM management at remove
-To:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        id S1726234AbgEOPJK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 15 May 2020 11:09:10 -0400
+Received: from relmlor1.renesas.com ([210.160.252.171]:21397 "EHLO
+        relmlie5.idc.renesas.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1726219AbgEOPJK (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 15 May 2020 11:09:10 -0400
+X-IronPort-AV: E=Sophos;i="5.73,395,1583161200"; 
+   d="scan'208";a="47188317"
+Received: from unknown (HELO relmlir5.idc.renesas.com) ([10.200.68.151])
+  by relmlie5.idc.renesas.com with ESMTP; 16 May 2020 00:09:07 +0900
+Received: from localhost.localdomain (unknown [10.226.36.204])
+        by relmlir5.idc.renesas.com (Postfix) with ESMTP id AC0BB400D4CD;
+        Sat, 16 May 2020 00:09:03 +0900 (JST)
+From:   Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+To:     Geert Uytterhoeven <geert+renesas@glider.be>,
+        Jens Axboe <axboe@kernel.dk>, Rob Herring <robh+dt@kernel.org>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Masahiro Yamada <yamada.masahiro@socionext.com>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc:     Ulrich Hecht <uli+renesas@fpond.eu>,
-        Simon Horman <horms+renesas@verge.net.au>,
-        Niklas Soderlund <niklas.soderlund@ragnatech.se>,
-        Geert Uytterhoeven <geert+renesas@glider.be>
-Content-Type: text/plain; charset="UTF-8"
+        Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>,
+        "David S. Miller" <davem@davemloft.net>,
+        Wim Van Sebroeck <wim@linux-watchdog.org>,
+        Guenter Roeck <linux@roeck-us.net>
+Cc:     linux-ide@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-i2c@vger.kernel.org,
+        linux-mmc@vger.kernel.org, netdev@vger.kernel.org,
+        linux-renesas-soc@vger.kernel.org, linux-watchdog@vger.kernel.org,
+        Prabhakar <prabhakar.csengg@gmail.com>,
+        Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+Subject: [PATCH 00/17] RZ/G1H describe I2C, IIC, MMC0, SATA, AVB, RWDT and APMU nodes
+Date:   Fri, 15 May 2020 16:08:40 +0100
+Message-Id: <1589555337-5498-1-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
+X-Mailer: git-send-email 2.7.4
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 15 May 2020 at 16:04, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->
-> Before calling tmio_mmc_host_probe(), the caller is required to enable
-> clocks for its device, as to make it accessible when reading/writing
-> registers during probe.
->
-> Therefore, the responsibility to disable these clocks, in the error path of
-> ->probe() and during ->remove(), is better managed outside
-> tmio_mmc_host_remove(). As a matter of fact, callers of
-> tmio_mmc_host_remove() already expects this to be the behaviour.
->
-> However, there's a problem with tmio_mmc_host_remove() when the Kconfig
-> option, CONFIG_PM, is set. More precisely, tmio_mmc_host_remove() may then
-> disable the clock via runtime PM, which leads to clock enable/disable
-> imbalance problems, when the caller of tmio_mmc_host_remove() also tries to
-> disable the same clocks.
+Hi All,
 
-Just realized that part of the commit message is missing, explaining
-the change. I intend to add this:
+This patch series describes i2c, iic, mmc0, sdhi, sata, AVB, apmu and
+RWDT on R8A7742 SoC.
 
-To solve the problem, let's make sure tmio_mmc_host_remove() leaves
-the device with clocks enabled, but also make sure to disable the
-IRQs, as we normally do at ->runtime_suspend().
+Cheers,
+Prabhakar
 
-Also, this is untested, so relying on you guys with the HW at hand.
+Lad Prabhakar (17):
+  dt-bindings: i2c: renesas,i2c: Document r8a7742 support
+  dt-bindings: i2c: renesas,iic: Document r8a7742 support
+  ARM: dts: r8a7742: Add I2C and IIC support
+  dt-bindings: mmc: renesas,sdhi: Document r8a7742 support
+  mmc: renesas_sdhi_sys_dmac: Add support for r8a7742 SoC
+  ARM: dts: r8a7742: Add SDHI nodes
+  ARM: dts: r8a7742: Add MMC0 node
+  dt-bindings: ata: renesas,rcar-sata: Add r8a7742 support
+  ARM: dts: r8a7742: Add sata nodes
+  dt-bindings: net: renesas,ravb: Add support for r8a7742 SoC
+  dt-bindings: net: renesas,ether: Document R8A7742 SoC
+  ARM: dts: r8a7742: Add Ethernet AVB support
+  ARM: dts: r8a7742: Add Ether support
+  dt-bindings: power: renesas,apmu: Document r8a7742 support
+  ARM: dts: r8a7742: Add APMU nodes
+  dt-bindings: watchdog: renesas,wdt: Document r8a7742 support
+  ARM: dts: r8a7742: Add RWDT node
 
-Kind regards
-Uffe
+ .../devicetree/bindings/ata/renesas,rcar-sata.yaml |   1 +
+ .../devicetree/bindings/i2c/renesas,i2c.txt        |   1 +
+ .../devicetree/bindings/i2c/renesas,iic.txt        |   1 +
+ .../devicetree/bindings/mmc/renesas,sdhi.txt       |   1 +
+ .../devicetree/bindings/net/renesas,ether.yaml     |   1 +
+ .../devicetree/bindings/net/renesas,ravb.txt       |   1 +
+ .../devicetree/bindings/power/renesas,apmu.yaml    |   1 +
+ .../devicetree/bindings/watchdog/renesas,wdt.txt   |   1 +
+ arch/arm/boot/dts/r8a7742.dtsi                     | 270 +++++++++++++++++++++
+ drivers/mmc/host/renesas_sdhi_sys_dmac.c           |   1 +
+ 10 files changed, 279 insertions(+)
 
->
-> Reported-by: Geert Uytterhoeven <geert+renesas@glider.be>
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-> ---
->  drivers/mmc/host/tmio_mmc_core.c | 6 ++++--
->  1 file changed, 4 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
-> index f31afd1c2671..ba301fb7656b 100644
-> --- a/drivers/mmc/host/tmio_mmc_core.c
-> +++ b/drivers/mmc/host/tmio_mmc_core.c
-> @@ -1231,12 +1231,14 @@ void tmio_mmc_host_remove(struct tmio_mmc_host *host)
->         cancel_work_sync(&host->done);
->         cancel_delayed_work_sync(&host->delayed_reset_work);
->         tmio_mmc_release_dma(host);
-> +       tmio_mmc_disable_mmc_irqs(host, TMIO_MASK_ALL);
->
-> -       pm_runtime_dont_use_autosuspend(&pdev->dev);
->         if (host->native_hotplug)
->                 pm_runtime_put_noidle(&pdev->dev);
-> -       pm_runtime_put_sync(&pdev->dev);
-> +
->         pm_runtime_disable(&pdev->dev);
-> +       pm_runtime_dont_use_autosuspend(&pdev->dev);
-> +       pm_runtime_put_noidle(&pdev->dev);
->  }
->  EXPORT_SYMBOL_GPL(tmio_mmc_host_remove);
->
-> --
-> 2.20.1
->
+-- 
+2.7.4
+
