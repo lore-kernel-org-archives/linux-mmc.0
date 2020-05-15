@@ -2,115 +2,122 @@ Return-Path: <SRS0=CGCI=65=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.1 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-1.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BCDDCC433E0
-	for <linux-mmc@archiver.kernel.org>; Fri, 15 May 2020 15:52:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3CE1DC433DF
+	for <linux-mmc@archiver.kernel.org>; Fri, 15 May 2020 16:49:14 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 95914206C0
-	for <linux-mmc@archiver.kernel.org>; Fri, 15 May 2020 15:52:58 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="h+zhmsKd"
+	by mail.kernel.org (Postfix) with ESMTP id 1D13A207F9
+	for <linux-mmc@archiver.kernel.org>; Fri, 15 May 2020 16:49:14 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1589561354;
+	bh=8pUV37zL9/W/bjQpYnreYlqFWAzQQtWDY2t2sSwMlKw=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:List-ID:From;
+	b=HweQ0Px9rr4l1Szh8eJ9YC00Y9JMJHghhrjb3XsG0/PMbeps+IbUo2Foc4aUk1iOD
+	 9anP5bkYxnOAl86w0VPaOb5CMBFTbmK3eN8wRMH2iMEudURupwwtNXDkxg002JPXQU
+	 gL4ujx9Rj44/CoTzRegomwbfQslH7iHPouOFP1Dw=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726551AbgEOPw6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 15 May 2020 11:52:58 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47576 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-FAIL-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1726250AbgEOPw5 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 15 May 2020 11:52:57 -0400
-Received: from mail-lf1-x143.google.com (mail-lf1-x143.google.com [IPv6:2a00:1450:4864:20::143])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D4B81C061A0C;
-        Fri, 15 May 2020 08:52:56 -0700 (PDT)
-Received: by mail-lf1-x143.google.com with SMTP id d22so2216335lfm.11;
-        Fri, 15 May 2020 08:52:56 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=l71weFdBgY/OPubK5TNcEV6JMPL70XXv0VPAI4BGmH8=;
-        b=h+zhmsKdPrBiA91DhveEfpS8srEtG6zUpM0LynXaeBAEpjymBb7cGgwHobsxSjveai
-         MczFjeQoUoR6hJ9K5WfBuDl6RUF3pIVcUH7a80+4OpUErSQVuHRoCukkkzKjzaC2mgjo
-         mjKXqx8t8tuPjiwOG5LF1XcrQz6VP+Z0Bk18SGdBx0GNTou6BwFy2NDR5le9ScpHhEqA
-         mYDelPDUPWjs3L6EPRXiDUmQ48Ni2B0+u1+p98HtmkYe4Bn57ASFvWY8W4/r1ZJzOOKK
-         5qCUawwktx2EmXiU3luK9jSBqVJJ/SHxbs9gvkyv1JoPU/81ttsidcCYJCD/KY40kdGA
-         e3EA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=l71weFdBgY/OPubK5TNcEV6JMPL70XXv0VPAI4BGmH8=;
-        b=M1n47HXBz/zH+lDK0suR2M5L53Pt1vdvNiDnaoCCH36lkWQp8MuX28hYUEh6uwd93Z
-         EWL3n59rwWn7i3S3ubIQ8ZuMcdBlyI2HQfNWqHUZxp+b2WXY+NqdYw3LieNd4WUBx73W
-         72sOZXx3Lq9ROZisqNe+b0thI7zDMTdb/HVjCARQql+yr6n2ZLnVbWj5/Ghl6d4edT9a
-         DVMkFsqCEaagQWOSAyQagkCIXwDeuvREEX84ue9LOBwBLdPOBWKK8Ajparlg3iqJAf3X
-         hiVcUfJ2SUUzFxcJxTbikNduBWRbr8gQ5B7sji3p/0968DvnobG8rlgcfGjuPjdve3RV
-         Q6tg==
-X-Gm-Message-State: AOAM532Rg6gPSN/W9GBeA6zcaVhmiUi+LrbBHGbsiPogvSsvQkk/A5aG
-        VUJquoagHKPofhWV3yc6kvy16Lva
-X-Google-Smtp-Source: ABdhPJxTNdXAf1FtSIiCyjYkNMI+hY5ajiYzUnof3HI0p3oY3hAgh9KXwjPIo2BOWmWGbMMBMBBZgg==
-X-Received: by 2002:a19:2258:: with SMTP id i85mr2905186lfi.86.1589557975112;
-        Fri, 15 May 2020 08:52:55 -0700 (PDT)
-Received: from [192.168.2.145] (ppp91-78-208-152.pppoe.mtu-net.ru. [91.78.208.152])
-        by smtp.googlemail.com with ESMTPSA id r3sm1529811lfm.52.2020.05.15.08.52.53
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 15 May 2020 08:52:54 -0700 (PDT)
-Subject: Re: [PATCH v4 4/6] partitions/efi: Support GPT entry lookup at a
- non-standard location
-To:     Steve McIntyre <steve@einval.com>
-Cc:     Jens Axboe <axboe@kernel.dk>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        Jonathan Hunter <jonathanh@nvidia.com>,
-        =?UTF-8?B?TWljaGHFgiBNaXJvc8WCYXc=?= <mirq-linux@rere.qmqm.pl>,
-        David Heidelberg <david@ixit.cz>,
-        Peter Geis <pgwipeout@gmail.com>,
-        Stephen Warren <swarren@wwwdotorg.org>,
-        Nicolas Chauvet <kwizart@gmail.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Billy Laws <blaws05@gmail.com>,
-        =?UTF-8?Q?Nils_=c3=96stlund?= <nils@naltan.com>,
-        Christoph Hellwig <hch@infradead.org>,
-        Ard Biesheuvel <ard.biesheuvel@linaro.org>,
-        Davidlohr Bueso <dave@stgolabs.net>,
-        linux-tegra@vger.kernel.org, linux-block@vger.kernel.org,
-        Andrey Danin <danindrey@mail.ru>,
-        Gilles Grandou <gilles@grandou.net>,
-        Ryan Grachek <ryan@edited.us>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-efi <linux-efi@vger.kernel.org>
-References: <20200515014143.12984-1-digetx@gmail.com>
- <20200515014143.12984-5-digetx@gmail.com>
- <20200515100320.GB30674@tack.einval.com>
-From:   Dmitry Osipenko <digetx@gmail.com>
-Message-ID: <2633429b-f014-15ea-c08c-d2157b0177b1@gmail.com>
-Date:   Fri, 15 May 2020 18:52:53 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.7.0
+        id S1726228AbgEOQtN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 15 May 2020 12:49:13 -0400
+Received: from conssluserg-02.nifty.com ([210.131.2.81]:63501 "EHLO
+        conssluserg-02.nifty.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726212AbgEOQtN (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 15 May 2020 12:49:13 -0400
+Received: from mail-vs1-f47.google.com (mail-vs1-f47.google.com [209.85.217.47]) (authenticated)
+        by conssluserg-02.nifty.com with ESMTP id 04FGmrGW007857;
+        Sat, 16 May 2020 01:48:53 +0900
+DKIM-Filter: OpenDKIM Filter v2.10.3 conssluserg-02.nifty.com 04FGmrGW007857
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nifty.com;
+        s=dec2015msa; t=1589561334;
+        bh=09wMO0HOLiuZEWBlp//e1RGQGwcTnw5OK53PxoKYyww=;
+        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+        b=XyLZEPgqzJa2xCj9I8I+vQAEMTwMscU9bUb7cjlqJ2yheq1UpUhraOZ7msmPMbsTK
+         qzOXH6ZdBcNM8VV93TTaLEl1EJ+RHJY4YQDSRANfuwyINTKLn+rg/BFHvyxo2ihm7M
+         0fJQjDi0RDer11HL/0YeSFHZvUV1ix4zaRKu55Uct6gBHnIxBxDA7ztsKmEQDA8fB+
+         a4yibEfmtj3g5KPFKA7jiMFbJqMSaBf7y6a46QaqYxrgx7ydK8IfnMc9HB98wUIVYa
+         ElGuo4QncXvmAS2DIOaW33/zkUj4yAJk3HN3r7Il3ba9szeUFmqFEaPbfqRprBfSl0
+         GyVrmUUEyWvyA==
+X-Nifty-SrcIP: [209.85.217.47]
+Received: by mail-vs1-f47.google.com with SMTP id h9so1641605vsa.3;
+        Fri, 15 May 2020 09:48:53 -0700 (PDT)
+X-Gm-Message-State: AOAM5300eOIVBWhB/RUJcnI47uUUaMLnh7uuFgQyJG/KvjLBTqquP6Lj
+        da9+i5tybuQ4hQCvxkZxmEDmLX/LJ4lisH6pcEs=
+X-Google-Smtp-Source: ABdhPJx5We+J/+P9eW3tPKlUwrEoyPTG2qrfC1Qcle2l35CTjE/I/Zn44C4+6bRhiAacp7HhTakV4UrolHd0e7ZP44A=
+X-Received: by 2002:a67:db0d:: with SMTP id z13mr3514563vsj.155.1589561332418;
+ Fri, 15 May 2020 09:48:52 -0700 (PDT)
 MIME-Version: 1.0
-In-Reply-To: <20200515100320.GB30674@tack.einval.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+References: <20200513173131.11200-1-wsa+renesas@sang-engineering.com> <CAPDyKFpaaVdpv22VO_OS7a2rw67xmD7qXcxUqD_g5CDdqiZiHA@mail.gmail.com>
+In-Reply-To: <CAPDyKFpaaVdpv22VO_OS7a2rw67xmD7qXcxUqD_g5CDdqiZiHA@mail.gmail.com>
+From:   Masahiro Yamada <masahiroy@kernel.org>
+Date:   Sat, 16 May 2020 01:48:16 +0900
+X-Gmail-Original-Message-ID: <CAK7LNAR0THa--b7GDtip1JehiOZCiLWs1VygJfNo1_nSHEj1RA@mail.gmail.com>
+Message-ID: <CAK7LNAR0THa--b7GDtip1JehiOZCiLWs1VygJfNo1_nSHEj1RA@mail.gmail.com>
+Subject: Re: [PATCH] mmc: renesas_sdhi: don't lose RPM savings because of
+ manual clk handling
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        =?UTF-8?Q?Niklas_S=C3=B6derlund?= 
+        <niklas.soderlund+renesas@ragnatech.se>,
+        Geert Uytterhoeven <geert+renesas@glider.be>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-15.05.2020 13:03, Steve McIntyre пишет:
-> On Fri, May 15, 2020 at 04:41:41AM +0300, Dmitry Osipenko wrote:
->> Most of consumer-grade NVIDIA Tegra devices use a proprietary bootloader
->> that can't be easily replaced because it's locked down using Secure Boot
->> cryptography singing and the crypto keys aren't given to a device owner.
->               ^^^^^^^ typo
->> These devices usually have eMMC storage that is partitioned using a custom
->> NVIDIA Tegra partition table format.  Of course bootloader and other
->> "special things" are stored on the eMMC storage, and thus, the partition
->> format can't be changed.
-> 
-> ...
-> 
+On Fri, May 15, 2020 at 6:26 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>
+> + Niklas, Geert, Yamada-san,
+>
+>
+> On Wed, 13 May 2020 at 19:31, Wolfram Sang
+> <wsa+renesas@sang-engineering.com> wrote:
+> >
+> > The SDHI driver en-/disabled clocks on its own during probe() and
+> > remove(). This basically killed all potential RPM power savings. Now, we
+> > just enable the clocks for a short time when we access registers in
+> > probe(). We otherwise leave all handling to RPM. That means, we need to
+> > shift the RPM enabling code in the TMIO core a bit up, so we can access
+> > registers there, too.
+>
+> No, this doesn't sound entirely right to me.
+>
+> However, I do admit that we may need to move the pm_runtime
+> initialization earlier (perhaps even out of tmio_mmc_core), but for
+> slightly different reasons. Let me elaborate.
+>
+> For uniphier-sd, renesas_sdhi_sys_dmac and renesas_sdhi_internal_dmac
+> - they all have assigned the ->clk_enable|disable() ops. Which means
+> they have internal clock management (calling clk_prepare|enable()
+> etc). For tmio_mmc, that's not the case.
+>
+> On top of this, the device may also have a potential PM domain
+> attached. If that is the case, the PM domain may or may not have clock
+> management implemented through genpd's ->start|stop() callbacks.
+>
+> So, in the end we are going to have to rely on clock enable/prepare
+> reference counting, as we have to manage the clock(s) at both the
+> driver and the PM domain level. Taking into account all various
+> combinations (and that CONFIG_PM may not always be set). I have
+> started to hack on some patches, but before I share them, let me ask a
+> few questions.
+>
+> 1. tmio_mmc: - is that used solely with clock management through
+> genpd? Or has no clock management at all?
+> 2. uniphier-sd: Don't have runtime PM callbacks assigned. It looks
+> like it doesn't care about runtime PM, but maybe it does through a PM
+> domain? Can we skip to enable runtime PM for uniphier-sd, no?
 
-Thanks! I'll correct it in v5.
+
+Right, uniphier-sd does not care about runtime PM.
+UniPhier SoCs do not have separate power domains.
+
+
+
+-- 
+Best Regards
+Masahiro Yamada
