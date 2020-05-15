@@ -2,119 +2,122 @@ Return-Path: <SRS0=CGCI=65=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.3 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B38AEC433DF
-	for <linux-mmc@archiver.kernel.org>; Fri, 15 May 2020 13:38:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 73B36C433E0
+	for <linux-mmc@archiver.kernel.org>; Fri, 15 May 2020 14:04:59 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9B16520657
-	for <linux-mmc@archiver.kernel.org>; Fri, 15 May 2020 13:38:54 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4E70420759
+	for <linux-mmc@archiver.kernel.org>; Fri, 15 May 2020 14:04:59 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="aX8u4ajF"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726185AbgEONix (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 15 May 2020 09:38:53 -0400
-Received: from mga04.intel.com ([192.55.52.120]:60438 "EHLO mga04.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726163AbgEONix (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 15 May 2020 09:38:53 -0400
-IronPort-SDR: 2MdteKxO0zjaZjATrhEpsNkPY1XlPe2UxN5Y9Bs032ZD/+WDjJWtfm5f+So1a7q1Clk5MNTtcw
- hFNtrVKwWEuQ==
-X-Amp-Result: SKIPPED(no attachment in message)
-X-Amp-File-Uploaded: False
-Received: from orsmga002.jf.intel.com ([10.7.209.21])
-  by fmsmga104.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 15 May 2020 06:38:52 -0700
-IronPort-SDR: D2FrE4M9KSTHAz1IOxi3JDX/N5BklvSOm99TB8g38Bn/G/IN9EmPhNPh4GTM7SU9Ob1yO53p0D
- ebwDarModJ7g==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.73,395,1583222400"; 
-   d="scan'208";a="281219394"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.157]) ([10.237.72.157])
-  by orsmga002.jf.intel.com with ESMTP; 15 May 2020 06:38:49 -0700
-Subject: Re: [PATCH v4 2/3] mmc: sdhci: add quirks for be to le byte swapping
-To:     Angelo Dureghello <angelo.dureghello@timesys.com>,
-        ulf.hansson@linaro.org, gerg@linux-m68k.org
-Cc:     linux-mmc@vger.kernel.org, linux-m68k@vger.kernel.org
-References: <20200513204133.2540568-1-angelo.dureghello@timesys.com>
- <20200513204133.2540568-2-angelo.dureghello@timesys.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <d1be973e-87b6-f45c-bea6-4b6660a8465c@intel.com>
-Date:   Fri, 15 May 2020 16:39:07 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.7.0
+        id S1726171AbgEOOE6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 15 May 2020 10:04:58 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58740 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-FAIL-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1726168AbgEOOE6 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 15 May 2020 10:04:58 -0400
+Received: from mail-lf1-x141.google.com (mail-lf1-x141.google.com [IPv6:2a00:1450:4864:20::141])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DE849C061A0C
+        for <linux-mmc@vger.kernel.org>; Fri, 15 May 2020 07:04:56 -0700 (PDT)
+Received: by mail-lf1-x141.google.com with SMTP id 188so1906199lfa.10
+        for <linux-mmc@vger.kernel.org>; Fri, 15 May 2020 07:04:56 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=KqMvS6Pwv6qwK7ezeFo5bAq4FbNQAaDLk8gZGW9T6as=;
+        b=aX8u4ajFiW391041HpRcD7gqgJfPAZ/hJVoyWEEUaZsOnxW/NcXwN+EP9hbJck9lLH
+         WDjTLqSnvRdOScIHXz0y+IBj5FybBPu1wchgIGEn/3IEiKao7HzyrKmf/G4hVoi7NNWb
+         IPeRDmM186Y88s49kG7u0h8mS9W6ca3w4wRNbFKAwUz3ZFb7y9BzuueL9PWOj+XGazv0
+         tOFcmxK4RueEOop4uFOwyOLHJPLzMKedGWodstvusmZwisrbLg5M/5rtpcy5EnacqsZk
+         CU3TCrmqzDVd6bQzneNAvp/KVozlKkU20ehMcnqfYKerAr/tPgdLCo+d5bojHWfP6EYt
+         kwzA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=KqMvS6Pwv6qwK7ezeFo5bAq4FbNQAaDLk8gZGW9T6as=;
+        b=Y6HKedTLUMRQPab6k4HC34SZ+v+QXuxvGcFeMP9/XzLk54CUAcqk8Pe/GBmv35XnuH
+         +3EJAeLAlJRk7XIXlE4YC8pMQYlVx8+y28Kd6BTm0yr8jctmNvnB1zc8gCGE2MdLxNDB
+         AP7jWodnqUP1/i7LGvKr3eDY7TIWNVOpEIyIJ/6G8NncB6UdplOOgLW71MJPKf0luMGc
+         help0mPFwpicOYb27VH/ETJCvhLZWVBfmSKKhyrtD4qMHt+94ISLIrlbFVyleBoARuYP
+         JrFvQyzIRE4rn1cqkpu9uIvc/GVVc6abjvgjuFuzyDrCFhdq+TeOvWBHQrkg1plBjL/p
+         oOOg==
+X-Gm-Message-State: AOAM5338MpCHmeKYRLzNlgHjnebFl5vnNp2CAvEDyQWTQJoA/Gdinsm1
+        Hm2cTKS2w+VEd+SgSz6imkpMSu+WEDQ=
+X-Google-Smtp-Source: ABdhPJwD6NGbv8QK0RiAWkvYC0Di8KBIOeOG9AwX2UOFScSP2rYJA8jKEFuP52XOClUvMPOa2FvGJw==
+X-Received: by 2002:a19:505b:: with SMTP id z27mr2401339lfj.123.1589551494656;
+        Fri, 15 May 2020 07:04:54 -0700 (PDT)
+Received: from localhost.localdomain (h-98-128-181-7.NA.cust.bahnhof.se. [98.128.181.7])
+        by smtp.gmail.com with ESMTPSA id q17sm1281448lfa.28.2020.05.15.07.04.52
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 15 May 2020 07:04:53 -0700 (PDT)
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+To:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
+        Masahiro Yamada <yamada.masahiro@socionext.com>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc:     Ulrich Hecht <uli+renesas@fpond.eu>,
+        Simon Horman <horms+renesas@verge.net.au>,
+        Niklas Soderlund <niklas.soderlund@ragnatech.se>,
+        Geert Uytterhoeven <geert+renesas@glider.be>
+Subject: [PATCH 1/2] mmc: tmio: Further fixup runtime PM management at remove
+Date:   Fri, 15 May 2020 16:04:45 +0200
+Message-Id: <20200515140445.15218-1-ulf.hansson@linaro.org>
+X-Mailer: git-send-email 2.20.1
 MIME-Version: 1.0
-In-Reply-To: <20200513204133.2540568-2-angelo.dureghello@timesys.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 13/05/20 11:41 pm, Angelo Dureghello wrote:
-> Some controller as the ColdFire eshdc may require an endianness
-> byte swap, becouse DMA read endianness is not configurable.
-> 
-> Signed-off-by: Angelo Dureghello <angelo.dureghello@timesys.com>
-> ---
-> Changes for v3:
-> - add post request callback
-> Changes for v4:
-> none
-> ---
->  drivers/mmc/host/sdhci.c | 7 +++++++
->  drivers/mmc/host/sdhci.h | 2 ++
->  2 files changed, 9 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 3f716466fcfd..d3bfbb6e11d5 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -637,6 +637,13 @@ static int sdhci_pre_dma_transfer(struct sdhci_host *host,
->  			sg_copy_to_buffer(data->sg, data->sg_len,
->  					  host->bounce_buffer,
->  					  length);
-> +
-> +			/*
-> +			 * Endianness can't be swapped in the sg list,
-> +			 * since the sg list is processed again later on.
-> +			 */
+Before calling tmio_mmc_host_probe(), the caller is required to enable
+clocks for its device, as to make it accessible when reading/writing
+registers during probe.
 
-The data in the sg list must not be changed because we don't know how
-else it might be being used.  Maybe leave out the comment.
+Therefore, the responsibility to disable these clocks, in the error path of
+->probe() and during ->remove(), is better managed outside
+tmio_mmc_host_remove(). As a matter of fact, callers of
+tmio_mmc_host_remove() already expects this to be the behaviour.
 
-> +			if (host->ops->pre_dma_transfer)
-> +				host->ops->pre_dma_transfer(host, data);
+However, there's a problem with tmio_mmc_host_remove() when the Kconfig
+option, CONFIG_PM, is set. More precisely, tmio_mmc_host_remove() may then
+disable the clock via runtime PM, which leads to clock enable/disable
+imbalance problems, when the caller of tmio_mmc_host_remove() also tries to
+disable the same clocks.
 
-Let's make this slightly more generic i.e.
+Reported-by: Geert Uytterhoeven <geert+renesas@glider.be>
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+---
+ drivers/mmc/host/tmio_mmc_core.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
 
-			if (host->ops->copy_to_bounce_buffer) {
-				host->ops->copy_to_bounce_buffer(host, data);
-			} else {
-				sg_copy_to_buffer(data->sg, data->sg_len,
-						  host->bounce_buffer,
-						  length);
-			}
-
-
->  		}
->  		/* Switch ownership to the DMA */
->  		dma_sync_single_for_device(host->mmc->parent,
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index 79dffbb731d3..076054308423 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -653,6 +653,8 @@ struct sdhci_ops {
->  	void	(*voltage_switch)(struct sdhci_host *host);
->  	void	(*adma_write_desc)(struct sdhci_host *host, void **desc,
->  				   dma_addr_t addr, int len, unsigned int cmd);
-> +	void	(*pre_dma_transfer)(struct sdhci_host *host,
-> +				    struct mmc_data *data);
->  	void	(*request_done)(struct sdhci_host *host,
->  				struct mmc_request *mrq);
->  };
-> 
+diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
+index f31afd1c2671..ba301fb7656b 100644
+--- a/drivers/mmc/host/tmio_mmc_core.c
++++ b/drivers/mmc/host/tmio_mmc_core.c
+@@ -1231,12 +1231,14 @@ void tmio_mmc_host_remove(struct tmio_mmc_host *host)
+ 	cancel_work_sync(&host->done);
+ 	cancel_delayed_work_sync(&host->delayed_reset_work);
+ 	tmio_mmc_release_dma(host);
++	tmio_mmc_disable_mmc_irqs(host, TMIO_MASK_ALL);
+ 
+-	pm_runtime_dont_use_autosuspend(&pdev->dev);
+ 	if (host->native_hotplug)
+ 		pm_runtime_put_noidle(&pdev->dev);
+-	pm_runtime_put_sync(&pdev->dev);
++
+ 	pm_runtime_disable(&pdev->dev);
++	pm_runtime_dont_use_autosuspend(&pdev->dev);
++	pm_runtime_put_noidle(&pdev->dev);
+ }
+ EXPORT_SYMBOL_GPL(tmio_mmc_host_remove);
+ 
+-- 
+2.20.1
 
