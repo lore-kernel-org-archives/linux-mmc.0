@@ -1,67 +1,204 @@
-Return-Path: <SRS0=Uo47=64=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=CGCI=65=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
-	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F2243C433E0
-	for <linux-mmc@archiver.kernel.org>; Thu, 14 May 2020 20:30:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A399DC433E0
+	for <linux-mmc@archiver.kernel.org>; Fri, 15 May 2020 01:43:09 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C803320675
-	for <linux-mmc@archiver.kernel.org>; Thu, 14 May 2020 20:30:04 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1589488204;
-	bh=2fV6FXaih3d1LNH4bSHTlCs2BKGVobhSasfNvqF+6Tk=;
-	h=Subject:From:In-Reply-To:References:Date:To:Cc:List-ID:From;
-	b=ymaAV+6omOPwg3MVxGs60tgbH6yNebIBFiY/uAdmvJBznRNKvXEmS0HOj3RGLyEjO
-	 nlwhxVVF8wyhsbnlLVG4NnSiGkpDAGDPu0u7jM4s+odqXh6CwkHqIfYuhnE2OoYG+y
-	 ArIgAvS7ZmE+ck3j4Byh/YQ9nqM/HNdmPdKQcOqQ=
+	by mail.kernel.org (Postfix) with ESMTP id 79C6820671
+	for <linux-mmc@archiver.kernel.org>; Fri, 15 May 2020 01:43:09 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="hoPx86lk"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726076AbgENUaE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 14 May 2020 16:30:04 -0400
-Received: from mail.kernel.org ([198.145.29.99]:60342 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725975AbgENUaD (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 14 May 2020 16:30:03 -0400
-Subject: Re: [GIT PULL] MMC fixes for v5.7-rc6
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1589488203;
-        bh=2fV6FXaih3d1LNH4bSHTlCs2BKGVobhSasfNvqF+6Tk=;
-        h=From:In-Reply-To:References:Date:To:Cc:From;
-        b=qPcA8Jh6iw1s44+sKTips4c4g3CpAd8xNV/SOli5+KiRJq5vn66PTu8HLH7qYW3aR
-         jGozAnwWjr+H05gkItWCbBDxW0tkJAUj4+PU1E1R+6N8wOi4mZs7FaHxvLyjlSwd9P
-         s8IxCTlwsi8YB8gD7VrWFUVtsCh7+4DeLjYKRFbY=
-From:   pr-tracker-bot@kernel.org
-In-Reply-To: <20200514193136.23283-1-ulf.hansson@linaro.org>
-References: <20200514193136.23283-1-ulf.hansson@linaro.org>
-X-PR-Tracked-List-Id: <linux-kernel.vger.kernel.org>
-X-PR-Tracked-Message-Id: <20200514193136.23283-1-ulf.hansson@linaro.org>
-X-PR-Tracked-Remote: git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.7-rc4
-X-PR-Tracked-Commit-Id: 45a3fe3bf93b7cfeddc28ef7386555e05dc57f06
-X-PR-Merge-Tree: torvalds/linux.git
-X-PR-Merge-Refname: refs/heads/master
-X-PR-Merge-Commit-Id: 1ae7efb388540adc1653a51a3bc3b2c9cef5ec1a
-Message-Id: <158948820347.8952.4690689675946895652.pr-tracker-bot@kernel.org>
-Date:   Thu, 14 May 2020 20:30:03 +0000
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+        id S1728465AbgEOBnC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 14 May 2020 21:43:02 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55878 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728400AbgEOBm4 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 14 May 2020 21:42:56 -0400
+Received: from mail-lj1-x242.google.com (mail-lj1-x242.google.com [IPv6:2a00:1450:4864:20::242])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 672DBC061A0C;
+        Thu, 14 May 2020 18:42:55 -0700 (PDT)
+Received: by mail-lj1-x242.google.com with SMTP id u15so489357ljd.3;
+        Thu, 14 May 2020 18:42:55 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=from:to:cc:subject:date:message-id:in-reply-to:references
+         :mime-version:content-transfer-encoding;
+        bh=JVySzFwgY7e8nHIHJ3dU/d0fc76IF5fhtoXaTUTq3/w=;
+        b=hoPx86lkMv329DILvtpon/Ajyu7+1OY5peruM7Vg7+OAXk+r+u7VTEqeBI+fmttHtB
+         /RGZ79ojlFV98bYnoLGwRB/pr0w/iPGJwSJOp9NS05gIssx2cos+rU2DyX4HPL+66ohJ
+         t5aFvt7PrCrUu79cvVD00vCpzZubK8MizHyf1rxztNhRROl1ur4byd/Hk5hTwEV3BcAr
+         MTWn6M6FkwILuWpkHkHe1LFb3hqmhtxb1fSVCvWKmcisQLT46z6SY7ZfYE76Bx1W+kgK
+         QdN5qSbO3gi55jgShl3JntW2B46hWZt8Y53TMnfC90PCN43Ge3X4GBPMA60lg3KqPek7
+         3XUQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=JVySzFwgY7e8nHIHJ3dU/d0fc76IF5fhtoXaTUTq3/w=;
+        b=Y91qKHyJJ1+2F0lLEtzE4CPHTszddjUll+Wqro8VsZ5VldV6tRn5BKz7394S7mHhAB
+         i1clpTBJJRB9wZ5OKfAaqq4Kll+ROvFI6kymhNFgBElk04KB3sZgz++oMoX8pjRdzuZR
+         /533PDWi+Wnx0cPQ0CUN3rHjanUUYsXImWwpHxWXb62RJZXVynyaK2ElUYk5W6/40NUb
+         f1shMm1nq9dRtvSLoYonnsUf7PA3OrbDyjlIGAN/7Koo0WcRULaDdQVuaI1O71dFjqDl
+         4x5U7iWpcxLpizbCaehXfjvAXg6YSbcVHvYoD/teH/Daytkqrb3c1l/boGPDXXodpMaU
+         UMow==
+X-Gm-Message-State: AOAM531+DvwVMcj4VUU37viJR5LmfTlxKZ/FbdjgQP1fKnOdt1D1gJmt
+        nrB7jIknkbpQ0VeQed5rkPA=
+X-Google-Smtp-Source: ABdhPJxkl15/TS/h0JiR0KBnsPh+lDA/C79Y/X8zJyP/oDmmlGQXUNVcNHzTOB+r9/XLVL38oaoUpA==
+X-Received: by 2002:a2e:b4a5:: with SMTP id q5mr701391ljm.58.1589506973705;
+        Thu, 14 May 2020 18:42:53 -0700 (PDT)
+Received: from localhost.localdomain (ppp91-78-208-152.pppoe.mtu-net.ru. [91.78.208.152])
+        by smtp.gmail.com with ESMTPSA id i1sm309669lja.3.2020.05.14.18.42.52
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 14 May 2020 18:42:53 -0700 (PDT)
+From:   Dmitry Osipenko <digetx@gmail.com>
+To:     Jens Axboe <axboe@kernel.dk>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        Jonathan Hunter <jonathanh@nvidia.com>,
+        =?UTF-8?q?Micha=C5=82=20Miros=C5=82aw?= <mirq-linux@rere.qmqm.pl>,
+        David Heidelberg <david@ixit.cz>,
+        Peter Geis <pgwipeout@gmail.com>,
+        Stephen Warren <swarren@wwwdotorg.org>,
+        Nicolas Chauvet <kwizart@gmail.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Billy Laws <blaws05@gmail.com>,
+        =?UTF-8?q?Nils=20=C3=96stlund?= <nils@naltan.com>,
+        Christoph Hellwig <hch@infradead.org>,
+        Ard Biesheuvel <ard.biesheuvel@linaro.org>,
+        Davidlohr Bueso <dave@stgolabs.net>
+Cc:     linux-tegra@vger.kernel.org, linux-block@vger.kernel.org,
+        Andrey Danin <danindrey@mail.ru>,
+        Gilles Grandou <gilles@grandou.net>,
+        Ryan Grachek <ryan@edited.us>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-efi <linux-efi@vger.kernel.org>
+Subject: [PATCH v4 5/6] partitions/tegra: Support gpt_sector= command line option
+Date:   Fri, 15 May 2020 04:41:42 +0300
+Message-Id: <20200515014143.12984-6-digetx@gmail.com>
+X-Mailer: git-send-email 2.26.0
+In-Reply-To: <20200515014143.12984-1-digetx@gmail.com>
+References: <20200515014143.12984-1-digetx@gmail.com>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The pull request you sent on Thu, 14 May 2020 21:31:36 +0200:
+The gpt_sector=<sector> causes the GPT partition parser to look at the
+specified sector for a valid GPT header if the GPT is not found at the
+beginning or the end of a block device.  This is needed by Tegra-based
+devices that have TegraPT and GPT placed in inaccessible by kernel
+locations.  The GPT entry duplicates TegraPT partitions.
 
-> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.7-rc4
+Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
+---
+ block/partitions/check.h |  1 +
+ block/partitions/core.c  |  1 +
+ block/partitions/efi.c   |  6 ++++++
+ block/partitions/tegra.c | 38 ++++++++++++++++++++++++++++++++++++++
+ 4 files changed, 46 insertions(+)
 
-has been merged into torvalds/linux.git:
-https://git.kernel.org/torvalds/c/1ae7efb388540adc1653a51a3bc3b2c9cef5ec1a
-
-Thank you!
-
+diff --git a/block/partitions/check.h b/block/partitions/check.h
+index ffa01cc4b0b0..ff07435b3ac3 100644
+--- a/block/partitions/check.h
++++ b/block/partitions/check.h
+@@ -67,5 +67,6 @@ int osf_partition(struct parsed_partitions *state);
+ int sgi_partition(struct parsed_partitions *state);
+ int sun_partition(struct parsed_partitions *state);
+ int sysv68_partition(struct parsed_partitions *state);
++int tegra_partition_gpt(struct parsed_partitions *state);
+ int tegra_partition(struct parsed_partitions *state);
+ int ultrix_partition(struct parsed_partitions *state);
+diff --git a/block/partitions/core.c b/block/partitions/core.c
+index 0b4720372f07..ece70f15f24d 100644
+--- a/block/partitions/core.c
++++ b/block/partitions/core.c
+@@ -83,6 +83,7 @@ static int (*check_part[])(struct parsed_partitions *) = {
+ 	sysv68_partition,
+ #endif
+ #ifdef CONFIG_TEGRA_PARTITION
++	tegra_partition_gpt,
+ 	tegra_partition,
+ #endif
+ 	NULL
+diff --git a/block/partitions/efi.c b/block/partitions/efi.c
+index 48e4c2aeeded..f3b26be2bd6e 100644
+--- a/block/partitions/efi.c
++++ b/block/partitions/efi.c
+@@ -98,6 +98,12 @@ static int force_gpt;
+ static int __init
+ force_gpt_fn(char *str)
+ {
++	/* This check allows to parse "gpt gpt_sector=" properly since
++	 * "gpt" overlaps with "gpt_sector", see tegra_gpt_sector_fn().
++	 */
++	if (force_gpt)
++		return 0;
++
+ 	force_gpt = 1;
+ 	return 1;
+ }
+diff --git a/block/partitions/tegra.c b/block/partitions/tegra.c
+index d1b84fff362c..c2dae0f32c2a 100644
+--- a/block/partitions/tegra.c
++++ b/block/partitions/tegra.c
+@@ -30,6 +30,7 @@
+ #include <soc/tegra/common.h>
+ #include <soc/tegra/partition.h>
+ 
++#include "efi.h"
+ #include "check.h"
+ 
+ #define TEGRA_PT_SECTOR_SIZE(ptp)	((ptp)->logical_sector_size / SZ_512)
+@@ -563,3 +564,40 @@ int tegra_partition(struct parsed_partitions *state)
+ 
+ 	return ret;
+ }
++
++/*
++ * This allows a kernel command line option 'gpt_sector=<sector>' to
++ * enable GPT header lookup at a non-standard location. This option
++ * is given to kernel by a proprietary bootloader, which is used by
++ * *most* (but not all) of NVIDIA Tegra-based devices.
++ */
++static sector_t tegra_gpt_sector;
++static int __init tegra_gpt_sector_fn(char *str)
++{
++	WARN_ON(kstrtoull(str, 10, &tegra_gpt_sector) < 0);
++	return 1;
++}
++__setup("gpt_sector=", tegra_gpt_sector_fn);
++
++int tegra_partition_gpt(struct parsed_partitions *state)
++{
++	int ret = 0;
++
++#ifdef CONFIG_EFI_PARTITION
++	struct tegra_partition_table_parser ptp = {};
++
++	if (!soc_is_tegra() || !tegra_boot_sdmmc || !tegra_gpt_sector)
++		return 0;
++
++	ptp.state = state;
++
++	ptp.boot_offset = tegra_partition_table_emmc_boot_offset(&ptp);
++	if (ptp.boot_offset < 0)
++		return 0;
++
++	force_gpt_sector = tegra_gpt_sector;
++	ret = efi_partition(ptp.state);
++	force_gpt_sector = 0;
++#endif
++	return ret;
++}
 -- 
-Deet-doot-dot, I am a bot.
-https://korg.wiki.kernel.org/userdoc/prtracker
+2.26.0
+
