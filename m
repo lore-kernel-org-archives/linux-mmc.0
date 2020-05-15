@@ -2,177 +2,135 @@ Return-Path: <SRS0=CGCI=65=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 245C3C433DF
-	for <linux-mmc@archiver.kernel.org>; Fri, 15 May 2020 14:35:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 11CA7C433DF
+	for <linux-mmc@archiver.kernel.org>; Fri, 15 May 2020 15:02:51 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0D06D20671
-	for <linux-mmc@archiver.kernel.org>; Fri, 15 May 2020 14:35:20 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id DD8E6207BB
+	for <linux-mmc@archiver.kernel.org>; Fri, 15 May 2020 15:02:50 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="MgEDHPIk"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726179AbgEOOfT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 15 May 2020 10:35:19 -0400
-Received: from mail-ot1-f67.google.com ([209.85.210.67]:35109 "EHLO
-        mail-ot1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726174AbgEOOfT (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 15 May 2020 10:35:19 -0400
-Received: by mail-ot1-f67.google.com with SMTP id k110so2062796otc.2;
-        Fri, 15 May 2020 07:35:18 -0700 (PDT)
+        id S1726295AbgEOPCu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 15 May 2020 11:02:50 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39670 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-FAIL-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1726144AbgEOPCu (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 15 May 2020 11:02:50 -0400
+Received: from mail-vs1-xe44.google.com (mail-vs1-xe44.google.com [IPv6:2607:f8b0:4864:20::e44])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DE58FC061A0C
+        for <linux-mmc@vger.kernel.org>; Fri, 15 May 2020 08:02:48 -0700 (PDT)
+Received: by mail-vs1-xe44.google.com with SMTP id g2so1406307vsb.4
+        for <linux-mmc@vger.kernel.org>; Fri, 15 May 2020 08:02:48 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=z80bmdCOaUy0IuTAv6MAjJEqIXKZVI9he/f6Sa92Qhw=;
+        b=MgEDHPIkTLkknXlmuTunpKO8ZpHeOLPkX7M0BlbjptYUvZOkRVYNlEviCFxxYJJD8r
+         QKfQSn/L+LCN3jSqudpQotgsQiK+scN7OxEKlU4Mo6Slfdy019o2hzVvwNj6JhZUMzPQ
+         ZrVSawUj0/SjcxfcIdM7Fapa6eobh0r1EAbVywrlPKIQUbo0I2ZV2ZgvoPo+sMxWBkqO
+         Po/qpL7IhWcIFc/oRYrOcEli52ZHuvI9pRqY8jqacRUWNrifSbz+Q8y9w0Smr2liexXp
+         HP3TUqUB2culF1Iw7IBIW1Kx61/a2cfD4CGMimSyjjqrxJ9e5EnaqwvofhQ57mOuHr7T
+         m9xw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=lKPlso0WQQziVOQ8u4GeFZPYKAS6yBlI0r6TV2B4BFI=;
-        b=pgbDJY7Tmvjt0sV316zSwHqFPcGL7XTKzbz2v8uJco0mC3KKmpBv+gCKthPz6ICcBY
-         CMxymbq/FoB1eaEMx1xOt3uxQM7YI6TT0Fmtwtf9H58MCgoNcHvwAw1abHRCs/pEILq/
-         d64CDGtgc/Ruk/w0GhZCRTUnvEi6E7yzIUeFNt2hQdYIKDP8MFCRSPrB5+glKR2Zi0Vr
-         Eq92Fayk45LiODpgondZ4lBa8UEzERtKf+ocyWlGPAfaWj8v+qbTXhClWbwc14NaQ3Ni
-         BasHIEWM3P5Skcn4kMekt+9NjFg8BnGy33LtCyQr7GuPZEYY5ImnQkgc8ZybJ3L2gham
-         Ecxg==
-X-Gm-Message-State: AOAM530j/ENbTTIgZZf21G42r5BspQ4r4Ofk9oypaSUkZ4EzgfA1s2F7
-        kgdeufxZb+kADLk36sllmJBqtEj7+WwwK3Biy0U=
-X-Google-Smtp-Source: ABdhPJzvqwKaXg+AlEIlz3HK5ciut0TcfbaOF3K4GdjnQBKBoGWbflImfe+EJ1VWKm4sC9BwTtavlC4uH3mf0GcqeNM=
-X-Received: by 2002:a9d:7e92:: with SMTP id m18mr2403315otp.145.1589553317993;
- Fri, 15 May 2020 07:35:17 -0700 (PDT)
+        bh=z80bmdCOaUy0IuTAv6MAjJEqIXKZVI9he/f6Sa92Qhw=;
+        b=fXBF1zsbe/JaJkwI26XmPTxnR4zWMSYkRAUiBjOrfnzgpnSEU+nhxk809mSUtj7gHC
+         U1PUMxxYt28/hxo0j71Jv8tLgnZbmM8zIhpn6gJ7jeMo1yKQd5n2myWRQ9E+EVQc9+W1
+         /MXjUSh0cYOcRqhbihEx3eJtkaxVeeFKbC8NCqMUKf/2ztWaBTNyAXBQbtRkaVroXh88
+         +iTM1NSfL7EBX2zJpzxVdZOtxmwOXvpDgFxNEwpcwObT8YY6wTs4qFIk7pXhu+ZBiV9o
+         NTd24kkw35/M4E+mNIk+Eq8XLgfLnhnxYxM8MxP97j06Ht91C2+OMvyi4XcAgnYI7M9T
+         2BoA==
+X-Gm-Message-State: AOAM530nYjJHP6sxFKrhKzVajnE049XFjl0+USFWsNJ0Y5A9kJpDDhb8
+        /quZp3eLQVfaEkyoniRZWgUtltlBN7TBclFJvn9snTlyS2w=
+X-Google-Smtp-Source: ABdhPJynuhF2lD3tjDNAkcAPzOrN8gRuqOI01TCvqn7tirBMmvXODObuOGr+8Xc35OtUplrHB+nF6dhCFpZb35G3eQU=
+X-Received: by 2002:a67:8b46:: with SMTP id n67mr2733279vsd.35.1589554965931;
+ Fri, 15 May 2020 08:02:45 -0700 (PDT)
 MIME-Version: 1.0
-References: <20200513173131.11200-1-wsa+renesas@sang-engineering.com>
-In-Reply-To: <20200513173131.11200-1-wsa+renesas@sang-engineering.com>
-From:   Geert Uytterhoeven <geert@linux-m68k.org>
-Date:   Fri, 15 May 2020 16:35:06 +0200
-Message-ID: <CAMuHMdXgWFAt1WTYarHEPv7x=+WJK7+aVEj8n+j_jB2tXMdYLQ@mail.gmail.com>
-Subject: Re: [PATCH] mmc: renesas_sdhi: don't lose RPM savings because of
- manual clk handling
-To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc:     Linux MMC List <linux-mmc@vger.kernel.org>,
-        Linux-Renesas <linux-renesas-soc@vger.kernel.org>
+References: <20200515140445.15218-1-ulf.hansson@linaro.org>
+In-Reply-To: <20200515140445.15218-1-ulf.hansson@linaro.org>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Fri, 15 May 2020 17:02:08 +0200
+Message-ID: <CAPDyKFr-7OkMW0UU_M78igBScOXiY784_TkqeHHwmVdZViRw6w@mail.gmail.com>
+Subject: Re: [PATCH 1/2] mmc: tmio: Further fixup runtime PM management at remove
+To:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Masahiro Yamada <yamada.masahiro@socionext.com>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc:     Ulrich Hecht <uli+renesas@fpond.eu>,
+        Simon Horman <horms+renesas@verge.net.au>,
+        Niklas Soderlund <niklas.soderlund@ragnatech.se>,
+        Geert Uytterhoeven <geert+renesas@glider.be>
 Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Wolfram,
+On Fri, 15 May 2020 at 16:04, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>
+> Before calling tmio_mmc_host_probe(), the caller is required to enable
+> clocks for its device, as to make it accessible when reading/writing
+> registers during probe.
+>
+> Therefore, the responsibility to disable these clocks, in the error path of
+> ->probe() and during ->remove(), is better managed outside
+> tmio_mmc_host_remove(). As a matter of fact, callers of
+> tmio_mmc_host_remove() already expects this to be the behaviour.
+>
+> However, there's a problem with tmio_mmc_host_remove() when the Kconfig
+> option, CONFIG_PM, is set. More precisely, tmio_mmc_host_remove() may then
+> disable the clock via runtime PM, which leads to clock enable/disable
+> imbalance problems, when the caller of tmio_mmc_host_remove() also tries to
+> disable the same clocks.
 
-On Wed, May 13, 2020 at 7:31 PM Wolfram Sang
-<wsa+renesas@sang-engineering.com> wrote:
-> The SDHI driver en-/disabled clocks on its own during probe() and
-> remove(). This basically killed all potential RPM power savings. Now, we
-> just enable the clocks for a short time when we access registers in
-> probe(). We otherwise leave all handling to RPM. That means, we need to
-> shift the RPM enabling code in the TMIO core a bit up, so we can access
-> registers there, too.
+Just realized that part of the commit message is missing, explaining
+the change. I intend to add this:
+
+To solve the problem, let's make sure tmio_mmc_host_remove() leaves
+the device with clocks enabled, but also make sure to disable the
+IRQs, as we normally do at ->runtime_suspend().
+
+Also, this is untested, so relying on you guys with the HW at hand.
+
+Kind regards
+Uffe
+
 >
-> clk_summary before:
-> sd0                   1        1        0    12480000          0     0  50000
->    sdif0              2        2        0    12480000          0     0  50000
->
-> clk_summary after:
-> sd0                   1        1        0    12480000          0     0  50000
->    sdif0              1        1        0    12480000          0     0  50000
->
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> Reported-by: Geert Uytterhoeven <geert+renesas@glider.be>
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 > ---
+>  drivers/mmc/host/tmio_mmc_core.c | 6 ++++--
+>  1 file changed, 4 insertions(+), 2 deletions(-)
 >
-> Tested on a Salvator-XS board with R-Car M3-N.
-
-While this seems to have no ill effects on R-Car Gen3, RZ/A1, and RZ/A2,
-it does on R-Car Gen2, which prints before probing:
-
-    sh_mobile_sdhi ee100000.sd: Unbalanced pm_runtime_enable!
-
-And on SH-Mobile AG5, R-Mobile A1, and R-Mobile APE6:
-
-    ------------[ cut here ]------------
-    WARNING: CPU: 0 PID: 5 at drivers/clk/clk.c:954 clk_core_disable+0x6c/0x2b0
-    sdhi1 already disabled
-    CPU: 0 PID: 5 Comm: kworker/0:0 Not tainted
-5.7.0-rc5-ape6evm-00536-ga65e619d428aff9a-dirty #186
-    Hardware name: Generic R8A73A4 (Flattened Device Tree)
-    Workqueue: pm pm_runtime_work
-    [<c00169e8>] (unwind_backtrace) from [<c001345c>] (show_stack+0x10/0x14)
-    [<c001345c>] (show_stack) from [<c04b6e34>] (dump_stack+0x88/0xa8)
-    [<c04b6e34>] (dump_stack) from [<c00270b8>] (__warn+0xd0/0xec)
-    [<c00270b8>] (__warn) from [<c0027144>] (warn_slowpath_fmt+0x70/0x9c)
-    [<c0027144>] (warn_slowpath_fmt) from [<c029d53c>]
-(clk_core_disable+0x6c/0x2b0)
-    [<c029d53c>] (clk_core_disable) from [<c029d798>]
-(clk_core_disable_lock+0x18/0x24)
-    [<c029d798>] (clk_core_disable_lock) from [<c02fa670>]
-(pm_clk_suspend+0x64/0x78)
-    [<c02fa670>] (pm_clk_suspend) from [<c02f8918>]
-(genpd_runtime_suspend+0x110/0x1bc)
-    [<c02f8918>] (genpd_runtime_suspend) from [<c02f01b4>]
-(__rpm_callback+0x30/0xe0)
-    [<c02f01b4>] (__rpm_callback) from [<c02f02d4>] (rpm_callback+0x70/0x80)
-    [<c02f02d4>] (rpm_callback) from [<c02f0e28>] (rpm_suspend+0x330/0x4a0)
-    [<c02f0e28>] (rpm_suspend) from [<c02f1240>] (pm_runtime_work+0x74/0x8c)
-    [<c02f1240>] (pm_runtime_work) from [<c00402f4>]
-(process_one_work+0x2cc/0x4ac)
-    [<c00402f4>] (process_one_work) from [<c0040730>]
-(worker_thread+0x230/0x2f0)
-    [<c0040730>] (worker_thread) from [<c0045b9c>] (kthread+0x12c/0x13c)
-    [<c0045b9c>] (kthread) from [<c0009148>] (ret_from_fork+0x14/0x2c)
-    Exception stack(0xef0cdfb0 to 0xef0cdff8)
-    dfa0:                                     00000000 00000000
-00000000 00000000
-    dfc0: 00000000 00000000 00000000 00000000 00000000 00000000
-00000000 00000000
-    dfe0: 00000000 00000000 00000000 00000000 00000013 00000000
-    ---[ end trace c1cca51c99a6297a ]---
-
-and later:
-
-    ------------[ cut here ]------------
-    WARNING: CPU: 0 PID: 12 at drivers/clk/clk.c:1014 clk_core_enable+0x6c/0x2bc
-    Enabling unprepared sdhi1
-    CPU: 0 PID: 12 Comm: kworker/0:1 Tainted: G        W
-5.7.0-rc5-ape6evm-00536-ga65e619d428aff9a-dirty #186
-    Hardware name: Generic R8A73A4 (Flattened Device Tree)
-    Workqueue: events_freezable mmc_rescan
-    [<c00169e8>] (unwind_backtrace) from [<c001345c>] (show_stack+0x10/0x14)
-    [<c001345c>] (show_stack) from [<c04b6e34>] (dump_stack+0x88/0xa8)
-    [<c04b6e34>] (dump_stack) from [<c00270b8>] (__warn+0xd0/0xec)
-    [<c00270b8>] (__warn) from [<c0027144>] (warn_slowpath_fmt+0x70/0x9c)
-    [<c0027144>] (warn_slowpath_fmt) from [<c029d810>]
-(clk_core_enable+0x6c/0x2bc)
-    [<c029d810>] (clk_core_enable) from [<c029da78>]
-(clk_core_enable_lock+0x18/0x2c)
-    [<c029da78>] (clk_core_enable_lock) from [<c02fa6ec>]
-(pm_clk_resume+0x68/0xa0)
-    [<c02fa6ec>] (pm_clk_resume) from [<c02f8dd0>]
-(genpd_runtime_resume+0xc8/0x170)
-    [<c02f8dd0>] (genpd_runtime_resume) from [<c02f01b4>]
-(__rpm_callback+0x30/0xe0)
-    [<c02f01b4>] (__rpm_callback) from [<c02f02d4>] (rpm_callback+0x70/0x80)
-    [<c02f02d4>] (rpm_callback) from [<c02f0a50>] (rpm_resume+0x44c/0x4f4)
-    [<c02f0a50>] (rpm_resume) from [<c02f00f0>] (__pm_runtime_resume+0x64/0x80)
-    [<c02f00f0>] (__pm_runtime_resume) from [<c0342480>]
-(__mmc_claim_host+0x1c8/0x218)
-    [<c0342480>] (__mmc_claim_host) from [<c03437f0>] (mmc_rescan+0xfc/0x260)
-    [<c03437f0>] (mmc_rescan) from [<c00402f4>] (process_one_work+0x2cc/0x4ac)
-    [<c00402f4>] (process_one_work) from [<c0040730>]
-(worker_thread+0x230/0x2f0)
-    [<c0040730>] (worker_thread) from [<c0045b9c>] (kthread+0x12c/0x13c)
-    [<c0045b9c>] (kthread) from [<c0009148>] (ret_from_fork+0x14/0x2c)
-    Exception stack(0xef0f1fb0 to 0xef0f1ff8)
-    1fa0:                                     00000000 00000000
-00000000 00000000
-    1fc0: 00000000 00000000 00000000 00000000 00000000 00000000
-00000000 00000000
-    1fe0: 00000000 00000000 00000000 00000000 00000013 00000000
-    ---[ end trace c1cca51c99a6297b ]---
-    sh_mobile_sdhi ee120000.sd: __pm_clk_enable: failed to enable clk
-(ptrval), error -108
-
-Gr{oetje,eeting}s,
-
-                        Geert
-
--- 
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+> diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
+> index f31afd1c2671..ba301fb7656b 100644
+> --- a/drivers/mmc/host/tmio_mmc_core.c
+> +++ b/drivers/mmc/host/tmio_mmc_core.c
+> @@ -1231,12 +1231,14 @@ void tmio_mmc_host_remove(struct tmio_mmc_host *host)
+>         cancel_work_sync(&host->done);
+>         cancel_delayed_work_sync(&host->delayed_reset_work);
+>         tmio_mmc_release_dma(host);
+> +       tmio_mmc_disable_mmc_irqs(host, TMIO_MASK_ALL);
+>
+> -       pm_runtime_dont_use_autosuspend(&pdev->dev);
+>         if (host->native_hotplug)
+>                 pm_runtime_put_noidle(&pdev->dev);
+> -       pm_runtime_put_sync(&pdev->dev);
+> +
+>         pm_runtime_disable(&pdev->dev);
+> +       pm_runtime_dont_use_autosuspend(&pdev->dev);
+> +       pm_runtime_put_noidle(&pdev->dev);
+>  }
+>  EXPORT_SYMBOL_GPL(tmio_mmc_host_remove);
+>
+> --
+> 2.20.1
+>
