@@ -2,172 +2,165 @@ Return-Path: <SRS0=CGCI=65=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.2 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MSGID_FROM_MTA_HEADER,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_2 autolearn=no
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.2 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	MSGID_FROM_MTA_HEADER,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_2
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5A26FC433DF
-	for <linux-mmc@archiver.kernel.org>; Fri, 15 May 2020 06:00:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 32543C433E0
+	for <linux-mmc@archiver.kernel.org>; Fri, 15 May 2020 06:26:56 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1FA822054F
-	for <linux-mmc@archiver.kernel.org>; Fri, 15 May 2020 06:00:30 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id F2D0F2075F
+	for <linux-mmc@archiver.kernel.org>; Fri, 15 May 2020 06:26:55 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=Synaptics.onmicrosoft.com header.i=@Synaptics.onmicrosoft.com header.b="iL3k30Ld"
+	dkim=pass (1024-bit key) header.d=Synaptics.onmicrosoft.com header.i=@Synaptics.onmicrosoft.com header.b="hBLWYZmS"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726532AbgEOGA3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 15 May 2020 02:00:29 -0400
-Received: from mail-co1nam11on2053.outbound.protection.outlook.com ([40.107.220.53]:14173
-        "EHLO NAM11-CO1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1726496AbgEOGA3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 15 May 2020 02:00:29 -0400
+        id S1726205AbgEOG0z (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 15 May 2020 02:26:55 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43714 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-FAIL-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1726184AbgEOG0y (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 15 May 2020 02:26:54 -0400
+Received: from NAM12-BN8-obe.outbound.protection.outlook.com (mail-bn8nam12on2061d.outbound.protection.outlook.com [IPv6:2a01:111:f400:fe5b::61d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3330DC061A0C;
+        Thu, 14 May 2020 23:19:46 -0700 (PDT)
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=ES1qZLGte81VaptSpdV/owe4pY0VzgmpOWrJcHqkSkXzttvr+60dbhmro7DXOUuiO8MNLYwIN5bmKZAvmVzrgg3rRJoSSqFDcHqONDIPznt/Lj1qY3/ZcHRuuliiMM4npzCD2grvJURpYOT5DjldPYv7NgB1Ho3FapkZO0ozR6l2FuPYPob3Ca3wDs4aKc0qrD5xwChdePNHiA05Rr0ljUQEJMmtSNwtjsFIuYhLxGg154uVsEsKKGEPdGYa4xptCV+bC3VOtVOaxYXWVGZ9Cpcf8nzJBfksCz//g5R5QpMgbSUCHrpUwY4XSrN0CZ1CKaZ2r8qaogsaFd04pig5LQ==
+ b=TK/o9GevPpGMZNxhN8IaFmC+HflotJcgqwYf34FaLUE/vL1+NBE7GSWb40ZAQhUyDpZxeKiQLPxWIh9Bezz+CD7IDiE3JNVuXWOaWooV5AL3wwebs/olHEIqDaCoJijOSSspLF9NpFP1Nmrp9lztZzeICZvNqBqYflBzfbFzbdEBrXzmRCfNy6+x7mFGw6Lb03rjmAX/zsMZVbdQAG+OXGV4aXxIi9C7iMBZ8Fd11LcAR3/znrllTGJUYWXHRnlbkUN5CPXuQ78V5gl01GPbQEere3mlD5SGg3OSW7QBcyFGKQZbL74X2qKvDDLZH38ol2nH++gyMlPi1jKZf0cI4w==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=3ZmphEWzFoXNSIimU8oVPZ9yl+6ZZsKgKw/fF+FxE2A=;
- b=aaIHz8I6rUCLPsXtchn9MSuDcPYsLkmptzLtsVKbsXst618R7nDo8y/Q11RUntqzpv3/UFswDY7V3c2mJyvqmZ37KGOCFAdc4dmK1jWzXgRprXDuUfHge3yEZoDpux0k2YE+TxHSTl+nGJXj6X+HTHByeOMh/EqErl27Dzzeq6TCZSuz2NTtC2ZZD1cemDULWj2e5Fm0hxFPbF1yAn0SA0Bd1gW8WsfJ8WFh5ByhUOWzYNcTQQPb5Yvxjjjg/t/gcaM1TPe3NZ/l+wrdA5zWM2bpREIBRnAkQRfpJnzytoLPv2xRgDS9NvFC/tMCLfuOFybpMdbJEArq5qc5xFN/yQ==
+ bh=X1Z2YWD4Sr8HL91H5loOg1Yst8BRluAOxKYTFXDqaUI=;
+ b=l/b7YTbfrB4aklb1pY3cn4m/6bDMG9CXmO9BL1EOsWrQCEtqrmuyHPPaLdqzj/2Kr/8DRkzE24AW50Vj/HOryKjeWdGWKTZZixD1tz1+hGfUqlkfFF2w9JJU5oGWjCGhAGv7pfU4UH3e4uavnz0dnxm86jVB6iXeHzJapCl19S83Qyn6ewQBqGthTvgxxCZWDccCPEi2sPg0Si6Yh4rasQZ+KEKVh2fv/7S6NMATamNzTpUdjU2aSDuPBJ7LRapzCgM/q54rYOFn079m7kW415i4tdCEsBjK0RsVQhjzcu+te2isuFMx7WYpcHavUPkz9y8Y3OlcRQQI1hrLyymwrg==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=synaptics.com; dmarc=pass action=none
  header.from=synaptics.com; dkim=pass header.d=synaptics.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
  d=Synaptics.onmicrosoft.com; s=selector2-Synaptics-onmicrosoft-com;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=3ZmphEWzFoXNSIimU8oVPZ9yl+6ZZsKgKw/fF+FxE2A=;
- b=iL3k30LdiQRtJbN0KQ839F8dmsuKCv5M2H6p9qN06YNonW1lcgwYWDnNZsGNfLSZVYgzEMmsatjaTHglHgwVRzDTlDItv60pfeSrGXt0bWCIeatEgQjG5B7XSDBtWy5qrQ/i/1T0xQDojfAqLOQfvaCZoeuoItDiIZ2aOA70y/I=
-Authentication-Results: linaro.org; dkim=none (message not signed)
- header.d=none;linaro.org; dmarc=none action=none header.from=synaptics.com;
+ bh=X1Z2YWD4Sr8HL91H5loOg1Yst8BRluAOxKYTFXDqaUI=;
+ b=hBLWYZmSlDZZQF2ODdorHcOTTyntJ39Ow5YM8sGMUgNX6qNav5jsShTyX2uBUT6arOVjZ7sS42sTnof5dvkRtwOfbMbbIITn9OaHmRqoqySk2aX2vRnCsDRenkO9nsh3wac+cbxjMwZdJX7gsDX1egg36/IJUGtPYVYFe8ZS1go=
+Authentication-Results: intel.com; dkim=none (message not signed)
+ header.d=none;intel.com; dmarc=none action=none header.from=synaptics.com;
 Received: from BYAPR03MB3573.namprd03.prod.outlook.com (2603:10b6:a02:ae::15)
- by BYAPR03MB4376.namprd03.prod.outlook.com (2603:10b6:a03:c9::29) with
+ by BYAPR03MB4405.namprd03.prod.outlook.com (2603:10b6:a03:c6::27) with
  Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.2979.34; Fri, 15 May
- 2020 06:00:25 +0000
+ 2020 06:19:40 +0000
 Received: from BYAPR03MB3573.namprd03.prod.outlook.com
  ([fe80::d1ae:8ea7:ea:8998]) by BYAPR03MB3573.namprd03.prod.outlook.com
  ([fe80::d1ae:8ea7:ea:8998%7]) with mapi id 15.20.3000.016; Fri, 15 May 2020
- 06:00:25 +0000
-Date:   Fri, 15 May 2020 14:00:08 +0800
+ 06:19:40 +0000
+Date:   Fri, 15 May 2020 14:19:26 +0800
 From:   Jisheng Zhang <Jisheng.Zhang@synaptics.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-Subject: Re: [PATCH] Revert "mmc: sdhci-xenon: add runtime pm support and
- reimplement standby"
-Message-ID: <20200515140008.6c8a8f2b@xhacker.debian>
-In-Reply-To: <CAPDyKFpUv=HGBAEchH25tdnRdUSAvbCgGGCgN8uuvPCQ92xwZg@mail.gmail.com>
-References: <20200513174706.3eeddb2b@xhacker.debian>
-        <CAPDyKFpE_uqiNQ22Fq9hDfb5pzMBdgmwgUbasEsEdXFkEOmq6A@mail.gmail.com>
-        <20200514134507.54c17936@xhacker.debian>
-        <CAPDyKFpUv=HGBAEchH25tdnRdUSAvbCgGGCgN8uuvPCQ92xwZg@mail.gmail.com>
+To:     Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: [PATCH] mmc: sdhci-of-dwcmshc: add suspend/resume support
+Message-ID: <20200515141926.52e088fe@xhacker.debian>
 X-Mailer: Claws Mail 3.17.5 (GTK+ 2.24.32; x86_64-pc-linux-gnu)
 Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: TYAPR01CA0036.jpnprd01.prod.outlook.com
- (2603:1096:404:28::24) To BYAPR03MB3573.namprd03.prod.outlook.com
+X-ClientProxiedBy: TYAPR01CA0028.jpnprd01.prod.outlook.com
+ (2603:1096:404:28::16) To BYAPR03MB3573.namprd03.prod.outlook.com
  (2603:10b6:a02:ae::15)
 MIME-Version: 1.0
 X-MS-Exchange-MessageSentRepresentingType: 1
-Received: from xhacker.debian (124.74.246.114) by TYAPR01CA0036.jpnprd01.prod.outlook.com (2603:1096:404:28::24) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3000.25 via Frontend Transport; Fri, 15 May 2020 06:00:23 +0000
+Received: from xhacker.debian (124.74.246.114) by TYAPR01CA0028.jpnprd01.prod.outlook.com (2603:1096:404:28::16) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3000.26 via Frontend Transport; Fri, 15 May 2020 06:19:38 +0000
 X-Mailer: Claws Mail 3.17.5 (GTK+ 2.24.32; x86_64-pc-linux-gnu)
 X-Originating-IP: [124.74.246.114]
 X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: 58407cf0-73fc-4797-0a6f-08d7f895429c
-X-MS-TrafficTypeDiagnostic: BYAPR03MB4376:
-X-Microsoft-Antispam-PRVS: <BYAPR03MB437625E3A5B143A0578CA9DEEDBD0@BYAPR03MB4376.namprd03.prod.outlook.com>
-X-MS-Oob-TLC-OOBClassifiers: OLM:9508;
+X-MS-Office365-Filtering-Correlation-Id: 38a226a6-cd8f-4db1-de4c-08d7f897f319
+X-MS-TrafficTypeDiagnostic: BYAPR03MB4405:
+X-Microsoft-Antispam-PRVS: <BYAPR03MB440574B7D5183AF4124C8F8CEDBD0@BYAPR03MB4405.namprd03.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:136;
 X-Forefront-PRVS: 04041A2886
 X-MS-Exchange-SenderADCheck: 1
 X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: lTN5dzrMY1/Qs0GglqOJVStDUjH5vtjqHKeJI7FyS+qL27JhxHDC9TivvKRP6yYOdLmQKwSvQQD0HRSx1l6mqcDS+4yORvOn3kgnCybiDPK34UJ8O72jvJ6kxwRE9EHP53b7FmBgOyVsyM+MnNNM2eipOpuAlhVOLyz2hgimntdtfAB7l7Y/5QEz1GdCqZPNukKjcZ36IMoBWNGXJvszeL+ErMY6vA+W6LZOYxcGHNp1fBCNJDFp8mZXqpQnfx9Un6hjMYYQD9sqQq+6ztLDrdo7uMCwL9VhmQV+kWJ10KGe744P2EfN2/t9quU6EkHu9h8l6ntrboE5gq5ZHeBCEiedO+8THfr86HOG48WotWwN9IA1uJnr+UiVpVT1l3G4V2A+MKMZy1lxnuCXMA7fjrW9XD/XDTFVZbAnc6vMH0yK5C6x+cMFxkD+4a8in/AO
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:BYAPR03MB3573.namprd03.prod.outlook.com;PTR:;CAT:NONE;SFTY:;SFS:(39860400002)(136003)(346002)(376002)(396003)(366004)(66476007)(6916009)(8676002)(5660300002)(66556008)(956004)(86362001)(316002)(54906003)(7696005)(52116002)(16526019)(1076003)(478600001)(6666004)(26005)(186003)(55016002)(9686003)(8936002)(2906002)(4326008)(6506007)(66946007);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData: SBxkCJouT7mMWQ5naXxvQq3cj652HKDiuGPe288PSeygMVN8QkJf1YIKSOqiUYVCNET4zDziQ2eqR4TnzeshQa6EJr3pdibFHIHRybM5yfYoyx0ZVGum/B6eYVbbaG7Sj0gOLYL1NeaFI+xRVxD8GBbCNzrJj46czjfsugmPz08C5CBVPr/Orab/TdZIQoWplNl6ex0Mv7/X+FWCjTwniLBkhFwH3A/OVK6Y8/AkdCJgHr/v+RWcTeMerhKVvddn0pnhdrU+8x1oh/sbrL0BzQOii1SijAsodMiPDOJu3N5zKDxs7WRocDqiHci5+Qx+H/I1Nfn6mBN4480v4MDxh3qgKEgXtCSH6BaYBEojT73ccLB5IYMQk/6+pIYb/NE9wCSUHrC0P6h/ss7lRYVtV8RETtHPdr2O1vFp3Jhu63AnX50jGb3cEOll0/3MF/w4Xpes324TprMLBkCs6Ky1E6lbpFg5+YKwXx4t2X/x0ERRpz4IG9dOBeez1Z2Wk/n9
+X-Microsoft-Antispam-Message-Info: NABEeEMHiS+KHjfp0TMqfw/EkeQIJvqpYYkSEH6EhdaGwJtAs3vIDqXS8K7rB2XdcpQ3ADtUW9LHdSYbfZQDe1fUzeOfzOGAoUWHzUWct3ICqLjA5d7847KaoAYZAWfzE2Xi18XVHsFdtgYlD3nddy+ki8uG/mvJRsW8MEFdStMbIAL4nLUyLygBPll55KjsCoHirvwT1S+Y2kBAUdDEGv1VNXlz/U4hkpw2Gbp2/XU0dNaTuCPkCrfCBTzbEY5f7GUZSjrBxoVpowGORX7LLjIkW9wyU94OcD7RE4Wn4RGQKrPJr3OfRww7+KDtAAzLAH+53Krj2WsR5yp1bOX9oHPrx5Jpmc1VhoYxbylPNk3IjcEd60drgPhs6xwVqxFSCGQdrEHxmY5SUrA+Ab4xH1BbXKZ0/mWm2XbjHDLrS+C2WIfdOrpVj7tMBVhUN8D0jNEzhG5beCnNW1jMFdmCS6embS7a5j0IMvuJEdXlts6HA/9UL4Tq0HHeBom4vx76
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:BYAPR03MB3573.namprd03.prod.outlook.com;PTR:;CAT:NONE;SFTY:;SFS:(346002)(376002)(39860400002)(366004)(396003)(136003)(7696005)(52116002)(8936002)(9686003)(26005)(6666004)(6506007)(4326008)(2906002)(15650500001)(316002)(186003)(86362001)(66946007)(66476007)(478600001)(55016002)(956004)(1076003)(110136005)(66556008)(5660300002)(8676002)(16526019)(133343001);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData: cRU31pdcAtGFs9n0m8eE2bk+vRwr/ET7SqJD1iDwLIlViP/lUthcEs5zcOrwsrcB6/EIqama+8+O6q18r5zQuYiVyDPALtlOmTpY/J+7fDnDmPX8td8wIHA9IwuQwXpY81YY6gEzDlibL3fldFtkMMgVYSWr0AOArHzKMNyhEvyFQ2lR6Rzl+/LgIzFjXo9z1g4L9ZuBl6Zraj1DohSjSSEgii2OCcuhTeNQUpMHoEXWZw7eSY5IW114JZse2PLYSoTyjfRJSI3JIbiTp0Gwnt0WCg8v92ljIGBIsyiKbwH53dyFRt/vvHsfaxu9/aZjAl1H1JBLNVKyazcs2BapH+pbLOQybCCRemTGtYsIpsCozqrV7gKyPLyIXEnCg2XsPw0999Q8bhOxdZ+AqpYGow4rJH7hCqWOBjJVtrHQZGHLv6I45NmL5s+BN0PQ+78FqsNNv33OLu27s/0J/ZMb6p0TQkISTv1wgqA2e0A+i9JwCL3HAAm70g2qahVnw76U
 X-OriginatorOrg: synaptics.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 58407cf0-73fc-4797-0a6f-08d7f895429c
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 15 May 2020 06:00:24.9401
+X-MS-Exchange-CrossTenant-Network-Message-Id: 38a226a6-cd8f-4db1-de4c-08d7f897f319
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 15 May 2020 06:19:40.1141
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: 335d1fbc-2124-4173-9863-17e7051a2a0e
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: ADqSttMrzoZ5rBHDoYvVbMvFn2GTL9WbcML3VchD4HqmuhdTt7KblZtyldXVlTsCFIVmrC70Yh5SrgvhQ3XhFA==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: BYAPR03MB4376
+X-MS-Exchange-CrossTenant-UserPrincipalName: poRgapekn3eJKkB6pgiVWrYE36/KElrL3iBd48yZ0uKsQS1R8FKlyqxVv0JnLaQDxmxR7UHUHLnDcTExAQcQBA==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: BYAPR03MB4405
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 14 May 2020 12:18:58 +0200 Ulf Hansson wrote:
+Add dwcmshc specific system-level suspend and resume support.
 
-> 
-> 
-> On Thu, 14 May 2020 at 07:45, Jisheng Zhang <Jisheng.Zhang@synaptics.com> wrote:
-> >
-> > On Wed, 13 May 2020 14:15:21 +0200 Ulf Hansson wrote:
-> >  
-> > >
-> > >
-> > > On Wed, 13 May 2020 at 11:47, Jisheng Zhang <Jisheng.Zhang@synaptics.com> wrote:  
-> > > >
-> > > > This reverts commit a027b2c5fed78851e69fab395b02d127a7759fc7.
-> > > >
-> > > > The HW supports auto clock gating, so it's useless to do runtime pm
-> > > > in software.  
-> > >
-> > > Runtime PM isn't soley about clock gating. Moreover it manages the  
-> >
-> > Per my understanding, current xenon rpm implementation is just clock gating.
+Signed-off-by: Jisheng Zhang <Jisheng.Zhang@synaptics.com>
+---
+ drivers/mmc/host/sdhci-of-dwcmshc.c | 43 +++++++++++++++++++++++++++++
+ 1 file changed, 43 insertions(+)
 
-what's your option about this? My point is the HW can auto clock
-gate, so what's the benefit of current rpm implementation given it only does
-clock gating. FWICT, when submitting the xenon rpm patch, I don't think the
-author  compared the power consumption. If the comparison is done, it's easy
-to find the rpm doesn't bring any power consumption benefit at all.
-
-> >  
-> > > "pltfm_host->clk", which means even if the controller supports auto
-> > > clock gating, gating/ungating the externally provided clock still
-> > > makes sense.  
-> >
-> >        clock -----------  xenon IP
-> >       |___ rpm           |__ HW Auto clock gate
-> >
-> > Per my understanding, with rpm, both clock and IP is clock gated; while with
-> > Auto clock gate, the IP is clock gated. So the only difference is clock itself.
-> > Considering the gain(suspect we have power consumption gain, see below), the
-> > pay -- 56 LoCs and latency doesn't deserve gain.
-> >
-> > Even if considering from power consumption POV, sdhci_runtime_suspend_host(),
-> > sdhci_runtime_resume_host(), and the retune process could be more than the clock
-> > itself.  
-> 
-> Right.
-> 
-> The re-tune may be costly, yes. However, whether the re-tune is
-> *really* needed actually varies depending on the sdhci variant and the
-> SoC. Additionally, re-tune isn't done for all types of (e)MMC/SD/SDIO
-> cards.
-> 
-> I see a few options that you can explore.
-> 
-> 1. There is no requirement to call sdhci_runtime_suspend|resume_host()
-> from sdhci-xenon's ->runtime_suspend|resume() callbacks - if that's
-> not explicitly needed. The point is, you can do other things there,
-> that suits your variant/SoC better.
-
-Yes, there's no requirement to call sdhci_runtime_suspend|resume_host().
-But simply removing the calls would break system suspend. How to handle
-this situation?
-
-> 
-> 2. Perhaps for embedded eMMCs, with a non-removable slot, the
-> re-tuning is costly. If you want to prevent the device from entering
-> runtime suspend for that slot, for example, just do an additional
-> pm_runtime_get_noresume() during ->probe().
-> 
-> [...]
-> 
-> Kind regards
-> Uffe
+diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
+index a9ed0e006e06..64ac0dbee95c 100644
+--- a/drivers/mmc/host/sdhci-of-dwcmshc.c
++++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
+@@ -163,6 +163,48 @@ static int dwcmshc_remove(struct platform_device *pdev)
+ 	return 0;
+ }
+ 
++#ifdef CONFIG_PM_SLEEP
++static int dwcmshc_suspend(struct device *dev)
++{
++	struct sdhci_host *host = dev_get_drvdata(dev);
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
++	int ret;
++
++	ret = sdhci_suspend_host(host);
++	if (ret)
++		return ret;
++
++	clk_disable_unprepare(pltfm_host->clk);
++	if (!IS_ERR(priv->bus_clk))
++		clk_disable_unprepare(priv->bus_clk);
++
++	return ret;
++}
++
++static int dwcmshc_resume(struct device *dev)
++{
++	struct sdhci_host *host = dev_get_drvdata(dev);
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
++	int ret;
++
++	ret = clk_prepare_enable(pltfm_host->clk);
++	if (ret)
++		return ret;
++
++	if (!IS_ERR(priv->bus_clk)) {
++		ret = clk_prepare_enable(priv->bus_clk);
++		if (ret)
++			return ret;
++	}
++
++	return sdhci_resume_host(host);
++}
++#endif
++
++static SIMPLE_DEV_PM_OPS(dwcmshc_pmops, dwcmshc_suspend, dwcmshc_resume);
++
+ static const struct of_device_id sdhci_dwcmshc_dt_ids[] = {
+ 	{ .compatible = "snps,dwcmshc-sdhci" },
+ 	{}
+@@ -173,6 +215,7 @@ static struct platform_driver sdhci_dwcmshc_driver = {
+ 	.driver	= {
+ 		.name	= "sdhci-dwcmshc",
+ 		.of_match_table = sdhci_dwcmshc_dt_ids,
++		.pm = &dwcmshc_pmops,
+ 	},
+ 	.probe	= dwcmshc_probe,
+ 	.remove	= dwcmshc_remove,
+-- 
+2.26.2
 
