@@ -2,233 +2,79 @@ Return-Path: <SRS0=CGCI=65=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DFB4CC433E0
-	for <linux-mmc@archiver.kernel.org>; Fri, 15 May 2020 14:30:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4D52FC433E0
+	for <linux-mmc@archiver.kernel.org>; Fri, 15 May 2020 14:31:58 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id BF29E2076A
-	for <linux-mmc@archiver.kernel.org>; Fri, 15 May 2020 14:30:05 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=ragnatech-se.20150623.gappssmtp.com header.i=@ragnatech-se.20150623.gappssmtp.com header.b="B2tBkp+V"
+	by mail.kernel.org (Postfix) with ESMTP id 2BC852078C
+	for <linux-mmc@archiver.kernel.org>; Fri, 15 May 2020 14:31:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726339AbgEOOaE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 15 May 2020 10:30:04 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34472 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-FAIL-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1726185AbgEOOaD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 15 May 2020 10:30:03 -0400
-Received: from mail-lj1-x243.google.com (mail-lj1-x243.google.com [IPv6:2a00:1450:4864:20::243])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 316B6C061A0C
-        for <linux-mmc@vger.kernel.org>; Fri, 15 May 2020 07:30:03 -0700 (PDT)
-Received: by mail-lj1-x243.google.com with SMTP id g4so2478929ljl.2
-        for <linux-mmc@vger.kernel.org>; Fri, 15 May 2020 07:30:03 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=ragnatech-se.20150623.gappssmtp.com; s=20150623;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:content-transfer-encoding:in-reply-to;
-        bh=okKiBGETk3y9fl+HPE2qnZNSxrs43Su2nSzMEQHFKx4=;
-        b=B2tBkp+VDDhqvAlK0qTINDRkXY/tWCA4eh1WU5Rl6p5UcN9G8zsiRFZnbRwXZA1RMC
-         bz961deR4ePG+cU9BPzNZudy92brj9qCZzp+Z37PIUonlU8bJpFMJQh6Y2jkOxEdQ8dv
-         kDqFawSa3pDNJMvmWGjdNGrqSSfil9tn0LNAVQtPox4B/zeeVxBSa4okeaT5s/+jnKJk
-         LVIgqQ8WSXbh3awbLtRmD8wnH80GOqpkjjYUpTMnMkgtHpf2G2O/TjJdP8Qxi1upRJj0
-         wAGqu5V9AxUSKSoloTgH25FK7b82VlkdwAhRpCwX8PNYk/tkjYCdEj8VnGN1fnqBQsjh
-         sAbA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:content-transfer-encoding
-         :in-reply-to;
-        bh=okKiBGETk3y9fl+HPE2qnZNSxrs43Su2nSzMEQHFKx4=;
-        b=Hvmcv3ZNPgWasfX9/ljW8w7vdbVBw4A4ZoGIx6njfJAJrEPGGmlHaZStpY1YjyAwYo
-         zgMKrVHA2eRVkcV3HmHhX4bllDjTq6ECaU0XAgZCEQKNNhp3F1bKdzg5XVCHA6L2hNbC
-         bYyxVGjkLS8aCvzd3La8vEs32vXPT47OicD9UpWsAovLfZVnbudvg8D+h1BL1xmfz+WI
-         HVUWmRCUvRyysz6oJKjBXsTi3s3kA0URUcToTleB4AQdIUCauLchqAHgPETUmR3hUfSo
-         dZAxMgzfli3Vr4eBSHHBH//vkqCSGy/XZSumhWYFrO4iAHXoVPEbvV6OjiqhycIppjbK
-         kS4Q==
-X-Gm-Message-State: AOAM530lqz/0NWc83lv2qJw1nS6XW4mXkHOfiaO9TageodanntQ4d7n1
-        /e4zKpqQRPIMUDm6OG9XUkTcew==
-X-Google-Smtp-Source: ABdhPJwyP8HWlV6JfW9ElgBPSDFN5rUvr9tJIY6LhOoGJarj93fEvMySkKXB99h0NpvErrrrT6tPFw==
-X-Received: by 2002:a2e:361a:: with SMTP id d26mr2435008lja.171.1589553001537;
-        Fri, 15 May 2020 07:30:01 -0700 (PDT)
-Received: from localhost (h-209-203.A463.priv.bahnhof.se. [155.4.209.203])
-        by smtp.gmail.com with ESMTPSA id t19sm1272731ljg.7.2020.05.15.07.30.00
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 15 May 2020 07:30:00 -0700 (PDT)
-Date:   Fri, 15 May 2020 16:30:00 +0200
-From:   Niklas =?iso-8859-1?Q?S=F6derlund?= 
-        <niklas.soderlund+renesas@ragnatech.se>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Geert Uytterhoeven <geert+renesas@glider.be>,
-        Masahiro Yamada <yamada.masahiro@socionext.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux-Renesas <linux-renesas-soc@vger.kernel.org>
-Subject: Re: [PATCH] mmc: renesas_sdhi: don't lose RPM savings because of
- manual clk handling
-Message-ID: <20200515143000.GC3310422@oden.dyn.berto.se>
-References: <20200513173131.11200-1-wsa+renesas@sang-engineering.com>
- <CAPDyKFpaaVdpv22VO_OS7a2rw67xmD7qXcxUqD_g5CDdqiZiHA@mail.gmail.com>
+        id S1726171AbgEOOb5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 15 May 2020 10:31:57 -0400
+Received: from mga05.intel.com ([192.55.52.43]:25542 "EHLO mga05.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726163AbgEOOb5 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 15 May 2020 10:31:57 -0400
+IronPort-SDR: M82nLLN/wHKfHsJh8kvqS1RTA+UAQAIcsVp58Xbbp6Jl7/AIFaHMG+Mpau1CQubkp4S1oc03Hc
+ HLV2u6i30ioA==
+X-Amp-Result: SKIPPED(no attachment in message)
+X-Amp-File-Uploaded: False
+Received: from orsmga006.jf.intel.com ([10.7.209.51])
+  by fmsmga105.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 15 May 2020 07:31:56 -0700
+IronPort-SDR: Ah/P2qSEeZWYqOZ8Oa57VMtZD4fisQtDi5J8j7bWCHUAHadvD18yALGaIslp3dIoY3v+fajODR
+ g8yIAfEKUdow==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.73,395,1583222400"; 
+   d="scan'208";a="266619515"
+Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.157]) ([10.237.72.157])
+  by orsmga006.jf.intel.com with ESMTP; 15 May 2020 07:31:53 -0700
+Subject: Re: [PATCH V1 0/7] Target specific DLL configuration for qcom SDHC
+To:     Sarthak Garg <sartgarg@codeaurora.org>, ulf.hansson@linaro.org
+Cc:     vbadigan@codeaurora.org, stummala@codeaurora.org,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-arm-msm@vger.kernel.org
+References: <1588838535-6050-1-git-send-email-sartgarg@codeaurora.org>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Message-ID: <a4bfb88c-b429-5733-8dd1-558ddc6bc71a@intel.com>
+Date:   Fri, 15 May 2020 17:32:11 +0300
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.7.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <CAPDyKFpaaVdpv22VO_OS7a2rw67xmD7qXcxUqD_g5CDdqiZiHA@mail.gmail.com>
+In-Reply-To: <1588838535-6050-1-git-send-email-sartgarg@codeaurora.org>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Wolfram and Ulf,
+On 7/05/20 11:02 am, Sarthak Garg wrote:
+> Sarthak Garg (6):
+>   dt-bindings: mmc: Add information for DLL register properties
+>   mmc: sdhci-msm: Update dll_config_3 as per HSR
+>   mmc: sdhci-msm: Update DDR_CONFIG as per device tree file
+>   mmc: sdhci-msm: Read and use DLL Config property from device tree file
+>   mmc: sdhci-msm: Introduce new ops to dump vendor specific registers
+>   mmc: sdhci-msm: dump vendor specific registers during error
+> 
+> Veerabhadrarao Badiganti (1):
+>   mmc: host: sdhci-msm: Configure dll-user-control in dll init sequence
 
-Thanks for working on this!
+For patches 2 to 7
 
-On 2020-05-15 11:26:06 +0200, Ulf Hansson wrote:
-> + Niklas, Geert, Yamada-san,
-> 
-> 
-> On Wed, 13 May 2020 at 19:31, Wolfram Sang
-> <wsa+renesas@sang-engineering.com> wrote:
-> >
-> > The SDHI driver en-/disabled clocks on its own during probe() and
-> > remove(). This basically killed all potential RPM power savings. Now, we
-> > just enable the clocks for a short time when we access registers in
-> > probe(). We otherwise leave all handling to RPM. That means, we need to
-> > shift the RPM enabling code in the TMIO core a bit up, so we can access
-> > registers there, too.
-> 
-> No, this doesn't sound entirely right to me.
-> 
-> However, I do admit that we may need to move the pm_runtime
-> initialization earlier (perhaps even out of tmio_mmc_core), but for
-> slightly different reasons. Let me elaborate.
-> 
-> For uniphier-sd, renesas_sdhi_sys_dmac and renesas_sdhi_internal_dmac
-> - they all have assigned the ->clk_enable|disable() ops. Which means
-> they have internal clock management (calling clk_prepare|enable()
-> etc). For tmio_mmc, that's not the case.
-> 
-> On top of this, the device may also have a potential PM domain
-> attached. If that is the case, the PM domain may or may not have clock
-> management implemented through genpd's ->start|stop() callbacks.
-> 
-> So, in the end we are going to have to rely on clock enable/prepare
-> reference counting, as we have to manage the clock(s) at both the
-> driver and the PM domain level. Taking into account all various
-> combinations (and that CONFIG_PM may not always be set). I have
-> started to hack on some patches, but before I share them, let me ask a
-> few questions.
-
-I had a go at this once but gave up as I only have knowledge about one 
-implementation and !CONFIG_PM made it messy for me. I will see if I can 
-digout the patches and see if I can recall exactly what it was. I'm sure 
-it was my lack of understanding and not something technical.
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
 > 
-> 1. tmio_mmc: - is that used solely with clock management through
-> genpd? Or has no clock management at all?
-> 2. uniphier-sd: Don't have runtime PM callbacks assigned. It looks
-> like it doesn't care about runtime PM, but maybe it does through a PM
-> domain? Can we skip to enable runtime PM for uniphier-sd, no?
+>  .../devicetree/bindings/mmc/sdhci-msm.txt          |  14 +++
+>  drivers/mmc/host/sdhci-msm.c                       | 103 ++++++++++++++++++++-
+>  drivers/mmc/host/sdhci.c                           |   3 +
+>  drivers/mmc/host/sdhci.h                           |   1 +
+>  4 files changed, 118 insertions(+), 3 deletions(-)
 > 
-> Kind regards
-> Uffe
-> 
-> >
-> > clk_summary before:
-> > sd0                   1        1        0    12480000          0     0  50000
-> >    sdif0              2        2        0    12480000          0     0  50000
-> >
-> > clk_summary after:
-> > sd0                   1        1        0    12480000          0     0  50000
-> >    sdif0              1        1        0    12480000          0     0  50000
-> >
-> > Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-> > ---
-> >
-> > Tested on a Salvator-XS board with R-Car M3-N.
-> >
-> >  drivers/mmc/host/renesas_sdhi_core.c |  7 +++----
-> >  drivers/mmc/host/tmio_mmc_core.c     | 14 +++++++-------
-> >  2 files changed, 10 insertions(+), 11 deletions(-)
-> >
-> > diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-> > index ff72b381a6b3..d581142634f8 100644
-> > --- a/drivers/mmc/host/renesas_sdhi_core.c
-> > +++ b/drivers/mmc/host/renesas_sdhi_core.c
-> > @@ -910,6 +910,8 @@ int renesas_sdhi_probe(struct platform_device *pdev,
-> >                 goto efree;
-> >
-> >         ver = sd_ctrl_read16(host, CTL_VERSION);
-> > +       renesas_sdhi_clk_disable(host);
-> > +
-> >         /* GEN2_SDR104 is first known SDHI to use 32bit block count */
-> >         if (ver < SDHI_VER_GEN2_SDR104 && mmc_data->max_blk_count > U16_MAX)
-> >                 mmc_data->max_blk_count = U16_MAX;
-> > @@ -920,7 +922,7 @@ int renesas_sdhi_probe(struct platform_device *pdev,
-> >
-> >         ret = tmio_mmc_host_probe(host);
-> >         if (ret < 0)
-> > -               goto edisclk;
-> > +               goto efree;
-> >
-> >         /* Enable tuning iff we have an SCC and a supported mode */
-> >         if (of_data && of_data->scc_offset &&
-> > @@ -985,8 +987,6 @@ int renesas_sdhi_probe(struct platform_device *pdev,
-> >
-> >  eirq:
-> >         tmio_mmc_host_remove(host);
-> > -edisclk:
-> > -       renesas_sdhi_clk_disable(host);
-> >  efree:
-> >         tmio_mmc_host_free(host);
-> >
-> > @@ -999,7 +999,6 @@ int renesas_sdhi_remove(struct platform_device *pdev)
-> >         struct tmio_mmc_host *host = platform_get_drvdata(pdev);
-> >
-> >         tmio_mmc_host_remove(host);
-> > -       renesas_sdhi_clk_disable(host);
-> >
-> >         return 0;
-> >  }
-> > diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
-> > index 9a4ae954553b..6968177dd1cd 100644
-> > --- a/drivers/mmc/host/tmio_mmc_core.c
-> > +++ b/drivers/mmc/host/tmio_mmc_core.c
-> > @@ -1116,6 +1116,13 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host)
-> >
-> >         _host->set_pwr = pdata->set_pwr;
-> >
-> > +       dev_pm_domain_start(&pdev->dev);
-> > +       pm_runtime_get_noresume(&pdev->dev);
-> > +       pm_runtime_set_active(&pdev->dev);
-> > +       pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
-> > +       pm_runtime_use_autosuspend(&pdev->dev);
-> > +       pm_runtime_enable(&pdev->dev);
-> > +
-> >         ret = tmio_mmc_init_ocr(_host);
-> >         if (ret < 0)
-> >                 return ret;
-> > @@ -1192,13 +1199,6 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host)
-> >         /* See if we also get DMA */
-> >         tmio_mmc_request_dma(_host, pdata);
-> >
-> > -       dev_pm_domain_start(&pdev->dev);
-> > -       pm_runtime_get_noresume(&pdev->dev);
-> > -       pm_runtime_set_active(&pdev->dev);
-> > -       pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
-> > -       pm_runtime_use_autosuspend(&pdev->dev);
-> > -       pm_runtime_enable(&pdev->dev);
-> > -
-> >         ret = mmc_add_host(mmc);
-> >         if (ret)
-> >                 goto remove_host;
-> > --
-> > 2.20.1
-> >
 
--- 
-Regards,
-Niklas Söderlund
