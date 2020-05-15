@@ -2,79 +2,177 @@ Return-Path: <SRS0=CGCI=65=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1
+X-Spam-Status: No, score=-3.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
 	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4D52FC433E0
-	for <linux-mmc@archiver.kernel.org>; Fri, 15 May 2020 14:31:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 245C3C433DF
+	for <linux-mmc@archiver.kernel.org>; Fri, 15 May 2020 14:35:20 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2BC852078C
-	for <linux-mmc@archiver.kernel.org>; Fri, 15 May 2020 14:31:58 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0D06D20671
+	for <linux-mmc@archiver.kernel.org>; Fri, 15 May 2020 14:35:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726171AbgEOOb5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 15 May 2020 10:31:57 -0400
-Received: from mga05.intel.com ([192.55.52.43]:25542 "EHLO mga05.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726163AbgEOOb5 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 15 May 2020 10:31:57 -0400
-IronPort-SDR: M82nLLN/wHKfHsJh8kvqS1RTA+UAQAIcsVp58Xbbp6Jl7/AIFaHMG+Mpau1CQubkp4S1oc03Hc
- HLV2u6i30ioA==
-X-Amp-Result: SKIPPED(no attachment in message)
-X-Amp-File-Uploaded: False
-Received: from orsmga006.jf.intel.com ([10.7.209.51])
-  by fmsmga105.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 15 May 2020 07:31:56 -0700
-IronPort-SDR: Ah/P2qSEeZWYqOZ8Oa57VMtZD4fisQtDi5J8j7bWCHUAHadvD18yALGaIslp3dIoY3v+fajODR
- g8yIAfEKUdow==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.73,395,1583222400"; 
-   d="scan'208";a="266619515"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.157]) ([10.237.72.157])
-  by orsmga006.jf.intel.com with ESMTP; 15 May 2020 07:31:53 -0700
-Subject: Re: [PATCH V1 0/7] Target specific DLL configuration for qcom SDHC
-To:     Sarthak Garg <sartgarg@codeaurora.org>, ulf.hansson@linaro.org
-Cc:     vbadigan@codeaurora.org, stummala@codeaurora.org,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-msm@vger.kernel.org
-References: <1588838535-6050-1-git-send-email-sartgarg@codeaurora.org>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <a4bfb88c-b429-5733-8dd1-558ddc6bc71a@intel.com>
-Date:   Fri, 15 May 2020 17:32:11 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.7.0
+        id S1726179AbgEOOfT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 15 May 2020 10:35:19 -0400
+Received: from mail-ot1-f67.google.com ([209.85.210.67]:35109 "EHLO
+        mail-ot1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726174AbgEOOfT (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 15 May 2020 10:35:19 -0400
+Received: by mail-ot1-f67.google.com with SMTP id k110so2062796otc.2;
+        Fri, 15 May 2020 07:35:18 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=lKPlso0WQQziVOQ8u4GeFZPYKAS6yBlI0r6TV2B4BFI=;
+        b=pgbDJY7Tmvjt0sV316zSwHqFPcGL7XTKzbz2v8uJco0mC3KKmpBv+gCKthPz6ICcBY
+         CMxymbq/FoB1eaEMx1xOt3uxQM7YI6TT0Fmtwtf9H58MCgoNcHvwAw1abHRCs/pEILq/
+         d64CDGtgc/Ruk/w0GhZCRTUnvEi6E7yzIUeFNt2hQdYIKDP8MFCRSPrB5+glKR2Zi0Vr
+         Eq92Fayk45LiODpgondZ4lBa8UEzERtKf+ocyWlGPAfaWj8v+qbTXhClWbwc14NaQ3Ni
+         BasHIEWM3P5Skcn4kMekt+9NjFg8BnGy33LtCyQr7GuPZEYY5ImnQkgc8ZybJ3L2gham
+         Ecxg==
+X-Gm-Message-State: AOAM530j/ENbTTIgZZf21G42r5BspQ4r4Ofk9oypaSUkZ4EzgfA1s2F7
+        kgdeufxZb+kADLk36sllmJBqtEj7+WwwK3Biy0U=
+X-Google-Smtp-Source: ABdhPJzvqwKaXg+AlEIlz3HK5ciut0TcfbaOF3K4GdjnQBKBoGWbflImfe+EJ1VWKm4sC9BwTtavlC4uH3mf0GcqeNM=
+X-Received: by 2002:a9d:7e92:: with SMTP id m18mr2403315otp.145.1589553317993;
+ Fri, 15 May 2020 07:35:17 -0700 (PDT)
 MIME-Version: 1.0
-In-Reply-To: <1588838535-6050-1-git-send-email-sartgarg@codeaurora.org>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+References: <20200513173131.11200-1-wsa+renesas@sang-engineering.com>
+In-Reply-To: <20200513173131.11200-1-wsa+renesas@sang-engineering.com>
+From:   Geert Uytterhoeven <geert@linux-m68k.org>
+Date:   Fri, 15 May 2020 16:35:06 +0200
+Message-ID: <CAMuHMdXgWFAt1WTYarHEPv7x=+WJK7+aVEj8n+j_jB2tXMdYLQ@mail.gmail.com>
+Subject: Re: [PATCH] mmc: renesas_sdhi: don't lose RPM savings because of
+ manual clk handling
+To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc:     Linux MMC List <linux-mmc@vger.kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 7/05/20 11:02 am, Sarthak Garg wrote:
-> Sarthak Garg (6):
->   dt-bindings: mmc: Add information for DLL register properties
->   mmc: sdhci-msm: Update dll_config_3 as per HSR
->   mmc: sdhci-msm: Update DDR_CONFIG as per device tree file
->   mmc: sdhci-msm: Read and use DLL Config property from device tree file
->   mmc: sdhci-msm: Introduce new ops to dump vendor specific registers
->   mmc: sdhci-msm: dump vendor specific registers during error
-> 
-> Veerabhadrarao Badiganti (1):
->   mmc: host: sdhci-msm: Configure dll-user-control in dll init sequence
+Hi Wolfram,
 
-For patches 2 to 7
+On Wed, May 13, 2020 at 7:31 PM Wolfram Sang
+<wsa+renesas@sang-engineering.com> wrote:
+> The SDHI driver en-/disabled clocks on its own during probe() and
+> remove(). This basically killed all potential RPM power savings. Now, we
+> just enable the clocks for a short time when we access registers in
+> probe(). We otherwise leave all handling to RPM. That means, we need to
+> shift the RPM enabling code in the TMIO core a bit up, so we can access
+> registers there, too.
+>
+> clk_summary before:
+> sd0                   1        1        0    12480000          0     0  50000
+>    sdif0              2        2        0    12480000          0     0  50000
+>
+> clk_summary after:
+> sd0                   1        1        0    12480000          0     0  50000
+>    sdif0              1        1        0    12480000          0     0  50000
+>
+> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> ---
+>
+> Tested on a Salvator-XS board with R-Car M3-N.
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+While this seems to have no ill effects on R-Car Gen3, RZ/A1, and RZ/A2,
+it does on R-Car Gen2, which prints before probing:
 
-> 
->  .../devicetree/bindings/mmc/sdhci-msm.txt          |  14 +++
->  drivers/mmc/host/sdhci-msm.c                       | 103 ++++++++++++++++++++-
->  drivers/mmc/host/sdhci.c                           |   3 +
->  drivers/mmc/host/sdhci.h                           |   1 +
->  4 files changed, 118 insertions(+), 3 deletions(-)
-> 
+    sh_mobile_sdhi ee100000.sd: Unbalanced pm_runtime_enable!
 
+And on SH-Mobile AG5, R-Mobile A1, and R-Mobile APE6:
+
+    ------------[ cut here ]------------
+    WARNING: CPU: 0 PID: 5 at drivers/clk/clk.c:954 clk_core_disable+0x6c/0x2b0
+    sdhi1 already disabled
+    CPU: 0 PID: 5 Comm: kworker/0:0 Not tainted
+5.7.0-rc5-ape6evm-00536-ga65e619d428aff9a-dirty #186
+    Hardware name: Generic R8A73A4 (Flattened Device Tree)
+    Workqueue: pm pm_runtime_work
+    [<c00169e8>] (unwind_backtrace) from [<c001345c>] (show_stack+0x10/0x14)
+    [<c001345c>] (show_stack) from [<c04b6e34>] (dump_stack+0x88/0xa8)
+    [<c04b6e34>] (dump_stack) from [<c00270b8>] (__warn+0xd0/0xec)
+    [<c00270b8>] (__warn) from [<c0027144>] (warn_slowpath_fmt+0x70/0x9c)
+    [<c0027144>] (warn_slowpath_fmt) from [<c029d53c>]
+(clk_core_disable+0x6c/0x2b0)
+    [<c029d53c>] (clk_core_disable) from [<c029d798>]
+(clk_core_disable_lock+0x18/0x24)
+    [<c029d798>] (clk_core_disable_lock) from [<c02fa670>]
+(pm_clk_suspend+0x64/0x78)
+    [<c02fa670>] (pm_clk_suspend) from [<c02f8918>]
+(genpd_runtime_suspend+0x110/0x1bc)
+    [<c02f8918>] (genpd_runtime_suspend) from [<c02f01b4>]
+(__rpm_callback+0x30/0xe0)
+    [<c02f01b4>] (__rpm_callback) from [<c02f02d4>] (rpm_callback+0x70/0x80)
+    [<c02f02d4>] (rpm_callback) from [<c02f0e28>] (rpm_suspend+0x330/0x4a0)
+    [<c02f0e28>] (rpm_suspend) from [<c02f1240>] (pm_runtime_work+0x74/0x8c)
+    [<c02f1240>] (pm_runtime_work) from [<c00402f4>]
+(process_one_work+0x2cc/0x4ac)
+    [<c00402f4>] (process_one_work) from [<c0040730>]
+(worker_thread+0x230/0x2f0)
+    [<c0040730>] (worker_thread) from [<c0045b9c>] (kthread+0x12c/0x13c)
+    [<c0045b9c>] (kthread) from [<c0009148>] (ret_from_fork+0x14/0x2c)
+    Exception stack(0xef0cdfb0 to 0xef0cdff8)
+    dfa0:                                     00000000 00000000
+00000000 00000000
+    dfc0: 00000000 00000000 00000000 00000000 00000000 00000000
+00000000 00000000
+    dfe0: 00000000 00000000 00000000 00000000 00000013 00000000
+    ---[ end trace c1cca51c99a6297a ]---
+
+and later:
+
+    ------------[ cut here ]------------
+    WARNING: CPU: 0 PID: 12 at drivers/clk/clk.c:1014 clk_core_enable+0x6c/0x2bc
+    Enabling unprepared sdhi1
+    CPU: 0 PID: 12 Comm: kworker/0:1 Tainted: G        W
+5.7.0-rc5-ape6evm-00536-ga65e619d428aff9a-dirty #186
+    Hardware name: Generic R8A73A4 (Flattened Device Tree)
+    Workqueue: events_freezable mmc_rescan
+    [<c00169e8>] (unwind_backtrace) from [<c001345c>] (show_stack+0x10/0x14)
+    [<c001345c>] (show_stack) from [<c04b6e34>] (dump_stack+0x88/0xa8)
+    [<c04b6e34>] (dump_stack) from [<c00270b8>] (__warn+0xd0/0xec)
+    [<c00270b8>] (__warn) from [<c0027144>] (warn_slowpath_fmt+0x70/0x9c)
+    [<c0027144>] (warn_slowpath_fmt) from [<c029d810>]
+(clk_core_enable+0x6c/0x2bc)
+    [<c029d810>] (clk_core_enable) from [<c029da78>]
+(clk_core_enable_lock+0x18/0x2c)
+    [<c029da78>] (clk_core_enable_lock) from [<c02fa6ec>]
+(pm_clk_resume+0x68/0xa0)
+    [<c02fa6ec>] (pm_clk_resume) from [<c02f8dd0>]
+(genpd_runtime_resume+0xc8/0x170)
+    [<c02f8dd0>] (genpd_runtime_resume) from [<c02f01b4>]
+(__rpm_callback+0x30/0xe0)
+    [<c02f01b4>] (__rpm_callback) from [<c02f02d4>] (rpm_callback+0x70/0x80)
+    [<c02f02d4>] (rpm_callback) from [<c02f0a50>] (rpm_resume+0x44c/0x4f4)
+    [<c02f0a50>] (rpm_resume) from [<c02f00f0>] (__pm_runtime_resume+0x64/0x80)
+    [<c02f00f0>] (__pm_runtime_resume) from [<c0342480>]
+(__mmc_claim_host+0x1c8/0x218)
+    [<c0342480>] (__mmc_claim_host) from [<c03437f0>] (mmc_rescan+0xfc/0x260)
+    [<c03437f0>] (mmc_rescan) from [<c00402f4>] (process_one_work+0x2cc/0x4ac)
+    [<c00402f4>] (process_one_work) from [<c0040730>]
+(worker_thread+0x230/0x2f0)
+    [<c0040730>] (worker_thread) from [<c0045b9c>] (kthread+0x12c/0x13c)
+    [<c0045b9c>] (kthread) from [<c0009148>] (ret_from_fork+0x14/0x2c)
+    Exception stack(0xef0f1fb0 to 0xef0f1ff8)
+    1fa0:                                     00000000 00000000
+00000000 00000000
+    1fc0: 00000000 00000000 00000000 00000000 00000000 00000000
+00000000 00000000
+    1fe0: 00000000 00000000 00000000 00000000 00000013 00000000
+    ---[ end trace c1cca51c99a6297b ]---
+    sh_mobile_sdhi ee120000.sd: __pm_clk_enable: failed to enable clk
+(ptrval), error -108
+
+Gr{oetje,eeting}s,
+
+                        Geert
+
+-- 
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
