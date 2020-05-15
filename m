@@ -7,25 +7,25 @@ X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B531AC433DF
-	for <linux-mmc@archiver.kernel.org>; Fri, 15 May 2020 15:10:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6A907C433E1
+	for <linux-mmc@archiver.kernel.org>; Fri, 15 May 2020 15:10:30 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9596E207CD
-	for <linux-mmc@archiver.kernel.org>; Fri, 15 May 2020 15:10:18 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4B898207C3
+	for <linux-mmc@archiver.kernel.org>; Fri, 15 May 2020 15:10:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728117AbgEOPKR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 15 May 2020 11:10:17 -0400
-Received: from relmlor1.renesas.com ([210.160.252.171]:14629 "EHLO
-        relmlie5.idc.renesas.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1728083AbgEOPKN (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 15 May 2020 11:10:13 -0400
+        id S1727893AbgEOPKY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 15 May 2020 11:10:24 -0400
+Received: from relmlor2.renesas.com ([210.160.252.172]:32716 "EHLO
+        relmlie6.idc.renesas.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1726695AbgEOPKX (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 15 May 2020 11:10:23 -0400
 X-IronPort-AV: E=Sophos;i="5.73,395,1583161200"; 
-   d="scan'208";a="47188396"
+   d="scan'208";a="46974880"
 Received: from unknown (HELO relmlir5.idc.renesas.com) ([10.200.68.151])
-  by relmlie5.idc.renesas.com with ESMTP; 16 May 2020 00:10:11 +0900
+  by relmlie6.idc.renesas.com with ESMTP; 16 May 2020 00:10:20 +0900
 Received: from localhost.localdomain (unknown [10.226.36.204])
-        by relmlir5.idc.renesas.com (Postfix) with ESMTP id 8B94F400E8F3;
-        Sat, 16 May 2020 00:10:07 +0900 (JST)
+        by relmlir5.idc.renesas.com (Postfix) with ESMTP id 6F9D640065C1;
+        Sat, 16 May 2020 00:10:16 +0900 (JST)
 From:   Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
 To:     Geert Uytterhoeven <geert+renesas@glider.be>,
         Jens Axboe <axboe@kernel.dk>, Rob Herring <robh+dt@kernel.org>,
@@ -41,9 +41,9 @@ Cc:     linux-ide@vger.kernel.org, devicetree@vger.kernel.org,
         linux-renesas-soc@vger.kernel.org, linux-watchdog@vger.kernel.org,
         Prabhakar <prabhakar.csengg@gmail.com>,
         Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-Subject: [PATCH 09/17] ARM: dts: r8a7742: Add sata nodes
-Date:   Fri, 15 May 2020 16:08:49 +0100
-Message-Id: <1589555337-5498-10-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
+Subject: [PATCH 11/17] dt-bindings: net: renesas,ether: Document R8A7742 SoC
+Date:   Fri, 15 May 2020 16:08:51 +0100
+Message-Id: <1589555337-5498-12-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
 X-Mailer: git-send-email 2.7.4
 In-Reply-To: <1589555337-5498-1-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
 References: <1589555337-5498-1-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
@@ -52,47 +52,26 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add the sata devices nodes to the R8A7742 device tree.
+Document RZ/G1H (R8A7742) SoC bindings.
 
 Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
 Reviewed-by: Marian-Cristian Rotariu <marian-cristian.rotariu.rb@bp.renesas.com>
 ---
- arch/arm/boot/dts/r8a7742.dtsi | 22 ++++++++++++++++++++++
- 1 file changed, 22 insertions(+)
+ Documentation/devicetree/bindings/net/renesas,ether.yaml | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/arch/arm/boot/dts/r8a7742.dtsi b/arch/arm/boot/dts/r8a7742.dtsi
-index ca1a016..553b92f 100644
---- a/arch/arm/boot/dts/r8a7742.dtsi
-+++ b/arch/arm/boot/dts/r8a7742.dtsi
-@@ -809,6 +809,28 @@
- 			max-frequency = <97500000>;
- 		};
- 
-+		sata0: sata@ee300000 {
-+			compatible = "renesas,sata-r8a7742",
-+				     "renesas,rcar-gen2-sata";
-+			reg = <0 0xee300000 0 0x200000>;
-+			interrupts = <GIC_SPI 105 IRQ_TYPE_LEVEL_HIGH>;
-+			clocks = <&cpg CPG_MOD 815>;
-+			power-domains = <&sysc R8A7742_PD_ALWAYS_ON>;
-+			resets = <&cpg 815>;
-+			status = "disabled";
-+		};
-+
-+		sata1: sata@ee500000 {
-+			compatible = "renesas,sata-r8a7742",
-+				     "renesas,rcar-gen2-sata";
-+			reg = <0 0xee500000 0 0x200000>;
-+			interrupts = <GIC_SPI 106 IRQ_TYPE_LEVEL_HIGH>;
-+			clocks = <&cpg CPG_MOD 814>;
-+			power-domains = <&sysc R8A7742_PD_ALWAYS_ON>;
-+			resets = <&cpg 814>;
-+			status = "disabled";
-+		};
-+
- 		gic: interrupt-controller@f1001000 {
- 			compatible = "arm,gic-400";
- 			#interrupt-cells = <3>;
+diff --git a/Documentation/devicetree/bindings/net/renesas,ether.yaml b/Documentation/devicetree/bindings/net/renesas,ether.yaml
+index c11eeb6..ce307e8 100644
+--- a/Documentation/devicetree/bindings/net/renesas,ether.yaml
++++ b/Documentation/devicetree/bindings/net/renesas,ether.yaml
+@@ -29,6 +29,7 @@ properties:
+               - renesas,rcar-gen1-ether  # a generic R-Car Gen1 device
+       - items:
+           - enum:
++              - renesas,ether-r8a7742    # device is a part of R8A7742 SoC
+               - renesas,ether-r8a7743    # device is a part of R8A7743 SoC
+               - renesas,ether-r8a7745    # device is a part of R8A7745 SoC
+               - renesas,ether-r8a7790    # device is a part of R8A7790 SoC
 -- 
 2.7.4
 
