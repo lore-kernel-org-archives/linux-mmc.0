@@ -7,25 +7,25 @@ X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 54CDBC433E4
-	for <linux-mmc@archiver.kernel.org>; Fri, 15 May 2020 15:11:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9606CC433E4
+	for <linux-mmc@archiver.kernel.org>; Fri, 15 May 2020 15:11:09 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 31C6B207C3
-	for <linux-mmc@archiver.kernel.org>; Fri, 15 May 2020 15:11:07 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 76D34207C3
+	for <linux-mmc@archiver.kernel.org>; Fri, 15 May 2020 15:11:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728334AbgEOPK4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 15 May 2020 11:10:56 -0400
-Received: from relmlor2.renesas.com ([210.160.252.172]:10282 "EHLO
-        relmlie6.idc.renesas.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1728313AbgEOPKt (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 15 May 2020 11:10:49 -0400
+        id S1728295AbgEOPKp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 15 May 2020 11:10:45 -0400
+Received: from relmlor1.renesas.com ([210.160.252.171]:7888 "EHLO
+        relmlie5.idc.renesas.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1728273AbgEOPKj (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 15 May 2020 11:10:39 -0400
 X-IronPort-AV: E=Sophos;i="5.73,395,1583161200"; 
-   d="scan'208";a="46974932"
+   d="scan'208";a="47188452"
 Received: from unknown (HELO relmlir5.idc.renesas.com) ([10.200.68.151])
-  by relmlie6.idc.renesas.com with ESMTP; 16 May 2020 00:10:47 +0900
+  by relmlie5.idc.renesas.com with ESMTP; 16 May 2020 00:10:38 +0900
 Received: from localhost.localdomain (unknown [10.226.36.204])
-        by relmlir5.idc.renesas.com (Postfix) with ESMTP id 2638640065C1;
-        Sat, 16 May 2020 00:10:42 +0900 (JST)
+        by relmlir5.idc.renesas.com (Postfix) with ESMTP id 399CE400D4CD;
+        Sat, 16 May 2020 00:10:34 +0900 (JST)
 From:   Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
 To:     Geert Uytterhoeven <geert+renesas@glider.be>,
         Jens Axboe <axboe@kernel.dk>, Rob Herring <robh+dt@kernel.org>,
@@ -41,9 +41,9 @@ Cc:     linux-ide@vger.kernel.org, devicetree@vger.kernel.org,
         linux-renesas-soc@vger.kernel.org, linux-watchdog@vger.kernel.org,
         Prabhakar <prabhakar.csengg@gmail.com>,
         Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-Subject: [PATCH 17/17] ARM: dts: r8a7742: Add RWDT node
-Date:   Fri, 15 May 2020 16:08:57 +0100
-Message-Id: <1589555337-5498-18-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
+Subject: [PATCH 15/17] ARM: dts: r8a7742: Add APMU nodes
+Date:   Fri, 15 May 2020 16:08:55 +0100
+Message-Id: <1589555337-5498-16-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
 X-Mailer: git-send-email 2.7.4
 In-Reply-To: <1589555337-5498-1-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
 References: <1589555337-5498-1-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
@@ -52,36 +52,46 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add a device node for the Watchdog Timer (RWDT) controller on the Renesas
-RZ/G1H (r8a7742) SoC.
+Add DT nodes for the Advanced Power Management Units (APMU), and use the
+enable-method to point out that the APMU should be used for SMP support.
 
 Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
 Reviewed-by: Marian-Cristian Rotariu <marian-cristian.rotariu.rb@bp.renesas.com>
 ---
- arch/arm/boot/dts/r8a7742.dtsi | 10 ++++++++++
- 1 file changed, 10 insertions(+)
+ arch/arm/boot/dts/r8a7742.dtsi | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
 
 diff --git a/arch/arm/boot/dts/r8a7742.dtsi b/arch/arm/boot/dts/r8a7742.dtsi
-index da75767..ea39c20 100644
+index 1fe65f7..da75767 100644
 --- a/arch/arm/boot/dts/r8a7742.dtsi
 +++ b/arch/arm/boot/dts/r8a7742.dtsi
-@@ -201,6 +201,16 @@
- 		#size-cells = <2>;
- 		ranges;
+@@ -18,6 +18,7 @@
+ 	cpus {
+ 		#address-cells = <1>;
+ 		#size-cells = <0>;
++		enable-method = "renesas,apmu";
  
-+		rwdt: watchdog@e6020000 {
-+			compatible = "renesas,r8a7742-wdt",
-+				     "renesas,rcar-gen2-wdt";
-+			reg = <0 0xe6020000 0 0x0c>;
-+			clocks = <&cpg CPG_MOD 402>;
-+			power-domains = <&sysc R8A7742_PD_ALWAYS_ON>;
-+			resets = <&cpg 402>;
-+			status = "disabled";
+ 		cpu0: cpu@0 {
+ 			device_type = "cpu";
+@@ -305,6 +306,18 @@
+ 			#reset-cells = <1>;
+ 		};
+ 
++		apmu@e6151000 {
++			compatible = "renesas,r8a7742-apmu", "renesas,apmu";
++			reg = <0 0xe6151000 0 0x188>;
++			cpus = <&cpu4 &cpu5 &cpu6 &cpu7>;
 +		};
 +
- 		gpio0: gpio@e6050000 {
- 			compatible = "renesas,gpio-r8a7742",
- 				     "renesas,rcar-gen2-gpio";
++		apmu@e6152000 {
++			compatible = "renesas,r8a7742-apmu", "renesas,apmu";
++			reg = <0 0xe6152000 0 0x188>;
++			cpus = <&cpu0 &cpu1 &cpu2 &cpu3>;
++		};
++
+ 		rst: reset-controller@e6160000 {
+ 			compatible = "renesas,r8a7742-rst";
+ 			reg = <0 0xe6160000 0 0x0100>;
 -- 
 2.7.4
 
