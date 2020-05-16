@@ -2,125 +2,119 @@ Return-Path: <SRS0=UNP7=66=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.1 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-8.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1F5C1C433DF
-	for <linux-mmc@archiver.kernel.org>; Sat, 16 May 2020 16:58:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 854B3C433DF
+	for <linux-mmc@archiver.kernel.org>; Sat, 16 May 2020 18:06:24 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id F0CF12065C
-	for <linux-mmc@archiver.kernel.org>; Sat, 16 May 2020 16:58:36 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="XWB8nVVv"
+	by mail.kernel.org (Postfix) with ESMTP id 7126E20657
+	for <linux-mmc@archiver.kernel.org>; Sat, 16 May 2020 18:06:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726269AbgEPQ6e (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 16 May 2020 12:58:34 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57832 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726237AbgEPQ6d (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 16 May 2020 12:58:33 -0400
-Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:e::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C456EC061A0C;
-        Sat, 16 May 2020 09:58:33 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=bombadil.20170209; h=Content-Transfer-Encoding:
-        Content-Type:In-Reply-To:MIME-Version:Date:Message-ID:From:References:Cc:To:
-        Subject:Sender:Reply-To:Content-ID:Content-Description;
-        bh=bbQ33WbtSFvsxRCkDIlragiDXl1OWmfa4TTs5FuIACg=; b=XWB8nVVv662/mphg0Jh2HbkVI+
-        +K5uoI5x7pxHZR76NkYSBI5gzEj2Zwa1IV/7ZkvRsnmauxN/dRNYpaJr40OFlQBhW61V1j3c8QMFK
-        zvc6etJpZg/M2ku2vVX58KgeKmuBHf6RVz7QZ2d0zk5RG5nvc60bkWFCpMut9jBBy32LqwzvTrcy3
-        m+bJBewURE5kzUIfnAv+oXPVDyGbd9UYJHpwHKvaPDQCcfttDazQZlkoMffKKMgi0oAbKgnsKwb6g
-        Sx0FD4KB8/LZ8CcJVOxjgeU0xP/mo+5gj7umJlBIWIJbmOlUp63EoySQb5DodLN6FREfTLW65BFSa
-        WzFHKO1Q==;
-Received: from [2601:1c0:6280:3f0::19c2]
-        by bombadil.infradead.org with esmtpsa (Exim 4.92.3 #3 (Red Hat Linux))
-        id 1ja08p-0000oq-An; Sat, 16 May 2020 16:58:27 +0000
-Subject: Re: [PATCH v5 4/6] partitions/efi: Support GPT entry lookup at a
- non-standard location
-To:     Dmitry Osipenko <digetx@gmail.com>, Jens Axboe <axboe@kernel.dk>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        Jonathan Hunter <jonathanh@nvidia.com>,
-        =?UTF-8?B?TWljaGHFgiBNaXJvc8WCYXc=?= <mirq-linux@rere.qmqm.pl>,
-        David Heidelberg <david@ixit.cz>,
-        Peter Geis <pgwipeout@gmail.com>,
-        Stephen Warren <swarren@wwwdotorg.org>,
-        Nicolas Chauvet <kwizart@gmail.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Billy Laws <blaws05@gmail.com>,
-        =?UTF-8?Q?Nils_=c3=96stlund?= <nils@naltan.com>,
-        Christoph Hellwig <hch@infradead.org>,
-        Ard Biesheuvel <ard.biesheuvel@linaro.org>,
-        Davidlohr Bueso <dave@stgolabs.net>
-Cc:     linux-tegra@vger.kernel.org, linux-block@vger.kernel.org,
-        Andrey Danin <danindrey@mail.ru>,
-        Gilles Grandou <gilles@grandou.net>,
-        Ryan Grachek <ryan@edited.us>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, Steve McIntyre <steve@einval.com>,
-        linux-efi <linux-efi@vger.kernel.org>
-References: <20200516153644.13748-1-digetx@gmail.com>
- <20200516153644.13748-5-digetx@gmail.com>
- <2ae298ca-016a-8867-52dd-86d99b9e0f3b@infradead.org>
- <595392b8-d950-4be6-f6cf-e274b4760b94@gmail.com>
-From:   Randy Dunlap <rdunlap@infradead.org>
-Message-ID: <4a0f6a9c-b652-598a-c8a0-580a3e98171b@infradead.org>
-Date:   Sat, 16 May 2020 09:58:25 -0700
+        id S1726364AbgEPSGY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 16 May 2020 14:06:24 -0400
+Received: from mga07.intel.com ([134.134.136.100]:6278 "EHLO mga07.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726263AbgEPSGX (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Sat, 16 May 2020 14:06:23 -0400
+IronPort-SDR: iQj8uy5xI4dOCVoKrK8b/9OkS7MeiCscQ2NVEtrzuV1LYjxAtuIyCegFYd+d7ZtuO/mlzwHjjf
+ TXiG9PWGzyfw==
+X-Amp-Result: SKIPPED(no attachment in message)
+X-Amp-File-Uploaded: False
+Received: from orsmga003.jf.intel.com ([10.7.209.27])
+  by orsmga105.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 16 May 2020 11:06:23 -0700
+IronPort-SDR: ayDH0DYpVPVH6H0/QixJtpzhWL2phJ2tuKfWz65kvwhZlyUB+XhEn32uI5NhpnOQ/d5Zsr2bPR
+ YckBWQDB7oGg==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.73,400,1583222400"; 
+   d="scan'208";a="263522471"
+Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.157]) ([10.237.72.157])
+  by orsmga003.jf.intel.com with ESMTP; 16 May 2020 11:06:21 -0700
+Subject: Re: [PATCH v5 2/3] mmc: sdhci: add quirks for be to le byte swapping
+To:     Angelo Dureghello <angelo.dureghello@timesys.com>,
+        ulf.hansson@linaro.org, gerg@linux-m68k.org
+Cc:     linux-mmc@vger.kernel.org, linux-m68k@vger.kernel.org
+References: <20200515222730.967105-1-angelo.dureghello@timesys.com>
+ <20200515222730.967105-2-angelo.dureghello@timesys.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Message-ID: <5209eb87-f210-8bc0-e323-4a894d6f6bbe@intel.com>
+Date:   Sat, 16 May 2020 21:06:38 +0300
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.8.0
+ Thunderbird/68.7.0
 MIME-Version: 1.0
-In-Reply-To: <595392b8-d950-4be6-f6cf-e274b4760b94@gmail.com>
+In-Reply-To: <20200515222730.967105-2-angelo.dureghello@timesys.com>
 Content-Type: text/plain; charset=utf-8
 Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 5/16/20 9:50 AM, Dmitry Osipenko wrote:
-> 16.05.2020 18:51, Randy Dunlap пишет:
->> On 5/16/20 8:36 AM, Dmitry Osipenko wrote:
->>> diff --git a/block/partitions/efi.c b/block/partitions/efi.c
->>> index b64bfdd4326c..3af4660bc11f 100644
->>> --- a/block/partitions/efi.c
->>> +++ b/block/partitions/efi.c
->>> @@ -621,6 +621,14 @@ static int find_valid_gpt(struct parsed_partitions *state, gpt_header **gpt,
->>>          if (!good_agpt && force_gpt)
->>>                  good_agpt = is_gpt_valid(state, lastlba, &agpt, &aptes);
->>>  
->>> +	/* The force_gpt_sector is used by NVIDIA Tegra partition parser in
->>> +	 * order to convey a non-standard location of the GPT entry for lookup.
->>> +	 * By default force_gpt_sector is set to 0 and has no effect.
->>> +	 */
->>
->> Please fix the multi-line comment format as described in
->> Documentation/process/coding-style.rst.
->>
->>> +	if (!good_agpt && force_gpt && state->force_gpt_sector)
->>> +		good_agpt = is_gpt_valid(state, state->force_gpt_sector,
->>> +					 &agpt, &aptes);
->>> +
->>>          /* The obviously unsuccessful case */
->>>          if (!good_pgpt && !good_agpt)
->>>                  goto fail;
->>
->> thanks.
->>
-> 
-> Hello Randy,
-> 
-> I know that it's not a proper kernel-style formatting, but that's the
-> style used by the whole efi.c source code and I wanted to maintain the
-> same style, for consistency. Of course I can change to a proper style if
-> it's more desirable than the consistency. Thank you for the comment!
-> 
+On 16/05/20 1:27 am, Angelo Dureghello wrote:
+> Some controller as the ColdFire eshdc may require an endianness
+> byte swap, becouse DMA read endianness is not configurable.
 
-too bad. Sorry to hear that.
-It should have been "fixed" much earlier.
-It's probably too late now.
+becouse -> because
 
--- 
-~Randy
+Needs a bit more explanation i.e.
+
+Facilitate using the bounce buffer for this by adding ->copy_to_bounce_buffer().
+
+Nevertheless:
+
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+
+> 
+> Signed-off-by: Angelo Dureghello <angelo.dureghello@timesys.com>
+> ---
+> Changes for v3:
+> - add post request callback
+> Changes for v4:
+> none
+> Changes for v5:
+> - remove useless comment before swapping bounce buffer
+> - rename pre_dma_transfer to copy_to_bounce_buffer
+> ---
+>  drivers/mmc/host/sdhci.c | 9 ++++++---
+>  drivers/mmc/host/sdhci.h | 2 ++
+>  2 files changed, 8 insertions(+), 3 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 3f716466fcfd..b7ba43e3b7c5 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -634,9 +634,12 @@ static int sdhci_pre_dma_transfer(struct sdhci_host *host,
+>  		}
+>  		if (mmc_get_dma_dir(data) == DMA_TO_DEVICE) {
+>  			/* Copy the data to the bounce buffer */
+> -			sg_copy_to_buffer(data->sg, data->sg_len,
+> -					  host->bounce_buffer,
+> -					  length);
+> +			if (host->ops->copy_to_bounce_buffer) {
+> +				host->ops->copy_to_bounce_buffer(host, data);
+> +			} else {
+> +				sg_copy_to_buffer(data->sg, data->sg_len,
+> +						  host->bounce_buffer, length);
+> +			}
+>  		}
+>  		/* Switch ownership to the DMA */
+>  		dma_sync_single_for_device(host->mmc->parent,
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index 79dffbb731d3..632ea297bb60 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -653,6 +653,8 @@ struct sdhci_ops {
+>  	void	(*voltage_switch)(struct sdhci_host *host);
+>  	void	(*adma_write_desc)(struct sdhci_host *host, void **desc,
+>  				   dma_addr_t addr, int len, unsigned int cmd);
+> +	void	(*copy_to_bounce_buffer)(struct sdhci_host *host,
+> +					 struct mmc_data *data);
+>  	void	(*request_done)(struct sdhci_host *host,
+>  				struct mmc_request *mrq);
+>  };
+> 
 
