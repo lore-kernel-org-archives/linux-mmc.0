@@ -2,117 +2,133 @@ Return-Path: <SRS0=SyG0=7A=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-5.3 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 27BA0C433DF
-	for <linux-mmc@archiver.kernel.org>; Mon, 18 May 2020 12:51:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B1523C433DF
+	for <linux-mmc@archiver.kernel.org>; Mon, 18 May 2020 13:17:57 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E877320671
-	for <linux-mmc@archiver.kernel.org>; Mon, 18 May 2020 12:51:09 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8873120709
+	for <linux-mmc@archiver.kernel.org>; Mon, 18 May 2020 13:17:57 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="oTCaHa41"
+	dkim=pass (2048-bit key) header.d=cogentembedded-com.20150623.gappssmtp.com header.i=@cogentembedded-com.20150623.gappssmtp.com header.b="xj1It/WG"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726775AbgERMvJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 18 May 2020 08:51:09 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42210 "EHLO
+        id S1726958AbgERNR5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 18 May 2020 09:17:57 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46366 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726709AbgERMvH (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 18 May 2020 08:51:07 -0400
-Received: from mail-vs1-xe44.google.com (mail-vs1-xe44.google.com [IPv6:2607:f8b0:4864:20::e44])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 13495C061A0C
-        for <linux-mmc@vger.kernel.org>; Mon, 18 May 2020 05:51:07 -0700 (PDT)
-Received: by mail-vs1-xe44.google.com with SMTP id o26so5445095vsr.10
-        for <linux-mmc@vger.kernel.org>; Mon, 18 May 2020 05:51:07 -0700 (PDT)
+        with ESMTP id S1726775AbgERNR4 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 18 May 2020 09:17:56 -0400
+Received: from mail-lj1-x243.google.com (mail-lj1-x243.google.com [IPv6:2a00:1450:4864:20::243])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 38129C05BD09
+        for <linux-mmc@vger.kernel.org>; Mon, 18 May 2020 06:17:56 -0700 (PDT)
+Received: by mail-lj1-x243.google.com with SMTP id b6so9830698ljj.1
+        for <linux-mmc@vger.kernel.org>; Mon, 18 May 2020 06:17:56 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=F3BUSKbo828h2E1EKD/0gfSxmOX3Dp5mHkq+oGuT5sI=;
-        b=oTCaHa41n3YsHvrUG3Lxk+lujs7RebbyKCNZ3sEbVUV/crDFTEKHeGz6fw9MAX2JfX
-         ORwZBLb3PzGSOed7tDwbzYuos6/X0oHYuUCkA6iyZqGIUr5Gsf7g/RP/DTfEIc6HQixT
-         HrTYr1bK2AJ8HeZkCpdw4vTP6xA8sFJdQZhhbI9SEy18qjBfCx+vOpG8Wk7iSpg/nH7d
-         0IkjOkpuRneLILNLn3TctQD34kabBXD/Badd5aZRjm2dcB0DzpjARh7NpDENhdCYn/tT
-         Z7qpWJbhsGthWk7p0ILhMPdetX7sw0fJ1FViHTBDwSDvrldIh0/Mn4JzgPYhkSPnqxHX
-         LFSg==
+        d=cogentembedded-com.20150623.gappssmtp.com; s=20150623;
+        h=subject:to:cc:references:from:message-id:date:user-agent
+         :mime-version:in-reply-to:content-language:content-transfer-encoding;
+        bh=aaWFz8XM3lber/1QtUDkEYgUS7TEOfr3vPPMOdwLrk4=;
+        b=xj1It/WGw6ho2gXyehxm6yxVpJNgYenYhtlgl5YhWyN5asWO9hvDGHw8rwukxDXrfX
+         dXgMMo0ZAZFQ8mEccZQHf50PdHilbq4KXfNFMbIfNosARIoOPCtmETgBepVHiDoNsjuH
+         A83hapb8pSHGKAN1sMZb8UMxb3PPZOzXEJWGAalWbF/RLzFuG97AwGFScLZAvWV2/z3m
+         E/Vn9Ns9itIfGBr03TxabMBQ53aGb1nWX+LDlRj2KXVhwV6AGa+r/FR+aKeEIn1RKWYn
+         7KyBPmyJIMzxnGy/lCHE9zMxdtRAgWMjgnpmyJBjZvPKtk4iu86WCuyUFTFHGnO06xBX
+         pVAQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=F3BUSKbo828h2E1EKD/0gfSxmOX3Dp5mHkq+oGuT5sI=;
-        b=a3/djZQdJQqhq0FIBgja1PjQSOOqIQNAiCIs6DQNn1KyjjweaBwuTK5ZUd6revniy+
-         uzEjzeDw2sUxA19a2nvb8aLEjCmyL58O/5mZgVyMLAasRAa0VyV7NufVRFiwZ5tukRAS
-         K+/y5tIO/wTCGY0spYyLyzAWpZwGkU668WGP8C12fZugyeBGEqwX6lulfymkykYJQxJ4
-         iGYvotSIXn9I8b9S1i8axniYty16eqgfC2jhjPxbfI//fsKNIg4c1veZoK+2n6SVAYm0
-         HULpC6pODQ4nW/232Ap5s2b60chwQ05MjDVsYLcOypIsRAgJJeP42UEqnYO3R197e2YU
-         oI1g==
-X-Gm-Message-State: AOAM531LIGSW2HQ6+ZKka0gxv5V3XEgvDG0Fdwo6wSe9ymibqD/lwoNy
-        VgRN6Yuqy/6BgSu1KASSSbYDzSl4JPsDmF6DVac9W7zl
-X-Google-Smtp-Source: ABdhPJy51OGGplkyUbHUeHsNQH1b7HeY7QZvnWmpssXL38U2Xe6u/GNafSzxw8l5wwGBugpr0QHWMT5mAJVAQf8bE48=
-X-Received: by 2002:a67:690e:: with SMTP id e14mr4184975vsc.34.1589806266292;
- Mon, 18 May 2020 05:51:06 -0700 (PDT)
-MIME-Version: 1.0
-References: <1588772671-19675-1-git-send-email-sartgarg@codeaurora.org>
- <1588772671-19675-2-git-send-email-sartgarg@codeaurora.org>
- <CAPDyKFo0CabC_O-NusH4tUzjnG37_XQhY=QNhgnkQMoTokfaQg@mail.gmail.com> <4db354d7-fff4-048e-dde5-647e8ba89a7d@intel.com>
-In-Reply-To: <4db354d7-fff4-048e-dde5-647e8ba89a7d@intel.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 18 May 2020 14:50:30 +0200
-Message-ID: <CAPDyKFqN8CeniJq5S9zCdYYR38DFyk0vKnCw3fi548tXvwbseg@mail.gmail.com>
-Subject: Re: [PATCH V1 1/2] mmc: sdhci: Introduce new quirk to use reserved timeout
-To:     Adrian Hunter <adrian.hunter@intel.com>
-Cc:     Sarthak Garg <sartgarg@codeaurora.org>,
-        Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
-        Sahitya Tummala <stummala@codeaurora.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=aaWFz8XM3lber/1QtUDkEYgUS7TEOfr3vPPMOdwLrk4=;
+        b=U8kU8D8aMA9yWLvj4EtXXC40j17xbAILZOgTf8X11k2QWzZa+I1h4RMp4HVwjprCmq
+         SG7ppYVxdpPG3ZMdJ6FT5lBXZnAJkNhj6YQtJx8928m2F1fuzQiHEk5vG7nQUhG8PqRv
+         /8A+DufhZGGWME4nOht2F1RwGs4g85Z96cGzEbBtAYA/MJVAj8bACrScBBbsjHx+YE7A
+         bx8XlMtgrRPVgUCCnNXRiASy6M02G9tDX0QbDlVBcnLFkU37Sfk84QbsvsK5ZSYJwHYl
+         r1Hlbc52DwFnWuvO6bdQOsHdcudlWNLuiNg6ya4lEVccQUS7n/T3JU8PLPd5QMya9clT
+         sP1g==
+X-Gm-Message-State: AOAM533qIGmt//6MzwWKUkxr2jY8buREDMM/TyZjdZKD2L4j377ehN8Q
+        /CSENifVaOitZVu4PuPIwnWXRQ==
+X-Google-Smtp-Source: ABdhPJw19UGyEwWJ5Mq/Mme9WNx4l0h6pfEFIGaCERwgxusIQHdpFrVvwJLlfLQPp5MqmCtmQRT2Bg==
+X-Received: by 2002:a2e:9a82:: with SMTP id p2mr10501360lji.279.1589807874514;
+        Mon, 18 May 2020 06:17:54 -0700 (PDT)
+Received: from ?IPv6:2a00:1fa0:484c:c9e:1c14:285d:1715:e170? ([2a00:1fa0:484c:c9e:1c14:285d:1715:e170])
+        by smtp.gmail.com with ESMTPSA id v10sm5486890lja.23.2020.05.18.06.17.52
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 18 May 2020 06:17:52 -0700 (PDT)
+Subject: Re: [PATCH 17/17] ARM: dts: r8a7742: Add RWDT node
+To:     "Lad, Prabhakar" <prabhakar.csengg@gmail.com>,
+        Geert Uytterhoeven <geert@linux-m68k.org>
+Cc:     Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>,
+        Jens Axboe <axboe@kernel.dk>, Rob Herring <robh+dt@kernel.org>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        "David S. Miller" <davem@davemloft.net>,
+        Wim Van Sebroeck <wim@linux-watchdog.org>,
+        Guenter Roeck <linux@roeck-us.net>, linux-ide@vger.kernel.org,
+        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
+        <devicetree@vger.kernel.org>,
         Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-arm-msm <linux-arm-msm@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+        Linux I2C <linux-i2c@vger.kernel.org>,
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        netdev <netdev@vger.kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
+        Linux Watchdog Mailing List <linux-watchdog@vger.kernel.org>
+References: <1589555337-5498-1-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
+ <1589555337-5498-18-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
+ <CAMuHMdVV+2HsgmBytCOFg4pri4XinT_SPWT_Ac6n7FMZN3dR3w@mail.gmail.com>
+ <CA+V-a8tmG1LKYqbc7feGZQO2Tj5RCpNUHi9e19vPr+bED0KOyQ@mail.gmail.com>
+From:   Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
+Message-ID: <9ab946d2-1076-ed92-0a48-9a95d798d291@cogentembedded.com>
+Date:   Mon, 18 May 2020 16:17:46 +0300
+User-Agent: Mozilla/5.0 (Windows NT 6.3; WOW64; rv:68.0) Gecko/20100101
+ Thunderbird/68.8.0
+MIME-Version: 1.0
+In-Reply-To: <CA+V-a8tmG1LKYqbc7feGZQO2Tj5RCpNUHi9e19vPr+bED0KOyQ@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 18 May 2020 at 13:45, Adrian Hunter <adrian.hunter@intel.com> wrote:
->
-> On 18/05/20 12:39 pm, Ulf Hansson wrote:
-> > On Wed, 6 May 2020 at 15:53, Sarthak Garg <sartgarg@codeaurora.org> wrote:
-> >>
-> >> Introduce a new quirk for letting vendor drivers to use reserved
-> >> timeout value (0xF) in timeout control register.
-> >>
-> >> Signed-off-by: Sahitya Tummala <stummala@codeaurora.org>
-> >> Signed-off-by: Sarthak Garg <sartgarg@codeaurora.org>
-> >> ---
-> >>  drivers/mmc/host/sdhci.c | 3 ++-
-> >>  drivers/mmc/host/sdhci.h | 5 +++++
-> >>  2 files changed, 7 insertions(+), 1 deletion(-)
-> >>
-> >> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> >> index 1bb6b67..07528a9 100644
-> >> --- a/drivers/mmc/host/sdhci.c
-> >> +++ b/drivers/mmc/host/sdhci.c
-> >> @@ -967,7 +967,8 @@ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd,
-> >>         }
-> >>
-> >>         if (count >= 0xF) {
-> >> -               if (!(host->quirks2 & SDHCI_QUIRK2_DISABLE_HW_TIMEOUT))
-> >> +               if (!(host->quirks2 & SDHCI_QUIRK2_DISABLE_HW_TIMEOUT) ||
-> >> +               !(host->quirks2 & SDHCI_QUIRK2_USE_RESERVED_MAX_TIMEOUT))
-> >
-> > I don't quite get how this can make your variant use 0xF rather than 0xE?
-> >
-> > To me it looks like an updated conditional check to print a debug message, no?
->
-> Probably need to introduce host->max_timeout_count, set it to 0xE in
-> sdhci_alloc_host(), and change sdhci_calc_timeout() to use it in place of
-> all the 0xE and 0xF constants.
+Hello!
 
-Yep, that seems like a reasonable approach to me as well.
+On 18.05.2020 15:27, Lad, Prabhakar wrote:
 
-[...]
+>>> Add a device node for the Watchdog Timer (RWDT) controller on the Renesas
+>>> RZ/G1H (r8a7742) SoC.
+>>>
+>>> Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+>>> Reviewed-by: Marian-Cristian Rotariu <marian-cristian.rotariu.rb@bp.renesas.com>
+>>
+>> Thanks for your patch!
+>>
+>>> --- a/arch/arm/boot/dts/r8a7742.dtsi
+>>> +++ b/arch/arm/boot/dts/r8a7742.dtsi
+>>> @@ -201,6 +201,16 @@
+>>>                  #size-cells = <2>;
+>>>                  ranges;
+>>>
+>>> +               rwdt: watchdog@e6020000 {
+>>> +                       compatible = "renesas,r8a7742-wdt",
+>>> +                                    "renesas,rcar-gen2-wdt";
+>>> +                       reg = <0 0xe6020000 0 0x0c>;
+>>> +                       clocks = <&cpg CPG_MOD 402>;
+>>> +                       power-domains = <&sysc R8A7742_PD_ALWAYS_ON>;
+>>> +                       resets = <&cpg 402>;
+>>> +                       status = "disabled";
+>>
+>> Missing "interrupts" property.
+>>
+> "interrupts" property isn't used by rwdt driver  and can be dropped
+> from bindings file.
 
-Kind regards
-Uffe
+    DT describes the hardware, not its driver's abilities.
+
+> Cheers,
+> --Prabhakar
+
+MBR, Sergei
