@@ -2,146 +2,118 @@ Return-Path: <SRS0=SyG0=7A=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 524C1C433E2
-	for <linux-mmc@archiver.kernel.org>; Mon, 18 May 2020 12:28:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3B01BC433E0
+	for <linux-mmc@archiver.kernel.org>; Mon, 18 May 2020 12:46:43 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 31A4520643
-	for <linux-mmc@archiver.kernel.org>; Mon, 18 May 2020 12:28:15 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0BC302065F
+	for <linux-mmc@archiver.kernel.org>; Mon, 18 May 2020 12:46:43 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="tyJZJSdS"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="ef51Q9OJ"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726726AbgERM2E (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 18 May 2020 08:28:04 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38636 "EHLO
+        id S1726726AbgERMqm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 18 May 2020 08:46:42 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41520 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726448AbgERM2E (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 18 May 2020 08:28:04 -0400
-Received: from mail-oi1-x241.google.com (mail-oi1-x241.google.com [IPv6:2607:f8b0:4864:20::241])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CF748C061A0C;
-        Mon, 18 May 2020 05:28:03 -0700 (PDT)
-Received: by mail-oi1-x241.google.com with SMTP id 19so8779290oiy.8;
-        Mon, 18 May 2020 05:28:03 -0700 (PDT)
+        with ESMTP id S1726709AbgERMqm (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 18 May 2020 08:46:42 -0400
+Received: from mail-vk1-xa44.google.com (mail-vk1-xa44.google.com [IPv6:2607:f8b0:4864:20::a44])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2478AC061A0C
+        for <linux-mmc@vger.kernel.org>; Mon, 18 May 2020 05:46:41 -0700 (PDT)
+Received: by mail-vk1-xa44.google.com with SMTP id r11so1093895vkf.11
+        for <linux-mmc@vger.kernel.org>; Mon, 18 May 2020 05:46:41 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
+        d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=knD02Z+9tC//YVd/yYg62jSva7tZ6kZO0J1cHOboZm0=;
-        b=tyJZJSdScYatoaiD3+nk8CaRyh/JcfmnCgYlKTcucGjbqGbNfJuy/pfaeFbWIiPvAE
-         Sn8UvhLxfP7wDSCX5CFCI/uWIPmOMWwv5D2RLwMwD2Emng16expUeCaEKjbsgCWOgjAz
-         RZx3PDskmOhc2BvEfg3adwjssmO0Bju9slSd+an6tw851Oh0t4/EEvxoMLWvE1ymqY29
-         GBYHNvJ1XhiTPz8BwcBUPjr1/BNQl6fgddkDDeSd/EMbIeDscKxA0WmyBMO6mbluT+YD
-         nowhn8OeLyNEVShUCCuaDVn/IFhpufgHp6oDyPXDtcaqdU+nkLga/mtxwLHyvR+v0AIB
-         U0FA==
+        bh=t6SXYknbSWZlo39yzXrKywXPYhHotTPUe8ppOdMptyE=;
+        b=ef51Q9OJN6Ky1XE2CFWmx5G9H/KgUnc9nx+mJRWUeUcZ1lRm0z23d+f2NXWIIpfTkd
+         EbKStZWMLyT/LJxQVESXr3KerItwrFBkUVQ4prPeKTdBEYMCv6/cVIUqQbCr3G7N482P
+         VDH7FSa3ICrRt/jw0jG6GyuslN8WC9FZ+iPLAIU375wReVSMk0aYmcdI1Y+cElY/mJdC
+         rDZ/jCu5CzRDpwyxjgu91RGRamvvDTZOYT6eh7sDEk8KimzpGFCN9knHQv14FsjeDUIx
+         6t6BIkODpjVygtSPSf1wDw94fx4tt0T4D7dsDSfXxsMRVK62SJ8DW5/Alf8xNQYNn2Fz
+         C7LQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=knD02Z+9tC//YVd/yYg62jSva7tZ6kZO0J1cHOboZm0=;
-        b=RMmeitidF0VFigiYzwAVTww5NeCztTBeux3D067yWghIRHIl0rC7zaGPogmzr+DfSd
-         95KRDndpwHgteZb02iYatrp8lJ83OxRmuZm16rX6XVOSufP5pAsCfLvyMBKX1MXWf+qs
-         zfI5zknvbiJmt1Fe/N3NCN0nZFiepKMrfsQwjYkuT3V6hprMbaeqBe5bfOT4n6a8hXxt
-         Z7suuKEgDAdpX0wPyjPHYBrqjpXCa4ujQylZQGWn/6mrNrQjixBidimQmbhwzcVkWazO
-         b/ljSz9Wpmo41P0TfIE+iLSTLeuR28+kVNJXvXLbPCWQ8DTKgOvAU6mH6edwgxk/plMA
-         J52w==
-X-Gm-Message-State: AOAM533iGzbZdwAavS2lIPIOk3FheZWNQUYxzEVSN0FCb04Q+MTEB1SF
-        WH8mJEW1AuiQ90HTrbaQHi8h5hJfPWl2YKKlNyE=
-X-Google-Smtp-Source: ABdhPJzZ2lS0ejqPsWuIGn043vBk+9V7Kj1deZdI5q/OaKt45cHvC56EYzI/9nBuanFZEV1fpAhD/jFUNkKMy5Tat5g=
-X-Received: by 2002:a05:6808:106:: with SMTP id b6mr4197157oie.142.1589804882884;
- Mon, 18 May 2020 05:28:02 -0700 (PDT)
+        bh=t6SXYknbSWZlo39yzXrKywXPYhHotTPUe8ppOdMptyE=;
+        b=Z4ghucW30syinP9MehxMTuCO7nxqVdFbEYxVDzcmwzTbJgHHYvJetraEbYUQpmisho
+         VIQmB+SK3EGRZoDy9QG4ynKZFZGW0ejZeqFqBDbGy9KgU0CRyPjNC/sywM99rBysW0ui
+         PiooX3rlsU+ct9fMrx7tuqqwlmlZtaAiyBX0eunMTpW2z+UlU250D084rRoz8uyMobSg
+         3XE9Ac4X6BxIPQhuLWIdm2lagmhIwVHnmRyYBHeKSVjLoc6ixNQo6Vah27K3hFz8oUkh
+         oB0FdK64575ab2Sq/O9QbvYBCe17ygO5G1hDMIIpquAD3DG5SMa1hFAEiEV6hD35hcEA
+         R5EQ==
+X-Gm-Message-State: AOAM531y8UMbe9iyJ94GoovLNoejWPPQ9AN1jb80WS0eAFPmzTDMllOi
+        Gxshr53x+RAow9uNB7N+NyU0xFxyAewv4hPqscTb8lfv
+X-Google-Smtp-Source: ABdhPJwqTeGMr5s/tn9+V5yYUaiW2zwe7DeKH5UC4LMjmEIyNyFMb6yJWGQU912ArsXxaHqtr8BXeLj8qwKBKyVkstI=
+X-Received: by 2002:a1f:25d7:: with SMTP id l206mr10736330vkl.53.1589806000276;
+ Mon, 18 May 2020 05:46:40 -0700 (PDT)
 MIME-Version: 1.0
-References: <1589555337-5498-1-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
- <1589555337-5498-18-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com> <CAMuHMdVV+2HsgmBytCOFg4pri4XinT_SPWT_Ac6n7FMZN3dR3w@mail.gmail.com>
-In-Reply-To: <CAMuHMdVV+2HsgmBytCOFg4pri4XinT_SPWT_Ac6n7FMZN3dR3w@mail.gmail.com>
-From:   "Lad, Prabhakar" <prabhakar.csengg@gmail.com>
-Date:   Mon, 18 May 2020 13:27:36 +0100
-Message-ID: <CA+V-a8tmG1LKYqbc7feGZQO2Tj5RCpNUHi9e19vPr+bED0KOyQ@mail.gmail.com>
-Subject: Re: [PATCH 17/17] ARM: dts: r8a7742: Add RWDT node
-To:     Geert Uytterhoeven <geert@linux-m68k.org>
-Cc:     Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>,
-        Jens Axboe <axboe@kernel.dk>, Rob Herring <robh+dt@kernel.org>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>,
-        "David S. Miller" <davem@davemloft.net>,
-        Wim Van Sebroeck <wim@linux-watchdog.org>,
-        Guenter Roeck <linux@roeck-us.net>, linux-ide@vger.kernel.org,
-        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
-        <devicetree@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Linux I2C <linux-i2c@vger.kernel.org>,
-        Linux MMC List <linux-mmc@vger.kernel.org>,
-        netdev <netdev@vger.kernel.org>,
-        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
-        Linux Watchdog Mailing List <linux-watchdog@vger.kernel.org>
+References: <20200518120939.1399-1-adrian.hunter@intel.com>
+In-Reply-To: <20200518120939.1399-1-adrian.hunter@intel.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Mon, 18 May 2020 14:46:04 +0200
+Message-ID: <CAPDyKFqZZ91G+28TmFMg-7UwaR-dxrc6tos627uHaignC1u_NQ@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci: Fix SDHCI_QUIRK_BROKEN_CQE
+To:     Adrian Hunter <adrian.hunter@intel.com>
+Cc:     linux-mmc <linux-mmc@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Geert,
+On Mon, 18 May 2020 at 14:09, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>
+> Previous to commit 511ce378e16f07 ("mmc: Add MMC host software queue
+> support"), removing MMC_CAP2_CQE was enough to disable command queuing, but
+> now the cqe_ops must also be NULL otherwise ->cqe_enable() will be
+> called. Fix SDHCI_QUIRK_BROKEN_CQE to do that.
+>
+> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+> Fixes: 511ce378e16f07 ("mmc: Add MMC host software queue support")
 
-Thank you for the review.
+Applied for fixes, thanks!
 
-On Mon, May 18, 2020 at 12:47 PM Geert Uytterhoeven
-<geert@linux-m68k.org> wrote:
->
-> Hi Prabhakar,
->
-> On Fri, May 15, 2020 at 5:10 PM Lad Prabhakar
-> <prabhakar.mahadev-lad.rj@bp.renesas.com> wrote:
-> > Add a device node for the Watchdog Timer (RWDT) controller on the Renesas
-> > RZ/G1H (r8a7742) SoC.
-> >
-> > Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-> > Reviewed-by: Marian-Cristian Rotariu <marian-cristian.rotariu.rb@bp.renesas.com>
->
-> Thanks for your patch!
->
-> > --- a/arch/arm/boot/dts/r8a7742.dtsi
-> > +++ b/arch/arm/boot/dts/r8a7742.dtsi
-> > @@ -201,6 +201,16 @@
-> >                 #size-cells = <2>;
-> >                 ranges;
-> >
-> > +               rwdt: watchdog@e6020000 {
-> > +                       compatible = "renesas,r8a7742-wdt",
-> > +                                    "renesas,rcar-gen2-wdt";
-> > +                       reg = <0 0xe6020000 0 0x0c>;
-> > +                       clocks = <&cpg CPG_MOD 402>;
-> > +                       power-domains = <&sysc R8A7742_PD_ALWAYS_ON>;
-> > +                       resets = <&cpg 402>;
-> > +                       status = "disabled";
->
-> Missing "interrupts" property.
->
-"interrupts" property isn't used by rwdt driver  and can be dropped
-from bindings file.
+Kind regards
+Uffe
 
-Cheers,
---Prabhakar
-
-> > +               };
-> > +
-> >                 gpio0: gpio@e6050000 {
-> >                         compatible = "renesas,gpio-r8a7742",
-> >                                      "renesas,rcar-gen2-gpio";
+> ---
+>  drivers/mmc/host/sdhci.c | 9 ++++++---
+>  1 file changed, 6 insertions(+), 3 deletions(-)
 >
-> The rest looks fine, so with the above fixed:
-> Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 9864e877e105..682ca8f0be8c 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -4131,9 +4131,6 @@ int sdhci_setup_host(struct sdhci_host *host)
+>                        mmc_hostname(mmc), host->version);
+>         }
 >
-> Gr{oetje,eeting}s,
+> -       if (host->quirks & SDHCI_QUIRK_BROKEN_CQE)
+> -               mmc->caps2 &= ~MMC_CAP2_CQE;
+> -
+>         if (host->quirks & SDHCI_QUIRK_FORCE_DMA)
+>                 host->flags |= SDHCI_USE_SDMA;
+>         else if (!(host->caps & SDHCI_CAN_DO_SDMA))
+> @@ -4662,6 +4659,12 @@ int __sdhci_add_host(struct sdhci_host *host)
+>         struct mmc_host *mmc = host->mmc;
+>         int ret;
 >
->                         Geert
->
+> +       if ((mmc->caps2 & MMC_CAP2_CQE) &&
+> +           (host->quirks & SDHCI_QUIRK_BROKEN_CQE)) {
+> +               mmc->caps2 &= ~MMC_CAP2_CQE;
+> +               mmc->cqe_ops = NULL;
+> +       }
+> +
+>         host->complete_wq = alloc_workqueue("sdhci", flags, 0);
+>         if (!host->complete_wq)
+>                 return -ENOMEM;
 > --
-> Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+> 2.17.1
 >
-> In personal conversations with technical people, I call myself a hacker. But
-> when I'm talking to journalists I just say "programmer" or something like that.
->                                 -- Linus Torvalds
