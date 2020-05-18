@@ -2,113 +2,80 @@ Return-Path: <SRS0=SyG0=7A=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no
+X-Spam-Status: No, score=-3.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=no
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1D4DAC433E2
-	for <linux-mmc@archiver.kernel.org>; Mon, 18 May 2020 10:10:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CCA41C433E4
+	for <linux-mmc@archiver.kernel.org>; Mon, 18 May 2020 11:10:47 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id F2EF8206D4
-	for <linux-mmc@archiver.kernel.org>; Mon, 18 May 2020 10:10:29 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id AC48B2070A
+	for <linux-mmc@archiver.kernel.org>; Mon, 18 May 2020 11:10:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726428AbgERKKY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 18 May 2020 06:10:24 -0400
-Received: from mail-oi1-f194.google.com ([209.85.167.194]:42086 "EHLO
-        mail-oi1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726040AbgERKKY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 18 May 2020 06:10:24 -0400
-Received: by mail-oi1-f194.google.com with SMTP id l6so2622638oic.9;
-        Mon, 18 May 2020 03:10:22 -0700 (PDT)
+        id S1726855AbgERLKm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 18 May 2020 07:10:42 -0400
+Received: from mail-ot1-f66.google.com ([209.85.210.66]:41828 "EHLO
+        mail-ot1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726448AbgERLKm (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 18 May 2020 07:10:42 -0400
+Received: by mail-ot1-f66.google.com with SMTP id 63so7664238oto.8;
+        Mon, 18 May 2020 04:10:40 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=OUWwAW1tiZj2X0S32FYVRQZMXC7D2eYX5NkiVFQhWuM=;
-        b=jHTzn0kZ2WgWP9ll68PeWpOYW0SEYTSqGrXDFO8PGseYmiIfoWTSpXlLyYJy29CYQW
-         dNTCM+K5gIbTai1adyeqFkkIUyK6mzuwE+jH/ePsJML9KoSW0vxr+fIC++q68ovb4/00
-         8kqWB5arem5HInZB92P9a92Qj0JRRNkbgmXDRodzeQiHzCdAADtw63Z+ok2mBV6RQkM8
-         e8VieaBLvO150B/p2z0MWWNTGRBBekAxuY3bPm5TshYCw5Hw16GpgDLgXcQ6uXINA4JQ
-         u2ou/Ffsot0kaRARMOuGS6vqLAMx4yh2PpNrmTW4MAqIjRKoCH9FCFQH9+uo//o1vmaL
-         c0mg==
-X-Gm-Message-State: AOAM532JzgILyyQvEpVz1AHJaQQhr5gOPcJ7DhZc82wPHXEqNs3k1lPq
-        839j7oyD3Uk8nSgXatxWR08i2UanzBUJBKeOfwQ=
-X-Google-Smtp-Source: ABdhPJyBWPgZF8Nef5VFnPwIMZCFFtRvCnBOgZddEawH+Whlxj+gaH+OLdK5CmIFCwYF6ugC0lIB1QUdlxdAkaabczY=
-X-Received: by 2002:aca:cd93:: with SMTP id d141mr9870659oig.148.1589796621997;
- Mon, 18 May 2020 03:10:21 -0700 (PDT)
+        bh=Hfu5FZwyRMz2cBI6uHSbWSrYNlQoEMc2a4ByBzUOoxc=;
+        b=PvGR3H6188VUwbVuqz+U1tSZlDPR4aNMbSZ06UVNUI8IQTFKkxHnw8o4Pi/LYazKFH
+         bOAeBjkjJCACmEL2DELOj/ES5BA1AqrhIkfbMeOLfXGX3S+M/Fpy2kpOZbO8yImHWgE+
+         P8g9gg/UjbCmSIcSecwOmOiUqmEIsb1l3gbCmN0UmbJ6qR9HD/wQfE2rRHxjRYyd3J37
+         gCt7n7ZiL7lkLP2c7pKCvHVYFONib1YE4hCBdv0PnMDS9YgYg5LUzSJpTZvQc5pb/ESm
+         Rbw/8ZySz09GZAL86Ix0hFA46BTFVkCXe43vyeL0tLTfFedvib8aCi3o5rDTd0mS8+ym
+         H/Kw==
+X-Gm-Message-State: AOAM531Rg/GhtPvNQfT7Vqtg4iOX0CIEfl0hJmroFBPaWv72nzpfyDoO
+        F7JwwNLIWz6uwoV7xorqFKPlGteUeZTJpgrbgi0=
+X-Google-Smtp-Source: ABdhPJzLb9Yd2vPjmp9vAX26Li3ikoW7YmjqcRstw9qLIGMukOAchEat+0yJWN8MFTwBUc3KOSYqxGh1YLmdx/kPZS0=
+X-Received: by 2002:a05:6830:18d9:: with SMTP id v25mr7863547ote.107.1589800240402;
+ Mon, 18 May 2020 04:10:40 -0700 (PDT)
 MIME-Version: 1.0
 References: <1589555337-5498-1-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
- <1589555337-5498-4-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
- <20200515171031.GB19423@ninjato> <CA+V-a8t6rPs4s8uMCpBQEAUvwsVn7Cte-vX3z2atWRhy_RFLQw@mail.gmail.com>
- <20200518092601.GA3268@ninjato>
-In-Reply-To: <20200518092601.GA3268@ninjato>
+ <1589555337-5498-5-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
+In-Reply-To: <1589555337-5498-5-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
 From:   Geert Uytterhoeven <geert@linux-m68k.org>
-Date:   Mon, 18 May 2020 12:10:05 +0200
-Message-ID: <CAMuHMdVWe1EEAtP64VW+0zXNingM1LiENv_Rfz5qTQ+C0dtGSw@mail.gmail.com>
-Subject: Re: [PATCH 03/17] ARM: dts: r8a7742: Add I2C and IIC support
-To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc:     "Lad, Prabhakar" <prabhakar.csengg@gmail.com>,
-        Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>,
-        Jens Axboe <axboe@kernel.dk>, Rob Herring <robh+dt@kernel.org>,
+Date:   Mon, 18 May 2020 13:10:23 +0200
+Message-ID: <CAMuHMdX_Uo+wMtbpj9o6qM_7j5knOP+qwnRuoWgxJUWWBS074g@mail.gmail.com>
+Subject: Re: [PATCH 04/17] dt-bindings: mmc: renesas,sdhi: Document r8a7742 support
+To:     Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+Cc:     Jens Axboe <axboe@kernel.dk>, Rob Herring <robh+dt@kernel.org>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
         Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>,
         "David S. Miller" <davem@davemloft.net>,
         Wim Van Sebroeck <wim@linux-watchdog.org>,
         Guenter Roeck <linux@roeck-us.net>, linux-ide@vger.kernel.org,
         "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
-        <devicetree@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>,
+        <devicetree@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
         Linux I2C <linux-i2c@vger.kernel.org>,
         Linux MMC List <linux-mmc@vger.kernel.org>,
         netdev <netdev@vger.kernel.org>,
         Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
-        Linux Watchdog Mailing List <linux-watchdog@vger.kernel.org>
+        Linux Watchdog Mailing List <linux-watchdog@vger.kernel.org>,
+        Prabhakar <prabhakar.csengg@gmail.com>
 Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Wolfram,
-
-On Mon, May 18, 2020 at 11:26 AM Wolfram Sang
-<wsa+renesas@sang-engineering.com> wrote:
-> > > However, both versions (with and without automatic transmission) are
-> > > described with the same "renesas,iic-r8a7742" compatible. Is it possible
-> > > to detect the reduced variant at runtime somehow?
-> > >
-> > I couldn't find anything the manual that would be useful to detect at runtime.
-
-Hence if we really need that (see below), we need a quirk based on compatible
-value + base address.
-
-> > > My concern is that the peculiarity of this SoC might be forgotten if we
-> > > describe it like this and ever add "automatic transmissions" somewhen.
-> > >
-> > Agreed.
+On Fri, May 15, 2020 at 5:09 PM Lad Prabhakar
+<prabhakar.mahadev-lad.rj@bp.renesas.com> wrote:
+> Document SDHI controller for RZ/G1H (R8A7742) SoC, which is compatible
+> with R-Car Gen2 SoC family.
 >
-> Well, I guess reading from a register which is supposed to not be there
-> on the modified IP core is too hackish.
+> Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+> Reviewed-by: Marian-Cristian Rotariu <marian-cristian.rotariu.rb@bp.renesas.com>
 
-According to the Hardware User's Manual Rev. 1.00, the registers do exist
-on all RZ/G1, except for RZ/G1E (see below).
-
-   "(automatic transmission can be used as a hardware function, but this is
-    not meaningful for actual use cases)."
-
-(whatever that comment may mean?)
-
-> Leaves us with a seperate compatible entry for it?
-
-On R-Car E3 and RZ/G2E, which have a single IIC instance, we
-handled that by:
-
-        The r8a77990 (R-Car E3) and r8a774c0 (RZ/G2E)
-        controllers are not considered compatible with
-        "renesas,rcar-gen3-iic" or "renesas,rmobile-iic"
-        due to the absence of automatic transmission registers.
-
-On R-Car E2 and RZ/G1E, we forgot, and used both SoC-specific and
-family-specific compatible values.
+Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
 
 Gr{oetje,eeting}s,
 
