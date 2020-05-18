@@ -2,127 +2,113 @@ Return-Path: <SRS0=SyG0=7A=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-0.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A582EC433E1
-	for <linux-mmc@archiver.kernel.org>; Mon, 18 May 2020 09:39:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B2F5EC433E1
+	for <linux-mmc@archiver.kernel.org>; Mon, 18 May 2020 09:43:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7F96A20709
-	for <linux-mmc@archiver.kernel.org>; Mon, 18 May 2020 09:39:47 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 924E42070A
+	for <linux-mmc@archiver.kernel.org>; Mon, 18 May 2020 09:43:53 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="xBsGXK3k"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="JqgjwmBP"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726758AbgERJjq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 18 May 2020 05:39:46 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40560 "EHLO
+        id S1726388AbgERJnx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 18 May 2020 05:43:53 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41238 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726040AbgERJjp (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 18 May 2020 05:39:45 -0400
-Received: from mail-vs1-xe43.google.com (mail-vs1-xe43.google.com [IPv6:2607:f8b0:4864:20::e43])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A0A94C061A0C
-        for <linux-mmc@vger.kernel.org>; Mon, 18 May 2020 02:39:44 -0700 (PDT)
-Received: by mail-vs1-xe43.google.com with SMTP id 1so5142080vsl.9
-        for <linux-mmc@vger.kernel.org>; Mon, 18 May 2020 02:39:44 -0700 (PDT)
+        with ESMTP id S1726130AbgERJnw (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 18 May 2020 05:43:52 -0400
+Received: from mail-oi1-x244.google.com (mail-oi1-x244.google.com [IPv6:2607:f8b0:4864:20::244])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B48A7C061A0C;
+        Mon, 18 May 2020 02:43:52 -0700 (PDT)
+Received: by mail-oi1-x244.google.com with SMTP id x23so1869341oic.3;
+        Mon, 18 May 2020 02:43:52 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
+        d=gmail.com; s=20161025;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=MorV8jZrfJk/BfhvGvB2TOF5zsx+Wxk/DjWRxlh/fVE=;
-        b=xBsGXK3kMfgTXnjc7qVZN+0UmomJeOzYsQPrIb+9tF4CbFMgiDA6C3PuDbob77YJzH
-         FakKCYPW/HtfPZpXfBOyOYW0f7QZes8e5nPCLSZE43x+uz7Ov/yGJKNJ3oXG0aXkDfXj
-         Lw3GWaG0HNNSs9qAMMfQLkd8seEktWf/on2x39MxXgiQu9TXpXfUnFnYs4tpAnPd2/Rv
-         VpQvQx/2Xwr1nGWIGgHhIpV/nMsBOdUrQqKVNLRTwGJnx4K1o0ySdlQIz+nnmTH3bw+p
-         mz06rbqx0UNN4Ln5H+Ua9xKlFSdlyB6LA5QtAYNP53JHZADQXnmfihvNji0GkjP/E2ct
-         VRFA==
+        bh=/VHy1hHOeueJvHWA+mIj7Qzx/f1KRkhXRlYmq2aNs+s=;
+        b=JqgjwmBPXoMBDRhMe/zLRO+0nqJpZo3xtehDSPILE43EMVp7vI1ltfmdts5s0KtCRf
+         uIBgtiMhyn/xhEM1Id+681LLJSD/Qj5nLdHpUxWXsbb7BOa3H+n6xY/DSomN53kEeQub
+         2m1BwrNVkjIv1TGT49CZlr9mhKPXYG3uK/ZMHmxwbPkZ8Rjwectk1gAHCV7CzzzaCkeR
+         gnYSbO8hAulsKvOwAb/5h8C1+Uqji79SPswiZelTUH9Pyz3CDYs1mmuV83v0fcyvwFXS
+         axdNbFME8NdzKR7KcRXjqDXEevkA/rrYfd3uFaW9m/S04Vw50TCElWMXIAIJ95KXr57o
+         IOvA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=MorV8jZrfJk/BfhvGvB2TOF5zsx+Wxk/DjWRxlh/fVE=;
-        b=X+jR6iz4FXgE45Xp0k603o9f2O+WqpEdmYAlXAs2xv4rlG14NV3anjGBcjGYPxHIbB
-         u/CgbTJCmqI+idGvPo7EU0DuAQGT8zwVT5Rqko9Ra2sD5txYWSnQJZu1bN8i1XK0Grcv
-         60OJQ0CwKC+2YERSjC6ttJ2fGJ7IV/ER2vg8Vjf5vpgsGAFpU8F0tSpoIdnct2kboLhg
-         9ukJUEOztpgzrBShr3X4PeiNe2ikwfQFNXQ3WBZqE3XN/A5eTnIXtHT3AQ85WgGlL+i8
-         BovsDcovVvLKCGGxOJfL0Uyp1llzJmHgeNFcWO8wQHTEv/bE22KnWonRnuYGe8mpCYMb
-         te6Q==
-X-Gm-Message-State: AOAM533zmyujOtm7k7pTnBpWvJUcvPsuJ6zTA1Zgx6moxZLAaxCetaNc
-        qL2NA6VvFe+20oYaCNf+64OyCX1dSMYef6kcfZ9+1w==
-X-Google-Smtp-Source: ABdhPJxJq8NTrKez2Q/RxkVPbbOJtDSlSlSG3djZ0+NTOrY+UEne/3D3GaPsOLbplZSqzwcILBswQF/S3sTSohFoEoA=
-X-Received: by 2002:a67:690e:: with SMTP id e14mr3632665vsc.34.1589794783785;
- Mon, 18 May 2020 02:39:43 -0700 (PDT)
+        bh=/VHy1hHOeueJvHWA+mIj7Qzx/f1KRkhXRlYmq2aNs+s=;
+        b=IWlXMULj8oD2pE1mrCYA9u8giZ+PIAZERFA64+XrE6EOM5+BoMphDwAYP1C1V1Atw7
+         uFbXEziiQJuOz/d4SFvtd14jD76A0hIbG1tOy+S4fPXtgmwczRiQacOUk09FgDJeTmyl
+         IolzDXPMuAScxIsm78a82Q6kEzg+frfGhLhZRXFJXMxv0uG+ldQWpEvcEjw9i+UKdAuJ
+         51SfgFN6iYW/82HSZIkfXdvbOhBJcas+Ry4QPFv/DziJhh0r8unyupNiVxMeDXPMh3Np
+         ZSA5dCP3CSXS3VbLxUNBsp8IoMbtHTZnWm8jPvof+hHISy3v7zmfDl8N/XiM5m5mXzu0
+         s6DQ==
+X-Gm-Message-State: AOAM5315Z1yJmoHZnOU8Ud6MSjajjvj6xVxGMksMNdqdFj5uNSGT9OcG
+        796ssuNFsCMUuAchBOozrG2zl5cbzHLsehK9Hlo=
+X-Google-Smtp-Source: ABdhPJyZokWBShBDnXM+nIl04b5W7Or37VItdZLPs5gY9c4zj0/Ms7gEb4Fyihg95NVJWH0uI4VMBKsajlBWzNrAoDg=
+X-Received: by 2002:aca:d68f:: with SMTP id n137mr8141794oig.62.1589795032149;
+ Mon, 18 May 2020 02:43:52 -0700 (PDT)
 MIME-Version: 1.0
-References: <1588772671-19675-1-git-send-email-sartgarg@codeaurora.org> <1588772671-19675-2-git-send-email-sartgarg@codeaurora.org>
-In-Reply-To: <1588772671-19675-2-git-send-email-sartgarg@codeaurora.org>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 18 May 2020 11:39:07 +0200
-Message-ID: <CAPDyKFo0CabC_O-NusH4tUzjnG37_XQhY=QNhgnkQMoTokfaQg@mail.gmail.com>
-Subject: Re: [PATCH V1 1/2] mmc: sdhci: Introduce new quirk to use reserved timeout
-To:     Sarthak Garg <sartgarg@codeaurora.org>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
-        Sahitya Tummala <stummala@codeaurora.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-arm-msm <linux-arm-msm@vger.kernel.org>
+References: <1589555337-5498-1-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
+ <1589555337-5498-4-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
+ <20200515171031.GB19423@ninjato> <CA+V-a8t6rPs4s8uMCpBQEAUvwsVn7Cte-vX3z2atWRhy_RFLQw@mail.gmail.com>
+ <20200518092601.GA3268@ninjato>
+In-Reply-To: <20200518092601.GA3268@ninjato>
+From:   "Lad, Prabhakar" <prabhakar.csengg@gmail.com>
+Date:   Mon, 18 May 2020 10:43:26 +0100
+Message-ID: <CA+V-a8sTm8YEP2Upu1t6tb6YMpaANFRnnLVW=1TXP2LpVMvrNw@mail.gmail.com>
+Subject: Re: [PATCH 03/17] ARM: dts: r8a7742: Add I2C and IIC support
+To:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Geert Uytterhoeven <geert+renesas@glider.be>
+Cc:     Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>,
+        Jens Axboe <axboe@kernel.dk>, Rob Herring <robh+dt@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>,
+        "David S. Miller" <davem@davemloft.net>,
+        Wim Van Sebroeck <wim@linux-watchdog.org>,
+        Guenter Roeck <linux@roeck-us.net>, linux-ide@vger.kernel.org,
+        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
+        <devicetree@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>,
+        linux-i2c@vger.kernel.org,
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        netdev <netdev@vger.kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
+        linux-watchdog@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 6 May 2020 at 15:53, Sarthak Garg <sartgarg@codeaurora.org> wrote:
->
-> Introduce a new quirk for letting vendor drivers to use reserved
-> timeout value (0xF) in timeout control register.
->
-> Signed-off-by: Sahitya Tummala <stummala@codeaurora.org>
-> Signed-off-by: Sarthak Garg <sartgarg@codeaurora.org>
-> ---
->  drivers/mmc/host/sdhci.c | 3 ++-
->  drivers/mmc/host/sdhci.h | 5 +++++
->  2 files changed, 7 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 1bb6b67..07528a9 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -967,7 +967,8 @@ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd,
->         }
->
->         if (count >= 0xF) {
-> -               if (!(host->quirks2 & SDHCI_QUIRK2_DISABLE_HW_TIMEOUT))
-> +               if (!(host->quirks2 & SDHCI_QUIRK2_DISABLE_HW_TIMEOUT) ||
-> +               !(host->quirks2 & SDHCI_QUIRK2_USE_RESERVED_MAX_TIMEOUT))
+Hi Wolfram,
 
-I don't quite get how this can make your variant use 0xF rather than 0xE?
-
-To me it looks like an updated conditional check to print a debug message, no?
-
->                         DBG("Too large timeout 0x%x requested for CMD%d!\n",
->                             count, cmd->opcode);
->                 count = 0xE;
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index 8d2a096..02f8779 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -476,6 +476,11 @@ struct sdhci_host {
->   * block count.
->   */
->  #define SDHCI_QUIRK2_USE_32BIT_BLK_CNT                 (1<<18)
-> +/*
-> + * Some controllers define the usage of 0xF in data timeout counter
-> + * register (0x2E) which is actually a reserved bit as per specification.
-> + */
-> +#define SDHCI_QUIRK2_USE_RESERVED_MAX_TIMEOUT          (1<<19)
+On Mon, May 18, 2020 at 10:26 AM Wolfram Sang
+<wsa+renesas@sang-engineering.com> wrote:
 >
->         int irq;                /* Device IRQ */
->         void __iomem *ioaddr;   /* Mapped address */
-> --
-> 2.7.4
 >
+> > > However, both versions (with and without automatic transmission) are
+> > > described with the same "renesas,iic-r8a7742" compatible. Is it possible
+> > > to detect the reduced variant at runtime somehow?
+> > >
+> > I couldn't find anything the manual that would be useful to detect at runtime.
+> >
+> > > My concern is that the peculiarity of this SoC might be forgotten if we
+> > > describe it like this and ever add "automatic transmissions" somewhen.
+> > >
+> > Agreed.
+>
+> Well, I guess reading from a register which is supposed to not be there
+> on the modified IP core is too hackish.
+>
+> Leaves us with a seperate compatible entry for it?
+>
+Sounds okay to me, how about "renesas,iic-no-dvfs" ? So that this
+could be used on all the SoC's which don't support DVFS.
 
-Kind regards
-Uffe
+Cheers,
+--Prabhakar
