@@ -2,88 +2,86 @@ Return-Path: <SRS0=SyG0=7A=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4F4FFC433DF
-	for <linux-mmc@archiver.kernel.org>; Mon, 18 May 2020 11:53:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AEB86C433E0
+	for <linux-mmc@archiver.kernel.org>; Mon, 18 May 2020 12:09:25 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 28CBD207D8
-	for <linux-mmc@archiver.kernel.org>; Mon, 18 May 2020 11:53:49 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8C460207D8
+	for <linux-mmc@archiver.kernel.org>; Mon, 18 May 2020 12:09:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726945AbgERLxm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 18 May 2020 07:53:42 -0400
-Received: from mail-ot1-f67.google.com ([209.85.210.67]:46306 "EHLO
-        mail-ot1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726362AbgERLxm (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 18 May 2020 07:53:42 -0400
-Received: by mail-ot1-f67.google.com with SMTP id g25so2027413otp.13;
-        Mon, 18 May 2020 04:53:41 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=gLeuUEV87rLj5u4SmWtflP3ainpFoOPWlk4LXLyZJY0=;
-        b=nu7bFe/1bGAq5QRQwLPZXJ7glu7LWMz2S/Nm2R3c9xLb6mmpZWiULxMuJDUxsKZhoZ
-         dsSON4pSEOHN/hezBuYGjzqWufCbn7hkFqIE5KQrVr3z6nXA+jACIcJNLN2Lsg6BIlv0
-         SuxeMgXElbK0cPWrjWNwIin/HYnzYh1Z+hCWCNMOGiN8kN4BFxhm9Tsj6/wIPD3sNJZr
-         8jsnHny+yGKq1XZ1bH8WRXEgM0YOsQT/rcNyosnYm0+g5/T6M0u/aOZOP9/SLaOKFNby
-         YLzQKaQiirTmJr0h8maxVHoSoyz+C2cMC+ApkTB5h/K2kygBOEu2CtTKLX9//Ti8N5i+
-         G/1A==
-X-Gm-Message-State: AOAM533UfAJofK4i1y3wuQzT+JovC5Vj+4QF7KSWQbG32WzztpF12Bpe
-        UfuWTlqg4k/oGxe/qZaWR3EvJwaW4pQaMpOmWa4=
-X-Google-Smtp-Source: ABdhPJy2SY7W6jVbtUNnzZ1VzMYJ0FdYvJiXsIT0cAmbcLSkFh2gCqjZ0r6X8r4D785kvRbXEN2EAeyemHuzGc01nfo=
-X-Received: by 2002:a9d:564:: with SMTP id 91mr12000493otw.250.1589802821424;
- Mon, 18 May 2020 04:53:41 -0700 (PDT)
-MIME-Version: 1.0
-References: <1589555337-5498-1-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
- <1589555337-5498-14-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
-In-Reply-To: <1589555337-5498-14-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
-From:   Geert Uytterhoeven <geert@linux-m68k.org>
-Date:   Mon, 18 May 2020 13:53:30 +0200
-Message-ID: <CAMuHMdW-Z20Ve2zkBBXBpMn-VF5TmXv7H6PMv2vbJf8havanwg@mail.gmail.com>
-Subject: Re: [PATCH 13/17] ARM: dts: r8a7742: Add Ether support
-To:     Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-Cc:     Jens Axboe <axboe@kernel.dk>, Rob Herring <robh+dt@kernel.org>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>,
-        "David S. Miller" <davem@davemloft.net>,
-        Wim Van Sebroeck <wim@linux-watchdog.org>,
-        Guenter Roeck <linux@roeck-us.net>, linux-ide@vger.kernel.org,
-        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
-        <devicetree@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Linux I2C <linux-i2c@vger.kernel.org>,
-        Linux MMC List <linux-mmc@vger.kernel.org>,
-        netdev <netdev@vger.kernel.org>,
-        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
-        Linux Watchdog Mailing List <linux-watchdog@vger.kernel.org>,
-        Prabhakar <prabhakar.csengg@gmail.com>
-Content-Type: text/plain; charset="UTF-8"
+        id S1726682AbgERMJZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 18 May 2020 08:09:25 -0400
+Received: from mga05.intel.com ([192.55.52.43]:61648 "EHLO mga05.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726448AbgERMJY (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 18 May 2020 08:09:24 -0400
+IronPort-SDR: nwolrVwpXjISpO9MkRDdcr7JaWnxj0rmcsnhP3BwKUFAoHm9CeF1E2l2QdnfwYZMUkogW3DXfN
+ E6Gf6Oy7W0ww==
+X-Amp-Result: SKIPPED(no attachment in message)
+X-Amp-File-Uploaded: False
+Received: from orsmga008.jf.intel.com ([10.7.209.65])
+  by fmsmga105.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 18 May 2020 05:09:24 -0700
+IronPort-SDR: ottMVBwfk9uGS7l0ZRibu2uEpB7E0mz3fr993pot7KKE3/+pZkwHjIjKpQdp8Kk03ebOUx4HfR
+ CHmXGkMKygpA==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.73,407,1583222400"; 
+   d="scan'208";a="299751833"
+Received: from ahunter-desktop.fi.intel.com ([10.237.72.157])
+  by orsmga008.jf.intel.com with ESMTP; 18 May 2020 05:09:22 -0700
+From:   Adrian Hunter <adrian.hunter@intel.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     linux-mmc <linux-mmc@vger.kernel.org>
+Subject: [PATCH] mmc: sdhci: Fix SDHCI_QUIRK_BROKEN_CQE
+Date:   Mon, 18 May 2020 15:09:39 +0300
+Message-Id: <20200518120939.1399-1-adrian.hunter@intel.com>
+X-Mailer: git-send-email 2.17.1
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki, Business Identity Code: 0357606 - 4, Domiciled in Helsinki
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, May 15, 2020 at 5:10 PM Lad Prabhakar
-<prabhakar.mahadev-lad.rj@bp.renesas.com> wrote:
-> Define the generic R8A7742 part of the Ether device node.
->
-> Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-> Reviewed-by: Marian-Cristian Rotariu <marian-cristian.rotariu.rb@bp.renesas.com>
+Previous to commit 511ce378e16f07 ("mmc: Add MMC host software queue
+support"), removing MMC_CAP2_CQE was enough to disable command queuing, but
+now the cqe_ops must also be NULL otherwise ->cqe_enable() will be
+called. Fix SDHCI_QUIRK_BROKEN_CQE to do that.
 
-Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
-i.e. will queue in renesas-devel for v5.9.
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+Fixes: 511ce378e16f07 ("mmc: Add MMC host software queue support")
+---
+ drivers/mmc/host/sdhci.c | 9 ++++++---
+ 1 file changed, 6 insertions(+), 3 deletions(-)
 
-Gr{oetje,eeting}s,
-
-                        Geert
-
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 9864e877e105..682ca8f0be8c 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -4131,9 +4131,6 @@ int sdhci_setup_host(struct sdhci_host *host)
+ 		       mmc_hostname(mmc), host->version);
+ 	}
+ 
+-	if (host->quirks & SDHCI_QUIRK_BROKEN_CQE)
+-		mmc->caps2 &= ~MMC_CAP2_CQE;
+-
+ 	if (host->quirks & SDHCI_QUIRK_FORCE_DMA)
+ 		host->flags |= SDHCI_USE_SDMA;
+ 	else if (!(host->caps & SDHCI_CAN_DO_SDMA))
+@@ -4662,6 +4659,12 @@ int __sdhci_add_host(struct sdhci_host *host)
+ 	struct mmc_host *mmc = host->mmc;
+ 	int ret;
+ 
++	if ((mmc->caps2 & MMC_CAP2_CQE) &&
++	    (host->quirks & SDHCI_QUIRK_BROKEN_CQE)) {
++		mmc->caps2 &= ~MMC_CAP2_CQE;
++		mmc->cqe_ops = NULL;
++	}
++
+ 	host->complete_wq = alloc_workqueue("sdhci", flags, 0);
+ 	if (!host->complete_wq)
+ 		return -ENOMEM;
 -- 
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+2.17.1
 
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
