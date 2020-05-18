@@ -2,153 +2,122 @@ Return-Path: <SRS0=SyG0=7A=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=no
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 92037C433DF
-	for <linux-mmc@archiver.kernel.org>; Mon, 18 May 2020 15:20:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 686BDC433E1
+	for <linux-mmc@archiver.kernel.org>; Mon, 18 May 2020 15:46:00 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 715FA20758
-	for <linux-mmc@archiver.kernel.org>; Mon, 18 May 2020 15:20:27 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1589815227;
-	bh=tSws2kjDhXaAFNWN68OWyjCdK+4AcxFyLFLzGGQxyNU=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:List-ID:From;
-	b=k9IKH6oVOhNcWJlMXVA+xYNpEAAJiVM3mRDpNYqz7bPDFbIaGN0ZcdICUNm9LKSc4
-	 XNC9GNGjdeenwoLT4d8xHTb+5b1wEF3FqMYR91fA9t8CUNR7g8qaCheHikcj3XM/5u
-	 BdPeI2BA6AQp8NFIb7azXCUXkjJcy0Ac3dQ+almg=
+	by mail.kernel.org (Postfix) with ESMTP id 5285620657
+	for <linux-mmc@archiver.kernel.org>; Mon, 18 May 2020 15:46:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728300AbgERPU0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 18 May 2020 11:20:26 -0400
-Received: from mail.kernel.org ([198.145.29.99]:57988 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727063AbgERPU0 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 18 May 2020 11:20:26 -0400
-Received: from mail-ot1-f42.google.com (mail-ot1-f42.google.com [209.85.210.42])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 1BE2F20709;
-        Mon, 18 May 2020 15:20:25 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1589815225;
-        bh=tSws2kjDhXaAFNWN68OWyjCdK+4AcxFyLFLzGGQxyNU=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=kZz+KHtEmx4LXcyztl4rmU2EAXazJQFb7E8mHywQvhoHn1/5wVi5TmH9zFMDLS4W/
-         MiKmt+x10Jms6pej2MZzFDOjkYSYEcoSMNblOS5IKOq3bv9ecuPNIZRnnJBSu7GCXv
-         mI5P/vnVxOyhBlbFI4Ezj8NA2S5v8JeiuE3LjRFQ=
-Received: by mail-ot1-f42.google.com with SMTP id x22so4751556otq.4;
-        Mon, 18 May 2020 08:20:25 -0700 (PDT)
-X-Gm-Message-State: AOAM532AXu2+ODHrVl/USjh57gFEjBKY3Xj6/SQBQi8niO4Abx/WAKpk
-        JP4+SsdoEdntaT89YyW0M+vGxKJxzww1f7hjMQ==
-X-Google-Smtp-Source: ABdhPJzAqhRdGybXpwpC/ZOQ7F9CQ8eOmJxxxyRMv1ENHmR6X3dhaIAFrOd3PP9Ko0YHK3CdCi+5NlS47TBiLzZklxs=
-X-Received: by 2002:a9d:5c8a:: with SMTP id a10mr8596315oti.129.1589815224353;
- Mon, 18 May 2020 08:20:24 -0700 (PDT)
+        id S1728301AbgERPpz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 18 May 2020 11:45:55 -0400
+Received: from mail-oi1-f195.google.com ([209.85.167.195]:41615 "EHLO
+        mail-oi1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727005AbgERPpy (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 18 May 2020 11:45:54 -0400
+Received: by mail-oi1-f195.google.com with SMTP id 19so9359277oiy.8;
+        Mon, 18 May 2020 08:45:52 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=/f/rHROcvUhCw63I5sVVKyGk9toPKIj6soJfQz2EyMk=;
+        b=qLeGB4aOl/w5JiRu8iF/OJTmVYQEoafdZUarQZDWXzAC0yq26tJtbUclmzHMpF5CLN
+         s4ii1ZweH8SwgT5fzQWSzcO11IYhLuPFk8kj6EUxdGVVzsYVvwH8X7CxjtA6Op36SUgm
+         RK2Uxi6fImrCYS+e23jnhkAEWL+TTDD5w1uvO0FuxitaqszyvZUelHifa26i1gyTz6Fc
+         AF95uVFYYY7uoIi22QuMZxWRfQn1CWqVVvfrRWW6MYh9T+o5fz19yfaPy7hoFu1QoG9F
+         E3NKPBr7e6oq/5Mr6wymi33+Jp0vtfA263Rag5YGl24sYLt5iqsdNrz+2OGdhIw9uPce
+         cZ9g==
+X-Gm-Message-State: AOAM531QikCru4ApAVm0boY8/2y+33noCex7rbsYb4RqJf4uaC2prQET
+        /puod+lhyUKC+M8xb7r261HYweorV2wv65kQbtk=
+X-Google-Smtp-Source: ABdhPJwSk1XfmEg5VHimLrZlcq2vUCKSvy8da0C+Vb1NpLhDq1xPj9z+Pbn4JqCRj9XUaY6QJTN5Vm86GhCvioFXK6Y=
+X-Received: by 2002:a05:6808:1:: with SMTP id u1mr18216oic.54.1589816752210;
+ Mon, 18 May 2020 08:45:52 -0700 (PDT)
 MIME-Version: 1.0
-References: <20200317093922.20785-1-lkundrak@v3.sk> <20200317093922.20785-29-lkundrak@v3.sk>
- <20200327195520.GA2235@bogus> <20200517193451.GG1695525@furthur.local>
-In-Reply-To: <20200517193451.GG1695525@furthur.local>
-From:   Rob Herring <robh@kernel.org>
-Date:   Mon, 18 May 2020 09:20:13 -0600
-X-Gmail-Original-Message-ID: <CAL_Jsq+oQSk=xGBiQ73SyGggo=gBOmH6xvTv1QBAUfbnt42E0A@mail.gmail.com>
-Message-ID: <CAL_Jsq+oQSk=xGBiQ73SyGggo=gBOmH6xvTv1QBAUfbnt42E0A@mail.gmail.com>
-Subject: Re: [PATCH 28/28] dt-bindings: usb: Convert ehci-mv to json-schema
-To:     Lubomir Rintel <lkundrak@v3.sk>
-Cc:     Linus Walleij <linus.walleij@linaro.org>,
-        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Jason Cooper <jason@lakedaemon.net>,
-        Marc Zyngier <maz@kernel.org>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
+References: <1589555337-5498-1-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
+ <1589555337-5498-18-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
+ <CAMuHMdVV+2HsgmBytCOFg4pri4XinT_SPWT_Ac6n7FMZN3dR3w@mail.gmail.com>
+ <CA+V-a8tmG1LKYqbc7feGZQO2Tj5RCpNUHi9e19vPr+bED0KOyQ@mail.gmail.com>
+ <9ab946d2-1076-ed92-0a48-9a95d798d291@cogentembedded.com> <CA+V-a8uuP9d6dNeRpn3O0_aOc15CqWoh0bbAfYze1_hn0dCh8g@mail.gmail.com>
+In-Reply-To: <CA+V-a8uuP9d6dNeRpn3O0_aOc15CqWoh0bbAfYze1_hn0dCh8g@mail.gmail.com>
+From:   Geert Uytterhoeven <geert@linux-m68k.org>
+Date:   Mon, 18 May 2020 17:45:40 +0200
+Message-ID: <CAMuHMdVkf8vGL-769PvfTkMV=yuqW_V8gjo_ZfwEHVkdDWGTyw@mail.gmail.com>
+Subject: Re: [PATCH 17/17] ARM: dts: r8a7742: Add RWDT node
+To:     "Lad, Prabhakar" <prabhakar.csengg@gmail.com>
+Cc:     Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>,
+        Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>,
+        Jens Axboe <axboe@kernel.dk>, Rob Herring <robh+dt@kernel.org>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Kishon Vijay Abraham I <kishon@ti.com>,
-        Alessandro Zummo <a.zummo@towertech.it>,
-        Alexandre Belloni <alexandre.belloni@bootlin.com>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Mark Brown <broonie@kernel.org>,
-        Daniel Lezcano <daniel.lezcano@linaro.org>,
-        Andrew Lunn <andrew@lunn.ch>,
-        Gregory Clement <gregory.clement@bootlin.com>,
-        Daniel Mack <daniel@zonque.org>,
-        Haojian Zhuang <haojian.zhuang@gmail.com>,
-        Robert Jarzmik <robert.jarzmik@free.fr>,
-        devicetree@vger.kernel.org,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
+        "David S. Miller" <davem@davemloft.net>,
+        Wim Van Sebroeck <wim@linux-watchdog.org>,
+        Guenter Roeck <linux@roeck-us.net>, linux-ide@vger.kernel.org,
+        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
+        <devicetree@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
         Linux I2C <linux-i2c@vger.kernel.org>,
-        Linux Media Mailing List <linux-media@vger.kernel.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        "open list:REAL TIME CLOCK (RTC) SUBSYSTEM" 
-        <linux-rtc@vger.kernel.org>,
-        "open list:SERIAL DRIVERS" <linux-serial@vger.kernel.org>,
-        linux-spi <linux-spi@vger.kernel.org>,
-        Linux USB List <linux-usb@vger.kernel.org>
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        netdev <netdev@vger.kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
+        Linux Watchdog Mailing List <linux-watchdog@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sun, May 17, 2020 at 1:34 PM Lubomir Rintel <lkundrak@v3.sk> wrote:
->
-> On Fri, Mar 27, 2020 at 01:55:20PM -0600, Rob Herring wrote:
-> > On Tue, Mar 17, 2020 at 10:39:22AM +0100, Lubomir Rintel wrote:
-> > > A straightforward conversion of the ehci-mv binding to DT schema format
-> > > using json-schema.
-> > >
-> > > Signed-off-by: Lubomir Rintel <lkundrak@v3.sk>
-> > > ---
-> > >  .../devicetree/bindings/usb/ehci-mv.txt       | 23 -------
-> > >  .../bindings/usb/marvell,pxau2o-ehci.yaml     | 60 +++++++++++++++++++
-> > >  2 files changed, 60 insertions(+), 23 deletions(-)
-> > >  delete mode 100644 Documentation/devicetree/bindings/usb/ehci-mv.txt
-> > >  create mode 100644 Documentation/devicetree/bindings/usb/marvell,pxau2o-ehci.yaml
-> > >
-> > > diff --git a/Documentation/devicetree/bindings/usb/ehci-mv.txt b/Documentation/devicetree/bindings/usb/ehci-mv.txt
-> > > deleted file mode 100644
-> > > index 335589895763e..0000000000000
-> > > --- a/Documentation/devicetree/bindings/usb/ehci-mv.txt
-> > > +++ /dev/null
-> > > @@ -1,23 +0,0 @@
-> > > -* Marvell PXA/MMP EHCI controller.
-> > > -
-> > > -Required properties:
-> > > -
-> > > -- compatible: must be "marvell,pxau2o-ehci"
-> > > -- reg: physical base addresses of the controller and length of memory mapped region
-> > > -- interrupts: one EHCI controller interrupt should be described here
-> > > -- clocks: phandle list of usb clocks
-> > > -- clock-names: should be "USBCLK"
-> > > -- phys: phandle for the PHY device
-> > > -- phy-names: should be "usb"
-> > > -
-> > > -Example:
-> > > -
-> > > -   ehci0: usb-ehci@d4208000 {
-> > > -           compatible = "marvell,pxau2o-ehci";
-> > > -           reg = <0xd4208000 0x200>;
-> > > -           interrupts = <44>;
-> > > -           clocks = <&soc_clocks MMP2_CLK_USB>;
-> > > -           clock-names = "USBCLK";
-> > > -           phys = <&usb_otg_phy>;
-> > > -           phy-names = "usb";
-> > > -   };
-> > > diff --git a/Documentation/devicetree/bindings/usb/marvell,pxau2o-ehci.yaml b/Documentation/devicetree/bindings/usb/marvell,pxau2o-ehci.yaml
-> > > new file mode 100644
-> > > index 0000000000000..189025ef1e92e
-> > > --- /dev/null
-> > > +++ b/Documentation/devicetree/bindings/usb/marvell,pxau2o-ehci.yaml
-> > > @@ -0,0 +1,60 @@
-> > > +# SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
+On Mon, May 18, 2020 at 3:23 PM Lad, Prabhakar
+<prabhakar.csengg@gmail.com> wrote:
+> On Mon, May 18, 2020 at 2:17 PM Sergei Shtylyov
+> <sergei.shtylyov@cogentembedded.com> wrote:
+> > On 18.05.2020 15:27, Lad, Prabhakar wrote:
+> > >>> Add a device node for the Watchdog Timer (RWDT) controller on the Renesas
+> > >>> RZ/G1H (r8a7742) SoC.
+> > >>>
+> > >>> Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+> > >>> Reviewed-by: Marian-Cristian Rotariu <marian-cristian.rotariu.rb@bp.renesas.com>
+> > >>
+> > >> Thanks for your patch!
+> > >>
+> > >>> --- a/arch/arm/boot/dts/r8a7742.dtsi
+> > >>> +++ b/arch/arm/boot/dts/r8a7742.dtsi
+> > >>> @@ -201,6 +201,16 @@
+> > >>>                  #size-cells = <2>;
+> > >>>                  ranges;
+> > >>>
+> > >>> +               rwdt: watchdog@e6020000 {
+> > >>> +                       compatible = "renesas,r8a7742-wdt",
+> > >>> +                                    "renesas,rcar-gen2-wdt";
+> > >>> +                       reg = <0 0xe6020000 0 0x0c>;
+> > >>> +                       clocks = <&cpg CPG_MOD 402>;
+> > >>> +                       power-domains = <&sysc R8A7742_PD_ALWAYS_ON>;
+> > >>> +                       resets = <&cpg 402>;
+> > >>> +                       status = "disabled";
+> > >>
+> > >> Missing "interrupts" property.
+> > >>
+> > > "interrupts" property isn't used by rwdt driver  and can be dropped
+> > > from bindings file.
 > >
-> > Same license comment.
->
-> I wrote that binding document and chose that license.
+> >     DT describes the hardware, not its driver's abilities.
 
-Okay, but please make it GPL-2.0-only instead of or-later. If everyone
-was attentive to licensing picking their own variations would be fine,
-but they aren't and just copy-n-paste. So there's 2 choices
-GPL-2.0-only (for converted bindings) or (GPL-2.0-only OR
-BSD-2-Clause) for new or re-licensed bindings.
+Thanks for chiming in, Sergei!
 
-Rob
+> Agreed will add, I had followed it on similar lines of r8a7743/44.
+
+Yeah. I know it's missing for a few other SoCs, too.
+
+Gr{oetje,eeting}s,
+
+                        Geert
+
+-- 
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
