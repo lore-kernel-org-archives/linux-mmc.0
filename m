@@ -2,725 +2,538 @@ Return-Path: <SRS0=SyG0=7A=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.6 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4B593C433DF
-	for <linux-mmc@archiver.kernel.org>; Mon, 18 May 2020 08:03:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9397FC433E0
+	for <linux-mmc@archiver.kernel.org>; Mon, 18 May 2020 08:58:28 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 18D46207D4
-	for <linux-mmc@archiver.kernel.org>; Mon, 18 May 2020 08:03:37 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 73645207D8
+	for <linux-mmc@archiver.kernel.org>; Mon, 18 May 2020 08:58:28 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="x1h175Ur"
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=microchip.com header.i=@microchip.com header.b="FJLycSLT"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727770AbgERIDg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 18 May 2020 04:03:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53766 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726919AbgERIDg (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 18 May 2020 04:03:36 -0400
-Received: from mail-vs1-xe43.google.com (mail-vs1-xe43.google.com [IPv6:2607:f8b0:4864:20::e43])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 08BB7C05BD09
-        for <linux-mmc@vger.kernel.org>; Mon, 18 May 2020 01:03:35 -0700 (PDT)
-Received: by mail-vs1-xe43.google.com with SMTP id u2so1234010vsi.13
-        for <linux-mmc@vger.kernel.org>; Mon, 18 May 2020 01:03:35 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=mSf718IzkWckrR4pmV7NcGpffgmYRZ7bY4YZOV0MDpQ=;
-        b=x1h175UrELvlSYUT11pRUKjXaoV6qRZ+600n3yZmHH7qvnBNvgpHkJ4I/p4nZbJG6g
-         TwPSjy2N1dhotDbpH8g9Ck6tvM0LofEAmHnv+28zWbfPnxwpgqVkSV3tjh+R4SvoJIx9
-         jzAIADdhJLICwQLTyHsiGreckGB08g75l/+jDqGbVuhgJyVCmRCtm26s19VICiRMevrn
-         oce4I0Palk04uzNqNlwZ7ipdd5xGXp47xCK1CDY/cRJ1bGim3Ac82Ml/KMV3enAgI1ZP
-         rsYNHXLBQdmch6tKrsS8bcZR9S0MOEFFA8yVSb4zZicsODY80OexXe0HUhu8p4GWPYvG
-         y35A==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=mSf718IzkWckrR4pmV7NcGpffgmYRZ7bY4YZOV0MDpQ=;
-        b=JSkqipmL0rhR58KE/ldarw0ReQo6fDti36d32Amf7g8Mf/4M1VuKZu5M89QBXmP3j3
-         hOAOe4bnIQ1Opz2OeBthVlRWitdKFUrU486cdNiEqeY8YQEX6DXxBbc3uzvSrJqiQV/N
-         /A/SeudMf0Hr4Y9pvAq6wPJoeP3lNtADc/94L5VyPXvrJnt2xlaIVrZV0QKtTKCNGxg0
-         BfwlBCoN0s1LHDhlSWpB+39Zdhbz1u1bp7DkR8vB1E5Q2rJej4Y7n9uGfVqZWjp379YO
-         mumvbsKmkHHNWSi5Vc50JbYWLAO1AChpxMfHO7An3vpqUSDMmh1GtlNNYr06pEHJxw2t
-         +r9Q==
-X-Gm-Message-State: AOAM533/4X4/HcgrY3zpAiJ8Mo+QIRIo85WjHAYi2ZmdtTeijyEI0xEr
-        GR+27msdJQ/+t8IONgji8ifJ8u9O4WsIOL6k9LwhJQ==
-X-Google-Smtp-Source: ABdhPJy5PtSKDkak6nJIydNMri8aKkj1cHC/7rsgyCqmAPUs7XKMdcugKMqrvZnk8PhDNLzPRPk2JcmPkaL2UlF55/c=
-X-Received: by 2002:a67:be05:: with SMTP id x5mr2274910vsq.35.1589789014800;
- Mon, 18 May 2020 01:03:34 -0700 (PDT)
+        id S1726378AbgERI61 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 18 May 2020 04:58:27 -0400
+Received: from esa1.microchip.iphmx.com ([68.232.147.91]:50998 "EHLO
+        esa1.microchip.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726357AbgERI61 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 18 May 2020 04:58:27 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=microchip.com; i=@microchip.com; q=dns/txt; s=mchp;
+  t=1589792306; x=1621328306;
+  h=references:from:to:cc:subject:in-reply-to:date:
+   message-id:mime-version;
+  bh=yt+4gfXTk7X0ddX3hBW5CT9l34qe5+5wv4Lv8l/gmI4=;
+  b=FJLycSLTbdWJDaKdkKTJc4oNo7IU0YqU8nL2P4615ziaOUNjiG/zV0Ch
+   DxxkXq0UmXE+zXKUXj2NzQRbKxETBTjQliu0+IqOJY7JE+kRJ/ajC9tNA
+   VkLHHvl8DroD4qGnTk1Sy/hT1ZcKCqQrcg/VAgYXkVrk8jXZ4m5lxWzpv
+   p34f3EBac1t5OjHqv2g1MLw0UlVk0c9qJhubtMfk5QyUhTPsD+nj9gOGW
+   U5RnF7JJyMwIQUuGi/u7aaDgSYl1iOtc4LsNxqMBwSId9lZcqjApHekHR
+   /sYw5kY9Y0BVai2m1L4RCo0YXF3+nOkjGBQ9mmBdaOsGo9/QJdBI7Ro6N
+   A==;
+IronPort-SDR: RsaoxOIY6BpRO/wb2pD1FjxLa+bWqIm1aPWra81xrp21BBuhxSf81KdRLDdFMaJ5B6TFSHz79m
+ GtR6wO5POcFv7RLhD7F9HVyrMQpJk2Pgt4LEJWLaN5+wrrjQJ4Ro6tdAk19ZOdYcup3KrE43WX
+ 9XblCDgcq4EFjLewu4/toUo+No9RN541RFklw9x4g3RRNKpuV23W8McqmwDdIE9JsBjHxBL3Ul
+ /k0BUY9H/qjkC33lUbUwrKi30lmg4/iKkHg5orERqKVdNQXE1G96obgrvjyTObfCYiSLNn+OTl
+ EOE=
+X-IronPort-AV: E=Sophos;i="5.73,406,1583218800"; 
+   d="scan'208";a="79999901"
+Received: from smtpout.microchip.com (HELO email.microchip.com) ([198.175.253.82])
+  by esa1.microchip.iphmx.com with ESMTP/TLS/AES256-SHA256; 18 May 2020 01:58:26 -0700
+Received: from chn-vm-ex02.mchp-main.com (10.10.87.72) by
+ chn-vm-ex02.mchp-main.com (10.10.87.72) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.1713.5; Mon, 18 May 2020 01:58:30 -0700
+Received: from soft-dev15.microsemi.net.microchip.com (10.10.115.15) by
+ chn-vm-ex02.mchp-main.com (10.10.85.144) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.1713.5
+ via Frontend Transport; Mon, 18 May 2020 01:58:27 -0700
+References: <20200513133122.25121-1-lars.povlsen@microchip.com> <20200513133122.25121-3-lars.povlsen@microchip.com> <6398c7a6-ce5e-1df6-d5a6-08664a7fc123@intel.com>
+From:   Lars Povlsen <lars.povlsen@microchip.com>
+To:     Adrian Hunter <adrian.hunter@intel.com>
+List-Id: <soc.lore.kernel.org>
+CC:     Lars Povlsen <lars.povlsen@microchip.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        SoC Team <soc@kernel.org>,
+        "Microchip Linux Driver Support" <UNGLinuxDriver@microchip.com>,
+        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>,
+        <linux-kernel@vger.kernel.org>,
+        Alexandre Belloni <alexandre.belloni@bootlin.com>
+Subject: Re: [PATCH 2/3] sdhci: sparx5: Add Sparx5 SoC eMMC driver
+In-Reply-To: <6398c7a6-ce5e-1df6-d5a6-08664a7fc123@intel.com>
+Date:   Mon, 18 May 2020 10:58:22 +0200
+Message-ID: <87v9ktoc0h.fsf@soft-dev15.microsemi.net>
 MIME-Version: 1.0
-References: <20200515222730.967105-1-angelo.dureghello@timesys.com>
- <20200515222730.967105-3-angelo.dureghello@timesys.com> <26ed71d3-2de5-9886-9465-45735802179d@intel.com>
- <CALJHbkAcR6YLBW8wH6KfOjwd9En1+aOVBmjOQOJGZcdPr8G0bg@mail.gmail.com>
-In-Reply-To: <CALJHbkAcR6YLBW8wH6KfOjwd9En1+aOVBmjOQOJGZcdPr8G0bg@mail.gmail.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 18 May 2020 10:02:57 +0200
-Message-ID: <CAPDyKFrEEsF-yRd5eWtcXqpt4FYQq8Zw9Q6Se=eCEzegji1SAw@mail.gmail.com>
-Subject: Re: [PATCH v5 3/3] mmc: host: add Coldfire esdhc support
-To:     Angelo Dureghello <angelo.dureghello@timesys.com>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        Greg Ungerer <gerg@linux-m68k.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        linux-m68k@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 18 May 2020 at 09:55, Angelo Dureghello
-<angelo.dureghello@timesys.com> wrote:
->
-> Hi Adrian and all,
->
-> thanks,
->
-> i can fix also these small issues in a v6 in case. Since is "acked" not sure
-> if i have to do it. Please let me know.
 
-Please re-spin a v6 to address Adrian's comments and add his acks.
+Adrian Hunter writes:
 
-In some cases I am amending the patches while applying, but this time
-it looks like it's easier for me to get a re-spin.
+> On 13/05/20 4:31 pm, Lars Povlsen wrote:
+>> This adds the eMMC driver for the Sparx5 SoC. It is based upon the
+>> designware IP, but requires some extra initialization and quirks.
+>>
+>> Reviewed-by: Alexandre Belloni <alexandre.belloni@bootlin.com>
+>> Signed-off-by: Lars Povlsen <lars.povlsen@microchip.com>
+>> ---
+>>  drivers/mmc/host/Kconfig           |  13 ++
+>>  drivers/mmc/host/Makefile          |   1 +
+>>  drivers/mmc/host/sdhci-of-sparx5.c | 348 +++++++++++++++++++++++++++++
+>>  3 files changed, 362 insertions(+)
+>>  create mode 100644 drivers/mmc/host/sdhci-of-sparx5.c
+>>
+>> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+>> index 462b5352fea75..1e8396d09df75 100644
+>> --- a/drivers/mmc/host/Kconfig
+>> +++ b/drivers/mmc/host/Kconfig
+>> @@ -213,6 +213,19 @@ config MMC_SDHCI_OF_DWCMSHC
+>>         If you have a controller with this interface, say Y or M here.
+>>         If unsure, say N.
+>>
+>> +config MMC_SDHCI_OF_SPARX5
+>> +     tristate "SDHCI OF support for the MCHP Sparx5 SoC"
+>> +     depends on MMC_SDHCI_PLTFM
+>> +     depends on ARCH_SPARX5
+>> +     select MMC_SDHCI_IO_ACCESSORS
+>> +     help
+>> +       This selects the Secure Digital Host Controller Interface (SDHCI)
+>> +       found in the MCHP Sparx5 SoC.
+>> +
+>> +       If you have a Sparx5 SoC with this interface, say Y or M here.
+>> +
+>> +       If unsure, say N.
+>> +
+>>  config MMC_SDHCI_CADENCE
+>>       tristate "SDHCI support for the Cadence SD/SDIO/eMMC controller"
+>>       depends on MMC_SDHCI_PLTFM
+>> diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+>> index b929ef9412083..9f09b7ffaaa16 100644
+>> --- a/drivers/mmc/host/Makefile
+>> +++ b/drivers/mmc/host/Makefile
+>> @@ -89,6 +89,7 @@ obj-$(CONFIG_MMC_SDHCI_OF_ARASAN)   += sdhci-of-arasan.o
+>>  obj-$(CONFIG_MMC_SDHCI_OF_ASPEED)    += sdhci-of-aspeed.o
+>>  obj-$(CONFIG_MMC_SDHCI_OF_AT91)              += sdhci-of-at91.o
+>>  obj-$(CONFIG_MMC_SDHCI_OF_ESDHC)     += sdhci-of-esdhc.o
+>> +obj-$(CONFIG_MMC_SDHCI_OF_SPARX5)    += sdhci-of-sparx5.o
+>>  obj-$(CONFIG_MMC_SDHCI_OF_HLWD)              += sdhci-of-hlwd.o
+>>  obj-$(CONFIG_MMC_SDHCI_OF_DWCMSHC)   += sdhci-of-dwcmshc.o
+>>  obj-$(CONFIG_MMC_SDHCI_BCM_KONA)     += sdhci-bcm-kona.o
+>> diff --git a/drivers/mmc/host/sdhci-of-sparx5.c b/drivers/mmc/host/sdhci-of-sparx5.c
+>> new file mode 100644
+>> index 0000000000000..8253bf80e175a
+>> --- /dev/null
+>> +++ b/drivers/mmc/host/sdhci-of-sparx5.c
+>> @@ -0,0 +1,348 @@
+>> +// SPDX-License-Identifier: GPL-2.0-or-later
+>> +/*
+>> + * drivers/mmc/host/sdhci-of-sparx5.c
+>> + *
+>> + * MCHP Sparx5 SoC Secure Digital Host Controller Interface.
+>> + *
+>> + * Copyright (c) 2019 Microchip Inc.
+>> + *
+>> + * Author: Lars Povlsen <lars.povlsen@microchip.com>
+>> + */
+>> +
+>> +//#define DEBUG
+>> +//#define TRACE_REGISTER
+>
+> No commented out code please.
+
+Yes, that's not relevant any more, I'll remove it.
 
 >
-> Also, checkpatch signals a missing maintainer name for this driver,
-> if there is any need to set a name for it ?
+>> +
+>> +#include <linux/sizes.h>
+>> +#include <linux/delay.h>
+>> +#include <linux/module.h>
+>> +#include <linux/regmap.h>
+>> +#include <linux/of_device.h>
+>> +#include <linux/mfd/syscon.h>
+>> +#include <linux/dma-mapping.h>
+>> +
+>> +#include "sdhci-pltfm.h"
+>> +
+>> +#define CPU_REGS_GENERAL_CTRL        (0x22 * 4)
+>> +#define  MSHC_DLY_CC_MASK    GENMASK(16, 13)
+>> +#define  MSHC_DLY_CC_SHIFT   13
+>> +#define  MSHC_DLY_CC_MAX     15
+>> +
+>> +#define CPU_REGS_PROC_CTRL   (0x2C * 4)
+>> +#define  ACP_CACHE_FORCE_ENA BIT(4)
+>> +#define  ACP_AWCACHE         BIT(3)
+>> +#define  ACP_ARCACHE         BIT(2)
+>> +#define  ACP_CACHE_MASK              (ACP_CACHE_FORCE_ENA|ACP_AWCACHE|ACP_ARCACHE)
+>> +
+>> +#define MSHC2_VERSION                        0x500   /* Off 0x140, reg 0x0 */
+>> +#define MSHC2_TYPE                   0x504   /* Off 0x140, reg 0x1 */
+>> +#define MSHC2_EMMC_CTRL                      0x52c   /* Off 0x140, reg 0xB */
+>> +#define  MSHC2_EMMC_CTRL_EMMC_RST_N  BIT(2)
+>> +#define  MSHC2_EMMC_CTRL_IS_EMMC     BIT(0)
+>> +
+>> +struct sdhci_sparx5_data {
+>> +     struct sdhci_host *host;
+>> +     struct regmap *cpu_ctrl;
+>> +     int delay_clock;
+>> +     struct device_attribute dev_delay_clock;
+>> +};
+>> +
+>> +#define BOUNDARY_OK(addr, len) \
+>> +     ((addr | (SZ_128M - 1)) == ((addr + len - 1) | (SZ_128M - 1)))
+>> +
+>> +#if defined(TRACE_REGISTER)
+>
+> If you want this then add a Kconfig entry for it
+>
 
-If you are willing to look after it, please add a patch adding
-yourself as maintainer!
+No, I'll just remove it.
 
-Otherwise I think the generic SDHCI section covers it.
+>> +static void sdhci_sparx5_writel(struct sdhci_host *host, u32 val, int reg)
+>> +{
+>> +     pr_debug("$$$ writel(0x%08x, 0x%02x)\n", val, reg);
+>> +     writel(val, host->ioaddr + reg);
+>> +}
+>> +
+>> +static void sdhci_sparx5_writew(struct sdhci_host *host, u16 val, int reg)
+>> +{
+>> +     pr_debug("$$$ writew(0x%04x, 0x%02x)\n", val, reg);
+>> +     writew(val, host->ioaddr + reg);
+>> +}
+>> +
+>> +static void sdhci_sparx5_writeb(struct sdhci_host *host, u8 val, int reg)
+>> +{
+>> +     pr_debug("$$$ writeb(0x%02x, 0x%02x)\n", val, reg);
+>> +     writeb(val, host->ioaddr + reg);
+>> +}
+>> +#endif
+>> +
+>> +/*
+>> + * If DMA addr spans 128MB boundary, we split the DMA transfer into two
+>> + * so that each DMA transfer doesn't exceed the boundary.
+>> + */
+>> +static void sdhci_sparx5_adma_write_desc(struct sdhci_host *host, void **desc,
+>> +                                       dma_addr_t addr, int len,
+>> +                                       unsigned int cmd)
+>> +{
+>> +     int tmplen, offset;
+>> +
+>> +     pr_debug("write_desc: cmd %02x: len %d, offset 0x%0llx\n",
+>> +              cmd, len, addr);
+>
+> Please prefix all kernel messages by either the mmc or device e.g.
+>
+>         pr_debug("%s: write_desc: cmd %02x: len %d, offset 0x%0llx\n",
+>                  mmc_hostname(host->mmc), cmd, len, addr);
 
-Kind regards
-Uffe
+Will do.
+
+>> +
+>> +     if (likely(!len || BOUNDARY_OK(addr, len))) {
+>> +             sdhci_adma_write_desc(host, desc, addr, len, cmd);
+>> +             return;
+>> +     }
+>> +
+>> +     pr_debug("write_desc: splitting dma len %d, offset 0x%0llx\n",
+>> +              len, addr);
+>> +
+>> +     offset = addr & (SZ_128M - 1);
+>> +     tmplen = SZ_128M - offset;
+>> +     sdhci_adma_write_desc(host, desc, addr, tmplen, cmd);
+>> +
+>> +     addr += tmplen;
+>> +     len -= tmplen;
+>> +     sdhci_adma_write_desc(host, desc, addr, len, cmd);
+>> +}
+>> +
+>> +static void sparx5_set_cacheable(struct sdhci_host *host, u32 value)
+>> +{
+>> +     struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>> +     struct sdhci_sparx5_data *sdhci_sparx5 = sdhci_pltfm_priv(pltfm_host);
+>> +
+>> +     pr_debug("%s: Set Cacheable = 0x%x\n", mmc_hostname(host->mmc), value);
+>> +
+>> +     /* Update ACP caching attributes in HW */
+>> +     regmap_update_bits(sdhci_sparx5->cpu_ctrl,
+>> +                        CPU_REGS_PROC_CTRL, ACP_CACHE_MASK, value);
+>> +}
+>> +
+>> +static void sparx5_set_delay(struct sdhci_host *host, u8 value)
+>> +{
+>> +     struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>> +     struct sdhci_sparx5_data *sdhci_sparx5 = sdhci_pltfm_priv(pltfm_host);
+>> +
+>> +     pr_debug("%s: Set DLY_CC = %u\n", mmc_hostname(host->mmc), value);
+>> +
+>> +     /* Update DLY_CC in HW */
+>> +     regmap_update_bits(sdhci_sparx5->cpu_ctrl,
+>> +                        CPU_REGS_GENERAL_CTRL,
+>> +                        MSHC_DLY_CC_MASK,
+>> +                        (value << MSHC_DLY_CC_SHIFT));
+>> +}
+>> +
+>> +static void sdhci_sparx5_set_emmc(struct sdhci_host *host)
+>> +{
+>> +     if (!mmc_card_is_removable(host->mmc)) {
+>> +             u8 value;
+>> +
+>> +             value = sdhci_readb(host, MSHC2_EMMC_CTRL);
+>> +             if (!(value & MSHC2_EMMC_CTRL_IS_EMMC)) {
+>> +                     pr_debug("Get EMMC_CTRL: 0x%08x\n", value);
+>> +                     value |= MSHC2_EMMC_CTRL_IS_EMMC;
+>> +                     pr_debug("Set EMMC_CTRL: 0x%08x\n", value);
+>> +                     sdhci_writeb(host, value, MSHC2_EMMC_CTRL);
+>> +             }
+>> +     }
+>> +}
+>> +
+>> +static void sdhci_sparx5_reset_emmc(struct sdhci_host *host)
+>> +{
+>> +     u8 value;
+>> +
+>> +     pr_debug("Toggle EMMC_CTRL.EMMC_RST_N\n");
+>> +     value = sdhci_readb(host, MSHC2_EMMC_CTRL) &
+>> +             ~MSHC2_EMMC_CTRL_EMMC_RST_N;
+>> +     sdhci_writeb(host, value, MSHC2_EMMC_CTRL);
+>> +     /* For eMMC, minimum is 1us but give it 10us for good measure */
+>> +     udelay(10);
+>> +     sdhci_writeb(host, value | MSHC2_EMMC_CTRL_EMMC_RST_N,
+>> +                  MSHC2_EMMC_CTRL);
+>> +     /* For eMMC, minimum is 200us but give it 300us for good measure */
+>> +     udelay(300);
+>
+> usleep_range() is better here
+>
+
+Got it.
+
+>> +}
+>> +
+>> +static void sdhci_sparx5_reset(struct sdhci_host *host, u8 mask)
+>> +{
+>> +     pr_debug("*** RESET: mask %d\n", mask);
+>> +
+>> +     sdhci_reset(host, mask);
+>> +
+>> +     /* Be sure CARD_IS_EMMC stays set */
+>> +     sdhci_sparx5_set_emmc(host);
+>> +}
+>> +
+>> +static const struct sdhci_ops sdhci_sparx5_ops = {
+>> +#if defined(TRACE_REGISTER)
+>> +     .write_l                = sdhci_sparx5_writel,
+>> +     .write_w                = sdhci_sparx5_writew,
+>> +     .write_b                = sdhci_sparx5_writeb,
+>> +#endif
+>> +     .set_clock              = sdhci_set_clock,
+>> +     .set_bus_width          = sdhci_set_bus_width,
+>> +     .set_uhs_signaling      = sdhci_set_uhs_signaling,
+>> +     .get_max_clock          = sdhci_pltfm_clk_get_max_clock,
+>> +     .reset                  = sdhci_sparx5_reset,
+>> +     .adma_write_desc        = sdhci_sparx5_adma_write_desc,
+>> +};
+>> +
+>> +static const struct sdhci_pltfm_data sdhci_sparx5_pdata = {
+>> +     .quirks  = 0,
+>> +     .quirks2 = SDHCI_QUIRK2_HOST_NO_CMD23 | /* Card quirk */
+>
+> If this is a card quirk then it should be in drivers/mmc/core/quirks.h not here.
+
+Yes, its supposedly a card quirk. I'll see to use the card quirks
+methods in place.
 
 >
-> Regards,
-> Angelo
+>> +                SDHCI_QUIRK2_NO_1_8_V, /* No sdr104, ddr50, etc */
+>> +     .ops = &sdhci_sparx5_ops,
+>> +};
+>> +
+>> +static ssize_t sparx5_delay_clock_show(struct device *dev,
+>> +                                     struct device_attribute *attr,
+>> +                                     char *buf)
+>> +{
+>> +     struct sdhci_sparx5_data *sdhci_sparx5;
+>> +
+>> +     sdhci_sparx5 = container_of(attr, struct sdhci_sparx5_data,
+>> +                                  dev_delay_clock);
+>> +     return scnprintf(buf, PAGE_SIZE, "%d\n", sdhci_sparx5->delay_clock);
+>> +}
+>> +
+>> +static ssize_t sparx5_delay_clock_store(struct device *dev,
+>> +                                      struct device_attribute *attr,
+>> +                                      const char *buf, size_t count)
+>> +{
+>> +     unsigned int delay_clock;
+>> +     struct sdhci_sparx5_data *sdhci_sparx5;
+>> +
+>> +     sdhci_sparx5 = container_of(attr, struct sdhci_sparx5_data,
+>> +                                  dev_delay_clock);
+>> +
+>> +     if (kstrtoint(buf, 10, &delay_clock) ||
+>> +         delay_clock > MSHC_DLY_CC_MAX) {
+>> +             dev_err(dev, "sdhci-of-sparx5: wrong parameter format.\n");
+>> +             return -EINVAL;
+>> +     }
+>> +
+>> +     sdhci_sparx5->delay_clock = delay_clock;
+>> +     sparx5_set_delay(sdhci_sparx5->host, sdhci_sparx5->delay_clock);
+>> +
+>> +     return strlen(buf);
+>> +}
+>> +
+>> +int sdhci_sparx5_probe(struct platform_device *pdev)
+>> +{
+>> +     int ret;
+>> +     const char *syscon = "microchip,sparx5-cpu-syscon";
+>> +     struct sdhci_host *host;
+>> +     struct sdhci_pltfm_host *pltfm_host;
+>> +     struct sdhci_sparx5_data *sdhci_sparx5;
+>> +     struct device_node *np = pdev->dev.of_node;
+>> +     u32 value;
+>> +     u32 extra;
+>> +
+>> +     host = sdhci_pltfm_init(pdev, &sdhci_sparx5_pdata,
+>> +                             sizeof(*sdhci_sparx5));
+>> +
+>> +     if (IS_ERR(host))
+>> +             return PTR_ERR(host);
+>> +
+>> +     /*
+>> +      * extra adma table cnt for cross 128M boundary handling.
+>> +      */
+>> +     extra = DIV_ROUND_UP_ULL(dma_get_required_mask(&pdev->dev), SZ_128M);
+>> +     if (extra > SDHCI_MAX_SEGS)
+>> +             extra = SDHCI_MAX_SEGS;
+>> +     host->adma_table_cnt += extra;
+>> +
+>> +     pltfm_host = sdhci_priv(host);
+>> +     sdhci_sparx5 = sdhci_pltfm_priv(pltfm_host);
+>> +     sdhci_sparx5->host = host;
+>> +
+>> +     pltfm_host->clk = devm_clk_get(&pdev->dev, "core");
+>> +     if (IS_ERR(pltfm_host->clk)) {
+>> +             ret = PTR_ERR(pltfm_host->clk);
+>> +             dev_err(&pdev->dev, "failed to get core clk: %d\n", ret);
+>> +             goto free_pltfm;
+>> +     }
+>> +     ret = clk_prepare_enable(pltfm_host->clk);
+>> +     if (ret)
+>> +             goto free_pltfm;
+>> +
+>> +     if (!of_property_read_u32(np, "microchip,clock-delay", &value) &&
+>> +         value <= MSHC_DLY_CC_MAX)
+>> +             sdhci_sparx5->delay_clock = value;
+>> +     else
+>> +             sdhci_sparx5->delay_clock = -1; /* Autotune */
+>> +
+>> +     /* Sysfs delay_clock interface */
+>> +     sdhci_sparx5->dev_delay_clock.show = sparx5_delay_clock_show;
+>> +     sdhci_sparx5->dev_delay_clock.store = sparx5_delay_clock_store;
+>> +     sysfs_attr_init(&sdhci_sparx5->dev_delay_clock.attr);
+>> +     sdhci_sparx5->dev_delay_clock.attr.name = "delay_clock";
+>> +     sdhci_sparx5->dev_delay_clock.attr.mode = 0644;
+>> +     ret = device_create_file(&pdev->dev, &sdhci_sparx5->dev_delay_clock);
 >
-> On Sat, May 16, 2020 at 8:09 PM Adrian Hunter <adrian.hunter@intel.com> wrote:
-> >
-> > On 16/05/20 1:27 am, Angelo Dureghello wrote:
-> > > This driver has been developed as a separate module starting
-> > > from the similar sdhci-esdhc-imx.c.
-> > >
-> > > Reasons for a separate sdchi-esdhc-mcf driver:
-> > >
-> > > - m68K architecture does not support devicetrees, so modifying
-> > > sdhci-of-esdhc.c that is devicetree-related adding platform data
-> > > seems not appropriate,
-> > > - clock-related part, has to be implemented specifically for
-> > > mcf5441x family (see esdhc_mcf_pltfm_set_clock()),
-> > > - this is a big endian cpu accessing a big endian controller,
-> > > but about sdma, this controller does not support hw swap, which
-> > > needs to be handled with specific code,
-> > > - some other minor differences but mainly to avoid risks on
-> > > tweaking inside largely used imx driver. Adding just a small
-> > > size ColdFire-specific driver, with benefits in a further less
-> > > risky maintenance.
-> > >
-> > > Signed-off-by: Angelo Dureghello <angelo.dureghello@timesys.com>
-> >
-> > One minor comment below, nevertheless:
-> >
-> > Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-> >
-> > > ---
-> > > Changes for v3:
-> > > - fix write support
-> > > Changes for v4:
-> > > none
-> > > Changes for v5:
-> > > - better probe cleanup on errors
-> > > - test for bounce buffer to be allocated
-> > > - rename pre_dma_transfer to copy_to_bounce_buffer
-> > > - change swap to swap and copy to bounce buffer
-> > > - fix line alignments to pass checkpatch --strict
-> > > ---
-> > >  drivers/mmc/host/Kconfig           |  13 +
-> > >  drivers/mmc/host/Makefile          |   1 +
-> > >  drivers/mmc/host/sdhci-esdhc-mcf.c | 522 +++++++++++++++++++++++++++++
-> > >  3 files changed, 536 insertions(+)
-> > >  create mode 100644 drivers/mmc/host/sdhci-esdhc-mcf.c
-> > >
-> > > diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> > > index 462b5352fea7..da793fc95203 100644
-> > > --- a/drivers/mmc/host/Kconfig
-> > > +++ b/drivers/mmc/host/Kconfig
-> > > @@ -235,6 +235,19 @@ config MMC_SDHCI_CNS3XXX
-> > >
-> > >         If unsure, say N.
-> > >
-> > > +config MMC_SDHCI_ESDHC_MCF
-> > > +     tristate "SDHCI support for the Freescale eSDHC ColdFire controller"
-> > > +     depends on M5441x
-> > > +     depends on MMC_SDHCI_PLTFM
-> > > +     select MMC_SDHCI_IO_ACCESSORS
-> > > +     help
-> > > +       This selects the Freescale eSDHC controller support for
-> > > +       ColdFire mcf5441x devices.
-> > > +
-> > > +       If you have a controller with this interface, say Y or M here.
-> > > +
-> > > +       If unsure, say N.
-> > > +
-> > >  config MMC_SDHCI_ESDHC_IMX
-> > >       tristate "SDHCI support for the Freescale eSDHC/uSDHC i.MX controller"
-> > >       depends on ARCH_MXC
-> > > diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-> > > index b929ef941208..af2cdaadc4d3 100644
-> > > --- a/drivers/mmc/host/Makefile
-> > > +++ b/drivers/mmc/host/Makefile
-> > > @@ -82,6 +82,7 @@ obj-$(CONFIG_MMC_REALTEK_USB)       += rtsx_usb_sdmmc.o
-> > >  obj-$(CONFIG_MMC_SDHCI_PLTFM)                += sdhci-pltfm.o
-> > >  obj-$(CONFIG_MMC_SDHCI_CADENCE)              += sdhci-cadence.o
-> > >  obj-$(CONFIG_MMC_SDHCI_CNS3XXX)              += sdhci-cns3xxx.o
-> > > +obj-$(CONFIG_MMC_SDHCI_ESDHC_MCF)       += sdhci-esdhc-mcf.o
-> > >  obj-$(CONFIG_MMC_SDHCI_ESDHC_IMX)    += sdhci-esdhc-imx.o
-> > >  obj-$(CONFIG_MMC_SDHCI_DOVE)         += sdhci-dove.o
-> > >  obj-$(CONFIG_MMC_SDHCI_TEGRA)                += sdhci-tegra.o
-> > > diff --git a/drivers/mmc/host/sdhci-esdhc-mcf.c b/drivers/mmc/host/sdhci-esdhc-mcf.c
-> > > new file mode 100644
-> > > index 000000000000..445faf76e676
-> > > --- /dev/null
-> > > +++ b/drivers/mmc/host/sdhci-esdhc-mcf.c
-> > > @@ -0,0 +1,522 @@
-> > > +// SPDX-License-Identifier: GPL-2.0
-> > > +/*
-> > > + * Freescale eSDHC ColdFire family controller driver, platform bus.
-> > > + *
-> > > + * Copyright (c) 2020 Timesys Corporation
-> > > + *   Author: Angelo Dureghello <angelo.dureghello@timesys.it>
-> > > + */
-> > > +
-> > > +#include <linux/module.h>
-> > > +#include <linux/delay.h>
-> > > +#include <linux/platform_data/mmc-esdhc-mcf.h>
-> > > +#include <linux/mmc/mmc.h>
-> > > +#include "sdhci-pltfm.h"
-> > > +#include "sdhci-esdhc.h"
-> > > +
-> > > +#define      ESDHC_PROCTL_D3CD               0x08
-> > > +#define ESDHC_SYS_CTRL_DTOCV_MASK    0x0f
-> > > +#define ESDHC_DEFAULT_HOST_CONTROL   0x28
-> > > +
-> > > +/*
-> > > + * Freescale eSDHC has DMA ERR flag at bit 28, not as std spec says, bit 25.
-> > > + */
-> > > +#define ESDHC_INT_VENDOR_SPEC_DMA_ERR        BIT(28)
-> > > +
-> > > +struct pltfm_mcf_data {
-> > > +     struct clk *clk_ipg;
-> > > +     struct clk *clk_ahb;
-> > > +     struct clk *clk_per;
-> > > +     int aside;
-> > > +     int current_bus_width;
-> > > +};
-> > > +
-> > > +static inline void esdhc_mcf_buffer_swap32(u32 *buf, int len)
-> > > +{
-> > > +     int i;
-> > > +     u32 temp;
-> > > +
-> > > +     len = (len + 3) >> 2;
-> > > +
-> > > +     for (i = 0; i < len;  i++) {
-> > > +             temp = swab32(*buf);
-> > > +             *buf++ = temp;
-> > > +     }
-> > > +}
-> > > +
-> > > +static inline void esdhc_clrset_be(struct sdhci_host *host,
-> > > +                                u32 mask, u32 val, int reg)
-> > > +{
-> > > +     void __iomem *base = host->ioaddr + (reg & ~3);
-> > > +     u8 shift = (reg & 3) << 3;
-> > > +
-> > > +     mask <<= shift;
-> > > +     val <<= shift;
-> > > +
-> > > +     if (reg == SDHCI_HOST_CONTROL)
-> > > +             val |= ESDHC_PROCTL_D3CD;
-> > > +
-> > > +     writel((readl(base) & ~mask) | val, base);
-> > > +}
-> > > +
-> > > +/*
-> > > + * Note: mcf is big-endian, single bytes need to be accessed at big endian
-> > > + * offsets.
-> > > + */
-> > > +static void esdhc_mcf_writeb_be(struct sdhci_host *host, u8 val, int reg)
-> > > +{
-> > > +     void __iomem *base = host->ioaddr + (reg & ~3);
-> > > +     u8 shift = (reg & 3) << 3;
-> > > +     u32 mask = ~(0xff << shift);
-> > > +
-> > > +     if (reg == SDHCI_HOST_CONTROL) {
-> > > +             u32 host_ctrl = ESDHC_DEFAULT_HOST_CONTROL;
-> > > +             u8 dma_bits = (val & SDHCI_CTRL_DMA_MASK) >> 3;
-> > > +             u8 tmp = readb(host->ioaddr + SDHCI_HOST_CONTROL + 1);
-> > > +
-> > > +             tmp &= ~0x03;
-> > > +             tmp |= dma_bits;
-> > > +
-> > > +             /*
-> > > +              * Recomposition needed, restore always endianness and
-> > > +              * keep D3CD and AI, just setting bus width.
-> > > +              */
-> > > +             host_ctrl |= val;
-> > > +             host_ctrl |= (dma_bits << 8);
-> > > +             writel(host_ctrl, host->ioaddr + SDHCI_HOST_CONTROL);
-> > > +
-> > > +             return;
-> > > +     }
-> > > +
-> > > +     writel((readl(base) & mask) | (val << shift), base);
-> > > +}
-> > > +
-> > > +static void esdhc_mcf_writew_be(struct sdhci_host *host, u16 val, int reg)
-> > > +{
-> > > +     struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> > > +     struct pltfm_mcf_data *mcf_data = sdhci_pltfm_priv(pltfm_host);
-> > > +     void __iomem *base = host->ioaddr + (reg & ~3);
-> > > +     u8 shift = (reg & 3) << 3;
-> > > +     u32 mask = ~(0xffff << shift);
-> > > +
-> > > +     switch (reg) {
-> > > +     case SDHCI_TRANSFER_MODE:
-> > > +             mcf_data->aside = val;
-> > > +             return;
-> > > +     case SDHCI_COMMAND:
-> > > +             if (host->cmd->opcode == MMC_STOP_TRANSMISSION)
-> > > +                     val |= SDHCI_CMD_ABORTCMD;
-> > > +
-> > > +             /*
-> > > +              * As for the fsl driver,
-> > > +              * we have to set the mode in a single write here.
-> > > +              */
-> > > +             writel(val << 16 | mcf_data->aside,
-> > > +                    host->ioaddr + SDHCI_TRANSFER_MODE);
-> > > +             return;
-> > > +     }
-> > > +
-> > > +     writel((readl(base) & mask) | (val << shift), base);
-> > > +}
-> > > +
-> > > +static void esdhc_mcf_writel_be(struct sdhci_host *host, u32 val, int reg)
-> > > +{
-> > > +     writel(val, host->ioaddr + reg);
-> > > +}
-> > > +
-> > > +static u8 esdhc_mcf_readb_be(struct sdhci_host *host, int reg)
-> > > +{
-> > > +     if (reg == SDHCI_HOST_CONTROL) {
-> > > +             u8 __iomem *base = host->ioaddr + (reg & ~3);
-> > > +             u16 val = readw(base + 2);
-> > > +             u8 dma_bits = (val >> 5) & SDHCI_CTRL_DMA_MASK;
-> > > +             u8 host_ctrl = val & 0xff;
-> > > +
-> > > +             host_ctrl &= ~SDHCI_CTRL_DMA_MASK;
-> > > +             host_ctrl |= dma_bits;
-> > > +
-> > > +             return host_ctrl;
-> > > +     }
-> > > +
-> > > +     return readb(host->ioaddr + (reg ^ 0x3));
-> > > +}
-> > > +
-> > > +static u16 esdhc_mcf_readw_be(struct sdhci_host *host, int reg)
-> > > +{
-> > > +     /*
-> > > +      * For SDHCI_HOST_VERSION, sdhci specs defines 0xFE,
-> > > +      * a wrong offset for us, we are at 0xFC.
-> > > +      */
-> > > +     if (reg == SDHCI_HOST_VERSION)
-> > > +             reg -= 2;
-> > > +
-> > > +     return readw(host->ioaddr + (reg ^ 0x2));
-> > > +}
-> > > +
-> > > +static u32 esdhc_mcf_readl_be(struct sdhci_host *host, int reg)
-> > > +{
-> > > +     u32 val;
-> > > +
-> > > +     val = readl(host->ioaddr + reg);
-> > > +
-> > > +     /*
-> > > +      * RM (25.3.9) sd pin clock must never exceed 25Mhz.
-> > > +      * So forcing legacy mode at 25Mhz.
-> > > +      */
-> > > +     if (unlikely(reg == SDHCI_CAPABILITIES))
-> > > +             val &= ~SDHCI_CAN_DO_HISPD;
-> > > +
-> > > +     if (unlikely(reg == SDHCI_INT_STATUS)) {
-> > > +             if (val & ESDHC_INT_VENDOR_SPEC_DMA_ERR) {
-> > > +                     val &= ~ESDHC_INT_VENDOR_SPEC_DMA_ERR;
-> > > +                     val |= SDHCI_INT_ADMA_ERROR;
-> > > +             }
-> > > +     }
-> > > +
-> > > +     return val;
-> > > +}
-> > > +
-> > > +static unsigned int esdhc_mcf_get_max_timeout_count(struct sdhci_host *host)
-> > > +{
-> > > +     return 1 << 27;
-> > > +}
-> > > +
-> > > +static void esdhc_mcf_set_timeout(struct sdhci_host *host,
-> > > +                               struct mmc_command *cmd)
-> > > +{
-> > > +     /* Use maximum timeout counter */
-> > > +     esdhc_clrset_be(host, ESDHC_SYS_CTRL_DTOCV_MASK, 0xE,
-> > > +                     SDHCI_TIMEOUT_CONTROL);
-> > > +}
-> > > +
-> > > +static void esdhc_mcf_reset(struct sdhci_host *host, u8 mask)
-> > > +{
-> > > +     struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> > > +     struct pltfm_mcf_data *mcf_data = sdhci_pltfm_priv(pltfm_host);
-> > > +
-> > > +     sdhci_reset(host, mask);
-> > > +
-> > > +     esdhc_clrset_be(host, ESDHC_CTRL_BUSWIDTH_MASK,
-> > > +                     mcf_data->current_bus_width, SDHCI_HOST_CONTROL);
-> > > +
-> > > +     sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
-> > > +     sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
-> > > +}
-> > > +
-> > > +static unsigned int esdhc_mcf_pltfm_get_max_clock(struct sdhci_host *host)
-> > > +{
-> > > +     struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> > > +
-> > > +     return pltfm_host->clock;
-> > > +}
-> > > +
-> > > +static unsigned int esdhc_mcf_pltfm_get_min_clock(struct sdhci_host *host)
-> > > +{
-> > > +     struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> > > +
-> > > +     return pltfm_host->clock / 256 / 16;
-> > > +}
-> > > +
-> > > +static void esdhc_mcf_pltfm_set_clock(struct sdhci_host *host,
-> > > +                                   unsigned int clock)
-> > > +{
-> > > +     struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> > > +     unsigned long *pll_dr = (unsigned long *)MCF_PLL_DR;
-> > > +     u32 fvco, fsys, fesdhc, temp;
-> > > +     const int sdclkfs[] = {2, 4, 8, 16, 32, 64, 128, 256};
-> > > +     int delta, old_delta = clock;
-> > > +     int i, q, ri, rq;
-> > > +
-> > > +     if (clock == 0) {
-> > > +             host->mmc->actual_clock = 0;
-> > > +             return;
-> > > +     }
-> > > +
-> > > +     /*
-> > > +      * ColdFire eSDHC clock.s
-> > > +      *
-> > > +      * pll -+-> / outdiv1 --> fsys
-> > > +      *      +-> / outdiv3 --> eSDHC clock ---> / SDCCLKFS / DVS
-> > > +      *
-> > > +      * mcf5441x datasheet says:
-> > > +      * (8.1.2) eSDHC should be 40 MHz max
-> > > +      * (25.3.9) eSDHC input is, as example, 96 Mhz ...
-> > > +      * (25.3.9) sd pin clock must never exceed 25Mhz
-> > > +      *
-> > > +      * fvco = fsys * outdvi1 + 1
-> > > +      * fshdc = fvco / outdiv3 + 1
-> > > +      */
-> > > +     temp = readl(pll_dr);
-> > > +     fsys = pltfm_host->clock;
-> > > +     fvco = fsys * ((temp & 0x1f) + 1);
-> > > +     fesdhc = fvco / (((temp >> 10) & 0x1f) + 1);
-> > > +
-> > > +     for (i = 0; i < 8; ++i) {
-> > > +             int result = fesdhc / sdclkfs[i];
-> > > +
-> > > +             for (q = 1; q < 17; ++q) {
-> > > +                     int finale = result / q;
-> > > +
-> > > +                     delta = abs(clock - finale);
-> > > +
-> > > +                     if (delta < old_delta) {
-> > > +                             old_delta = delta;
-> > > +                             ri = i;
-> > > +                             rq = q;
-> > > +                     }
-> > > +             }
-> > > +     }
-> > > +
-> > > +     /*
-> > > +      * Apply divisors and re-enable all the clocks
-> > > +      */
-> > > +     temp = ((sdclkfs[ri] >> 1) << 8) | ((rq - 1) << 4) |
-> > > +             (ESDHC_CLOCK_IPGEN | ESDHC_CLOCK_HCKEN | ESDHC_CLOCK_PEREN);
-> > > +     esdhc_clrset_be(host, 0x0000fff7, temp, SDHCI_CLOCK_CONTROL);
-> > > +
-> > > +     host->mmc->actual_clock = clock;
-> > > +
-> > > +     mdelay(1);
-> > > +}
-> > > +
-> > > +static void esdhc_mcf_pltfm_set_bus_width(struct sdhci_host *host, int width)
-> > > +{
-> > > +     struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> > > +     struct pltfm_mcf_data *mcf_data = sdhci_pltfm_priv(pltfm_host);
-> > > +
-> > > +     switch (width) {
-> > > +     case MMC_BUS_WIDTH_4:
-> > > +             mcf_data->current_bus_width = ESDHC_CTRL_4BITBUS;
-> > > +             break;
-> > > +     default:
-> > > +             mcf_data->current_bus_width = 0;
-> > > +             break;
-> > > +     }
-> > > +
-> > > +     esdhc_clrset_be(host, ESDHC_CTRL_BUSWIDTH_MASK,
-> > > +                     mcf_data->current_bus_width, SDHCI_HOST_CONTROL);
-> > > +}
-> > > +
-> > > +static void esdhc_mcf_request_done(struct sdhci_host *host,
-> > > +                                struct mmc_request *mrq)
-> > > +{
-> > > +     struct scatterlist *sg;
-> > > +     u32 *buffer;
-> > > +     int i;
-> > > +
-> > > +     if (!mrq->data || !mrq->data->bytes_xfered)
-> > > +             goto exit_done;
-> > > +
-> > > +     if (mmc_get_dma_dir(mrq->data) != DMA_FROM_DEVICE)
-> > > +             goto exit_done;
-> > > +
-> > > +     /*
-> > > +      * On mcf5441x there is no hw sdma option/flag to select the dma
-> > > +      * transfer endiannes. A swap after the transfer is needed.
-> > > +      */
-> > > +     for_each_sg(mrq->data->sg, sg, mrq->data->sg_len, i) {
-> > > +             buffer = (u32 *)sg_virt(sg);
-> > > +             esdhc_mcf_buffer_swap32(buffer, sg->length);
-> > > +     }
-> > > +
-> > > +exit_done:
-> > > +     mmc_request_done(host->mmc, mrq);
-> > > +}
-> > > +
-> > > +static void esdhc_mcf_copy_to_bounce_buffer(struct sdhci_host *host,
-> > > +                                         struct mmc_data *data)
-> > > +{
-> > > +     unsigned int length = data->blksz * data->blocks;
-> > > +
-> > > +     sg_copy_to_buffer(data->sg, data->sg_len,
-> > > +                       host->bounce_buffer, length);
-> > > +
-> > > +     esdhc_mcf_buffer_swap32((u32 *)host->bounce_buffer,
-> > > +                             data->blksz * data->blocks);
-> >
-> > data->blksz * data->blocks is already calculated as 'length'
-> >
-> > > +}
-> > > +
-> > > +static struct sdhci_ops sdhci_esdhc_ops = {
-> > > +     .reset = esdhc_mcf_reset,
-> > > +     .set_clock = esdhc_mcf_pltfm_set_clock,
-> > > +     .get_max_clock = esdhc_mcf_pltfm_get_max_clock,
-> > > +     .get_min_clock = esdhc_mcf_pltfm_get_min_clock,
-> > > +     .set_bus_width = esdhc_mcf_pltfm_set_bus_width,
-> > > +     .get_max_timeout_count = esdhc_mcf_get_max_timeout_count,
-> > > +     .set_timeout = esdhc_mcf_set_timeout,
-> > > +     .write_b = esdhc_mcf_writeb_be,
-> > > +     .write_w = esdhc_mcf_writew_be,
-> > > +     .write_l = esdhc_mcf_writel_be,
-> > > +     .read_b = esdhc_mcf_readb_be,
-> > > +     .read_w = esdhc_mcf_readw_be,
-> > > +     .read_l = esdhc_mcf_readl_be,
-> > > +     .copy_to_bounce_buffer = esdhc_mcf_copy_to_bounce_buffer,
-> > > +     .request_done = esdhc_mcf_request_done,
-> > > +};
-> > > +
-> > > +static const struct sdhci_pltfm_data sdhci_esdhc_mcf_pdata = {
-> > > +     .ops = &sdhci_esdhc_ops,
-> > > +     .quirks = ESDHC_DEFAULT_QUIRKS | SDHCI_QUIRK_FORCE_DMA,
-> > > +              /*
-> > > +               * Mandatory quirk,
-> > > +               * controller does not support cmd23,
-> > > +               * without, on > 8G cards cmd23 is used, and
-> > > +               * driver times out.
-> > > +               */
-> > > +               SDHCI_QUIRK2_HOST_NO_CMD23,
-> > > +};
-> > > +
-> > > +static int esdhc_mcf_plat_init(struct sdhci_host *host,
-> > > +                            struct pltfm_mcf_data *mcf_data)
-> > > +{
-> > > +     struct mcf_esdhc_platform_data *plat_data;
-> > > +
-> > > +     if (!host->mmc->parent->platform_data) {
-> > > +             dev_err(mmc_dev(host->mmc), "no platform data!\n");
-> > > +             return -EINVAL;
-> > > +     }
-> > > +
-> > > +     plat_data = (struct mcf_esdhc_platform_data *)
-> > > +                     host->mmc->parent->platform_data;
-> > > +
-> > > +     /* Card_detect */
-> > > +     switch (plat_data->cd_type) {
-> > > +     default:
-> > > +     case ESDHC_CD_CONTROLLER:
-> > > +             /* We have a working card_detect back */
-> > > +             host->quirks &= ~SDHCI_QUIRK_BROKEN_CARD_DETECTION;
-> > > +             break;
-> > > +     case ESDHC_CD_PERMANENT:
-> > > +             host->mmc->caps |= MMC_CAP_NONREMOVABLE;
-> > > +             break;
-> > > +     case ESDHC_CD_NONE:
-> > > +             break;
-> > > +     }
-> > > +
-> > > +     switch (plat_data->max_bus_width) {
-> > > +     case 4:
-> > > +             host->mmc->caps |= MMC_CAP_4_BIT_DATA;
-> > > +             break;
-> > > +     case 1:
-> > > +     default:
-> > > +             host->quirks |= SDHCI_QUIRK_FORCE_1_BIT_DATA;
-> > > +             break;
-> > > +     }
-> > > +
-> > > +     return 0;
-> > > +}
-> > > +
-> > > +static int sdhci_esdhc_mcf_probe(struct platform_device *pdev)
-> > > +{
-> > > +     struct sdhci_host *host;
-> > > +     struct sdhci_pltfm_host *pltfm_host;
-> > > +     struct pltfm_mcf_data *mcf_data;
-> > > +     int err;
-> > > +
-> > > +     host = sdhci_pltfm_init(pdev, &sdhci_esdhc_mcf_pdata,
-> > > +                             sizeof(*mcf_data));
-> > > +
-> > > +     if (IS_ERR(host))
-> > > +             return PTR_ERR(host);
-> > > +
-> > > +     pltfm_host = sdhci_priv(host);
-> > > +     mcf_data = sdhci_pltfm_priv(pltfm_host);
-> > > +
-> > > +     host->sdma_boundary = 0;
-> > > +
-> > > +     host->flags |= SDHCI_AUTO_CMD12;
-> > > +
-> > > +     mcf_data->clk_ipg = devm_clk_get(&pdev->dev, "ipg");
-> > > +     if (IS_ERR(mcf_data->clk_ipg)) {
-> > > +             err = PTR_ERR(mcf_data->clk_ipg);
-> > > +             goto err_exit;
-> > > +     }
-> > > +
-> > > +     mcf_data->clk_ahb = devm_clk_get(&pdev->dev, "ahb");
-> > > +     if (IS_ERR(mcf_data->clk_ahb)) {
-> > > +             err = PTR_ERR(mcf_data->clk_ahb);
-> > > +             goto err_exit;
-> > > +     }
-> > > +
-> > > +     mcf_data->clk_per = devm_clk_get(&pdev->dev, "per");
-> > > +     if (IS_ERR(mcf_data->clk_per)) {
-> > > +             err = PTR_ERR(mcf_data->clk_per);
-> > > +             goto err_exit;
-> > > +     }
-> > > +
-> > > +     pltfm_host->clk = mcf_data->clk_per;
-> > > +     pltfm_host->clock = clk_get_rate(pltfm_host->clk);
-> > > +     err = clk_prepare_enable(mcf_data->clk_per);
-> > > +     if (err)
-> > > +             goto err_exit;
-> > > +
-> > > +     err = clk_prepare_enable(mcf_data->clk_ipg);
-> > > +     if (err)
-> > > +             goto unprep_per;
-> > > +
-> > > +     err = clk_prepare_enable(mcf_data->clk_ahb);
-> > > +     if (err)
-> > > +             goto unprep_ipg;
-> > > +
-> > > +     err = esdhc_mcf_plat_init(host, mcf_data);
-> > > +     if (err)
-> > > +             goto unprep_ahb;
-> > > +
-> > > +     err = sdhci_setup_host(host);
-> > > +     if (err)
-> > > +             goto unprep_ahb;
-> > > +
-> > > +     if (!host->bounce_buffer) {
-> > > +             dev_err(&pdev->dev, "bounce buffer not allocated");
-> > > +             err = -ENOMEM;
-> > > +             goto cleanup;
-> > > +     }
-> > > +
-> > > +     err = __sdhci_add_host(host);
-> > > +     if (err)
-> > > +             goto cleanup;
-> > > +
-> > > +     return 0;
-> > > +
-> > > +cleanup:
-> > > +     sdhci_cleanup_host(host);
-> > > +unprep_ahb:
-> > > +     clk_disable_unprepare(mcf_data->clk_ahb);
-> > > +unprep_ipg:
-> > > +     clk_disable_unprepare(mcf_data->clk_ipg);
-> > > +unprep_per:
-> > > +     clk_disable_unprepare(mcf_data->clk_per);
-> > > +err_exit:
-> > > +     sdhci_pltfm_free(pdev);
-> > > +
-> > > +     return err;
-> > > +}
-> > > +
-> > > +static int sdhci_esdhc_mcf_remove(struct platform_device *pdev)
-> > > +{
-> > > +     struct sdhci_host *host = platform_get_drvdata(pdev);
-> > > +     struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> > > +     struct pltfm_mcf_data *mcf_data = sdhci_pltfm_priv(pltfm_host);
-> > > +
-> > > +     sdhci_remove_host(host, 0);
-> > > +
-> > > +     clk_disable_unprepare(mcf_data->clk_ipg);
-> > > +     clk_disable_unprepare(mcf_data->clk_ahb);
-> > > +     clk_disable_unprepare(mcf_data->clk_per);
-> > > +
-> > > +     sdhci_pltfm_free(pdev);
-> > > +
-> > > +     return 0;
-> > > +}
-> > > +
-> > > +static struct platform_driver sdhci_esdhc_mcf_driver = {
-> > > +     .driver = {
-> > > +             .name = "sdhci-esdhc-mcf",
-> > > +     },
-> > > +     .probe = sdhci_esdhc_mcf_probe,
-> > > +     .remove = sdhci_esdhc_mcf_remove,
-> > > +};
-> > > +
-> > > +module_platform_driver(sdhci_esdhc_mcf_driver);
-> > > +
-> > > +MODULE_DESCRIPTION("SDHCI driver for Freescale ColdFire eSDHC");
-> > > +MODULE_AUTHOR("Angelo Dureghello <angelo.dureghello@timesys.com>");
-> > > +MODULE_LICENSE("GPL v2");
-> > >
-> >
+> Why is this needed?  It seems doubtful that user space knows what value to
+> put here if neither the board information nor the driver have that information.
+
+The interface was provided to do tuning with a scope attached. As it is
+not a requirement, I'll remove it.
+
 >
+>> +     if (ret)
+>> +             dev_err(&pdev->dev, "failure creating '%s' device file",
+>> +                     sdhci_sparx5->dev_delay_clock.attr.name);
+>> +
+>> +     sdhci_get_of_property(pdev);
+>> +
+>> +     ret = mmc_of_parse(host->mmc);
+>> +     if (ret)
+>> +             goto err_clk;
+>> +
+>> +     sdhci_sparx5->cpu_ctrl = syscon_regmap_lookup_by_compatible(syscon);
+>> +     if (IS_ERR(sdhci_sparx5->cpu_ctrl)) {
+>> +             dev_err(&pdev->dev, "No CPU syscon regmap !\n");
+>> +             ret = PTR_ERR(sdhci_sparx5->cpu_ctrl);
+>> +             goto err_clk;
+>> +     }
+>> +
+>> +     if (sdhci_sparx5->delay_clock >= 0)
+>> +             sparx5_set_delay(host, sdhci_sparx5->delay_clock);
+>> +
+>> +     if (!mmc_card_is_removable(host->mmc)) {
+>> +             /* Do a HW reset of eMMC card */
+>> +             sdhci_sparx5_reset_emmc(host);
+>> +             /* Update EMMC_CTRL */
+>> +             sdhci_sparx5_set_emmc(host);
+>> +             /* If eMMC, disable SD and SDIO */
+>> +             host->mmc->caps2 |= (MMC_CAP2_NO_SDIO|MMC_CAP2_NO_SD);
+>> +     }
+>> +
+>> +     /* Enable v4 mode */
+>> +     //sdhci_enable_v4_mode(host);
 >
-> --
-> Angelo Dureghello
-> Timesys
-> e. angelo.dureghello@timesys.com
+> No commented out code please.
+
+I'll remove this.
+
+>
+>> +
+>> +     ret = sdhci_add_host(host);
+>> +     if (ret)
+>> +             dev_err(&pdev->dev, "sdhci_add_host() failed (%d)\n", ret);
+>> +
+>> +     /* Set AXI bus master to use un-cached access (for DMA) */
+>> +     if (host->flags & (SDHCI_USE_SDMA | SDHCI_USE_ADMA) &&
+>> +         IS_ENABLED(CONFIG_DMA_DECLARE_COHERENT))
+>> +             sparx5_set_cacheable(host, ACP_CACHE_FORCE_ENA);
+>> +
+>> +     pr_debug("SDHC version: 0x%08x\n", sdhci_readl(host, MSHC2_VERSION));
+>> +     pr_debug("SDHC type:    0x%08x\n", sdhci_readl(host, MSHC2_TYPE));
+>> +
+>> +     return ret;
+>> +
+>> +err_clk:
+>> +     clk_disable_unprepare(pltfm_host->clk);
+>> +free_pltfm:
+>> +     sdhci_pltfm_free(pdev);
+>> +     return ret;
+>> +}
+>> +
+>> +static const struct of_device_id sdhci_sparx5_of_match[] = {
+>> +     { .compatible = "microchip,dw-sparx5-sdhci" },
+>> +     { }
+>> +};
+>> +MODULE_DEVICE_TABLE(of, sdhci_sparx5_of_match);
+>> +
+>> +static struct platform_driver sdhci_sparx5_driver = {
+>> +     .driver = {
+>> +             .name = "sdhci-sparx5",
+>> +             .of_match_table = sdhci_sparx5_of_match,
+>> +             .pm = &sdhci_pltfm_pmops,
+>> +     },
+>> +     .probe = sdhci_sparx5_probe,
+>> +     .remove = sdhci_pltfm_unregister,
+>> +};
+>> +
+>> +module_platform_driver(sdhci_sparx5_driver);
+>> +
+>> +MODULE_DESCRIPTION("Sparx5 SDHCI OF driver");
+>> +MODULE_AUTHOR("Lars Povlsen <lars.povlsen@microchip.com>");
+>> +MODULE_LICENSE("GPL v2");
+>> --
+>> 2.26.2
+>>
+
+Thank you very much for your comments, I will make the suggested changes
+and submit an new series asap.
+
+-- 
+Lars Povlsen,
+Microchip
