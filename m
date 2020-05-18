@@ -2,122 +2,116 @@ Return-Path: <SRS0=SyG0=7A=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.3 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BFA75C433E0
-	for <linux-mmc@archiver.kernel.org>; Mon, 18 May 2020 11:45:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C4679C433DF
+	for <linux-mmc@archiver.kernel.org>; Mon, 18 May 2020 11:47:45 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9C71C206D4
-	for <linux-mmc@archiver.kernel.org>; Mon, 18 May 2020 11:45:48 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id AD3C8206D4
+	for <linux-mmc@archiver.kernel.org>; Mon, 18 May 2020 11:47:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727823AbgERLps (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 18 May 2020 07:45:48 -0400
-Received: from mga02.intel.com ([134.134.136.20]:8571 "EHLO mga02.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726557AbgERLps (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 18 May 2020 07:45:48 -0400
-IronPort-SDR: 86wQlj8NtQSR9yC4+rAi3+XkfMrLKWqNiNeXkNmX273DC+31JvTjgChQ7DGhuxWEiddsSqzVcz
- /uaF4qBkyakA==
-X-Amp-Result: SKIPPED(no attachment in message)
-X-Amp-File-Uploaded: False
-Received: from orsmga006.jf.intel.com ([10.7.209.51])
-  by orsmga101.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 18 May 2020 04:45:47 -0700
-IronPort-SDR: fMp6Jh4c9tB5sz7JoIjbV5D9Mt6F+z2/CjIhsUUTUpDYYlNIkaUHc+Z+WgzA4GSyxrjPDjwB+x
- KZkpAQS/bF+w==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.73,407,1583222400"; 
-   d="scan'208";a="267492215"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.157]) ([10.237.72.157])
-  by orsmga006.jf.intel.com with ESMTP; 18 May 2020 04:45:45 -0700
-Subject: Re: [PATCH V1 1/2] mmc: sdhci: Introduce new quirk to use reserved
- timeout
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Sarthak Garg <sartgarg@codeaurora.org>
-Cc:     Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
-        Sahitya Tummala <stummala@codeaurora.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-arm-msm <linux-arm-msm@vger.kernel.org>
-References: <1588772671-19675-1-git-send-email-sartgarg@codeaurora.org>
- <1588772671-19675-2-git-send-email-sartgarg@codeaurora.org>
- <CAPDyKFo0CabC_O-NusH4tUzjnG37_XQhY=QNhgnkQMoTokfaQg@mail.gmail.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <4db354d7-fff4-048e-dde5-647e8ba89a7d@intel.com>
-Date:   Mon, 18 May 2020 14:46:02 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.7.0
+        id S1728100AbgERLrj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 18 May 2020 07:47:39 -0400
+Received: from mail-ot1-f66.google.com ([209.85.210.66]:45592 "EHLO
+        mail-ot1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728073AbgERLre (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 18 May 2020 07:47:34 -0400
+Received: by mail-ot1-f66.google.com with SMTP id c3so7715825otr.12;
+        Mon, 18 May 2020 04:47:33 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=Qir9cbaQHXVGA1/iOYKuzF6odjOmx8lAyNZpRQv2tdQ=;
+        b=pac8S5O9hfO9GzSPea8N30VEeh5U4p2whwuRjCjRtsIPxO5HjxrQlQ/6QA8cdAOCDs
+         wv7rhviq+OGfOVGtvKz1HXHBjvbnAvbadjKPw6Sz6/tI7zg4nmpSfZ34szbo7yqAQnnj
+         BNmQgVfgje4RdWhoSOvIuBDa1nc/VowFE+T470OIz9NXaoVB8ZQQu5wy/OSMkPN9zqFE
+         +eQy7vC/r4Tqr1ixxgkunmfdZ/zs2gyD919/2MeX3hFmHNSs5bUQk02eDcFswC1Zwart
+         vPYR3Ks9AAhpi99XL/LGkck8WAvr2NZocYcvnhxNW+5QFEyq2eIRdJlZWPH+Xq3/yAyg
+         w/8w==
+X-Gm-Message-State: AOAM5321tk2W51TXs1rnixEh84mRQdX7kUzO4waTfD9IrrOIi4u6CEil
+        vXsj5z9paRgePJq+6GrAfUQN8O8A7e/lc8+Momc=
+X-Google-Smtp-Source: ABdhPJz2O4DBISUCLAR/kMEi9tuaM6RkZ5fY65PyWK3fsl2Xw8Rol1/2G9QYKQWCwWde1YPgoARYOiu95keFbjPun1E=
+X-Received: by 2002:a9d:564:: with SMTP id 91mr11986786otw.250.1589802453218;
+ Mon, 18 May 2020 04:47:33 -0700 (PDT)
 MIME-Version: 1.0
-In-Reply-To: <CAPDyKFo0CabC_O-NusH4tUzjnG37_XQhY=QNhgnkQMoTokfaQg@mail.gmail.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+References: <1589555337-5498-1-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
+ <1589555337-5498-18-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
+In-Reply-To: <1589555337-5498-18-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
+From:   Geert Uytterhoeven <geert@linux-m68k.org>
+Date:   Mon, 18 May 2020 13:47:19 +0200
+Message-ID: <CAMuHMdVV+2HsgmBytCOFg4pri4XinT_SPWT_Ac6n7FMZN3dR3w@mail.gmail.com>
+Subject: Re: [PATCH 17/17] ARM: dts: r8a7742: Add RWDT node
+To:     Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+Cc:     Jens Axboe <axboe@kernel.dk>, Rob Herring <robh+dt@kernel.org>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>,
+        "David S. Miller" <davem@davemloft.net>,
+        Wim Van Sebroeck <wim@linux-watchdog.org>,
+        Guenter Roeck <linux@roeck-us.net>, linux-ide@vger.kernel.org,
+        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
+        <devicetree@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        Linux I2C <linux-i2c@vger.kernel.org>,
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        netdev <netdev@vger.kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
+        Linux Watchdog Mailing List <linux-watchdog@vger.kernel.org>,
+        Prabhakar <prabhakar.csengg@gmail.com>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 18/05/20 12:39 pm, Ulf Hansson wrote:
-> On Wed, 6 May 2020 at 15:53, Sarthak Garg <sartgarg@codeaurora.org> wrote:
->>
->> Introduce a new quirk for letting vendor drivers to use reserved
->> timeout value (0xF) in timeout control register.
->>
->> Signed-off-by: Sahitya Tummala <stummala@codeaurora.org>
->> Signed-off-by: Sarthak Garg <sartgarg@codeaurora.org>
->> ---
->>  drivers/mmc/host/sdhci.c | 3 ++-
->>  drivers/mmc/host/sdhci.h | 5 +++++
->>  2 files changed, 7 insertions(+), 1 deletion(-)
->>
->> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->> index 1bb6b67..07528a9 100644
->> --- a/drivers/mmc/host/sdhci.c
->> +++ b/drivers/mmc/host/sdhci.c
->> @@ -967,7 +967,8 @@ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd,
->>         }
->>
->>         if (count >= 0xF) {
->> -               if (!(host->quirks2 & SDHCI_QUIRK2_DISABLE_HW_TIMEOUT))
->> +               if (!(host->quirks2 & SDHCI_QUIRK2_DISABLE_HW_TIMEOUT) ||
->> +               !(host->quirks2 & SDHCI_QUIRK2_USE_RESERVED_MAX_TIMEOUT))
-> 
-> I don't quite get how this can make your variant use 0xF rather than 0xE?
-> 
-> To me it looks like an updated conditional check to print a debug message, no?
+Hi Prabhakar,
 
-Probably need to introduce host->max_timeout_count, set it to 0xE in
-sdhci_alloc_host(), and change sdhci_calc_timeout() to use it in place of
-all the 0xE and 0xF constants.
+On Fri, May 15, 2020 at 5:10 PM Lad Prabhakar
+<prabhakar.mahadev-lad.rj@bp.renesas.com> wrote:
+> Add a device node for the Watchdog Timer (RWDT) controller on the Renesas
+> RZ/G1H (r8a7742) SoC.
+>
+> Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+> Reviewed-by: Marian-Cristian Rotariu <marian-cristian.rotariu.rb@bp.renesas.com>
 
-> 
->>                         DBG("Too large timeout 0x%x requested for CMD%d!\n",
->>                             count, cmd->opcode);
->>                 count = 0xE;
->> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
->> index 8d2a096..02f8779 100644
->> --- a/drivers/mmc/host/sdhci.h
->> +++ b/drivers/mmc/host/sdhci.h
->> @@ -476,6 +476,11 @@ struct sdhci_host {
->>   * block count.
->>   */
->>  #define SDHCI_QUIRK2_USE_32BIT_BLK_CNT                 (1<<18)
->> +/*
->> + * Some controllers define the usage of 0xF in data timeout counter
->> + * register (0x2E) which is actually a reserved bit as per specification.
->> + */
->> +#define SDHCI_QUIRK2_USE_RESERVED_MAX_TIMEOUT          (1<<19)
->>
->>         int irq;                /* Device IRQ */
->>         void __iomem *ioaddr;   /* Mapped address */
->> --
->> 2.7.4
->>
-> 
-> Kind regards
-> Uffe
-> 
+Thanks for your patch!
 
+> --- a/arch/arm/boot/dts/r8a7742.dtsi
+> +++ b/arch/arm/boot/dts/r8a7742.dtsi
+> @@ -201,6 +201,16 @@
+>                 #size-cells = <2>;
+>                 ranges;
+>
+> +               rwdt: watchdog@e6020000 {
+> +                       compatible = "renesas,r8a7742-wdt",
+> +                                    "renesas,rcar-gen2-wdt";
+> +                       reg = <0 0xe6020000 0 0x0c>;
+> +                       clocks = <&cpg CPG_MOD 402>;
+> +                       power-domains = <&sysc R8A7742_PD_ALWAYS_ON>;
+> +                       resets = <&cpg 402>;
+> +                       status = "disabled";
+
+Missing "interrupts" property.
+
+> +               };
+> +
+>                 gpio0: gpio@e6050000 {
+>                         compatible = "renesas,gpio-r8a7742",
+>                                      "renesas,rcar-gen2-gpio";
+
+The rest looks fine, so with the above fixed:
+Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
+
+Gr{oetje,eeting}s,
+
+                        Geert
+
+-- 
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
