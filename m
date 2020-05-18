@@ -2,110 +2,122 @@ Return-Path: <SRS0=SyG0=7A=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.3 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 34D7CC433DF
-	for <linux-mmc@archiver.kernel.org>; Mon, 18 May 2020 11:24:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BFA75C433E0
+	for <linux-mmc@archiver.kernel.org>; Mon, 18 May 2020 11:45:48 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1C499206D4
-	for <linux-mmc@archiver.kernel.org>; Mon, 18 May 2020 11:24:31 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9C71C206D4
+	for <linux-mmc@archiver.kernel.org>; Mon, 18 May 2020 11:45:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727034AbgERLYa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 18 May 2020 07:24:30 -0400
-Received: from mail-ot1-f65.google.com ([209.85.210.65]:40584 "EHLO
-        mail-ot1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726739AbgERLYa (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 18 May 2020 07:24:30 -0400
-Received: by mail-ot1-f65.google.com with SMTP id d26so7695593otc.7;
-        Mon, 18 May 2020 04:24:29 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=S+/xJo9DYFV5x/KGWI9bYykM6mq0Xnr1uVyyiFMOM94=;
-        b=Y1TXobsoU2Lmp4U/8L5YGzh0WkqFwCw/MDZ87ObhHLJTWmtMOimQskBr1/pbdWjP75
-         MJzrlD6TnptUtEaImuH9sNuPt4YyZY3kI/HTJ2Up2RSXirs4GYPSz0Fge7nicdEz/GXA
-         QFVOLgiLVF0FCpbcs/Es3B5UpiA2WBiJE6tQOqg0k9esI9Xo0rtm0BDS8NTQRvTC52rI
-         T2MUGuFN/USBlEWEvvu8A7v1EurJ9jMydykR8leyxtxK7z6sN0sRdwm799HfTLh1wBbA
-         R09IycWVjec5eWiT1qKk9BmSI0iz5xpu/HVR2h+lOnPH5CgksqfwPiBu4DvmfixZXtoV
-         hKKQ==
-X-Gm-Message-State: AOAM5312P1nLMyt2BTLykHafZ924Fj7G0tJKVbPDOAEitDbdmca0qxiM
-        EkRPKMopYj89LiZqofOeAGvu6VLLt0g0JqaA9SA=
-X-Google-Smtp-Source: ABdhPJwNoxButZwgH4SDPteHjBuwwMLD1bqxVYkjDcQmRozmQtDNJ0fFE+TRSmeEzroqrNyEaK173xc8SAa+z83VsXs=
-X-Received: by 2002:a05:6830:18d9:: with SMTP id v25mr7897454ote.107.1589801068351;
- Mon, 18 May 2020 04:24:28 -0700 (PDT)
-MIME-Version: 1.0
-References: <1589555337-5498-1-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
- <1589555337-5498-6-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com> <20200515171754.GF19423@ninjato>
-In-Reply-To: <20200515171754.GF19423@ninjato>
-From:   Geert Uytterhoeven <geert@linux-m68k.org>
-Date:   Mon, 18 May 2020 13:24:15 +0200
-Message-ID: <CAMuHMdXgRgP8acDzn-p31wmomEbzFXJ2i2vOW1ppuHP-K6-UpQ@mail.gmail.com>
-Subject: Re: [PATCH 05/17] mmc: renesas_sdhi_sys_dmac: Add support for r8a7742 SoC
-To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc:     Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>,
-        Jens Axboe <axboe@kernel.dk>, Rob Herring <robh+dt@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>,
-        "David S. Miller" <davem@davemloft.net>,
-        Wim Van Sebroeck <wim@linux-watchdog.org>,
-        Guenter Roeck <linux@roeck-us.net>, linux-ide@vger.kernel.org,
-        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
-        <devicetree@vger.kernel.org>,
+        id S1727823AbgERLps (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 18 May 2020 07:45:48 -0400
+Received: from mga02.intel.com ([134.134.136.20]:8571 "EHLO mga02.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726557AbgERLps (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 18 May 2020 07:45:48 -0400
+IronPort-SDR: 86wQlj8NtQSR9yC4+rAi3+XkfMrLKWqNiNeXkNmX273DC+31JvTjgChQ7DGhuxWEiddsSqzVcz
+ /uaF4qBkyakA==
+X-Amp-Result: SKIPPED(no attachment in message)
+X-Amp-File-Uploaded: False
+Received: from orsmga006.jf.intel.com ([10.7.209.51])
+  by orsmga101.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 18 May 2020 04:45:47 -0700
+IronPort-SDR: fMp6Jh4c9tB5sz7JoIjbV5D9Mt6F+z2/CjIhsUUTUpDYYlNIkaUHc+Z+WgzA4GSyxrjPDjwB+x
+ KZkpAQS/bF+w==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.73,407,1583222400"; 
+   d="scan'208";a="267492215"
+Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.157]) ([10.237.72.157])
+  by orsmga006.jf.intel.com with ESMTP; 18 May 2020 04:45:45 -0700
+Subject: Re: [PATCH V1 1/2] mmc: sdhci: Introduce new quirk to use reserved
+ timeout
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Sarthak Garg <sartgarg@codeaurora.org>
+Cc:     Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
+        Sahitya Tummala <stummala@codeaurora.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
         Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Linux I2C <linux-i2c@vger.kernel.org>,
-        Linux MMC List <linux-mmc@vger.kernel.org>,
-        netdev <netdev@vger.kernel.org>,
-        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
-        Linux Watchdog Mailing List <linux-watchdog@vger.kernel.org>,
-        Prabhakar <prabhakar.csengg@gmail.com>
-Content-Type: text/plain; charset="UTF-8"
+        linux-arm-msm <linux-arm-msm@vger.kernel.org>
+References: <1588772671-19675-1-git-send-email-sartgarg@codeaurora.org>
+ <1588772671-19675-2-git-send-email-sartgarg@codeaurora.org>
+ <CAPDyKFo0CabC_O-NusH4tUzjnG37_XQhY=QNhgnkQMoTokfaQg@mail.gmail.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Message-ID: <4db354d7-fff4-048e-dde5-647e8ba89a7d@intel.com>
+Date:   Mon, 18 May 2020 14:46:02 +0300
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.7.0
+MIME-Version: 1.0
+In-Reply-To: <CAPDyKFo0CabC_O-NusH4tUzjnG37_XQhY=QNhgnkQMoTokfaQg@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Wolfram, Prabhakar,
+On 18/05/20 12:39 pm, Ulf Hansson wrote:
+> On Wed, 6 May 2020 at 15:53, Sarthak Garg <sartgarg@codeaurora.org> wrote:
+>>
+>> Introduce a new quirk for letting vendor drivers to use reserved
+>> timeout value (0xF) in timeout control register.
+>>
+>> Signed-off-by: Sahitya Tummala <stummala@codeaurora.org>
+>> Signed-off-by: Sarthak Garg <sartgarg@codeaurora.org>
+>> ---
+>>  drivers/mmc/host/sdhci.c | 3 ++-
+>>  drivers/mmc/host/sdhci.h | 5 +++++
+>>  2 files changed, 7 insertions(+), 1 deletion(-)
+>>
+>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>> index 1bb6b67..07528a9 100644
+>> --- a/drivers/mmc/host/sdhci.c
+>> +++ b/drivers/mmc/host/sdhci.c
+>> @@ -967,7 +967,8 @@ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd,
+>>         }
+>>
+>>         if (count >= 0xF) {
+>> -               if (!(host->quirks2 & SDHCI_QUIRK2_DISABLE_HW_TIMEOUT))
+>> +               if (!(host->quirks2 & SDHCI_QUIRK2_DISABLE_HW_TIMEOUT) ||
+>> +               !(host->quirks2 & SDHCI_QUIRK2_USE_RESERVED_MAX_TIMEOUT))
+> 
+> I don't quite get how this can make your variant use 0xF rather than 0xE?
+> 
+> To me it looks like an updated conditional check to print a debug message, no?
 
-On Fri, May 15, 2020 at 7:17 PM Wolfram Sang
-<wsa+renesas@sang-engineering.com> wrote:
-> On Fri, May 15, 2020 at 04:08:45PM +0100, Lad Prabhakar wrote:
-> > Add support for r8a7742 SoC. Renesas RZ/G1H (R8A7742) SDHI is identical to
-> > the R-Car Gen2 family.
-> >
-> > Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-> > Reviewed-by: Marian-Cristian Rotariu <marian-cristian.rotariu.rb@bp.renesas.com>
->
-> I think we can skip this because of the generic fallback? The other
+Probably need to introduce host->max_timeout_count, set it to 0xE in
+sdhci_alloc_host(), and change sdhci_calc_timeout() to use it in place of
+all the 0xE and 0xF constants.
 
-Agreed.
+> 
+>>                         DBG("Too large timeout 0x%x requested for CMD%d!\n",
+>>                             count, cmd->opcode);
+>>                 count = 0xE;
+>> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+>> index 8d2a096..02f8779 100644
+>> --- a/drivers/mmc/host/sdhci.h
+>> +++ b/drivers/mmc/host/sdhci.h
+>> @@ -476,6 +476,11 @@ struct sdhci_host {
+>>   * block count.
+>>   */
+>>  #define SDHCI_QUIRK2_USE_32BIT_BLK_CNT                 (1<<18)
+>> +/*
+>> + * Some controllers define the usage of 0xF in data timeout counter
+>> + * register (0x2E) which is actually a reserved bit as per specification.
+>> + */
+>> +#define SDHCI_QUIRK2_USE_RESERVED_MAX_TIMEOUT          (1<<19)
+>>
+>>         int irq;                /* Device IRQ */
+>>         void __iomem *ioaddr;   /* Mapped address */
+>> --
+>> 2.7.4
+>>
+> 
+> Kind regards
+> Uffe
+> 
 
-> entries come from a time when we had a different policy IIRC.
-
-Indeed.  Commit c16a854e4463078a ("mmc: renesas_sdhi: Add r8a7743/5
-support") predated commit d6dc425ae595e140 ("mmc: renesas_sdhi:
-implement R-Car Gen[123] fallback compatibility strings").
-
-> > --- a/drivers/mmc/host/renesas_sdhi_sys_dmac.c
-> > +++ b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
-> > @@ -75,6 +75,7 @@ static const struct of_device_id renesas_sdhi_sys_dmac_of_match[] = {
-> >       { .compatible = "renesas,sdhi-r7s72100", .data = &of_rz_compatible, },
-> >       { .compatible = "renesas,sdhi-r8a7778", .data = &of_rcar_gen1_compatible, },
-> >       { .compatible = "renesas,sdhi-r8a7779", .data = &of_rcar_gen1_compatible, },
-> > +     { .compatible = "renesas,sdhi-r8a7742", .data = &of_rcar_gen2_compatible, },
-> >       { .compatible = "renesas,sdhi-r8a7743", .data = &of_rcar_gen2_compatible, },
-> >       { .compatible = "renesas,sdhi-r8a7745", .data = &of_rcar_gen2_compatible, },
-> >       { .compatible = "renesas,sdhi-r8a7790", .data = &of_rcar_gen2_compatible, },
-
-Gr{oetje,eeting}s,
-
-                        Geert
-
--- 
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
