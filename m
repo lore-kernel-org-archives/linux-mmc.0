@@ -2,124 +2,119 @@ Return-Path: <SRS0=/V3P=7B=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.6 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-9.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2DEE9C433E0
-	for <linux-mmc@archiver.kernel.org>; Tue, 19 May 2020 14:08:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8EA23C433E1
+	for <linux-mmc@archiver.kernel.org>; Tue, 19 May 2020 14:45:06 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0EA862083E
-	for <linux-mmc@archiver.kernel.org>; Tue, 19 May 2020 14:08:45 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (1024-bit key) header.d=mg.codeaurora.org header.i=@mg.codeaurora.org header.b="oNAjjFbj"
+	by mail.kernel.org (Postfix) with ESMTP id 6AF7F2083E
+	for <linux-mmc@archiver.kernel.org>; Tue, 19 May 2020 14:45:06 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1589899506;
+	bh=IaVjtUjZRfD5n9+imvde6GZIZTX/UXJ/zi0G9EtqwY8=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
+	b=AETEGglQjqVL46IPNvDtCc0AxEs+ALnMJ31wDupkw4PWdsIoxYK1jXguXiHiglFAb
+	 A/Bal+uZ+obdEc9qUIWGNwaeD4QzG3oGIrzHbqrgxpBtTl4pixr/8Xp+NLBzfWdMfw
+	 jixc/ihl8LBr0JL2y1qY6vIA20WmWGPBdTAdnjx4=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728901AbgESOIo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 19 May 2020 10:08:44 -0400
-Received: from mail26.static.mailgun.info ([104.130.122.26]:15513 "EHLO
-        mail26.static.mailgun.info" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1728857AbgESOIo (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 May 2020 10:08:44 -0400
-DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
- s=smtp; t=1589897323; h=Message-ID: References: In-Reply-To: Subject:
- Cc: To: From: Date: Content-Transfer-Encoding: Content-Type:
- MIME-Version: Sender; bh=Ozo4sFFD/vkELudTAzBv4lNjvTKjz0A3Zf2SclqnVPQ=;
- b=oNAjjFbja1tTH8cTh64tffiIW8PbW4Z6EHgUkUrD1tD2wCgdFo6MhxL3T0oQpR/6JU8ycmr7
- RJUS3sYtwRgOmQPx+0jApOisOWwx7sUuKlQiCvob2iP2/BBueWEfiINjRDrzRs+95060KWbx
- gcWZyjq8k+sa33ukFopGSHZEIz8=
-X-Mailgun-Sending-Ip: 104.130.122.26
-X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
-Received: from smtp.codeaurora.org (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171])
- by mxa.mailgun.org with ESMTP id 5ec3e858.7f2e1a8de308-smtp-out-n05;
- Tue, 19 May 2020 14:08:24 -0000 (UTC)
-Received: by smtp.codeaurora.org (Postfix, from userid 1001)
-        id 3BAD8C432C2; Tue, 19 May 2020 14:08:24 +0000 (UTC)
-Received: from mail.codeaurora.org (localhost.localdomain [127.0.0.1])
-        (using TLSv1 with cipher ECDHE-RSA-AES256-SHA (256/256 bits))
+        id S1729136AbgESOpE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 19 May 2020 10:45:04 -0400
+Received: from mail.kernel.org ([198.145.29.99]:44100 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1728647AbgESOpE (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 19 May 2020 10:45:04 -0400
+Received: from sol.localdomain (c-107-3-166-239.hsd1.ca.comcast.net [107.3.166.239])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        (Authenticated sender: sartgarg)
-        by smtp.codeaurora.org (Postfix) with ESMTPSA id A5B52C43636;
-        Tue, 19 May 2020 14:08:23 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id BB3C920825;
+        Tue, 19 May 2020 14:45:02 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1589899503;
+        bh=IaVjtUjZRfD5n9+imvde6GZIZTX/UXJ/zi0G9EtqwY8=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=mJzQ71AZohKqnmu/hIb1vJojWlq7pnCYd6ePvm+HoHwhRH6gnFUNWLJbDW6vXlxy+
+         Sjjoqco6E4dO0ac3gZYa7/CYDGb5rG1spEg7Ug7kjnlZETQtiS4HugobFC8VDghAls
+         srvR1sb43gH1vlDywH6XqoHrdvbMx4qhRYGcQXCE=
+Date:   Tue, 19 May 2020 07:45:01 -0700
+From:   Eric Biggers <ebiggers@kernel.org>
+To:     "Theodore Y. Ts'o" <tytso@mit.edu>
+Cc:     linux-fscrypt@vger.kernel.org,
+        linux-f2fs-devel@lists.sourceforge.net, linux-ext4@vger.kernel.org,
+        linux-fsdevel@vger.kernel.org, linux-crypto@vger.kernel.org,
+        linux-mmc@vger.kernel.org, Satya Tangirala <satyat@google.com>,
+        Jaegeuk Kim <jaegeuk@kernel.org>,
+        Paul Crowley <paulcrowley@google.com>
+Subject: Re: [PATCH] fscrypt: add support for IV_INO_LBLK_32 policies
+Message-ID: <20200519144501.GA857@sol.localdomain>
+References: <20200515204141.251098-1-ebiggers@kernel.org>
+ <20200519111321.GE2396055@mit.edu>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII;
- format=flowed
-Content-Transfer-Encoding: 7bit
-Date:   Tue, 19 May 2020 19:38:23 +0530
-From:   sartgarg@codeaurora.org
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
-        Sahitya Tummala <stummala@codeaurora.org>,
-        linux-mmc@vger.kernel.org,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
-        linux-mmc-owner@vger.kernel.org
-Subject: Re: [PATCH V1 1/2] mmc: sdhci: Introduce new quirk to use reserved
- timeout
-In-Reply-To: <CAPDyKFqN8CeniJq5S9zCdYYR38DFyk0vKnCw3fi548tXvwbseg@mail.gmail.com>
-References: <1588772671-19675-1-git-send-email-sartgarg@codeaurora.org>
- <1588772671-19675-2-git-send-email-sartgarg@codeaurora.org>
- <CAPDyKFo0CabC_O-NusH4tUzjnG37_XQhY=QNhgnkQMoTokfaQg@mail.gmail.com>
- <4db354d7-fff4-048e-dde5-647e8ba89a7d@intel.com>
- <CAPDyKFqN8CeniJq5S9zCdYYR38DFyk0vKnCw3fi548tXvwbseg@mail.gmail.com>
-Message-ID: <e27745b48566d3535bd1a1a6d8dbb9c4@codeaurora.org>
-X-Sender: sartgarg@codeaurora.org
-User-Agent: Roundcube Webmail/1.3.9
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20200519111321.GE2396055@mit.edu>
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 2020-05-18 18:20, Ulf Hansson wrote:
-> On Mon, 18 May 2020 at 13:45, Adrian Hunter <adrian.hunter@intel.com> 
-> wrote:
->> 
->> On 18/05/20 12:39 pm, Ulf Hansson wrote:
->> > On Wed, 6 May 2020 at 15:53, Sarthak Garg <sartgarg@codeaurora.org> wrote:
->> >>
->> >> Introduce a new quirk for letting vendor drivers to use reserved
->> >> timeout value (0xF) in timeout control register.
->> >>
->> >> Signed-off-by: Sahitya Tummala <stummala@codeaurora.org>
->> >> Signed-off-by: Sarthak Garg <sartgarg@codeaurora.org>
->> >> ---
->> >>  drivers/mmc/host/sdhci.c | 3 ++-
->> >>  drivers/mmc/host/sdhci.h | 5 +++++
->> >>  2 files changed, 7 insertions(+), 1 deletion(-)
->> >>
->> >> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->> >> index 1bb6b67..07528a9 100644
->> >> --- a/drivers/mmc/host/sdhci.c
->> >> +++ b/drivers/mmc/host/sdhci.c
->> >> @@ -967,7 +967,8 @@ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd,
->> >>         }
->> >>
->> >>         if (count >= 0xF) {
->> >> -               if (!(host->quirks2 & SDHCI_QUIRK2_DISABLE_HW_TIMEOUT))
->> >> +               if (!(host->quirks2 & SDHCI_QUIRK2_DISABLE_HW_TIMEOUT) ||
->> >> +               !(host->quirks2 & SDHCI_QUIRK2_USE_RESERVED_MAX_TIMEOUT))
->> >
->> > I don't quite get how this can make your variant use 0xF rather than 0xE?
->> >
->> > To me it looks like an updated conditional check to print a debug message, no?
->> 
->> Probably need to introduce host->max_timeout_count, set it to 0xE in
->> sdhci_alloc_host(), and change sdhci_calc_timeout() to use it in place 
->> of
->> all the 0xE and 0xF constants.
+On Tue, May 19, 2020 at 07:13:21AM -0400, Theodore Y. Ts'o wrote:
+> On Fri, May 15, 2020 at 01:41:41PM -0700, Eric Biggers wrote:
+> > From: Eric Biggers <ebiggers@google.com>
+> > 
+> > The eMMC inline crypto standard will only specify 32 DUN bits (a.k.a. IV
+> > bits), unlike UFS's 64.  IV_INO_LBLK_64 is therefore not applicable, but
+> > an encryption format which uses one key per policy and permits the
+> > moving of encrypted file contents (as f2fs's garbage collector requires)
+> > is still desirable.
+> > 
+> > To support such hardware, add a new encryption format IV_INO_LBLK_32
+> > that makes the best use of the 32 bits: the IV is set to
+> > 'SipHash-2-4(inode_number) + file_logical_block_number mod 2^32', where
+> > the SipHash key is derived from the fscrypt master key.  We hash only
+> > the inode number and not also the block number, because we need to
+> > maintain contiguity of DUNs to merge bios.
+> > 
+> > Unlike with IV_INO_LBLK_64, with this format IV reuse is possible; this
+> > is unavoidable given the size of the DUN.  This means this format should
+> > only be used where the requirements of the first paragraph apply.
+> > However, the hash spreads out the IVs in the whole usable range, and the
+> > use of a keyed hash makes it difficult for an attacker to determine
+> > which files use which IVs.
+> > 
+> > Besides the above differences, this flag works like IV_INO_LBLK_64 in
+> > that on ext4 it is only allowed if the stable_inodes feature has been
+> > enabled to prevent inode numbers and the filesystem UUID from changing.
+> > 
+> > Signed-off-by: Eric Biggers <ebiggers@google.com>
 > 
-> Yep, that seems like a reasonable approach to me as well.
+> Reviewed-by: Theodore Ts'o <tytso@mit.edu>
 > 
-> [...]
+> I kind of wish we had Kunit tests with test vectors, but that's for
+> another commit I think.
 > 
-> Kind regards
-> Uffe
 
-Resending the mail again as can't see my comment on the 
-https://patchwork.kernel.org/ page.
-Sorry for the mistake just want to update the logic as below.
--               count = 0xE;
-+               if(!(host->quirks2 & 
-SDHCI_QUIRK2_USE_RESERVED_MAX_TIMEOUT))
-+                       count = 0xE;
+We do have ciphertext verification tests in xfstests for all the existing
+fscrypt options.  Actually, I had hacked one together for IV_INO_LBLK_32 before
+sending this patch
+(https://git.kernel.org/pub/scm/linux/kernel/git/ebiggers/xfstests-dev.git/commit/?id=55153ceee2948269c0359bd97fc0d58a26139c87).
+I'll be sending it for review after I've looked over it again.
+
+Similarly, since earlier this year, we now also have ciphertext verification
+tests in Android's VTS (Vendor Test Suite)
+(https://android.googlesource.com/platform/test/vts-testcase/kernel/+/refs/heads/master/encryption/).
+I'll be adding one for this new flag.
+
+These ciphertext verification tests test the round-trip from the key added by
+userspace to the data on-disk -- even if the data is encrypted by inline crypto
+hardware rather than the kernel itself.  So they're better than Kunit tests.
+
+The thing I'm struggling with a bit is actually that when inline crypto is used,
+IV_INO_LBLK_32 introduces a case where the DUN can wrap from 0xffffffff to 0,
+and that case is new/special in that blocks can't be merged over that boundary
+even if they are both logically and physically contiguous.  So, we could also
+use a test that tests doing I/O around this boundary where the DUN wraps around.
+
+- Eric
