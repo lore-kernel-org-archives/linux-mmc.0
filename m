@@ -2,90 +2,106 @@ Return-Path: <SRS0=/V3P=7B=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.1 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B1FC9C433DF
-	for <linux-mmc@archiver.kernel.org>; Tue, 19 May 2020 11:33:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E2B3AC433E0
+	for <linux-mmc@archiver.kernel.org>; Tue, 19 May 2020 11:35:48 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 91EA420758
-	for <linux-mmc@archiver.kernel.org>; Tue, 19 May 2020 11:33:36 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B298420758
+	for <linux-mmc@archiver.kernel.org>; Tue, 19 May 2020 11:35:48 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=fail reason="signature verification failed" (1024-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="2ZIiylDR"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728573AbgESLdg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 19 May 2020 07:33:36 -0400
-Received: from relmlor2.renesas.com ([210.160.252.172]:8524 "EHLO
-        relmlie6.idc.renesas.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1726508AbgESLdf (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 May 2020 07:33:35 -0400
-X-IronPort-AV: E=Sophos;i="5.73,409,1583161200"; 
-   d="scan'208";a="47264943"
-Received: from unknown (HELO relmlir5.idc.renesas.com) ([10.200.68.151])
-  by relmlie6.idc.renesas.com with ESMTP; 19 May 2020 20:33:34 +0900
-Received: from localhost.localdomain (unknown [10.166.252.89])
-        by relmlir5.idc.renesas.com (Postfix) with ESMTP id 90CA640065AA;
-        Tue, 19 May 2020 20:33:34 +0900 (JST)
-From:   Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-To:     ulf.hansson@linaro.org
-Cc:     linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-Subject: [PATCH/RFC] mmc: core: Issue power_off_notify for eMMC Suspend-to-RAM
-Date:   Tue, 19 May 2020 20:33:08 +0900
-Message-Id: <1589887988-7362-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
-X-Mailer: git-send-email 2.7.4
+        id S1726859AbgESLfs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 19 May 2020 07:35:48 -0400
+Received: from www.zeus03.de ([194.117.254.33]:46766 "EHLO mail.zeus03.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726508AbgESLfs (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 19 May 2020 07:35:48 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
+        date:from:to:cc:subject:message-id:references:mime-version
+        :content-type:in-reply-to; s=k1; bh=Fr7SK5ZlMO7ObWQT9rVGgOnzmdw/
+        gHa5YkKKChKkP3c=; b=2ZIiylDRd5e7OUIeZU2kRVs7hDQ89rJXN2IOyfbLz6RY
+        7yfZ7jidIuUvq7+HooJQAmXj+cleuYIdw+mgFVZq7ReQTAVtJOTfn+WiKMOdEMox
+        BZT+3SRbGtm7TAqDAxUNmCVuKllstqcPhjGgdiPiLE7eEoeXuZtuHU0XN9WPtv8=
+Received: (qmail 235465 invoked from network); 19 May 2020 13:35:46 +0200
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 19 May 2020 13:35:46 +0200
+X-UD-Smtp-Session: l3s3148p1@ujIvrv6lfuMgAwDPXxCmAFNwG0mTH/5q
+Date:   Tue, 19 May 2020 13:35:45 +0200
+From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Geert Uytterhoeven <geert@linux-m68k.org>,
+        Masahiro Yamada <yamada.masahiro@socionext.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Ulrich Hecht <uli+renesas@fpond.eu>,
+        Simon Horman <horms+renesas@verge.net.au>,
+        Niklas Soderlund <niklas.soderlund@ragnatech.se>
+Subject: Re: [PATCH 2/2] mmc: tmio: Make sure the PM domain is 'started'
+ while probing
+Message-ID: <20200519113545.GK1094@ninjato>
+References: <20200515140459.15273-1-ulf.hansson@linaro.org>
+ <20200518202200.GC5109@ninjato>
+ <CAPDyKFpCdD=B08aVhbTM9VjYGNNvNiE-A_fTF2XdHppGbVh6Bw@mail.gmail.com>
+ <20200519084653.GF1094@ninjato>
+ <CAMuHMdXVj_A20S+69Yr9nvL5mWsDTi=BuHNcsy-qNwmfb5S46Q@mail.gmail.com>
+ <CAPDyKFr0Pfge4tm5MQmnmjx7Pvjjf16tLr47wYiR-2ys69Ux2A@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="fUvfsPTz/SzOZDdw"
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFr0Pfge4tm5MQmnmjx7Pvjjf16tLr47wYiR-2ys69Ux2A@mail.gmail.com>
+User-Agent: Mutt/1.10.1 (2018-07-13)
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The commit 432356793415 ("mmc: core: Enable power_off_notify for
-eMMC shutdown sequence") enabled the power off notification
-even if MMC_CAP2_POWEROFF_NOTIFY (MMC_CAP2_FULL_PWR_CYCLE now) is
-not set. However, the mmc core lacks to issue the power off
-notificaiton when Suspend-to-{RAM,Disk} happens on the system.
 
-So, add Suspend-to-RAM support at first because this is easy to
-check by using pm_suspend_target_state condition on _mmc_suspend().
+--fUvfsPTz/SzOZDdw
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
----
- drivers/mmc/core/mmc.c | 9 ++++++++-
- 1 file changed, 8 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 4203303..4a23f83 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -11,6 +11,7 @@
- #include <linux/of.h>
- #include <linux/slab.h>
- #include <linux/stat.h>
-+#include <linux/suspend.h>
- #include <linux/pm_runtime.h>
- 
- #include <linux/mmc/host.h>
-@@ -2027,6 +2028,12 @@ static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
- 	int err = 0;
- 	unsigned int notify_type = is_suspend ? EXT_CSD_POWER_OFF_SHORT :
- 					EXT_CSD_POWER_OFF_LONG;
-+	bool s2ram = false;
-+
-+#ifdef CONFIG_PM_SLEEP
-+	if (pm_suspend_target_state == PM_SUSPEND_MEM)
-+		s2ram = true;
-+#endif
- 
- 	mmc_claim_host(host);
- 
-@@ -2038,7 +2045,7 @@ static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
- 		goto out;
- 
- 	if (mmc_can_poweroff_notify(host->card) &&
--		((host->caps2 & MMC_CAP2_FULL_PWR_CYCLE) || !is_suspend))
-+	    ((host->caps2 & MMC_CAP2_FULL_PWR_CYCLE) || !is_suspend || s2ram))
- 		err = mmc_poweroff_notify(host->card, notify_type);
- 	else if (mmc_can_sleep(host->card))
- 		err = mmc_sleep(host);
--- 
-2.7.4
+> This means dev_pm_domain_start() is needed only for the SDHI renesas
+> variants. But on the other hand, it doesn't hurt for the others (the
+> uniphier-sd variant doesn't even use runtime PM as confirmed by
+> Yamada-san).
+>=20
+> I don't have a strong opinion, but it looks like we can either apply
+> $subject patch as is, or modify it to make dev_pm_domain_start() be
+> called only for the SDHI renesas variants.
+>=20
+> What do you prefer?
 
+Dealing with PM is confusing often enough. To keep it simple, I'd
+suggest to avoid unneeded calls. It may take a while later to rediscover
+if this call is essential or not. So, for the uniphier case, we know it
+is not needed. If we agree on a best effort basis that it is also not
+needed for tmio_mmc, then I think we should keep it only for Renesas
+SDHI.
+
+
+--fUvfsPTz/SzOZDdw
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAl7DxJEACgkQFA3kzBSg
+KbbFmQ/+L2mBWlTid0R/FtjJaab1r/dnsc7vkBGWoLECY8SFi3/bQQmbPNrBaPCq
+AuxqDt3yKc2wOD1Bzd2wqlDwzX6Kqr7Zfjh9KcLbSIcQDJwv2/AeItv9VOl6Z3fr
+cKlLep4SOU0CppGLqTQa3ivt+GJDxEenk82HsSb1pSvh1ezbx8cOf7wu4yzRRh/t
+iG3zNtwIZ5hMHmpsd6bBJCOwCjZu/idAOyI788jqDeg9/PNsR4tQxjKJf78vwjKQ
+U1MMgPu/QMCrBMXNRcSqfhm9tO5wh24hie09DsshhKq85Jgy4gpreku9Ota/rkdq
+pWtB+BpBMnRCvDR5C6+DWGOP3uAKaS1mZq4TOQN4kj6Vnljb1Sd7K+XuMtlnf0UO
+7u8Rf2FIaKt5QYcNoE53WkrMOWC40LJ16Dh2JUNFHJ3FnWXQNqtx9jqVUrTdbAxn
+jG2xafcxajc7kh7ApihGymburP865OYUFO6pUKTi0SNq6k8/0dC5LdV1GnmWVlMb
+J6LxydsaqfW9BVe5s25d1aft0Zb/d3aq8LUMluw4J+0QPj9QlztrKDFeIyN7x84l
+WIDNIq3PU696/zxCG/Ed43tOs2nLMRiajrV3GpZAOp0QVN+AcwUmaFBxOEPsUhYY
+nmQxcLt+c2NjhQhcufeXMV2AZkM2Uw6kIxidHPC2b0FaBM6B12c=
+=Y8O1
+-----END PGP SIGNATURE-----
+
+--fUvfsPTz/SzOZDdw--
