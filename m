@@ -2,70 +2,82 @@ Return-Path: <SRS0=/V3P=7B=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.1 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-0.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 30413C433E0
-	for <linux-mmc@archiver.kernel.org>; Tue, 19 May 2020 09:09:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E395BC433E0
+	for <linux-mmc@archiver.kernel.org>; Tue, 19 May 2020 09:15:56 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0C873206D4
-	for <linux-mmc@archiver.kernel.org>; Tue, 19 May 2020 09:09:53 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C257220756
+	for <linux-mmc@archiver.kernel.org>; Tue, 19 May 2020 09:15:56 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (1024-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="aWHSvZ7y"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="uiKohL+D"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726959AbgESJJw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 19 May 2020 05:09:52 -0400
-Received: from www.zeus03.de ([194.117.254.33]:50744 "EHLO mail.zeus03.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726880AbgESJJw (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 19 May 2020 05:09:52 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
-        date:from:to:cc:subject:message-id:references:mime-version
-        :content-type:in-reply-to; s=k1; bh=0SYJk9+3u4SBFYrTG2RiYc79thOJ
-        IptilkttCtpyR00=; b=aWHSvZ7yKgeBfHVHB527SBfobtwsk+O8ceEcFG2aXZHX
-        IQUCATtGzj6gSzo5E79SIqBVTaH39WSQyblQ/5jQndUfZ43avRW6BKmRGtNLjOQ6
-        SNS4HdzWNIdKuXAneqUy5AnE9AlY/syCVGsU8ikpDEb8ElBTmAnXxjYgGoC1z3E=
-Received: (qmail 187589 invoked from network); 19 May 2020 11:09:50 +0200
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 19 May 2020 11:09:50 +0200
-X-UD-Smtp-Session: l3s3148p1@579PpPylBOMgAwDPXxCmAFNwG0mTH/5q
-Date:   Tue, 19 May 2020 11:09:50 +0200
-From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
-To:     Geert Uytterhoeven <geert@linux-m68k.org>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Masahiro Yamada <yamada.masahiro@socionext.com>,
+        id S1726818AbgESJP4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 19 May 2020 05:15:56 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35976 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728579AbgESJPz (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 May 2020 05:15:55 -0400
+Received: from mail-vs1-xe42.google.com (mail-vs1-xe42.google.com [IPv6:2607:f8b0:4864:20::e42])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7F795C061A0C
+        for <linux-mmc@vger.kernel.org>; Tue, 19 May 2020 02:15:55 -0700 (PDT)
+Received: by mail-vs1-xe42.google.com with SMTP id e7so5347383vsm.6
+        for <linux-mmc@vger.kernel.org>; Tue, 19 May 2020 02:15:55 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=WGmfkmnEQ7AXkqu9jnjooqDPpHxF7QVKoI7jxUDGMsg=;
+        b=uiKohL+D4LbHgp30H/XaPQq/KGH28ioTcCuD57ZZo1cspCJ6YZHvhPIY12TGSWi6+R
+         UuKO1OBBNmIwmT0K5H/MjJK+4hOj4F1a+vOhn9PDRJqx1jPys4dJcZoqqde0lNc+wwzv
+         GGUqV6ql0kK26+YBMU7dTI4KSNLjfzqiEY36/48FHc+bs96CZNYhUQnqxw4PtM1vZOQV
+         hnY/ReI1bhMcZMWrlSP2Thw9qsxvbZ9jgK1gGdvHMrQWbZTwCmWtkFjNHYn4Yqln878B
+         U6YoD4bsyDx1HD1k947oydgJWEL7yKkq+Mjf+H7lVeSL0wvsXYcGSMECV+QnbIt3Kd7H
+         MYEg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=WGmfkmnEQ7AXkqu9jnjooqDPpHxF7QVKoI7jxUDGMsg=;
+        b=of5F+zCpGEW+BT6dWoqS15hvtX0OOUQHn20SxJN57H5zP4WNHsyKhLlJVLAnnSuMt/
+         /M8e3t4tle1csbZ/hi2+wyK4DZ/PKA0WhkNla4t5hXRDXdmoTMX4P4R66rTePq/686kc
+         Z5oThOIsiK2YTbY2CDZHAD98tIDsgmqfWRj6xgsLFxfihTRkb6YwAYfbTI1AeIf1/Kym
+         +3u23QbfAIELDSTujM0hNSSexAP+l54GmzFmXkK7bRDfgkL1GPUBCgk+DhRKsqUkccKS
+         chPPdM+V2GC9ily9aHyog2ELHs/H/NxoJkfti1ubMwpu/yf/umt0KUvnCGwnkazgDNXG
+         YT6g==
+X-Gm-Message-State: AOAM533g3KnWHHYHNPaHbXYGG7i9kTIWCFSR8ZoUsBBv9+ndT1iCAqJZ
+        lGmE4itEp5qxMPQN5r8qmWd0W/hA7LHFzWzk/3JrWw==
+X-Google-Smtp-Source: ABdhPJz9IklGUN+OS3sv2WYySKcNv/F4K8GKniVrK2P1Kww4IxJwo9f06ao8Bbhj2MbogVKub1QYxrM7CuIABCnLY0c=
+X-Received: by 2002:a67:690e:: with SMTP id e14mr7706986vsc.34.1589879754724;
+ Tue, 19 May 2020 02:15:54 -0700 (PDT)
+MIME-Version: 1.0
+References: <20200515140459.15273-1-ulf.hansson@linaro.org>
+ <20200518202200.GC5109@ninjato> <CAPDyKFpCdD=B08aVhbTM9VjYGNNvNiE-A_fTF2XdHppGbVh6Bw@mail.gmail.com>
+ <20200519084653.GF1094@ninjato> <CAMuHMdXVj_A20S+69Yr9nvL5mWsDTi=BuHNcsy-qNwmfb5S46Q@mail.gmail.com>
+In-Reply-To: <CAMuHMdXVj_A20S+69Yr9nvL5mWsDTi=BuHNcsy-qNwmfb5S46Q@mail.gmail.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Tue, 19 May 2020 11:15:18 +0200
+Message-ID: <CAPDyKFr0Pfge4tm5MQmnmjx7Pvjjf16tLr47wYiR-2ys69Ux2A@mail.gmail.com>
+Subject: Re: [PATCH 2/2] mmc: tmio: Make sure the PM domain is 'started' while probing
+To:     Geert Uytterhoeven <geert@linux-m68k.org>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Masahiro Yamada <yamada.masahiro@socionext.com>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
         Ulrich Hecht <uli+renesas@fpond.eu>,
         Simon Horman <horms+renesas@verge.net.au>,
         Niklas Soderlund <niklas.soderlund@ragnatech.se>
-Subject: Re: [PATCH 2/2] mmc: tmio: Make sure the PM domain is 'started'
- while probing
-Message-ID: <20200519090950.GI1094@ninjato>
-References: <20200515140459.15273-1-ulf.hansson@linaro.org>
- <20200518202200.GC5109@ninjato>
- <CAPDyKFpCdD=B08aVhbTM9VjYGNNvNiE-A_fTF2XdHppGbVh6Bw@mail.gmail.com>
- <20200519084653.GF1094@ninjato>
- <CAMuHMdXVj_A20S+69Yr9nvL5mWsDTi=BuHNcsy-qNwmfb5S46Q@mail.gmail.com>
-MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="VkVuOCYP9O7H3CXI"
-Content-Disposition: inline
-In-Reply-To: <CAMuHMdXVj_A20S+69Yr9nvL5mWsDTi=BuHNcsy-qNwmfb5S46Q@mail.gmail.com>
-User-Agent: Mutt/1.10.1 (2018-07-13)
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-
---VkVuOCYP9O7H3CXI
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-
-On Tue, May 19, 2020 at 10:53:28AM +0200, Geert Uytterhoeven wrote:
+On Tue, 19 May 2020 at 10:53, Geert Uytterhoeven <geert@linux-m68k.org> wrote:
+>
 > Hi Wolfram,
->=20
+>
 > On Tue, May 19, 2020 at 10:46 AM Wolfram Sang
 > <wsa+renesas@sang-engineering.com> wrote:
 > > > > Can't we put it before the custom clk_enable()? And then clean up
@@ -82,31 +94,22 @@ On Tue, May 19, 2020 at 10:53:28AM +0200, Geert Uytterhoeven wrote:
 > >
 > > Similar to what Geert responded, for Renesas SDHI both is always true
 > > AFAIU. Geert?
->=20
+>
 > For Renesas SDHI, both are always false ;-)
 > I.e. CONFIG_PM is always set, genpd is always attached.
 
-I hope it was obvious that this is what I meant :)
+OK, thanks for clarifying.
 
+This means dev_pm_domain_start() is needed only for the SDHI renesas
+variants. But on the other hand, it doesn't hurt for the others (the
+uniphier-sd variant doesn't even use runtime PM as confirmed by
+Yamada-san).
 
---VkVuOCYP9O7H3CXI
-Content-Type: application/pgp-signature; name="signature.asc"
+I don't have a strong opinion, but it looks like we can either apply
+$subject patch as is, or modify it to make dev_pm_domain_start() be
+called only for the SDHI renesas variants.
 
------BEGIN PGP SIGNATURE-----
+What do you prefer?
 
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAl7Dol4ACgkQFA3kzBSg
-Kbbn0Q//aby8zly97QeY6Jd4IeVvEIO41MhfXmb732fWS1flQZNZ6905hwtsVeiG
-L5expCq02FGM+VuXFEzSxZX4lHLbUx/KbgDxpgufz6Tl2WWG3mLM/D4zGcY07wUS
-Lw9Z50pv8v6/GmHa4C7mzhyaLu3UhaKEFmfdtxZjZanXJ1sJ6xToDpAeoBFqCbkL
-JgdjSw6H5N66CLopsjAh+DdmbNkQL0/sFDxG5h/SX94mBeelB3OOMmsevwiwaUr0
-EeAaG3HgxLmj7zSe4koz19ShfZOtnrYxMgjjpBfUi3ThuFC/YWdQY1scR5r/d5+h
-APGrpT0gdmD14nsTAl7SwvkeVVH7n1YhUn090Y6c0vuxP8zQnXFgOJYRq7rtunhM
-3eBP/vzBFmZ0k7Djg7x59hAEua69pkralV8EBUFh7elfeEdBPUqvQtUJINyd0mo9
-0RE/b8dJxwPSO+r1+67Rd6hPrCMYxUR0hDAEy0JDc6AHVmzTxIbheKAR0P1ldW3G
-JL8xj9RIBUj0Qm47o8sFHRKSTfrtIriuA0/wTi5yJ3mwJmnYph2XUpFFYhfZZHRK
-IE6y9SRZf0COMDZG9wg0aWHHniLPkOiz6RVRk3HCr4kCEkZuil5OHXlt+pSJ6vmI
-DVTUXCcFtPl0NqpDYzzaYpWMNhzHi1on8obTxyj9aTr1cPLQvHM=
-=6R1c
------END PGP SIGNATURE-----
-
---VkVuOCYP9O7H3CXI--
+Kind regards
+Uffe
