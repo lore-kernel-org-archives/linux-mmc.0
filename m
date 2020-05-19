@@ -2,117 +2,86 @@ Return-Path: <SRS0=/V3P=7B=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.3 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no
+X-Spam-Status: No, score=-3.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=no
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 445CBC433E0
-	for <linux-mmc@archiver.kernel.org>; Tue, 19 May 2020 10:57:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A79C7C433E3
+	for <linux-mmc@archiver.kernel.org>; Tue, 19 May 2020 11:13:45 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1D27C20709
-	for <linux-mmc@archiver.kernel.org>; Tue, 19 May 2020 10:57:16 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 90304207D3
+	for <linux-mmc@archiver.kernel.org>; Tue, 19 May 2020 11:13:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726494AbgESK5P (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 19 May 2020 06:57:15 -0400
-Received: from mga06.intel.com ([134.134.136.31]:21143 "EHLO mga06.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726157AbgESK5O (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 19 May 2020 06:57:14 -0400
-IronPort-SDR: HOVmPEZlzAlMCjAVMOXiyELmIY/1BjJkLRixYekxhYGbA8m/bQe1bwt6TStyg9SeTZooFPuolX
- xIR+bssJ9ykw==
-X-Amp-Result: SKIPPED(no attachment in message)
-X-Amp-File-Uploaded: False
-Received: from fmsmga004.fm.intel.com ([10.253.24.48])
-  by orsmga104.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 19 May 2020 03:57:13 -0700
-IronPort-SDR: 2Ru7e82J+azRLad8p2tCR+KZQXufvzyZSFptH1nFOg+Kqj/64E4f1JttxA3s8gBi6Ctn5MbMu/
- qufgEzlu4Mdg==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.73,409,1583222400"; 
-   d="scan'208";a="288918543"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.157]) ([10.237.72.157])
-  by fmsmga004.fm.intel.com with ESMTP; 19 May 2020 03:57:12 -0700
-Subject: Re: Query on patch "7ff2760 mmc: core: Add a facility to "pause"
- re-tuning"
-To:     "Y.b. Lu" <yangbo.lu@nxp.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc:     Sachin Miglani <sachin.miglani@nxp.com>
-References: <AM7PR04MB6885850EAB3307DDA0C4FDC3F8B90@AM7PR04MB6885.eurprd04.prod.outlook.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <3d56b588-9519-ed36-4bbe-6929a9f5ee53@intel.com>
-Date:   Tue, 19 May 2020 13:57:28 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.7.0
+        id S1728440AbgESLNo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 19 May 2020 07:13:44 -0400
+Received: from outgoing-auth-1.mit.edu ([18.9.28.11]:49137 "EHLO
+        outgoing.mit.edu" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1726505AbgESLNm (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 May 2020 07:13:42 -0400
+Received: from callcc.thunk.org (pool-100-0-195-244.bstnma.fios.verizon.net [100.0.195.244])
+        (authenticated bits=0)
+        (User authenticated as tytso@ATHENA.MIT.EDU)
+        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 04JBDLpS006587
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Tue, 19 May 2020 07:13:22 -0400
+Received: by callcc.thunk.org (Postfix, from userid 15806)
+        id 5513F420304; Tue, 19 May 2020 07:13:21 -0400 (EDT)
+Date:   Tue, 19 May 2020 07:13:21 -0400
+From:   "Theodore Y. Ts'o" <tytso@mit.edu>
+To:     Eric Biggers <ebiggers@kernel.org>
+Cc:     linux-fscrypt@vger.kernel.org,
+        linux-f2fs-devel@lists.sourceforge.net, linux-ext4@vger.kernel.org,
+        linux-fsdevel@vger.kernel.org, linux-crypto@vger.kernel.org,
+        linux-mmc@vger.kernel.org, Satya Tangirala <satyat@google.com>,
+        Jaegeuk Kim <jaegeuk@kernel.org>,
+        Paul Crowley <paulcrowley@google.com>
+Subject: Re: [PATCH] fscrypt: add support for IV_INO_LBLK_32 policies
+Message-ID: <20200519111321.GE2396055@mit.edu>
+References: <20200515204141.251098-1-ebiggers@kernel.org>
 MIME-Version: 1.0
-In-Reply-To: <AM7PR04MB6885850EAB3307DDA0C4FDC3F8B90@AM7PR04MB6885.eurprd04.prod.outlook.com>
-Content-Type: text/plain; charset=windows-1252
-Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20200515204141.251098-1-ebiggers@kernel.org>
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 19/05/20 1:42 pm, Y.b. Lu wrote:
-> Hi Uffe and Adrian,
+On Fri, May 15, 2020 at 01:41:41PM -0700, Eric Biggers wrote:
+> From: Eric Biggers <ebiggers@google.com>
 > 
->  
+> The eMMC inline crypto standard will only specify 32 DUN bits (a.k.a. IV
+> bits), unlike UFS's 64.  IV_INO_LBLK_64 is therefore not applicable, but
+> an encryption format which uses one key per policy and permits the
+> moving of encrypted file contents (as f2fs's garbage collector requires)
+> is still desirable.
 > 
-> May I have a query on below patch. Do we really need re-tuning before
-> switching to RPMB partition each time per eMMC spec, especially for HS400
-> mode with auto-tuning?
+> To support such hardware, add a new encryption format IV_INO_LBLK_32
+> that makes the best use of the 32 bits: the IV is set to
+> 'SipHash-2-4(inode_number) + file_logical_block_number mod 2^32', where
+> the SipHash key is derived from the fscrypt master key.  We hash only
+> the inode number and not also the block number, because we need to
+> maintain contiguity of DUNs to merge bios.
+> 
+> Unlike with IV_INO_LBLK_64, with this format IV reuse is possible; this
+> is unavoidable given the size of the DUN.  This means this format should
+> only be used where the requirements of the first paragraph apply.
+> However, the hash spreads out the IVs in the whole usable range, and the
+> use of a keyed hash makes it difficult for an attacker to determine
+> which files use which IVs.
+> 
+> Besides the above differences, this flag works like IV_INO_LBLK_64 in
+> that on ext4 it is only allowed if the stable_inodes feature has been
+> enabled to prevent inode numbers and the filesystem UUID from changing.
+> 
+> Signed-off-by: Eric Biggers <ebiggers@google.com>
 
-It was to ensure tuning would not be needed while accessing RPMB since RPMB
-does not support tuning.
+Reviewed-by: Theodore Ts'o <tytso@mit.edu>
 
-> 
-> What’s the impact if no re-tuning here?
+I kind of wish we had Kunit tests with test vectors, but that's for
+another commit I think.
 
-Increased risk of CRC errors.
+					- Ted
 
-> 
->  
-> 
-> 7ff2760 mmc: core: Add a facility to "pause" re-tuning
-> 
->  
-> 
-> +/*
-> 
-> + * Pause re-tuning for a small set of operations.  The pause begins after the
-> 
-> + * next command and after first doing re-tuning.
-> 
-> + */
-> 
-> +void mmc_retune_pause(struct mmc_host *host)
-> 
-> +{
-> 
-> +       if (!host->retune_paused) {
-> 
-> +               host->retune_paused = 1;
-> 
-> +               mmc_retune_needed(host);
-> 
-> +               mmc_retune_hold(host);
-> 
-> +       }
-> 
-> +}
-> 
->  
-> 
-> Thanks a lot.
-> 
->  
-> 
-> Best regards,
-> 
-> Yangbo Lu
-> 
->  
-> 
+
 
