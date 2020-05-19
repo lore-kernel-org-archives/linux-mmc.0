@@ -2,94 +2,152 @@ Return-Path: <SRS0=/V3P=7B=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.4 required=3.0 tests=DKIMWL_WL_MED,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,USER_IN_DEF_DKIM_WL autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-1.1 required=3.0 tests=DKIMWL_BL,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1AE12C433E0
-	for <linux-mmc@archiver.kernel.org>; Tue, 19 May 2020 16:33:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 74D70C433E3
+	for <linux-mmc@archiver.kernel.org>; Tue, 19 May 2020 16:33:47 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E671B20709
-	for <linux-mmc@archiver.kernel.org>; Tue, 19 May 2020 16:33:45 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 517B8207D8
+	for <linux-mmc@archiver.kernel.org>; Tue, 19 May 2020 16:33:47 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="OuDq+uZ2"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="PXXIEkHb"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726203AbgESQdm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 19 May 2020 12:33:42 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47826 "EHLO
+        id S1729489AbgESQdq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 19 May 2020 12:33:46 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47880 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729437AbgESQdZ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 May 2020 12:33:25 -0400
-Received: from mail-lj1-x244.google.com (mail-lj1-x244.google.com [IPv6:2a00:1450:4864:20::244])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A465DC08C5C3
-        for <linux-mmc@vger.kernel.org>; Tue, 19 May 2020 09:33:24 -0700 (PDT)
-Received: by mail-lj1-x244.google.com with SMTP id m18so412642ljo.5
-        for <linux-mmc@vger.kernel.org>; Tue, 19 May 2020 09:33:24 -0700 (PDT)
+        with ESMTP id S1729488AbgESQdn (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 May 2020 12:33:43 -0400
+Received: from mail-lf1-x142.google.com (mail-lf1-x142.google.com [IPv6:2a00:1450:4864:20::142])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E863BC08C5C0;
+        Tue, 19 May 2020 09:33:41 -0700 (PDT)
+Received: by mail-lf1-x142.google.com with SMTP id c12so40979lfc.10;
+        Tue, 19 May 2020 09:33:41 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=2FsHvUk8dZh0ajzB3TiumDfxSGd35hr/R1OCXsEMaZA=;
-        b=OuDq+uZ2QpYJRvb/GeO+A1uwQ5ZGVdYpPQNakARsRaC0tVz+Y2WhHx7QO92kh4zmEo
-         hat1wqnZozmWrQqBpNGDXrYSjHetfvdRerSP00yzpoJpdWsHDdybi1TPyV469jMT2/Bw
-         w//6XEQgmwhX2rpK8Bf14xhWiiSsMzArs41dJIB6inPZ7k1okxBmAkm0cZzYn+8s0AtU
-         ISUd/6VByWUaIMiDlQ9ds+3/hneGNiP/6Ef4pq7a7WYas/7HaOxqm7ITPmJ30VyOO4SE
-         4cgiZVpPS9Y9QZcQhRloXVF0GMXP0p/5dX55Zve9rXXG/f4/yxiZvpTshzXuKEgWJSTA
-         +jNQ==
+        d=gmail.com; s=20161025;
+        h=subject:to:cc:references:from:message-id:date:user-agent
+         :mime-version:in-reply-to:content-language:content-transfer-encoding;
+        bh=erHld5g8aUsGObcGGn0MGFVIEHLOUjB0Us6LDfsWtwI=;
+        b=PXXIEkHbyn+P/kMEEJSfC4wL0O4hX4OmmwcfZbc+VOa1IlbTxAww8MjZF1eb69czSl
+         JhNxWfdAvNvf0aLOJ2zIgjjWjoo3/qMuhePXkwjT47u0273RtTb2w6fbghDsX1IyOsh7
+         ycbxPguVWsvQKY0q2jHaG22jnYYiiQMY92Rhi39x4/Lpu35VITIeAg19c9SUDG8w/qVo
+         OX3zjE3HtGEFaPiApNAXpWAwHWvFp5S5zxBcHjnSAgOQpvSbZOc664cbBcgISbUKtgLG
+         FhgDukKAHwsL4iNX8v0Uc6U3aGczmzdO5M2bQ+S/NnIv/eLlwVXMGR8NYl2RmzgB+wk1
+         u8mA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=2FsHvUk8dZh0ajzB3TiumDfxSGd35hr/R1OCXsEMaZA=;
-        b=b4Ujsls19ZFYf/dMUWhKsi7Phisf9dxU5HWNLSW0Pxdn+jPJZ0vvw9uqVboWVLwMxv
-         jDQE00OmPnbubvtHjY6b9Hj6QoSGW8TRbxI5MlC2VTxpbyc+cdiG+ph3U1b7NP7/C1JZ
-         xhVSwxty5uxR+CVAqCCfdqo4Gt9nypYdmQHg3uRvgOTYPeF4eONZF3MiVyWvDPOWVO70
-         lLvzWjp9cPY0i5fHXVtRdQhkzABzmNn02aJUxBJf03C9pZNNu//iUjC6TLAp7FgsNRr1
-         6CCnokUgWOaf/Xzq0qWJ6Lgj3Rs05lvWeMwntDOI6sSc+qT19sd5lDDQ79jqJpWhWg+Z
-         QGAA==
-X-Gm-Message-State: AOAM530G8rNM44zjiPj/FNNcdNPCVbl4t0uijCT6CkJYeAJYxLhWZJpN
-        IR/YeqiCpO1KgB2ZqXJrvU2tvBSbV2CcxVBqQv6ffg==
-X-Google-Smtp-Source: ABdhPJwPMZ+B//q1l+gspCxSvYAD5mGiFN9/ycCKeAsnEVod6dS23lZ1SlsTQnf1ToCfRRMuXDUo8D2W9i0it03SfwM=
-X-Received: by 2002:a05:651c:3c6:: with SMTP id f6mr179097ljp.138.1589906002547;
- Tue, 19 May 2020 09:33:22 -0700 (PDT)
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=erHld5g8aUsGObcGGn0MGFVIEHLOUjB0Us6LDfsWtwI=;
+        b=mZVYCtG+b8MGjjdEASra3n+ImZWjkBDnrWDrC04vcBrkKpwVrAzsBgrLbKLTXgh3yR
+         /2fn0nTzN+q2YQxeqF9vf0MQgbBA0peUj4mfnBgY7B2h6ExnN2tPKoAeKTGRcbaLgyw7
+         /EHdPZ3vbE2Oh0aZi1Ifok1uZdAI61FFAAarRYs64E1Z1tMXUOi/TqG5L3LZNIIbZyld
+         ceCYu6T93g6eN86KXYKA83yokL8qi4zJdYX2NlvVdODRfQFKshE6CqH6XxIXzXdHnPDp
+         xtcjFHup8nGbEc/qjM5zHoe3pANHaDpaOxD+GnsyCqhiSix3mPuPWd3hpbN164eFfKFT
+         piZw==
+X-Gm-Message-State: AOAM531y+Ayjle6mwW5EvlH6xxYXtEVRvsYkdKpecs7K+YN5emUbOIm/
+        jAxzSxZP/Ohh6GqO7ruNWANN11Iw
+X-Google-Smtp-Source: ABdhPJynTG9WE/2wz7rU96llUm+O8M3VCxmsoLGn8GGEC/AtLXD3ecQSqJWInxjS2UgGX4APrbMdJA==
+X-Received: by 2002:ac2:5ccf:: with SMTP id f15mr15638072lfq.216.1589906019877;
+        Tue, 19 May 2020 09:33:39 -0700 (PDT)
+Received: from [192.168.2.145] (ppp91-78-208-152.pppoe.mtu-net.ru. [91.78.208.152])
+        by smtp.googlemail.com with ESMTPSA id v4sm52411ljj.104.2020.05.19.09.33.38
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 19 May 2020 09:33:39 -0700 (PDT)
+Subject: Re: [PATCH v1] sdhci: tegra: Remove warnings about missing
+ device-tree properties
+To:     Thierry Reding <thierry.reding@gmail.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Jonathan Hunter <jonathanh@nvidia.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Sowjanya Komatineni <skomatineni@nvidia.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        linux-tegra <linux-tegra@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+References: <20200516154314.14769-1-digetx@gmail.com>
+ <CAPDyKFo_Xp-zipqE26iMv4CFwUoMCQZy3Zr63Cp=uzePgWX7BA@mail.gmail.com>
+ <b634e7a5-9a30-3bd1-126d-be62e4dd73e1@gmail.com>
+ <20200519162444.GD2113674@ulmo>
+From:   Dmitry Osipenko <digetx@gmail.com>
+Message-ID: <b4eb368e-adc2-7b77-3ae9-fefdcfddaf3d@gmail.com>
+Date:   Tue, 19 May 2020 19:33:38 +0300
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.7.0
 MIME-Version: 1.0
-References: <20200515204141.251098-1-ebiggers@kernel.org>
-In-Reply-To: <20200515204141.251098-1-ebiggers@kernel.org>
-From:   Paul Crowley <paulcrowley@google.com>
-Date:   Tue, 19 May 2020 09:33:11 -0700
-Message-ID: <CA+_SqcB09GJJoTBm-U7ZwyTjuumyp4QwhLyxj8wbObd47qJOWw@mail.gmail.com>
-Subject: Re: [PATCH] fscrypt: add support for IV_INO_LBLK_32 policies
-To:     Eric Biggers <ebiggers@kernel.org>
-Cc:     linux-fscrypt@vger.kernel.org,
-        linux-f2fs-devel@lists.sourceforge.net, linux-ext4@vger.kernel.org,
-        linux-fsdevel@vger.kernel.org, linux-crypto@vger.kernel.org,
-        linux-mmc@vger.kernel.org, "Theodore Y . Ts'o" <tytso@mit.edu>,
-        Satya Tangirala <satyat@google.com>,
-        Jaegeuk Kim <jaegeuk@kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+In-Reply-To: <20200519162444.GD2113674@ulmo>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 8bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 15 May 2020 at 13:50, Eric Biggers <ebiggers@kernel.org> wrote:
->
-> From: Eric Biggers <ebiggers@google.com>
->
-> The eMMC inline crypto standard will only specify 32 DUN bits (a.k.a. IV
-> bits), unlike UFS's 64.  IV_INO_LBLK_64 is therefore not applicable, but
-> an encryption format which uses one key per policy and permits the
-> moving of encrypted file contents (as f2fs's garbage collector requires)
-> is still desirable.
->
-> To support such hardware, add a new encryption format IV_INO_LBLK_32
-> that makes the best use of the 32 bits: the IV is set to
-> 'SipHash-2-4(inode_number) + file_logical_block_number mod 2^32', where
-> the SipHash key is derived from the fscrypt master key.  We hash only
-> the inode number and not also the block number, because we need to
-> maintain contiguity of DUNs to merge bios.
+19.05.2020 19:24, Thierry Reding пишет:
+> On Tue, May 19, 2020 at 05:05:27PM +0300, Dmitry Osipenko wrote:
+>> 19.05.2020 10:28, Ulf Hansson пишет:
+>>> On Sat, 16 May 2020 at 17:44, Dmitry Osipenko <digetx@gmail.com> wrote:
+>>>>
+>>>> Several people asked me about the MMC warnings in the KMSG log and
+>>>> I had to tell to ignore them because these warning are irrelevant to
+>>>> pre-Tegra210 SoCs.
+>>>
+>>> Why are the warnings irrelevant?
+>>
+>> That's what the DT binding doc says [1].
+>>
+>> [1]
+>> https://www.kernel.org/doc/Documentation/devicetree/bindings/mmc/nvidia%2Ctegra20-sdhci.txt
+>>
+>> Although, looking at the driver's code and TRM docs, it seems that all
+>> those properties are really irrelevant only to the older Terga20 SoC. So
+>> the binding doc is a bit misleading.
+>>
+>> Nevertheless, the binding explicitly says that the properties are
+>> optional, which is correct.
+> 
+> Optional only means that drivers must not fail if these properties
+> aren't found, it doesn't mean that the driver can't warn that they
+> are missing.
+> 
+> Quite possibly the only reason why they were made optional is because
+> they weren't part of the bindings since the beginning. Anything added
+> to a binding after the first public release has to be optional by
+> definition, otherwise DT ABI wouldn't be stable.
+> 
+> I think these warnings were added on purpose, though I also see that
+> there are only values for these in device tree for Tegra186 and Tegra194
+> but not Tegra210 where these should also be necessary.
+> 
+> Adding Sowjanya who wrote this code. Perhaps she can clarify why the
+> warnings were added. If these values /should/ be there on a subset of
+> Tegra, then I think we should keep them, or add them again, but perhaps
+> add a better way of identifying when they are necessary and when it is
+> safe to work without them.
+> 
+> That said, looking at those checks I wonder if they are perhaps just
+> wrong. Or at the very least they seem redundant. It looks to me like
+> they can just be:
+> 
+> 	if (tegra_host->pinctrl_state_XYZ == NULL) {
+> 		...
+> 	}
+> 
+> That !IS_ERR(...) doesn't seem to do anything. But in that case, it's
+> also obvious why we're warning about them on platforms where these
+> properties don't exist in DT.
+> 
+> So I think we either need to add those values where appropriate so that
+> the warning doesn't show, or we need to narrow down where they are
+> really needed and add a corresponding condition.
+> 
+> But again, perhaps Sowjanya can help clarify if these really are only
+> needed on Tegra210 and later or if these also apply to older chips.
 
-Reviewed-by: Paul Crowley <paulcrowley@google.com>
+Either way will be cleaner to convert the DT binding to YAML rather than
+clutter the driver, IMO.
 
-This is the best that can be done cryptographically on such hardware.
