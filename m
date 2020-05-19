@@ -2,86 +2,102 @@ Return-Path: <SRS0=/V3P=7B=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=no
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.1 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A79C7C433E3
-	for <linux-mmc@archiver.kernel.org>; Tue, 19 May 2020 11:13:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 64A9FC433E0
+	for <linux-mmc@archiver.kernel.org>; Tue, 19 May 2020 11:32:36 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 90304207D3
-	for <linux-mmc@archiver.kernel.org>; Tue, 19 May 2020 11:13:45 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 93B042072C
+	for <linux-mmc@archiver.kernel.org>; Tue, 19 May 2020 11:32:35 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=fail reason="signature verification failed" (1024-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="ED85HAT/"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728440AbgESLNo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 19 May 2020 07:13:44 -0400
-Received: from outgoing-auth-1.mit.edu ([18.9.28.11]:49137 "EHLO
-        outgoing.mit.edu" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1726505AbgESLNm (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 May 2020 07:13:42 -0400
-Received: from callcc.thunk.org (pool-100-0-195-244.bstnma.fios.verizon.net [100.0.195.244])
-        (authenticated bits=0)
-        (User authenticated as tytso@ATHENA.MIT.EDU)
-        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 04JBDLpS006587
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Tue, 19 May 2020 07:13:22 -0400
-Received: by callcc.thunk.org (Postfix, from userid 15806)
-        id 5513F420304; Tue, 19 May 2020 07:13:21 -0400 (EDT)
-Date:   Tue, 19 May 2020 07:13:21 -0400
-From:   "Theodore Y. Ts'o" <tytso@mit.edu>
-To:     Eric Biggers <ebiggers@kernel.org>
-Cc:     linux-fscrypt@vger.kernel.org,
-        linux-f2fs-devel@lists.sourceforge.net, linux-ext4@vger.kernel.org,
-        linux-fsdevel@vger.kernel.org, linux-crypto@vger.kernel.org,
-        linux-mmc@vger.kernel.org, Satya Tangirala <satyat@google.com>,
-        Jaegeuk Kim <jaegeuk@kernel.org>,
-        Paul Crowley <paulcrowley@google.com>
-Subject: Re: [PATCH] fscrypt: add support for IV_INO_LBLK_32 policies
-Message-ID: <20200519111321.GE2396055@mit.edu>
-References: <20200515204141.251098-1-ebiggers@kernel.org>
+        id S1726595AbgESLcf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 19 May 2020 07:32:35 -0400
+Received: from www.zeus03.de ([194.117.254.33]:45556 "EHLO mail.zeus03.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726508AbgESLcf (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 19 May 2020 07:32:35 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
+        date:from:to:cc:subject:message-id:references:mime-version
+        :content-type:in-reply-to; s=k1; bh=M/0PbwmMp/KQ+QwbeMlV+an7rw4H
+        cCBFhHGtcLD6y8E=; b=ED85HAT/feAqYguFrh1DAExzCYPkPaEztEaH0AUitOkF
+        3N4s++CFgmMf7JaBQd87aMTod2qb7rTovVseQ3VKZDvtw2uwPbHD8vqrqB42sTZG
+        lRfQjhBg6BgOCyxK1N2t7raOox8vHtvqwKyj2yKHRUrOeaOg4NpDlkAYOvC2Zx4=
+Received: (qmail 234079 invoked from network); 19 May 2020 13:32:33 +0200
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 19 May 2020 13:32:33 +0200
+X-UD-Smtp-Session: l3s3148p1@HOqrov6lfOMgAwDPXxCmAFNwG0mTH/5q
+Date:   Tue, 19 May 2020 13:32:32 +0200
+From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Geert Uytterhoeven <geert@linux-m68k.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Masahiro Yamada <yamada.masahiro@socionext.com>,
+        Ulrich Hecht <uli+renesas@fpond.eu>,
+        Simon Horman <horms+renesas@verge.net.au>,
+        Niklas Soderlund <niklas.soderlund@ragnatech.se>
+Subject: Re: [PATCH 2/2] mmc: tmio: Make sure the PM domain is 'started'
+ while probing
+Message-ID: <20200519113232.GJ1094@ninjato>
+References: <20200515140459.15273-1-ulf.hansson@linaro.org>
+ <20200518202200.GC5109@ninjato>
+ <CAPDyKFpCdD=B08aVhbTM9VjYGNNvNiE-A_fTF2XdHppGbVh6Bw@mail.gmail.com>
+ <20200519084653.GF1094@ninjato>
+ <CAMuHMdXVj_A20S+69Yr9nvL5mWsDTi=BuHNcsy-qNwmfb5S46Q@mail.gmail.com>
+ <CAPDyKFr0Pfge4tm5MQmnmjx7Pvjjf16tLr47wYiR-2ys69Ux2A@mail.gmail.com>
+ <CAPDyKFqM6YoS+0YhHaqLqjZYnvQywb9t0OHQ1Lw2T=dAKeWvtA@mail.gmail.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="va4/JQ6j8/8uipEp"
 Content-Disposition: inline
-In-Reply-To: <20200515204141.251098-1-ebiggers@kernel.org>
+In-Reply-To: <CAPDyKFqM6YoS+0YhHaqLqjZYnvQywb9t0OHQ1Lw2T=dAKeWvtA@mail.gmail.com>
+User-Agent: Mutt/1.10.1 (2018-07-13)
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, May 15, 2020 at 01:41:41PM -0700, Eric Biggers wrote:
-> From: Eric Biggers <ebiggers@google.com>
-> 
-> The eMMC inline crypto standard will only specify 32 DUN bits (a.k.a. IV
-> bits), unlike UFS's 64.  IV_INO_LBLK_64 is therefore not applicable, but
-> an encryption format which uses one key per policy and permits the
-> moving of encrypted file contents (as f2fs's garbage collector requires)
-> is still desirable.
-> 
-> To support such hardware, add a new encryption format IV_INO_LBLK_32
-> that makes the best use of the 32 bits: the IV is set to
-> 'SipHash-2-4(inode_number) + file_logical_block_number mod 2^32', where
-> the SipHash key is derived from the fscrypt master key.  We hash only
-> the inode number and not also the block number, because we need to
-> maintain contiguity of DUNs to merge bios.
-> 
-> Unlike with IV_INO_LBLK_64, with this format IV reuse is possible; this
-> is unavoidable given the size of the DUN.  This means this format should
-> only be used where the requirements of the first paragraph apply.
-> However, the hash spreads out the IVs in the whole usable range, and the
-> use of a keyed hash makes it difficult for an attacker to determine
-> which files use which IVs.
-> 
-> Besides the above differences, this flag works like IV_INO_LBLK_64 in
-> that on ext4 it is only allowed if the stable_inodes feature has been
-> enabled to prevent inode numbers and the filesystem UUID from changing.
-> 
-> Signed-off-by: Eric Biggers <ebiggers@google.com>
 
-Reviewed-by: Theodore Ts'o <tytso@mit.edu>
-
-I kind of wish we had Kunit tests with test vectors, but that's for
-another commit I think.
-
-					- Ted
+--va4/JQ6j8/8uipEp
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
 
+> And no matter what solution, can always drop to manage the "main"
+> clock from renesas_sdhi_clk_enable|disable() as it's managed by the PM
+> domain.
 
+Good. That was what I was aiming for.
+
+>=20
+> Although, then we need to call dev_pm_domain_start() prior
+> renesas_sdhi_clk_enable() during ->probe()?
+
+Yep, I moved it upwards in my proof-of-concept diff. But it would be
+better if you would apply this change in your patch already.
+
+
+--va4/JQ6j8/8uipEp
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAl7Dw8wACgkQFA3kzBSg
+KbZlqQ/8DYS3B50jEa66KyfdN4uTscPXNJP653R/kygwl/uOhz9GgXjLle8RVw8g
+1Q89YqwMB/VklsXynhpSBCtafEIdADoF1ODtzBXRM/yIOXqSIu/+3BvwLjtdAzK1
+n/ucfCLhIgxpOmbQbt8S1X5OTIBOxjtQg75KjaQMPFhYMpJPh0awdm9+eb6UjiJC
+23Tyrg5WXoB8sIzSTyCk45fpB7scgo3DjGJb3oROzEzO51/7fUWSu0NdHCiy9e3t
++uYtjX4HKQrfJDCtPjVxmWCIhWUi1WxVVEjjXxWsJ2LZ92wbJZTmkGWzmsN84ZMo
+FlcR2TyMRQWG3C8MWPm6jZBbRAgmakkQByXvK8MwvhE+iYiL/xY0HexITPldSfXI
+NZRMfk3oX6yEhveJhmkN3WfsOFE1iCakt9pDoUBRPTQ5gcBLXXwRNLCsO/uWiwdr
+8dz/zkJiov/smRYtLI4NEiLr1L2QLEp2qbGPNdL9zG2TAwCKpUZ9+TXSjIS6M5pf
+XqBhqWD1V8+n+Jz3op5Y6y0hzi2wv3VBcYex19Cj/9v+OJkH06EYquz3guMRER2u
+mKv22kl569D1cEWFYq6b8JXHfghIpE7a+9nzYd43RhG6labF6NvlCuTaWopXgqtM
+icLObz8g3da2zsyAZAq2dETROSr+zqRV0tkRZ1wf1TOZxUp7Do8=
+=zApZ
+-----END PGP SIGNATURE-----
+
+--va4/JQ6j8/8uipEp--
