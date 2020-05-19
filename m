@@ -2,104 +2,110 @@ Return-Path: <SRS0=/V3P=7B=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.1 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
+	SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B0C44C433E0
-	for <linux-mmc@archiver.kernel.org>; Tue, 19 May 2020 13:55:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5F046C433E0
+	for <linux-mmc@archiver.kernel.org>; Tue, 19 May 2020 13:56:50 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8F86A20829
-	for <linux-mmc@archiver.kernel.org>; Tue, 19 May 2020 13:55:23 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8A32D20825
+	for <linux-mmc@archiver.kernel.org>; Tue, 19 May 2020 13:56:49 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="L0JX+yMI"
+	dkim=fail reason="signature verification failed" (1024-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="WotWE0Gn"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729086AbgESNzX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 19 May 2020 09:55:23 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51380 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729072AbgESNzW (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 May 2020 09:55:22 -0400
-Received: from mail-ua1-x942.google.com (mail-ua1-x942.google.com [IPv6:2607:f8b0:4864:20::942])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 98DC9C08C5C0
-        for <linux-mmc@vger.kernel.org>; Tue, 19 May 2020 06:55:22 -0700 (PDT)
-Received: by mail-ua1-x942.google.com with SMTP id f9so2664555uaq.2
-        for <linux-mmc@vger.kernel.org>; Tue, 19 May 2020 06:55:22 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=4uTwCBDDs4EthcdAW00VJw+6HTab5xcK1MQrTPFjNlY=;
-        b=L0JX+yMIQUuJ9ARnYnhxf8wAwkfFqaJmwlk97rHMfOVOrDHtjRW+uWulM2og0dVNx8
-         4Jp8a7DSAm4ye7UGZ3K9dLPcbUth+axEYs/MH6KSvC0NY239csAabHI/XU1ZaFP7z7e6
-         oLHMxwGKMlhTno/+Ehea2uLq62RzOgud3GlN8BGu0t+T8dHEBplnlNH1iyH1Z50LK/hV
-         LfZe6oM0agEGwZAOt97GlCSgE6WJoqvBt4KhRqQClpLbOflTC5thkuTGm6EQcBC6VBzA
-         w4lk6JO1Ezb9tDTNJm5S6/Gilpb74kkNJUswA8AZbKATUM5AGSj/pgQ3RckKIaZw+TE+
-         1xNw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=4uTwCBDDs4EthcdAW00VJw+6HTab5xcK1MQrTPFjNlY=;
-        b=kBa66RnvDOCrc4hKJSZQQHR1BLfCR7vTxYdj6YX56aAqxSCcK+6TeqWTPmSuc70psL
-         cK6CPEuc6EeeOPsPpKwnpK7N7q1fXdyNWdEJ3Wv23aB/WUhPCUqFZBI9JQ2jUsVmXNsL
-         mxgeflq8DuAEVZC2d0cU/CNFkdfUne0qz+2AKlXF0VxhI5HzRpzqch6gE5rz2Qun+jns
-         w3rb5ST+Hxc7npalK3X/3f1KfNyr5JUZp3KWrCQO8sM3IptLpp+dHGu+AI0xySuWQWnb
-         8bXiHTrW9wAuqzPJyPLfFsSAp2C+ek+L5Z4pnnmNEIiCn5QJtFxysA8TN1aRiAT8lsAA
-         w5lA==
-X-Gm-Message-State: AOAM533vgDUel6u0rxXpu1osxVH4lK0A7T11WNFLwjPUXchQEwZKxq6v
-        rvE3SBqV32yLizZ8MPOoUMn0nokpHWCevlMH4CFIEg==
-X-Google-Smtp-Source: ABdhPJyfejL8MlbpYT/yUhtwfQIj82SAO54MnV6iUP0BbPafQvG55WOAJOyOFhPbas48pu8IvFbzpoAaCSTMIo+rNXg=
-X-Received: by 2002:ab0:7293:: with SMTP id w19mr14983055uao.129.1589896521587;
- Tue, 19 May 2020 06:55:21 -0700 (PDT)
-MIME-Version: 1.0
-References: <20200515140459.15273-1-ulf.hansson@linaro.org>
- <20200518202200.GC5109@ninjato> <CAPDyKFpCdD=B08aVhbTM9VjYGNNvNiE-A_fTF2XdHppGbVh6Bw@mail.gmail.com>
- <20200519084653.GF1094@ninjato> <CAMuHMdXVj_A20S+69Yr9nvL5mWsDTi=BuHNcsy-qNwmfb5S46Q@mail.gmail.com>
- <CAPDyKFr0Pfge4tm5MQmnmjx7Pvjjf16tLr47wYiR-2ys69Ux2A@mail.gmail.com> <20200519113545.GK1094@ninjato>
-In-Reply-To: <20200519113545.GK1094@ninjato>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 19 May 2020 15:54:45 +0200
-Message-ID: <CAPDyKFpepDt5SyqLJ9-3HfutiW9TSP_jLg8zmqLn-O6LAy+RYQ@mail.gmail.com>
-Subject: Re: [PATCH 2/2] mmc: tmio: Make sure the PM domain is 'started' while probing
-To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc:     Geert Uytterhoeven <geert@linux-m68k.org>,
+        id S1728750AbgESN4t (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 19 May 2020 09:56:49 -0400
+Received: from www.zeus03.de ([194.117.254.33]:42212 "EHLO mail.zeus03.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1728052AbgESN4t (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 19 May 2020 09:56:49 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
+        date:from:to:cc:subject:message-id:references:mime-version
+        :content-type:in-reply-to; s=k1; bh=vhhhQScVj2yuyaXZEuN1mVQNFgwV
+        yBfgImuozQNNeLI=; b=WotWE0GncwsD06WQ1jslCYTY4J9VSAdjUFPIITZfeNYl
+        mKzLrkZBaFgzJsHEzJ0Rvn3KTv35LvLg5AoGXKTi6BggEBpjwiTzf1EItRjT0T6u
+        wZ6ZNqcICEc0anG77UsQL7MkcoRRlt9bgGSMN/W5SNEQaeducrUfrRYkvN1ZFKk=
+Received: (qmail 281627 invoked from network); 19 May 2020 15:56:46 +0200
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 19 May 2020 15:56:46 +0200
+X-UD-Smtp-Session: l3s3148p1@p517pgCmkucgAwDPXxCmAFNwG0mTH/5q
+Date:   Tue, 19 May 2020 15:56:46 +0200
+From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     linux-mmc@vger.kernel.org,
         Masahiro Yamada <yamada.masahiro@socionext.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
         Ulrich Hecht <uli+renesas@fpond.eu>,
         Simon Horman <horms+renesas@verge.net.au>,
-        Niklas Soderlund <niklas.soderlund@ragnatech.se>
-Content-Type: text/plain; charset="UTF-8"
+        Niklas Soderlund <niklas.soderlund@ragnatech.se>,
+        Geert Uytterhoeven <geert+renesas@glider.be>
+Subject: Re: [PATCH 1/2] mmc: tmio: Further fixup runtime PM management at
+ remove
+Message-ID: <20200519135646.GA19235@ninjato>
+References: <20200515140445.15218-1-ulf.hansson@linaro.org>
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="7AUc2qLy4jB3hD7Z"
+Content-Disposition: inline
+In-Reply-To: <20200515140445.15218-1-ulf.hansson@linaro.org>
+User-Agent: Mutt/1.10.1 (2018-07-13)
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 19 May 2020 at 13:35, Wolfram Sang
-<wsa+renesas@sang-engineering.com> wrote:
->
->
-> > This means dev_pm_domain_start() is needed only for the SDHI renesas
-> > variants. But on the other hand, it doesn't hurt for the others (the
-> > uniphier-sd variant doesn't even use runtime PM as confirmed by
-> > Yamada-san).
-> >
-> > I don't have a strong opinion, but it looks like we can either apply
-> > $subject patch as is, or modify it to make dev_pm_domain_start() be
-> > called only for the SDHI renesas variants.
-> >
-> > What do you prefer?
->
-> Dealing with PM is confusing often enough. To keep it simple, I'd
-> suggest to avoid unneeded calls. It may take a while later to rediscover
-> if this call is essential or not. So, for the uniphier case, we know it
-> is not needed. If we agree on a best effort basis that it is also not
-> needed for tmio_mmc, then I think we should keep it only for Renesas
-> SDHI.
 
-Alright, I re-spin the series taking into account what has been said.
+--7AUc2qLy4jB3hD7Z
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Then I wait for your tested/reviewed-by tags before applying.
+On Fri, May 15, 2020 at 04:04:45PM +0200, Ulf Hansson wrote:
+> Before calling tmio_mmc_host_probe(), the caller is required to enable
+> clocks for its device, as to make it accessible when reading/writing
+> registers during probe.
+>=20
+> Therefore, the responsibility to disable these clocks, in the error path =
+of
+> ->probe() and during ->remove(), is better managed outside
+> tmio_mmc_host_remove(). As a matter of fact, callers of
+> tmio_mmc_host_remove() already expects this to be the behaviour.
+>=20
+> However, there's a problem with tmio_mmc_host_remove() when the Kconfig
+> option, CONFIG_PM, is set. More precisely, tmio_mmc_host_remove() may then
+> disable the clock via runtime PM, which leads to clock enable/disable
+> imbalance problems, when the caller of tmio_mmc_host_remove() also tries =
+to
+> disable the same clocks.
+>=20
+> Reported-by: Geert Uytterhoeven <geert+renesas@glider.be>
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 
-Kind regards
-Uffe
+Works fine on my Lager board, too. Imbalance is gone when rebinding, and
+I can access large files on the SD card.
+
+Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Tested-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+
+
+--7AUc2qLy4jB3hD7Z
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAl7D5ZoACgkQFA3kzBSg
+Kbadxg//YfjFd0p2YpU5mwqtvjdXd+KSrRkbeDHVWviNdeqCdvVMvsB6T9/eod3p
+tH/JGQWXJLmhAdJFuaTq381TMHpQ+ak2cnv5MMi0qj8dlAdhi83S+sEWQTF4Vky7
+ceY45ulV9Ex5gz5gtYYq4Egj9hHaTW6aMR26w7op4NROAbbVNL2hhWOVTPlAb5av
+XhKmzTo1DoP795mhz0TW32/VQPrxE+nxbvc6d+H7deywI6WPVuRPSx9PlnxPHnrW
+SKxuNaVmx0nxKAQnWjNJhgKTIbSCXlvk7meTYQZNDtsYM4Oe/ecw1h9vfqsdLTV7
+rgIb7Zj2R95rRd71tgrmyGyBmdBb1GAsUlPU85z2otXgPUN/yGIFYuG4GSieMdEe
+IL+OojmUlHRQ0UW6UH/otzu9/nXZ69edew9OK3j6FcI/xagM4tuWn9btG+OhRCKQ
+LOI5STnc5DIHl1OQDBhkCQAdsGb+OPI2EKkb0dLOaN3jIKjLpL4fMhxRoIlqAnfN
+TGqYbVSnwKpzuKUFQVM2/eyUKB/SqP0GQmExrGmLGt7Byp4XB7TUjSBRjmBBll9e
+S+x1iGrth1y+yKgIwjdp3Ut/iXYrm+LGYFtj6ghnNGKDObcdlSefPt6rkI+ehlMs
+vPf1V2yrxSBt1DQafGJr8c9qSDhV6OOqdIb2uDjcuNv/V2sqt70=
+=uAe8
+-----END PGP SIGNATURE-----
+
+--7AUc2qLy4jB3hD7Z--
