@@ -2,123 +2,118 @@ Return-Path: <SRS0=/V3P=7B=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.6 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-2.1 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 59955C433E0
-	for <linux-mmc@archiver.kernel.org>; Tue, 19 May 2020 14:00:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id ACA1AC433E0
+	for <linux-mmc@archiver.kernel.org>; Tue, 19 May 2020 14:05:36 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3A7E420825
-	for <linux-mmc@archiver.kernel.org>; Tue, 19 May 2020 14:00:09 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8998D20823
+	for <linux-mmc@archiver.kernel.org>; Tue, 19 May 2020 14:05:36 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (1024-bit key) header.d=mg.codeaurora.org header.i=@mg.codeaurora.org header.b="ZzMSRq86"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="JNM5HwwQ"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727086AbgESOAI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 19 May 2020 10:00:08 -0400
-Received: from mail26.static.mailgun.info ([104.130.122.26]:21404 "EHLO
-        mail26.static.mailgun.info" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1728725AbgESOAI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 May 2020 10:00:08 -0400
-DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
- s=smtp; t=1589896808; h=Message-ID: References: In-Reply-To: Subject:
- Cc: To: From: Date: Content-Transfer-Encoding: Content-Type:
- MIME-Version: Sender; bh=eLQlBtr65E965ED8VgWttrf28Jic4su3n2v7Vzwtums=;
- b=ZzMSRq86aohTemx2kar/sGuntJ4QGS6/wehfr5ijCCQlwaao2L9TQhVHMbhB1Sd57B9aNRny
- LyJw+McqJ6D6yfrf8NJ/wtiFprA84BaHOehv9BKpAprtAv8mV7WbsJWKDxoCMPshMN0wESqE
- JHbfbsDaRRJLAwyPISMvpf2FOTA=
-X-Mailgun-Sending-Ip: 104.130.122.26
-X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
-Received: from smtp.codeaurora.org
- (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171]) by
- smtp-out-n03.prod.us-east-1.postgun.com with SMTP id
- 5ec3e662a2156719d9057573 (version=TLS1.2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256); Tue, 19 May 2020 14:00:02
- GMT
-Received: by smtp.codeaurora.org (Postfix, from userid 1001)
-        id D5BCCC433D2; Tue, 19 May 2020 14:00:01 +0000 (UTC)
-Received: from mail.codeaurora.org (localhost.localdomain [127.0.0.1])
-        (using TLSv1 with cipher ECDHE-RSA-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        (Authenticated sender: sartgarg)
-        by smtp.codeaurora.org (Postfix) with ESMTPSA id 6D651C433F2;
-        Tue, 19 May 2020 14:00:01 +0000 (UTC)
+        id S1729126AbgESOFd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 19 May 2020 10:05:33 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52960 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727910AbgESOFc (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 May 2020 10:05:32 -0400
+Received: from mail-lf1-x141.google.com (mail-lf1-x141.google.com [IPv6:2a00:1450:4864:20::141])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EE78BC08C5C0;
+        Tue, 19 May 2020 07:05:31 -0700 (PDT)
+Received: by mail-lf1-x141.google.com with SMTP id w15so3988578lfe.11;
+        Tue, 19 May 2020 07:05:31 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=subject:to:cc:references:from:message-id:date:user-agent
+         :mime-version:in-reply-to:content-language:content-transfer-encoding;
+        bh=3ngWGohqyk1bY0kV0++kwnpeD3y2ZE5Nt8l5LSZ6FRQ=;
+        b=JNM5HwwQ0gQ6nuCM6Kwij9v2fd9iRgUdc+MT4Op08k7J6Ulu1qQVyXeFLvk7ehAi8K
+         +EnpUcbc4KK4ErikoxL4837JsZFfJMcoh84iWKWNRzVzXjZ3XIG6NVQUa2XVeWrq25d2
+         V+UdACbBZga9RlPT36llf67I9pQrLn+zXRj6i2YjZOWNjdlLzI2cV4vuVtzqUlp3NvXH
+         Xrnj8h6hFoKRUMc+ejo1L08QIDjmdyERbsLAqcmyc67t1TPEFbBmc1JE3Al9M9lw9Izt
+         3QnnpQRuriGz91mMQ8rFOxR8bHQDEtW4+Xes5BCx5wARSFHjdNioYpTlgqJiJcPj5rl8
+         VRzA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=3ngWGohqyk1bY0kV0++kwnpeD3y2ZE5Nt8l5LSZ6FRQ=;
+        b=lUGHUGAWx44nLseswMnQXMVm+h1ToXFRKJ7YL3gp2bTOkXFFpGrQ3cNx6ReSUJ5IGu
+         Ut7/21Rnfbv7kAoS26kfpsmQQqzEphvJda4BOqY4Z8Ax8gzfC9xM6pfLxMPO6bEnn25O
+         jOnLir1rXwPLWWNVuAZvd1Qvvuf4Cb9cEmB+mgwtDS8QO2PFJefqqQ9PAKWyZ+ZTRY1w
+         FGTfS5eNhl8Bhic18ijsABOg6lFaG9Q4BMKGu5xp2oC233cs9PUVjXgi/DQ1SzT8PbUJ
+         0s2Q0bZylQZp6HDvDLROVXLCd80S33pQJWUxoyvUOq93PmaebAd58UnztztVBAytnYLL
+         Ou3Q==
+X-Gm-Message-State: AOAM530uvaFHxBxrAGSQsCX4/DrK7951SFU6uSGeL8x9vkBatDq2wRN0
+        wLh4XtwUD1uTfmNzixHjeBd2A8kZ
+X-Google-Smtp-Source: ABdhPJwWBveEsnFnC70i5Th3zmI8qQ90kscFZox1OYGMh21oaSbVDP3KHvAzjOQRvnunWXdFREr1Dg==
+X-Received: by 2002:ac2:5f69:: with SMTP id c9mr8778817lfc.2.1589897130069;
+        Tue, 19 May 2020 07:05:30 -0700 (PDT)
+Received: from [192.168.2.145] (ppp91-78-208-152.pppoe.mtu-net.ru. [91.78.208.152])
+        by smtp.googlemail.com with ESMTPSA id v28sm3041273lfd.35.2020.05.19.07.05.27
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 19 May 2020 07:05:28 -0700 (PDT)
+Subject: Re: [PATCH v1] sdhci: tegra: Remove warnings about missing
+ device-tree properties
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Thierry Reding <thierry.reding@gmail.com>,
+        Jonathan Hunter <jonathanh@nvidia.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        linux-tegra <linux-tegra@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+References: <20200516154314.14769-1-digetx@gmail.com>
+ <CAPDyKFo_Xp-zipqE26iMv4CFwUoMCQZy3Zr63Cp=uzePgWX7BA@mail.gmail.com>
+From:   Dmitry Osipenko <digetx@gmail.com>
+Message-ID: <b634e7a5-9a30-3bd1-126d-be62e4dd73e1@gmail.com>
+Date:   Tue, 19 May 2020 17:05:27 +0300
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.7.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII;
- format=flowed
-Content-Transfer-Encoding: 7bit
-Date:   Tue, 19 May 2020 19:30:01 +0530
-From:   sartgarg@codeaurora.org
-To:     Rob Herring <robh@kernel.org>
-Cc:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
-        vbadigan@codeaurora.org, stummala@codeaurora.org,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-msm@vger.kernel.org,
-        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
-        <devicetree@vger.kernel.org>, linux-mmc-owner@vger.kernel.org
-Subject: Re: [PATCH V1 1/7] dt-bindings: mmc: Add information for DLL register
- properties
-In-Reply-To: <20200515025047.GA27895@bogus>
-References: <1588838535-6050-1-git-send-email-sartgarg@codeaurora.org>
- <1588838535-6050-2-git-send-email-sartgarg@codeaurora.org>
- <20200515025047.GA27895@bogus>
-Message-ID: <754eb06777c76dcfaedf42083ad13bb5@codeaurora.org>
-X-Sender: sartgarg@codeaurora.org
-User-Agent: Roundcube Webmail/1.3.9
+In-Reply-To: <CAPDyKFo_Xp-zipqE26iMv4CFwUoMCQZy3Zr63Cp=uzePgWX7BA@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 8bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 2020-05-15 08:20, Rob Herring wrote:
-> On Thu, May 07, 2020 at 01:32:08PM +0530, Sarthak Garg wrote:
->> Add information regarding DLL register properties for getting target
->> specific configurations. These DLL register settings may vary from
->> target to target.
->> 
->> Also new compatible string value for sm8250 target.
->> 
->> Signed-off-by: Sarthak Garg <sartgarg@codeaurora.org>
->> ---
->>  Documentation/devicetree/bindings/mmc/sdhci-msm.txt | 14 
->> ++++++++++++++
->>  1 file changed, 14 insertions(+)
->> 
->> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt 
->> b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
->> index 5445931..b8e1d2b 100644
->> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
->> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
->> @@ -17,6 +17,7 @@ Required properties:
->>  		"qcom,msm8916-sdhci", "qcom,sdhci-msm-v4"
->>  		"qcom,msm8992-sdhci", "qcom,sdhci-msm-v4"
->>  		"qcom,msm8996-sdhci", "qcom,sdhci-msm-v4"
->> +		"qcom,sm8250-sdhci", "qcom,sdhci-msm-v5"
->>  		"qcom,sdm845-sdhci", "qcom,sdhci-msm-v5"
->>  		"qcom,qcs404-sdhci", "qcom,sdhci-msm-v5"
->>  		"qcom,sc7180-sdhci", "qcom,sdhci-msm-v5";
->> @@ -46,6 +47,13 @@ Required properties:
->>  	"cal"	- reference clock for RCLK delay calibration (optional)
->>  	"sleep"	- sleep clock for RCLK delay calibration (optional)
->> 
->> +- qcom,ddr-config: Certain chipsets and platforms require particular 
->> settings
->> +	for the DDR_CONFIG register. Use this field to specify the register
->> +	value as per the Hardware Programming Guide.
->> +
->> +- qcom,dll-config: Chipset and Platform specific value. Use this 
->> field to
->> +	specify the DLL_CONFIG register value as per Hardware Programming 
->> Guide.
+19.05.2020 10:28, Ulf Hansson пишет:
+> On Sat, 16 May 2020 at 17:44, Dmitry Osipenko <digetx@gmail.com> wrote:
+>>
+>> Several people asked me about the MMC warnings in the KMSG log and
+>> I had to tell to ignore them because these warning are irrelevant to
+>> pre-Tegra210 SoCs.
 > 
-> Board specific or SoC specific? If the latter, imply this from the
-> compatible string.
+> Why are the warnings irrelevant?
 
-Reposting again as can't find my comment on the 
-https://patchwork.kernel.org/ page.
-Whatever DLL settings are SOC specific are being taken care with the 
-compatible string.
-That is the reason we introduced qcom,sm8250-sdhci string.
-The above listed two configuration can change from board to board 
-as-well.
+That's what the DT binding doc says [1].
+
+[1]
+https://www.kernel.org/doc/Documentation/devicetree/bindings/mmc/nvidia%2Ctegra20-sdhci.txt
+
+Although, looking at the driver's code and TRM docs, it seems that all
+those properties are really irrelevant only to the older Terga20 SoC. So
+the binding doc is a bit misleading.
+
+Nevertheless, the binding explicitly says that the properties are
+optional, which is correct.
+
+>> It should be up to a board's device-tree writer to
+>> properly describe all the necessary properties. Secondly, eventually all
+>> device-tree bindings will be converted to YAML, which allows to validate
+>> board DT files, giving a warning about missing properties. Hence let's
+>> remove the noisy warnings to stop the confusion.
+> 
+> Yep, makes sense. However, perhaps we should do this conversion then,
+> rather than first drop the warnings?
+
+I don't mind to postpone this patch. But again, IIUC, all these
+properties are optional, and thus, there is no critical need to verify
+them in DT right now, it could be done later on.
