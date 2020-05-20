@@ -2,312 +2,203 @@ Return-Path: <SRS0=coTY=7C=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6F374C433E0
-	for <linux-mmc@archiver.kernel.org>; Wed, 20 May 2020 16:09:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 27F7FC433E0
+	for <linux-mmc@archiver.kernel.org>; Wed, 20 May 2020 16:12:29 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 47C4220759
-	for <linux-mmc@archiver.kernel.org>; Wed, 20 May 2020 16:09:43 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E6C7420671
+	for <linux-mmc@archiver.kernel.org>; Wed, 20 May 2020 16:12:28 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=nvidia.com header.i=@nvidia.com header.b="F/sxcm2q"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="X25mO4FM"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726978AbgETQJk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 20 May 2020 12:09:40 -0400
-Received: from hqnvemgate26.nvidia.com ([216.228.121.65]:5168 "EHLO
-        hqnvemgate26.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726439AbgETQJk (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 20 May 2020 12:09:40 -0400
-Received: from hqpgpgate101.nvidia.com (Not Verified[216.228.121.13]) by hqnvemgate26.nvidia.com (using TLS: TLSv1.2, DES-CBC3-SHA)
-        id <B5ec556370000>; Wed, 20 May 2020 09:09:27 -0700
-Received: from hqmail.nvidia.com ([172.20.161.6])
-  by hqpgpgate101.nvidia.com (PGP Universal service);
-  Wed, 20 May 2020 09:09:39 -0700
-X-PGP-Universal: processed;
-        by hqpgpgate101.nvidia.com on Wed, 20 May 2020 09:09:39 -0700
-Received: from [10.2.164.184] (10.124.1.5) by HQMAIL107.nvidia.com
- (172.20.187.13) with Microsoft SMTP Server (TLS) id 15.0.1473.3; Wed, 20 May
- 2020 16:09:35 +0000
-Subject: Re: [PATCH v1] sdhci: tegra: Remove warnings about missing
- device-tree properties
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Dmitry Osipenko <digetx@gmail.com>,
-        Thierry Reding <thierry.reding@gmail.com>
-CC:     Jonathan Hunter <jonathanh@nvidia.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        linux-tegra <linux-tegra@vger.kernel.org>,
-        "Linux Kernel Mailing List" <linux-kernel@vger.kernel.org>
-References: <20200516154314.14769-1-digetx@gmail.com>
- <CAPDyKFo_Xp-zipqE26iMv4CFwUoMCQZy3Zr63Cp=uzePgWX7BA@mail.gmail.com>
- <b634e7a5-9a30-3bd1-126d-be62e4dd73e1@gmail.com>
- <20200519162444.GD2113674@ulmo>
- <b4eb368e-adc2-7b77-3ae9-fefdcfddaf3d@gmail.com>
- <11c93dac-f5ba-2193-6f44-63af27fdce09@nvidia.com>
- <aed72c87-0e16-6dea-a4e2-7fc6a97cd313@nvidia.com>
- <c7469c16-f6f1-f9c0-566f-3b1d3774f130@nvidia.com>
- <c712de1d-cfa4-2746-ec6b-54f318aeaac2@nvidia.com>
- <d2c71267-e696-c459-fbd6-dbb5fd312ed3@gmail.com>
- <CAPDyKFqdeGyQpXpM+xynd_rWbi0S6hCeQS1Dyiy6Hd2E_yfHpg@mail.gmail.com>
-From:   Sowjanya Komatineni <skomatineni@nvidia.com>
-Message-ID: <96f917a3-d822-1c36-d088-3e4a322c1761@nvidia.com>
-Date:   Wed, 20 May 2020 09:09:33 -0700
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.7.0
+        id S1726650AbgETQM2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 20 May 2020 12:12:28 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44078 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726443AbgETQM2 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 20 May 2020 12:12:28 -0400
+Received: from mail-vs1-xe41.google.com (mail-vs1-xe41.google.com [IPv6:2607:f8b0:4864:20::e41])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C5CEFC061A0E
+        for <linux-mmc@vger.kernel.org>; Wed, 20 May 2020 09:12:27 -0700 (PDT)
+Received: by mail-vs1-xe41.google.com with SMTP id u2so2109897vsi.13
+        for <linux-mmc@vger.kernel.org>; Wed, 20 May 2020 09:12:27 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=YtrzLXGtxgRWkzlUqxtu97QqoZy64rwr9++B/m+w0bM=;
+        b=X25mO4FMVFWX9bD4sVjVdh6jjataSoBgWwqq7lzOARIYBhnm3zLBKkY9JTZx8EgSAq
+         7aNz2eLhfh/m6xOFl/fobLsZ13/d6V+wop2isk9rpCP8RcOuf4jdok4ulS0GcLLQZUEo
+         C1lcgXy8FoEivSrEG/HgFDWOBZMcFP6W5NVZTCxhgANHntp1XotjhrIrY2P7nfrzF4fN
+         LwOgsH8MJnBlq04yRlUbgjwD4xZYwek9WGtbq1xSh9QR0L39c0XpsJrK6rMCxW2a3a2h
+         7RtUli0zxYZuQs687PvV6H5aqXpzoWGfHHzu8h7dsB/f0Ef+DRb1Gsj1MtMRt8cflgVU
+         4G3g==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=YtrzLXGtxgRWkzlUqxtu97QqoZy64rwr9++B/m+w0bM=;
+        b=ct81haVUIidy+yjOTxTb7lhatQRFQS8IcTBqGqmDePEkxMT9kqH8SFv61qVIyvIqnj
+         7pWwGhp4DkKij1VhixJiR8dWasjY60KVPXJGeflD1EPtcFJHjPsUwY1bGBJpTK0oMoDi
+         wuIM4H2TfKimSFn6nJ99rI4l17ajEJpKfe1ZZnlu/1asDgYVJTzBt37d6URdOPsEDdwv
+         DSnGFuyB8pav+xcQPHCJ3xzc9Qjk8lX2gB6od48NiPbLYnTUDZmaZua6EE9AfzY+V9AV
+         uf8UVnJEyMh54hSZZwPigRX0HpDI+LD6cVcQus5EugjTxm9r+OGz/rO1YUAzDG1ttBeK
+         19HQ==
+X-Gm-Message-State: AOAM531R557oIb3bNwqkUpPHSy1R/LkEwTRZ/5O/ruFOEa6D1pa8i+OM
+        Y8TLD+em75fPuDCmdamKd+GlM/9U/INnzP8op+H4bg==
+X-Google-Smtp-Source: ABdhPJyUxYSmAfttYuzTfbgRH+uY3/B82jtNFyWpV0GDSdLZj6mIIT72znl6jOaKVWRHsC01UabEC6lC4aZ+E7zxU9U=
+X-Received: by 2002:a05:6102:5d6:: with SMTP id v22mr3741710vsf.191.1589991146916;
+ Wed, 20 May 2020 09:12:26 -0700 (PDT)
 MIME-Version: 1.0
-In-Reply-To: <CAPDyKFqdeGyQpXpM+xynd_rWbi0S6hCeQS1Dyiy6Hd2E_yfHpg@mail.gmail.com>
-X-Originating-IP: [10.124.1.5]
-X-ClientProxiedBy: HQMAIL101.nvidia.com (172.20.187.10) To
- HQMAIL107.nvidia.com (172.20.187.13)
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Transfer-Encoding: quoted-printable
-Content-Language: en-US
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nvidia.com; s=n1;
-        t=1589990967; bh=701Do0bcSh5yQLFFz76ykVz6leV5RbVhuweprGQX7VY=;
-        h=X-PGP-Universal:Subject:To:CC:References:From:Message-ID:Date:
-         User-Agent:MIME-Version:In-Reply-To:X-Originating-IP:
-         X-ClientProxiedBy:Content-Type:Content-Transfer-Encoding:
-         Content-Language;
-        b=F/sxcm2qjcMimAHvBAPrT1B7wec5bkaHTDPkfNWY3vuAVmR9FWGi0QI+isyY7JOj3
-         P1h8FOu2Cm65JYv2midonoo1tzbwhSbjI1n2X4LA6SonAiRU2FC4tpn0UEVW9q/Orz
-         YQThGLDD8+q+iqQKds0cUxs/Sm/tmWw2mvKFo1tfffetuxD8IsmJS+VSmABrZnM25x
-         P3I2JfozzG5EU59e649p2b93+BtUyDOko1fQ7HpgGPuxnqL36it4iDwrravpdvjDPJ
-         fC+l1M1yMt5p4DidVyawOUM1sTN0zCpxug9VyiUQdI+q1o8uJYPfDiFzPQoOeLrbcA
-         toReS7rC5lExQ==
+References: <20200519152445.6922-1-ulf.hansson@linaro.org> <CAMuHMdXc8jzLoKbb_heX-Ftb+3RNOQRtEX=7NS4KxWdxUfBcwA@mail.gmail.com>
+In-Reply-To: <CAMuHMdXc8jzLoKbb_heX-Ftb+3RNOQRtEX=7NS4KxWdxUfBcwA@mail.gmail.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Wed, 20 May 2020 18:11:50 +0200
+Message-ID: <CAPDyKFpBo3T-RhszJq8wL_wTzsVmo9zz=Ng6G=2R=Jx2XyrdFQ@mail.gmail.com>
+Subject: Re: [PATCH 2/2] mmc: tmio: Make sure the PM domain is 'started' while probing
+To:     Geert Uytterhoeven <geert@linux-m68k.org>
+Cc:     Linux MMC List <linux-mmc@vger.kernel.org>,
+        Masahiro Yamada <yamada.masahiro@socionext.com>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Ulrich Hecht <uli+renesas@fpond.eu>,
+        Simon Horman <horms+renesas@verge.net.au>,
+        Niklas Soderlund <niklas.soderlund@ragnatech.se>,
+        Geert Uytterhoeven <geert+renesas@glider.be>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-
-On 5/20/20 4:26 AM, Ulf Hansson wrote:
-> On Wed, 20 May 2020 at 04:00, Dmitry Osipenko <digetx@gmail.com> wrote:
->> 19.05.2020 23:44, Sowjanya Komatineni =D0=BF=D0=B8=D1=88=D0=B5=D1=82:
->>> On 5/19/20 12:07 PM, Sowjanya Komatineni wrote:
->>>> On 5/19/20 11:41 AM, Sowjanya Komatineni wrote:
->>>>> On 5/19/20 11:34 AM, Sowjanya Komatineni wrote:
->>>>>> On 5/19/20 9:33 AM, Dmitry Osipenko wrote:
->>>>>>> 19.05.2020 19:24, Thierry Reding =D0=BF=D0=B8=D1=88=D0=B5=D1=82:
->>>>>>>> On Tue, May 19, 2020 at 05:05:27PM +0300, Dmitry Osipenko wrote:
->>>>>>>>> 19.05.2020 10:28, Ulf Hansson =D0=BF=D0=B8=D1=88=D0=B5=D1=82:
->>>>>>>>>> On Sat, 16 May 2020 at 17:44, Dmitry Osipenko <digetx@gmail.com>
->>>>>>>>>> wrote:
->>>>>>>>>>> Several people asked me about the MMC warnings in the KMSG log =
-and
->>>>>>>>>>> I had to tell to ignore them because these warning are
->>>>>>>>>>> irrelevant to
->>>>>>>>>>> pre-Tegra210 SoCs.
->>>>>>>>>> Why are the warnings irrelevant?
->>>>>>>>> That's what the DT binding doc says [1].
->>>>>>>>>
->>>>>>>>> [1]
->>>>>>>>> https://www.kernel.org/doc/Documentation/devicetree/bindings/mmc/=
-nvidia%2Ctegra20-sdhci.txt
->>>>>>>>>
->>>>>>>>>
->>>>>>>>> Although, looking at the driver's code and TRM docs, it seems
->>>>>>>>> that all
->>>>>>>>> those properties are really irrelevant only to the older Terga20
->>>>>>>>> SoC. So
->>>>>>>>> the binding doc is a bit misleading.
->>>>>>>>>
->>>>>>>>> Nevertheless, the binding explicitly says that the properties are
->>>>>>>>> optional, which is correct.
->>>>>>>> Optional only means that drivers must not fail if these properties
->>>>>>>> aren't found, it doesn't mean that the driver can't warn that they
->>>>>>>> are missing.
->>>>>>>>
->>>>>>>> Quite possibly the only reason why they were made optional is beca=
-use
->>>>>>>> they weren't part of the bindings since the beginning. Anything ad=
-ded
->>>>>>>> to a binding after the first public release has to be optional by
->>>>>>>> definition, otherwise DT ABI wouldn't be stable.
->>>>>>>>
->>>>>>>> I think these warnings were added on purpose, though I also see th=
-at
->>>>>>>> there are only values for these in device tree for Tegra186 and
->>>>>>>> Tegra194
->>>>>>>> but not Tegra210 where these should also be necessary.
->>>>>> dt binding doc we have is common for MMC, SD and SDIO of all Tegras.
->>>>>> Its not mandatory to have both 3v3 and 1v8 in device tree as based
->>>>>> on signal mode.
->>>>>>
->>>>>> As these driver strengths are SoC specific, they are part of Tegra
->>>>>> SoC specific device tree where same values will be applicable to all
->>>>>> Tegra SoC specific platforms.
->>>>>>
->>>>>> Based on interface usage on platform, we use one or both of them
->>>>>> like sdcard supports dual voltage and we use both 3V3 and 1V8 but if
->>>>>> same interface is used for WIFI SD we use 1V8 only.
->>>>>>
->>>>>> So made these dt properties as optional.
->>>>>>
->>>>>> Other reason they are optional is, Tegra210 and prior has drive
->>>>>> strength settings part of apb_misc and Tegra186 and later has driver
->>>>>> strengths part of SDMMC controller. So,
->>>>>>
->>>>>> - Pinctrls "sdmmc-3v3-drv" and "sdmmc-1v8-drv" for driver strengths
->>>>>> are applicable for Tegra210 and prior.
->>>>>> - dt properties pad-autocal-pull-up/down-offset-1v8/3v3-timeout are
->>>>>> for T186 onwards for driver strengths
->>>>>>
->>>>>> Looks like dt binding doc need fix to clearly document these based
->>>>>> on SoC or agree with Yaml we can conditionally specify pinctrl or dt
->>>>>> properties based on SoC dependent.
->>>>>>
->>>>>>
->>>>>>>> Adding Sowjanya who wrote this code. Perhaps she can clarify why t=
-he
->>>>>>>> warnings were added. If these values /should/ be there on a subset=
- of
->>>>>>>> Tegra, then I think we should keep them, or add them again, but
->>>>>>>> perhaps
->>>>>>>> add a better way of identifying when they are necessary and when
->>>>>>>> it is
->>>>>>>> safe to work without them.
->>>>>>>>
->>>>>>>> That said, looking at those checks I wonder if they are perhaps ju=
-st
->>>>>>>> wrong. Or at the very least they seem redundant. It looks to me li=
-ke
->>>>>>>> they can just be:
->>>>>>>>
->>>>>>>>      if (tegra_host->pinctrl_state_XYZ =3D=3D NULL) {
->>>>>>>>          ...
->>>>>>>>      }
->>>>>>>>
->>>>>>>> That !IS_ERR(...) doesn't seem to do anything. But in that case, i=
-t's
->>>>>>>> also obvious why we're warning about them on platforms where these
->>>>>>>> properties don't exist in DT.
->>>>>> As drive strengths are through dt properties for T186 and later and
->>>>>> thru pinctrl for T210 and prior, driver first checks for dt autocal
->>>>>> timeout pull-up/down properties and if they are not found, it then
->>>>>> checks for presence of pinctrl_state_xyx_drv only when valid
->>>>>> pinctrl_state_xyz is present.
->>>>>>
->>>>>> Driver expects either pinctrl or dt properties and shows warning
->>>>>> when neither of them are present as its mandatory to use fixed
->>>>>> driver strengths when auto calibration fails.
->>>>>>
->>>>>>      err =3D device_property_read_u32(host->mmc->parent,
->>>>>>              "nvidia,pad-autocal-pull-down-offset-3v3-timeout",
->>>>>>              &autocal->pull_down_3v3_timeout);
->>>>>>      if (err) {
->>>>>>          if (!IS_ERR(tegra_host->pinctrl_state_3v3) &&
->>>>>>              (tegra_host->pinctrl_state_3v3_drv =3D=3D NULL))
->>>>>>              pr_warn("%s: Missing autocal timeout 3v3-pad drvs\n",
->>>>>>                  mmc_hostname(host->mmc));
->>>>>>          autocal->pull_down_3v3_timeout =3D 0;
->>>>>>      }
->>>>>>
->>>>>>>> So I think we either need to add those values where appropriate so
->>>>>>>> that
->>>>>>>> the warning doesn't show, or we need to narrow down where they are
->>>>>>>> really needed and add a corresponding condition.
->>>>>>>>
->>>>>>>> But again, perhaps Sowjanya can help clarify if these really are o=
-nly
->>>>>>>> needed on Tegra210 and later or if these also apply to older chips=
-.
->>>>>>> Either way will be cleaner to convert the DT binding to YAML rather
->>>>>>> than
->>>>>>> clutter the driver, IMO.
->>>>>>>
->>>>>>
->>>>>>
->>>>> Auto calibration is present from Tegra30 onward and looking into
->>>>> change where autocalibration was added to sdhci driver somehow it was
->>>>> enabled only for T30/T210/T186/T194.
->>>>>
->>>>> tegra_sdhci_parse_pad_autocal_dt() was added when auto-calibration
->>>>> was added to driver and I see this dt parse is being done
->>>>> irrespective of NVQUIRK_HAS_PADCALIB quirk so even on platforms
->>>>> without auto cal enabled in driver, these messages shows up.
->>>>>
->>>>> This should be fixed in driver to allow
->>>>> tegra_sdhci_parse_pad_autocal_dt() only when NVQUIRK_HAS_PADCALIB is
->>>>> set to avoid dt parsing to happen on platforms that don't have auto
->>>>> cal enabled.
->>>> Warning on missing drive strengths when auto cal is enabled should be
->>>> present as we should switch to fixed recommended drive strengths when
->>>> auto cal fails.
->>>>
->>>> So probably proper fix should be
->>>>
->>>> - allow tegra_sdhci_parse_pad_autocal_dt() only when
->>>> NVQUIRK_HAS_PADCALIB is set
->>>>
->>>> - current driver sets NVQUIRK_HAS_PADCALIB for T30 as well so need to
->>>> add pinctrls "sdmmc-3v3-drv" and "sdmmc-1v8-drv" to Tegra30 device tre=
-e.
->>> [Correction] T30 has same drive strengths to use irrespective of signal
->>> voltage and it doesn't have pad control. So for T3- we can update devic=
-e
->>> tree to specify "default" pinctrl with drvup/dn settings.
->>>> - Keep warning message of missing auto cal timeouts as its mandatory
->>>> to use fixed recommended driver strengths when auto cal fails.
->>>>
->>> Regarding warnings, I guess simpler and easy fix is to remove warning
->>> message on missing 3v3/1v8 drive strengths as pinctrl/dt properties wer=
-e
->>> already added for T210/186/194 where we need and old device tree don't
->>> have them but the case where auto cal can fail is very rare.
->>>
->>> Otherwise should update driver to allow
->>> tegra_sdhci_parse_pad_autocal_dt() only when NVQUIRK_HAS_PADCALIB is se=
-t
->>> and also within tegra_sdhci_parse_pad_autocal_dt() show warning of
->>> missing 3v3/1v8 settings only when NVQUIRK_NEEDS_PAD_CONTROL is set.
->>>
->>> Thierry, please suggest if you prefer to removing warnings or fix drive=
-r
->>> to show warning based on PADCALIB and PAD_CONTROL quirks.
->> The SDIO PINCTRL drive-strengths are usually a part of the board's
->> default PINCTRL state, which is either preset by bootloader or by
->> PINCTRL driver early at a boot time.
->>
->> The SDIO drive-strengths values should be board-specific and not
->> SoC-specific because they should depend on the electrical properties of
->> the board, IIUC.
-
-Drive strengths we program here when auto calibration fails are=20
-recommended values based on pre-SI circuit analysis and characterized=20
-across PVT.
-
-So,=C2=A0 these fail safe values are same for all boards of specific SoC as=
-=20
-all platform designs follow the design guidelines.
-
->> If the SDIO PINCTRL states are mandatory for the SDHCI nodes in the
->> device-trees, then the DT binding is wrong since it says that all
->> properties are optional. But I think that the current binding is okay,
->> since today SDHCI PINCTRL drive-strengths are specified implicitly in
->> the device-trees, and thus, there is no real need to emit the noisy
->> warnings in this case.
-> For now I will keep $subject patch applied, but please tell me if I
-> should drop it so we can start over.
+On Wed, 20 May 2020 at 17:57, Geert Uytterhoeven <geert@linux-m68k.org> wrote:
 >
-> In any case, I would appreciate it if someone could have a stab at
-> converting sdhci and tegra DT bindings to yaml.
+> Hi Ulf,
 >
-> Kind regards
-> Uffe
+> On Tue, May 19, 2020 at 5:24 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> > If the tmio device is attached to a genpd (PM domain), that genpd may have
+> > ->start|stop() callback assigned to it. To make sure the device is
+> > accessible during ->probe(), genpd's ->start() callback must be invoked,
+> > which is currently managed by tmio_mmc_host_probe(). However, it's likely
+> > that may be too late for some cases, as registers may be read and written
+> > way before that point.
+> >
+> > To fix the behaviour, let's move the call to dev_pm_domain_start() from
+> > tmio_mmc_host_probe() into those clients that needs it. From discussions at
+> > linux-mmc mailing list, it turned out that it should be sufficient to do
+> > this for the SDHI renesas variants, hence the call is move to
+> > renesas_sdhi_probe().
+> >
+> > Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> > ---
+> >  drivers/mmc/host/renesas_sdhi_core.c | 3 +++
+> >  drivers/mmc/host/tmio_mmc_core.c     | 2 --
+> >  2 files changed, 3 insertions(+), 2 deletions(-)
+> >
+> > diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
+> > index ff72b381a6b3..dcba9ad35dd1 100644
+> > --- a/drivers/mmc/host/renesas_sdhi_core.c
+> > +++ b/drivers/mmc/host/renesas_sdhi_core.c
+> > @@ -24,6 +24,7 @@
+> >  #include <linux/module.h>
+> >  #include <linux/of_device.h>
+> >  #include <linux/platform_device.h>
+> > +#include <linux/pm_domain.h>
+> >  #include <linux/mmc/host.h>
+> >  #include <linux/mmc/slot-gpio.h>
+> >  #include <linux/mfd/tmio.h>
+> > @@ -905,6 +906,8 @@ int renesas_sdhi_probe(struct platform_device *pdev,
+> >         /* All SDHI have SDIO status bits which must be 1 */
+> >         mmc_data->flags |= TMIO_MMC_SDIO_STATUS_SETBITS;
+> >
+> > +       dev_pm_domain_start(&pdev->dev);
+> > +
+>
+>
+> I have debug prints at the top of genpd_stop_dev():
+>
+>     pr_info("==== %s/%s: stop\n", genpd->name, dev_name(dev));
+>
+> and genpd_start_dev():
+>
+>     pr_info("==== %s/%s: start\n", genpd->name, dev_name(dev));
+>
+> On Koelsch (R-Car M2-W), the three SDHI devices are started twice:
+>
+>     PM: ==== always-on/ee100000.sd: start
+>     PM: ==== always-on/ee140000.sd: start
+>     PM: ==== always-on/ee160000.sd: start
+>     PM: ==== always-on/ee100000.sd: start
+>     PM: ==== always-on/ee140000.sd: start
+>     PM: ==== always-on/ee160000.sd: start
+>
+> The first time, the probe is deferred, because the regulator needed in
+> tmio_mmc_init_ocr() hasn't been instantiated yet. The SDHI device is
+> detached from the PM domain, but not stopped.
+> Interestingly, I see no clock imbalances afterwards.
 
-HI Uffe,
+That's because genpd's->detach_dev() callback is invoked at the
+"deferred probe" case. In your case this ends up calling
+pm_clk_destroy(). Thus the clock gets disabled and unprepared
+correctly.
 
-Please drop $subject patch. Will send patch that allows parsing for=20
-these properties only for SoC where auto cal is enabled as that's where=20
-driver needs these properties.
+>
+> On R-Car Gen3, R-Mobile A1, and RZ/A systems, they are started once,
+> as expected.
+>
+> On R-Mobile APE6 and SH-Mobile AG5, one device is stopped and started
+> again:
+>
+>     PM: ==== a3sp/ee100000.sd: start
+>     PM: ==== a3sp/ee120000.sd: start
+>     PM: ==== a3sp/ee120000.sd: stop
+>     PM: ==== a3sp/ee120000.sd: start
+>
+> But here no probe deferral is involved.
+> Just Runtime PM kicking in, I guess.
 
-So with this fix, warning will not show up on systems where autocal is=20
-not enabled.
+Yep, and that's okay, right?
 
-Thanks
+>
+> >         ret = renesas_sdhi_clk_enable(host);
+> >         if (ret)
+> >                 goto efree;
+> > diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
+> > index ba301fb7656b..d7fde57c78c1 100644
+> > --- a/drivers/mmc/host/tmio_mmc_core.c
+> > +++ b/drivers/mmc/host/tmio_mmc_core.c
+> > @@ -39,7 +39,6 @@
+> >  #include <linux/module.h>
+> >  #include <linux/pagemap.h>
+> >  #include <linux/platform_device.h>
+> > -#include <linux/pm_domain.h>
+> >  #include <linux/pm_qos.h>
+> >  #include <linux/pm_runtime.h>
+> >  #include <linux/regulator/consumer.h>
+> > @@ -1192,7 +1191,6 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host)
+> >         /* See if we also get DMA */
+> >         tmio_mmc_request_dma(_host, pdata);
+> >
+> > -       dev_pm_domain_start(&pdev->dev);
+>
+> Before, the issue on probe deferral didn't happen, as the device was only
+> started after the regulator was found.
 
-Sowjanya
+I am not sure there is an issue or did I miss something?
 
+>
+> >         pm_runtime_get_noresume(&pdev->dev);
+> >         pm_runtime_set_active(&pdev->dev);
+> >         pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
+>
+> Gr{oetje,eeting}s,
+>
+>                         Geert
+
+Thanks a lot for testing and sharing results! Very much appreciated!
+
+Kind regards
+Uffe
