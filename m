@@ -2,158 +2,99 @@ Return-Path: <SRS0=coTY=7C=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-0.6 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 43AB8C433DF
-	for <linux-mmc@archiver.kernel.org>; Wed, 20 May 2020 20:09:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4F3E9C433DF
+	for <linux-mmc@archiver.kernel.org>; Wed, 20 May 2020 20:32:23 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1190C2075F
-	for <linux-mmc@archiver.kernel.org>; Wed, 20 May 2020 20:09:08 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 73D5120823
+	for <linux-mmc@archiver.kernel.org>; Wed, 20 May 2020 20:32:22 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=nvidia.com header.i=@nvidia.com header.b="fHmNx+2l"
+	dkim=fail reason="signature verification failed" (1024-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="tWAcsHni"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726860AbgETUJH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 20 May 2020 16:09:07 -0400
-Received: from hqnvemgate26.nvidia.com ([216.228.121.65]:8406 "EHLO
-        hqnvemgate26.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726853AbgETUJH (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 20 May 2020 16:09:07 -0400
-Received: from hqpgpgate102.nvidia.com (Not Verified[216.228.121.13]) by hqnvemgate26.nvidia.com (using TLS: TLSv1.2, DES-CBC3-SHA)
-        id <B5ec58e560002>; Wed, 20 May 2020 13:08:54 -0700
-Received: from hqmail.nvidia.com ([172.20.161.6])
-  by hqpgpgate102.nvidia.com (PGP Universal service);
-  Wed, 20 May 2020 13:09:07 -0700
-X-PGP-Universal: processed;
-        by hqpgpgate102.nvidia.com on Wed, 20 May 2020 13:09:07 -0700
-Received: from HQMAIL111.nvidia.com (172.20.187.18) by HQMAIL109.nvidia.com
- (172.20.187.15) with Microsoft SMTP Server (TLS) id 15.0.1473.3; Wed, 20 May
- 2020 20:09:06 +0000
-Received: from rnnvemgw01.nvidia.com (10.128.109.123) by HQMAIL111.nvidia.com
- (172.20.187.18) with Microsoft SMTP Server (TLS) id 15.0.1473.3 via Frontend
- Transport; Wed, 20 May 2020 20:09:06 +0000
-Received: from skomatineni-linux.nvidia.com (Not Verified[10.2.164.184]) by rnnvemgw01.nvidia.com with Trustwave SEG (v7,5,8,10121)
-        id <B5ec58e610004>; Wed, 20 May 2020 13:09:06 -0700
-From:   Sowjanya Komatineni <skomatineni@nvidia.com>
-To:     <adrian.hunter@intel.com>, <ulf.hansson@linaro.org>,
-        <thierry.reding@gmail.com>, <jonathanh@nvidia.com>
-CC:     <skomatineni@nvidia.com>, <digetx@gmail.com>,
-        <linux-tegra@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-        <linux-mmc@vger.kernel.org>
-Subject: [PATCH] sdhci: tegra: Avoid reading autocal timeout values when not applicable
-Date:   Wed, 20 May 2020 13:08:57 -0700
-Message-ID: <1590005337-1087-1-git-send-email-skomatineni@nvidia.com>
-X-Mailer: git-send-email 2.7.4
-X-NVConfidentiality: public
+        id S1727065AbgETUcW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 20 May 2020 16:32:22 -0400
+Received: from www.zeus03.de ([194.117.254.33]:60964 "EHLO mail.zeus03.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726860AbgETUcV (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 20 May 2020 16:32:21 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
+        date:from:to:cc:subject:message-id:references:mime-version
+        :content-type:in-reply-to; s=k1; bh=mXl7smbdveSJQbHulzBTxhQgLWsq
+        v0R7IK20OzufJ5A=; b=tWAcsHni7UwfZOkryUXQixoWzvvMLgDsYM6HJK28z0ru
+        GWHDsGU/O3Wg4MWjExVeo3d4ROxoSamJc+if3HDdRSg8Q272/JxoMyaX0safbk7b
+        M+MblU96v8I6P6mh0HNyS2w2PrPGtcaD/q/IDoONyyIRGWQdgn5mzB0sGa+dtTQ=
+Received: (qmail 779749 invoked from network); 20 May 2020 22:32:18 +0200
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 20 May 2020 22:32:18 +0200
+X-UD-Smtp-Session: l3s3148p1@kIjaShqm8KcgAwDPXwjBAPZbXQqYFqkx
+Date:   Wed, 20 May 2020 22:32:18 +0200
+From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
+To:     Geert Uytterhoeven <geert@linux-m68k.org>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        Masahiro Yamada <yamada.masahiro@socionext.com>,
+        Ulrich Hecht <uli+renesas@fpond.eu>,
+        Simon Horman <horms+renesas@verge.net.au>,
+        Niklas Soderlund <niklas.soderlund@ragnatech.se>
+Subject: Re: [PATCH 1/2] mmc: tmio: Further fixup runtime PM management at
+ remove
+Message-ID: <20200520203111.GA4634@kunai>
+References: <20200519152434.6867-1-ulf.hansson@linaro.org>
+ <CAMuHMdXUuXLh1FWAoTTNraQQ7RGGmEOBFmaYdH71ccRovNEpgw@mail.gmail.com>
+ <20200520154906.GE5759@ninjato>
+ <CAMuHMdU99uc8fUO7gPVh1K-ZwqgpqfvFB7fVckrKzC8N-8wa8A@mail.gmail.com>
+ <CAMuHMdUdT7MJkArMNcuX-uaryqR3qALfJSDJapBaXy8F6isffQ@mail.gmail.com>
 MIME-Version: 1.0
-Content-Type: text/plain
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nvidia.com; s=n1;
-        t=1590005334; bh=asVh9rLzkiD5JyaaI6j95vjUXlrE2IDu86+Pd2Cz4zM=;
-        h=X-PGP-Universal:From:To:CC:Subject:Date:Message-ID:X-Mailer:
-         X-NVConfidentiality:MIME-Version:Content-Type;
-        b=fHmNx+2lYx43GNJpWveADlxwYya+YjTiMTBROfuoxO6BfYFYdKL88jXEWWl8RcMc/
-         v1iphoiCiARVwfwnYCpwPcY+qC8yV//Xvd0f/P90lRsdH4ivw0p0cS6L23Ak7BFgMs
-         sATl7k0XAKXkhUWcIBVoVBw6PMkhdSCeiMzZCcVa1KlvROoTV548j5jC0H6HUfNIYm
-         TBRrHaqqi3mFLUYB5yDOEEaO7aRZ6AhBv5Gi//iHfLiwI4+TzwKX7zZb665VtuLJsu
-         QVK23NunEtoELHRvUAa3z8ZBxLeP3FNvCzFG7pckxHxM+VO0jgRIcMQwZ+keZiiA9v
-         9gx41ZeN2BnNA==
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="PHCdUe6m4AxPMzOu"
+Content-Disposition: inline
+In-Reply-To: <CAMuHMdUdT7MJkArMNcuX-uaryqR3qALfJSDJapBaXy8F6isffQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-When auto calibration timeouts, calibration is disabled and fail-safe
-drive strength values are programmed based on the signal voltage.
 
-Different fail-safe drive strength values based on voltage are
-applicable only for SoCs supporting 3V3 and 1V8 pad controls.
+--PHCdUe6m4AxPMzOu
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-So, this patch avoids reading these properties from the device tree
-for SoCs not using pad controls and the warning of missing properties
-will not show up on these SoC platforms.
 
-Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
----
- drivers/mmc/host/sdhci-tegra.c | 57 ++++++++++++++++++++++++------------------
- 1 file changed, 33 insertions(+), 24 deletions(-)
+> Commit 9b0d6855e756b60d ("mmc: renesas_sdhi: enforce manual correction
+> for Gen3") fixed it.  However, there must be other later changes that
+> have impact, as reverting 9b0d6855e756b60d and reapplying 7a7dab237027
+> on both mmc/next~3 and mmc/next gives a working system.
+>=20
+> Let's call it a day, no more bisecting today...
 
-diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-index 3e2c510..141b49b 100644
---- a/drivers/mmc/host/sdhci-tegra.c
-+++ b/drivers/mmc/host/sdhci-tegra.c
-@@ -605,6 +605,39 @@ static void tegra_sdhci_parse_pad_autocal_dt(struct sdhci_host *host)
- 		autocal->pull_down_1v8 = 0;
- 
- 	err = device_property_read_u32(host->mmc->parent,
-+			"nvidia,pad-autocal-pull-up-offset-sdr104",
-+			&autocal->pull_up_sdr104);
-+	if (err)
-+		autocal->pull_up_sdr104 = autocal->pull_up_1v8;
-+
-+	err = device_property_read_u32(host->mmc->parent,
-+			"nvidia,pad-autocal-pull-down-offset-sdr104",
-+			&autocal->pull_down_sdr104);
-+	if (err)
-+		autocal->pull_down_sdr104 = autocal->pull_down_1v8;
-+
-+	err = device_property_read_u32(host->mmc->parent,
-+			"nvidia,pad-autocal-pull-up-offset-hs400",
-+			&autocal->pull_up_hs400);
-+	if (err)
-+		autocal->pull_up_hs400 = autocal->pull_up_1v8;
-+
-+	err = device_property_read_u32(host->mmc->parent,
-+			"nvidia,pad-autocal-pull-down-offset-hs400",
-+			&autocal->pull_down_hs400);
-+	if (err)
-+		autocal->pull_down_hs400 = autocal->pull_down_1v8;
-+
-+	/*
-+	 * Different fail-safe drive strength values based on the signaling
-+	 * voltage are applicable for SoCs supporting 3V3 and 1V8 pad controls.
-+	 * So, avoid reading below device tree properies for SoCs that don't
-+	 * have NVQUIRK_NEEDS_PAD_CONTROL.
-+	 */
-+	if (!(tegra_host->soc_data->nvquirks & NVQUIRK_NEEDS_PAD_CONTROL))
-+		return;
-+
-+	err = device_property_read_u32(host->mmc->parent,
- 			"nvidia,pad-autocal-pull-up-offset-3v3-timeout",
- 			&autocal->pull_up_3v3_timeout);
- 	if (err) {
-@@ -647,30 +680,6 @@ static void tegra_sdhci_parse_pad_autocal_dt(struct sdhci_host *host)
- 				mmc_hostname(host->mmc));
- 		autocal->pull_down_1v8_timeout = 0;
- 	}
--
--	err = device_property_read_u32(host->mmc->parent,
--			"nvidia,pad-autocal-pull-up-offset-sdr104",
--			&autocal->pull_up_sdr104);
--	if (err)
--		autocal->pull_up_sdr104 = autocal->pull_up_1v8;
--
--	err = device_property_read_u32(host->mmc->parent,
--			"nvidia,pad-autocal-pull-down-offset-sdr104",
--			&autocal->pull_down_sdr104);
--	if (err)
--		autocal->pull_down_sdr104 = autocal->pull_down_1v8;
--
--	err = device_property_read_u32(host->mmc->parent,
--			"nvidia,pad-autocal-pull-up-offset-hs400",
--			&autocal->pull_up_hs400);
--	if (err)
--		autocal->pull_up_hs400 = autocal->pull_up_1v8;
--
--	err = device_property_read_u32(host->mmc->parent,
--			"nvidia,pad-autocal-pull-down-offset-hs400",
--			&autocal->pull_down_hs400);
--	if (err)
--		autocal->pull_down_hs400 = autocal->pull_down_1v8;
- }
- 
- static void tegra_sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
--- 
-2.7.4
+Thanks for the work, Geert!
 
+This non-deterministic outcome already convinces me that we should
+really first try to reproduce and fix the stalled SCC case before we
+remove the workaround again.
+
+
+--PHCdUe6m4AxPMzOu
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAl7Fk9IACgkQFA3kzBSg
+KbbrLxAAkd68XOHdf3IOsTepqFYJ35bSqfyLBP5n7R2CEuxe5D6ralo6R9jE0hfC
+udmHiI8eCQYq1AO1yHORnSc2vqYndFMOwZIlP5kdqSNIOq9Zjm+vhjEjekgasqwW
+u+rMZDnbxR3ffXAwl48RDyx719ueOhp2V8AJZ0lDyhK2GyXCkq1HIhXu8xRW6SIG
+7QQCGAEfV4hRPVDa+6YboCPGKTvtLE0hW5GqIU4Lrl0gLV8JzAaExMedwhAjwWzh
+GYodfyYn0Sc5bVp0d2C9rnI5hLz6+lolpcnU89r9WYsWASb0JRPbrXfFOo1SibQE
+xD7zvHFS8WSoaeNmT+UPPB2zRDn9fzCLotiTBBxnJHlKb1GC/A2hmp5PGYLBJZXe
+pQA5VzSCkR2j16Tv7txHal6qLkQa8EQoIkf4+guddRUnCqYHuSMzKXe8TeS0piPg
+FQN4sH4+aa2C44xrx6415BAofWmPyW6xU/bcJELJwxXYiqqF32pMFxrDSJeJZXjw
+SZA9ZrcG4xsY6I/hw5cIlnQAlqWGWt5B718nOIZqF79nffca9a/VGaUCXUYyGymP
+KVZWX2Ceqyw+fOpgqbMQT+DNz3kkZHujuFLSvXuegCPBWz1FicNOeUAYeTUJpbmV
+8sDADPtBxyE6HyYT3oXRuEShnu1Y/ARXM9A39T+KPhdOy9wcdvc=
+=pDbP
+-----END PGP SIGNATURE-----
+
+--PHCdUe6m4AxPMzOu--
