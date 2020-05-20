@@ -2,143 +2,99 @@ Return-Path: <SRS0=coTY=7C=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CA58BC433E0
-	for <linux-mmc@archiver.kernel.org>; Wed, 20 May 2020 11:35:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F29A0C433E0
+	for <linux-mmc@archiver.kernel.org>; Wed, 20 May 2020 14:30:47 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A332620671
-	for <linux-mmc@archiver.kernel.org>; Wed, 20 May 2020 11:35:55 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Du9Tc0gw"
+	by mail.kernel.org (Postfix) with ESMTP id C9A07207D3
+	for <linux-mmc@archiver.kernel.org>; Wed, 20 May 2020 14:30:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726435AbgETLfz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 20 May 2020 07:35:55 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57318 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726525AbgETLfy (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 20 May 2020 07:35:54 -0400
-Received: from mail-vk1-xa42.google.com (mail-vk1-xa42.google.com [IPv6:2607:f8b0:4864:20::a42])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6E74DC05BD43
-        for <linux-mmc@vger.kernel.org>; Wed, 20 May 2020 04:35:54 -0700 (PDT)
-Received: by mail-vk1-xa42.google.com with SMTP id 134so679399vky.2
-        for <linux-mmc@vger.kernel.org>; Wed, 20 May 2020 04:35:54 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=+aE0A0M5Qg9SXZIcPPNRj5FWijxTBxGrBtlS/gFGoT8=;
-        b=Du9Tc0gw3O1YUeg9tnkrby1f5eTFb+hNUB1RByKvkiome1cXOHOM5qzZUryjXpVUxa
-         6kpvbc+O0h1MXl3xvOFaIZ7+iH42J9cU6mkwiso8AFh4SSuHKqYxAimOu9DlrSZwSg6H
-         KppqevnNhBUBMW50+4GkcKSFwyzQ38Dp8ADdAUcyo//bO3IMnOt+5hpCm7+nlZSfw8aV
-         t845chc788hXfV4rKOznpkRia59Cc5nwXCd4Sn3UGVqZ2tD2pvcHYfMyRzJNYtbrF9v6
-         JmG7b3BuxQIVjXjqFYDOCMOuC/zL0uPvAFRS/IVMX9kCqT1alr/+zylPG6wZV/m1fHk5
-         +6ng==
+        id S1726729AbgETOar (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 20 May 2020 10:30:47 -0400
+Received: from mail-ot1-f68.google.com ([209.85.210.68]:33333 "EHLO
+        mail-ot1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726452AbgETOaq (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 20 May 2020 10:30:46 -0400
+Received: by mail-ot1-f68.google.com with SMTP id v17so2648222ote.0
+        for <linux-mmc@vger.kernel.org>; Wed, 20 May 2020 07:30:45 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=+aE0A0M5Qg9SXZIcPPNRj5FWijxTBxGrBtlS/gFGoT8=;
-        b=f1Gp3GljQ0q9/g4xplz4G6QxRf/gbVlNjw+uFvPHmeQNXseEmTtNHjmw+bjTuedinN
-         2hmj9+iFBpHBw1TTfsN3KT6NbIVOZLyNgRTJZ9AzA5hIbG7q8j9lIGVKdZkrrkkEIckN
-         BI1/gzMa2OC+L1aWzu2k5Od1DspswOzUHM4IwxebXIZCOqAVGb4CQ0DE70yC40Ey3VM8
-         2lt8QpS0GHPilGOxxJWOrJ7HQ15vh9b7EDbY/KlwckIWptlruCkApASPSP9sa+ykKtNS
-         EKiSj4kCqGq5P6p0zaU4YwCok0IotRPes0c1CpZdTI9OypsGv+TtmRRAOTn+UCL20o5Q
-         SRIQ==
-X-Gm-Message-State: AOAM531ivZ0dgsPqO4eI07C09gReRnVVh+0isrzCO4VIZ8jMwECaMu2m
-        fxSf7QP/13qUEDb0aKL0+JoGgFqx6+eToFyqC9jxng==
-X-Google-Smtp-Source: ABdhPJypO0qOnBkxx9iB9RyuzTNifOfMDcbFFlvy37TuGrWiaK0Fb8LAeMN0es2fOho+sfGVkw1OoCf49fFnDYoMWto=
-X-Received: by 2002:ac5:cded:: with SMTP id v13mr3321768vkn.59.1589974553603;
- Wed, 20 May 2020 04:35:53 -0700 (PDT)
+        bh=25Ibcwww+BcN0/96boziMJavMAoQiNziLwFuwJDrUko=;
+        b=EscRPFICkARagNBoH9QFZd+mrRvQ1bbi44irMicLX/ukzQrJL8+2sQUwqgjN4dpDzO
+         eVoSew2n24UUyqcrTxcpR8cS/L7FdyFamiKDBz9jrS4bkNRP9NbXMSlf2eanroRN4BUl
+         M4FMTeBN1n2uTzVE7Q/bJrwp5MnSJQ7pAJ9RICSFVcgZt26REqjusCwkmolLJvOzxraN
+         HA7VIl6gbGTMRMoGwP2PGqqwviM+msBp2kjp5jfFft5rAOeTJ87eYCY0A1R0L/ZEQys2
+         /9mlNsGxOtMGsp7p0QZWZpn7pTRMSOA1GyDE0GDl0s1WT4LKwNaEy4Crl4djjzDpLZTz
+         +Zbg==
+X-Gm-Message-State: AOAM533G7GMOk+F4IW6EI9y7YiZrDwCXDCN5HC1tN8hI7jCFOevu3m7H
+        cVr4ph6FWnaMVSjxiHzrCs9Aezds+LBHm0hzA5Y=
+X-Google-Smtp-Source: ABdhPJxUrlorzaEl5xk+OAN/4uiZlrr62u3pS+3TM7funhkQccEdpAGNARSsPE61JEHXFJBGWANKoOLZVDrZBKxnj0U=
+X-Received: by 2002:a9d:564:: with SMTP id 91mr3409201otw.250.1589985044490;
+ Wed, 20 May 2020 07:30:44 -0700 (PDT)
 MIME-Version: 1.0
-References: <20200519164251.5430-1-wsa+renesas@sang-engineering.com>
-In-Reply-To: <20200519164251.5430-1-wsa+renesas@sang-engineering.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 20 May 2020 13:35:17 +0200
-Message-ID: <CAPDyKFq0TuCfnNE3i2reSzsO7=ex+2-JUDn1XEVxT52GMM3JLQ@mail.gmail.com>
-Subject: Re: [PATCH v2] mmc: renesas_sdhi: remove manual clk handling
-To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
-        Geert Uytterhoeven <geert+renesas@glider.be>
+References: <20200519152434.6867-1-ulf.hansson@linaro.org>
+In-Reply-To: <20200519152434.6867-1-ulf.hansson@linaro.org>
+From:   Geert Uytterhoeven <geert@linux-m68k.org>
+Date:   Wed, 20 May 2020 16:30:33 +0200
+Message-ID: <CAMuHMdXUuXLh1FWAoTTNraQQ7RGGmEOBFmaYdH71ccRovNEpgw@mail.gmail.com>
+Subject: Re: [PATCH 1/2] mmc: tmio: Further fixup runtime PM management at remove
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Linux MMC List <linux-mmc@vger.kernel.org>,
+        Masahiro Yamada <yamada.masahiro@socionext.com>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Ulrich Hecht <uli+renesas@fpond.eu>,
+        Simon Horman <horms+renesas@verge.net.au>,
+        Niklas Soderlund <niklas.soderlund@ragnatech.se>
 Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 19 May 2020 at 18:42, Wolfram Sang
-<wsa+renesas@sang-engineering.com> wrote:
+Hi Ulf,
+
+On Tue, May 19, 2020 at 5:24 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> Before calling tmio_mmc_host_probe(), the caller is required to enable
+> clocks for its device, as to make it accessible when reading/writing
+> registers during probe.
 >
-> The SDHI driver en-/disabled its main clock on its own, e.g. during
-> probe() and remove(). Now, we leave all handling to RPM.
+> Therefore, the responsibility to disable these clocks, in the error path of
+> ->probe() and during ->remove(), is better managed outside
+> tmio_mmc_host_remove(). As a matter of fact, callers of
+> tmio_mmc_host_remove() already expects this to be the behaviour.
 >
-> clk_summary before:
-> sd0                   1        1        0    12480000          0     0  50000
->    sdif0              2        2        0    12480000          0     0  50000
+> However, there's a problem with tmio_mmc_host_remove() when the Kconfig
+> option, CONFIG_PM, is set. More precisely, tmio_mmc_host_remove() may then
+> disable the clock via runtime PM, which leads to clock enable/disable
+> imbalance problems, when the caller of tmio_mmc_host_remove() also tries to
+> disable the same clocks.
 >
-> clk_summary after:
-> sd0                   1        1        0    12480000          0     0  50000
->    sdif0              1        1        0    12480000          0     0  50000
+> To solve the problem, let's make sure tmio_mmc_host_remove() leaves the
+> device with clocks enabled, but also make sure to disable the IRQs, as we
+> normally do at ->runtime_suspend().
 >
 > Reported-by: Geert Uytterhoeven <geert+renesas@glider.be>
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> Tested-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 
-Applied for next, thanks!
+Tested-by: Geert Uytterhoeven <geert+renesas@glider.be>
 
-Kind regards
-Uffe
+(on R-Car Gen2, various Gen3, SH-Mobile AG5, R-Mobile A1, R-Mobile APE6,
+ RZ/A1, and RZ/A2)
 
+Gr{oetje,eeting}s,
 
-> ---
->
-> Depends on mmc/next + "[PATCH 2/2] mmc: tmio: Make sure the PM domain is
-> 'started' while probing" from Ulf
->
-> Changes since v1:
->
-> * reworded commit message
-> * don't remove the en-/disable calls themselves but only the clk_* calls
->   to the main clock
->
->
->  drivers/mmc/host/renesas_sdhi_core.c | 10 ++--------
->  1 file changed, 2 insertions(+), 8 deletions(-)
->
-> diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-> index dcba9ad35dd1..15e21894bd44 100644
-> --- a/drivers/mmc/host/renesas_sdhi_core.c
-> +++ b/drivers/mmc/host/renesas_sdhi_core.c
-> @@ -83,16 +83,11 @@ static int renesas_sdhi_clk_enable(struct tmio_mmc_host *host)
->  {
->         struct mmc_host *mmc = host->mmc;
->         struct renesas_sdhi *priv = host_to_priv(host);
-> -       int ret = clk_prepare_enable(priv->clk);
-> -
-> -       if (ret < 0)
-> -               return ret;
-> +       int ret;
->
->         ret = clk_prepare_enable(priv->clk_cd);
-> -       if (ret < 0) {
-> -               clk_disable_unprepare(priv->clk);
-> +       if (ret < 0)
->                 return ret;
-> -       }
->
->         /*
->          * The clock driver may not know what maximum frequency
-> @@ -198,7 +193,6 @@ static void renesas_sdhi_clk_disable(struct tmio_mmc_host *host)
->  {
->         struct renesas_sdhi *priv = host_to_priv(host);
->
-> -       clk_disable_unprepare(priv->clk);
->         clk_disable_unprepare(priv->clk_cd);
->  }
->
-> --
-> 2.20.1
->
+                        Geert
+
+-- 
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
