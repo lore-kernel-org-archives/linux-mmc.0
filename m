@@ -4,34 +4,35 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+	URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6F006C433E2
-	for <linux-mmc@archiver.kernel.org>; Thu, 21 May 2020 07:01:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3F39FC433E5
+	for <linux-mmc@archiver.kernel.org>; Thu, 21 May 2020 07:01:23 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4F5CE2083E
-	for <linux-mmc@archiver.kernel.org>; Thu, 21 May 2020 07:01:22 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1FBC42083E
+	for <linux-mmc@archiver.kernel.org>; Thu, 21 May 2020 07:01:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727030AbgEUHBV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 21 May 2020 03:01:21 -0400
-Received: from relmlor1.renesas.com ([210.160.252.171]:15628 "EHLO
-        relmlie5.idc.renesas.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1726938AbgEUHBV (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 21 May 2020 03:01:21 -0400
+        id S1726938AbgEUHBW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 21 May 2020 03:01:22 -0400
+Received: from relmlor2.renesas.com ([210.160.252.172]:14295 "EHLO
+        relmlie6.idc.renesas.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1728000AbgEUHBW (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 21 May 2020 03:01:22 -0400
 X-IronPort-AV: E=Sophos;i="5.73,416,1583161200"; 
-   d="scan'208";a="47651283"
+   d="scan'208";a="47438475"
 Received: from unknown (HELO relmlir5.idc.renesas.com) ([10.200.68.151])
-  by relmlie5.idc.renesas.com with ESMTP; 21 May 2020 16:01:19 +0900
+  by relmlie6.idc.renesas.com with ESMTP; 21 May 2020 16:01:19 +0900
 Received: from localhost.localdomain (unknown [10.166.252.89])
-        by relmlir5.idc.renesas.com (Postfix) with ESMTP id 77F3F400C755;
+        by relmlir5.idc.renesas.com (Postfix) with ESMTP id 854BA400C4C1;
         Thu, 21 May 2020 16:01:19 +0900 (JST)
 From:   Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
 To:     ulf.hansson@linaro.org, wsa+renesas@sang-engineering.com
 Cc:     linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
         Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-Subject: [PATCH 1/3] mmc: tmio: core: Add end operation into tmio_mmc_dma_ops
-Date:   Thu, 21 May 2020 16:01:04 +0900
-Message-Id: <1590044466-28372-2-git-send-email-yoshihiro.shimoda.uh@renesas.com>
+Subject: [PATCH 2/3] mmc: renesas_sdhi_internal_dmac: clean up the code for dma complete
+Date:   Thu, 21 May 2020 16:01:05 +0900
+Message-Id: <1590044466-28372-3-git-send-email-yoshihiro.shimoda.uh@renesas.com>
 X-Mailer: git-send-email 2.7.4
 In-Reply-To: <1590044466-28372-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
 References: <1590044466-28372-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
@@ -40,60 +41,54 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Related drivers like renesas_sdhi_internal_dmac are possible
-to lack dma unmaping in error cases (for example response timeout).
-
-Since tmio_mmc_finish_request() will be always called in any case,
-to fix the issue, add end operation into struct tmio_mmc_dma_ops and
-call the operation in tmio_mmc_finish_request() to call dma_ummap API
-by the related drivers correctly.
+To add end() operation in the future, clean the code of
+renesas_sdhi_internal_dmac_complete_tasklet_fn(). No behavior change.
 
 Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
 ---
- drivers/mmc/host/tmio_mmc.h      | 3 +++
- drivers/mmc/host/tmio_mmc_core.c | 8 ++++++++
- 2 files changed, 11 insertions(+)
+ drivers/mmc/host/renesas_sdhi_internal_dmac.c | 18 +++++++++++++-----
+ 1 file changed, 13 insertions(+), 5 deletions(-)
 
-diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
-index b4cf101..0a4f365 100644
---- a/drivers/mmc/host/tmio_mmc.h
-+++ b/drivers/mmc/host/tmio_mmc.h
-@@ -118,6 +118,9 @@ struct tmio_mmc_dma_ops {
- 	void (*release)(struct tmio_mmc_host *host);
- 	void (*abort)(struct tmio_mmc_host *host);
- 	void (*dataend)(struct tmio_mmc_host *host);
-+
-+	/* optional */
-+	void (*end)(struct tmio_mmc_host *host);	/* held host->lock */
- };
- 
- struct tmio_mmc_host {
-diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
-index d7fde57..946fb01 100644
---- a/drivers/mmc/host/tmio_mmc_core.c
-+++ b/drivers/mmc/host/tmio_mmc_core.c
-@@ -57,6 +57,12 @@ static inline void tmio_mmc_start_dma(struct tmio_mmc_host *host,
- 		host->dma_ops->start(host, data);
+diff --git a/drivers/mmc/host/renesas_sdhi_internal_dmac.c b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
+index 47ac53e..201b8ed 100644
+--- a/drivers/mmc/host/renesas_sdhi_internal_dmac.c
++++ b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
+@@ -229,15 +229,12 @@ static void renesas_sdhi_internal_dmac_issue_tasklet_fn(unsigned long arg)
+ 					    DTRAN_CTRL_DM_START);
  }
  
-+static inline void tmio_mmc_end_dma(struct tmio_mmc_host *host)
-+{
-+	if (host->dma_ops && host->dma_ops->end)
-+		host->dma_ops->end(host);
+-static void renesas_sdhi_internal_dmac_complete_tasklet_fn(unsigned long arg)
++static bool renesas_sdhi_internal_dmac_complete(struct tmio_mmc_host *host)
+ {
+-	struct tmio_mmc_host *host = (struct tmio_mmc_host *)arg;
+ 	enum dma_data_direction dir;
+ 
+-	spin_lock_irq(&host->lock);
+-
+ 	if (!host->data)
+-		goto out;
++		return false;
+ 
+ 	if (host->data->flags & MMC_DATA_READ)
+ 		dir = DMA_FROM_DEVICE;
+@@ -250,6 +247,17 @@ static void renesas_sdhi_internal_dmac_complete_tasklet_fn(unsigned long arg)
+ 	if (dir == DMA_FROM_DEVICE)
+ 		clear_bit(SDHI_INTERNAL_DMAC_RX_IN_USE, &global_flags);
+ 
++	return true;
 +}
 +
- static inline void tmio_mmc_enable_dma(struct tmio_mmc_host *host, bool enable)
- {
- 	if (host->dma_ops)
-@@ -797,6 +803,8 @@ static void tmio_mmc_finish_request(struct tmio_mmc_host *host)
- 
- 	spin_lock_irqsave(&host->lock, flags);
- 
-+	tmio_mmc_end_dma(host);
++static void renesas_sdhi_internal_dmac_complete_tasklet_fn(unsigned long arg)
++{
++	struct tmio_mmc_host *host = (struct tmio_mmc_host *)arg;
 +
- 	mrq = host->mrq;
- 	if (IS_ERR_OR_NULL(mrq)) {
- 		spin_unlock_irqrestore(&host->lock, flags);
++	spin_lock_irq(&host->lock);
++	if (!renesas_sdhi_internal_dmac_complete(host))
++		goto out;
++
+ 	tmio_mmc_do_data_irq(host);
+ out:
+ 	spin_unlock_irq(&host->lock);
 -- 
 2.7.4
 
