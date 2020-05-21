@@ -2,146 +2,104 @@ Return-Path: <SRS0=q8Wp=7D=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.1 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
+	SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 513C8C433E0
-	for <linux-mmc@archiver.kernel.org>; Thu, 21 May 2020 07:45:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 39F41C433DF
+	for <linux-mmc@archiver.kernel.org>; Thu, 21 May 2020 12:40:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2CD672065F
-	for <linux-mmc@archiver.kernel.org>; Thu, 21 May 2020 07:45:08 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 19D522078B
+	for <linux-mmc@archiver.kernel.org>; Thu, 21 May 2020 12:40:40 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=renesasgroup.onmicrosoft.com header.i=@renesasgroup.onmicrosoft.com header.b="aczDVlWy"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="sqbpbKXn"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728456AbgEUHpH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 21 May 2020 03:45:07 -0400
-Received: from mail-eopbgr1310103.outbound.protection.outlook.com ([40.107.131.103]:60557
-        "EHLO APC01-SG2-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1728375AbgEUHpG (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 21 May 2020 03:45:06 -0400
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=NggMi36cFRSYp5r2QhB66Wq9QZxAWuTZopM9M6at+j8bO8okULwGgbugvjrVKP9QXR+n3l+zM0Z7mEHLT+ttxZ3SEQmc3TxuZ8v9lOFnKz+QqMMC7/VAbvsIWvlhKGW9d7KbAl065FD+8RKthwvG0gql37QrPnGdCadHi3enXWNpSjw4I07yq7UHIaam8Kbkr72kl2qjRMszfuCMvkM+8poXmOUKS2zfZ7WEkpzTv8HpnTwT9qd5lLl82AfNKZUHF3dFwSvbvPhroGT6GHrD2SNkDMBSB7V+5hiK2LFez59EqHWCLNHwHOGO9u85/yJ/hI8JpjbgrEyUulxzQIH2fA==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=E1m6K+Lz/XzzKlm//NlUjS6DMe2Ad11bOvu/vfevUNE=;
- b=Bs/4bu3ySe2+zxSkQen3G28Ve4PgR5o3LNNjU4wlA6fvIY6CzZN/UkuXCdxnejYKtsQm3EjQMG/W3flDxUxjEGICOa4PVCU45TfThks5LQdKWlQkwYWMd4Yr8pXfD1zIzhIqyjAMCrD+YqRN9CE5M5883hIfHqytPsVOnFrxJSsvxz/tMyO1WhxTqxAI5lRBNGpoOYeYCpVnZAGbYxhF9/eB1zdQVw3l1LK0STyAki9jP4d/mbzEgdomd4ss8GqW32PZYrZV9zQ11l1Xq2hEPl0kj4EoVhLweDeVGSHxcvboc1gLDCLcMgA+NkprXCoWMH2RB/9mBodrKn+WNP5a2Q==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=renesas.com; dmarc=pass action=none header.from=renesas.com;
- dkim=pass header.d=renesas.com; arc=none
+        id S1729146AbgEUMkg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 21 May 2020 08:40:36 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37820 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728164AbgEUMkg (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 21 May 2020 08:40:36 -0400
+Received: from mail-lj1-x244.google.com (mail-lj1-x244.google.com [IPv6:2a00:1450:4864:20::244])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E9A46C061A0E;
+        Thu, 21 May 2020 05:40:34 -0700 (PDT)
+Received: by mail-lj1-x244.google.com with SMTP id z6so8023268ljm.13;
+        Thu, 21 May 2020 05:40:34 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=renesasgroup.onmicrosoft.com; s=selector2-renesasgroup-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=E1m6K+Lz/XzzKlm//NlUjS6DMe2Ad11bOvu/vfevUNE=;
- b=aczDVlWyuf1c9m0WbxRHKzXJk00QBqq7B8/ZZJjOsdjFLEhJQUiOYLeND6ITvxpKS6oHPleAfzLek0hl9P749vYnX3rJyPYZbC3sg2AYJKj8nuxuXrR4gCp8gAFJinJI/tXdFK4gEO/aCJxQSWmm0+Tq6WQkyOToYL75LF++6Wo=
-Received: from TY2PR01MB3692.jpnprd01.prod.outlook.com (2603:1096:404:d5::22)
- by TY2SPR01MB0032.jpnprd01.prod.outlook.com (2603:1096:404:d9::23) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3021.23; Thu, 21 May
- 2020 07:44:59 +0000
-Received: from TY2PR01MB3692.jpnprd01.prod.outlook.com
- ([fe80::2da1:bdb7:9089:7f43]) by TY2PR01MB3692.jpnprd01.prod.outlook.com
- ([fe80::2da1:bdb7:9089:7f43%3]) with mapi id 15.20.3000.033; Thu, 21 May 2020
- 07:44:59 +0000
-From:   Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-To:     "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        "wsa+renesas@sang-engineering.com" <wsa+renesas@sang-engineering.com>
-CC:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-renesas-soc@vger.kernel.org" 
-        <linux-renesas-soc@vger.kernel.org>
-Subject: RE: [PATCH 0/3] mmc: tmio and renesas_sdhi_internal_dmac: fix dma
- unmapping
-Thread-Topic: [PATCH 0/3] mmc: tmio and renesas_sdhi_internal_dmac: fix dma
- unmapping
-Thread-Index: AQHWLz2iQ8JJHLYs4USF4zCo+Q8xCqiyJ38A
-Date:   Thu, 21 May 2020 07:44:59 +0000
-Message-ID: <TY2PR01MB36921D805C79B829563698D6D8B70@TY2PR01MB3692.jpnprd01.prod.outlook.com>
-References: <1590044466-28372-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
-In-Reply-To: <1590044466-28372-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
-Accept-Language: ja-JP, en-US
-Content-Language: ja-JP
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-authentication-results: linaro.org; dkim=none (message not signed)
- header.d=none;linaro.org; dmarc=none action=none header.from=renesas.com;
-x-originating-ip: [124.210.22.195]
-x-ms-publictraffictype: Email
-x-ms-office365-filtering-ht: Tenant
-x-ms-office365-filtering-correlation-id: b4dfdc12-5326-4abd-9d34-08d7fd5add4d
-x-ms-traffictypediagnostic: TY2SPR01MB0032:
-x-microsoft-antispam-prvs: <TY2SPR01MB0032F0F86E517F91D0A09108D8B70@TY2SPR01MB0032.jpnprd01.prod.outlook.com>
-x-ms-oob-tlc-oobclassifiers: OLM:7219;
-x-forefront-prvs: 041032FF37
-x-ms-exchange-senderadcheck: 1
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: DqFJmUvZja/FRXbmxBRDvZsdkK7ztNBm93fcudrvDyFPY36RCQNtzP1eTj1tm7IvATSIYa91EefaxeFby2MSjeXyMDoYTXDlNSlPTkVbEdoGfdmcGbizAwScdZiUXmXkaOLJy/2YVJuWxOJAVE5XHDGTwfB0CkVNr7eSHF6J/0DD4i9K0wF2qryDk87xgjP4VmkBtD9KnscTX1FPLi2CuSJpctgD+BquNykSDWMYsLlDcd51ZC72U8I/lvTwgqZgniQ6rmxtUtEOoiJBRIh0exRvCyWDmSPeHEYz42wZiSd4K/ZZ/svmwTLBOou95p2OjfJgCvvPWb53Me0WLI2vwQ==
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY2PR01MB3692.jpnprd01.prod.outlook.com;PTR:;CAT:NONE;SFTY:;SFS:(4636009)(376002)(136003)(346002)(39860400002)(366004)(396003)(53546011)(52536014)(55236004)(26005)(9686003)(7696005)(6506007)(76116006)(86362001)(55016002)(5660300002)(66946007)(66476007)(66556008)(66446008)(64756008)(186003)(71200400001)(110136005)(54906003)(33656002)(2906002)(4326008)(8936002)(8676002)(478600001)(316002);DIR:OUT;SFP:1102;
-x-ms-exchange-antispam-messagedata: QsRq1TXDTMnFBOaHD4SxslX9bj3/sY1ALRy7wC3lCO6hn4c8863li9DZ03ssEbrTsP1YuBzLQLJl2pmETuogASrHdWu5tEuJrofCXTqVepKs1mwdanLHY5ZXl/+EOd/HNAE1m+CgBl4jzuNOSH9HI4uZSsL3M/dLBytlImtNkpbnz5ZfgrWf7QyuoNMSEf4LRpnknKuv5kQ+ES/hTqHtdWe3YC0jMqxtnqxvQihzV2gPJntQFhJu3NkCkd2OczGKOc4pwiVADZcRUtYZ/B0hFmLbQuv5Jve7W3UkWjvSW+cbEZfeuQ2hN0tt0XfRouUbIUxm0sdu39jsySYNgh2+BzO7SLjA1v47eP+nDqbRgU9BsvzRG2ICNUCSGMSPpVybFreI3+NIXJdVAkbPPNHJvKcQEY/M95I8UEQvSURD670uZooVuMvfjvaSt1PfiAjLWK6fZFxLJ8bleV5sIFi8bGqj88GVw+xyZLsMeyvDjqkezRjs9nuACrd7EE4NG+27
-x-ms-exchange-transport-forked: True
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+        d=gmail.com; s=20161025;
+        h=subject:to:cc:references:from:message-id:date:user-agent
+         :mime-version:in-reply-to:content-language:content-transfer-encoding;
+        bh=Bz9kW9o/9YtdCQhvvB7QDx10N00o+JmEwpJejIQIQC4=;
+        b=sqbpbKXnnY6uMSFqSGEn3a6CxICrJyZqvk65oaAGSlYLP6esz/UkVdoJ2LsTojVQ/z
+         F3mY0HIvY/wzm+zDbYRIfXdktMFD9zXqXQXT4JfkeXUxe3W0Cs443CEmdR1MlnqbiLvz
+         sCwSMTuRvktY2ATbNsLmp0qgnnL71T6aWbCznAKMUaGT0ZuIp9j0NNQA7eoXEo/wH/Bp
+         WSq5daGmq8lRF07dPqfeOG8+ZRrgeVeHa1gmMJ3R0PNOMS2YbBpR/lIg9XaVJD2571uY
+         q7yLIPA6cKu6yujpOcFxI231bGWMTIxV2feb1uuBQheKSt43UleIlU2grjUVGqCzfa1I
+         RUog==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=Bz9kW9o/9YtdCQhvvB7QDx10N00o+JmEwpJejIQIQC4=;
+        b=nE1Ewlq/01ZOcvuf5vAGXTKCVzbEMdeRcparP8hYg1axXQ3Y2/FHRKekIan+/aAlPT
+         eP7TUeGMPDyL0Qwz0IfmjdUqgx30Yr0MHIga+A+KnOOO5G/WUHyEX78DFhwL2mQKjTtM
+         nMMG7p39UPqjl6R6LNCt681D3LZc16tLX5tnNsJgVSSfeRDNUWmATDPH7KvcjPo9LcuW
+         03MQk8gxNu/7Gqq6vjL1acd2sQ2v6dh+BPiYi8dupo8KA8oRQMY5X0nAU3R6NlmB132N
+         uFjseGKQmk5BiTyxW7mr/PqVdJ7gi0t6gF6Q/rsmEUpJGptXGAzedk/nKhMUK8/szdFP
+         72iA==
+X-Gm-Message-State: AOAM531OXszLU2W0YYy0HW1Jw7I/YHlkLZ/OZJ3tgG6jF/5iWyQsSt8F
+        snM4kTQD2e/rKDW2NUe9na0z1t2F
+X-Google-Smtp-Source: ABdhPJzNyDE6H412DCiAfBDPeBmNqbKsp22MrTsH+gzNfvHqt6hOaJDPP4B9eJy5cVKcOiRlz5Skqg==
+X-Received: by 2002:a2e:9743:: with SMTP id f3mr5151896ljj.205.1590064833179;
+        Thu, 21 May 2020 05:40:33 -0700 (PDT)
+Received: from [192.168.2.145] (ppp91-78-208-152.pppoe.mtu-net.ru. [91.78.208.152])
+        by smtp.googlemail.com with ESMTPSA id x8sm1700413ljh.97.2020.05.21.05.40.32
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 21 May 2020 05:40:32 -0700 (PDT)
+Subject: Re: [PATCH] sdhci: tegra: Avoid reading autocal timeout values when
+ not applicable
+To:     Sowjanya Komatineni <skomatineni@nvidia.com>,
+        adrian.hunter@intel.com, ulf.hansson@linaro.org,
+        thierry.reding@gmail.com, jonathanh@nvidia.com
+Cc:     linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org
+References: <1590005337-1087-1-git-send-email-skomatineni@nvidia.com>
+From:   Dmitry Osipenko <digetx@gmail.com>
+Message-ID: <45c290f9-e276-53be-a7a6-23bf81f50bc3@gmail.com>
+Date:   Thu, 21 May 2020 15:40:31 +0300
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.7.0
 MIME-Version: 1.0
-X-OriginatorOrg: renesas.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: b4dfdc12-5326-4abd-9d34-08d7fd5add4d
-X-MS-Exchange-CrossTenant-originalarrivaltime: 21 May 2020 07:44:59.6890
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 53d82571-da19-47e4-9cb4-625a166a4a2a
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: CdRuJuG+nmYatV2macom/BMycPlSxDGkqWRRPvubI6ALUjDpZ7AdzNN4VUoGm32nwbbsoHUaAx6ipkeY+U4bqZOahuRNe8rled5M/k/3XkARFjiGASv/z9z0u0m/Uy6P
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: TY2SPR01MB0032
+In-Reply-To: <1590005337-1087-1-git-send-email-skomatineni@nvidia.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 8bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi again,
+20.05.2020 23:08, Sowjanya Komatineni пишет:
+> When auto calibration timeouts, calibration is disabled and fail-safe
+> drive strength values are programmed based on the signal voltage.
+> 
+> Different fail-safe drive strength values based on voltage are
+> applicable only for SoCs supporting 3V3 and 1V8 pad controls.
+> 
+> So, this patch avoids reading these properties from the device tree
+> for SoCs not using pad controls and the warning of missing properties
+> will not show up on these SoC platforms.
+> 
+> Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
+> ---
+>  drivers/mmc/host/sdhci-tegra.c | 57 ++++++++++++++++++++++++------------------
+>  1 file changed, 33 insertions(+), 24 deletions(-)
 
-> From: Yoshihiro Shimoda, Sent: Thursday, May 21, 2020 4:01 PM
-> To: ulf.hansson@linaro.org; wsa+renesas@sang-engineering.com
-> Cc: linux-mmc@vger.kernel.org; linux-renesas-soc@vger.kernel.org; Yoshihi=
-ro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-> Subject: [PATCH 0/3] mmc: tmio and renesas_sdhi_internal_dmac: fix dma un=
-mapping
->=20
-> This patch series is based on mmc.git / next branch.
+Hello Sowjanya,
 
-Note that this patch series is tested by using additional debug code [1],
-because there is difficult to reproduce this issue. Before apply patch,
-When I enabled CONFIG_DMA_API_DEBUG and CONFIG_DMA_API_DEBUG_SG,
-I observed lacking dma unmapping on /sys/kernel/debug/dma-api/dump.
-And then I confirmed the patch can fix the issue.
+Thank you for the patch.
 
----
-[1]
-diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
-index adc2bf7..1df00f6 100644
---- a/drivers/mmc/host/tmio_mmc.h
-+++ b/drivers/mmc/host/tmio_mmc.h
-@@ -192,6 +192,7 @@ struct tmio_mmc_host {
- 	void (*hs400_complete)(struct tmio_mmc_host *host);
-=20
- 	const struct tmio_mmc_dma_ops *dma_ops;
-+	int debug;
- };
-=20
- struct tmio_mmc_host *tmio_mmc_host_alloc(struct platform_device *pdev,
-diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_c=
-ore.c
-index 946fb01..f8fe905 100644
---- a/drivers/mmc/host/tmio_mmc_core.c
-+++ b/drivers/mmc/host/tmio_mmc_core.c
-@@ -552,7 +552,8 @@ static void tmio_mmc_cmd_irq(struct tmio_mmc_host *host=
-, unsigned int stat)
- 		cmd->resp[0] =3D cmd->resp[3];
- 	}
-=20
--	if (stat & TMIO_STAT_CMDTIMEOUT)
-+	host->debug++;
-+	if (stat & TMIO_STAT_CMDTIMEOUT || !(host->debug & 0xff))
- 		cmd->error =3D -ETIMEDOUT;
- 	else if ((stat & TMIO_STAT_CRCFAIL && cmd->flags & MMC_RSP_CRC) ||
- 		 stat & TMIO_STAT_STOPBIT_ERR ||
-
+Tested-by: Dmitry Osipenko <digetx@gmail.com>
