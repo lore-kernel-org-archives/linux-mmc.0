@@ -2,153 +2,115 @@ Return-Path: <SRS0=PvXF=7E=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
+X-Spam-Status: No, score=-8.1 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 42D0EC433DF
-	for <linux-mmc@archiver.kernel.org>; Fri, 22 May 2020 14:46:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8D0F1C433E1
+	for <linux-mmc@archiver.kernel.org>; Fri, 22 May 2020 14:47:18 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 21687204EF
-	for <linux-mmc@archiver.kernel.org>; Fri, 22 May 2020 14:46:39 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1590158799;
-	bh=JuVtsoJtqiGRmlRjn0aQhleeQaWm700qqmuKFp/zUsM=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=EPAwkZzlYqLE20UWSBiJxdebwax92ZcF/ZJbM4EeickISIFbtwGQciAPRb7f4ZxH0
-	 u+BTCrOXgjHC+4Pirp5gUoNRC16WCduzTLpqaumgPUHL6xQfJEzPwODTRywJLWOXeG
-	 OefALq7GXG6iJ24s7hLR9ICa33O3I/VVjSSSliqs=
+	by mail.kernel.org (Postfix) with ESMTP id 6BFEB20897
+	for <linux-mmc@archiver.kernel.org>; Fri, 22 May 2020 14:47:18 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Ujuhda9s"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730357AbgEVOqe (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 22 May 2020 10:46:34 -0400
-Received: from mail.kernel.org ([198.145.29.99]:48314 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1730089AbgEVOpx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 22 May 2020 10:45:53 -0400
-Received: from pali.im (pali.im [31.31.79.79])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 05EF420727;
-        Fri, 22 May 2020 14:45:52 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1590158752;
-        bh=JuVtsoJtqiGRmlRjn0aQhleeQaWm700qqmuKFp/zUsM=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=KA9a1lxgJE9kGo8WzKl//DiDJ0mIhN5vTC2JDL6dMQ5+Zm9/Q5w7ftISDJaERGnsw
-         WU7zCHsKRoAdfuF/WFi0DnRc7O+PXFrI8NmSYE5774cBV0eCl8oz+xEw8kDjsPAbmz
-         iHLXemt9FudqdZVrtqvwWCywY1qzI8i/HFMoFqWo=
-Received: by pali.im (Postfix)
-        id 3FEBD51E; Fri, 22 May 2020 16:45:50 +0200 (CEST)
-From:   =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>
-To:     Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
-Cc:     Matthias Brugger <matthias.bgg@gmail.com>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Kalle Valo <kvalo@codeaurora.org>,
-        Amitkumar Karwar <amitkarwar@gmail.com>,
-        Ganapathi Bhat <ganapathi.bhat@nxp.com>,
-        Xinming Hu <huxinming820@gmail.com>,
-        linux-kernel@vger.kernel.org, ath10k@lists.infradead.org,
-        b43-dev@lists.infradead.org, brcm80211-dev-list.pdl@broadcom.com,
-        brcm80211-dev-list@cypress.com, libertas-dev@lists.infradead.org,
-        linux-wireless@vger.kernel.org,
-        =?UTF-8?q?Marek=20Beh=C3=BAn?= <marek.behun@nic.cz>
-Subject: [PATCH 04/11] mmc: sdio: Move SDIO IDs from btmrvl driver to common include file
-Date:   Fri, 22 May 2020 16:44:05 +0200
-Message-Id: <20200522144412.19712-5-pali@kernel.org>
-X-Mailer: git-send-email 2.20.1
-In-Reply-To: <20200522144412.19712-1-pali@kernel.org>
-References: <20200522144412.19712-1-pali@kernel.org>
+        id S1730012AbgEVOrL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 22 May 2020 10:47:11 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56524 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1729903AbgEVOrL (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 22 May 2020 10:47:11 -0400
+Received: from mail-pj1-x1044.google.com (mail-pj1-x1044.google.com [IPv6:2607:f8b0:4864:20::1044])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 21D17C061A0E;
+        Fri, 22 May 2020 07:47:11 -0700 (PDT)
+Received: by mail-pj1-x1044.google.com with SMTP id l73so2297354pjb.1;
+        Fri, 22 May 2020 07:47:11 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=sender:date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to:user-agent;
+        bh=pyI8RXJv0A9qOfUOs7+t5xXq9tBCjrOPiOAhgZoNJGU=;
+        b=Ujuhda9sRCNvYqh00NglKq18LhbkIq8aE4BUcXG3v7wbWcu1ySHA8zIVb+5qyZ5cXW
+         UPnhYOx5gxzweUHjEMfamVI16WBTsGW/NWZNFpC9CEQgX161wxmC4s/WE5Nr6RTQeIaH
+         4b0YabqbO/sH76bBoye3TRdm6o763j0xliAkqVo4UvT1jBaZSTQ2HyKPHfXhhuaOEGov
+         OnPnEuh+Lz3gZcTkTSnw3jkWnBbRhfB3bq6nDxWHwRcrdf+dhjoA/2tWBwEyXr13fZGJ
+         fX40OFWM3EC8WYw3wOseIxV8YbmhcqwcoQNHcF/foWZpegvLrHtAdMB1s4r0DZIG6ixg
+         HPJg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:sender:date:from:to:cc:subject:message-id
+         :references:mime-version:content-disposition:in-reply-to:user-agent;
+        bh=pyI8RXJv0A9qOfUOs7+t5xXq9tBCjrOPiOAhgZoNJGU=;
+        b=O/hCP1V0NNJMQZUG+t9Bh5lxdUqVMSr3Qi+spR+8ouILsF45hzs17drHoHlshSpY4U
+         3mUc0WKdF2fu8kwlhsRdftUaJFrahz05moRmmNqv0O1u602gkT0lzGC3KUrsEwA0bay/
+         1wv0eEKLXcctPNITtDP9vcIH7iCzR1nWBaSzKfjdGZNAQYc0CEJamx6qcL4Gg5//PpBm
+         3QV7gGO7UtBHIRKl8UJJfDJ5n42mzywPS8t3rf9ZJx7o9QidtqCkb+c39l2+qA7xQoAD
+         QS4g/N4YwzI95zZBNYTKUUvBF+HWh/BPRHe1N7ebM51DkRl553jNi0vwEyNttL7qFDy5
+         bDow==
+X-Gm-Message-State: AOAM5302slwv5SbSva3ryBEGqn2pmj+qe/qzpqMMwdYBn7itrccZydCA
+        mymHwrCSXGrvwzS3lx2/a0k=
+X-Google-Smtp-Source: ABdhPJwEjkbC0ZRvqsKRNasE1thUYFAv46HEbfQoZ9/iqC+b34JBVlEVMv+91eqFvfq8/THk/tyv3A==
+X-Received: by 2002:a17:902:bd42:: with SMTP id b2mr14491950plx.219.1590158830652;
+        Fri, 22 May 2020 07:47:10 -0700 (PDT)
+Received: from localhost ([2600:1700:e321:62f0:329c:23ff:fee3:9d7c])
+        by smtp.gmail.com with ESMTPSA id v127sm7113218pfb.91.2020.05.22.07.47.08
+        (version=TLS1_2 cipher=ECDHE-ECDSA-CHACHA20-POLY1305 bits=256/256);
+        Fri, 22 May 2020 07:47:08 -0700 (PDT)
+Date:   Fri, 22 May 2020 07:47:07 -0700
+From:   Guenter Roeck <linux@roeck-us.net>
+To:     Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+Cc:     Geert Uytterhoeven <geert+renesas@glider.be>,
+        Jens Axboe <axboe@kernel.dk>, Rob Herring <robh+dt@kernel.org>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>,
+        "David S. Miller" <davem@davemloft.net>,
+        Wim Van Sebroeck <wim@linux-watchdog.org>,
+        linux-ide@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-i2c@vger.kernel.org,
+        linux-mmc@vger.kernel.org, netdev@vger.kernel.org,
+        linux-renesas-soc@vger.kernel.org, linux-watchdog@vger.kernel.org,
+        Prabhakar <prabhakar.csengg@gmail.com>
+Subject: Re: [PATCH 16/17] dt-bindings: watchdog: renesas,wdt: Document
+ r8a7742 support
+Message-ID: <20200522144707.GA173101@roeck-us.net>
+References: <1589555337-5498-1-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
+ <1589555337-5498-17-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1589555337-5498-17-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
+User-Agent: Mutt/1.9.4 (2018-02-28)
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Define appropriate macro names for consistency with other Marvell macros.
+On Fri, May 15, 2020 at 04:08:56PM +0100, Lad Prabhakar wrote:
+> RZ/G1H (R8A7742) watchdog implementation is compatible with R-Car Gen2,
+> therefore add relevant documentation.
+> 
+> Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+> Reviewed-by: Marian-Cristian Rotariu <marian-cristian.rotariu.rb@bp.renesas.com>
+> Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
 
-Signed-off-by: Pali Rohár <pali@kernel.org>
----
- drivers/bluetooth/btmrvl_sdio.c | 18 +++++++++---------
- include/linux/mmc/sdio_ids.h    |  8 ++++++++
- 2 files changed, 17 insertions(+), 9 deletions(-)
+Reviewed-by: Guenter Roeck <linux@roeck-us.net>
 
-diff --git a/drivers/bluetooth/btmrvl_sdio.c b/drivers/bluetooth/btmrvl_sdio.c
-index 0f3a020703ab..a296f8526433 100644
---- a/drivers/bluetooth/btmrvl_sdio.c
-+++ b/drivers/bluetooth/btmrvl_sdio.c
-@@ -355,31 +355,31 @@ static const struct btmrvl_sdio_device btmrvl_sdio_sd8997 = {
- 
- static const struct sdio_device_id btmrvl_sdio_ids[] = {
- 	/* Marvell SD8688 Bluetooth device */
--	{ SDIO_DEVICE(SDIO_VENDOR_ID_MARVELL, 0x9105),
-+	{ SDIO_DEVICE(SDIO_VENDOR_ID_MARVELL, SDIO_DEVICE_ID_MARVELL_8688_BT),
- 			.driver_data = (unsigned long)&btmrvl_sdio_sd8688 },
- 	/* Marvell SD8787 Bluetooth device */
--	{ SDIO_DEVICE(SDIO_VENDOR_ID_MARVELL, 0x911A),
-+	{ SDIO_DEVICE(SDIO_VENDOR_ID_MARVELL, SDIO_DEVICE_ID_MARVELL_8787_BT),
- 			.driver_data = (unsigned long)&btmrvl_sdio_sd8787 },
- 	/* Marvell SD8787 Bluetooth AMP device */
--	{ SDIO_DEVICE(SDIO_VENDOR_ID_MARVELL, 0x911B),
-+	{ SDIO_DEVICE(SDIO_VENDOR_ID_MARVELL, SDIO_DEVICE_ID_MARVELL_8787_BT_AMP),
- 			.driver_data = (unsigned long)&btmrvl_sdio_sd8787 },
- 	/* Marvell SD8797 Bluetooth device */
--	{ SDIO_DEVICE(SDIO_VENDOR_ID_MARVELL, 0x912A),
-+	{ SDIO_DEVICE(SDIO_VENDOR_ID_MARVELL, SDIO_DEVICE_ID_MARVELL_8797_BT),
- 			.driver_data = (unsigned long)&btmrvl_sdio_sd8797 },
- 	/* Marvell SD8887 Bluetooth device */
--	{ SDIO_DEVICE(SDIO_VENDOR_ID_MARVELL, 0x9136),
-+	{ SDIO_DEVICE(SDIO_VENDOR_ID_MARVELL, SDIO_DEVICE_ID_MARVELL_8887_BT),
- 			.driver_data = (unsigned long)&btmrvl_sdio_sd8887 },
- 	/* Marvell SD8897 Bluetooth device */
--	{ SDIO_DEVICE(SDIO_VENDOR_ID_MARVELL, 0x912E),
-+	{ SDIO_DEVICE(SDIO_VENDOR_ID_MARVELL, SDIO_DEVICE_ID_MARVELL_8897_BT),
- 			.driver_data = (unsigned long)&btmrvl_sdio_sd8897 },
- 	/* Marvell SD8977 Bluetooth device */
--	{ SDIO_DEVICE(SDIO_VENDOR_ID_MARVELL, 0x9146),
-+	{ SDIO_DEVICE(SDIO_VENDOR_ID_MARVELL, SDIO_DEVICE_ID_MARVELL_8977_BT),
- 			.driver_data = (unsigned long)&btmrvl_sdio_sd8977 },
- 	/* Marvell SD8987 Bluetooth device */
--	{ SDIO_DEVICE(SDIO_VENDOR_ID_MARVELL, 0x914A),
-+	{ SDIO_DEVICE(SDIO_VENDOR_ID_MARVELL, SDIO_DEVICE_ID_MARVELL_8987_BT),
- 			.driver_data = (unsigned long)&btmrvl_sdio_sd8987 },
- 	/* Marvell SD8997 Bluetooth device */
--	{ SDIO_DEVICE(SDIO_VENDOR_ID_MARVELL, 0x9142),
-+	{ SDIO_DEVICE(SDIO_VENDOR_ID_MARVELL, SDIO_DEVICE_ID_MARVELL_8997_BT),
- 			.driver_data = (unsigned long)&btmrvl_sdio_sd8997 },
- 
- 	{ }	/* Terminating entry */
-diff --git a/include/linux/mmc/sdio_ids.h b/include/linux/mmc/sdio_ids.h
-index 90361ea7f5ed..1237e1048d06 100644
---- a/include/linux/mmc/sdio_ids.h
-+++ b/include/linux/mmc/sdio_ids.h
-@@ -60,16 +60,24 @@
- #define SDIO_DEVICE_ID_MARVELL_8688_BT		0x9105
- #define SDIO_DEVICE_ID_MARVELL_8786_WLAN	0x9116
- #define SDIO_DEVICE_ID_MARVELL_8787_WLAN	0x9119
-+#define SDIO_DEVICE_ID_MARVELL_8787_BT		0x911a
-+#define SDIO_DEVICE_ID_MARVELL_8787_BT_AMP	0x911b
- #define SDIO_DEVICE_ID_MARVELL_8797_F0		0x9128
- #define SDIO_DEVICE_ID_MARVELL_8797_WLAN	0x9129
-+#define SDIO_DEVICE_ID_MARVELL_8797_BT		0x912a
- #define SDIO_DEVICE_ID_MARVELL_8897_WLAN	0x912d
-+#define SDIO_DEVICE_ID_MARVELL_8897_BT		0x912e
- #define SDIO_DEVICE_ID_MARVELL_8887_F0		0x9134
- #define SDIO_DEVICE_ID_MARVELL_8887_WLAN	0x9135
-+#define SDIO_DEVICE_ID_MARVELL_8887_BT		0x9136
- #define SDIO_DEVICE_ID_MARVELL_8801_WLAN	0x9139
- #define SDIO_DEVICE_ID_MARVELL_8997_F0		0x9140
- #define SDIO_DEVICE_ID_MARVELL_8997_WLAN	0x9141
-+#define SDIO_DEVICE_ID_MARVELL_8997_BT		0x9142
- #define SDIO_DEVICE_ID_MARVELL_8977_WLAN	0x9145
-+#define SDIO_DEVICE_ID_MARVELL_8977_BT		0x9146
- #define SDIO_DEVICE_ID_MARVELL_8987_WLAN	0x9149
-+#define SDIO_DEVICE_ID_MARVELL_8987_BT		0x914a
- 
- #define SDIO_VENDOR_ID_MEDIATEK			0x037a
- 
--- 
-2.20.1
-
+> ---
+>  Documentation/devicetree/bindings/watchdog/renesas,wdt.txt | 1 +
+>  1 file changed, 1 insertion(+)
+> 
+> diff --git a/Documentation/devicetree/bindings/watchdog/renesas,wdt.txt b/Documentation/devicetree/bindings/watchdog/renesas,wdt.txt
+> index 79b3c62..e42fd30 100644
+> --- a/Documentation/devicetree/bindings/watchdog/renesas,wdt.txt
+> +++ b/Documentation/devicetree/bindings/watchdog/renesas,wdt.txt
+> @@ -5,6 +5,7 @@ Required properties:
+>  		fallback compatible string when compatible with the generic
+>  		version.
+>  	       Examples with soctypes are:
+> +		 - "renesas,r8a7742-wdt" (RZ/G1H)
+>  		 - "renesas,r8a7743-wdt" (RZ/G1M)
+>  		 - "renesas,r8a7744-wdt" (RZ/G1N)
+>  		 - "renesas,r8a7745-wdt" (RZ/G1E)
