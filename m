@@ -1,248 +1,188 @@
-Return-Path: <SRS0=q8Wp=7D=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=PvXF=7E=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-0.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C90C5C433E0
-	for <linux-mmc@archiver.kernel.org>; Thu, 21 May 2020 19:08:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C3B3FC433E0
+	for <linux-mmc@archiver.kernel.org>; Fri, 22 May 2020 02:01:15 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9C8A420738
-	for <linux-mmc@archiver.kernel.org>; Thu, 21 May 2020 19:08:59 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 95867207F7
+	for <linux-mmc@archiver.kernel.org>; Fri, 22 May 2020 02:01:15 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="flKVBAWu"
+	dkim=pass (1024-bit key) header.d=nxp.com header.i=@nxp.com header.b="AtAgnC+a"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730258AbgEUTI7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 21 May 2020 15:08:59 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42378 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729615AbgEUTI6 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 21 May 2020 15:08:58 -0400
-Received: from mail-pf1-x442.google.com (mail-pf1-x442.google.com [IPv6:2607:f8b0:4864:20::442])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 79847C061A0E
-        for <linux-mmc@vger.kernel.org>; Thu, 21 May 2020 12:08:58 -0700 (PDT)
-Received: by mail-pf1-x442.google.com with SMTP id n18so3810395pfa.2
-        for <linux-mmc@vger.kernel.org>; Thu, 21 May 2020 12:08:58 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=Z9lfKcpsk04+MOjenH3XmZ96ZShPJypXmsAOWsF+hL8=;
-        b=flKVBAWuiWwOAA9S9JGU6N3N3DZ1k/BIhgDYq+IJS1Lh9cBYnnY/7UPOZRlCYVLpRg
-         rpH3swfpnnGOb/2ynI7ZJWJv1sAa0Rl7icksSX+XYvnyJIKfz1WpK2N15qchQgje3pON
-         gB/8dfYLAeu1puK6NUs3AuQOkUCCHaJUHkEW/ZwfSWm5XCR3B2eGleNyGLKrt7ujLMEv
-         Nq04dkI45QpGkqcXsUOaPGeo3vMiyqMl4BQV1GGZTDl7xEEGTThMvrVZOdz7PlKYuqv9
-         GVTGZBdxVohQXb6pnXI+zAcA1d1vjxRkgwLOkGtChAFBSdQIA5i0RdLYRPx1QDSit9Pq
-         rJgw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=Z9lfKcpsk04+MOjenH3XmZ96ZShPJypXmsAOWsF+hL8=;
-        b=aO+qjeFk3DpcdVPV+UlbiUwOyIKAHqO9AfE7N0lZhHNkRVdrlKlP6Od4+S3GnFdS/F
-         T6NWGdONQ5PtpigwP15kUhWdTP+PTyZsEcP+DTWY6HxKvd76aq2vGpdeoy1C0cJiRuao
-         Z6tbuMxxO4ZPv6tnvyaTa9OrCEtndWWxL3DxrYWCI9e356D7PN/yCXk3H/YvkftChS6e
-         D08XgfK28B8nWh7jLrecfjN2FgSyZScqjfkLJGbrjmKqr1qU2I4e4VO27AumbCkMhfYj
-         evy+uRVYp0eGH0ksNYFMFuM7SbnSyDlb9eatPRUsUg44/hJ8Pz9v0nEPIFpgnwl5EC9m
-         mAtA==
-X-Gm-Message-State: AOAM5318GZURxrdjKaUMHWeXRsx3yIR4H8T7YQy3PgmwGuCPC6Mb/lwD
-        qLOetYaDpMluA7Jy1I4kInuv5zIjc5Y=
-X-Google-Smtp-Source: ABdhPJzvWYyJDO4JoirTkov2oI3WzQyVmBYO53edLU3D5fEctgmNUNunuP5QihACIwCQCB1eHJ1gpQ==
-X-Received: by 2002:a62:6186:: with SMTP id v128mr162480pfb.185.1590088137862;
-        Thu, 21 May 2020 12:08:57 -0700 (PDT)
-Received: from builder.lan (104-188-17-28.lightspeed.sndgca.sbcglobal.net. [104.188.17.28])
-        by smtp.gmail.com with ESMTPSA id x2sm4961819pfc.106.2020.05.21.12.08.56
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 21 May 2020 12:08:57 -0700 (PDT)
-Date:   Thu, 21 May 2020 12:07:39 -0700
-From:   Bjorn Andersson <bjorn.andersson@linaro.org>
-To:     Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
-Cc:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
-        robh+dt@kernel.org, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        devicetree@vger.kernel.org, Asutosh Das <asutoshd@codeaurora.org>,
-        Vijay Viswanath <vviswana@codeaurora.org>,
-        Andy Gross <agross@kernel.org>
-Subject: Re: [PATCH V2 2/3] mmc: sdhci-msm: Use internal voltage control
-Message-ID: <20200521190739.GC1331782@builder.lan>
-References: <1589541535-8523-1-git-send-email-vbadigan@codeaurora.org>
- <1590074615-10787-1-git-send-email-vbadigan@codeaurora.org>
- <1590074615-10787-3-git-send-email-vbadigan@codeaurora.org>
+        id S1728018AbgEVCBP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 21 May 2020 22:01:15 -0400
+Received: from mail-eopbgr80042.outbound.protection.outlook.com ([40.107.8.42]:32996
+        "EHLO EUR04-VI1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1726335AbgEVCBO (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 21 May 2020 22:01:14 -0400
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=VxQ+jJWIrUZW1OF+GOsBfIXi87wIwKa7HyTpVJXYQNnQYwGh2ijCo8z3dWMMKQMePxckvfuvBoKOslX1ezwXIGk3x/i/LQ/TJzHpcaJFjfsdy6/4/VrKRzMY1yMvJPEDU9uzmdGXfNYJWAfvsZLYDU3Pg1XB2/vSNtzynDoc4o1KfVfSOe8NzgaMuHWxQv7oX1Dp/GyKCWvYZTzbnV7gvJQBJkI4CqDK0YuAQq0KxI0Jl0+QUARWlv6pd2yiLimd5i1Dnto/uycAhO4jNL1molZh/p7MBGC7k9PHnHQZ83HYuSuG7HF5yYlQMh1dG6JnzMSOonUmAGA1SPAr4bZ7og==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=/BUmvZEQGp1yejt/zLdMmxwWHNNuM2DiPBV98z4tDxU=;
+ b=U5lIOj2wPGO1Dlcl33lMfcIWccv5B/ZTJTyaw3bAmuYrUDoWBOsKHGaEBFKfcOeDtNI3ReIk/dWobaetRDeT/NbqHKZpn7IwmGw5Pxhe0knP4Ifw9QKT/QJWyerCiUaG7/rTjZah4jOhSeRZbr20uo3/IgeeUpOSH2vFmlkQNmkkmJNnavBuZHrjCQQFRL6RVAM88SG07RlToqP28JiQ8xkw1R7+OJjOHtYy9Q9Ih0D3N1WtjSslohux1rw52umBg7KnrlkAzn6D6OM1UCW3NTsOLlPyuBbBPdAtYUQGYrR2jwHeIRBFHHhVhEkZUm+6YmfKvIkWw/nr2xuTgbsgrg==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=nxp.com; dmarc=pass action=none header.from=nxp.com; dkim=pass
+ header.d=nxp.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nxp.com; s=selector2;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=/BUmvZEQGp1yejt/zLdMmxwWHNNuM2DiPBV98z4tDxU=;
+ b=AtAgnC+adjF1Cm2+bn7woCvUSAlJki980Yp3o97YPETF6FtIJL35ozvHq4+VeE5stOZjxm9Bp5NiH3iiWGX3zHtG+VRjlvpgGW6bOU8k795GU3p5bg+W2jQpMxTR57LD1jUsD4PAp/FyLSPToqQDRYMP7BNGl92E9IVlmA1TAjw=
+Received: from AM7PR04MB6885.eurprd04.prod.outlook.com (2603:10a6:20b:10d::24)
+ by AM7PR04MB6920.eurprd04.prod.outlook.com (2603:10a6:20b:101::23) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3021.27; Fri, 22 May
+ 2020 02:01:11 +0000
+Received: from AM7PR04MB6885.eurprd04.prod.outlook.com
+ ([fe80::fdc0:9eff:2931:d11b]) by AM7PR04MB6885.eurprd04.prod.outlook.com
+ ([fe80::fdc0:9eff:2931:d11b%6]) with mapi id 15.20.3021.026; Fri, 22 May 2020
+ 02:01:11 +0000
+From:   "Y.b. Lu" <yangbo.lu@nxp.com>
+To:     Adrian Hunter <adrian.hunter@intel.com>
+CC:     Sachin Miglani <sachin.miglani@nxp.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Subject: RE: Query on patch "7ff2760 mmc: core: Add a facility to "pause"
+ re-tuning"
+Thread-Topic: Query on patch "7ff2760 mmc: core: Add a facility to "pause"
+ re-tuning"
+Thread-Index: AdYtyU1s4sh3Ym1ST5u56DNSSIuiEwAAvvYAAIO9bTA=
+Date:   Fri, 22 May 2020 02:01:11 +0000
+Message-ID: <AM7PR04MB6885EC0D3B8E2B1C5EEBB23BF8B40@AM7PR04MB6885.eurprd04.prod.outlook.com>
+References: <AM7PR04MB6885850EAB3307DDA0C4FDC3F8B90@AM7PR04MB6885.eurprd04.prod.outlook.com>
+ <3d56b588-9519-ed36-4bbe-6929a9f5ee53@intel.com>
+In-Reply-To: <3d56b588-9519-ed36-4bbe-6929a9f5ee53@intel.com>
+Accept-Language: en-US
+Content-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+authentication-results: intel.com; dkim=none (message not signed)
+ header.d=none;intel.com; dmarc=none action=none header.from=nxp.com;
+x-originating-ip: [119.31.174.73]
+x-ms-publictraffictype: Email
+x-ms-office365-filtering-ht: Tenant
+x-ms-office365-filtering-correlation-id: 8709447e-f409-4026-59f0-08d7fdf4003a
+x-ms-traffictypediagnostic: AM7PR04MB6920:
+x-ms-exchange-transport-forked: True
+x-microsoft-antispam-prvs: <AM7PR04MB692069A55ABDAC4DB35DBB17F8B40@AM7PR04MB6920.eurprd04.prod.outlook.com>
+x-ms-oob-tlc-oobclassifiers: OLM:9508;
+x-forefront-prvs: 04111BAC64
+x-ms-exchange-senderadcheck: 1
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: K+al4gsAeTGcA76kcP13LkshFRO9WztUdU5h0VPPULcWiIairXaoUzfz89k696Gm0CXhfaZYYhTusegYXNDt1wKHveffmrpe1qsR9Ohe/Y+/nw9kzq3r0wVSQVAXeQ5boiU9byo2fXcTEh/hb8gp3KAHUGVobMUGJq6Cnv0/Ry4Onz3Fv6v3uEAizkyjX5OJuMtkYLlu+7NtoO0v7JnAg3epXPbTWbZu5y0ZcPs3/e3d5zY25qrHHk406uwvWOicKdnLF0d9ahlAny447sG0BHT6H4HxdMRn1QScv5+eHaau4m1MwpzqcQOyZLmhCJX1
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:AM7PR04MB6885.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFTY:;SFS:(4636009)(396003)(346002)(366004)(39860400002)(136003)(376002)(8936002)(6506007)(7696005)(5660300002)(186003)(478600001)(53546011)(6916009)(26005)(2906002)(9686003)(66556008)(55016002)(4326008)(52536014)(86362001)(33656002)(76116006)(316002)(54906003)(64756008)(66446008)(71200400001)(66946007)(66476007)(8676002);DIR:OUT;SFP:1101;
+x-ms-exchange-antispam-messagedata: 8QdWkX8xdey5xJxyho1nw5zlL3kU5HilGe3EscqhHmJFcNA48bHQa5DkMPQo2IovhSyLwaiQWtdwl5YtQ6TpCun0al4lnxgcGGvJbSIvMKnNJmoTexaXhw9T6mQjX2mOfg0sYqVV22JxcbdrAH0QOA1S+ZazZn/WIX6Zh5fmC8Xj5Uj0Igvg6qsFP9P519fpwWk+S404PwTpGkz+8wfB2BYLXjUcfvLTD6euadO3TD/TJgqzfJI0Y4I8sWUNXLiAEh/6lcPVe4vvNzGerV7I6oj2jhyOldPJ6JEkVaD696CDtUns701mrJzMege+GT3zmFmnnWwWIqukBgvmR2qS0eANeeoZ7Bly6nO1qorcwE8+dzQTMbyRAoYY2FLSY/vyHj1LMC8f9i8E4p0GUe+4kpUv7sSat5zeF2A6caHLNwWLQucythMyEBF2Lo220fiJ19aGnh6eqFytSrqB9WMSwwd9YoVZRdF/kW0cMA8MjWA=
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1590074615-10787-3-git-send-email-vbadigan@codeaurora.org>
+X-OriginatorOrg: nxp.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 8709447e-f409-4026-59f0-08d7fdf4003a
+X-MS-Exchange-CrossTenant-originalarrivaltime: 22 May 2020 02:01:11.2094
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: xBOh2t0+Ssaj6oTwnodrduNA7ylwYyYnZ4Tc+qGbkFNyGqm3YZU3RBgjv8bnnBCJ5j1ir48DMtQiUQA7zyhJCA==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: AM7PR04MB6920
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu 21 May 08:23 PDT 2020, Veerabhadrarao Badiganti wrote:
+Hi Adrian,
 
-> On qcom SD host controllers voltage switching be done after the HW
-> is ready for it. The HW informs its readiness through power irq.
-> The voltage switching should happen only then.
-> 
-> Use the internal voltage switching and then control the voltage
-> switching using power irq.
-> 
-> Set the regulator load as well so that regulator can be configured
-> in LPM mode when in is not being used.
-> 
-> Co-developed-by: Asutosh Das <asutoshd@codeaurora.org>
-> Signed-off-by: Asutosh Das <asutoshd@codeaurora.org>
-> Co-developed-by: Vijay Viswanath <vviswana@codeaurora.org>
-> Signed-off-by: Vijay Viswanath <vviswana@codeaurora.org>
-> Co-developed-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
-> Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+Thanks for your quick explaining.
+Auto tuning mode make sure tuning would not be needed as hardware will auto=
+matically take care of drift for data transfer.
+And the chances of drift on response line (48 cycles) is very less.
 
-Looks better, thanks.
+Ok. The retuning can reduce the risk of CRC errors even the risk is very lo=
+w for auto tuning mode.
+I have no question now:)
 
-> ---
->  drivers/mmc/host/sdhci-msm.c | 207 +++++++++++++++++++++++++++++++++++++++++--
->  1 file changed, 198 insertions(+), 9 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-[..]
->  static const struct sdhci_msm_offset *sdhci_priv_msm_offset(struct sdhci_host *host)
-> @@ -1298,6 +1302,71 @@ static void sdhci_msm_set_uhs_signaling(struct sdhci_host *host,
->  		sdhci_msm_hs400(host, &mmc->ios);
->  }
->  
-> +static int sdhci_msm_set_vmmc(struct mmc_host *mmc)
-> +{
-> +	int ret;
-> +
-> +	if (IS_ERR(mmc->supply.vmmc))
-> +		return 0;
-> +
-> +	ret = mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, mmc->ios.vdd);
-> +	if (ret)
-> +		dev_err(mmc_dev(mmc), "%s: vmmc set ocr with vdd=%d failed: %d\n",
-> +			mmc_hostname(mmc), mmc->ios.vdd, ret);
+Thanks a lot.
 
-Missed this one on v1, in the event that mmc_regulator_set_ocr() return
-a non-zero value it has already printed an error message. So please
-replace the tail with just:
+Best regards,
+Yangbo Lu
 
-	return mmc_regulator_set_ocr(...);
+> -----Original Message-----
+> From: linux-mmc-owner@vger.kernel.org <linux-mmc-owner@vger.kernel.org>
+> On Behalf Of Adrian Hunter
+> Sent: Tuesday, May 19, 2020 6:57 PM
+> To: Y.b. Lu <yangbo.lu@nxp.com>; Ulf Hansson <ulf.hansson@linaro.org>;
+> linux-mmc@vger.kernel.org
+> Cc: Sachin Miglani <sachin.miglani@nxp.com>
+> Subject: Re: Query on patch "7ff2760 mmc: core: Add a facility to "pause"
+> re-tuning"
+>=20
+> On 19/05/20 1:42 pm, Y.b. Lu wrote:
+> > Hi Uffe and Adrian,
+> >
+> >
+> >
+> > May I have a query on below patch. Do we really need re-tuning before
+> > switching to RPMB partition each time per eMMC spec, especially for HS4=
+00
+> > mode with auto-tuning?
+>=20
+> It was to ensure tuning would not be needed while accessing RPMB since
+> RPMB
+> does not support tuning.
+>=20
+> >
+> > What's the impact if no re-tuning here?
+>=20
+> Increased risk of CRC errors.
+>=20
+> >
+> >
+> >
+> > 7ff2760 mmc: core: Add a facility to "pause" re-tuning
+> >
+> >
+> >
+> > +/*
+> >
+> > + * Pause re-tuning for a small set of operations.=A0 The pause begins =
+after the
+> >
+> > + * next command and after first doing re-tuning.
+> >
+> > + */
+> >
+> > +void mmc_retune_pause(struct mmc_host *host)
+> >
+> > +{
+> >
+> > +=A0=A0=A0=A0=A0=A0 if (!host->retune_paused) {
+> >
+> > +=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 host->retune_paused =3D 1;
+> >
+> > +=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 mmc_retune_needed(host);
+> >
+> > +=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 mmc_retune_hold(host);
+> >
+> > +=A0=A0=A0=A0=A0=A0 }
+> >
+> > +}
+> >
+> >
+> >
+> > Thanks a lot.
+> >
+> >
+> >
+> > Best regards,
+> >
+> > Yangbo Lu
+> >
+> >
+> >
 
-> +
-> +	return ret;
-> +}
-> +
-> +static int sdhci_msm_set_vqmmc(struct sdhci_msm_host *msm_host,
-> +			      struct mmc_host *mmc, bool level)
-> +{
-> +	int load, ret;
-> +	struct mmc_ios ios;
-> +
-> +	if (IS_ERR(mmc->supply.vqmmc)			 ||
-> +	    (mmc->ios.power_mode == MMC_POWER_UNDEFINED) ||
-> +	    (msm_host->vqmmc_enabled == level))
-> +		return 0;
-> +
-> +	if (msm_host->vqmmc_load) {
-> +		load = level ? msm_host->vqmmc_load : 0;
-> +		ret = regulator_set_load(mmc->supply.vqmmc, load);
-
-Sorry for the late reply on v1, but please see my explanation regarding
-load and always-on regulators there.
-
-> +		if (ret) {
-> +			dev_err(mmc_dev(mmc), "%s: vqmmc set load failed: %d\n",
-> +				mmc_hostname(mmc), ret);
-> +			goto out;
-> +		}
-> +	}
-> +
-> +	if (level) {
-> +		/* Set the IO voltage regulator to default voltage level */
-> +		if (msm_host->caps_0 & CORE_3_0V_SUPPORT)
-> +			ios.signal_voltage = MMC_SIGNAL_VOLTAGE_330;
-> +		else if (msm_host->caps_0 & CORE_1_8V_SUPPORT)
-> +			ios.signal_voltage = MMC_SIGNAL_VOLTAGE_180;
-> +
-> +		if (msm_host->caps_0 & CORE_VOLT_SUPPORT) {
-> +			ret = mmc_regulator_set_vqmmc(mmc, &ios);
-> +			if (ret < 0) {
-> +				dev_err(mmc_dev(mmc), "%s: vqmmc set volgate failed: %d\n",
-> +					mmc_hostname(mmc), ret);
-> +				goto out;
-> +			}
-> +		}
-> +		ret = regulator_enable(mmc->supply.vqmmc);
-> +	} else {
-> +		ret = regulator_disable(mmc->supply.vqmmc);
-> +	}
-> +
-> +	if (ret)
-> +		dev_err(mmc_dev(mmc), "%s: vqmm %sable failed: %d\n",
-> +			mmc_hostname(mmc), level ? "en":"dis", ret);
-> +	else
-> +		msm_host->vqmmc_enabled = level;
-> +out:
-> +	return ret;
-> +}
-[..]
-> +static int sdhci_msm_start_signal_voltage_switch(struct mmc_host *mmc,
-> +				      struct mmc_ios *ios)
-> +{
-> +	struct sdhci_host *host = mmc_priv(mmc);
-> +	u16 ctrl, status;
-> +
-> +	/*
-> +	 * Signal Voltage Switching is only applicable for Host Controllers
-> +	 * v3.00 and above.
-> +	 */
-> +	if (host->version < SDHCI_SPEC_300)
-> +		return 0;
-> +
-> +	ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-> +
-> +	switch (ios->signal_voltage) {
-> +	case MMC_SIGNAL_VOLTAGE_330:
-> +		if (!(host->flags & SDHCI_SIGNALING_330))
-> +			return -EINVAL;
-> +
-> +		/* Set 1.8V Signal Enable in the Host Control2 register to 0 */
-> +		ctrl &= ~SDHCI_CTRL_VDD_180;
-> +		break;
-> +	case MMC_SIGNAL_VOLTAGE_180:
-> +		if (!(host->flags & SDHCI_SIGNALING_180))
-> +			return -EINVAL;
-> +
-> +		/*
-> +		 * Enable 1.8V Signal Enable in the Host Control2
-> +		 * register
-> +		 */
-> +		ctrl |= SDHCI_CTRL_VDD_180;
-> +		break;
-> +	case MMC_SIGNAL_VOLTAGE_120:
-> +		if (!(host->flags & SDHCI_SIGNALING_120))
-> +			return -EINVAL;
-> +		return 0;
-> +	default:
-> +		/* No signal voltage switch required */
-> +		return 0;
-> +	}
-> +
-> +	sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
-> +
-> +	/* Wait for 5ms */
-> +	usleep_range(5000, 5500);
-> +
-> +	/* regulator output should be stable within 5 ms */
-> +	status = !!(ctrl & SDHCI_CTRL_VDD_180);
-> +	ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-> +	if (!!(ctrl &  SDHCI_CTRL_VDD_180) == status)
-
-You should be able to drop the !! both here and when assigning status.
-
-Overall this looks neater, thanks for reworking it.
-
-Regards,
-Bjorn
