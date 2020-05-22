@@ -7,39 +7,39 @@ X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 89A53C433E2
-	for <linux-mmc@archiver.kernel.org>; Fri, 22 May 2020 14:46:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9642BC433DF
+	for <linux-mmc@archiver.kernel.org>; Fri, 22 May 2020 14:46:07 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 60F522054F
-	for <linux-mmc@archiver.kernel.org>; Fri, 22 May 2020 14:46:00 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 673EE21534
+	for <linux-mmc@archiver.kernel.org>; Fri, 22 May 2020 14:46:07 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1590158760;
-	bh=FK2cjUuXlz/7vUmgD5dr+Rxd2hc1F0f/Urz70jIMZa4=;
+	s=default; t=1590158767;
+	bh=9vrfLJZTL8WRQ1zupaCKPmQrLZnRZD1ZGr/IqCu0zrg=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=AsNh4S8WUofAiMFlx63V9sgWRTrc8NCZ0XSIHDgwZpi0sSCbW2VTqmY6gp34KxoAO
-	 nA73yhvXINAHiAbDbdTLaUwDKDWIpulYJOZFlASH64GRY+HugQtP4VNnvA1tpkAYJi
-	 bMlrBLn0I7T09MsfRmuIXRXERYlSHXJg/LhtO4lk=
+	b=G95KDbBj+EX9KoXF9peSYZIS6Ep+JLQp3iNjgAZUuVfaSsxwvXVJqxuOX08bSawmV
+	 fxBH7Vksh+2al7JSBNG7ZKTA3+F3GvFVbi+/wfulLbsxqVTP0yBVmesAibYpWiBR7P
+	 ZJZYUaNdEs09g+NI8aUBQgAjOgxOj1g1KjceKiiY=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730325AbgEVOp7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 22 May 2020 10:45:59 -0400
-Received: from mail.kernel.org ([198.145.29.99]:48438 "EHLO mail.kernel.org"
+        id S1730409AbgEVOqG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 22 May 2020 10:46:06 -0400
+Received: from mail.kernel.org ([198.145.29.99]:48604 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1730311AbgEVOp6 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 22 May 2020 10:45:58 -0400
+        id S1730357AbgEVOqF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 22 May 2020 10:46:05 -0400
 Received: from pali.im (pali.im [31.31.79.79])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id BFD8320727;
-        Fri, 22 May 2020 14:45:57 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id E68F12053B;
+        Fri, 22 May 2020 14:46:04 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1590158757;
-        bh=FK2cjUuXlz/7vUmgD5dr+Rxd2hc1F0f/Urz70jIMZa4=;
+        s=default; t=1590158765;
+        bh=9vrfLJZTL8WRQ1zupaCKPmQrLZnRZD1ZGr/IqCu0zrg=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=R4RGsK78MnWMvmiJBT2se89kpkaB0qz25O7LIel5g4KT4tf6cSu6RGEEHAp9j9sjs
-         sK/teQ9m8Di3KhBmn5dUiez6gg8GmzdC6PGfJXWc+BAeE8sq4+l4tHgwd1oVnYsNrC
-         NNgAol6PCO16S/2N/bcbwUCFXI+seymMU3u2HK+Y=
+        b=jK2flk8kqtjnzRkud16YaMP5KNZWB2D/e0eVyzKP27T567icbolifPhI0j0G+ve+Y
+         H6h8Xme+lxQmSFqw8laWH/FDENfb0FnxwRdGJDoqspL0SBjr8THw6h8twJq4I/UXhy
+         XiLnCTKBOSl/T1MRltWqSS2+25W73HEc0UC85IPc=
 Received: by pali.im (Postfix)
-        id 049BC51E; Fri, 22 May 2020 16:45:56 +0200 (CEST)
+        id 2D0B651E; Fri, 22 May 2020 16:46:03 +0200 (CEST)
 From:   =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>
 To:     Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
 Cc:     Matthias Brugger <matthias.bgg@gmail.com>,
@@ -53,9 +53,9 @@ Cc:     Matthias Brugger <matthias.bgg@gmail.com>,
         brcm80211-dev-list@cypress.com, libertas-dev@lists.infradead.org,
         linux-wireless@vger.kernel.org,
         =?UTF-8?q?Marek=20Beh=C3=BAn?= <marek.behun@nic.cz>
-Subject: [PATCH 06/11] mmc: sdio: Move SDIO IDs from smssdio driver to common include file
-Date:   Fri, 22 May 2020 16:44:07 +0200
-Message-Id: <20200522144412.19712-7-pali@kernel.org>
+Subject: [PATCH 09/11] mmc: sdio: Move SDIO IDs from b43-sdio driver to common include file
+Date:   Fri, 22 May 2020 16:44:10 +0200
+Message-Id: <20200522144412.19712-10-pali@kernel.org>
 X-Mailer: git-send-email 2.20.1
 In-Reply-To: <20200522144412.19712-1-pali@kernel.org>
 References: <20200522144412.19712-1-pali@kernel.org>
@@ -67,55 +67,51 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Define appropriate macro names for consistency with other Siano macros.
+Define appropriate macro names for consistency with other macros.
 
 Signed-off-by: Pali Rohár <pali@kernel.org>
 ---
- drivers/media/mmc/siano/smssdio.c | 10 +++++-----
- include/linux/mmc/sdio_ids.h      |  5 +++++
- 2 files changed, 10 insertions(+), 5 deletions(-)
+ drivers/net/wireless/broadcom/b43/sdio.c | 4 ++--
+ include/linux/mmc/sdio_ids.h             | 4 ++++
+ 2 files changed, 6 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/media/mmc/siano/smssdio.c b/drivers/media/mmc/siano/smssdio.c
-index def5e93849d2..065b572e0272 100644
---- a/drivers/media/mmc/siano/smssdio.c
-+++ b/drivers/media/mmc/siano/smssdio.c
-@@ -58,15 +58,15 @@ static const struct sdio_device_id smssdio_ids[] = {
- 	 .driver_data = SMS1XXX_BOARD_SIANO_VEGA},
- 	{SDIO_DEVICE(SDIO_VENDOR_ID_SIANO, SDIO_DEVICE_ID_SIANO_VENICE),
- 	 .driver_data = SMS1XXX_BOARD_SIANO_VEGA},
--	{SDIO_DEVICE(SDIO_VENDOR_ID_SIANO, 0x302),
-+	{SDIO_DEVICE(SDIO_VENDOR_ID_SIANO, SDIO_DEVICE_ID_SIANO_MING),
- 	.driver_data = SMS1XXX_BOARD_SIANO_MING},
--	{SDIO_DEVICE(SDIO_VENDOR_ID_SIANO, 0x500),
-+	{SDIO_DEVICE(SDIO_VENDOR_ID_SIANO, SDIO_DEVICE_ID_SIANO_PELE),
- 	.driver_data = SMS1XXX_BOARD_SIANO_PELE},
--	{SDIO_DEVICE(SDIO_VENDOR_ID_SIANO, 0x600),
-+	{SDIO_DEVICE(SDIO_VENDOR_ID_SIANO, SDIO_DEVICE_ID_SIANO_RIO),
- 	.driver_data = SMS1XXX_BOARD_SIANO_RIO},
--	{SDIO_DEVICE(SDIO_VENDOR_ID_SIANO, 0x700),
-+	{SDIO_DEVICE(SDIO_VENDOR_ID_SIANO, SDIO_DEVICE_ID_SIANO_DENVER_2160),
- 	.driver_data = SMS1XXX_BOARD_SIANO_DENVER_2160},
--	{SDIO_DEVICE(SDIO_VENDOR_ID_SIANO, 0x800),
-+	{SDIO_DEVICE(SDIO_VENDOR_ID_SIANO, SDIO_DEVICE_ID_SIANO_DENVER_1530),
- 	.driver_data = SMS1XXX_BOARD_SIANO_DENVER_1530},
- 	{ /* end: all zeroes */ },
+diff --git a/drivers/net/wireless/broadcom/b43/sdio.c b/drivers/net/wireless/broadcom/b43/sdio.c
+index 881a7938c494..02b0cfd535ab 100644
+--- a/drivers/net/wireless/broadcom/b43/sdio.c
++++ b/drivers/net/wireless/broadcom/b43/sdio.c
+@@ -180,8 +180,8 @@ static void b43_sdio_remove(struct sdio_func *func)
+ }
+ 
+ static const struct sdio_device_id b43_sdio_ids[] = {
+-	{ SDIO_DEVICE(0x02d0, 0x044b) }, /* Nintendo Wii WLAN daughter card */
+-	{ SDIO_DEVICE(0x0092, 0x0004) }, /* C-guys, Inc. EW-CG1102GC */
++	{ SDIO_DEVICE(SDIO_VENDOR_ID_BROADCOM, SDIO_DEVICE_ID_BROADCOM_NINTENDO_WII) },
++	{ SDIO_DEVICE(SDIO_VENDOR_ID_CGUYS, SDIO_DEVICE_ID_CGUYS_EW_CG1102GC) },
+ 	{ },
  };
+ 
 diff --git a/include/linux/mmc/sdio_ids.h b/include/linux/mmc/sdio_ids.h
-index c9aca57d4dea..9ec675a7ac37 100644
+index 2894f7739acc..8e7a0683b927 100644
 --- a/include/linux/mmc/sdio_ids.h
 +++ b/include/linux/mmc/sdio_ids.h
-@@ -88,6 +88,11 @@
- #define SDIO_DEVICE_ID_SIANO_NICE		0x0202
- #define SDIO_DEVICE_ID_SIANO_VEGA_A0		0x0300
- #define SDIO_DEVICE_ID_SIANO_VENICE		0x0301
-+#define SDIO_DEVICE_ID_SIANO_MING		0x0302
-+#define SDIO_DEVICE_ID_SIANO_PELE		0x0500
-+#define SDIO_DEVICE_ID_SIANO_RIO		0x0600
-+#define SDIO_DEVICE_ID_SIANO_DENVER_2160	0x0700
-+#define SDIO_DEVICE_ID_SIANO_DENVER_1530	0x0800
- #define SDIO_DEVICE_ID_SIANO_NOVA_A0		0x1100
- #define SDIO_DEVICE_ID_SIANO_STELLAR 		0x5347
+@@ -25,6 +25,9 @@
+  * Vendors and devices.  Sort key: vendor first, device next.
+  */
  
++#define SDIO_VENDOR_ID_CGUYS			0x0092
++#define SDIO_DEVICE_ID_CGUYS_EW_CG1102GC	0x0004
++
+ #define SDIO_VENDOR_ID_ATHEROS			0x0271
+ #define SDIO_DEVICE_ID_ATHEROS_AR6003_00	0x0300
+ #define SDIO_DEVICE_ID_ATHEROS_AR6003_01	0x0301
+@@ -37,6 +40,7 @@
+ #define SDIO_DEVICE_ID_ATHEROS_QCA9377		0x0701
+ 
+ #define SDIO_VENDOR_ID_BROADCOM			0x02d0
++#define SDIO_DEVICE_ID_BROADCOM_NINTENDO_WII	0x044b
+ #define SDIO_DEVICE_ID_BROADCOM_43143		0xa887
+ #define SDIO_DEVICE_ID_BROADCOM_43241		0x4324
+ #define SDIO_DEVICE_ID_BROADCOM_4329		0x4329
 -- 
 2.20.1
 
