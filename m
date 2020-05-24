@@ -4,151 +4,118 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-8.3 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no version=3.4.0
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F2B68C433DF
-	for <linux-mmc@archiver.kernel.org>; Sun, 24 May 2020 15:33:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3F8C5C433E1
+	for <linux-mmc@archiver.kernel.org>; Sun, 24 May 2020 15:57:32 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id DB21D207CB
-	for <linux-mmc@archiver.kernel.org>; Sun, 24 May 2020 15:33:10 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 22A76207DA
+	for <linux-mmc@archiver.kernel.org>; Sun, 24 May 2020 15:57:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2387453AbgEXPdG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 24 May 2020 11:33:06 -0400
-Received: from mga04.intel.com ([192.55.52.120]:4655 "EHLO mga04.intel.com"
+        id S2387453AbgEXP5b (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 24 May 2020 11:57:31 -0400
+Received: from mga17.intel.com ([192.55.52.151]:27866 "EHLO mga17.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728879AbgEXPdG (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Sun, 24 May 2020 11:33:06 -0400
-IronPort-SDR: 3YwnvRi7lHSeMg/V31Qk3vZ37k7uZ9Npe3RNM16el3I4KrGcNXwmPILoea8GwC7HNhZZXzTgmq
- xnWM1HJpms5A==
+        id S2387416AbgEXP5b (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Sun, 24 May 2020 11:57:31 -0400
+IronPort-SDR: 4UajMwWyB+3lwvH5nRvwV2qh/uYIMCnXrHq1AWON8Zcw6nPRQeMuKX6+NqqBFSrizLbYYerRJB
+ eIfs3BUb3K9A==
 X-Amp-Result: SKIPPED(no attachment in message)
 X-Amp-File-Uploaded: False
 Received: from orsmga004.jf.intel.com ([10.7.209.38])
-  by fmsmga104.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 24 May 2020 08:33:06 -0700
-IronPort-SDR: QrK45m7zkqwMl8XRO5Mfaqz70ESsi8VKLD55T6xbt2A38ozJiTIaPwCWhwV2nvnjwQiK5lcLoI
- A5UliBJzU+yA==
+  by fmsmga107.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 24 May 2020 08:57:31 -0700
+IronPort-SDR: hk68hYC03OPo2F0K/+T9/mfav93uypD6QB4TPh6FY6viZHHUoPktCFF8BsIqHjBkN0VlMOU9Hg
+ 9fESbYVajIwQ==
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="5.73,430,1583222400"; 
-   d="scan'208";a="413277405"
+   d="scan'208";a="413280834"
 Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.157]) ([10.237.72.157])
-  by orsmga004.jf.intel.com with ESMTP; 24 May 2020 08:33:03 -0700
-Subject: Re: [PATCH] sdhci: tegra: Avoid reading autocal timeout values when
- not applicable
-To:     Sowjanya Komatineni <skomatineni@nvidia.com>,
-        ulf.hansson@linaro.org, thierry.reding@gmail.com,
-        jonathanh@nvidia.com
-Cc:     digetx@gmail.com, linux-tegra@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
-References: <1590005337-1087-1-git-send-email-skomatineni@nvidia.com>
+  by orsmga004.jf.intel.com with ESMTP; 24 May 2020 08:57:28 -0700
+Subject: Re: [PATCH V1 1/2] mmc: sdhci: Introduce new quirk to use reserved
+ timeout
+To:     sartgarg@codeaurora.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
+        Sahitya Tummala <stummala@codeaurora.org>,
+        linux-mmc@vger.kernel.org,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
+        linux-mmc-owner@vger.kernel.org
+References: <1588772671-19675-1-git-send-email-sartgarg@codeaurora.org>
+ <1588772671-19675-2-git-send-email-sartgarg@codeaurora.org>
+ <CAPDyKFo0CabC_O-NusH4tUzjnG37_XQhY=QNhgnkQMoTokfaQg@mail.gmail.com>
+ <4db354d7-fff4-048e-dde5-647e8ba89a7d@intel.com>
+ <CAPDyKFqN8CeniJq5S9zCdYYR38DFyk0vKnCw3fi548tXvwbseg@mail.gmail.com>
+ <e27745b48566d3535bd1a1a6d8dbb9c4@codeaurora.org>
 From:   Adrian Hunter <adrian.hunter@intel.com>
 Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
  Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <c29287da-a497-8b5e-7275-d2254ee4fb7e@intel.com>
-Date:   Sun, 24 May 2020 18:33:17 +0300
+Message-ID: <eddfacfd-ecb6-fda3-5911-48e03046b8d5@intel.com>
+Date:   Sun, 24 May 2020 18:57:42 +0300
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
  Thunderbird/68.7.0
 MIME-Version: 1.0
-In-Reply-To: <1590005337-1087-1-git-send-email-skomatineni@nvidia.com>
+In-Reply-To: <e27745b48566d3535bd1a1a6d8dbb9c4@codeaurora.org>
 Content-Type: text/plain; charset=utf-8
 Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 20/05/20 11:08 pm, Sowjanya Komatineni wrote:
-> When auto calibration timeouts, calibration is disabled and fail-safe
-> drive strength values are programmed based on the signal voltage.
+On 19/05/20 5:08 pm, sartgarg@codeaurora.org wrote:
+> On 2020-05-18 18:20, Ulf Hansson wrote:
+>> On Mon, 18 May 2020 at 13:45, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>>
+>>> On 18/05/20 12:39 pm, Ulf Hansson wrote:
+>>> > On Wed, 6 May 2020 at 15:53, Sarthak Garg <sartgarg@codeaurora.org> wrote:
+>>> >>
+>>> >> Introduce a new quirk for letting vendor drivers to use reserved
+>>> >> timeout value (0xF) in timeout control register.
+>>> >>
+>>> >> Signed-off-by: Sahitya Tummala <stummala@codeaurora.org>
+>>> >> Signed-off-by: Sarthak Garg <sartgarg@codeaurora.org>
+>>> >> ---
+>>> >>  drivers/mmc/host/sdhci.c | 3 ++-
+>>> >>  drivers/mmc/host/sdhci.h | 5 +++++
+>>> >>  2 files changed, 7 insertions(+), 1 deletion(-)
+>>> >>
+>>> >> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>>> >> index 1bb6b67..07528a9 100644
+>>> >> --- a/drivers/mmc/host/sdhci.c
+>>> >> +++ b/drivers/mmc/host/sdhci.c
+>>> >> @@ -967,7 +967,8 @@ static u8 sdhci_calc_timeout(struct sdhci_host
+>>> *host, struct mmc_command *cmd,
+>>> >>         }
+>>> >>
+>>> >>         if (count >= 0xF) {
+>>> >> -               if (!(host->quirks2 & SDHCI_QUIRK2_DISABLE_HW_TIMEOUT))
+>>> >> +               if (!(host->quirks2 & SDHCI_QUIRK2_DISABLE_HW_TIMEOUT) ||
+>>> >> +               !(host->quirks2 & SDHCI_QUIRK2_USE_RESERVED_MAX_TIMEOUT))
+>>> >
+>>> > I don't quite get how this can make your variant use 0xF rather than 0xE?
+>>> >
+>>> > To me it looks like an updated conditional check to print a debug
+>>> message, no?
+>>>
+>>> Probably need to introduce host->max_timeout_count, set it to 0xE in
+>>> sdhci_alloc_host(), and change sdhci_calc_timeout() to use it in place of
+>>> all the 0xE and 0xF constants.
+>>
+>> Yep, that seems like a reasonable approach to me as well.
+>>
+>> [...]
+>>
+>> Kind regards
+>> Uffe
 > 
-> Different fail-safe drive strength values based on voltage are
-> applicable only for SoCs supporting 3V3 and 1V8 pad controls.
-> 
-> So, this patch avoids reading these properties from the device tree
-> for SoCs not using pad controls and the warning of missing properties
-> will not show up on these SoC platforms.
-> 
-> Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
+> Resending the mail again as can't see my comment on the
+> https://patchwork.kernel.org/ page.
+> Sorry for the mistake just want to update the logic as below.
+> -               count = 0xE;
+> +               if(!(host->quirks2 & SDHCI_QUIRK2_USE_RESERVED_MAX_TIMEOUT))
+> +                       count = 0xE;
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-
-> ---
->  drivers/mmc/host/sdhci-tegra.c | 57 ++++++++++++++++++++++++------------------
->  1 file changed, 33 insertions(+), 24 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-> index 3e2c510..141b49b 100644
-> --- a/drivers/mmc/host/sdhci-tegra.c
-> +++ b/drivers/mmc/host/sdhci-tegra.c
-> @@ -605,6 +605,39 @@ static void tegra_sdhci_parse_pad_autocal_dt(struct sdhci_host *host)
->  		autocal->pull_down_1v8 = 0;
->  
->  	err = device_property_read_u32(host->mmc->parent,
-> +			"nvidia,pad-autocal-pull-up-offset-sdr104",
-> +			&autocal->pull_up_sdr104);
-> +	if (err)
-> +		autocal->pull_up_sdr104 = autocal->pull_up_1v8;
-> +
-> +	err = device_property_read_u32(host->mmc->parent,
-> +			"nvidia,pad-autocal-pull-down-offset-sdr104",
-> +			&autocal->pull_down_sdr104);
-> +	if (err)
-> +		autocal->pull_down_sdr104 = autocal->pull_down_1v8;
-> +
-> +	err = device_property_read_u32(host->mmc->parent,
-> +			"nvidia,pad-autocal-pull-up-offset-hs400",
-> +			&autocal->pull_up_hs400);
-> +	if (err)
-> +		autocal->pull_up_hs400 = autocal->pull_up_1v8;
-> +
-> +	err = device_property_read_u32(host->mmc->parent,
-> +			"nvidia,pad-autocal-pull-down-offset-hs400",
-> +			&autocal->pull_down_hs400);
-> +	if (err)
-> +		autocal->pull_down_hs400 = autocal->pull_down_1v8;
-> +
-> +	/*
-> +	 * Different fail-safe drive strength values based on the signaling
-> +	 * voltage are applicable for SoCs supporting 3V3 and 1V8 pad controls.
-> +	 * So, avoid reading below device tree properies for SoCs that don't
-> +	 * have NVQUIRK_NEEDS_PAD_CONTROL.
-> +	 */
-> +	if (!(tegra_host->soc_data->nvquirks & NVQUIRK_NEEDS_PAD_CONTROL))
-> +		return;
-> +
-> +	err = device_property_read_u32(host->mmc->parent,
->  			"nvidia,pad-autocal-pull-up-offset-3v3-timeout",
->  			&autocal->pull_up_3v3_timeout);
->  	if (err) {
-> @@ -647,30 +680,6 @@ static void tegra_sdhci_parse_pad_autocal_dt(struct sdhci_host *host)
->  				mmc_hostname(host->mmc));
->  		autocal->pull_down_1v8_timeout = 0;
->  	}
-> -
-> -	err = device_property_read_u32(host->mmc->parent,
-> -			"nvidia,pad-autocal-pull-up-offset-sdr104",
-> -			&autocal->pull_up_sdr104);
-> -	if (err)
-> -		autocal->pull_up_sdr104 = autocal->pull_up_1v8;
-> -
-> -	err = device_property_read_u32(host->mmc->parent,
-> -			"nvidia,pad-autocal-pull-down-offset-sdr104",
-> -			&autocal->pull_down_sdr104);
-> -	if (err)
-> -		autocal->pull_down_sdr104 = autocal->pull_down_1v8;
-> -
-> -	err = device_property_read_u32(host->mmc->parent,
-> -			"nvidia,pad-autocal-pull-up-offset-hs400",
-> -			&autocal->pull_up_hs400);
-> -	if (err)
-> -		autocal->pull_up_hs400 = autocal->pull_up_1v8;
-> -
-> -	err = device_property_read_u32(host->mmc->parent,
-> -			"nvidia,pad-autocal-pull-down-offset-hs400",
-> -			&autocal->pull_down_hs400);
-> -	if (err)
-> -		autocal->pull_down_hs400 = autocal->pull_down_1v8;
->  }
->  
->  static void tegra_sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
-> 
-
+I think it is conceptually simpler to define SDHCI constants as variables
+and let vendor drivers change them if need be.  In other words, what I wrote
+above.  It changes more code, but the overall result is more consistent.
