@@ -2,132 +2,138 @@ Return-Path: <SRS0=RjyY=7H=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-0.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E64C0C433E0
-	for <linux-mmc@archiver.kernel.org>; Mon, 25 May 2020 06:14:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A8326C433E0
+	for <linux-mmc@archiver.kernel.org>; Mon, 25 May 2020 07:15:54 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id BDB4A2071A
-	for <linux-mmc@archiver.kernel.org>; Mon, 25 May 2020 06:14:38 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 83F71206D5
+	for <linux-mmc@archiver.kernel.org>; Mon, 25 May 2020 07:15:54 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=googlemail.com header.i=@googlemail.com header.b="oH0jGp/2"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="X3f906WA"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729614AbgEYGOi (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 25 May 2020 02:14:38 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53090 "EHLO
+        id S2388982AbgEYHPy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 25 May 2020 03:15:54 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34834 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729125AbgEYGOh (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 25 May 2020 02:14:37 -0400
-Received: from mail-lj1-x242.google.com (mail-lj1-x242.google.com [IPv6:2a00:1450:4864:20::242])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6348FC061A0E;
-        Sun, 24 May 2020 23:14:37 -0700 (PDT)
-Received: by mail-lj1-x242.google.com with SMTP id k5so19435094lji.11;
-        Sun, 24 May 2020 23:14:37 -0700 (PDT)
+        with ESMTP id S2388972AbgEYHPx (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 25 May 2020 03:15:53 -0400
+Received: from mail-ua1-x941.google.com (mail-ua1-x941.google.com [IPv6:2607:f8b0:4864:20::941])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 68795C061A0E
+        for <linux-mmc@vger.kernel.org>; Mon, 25 May 2020 00:15:53 -0700 (PDT)
+Received: by mail-ua1-x941.google.com with SMTP id g14so98940uaq.0
+        for <linux-mmc@vger.kernel.org>; Mon, 25 May 2020 00:15:53 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=googlemail.com; s=20161025;
+        d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=xxPp1YhKBxMDmxPDlgA3r6L4BPVtYqrACCbiDdkf2HU=;
-        b=oH0jGp/2CUEdGLq6EDmu5s+PiAb/IDEiXKtMl/yTpb3Y3fg51+Iq4kgQCw95Q9cV6e
-         DTYwCy/OywCcfPMYn5cyMejV3EqYTyRuZhqXotrPwKh3AWq/xRhhzrrRgwdJBeITWTHp
-         spvmnFufI/vuLUzULK9+q3fPphWeh6BPVRV0qBbZaUn1BZxFRO+aUi/Za0m/FqFKkQma
-         v379pALdXZRKuwU3JFSw2RZVsKj0VyGXKElz5a+wMKXOfo1gARzxdVps067fQh/WdOhG
-         WXSshs0r4TkX8K7MBUeYGLKpvju5PvJJmcIFKpd8DKvuZLs6dAsjuINXeFIyMnVM0Mfa
-         5iYQ==
+         :cc:content-transfer-encoding;
+        bh=tW47sLPl7yvQUlpsqFGaRt0/eA0f/XtExRc8VNJ5L8s=;
+        b=X3f906WAm1B7znVikPVukV6tgsYYUkm8v+SSd0x+rtjZfgsQwXU/C5hodPsbUpzf+R
+         BsNenIyHnRQKNVI0gEyOsBlWkBG9l8kpemHYf5arLdSXoKccfSR3MFVTK8U28fiH6RFy
+         zpF/6oIiC1R937exP0cxNj+fLhwVY5mLbZLV4dAnb+aI8JqZcUh6rWxOf0f+av+GNbEO
+         Qno7YKLbvApPD9bO42MZre7gFikypcUpyT6VmJmffeKr84+gD7MR4Fb6R8cH1oPFWWTr
+         ICbH30dzo42Yu5VE2FUsF3x6DtchJd7jbvjnBmUjmQDi3KtvBDtnQfJBA4d0R3eKGEM7
+         ad7g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=xxPp1YhKBxMDmxPDlgA3r6L4BPVtYqrACCbiDdkf2HU=;
-        b=PIdWB5zCeMhDwqcimL4YVAX7KmkC4oncnZKcadKKrsDFr0dyCccTCxmj5yBMYLZYVl
-         N2T+2/Nb7MxCFQKwhD8+22+u5b6JouRQqorch0Pu1e9Z91wIGKHpaHK5PDkJZftHlkqy
-         746G/NpiN8wjECzmNceIRe5URMvkregozzcVU86FIuSJA7pR006AC9gfbLtaPQ75T0nq
-         6w+FFC7Vhb1EfT9AQcdJ6Mi7YO2gMAbD5qdhiIc0DcLP1vK+Sq8ElpuP06H7/7dmPLOK
-         ZpRPyePNRcCnqBh8+prF8KVmHC+KIBhlDDbWV16geaQGxbIImZuj5qYqf1sgyW1F309H
-         u+2g==
-X-Gm-Message-State: AOAM530fL3p2RMVAR5kINSEMu7xraBHX/A3Y6h43oiscts5jAzgomM+Z
-        aJapJNWyigZhFnZO0jJysBD5wqSNoPVSp4VuOdc=
-X-Google-Smtp-Source: ABdhPJzaVD3W8XB8LNxW925jXvFBvaW8onNuO96IUdcvivMzSYciGrsBcQqGjF7n+6WXCtsIuyKlXvmMkqyksGWw2uM=
-X-Received: by 2002:a2e:d1a:: with SMTP id 26mr13109692ljn.160.1590387275853;
- Sun, 24 May 2020 23:14:35 -0700 (PDT)
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=tW47sLPl7yvQUlpsqFGaRt0/eA0f/XtExRc8VNJ5L8s=;
+        b=aOOxaq3YsuSpXAbQ6W6oQFxPTkwZ78HgywtgJaBcoxB1E4TBOKseCv+dMvAEfyV5vh
+         TlDWHjWi5Ix1PUiZ192vcVPGvUc8uMgQ7jA2kLvPwqc4PiSsJOuy/yYIO02Oj3LHnKgP
+         TOCS0O75HIvjBcD/lyF0ZEbpcAhMZv9CWfqT3a9jD+TE3qfylPRog4bimkkozwTwKoG0
+         ah32qGidavtm9fpFa/5TZRwLLXeT54dbdO7z55tT0UE4SGgyijQuYB+feSn/FDvDvOJH
+         esoDJJMewW4vh7dxf9E0X+kt9EKpN2eMJnHJ990WdwQdZwex7fJ9ng8szKd8KVZcWF8H
+         LrWg==
+X-Gm-Message-State: AOAM533KFIvahXtj0rn12LQMOYFWZHTofszi1xc8cfezl/W1yXboF6bE
+        6mcRtLU0ZVaxIyj6oksq3WHIhXoNZLsdK/ReFqgNdw==
+X-Google-Smtp-Source: ABdhPJyn+vBET+wry7tIEPuyPG84ngjDJAb2r8EvcfU02yuysMA8153T8p81LOO/yO3mggJ+Oo/TpwlvMW9/07YJ+KQ=
+X-Received: by 2002:ab0:7293:: with SMTP id w19mr17816123uao.129.1590390952511;
+ Mon, 25 May 2020 00:15:52 -0700 (PDT)
 MIME-Version: 1.0
-References: <20200517222907.1277787-1-martin.blumenstingl@googlemail.com>
-In-Reply-To: <20200517222907.1277787-1-martin.blumenstingl@googlemail.com>
-From:   Thomas Graichen <thomas.graichen@googlemail.com>
-Date:   Mon, 25 May 2020 08:14:24 +0200
-Message-ID: <CAOUEw11pirqhOHTjO_xHnZpnSgKNuJk5ysh43B7jWJokuGPB2A@mail.gmail.com>
-Subject: Re: [PATCH 1/2] mmc: host: meson-mx-sdhc: fix manual RX FIFO flushing
-To:     Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Cc:     ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
-        linux-amlogic@lists.infradead.org,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+References: <20200522144412.19712-1-pali@kernel.org>
+In-Reply-To: <20200522144412.19712-1-pali@kernel.org>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Mon, 25 May 2020 09:15:16 +0200
+Message-ID: <CAPDyKFqwrtJy2Ss0_KcBtpGP78d_BePTGJp01KtfuOaQqiwiHg@mail.gmail.com>
+Subject: Re: [PATCH 00/11] mmc: sdio: Move SDIO IDs from drivers to common
+ include file
+To:     =?UTF-8?Q?Pali_Roh=C3=A1r?= <pali@kernel.org>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        Kalle Valo <kvalo@codeaurora.org>,
+        Amitkumar Karwar <amitkarwar@gmail.com>,
+        Ganapathi Bhat <ganapathi.bhat@nxp.com>,
+        Xinming Hu <huxinming820@gmail.com>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        ath10k@lists.infradead.org, b43-dev@lists.infradead.org,
+        brcm80211-dev-list.pdl@broadcom.com,
+        brcm80211-dev-list <brcm80211-dev-list@cypress.com>,
+        libertas-dev@lists.infradead.org,
+        linux-wireless <linux-wireless@vger.kernel.org>,
+        =?UTF-8?B?TWFyZWsgQmVow7pu?= <marek.behun@nic.cz>
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, May 18, 2020 at 12:29 AM Martin Blumenstingl
-<martin.blumenstingl@googlemail.com> wrote:
+On Fri, 22 May 2020 at 16:45, Pali Roh=C3=A1r <pali@kernel.org> wrote:
 >
-> For Meson8 and Meson8b SoCs the vendor driver follows the following
-> pattern:
-> - for eMMC and SD cards in .set_pdma it sets:
->   pdma->rxfifo_manual_flush = 1;
-> - for SDIO cards in .set_pdma it sets:
->   pdma->rxfifo_manual_flush = 0;
-> - before syncing the DMA read buffer is sets:
->   pdma->rxfifo_manual_flush |= 0x02;
+> Most SDIO IDs are defined in the common include file linux/mmc/sdio_ids.h=
+.
+> But some drivers define IDs locally or do not use existing macros from th=
+e
+> common include file.
 >
-> Set the second bit of MESON_SDHC_PDMA_RXFIFO_MANUAL_FLUSH without
-> clearing the first bit before syncing the DMA read buffer. This fixes a
-> problem where Meson8 and Meson8b SoCs would read random garbage from SD
-> cards. It is not clear why it worked for eMMC cards. This manifested in
-> the following errors when plugging in an SD card:
->   unrecognised SCR structure version <random number>
->
-> Fixes: 53ded1b676d199 ("mmc: host: meson-mx-sdhc: new driver for the Amlogic Meson SDHC host")
-> Cc: Thomas Graichen <thomas.graichen@gmail.com>
-> Signed-off-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+> This patch series fixes above inconsistency. It defines missing macro nam=
+es
+> and moves all remaining SDIO IDs from drivers to the common include file.
+> Also some macro names are changed to follow existing naming conventions.
 
-Tested-by: thomas graichen <thomas.graichen@gmail.com>
+Thanks - a nice cleanup!
 
-BEFORE: on my meson8 based mxiii i got the above error and the sd card
-was not useable
+I guess this is best queued via my mmc tree, unless bluetooth/wireless
+maintainers think there are some problems with that. I will wait for
+an ack from them before applying.
 
-AFTER: no more error and sd cards works fine
+Kind regards
+Uffe
 
-> ---
->  drivers/mmc/host/meson-mx-sdhc.c | 11 +++++++++--
->  1 file changed, 9 insertions(+), 2 deletions(-)
 >
-> diff --git a/drivers/mmc/host/meson-mx-sdhc.c b/drivers/mmc/host/meson-mx-sdhc.c
-> index 5c00958d7754..53e3f6a4245a 100644
-> --- a/drivers/mmc/host/meson-mx-sdhc.c
-> +++ b/drivers/mmc/host/meson-mx-sdhc.c
-> @@ -586,10 +586,17 @@ static irqreturn_t meson_mx_sdhc_irq_thread(int irq, void *irq_data)
->                     cmd->data->flags & MMC_DATA_READ) {
->                         meson_mx_sdhc_wait_cmd_ready(host->mmc);
+> Pali Roh=C3=A1r (11):
+>   mmc: sdio: Fix macro name for Marvell device with ID 0x9134
+>   mmc: sdio: Change macro names for Marvell 8688 modules
+>   mmc: sdio: Move SDIO IDs from mwifiex driver to common include file
+>   mmc: sdio: Move SDIO IDs from btmrvl driver to common include file
+>   mmc: sdio: Move SDIO IDs from btmtksdio driver to common include file
+>   mmc: sdio: Move SDIO IDs from smssdio driver to common include file
+>   mmc: sdio: Move SDIO IDs from ath6kl driver to common include file
+>   mmc: sdio: Move SDIO IDs from ath10k driver to common include file
+>   mmc: sdio: Move SDIO IDs from b43-sdio driver to common include file
+>   mmc: sdio: Fix Cypress SDIO IDs macros in common include file
+>   mmc: sdio: Sort all SDIO IDs in common include file
 >
-> +                       /*
-> +                        * If MESON_SDHC_PDMA_RXFIFO_MANUAL_FLUSH was
-> +                        * previously 0x1 then it has to be set to 0x3. If it
-> +                        * was 0x0 before then it has to be set to 0x2. Without
-> +                        * this reading SD cards sometimes transfers garbage,
-> +                        * which results in cards not being detected due to:
-> +                        *   unrecognised SCR structure version <random number>
-> +                        */
->                         val = FIELD_PREP(MESON_SDHC_PDMA_RXFIFO_MANUAL_FLUSH,
->                                          2);
-> -                       regmap_update_bits(host->regmap, MESON_SDHC_PDMA,
-> -                                          MESON_SDHC_PDMA_RXFIFO_MANUAL_FLUSH,
-> +                       regmap_update_bits(host->regmap, MESON_SDHC_PDMA, val,
->                                            val);
->                 }
+>  drivers/bluetooth/btmrvl_sdio.c               | 18 ++--
+>  drivers/bluetooth/btmtksdio.c                 |  4 +-
+>  drivers/media/mmc/siano/smssdio.c             | 10 +-
+>  drivers/mmc/core/quirks.h                     |  2 +-
+>  drivers/net/wireless/ath/ath10k/sdio.c        | 25 ++---
+>  drivers/net/wireless/ath/ath10k/sdio.h        |  8 --
+>  drivers/net/wireless/ath/ath6kl/hif.h         |  6 --
+>  drivers/net/wireless/ath/ath6kl/sdio.c        | 17 ++--
+>  drivers/net/wireless/broadcom/b43/sdio.c      |  4 +-
+>  .../broadcom/brcm80211/brcmfmac/bcmsdh.c      |  6 +-
+>  .../broadcom/brcm80211/brcmfmac/sdio.c        |  4 +-
+>  .../net/wireless/marvell/libertas/if_sdio.c   |  2 +-
+>  drivers/net/wireless/marvell/mwifiex/sdio.c   | 38 ++------
+>  include/linux/mmc/sdio_ids.h                  | 94 ++++++++++++++-----
+>  14 files changed, 120 insertions(+), 118 deletions(-)
 >
 > --
-> 2.26.2
+> 2.20.1
 >
