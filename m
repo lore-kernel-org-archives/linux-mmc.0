@@ -2,138 +2,113 @@ Return-Path: <SRS0=RjyY=7H=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A8326C433E0
-	for <linux-mmc@archiver.kernel.org>; Mon, 25 May 2020 07:15:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B2944C433E0
+	for <linux-mmc@archiver.kernel.org>; Mon, 25 May 2020 07:41:58 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 83F71206D5
-	for <linux-mmc@archiver.kernel.org>; Mon, 25 May 2020 07:15:54 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="X3f906WA"
+	by mail.kernel.org (Postfix) with ESMTP id 874052073B
+	for <linux-mmc@archiver.kernel.org>; Mon, 25 May 2020 07:41:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2388982AbgEYHPy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 25 May 2020 03:15:54 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34834 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2388972AbgEYHPx (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 25 May 2020 03:15:53 -0400
-Received: from mail-ua1-x941.google.com (mail-ua1-x941.google.com [IPv6:2607:f8b0:4864:20::941])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 68795C061A0E
-        for <linux-mmc@vger.kernel.org>; Mon, 25 May 2020 00:15:53 -0700 (PDT)
-Received: by mail-ua1-x941.google.com with SMTP id g14so98940uaq.0
-        for <linux-mmc@vger.kernel.org>; Mon, 25 May 2020 00:15:53 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=tW47sLPl7yvQUlpsqFGaRt0/eA0f/XtExRc8VNJ5L8s=;
-        b=X3f906WAm1B7znVikPVukV6tgsYYUkm8v+SSd0x+rtjZfgsQwXU/C5hodPsbUpzf+R
-         BsNenIyHnRQKNVI0gEyOsBlWkBG9l8kpemHYf5arLdSXoKccfSR3MFVTK8U28fiH6RFy
-         zpF/6oIiC1R937exP0cxNj+fLhwVY5mLbZLV4dAnb+aI8JqZcUh6rWxOf0f+av+GNbEO
-         Qno7YKLbvApPD9bO42MZre7gFikypcUpyT6VmJmffeKr84+gD7MR4Fb6R8cH1oPFWWTr
-         ICbH30dzo42Yu5VE2FUsF3x6DtchJd7jbvjnBmUjmQDi3KtvBDtnQfJBA4d0R3eKGEM7
-         ad7g==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=tW47sLPl7yvQUlpsqFGaRt0/eA0f/XtExRc8VNJ5L8s=;
-        b=aOOxaq3YsuSpXAbQ6W6oQFxPTkwZ78HgywtgJaBcoxB1E4TBOKseCv+dMvAEfyV5vh
-         TlDWHjWi5Ix1PUiZ192vcVPGvUc8uMgQ7jA2kLvPwqc4PiSsJOuy/yYIO02Oj3LHnKgP
-         TOCS0O75HIvjBcD/lyF0ZEbpcAhMZv9CWfqT3a9jD+TE3qfylPRog4bimkkozwTwKoG0
-         ah32qGidavtm9fpFa/5TZRwLLXeT54dbdO7z55tT0UE4SGgyijQuYB+feSn/FDvDvOJH
-         esoDJJMewW4vh7dxf9E0X+kt9EKpN2eMJnHJ990WdwQdZwex7fJ9ng8szKd8KVZcWF8H
-         LrWg==
-X-Gm-Message-State: AOAM533KFIvahXtj0rn12LQMOYFWZHTofszi1xc8cfezl/W1yXboF6bE
-        6mcRtLU0ZVaxIyj6oksq3WHIhXoNZLsdK/ReFqgNdw==
-X-Google-Smtp-Source: ABdhPJyn+vBET+wry7tIEPuyPG84ngjDJAb2r8EvcfU02yuysMA8153T8p81LOO/yO3mggJ+Oo/TpwlvMW9/07YJ+KQ=
-X-Received: by 2002:ab0:7293:: with SMTP id w19mr17816123uao.129.1590390952511;
- Mon, 25 May 2020 00:15:52 -0700 (PDT)
+        id S2389127AbgEYHl6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 25 May 2020 03:41:58 -0400
+Received: from mga18.intel.com ([134.134.136.126]:12119 "EHLO mga18.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S2389100AbgEYHl5 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 25 May 2020 03:41:57 -0400
+IronPort-SDR: ZQRDNMhBSUx6nRkPnDD0ILHp54ZncEzzaOyGQYSXem8tecFP3DHmIrPDEElGmSfYkYL5j4Sebr
+ H4GIcICPNfgg==
+X-Amp-Result: SKIPPED(no attachment in message)
+X-Amp-File-Uploaded: False
+Received: from orsmga003.jf.intel.com ([10.7.209.27])
+  by orsmga106.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 25 May 2020 00:41:56 -0700
+IronPort-SDR: EhtfxJKT7puHs//4h3Slq54GHPt/QVzuAECaYnBD8tT1p1zn517rJvIwSricqYg4jfICNRJVFG
+ +HVxXShnfa+g==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.73,432,1583222400"; 
+   d="scan'208";a="266078332"
+Received: from cvg-ubt08.iil.intel.com (HELO cvg-ubt08.me-corp.lan) ([10.185.176.12])
+  by orsmga003.jf.intel.com with ESMTP; 25 May 2020 00:41:55 -0700
+From:   Vladimir Kondratiev <vladimir.kondratiev@intel.com>
+To:     Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+Cc:     Vladimir Kondratiev <vladimir.kondratiev@intel.com>,
+        linux-kernel@vger.kernel.org
+Subject: [PATCH] mmc: sdhci-cadence: fix PHY write
+Date:   Mon, 25 May 2020 10:40:53 +0300
+Message-Id: <20200525074053.7309-1-vladimir.kondratiev@intel.com>
+X-Mailer: git-send-email 2.20.1
 MIME-Version: 1.0
-References: <20200522144412.19712-1-pali@kernel.org>
-In-Reply-To: <20200522144412.19712-1-pali@kernel.org>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 25 May 2020 09:15:16 +0200
-Message-ID: <CAPDyKFqwrtJy2Ss0_KcBtpGP78d_BePTGJp01KtfuOaQqiwiHg@mail.gmail.com>
-Subject: Re: [PATCH 00/11] mmc: sdio: Move SDIO IDs from drivers to common
- include file
-To:     =?UTF-8?Q?Pali_Roh=C3=A1r?= <pali@kernel.org>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Kalle Valo <kvalo@codeaurora.org>,
-        Amitkumar Karwar <amitkarwar@gmail.com>,
-        Ganapathi Bhat <ganapathi.bhat@nxp.com>,
-        Xinming Hu <huxinming820@gmail.com>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        ath10k@lists.infradead.org, b43-dev@lists.infradead.org,
-        brcm80211-dev-list.pdl@broadcom.com,
-        brcm80211-dev-list <brcm80211-dev-list@cypress.com>,
-        libertas-dev@lists.infradead.org,
-        linux-wireless <linux-wireless@vger.kernel.org>,
-        =?UTF-8?B?TWFyZWsgQmVow7pu?= <marek.behun@nic.cz>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 22 May 2020 at 16:45, Pali Roh=C3=A1r <pali@kernel.org> wrote:
->
-> Most SDIO IDs are defined in the common include file linux/mmc/sdio_ids.h=
-.
-> But some drivers define IDs locally or do not use existing macros from th=
-e
-> common include file.
->
-> This patch series fixes above inconsistency. It defines missing macro nam=
-es
-> and moves all remaining SDIO IDs from drivers to the common include file.
-> Also some macro names are changed to follow existing naming conventions.
+Accordingly to Cadence documentation, PHY write procedure is:
 
-Thanks - a nice cleanup!
+1. Software sets the PHY Register Address (HRS04[5:0]) and the
+   PHY Write Data (HRS04[15:8]) fields.
+2. Software sets the PHY Write Transaction Request (HRS04[24]) field to 1.
+3. Software waits as the PHY Write Transaction Acknowledge (HRS04[26])
+   field is equal to 0.
+4. Hardware performs the write transaction to PHY register where
+   HRS04[15:8] is a data written to register under HRS04[5:0] address.
+5. Hardware sets the PHY Transaction Acknowledge (HRS04[26]) to 1 when
+   transaction is completed.
+6. Software clears the PHY Write Transaction Request (HRS04[24]) to 1
+   after noticing that the PHY Write Transaction Acknowledge (HRS04[26])
+   field is equal to 1.
+7. Software waits for the PHY Acknowledge Register (HRS04[26]) field is
+   equal to 0.
 
-I guess this is best queued via my mmc tree, unless bluetooth/wireless
-maintainers think there are some problems with that. I will wait for
-an ack from them before applying.
+Add missing steps 3 and 7. Lack of these steps causes
+integrity errors detested by hardware.
 
-Kind regards
-Uffe
+Signed-off-by: Vladimir Kondratiev <vladimir.kondratiev@intel.com>
+---
+ drivers/mmc/host/sdhci-cadence.c | 10 +++++++++-
+ 1 file changed, 9 insertions(+), 1 deletion(-)
 
->
-> Pali Roh=C3=A1r (11):
->   mmc: sdio: Fix macro name for Marvell device with ID 0x9134
->   mmc: sdio: Change macro names for Marvell 8688 modules
->   mmc: sdio: Move SDIO IDs from mwifiex driver to common include file
->   mmc: sdio: Move SDIO IDs from btmrvl driver to common include file
->   mmc: sdio: Move SDIO IDs from btmtksdio driver to common include file
->   mmc: sdio: Move SDIO IDs from smssdio driver to common include file
->   mmc: sdio: Move SDIO IDs from ath6kl driver to common include file
->   mmc: sdio: Move SDIO IDs from ath10k driver to common include file
->   mmc: sdio: Move SDIO IDs from b43-sdio driver to common include file
->   mmc: sdio: Fix Cypress SDIO IDs macros in common include file
->   mmc: sdio: Sort all SDIO IDs in common include file
->
->  drivers/bluetooth/btmrvl_sdio.c               | 18 ++--
->  drivers/bluetooth/btmtksdio.c                 |  4 +-
->  drivers/media/mmc/siano/smssdio.c             | 10 +-
->  drivers/mmc/core/quirks.h                     |  2 +-
->  drivers/net/wireless/ath/ath10k/sdio.c        | 25 ++---
->  drivers/net/wireless/ath/ath10k/sdio.h        |  8 --
->  drivers/net/wireless/ath/ath6kl/hif.h         |  6 --
->  drivers/net/wireless/ath/ath6kl/sdio.c        | 17 ++--
->  drivers/net/wireless/broadcom/b43/sdio.c      |  4 +-
->  .../broadcom/brcm80211/brcmfmac/bcmsdh.c      |  6 +-
->  .../broadcom/brcm80211/brcmfmac/sdio.c        |  4 +-
->  .../net/wireless/marvell/libertas/if_sdio.c   |  2 +-
->  drivers/net/wireless/marvell/mwifiex/sdio.c   | 38 ++------
->  include/linux/mmc/sdio_ids.h                  | 94 ++++++++++++++-----
->  14 files changed, 120 insertions(+), 118 deletions(-)
->
-> --
-> 2.20.1
->
+diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
+index e474d3fa099e..6b2e7c43cbc1 100644
+--- a/drivers/mmc/host/sdhci-cadence.c
++++ b/drivers/mmc/host/sdhci-cadence.c
+@@ -114,6 +114,11 @@ static int sdhci_cdns_write_phy_reg(struct sdhci_cdns_priv *priv,
+ 	u32 tmp;
+ 	int ret;
+ 
++	ret = readl_poll_timeout(reg, tmp, !(tmp & SDHCI_CDNS_HRS04_ACK),
++				 0, 10);
++	if (ret)
++		return ret;
++
+ 	tmp = FIELD_PREP(SDHCI_CDNS_HRS04_WDATA, data) |
+ 	      FIELD_PREP(SDHCI_CDNS_HRS04_ADDR, addr);
+ 	writel(tmp, reg);
+@@ -128,7 +133,10 @@ static int sdhci_cdns_write_phy_reg(struct sdhci_cdns_priv *priv,
+ 	tmp &= ~SDHCI_CDNS_HRS04_WR;
+ 	writel(tmp, reg);
+ 
+-	return 0;
++	ret = readl_poll_timeout(reg, tmp, !(tmp & SDHCI_CDNS_HRS04_ACK),
++				 0, 10);
++
++	return ret;
+ }
+ 
+ static unsigned int sdhci_cdns_phy_param_count(struct device_node *np)
+-- 
+2.20.1
+
+---------------------------------------------------------------------
+Intel Israel (74) Limited
+
+This e-mail and any attachments may contain confidential material for
+the sole use of the intended recipient(s). Any review or distribution
+by others is strictly prohibited. If you are not the intended
+recipient, please contact the sender and delete all copies.
+
