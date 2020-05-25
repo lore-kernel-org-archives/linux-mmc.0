@@ -2,56 +2,42 @@ Return-Path: <SRS0=RjyY=7H=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+X-Spam-Status: No, score=-5.5 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no version=3.4.0
+	UNWANTED_LANGUAGE_BODY,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2F07CC433E2
-	for <linux-mmc@archiver.kernel.org>; Mon, 25 May 2020 05:43:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9049EC433E0
+	for <linux-mmc@archiver.kernel.org>; Mon, 25 May 2020 06:02:08 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 19AC4207DA
-	for <linux-mmc@archiver.kernel.org>; Mon, 25 May 2020 05:43:31 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7B62E207FB
+	for <linux-mmc@archiver.kernel.org>; Mon, 25 May 2020 06:02:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729592AbgEYFn2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 25 May 2020 01:43:28 -0400
-Received: from mga04.intel.com ([192.55.52.120]:39674 "EHLO mga04.intel.com"
+        id S2388627AbgEYGCI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 25 May 2020 02:02:08 -0400
+Received: from mail.kernel.org ([198.145.29.99]:52170 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725763AbgEYFn2 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 25 May 2020 01:43:28 -0400
-IronPort-SDR: zwmSkPIkLXJmSvn/vkXoF0L/XGqfsrJrjGEYKj+AdIiz73CyIikFQfOS2NMwyGClATdpyj3DAX
- Oisv7qnPMGOQ==
-X-Amp-Result: SKIPPED(no attachment in message)
-X-Amp-File-Uploaded: False
-Received: from fmsmga005.fm.intel.com ([10.253.24.32])
-  by fmsmga104.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 24 May 2020 22:43:27 -0700
-IronPort-SDR: RgGj6yKfCRpRXq4AIbrpN98WCXvHKkV4whYtLSII4XNB9usli7hIXRWZ8J5TcvrZp1AGq8jDPK
- vBJd6ZmWFWmw==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.73,432,1583222400"; 
-   d="scan'208";a="467862618"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.157]) ([10.237.72.157])
-  by fmsmga005.fm.intel.com with ESMTP; 24 May 2020 22:43:24 -0700
-Subject: Re: [PATCH V2 3/3] mmc: sdhci: Allow platform controlled voltage
- switching
-To:     Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
-        ulf.hansson@linaro.org, bjorn.andersson@linaro.org,
-        robh+dt@kernel.org
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
-        Vijay Viswanath <vviswana@codeaurora.org>
-References: <1589541535-8523-1-git-send-email-vbadigan@codeaurora.org>
- <1590074615-10787-1-git-send-email-vbadigan@codeaurora.org>
- <1590074615-10787-4-git-send-email-vbadigan@codeaurora.org>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <cfb229eb-a5e6-a0a9-6590-ef57b621ccb7@intel.com>
-Date:   Mon, 25 May 2020 08:42:55 +0300
+        id S2388589AbgEYGCH (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 25 May 2020 02:02:07 -0400
+Received: from [10.44.0.192] (unknown [103.48.210.53])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id 1562E2075F;
+        Mon, 25 May 2020 06:02:04 +0000 (UTC)
+Subject: Re: [PATCH v6 1/4] m68k: mcf5441x: add support for esdhc mmc
+ controller
+To:     Angelo Dureghello <angelo.dureghello@timesys.com>,
+        adrian.hunter@intel.com, ulf.hansson@linaro.org
+Cc:     linux-mmc@vger.kernel.org, linux-m68k@vger.kernel.org
+References: <20200518191742.1251440-1-angelo.dureghello@timesys.com>
+From:   Greg Ungerer <gerg@linux-m68k.org>
+Message-ID: <fdfe557a-49fe-410a-cb05-5bff5e04fdd0@linux-m68k.org>
+Date:   Mon, 25 May 2020 16:02:01 +1000
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
  Thunderbird/68.7.0
 MIME-Version: 1.0
-In-Reply-To: <1590074615-10787-4-git-send-email-vbadigan@codeaurora.org>
-Content-Type: text/plain; charset=utf-8
+In-Reply-To: <20200518191742.1251440-1-angelo.dureghello@timesys.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Language: en-US
 Content-Transfer-Encoding: 7bit
 Sender: linux-mmc-owner@vger.kernel.org
@@ -59,119 +45,258 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 21/05/20 6:23 pm, Veerabhadrarao Badiganti wrote:
-> From: Vijay Viswanath <vviswana@codeaurora.org>
-> 
-> If vendor platform drivers are controlling whole logic of voltage
-> switching, then sdhci driver no need control vqmmc regulator.
-> So skip enabling/disable vqmmc from SDHC driver.
-> 
-> Signed-off-by: Vijay Viswanath <vviswana@codeaurora.org>
-> Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+Hi Angelo,
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Have you seen this breakage being reported in linux-next?
 
+     arch/m68k/coldfire/clk.c:78:60: error: 'MCFSDHC_CLK' undeclared (first
+     use in this function); did you mean 'MCF_CLK'?
+     arch/m68k/coldfire/clk.c:83:61: error: 'MCFSDHC_CLK' undeclared (first
+     use in this function); did you mean 'MCF_CLK'?
+     make[2]: *** [scripts/Makefile.build:272: arch/m68k/coldfire/clk.o] 
+     Error 1
+     make[1]: *** [Makefile:1736: arch/m68k/coldfire] Error 2
+     make: *** [Makefile:185: __sub-make] Error 2
+
+This is when compiling for pretty much anything other than an mcf5441x 
+target.
+
+
+On 19/5/20 5:17 am, Angelo Dureghello wrote:
+> Add support for sdhci-edshc mmc controller.
+> 
+> Signed-off-by: Angelo Dureghello <angelo.dureghello@timesys.com>
+> Acked-by: Greg Ungerer <gerg@linux-m68k.org>
 > ---
->  drivers/mmc/host/sdhci.c | 32 +++++++++++++++++++-------------
->  drivers/mmc/host/sdhci.h |  1 +
->  2 files changed, 20 insertions(+), 13 deletions(-)
+> Changes for v3:
+> - removed volatile cast from clk.c
+> Changes for v4:
+> - comment style fix in m5441xsim.h
+> Changes for v5:
+> - fix compilation warnings from __clk_enable2 and __clk_disable2
+> Changes for v6:
+> none
+> ---
+>   arch/m68k/coldfire/clk.c                    | 15 ++++++++++
+>   arch/m68k/coldfire/device.c                 | 33 +++++++++++++++++++--
+>   arch/m68k/coldfire/m5441x.c                 | 12 +++++++-
+>   arch/m68k/include/asm/m5441xsim.h           | 15 ++++++++++
+>   arch/m68k/include/asm/mcfclk.h              |  2 ++
+>   include/linux/platform_data/mmc-esdhc-mcf.h | 17 +++++++++++
+>   6 files changed, 91 insertions(+), 3 deletions(-)
+>   create mode 100644 include/linux/platform_data/mmc-esdhc-mcf.h
 > 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 1bb6b67..88e5312 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -4098,6 +4098,7 @@ int sdhci_setup_host(struct sdhci_host *host)
->  	unsigned int override_timeout_clk;
->  	u32 max_clk;
->  	int ret;
-> +	bool enable_vqmmc = false;
->  
->  	WARN_ON(host == NULL);
->  	if (host == NULL)
-> @@ -4111,9 +4112,12 @@ int sdhci_setup_host(struct sdhci_host *host)
->  	 * the host can take the appropriate action if regulators are not
->  	 * available.
->  	 */
-> -	ret = mmc_regulator_get_supply(mmc);
-> -	if (ret)
-> -		return ret;
-> +	if (!mmc->supply.vqmmc) {
-> +		ret = mmc_regulator_get_supply(mmc);
-> +		if (ret)
-> +			return ret;
-> +		enable_vqmmc  = true;
-> +	}
->  
->  	DBG("Version:   0x%08x | Present:  0x%08x\n",
->  	    sdhci_readw(host, SDHCI_HOST_VERSION),
-> @@ -4373,7 +4377,15 @@ int sdhci_setup_host(struct sdhci_host *host)
->  		mmc->caps |= MMC_CAP_NEEDS_POLL;
->  
->  	if (!IS_ERR(mmc->supply.vqmmc)) {
-> -		ret = regulator_enable(mmc->supply.vqmmc);
-> +		if (enable_vqmmc) {
-> +			ret = regulator_enable(mmc->supply.vqmmc);
-> +			if (ret) {
-> +				pr_warn("%s: Failed to enable vqmmc regulator: %d\n",
-> +					mmc_hostname(mmc), ret);
-> +				mmc->supply.vqmmc = ERR_PTR(-EINVAL);
-> +			}
-> +			host->sdhci_core_to_disable_vqmmc = !ret;
-> +		}
->  
->  		/* If vqmmc provides no 1.8V signalling, then there's no UHS */
->  		if (!regulator_is_supported_voltage(mmc->supply.vqmmc, 1700000,
-> @@ -4386,12 +4398,6 @@ int sdhci_setup_host(struct sdhci_host *host)
->  		if (!regulator_is_supported_voltage(mmc->supply.vqmmc, 2700000,
->  						    3600000))
->  			host->flags &= ~SDHCI_SIGNALING_330;
+> diff --git a/arch/m68k/coldfire/clk.c b/arch/m68k/coldfire/clk.c
+> index 7bc666e482eb..75a057445472 100644
+> --- a/arch/m68k/coldfire/clk.c
+> +++ b/arch/m68k/coldfire/clk.c
+> @@ -73,6 +73,21 @@ struct clk_ops clk_ops1 = {
+>   #endif /* MCFPM_PPMCR1 */
+>   #endif /* MCFPM_PPMCR0 */
+>   
+> +static void __clk_enable2(struct clk *clk)
+> +{
+> +	__raw_writel(__raw_readl(MCFSDHC_CLK) | (1 << clk->slot), MCFSDHC_CLK);
+> +}
+
+MCFSDHC_CLK will not be defiend for anything other than mcf5441x targets.
+
+This mechanism looks a little out of place here, given how specific
+it is to the sdhc hardware module of the 5441x. Can you move this
+to the m5441x specific code resolving this?
+
+Regards
+Greg
+
+
+> +static void __clk_disable2(struct clk *clk)
+> +{
+> +	__raw_writel(__raw_readl(MCFSDHC_CLK) & ~(1 << clk->slot), MCFSDHC_CLK);
+> +}
+> +
+> +struct clk_ops clk_ops2 = {
+> +	.enable		= __clk_enable2,
+> +	.disable	= __clk_disable2,
+> +};
+> +
+>   struct clk *clk_get(struct device *dev, const char *id)
+>   {
+>   	const char *clk_name = dev ? dev_name(dev) : id ? id : NULL;
+> diff --git a/arch/m68k/coldfire/device.c b/arch/m68k/coldfire/device.c
+> index b4103b6bfdeb..9ef4ec0aea00 100644
+> --- a/arch/m68k/coldfire/device.c
+> +++ b/arch/m68k/coldfire/device.c
+> @@ -22,6 +22,7 @@
+>   #include <asm/mcfqspi.h>
+>   #include <linux/platform_data/edma.h>
+>   #include <linux/platform_data/dma-mcf-edma.h>
+> +#include <linux/platform_data/mmc-esdhc-mcf.h>
+>   
+>   /*
+>    *	All current ColdFire parts contain from 2, 3, 4 or 10 UARTS.
+> @@ -551,9 +552,35 @@ static struct platform_device mcf_edma = {
+>   		.platform_data = &mcf_edma_data,
+>   	}
+>   };
 > -
-> -		if (ret) {
-> -			pr_warn("%s: Failed to enable vqmmc regulator: %d\n",
-> -				mmc_hostname(mmc), ret);
-> -			mmc->supply.vqmmc = ERR_PTR(-EINVAL);
-> -		}
->  	}
->  
->  	if (host->quirks2 & SDHCI_QUIRK2_NO_1_8_V) {
-> @@ -4625,7 +4631,7 @@ int sdhci_setup_host(struct sdhci_host *host)
->  	return 0;
->  
->  unreg:
-> -	if (!IS_ERR(mmc->supply.vqmmc))
-> +	if (host->sdhci_core_to_disable_vqmmc)
->  		regulator_disable(mmc->supply.vqmmc);
->  undma:
->  	if (host->align_buffer)
-> @@ -4643,7 +4649,7 @@ void sdhci_cleanup_host(struct sdhci_host *host)
->  {
->  	struct mmc_host *mmc = host->mmc;
->  
-> -	if (!IS_ERR(mmc->supply.vqmmc))
-> +	if (host->sdhci_core_to_disable_vqmmc)
->  		regulator_disable(mmc->supply.vqmmc);
->  
->  	if (host->align_buffer)
-> @@ -4780,7 +4786,7 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
->  
->  	destroy_workqueue(host->complete_wq);
->  
-> -	if (!IS_ERR(mmc->supply.vqmmc))
-> +	if (host->sdhci_core_to_disable_vqmmc)
->  		regulator_disable(mmc->supply.vqmmc);
->  
->  	if (host->align_buffer)
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index 8d2a096..c7dbc68 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -570,6 +570,7 @@ struct sdhci_host {
->  	u32 caps1;		/* CAPABILITY_1 */
->  	bool read_caps;		/* Capability flags have been read */
->  
-> +	bool sdhci_core_to_disable_vqmmc;  /* sdhci core can disable vqmmc */
->  	unsigned int            ocr_avail_sdio;	/* OCR bit masks */
->  	unsigned int            ocr_avail_sd;
->  	unsigned int            ocr_avail_mmc;
+>   #endif /* IS_ENABLED(CONFIG_MCF_EDMA) */
+>   
+> +#if IS_ENABLED(CONFIG_MMC)
+> +static struct mcf_esdhc_platform_data mcf_esdhc_data = {
+> +	.max_bus_width = 4,
+> +	.cd_type = ESDHC_CD_NONE,
+> +};
+> +
+> +static struct resource mcf_esdhc_resources[] = {
+> +	{
+> +		.start = MCFSDHC_BASE,
+> +		.end = MCFSDHC_BASE + MCFSDHC_SIZE - 1,
+> +		.flags = IORESOURCE_MEM,
+> +	}, {
+> +		.start = MCF_IRQ_SDHC,
+> +		.end = MCF_IRQ_SDHC,
+> +		.flags = IORESOURCE_IRQ,
+> +	},
+> +};
+> +
+> +static struct platform_device mcf_esdhc = {
+> +	.name			= "sdhci-esdhc-mcf",
+> +	.id			= 0,
+> +	.num_resources		= ARRAY_SIZE(mcf_esdhc_resources),
+> +	.resource		= mcf_esdhc_resources,
+> +	.dev.platform_data	= &mcf_esdhc_data,
+> +};
+> +#endif /* IS_ENABLED(CONFIG_MMC) */
+> +
+>   static struct platform_device *mcf_devices[] __initdata = {
+>   	&mcf_uart,
+>   #if IS_ENABLED(CONFIG_FEC)
+> @@ -586,6 +613,9 @@ static struct platform_device *mcf_devices[] __initdata = {
+>   #if IS_ENABLED(CONFIG_MCF_EDMA)
+>   	&mcf_edma,
+>   #endif
+> +#if IS_ENABLED(CONFIG_MMC)
+> +	&mcf_esdhc,
+> +#endif
+>   };
+>   
+>   /*
+> @@ -614,4 +644,3 @@ static int __init mcf_init_devices(void)
+>   }
+>   
+>   arch_initcall(mcf_init_devices);
+> -
+> diff --git a/arch/m68k/coldfire/m5441x.c b/arch/m68k/coldfire/m5441x.c
+> index 5bd24c9b865d..ffa02de1a3fb 100644
+> --- a/arch/m68k/coldfire/m5441x.c
+> +++ b/arch/m68k/coldfire/m5441x.c
+> @@ -52,7 +52,7 @@ DEFINE_CLK(0, "mcfssi.0", 47, MCF_CLK);
+>   DEFINE_CLK(0, "pll.0", 48, MCF_CLK);
+>   DEFINE_CLK(0, "mcfrng.0", 49, MCF_CLK);
+>   DEFINE_CLK(0, "mcfssi.1", 50, MCF_CLK);
+> -DEFINE_CLK(0, "mcfsdhc.0", 51, MCF_CLK);
+> +DEFINE_CLK(0, "sdhci-esdhc-mcf.0", 51, MCF_CLK);
+>   DEFINE_CLK(0, "enet-fec.0", 53, MCF_CLK);
+>   DEFINE_CLK(0, "enet-fec.1", 54, MCF_CLK);
+>   DEFINE_CLK(0, "switch.0", 55, MCF_CLK);
+> @@ -74,6 +74,10 @@ DEFINE_CLK(1, "mcfpwm.0", 34, MCF_BUSCLK);
+>   DEFINE_CLK(1, "sys.0", 36, MCF_BUSCLK);
+>   DEFINE_CLK(1, "gpio.0", 37, MCF_BUSCLK);
+>   
+> +DEFINE_CLK(2, "ipg.0", 0, MCF_CLK);
+> +DEFINE_CLK(2, "ahb.0", 1, MCF_CLK);
+> +DEFINE_CLK(2, "per.0", 2, MCF_CLK);
+> +
+>   struct clk *mcf_clks[] = {
+>   	&__clk_0_2,
+>   	&__clk_0_8,
+> @@ -131,6 +135,11 @@ struct clk *mcf_clks[] = {
+>   	&__clk_1_34,
+>   	&__clk_1_36,
+>   	&__clk_1_37,
+> +
+> +	&__clk_2_0,
+> +	&__clk_2_1,
+> +	&__clk_2_2,
+> +
+>   	NULL,
+>   };
+>   
+> @@ -151,6 +160,7 @@ static struct clk * const enable_clks[] __initconst = {
+>   	&__clk_0_33, /* pit.1 */
+>   	&__clk_0_37, /* eport */
+>   	&__clk_0_48, /* pll */
+> +	&__clk_0_51, /* esdhc */
+>   
+>   	&__clk_1_36, /* CCM/reset module/Power management */
+>   	&__clk_1_37, /* gpio */
+> diff --git a/arch/m68k/include/asm/m5441xsim.h b/arch/m68k/include/asm/m5441xsim.h
+> index 4892f314ff38..e091e36d3464 100644
+> --- a/arch/m68k/include/asm/m5441xsim.h
+> +++ b/arch/m68k/include/asm/m5441xsim.h
+> @@ -278,6 +278,13 @@
+>   #define MCFGPIO_IRQ_VECBASE	(MCFINT_VECBASE - MCFGPIO_IRQ_MIN)
+>   #define MCFGPIO_PIN_MAX		87
+>   
+> +/*
+> + * Phase Locked Loop (PLL)
+> + */
+> +#define MCF_PLL_CR		0xFC0C0000
+> +#define MCF_PLL_DR		0xFC0C0004
+> +#define MCF_PLL_SR		0xFC0C0008
+> +
+>   /*
+>    *  DSPI module.
+>    */
+> @@ -298,5 +305,13 @@
+>   #define MCFEDMA_IRQ_INTR16	(MCFINT1_VECBASE + MCFEDMA_EDMA_INTR16)
+>   #define MCFEDMA_IRQ_INTR56	(MCFINT2_VECBASE + MCFEDMA_EDMA_INTR56)
+>   #define MCFEDMA_IRQ_ERR	(MCFINT0_VECBASE + MCFINT0_EDMA_ERR)
+> +/*
+> + *  esdhc module.
+> + */
+> +#define MCFSDHC_BASE		0xfc0cc000
+> +#define MCFSDHC_SIZE		256
+> +#define MCFINT2_SDHC		31
+> +#define MCF_IRQ_SDHC		(MCFINT2_VECBASE + MCFINT2_SDHC)
+> +#define MCFSDHC_CLK		(MCFSDHC_BASE + 0x2c)
+>   
+>   #endif /* m5441xsim_h */
+> diff --git a/arch/m68k/include/asm/mcfclk.h b/arch/m68k/include/asm/mcfclk.h
+> index 0aca504fae31..722627e06d66 100644
+> --- a/arch/m68k/include/asm/mcfclk.h
+> +++ b/arch/m68k/include/asm/mcfclk.h
+> @@ -30,6 +30,8 @@ extern struct clk_ops clk_ops0;
+>   extern struct clk_ops clk_ops1;
+>   #endif /* MCFPM_PPMCR1 */
+>   
+> +extern struct clk_ops clk_ops2;
+> +
+>   #define DEFINE_CLK(clk_bank, clk_name, clk_slot, clk_rate) \
+>   static struct clk __clk_##clk_bank##_##clk_slot = { \
+>   	.name = clk_name, \
+> diff --git a/include/linux/platform_data/mmc-esdhc-mcf.h b/include/linux/platform_data/mmc-esdhc-mcf.h
+> new file mode 100644
+> index 000000000000..85cb786a62fe
+> --- /dev/null
+> +++ b/include/linux/platform_data/mmc-esdhc-mcf.h
+> @@ -0,0 +1,17 @@
+> +/* SPDX-License-Identifier: GPL-2.0 */
+> +
+> +#ifndef __LINUX_PLATFORM_DATA_MCF_ESDHC_H__
+> +#define __LINUX_PLATFORM_DATA_MCF_ESDHC_H__
+> +
+> +enum cd_types {
+> +	ESDHC_CD_NONE,		/* no CD, neither controller nor gpio */
+> +	ESDHC_CD_CONTROLLER,	/* mmc controller internal CD */
+> +	ESDHC_CD_PERMANENT,	/* no CD, card permanently wired to host */
+> +};
+> +
+> +struct mcf_esdhc_platform_data {
+> +	int max_bus_width;
+> +	int cd_type;
+> +};
+> +
+> +#endif /* __LINUX_PLATFORM_DATA_MCF_ESDHC_H__ */
 > 
 
