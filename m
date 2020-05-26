@@ -2,167 +2,121 @@ Return-Path: <SRS0=LLi2=7I=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-2.1 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E5EC7C433E0
-	for <linux-mmc@archiver.kernel.org>; Tue, 26 May 2020 11:43:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E65D8C433E0
+	for <linux-mmc@archiver.kernel.org>; Tue, 26 May 2020 13:03:57 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C55B5208C7
-	for <linux-mmc@archiver.kernel.org>; Tue, 26 May 2020 11:43:43 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C0B2B2086A
+	for <linux-mmc@archiver.kernel.org>; Tue, 26 May 2020 13:03:57 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="ZwYOS+cV"
+	dkim=fail reason="signature verification failed" (1024-bit key) header.d=mg.codeaurora.org header.i=@mg.codeaurora.org header.b="v/WUFglD"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1731539AbgEZLnn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 26 May 2020 07:43:43 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48992 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1731676AbgEZLnm (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 26 May 2020 07:43:42 -0400
-Received: from mail-vs1-xe42.google.com (mail-vs1-xe42.google.com [IPv6:2607:f8b0:4864:20::e42])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BC3C2C08C5C1
-        for <linux-mmc@vger.kernel.org>; Tue, 26 May 2020 04:43:42 -0700 (PDT)
-Received: by mail-vs1-xe42.google.com with SMTP id b28so9543786vsa.5
-        for <linux-mmc@vger.kernel.org>; Tue, 26 May 2020 04:43:42 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=nPdu7SPTh7JNX7Uc2Z7FhGt13qKrZbymgkVtLODSfA4=;
-        b=ZwYOS+cV7mJ83i9sr2VExWXiEFDnq/JqhbFXX3fAzvAOd2oPuprKymA6ETAeP8GLqm
-         vL5jZBCNjHihDatlNRKcDFnK8MmiWCN1sXxalNaD9LTWUIqelPlo0st0vrUa40U7qu7i
-         XzjQoWcFOv8iMrkaQ+jw5n7utfuSi5UWtzQiNV6lglrMugIvxm1WbZM7DmEjLRwk4E83
-         brPR3zg3zu/gefBQWQFSAo4/iRw204LTUubMH8VQ/uKzQwNZg2D6yDvHlnu1BUsgjm8I
-         8tpFcbUsS0WLKUvjWWMw+sOg3wmf119zvHke6fIkU+5FdDPV2BX0y+bB8twggxD817B2
-         qpuw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=nPdu7SPTh7JNX7Uc2Z7FhGt13qKrZbymgkVtLODSfA4=;
-        b=rkyP00pIa3fC5ZGOnzs/lIZyK7SoRRBclvc50nSI2wmrQYs+oHdwJHXbDmbW8TQ4LJ
-         QH5nrPO8j0oFRov9Nu9zsT+RPxhV3sV53ECtL21MAdInJGAaweWAnnzEIGRBDJ3tEzZ2
-         i9tUY6nm4MDDunrFdc6YQ7q1miSuOJ0bHbHt+il82KfDhFbVIjZqdU59yx8VUcUN4An8
-         i6pqWz5K5wGH2K5RQl9Cy+ueaFuiNU/5sdC3wqDOwTw3E+lzrk14xJbmeoo7CmG16cbQ
-         O92LYhmnf58cNxfKLT8pwkYa1YMgOuIMjau/UMTtZKVS3zbXjBo+GkNZn0BHDrU8/uyL
-         GcNA==
-X-Gm-Message-State: AOAM531SJyPl0+LDgLBAxvZn0fbGirgsNnZ3FJu25STlkS2802jcntBc
-        xPA6Phy0FjqiaNwXaFQWC/GLOfYnQLCIVs2Qwcvonw==
-X-Google-Smtp-Source: ABdhPJxX3ByxW2H4N6c89dFaCJvwdMVe5SnL4enMfxjWHotYtz6hvN2m1vJ0v196TxJgcUHhkScnUgdJSyhPeOpEZus=
-X-Received: by 2002:a67:690e:: with SMTP id e14mr512853vsc.34.1590493421821;
- Tue, 26 May 2020 04:43:41 -0700 (PDT)
-MIME-Version: 1.0
-References: <1590481839-28603-1-git-send-email-haibo.chen@nxp.com>
-In-Reply-To: <1590481839-28603-1-git-send-email-haibo.chen@nxp.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 26 May 2020 13:43:05 +0200
-Message-ID: <CAPDyKFqjZdN0zv2iW+Rq6WZSo56HfyPFYHvg-JvzYZPy_eTSBQ@mail.gmail.com>
-Subject: Re: [PATCH] mmc: host: sdhci-esdhc-imx: add wakeup feature for GPIO
- CD pin
-To:     Haibo Chen <haibo.chen@nxp.com>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        id S1728151AbgEZND5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 26 May 2020 09:03:57 -0400
+Received: from mail27.static.mailgun.info ([104.130.122.27]:23846 "EHLO
+        mail27.static.mailgun.info" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726325AbgEZND4 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 26 May 2020 09:03:56 -0400
+DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
+ s=smtp; t=1590498236; h=Content-Transfer-Encoding: Content-Type:
+ In-Reply-To: MIME-Version: Date: Message-ID: From: References: Cc: To:
+ Subject: Sender; bh=YmwIjFl/c14iDt6fi1BUWfIyIuL8313MiVePI/ekEJ8=; b=v/WUFglDNxUmkBkNpTvjdT+tWSinmFAUWNBXniKBCj2tgI07IoTNullXAq4GQ3t9rbBG1tqy
+ oh6GY0HRPOv5ens9rbBfpsLqN0YHzVncWbivlB+R5Kvpc/3DULLEFulnP+tCQDzTLLEIUdZW
+ fh41je6JE+fN3qwfN4GHXqCoTS0=
+X-Mailgun-Sending-Ip: 104.130.122.27
+X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
+Received: from smtp.codeaurora.org
+ (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171]) by
+ smtp-out-n01.prod.us-east-1.postgun.com with SMTP id
+ 5ecd134a76fccbb4c8ad2a45 (version=TLS1.2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256); Tue, 26 May 2020 13:02:02
+ GMT
+Received: by smtp.codeaurora.org (Postfix, from userid 1001)
+        id 51C4CC433CB; Tue, 26 May 2020 13:02:01 +0000 (UTC)
+Received: from [192.168.0.106] (unknown [183.83.65.109])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        (Authenticated sender: vbadigan)
+        by smtp.codeaurora.org (Postfix) with ESMTPSA id 039DCC433C9;
+        Tue, 26 May 2020 13:01:58 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.3.2 smtp.codeaurora.org 039DCC433C9
+Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
+Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=none smtp.mailfrom=vbadigan@codeaurora.org
+Subject: Re: sdhci_msm issues with cold-plugged SD cards
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Iskren Chernev <iskren.chernev@gmail.com>
+Cc:     kernelnewbies@kernelnewbies.org,
         "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        dl-linux-imx <linux-imx@nxp.com>,
-        Shawn Guo <shawnguo@kernel.org>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        Sascha Hauer <kernel@pengutronix.de>,
-        Fabio Estevam <festevam@gmail.com>,
-        Linux PM <linux-pm@vger.kernel.org>,
-        "Rafael J. Wysocki" <rjw@rjwysocki.net>
-Content-Type: text/plain; charset="UTF-8"
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Sarthak Garg <sartgarg@codeaurora.org>
+References: <491cfef4-4a97-b6e8-0f41-d44e1c73eea4@gmail.com>
+ <CAPDyKFqAWVPU=mJ=RzMyJsBiMTfSQqFTXw1oLqb=cZCM4e9ebw@mail.gmail.com>
+From:   Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+Message-ID: <d268a70b-a938-ab37-cca1-9a1322ad3cae@codeaurora.org>
+Date:   Tue, 26 May 2020 18:31:56 +0530
+User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:68.0) Gecko/20100101
+ Thunderbird/68.8.1
+MIME-Version: 1.0
+In-Reply-To: <CAPDyKFqAWVPU=mJ=RzMyJsBiMTfSQqFTXw1oLqb=cZCM4e9ebw@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-+ Rafael, linux-pm
 
-On Tue, 26 May 2020 at 10:41, <haibo.chen@nxp.com> wrote:
+On 5/25/2020 2:44 PM, Ulf Hansson wrote:
+> + Bjorn, Sarthak, Veerabhadrarao
 >
-> From: Haibo Chen <haibo.chen@nxp.com>
+> On Fri, 22 May 2020 at 17:51, Iskren Chernev <iskren.chernev@gmail.com> wrote:
+>>
+>> Hello,
+>>
+>> I'm trying to add SD Card support to a smartphone (Samsung Galaxy S5). After
+>> configuring the sdhci-msm driver through DT, it all seems to work fine except
+>> the case when the phone boots with the SD card inserted. If the card is
+>> re-inserted, or the driver is polling, or the probe code is forcefully executed
+>> a second time the card is properly detected.
+>>
+>> I logged the SD interrupts, commands and responses, and it looks like the
+>> hardware is returning Command Index Error and/or Command End Bit Error via the
+>> Error Interrupt Status Register, which gets converted to -EILSEQ error. On
+>> a second attempt (due to re-insertion, polling or re-execution) these errors
+>> are missing, and the card behaves correctly.
+>>
+>> On the downstream kernel, these errors resulting in EILSEQ do not appear, so it
+>> might be related to setup. Also I see that sdhci-msm driver has hardcoded
+>> a SDHCI_QUIRK_BROKEN_CARD_DETECTION quirk, which might imply that polling
+>> should be used (instead Card Detection GPIO), in which case this issue won't
+>> manifest itself. But polling wastes power, and the Card Detect pin works well,
+>> at least for this device, so I feel it can be made better.
+>>
+>> Any suggestions on how to track this down are appreciated!
+> I think the device is intended to be used with GPIO card detection.
+> Polling mode shouldn't be needed if there is GPIO.
 >
-> When use the specific GPIO to detect the card insert/remove, we can
-> also add the GPIO as a wakeup source. When system suspend, insert or
-> remove the card can wakeup the system.
-
-Yes, this makes perfect sense! However...
-
+> Anyway, to me it sounds like the HW/controller isn't properly
+> initialized during ->probe(), but I can't help you much more than
+> that. I have looped in some of the recent active sdhci-msm developers
+> to see if they have some ideas that we can try.
 >
-> Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
-> ---
->  drivers/mmc/host/sdhci-esdhc-imx.c | 19 +++++++++++++++++--
->  1 file changed, 17 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-> index 5398af4824c3..7af9d87d4245 100644
-> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -1599,6 +1599,11 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
->         if (esdhc_is_usdhc(imx_data)) {
->                 host->quirks2 |= SDHCI_QUIRK2_PRESET_VALUE_BROKEN;
->                 host->mmc->caps |= MMC_CAP_1_8V_DDR | MMC_CAP_3_3V_DDR;
-> +
-> +               /* GPIO CD can be set as a wakeup source */
-> +               host->mmc->caps |= MMC_CAP_CD_WAKE;
-> +               device_init_wakeup(&pdev->dev, true);
-> +
+> Kind regards
+> Uffe
+Strange issue. We never encountered this issue internally.
+Please define "post-power-on-delay-ms" dt property with some larger 
+delay value (25ms?)
+and see if that helps you...
 
-... if the device is attached to a genpd (a PM domain), this may cause
-it to stay powered on in the system suspend state. Not sure if that
-can cause a problem for you? Wasting energy?
+If this doesn't work, let me know the Qcom SoC (name/number) present on 
+that phone.
+And the kernel that you are using.
 
-In any case, I think it's wrong to make "&pdev->dev" wakeup capable,
-like this. Especially as at it's the GPIO controller that manages the
-system wakeup irq.
+Thanks
+Veera
 
->                 if (!(imx_data->socdata->flags & ESDHC_FLAG_HS200))
->                         host->quirks2 |= SDHCI_QUIRK2_BROKEN_HS200;
->
-> @@ -1734,8 +1739,15 @@ static int sdhci_esdhc_suspend(struct device *dev)
->                 mmc_retune_needed(host->mmc);
->
->         ret = sdhci_suspend_host(host);
-> -       if (!ret)
-> -               return pinctrl_pm_select_sleep_state(dev);
-> +       if (ret)
-> +               return ret;
-> +
-> +       ret = pinctrl_pm_select_sleep_state(dev);
-> +       if (ret)
-> +               return ret;
-> +
-> +       if (device_may_wakeup(dev))
-> +               ret = mmc_gpio_set_cd_wake(host->mmc, true);
 
-With the above said, I think the best available approach at this
-point, is to just call mmc_gpio_set_cd_wake() - and just skip checking
-device_may_wakeup().
-
-BTW, mmc_gpio_set_cd_wake() calls enable_irq_wake(), which doesn't
-require the "dev" to be wakeup capable. So this is fine!
-
-Yes, it means that the IRQ will be configured as a system wakeup,
-without letting user space to have a say about it. I guess we can live
-with that limitation.
-
->
->         return ret;
->  }
-> @@ -1759,6 +1771,9 @@ static int sdhci_esdhc_resume(struct device *dev)
->         if (host->mmc->caps2 & MMC_CAP2_CQE)
->                 ret = cqhci_resume(host->mmc);
->
-> +       if (!ret && device_may_wakeup(dev))
-> +               ret = mmc_gpio_set_cd_wake(host->mmc, false);
-> +
->         return ret;
->  }
->  #endif
-> --
-> 2.17.1
->
-
-Kind regards
-Uffe
