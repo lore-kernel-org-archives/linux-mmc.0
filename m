@@ -1,101 +1,82 @@
-Return-Path: <SRS0=RjyY=7H=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=LLi2=7I=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-4.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=no
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A955CC433E2
-	for <linux-mmc@archiver.kernel.org>; Mon, 25 May 2020 15:33:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A7311C433DF
+	for <linux-mmc@archiver.kernel.org>; Tue, 26 May 2020 06:29:28 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7EF5A207CB
-	for <linux-mmc@archiver.kernel.org>; Mon, 25 May 2020 15:33:36 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1590420816;
-	bh=/lRcApMN9bchgxQmdRuHru0M8nV62fiOyAvgNyyKOqE=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
-	b=qzIv6pGm8bqFxIfnptIxZyfCdogiuDfBeR6GU7jbvncityDd4JGwE7lSqe6fSALx4
-	 I3jVHtNv7SihIds5k9Ph9/FUQTsAE1dgKI7L07CWHJ9xmt1IXqaxtOlDkRP0Vei5Tb
-	 WeCLcm9wz4vS5SXISFj9F0cYeo09lefqsZIzsEIk=
+	by mail.kernel.org (Postfix) with ESMTP id 8E9A420870
+	for <linux-mmc@archiver.kernel.org>; Tue, 26 May 2020 06:29:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2404198AbgEYPdf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 25 May 2020 11:33:35 -0400
-Received: from mail.kernel.org ([198.145.29.99]:52490 "EHLO mail.kernel.org"
+        id S1729594AbgEZG32 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 26 May 2020 02:29:28 -0400
+Received: from mga09.intel.com ([134.134.136.24]:47652 "EHLO mga09.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2404092AbgEYPdf (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 25 May 2020 11:33:35 -0400
-Received: from sol.localdomain (c-107-3-166-239.hsd1.ca.comcast.net [107.3.166.239])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 0D41B2071A;
-        Mon, 25 May 2020 15:33:34 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1590420814;
-        bh=/lRcApMN9bchgxQmdRuHru0M8nV62fiOyAvgNyyKOqE=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=FkSvkKrkHrQNmOS5J/o9VjrQqOrK15S4n8hbD/X0fyIUhr7F42waBhGQOqj/6HAJx
-         tyzcpYbp9yyCxo7RvSbHabJpYOQEmcyfJ+E1oVol2cFd97D1c/VRNotZIGgME0uUKv
-         pVg9kv2JyeNisFfbKjtrNkuNbJM87euAu3sXNQ6I=
-Date:   Mon, 25 May 2020 08:33:20 -0700
-From:   Eric Biggers <ebiggers@kernel.org>
-To:     linux-fscrypt@vger.kernel.org
-Cc:     linux-f2fs-devel@lists.sourceforge.net, linux-ext4@vger.kernel.org,
-        linux-fsdevel@vger.kernel.org, linux-crypto@vger.kernel.org,
-        linux-mmc@vger.kernel.org, "Theodore Y . Ts'o" <tytso@mit.edu>,
-        Satya Tangirala <satyat@google.com>,
-        Jaegeuk Kim <jaegeuk@kernel.org>,
-        Paul Crowley <paulcrowley@google.com>
-Subject: Re: [PATCH] fscrypt: add support for IV_INO_LBLK_32 policies
-Message-ID: <20200525153320.GA2152@sol.localdomain>
-References: <20200515204141.251098-1-ebiggers@kernel.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20200515204141.251098-1-ebiggers@kernel.org>
+        id S1726750AbgEZG31 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 26 May 2020 02:29:27 -0400
+IronPort-SDR: Pu2KDcu5ZZkZXjFMj2/momiZD4zZ4ZhcMOIPjE0vo1/WwkGky9x7xv+nkfUTPYkHaevt6nMf8U
+ 47Wb3tu/MoGw==
+X-Amp-Result: SKIPPED(no attachment in message)
+X-Amp-File-Uploaded: False
+Received: from orsmga007.jf.intel.com ([10.7.209.58])
+  by orsmga102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 25 May 2020 23:29:27 -0700
+IronPort-SDR: kzO2sf3rdj+1rN1KtOAXe+G7AnuFW1F011oMntagOE9AwBiI6uFM0wr2TUe0apRoTWjxtijmd1
+ iU15v4I9o5MQ==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.73,436,1583222400"; 
+   d="scan'208";a="255301176"
+Received: from wwanmoha-ilbpg2.png.intel.com ([10.88.227.42])
+  by orsmga007.jf.intel.com with ESMTP; 25 May 2020 23:29:24 -0700
+From:   Wan Ahmad Zainie <wan.ahmad.zainie.wan.mohamad@intel.com>
+To:     ulf.hansson@linaro.org, robh+dt@kernel.org,
+        adrian.hunter@intel.com, michal.simek@xilinx.com
+Cc:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        wan.ahmad.zainie.wan.mohamad@intel.com
+Subject: [PATCH v2 0/3] mmc: sdhci-of-arasan: Add support for Intel Keem Bay
+Date:   Tue, 26 May 2020 14:27:55 +0800
+Message-Id: <20200526062758.17642-1-wan.ahmad.zainie.wan.mohamad@intel.com>
+X-Mailer: git-send-email 2.17.1
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, May 15, 2020 at 01:41:41PM -0700, Eric Biggers wrote:
-> From: Eric Biggers <ebiggers@google.com>
-> 
-> The eMMC inline crypto standard will only specify 32 DUN bits (a.k.a. IV
-> bits), unlike UFS's 64.  IV_INO_LBLK_64 is therefore not applicable, but
-> an encryption format which uses one key per policy and permits the
-> moving of encrypted file contents (as f2fs's garbage collector requires)
-> is still desirable.
-> 
-> To support such hardware, add a new encryption format IV_INO_LBLK_32
-> that makes the best use of the 32 bits: the IV is set to
-> 'SipHash-2-4(inode_number) + file_logical_block_number mod 2^32', where
-> the SipHash key is derived from the fscrypt master key.  We hash only
-> the inode number and not also the block number, because we need to
-> maintain contiguity of DUNs to merge bios.
-> 
-> Unlike with IV_INO_LBLK_64, with this format IV reuse is possible; this
-> is unavoidable given the size of the DUN.  This means this format should
-> only be used where the requirements of the first paragraph apply.
-> However, the hash spreads out the IVs in the whole usable range, and the
-> use of a keyed hash makes it difficult for an attacker to determine
-> which files use which IVs.
-> 
-> Besides the above differences, this flag works like IV_INO_LBLK_64 in
-> that on ext4 it is only allowed if the stable_inodes feature has been
-> enabled to prevent inode numbers and the filesystem UUID from changing.
-> 
-> Signed-off-by: Eric Biggers <ebiggers@google.com>
-> ---
->  Documentation/filesystems/fscrypt.rst | 33 +++++++++--
->  fs/crypto/crypto.c                    |  6 +-
->  fs/crypto/fscrypt_private.h           | 20 +++++--
->  fs/crypto/keyring.c                   |  5 +-
->  fs/crypto/keysetup.c                  | 85 +++++++++++++++++++++------
->  fs/crypto/policy.c                    | 51 +++++++++++-----
->  include/uapi/linux/fscrypt.h          |  3 +-
->  7 files changed, 157 insertions(+), 46 deletions(-)
+Hi.
 
-Applied to fscrypt.git#master for 5.8.
+The first part is to document the new compatible string required
+for eMMC, SD and SDIO support in Intel Keem Bay.
 
-- Eric
+The second part is to add the changes required to support the Host
+Controller and its integrated eMMC PHY. The significant change is
+to disable 64-bit support.
+
+The patch was tested with Keem Bay evaluation module board.
+
+Thank you.
+
+Best regards,
+Zainie
+
+Changes since v1:
+- Add patch to convert arasan,sdhci.txt to yaml format.
+
+
+Wan Ahmad Zainie (3):
+  dt-bindings: mmc: arasan: Add compatible strings for Intel Keem Bay
+  mmc: sdhci-of-arasan: Add support for Intel Keem Bay
+  dt-bindings: mmc: convert arasan sdhci bindings to yaml
+
+ .../devicetree/bindings/mmc/arasan,sdhci.txt  | 150 ---------
+ .../devicetree/bindings/mmc/arasan,sdhci.yaml | 293 ++++++++++++++++++
+ drivers/mmc/host/sdhci-of-arasan.c            | 123 ++++++++
+ 3 files changed, 416 insertions(+), 150 deletions(-)
+ delete mode 100644 Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
+ create mode 100644 Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml
+
+-- 
+2.17.1
+
