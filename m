@@ -2,98 +2,97 @@ Return-Path: <SRS0=dyeO=7K=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.5 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-4.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D5B2DC433DF
-	for <linux-mmc@archiver.kernel.org>; Thu, 28 May 2020 15:14:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 305B3C433E1
+	for <linux-mmc@archiver.kernel.org>; Thu, 28 May 2020 19:36:59 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B4E492075F
-	for <linux-mmc@archiver.kernel.org>; Thu, 28 May 2020 15:14:37 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (1024-bit key) header.d=mg.codeaurora.org header.i=@mg.codeaurora.org header.b="WC5WnP1t"
+	by mail.kernel.org (Postfix) with ESMTP id 09BDD2078C
+	for <linux-mmc@archiver.kernel.org>; Thu, 28 May 2020 19:36:59 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1590694619;
+	bh=/7kHFBqmcXUzywK3Zg26OL14ofFFyyZj6hSKx1od/WU=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
+	b=hiqA198GCP/M+bjija13G7lokiE/k2BkQemxxhvQkmnpgIEZUkwMTWFYbLGyfb0z8
+	 U9fXCFNI1C2inH1TuQBDVbPAMvxi+DFw3F8gNlW+UNHs0x9S8mFqkcZrJBLAj3u30u
+	 2qgQGeXGpIfXyqvZFqQ1qW/AYJN6E8CTVLQtPMtY=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2404274AbgE1POb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 28 May 2020 11:14:31 -0400
-Received: from mail27.static.mailgun.info ([104.130.122.27]:54128 "EHLO
-        mail27.static.mailgun.info" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S2404272AbgE1POa (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 28 May 2020 11:14:30 -0400
-DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
- s=smtp; t=1590678869; h=Message-Id: Date: Subject: Cc: To: From:
- Sender; bh=h4qi7yJ1wKkDLO7TOjVp4zfX/ugxHLRzaf+TIRV8OVw=; b=WC5WnP1tVHF+xCScbqDtt1/C7NPX/NlHaqJkFGH16MSDqoI294sv6q1s6n8I5JBnPhA0F3CS
- pkHtFjEvRvPsuNmtnDD47rrpuhBfCEe0Fp1Z+lzIrIVSM/SqwccSprz+LPuSoBSFEjE0ZjDA
- KkUvnOeC1km334pSngc0cBuN+Nw=
-X-Mailgun-Sending-Ip: 104.130.122.27
-X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
-Received: from smtp.codeaurora.org
- (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171]) by
- smtp-out-n01.prod.us-west-2.postgun.com with SMTP id
- 5ecfd54f4776d1da6d686378 (version=TLS1.2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256); Thu, 28 May 2020 15:14:23
- GMT
-Received: by smtp.codeaurora.org (Postfix, from userid 1001)
-        id 3C996C433C6; Thu, 28 May 2020 15:14:23 +0000 (UTC)
-Received: from vbadigan-linux.qualcomm.com (blr-c-bdr-fw-01_GlobalNAT_AllZones-Outside.qualcomm.com [103.229.19.19])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-SHA256 (128/128 bits))
-        (No client certificate requested)
-        (Authenticated sender: vbadigan)
-        by smtp.codeaurora.org (Postfix) with ESMTPSA id E2423C433C9;
-        Thu, 28 May 2020 15:14:17 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.3.2 smtp.codeaurora.org E2423C433C9
-Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
-Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=none smtp.mailfrom=vbadigan@codeaurora.org
-From:   Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
-To:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
-        bjorn.andersson@linaro.org
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-msm@vger.kernel.org,
-        Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
-        stable@vger.kernel.org, Andy Gross <agross@kernel.org>,
-        Ritesh Harjani <riteshh@codeaurora.org>,
-        Venkat Gopalakrishnan <venkatg@codeaurora.org>
-Subject: [PATCH V1] mmc: sdhci-msm: Clear tuning done flag while hs400 tuning
-Date:   Thu, 28 May 2020 20:43:52 +0530
-Message-Id: <1590678838-18099-1-git-send-email-vbadigan@codeaurora.org>
-X-Mailer: git-send-email 1.9.1
+        id S2406609AbgE1Tgs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 28 May 2020 15:36:48 -0400
+Received: from mail-io1-f66.google.com ([209.85.166.66]:45740 "EHLO
+        mail-io1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S2406319AbgE1Tgq (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 28 May 2020 15:36:46 -0400
+Received: by mail-io1-f66.google.com with SMTP id y5so8596721iob.12;
+        Thu, 28 May 2020 12:36:45 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=anLARnrJJYeYAOB5KTKHSKOnzH0boPrtofWMELzWPU8=;
+        b=eszk8+Dr5DGsMPVkuuDZkT9s0FqOEuL1kSXDU6CHHdpAyv3w59G8WWWangxo2itI7P
+         gdqo/85HaK7KV1rX91Tm/xqSvCXUQIWJLGSWEOPsbfb9Jek0r5nY6Pd9cMomYu3b5QdG
+         TCkRoRjcXt5EzyBPYCfdagT+RCcARPRm1LhSEftBII4FSKFbwPF1ioV1QxX5kqHUsOh/
+         6BBQuE6OH7gMfQqJg965LiGH+xTj+M3aSWJKtro02rXNBHZf0eAYqhkqV3i3D2ikH2c2
+         espqQS17WeqLU0FNHkkk/Jy/i9yrNWyWmE9TOqorkJXyWlEU60T+zlJrqqdTW1NcJUUO
+         G6xA==
+X-Gm-Message-State: AOAM5331Wh+sRBbU3q3jArtjh/jDaaPjv5624qImiZdzwnCBUfJrKtjx
+        rbXVztGWDclvMpWfPr9eorkUj2k=
+X-Google-Smtp-Source: ABdhPJxAbgV9QaVK5dOC48fScjQWHA5Gld2FnTR86BVEq9Vbv9X4kGVbNWcHJZhyKd7pm6KmH4S+0Q==
+X-Received: by 2002:a5d:88d3:: with SMTP id i19mr3781474iol.194.1590694605038;
+        Thu, 28 May 2020 12:36:45 -0700 (PDT)
+Received: from xps15 ([64.188.179.252])
+        by smtp.gmail.com with ESMTPSA id v2sm1938613iol.36.2020.05.28.12.36.43
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 28 May 2020 12:36:44 -0700 (PDT)
+Received: (nullmailer pid 553763 invoked by uid 1000);
+        Thu, 28 May 2020 19:36:42 -0000
+Date:   Thu, 28 May 2020 13:36:42 -0600
+From:   Rob Herring <robh@kernel.org>
+To:     Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+Cc:     Linus Walleij <linus.walleij@linaro.org>,
+        linux-renesas-soc@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-serial@vger.kernel.org,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Vinod Koul <vkoul@kernel.org>,
+        Prabhakar <prabhakar.csengg@gmail.com>,
+        devicetree@vger.kernel.org, dmaengine@vger.kernel.org,
+        Magnus Damm <magnus.damm@gmail.com>,
+        Geert Uytterhoeven <geert+renesas@glider.be>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-kernel@vger.kernel.org, linux-gpio@vger.kernel.org
+Subject: Re: [PATCH v2 03/10] dt-bindings: serial: renesas,scifa: Document
+ r8a7742 bindings
+Message-ID: <20200528193642.GA552811@bogus>
+References: <1588542414-14826-1-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
+ <1588542414-14826-4-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
+ <20200512222056.GA7267@bogus>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20200512222056.GA7267@bogus>
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Clear tuning_done flag while executing tuning to ensure vendor
-specific HS400 settings are applied properly when the controller
-is re-initialized in HS400 mode.
+On Tue, May 12, 2020 at 05:20:56PM -0500, Rob Herring wrote:
+> On Sun,  3 May 2020 22:46:47 +0100, Lad Prabhakar wrote:
+> > RZ/G1H (R8A7742) SoC also has the R-Car gen2 compatible SCIFA ports,
+> > so document the SoC specific bindings.
+> > 
+> > Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+> > Reviewed-by: Marian-Cristian Rotariu <marian-cristian.rotariu.rb@bp.renesas.com>
+> > Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
+> > ---
+> >  Documentation/devicetree/bindings/serial/renesas,scifa.yaml | 1 +
+> >  1 file changed, 1 insertion(+)
+> > 
+> 
+> Acked-by: Rob Herring <robh@kernel.org>
 
-Without this, re-initialization of the qcom SDHC in HS400 mode fails
-while resuming the driver from runtime-suspend or system-suspend.
+Geert asked me to apply this one, so I have now.
 
-Fixes: ff06ce4 ("mmc: sdhci-msm: Add HS400 platform support")
-Cc: stable@vger.kernel.org
-Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
----
- drivers/mmc/host/sdhci-msm.c | 6 ++++++
- 1 file changed, 6 insertions(+)
-
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index 95cd973..b277dd7 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -1174,6 +1174,12 @@ static int sdhci_msm_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 	msm_host->use_cdr = true;
- 
- 	/*
-+	 * Clear tuning_done flag before tuning to ensure proper
-+	 * HS400 settings.
-+	 */
-+	msm_host->tuning_done = 0;
-+
-+	/*
- 	 * For HS400 tuning in HS200 timing requires:
- 	 * - select MCLK/2 in VENDOR_SPEC
- 	 * - program MCLK to 400MHz (or nearest supported) in GCC
--- 
-Qualcomm India Private Limited, on behalf of Qualcomm Innovation Center, Inc., is a member of Code Aurora Forum, a Linux Foundation Collaborative Project
-
+Rob
