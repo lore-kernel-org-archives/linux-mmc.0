@@ -1,163 +1,257 @@
-Return-Path: <SRS0=ylMS=7J=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=dyeO=7K=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.7 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.0 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D0FA9C433E2
-	for <linux-mmc@archiver.kernel.org>; Wed, 27 May 2020 16:33:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 26E02C433DF
+	for <linux-mmc@archiver.kernel.org>; Thu, 28 May 2020 07:13:14 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id AB4C62084C
-	for <linux-mmc@archiver.kernel.org>; Wed, 27 May 2020 16:33:18 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id F3D95207D3
+	for <linux-mmc@archiver.kernel.org>; Thu, 28 May 2020 07:13:13 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=renesasgroup.onmicrosoft.com header.i=@renesasgroup.onmicrosoft.com header.b="Dl+jN/iP"
+	dkim=fail reason="signature verification failed" (1024-bit key) header.d=mg.codeaurora.org header.i=@mg.codeaurora.org header.b="uMCaXWSP"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2391209AbgE0QdK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 27 May 2020 12:33:10 -0400
-Received: from mail-eopbgr1410107.outbound.protection.outlook.com ([40.107.141.107]:15278
-        "EHLO JPN01-OS2-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S2387763AbgE0QdJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 27 May 2020 12:33:09 -0400
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=jfDvThtIWclaiyHqzmhGD3lwnaIbi28xdkilmr1H23VvcUSuO957E82HB/IKEGIzUFwqDQzOimMb1hciLFwn0Rez6IcIMFaPT21X9RT0nW1DMKuoYtemIN1x0kp4zV3di9592JhFWX+jygr0tfIUc3u2RakwJTxBCWAbp6Gx6vSLIN6lZGlblMWdKKkRdadL0bvKnvtAsyHHrgCHfweMslEllm/AWALod4rNYrWTbFnqShWbT7PRjL5/Q/NEZwCgrNXlfcPv/5aVJdFenNGt7qPwG66jMobpUbQ1eB5X9BUYhF6C0Dy2pc8sl8jiEe3xYHxP3INytHW02TTXWyanWw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=4sH1bRwO1ILjdBGqaotTt+r7jcvaJ4XvAkfPdogJkpw=;
- b=Xt7emn/8Kj9oKwrN/g7vTb55mtf7GEEoJUxjC2pY8ObtU5Br0sReUPHEtfXIVqQzMUqCkANuXhOSAIzNKe4HMv79R3rkgkjNOzz9QlCDJyYiydgrW/xM4yq0lZzFtDPpFEWdspSZEhAYeVvhofaJoMOLSWHAQNLg4iadxhAVpgzzYvPCEesHW0YsmJLg66AfANvUdXL8wPbvNJTNf0KP2eKc42rugem7GVIEQum9CSBef1tplffQUVWTXwxUgwdnq0ljEMsE5LOwAnM/QOWAILYPi8iNbTPLF3md65+hNtcHyvZq9QI2fswrqUSc38XmdQ2gmA5NNJAi8sehXExyNA==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=bp.renesas.com; dmarc=pass action=none
- header.from=bp.renesas.com; dkim=pass header.d=bp.renesas.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=renesasgroup.onmicrosoft.com; s=selector2-renesasgroup-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=4sH1bRwO1ILjdBGqaotTt+r7jcvaJ4XvAkfPdogJkpw=;
- b=Dl+jN/iPndhVcPbmqW6HyFP6LnYS4r6TbhkK1gMNlqOyBCYnIcjZ44RdRaGdHaave93VQoElvEpnXGE0B5GexZKzNOu3qTmipe7wfCLxdb9CYzUYhqER3JcQNltd2DaAb3vo19z+VpYJKVRSoi+gT7gZ3Uu0l4ZVb64fycox9vk=
-Received: from OSBPR01MB3590.jpnprd01.prod.outlook.com (2603:1096:604:45::16)
- by OSBPR01MB1493.jpnprd01.prod.outlook.com (2603:1096:603:5::11) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3021.26; Wed, 27 May
- 2020 16:33:04 +0000
-Received: from OSBPR01MB3590.jpnprd01.prod.outlook.com
- ([fe80::383a:9fc3:aaa4:d3b]) by OSBPR01MB3590.jpnprd01.prod.outlook.com
- ([fe80::383a:9fc3:aaa4:d3b%7]) with mapi id 15.20.3021.029; Wed, 27 May 2020
- 16:33:04 +0000
-From:   Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>
-To:     Rob Herring <robh@kernel.org>,
-        "Lad, Prabhakar" <prabhakar.csengg@gmail.com>
-CC:     Geert Uytterhoeven <geert+renesas@glider.be>,
-        Jens Axboe <axboe@kernel.dk>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>,
-        "David S. Miller" <davem@davemloft.net>,
-        Wim Van Sebroeck <wim@linux-watchdog.org>,
-        Guenter Roeck <linux@roeck-us.net>,
-        "open list:LIBATA SUBSYSTEM (Serial and Parallel ATA drivers)" 
-        <linux-ide@vger.kernel.org>,
-        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
-        <devicetree@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>,
-        Linux I2C <linux-i2c@vger.kernel.org>,
-        Linux MMC List <linux-mmc@vger.kernel.org>,
-        netdev <netdev@vger.kernel.org>,
-        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
-        Linux Watchdog Mailing List <linux-watchdog@vger.kernel.org>
-Subject: RE: [PATCH 16/17] dt-bindings: watchdog: renesas,wdt: Document
- r8a7742 support
-Thread-Topic: [PATCH 16/17] dt-bindings: watchdog: renesas,wdt: Document
- r8a7742 support
-Thread-Index: AQHWKssCxC2vfuzWzEyRDegtm28a06i7N4kAgAClJYCAADacAIAAH9HA
-Date:   Wed, 27 May 2020 16:33:04 +0000
-Message-ID: <OSBPR01MB35901639581F7DEFEFD13BA3AAB10@OSBPR01MB3590.jpnprd01.prod.outlook.com>
-References: <1589555337-5498-1-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
- <1589555337-5498-17-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
- <20200527013136.GA838011@bogus>
- <CA+V-a8t6mXkTUac69V=T8_27r_sdN+=MktDTM1mmtbXRn8SSQQ@mail.gmail.com>
- <CAL_JsqJUn9iOy5FT6VRmsC-uAhSdN8_Sne0Vn_7Q1dHudbzopw@mail.gmail.com>
-In-Reply-To: <CAL_JsqJUn9iOy5FT6VRmsC-uAhSdN8_Sne0Vn_7Q1dHudbzopw@mail.gmail.com>
-Accept-Language: en-GB, en-US
-Content-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-authentication-results: kernel.org; dkim=none (message not signed)
- header.d=none;kernel.org; dmarc=none action=none header.from=bp.renesas.com;
-x-originating-ip: [193.141.220.21]
-x-ms-publictraffictype: Email
-x-ms-office365-filtering-ht: Tenant
-x-ms-office365-filtering-correlation-id: c8b5b404-6d14-4370-00dd-08d8025ba13a
-x-ms-traffictypediagnostic: OSBPR01MB1493:
-x-microsoft-antispam-prvs: <OSBPR01MB149344BA3F18CF9C9154D13DAAB10@OSBPR01MB1493.jpnprd01.prod.outlook.com>
-x-ms-oob-tlc-oobclassifiers: OLM:238;
-x-forefront-prvs: 04163EF38A
-x-ms-exchange-senderadcheck: 1
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: ckEePHCXj8Zn0Ecqi28PoYqh5Fchs5kuYP1DbgUyB60XAWOyZYycaL7woeld4Z7yE8vIV8iezZMSz/ZjOusWn1Yqq0GTAqcL2CNfa8RDGMj29tmnpc6pYm1zj44AEyZaxaAqw3KXQBDQrqk8F0jX88RUgMnHiv/W6448qE0dawKHK2muOhFa3tfH3ZXRkAnCdp3oSitLO78vm4PxOLESOWemGdCUmALpEOdlFHtBxqRkgNVOZJOAVWgHfzBhnIW+nz1/hzeTMdJ3ERfuIgfuN/7qMGxhXFAJWlAI57RJPOTBODzq3ugwIteW4zbk3YSGWbZ8Qa4+42TIl0NenRs4bsUi3vNfuOI7HCT3ZGNG45WCazFr4pbtBNUum0n5u1PGHkLSmo1A6Jl1cOmkuWlc2lDlnMGyPufNUcSbYSXYanGh/saarmwLYGoQKeeARIw81awVJrT1qcY0ulvTAAKMMw==
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:OSBPR01MB3590.jpnprd01.prod.outlook.com;PTR:;CAT:NONE;SFTY:;SFS:(4636009)(396003)(39860400002)(346002)(376002)(366004)(136003)(66476007)(110136005)(8936002)(7416002)(66446008)(55016002)(64756008)(66556008)(7696005)(9686003)(26005)(6506007)(66946007)(83380400001)(186003)(5660300002)(53546011)(54906003)(33656002)(2906002)(316002)(76116006)(71200400001)(478600001)(966005)(8676002)(4326008)(52536014)(86362001)(142933001);DIR:OUT;SFP:1102;
-x-ms-exchange-antispam-messagedata: Wx6hnCv1I2hGvem2jCwHT6rPeXoUxrapPPVcAsGeWNpv+jHdMyh/HNSR2QGR2LBgIG/BRgrYWCSfZOaFif+rCet2qBuQS14pwnC+t7485RTahsQSNyv7aBjKaCgDmQ9JCZatDohe6Qhbo9LTj0IwaS05ooJE0ah0jcveUZoUnIin26pzgaNEhkHTRMwacUHYJPyPpjW499sQBMEMs8gyQNGgtfDZaX7nbC1gGtFgWKYQC7glJEhupeTpwxehkLL4HVDxWq5dskoIfjyi9FCn7Y4l3J/9hzpVppp1tl56MhSpT26ol5Ch9xNNTeYOC5FjiZ+est5ZMoYl6bWPQKT6McMykzkBI4DzaJI3K0dnGcPdA0K9LLvMm5hE1JDt3JeoPKMdJcAuESsJZx8M48eHhMJSg6xNl+xdaVKEruDxxovi8YxLGJ/d3y0XsK3HKWFkGHNEwkMRV391LshRzHCmDr+PhGDa3p8AEpLfbNziXem8BLiZJA6Nhq/KDyiZcQOG
-x-ms-exchange-transport-forked: True
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+        id S1725846AbgE1HNN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 28 May 2020 03:13:13 -0400
+Received: from m43-7.mailgun.net ([69.72.43.7]:60132 "EHLO m43-7.mailgun.net"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1725779AbgE1HNN (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 28 May 2020 03:13:13 -0400
+DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
+ s=smtp; t=1590649991; h=Content-Transfer-Encoding: Content-Type:
+ In-Reply-To: MIME-Version: Date: Message-ID: From: References: Cc: To:
+ Subject: Sender; bh=4Wp8FUOA+gtgDBp4CnR6tacVRDKfqb4xSu2rmvMHUck=; b=uMCaXWSPfN9GpSeUT5zPr84UsWLNJL2LhUKAXCIELdpPnFspJCUKL9q491g4+dwAdOWz8oml
+ NiAcd+Svy43wNMLcpVRpYGjANoJhFuIgA6JmIL/d6LZP8YBPxcJVeHWgVrhi7j0DthOPZMI1
+ rK5b6DID1qg8qtvM8bnFV9IZc5Q=
+X-Mailgun-Sending-Ip: 69.72.43.7
+X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
+Received: from smtp.codeaurora.org
+ (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171]) by
+ smtp-out-n02.prod.us-east-1.postgun.com with SMTP id
+ 5ecf648776fccbb4c8b22ecc (version=TLS1.2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256); Thu, 28 May 2020 07:13:11
+ GMT
+Received: by smtp.codeaurora.org (Postfix, from userid 1001)
+        id 5184AC43387; Thu, 28 May 2020 07:13:10 +0000 (UTC)
+Received: from [192.168.0.106] (unknown [183.83.65.109])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        (Authenticated sender: vbadigan)
+        by smtp.codeaurora.org (Postfix) with ESMTPSA id 570CBC433C6;
+        Thu, 28 May 2020 07:13:06 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.3.2 smtp.codeaurora.org 570CBC433C6
+Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
+Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=none smtp.mailfrom=vbadigan@codeaurora.org
+Subject: Re: [PATCH V2 2/3] mmc: sdhci-msm: Use internal voltage control
+To:     Bjorn Andersson <bjorn.andersson@linaro.org>
+Cc:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
+        robh+dt@kernel.org, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+        devicetree@vger.kernel.org, Asutosh Das <asutoshd@codeaurora.org>,
+        Vijay Viswanath <vviswana@codeaurora.org>,
+        Andy Gross <agross@kernel.org>
+References: <1589541535-8523-1-git-send-email-vbadigan@codeaurora.org>
+ <1590074615-10787-1-git-send-email-vbadigan@codeaurora.org>
+ <1590074615-10787-3-git-send-email-vbadigan@codeaurora.org>
+ <20200521190739.GC1331782@builder.lan>
+ <08d11687-7aee-2c62-9435-670be1afb21e@codeaurora.org>
+ <20200522170415.GI11847@yoga>
+From:   Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+Message-ID: <b2db3743-63bd-9a34-3fcb-d9faac96dfee@codeaurora.org>
+Date:   Thu, 28 May 2020 12:43:03 +0530
+User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:68.0) Gecko/20100101
+ Thunderbird/68.8.1
 MIME-Version: 1.0
-X-OriginatorOrg: bp.renesas.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: c8b5b404-6d14-4370-00dd-08d8025ba13a
-X-MS-Exchange-CrossTenant-originalarrivaltime: 27 May 2020 16:33:04.2048
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 53d82571-da19-47e4-9cb4-625a166a4a2a
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: UMMWX/O7LAyNaVx7aADg+dK6uj4yAsDb7m5T+iU0XUYKrl+y4UQCWVTX+LYfZD3VU0DN0gT8PV6PUukVdRqdC9wwGOu4BYP7DxmukNwlRek7F99ESgAvPc6+/9q66Nvk
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: OSBPR01MB1493
+In-Reply-To: <20200522170415.GI11847@yoga>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 8bit
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-SGkgUm9iLA0KDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IFJvYiBIZXJy
-aW5nIDxyb2JoQGtlcm5lbC5vcmc+DQo+IFNlbnQ6IDI3IE1heSAyMDIwIDE1OjM4DQo+IFRvOiBM
-YWQsIFByYWJoYWthciA8cHJhYmhha2FyLmNzZW5nZ0BnbWFpbC5jb20+DQo+IENjOiBQcmFiaGFr
-YXIgTWFoYWRldiBMYWQgPHByYWJoYWthci5tYWhhZGV2LWxhZC5yakBicC5yZW5lc2FzLmNvbT47
-IEdlZXJ0IFV5dHRlcmhvZXZlbiA8Z2VlcnQrcmVuZXNhc0BnbGlkZXIuYmU+OyBKZW5zIEF4Ym9l
-DQo+IDxheGJvZUBrZXJuZWwuZGs+OyBXb2xmcmFtIFNhbmcgPHdzYStyZW5lc2FzQHNhbmctZW5n
-aW5lZXJpbmcuY29tPjsgVWxmIEhhbnNzb24gPHVsZi5oYW5zc29uQGxpbmFyby5vcmc+OyBTZXJn
-ZWkgU2h0eWx5b3YNCj4gPHNlcmdlaS5zaHR5bHlvdkBjb2dlbnRlbWJlZGRlZC5jb20+OyBEYXZp
-ZCBTLiBNaWxsZXIgPGRhdmVtQGRhdmVtbG9mdC5uZXQ+OyBXaW0gVmFuIFNlYnJvZWNrIDx3aW1A
-bGludXgtd2F0Y2hkb2cub3JnPjsNCj4gR3VlbnRlciBSb2VjayA8bGludXhAcm9lY2stdXMubmV0
-Pjsgb3BlbiBsaXN0OkxJQkFUQSBTVUJTWVNURU0gKFNlcmlhbCBhbmQgUGFyYWxsZWwgQVRBIGRy
-aXZlcnMpIDxsaW51eC1pZGVAdmdlci5rZXJuZWwub3JnPjsgb3Blbg0KPiBsaXN0Ok9QRU4gRklS
-TVdBUkUgQU5EIEZMQVRURU5FRCBERVZJQ0UgVFJFRSBCSU5ESU5HUyA8ZGV2aWNldHJlZUB2Z2Vy
-Lmtlcm5lbC5vcmc+OyBMS01MIDxsaW51eC1rZXJuZWxAdmdlci5rZXJuZWwub3JnPjsgTGludXgN
-Cj4gSTJDIDxsaW51eC1pMmNAdmdlci5rZXJuZWwub3JnPjsgTGludXggTU1DIExpc3QgPGxpbnV4
-LW1tY0B2Z2VyLmtlcm5lbC5vcmc+OyBuZXRkZXYgPG5ldGRldkB2Z2VyLmtlcm5lbC5vcmc+OyBM
-aW51eC1SZW5lc2FzIDxsaW51eC0NCj4gcmVuZXNhcy1zb2NAdmdlci5rZXJuZWwub3JnPjsgTGlu
-dXggV2F0Y2hkb2cgTWFpbGluZyBMaXN0IDxsaW51eC13YXRjaGRvZ0B2Z2VyLmtlcm5lbC5vcmc+
-DQo+IFN1YmplY3Q6IFJlOiBbUEFUQ0ggMTYvMTddIGR0LWJpbmRpbmdzOiB3YXRjaGRvZzogcmVu
-ZXNhcyx3ZHQ6IERvY3VtZW50IHI4YTc3NDIgc3VwcG9ydA0KPg0KPiBPbiBXZWQsIE1heSAyNywg
-MjAyMCBhdCA1OjIzIEFNIExhZCwgUHJhYmhha2FyDQo+IDxwcmFiaGFrYXIuY3NlbmdnQGdtYWls
-LmNvbT4gd3JvdGU6DQo+ID4NCj4gPiBIaSBSb2IsDQo+ID4NCj4gPiBPbiBXZWQsIE1heSAyNywg
-MjAyMCBhdCAyOjMxIEFNIFJvYiBIZXJyaW5nIDxyb2JoQGtlcm5lbC5vcmc+IHdyb3RlOg0KPiA+
-ID4NCj4gPiA+IE9uIEZyaSwgTWF5IDE1LCAyMDIwIGF0IDA0OjA4OjU2UE0gKzAxMDAsIExhZCBQ
-cmFiaGFrYXIgd3JvdGU6DQo+ID4gPiA+IFJaL0cxSCAoUjhBNzc0Mikgd2F0Y2hkb2cgaW1wbGVt
-ZW50YXRpb24gaXMgY29tcGF0aWJsZSB3aXRoIFItQ2FyIEdlbjIsDQo+ID4gPiA+IHRoZXJlZm9y
-ZSBhZGQgcmVsZXZhbnQgZG9jdW1lbnRhdGlvbi4NCj4gPiA+ID4NCj4gPiA+ID4gU2lnbmVkLW9m
-Zi1ieTogTGFkIFByYWJoYWthciA8cHJhYmhha2FyLm1haGFkZXYtbGFkLnJqQGJwLnJlbmVzYXMu
-Y29tPg0KPiA+ID4gPiBSZXZpZXdlZC1ieTogTWFyaWFuLUNyaXN0aWFuIFJvdGFyaXUgPG1hcmlh
-bi1jcmlzdGlhbi5yb3Rhcml1LnJiQGJwLnJlbmVzYXMuY29tPg0KPiA+ID4gPiAtLS0NCj4gPiA+
-ID4gIERvY3VtZW50YXRpb24vZGV2aWNldHJlZS9iaW5kaW5ncy93YXRjaGRvZy9yZW5lc2FzLHdk
-dC50eHQgfCAxICsNCj4gPiA+ID4gIDEgZmlsZSBjaGFuZ2VkLCAxIGluc2VydGlvbigrKQ0KPiA+
-ID4NCj4gPiA+IE1lYW53aGlsZSBpbiB0aGUgRFQgdHJlZSwgY29udmVydGluZyB0aGlzIHNjaGVt
-YSBsYW5kZWQuIENhbiB5b3UgcHJlcGFyZQ0KPiA+ID4gYSB2ZXJzaW9uIGJhc2VkIG9uIHRoZSBz
-Y2hlbWEuDQo+ID4gPg0KPiA+IFRoaXMgd2FzIGtpbmRseSB0YWtlbiBjYXJlIGJ5IFN0ZXBoZW4g
-ZHVyaW5nIG1lcmdlIGluIGxpbnV4LW5leHQgWzFdLg0KPg0KPiBZZXMsIEknbSBhd2FyZSBvZiB0
-aGF0LiBJIHdhcyBob3BpbmcgZm9yIGEgYmV0dGVyIGNvbW1pdCBtZXNzYWdlIHdoaWNoDQo+IHN0
-YW5kcyBvbiBpdHMgb3duIChlc3NlbnRpYWxseSB0aGUgb25lIGhlcmUpLg0KPg0KQXMgcmVxdWVz
-dGVkIEkgaGF2ZSBwb3N0ZWQgYSBwYXRjaCBbMV0uDQoNClsxXSBodHRwczovL2xvcmUua2VybmVs
-Lm9yZy9wYXRjaHdvcmsvcGF0Y2gvMTI0ODU5Ny8NCg0KQ2hlZXJzLA0KLS1QcmFiaGFrYXINCg0K
-DQpSZW5lc2FzIEVsZWN0cm9uaWNzIEV1cm9wZSBHbWJILCBHZXNjaGFlZnRzZnVlaHJlci9QcmVz
-aWRlbnQ6IENhcnN0ZW4gSmF1Y2gsIFNpdHogZGVyIEdlc2VsbHNjaGFmdC9SZWdpc3RlcmVkIG9m
-ZmljZTogRHVlc3NlbGRvcmYsIEFyY2FkaWFzdHJhc3NlIDEwLCA0MDQ3MiBEdWVzc2VsZG9yZiwg
-R2VybWFueSwgSGFuZGVsc3JlZ2lzdGVyL0NvbW1lcmNpYWwgUmVnaXN0ZXI6IER1ZXNzZWxkb3Jm
-LCBIUkIgMzcwOCBVU3QtSUROci4vVGF4IGlkZW50aWZpY2F0aW9uIG5vLjogREUgMTE5MzUzNDA2
-IFdFRUUtUmVnLi1Oci4vV0VFRSByZWcuIG5vLjogREUgMTQ5Nzg2NDcNCg==
+
+On 5/22/2020 10:34 PM, Bjorn Andersson wrote:
+> On Fri 22 May 06:27 PDT 2020, Veerabhadrarao Badiganti wrote:
+>
+>> Hi Bjorn,
+>>
+>> On 5/22/2020 12:37 AM, Bjorn Andersson wrote:
+>>> On Thu 21 May 08:23 PDT 2020, Veerabhadrarao Badiganti wrote:
+>>>
+>>>> On qcom SD host controllers voltage switching be done after the HW
+>>>> is ready for it. The HW informs its readiness through power irq.
+>>>> The voltage switching should happen only then.
+>>>>
+>>>> Use the internal voltage switching and then control the voltage
+>>>> switching using power irq.
+>>>>
+>>>> Set the regulator load as well so that regulator can be configured
+>>>> in LPM mode when in is not being used.
+>>>>
+>>>> Co-developed-by: Asutosh Das <asutoshd@codeaurora.org>
+>>>> Signed-off-by: Asutosh Das <asutoshd@codeaurora.org>
+>>>> Co-developed-by: Vijay Viswanath <vviswana@codeaurora.org>
+>>>> Signed-off-by: Vijay Viswanath <vviswana@codeaurora.org>
+>>>> Co-developed-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+>>>> Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+>>> Looks better, thanks.
+>>>
+>>>> ---
+>>>>    drivers/mmc/host/sdhci-msm.c | 207 +++++++++++++++++++++++++++++++++++++++++--
+>>>>    1 file changed, 198 insertions(+), 9 deletions(-)
+>>>>
+>>>> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+>>> [..]
+>>>>    static const struct sdhci_msm_offset *sdhci_priv_msm_offset(struct sdhci_host *host)
+>>>> @@ -1298,6 +1302,71 @@ static void sdhci_msm_set_uhs_signaling(struct sdhci_host *host,
+>>>>    		sdhci_msm_hs400(host, &mmc->ios);
+>>>>    }
+>>>> +static int sdhci_msm_set_vmmc(struct mmc_host *mmc)
+>>>> +{
+>>>> +	int ret;
+>>>> +
+>>>> +	if (IS_ERR(mmc->supply.vmmc))
+>>>> +		return 0;
+>>>> +
+>>>> +	ret = mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, mmc->ios.vdd);
+>>>> +	if (ret)
+>>>> +		dev_err(mmc_dev(mmc), "%s: vmmc set ocr with vdd=%d failed: %d\n",
+>>>> +			mmc_hostname(mmc), mmc->ios.vdd, ret);
+>>> Missed this one on v1, in the event that mmc_regulator_set_ocr() return
+>>> a non-zero value it has already printed an error message. So please
+>>> replace the tail with just:
+>>>
+>>> 	return mmc_regulator_set_ocr(...);
+>>>
+>>>> +
+>>>> +	return ret;
+>>>> +}
+>>>> +
+>>>> +static int sdhci_msm_set_vqmmc(struct sdhci_msm_host *msm_host,
+>>>> +			      struct mmc_host *mmc, bool level)
+>>>> +{
+>>>> +	int load, ret;
+>>>> +	struct mmc_ios ios;
+>>>> +
+>>>> +	if (IS_ERR(mmc->supply.vqmmc)			 ||
+>>>> +	    (mmc->ios.power_mode == MMC_POWER_UNDEFINED) ||
+>>>> +	    (msm_host->vqmmc_enabled == level))
+>>>> +		return 0;
+>>>> +
+>>>> +	if (msm_host->vqmmc_load) {
+>>>> +		load = level ? msm_host->vqmmc_load : 0;
+>>>> +		ret = regulator_set_load(mmc->supply.vqmmc, load);
+>>> Sorry for the late reply on v1, but please see my explanation regarding
+>>> load and always-on regulators there.
+>> <Merging your comment from V1 here>
+>>
+>>>> You should still call regulator_enable()/regulator_disable() on your
+>>>> consumer regulator in this driver. When you do this the regulator core
+>>>> will conclude that the regulator_dev (i.e. the part that represents the
+>>>> hardware) is marked always_on and will not enable/disable the regulator.
+>>>> But it will still invoke _regulator_handle_consumer_enable() and
+>>>> _regulator_handle_consumer_disable(), which will aggregate the "load" of
+>>>> all client regulators and update the regulator's load.
+>>>> So this will apply the load as you expect regardless of it being
+>>>> supplied by a regulator marked as always_on.
+>> Since I'm not turning off this regulator for eMMC, I wanted to keep it in
+>> LPM mode
+>> to save some power.
+>> When the regulator configured in auto mode (RPMH_REGULATOR_MODE_AUTO) it
+>> switches to LPM/HPM mode based on the active load.
+>> So i have to minimize my driver load requirement so that I can let this
+>> regulator
+>> in LPM mode.
+>> So i need to set load every-time I disable/enable the regulator.
+>>
+> You call regulator_enable(vqmmc) and regulator_disable() below, so you
+> are telling the regulator framework that your struct regulator should be
+> "on" or "off".
+>
+> This will cause the sum of all struct regulator's for the underlying
+> struct regulator_dev to be recalculated. So after calling
+> regulator_disable() below your effective addition to the load
+> calculation is 0, regardless of which load you have specified.
+>
+> Independent of this the property regulator-always-on (always_on in
+> struct regulator_dev) will determine if the enable/disable request will
+> actually be sent to the RPMh.
+>
+>
+> So, if you where to not call regulator_disable() for eMMC your argument
+> is correct, but as far as I can see you are and you're relying on the
+> regulator core to keep it always-on - and then the load logic is in
+> effect still.
+Thanks for the details Bjorn.
+My requirement is, for eMMC i shouldn't be turning this regulator off. 
+But has to configure in LPM mode.
+For SD-card, i have to turn-off this regulator.
+So I'm planning to update the logic as below, let me know if you have 
+any other suggestions.
+
++static int sdhci_msm_set_vqmmc(struct sdhci_msm_host *msm_host,
++                             struct mmc_host *mmc, bool level)
++{
++       int ret;
++       bool always_on;
++
++       if (IS_ERR(mmc->supply.vqmmc)           ||
++           (mmc->ios.power_mode == MMC_POWER_UNDEFINED))
++               return 0;
++       /*
++        * For eMMC don't turn off Vqmmc, Instead just configure it in LPM
++        * and HPM modes by setting the right amount of load.
++        */
++       always_on = mmc->card && mmc_card_mmc(mmc->card);
++
++       if (always_on)
++               ret = msm_config_vqmmc_mode(msm_host, mmc, level);
++       else
++               ret = msm_toggle_vqmmc(msm_host, mmc, level);
++
++       return ret;
++}
+> Regards,
+> Bjorn
+>
+>>>> +		if (ret) {
+>>>> +			dev_err(mmc_dev(mmc), "%s: vqmmc set load failed: %d\n",
+>>>> +				mmc_hostname(mmc), ret);
+>>>> +			goto out;
+>>>> +		}
+>>>> +	}
+>>>> +
+>>>> +	if (level) {
+>>>> +		/* Set the IO voltage regulator to default voltage level */
+>>>> +		if (msm_host->caps_0 & CORE_3_0V_SUPPORT)
+>>>> +			ios.signal_voltage = MMC_SIGNAL_VOLTAGE_330;
+>>>> +		else if (msm_host->caps_0 & CORE_1_8V_SUPPORT)
+>>>> +			ios.signal_voltage = MMC_SIGNAL_VOLTAGE_180;
+>>>> +
+>>>> +		if (msm_host->caps_0 & CORE_VOLT_SUPPORT) {
+>>>> +			ret = mmc_regulator_set_vqmmc(mmc, &ios);
+>>>> +			if (ret < 0) {
+>>>> +				dev_err(mmc_dev(mmc), "%s: vqmmc set volgate failed: %d\n",
+>>>> +					mmc_hostname(mmc), ret);
+>>>> +				goto out;
+>>>> +			}
+>>>> +		}
+>>>> +		ret = regulator_enable(mmc->supply.vqmmc);
+>>>> +	} else {
+>>>> +		ret = regulator_disable(mmc->supply.vqmmc);
+>>>> +	}
+>>>> +
+>>>> +	if (ret)
+>>>> +		dev_err(mmc_dev(mmc), "%s: vqmm %sable failed: %d\n",
+>>>> +			mmc_hostname(mmc), level ? "en":"dis", ret);
+>>>> +	else
+>>>> +		msm_host->vqmmc_enabled = level;
+>>>> +out:
+>>>> +	return ret;
+>>>> +}
