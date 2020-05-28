@@ -2,67 +2,67 @@ Return-Path: <SRS0=dyeO=7K=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+X-Spam-Status: No, score=-4.0 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
-	autolearn_force=no version=3.4.0
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,UNWANTED_LANGUAGE_BODY
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 91D7BC433DF
-	for <linux-mmc@archiver.kernel.org>; Thu, 28 May 2020 10:16:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 843D0C433DF
+	for <linux-mmc@archiver.kernel.org>; Thu, 28 May 2020 10:16:07 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 611B820776
-	for <linux-mmc@archiver.kernel.org>; Thu, 28 May 2020 10:16:04 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 59D6D20DD4
+	for <linux-mmc@archiver.kernel.org>; Thu, 28 May 2020 10:16:07 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="MnzFGD3v"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="J14crb2j"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2387768AbgE1KPE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 28 May 2020 06:15:04 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58898 "EHLO
+        id S2387763AbgE1KPB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 28 May 2020 06:15:01 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58886 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2387765AbgE1KO6 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 28 May 2020 06:14:58 -0400
-Received: from mail-ua1-x942.google.com (mail-ua1-x942.google.com [IPv6:2607:f8b0:4864:20::942])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D7E7EC08C5C5
-        for <linux-mmc@vger.kernel.org>; Thu, 28 May 2020 03:14:57 -0700 (PDT)
-Received: by mail-ua1-x942.google.com with SMTP id a11so9454230uah.12
-        for <linux-mmc@vger.kernel.org>; Thu, 28 May 2020 03:14:57 -0700 (PDT)
+        with ESMTP id S2387769AbgE1KOz (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 28 May 2020 06:14:55 -0400
+Received: from mail-vk1-xa43.google.com (mail-vk1-xa43.google.com [IPv6:2607:f8b0:4864:20::a43])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 004E4C08C5C6
+        for <linux-mmc@vger.kernel.org>; Thu, 28 May 2020 03:14:54 -0700 (PDT)
+Received: by mail-vk1-xa43.google.com with SMTP id r11so6594279vkf.11
+        for <linux-mmc@vger.kernel.org>; Thu, 28 May 2020 03:14:54 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=xdz9MWebLwQSND4D0Bm3yeIJXnZ0zEw1qUOEdEpzjzg=;
-        b=MnzFGD3vnBMN60+yOn2FCarWkarrPbqQizY4U25FCU9cbPfhcWUpoHqzz7CmkjYz40
-         LoCddUYYP1d/hMOrusgsmN0bn4/gTqTxkWWs01U5mV8TYu/v1LLGUfEpbGh8GeRYX95O
-         9jk9IRtpm0233tnYvAJwhAO08c949xbJDyt6GqRY6k1nAd7GkekCy51DJ/zFIY0uFI6p
-         tbkst+cRdjDMAjT3pJDx7o7ClyuWdTegFXPej+t1KB+yOcL6NVkoJiLNJyQvBj9Rdrap
-         8QX5ykRB/9XhlMlYMaJQw/YjgtdjC8CzLlTnU52zaxHZszztzGoY1dip1g19KHJvIC0Z
-         YLHQ==
+        bh=nAUj/kEpfoZ0ia6NxEX2fFXuOIBIRYCGa6eSme4RY3s=;
+        b=J14crb2jF9tUh4DBD+9prVqZRXyqwpMPCCoiq3C3clPk+7pQSKNtaR/dtNcGVhrm1Z
+         wftbzhxx4VuNfR7Mj0qLKISYCIIasNLr2ZQsftLNmlDjOoP8vd9joIw9yMvacBmtXXPd
+         OL/pO/Xvy1+3hSIR+kmwzL4wqUa1geIwnkH3/rNO8Ioh9RhU0VwOkYEvaEAFBz0sqTMo
+         EuPdF7vQtph678iNA6gvkTv8eeOmT65lGS12wyibdgNvUqsa1hGh4cqd7+PWCpfvz0r/
+         A4zIleIdI2x90N3u2yZF5fe2gE/Osg8/AWGrmNx+JniMxHitmIWAiimEp/94GiqtDN2w
+         IXEg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=xdz9MWebLwQSND4D0Bm3yeIJXnZ0zEw1qUOEdEpzjzg=;
-        b=rZuM8d0yskQCwlO/1kdDggwaTAR4su0A55zzOs97mvCRpLnO8nDwAk6UpCCb4Adr71
-         mpEk2BDSEm6Pgj7yVgQtyIUVfyJ1XsRGKqG8NrJQlpDOEH/8vgkdzCReIVSUvArQBc87
-         LoePC/uoWJQ1Um174C2MJUZVVloIwqYDDdCw7wVCq3HdQxD34u7BAndKbPcJL69MvNA1
-         GBsP5wL2wQDGiBd7UyZ1IyYh4Nf1TuIKTm/Nhm3EKrGEw1TqrZPc1jgYUenU1Wu9a3UZ
-         x3Yx7Vta0RnDWiUq/N//+cjSmoLWQhDsuXVbRNwLNwhGyF7fddCWYNg2pvfrsQdHLDTB
-         qlrQ==
-X-Gm-Message-State: AOAM533uNWXqqwhFUx0jxBtmMXjsG5U4PQLLXtrxHAzKkEpPaHjZQ/CA
-        l6AMc8l03vstOqtvXeGb1fVFNiyYhRAeWg9f6XmkyQ==
-X-Google-Smtp-Source: ABdhPJyXviAJaU0Syk8zmEh34oVnZlsPyEKZ18ZkNSCsO/FREdzCCyZRh6J0EnFvQIa47dVszDJwQxlQhwCSK7LoKfQ=
-X-Received: by 2002:ab0:13f2:: with SMTP id n47mr1325466uae.129.1590660896762;
- Thu, 28 May 2020 03:14:56 -0700 (PDT)
+        bh=nAUj/kEpfoZ0ia6NxEX2fFXuOIBIRYCGa6eSme4RY3s=;
+        b=YGU5Rv4azd4W7P7GxX34LMWYzfH+zxY/6lDJ8sghVu9B+YYLWrR3/N5h0yfkAmVAIZ
+         xYqqniJ4CO5uScJ3EQU8U0HAu4ur9z127Oj+aetqmRRgzziytOBlOubm8j6tXZRGhRyV
+         NvU521gwX3yi2ByBhMQtyeCAkuEi1LUQIEcOfJvFaySpQ8cJBOTnwfHaQ/CyJmbrvaqB
+         EQ709crR01GEFp1SBXJcDuFTU5kyhLenJMAv9oDddiz4mGFtlR7YOnWQ/nsZsM05IEB6
+         0FSdD1VP43iTFaEXGxIF3fE/W/6mSKf212BoVpBGZNXvGmEHHnEC5Z6jXXhoU8Yy/dL5
+         4+8g==
+X-Gm-Message-State: AOAM5331b4p2h29UD3eKjVZJilahF8gSh4RncCzkvZTs5piBwKe/hKr6
+        JJERrsJFiG3MJPvY1yEl255k2z8DKM3ftPreXc2vAQ==
+X-Google-Smtp-Source: ABdhPJxH0XoMIdAuMN9qtVZvUJ9sj6A/MlzwZDxbfNcwdSU12eGT1pIEGZkSv3XqTj/sGL9tbJEEdxMOaMo/Gu1xFtw=
+X-Received: by 2002:a1f:1188:: with SMTP id 130mr1448071vkr.25.1590660894032;
+ Thu, 28 May 2020 03:14:54 -0700 (PDT)
 MIME-Version: 1.0
-References: <20200526062758.17642-1-wan.ahmad.zainie.wan.mohamad@intel.com> <20200526062758.17642-4-wan.ahmad.zainie.wan.mohamad@intel.com>
-In-Reply-To: <20200526062758.17642-4-wan.ahmad.zainie.wan.mohamad@intel.com>
+References: <20200526062758.17642-1-wan.ahmad.zainie.wan.mohamad@intel.com> <20200526062758.17642-3-wan.ahmad.zainie.wan.mohamad@intel.com>
+In-Reply-To: <20200526062758.17642-3-wan.ahmad.zainie.wan.mohamad@intel.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 28 May 2020 12:14:20 +0200
-Message-ID: <CAPDyKFpZNKB=XmD8_qig9HUy9uktH7d7DSJKaW7dshabi5WCBw@mail.gmail.com>
-Subject: Re: [PATCH v2 3/3] dt-bindings: mmc: convert arasan sdhci bindings to yaml
-To:     Wan Ahmad Zainie <wan.ahmad.zainie.wan.mohamad@intel.com>,
-        Rob Herring <robh+dt@kernel.org>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+Date:   Thu, 28 May 2020 12:14:16 +0200
+Message-ID: <CAPDyKFr+u5vzTJAdKR6RzKOxPMiMzpVX9Zs4hms_CYnG2S6fVQ@mail.gmail.com>
+Subject: Re: [PATCH v2 2/3] mmc: sdhci-of-arasan: Add support for Intel Keem Bay
+To:     Wan Ahmad Zainie <wan.ahmad.zainie.wan.mohamad@intel.com>
+Cc:     Rob Herring <robh+dt@kernel.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
         Michal Simek <michal.simek@xilinx.com>,
         "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
         DTML <devicetree@vger.kernel.org>
@@ -75,524 +75,208 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 On Tue, 26 May 2020 at 08:29, Wan Ahmad Zainie
 <wan.ahmad.zainie.wan.mohamad@intel.com> wrote:
 >
-> Convert arasan,sdhci.txt file to yaml. The new file arasan,sdhci.yaml
-> will inherit properties from mmc-controller.yaml. 'sdhci' is no longer
-> a valid name for node and should be changed to 'mmc'.
+> Intel Keem Bay SoC eMMC/SD/SDIO controller is based on
+> Arasan SD 3.0 / eMMC 5.1 host controller IP.
 >
-> Suggested-by: Ulf Hansson <ulf.hansson@linaro.org>
+> However, it does not support 64-bit access as its AXI interface
+> has 32-bit address ports.
+>
 > Signed-off-by: Wan Ahmad Zainie <wan.ahmad.zainie.wan.mohamad@intel.com>
+> Reviewed-by: Adrian Hunter <adrian.hunter@intel.com>
 
-I didn't queue this one yet, as I am would appreciate some feedback
-from Rob first.
+Applied for next, thanks!
 
 Kind regards
 Uffe
 
 
 > ---
->  .../devicetree/bindings/mmc/arasan,sdhci.txt  | 192 ------------
->  .../devicetree/bindings/mmc/arasan,sdhci.yaml | 293 ++++++++++++++++++
->  2 files changed, 293 insertions(+), 192 deletions(-)
->  delete mode 100644 Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
->  create mode 100644 Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml
+>  drivers/mmc/host/sdhci-of-arasan.c | 123 +++++++++++++++++++++++++++++
+>  1 file changed, 123 insertions(+)
 >
-> diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-> deleted file mode 100644
-> index f29bf7dd2ece..000000000000
-> --- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-> +++ /dev/null
-> @@ -1,192 +0,0 @@
-> -Device Tree Bindings for the Arasan SDHCI Controller
-> -
-> -  The bindings follow the mmc[1], clock[2], interrupt[3] and phy[4] bindings.
-> -  Only deviations are documented here.
-> -
-> -  [1] Documentation/devicetree/bindings/mmc/mmc.txt
-> -  [2] Documentation/devicetree/bindings/clock/clock-bindings.txt
-> -  [3] Documentation/devicetree/bindings/interrupt-controller/interrupts.txt
-> -  [4] Documentation/devicetree/bindings/phy/phy-bindings.txt
-> -
-> -Required Properties:
-> -  - compatible: Compatibility string.  One of:
-> -    - "arasan,sdhci-8.9a": generic Arasan SDHCI 8.9a PHY
-> -    - "arasan,sdhci-4.9a": generic Arasan SDHCI 4.9a PHY
-> -    - "arasan,sdhci-5.1": generic Arasan SDHCI 5.1 PHY
-> -    - "rockchip,rk3399-sdhci-5.1", "arasan,sdhci-5.1": rk3399 eMMC PHY
-> -      For this device it is strongly suggested to include arasan,soc-ctl-syscon.
-> -    - "xlnx,zynqmp-8.9a": ZynqMP SDHCI 8.9a PHY
-> -      For this device it is strongly suggested to include clock-output-names and
-> -      #clock-cells.
-> -    - "xlnx,versal-8.9a": Versal SDHCI 8.9a PHY
-> -      For this device it is strongly suggested to include clock-output-names and
-> -      #clock-cells.
-> -    - "ti,am654-sdhci-5.1", "arasan,sdhci-5.1": TI AM654 MMC PHY
-> -       Note: This binding has been deprecated and moved to [5].
-> -    - "intel,lgm-sdhci-5.1-emmc", "arasan,sdhci-5.1": Intel LGM eMMC PHY
-> -      For this device it is strongly suggested to include arasan,soc-ctl-syscon.
-> -    - "intel,lgm-sdhci-5.1-sdxc", "arasan,sdhci-5.1": Intel LGM SDXC PHY
-> -      For this device it is strongly suggested to include arasan,soc-ctl-syscon.
-> -    - "intel,keembay-sdhci-5.1-emmc", "arasan,sdhci-5.1": Intel Keem Bay eMMC
-> -      For this device it is strongly suggested to include arasan,soc-ctl-syscon.
-> -    - "intel,keembay-sdhci-5.1-sd": Intel Keem Bay SD controller
-> -      For this device it is strongly suggested to include arasan,soc-ctl-syscon.
-> -    - "intel,keembay-sdhci-5.1-sdio": Intel Keem Bay SDIO controller
-> -      For this device it is strongly suggested to include arasan,soc-ctl-syscon.
-> -
-> -  [5] Documentation/devicetree/bindings/mmc/sdhci-am654.txt
-> -
-> -  - reg: From mmc bindings: Register location and length.
-> -  - clocks: From clock bindings: Handles to clock inputs.
-> -  - clock-names: From clock bindings: Tuple including "clk_xin" and "clk_ahb"
-> -  - interrupts: Interrupt specifier
-> -
-> -Required Properties for "arasan,sdhci-5.1":
-> -  - phys: From PHY bindings: Phandle for the Generic PHY for arasan.
-> -  - phy-names:  MUST be "phy_arasan".
-> -
-> -Optional Properties:
-> -  - arasan,soc-ctl-syscon: A phandle to a syscon device (see ../mfd/syscon.txt)
-> -    used to access core corecfg registers.  Offsets of registers in this
-> -    syscon are determined based on the main compatible string for the device.
-> -  - clock-output-names: If specified, this will be the name of the card clock
-> -    which will be exposed by this device.  Required if #clock-cells is
-> -    specified.
-> -  - #clock-cells: If specified this should be the value <0> or <1>. With this
-> -    property in place we will export one or two clocks representing the Card
-> -    Clock. These clocks are expected to be consumed by our PHY.
-> -  - xlnx,fails-without-test-cd: when present, the controller doesn't work when
-> -    the CD line is not connected properly, and the line is not connected
-> -    properly. Test mode can be used to force the controller to function.
-> -  - xlnx,int-clock-stable-broken: when present, the controller always reports
-> -    that the internal clock is stable even when it is not.
-> -
-> -  - xlnx,mio-bank: When specified, this will indicate the MIO bank number in
-> -    which the command and data lines are configured. If not specified, driver
-> -    will assume this as 0.
-> -
-> -Example:
-> -       sdhci@e0100000 {
-> -               compatible = "arasan,sdhci-8.9a";
-> -               reg = <0xe0100000 0x1000>;
-> -               clock-names = "clk_xin", "clk_ahb";
-> -               clocks = <&clkc 21>, <&clkc 32>;
-> -               interrupt-parent = <&gic>;
-> -               interrupts = <0 24 4>;
-> -       } ;
-> -
-> -       sdhci@e2800000 {
-> -               compatible = "arasan,sdhci-5.1";
-> -               reg = <0xe2800000 0x1000>;
-> -               clock-names = "clk_xin", "clk_ahb";
-> -               clocks = <&cru 8>, <&cru 18>;
-> -               interrupt-parent = <&gic>;
-> -               interrupts = <0 24 4>;
-> -               phys = <&emmc_phy>;
-> -               phy-names = "phy_arasan";
-> -       } ;
-> -
-> -       sdhci: sdhci@fe330000 {
-> -               compatible = "rockchip,rk3399-sdhci-5.1", "arasan,sdhci-5.1";
-> -               reg = <0x0 0xfe330000 0x0 0x10000>;
-> -               interrupts = <GIC_SPI 11 IRQ_TYPE_LEVEL_HIGH>;
-> -               clocks = <&cru SCLK_EMMC>, <&cru ACLK_EMMC>;
-> -               clock-names = "clk_xin", "clk_ahb";
-> -               arasan,soc-ctl-syscon = <&grf>;
-> -               assigned-clocks = <&cru SCLK_EMMC>;
-> -               assigned-clock-rates = <200000000>;
-> -               clock-output-names = "emmc_cardclock";
-> -               phys = <&emmc_phy>;
-> -               phy-names = "phy_arasan";
-> -               #clock-cells = <0>;
-> -       };
-> -
-> -       sdhci: mmc@ff160000 {
-> -               compatible = "xlnx,zynqmp-8.9a", "arasan,sdhci-8.9a";
-> -               interrupt-parent = <&gic>;
-> -               interrupts = <0 48 4>;
-> -               reg = <0x0 0xff160000 0x0 0x1000>;
-> -               clocks = <&clk200>, <&clk200>;
-> -               clock-names = "clk_xin", "clk_ahb";
-> -               clock-output-names = "clk_out_sd0", "clk_in_sd0";
-> -               #clock-cells = <1>;
-> -               clk-phase-sd-hs = <63>, <72>;
-> -       };
-> -
-> -       sdhci: mmc@f1040000 {
-> -               compatible = "xlnx,versal-8.9a", "arasan,sdhci-8.9a";
-> -               interrupt-parent = <&gic>;
-> -               interrupts = <0 126 4>;
-> -               reg = <0x0 0xf1040000 0x0 0x10000>;
-> -               clocks = <&clk200>, <&clk200>;
-> -               clock-names = "clk_xin", "clk_ahb";
-> -               clock-output-names = "clk_out_sd0", "clk_in_sd0";
-> -               #clock-cells = <1>;
-> -               clk-phase-sd-hs = <132>, <60>;
-> -       };
-> -
-> -       emmc: sdhci@ec700000 {
-> -               compatible = "intel,lgm-sdhci-5.1-emmc", "arasan,sdhci-5.1";
-> -               reg = <0xec700000 0x300>;
-> -               interrupt-parent = <&ioapic1>;
-> -               interrupts = <44 1>;
-> -               clocks = <&cgu0 LGM_CLK_EMMC5>, <&cgu0 LGM_CLK_NGI>,
-> -                        <&cgu0 LGM_GCLK_EMMC>;
-> -               clock-names = "clk_xin", "clk_ahb", "gate";
-> -               clock-output-names = "emmc_cardclock";
-> -               #clock-cells = <0>;
-> -               phys = <&emmc_phy>;
-> -               phy-names = "phy_arasan";
-> -               arasan,soc-ctl-syscon = <&sysconf>;
-> -       };
-> -
-> -       sdxc: sdhci@ec600000 {
-> -               compatible = "arasan,sdhci-5.1", "intel,lgm-sdhci-5.1-sdxc";
-> -               reg = <0xec600000 0x300>;
-> -               interrupt-parent = <&ioapic1>;
-> -               interrupts = <43 1>;
-> -               clocks = <&cgu0 LGM_CLK_SDIO>, <&cgu0 LGM_CLK_NGI>,
-> -                        <&cgu0 LGM_GCLK_SDXC>;
-> -               clock-names = "clk_xin", "clk_ahb", "gate";
-> -               clock-output-names = "sdxc_cardclock";
-> -               #clock-cells = <0>;
-> -               phys = <&sdxc_phy>;
-> -               phy-names = "phy_arasan";
-> -               arasan,soc-ctl-syscon = <&sysconf>;
-> -       };
-> -
-> -       mmc: mmc@33000000 {
-> -               compatible = "intel,keembay-sdhci-5.1-emmc", "arasan,sdhci-5.1";
-> -               interrupts = <GIC_SPI 82 IRQ_TYPE_LEVEL_HIGH>;
-> -               reg = <0x0 0x33000000 0x0 0x300>;
-> -               clock-names = "clk_xin", "clk_ahb";
-> -               clocks = <&scmi_clk KEEM_BAY_PSS_AUX_EMMC>,
-> -                        <&scmi_clk KEEM_BAY_PSS_EMMC>;
-> -               phys = <&emmc_phy>;
-> -               phy-names = "phy_arasan";
-> -               assigned-clocks = <&scmi_clk KEEM_BAY_PSS_AUX_EMMC>;
-> -               assigned-clock-rates = <200000000>;
-> -               clock-output-names = "emmc_cardclock";
-> -               #clock-cells = <0>;
-> -               arasan,soc-ctl-syscon = <&mmc_phy_syscon>;
-> -       };
-> -
-> -       sd0: mmc@31000000 {
-> -               compatible = "intel,keembay-sdhci-5.1-sd";
-> -               interrupts = <GIC_SPI 83 IRQ_TYPE_LEVEL_HIGH>;
-> -               reg = <0x0 0x31000000 0x0 0x300>;
-> -               clock-names = "clk_xin", "clk_ahb";
-> -               clocks = <&scmi_clk KEEM_BAY_PSS_AUX_SD0>,
-> -                        <&scmi_clk KEEM_BAY_PSS_SD0>;
-> -               arasan,soc-ctl-syscon = <&sd0_phy_syscon>;
-> -       };
-> -
-> -       sd1: mmc@32000000 {
-> -               compatible = "intel,keembay-sdhci-5.1-sdio";
-> -               interrupts = <GIC_SPI 84 IRQ_TYPE_LEVEL_HIGH>;
-> -               reg = <0x0 0x32000000 0x0 0x300>;
-> -               clock-names = "clk_xin", "clk_ahb";
-> -               clocks = <&scmi_clk KEEM_BAY_PSS_AUX_SD1>,
-> -                        <&scmi_clk KEEM_BAY_PSS_SD1>;
-> -               arasan,soc-ctl-syscon = <&sd1_phy_syscon>;
-> -       };
-> diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml b/Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml
-> new file mode 100644
-> index 000000000000..927e2f13958b
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml
-> @@ -0,0 +1,293 @@
-> +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
-> +%YAML 1.2
-> +---
-> +$id: "http://devicetree.org/schemas/mmc/arasan,sdhci.yaml#"
-> +$schema: "http://devicetree.org/meta-schemas/core.yaml#"
+> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+> index 2fe2c4dcc280..db9b544465cd 100644
+> --- a/drivers/mmc/host/sdhci-of-arasan.c
+> +++ b/drivers/mmc/host/sdhci-of-arasan.c
+> @@ -75,6 +75,7 @@ struct sdhci_arasan_soc_ctl_field {
+>   *
+>   * @baseclkfreq:       Where to find corecfg_baseclkfreq
+>   * @clockmultiplier:   Where to find corecfg_clockmultiplier
+> + * @support64b:                Where to find SUPPORT64B bit
+>   * @hiword_update:     If true, use HIWORD_UPDATE to access the syscon
+>   *
+>   * It's up to the licensee of the Arsan IP block to make these available
+> @@ -84,6 +85,7 @@ struct sdhci_arasan_soc_ctl_field {
+>  struct sdhci_arasan_soc_ctl_map {
+>         struct sdhci_arasan_soc_ctl_field       baseclkfreq;
+>         struct sdhci_arasan_soc_ctl_field       clockmultiplier;
+> +       struct sdhci_arasan_soc_ctl_field       support64b;
+>         bool                                    hiword_update;
+>  };
+>
+> @@ -180,6 +182,13 @@ static const struct sdhci_arasan_soc_ctl_map intel_lgm_sdxc_soc_ctl_map = {
+>         .hiword_update = false,
+>  };
+>
+> +static const struct sdhci_arasan_soc_ctl_map intel_keembay_soc_ctl_map = {
+> +       .baseclkfreq = { .reg = 0x0, .width = 8, .shift = 14 },
+> +       .clockmultiplier = { .reg = 0x4, .width = 8, .shift = 14 },
+> +       .support64b = { .reg = 0x4, .width = 1, .shift = 24 },
+> +       .hiword_update = false,
+> +};
 > +
-> +title: Device Tree Bindings for the Arasan SDHCI Controller
+>  /**
+>   * sdhci_arasan_syscon_write - Write to a field in soc_ctl registers
+>   *
+> @@ -1095,6 +1104,50 @@ static struct sdhci_arasan_of_data sdhci_arasan_generic_data = {
+>         .clk_ops = &arasan_clk_ops,
+>  };
+>
+> +static const struct sdhci_pltfm_data sdhci_keembay_emmc_pdata = {
+> +       .ops = &sdhci_arasan_cqe_ops,
+> +       .quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN |
+> +               SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC |
+> +               SDHCI_QUIRK_NO_LED |
+> +               SDHCI_QUIRK_32BIT_DMA_ADDR |
+> +               SDHCI_QUIRK_32BIT_DMA_SIZE |
+> +               SDHCI_QUIRK_32BIT_ADMA_SIZE,
+> +       .quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
+> +               SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN |
+> +               SDHCI_QUIRK2_CAPS_BIT63_FOR_HS400 |
+> +               SDHCI_QUIRK2_STOP_WITH_TC |
+> +               SDHCI_QUIRK2_BROKEN_64_BIT_DMA,
+> +};
 > +
-> +allOf:
-> +  - $ref: "mmc-controller.yaml#"
+> +static const struct sdhci_pltfm_data sdhci_keembay_sd_pdata = {
+> +       .ops = &sdhci_arasan_ops,
+> +       .quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN |
+> +               SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC |
+> +               SDHCI_QUIRK_NO_LED |
+> +               SDHCI_QUIRK_32BIT_DMA_ADDR |
+> +               SDHCI_QUIRK_32BIT_DMA_SIZE |
+> +               SDHCI_QUIRK_32BIT_ADMA_SIZE,
+> +       .quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
+> +               SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN |
+> +               SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON |
+> +               SDHCI_QUIRK2_STOP_WITH_TC |
+> +               SDHCI_QUIRK2_BROKEN_64_BIT_DMA,
+> +};
 > +
-> +maintainers:
-> +  - Adrian Hunter <adrian.hunter@intel.com>
+> +static const struct sdhci_pltfm_data sdhci_keembay_sdio_pdata = {
+> +       .ops = &sdhci_arasan_ops,
+> +       .quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN |
+> +               SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC |
+> +               SDHCI_QUIRK_NO_LED |
+> +               SDHCI_QUIRK_32BIT_DMA_ADDR |
+> +               SDHCI_QUIRK_32BIT_DMA_SIZE |
+> +               SDHCI_QUIRK_32BIT_ADMA_SIZE,
+> +       .quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
+> +               SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN |
+> +               SDHCI_QUIRK2_HOST_OFF_CARD_ON |
+> +               SDHCI_QUIRK2_BROKEN_64_BIT_DMA,
+> +};
 > +
-> +properties:
-> +  compatible:
-> +    oneOf:
-> +      - const: arasan,sdhci-8.9a                # generic Arasan SDHCI 8.9a PHY
-> +      - const: arasan,sdhci-4.9a                # generic Arasan SDHCI 4.9a PHY
-> +      - const: arasan,sdhci-5.1                 # generic Arasan SDHCI 5.1 PHY
-> +      - items:
-> +          - const: rockchip,rk3399-sdhci-5.1    # rk3399 eMMC PHY
-> +          - const: arasan,sdhci-5.1
-> +        description: |
-> +          For this device it is strongly suggested to include
-> +          arasan,soc-ctl-syscon.
-> +      - items:
-> +          - const: xlnx,zynqmp-8.9a             # ZynqMP SDHCI 8.9a PHY
-> +          - const: arasan,sdhci-8.9a
-> +        description: |
-> +          For this device it is strongly suggested to include
-> +          clock-output-names and '#clock-cells'.
-> +      - items:
-> +          - const: xlnx,versal-8.9a             # Versal SDHCI 8.9a PHY
-> +          - const: arasan,sdhci-8.9a
-> +        description: |
-> +          For this device it is strongly suggested to include
-> +          clock-output-names and '#clock-cells'.
-> +      - items:
-> +          - const: intel,lgm-sdhci-5.1-emmc     # Intel LGM eMMC PHY
-> +          - const: arasan,sdhci-5.1
-> +        description: |
-> +          For this device it is strongly suggested to include
-> +          arasan,soc-ctl-syscon.
-> +      - items:
-> +          - const: intel,lgm-sdhci-5.1-sdxc     # Intel LGM SDXC PHY
-> +          - const: arasan,sdhci-5.1
-> +        description: |
-> +          For this device it is strongly suggested to include
-> +          arasan,soc-ctl-syscon.
-> +      - items:
-> +          - const: intel,keembay-sdhci-5.1-emmc # Intel Keem Bay eMMC PHY
-> +          - const: arasan,sdhci-5.1
-> +        description: |
-> +          For this device it is strongly suggested to include
-> +          arasan,soc-ctl-syscon.
-> +      - const: intel,keembay-sdhci-5.1-sd       # Intel Keem Bay SD controller
-> +        description: |
-> +          For this device it is strongly suggested to include
-> +          arasan,soc-ctl-syscon.
-> +      - const: intel,keembay-sdhci-5.1-sdio     # Intel Keem Bay SDIO controller
-> +        description: |
-> +          For this device it is strongly suggested to include
-> +          arasan,soc-ctl-syscon.
+>  static struct sdhci_arasan_of_data sdhci_arasan_rk3399_data = {
+>         .soc_ctl_map = &rk3399_soc_ctl_map,
+>         .pdata = &sdhci_arasan_cqe_pdata,
+> @@ -1140,6 +1193,21 @@ static struct sdhci_arasan_of_data sdhci_arasan_versal_data = {
+>         .clk_ops = &versal_clk_ops,
+>  };
+>
+> +static struct sdhci_arasan_of_data intel_keembay_emmc_data = {
+> +       .soc_ctl_map = &intel_keembay_soc_ctl_map,
+> +       .pdata = &sdhci_keembay_emmc_pdata,
+> +};
 > +
-> +  reg:
-> +    maxItems: 1
+> +static struct sdhci_arasan_of_data intel_keembay_sd_data = {
+> +       .soc_ctl_map = &intel_keembay_soc_ctl_map,
+> +       .pdata = &sdhci_keembay_sd_pdata,
+> +};
 > +
-> +  clocks:
-> +    minItems: 2
-> +    maxItems: 3
+> +static struct sdhci_arasan_of_data intel_keembay_sdio_data = {
+> +       .soc_ctl_map = &intel_keembay_soc_ctl_map,
+> +       .pdata = &sdhci_keembay_sdio_pdata,
+> +};
 > +
-> +  clock-names:
-> +    minItems: 2
-> +    items:
-> +      - const: clk_xin
-> +      - const: clk_ahb
-> +      - const: gate
+>  static const struct of_device_id sdhci_arasan_of_match[] = {
+>         /* SoC-specific compatible strings w/ soc_ctl_map */
+>         {
+> @@ -1154,6 +1222,18 @@ static const struct of_device_id sdhci_arasan_of_match[] = {
+>                 .compatible = "intel,lgm-sdhci-5.1-sdxc",
+>                 .data = &intel_lgm_sdxc_data,
+>         },
+> +       {
+> +               .compatible = "intel,keembay-sdhci-5.1-emmc",
+> +               .data = &intel_keembay_emmc_data,
+> +       },
+> +       {
+> +               .compatible = "intel,keembay-sdhci-5.1-sd",
+> +               .data = &intel_keembay_sd_data,
+> +       },
+> +       {
+> +               .compatible = "intel,keembay-sdhci-5.1-sdio",
+> +               .data = &intel_keembay_sdio_data,
+> +       },
+>         /* Generic compatible below here */
+>         {
+>                 .compatible = "arasan,sdhci-8.9a",
+> @@ -1297,6 +1377,40 @@ static void sdhci_arasan_unregister_sdclk(struct device *dev)
+>         of_clk_del_provider(dev->of_node);
+>  }
+>
+> +/**
+> + * sdhci_arasan_update_support64b - Set SUPPORT_64B (64-bit System Bus Support)
+> + *
+> + * This should be set based on the System Address Bus.
+> + * 0: the Core supports only 32-bit System Address Bus.
+> + * 1: the Core supports 64-bit System Address Bus.
+> + *
+> + * NOTES:
+> + * - For Keem Bay, it is required to clear this bit. Its default value is 1'b1.
+> + *   Keem Bay does not support 64-bit access.
+> + *
+> + * @host               The sdhci_host
+> + */
+> +static void sdhci_arasan_update_support64b(struct sdhci_host *host, u32 value)
+> +{
+> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +       struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
+> +       const struct sdhci_arasan_soc_ctl_map *soc_ctl_map =
+> +               sdhci_arasan->soc_ctl_map;
 > +
-> +  interrupts:
-> +    maxItems: 1
+> +       /* Having a map is optional */
+> +       if (!soc_ctl_map)
+> +               return;
 > +
-> +  phys:
-> +    maxItems: 1
+> +       /* If we have a map, we expect to have a syscon */
+> +       if (!sdhci_arasan->soc_ctl_base) {
+> +               pr_warn("%s: Have regmap, but no soc-ctl-syscon\n",
+> +                       mmc_hostname(host->mmc));
+> +               return;
+> +       }
 > +
-> +  phy-names:
-> +    const: phy_arasan
+> +       sdhci_arasan_syscon_write(host, &soc_ctl_map->support64b, value);
+> +}
 > +
-> +  arasan,soc-ctl-syscon:
-> +    $ref: /schemas/types.yaml#/definitions/phandle
-> +    description: |
-> +      A phandle to a syscon device (see ../mfd/syscon.txt) used to access
-> +      core corecfg registers. Offsets of registers in this syscon are
-> +      determined based on the main compatible string for the device.
+>  /**
+>   * sdhci_arasan_register_sdclk - Register the sdcardclk for a PHY to use
+>   *
+> @@ -1469,6 +1583,15 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
+>                                     "rockchip,rk3399-sdhci-5.1"))
+>                 sdhci_arasan_update_clockmultiplier(host, 0x0);
+>
+> +       if (of_device_is_compatible(np, "intel,keembay-sdhci-5.1-emmc") ||
+> +           of_device_is_compatible(np, "intel,keembay-sdhci-5.1-sd") ||
+> +           of_device_is_compatible(np, "intel,keembay-sdhci-5.1-sdio")) {
+> +               sdhci_arasan_update_clockmultiplier(host, 0x0);
+> +               sdhci_arasan_update_support64b(host, 0x0);
 > +
-> +  clock-output-names:
-> +    description: |
-> +      If specified, this will be the name of the card clock which will
-> +      be exposed by this device. Required if '#clock-cells' is specified.
+> +               host->mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY;
+> +       }
 > +
-> +  '#clock-cells':
-> +    enum: [0, 1]
-> +    description: |
-> +      With this property in place we will export one or two clocks
-> +      representing the Card Clock. These clocks are expected to be
-> +      consumed by our PHY.
-> +
-> +  xlnx,fails-without-test-cd:
-> +    $ref: /schemas/types.yaml#/definitions/flag
-> +    description: |
-> +      When present, the controller doesn't work when the CD line is not
-> +      connected properly, and the line is not connected properly.
-> +      Test mode can be used to force the controller to function.
-> +
-> +  xlnx,int-clock-stable-broken:
-> +    $ref: /schemas/types.yaml#/definitions/flag
-> +    description: |
-> +      When present, the controller always reports that the internal clock
-> +      is stable even when it is not.
-> +
-> +  xlnx,mio-bank:
-> +    $ref: /schemas/types.yaml#/definitions/uint32
-> +    description: |
-> +      When specified, this will indicate the MIO bank number in which
-> +      the command and data lines are configured. If not specified, driver
-> +      will assume this as 0.
-> +
-> +required:
-> +  - compatible
-> +  - reg
-> +  - interrupts
-> +  - clocks
-> +  - clock-names
-> +
-> +if:
-> +  properties:
-> +    compatible:
-> +      contains:
-> +        const: arasan,sdhci-5.1
-> +then:
-> +  required:
-> +    - phys
-> +    - phy-names
-> +
-> +examples:
-> +  - |
-> +    mmc@e0100000 {
-> +          compatible = "arasan,sdhci-8.9a";
-> +          reg = <0xe0100000 0x1000>;
-> +          clock-names = "clk_xin", "clk_ahb";
-> +          clocks = <&clkc 21>, <&clkc 32>;
-> +          interrupt-parent = <&gic>;
-> +          interrupts = <0 24 4>;
-> +    };
-> +
-> +  - |
-> +    mmc@e2800000 {
-> +          compatible = "arasan,sdhci-5.1";
-> +          reg = <0xe2800000 0x1000>;
-> +          clock-names = "clk_xin", "clk_ahb";
-> +          clocks = <&cru 8>, <&cru 18>;
-> +          interrupt-parent = <&gic>;
-> +          interrupts = <0 24 4>;
-> +          phys = <&emmc_phy>;
-> +          phy-names = "phy_arasan";
-> +    };
-> +
-> +  - |
-> +    #include <dt-bindings/clock/rk3399-cru.h>
-> +    #include <dt-bindings/interrupt-controller/arm-gic.h>
-> +    #include <dt-bindings/interrupt-controller/irq.h>
-> +    mmc@fe330000 {
-> +          compatible = "rockchip,rk3399-sdhci-5.1", "arasan,sdhci-5.1";
-> +          reg = <0x0 0xfe330000 0x0 0x10000>;
-> +          interrupts = <GIC_SPI 11 IRQ_TYPE_LEVEL_HIGH>;
-> +          clocks = <&cru SCLK_EMMC>, <&cru ACLK_EMMC>;
-> +          clock-names = "clk_xin", "clk_ahb";
-> +          arasan,soc-ctl-syscon = <&grf>;
-> +          assigned-clocks = <&cru SCLK_EMMC>;
-> +          assigned-clock-rates = <200000000>;
-> +          clock-output-names = "emmc_cardclock";
-> +          phys = <&emmc_phy>;
-> +          phy-names = "phy_arasan";
-> +          #clock-cells = <0>;
-> +    };
-> +
-> +  - |
-> +    mmc@ff160000 {
-> +          compatible = "xlnx,zynqmp-8.9a", "arasan,sdhci-8.9a";
-> +          interrupt-parent = <&gic>;
-> +          interrupts = <0 48 4>;
-> +          reg = <0x0 0xff160000 0x0 0x1000>;
-> +          clocks = <&clk200>, <&clk200>;
-> +          clock-names = "clk_xin", "clk_ahb";
-> +          clock-output-names = "clk_out_sd0", "clk_in_sd0";
-> +          #clock-cells = <1>;
-> +          clk-phase-sd-hs = <63 72>;
-> +    };
-> +
-> +  - |
-> +    mmc@f1040000 {
-> +          compatible = "xlnx,versal-8.9a", "arasan,sdhci-8.9a";
-> +          interrupt-parent = <&gic>;
-> +          interrupts = <0 126 4>;
-> +          reg = <0x0 0xf1040000 0x0 0x10000>;
-> +          clocks = <&clk200>, <&clk200>;
-> +          clock-names = "clk_xin", "clk_ahb";
-> +          clock-output-names = "clk_out_sd0", "clk_in_sd0";
-> +          #clock-cells = <1>;
-> +          clk-phase-sd-hs = <132>, <60>;
-> +    };
-> +
-> +  - |
-> +    #define LGM_CLK_EMMC5
-> +    #define LGM_CLK_NGI
-> +    #define LGM_GCLK_EMMC
-> +    mmc@ec700000 {
-> +          compatible = "intel,lgm-sdhci-5.1-emmc", "arasan,sdhci-5.1";
-> +          reg = <0xec700000 0x300>;
-> +          interrupt-parent = <&ioapic1>;
-> +          interrupts = <44 1>;
-> +          clocks = <&cgu0 LGM_CLK_EMMC5>, <&cgu0 LGM_CLK_NGI>,
-> +                   <&cgu0 LGM_GCLK_EMMC>;
-> +          clock-names = "clk_xin", "clk_ahb", "gate";
-> +          clock-output-names = "emmc_cardclock";
-> +          #clock-cells = <0>;
-> +          phys = <&emmc_phy>;
-> +          phy-names = "phy_arasan";
-> +          arasan,soc-ctl-syscon = <&sysconf>;
-> +    };
-> +
-> +  - |
-> +    #define LGM_CLK_SDIO
-> +    #define LGM_GCLK_SDXC
-> +    mmc@ec600000 {
-> +          compatible = "intel,lgm-sdhci-5.1-sdxc", "arasan,sdhci-5.1";
-> +          reg = <0xec600000 0x300>;
-> +          interrupt-parent = <&ioapic1>;
-> +          interrupts = <43 1>;
-> +          clocks = <&cgu0 LGM_CLK_SDIO>, <&cgu0 LGM_CLK_NGI>,
-> +                   <&cgu0 LGM_GCLK_SDXC>;
-> +          clock-names = "clk_xin", "clk_ahb", "gate";
-> +          clock-output-names = "sdxc_cardclock";
-> +          #clock-cells = <0>;
-> +          phys = <&sdxc_phy>;
-> +          phy-names = "phy_arasan";
-> +          arasan,soc-ctl-syscon = <&sysconf>;
-> +    };
-> +
-> +  - |
-> +    #define KEEM_BAY_PSS_AUX_EMMC
-> +    #define KEEM_BAY_PSS_EMMC
-> +    mmc@33000000 {
-> +          compatible = "intel,keembay-sdhci-5.1-emmc", "arasan,sdhci-5.1";
-> +          interrupts = <GIC_SPI 82 IRQ_TYPE_LEVEL_HIGH>;
-> +          reg = <0x0 0x33000000 0x0 0x300>;
-> +          clock-names = "clk_xin", "clk_ahb";
-> +          clocks = <&scmi_clk KEEM_BAY_PSS_AUX_EMMC>,
-> +                   <&scmi_clk KEEM_BAY_PSS_EMMC>;
-> +          phys = <&emmc_phy>;
-> +          phy-names = "phy_arasan";
-> +          assigned-clocks = <&scmi_clk KEEM_BAY_PSS_AUX_EMMC>;
-> +          assigned-clock-rates = <200000000>;
-> +          clock-output-names = "emmc_cardclock";
-> +          #clock-cells = <0>;
-> +          arasan,soc-ctl-syscon = <&mmc_phy_syscon>;
-> +    };
-> +
-> +  - |
-> +    #define KEEM_BAY_PSS_AUX_SD0
-> +    #define KEEM_BAY_PSS_SD0
-> +    mmc@31000000 {
-> +          compatible = "intel,keembay-sdhci-5.1-sd";
-> +          interrupts = <GIC_SPI 83 IRQ_TYPE_LEVEL_HIGH>;
-> +          reg = <0x0 0x31000000 0x0 0x300>;
-> +          clock-names = "clk_xin", "clk_ahb";
-> +          clocks = <&scmi_clk KEEM_BAY_PSS_AUX_SD0>,
-> +                   <&scmi_clk KEEM_BAY_PSS_SD0>;
-> +          arasan,soc-ctl-syscon = <&sd0_phy_syscon>;
-> +    };
-> +
-> +  - |
-> +    #define KEEM_BAY_PSS_AUX_SD1
-> +    #define KEEM_BAY_PSS_SD1
-> +    mmc@32000000 {
-> +          compatible = "intel,keembay-sdhci-5.1-sdio";
-> +          interrupts = <GIC_SPI 84 IRQ_TYPE_LEVEL_HIGH>;
-> +          reg = <0x0 0x32000000 0x0 0x300>;
-> +          clock-names = "clk_xin", "clk_ahb";
-> +          clocks = <&scmi_clk KEEM_BAY_PSS_AUX_SD1>,
-> +                   <&scmi_clk KEEM_BAY_PSS_SD1>;
-> +          arasan,soc-ctl-syscon = <&sd1_phy_syscon>;
-> +    };
+>         sdhci_arasan_update_baseclkfreq(host);
+>
+>         ret = sdhci_arasan_register_sdclk(sdhci_arasan, clk_xin, &pdev->dev);
 > --
 > 2.17.1
 >
