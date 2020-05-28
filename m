@@ -2,114 +2,98 @@ Return-Path: <SRS0=dyeO=7K=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.5 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7D98EC433DF
-	for <linux-mmc@archiver.kernel.org>; Thu, 28 May 2020 12:32:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D5B2DC433DF
+	for <linux-mmc@archiver.kernel.org>; Thu, 28 May 2020 15:14:37 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5A19E206C3
-	for <linux-mmc@archiver.kernel.org>; Thu, 28 May 2020 12:32:54 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B4E492075F
+	for <linux-mmc@archiver.kernel.org>; Thu, 28 May 2020 15:14:37 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=nxp.com header.i=@nxp.com header.b="RkHoTbjl"
+	dkim=fail reason="signature verification failed" (1024-bit key) header.d=mg.codeaurora.org header.i=@mg.codeaurora.org header.b="WC5WnP1t"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2389664AbgE1Mct (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 28 May 2020 08:32:49 -0400
-Received: from mail-eopbgr80077.outbound.protection.outlook.com ([40.107.8.77]:24418
-        "EHLO EUR04-VI1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S2389279AbgE1Mcr (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 28 May 2020 08:32:47 -0400
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=oTRhF46UoipCDrhTI57mc2lOC0onjt5GQ5glpspyXg6rgw8A9z+ozFK/QJMDEuzvb9bfRulTlMnlcM5q+6jWIyHc+w+yu/wR/tm0Irwx42Cf8EsCjavAnZVoQWXB2QUuu3SPVclC3FAWnq6KFbLhS4yuW7EjvCcr6s5mq5OATVuPeUFzmviNGj8+7bkx5YALOmHDSgi04fPqbWBQ2PAX4Ibf7MFdvgu0EOvKefOZDm+2Ohpm8DzNXxNONV8kT+f0LOZB2MJmlq1E6273xnK7/OKZvRjSllNG0MjpYutjgPRS/Jyz0VYjjA+zUAelrCm4mUpv/OjFnfH/WhNhhBBBeg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=MA0Ixfgt2t6+2BNKy5rniQQv7W86MoGdcA3p9aDbrVU=;
- b=cFoBh10dAEfUOXHMUD9SvM8Xt3Co//pzVEHdlhUdFm4+mWDtr9jUynGyABeP4yA52IOC5HeyO08CcfsrCsf7d3dUgZKZiAQyfiWOYNYTAahbm2fi8G3YjW1vCY0cyjdI/fQIsn/YApAzAWoNjHQHvx73Oe6m4VXqtKA8LsKKUgmGE+pHSjoEkcAvMgbLBFah1ROcv1AsO5MbgpnapsAJgqxdzfxX01RVJ1QqLuICqbuNP/gFT/ElCvvVHywnOQPWxYQSUmJZfwWk2JUdWu6RbNExTwhAtM2NDlHvSg0uD9ZKudwfj/ydR0L2UEFfZiUQteJpLnVDgf4b/zzBL9cV/g==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=nxp.com; dmarc=pass action=none header.from=nxp.com; dkim=pass
- header.d=nxp.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nxp.com; s=selector2;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=MA0Ixfgt2t6+2BNKy5rniQQv7W86MoGdcA3p9aDbrVU=;
- b=RkHoTbjlsZeYOnQ+mx1DV0+cX6+hjfTOkuPdWcIP23EiFh9uxLaZ9sYSxX3YxCSqJAk4eACRdV3bTEXcNLPPKWMcshy57X4pWwbwCTNiPuiJ0w6StFzUOZFVy6EAZY/Yf7K38kFXyKCQH6GhX85j8cvOrL1NlOhEGYJh0AY37A4=
-Received: from VI1PR04MB4366.eurprd04.prod.outlook.com (2603:10a6:803:3d::27)
- by VI1PR04MB4366.eurprd04.prod.outlook.com (2603:10a6:803:3d::27) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3045.17; Thu, 28 May
- 2020 12:32:43 +0000
-Received: from VI1PR04MB4366.eurprd04.prod.outlook.com
- ([fe80::8102:b59d:36b:4d09]) by VI1PR04MB4366.eurprd04.prod.outlook.com
- ([fe80::8102:b59d:36b:4d09%7]) with mapi id 15.20.3045.018; Thu, 28 May 2020
- 12:32:43 +0000
-From:   Ganapathi Bhat <ganapathi.bhat@nxp.com>
-To:     =?utf-8?B?UGFsaSBSb2jDoXI=?= <pali@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-CC:     Matthias Brugger <matthias.bgg@gmail.com>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Kalle Valo <kvalo@codeaurora.org>,
-        Amitkumar Karwar <amitkarwar@gmail.com>,
-        Xinming Hu <huxinming820@gmail.com>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "ath10k@lists.infradead.org" <ath10k@lists.infradead.org>,
-        "b43-dev@lists.infradead.org" <b43-dev@lists.infradead.org>,
-        "brcm80211-dev-list.pdl@broadcom.com" 
-        <brcm80211-dev-list.pdl@broadcom.com>,
-        "brcm80211-dev-list@cypress.com" <brcm80211-dev-list@cypress.com>,
-        "libertas-dev@lists.infradead.org" <libertas-dev@lists.infradead.org>,
-        "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>,
-        =?utf-8?B?TWFyZWsgQmVow7pu?= <marek.behun@nic.cz>
-Subject: RE: [EXT] [PATCH 02/11] mmc: sdio: Change macro names for Marvell
- 8688 modules
-Thread-Topic: [EXT] [PATCH 02/11] mmc: sdio: Change macro names for Marvell
- 8688 modules
-Thread-Index: AQHWMEeuWeLcIUCYeUyYT+wggOmgN6i9d2kw
-Date:   Thu, 28 May 2020 12:32:43 +0000
-Message-ID: <VI1PR04MB43668C45F20EECE78179ECB78F8E0@VI1PR04MB4366.eurprd04.prod.outlook.com>
-References: <20200522144412.19712-1-pali@kernel.org>
- <20200522144412.19712-3-pali@kernel.org>
-In-Reply-To: <20200522144412.19712-3-pali@kernel.org>
-Accept-Language: en-US
-Content-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-authentication-results: kernel.org; dkim=none (message not signed)
- header.d=none;kernel.org; dmarc=none action=none header.from=nxp.com;
-x-originating-ip: [103.54.18.180]
-x-ms-publictraffictype: Email
-x-ms-office365-filtering-ht: Tenant
-x-ms-office365-filtering-correlation-id: ca7b1354-c335-40ec-cada-08d803033840
-x-ms-traffictypediagnostic: VI1PR04MB4366:
-x-microsoft-antispam-prvs: <VI1PR04MB436666734DD809481C1A69A08F8E0@VI1PR04MB4366.eurprd04.prod.outlook.com>
-x-ms-oob-tlc-oobclassifiers: OLM:5797;
-x-forefront-prvs: 0417A3FFD2
-x-ms-exchange-senderadcheck: 1
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: ESNnmwwBk9xw+EqpcDpDkIU1MClWcX9EIew2dSd5J4mQPHgs41NUZBPY468Ihk/tyBLDz0pSkXFvjO9N0tGa0Fx3O08I+8LaY/BycnLK8+717rN9E9rtoltgMzOncRt6dCAvnEp0VtvGZrvsc+b4HhhNrFbqRGDD14LAA0Xc6m4PDONdR04YOlSPTg4csJfSca6m2l3PNYWFw4z/cexXx8HTmgmEKMbN7UMSvQVcir3BmTta3R3RxhXX0Heemmlo3NgsIuVMBtwzZcTZYlZhkEikvmIvbS/G2YGb4yliP1wJL6/7NRoRsp3mhv2uadWw
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:VI1PR04MB4366.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFTY:;SFS:(4636009)(136003)(366004)(346002)(396003)(39860400002)(376002)(316002)(33656002)(5660300002)(44832011)(558084003)(186003)(7696005)(9686003)(54906003)(76116006)(110136005)(71200400001)(66946007)(66476007)(66446008)(64756008)(2906002)(86362001)(52536014)(7416002)(66556008)(6506007)(26005)(8936002)(8676002)(478600001)(4326008)(55016002);DIR:OUT;SFP:1101;
-x-ms-exchange-antispam-messagedata: N+FxMGKvUKKHG8gJjgTFgOaRXptaDXLmPzTmm68kNQDYf75HCZTHZx5b3+9myP8CJj5+cdPWqvZU1HQRQm00nCn+CNeXCpE349KRZGJPO5/u5FGQaS3K7EeP/rCNih8nIai/LkkBlS08Jf5Uh/Ms91Jmvb9UubGcsXBd28QPexKeITZ2OJRbDNpwqUMHOkaS81Sme2hL5yuFhb7wtuJLfGAWfHMDSB3PhXhBQGx4SCJVRnuC2NxQx34n6iOp/mB5/H6jMniH5T+Ty2MDxFwLwpRPpy7v4FexYIbKPR4FxCis37aXBM9dL89Qv6JC9JPMu50ZfnjZThdka2J3EPUF9KiWKtHRCU1X2Co4CCycfMb/YLTQSyOTu8ZwFy2RYJJuykMReSnjR7V5WEf3aMpQ76YissVSGhkqHqPv1VsbULIih7kKe8eHHDXVWAjsGSsbkA8w0V18INjC1lLVuPH1pSByEAHjnxTV3oih+geTGA8=
-x-ms-exchange-transport-forked: True
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-MIME-Version: 1.0
-X-OriginatorOrg: nxp.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: ca7b1354-c335-40ec-cada-08d803033840
-X-MS-Exchange-CrossTenant-originalarrivaltime: 28 May 2020 12:32:43.5251
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: CbCG6NOquhkq8Bse3J2apcyRB/AzPvZDgSnFSUovTtFL1cJYZtBHwqzqJOIE0isEz+l23VR2U9C6kNmbWjUaUQ==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: VI1PR04MB4366
+        id S2404274AbgE1POb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 28 May 2020 11:14:31 -0400
+Received: from mail27.static.mailgun.info ([104.130.122.27]:54128 "EHLO
+        mail27.static.mailgun.info" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S2404272AbgE1POa (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 28 May 2020 11:14:30 -0400
+DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
+ s=smtp; t=1590678869; h=Message-Id: Date: Subject: Cc: To: From:
+ Sender; bh=h4qi7yJ1wKkDLO7TOjVp4zfX/ugxHLRzaf+TIRV8OVw=; b=WC5WnP1tVHF+xCScbqDtt1/C7NPX/NlHaqJkFGH16MSDqoI294sv6q1s6n8I5JBnPhA0F3CS
+ pkHtFjEvRvPsuNmtnDD47rrpuhBfCEe0Fp1Z+lzIrIVSM/SqwccSprz+LPuSoBSFEjE0ZjDA
+ KkUvnOeC1km334pSngc0cBuN+Nw=
+X-Mailgun-Sending-Ip: 104.130.122.27
+X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
+Received: from smtp.codeaurora.org
+ (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171]) by
+ smtp-out-n01.prod.us-west-2.postgun.com with SMTP id
+ 5ecfd54f4776d1da6d686378 (version=TLS1.2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256); Thu, 28 May 2020 15:14:23
+ GMT
+Received: by smtp.codeaurora.org (Postfix, from userid 1001)
+        id 3C996C433C6; Thu, 28 May 2020 15:14:23 +0000 (UTC)
+Received: from vbadigan-linux.qualcomm.com (blr-c-bdr-fw-01_GlobalNAT_AllZones-Outside.qualcomm.com [103.229.19.19])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-SHA256 (128/128 bits))
+        (No client certificate requested)
+        (Authenticated sender: vbadigan)
+        by smtp.codeaurora.org (Postfix) with ESMTPSA id E2423C433C9;
+        Thu, 28 May 2020 15:14:17 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.3.2 smtp.codeaurora.org E2423C433C9
+Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
+Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=none smtp.mailfrom=vbadigan@codeaurora.org
+From:   Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+To:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
+        bjorn.andersson@linaro.org
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-arm-msm@vger.kernel.org,
+        Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
+        stable@vger.kernel.org, Andy Gross <agross@kernel.org>,
+        Ritesh Harjani <riteshh@codeaurora.org>,
+        Venkat Gopalakrishnan <venkatg@codeaurora.org>
+Subject: [PATCH V1] mmc: sdhci-msm: Clear tuning done flag while hs400 tuning
+Date:   Thu, 28 May 2020 20:43:52 +0530
+Message-Id: <1590678838-18099-1-git-send-email-vbadigan@codeaurora.org>
+X-Mailer: git-send-email 1.9.1
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-SGkgUGFsaSwNCg0KPiBBZGQgdW5kZXJzY29yZSBhcyBzZXBhcmF0b3IgaW4gTWFydmVsbCA4Njg4
-IG1hY3JvIG5hbWVzIGZvciBiZXR0ZXINCj4gcmVhZGFiaWxpdHkgYW5kIGNvbnNpc3RlbmN5Lg0K
-PiANCg0KVGhhbmtzIGZvciB0aGUgY2hhbmdlOw0KDQpBY2tlZC1ieTogR2FuYXBhdGhpIEJoYXQg
-PGdhbmFwYXRoaS5iaGF0QG54cC5jb20+DQo=
+Clear tuning_done flag while executing tuning to ensure vendor
+specific HS400 settings are applied properly when the controller
+is re-initialized in HS400 mode.
+
+Without this, re-initialization of the qcom SDHC in HS400 mode fails
+while resuming the driver from runtime-suspend or system-suspend.
+
+Fixes: ff06ce4 ("mmc: sdhci-msm: Add HS400 platform support")
+Cc: stable@vger.kernel.org
+Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+---
+ drivers/mmc/host/sdhci-msm.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+index 95cd973..b277dd7 100644
+--- a/drivers/mmc/host/sdhci-msm.c
++++ b/drivers/mmc/host/sdhci-msm.c
+@@ -1174,6 +1174,12 @@ static int sdhci_msm_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 	msm_host->use_cdr = true;
+ 
+ 	/*
++	 * Clear tuning_done flag before tuning to ensure proper
++	 * HS400 settings.
++	 */
++	msm_host->tuning_done = 0;
++
++	/*
+ 	 * For HS400 tuning in HS200 timing requires:
+ 	 * - select MCLK/2 in VENDOR_SPEC
+ 	 * - program MCLK to 400MHz (or nearest supported) in GCC
+-- 
+Qualcomm India Private Limited, on behalf of Qualcomm Innovation Center, Inc., is a member of Code Aurora Forum, a Linux Foundation Collaborative Project
+
