@@ -4,96 +4,106 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2571CC433DF
-	for <linux-mmc@archiver.kernel.org>; Thu, 28 May 2020 10:15:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AF225C433E0
+	for <linux-mmc@archiver.kernel.org>; Thu, 28 May 2020 10:15:30 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 00B6220776
-	for <linux-mmc@archiver.kernel.org>; Thu, 28 May 2020 10:15:22 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8D91220707
+	for <linux-mmc@archiver.kernel.org>; Thu, 28 May 2020 10:15:30 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="oju0zui0"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="YUVHiSIX"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2387750AbgE1KOp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 28 May 2020 06:14:45 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58844 "EHLO
+        id S2387777AbgE1KP2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 28 May 2020 06:15:28 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58974 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2387708AbgE1KOm (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 28 May 2020 06:14:42 -0400
-Received: from mail-vs1-xe43.google.com (mail-vs1-xe43.google.com [IPv6:2607:f8b0:4864:20::e43])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BB4A2C08C5C7
-        for <linux-mmc@vger.kernel.org>; Thu, 28 May 2020 03:14:41 -0700 (PDT)
-Received: by mail-vs1-xe43.google.com with SMTP id 1so15423076vsl.9
-        for <linux-mmc@vger.kernel.org>; Thu, 28 May 2020 03:14:41 -0700 (PDT)
+        with ESMTP id S2387780AbgE1KPV (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 28 May 2020 06:15:21 -0400
+Received: from mail-vk1-xa44.google.com (mail-vk1-xa44.google.com [IPv6:2607:f8b0:4864:20::a44])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C0A79C08C5D1
+        for <linux-mmc@vger.kernel.org>; Thu, 28 May 2020 03:15:19 -0700 (PDT)
+Received: by mail-vk1-xa44.google.com with SMTP id m18so6608226vkk.9
+        for <linux-mmc@vger.kernel.org>; Thu, 28 May 2020 03:15:19 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=TY9Fq3LC1xXg14hd0WuKsgTduh/q3AHtb5rRCMjqthI=;
-        b=oju0zui0cmPviPwNVqYCcbRzOnIlDnD2z/Ec7qSBE11ITW0arlTs0rfOYMvIeQ9wfx
-         /4yWDLNn5L7oK7nTxhx+JKY0U0oQ+33Fpes4gNQiQIwbcu+tiBzxyJqW1zOVQAT2t3O9
-         ORDGfYB9mcEyABJO8mdBkkCId6+gCFiYf3CwT+u32T7jVpY9JODfw+B7YfY23icsTcay
-         gq0SH2+cp0IRpnzkPfiW/rSYlmRsfNcdwoUbRd64xyIaGa8WMq4a/M+ZHaD2Cwt/ooCO
-         wA603COlUc7IAHkuKE2rTU5/aIZ4N6njxoQoLrqcLKeQO700kbw8VDYs+wwRYfsYtKE6
-         e3Kw==
+         :cc:content-transfer-encoding;
+        bh=k9E+YiCz7eYDmM11BkqW6Mr85TeDyC8/4dldyhTF8E8=;
+        b=YUVHiSIXPjOMZXRJSWOJ6cycwQMjyqcnxpdlF7flS/6dx25hW5vtgM8PMR4lN5I0h5
+         44cSX1wqIloWusdYYBHbP9wH7TisJ0f/gclugCoXjP9nByCIlB/jZj0RsMdeSzd8u0az
+         hq3SxrrjMy2z24sDYf9xlvwdqJy/vGO9DW6gSMYJLVbj4MJCUK78rRIVvuWMC5iM3flH
+         ECOjtf3BTFhfpCmzXQiYFDqQQLJKM1/xNsbfejruRPHC560F6zKIqVkJZZhkR2wfMsf9
+         ixYRG3mAdTZI2/Qc/c+/uGWeJ4gFVFIrAJGRsrEsqJPGzSRrq3rIat/QjLmlFinR4g8l
+         g4OQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=TY9Fq3LC1xXg14hd0WuKsgTduh/q3AHtb5rRCMjqthI=;
-        b=ZH6k5MRthkTszwtZj67xGd9C1huACYIhoyz+K9QTm/JRxIjFmZLG+GYnta3UNng2V3
-         nxnTqnd1eIJUJnPwLsxTYWtm9s2wB/yyZt+jdumDqiKD8PVMUq6OSLJctFdcbVGw//jQ
-         cVMt5/35rt1NL8hlqmarDMIHPRy499oqMgNvc3D55qZD25QrZgLUfAq9K97n+x+wYh5J
-         siE4tHMebMgg+elfgw/NQET6GYgdRFHpw2dmmY4zBotv1exwIWPtIThQeRIIj58vmqi0
-         NyBnljVF37ac59KyJtLaggBw5Tj30bxoPuJj2UAdQIDYYjmIOkJKAH8obouci4SughJ6
-         0RXg==
-X-Gm-Message-State: AOAM531WukF0a5RhBcM6bzXhaf5Qp60kX/iAUkaEIp7c+c/CQv+02RWL
-        5Su/bhejHToM8t4wwUbuYtDjPFuGSn+vsJajSXw+cg==
-X-Google-Smtp-Source: ABdhPJxaSx0GrfVYgNa6ttgTTx9DNETbX+EjiCtMH3XnmOpimLE18atcCkh+HHZjk+14Uco80rFogu5VL03hl/Tqrpw=
-X-Received: by 2002:a67:690e:: with SMTP id e14mr1364771vsc.34.1590660880942;
- Thu, 28 May 2020 03:14:40 -0700 (PDT)
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=k9E+YiCz7eYDmM11BkqW6Mr85TeDyC8/4dldyhTF8E8=;
+        b=Z26ZuHrmkyDUlausG9m3FdhB7lGdPAMMScuIKD70D93Bj3FAM1V1ZrjNgv0TYEd2Gb
+         AgDqbSS5UvlwZbfmySN3LJAl1B7E4oWc1T1cDMswxu5lZcOli05IIGyHMTBriImWSJUG
+         q+OS5GU7nyAmunQeLGhRBYTiEF3YIwNvABU1wEdAwZDeuwVN4mvXejR8+QU1ungcPFPf
+         ejjBQWIz3VjMiXcOGzIRIbz9DWB3kQBjjMjcIGOjBHC0th40KRr1Lecyf8Meu93qGaxq
+         MKtJod1N1yseixdRXMSLEzZ6Q9nFNq8pJTFWCBjEr9BZEZDbY99xhoEzF18LWH/yHfhu
+         BiTA==
+X-Gm-Message-State: AOAM532MqtooC+vEifxpbYBOBtplWwIuABqeu4yNglmbnh+S08sHLwKS
+        993Fv8SL34Uc91X8yxiQtx5upATkq7phGtGKeDAanytPt1k=
+X-Google-Smtp-Source: ABdhPJzq+Kx3OYL+6G1qhd2lkHQpjppzj1oPaVyPbutDkNuy2xuAXrFoC2t79djeyVLRUTgP3zWyrrJaCDTr4yv034k=
+X-Received: by 2002:a1f:fc06:: with SMTP id a6mr1443177vki.101.1590660918913;
+ Thu, 28 May 2020 03:15:18 -0700 (PDT)
 MIME-Version: 1.0
-References: <20200525074053.7309-1-vladimir.kondratiev@intel.com>
-In-Reply-To: <20200525074053.7309-1-vladimir.kondratiev@intel.com>
+References: <1590488522-9292-1-git-send-email-haibo.chen@nxp.com> <1590488522-9292-2-git-send-email-haibo.chen@nxp.com>
+In-Reply-To: <1590488522-9292-2-git-send-email-haibo.chen@nxp.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 28 May 2020 12:14:04 +0200
-Message-ID: <CAPDyKFqOMyXwqjPm8BoPqUEDeo9nmJ3TBryZd7-Gf76POxKjPg@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-cadence: fix PHY write
-To:     Vladimir Kondratiev <vladimir.kondratiev@intel.com>
+Date:   Thu, 28 May 2020 12:14:40 +0200
+Message-ID: <CAPDyKFoSSS0rh06Kso44J+ZFQC16K+Xttw6gQfUiganHKG5BXg@mail.gmail.com>
+Subject: Re: [PATCH 2/2] mmc: sdhci-esdhc-imx: disable the CMD CRC check for
+ standard tuning
+To:     Haibo Chen <haibo.chen@nxp.com>
 Cc:     Adrian Hunter <adrian.hunter@intel.com>,
         "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+        dl-linux-imx <linux-imx@nxp.com>,
+        Shawn Guo <shawnguo@kernel.org>,
+        Sascha Hauer <s.hauer@pengutronix.de>,
+        Sascha Hauer <kernel@pengutronix.de>,
+        Fabio Estevam <festevam@gmail.com>,
+        Aisheng Dong <aisheng.dong@nxp.com>,
+        Yangbo Lu <yangbo.lu@nxp.com>
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 25 May 2020 at 09:41, Vladimir Kondratiev
-<vladimir.kondratiev@intel.com> wrote:
+On Tue, 26 May 2020 at 12:32, <haibo.chen@nxp.com> wrote:
 >
-> Accordingly to Cadence documentation, PHY write procedure is:
+> From: Haibo Chen <haibo.chen@nxp.com>
 >
-> 1. Software sets the PHY Register Address (HRS04[5:0]) and the
->    PHY Write Data (HRS04[15:8]) fields.
-> 2. Software sets the PHY Write Transaction Request (HRS04[24]) field to 1.
-> 3. Software waits as the PHY Write Transaction Acknowledge (HRS04[26])
->    field is equal to 0.
-> 4. Hardware performs the write transaction to PHY register where
->    HRS04[15:8] is a data written to register under HRS04[5:0] address.
-> 5. Hardware sets the PHY Transaction Acknowledge (HRS04[26]) to 1 when
->    transaction is completed.
-> 6. Software clears the PHY Write Transaction Request (HRS04[24]) to 1
->    after noticing that the PHY Write Transaction Acknowledge (HRS04[26])
->    field is equal to 1.
-> 7. Software waits for the PHY Acknowledge Register (HRS04[26]) field is
->    equal to 0.
+> In current code, we add 1ms dealy after each tuning command for standard
+> tuning method. Adding this 1ms dealy is because USDHC default check the
+> CMD CRC and DATA line. If detect the CMD CRC, USDHC standard tuning
+> IC logic do not wait for the tuning data sending out by the card, trigger
+> the buffer read ready interrupt immediately, and step to next cycle. So
+> when next time the new tuning command send out by USDHC, card may still
+> not send out the tuning data of the upper command=EF=BC=8Cthen some eMMC =
+cards
+> may stuck, can't response to any command, block the whole tuning procedur=
+e.
 >
-> Add missing steps 3 and 7. Lack of these steps causes
-> integrity errors detested by hardware.
+> If do not check the CMD CRC for tuning, then do not has this issue. USDHC
+> will wait for the tuning data of each tuning command and check them. If t=
+he
+> tuning data pass the check, it also means the CMD line also okay for tuni=
+ng.
 >
-> Signed-off-by: Vladimir Kondratiev <vladimir.kondratiev@intel.com>
+> So this patch disable the CMD CRC check for tuning, save some time for th=
+e
+> whole tuning procedure.
+>
+> Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
 
 Applied for next, thanks!
 
@@ -102,45 +112,62 @@ Uffe
 
 
 > ---
->  drivers/mmc/host/sdhci-cadence.c | 10 +++++++++-
->  1 file changed, 9 insertions(+), 1 deletion(-)
+>  drivers/mmc/host/sdhci-esdhc-imx.c | 15 +++++++++++++--
+>  1 file changed, 13 insertions(+), 2 deletions(-)
 >
-> diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
-> index e474d3fa099e..6b2e7c43cbc1 100644
-> --- a/drivers/mmc/host/sdhci-cadence.c
-> +++ b/drivers/mmc/host/sdhci-cadence.c
-> @@ -114,6 +114,11 @@ static int sdhci_cdns_write_phy_reg(struct sdhci_cdns_priv *priv,
->         u32 tmp;
->         int ret;
+> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-=
+esdhc-imx.c
+> index 2cf7fa59270e..b0ddf3db440f 100644
+> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> @@ -91,6 +91,7 @@
+>  /* NOTE: the minimum valid tuning start tap for mx6sl is 1 */
+>  #define ESDHC_TUNING_START_TAP_DEFAULT 0x1
+>  #define ESDHC_TUNING_START_TAP_MASK    0x7f
+> +#define ESDHC_TUNING_CMD_CRC_CHECK_DISABLE     (1 << 7)
+>  #define ESDHC_TUNING_STEP_MASK         0x00070000
+>  #define ESDHC_TUNING_STEP_SHIFT                16
 >
-> +       ret = readl_poll_timeout(reg, tmp, !(tmp & SDHCI_CDNS_HRS04_ACK),
-> +                                0, 10);
-> +       if (ret)
-> +               return ret;
+> @@ -1316,6 +1317,18 @@ static void sdhci_esdhc_imx_hwinit(struct sdhci_ho=
+st *host)
+>                                 tmp |=3D imx_data->boarddata.tuning_step
+>                                         << ESDHC_TUNING_STEP_SHIFT;
+>                         }
 > +
->         tmp = FIELD_PREP(SDHCI_CDNS_HRS04_WDATA, data) |
->               FIELD_PREP(SDHCI_CDNS_HRS04_ADDR, addr);
->         writel(tmp, reg);
-> @@ -128,7 +133,10 @@ static int sdhci_cdns_write_phy_reg(struct sdhci_cdns_priv *priv,
->         tmp &= ~SDHCI_CDNS_HRS04_WR;
->         writel(tmp, reg);
+> +                       /* Disable the CMD CRC check for tuning, if not, =
+need to
+> +                        * add some delay after every tuning command, bec=
+ause
+> +                        * hardware standard tuning logic will directly g=
+o to next
+> +                        * step once it detect the CMD CRC error, will no=
+t wait for
+> +                        * the card side to finally send out the tuning d=
+ata, trigger
+> +                        * the buffer read ready interrupt immediately. I=
+f usdhc send
+> +                        * the next tuning command some eMMC card will st=
+uck, can't
+> +                        * response, block the tuning procedure or the fi=
+rst command
+> +                        * after the whole tuning procedure always can't =
+get any response.
+> +                        */
+> +                        tmp |=3D ESDHC_TUNING_CMD_CRC_CHECK_DISABLE;
+>                         writel(tmp, host->ioaddr + ESDHC_TUNING_CTRL);
+>                 } else if (imx_data->socdata->flags & ESDHC_FLAG_MAN_TUNI=
+NG) {
+>                         /*
+> @@ -1661,8 +1674,6 @@ static int sdhci_esdhc_imx_probe(struct platform_de=
+vice *pdev)
+>         if (err)
+>                 goto disable_ahb_clk;
 >
-> -       return 0;
-> +       ret = readl_poll_timeout(reg, tmp, !(tmp & SDHCI_CDNS_HRS04_ACK),
-> +                                0, 10);
-> +
-> +       return ret;
->  }
+> -       host->tuning_delay =3D 1;
+> -
+>         sdhci_esdhc_imx_hwinit(host);
 >
->  static unsigned int sdhci_cdns_phy_param_count(struct device_node *np)
+>         err =3D sdhci_add_host(host);
 > --
-> 2.20.1
->
-> ---------------------------------------------------------------------
-> Intel Israel (74) Limited
->
-> This e-mail and any attachments may contain confidential material for
-> the sole use of the intended recipient(s). Any review or distribution
-> by others is strictly prohibited. If you are not the intended
-> recipient, please contact the sender and delete all copies.
+> 2.17.1
 >
