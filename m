@@ -2,113 +2,119 @@ Return-Path: <SRS0=LShN=7L=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PULL_REQUEST,
-	MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2FFB6C433DF
-	for <linux-mmc@archiver.kernel.org>; Fri, 29 May 2020 10:32:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 98A03C433E1
+	for <linux-mmc@archiver.kernel.org>; Fri, 29 May 2020 10:36:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 09377207BC
-	for <linux-mmc@archiver.kernel.org>; Fri, 29 May 2020 10:32:37 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7797920776
+	for <linux-mmc@archiver.kernel.org>; Fri, 29 May 2020 10:36:35 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="ZE2McD10"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="n6OtqtRi"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725961AbgE2Kcg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 29 May 2020 06:32:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60144 "EHLO
+        id S1725681AbgE2Kge (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 29 May 2020 06:36:34 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60750 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725865AbgE2Kce (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 29 May 2020 06:32:34 -0400
-Received: from mail-lf1-x143.google.com (mail-lf1-x143.google.com [IPv6:2a00:1450:4864:20::143])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 82F59C08C5C6
-        for <linux-mmc@vger.kernel.org>; Fri, 29 May 2020 03:32:34 -0700 (PDT)
-Received: by mail-lf1-x143.google.com with SMTP id x22so1008687lfd.4
-        for <linux-mmc@vger.kernel.org>; Fri, 29 May 2020 03:32:34 -0700 (PDT)
+        with ESMTP id S1725836AbgE2Kga (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 29 May 2020 06:36:30 -0400
+Received: from mail-vs1-xe42.google.com (mail-vs1-xe42.google.com [IPv6:2607:f8b0:4864:20::e42])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 87883C08C5C8
+        for <linux-mmc@vger.kernel.org>; Fri, 29 May 2020 03:36:29 -0700 (PDT)
+Received: by mail-vs1-xe42.google.com with SMTP id u7so1189229vsp.7
+        for <linux-mmc@vger.kernel.org>; Fri, 29 May 2020 03:36:29 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=gUsASV2qevDpaTIODIKhB0T3yPkNMeRLmnhehfGPDPo=;
-        b=ZE2McD10j3rpPW+srhAM5CQLoE5IWRIsQFVOKyQKATTntubzhUeEQszymH+lSU4ZQx
-         YbU6MoPJ3yNoN3SfNzhJpx5+/fAs/yrO6xeHArYLmxoUL6UY80G3c0KM6x96tzbnwJXE
-         u/aKtw2sgH296T6rc0JqWpvFPXb97DgztLIPo/o9J8RB7lg1yb4UP8RnMg+rxCehf4Tp
-         U1It1EjCRGmtNsX83rOfs5oOBke3gsDbc6LXagVdZdikSq7lIKPANh7s/rR0In+kRa8r
-         8oUOyTJgegiuVv6nC3o9qMQhJFVDplCIRRIdQzg8k2RJitC2uf9dO2VOPIUUj2nNNUh4
-         GcSQ==
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=HmjuhvsPi7i8QqafSrWT+BKWCrvyW72ZyBBet/hxqD0=;
+        b=n6OtqtRiLbTORvfYG6+bQXzcgCH/G6pkw+zSMMdxMxkDlpoVqcIbqFNyv3NrrCz5UM
+         FYu3A0S/YnIkMA6bPm3usBVBl4ZBaVa7R9KMWxUFhoNB1G2oMSEiymI0XafYge8Sf0Vw
+         RE5rWLK+Ax0x/TMsslPBgGo/gJ7BZJ07OXg/tMJlBcLFWiVx5N0oeSsxW8LMHfj2MWbF
+         TrE2E2NBmbZV50QHjMp5wcPnnKffF5IPTYZFS6YILUdLLHlTJ9jvyGuKXuiOblPE7urJ
+         eKL9W0/yjaSHd7EMkRbmYeRpkPUCJZWIWARpOLgbdPj+Lxi4usxtZkAfc6wHgLFUil1t
+         8jGw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=gUsASV2qevDpaTIODIKhB0T3yPkNMeRLmnhehfGPDPo=;
-        b=qV9iW0CxDwm1KXKU6PCa3QpB2hbGzLfSqD1MCyzy9sUMAhoFWeZ/L45zNdvr/5ednm
-         5GyphxzjGVphhbodp4lC5Je6uhxOehSTpP4ZXAzVzGfWZ1XA/WSr/NJi6WjpyzXDGqq3
-         7uyNBfVi9DtLdX+2n1ykFfeyB8/d/RX81QzNgbnnxJzc4rxtoG1jSGgfLweIOHqTGmPx
-         WrOCQOgGEyTYaE8yr6Q3Rm9Hso43r//5+COSvPGdtB2I3abIWz1Kw19hLOJjE0U1mWz8
-         wmadWZlUaNj61gNqfKklwLbL8hqYb7gFAdY9HgjYPAhWrtzKylBjUPgFDB6rQpeEQCDE
-         jMcw==
-X-Gm-Message-State: AOAM531F5G7j0DaHWcxhODkpbxpNYjS7FxQdxBmKPXxGH/PFIpMtj0GV
-        jaqNRs7z7YHdq8bwDQSyp5Ut6A==
-X-Google-Smtp-Source: ABdhPJyomo5KZulw68tEyajivVTXQYIeJ+eK908jzIRxTB7Iu8gjMDZ676KNF6yYNXfUqPrE721eeQ==
-X-Received: by 2002:a19:c8e:: with SMTP id 136mr3995874lfm.72.1590748352738;
-        Fri, 29 May 2020 03:32:32 -0700 (PDT)
-Received: from localhost.localdomain (h-98-128-181-7.NA.cust.bahnhof.se. [98.128.181.7])
-        by smtp.gmail.com with ESMTPSA id l2sm1919348ljg.124.2020.05.29.03.32.30
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 29 May 2020 03:32:31 -0700 (PDT)
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-To:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [GIT PULL] MMC fixes for v5.7-rc8
-Date:   Fri, 29 May 2020 12:32:30 +0200
-Message-Id: <20200529103230.13171-1-ulf.hansson@linaro.org>
-X-Mailer: git-send-email 2.20.1
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=HmjuhvsPi7i8QqafSrWT+BKWCrvyW72ZyBBet/hxqD0=;
+        b=Ciicc1ZDF0Co3Za5uJCTeambumInD3+TKpl//INpZv4f2rYtVSWnqDvJwLmJfegs7m
+         mncYeSvQJ3O54SpHWcjpwsD2P1lPrOrGlUkYXGGOtvtw6IxyQBm/thdwTE5eLR/NI7Ja
+         sS4dS+tx3zELHHIbzWFwiGI7N6eyKdZI0QPpGceifebQoKGlhi8C9IK5Ajbi+MZroASX
+         9ngvk3icKbzcNy91tdCq4g2yMUON3iHpmkAVceQDj4eeOaENeHOsVOuoyIAWCfs2leEQ
+         zR0hTCK733PujyDKIpOax+LvTw+UnaKVb+EUWKHtiN+H2L20QRZpYV+f6NpDqUEKWREF
+         XjFg==
+X-Gm-Message-State: AOAM531EHdqO4R9w0yCViOAbopWIuknPj6JyNwwkP5QTco3IrhxDpJGv
+        KLHg5El9AC8SM/P9Rw9E2/9YmDIXlxseqRAd/JxBdA==
+X-Google-Smtp-Source: ABdhPJzBQ0zlzWRM+H9Ii1EWbIJoP5vdLRB7231T5LWWfcHEbqkYTyRcxm7AJOljOxCsWsLh6iMLrbF8H2nC95j2LAE=
+X-Received: by 2002:a67:1486:: with SMTP id 128mr5150038vsu.191.1590748585116;
+ Fri, 29 May 2020 03:36:25 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <1590678838-18099-1-git-send-email-vbadigan@codeaurora.org>
+In-Reply-To: <1590678838-18099-1-git-send-email-vbadigan@codeaurora.org>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Fri, 29 May 2020 12:35:48 +0200
+Message-ID: <CAPDyKFpC+C32oa4ucNLWeEGJ8PDwzi+X55Lp7UqrHR--Yc47mw@mail.gmail.com>
+Subject: Re: [PATCH V1] mmc: sdhci-msm: Clear tuning done flag while hs400 tuning
+To:     Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
+        "# 4.0+" <stable@vger.kernel.org>, Andy Gross <agross@kernel.org>,
+        Ritesh Harjani <riteshh@codeaurora.org>,
+        Venkat Gopalakrishnan <venkatg@codeaurora.org>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Linus,
+On Thu, 28 May 2020 at 17:14, Veerabhadrarao Badiganti
+<vbadigan@codeaurora.org> wrote:
+>
+> Clear tuning_done flag while executing tuning to ensure vendor
+> specific HS400 settings are applied properly when the controller
+> is re-initialized in HS400 mode.
+>
+> Without this, re-initialization of the qcom SDHC in HS400 mode fails
+> while resuming the driver from runtime-suspend or system-suspend.
+>
+> Fixes: ff06ce4 ("mmc: sdhci-msm: Add HS400 platform support")
+> Cc: stable@vger.kernel.org
+> Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
 
-Here's a PR with a couple of MMC fixes intended for v5.7-rc8. Details about the
-highlights are as usual found in the signed tag.
-
-Please pull this in!
+Applied for next, thanks!
 
 Kind regards
-Ulf Hansson
+Uffe
 
-
-The following changes since commit b9bbe6ed63b2b9f2c9ee5cbd0f2c946a2723f4ce:
-
-  Linux 5.7-rc6 (2020-05-17 16:48:37 -0700)
-
-are available in the Git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.7-rc6
-
-for you to fetch changes up to 202500d21654874aa03243e91f96de153ec61860:
-
-  mmc: block: Fix use-after-free issue for rpmb (2020-05-25 10:45:17 +0200)
-
-----------------------------------------------------------------
-MMC core:
- - Fix use-after-free issue for rpmb partition
-
-MMC host
- - Fix quirk for broken CQE support
-
-----------------------------------------------------------------
-Adrian Hunter (1):
-      mmc: sdhci: Fix SDHCI_QUIRK_BROKEN_CQE
-
-Peng Hao (1):
-      mmc: block: Fix use-after-free issue for rpmb
-
- drivers/mmc/core/block.c | 2 +-
- drivers/mmc/host/sdhci.c | 9 ++++++---
- 2 files changed, 7 insertions(+), 4 deletions(-)
+> ---
+>  drivers/mmc/host/sdhci-msm.c | 6 ++++++
+>  1 file changed, 6 insertions(+)
+>
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index 95cd973..b277dd7 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -1174,6 +1174,12 @@ static int sdhci_msm_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>         msm_host->use_cdr = true;
+>
+>         /*
+> +        * Clear tuning_done flag before tuning to ensure proper
+> +        * HS400 settings.
+> +        */
+> +       msm_host->tuning_done = 0;
+> +
+> +       /*
+>          * For HS400 tuning in HS200 timing requires:
+>          * - select MCLK/2 in VENDOR_SPEC
+>          * - program MCLK to 400MHz (or nearest supported) in GCC
+> --
+> Qualcomm India Private Limited, on behalf of Qualcomm Innovation Center, Inc., is a member of Code Aurora Forum, a Linux Foundation Collaborative Project
+>
