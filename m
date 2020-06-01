@@ -1,67 +1,83 @@
-Return-Path: <SRS0=LShN=7L=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=cZK/=7O=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
-	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-0.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E1295C433E0
-	for <linux-mmc@archiver.kernel.org>; Fri, 29 May 2020 21:10:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 78CF9C433E1
+	for <linux-mmc@archiver.kernel.org>; Mon,  1 Jun 2020 07:50:20 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id BBDD62054F
-	for <linux-mmc@archiver.kernel.org>; Fri, 29 May 2020 21:10:33 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1590786633;
-	bh=wbDSQIu+fxpS+dXqUvdtTPyHNi2/iFqBv10jvDeqrcM=;
-	h=Subject:From:In-Reply-To:References:Date:To:Cc:List-ID:From;
-	b=2Nh/nOxWuEcL4lWkJsM/OeZgfbnRoTTujmPZfvTPGlWa8R7Hzh9BLPwzqlddezO33
-	 SDbizCoSSXO+YZ50Vp+uclfU1UL4+al6HgqkcSoHMGgvHVmWORuZ7HjRsj5RFIxqo0
-	 z3zykBBUAciQtjPnzFLsEPZGqpDulPNGVFD2OgK0=
+	by mail.kernel.org (Postfix) with ESMTP id 4DA7520734
+	for <linux-mmc@archiver.kernel.org>; Mon,  1 Jun 2020 07:50:20 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="NQN6bqf/"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728369AbgE2VKI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 29 May 2020 17:10:08 -0400
-Received: from mail.kernel.org ([198.145.29.99]:33628 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728312AbgE2VKF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 29 May 2020 17:10:05 -0400
-Subject: Re: [GIT PULL] MMC fixes for v5.7-rc8
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1590786605;
-        bh=wbDSQIu+fxpS+dXqUvdtTPyHNi2/iFqBv10jvDeqrcM=;
-        h=From:In-Reply-To:References:Date:To:Cc:From;
-        b=wy8FOvsGTe+cUL3u8oIJpR36vnafcWUIu6Gah+6pOR8PWr4M6xzMKpgpo7t71oBV+
-         nqg1YZpZq6QhKyZ95afzKu+H3p3FQZsxeSxL8GXgoP96YBvncHjQMAC0e5H1VCD5lD
-         DCMAAFoIiR3hggpPW0d/o7wrxD6+mDOpvBKfEFHc=
-From:   pr-tracker-bot@kernel.org
-In-Reply-To: <20200529103230.13171-1-ulf.hansson@linaro.org>
-References: <20200529103230.13171-1-ulf.hansson@linaro.org>
-X-PR-Tracked-List-Id: <linux-kernel.vger.kernel.org>
-X-PR-Tracked-Message-Id: <20200529103230.13171-1-ulf.hansson@linaro.org>
-X-PR-Tracked-Remote: git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.7-rc6
-X-PR-Tracked-Commit-Id: 202500d21654874aa03243e91f96de153ec61860
-X-PR-Merge-Tree: torvalds/linux.git
-X-PR-Merge-Refname: refs/heads/master
-X-PR-Merge-Commit-Id: 411ea6790e736da763d02da7e704107ce9365451
-Message-Id: <159078660518.32003.11524358665584005860.pr-tracker-bot@kernel.org>
-Date:   Fri, 29 May 2020 21:10:05 +0000
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+        id S1726056AbgFAHuT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 1 Jun 2020 03:50:19 -0400
+Received: from us-smtp-1.mimecast.com ([207.211.31.81]:27658 "EHLO
+        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1725935AbgFAHuT (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 1 Jun 2020 03:50:19 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1590997818;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=IuO46ycNz8mneB+aXPJm85h+RFJWz/TY+HoUCs4wBY8=;
+        b=NQN6bqf/niicZYal857+Jbw0LTOyT0X/vq0nBk/aMgJPRaBGb+tIXpGfMfnLXwf+DMyUVc
+        jSP8pLGDDUKorZR/vi5IJUIL56uQO70POfwu5tCwOeq8MD6JpHSwJ4ObGk2e21xNeHHMlf
+        qjk1NJP8rBF7z/uLmBDk3ZXW7kUg7tE=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-167-5Kga0UcWNre1R3UidKM26A-1; Mon, 01 Jun 2020 03:50:13 -0400
+X-MC-Unique: 5Kga0UcWNre1R3UidKM26A-1
+Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.phx2.redhat.com [10.5.11.15])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 42EB9100CCC2;
+        Mon,  1 Jun 2020 07:50:12 +0000 (UTC)
+Received: from T590 (ovpn-13-152.pek2.redhat.com [10.72.13.152])
+        by smtp.corp.redhat.com (Postfix) with ESMTPS id 0A29C78EA8;
+        Mon,  1 Jun 2020 07:50:01 +0000 (UTC)
+Date:   Mon, 1 Jun 2020 15:49:57 +0800
+From:   Ming Lei <ming.lei@redhat.com>
+To:     Linus Walleij <linus.walleij@linaro.org>
+Cc:     linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>,
+        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org,
+        Johannes Thumshirn <jthumshirn@suse.de>,
+        Christoph Hellwig <hch@lst.de>,
+        Damien Le Moal <damien.lemoal@wdc.com>,
+        Paolo Valente <paolo.valente@linaro.org>
+Subject: Re: [PATCH] block: Flag elevators suitable for single queue
+Message-ID: <20200601074957.GE1181806@T590>
+References: <20200528081003.238804-1-linus.walleij@linaro.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20200528081003.238804-1-linus.walleij@linaro.org>
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.15
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The pull request you sent on Fri, 29 May 2020 12:32:30 +0200:
+On Thu, May 28, 2020 at 10:10:03AM +0200, Linus Walleij wrote:
+> The Kyber block scheduler is not suitable for single hardware
+> queue devices, so add a new flag for single hardware queue
+> devices and add that to the deadline and BFQ schedulers
+> so the Kyber scheduler will not be selected for single queue
+> devices.
 
-> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.7-rc6
+The above may not be true for some single hw queue high performance HBA(
+such as megasas), which can get better performance from none, so it is
+reasonable to get better performance from kyber, see 6ce3dd6eec11 ("blk-mq:
+issue directly if hw queue isn't busy in case of 'none'"), and the
+following link:
 
-has been merged into torvalds/linux.git:
-https://git.kernel.org/torvalds/c/411ea6790e736da763d02da7e704107ce9365451
+https://lore.kernel.org/linux-block/20180710010331.27479-1-ming.lei@redhat.com/
 
-Thank you!
+Thanks, 
+Ming
 
--- 
-Deet-doot-dot, I am a bot.
-https://korg.wiki.kernel.org/userdoc/prtracker
