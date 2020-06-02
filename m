@@ -2,262 +2,168 @@ Return-Path: <SRS0=LU6H=7P=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-0.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D2DB9C433E6
-	for <linux-mmc@archiver.kernel.org>; Tue,  2 Jun 2020 03:48:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C36AAC433DF
+	for <linux-mmc@archiver.kernel.org>; Tue,  2 Jun 2020 06:46:44 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B88F12086A
-	for <linux-mmc@archiver.kernel.org>; Tue,  2 Jun 2020 03:48:29 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A4E3E20772
+	for <linux-mmc@archiver.kernel.org>; Tue,  2 Jun 2020 06:46:44 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="cKJ0Ua8V"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726181AbgFBDsQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 1 Jun 2020 23:48:16 -0400
-Received: from inva021.nxp.com ([92.121.34.21]:40082 "EHLO inva021.nxp.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725872AbgFBDsQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 1 Jun 2020 23:48:16 -0400
-Received: from inva021.nxp.com (localhost [127.0.0.1])
-        by inva021.eu-rdc02.nxp.com (Postfix) with ESMTP id 6AA762005FD;
-        Tue,  2 Jun 2020 05:48:13 +0200 (CEST)
-Received: from invc005.ap-rdc01.nxp.com (invc005.ap-rdc01.nxp.com [165.114.16.14])
-        by inva021.eu-rdc02.nxp.com (Postfix) with ESMTP id 4C7502005FE;
-        Tue,  2 Jun 2020 05:48:08 +0200 (CEST)
-Received: from localhost.localdomain (shlinux2.ap.freescale.net [10.192.224.44])
-        by invc005.ap-rdc01.nxp.com (Postfix) with ESMTP id 065BF40285;
-        Tue,  2 Jun 2020 11:48:01 +0800 (SGT)
-From:   Anson Huang <Anson.Huang@nxp.com>
-To:     ulf.hansson@linaro.org, robh+dt@kernel.org, shawnguo@kernel.org,
-        s.hauer@pengutronix.de, kernel@pengutronix.de, festevam@gmail.com,
-        mpa@pengutronix.de, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-kernel@vger.kernel.org
-Cc:     Linux-imx@nxp.com
-Subject: [PATCH 1/3] dt-bindings: mmc: Convert imx esdhc to json-schema
-Date:   Tue,  2 Jun 2020 11:37:44 +0800
-Message-Id: <1591069066-12727-2-git-send-email-Anson.Huang@nxp.com>
-X-Mailer: git-send-email 2.7.4
-In-Reply-To: <1591069066-12727-1-git-send-email-Anson.Huang@nxp.com>
-References: <1591069066-12727-1-git-send-email-Anson.Huang@nxp.com>
-X-Virus-Scanned: ClamAV using ClamSMTP
+        id S1725298AbgFBGqo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 2 Jun 2020 02:46:44 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43956 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726144AbgFBGqn (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Jun 2020 02:46:43 -0400
+Received: from mail-vk1-xa42.google.com (mail-vk1-xa42.google.com [IPv6:2607:f8b0:4864:20::a42])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 79CEAC05BD43
+        for <linux-mmc@vger.kernel.org>; Mon,  1 Jun 2020 23:46:43 -0700 (PDT)
+Received: by mail-vk1-xa42.google.com with SMTP id t23so638679vkt.5
+        for <linux-mmc@vger.kernel.org>; Mon, 01 Jun 2020 23:46:43 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=po5KhSQTeo32/YVK41COchciTQ5Axh4/cuzyzfj7k8Y=;
+        b=cKJ0Ua8VUyJPxTXav2T7v9Iap1uoLnK2FAfVwkXDm6QLkxuY2sRpJQ8/gjoSeD9I5F
+         GtO1vc4iUY2sO/v2w6oGyi5KRwIXLd1/+tDtPljWs4g3XWjZx5uh9Q+dlz0A91L5eCCd
+         gm+FvNbqO9Lrbd39hqeFozWz1NVGptqVi4kJuPAq9ysg+mFnC+b8I1ySRNQI21vhUCE9
+         Bk5QLuGj6X6NurT6EzvGQb09ELdfs6SRHqOoL1GK7A1WT89qM8fRz0JA9VYMYmiTNg16
+         7Tn2UsWhITskp/GIcxh/YPUkgspoIh+IZ6MDzyvf7gtl3KGdfCShIH84jeLf+yCTRYUa
+         6VTA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=po5KhSQTeo32/YVK41COchciTQ5Axh4/cuzyzfj7k8Y=;
+        b=eFdkH4c5gmmhnLjc9ZD1GGXlqI1vDXqHGU/7ETCDyGYqyGJ/5Tekz3GAQN0x55eIej
+         uFa450Z/ljnp5gIlUoCCgOu6wOO6OY4jBU+BJxcgB4ocEzLH5OXdiewfwUKukHvoBIY/
+         Zw21UOiHXkfs8/Ykcgv2f/97VUJ1EpOpouLDEvdjusleozUNXkR3WmP6o2Zt6y1jUAts
+         kmWnRghs0AjfBnsB4S6bALiuqRHF+XkgwGCthk9Mz7Kdn+EjwcVWVC74YO51NxZc6npR
+         eGmFEDwX3UNPtGsN4CCO2TZbxZN7FKBTPeXpqfr+KoVBOFTUcaVcCm8D8ZmjJgbz+WXY
+         q65Q==
+X-Gm-Message-State: AOAM533DY2FMZKyhzyter9E5DtuYOagKqNRXVd9PolSAkrV8cXP9GZeE
+        Q2YLqRZpDTJy+m95RZzEOQqAzxIkfyNS3etr4U/gGA==
+X-Google-Smtp-Source: ABdhPJwk2Bn3ClGMFwno2UudGxk3fxDlJ6UnRjdygaD9Zp+7Cb47KxvzLjYfdTNTDbz6LB5+4cgoo5UQLmemmh+F/HQ=
+X-Received: by 2002:ac5:cc44:: with SMTP id l4mr8633992vkm.43.1591080402504;
+ Mon, 01 Jun 2020 23:46:42 -0700 (PDT)
+MIME-Version: 1.0
+References: <20200528081003.238804-1-linus.walleij@linaro.org>
+ <20200601074957.GE1181806@T590> <CACRpkdYL4-Z=kaS+RfniVr=Sn-yOf+=CKMJDsn=eTK3atmGohg@mail.gmail.com>
+ <20200601115818.GB1190838@T590> <CAPDyKFq2paDu9ogEFh6VXWq8___FLeEaNyBWhkMSdpZYpEytQQ@mail.gmail.com>
+ <7f9aaf69b24b794ca4c9c126eb2394862e276c73.camel@wdc.com> <6bda7563-fc47-e049-ed55-265f58ae522c@kernel.dk>
+In-Reply-To: <6bda7563-fc47-e049-ed55-265f58ae522c@kernel.dk>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Tue, 2 Jun 2020 08:46:06 +0200
+Message-ID: <CAPDyKFoNQwmtrw1Ka=M6SKbnKbD_aapkmLBZ-Ji-YgSFEhT5ow@mail.gmail.com>
+Subject: Re: [PATCH] block: Flag elevators suitable for single queue
+To:     Jens Axboe <axboe@kernel.dk>
+Cc:     Damien Le Moal <Damien.LeMoal@wdc.com>,
+        "ming.lei@redhat.com" <ming.lei@redhat.com>,
+        "jthumshirn@suse.de" <jthumshirn@suse.de>,
+        "hch@lst.de" <hch@lst.de>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linus.walleij@linaro.org" <linus.walleij@linaro.org>,
+        "paolo.valente@linaro.org" <paolo.valente@linaro.org>,
+        "linux-mtd@lists.infradead.org" <linux-mtd@lists.infradead.org>,
+        "linux-block@vger.kernel.org" <linux-block@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Convert the i.MX ESDHC binding to DT schema format using json-schema
+On Tue, 2 Jun 2020 at 01:45, Jens Axboe <axboe@kernel.dk> wrote:
+>
+> On 6/1/20 5:37 PM, Damien Le Moal wrote:
+> > On Mon, 2020-06-01 at 14:53 +0200, Ulf Hansson wrote:
+> >> On Mon, 1 Jun 2020 at 13:58, Ming Lei <ming.lei@redhat.com> wrote:
+> >>> On Mon, Jun 01, 2020 at 01:36:54PM +0200, Linus Walleij wrote:
+> >>>> On Mon, Jun 1, 2020 at 9:50 AM Ming Lei <ming.lei@redhat.com> wrote:
+> >>>>> On Thu, May 28, 2020 at 10:10:03AM +0200, Linus Walleij wrote:
+> >>>>>> The Kyber block scheduler is not suitable for single hardware
+> >>>>>> queue devices, so add a new flag for single hardware queue
+> >>>>>> devices and add that to the deadline and BFQ schedulers
+> >>>>>> so the Kyber scheduler will not be selected for single queue
+> >>>>>> devices.
+> >>>>>
+> >>>>> The above may not be true for some single hw queue high performance HBA(
+> >>>>> such as megasas), which can get better performance from none, so it is
+> >>>>> reasonable to get better performance from kyber, see 6ce3dd6eec11 ("blk-mq:
+> >>>>> issue directly if hw queue isn't busy in case of 'none'"), and the
+> >>>>> following link:
+> >>>>>
+> >>>>> https://lore.kernel.org/linux-block/20180710010331.27479-1-ming.lei@redhat.com/
+> >>>>
+> >>>> I see, but isn't the case rather that none is preferred and kyber gives
+> >>>> the same characteristics because it's not standing in the way
+> >>>> as much?
+> >>>
+> >>> Kyber has its own characteristic, such as fair read & write, better
+> >>> IO merge. And the decision on scheduler isn't only related with device,
+> >>> but also with workloads.
+> >>>
+> >>>> It looks like if we should add a special flag for these devices with
+> >>>> very fast single queues so they can say "I prefer none", do you
+> >>>> agree?
+> >>>
+> >>> I am not sure if it is easy to add such flag, because it isn't only
+> >>> related with HBA, but also with the attached disks.
+> >>>
+> >>
+> >> In general I don't mind the idea of giving hints from lower layer
+> >> block devices, about what kind of scheduling algorithm that could make
+> >> sense (as long it's on a reasonable granularity).
+> >>
+> >> If I understand your point correctly, what you are saying is that it
+> >> isn't easy or even possible for some block devices HWs. However, that
+> >> should be fine, as it wouldn't be mandatory to set this kind of flags,
+> >> but
+> >> instead could help where we see it fit, right?
+> >
+> > The elevator features flag was implemented not as a hint, but as hard
+> > requirements for elevators that are needed (mandatory) for a particular
+> > device type for correct operation. By correct operation, I mean "no IO
+> > errors or weird behavior resulting in errors such as timeouts". Until
+> > now, the only hard requirement we have is for zoned block devices which
+> > need mq-deadline to guarantee in-order dispatch of write commands (for
+> > sequential zones writing).
+> >
+> > We definitely could add hint flags to better help the block layer
+> > decide on the default optimal elevator for a particular device type,
+> > but as is, the elevator features will completely prevent the use of any
+> > other elevator that does not have the feature set. Those elevators will
+> > not be seen in /sys/block/<dev>/queue/scheduler. This may be a little
+> > too much for hint level rather than hard requirement.
+> >
+> > Furthermore, as Ming said, this depends on the HBA too rather than just
+> > the device itself. E.g. the smartpqi driver (Microsemi SAS HBAs)
+> > exposes single hard-disks as well as fast RAID arrays as multi-queue
+> > devices. While kyber may make sense for the latter, it probably does
+> > not make much sense for the former.
+> >
+> > In kernel vs udev rules for setting the optimal elevator for a
+> > particular device type should also be considered.
+>
+> Agree, the elevator flags are hard requirements, which doesn't match
+> what this patch is trying to do. There's absolutely nothing wrong with
+> using none or kyber on single queue devices, hence it should be possible
+> to configure it as such.
 
-Signed-off-by: Anson Huang <Anson.Huang@nxp.com>
----
- .../devicetree/bindings/mmc/fsl-imx-esdhc.txt      |  67 -----------
- .../devicetree/bindings/mmc/fsl-imx-esdhc.yaml     | 122 +++++++++++++++++++++
- 2 files changed, 122 insertions(+), 67 deletions(-)
- delete mode 100644 Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
- create mode 100644 Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
+I agree, the elevator flags as is, currently don't work for giving
+hints from lower block layers. However, I still think it would be
+worth exploring the idea that is brought up here.
 
-diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
-deleted file mode 100644
-index de1b8bd..0000000
---- a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
-+++ /dev/null
-@@ -1,67 +0,0 @@
--* Freescale Enhanced Secure Digital Host Controller (eSDHC) for i.MX
--
--The Enhanced Secure Digital Host Controller on Freescale i.MX family
--provides an interface for MMC, SD, and SDIO types of memory cards.
--
--This file documents differences between the core properties described
--by mmc.txt and the properties used by the sdhci-esdhc-imx driver.
--
--Required properties:
--- compatible : Should be "fsl,<chip>-esdhc", the supported chips include
--	       "fsl,imx25-esdhc"
--	       "fsl,imx35-esdhc"
--	       "fsl,imx51-esdhc"
--	       "fsl,imx53-esdhc"
--	       "fsl,imx6q-usdhc"
--	       "fsl,imx6sl-usdhc"
--	       "fsl,imx6sx-usdhc"
--	       "fsl,imx6ull-usdhc"
--	       "fsl,imx7d-usdhc"
--	       "fsl,imx7ulp-usdhc"
--	       "fsl,imx8mq-usdhc"
--	       "fsl,imx8mm-usdhc"
--	       "fsl,imx8mn-usdhc"
--	       "fsl,imx8mp-usdhc"
--	       "fsl,imx8qm-usdhc"
--	       "fsl,imx8qxp-usdhc"
--
--Optional properties:
--- fsl,wp-controller : Indicate to use controller internal write protection
--- fsl,delay-line : Specify the number of delay cells for override mode.
--  This is used to set the clock delay for DLL(Delay Line) on override mode
--  to select a proper data sampling window in case the clock quality is not good
--  due to signal path is too long on the board. Please refer to eSDHC/uSDHC
--  chapter, DLL (Delay Line) section in RM for details.
--- voltage-ranges : Specify the voltage range in case there are software
--  transparent level shifters on the outputs of the controller. Two cells are
--  required, first cell specifies minimum slot voltage (mV), second cell
--  specifies maximum slot voltage (mV). Several ranges could be specified.
--- fsl,tuning-start-tap: Specify the start dealy cell point when send first CMD19
--  in tuning procedure.
--- fsl,tuning-step: Specify the increasing delay cell steps in tuning procedure.
--  The uSDHC use one delay cell as default increasing step to do tuning process.
--  This property allows user to change the tuning step to more than one delay
--  cells which is useful for some special boards or cards when the default
--  tuning step can't find the proper delay window within limited tuning retries.
--- fsl,strobe-dll-delay-target: Specify the strobe dll control slave delay target.
--  This delay target programming host controller loopback read clock, and this
--  property allows user to change the delay target for the strobe input read clock.
--  If not use this property, driver default set the delay target to value 7.
--  Only eMMC HS400 mode need to take care of this property.
--
--Examples:
--
--esdhc@70004000 {
--	compatible = "fsl,imx51-esdhc";
--	reg = <0x70004000 0x4000>;
--	interrupts = <1>;
--	fsl,wp-controller;
--};
--
--esdhc@70008000 {
--	compatible = "fsl,imx51-esdhc";
--	reg = <0x70008000 0x4000>;
--	interrupts = <2>;
--	cd-gpios = <&gpio1 6 0>; /* GPIO1_6 */
--	wp-gpios = <&gpio1 5 0>; /* GPIO1_5 */
--};
-diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
-new file mode 100644
-index 0000000..7d0ea27
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
-@@ -0,0 +1,122 @@
-+# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
-+%YAML 1.2
-+---
-+$id: http://devicetree.org/schemas/mmc/fsl-imx-esdhc.yaml#
-+$schema: http://devicetree.org/meta-schemas/core.yaml#
-+
-+title: Freescale Enhanced Secure Digital Host Controller (eSDHC) for i.MX
-+
-+maintainers:
-+  - Shawn Guo <shawn.guo@linaro.org>
-+
-+allOf:
-+  - $ref: "mmc-controller.yaml"
-+
-+description: |
-+  The Enhanced Secure Digital Host Controller on Freescale i.MX family
-+  provides an interface for MMC, SD, and SDIO types of memory cards.
-+
-+  This file documents differences between the core properties described
-+  by mmc.txt and the properties used by the sdhci-esdhc-imx driver.
-+
-+properties:
-+  compatible:
-+    enum:
-+      - fsl,imx25-esdhc
-+      - fsl,imx35-esdhc
-+      - fsl,imx51-esdhc
-+      - fsl,imx53-esdhc
-+      - fsl,imx6q-usdhc
-+      - fsl,imx6sl-usdhc
-+      - fsl,imx6sx-usdhc
-+      - fsl,imx6ull-usdhc
-+      - fsl,imx7d-usdhc
-+      - fsl,imx7ulp-usdhc
-+      - fsl,imx8mq-usdhc
-+      - fsl,imx8mm-usdhc
-+      - fsl,imx8mn-usdhc
-+      - fsl,imx8mp-usdhc
-+      - fsl,imx8qm-usdhc
-+      - fsl,imx8qxp-usdhc
-+
-+  reg:
-+    maxItems: 1
-+
-+  interrupts:
-+    maxItems: 1
-+
-+  fsl,wp-controller:
-+    description: |
-+      boolean, if present, indicate to use controller internal write protection.
-+    type: boolean
-+
-+  fsl,delay-line:
-+    $ref: /schemas/types.yaml#/definitions/uint32
-+    description: |
-+      Specify the number of delay cells for override mode.
-+      This is used to set the clock delay for DLL(Delay Line) on override mode
-+      to select a proper data sampling window in case the clock quality is not good
-+      due to signal path is too long on the board. Please refer to eSDHC/uSDHC
-+      chapter, DLL (Delay Line) section in RM for details.
-+    default: 0
-+
-+  voltage-ranges:
-+    $ref: '/schemas/types.yaml#/definitions/uint32-matrix'
-+    description: |
-+      Specify the voltage range in case there are software
-+      transparent level shifters on the outputs of the controller. Two cells are
-+      required, first cell specifies minimum slot voltage (mV), second cell
-+      specifies maximum slot voltage (mV). Several ranges could be specified.
-+    items:
-+      items:
-+        - description: value for minimum slot voltage
-+        - description: value for maximum slot voltage
-+    maxItems: 1
-+
-+  fsl,tuning-start-tap:
-+    $ref: /schemas/types.yaml#/definitions/uint32
-+    description: |
-+      Specify the start dealy cell point when send first CMD19 in tuning procedure.
-+    default: 0
-+
-+  fsl,tuning-step:
-+    $ref: /schemas/types.yaml#/definitions/uint32
-+    description: |
-+      Specify the increasing delay cell steps in tuning procedure.
-+      The uSDHC use one delay cell as default increasing step to do tuning process.
-+      This property allows user to change the tuning step to more than one delay
-+      cells which is useful for some special boards or cards when the default
-+      tuning step can't find the proper delay window within limited tuning retries.
-+    default: 0
-+
-+  fsl,strobe-dll-delay-target:
-+    $ref: /schemas/types.yaml#/definitions/uint32
-+    description: |
-+      Specify the strobe dll control slave delay target.
-+      This delay target programming host controller loopback read clock, and this
-+      property allows user to change the delay target for the strobe input read clock.
-+      If not use this property, driver default set the delay target to value 7.
-+      Only eMMC HS400 mode need to take care of this property.
-+    default: 0
-+
-+required:
-+  - compatible
-+  - reg
-+  - interrupts
-+
-+examples:
-+  - |
-+    mmc@70004000 {
-+        compatible = "fsl,imx51-esdhc";
-+        reg = <0x70004000 0x4000>;
-+        interrupts = <1>;
-+        fsl,wp-controller;
-+    };
-+
-+    mmc@70008000 {
-+        compatible = "fsl,imx51-esdhc";
-+        reg = <0x70008000 0x4000>;
-+        interrupts = <2>;
-+        cd-gpios = <&gpio1 6 0>; /* GPIO1_6 */
-+        wp-gpios = <&gpio1 5 0>; /* GPIO1_5 */
-+    };
--- 
-2.7.4
+The point is, even if it's perfectly fine to use kyber for MMC/SD, for
+example, it would make little sense as BFQ performs better on this
+type of single queue storage device. So, why solely rely on userspace
+udev rules, when we can, in-kernel, help to decide what is the best
+configuration?
 
+Kind regards
+Uffe
