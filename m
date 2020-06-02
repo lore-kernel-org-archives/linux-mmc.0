@@ -2,114 +2,412 @@ Return-Path: <SRS0=LU6H=7P=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-0.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6242CC433E0
-	for <linux-mmc@archiver.kernel.org>; Tue,  2 Jun 2020 07:13:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D7CD2C433E1
+	for <linux-mmc@archiver.kernel.org>; Tue,  2 Jun 2020 08:36:57 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 47317206A2
-	for <linux-mmc@archiver.kernel.org>; Tue,  2 Jun 2020 07:13:56 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B14D82077D
+	for <linux-mmc@archiver.kernel.org>; Tue,  2 Jun 2020 08:36:57 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="jy5AiYo2"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725921AbgFBHNz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 2 Jun 2020 03:13:55 -0400
-Received: from rtits2.realtek.com ([211.75.126.72]:39560 "EHLO
-        rtits2.realtek.com.tw" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725900AbgFBHNz (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Jun 2020 03:13:55 -0400
-Authenticated-By: 
-X-SpamFilter-By: ArmorX SpamTrap 5.69 with qID 0527DSCS0001740, This message is accepted by code: ctloc85258
-Received: from mail.realtek.com (rtexmb06.realtek.com.tw[172.21.6.99])
-        by rtits2.realtek.com.tw (8.15.2/2.66/5.86) with ESMTPS id 0527DSCS0001740
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=NOT);
-        Tue, 2 Jun 2020 15:13:28 +0800
-Received: from RTEXMB04.realtek.com.tw (172.21.6.97) by
- RTEXMB06.realtek.com.tw (172.21.6.99) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.1779.2; Tue, 2 Jun 2020 15:13:27 +0800
-Received: from RTEXMB01.realtek.com.tw (172.21.6.94) by
- RTEXMB04.realtek.com.tw (172.21.6.97) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.1779.2; Tue, 2 Jun 2020 15:13:27 +0800
-Received: from RTEXMB01.realtek.com.tw ([fe80::d53a:d9a5:318:7cd8]) by
- RTEXMB01.realtek.com.tw ([fe80::d53a:d9a5:318:7cd8%5]) with mapi id
- 15.01.1779.005; Tue, 2 Jun 2020 15:13:27 +0800
-From:   =?utf-8?B?5ZCz5piK5r6EIFJpY2t5?= <ricky_wu@realtek.com>
-To:     Philip Schwartz <philquadra@gmail.com>,
-        Randy Dunlap <rdunlap@infradead.org>
-CC:     "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "Greg Kroah-Hartman" <gregkh@linuxfoundation.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>
-Subject: RE: Bug in your kernel since version 5.2
-Thread-Topic: Bug in your kernel since version 5.2
-Thread-Index: AQHWOHWyfrvx4DwjCUuaFCjruHqHp6jD+PmAgADtNkA=
-Date:   Tue, 2 Jun 2020 07:13:26 +0000
-Message-ID: <cc342555d3b343d59a7824a7e20d0907@realtek.com>
-References: <CACYmiSfM00o864c5pxxWEQNZsgFMkNwJePCGvae6P7o31NXMyw@mail.gmail.com>
- <0fc7c8c2-ac6a-2b66-074b-92b5d03219b6@infradead.org>
- <CACYmiSer8FA+qjh8NHZJ2maxSd-=RwDdZ2F7_-E4uM1NXuZ8gQ@mail.gmail.com>
-In-Reply-To: <CACYmiSer8FA+qjh8NHZJ2maxSd-=RwDdZ2F7_-E4uM1NXuZ8gQ@mail.gmail.com>
-Accept-Language: zh-TW, en-US
-Content-Language: zh-TW
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-x-originating-ip: [172.22.88.99]
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+        id S1726311AbgFBIg4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 2 Jun 2020 04:36:56 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60928 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726110AbgFBIgz (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Jun 2020 04:36:55 -0400
+Received: from mail-ua1-x944.google.com (mail-ua1-x944.google.com [IPv6:2607:f8b0:4864:20::944])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 92439C05BD43
+        for <linux-mmc@vger.kernel.org>; Tue,  2 Jun 2020 01:36:53 -0700 (PDT)
+Received: by mail-ua1-x944.google.com with SMTP id w20so971549uaa.2
+        for <linux-mmc@vger.kernel.org>; Tue, 02 Jun 2020 01:36:53 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc:content-transfer-encoding;
+        bh=H3Yxpmvf/jSIgS2LxZ4b2NRQSqd0Cs8jFnBdeCalSV4=;
+        b=jy5AiYo21Nj8g9MlweO+Mqsyt6anwUeETomK/CRHigeKq9x61noYUPLRhLPYVLLIxQ
+         Zxi05WXhVs+Ja+kkTFI7lfb9G4CHRLnQ8RcIKu2Jmpw9MNpOFrAHhgwyr07COj2BJfqM
+         iGjQDtcC2tD2hQJZs/j4VoXop25hiy1MbFM0JTZwKuhUUR7ncKxoeW9apvjsxuHX128g
+         UEuZ/sAO9tFKVDTme5woXlyyvVF+nqYazQF2YVAZv7wJV76FgvnkYdd2DyLOGDoXO0pu
+         xdXG7ZUvAJ29hFu9cqU3lcPQuIsrorGBxZd/xt3Onlhocm3hwruxnwIpPNMUxwLv0fW5
+         9+3g==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=H3Yxpmvf/jSIgS2LxZ4b2NRQSqd0Cs8jFnBdeCalSV4=;
+        b=bQZiDzrEHPaXGuvNltksFd93P/OFYFl+yxdT551bgKr+HZaWkXMRS/k9d9/vaDvbwu
+         tOiLbc4nMxIdUa7AE7cq3Pul9i8VP1+0bLt6wElDXYXN7auyTFT39FsE5hNz7ofBcgXY
+         mxU0BfRHo4a3HeczmHjf9ALs8nwap2n5pD4SLq8V4hRarMfbwN4OiCFUaK2qWx5SVA97
+         bZxNleExbnMmBfooPLB/GxcbhyqK9zbWh3suyCqqUUhompQZjuT2Vjvm6PPHKpFizjBr
+         SJujliAMGunMOG+ZM9FBt+MM4vF1ElgdO5pgdxh+iwGMI5X0eeiov/snK5akzAXy1cIv
+         snlQ==
+X-Gm-Message-State: AOAM532wBj1rW7pgO56MCuVdFeFHSJGCW6gwuf1SgpN6MIEFWGvMoJeC
+        QqsOCynmjxhymnXpz8pme5ugwfQCPfezF92Km1E83g==
+X-Google-Smtp-Source: ABdhPJymekmfL7pO0Vtb4MHnGLHYk/wBoElXzxSAvhbj+sCV77rPXmv1viK2rXGHyITSf+G6ilqnfhyb6qV/id1CjgM=
+X-Received: by 2002:a9f:3701:: with SMTP id z1mr17706819uad.100.1591087009888;
+ Tue, 02 Jun 2020 01:36:49 -0700 (PDT)
 MIME-Version: 1.0
+References: <1587864346-3144-1-git-send-email-rui_feng@realsil.com.cn>
+ <20200427061426.GA11270@infradead.org> <2A308283684ECD4B896628E09AF5361E028BCA26@RS-MBS01.realsil.com.cn>
+ <CAK8P3a0EY=FOu5j5DG1BzMEoy_6nEy129kniWCjMYDEdO1o_Jw@mail.gmail.com>
+ <2A308283684ECD4B896628E09AF5361E028BCB4B@RS-MBS01.realsil.com.cn>
+ <CAPDyKFqWAzzHDtCwaUUBVvzxX0cf46V-6RZrZ-jvnxpptNKppA@mail.gmail.com>
+ <2A308283684ECD4B896628E09AF5361E59ACDB91@RS-MBS01.realsil.com.cn>
+ <CAPDyKFo9X9ghjCeF_kGE2BhB+3QiMAMbD1Qz53saXshxy9odVg@mail.gmail.com>
+ <2A308283684ECD4B896628E09AF5361E59AD1194@RS-MBS01.realsil.com.cn>
+ <CAPDyKFp0Ahcx=iJSGeG19ekDa4rykvAnDHrn4PF5pOoONuH0RA@mail.gmail.com> <2A308283684ECD4B896628E09AF5361E59AD13F0@RS-MBS01.realsil.com.cn>
+In-Reply-To: <2A308283684ECD4B896628E09AF5361E59AD13F0@RS-MBS01.realsil.com.cn>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Tue, 2 Jun 2020 10:36:13 +0200
+Message-ID: <CAPDyKFp8gwQtPXJgdtEYQovGdFmah+kR7apFjUf_oMPZd_uU8Q@mail.gmail.com>
+Subject: Re: [PATCH] mmc: rtsx: Add SD Express mode support for RTS5261
+To:     =?UTF-8?B?5Yav6ZSQ?= <rui_feng@realsil.com.cn>
+Cc:     Arnd Bergmann <arnd@arndb.de>,
+        Christoph Hellwig <hch@infradead.org>,
+        "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "linux-pci@vger.kernel.org" <linux-pci@vger.kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-SGkgUGhpbGlw77yMDQoNCldlIGNhbid0IHJlcHJvZHVjZSB0aGlzIHByb2JsZW0gb24gZ2VuZXJh
-bCBwbGF0Zm9ybSBvbiBvdXIgc2lkZSwgaXQgd29ya3Mgd2VsbCBvbiBvdXIgcGxhdGZvcm1zIHRo
-YXQgd2UgaGF2ZSwgDQpidXQgd2UgZG9u4oCZdCBoYXZlIE5VQzdQSllIIHBsYXRmb3JtIHRvIGNo
-ZWNrIHRoaXMuDQoNClRoaXMgcGF0Y2ggKGJlZGUwM2E1NzliM2I0YTAzNjAwM2M0ODYyY2MxYmFh
-NGRkYzM1MWYpIHNob3VsZCBub3QgYWZmZWN0IHJ0czUyMjksIHdlIGRpZG7igJl0IGRvIGFueXRo
-aW5nIG9uIHJ0czUyMjkNCg0KUmlja3kgICAgDQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0t
-LS0NCj4gRnJvbTogUGhpbGlwIFNjaHdhcnR6IFttYWlsdG86cGhpbHF1YWRyYUBnbWFpbC5jb21d
-DQo+IFNlbnQ6IFR1ZXNkYXksIEp1bmUgMDIsIDIwMjAgODo1MiBBTQ0KPiBUbzogUmFuZHkgRHVu
-bGFwDQo+IENjOiBsaW51eC1rZXJuZWxAdmdlci5rZXJuZWwub3JnOyDlkLPmmIrmvoQgUmlja3k7
-IEdyZWcgS3JvYWgtSGFydG1hbjsgVWxmDQo+IEhhbnNzb247IGxpbnV4LW1tYw0KPiBTdWJqZWN0
-OiBSZTogQnVnIGluIHlvdXIga2VybmVsIHNpbmNlIHZlcnNpb24gNS4yDQo+IA0KPiBUaGFua3Ms
-IEknbGwgY2hlY2sgaXQgb3V0Lg0KPiANCj4gT24gTW9uLCBKdW4gMSwgMjAyMCBhdCA3OjM1IFBN
-IFJhbmR5IER1bmxhcCA8cmR1bmxhcEBpbmZyYWRlYWQub3JnPiB3cm90ZToNCj4gPg0KPiA+IFth
-ZGRpbmcgQ2M6cyBhbmQgY29tbWVudHNdDQo+ID4NCj4gPg0KPiA+IE9uIDYvMS8yMCAzOjUyIFBN
-LCBQaGlsaXAgU2Nod2FydHogd3JvdGU6DQo+ID4gPiBUaGlzIGlzIG15IHNpeHRoIGF0dGVtcHQg
-dG8gc2VuZCBhIGJ1ZyByZXBvcnQuDQo+ID4gPg0KPiA+ID4gVGhlIGZpcnN0IHRpbWUgeW91IGRp
-ZG4ndCBsaWtlIG15IGVtYWlsIGFkZHJlc3MuDQo+ID4gPiBUaGUgc2Vjb25kIHRpbWUgeW91IGRp
-ZG4ndCBsaWtlIHRoYXQgSSBjb3BpZWQgdGhlIHdob2xlIHVybC4NCj4gPiA+IFRoZSB0aGlyZCB0
-aW1lIHlvdSBkaWRuJ3QgbGlrZSB0aGF0IHRoZSBwYXJ0IG9mIHRoZSB1cmwgdGhhdCBJIGNvcGll
-ZA0KPiA+ID4gbG9va2VkIGEgYml0IGxpa2UgYSB1cmwuDQo+ID4gPiBUaGUgZm91cnRoIHRpbWUg
-eW91IGNvbXBsYWluZWQgdGhhdCAiVGhlIG1lc3NhZ2UgY29udGFpbnMgSFRNTA0KPiA+ID4gc3Vi
-cGFydCx0aGVyZWZvcmUgd2UgY29uc2lkZXIgaXQgU1BBTSINCj4gPg0KPiA+IFllcy4NCj4gPg0K
-PiA+ID4gVGhlIGZpZnRoIHRpbWUgeW91IGRpZG4ndCBsaWtlID8/Pz8/Pz8/Py4NCj4gPiA+DQo+
-ID4gPiBLZXJuZWwgZG90IG9yZyBCdWd6aWxsYSAgICAgICBJIEQgZXF1YWxzICAyMDQwMDMNCj4g
-PiA+DQo+ID4gPg0KPiA+ID4gSSBsb29rIGZvcndhcmQgdG8geW91ciBlbWFpbCByZWplY3Rpb24g
-bWVzc2FnZS4NCj4gPg0KPiA+DQo+ID4gUGxlYXNlIHNlZSBodHRwczovL2J1Z3ppbGxhLmtlcm5l
-bC5vcmcvc2hvd19idWcuY2dpP2lkPTIwNDAwMw0KPiA+DQo+ID4gU2V2ZXJhbCBwZW9wbGUgYXJl
-IGhhdmluZyBwcm9ibGVtcyB3aXRoIEludGVsIE5VQ3MgYW5kL29yDQo+ID4gdGhlIFJUUzUyMjkg
-UENJIEV4cHJlc3MgQ2FyZCBSZWFkZXIvZHJpdmVyLCBiZWdpbm5pbmcgd2l0aA0KPiA+IDUuMS1y
-YzEuDQo+ID4NCj4gPiBIZXJlIGlzIG9uZSBidWd6aWxsYSBjb21tZW50Og0KPiA+IERpZCBhIGdp
-dCBiaXNlY3QgYW5kIGZvdW5kIHRoZSBjdWxwcml0Lg0KPiA+DQo+ID4gYmVkZTAzYTU3OWIzYjRh
-MDM2MDAzYzQ4NjJjYzFiYWE0ZGRjMzUxZiBpcyB0aGUgZmlyc3QgYmFkIGNvbW1pdA0KPiA+IGNv
-bW1pdCBiZWRlMDNhNTc5YjNiNGEwMzYwMDNjNDg2MmNjMWJhYTRkZGMzNTFmDQo+ID4gQXV0aG9y
-OiBSaWNreVd1IDxyaWNreV93dUByZWFsdGVrLmNvbT4NCj4gPiBEYXRlOiAgIFR1ZSBGZWIgMTkg
-MjA6NDk6NTggMjAxOSArMDgwMA0KPiA+DQo+ID4gICAgIG1pc2M6IHJ0c3g6IEVuYWJsZSBPQ1Ag
-Zm9yIHJ0czUyMmEgcnRzNTI0YSBydHM1MjVhIHJ0czUyNjANCj4gPg0KPiA+ICAgICB0aGlzIGVu
-YWJsZXMgYW5kIGFkZHMgT0NQIGZ1bmN0aW9uIGZvciBSZWFsdGVrIEEgc2VyaWVzIGNhcmRyZWFk
-ZXIgY2hpcHMNCj4gPiAgICAgYW5kIGZpeGVzIHNvbWUgT0NQIGZsb3cgaW4gcnRzNTI2MC5jDQo+
-ID4NCj4gPiAgICAgU2lnbmVkLW9mZi1ieTogUmlja3lXdSA8cmlja3lfd3VAcmVhbHRlay5jb20+
-DQo+ID4gICAgIFNpZ25lZC1vZmYtYnk6IEdyZWcgS3JvYWgtSGFydG1hbiA8Z3JlZ2toQGxpbnV4
-Zm91bmRhdGlvbi5vcmc+DQo+ID4NCj4gPiA6MDQwMDAwIDA0MDAwMCA2NWJmZGM0NzNiN2I4NWNi
-NDIzZmY1MjgzMDlmYzkyZDczZWFlNWI0DQo+IDEyOTJkODU2NGY2NzgwMjdkMGU1Yzc3NTUwZTM3
-ZDY5NmIxMzRiMjggTSAgICAgIGRyaXZlcnMNCj4gPg0KPiA+IEp1c3QgcmV2ZXJ0IHRoYXQgYW5k
-IHlvdSdsbCBiZSBnb2xkZW4uDQo+ID4NCj4gPiBydHM1MjJhLHJ0czUyNGEscnRzNTI1YSxydHM1
-MjYwDQo+ID4gU28gc29tZWhvdyBPQ1AgZ290IGVuYWJsZWQgZm9yIHJ0czUyMjkgdW5sZXNzIGEg
-bWVhbnMgcnRzNTIyeC4gSSBndWVzcyB0aGV5DQo+IG5lZWQgdG8gbWFrZSBzdXJlIGl0cyBub3Qg
-ZW5hYmxlZCBmb3IgNTIyOS4NCj4gPiB7ZW5kIG9mIGJ1Z3ppbGxhIGNvbW1lbnR9DQo+ID4NCj4g
-Pg0KPiA+DQo+ID4gLS0NCj4gPiB+UmFuZHkNCj4gPg0KPiANCj4gLS0tLS0tUGxlYXNlIGNvbnNp
-ZGVyIHRoZSBlbnZpcm9ubWVudCBiZWZvcmUgcHJpbnRpbmcgdGhpcyBlLW1haWwuDQo=
+On Tue, 2 Jun 2020 at 04:41, =E5=86=AF=E9=94=90 <rui_feng@realsil.com.cn> w=
+rote:
+>
+> >
+> > +linux-mmc
+> >
+> > On Mon, 1 Jun 2020 at 09:34, =E5=86=AF=E9=94=90 <rui_feng@realsil.com.c=
+n> wrote:
+> > >
+> > > >
+> > > > On Tue, 19 May 2020 at 11:18, =E5=86=AF=E9=94=90 <rui_feng@realsil.=
+com.cn> wrote:
+> > > > >
+> > > > > > On Tue, 28 Apr 2020 at 05:44, =E5=86=AF=E9=94=90 <rui_feng@real=
+sil.com.cn> wrote:
+> > > > > > >
+> > > > > > > >
+> > > > > > > > On Mon, Apr 27, 2020 at 11:41 AM =E5=86=AF=E9=94=90
+> > > > > > > > <rui_feng@realsil.com.cn>
+> > > > > > wrote:
+> > > > > > > > >
+> > > > > > > > >
+> > > > > > > > > > On Sun, Apr 26, 2020 at 09:25:46AM +0800,
+> > > > > > > > > > rui_feng@realsil.com.cn
+> > > > > > > > wrote:
+> > > > > > > > > > > From: Rui Feng <rui_feng@realsil.com.cn>
+> > > > > > > > > > >
+> > > > > > > > > > > RTS5261 support legacy SD mode and SD Express mode.
+> > > > > > > > > > > In SD7.x, SD association introduce SD Express as a ne=
+w mode.
+> > > > > > > > > > > SD Express mode is distinguished by CMD8.
+> > > > > > > > > > > Therefore, CMD8 has new bit for SD Express.
+> > > > > > > > > > > SD Express is based on PCIe/NVMe.
+> > > > > > > > > > > RTS5261 uses CMD8 to switch to SD Express mode.
+> > > > > > > > > >
+> > > > > > > > > > So how does this bit work?  They way I imagined SD
+> > > > > > > > > > Express to work is that the actual SD Card just shows u=
+p
+> > > > > > > > > > as a real PCIe device, similar to say Thunderbolt.
+> > > > > > > > >
+> > > > > > > > > New SD Express card has dual mode. One is SD mode and
+> > > > > > > > > another is PCIe
+> > > > > > > > mode.
+> > > > > > > > > In PCIe mode, it act as a PCIe device and use PCIe
+> > > > > > > > > protocol not Thunderbolt
+> > > > > > > > protocol.
+> > > > > > > >
+> > > > > > > > I think what Christoph was asking about is why you need to
+> > > > > > > > issue any commands at all in SD mode when you want to use
+> > > > > > > > PCIe mode
+> > > > instead.
+> > > > > > > > What happens if you load the NVMe dthriver before loading
+> > > > > > > > the
+> > > > > > > > rts5261
+> > > > > > driver?
+> > > > > > > >
+> > > > > > > >        Arnd
+> > > > > > > >
+> > > > > > > > ------Please consider the environment before printing this =
+e-mail.
+> > > > > > >
+> > > > > > > RTS5261 support SD mode and PCIe/NVMe mode. The workflow is a=
+s
+> > > > follows.
+> > > > > > > 1.RTS5261 work in SD mode.
+> > > > > > > 2.If card is plugged in, Host send CMD8 to ask card's PCIe av=
+ailability.
+> > > > > >
+> > > > > > This sounds like the card insert/removal needs to be managed by
+> > > > > > the rtsx_pci_sdmmc driver (mmc).
+> > > > > >
+> > > > > > > 3.If the card has PCIe availability, RTS5261 switch to PCIe/N=
+VMe
+> > mode.
+> > > > > >
+> > > > > > This switch is done by the mmc driver, but how does the
+> > > > > > PCIe/NVMe driver know when to take over? Isn't there a
+> > synchronization point needed?
+> > > > > >
+> > > > > > > 4.Mmc driver exit and NVMe driver start working.
+> > > > > >
+> > > > > > Having the mmc driver to exit seems wrong to me. Else how would
+> > > > > > you handle a card being removed and inserted again?
+> > > > > >
+> > > > > > In principle you want the mmc core to fail to detect the card
+> > > > > > and then do a handover, somehow. No?
+> > > > > >
+> > > > > > Although, to make this work there are a couple of problems you
+> > > > > > need to deal with.
+> > > > > >
+> > > > > > 1. If the mmc core doesn't successfully detect a card, it will
+> > > > > > request the mmc host to power off the card. In this situation,
+> > > > > > you want to keep the power to the card, but leave it to be
+> > > > > > managed by the
+> > > > PCIe/NVMe driver in some way.
+> > > > > >
+> > > > > > 2. During system resume, the mmc core may try to restore power
+> > > > > > for a card, especially if it's a removable slot, as to make sur=
+e
+> > > > > > it gets detected if someone inserted a card while the system wa=
+s
+> > suspended.
+> > > > > > Not sure if this plays well with the PCIe/NVMe driver's behavio=
+ur.
+> > > > > > Again, I think some kind of synchronization is needed.
+> > > > > >
+> > > > > > > 5.If card is unplugged, RTS5261 will switch to SD mode.
+> > > > > >
+> > > > > > Alright, clearly the mmc driver is needed to manage card
+> > insert/removal.
+> > > > > >
+> > > > > > > We should send CMD8 in SD mode to ask card's PCIe
+> > > > > > > availability, and the
+> > > > > > order of NVMe driver and rts5261 driver doesn't matter.
+> > > > > >
+> > > > > > That assumes there's another synchronization mechanism. Maybe
+> > > > > > there is, but I don't understand how.
+> > > > > >
+> > > > > If no card in RTS5261, RTS5261 works in SD mode. If you run
+> > > > > command lspci,
+> > > > you can see the RTS5261 device.
+> > > >
+> > > > Right.
+> > > >
+> > > > The rtsx_pci_driver (drivers/misc/cardreader/rtsx_pcr.c) has
+> > > > registered itself as a pci driver and been probed successfully, I
+> > > > assume. Then during
+> > > > rtsx_pci_probe() an mfd device is added via mfd_add_devices(), whic=
+h
+> > > > corresponds to the rtsx_pci_sdmmc
+> > > > (drivers/mmc/host/rtsx_pci_sdmmc.c) platform driver.
+> > > >
+> > > > > When insert a SD Express card, Mmc driver will send CMD8 to ask
+> > > > > the card's PCIe availability, because it's a SD EXPRESS card,
+> > > >
+> > > > Okay, so this will then be a part of the rtsx_pci_sdmmc driver's pr=
+obe
+> > sequence.
+> > > > Or more exactly, when rtsx_pci_sdmmc_drv_probe() completes
+> > > > successfully, a mmc rescan work becomes scheduled to try to detect
+> > > > an SD/MMC card. Then the CMD8 command is sent...
+> > > >
+> > > > > RTS5261 will switch to NVMe mode, after switch if you run lspci,
+> > > > > you can see
+> > > > RTS5261 disappeared and a NVMe device replaces RTS5261.
+> > > >
+> > > > Can you elaborate more exactly how this managed?
+> > > >
+> > > > It kind of sounds like the original PCI device is being deleted? Ho=
+w
+> > > > is this managed?
+> > > >
+> > > > In any case, the rtsx_pci_driver's ->remove() callback,
+> > > > rtsx_pci_remove(), should be invoked, I assume?
+> > > >
+> > > > That would then lead to that mfd_remove_devices() gets called, whic=
+h
+> > > > makes the ->remove() callback of the rtsx_pci_sdmmc driver,
+> > > > rtsx_pci_sdmmc_drv_remove(), to be invoked. Correct?
+> > > >
+> > > Yes, after RTS5261 switch to NVMe mode, rtsx_pci_remove() and
+> > rtsx_pci_sdmmc_drv_remove() will be invoked.
+> >
+> > So, the ->remove() callbacks are invoked because the PCI device that
+> > corresponds to the rtsx_pci_driver is being deleted. Can you explain wh=
+o
+> > deletes the PCI device and why?
+> >
+> > I am not a PCI expert, so apologize for my ignorance - but I really wan=
+t to
+> > understand how this is supposed to work.
+> >
+> Rtsx host driver sets RTS5261 0xFF54 bit0=3D1 and 0xFF55 bit4=3D0, then R=
+TS5261 will switch MCU and enter SD EXPRESS mode.
+> Because hardware design is involved, sorry I can't explain much more deta=
+ils about that.
+
+Okay, so somehow that will trigger the PCI bus to remove the
+corresponding PCI device, I guess.
+
+>
+> > >
+> > > > > In NVMe mode, RTS5261 only provide a bridge between SD Express
+> > > > > card and
+> > > > PCIe. For NVMe driver, just like a new NVMe device is inserted.
+> > > >
+> > > > I don't understand what that means, but I am also not an expert on
+> > PCI/NVMe.
+> > > > Care to explain more?
+> > > >
+> > > In NVMe mode, SD Express card connect the computer via PCIe.
+> > > IN SD mode, card connect computer via reader.
+> >
+> > That didn't make better sense to me, sorry. I do know about the SD spec=
+ and
+> > the SD-express card protocol parts. Anyway, let's leave this for now.
+> >
+> > >
+> > > > > Mmc core doesn't successfully detect the card and handover to NVM=
+e
+> > > > > driver. Because of detect the card failed,
+> > > >
+> > > > How do you make sure that the rtsx_pci_sdmmc driver is leaving the
+> > > > card in the correct state for NVMe?
+> > > >
+> > > > For example, the mmc core has a loop re-trying with a lower
+> > > > initialization frequency for the card (400KHz, 300KHz, 200KHz,
+> > > > 100KHz). This will cause additional requests to the rtsx_pci_sdmmc =
+driver.
+> > > >
+> > > > > Mmc driver will request the RTS5261 to power off the card, but at
+> > > > > that time
+> > > > power off the card will not succeed.
+> > > >
+> > > > Yes, assuming no card was found, the mmc core calls mmc_power_off()=
+.
+> > > > Ths leads to the rtsx_pci_sdmmc driver's ->set_ios() callback being
+> > > > invoked, requesting the card to be powered off. I don't see how you
+> > > > are managing this, what am I missing?
+> > > >
+> > > Before power off card and re-trying initialization, rtsx driver sets =
+RTS5261
+> > 0xFF55 bit4=3D0.
+> > > After set 0xFF55 bit4=3D0, RTS5261 can't receive any CMD from PCIe an=
+d
+> > prepare for device disappear.
+> > > Therefore, MMC driver can't change card status.
+> >
+> > Okay, so beyond that point - any calls to the interface that is provide=
+d from
+> > drivers/misc/cardreader/rtsx_pcr will fail, when invoked by the
+> > rtsx_pci_sdmmc driver?
+> >
+> Yes.
+>
+> > To me, that sounds a bit fragile and it's also relying on a specific be=
+haviour of
+> > the RTS5261 card reader interface. I wonder if this could be considered=
+ as a
+> > common behaviour...??
+> >
+> It's a feature proposal by realtek not common.
+
+Yes, of course.
+
+>
+> > Perhaps it's better to teach the mmc core *more* about SD express cards=
+.
+> > Maybe add a new host ops for dealing with the specific CMD8 command and
+> > make the mmc core to "bail out", rather than keep retrying the initiali=
+zation. In
+> > principle I think the core should accept that it may have found an SD e=
+xpress
+> > card, then abort further communication with it. At least until the mmc =
+host
+> > indicates that a re-initialization of the card can be done, which could=
+ be through
+> > a remove/re-probe, for example.
+> >
+> In SD7.x spec host should send CMD8 with bit20=3D1 and bit21=3D1 to ask c=
+ard's PCIe availability.
+> So the CMD8 is not specific for RTS5261, it's just newly defined in SD7.x=
+ spec.
+
+Yes, of course.
+
+So, there are two PCIe modes. 1.8V I/O (mandatory and corresponds to
+bit20) and 1.2V I/O (optional and corresponds to bit21). It's
+important that the mmc host informs the mmc core about it's
+capabilities, so we can set the correct bits when sending CMD8.
+
+What do your host support?
+
+> The mmc core will request host to power off card and has a loop re-trying=
+ with different initialization frequency for the card (400KHz, 300KHz, 200K=
+Hz,
+> 100KHz), if I don't modify mmc core, I can't stop the power off and re-tr=
+ying, if I modify mmc core, RTS5261 will become a special case for mmc core=
+.
+> So make the operation fail is the minimum modification in mmc core for me=
+. Do you have any other suggestion?
+
+Along the lines of what I suggested above. I think the mmc core should
+stop sending commands beyond the CMD8, if the card responds to support
+PCIe.
+
+>
+> > >
+> > > > As stated above, I assume you the corresponding platform device for
+> > > > rtsx_pci_sdmmc being deleted and thus triggering the
+> > > > rtsx_pci_sdmmc_drv_remove() being called. Correct? If not, how does
+> > > > the driver manage this?
+> > > >
+> > > Yes.
+> > >
+> > > > > When the card is unplugged, RTS5261 will switch to SD mode by
+> > > > > itself and don't need mmc driver to do anything,
+> > > >
+> > > > Okay.
+> > > >
+> > > > So that means the rtsx_pci_sdmmc driver is being probed again?
+> > > >
+> > > Yes.
+> > >
+> > > > > If you run lspci, you can see NVMe device disappeared and RTS5261
+> > > > > appeared
+> > > > again.
+> > > >
+> > > > I see.
+> > > >
+> >
+> > If you need some help on the mmc core parts, I am willing to help out.
+> > However, first, I would like to get some better understanding of who an=
+d why
+> > the PCI device is deleted.
+> >
+> Can I stop the re-trying in host driver other than modify mmc core?
+
+We need to modify the core, but let me try to help in regards to that.
+I will post some patches within a couple of days and keep you posted.
+
+Let's see how this goes.
+
+> As above, I'm sorry I can't explain much more details about hardware desi=
+gn.
+
+Sure, it's okay.
+
+Kind regards
+Uffe
