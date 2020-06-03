@@ -2,76 +2,101 @@ Return-Path: <SRS0=STY7=7Q=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 592DDC433E2
-	for <linux-mmc@archiver.kernel.org>; Wed,  3 Jun 2020 09:11:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A4721C433E0
+	for <linux-mmc@archiver.kernel.org>; Wed,  3 Jun 2020 11:49:18 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 41E9D2068D
-	for <linux-mmc@archiver.kernel.org>; Wed,  3 Jun 2020 09:11:34 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8325A20674
+	for <linux-mmc@archiver.kernel.org>; Wed,  3 Jun 2020 11:49:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726241AbgFCJLZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 3 Jun 2020 05:11:25 -0400
-Received: from alexa-out-blr-02.qualcomm.com ([103.229.18.198]:13487 "EHLO
-        alexa-out-blr-02.qualcomm.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1725355AbgFCJLY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 3 Jun 2020 05:11:24 -0400
-Received: from ironmsg02-blr.qualcomm.com ([10.86.208.131])
-  by alexa-out-blr-02.qualcomm.com with ESMTP/TLS/AES256-SHA; 03 Jun 2020 14:40:20 +0530
-Received: from c-ppvk-linux.qualcomm.com ([10.206.24.34])
-  by ironmsg02-blr.qualcomm.com with ESMTP; 03 Jun 2020 14:39:50 +0530
-Received: by c-ppvk-linux.qualcomm.com (Postfix, from userid 2304101)
-        id 0BBF85046; Wed,  3 Jun 2020 14:39:48 +0530 (IST)
-From:   Pradeep P V K <ppvk@codeaurora.org>
-To:     bjorn.andersson@linaro.org, adrian.hunter@intel.com,
-        robh+dt@kernel.org, ulf.hansson@linaro.org,
-        vbadigan@codeaurora.org, sboyd@kernel.org,
-        georgi.djakov@linaro.org, mka@chromium.org
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-mmc-owner@vger.kernel.org, rnayak@codeaurora.org,
-        sibis@codeaurora.org, matthias@chromium.org,
-        Pradeep P V K <ppvk@codeaurora.org>
-Subject: [PATCH V1 0/2] Add SDHC interconnect bandwidth scaling 
-Date:   Wed,  3 Jun 2020 14:39:34 +0530
-Message-Id: <1591175376-2374-1-git-send-email-ppvk@codeaurora.org>
-X-Mailer: git-send-email 1.9.1
+        id S1726123AbgFCLtO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 3 Jun 2020 07:49:14 -0400
+Received: from mga05.intel.com ([192.55.52.43]:60884 "EHLO mga05.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1725833AbgFCLtO (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 3 Jun 2020 07:49:14 -0400
+IronPort-SDR: HekfZPGzVfN3Rz8tXdbg6osW7MqtPM45sCbbU6myPzFh+ifZZ6IXUlqfuyRZnburCgndiRm0+u
+ gCvnaPhtsHEQ==
+X-Amp-Result: SKIPPED(no attachment in message)
+X-Amp-File-Uploaded: False
+Received: from orsmga007.jf.intel.com ([10.7.209.58])
+  by fmsmga105.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 03 Jun 2020 04:49:13 -0700
+IronPort-SDR: H1mn7D3ibaebcB80vdUcFHwoNFnvDau4t3J8OyMuciLHY/Jr37C3l+UjPB97E1FmoH0aeFTeT+
+ 2cqNvLgVz3sw==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.73,467,1583222400"; 
+   d="scan'208";a="257987380"
+Received: from gklab-125-110.igk.intel.com ([10.91.125.110])
+  by orsmga007.jf.intel.com with ESMTP; 03 Jun 2020 04:49:10 -0700
+From:   Piotr Stankiewicz <piotr.stankiewicz@intel.com>
+To:     Bjorn Helgaas <bhelgaas@google.com>, linux-pci@vger.kernel.org
+Cc:     Piotr Stankiewicz <piotr.stankiewicz@intel.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Ben Chuang <ben.chuang@genesyslogic.com.tw>,
+        Michael K Johnson <johnsonm@danlj.org>,
+        Andy Shevchenko <andriy.shevchenko@intel.com>,
+        "Shirley Her (SC)" <shirley.her@bayhubtech.com>,
+        Raul E Rangel <rrangel@chromium.org>,
+        Allison Randal <allison@lohutok.net>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Daniel Drake <drake@endlessm.com>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Subject: [PATCH v2 11/15] mmc: sdhci: Use PCI_IRQ_MSI_TYPES where appropriate
+Date:   Wed,  3 Jun 2020 13:49:01 +0200
+Message-Id: <20200603114906.13625-1-piotr.stankiewicz@intel.com>
+X-Mailer: git-send-email 2.17.2
+In-Reply-To: <20200603114212.12525-1-piotr.stankiewicz@intel.com>
+References: <20200603114212.12525-1-piotr.stankiewicz@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Seeing as there is shorthand available to use when asking for any type
+of interrupt, or any type of message signalled interrupt, leverage it.
 
-Add interconnect bandwidths for SDHC driver using OPP framework that
-is required by SDHC driver based on the clock frequency and bus width
-of the card. Otherwise, the system clocks may run at minimum clock
-speed and thus affecting the performance.
+Signed-off-by: Piotr Stankiewicz <piotr.stankiewicz@intel.com>
+Reviewed-by: Andy Shevchenko <andriy.shevchenko@intel.com>
+Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+---
+ drivers/mmc/host/sdhci-pci-gli.c     | 3 +--
+ drivers/mmc/host/sdhci-pci-o2micro.c | 3 +--
+ 2 files changed, 2 insertions(+), 4 deletions(-)
 
-This change is based on
-[1] [Patch v8] Introduce OPP bandwidth bindings
-(https://lkml.org/lkml/2020/5/12/493)
-
-[2] [Patch v3 09/17] mmc: sdhci-msm: Fix error handling
-for dev_pm_opp_of_add_table()
-(https://lkml.org/lkml/2020/5/5/491)
-
-[3] [RFC v6 2/2] dt-bindings: mmc: sdhci-msm: Add interconnect BW
-scaling strings
-(https://lkml.org/lkml/2020/3/23/409)
-
-as there were no extra changes made on [3], retaining the Acked-by and
-Reviewed-by sign-off from [3].
-
-Pradeep P V K (2):
-  mmc: sdhci-msm: Add interconnect bandwidth scaling support
-  dt-bindings: mmc: sdhci-msm: Add interconnect BW scaling strings
-
- Documentation/devicetree/bindings/mmc/sdhci-msm.txt | 18 ++++++++++++++++++
- drivers/mmc/host/sdhci-msm.c                        | 16 ++++++++++++++++
- 2 files changed, 34 insertions(+)
-
+diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
+index fd76aa672e02..d14997f9cbf9 100644
+--- a/drivers/mmc/host/sdhci-pci-gli.c
++++ b/drivers/mmc/host/sdhci-pci-gli.c
+@@ -271,8 +271,7 @@ static void gli_pcie_enable_msi(struct sdhci_pci_slot *slot)
+ {
+ 	int ret;
+ 
+-	ret = pci_alloc_irq_vectors(slot->chip->pdev, 1, 1,
+-				    PCI_IRQ_MSI | PCI_IRQ_MSIX);
++	ret = pci_alloc_irq_vectors(slot->chip->pdev, 1, 1, PCI_IRQ_MSI_TYPES);
+ 	if (ret < 0) {
+ 		pr_warn("%s: enable PCI MSI failed, error=%d\n",
+ 		       mmc_hostname(slot->host->mmc), ret);
+diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
+index fa8105087d68..498c51207bfb 100644
+--- a/drivers/mmc/host/sdhci-pci-o2micro.c
++++ b/drivers/mmc/host/sdhci-pci-o2micro.c
+@@ -470,8 +470,7 @@ static void sdhci_pci_o2_enable_msi(struct sdhci_pci_chip *chip,
+ 		return;
+ 	}
+ 
+-	ret = pci_alloc_irq_vectors(chip->pdev, 1, 1,
+-				    PCI_IRQ_MSI | PCI_IRQ_MSIX);
++	ret = pci_alloc_irq_vectors(chip->pdev, 1, 1, PCI_IRQ_MSI_TYPES);
+ 	if (ret < 0) {
+ 		pr_err("%s: enable PCI MSI failed, err=%d\n",
+ 		       mmc_hostname(host->mmc), ret);
 -- 
-1.9.1
+2.17.2
 
