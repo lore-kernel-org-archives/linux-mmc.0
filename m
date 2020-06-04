@@ -6,27 +6,27 @@ X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
 	URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E6BBBC433E3
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CE971C433DF
 	for <linux-mmc@archiver.kernel.org>; Thu,  4 Jun 2020 01:52:02 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id CC037207D8
+	by mail.kernel.org (Postfix) with ESMTP id AD64020738
 	for <linux-mmc@archiver.kernel.org>; Thu,  4 Jun 2020 01:52:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727860AbgFDBwC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        id S1727783AbgFDBwC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
         Wed, 3 Jun 2020 21:52:02 -0400
-Received: from inva021.nxp.com ([92.121.34.21]:35584 "EHLO inva021.nxp.com"
+Received: from inva020.nxp.com ([92.121.34.13]:32892 "EHLO inva020.nxp.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727008AbgFDBwB (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        id S1726462AbgFDBwB (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
         Wed, 3 Jun 2020 21:52:01 -0400
-Received: from inva021.nxp.com (localhost [127.0.0.1])
-        by inva021.eu-rdc02.nxp.com (Postfix) with ESMTP id 1C100200F09;
-        Thu,  4 Jun 2020 03:51:59 +0200 (CEST)
+Received: from inva020.nxp.com (localhost [127.0.0.1])
+        by inva020.eu-rdc02.nxp.com (Postfix) with ESMTP id 1CAD21A10D6;
+        Thu,  4 Jun 2020 03:51:58 +0200 (CEST)
 Received: from invc005.ap-rdc01.nxp.com (invc005.ap-rdc01.nxp.com [165.114.16.14])
-        by inva021.eu-rdc02.nxp.com (Postfix) with ESMTP id 39045200130;
-        Thu,  4 Jun 2020 03:51:54 +0200 (CEST)
+        by inva020.eu-rdc02.nxp.com (Postfix) with ESMTP id 0BE9A1A10CD;
+        Thu,  4 Jun 2020 03:51:53 +0200 (CEST)
 Received: from localhost.localdomain (shlinux2.ap.freescale.net [10.192.224.44])
-        by invc005.ap-rdc01.nxp.com (Postfix) with ESMTP id DD49D402AD;
-        Thu,  4 Jun 2020 09:51:47 +0800 (SGT)
+        by invc005.ap-rdc01.nxp.com (Postfix) with ESMTP id B6BAB40299;
+        Thu,  4 Jun 2020 09:51:46 +0800 (SGT)
 From:   Anson Huang <Anson.Huang@nxp.com>
 To:     ulf.hansson@linaro.org, robh+dt@kernel.org, shawnguo@kernel.org,
         s.hauer@pengutronix.de, kernel@pengutronix.de, festevam@gmail.com,
@@ -34,9 +34,9 @@ To:     ulf.hansson@linaro.org, robh+dt@kernel.org, shawnguo@kernel.org,
         devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
         linux-kernel@vger.kernel.org
 Cc:     Linux-imx@nxp.com
-Subject: [PATCH V2 2/3] dt-bindings: mmc: Convert imx mmc to json-schema
-Date:   Thu,  4 Jun 2020 09:41:25 +0800
-Message-Id: <1591234886-15351-3-git-send-email-Anson.Huang@nxp.com>
+Subject: [PATCH V2 1/3] dt-bindings: mmc: Convert imx esdhc to json-schema
+Date:   Thu,  4 Jun 2020 09:41:24 +0800
+Message-Id: <1591234886-15351-2-git-send-email-Anson.Huang@nxp.com>
 X-Mailer: git-send-email 2.7.4
 In-Reply-To: <1591234886-15351-1-git-send-email-Anson.Huang@nxp.com>
 References: <1591234886-15351-1-git-send-email-Anson.Huang@nxp.com>
@@ -46,76 +46,138 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Convert the i.MX MMC binding to DT schema format using json-schema
+Convert the i.MX ESDHC binding to DT schema format using json-schema
 
 Signed-off-by: Anson Huang <Anson.Huang@nxp.com>
 ---
 Changes since V1:
 	- add "unevaluatedProperties: false".
 ---
- .../devicetree/bindings/mmc/fsl-imx-mmc.txt        | 23 ----------
- .../devicetree/bindings/mmc/fsl-imx-mmc.yaml       | 53 ++++++++++++++++++++++
- 2 files changed, 53 insertions(+), 23 deletions(-)
- delete mode 100644 Documentation/devicetree/bindings/mmc/fsl-imx-mmc.txt
- create mode 100644 Documentation/devicetree/bindings/mmc/fsl-imx-mmc.yaml
+ .../devicetree/bindings/mmc/fsl-imx-esdhc.txt      |  67 -----------
+ .../devicetree/bindings/mmc/fsl-imx-esdhc.yaml     | 124 +++++++++++++++++++++
+ 2 files changed, 124 insertions(+), 67 deletions(-)
+ delete mode 100644 Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
+ create mode 100644 Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
 
-diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-mmc.txt b/Documentation/devicetree/bindings/mmc/fsl-imx-mmc.txt
+diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
 deleted file mode 100644
-index 184ccff..0000000
---- a/Documentation/devicetree/bindings/mmc/fsl-imx-mmc.txt
+index de1b8bd..0000000
+--- a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
 +++ /dev/null
-@@ -1,23 +0,0 @@
--* Freescale Secure Digital Host Controller for i.MX2/3 series
+@@ -1,67 +0,0 @@
+-* Freescale Enhanced Secure Digital Host Controller (eSDHC) for i.MX
 -
--This file documents differences to the properties defined in mmc.txt.
+-The Enhanced Secure Digital Host Controller on Freescale i.MX family
+-provides an interface for MMC, SD, and SDIO types of memory cards.
+-
+-This file documents differences between the core properties described
+-by mmc.txt and the properties used by the sdhci-esdhc-imx driver.
 -
 -Required properties:
--- compatible : Should be "fsl,<chip>-mmc", chip can be imx21 or imx31
+-- compatible : Should be "fsl,<chip>-esdhc", the supported chips include
+-	       "fsl,imx25-esdhc"
+-	       "fsl,imx35-esdhc"
+-	       "fsl,imx51-esdhc"
+-	       "fsl,imx53-esdhc"
+-	       "fsl,imx6q-usdhc"
+-	       "fsl,imx6sl-usdhc"
+-	       "fsl,imx6sx-usdhc"
+-	       "fsl,imx6ull-usdhc"
+-	       "fsl,imx7d-usdhc"
+-	       "fsl,imx7ulp-usdhc"
+-	       "fsl,imx8mq-usdhc"
+-	       "fsl,imx8mm-usdhc"
+-	       "fsl,imx8mn-usdhc"
+-	       "fsl,imx8mp-usdhc"
+-	       "fsl,imx8qm-usdhc"
+-	       "fsl,imx8qxp-usdhc"
 -
 -Optional properties:
--- dmas: One DMA phandle with arguments as defined by the devicetree bindings
--	of the used DMA controller.
--- dma-names: Has to be "rx-tx".
+-- fsl,wp-controller : Indicate to use controller internal write protection
+-- fsl,delay-line : Specify the number of delay cells for override mode.
+-  This is used to set the clock delay for DLL(Delay Line) on override mode
+-  to select a proper data sampling window in case the clock quality is not good
+-  due to signal path is too long on the board. Please refer to eSDHC/uSDHC
+-  chapter, DLL (Delay Line) section in RM for details.
+-- voltage-ranges : Specify the voltage range in case there are software
+-  transparent level shifters on the outputs of the controller. Two cells are
+-  required, first cell specifies minimum slot voltage (mV), second cell
+-  specifies maximum slot voltage (mV). Several ranges could be specified.
+-- fsl,tuning-start-tap: Specify the start dealy cell point when send first CMD19
+-  in tuning procedure.
+-- fsl,tuning-step: Specify the increasing delay cell steps in tuning procedure.
+-  The uSDHC use one delay cell as default increasing step to do tuning process.
+-  This property allows user to change the tuning step to more than one delay
+-  cells which is useful for some special boards or cards when the default
+-  tuning step can't find the proper delay window within limited tuning retries.
+-- fsl,strobe-dll-delay-target: Specify the strobe dll control slave delay target.
+-  This delay target programming host controller loopback read clock, and this
+-  property allows user to change the delay target for the strobe input read clock.
+-  If not use this property, driver default set the delay target to value 7.
+-  Only eMMC HS400 mode need to take care of this property.
 -
--Example:
+-Examples:
 -
--sdhci1: sdhci@10014000 {
--	compatible = "fsl,imx27-mmc", "fsl,imx21-mmc";
--	reg = <0x10014000 0x1000>;
--	interrupts = <11>;
--	dmas = <&dma 7>;
--	dma-names = "rx-tx";
--	bus-width = <4>;
--	cd-gpios = <&gpio3 29>;
+-esdhc@70004000 {
+-	compatible = "fsl,imx51-esdhc";
+-	reg = <0x70004000 0x4000>;
+-	interrupts = <1>;
+-	fsl,wp-controller;
 -};
-diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-mmc.yaml b/Documentation/devicetree/bindings/mmc/fsl-imx-mmc.yaml
+-
+-esdhc@70008000 {
+-	compatible = "fsl,imx51-esdhc";
+-	reg = <0x70008000 0x4000>;
+-	interrupts = <2>;
+-	cd-gpios = <&gpio1 6 0>; /* GPIO1_6 */
+-	wp-gpios = <&gpio1 5 0>; /* GPIO1_5 */
+-};
+diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
 new file mode 100644
-index 0000000..ffa1627
+index 0000000..74db24aa
 --- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/fsl-imx-mmc.yaml
-@@ -0,0 +1,53 @@
++++ b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
+@@ -0,0 +1,124 @@
 +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
 +%YAML 1.2
 +---
-+$id: http://devicetree.org/schemas/mmc/fsl-imx-mmc.yaml#
++$id: http://devicetree.org/schemas/mmc/fsl-imx-esdhc.yaml#
 +$schema: http://devicetree.org/meta-schemas/core.yaml#
 +
-+title: Freescale Secure Digital Host Controller for i.MX2/3 series
++title: Freescale Enhanced Secure Digital Host Controller (eSDHC) for i.MX
 +
 +maintainers:
-+  - Markus Pargmann <mpa@pengutronix.de>
++  - Shawn Guo <shawn.guo@linaro.org>
 +
 +allOf:
 +  - $ref: "mmc-controller.yaml"
 +
++description: |
++  The Enhanced Secure Digital Host Controller on Freescale i.MX family
++  provides an interface for MMC, SD, and SDIO types of memory cards.
++
++  This file documents differences between the core properties described
++  by mmc.txt and the properties used by the sdhci-esdhc-imx driver.
++
 +properties:
 +  compatible:
-+    oneOf:
-+      - const: fsl,imx21-mmc
-+      - const: fsl,imx31-mmc
-+      - items:
-+          - const: fsl,imx27-mmc
-+          - const: fsl,imx21-mmc
++    enum:
++      - fsl,imx25-esdhc
++      - fsl,imx35-esdhc
++      - fsl,imx51-esdhc
++      - fsl,imx53-esdhc
++      - fsl,imx6q-usdhc
++      - fsl,imx6sl-usdhc
++      - fsl,imx6sx-usdhc
++      - fsl,imx6ull-usdhc
++      - fsl,imx7d-usdhc
++      - fsl,imx7ulp-usdhc
++      - fsl,imx8mq-usdhc
++      - fsl,imx8mm-usdhc
++      - fsl,imx8mn-usdhc
++      - fsl,imx8mp-usdhc
++      - fsl,imx8qm-usdhc
++      - fsl,imx8qxp-usdhc
 +
 +  reg:
 +    maxItems: 1
@@ -123,11 +185,59 @@ index 0000000..ffa1627
 +  interrupts:
 +    maxItems: 1
 +
-+  dmas:
++  fsl,wp-controller:
++    description: |
++      boolean, if present, indicate to use controller internal write protection.
++    type: boolean
++
++  fsl,delay-line:
++    $ref: /schemas/types.yaml#/definitions/uint32
++    description: |
++      Specify the number of delay cells for override mode.
++      This is used to set the clock delay for DLL(Delay Line) on override mode
++      to select a proper data sampling window in case the clock quality is not good
++      due to signal path is too long on the board. Please refer to eSDHC/uSDHC
++      chapter, DLL (Delay Line) section in RM for details.
++    default: 0
++
++  voltage-ranges:
++    $ref: '/schemas/types.yaml#/definitions/uint32-matrix'
++    description: |
++      Specify the voltage range in case there are software
++      transparent level shifters on the outputs of the controller. Two cells are
++      required, first cell specifies minimum slot voltage (mV), second cell
++      specifies maximum slot voltage (mV). Several ranges could be specified.
++    items:
++      items:
++        - description: value for minimum slot voltage
++        - description: value for maximum slot voltage
 +    maxItems: 1
 +
-+  dma-names:
-+    const: rx-tx
++  fsl,tuning-start-tap:
++    $ref: /schemas/types.yaml#/definitions/uint32
++    description: |
++      Specify the start dealy cell point when send first CMD19 in tuning procedure.
++    default: 0
++
++  fsl,tuning-step:
++    $ref: /schemas/types.yaml#/definitions/uint32
++    description: |
++      Specify the increasing delay cell steps in tuning procedure.
++      The uSDHC use one delay cell as default increasing step to do tuning process.
++      This property allows user to change the tuning step to more than one delay
++      cells which is useful for some special boards or cards when the default
++      tuning step can't find the proper delay window within limited tuning retries.
++    default: 0
++
++  fsl,strobe-dll-delay-target:
++    $ref: /schemas/types.yaml#/definitions/uint32
++    description: |
++      Specify the strobe dll control slave delay target.
++      This delay target programming host controller loopback read clock, and this
++      property allows user to change the delay target for the strobe input read clock.
++      If not use this property, driver default set the delay target to value 7.
++      Only eMMC HS400 mode need to take care of this property.
++    default: 0
 +
 +required:
 +  - compatible
@@ -138,14 +248,19 @@ index 0000000..ffa1627
 +
 +examples:
 +  - |
-+    mmc@10014000 {
-+        compatible = "fsl,imx27-mmc", "fsl,imx21-mmc";
-+        reg = <0x10014000 0x1000>;
-+        interrupts = <11>;
-+        dmas = <&dma 7>;
-+        dma-names = "rx-tx";
-+        bus-width = <4>;
-+        cd-gpios = <&gpio3 29>;
++    mmc@70004000 {
++        compatible = "fsl,imx51-esdhc";
++        reg = <0x70004000 0x4000>;
++        interrupts = <1>;
++        fsl,wp-controller;
++    };
++
++    mmc@70008000 {
++        compatible = "fsl,imx51-esdhc";
++        reg = <0x70008000 0x4000>;
++        interrupts = <2>;
++        cd-gpios = <&gpio1 6 0>; /* GPIO1_6 */
++        wp-gpios = <&gpio1 5 0>; /* GPIO1_5 */
 +    };
 -- 
 2.7.4
