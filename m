@@ -2,46 +2,44 @@ Return-Path: <SRS0=N8Xy=7R=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-8.6 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EB018C433E2
-	for <linux-mmc@archiver.kernel.org>; Thu,  4 Jun 2020 11:20:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 11F31C433E3
+	for <linux-mmc@archiver.kernel.org>; Thu,  4 Jun 2020 11:20:55 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C8E23206E6
+	by mail.kernel.org (Postfix) with ESMTP id E63F3207D5
 	for <linux-mmc@archiver.kernel.org>; Thu,  4 Jun 2020 11:20:54 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (1024-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="JSE4mkCT"
+	dkim=fail reason="signature verification failed" (1024-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="Nt4CqCc8"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727038AbgFDLUx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 4 Jun 2020 07:20:53 -0400
-Received: from www.zeus03.de ([194.117.254.33]:58172 "EHLO mail.zeus03.de"
+        id S1726990AbgFDLUy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 4 Jun 2020 07:20:54 -0400
+Received: from www.zeus03.de ([194.117.254.33]:58154 "EHLO mail.zeus03.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727046AbgFDLUx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        id S1727041AbgFDLUx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
         Thu, 4 Jun 2020 07:20:53 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
-        from:to:cc:subject:date:message-id:in-reply-to:references
-        :mime-version:content-transfer-encoding; s=k1; bh=Z93EQCVx29m/J8
-        oT4GzMC5ngz7xne9z1CvWsn7xKrXw=; b=JSE4mkCT9EjQg3BHj/YbjjCvCI18vK
-        KrYSQOOSL3FjfrpbrnSs3mXJsIXSuIaX8OhJbZ53sms94krE4jBbtPw7uEd55RUD
-        Wlxh3TDzmXNBtYNTG0uexK0KakmlUIj2ySTBFfNTDy6AhWVZI12Pj92N5S/ILKVV
-        0qq/PADIgLqpY=
-Received: (qmail 1656181 invoked from network); 4 Jun 2020 13:20:51 +0200
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 4 Jun 2020 13:20:51 +0200
-X-UD-Smtp-Session: l3s3148p1@ZA5UVkCncuUgAwDPXw1XANux7yWtmp4Z
+        from:to:cc:subject:date:message-id:mime-version
+        :content-transfer-encoding; s=k1; bh=qPyIgXO6fYmlepctzZg1Xnpmxe9
+        T2ol8nuKpMrVgVbo=; b=Nt4CqCc8VVJ0AbwyzOVw+FYs63/I6smkpFLJbFIqCp3
+        p22PtrNl09FHDbQ3kXwsipxFKdSoQCFRrcWm2DWmtmtx/QWYjwIp8mg4VGmQJivh
+        HdgGzKGh783ljXiArbVQ4TOLE0BnbzJJ4QjTBe2krhq4QeB2FpJkVQJPzSqpaoas
+        =
+Received: (qmail 1656118 invoked from network); 4 Jun 2020 13:20:50 +0200
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 4 Jun 2020 13:20:50 +0200
+X-UD-Smtp-Session: l3s3148p1@mRxIVkCnbuUgAwDPXw1XANux7yWtmp4Z
 From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
 To:     linux-mmc@vger.kernel.org
 Cc:     linux-renesas-soc@vger.kernel.org,
         Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
         Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: [PATCH 2/2] mmc: renesas_sdhi: keep SCC clock active when tuning
-Date:   Thu,  4 Jun 2020 13:20:40 +0200
-Message-Id: <20200604112040.22144-3-wsa+renesas@sang-engineering.com>
+Subject: [PATCH 0/2] renesas_sdhi: fix hang when SCC loses its clock
+Date:   Thu,  4 Jun 2020 13:20:38 +0200
+Message-Id: <20200604112040.22144-1-wsa+renesas@sang-engineering.com>
 X-Mailer: git-send-email 2.20.1
-In-Reply-To: <20200604112040.22144-1-wsa+renesas@sang-engineering.com>
-References: <20200604112040.22144-1-wsa+renesas@sang-engineering.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Sender: linux-mmc-owner@vger.kernel.org
@@ -49,90 +47,43 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Tuning procedure switches to lower frequencies but that will turn the
-SCC off and accessing its register then will hang. So, flag when we are
-tuning and keep the current setup of the external clock if we are doing
-so. Note that we still switch to the lower frequency because of the
-internal divider. We just make sure to not modify the external clock.
-This patch depends on a MMC core patch calling the downgrade function
-earlier.
+This was a nasty one because it wasn't reproducible for a long time.
+Recent work on the manual calibration mechanism made it show up again
+for me, so I could finally tackle it. The reason is that there is more
+SCC handling now, so we are more likely to stumble again over the
+problem that it may have no clock at that time.
 
-Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
----
+There is a patch in the BSP handling this issue, too, but it didn't work
+for me on at least v5.6+ kernels. Also, I thought it is way simpler to
+keep the last working external frequency instead of defining a default
+one per SoC generation.
+
+Patches are based on mmc/next as of yesterday or so. You need the
+'manual calibration' patches for the issue to show up. They are not
+fully tested yet, so I will send them as RFC in a minute. Or just fetch
+this branch:
+
+git://git.kernel.org/pub/scm/linux/kernel/git/wsa/linux.git renesas/sdhi/new_manual_calib
+
+With that branch, reading a file from eMMC works for me(tm). If you
+prevent 'keep_scc_freq' from being 'true', then reading a file should
+stall the machine. Happened here on a R-Car M3-N to me.
+
+Looking forward to comments and more tests.
+
+Thanks,
+
+   Wolfram
+
+Wolfram Sang (2):
+  mmc: core: when downgrading HS400, callback into drivers earlier
+  mmc: renesas_sdhi: keep SCC clock active when tuning
+
+ drivers/mmc/core/mmc.c               | 14 +++++++-------
  drivers/mmc/host/renesas_sdhi.h      |  1 +
  drivers/mmc/host/renesas_sdhi_core.c | 25 ++++++++++++++++++++++---
- 2 files changed, 23 insertions(+), 3 deletions(-)
+ 3 files changed, 30 insertions(+), 10 deletions(-)
 
-diff --git a/drivers/mmc/host/renesas_sdhi.h b/drivers/mmc/host/renesas_sdhi.h
-index 14c64caefc64..58a8c9133ba4 100644
---- a/drivers/mmc/host/renesas_sdhi.h
-+++ b/drivers/mmc/host/renesas_sdhi.h
-@@ -59,6 +59,7 @@ struct renesas_sdhi {
- 	u32 scc_tappos;
- 	u32 scc_tappos_hs400;
- 	bool doing_tune;
-+	bool keep_scc_freq;
- 
- 	/* Tuning values: 1 for success, 0 for failure */
- 	DECLARE_BITMAP(taps, BITS_PER_LONG);
-diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-index 15e21894bd44..589a59fb70eb 100644
---- a/drivers/mmc/host/renesas_sdhi_core.c
-+++ b/drivers/mmc/host/renesas_sdhi_core.c
-@@ -117,8 +117,12 @@ static unsigned int renesas_sdhi_clk_update(struct tmio_mmc_host *host,
- 	unsigned int freq, diff, best_freq = 0, diff_min = ~0;
- 	int i;
- 
--	/* tested only on R-Car Gen2+ currently; may work for others */
--	if (!(host->pdata->flags & TMIO_MMC_MIN_RCAR2))
-+	/*
-+	 * We simply return the current rate if a) we are not on a R-Car Gen2+
-+	 * SoC (may work for others, but untested) or b) if the SCC needs its
-+	 * clock during tuning, so we don't change the external clock setup.
-+	 */
-+	if (!(host->pdata->flags & TMIO_MMC_MIN_RCAR2) || priv->keep_scc_freq)
- 		return clk_get_rate(priv->clk);
- 
- 	/*
-@@ -323,6 +327,9 @@ static void renesas_sdhi_hs400_complete(struct mmc_host *mmc)
- 	u32 bad_taps = priv->quirks ? priv->quirks->hs400_bad_taps : 0;
- 	bool use_4tap = priv->quirks && priv->quirks->hs400_4taps;
- 
-+	/* Tuning done, no special handling for SCC clock needed anymore */
-+	priv->keep_scc_freq = false;
-+
- 	sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, ~CLK_CTL_SCLKEN &
- 		sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL));
- 
-@@ -401,6 +408,14 @@ static void renesas_sdhi_disable_scc(struct mmc_host *mmc)
- 
- 	sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, CLK_CTL_SCLKEN |
- 			sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL));
-+
-+	/*
-+	 * During retune, we still access SCC registers, so keep clock on.
-+	 * We have it here again because for retuning it is too late when we
-+	 * only enable this flag when HS400 tuning gets initialized.
-+	 */
-+	if (mmc_doing_retune(mmc))
-+		priv->keep_scc_freq = true;
- }
- 
- static void renesas_sdhi_reset_hs400_mode(struct tmio_mmc_host *host,
-@@ -427,8 +442,12 @@ static void renesas_sdhi_reset_hs400_mode(struct tmio_mmc_host *host,
- static int renesas_sdhi_prepare_hs400_tuning(struct mmc_host *mmc, struct mmc_ios *ios)
- {
- 	struct tmio_mmc_host *host = mmc_priv(mmc);
-+	struct renesas_sdhi *priv = host_to_priv(host);
-+
-+	/* During tuning, we still access SCC registers, so keep clock on */
-+	priv->keep_scc_freq = true;
-+	renesas_sdhi_reset_hs400_mode(host, priv);
- 
--	renesas_sdhi_reset_hs400_mode(host, host_to_priv(host));
- 	return 0;
- }
- 
 -- 
 2.20.1
 
