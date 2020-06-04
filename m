@@ -2,139 +2,94 @@ Return-Path: <SRS0=N8Xy=7R=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.5 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-2.1 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 341DFC433E0
-	for <linux-mmc@archiver.kernel.org>; Thu,  4 Jun 2020 18:34:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4F050C433DF
+	for <linux-mmc@archiver.kernel.org>; Thu,  4 Jun 2020 19:21:08 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 16E26207D3
-	for <linux-mmc@archiver.kernel.org>; Thu,  4 Jun 2020 18:34:12 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 203CF207D3
+	for <linux-mmc@archiver.kernel.org>; Thu,  4 Jun 2020 19:21:08 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (1024-bit key) header.d=mg.codeaurora.org header.i=@mg.codeaurora.org header.b="DNTXSOS6"
+	dkim=fail reason="signature verification failed" (1024-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="F/CIgZLC"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727928AbgFDSeL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 4 Jun 2020 14:34:11 -0400
-Received: from mail27.static.mailgun.info ([104.130.122.27]:27563 "EHLO
-        mail27.static.mailgun.info" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1730348AbgFDSeH (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Jun 2020 14:34:07 -0400
-DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
- s=smtp; t=1591295647; h=Message-ID: References: In-Reply-To: Subject:
- Cc: To: From: Date: Content-Transfer-Encoding: Content-Type:
- MIME-Version: Sender; bh=b+m+f2wIQAOgddiFH2GauZEHY1uboxw/Z1poVAGvYyQ=;
- b=DNTXSOS6XQ1w6d2vC1omZbOaeDHmn8W1OzoKd+OG2e+gpeD168f2EX1/CEx7zKE/Qx/6o26k
- wfoTrsfOKx6f3NciYO9UeJBKLVAfhAufQ6qSvnlNXJoy0kV2qbc8ODerNZyZttOtDnJLjjzK
- IGFXPgyx8+YZ85mo0byW45Mv7Mo=
-X-Mailgun-Sending-Ip: 104.130.122.27
-X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
-Received: from smtp.codeaurora.org
- (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171]) by
- smtp-out-n13.prod.us-east-1.postgun.com with SMTP id
- 5ed93e9cc0031c71c20ed0f7 (version=TLS1.2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256); Thu, 04 Jun 2020 18:34:04
- GMT
-Received: by smtp.codeaurora.org (Postfix, from userid 1001)
-        id 00A70C433B2; Thu,  4 Jun 2020 18:34:03 +0000 (UTC)
-Received: from mail.codeaurora.org (localhost.localdomain [127.0.0.1])
-        (using TLSv1 with cipher ECDHE-RSA-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        (Authenticated sender: sibis)
-        by smtp.codeaurora.org (Postfix) with ESMTPSA id 11E1AC433A1;
-        Thu,  4 Jun 2020 18:34:03 +0000 (UTC)
+        id S1728714AbgFDTVH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 4 Jun 2020 15:21:07 -0400
+Received: from www.zeus03.de ([194.117.254.33]:40564 "EHLO mail.zeus03.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1725939AbgFDTVH (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 4 Jun 2020 15:21:07 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
+        date:from:to:cc:subject:message-id:references:mime-version
+        :content-type:in-reply-to; s=k1; bh=WiGsQ2qsBhvS3Xj7NDBbPyphfBwY
+        +yhHsYYqF17bInQ=; b=F/CIgZLClYzydv7oHc1cNqtlSf2cnHcyRF43yEmoMVY9
+        R0N61nSoPli8p+rDJ7KUlZLtQGCuDxZTgXbAkao9jJlXt5q/OTuEtIPUbnEDYFi+
+        aDxb1M7g0ACYLHSoVl4HXyG4rByl+RgOcZVVz3qhyHxE4QYkg3EwuGVxz8Zvr4c=
+Received: (qmail 1832535 invoked from network); 4 Jun 2020 21:21:04 +0200
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 4 Jun 2020 21:21:04 +0200
+X-UD-Smtp-Session: l3s3148p1@Ary3C0enjoQgAwDPXw1XANux7yWtmp4Z
+Date:   Thu, 4 Jun 2020 21:21:04 +0200
+From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
+To:     linux-mmc@vger.kernel.org
+Cc:     linux-renesas-soc@vger.kernel.org,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        Takeshi Saito <takeshi.saito.xv@renesas.com>
+Subject: Re: [RFC PATCH v3 2/2] mmc: renesas_sdhi: support manual calibration
+Message-ID: <20200604192104.GA26501@ninjato>
+References: <20200604120633.22795-1-wsa+renesas@sang-engineering.com>
+ <20200604120633.22795-3-wsa+renesas@sang-engineering.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII;
- format=flowed
-Content-Transfer-Encoding: 7bit
-Date:   Fri, 05 Jun 2020 00:04:02 +0530
-From:   Sibi Sankar <sibis@codeaurora.org>
-To:     Matthias Kaehlcke <mka@chromium.org>
-Cc:     Pradeep P V K <ppvk@codeaurora.org>, bjorn.andersson@linaro.org,
-        adrian.hunter@intel.com, robh+dt@kernel.org,
-        ulf.hansson@linaro.org, vbadigan@codeaurora.org, sboyd@kernel.org,
-        georgi.djakov@linaro.org, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-mmc-owner@vger.kernel.org,
-        rnayak@codeaurora.org, matthias@chromium.org
-Subject: Re: [PATCH V2 1/2] mmc: sdhci-msm: Add interconnect bandwidth scaling
- support
-In-Reply-To: <20200604170906.GP4525@google.com>
-References: <1591269283-24084-1-git-send-email-ppvk@codeaurora.org>
- <1591269283-24084-2-git-send-email-ppvk@codeaurora.org>
- <20200604170906.GP4525@google.com>
-Message-ID: <23d6da79d604ce5113d90a2adab17483@codeaurora.org>
-X-Sender: sibis@codeaurora.org
-User-Agent: Roundcube Webmail/1.3.9
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="wac7ysb48OaltWcw"
+Content-Disposition: inline
+In-Reply-To: <20200604120633.22795-3-wsa+renesas@sang-engineering.com>
+User-Agent: Mutt/1.10.1 (2018-07-13)
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 2020-06-04 22:39, Matthias Kaehlcke wrote:
-> On Thu, Jun 04, 2020 at 04:44:42PM +0530, Pradeep P V K wrote:
->> Interconnect bandwidth scaling support is now added as a
->> part of OPP [1]. So, make sure interconnect driver is ready
->> before handling interconnect scaling.
->> 
->> This change is based on
->> [1] [Patch v8] Introduce OPP bandwidth bindings
->> (https://lkml.org/lkml/2020/5/12/493)
->> 
->> [2] [Patch v3] mmc: sdhci-msm: Fix error handling
->> for dev_pm_opp_of_add_table()
->> (https://lkml.org/lkml/2020/5/5/491)
->> 
->> Signed-off-by: Pradeep P V K <ppvk@codeaurora.org>
->> ---
->>  drivers/mmc/host/sdhci-msm.c | 13 +++++++++++++
->>  1 file changed, 13 insertions(+)
->> 
->> diff --git a/drivers/mmc/host/sdhci-msm.c 
->> b/drivers/mmc/host/sdhci-msm.c
->> index b277dd7..a13ff1b 100644
->> --- a/drivers/mmc/host/sdhci-msm.c
->> +++ b/drivers/mmc/host/sdhci-msm.c
->> @@ -14,6 +14,7 @@
->>  #include <linux/slab.h>
->>  #include <linux/iopoll.h>
->>  #include <linux/regulator/consumer.h>
->> +#include <linux/interconnect.h>
->> 
->>  #include "sdhci-pltfm.h"
->>  #include "cqhci.h"
->> @@ -2070,6 +2071,18 @@ static int sdhci_msm_probe(struct 
->> platform_device *pdev)
->>  	}
->>  	msm_host->bulk_clks[0].clk = clk;
->> 
->> +	/* Make sure that ICC driver is ready for interconnect bandwdith
->> +	 * scaling before registering the device for OPP.
->> +	 */
->> +	ret = dev_pm_opp_of_find_icc_paths(&pdev->dev, NULL);
->> +	if (ret) {
->> +		if (ret == -EPROBE_DEFER)
->> +			dev_info(&pdev->dev, "defer icc path: %d\n", ret);
-> 
-> I already commented on this on v1:
-> 
->   This log seems to add little more than noise, or are there particular 
-> reasons
->   why it is useful in this driver? Most drivers just return silently in 
-> case of
->   deferred probing.
-> 
-> If you think the log is really needed please explain why.
 
-Both the err logs seem redundant.
-EPROBE_DEFERS are rather readily
-noticeable through the return val.
-dev_.._find_icc_paths already prints
-err messages when we fail to get icc
-paths.
+--wac7ysb48OaltWcw
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
 
--- 
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
-a Linux Foundation Collaborative Project.
+> +	if (ver == SDHI_VER_GEN3_SDMMC && quirks && quirks->hs400_calib_table) {
+> +		host->fixup_request = renesas_sdhi_fixup_request;
+> +		priv->adjust_hs400_calib_table = *(
+> +			res->start == SDHI_GEN3_MMC0_ADDR ?
+> +			quirks->hs400_calib_table :
+> +			quirks->hs400_calib_table + 1);
+> +	}
+> +
+
+Testing revealed that this chunk should be moved up before calling
+tmio_mmc_host_probe(). After that, output from R-Car M3-N and H3 ES2.0
+were as expected. Updated debug test patch was pushed out to the branch
+as well. Tomorrow, I will test R-Car H2 and if all goes well, I will
+send out the fixed and non-RFC version of this series.
+
+
+--wac7ysb48OaltWcw
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAl7ZSZwACgkQFA3kzBSg
+KbbY/Q/+NiC7/Src/5Iai+hH/M8S2HdKtBIZ1E7pXzdPpAkDBma6B8NYKG+2pf78
+iLNJzW2uxfLSvbcwg7Xf5OCYk+9S3lwNAxtCZfi598nbhnmp5NOGR5odfixW9ZwT
+Gur36AhJzbpYMHYOmkDGzfVcxMoUMdVWjWBOrUeB+k8eP5H/Cwa9gZLzkPt4H/3+
+my92rqw0cy7CIlqHMEHv3RXG+FfytvVxNBLr9ECi19MlZM5V6aMp61OfosIU5p8I
+x5caTY3Z0qWBAjgjThzNN+oX722u7cwIrOSyp2jpxJXAZ17bGes40irSaIl+6s9U
+NwZ1djFe58nE/gzgpn/IynGwzdSmz205qD7632a8G7FhOzle2OrRTXF6czaJXwBu
+SwXcMianV7vIztjKIlTrUHeT0R0/B4Hs/W/Ft9F1TSZ5xwlU2bs8l+3Qthsw+P79
+cJRnrJsCrAp4dy43hG8qKhma2fIebmle6QOHC0tlqdJBECsXSoYlzGm4TlX1aWVd
+ls5RgvxWg92+A9YM3u1QqSsph90ZFxGdQv5sgh/+g6ieBe5ldARlMGhgfmXfztDJ
+brjTbt5GVIP+nur3TwM18LiwWyYu2jZem9B+7fDr1Fgg27k2bJQEBlVsKyxg5IH9
+VPPj2R/SV/G2QrcPTEGyN6pRbUr2byHRUimNy0QqBC1BdrYFf3Q=
+=1tZH
+-----END PGP SIGNATURE-----
+
+--wac7ysb48OaltWcw--
