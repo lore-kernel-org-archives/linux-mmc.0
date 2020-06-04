@@ -2,28 +2,28 @@ Return-Path: <SRS0=N8Xy=7R=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 73EB7C433E1
-	for <linux-mmc@archiver.kernel.org>; Thu,  4 Jun 2020 11:17:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8B1C4C433DF
+	for <linux-mmc@archiver.kernel.org>; Thu,  4 Jun 2020 11:17:14 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5002A20663
-	for <linux-mmc@archiver.kernel.org>; Thu,  4 Jun 2020 11:17:06 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7506620663
+	for <linux-mmc@archiver.kernel.org>; Thu,  4 Jun 2020 11:17:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726787AbgFDLRF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 4 Jun 2020 07:17:05 -0400
+        id S1727794AbgFDLRJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 4 Jun 2020 07:17:09 -0400
 Received: from alexa-out-blr-02.qualcomm.com ([103.229.18.198]:62205 "EHLO
         alexa-out-blr-02.qualcomm.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726444AbgFDLRF (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Jun 2020 07:17:05 -0400
+        by vger.kernel.org with ESMTP id S1727768AbgFDLRI (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Jun 2020 07:17:08 -0400
 Received: from ironmsg02-blr.qualcomm.com ([10.86.208.131])
   by alexa-out-blr-02.qualcomm.com with ESMTP/TLS/AES256-SHA; 04 Jun 2020 16:45:16 +0530
 Received: from c-ppvk-linux.qualcomm.com ([10.206.24.34])
-  by ironmsg02-blr.qualcomm.com with ESMTP; 04 Jun 2020 16:44:47 +0530
+  by ironmsg02-blr.qualcomm.com with ESMTP; 04 Jun 2020 16:44:46 +0530
 Received: by c-ppvk-linux.qualcomm.com (Postfix, from userid 2304101)
-        id 9EFCE47A9; Thu,  4 Jun 2020 16:44:46 +0530 (IST)
+        id B0FB6191B; Thu,  4 Jun 2020 16:44:45 +0530 (IST)
 From:   Pradeep P V K <ppvk@codeaurora.org>
 To:     bjorn.andersson@linaro.org, adrian.hunter@intel.com,
         robh+dt@kernel.org, ulf.hansson@linaro.org,
@@ -34,65 +34,44 @@ Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
         linux-mmc-owner@vger.kernel.org, rnayak@codeaurora.org,
         sibis@codeaurora.org, matthias@chromium.org,
         Pradeep P V K <ppvk@codeaurora.org>
-Subject: [PATCH V2 1/2] mmc: sdhci-msm: Add interconnect bandwidth scaling support
-Date:   Thu,  4 Jun 2020 16:44:42 +0530
-Message-Id: <1591269283-24084-2-git-send-email-ppvk@codeaurora.org>
+Subject: [PATCH V2 0/2] Add SDHC interconnect bandwidth scaling 
+Date:   Thu,  4 Jun 2020 16:44:41 +0530
+Message-Id: <1591269283-24084-1-git-send-email-ppvk@codeaurora.org>
 X-Mailer: git-send-email 1.9.1
-In-Reply-To: <1591269283-24084-1-git-send-email-ppvk@codeaurora.org>
-References: <1591269283-24084-1-git-send-email-ppvk@codeaurora.org>
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Interconnect bandwidth scaling support is now added as a
-part of OPP [1]. So, make sure interconnect driver is ready
-before handling interconnect scaling.
+
+Add interconnect bandwidths for SDHC driver using OPP framework that
+is required by SDHC driver based on the clock frequency and bus width
+of the card. Otherwise, the system clocks may run at minimum clock
+speed and thus affecting the performance.
 
 This change is based on
 [1] [Patch v8] Introduce OPP bandwidth bindings
 (https://lkml.org/lkml/2020/5/12/493)
 
-[2] [Patch v3] mmc: sdhci-msm: Fix error handling
+[2] [Patch v3 09/17] mmc: sdhci-msm: Fix error handling
 for dev_pm_opp_of_add_table()
 (https://lkml.org/lkml/2020/5/5/491)
 
-Signed-off-by: Pradeep P V K <ppvk@codeaurora.org>
----
- drivers/mmc/host/sdhci-msm.c | 13 +++++++++++++
- 1 file changed, 13 insertions(+)
+[3] [RFC v6 2/2] dt-bindings: mmc: sdhci-msm: Add interconnect BW
+scaling strings
+(https://lkml.org/lkml/2020/3/23/409)
 
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index b277dd7..a13ff1b 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -14,6 +14,7 @@
- #include <linux/slab.h>
- #include <linux/iopoll.h>
- #include <linux/regulator/consumer.h>
-+#include <linux/interconnect.h>
- 
- #include "sdhci-pltfm.h"
- #include "cqhci.h"
-@@ -2070,6 +2071,18 @@ static int sdhci_msm_probe(struct platform_device *pdev)
- 	}
- 	msm_host->bulk_clks[0].clk = clk;
- 
-+	/* Make sure that ICC driver is ready for interconnect bandwdith
-+	 * scaling before registering the device for OPP.
-+	 */
-+	ret = dev_pm_opp_of_find_icc_paths(&pdev->dev, NULL);
-+	if (ret) {
-+		if (ret == -EPROBE_DEFER)
-+			dev_info(&pdev->dev, "defer icc path: %d\n", ret);
-+		else
-+			dev_err(&pdev->dev, "failed to get icc path:%d\n", ret);
-+		goto bus_clk_disable;
-+	}
-+
- 	msm_host->opp_table = dev_pm_opp_set_clkname(&pdev->dev, "core");
- 	if (IS_ERR(msm_host->opp_table)) {
- 		ret = PTR_ERR(msm_host->opp_table);
+as there were no extra changes made on [3], retaining the Acked-by and
+Reviewed-by sign-off from [3].
+
+Pradeep P V K (2):
+  mmc: sdhci-msm: Add interconnect bandwidth scaling support
+  dt-bindings: mmc: sdhci-msm: Add interconnect BW scaling strings
+
+ Documentation/devicetree/bindings/mmc/sdhci-msm.txt | 18 ++++++++++++++++++
+ drivers/mmc/host/sdhci-msm.c                        | 13 +++++++++++++
+ 2 files changed, 31 insertions(+)
+
 -- 
-1.9.1
-
+changes since V1:
+- Added dev_pm_opp_find_icc_paths() to check for icc paths.
