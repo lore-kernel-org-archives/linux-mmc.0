@@ -2,76 +2,111 @@ Return-Path: <SRS0=N8Xy=7R=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8B1C4C433DF
-	for <linux-mmc@archiver.kernel.org>; Thu,  4 Jun 2020 11:17:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A7844C433E0
+	for <linux-mmc@archiver.kernel.org>; Thu,  4 Jun 2020 11:20:54 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7506620663
-	for <linux-mmc@archiver.kernel.org>; Thu,  4 Jun 2020 11:17:14 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7D97A2077D
+	for <linux-mmc@archiver.kernel.org>; Thu,  4 Jun 2020 11:20:54 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=fail reason="signature verification failed" (1024-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="u13yUz49"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727794AbgFDLRJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 4 Jun 2020 07:17:09 -0400
-Received: from alexa-out-blr-02.qualcomm.com ([103.229.18.198]:62205 "EHLO
-        alexa-out-blr-02.qualcomm.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1727768AbgFDLRI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Jun 2020 07:17:08 -0400
-Received: from ironmsg02-blr.qualcomm.com ([10.86.208.131])
-  by alexa-out-blr-02.qualcomm.com with ESMTP/TLS/AES256-SHA; 04 Jun 2020 16:45:16 +0530
-Received: from c-ppvk-linux.qualcomm.com ([10.206.24.34])
-  by ironmsg02-blr.qualcomm.com with ESMTP; 04 Jun 2020 16:44:46 +0530
-Received: by c-ppvk-linux.qualcomm.com (Postfix, from userid 2304101)
-        id B0FB6191B; Thu,  4 Jun 2020 16:44:45 +0530 (IST)
-From:   Pradeep P V K <ppvk@codeaurora.org>
-To:     bjorn.andersson@linaro.org, adrian.hunter@intel.com,
-        robh+dt@kernel.org, ulf.hansson@linaro.org,
-        vbadigan@codeaurora.org, sboyd@kernel.org,
-        georgi.djakov@linaro.org, mka@chromium.org
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-mmc-owner@vger.kernel.org, rnayak@codeaurora.org,
-        sibis@codeaurora.org, matthias@chromium.org,
-        Pradeep P V K <ppvk@codeaurora.org>
-Subject: [PATCH V2 0/2] Add SDHC interconnect bandwidth scaling 
-Date:   Thu,  4 Jun 2020 16:44:41 +0530
-Message-Id: <1591269283-24084-1-git-send-email-ppvk@codeaurora.org>
-X-Mailer: git-send-email 1.9.1
+        id S1727109AbgFDLUx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 4 Jun 2020 07:20:53 -0400
+Received: from www.zeus03.de ([194.117.254.33]:58166 "EHLO mail.zeus03.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1727038AbgFDLUx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 4 Jun 2020 07:20:53 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
+        from:to:cc:subject:date:message-id:in-reply-to:references
+        :mime-version:content-transfer-encoding; s=k1; bh=fy0N5v6dMpnuMO
+        xPYW0BamAucP2Gatl8R92TW/mjjgs=; b=u13yUz494e1+srkMiGdtJSW+sRd8dS
+        t3GK2hPoFdKaCahOLt6VlS6JEyOzVaNmmw3yMuQ+qQwRIczVNoH18/Ixt0pWwaQm
+        U63qknRKtatUpWQRN27YVQ8x2wlX5a0flgGwhCSkSh+ZKL1TBgFu0AF1EimLZmQX
+        X9tEI867k5rwI=
+Received: (qmail 1656146 invoked from network); 4 Jun 2020 13:20:51 +0200
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 4 Jun 2020 13:20:51 +0200
+X-UD-Smtp-Session: l3s3148p1@+g9OVkCncOUgAwDPXw1XANux7yWtmp4Z
+From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
+To:     linux-mmc@vger.kernel.org
+Cc:     linux-renesas-soc@vger.kernel.org,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>
+Subject: [PATCH 1/2] mmc: core: when downgrading HS400, callback into drivers earlier
+Date:   Thu,  4 Jun 2020 13:20:39 +0200
+Message-Id: <20200604112040.22144-2-wsa+renesas@sang-engineering.com>
+X-Mailer: git-send-email 2.20.1
+In-Reply-To: <20200604112040.22144-1-wsa+renesas@sang-engineering.com>
+References: <20200604112040.22144-1-wsa+renesas@sang-engineering.com>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+The driver specific downgrade function makes more sense if we run it
+before we switch anything, not after we already switched. Otherwise some
+non-HS400 communication has already happened.
 
-Add interconnect bandwidths for SDHC driver using OPP framework that
-is required by SDHC driver based on the clock frequency and bus width
-of the card. Otherwise, the system clocks may run at minimum clock
-speed and thus affecting the performance.
+No need to convert users. There is only one currenty which needs this
+change in a later patchset.
 
-This change is based on
-[1] [Patch v8] Introduce OPP bandwidth bindings
-(https://lkml.org/lkml/2020/5/12/493)
+Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+---
+ drivers/mmc/core/mmc.c | 14 +++++++-------
+ 1 file changed, 7 insertions(+), 7 deletions(-)
 
-[2] [Patch v3 09/17] mmc: sdhci-msm: Fix error handling
-for dev_pm_opp_of_add_table()
-(https://lkml.org/lkml/2020/5/5/491)
-
-[3] [RFC v6 2/2] dt-bindings: mmc: sdhci-msm: Add interconnect BW
-scaling strings
-(https://lkml.org/lkml/2020/3/23/409)
-
-as there were no extra changes made on [3], retaining the Acked-by and
-Reviewed-by sign-off from [3].
-
-Pradeep P V K (2):
-  mmc: sdhci-msm: Add interconnect bandwidth scaling support
-  dt-bindings: mmc: sdhci-msm: Add interconnect BW scaling strings
-
- Documentation/devicetree/bindings/mmc/sdhci-msm.txt | 18 ++++++++++++++++++
- drivers/mmc/host/sdhci-msm.c                        | 13 +++++++++++++
- 2 files changed, 31 insertions(+)
-
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 4203303f946a..f97994eace3b 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -1156,6 +1156,10 @@ static int mmc_select_hs400(struct mmc_card *card)
+ 	      host->ios.bus_width == MMC_BUS_WIDTH_8))
+ 		return 0;
+ 
++	/* Prepare host to downgrade to HS timing */
++	if (host->ops->hs400_downgrade)
++		host->ops->hs400_downgrade(host);
++
+ 	/* Switch card to HS mode */
+ 	val = EXT_CSD_TIMING_HS;
+ 	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+@@ -1171,10 +1175,6 @@ static int mmc_select_hs400(struct mmc_card *card)
+ 	/* Set host controller to HS timing */
+ 	mmc_set_timing(card->host, MMC_TIMING_MMC_HS);
+ 
+-	/* Prepare host to downgrade to HS timing */
+-	if (host->ops->hs400_downgrade)
+-		host->ops->hs400_downgrade(host);
+-
+ 	/* Reduce frequency to HS frequency */
+ 	max_dtr = card->ext_csd.hs_max_dtr;
+ 	mmc_set_clock(host, max_dtr);
+@@ -1241,6 +1241,9 @@ int mmc_hs400_to_hs200(struct mmc_card *card)
+ 	int err;
+ 	u8 val;
+ 
++	if (host->ops->hs400_downgrade)
++		host->ops->hs400_downgrade(host);
++
+ 	/* Reduce frequency to HS */
+ 	max_dtr = card->ext_csd.hs_max_dtr;
+ 	mmc_set_clock(host, max_dtr);
+@@ -1268,9 +1271,6 @@ int mmc_hs400_to_hs200(struct mmc_card *card)
+ 
+ 	mmc_set_timing(host, MMC_TIMING_MMC_HS);
+ 
+-	if (host->ops->hs400_downgrade)
+-		host->ops->hs400_downgrade(host);
+-
+ 	err = mmc_switch_status(card, true);
+ 	if (err)
+ 		goto out_err;
 -- 
-changes since V1:
-- Added dev_pm_opp_find_icc_paths() to check for icc paths.
+2.20.1
+
