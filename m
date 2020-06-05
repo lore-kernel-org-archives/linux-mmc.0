@@ -2,149 +2,142 @@ Return-Path: <SRS0=Uv8K=7S=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.5 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B07EDC433E0
-	for <linux-mmc@archiver.kernel.org>; Fri,  5 Jun 2020 11:41:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 56ADFC433E1
+	for <linux-mmc@archiver.kernel.org>; Fri,  5 Jun 2020 12:52:10 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8C3FD2070B
-	for <linux-mmc@archiver.kernel.org>; Fri,  5 Jun 2020 11:41:11 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (1024-bit key) header.d=mg.codeaurora.org header.i=@mg.codeaurora.org header.b="M04jhQxK"
+	by mail.kernel.org (Postfix) with ESMTP id 402E2206A2
+	for <linux-mmc@archiver.kernel.org>; Fri,  5 Jun 2020 12:52:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726363AbgFELlK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 5 Jun 2020 07:41:10 -0400
-Received: from m43-7.mailgun.net ([69.72.43.7]:31014 "EHLO m43-7.mailgun.net"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726539AbgFELlK (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 5 Jun 2020 07:41:10 -0400
-DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
- s=smtp; t=1591357270; h=Message-ID: References: In-Reply-To: Subject:
- Cc: To: From: Date: Content-Transfer-Encoding: Content-Type:
- MIME-Version: Sender; bh=lyPYOzLX8Vuo1M7AG9NpLi25wODcB0QLRhTvvaOQYkg=;
- b=M04jhQxKNMbaQtZkyWEJeNcFivsMRCwAssHQ5+nHLi3JaTnZzWXG/7NMp4pSMkJh5mjyRMJK
- VUlVFpnlq4br+CptUlKhgA/RmzFiolfFEM89NF8333ubXgfN2SVDL9VW/9SoMzRkW3L2m2aL
- kv1dH38RkE3McUn7yGYXH+Uce2s=
-X-Mailgun-Sending-Ip: 69.72.43.7
-X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
-Received: from smtp.codeaurora.org
- (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171]) by
- smtp-out-n05.prod.us-east-1.postgun.com with SMTP id
- 5eda2f4127386861269869b5 (version=TLS1.2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256); Fri, 05 Jun 2020 11:40:49
- GMT
-Received: by smtp.codeaurora.org (Postfix, from userid 1001)
-        id 8C5FCC433CA; Fri,  5 Jun 2020 11:40:48 +0000 (UTC)
-Received: from mail.codeaurora.org (localhost.localdomain [127.0.0.1])
-        (using TLSv1 with cipher ECDHE-RSA-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        (Authenticated sender: sibis)
-        by smtp.codeaurora.org (Postfix) with ESMTPSA id E6338C433C6;
-        Fri,  5 Jun 2020 11:40:47 +0000 (UTC)
+        id S1726592AbgFEMwF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 5 Jun 2020 08:52:05 -0400
+Received: from mail-oi1-f193.google.com ([209.85.167.193]:37986 "EHLO
+        mail-oi1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726553AbgFEMwE (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 5 Jun 2020 08:52:04 -0400
+Received: by mail-oi1-f193.google.com with SMTP id c194so8108722oig.5;
+        Fri, 05 Jun 2020 05:52:03 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=0l1qYzvXi/GO1NNvXjYET+2paPoc72Q4SdiakMSrAJE=;
+        b=NMiI0cxm3L5FK+XtkUqxfkfr16nI8LXlr6zv2XNGDXyMN5Rt1ttn0qhKXMEMtCpiIR
+         rvZZcqwQrQvaDVA2S1v2j1fvnG9+Qaxw40pcFFaFh/ERXgX5g9gOyw271xfoCNDQYy+l
+         CESBmJzj9C63rBx73CiXDS7QcW5TBOp4TFb274Byvj4DD01yLc6V3MVoGZa8Omgu4B86
+         Yv0lZ2KtbUceWzGjeq3vHYbw5kmV7pCNWrfPAw9UudKFtGSuqHarOOEC1EJMTTV+eJbf
+         GJefnoOypP8BsxzQWnWtC60fu9aVf4BXrD1EsfyPVjeosA2JNIYiqK1CzGf+bjeLVdPY
+         0Q0A==
+X-Gm-Message-State: AOAM530GlO5HQszfC6hPJUihsZSTy/zUCqltYggG3mFdx+k/oRH+8kEF
+        glM1aXIsqJrqs0swTMnhpGkt1Ab/sY9I3CoQZBgYok5Z
+X-Google-Smtp-Source: ABdhPJytYGDFbxN/XEq2VGE23sTUMKtd1U9+zTazCFQWHGPrv/2hO4eOc8uC8OCmgaeeBGlB90o3SnUqaReY8OrFTNk=
+X-Received: by 2002:aca:1a19:: with SMTP id a25mr1815274oia.54.1591361523495;
+ Fri, 05 Jun 2020 05:52:03 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII;
- format=flowed
-Content-Transfer-Encoding: 7bit
-Date:   Fri, 05 Jun 2020 17:10:47 +0530
-From:   Sibi Sankar <sibis@codeaurora.org>
-To:     Pradeep P V K <ppvk@codeaurora.org>
-Cc:     bjorn.andersson@linaro.org, adrian.hunter@intel.com,
-        robh+dt@kernel.org, ulf.hansson@linaro.org,
-        vbadigan@codeaurora.org, sboyd@kernel.org,
-        georgi.djakov@linaro.org, mka@chromium.org,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-mmc-owner@vger.kernel.org, rnayak@codeaurora.org,
-        matthias@chromium.org, linux-arm-msm-owner@vger.kernel.org
-Subject: =?UTF-8?Q?Re=3A_=5BPATCH=C2=A0V3_1/2=5D_mmc=3A_sdhci-msm=3A_Add_?=
- =?UTF-8?Q?interconnect_bandwidth_scaling_support?=
-In-Reply-To: <1591349427-27004-2-git-send-email-ppvk@codeaurora.org>
-References: <1591269283-24084-1-git-send-email-ppvk@codeaurora.org>
- <1591349427-27004-1-git-send-email-ppvk@codeaurora.org>
- <1591349427-27004-2-git-send-email-ppvk@codeaurora.org>
-Message-ID: <8b2808215a09871bfccccb72cfa01e60@codeaurora.org>
-X-Sender: sibis@codeaurora.org
-User-Agent: Roundcube Webmail/1.3.9
+References: <1588542414-14826-1-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
+ <1588542414-14826-11-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
+In-Reply-To: <1588542414-14826-11-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
+From:   Geert Uytterhoeven <geert@linux-m68k.org>
+Date:   Fri, 5 Jun 2020 14:51:52 +0200
+Message-ID: <CAMuHMdXgSWHd-w_vgv-2mrYwJ2trcdDNniKFGCDGbn3ts-CkjA@mail.gmail.com>
+Subject: Re: [PATCH v2 10/10] ARM: dts: r8a7742-iwg21d-q7: Add support for
+ iWave G21D-Q7 board based on RZ/G1H
+To:     Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+Cc:     Magnus Damm <magnus.damm@gmail.com>,
+        Rob Herring <robh+dt@kernel.org>,
+        Vinod Koul <vkoul@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
+        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
+        <devicetree@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        dmaengine <dmaengine@vger.kernel.org>,
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
+        "open list:SERIAL DRIVERS" <linux-serial@vger.kernel.org>,
+        Prabhakar <prabhakar.csengg@gmail.com>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hey Pradeep,
-Thanks for the patch.
+Hi Prabhakar,
 
-On 2020-06-05 15:00, Pradeep P V K wrote:
-> Interconnect bandwidth scaling support is now added as a
-> part of OPP [1]. So, make sure interconnect driver is ready
+On Sun, May 3, 2020 at 11:47 PM Lad Prabhakar
+<prabhakar.mahadev-lad.rj@bp.renesas.com> wrote:
+> Add support for iWave RainboW-G21D-Qseven board based on RZ/G1H.
+>
+> Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+> Reviewed-by: Marian-Cristian Rotariu <marian-cristian.rotariu.rb@bp.renesas.com>
 
-can you please replace driver with paths
-instead?
-
-> before handling interconnect scaling.
-> 
-> This change is based on
-> [1] [Patch v8] Introduce OPP bandwidth bindings
-> (https://lkml.org/lkml/2020/5/12/493)
-> 
-> [2] [Patch v3] mmc: sdhci-msm: Fix error handling
-> for dev_pm_opp_of_add_table()
-> (https://lkml.org/lkml/2020/5/5/491)
-
-sry didn't notice ^^ earlier
-you might want to place these
-comments and dependencies similar
-to the following patch.
-https://patchwork.kernel.org/patch/11573903/
-
-> 
-> Signed-off-by: Pradeep P V K <ppvk@codeaurora.org>
-> ---
->  drivers/mmc/host/sdhci-msm.c | 8 ++++++++
->  1 file changed, 8 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci-msm.c 
-> b/drivers/mmc/host/sdhci-msm.c
-> index b277dd7..a945e84 100644
-> --- a/drivers/mmc/host/sdhci-msm.c
-> +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -14,6 +14,7 @@
->  #include <linux/slab.h>
->  #include <linux/iopoll.h>
->  #include <linux/regulator/consumer.h>
-> +#include <linux/interconnect.h>
-> 
->  #include "sdhci-pltfm.h"
->  #include "cqhci.h"
-> @@ -2070,6 +2071,13 @@ static int sdhci_msm_probe(struct 
-> platform_device *pdev)
->  	}
->  	msm_host->bulk_clks[0].clk = clk;
-> 
-> +	/* Make sure that ICC driver is ready for interconnect bandwdith
-
-typo /s/bandwdith/bandwidth
-
-> +	 * scaling before registering the device for OPP.
-> +	 */
-
-/* Check for optional interconnect paths */
-Maybe using ^^ would suffice since
-that's what we are actually doing
-
-Reviewed-by: Sibi Sankar <sibis@codeaurora.org>
-
-> +	ret = dev_pm_opp_of_find_icc_paths(&pdev->dev, NULL);
-> +	if (ret)
-> +		goto bus_clk_disable;
+> --- /dev/null
+> +++ b/arch/arm/boot/dts/r8a7742-iwg21d-q7.dts
+> @@ -0,0 +1,37 @@
+> +// SPDX-License-Identifier: GPL-2.0
+> +/*
+> + * Device Tree Source for the iWave-RZ/G1H Qseven board
+> + *
+> + * Copyright (C) 2020 Renesas Electronics Corp.
+> + */
 > +
->  	msm_host->opp_table = dev_pm_opp_set_clkname(&pdev->dev, "core");
->  	if (IS_ERR(msm_host->opp_table)) {
->  		ret = PTR_ERR(msm_host->opp_table);
+> +/dts-v1/;
+> +#include "r8a7742-iwg21m.dtsi"
+> +
+> +/ {
+> +       model = "iWave Systems RainboW-G21D-Qseven board based on RZ/G1H";
+> +       compatible = "iwave,g21d", "iwave,g21m", "renesas,r8a7742";
+> +
+> +       aliases {
+> +               serial2 = &scifa2;
+> +       };
+> +
+> +       chosen {
+> +               bootargs = "ignore_loglevel root=/dev/mmcblk0p1 rw rootwait";
+> +               stdout-path = "serial2:115200n8";
+> +       };
+> +};
+> +
+> +&pfc {
+> +       scifa2_pins: scifa2 {
+> +               groups = "scifa2_data_c";
 
+Upon second look, I think this group is wrong.  While labeled SCIFA2 in
+the SOM schematics, these signals seem to be connected to a debugging
+interface.
+
+The real UART2 seems to be present on the camera daughter board.  Those
+signals are labeled "SCIFA2" in the camera board schematics, but "SCIF2"
+in the SOM schematics.  This is OK, as "scif2_data" and "scifa2_data"
+share the same pins, so you can choose either SCIF2 or SCIFA2 to drive
+them.
+
+If I'm right, please change the group, and move all serial2 descriptions
+to the camera board DTS.
+
+> +               function = "scifa2";
+> +       };
+> +};
+> +
+> +&scifa2 {
+> +       pinctrl-0 = <&scifa2_pins>;
+> +       pinctrl-names = "default";
+> +
+> +       status = "okay";
+> +};
+
+Gr{oetje,eeting}s,
+
+                        Geert
 
 -- 
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
-a Linux Foundation Collaborative Project.
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
