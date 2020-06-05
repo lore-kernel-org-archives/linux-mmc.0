@@ -2,44 +2,47 @@ Return-Path: <SRS0=Uv8K=7S=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.6 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,UNWANTED_LANGUAGE_BODY,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 945D2C433E2
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B5C50C433E3
 	for <linux-mmc@archiver.kernel.org>; Fri,  5 Jun 2020 10:12:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 6AA682053B
+	by mail.kernel.org (Postfix) with ESMTP id 956C22075B
 	for <linux-mmc@archiver.kernel.org>; Fri,  5 Jun 2020 10:12:35 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (1024-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="BsdTnlrI"
+	dkim=fail reason="signature verification failed" (1024-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="2VS02UnR"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725926AbgFEKMe (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 5 Jun 2020 06:12:34 -0400
-Received: from www.zeus03.de ([194.117.254.33]:34690 "EHLO mail.zeus03.de"
+        id S1726378AbgFEKMf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 5 Jun 2020 06:12:35 -0400
+Received: from www.zeus03.de ([194.117.254.33]:34708 "EHLO mail.zeus03.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726010AbgFEKMe (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        id S1726404AbgFEKMe (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
         Fri, 5 Jun 2020 06:12:34 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
-        from:to:cc:subject:date:message-id:mime-version
-        :content-transfer-encoding; s=k1; bh=gYFeONL5I/bcVZjzHzAV9PjeLn3
-        ZeKKPj5bBnRQhTQg=; b=BsdTnlrI3rb+3fOyBppCVNJR4aWmRo8RyH2db5VdUlI
-        UoSHqgO8NOXRzNi18CYE9Cn+BkLfjdlC3DCe0K0ofWokrHj4KaPX2QzLN6YPV4IQ
-        2xy/Mr/q3fEkHvK3xguqL2nXHQmrC/yRvBeikAjZq7yziL5++kt7v5eFhObHfGgU
-        =
-Received: (qmail 2053844 invoked from network); 5 Jun 2020 12:12:31 +0200
+        from:to:cc:subject:date:message-id:in-reply-to:references
+        :mime-version:content-transfer-encoding; s=k1; bh=zUqDOXTcMkOC91
+        M80A6a9aSTT19RqaBE03iRgnIKhRc=; b=2VS02UnRYrJZl18Sg3W++UPsjqyo7U
+        hk0Hh0n4I0JUZO7E7Zh34neLFzUZBJst2k8LdtzD3l1H9GGu8sG3ZItNbNOw0yCX
+        uriCcx/hYBt4EZdxrCQ7mU5x612PZLQpIowpQh94OHpeiH55XyDbGVe2FwyhNTGl
+        8Kw564Ja9LOJk=
+Received: (qmail 2053897 invoked from network); 5 Jun 2020 12:12:31 +0200
 Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 5 Jun 2020 12:12:31 +0200
-X-UD-Smtp-Session: l3s3148p1@IXi+f1OnlpsgAwDPXwgPAMwULGf5QH9H
+X-UD-Smtp-Session: l3s3148p1@MRDOf1OnmpsgAwDPXwgPAMwULGf5QH9H
 From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
 To:     linux-mmc@vger.kernel.org
 Cc:     linux-renesas-soc@vger.kernel.org,
         Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: [PATCH 0/2] mmc: renesas_sdhi: support manual calibration
-Date:   Fri,  5 Jun 2020 12:12:20 +0200
-Message-Id: <20200605101222.10783-1-wsa+renesas@sang-engineering.com>
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Takeshi Saito <takeshi.saito.xv@renesas.com>
+Subject: [PATCH 2/2] mmc: renesas_sdhi: support manual calibration
+Date:   Fri,  5 Jun 2020 12:12:22 +0200
+Message-Id: <20200605101222.10783-3-wsa+renesas@sang-engineering.com>
 X-Mailer: git-send-email 2.20.1
+In-Reply-To: <20200605101222.10783-1-wsa+renesas@sang-engineering.com>
+References: <20200605101222.10783-1-wsa+renesas@sang-engineering.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Sender: linux-mmc-owner@vger.kernel.org
@@ -47,98 +50,302 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Some R-Car Gen3 SoCs need corrections after they tuned to HS400. This
-series implements that. Please have a look at the patch descriptions for
-details. The origins were patches in the BSP from Takeshi Saito.
+Some R-Car Gen3 SoCs need some manual correction of timing parameters
+after the automatic tuning has finished but before next CMD13 is
+completed. This patch implements that by this state machine:
 
-Changes since RFC v3:
+- introducing a per-SoC correction table if needed
+- iff such a table exists, the 'fixup_request' callback is populated
+  during probe
+- iff such a table exists, a runtime flag ('needs_adjust_hs400')
+  is set when HS400 tuning gets prepared
+- if tuning HS400 fails, the runtime flag is cleared again
+- the callback will check the runtime flag and enable the corrected
+  manual mode if the flag is set and CMD13 is encountered
+- at the end of the enablement the runtime flag is cleared
+- iff the configuration flag is set, the manual mode will be disabled
+  when HS400 gets downgraded
 
-* moved detection in probe() a bit to the front before calling into the
-  TMIO driver ensuring all fields are properly initialized
-* tested on Gen2 (R-Car H2), too; no regressions
+There also some helper functions added to access the TMPPORT registers.
+The actual correction table is SoC and instance(!) specific and is
+added to the quirks struct.
 
-There is a branch for testing here (with the debug patch on top):
-
-git://git.kernel.org/pub/scm/linux/kernel/git/wsa/linux.git renesas/topic/sdhi-manual-calib
-
-Note: handling 'hs400_calib_table' in patch 2 uses some multidimensional
-array vs pointers judo. I think it is correct C this way but I am
-especially grateful for further review there.
-
-
-Current test results:
----------------------
-
-An unaffected SDHI instance (no eMMC (R-Car H2) or no table (H3 ES2.0)):
-
-No calib table, so flag gets disabled during the reset in the beginning
-of the initialization. The same reset routine will be called when tuning
-fails.
-
-     kworker/0:0-3     [000] ....     2.799451: renesas_sdhi_reset_hs400_mode: ee100000.sd: calib table 00000000
-     kworker/0:0-3     [000] ....     2.799459: renesas_sdhi_hw_reset: ee100000.sd: reset! flag disabled
-
-An SDHI instance with a HS400 capable eMMC connected (R-Car M3-N):
-
-When preparing HS400 tuning, a calib table is found. So, (potential) old
-HS400 tuning gets reset and the manual adjustment gets disabled, the
-runtime flag (signalling new manual adjustment will be needed) is set:
-
-     kworker/1:2-139   [001] ....     4.028232: renesas_sdhi_reset_hs400_mode: ee140000.sd: calib table ffff800010c76ee8
-     kworker/1:2-139   [001] ....     4.028237: renesas_sdhi_reset_hs400_mode: ee140000.sd: adjustment disabled
-     kworker/1:2-139   [001] ....     4.028239: renesas_sdhi_prepare_hs400_tuning: ee140000.sd: flag enabled
-
-Lots of tuning CMDs:
-
-     kworker/0:1-21    [000] ....     4.028370: renesas_sdhi_fixup_request: ee140000.sd: opcode 21, flag 1
-     kworker/0:1-21    [000] ....     4.028576: renesas_sdhi_fixup_request: ee140000.sd: opcode 21, flag 1
-     kworker/0:1-21    [000] ....     4.028668: renesas_sdhi_fixup_request: ee140000.sd: opcode 21, flag 1
-     kworker/0:1-21    [000] ....     4.028754: renesas_sdhi_fixup_request: ee140000.sd: opcode 21, flag 1
-     kworker/0:1-21    [000] ....     4.028832: renesas_sdhi_fixup_request: ee140000.sd: opcode 21, flag 1
-     kworker/0:1-21    [000] ....     4.028909: renesas_sdhi_fixup_request: ee140000.sd: opcode 21, flag 1
-     kworker/0:1-21    [000] ....     4.028989: renesas_sdhi_fixup_request: ee140000.sd: opcode 21, flag 1
-     kworker/0:1-21    [000] ....     4.029065: renesas_sdhi_fixup_request: ee140000.sd: opcode 21, flag 1
-     kworker/0:1-21    [000] ....     4.029149: renesas_sdhi_fixup_request: ee140000.sd: opcode 21, flag 1
-     kworker/0:1-21    [000] ....     4.029228: renesas_sdhi_fixup_request: ee140000.sd: opcode 21, flag 1
-     kworker/0:1-21    [000] ....     4.029302: renesas_sdhi_fixup_request: ee140000.sd: opcode 21, flag 1
-     kworker/0:1-21    [000] ....     4.029378: renesas_sdhi_fixup_request: ee140000.sd: opcode 21, flag 1
-     kworker/0:1-21    [000] ....     4.029453: renesas_sdhi_fixup_request: ee140000.sd: opcode 21, flag 1
-     kworker/0:1-21    [000] ....     4.029532: renesas_sdhi_fixup_request: ee140000.sd: opcode 21, flag 1
-     kworker/0:1-21    [000] ....     4.029612: renesas_sdhi_fixup_request: ee140000.sd: opcode 21, flag 1
-     kworker/0:1-21    [000] ....     4.029694: renesas_sdhi_fixup_request: ee140000.sd: opcode 21, flag 1
-     kworker/0:1-21    [000] ....     4.029775: renesas_sdhi_fixup_request: ee140000.sd: opcode 6, flag 1
-
-First CMD13 after tuning discovered, enable adjustment, clear runtime
-flag, show replacement value:
-
-     kworker/0:1-21    [000] ....     4.030294: renesas_sdhi_fixup_request: ee140000.sd: opcode 13, flag 1
-     kworker/0:1-21    [000] ....     4.030299: renesas_sdhi_fixup_request: ee140000.sd: adjustment enabled, flag disabled
-     kworker/0:1-21    [000] ....     4.030300: renesas_sdhi_fixup_request: code 0 replacement 1
-
-And then checksumming a large file works without performance
-regressions. Retunes happen once occasionally and follow the above
-pattern exactly (with different replacement values, though).
-
-So, again a lot of text but I want interested parties to verify results.
-
-Looking forward to comments, although I won't complain if this is the
-final version ;)
-
-Thanks and kind regards,
-
-   Wolfram
-
-
-Wolfram Sang (2):
-  mmc: tmio: add generic hook to fixup after a completed request
-  mmc: renesas_sdhi: support manual calibration
-
+Signed-off-by: Takeshi Saito <takeshi.saito.xv@renesas.com>
+Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+---
  drivers/mmc/host/renesas_sdhi.h      |   5 +
  drivers/mmc/host/renesas_sdhi_core.c | 152 ++++++++++++++++++++++++++-
- drivers/mmc/host/tmio_mmc.h          |   1 +
- drivers/mmc/host/tmio_mmc_core.c     |   3 +
- 4 files changed, 159 insertions(+), 2 deletions(-)
+ 2 files changed, 155 insertions(+), 2 deletions(-)
 
+diff --git a/drivers/mmc/host/renesas_sdhi.h b/drivers/mmc/host/renesas_sdhi.h
+index 58a8c9133ba4..be80c5edff68 100644
+--- a/drivers/mmc/host/renesas_sdhi.h
++++ b/drivers/mmc/host/renesas_sdhi.h
+@@ -33,10 +33,13 @@ struct renesas_sdhi_of_data {
+ 	unsigned short max_segs;
+ };
+ 
++#define SDHI_CALIB_TABLE_MAX 32
++
+ struct renesas_sdhi_quirks {
+ 	bool hs400_disabled;
+ 	bool hs400_4taps;
+ 	u32 hs400_bad_taps;
++	const u8 (*hs400_calib_table)[SDHI_CALIB_TABLE_MAX];
+ };
+ 
+ struct tmio_mmc_dma {
+@@ -58,6 +61,8 @@ struct renesas_sdhi {
+ 	void __iomem *scc_ctl;
+ 	u32 scc_tappos;
+ 	u32 scc_tappos_hs400;
++	const u8 *adjust_hs400_calib_table;
++	bool needs_adjust_hs400;
+ 	bool doing_tune;
+ 	bool keep_scc_freq;
+ 
+diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
+index 589a59fb70eb..d90c0defa14e 100644
+--- a/drivers/mmc/host/renesas_sdhi_core.c
++++ b/drivers/mmc/host/renesas_sdhi_core.c
+@@ -26,6 +26,7 @@
+ #include <linux/platform_device.h>
+ #include <linux/pm_domain.h>
+ #include <linux/mmc/host.h>
++#include <linux/mmc/mmc.h>
+ #include <linux/mmc/slot-gpio.h>
+ #include <linux/mfd/tmio.h>
+ #include <linux/sh_dma.h>
+@@ -47,6 +48,8 @@
+ #define SDHI_VER_GEN3_SD	0xcc10
+ #define SDHI_VER_GEN3_SDMMC	0xcd10
+ 
++#define SDHI_GEN3_MMC0_ADDR	0xee140000
++
+ static void renesas_sdhi_sdbuf_width(struct tmio_mmc_host *host, int width)
+ {
+ 	u32 val;
+@@ -251,6 +254,11 @@ static int renesas_sdhi_start_signal_voltage_switch(struct mmc_host *mmc,
+ #define SH_MOBILE_SDHI_SCC_RVSREQ	0x00A
+ #define SH_MOBILE_SDHI_SCC_SMPCMP       0x00C
+ #define SH_MOBILE_SDHI_SCC_TMPPORT2	0x00E
++#define SH_MOBILE_SDHI_SCC_TMPPORT3	0x014
++#define SH_MOBILE_SDHI_SCC_TMPPORT4	0x016
++#define SH_MOBILE_SDHI_SCC_TMPPORT5	0x018
++#define SH_MOBILE_SDHI_SCC_TMPPORT6	0x01A
++#define SH_MOBILE_SDHI_SCC_TMPPORT7	0x01C
+ 
+ #define SH_MOBILE_SDHI_SCC_DTCNTL_TAPEN		BIT(0)
+ #define SH_MOBILE_SDHI_SCC_DTCNTL_TAPNUM_SHIFT	16
+@@ -271,6 +279,40 @@ static int renesas_sdhi_start_signal_voltage_switch(struct mmc_host *mmc,
+ #define SH_MOBILE_SDHI_SCC_TMPPORT2_HS400OSEL	BIT(4)
+ #define SH_MOBILE_SDHI_SCC_TMPPORT2_HS400EN	BIT(31)
+ 
++/* Definitions for values the SH_MOBILE_SDHI_SCC_TMPPORT4 register */
++#define SH_MOBILE_SDHI_SCC_TMPPORT4_DLL_ACC_START	BIT(0)
++
++/* Definitions for values the SH_MOBILE_SDHI_SCC_TMPPORT5 register */
++#define SH_MOBILE_SDHI_SCC_TMPPORT5_DLL_RW_SEL_R	BIT(8)
++#define SH_MOBILE_SDHI_SCC_TMPPORT5_DLL_RW_SEL_W	(0 << 8)
++#define SH_MOBILE_SDHI_SCC_TMPPORT5_DLL_ADR_MASK	0x3F
++
++/* Definitions for values the SH_MOBILE_SDHI_SCC register */
++#define SH_MOBILE_SDHI_SCC_TMPPORT_DISABLE_WP_CODE	0xa5000000
++#define SH_MOBILE_SDHI_SCC_TMPPORT_CALIB_CODE_MASK	0x1f
++#define SH_MOBILE_SDHI_SCC_TMPPORT_MANUAL_MODE		BIT(7)
++
++static const u8 r8a7796_es13_calib_table[2][SDHI_CALIB_TABLE_MAX] = {
++	{ 3,  3,  3,  3,  3,  3,  3,  4,  4,  5,  6,  7,  8,  9, 10, 15,
++	 16, 16, 16, 16, 16, 16, 17, 18, 18, 19, 20, 21, 22, 23, 24, 25 },
++	{ 5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  6,  7,  8, 11,
++	 12, 17, 18, 18, 18, 18, 18, 18, 18, 19, 20, 21, 22, 23, 25, 25 }
++};
++
++static const u8 r8a77965_calib_table[2][SDHI_CALIB_TABLE_MAX] = {
++	{ 1,  2,  6,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 15, 15, 16,
++	 17, 18, 19, 20, 21, 22, 23, 24, 25, 25, 26, 27, 28, 29, 30, 31 },
++	{ 2,  3,  4,  4,  5,  6,  7,  9, 10, 11, 12, 13, 14, 15, 16, 17,
++	 17, 17, 20, 21, 22, 23, 24, 25, 27, 28, 29, 30, 31, 31, 31, 31 }
++};
++
++static const u8 r8a77990_calib_table[2][SDHI_CALIB_TABLE_MAX] = {
++	{ 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
++	  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0 },
++	{ 0,  0,  0,  1,  2,  3,  3,  4,  4,  4,  5,  5,  6,  8,  9, 10,
++	 11, 12, 13, 15, 16, 17, 17, 18, 18, 19, 20, 22, 24, 25, 26, 26 }
++};
++
+ static inline u32 sd_scc_read32(struct tmio_mmc_host *host,
+ 				struct renesas_sdhi *priv, int addr)
+ {
+@@ -418,6 +460,74 @@ static void renesas_sdhi_disable_scc(struct mmc_host *mmc)
+ 		priv->keep_scc_freq = true;
+ }
+ 
++static u32 sd_scc_tmpport_read32(struct tmio_mmc_host *host,
++				 struct renesas_sdhi *priv, u32 addr)
++{
++	/* read mode */
++	sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_TMPPORT5,
++		       SH_MOBILE_SDHI_SCC_TMPPORT5_DLL_RW_SEL_R |
++		       (SH_MOBILE_SDHI_SCC_TMPPORT5_DLL_ADR_MASK & addr));
++
++	/* access start and stop */
++	sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_TMPPORT4,
++		       SH_MOBILE_SDHI_SCC_TMPPORT4_DLL_ACC_START);
++	sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_TMPPORT4, 0);
++
++	return sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_TMPPORT7);
++}
++
++static void sd_scc_tmpport_write32(struct tmio_mmc_host *host,
++				   struct renesas_sdhi *priv, u32 addr, u32 val)
++{
++	/* write mode */
++	sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_TMPPORT5,
++		       SH_MOBILE_SDHI_SCC_TMPPORT5_DLL_RW_SEL_W |
++		       (SH_MOBILE_SDHI_SCC_TMPPORT5_DLL_ADR_MASK & addr));
++
++	sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_TMPPORT6, val);
++
++	/* access start and stop */
++	sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_TMPPORT4,
++		       SH_MOBILE_SDHI_SCC_TMPPORT4_DLL_ACC_START);
++	sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_TMPPORT4, 0);
++}
++
++static void renesas_sdhi_adjust_hs400_mode_enable(struct tmio_mmc_host *host)
++{
++	struct renesas_sdhi *priv = host_to_priv(host);
++	u32 calib_code;
++
++	/* disable write protect */
++	sd_scc_tmpport_write32(host, priv, 0x00,
++			       SH_MOBILE_SDHI_SCC_TMPPORT_DISABLE_WP_CODE);
++	/* read calibration code and adjust */
++	calib_code = sd_scc_tmpport_read32(host, priv, 0x26);
++	calib_code &= SH_MOBILE_SDHI_SCC_TMPPORT_CALIB_CODE_MASK;
++
++	sd_scc_tmpport_write32(host, priv, 0x22,
++			       SH_MOBILE_SDHI_SCC_TMPPORT_MANUAL_MODE |
++			       priv->adjust_hs400_calib_table[calib_code]);
++
++	/* set offset value to TMPPORT3, hardcoded to OFFSET0 (= 0x3) for now */
++	sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_TMPPORT3, 0x3);
++
++	/* adjustment done, clear flag */
++	priv->needs_adjust_hs400 = false;
++}
++
++static void renesas_sdhi_adjust_hs400_mode_disable(struct tmio_mmc_host *host)
++{
++	struct renesas_sdhi *priv = host_to_priv(host);
++
++	/* disable write protect */
++	sd_scc_tmpport_write32(host, priv, 0x00,
++			       SH_MOBILE_SDHI_SCC_TMPPORT_DISABLE_WP_CODE);
++	/* disable manual calibration */
++	sd_scc_tmpport_write32(host, priv, 0x22, 0);
++	/* clear offset value of TMPPORT3 */
++	sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_TMPPORT3, 0);
++}
++
+ static void renesas_sdhi_reset_hs400_mode(struct tmio_mmc_host *host,
+ 					  struct renesas_sdhi *priv)
+ {
+@@ -435,6 +545,9 @@ static void renesas_sdhi_reset_hs400_mode(struct tmio_mmc_host *host,
+ 			 SH_MOBILE_SDHI_SCC_TMPPORT2_HS400OSEL) &
+ 			sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_TMPPORT2));
+ 
++	if (priv->adjust_hs400_calib_table)
++		renesas_sdhi_adjust_hs400_mode_disable(host);
++
+ 	sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, CLK_CTL_SCLKEN |
+ 			sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL));
+ }
+@@ -448,6 +561,9 @@ static int renesas_sdhi_prepare_hs400_tuning(struct mmc_host *mmc, struct mmc_io
+ 	priv->keep_scc_freq = true;
+ 	renesas_sdhi_reset_hs400_mode(host, priv);
+ 
++	if (priv->adjust_hs400_calib_table)
++		priv->needs_adjust_hs400 = true;
++
+ 	return 0;
+ }
+ 
+@@ -658,6 +774,7 @@ static void renesas_sdhi_hw_reset(struct tmio_mmc_host *host)
+ 
+ 	renesas_sdhi_reset_scc(host, priv);
+ 	renesas_sdhi_reset_hs400_mode(host, priv);
++	priv->needs_adjust_hs400 = false;
+ 
+ 	sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, CLK_CTL_SCLKEN |
+ 			sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL));
+@@ -730,6 +847,13 @@ static int renesas_sdhi_multi_io_quirk(struct mmc_card *card,
+ 	return blk_size;
+ }
+ 
++static void renesas_sdhi_fixup_request(struct tmio_mmc_host *host, struct mmc_request *mrq)
++{
++	struct renesas_sdhi *priv = host_to_priv(host);
++
++	if (priv->needs_adjust_hs400 && mrq->cmd->opcode == MMC_SEND_STATUS)
++		renesas_sdhi_adjust_hs400_mode_enable(host);
++}
+ static void renesas_sdhi_enable_dma(struct tmio_mmc_host *host, bool enable)
+ {
+ 	/* Iff regs are 8 byte apart, sdbuf is 64 bit. Otherwise always 32. */
+@@ -761,6 +885,21 @@ static const struct renesas_sdhi_quirks sdhi_quirks_bad_taps2367 = {
+ 	.hs400_bad_taps = BIT(2) | BIT(3) | BIT(6) | BIT(7),
+ };
+ 
++static const struct renesas_sdhi_quirks sdhi_quirks_r8a7796_es13 = {
++	.hs400_4taps = true,
++	.hs400_bad_taps = BIT(2) | BIT(3) | BIT(6) | BIT(7),
++	.hs400_calib_table = r8a7796_es13_calib_table,
++};
++
++static const struct renesas_sdhi_quirks sdhi_quirks_r8a77965 = {
++	.hs400_bad_taps = BIT(2) | BIT(3) | BIT(6) | BIT(7),
++	.hs400_calib_table = r8a77965_calib_table,
++};
++
++static const struct renesas_sdhi_quirks sdhi_quirks_r8a77990 = {
++	.hs400_calib_table = r8a77990_calib_table,
++};
++
+ /*
+  * Note for r8a7796 / r8a774a1: we can't distinguish ES1.1 and 1.2 as of now.
+  * So, we want to treat them equally and only have a match for ES1.2 to enforce
+@@ -772,10 +911,11 @@ static const struct soc_device_attribute sdhi_quirks_match[]  = {
+ 	{ .soc_id = "r8a7795", .revision = "ES2.0", .data = &sdhi_quirks_4tap },
+ 	{ .soc_id = "r8a7795", .revision = "ES3.*", .data = &sdhi_quirks_bad_taps2367 },
+ 	{ .soc_id = "r8a7796", .revision = "ES1.[012]", .data = &sdhi_quirks_4tap_nohs400 },
+-	{ .soc_id = "r8a7796", .revision = "ES1.*", .data = &sdhi_quirks_4tap },
++	{ .soc_id = "r8a7796", .revision = "ES1.*", .data = &sdhi_quirks_r8a7796_es13 },
+ 	{ .soc_id = "r8a7796", .revision = "ES3.*", .data = &sdhi_quirks_bad_taps1357 },
+-	{ .soc_id = "r8a77965", .data = &sdhi_quirks_bad_taps2367 },
++	{ .soc_id = "r8a77965", .data = &sdhi_quirks_r8a77965 },
+ 	{ .soc_id = "r8a77980", .data = &sdhi_quirks_nohs400 },
++	{ .soc_id = "r8a77990", .data = &sdhi_quirks_r8a77990 },
+ 	{ /* Sentinel. */ },
+ };
+ 
+@@ -934,6 +1074,14 @@ int renesas_sdhi_probe(struct platform_device *pdev,
+ 	if (ver == SDHI_VER_GEN2_SDR50)
+ 		mmc_data->flags &= ~TMIO_MMC_HAVE_CBSY;
+ 
++	if (ver == SDHI_VER_GEN3_SDMMC && quirks && quirks->hs400_calib_table) {
++		host->fixup_request = renesas_sdhi_fixup_request;
++		priv->adjust_hs400_calib_table = *(
++			res->start == SDHI_GEN3_MMC0_ADDR ?
++			quirks->hs400_calib_table :
++			quirks->hs400_calib_table + 1);
++	}
++
+ 	ret = tmio_mmc_host_probe(host);
+ 	if (ret < 0)
+ 		goto edisclk;
 -- 
 2.20.1
 
