@@ -2,123 +2,174 @@ Return-Path: <SRS0=Uv8K=7S=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-3.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6B43FC433E0
-	for <linux-mmc@archiver.kernel.org>; Fri,  5 Jun 2020 15:18:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 59B60C433E3
+	for <linux-mmc@archiver.kernel.org>; Fri,  5 Jun 2020 19:05:20 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4659E206A2
-	for <linux-mmc@archiver.kernel.org>; Fri,  5 Jun 2020 15:18:16 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2E48E2074B
+	for <linux-mmc@archiver.kernel.org>; Fri,  5 Jun 2020 19:05:20 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=cerno.tech header.i=@cerno.tech header.b="ExN7CqWr";
-	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="F0SyF/JM"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="VFJHWNkv"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726675AbgFEPSP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 5 Jun 2020 11:18:15 -0400
-Received: from wnew4-smtp.messagingengine.com ([64.147.123.18]:47429 "EHLO
-        wnew4-smtp.messagingengine.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726601AbgFEPSP (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 5 Jun 2020 11:18:15 -0400
-Received: from compute4.internal (compute4.nyi.internal [10.202.2.44])
-        by mailnew.west.internal (Postfix) with ESMTP id 1B2636C7;
-        Fri,  5 Jun 2020 11:18:14 -0400 (EDT)
-Received: from mailfrontend1 ([10.202.2.162])
-  by compute4.internal (MEProxy); Fri, 05 Jun 2020 11:18:14 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=cerno.tech; h=
-        date:from:to:cc:subject:message-id:references:mime-version
-        :content-type:in-reply-to; s=fm3; bh=eDXBvR6YBBtfhuiC0E7a3EHj/Ym
-        N6ySkgO12Cpj2Nrw=; b=ExN7CqWrg4jyViAfCa+fhX2rn1O70zwpNpT8K2nymCT
-        EuTVoVh9M//JKOtrBcux+WH0wuXC8PziL8fNrzpSYTpyRE2wef7A4T0PnafZpjud
-        6sN3kEk4DoSg3t9Y8mnsNgaT8x1mF+fwcOQl7syJlyahtXCmIbndzuSAKNT+FxBs
-        1cvp4M5CWvtPKzQjvmEcBK40/5fMlaEXeZ12+KTQEpcRukiquUZIuvF/J0dV4azf
-        7IkhOjzRYHRM8bm24gnasbK95WWj0gIZWErDzl4NNfVDCl9ZKJCMIMdxxFwCVrxf
-        0t5vWIQwi3/8NXvVfgnZ0LFbKE0L3ckwIQtqFCzn6Fg==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-        messagingengine.com; h=cc:content-type:date:from:in-reply-to
-        :message-id:mime-version:references:subject:to:x-me-proxy
-        :x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=fm3; bh=eDXBvR
-        6YBBtfhuiC0E7a3EHj/YmN6ySkgO12Cpj2Nrw=; b=F0SyF/JMN+D6e7CqCPOP8K
-        6avtHMvP25wWVwrKG5TCReTrYZ3fDN2pHRRntboqsU9Ga54gNOPT3nZVxQQMCYdk
-        2aB8dJcV2gykE3hO8WIXSLj0x3VzvNaR66QhRbjKhNGYGT7g5xwACa7XD0tNlblp
-        uHmki7hCqRI45kd2mFgN8KmpY8ZGuM1uDEGtlW8k1Jr7LjmdXHNBWZantFQsk0YA
-        rH7hRjfm1lnRi2epqsx4zxHIhI18Mbyr3ZIlYxIUzDY9d4GgVC+NUarxm3Fk+Tvq
-        FbDtnDDMZ0rUQFamzs49qJ4+qf2wsYKqX3H5rOlw0uwfMUvhvjeHSAqjh4gAHRFw
-        ==
-X-ME-Sender: <xms:NGLaXsqg53A4vXafdJw4pq_lA7qt40tpwRF8q4-tc0E1SUULdOQmdA>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeduhedrudegfedgjeehucetufdoteggodetrfdotf
-    fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfqfgfvpdfurfetoffkrfgpnffqhgen
-    uceurghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmne
-    cujfgurhepfffhvffukfhfgggtuggjsehgtderredttddvnecuhfhrohhmpeforgigihhm
-    vgcutfhiphgrrhguuceomhgrgihimhgvsegtvghrnhhordhtvggthheqnecuggftrfgrth
-    htvghrnhepleekgeehhfdutdeljefgleejffehfffgieejhffgueefhfdtveetgeehieeh
-    gedunecukfhppeeltddrkeelrdeikedrjeeinecuvehluhhsthgvrhfuihiivgeptdenuc
-    frrghrrghmpehmrghilhhfrhhomhepmhgrgihimhgvsegtvghrnhhordhtvggthh
-X-ME-Proxy: <xmx:NGLaXioOQ9sTvkE8t2fbvYnoB0Xdmszj0f2VF6Phs5vc2DkgVxKx2g>
-    <xmx:NGLaXhMcXwxl2_nKkYrgvE1SLyP_jqHsdtXwd4bNpkxWdr6SjKT2SQ>
-    <xmx:NGLaXj5yH1gEu92lw8JY84PtauSDbXcZZBVvgtet0WogpEJQhdQadg>
-    <xmx:NWLaXlsvqfIBPxsHWFF7JELiV3ds3aGkrB2r5WzrUyP-TK4b56pJuQhRsR8>
-Received: from localhost (lfbn-tou-1-1502-76.w90-89.abo.wanadoo.fr [90.89.68.76])
-        by mail.messagingengine.com (Postfix) with ESMTPA id F39FF3280065;
-        Fri,  5 Jun 2020 11:18:11 -0400 (EDT)
-Date:   Fri, 5 Jun 2020 17:18:10 +0200
-From:   Maxime Ripard <maxime@cerno.tech>
-To:     Frank Lee <frank@allwinnertech.com>
-Cc:     chaotian.jing@mediatek.com, ulf.hansson@linaro.org,
-        matthias.bgg@gmail.com, wens@csie.org, tiny.windzz@gmail.com,
-        rmfrfs@gmail.com, marex@denx.de, linux-mmc@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org,
-        linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH 1/2] mmc: sunxi-mmc: do not hide address in
- sunxi_mmc_irq()
-Message-ID: <20200605151810.vmgnnzp7cadfwsu5@gilmour.lan>
-References: <20200605125545.31974-1-frank@allwinnertech.com>
+        id S1728025AbgFETFQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 5 Jun 2020 15:05:16 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37580 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726958AbgFETFP (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 5 Jun 2020 15:05:15 -0400
+Received: from mail-oo1-xc43.google.com (mail-oo1-xc43.google.com [IPv6:2607:f8b0:4864:20::c43])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 80161C08C5C2;
+        Fri,  5 Jun 2020 12:05:15 -0700 (PDT)
+Received: by mail-oo1-xc43.google.com with SMTP id v26so1164977oof.7;
+        Fri, 05 Jun 2020 12:05:15 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=Qs9QY5b17T4Lq7hXEjIEKo/PvUm237YC2CaO1E2diG8=;
+        b=VFJHWNkvJmJX90giuV61jQ7kiccmFLdEVVLKXu4PxdWYurrYFYiz8lZuwxQWZ0n7Wc
+         yqhbt4czbepmBIz1HVMw2BU/xHofgVZYcZm0m0aVuYOen8J93WMKJpwRqnhpQwseb4iP
+         nTFIBviunhhNqVx4bUpLna4pcFh6INqif/J0SF3SC+uoE8WFCRj2qscO9r/1vfsmztE3
+         o7wjoeaB2YtJa4j9v5pgS8XhcZUXkTN99tYl0TCs6fCTmvGrocK2Mq38lJW1pjm8rDWH
+         UN4rar2FhGwgjKTcGmzkuz1GVOX1F7W+0aC+6XQe/gtufZf02nh1NDaa2YE7hsg6x5mN
+         130w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=Qs9QY5b17T4Lq7hXEjIEKo/PvUm237YC2CaO1E2diG8=;
+        b=TldVy0fnyLJPvGIiWrUizTZ9+bIIuaPwSkDB8wesOC2zE+HWvyT8R3/28vcFIQriM5
+         y1gvwowYvkDK/nqgXiWJNdmszB6z48do0/PXmuPmfhe6r7G4tKsA6CsPxrTO6S/oO8e7
+         xQWCBBuZScLEoc617x7ZL3S0lVortx88gdzFwG8jMOM31fnHpsvox2hjSOqUGoKIXtXd
+         QxPmP7SMiZcS+OfGoKl+/KXb1H8AyQbhj+XxpQNU8AMtOhbT2xs//V8NwgXPfqB/MEQc
+         LgeXS3qYUPTauw81bSvhQMHEXGQO1Xl2RxaSJUjm3fZKPCba1DLTSCtsXEWkMO7aHk9n
+         LL5g==
+X-Gm-Message-State: AOAM532x30ZhCouE1J8abR888VZie9+WiJSR+1xL3uXZdSLsP2DBjsn0
+        iGjX5OG13egn2NvM1TMd9o3fSl6hwWYNvLCz0Kw=
+X-Google-Smtp-Source: ABdhPJzW6MwzWQBJS+ULgHeL/swNJlQvIM9FQrimswHIkx7+3vzQXKk44yBXf+5Rg347qSGB5Q2c1/W7jwgGKQuIKYI=
+X-Received: by 2002:a4a:98c7:: with SMTP id b7mr8842755ooj.42.1591383914796;
+ Fri, 05 Jun 2020 12:05:14 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="lqyrkswqzjhc3pkq"
-Content-Disposition: inline
-In-Reply-To: <20200605125545.31974-1-frank@allwinnertech.com>
+References: <1588542414-14826-1-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
+ <1588542414-14826-11-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com> <CAMuHMdXgSWHd-w_vgv-2mrYwJ2trcdDNniKFGCDGbn3ts-CkjA@mail.gmail.com>
+In-Reply-To: <CAMuHMdXgSWHd-w_vgv-2mrYwJ2trcdDNniKFGCDGbn3ts-CkjA@mail.gmail.com>
+From:   "Lad, Prabhakar" <prabhakar.csengg@gmail.com>
+Date:   Fri, 5 Jun 2020 20:04:48 +0100
+Message-ID: <CA+V-a8skA0Gf+bnWJA_TaVsX2uLCrdGqVkZnioW0X0XULVeDrg@mail.gmail.com>
+Subject: Re: [PATCH v2 10/10] ARM: dts: r8a7742-iwg21d-q7: Add support for
+ iWave G21D-Q7 board based on RZ/G1H
+To:     Geert Uytterhoeven <geert@linux-m68k.org>
+Cc:     Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>,
+        Magnus Damm <magnus.damm@gmail.com>,
+        Rob Herring <robh+dt@kernel.org>,
+        Vinod Koul <vkoul@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
+        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
+        <devicetree@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        dmaengine <dmaengine@vger.kernel.org>,
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
+        "open list:SERIAL DRIVERS" <linux-serial@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Hi Geert,
 
---lqyrkswqzjhc3pkq
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+On Fri, Jun 5, 2020 at 1:52 PM Geert Uytterhoeven <geert@linux-m68k.org> wrote:
+>
+> Hi Prabhakar,
+>
+> On Sun, May 3, 2020 at 11:47 PM Lad Prabhakar
+> <prabhakar.mahadev-lad.rj@bp.renesas.com> wrote:
+> > Add support for iWave RainboW-G21D-Qseven board based on RZ/G1H.
+> >
+> > Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+> > Reviewed-by: Marian-Cristian Rotariu <marian-cristian.rotariu.rb@bp.renesas.com>
+>
+> > --- /dev/null
+> > +++ b/arch/arm/boot/dts/r8a7742-iwg21d-q7.dts
+> > @@ -0,0 +1,37 @@
+> > +// SPDX-License-Identifier: GPL-2.0
+> > +/*
+> > + * Device Tree Source for the iWave-RZ/G1H Qseven board
+> > + *
+> > + * Copyright (C) 2020 Renesas Electronics Corp.
+> > + */
+> > +
+> > +/dts-v1/;
+> > +#include "r8a7742-iwg21m.dtsi"
+> > +
+> > +/ {
+> > +       model = "iWave Systems RainboW-G21D-Qseven board based on RZ/G1H";
+> > +       compatible = "iwave,g21d", "iwave,g21m", "renesas,r8a7742";
+> > +
+> > +       aliases {
+> > +               serial2 = &scifa2;
+> > +       };
+> > +
+> > +       chosen {
+> > +               bootargs = "ignore_loglevel root=/dev/mmcblk0p1 rw rootwait";
+> > +               stdout-path = "serial2:115200n8";
+> > +       };
+> > +};
+> > +
+> > +&pfc {
+> > +       scifa2_pins: scifa2 {
+> > +               groups = "scifa2_data_c";
+>
+> Upon second look, I think this group is wrong.  While labeled SCIFA2 in
+> the SOM schematics, these signals seem to be connected to a debugging
+> interface.
+>
+> The real UART2 seems to be present on the camera daughter board.  Those
+> signals are labeled "SCIFA2" in the camera board schematics, but "SCIF2"
+> in the SOM schematics.  This is OK, as "scif2_data" and "scifa2_data"
+> share the same pins, so you can choose either SCIF2 or SCIFA2 to drive
+> them.
+>
+> If I'm right, please change the group, and move all serial2 descriptions
+> to the camera board DTS.
+>
+I took a closer look at the schematics, SCIFA2 is connected to the
+debug interface similarly on G1M where SCIF0 is connected to the debug
+interface.
 
-Hi,
+I will send the user guide privately which should clarify the serial
+interfaces on the board.
 
-On Fri, Jun 05, 2020 at 08:55:44PM +0800, Frank Lee wrote:
-> From: Yangtao Li <tiny.windzz@gmail.com>
->=20
-> Using %px to show the actual address in sunxi_mmc_irq()
-> to help us to debug issue.
->=20
-> Signed-off-by: Yangtao Li <tiny.windzz@gmail.com>
-> Signed-off-by: Frank Lee <frank@allwinnertech.com>
+Cheers,
+--Prabhakar
 
-I'm fairly sure this hash is on purpose, and both the commit log of the
-%px introduction (ad67b74d2469) and the checkpatch message are pretty
-explicit about it.
 
-What issue were you trying to solve here?
-
-Maxime
-
---lqyrkswqzjhc3pkq
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iHUEABYIAB0WIQRcEzekXsqa64kGDp7j7w1vZxhRxQUCXtpiMgAKCRDj7w1vZxhR
-xX8tAQCtvLK2kLjK9ek6BhW0HKPRmxoCrg3HRrnR7yKGjtdBLgD/Ru2M3MqS1iws
-hyuU+IoR9fzMA4nBd/Rq7FQ104ypeQQ=
-=VGny
------END PGP SIGNATURE-----
-
---lqyrkswqzjhc3pkq--
+> > +               function = "scifa2";
+> > +       };
+> > +};
+> > +
+> > +&scifa2 {
+> > +       pinctrl-0 = <&scifa2_pins>;
+> > +       pinctrl-names = "default";
+> > +
+> > +       status = "okay";
+> > +};
+>
+> Gr{oetje,eeting}s,
+>
+>                         Geert
+>
+> --
+> Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+>
+> In personal conversations with technical people, I call myself a hacker. But
+> when I'm talking to journalists I just say "programmer" or something like that.
+>                                 -- Linus Torvalds
