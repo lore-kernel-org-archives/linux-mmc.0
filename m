@@ -1,175 +1,169 @@
-Return-Path: <SRS0=Uv8K=7S=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=G9E5=7V=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 59B60C433E3
-	for <linux-mmc@archiver.kernel.org>; Fri,  5 Jun 2020 19:05:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EC765C433DF
+	for <linux-mmc@archiver.kernel.org>; Mon,  8 Jun 2020 06:02:46 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2E48E2074B
-	for <linux-mmc@archiver.kernel.org>; Fri,  5 Jun 2020 19:05:20 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C7D9A2076A
+	for <linux-mmc@archiver.kernel.org>; Mon,  8 Jun 2020 06:02:46 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="VFJHWNkv"
+	dkim=pass (1024-bit key) header.d=renesasgroup.onmicrosoft.com header.i=@renesasgroup.onmicrosoft.com header.b="JVSuH1fk"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728025AbgFETFQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 5 Jun 2020 15:05:16 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37580 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726958AbgFETFP (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 5 Jun 2020 15:05:15 -0400
-Received: from mail-oo1-xc43.google.com (mail-oo1-xc43.google.com [IPv6:2607:f8b0:4864:20::c43])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 80161C08C5C2;
-        Fri,  5 Jun 2020 12:05:15 -0700 (PDT)
-Received: by mail-oo1-xc43.google.com with SMTP id v26so1164977oof.7;
-        Fri, 05 Jun 2020 12:05:15 -0700 (PDT)
+        id S1728343AbgFHGCq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 8 Jun 2020 02:02:46 -0400
+Received: from mail-eopbgr1300100.outbound.protection.outlook.com ([40.107.130.100]:19376
+        "EHLO APC01-HK2-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1728159AbgFHGCp (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 8 Jun 2020 02:02:45 -0400
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=agsX9L39Spa3hIEK0o6ONeq230JOVnBfEw18ti9h3qf0vJEJ7otEyA2nS/yUk1nUqmdmx0NClkOUB6/6R60+UIuAy4PxD/uQtNenXmRI3bbAHLk0s0oppMjbcaAdEfqEcdcN44abtD6lpTeHLZeOk3vTNNICnx9EtHpLbfirLnk5F8ShIh+feFU1GBHwgHVwepMl6ok2GZwXRXeURwQczjWVYwftFTfnBpAWyj3V39M4NHgoCFUujbPCppRL7ikqHPgmJNjjqVAzPEnsIQvnCy6V7cDQB8IWHHGx7d8Cs0fUn6L2lYbsllP2oTzSSg1nEYxTqyODsfLGasSzOXN7yw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=PcYW1BQ0bk6J7OSs/PNSxHDAnWAUzxtPnF+/W+aopZY=;
+ b=VlwBIvXeAN13oj94zaMHGiCqlXYB/VaTsKXNOsTZoY0GAgUZYqB3vraSlzXqvpjXpFX5m7kQOlUyPAJxfrkCeHaTpr/u4gSSwqH+clt3yPC8DWIhIS4GqOrLguCMfN+WlI8BasyP2u2GA6LhB8BUgs1yF3hY0ztlZdH0QZeQnzgKNa0foTNlQRoHeGdk0+A00t0zzMM3oVbpswfRe5c0VF4JjmSpyTuzGAVJNw24Nr+9caJgMYi+m91omF9xx+/llN3EyjBCfeUZTk+7HKjc5LYXbhX/UP2K4JaU92Poh13vfA2Fynjhlv3b3INBrF1z7GtTnYaX0hlVI8WXJNJwCA==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=renesas.com; dmarc=pass action=none header.from=renesas.com;
+ dkim=pass header.d=renesas.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=Qs9QY5b17T4Lq7hXEjIEKo/PvUm237YC2CaO1E2diG8=;
-        b=VFJHWNkvJmJX90giuV61jQ7kiccmFLdEVVLKXu4PxdWYurrYFYiz8lZuwxQWZ0n7Wc
-         yqhbt4czbepmBIz1HVMw2BU/xHofgVZYcZm0m0aVuYOen8J93WMKJpwRqnhpQwseb4iP
-         nTFIBviunhhNqVx4bUpLna4pcFh6INqif/J0SF3SC+uoE8WFCRj2qscO9r/1vfsmztE3
-         o7wjoeaB2YtJa4j9v5pgS8XhcZUXkTN99tYl0TCs6fCTmvGrocK2Mq38lJW1pjm8rDWH
-         UN4rar2FhGwgjKTcGmzkuz1GVOX1F7W+0aC+6XQe/gtufZf02nh1NDaa2YE7hsg6x5mN
-         130w==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=Qs9QY5b17T4Lq7hXEjIEKo/PvUm237YC2CaO1E2diG8=;
-        b=TldVy0fnyLJPvGIiWrUizTZ9+bIIuaPwSkDB8wesOC2zE+HWvyT8R3/28vcFIQriM5
-         y1gvwowYvkDK/nqgXiWJNdmszB6z48do0/PXmuPmfhe6r7G4tKsA6CsPxrTO6S/oO8e7
-         xQWCBBuZScLEoc617x7ZL3S0lVortx88gdzFwG8jMOM31fnHpsvox2hjSOqUGoKIXtXd
-         QxPmP7SMiZcS+OfGoKl+/KXb1H8AyQbhj+XxpQNU8AMtOhbT2xs//V8NwgXPfqB/MEQc
-         LgeXS3qYUPTauw81bSvhQMHEXGQO1Xl2RxaSJUjm3fZKPCba1DLTSCtsXEWkMO7aHk9n
-         LL5g==
-X-Gm-Message-State: AOAM532x30ZhCouE1J8abR888VZie9+WiJSR+1xL3uXZdSLsP2DBjsn0
-        iGjX5OG13egn2NvM1TMd9o3fSl6hwWYNvLCz0Kw=
-X-Google-Smtp-Source: ABdhPJzW6MwzWQBJS+ULgHeL/swNJlQvIM9FQrimswHIkx7+3vzQXKk44yBXf+5Rg347qSGB5Q2c1/W7jwgGKQuIKYI=
-X-Received: by 2002:a4a:98c7:: with SMTP id b7mr8842755ooj.42.1591383914796;
- Fri, 05 Jun 2020 12:05:14 -0700 (PDT)
+ d=renesasgroup.onmicrosoft.com; s=selector2-renesasgroup-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=PcYW1BQ0bk6J7OSs/PNSxHDAnWAUzxtPnF+/W+aopZY=;
+ b=JVSuH1fkL9jmmmvcGhraF4bFC7f4xl/cD3lMmfJVlCf+KH0wn6ezJSjM8YhU+LgyLDDX0fot8s9WeWQaUmQwWxRdlhJuiek7Gk03/3bBDqovPNE9916wnyWmfEVLPsRtjE935XwlZ/UOArJl+qqiuqMMUfKWr9O9ans2Q7dVpqE=
+Received: from TY2PR01MB3692.jpnprd01.prod.outlook.com (2603:1096:404:d5::22)
+ by TY2PR01MB3547.jpnprd01.prod.outlook.com (2603:1096:404:df::17) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3066.18; Mon, 8 Jun
+ 2020 06:02:40 +0000
+Received: from TY2PR01MB3692.jpnprd01.prod.outlook.com
+ ([fe80::2da1:bdb7:9089:7f43]) by TY2PR01MB3692.jpnprd01.prod.outlook.com
+ ([fe80::2da1:bdb7:9089:7f43%3]) with mapi id 15.20.3066.023; Mon, 8 Jun 2020
+ 06:02:40 +0000
+From:   Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+To:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+CC:     "linux-renesas-soc@vger.kernel.org" 
+        <linux-renesas-soc@vger.kernel.org>
+Subject: RE: [PATCH 1/2] mmc: core: when downgrading HS400, callback into
+ drivers earlier
+Thread-Topic: [PATCH 1/2] mmc: core: when downgrading HS400, callback into
+ drivers earlier
+Thread-Index: AQHWOmI3Nx6zJ2C2OUWQ6X8UubntrajOPffA
+Date:   Mon, 8 Jun 2020 06:02:40 +0000
+Message-ID: <TY2PR01MB369228A84C46D582D1219EFFD8850@TY2PR01MB3692.jpnprd01.prod.outlook.com>
+References: <20200604112040.22144-1-wsa+renesas@sang-engineering.com>
+ <20200604112040.22144-2-wsa+renesas@sang-engineering.com>
+In-Reply-To: <20200604112040.22144-2-wsa+renesas@sang-engineering.com>
+Accept-Language: ja-JP, en-US
+Content-Language: ja-JP
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+authentication-results: sang-engineering.com; dkim=none (message not signed)
+ header.d=none;sang-engineering.com; dmarc=none action=none
+ header.from=renesas.com;
+x-originating-ip: [124.210.22.195]
+x-ms-publictraffictype: Email
+x-ms-office365-filtering-ht: Tenant
+x-ms-office365-filtering-correlation-id: 828241ff-f46c-438b-cc91-08d80b718daa
+x-ms-traffictypediagnostic: TY2PR01MB3547:
+x-microsoft-antispam-prvs: <TY2PR01MB354714C341C3DD7EBC2C6D3AD8850@TY2PR01MB3547.jpnprd01.prod.outlook.com>
+x-ms-oob-tlc-oobclassifiers: OLM:8882;
+x-forefront-prvs: 042857DBB5
+x-ms-exchange-senderadcheck: 1
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: cEgbjWq+UUygRPCfIeCWpyWJ0AAICum5ED7zRUV3vj4WWBnpSdAyV0cOhOtrzxVbzWgKZa++V5WMN3jCzMYNJN+ZopW+kzAPo0i287mT+VYv+Zc0+FlosvcTABAVzk+9xJXvCxRpI5PiA3tgDTTWZYQLrcV9i83Qorvc3ek/dv2p9D9pGAhY/bXdETwh0cgydqy4cVj/DQaxFd2Wy8wJZ9JHUnUJ5Obxb4wHWDIJrmTGPRGjzDaDoxC7cVE3z+1dI/YJkKQFfWV1JnP8sC0fWfhtNALHhW+PFIXVcsQPgpWOWIbN7BCdLWktm6C4LIIOxxGycQdgj8led+bKdRBdsg==
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY2PR01MB3692.jpnprd01.prod.outlook.com;PTR:;CAT:NONE;SFTY:;SFS:(4636009)(396003)(346002)(136003)(39860400002)(366004)(376002)(9686003)(8676002)(55016002)(316002)(55236004)(2906002)(7696005)(33656002)(86362001)(186003)(478600001)(6506007)(83380400001)(110136005)(71200400001)(66476007)(8936002)(66946007)(76116006)(26005)(4326008)(64756008)(66446008)(66556008)(5660300002)(52536014);DIR:OUT;SFP:1102;
+x-ms-exchange-antispam-messagedata: 82oQ0oyrBqxCeUlpqWWn7rX3F7x8gOFdJpu+nF95OB9dOqdRAJJw2SzED3II8VoIexCnfhxrFN/l8V7ziJHvi2QLfvhuykchAiItlmiDVT5pUeNjYheQERQjNulz8bW8/0W/H0zdKCTLy0FaCzjkTegxn6dy8XiT1efjpSC33jebTaJ34ZRrQg3WZKa4yDS0FRRfvMHGpXar6EK+CbWtfXqYliJramMpISrTJ5IZP0LJ+LlJbIHr6Rd540KIRtVlNb0GOoU9ZrmwDxblonrY+1mITzaMA/v0IbQv9f4Yv4qio43CZ5eCGW2przoiVR0LlOImwH0aGV6dhff/+LiT2b+xP8QS4ZVoxDwHlxhUj2kQF6h9lwJe06CescuX1ppNythsf6HNfAqRPbUBJ1Gk+Ybq+HzeezQsCuUOKfJn25b9fI4DhgAPo9DtgdiS1uelON1RU6HgUYQ5zG8rE34whOyW09r5Ia70rLrQuP3npj7eAuQzCW3uaqdKMIzGwjE1
+x-ms-exchange-transport-forked: True
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 MIME-Version: 1.0
-References: <1588542414-14826-1-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
- <1588542414-14826-11-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com> <CAMuHMdXgSWHd-w_vgv-2mrYwJ2trcdDNniKFGCDGbn3ts-CkjA@mail.gmail.com>
-In-Reply-To: <CAMuHMdXgSWHd-w_vgv-2mrYwJ2trcdDNniKFGCDGbn3ts-CkjA@mail.gmail.com>
-From:   "Lad, Prabhakar" <prabhakar.csengg@gmail.com>
-Date:   Fri, 5 Jun 2020 20:04:48 +0100
-Message-ID: <CA+V-a8skA0Gf+bnWJA_TaVsX2uLCrdGqVkZnioW0X0XULVeDrg@mail.gmail.com>
-Subject: Re: [PATCH v2 10/10] ARM: dts: r8a7742-iwg21d-q7: Add support for
- iWave G21D-Q7 board based on RZ/G1H
-To:     Geert Uytterhoeven <geert@linux-m68k.org>
-Cc:     Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>,
-        Magnus Damm <magnus.damm@gmail.com>,
-        Rob Herring <robh+dt@kernel.org>,
-        Vinod Koul <vkoul@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
-        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
-        <devicetree@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        dmaengine <dmaengine@vger.kernel.org>,
-        Linux MMC List <linux-mmc@vger.kernel.org>,
-        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
-        "open list:SERIAL DRIVERS" <linux-serial@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+X-OriginatorOrg: renesas.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 828241ff-f46c-438b-cc91-08d80b718daa
+X-MS-Exchange-CrossTenant-originalarrivaltime: 08 Jun 2020 06:02:40.8016
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 53d82571-da19-47e4-9cb4-625a166a4a2a
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: H1X9+7JoGNrPBKtZGcndHxJqZOAH/7ZfVu1dcVIk4tz4pNczteOlteP9fzZZ93JuIyuPTMzWjjGtD3HsoPSJck4c/25zitjDKfaCugher3GNKUMEqW75HB314eK8soKG
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: TY2PR01MB3547
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Geert,
+Hi Wolfram-san,
 
-On Fri, Jun 5, 2020 at 1:52 PM Geert Uytterhoeven <geert@linux-m68k.org> wrote:
->
-> Hi Prabhakar,
->
-> On Sun, May 3, 2020 at 11:47 PM Lad Prabhakar
-> <prabhakar.mahadev-lad.rj@bp.renesas.com> wrote:
-> > Add support for iWave RainboW-G21D-Qseven board based on RZ/G1H.
-> >
-> > Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-> > Reviewed-by: Marian-Cristian Rotariu <marian-cristian.rotariu.rb@bp.renesas.com>
->
-> > --- /dev/null
-> > +++ b/arch/arm/boot/dts/r8a7742-iwg21d-q7.dts
-> > @@ -0,0 +1,37 @@
-> > +// SPDX-License-Identifier: GPL-2.0
-> > +/*
-> > + * Device Tree Source for the iWave-RZ/G1H Qseven board
-> > + *
-> > + * Copyright (C) 2020 Renesas Electronics Corp.
-> > + */
-> > +
-> > +/dts-v1/;
-> > +#include "r8a7742-iwg21m.dtsi"
-> > +
-> > +/ {
-> > +       model = "iWave Systems RainboW-G21D-Qseven board based on RZ/G1H";
-> > +       compatible = "iwave,g21d", "iwave,g21m", "renesas,r8a7742";
-> > +
-> > +       aliases {
-> > +               serial2 = &scifa2;
-> > +       };
-> > +
-> > +       chosen {
-> > +               bootargs = "ignore_loglevel root=/dev/mmcblk0p1 rw rootwait";
-> > +               stdout-path = "serial2:115200n8";
-> > +       };
-> > +};
-> > +
-> > +&pfc {
-> > +       scifa2_pins: scifa2 {
-> > +               groups = "scifa2_data_c";
->
-> Upon second look, I think this group is wrong.  While labeled SCIFA2 in
-> the SOM schematics, these signals seem to be connected to a debugging
-> interface.
->
-> The real UART2 seems to be present on the camera daughter board.  Those
-> signals are labeled "SCIFA2" in the camera board schematics, but "SCIF2"
-> in the SOM schematics.  This is OK, as "scif2_data" and "scifa2_data"
-> share the same pins, so you can choose either SCIF2 or SCIFA2 to drive
-> them.
->
-> If I'm right, please change the group, and move all serial2 descriptions
-> to the camera board DTS.
->
-I took a closer look at the schematics, SCIFA2 is connected to the
-debug interface similarly on G1M where SCIF0 is connected to the debug
-interface.
+Thank you for the patch!
 
-I will send the user guide privately which should clarify the serial
-interfaces on the board.
+> From: Wolfram Sang, Sent: Thursday, June 4, 2020 8:21 PM
+>=20
+> The driver specific downgrade function makes more sense if we run it
+> before we switch anything, not after we already switched. Otherwise some
+> non-HS400 communication has already happened.
+>=20
+> No need to convert users. There is only one currenty which needs this
+> change in a later patchset.
 
-Cheers,
---Prabhakar
+Perhaps, should we add Fixes tag like below?
 
+Fixes: ba6c7ac3a2f4 ("mmc: core: more fine-grained hooks for HS400 tuning")
 
-> > +               function = "scifa2";
-> > +       };
-> > +};
-> > +
-> > +&scifa2 {
-> > +       pinctrl-0 = <&scifa2_pins>;
-> > +       pinctrl-names = "default";
-> > +
-> > +       status = "okay";
-> > +};
->
-> Gr{oetje,eeting}s,
->
->                         Geert
->
-> --
-> Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
->
-> In personal conversations with technical people, I call myself a hacker. But
-> when I'm talking to journalists I just say "programmer" or something like that.
->                                 -- Linus Torvalds
+> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> ---
+>  drivers/mmc/core/mmc.c | 14 +++++++-------
+>  1 file changed, 7 insertions(+), 7 deletions(-)
+>=20
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 4203303f946a..f97994eace3b 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -1156,6 +1156,10 @@ static int mmc_select_hs400(struct mmc_card *card)
+>  	      host->ios.bus_width =3D=3D MMC_BUS_WIDTH_8))
+>  		return 0;
+>=20
+> +	/* Prepare host to downgrade to HS timing */
+> +	if (host->ops->hs400_downgrade)
+> +		host->ops->hs400_downgrade(host);
+> +
+
+IICU, we should call hs400_downgrade() between the __mmc_switch("EXT_CSD_TI=
+MING_HS")
+and mmc_set_timing(card->host, MMC_TIMING_MMC_HS) because the switch comman=
+d should
+be issued in HS400 mode.
+
+>  	/* Switch card to HS mode */
+>  	val =3D EXT_CSD_TIMING_HS;
+>  	err =3D __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+> @@ -1171,10 +1175,6 @@ static int mmc_select_hs400(struct mmc_card *card)
+>  	/* Set host controller to HS timing */
+>  	mmc_set_timing(card->host, MMC_TIMING_MMC_HS);
+>=20
+> -	/* Prepare host to downgrade to HS timing */
+> -	if (host->ops->hs400_downgrade)
+> -		host->ops->hs400_downgrade(host);
+> -
+>  	/* Reduce frequency to HS frequency */
+>  	max_dtr =3D card->ext_csd.hs_max_dtr;
+>  	mmc_set_clock(host, max_dtr);
+> @@ -1241,6 +1241,9 @@ int mmc_hs400_to_hs200(struct mmc_card *card)
+>  	int err;
+>  	u8 val;
+>=20
+> +	if (host->ops->hs400_downgrade)
+> +		host->ops->hs400_downgrade(host);
+> +
+
+IIUC, this also should be called between
+__mmc_switch("EXT_CSD_TIMING_HS") to mmc_set_timing(MMC_TIMING_MMC_DDR52).
+
+Best regards,
+Yoshihiro Shimoda
+
