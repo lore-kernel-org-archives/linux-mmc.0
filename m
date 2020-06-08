@@ -7,46 +7,47 @@ X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6E103C433E2
-	for <linux-mmc@archiver.kernel.org>; Mon,  8 Jun 2020 23:45:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EDF3DC433E3
+	for <linux-mmc@archiver.kernel.org>; Mon,  8 Jun 2020 23:46:23 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4780420760
-	for <linux-mmc@archiver.kernel.org>; Mon,  8 Jun 2020 23:45:53 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CCFBC20884
+	for <linux-mmc@archiver.kernel.org>; Mon,  8 Jun 2020 23:46:23 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1591659953;
-	bh=Zl35wCPdR6TlYziZIdihY+3fGlog9FY38U1LOAbiZak=;
+	s=default; t=1591659983;
+	bh=I6jLjnX3obnwMG+B1lARQXllfAfTLbLa1N0uYFyXtIw=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=vi+t745MjsY2gorkUwC5SO9fxlNtQIvPPJ5XzsTwdlsfR8s3EVF4v+w9hXBX/TBJL
-	 vBkQVJ3xCoPPxsRRN1E/93lo704hyw8RdNhe7tXtXydPOfUHmVyQu6a0/QuI8AVNTE
-	 ovuzyaw2S5r6ZJq0mvaLqZ/gEgX6xAiFTVDdDiF4=
+	b=ztNJth9Hrtgtw1O6imOToKn+HsMRiDR2aamK0JTY3vNR1qBUGczkGozzK1R3wKchr
+	 arH1VNn86i4jRXMRdw/1hqPXuq84vx8C3N+yQQRNNg+nTOc2zt+iB8WTodCAP7UIRO
+	 7LJSDk2z8zsVa1ibuhlW3onV0hGZekY1LNX24oF8=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1731985AbgFHX0e (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 8 Jun 2020 19:26:34 -0400
-Received: from mail.kernel.org ([198.145.29.99]:54130 "EHLO mail.kernel.org"
+        id S1731927AbgFHXp6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 8 Jun 2020 19:45:58 -0400
+Received: from mail.kernel.org ([198.145.29.99]:54022 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1731977AbgFHX0c (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 8 Jun 2020 19:26:32 -0400
+        id S1731971AbgFHX02 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 8 Jun 2020 19:26:28 -0400
 Received: from sasha-vm.mshome.net (c-73-47-72-35.hsd1.nh.comcast.net [73.47.72.35])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 9766E2076C;
-        Mon,  8 Jun 2020 23:26:31 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 88B9C20801;
+        Mon,  8 Jun 2020 23:26:26 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1591658792;
-        bh=Zl35wCPdR6TlYziZIdihY+3fGlog9FY38U1LOAbiZak=;
+        s=default; t=1591658787;
+        bh=I6jLjnX3obnwMG+B1lARQXllfAfTLbLa1N0uYFyXtIw=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=Bfk8H5TmSgDOTmuLLyDWJQ+C5mOYzhiG8Ak8uDS3A7X4P8mQ61SlLuqAkgdObgEU7
-         10tlfPVJB9y5oziENdXPj4A1uV82ICNaPa/Ia2IFUNVTNIXh4Slch2Vmf4yomIpAXM
-         +ggAZaRmDdpPzmPpJVlqQAiK3ncllZv01fPo0nL4=
+        b=AnpwYT4dW9oRnszDDhudVvgirTx9qIrCR3Rhrzx5+akL+n+cDcZ0/d0McGMqrsKVU
+         Y7Ob1eQWZYxPJb6oro55rbWtdaHj4Y6NFVn7etRna/KBbgfxDPyNja+eLlS8zhMNt4
+         IDHfAekPNckGlQ75IxrU0DYazLC2wKeCHaqSd01U=
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc:     Haibo Chen <haibo.chen@nxp.com>,
+Cc:     Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
         Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org
-Subject: [PATCH AUTOSEL 4.14 67/72] mmc: sdhci-esdhc-imx: fix the mask for tuning start point
-Date:   Mon,  8 Jun 2020 19:24:55 -0400
-Message-Id: <20200608232500.3369581-67-sashal@kernel.org>
+        linux-arm-msm@vger.kernel.org
+Subject: [PATCH AUTOSEL 4.14 63/72] mmc: sdhci-msm: Set SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12 quirk
+Date:   Mon,  8 Jun 2020 19:24:51 -0400
+Message-Id: <20200608232500.3369581-63-sashal@kernel.org>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20200608232500.3369581-1-sashal@kernel.org>
 References: <20200608232500.3369581-1-sashal@kernel.org>
@@ -59,36 +60,37 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Haibo Chen <haibo.chen@nxp.com>
+From: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
 
-[ Upstream commit 1194be8c949b8190b2882ad8335a5d98aa50c735 ]
+[ Upstream commit d863cb03fb2aac07f017b2a1d923cdbc35021280 ]
 
-According the RM, the bit[6~0] of register ESDHC_TUNING_CTRL is
-TUNING_START_TAP, bit[7] of this register is to disable the command
-CRC check for standard tuning. So fix it here.
+sdhci-msm can support auto cmd12.
+So enable SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12 quirk.
 
-Fixes: d87fc9663688 ("mmc: sdhci-esdhc-imx: support setting tuning start point")
-Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
-Link: https://lore.kernel.org/r/1590488522-9292-1-git-send-email-haibo.chen@nxp.com
+Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Link: https://lore.kernel.org/r/1587363626-20413-3-git-send-email-vbadigan@codeaurora.org
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 Signed-off-by: Sasha Levin <sashal@kernel.org>
 ---
- drivers/mmc/host/sdhci-esdhc-imx.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ drivers/mmc/host/sdhci-msm.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index 8c0b80a54e4d..6d1ac9443eb2 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -79,7 +79,7 @@
- #define ESDHC_STD_TUNING_EN		(1 << 24)
- /* NOTE: the minimum valid tuning start tap for mx6sl is 1 */
- #define ESDHC_TUNING_START_TAP_DEFAULT	0x1
--#define ESDHC_TUNING_START_TAP_MASK	0xff
-+#define ESDHC_TUNING_START_TAP_MASK	0x7f
- #define ESDHC_TUNING_STEP_MASK		0x00070000
- #define ESDHC_TUNING_STEP_SHIFT		16
- 
+diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+index 192844b50c69..661052f450fb 100644
+--- a/drivers/mmc/host/sdhci-msm.c
++++ b/drivers/mmc/host/sdhci-msm.c
+@@ -1162,7 +1162,9 @@ static const struct sdhci_pltfm_data sdhci_msm_pdata = {
+ 	.quirks = SDHCI_QUIRK_BROKEN_CARD_DETECTION |
+ 		  SDHCI_QUIRK_NO_CARD_NO_RESET |
+ 		  SDHCI_QUIRK_SINGLE_POWER_WRITE |
+-		  SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
++		  SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN |
++		  SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12,
++
+ 	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
+ 	.ops = &sdhci_msm_ops,
+ };
 -- 
 2.25.1
 
