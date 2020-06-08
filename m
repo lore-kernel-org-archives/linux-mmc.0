@@ -2,99 +2,121 @@ Return-Path: <SRS0=G9E5=7V=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-2.0 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AEE47C433DF
-	for <linux-mmc@archiver.kernel.org>; Mon,  8 Jun 2020 18:15:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E805DC433DF
+	for <linux-mmc@archiver.kernel.org>; Mon,  8 Jun 2020 20:41:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8B09D2078C
-	for <linux-mmc@archiver.kernel.org>; Mon,  8 Jun 2020 18:15:23 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C55BA2076C
+	for <linux-mmc@archiver.kernel.org>; Mon,  8 Jun 2020 20:41:17 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="oIwYbMCn"
+	dkim=fail reason="signature verification failed" (1024-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="l4NudZ+M"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726021AbgFHSPX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 8 Jun 2020 14:15:23 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48998 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725978AbgFHSPW (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Jun 2020 14:15:22 -0400
-Received: from mail-vs1-xe41.google.com (mail-vs1-xe41.google.com [IPv6:2607:f8b0:4864:20::e41])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D315EC08C5C3
-        for <linux-mmc@vger.kernel.org>; Mon,  8 Jun 2020 11:15:20 -0700 (PDT)
-Received: by mail-vs1-xe41.google.com with SMTP id d21so10018819vsh.12
-        for <linux-mmc@vger.kernel.org>; Mon, 08 Jun 2020 11:15:20 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=chromium.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=EGpe1/DmAZEAKC2EbhqvjHPxfTMYfr/m0SisqKdbZdo=;
-        b=oIwYbMCnIsfKNwYT8md93PfuP9r3WakuHjByQqasLAlm2TSsnJdX7xymMGbPH1plWN
-         Nos3Z+kA0XluxPtrS6ygw5fiEaBGd2U5+fGB+CSIsEv3CpJXlW7HyDc/8r406Yso9AQ9
-         Ka/1KynuFafizTnKPJB0DxSRmZgeoyXY5/tOA=
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=EGpe1/DmAZEAKC2EbhqvjHPxfTMYfr/m0SisqKdbZdo=;
-        b=YmXJuvsQoLClEYnS97oQtHKwuschx4NhbylStu32R2WOeRO+kqX9ztjoUWuxzCKSak
-         3rLYCCd+rFWlsDqCyFdP+Mq/wLEkbSafLSxSuuXOJwbNuWwQ8hc8D+ssB61fX1fAvO4t
-         dsv/QH+97YMSZBz8yf0HBIZDJiPpLdcKnbjyoMx+kZgbxcrH663Ur0zqttiJCY0pJBGj
-         jWLn8ibje8NxCQrGy9010lngmIi7P+w2S3k9buXjCRES25bBzSWgh78zKMQqagIwjNU/
-         GaotoCEJ7Dkq5xScjV/0Dm6PAJoXuwQnrNE5b2chSR4khoXWvWiyMYk+ohRlooWYUj9T
-         kCZA==
-X-Gm-Message-State: AOAM5321KhG0tdgUKM7uPqiyS/DzrNIHFPC364GXYdRB8SPSnb5SJft4
-        /yGLPr0sgjUUY7gKxVv5bYN2RgNX7Jk=
-X-Google-Smtp-Source: ABdhPJww4bPp1STolByI3xIMtNPI3tlT+YKc9/m8IXw9zdjKus/GPtXvVocfmjUbGg8UyHvpkiE2eg==
-X-Received: by 2002:a67:e445:: with SMTP id n5mr72555vsm.73.1591640119517;
-        Mon, 08 Jun 2020 11:15:19 -0700 (PDT)
-Received: from mail-vk1-f172.google.com (mail-vk1-f172.google.com. [209.85.221.172])
-        by smtp.gmail.com with ESMTPSA id a21sm74414vsq.15.2020.06.08.11.15.18
-        for <linux-mmc@vger.kernel.org>
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 08 Jun 2020 11:15:18 -0700 (PDT)
-Received: by mail-vk1-f172.google.com with SMTP id u15so4210332vkk.6
-        for <linux-mmc@vger.kernel.org>; Mon, 08 Jun 2020 11:15:18 -0700 (PDT)
-X-Received: by 2002:ac5:ce86:: with SMTP id 6mr15986500vke.75.1591640117928;
- Mon, 08 Jun 2020 11:15:17 -0700 (PDT)
+        id S1726714AbgFHUlR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 8 Jun 2020 16:41:17 -0400
+Received: from www.zeus03.de ([194.117.254.33]:37016 "EHLO mail.zeus03.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726566AbgFHUlQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 8 Jun 2020 16:41:16 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
+        date:from:to:cc:subject:message-id:references:mime-version
+        :content-type:in-reply-to; s=k1; bh=lfRlR6rk2IoTNg54fbivRcobce3D
+        Ce6/iyfI/FoAao8=; b=l4NudZ+Md4P0yig/iC5VtKIDZs0cgxh9TOZadm4uY8Qt
+        Gi7BjWgzLam6A6VoE6BXyQ/62il0sCaW564AvYn3d20/I3KZ8mtcBqe4oGPonw/0
+        Znqjsq6YSF8N1tutRR8ThaHGhpQ7L6/CbF4T+WBeWZf9sF2IsnXmYTWyHl5e/e4=
+Received: (qmail 3137612 invoked from network); 8 Jun 2020 22:41:14 +0200
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 8 Jun 2020 22:41:14 +0200
+X-UD-Smtp-Session: l3s3148p1@aIrEoZinIoQgAwDPXwXUAIYwoJSUoKNc
+Date:   Mon, 8 Jun 2020 22:41:14 +0200
+From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
+To:     Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-renesas-soc@vger.kernel.org" 
+        <linux-renesas-soc@vger.kernel.org>
+Subject: Re: [PATCH 1/2] mmc: core: when downgrading HS400, callback into
+ drivers earlier
+Message-ID: <20200608204113.GC917@ninjato>
+References: <20200604112040.22144-1-wsa+renesas@sang-engineering.com>
+ <20200604112040.22144-2-wsa+renesas@sang-engineering.com>
+ <TY2PR01MB369228A84C46D582D1219EFFD8850@TY2PR01MB3692.jpnprd01.prod.outlook.com>
 MIME-Version: 1.0
-References: <20200608162226.3259186-1-hslester96@gmail.com>
-In-Reply-To: <20200608162226.3259186-1-hslester96@gmail.com>
-From:   Doug Anderson <dianders@chromium.org>
-Date:   Mon, 8 Jun 2020 11:15:06 -0700
-X-Gmail-Original-Message-ID: <CAD=FV=U-Cn=Ze=6nY=E3LmxmrJPbnzKKd9h1dvtwx__u3KUQzw@mail.gmail.com>
-Message-ID: <CAD=FV=U-Cn=Ze=6nY=E3LmxmrJPbnzKKd9h1dvtwx__u3KUQzw@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-of-arasan: Add missed checks for devm_clk_register()
-To:     Chuhong Yuan <hslester96@gmail.com>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        Michal Simek <michal.simek@xilinx.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Heiko Stuebner <heiko@sntech.de>,
-        Linux MMC List <linux-mmc@vger.kernel.org>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        LKML <linux-kernel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="GPJrCs/72TxItFYR"
+Content-Disposition: inline
+In-Reply-To: <TY2PR01MB369228A84C46D582D1219EFFD8850@TY2PR01MB3692.jpnprd01.prod.outlook.com>
+User-Agent: Mutt/1.10.1 (2018-07-13)
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi,
 
-On Mon, Jun 8, 2020 at 9:22 AM Chuhong Yuan <hslester96@gmail.com> wrote:
->
-> These functions do not check the return value of devm_clk_register():
->   - sdhci_arasan_register_sdcardclk()
->   - sdhci_arasan_register_sampleclk()
->
-> Therefore, add the missed checks to fix them.
->
-> Fixes: c390f2110adf1 ("mmc: sdhci-of-arasan: Add ability to export card clock")
-> Signed-off-by: Chuhong Yuan <hslester96@gmail.com>
-> ---
->  drivers/mmc/host/sdhci-of-arasan.c | 4 ++++
->  1 file changed, 4 insertions(+)
+--GPJrCs/72TxItFYR
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Reviewed-by: Douglas Anderson <dianders@chromium.org>
+Hi Shimoda-san,
+
+thank you very much for the review!
+
+> > The driver specific downgrade function makes more sense if we run it
+> > before we switch anything, not after we already switched. Otherwise some
+> > non-HS400 communication has already happened.
+> >=20
+> > No need to convert users. There is only one currenty which needs this
+> > change in a later patchset.
+>=20
+> Perhaps, should we add Fixes tag like below?
+>=20
+> Fixes: ba6c7ac3a2f4 ("mmc: core: more fine-grained hooks for HS400 tuning=
+")
+
+I am not sure. While it is more correct to move the call to
+hs400_downgrade upwards, it does not really fix a bug on its own.
+Without patch 2/2 of this series, there is not really a huge difference
+when we disable the SCC the old way. For the new way, this patch is a
+prerequisite.
+
+
+> > +	/* Prepare host to downgrade to HS timing */
+> > +	if (host->ops->hs400_downgrade)
+> > +		host->ops->hs400_downgrade(host);
+> > +
+>=20
+> IICU, we should call hs400_downgrade() between the __mmc_switch("EXT_CSD_=
+TIMING_HS")
+> and mmc_set_timing(card->host, MMC_TIMING_MMC_HS) because the switch comm=
+and should
+> be issued in HS400 mode.
+
+Yes, of course, you are right. Will fix!
+
+Kind regards,
+
+   Wolfram
+
+
+--GPJrCs/72TxItFYR
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAl7eomkACgkQFA3kzBSg
+Kbb0dw/+IU1CyXHkDLpFjZWmvXBJoVZRsi6HF8MvNbabaGPWw36gkISpfZ4aZHgo
+VHk0zWGSnTDOYM6cBTYfz8m8cO2+4ULp2vbxdW5jThklxstICFeBXV73DhHE5yoS
+1mskaAnSiuvCFu5QNLWGZkAk0FbSmkl1k3iNRifqH7BuafTR0AqqTGOqgJ5fGH/8
+FjrBVUtZHYM+VIcdRonMf/BXzx3DX8tAr8pxF7DKurIHZT/LCWmQ7w88ZykWjSV+
+5gw5LZC6N9HzyC9P6OvXGurtnzovQEXkPxUANwPavddjghVkNIGkXMf8RoVl4lgl
+06te1UgzewW/U0qIsU8OqxLvffGL65WK+oyzYcKzvp75AS0oMk2UmBgT/w9JwfTK
+T146VxkD5KxKpbwH6eruITNAvIPCE5rH4dRbkcof5ecD8uEFcg+u/wZp/eB6/URR
+19HcddbiBD3mdwTU3TNTZLfJvfZF0vtv7Wcc+0xx/rVRPGjmU1Gby8nNyWtUjWir
+HFXLbZtYU7/u6PQlW1FdTQvfKdJLTyO4YGyq7T+d0ocCFNWNIedV84/lHQUar5b8
+iclRvm3IhkLqerUgjtnFE9YrU45OTmiygTnaq10XdquFAmmQ9uDb2nPsAqbtTPtx
+ps0qE20X9sqytR09J1coq+n0j4aLz3WZRrlpISDgCJqvuGQNqlY=
+=hZd4
+-----END PGP SIGNATURE-----
+
+--GPJrCs/72TxItFYR--
