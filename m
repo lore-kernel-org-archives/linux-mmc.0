@@ -2,95 +2,120 @@ Return-Path: <SRS0=G9E5=7V=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.0 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 36656C433DF
-	for <linux-mmc@archiver.kernel.org>; Mon,  8 Jun 2020 21:27:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D42DEC433E0
+	for <linux-mmc@archiver.kernel.org>; Mon,  8 Jun 2020 23:26:34 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0C5DF2076A
-	for <linux-mmc@archiver.kernel.org>; Mon,  8 Jun 2020 21:27:05 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (1024-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="IjiDGA+V"
+	by mail.kernel.org (Postfix) with ESMTP id AAF752072F
+	for <linux-mmc@archiver.kernel.org>; Mon,  8 Jun 2020 23:26:34 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1591658794;
+	bh=dA8deVe8Oc5xCiWh0RcR44ajduoZk4p5UPFlT99UIfM=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
+	b=gM3w8heC5JFfJAmdUwsULyY3sNBfsfuMyGzwr1kYhI6Pz3hcDDEvwYkl+vFQzhqaT
+	 Kpm6PQlptAUIb3AKDJIEnHQ675vv/gCUdAqv369OCmel6UF/UWaPiGeYnb13vERwUm
+	 ueQkr0rqujf9GtEfdby7/P5p6JVYgRdOYp4Zzb4c=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726749AbgFHV1E (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 8 Jun 2020 17:27:04 -0400
-Received: from www.zeus03.de ([194.117.254.33]:47966 "EHLO mail.zeus03.de"
+        id S1731981AbgFHX0d (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 8 Jun 2020 19:26:33 -0400
+Received: from mail.kernel.org ([198.145.29.99]:54022 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726734AbgFHV1E (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 8 Jun 2020 17:27:04 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
-        date:from:to:cc:subject:message-id:references:mime-version
-        :content-type:in-reply-to; s=k1; bh=WUtagRU3g82ExRNn7D1biyJuJW4q
-        PcLsdg41K1ak1Z4=; b=IjiDGA+VB91wi74TeiYO7piJXtggNmfsc+zFBhI9QMR/
-        46FmrQUWcCo+DT10K+cqYngPkHgcDuT9MKsKa695UvBgj43wR0TdFCSLRESShFsp
-        XDj8d1LlNSoakFFdqcnl4NY5VpCsEt8l3eTBe0NNhEJ69Uw4UArla/wxOm53WWc=
-Received: (qmail 3147057 invoked from network); 8 Jun 2020 23:27:02 +0200
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 8 Jun 2020 23:27:02 +0200
-X-UD-Smtp-Session: l3s3148p1@aA6URZmnKIQgAwDPXwXUAIYwoJSUoKNc
-Date:   Mon, 8 Jun 2020 23:27:02 +0200
-From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
-To:     Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-renesas-soc@vger.kernel.org" 
-        <linux-renesas-soc@vger.kernel.org>
-Subject: Re: [PATCH 2/2] mmc: renesas_sdhi: keep SCC clock active when tuning
-Message-ID: <20200608212702.GD917@ninjato>
-References: <20200604112040.22144-1-wsa+renesas@sang-engineering.com>
- <20200604112040.22144-3-wsa+renesas@sang-engineering.com>
- <TY2PR01MB36923A1D7091431CE3F73195D8850@TY2PR01MB3692.jpnprd01.prod.outlook.com>
+        id S1731974AbgFHX0a (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 8 Jun 2020 19:26:30 -0400
+Received: from sasha-vm.mshome.net (c-73-47-72-35.hsd1.nh.comcast.net [73.47.72.35])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id 2A2C020775;
+        Mon,  8 Jun 2020 23:26:29 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1591658789;
+        bh=dA8deVe8Oc5xCiWh0RcR44ajduoZk4p5UPFlT99UIfM=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=Oi3xE4nIktiVbBUD4HB7oxIv2jHWe7xb7gVn+LdY4VNfB+LEJjmFUgy7sYm3pAx6W
+         Yy03luoe7CzRjaVg+MhKRdo96B6gEe50D20Wagm+doB0dFgzfkcvJAHEWwksP+Ccdr
+         UF4+wM81qbO0v7hNSkuBWDryfi4kK4dCg8ZA05Uc=
+From:   Sasha Levin <sashal@kernel.org>
+To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Bruce Chang <brucechang@via.com.tw>,
+        Harald Welte <HaraldWelte@viatech.com>,
+        Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org
+Subject: [PATCH AUTOSEL 4.14 65/72] mmc: via-sdmmc: Respect the cmd->busy_timeout from the mmc core
+Date:   Mon,  8 Jun 2020 19:24:53 -0400
+Message-Id: <20200608232500.3369581-65-sashal@kernel.org>
+X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20200608232500.3369581-1-sashal@kernel.org>
+References: <20200608232500.3369581-1-sashal@kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="mSxgbZZZvrAyzONB"
-Content-Disposition: inline
-In-Reply-To: <TY2PR01MB36923A1D7091431CE3F73195D8850@TY2PR01MB3692.jpnprd01.prod.outlook.com>
-User-Agent: Mutt/1.10.1 (2018-07-13)
+X-stable: review
+X-Patchwork-Hint: Ignore
+Content-Transfer-Encoding: 8bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+From: Ulf Hansson <ulf.hansson@linaro.org>
 
---mSxgbZZZvrAyzONB
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+[ Upstream commit 966244ccd2919e28f25555a77f204cd1c109cad8 ]
 
+Using a fixed 1s timeout for all commands (and data transfers) is a bit
+problematic.
 
-> > +	/* Tuning done, no special handling for SCC clock needed anymore */
-> > +	priv->keep_scc_freq =3D false;
-> > +
->=20
-> Setting keep_scc_freq to false is only here. But, I'm thinking
-> we should set it in some error paths like below somehow too:
->  - error paths before hs400_complete() in mmc_select_hs400().
->  - error path of mmc_execute_tuning() in mmc_retune().
+For some commands it means waiting longer than needed for the timer to
+expire, which may not a big issue, but still. For other commands, like for
+an erase (CMD38) that uses a R1B response, may require longer timeouts than
+1s. In these cases, we may end up treating the command as it failed, while
+it just needed some more time to complete successfully.
 
-Hmm, I guess you are right. That would kind of spoil my approach taken
-here. Maybe we need another flag in the core like 'doing_tune' to
-supplement 'doing_retune', so or driver knows when any kind of tuning is
-going on?
+Fix the problem by respecting the cmd->busy_timeout, which is provided by
+the mmc core.
 
+Cc: Bruce Chang <brucechang@via.com.tw>
+Cc: Harald Welte <HaraldWelte@viatech.com>
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+Link: https://lore.kernel.org/r/20200414161413.3036-17-ulf.hansson@linaro.org
+Signed-off-by: Sasha Levin <sashal@kernel.org>
+---
+ drivers/mmc/host/via-sdmmc.c | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
 
---mSxgbZZZvrAyzONB
-Content-Type: application/pgp-signature; name="signature.asc"
+diff --git a/drivers/mmc/host/via-sdmmc.c b/drivers/mmc/host/via-sdmmc.c
+index a838bf5480d8..a863a345fc59 100644
+--- a/drivers/mmc/host/via-sdmmc.c
++++ b/drivers/mmc/host/via-sdmmc.c
+@@ -323,6 +323,8 @@ struct via_crdr_mmc_host {
+ /* some devices need a very long delay for power to stabilize */
+ #define VIA_CRDR_QUIRK_300MS_PWRDELAY	0x0001
+ 
++#define VIA_CMD_TIMEOUT_MS		1000
++
+ static const struct pci_device_id via_ids[] = {
+ 	{PCI_VENDOR_ID_VIA, PCI_DEVICE_ID_VIA_9530,
+ 	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0,},
+@@ -555,14 +557,17 @@ static void via_sdc_send_command(struct via_crdr_mmc_host *host,
+ {
+ 	void __iomem *addrbase;
+ 	struct mmc_data *data;
++	unsigned int timeout_ms;
+ 	u32 cmdctrl = 0;
+ 
+ 	WARN_ON(host->cmd);
+ 
+ 	data = cmd->data;
+-	mod_timer(&host->timer, jiffies + HZ);
+ 	host->cmd = cmd;
+ 
++	timeout_ms = cmd->busy_timeout ? cmd->busy_timeout : VIA_CMD_TIMEOUT_MS;
++	mod_timer(&host->timer, jiffies + msecs_to_jiffies(timeout_ms));
++
+ 	/*Command index*/
+ 	cmdctrl = cmd->opcode << 8;
+ 
+-- 
+2.25.1
 
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAl7erSIACgkQFA3kzBSg
-Kbbn1RAAhE/rLNgZtVHTTSY62gEMuwVKYtXCu3n79wQGRVLKAbEgL+My4jAEMaQ6
-D2OCdOZggJp8auuT473zjfXf8tKtMP6nQWf1ViopAawj7GS6oitwi/iPkPBbG/tr
-ZIOL9YoK1Gg0JEQhE376SRAyIPeC8l4q2rvFDgGM1FhpKa4i9H7V9bA82vZSvyAx
-RuAN0TDmM72g9Fm6nD5oY/l5bXN2d+cyB7WsrIoLAigNQD9tBsqE3e4aRXSFYS25
-z67igCDSEVUuTzXEWs1AoYQJnrkhyBT0Q5vSxiZ1O2pFmQ5IIWUD/BBFxAyAYSW+
-jRowL54vaqFwPKQQB61bVAUyExK0TIygDnF+P6wuNwRrvcVem7lyp4v0/tR5blaZ
-eewhrsE4i7i6m1/ENS3WZmz8VxqrvGaj+0fFhcawSHEKke2XsBf7CRiD6ns1b7HD
-+IJTxL0XLDzVxKIG81FL7FfXwsj/H4veebEWsGNZAe8brRnk+vZzbKLs67W3I0E/
-0jQ/a/bVlmE9eTenWQS9TDZdN+/g2wa2cmC+rhaq7il71yZrKuZBnnvBq+AH8Dtg
-mCRJQA6w2aobRgngqbqqEyXJflf4G663VSAr26iUnd0azMzrdH1YjQsWAmnP07a4
-PMbOR699kYNMgxttdoC8nmhF3HkPRRCSewBPPGUdAhKUTEqgFOM=
-=SS9v
------END PGP SIGNATURE-----
-
---mSxgbZZZvrAyzONB--
