@@ -4,50 +4,51 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B1A1DC433E2
-	for <linux-mmc@archiver.kernel.org>; Tue,  9 Jun 2020 00:02:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2C553C433E1
+	for <linux-mmc@archiver.kernel.org>; Tue,  9 Jun 2020 00:11:12 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7FFD72074B
-	for <linux-mmc@archiver.kernel.org>; Tue,  9 Jun 2020 00:02:15 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0ACAF20801
+	for <linux-mmc@archiver.kernel.org>; Tue,  9 Jun 2020 00:11:12 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1591660935;
-	bh=ZcVpFMnNya8jE2nq81tFcyYpizXtVtOzYmsv2lw/vwI=;
+	s=default; t=1591661472;
+	bh=7vHlbNH5y8voS2cDM4bKwMfkLZfQfTj4TTeCBy55ia8=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=DgzgdjcORrrZRtgLKNiqysQLDI0g9RRKB5vjKdrWviGDbQwchzKrOZEZE9CH/3BBc
-	 Na/gSBthGFfIwIX7RgrKmRNWnWFVDOWxrg3aLeifxFFP8hCngD9cYD9XqlIW7TBoAm
-	 gq9OtAQ+QwvT8yExO2UQjIOaiLbIw6gq5MkBX/ns=
+	b=tvabRHgDHDtY4T8/qTd4RLSt0h3GhLvj64r4cYGLYcTGMVDrmt28RgzCdcvGk1nNp
+	 cbSq4KjrFlrwU7aD5Z3I/kB5ah7K52Hf+kBAVjCKNpJlQd0fvxLzCmXZOjjKbD5iq3
+	 ASUQGb0Zk1LCNpwjG3G8oPqfWTcc29RzSCmQFYqM=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728414AbgFIACN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 8 Jun 2020 20:02:13 -0400
-Received: from mail.kernel.org ([198.145.29.99]:46594 "EHLO mail.kernel.org"
+        id S1732384AbgFIAKy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 8 Jun 2020 20:10:54 -0400
+Received: from mail.kernel.org ([198.145.29.99]:43162 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728842AbgFHXWJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 8 Jun 2020 19:22:09 -0400
+        id S1730560AbgFHXT6 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 8 Jun 2020 19:19:58 -0400
 Received: from sasha-vm.mshome.net (c-73-47-72-35.hsd1.nh.comcast.net [73.47.72.35])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id DD89E2086A;
-        Mon,  8 Jun 2020 23:22:08 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 4FE3120870;
+        Mon,  8 Jun 2020 23:19:57 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1591658529;
-        bh=ZcVpFMnNya8jE2nq81tFcyYpizXtVtOzYmsv2lw/vwI=;
+        s=default; t=1591658398;
+        bh=7vHlbNH5y8voS2cDM4bKwMfkLZfQfTj4TTeCBy55ia8=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=zHyzShWy8sWM2C9ytOISmDCo+4nY4L5Nj6+I1jwaZGOizoHG2VgqG2JGpb6jVC6Jk
-         kB3zSFYnP5DheMnzc07d6WP82WRRk6DFpfWowHT4g/GrYDImtgvhUoNNdTTCO+cFoN
-         jqUvJt2gBi5qc6ZKOG/scwGJELIv/OSceA/W66ZA=
+        b=E3XvqYrlHzxxgFx7bhYxb56zfsaI9UPrlC3C+ypYIrGorp6jKSq7vI5HvbmESI2cv
+         SObygjJHSlDYP8dMmag5rL1E8ehUNnZu/Bshd/VQSn5SdFYU9uJex2BiwTwOxf6P4+
+         KSk3A47XdSwo1UGWmhqBBNzQakgO/N1RGwfWpp0o=
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc:     Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
+Cc:     Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+        Tobias Baumann <017623705678@o2online.de>,
         Ulf Hansson <ulf.hansson@linaro.org>,
         Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org,
-        linux-arm-msm@vger.kernel.org
-Subject: [PATCH AUTOSEL 5.4 154/175] mmc: sdhci-msm: Set SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12 quirk
-Date:   Mon,  8 Jun 2020 19:18:27 -0400
-Message-Id: <20200608231848.3366970-154-sashal@kernel.org>
+        linux-arm-kernel@lists.infradead.org,
+        linux-amlogic@lists.infradead.org
+Subject: [PATCH AUTOSEL 5.4 054/175] mmc: meson-mx-sdio: trigger a soft reset after a timeout or CRC error
+Date:   Mon,  8 Jun 2020 19:16:47 -0400
+Message-Id: <20200608231848.3366970-54-sashal@kernel.org>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20200608231848.3366970-1-sashal@kernel.org>
 References: <20200608231848.3366970-1-sashal@kernel.org>
@@ -60,37 +61,77 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+From: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
 
-[ Upstream commit d863cb03fb2aac07f017b2a1d923cdbc35021280 ]
+[ Upstream commit 91995b904ec2e44b5c159ac6a5d3f154345a4de7 ]
 
-sdhci-msm can support auto cmd12.
-So enable SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12 quirk.
+The vendor driver (from the 3.10 kernel) triggers a soft reset every
+time before starting a new command. While this fixes a problem where
+SDIO cards are not detected at all (because all commands simply
+timed out) this hurts SD card read performance a bit (in my tests
+between 10% to 20%).
 
-Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-Link: https://lore.kernel.org/r/1587363626-20413-3-git-send-email-vbadigan@codeaurora.org
+Trigger a soft reset after we got a CRC error or if the previous command
+timed out (just like the vendor driver from the same 3.10 kernel for the
+newer SDHC controller IP does). This fixes detection of SDIO cards and
+doesn't hurt SD card read performance at the same time.
+
+With this patch the initialization of an RTL8723BS SDIO card looks like
+this:
+  req done (CMD52): -110: 00000000 00000000 00000000 00000000
+  clock 400000Hz busmode 2 powermode 2 cs 1 Vdd 21 width 1 timing 0
+  starting CMD0 arg 00000000 flags 000000c0
+  req done (CMD0): 0: 00000000 00000000 00000000 00000000
+  clock 400000Hz busmode 2 powermode 2 cs 0 Vdd 21 width 1 timing 0
+  starting CMD8 arg 000001aa flags 000002f5
+  req done (CMD8): -110: 00000000 00000000 00000000 00000000
+  starting CMD5 arg 00000000 flags 000002e1
+  req done (CMD5): 0: 90ff0000 00000000 00000000 00000000
+  starting CMD5 arg 00200000 flags 000002e1
+  req done (CMD5): 0: 90ff0000 00000000 00000000 00000000
+  starting CMD3 arg 00000000 flags 00000075
+  req done (CMD3): 0: 00010000 00000000 00000000 00000000
+  starting CMD7 arg 00010000 flags 00000015
+  req done (CMD7): 0: 00001e00 00000000 00000000 00000000
+  starting CMD52 arg 00000000 flags 00000195
+  req done (CMD52): 0: 00001032 00000000 00000000 00000000
+  [... more CMD52 omitted ...]
+  clock 400000Hz busmode 2 powermode 2 cs 0 Vdd 21 width 1 timing 2
+  clock 50000000Hz busmode 2 powermode 2 cs 0 Vdd 21 width 1 timing 2
+  starting CMD52 arg 00000e00 flags 00000195
+  req done (CMD52): 0: 00001000 00000000 00000000 00000000
+  starting CMD52 arg 80000e02 flags 00000195
+  req done (CMD52): 0: 00001002 00000000 00000000 00000000
+  clock 50000000Hz busmode 2 powermode 2 cs 0 Vdd 21 width 4 timing 2
+  starting CMD52 arg 00020000 flags 00000195
+  req done (CMD52): 0: 00001007 00000000 00000000 00000000
+  [... more CMD52 omitted ...]
+  new high speed SDIO card at address 0001
+
+Fixes: ed80a13bb4c4c9 ("mmc: meson-mx-sdio: Add a driver for the Amlogic Meson8 and Meson8b SoCs")
+Signed-off-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+Link: https://lore.kernel.org/r/20200503222805.2668941-1-martin.blumenstingl@googlemail.com
+Tested-by: Tobias Baumann <017623705678@o2online.de>
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 Signed-off-by: Sasha Levin <sashal@kernel.org>
 ---
- drivers/mmc/host/sdhci-msm.c | 4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
+ drivers/mmc/host/meson-mx-sdio.c | 3 +++
+ 1 file changed, 3 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index 0148f8e6bb37..fe7e9028f767 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -1736,7 +1736,9 @@ static const struct sdhci_ops sdhci_msm_ops = {
- static const struct sdhci_pltfm_data sdhci_msm_pdata = {
- 	.quirks = SDHCI_QUIRK_BROKEN_CARD_DETECTION |
- 		  SDHCI_QUIRK_SINGLE_POWER_WRITE |
--		  SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
-+		  SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN |
-+		  SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12,
+diff --git a/drivers/mmc/host/meson-mx-sdio.c b/drivers/mmc/host/meson-mx-sdio.c
+index 999214e8cf2b..360d523132bd 100644
+--- a/drivers/mmc/host/meson-mx-sdio.c
++++ b/drivers/mmc/host/meson-mx-sdio.c
+@@ -246,6 +246,9 @@ static void meson_mx_mmc_request_done(struct meson_mx_mmc_host *host)
+ 
+ 	mrq = host->mrq;
+ 
++	if (host->cmd->error)
++		meson_mx_mmc_soft_reset(host);
 +
- 	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
- 	.ops = &sdhci_msm_ops,
- };
+ 	host->mrq = NULL;
+ 	host->cmd = NULL;
+ 
 -- 
 2.25.1
 
