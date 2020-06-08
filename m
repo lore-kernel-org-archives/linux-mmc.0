@@ -4,360 +4,139 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 18FFBC433E0
-	for <linux-mmc@archiver.kernel.org>; Mon,  8 Jun 2020 07:29:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0392CC433DF
+	for <linux-mmc@archiver.kernel.org>; Mon,  8 Jun 2020 07:58:04 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D61CA20775
-	for <linux-mmc@archiver.kernel.org>; Mon,  8 Jun 2020 07:29:03 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D7EA120774
+	for <linux-mmc@archiver.kernel.org>; Mon,  8 Jun 2020 07:58:03 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="I1UkKGJ2"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="jbjzzPoj"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728983AbgFHH3D (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 8 Jun 2020 03:29:03 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33572 "EHLO
+        id S1729075AbgFHH6D (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 8 Jun 2020 03:58:03 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38110 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727977AbgFHH3C (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Jun 2020 03:29:02 -0400
-Received: from mail-vs1-xe43.google.com (mail-vs1-xe43.google.com [IPv6:2607:f8b0:4864:20::e43])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4B416C08C5C3
-        for <linux-mmc@vger.kernel.org>; Mon,  8 Jun 2020 00:29:02 -0700 (PDT)
-Received: by mail-vs1-xe43.google.com with SMTP id c1so9169146vsc.11
-        for <linux-mmc@vger.kernel.org>; Mon, 08 Jun 2020 00:29:02 -0700 (PDT)
+        with ESMTP id S1725868AbgFHH6C (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Jun 2020 03:58:02 -0400
+Received: from mail-ua1-x944.google.com (mail-ua1-x944.google.com [IPv6:2607:f8b0:4864:20::944])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6811BC08C5C3
+        for <linux-mmc@vger.kernel.org>; Mon,  8 Jun 2020 00:58:02 -0700 (PDT)
+Received: by mail-ua1-x944.google.com with SMTP id b10so4343087uaf.0
+        for <linux-mmc@vger.kernel.org>; Mon, 08 Jun 2020 00:58:02 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=FCmiNcLMNBnegLTsWZLMDUk4w4C6QmrCaW3YO/17GXY=;
-        b=I1UkKGJ2LVoDVTKZtN5Lnu5DqC0dpcAJu7JlbKE5S2l6r5Z+6xc7v03MOzHc5ZoRlK
-         msegtRJh2B1YKkWLyMKdhbQG+VnsbhfFEec8R0jj2ppIF3LdJpu94beYDQAyH88yKgHo
-         1WW0QzoEqGHQnPrrPmnVVIKq8fff5eOvuMznOfSYyprD7Wc+HJDOlfap2FbI5fxv5OE9
-         3seejNlz3y6jShHGMLfU0Pwd9UfZTxQyQuY/wli4AAKCYy7iCO7qMXS3mnekJ/QqhNr1
-         oMvKVMa4CH0etxVcRCF2KUmjp4fajJ6ajrO7aG8/G5elqUYIMv5CmSvf55w5FOo3IynM
-         2szA==
+        bh=usa2O3VnVimdZz2QFTyqirZyCnD9v7o6Y9XSy9l9BZQ=;
+        b=jbjzzPoj1LdiFFNG5vJNANcVDGSPSpfEkRZwfsXF2gcUG29xQOQ5oBYLYDNYasI49I
+         q12WRMFRu5cwpEFK6YLSextAJTw7PO/wRgSurkZ5iUZzifmeNrzA51kCfdysGz0G7Heb
+         6I7agqBH1Om4sLhJZzpWfdS3ceapyJEhD3lNVh/OEO2jo9vN8CkycHhGu8lZYqCcRPSp
+         yqVYPRA1T+1bvpK8KnO2w48bz388aSvitb4TdfKav/g+lHY4+PJnrPNBm+LeZOR9UDyr
+         MZHh87ce+FVZZ/sF6gQgyZpgEbterGO0d3j5PTKNrwyyTe44yPaLu/h4SwgHuB4EDUW0
+         m/jw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=FCmiNcLMNBnegLTsWZLMDUk4w4C6QmrCaW3YO/17GXY=;
-        b=bn/nKkIdcfrXHZbtujnauUv7Lm6yUUIJs2SQvam9onyADNV1nrMEiV47cWseccfn2z
-         BhkcVR7c8O/uCZUloT/O0+n5Kck1SvQzSyEaxMO68VD+nmsPh84hS517H+MCNCwl9Aty
-         uamF4CxRgZorcq+NowRK3VNo+dJe+JJgSHjDjBabL08T76Y110KcRUXvOa68L0xbKb2X
-         lrl+wpGEwviiI8Qykt+KlTwRq5hsR8VfuJZqK39sw7ZOe53N15FKwzxMABFWcgJ7au07
-         8IFCU9mFuMmaTtBpNWu3ouZkUge9u4cthGgwEhcrQ++4ihUjgWOWou0RYF19Tt1uEego
-         akaw==
-X-Gm-Message-State: AOAM53383w4lWn3i3sokvTd2dHcYL1uc6HgX7FPstIyT/f5KrCQxJmW7
-        QhSsZfernyyy5SkiOp/FMBbg6dEYYR63QacsUIjq3A==
-X-Google-Smtp-Source: ABdhPJydAV5F2km3PPtt844KawDCecTd9Z2vElrOVuRPYaTKIe3zLB54uwh1iKm0IcSFPVg9rfecEWzLQPm6GWdp2QU=
-X-Received: by 2002:a67:ee1b:: with SMTP id f27mr12334448vsp.34.1591601341180;
- Mon, 08 Jun 2020 00:29:01 -0700 (PDT)
+        bh=usa2O3VnVimdZz2QFTyqirZyCnD9v7o6Y9XSy9l9BZQ=;
+        b=Ddob6WLrxHPsOgKLcbnZcS3syMRXhWPZCjXC2z/KmLfDGrxOjuU0zGNSv344vvxVzJ
+         5KbCuiX9y9a9st14OBU8NbzNOoFAIphMpUTzHJQoD6AlMMtJpsorLRkWTFIRh6lnDtC6
+         1LSXziwu07l9OMIKA2/O8VRB7VM6dYdHPLAx3lL1Sz2EgVmP3OhFUq1w64YIC50FjQ8W
+         dhv/6PEcXgwqzfLJUTfmGf67ietcvi8RghfLaB8jZGOq8yZ2llwX48z9T690R8gGPK12
+         m5KXHoecF+3OlTHOPIwoEXanedtKzTXCZ9j2tuUuS5MrgwlK5kUl+e6JRv5n1Bj+B3N9
+         6vRg==
+X-Gm-Message-State: AOAM530WNKI8c35w8fJVgoMpz1dCBJKwwC57B6PjFf27EAFMiOQSCd1R
+        E567dW34n+5LoHrjh4sXDghXPLE+FYaJ5jCseXxYGQ==
+X-Google-Smtp-Source: ABdhPJzHPVZcT9fOcq/5mnEdYXiSTcCK3xCGQDgTq7ZQjol8t3AS01de6pjkoygr26G7tmIC54OyjHigWPcFrcXu7tU=
+X-Received: by 2002:ab0:186d:: with SMTP id j45mr15425936uag.104.1591603081439;
+ Mon, 08 Jun 2020 00:58:01 -0700 (PDT)
 MIME-Version: 1.0
-References: <1591277381-7734-1-git-send-email-vbadigan@codeaurora.org>
-In-Reply-To: <1591277381-7734-1-git-send-email-vbadigan@codeaurora.org>
+References: <1589887988-7362-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
+In-Reply-To: <1589887988-7362-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 8 Jun 2020 09:28:25 +0200
-Message-ID: <CAPDyKFpO9afpONQEKgYBxwc2LtAn+31isoMGewOwR2Q8FnbCdA@mail.gmail.com>
-Subject: Re: [RFC V1] mmc: core: Add partial initialization support
-To:     Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
-        Maya Erez <merez@codeaurora.org>,
-        Baolin Wang <baolin.wang@linaro.org>,
-        Ludovic Barre <ludovic.barre@st.com>,
-        Arnd Bergmann <arnd@arndb.de>,
-        Bradley Bolen <bradleybolen@gmail.com>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Thomas Gleixner <tglx@linutronix.de>
+Date:   Mon, 8 Jun 2020 09:57:24 +0200
+Message-ID: <CAPDyKFq5yueXp4NW2fj3tvPRv0S_VDM1khAw51VeEHxG79qp+Q@mail.gmail.com>
+Subject: Re: [PATCH/RFC] mmc: core: Issue power_off_notify for eMMC Suspend-to-RAM
+To:     Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 4 Jun 2020 at 15:30, Veerabhadrarao Badiganti
-<vbadigan@codeaurora.org> wrote:
+On Tue, 19 May 2020 at 13:33, Yoshihiro Shimoda
+<yoshihiro.shimoda.uh@renesas.com> wrote:
 >
-> From: Maya Erez <merez@codeaurora.org>
->
-> This change adds the ability to partially initialize
-> the MMC card by using card Sleep/Awake sequence (CMD5).
-> Card will be sent to Sleep state during runtime/system suspend
-> and will be woken up during runtime/system resume.
-> By using this sequence the card doesn't need full initialization
-> which gives time reduction in system/runtime resume path.
+> The commit 432356793415 ("mmc: core: Enable power_off_notify for
+> eMMC shutdown sequence") enabled the power off notification
+> even if MMC_CAP2_POWEROFF_NOTIFY (MMC_CAP2_FULL_PWR_CYCLE now) is
+> not set. However, the mmc core lacks to issue the power off
+> notificaiton when Suspend-to-{RAM,Disk} happens on the system.
 
-It would be nice if you could provide some more exact numbers of what
-the gain is for a couple of different eMMCs, as to justify the change
-a bit more.
+This isn't an entirely correct description, I think.
+
+If the host supports MMC_CAP2_FULL_PWR_CYCLE (both vmmc and vqmmc can
+be powered on/off), we use power-off-notification during system
+suspend, in case the eMMC card also supports it. Otherwise we send the
+sleep command.
+
+This behaviour was decided on purpose and it's mainly because without
+MMC_CAP2_FULL_PWR_CYCLE, we assume that vqmmc remains always-on. In
+this case, it simply seemed better to use the sleep command, rather
+than the power-off-notification, as we aren't really going to do a
+full power off anyway.
 
 Kind regards
 Uffe
 
 >
-> Signed-off-by: Maya Erez <merez@codeaurora.org>
-> Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+> So, add Suspend-to-RAM support at first because this is easy to
+> check by using pm_suspend_target_state condition on _mmc_suspend().
+>
+> Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
 > ---
->  drivers/mmc/core/mmc.c   | 146 ++++++++++++++++++++++++++++++++++++++++++++---
->  include/linux/mmc/card.h |   4 ++
->  include/linux/mmc/host.h |   2 +
->  3 files changed, 143 insertions(+), 9 deletions(-)
+>  drivers/mmc/core/mmc.c | 9 ++++++++-
+>  1 file changed, 8 insertions(+), 1 deletion(-)
 >
 > diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index de94fbe629bd..5c6444113c92 100644
+> index 4203303..4a23f83 100644
 > --- a/drivers/mmc/core/mmc.c
 > +++ b/drivers/mmc/core/mmc.c
-> @@ -1892,7 +1892,13 @@ static int mmc_can_sleep(struct mmc_card *card)
->         return (card && card->ext_csd.rev >= 3);
->  }
+> @@ -11,6 +11,7 @@
+>  #include <linux/of.h>
+>  #include <linux/slab.h>
+>  #include <linux/stat.h>
+> +#include <linux/suspend.h>
+>  #include <linux/pm_runtime.h>
 >
-> -static int mmc_sleep(struct mmc_host *host)
-> +static int mmc_can_sleepawake(struct mmc_host *host)
-> +{
-> +       return host && (host->caps2 & MMC_CAP2_SLEEP_AWAKE) && host->card &&
-> +               (host->card->ext_csd.rev >= 3);
-> +}
-> +
-> +static int mmc_sleepawake(struct mmc_host *host, bool sleep)
->  {
->         struct mmc_command cmd = {};
->         struct mmc_card *card = host->card;
-> @@ -1902,13 +1908,16 @@ static int mmc_sleep(struct mmc_host *host)
->         /* Re-tuning can't be done once the card is deselected */
->         mmc_retune_hold(host);
->
-> -       err = mmc_deselect_cards(host);
-> -       if (err)
-> -               goto out_release;
-> +       if (sleep) {
-> +               err = mmc_deselect_cards(host);
-> +               if (err)
-> +                       goto out_release;
-> +       }
->
->         cmd.opcode = MMC_SLEEP_AWAKE;
->         cmd.arg = card->rca << 16;
-> -       cmd.arg |= 1 << 15;
-> +       if (sleep)
-> +               cmd.arg |= 1 << 15;
->
->         /*
->          * If the max_busy_timeout of the host is specified, validate it against
-> @@ -1939,6 +1948,9 @@ static int mmc_sleep(struct mmc_host *host)
->         if (!cmd.busy_timeout || !(host->caps & MMC_CAP_WAIT_WHILE_BUSY))
->                 mmc_delay(timeout_ms);
->
-> +       if (!sleep)
-> +               err = mmc_select_card(card);
-> +
->  out_release:
->         mmc_retune_release(host);
->         return err;
-> @@ -2016,6 +2028,69 @@ static void mmc_detect(struct mmc_host *host)
->         }
->  }
->
-> +static int mmc_cache_card_ext_csd(struct mmc_host *host)
-> +{
-> +       int err;
-> +       u8 *ext_csd;
-> +       struct mmc_card *card = host->card;
-> +
-> +       err = mmc_get_ext_csd(card, &ext_csd);
-> +       if (err || !ext_csd) {
-> +               pr_err("%s: %s: mmc_get_ext_csd failed (%d)\n",
-> +                       mmc_hostname(host), __func__, err);
-> +               return err;
-> +       }
-> +
-> +       /* only cache read/write fields that the sw changes */
-> +       card->ext_csd.raw_ext_csd_cmdq = ext_csd[EXT_CSD_CMDQ_MODE_EN];
-> +       card->ext_csd.raw_ext_csd_cache_ctrl = ext_csd[EXT_CSD_CACHE_CTRL];
-> +       card->ext_csd.raw_ext_csd_bus_width = ext_csd[EXT_CSD_BUS_WIDTH];
-> +       card->ext_csd.raw_ext_csd_hs_timing = ext_csd[EXT_CSD_HS_TIMING];
-> +
-> +       kfree(ext_csd);
-> +
-> +       return 0;
-> +}
-> +
-> +static int mmc_test_awake_ext_csd(struct mmc_host *host)
-> +{
-> +       int err;
-> +       u8 *ext_csd;
-> +       struct mmc_card *card = host->card;
-> +
-> +       err = mmc_get_ext_csd(card, &ext_csd);
-> +       if (err) {
-> +               pr_err("%s: %s: mmc_get_ext_csd failed (%d)\n",
-> +                       mmc_hostname(host), __func__, err);
-> +               return err;
-> +       }
-> +
-> +       /* only compare read/write fields that the sw changes */
-> +       pr_debug("%s: %s: type(cached:current) cmdq(%d:%d) cache_ctrl(%d:%d) bus_width (%d:%d) timing(%d:%d)\n",
-> +               mmc_hostname(host), __func__,
-> +               card->ext_csd.raw_ext_csd_cmdq,
-> +               ext_csd[EXT_CSD_CMDQ_MODE_EN],
-> +               card->ext_csd.raw_ext_csd_cache_ctrl,
-> +               ext_csd[EXT_CSD_CACHE_CTRL],
-> +               card->ext_csd.raw_ext_csd_bus_width,
-> +               ext_csd[EXT_CSD_BUS_WIDTH],
-> +               card->ext_csd.raw_ext_csd_hs_timing,
-> +               ext_csd[EXT_CSD_HS_TIMING]);
-> +
-> +       err = !((card->ext_csd.raw_ext_csd_cmdq ==
-> +                       ext_csd[EXT_CSD_CMDQ_MODE_EN]) &&
-> +               (card->ext_csd.raw_ext_csd_cache_ctrl ==
-> +                       ext_csd[EXT_CSD_CACHE_CTRL]) &&
-> +               (card->ext_csd.raw_ext_csd_bus_width ==
-> +                       ext_csd[EXT_CSD_BUS_WIDTH]) &&
-> +               (card->ext_csd.raw_ext_csd_hs_timing ==
-> +                       ext_csd[EXT_CSD_HS_TIMING]));
-> +
-> +       kfree(ext_csd);
-> +
-> +       return err;
-> +}
-> +
->  static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
->  {
+>  #include <linux/mmc/host.h>
+> @@ -2027,6 +2028,12 @@ static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
 >         int err = 0;
-> @@ -2034,8 +2109,12 @@ static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
->         if (mmc_can_poweroff_notify(host->card) &&
->                 ((host->caps2 & MMC_CAP2_FULL_PWR_CYCLE) || !is_suspend))
->                 err = mmc_poweroff_notify(host->card, notify_type);
-> -       else if (mmc_can_sleep(host->card))
-> -               err = mmc_sleep(host);
-> +       if (mmc_can_sleepawake(host)) {
-> +               memcpy(&host->cached_ios, &host->ios, sizeof(host->cached_ios));
-> +               mmc_cache_card_ext_csd(host);
-> +       }
-> +       if (mmc_can_sleep(host->card))
-> +               err = mmc_sleepawake(host, true);
->         else if (!mmc_host_is_spi(host))
->                 err = mmc_deselect_cards(host);
->
-> @@ -2048,6 +2127,43 @@ static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
->         return err;
->  }
->
-> +static int mmc_partial_init(struct mmc_host *host)
-> +{
-> +       int err = 0;
-> +       struct mmc_card *card = host->card;
+>         unsigned int notify_type = is_suspend ? EXT_CSD_POWER_OFF_SHORT :
+>                                         EXT_CSD_POWER_OFF_LONG;
+> +       bool s2ram = false;
 > +
-> +       mmc_set_bus_width(host, host->cached_ios.bus_width);
-> +       mmc_set_timing(host, host->cached_ios.timing);
-> +       if (host->cached_ios.enhanced_strobe) {
-> +               host->ios.enhanced_strobe = true;
-> +               if (host->ops->hs400_enhanced_strobe)
-> +                       host->ops->hs400_enhanced_strobe(host, &host->ios);
-> +       }
-> +       mmc_set_clock(host, host->cached_ios.clock);
-> +       mmc_set_bus_mode(host, host->cached_ios.bus_mode);
-> +
-> +       if (!mmc_card_hs400es(card) &&
-> +                       (mmc_card_hs200(card) || mmc_card_hs400(card)))
-> +               err = mmc_execute_tuning(card);
-> +
-> +       /*
-> +        * The ext_csd is read to make sure the card did not went through
-> +        * Power-failure during sleep period.
-> +        * A subset of the W/E_P, W/C_P register will be tested. In case
-> +        * these registers values are different from the values that were
-> +        * cached during suspend, we will conclude that a Power-failure occurred
-> +        * and will do full initialization sequence.
-> +        */
-> +       err = mmc_test_awake_ext_csd(host);
-> +       if (err) {
-> +               pr_debug("%s: %s: fail on ext_csd read (%d)\n",
-> +                       mmc_hostname(host), __func__, err);
-> +               goto out;
-> +       }
-> +out:
-> +       return err;
-> +}
-> +
->  /*
->   * Suspend callback
->   */
-> @@ -2070,7 +2186,7 @@ static int mmc_suspend(struct mmc_host *host)
->   */
->  static int _mmc_resume(struct mmc_host *host)
->  {
-> -       int err = 0;
-> +       int err = -EINVAL;
+> +#ifdef CONFIG_PM_SLEEP
+> +       if (pm_suspend_target_state == PM_SUSPEND_MEM)
+> +               s2ram = true;
+> +#endif
 >
 >         mmc_claim_host(host);
 >
-> @@ -2078,7 +2194,19 @@ static int _mmc_resume(struct mmc_host *host)
+> @@ -2038,7 +2045,7 @@ static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
 >                 goto out;
 >
->         mmc_power_up(host, host->card->ocr);
-> -       err = mmc_init_card(host, host->card->ocr, host->card);
-> +
-> +       if (mmc_can_sleepawake(host)) {
-> +               err = mmc_sleepawake(host, false);
-> +               if (!err)
-> +                       err = mmc_partial_init(host);
-> +               else
-> +                       pr_err("%s: %s: awake failed (%d), fallback to full init\n",
-> +                               mmc_hostname(host), __func__, err);
-> +       }
-> +
-> +       if (err)
-> +               err = mmc_init_card(host, host->card->ocr, host->card);
-> +
->         mmc_card_clr_suspended(host->card);
->
->  out:
-> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-> index cf3780a6ccc4..2f4c8d3d5763 100644
-> --- a/include/linux/mmc/card.h
-> +++ b/include/linux/mmc/card.h
-> @@ -85,6 +85,8 @@ struct mmc_ext_csd {
->         unsigned int            data_tag_unit_size;     /* DATA TAG UNIT size */
->         unsigned int            boot_ro_lock;           /* ro lock support */
->         bool                    boot_ro_lockable;
-> +       u8                      raw_ext_csd_cmdq;       /* 15 */
-> +       u8                      raw_ext_csd_cache_ctrl; /* 33 */
->         bool                    ffu_capable;    /* Firmware upgrade support */
->         bool                    cmdq_en;        /* Command Queue enabled */
->         bool                    cmdq_support;   /* Command Queue supported */
-> @@ -95,7 +97,9 @@ struct mmc_ext_csd {
->         u8                      raw_partition_support;  /* 160 */
->         u8                      raw_rpmb_size_mult;     /* 168 */
->         u8                      raw_erased_mem_count;   /* 181 */
-> +       u8                      raw_ext_csd_bus_width;  /* 183 */
->         u8                      strobe_support;         /* 184 */
-> +       u8                      raw_ext_csd_hs_timing;  /* 185 */
->         u8                      raw_ext_csd_structure;  /* 194 */
->         u8                      raw_card_type;          /* 196 */
->         u8                      raw_driver_strength;    /* 197 */
-> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index d4a50e5dc111..a69abe9f032b 100644
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -375,6 +375,7 @@ struct mmc_host {
->  #define MMC_CAP2_CQE_DCMD      (1 << 24)       /* CQE can issue a direct command */
->  #define MMC_CAP2_AVOID_3_3V    (1 << 25)       /* Host must negotiate down from 3.3V */
->  #define MMC_CAP2_MERGE_CAPABLE (1 << 26)       /* Host can merge a segment over the segment size */
-> +#define MMC_CAP2_SLEEP_AWAKE   (1 << 27)       /* Use Sleep/Awake (CMD5) */
->
->         int                     fixed_drv_type; /* fixed driver type for non-removable media */
->
-> @@ -393,6 +394,7 @@ struct mmc_host {
->         spinlock_t              lock;           /* lock for claim and bus ops */
->
->         struct mmc_ios          ios;            /* current io bus settings */
-> +       struct mmc_ios          cached_ios;
->
->         /* group bitfields together to minimize padding */
->         unsigned int            use_spi_crc:1;
+>         if (mmc_can_poweroff_notify(host->card) &&
+> -               ((host->caps2 & MMC_CAP2_FULL_PWR_CYCLE) || !is_suspend))
+> +           ((host->caps2 & MMC_CAP2_FULL_PWR_CYCLE) || !is_suspend || s2ram))
+>                 err = mmc_poweroff_notify(host->card, notify_type);
+>         else if (mmc_can_sleep(host->card))
+>                 err = mmc_sleep(host);
 > --
-> Qualcomm India Private Limited, on behalf of Qualcomm Innovation Center, Inc., is a member of Code Aurora Forum, a Linux Foundation Collaborative Project
+> 2.7.4
 >
