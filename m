@@ -7,46 +7,46 @@ X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A3062C433DF
-	for <linux-mmc@archiver.kernel.org>; Tue,  9 Jun 2020 00:46:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 10784C433DF
+	for <linux-mmc@archiver.kernel.org>; Tue,  9 Jun 2020 00:46:38 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7E40B20774
-	for <linux-mmc@archiver.kernel.org>; Tue,  9 Jun 2020 00:46:36 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E0D6B20774
+	for <linux-mmc@archiver.kernel.org>; Tue,  9 Jun 2020 00:46:37 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1591663596;
-	bh=fE+F2MIP8scEjfPsKRccOUjhiCq/HM5JqCR7gNnlWr0=;
+	s=default; t=1591663597;
+	bh=J2LPRJU66y4X8KcWE0g+592NbySdoJsVXoYtZI00P5I=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=GaOPLfk84Wqv37ADfEt18DYlFcp7/3ud5MrDGlHeWhaf4VPG2IDKAW/0uQ8BQ6eLE
-	 sgxzSot/7vr/sRWQE77+9L+vUHmmHgf5bN16L/B1dzg7ff3UXLOpzPCVXVuiIqI9s0
-	 q1vy2j7HeI/q2mTp3M+4i7CwztMTDS3qVhQxziLs=
+	b=agFwIZenYwyu70Al3iWPBuMUBjEwzoEN9dHDXugWUtYjpb17TJEaTWyCzH6jt/DjF
+	 ztHMWp18si4kE8QNao4U4Ivkir1hJNe6CHC6df0tO/PTwjwe1hR7uY6mZ9XG4lvvYD
+	 AF1VmmlTUTC8X2zTy3ebceZknZTzkRa0iW3Xgej8=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728973AbgFIAqb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 8 Jun 2020 20:46:31 -0400
-Received: from mail.kernel.org ([198.145.29.99]:58540 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728923AbgFHXLg (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        id S1728926AbgFHXLg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
         Mon, 8 Jun 2020 19:11:36 -0400
+Received: from mail.kernel.org ([198.145.29.99]:58496 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1728162AbgFHXLe (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 8 Jun 2020 19:11:34 -0400
 Received: from sasha-vm.mshome.net (c-73-47-72-35.hsd1.nh.comcast.net [73.47.72.35])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 19995208C7;
-        Mon,  8 Jun 2020 23:11:35 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id B9DBD20897;
+        Mon,  8 Jun 2020 23:11:32 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1591657895;
-        bh=fE+F2MIP8scEjfPsKRccOUjhiCq/HM5JqCR7gNnlWr0=;
+        s=default; t=1591657893;
+        bh=J2LPRJU66y4X8KcWE0g+592NbySdoJsVXoYtZI00P5I=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=hBr+QauRZzy/vQk08leVj3G3rLae2SBYhTHgkzsq+HLRtGgtxwjqjX0EAlAru7RnU
-         T3Ryhr57MwjUSwZ1BNP2PIa4Un+m8o6MA6ndA/AmIvEZF+2d/cezGkRlbFZgXhR+A6
-         neiCObI0mbwOiM9VfUagboK146GW6wF48lJFxVzA=
+        b=ROP1rxkHmSif6KNnYX1KxXVihi18D7znAeCVKrM4JfqmcpMAO2N5DGoWqSkR+DckI
+         9bG3th7dla5RoL0AlyciPDYvYRlw+AqeKhvBN1HOydba8dt8EPmEJ1Ce/4CEhdQaSA
+         +FZmqdizTHwRR7Bh7T/2UgUoC5LNoVvtimsm9Kl8=
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc:     Angelo Dureghello <angelo.dureghello@timesys.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org
-Subject: [PATCH AUTOSEL 5.7 250/274] mmc: sdhci: add quirks for be to le byte swapping
-Date:   Mon,  8 Jun 2020 19:05:43 -0400
-Message-Id: <20200608230607.3361041-250-sashal@kernel.org>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>,
+        Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org
+Subject: [PATCH AUTOSEL 5.7 248/274] mmc: owl-mmc: Respect the cmd->busy_timeout from the mmc core
+Date:   Mon,  8 Jun 2020 19:05:41 -0400
+Message-Id: <20200608230607.3361041-248-sashal@kernel.org>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20200608230607.3361041-1-sashal@kernel.org>
 References: <20200608230607.3361041-1-sashal@kernel.org>
@@ -59,61 +59,63 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Angelo Dureghello <angelo.dureghello@timesys.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
 
-[ Upstream commit e93577ecde8f3cbd12a2eaa0522d5c85e0dbdd53 ]
+[ Upstream commit f37ac1ae3ca93d0995553ad9604a25eadfe9406d ]
 
-Some controller as the ColdFire eshdc may require an endianness
-byte swap, because DMA read endianness is not configurable.
+For commands that doesn't involve to prepare a data transfer, owl-mmc is
+using a fixed 30s response timeout. This is a bit problematic.
 
-Facilitate using the bounce buffer for this by adding
-->copy_to_bounce_buffer().
+For some commands it means waiting longer than needed for the completion to
+expire, which may not a big issue, but still. For other commands, like for
+an erase (CMD38) that uses a R1B response, may require longer timeouts than
+30s. In these cases, we may end up treating the command as it failed, while
+it just needed some more time to complete successfully.
 
-Signed-off-by: Angelo Dureghello <angelo.dureghello@timesys.com>
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-Link: https://lore.kernel.org/r/20200518191742.1251440-2-angelo.dureghello@timesys.com
+Fix the problem by respecting the cmd->busy_timeout, which is provided by
+the mmc core.
+
+Cc: Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+Link: https://lore.kernel.org/r/20200414161413.3036-8-ulf.hansson@linaro.org
 Signed-off-by: Sasha Levin <sashal@kernel.org>
 ---
- drivers/mmc/host/sdhci.c | 10 +++++++---
- drivers/mmc/host/sdhci.h |  3 +++
- 2 files changed, 10 insertions(+), 3 deletions(-)
+ drivers/mmc/host/owl-mmc.c | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index e368f2dabf20..5dcdda5918cb 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -634,9 +634,13 @@ static int sdhci_pre_dma_transfer(struct sdhci_host *host,
- 		}
- 		if (mmc_get_dma_dir(data) == DMA_TO_DEVICE) {
- 			/* Copy the data to the bounce buffer */
--			sg_copy_to_buffer(data->sg, data->sg_len,
--					  host->bounce_buffer,
--					  length);
-+			if (host->ops->copy_to_bounce_buffer) {
-+				host->ops->copy_to_bounce_buffer(host,
-+								 data, length);
-+			} else {
-+				sg_copy_to_buffer(data->sg, data->sg_len,
-+						  host->bounce_buffer, length);
-+			}
- 		}
- 		/* Switch ownership to the DMA */
- 		dma_sync_single_for_device(host->mmc->parent,
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 79dffbb731d3..1bf4f1d91951 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -653,6 +653,9 @@ struct sdhci_ops {
- 	void	(*voltage_switch)(struct sdhci_host *host);
- 	void	(*adma_write_desc)(struct sdhci_host *host, void **desc,
- 				   dma_addr_t addr, int len, unsigned int cmd);
-+	void	(*copy_to_bounce_buffer)(struct sdhci_host *host,
-+					 struct mmc_data *data,
-+					 unsigned int length);
- 	void	(*request_done)(struct sdhci_host *host,
- 				struct mmc_request *mrq);
- };
+diff --git a/drivers/mmc/host/owl-mmc.c b/drivers/mmc/host/owl-mmc.c
+index 01ffe51f413d..5e20c099fe03 100644
+--- a/drivers/mmc/host/owl-mmc.c
++++ b/drivers/mmc/host/owl-mmc.c
+@@ -92,6 +92,8 @@
+ #define OWL_SD_STATE_RC16ER		BIT(1)
+ #define OWL_SD_STATE_CRC7ER		BIT(0)
+ 
++#define OWL_CMD_TIMEOUT_MS		30000
++
+ struct owl_mmc_host {
+ 	struct device *dev;
+ 	struct reset_control *reset;
+@@ -172,6 +174,7 @@ static void owl_mmc_send_cmd(struct owl_mmc_host *owl_host,
+ 			     struct mmc_command *cmd,
+ 			     struct mmc_data *data)
+ {
++	unsigned long timeout;
+ 	u32 mode, state, resp[2];
+ 	u32 cmd_rsp_mask = 0;
+ 
+@@ -239,7 +242,10 @@ static void owl_mmc_send_cmd(struct owl_mmc_host *owl_host,
+ 	if (data)
+ 		return;
+ 
+-	if (!wait_for_completion_timeout(&owl_host->sdc_complete, 30 * HZ)) {
++	timeout = msecs_to_jiffies(cmd->busy_timeout ? cmd->busy_timeout :
++		OWL_CMD_TIMEOUT_MS);
++
++	if (!wait_for_completion_timeout(&owl_host->sdc_complete, timeout)) {
+ 		dev_err(owl_host->dev, "CMD interrupt timeout\n");
+ 		cmd->error = -ETIMEDOUT;
+ 		return;
 -- 
 2.25.1
 
