@@ -2,141 +2,130 @@ Return-Path: <SRS0=G9E5=7V=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no
+X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0392CC433DF
-	for <linux-mmc@archiver.kernel.org>; Mon,  8 Jun 2020 07:58:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EA55FC433DF
+	for <linux-mmc@archiver.kernel.org>; Mon,  8 Jun 2020 08:06:37 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D7EA120774
-	for <linux-mmc@archiver.kernel.org>; Mon,  8 Jun 2020 07:58:03 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B605B20656
+	for <linux-mmc@archiver.kernel.org>; Mon,  8 Jun 2020 08:06:37 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="jbjzzPoj"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="o4uThnaa"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729075AbgFHH6D (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 8 Jun 2020 03:58:03 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38110 "EHLO
+        id S1729093AbgFHIGh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 8 Jun 2020 04:06:37 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39416 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725868AbgFHH6C (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Jun 2020 03:58:02 -0400
-Received: from mail-ua1-x944.google.com (mail-ua1-x944.google.com [IPv6:2607:f8b0:4864:20::944])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6811BC08C5C3
-        for <linux-mmc@vger.kernel.org>; Mon,  8 Jun 2020 00:58:02 -0700 (PDT)
-Received: by mail-ua1-x944.google.com with SMTP id b10so4343087uaf.0
-        for <linux-mmc@vger.kernel.org>; Mon, 08 Jun 2020 00:58:02 -0700 (PDT)
+        with ESMTP id S1728956AbgFHIGe (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Jun 2020 04:06:34 -0400
+Received: from mail-pj1-x1043.google.com (mail-pj1-x1043.google.com [IPv6:2607:f8b0:4864:20::1043])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 23C7CC08C5C3
+        for <linux-mmc@vger.kernel.org>; Mon,  8 Jun 2020 01:06:34 -0700 (PDT)
+Received: by mail-pj1-x1043.google.com with SMTP id b7so4733593pju.0
+        for <linux-mmc@vger.kernel.org>; Mon, 08 Jun 2020 01:06:34 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=usa2O3VnVimdZz2QFTyqirZyCnD9v7o6Y9XSy9l9BZQ=;
-        b=jbjzzPoj1LdiFFNG5vJNANcVDGSPSpfEkRZwfsXF2gcUG29xQOQ5oBYLYDNYasI49I
-         q12WRMFRu5cwpEFK6YLSextAJTw7PO/wRgSurkZ5iUZzifmeNrzA51kCfdysGz0G7Heb
-         6I7agqBH1Om4sLhJZzpWfdS3ceapyJEhD3lNVh/OEO2jo9vN8CkycHhGu8lZYqCcRPSp
-         yqVYPRA1T+1bvpK8KnO2w48bz388aSvitb4TdfKav/g+lHY4+PJnrPNBm+LeZOR9UDyr
-         MZHh87ce+FVZZ/sF6gQgyZpgEbterGO0d3j5PTKNrwyyTe44yPaLu/h4SwgHuB4EDUW0
-         m/jw==
+        d=gmail.com; s=20161025;
+        h=from:to:cc:subject:date:message-id;
+        bh=xdvIYaSYRN0iBQvKoB6lnmWB7QLF2DNRpHW6cM2KMb8=;
+        b=o4uThnaauCkVIXf/5gOFqTM0HykIVQUOz3BmWfBQ+Dzahm5jG9Olr7H5YECRRPh1lQ
+         V2UjGSBSx15/e7/drIgx/yXv0SxWlNI2uEpMQG77Pbz/Cw6dY0N6kMvP0T+in8kXE4Ke
+         qw3ltjgOYCwg3ibkd/+ASvBIwu6CBtoUxD2sTAFK7dBAtRD9BO3vnC5rO5guSwBnqoEE
+         ZyQqKMOAhsXG8W+J3sYDfMzYqACYFCOZMsU+jV510D9tXc0uMWh5bDziTic8MeTGcsjd
+         fRQcwkbl14Aq8RHKY8ogMxSWJSOmwqFCBFItmxNEB+esFoQiKPAmqSX3efzx03XlqfGw
+         PRqg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=usa2O3VnVimdZz2QFTyqirZyCnD9v7o6Y9XSy9l9BZQ=;
-        b=Ddob6WLrxHPsOgKLcbnZcS3syMRXhWPZCjXC2z/KmLfDGrxOjuU0zGNSv344vvxVzJ
-         5KbCuiX9y9a9st14OBU8NbzNOoFAIphMpUTzHJQoD6AlMMtJpsorLRkWTFIRh6lnDtC6
-         1LSXziwu07l9OMIKA2/O8VRB7VM6dYdHPLAx3lL1Sz2EgVmP3OhFUq1w64YIC50FjQ8W
-         dhv/6PEcXgwqzfLJUTfmGf67ietcvi8RghfLaB8jZGOq8yZ2llwX48z9T690R8gGPK12
-         m5KXHoecF+3OlTHOPIwoEXanedtKzTXCZ9j2tuUuS5MrgwlK5kUl+e6JRv5n1Bj+B3N9
-         6vRg==
-X-Gm-Message-State: AOAM530WNKI8c35w8fJVgoMpz1dCBJKwwC57B6PjFf27EAFMiOQSCd1R
-        E567dW34n+5LoHrjh4sXDghXPLE+FYaJ5jCseXxYGQ==
-X-Google-Smtp-Source: ABdhPJzHPVZcT9fOcq/5mnEdYXiSTcCK3xCGQDgTq7ZQjol8t3AS01de6pjkoygr26G7tmIC54OyjHigWPcFrcXu7tU=
-X-Received: by 2002:ab0:186d:: with SMTP id j45mr15425936uag.104.1591603081439;
- Mon, 08 Jun 2020 00:58:01 -0700 (PDT)
-MIME-Version: 1.0
-References: <1589887988-7362-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
-In-Reply-To: <1589887988-7362-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 8 Jun 2020 09:57:24 +0200
-Message-ID: <CAPDyKFq5yueXp4NW2fj3tvPRv0S_VDM1khAw51VeEHxG79qp+Q@mail.gmail.com>
-Subject: Re: [PATCH/RFC] mmc: core: Issue power_off_notify for eMMC Suspend-to-RAM
-To:     Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux-Renesas <linux-renesas-soc@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+        h=x-gm-message-state:from:to:cc:subject:date:message-id;
+        bh=xdvIYaSYRN0iBQvKoB6lnmWB7QLF2DNRpHW6cM2KMb8=;
+        b=BLj9VWNMH5gyeDblkKS+xEXFdtzpt6kp8w9i6MAaaYAyCKAxsJkB3w409INeyN/REt
+         hGlYzOxZrZlMeSn/RUrUzv1qEXUfxtN8QQubgvrlR2Q0PNg4+GlRMvFyRL882MxrQDjq
+         xQCMUvJLzaqgAufKeBBbrIDH42CKBT1OEcwY/dFbXnQkE6SNIyfQtFe6q5ETdZ6f2nN7
+         6hSVdx58J2jqITecc45IvRZ9+3NnrWDCoeFjqzcMpwaGhFxib6wGXQUdazl34h0Zl178
+         szu/FK8rfaR94tQ9rKjvEDXuEWMrYyBbIG7lher3t6LoyxZ97RnFyX48FoRdxu7W804v
+         PTGQ==
+X-Gm-Message-State: AOAM530ZsOcwlmEk94FElV+RV/s9zbxFsqQAyH9CyIH2iBwCk0LS1x+a
+        Ln4tO6QBHXIcsa9uC//7v8Q=
+X-Google-Smtp-Source: ABdhPJzUEmYTv10Y2SGhiGweRlxCajQdBupLRyX3S4HqvZvq2spJEatPZg5se1kLGcH7wWms9XfBrg==
+X-Received: by 2002:a17:90b:3612:: with SMTP id ml18mr13726429pjb.153.1591603593715;
+        Mon, 08 Jun 2020 01:06:33 -0700 (PDT)
+Received: from huyue2.ccdomain.com ([103.29.143.67])
+        by smtp.gmail.com with ESMTPSA id b4sm6418168pfg.75.2020.06.08.01.06.30
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Mon, 08 Jun 2020 01:06:32 -0700 (PDT)
+From:   Yue Hu <zbestahu@gmail.com>
+To:     ulf.hansson@linaro.org, dianders@chromium.org, mka@chromium.org
+Cc:     linux-mmc@vger.kernel.org, huyue2@yulong.com
+Subject: [PATCH] mmc: sdio: Enable SDIO 4-bit bus if not support SD_SCR_BUS_WIDTH_4 for SD combo card
+Date:   Mon,  8 Jun 2020 16:06:19 +0800
+Message-Id: <20200608080619.9388-1-zbestahu@gmail.com>
+X-Mailer: git-send-email 2.17.1.windows.2
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 19 May 2020 at 13:33, Yoshihiro Shimoda
-<yoshihiro.shimoda.uh@renesas.com> wrote:
->
-> The commit 432356793415 ("mmc: core: Enable power_off_notify for
-> eMMC shutdown sequence") enabled the power off notification
-> even if MMC_CAP2_POWEROFF_NOTIFY (MMC_CAP2_FULL_PWR_CYCLE now) is
-> not set. However, the mmc core lacks to issue the power off
-> notificaiton when Suspend-to-{RAM,Disk} happens on the system.
+From: Yue Hu <huyue2@yulong.com>
 
-This isn't an entirely correct description, I think.
+If the card type is SD combo and the memory part does not support wider
+bus(SD_SCR_BUS_WIDTH_4), nothing will be done except return 0. However,
+we should check whether SDIO part support wider bus or not just like
+the behavior about enabling high speed mode in sdio_enable_hs().
 
-If the host supports MMC_CAP2_FULL_PWR_CYCLE (both vmmc and vqmmc can
-be powered on/off), we use power-off-notification during system
-suspend, in case the eMMC card also supports it. Otherwise we send the
-sleep command.
+In addition, there's a duplicated check to MMC_CAP_4_BIT_DATA since
+sdio_enable_wide() will include that check. And we can also save one
+call site to sdio_enable_wide() after this change.
 
-This behaviour was decided on purpose and it's mainly because without
-MMC_CAP2_FULL_PWR_CYCLE, we assume that vqmmc remains always-on. In
-this case, it simply seemed better to use the sleep command, rather
-than the power-off-notification, as we aren't really going to do a
-full power off anyway.
+Signed-off-by: Yue Hu <huyue2@yulong.com>
+---
+ drivers/mmc/core/sdio.c | 26 ++++++++++++--------------
+ 1 file changed, 12 insertions(+), 14 deletions(-)
 
-Kind regards
-Uffe
+diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+index ebb387a..cacc863 100644
+--- a/drivers/mmc/core/sdio.c
++++ b/drivers/mmc/core/sdio.c
+@@ -290,25 +290,23 @@ static int sdio_enable_4bit_bus(struct mmc_card *card)
+ {
+ 	int err;
+ 
++	err = sdio_enable_wide(card);
++	if (err <= 0)
++		return err;
+ 	if (card->type == MMC_TYPE_SDIO)
+-		err = sdio_enable_wide(card);
+-	else if ((card->host->caps & MMC_CAP_4_BIT_DATA) &&
+-		 (card->scr.bus_widths & SD_SCR_BUS_WIDTH_4)) {
++		goto out;
++
++	if (card->scr.bus_widths & SD_SCR_BUS_WIDTH_4) {
+ 		err = mmc_app_set_bus_width(card, MMC_BUS_WIDTH_4);
+-		if (err)
++		if (err) {
++			sdio_disable_wide(card);
+ 			return err;
+-		err = sdio_enable_wide(card);
+-		if (err <= 0)
+-			mmc_app_set_bus_width(card, MMC_BUS_WIDTH_1);
+-	} else
+-		return 0;
+-
+-	if (err > 0) {
+-		mmc_set_bus_width(card->host, MMC_BUS_WIDTH_4);
+-		err = 0;
++		}
+ 	}
++out:
++	mmc_set_bus_width(card->host, MMC_BUS_WIDTH_4);
+ 
+-	return err;
++	return 0;
+ }
+ 
+ 
+-- 
+1.9.1
 
->
-> So, add Suspend-to-RAM support at first because this is easy to
-> check by using pm_suspend_target_state condition on _mmc_suspend().
->
-> Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-> ---
->  drivers/mmc/core/mmc.c | 9 ++++++++-
->  1 file changed, 8 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 4203303..4a23f83 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -11,6 +11,7 @@
->  #include <linux/of.h>
->  #include <linux/slab.h>
->  #include <linux/stat.h>
-> +#include <linux/suspend.h>
->  #include <linux/pm_runtime.h>
->
->  #include <linux/mmc/host.h>
-> @@ -2027,6 +2028,12 @@ static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
->         int err = 0;
->         unsigned int notify_type = is_suspend ? EXT_CSD_POWER_OFF_SHORT :
->                                         EXT_CSD_POWER_OFF_LONG;
-> +       bool s2ram = false;
-> +
-> +#ifdef CONFIG_PM_SLEEP
-> +       if (pm_suspend_target_state == PM_SUSPEND_MEM)
-> +               s2ram = true;
-> +#endif
->
->         mmc_claim_host(host);
->
-> @@ -2038,7 +2045,7 @@ static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
->                 goto out;
->
->         if (mmc_can_poweroff_notify(host->card) &&
-> -               ((host->caps2 & MMC_CAP2_FULL_PWR_CYCLE) || !is_suspend))
-> +           ((host->caps2 & MMC_CAP2_FULL_PWR_CYCLE) || !is_suspend || s2ram))
->                 err = mmc_poweroff_notify(host->card, notify_type);
->         else if (mmc_can_sleep(host->card))
->                 err = mmc_sleep(host);
-> --
-> 2.7.4
->
