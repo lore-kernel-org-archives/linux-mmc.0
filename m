@@ -7,46 +7,47 @@ X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8C10FC433E0
-	for <linux-mmc@archiver.kernel.org>; Tue,  9 Jun 2020 00:46:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 124F6C433E1
+	for <linux-mmc@archiver.kernel.org>; Tue,  9 Jun 2020 00:46:45 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 6799120774
+	by mail.kernel.org (Postfix) with ESMTP id E4DC220774
 	for <linux-mmc@archiver.kernel.org>; Tue,  9 Jun 2020 00:46:44 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
 	s=default; t=1591663604;
-	bh=MHM7Fdo3PdvDzgIUfO+YIaHewyH4D4uZ7SHnfgDihPg=;
+	bh=EnRmq9zh4Y6NmpMblMq2iXljdkShGO0VJYzbMq6hjsk=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=qJpXwEgHHzZaJWL9RdAeVTgwKYyLjG5abPs6bSfPczR23GAJ4uWiZu6XYcwXxGjsL
-	 iTvf0jJff1MQMK9n69K84pPVfc3BH5u/RjkTVozc4mn1aAWpBq1VDlW+8hIddoqfUZ
-	 KvVKON3TY54FtnOS7LHy3Ikw7VVOvMda97h/ZaSM=
+	b=yPbpJc5VyRapAZttuqc8VzuYREsbkMm7mkazTC7wN+mGVMaKBBkVHCUxxCmrvtbh5
+	 tRV6S3wA7qQ5bdjgcRR+xKXUsVQCCHSCn6ANC1i3HM6yRytK0s/8lsnUhSWzjaXiRZ
+	 IbLUDBTDiTTH7yp0MQfkn7iIgw3PdGuXacJJ1pO4=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729911AbgFIAqi (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 8 Jun 2020 20:46:38 -0400
-Received: from mail.kernel.org ([198.145.29.99]:58518 "EHLO mail.kernel.org"
+        id S1728914AbgFHXLc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 8 Jun 2020 19:11:32 -0400
+Received: from mail.kernel.org ([198.145.29.99]:58442 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728921AbgFHXLe (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 8 Jun 2020 19:11:34 -0400
+        id S1728025AbgFHXLb (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 8 Jun 2020 19:11:31 -0400
 Received: from sasha-vm.mshome.net (c-73-47-72-35.hsd1.nh.comcast.net [73.47.72.35])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id DCC4520B80;
-        Mon,  8 Jun 2020 23:11:33 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 0F7312100A;
+        Mon,  8 Jun 2020 23:11:29 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1591657894;
-        bh=MHM7Fdo3PdvDzgIUfO+YIaHewyH4D4uZ7SHnfgDihPg=;
+        s=default; t=1591657890;
+        bh=EnRmq9zh4Y6NmpMblMq2iXljdkShGO0VJYzbMq6hjsk=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=iluAK68K3XCbUd6pabxdzmQnvDv1UPkro4P5up3qXriIlofEhweh7ViGvBSbKgSUF
-         4dVe2MKovDO/1FDnca0DKbzJf6bpP/veWPa53lmQeS9djduk0B7EAn3eCCXCCQJzlo
-         SIysFlyzDNyrfccFjriX67ukmYF8eECR/jR4hU+M=
+        b=Ed4XYjuISYG5bn5+kayhiq1cD1jwbGJEnmtq9nRFkkJlnWLeAyatgxaiNaWs9/rtv
+         nvWO9ItxdHS0Erb/1zioo/Z8Y4MkvsFJZAGcdIYOJc39q+O11DAzy2tZ2OzcF5pLYa
+         mTrsn56l1rkhKbnzaDk9A18+/hZlb/zE1vHFyL1c=
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Bruce Chang <brucechang@via.com.tw>,
-        Harald Welte <HaraldWelte@viatech.com>,
-        Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org
-Subject: [PATCH AUTOSEL 5.7 249/274] mmc: via-sdmmc: Respect the cmd->busy_timeout from the mmc core
-Date:   Mon,  8 Jun 2020 19:05:42 -0400
-Message-Id: <20200608230607.3361041-249-sashal@kernel.org>
+Cc:     Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Sasha Levin <sashal@kernel.org>, linux-arm-msm@vger.kernel.org,
+        linux-mmc@vger.kernel.org
+Subject: [PATCH AUTOSEL 5.7 246/274] mmc: sdhci-msm: Set SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12 quirk
+Date:   Mon,  8 Jun 2020 19:05:39 -0400
+Message-Id: <20200608230607.3361041-246-sashal@kernel.org>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20200608230607.3361041-1-sashal@kernel.org>
 References: <20200608230607.3361041-1-sashal@kernel.org>
@@ -59,63 +60,37 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Ulf Hansson <ulf.hansson@linaro.org>
+From: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
 
-[ Upstream commit 966244ccd2919e28f25555a77f204cd1c109cad8 ]
+[ Upstream commit d863cb03fb2aac07f017b2a1d923cdbc35021280 ]
 
-Using a fixed 1s timeout for all commands (and data transfers) is a bit
-problematic.
+sdhci-msm can support auto cmd12.
+So enable SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12 quirk.
 
-For some commands it means waiting longer than needed for the timer to
-expire, which may not a big issue, but still. For other commands, like for
-an erase (CMD38) that uses a R1B response, may require longer timeouts than
-1s. In these cases, we may end up treating the command as it failed, while
-it just needed some more time to complete successfully.
-
-Fix the problem by respecting the cmd->busy_timeout, which is provided by
-the mmc core.
-
-Cc: Bruce Chang <brucechang@via.com.tw>
-Cc: Harald Welte <HaraldWelte@viatech.com>
+Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Link: https://lore.kernel.org/r/1587363626-20413-3-git-send-email-vbadigan@codeaurora.org
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-Link: https://lore.kernel.org/r/20200414161413.3036-17-ulf.hansson@linaro.org
 Signed-off-by: Sasha Levin <sashal@kernel.org>
 ---
- drivers/mmc/host/via-sdmmc.c | 7 ++++++-
- 1 file changed, 6 insertions(+), 1 deletion(-)
+ drivers/mmc/host/sdhci-msm.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/via-sdmmc.c b/drivers/mmc/host/via-sdmmc.c
-index e48bddd95ce6..ef95bce50889 100644
---- a/drivers/mmc/host/via-sdmmc.c
-+++ b/drivers/mmc/host/via-sdmmc.c
-@@ -319,6 +319,8 @@ struct via_crdr_mmc_host {
- /* some devices need a very long delay for power to stabilize */
- #define VIA_CRDR_QUIRK_300MS_PWRDELAY	0x0001
- 
-+#define VIA_CMD_TIMEOUT_MS		1000
+diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+index a8bcb3f16aa4..11139d7d394a 100644
+--- a/drivers/mmc/host/sdhci-msm.c
++++ b/drivers/mmc/host/sdhci-msm.c
+@@ -1882,7 +1882,9 @@ static const struct sdhci_ops sdhci_msm_ops = {
+ static const struct sdhci_pltfm_data sdhci_msm_pdata = {
+ 	.quirks = SDHCI_QUIRK_BROKEN_CARD_DETECTION |
+ 		  SDHCI_QUIRK_SINGLE_POWER_WRITE |
+-		  SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
++		  SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN |
++		  SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12,
 +
- static const struct pci_device_id via_ids[] = {
- 	{PCI_VENDOR_ID_VIA, PCI_DEVICE_ID_VIA_9530,
- 	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0,},
-@@ -551,14 +553,17 @@ static void via_sdc_send_command(struct via_crdr_mmc_host *host,
- {
- 	void __iomem *addrbase;
- 	struct mmc_data *data;
-+	unsigned int timeout_ms;
- 	u32 cmdctrl = 0;
- 
- 	WARN_ON(host->cmd);
- 
- 	data = cmd->data;
--	mod_timer(&host->timer, jiffies + HZ);
- 	host->cmd = cmd;
- 
-+	timeout_ms = cmd->busy_timeout ? cmd->busy_timeout : VIA_CMD_TIMEOUT_MS;
-+	mod_timer(&host->timer, jiffies + msecs_to_jiffies(timeout_ms));
-+
- 	/*Command index*/
- 	cmdctrl = cmd->opcode << 8;
- 
+ 	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
+ 	.ops = &sdhci_msm_ops,
+ };
 -- 
 2.25.1
 
