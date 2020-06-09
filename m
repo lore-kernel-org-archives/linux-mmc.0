@@ -2,109 +2,127 @@ Return-Path: <SRS0=tDFP=7W=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	MIME_BASE64_TEXT,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,
+	URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AE690C433E0
-	for <linux-mmc@archiver.kernel.org>; Tue,  9 Jun 2020 01:03:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 60C98C433E0
+	for <linux-mmc@archiver.kernel.org>; Tue,  9 Jun 2020 01:18:45 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 82F6920737
-	for <linux-mmc@archiver.kernel.org>; Tue,  9 Jun 2020 01:03:14 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1591664594;
-	bh=OaiQKm1bB3NmMoGKTxrJngEVvq3569afw1osq8OEFZM=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=k2P8YCUAi/1qexL5ntND79eEniya2mxk7EEvJVASSg7rE1GhOwusjwpQv0yVDWg9v
-	 0dH+nqH33DL2UNwn5Sj71NynDR1zwcFfdI969L1E0zSLPylYpjMtNHcunlb0SUiUUf
-	 X21A0KorKk0dUhsVqoWZV9pnOfvSn+mK8Exyqyak=
+	by mail.kernel.org (Postfix) with ESMTP id 3B3DF2076C
+	for <linux-mmc@archiver.kernel.org>; Tue,  9 Jun 2020 01:18:45 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (1024-bit key) header.d=mediatek.com header.i=@mediatek.com header.b="KeAEMrHR"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727997AbgFHXHr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 8 Jun 2020 19:07:47 -0400
-Received: from mail.kernel.org ([198.145.29.99]:52342 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727989AbgFHXHq (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 8 Jun 2020 19:07:46 -0400
-Received: from sasha-vm.mshome.net (c-73-47-72-35.hsd1.nh.comcast.net [73.47.72.35])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 2A72D20888;
-        Mon,  8 Jun 2020 23:07:45 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1591657666;
-        bh=OaiQKm1bB3NmMoGKTxrJngEVvq3569afw1osq8OEFZM=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=ruNEgV7kIJbhNz4ws/2nOm4I69roVOGO5ElZRJjJy1YAse6dtOl2ddZMuO47JEVtA
-         NxWBmcqdxafQeZOslHRM6LoSZr1GonP0MlqE/zGp+7TkZx0uXqG916fNIsPLe/DelL
-         GbOWSVnif37OrPMwI1Zi3Vr9Hva4tBGJgBBLuWQM=
-From:   Sasha Levin <sashal@kernel.org>
-To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc:     Ludovic Barre <ludovic.barre@st.com>,
+        id S1726938AbgFIBSk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 8 Jun 2020 21:18:40 -0400
+Received: from Mailgw01.mediatek.com ([1.203.163.78]:12037 "EHLO
+        mailgw01.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1726860AbgFIBSj (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Jun 2020 21:18:39 -0400
+X-UUID: 25931175cf324c1ea38ba3328ec615fe-20200609
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=mediatek.com; s=dk;
+        h=Content-Transfer-Encoding:Content-Type:MIME-Version:References:In-Reply-To:Message-ID:Date:Subject:CC:To:From; bh=VTLGLsJ6SGm+CutMLz88dqeJSoLg2+xdFN6+1Vabv6g=;
+        b=KeAEMrHROK1xxlW2iKxoD/0c+pl4+dzQmw3Jo+wKiDa6ojpSyWuxK/+ys6rqhy0KldVShKagiFSi0x1ktXIi80JjkzVSMYAq6xZYZgTivd3IwhPFRMd12pJZkLqSBOzdVnPvBQBAgTXRkf5SturBzFAfNBEGod1q9wxuEhazwvk=;
+X-UUID: 25931175cf324c1ea38ba3328ec615fe-20200609
+Received: from mtkcas36.mediatek.inc [(172.27.4.253)] by mailgw01.mediatek.com
+        (envelope-from <chun-hung.wu@mediatek.com>)
+        (mailgw01.mediatek.com ESMTP with TLS)
+        with ESMTP id 1231092594; Tue, 09 Jun 2020 09:18:35 +0800
+Received: from MTKCAS06.mediatek.inc (172.21.101.30) by
+ MTKMBS31N2.mediatek.inc (172.27.4.87) with Microsoft SMTP Server (TLS) id
+ 15.0.1497.2; Tue, 9 Jun 2020 09:18:33 +0800
+Received: from mtkswgap22.mediatek.inc (172.21.77.33) by MTKCAS06.mediatek.inc
+ (172.21.101.73) with Microsoft SMTP Server id 15.0.1497.2 via Frontend
+ Transport; Tue, 9 Jun 2020 09:18:33 +0800
+From:   Chun-Hung Wu <chun-hung.wu@mediatek.com>
+To:     <mirq-linux@rere.qmqm.pl>, Jonathan Hunter <jonathanh@nvidia.com>,
+        Al Cooper <alcooperx@gmail.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Florian Fainelli <f.fainelli@gmail.com>,
+        <bcm-kernel-feedback-list@broadcom.com>,
+        Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Michal Simek <michal.simek@xilinx.com>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org,
-        linux-stm32@st-md-mailman.stormreply.com,
-        linux-arm-kernel@lists.infradead.org
-Subject: [PATCH AUTOSEL 5.7 076/274] mmc: mmci_sdmmc: fix power on issue due to pwr_reg initialization
-Date:   Mon,  8 Jun 2020 19:02:49 -0400
-Message-Id: <20200608230607.3361041-76-sashal@kernel.org>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20200608230607.3361041-1-sashal@kernel.org>
-References: <20200608230607.3361041-1-sashal@kernel.org>
+        Rob Herring <robh+dt@kernel.org>,
+        Mark Rutland <mark.rutland@arm.com>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Pavel Machek <pavel@ucw.cz>,
+        Kate Stewart <kstewart@linuxfoundation.org>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+        Pan Bian <bianpan2016@163.com>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Allison Randal <allison@lohutok.net>,
+        Mathieu Malaterre <malat@debian.org>,
+        Stanley Chu <stanley.chu@mediatek.com>,
+        Kuohong Wang <kuohong.wang@mediatek.com>
+CC:     <kernel-team@android.com>, <linux-kernel@vger.kernel.org>,
+        <linux-mmc@vger.kernel.org>, <linux-mediatek@lists.infradead.org>,
+        <devicetree@vger.kernel.org>, <wsd_upstream@mediatek.com>,
+        <linux-arm-kernel@lists.infradead.org>,
+        <linux-arm-msm@vger.kernel.org>, <linux-tegra@vger.kernel.org>,
+        Chun-Hung Wu <chun-hung.wu@mediatek.com>
+Subject: [PATCH v6 2/4] mmc: mediatek: refine msdc timeout api
+Date:   Tue, 9 Jun 2020 09:18:20 +0800
+Message-ID: <1591665502-6573-3-git-send-email-chun-hung.wu@mediatek.com>
+X-Mailer: git-send-email 1.9.1
+In-Reply-To: <1591665502-6573-1-git-send-email-chun-hung.wu@mediatek.com>
+References: <1591665502-6573-1-git-send-email-chun-hung.wu@mediatek.com>
 MIME-Version: 1.0
-X-stable: review
-X-Patchwork-Hint: Ignore
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-TM-SNTS-SMTP: 64F0A105F5E4710B74A27F80C6C28CD5C966B677B12E37B3227B97FBD48048FD2000:8
+X-MTK:  N
+Content-Transfer-Encoding: base64
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Ludovic Barre <ludovic.barre@st.com>
-
-[ Upstream commit 33ba6fec0012e47f4e72bfab922b99327373f210 ]
-
-This patch fix a power-on issue, and avoid to retry the power sequence.
-
-In power off sequence: sdmmc must set pwr_reg in "power-cycle" state
-(value 0x2), to prevent the card from being supplied through the signal
-lines (all the lines are driven low).
-
-In power on sequence: when the power is stable, sdmmc must set pwr_reg
-in "power-off" state (value 0x0) to drive all signal to high before to
-set "power-on".
-
-To avoid writing the same value to the power register several times, this
-register is cached by the pwr_reg variable. At probe pwr_reg is initialized
-to 0 by kzalloc of mmc_alloc_host.
-
-Like pwr_reg value is 0 at probing, the power on sequence fail because
-the "power-off" state is not writes (value 0x0) and the lines
-remain drive to low.
-
-This patch initializes "pwr_reg" variable with power register value.
-This it done in sdmmc variant init to not disturb default mmci behavior.
-
-Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
-Link: https://lore.kernel.org/r/20200420161831.5043-1-ludovic.barre@st.com
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-Signed-off-by: Sasha Levin <sashal@kernel.org>
----
- drivers/mmc/host/mmci_stm32_sdmmc.c | 1 +
- 1 file changed, 1 insertion(+)
-
-diff --git a/drivers/mmc/host/mmci_stm32_sdmmc.c b/drivers/mmc/host/mmci_stm32_sdmmc.c
-index d33e62bd6153..14f99d8aa3f0 100644
---- a/drivers/mmc/host/mmci_stm32_sdmmc.c
-+++ b/drivers/mmc/host/mmci_stm32_sdmmc.c
-@@ -519,6 +519,7 @@ void sdmmc_variant_init(struct mmci_host *host)
- 	struct sdmmc_dlyb *dlyb;
- 
- 	host->ops = &sdmmc_variant_ops;
-+	host->pwr_reg = readl_relaxed(host->base + MMCIPOWER);
- 
- 	base_dlyb = devm_of_iomap(mmc_dev(host->mmc), np, 1, NULL);
- 	if (IS_ERR(base_dlyb))
--- 
-2.25.1
+RXh0cmFjdCBtc2RjIHRpbWVvdXQgYXBpIGNvbW1vbiBwYXJ0IHRvIGhhdmUNCmJldHRlciBjb2Rl
+IGFyY2hpdGVjdHVyZSBhbmQgYXZvaWQgcmVkdW5kYW50IGNvZGUuDQoNClNpZ25lZC1vZmYtYnk6
+IENodW4tSHVuZyBXdSA8Y2h1bi1odW5nLnd1QG1lZGlhdGVrLmNvbT4NCi0tLQ0KIGRyaXZlcnMv
+bW1jL2hvc3QvbXRrLXNkLmMgfCAzMiArKysrKysrKysrKysrKysrKysrKysrLS0tLS0tLS0tLQ0K
+IDEgZmlsZSBjaGFuZ2VkLCAyMiBpbnNlcnRpb25zKCspLCAxMCBkZWxldGlvbnMoLSkNCg0KZGlm
+ZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2hvc3QvbXRrLXNkLmMgYi9kcml2ZXJzL21tYy9ob3N0L210
+ay1zZC5jDQppbmRleCA4YWRhNjc1Li44NGE3YmQ0NCAxMDA2NDQNCi0tLSBhL2RyaXZlcnMvbW1j
+L2hvc3QvbXRrLXNkLmMNCisrKyBiL2RyaXZlcnMvbW1jL2hvc3QvbXRrLXNkLmMNCkBAIC03MjMs
+MjEgKzcyMywyMSBAQCBzdGF0aWMgdm9pZCBtc2RjX3VucHJlcGFyZV9kYXRhKHN0cnVjdCBtc2Rj
+X2hvc3QgKmhvc3QsIHN0cnVjdCBtbWNfcmVxdWVzdCAqbXJxKQ0KIAl9DQogfQ0KIA0KLS8qIGNs
+b2NrIGNvbnRyb2wgcHJpbWl0aXZlcyAqLw0KLXN0YXRpYyB2b2lkIG1zZGNfc2V0X3RpbWVvdXQo
+c3RydWN0IG1zZGNfaG9zdCAqaG9zdCwgdTMyIG5zLCB1MzIgY2xrcykNCitzdGF0aWMgdTY0IG1z
+ZGNfdGltZW91dF9jYWwoc3RydWN0IG1zZGNfaG9zdCAqaG9zdCwgdTY0IG5zLCB1NjQgY2xrcykN
+CiB7DQotCXUzMiB0aW1lb3V0LCBjbGtfbnM7DQorCXU2NCB0aW1lb3V0LCBjbGtfbnM7DQogCXUz
+MiBtb2RlID0gMDsNCiANCi0JaG9zdC0+dGltZW91dF9ucyA9IG5zOw0KLQlob3N0LT50aW1lb3V0
+X2Nsa3MgPSBjbGtzOw0KIAlpZiAoaG9zdC0+bW1jLT5hY3R1YWxfY2xvY2sgPT0gMCkgew0KIAkJ
+dGltZW91dCA9IDA7DQogCX0gZWxzZSB7DQotCQljbGtfbnMgID0gMTAwMDAwMDAwMFVMIC8gaG9z
+dC0+bW1jLT5hY3R1YWxfY2xvY2s7DQotCQl0aW1lb3V0ID0gKG5zICsgY2xrX25zIC0gMSkgLyBj
+bGtfbnMgKyBjbGtzOw0KKwkJY2xrX25zICA9IDEwMDAwMDAwMDBVTEw7DQorCQlkb19kaXYoY2xr
+X25zLCBob3N0LT5tbWMtPmFjdHVhbF9jbG9jayk7DQorCQl0aW1lb3V0ID0gbnMgKyBjbGtfbnMg
+LSAxOw0KKwkJZG9fZGl2KHRpbWVvdXQsIGNsa19ucyk7DQorCQl0aW1lb3V0ICs9IGNsa3M7DQog
+CQkvKiBpbiAxMDQ4NTc2IHNjbGsgY3ljbGUgdW5pdCAqLw0KLQkJdGltZW91dCA9ICh0aW1lb3V0
+ICsgKDB4MSA8PCAyMCkgLSAxKSA+PiAyMDsNCisJCXRpbWVvdXQgPSBESVZfUk9VTkRfVVAodGlt
+ZW91dCwgKDB4MSA8PCAyMCkpOw0KIAkJaWYgKGhvc3QtPmRldl9jb21wLT5jbGtfZGl2X2JpdHMg
+PT0gOCkNCiAJCQlzZHJfZ2V0X2ZpZWxkKGhvc3QtPmJhc2UgKyBNU0RDX0NGRywNCiAJCQkJICAg
+ICAgTVNEQ19DRkdfQ0tNT0QsICZtb2RlKTsNCkBAIC03NDcsOSArNzQ3LDIxIEBAIHN0YXRpYyB2
+b2lkIG1zZGNfc2V0X3RpbWVvdXQoc3RydWN0IG1zZGNfaG9zdCAqaG9zdCwgdTMyIG5zLCB1MzIg
+Y2xrcykNCiAJCS8qRERSIG1vZGUgd2lsbCBkb3VibGUgdGhlIGNsayBjeWNsZXMgZm9yIGRhdGEg
+dGltZW91dCAqLw0KIAkJdGltZW91dCA9IG1vZGUgPj0gMiA/IHRpbWVvdXQgKiAyIDogdGltZW91
+dDsNCiAJCXRpbWVvdXQgPSB0aW1lb3V0ID4gMSA/IHRpbWVvdXQgLSAxIDogMDsNCi0JCXRpbWVv
+dXQgPSB0aW1lb3V0ID4gMjU1ID8gMjU1IDogdGltZW91dDsNCiAJfQ0KLQlzZHJfc2V0X2ZpZWxk
+KGhvc3QtPmJhc2UgKyBTRENfQ0ZHLCBTRENfQ0ZHX0RUT0MsIHRpbWVvdXQpOw0KKwlyZXR1cm4g
+dGltZW91dDsNCit9DQorDQorLyogY2xvY2sgY29udHJvbCBwcmltaXRpdmVzICovDQorc3RhdGlj
+IHZvaWQgbXNkY19zZXRfdGltZW91dChzdHJ1Y3QgbXNkY19ob3N0ICpob3N0LCB1NjQgbnMsIHU2
+NCBjbGtzKQ0KK3sNCisJdTY0IHRpbWVvdXQ7DQorDQorCWhvc3QtPnRpbWVvdXRfbnMgPSBuczsN
+CisJaG9zdC0+dGltZW91dF9jbGtzID0gY2xrczsNCisNCisJdGltZW91dCA9IG1zZGNfdGltZW91
+dF9jYWwoaG9zdCwgbnMsIGNsa3MpOw0KKwlzZHJfc2V0X2ZpZWxkKGhvc3QtPmJhc2UgKyBTRENf
+Q0ZHLCBTRENfQ0ZHX0RUT0MsDQorCQkgICAgICAodTMyKSh0aW1lb3V0ID4gMjU1ID8gMjU1IDog
+dGltZW91dCkpOw0KIH0NCiANCiBzdGF0aWMgdm9pZCBtc2RjX2dhdGVfY2xvY2soc3RydWN0IG1z
+ZGNfaG9zdCAqaG9zdCkNCi0tIA0KMS45LjENCg==
 
