@@ -2,142 +2,104 @@ Return-Path: <SRS0=tDFP=7W=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
+X-Spam-Status: No, score=-7.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A73EFC433DF
-	for <linux-mmc@archiver.kernel.org>; Tue,  9 Jun 2020 16:04:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 95BC6C433E0
+	for <linux-mmc@archiver.kernel.org>; Tue,  9 Jun 2020 23:02:25 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 6992620737
-	for <linux-mmc@archiver.kernel.org>; Tue,  9 Jun 2020 16:04:59 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=cerno.tech header.i=@cerno.tech header.b="iXSICJKU";
-	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="KevHb/78"
+	by mail.kernel.org (Postfix) with ESMTP id 6ED0920734
+	for <linux-mmc@archiver.kernel.org>; Tue,  9 Jun 2020 23:02:25 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1591743745;
+	bh=8vAND9tiTsz++BCaHz0XGGCZBqSa9+BRIRGPBWK/rzQ=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
+	b=ZzGqJmUkgnBHIxAjrTuSeYoVF0+5gQz43cBXSuxBLgOyi0hKkkN+KVX2a6gWeFpel
+	 DPHF12bGIbFQK385oeVHKrThK6uCtKZgddV/fBuZe1B/oYtIv2pBikWiwEKSEEw2cd
+	 miKJWuV9aw26Olf2kdF5Np8PZXuZoV/6/J0Wl6+s=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1731040AbgFIQE6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 9 Jun 2020 12:04:58 -0400
-Received: from new2-smtp.messagingengine.com ([66.111.4.224]:38899 "EHLO
-        new2-smtp.messagingengine.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1730999AbgFIQE4 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Jun 2020 12:04:56 -0400
-Received: from compute4.internal (compute4.nyi.internal [10.202.2.44])
-        by mailnew.nyi.internal (Postfix) with ESMTP id 00C9D580198;
-        Tue,  9 Jun 2020 12:04:54 -0400 (EDT)
-Received: from mailfrontend1 ([10.202.2.162])
-  by compute4.internal (MEProxy); Tue, 09 Jun 2020 12:04:55 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=cerno.tech; h=
-        date:from:to:cc:subject:message-id:references:mime-version
-        :content-type:in-reply-to; s=fm3; bh=+Z1CbKKzxFQkq1/YTSxGbIdFSzg
-        K4ihAD5NZF8upwxI=; b=iXSICJKUKbub8O1mb/4XprYG6trgvVZ4uvlrXgS6UAu
-        c/McrLTaBFyWCe4ecRAseIC+ifBoW5MlWqPmgDAcH9CiFJdaYh0MrveUwspHRR3S
-        h+JcXC77Qph8GLfibzZsYPx6mytiIT37zLfd4QTnetypJDO1xGsqhg8mkiUPGNGF
-        fnZS+aYnQSw6na7bt/wCkN8r4250fx6vx9QTdzE0e+DAVIgc6+qPsPQ7YGsy7ban
-        9E+V3ODTGK6PA0xlZC+UCNCdYKqcEO4JjURsm/Pl6HdwX4LtLPNf8arzMf1O2wR4
-        v7ithUgvhcJ8R00QgJteE93qBUfRB9OHW14zfSmIxOQ==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-        messagingengine.com; h=cc:content-type:date:from:in-reply-to
-        :message-id:mime-version:references:subject:to:x-me-proxy
-        :x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=fm3; bh=+Z1CbK
-        KzxFQkq1/YTSxGbIdFSzgK4ihAD5NZF8upwxI=; b=KevHb/78PKKepKdMUBnr7h
-        R+3lIkYZ6Zt08egMuE/+Hk7EI89kBhUVXeE7KTd+SLGGqZ00cJoDemOBkhAjd9T9
-        qLzRgYxZCSnjG0mNo0k9Awg8jzwL+QZFYDcyKvu7c1IP44AXb2L0Noi3dR8n3JHv
-        uj+ztELeVjOCQF+KwWPWbVqY0WpiyPmzBJOiCR7lCQNoJPDy11e4JG4+ToWboADn
-        NOg7rCJzuJt1makv7efI6L7YDyADgKYO+aWvtYM8k++ALzAtEQEFA93m0FZSU520
-        WguNFHqrTaYOGZ2hjWYYx/epchsMOjpzVBeiyZwAE6z0xP4dV9hYZOpFNwiCGANQ
-        ==
-X-ME-Sender: <xms:IrPfXuWsSVa0ZPTZYogX02FsTEzNbd6NO09uJ5DEEC7s36akvn7-1g>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeduhedrudehgedgleekucetufdoteggodetrfdotf
-    fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfqfgfvpdfurfetoffkrfgpnffqhgen
-    uceurghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmne
-    cujfgurhepfffhvffukfhfgggtuggjsehgtderredttddvnecuhfhrohhmpeforgigihhm
-    vgcutfhiphgrrhguuceomhgrgihimhgvsegtvghrnhhordhtvggthheqnecuggftrfgrth
-    htvghrnhepleekgeehhfdutdeljefgleejffehfffgieejhffgueefhfdtveetgeehieeh
-    gedunecukfhppeeltddrkeelrdeikedrjeeinecuvehluhhsthgvrhfuihiivgeptdenuc
-    frrghrrghmpehmrghilhhfrhhomhepmhgrgihimhgvsegtvghrnhhordhtvggthh
-X-ME-Proxy: <xmx:IrPfXql3xi9awde6ICH0Hx-fY0FjpOH84zr4Y_UEMI7Yd0GL9dhQwQ>
-    <xmx:IrPfXiYhL3ztgubReA5xwKSGkPocTbuzeOFsM1nJ3S3-yniFLQ7NNA>
-    <xmx:IrPfXlWtxP9_Dk07K6cZ9SZF-Jk3BaVFA9LMLlEfJZ-VEsuQ92jxMQ>
-    <xmx:JrPfXi6fIGP-gCnnKabye7wBEem0m1quMDoyKnUC1ckdjhuXeWEQbQ>
-Received: from localhost (lfbn-tou-1-1502-76.w90-89.abo.wanadoo.fr [90.89.68.76])
-        by mail.messagingengine.com (Postfix) with ESMTPA id 47B1F328005D;
-        Tue,  9 Jun 2020 12:04:50 -0400 (EDT)
-Date:   Tue, 9 Jun 2020 18:04:48 +0200
-From:   Maxime Ripard <maxime@cerno.tech>
-To:     Frank Lee <tiny.windzz@gmail.com>
-Cc:     Frank Lee <frank@allwinnertech.com>, chaotian.jing@mediatek.com,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        Chen-Yu Tsai <wens@csie.org>, rmfrfs@gmail.com, marex@denx.de,
-        linux-mmc@vger.kernel.org,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        linux-mediatek@lists.infradead.org,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-Subject: Re: [PATCH 1/2] mmc: sunxi-mmc: do not hide address in
- sunxi_mmc_irq()
-Message-ID: <20200609160448.cy47xfwqs6hkxi7d@gilmour.lan>
-References: <20200605125545.31974-1-frank@allwinnertech.com>
- <20200605151810.vmgnnzp7cadfwsu5@gilmour.lan>
- <CAEExFWuoHhLqt4aukmP30SSXmwnmYuRq2t5HWKUBvreeABg=XQ@mail.gmail.com>
+        id S1728754AbgFIXCU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 9 Jun 2020 19:02:20 -0400
+Received: from mail-io1-f65.google.com ([209.85.166.65]:45345 "EHLO
+        mail-io1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728108AbgFIXCT (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Jun 2020 19:02:19 -0400
+Received: by mail-io1-f65.google.com with SMTP id y5so27438iob.12;
+        Tue, 09 Jun 2020 16:02:18 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=9UAjDcGkiv4VYRf/6C6V6G9cxQr/lplrc3OR9Y4YnTY=;
+        b=gLh5b/Mzx82dvgT9FDtczaQdpF0KgOSUHi1oup2Oa0mYMxOSTwgSy0/vzr0pBoQpB7
+         ciGTjXnjxoBXTEPCmZSmljkiqmYHor9SYubXvECIVZBSzmoDFOiM8X5A4/EBR2KPCrV6
+         X9Bpv5q2v/iyndwOt+ZyF6rEt6nN2jH3P/yMVF/sb9xozlJfTnR8OXYs6ZQLM8YOcOIZ
+         MC7pKOWBZHZWHie3nSSsvEca1I5+GZLk7tvx7zU9tPspSCe+gtsxIJdiUymsznANOpFH
+         Aa3HNA74JgpzrvBNuFMufcTEN6QWMfi5EgX/kM19ACGIhHJ/CTjE2uYgOokScAomBLFC
+         7Lmg==
+X-Gm-Message-State: AOAM531FWlCScH9s/fatIeF9jBJh4njLQFBtjsqh8mYSDjRiy0mLaGKz
+        UDW7f/QMkAvXICLKjheJyA==
+X-Google-Smtp-Source: ABdhPJw3B/5yrBt/y3dpRloQGYK8NgxRmXYSpins8OjJRCa8Nz5fGw8lZcOgcw38BCyDDNJuKrHPCA==
+X-Received: by 2002:a02:a46:: with SMTP id 67mr481777jaw.144.1591743738577;
+        Tue, 09 Jun 2020 16:02:18 -0700 (PDT)
+Received: from xps15 ([64.188.179.251])
+        by smtp.gmail.com with ESMTPSA id r19sm8035022ioj.12.2020.06.09.16.02.16
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 09 Jun 2020 16:02:17 -0700 (PDT)
+Received: (nullmailer pid 1670237 invoked by uid 1000);
+        Tue, 09 Jun 2020 23:02:16 -0000
+Date:   Tue, 9 Jun 2020 17:02:16 -0600
+From:   Rob Herring <robh@kernel.org>
+To:     Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+Cc:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
+        bjorn.andersson@linaro.org, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+        devicetree@vger.kernel.org, broonie@kernel.org
+Subject: Re: [PATCH V3 1/3] dt-bindings: mmc: Supply max load for mmc supplies
+Message-ID: <20200609230216.GA1655591@bogus>
+References: <1589541535-8523-1-git-send-email-vbadigan@codeaurora.org>
+ <1591094883-11674-1-git-send-email-vbadigan@codeaurora.org>
+ <1591094883-11674-2-git-send-email-vbadigan@codeaurora.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="uphnnc535acqsyc6"
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <CAEExFWuoHhLqt4aukmP30SSXmwnmYuRq2t5HWKUBvreeABg=XQ@mail.gmail.com>
+In-Reply-To: <1591094883-11674-2-git-send-email-vbadigan@codeaurora.org>
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
++Mark B
 
---uphnnc535acqsyc6
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+On Tue, Jun 02, 2020 at 04:17:54PM +0530, Veerabhadrarao Badiganti wrote:
+> Supply the max load needed for driving the mmc supplies.
+> 
+> Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+> ---
+>  Documentation/devicetree/bindings/mmc/mmc-controller.yaml | 6 ++++++
+>  1 file changed, 6 insertions(+)
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
+> index acc9f10871d4..d95219721fa1 100644
+> --- a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
+> @@ -290,6 +290,12 @@ properties:
+>      description:
+>        Supply for the bus IO line power
+>  
+> +  vmmc-supply-max-microamp:
+> +    description: Maximum load for the card power.
+> +
+> +  vqmmc-supply-max-microamp:
+> +    description: Maximum load for the bus IO line power.
 
-On Mon, Jun 08, 2020 at 08:54:51PM +0800, Frank Lee wrote:
-> On Fri, Jun 5, 2020 at 11:18 PM Maxime Ripard <maxime@cerno.tech> wrote:
-> >
-> > Hi,
-> >
-> > On Fri, Jun 05, 2020 at 08:55:44PM +0800, Frank Lee wrote:
-> > > From: Yangtao Li <tiny.windzz@gmail.com>
-> > >
-> > > Using %px to show the actual address in sunxi_mmc_irq()
-> > > to help us to debug issue.
-> > >
-> > > Signed-off-by: Yangtao Li <tiny.windzz@gmail.com>
-> > > Signed-off-by: Frank Lee <frank@allwinnertech.com>
-> >
-> > I'm fairly sure this hash is on purpose, and both the commit log of the
-> > %px introduction (ad67b74d2469) and the checkpatch message are pretty
-> > explicit about it.
-> >
-> > What issue were you trying to solve here?
->=20
-> There doesn't seem to be a strong requirement to force this to be printed=
- out,
-> I just think that ____ptrval____ is very unpleasant.
+By a 'common regulator property' I meant documented with regulator 
+binding like *-supply, not common to MMC. How is MMC special?
 
-That should happen only at boot when the system doesn't have enough
-entropy iirc, after a while it prints out hashes.
+Thinking about this some more, what's wrong with the max current in the 
+regulator nodes? I suppose you could have more than one load and need to 
+define the loads separately?
 
-> Or delete %p directly?
-
-You mean the message in the driver? I'd be fine with that too.
-
-Maxime
-
---uphnnc535acqsyc6
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iHUEABYIAB0WIQRcEzekXsqa64kGDp7j7w1vZxhRxQUCXt+zIAAKCRDj7w1vZxhR
-xb84AP46JXO+C4VULSIH3+jYn7G+NlNEDTE3GV7/bT7NB3BsmQEA7Kq4fnJRdk4P
-/iG2Sff9PD+15yt8ZNIKVw2xH/1twQI=
-=t5aH
------END PGP SIGNATURE-----
-
---uphnnc535acqsyc6--
+Rob
