@@ -2,122 +2,229 @@ Return-Path: <SRS0=tDFP=7W=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.1 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8A69FC433E1
-	for <linux-mmc@archiver.kernel.org>; Tue,  9 Jun 2020 10:41:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 60C87C433E1
+	for <linux-mmc@archiver.kernel.org>; Tue,  9 Jun 2020 11:25:15 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 68C9A20814
-	for <linux-mmc@archiver.kernel.org>; Tue,  9 Jun 2020 10:41:08 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3688E206A4
+	for <linux-mmc@archiver.kernel.org>; Tue,  9 Jun 2020 11:25:15 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=renesasgroup.onmicrosoft.com header.i=@renesasgroup.onmicrosoft.com header.b="crcMPv7n"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="NjZa5cls"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727928AbgFIKlI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 9 Jun 2020 06:41:08 -0400
-Received: from mail-eopbgr1320125.outbound.protection.outlook.com ([40.107.132.125]:48576
-        "EHLO APC01-PU1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1727818AbgFIKlG (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 9 Jun 2020 06:41:06 -0400
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=GkaJ1m59DjBcCgkNutgxmRxvdaeuU0mEBhAfyLiKH6cqQACIMmjK/vyzXgSyRJZFnTKFTYKS2zkPM+wH79rOdENL5SZ1U0hyPsP18zGl0IngMvLzVXWqv1Q53FutEvvz8nimwmgOGC6glwJqVprZXeUiOb9wSXOBQhdiMuTy3QYHPNcOYUl9cty5WeiPJaiYumBYV2kFgTvT2AYRLBZqOQmlzQfgu1yR7OydLDkbV7dX71I/gx6W5dHf5wA3ZmeYXRABpbHFxR61kfMIfqH44Gr5wSdDevofXmVQPUdrEEparGvm8F2RzYBfh5bsByoZKMP+T2AsOb348afl0QdsDA==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=3GnBTODfBnUQewolmyb9ycqLKN/2eEio1vFCIaYZf0E=;
- b=e3E8RsxwZxkekrV/hdrD/Z3MBsbabGgZpUDsjCwZyUgcj3ozh4aHCARq+Y1sE0yUEnz9W5FARivHGqHJndEzTEyHAEA/xLoSe1TEHrnNV/Rmq7OSQDvpLKPm5Ka5YPOHe/dNBzU1jULAI46HiSSyubhQhXQ4gG9MX7LsSbJ436Zf+6LtFqZEFJnakel3dc81ySPEh4xDqAM6XWL1fbfVg9WNa1rUY3Wz1cAavVkiXf8KF8byoAA0ROZtiOnTKemU3xn4zTHiu48i9yT0i+sNe8AdgYxBPj6o333g94Cl4g86n6qiw4dlwrF/gqL6vCGkV1KfQEbNHZuefTO5M1zldQ==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=renesas.com; dmarc=pass action=none header.from=renesas.com;
- dkim=pass header.d=renesas.com; arc=none
+        id S1728960AbgFILZM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 9 Jun 2020 07:25:12 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38338 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726803AbgFILZK (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Jun 2020 07:25:10 -0400
+Received: from mail-wm1-x342.google.com (mail-wm1-x342.google.com [IPv6:2a00:1450:4864:20::342])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EAE43C05BD1E;
+        Tue,  9 Jun 2020 04:25:09 -0700 (PDT)
+Received: by mail-wm1-x342.google.com with SMTP id d128so2746413wmc.1;
+        Tue, 09 Jun 2020 04:25:09 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=renesasgroup.onmicrosoft.com; s=selector2-renesasgroup-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=3GnBTODfBnUQewolmyb9ycqLKN/2eEio1vFCIaYZf0E=;
- b=crcMPv7n2f1lqzXSBFAFQlBvPV4zCpHrGyKOVAAL+ErRZ93MUfszS4TtzvBwKGlCpT52+uLUYPg2/D7TlUY+sLjMmUliv29Q51wRluFkbLd8K0Kv1D8PB21fQAuKkpZi2Z3K3PzNVGqNpB1mYTxcUSAbXaxUu8gbqpUn9hGR/gc=
-Received: from TY2PR01MB3692.jpnprd01.prod.outlook.com (2603:1096:404:d5::22)
- by TY2PR01MB2058.jpnprd01.prod.outlook.com (2603:1096:404:c::19) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3066.23; Tue, 9 Jun
- 2020 10:41:03 +0000
-Received: from TY2PR01MB3692.jpnprd01.prod.outlook.com
- ([fe80::2da1:bdb7:9089:7f43]) by TY2PR01MB3692.jpnprd01.prod.outlook.com
- ([fe80::2da1:bdb7:9089:7f43%3]) with mapi id 15.20.3066.023; Tue, 9 Jun 2020
- 10:41:03 +0000
-From:   Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
-CC:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-renesas-soc@vger.kernel.org" 
-        <linux-renesas-soc@vger.kernel.org>
-Subject: RE: [PATCH 2/2] mmc: renesas_sdhi: keep SCC clock active when tuning
-Thread-Topic: [PATCH 2/2] mmc: renesas_sdhi: keep SCC clock active when tuning
-Thread-Index: AQHWOmI34Rq2naXnyEWINhVI/t25BKjORxnQgAD7OwCAANxGQA==
-Date:   Tue, 9 Jun 2020 10:41:02 +0000
-Message-ID: <TY2PR01MB3692310754A6B4D6A05DADF0D8820@TY2PR01MB3692.jpnprd01.prod.outlook.com>
-References: <20200604112040.22144-1-wsa+renesas@sang-engineering.com>
- <20200604112040.22144-3-wsa+renesas@sang-engineering.com>
- <TY2PR01MB36923A1D7091431CE3F73195D8850@TY2PR01MB3692.jpnprd01.prod.outlook.com>
- <20200608212702.GD917@ninjato>
-In-Reply-To: <20200608212702.GD917@ninjato>
-Accept-Language: ja-JP, en-US
-Content-Language: ja-JP
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-authentication-results: sang-engineering.com; dkim=none (message not signed)
- header.d=none;sang-engineering.com; dmarc=none action=none
- header.from=renesas.com;
-x-originating-ip: [124.210.22.195]
-x-ms-publictraffictype: Email
-x-ms-office365-filtering-ht: Tenant
-x-ms-office365-filtering-correlation-id: 4153c735-6fe9-4b94-46ec-08d80c619b56
-x-ms-traffictypediagnostic: TY2PR01MB2058:
-x-microsoft-antispam-prvs: <TY2PR01MB20586E2C9BE152AC6A28B1D6D8820@TY2PR01MB2058.jpnprd01.prod.outlook.com>
-x-ms-oob-tlc-oobclassifiers: OLM:3383;
-x-forefront-prvs: 042957ACD7
-x-ms-exchange-senderadcheck: 1
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: YJydXIMG1PPBhNkXvlBhpg6UwdTtQCfC2CzHupjt8r42Kf7bG0ZT/GgN8s7Bgp51/5HvXXGc09VBlQmiHozFLH8kPn3WOPggmHv85xQ6KOrdh2qpt6n5BuwdyISP6vhjYG9Y15VL8kWOaouXFcihXxdQZQMsm8RWC1zsxNkCo7U90rk7G4SrSrcofBDTC5ywVgMhMF75W66awe6bnzOxkI3dZMMS1Zhz0b/C+211Zjm+Bdh/sg/okEangJl5W932EwYdhxBSL0bBnq4VTNsJaXfTStp6lHdtz8oqZzA3b3NwVHn4Sd3oPAc/lhnAFuYMKOsTohyL5K8LSbRHXrLiZw==
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY2PR01MB3692.jpnprd01.prod.outlook.com;PTR:;CAT:NONE;SFTY:;SFS:(4636009)(136003)(376002)(39860400002)(396003)(346002)(366004)(33656002)(478600001)(7696005)(4326008)(55236004)(83380400001)(8936002)(86362001)(6506007)(8676002)(2906002)(52536014)(66946007)(55016002)(316002)(186003)(71200400001)(4744005)(9686003)(5660300002)(66556008)(66476007)(76116006)(54906003)(66446008)(26005)(64756008);DIR:OUT;SFP:1102;
-x-ms-exchange-antispam-messagedata: A4JqEhtYnOTpp+jAiHFAS4S7GNHXSCkRmdXJMf1Gs+rua9pUQJJsTaxqGVA7PKyXK4f1VVb6QvpdSU+04SNgFHyacRmtLa99nfz/8nwiU6ihfR3rkwxI6UjGSSmk7mUdZWqj+nIugRzH4P1Wgb0yztKyWfHMPjmJWY/+dI8w32LW1Rq+dfA00nT3GY2zAWcqZgW7OxYm3ltyMtKo3ILF+Kvfi+gzCMA7Goqkz9hzAEJIqp0VGKhU6OvE6Z+hmGKhWJN+OjbVCiHG9CE3TdEaFwvZIyFfZYwcz0RCtjQ0CtnIF2z72+gdvbIwdjs408+YyFsVF7SgkXNVFnOPJlyVT8ohWOsR0UMNpCdTV0yh0A8GmTwG6440HfQJR53GTs+uvfc5Fp2Lsr/1FmBD/RvIakL7QQfU0GuX1byFHlmCA26wNHJUVtPYQ7j4qxdttZwBi1LjFAaLQvxoac/v4ELCyT9hHa/qICa0xyyOgFwEaPnTKeCTGwJAjMiWk/Ro4OMy
-x-ms-exchange-transport-forked: True
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+        d=gmail.com; s=20161025;
+        h=subject:to:cc:references:from:autocrypt:message-id:date:user-agent
+         :mime-version:in-reply-to:content-language:content-transfer-encoding;
+        bh=N6xeeXvpkYdEt1bQcjol91JJXVVrY/bVfMi7ubXpypo=;
+        b=NjZa5clsGq5j/0unT0y99S6KtGw8tq1rjznUkEOwRaKul6OX8NMdrG93LOALD3K2gG
+         MjTtJRO9bWZ46GA3Lqu1Y7meiHt2Hc8TnpniSEafIr1pUo1FiqMSeScbgBUfsMIb7ETP
+         ATb2bloqMHspwcaHahSxKRH0tOTsUvr99PF9BTRb1AwNkwvyo8XPEQjKVllDsH8bM2eF
+         nmlONzMRwcQK6XhXPLsmDkf7qsXKbMx43HeAeYjq8M0BR6d75wEuGOmt98oRQmR6q0Fh
+         UY5FQ8FomKsPRWBirr4cvXJ97i9T8jwumkUxo+pwLMNJ/sW7foemW+lfpda7MxHLTFGL
+         Eetg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:subject:to:cc:references:from:autocrypt
+         :message-id:date:user-agent:mime-version:in-reply-to
+         :content-language:content-transfer-encoding;
+        bh=N6xeeXvpkYdEt1bQcjol91JJXVVrY/bVfMi7ubXpypo=;
+        b=d3jiAq3sr25CJcUC3TIAA+OOfJ5o511UTYtMtO9/aWrAcnhVqmjyloCKU1iAF8hGU0
+         1DaPsI3R1MXHw9tJ2PRUm8mYPFmM1G0p60Dk5RHyga7FFFCBLwZWLg7GOjTFnQLEgg1b
+         EpOOKnOGGMX/2LtrEhDKfTQ0sI3zTatlp5C0e4cTyDgrD7Acl9Q4zfGT55OVrkdwOz5m
+         pALpDWTmoG3Gm2ozKLc4X7mChkLFzK9rYY5YFV/ksWIi87t7ykSJWZJEO3hqjibUAK8Q
+         N5/HCTnF505dxYZbIXFVf99vAVXBPkq8FO9PSH1Pzfg1ZU75yFCiJPuN1T05SLQxr9Ig
+         GesA==
+X-Gm-Message-State: AOAM531uwNjPbNZYCbAfNYiE2Ewy82jUNI1ajEBZ3RpIHkyy1YByveRF
+        6QJ5dXw0ixIgZfusuyVks0GKLt0t
+X-Google-Smtp-Source: ABdhPJx9J4l5CIFvskPvDKnsbGCgmJNu7nWcI+IKqSy+tqcdZhelv+pViZweNpTewKkiiFu/f/jhfg==
+X-Received: by 2002:a1c:62d6:: with SMTP id w205mr3328660wmb.97.1591701906851;
+        Tue, 09 Jun 2020 04:25:06 -0700 (PDT)
+Received: from ziggy.stardust ([213.195.114.138])
+        by smtp.gmail.com with ESMTPSA id w3sm2688134wmg.44.2020.06.09.04.25.04
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 09 Jun 2020 04:25:06 -0700 (PDT)
+Subject: Re: [PATCH v6 1/4] mmc: mediatek: add MT6779 MMC driver support
+To:     Chun-Hung Wu <chun-hung.wu@mediatek.com>, mirq-linux@rere.qmqm.pl,
+        Jonathan Hunter <jonathanh@nvidia.com>,
+        Al Cooper <alcooperx@gmail.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Florian Fainelli <f.fainelli@gmail.com>,
+        bcm-kernel-feedback-list@broadcom.com,
+        Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Michal Simek <michal.simek@xilinx.com>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Mark Rutland <mark.rutland@arm.com>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Pavel Machek <pavel@ucw.cz>,
+        Kate Stewart <kstewart@linuxfoundation.org>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+        Pan Bian <bianpan2016@163.com>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Allison Randal <allison@lohutok.net>,
+        Mathieu Malaterre <malat@debian.org>,
+        Stanley Chu <stanley.chu@mediatek.com>,
+        Kuohong Wang <kuohong.wang@mediatek.com>
+Cc:     kernel-team@android.com, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-mediatek@lists.infradead.org,
+        devicetree@vger.kernel.org, wsd_upstream@mediatek.com,
+        linux-arm-kernel@lists.infradead.org,
+        linux-arm-msm@vger.kernel.org, linux-tegra@vger.kernel.org
+References: <1591665502-6573-1-git-send-email-chun-hung.wu@mediatek.com>
+ <1591665502-6573-2-git-send-email-chun-hung.wu@mediatek.com>
+From:   Matthias Brugger <matthias.bgg@gmail.com>
+Autocrypt: addr=matthias.bgg@gmail.com; prefer-encrypt=mutual; keydata=
+ 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
+Message-ID: <a95eae56-4011-a9c8-90b4-7a906ffd7e6c@gmail.com>
+Date:   Tue, 9 Jun 2020 13:25:03 +0200
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.8.1
 MIME-Version: 1.0
-X-OriginatorOrg: renesas.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 4153c735-6fe9-4b94-46ec-08d80c619b56
-X-MS-Exchange-CrossTenant-originalarrivaltime: 09 Jun 2020 10:41:02.8869
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 53d82571-da19-47e4-9cb4-625a166a4a2a
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: Vd6EgnBlhKa7Igv/kaZUfrX6dk2uqoomp387E6skV168XH+KJT4Gimvs47fzRCErygP5VXF3FZ9tfu68X1ViR3eFPIS16/JmiAc8SDNAHZqVTNahZOS8koXcs49Kt6RW
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: TY2PR01MB2058
+In-Reply-To: <1591665502-6573-2-git-send-email-chun-hung.wu@mediatek.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 8bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Wolfram-san,
 
-> From: Wolfram Sang, Sent: Tuesday, June 9, 2020 6:27 AM
->=20
-> > > +	/* Tuning done, no special handling for SCC clock needed anymore */
-> > > +	priv->keep_scc_freq =3D false;
-> > > +
-> >
-> > Setting keep_scc_freq to false is only here. But, I'm thinking
-> > we should set it in some error paths like below somehow too:
-> >  - error paths before hs400_complete() in mmc_select_hs400().
-> >  - error path of mmc_execute_tuning() in mmc_retune().
->=20
-> Hmm, I guess you are right. That would kind of spoil my approach taken
-> here. Maybe we need another flag in the core like 'doing_tune' to
-> supplement 'doing_retune', so or driver knows when any kind of tuning is
-> going on?
 
-Adding such a new flag is better, I think.
+On 09/06/2020 03:18, Chun-Hung Wu wrote:
+> MT6779 add cqhci support, so need to add new code
+> to support it.
+> 
 
-Best regards,
-Yoshihiro Shimoda
+Please work on the commit message. For example it mentions cqhci while the code
+does not. Better describe what technical specification the controller has etc
 
+> Signed-off-by: Chun-Hung Wu <chun-hung.wu@mediatek.com>
+> ---
+>  drivers/mmc/host/mtk-sd.c | 13 +++++++++++++
+>  1 file changed, 13 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+> index b221c02..8ada675 100644
+> --- a/drivers/mmc/host/mtk-sd.c
+> +++ b/drivers/mmc/host/mtk-sd.c
+> @@ -538,6 +538,18 @@ struct msdc_host {
+>  	.use_internal_cd = true,
+>  };
+>  
+> +static const struct mtk_mmc_compatible mt6779_compat = {
+> +	.clk_div_bits = 12,
+> +	.hs400_tune = false,
+> +	.pad_tune_reg = MSDC_PAD_TUNE0,
+> +	.async_fifo = true,
+> +	.data_tune = true,
+> +	.busy_check = true,
+> +	.stop_clk_fix = true,
+> +	.enhance_rx = true,
+> +	.support_64g = true,
+> +};
+> +
+>  static const struct of_device_id msdc_of_ids[] = {
+>  	{ .compatible = "mediatek,mt8135-mmc", .data = &mt8135_compat},
+>  	{ .compatible = "mediatek,mt8173-mmc", .data = &mt8173_compat},
+> @@ -547,6 +559,7 @@ struct msdc_host {
+>  	{ .compatible = "mediatek,mt7622-mmc", .data = &mt7622_compat},
+>  	{ .compatible = "mediatek,mt8516-mmc", .data = &mt8516_compat},
+>  	{ .compatible = "mediatek,mt7620-mmc", .data = &mt7620_compat},
+> +	{ .compatible = "mediatek,mt6779-mmc", .data = &mt6779_compat},
+>  	{}
+>  };
+>  MODULE_DEVICE_TABLE(of, msdc_of_ids);
+> 
