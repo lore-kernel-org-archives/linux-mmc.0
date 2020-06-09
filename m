@@ -2,144 +2,105 @@ Return-Path: <SRS0=tDFP=7W=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.5 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED,USER_AGENT_GIT autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2C8DBC433E0
-	for <linux-mmc@archiver.kernel.org>; Tue,  9 Jun 2020 10:02:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AF435C433E0
+	for <linux-mmc@archiver.kernel.org>; Tue,  9 Jun 2020 10:20:38 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0936A207F9
-	for <linux-mmc@archiver.kernel.org>; Tue,  9 Jun 2020 10:02:22 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 63F38207ED
+	for <linux-mmc@archiver.kernel.org>; Tue,  9 Jun 2020 10:20:38 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="dssBi8/f"
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=microchip.com header.i=@microchip.com header.b="s+wfFT6T"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727022AbgFIKCV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 9 Jun 2020 06:02:21 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53770 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726286AbgFIKCU (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Jun 2020 06:02:20 -0400
-Received: from mail-vs1-xe42.google.com (mail-vs1-xe42.google.com [IPv6:2607:f8b0:4864:20::e42])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6E39AC05BD1E
-        for <linux-mmc@vger.kernel.org>; Tue,  9 Jun 2020 03:02:20 -0700 (PDT)
-Received: by mail-vs1-xe42.google.com with SMTP id y123so11582282vsb.6
-        for <linux-mmc@vger.kernel.org>; Tue, 09 Jun 2020 03:02:20 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=eOXr7nsca37iiptugzIdql/m6OOhx4OtKtMb7kRPm1s=;
-        b=dssBi8/fZQlcH6Zx/hiX5vpqwbn7JG7n2fZ8rQk8601As0FuOAOMpi32y3obdFiOye
-         SbQGgiyN4azsymqUeYBQckHQWaEIYRfP6NB3Yf1w6KReSNDRkXGbzt3ZmsyYRLhKnItJ
-         RplgyEPrNauDZBwFxqEYpo3K6873h0OfhArHROMggm6+4HJjPCfvdrFZt6sZPzqHtoIM
-         sQxj0H6TcljV3Ngt6cY7S+1e87cotL1DywMhdHsPY7xcu2J4Wd0hxj0vRV+RR9j+GFls
-         LpmlcrSrCBC8gfSyzBfQjqjRq0RlYW/7dGxmJq7GAf7d+xRwMQ49te074RdnLN5xDqqp
-         0aHw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=eOXr7nsca37iiptugzIdql/m6OOhx4OtKtMb7kRPm1s=;
-        b=Dfe5a4tVUvaj6A1BY9NJqAVbmn+WrnoHp4XW4IQ2faWlXRufr6Q4lGYNk8BEMB/ks8
-         hyKDYEXlU/bl3Mry9+9hv40H3I/kNwXmjBc3CnziWW/XyEnlMHSF2FVsomq3rVK0NKQO
-         6Srwzk7JLjZ8Ed83XsoT/GB6/BRROuojk2tgKpRsmKm08ueMsymiXdt47iarAaKeOQtf
-         0g/S276DVZ24XFqfWxm3SRGm9SKPHir0HNxFQi2U13fWoydQluev020TO4CgAEOhS+5p
-         z80i3YCriw2Lu/UZ4mFnj3p+6WgTEiJWaxM9vL8/0UN04UYmdiRypjBczIl+NWLCbeP/
-         9omw==
-X-Gm-Message-State: AOAM530pW+dTL92V+5ODN77ESx1HEUeAWmQvFLxWK1BPWVYnbr5EtHpX
-        2R0kg+LZERnIvVdWrSv8xQUSuc8WX6UHDjxFLBJaXw==
-X-Google-Smtp-Source: ABdhPJwN1YIVs5G9p/I0Ss5PinWxQSjST7esl7c/LesaOMO8JE43NwYVoy/kC4JxyhD2rnFnrRF/230yq4iXU5eoYvA=
-X-Received: by 2002:a67:db88:: with SMTP id f8mr2051190vsk.165.1591696939065;
- Tue, 09 Jun 2020 03:02:19 -0700 (PDT)
+        id S1728666AbgFIKUh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 9 Jun 2020 06:20:37 -0400
+Received: from esa5.microchip.iphmx.com ([216.71.150.166]:36372 "EHLO
+        esa5.microchip.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726937AbgFIKUf (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Jun 2020 06:20:35 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=microchip.com; i=@microchip.com; q=dns/txt; s=mchp;
+  t=1591698036; x=1623234036;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=Jog8U1hg1Jb0yOPntlrXCpHzhFdDi4nx+A8hEzkfpIc=;
+  b=s+wfFT6T4QWxS5bq8yxTT0Co2z5aDLAunK4vm3qRizlZQ4rqyafhZboy
+   cwa+yQ/lu1ZlnEKSlcAR7JYxejO1Q8NlvD6mxABrwjesJnIdwXFfBSM2+
+   IZNX6c0zI7M3ikx3UGLQAWQUIY59PjmlSkPX/f6/dUi86b4D+vebxXjWc
+   CZa6Z+34+AnT9vQGWA8katR00yWcP7TXgYEHLa2keMHF2XLfQikaNYF9f
+   l1g0wab5Kugc2S1TUBKlRAD/ZA0P7sEgEJsBRvxfz4v+ynt8VewMTh9yA
+   r2UmAsgYVcR45HvKw8cejm0VVY88yj2fxs80Uj917Q1S+S9UU147kxgcD
+   Q==;
+IronPort-SDR: GsUomaDlsyMFGql6N5vKCKqggAS8YTeM8rMEysweN7jreEtYgmsUT9SR7LCgT5iWJHn6yq+KBr
+ JcYdSIakI6+vBex31IJhOeiKfHKihHDKm5ZCOwUH9fhXnWy/KxRxYbqgxwXcGeAWeTj3Y+odJK
+ WRJUbXsCdmC398dPnffw8iYmYxC69HKWzjaaP1porxdM6EcDPHCYk+l9UA4wNtGvaF0mszvqg1
+ LF4sySzldi0r2v3DJPvEH+Uwo+SxpKpKRZ/BwGM8uILdf+uSuYToyvvj9qTX+bn1nswG3MFKYk
+ 6/g=
+X-IronPort-AV: E=Sophos;i="5.73,491,1583218800"; 
+   d="scan'208";a="78723000"
+Received: from smtpout.microchip.com (HELO email.microchip.com) ([198.175.253.82])
+  by esa5.microchip.iphmx.com with ESMTP/TLS/AES256-SHA256; 09 Jun 2020 03:20:35 -0700
+Received: from chn-vm-ex02.mchp-main.com (10.10.85.144) by
+ chn-vm-ex04.mchp-main.com (10.10.85.152) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.1847.3; Tue, 9 Jun 2020 03:20:34 -0700
+Received: from soft-dev15.microsemi.net (10.10.115.15) by
+ chn-vm-ex02.mchp-main.com (10.10.85.144) with Microsoft SMTP Server id
+ 15.1.1847.3 via Frontend Transport; Tue, 9 Jun 2020 03:20:32 -0700
+From:   Lars Povlsen <lars.povlsen@microchip.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>
+CC:     Lars Povlsen <lars.povlsen@microchip.com>,
+        Microchip Linux Driver Support <UNGLinuxDriver@microchip.com>,
+        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>,
+        <linux-kernel@vger.kernel.org>
+Subject: [PATCH v2 0/3] mmc: Adding support for Microchip Sparx5 SoC
+Date:   Tue, 9 Jun 2020 12:20:05 +0200
+Message-ID: <20200609102008.10530-1-lars.povlsen@microchip.com>
+X-Mailer: git-send-email 2.27.0
 MIME-Version: 1.0
-References: <20200609081431.6376-1-zbestahu@gmail.com>
-In-Reply-To: <20200609081431.6376-1-zbestahu@gmail.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 9 Jun 2020 12:01:42 +0200
-Message-ID: <CAPDyKFr+NKoQVLqK9J-gmW9E7pwfZKeJQ8JEdx792jDA1kYKiA@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdio: Fix 1-bit mode for SD-combo cards during suspend
-To:     Yue Hu <zbestahu@gmail.com>
-Cc:     Doug Anderson <dianders@chromium.org>,
-        Matthias Kaehlcke <mka@chromium.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        huyue2@yulong.com, zhangwen@yulong.com
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 9 Jun 2020 at 10:14, Yue Hu <zbestahu@gmail.com> wrote:
->
-> From: Yue Hu <huyue2@yulong.com>
->
-> Commit 6b5eda369ac3 ("sdio: put active devices into 1-bit mode during
-> suspend") disabled 4-bit mode during system suspend. After this patch,
-> commit 7310ece86ad7 ("mmc: implement SD-combo (IO+mem) support") used
-> new sdio_enable_4bit_bus() instead of sdio_enable_wide() to support
-> SD-combo cards, also for card resume. However, no corresponding support
-> added during suspend. That is not correct. Let's fix it.
+This is an add-on series to the main SoC Sparx5 series
+(Message-ID: <20200608123024.5330-1-lars.povlsen@microchip.com>)
 
-I believe the change makes sense to me.
+It adds eMMC support for Sparx5, by adding a driver for the SoC SDHCI
+controller, DT configuration and DT binding documentation.
 
-However, the commit 6b5eda369ac3 that you refer to is from v2.6.34,
-which is more than ten years ago. That makes me wonder, are these
-cards really being used?
+Changes in v2:
+- Changes in driver as per review comments
+ - Drop debug code
+ - Drop sysfs code
+ - Minor cosmetics
 
-Did you test this with a combo card?
+Lars Povlsen (3):
+  dt-bindings: mmc: Add Sparx5 SDHCI controller bindings
+  sdhci: sparx5: Add Sparx5 SoC eMMC driver
+  arm64: dts: sparx5: Add Sparx5 eMMC support
 
->
-> Signed-off-by: Yue Hu <huyue2@yulong.com>
-> ---
->  drivers/mmc/core/sdio.c | 23 ++++++++++++++++++++++-
->  1 file changed, 22 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-> index ebb387a..2d2ae35 100644
-> --- a/drivers/mmc/core/sdio.c
-> +++ b/drivers/mmc/core/sdio.c
-> @@ -285,6 +285,27 @@ static int sdio_disable_wide(struct mmc_card *card)
->         return 0;
->  }
->
-> +static int sdio_disable_4bit_bus(struct mmc_card *card)
-> +{
-> +       int err;
-> +
-> +       if (card->type == MMC_TYPE_SDIO)
-> +               goto out;
-> +
-> +       if (!(card->host->caps & MMC_CAP_4_BIT_DATA))
-> +               return 0;
-> +
-> +       if (!(card->scr.bus_widths & SD_SCR_BUS_WIDTH_4))
-> +               return 0;
-> +
-> +       err = mmc_app_set_bus_width(card, MMC_BUS_WIDTH_1);
-> +       if (err)
-> +               return err;
-> +
-> +out:
-> +       return sdio_disable_wide(card);
-> +}
-> +
->
->  static int sdio_enable_4bit_bus(struct mmc_card *card)
->  {
-> @@ -960,7 +981,7 @@ static int mmc_sdio_suspend(struct mmc_host *host)
->         mmc_claim_host(host);
->
->         if (mmc_card_keep_power(host) && mmc_card_wake_sdio_irq(host))
-> -               sdio_disable_wide(host->card);
-> +               sdio_disable_4bit_bus(host->card);
->
->         if (!mmc_card_keep_power(host)) {
->                 mmc_power_off(host);
-> --
-> 1.9.1
->
+ .../mmc/microchip,dw-sparx5-sdhci.yaml        |  57 ++++
+ arch/arm64/boot/dts/microchip/sparx5.dtsi     |  24 ++
+ .../boot/dts/microchip/sparx5_pcb125.dts      |  23 ++
+ .../boot/dts/microchip/sparx5_pcb134_emmc.dts |  23 ++
+ .../boot/dts/microchip/sparx5_pcb135_emmc.dts |  23 ++
+ drivers/mmc/host/Kconfig                      |  13 +
+ drivers/mmc/host/Makefile                     |   1 +
+ drivers/mmc/host/sdhci-of-sparx5.c            | 274 ++++++++++++++++++
+ 8 files changed, 438 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/mmc/microchip,dw-sparx5-sdhci.yaml
+ create mode 100644 drivers/mmc/host/sdhci-of-sparx5.c
 
-Kind regards
-Uffe
+--
+Cc: Microchip Linux Driver Support <UNGLinuxDriver@microchip.com>
+Cc: linux-mmc@vger.kernel.org
+Cc: devicetree@vger.kernel.org
+Cc: linux-arm-kernel@lists.infradead.org
+Cc: linux-kernel@vger.kernel.org
