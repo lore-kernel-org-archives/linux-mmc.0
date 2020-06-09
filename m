@@ -2,95 +2,142 @@ Return-Path: <SRS0=tDFP=7W=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.7 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EC09EC433E0
-	for <linux-mmc@archiver.kernel.org>; Tue,  9 Jun 2020 14:54:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A73EFC433DF
+	for <linux-mmc@archiver.kernel.org>; Tue,  9 Jun 2020 16:04:59 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B5E7620774
-	for <linux-mmc@archiver.kernel.org>; Tue,  9 Jun 2020 14:54:27 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6992620737
+	for <linux-mmc@archiver.kernel.org>; Tue,  9 Jun 2020 16:04:59 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=baylibre-com.20150623.gappssmtp.com header.i=@baylibre-com.20150623.gappssmtp.com header.b="NiEZq/uk"
+	dkim=pass (2048-bit key) header.d=cerno.tech header.i=@cerno.tech header.b="iXSICJKU";
+	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="KevHb/78"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730115AbgFIOy1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 9 Jun 2020 10:54:27 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42444 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728913AbgFIOy0 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Jun 2020 10:54:26 -0400
-Received: from mail-wr1-x441.google.com (mail-wr1-x441.google.com [IPv6:2a00:1450:4864:20::441])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6BEBAC05BD1E
-        for <linux-mmc@vger.kernel.org>; Tue,  9 Jun 2020 07:54:25 -0700 (PDT)
-Received: by mail-wr1-x441.google.com with SMTP id e1so21690911wrt.5
-        for <linux-mmc@vger.kernel.org>; Tue, 09 Jun 2020 07:54:25 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20150623.gappssmtp.com; s=20150623;
-        h=from:to:cc:subject:in-reply-to:references:date:message-id
-         :mime-version;
-        bh=gejxJi50IAlBWLUl0QwogqgVYpxXpSQbraYHpVsLRqw=;
-        b=NiEZq/ukPyXU22K7LVp0m+r0RSMtNOwTqKt6aP1iSq0smXw4wcda1UFih4tdLiJpOV
-         njmkzC6jYqVbBJcMmPlUuYcjd4O1KZtnUYl3FTNu3b0H5sEJzXEF8hkH0aH+CxMFaXTF
-         m0iEsiqvFbVJ8Cav0uoTsbAk1t062PDuF37egpU9e6kx4QM4qF71J4wfHXC6G1ROxxRY
-         JMs5QOxV4WFTAtQiEra3rsosSlJqi2YwDqpgjga+JgAKlk5SFrztqT2zf6hhcMMJ/o9W
-         /99JDMGh3FZ/6WjPNINfrDjPPyvsEocvbA7qE1JmjjQz6h3l0iJp3NLXfrP9gD134TtP
-         tpvQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:in-reply-to:references:date
-         :message-id:mime-version;
-        bh=gejxJi50IAlBWLUl0QwogqgVYpxXpSQbraYHpVsLRqw=;
-        b=p+/jPmumddI9Ltwbv+frSITPy8PJwQRey5bSL8DHQoJ2Ywd5y7WiO5grB2nA/1Qxrm
-         nB9IQu3shrOrDGoVR6atrQlOHGWsILjcnYHJ1Szt2xZZ96i702Gw1cp+EwwiD7LXLj/G
-         FDRqYg9WnPVAKUNuyXYN9faVFH7yhY68aKxWj79M8ETOYhQjyb6ID9BZN/eS/FSof2v6
-         bqrgeKrK9N6V4d34dxXEuPvHHxDtIklD8OTJ7G+E4VXR1abh214OvQkvds38m49pmycY
-         Vjdec4jQ5SEDntMi9CWnWmQmofhi+LF8ba48e1rjkmtoIUdEyQBfvwuyRLlJeWgKyYGf
-         pJuA==
-X-Gm-Message-State: AOAM531Xl7fsWxeRYKzCxew66f4xXk4l4iix0wM+kBr25Ihu7AupuxNI
-        4Oqz5y49VarmgQPQSuVmhdHp1A==
-X-Google-Smtp-Source: ABdhPJx0g0ITtVIgCVlfIpmzgRxBsMtKoHziqrcBUDg+BtiyrsHIhGb+DPpRsoxOg3ZMlcgjF7+SZw==
-X-Received: by 2002:adf:9481:: with SMTP id 1mr4875326wrr.396.1591714463791;
-        Tue, 09 Jun 2020 07:54:23 -0700 (PDT)
-Received: from localhost (c-71-197-186-152.hsd1.wa.comcast.net. [71.197.186.152])
-        by smtp.gmail.com with ESMTPSA id f185sm3241153wmf.43.2020.06.09.07.54.22
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 09 Jun 2020 07:54:23 -0700 (PDT)
-From:   Kevin Hilman <khilman@baylibre.com>
-To:     Neil Armstrong <narmstrong@baylibre.com>, ulf.hansson@linaro.org
-Cc:     linux-amlogic@lists.infradead.org, linux-mmc@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-        Neil Armstrong <narmstrong@baylibre.com>,
-        Art Nikpal <art@khadas.com>,
-        Christian Hewitt <christianshewitt@gmail.com>
-Subject: Re: [PATCH] mmc: meson-gx: limit segments to 1 when dram-access-quirk is needed
-In-Reply-To: <20200608084458.32014-1-narmstrong@baylibre.com>
-References: <20200608084458.32014-1-narmstrong@baylibre.com>
-Date:   Tue, 09 Jun 2020 07:54:20 -0700
-Message-ID: <7hmu5cguhv.fsf@baylibre.com>
+        id S1731040AbgFIQE6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 9 Jun 2020 12:04:58 -0400
+Received: from new2-smtp.messagingengine.com ([66.111.4.224]:38899 "EHLO
+        new2-smtp.messagingengine.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1730999AbgFIQE4 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Jun 2020 12:04:56 -0400
+Received: from compute4.internal (compute4.nyi.internal [10.202.2.44])
+        by mailnew.nyi.internal (Postfix) with ESMTP id 00C9D580198;
+        Tue,  9 Jun 2020 12:04:54 -0400 (EDT)
+Received: from mailfrontend1 ([10.202.2.162])
+  by compute4.internal (MEProxy); Tue, 09 Jun 2020 12:04:55 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=cerno.tech; h=
+        date:from:to:cc:subject:message-id:references:mime-version
+        :content-type:in-reply-to; s=fm3; bh=+Z1CbKKzxFQkq1/YTSxGbIdFSzg
+        K4ihAD5NZF8upwxI=; b=iXSICJKUKbub8O1mb/4XprYG6trgvVZ4uvlrXgS6UAu
+        c/McrLTaBFyWCe4ecRAseIC+ifBoW5MlWqPmgDAcH9CiFJdaYh0MrveUwspHRR3S
+        h+JcXC77Qph8GLfibzZsYPx6mytiIT37zLfd4QTnetypJDO1xGsqhg8mkiUPGNGF
+        fnZS+aYnQSw6na7bt/wCkN8r4250fx6vx9QTdzE0e+DAVIgc6+qPsPQ7YGsy7ban
+        9E+V3ODTGK6PA0xlZC+UCNCdYKqcEO4JjURsm/Pl6HdwX4LtLPNf8arzMf1O2wR4
+        v7ithUgvhcJ8R00QgJteE93qBUfRB9OHW14zfSmIxOQ==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+        messagingengine.com; h=cc:content-type:date:from:in-reply-to
+        :message-id:mime-version:references:subject:to:x-me-proxy
+        :x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=fm3; bh=+Z1CbK
+        KzxFQkq1/YTSxGbIdFSzgK4ihAD5NZF8upwxI=; b=KevHb/78PKKepKdMUBnr7h
+        R+3lIkYZ6Zt08egMuE/+Hk7EI89kBhUVXeE7KTd+SLGGqZ00cJoDemOBkhAjd9T9
+        qLzRgYxZCSnjG0mNo0k9Awg8jzwL+QZFYDcyKvu7c1IP44AXb2L0Noi3dR8n3JHv
+        uj+ztELeVjOCQF+KwWPWbVqY0WpiyPmzBJOiCR7lCQNoJPDy11e4JG4+ToWboADn
+        NOg7rCJzuJt1makv7efI6L7YDyADgKYO+aWvtYM8k++ALzAtEQEFA93m0FZSU520
+        WguNFHqrTaYOGZ2hjWYYx/epchsMOjpzVBeiyZwAE6z0xP4dV9hYZOpFNwiCGANQ
+        ==
+X-ME-Sender: <xms:IrPfXuWsSVa0ZPTZYogX02FsTEzNbd6NO09uJ5DEEC7s36akvn7-1g>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeduhedrudehgedgleekucetufdoteggodetrfdotf
+    fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfqfgfvpdfurfetoffkrfgpnffqhgen
+    uceurghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmne
+    cujfgurhepfffhvffukfhfgggtuggjsehgtderredttddvnecuhfhrohhmpeforgigihhm
+    vgcutfhiphgrrhguuceomhgrgihimhgvsegtvghrnhhordhtvggthheqnecuggftrfgrth
+    htvghrnhepleekgeehhfdutdeljefgleejffehfffgieejhffgueefhfdtveetgeehieeh
+    gedunecukfhppeeltddrkeelrdeikedrjeeinecuvehluhhsthgvrhfuihiivgeptdenuc
+    frrghrrghmpehmrghilhhfrhhomhepmhgrgihimhgvsegtvghrnhhordhtvggthh
+X-ME-Proxy: <xmx:IrPfXql3xi9awde6ICH0Hx-fY0FjpOH84zr4Y_UEMI7Yd0GL9dhQwQ>
+    <xmx:IrPfXiYhL3ztgubReA5xwKSGkPocTbuzeOFsM1nJ3S3-yniFLQ7NNA>
+    <xmx:IrPfXlWtxP9_Dk07K6cZ9SZF-Jk3BaVFA9LMLlEfJZ-VEsuQ92jxMQ>
+    <xmx:JrPfXi6fIGP-gCnnKabye7wBEem0m1quMDoyKnUC1ckdjhuXeWEQbQ>
+Received: from localhost (lfbn-tou-1-1502-76.w90-89.abo.wanadoo.fr [90.89.68.76])
+        by mail.messagingengine.com (Postfix) with ESMTPA id 47B1F328005D;
+        Tue,  9 Jun 2020 12:04:50 -0400 (EDT)
+Date:   Tue, 9 Jun 2020 18:04:48 +0200
+From:   Maxime Ripard <maxime@cerno.tech>
+To:     Frank Lee <tiny.windzz@gmail.com>
+Cc:     Frank Lee <frank@allwinnertech.com>, chaotian.jing@mediatek.com,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        Chen-Yu Tsai <wens@csie.org>, rmfrfs@gmail.com, marex@denx.de,
+        linux-mmc@vger.kernel.org,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        linux-mediatek@lists.infradead.org,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Subject: Re: [PATCH 1/2] mmc: sunxi-mmc: do not hide address in
+ sunxi_mmc_irq()
+Message-ID: <20200609160448.cy47xfwqs6hkxi7d@gilmour.lan>
+References: <20200605125545.31974-1-frank@allwinnertech.com>
+ <20200605151810.vmgnnzp7cadfwsu5@gilmour.lan>
+ <CAEExFWuoHhLqt4aukmP30SSXmwnmYuRq2t5HWKUBvreeABg=XQ@mail.gmail.com>
 MIME-Version: 1.0
-Content-Type: text/plain
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="uphnnc535acqsyc6"
+Content-Disposition: inline
+In-Reply-To: <CAEExFWuoHhLqt4aukmP30SSXmwnmYuRq2t5HWKUBvreeABg=XQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Neil Armstrong <narmstrong@baylibre.com> writes:
 
-> The actual max_segs computation leads to failure while using the broadcom
-> sdio brcmfmac/bcmsdh driver, since the driver tries to make usage of scatter
-> gather.
->
-> But with the dram-access-quirk we use a 1,5K SRAM bounce buffer, and the
-> max_segs current value of 3 leads to max transfers to 4,5k, which doesn't work.
->
-> This patch sets max_segs to 1 to better describe the hardware limitation,
-> and fix the SDIO functionnality with the brcmfmac/bcmsdh driver on Amlogic
-> G12A/G12B SoCs on boards like SEI510 or Khadas VIM3.
->
-> Reported-by: Art Nikpal <art@khadas.com>
-> Reported-by: Christian Hewitt <christianshewitt@gmail.com>
-> Fixes: acdc8e71d9bb ("mmc: meson-gx: add dram-access-quirk")
-> Signed-off-by: Neil Armstrong <narmstrong@baylibre.com>
+--uphnnc535acqsyc6
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Reviewed-by: Kevin Hilman <khilman@baylibre.com>
+On Mon, Jun 08, 2020 at 08:54:51PM +0800, Frank Lee wrote:
+> On Fri, Jun 5, 2020 at 11:18 PM Maxime Ripard <maxime@cerno.tech> wrote:
+> >
+> > Hi,
+> >
+> > On Fri, Jun 05, 2020 at 08:55:44PM +0800, Frank Lee wrote:
+> > > From: Yangtao Li <tiny.windzz@gmail.com>
+> > >
+> > > Using %px to show the actual address in sunxi_mmc_irq()
+> > > to help us to debug issue.
+> > >
+> > > Signed-off-by: Yangtao Li <tiny.windzz@gmail.com>
+> > > Signed-off-by: Frank Lee <frank@allwinnertech.com>
+> >
+> > I'm fairly sure this hash is on purpose, and both the commit log of the
+> > %px introduction (ad67b74d2469) and the checkpatch message are pretty
+> > explicit about it.
+> >
+> > What issue were you trying to solve here?
+>=20
+> There doesn't seem to be a strong requirement to force this to be printed=
+ out,
+> I just think that ____ptrval____ is very unpleasant.
+
+That should happen only at boot when the system doesn't have enough
+entropy iirc, after a while it prints out hashes.
+
+> Or delete %p directly?
+
+You mean the message in the driver? I'd be fine with that too.
+
+Maxime
+
+--uphnnc535acqsyc6
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iHUEABYIAB0WIQRcEzekXsqa64kGDp7j7w1vZxhRxQUCXt+zIAAKCRDj7w1vZxhR
+xb84AP46JXO+C4VULSIH3+jYn7G+NlNEDTE3GV7/bT7NB3BsmQEA7Kq4fnJRdk4P
+/iG2Sff9PD+15yt8ZNIKVw2xH/1twQI=
+=t5aH
+-----END PGP SIGNATURE-----
+
+--uphnnc535acqsyc6--
