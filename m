@@ -2,112 +2,111 @@ Return-Path: <SRS0=O4RQ=7X=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.6 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.0 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_2 autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7273AC433E1
-	for <linux-mmc@archiver.kernel.org>; Wed, 10 Jun 2020 10:00:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 71C5BC433E0
+	for <linux-mmc@archiver.kernel.org>; Wed, 10 Jun 2020 13:22:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4576A2072E
-	for <linux-mmc@archiver.kernel.org>; Wed, 10 Jun 2020 10:00:21 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1591783221;
-	bh=VSaKKfy/V9rqADPSSuu4IkfVocrsiTN4SkeMzZaW7sU=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
-	b=SPOBbMP8oO9SeT+8rjR/OGRJ4sKgGiLHG1zVXIU1eAdvY4BoZjmUZ9vF/9RO+gyIt
-	 1irx0z7lXtM7PzOK7cKU2hINhDaIMnupffjwHyO+Akv0d2G7zTVYm+Pf4TbFVnt4JJ
-	 KrVJK3CD4FvZ8mcQgO1ClTzE1gDnrZhKKhB38hew=
+	by mail.kernel.org (Postfix) with ESMTP id 495CA2078D
+	for <linux-mmc@archiver.kernel.org>; Wed, 10 Jun 2020 13:22:17 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=tq-group.com header.i=@tq-group.com header.b="E0W97Phx"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728030AbgFJKAP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 10 Jun 2020 06:00:15 -0400
-Received: from mail.kernel.org ([198.145.29.99]:41390 "EHLO mail.kernel.org"
+        id S1726309AbgFJNWQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 10 Jun 2020 09:22:16 -0400
+Received: from mx1.tq-group.com ([62.157.118.193]:20790 "EHLO mx1.tq-group.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726134AbgFJKAN (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 10 Jun 2020 06:00:13 -0400
-Received: from localhost (fw-tnat.cambridge.arm.com [217.140.96.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 8777D206F7;
-        Wed, 10 Jun 2020 10:00:11 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1591783212;
-        bh=VSaKKfy/V9rqADPSSuu4IkfVocrsiTN4SkeMzZaW7sU=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=YDs7MBeb2K677sLe+jsRXVpbxfgyiWtMqgAAH4UBRVDPr6G15N6APmORXYwb0GRiV
-         8+vaBwg4yMWkxljIhw0cjb2+glk+B4zRdYHRnaSZhsEefHapZURnCwnIK5CNGsPWW9
-         PssrjRNGQ367egX8GwKYwHnwj4R+zYE2Fw4pcmoo=
-Date:   Wed, 10 Jun 2020 11:00:08 +0100
-From:   Mark Brown <broonie@kernel.org>
-To:     Rob Herring <robh@kernel.org>
-Cc:     Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
-        adrian.hunter@intel.com, ulf.hansson@linaro.org,
-        bjorn.andersson@linaro.org, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        devicetree@vger.kernel.org
-Subject: Re: [PATCH V3 1/3] dt-bindings: mmc: Supply max load for mmc supplies
-Message-ID: <20200610100008.GA5005@sirena.org.uk>
-References: <1589541535-8523-1-git-send-email-vbadigan@codeaurora.org>
- <1591094883-11674-1-git-send-email-vbadigan@codeaurora.org>
- <1591094883-11674-2-git-send-email-vbadigan@codeaurora.org>
- <20200609230216.GA1655591@bogus>
-MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="jI8keyz6grp/JLjh"
-Content-Disposition: inline
-In-Reply-To: <20200609230216.GA1655591@bogus>
-X-Cookie: fortune: No such file or directory
-User-Agent: Mutt/1.10.1 (2018-07-13)
+        id S1726291AbgFJNWQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 10 Jun 2020 09:22:16 -0400
+X-Greylist: delayed 430 seconds by postgrey-1.27 at vger.kernel.org; Wed, 10 Jun 2020 09:22:15 EDT
+IronPort-SDR: SOfhtoo3cpPQCaGkiVCLO+0Xcv1JaC0cxYzO1+Xr/hUPpQHW6xNnOkNnznXfSEq7ylKpH+1SV7
+ uObid5vBytdKiWX/Q3SPDPaQazWqjcedy/dE10EaQAO3n8tt+lGsKxmKiLTCQs+1LMC0oGgj7k
+ MMp+qTugf/Ct28bdM2uMduwiHeHTF9pPjTgi85Mu21/f43YJAyH7m7HN4hsr0JKvzohbyfyoL6
+ 7gpHVdCghawn6yXWUK7nIEI2ppfA2jsOQoSYEBB5+Vq//QpSJFgV4pXN0C6qPG4iIUImSQOPPR
+ vNE=
+X-IronPort-AV: E=Sophos;i="5.73,496,1583190000"; 
+   d="scan'208";a="12638479"
+Received: from unknown (HELO tq-pgp-pr1.tq-net.de) ([192.168.6.15])
+  by mx1-pgp.tq-group.com with ESMTP; 10 Jun 2020 15:15:04 +0200
+Received: from mx1.tq-group.com ([192.168.6.7])
+  by tq-pgp-pr1.tq-net.de (PGP Universal service);
+  Wed, 10 Jun 2020 15:15:04 +0200
+X-PGP-Universal: processed;
+        by tq-pgp-pr1.tq-net.de on Wed, 10 Jun 2020 15:15:04 +0200
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=tq-group.com; i=@tq-group.com; q=dns/txt; s=key1;
+  t=1591794904; x=1623330904;
+  h=message-id:subject:from:to:cc:date:mime-version:
+   content-transfer-encoding;
+  bh=TGTIzXlZhILMwfzfkA0Ocp9bCG1jW+m/WMFkKoJLGXU=;
+  b=E0W97PhxpNq3lCE9RokfYjozbtzQsZDXaz+u0CawBHiyaLjqiCcVW397
+   KxtDlc1VTWewjYKpnGMBlvXNX7hjedtIqgrTHhP3SDQxZA/n4YG9vxucf
+   K6MNlPditsRGe0xj9NOO8mNs69fh8OJPBimK/vMe4DicW9CjpBDTZp28F
+   1Ye3oE6BVdckmEuanchYadA/qNwQobn3p/IpMaOGiVkt7HqxPIbG1kLWJ
+   kQO9iNw1atGGtZHSbK2w35OqQBQ5UhimKNRBHoKYiZ1A2W8WuLUNnrInW
+   t5Um83HktLc72/6QUdEmCFN81yO4I59VqpnLVm2wdvq3tIFEswaCLsr4l
+   g==;
+IronPort-SDR: H2jn5AkN840HjfNLY7chLDDFaHSLNEvxTuoZAQ2lc1MRLVISi0Y6+z5L8mlg0yysVPF4aQb8nN
+ i7ifUzS0OIrAZpbXg5rUf0tJ6+oqYKDNMeFFW3kvZuYdyNtwhc2YLStxIxuA58BDur7iRhNHlT
+ 8LPJzR0kuRNsMjyDHVe/QfynVklGu+FuQlC860YG7Xv7JTvnMVe8mSFFvA8j64eBk7qQe/yp2J
+ j0Ki0ljZaxtF+ViQbCDL5e2HeswK3BYr2jqQQIoFExNZQumqE2N6dv+Yme1fy3gmFvsyhXNsLE
+ 9Ps=
+X-IronPort-AV: E=Sophos;i="5.73,496,1583190000"; 
+   d="scan'208";a="12638478"
+Received: from vtuxmail01.tq-net.de ([10.115.0.20])
+  by mx1.tq-group.com with ESMTP; 10 Jun 2020 15:15:04 +0200
+Received: from schifferm-ubuntu4.tq-net.de (schifferm-ubuntu4.tq-net.de [10.117.49.26])
+        by vtuxmail01.tq-net.de (Postfix) with ESMTPA id A04A4280065;
+        Wed, 10 Jun 2020 15:15:04 +0200 (CEST)
+Message-ID: <fb0340aaf273be84e915214a3d8bae4ac85d7c0b.camel@ew.tq-group.com>
+Subject: Consistent block device references for root= cmdline
+From:   Matthias Schiffer <matthias.schiffer@ew.tq-group.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Al Viro <viro@zeniv.linux.org.uk>,
+        Jens Axboe <axboe@kernel.dk>, s.hauer@pengutronix.de
+Cc:     linux-mmc@vger.kernel.org, linux-block@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Date:   Wed, 10 Jun 2020 15:15:03 +0200
+Content-Type: text/plain; charset="UTF-8"
+X-Mailer: Evolution 3.28.5-0ubuntu0.18.04.2 
+Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Hello all,
 
---jI8keyz6grp/JLjh
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+there have been numerous attempts to make the numbering of mmcblk
+devices consistent, mostly by using aliases from the DTS ([1], [2],
+[3]), but all have been (rightfully) rejected. Unless I have overlooked
+a more recent development, no attempts for a different solution were
+made.
 
-On Tue, Jun 09, 2020 at 05:02:16PM -0600, Rob Herring wrote:
-> On Tue, Jun 02, 2020 at 04:17:54PM +0530, Veerabhadrarao Badiganti wrote:
+As far as I can tell, the core of the issue seems to be the following:
 
-> > +  vmmc-supply-max-microamp:
-> > +    description: Maximum load for the card power.
+The existing solutions like LABELs and UUIDs are viable alternatives in
+many cases, but in particular on embedded systems, this is not quite
+sufficient: In addition to the problem that more knowledge about the
+system to boot is required in the bootloader, this approach fails
+completely when the same firmware image exists on multiple devices, for
+example on an eMMC and an SD card - not an entirely uncommon situation
+during the development of embedded systems.
 
-> > +  vqmmc-supply-max-microamp:
-> > +    description: Maximum load for the bus IO line power.
+With udev, I can refer to a specific partition using a path like
+/dev/disk/by-path/platform-2194000.usdhc-part2. In [4] it was proposed
+to add a way to refer to a device path/phandle from the kernel command
+line. Has there been any progress on this proposal?
 
-> By a 'common regulator property' I meant documented with regulator=20
-> binding like *-supply, not common to MMC. How is MMC special?
+Kind regards,
+Matthias
 
-TBH I'm surprised that these aren't defined by the MMC spec or by the ID
-information from the part we find connected - I'd not expect the board
-to be defining these at all.
 
-> Thinking about this some more, what's wrong with the max current in the=
-=20
-> regulator nodes? I suppose you could have more than one load and need to=
-=20
-> define the loads separately?
+[1] https://patchwork.kernel.org/patch/8685711/
+[2] https://lore.kernel.org/patchwork/cover/674381/
+[3] https://www.spinics.net/lists/linux-mmc/msg26586.html
+[4] https://www.spinics.net/lists/linux-mmc/msg26708.html
 
-One of the bigger reasons to think about the loads would be to
-dynamically configure the mode the regulator is in to go into a more
-efficient mode when some of the devices attached to it are turned off.
-
---jI8keyz6grp/JLjh
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQEzBAABCgAdFiEEreZoqmdXGLWf4p/qJNaLcl1Uh9AFAl7gryQACgkQJNaLcl1U
-h9DsNQf/QMOcKgKBR1OfTOXetzJw0GYmTTeWBRwrDxvOzlh/codHfgyJ97CrHmOY
-1+Th0yTlUfe69S3B5iZpER3S5jU+lsZmkeaKBNfxx3qykrWDpRi3FQG5AIOEBDB6
-m43i71UuvaryROGVyZQWEXiQ+H6RpJ7MV7IUBSa9bFZBVwwJ0ous7/nzsPt5iwfr
-0P/ZivT1TK9t/Zkp7biFYiuIZqvtDaSlO6yyPIb60D0Xq4+9XVJ+kPYnvRj7CEb5
-w3RLxK78z4QCWveNCjNrhIUtynLudM63ofRP3O6qtcYQ7wRkHjvpTbOZ4JvUMoKl
-bdh2nZKb7xJazHo13G3QtNgjgoq/0g==
-=QJTj
------END PGP SIGNATURE-----
-
---jI8keyz6grp/JLjh--
