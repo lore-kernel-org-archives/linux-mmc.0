@@ -2,177 +2,104 @@ Return-Path: <SRS0=Bxak=7Y=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.0 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED,USER_AGENT_SANE_2 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E8676C433DF
-	for <linux-mmc@archiver.kernel.org>; Thu, 11 Jun 2020 11:23:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CF25FC433E0
+	for <linux-mmc@archiver.kernel.org>; Thu, 11 Jun 2020 13:29:10 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C0E86207ED
-	for <linux-mmc@archiver.kernel.org>; Thu, 11 Jun 2020 11:23:33 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A561020823
+	for <linux-mmc@archiver.kernel.org>; Thu, 11 Jun 2020 13:29:10 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (2048-bit key) header.d=tq-group.com header.i=@tq-group.com header.b="D5T4hJX4"
+	dkim=pass (2048-bit key) header.d=st.com header.i=@st.com header.b="KtRUV29z"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727975AbgFKLXS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 11 Jun 2020 07:23:18 -0400
-Received: from mx1.tq-group.com ([62.157.118.193]:38499 "EHLO mx1.tq-group.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727904AbgFKLXR (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 11 Jun 2020 07:23:17 -0400
-IronPort-SDR: K/Fz8CzlNt0Sls90ffuamuQjdSAoeVs7WX5hKr1ZBOkWQHFga6tKQnGVdxAzyMk1J4tcbGxHqO
- kaq1IvkTFeXrBYxArTZiUbQkglQeCpcMVS/12QTfBy5x9AqyTgA5Oq7+28d7SGFUeB1OiBjQR2
- /rdNw7GD3pkbTZlZVxfrJcYXEfGbIiPjarLoTWONiyeoPe9/L5xjE2I7OM9KbQXWduSHaY3jbL
- YRgptM+9AlPZPirWGJprS1utvicTg4hLbKkHkGUMRVv25HZDhnDCT+TrPyLyxuv+ks8OvTMtqc
- Rdk=
-X-IronPort-AV: E=Sophos;i="5.73,499,1583190000"; 
-   d="scan'208";a="12649147"
-Received: from unknown (HELO tq-pgp-pr1.tq-net.de) ([192.168.6.15])
-  by mx1-pgp.tq-group.com with ESMTP; 11 Jun 2020 13:23:15 +0200
-Received: from mx1.tq-group.com ([192.168.6.7])
-  by tq-pgp-pr1.tq-net.de (PGP Universal service);
-  Thu, 11 Jun 2020 13:23:15 +0200
-X-PGP-Universal: processed;
-        by tq-pgp-pr1.tq-net.de on Thu, 11 Jun 2020 13:23:15 +0200
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=tq-group.com; i=@tq-group.com; q=dns/txt; s=key1;
-  t=1591874595; x=1623410595;
-  h=message-id:subject:from:to:cc:date:in-reply-to:
-   references:mime-version:content-transfer-encoding;
-  bh=L/lgEa4ngwESBUIJx1nHCkPgKmQSKt9J/YaWqXauyUY=;
-  b=D5T4hJX4FEoWAS/wvQwynmTaIeqQvuskhlM/PDu4E80stFfhaKrNz7wJ
-   Ur4lAhKPqW2ZXa8EQrNmEWXqifmPoXr2J1WLASGunUA56/rlfu7xAgy1L
-   IIYLgruaulVukYN4Fvjexg4rmBadBNhGVsK9yv8H2tWF6gom+OXPDcgJV
-   z94gAaQWH2wVw9kS8MsbAGRJsZmdhWJFqEm/1oKRBmJPAG4su3HzlDSh9
-   2oaA1rm2XwrNeU0q5EVsmcdgjtR6P/TWf1YtMEUU9Zd8QA4oeO/UVHfmO
-   hVpRACaBVuomaI8rRSRxEFBYLIgoFb8efJfDIL27wEAQeBkB+Ck28n71E
-   A==;
-IronPort-SDR: BBPnzRjo5PtKvM3sAoKKY/91efyUw36B8KUb3x0FrhdKvXoii3SYRfpW7ffwNcSyL31qRBh+25
- 93tfMfF8KK971BnNFi8HBA2zNHw4d5Q/LpoBqvKBL0D7/LWsMXvyflargHSdF9tvMy412WYp0U
- piWfYYQ/tVpSOWWAmy97dwF4HwmFcqbkpY4E7z62bwPoFcq38frXok8ntIUtIniAIiOq1TWzVy
- z9gDwgSmhmj+IUhtx6JVmaepfaAcEYtcWba8z1yj8b+A1hhjI4VIO0jvWyPc71x7DIEjFV1EOS
- hQo=
-X-IronPort-AV: E=Sophos;i="5.73,499,1583190000"; 
-   d="scan'208";a="12649146"
-Received: from vtuxmail01.tq-net.de ([10.115.0.20])
-  by mx1.tq-group.com with ESMTP; 11 Jun 2020 13:23:15 +0200
-Received: from schifferm-ubuntu4.tq-net.de (schifferm-ubuntu4.tq-net.de [10.117.49.26])
-        by vtuxmail01.tq-net.de (Postfix) with ESMTPA id C7DCE280065;
-        Thu, 11 Jun 2020 13:23:16 +0200 (CEST)
-Message-ID: <0637641b8872a84481f5177876893cd1543a0d0b.camel@ew.tq-group.com>
-Subject: Re: (EXT) Re: Consistent block device references for root= cmdline
-From:   Matthias Schiffer <matthias.schiffer@ew.tq-group.com>
-To:     Roger Heflin <rogerheflin@gmail.com>
-Cc:     Al Viro <viro@zeniv.linux.org.uk>, Jens Axboe <axboe@kernel.dk>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        linux-block <linux-block@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 11 Jun 2020 13:23:13 +0200
-In-Reply-To: <CAAMCDef2g8t5u1GuVH7p4bM1C7UMsC=fV4RKGU9jSG1rScPc9g@mail.gmail.com>
-References: <fb0340aaf273be84e915214a3d8bae4ac85d7c0b.camel@ew.tq-group.com>
-         <CAPDyKFq+RiwbDj+58+W5GTcT7=ZOpZFmc02+FxjRGYwbBgA8oQ@mail.gmail.com>
-         <CAAMCDef2g8t5u1GuVH7p4bM1C7UMsC=fV4RKGU9jSG1rScPc9g@mail.gmail.com>
-Content-Type: text/plain; charset="UTF-8"
-X-Mailer: Evolution 3.28.5-0ubuntu0.18.04.2 
-Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
+        id S1726357AbgFKN3K (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 11 Jun 2020 09:29:10 -0400
+Received: from mx07-00178001.pphosted.com ([62.209.51.94]:40832 "EHLO
+        mx07-00178001.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726249AbgFKN3J (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 11 Jun 2020 09:29:09 -0400
+Received: from pps.filterd (m0046668.ppops.net [127.0.0.1])
+        by mx07-00178001.pphosted.com (8.16.0.42/8.16.0.42) with SMTP id 05BDNNup014789;
+        Thu, 11 Jun 2020 15:28:54 +0200
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=st.com; h=from : to : cc : subject
+ : date : message-id : mime-version : content-type; s=STMicroelectronics;
+ bh=XL9z7/V+U5HkKeCU7/wVDcDZ122tdikkkBnJhib8NcA=;
+ b=KtRUV29zz7edVwBG9SxLneT9I1w3neuWasapJHAnklsh3/HW/669sT+tG7cANv17zqXB
+ MH+C/GXnJM73SVT8kfe2PGBy5+kNmrvUQyxUXVYibmnhFS2zPcfj4po/VSfNHUvIWlLc
+ O5F6JwUdpMo2UYvwt9hEId2B6mFPmwq70iMijmRwYcpRGqGKgOux6RJPdhR0X3BCH+wZ
+ wn6ky1hEVNi8Ds2niTQyz9gBWxR4rNCLiyp8nFBSuMzypiDVS4KTo5m7XxHLpiGODWb3
+ LLflgi5PkKAP0tECF+bitleKiWtj9dJiwcZJChTvhb43CW87rNTJFPQSdpo6kH+8WiiA Dg== 
+Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
+        by mx07-00178001.pphosted.com with ESMTP id 31jppp0cf8-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Thu, 11 Jun 2020 15:28:54 +0200
+Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
+        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 0100E10002A;
+        Thu, 11 Jun 2020 15:28:53 +0200 (CEST)
+Received: from Webmail-eu.st.com (sfhdag6node1.st.com [10.75.127.16])
+        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id E1F542A48CC;
+        Thu, 11 Jun 2020 15:28:52 +0200 (CEST)
+Received: from localhost (10.75.127.50) by SFHDAG6NODE1.st.com (10.75.127.16)
+ with Microsoft SMTP Server (TLS) id 15.0.1473.3; Thu, 11 Jun 2020 15:28:52
+ +0200
+From:   Ludovic Barre <ludovic.barre@st.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>
+CC:     <srinivas.kandagatla@linaro.org>,
+        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
+        Alexandre Torgue <alexandre.torgue@st.com>,
+        <linux-arm-kernel@lists.infradead.org>,
+        <linux-kernel@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-mmc@vger.kernel.org>,
+        <linux-stm32@st-md-mailman.stormreply.com>,
+        Ludovic Barre <ludovic.barre@st.com>
+Subject: [PATCH] mmc: mmci: add sdio datactrl mask for sdmmc revisions
+Date:   Thu, 11 Jun 2020 15:28:39 +0200
+Message-ID: <20200611132839.4515-1-ludovic.barre@st.com>
+X-Mailer: git-send-email 2.17.1
+MIME-Version: 1.0
+Content-Type: text/plain
+X-Originating-IP: [10.75.127.50]
+X-ClientProxiedBy: SFHDAG5NODE2.st.com (10.75.127.14) To SFHDAG6NODE1.st.com
+ (10.75.127.16)
+X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.216,18.0.687
+ definitions=2020-06-11_14:2020-06-11,2020-06-11 signatures=0
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 2020-06-10 at 12:33 -0500, Roger Heflin wrote:
-> No idea if this would still work, but back before label/uuid and lvm
-> in initird I had a staticly linked "C" program that ran inside
-> initrd,
-> it searched for likely places a boot device could be (mounted them
-> and
-> looked for a file to confirm it was the right device, then unmounted
-> it), and when it found the right one, it then echo's is major/minor
-> numbers into /proc/sys/kernel/real-root-dev and that is used for
-> root=
-> without it being on the command line.  Assuming you could get
-> something similar started by sytemd and/or udev inside the initrd it
-> might still work.
+This patch adds datactrl_mask_sdio for sdmmc revisions.
+sdmmc revisions used same bit of previous ST variant.
 
-Using an initramfs is obviously an option, but it complicates both the
-build setup and boot process, so we would like to avoid making this a
-hard requirement if possible.
+Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
+---
+ drivers/mmc/host/mmci.c | 2 ++
+ 1 file changed, 2 insertions(+)
 
-
-> 
-> On Wed, Jun 10, 2020 at 11:51 AM Ulf Hansson <ulf.hansson@linaro.org>
-> wrote:
-> > 
-> > On Wed, 10 Jun 2020 at 15:15, Matthias Schiffer
-> > <matthias.schiffer@ew.tq-group.com> wrote:
-> > > 
-> > > Hello all,
-> > > 
-> > > there have been numerous attempts to make the numbering of mmcblk
-> > > devices consistent, mostly by using aliases from the DTS ([1],
-> > > [2],
-> > > [3]), but all have been (rightfully) rejected. Unless I have
-> > > overlooked
-> > > a more recent development, no attempts for a different solution
-> > > were
-> > > made.
-> > 
-> > According to aliases attempts, I think those have failed, mainly
-> > because of two reasons.
-> > 
-> > 1. Arguments stating that LABELs/UUIDs are variable alternatives.
-> > This
-> > isn't the case, which I think was also concluded from the several
-> > earlier discussions.
-> > 2. Patches that tried adding support for mmc aliases, were not
-> > correctly coded. More precisely, what needs to be addressed is that
-> > the mmc core also preserves the same ids to be set for the host
-> > class
-> > as the block device, mmc[n] must correspond to mmcblk[n].
-> > 
-> > > 
-> > > As far as I can tell, the core of the issue seems to be the
-> > > following:
-> > > 
-> > > The existing solutions like LABELs and UUIDs are viable
-> > > alternatives in
-> > > many cases, but in particular on embedded systems, this is not
-> > > quite
-> > > sufficient: In addition to the problem that more knowledge about
-> > > the
-> > > system to boot is required in the bootloader, this approach fails
-> > > completely when the same firmware image exists on multiple
-> > > devices, for
-> > > example on an eMMC and an SD card - not an entirely uncommon
-> > > situation
-> > > during the development of embedded systems.
-> > > 
-> > > With udev, I can refer to a specific partition using a path like
-> > > /dev/disk/by-path/platform-2194000.usdhc-part2. In [4] it was
-> > > proposed
-> > > to add a way to refer to a device path/phandle from the kernel
-> > > command
-> > > line. Has there been any progress on this proposal?
-> > 
-> > Lots of time during the years I have been approached, both publicly
-> > and offlist, about whether it would be possible to add support for
-> > "consistent" mmcblk devices. To me, I am fine with the aliases
-> > approach, as long as it gets implemented correctly.
-> > 
-> > > 
-> > > Kind regards,
-> > > Matthias
-> > > 
-> > > 
-> > > [1] https://patchwork.kernel.org/patch/8685711/
-> > > [2] https://lore.kernel.org/patchwork/cover/674381/
-> > > [3] https://www.spinics.net/lists/linux-mmc/msg26586.html
-> > > [4] https://www.spinics.net/lists/linux-mmc/msg26708.html
-> > > 
-> > 
-> > Kind regards
-> > Uffe
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index a69d6a0c2e15..b5a41a7ce165 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -267,6 +267,7 @@ static struct variant_data variant_stm32_sdmmc = {
+ 	.datalength_bits	= 25,
+ 	.datactrl_blocksz	= 14,
+ 	.datactrl_any_blocksz	= true,
++	.datactrl_mask_sdio	= MCI_DPSM_ST_SDIOEN,
+ 	.stm32_idmabsize_mask	= GENMASK(12, 5),
+ 	.busy_timeout		= true,
+ 	.busy_detect		= true,
+@@ -292,6 +293,7 @@ static struct variant_data variant_stm32_sdmmcv2 = {
+ 	.datalength_bits	= 25,
+ 	.datactrl_blocksz	= 14,
+ 	.datactrl_any_blocksz	= true,
++	.datactrl_mask_sdio	= MCI_DPSM_ST_SDIOEN,
+ 	.stm32_idmabsize_mask	= GENMASK(16, 5),
+ 	.dma_lli		= true,
+ 	.busy_timeout		= true,
+-- 
+2.17.1
 
