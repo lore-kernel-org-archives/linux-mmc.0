@@ -2,104 +2,125 @@ Return-Path: <SRS0=Bxak=7Y=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.0 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CF25FC433E0
-	for <linux-mmc@archiver.kernel.org>; Thu, 11 Jun 2020 13:29:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 44BD4C433DF
+	for <linux-mmc@archiver.kernel.org>; Thu, 11 Jun 2020 20:32:39 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A561020823
-	for <linux-mmc@archiver.kernel.org>; Thu, 11 Jun 2020 13:29:10 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1BDBB2074B
+	for <linux-mmc@archiver.kernel.org>; Thu, 11 Jun 2020 20:32:39 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=st.com header.i=@st.com header.b="KtRUV29z"
+	dkim=fail reason="signature verification failed" (1024-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="g8pI0qJ4"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726357AbgFKN3K (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 11 Jun 2020 09:29:10 -0400
-Received: from mx07-00178001.pphosted.com ([62.209.51.94]:40832 "EHLO
-        mx07-00178001.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726249AbgFKN3J (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 11 Jun 2020 09:29:09 -0400
-Received: from pps.filterd (m0046668.ppops.net [127.0.0.1])
-        by mx07-00178001.pphosted.com (8.16.0.42/8.16.0.42) with SMTP id 05BDNNup014789;
-        Thu, 11 Jun 2020 15:28:54 +0200
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=st.com; h=from : to : cc : subject
- : date : message-id : mime-version : content-type; s=STMicroelectronics;
- bh=XL9z7/V+U5HkKeCU7/wVDcDZ122tdikkkBnJhib8NcA=;
- b=KtRUV29zz7edVwBG9SxLneT9I1w3neuWasapJHAnklsh3/HW/669sT+tG7cANv17zqXB
- MH+C/GXnJM73SVT8kfe2PGBy5+kNmrvUQyxUXVYibmnhFS2zPcfj4po/VSfNHUvIWlLc
- O5F6JwUdpMo2UYvwt9hEId2B6mFPmwq70iMijmRwYcpRGqGKgOux6RJPdhR0X3BCH+wZ
- wn6ky1hEVNi8Ds2niTQyz9gBWxR4rNCLiyp8nFBSuMzypiDVS4KTo5m7XxHLpiGODWb3
- LLflgi5PkKAP0tECF+bitleKiWtj9dJiwcZJChTvhb43CW87rNTJFPQSdpo6kH+8WiiA Dg== 
-Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
-        by mx07-00178001.pphosted.com with ESMTP id 31jppp0cf8-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Thu, 11 Jun 2020 15:28:54 +0200
-Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
-        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 0100E10002A;
-        Thu, 11 Jun 2020 15:28:53 +0200 (CEST)
-Received: from Webmail-eu.st.com (sfhdag6node1.st.com [10.75.127.16])
-        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id E1F542A48CC;
-        Thu, 11 Jun 2020 15:28:52 +0200 (CEST)
-Received: from localhost (10.75.127.50) by SFHDAG6NODE1.st.com (10.75.127.16)
- with Microsoft SMTP Server (TLS) id 15.0.1473.3; Thu, 11 Jun 2020 15:28:52
- +0200
-From:   Ludovic Barre <ludovic.barre@st.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>
-CC:     <srinivas.kandagatla@linaro.org>,
-        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
-        Alexandre Torgue <alexandre.torgue@st.com>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <linux-kernel@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-mmc@vger.kernel.org>,
-        <linux-stm32@st-md-mailman.stormreply.com>,
-        Ludovic Barre <ludovic.barre@st.com>
-Subject: [PATCH] mmc: mmci: add sdio datactrl mask for sdmmc revisions
-Date:   Thu, 11 Jun 2020 15:28:39 +0200
-Message-ID: <20200611132839.4515-1-ludovic.barre@st.com>
-X-Mailer: git-send-email 2.17.1
+        id S1726265AbgFKUci (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 11 Jun 2020 16:32:38 -0400
+Received: from www.zeus03.de ([194.117.254.33]:56232 "EHLO mail.zeus03.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1725782AbgFKUci (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 11 Jun 2020 16:32:38 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
+        date:from:to:cc:subject:message-id:references:mime-version
+        :content-type:in-reply-to; s=k1; bh=XfjGlyJl/T3p3ZUurz3vqEk1fEjR
+        3cpWETyOWaoOn0U=; b=g8pI0qJ4me9kXmg2KRopgd/TpOPVrDYTANMyYIpQdkvd
+        LPpCVPrcAPZgU+fIzi0KXelOoAejaFDDVC2vvhQNFWjX7eMQl5v5OrpuriIOLFBc
+        X1ArMHrk3K9lOcxqlTaBA+4LF/KGiBy2PFmZ1guMOWASfSUzIN4dFdB2KujFunQ=
+Received: (qmail 4193618 invoked from network); 11 Jun 2020 22:32:35 +0200
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 11 Jun 2020 22:32:35 +0200
+X-UD-Smtp-Session: l3s3148p1@dBtf3NSnbtAgAwDPXw1WAG/z8f7aUK6V
+Date:   Thu, 11 Jun 2020 22:32:35 +0200
+From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
+To:     Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Cc:     ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
+        linux-renesas-soc@vger.kernel.org
+Subject: Re: [PATCH 1/3] mmc: tmio: core: Add end operation into
+ tmio_mmc_dma_ops
+Message-ID: <20200611203235.GA10758@ninjato>
+References: <1590044466-28372-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
+ <1590044466-28372-2-git-send-email-yoshihiro.shimoda.uh@renesas.com>
 MIME-Version: 1.0
-Content-Type: text/plain
-X-Originating-IP: [10.75.127.50]
-X-ClientProxiedBy: SFHDAG5NODE2.st.com (10.75.127.14) To SFHDAG6NODE1.st.com
- (10.75.127.16)
-X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.216,18.0.687
- definitions=2020-06-11_14:2020-06-11,2020-06-11 signatures=0
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="fUYQa+Pmc3FrFX/N"
+Content-Disposition: inline
+In-Reply-To: <1590044466-28372-2-git-send-email-yoshihiro.shimoda.uh@renesas.com>
+User-Agent: Mutt/1.10.1 (2018-07-13)
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-This patch adds datactrl_mask_sdio for sdmmc revisions.
-sdmmc revisions used same bit of previous ST variant.
 
-Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
----
- drivers/mmc/host/mmci.c | 2 ++
- 1 file changed, 2 insertions(+)
+--fUYQa+Pmc3FrFX/N
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index a69d6a0c2e15..b5a41a7ce165 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -267,6 +267,7 @@ static struct variant_data variant_stm32_sdmmc = {
- 	.datalength_bits	= 25,
- 	.datactrl_blocksz	= 14,
- 	.datactrl_any_blocksz	= true,
-+	.datactrl_mask_sdio	= MCI_DPSM_ST_SDIOEN,
- 	.stm32_idmabsize_mask	= GENMASK(12, 5),
- 	.busy_timeout		= true,
- 	.busy_detect		= true,
-@@ -292,6 +293,7 @@ static struct variant_data variant_stm32_sdmmcv2 = {
- 	.datalength_bits	= 25,
- 	.datactrl_blocksz	= 14,
- 	.datactrl_any_blocksz	= true,
-+	.datactrl_mask_sdio	= MCI_DPSM_ST_SDIOEN,
- 	.stm32_idmabsize_mask	= GENMASK(16, 5),
- 	.dma_lli		= true,
- 	.busy_timeout		= true,
--- 
-2.17.1
+Hi,
 
+On Thu, May 21, 2020 at 04:01:04PM +0900, Yoshihiro Shimoda wrote:
+> Related drivers like renesas_sdhi_internal_dmac are possible
+> to lack dma unmaping in error cases (for example response timeout).
+>=20
+> Since tmio_mmc_finish_request() will be always called in any case,
+> to fix the issue, add end operation into struct tmio_mmc_dma_ops and
+> call the operation in tmio_mmc_finish_request() to call dma_ummap API
+> by the related drivers correctly.
+>=20
+> Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+> ---
+>  drivers/mmc/host/tmio_mmc.h      | 3 +++
+>  drivers/mmc/host/tmio_mmc_core.c | 8 ++++++++
+>  2 files changed, 11 insertions(+)
+>=20
+> diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
+> index b4cf101..0a4f365 100644
+> --- a/drivers/mmc/host/tmio_mmc.h
+> +++ b/drivers/mmc/host/tmio_mmc.h
+> @@ -118,6 +118,9 @@ struct tmio_mmc_dma_ops {
+>  	void (*release)(struct tmio_mmc_host *host);
+>  	void (*abort)(struct tmio_mmc_host *host);
+>  	void (*dataend)(struct tmio_mmc_host *host);
+> +
+> +	/* optional */
+> +	void (*end)(struct tmio_mmc_host *host);	/* held host->lock */
+
+Okay, the good news is that I can reproduce the error case. I also get a
+growing list in /sys/kernel/debug/dma-api/dump.
+
+However, here, the list does not grow at the same rate as the fake
+timeouts are injected. So, it doesn't look like the unmapping is missed
+every time but only occasionally, so this seems like a race somewhere?
+
+And if that is true, I wonder if we couldn't fix the current error paths
+instead of adding another callback?
+
+Or do you get a missed unmap for every timeout, Shimoda-san?
+
+All the best,
+
+   Wolfram
+
+
+--fUYQa+Pmc3FrFX/N
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAl7ilN8ACgkQFA3kzBSg
+KbZEcA/7B/NMY+HhZtZaxcO5dyZ8YWBnFgsGPAXd1L2VLDpF/ZxEtb+ptz768BSf
++zh6nbzAafO/tLqpLNVM5TJzMYLZjQAC/ku+GIyhMbtyAHb5Rjd+vot73J2RAwhB
+xkbBFxJgCvbEYlURyAkukfZhXqAw4g8uns9i7znp44apQDD/BwYma1fWRU4RnpPz
+2BY8kKU/IIyS74zA69qFMx+ktL/uSKVHTQ+asNJIyEqFIDAQYZgDHk8UOLD+yvev
+irNGRcOG718nusxhxro6i0qFPRo0SgbRr95SnmutL8YmsQGgh4wrM6c6SpcEYGJi
+LP3KL5HzEpUZCQbKGEmbt4E4Ztp2HxcXRBeb+ZG8AYKr2eViVbxpx3PwanmtXBIR
+YWHa4bTnprj6NlVqkZgfOFrQqikqyywvydXl4x1lddrbt4q+6lYHdzs8fRW9mXXg
+j4jJ8hhUZ7g55CgxYtyAQROSgC/aZmlBic7Z8qyGR+Q6Ig/zG4ov61Amnm+CpDOg
+azwZ6UvlL1+EvXCZ4VWx9JaDIAXzhEki3r9a8dgSqV5aWaYyn4rqwEBGj0spap5M
+WS1gp9Ib5If495drGDMp7IhpHQHvw+T/wU9KTP+mpxto4VIdbMqH5unkjT80ld8J
+HAabdLIhF04Erm3GvGz1GI6QVsKjdFwj0mHQOXLPUDEhOL5xqU0=
+=a2uH
+-----END PGP SIGNATURE-----
+
+--fUYQa+Pmc3FrFX/N--
