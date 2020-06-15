@@ -2,87 +2,91 @@ Return-Path: <SRS0=6MuA=74=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-4.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2D591C433E0
-	for <linux-mmc@archiver.kernel.org>; Mon, 15 Jun 2020 16:41:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3211BC433E2
+	for <linux-mmc@archiver.kernel.org>; Mon, 15 Jun 2020 23:12:13 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0C37B2078E
-	for <linux-mmc@archiver.kernel.org>; Mon, 15 Jun 2020 16:41:49 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1592239309;
-	bh=Sg9pbTBM29sML7ioDwEww4Qaaa7omQvS8yZyfbKVLPw=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
-	b=A+0wH6aoxGEbl5WK/s97NIBc7eAN5JTPi/pdMJudfRe/llOkDuSKzYm1GVUFBOPZw
-	 5/zxA28MN/FVhrx8y+8MAWMIBGyTzl0vGttG5Z1KvH64n2V6dj5s56KzrQq47Zabfi
-	 CTJXKRVAhSNcT5c98+9R7Qg+gyOF1qMDP3/gM6yw=
+	by mail.kernel.org (Postfix) with ESMTP id 07AE020C56
+	for <linux-mmc@archiver.kernel.org>; Mon, 15 Jun 2020 23:12:13 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="a/H1lS9d"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1731082AbgFOQlo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 15 Jun 2020 12:41:44 -0400
-Received: from mail-il1-f195.google.com ([209.85.166.195]:37841 "EHLO
-        mail-il1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1730985AbgFOQlm (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Jun 2020 12:41:42 -0400
-Received: by mail-il1-f195.google.com with SMTP id e11so15914850ilr.4;
-        Mon, 15 Jun 2020 09:41:40 -0700 (PDT)
+        id S1726731AbgFOXMM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 15 Jun 2020 19:12:12 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34178 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726688AbgFOXML (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Jun 2020 19:12:11 -0400
+Received: from mail-pj1-x1043.google.com (mail-pj1-x1043.google.com [IPv6:2607:f8b0:4864:20::1043])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1DD25C08C5C2
+        for <linux-mmc@vger.kernel.org>; Mon, 15 Jun 2020 16:12:10 -0700 (PDT)
+Received: by mail-pj1-x1043.google.com with SMTP id d6so609231pjs.3
+        for <linux-mmc@vger.kernel.org>; Mon, 15 Jun 2020 16:12:10 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=chromium.org; s=google;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=brcjvLKF1tqBCWFby3z+8MOldV/7mW3P5ikqS7XALSA=;
+        b=a/H1lS9d3FYn9UhSPXJsrr9Ixza6PpJjH8tSHUvh/CVDtcrK+HwLEfl5AcfQGKk7Yt
+         DgkSjxwNcl1kly5pAN0wEFgD8B08fUExsWnorPyLFmvpIBj+R/zkm9nzMFoDzMIv7hC6
+         We3UEU2NIbpxqEVOI2R78klemetd7V15D0qk4=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:date:from:to:cc:subject:message-id:references
          :mime-version:content-disposition:in-reply-to;
-        bh=3Urph/U1UKzR1PGfVK4c+aNc5CstzpffUrGS0jzQZrg=;
-        b=NWOFhuynPH9TBcqI22lYfH9Y8BplE/rJ/75sF3nhHZSWGc5lGXlSw6WCVnOsyE4N8c
-         Rd6x+5IJZDc/mxrsyFf3FWwIl5eWbZfoaP5aB5H/63K04kCz04OY+UETq7F6kELlgxVL
-         YltXUe9cSlkktKV4p5JTpHDups5wDgIy2gCIFZG9FN1WBX5/SHb5iqWTB1GxDRvwomfd
-         fmPf5DOld6I9iV4FWVj1yWZAbnSDHbdC3JkxugL0eLWoN8uGpJstj6e6KPDOwJYHbBUC
-         x1Qrwkrox+WBidDYUNPGT6PaZqWa5ax/oWIrymrFNl4Hx08dpQ0e2zEGuCdfPaCc5Fvr
-         sYDA==
-X-Gm-Message-State: AOAM533ACBNglswbY2qrmTzcJBtw8xkXK3IScFisCSJloUYlLWpG098d
-        7kAB1B0Hi3ylx+GpGyJA6g==
-X-Google-Smtp-Source: ABdhPJzR+1azivHuOTLfcrjgVgEufsot5KpaUT3Obr+FfX/SVPDRyiHptwaIbAJrewGwD3KKNi3pSA==
-X-Received: by 2002:a92:c985:: with SMTP id y5mr27865848iln.50.1592239300220;
-        Mon, 15 Jun 2020 09:41:40 -0700 (PDT)
-Received: from xps15 ([64.188.179.251])
-        by smtp.gmail.com with ESMTPSA id k185sm8463534ilk.16.2020.06.15.09.41.38
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 15 Jun 2020 09:41:39 -0700 (PDT)
-Received: (nullmailer pid 1922706 invoked by uid 1000);
-        Mon, 15 Jun 2020 16:41:38 -0000
-Date:   Mon, 15 Jun 2020 10:41:38 -0600
-From:   Rob Herring <robh@kernel.org>
-To:     Anson Huang <Anson.Huang@nxp.com>
-Cc:     festevam@gmail.com, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, devicetree@vger.kernel.org,
-        Linux-imx@nxp.com, ulf.hansson@linaro.org, s.hauer@pengutronix.de,
-        shawnguo@kernel.org, kernel@pengutronix.de, mpa@pengutronix.de,
-        linux-arm-kernel@lists.infradead.org, robh+dt@kernel.org
-Subject: Re: [PATCH V2 3/3] dt-bindings: mmc: Convert mxs mmc to json-schema
-Message-ID: <20200615164138.GA1922410@bogus>
-References: <1591234886-15351-1-git-send-email-Anson.Huang@nxp.com>
- <1591234886-15351-4-git-send-email-Anson.Huang@nxp.com>
+        bh=brcjvLKF1tqBCWFby3z+8MOldV/7mW3P5ikqS7XALSA=;
+        b=lTl3ikxPpqxLXv2vkwLPSrQTudivlr04vELnVFUIGhPxK0rce5+lQ0+NjpAep9vdzq
+         JOZW8ztrTFBu+7DE2uNhkiQICsrcuWHnfXnkUW5tkWG31OLX8QS+T5tnqMBPajxQ8fTA
+         DW8jizVWdlk5Q3Txbd+X7caPaIp0Ig6614ZL46y5F0JHCkmaqoxYFh6NOVkRTip3xM5T
+         EUo5pJEc1LIPXJ0JKwg2yATNpc95qy3Tj9UMymw9FapqXCHY9HsOlxk5iaODHTkCL72h
+         GHxSJALP0k2tJO5KbdHH4BL9j497R9qES8VggKdXjrJNhXSS8GLfQKtnAXhIdR1R2D78
+         SPQA==
+X-Gm-Message-State: AOAM5323Tm4OIFZbsqzywy7KxNfBl1G3RVpX69SyNHe0kP+Z1TjG1y0W
+        17K3yrx4s6CnYst1axUcWpSERA==
+X-Google-Smtp-Source: ABdhPJyyci+2oQlVyjby51mYZoyBYZiTzI2eRXhAYx5ofJPrOzIloyTJpVXRIiOsGGjwxvfH9O22kg==
+X-Received: by 2002:a17:90b:3004:: with SMTP id hg4mr266813pjb.208.1592262729649;
+        Mon, 15 Jun 2020 16:12:09 -0700 (PDT)
+Received: from localhost ([2620:15c:202:1:4fff:7a6b:a335:8fde])
+        by smtp.gmail.com with ESMTPSA id h3sm513401pje.28.2020.06.15.16.12.08
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 15 Jun 2020 16:12:08 -0700 (PDT)
+Date:   Mon, 15 Jun 2020 16:12:07 -0700
+From:   Matthias Kaehlcke <mka@chromium.org>
+To:     Pradeep P V K <ppvk@codeaurora.org>
+Cc:     bjorn.andersson@linaro.org, adrian.hunter@intel.com,
+        robh+dt@kernel.org, ulf.hansson@linaro.org,
+        vbadigan@codeaurora.org, sboyd@kernel.org,
+        georgi.djakov@linaro.org, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-mmc-owner@vger.kernel.org,
+        rnayak@codeaurora.org, sibis@codeaurora.org, matthias@chromium.org
+Subject: Re: [PATCH V4 1/2] mmc: sdhci-msm: Add interconnect bandwidth
+ scaling support
+Message-ID: <20200615231207.GX4525@google.com>
+References: <1591691846-7578-1-git-send-email-ppvk@codeaurora.org>
+ <1591691846-7578-2-git-send-email-ppvk@codeaurora.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <1591234886-15351-4-git-send-email-Anson.Huang@nxp.com>
+In-Reply-To: <1591691846-7578-2-git-send-email-ppvk@codeaurora.org>
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 04 Jun 2020 09:41:26 +0800, Anson Huang wrote:
-> Convert the MXS MMC binding to DT schema format using json-schema
+On Tue, Jun 09, 2020 at 02:07:25PM +0530, Pradeep P V K wrote:
+> Interconnect bandwidth scaling support is now added as a
+> part of OPP. So, make sure interconnect driver is ready
+> before handling interconnect scaling.
 > 
-> Signed-off-by: Anson Huang <Anson.Huang@nxp.com>
-> ---
-> Changes since V1:
-> 	- add "unevaluatedProperties: false".
-> ---
->  Documentation/devicetree/bindings/mmc/mxs-mmc.txt  | 27 ----------
->  Documentation/devicetree/bindings/mmc/mxs-mmc.yaml | 58 ++++++++++++++++++++++
->  2 files changed, 58 insertions(+), 27 deletions(-)
->  delete mode 100644 Documentation/devicetree/bindings/mmc/mxs-mmc.txt
->  create mode 100644 Documentation/devicetree/bindings/mmc/mxs-mmc.yaml
-> 
+> Signed-off-by: Pradeep P V K <ppvk@codeaurora.org>
+> Reviewed-by: Sibi Sankar <sibis@codeaurora.org>
 
-Applied, thanks!
+Reviewed-by: Matthias Kaehlcke <mka@chromium.org>
+
+Do you plan to send also patches that add the necessary DT entries?
+I'm particularly interested in SC7180.
