@@ -2,52 +2,54 @@ Return-Path: <SRS0=InOK=75=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+X-Spam-Status: No, score=-8.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
 	USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 81A77C433DF
-	for <linux-mmc@archiver.kernel.org>; Tue, 16 Jun 2020 18:42:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 631E0C433DF
+	for <linux-mmc@archiver.kernel.org>; Tue, 16 Jun 2020 18:47:11 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 66071208B3
-	for <linux-mmc@archiver.kernel.org>; Tue, 16 Jun 2020 18:42:40 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3D921207C4
+	for <linux-mmc@archiver.kernel.org>; Tue, 16 Jun 2020 18:47:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726881AbgFPSmf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 16 Jun 2020 14:42:35 -0400
-Received: from mga14.intel.com ([192.55.52.115]:4099 "EHLO mga14.intel.com"
+        id S1729065AbgFPSrK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 16 Jun 2020 14:47:10 -0400
+Received: from mga14.intel.com ([192.55.52.115]:4613 "EHLO mga14.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726464AbgFPSmf (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 16 Jun 2020 14:42:35 -0400
-IronPort-SDR: mGQHGETqUI78KctK4s7FgBYqSusKHpbSHG5QuloWbZB+dQIOXEyoF/QQ6mV6l8R/XkKw4gVjFt
- W2uRimFSsrqw==
+        id S1727114AbgFPSrJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 16 Jun 2020 14:47:09 -0400
+IronPort-SDR: /+l4W6M09FLmJAyYa3TuiTWGX1/mdBgXg6v1HoZwjA9ggqix+PKgWD/YmF4JJPZ4XJdmh2MO03
+ ECWG8kzeqjzw==
 X-Amp-Result: SKIPPED(no attachment in message)
 X-Amp-File-Uploaded: False
 Received: from orsmga003.jf.intel.com ([10.7.209.27])
-  by fmsmga103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 16 Jun 2020 11:42:04 -0700
-IronPort-SDR: FKLrpSfAK37xmRaGUKWg0ZhfZjwBKePy7x3Xv+XvMow2H5V2coTdUsJU8272eyN0ika7VHVmLn
- LCKqOdWyR3eA==
+  by fmsmga103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 16 Jun 2020 11:46:38 -0700
+IronPort-SDR: yS4kdxs3NL8vNSOJdyaZMSBL1jVCCWzOmJc3lPSd14irDK4TUkxn/OPPXN/ybnkz2cjsq+AgLl
+ ZlhPLUZmLgcQ==
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="5.73,519,1583222400"; 
-   d="scan'208";a="273247381"
+   d="scan'208";a="273248485"
 Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.73]) ([10.237.72.73])
-  by orsmga003.jf.intel.com with ESMTP; 16 Jun 2020 11:42:00 -0700
-Subject: Re: [PATCH v2 2/3] sdhci: sparx5: Add Sparx5 SoC eMMC driver
+  by orsmga003.jf.intel.com with ESMTP; 16 Jun 2020 11:46:35 -0700
+Subject: Re: [PATCH v3 2/3] sdhci: sparx5: Add Sparx5 SoC eMMC driver
+List-Id: <soc.lore.kernel.org>
 To:     Lars Povlsen <lars.povlsen@microchip.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
+        Ulf Hansson <ulf.hansson@linaro.org>, SoC Team <soc@kernel.org>
 Cc:     Microchip Linux Driver Support <UNGLinuxDriver@microchip.com>,
         linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
-References: <20200609102008.10530-1-lars.povlsen@microchip.com>
- <20200609102008.10530-3-lars.povlsen@microchip.com>
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+        Alexandre Belloni <alexandre.belloni@bootlin.com>
+References: <20200616140027.4949-1-lars.povlsen@microchip.com>
+ <20200616140027.4949-3-lars.povlsen@microchip.com>
 From:   Adrian Hunter <adrian.hunter@intel.com>
 Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
  Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <27a9ad72-9657-ea84-8240-3b912c7f3b6b@intel.com>
-Date:   Tue, 16 Jun 2020 21:41:30 +0300
+Message-ID: <b4ba671d-aa51-78a4-8e49-f105663a308a@intel.com>
+Date:   Tue, 16 Jun 2020 21:46:05 +0300
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
  Thunderbird/68.8.1
 MIME-Version: 1.0
-In-Reply-To: <20200609102008.10530-3-lars.povlsen@microchip.com>
+In-Reply-To: <20200616140027.4949-3-lars.povlsen@microchip.com>
 Content-Type: text/plain; charset=utf-8
 Content-Language: en-US
 Content-Transfer-Encoding: 7bit
@@ -56,24 +58,26 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 9/06/20 1:20 pm, Lars Povlsen wrote:
+On 16/06/20 5:00 pm, Lars Povlsen wrote:
 > This adds the eMMC driver for the Sparx5 SoC. It is based upon the
 > designware IP, but requires some extra initialization and quirks.
+> 
+> Signed-off-by: Lars Povlsen <lars.povlsen@microchip.com>
 > ---
 >  drivers/mmc/host/Kconfig           |  13 ++
 >  drivers/mmc/host/Makefile          |   1 +
->  drivers/mmc/host/sdhci-of-sparx5.c | 274 +++++++++++++++++++++++++++++
->  3 files changed, 288 insertions(+)
+>  drivers/mmc/host/sdhci-of-sparx5.c | 269 +++++++++++++++++++++++++++++
+>  3 files changed, 283 insertions(+)
 >  create mode 100644 drivers/mmc/host/sdhci-of-sparx5.c
 > 
 > diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index eb85237bf2d63..32dc3ced8529d 100644
+> index 3b706af35ec31..a3bad4b4ed7ea 100644
 > --- a/drivers/mmc/host/Kconfig
 > +++ b/drivers/mmc/host/Kconfig
 > @@ -213,6 +213,19 @@ config MMC_SDHCI_OF_DWCMSHC
 >  	  If you have a controller with this interface, say Y or M here.
 >  	  If unsure, say N.
-> 
+>  
 > +config MMC_SDHCI_OF_SPARX5
 > +	tristate "SDHCI OF support for the MCHP Sparx5 SoC"
 > +	depends on MMC_SDHCI_PLTFM
@@ -91,23 +95,23 @@ On 9/06/20 1:20 pm, Lars Povlsen wrote:
 >  	tristate "SDHCI support for the Cadence SD/SDIO/eMMC controller"
 >  	depends on MMC_SDHCI_PLTFM
 > diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-> index 4d5bcb0144a0a..4a57c4bf18a2e 100644
+> index 4d5bcb0144a0a..451c25fc2c692 100644
 > --- a/drivers/mmc/host/Makefile
 > +++ b/drivers/mmc/host/Makefile
-> @@ -92,6 +92,7 @@ obj-$(CONFIG_MMC_SDHCI_OF_ARASAN)	+= sdhci-of-arasan.o
->  obj-$(CONFIG_MMC_SDHCI_OF_ASPEED)	+= sdhci-of-aspeed.o
->  obj-$(CONFIG_MMC_SDHCI_OF_AT91)		+= sdhci-of-at91.o
+> @@ -94,6 +94,7 @@ obj-$(CONFIG_MMC_SDHCI_OF_AT91)		+= sdhci-of-at91.o
 >  obj-$(CONFIG_MMC_SDHCI_OF_ESDHC)	+= sdhci-of-esdhc.o
-> +obj-$(CONFIG_MMC_SDHCI_OF_SPARX5)	+= sdhci-of-sparx5.o
 >  obj-$(CONFIG_MMC_SDHCI_OF_HLWD)		+= sdhci-of-hlwd.o
 >  obj-$(CONFIG_MMC_SDHCI_OF_DWCMSHC)	+= sdhci-of-dwcmshc.o
+> +obj-$(CONFIG_MMC_SDHCI_OF_SPARX5)	+= sdhci-of-sparx5.o
 >  obj-$(CONFIG_MMC_SDHCI_BCM_KONA)	+= sdhci-bcm-kona.o
+>  obj-$(CONFIG_MMC_SDHCI_IPROC)		+= sdhci-iproc.o
+>  obj-$(CONFIG_MMC_SDHCI_MSM)		+= sdhci-msm.o
 > diff --git a/drivers/mmc/host/sdhci-of-sparx5.c b/drivers/mmc/host/sdhci-of-sparx5.c
 > new file mode 100644
-> index 0000000000000..1ec40bb27e06d
+> index 0000000000000..972942fed4a68
 > --- /dev/null
 > +++ b/drivers/mmc/host/sdhci-of-sparx5.c
-> @@ -0,1 +1,274 @@
+> @@ -0,0 +1,269 @@
 > +// SPDX-License-Identifier: GPL-2.0-or-later
 > +/*
 > + * drivers/mmc/host/sdhci-of-sparx5.c
@@ -164,9 +168,6 @@ On 9/06/20 1:20 pm, Lars Povlsen wrote:
 > +					  unsigned int cmd)
 > +{
 > +	int tmplen, offset;
-> +
-> +	pr_debug("%s: write_desc: cmd %02x: len %d, offset 0x%0llx\n",
-> +		 mmc_hostname(host->mmc), cmd, len, addr);
 > +
 > +	if (likely(!len || BOUNDARY_OK(addr, len))) {
 > +		sdhci_adma_write_desc(host, desc, addr, len, cmd);
@@ -308,10 +309,8 @@ On 9/06/20 1:20 pm, Lars Povlsen wrote:
 > +		goto free_pltfm;
 > +
 > +	if (!of_property_read_u32(np, "microchip,clock-delay", &value) &&
-> +	    value <= MSHC_DLY_CC_MAX)
+> +	    (value > 0 && value <= MSHC_DLY_CC_MAX))
 > +		sdhci_sparx5->delay_clock = value;
-> +	else
-> +		sdhci_sparx5->delay_clock = -1; /* Autotune */
 > +
 > +	sdhci_get_of_property(pdev);
 > +
@@ -387,11 +386,5 @@ Also, the error message is not really needed if ret == -EPROBE_DEFER
 > +MODULE_DESCRIPTION("Sparx5 SDHCI OF driver");
 > +MODULE_AUTHOR("Lars Povlsen <lars.povlsen@microchip.com>");
 > +MODULE_LICENSE("GPL v2");
-> --
-> Cc: Microchip Linux Driver Support <UNGLinuxDriver@microchip.com>
-> Cc: linux-mmc@vger.kernel.org
-> Cc: devicetree@vger.kernel.org
-> Cc: linux-arm-kernel@lists.infradead.org
-> Cc: linux-kernel@vger.kernel.org
 > 
 
