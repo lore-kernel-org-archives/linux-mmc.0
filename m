@@ -7,101 +7,119 @@ X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D979BC433E1
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BCC73C433DF
 	for <linux-mmc@archiver.kernel.org>; Tue, 16 Jun 2020 11:33:16 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B796320B80
+	by mail.kernel.org (Postfix) with ESMTP id 9A7B82098B
 	for <linux-mmc@archiver.kernel.org>; Tue, 16 Jun 2020 11:33:16 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="iUYZE6Ij"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="VibwAZSD"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728576AbgFPLdP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        id S1728596AbgFPLdP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
         Tue, 16 Jun 2020 07:33:15 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35032 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35012 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728445AbgFPLdM (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 16 Jun 2020 07:33:12 -0400
-Received: from mail-vk1-xa42.google.com (mail-vk1-xa42.google.com [IPv6:2607:f8b0:4864:20::a42])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E4A99C08C5C2
-        for <linux-mmc@vger.kernel.org>; Tue, 16 Jun 2020 04:33:10 -0700 (PDT)
-Received: by mail-vk1-xa42.google.com with SMTP id y23so1623771vkd.13
-        for <linux-mmc@vger.kernel.org>; Tue, 16 Jun 2020 04:33:10 -0700 (PDT)
+        with ESMTP id S1726606AbgFPLdO (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 16 Jun 2020 07:33:14 -0400
+Received: from mail-vk1-xa44.google.com (mail-vk1-xa44.google.com [IPv6:2607:f8b0:4864:20::a44])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2B6A7C08C5C3
+        for <linux-mmc@vger.kernel.org>; Tue, 16 Jun 2020 04:33:13 -0700 (PDT)
+Received: by mail-vk1-xa44.google.com with SMTP id i1so4712965vkp.8
+        for <linux-mmc@vger.kernel.org>; Tue, 16 Jun 2020 04:33:13 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=aGK4YbhCcwirb0SVPCE+lFgJzM9gI3w/a7Njq3MvGOM=;
-        b=iUYZE6Ijc6WacIvt9ZuRdg7PWXdzmLnFzOx6tDATh5LsyftfqAIaOqVzK8ZvQSccDv
-         +M/h0lJdFifa8aPECvrC14s0tSjKcPBej/+LK4vzMSspSA6cz3hbpvMQAlWvjji8NfMX
-         4Sfy4RX33xH8TNb2zZ5tTqp/qSY/bnRqxP668LuNqVz9MjlU4E7nGW6NVW5M9/a2LG7N
-         tUp6oEI53+t9qQU/NmResf+EuwbcAFdJprdJrfGo0jkPDTcfwYXgKJH+GINXEeY99M94
-         s2t4gv6SlTCpxJzhOH46K9Td84u3P8ogUEPIHa/eBES8QaqZCsMyjzz+DiuegOT1hD6s
-         ggaA==
+        bh=ZSg0muGbkwOyh6Ot3lTlpvo0Mmt4wgCAweHT5tRHxm0=;
+        b=VibwAZSD84LU+4hHmx7H20bVV8ZpftSbkJ7qeyM+fPSnWy5b52HMmY8uC6oN/TOJ3N
+         Ppd7MeLLzhu4lLdwL1u8+HFFzEJwEkIRbPl3l2liiO84a2tEXnOOLJLVeD2eQr2LEdo1
+         GuqKU5ksA+/+QuCtf656nkvB+l8BnzLR+CwMeWI8NMKjSG87T6hTFLog6RcU8uJ5b42y
+         lBqr6ENJXZQ31zwwwbbWm8fG8NZlpIVe4l6fg47KvRL/VkNsBi3g56UkQTQ64+dQKFpF
+         89zZO5b6w/YjOAiLDeGYGxLcR5EKhAFvvlLFVKqumAr2y0DtwWTd9++bWUxaqHYG4fEh
+         NmyQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=aGK4YbhCcwirb0SVPCE+lFgJzM9gI3w/a7Njq3MvGOM=;
-        b=H0+YDYeFqWP2KV5EUCY3mXv8h7hXlCrOxQ8jPtD/kie6GQZZFhio7iBSI8mHAtiplT
-         ywkpjzVJ3vjSono+7sguljJWZWJEYjiF91FmWAGJYEiqH23a4a84OqfjtvSYZMfLuv3E
-         zNWq0zNIKC1/7XytfhBSxdLvVXz5Cg5hb1AfTf8IXtGrS2OOcHEgw/9FkiVFpLkSmrk5
-         R7VfBoxr5MJmQSIJb8hN6KBoQVa1gWT4dyH072GqMfIRCm0GRPXagv8BJsDaI0e419Tm
-         UR2eLq5/LPpDluKA27B1iNoINGdMHcokcC/qpnu2lDWy8VYgJCo+F3FPUokxVuvLUga6
-         0Isg==
-X-Gm-Message-State: AOAM53325VlfAIrvzCRIkMvxUG8m/LrAL+MknafOT6F3nNPPFffn9spk
-        LB43yrLKnwVgzFjdFCSiLS7vaIAG/EdejtSUpXUDyw==
-X-Google-Smtp-Source: ABdhPJwUYh4G25X8uNlyJV1JSiV/4TO05WKTdEB/kI9t/hbTUt46H5QKVf9ZIf+q00IIYmJ6Rwm9ORXK40d0MeOZDmo=
-X-Received: by 2002:a1f:5e51:: with SMTP id s78mr1151790vkb.59.1592307190187;
- Tue, 16 Jun 2020 04:33:10 -0700 (PDT)
+        bh=ZSg0muGbkwOyh6Ot3lTlpvo0Mmt4wgCAweHT5tRHxm0=;
+        b=TWJ+pybH92uaJISftFbtlUOTz5EL2BMrQ1//GxVpSjG6Vd6DRurtwiP9W6F02i0gfP
+         2tQrGbKBgxDezs8uvHpSGbMykUXhVXPGpsSH74WSZhype2QFvpQyqkQJzDcBMOYZw9zW
+         emw1GsaG+D7w0k4DSqUdZwX809nl7MbJN/qRAoWGrMpE761AByQMRuIcVOcvTMEIzZLm
+         zswWoa3v2lCYxvib23HMl1NykEUjArSHrNPQ0bjLvg0B2u9mLGfzo4BC2+8YE5T4nHuZ
+         op79Px4qJU4CRMt1hPgJNXYc8sbzWKGaL0LxGZf1WNcrhV/z2QYYbNd1mRQ64RLkDxfF
+         lzbQ==
+X-Gm-Message-State: AOAM533jSD2OBTA/ckimQ5VF5yPraub/25xt2zcz7HzbNW2Efe9UGT+O
+        jfdsfJLZyu8ROvl1PZ0fJQTBe83RRbEEH9Xyt0bF9A==
+X-Google-Smtp-Source: ABdhPJznqqxzYSq4IwrFjXL5kmjhHPScZNDOA7H32xZbM7qlqeiuriVkd5OOYnJKbb8oO4Q4Ov7r07YvZL4Xn1v7YjE=
+X-Received: by 2002:a1f:2145:: with SMTP id h66mr1118293vkh.53.1592307192362;
+ Tue, 16 Jun 2020 04:33:12 -0700 (PDT)
 MIME-Version: 1.0
-References: <20200604100102.13572-1-zbestahu@gmail.com>
-In-Reply-To: <20200604100102.13572-1-zbestahu@gmail.com>
+References: <20200608084458.32014-1-narmstrong@baylibre.com>
+In-Reply-To: <20200608084458.32014-1-narmstrong@baylibre.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 16 Jun 2020 13:32:32 +0200
-Message-ID: <CAPDyKFq6bGtBm94f_5G1_p2LW40hLet_kMtPbpX9BfxNsLfhuQ@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdio: Return ret if sdio_disable_func() fails
-To:     Yue Hu <zbestahu@gmail.com>
-Cc:     Doug Anderson <dianders@chromium.org>,
+Date:   Tue, 16 Jun 2020 13:32:36 +0200
+Message-ID: <CAPDyKFo7VA-wbOZUxExUpPoc+u446KecFARX0KNCakaubowpXg@mail.gmail.com>
+Subject: Re: [PATCH] mmc: meson-gx: limit segments to 1 when dram-access-quirk
+ is needed
+To:     Neil Armstrong <narmstrong@baylibre.com>
+Cc:     "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>,
         "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        huyue2@yulong.com
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        Art Nikpal <art@khadas.com>,
+        Christian Hewitt <christianshewitt@gmail.com>
 Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 4 Jun 2020 at 12:01, Yue Hu <zbestahu@gmail.com> wrote:
+On Mon, 8 Jun 2020 at 10:45, Neil Armstrong <narmstrong@baylibre.com> wrote:
 >
-> From: Yue Hu <huyue2@yulong.com>
+> The actual max_segs computation leads to failure while using the broadcom
+> sdio brcmfmac/bcmsdh driver, since the driver tries to make usage of scatter
+> gather.
 >
-> We should return any possible error returned by mmc_io_rw_direct()
-> rather than only -EIO in sdio_disable_func() failure path.
+> But with the dram-access-quirk we use a 1,5K SRAM bounce buffer, and the
+> max_segs current value of 3 leads to max transfers to 4,5k, which doesn't work.
 >
-> Signed-off-by: Yue Hu <huyue2@yulong.com>
+> This patch sets max_segs to 1 to better describe the hardware limitation,
+> and fix the SDIO functionnality with the brcmfmac/bcmsdh driver on Amlogic
+> G12A/G12B SoCs on boards like SEI510 or Khadas VIM3.
+>
+> Reported-by: Art Nikpal <art@khadas.com>
+> Reported-by: Christian Hewitt <christianshewitt@gmail.com>
+> Fixes: acdc8e71d9bb ("mmc: meson-gx: add dram-access-quirk")
+> Signed-off-by: Neil Armstrong <narmstrong@baylibre.com>
 
-Applied for next, thanks!
+Applied for fixes and by adding a stable tag, thanks!
 
 Kind regards
 Uffe
 
 
 > ---
->  drivers/mmc/core/sdio_io.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+>  drivers/mmc/host/meson-gx-mmc.c | 6 ++++--
+>  1 file changed, 4 insertions(+), 2 deletions(-)
 >
-> diff --git a/drivers/mmc/core/sdio_io.c b/drivers/mmc/core/sdio_io.c
-> index 2ba00ac..cba54df 100644
-> --- a/drivers/mmc/core/sdio_io.c
-> +++ b/drivers/mmc/core/sdio_io.c
-> @@ -133,7 +133,7 @@ int sdio_disable_func(struct sdio_func *func)
+> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
+> index 35400cf2a2e4..cfaf8e7e22ec 100644
+> --- a/drivers/mmc/host/meson-gx-mmc.c
+> +++ b/drivers/mmc/host/meson-gx-mmc.c
+> @@ -1143,9 +1143,11 @@ static int meson_mmc_probe(struct platform_device *pdev)
 >
->  err:
->         pr_debug("SDIO: Failed to disable device %s\n", sdio_func_id(func));
-> -       return -EIO;
-> +       return ret;
->  }
->  EXPORT_SYMBOL_GPL(sdio_disable_func);
->
+>         mmc->caps |= MMC_CAP_CMD23;
+>         if (host->dram_access_quirk) {
+> +               /* Limit segments to 1 due to low available sram memory */
+> +               mmc->max_segs = 1;
+>                 /* Limit to the available sram memory */
+> -               mmc->max_segs = SD_EMMC_SRAM_DATA_BUF_LEN / mmc->max_blk_size;
+> -               mmc->max_blk_count = mmc->max_segs;
+> +               mmc->max_blk_count = SD_EMMC_SRAM_DATA_BUF_LEN /
+> +                                    mmc->max_blk_size;
+>         } else {
+>                 mmc->max_blk_count = CMD_CFG_LENGTH_MASK;
+>                 mmc->max_segs = SD_EMMC_DESC_BUF_LEN /
 > --
-> 1.9.1
+> 2.22.0
 >
