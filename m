@@ -1,92 +1,266 @@
-Return-Path: <SRS0=6MuA=74=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=InOK=75=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.7 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3211BC433E2
-	for <linux-mmc@archiver.kernel.org>; Mon, 15 Jun 2020 23:12:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 51FD8C433DF
+	for <linux-mmc@archiver.kernel.org>; Tue, 16 Jun 2020 03:46:58 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 07AE020C56
-	for <linux-mmc@archiver.kernel.org>; Mon, 15 Jun 2020 23:12:13 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="a/H1lS9d"
+	by mail.kernel.org (Postfix) with ESMTP id 1E53D2074D
+	for <linux-mmc@archiver.kernel.org>; Tue, 16 Jun 2020 03:46:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726731AbgFOXMM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 15 Jun 2020 19:12:12 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34178 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726688AbgFOXML (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Jun 2020 19:12:11 -0400
-Received: from mail-pj1-x1043.google.com (mail-pj1-x1043.google.com [IPv6:2607:f8b0:4864:20::1043])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1DD25C08C5C2
-        for <linux-mmc@vger.kernel.org>; Mon, 15 Jun 2020 16:12:10 -0700 (PDT)
-Received: by mail-pj1-x1043.google.com with SMTP id d6so609231pjs.3
-        for <linux-mmc@vger.kernel.org>; Mon, 15 Jun 2020 16:12:10 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=chromium.org; s=google;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=brcjvLKF1tqBCWFby3z+8MOldV/7mW3P5ikqS7XALSA=;
-        b=a/H1lS9d3FYn9UhSPXJsrr9Ixza6PpJjH8tSHUvh/CVDtcrK+HwLEfl5AcfQGKk7Yt
-         DgkSjxwNcl1kly5pAN0wEFgD8B08fUExsWnorPyLFmvpIBj+R/zkm9nzMFoDzMIv7hC6
-         We3UEU2NIbpxqEVOI2R78klemetd7V15D0qk4=
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=brcjvLKF1tqBCWFby3z+8MOldV/7mW3P5ikqS7XALSA=;
-        b=lTl3ikxPpqxLXv2vkwLPSrQTudivlr04vELnVFUIGhPxK0rce5+lQ0+NjpAep9vdzq
-         JOZW8ztrTFBu+7DE2uNhkiQICsrcuWHnfXnkUW5tkWG31OLX8QS+T5tnqMBPajxQ8fTA
-         DW8jizVWdlk5Q3Txbd+X7caPaIp0Ig6614ZL46y5F0JHCkmaqoxYFh6NOVkRTip3xM5T
-         EUo5pJEc1LIPXJ0JKwg2yATNpc95qy3Tj9UMymw9FapqXCHY9HsOlxk5iaODHTkCL72h
-         GHxSJALP0k2tJO5KbdHH4BL9j497R9qES8VggKdXjrJNhXSS8GLfQKtnAXhIdR1R2D78
-         SPQA==
-X-Gm-Message-State: AOAM5323Tm4OIFZbsqzywy7KxNfBl1G3RVpX69SyNHe0kP+Z1TjG1y0W
-        17K3yrx4s6CnYst1axUcWpSERA==
-X-Google-Smtp-Source: ABdhPJyyci+2oQlVyjby51mYZoyBYZiTzI2eRXhAYx5ofJPrOzIloyTJpVXRIiOsGGjwxvfH9O22kg==
-X-Received: by 2002:a17:90b:3004:: with SMTP id hg4mr266813pjb.208.1592262729649;
-        Mon, 15 Jun 2020 16:12:09 -0700 (PDT)
-Received: from localhost ([2620:15c:202:1:4fff:7a6b:a335:8fde])
-        by smtp.gmail.com with ESMTPSA id h3sm513401pje.28.2020.06.15.16.12.08
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 15 Jun 2020 16:12:08 -0700 (PDT)
-Date:   Mon, 15 Jun 2020 16:12:07 -0700
-From:   Matthias Kaehlcke <mka@chromium.org>
-To:     Pradeep P V K <ppvk@codeaurora.org>
-Cc:     bjorn.andersson@linaro.org, adrian.hunter@intel.com,
-        robh+dt@kernel.org, ulf.hansson@linaro.org,
-        vbadigan@codeaurora.org, sboyd@kernel.org,
-        georgi.djakov@linaro.org, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-mmc-owner@vger.kernel.org,
-        rnayak@codeaurora.org, sibis@codeaurora.org, matthias@chromium.org
-Subject: Re: [PATCH V4 1/2] mmc: sdhci-msm: Add interconnect bandwidth
- scaling support
-Message-ID: <20200615231207.GX4525@google.com>
-References: <1591691846-7578-1-git-send-email-ppvk@codeaurora.org>
- <1591691846-7578-2-git-send-email-ppvk@codeaurora.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <1591691846-7578-2-git-send-email-ppvk@codeaurora.org>
+        id S1726091AbgFPDq5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 15 Jun 2020 23:46:57 -0400
+Received: from inva020.nxp.com ([92.121.34.13]:53444 "EHLO inva020.nxp.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1725985AbgFPDq5 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 15 Jun 2020 23:46:57 -0400
+Received: from inva020.nxp.com (localhost [127.0.0.1])
+        by inva020.eu-rdc02.nxp.com (Postfix) with ESMTP id 577321A056B;
+        Tue, 16 Jun 2020 05:46:55 +0200 (CEST)
+Received: from invc005.ap-rdc01.nxp.com (invc005.ap-rdc01.nxp.com [165.114.16.14])
+        by inva020.eu-rdc02.nxp.com (Postfix) with ESMTP id 2E7611A0568;
+        Tue, 16 Jun 2020 05:46:50 +0200 (CEST)
+Received: from localhost.localdomain (shlinux2.ap.freescale.net [10.192.224.44])
+        by invc005.ap-rdc01.nxp.com (Postfix) with ESMTP id 4BF16402E8;
+        Tue, 16 Jun 2020 11:46:44 +0800 (SGT)
+From:   Anson Huang <Anson.Huang@nxp.com>
+To:     ulf.hansson@linaro.org, robh+dt@kernel.org, shawnguo@kernel.org,
+        s.hauer@pengutronix.de, kernel@pengutronix.de, festevam@gmail.com,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+Cc:     Linux-imx@nxp.com
+Subject: [PATCH V3] dt-bindings: mmc: Convert imx esdhc to json-schema
+Date:   Tue, 16 Jun 2020 11:35:49 +0800
+Message-Id: <1592278549-32283-1-git-send-email-Anson.Huang@nxp.com>
+X-Mailer: git-send-email 2.7.4
+X-Virus-Scanned: ClamAV using ClamSMTP
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Jun 09, 2020 at 02:07:25PM +0530, Pradeep P V K wrote:
-> Interconnect bandwidth scaling support is now added as a
-> part of OPP. So, make sure interconnect driver is ready
-> before handling interconnect scaling.
-> 
-> Signed-off-by: Pradeep P V K <ppvk@codeaurora.org>
-> Reviewed-by: Sibi Sankar <sibis@codeaurora.org>
+Convert the i.MX ESDHC binding to DT schema format using json-schema
 
-Reviewed-by: Matthias Kaehlcke <mka@chromium.org>
+Signed-off-by: Anson Huang <Anson.Huang@nxp.com>
+---
+Changes since V2:
+	- fix typo of "dealy" to "delay";
+	- remove unused "Several ranges could be specified." in voltage-ranges which contradicts
+	  the min/max items.
+---
+ .../devicetree/bindings/mmc/fsl-imx-esdhc.txt      |  67 -----------
+ .../devicetree/bindings/mmc/fsl-imx-esdhc.yaml     | 124 +++++++++++++++++++++
+ 2 files changed, 124 insertions(+), 67 deletions(-)
+ delete mode 100644 Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
+ create mode 100644 Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
 
-Do you plan to send also patches that add the necessary DT entries?
-I'm particularly interested in SC7180.
+diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
+deleted file mode 100644
+index de1b8bd..0000000
+--- a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
++++ /dev/null
+@@ -1,67 +0,0 @@
+-* Freescale Enhanced Secure Digital Host Controller (eSDHC) for i.MX
+-
+-The Enhanced Secure Digital Host Controller on Freescale i.MX family
+-provides an interface for MMC, SD, and SDIO types of memory cards.
+-
+-This file documents differences between the core properties described
+-by mmc.txt and the properties used by the sdhci-esdhc-imx driver.
+-
+-Required properties:
+-- compatible : Should be "fsl,<chip>-esdhc", the supported chips include
+-	       "fsl,imx25-esdhc"
+-	       "fsl,imx35-esdhc"
+-	       "fsl,imx51-esdhc"
+-	       "fsl,imx53-esdhc"
+-	       "fsl,imx6q-usdhc"
+-	       "fsl,imx6sl-usdhc"
+-	       "fsl,imx6sx-usdhc"
+-	       "fsl,imx6ull-usdhc"
+-	       "fsl,imx7d-usdhc"
+-	       "fsl,imx7ulp-usdhc"
+-	       "fsl,imx8mq-usdhc"
+-	       "fsl,imx8mm-usdhc"
+-	       "fsl,imx8mn-usdhc"
+-	       "fsl,imx8mp-usdhc"
+-	       "fsl,imx8qm-usdhc"
+-	       "fsl,imx8qxp-usdhc"
+-
+-Optional properties:
+-- fsl,wp-controller : Indicate to use controller internal write protection
+-- fsl,delay-line : Specify the number of delay cells for override mode.
+-  This is used to set the clock delay for DLL(Delay Line) on override mode
+-  to select a proper data sampling window in case the clock quality is not good
+-  due to signal path is too long on the board. Please refer to eSDHC/uSDHC
+-  chapter, DLL (Delay Line) section in RM for details.
+-- voltage-ranges : Specify the voltage range in case there are software
+-  transparent level shifters on the outputs of the controller. Two cells are
+-  required, first cell specifies minimum slot voltage (mV), second cell
+-  specifies maximum slot voltage (mV). Several ranges could be specified.
+-- fsl,tuning-start-tap: Specify the start dealy cell point when send first CMD19
+-  in tuning procedure.
+-- fsl,tuning-step: Specify the increasing delay cell steps in tuning procedure.
+-  The uSDHC use one delay cell as default increasing step to do tuning process.
+-  This property allows user to change the tuning step to more than one delay
+-  cells which is useful for some special boards or cards when the default
+-  tuning step can't find the proper delay window within limited tuning retries.
+-- fsl,strobe-dll-delay-target: Specify the strobe dll control slave delay target.
+-  This delay target programming host controller loopback read clock, and this
+-  property allows user to change the delay target for the strobe input read clock.
+-  If not use this property, driver default set the delay target to value 7.
+-  Only eMMC HS400 mode need to take care of this property.
+-
+-Examples:
+-
+-esdhc@70004000 {
+-	compatible = "fsl,imx51-esdhc";
+-	reg = <0x70004000 0x4000>;
+-	interrupts = <1>;
+-	fsl,wp-controller;
+-};
+-
+-esdhc@70008000 {
+-	compatible = "fsl,imx51-esdhc";
+-	reg = <0x70008000 0x4000>;
+-	interrupts = <2>;
+-	cd-gpios = <&gpio1 6 0>; /* GPIO1_6 */
+-	wp-gpios = <&gpio1 5 0>; /* GPIO1_5 */
+-};
+diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
+new file mode 100644
+index 0000000..75dc116
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
+@@ -0,0 +1,124 @@
++# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
++%YAML 1.2
++---
++$id: http://devicetree.org/schemas/mmc/fsl-imx-esdhc.yaml#
++$schema: http://devicetree.org/meta-schemas/core.yaml#
++
++title: Freescale Enhanced Secure Digital Host Controller (eSDHC) for i.MX
++
++maintainers:
++  - Shawn Guo <shawn.guo@linaro.org>
++
++allOf:
++  - $ref: "mmc-controller.yaml"
++
++description: |
++  The Enhanced Secure Digital Host Controller on Freescale i.MX family
++  provides an interface for MMC, SD, and SDIO types of memory cards.
++
++  This file documents differences between the core properties described
++  by mmc.txt and the properties used by the sdhci-esdhc-imx driver.
++
++properties:
++  compatible:
++    enum:
++      - fsl,imx25-esdhc
++      - fsl,imx35-esdhc
++      - fsl,imx51-esdhc
++      - fsl,imx53-esdhc
++      - fsl,imx6q-usdhc
++      - fsl,imx6sl-usdhc
++      - fsl,imx6sx-usdhc
++      - fsl,imx6ull-usdhc
++      - fsl,imx7d-usdhc
++      - fsl,imx7ulp-usdhc
++      - fsl,imx8mq-usdhc
++      - fsl,imx8mm-usdhc
++      - fsl,imx8mn-usdhc
++      - fsl,imx8mp-usdhc
++      - fsl,imx8qm-usdhc
++      - fsl,imx8qxp-usdhc
++
++  reg:
++    maxItems: 1
++
++  interrupts:
++    maxItems: 1
++
++  fsl,wp-controller:
++    description: |
++      boolean, if present, indicate to use controller internal write protection.
++    type: boolean
++
++  fsl,delay-line:
++    $ref: /schemas/types.yaml#/definitions/uint32
++    description: |
++      Specify the number of delay cells for override mode.
++      This is used to set the clock delay for DLL(Delay Line) on override mode
++      to select a proper data sampling window in case the clock quality is not good
++      due to signal path is too long on the board. Please refer to eSDHC/uSDHC
++      chapter, DLL (Delay Line) section in RM for details.
++    default: 0
++
++  voltage-ranges:
++    $ref: '/schemas/types.yaml#/definitions/uint32-matrix'
++    description: |
++      Specify the voltage range in case there are software transparent level
++      shifters on the outputs of the controller. Two cells are required, first
++      cell specifies minimum slot voltage (mV), second cell specifies maximum
++      slot voltage (mV).
++    items:
++      items:
++        - description: value for minimum slot voltage
++        - description: value for maximum slot voltage
++    maxItems: 1
++
++  fsl,tuning-start-tap:
++    $ref: /schemas/types.yaml#/definitions/uint32
++    description: |
++      Specify the start delay cell point when send first CMD19 in tuning procedure.
++    default: 0
++
++  fsl,tuning-step:
++    $ref: /schemas/types.yaml#/definitions/uint32
++    description: |
++      Specify the increasing delay cell steps in tuning procedure.
++      The uSDHC use one delay cell as default increasing step to do tuning process.
++      This property allows user to change the tuning step to more than one delay
++      cells which is useful for some special boards or cards when the default
++      tuning step can't find the proper delay window within limited tuning retries.
++    default: 0
++
++  fsl,strobe-dll-delay-target:
++    $ref: /schemas/types.yaml#/definitions/uint32
++    description: |
++      Specify the strobe dll control slave delay target.
++      This delay target programming host controller loopback read clock, and this
++      property allows user to change the delay target for the strobe input read clock.
++      If not use this property, driver default set the delay target to value 7.
++      Only eMMC HS400 mode need to take care of this property.
++    default: 0
++
++required:
++  - compatible
++  - reg
++  - interrupts
++
++unevaluatedProperties: false
++
++examples:
++  - |
++    mmc@70004000 {
++        compatible = "fsl,imx51-esdhc";
++        reg = <0x70004000 0x4000>;
++        interrupts = <1>;
++        fsl,wp-controller;
++    };
++
++    mmc@70008000 {
++        compatible = "fsl,imx51-esdhc";
++        reg = <0x70008000 0x4000>;
++        interrupts = <2>;
++        cd-gpios = <&gpio1 6 0>; /* GPIO1_6 */
++        wp-gpios = <&gpio1 5 0>; /* GPIO1_5 */
++    };
+-- 
+2.7.4
+
