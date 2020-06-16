@@ -2,53 +2,54 @@ Return-Path: <SRS0=InOK=75=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.5 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.5 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8CACDC433DF
-	for <linux-mmc@archiver.kernel.org>; Tue, 16 Jun 2020 14:00:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6DD7DC433E0
+	for <linux-mmc@archiver.kernel.org>; Tue, 16 Jun 2020 14:00:45 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 69414207C3
-	for <linux-mmc@archiver.kernel.org>; Tue, 16 Jun 2020 14:00:35 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 459DC2082F
+	for <linux-mmc@archiver.kernel.org>; Tue, 16 Jun 2020 14:00:45 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (2048-bit key) header.d=microchip.com header.i=@microchip.com header.b="x+ENPzML"
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=microchip.com header.i=@microchip.com header.b="rwPO/s52"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728847AbgFPOAe (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 16 Jun 2020 10:00:34 -0400
-Received: from esa5.microchip.iphmx.com ([216.71.150.166]:46763 "EHLO
-        esa5.microchip.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726606AbgFPOAe (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 16 Jun 2020 10:00:34 -0400
+        id S1729154AbgFPOAo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 16 Jun 2020 10:00:44 -0400
+Received: from esa6.microchip.iphmx.com ([216.71.154.253]:37397 "EHLO
+        esa6.microchip.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1729139AbgFPOAm (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 16 Jun 2020 10:00:42 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
   d=microchip.com; i=@microchip.com; q=dns/txt; s=mchp;
-  t=1592316034; x=1623852034;
-  h=from:to:cc:subject:date:message-id:mime-version:
-   content-transfer-encoding;
-  bh=unQ0smonLVJdukLZdKp67AJLTTij5kY3nS4sy5MJHsY=;
-  b=x+ENPzMLtnQyqMWtu8KZVLE2hHJ+NmLbOuZ4nr/Ld0qS2W1ToxAJPS5f
-   qnsJTZXdkrzHgmWVSceIZIXXU8M3IvkExg0exy53A7G+doRtjn+6D9oCs
-   xnQCcadIyxtbjbO6oPHl1vKphjY/9YaDh5FRMPjMyYt98iRnKGhEn8SWE
-   1s6K1bKEwrgATbjCI7wkhiRcoOyA+fXbDo+CwBn7l3xDO/dmraF9c9vJM
-   LLCDe489LSOKyzSfnf4nSBHPpsQcqCaFGRbjLSSe/GZMS1nX8Kpih/o4L
-   8QUnMkHJfIa7zL0wfA/eVeAiB3/6wOTnWgPxKCismbzhWkIsoUhHr2sdl
-   Q==;
-IronPort-SDR: YS7CfaPxcZ7Eqli+xu8y6DhdDKr/sFi6fKYNs7GCDf/f/ArlySlb6tgXpUTH0LMNdPtH1LN6rr
- ZcR8Z1QXNnbS8VAgRP/CUdO+GpPDUk5E7bD/+FXDwaaDeyos8UFc5OJWyfq+3AFwvUeAIVbRyT
- jQT1/BwXzj120JPWUZhvZi2E5uybmrVP0KQb9fjPIuUAA3nWekIlUdR+D4esATpchRcv0vDdJV
- TB/OpHL+Nq+ssG4wNpc2bqWSiQjUFQ8jtJumesalNdZzmcjJbdAm1SoE8gFQyD8Ux/q+YqU82u
- hZc=
+  t=1592316042; x=1623852042;
+  h=from:to:cc:subject:date:message-id:in-reply-to:
+   references:mime-version:content-transfer-encoding;
+  bh=xXlRuWDsgHzsC/cK9WaU+YzlpcD2wIPLoPF5OvjRa5Y=;
+  b=rwPO/s52fm32nCrgN/xl1n5gnb1DFierB2+JxDQBOFnQ1kl9HfNVrL66
+   v9l7bcCVK0W4MYLPfbDsxAueGNfs79UhqkKTtui6FOfR2tw8BoGXuhr2k
+   DEXjG+MGMhDGFjH+KaCYMXDACi2FU10b4VkCPopQKwnkIap4keRwReO2e
+   /3wBNBi20WWGRCWBmdXAfCEY7ytPI64Ia9GSibHDJ+IYRJDK0+7HX28hU
+   M0qP6kAsQwtotTcRycKOqNEgxgDBIXHt4n6EqU89GmEfxKkJAaD9fSZwi
+   gg39mfZ6ZBvvcvWIRlENpzufetdsQJUP0Exswn40Bc1om25H3WWge21Uc
+   g==;
+IronPort-SDR: uY6g/8+zHQx2OtaDYvTdpzDMcDYqcyFmfGRLTYLmbrghuptB1K/p3lOIexnQ7kgGtHeK7o+YVm
+ IpT05gLi4DDdBvo1e285JX5oOauyxpYE59u2E7mLXGVHZgz+dgB8UvSSAaCWlub+TLP8neAuWY
+ auOxweCzt+zq33PkKGYJa4dm8mjoD04WSKaW96jAcRIBriLr4kFqav5LKx5CwCOwPcS8GIAgkG
+ PHVLdmG5fL61DrZ+o2F+9GVmmKYM/JpV+FeNwV/QtkH/kzK162fGhxtbO/AAhKL3cINj8aocx5
+ rpU=
 X-IronPort-AV: E=Sophos;i="5.73,518,1583218800"; 
-   d="scan'208";a="79657991"
+   d="scan'208";a="15973195"
 Received: from smtpout.microchip.com (HELO email.microchip.com) ([198.175.253.82])
-  by esa5.microchip.iphmx.com with ESMTP/TLS/AES256-SHA256; 16 Jun 2020 07:00:33 -0700
+  by esa6.microchip.iphmx.com with ESMTP/TLS/AES256-SHA256; 16 Jun 2020 07:00:40 -0700
 Received: from chn-vm-ex01.mchp-main.com (10.10.85.143) by
- chn-vm-ex03.mchp-main.com (10.10.85.151) with Microsoft SMTP Server
+ chn-vm-ex04.mchp-main.com (10.10.85.152) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.1979.3; Tue, 16 Jun 2020 07:00:33 -0700
+ 15.1.1979.3; Tue, 16 Jun 2020 07:00:40 -0700
 Received: from soft-dev15.microsemi.net (10.10.115.15) by
  chn-vm-ex01.mchp-main.com (10.10.85.143) with Microsoft SMTP Server id
- 15.1.1979.3 via Frontend Transport; Tue, 16 Jun 2020 07:00:26 -0700
+ 15.1.1979.3 via Frontend Transport; Tue, 16 Jun 2020 07:00:34 -0700
 From:   Lars Povlsen <lars.povlsen@microchip.com>
 List-Id: <soc.lore.kernel.org>
 To:     Ulf Hansson <ulf.hansson@linaro.org>,
@@ -60,10 +61,12 @@ CC:     Lars Povlsen <lars.povlsen@microchip.com>,
         <linux-arm-kernel@lists.infradead.org>,
         <linux-kernel@vger.kernel.org>,
         Alexandre Belloni <alexandre.belloni@bootlin.com>
-Subject: [PATCH v3 0/3] mmc: Adding support for Microchip Sparx5 SoC
-Date:   Tue, 16 Jun 2020 16:00:24 +0200
-Message-ID: <20200616140027.4949-1-lars.povlsen@microchip.com>
+Subject: [PATCH v3 3/3] arm64: dts: sparx5: Add Sparx5 eMMC support
+Date:   Tue, 16 Jun 2020 16:00:27 +0200
+Message-ID: <20200616140027.4949-4-lars.povlsen@microchip.com>
 X-Mailer: git-send-email 2.27.0
+In-Reply-To: <20200616140027.4949-1-lars.povlsen@microchip.com>
+References: <20200616140027.4949-1-lars.povlsen@microchip.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Content-Type: text/plain
@@ -72,43 +75,162 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-This is an add-on series to the main SoC Sparx5 series
-(Message-ID: <20200615133242.24911-1-lars.povlsen@microchip.com>
+This adds eMMC support to the applicable Sparx5 board configuration
+files.
 
-It adds eMMC support for Sparx5, by adding a driver for the SoC SDHCI
-controller, DT configuration and DT binding documentation.
+Signed-off-by: Lars Povlsen <lars.povlsen@microchip.com>
+---
+ arch/arm64/boot/dts/microchip/sparx5.dtsi     | 24 +++++++++++++++++++
+ .../boot/dts/microchip/sparx5_pcb125.dts      | 23 ++++++++++++++++++
+ .../boot/dts/microchip/sparx5_pcb134_emmc.dts | 23 ++++++++++++++++++
+ .../boot/dts/microchip/sparx5_pcb135_emmc.dts | 23 ++++++++++++++++++
+ 4 files changed, 93 insertions(+)
 
-Changes in v3:
-- Add dt-bindings for property "microchip,clock-delay"
-- Enforce "microchip,clock-delay" valid range in driver
-- Removed a noisy pr_debug() in sdhci_sparx5_adma_write_desc()
-
-Changes in v2:
-- Changes in driver as per review comments
- - Drop debug code
- - Drop sysfs code
- - use usleep_range()
- - use mmc_hostname() in pr_debug()
- - Remove deactivated code
- - Minor cosmetics
-
-Lars Povlsen (3):
-  dt-bindings: mmc: Add Sparx5 SDHCI controller bindings
-  sdhci: sparx5: Add Sparx5 SoC eMMC driver
-  arm64: dts: sparx5: Add Sparx5 eMMC support
-
- .../mmc/microchip,dw-sparx5-sdhci.yaml        |  65 +++++
- arch/arm64/boot/dts/microchip/sparx5.dtsi     |  24 ++
- .../boot/dts/microchip/sparx5_pcb125.dts      |  23 ++
- .../boot/dts/microchip/sparx5_pcb134_emmc.dts |  23 ++
- .../boot/dts/microchip/sparx5_pcb135_emmc.dts |  23 ++
- drivers/mmc/host/Kconfig                      |  13 +
- drivers/mmc/host/Makefile                     |   1 +
- drivers/mmc/host/sdhci-of-sparx5.c            | 269 ++++++++++++++++++
- 8 files changed, 441 insertions(+)
- create mode 100644 Documentation/devicetree/bindings/mmc/microchip,dw-sparx5-sdhci.yaml
- create mode 100644 drivers/mmc/host/sdhci-of-sparx5.c
-
+diff --git a/arch/arm64/boot/dts/microchip/sparx5.dtsi b/arch/arm64/boot/dts/microchip/sparx5.dtsi
+index 84bca999420ef..c9dbd1a8b22b6 100644
+--- a/arch/arm64/boot/dts/microchip/sparx5.dtsi
++++ b/arch/arm64/boot/dts/microchip/sparx5.dtsi
+@@ -5,6 +5,7 @@
+ 
+ #include <dt-bindings/gpio/gpio.h>
+ #include <dt-bindings/interrupt-controller/arm-gic.h>
++#include <dt-bindings/clock/microchip,sparx5.h>
+ 
+ / {
+ 	compatible = "microchip,sparx5";
+@@ -162,6 +163,20 @@ timer1: timer@600105000 {
+ 			interrupts = <GIC_SPI 6 IRQ_TYPE_LEVEL_HIGH>;
+ 		};
+ 
++		sdhci0: sdhci@600800000 {
++			compatible = "microchip,dw-sparx5-sdhci";
++			status = "disabled";
++			reg = <0x6 0x00800000 0x1000>;
++			pinctrl-0 = <&emmc_pins>;
++			pinctrl-names = "default";
++			clocks = <&clks CLK_ID_AUX1>;
++			clock-names = "core";
++			assigned-clocks = <&clks CLK_ID_AUX1>;
++			assigned-clock-rates = <800000000>;
++			interrupts = <GIC_SPI 4 IRQ_TYPE_LEVEL_HIGH>;
++			bus-width = <8>;
++		};
++
+ 		gpio: pinctrl@6110101e0 {
+ 			compatible = "microchip,sparx5-pinctrl";
+ 			reg = <0x6 0x110101e0 0x90>, <0x6 0x10508010 0x100>;
+@@ -191,6 +206,15 @@ i2c2_pins: i2c2-pins {
+ 				pins = "GPIO_28", "GPIO_29";
+ 				function = "twi2";
+ 			};
++
++			emmc_pins: emmc-pins {
++				pins = "GPIO_34", "GPIO_35", "GPIO_36",
++					"GPIO_37", "GPIO_38", "GPIO_39",
++					"GPIO_40", "GPIO_41", "GPIO_42",
++					"GPIO_43", "GPIO_44", "GPIO_45",
++					"GPIO_46", "GPIO_47";
++				function = "emmc";
++			};
+ 		};
+ 
+ 		i2c0: i2c@600101000 {
+diff --git a/arch/arm64/boot/dts/microchip/sparx5_pcb125.dts b/arch/arm64/boot/dts/microchip/sparx5_pcb125.dts
+index 91ee5b6cfc37a..573309fe45823 100644
+--- a/arch/arm64/boot/dts/microchip/sparx5_pcb125.dts
++++ b/arch/arm64/boot/dts/microchip/sparx5_pcb125.dts
+@@ -16,6 +16,29 @@ memory@0 {
+ 	};
+ };
+ 
++&gpio {
++	emmc_pins: emmc-pins {
++		/* NB: No "GPIO_35", "GPIO_36", "GPIO_37"
++		 * (N/A: CARD_nDETECT, CARD_WP, CARD_LED)
++		 */
++		pins = "GPIO_34", "GPIO_38", "GPIO_39",
++			"GPIO_40", "GPIO_41", "GPIO_42",
++			"GPIO_43", "GPIO_44", "GPIO_45",
++			"GPIO_46", "GPIO_47";
++		drive-strength = <3>;
++		function = "emmc";
++	};
++};
++
++&sdhci0 {
++	status = "okay";
++	bus-width = <8>;
++	non-removable;
++	pinctrl-0 = <&emmc_pins>;
++	max-frequency = <8000000>;
++	microchip,clock-delay = <10>;
++};
++
+ &i2c1 {
+ 	status = "okay";
+ };
+diff --git a/arch/arm64/boot/dts/microchip/sparx5_pcb134_emmc.dts b/arch/arm64/boot/dts/microchip/sparx5_pcb134_emmc.dts
+index 10081a66961bb..bbb9852c1f151 100644
+--- a/arch/arm64/boot/dts/microchip/sparx5_pcb134_emmc.dts
++++ b/arch/arm64/boot/dts/microchip/sparx5_pcb134_emmc.dts
+@@ -15,3 +15,26 @@ memory@0 {
+ 		reg = <0x00000000 0x00000000 0x10000000>;
+ 	};
+ };
++
++&gpio {
++	emmc_pins: emmc-pins {
++		/* NB: No "GPIO_35", "GPIO_36", "GPIO_37"
++		 * (N/A: CARD_nDETECT, CARD_WP, CARD_LED)
++		 */
++		pins = "GPIO_34", "GPIO_38", "GPIO_39",
++			"GPIO_40", "GPIO_41", "GPIO_42",
++			"GPIO_43", "GPIO_44", "GPIO_45",
++			"GPIO_46", "GPIO_47";
++		drive-strength = <3>;
++		function = "emmc";
++	};
++};
++
++&sdhci0 {
++	status = "okay";
++	pinctrl-0 = <&emmc_pins>;
++	non-removable;
++	max-frequency = <52000000>;
++	bus-width = <8>;
++	microchip,clock-delay = <10>;
++};
+diff --git a/arch/arm64/boot/dts/microchip/sparx5_pcb135_emmc.dts b/arch/arm64/boot/dts/microchip/sparx5_pcb135_emmc.dts
+index 741f0e12260e5..f82266fe2ad49 100644
+--- a/arch/arm64/boot/dts/microchip/sparx5_pcb135_emmc.dts
++++ b/arch/arm64/boot/dts/microchip/sparx5_pcb135_emmc.dts
+@@ -15,3 +15,26 @@ memory@0 {
+ 		reg = <0x00000000 0x00000000 0x10000000>;
+ 	};
+ };
++
++&gpio {
++	emmc_pins: emmc-pins {
++		/* NB: No "GPIO_35", "GPIO_36", "GPIO_37"
++		 * (N/A: CARD_nDETECT, CARD_WP, CARD_LED)
++		 */
++		pins = "GPIO_34", "GPIO_38", "GPIO_39",
++			"GPIO_40", "GPIO_41", "GPIO_42",
++			"GPIO_43", "GPIO_44", "GPIO_45",
++			"GPIO_46", "GPIO_47";
++		drive-strength = <3>;
++		function = "emmc";
++	};
++};
++
++&sdhci0 {
++	status = "okay";
++	pinctrl-0 = <&emmc_pins>;
++	non-removable;
++	max-frequency = <52000000>;
++	bus-width = <8>;
++	microchip,clock-delay = <10>;
++};
 -- 
 2.27.0
 
