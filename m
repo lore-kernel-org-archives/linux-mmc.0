@@ -2,427 +2,136 @@ Return-Path: <SRS0=gCHa=77=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.5 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.2 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	MSGID_FROM_MTA_HEADER,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_2
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 00946C433E0
-	for <linux-mmc@archiver.kernel.org>; Thu, 18 Jun 2020 08:18:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CAACDC433E0
+	for <linux-mmc@archiver.kernel.org>; Thu, 18 Jun 2020 08:52:30 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C3B01208C7
-	for <linux-mmc@archiver.kernel.org>; Thu, 18 Jun 2020 08:18:47 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id AA02920B1F
+	for <linux-mmc@archiver.kernel.org>; Thu, 18 Jun 2020 08:52:30 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (2048-bit key) header.d=microchip.com header.i=@microchip.com header.b="18LjYfUr"
+	dkim=pass (1024-bit key) header.d=Synaptics.onmicrosoft.com header.i=@Synaptics.onmicrosoft.com header.b="G7ACgFy2"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728491AbgFRISm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 18 Jun 2020 04:18:42 -0400
-Received: from esa3.microchip.iphmx.com ([68.232.153.233]:12726 "EHLO
-        esa3.microchip.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728508AbgFRISc (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 18 Jun 2020 04:18:32 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=microchip.com; i=@microchip.com; q=dns/txt; s=mchp;
-  t=1592468311; x=1624004311;
-  h=references:from:to:cc:subject:in-reply-to:date:
-   message-id:mime-version;
-  bh=Lz+3uzq0aiZlbwsb/OI0JEWxmMZoJW1zOo33zKFn/VM=;
-  b=18LjYfUr0R1OCvDEXcILJzAfZPrtZsKzAj5kK06OEzrnF+NjXnFXDjib
-   6nxgj9MHFwLt2JOQzjfDHbPySe4jxRPRzp9+RTrkvwgxG5O5Z/8wmbNUy
-   kTMvBabVE/DKJrAKrPM6GYhmuO2pJpzLoYvIO2Ox2MgGvDPfboUN7ibsQ
-   KoHnK9y8iPsGpN/RB2uK7n0Vwsl5/niXZ86UsXEXZ+y1bSdEZfKXdlmTU
-   Laq3wg1t3Rcp0feSs/eyxNsnSoudTxTAk8+cpu9gOEYeDd59xIanoS2Tg
-   zLawb6v+FK0WHjfemNe38eg3SsFf/NhJ22mUEN3nbuH+KDL5AC5TWDT1O
-   w==;
-IronPort-SDR: Lh14XOG1EblNvzIEx9ZjGIQMoKaykV3sv3Bl9GWPbnc5NZO9hoKtnjmpDp79WKPwTHOsw++mv3
- Qi+lrOQqmr4+veJpr8pJPe9p+YGk8tGhgUw+0K+OYoXtp3TUSs23P2NDPcfa4Ibo1ke6zi5S1N
- Rrf6Jh62zzqXKYuqvPCHHBX1l6LJMoKmkhoYuCPh+kz5NkmQQimnhMmvSfrfU3OMQErVQt7LQt
- KGiR+mvYRqR7P/lUjsPPxDWrqjfcGhaCZ0+KGCebhicnkGQyqX7WkCqN639x5phoz+QWm8MOmQ
- yno=
-X-IronPort-AV: E=Sophos;i="5.73,526,1583218800"; 
-   d="scan'208";a="80594862"
-Received: from smtpout.microchip.com (HELO email.microchip.com) ([198.175.253.82])
-  by esa3.microchip.iphmx.com with ESMTP/TLS/AES256-SHA256; 18 Jun 2020 01:18:31 -0700
-Received: from chn-vm-ex02.mchp-main.com (10.10.85.144) by
- chn-vm-ex03.mchp-main.com (10.10.85.151) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.1979.3; Thu, 18 Jun 2020 01:18:31 -0700
-Received: from soft-dev15.microsemi.net.microchip.com (10.10.115.15) by
- chn-vm-ex02.mchp-main.com (10.10.85.144) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.1979.3
- via Frontend Transport; Thu, 18 Jun 2020 01:18:23 -0700
-References: <20200609102008.10530-1-lars.povlsen@microchip.com> <20200609102008.10530-3-lars.povlsen@microchip.com> <27a9ad72-9657-ea84-8240-3b912c7f3b6b@intel.com>
-From:   Lars Povlsen <lars.povlsen@microchip.com>
-To:     Adrian Hunter <adrian.hunter@intel.com>
-CC:     Lars Povlsen <lars.povlsen@microchip.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Microchip Linux Driver Support <UNGLinuxDriver@microchip.com>,
-        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <linux-kernel@vger.kernel.org>
-Subject: Re: [PATCH v2 2/3] sdhci: sparx5: Add Sparx5 SoC eMMC driver
-In-Reply-To: <27a9ad72-9657-ea84-8240-3b912c7f3b6b@intel.com>
-Date:   Thu, 18 Jun 2020 10:18:28 +0200
-Message-ID: <87h7v8wzvv.fsf@soft-dev15.microsemi.net>
+        id S1728828AbgFRIw1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 18 Jun 2020 04:52:27 -0400
+Received: from mail-dm6nam11on2068.outbound.protection.outlook.com ([40.107.223.68]:6016
+        "EHLO NAM11-DM6-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1728452AbgFRIwZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 18 Jun 2020 04:52:25 -0400
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=lFE9MirtL046gGRMAq9Dp/a2vK0SGIx5X11dKRCWT+8PFzpAccKuC9uAQE86+2uKEF9tL7n9FEQVlSbNP3F4nGuHsX1Rly96r1rAaByIcP8486UfZw5WfSckIzi9dlsH7R2jQqsy+v1FE67n5Eci8fwXghkEsD6BPxpz5bqU6YW6rKkTtWtg93V617F4iMLYkvXxYV9qcpoJZi/DWWRCE6SSYvy+m76KrG+b97p9Al297UMpwy/VKIUIQ4hf3vAQsGx70DPQkalkXqeOmeXwLrluBGBQWnR6iDadevr9u02B7EHKoCnO6VPd3wseCu8iiqXrX7w2ndWkoncwIJRmqw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=ffB1lzgZxCR1LCJC6OT09gnPCL0YmhbLBfU/MVyWW0U=;
+ b=NSCLooCSDMQSQNFRwEVeD1Vz9w+QUmQXnB3agSAu4QBfk3iLKrNcw3n62E9gXqvd6JrrDkc9G6es9pG2hbym9S9tl1TWmL+YjF/LA27+9OdKU/OdUTzCTV17M4Az1XIy+3Hm53JrltnhLZb82Zp27cAxtgCJB+IDv6JPNi4G6aWAnpS+ba/WLJyj1dVTUaS9HiZHXbP9VB/ATjs2bRtGOCtbnL7tgiyNBk3ZvJc7GCqHk3KQJjBw4zREw2ozEt/cwx7hqPEj/56iI2VHkQIgv20NQvp3M654Yonxig5dUsxKEQPVlSPSlAPMeCkejGMU4DU5tQM5n+vabHJ9aEJHkw==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=synaptics.com; dmarc=pass action=none
+ header.from=synaptics.com; dkim=pass header.d=synaptics.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=Synaptics.onmicrosoft.com; s=selector2-Synaptics-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=ffB1lzgZxCR1LCJC6OT09gnPCL0YmhbLBfU/MVyWW0U=;
+ b=G7ACgFy2voLaUP9KIHD19nUpYVSAN3R/QQMEaxghJ7OZfClUSSACpkXzhbVqZAeQbrvdPCmnWbWJgudgzNmrbz2Lr7pwibP97UMCx+LbnEB7mt7UAxCQGUvhADfFWkM7rJnwgEQSZ+KLzsP2UIons2S/8CP7ChWevxwXzTOOim8=
+Authentication-Results: linaro.org; dkim=none (message not signed)
+ header.d=none;linaro.org; dmarc=none action=none header.from=synaptics.com;
+Received: from BYAPR03MB3573.namprd03.prod.outlook.com (2603:10b6:a02:ae::15)
+ by BY5PR03MB5186.namprd03.prod.outlook.com (2603:10b6:a03:221::11) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3109.22; Thu, 18 Jun
+ 2020 08:52:21 +0000
+Received: from BYAPR03MB3573.namprd03.prod.outlook.com
+ ([fe80::d1ae:8ea7:ea:8998]) by BYAPR03MB3573.namprd03.prod.outlook.com
+ ([fe80::d1ae:8ea7:ea:8998%7]) with mapi id 15.20.3088.028; Thu, 18 Jun 2020
+ 08:52:21 +0000
+Date:   Thu, 18 Jun 2020 16:52:07 +0800
+From:   Jisheng Zhang <Jisheng.Zhang@synaptics.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>
+Cc:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Subject: [PATCH] dt-bindings: mmc: pwrseq: Fix syntax errors in device tree
+ examples
+Message-ID: <20200618165207.512dc59f@xhacker.debian>
+X-Mailer: Claws Mail 3.17.5 (GTK+ 2.24.32; x86_64-pc-linux-gnu)
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+X-ClientProxiedBy: TYAPR01CA0073.jpnprd01.prod.outlook.com
+ (2603:1096:404:2c::13) To BYAPR03MB3573.namprd03.prod.outlook.com
+ (2603:10b6:a02:ae::15)
 MIME-Version: 1.0
-Content-Type: text/plain
+X-MS-Exchange-MessageSentRepresentingType: 1
+Received: from xhacker.debian (124.74.246.114) by TYAPR01CA0073.jpnprd01.prod.outlook.com (2603:1096:404:2c::13) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3109.22 via Frontend Transport; Thu, 18 Jun 2020 08:52:19 +0000
+X-Mailer: Claws Mail 3.17.5 (GTK+ 2.24.32; x86_64-pc-linux-gnu)
+X-Originating-IP: [124.74.246.114]
+X-MS-PublicTrafficType: Email
+X-MS-Office365-Filtering-Correlation-Id: 1585ed13-5909-4262-5368-08d81364e991
+X-MS-TrafficTypeDiagnostic: BY5PR03MB5186:
+X-Microsoft-Antispam-PRVS: <BY5PR03MB5186AA9928B0AA44FED50235ED9B0@BY5PR03MB5186.namprd03.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:2399;
+X-Forefront-PRVS: 0438F90F17
+X-MS-Exchange-SenderADCheck: 1
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: o80C70TE/2pXw6eyGCLGbAEQDT1PovMNRPLMVSIFEWV0ywIrSCX4L54iMZZuvHUDMfhoLk/Z/uIrhZ0l4His2WCewaTIvUuSaflQH5eSwIjyAwgJne1b88XHtdEHliSc5WmWmUyGHPdN+HJ3JPVb7IfytIXF/oFXeWpp5hBmk8oNrpNV4QP/SPI69RwxpWwuxHkqfwdBemScODUnUGulRt6E6tiPHKSeSQ7PtAUaB/3SQjtxY3Og/LchrVdv63jSLZ6/NN5i6gDB/qporkELS/oPDkLIEX7JBdmVVgnht47HHBbPohadKldTFsDgNx9ES+vbtATADDlNVhAOpXsOUw==
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:BYAPR03MB3573.namprd03.prod.outlook.com;PTR:;CAT:NONE;SFTY:;SFS:(136003)(396003)(346002)(376002)(366004)(39860400002)(956004)(83380400001)(6506007)(478600001)(86362001)(1076003)(8676002)(8936002)(52116002)(6666004)(7696005)(55016002)(186003)(26005)(2906002)(4326008)(9686003)(66556008)(110136005)(5660300002)(316002)(66946007)(16526019)(66476007);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData: Y424hfWP5YzXq1cG4Y5EsOB6hokx6nyTsKWHSehqfk936mrxkXM+frPLkcbAIEe0PDVRXJ8fCoONK6TEvMKiki1oMnOpT8SHrc0+6HtChbjLc6CbgwScbLSt/XO5YIfqUu5pVpB5cScN5wabGigIF24R8EIZalUmhdlRYKj1pg9v+d2pi5RgWKGZoA56dtBNI17TsnvrYWtS58sdH6W8rohcxK84whuX5segM4DzWTIOMOn9peeMzJ2xCZYuiibRlt5QlW5eH/ZubXayEsbT898Nj4srJClLKQymB6EmYB0IZt8Q+gEc8BxkB3yRRgy+4saZKzHXvp5+Ue2ghSu6XJr0f+FBjCbYnYfKNoBaNUG+C7V1Lt7O4DG72uCdQf1fCyLwxEgIj1yzOguSyFn/fo88/ZzD2cZCo0/yt37SGXJFMfKsoOV3PiAK8Ks45cdCKNkXbmij0aV3xokdfLAlstobJ4KSFj6pdR67yITxcwjsvQIZrSYwiJ84aadJ2kxx
+X-OriginatorOrg: synaptics.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 1585ed13-5909-4262-5368-08d81364e991
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 18 Jun 2020 08:52:21.2276
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 335d1fbc-2124-4173-9863-17e7051a2a0e
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: f6GkZbpqdJ8p8KH20i5Bmwi4LtimrCDq1HU1RYNO7J/bN66Gbtegy92Q6vmfX3YqkYkQyfpf1XeD1aTFkbAWSg==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: BY5PR03MB5186
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+A ";" is missing in the pwrseq dt examples, fix them.
 
-Adrian Hunter writes:
+Signed-off-by: Jisheng Zhang <Jisheng.Zhang@synaptics.com>
+---
+ Documentation/devicetree/bindings/mmc/mmc-pwrseq-emmc.txt   | 2 +-
+ Documentation/devicetree/bindings/mmc/mmc-pwrseq-sd8787.txt | 2 +-
+ Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt | 2 +-
+ 3 files changed, 3 insertions(+), 3 deletions(-)
 
-> On 9/06/20 1:20 pm, Lars Povlsen wrote:
->> This adds the eMMC driver for the Sparx5 SoC. It is based upon the
->> designware IP, but requires some extra initialization and quirks.
->> ---
->>  drivers/mmc/host/Kconfig           |  13 ++
->>  drivers/mmc/host/Makefile          |   1 +
->>  drivers/mmc/host/sdhci-of-sparx5.c | 274 +++++++++++++++++++++++++++++
->>  3 files changed, 288 insertions(+)
->>  create mode 100644 drivers/mmc/host/sdhci-of-sparx5.c
->>
->> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
->> index eb85237bf2d63..32dc3ced8529d 100644
->> --- a/drivers/mmc/host/Kconfig
->> +++ b/drivers/mmc/host/Kconfig
->> @@ -213,6 +213,19 @@ config MMC_SDHCI_OF_DWCMSHC
->>         If you have a controller with this interface, say Y or M here.
->>         If unsure, say N.
->>
->> +config MMC_SDHCI_OF_SPARX5
->> +     tristate "SDHCI OF support for the MCHP Sparx5 SoC"
->> +     depends on MMC_SDHCI_PLTFM
->> +     depends on ARCH_SPARX5
->> +     select MMC_SDHCI_IO_ACCESSORS
->> +     help
->> +       This selects the Secure Digital Host Controller Interface (SDHCI)
->> +       found in the MCHP Sparx5 SoC.
->> +
->> +       If you have a Sparx5 SoC with this interface, say Y or M here.
->> +
->> +       If unsure, say N.
->> +
->>  config MMC_SDHCI_CADENCE
->>       tristate "SDHCI support for the Cadence SD/SDIO/eMMC controller"
->>       depends on MMC_SDHCI_PLTFM
->> diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
->> index 4d5bcb0144a0a..4a57c4bf18a2e 100644
->> --- a/drivers/mmc/host/Makefile
->> +++ b/drivers/mmc/host/Makefile
->> @@ -92,6 +92,7 @@ obj-$(CONFIG_MMC_SDHCI_OF_ARASAN)   += sdhci-of-arasan.o
->>  obj-$(CONFIG_MMC_SDHCI_OF_ASPEED)    += sdhci-of-aspeed.o
->>  obj-$(CONFIG_MMC_SDHCI_OF_AT91)              += sdhci-of-at91.o
->>  obj-$(CONFIG_MMC_SDHCI_OF_ESDHC)     += sdhci-of-esdhc.o
->> +obj-$(CONFIG_MMC_SDHCI_OF_SPARX5)    += sdhci-of-sparx5.o
->>  obj-$(CONFIG_MMC_SDHCI_OF_HLWD)              += sdhci-of-hlwd.o
->>  obj-$(CONFIG_MMC_SDHCI_OF_DWCMSHC)   += sdhci-of-dwcmshc.o
->>  obj-$(CONFIG_MMC_SDHCI_BCM_KONA)     += sdhci-bcm-kona.o
->> diff --git a/drivers/mmc/host/sdhci-of-sparx5.c b/drivers/mmc/host/sdhci-of-sparx5.c
->> new file mode 100644
->> index 0000000000000..1ec40bb27e06d
->> --- /dev/null
->> +++ b/drivers/mmc/host/sdhci-of-sparx5.c
->> @@ -0,1 +1,274 @@
->> +// SPDX-License-Identifier: GPL-2.0-or-later
->> +/*
->> + * drivers/mmc/host/sdhci-of-sparx5.c
->> + *
->> + * MCHP Sparx5 SoC Secure Digital Host Controller Interface.
->> + *
->> + * Copyright (c) 2019 Microchip Inc.
->> + *
->> + * Author: Lars Povlsen <lars.povlsen@microchip.com>
->> + */
->> +
->> +#include <linux/sizes.h>
->> +#include <linux/delay.h>
->> +#include <linux/module.h>
->> +#include <linux/regmap.h>
->> +#include <linux/of_device.h>
->> +#include <linux/mfd/syscon.h>
->> +#include <linux/dma-mapping.h>
->> +
->> +#include "sdhci-pltfm.h"
->> +
->> +#define CPU_REGS_GENERAL_CTRL        (0x22 * 4)
->> +#define  MSHC_DLY_CC_MASK    GENMASK(16, 13)
->> +#define  MSHC_DLY_CC_SHIFT   13
->> +#define  MSHC_DLY_CC_MAX     15
->> +
->> +#define CPU_REGS_PROC_CTRL   (0x2C * 4)
->> +#define  ACP_CACHE_FORCE_ENA BIT(4)
->> +#define  ACP_AWCACHE         BIT(3)
->> +#define  ACP_ARCACHE         BIT(2)
->> +#define  ACP_CACHE_MASK              (ACP_CACHE_FORCE_ENA|ACP_AWCACHE|ACP_ARCACHE)
->> +
->> +#define MSHC2_VERSION                        0x500   /* Off 0x140, reg 0x0 */
->> +#define MSHC2_TYPE                   0x504   /* Off 0x140, reg 0x1 */
->> +#define MSHC2_EMMC_CTRL                      0x52c   /* Off 0x140, reg 0xB */
->> +#define  MSHC2_EMMC_CTRL_EMMC_RST_N  BIT(2)
->> +#define  MSHC2_EMMC_CTRL_IS_EMMC     BIT(0)
->> +
->> +struct sdhci_sparx5_data {
->> +     struct sdhci_host *host;
->> +     struct regmap *cpu_ctrl;
->> +     int delay_clock;
->> +};
->> +
->> +#define BOUNDARY_OK(addr, len) \
->> +     ((addr | (SZ_128M - 1)) == ((addr + len - 1) | (SZ_128M - 1)))
->> +
->> +/*
->> + * If DMA addr spans 128MB boundary, we split the DMA transfer into two
->> + * so that each DMA transfer doesn't exceed the boundary.
->> + */
->> +static void sdhci_sparx5_adma_write_desc(struct sdhci_host *host, void **desc,
->> +                                       dma_addr_t addr, int len,
->> +                                       unsigned int cmd)
->> +{
->> +     int tmplen, offset;
->> +
->> +     pr_debug("%s: write_desc: cmd %02x: len %d, offset 0x%0llx\n",
->> +              mmc_hostname(host->mmc), cmd, len, addr);
->> +
->> +     if (likely(!len || BOUNDARY_OK(addr, len))) {
->> +             sdhci_adma_write_desc(host, desc, addr, len, cmd);
->> +             return;
->> +     }
->> +
->> +     pr_debug("%s: write_desc: splitting dma len %d, offset 0x%0llx\n",
->> +              mmc_hostname(host->mmc), len, addr);
->> +
->> +     offset = addr & (SZ_128M - 1);
->> +     tmplen = SZ_128M - offset;
->> +     sdhci_adma_write_desc(host, desc, addr, tmplen, cmd);
->> +
->> +     addr += tmplen;
->> +     len -= tmplen;
->> +     sdhci_adma_write_desc(host, desc, addr, len, cmd);
->> +}
->> +
->> +static void sparx5_set_cacheable(struct sdhci_host *host, u32 value)
->> +{
->> +     struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->> +     struct sdhci_sparx5_data *sdhci_sparx5 = sdhci_pltfm_priv(pltfm_host);
->> +
->> +     pr_debug("%s: Set Cacheable = 0x%x\n", mmc_hostname(host->mmc), value);
->> +
->> +     /* Update ACP caching attributes in HW */
->> +     regmap_update_bits(sdhci_sparx5->cpu_ctrl,
->> +                        CPU_REGS_PROC_CTRL, ACP_CACHE_MASK, value);
->> +}
->> +
->> +static void sparx5_set_delay(struct sdhci_host *host, u8 value)
->> +{
->> +     struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->> +     struct sdhci_sparx5_data *sdhci_sparx5 = sdhci_pltfm_priv(pltfm_host);
->> +
->> +     pr_debug("%s: Set DLY_CC = %u\n", mmc_hostname(host->mmc), value);
->> +
->> +     /* Update DLY_CC in HW */
->> +     regmap_update_bits(sdhci_sparx5->cpu_ctrl,
->> +                        CPU_REGS_GENERAL_CTRL,
->> +                        MSHC_DLY_CC_MASK,
->> +                        (value << MSHC_DLY_CC_SHIFT));
->> +}
->> +
->> +static void sdhci_sparx5_set_emmc(struct sdhci_host *host)
->> +{
->> +     if (!mmc_card_is_removable(host->mmc)) {
->> +             u8 value;
->> +
->> +             value = sdhci_readb(host, MSHC2_EMMC_CTRL);
->> +             if (!(value & MSHC2_EMMC_CTRL_IS_EMMC)) {
->> +                     value |= MSHC2_EMMC_CTRL_IS_EMMC;
->> +                     pr_debug("%s: Set EMMC_CTRL: 0x%08x\n",
->> +                              mmc_hostname(host->mmc), value);
->> +                     sdhci_writeb(host, value, MSHC2_EMMC_CTRL);
->> +             }
->> +     }
->> +}
->> +
->> +static void sdhci_sparx5_reset_emmc(struct sdhci_host *host)
->> +{
->> +     u8 value;
->> +
->> +     pr_debug("%s: Toggle EMMC_CTRL.EMMC_RST_N\n", mmc_hostname(host->mmc));
->> +     value = sdhci_readb(host, MSHC2_EMMC_CTRL) &
->> +             ~MSHC2_EMMC_CTRL_EMMC_RST_N;
->> +     sdhci_writeb(host, value, MSHC2_EMMC_CTRL);
->> +     /* For eMMC, minimum is 1us but give it 10us for good measure */
->> +     usleep_range(10, 20);
->> +     sdhci_writeb(host, value | MSHC2_EMMC_CTRL_EMMC_RST_N,
->> +                  MSHC2_EMMC_CTRL);
->> +     /* For eMMC, minimum is 200us but give it 300us for good measure */
->> +     usleep_range(300, 400);
->> +}
->> +
->> +static void sdhci_sparx5_reset(struct sdhci_host *host, u8 mask)
->> +{
->> +     pr_debug("%s: *** RESET: mask %d\n", mmc_hostname(host->mmc), mask);
->> +
->> +     sdhci_reset(host, mask);
->> +
->> +     /* Be sure CARD_IS_EMMC stays set */
->> +     sdhci_sparx5_set_emmc(host);
->> +}
->> +
->> +static const struct sdhci_ops sdhci_sparx5_ops = {
->> +     .set_clock              = sdhci_set_clock,
->> +     .set_bus_width          = sdhci_set_bus_width,
->> +     .set_uhs_signaling      = sdhci_set_uhs_signaling,
->> +     .get_max_clock          = sdhci_pltfm_clk_get_max_clock,
->> +     .reset                  = sdhci_sparx5_reset,
->> +     .adma_write_desc        = sdhci_sparx5_adma_write_desc,
->> +};
->> +
->> +static const struct sdhci_pltfm_data sdhci_sparx5_pdata = {
->> +     .quirks  = 0,
->> +     .quirks2 = SDHCI_QUIRK2_HOST_NO_CMD23 | /* Controller issue */
->> +                SDHCI_QUIRK2_NO_1_8_V, /* No sdr104, ddr50, etc */
->> +     .ops = &sdhci_sparx5_ops,
->> +};
->> +
->> +int sdhci_sparx5_probe(struct platform_device *pdev)
->> +{
->> +     int ret;
->> +     const char *syscon = "microchip,sparx5-cpu-syscon";
->> +     struct sdhci_host *host;
->> +     struct sdhci_pltfm_host *pltfm_host;
->> +     struct sdhci_sparx5_data *sdhci_sparx5;
->> +     struct device_node *np = pdev->dev.of_node;
->> +     u32 value;
->> +     u32 extra;
->> +
->> +     host = sdhci_pltfm_init(pdev, &sdhci_sparx5_pdata,
->> +                             sizeof(*sdhci_sparx5));
->> +
->> +     if (IS_ERR(host))
->> +             return PTR_ERR(host);
->> +
->> +     /*
->> +      * extra adma table cnt for cross 128M boundary handling.
->> +      */
->> +     extra = DIV_ROUND_UP_ULL(dma_get_required_mask(&pdev->dev), SZ_128M);
->> +     if (extra > SDHCI_MAX_SEGS)
->> +             extra = SDHCI_MAX_SEGS;
->> +     host->adma_table_cnt += extra;
->> +
->> +     pltfm_host = sdhci_priv(host);
->> +     sdhci_sparx5 = sdhci_pltfm_priv(pltfm_host);
->> +     sdhci_sparx5->host = host;
->> +
->> +     pltfm_host->clk = devm_clk_get(&pdev->dev, "core");
->> +     if (IS_ERR(pltfm_host->clk)) {
->> +             ret = PTR_ERR(pltfm_host->clk);
->> +             dev_err(&pdev->dev, "failed to get core clk: %d\n", ret);
->> +             goto free_pltfm;
->> +     }
->> +     ret = clk_prepare_enable(pltfm_host->clk);
->> +     if (ret)
->> +             goto free_pltfm;
->> +
->> +     if (!of_property_read_u32(np, "microchip,clock-delay", &value) &&
->> +         value <= MSHC_DLY_CC_MAX)
->> +             sdhci_sparx5->delay_clock = value;
->> +     else
->> +             sdhci_sparx5->delay_clock = -1; /* Autotune */
->> +
->> +     sdhci_get_of_property(pdev);
->> +
->> +     ret = mmc_of_parse(host->mmc);
->> +     if (ret)
->> +             goto err_clk;
->> +
->> +     sdhci_sparx5->cpu_ctrl = syscon_regmap_lookup_by_compatible(syscon);
->> +     if (IS_ERR(sdhci_sparx5->cpu_ctrl)) {
->> +             dev_err(&pdev->dev, "No CPU syscon regmap !\n");
->> +             ret = PTR_ERR(sdhci_sparx5->cpu_ctrl);
->> +             goto err_clk;
->> +     }
->> +
->> +     if (sdhci_sparx5->delay_clock >= 0)
->> +             sparx5_set_delay(host, sdhci_sparx5->delay_clock);
->> +
->> +     if (!mmc_card_is_removable(host->mmc)) {
->> +             /* Do a HW reset of eMMC card */
->> +             sdhci_sparx5_reset_emmc(host);
->> +             /* Update EMMC_CTRL */
->> +             sdhci_sparx5_set_emmc(host);
->> +             /* If eMMC, disable SD and SDIO */
->> +             host->mmc->caps2 |= (MMC_CAP2_NO_SDIO|MMC_CAP2_NO_SD);
->> +     }
->> +
->> +     ret = sdhci_add_host(host);
->> +     if (ret)
->> +             dev_err(&pdev->dev, "sdhci_add_host() failed (%d)\n", ret);
->
-> Shouldn't this goto err_clk;
->
-> Also, the error message is not really needed if ret == -EPROBE_DEFER
-
-Adrian, good catch!
-
-I'll align with other drivers here - no dev_err() and disable the clock.
-
-Thank you for your comments, I will refresh asap.
-
-Cheers,
-
----Lars
-
->
->> +
->> +     /* Set AXI bus master to use un-cached access (for DMA) */
->> +     if (host->flags & (SDHCI_USE_SDMA | SDHCI_USE_ADMA) &&
->> +         IS_ENABLED(CONFIG_DMA_DECLARE_COHERENT))
->> +             sparx5_set_cacheable(host, ACP_CACHE_FORCE_ENA);
->> +
->> +     pr_debug("%s: SDHC version: 0x%08x\n",
->> +              mmc_hostname(host->mmc), sdhci_readl(host, MSHC2_VERSION));
->> +     pr_debug("%s: SDHC type:    0x%08x\n",
->> +              mmc_hostname(host->mmc), sdhci_readl(host, MSHC2_TYPE));
->> +
->> +     return ret;
->> +
->> +err_clk:
->> +     clk_disable_unprepare(pltfm_host->clk);
->> +free_pltfm:
->> +     sdhci_pltfm_free(pdev);
->> +     return ret;
->> +}
->> +
->> +static const struct of_device_id sdhci_sparx5_of_match[] = {
->> +     { .compatible = "microchip,dw-sparx5-sdhci" },
->> +     { }
->> +};
->> +MODULE_DEVICE_TABLE(of, sdhci_sparx5_of_match);
->> +
->> +static struct platform_driver sdhci_sparx5_driver = {
->> +     .driver = {
->> +             .name = "sdhci-sparx5",
->> +             .of_match_table = sdhci_sparx5_of_match,
->> +             .pm = &sdhci_pltfm_pmops,
->> +     },
->> +     .probe = sdhci_sparx5_probe,
->> +     .remove = sdhci_pltfm_unregister,
->> +};
->> +
->> +module_platform_driver(sdhci_sparx5_driver);
->> +
->> +MODULE_DESCRIPTION("Sparx5 SDHCI OF driver");
->> +MODULE_AUTHOR("Lars Povlsen <lars.povlsen@microchip.com>");
->> +MODULE_LICENSE("GPL v2");
->> --
->> Cc: Microchip Linux Driver Support <UNGLinuxDriver@microchip.com>
->> Cc: linux-mmc@vger.kernel.org
->> Cc: devicetree@vger.kernel.org
->> Cc: linux-arm-kernel@lists.infradead.org
->> Cc: linux-kernel@vger.kernel.org
->>
-
+diff --git a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-emmc.txt b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-emmc.txt
+index 3d965d57e00b..c4fb06bf0bc2 100644
+--- a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-emmc.txt
++++ b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-emmc.txt
+@@ -22,4 +22,4 @@ Example:
+ 	sdhci0_pwrseq {
+ 		compatible = "mmc-pwrseq-emmc";
+ 		reset-gpios = <&gpio1 12 GPIO_ACTIVE_LOW>;
+-	}
++	};
+diff --git a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-sd8787.txt b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-sd8787.txt
+index 22e9340e4ba2..8204374546e1 100644
+--- a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-sd8787.txt
++++ b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-sd8787.txt
+@@ -13,4 +13,4 @@ Example:
+ 		compatible = "mmc-pwrseq-sd8787";
+ 		powerdown-gpios = <&twl_gpio 0 GPIO_ACTIVE_LOW>;
+ 		reset-gpios = <&twl_gpio 1 GPIO_ACTIVE_LOW>;
+-	}
++	};
+diff --git a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
+index 9029b45b8a22..bcbe8e947459 100644
+--- a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
++++ b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
+@@ -28,4 +28,4 @@ Example:
+ 		reset-gpios = <&gpio1 12 GPIO_ACTIVE_LOW>;
+ 		clocks = <&clk_32768_ck>;
+ 		clock-names = "ext_clock";
+-	}
++	};
 -- 
-Lars Povlsen,
-Microchip
+2.27.0
+
