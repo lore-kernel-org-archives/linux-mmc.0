@@ -2,88 +2,276 @@ Return-Path: <SRS0=gCHa=77=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.0 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.0 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B95B6C433E1
-	for <linux-mmc@archiver.kernel.org>; Thu, 18 Jun 2020 05:39:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9FFD3C433E0
+	for <linux-mmc@archiver.kernel.org>; Thu, 18 Jun 2020 06:30:22 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8E93021924
-	for <linux-mmc@archiver.kernel.org>; Thu, 18 Jun 2020 05:39:48 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 728B720776
+	for <linux-mmc@archiver.kernel.org>; Thu, 18 Jun 2020 06:30:22 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (1024-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="3ed8SRqu"
+	dkim=fail reason="signature verification failed" (1024-bit key) header.d=mg.codeaurora.org header.i=@mg.codeaurora.org header.b="rtooFavj"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726982AbgFRFjr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 18 Jun 2020 01:39:47 -0400
-Received: from www.zeus03.de ([194.117.254.33]:34432 "EHLO mail.zeus03.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726959AbgFRFjr (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 18 Jun 2020 01:39:47 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
-        date:from:to:cc:subject:message-id:references:mime-version
-        :content-type:in-reply-to; s=k1; bh=iC83Ym0C/HcbMWo3LBEpygjGUIdB
-        H1z0NWt2TnOqP/s=; b=3ed8SRquexMZOZiguMZtrKLFd2qQ4W6z1oZR7ho7MbBU
-        0REIXH999WFxMCYDqC2X0zf7+itqLl/Uh9VwqdLP3737aSPMkYUI2iDa+iyk98pO
-        1+SSNwenlHKU0Han7+1NRiyetm9eWZZ5saFDJoImYZ92zBavzuxgp1RlNprOlyk=
-Received: (qmail 2040142 invoked from network); 18 Jun 2020 07:39:44 +0200
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 18 Jun 2020 07:39:44 +0200
-X-UD-Smtp-Session: l3s3148p1@wVcyNFWojswgAwDPXwquAEh09UUtPuGD
-Date:   Thu, 18 Jun 2020 07:39:44 +0200
-From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
+        id S1727852AbgFRGaW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 18 Jun 2020 02:30:22 -0400
+Received: from mail29.static.mailgun.info ([104.130.122.29]:61237 "EHLO
+        mail29.static.mailgun.info" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1727845AbgFRGaV (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 18 Jun 2020 02:30:21 -0400
+DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
+ s=smtp; t=1592461820; h=Content-Transfer-Encoding: Content-Type:
+ In-Reply-To: MIME-Version: Date: Message-ID: From: References: Cc: To:
+ Subject: Sender; bh=GoNXgc7+2d91O+hXVI16Z9u6/tuLTSjOHfmUUPsJg5M=; b=rtooFavjBP/FY4wZ/3/qBrDEWmIcykwvnCgJPhqhVKLe3eBxoZiobGPJOTWH/ZITkh7+PSCd
+ dsn2FuLd4mRliY8sgE5C4RWPAmVfwUOhdaja6cnaWDbQp0cbHRUnwDlLJRNlD+9Fw+uztWNB
+ QU++hiXzg1LhSqHmRDvG10PtMFU=
+X-Mailgun-Sending-Ip: 104.130.122.29
+X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
+Received: from smtp.codeaurora.org
+ (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171]) by
+ smtp-out-n03.prod.us-east-1.postgun.com with SMTP id
+ 5eeb09f5c76a4e7a2a990376 (version=TLS1.2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256); Thu, 18 Jun 2020 06:30:13
+ GMT
+Received: by smtp.codeaurora.org (Postfix, from userid 1001)
+        id 3240EC433CA; Thu, 18 Jun 2020 06:30:12 +0000 (UTC)
+Received: from [192.168.0.106] (unknown [183.83.66.216])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        (Authenticated sender: vbadigan)
+        by smtp.codeaurora.org (Postfix) with ESMTPSA id 8FD31C433C9;
+        Thu, 18 Jun 2020 06:30:08 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.3.2 smtp.codeaurora.org 8FD31C433C9
+Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
+Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=none smtp.mailfrom=vbadigan@codeaurora.org
+Subject: Re: [PATCH V4 2/2] mmc: sdhci-msm: Use internal voltage control
 To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-Subject: Re: [PATCH 0/2] mmc: renesas_sdhi: support manual calibration
-Message-ID: <20200618053944.GA1121@ninjato>
-References: <20200605101222.10783-1-wsa+renesas@sang-engineering.com>
- <CAPDyKFrZHYeUa9ryen_F0uyrvvEDr_W+Q5xyOKt_YwyiaM+6cQ@mail.gmail.com>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
+        Asutosh Das <asutoshd@codeaurora.org>,
+        Vijay Viswanath <vviswana@codeaurora.org>,
+        Andy Gross <agross@kernel.org>
+References: <1589541535-8523-1-git-send-email-vbadigan@codeaurora.org>
+ <1592321779-28556-1-git-send-email-vbadigan@codeaurora.org>
+ <1592321779-28556-3-git-send-email-vbadigan@codeaurora.org>
+ <CAPDyKFrvvhQPio3FRQmoBgMm1Euvsma_dgGzxA=R8rm0aQgDMQ@mail.gmail.com>
+ <40b03630-cdbc-50ee-e483-8ff919f76fb5@codeaurora.org>
+ <CAPDyKFrf3rxA-_0wB=bNby2dVSxTwZHSTXeNO5OayQ57Eqiphg@mail.gmail.com>
+From:   Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+Message-ID: <541c95a6-0b89-fdc1-4707-e0a1eef1bf91@codeaurora.org>
+Date:   Thu, 18 Jun 2020 12:00:05 +0530
+User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:68.0) Gecko/20100101
+ Thunderbird/68.9.0
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="SLDf9lqlvOQaIe6s"
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFrZHYeUa9ryen_F0uyrvvEDr_W+Q5xyOKt_YwyiaM+6cQ@mail.gmail.com>
-User-Agent: Mutt/1.10.1 (2018-07-13)
+In-Reply-To: <CAPDyKFrf3rxA-_0wB=bNby2dVSxTwZHSTXeNO5OayQ57Eqiphg@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 
---SLDf9lqlvOQaIe6s
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-
-=09
-> I tried applying this, but got some conflict. I guess you have based
-> this on some of the other series that's in the pipe. Maybe you can
-> give me some advice about the order or how to apply things?
-
-Sorry, this depends on the stalled SCC patchset and I need to send a
-second version of that (hopefully next week). Should have mentioned it
-here, mea culpa! So, this needs to wait a little.
-
-
---SLDf9lqlvOQaIe6s
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAl7q/hwACgkQFA3kzBSg
-KbZ/Iw/+NBjnWSJurj0Qbr0KXH3/l3uIKDXIwiV0SBvDuTZNCiQx9wmiQBea6zux
-CcpBUCTagJPDTlUebxe67QWibEwToFuU4IGKhuw4I+qqmNBiKKl1AH5Mf+l7RFZ6
-tWnn1Um2IPw9NsoHuN1+Qe3UTbbODVM58G9jVqN4XvPdCpgvFUXb7Qsf5055DFSD
-iXgE5y6bGIjfucjIU4fXnHtYGCl4P4sYLRUuB8kX6nB8LhOo6Q9rf6jbXGHAKP//
-NR1OtQavJNAtpnF7k8BCvRZyLJDVnpu2aP4RJSSDJF4WDgr4HbNvSFPhm5J3cpT4
-t5rsLyThdvaxwrpL0hQL4TJopSy3kFb93SP4w6QyDLs3JVHcKdaSiO2iMdnv1ZKq
-3DgIPNhTJ91D3qVtQOOaVvHFtZvJhOYzNK8lMwS+L4RhWnKzef+wsyD2cUJpizLN
-B8nrWLnzmhUsDJhG2xzx5ELTzvIcOS/Lg8x8YKeA7wL2FHSz4HdONL89V+pu+4GQ
-ApaWJO8zYIGD6cPlpDZ4qqrXdLCnWWAHs12tJk/Iru47FenZBhfXhUKtUSWYTZO5
-+PLup9UC+IwV4ALTtE7p1Qob30zOJJzPUBTt1ld/g+yy5xVdyGplQXSCU4X8+tMx
-GuGwl1c1tXEusE4044wBBIeNpPSb9Fzu2T6CtqXwMgg7Xm0UOnM=
-=W5kf
------END PGP SIGNATURE-----
-
---SLDf9lqlvOQaIe6s--
+On 6/17/2020 7:46 PM, Ulf Hansson wrote:
+> On Wed, 17 Jun 2020 at 14:46, Veerabhadrarao Badiganti
+> <vbadigan@codeaurora.org> wrote:
+>> Thanks for comments Uffe.
+>>
+>> On 6/17/2020 3:04 PM, Ulf Hansson wrote:
+>>> On Tue, 16 Jun 2020 at 17:38, Veerabhadrarao Badiganti
+>>> <vbadigan@codeaurora.org> wrote:
+>>>> On qcom SD host controllers voltage switching be done after the HW
+>>>> is ready for it. The HW informs its readiness through power irq.
+>>>> The voltage switching should happen only then.
+>>>>
+>>>> Use the internal voltage switching and then control the voltage
+>>>> switching using power irq.
+>>>>
+>>>> IO-bus supply of eMMC would be kept always-on. So set the load
+>>>> for this supply to configure it in LPM when eMMC is suspend state
+>>>>    and in HPM when eMMC is active.
+>>>>
+>>>> Co-developed-by: Asutosh Das <asutoshd@codeaurora.org>
+>>>> Signed-off-by: Asutosh Das <asutoshd@codeaurora.org>
+>>>> Co-developed-by: Vijay Viswanath <vviswana@codeaurora.org>
+>>>> Signed-off-by: Vijay Viswanath <vviswana@codeaurora.org>
+>>>> Co-developed-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+>>>> Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+>>>> ---
+>>>>    drivers/mmc/host/sdhci-msm.c | 208 +++++++++++++++++++++++++++++++++++++++++--
+>>>>    1 file changed, 199 insertions(+), 9 deletions(-)
+>>>>
+>>>> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+>>>> index 15c42b059240..8297b2142748 100644
+>>>> --- a/drivers/mmc/host/sdhci-msm.c
+>>>> +++ b/drivers/mmc/host/sdhci-msm.c
+>>>> @@ -37,7 +37,9 @@
+>>>>    #define CORE_PWRCTL_IO_LOW     BIT(2)
+>>>>    #define CORE_PWRCTL_IO_HIGH    BIT(3)
+>>>>    #define CORE_PWRCTL_BUS_SUCCESS BIT(0)
+>>>> +#define CORE_PWRCTL_BUS_FAIL    BIT(1)
+>>>>    #define CORE_PWRCTL_IO_SUCCESS BIT(2)
+>>>> +#define CORE_PWRCTL_IO_FAIL     BIT(3)
+>>>>    #define REQ_BUS_OFF            BIT(0)
+>>>>    #define REQ_BUS_ON             BIT(1)
+>>>>    #define REQ_IO_LOW             BIT(2)
+>>>> @@ -127,6 +129,9 @@
+>>>>    /* Timeout value to avoid infinite waiting for pwr_irq */
+>>>>    #define MSM_PWR_IRQ_TIMEOUT_MS 5000
+>>>>
+>>>> +/* Max load for eMMC Vdd-io supply */
+>>>> +#define MMC_VQMMC_MAX_LOAD_UA  325000
+>>>> +
+>>>>    #define msm_host_readl(msm_host, host, offset) \
+>>>>           msm_host->var_ops->msm_readl_relaxed(host, offset)
+>>>>
+>>>> @@ -278,6 +283,7 @@ struct sdhci_msm_host {
+>>>>           bool uses_tassadar_dll;
+>>>>           u32 dll_config;
+>>>>           u32 ddr_config;
+>>>> +       bool vqmmc_enabled;
+>>>>    };
+>>>>
+>>>>    static const struct sdhci_msm_offset *sdhci_priv_msm_offset(struct sdhci_host *host)
+>>>> @@ -1346,6 +1352,88 @@ static void sdhci_msm_set_uhs_signaling(struct sdhci_host *host,
+>>>>                   sdhci_msm_hs400(host, &mmc->ios);
+>>>>    }
+>>>>
+>>>> +static int sdhci_msm_set_vmmc(struct mmc_host *mmc)
+>>>> +{
+>>>> +       if (IS_ERR(mmc->supply.vmmc))
+>>>> +               return 0;
+>>>> +
+>>>> +       return mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, mmc->ios.vdd);
+>>>> +}
+>>>> +
+>>>> +static int msm_toggle_vqmmc(struct sdhci_msm_host *msm_host,
+>>>> +                             struct mmc_host *mmc, bool level)
+>>>> +{
+>>>> +       int ret;
+>>>> +       struct mmc_ios ios;
+>>>> +
+>>>> +       if (msm_host->vqmmc_enabled == level)
+>>>> +               return 0;
+>>>> +
+>>>> +       if (level) {
+>>>> +               /* Set the IO voltage regulator to default voltage level */
+>>>> +               if (msm_host->caps_0 & CORE_3_0V_SUPPORT)
+>>>> +                       ios.signal_voltage = MMC_SIGNAL_VOLTAGE_330;
+>>>> +               else if (msm_host->caps_0 & CORE_1_8V_SUPPORT)
+>>>> +                       ios.signal_voltage = MMC_SIGNAL_VOLTAGE_180;
+>>>> +
+>>>> +               if (msm_host->caps_0 & CORE_VOLT_SUPPORT) {
+>>>> +                       ret = mmc_regulator_set_vqmmc(mmc, &ios);
+>>>> +                       if (ret < 0) {
+>>>> +                               dev_err(mmc_dev(mmc), "%s: vqmmc set volgate failed: %d\n",
+>>>> +                                       mmc_hostname(mmc), ret);
+>>>> +                               goto out;
+>>>> +                       }
+>>>> +               }
+>>>> +               ret = regulator_enable(mmc->supply.vqmmc);
+>>>> +       } else {
+>>>> +               ret = regulator_disable(mmc->supply.vqmmc);
+>>>> +       }
+>>>> +
+>>>> +       if (ret)
+>>>> +               dev_err(mmc_dev(mmc), "%s: vqmm %sable failed: %d\n",
+>>>> +                       mmc_hostname(mmc), level ? "en":"dis", ret);
+>>>> +       else
+>>>> +               msm_host->vqmmc_enabled = level;
+>>>> +out:
+>>>> +       return ret;
+>>>> +}
+>>>> +
+>>>> +static int msm_config_vqmmc_mode(struct sdhci_msm_host *msm_host,
+>>>> +                             struct mmc_host *mmc, bool hpm)
+>>>> +{
+>>>> +       int load, ret;
+>>>> +
+>>>> +       load = hpm ? MMC_VQMMC_MAX_LOAD_UA : 0;
+>>>> +       ret = regulator_set_load(mmc->supply.vqmmc, load);
+>>>> +       if (ret)
+>>>> +               dev_err(mmc_dev(mmc), "%s: vqmmc set load failed: %d\n",
+>>>> +                       mmc_hostname(mmc), ret);
+>>>> +       return ret;
+>>>> +}
+>>>> +
+>>>> +static int sdhci_msm_set_vqmmc(struct sdhci_msm_host *msm_host,
+>>>> +                             struct mmc_host *mmc, bool level)
+>>>> +{
+>>>> +       int ret;
+>>>> +       bool always_on;
+>>>> +
+>>>> +       if (IS_ERR(mmc->supply.vqmmc)           ||
+>>> White space.
+>>>
+>>>> +           (mmc->ios.power_mode == MMC_POWER_UNDEFINED))
+>>>> +               return 0;
+>>>> +       /*
+>>>> +        * For eMMC don't turn off Vqmmc, Instead just configure it in LPM
+>>>> +        * and HPM modes by setting the right amonut of load.
+>>> /s/right amonut of load/corresponding load
+>>>
+>>>> +        */
+>>>> +       always_on = mmc->card && mmc_card_mmc(mmc->card);
+>>>> +
+>>>> +       if (always_on)
+>>>> +               ret = msm_config_vqmmc_mode(msm_host, mmc, level);
+>>>> +       else
+>>>> +               ret = msm_toggle_vqmmc(msm_host, mmc, level);
+>>> I am worried that this isn't really doing what you think it does.
+>>> always_on may not always be set for an eMMC.
+>>>
+>>> This is because the mmc->card doesn't get assigned until the
+>>> initialization of the eMMC has been completed. In other words, way
+>>> after VCC and VCCQ have been turned on and changed voltage levels.
+>> For the very first time, i have to enable the vqmmc.
+>> And second time on-wards I have to set load instead of turning vqmmc off
+>> / on.
+>>
+>> This condition helps me in doing exactly the same.
+>>
+>> This gets invoked first time when  mmc_power_up() is called.
+>> Yes, by that time card won't be initialized. So this check fails and
+>> allows to turn on the regulator instead of setting load.
+>>
+>> After that, this gets invoked only next time mmc_power_up/off() is called
+>> which is during mmc_suspend/resume.
+> I see.
+>
+> That assumes the initialization always works at the first attempt, so
+> no re-try or power cycle gets done in some error/reset path.
+>
+>> By this time card is initialized, it allows to set load.
+> Okay, I get it. Thanks for clarifying.
+>
+> Perhaps you can add a small comment about this in the code, so we
+> don't forget the reasons why the code looks like this.
+Sure. Will update comment with this info.
+>>
+>>> Moreover, mmc_card_mmc() is also about legacy MMC cards, not solely for eMMCs.
+>> Okay. But on qcom platform, we have support for only eMMC/SD/SDIO.
+>> So this mmc_card_mmc() meets my requirements!!! Allows only eMMC not SD
+>> & SDIO.
+> Well, eMMC is fairly similar to MMC, from a basic functionality point
+> of view. So, I am quite sure you can get it to work with your
+> controller, even if it's not officially supported.
+>>> If you want special treatment of an eMMC, I think it's better to use
+>>> the DT bindings Documentation/devicetree/bindings/mmc/mmc-card.txt. If
+>>> you have such a subnode, that indicates that there is an eMMC card
+>>> attached.
+> That said, if you don't like the pure DT based solution, as I
+> suggested above - at least extend mmc_card_mmc() with checking the
+> MMC_CAP_NONREMOVABLE flag.
+sure. Will update it. Thank you.
+>
+> [...]
+>
+> Kind regards
+> Uffe
