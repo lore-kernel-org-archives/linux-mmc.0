@@ -1,81 +1,82 @@
-Return-Path: <SRS0=u+69=AA=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=cqRv=AC=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.7 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A6C51C433E2
-	for <linux-mmc@archiver.kernel.org>; Fri, 19 Jun 2020 16:33:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C32FDC433DF
+	for <linux-mmc@archiver.kernel.org>; Sun, 21 Jun 2020 02:54:02 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 860FE21527
-	for <linux-mmc@archiver.kernel.org>; Fri, 19 Jun 2020 16:33:45 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 81A13247C8
+	for <linux-mmc@archiver.kernel.org>; Sun, 21 Jun 2020 02:54:02 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1592708042;
+	bh=8kz0YS2YpXAP78yJ5e4pDrntY+2vR5l3xnCBVIzu5io=;
+	h=From:To:Cc:Subject:Date:List-ID:From;
+	b=VKoQ1Y+kqxDy7GZLsdzt7+l9r1niru1OIFM0vJgbfyV6KBrcgj3IEuFtvJ4Vep2y9
+	 rCHWLtMONcnlyBTrTaH9PEXEqpLaDZPY7duWMzG5EM7Tfmw9K+mhWZLb9lZpt0IMd6
+	 FFy8J8Y34S6lgzX+bI1YTQSDvhyuZTNayLl6a0LM=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2389740AbgFSQde (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 19 Jun 2020 12:33:34 -0400
-Received: from mail-oo1-f67.google.com ([209.85.161.67]:42374 "EHLO
-        mail-oo1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2389460AbgFSOvb (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 19 Jun 2020 10:51:31 -0400
-Received: by mail-oo1-f67.google.com with SMTP id 127so1934876ooc.9;
-        Fri, 19 Jun 2020 07:51:31 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=bJFYbFCrsPdWe/xZfbajjRe6GBurn8Q+z5Rl0GsivUE=;
-        b=g3NhBsWh4zoVQBO5xwmi2X/35gY9D6LekWf/YecliIycznBUWWOeTJsQ4xXIithriP
-         YTxo6PaksL+5VWas48eJ1XJj1BIOFRG1wlFBqqx7FwmJh3KbUVR8pSEb+BGJRw6rLOLr
-         JLZTM4kuhtWLo4vE5dwi0ihcAqIEMk84EMpX8TO9QsrMA82H44DqSBdhHg44DYrMpBfz
-         98MniPCUUUnLziGVaixuBb8/WODJzzVdxXRGTc6jaReVJs8P0luh9NBgl/SxDxtQkc52
-         OoG4GB6+fOykyZ3E0wL7cNttSlIJEOhhszXIAjtabtizouDm0kvH12JiMD1Eu0ldmyrJ
-         Af2A==
-X-Gm-Message-State: AOAM5331BS30TsRRMV8P1vBypXs6xxjewp7kUY5bn9u88M575ypTdZ0T
-        918uOPt395hbdIjprXFvecFRfDOR5CN2RwOVECuOQWXr
-X-Google-Smtp-Source: ABdhPJy0Coxpt/4fMimNdZDRdevNU75GhwFunAubdWuwkhWCZUVekNYh1JkaUavS8wVGdcv22mB77tagVxninzhIG6E=
-X-Received: by 2002:a4a:5744:: with SMTP id u65mr3565759ooa.1.1592578291406;
- Fri, 19 Jun 2020 07:51:31 -0700 (PDT)
-MIME-Version: 1.0
-References: <1592566143-4546-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
-In-Reply-To: <1592566143-4546-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
-From:   Geert Uytterhoeven <geert@linux-m68k.org>
-Date:   Fri, 19 Jun 2020 16:51:20 +0200
-Message-ID: <CAMuHMdUEahv3bPNfOmzA5fdkJdkmx4nEqPqWKMYt2O=ZRJOiTA@mail.gmail.com>
-Subject: Re: [PATCH/RFC v2 0/2] treewide: fix _mmc_suspend() on PSCI
-To:     Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-Cc:     Mark Rutland <mark.rutland@arm.com>,
-        Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Linux MMC List <linux-mmc@vger.kernel.org>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        Linux-Renesas <linux-renesas-soc@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+        id S1729138AbgFUCyB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 20 Jun 2020 22:54:01 -0400
+Received: from mail.kernel.org ([198.145.29.99]:47594 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1728992AbgFUCyB (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Sat, 20 Jun 2020 22:54:01 -0400
+Received: from Mani-XPS-13-9360.localdomain (unknown [157.50.185.55])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id 0BC12247AF;
+        Sun, 21 Jun 2020 02:53:57 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1592708041;
+        bh=8kz0YS2YpXAP78yJ5e4pDrntY+2vR5l3xnCBVIzu5io=;
+        h=From:To:Cc:Subject:Date:From;
+        b=MkmXiACrOD/CQ+R0OcgDaSmrMSBNtwmVcOliTbhfTRdv+8ukxaJxc5XKrB1BU1Uww
+         WGUFIcBENadA6UIj0NCww9g6Igu6mWztI8mqCnpp54vVrt6bvmSkTYgLAr4h2LMygJ
+         iisi/tz0tzEA7birQe0bw/wIqRpOWPmYwxTxEdhE=
+From:   Manivannan Sadhasivam <mani@kernel.org>
+To:     ulf.hansson@linaro.org
+Cc:     afaerber@suse.de, linux-mmc@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+        Manivannan Sadhasivam <mani@kernel.org>
+Subject: [PATCH] mmc: owl-mmc: Get rid of of_match_ptr() macro
+Date:   Sun, 21 Jun 2020 08:23:30 +0530
+Message-Id: <20200621025330.10561-1-mani@kernel.org>
+X-Mailer: git-send-email 2.17.1
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Shimoda-san,
+Remove the 'of_match_ptr()' macro to fix the warning when CONFIG_OF is
+not selected.
 
-On Fri, Jun 19, 2020 at 2:42 PM Yoshihiro Shimoda
-<yoshihiro.shimoda.uh@renesas.com> wrote:
-> We can detect whether the system is going to suspend by using
-> pm_suspend_via_firmware() API. So, this patch series update
-> both PSCI and MMC driver for my environment (r8a77951-salvator-xs).
+drivers/mmc/host/owl-mmc.c:677:34: warning: unused variable 'owl_mmc_of_match'
+[-Wunused-const-variable]
 
-Cool, didn't know about pm_set_.*_via_firmware().
+Reported-by: kernel test robot <lkp@intel.com>
+Signed-off-by: Manivannan Sadhasivam <mani@kernel.org>
+---
+ drivers/mmc/host/owl-mmc.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-Looks like this can be used in the clock and pin control drivers, too.
-Currently they're checking for !psci_ops.cpu_suspend.
-
-Gr{oetje,eeting}s,
-
-                        Geert
-
+diff --git a/drivers/mmc/host/owl-mmc.c b/drivers/mmc/host/owl-mmc.c
+index 5e20c099fe03..df43f42855e2 100644
+--- a/drivers/mmc/host/owl-mmc.c
++++ b/drivers/mmc/host/owl-mmc.c
+@@ -689,7 +689,7 @@ MODULE_DEVICE_TABLE(of, owl_mmc_of_match);
+ static struct platform_driver owl_mmc_driver = {
+ 	.driver = {
+ 		.name	= "owl_mmc",
+-		.of_match_table = of_match_ptr(owl_mmc_of_match),
++		.of_match_table = owl_mmc_of_match,
+ 	},
+ 	.probe		= owl_mmc_probe,
+ 	.remove		= owl_mmc_remove,
 -- 
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+2.17.1
 
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
