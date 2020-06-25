@@ -1,111 +1,159 @@
-Return-Path: <SRS0=NsbL=AF=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=uQvo=AG=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-1.0 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-1.0 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2D465C433E0
-	for <linux-mmc@archiver.kernel.org>; Wed, 24 Jun 2020 11:13:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4EC74C433DF
+	for <linux-mmc@archiver.kernel.org>; Thu, 25 Jun 2020 06:31:38 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 17B462088E
-	for <linux-mmc@archiver.kernel.org>; Wed, 24 Jun 2020 11:13:42 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2482C20706
+	for <linux-mmc@archiver.kernel.org>; Thu, 25 Jun 2020 06:31:38 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (1024-bit key) header.d=renesasgroup.onmicrosoft.com header.i=@renesasgroup.onmicrosoft.com header.b="Max7LbOZ"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2390583AbgFXLNl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 24 Jun 2020 07:13:41 -0400
-Received: from mail-ot1-f67.google.com ([209.85.210.67]:44985 "EHLO
-        mail-ot1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728656AbgFXLNl (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 24 Jun 2020 07:13:41 -0400
-Received: by mail-ot1-f67.google.com with SMTP id e5so1501014ote.11;
-        Wed, 24 Jun 2020 04:13:40 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=VGHbY4tRcC+HGQ6+hqB3IaCi6Xesr0JrCyLKajoL86A=;
-        b=LzTLQ4EHFsXqK7dN/HeZQGeVflkELn7Pvu0NgEzJuHLnEmwGgRCCBLc7Gsd0NSNI4c
-         nlNA/QmEQk7M7MlxCkPWPGp8Lk1qSlRc64UOTsQxb3tj/3w5JUmh5hQD7TpZqLNd5ILb
-         Gd6JMeAs83swtwLpYVa0F7F7t42V75QC3ErtXYOH4PLJngQXrv1G5DlKo4dJsrGZD78N
-         6ieKeDbDfGvYyaiDpTMyd8G/pL9znXs5DWy4qBAxmnmOmjhL1thWWZNiE7rpbYvqp5Ou
-         xw5w3ajIjXb1RIJICFaw3stiSA18JegcZxlpeX9QUCoFbmUqcbeyPpryGUSissZytyl4
-         ivFw==
-X-Gm-Message-State: AOAM531W07DPbSl6tLWZUVJjJ1KW9XAXiTMEsXMsOP2QxF5v5ogLvZhW
-        e+rgEoR1w9i/bZi3vFQoWxF5azOeXi8dXCT4iCk=
-X-Google-Smtp-Source: ABdhPJzt56PzOmPRiUdhsI78I8Kqbjlq7j1oL/WY2YX+wBR8LDPTMsZF0eFLOsPi4AcdVLdl1E95crMmNyg0URw5X2A=
-X-Received: by 2002:a9d:62c2:: with SMTP id z2mr21719012otk.145.1592997220346;
- Wed, 24 Jun 2020 04:13:40 -0700 (PDT)
-MIME-Version: 1.0
-References: <1592792699-24638-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
- <1592792699-24638-3-git-send-email-yoshihiro.shimoda.uh@renesas.com> <CAPDyKFq-dEPaU094hrk2xg18VpJAsbnf8enieFmcMhKiB1bW1A@mail.gmail.com>
-In-Reply-To: <CAPDyKFq-dEPaU094hrk2xg18VpJAsbnf8enieFmcMhKiB1bW1A@mail.gmail.com>
-From:   Geert Uytterhoeven <geert@linux-m68k.org>
-Date:   Wed, 24 Jun 2020 13:13:29 +0200
-Message-ID: <CAMuHMdXjU7N4oG89YsozGijMpjgKGN6ezw2qm6FeGX=JyRhsvg@mail.gmail.com>
-Subject: Re: [PATCH v3 2/2] mmc: core: Call mmc_poweroff_nofity() if pm_suspend_via_firmware()
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        Mark Rutland <mark.rutland@arm.com>,
+        id S2390074AbgFYGbh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 25 Jun 2020 02:31:37 -0400
+Received: from mail-eopbgr1400118.outbound.protection.outlook.com ([40.107.140.118]:57088
+        "EHLO JPN01-TY1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1726742AbgFYGbh (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 25 Jun 2020 02:31:37 -0400
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=bgeeMXfqr/vLEOk+BX4h1jtFgt2sVNASolOqAsOfPnpbR7siAmaBF5BmaTsXZBlDEXvW5REfLr1tW2xq5GYCq4Mix6JXkyn4RYpEu7RxcQ+3fiFuOuVVBPVWpPLM5cR2MXaBssySVYiC0J/ag49378ble2DkvVFcGGpoNADnIDkk02awzb20XfL3dhCGSnK1GVn8IemWZ1UXYVPOh1Fs6wBPzQltm8S8y24mDHh07jNX/Lfs+ukUTSOtDF73mvTFN+CFojP5VP1J91CTT7XElH+kqxU2MqEAGYDlVKagE2rhK40BWlTmswC7jQjShYhjkkZZM+z/8C+rir1hLZBP5g==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=NahcgyBsqwUFGX5oZnK0SooyoEL6gAjGBxxwYGeZ+hU=;
+ b=IRzC68Lnqs1JvghDz13GTI/98f8H+nLPVQ63ZtE6D+Bk/PlrB5xt3xvLr/PhP6ARlrlmho5Us851J+QCasI5mEswHxNSwXmHA+trWaIXM6F3U06ijcz0dc+w1syQBI8vXSbRsrMyKdOzDq00ene3CyxfLUucX1RmP+7my4gBGc2tKe/fLncf8sg7LaXIZ6w/uDTfwVRD6BXudpcpWOiuWRLPstXBrxlLn+nsCeSb2I+b8tgKmvoNyjruHAcgHTbvv9ijzSz5SiA3uUcGfvXg+0oUNSLPzG7ZoYf3CNLALGfDq5qshMKh2+hfVwO27MWCWswRcfddFep0Cxtkqibv+Q==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=renesas.com; dmarc=pass action=none header.from=renesas.com;
+ dkim=pass header.d=renesas.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=renesasgroup.onmicrosoft.com; s=selector2-renesasgroup-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=NahcgyBsqwUFGX5oZnK0SooyoEL6gAjGBxxwYGeZ+hU=;
+ b=Max7LbOZEZOqvpQkaeCIQjAUPmvTDRtHaTFHE/TI++ziIwH9WSBbFKpd0C07h+4m1a4ro887zy1mDoJpeoO+cELBI2XAR8jj3ONZQMd9yigklUUZ+YrRzafWonM7qP/+NDkxs3zj0iwwYlOYN7PEjrbeM2P+tSInZVjFtlHsUfQ=
+Received: from TY2PR01MB3692.jpnprd01.prod.outlook.com (2603:1096:404:d5::22)
+ by TYAPR01MB4304.jpnprd01.prod.outlook.com (2603:1096:404:130::10) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3131.21; Thu, 25 Jun
+ 2020 06:31:33 +0000
+Received: from TY2PR01MB3692.jpnprd01.prod.outlook.com
+ ([fe80::9083:6001:8090:9f3]) by TY2PR01MB3692.jpnprd01.prod.outlook.com
+ ([fe80::9083:6001:8090:9f3%6]) with mapi id 15.20.3131.020; Thu, 25 Jun 2020
+ 06:31:33 +0000
+From:   Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+To:     Geert Uytterhoeven <geert@linux-m68k.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+CC:     Mark Rutland <mark.rutland@arm.com>,
         Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
         Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>,
         "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
         Linux ARM <linux-arm-kernel@lists.infradead.org>
-Content-Type: text/plain; charset="UTF-8"
+Subject: RE: [PATCH v3 2/2] mmc: core: Call mmc_poweroff_nofity() if
+ pm_suspend_via_firmware()
+Thread-Topic: [PATCH v3 2/2] mmc: core: Call mmc_poweroff_nofity() if
+ pm_suspend_via_firmware()
+Thread-Index: AQHWSDxc4WkWJe7NmU+vEp59xfJ7+ajnjXWAgAATDICAATp98A==
+Date:   Thu, 25 Jun 2020 06:31:33 +0000
+Message-ID: <TY2PR01MB36921A71A493ABD624A28C42D8920@TY2PR01MB3692.jpnprd01.prod.outlook.com>
+References: <1592792699-24638-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
+ <1592792699-24638-3-git-send-email-yoshihiro.shimoda.uh@renesas.com>
+ <CAPDyKFq-dEPaU094hrk2xg18VpJAsbnf8enieFmcMhKiB1bW1A@mail.gmail.com>
+ <CAMuHMdXjU7N4oG89YsozGijMpjgKGN6ezw2qm6FeGX=JyRhsvg@mail.gmail.com>
+In-Reply-To: <CAMuHMdXjU7N4oG89YsozGijMpjgKGN6ezw2qm6FeGX=JyRhsvg@mail.gmail.com>
+Accept-Language: ja-JP, en-US
+Content-Language: ja-JP
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+authentication-results: linux-m68k.org; dkim=none (message not signed)
+ header.d=none;linux-m68k.org; dmarc=none action=none header.from=renesas.com;
+x-originating-ip: [124.210.22.195]
+x-ms-publictraffictype: Email
+x-ms-office365-filtering-ht: Tenant
+x-ms-office365-filtering-correlation-id: 3bd530b0-b10f-4c70-c364-08d818d1675f
+x-ms-traffictypediagnostic: TYAPR01MB4304:
+x-microsoft-antispam-prvs: <TYAPR01MB4304B80CDC2B34E7A2372DA1D8920@TYAPR01MB4304.jpnprd01.prod.outlook.com>
+x-ms-oob-tlc-oobclassifiers: OLM:10000;
+x-forefront-prvs: 0445A82F82
+x-ms-exchange-senderadcheck: 1
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: 6NnOCC60UZfMYpDZLIsg1lZtkQmPYKFdh55I3IQN4MyLKbi0Ct3X2fv+AX9S41RA+CU9WMqLuLNczeFazWPJHJzDVq7QujBqSiVTYtNWq5IxmMAimkZPUZ7BXo0nA9aoItjVruEUJgCQDb+AwzI17eLX0VHawqarGWNRQzhRnYMC5ZvMmg5As22l352hRRFwIODyeDFW37P9uasmjxGpRIb+FSoRxksL88yoMeR3DKW/x/+eBljsMZlabKNQKSyjC5JiMji+kwytbiyEPgiBUPygqlknOSF9JQ2Tr9EQ87f2s6QeJaq306gBfEosc221kInaNBzxWmm6raRCLXNWvA==
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY2PR01MB3692.jpnprd01.prod.outlook.com;PTR:;CAT:NONE;SFTY:;SFS:(4636009)(376002)(396003)(366004)(39860400002)(346002)(136003)(53546011)(6506007)(55236004)(8936002)(478600001)(7696005)(4326008)(8676002)(55016002)(52536014)(316002)(54906003)(83380400001)(110136005)(66476007)(26005)(33656002)(66556008)(186003)(66446008)(76116006)(66946007)(2906002)(5660300002)(71200400001)(9686003)(86362001)(64756008);DIR:OUT;SFP:1102;
+x-ms-exchange-antispam-messagedata: aSSIR2BrRlxFi+CfYrs6fDTaTxtbrr6uXVZBWDifZwlVVhfcud7fogfs/oTrq2P+Piw9gFaHPmRXUTWw7EESer8FbZGaS4FivQF+/FaFe0WaIdZBosddONeLdp+Ru99S5Pq8LGCl2PQEfipuZzNaffPRTR6iw0YA66yEvMBdpCdVzi3n5s5cdf045YEo6DUVxIe5k1Zh7WL/XxLflXNvpW8IGblYQQhvV0yv3Zm1OEpJ7Ban1dQ8iZ+YrwXn3OdRNNaYPNDmuVlxXqZyrgXA8Azvll/66WSgeI4pHUCi2AIUVxOzODhD0a7sezs3MjYsABC4cI1VRfohrrM+lC2ifuaIfKogYr3V2D9BRjleHQcJTrPkMXNvkvxCqKxwJGGCGXD6jDSrl83JSdRiyRKOuXHUkH9OUzUrf/HH2+heQ2vA5UwEIAKKzzdTNSUicm5PXe1Pg4sTxeHqhw63oi4ahwL0iq+Dpfu+lpZ7t5jW+wjitEsGfb14Gyhh+xs9vMlK
+x-ms-exchange-transport-forked: True
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+MIME-Version: 1.0
+X-OriginatorOrg: renesas.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: TY2PR01MB3692.jpnprd01.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 3bd530b0-b10f-4c70-c364-08d818d1675f
+X-MS-Exchange-CrossTenant-originalarrivaltime: 25 Jun 2020 06:31:33.3276
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 53d82571-da19-47e4-9cb4-625a166a4a2a
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: z+qB/7gneh/15kHtjLTy1cqd4IvUFm0HVoXwmBP3XTScWv/JCuFjUGXAXNgZHMjnywPp6M10XcMlUhUWujC8B+559GDhgMxSYuw8tBEA9sX5dB+8GbwzL9dmQlveCx5s
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: TYAPR01MB4304
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Ulf,
-
-On Wed, Jun 24, 2020 at 12:06 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> On Mon, 22 Jun 2020 at 04:25, Yoshihiro Shimoda
-> <yoshihiro.shimoda.uh@renesas.com> wrote:
-> > If pm_suspend_via_firmware() returns true, the system will be able
-> > to cut both vcc and vccq in the suspend. So, call
-> > mmc_poweroff_nofity() if pm_suspend_via_firmware() returns true.
-> >
-> > Note that we should not update the MMC_CAP2_FULL_PWR_CYCLE caps
-> > because the mmc_select_voltage() checks the caps when attaches
-> > a mmc/sd.
-
-> > --- a/drivers/mmc/core/mmc.c
-> > +++ b/drivers/mmc/core/mmc.c
-> > @@ -2038,7 +2039,8 @@ static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
-> >                 goto out;
-> >
-> >         if (mmc_can_poweroff_notify(host->card) &&
-> > -               ((host->caps2 & MMC_CAP2_FULL_PWR_CYCLE) || !is_suspend))
-> > +           ((host->caps2 & MMC_CAP2_FULL_PWR_CYCLE) || !is_suspend ||
-> > +            pm_suspend_via_firmware()))
->
-> Sorry, but this doesn't work.
->
-> Even if PSCI is a generic FW interface, it doesn't mean that all PSCI
-> implementations will cut the vcc and vccq for the MMC card at system
-> suspend.
-
-Indeed, there's nothing guaranteed here.  Nor documented how it should
-behave.  Basically the firmware is free to power off the SoC. Or not do that.
-"If firmware is involved, all odds are off".
-
-> Instead, you need to decide this based on some specific DT property.
-> Perhaps in conjunction with using pm_suspend_via_firmware().
-
-Last time I was involved in a discussion about this, the PSCI people
-didn't want to add any properties describing particular PSCI behavior...
-"If firmware is involved, all odds are off".
-
-So the only safe thing to do is to expect the worst, and prepare for it...
-
-Gr{oetje,eeting}s,
-
-                        Geert
-
--- 
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+SGkgVWxmLCBHZWVydCwNCg0KPiBGcm9tOiBHZWVydCBVeXR0ZXJob2V2ZW4sIFNlbnQ6IFdlZG5l
+c2RheSwgSnVuZSAyNCwgMjAyMCA4OjEzIFBNDQo+IA0KPiBIaSBVbGYsDQo+IA0KPiBPbiBXZWQs
+IEp1biAyNCwgMjAyMCBhdCAxMjowNiBQTSBVbGYgSGFuc3NvbiA8dWxmLmhhbnNzb25AbGluYXJv
+Lm9yZz4gd3JvdGU6DQo+ID4gT24gTW9uLCAyMiBKdW4gMjAyMCBhdCAwNDoyNSwgWW9zaGloaXJv
+IFNoaW1vZGENCj4gPiA8eW9zaGloaXJvLnNoaW1vZGEudWhAcmVuZXNhcy5jb20+IHdyb3RlOg0K
+PiA+ID4gSWYgcG1fc3VzcGVuZF92aWFfZmlybXdhcmUoKSByZXR1cm5zIHRydWUsIHRoZSBzeXN0
+ZW0gd2lsbCBiZSBhYmxlDQo+ID4gPiB0byBjdXQgYm90aCB2Y2MgYW5kIHZjY3EgaW4gdGhlIHN1
+c3BlbmQuIFNvLCBjYWxsDQo+ID4gPiBtbWNfcG93ZXJvZmZfbm9maXR5KCkgaWYgcG1fc3VzcGVu
+ZF92aWFfZmlybXdhcmUoKSByZXR1cm5zIHRydWUuDQo+ID4gPg0KPiA+ID4gTm90ZSB0aGF0IHdl
+IHNob3VsZCBub3QgdXBkYXRlIHRoZSBNTUNfQ0FQMl9GVUxMX1BXUl9DWUNMRSBjYXBzDQo+ID4g
+PiBiZWNhdXNlIHRoZSBtbWNfc2VsZWN0X3ZvbHRhZ2UoKSBjaGVja3MgdGhlIGNhcHMgd2hlbiBh
+dHRhY2hlcw0KPiA+ID4gYSBtbWMvc2QuDQo+IA0KPiA+ID4gLS0tIGEvZHJpdmVycy9tbWMvY29y
+ZS9tbWMuYw0KPiA+ID4gKysrIGIvZHJpdmVycy9tbWMvY29yZS9tbWMuYw0KPiA+ID4gQEAgLTIw
+MzgsNyArMjAzOSw4IEBAIHN0YXRpYyBpbnQgX21tY19zdXNwZW5kKHN0cnVjdCBtbWNfaG9zdCAq
+aG9zdCwgYm9vbCBpc19zdXNwZW5kKQ0KPiA+ID4gICAgICAgICAgICAgICAgIGdvdG8gb3V0Ow0K
+PiA+ID4NCj4gPiA+ICAgICAgICAgaWYgKG1tY19jYW5fcG93ZXJvZmZfbm90aWZ5KGhvc3QtPmNh
+cmQpICYmDQo+ID4gPiAtICAgICAgICAgICAgICAgKChob3N0LT5jYXBzMiAmIE1NQ19DQVAyX0ZV
+TExfUFdSX0NZQ0xFKSB8fCAhaXNfc3VzcGVuZCkpDQo+ID4gPiArICAgICAgICAgICAoKGhvc3Qt
+PmNhcHMyICYgTU1DX0NBUDJfRlVMTF9QV1JfQ1lDTEUpIHx8ICFpc19zdXNwZW5kIHx8DQo+ID4g
+PiArICAgICAgICAgICAgcG1fc3VzcGVuZF92aWFfZmlybXdhcmUoKSkpDQo+ID4NCj4gPiBTb3Jy
+eSwgYnV0IHRoaXMgZG9lc24ndCB3b3JrLg0KPiA+DQo+ID4gRXZlbiBpZiBQU0NJIGlzIGEgZ2Vu
+ZXJpYyBGVyBpbnRlcmZhY2UsIGl0IGRvZXNuJ3QgbWVhbiB0aGF0IGFsbCBQU0NJDQo+ID4gaW1w
+bGVtZW50YXRpb25zIHdpbGwgY3V0IHRoZSB2Y2MgYW5kIHZjY3EgZm9yIHRoZSBNTUMgY2FyZCBh
+dCBzeXN0ZW0NCj4gPiBzdXNwZW5kLg0KPiANCj4gSW5kZWVkLCB0aGVyZSdzIG5vdGhpbmcgZ3Vh
+cmFudGVlZCBoZXJlLiAgTm9yIGRvY3VtZW50ZWQgaG93IGl0IHNob3VsZA0KPiBiZWhhdmUuICBC
+YXNpY2FsbHkgdGhlIGZpcm13YXJlIGlzIGZyZWUgdG8gcG93ZXIgb2ZmIHRoZSBTb0MuIE9yIG5v
+dCBkbyB0aGF0Lg0KPiAiSWYgZmlybXdhcmUgaXMgaW52b2x2ZWQsIGFsbCBvZGRzIGFyZSBvZmYi
+Lg0KDQpJIHRob3VnaHQgd2UgY291bGQgYmUgZ3VhcmFudGVlZC4gQnV0LCBJIHVuZGVyc3Rvb2Qg
+d2UgY291bGQgbm90IGJlIGd1YXJhbnRlZWQuLi4NCg0KPiA+IEluc3RlYWQsIHlvdSBuZWVkIHRv
+IGRlY2lkZSB0aGlzIGJhc2VkIG9uIHNvbWUgc3BlY2lmaWMgRFQgcHJvcGVydHkuDQo+ID4gUGVy
+aGFwcyBpbiBjb25qdW5jdGlvbiB3aXRoIHVzaW5nIHBtX3N1c3BlbmRfdmlhX2Zpcm13YXJlKCku
+DQo+IA0KPiBMYXN0IHRpbWUgSSB3YXMgaW52b2x2ZWQgaW4gYSBkaXNjdXNzaW9uIGFib3V0IHRo
+aXMsIHRoZSBQU0NJIHBlb3BsZQ0KPiBkaWRuJ3Qgd2FudCB0byBhZGQgYW55IHByb3BlcnRpZXMg
+ZGVzY3JpYmluZyBwYXJ0aWN1bGFyIFBTQ0kgYmVoYXZpb3IuLi4NCj4gIklmIGZpcm13YXJlIGlz
+IGludm9sdmVkLCBhbGwgb2RkcyBhcmUgb2ZmIi4NCj4gDQo+IFNvIHRoZSBvbmx5IHNhZmUgdGhp
+bmcgdG8gZG8gaXMgdG8gZXhwZWN0IHRoZSB3b3JzdCwgYW5kIHByZXBhcmUgZm9yIGl0Li4uDQoN
+CkEgaGVhZGFjaGUgcG9pbnQgaXMgYW4gZU1NQyBkZXZpY2UgY29uc3VtZXMgbXVjaCBwb3dlciBp
+ZiB0aGF0IHRoZSBzeXN0ZW0NCmRvZXNuJ3QgY3V0IHRoZSB2Y2MgYW5kIHZjY3EgYW5kIGRvZXNu
+4oCZdCBlbnRlciB0aGUgc2xlZXAgbW9kZS4NCkluIG90aGVyIHdvcmRzLCBpbiBwb3dlciBjb25z
+dW1wdGlvbiBwb2ludCBvZiB2aWV3LCB0aGlzIHBhdGNoIHdpbGwNCmNhdXNlIGEgcmVncmVzc2lv
+biBpbiBzdWNoIGEgY2FzZS4uLg0KDQpCeSB0aGUgd2F5LCBhYm91dCBhZGRpbmcgc3BlY2lmaWMg
+RFQgcHJvcGVydHksIHRoZSByZWd1bGF0b3IgY2FuIGhhdmUNCnJlZ3VsYXRvci1vZmYtaW4tc3Vz
+cGVuZCBwcm9wZXJ0eSBpbiByZWd1bGF0b3Itc3RhdGUtbWVtIHN1Ym5vZGUuDQpGb3Igbm93LCB3
+ZSBkb2Vzbid0IHNlZW0gdG8gZ2V0IHRoZSBwcm9wZXJ0eSBmcm9tIGEgcmVndWxhdG9yIGNvbnN1
+bWVyIHRob3VnaC4NClNvLCBJJ2xsIHRyeSB0byBhZGQgYW4gQVBJIG9mIHJlZ3VsYXRvciBmb3Ig
+aXQuDQoNCkJlc3QgcmVnYXJkcywNCllvc2hpaGlybyBTaGltb2RhDQoNCj4gR3J7b2V0amUsZWV0
+aW5nfXMsDQo+IA0KPiAgICAgICAgICAgICAgICAgICAgICAgICBHZWVydA0KPiANCj4gLS0NCj4g
+R2VlcnQgVXl0dGVyaG9ldmVuIC0tIFRoZXJlJ3MgbG90cyBvZiBMaW51eCBiZXlvbmQgaWEzMiAt
+LSBnZWVydEBsaW51eC1tNjhrLm9yZw0KPiANCj4gSW4gcGVyc29uYWwgY29udmVyc2F0aW9ucyB3
+aXRoIHRlY2huaWNhbCBwZW9wbGUsIEkgY2FsbCBteXNlbGYgYSBoYWNrZXIuIEJ1dA0KPiB3aGVu
+IEknbSB0YWxraW5nIHRvIGpvdXJuYWxpc3RzIEkganVzdCBzYXkgInByb2dyYW1tZXIiIG9yIHNv
+bWV0aGluZyBsaWtlIHRoYXQuDQo+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgLS0g
+TGludXMgVG9ydmFsZHMNCg==
