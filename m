@@ -2,29 +2,29 @@ Return-Path: <SRS0=oKGY=AH=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.0 required=3.0
-	tests=HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-7.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	UNWANTED_LANGUAGE_BODY,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D5C88C433E0
-	for <linux-mmc@archiver.kernel.org>; Fri, 26 Jun 2020 09:32:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 05AEFC433DF
+	for <linux-mmc@archiver.kernel.org>; Fri, 26 Jun 2020 09:32:44 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id BF39E212CC
-	for <linux-mmc@archiver.kernel.org>; Fri, 26 Jun 2020 09:32:40 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D37D621548
+	for <linux-mmc@archiver.kernel.org>; Fri, 26 Jun 2020 09:32:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726646AbgFZJcf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 26 Jun 2020 05:32:35 -0400
-Received: from relmlor2.renesas.com ([210.160.252.172]:17253 "EHLO
+        id S1726579AbgFZJca (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 26 Jun 2020 05:32:30 -0400
+Received: from relmlor2.renesas.com ([210.160.252.172]:24970 "EHLO
         relmlie6.idc.renesas.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1726568AbgFZJcb (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 26 Jun 2020 05:32:31 -0400
+        by vger.kernel.org with ESMTP id S1726074AbgFZJca (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 26 Jun 2020 05:32:30 -0400
 X-IronPort-AV: E=Sophos;i="5.75,283,1589209200"; 
-   d="scan'208";a="50446472"
+   d="scan'208";a="50446469"
 Received: from unknown (HELO relmlir6.idc.renesas.com) ([10.200.68.152])
   by relmlie6.idc.renesas.com with ESMTP; 26 Jun 2020 18:32:28 +0900
 Received: from localhost.localdomain (unknown [10.166.252.89])
-        by relmlir6.idc.renesas.com (Postfix) with ESMTP id 7EC6E420331D;
+        by relmlir6.idc.renesas.com (Postfix) with ESMTP id 6BEAD42034D1;
         Fri, 26 Jun 2020 18:32:28 +0900 (JST)
 From:   Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
 To:     ulf.hansson@linaro.org, lgirdwood@gmail.com, broonie@kernel.org,
@@ -32,9 +32,9 @@ To:     ulf.hansson@linaro.org, lgirdwood@gmail.com, broonie@kernel.org,
 Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
         linux-renesas-soc@vger.kernel.org,
         Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-Subject: [PATCH/RFC v4 3/4] mmc: core: Call mmc_poweroff_nofity() if regulators are disabled
-Date:   Fri, 26 Jun 2020 18:32:21 +0900
-Message-Id: <1593163942-5087-4-git-send-email-yoshihiro.shimoda.uh@renesas.com>
+Subject: [PATCH/RFC v4 2/4] regulator: fixed: add regulator_ops members for suspend/resume
+Date:   Fri, 26 Jun 2020 18:32:20 +0900
+Message-Id: <1593163942-5087-3-git-send-email-yoshihiro.shimoda.uh@renesas.com>
 X-Mailer: git-send-email 2.7.4
 In-Reply-To: <1593163942-5087-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
 References: <1593163942-5087-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
@@ -43,60 +43,80 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-If regulator_is_enabled() of both vmmc and vqmmc returns false,
-_mmc_suspend() should call mmc_poweroff_nofity() instead of
-mmc_sleep().
+The regulator-fixed driver is possible to be off by firmware
+like PSCI while the system is suspended. If a consumer could get
+such a condition from regulator_is_enabled(), it's useful by
+consumers.
 
-Note that this is possible to happen when the regulator-fixed driver
-turns the vmmc and vqmmc off by firmware like PSCI while the system
-is suspended.
+So, add some regulator_ops members for it. And then, if
+regulator-fixed nodes have suitable sub-nodes and properties [1],
+regulator_is_enabled() will return false while suspend() of
+a consumer.
+
+[1]
+ - The node has regulator-state-(standby|mem|disk) sub-nodes.
+ - The node doesn't have regulator-always-on.
+ - The sub-node has regulator-off-in-suspend property.
 
 Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
 ---
- drivers/mmc/core/mmc.c | 16 +++++++++++++++-
- 1 file changed, 15 insertions(+), 1 deletion(-)
+ drivers/regulator/fixed.c | 29 +++++++++++++++++++++++++++++
+ 1 file changed, 29 insertions(+)
 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 4203303..75df5f8 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -12,6 +12,7 @@
- #include <linux/slab.h>
- #include <linux/stat.h>
- #include <linux/pm_runtime.h>
-+#include <linux/regulator/consumer.h>
+diff --git a/drivers/regulator/fixed.c b/drivers/regulator/fixed.c
+index d54830e..0bd4a1a 100644
+--- a/drivers/regulator/fixed.c
++++ b/drivers/regulator/fixed.c
+@@ -35,6 +35,7 @@ struct fixed_voltage_data {
  
- #include <linux/mmc/host.h>
- #include <linux/mmc/card.h>
-@@ -2022,6 +2023,18 @@ static void mmc_detect(struct mmc_host *host)
- 	}
- }
+ 	struct clk *enable_clock;
+ 	unsigned int clk_enable_counter;
++	bool disabled_in_suspend;
+ };
  
-+static bool mmc_regulators_are_disabled(struct mmc_host *host)
+ struct fixed_dev_type {
+@@ -49,6 +50,31 @@ static const struct fixed_dev_type fixed_clkenable_data = {
+ 	.has_enable_clock = true,
+ };
+ 
++static int reg_is_enabled(struct regulator_dev *rdev)
 +{
-+	if (IS_ERR(host->supply.vmmc) ||
-+	    regulator_is_enabled(host->supply.vmmc))
-+		return false;
-+	if (IS_ERR(host->supply.vqmmc) ||
-+	    regulator_is_enabled(host->supply.vqmmc))
-+		return false;
++	struct fixed_voltage_data *priv = rdev_get_drvdata(rdev);
 +
-+	return true;
++	return !priv->disabled_in_suspend;
 +}
 +
- static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
++static int reg_prepare_disable(struct regulator_dev *rdev)
++{
++	struct fixed_voltage_data *priv = rdev_get_drvdata(rdev);
++
++	priv->disabled_in_suspend = true;
++
++	return 0;
++}
++
++static int reg_resume_early_disable(struct regulator_dev *rdev)
++{
++	struct fixed_voltage_data *priv = rdev_get_drvdata(rdev);
++
++	priv->disabled_in_suspend = false;
++
++	return 0;
++}
++
+ static int reg_clock_enable(struct regulator_dev *rdev)
  {
- 	int err = 0;
-@@ -2038,7 +2051,8 @@ static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
- 		goto out;
+ 	struct fixed_voltage_data *priv = rdev_get_drvdata(rdev);
+@@ -132,6 +158,9 @@ of_get_fixed_voltage_config(struct device *dev,
+ }
  
- 	if (mmc_can_poweroff_notify(host->card) &&
--		((host->caps2 & MMC_CAP2_FULL_PWR_CYCLE) || !is_suspend))
-+	    ((host->caps2 & MMC_CAP2_FULL_PWR_CYCLE) || !is_suspend ||
-+	     mmc_regulators_are_disabled(host)))
- 		err = mmc_poweroff_notify(host->card, notify_type);
- 	else if (mmc_can_sleep(host->card))
- 		err = mmc_sleep(host);
+ static struct regulator_ops fixed_voltage_ops = {
++	.is_enabled = reg_is_enabled,
++	.set_prepare_disable = reg_prepare_disable,
++	.clear_resume_early_disable = reg_resume_early_disable,
+ };
+ 
+ static struct regulator_ops fixed_voltage_clkenabled_ops = {
 -- 
 2.7.4
 
