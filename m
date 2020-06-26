@@ -1,143 +1,151 @@
-Return-Path: <SRS0=uQvo=AG=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=oKGY=AH=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-1.0 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.0 required=3.0
+	tests=HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 172C1C433E0
-	for <linux-mmc@archiver.kernel.org>; Thu, 25 Jun 2020 09:26:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D327AC433DF
+	for <linux-mmc@archiver.kernel.org>; Fri, 26 Jun 2020 09:32:33 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id F29A020578
-	for <linux-mmc@archiver.kernel.org>; Thu, 25 Jun 2020 09:26:26 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id BDA6421527
+	for <linux-mmc@archiver.kernel.org>; Fri, 26 Jun 2020 09:32:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2390071AbgFYJ00 convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 25 Jun 2020 05:26:26 -0400
-Received: from mail-oi1-f195.google.com ([209.85.167.195]:41444 "EHLO
-        mail-oi1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726149AbgFYJ00 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 25 Jun 2020 05:26:26 -0400
-Received: by mail-oi1-f195.google.com with SMTP id a21so4365338oic.8;
-        Thu, 25 Jun 2020 02:26:25 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=yjzuDu5iqeNsu8xsS5EjF8Gr+ffGuq2vYXMsQZ3k7jM=;
-        b=t5r1W+kC9nS+TaTm1T6GoKesiKPG6wHWBa3urlMP2Wk5ej3xwKueRPVpEvMznSE1C8
-         1dj2ne/+ypF24KAPqm05ZX+caR+PNr2FLFuPXmE0RSqF589iHjzCr6YsjeMgxm8QGyyx
-         S0NLHObNlI54stIVoGyuT+mKt7NxCYXPwmIXZqtUEv1o+u6GxNyE45W9+ocMWsAD9esq
-         j7d3qgTnn7oaMK/XV6/h3qxYmUsBma5GA0QZKibtwm8KiOUthLpR5ZFZYOTcltlDpfg5
-         BWGHA315ckMAkqSINUp9By5e1MUOJsvvyIzeT4hImlp9PCw1XVa5kW8UkVRTK8ikAx/D
-         uIDQ==
-X-Gm-Message-State: AOAM530sP7mjd//Ylw9yurtMjjquLVT90WIhi29S6GeSxUkGJfoHM4n6
-        V1fwXuNCXpJjtNM+u3crtis2qkpFObyz43NfQPs=
-X-Google-Smtp-Source: ABdhPJwsgOEyHOyhQZQfhnuYyoD/aYDE50iovKEbQsMjIg8T4WNNLfeSIQT55JpX+5PPkCNy8BmSIizKd1H9+owNtRU=
-X-Received: by 2002:a54:4006:: with SMTP id x6mr1352366oie.148.1593077185115;
- Thu, 25 Jun 2020 02:26:25 -0700 (PDT)
-MIME-Version: 1.0
-References: <1592792699-24638-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
- <1592792699-24638-3-git-send-email-yoshihiro.shimoda.uh@renesas.com>
- <CAPDyKFq-dEPaU094hrk2xg18VpJAsbnf8enieFmcMhKiB1bW1A@mail.gmail.com>
- <CAMuHMdXjU7N4oG89YsozGijMpjgKGN6ezw2qm6FeGX=JyRhsvg@mail.gmail.com> <TY2PR01MB36921A71A493ABD624A28C42D8920@TY2PR01MB3692.jpnprd01.prod.outlook.com>
-In-Reply-To: <TY2PR01MB36921A71A493ABD624A28C42D8920@TY2PR01MB3692.jpnprd01.prod.outlook.com>
-From:   Geert Uytterhoeven <geert@linux-m68k.org>
-Date:   Thu, 25 Jun 2020 11:26:14 +0200
-Message-ID: <CAMuHMdWLWBvZmHNqPFk2GW6XLnBx-sqfCo6d=B4iei88ONWX=w@mail.gmail.com>
-Subject: Re: [PATCH v3 2/2] mmc: core: Call mmc_poweroff_nofity() if pm_suspend_via_firmware()
-To:     Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Mark Rutland <mark.rutland@arm.com>,
-        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
-        Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        Mark Brown <broonie@kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
+        id S1726593AbgFZJcb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 26 Jun 2020 05:32:31 -0400
+Received: from relmlor1.renesas.com ([210.160.252.171]:59362 "EHLO
+        relmlie5.idc.renesas.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1725768AbgFZJca (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 26 Jun 2020 05:32:30 -0400
+X-IronPort-AV: E=Sophos;i="5.75,283,1589209200"; 
+   d="scan'208";a="50657262"
+Received: from unknown (HELO relmlir6.idc.renesas.com) ([10.200.68.152])
+  by relmlie5.idc.renesas.com with ESMTP; 26 Jun 2020 18:32:28 +0900
+Received: from localhost.localdomain (unknown [10.166.252.89])
+        by relmlir6.idc.renesas.com (Postfix) with ESMTP id 58F57420331D;
+        Fri, 26 Jun 2020 18:32:28 +0900 (JST)
+From:   Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+To:     ulf.hansson@linaro.org, lgirdwood@gmail.com, broonie@kernel.org,
+        geert+renesas@glider.be, magnus.damm@gmail.com
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-renesas-soc@vger.kernel.org,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Subject: [PATCH/RFC v4 1/4] regulator: core: add prepare and resume_early
+Date:   Fri, 26 Jun 2020 18:32:19 +0900
+Message-Id: <1593163942-5087-2-git-send-email-yoshihiro.shimoda.uh@renesas.com>
+X-Mailer: git-send-email 2.7.4
+In-Reply-To: <1593163942-5087-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
+References: <1593163942-5087-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Shimoda-san,
+The regulator-fixed driver is possible to be off by firmware
+like PSCI while the system is suspended. If a consumer could get
+such a condition from regulator_is_enabled(), it's useful by
+consumers.
 
-CC broonie
+The regulator subsystem already has regulator-state-(standby|mem|disk)
+sub-nodes and regulator-off-in-suspend property. However,
+suitable regulator_ops APIs didn't exist.
 
-On Thu, Jun 25, 2020 at 8:31 AM Yoshihiro Shimoda
-<yoshihiro.shimoda.uh@renesas.com> wrote:
-> > From: Geert Uytterhoeven, Sent: Wednesday, June 24, 2020 8:13 PM
-> > On Wed, Jun 24, 2020 at 12:06 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> > > On Mon, 22 Jun 2020 at 04:25, Yoshihiro Shimoda
-> > > <yoshihiro.shimoda.uh@renesas.com> wrote:
-> > > > If pm_suspend_via_firmware() returns true, the system will be able
-> > > > to cut both vcc and vccq in the suspend. So, call
-> > > > mmc_poweroff_nofity() if pm_suspend_via_firmware() returns true.
-> > > >
-> > > > Note that we should not update the MMC_CAP2_FULL_PWR_CYCLE caps
-> > > > because the mmc_select_voltage() checks the caps when attaches
-> > > > a mmc/sd.
-> >
-> > > > --- a/drivers/mmc/core/mmc.c
-> > > > +++ b/drivers/mmc/core/mmc.c
-> > > > @@ -2038,7 +2039,8 @@ static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
-> > > >                 goto out;
-> > > >
-> > > >         if (mmc_can_poweroff_notify(host->card) &&
-> > > > -               ((host->caps2 & MMC_CAP2_FULL_PWR_CYCLE) || !is_suspend))
-> > > > +           ((host->caps2 & MMC_CAP2_FULL_PWR_CYCLE) || !is_suspend ||
-> > > > +            pm_suspend_via_firmware()))
-> > >
-> > > Sorry, but this doesn't work.
-> > >
-> > > Even if PSCI is a generic FW interface, it doesn't mean that all PSCI
-> > > implementations will cut the vcc and vccq for the MMC card at system
-> > > suspend.
-> >
-> > Indeed, there's nothing guaranteed here.  Nor documented how it should
-> > behave.  Basically the firmware is free to power off the SoC. Or not do that.
-> > "If firmware is involved, all odds are off".
->
-> I thought we could be guaranteed. But, I understood we could not be guaranteed...
->
-> > > Instead, you need to decide this based on some specific DT property.
-> > > Perhaps in conjunction with using pm_suspend_via_firmware().
-> >
-> > Last time I was involved in a discussion about this, the PSCI people
-> > didn't want to add any properties describing particular PSCI behavior...
-> > "If firmware is involved, all odds are off".
-> >
-> > So the only safe thing to do is to expect the worst, and prepare for it...
->
-> A headache point is an eMMC device consumes much power if that the system
-> doesn't cut the vcc and vccq and doesn’t enter the sleep mode.
-> In other words, in power consumption point of view, this patch will
-> cause a regression in such a case...
+So, add new regulator_ops APIs and prepare()/resume_early() in
+the regulator_pm_ops to set/clear the condition by new APIs before
+suspend() functions of consumers are called.
 
-Indeed.
+Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+---
+ drivers/regulator/core.c         | 42 ++++++++++++++++++++++++++++++++++++++++
+ include/linux/regulator/driver.h |  6 ++++++
+ 2 files changed, 48 insertions(+)
 
-> By the way, about adding specific DT property, the regulator can have
-> regulator-off-in-suspend property in regulator-state-mem subnode.
-> For now, we doesn't seem to get the property from a regulator consumer though.
-> So, I'll try to add an API of regulator for it.
-
-Oh right, the eMMC is described in DT as being connected to two
-regulators.
-Note that the semantics of regulator-off-in-suspend are that the
-regulator should be disabled (by the regulator core) during suspend, not
-that the regulator is disabled during suspend by a third party.
-No idea if that will work with a fixed-regulator without GPIO control,
-but of course you can try.
-
-Gr{oetje,eeting}s,
-
-                        Geert
-
+diff --git a/drivers/regulator/core.c b/drivers/regulator/core.c
+index 03154f5..93eb2a3 100644
+--- a/drivers/regulator/core.c
++++ b/drivers/regulator/core.c
+@@ -5286,6 +5286,46 @@ void regulator_unregister(struct regulator_dev *rdev)
+ EXPORT_SYMBOL_GPL(regulator_unregister);
+ 
+ #ifdef CONFIG_SUSPEND
++static int regulator_prepare(struct device *dev)
++{
++	struct regulator_dev *rdev = dev_to_rdev(dev);
++	suspend_state_t state = pm_suspend_target_state;
++	struct regulator_state *rstate;
++	int ret = 0;
++
++	rstate = regulator_get_suspend_state(rdev, state);
++	if (rstate == NULL)
++		return 0;
++
++	regulator_lock(rdev);
++	if (rstate->enabled == DISABLE_IN_SUSPEND &&
++	    rdev->desc->ops->set_prepare_disable)
++		ret = rdev->desc->ops->set_prepare_disable(rdev);
++	regulator_unlock(rdev);
++
++	return ret;
++}
++
++static int regulator_resume_early(struct device *dev)
++{
++	struct regulator_dev *rdev = dev_to_rdev(dev);
++	suspend_state_t state = pm_suspend_target_state;
++	struct regulator_state *rstate;
++	int ret = 0;
++
++	rstate = regulator_get_suspend_state(rdev, state);
++	if (rstate == NULL)
++		return 0;
++
++	regulator_lock(rdev);
++	if (rstate->enabled == DISABLE_IN_SUSPEND &&
++	    rdev->desc->ops->clear_resume_early_disable)
++		ret = rdev->desc->ops->clear_resume_early_disable(rdev);
++	regulator_unlock(rdev);
++
++	return ret;
++}
++
+ /**
+  * regulator_suspend - prepare regulators for system wide suspend
+  * @dev: ``&struct device`` pointer that is passed to _regulator_suspend()
+@@ -5336,6 +5376,8 @@ static int regulator_resume(struct device *dev)
+ 
+ #ifdef CONFIG_PM
+ static const struct dev_pm_ops __maybe_unused regulator_pm_ops = {
++	.prepare	= regulator_prepare,
++	.resume_early	= regulator_resume_early,
+ 	.suspend	= regulator_suspend,
+ 	.resume		= regulator_resume,
+ };
+diff --git a/include/linux/regulator/driver.h b/include/linux/regulator/driver.h
+index 7eb9fea..299a504 100644
+--- a/include/linux/regulator/driver.h
++++ b/include/linux/regulator/driver.h
+@@ -115,6 +115,10 @@ enum regulator_status {
+  *                      suspended.
+  * @set_suspend_disable: Mark the regulator as disabled when the system is
+  *                       suspended.
++ * @set_prepare_disable: Mark the regulator as disabled when the system is
++ *                       suspending.
++ * @clear_resume_early_disable: Unmark the regulator as disabled when
++ *                              the system is resuming.
+  * @set_suspend_mode: Set the operating mode for the regulator when the
+  *                    system is suspended.
+  *
+@@ -195,6 +199,8 @@ struct regulator_ops {
+ 	/* enable/disable regulator in suspend state */
+ 	int (*set_suspend_enable) (struct regulator_dev *);
+ 	int (*set_suspend_disable) (struct regulator_dev *);
++	int (*set_prepare_disable) (struct regulator_dev *);
++	int (*clear_resume_early_disable) (struct regulator_dev *);
+ 
+ 	/* set regulator suspend operating mode (defined in consumer.h) */
+ 	int (*set_suspend_mode) (struct regulator_dev *, unsigned int mode);
 -- 
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+2.7.4
 
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
