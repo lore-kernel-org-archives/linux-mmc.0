@@ -6,44 +6,44 @@ X-Spam-Status: No, score=-2.6 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
 	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 72E77C433DF
-	for <linux-mmc@archiver.kernel.org>; Mon, 29 Jun 2020 21:31:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 61AD3C433E2
+	for <linux-mmc@archiver.kernel.org>; Mon, 29 Jun 2020 21:35:04 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5505520786
-	for <linux-mmc@archiver.kernel.org>; Mon, 29 Jun 2020 21:31:29 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4358720759
+	for <linux-mmc@archiver.kernel.org>; Mon, 29 Jun 2020 21:35:04 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1593466289;
-	bh=i3XF3hOBLFwb0NzPxlALfSrDzl4dgkIr0XA+m7+JoC8=;
+	s=default; t=1593466504;
+	bh=bcyRH8SrIJRpWOCioAE7dQk1Zwno7fu5lbGQHD57n+M=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
-	b=J/1l+jDR9w0hF7HbzzSnVsUIJNl0OdpI348f69O/TDuCDUO+r3IPo7yg0f0xTt30T
-	 IZV2uu33D388B0ucTA5d9j+4rO76JEALf04ZMGTlO95ekOv3HOcYf9d5wVNeQG+NW9
-	 itH9fTljTfjQHkIChYEEd0TlQHZS8CyB50nee2qY=
+	b=yX7Lt6A9E6smpx3bai3nn/fq//n4JjefE+RDJYeGzcP6UNy67079AMDQIl9Tr6vPx
+	 VzHs69weTVmU5zsGeaL27lB+fBobeWHX8/HliBsa0M0zZy50KvJOFXXBLWzYVISQii
+	 ngtE5Y2UWm0AIaGiUN0VmEZeiV43VTZKy25VhfRY=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2388131AbgF2VbJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 29 Jun 2020 17:31:09 -0400
-Received: from mail.kernel.org ([198.145.29.99]:60658 "EHLO mail.kernel.org"
+        id S1728544AbgF2Vez (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 29 Jun 2020 17:34:55 -0400
+Received: from mail.kernel.org ([198.145.29.99]:60654 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728804AbgF2SlS (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 29 Jun 2020 14:41:18 -0400
+        id S1728566AbgF2Skz (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 29 Jun 2020 14:40:55 -0400
 Received: from localhost (fw-tnat.cambridge.arm.com [217.140.96.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 8C6B325587;
-        Mon, 29 Jun 2020 16:14:52 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 51FD823D25;
+        Mon, 29 Jun 2020 12:57:58 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1593447293;
-        bh=i3XF3hOBLFwb0NzPxlALfSrDzl4dgkIr0XA+m7+JoC8=;
+        s=default; t=1593435478;
+        bh=bcyRH8SrIJRpWOCioAE7dQk1Zwno7fu5lbGQHD57n+M=;
         h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=X+SIl8ZxkoXoG+sr41c2HNEnAyjfyK1CY3DA9icEyBQ+PEswOA8VF0ZeBwHmyoaxQ
-         eAllUfzRvyXPv1+0n0a0Y83PLyxT/SowR4vO1gl3gFkVw3NnVmu9y4mTdHddlP87K0
-         33omSROIgfdIPoK7+55i1Fm9buHYzrVyNTQwjTME=
-Date:   Mon, 29 Jun 2020 17:14:50 +0100
+        b=aSSuD7UPU9scWauVRzNqe8ZN1yN6QlsyN7rZk8VrNsWYDgD/+hATBOQzmvBCe2E+t
+         D3Xh+qBwPFvd/SS8ZHrwu7i6dNvNqobYG+MXCWb6C9721v0VwWQxe/CzBuVBy5sWdE
+         YIMT3SzvxnbDL+UZ6JEuxwTiUHnlnblRL/az3+KA=
+Date:   Mon, 29 Jun 2020 13:57:56 +0100
 From:   Mark Brown <broonie@kernel.org>
-To:     Sudeep Holla <sudeep.holla@arm.com>
-Cc:     Geert Uytterhoeven <geert@linux-m68k.org>,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+To:     Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Cc:     "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+        Sudeep Holla <sudeep.holla@arm.com>,
         "lgirdwood@gmail.com" <lgirdwood@gmail.com>,
+        "geert+renesas@glider.be" <geert+renesas@glider.be>,
         "magnus.damm@gmail.com" <magnus.damm@gmail.com>,
         "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
         "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
@@ -51,20 +51,16 @@ Cc:     Geert Uytterhoeven <geert@linux-m68k.org>,
         <linux-renesas-soc@vger.kernel.org>
 Subject: Re: [PATCH/RFC v4 2/4] regulator: fixed: add regulator_ops members
  for suspend/resume
-Message-ID: <20200629161450.GE5499@sirena.org.uk>
+Message-ID: <20200629125756.GC5499@sirena.org.uk>
 References: <1593163942-5087-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
  <1593163942-5087-3-git-send-email-yoshihiro.shimoda.uh@renesas.com>
  <20200626143914.GE5289@sirena.org.uk>
  <TY2PR01MB3692A3B12CEF7F9708A8A59CD86E0@TY2PR01MB3692.jpnprd01.prod.outlook.com>
- <20200629125756.GC5499@sirena.org.uk>
- <20200629134011.GA23284@bogus>
- <CAMuHMdU81-EAve+jHhL8+ohCd5YXrgLWpMgaCvgXFDLO7p17pQ@mail.gmail.com>
- <20200629150728.GA27911@bogus>
 MIME-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="9crTWz/Z+Zyzu20v"
+        protocol="application/pgp-signature"; boundary="vOmOzSkFvhd7u8Ms"
 Content-Disposition: inline
-In-Reply-To: <20200629150728.GA27911@bogus>
+In-Reply-To: <TY2PR01MB3692A3B12CEF7F9708A8A59CD86E0@TY2PR01MB3692.jpnprd01.prod.outlook.com>
 X-Cookie: Real programs don't eat cache.
 User-Agent: Mutt/1.10.1 (2018-07-13)
 Sender: linux-mmc-owner@vger.kernel.org
@@ -73,74 +69,70 @@ List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 
---9crTWz/Z+Zyzu20v
-Content-Type: text/plain; charset=utf-8
+--vOmOzSkFvhd7u8Ms
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-On Mon, Jun 29, 2020 at 04:07:28PM +0100, Sudeep Holla wrote:
-> On Mon, Jun 29, 2020 at 04:15:39PM +0200, Geert Uytterhoeven wrote:
+On Mon, Jun 29, 2020 at 02:42:26AM +0000, Yoshihiro Shimoda wrote:
+> > From: Mark Brown, Sent: Friday, June 26, 2020 11:39 PM
 
-> > This is all about how to know what exactly PSCI is powering down during
-> > SYSTEM_SUSPEND.  In this specific case, it is about knowing if the eMMC
-> > is powered down or not, as Linux should follow a specific procedure to
-> > prepare the eMMC for that, and Linux should not if that isn't the case.
+Copying in Sudeep for the feedback on firmware interfaces.
 
-> OK, unless you are optimising, you shouldn't care then what PSCI does.
-> If you don't need eMMC, just suspend/power it off before you enter system/
-> psci suspend.
+> > According to the changelog this is all about reflecting changes in the
+> > system state done by firmware but there's no interaction with firmware
+> > here which means this will be at best fragile.  If we need to reflect
+> > changes in firmware configuration I'd expect there to be some
+> > interaction with firmware about how it is configured, or at least that
+> > the configuration would come from the same source.
 
-That only works if the power off procedure doesn't require that power be
-removed as part of the procedure.  There's a reasonable argument that
-specs that have such requirements are unhelpful but that doesn't mean
-that nobody will make hardware with such requrements which creates
-problems for generic code that needs to control that hardware if it
-can't discover the power state over suspend.
+> I should have described background of previous patch series though,
+> according to previous discussion [1] the firmware side (like PSCI) is
+> also fragile unfortunately... So, I thought using regulator-off-in-suspend
+> in a regulator was better.
 
-> > I had a quick look at the latest revision of the PSCI specification, and
-> > it doesn't look like anything has changed in that area since my old pat=
-ch
-> > series from 2017.  So it still boils down to: we don't know what a
-> > specific PSCI implementation will do, as basically anything is
-> > compliant, so the only safe thing is to assume the worst.
+> On other hand, Ulf is talking about either adding a property (perhaps like
+> regulator-off-in-suspend) into a regulator or just adding a new property
+> into MMC [2]. What do you think about Ulf' comment? I'm thinking
+> adding a new property "full-pwr-cycle-in-suspend" is the best solution.
+> This is because using a regulator property and reflecting a state of regu=
+lator without
+> firmware is fragile, as you said.
 
-> The specification states clearly:
-> "... all devices in the system must be in a state that is compatible
-> with entry into the system state. These preconditions are beyond the scope
-> of this specification and are therefore not described here."
-> "Prior to the call, the OS must disable all sources of wakeup other than
-> those it needs to support for its implementation of suspend to RAM."
+TBH I worry about a property drifting out of sync with the firmware on
+systems where the firmware can be updated.  Personally my default
+assumption would always be that we're going to loose power for anything
+except the RAM and whatever is needed for wake sources during suspend so
+I find the discussion a bit surprising but in any case that seems like a
+better option than trying to shoehorn things in the way the series here
+did.  Like I said in my earlier replies if this is done through the
+regulator API I'd expect it to be via the suspend interface.
 
-This gets a bit circular for a generic OS since the OS needs some way to
-figure out what it's supposed to do on a given platform - for example
-the OS may be happy to use wakeup sources that the firmware is just
-going to cut power on.
+> [1]
+> https://lore.kernel.org/linux-renesas-soc/CAMuHMdXjU7N4oG89YsozGijMpjgKGN=
+6ezw2qm6FeGX=3DJyRhsvg@mail.gmail.com/
+>=20
+> [2]
+> https://lore.kernel.org/linux-renesas-soc/CAPDyKFpiBU1D+a7zb+Ggm0_HZ+YR4=
+=3DLXJZ5MPytXtT=3DuBEdjPA@mail.gmail.com/
+>=20
+> Best regards,
+> Yoshihiro Shimoda
+>=20
 
-> I see nothing has been fixed in the firmware too and we are still
-> discussing the same after 3 years =F0=9F=98=84. Clearly we should start t=
-rusting
-> firmware and built capability to fix and replace it if there are bugs
-> just like kernel and stop hacking around in the kernel to deal with
-> just broken platform/psci firmware.
-
-This isn't just an issue of buggy firmware as far as I can see, it's
-also a lack of ability for the OS and firmware to communicate
-information about their intentions to each other.  As things stand you'd
-need to put static information in the DT.
-
---9crTWz/Z+Zyzu20v
+--vOmOzSkFvhd7u8Ms
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQEzBAABCgAdFiEEreZoqmdXGLWf4p/qJNaLcl1Uh9AFAl76E3kACgkQJNaLcl1U
-h9CVZQf/b/5Ry1gGVzgtNgFJSdZbuHAxc/M3ISHQRVcymW1iEZfglFzYYPbztCAh
-Z9wvSSL2wdE5QIn3fiCogRWEYZ00MRWYaGEkejEVuGiX37nlPtjvrnuk0jU892SI
-mE0lbSPO8fWuF625sxNgUqVVtEX1rYzLY/cQm1OGqADIv2Vu2UsxkotYJ1GogT2N
-D2Uar5ao+JY3t4DkbNw0vL6bnem2tPcQh94HbNR8E/yf+c1dcosKS4nTXQkzzFcK
-pTbtsakKpe+sNs/BXSDOH2Nq00O3LHIrAUEUfx/dl6MyXg5SCHlwmek300usG/8y
-BuBF13l/Vd3ujNfSFazfX8dpElQDQQ==
-=TKQb
+iQEzBAABCgAdFiEEreZoqmdXGLWf4p/qJNaLcl1Uh9AFAl755VMACgkQJNaLcl1U
+h9BCWAf/alYjM1GUf8o0xC1cfZB+/ZQDJlP1ynAY3yBAz6znDVqyB0+0YHESvJeZ
+H9rCGXZ4YyH+CRLnd3TzJrAYfJ9wedaSQiabb5GE7hUKuC/SYPgLHX/3201Kgwl+
++MNM6w0kvzjyU/0OzvYI0SXBFu5g21LAZLR5FSaYcReUfqOJah+OtilSFdO+z86h
+YsX6CMecRYl+4gwHkKlr1mQ7ZvrdtFkYynwxr3CZaD/ZsxZQ5DFL/p4h46D/ewKJ
+qYoD8RX0S5QnWLxNBWmy10XtW67Rznftmh5lSBV9UkG2zxIIYL8878fmVecdLsiI
+ZeLVxrKgg+Jq0Jzcy+7yux7aucvd+A==
+=ENZF
 -----END PGP SIGNATURE-----
 
---9crTWz/Z+Zyzu20v--
+--vOmOzSkFvhd7u8Ms--
