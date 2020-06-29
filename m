@@ -1,150 +1,148 @@
-Return-Path: <SRS0=oKGY=AH=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=XB32=AK=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.5 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-1.0 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0BD32C433DF
-	for <linux-mmc@archiver.kernel.org>; Fri, 26 Jun 2020 16:01:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2D088C433E1
+	for <linux-mmc@archiver.kernel.org>; Mon, 29 Jun 2020 02:12:36 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C28F12053B
-	for <linux-mmc@archiver.kernel.org>; Fri, 26 Jun 2020 16:00:59 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 06B02206BE
+	for <linux-mmc@archiver.kernel.org>; Mon, 29 Jun 2020 02:12:36 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (2048-bit key) header.d=microchip.com header.i=@microchip.com header.b="lIjxaqlG";
-	dkim=pass (1024-bit key) header.d=microchiptechnology.onmicrosoft.com header.i=@microchiptechnology.onmicrosoft.com header.b="mI0vlXeU"
+	dkim=pass (1024-bit key) header.d=renesasgroup.onmicrosoft.com header.i=@renesasgroup.onmicrosoft.com header.b="krSnPLyV"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725854AbgFZQA7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 26 Jun 2020 12:00:59 -0400
-Received: from esa5.microchip.iphmx.com ([216.71.150.166]:44545 "EHLO
-        esa5.microchip.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725807AbgFZQA6 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 26 Jun 2020 12:00:58 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=microchip.com; i=@microchip.com; q=dns/txt; s=mchp;
-  t=1593187258; x=1624723258;
-  h=from:to:subject:date:message-id:content-id:
-   content-transfer-encoding:mime-version;
-  bh=yKujsTbxii9cR/15vMRWEGrW5VAWVJ1MxHh+YbvzrIY=;
-  b=lIjxaqlGos8UmQisdin7AAJP/zgYaGvhmNGz5Jvz9yI7NzTU8OI4kAYS
-   J1w6DpsBJBd05H8DTIlSJq+eQ6u27tRzpla68trvZNmlcHMvEVnsK3f4b
-   0NtTvEpQCxLdW9MXUOTfuu7VUw9SYKP2bHpuq1Ru4UqBWbfEzMs9kDBWf
-   5WP+hrChlxqFdghDfA5d6avb/qal8dMW6wxq1A1MwPLG0IYm5V0mb14vl
-   vra8eKscXMFqKR4liyZDARvYWGe2rDoDg8ogY3LOK4sgJ+w5lX5nPfJft
-   /8tipjce97QZMlk7/qADABPRbQtbl1OLBXQl6LthFJi9i+apMwmLkCFhV
-   Q==;
-IronPort-SDR: UuWBJnrWMmRKMP9IdpBdcJFBznD++pzSiy0LnNZa0gPeJ6SLiAnIrnembLeO6fWol2RMbzX84E
- EFChKP0JWPJKnkC/rMaVZkHs+8lnNnImOBPe2dBihbcRl2EJixFnpGxSLEi85HhSZuHXxXE+MA
- 9ycqs8eWKhRfW8azhjAPke9nfSQqq4An8iifZ/T7kSYExcKBQwA6doQOh/SGALDPwCVN3gSAn2
- ngkjJXrzstF072dAYuFOAlmy9HzempmYbLe+Z5I5Y/jC8wiIXtlzkvO1Zj+7vAcEiQ9nMsUBVT
- 0Z0=
-X-IronPort-AV: E=Sophos;i="5.75,284,1589266800"; 
-   d="scan'208";a="81020054"
-Received: from smtpout.microchip.com (HELO email.microchip.com) ([198.175.253.82])
-  by esa5.microchip.iphmx.com with ESMTP/TLS/AES256-SHA256; 26 Jun 2020 09:00:58 -0700
-Received: from chn-vm-ex01.mchp-main.com (10.10.85.143) by
- chn-vm-ex02.mchp-main.com (10.10.85.144) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.1979.3; Fri, 26 Jun 2020 09:00:43 -0700
-Received: from NAM12-BN8-obe.outbound.protection.outlook.com (10.10.215.89) by
- email.microchip.com (10.10.87.71) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.1979.3 via Frontend
- Transport; Fri, 26 Jun 2020 09:00:43 -0700
+        id S1726204AbgF2CMc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 28 Jun 2020 22:12:32 -0400
+Received: from mail-eopbgr1310095.outbound.protection.outlook.com ([40.107.131.95]:23308
+        "EHLO APC01-SG2-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1726071AbgF2CMb (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Sun, 28 Jun 2020 22:12:31 -0400
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=DI754VQEMRotUFJsFYkb3h0+K0k5RpX7NsJiP85N3dHqT4WmV7LKSfotxPA4zabAQKqFlU9T+q8YOxWtk0EmgykATWse+FeV2zBNKgBp/xf5oXezCqJi9B73LXHl+YWPcYZk7ID0nbN1Ktv1RYhEfPJUK90ZVADtZ+lUur28xe+qHEiAg93LWxISd69/N4WInKOqIrA5c6qvRh9hrwLBrIms7gavTzMMfuEYONcseO7gL1HphbCIZJq8buc5/9G6+/SBHojdUeqrh6opFum+CUhaN64piFvJSwnBk9LVv4LU22Mstk0luuLT/W4jhneHoBANfB3oOQYj49gBtqAioQ==
+ b=ofkjOjXreZOaCWPflEp/z2ZStl2p7cWkF2Rw75wJoxNTeVR4F82QgNMRhiMCA8IQ1o9h04N7UwdYrr6VlQ4JdyRzOCG6ZcpbWKCXIIGSImRRiagauoqS15jp2BLMW9zyaM8KinUAErC36IhluMM0dIK1OpnR2hhZu1mkualYgPFhGqw5XVc00Lmy5wR8SFAtzwbf4aDXZTK32CvofmQ8v33DoH/Ve0adlQ6B2UtAPoKNVQhY2zlKdw8SkDtBUS+ZORI/NRSmoCM2MYOxwH6oSNrQ4+bdjFw6xbeuX8uV6JRom3ITE5lJkTzLzSGb8B7XxkMJ2oWL/AjKiiflKsZkWQ==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=yKujsTbxii9cR/15vMRWEGrW5VAWVJ1MxHh+YbvzrIY=;
- b=Wy2osGyOLbRQ2xy7oIvRo5Sq9xyPbWKDzitZCxm4ut7xeqPsMbo9DLBE9WDzEdzTgr7+DJ6c8HpX5bTiCkV7ZEuiiXcC3MaOR/EOve0U3Qh8QfLEHdgc7fugINobs2h3Aor+UbcT5233D22TXkhPrWFwWxo5uGn00Kmn+wfSccvkekqNJAaR52JoCxPaFjHA1DdiNMxzOgCDij73WrDYRHSU6pUYBTdMAnA2TLLZXz8N5PawSf/i/tqja4shPfdSaRR4Xs/fyLiSTLy/fQj5OoekSWN6OIzrvnNA/YW3MMvFlijkrDllGjBcMzP52UCyXY+f+nWW9esz9/tqg0THtQ==
+ bh=PZ7M6Xtgvft+1JeobBbMcL+gTkR42pOFS815r7RIFcM=;
+ b=PjBp50SUvLO3t3Ls+HUSo1cemZg3AB/peKBei/k691Id7R0+KWgd/azxqvuwKs3tXJ+YUSwQErOK3ktddb/SMzERYtJq2aNKJKMo6p7KQil51FHnTtsmMYe0PXC5Agr/Be40dDJaPjNmxK/GkfkiE8tQYD/GVlDD1/12sK0h0WOH3xm5imejUCajDTLpa5l+P7jzzGkraMwzGWhPwfG6/3HzYHpXh5mzKKRixXefSmSq+QQxyD5hlmkWHHhV2QwapVpJYEYytypJFN00p5bFmX0O1cOR4MBCtvxRLPrlokgyycz90Qdxdw+S5e+Rx79tSec6RJTG4W90D9hRhtThXQ==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=microchip.com; dmarc=pass action=none
- header.from=microchip.com; dkim=pass header.d=microchip.com; arc=none
+ smtp.mailfrom=renesas.com; dmarc=pass action=none header.from=renesas.com;
+ dkim=pass header.d=renesas.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=microchiptechnology.onmicrosoft.com;
- s=selector2-microchiptechnology-onmicrosoft-com;
+ d=renesasgroup.onmicrosoft.com; s=selector2-renesasgroup-onmicrosoft-com;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=yKujsTbxii9cR/15vMRWEGrW5VAWVJ1MxHh+YbvzrIY=;
- b=mI0vlXeUVnM+sO7qurHxAmg1CP9As4RAE95fEmlvJHmsbcYfKeQ6oMdKPmF/9QxVnerO4EmTSsguBMc75zvxAqlkL59PI1baROUZNTQjArqtGfLOHgQjRcxF6zoUCDKHUul1Jq5/IeY7Yf2Q+EgUUjJkIViq8DYohMF+As9xENQ=
-Received: from BYAPR11MB2999.namprd11.prod.outlook.com (2603:10b6:a03:90::17)
- by BY5PR11MB3944.namprd11.prod.outlook.com (2603:10b6:a03:18e::16) with
+ bh=PZ7M6Xtgvft+1JeobBbMcL+gTkR42pOFS815r7RIFcM=;
+ b=krSnPLyVvChJcd+OjexFXWlqmH1YKjrJR7I0dfnUt3/gRkGT3WdP6pvxiU1ASofGwZUkC8U15tfjFDgpAdjzZ35hu4cQlEAxqDG+P8i7iqD6fomryAJcDcGmh4nmhg+UktnYBuxZyqRf8RXGrLX+eiKJndrn7fQ7nJsemUMc9dw=
+Received: from TY2PR01MB3692.jpnprd01.prod.outlook.com (2603:1096:404:d5::22)
+ by TY2PR01MB4025.jpnprd01.prod.outlook.com (2603:1096:404:d6::20) with
  Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3131.25; Fri, 26 Jun
- 2020 16:00:56 +0000
-Received: from BYAPR11MB2999.namprd11.prod.outlook.com
- ([fe80::996a:3417:7ea7:2b8f]) by BYAPR11MB2999.namprd11.prod.outlook.com
- ([fe80::996a:3417:7ea7:2b8f%7]) with mapi id 15.20.3131.020; Fri, 26 Jun 2020
- 16:00:56 +0000
-From:   <Eugen.Hristev@microchip.com>
-To:     <linux-mmc@vger.kernel.org>, <ulf.hansson@linaro.org>,
-        <adrian.hunter@intel.com>
-Subject: Clock selection before switching mode for eMMCs
-Thread-Topic: Clock selection before switching mode for eMMCs
-Thread-Index: AQHWS9L5oVjpL72UjU6cEwCTLROh2A==
-Date:   Fri, 26 Jun 2020 16:00:56 +0000
-Message-ID: <7768906b-7916-39be-08e9-0a5d0f6bf69e@microchip.com>
-Accept-Language: en-US, ro-RO
-Content-Language: en-US
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3131.25; Mon, 29 Jun
+ 2020 02:12:26 +0000
+Received: from TY2PR01MB3692.jpnprd01.prod.outlook.com
+ ([fe80::9083:6001:8090:9f3]) by TY2PR01MB3692.jpnprd01.prod.outlook.com
+ ([fe80::9083:6001:8090:9f3%6]) with mapi id 15.20.3131.026; Mon, 29 Jun 2020
+ 02:12:26 +0000
+From:   Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+To:     Mark Brown <broonie@kernel.org>
+CC:     "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+        "lgirdwood@gmail.com" <lgirdwood@gmail.com>,
+        "geert+renesas@glider.be" <geert+renesas@glider.be>,
+        "magnus.damm@gmail.com" <magnus.damm@gmail.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "linux-renesas-soc@vger.kernel.org" 
+        <linux-renesas-soc@vger.kernel.org>
+Subject: RE: [PATCH/RFC v4 1/4] regulator: core: add prepare and resume_early
+Thread-Topic: [PATCH/RFC v4 1/4] regulator: core: add prepare and resume_early
+Thread-Index: AQHWS5y2xTHB/bN5kEWVx8Xm0qNT0Kjq9VyAgAPa5aA=
+Date:   Mon, 29 Jun 2020 02:12:25 +0000
+Message-ID: <TY2PR01MB3692FA79B8187D100F947327D86E0@TY2PR01MB3692.jpnprd01.prod.outlook.com>
+References: <1593163942-5087-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
+ <1593163942-5087-2-git-send-email-yoshihiro.shimoda.uh@renesas.com>
+ <20200626143009.GD5289@sirena.org.uk>
+In-Reply-To: <20200626143009.GD5289@sirena.org.uk>
+Accept-Language: ja-JP, en-US
+Content-Language: ja-JP
 X-MS-Has-Attach: 
 X-MS-TNEF-Correlator: 
-user-agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.8.0
-authentication-results: vger.kernel.org; dkim=none (message not signed)
- header.d=none;vger.kernel.org; dmarc=none action=none
- header.from=microchip.com;
-x-originating-ip: [82.76.24.202]
+authentication-results: kernel.org; dkim=none (message not signed)
+ header.d=none;kernel.org; dmarc=none action=none header.from=renesas.com;
+x-originating-ip: [124.210.22.195]
 x-ms-publictraffictype: Email
-x-ms-office365-filtering-correlation-id: 33f80ee4-87bf-4926-0cae-08d819ea1c74
-x-ms-traffictypediagnostic: BY5PR11MB3944:
-x-microsoft-antispam-prvs: <BY5PR11MB39442A575C669C0BD90D2034E8930@BY5PR11MB3944.namprd11.prod.outlook.com>
-x-bypassexternaltag: True
+x-ms-office365-filtering-ht: Tenant
+x-ms-office365-filtering-correlation-id: fbc9484c-c5d4-4578-2055-08d81bd1de12
+x-ms-traffictypediagnostic: TY2PR01MB4025:
+x-microsoft-antispam-prvs: <TY2PR01MB402503D8CE14D1A8B7B07FD3D86E0@TY2PR01MB4025.jpnprd01.prod.outlook.com>
 x-ms-oob-tlc-oobclassifiers: OLM:10000;
-x-forefront-prvs: 0446F0FCE1
+x-forefront-prvs: 044968D9E1
 x-ms-exchange-senderadcheck: 1
 x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: 1b6qqAkD/iyEAQPv7oTO99G9vNM6hVmNj145okubSWWoi1PatLvLO6tpE/Mec3xZVtp8cIt18QljUYxoKMyZYVf/vWIcrJ3RJrPN3fHgvH8byvLFpqhYLf2NceccFGvPZP+bdN8Mr2nuwswXEoDwFFXp/nKeffHBdct6+6SdWy4vhOtDunbiXIhgiM4qPvBp/gmg4sJvEIuHwt2OZhwXQSJIovBiRZM+MMJ2uGx8YrYQ4VQDi8AT0xMCe9K+BwubgeIfcDT/rozIofsXw5IKv+25c1HdMqMPHU+mI0Ekvk0IpPcuoZCT2qVvu+wJoQpmD8HaC2ZV5MlNybp3zABbQF6synv3XhcuMFQaADTkI0xAhMU5TkdfEGxRCPXV6levM4dhMterbOYMa25LGOnyzVtjDlZmDjyyInbkAnGytgS/5cIa9QFNos9vyrO4dRVMEkqUZmVG8N6klSdfPgJwDw==
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:BYAPR11MB2999.namprd11.prod.outlook.com;PTR:;CAT:NONE;SFTY:;SFS:(396003)(136003)(366004)(39860400002)(376002)(346002)(316002)(110136005)(36756003)(31686004)(86362001)(91956017)(76116006)(5660300002)(66946007)(966005)(8676002)(66476007)(66556008)(64756008)(66446008)(31696002)(2616005)(6506007)(2906002)(478600001)(71200400001)(186003)(6486002)(6512007)(26005)(83380400001)(8936002)(43740500002);DIR:OUT;SFP:1101;
-x-ms-exchange-antispam-messagedata: I75MK2n0eYsV388VPXzYiBWWUYBp4mGvi7rRJa+cy1ZdpnhjEc+bzh9bVofWQk2o9FMAADVfleyUxah69F6t3W08FyTog04mKnAsLbwtc6BgX5q2ePMMQAzmR1oc75T4T1F0Sci+LH+1X2r9mcJpCdIgYx+F1dP1PPWwxY5vszetl2Lj3ZNO9A2PF7ul1DQcoQQLBAodfczkQom7O06b8N3di8e5eR7mt3Vh/7WO8jfUujYlIdPlulWHdRK3kQehcPMif5A9+X9K1ZecgEfldzse7f+nGhIPjKKH9RMfxN5NuFjzOXVOzfN6tG+c+gFRrEYOxgEVHUn6P/q0gzXpYt6V7d5/TDgpIVmF4VSTSwhbq+IJ/87nXVugOkEsxGR6wtAi7ypLaO4AhB68Lu4LJfYNbKFuG8WQaJp0zKIkwJwX+QrFVj0UfwKLU9rNYUrIxo6aHOic39T2Qe2XTL0jeDXGFvfBcJzJN7+U4j8JpAM=
+x-microsoft-antispam-message-info: W48lhslR0ohBnU1UjuUouw6mSBw2ZmecXOuyb/2DJo29dxrMiqqJe/wPo539MKTKqRxX19N3UPo/6UeqBEP41FEhBvDfadk3Oubr4DufTD7AwoY9cNIDtajP5hIX2eVn9fE7GxoP6uPw6SYLObLPCX+DwC2p/NDZMTDAQKI0m/MgqvVJVUZAlMksuDn4ORxpOyw6s3ZxavR5vzaNQIwNO27KIWbZAx6JICT3cVPfDKS2NrCNwwxqT+JLaOIudDei9kVtrr9Cjazivhg+TMwvq/LUCM2nqVVU/WPnXktLQv7cBRBf8AZBwiV4bhTbmroh
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY2PR01MB3692.jpnprd01.prod.outlook.com;PTR:;CAT:NONE;SFTY:;SFS:(4636009)(376002)(39860400002)(136003)(396003)(346002)(366004)(83380400001)(5660300002)(26005)(186003)(55236004)(6506007)(8676002)(52536014)(33656002)(8936002)(71200400001)(478600001)(316002)(6916009)(54906003)(55016002)(4326008)(86362001)(7696005)(66946007)(64756008)(66476007)(2906002)(66556008)(76116006)(9686003)(66446008);DIR:OUT;SFP:1102;
+x-ms-exchange-antispam-messagedata: 504OAqcfSCDCDC2KCyizwIfIHBpq9LxSZSm0suuMGh55YiodkOZVxgKFbpMMLBjLoP9rpyTm2HHmzP4XclKKQEd7Xw9AdH12zNSWPMi+uXPeNGwwfaum5w3+GGJVOtia7/rDUEpfivdUGMv/Nhl7nSO4If2lskCE0NWucJ8kd4KpvZWCEDtkYk4NXCywIOhbnoPuRXzK/TTTgW5c3OfOH7906BrjyLwu+lia38h2IwrfUCCzjYmR2md/+/xQu/AexSbMKjWA6d3FEnsOi2pqwDMocIzWqc+DMGOON2S4/0bIu3IW9rhnDRCmKQuLsEthULeGy2dTn13GDxH65/s6XXjiWVZJMgybnzwCUzuth5nFzrh10zt1kLtBsvQ7Tg9/7ie6eczkJY6+dZLqYrFp/4PYvIwHcw39L2gRjGKJXuJ2N9nlmLdpEc7lBbdkej5rd4U9bsDKR/U5Af4eV5j8+uWuTspS/lbY3MpWiRSK0iRpGu4IWUmbzlQN31iczFjC
 x-ms-exchange-transport-forked: True
-Content-Type: text/plain; charset="utf-8"
-Content-ID: <0CCEB47C584E8249A37E698DEEEDEDE5@namprd11.prod.outlook.com>
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 MIME-Version: 1.0
+X-OriginatorOrg: renesas.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: BYAPR11MB2999.namprd11.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 33f80ee4-87bf-4926-0cae-08d819ea1c74
-X-MS-Exchange-CrossTenant-originalarrivaltime: 26 Jun 2020 16:00:56.2604
+X-MS-Exchange-CrossTenant-AuthSource: TY2PR01MB3692.jpnprd01.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: fbc9484c-c5d4-4578-2055-08d81bd1de12
+X-MS-Exchange-CrossTenant-originalarrivaltime: 29 Jun 2020 02:12:25.8521
  (UTC)
 X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 3f4057f3-b418-4d4e-ba84-d55b4e897d88
+X-MS-Exchange-CrossTenant-id: 53d82571-da19-47e4-9cb4-625a166a4a2a
 X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: +uUoYB7pgFIRl/oI8M/TBMrxsDhwZF5FpFDt/4zgm+2RJ1027F7NTO80gPfbnReUAzu2adjSW57xOV7gZZv11BY0iOaxybEhq8qxSxfFXMg=
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: BY5PR11MB3944
+X-MS-Exchange-CrossTenant-userprincipalname: mUcEBLmCumC3J91srB9O9/XWU8nxNADXXChP4xWF202u73lsflvwglNZhZDqNw9z2GODXml1+uIcx4x8YWa8wFD4IdQoU26qCPF//MpBr4lX12NVHbQlV9wYIE2kULH6
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: TY2PR01MB4025
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-SGVsbG8gVWxmLCBBZHJpYW4sIGFuZCBhbnlvbmUgaW50ZXJlc3RlZCwNCg0KT24gb3VyIEFUOTEg
-cHJvZHVjdHMgd2UgaGF2ZSBhbiBTRC9NTUMgYmxvY2sgd2l0aCBhbiBpbmNsdWRlZCBETEwgdGhh
-dCANCmRvZXMgbm90IGxvY2sgaWYgdGhlIFNEIGNsb2NrIGlzIG5vdCBjb25maWd1cmVkIGRlcGVu
-ZGluZyBvbiBzcGVlZCANCm1vZGVzLCBsaWtlIGhpZ2ggc3BlZWQgcmVxdWlyZXMgMjUgTWh6LCBI
-UzIwMCByZXF1aXJlcyAxMDAgTWh6LCBldGMuDQoNCkFsbCB0aGUgc3BlYyBhbmQgdGhlIGNvZGUg
-Y29uZmlndXJlcyBldmVyeXRoaW5nIGF0IDQwMCBrSHogYW5kIHRoZW4gDQptb3ZlcyB0byBoaWdo
-IHNwZWVkLCBldGMuIGFuZCBpbiB0aGUgZW5kICwgdGhlIGNsb2NrIGlzIHJhaXNlZC4NCldoaWxl
-IHRoaXMgaXMgcGVyZmVjdGx5IGZpbmUsIG9uIG91ciBibG9jayB3ZSBuZWVkIHRvIHJhaXNlIHRo
-ZSBjbG9jayANCmZpcnN0IGFuZCBjaGFuZ2UgdGhlIHNwZWVkIG1vZGUgYWZ0ZXIuDQoNCk5hbWVs
-eSwgaW4gdGhlIGZ1bmN0aW9uIG1tY19zZWxlY3RfdGltaW5nICwgaWYgd2UgY2FsbCBmaXJzdCAN
-Cm1tY19zZXRfYnVzX3NwZWVkIHRoZW4gb3VyIERMTCB3aWxsIGxvY2sgY29ycmVjdGx5IHdoZW4g
-c2VsZWN0aW5nIHRoZSANCm1vZGUuIElmIHdlIHNlbGVjdCB0aGUgbW9kZSBmaXJzdCwgb3VyIGNs
-b2NrIGlzIHN0dWNrLg0KDQpNeSBxdWVzdGlvbiBpcyBhY3R1YWxseSBob3cgKGlmIHBvc3NpYmxl
-KSAgd2UgY291bGQgZG8gYSBxdWlyayBpbiB0aGUgDQptbWMgc3VjaCB0aGF0IG91ciBibG9jayB3
-aWxsIHdvcmsgY29ycmVjdGx5Lg0KU28gSSB3b3VsZCBuZWVkIGEgbGl0dGxlIGd1aWRhbmNlIGFi
-b3V0IHdoZXJlIHRvIHBsYWNlIHN1Y2ggcXVpcmssIGlmIGl0IA0Kd291bGQgYmUgYWNjZXB0ZWQg
-b3Igbm90LCBhbmQgd2UgYXJlIGZvcmNlZCB0byBiZSBpbmNvbXBhdGlibGUgd2l0aCB0aGUgDQps
-aW51eC1tbWMgc2RoY2kgLg0KDQpJIGhhdmUgc2VlbiBzb21lIHBhdGNoZXMgZm9yIHNvbWV0aGlu
-ZyBzaW1pbGFyIGEgZmV3IHllYXJzIGFnbyBbMV0gb24gDQp0aGUgTUwsIGJ1dCB0aGV5IHdlcmUg
-bGVmdCBmbG9hdGluZyBpbiB0aGUgZW5kLCBzbyB0aGF0IGlzIHdoeSBJIGFtIA0KYXNraW5nLCB3
-aGljaCB3b3VsZCBiZSB0aGUgcHJvcGVyIHdheSB0byBkbyB0aGlzLg0KDQpUaGFua3MgIQ0KRXVn
-ZW4NCg0KWzFdIGh0dHBzOi8vcGF0Y2h3b3JrLmtlcm5lbC5vcmcvcGF0Y2gvNzEyNzQ0MS8NCg==
+Hi Mark,
+
+> From: Mark Brown, Sent: Friday, June 26, 2020 11:30 PM
+>=20
+> On Fri, Jun 26, 2020 at 06:32:19PM +0900, Yoshihiro Shimoda wrote:
+>=20
+> > The regulator-fixed driver is possible to be off by firmware
+> > like PSCI while the system is suspended. If a consumer could get
+> > such a condition from regulator_is_enabled(), it's useful by
+> > consumers.
+>=20
+> > The regulator subsystem already has regulator-state-(standby|mem|disk)
+> > sub-nodes and regulator-off-in-suspend property. However,
+> > suitable regulator_ops APIs didn't exist.
+>=20
+> > So, add new regulator_ops APIs and prepare()/resume_early() in
+> > the regulator_pm_ops to set/clear the condition by new APIs before
+> > suspend() functions of consumers are called.
+>=20
+> I can't follow this explanation at all, I really can't understand what
+> these functions are supposed to do or how they are supposed to be used.
+> Nothing in the rest of this series is at all enlightening either.  It
+> seems there is some need for a consumer to query things about the
+> suspend state but there is no obvious connection from that to adding
+> these new operations for regulator drivers.
+
+I'm very sorry for lack description... Perhaps I should have described
+one of use cases like below.
+
+regulator_prepare()
+--> call regulator_ops.set_prepare_disable() if DISABLE_IN_SUSPEND
+ --> A regulator can be disabled by the operation.
+ --> We can guarantee an order which is called before a consumer if
+     it uses dev_pm_ops.suspend().
+..
+A consumer driver's suspend().
+--> call regulator_is_enabled()
+ --> If the regulator was called set_prepare_disable(), this can returns fa=
+lse.
+
+Best regards,
+Yoshihiro Shimoda
+
