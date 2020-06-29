@@ -2,119 +2,124 @@ Return-Path: <SRS0=XB32=AK=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-1.0 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.6 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
+	SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 94158C433DF
-	for <linux-mmc@archiver.kernel.org>; Mon, 29 Jun 2020 20:39:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EE0F0C433E0
+	for <linux-mmc@archiver.kernel.org>; Mon, 29 Jun 2020 21:08:27 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 763D220672
-	for <linux-mmc@archiver.kernel.org>; Mon, 29 Jun 2020 20:39:55 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=renesasgroup.onmicrosoft.com header.i=@renesasgroup.onmicrosoft.com header.b="WOBCG3x6"
+	by mail.kernel.org (Postfix) with ESMTP id D1668207E8
+	for <linux-mmc@archiver.kernel.org>; Mon, 29 Jun 2020 21:08:27 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1593464907;
+	bh=f1aS4cZsNksB3LauE1ytRje/Ho2vh8OFZ9gcBrF7hoE=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
+	b=HmlIkBzQWh9u80J/W7msCeik2HxlKaRLCd+TV0WQwT0Qk/fZJTugfPqFJLjm1jajx
+	 j09oeWFHENIFwJnZu/R6tjwDj3fkXyZoDn8PPfq65lMBT2GpFydoDMSs1peGaohQXP
+	 tOKg5b7om4Btmc1hF0vu94IWqf0LuqbQ3okQAV44=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2389361AbgF2UjL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 29 Jun 2020 16:39:11 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43394 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1731727AbgF2TOP (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 29 Jun 2020 15:14:15 -0400
-Received: from APC01-HK2-obe.outbound.protection.outlook.com (mail-hk2apc01on0708.outbound.protection.outlook.com [IPv6:2a01:111:f400:febc::708])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 18B38C08E81A;
-        Sun, 28 Jun 2020 22:16:52 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=FbwSdYtd2/mf/m7RXuPMTauDzJ3pWf8RvE+Wz/bKtsinBV0ukAO8zHlo/cCwognWYOH+DGLronSpaKQPdkoKy4jVte6wOfQitUSHjmFrdU/FM5Ctspgx0endem3uvqSsedYB7MTrQFtqSGIqR1m6dFzsM9I21hs9vMF3BzZSTuVsUpl3LQb9jYbiXwY3I7OC83RRNus/fMGVCqCyi6ldu0J07KZRlqDI7LuB71denGRPJjbm2Up7cOh+NP+7FQEZky7NkZvCbyWCQxcXwozLLd3AxMNBSGQJtqodqOV4nkaaj2V9kJa+vI82WoT4Y1MQHfdir3vsWhVi9vLjNrjENg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=jU6bJVp5twjwAufNmBP/C37WJ4RjFc7sz331r/5OrWI=;
- b=RJPX2DV5f9wRtQghopIoE/iHsGv78YBsKT9U6PkkXtHOTsoeaDDFaPijE8W5nzBn0tVFZB4AH4H0rWIuIn6xsW8cJ/j4B2xbtxV+wsprFtvMPgxgIzVx92Yma3lsRvKg4YCcLxCWkhlJlFxDUzTJSTdfaIeAukQYJZXTY52rgjgD6ecz+RxCrN7Pqlw6l6I592HKTLIASlxxCOqM6e12kaqV7B3RZQTxXM0uZMwzFbCjNHvrQCV1xKfzpFYuxmv5zlvidRY2TghynuRery1DiEBTI9cIXwKFpowrzDu9Cpr2KO76puOYAWmQ1ghyboRKupscqTXnUsUrnbhbOwKIZw==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=renesas.com; dmarc=pass action=none header.from=renesas.com;
- dkim=pass header.d=renesas.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=renesasgroup.onmicrosoft.com; s=selector2-renesasgroup-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=jU6bJVp5twjwAufNmBP/C37WJ4RjFc7sz331r/5OrWI=;
- b=WOBCG3x6dry9y9wWJbxj7umJK2XwMaiBpHH28O4m36BGOVSZAfKR/BaJOWbOodqWd0a+QhmqKACIiHUe57fPf1UjqML7laUmuTbIICGRKCgTcSsvgDxLEi7cM4Nqqs/qtUKgtgoyuJ1t0+xXKu/UzH06hEq/YGVvkh3vRTNb/Js=
-Received: from TY2PR01MB3692.jpnprd01.prod.outlook.com (2603:1096:404:d5::22)
- by TY2PR01MB2329.jpnprd01.prod.outlook.com (2603:1096:404:6b::13) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3131.25; Mon, 29 Jun
- 2020 05:16:46 +0000
-Received: from TY2PR01MB3692.jpnprd01.prod.outlook.com
- ([fe80::9083:6001:8090:9f3]) by TY2PR01MB3692.jpnprd01.prod.outlook.com
- ([fe80::9083:6001:8090:9f3%6]) with mapi id 15.20.3131.026; Mon, 29 Jun 2020
- 05:16:46 +0000
-From:   Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-To:     Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
-CC:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "linux-renesas-soc@vger.kernel.org" 
-        <linux-renesas-soc@vger.kernel.org>,
-        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        "lgirdwood@gmail.com" <lgirdwood@gmail.com>,
-        "broonie@kernel.org" <broonie@kernel.org>,
-        "geert+renesas@glider.be" <geert+renesas@glider.be>,
-        "magnus.damm@gmail.com" <magnus.damm@gmail.com>
-Subject: RE: [PATCH/RFC v4 3/4] mmc: core: Call mmc_poweroff_nofity() if
- regulators are disabled
-Thread-Topic: [PATCH/RFC v4 3/4] mmc: core: Call mmc_poweroff_nofity() if
- regulators are disabled
-Thread-Index: AQHWS5y2P9SOm+4ShEmD+FQrAiQE9qjrDL+AgAQErAA=
-Date:   Mon, 29 Jun 2020 05:16:46 +0000
-Message-ID: <TY2PR01MB3692D8D02FF1680B2A7391B8D86E0@TY2PR01MB3692.jpnprd01.prod.outlook.com>
-References: <1593163942-5087-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
- <1593163942-5087-4-git-send-email-yoshihiro.shimoda.uh@renesas.com>
- <059bced3-00d3-cf2e-6628-a8c9f1544909@cogentembedded.com>
-In-Reply-To: <059bced3-00d3-cf2e-6628-a8c9f1544909@cogentembedded.com>
-Accept-Language: ja-JP, en-US
-Content-Language: ja-JP
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-authentication-results: cogentembedded.com; dkim=none (message not signed)
- header.d=none;cogentembedded.com; dmarc=none action=none
- header.from=renesas.com;
-x-originating-ip: [124.210.22.195]
-x-ms-publictraffictype: Email
-x-ms-office365-filtering-ht: Tenant
-x-ms-office365-filtering-correlation-id: b318ef9b-1faf-430c-3a10-08d81beb9ec8
-x-ms-traffictypediagnostic: TY2PR01MB2329:
-x-microsoft-antispam-prvs: <TY2PR01MB2329B5A32CB041739EE4BC83D86E0@TY2PR01MB2329.jpnprd01.prod.outlook.com>
-x-ms-oob-tlc-oobclassifiers: OLM:1303;
-x-forefront-prvs: 044968D9E1
-x-ms-exchange-senderadcheck: 1
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: wsdhJlkxId8q8l9Xot95x7fdTmruznnK7H/b5WqTXp1/HFfdyuHRrsP5VuARnvTGxdnAGYX7NitkQLPzfZnB6Ta4MOMMExhHnEl9r3RyNySD/x6SdZzsQU3NXavwhNtaMw3DCYB84AWMcAqT8wOLbwF4NF9OKYnh38RrNnw+nRDCx07in6erEuIGERn6quxwntapDaOcStpkqecm0VB4phoYiWYuuWj/yIYt9/qfGcckMhLTDIeeHccTUhRScwfMBIl+fdjVoHzyAASLvgUIWozZga1g6463GSEkkcLrBHwVIk8t+fXCuCHS1pwK+aXBWhmyWoZgG+492MSt37uFxA==
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY2PR01MB3692.jpnprd01.prod.outlook.com;PTR:;CAT:NONE;SFTY:;SFS:(4636009)(346002)(136003)(376002)(39860400002)(396003)(366004)(71200400001)(7696005)(83380400001)(86362001)(26005)(4744005)(186003)(64756008)(66476007)(66446008)(76116006)(53546011)(52536014)(5660300002)(66556008)(66946007)(55236004)(6506007)(54906003)(4326008)(316002)(8936002)(2906002)(55016002)(8676002)(9686003)(478600001)(33656002)(6916009);DIR:OUT;SFP:1102;
-x-ms-exchange-antispam-messagedata: cebFixr0WPYa6cLiz0eUHvHULn7AoKnVNh1ma2O1geG9RwPD3yxpMfdW7i26hiF3qKU5CmiHWnit49byFN0ze6Lzrij0fdInCYxncKDW9b043/HwUrT4wvYol1tPuRag1p3Dr3Zf/DGmyXjMW+HkvOb2gY5t1h4IwUsKREEkPHETYjGIPPBEmaHfG++3t8YUHWURNX603CDuyVcN2sCilt8hUCpt2S0bBshJP4BgAOvw4rCw1rYeinVSdrMwykZFjJIZVBY+WyYb2ud0F1YbCivDbHF2xIHI/clEZUhNVv6oFKHY0hkEtQND9Y84EEhWpVXjFMugknij3tnC7mnP9PGtwb4ZeVDqdP+i6LpHyqRRf0A5YNldFlzz0xEfQHvlpV2My4nX43fg8vUWHOV0FLdT0aIqXjnoDQZxF4sZNT5JZiWBQJKp/wqUJSK9RPFbirRVIMfBI+hls1LTGXowTrGlt3ukrMge9nQSAun3wy/2lyvcGcXPzhEIOAGnaNjz
-x-ms-exchange-transport-forked: True
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+        id S2390408AbgF2VI0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 29 Jun 2020 17:08:26 -0400
+Received: from mail-ed1-f65.google.com ([209.85.208.65]:38415 "EHLO
+        mail-ed1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S2390229AbgF2VIZ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 29 Jun 2020 17:08:25 -0400
+Received: by mail-ed1-f65.google.com with SMTP id n2so5209653edr.5;
+        Mon, 29 Jun 2020 14:08:22 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to:user-agent;
+        bh=WVzOc0zshIAzur/W9UldDSamNUZIg6bYwU7gViF4xjM=;
+        b=XUXYJW1YjmtF6PwxsLRs3RzxxVAxAPl7iKRiELCzxj0g2cn0itGuB0hAxZWMlVWLz9
+         mB/GxGKY1TNMXWRU3RyUPszljbezvgimuF6zmQ0AUbEHJuhn5+x1GZYaLrRDElgjbSS7
+         tr0XrGMtbul0eR19pifhTezdUkD5WSsa7vIzIGTgYm2mpC0vO3G70xoKufwmcU+2ps1k
+         7xV+f1JuuXwcGNa+V4U00pMduOQX/3MwZ5Qe+fxzAnl5SjnNtYGamDSIL8apuZ/WdfZB
+         FrgtdWnROwzVaJs8oBJco62GMCT7Gck1SN5QKUVSVVl1OdVPJVU/Ub29R1fKnBhFF6X0
+         T9vw==
+X-Gm-Message-State: AOAM531cBYxiOkNeTnLFpykwfPa4/2XJFJMFgqXxfIHsM/ztjxcTxXHk
+        eAS3ol0jBFkx/OeDL/YUclE=
+X-Google-Smtp-Source: ABdhPJz7uJ34zkR7UdIcDmO5eQD/05KE/U7ACuTf+SbkMdyaKDXIEt+RJAAp/9n0LB1FcwdSrdDevA==
+X-Received: by 2002:aa7:d6cc:: with SMTP id x12mr11487518edr.354.1593464901568;
+        Mon, 29 Jun 2020 14:08:21 -0700 (PDT)
+Received: from kozik-lap ([194.230.155.195])
+        by smtp.googlemail.com with ESMTPSA id q3sm736869eds.0.2020.06.29.14.08.19
+        (version=TLS1_2 cipher=ECDHE-ECDSA-CHACHA20-POLY1305 bits=256/256);
+        Mon, 29 Jun 2020 14:08:20 -0700 (PDT)
+Date:   Mon, 29 Jun 2020 23:08:17 +0200
+From:   Krzysztof Kozlowski <krzk@kernel.org>
+To:     "Alexander A. Klimov" <grandmaster@al2klimov.de>
+Cc:     corbet@lwn.net, aaro.koskinen@iki.fi, tony@atomide.com,
+        linux@armlinux.org.uk, daniel@zonque.org, haojian.zhuang@gmail.com,
+        robert.jarzmik@free.fr, kgene@kernel.org,
+        dmitry.torokhov@gmail.com, lee.jones@linaro.org,
+        wsa+renesas@sang-engineering.com, ulf.hansson@linaro.org,
+        davem@davemloft.net, kuba@kernel.org, b.zolnierkie@samsung.com,
+        j.neuschaefer@gmx.net, mchehab+samsung@kernel.org,
+        gustavo@embeddedor.com, gregkh@linuxfoundation.org,
+        yanaijie@huawei.com, daniel.vetter@ffwll.ch,
+        rafael.j.wysocki@intel.com, Julia.Lawall@inria.fr,
+        linus.walleij@linaro.org, viresh.kumar@linaro.org, arnd@arndb.de,
+        jani.nikula@intel.com, yuehaibing@huawei.com,
+        linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-samsung-soc@vger.kernel.org, linux-input@vger.kernel.org,
+        linux-mmc@vger.kernel.org, netdev@vger.kernel.org,
+        linux-parisc@vger.kernel.org, dri-devel@lists.freedesktop.org,
+        linux-fbdev@vger.kernel.org
+Subject: Re: [PATCH] Remove handhelds.org links and email addresses
+Message-ID: <20200629210817.GA32399@kozik-lap>
+References: <20200629203121.7892-1-grandmaster@al2klimov.de>
 MIME-Version: 1.0
-X-OriginatorOrg: renesas.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: TY2PR01MB3692.jpnprd01.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: b318ef9b-1faf-430c-3a10-08d81beb9ec8
-X-MS-Exchange-CrossTenant-originalarrivaltime: 29 Jun 2020 05:16:46.6422
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 53d82571-da19-47e4-9cb4-625a166a4a2a
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: tlNaZPy/8Ky5AW437YMByKVrNHdIYbjQGWmyD71atULmP1JJCm7OqzZrQcQz8/QYyapVBLx95i5I4yj6S3zYUecObVVYTO/sOW1AtdPeD9y7XULErtHHEVrTAq5V0Vcl
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: TY2PR01MB2329
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <20200629203121.7892-1-grandmaster@al2klimov.de>
+User-Agent: Mutt/1.9.4 (2018-02-28)
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-SGVsbG8hDQoNCj4gRnJvbTogU2VyZ2VpIFNodHlseW92LCBTZW50OiBTYXR1cmRheSwgSnVuZSAy
-NywgMjAyMCAxMjo1NCBBTQ0KPiANCj4gSGVsbG8hDQo+IA0KPiBPbiAwNi8yNi8yMDIwIDEyOjMy
-IFBNLCBZb3NoaWhpcm8gU2hpbW9kYSB3cm90ZToNCj4gDQo+ID4gSWYgcmVndWxhdG9yX2lzX2Vu
-YWJsZWQoKSBvZiBib3RoIHZtbWMgYW5kIHZxbW1jIHJldHVybnMgZmFsc2UsDQo+ID4gX21tY19z
-dXNwZW5kKCkgc2hvdWxkIGNhbGwgbW1jX3Bvd2Vyb2ZmX25vZml0eSgpIGluc3RlYWQgb2YNCj4g
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXl5eXl5eDQo+ICAgVGhh
-dCBoYXJkIHdvcmQgYWdhaW4uIDotKQ0KDQpPb3BzISBUaGFuayB5b3UgZm9yIHBvaW50ZWQgaXQg
-b3V0IQ0KIyBBbHNvLCB0aGUgc3ViamVjdCB3YXMgaW5jb3JyZWN0Li4uDQoNCkJlc3QgcmVnYXJk
-cywNCllvc2hpaGlybyBTaGltb2RhDQoNCg0K
+On Mon, Jun 29, 2020 at 10:31:21PM +0200, Alexander A. Klimov wrote:
+> Rationale:
+> https://lore.kernel.org/linux-doc/20200626110706.7b5d4a38@lwn.net/
+> 
+> Signed-off-by: Alexander A. Klimov <grandmaster@al2klimov.de>
+> ---
+>  @Jon I thought about what I said and *no*, unfortunately I *can't* automate
+>  the detection of such as easy as the HTTPSifying. As you maybe see below
+>  cleaning up is even "harder".
+> 
+>  We have only 17 files and one domain here. Shall I split it up per subsystem
+>  or can we let it as is?
+> 
+>  Documentation/arm/sa1100/assabet.rst           |  2 --
+>  Documentation/arm/samsung-s3c24xx/h1940.rst    | 10 ----------
+>  Documentation/arm/samsung-s3c24xx/overview.rst |  3 +--
+>  Documentation/arm/samsung-s3c24xx/smdk2440.rst |  4 ----
+>  arch/arm/mach-omap1/Kconfig                    |  4 +---
+>  arch/arm/mach-pxa/h5000.c                      |  2 +-
+>  arch/arm/mach-s3c24xx/mach-h1940.c             |  2 --
+>  arch/arm/mach-s3c24xx/mach-n30.c               |  3 ---
+>  arch/arm/mach-s3c24xx/mach-rx3715.c            |  2 --
+
+For s3c24xx, I am fine taking it through docs tree:
+Acked-by: Krzysztof Kozlowski <krzk@kernel.org>
+
+Otherwise, after splitting, I could take the s3c-24xx bits.
+
+Best regards,
+Krzysztof
+
+
+>  drivers/input/keyboard/gpio_keys.c             |  2 +-
+>  drivers/input/keyboard/jornada720_kbd.c        |  2 +-
+>  drivers/input/touchscreen/jornada720_ts.c      |  2 +-
+>  drivers/mfd/asic3.c                            |  2 +-
+>  drivers/mmc/host/renesas_sdhi_core.c           |  2 +-
+>  drivers/net/ethernet/dec/tulip/de4x5.c         |  1 -
+>  drivers/video/fbdev/sa1100fb.c                 |  2 +-
+>  include/linux/apm-emulation.h                  |  2 --
+>  17 files changed, 9 insertions(+), 38 deletions(-)
