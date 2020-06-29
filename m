@@ -2,125 +2,104 @@ Return-Path: <SRS0=XB32=AK=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.6 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-9.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E3715C433E1
-	for <linux-mmc@archiver.kernel.org>; Mon, 29 Jun 2020 21:40:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CE2D8C433DF
+	for <linux-mmc@archiver.kernel.org>; Mon, 29 Jun 2020 21:48:20 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C153A2072D
-	for <linux-mmc@archiver.kernel.org>; Mon, 29 Jun 2020 21:40:32 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A856320656
+	for <linux-mmc@archiver.kernel.org>; Mon, 29 Jun 2020 21:48:20 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1593466832;
-	bh=t6v5DZt1l1daNu/bUPS5nyAIjtuuXbZlqsHTaDwr+nM=;
+	s=default; t=1593467300;
+	bh=pHWXkpDmMnzt9/atnFVWTOS9Q9wcOY5N5scI8iSGDa4=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
-	b=louGoV6y0WGg/zBbMm3A8HlMry5PtGAh2/LVbRHwCJ8qXPSsnqUkx+Oma+R4o245C
-	 j07zniT5WLaZplvzwVTBvuEh2ZygLmxx2OVPff72MCfraBZrJDd7IIXEwxv/7bAldn
-	 HE0RV6wm7kaJVp2H1fYYvhwb84IKzPKFDItJo37U=
+	b=HIHTLgX7K7EJPtIsFBcZ3naq5LE6U9jz64D/axKkzdJYbptsmx4almuKIzc3YOPUC
+	 LkQIgr6Nzv9Qq5IVsz1Quz0WyOK5ZZlBytkesRtmYMRhc4CPJ2TxUHfvDBuS963dnN
+	 6c717EhzmvABeC3g5d8ZRvOJabphaDOSPX/Ups3I=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727052AbgF2Vkb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 29 Jun 2020 17:40:31 -0400
-Received: from mail.kernel.org ([198.145.29.99]:60594 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726818AbgF2Sk1 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 29 Jun 2020 14:40:27 -0400
-Received: from pali.im (pali.im [31.31.79.79])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 17ECB206E2;
-        Mon, 29 Jun 2020 08:03:10 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1593417790;
-        bh=t6v5DZt1l1daNu/bUPS5nyAIjtuuXbZlqsHTaDwr+nM=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=0M9Maneao5FvAVD0BmAOoIxq7d6OuBmjWSWAKjDQM+J0/8XN5KzRFqh+90I/UyfL8
-         +jKxBhB5WxBjt4qsg4gGdLiJyoRjivO57nxPIMmqRU2kUKAh6EwYKsRIbnvQ8tw64V
-         8npSKbq+Guk1jcRBXhg00ia8tVkekCzqeMa/1b7A=
-Received: by pali.im (Postfix)
-        id 3078B81F; Mon, 29 Jun 2020 10:03:08 +0200 (CEST)
-Date:   Mon, 29 Jun 2020 10:03:08 +0200
-From:   Pali =?utf-8?B?Um9ow6Fy?= <pali@kernel.org>
-To:     haibo.chen@nxp.com
-Cc:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
-        linux-mmc@vger.kernel.org, linux-imx@nxp.com, fugang.duan@nxp.com,
-        dianders@chromium.org, huyue2@yulong.com, mka@chromium.org
-Subject: Re: [PATCH] mmc: sdio: fix clock rate setting for SDR12/SDR25 mode
-Message-ID: <20200629080308.2763brhbflqwauad@pali>
-References: <1592813959-5914-1-git-send-email-haibo.chen@nxp.com>
+        id S2404270AbgF2VsT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 29 Jun 2020 17:48:19 -0400
+Received: from mail-io1-f68.google.com ([209.85.166.68]:38672 "EHLO
+        mail-io1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S2404255AbgF2VsJ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 29 Jun 2020 17:48:09 -0400
+Received: by mail-io1-f68.google.com with SMTP id f6so3231010ioj.5;
+        Mon, 29 Jun 2020 14:48:08 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=wGWmyGXfNATJETlByWIEZ13t4eNzYwD3JHETLNfxb54=;
+        b=LSTQHAqoIoV/qaZ7TayTtaGHtNbbU7i50/njuRYKApJYi5gEpkVGwdXkB8vXP2xdsk
+         ysyi5ajs/I2ER9KBGj8+FdLPeUk8NJJgtiU2kYrYe8LvmeJZVEegydgAFgSmUidGI5WE
+         XRSdYwZpFaVKH9pNYAuiBhl4LeC0cjIdybvKY0LCYUMqPuHFiCci7zW8rPSRUHfyHuvy
+         H/wxaPx+sjuP4DW/i4PbZTOq8/BgZvYCxkrQq9+BHaNs1n2gpQcaogkhoQvBW95ajTAK
+         lcIRPfmdOKKvOR8GTecazz47RjfNvCGq1WXPpHwSQ4GAS/yciphyChc6sEuD6dZ1XKTl
+         K5qQ==
+X-Gm-Message-State: AOAM531m6d+RoibLzHPJ5tXG+6acAXaykD8ExqP0U9wwrSS/kSIyu9wP
+        oLPMdakqjKQrvQRXi7jXsA==
+X-Google-Smtp-Source: ABdhPJwEfRn6dYm/O5ro6RnMRhK1qWiklysncseXKlDL5Wp1cyeVC6ap1ygyNz6c3jdV70Ag3tnIxg==
+X-Received: by 2002:a6b:1496:: with SMTP id 144mr18920446iou.6.1593467288379;
+        Mon, 29 Jun 2020 14:48:08 -0700 (PDT)
+Received: from xps15 ([64.188.179.255])
+        by smtp.gmail.com with ESMTPSA id k3sm601299ils.8.2020.06.29.14.48.06
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 29 Jun 2020 14:48:07 -0700 (PDT)
+Received: (nullmailer pid 2985144 invoked by uid 1000);
+        Mon, 29 Jun 2020 21:48:05 -0000
+Date:   Mon, 29 Jun 2020 15:48:05 -0600
+From:   Rob Herring <robh@kernel.org>
+To:     Anson Huang <Anson.Huang@nxp.com>
+Cc:     mturquette@baylibre.com, ulf.hansson@linaro.org, sboyd@kernel.org,
+        aisheng.dong@nxp.com, linux-clk@vger.kernel.org,
+        festevam@gmail.com, s.hauer@pengutronix.de, robh+dt@kernel.org,
+        s.trumtrar@pengutronix.de, devicetree@vger.kernel.org,
+        shawnguo@kernel.org, linux-arm-kernel@lists.infradead.org,
+        kernel@pengutronix.de, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org, Linux-imx@nxp.com
+Subject: Re: [PATCH V4 1/3] dt-bindings: mmc: Convert imx esdhc to json-schema
+Message-ID: <20200629214805.GA2983242@bogus>
+References: <1592450578-30140-1-git-send-email-Anson.Huang@nxp.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <1592813959-5914-1-git-send-email-haibo.chen@nxp.com>
-User-Agent: NeoMutt/20180716
+In-Reply-To: <1592450578-30140-1-git-send-email-Anson.Huang@nxp.com>
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Monday 22 June 2020 16:19:19 haibo.chen@nxp.com wrote:
-> From: Haibo Chen <haibo.chen@nxp.com>
+On Thu, 18 Jun 2020 11:22:56 +0800, Anson Huang wrote:
+> Convert the i.MX ESDHC binding to DT schema format using json-schema
 > 
-> In current code logic, when work in SDR12/SDR25 mode, the final clock
-> rate is incorrect, just the legancy 400KHz, because the
-> card->sw_caps.sd3_bus_mode do not has the flag SD_MODE_UHS_SDR12 or
-> SD_MODE_UHS_SDR25. Besides, SDIO_SPEED_SDR12 is actually value 0, and
-> every mode need to config the timing and clock rate, so remove the
-> ‘if’ operator.
-> 
-> Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
-
-Hello! I do not know what should be the correct behavior according to
-sdio standards, but I tested this patch with DDR50 card and behavior of
-that card was not changed, it is working as before.
-
-Tested-by: Pali Rohár <pali@kernel.org>
-
+> Signed-off-by: Anson Huang <Anson.Huang@nxp.com>
 > ---
->  drivers/mmc/core/sdio.c | 15 ++++++++-------
->  1 file changed, 8 insertions(+), 7 deletions(-)
+> No change.
+> ---
+>  .../devicetree/bindings/mmc/fsl-imx-esdhc.txt      |  67 -----------
+>  .../devicetree/bindings/mmc/fsl-imx-esdhc.yaml     | 124 +++++++++++++++++++++
+>  2 files changed, 124 insertions(+), 67 deletions(-)
+>  delete mode 100644 Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
+>  create mode 100644 Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
 > 
-> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-> index 0e32ca7b9488..7b40553d3934 100644
-> --- a/drivers/mmc/core/sdio.c
-> +++ b/drivers/mmc/core/sdio.c
-> @@ -176,15 +176,18 @@ static int sdio_read_cccr(struct mmc_card *card, u32 ocr)
->  			if (mmc_host_uhs(card->host)) {
->  				if (data & SDIO_UHS_DDR50)
->  					card->sw_caps.sd3_bus_mode
-> -						|= SD_MODE_UHS_DDR50;
-> +						|= SD_MODE_UHS_DDR50 | SD_MODE_UHS_SDR50
-> +							| SD_MODE_UHS_SDR25 | SD_MODE_UHS_SDR12;
->  
->  				if (data & SDIO_UHS_SDR50)
->  					card->sw_caps.sd3_bus_mode
-> -						|= SD_MODE_UHS_SDR50;
-> +						|= SD_MODE_UHS_SDR50 | SD_MODE_UHS_SDR25
-> +							| SD_MODE_UHS_SDR12;
->  
->  				if (data & SDIO_UHS_SDR104)
->  					card->sw_caps.sd3_bus_mode
-> -						|= SD_MODE_UHS_SDR104;
-> +						|= SD_MODE_UHS_SDR104 | SD_MODE_UHS_SDR50
-> +							| SD_MODE_UHS_SDR25 | SD_MODE_UHS_SDR12;
->  			}
->  
->  			ret = mmc_io_rw_direct(card, 0, 0,
-> @@ -537,10 +540,8 @@ static int sdio_set_bus_speed_mode(struct mmc_card *card)
->  	max_rate = min_not_zero(card->quirk_max_rate,
->  				card->sw_caps.uhs_max_dtr);
->  
-> -	if (bus_speed) {
-> -		mmc_set_timing(card->host, timing);
-> -		mmc_set_clock(card->host, max_rate);
-> -	}
-> +	mmc_set_timing(card->host, timing);
-> +	mmc_set_clock(card->host, max_rate);
->  
->  	return 0;
->  }
-> -- 
-> 2.17.1
-> 
+
+
+My bot found errors running 'make dt_binding_check' on your patch:
+
+/builds/robherring/linux-dt-review/Documentation/devicetree/bindings/clock/imx8qxp-lpcg.example.dt.yaml: mmc@5b010000: compatible: Additional items are not allowed ('fsl,imx7d-usdhc' was unexpected)
+/builds/robherring/linux-dt-review/Documentation/devicetree/bindings/clock/imx8qxp-lpcg.example.dt.yaml: mmc@5b010000: compatible: ['fsl,imx8qxp-usdhc', 'fsl,imx7d-usdhc'] is too long
+/builds/robherring/linux-dt-review/Documentation/devicetree/bindings/clock/imx35-clock.example.dt.yaml: esdhc@53fb4000: $nodename:0: 'esdhc@53fb4000' does not match '^mmc(@.*)?$'
+
+
+See https://patchwork.ozlabs.org/patch/1311722
+
+If you already ran 'make dt_binding_check' and didn't see the above
+error(s), then make sure dt-schema is up to date:
+
+pip3 install git+https://github.com/devicetree-org/dt-schema.git@master --upgrade
+
+Please check and re-submit.
+
