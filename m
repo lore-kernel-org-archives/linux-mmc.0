@@ -2,137 +2,134 @@ Return-Path: <SRS0=XB32=AK=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.6 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 61AD3C433E2
-	for <linux-mmc@archiver.kernel.org>; Mon, 29 Jun 2020 21:35:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 280B6C433E0
+	for <linux-mmc@archiver.kernel.org>; Mon, 29 Jun 2020 21:38:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4358720759
-	for <linux-mmc@archiver.kernel.org>; Mon, 29 Jun 2020 21:35:04 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 07A9D206E9
+	for <linux-mmc@archiver.kernel.org>; Mon, 29 Jun 2020 21:38:35 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1593466504;
-	bh=bcyRH8SrIJRpWOCioAE7dQk1Zwno7fu5lbGQHD57n+M=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
-	b=yX7Lt6A9E6smpx3bai3nn/fq//n4JjefE+RDJYeGzcP6UNy67079AMDQIl9Tr6vPx
-	 VzHs69weTVmU5zsGeaL27lB+fBobeWHX8/HliBsa0M0zZy50KvJOFXXBLWzYVISQii
-	 ngtE5Y2UWm0AIaGiUN0VmEZeiV43VTZKy25VhfRY=
+	s=default; t=1593466715;
+	bh=yT91BYvH3WjdmAvG2j2qrg9Xq6C0JSmmu5V70ZdeVAE=;
+	h=From:To:Cc:Subject:Date:List-ID:From;
+	b=MIyJ0QVE5njDXQ1HsIj6snCG+MvrnfIjuHJuhIMddwp3RCZ4d3Hj9z5TU/atpRKHd
+	 EKhTxerMRE8eygzfbydB6ZtKLDIo6BgBFejo6lU0hcLcDtRyKhQCQyonLDC7B1WNEQ
+	 OFSkkYgfDKbogGX1vp1vr5HNcEw3mzAMqyMqOmNo=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728544AbgF2Vez (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 29 Jun 2020 17:34:55 -0400
-Received: from mail.kernel.org ([198.145.29.99]:60654 "EHLO mail.kernel.org"
+        id S1728386AbgF2Vhk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 29 Jun 2020 17:37:40 -0400
+Received: from mail.kernel.org ([198.145.29.99]:60596 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728566AbgF2Skz (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 29 Jun 2020 14:40:55 -0400
-Received: from localhost (fw-tnat.cambridge.arm.com [217.140.96.140])
+        id S1728372AbgF2Skd (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 29 Jun 2020 14:40:33 -0400
+Received: from pali.im (pali.im [31.31.79.79])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 51FD823D25;
-        Mon, 29 Jun 2020 12:57:58 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 627C423128;
+        Mon, 29 Jun 2020 07:22:54 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1593435478;
-        bh=bcyRH8SrIJRpWOCioAE7dQk1Zwno7fu5lbGQHD57n+M=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=aSSuD7UPU9scWauVRzNqe8ZN1yN6QlsyN7rZk8VrNsWYDgD/+hATBOQzmvBCe2E+t
-         D3Xh+qBwPFvd/SS8ZHrwu7i6dNvNqobYG+MXCWb6C9721v0VwWQxe/CzBuVBy5sWdE
-         YIMT3SzvxnbDL+UZ6JEuxwTiUHnlnblRL/az3+KA=
-Date:   Mon, 29 Jun 2020 13:57:56 +0100
-From:   Mark Brown <broonie@kernel.org>
-To:     Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-Cc:     "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        Sudeep Holla <sudeep.holla@arm.com>,
-        "lgirdwood@gmail.com" <lgirdwood@gmail.com>,
-        "geert+renesas@glider.be" <geert+renesas@glider.be>,
-        "magnus.damm@gmail.com" <magnus.damm@gmail.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "linux-renesas-soc@vger.kernel.org" 
-        <linux-renesas-soc@vger.kernel.org>
-Subject: Re: [PATCH/RFC v4 2/4] regulator: fixed: add regulator_ops members
- for suspend/resume
-Message-ID: <20200629125756.GC5499@sirena.org.uk>
-References: <1593163942-5087-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
- <1593163942-5087-3-git-send-email-yoshihiro.shimoda.uh@renesas.com>
- <20200626143914.GE5289@sirena.org.uk>
- <TY2PR01MB3692A3B12CEF7F9708A8A59CD86E0@TY2PR01MB3692.jpnprd01.prod.outlook.com>
+        s=default; t=1593415374;
+        bh=yT91BYvH3WjdmAvG2j2qrg9Xq6C0JSmmu5V70ZdeVAE=;
+        h=From:To:Cc:Subject:Date:From;
+        b=Y0p63s01rk+DVrstkcB9Db5yUPgHaeny0zC60+6dYzTJATXErTMDJEmi4aXIgBaet
+         QF+ho1djOTn6KVLeI8TZoiLcitj4+MdwV8uRljaCvrtcueHzMIw4T0Bhg2RxeATNMn
+         gWqaqAr/3Zsadcx1J7DlSM1FV/Q00KdP/F1C4lzI=
+Received: by pali.im (Postfix)
+        id CBE1881F; Mon, 29 Jun 2020 09:22:51 +0200 (CEST)
+From:   =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>
+To:     Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+Cc:     Amitkumar Karwar <amitkarwar@gmail.com>,
+        Siva Rebbagondla <siva8118@gmail.com>,
+        Kalle Valo <kvalo@codeaurora.org>,
+        linux-wireless@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: [PATCH] mmc: sdio: Move SDIO IDs from rsi_sdio driver to common include file
+Date:   Mon, 29 Jun 2020 09:21:44 +0200
+Message-Id: <20200629072144.24351-1-pali@kernel.org>
+X-Mailer: git-send-email 2.20.1
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="vOmOzSkFvhd7u8Ms"
-Content-Disposition: inline
-In-Reply-To: <TY2PR01MB3692A3B12CEF7F9708A8A59CD86E0@TY2PR01MB3692.jpnprd01.prod.outlook.com>
-X-Cookie: Real programs don't eat cache.
-User-Agent: Mutt/1.10.1 (2018-07-13)
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Define appropriate macro names for consistency with other macros.
 
---vOmOzSkFvhd7u8Ms
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Signed-off-by: Pali Rohár <pali@kernel.org>
+---
+Hello Ulf! I forgot to include change for rsi driver into patch series:
+"mmc: sdio: Move SDIO IDs from drivers to common include file"
+https://lore.kernel.org/linux-mmc/20200522144412.19712-1-pali@kernel.org/
+As patch series was already merged, I'm sending this patch separately.
+---
+ drivers/net/wireless/rsi/rsi_91x_sdio.c | 8 ++++----
+ drivers/net/wireless/rsi/rsi_sdio.h     | 4 ----
+ include/linux/mmc/sdio_ids.h            | 4 ++++
+ 3 files changed, 8 insertions(+), 8 deletions(-)
 
-On Mon, Jun 29, 2020 at 02:42:26AM +0000, Yoshihiro Shimoda wrote:
-> > From: Mark Brown, Sent: Friday, June 26, 2020 11:39 PM
+diff --git a/drivers/net/wireless/rsi/rsi_91x_sdio.c b/drivers/net/wireless/rsi/rsi_91x_sdio.c
+index 5d6143a55187..a04ff75c409f 100644
+--- a/drivers/net/wireless/rsi/rsi_91x_sdio.c
++++ b/drivers/net/wireless/rsi/rsi_91x_sdio.c
+@@ -1038,10 +1038,10 @@ static int rsi_probe(struct sdio_func *pfunction,
+ 		goto fail_free_adapter;
+ 	}
+ 
+-	if (pfunction->device == RSI_SDIO_PID_9113) {
++	if (pfunction->device == SDIO_DEVICE_ID_RSI_9113) {
+ 		rsi_dbg(ERR_ZONE, "%s: 9113 module detected\n", __func__);
+ 		adapter->device_model = RSI_DEV_9113;
+-	} else  if (pfunction->device == RSI_SDIO_PID_9116) {
++	} else  if (pfunction->device == SDIO_DEVICE_ID_RSI_9116) {
+ 		rsi_dbg(ERR_ZONE, "%s: 9116 module detected\n", __func__);
+ 		adapter->device_model = RSI_DEV_9116;
+ 	} else {
+@@ -1526,8 +1526,8 @@ static const struct dev_pm_ops rsi_pm_ops = {
+ #endif
+ 
+ static const struct sdio_device_id rsi_dev_table[] =  {
+-	{ SDIO_DEVICE(RSI_SDIO_VENDOR_ID, RSI_SDIO_PID_9113) },
+-	{ SDIO_DEVICE(RSI_SDIO_VENDOR_ID, RSI_SDIO_PID_9116) },
++	{ SDIO_DEVICE(SDIO_VENDOR_ID_RSI, SDIO_DEVICE_ID_RSI_9113) },
++	{ SDIO_DEVICE(SDIO_VENDOR_ID_RSI, SDIO_DEVICE_ID_RSI_9116) },
+ 	{ /* Blank */},
+ };
+ 
+diff --git a/drivers/net/wireless/rsi/rsi_sdio.h b/drivers/net/wireless/rsi/rsi_sdio.h
+index c5cfb6238f73..9afc1d0d2684 100644
+--- a/drivers/net/wireless/rsi/rsi_sdio.h
++++ b/drivers/net/wireless/rsi/rsi_sdio.h
+@@ -28,10 +28,6 @@
+ #include <linux/mmc/sdio_ids.h>
+ #include "rsi_main.h"
+ 
+-#define RSI_SDIO_VENDOR_ID   0x041B
+-#define RSI_SDIO_PID_9113    0x9330
+-#define RSI_SDIO_PID_9116    0x9116
+-
+ enum sdio_interrupt_type {
+ 	BUFFER_FULL         = 0x0,
+ 	BUFFER_AVAILABLE    = 0x2,
+diff --git a/include/linux/mmc/sdio_ids.h b/include/linux/mmc/sdio_ids.h
+index 15ed8ce9d394..ab41801c5f51 100644
+--- a/include/linux/mmc/sdio_ids.h
++++ b/include/linux/mmc/sdio_ids.h
+@@ -118,6 +118,10 @@
+ #define SDIO_DEVICE_ID_SIANO_NOVA_A0		0x1100
+ #define SDIO_DEVICE_ID_SIANO_STELLAR 		0x5347
+ 
++#define SDIO_VENDOR_ID_RSI			0x041b
++#define SDIO_DEVICE_ID_RSI_9113			0x9330
++#define SDIO_DEVICE_ID_RSI_9116			0x9116
++
+ #define SDIO_VENDOR_ID_TI_WL1251		0x104c
+ #define SDIO_DEVICE_ID_TI_WL1251		0x9066
+ 
+-- 
+2.20.1
 
-Copying in Sudeep for the feedback on firmware interfaces.
-
-> > According to the changelog this is all about reflecting changes in the
-> > system state done by firmware but there's no interaction with firmware
-> > here which means this will be at best fragile.  If we need to reflect
-> > changes in firmware configuration I'd expect there to be some
-> > interaction with firmware about how it is configured, or at least that
-> > the configuration would come from the same source.
-
-> I should have described background of previous patch series though,
-> according to previous discussion [1] the firmware side (like PSCI) is
-> also fragile unfortunately... So, I thought using regulator-off-in-suspend
-> in a regulator was better.
-
-> On other hand, Ulf is talking about either adding a property (perhaps like
-> regulator-off-in-suspend) into a regulator or just adding a new property
-> into MMC [2]. What do you think about Ulf' comment? I'm thinking
-> adding a new property "full-pwr-cycle-in-suspend" is the best solution.
-> This is because using a regulator property and reflecting a state of regu=
-lator without
-> firmware is fragile, as you said.
-
-TBH I worry about a property drifting out of sync with the firmware on
-systems where the firmware can be updated.  Personally my default
-assumption would always be that we're going to loose power for anything
-except the RAM and whatever is needed for wake sources during suspend so
-I find the discussion a bit surprising but in any case that seems like a
-better option than trying to shoehorn things in the way the series here
-did.  Like I said in my earlier replies if this is done through the
-regulator API I'd expect it to be via the suspend interface.
-
-> [1]
-> https://lore.kernel.org/linux-renesas-soc/CAMuHMdXjU7N4oG89YsozGijMpjgKGN=
-6ezw2qm6FeGX=3DJyRhsvg@mail.gmail.com/
->=20
-> [2]
-> https://lore.kernel.org/linux-renesas-soc/CAPDyKFpiBU1D+a7zb+Ggm0_HZ+YR4=
-=3DLXJZ5MPytXtT=3DuBEdjPA@mail.gmail.com/
->=20
-> Best regards,
-> Yoshihiro Shimoda
->=20
-
---vOmOzSkFvhd7u8Ms
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQEzBAABCgAdFiEEreZoqmdXGLWf4p/qJNaLcl1Uh9AFAl755VMACgkQJNaLcl1U
-h9BCWAf/alYjM1GUf8o0xC1cfZB+/ZQDJlP1ynAY3yBAz6znDVqyB0+0YHESvJeZ
-H9rCGXZ4YyH+CRLnd3TzJrAYfJ9wedaSQiabb5GE7hUKuC/SYPgLHX/3201Kgwl+
-+MNM6w0kvzjyU/0OzvYI0SXBFu5g21LAZLR5FSaYcReUfqOJah+OtilSFdO+z86h
-YsX6CMecRYl+4gwHkKlr1mQ7ZvrdtFkYynwxr3CZaD/ZsxZQ5DFL/p4h46D/ewKJ
-qYoD8RX0S5QnWLxNBWmy10XtW67Rznftmh5lSBV9UkG2zxIIYL8878fmVecdLsiI
-ZeLVxrKgg+Jq0Jzcy+7yux7aucvd+A==
-=ENZF
------END PGP SIGNATURE-----
-
---vOmOzSkFvhd7u8Ms--
