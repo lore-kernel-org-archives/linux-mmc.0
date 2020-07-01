@@ -4,53 +4,52 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-8.5 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no
-	version=3.4.0
+	URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 538F6C433E1
-	for <linux-mmc@archiver.kernel.org>; Wed,  1 Jul 2020 10:34:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 29B0FC433DF
+	for <linux-mmc@archiver.kernel.org>; Wed,  1 Jul 2020 10:44:32 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 40E0A20747
-	for <linux-mmc@archiver.kernel.org>; Wed,  1 Jul 2020 10:34:19 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0ED4B20747
+	for <linux-mmc@archiver.kernel.org>; Wed,  1 Jul 2020 10:44:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729908AbgGAKeS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 1 Jul 2020 06:34:18 -0400
-Received: from mga05.intel.com ([192.55.52.43]:1968 "EHLO mga05.intel.com"
+        id S1730054AbgGAKoa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 1 Jul 2020 06:44:30 -0400
+Received: from mga02.intel.com ([134.134.136.20]:39136 "EHLO mga02.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1729180AbgGAKeS (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 1 Jul 2020 06:34:18 -0400
-IronPort-SDR: tXPm5DZxN8Nc4u5kMMFPc+FVBAP5palGdp7J2o8ByiMduucpju6kx9UFwll+4yafsjVyskQ//x
- tw84jEzwh7yw==
-X-IronPort-AV: E=McAfee;i="6000,8403,9668"; a="231406762"
+        id S1729952AbgGAKoa (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 1 Jul 2020 06:44:30 -0400
+IronPort-SDR: N7whw5bG3g52W9I+AUsJ67g7tMFtvfVjXGjzz9qV8mM2fU2QHfviptTu/iR2J7uGT/dw9e31Xu
+ +M8KcJYHLeOA==
+X-IronPort-AV: E=McAfee;i="6000,8403,9668"; a="134807117"
 X-IronPort-AV: E=Sophos;i="5.75,299,1589266800"; 
-   d="scan'208";a="231406762"
+   d="scan'208";a="134807117"
 X-Amp-Result: SKIPPED(no attachment in message)
 X-Amp-File-Uploaded: False
 Received: from fmsmga004.fm.intel.com ([10.253.24.48])
-  by fmsmga105.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 01 Jul 2020 03:34:17 -0700
-IronPort-SDR: /SGe/XKYWuaoce/TsPtS7IN2mBOQJUEX4bShJOO4dvuuaJiwiojG3GnU8un3tzbr0p7pjm/jMt
- IqGbDE29Gpaw==
+  by orsmga101.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 01 Jul 2020 03:44:19 -0700
+IronPort-SDR: Jpa5Aep7E13qHjqBxVTHr2OHKFxzhVxQg1u48cFSsh6JHvXElDp5y1uTpbe1iAf+8vu9YyleRV
+ WGtiCn5O2Dqg==
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="5.75,299,1589266800"; 
-   d="scan'208";a="303803013"
+   d="scan'208";a="303805612"
 Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.73]) ([10.237.72.73])
-  by fmsmga004.fm.intel.com with ESMTP; 01 Jul 2020 03:34:15 -0700
-Subject: Re: [PATCH] mmc: host: dereference null return value
-To:     haibo.chen@nxp.com, ulf.hansson@linaro.org,
-        linux-mmc@vger.kernel.org, jh80.chung@samsung.com,
-        kgene@kernel.org, krzk@kernel.org, michal.simek@xilinx.com,
-        linux-samsung-soc@vger.kernel.org
-Cc:     linux-imx@nxp.com
-References: <1592885209-25839-1-git-send-email-haibo.chen@nxp.com>
+  by fmsmga004.fm.intel.com with ESMTP; 01 Jul 2020 03:44:17 -0700
+Subject: Re: [PATCH] mmc: sdhci-acpi: For amd device set driver type as
+ MMC_SET_DRIVER_TYPE_A
+To:     Akshu Agrawal <akshu.agrawal@amd.com>
+Cc:     rrangel@google.com, nehal-bakulchandra.shah@amd.com,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-mmc@vger.kernel.org, open list <linux-kernel@vger.kernel.org>
+References: <20200623133347.4598-1-akshu.agrawal@amd.com>
 From:   Adrian Hunter <adrian.hunter@intel.com>
 Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
  Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <cdc9b395-37ea-8ecd-6e20-1e32f2bd0931@intel.com>
-Date:   Wed, 1 Jul 2020 13:33:37 +0300
+Message-ID: <b51faa2a-f465-581b-05bc-81677c8c1071@intel.com>
+Date:   Wed, 1 Jul 2020 13:43:40 +0300
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
  Thunderbird/68.8.1
 MIME-Version: 1.0
-In-Reply-To: <1592885209-25839-1-git-send-email-haibo.chen@nxp.com>
+In-Reply-To: <20200623133347.4598-1-akshu.agrawal@amd.com>
 Content-Type: text/plain; charset=utf-8
 Content-Language: en-US
 Content-Transfer-Encoding: 7bit
@@ -59,102 +58,33 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 23/06/20 7:06 am, haibo.chen@nxp.com wrote:
-> From: Haibo Chen <haibo.chen@nxp.com>
+On 23/06/20 4:33 pm, Akshu Agrawal wrote:
+> HS400/HS200/eMMC HS doesn't have Preset Value register.
+> Hence, sdhci_set_ios function overrides the value set by fmw to
+> SDHCI_CTRL_DRV_TYPE_B.
+> This patch sets drv_type to MMC_SET_DRIVER_TYPE_A
+> so that host_control2 register gets updated with the required
+> strength value.
 > 
-> of_match_node() has the opportunity to return NULL, so need to
-> dereference null return value.
-> This is reported by Coverity.
-> 
-> Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
+> Signed-off-by: Akshu Agrawal <akshu.agrawal@amd.com>
+
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+
 > ---
->  drivers/mmc/host/dw_mmc-exynos.c   | 5 +++--
->  drivers/mmc/host/dw_mmc-k3.c       | 5 +++--
->  drivers/mmc/host/dw_mmc-pltfm.c    | 3 ++-
->  drivers/mmc/host/sdhci-of-arasan.c | 2 ++
->  4 files changed, 10 insertions(+), 5 deletions(-)
+>  drivers/mmc/host/sdhci-acpi.c | 1 +
+>  1 file changed, 1 insertion(+)
 > 
-> diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
-> index 5e3d95b63676..27ab55abb03f 100644
-> --- a/drivers/mmc/host/dw_mmc-exynos.c
-> +++ b/drivers/mmc/host/dw_mmc-exynos.c
-> @@ -545,12 +545,13 @@ MODULE_DEVICE_TABLE(of, dw_mci_exynos_match);
->  
->  static int dw_mci_exynos_probe(struct platform_device *pdev)
+> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+> index d8b76cb8698a..48ecbd0b180d 100644
+> --- a/drivers/mmc/host/sdhci-acpi.c
+> +++ b/drivers/mmc/host/sdhci-acpi.c
+> @@ -542,6 +542,7 @@ static int amd_select_drive_strength(struct mmc_card *card,
+>  				     unsigned int max_dtr, int host_drv,
+>  				     int card_drv, int *drv_type)
 >  {
-> -	const struct dw_mci_drv_data *drv_data;
-> +	const struct dw_mci_drv_data *drv_data = NULL;
->  	const struct of_device_id *match;
->  	int ret;
->  
->  	match = of_match_node(dw_mci_exynos_match, pdev->dev.of_node);
-> -	drv_data = match->data;
-> +	if (match)
-> +		drv_data = match->data;
-
-Could be 1 line change:
-
-	drv_data = match ? match->data : NULL;
-
->  
->  	pm_runtime_get_noresume(&pdev->dev);
->  	pm_runtime_set_active(&pdev->dev);
-> diff --git a/drivers/mmc/host/dw_mmc-k3.c b/drivers/mmc/host/dw_mmc-k3.c
-> index 50977ff18074..e8a148c306b3 100644
-> --- a/drivers/mmc/host/dw_mmc-k3.c
-> +++ b/drivers/mmc/host/dw_mmc-k3.c
-> @@ -451,11 +451,12 @@ MODULE_DEVICE_TABLE(of, dw_mci_k3_match);
->  
->  static int dw_mci_k3_probe(struct platform_device *pdev)
->  {
-> -	const struct dw_mci_drv_data *drv_data;
-> +	const struct dw_mci_drv_data *drv_data = NULL;
->  	const struct of_device_id *match;
->  
->  	match = of_match_node(dw_mci_k3_match, pdev->dev.of_node);
-> -	drv_data = match->data;
-> +	if (match)
-> +		drv_data = match->data;
-
-Could be 1 line change:
-
-	drv_data = match ? match->data : NULL;
-
->  
->  	return dw_mci_pltfm_register(pdev, drv_data);
+> +	*drv_type = MMC_SET_DRIVER_TYPE_A;
+>  	return MMC_SET_DRIVER_TYPE_A;
 >  }
-> diff --git a/drivers/mmc/host/dw_mmc-pltfm.c b/drivers/mmc/host/dw_mmc-pltfm.c
-> index 7de37f524a96..d3dcb96efd13 100644
-> --- a/drivers/mmc/host/dw_mmc-pltfm.c
-> +++ b/drivers/mmc/host/dw_mmc-pltfm.c
-> @@ -78,7 +78,8 @@ static int dw_mci_pltfm_probe(struct platform_device *pdev)
->  
->  	if (pdev->dev.of_node) {
->  		match = of_match_node(dw_mci_pltfm_match, pdev->dev.of_node);
-> -		drv_data = match->data;
-> +		if (match)
-> +			drv_data = match->data;
->  	}
->  
->  	return dw_mci_pltfm_register(pdev, drv_data);
-> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-> index fb26e743e1fd..f2090f944a0e 100644
-> --- a/drivers/mmc/host/sdhci-of-arasan.c
-> +++ b/drivers/mmc/host/sdhci-of-arasan.c
-> @@ -1520,6 +1520,8 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
->  	const struct sdhci_arasan_of_data *data;
->  
->  	match = of_match_node(sdhci_arasan_of_match, pdev->dev.of_node);
-> +	if (match == NULL)
-
-(!match) seems to be preferred over (match == NULL)
-
-> +		return -ENOPARAM;
-
-ENOPARAM is unconventional here.  ENODEV or EINVAL are better
-
->  	data = match->data;
->  	host = sdhci_pltfm_init(pdev, data->pdata, sizeof(*sdhci_arasan));
 >  
 > 
 
