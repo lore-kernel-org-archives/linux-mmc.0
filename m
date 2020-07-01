@@ -2,79 +2,130 @@ Return-Path: <SRS0=joLi=AM=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.0 required=3.0
-	tests=HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.5 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2B168C433DF
-	for <linux-mmc@archiver.kernel.org>; Wed,  1 Jul 2020 09:53:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8607EC433DF
+	for <linux-mmc@archiver.kernel.org>; Wed,  1 Jul 2020 09:57:51 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0B7B52077D
-	for <linux-mmc@archiver.kernel.org>; Wed,  1 Jul 2020 09:53:32 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6B50B2073E
+	for <linux-mmc@archiver.kernel.org>; Wed,  1 Jul 2020 09:57:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729816AbgGAJxb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 1 Jul 2020 05:53:31 -0400
-Received: from smtp.asem.it ([151.1.184.197]:64358 "EHLO smtp.asem.it"
+        id S1729358AbgGAJ5u (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 1 Jul 2020 05:57:50 -0400
+Received: from mga01.intel.com ([192.55.52.88]:20571 "EHLO mga01.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726343AbgGAJxb (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 1 Jul 2020 05:53:31 -0400
-Received: from webmail.asem.it
-        by asem.it (smtp.asem.it)
-        (SecurityGateway 6.5.2)
-        with ESMTP id SG000352730.MSG 
-        for <linux-mmc@vger.kernel.org>; Wed, 01 Jul 2020 11:53:28 +0200S
-Received: from ASAS044.asem.intra (172.16.16.44) by ASAS044.asem.intra
- (172.16.16.44) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.1979.3; Wed, 1 Jul
- 2020 11:53:25 +0200
-Received: from flavio-x.asem.intra (172.16.17.208) by ASAS044.asem.intra
- (172.16.16.44) with Microsoft SMTP Server id 15.1.1979.3 via Frontend
- Transport; Wed, 1 Jul 2020 11:53:25 +0200
-From:   Flavio Suligoi <f.suligoi@asem.it>
-To:     Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-CC:     <linux-arm-msm@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>, Flavio Suligoi <f.suligoi@asem.it>
-Subject: [PATCH v1 1/1] mmc: host: sdhci-msm: fix spelling mistake
-Date:   Wed, 1 Jul 2020 11:53:13 +0200
-Message-ID: <20200701095313.27507-1-f.suligoi@asem.it>
-X-Mailer: git-send-email 2.17.1
+        id S1729332AbgGAJ5u (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 1 Jul 2020 05:57:50 -0400
+IronPort-SDR: 1A3Q9ey3bFzkFE2+bWsI66/08coGxjPulEDFygyy7wIeGUthqrql5woZ0NUFpLe+FqgTAHW9lf
+ DLKEMyOKdJLA==
+X-IronPort-AV: E=McAfee;i="6000,8403,9668"; a="164527274"
+X-IronPort-AV: E=Sophos;i="5.75,299,1589266800"; 
+   d="scan'208";a="164527274"
+X-Amp-Result: SKIPPED(no attachment in message)
+X-Amp-File-Uploaded: False
+Received: from fmsmga004.fm.intel.com ([10.253.24.48])
+  by fmsmga101.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 01 Jul 2020 02:57:49 -0700
+IronPort-SDR: eLaADTkcKhiOvG4JlSZ0Sxp3y0KdIygaZBalh8sTPTeY0Cingbus4yq/wDFE49FVZ/AkvAyNXD
+ pQ0TrId8spCw==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.75,299,1589266800"; 
+   d="scan'208";a="303788511"
+Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.73]) ([10.237.72.73])
+  by fmsmga004.fm.intel.com with ESMTP; 01 Jul 2020 02:57:48 -0700
+Subject: Re: 0001-Fix-CQE-task-queue-timeout.patch
+To:     chen jiangnan <chen.jiangnan@zlingsmart.com>
+Cc:     "riteshh@codeaurora.org" <riteshh@codeaurora.org>,
+        "asutoshd@codeaurora.org" <asutoshd@codeaurora.org>,
+        "ulf.hansson@linaro.or" <ulf.hansson@linaro.or>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+References: <5a7b5ad9-bb3a-4281-a065-f57f9cf71a5a.chen.jiangnan@zlingsmart.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Message-ID: <40cccbed-1cbf-c709-9d5b-b87e796b07e5@intel.com>
+Date:   Wed, 1 Jul 2020 12:57:10 +0300
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.8.1
 MIME-Version: 1.0
-Content-Type: text/plain
-X-SGHeloLookup-Result: pass smtp.helo=webmail.asem.it (ip=172.16.16.44)
-X-SGSPF-Result: none (smtp.asem.it)
-X-SGOP-RefID: str=0001.0A090209.5EFC5D16.0032,ss=1,re=0.000,recu=0.000,reip=0.000,cl=1,cld=1,fgs=0 (_st=1 _vt=0 _iwf=0)
+In-Reply-To: <5a7b5ad9-bb3a-4281-a065-f57f9cf71a5a.chen.jiangnan@zlingsmart.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 8bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Fix typo: "trigered" --> "triggered"
+On 22/06/20 8:44 am, chen jiangnan wrote:
+> From 547e5635c04f4f9d62cbc1e3a4b4527f87c4e83b Mon Sep 17 00:00:00 2001
+> From: JiangnanChen <chen.jiangnan@zlingsmart.com>
+> Date: Mon, 22 Jun 2020 05:32:21 +0000
+> Subject: [PATCH] Fix CQE task queue timeout. CQE notifies the software that
 
-Signed-off-by: Flavio Suligoi <f.suligoi@asem.it>
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
----
-v1: add Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Please separate subject from commit message.
 
- drivers/mmc/host/sdhci-msm.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+>  task has completed through task completion notification (TCN), but some CQE
+>  will occasionally mark the task in the pending state (via DPT). At this time,
+>  if a QBR task (such as flush cache) is followed, the entire command queue
+>  will be blocked, causing the mmc subsystem to report a timeout error, and cqe
+>  enters the recovery process.
 
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index b277dd7fbdb5..3f615d0ccb61 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -1362,7 +1362,7 @@ static inline void sdhci_msm_complete_pwr_irq_wait(
-  * To what state the register writes will change the IO lines should be passed
-  * as the argument req_type. This API will check whether the IO line's state
-  * is already the expected state and will wait for power irq only if
-- * power irq is expected to be trigerred based on the current IO line state
-+ * power irq is expected to be triggered based on the current IO line state
-  * and expected IO line state.
-  */
- static void sdhci_msm_check_power_status(struct sdhci_host *host, u32 req_type)
--- 
-2.17.1
+It seems like this is a workaround for broken HW, so you could create a quirk for
+this, but making use of the ->write_l host op is cleaner for cqhci.
+
+e.g. in your driver, for the broken controller set cqhci_host_ops write_l to use
+the following:
+
+static void ???_cqhci_writel(struct cqhci_host *cq_host, u32 val, int reg)
+{
+	writel_relaxed(val, cq_host->mmio + reg);
+
+	if (reg == CQHCI_TCN) {
+               u32 pend_status = cqhci_readl(cq_host, CQHCI_DPT);
+               if (val & pend_status) {
+                       pr_debug("%s: cqhci conflict: TCN: 0x%08lx DPT: 0x%08lx\n",
+                                mmc_hostname(cq_host->mmc), val, pend_status);
+                       cqhci_writel(cq_host, val & pend_status, CQHCI_TCLR);
+               }
+	}
+}
+
+> 
+> Signed-off-by: JiangnanChen <chen.jiangnan@zlingsmart.com>
+> ---
+>  drivers/mmc/host/cqhci.c | 9 ++++++++-
+>  1 file changed, 8 insertions(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/cqhci.c b/drivers/mmc/host/cqhci.c
+> index 75934f3c117e..b8c7f6119ac4 100644
+> --- a/drivers/mmc/host/cqhci.c
+> +++ b/drivers/mmc/host/cqhci.c
+> @@ -760,7 +760,7 @@ irqreturn_t cqhci_irq(struct mmc_host *mmc, u32 intmask, int cmd_error,
+>                       int data_error)
+>  {
+>         u32 status;
+> -       unsigned long tag = 0, comp_status;
+> +       unsigned long tag = 0, comp_status, pend_status;
+>         struct cqhci_host *cq_host = mmc->cqe_private;
+>  
+>         status = cqhci_readl(cq_host, CQHCI_IS);
+> @@ -778,6 +778,13 @@ irqreturn_t cqhci_irq(struct mmc_host *mmc, u32 intmask, int cmd_error,
+>                 pr_debug("%s: cqhci: TCN: 0x%08lx\n",
+>                          mmc_hostname(mmc), comp_status);
+>  
+> +               pend_status = cqhci_readl(cq_host, CQHCI_DPT);
+> +               if (comp_status & pend_status) {
+> +                       pr_debug("%s: cqhci conflict: TCN: 0x%08lx DPT: 0x%08lx\n",
+> +                                mmc_hostname(mmc), comp_status, pend_status);
+> +                       cqhci_writel(cq_host, comp_status & pend_status, CQHCI_TCLR);
+> +               }
+> +
+>                 spin_lock(&cq_host->lock);
+>  
+>                 for_each_set_bit(tag, &comp_status, cq_host->num_slots) {
+> -- 
+> 2.17.1
 
