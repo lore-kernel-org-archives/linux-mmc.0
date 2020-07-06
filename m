@@ -2,169 +2,93 @@ Return-Path: <SRS0=mNiq=AR=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-0.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 35406C433E0
-	for <linux-mmc@archiver.kernel.org>; Mon,  6 Jul 2020 14:50:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7F4AEC433E2
+	for <linux-mmc@archiver.kernel.org>; Mon,  6 Jul 2020 14:50:03 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 10F322070C
-	for <linux-mmc@archiver.kernel.org>; Mon,  6 Jul 2020 14:50:02 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 403B4206E6
+	for <linux-mmc@archiver.kernel.org>; Mon,  6 Jul 2020 14:50:03 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="uxoutIAL"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="U2gB/rlP"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729479AbgGFOt4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 6 Jul 2020 10:49:56 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59154 "EHLO
+        id S1729477AbgGFOuC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 6 Jul 2020 10:50:02 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59166 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729478AbgGFOtz (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Jul 2020 10:49:55 -0400
-Received: from mail-ua1-x942.google.com (mail-ua1-x942.google.com [IPv6:2607:f8b0:4864:20::942])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8CA3BC08C5DF
-        for <linux-mmc@vger.kernel.org>; Mon,  6 Jul 2020 07:49:55 -0700 (PDT)
-Received: by mail-ua1-x942.google.com with SMTP id c7so10703015uap.0
-        for <linux-mmc@vger.kernel.org>; Mon, 06 Jul 2020 07:49:55 -0700 (PDT)
+        with ESMTP id S1729253AbgGFOuA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Jul 2020 10:50:00 -0400
+Received: from mail-vk1-xa31.google.com (mail-vk1-xa31.google.com [IPv6:2607:f8b0:4864:20::a31])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 45684C061794
+        for <linux-mmc@vger.kernel.org>; Mon,  6 Jul 2020 07:50:00 -0700 (PDT)
+Received: by mail-vk1-xa31.google.com with SMTP id m21so7328023vkp.1
+        for <linux-mmc@vger.kernel.org>; Mon, 06 Jul 2020 07:50:00 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=SAUTZCKNrEvpQK8X43iPxicP+R3S1kWBry2NpIY1/dQ=;
-        b=uxoutIAL0NtSt92mYsh794ORpUzNdUsYmApSv4txaGPcQv6KRB+4sVITsf6nq9FXOA
-         SMfhiISK4XrJ0VABXVXUR1TCPvQ6cTUnzIrR3T4MlbiMadFBrCn5zv13duPlqPbr6OkB
-         qjPJ2PnqeuNe5me+YC513P9zephNVgaarMIXcV69qxcBm31ZjpYfeS1DHgqMPuA4YOib
-         EPYFm38JMv4f0j+5yGTEUn+4aOUoVUcwC1neqZxWx+wGpRH3mMcPM9R2+Vf+YZXhEH0r
-         tLhBbg3hl6KInWva+x5JB+jE+KuVmgdjRLBls16epNVBORd31dlK/hK62DAH7ZYYESy3
-         +Elg==
+         :cc;
+        bh=cS0UGykJG5S9ONR4xGpHa+s4l1jjOkyocdkJ+48d1fo=;
+        b=U2gB/rlPLjqZKu46T/JhoNrdkri9PVo5hFShbezqsEs8dApjiFvZbZT/DBmX6pnABx
+         9sWR3YMMULHm0opDG/kF71HQC6JVOMicIKDyLRYH/c4wIphxDS/8dyj7jes+0VMnrFAN
+         wzZ4ewTQxKn4YCooAaq/KGbSrLHk6E6uUGl29caFi4VA+2hBYXDnja0H6SRhmCS934Z/
+         /xJtzLygIGIwaI/mQxrMvnSt/rQN/TZCkDN8xA2xhRrZmUacgK2TNXcUrIzn+AXH0oV2
+         +3qvN89dlA5vd5B5UpRWsiEKn4iV8BonLViU7WfnZWJICLKW+8W92OpIlG6NwdZ6H70A
+         a49A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=SAUTZCKNrEvpQK8X43iPxicP+R3S1kWBry2NpIY1/dQ=;
-        b=K0frV1JK+qCd5xmUeL69E8JTPi0oyWqa/ZmnXzLcM/ZezvuFXVHCo6U2M/BhWSDs4+
-         bcWqXyE5L2MZKR/yV+WE6xMwDfJEiKuPxdS9IhDXqlrmpnlPhlGSyXD5d1Q619CIhGdV
-         BRsBgmWS1H19OSPfxZtaKHg1ZOsZpmkCsmrNuu2X7sXw0+0eE4t6sYHL4rJiZAThm/lf
-         +Y1bLJ+hcSP+KHn+0hW7jhMhD7yGS5HPRC4e+Fnvfaa1GOIogxLcPg6vcTbqY6WgWln3
-         sLhyHl30392vjySsmEbTn47c59JVZpPN8S3FWLv1VdEWYCLfY0z4+6rKCyw1XBBeQZV6
-         pHOQ==
-X-Gm-Message-State: AOAM531JZ8aljfA+ps7GEkRBpJzh4xYonK7mMmpEek4B2BLOyhQeVSUO
-        ci/fSsoJijt+Q/5E8kxF2LjhYe/ikyBj1eI71aIc2g==
-X-Google-Smtp-Source: ABdhPJxgj9RMBRxUAfldh72xeG7C36VY7RNbaVfCXry+dxCiSq7RJ3pHvb56O9+k8W7z/55b0tNU1kBAdhneXVf03TI=
-X-Received: by 2002:a9f:22e1:: with SMTP id 88mr34504520uan.19.1594046994591;
- Mon, 06 Jul 2020 07:49:54 -0700 (PDT)
+         :message-id:subject:to:cc;
+        bh=cS0UGykJG5S9ONR4xGpHa+s4l1jjOkyocdkJ+48d1fo=;
+        b=YaFwY+zKgWXMGGFSzxjKcTqJveefNEV0adInEAF9v3+io4zdicL9LqLwKmyQTGmDYg
+         WjhUKaAIGoOOby7dmPw49b7tAH7qlbOVX7MqhHNwM4HE3S41UBf/5dGIsppPEZcYS3Lm
+         2vX8ew/LtbGhUjHaUPeD/Z0BtQcgWOZ2UbXi3g1o8Vf2x2zNUL8/bFZEqX8p0n9SquJm
+         UYxnuTnkUT+rYE7TYf8iSS4fYzc05aF0ilQaVsRW6W4bTknGSw8QDDCKBYY6f17J9mE5
+         E6b8ff3CtSeFY/yPuo4sr7ugUQVIgqr18laPxvnragQ57Fqk4aEuzB1pGPM8ia+hGbBK
+         XwBg==
+X-Gm-Message-State: AOAM531Ljj31wLrXZyF3JFIJjrQlXuLrLlDXDmhGc4dkmMA2Wnz5INu8
+        b0K1B3OahfChbBligV/QBFz8FQtHykgVKx5cfMkZ98E/sdU=
+X-Google-Smtp-Source: ABdhPJw5LCXlg5p88FMT/PnsnfIwwxz8F/zH0kuw+9vugiDGmpY2/NpMAybQbLXmtjilNX9lay0+cTNjxUNqttyO4zk=
+X-Received: by 2002:a1f:1889:: with SMTP id 131mr26203707vky.59.1594046999513;
+ Mon, 06 Jul 2020 07:49:59 -0700 (PDT)
 MIME-Version: 1.0
-References: <20200629072144.24351-1-pali@kernel.org>
-In-Reply-To: <20200629072144.24351-1-pali@kernel.org>
+References: <1590044466-28372-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
+ <TY2PR01MB36921D805C79B829563698D6D8B70@TY2PR01MB3692.jpnprd01.prod.outlook.com>
+ <20200602125131.GA1318@ninjato> <TY2PR01MB36926A830866FEA2C49735E0D8890@TY2PR01MB3692.jpnprd01.prod.outlook.com>
+ <CAPDyKFpzZG-LFbCDZYZx7J9sH536dcyHvoatCD4F-AvzM1kaZw@mail.gmail.com> <20200706140008.GD1046@ninjato>
+In-Reply-To: <20200706140008.GD1046@ninjato>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 6 Jul 2020 16:49:17 +0200
-Message-ID: <CAPDyKFp-meAG4XNgL3ixacYKpFByV-Pynz6-GRDtfT95hC-Jmw@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdio: Move SDIO IDs from rsi_sdio driver to common
- include file
-To:     =?UTF-8?Q?Pali_Roh=C3=A1r?= <pali@kernel.org>,
-        Kalle Valo <kvalo@codeaurora.org>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Amitkumar Karwar <amitkarwar@gmail.com>,
-        Siva Rebbagondla <siva8118@gmail.com>,
-        linux-wireless <linux-wireless@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Date:   Mon, 6 Jul 2020 16:49:20 +0200
+Message-ID: <CAPDyKFoUdJLc+CzXNjQa7Er1oYmC-bqNszhPYya9ov=-THcfEQ@mail.gmail.com>
+Subject: Re: [PATCH 0/3] mmc: tmio and renesas_sdhi_internal_dmac: fix dma unmapping
+To:     "wsa+renesas@sang-engineering.com" <wsa+renesas@sang-engineering.com>
+Cc:     Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-renesas-soc@vger.kernel.org" 
+        <linux-renesas-soc@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 29 Jun 2020 at 09:22, Pali Roh=C3=A1r <pali@kernel.org> wrote:
+On Mon, 6 Jul 2020 at 16:00, wsa+renesas@sang-engineering.com
+<wsa+renesas@sang-engineering.com> wrote:
 >
-> Define appropriate macro names for consistency with other macros.
 >
-> Signed-off-by: Pali Roh=C3=A1r <pali@kernel.org>
+> > Just wanted to check if this is ready to go or more tests are needed?
+>
+> From my tests, this patch series fixes the issue. I'd just like to avoid
+> the extra callback. However, my tries to do that failed so far. And now
+> I'll be away for two weeks.
+>
+> Dunno, maybe we merge the series and if I come up with something else
+> that works, we can add it incrementally?
 
-Applied for next, thanks!
+Sounds reasonable to me.
 
-If it turns out that it's a better idea to funnel this via Kale's
-wireless tree, then I can drop it - and you may consider this as an
-ack instead.
+So, applied for next, thanks!
 
 Kind regards
 Uffe
-
-
-
-> ---
-> Hello Ulf! I forgot to include change for rsi driver into patch series:
-> "mmc: sdio: Move SDIO IDs from drivers to common include file"
-> https://lore.kernel.org/linux-mmc/20200522144412.19712-1-pali@kernel.org/
-> As patch series was already merged, I'm sending this patch separately.
-> ---
->  drivers/net/wireless/rsi/rsi_91x_sdio.c | 8 ++++----
->  drivers/net/wireless/rsi/rsi_sdio.h     | 4 ----
->  include/linux/mmc/sdio_ids.h            | 4 ++++
->  3 files changed, 8 insertions(+), 8 deletions(-)
->
-> diff --git a/drivers/net/wireless/rsi/rsi_91x_sdio.c b/drivers/net/wirele=
-ss/rsi/rsi_91x_sdio.c
-> index 5d6143a55187..a04ff75c409f 100644
-> --- a/drivers/net/wireless/rsi/rsi_91x_sdio.c
-> +++ b/drivers/net/wireless/rsi/rsi_91x_sdio.c
-> @@ -1038,10 +1038,10 @@ static int rsi_probe(struct sdio_func *pfunction,
->                 goto fail_free_adapter;
->         }
->
-> -       if (pfunction->device =3D=3D RSI_SDIO_PID_9113) {
-> +       if (pfunction->device =3D=3D SDIO_DEVICE_ID_RSI_9113) {
->                 rsi_dbg(ERR_ZONE, "%s: 9113 module detected\n", __func__)=
-;
->                 adapter->device_model =3D RSI_DEV_9113;
-> -       } else  if (pfunction->device =3D=3D RSI_SDIO_PID_9116) {
-> +       } else  if (pfunction->device =3D=3D SDIO_DEVICE_ID_RSI_9116) {
->                 rsi_dbg(ERR_ZONE, "%s: 9116 module detected\n", __func__)=
-;
->                 adapter->device_model =3D RSI_DEV_9116;
->         } else {
-> @@ -1526,8 +1526,8 @@ static const struct dev_pm_ops rsi_pm_ops =3D {
->  #endif
->
->  static const struct sdio_device_id rsi_dev_table[] =3D  {
-> -       { SDIO_DEVICE(RSI_SDIO_VENDOR_ID, RSI_SDIO_PID_9113) },
-> -       { SDIO_DEVICE(RSI_SDIO_VENDOR_ID, RSI_SDIO_PID_9116) },
-> +       { SDIO_DEVICE(SDIO_VENDOR_ID_RSI, SDIO_DEVICE_ID_RSI_9113) },
-> +       { SDIO_DEVICE(SDIO_VENDOR_ID_RSI, SDIO_DEVICE_ID_RSI_9116) },
->         { /* Blank */},
->  };
->
-> diff --git a/drivers/net/wireless/rsi/rsi_sdio.h b/drivers/net/wireless/r=
-si/rsi_sdio.h
-> index c5cfb6238f73..9afc1d0d2684 100644
-> --- a/drivers/net/wireless/rsi/rsi_sdio.h
-> +++ b/drivers/net/wireless/rsi/rsi_sdio.h
-> @@ -28,10 +28,6 @@
->  #include <linux/mmc/sdio_ids.h>
->  #include "rsi_main.h"
->
-> -#define RSI_SDIO_VENDOR_ID   0x041B
-> -#define RSI_SDIO_PID_9113    0x9330
-> -#define RSI_SDIO_PID_9116    0x9116
-> -
->  enum sdio_interrupt_type {
->         BUFFER_FULL         =3D 0x0,
->         BUFFER_AVAILABLE    =3D 0x2,
-> diff --git a/include/linux/mmc/sdio_ids.h b/include/linux/mmc/sdio_ids.h
-> index 15ed8ce9d394..ab41801c5f51 100644
-> --- a/include/linux/mmc/sdio_ids.h
-> +++ b/include/linux/mmc/sdio_ids.h
-> @@ -118,6 +118,10 @@
->  #define SDIO_DEVICE_ID_SIANO_NOVA_A0           0x1100
->  #define SDIO_DEVICE_ID_SIANO_STELLAR           0x5347
->
-> +#define SDIO_VENDOR_ID_RSI                     0x041b
-> +#define SDIO_DEVICE_ID_RSI_9113                        0x9330
-> +#define SDIO_DEVICE_ID_RSI_9116                        0x9116
-> +
->  #define SDIO_VENDOR_ID_TI_WL1251               0x104c
->  #define SDIO_DEVICE_ID_TI_WL1251               0x9066
->
-> --
-> 2.20.1
->
