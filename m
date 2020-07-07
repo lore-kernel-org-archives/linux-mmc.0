@@ -2,135 +2,173 @@ Return-Path: <SRS0=aSBx=AS=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
+X-Spam-Status: No, score=-8.6 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 74CEFC433DF
-	for <linux-mmc@archiver.kernel.org>; Tue,  7 Jul 2020 06:55:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 95073C433E0
+	for <linux-mmc@archiver.kernel.org>; Tue,  7 Jul 2020 07:04:24 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4C62820674
-	for <linux-mmc@archiver.kernel.org>; Tue,  7 Jul 2020 06:55:29 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="u3N/FiQE"
+	by mail.kernel.org (Postfix) with ESMTP id 75D8A20708
+	for <linux-mmc@archiver.kernel.org>; Tue,  7 Jul 2020 07:04:24 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1594105464;
+	bh=WaxY9UuFUZMio8lU8uSW/II3c3cTj0kgxwgSUSl8afc=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
+	b=OQsuYmTKv0s6ESeslvgYslgS7sqoGOAyFXZoXFnXmK/OMiGBs5HSytaozzfyQfWqE
+	 izEfpGp2r2LjMk2U4eB7NdKPowlxXkSXe/Otm2jiC/yzqC+D5xKpgIyuuU0t5X6WA1
+	 4ayACYiT6BWLSpSj2C4i42Aq0kQ3GoDBE91awvYs=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727038AbgGGGzY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 7 Jul 2020 02:55:24 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38536 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726434AbgGGGzY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Jul 2020 02:55:24 -0400
-Received: from mail-vs1-xe41.google.com (mail-vs1-xe41.google.com [IPv6:2607:f8b0:4864:20::e41])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5ADB6C061755
-        for <linux-mmc@vger.kernel.org>; Mon,  6 Jul 2020 23:55:24 -0700 (PDT)
-Received: by mail-vs1-xe41.google.com with SMTP id m25so21910466vsp.8
-        for <linux-mmc@vger.kernel.org>; Mon, 06 Jul 2020 23:55:24 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=R5BjuHDM7SvbwjX2Wy0yK9rZ3kvZqwci6rTlVHchQms=;
-        b=u3N/FiQEU/C/kO2T73BlHN0SZ7p0aso1DFhdA3lZ7DW8LAGykkaHH2i+XXtXsWEqhx
-         2oZftQS3TbmOAeem+c/Ykimd/yZVKGFScenD6Ql31xaBx1OMGL73tvizuPBaGVuHZPKV
-         dWQa+7nduTPNA193emz8Qjc5qY8xal2QyyewGgr5G6NWqWMeHmOBvdRoYGZs5yZrN31H
-         4hojVcG6VhV2rQwnVFCA1g2Ed4lR2lvb0Z2vBIJVB6pup/VMvTvlJJ/cBbLhHEezzS9j
-         4SMFXHh2OqjD4C4n2P9JfpvUH7OCFS5Dcso8LaoYIIfNhxbHR52barpQSRtgrBJCMAOR
-         X81A==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=R5BjuHDM7SvbwjX2Wy0yK9rZ3kvZqwci6rTlVHchQms=;
-        b=tyBa1miBFF29C+mNgxvCjqDy2NSWthqJiLoFidsMCHkujz4iJ14OY6Eg4Ks8YV3ZqD
-         h9gWnLdQXx2LWoXamO0HYhIyA32baes/r1bstrqgXx3Ms44gk2yT7hD2dU+UdfzoXnyd
-         Z0vlNnUEwzSkh5tEt1KGPcQ7FOY3WgHdli4tIXmXUKwzNVIaM47vxUsyFsgHXdu/5x3+
-         823aajc55v5TnXL6Xn+KdtLGn+oCSBfRMbt8+VpldEkSnuyUm3AX7wl8Ki0yktDlWNnV
-         hpEV8bDEvz0o8GouxXgIUV3ALkUDOlLPbO05NsE31rKpCDtzPdPfNienjXByfrFEgyV+
-         7g7Q==
-X-Gm-Message-State: AOAM5314fEhYmCU37Wi3PiefqbpNdWuVkQW/gPpGuC9Kr6L8Czr+k6JY
-        b9qzrCE3JItCguqAciIbrQYmd7AmgwRBQ14PoXiLcA==
-X-Google-Smtp-Source: ABdhPJxBYFpArr21ZuEa8iqd08YvBimLIpo2Sv9wNImWbaG78jmphcf8G/Cb+SRyEWPEqwFoz62WDpVw5zzTvOldd3w=
-X-Received: by 2002:a67:ca03:: with SMTP id z3mr31570079vsk.34.1594104923449;
- Mon, 06 Jul 2020 23:55:23 -0700 (PDT)
-MIME-Version: 1.0
-References: <20200701102317.235032-1-lee.jones@linaro.org>
-In-Reply-To: <20200701102317.235032-1-lee.jones@linaro.org>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 7 Jul 2020 08:54:47 +0200
-Message-ID: <CAPDyKFonM1AJro7UEY0V=OmGEhMEQHpx5zQM6aMvJidEXFiWpA@mail.gmail.com>
-Subject: Re: [PATCH 1/1] arch: arm: mach-omap2: mmc: Move omap_mmc_notify_cover_event()
- prototype
-To:     Lee Jones <lee.jones@linaro.org>
-Cc:     Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        id S1727038AbgGGHEY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 7 Jul 2020 03:04:24 -0400
+Received: from mail.kernel.org ([198.145.29.99]:48068 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726434AbgGGHEX (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 7 Jul 2020 03:04:23 -0400
+Received: from pali.im (pali.im [31.31.79.79])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id 1848A206E9;
+        Tue,  7 Jul 2020 07:04:23 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1594105463;
+        bh=WaxY9UuFUZMio8lU8uSW/II3c3cTj0kgxwgSUSl8afc=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=S1k2zwVpNaKH4TiNj92q+HbMhUCJ46KTdc6mR7tL9KvnCACDf9OFMbiumIypBMLi+
+         DdnPSn6Nke1slCBF2Q/V8HGDi9ZJvYzr68rG3lmDxoze/4pnKOHTRqDGvY71BOTYs6
+         QkRhnZQcV5Oqm4vv6ZY9PumhBfgk4YAFyTTEjYsU=
+Received: by pali.im (Postfix)
+        id E331DBF7; Tue,  7 Jul 2020 09:04:20 +0200 (CEST)
+Date:   Tue, 7 Jul 2020 09:04:20 +0200
+From:   Pali =?utf-8?B?Um9ow6Fy?= <pali@kernel.org>
+To:     BOUGH CHEN <haibo.chen@nxp.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        "stable@vger.kernel.org" <stable@vger.kernel.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
         "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Tony Lindgren <tony@atomide.com>,
-        linux-omap <linux-omap@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+        dl-linux-imx <linux-imx@nxp.com>,
+        Andy Duan <fugang.duan@nxp.com>,
+        Doug Anderson <dianders@chromium.org>,
+        "huyue2@yulong.com" <huyue2@yulong.com>,
+        Matthias Kaehlcke <mka@chromium.org>
+Subject: Re: [PATCH] mmc: sdio: fix clock rate setting for SDR12/SDR25 mode
+Message-ID: <20200707070420.yn3kunscp4om5iyz@pali>
+References: <1592813959-5914-1-git-send-email-haibo.chen@nxp.com>
+ <CAPDyKFphkPAgcOEd=j8EUoFyAz7Oj8DEXbgK=k7R15rizWWcTw@mail.gmail.com>
+ <VI1PR04MB5294D51A326E7B010D10DE1490660@VI1PR04MB5294.eurprd04.prod.outlook.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <VI1PR04MB5294D51A326E7B010D10DE1490660@VI1PR04MB5294.eurprd04.prod.outlook.com>
+User-Agent: NeoMutt/20180716
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 1 Jul 2020 at 12:23, Lee Jones <lee.jones@linaro.org> wrote:
->
-> When building the kernel with W=3D1 the build system complains of:
->
->  drivers/mmc/host/omap.c:854:6: warning: no previous prototype for =E2=80=
-=98omap_mmc_notify_cover_event=E2=80=99 [-Wmissing-prototypes]
->  854 | void omap_mmc_notify_cover_event(struct device *dev, int num, int =
-is_closed)
->  | ^~~~~~~~~~~~~~~~~~~~~~~~~~~
->
-> If we move the prototype into a shared headerfile the build system
-> will be satisfied.  Rather than create a whole new headerfile just
-> for this purpose, it makes sense to use the already existing
-> mmc-omap.h.
->
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: linux-mmc@vger.kernel.org
-> Cc: Tony Lindgren <tony@atomide.com>
-> Cc: linux-omap@vger.kernel.org
-> Signed-off-by: Lee Jones <lee.jones@linaro.org>
+On Tuesday 07 July 2020 01:48:18 BOUGH CHEN wrote:
+> > -----Original Message-----
+> > From: Ulf Hansson [mailto:ulf.hansson@linaro.org]
+> > Sent: 2020年7月6日 22:49
+> > To: BOUGH CHEN <haibo.chen@nxp.com>
+> > Cc: Adrian Hunter <adrian.hunter@intel.com>; linux-mmc@vger.kernel.org;
+> > Pali Rohár <pali@kernel.org>; dl-linux-imx <linux-imx@nxp.com>; Andy Duan
+> > <fugang.duan@nxp.com>; Doug Anderson <dianders@chromium.org>;
+> > huyue2@yulong.com; Matthias Kaehlcke <mka@chromium.org>
+> > Subject: Re: [PATCH] mmc: sdio: fix clock rate setting for SDR12/SDR25 mode
+> > 
+> > On Mon, 22 Jun 2020 at 10:30, <haibo.chen@nxp.com> wrote:
+> > >
+> > > From: Haibo Chen <haibo.chen@nxp.com>
+> > >
+> > > In current code logic, when work in SDR12/SDR25 mode, the final clock
+> > > rate is incorrect, just the legancy 400KHz, because the
+> > > card->sw_caps.sd3_bus_mode do not has the flag SD_MODE_UHS_SDR12 or
+> > > SD_MODE_UHS_SDR25. Besides, SDIO_SPEED_SDR12 is actually value 0, and
+> > > every mode need to config the timing and clock rate, so remove the
+> > > ‘if’ operator.
+> > >
+> > > Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
+> > 
+> > This looks like a rather serious error, should we tag this for stable?
+> 
+> Yes, need to do that.
+> 
+> Cc: <stable@vger.kernel.org>
 
-Applied for next, thanks!
+Hello! I think you can add Fixes line, e.g.:
 
-Kind regards
-Uffe
+Fixes: a303c5319c8e ("mmc: sdio: support SDIO UHS cards")
 
-
-> ---
->  arch/arm/mach-omap2/mmc.h              | 4 ----
->  include/linux/platform_data/mmc-omap.h | 3 +++
->  2 files changed, 3 insertions(+), 4 deletions(-)
->
-> diff --git a/arch/arm/mach-omap2/mmc.h b/arch/arm/mach-omap2/mmc.h
-> index 7f4e053c34344..b5533e93cb632 100644
-> --- a/arch/arm/mach-omap2/mmc.h
-> +++ b/arch/arm/mach-omap2/mmc.h
-> @@ -16,7 +16,3 @@ static inline int omap_msdi_reset(struct omap_hwmod *oh=
-)
->         return 0;
->  }
->  #endif
-> -
-> -/* called from board-specific card detection service routine */
-> -extern void omap_mmc_notify_cover_event(struct device *dev, int slot,
-> -                                       int is_closed);
-> diff --git a/include/linux/platform_data/mmc-omap.h b/include/linux/platf=
-orm_data/mmc-omap.h
-> index 9acf0e87aa9be..f0b8947e6b07d 100644
-> --- a/include/linux/platform_data/mmc-omap.h
-> +++ b/include/linux/platform_data/mmc-omap.h
-> @@ -116,3 +116,6 @@ struct omap_mmc_platform_data {
->
->         } slots[OMAP_MMC_MAX_SLOTS];
->  };
-> +
-> +extern void omap_mmc_notify_cover_event(struct device *dev, int slot,
-> +                                       int is_closed);
-> --
-> 2.25.1
->
+> Best Regards
+> Haibo Chen
+> > 
+> > In the meantime, I have applied this for next to get it tested, thanks!
+> > 
+> > Kind regards
+> > Uffe
+> > 
+> > 
+> > 
+> > > ---
+> > >  drivers/mmc/core/sdio.c | 15 ++++++++-------
+> > >  1 file changed, 8 insertions(+), 7 deletions(-)
+> > >
+> > > diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c index
+> > > 0e32ca7b9488..7b40553d3934 100644
+> > > --- a/drivers/mmc/core/sdio.c
+> > > +++ b/drivers/mmc/core/sdio.c
+> > > @@ -176,15 +176,18 @@ static int sdio_read_cccr(struct mmc_card *card,
+> > u32 ocr)
+> > >                         if (mmc_host_uhs(card->host)) {
+> > >                                 if (data & SDIO_UHS_DDR50)
+> > >
+> > card->sw_caps.sd3_bus_mode
+> > > -                                               |=
+> > SD_MODE_UHS_DDR50;
+> > > +                                               |=
+> > SD_MODE_UHS_DDR50 | SD_MODE_UHS_SDR50
+> > > +                                                       |
+> > > + SD_MODE_UHS_SDR25 | SD_MODE_UHS_SDR12;
+> > >
+> > >                                 if (data & SDIO_UHS_SDR50)
+> > >
+> > card->sw_caps.sd3_bus_mode
+> > > -                                               |=
+> > SD_MODE_UHS_SDR50;
+> > > +                                               |=
+> > SD_MODE_UHS_SDR50 | SD_MODE_UHS_SDR25
+> > > +                                                       |
+> > > + SD_MODE_UHS_SDR12;
+> > >
+> > >                                 if (data & SDIO_UHS_SDR104)
+> > >
+> > card->sw_caps.sd3_bus_mode
+> > > -                                               |=
+> > SD_MODE_UHS_SDR104;
+> > > +                                               |=
+> > SD_MODE_UHS_SDR104 | SD_MODE_UHS_SDR50
+> > > +                                                       |
+> > > + SD_MODE_UHS_SDR25 | SD_MODE_UHS_SDR12;
+> > >                         }
+> > >
+> > >                         ret = mmc_io_rw_direct(card, 0, 0, @@
+> > -537,10
+> > > +540,8 @@ static int sdio_set_bus_speed_mode(struct mmc_card *card)
+> > >         max_rate = min_not_zero(card->quirk_max_rate,
+> > >                                 card->sw_caps.uhs_max_dtr);
+> > >
+> > > -       if (bus_speed) {
+> > > -               mmc_set_timing(card->host, timing);
+> > > -               mmc_set_clock(card->host, max_rate);
+> > > -       }
+> > > +       mmc_set_timing(card->host, timing);
+> > > +       mmc_set_clock(card->host, max_rate);
+> > >
+> > >         return 0;
+> > >  }
+> > > --
+> > > 2.17.1
+> > >
