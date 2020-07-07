@@ -2,113 +2,114 @@ Return-Path: <SRS0=aSBx=AS=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E177EC433DF
-	for <linux-mmc@archiver.kernel.org>; Tue,  7 Jul 2020 07:15:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 281E2C433DF
+	for <linux-mmc@archiver.kernel.org>; Tue,  7 Jul 2020 07:16:07 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B8DDC20656
-	for <linux-mmc@archiver.kernel.org>; Tue,  7 Jul 2020 07:15:04 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0188F20720
+	for <linux-mmc@archiver.kernel.org>; Tue,  7 Jul 2020 07:16:07 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="pecCipcq"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="wcKWsYuJ"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726825AbgGGHPE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 7 Jul 2020 03:15:04 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41554 "EHLO
+        id S1726869AbgGGHQD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 7 Jul 2020 03:16:03 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41714 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726805AbgGGHPD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Jul 2020 03:15:03 -0400
-Received: from mail-vk1-xa44.google.com (mail-vk1-xa44.google.com [IPv6:2607:f8b0:4864:20::a44])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A2662C061755
-        for <linux-mmc@vger.kernel.org>; Tue,  7 Jul 2020 00:15:03 -0700 (PDT)
-Received: by mail-vk1-xa44.google.com with SMTP id h190so9181781vkh.6
-        for <linux-mmc@vger.kernel.org>; Tue, 07 Jul 2020 00:15:03 -0700 (PDT)
+        with ESMTP id S1726478AbgGGHQC (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Jul 2020 03:16:02 -0400
+Received: from mail-ua1-x942.google.com (mail-ua1-x942.google.com [IPv6:2607:f8b0:4864:20::942])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 93D48C08C5DB
+        for <linux-mmc@vger.kernel.org>; Tue,  7 Jul 2020 00:16:02 -0700 (PDT)
+Received: by mail-ua1-x942.google.com with SMTP id q15so12706143uap.4
+        for <linux-mmc@vger.kernel.org>; Tue, 07 Jul 2020 00:16:02 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=X8k4LhyngBUgsPkXSIuJNd4eGfzJ30YM0Kw4kJO46WE=;
-        b=pecCipcqBaIIXGxh5Rr/xZ6ORzkgD+l+9SY+gMkEc6lbYqVkTJBDq3ljKMB6TCZgqk
-         S1zchLwa/XnMRuon8zOcsoSwgZJuZzJgzU40afdO8UY2NlzCSSMirTBn4JfsxDtVKzud
-         qctjtjuCIHyq7ga7MoIo+N7vSNOAzMqbZ4FDd1EwGuqmpieCrc/WmfoX6mHaNLxC+B1y
-         WXS52VtxthnlE9AqIi83Yf1qypNhU02j5hLhmbvb6D/8E8jEn9EO6P3FdPop29iBMjQP
-         KutGedk7SnW9mTY5U4sAF5LFjkT/l4Xrnf6SFlN79i78nKbl2eEkOrWY6Xtb+Isv0yYi
-         Z8/w==
+        bh=wULRYb8hTQ3DSK0waXDTahHo3SLIrsIw0jdCnMxAKcA=;
+        b=wcKWsYuJHcCaZBBYXq+uak+cU00WVu2UgYkovzrsp2rvH7fV8jVNnFn0xBKxwAF2Ae
+         uWdnbQRiEK6JyTL9+FutmmrqTR3CC+lasw9LeA6aw0fQQSzkQYqjEbzn6cJbo7ptrWdQ
+         xGTIzf4ImUSRJoQMT+3OMQTx5AVpNVC3uq6QieRnLDtFAvv6iql5C1xW3TRRE9H5zW/1
+         TLCi3BH+Aafjz00IRsYJlvW5DyHGtm5u8uX9WfwWO32F8TishTYObMok5gWvtCg2XBjD
+         eVLL9QOY7EwPrs099vYX04X/yY7hsRooQcG8m+svdn/kyzzQ4IFCc/ThOlUtXtLlZUOu
+         8IYg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=X8k4LhyngBUgsPkXSIuJNd4eGfzJ30YM0Kw4kJO46WE=;
-        b=cyjHoJ1qm03hnZCX+zf9oBWtJQO8YMbfRebUK6BbEj8J+O/S8H4wuhShcmpNRlB60H
-         XQe1deaq7GXzVIWJMoyFqsgernUxKyLzF2h+FznwBnn4DEtHvmdgTXCMCFiB6lSkOmcN
-         sv8z22BRXI9RlQArE0OpSR0juoHyty4ndb3/iTfUuB91O6MeAY90p01mPVrEC2ArEyaZ
-         OA4XowNM9+1o9/0xt13r4RK0WCQ9TX2Fh1cAPT3ylf3spguDaInOBZ6dqqYpfBtjdJk3
-         O1tE6IEG9ioEohAdctH5Vdm+Wh7Enlz8VnPEGCvnJMN+k/dzfx1oa7sTypYcYmm03V7g
-         hPnQ==
-X-Gm-Message-State: AOAM5308j+C8v5Q93slD2MVn7ioqe9fS7wjU8QvFCosdgBqoJnk1SDU4
-        C+wvEtE8xvKkmJw03XaIn0Q5TgTg8Oqel6Lt0oQ4kA==
-X-Google-Smtp-Source: ABdhPJxFrlE2Uv74xRyyyUk+mw5La7mTCFu3zD2rSt5vaFFD0yO+bCWdFasa+MeEk+EtQdrsOgplZR6Z45JIskW0Zqw=
-X-Received: by 2002:a1f:3f0f:: with SMTP id m15mr37545331vka.53.1594106102886;
- Tue, 07 Jul 2020 00:15:02 -0700 (PDT)
+        bh=wULRYb8hTQ3DSK0waXDTahHo3SLIrsIw0jdCnMxAKcA=;
+        b=EduZEEdPVMNfoPMtotciRQQGtbichMm1OinOlmEr9VpGl0Q3Id1DxZpEi/gF7sTKFN
+         O/SDd97KijQct/1bAeVJ9h2sZkTsFiLwKEgsHAY/L6WBaVYROgbPoTAFMRFu17zt1lVL
+         sDsuO+xWk3lxiEkCz8+wyMIBTYhIrLQXeuKIKfXgHsT4vqpg5bmu/aq+5BPcrlYKvjqr
+         88Ss2E2ML6F8oWPCYPlRIzyUdEaJ6pCOI51KRLQltjvq+jprdrqNKcWoaoSKyvtRFOcd
+         tufrMWkNNXTkN85MAn4xIpbE3yCSn7QkMgxHadYfSsxAJlt9bYwIiO8RsvcKiJEnlnJR
+         PrIA==
+X-Gm-Message-State: AOAM533d38oCZCVEim2O/FXjpEuzbPqCGrgK5Re7vp1H4pBxXEUDc5+l
+        g3JqE8cJXQVczVNaI8v9oANprnExcOhxZwZObv+C+Q==
+X-Google-Smtp-Source: ABdhPJwMwTl3YpAgByVRV5/0CyJMIT9UexQ3ZB6gZc+BkUJfj4jbLurrY4uFc+j16UQ+IYEihjoOLDUK2mNhKiKB2zQ=
+X-Received: by 2002:a9f:22e1:: with SMTP id 88mr36772869uan.19.1594106161737;
+ Tue, 07 Jul 2020 00:16:01 -0700 (PDT)
 MIME-Version: 1.0
-References: <7768906b-7916-39be-08e9-0a5d0f6bf69e@microchip.com>
-In-Reply-To: <7768906b-7916-39be-08e9-0a5d0f6bf69e@microchip.com>
+References: <20200706163031.503431-1-colin.king@canonical.com>
+In-Reply-To: <20200706163031.503431-1-colin.king@canonical.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 7 Jul 2020 09:14:26 +0200
-Message-ID: <CAPDyKFqvkHL3x9ODYAC1GMmabftoTZ9Ykois4t5RmnFfuKVfDA@mail.gmail.com>
-Subject: Re: Clock selection before switching mode for eMMCs
-To:     Eugen Hristev <Eugen.Hristev@microchip.com>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>
+Date:   Tue, 7 Jul 2020 09:15:25 +0200
+Message-ID: <CAPDyKFqtcw+zccgR4LOPqYAs3dQ02Hu7SmpNq7aNgOs23dzJ5g@mail.gmail.com>
+Subject: Re: [PATCH] mmc: dw_mmc-exynos: remove redundant initialization of
+ variable 'found'
+To:     Colin King <colin.king@canonical.com>
+Cc:     Jaehoon Chung <jh80.chung@samsung.com>,
+        Kukjin Kim <kgene@kernel.org>,
+        Krzysztof Kozlowski <krzk@kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        linux-samsung-soc <linux-samsung-soc@vger.kernel.org>,
+        kernel-janitors@vger.kernel.org,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 26 Jun 2020 at 18:00, <Eugen.Hristev@microchip.com> wrote:
+On Mon, 6 Jul 2020 at 18:30, Colin King <colin.king@canonical.com> wrote:
 >
-> Hello Ulf, Adrian, and anyone interested,
+> From: Colin Ian King <colin.king@canonical.com>
 >
-> On our AT91 products we have an SD/MMC block with an included DLL that
-> does not lock if the SD clock is not configured depending on speed
-> modes, like high speed requires 25 Mhz, HS200 requires 100 Mhz, etc.
+> The variable 'found' is being initialized with a value that is never read
+> and it is being updated later with a new value.  The initialization is
+> redundant and can be removed.
 >
-> All the spec and the code configures everything at 400 kHz and then
-> moves to high speed, etc. and in the end , the clock is raised.
-> While this is perfectly fine, on our block we need to raise the clock
-> first and change the speed mode after.
->
-> Namely, in the function mmc_select_timing , if we call first
-> mmc_set_bus_speed then our DLL will lock correctly when selecting the
-> mode. If we select the mode first, our clock is stuck.
->
-> My question is actually how (if possible)  we could do a quirk in the
-> mmc such that our block will work correctly.
-> So I would need a little guidance about where to place such quirk, if it
-> would be accepted or not, and we are forced to be incompatible with the
-> linux-mmc sdhci .
->
-> I have seen some patches for something similar a few years ago [1] on
-> the ML, but they were left floating in the end, so that is why I am
-> asking, which would be the proper way to do this.
+> Addresses-Coverity: ("Unused value")
+> Signed-off-by: Colin Ian King <colin.king@canonical.com>
 
-I would prefer if this is addressed in the host driver. Typically in
-the host's ->set_ios() callback, before you update the clock according
-to ios->clock, you can check the ios->timing value. If the conditions
-don't allow to update the clock, just defer it to next time when the
-->set_ios() callback is being called, likely having the "correct"
-ios->timing.
-
-Would that work?
-
->
-> Thanks !
-> Eugen
->
-> [1] https://patchwork.kernel.org/patch/7127441/
+Applied for next, thanks!
 
 Kind regards
 Uffe
+
+
+> ---
+>  drivers/mmc/host/dw_mmc-exynos.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
+> index 5e3d95b63676..99b900008a03 100644
+> --- a/drivers/mmc/host/dw_mmc-exynos.c
+> +++ b/drivers/mmc/host/dw_mmc-exynos.c
+> @@ -472,7 +472,7 @@ static int dw_mci_exynos_execute_tuning(struct dw_mci_slot *slot, u32 opcode)
+>         struct dw_mci_exynos_priv_data *priv = host->priv;
+>         struct mmc_host *mmc = slot->mmc;
+>         u8 start_smpl, smpl, candiates = 0;
+> -       s8 found = -1;
+> +       s8 found;
+>         int ret = 0;
+>
+>         start_smpl = dw_mci_exynos_get_clksmpl(host);
+> --
+> 2.27.0
+>
