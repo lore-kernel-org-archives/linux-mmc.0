@@ -2,97 +2,124 @@ Return-Path: <SRS0=AGpe=AT=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=no
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-7.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E145BC433DF
-	for <linux-mmc@archiver.kernel.org>; Wed,  8 Jul 2020 17:49:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 37C66C433DF
+	for <linux-mmc@archiver.kernel.org>; Wed,  8 Jul 2020 17:53:39 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C7075206E9
-	for <linux-mmc@archiver.kernel.org>; Wed,  8 Jul 2020 17:49:32 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1D14C20786
+	for <linux-mmc@archiver.kernel.org>; Wed,  8 Jul 2020 17:53:39 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1594230819;
+	bh=ZXTVrAxt2BMAWE6jdwxSDmOlWWlY67skJb6anAFgFQs=;
+	h=Date:From:To:Cc:Subject:In-Reply-To:References:List-ID:From;
+	b=JqrF5HsH7IIySfHoae+CnnJTKjIr+jIx6RkbboRFE/w3whIjcNmFP4rWtTvFWLB5c
+	 BNbk2nUSZU/rNShtotqZK4oMSl/yQhSmGtnO63VRh/jM2zkqTQCei4qZpebd90M3Zg
+	 fukQPKafWqrP7fackcqastbkgJV7dZCk4qvQfF+0=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726648AbgGHRsj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 8 Jul 2020 13:48:39 -0400
-Received: from relmlor1.renesas.com ([210.160.252.171]:48841 "EHLO
-        relmlie5.idc.renesas.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1725953AbgGHRsj (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Jul 2020 13:48:39 -0400
-X-IronPort-AV: E=Sophos;i="5.75,328,1589209200"; 
-   d="scan'208";a="51641764"
-Received: from unknown (HELO relmlir5.idc.renesas.com) ([10.200.68.151])
-  by relmlie5.idc.renesas.com with ESMTP; 09 Jul 2020 02:48:36 +0900
-Received: from localhost.localdomain (unknown [10.226.36.204])
-        by relmlir5.idc.renesas.com (Postfix) with ESMTP id E89474005E3D;
-        Thu,  9 Jul 2020 02:48:32 +0900 (JST)
-From:   Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-To:     Geert Uytterhoeven <geert+renesas@glider.be>,
+        id S1726145AbgGHRxi (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 8 Jul 2020 13:53:38 -0400
+Received: from mail.kernel.org ([198.145.29.99]:57882 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726100AbgGHRxi (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 8 Jul 2020 13:53:38 -0400
+Received: from disco-boy.misterjones.org (disco-boy.misterjones.org [51.254.78.96])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id 62219206E9;
+        Wed,  8 Jul 2020 17:53:37 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1594230817;
+        bh=ZXTVrAxt2BMAWE6jdwxSDmOlWWlY67skJb6anAFgFQs=;
+        h=Date:From:To:Cc:Subject:In-Reply-To:References:From;
+        b=SK/e44KLdRfJM29yIStfOo7N8ICd0pwunnsQJIXgfumzLPch2QwpB2QHz9mBmw2xn
+         6xaAol7QCiZYkv8cMVtkv3AsX4AHhZXZhy14C5eY2zM1ED/InYBzdqvDoUcJCJKwie
+         ffhJ3RezTrRyIf6y1p8ootCJOKI+f62QSz63DCGQ=
+Received: from disco-boy.misterjones.org ([51.254.78.96] helo=www.loen.fr)
+        by disco-boy.misterjones.org with esmtpsa (TLS1.2:ECDHE_RSA_AES_128_GCM_SHA256:128)
+        (Exim 4.92)
+        (envelope-from <maz@kernel.org>)
+        id 1jtEGF-00AAKr-Te; Wed, 08 Jul 2020 18:53:36 +0100
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII;
+ format=flowed
+Content-Transfer-Encoding: 7bit
+Date:   Wed, 08 Jul 2020 18:53:35 +0100
+From:   Marc Zyngier <maz@kernel.org>
+To:     Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+Cc:     Geert Uytterhoeven <geert+renesas@glider.be>,
         Magnus Damm <magnus.damm@gmail.com>,
         Rob Herring <robh+dt@kernel.org>,
         Thomas Gleixner <tglx@linutronix.de>,
         Jason Cooper <jason@lakedaemon.net>,
-        Marc Zyngier <maz@kernel.org>,
         Ulf Hansson <ulf.hansson@linaro.org>,
         Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
         Catalin Marinas <catalin.marinas@arm.com>,
-        Will Deacon <will@kernel.org>
-Cc:     linux-renesas-soc@vger.kernel.org, devicetree@vger.kernel.org,
+        Will Deacon <will@kernel.org>,
+        linux-renesas-soc@vger.kernel.org, devicetree@vger.kernel.org,
         linux-mmc@vger.kernel.org, linux-serial@vger.kernel.org,
         linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-        Prabhakar <prabhakar.csengg@gmail.com>,
-        Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-Subject: [PATCH 0/8] Add basic DT support for R8A774E1 SoC enabling HiHope RZ/G2H board
-Date:   Wed,  8 Jul 2020 18:48:23 +0100
-Message-Id: <1594230511-24790-1-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
-X-Mailer: git-send-email 2.7.4
+        Prabhakar <prabhakar.csengg@gmail.com>
+Subject: Re: [PATCH 6/8] arm64: dts: renesas: Initial r8a774e1 SoC device tree
+In-Reply-To: <1594230511-24790-7-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
+References: <1594230511-24790-1-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
+ <1594230511-24790-7-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
+User-Agent: Roundcube Webmail/1.4.5
+Message-ID: <daf83dafc069b12b6a10205e5f93793a@kernel.org>
+X-Sender: maz@kernel.org
+X-SA-Exim-Connect-IP: 51.254.78.96
+X-SA-Exim-Rcpt-To: prabhakar.mahadev-lad.rj@bp.renesas.com, geert+renesas@glider.be, magnus.damm@gmail.com, robh+dt@kernel.org, tglx@linutronix.de, jason@lakedaemon.net, ulf.hansson@linaro.org, gregkh@linuxfoundation.org, catalin.marinas@arm.com, will@kernel.org, linux-renesas-soc@vger.kernel.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-serial@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, prabhakar.csengg@gmail.com
+X-SA-Exim-Mail-From: maz@kernel.org
+X-SA-Exim-Scanned: No (on disco-boy.misterjones.org); SAEximRunCond expanded to false
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi All,
+On 2020-07-08 18:48, Lad Prabhakar wrote:
+> From: Marian-Cristian Rotariu 
+> <marian-cristian.rotariu.rb@bp.renesas.com>
+> 
+> Basic support for the RZ/G2H SoC.
+> 
+> Signed-off-by: Marian-Cristian Rotariu
+> <marian-cristian.rotariu.rb@bp.renesas.com>
+> Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+> ---
+>  arch/arm64/boot/dts/renesas/r8a774e1.dtsi | 652 ++++++++++++++++++++++
+>  1 file changed, 652 insertions(+)
+>  create mode 100644 arch/arm64/boot/dts/renesas/r8a774e1.dtsi
+> 
+> diff --git a/arch/arm64/boot/dts/renesas/r8a774e1.dtsi
+> b/arch/arm64/boot/dts/renesas/r8a774e1.dtsi
+> new file mode 100644
+> index 000000000000..6637e157ffcd
+> --- /dev/null
+> +++ b/arch/arm64/boot/dts/renesas/r8a774e1.dtsi
 
-This patch series adds basic SOC DT support for RZ/G2H and enabling
-HiHope RZ/G2H board. With these minimalist DT the HiHope RZ/G2H
-board can be booted from initramfs/eMMC.
+[...]
+> +		gic: interrupt-controller@f1010000 {
+> +			compatible = "arm,gic-400";
+> +			#interrupt-cells = <3>;
+> +			#address-cells = <0>;
+> +			interrupt-controller;
+> +			reg = <0x0 0xf1010000 0 0x1000>,
+> +			      <0x0 0xf1020000 0 0x20000>,
+> +			      <0x0 0xf1040000 0 0x20000>,
+> +			      <0x0 0xf1060000 0 0x20000>;
+> +			interrupts = <GIC_PPI 9
+> +					(GIC_CPU_MASK_SIMPLE(2) | IRQ_TYPE_LEVEL_HIGH)>;
 
-This patch series is dependent [1].
+You seem to have a bit more than only 2 CPUs in this system.
 
-[1] https://patchwork.kernel.org/project/linux-renesas-soc/list/?series=314235
+> +			clocks = <&cpg CPG_MOD 408>;
+> +			clock-names = "clk";
+> +			power-domains = <&sysc R8A774E1_PD_ALWAYS_ON>;
+> +			resets = <&cpg 408>;
+> +		};
 
-Cheers,
-Prabhakar
-
-
-Lad Prabhakar (3):
-  dt-bindings: serial: renesas,scif: Document r8a774e1 bindings
-  dt-bindings: serial: renesas,hscif: Document r8a774e1 bindings
-  dt-bindings: mmc: renesas,sdhi: Add r8a774e1 support
-
-Marian-Cristian Rotariu (5):
-  dt-bindings: irqchip: renesas-irqc: Document r8a774e1 bindings
-  arm64: defconfig: Enable R8A774E1 SoC
-  arm64: dts: renesas: Initial r8a774e1 SoC device tree
-  arm64: dts: renesas: Add HiHope RZ/G2H main board support
-  arm64: dts: renesas: Add HiHope RZ/G2H sub board support
-
- .../interrupt-controller/renesas,irqc.yaml    |   1 +
- .../devicetree/bindings/mmc/renesas,sdhi.txt  |   1 +
- .../bindings/serial/renesas,hscif.yaml        |   1 +
- .../bindings/serial/renesas,scif.yaml         |   1 +
- arch/arm64/boot/dts/renesas/Makefile          |   2 +
- .../arm64/boot/dts/renesas/hihope-common.dtsi |   4 +-
- arch/arm64/boot/dts/renesas/hihope-rev4.dtsi  |   4 +-
- .../boot/dts/renesas/hihope-rzg2-ex.dtsi      |   2 +-
- .../dts/renesas/r8a774e1-hihope-rzg2h-ex.dts  |  15 +
- .../dts/renesas/r8a774e1-hihope-rzg2h.dts     |  26 +
- arch/arm64/boot/dts/renesas/r8a774e1.dtsi     | 652 ++++++++++++++++++
- arch/arm64/configs/defconfig                  |   1 +
- 12 files changed, 705 insertions(+), 5 deletions(-)
- create mode 100644 arch/arm64/boot/dts/renesas/r8a774e1-hihope-rzg2h-ex.dts
- create mode 100644 arch/arm64/boot/dts/renesas/r8a774e1-hihope-rzg2h.dts
- create mode 100644 arch/arm64/boot/dts/renesas/r8a774e1.dtsi
-
+         M.
 -- 
-2.17.1
-
+Jazz is not dead. It just smells funny...
