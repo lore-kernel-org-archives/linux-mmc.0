@@ -2,148 +2,97 @@ Return-Path: <SRS0=hS93=AV=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 87FD4C433DF
-	for <linux-mmc@archiver.kernel.org>; Fri, 10 Jul 2020 00:52:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8DF32C433E0
+	for <linux-mmc@archiver.kernel.org>; Fri, 10 Jul 2020 01:14:25 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 68D4320775
-	for <linux-mmc@archiver.kernel.org>; Fri, 10 Jul 2020 00:52:37 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6D6052073A
+	for <linux-mmc@archiver.kernel.org>; Fri, 10 Jul 2020 01:14:25 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="BFP8tF2H"
+	dkim=pass (2048-bit key) header.d=aj.id.au header.i=@aj.id.au header.b="nbX6FxWq";
+	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="Yitk5wyJ"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726272AbgGJAwg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 9 Jul 2020 20:52:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59262 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726496AbgGJAwg (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Jul 2020 20:52:36 -0400
-Received: from mail-pg1-x542.google.com (mail-pg1-x542.google.com [IPv6:2607:f8b0:4864:20::542])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4BC16C08C5DD
-        for <linux-mmc@vger.kernel.org>; Thu,  9 Jul 2020 17:52:36 -0700 (PDT)
-Received: by mail-pg1-x542.google.com with SMTP id o13so1756805pgf.0
-        for <linux-mmc@vger.kernel.org>; Thu, 09 Jul 2020 17:52:36 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=chromium.org; s=google;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=8yPHrCXyBLOpR6zGRIWiDtKHwiJWpvvhg1ayG2n9fc8=;
-        b=BFP8tF2HhYiKA/qyJjHegpvIsVSUuEje6azN5GY0R3L8WUoBLc3wHtzR+46I4fEuPk
-         XfiUAO8rReB0liW6wBmI3p2UY8xt/niNaytXTXJB+c3gWeaM5uKjATHL5zaongbYrilm
-         Ztasc8EgPA+Q1kqS5vkNpKLsqai7o8NQCrLkI=
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=8yPHrCXyBLOpR6zGRIWiDtKHwiJWpvvhg1ayG2n9fc8=;
-        b=I4BkT5P5w9JevDcknrcfmPB+paAD7/ulPGetImGG+E/yjNAUL6ablN28ErqxeEPzGv
-         6bilu0rhbfF+dbULD1nBrJsBuWyLh2/F7sNSnmgJhAyHrVMLrs9hUpH+l/zEeWRS3H2I
-         ufyJVBuZntuOuVbh+LN0nch7kmhILz3mgBS0AIHmpgnI/aUzqjm60aUpo+ZROcd/uL7d
-         Jjdd35wqiVqZkUKn6L5jePNBu03pFs8NaxUp105eu8G+cwRUNpHRz6eYdM5DRuLJn9FG
-         SGfhTuDONPxNXUXtOmsCLKLaqxLJnV1tni6EscYBId2KgojJdtaOtIuop4Ho7cUlWoxH
-         1Z5g==
-X-Gm-Message-State: AOAM533+zXiTthqOyRLGS2+OhZPlnDZhdaTu03A1qiDLhidn0IpRKv+a
-        ZmcbBo+afWaPU+REf8XzA5I5sg==
-X-Google-Smtp-Source: ABdhPJwcYWeG5bs4YVaoD0/XoNI2VB/2PQjL7qAGKEGMFaiXaUld/StQmsEVPMcCxV9DXDcYFi7yBw==
-X-Received: by 2002:a62:1716:: with SMTP id 22mr56845258pfx.99.1594342355674;
-        Thu, 09 Jul 2020 17:52:35 -0700 (PDT)
-Received: from localhost ([2620:15c:202:1:f693:9fff:fef4:e70a])
-        by smtp.gmail.com with ESMTPSA id v28sm3992962pgn.81.2020.07.09.17.52.34
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 09 Jul 2020 17:52:34 -0700 (PDT)
-Date:   Thu, 9 Jul 2020 17:52:33 -0700
-From:   Matthias Kaehlcke <mka@chromium.org>
-To:     Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
-Cc:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
-        bjorn.andersson@linaro.org, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        Andy Gross <agross@kernel.org>
-Subject: Re: [PATCH V1] mmc: sdhci-msm: Set IO pins in low power state during
- suspend
-Message-ID: <20200710005233.GN3191083@google.com>
-References: <1594213888-2780-1-git-send-email-vbadigan@codeaurora.org>
- <1594213888-2780-2-git-send-email-vbadigan@codeaurora.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <1594213888-2780-2-git-send-email-vbadigan@codeaurora.org>
+        id S1726867AbgGJBOY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 9 Jul 2020 21:14:24 -0400
+Received: from wout2-smtp.messagingengine.com ([64.147.123.25]:53103 "EHLO
+        wout2-smtp.messagingengine.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726311AbgGJBOX (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Jul 2020 21:14:23 -0400
+Received: from compute3.internal (compute3.nyi.internal [10.202.2.43])
+        by mailout.west.internal (Postfix) with ESMTP id 4DCFA2E3;
+        Thu,  9 Jul 2020 21:14:22 -0400 (EDT)
+Received: from imap2 ([10.202.2.52])
+  by compute3.internal (MEProxy); Thu, 09 Jul 2020 21:14:22 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=aj.id.au; h=
+        mime-version:message-id:in-reply-to:references:date:from:to:cc
+        :subject:content-type; s=fm3; bh=yw9HbxmYVrUStuFGG15xWYmuHOEp4mb
+        rjs7zPres9Ds=; b=nbX6FxWqm7xH1s8bcJ6VKQgvibPNZwzXHk8GeKQam5IJfH3
+        ES5IjDIFHNeB39MXXAKRPDPz3xXczt133heBRVoonQ/A4Due0kGY3Kqj7nejT/1T
+        DmzSz8LOSNuN0LKxdpUoMzLfH8pfXL+3TFTM/YJ+wcQnMtWWsYPtLkbvh9g16Qz6
+        579Zce5dihAC1CZDT2QuEHrdRUSLHp+QI4G8fxfrZvBkuI29vLbDHmrFtL2GFZlX
+        q4QscgnDOSJUifKAGnxNyUTKD/4r4UctcEc+/A9ul+lI6Zwv9WBJfTUL9zIwDxSW
+        rr81A6x1Y4MQhge32sC+Y4vwaXBVkCUxsZIAENQ==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+        messagingengine.com; h=cc:content-type:date:from:in-reply-to
+        :message-id:mime-version:references:subject:to:x-me-proxy
+        :x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=fm3; bh=yw9Hbx
+        mYVrUStuFGG15xWYmuHOEp4mbrjs7zPres9Ds=; b=Yitk5wyJCWnlKpxOnjf389
+        XMJK0dnGDNDYEBOF7FQ7ScdS7N5jhUxjE0FNoB9V7iTsUbIPlCgBfrkO5duA/s0O
+        /WMeCuYTKM2nYBoQQfxRxjv7y7nEUc2ED/vVbbzT/I0iYNsIiNGSij5DcmIa1kJz
+        6frLO+jGYiSUvpHZi/Omqv1OuabKj1raUQNk6txvr/OMZsngpRHQrskjMK8HYgGg
+        G1evBDieb24xQo1Fs7HaiLIuElFEoQx2hAEcw4MdUUYb8Q7sdcUr74LPy/3mkJKq
+        xxB7oPOR6A5TNV2fFRJR574O4aIW8seyhqRUAG9Anflu3VpFux+AkX345gvxXbTg
+        ==
+X-ME-Sender: <xms:7MAHX3p7Xk6KCv6dP_qJlFhK4jUdkn9BhUN_nSgBL7ccOVNkPRsnFw>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeduiedrvddtgdegfecutefuodetggdotefrodftvf
+    curfhrohhfihhlvgemucfhrghsthforghilhdpqfgfvfdpuffrtefokffrpgfnqfghnecu
+    uegrihhlohhuthemuceftddtnecusecvtfgvtghiphhivghnthhsucdlqddutddtmdenuc
+    fjughrpefofgggkfgjfhffhffvufgtsehttdertderredtnecuhfhrohhmpedftehnughr
+    vgifucflvghffhgvrhihfdcuoegrnhgurhgvfiesrghjrdhiugdrrghuqeenucggtffrrg
+    htthgvrhhnpeehhfefkefgkeduveehffehieehudejfeejveejfedugfefuedtuedvhefh
+    veeuffenucevlhhushhtvghrufhiiigvpedtnecurfgrrhgrmhepmhgrihhlfhhrohhmpe
+    grnhgurhgvfiesrghjrdhiugdrrghu
+X-ME-Proxy: <xmx:7MAHXxpLmClJpfh_ZhbV5ne9AjsSlX2WZQDxmmsookPsNe_j6S1Zaw>
+    <xmx:7MAHX0OuqUgry6xIxGDFQp_Xpm-jHqy1Bb4aUbpM9b-NnkjXaCHgmA>
+    <xmx:7MAHX67Qdmft9mSv_RLQ9YBr_ADv2Ys1pK-UP8ZONFDTcK2akC9Rog>
+    <xmx:7cAHXzuzqQHp5TtKVCGo7e6MnlF71RaqakwCZqFV7Jo0ATosZlopyw>
+Received: by mailuser.nyi.internal (Postfix, from userid 501)
+        id 77FD0E00AA; Thu,  9 Jul 2020 21:14:20 -0400 (EDT)
+X-Mailer: MessagingEngine.com Webmail Interface
+User-Agent: Cyrus-JMAP/3.3.0-dev0-613-g8a73ad6-fm-20200709.001-g8a73ad6e
+Mime-Version: 1.0
+Message-Id: <4acad452-33c7-4fb2-ba90-19a824558b94@www.fastmail.com>
+In-Reply-To: <20200709195706.12741-3-eajames@linux.ibm.com>
+References: <20200709195706.12741-1-eajames@linux.ibm.com>
+ <20200709195706.12741-3-eajames@linux.ibm.com>
+Date:   Fri, 10 Jul 2020 10:43:59 +0930
+From:   "Andrew Jeffery" <andrew@aj.id.au>
+To:     "Eddie James" <eajames@linux.ibm.com>, linux-clk@vger.kernel.org
+Cc:     linux-kernel@vger.kernel.org, linux-aspeed@lists.ozlabs.org,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        "Joel Stanley" <joel@jms.id.au>,
+        "Ulf Hansson" <ulf.hansson@linaro.org>,
+        "Adrian Hunter" <adrian.hunter@intel.com>,
+        "Stephen Boyd" <sboyd@kernel.org>,
+        "Michael Turquette" <mturquette@baylibre.com>
+Subject: Re: [PATCH 2/2] mmc: sdhci-of-aspeed: Fix clock divider calculation
+Content-Type: text/plain
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi,
 
-On Wed, Jul 08, 2020 at 06:41:20PM +0530, Veerabhadrarao Badiganti wrote:
-> Configure SDHC IO pins with low power configuration when the driver
-> is in suspend state.
+
+On Fri, 10 Jul 2020, at 05:27, Eddie James wrote:
+> When calculating the clock divider, start dividing at 2 instead of 1.
+> The divider is divided by two at the end of the calculation, so starting
+> at 1 may result in a divider of 0, which shouldn't happen.
 > 
-> Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
-> ---
->  drivers/mmc/host/sdhci-msm.c | 17 +++++++++++++++++
->  1 file changed, 17 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> index 392d41d57a6e..efd2bae1430c 100644
-> --- a/drivers/mmc/host/sdhci-msm.c
-> +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -15,6 +15,7 @@
->  #include <linux/iopoll.h>
->  #include <linux/regulator/consumer.h>
->  #include <linux/interconnect.h>
-> +#include <linux/pinctrl/consumer.h>
->  
->  #include "sdhci-pltfm.h"
->  #include "cqhci.h"
-> @@ -1352,6 +1353,19 @@ static void sdhci_msm_set_uhs_signaling(struct sdhci_host *host,
->  		sdhci_msm_hs400(host, &mmc->ios);
->  }
->  
-> +static int sdhci_msm_set_pincfg(struct sdhci_msm_host *msm_host, bool level)
-> +{
-> +	struct platform_device *pdev = msm_host->pdev;
-> +	int ret;
-> +
-> +	if (level)
-> +		ret = pinctrl_pm_select_default_state(&pdev->dev);
-> +	else
-> +		ret = pinctrl_pm_select_sleep_state(&pdev->dev);
-> +
-> +	return ret;
-> +}
-> +
->  static int sdhci_msm_set_vmmc(struct mmc_host *mmc)
->  {
->  	if (IS_ERR(mmc->supply.vmmc))
-> @@ -1596,6 +1610,9 @@ static void sdhci_msm_handle_pwr_irq(struct sdhci_host *host, int irq)
->  			ret = sdhci_msm_set_vqmmc(msm_host, mmc,
->  					pwr_state & REQ_BUS_ON);
->  		if (!ret)
-> +			ret = sdhci_msm_set_pincfg(msm_host,
-> +					pwr_state & REQ_BUS_ON);
-> +		if (!ret)
->  			irq_ack |= CORE_PWRCTL_BUS_SUCCESS;
->  		else
->  			irq_ack |= CORE_PWRCTL_BUS_FAIL;
+> Signed-off-by: Eddie James <eajames@linux.ibm.com>
 
-I happened to have a debug patch in my tree which logs when regulators
-are enabled/disabled, with this patch I see the SD card regulator
-toggling constantly after returning from the first system suspend.
-
-I added more logs:
-
-[ 1156.085819] DBG: sdhci_msm_set_pincfg: level = 0 (ret: 0)
-[ 1156.248936] DBG: sdhci_msm_set_pincfg: level = 1 (ret: 0)
-[ 1156.301989] DBG: sdhci_msm_set_pincfg: level = 0 (ret: 0)
-[ 1156.462383] DBG: sdhci_msm_set_pincfg: level = 1 (ret: 0)
-[ 1156.525988] DBG: sdhci_msm_set_pincfg: level = 0 (ret: 0)
-[ 1156.670372] DBG: sdhci_msm_set_pincfg: level = 1 (ret: 0)
-[ 1156.717935] DBG: sdhci_msm_set_pincfg: level = 0 (ret: 0)
-[ 1156.878122] DBG: sdhci_msm_set_pincfg: level = 1 (ret: 0)
-[ 1156.928134] DBG: sdhci_msm_set_pincfg: level = 0 (ret: 0)
-
-This is on an SC7180 platform. It doesn't run an upstream kernel though,
-but v5.4 with plenty of upstream patches.
+Reviewed-by: Andrew Jeffery <andrew@aj.id.au>
