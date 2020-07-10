@@ -2,110 +2,116 @@ Return-Path: <SRS0=hS93=AV=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-13.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PULL_REQUEST,
+	MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E930AC433E1
-	for <linux-mmc@archiver.kernel.org>; Fri, 10 Jul 2020 07:40:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B8862C433DF
+	for <linux-mmc@archiver.kernel.org>; Fri, 10 Jul 2020 07:52:39 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C743A206A5
-	for <linux-mmc@archiver.kernel.org>; Fri, 10 Jul 2020 07:40:08 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 914542078D
+	for <linux-mmc@archiver.kernel.org>; Fri, 10 Jul 2020 07:52:39 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="S0F2RZ5t"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Kf35N59M"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726615AbgGJHkI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 10 Jul 2020 03:40:08 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36968 "EHLO
+        id S1726288AbgGJHwj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 10 Jul 2020 03:52:39 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38876 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726509AbgGJHkH (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Jul 2020 03:40:07 -0400
-Received: from mail-vk1-xa44.google.com (mail-vk1-xa44.google.com [IPv6:2607:f8b0:4864:20::a44])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 536D2C08C5DD
-        for <linux-mmc@vger.kernel.org>; Fri, 10 Jul 2020 00:40:07 -0700 (PDT)
-Received: by mail-vk1-xa44.google.com with SMTP id v26so1033571vkn.2
-        for <linux-mmc@vger.kernel.org>; Fri, 10 Jul 2020 00:40:07 -0700 (PDT)
+        with ESMTP id S1725802AbgGJHwi (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Jul 2020 03:52:38 -0400
+Received: from mail-lj1-x241.google.com (mail-lj1-x241.google.com [IPv6:2a00:1450:4864:20::241])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CF617C08C5CE
+        for <linux-mmc@vger.kernel.org>; Fri, 10 Jul 2020 00:52:37 -0700 (PDT)
+Received: by mail-lj1-x241.google.com with SMTP id z24so5359798ljn.8
+        for <linux-mmc@vger.kernel.org>; Fri, 10 Jul 2020 00:52:37 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=HbS7NrT88QQtzei4LIhV4jR15fEzmmczH+EWwTkx0Gc=;
-        b=S0F2RZ5t6lwxkw0gw10S2nKQUqUR0kxq+ZFgzWnIqbArWFmnoTIFp2hoE/n9I7TMky
-         UYZxYZK76jZwCpPuHolcsFVyPUMHA/+MlyQc3nc9K49PXc1HHJRP2te9zTe7Qx9ZOYXq
-         JYZ5feuoHQe7fDKQWVsCTR6dfMeyB+3XY1zkE4ZO72ud1Amar4cIJdogSEFH61EhsRhS
-         jUAPqyFz2z0LpzxYyhj+RqU8Luqkw8U373G+XHNw+qKcPlIynK/QTWK3Leeuyfx9nirz
-         LsOQU4T9vHmstut2VpQ7BIlLmnsDqTQWC2SnM/4ThTrMvOkcceh/YR6rpBwyTAT5DSlu
-         xetQ==
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=+oFIrmZGV+ZEuN3a4UzFRY4jDqpbgwIVGMqqY/aPagw=;
+        b=Kf35N59M9qiHElyqYUKFB+j6ySnjXJey2z9LT5MipIrL6XBCtUfYeNKYQfO5Maukte
+         VWc9VzwDDDJLSwgx48gy0dwBvAA9dEx/MstTHNASWFjMKtfgVmg7xqipD3DkAhzNCYZp
+         qw1CIj7mQWwCBLe0FI8xBrkXDbVw7tHhRFDm2GAj4ap/2L2M/ee5nXQ1llWmWEINzlVE
+         mDvrgVQn/ckEpSKxumS7CI1bfyiNa0jwf7/DwudEdtmrrT7ituMyalLelmH5wPp/GEMf
+         fUi20hvfC5kjxVUz41Nua9nRU+RGlWJnHaNdalpHPotlRuSFCH0Fd0NG6eOQlg3ytPtI
+         Ra6A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=HbS7NrT88QQtzei4LIhV4jR15fEzmmczH+EWwTkx0Gc=;
-        b=oyRWZbwVVNhzGEBoyF0C1y1B0XlXi9YZiEpsXxwBHFiteQBOnTx6k2gfe8uv8SsFbM
-         Hvp/Ylpcm9odWWOTBkcSMXIQJtqj5JT59H1NjFilv3qMLlkmphYOPs3lAueRo6Op+2rb
-         gKMMOdT4LY4RMZOB6HedeY+kdjaQ0TeiGO3bhqJRFFDhILQnrsOwnpES7Ufudd6aC/Qe
-         jUfmgr8vcYLaI9SXfoO5nCUUrP9HkG4rROzi6+Y9yqQc0hq8/JaIERcFD9BkH+W3Z5x3
-         BIHyUvGM0dKo4oxpystJRc/tMhdp2EfOyJypRT3oD+CKaU2miDwxst7CIbJqRSrlybbV
-         XySg==
-X-Gm-Message-State: AOAM530d4sph993jYtPpavyMLLl7XMsc2F3BY42/i1r2hoDIguFm4DXg
-        K/6/tlfK53yvJLUyZZfMdMj/o1+KaP12pw6raumRxA==
-X-Google-Smtp-Source: ABdhPJyxAUZLBoe1qaidLdrmiJXsBccoWfh2LWUPQHC4jzlNh6ot1/AAIwVeQsFJQhWrdqZv9UO9vOxkLYbd7WLwQd4=
-X-Received: by 2002:a1f:3f0f:: with SMTP id m15mr49715254vka.53.1594366806470;
- Fri, 10 Jul 2020 00:40:06 -0700 (PDT)
-MIME-Version: 1.0
-References: <20200709195706.12741-1-eajames@linux.ibm.com> <20200709195706.12741-3-eajames@linux.ibm.com>
-In-Reply-To: <20200709195706.12741-3-eajames@linux.ibm.com>
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=+oFIrmZGV+ZEuN3a4UzFRY4jDqpbgwIVGMqqY/aPagw=;
+        b=hjVsIl+WN/7AaNWEA9527Rz6cjyhOReFV6h1OEe9lPaoVp4c39sgIpHux0AjTkCwgI
+         7IeyI/2wxA9Pbtno5McASJGKvFJ3VHcKPHBGjBQUZU5ae+e23QRIAxvB7srGSWyAzZ+K
+         Ar3rHyz47QtzM1XZ2uqS4FCLzjDvQDFcBoDK6whDY3d4/isIbeg85zLsa0uAlhGE1ZhH
+         BMTG0hwPunNL5ogPz+aT/Csxw1YYJvSRLkzYZZdsP9ZBfRAwAk+G8KNcDkH5xPzsKFrF
+         zUFrKcl7RB/tygHM1KAlUZmErj0ZRRU6j/Vn6zvfizAJj+9oIdoFb5NJaB8RaTqwJ0hR
+         X/OA==
+X-Gm-Message-State: AOAM530DJQn1nHWO7PgP3CjJtf+NHKUtHo/8n7D9ldTiWmJ9RbJmRLZm
+        8ZADwK+1mts4NaX13FskXQDG/A==
+X-Google-Smtp-Source: ABdhPJxSos7J5sZ8wIpuqp/f0cczF3c92h0YoRJNJrQCv5ckuVMprrqgF7XztA8wxvvCASff49ocjw==
+X-Received: by 2002:a2e:730c:: with SMTP id o12mr33201055ljc.165.1594367556217;
+        Fri, 10 Jul 2020 00:52:36 -0700 (PDT)
+Received: from localhost.localdomain (h-98-128-181-7.NA.cust.bahnhof.se. [98.128.181.7])
+        by smtp.gmail.com with ESMTPSA id v3sm1629478ljj.110.2020.07.10.00.52.34
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 10 Jul 2020 00:52:35 -0700 (PDT)
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 10 Jul 2020 09:39:30 +0200
-Message-ID: <CAPDyKFozpWKt=L_hMh4ymhJ1X+TSK0vUQ5E0vy7j9EowTRywxQ@mail.gmail.com>
-Subject: Re: [PATCH 2/2] mmc: sdhci-of-aspeed: Fix clock divider calculation
-To:     Eddie James <eajames@linux.ibm.com>
-Cc:     linux-clk <linux-clk@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-aspeed <linux-aspeed@lists.ozlabs.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Andrew Jeffery <andrew@aj.id.au>,
-        Joel Stanley <joel@jms.id.au>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Mike Turquette <mturquette@baylibre.com>
-Content-Type: text/plain; charset="UTF-8"
+To:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC fixes for v5.8-rc5
+Date:   Fri, 10 Jul 2020 09:52:34 +0200
+Message-Id: <20200710075234.24987-1-ulf.hansson@linaro.org>
+X-Mailer: git-send-email 2.20.1
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 9 Jul 2020 at 21:57, Eddie James <eajames@linux.ibm.com> wrote:
->
-> When calculating the clock divider, start dividing at 2 instead of 1.
-> The divider is divided by two at the end of the calculation, so starting
-> at 1 may result in a divider of 0, which shouldn't happen.
->
-> Signed-off-by: Eddie James <eajames@linux.ibm.com>
+Hi Linus,
 
-Looks like I can pick this for fixes, as a standalone fix without patch1? No?
+Here's a PR with a couple of MMC fixes intended for v5.8-rc5. Details about the
+highlights are as usual found in the signed tag.
+
+Please pull this in!
 
 Kind regards
-Uffe
+Ulf Hansson
 
-> ---
->  drivers/mmc/host/sdhci-of-aspeed.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/sdhci-of-aspeed.c b/drivers/mmc/host/sdhci-of-aspeed.c
-> index 56912e30c47e..a1bcc0f4ba9e 100644
-> --- a/drivers/mmc/host/sdhci-of-aspeed.c
-> +++ b/drivers/mmc/host/sdhci-of-aspeed.c
-> @@ -68,7 +68,7 @@ static void aspeed_sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
->         if (WARN_ON(clock > host->max_clk))
->                 clock = host->max_clk;
->
-> -       for (div = 1; div < 256; div *= 2) {
-> +       for (div = 2; div < 256; div *= 2) {
->                 if ((parent / div) <= clock)
->                         break;
->         }
-> --
-> 2.24.0
->
+
+The following changes since commit b3a9e3b9622ae10064826dccb4f7a52bd88c7407:
+
+  Linux 5.8-rc1 (2020-06-14 12:45:04 -0700)
+
+are available in the Git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.8-rc1
+
+for you to fetch changes up to 3ec2d5113ea5e182b759b613dc1f7108ba7aac9e:
+
+  mmc: sdhci-msm: Override DLL_CONFIG only if the valid value is supplied (2020-07-08 15:30:35 +0200)
+
+----------------------------------------------------------------
+MMC host:
+ - sdhci-msm: Override DLL_CONFIG only with valid values
+ - owl-mmc: Get rid of of_match_ptr() macro to fix warning
+ - meson-gx: Limit segments to 1 to fix G12A/G12B SoCs
+
+----------------------------------------------------------------
+Manivannan Sadhasivam (1):
+      mmc: owl-mmc: Get rid of of_match_ptr() macro
+
+Neil Armstrong (1):
+      mmc: meson-gx: limit segments to 1 when dram-access-quirk is needed
+
+Veerabhadrarao Badiganti (1):
+      mmc: sdhci-msm: Override DLL_CONFIG only if the valid value is supplied
+
+ drivers/mmc/host/meson-gx-mmc.c | 6 ++++--
+ drivers/mmc/host/owl-mmc.c      | 2 +-
+ drivers/mmc/host/sdhci-msm.c    | 5 +++--
+ 3 files changed, 8 insertions(+), 5 deletions(-)
