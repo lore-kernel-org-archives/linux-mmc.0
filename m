@@ -1,88 +1,149 @@
-Return-Path: <SRS0=IwUb=AU=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=hS93=AV=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-4.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A42DFC433DF
-	for <linux-mmc@archiver.kernel.org>; Thu,  9 Jul 2020 22:52:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 87FD4C433DF
+	for <linux-mmc@archiver.kernel.org>; Fri, 10 Jul 2020 00:52:37 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7918B2078B
-	for <linux-mmc@archiver.kernel.org>; Thu,  9 Jul 2020 22:52:27 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1594335147;
-	bh=uyh84sNjd3MyHxEmWcRrWmzb1vGVuR90g1bgfEidygI=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
-	b=XRqbtYfyfgY4isCvG++oESIOTaxCU6hKZCjDRQmdumSKkOHuvcS4GN8YkCq6fM0Ku
-	 dXH3caCYvjiNNyJvJYxCGKxK+CIZMvDBnYphdBCHG97C48N3DnsQTyDx+ua1yu5aM6
-	 AuQf3oUw+w6VXfJ1b1NyFQqAP7gvPcTQW4Stp7C0=
+	by mail.kernel.org (Postfix) with ESMTP id 68D4320775
+	for <linux-mmc@archiver.kernel.org>; Fri, 10 Jul 2020 00:52:37 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="BFP8tF2H"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726721AbgGIWw1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 9 Jul 2020 18:52:27 -0400
-Received: from mail-io1-f66.google.com ([209.85.166.66]:36624 "EHLO
-        mail-io1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726228AbgGIWw0 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Jul 2020 18:52:26 -0400
-Received: by mail-io1-f66.google.com with SMTP id y2so4095051ioy.3;
-        Thu, 09 Jul 2020 15:52:26 -0700 (PDT)
+        id S1726272AbgGJAwg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 9 Jul 2020 20:52:36 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59262 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726496AbgGJAwg (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Jul 2020 20:52:36 -0400
+Received: from mail-pg1-x542.google.com (mail-pg1-x542.google.com [IPv6:2607:f8b0:4864:20::542])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4BC16C08C5DD
+        for <linux-mmc@vger.kernel.org>; Thu,  9 Jul 2020 17:52:36 -0700 (PDT)
+Received: by mail-pg1-x542.google.com with SMTP id o13so1756805pgf.0
+        for <linux-mmc@vger.kernel.org>; Thu, 09 Jul 2020 17:52:36 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=chromium.org; s=google;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=8yPHrCXyBLOpR6zGRIWiDtKHwiJWpvvhg1ayG2n9fc8=;
+        b=BFP8tF2HhYiKA/qyJjHegpvIsVSUuEje6azN5GY0R3L8WUoBLc3wHtzR+46I4fEuPk
+         XfiUAO8rReB0liW6wBmI3p2UY8xt/niNaytXTXJB+c3gWeaM5uKjATHL5zaongbYrilm
+         Ztasc8EgPA+Q1kqS5vkNpKLsqai7o8NQCrLkI=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:date:from:to:cc:subject:message-id:references
          :mime-version:content-disposition:in-reply-to;
-        bh=6LfjAawJFtBDH4x+516uZv85LV5FkHlGr9GJK4wgdsc=;
-        b=lGShhl7hMuhEmqY/MJs3ILm8BXiNuWzt18Oo6NjrxD60SSVzcqlDnmysnvxZaqTZey
-         kzbuAsg1A52b2p8jRytjKHzb7RRQSkWsigKSBipJFyrNBhSDPf1llQRhBEB0KQO+PPzO
-         OJ7LrtWCMMDd1lgUzP8senlE7rEgO1ngQalV3M+Z4at3qUTVeFaVLxeCYr4IPlj7aKfx
-         i+Gwa7pxCJFlvMVLeZlipG4qstCMePtMUdB1qFuAb2AGUGTUmiXPAiRrPRsVRNarC2Z5
-         qf1alVgd0oPn34VESv8zqqhMnlwWNPagywEn7m70AZKeoiealuaX1hfgPnHHB06i5Bqw
-         3UlA==
-X-Gm-Message-State: AOAM533pX8BMWP8Xs0QRqRdCLr1dTvCVGvpmiDTY4aAdQX6hdEvxG0Je
-        7GavSSjj203U0u5Y+DdDSddE5aqSCA==
-X-Google-Smtp-Source: ABdhPJzqId51TrJ5MSjMXnyhtyG45cZkMTMbHXKT/zLRTAVjRtl4TmYH228tsm2hY9hn3udwdQvwYQ==
-X-Received: by 2002:a05:6602:2d89:: with SMTP id k9mr44309105iow.41.1594335145902;
-        Thu, 09 Jul 2020 15:52:25 -0700 (PDT)
-Received: from xps15 ([64.188.179.254])
-        by smtp.gmail.com with ESMTPSA id d77sm2633769ill.67.2020.07.09.15.52.24
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 09 Jul 2020 15:52:25 -0700 (PDT)
-Received: (nullmailer pid 1038901 invoked by uid 1000);
-        Thu, 09 Jul 2020 22:52:24 -0000
-Date:   Thu, 9 Jul 2020 16:52:24 -0600
-From:   Rob Herring <robh@kernel.org>
-To:     Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-Cc:     linux-renesas-soc@vger.kernel.org, devicetree@vger.kernel.org,
-        ulf.hansson@linaro.org, robh+dt@kernel.org,
-        linux-mmc@vger.kernel.org
-Subject: Re: [PATCH v5 1/2] dt-bindings: mmc: Add full-pwr-cycle-in-suspend
- property
-Message-ID: <20200709225224.GA1038850@bogus>
-References: <1594123122-13156-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
- <1594123122-13156-2-git-send-email-yoshihiro.shimoda.uh@renesas.com>
+        bh=8yPHrCXyBLOpR6zGRIWiDtKHwiJWpvvhg1ayG2n9fc8=;
+        b=I4BkT5P5w9JevDcknrcfmPB+paAD7/ulPGetImGG+E/yjNAUL6ablN28ErqxeEPzGv
+         6bilu0rhbfF+dbULD1nBrJsBuWyLh2/F7sNSnmgJhAyHrVMLrs9hUpH+l/zEeWRS3H2I
+         ufyJVBuZntuOuVbh+LN0nch7kmhILz3mgBS0AIHmpgnI/aUzqjm60aUpo+ZROcd/uL7d
+         Jjdd35wqiVqZkUKn6L5jePNBu03pFs8NaxUp105eu8G+cwRUNpHRz6eYdM5DRuLJn9FG
+         SGfhTuDONPxNXUXtOmsCLKLaqxLJnV1tni6EscYBId2KgojJdtaOtIuop4Ho7cUlWoxH
+         1Z5g==
+X-Gm-Message-State: AOAM533+zXiTthqOyRLGS2+OhZPlnDZhdaTu03A1qiDLhidn0IpRKv+a
+        ZmcbBo+afWaPU+REf8XzA5I5sg==
+X-Google-Smtp-Source: ABdhPJwcYWeG5bs4YVaoD0/XoNI2VB/2PQjL7qAGKEGMFaiXaUld/StQmsEVPMcCxV9DXDcYFi7yBw==
+X-Received: by 2002:a62:1716:: with SMTP id 22mr56845258pfx.99.1594342355674;
+        Thu, 09 Jul 2020 17:52:35 -0700 (PDT)
+Received: from localhost ([2620:15c:202:1:f693:9fff:fef4:e70a])
+        by smtp.gmail.com with ESMTPSA id v28sm3992962pgn.81.2020.07.09.17.52.34
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 09 Jul 2020 17:52:34 -0700 (PDT)
+Date:   Thu, 9 Jul 2020 17:52:33 -0700
+From:   Matthias Kaehlcke <mka@chromium.org>
+To:     Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+Cc:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
+        bjorn.andersson@linaro.org, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+        Andy Gross <agross@kernel.org>
+Subject: Re: [PATCH V1] mmc: sdhci-msm: Set IO pins in low power state during
+ suspend
+Message-ID: <20200710005233.GN3191083@google.com>
+References: <1594213888-2780-1-git-send-email-vbadigan@codeaurora.org>
+ <1594213888-2780-2-git-send-email-vbadigan@codeaurora.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <1594123122-13156-2-git-send-email-yoshihiro.shimoda.uh@renesas.com>
+In-Reply-To: <1594213888-2780-2-git-send-email-vbadigan@codeaurora.org>
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 07 Jul 2020 20:58:41 +0900, Yoshihiro Shimoda wrote:
-> The commit 5a36d6bcdf23 ("mmc: core: Add DT-bindings for
-> MMC_CAP2_FULL_PWR_CYCLE") added the "full-pwr-cycle" property which
-> is possible to perform a full power cycle of the card at any time.
-> 
-> However, some environment (like r8a77951-salvator-xs) is possible
-> to perform a full power cycle of the card in suspend via firmware
-> (PSCI on arm-trusted-firmware). So, add a new property for such
-> environment.
-> 
-> Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-> ---
->  Documentation/devicetree/bindings/mmc/mmc-controller.yaml | 5 +++++
->  1 file changed, 5 insertions(+)
-> 
+Hi,
 
-Reviewed-by: Rob Herring <robh@kernel.org>
+On Wed, Jul 08, 2020 at 06:41:20PM +0530, Veerabhadrarao Badiganti wrote:
+> Configure SDHC IO pins with low power configuration when the driver
+> is in suspend state.
+> 
+> Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+> ---
+>  drivers/mmc/host/sdhci-msm.c | 17 +++++++++++++++++
+>  1 file changed, 17 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index 392d41d57a6e..efd2bae1430c 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -15,6 +15,7 @@
+>  #include <linux/iopoll.h>
+>  #include <linux/regulator/consumer.h>
+>  #include <linux/interconnect.h>
+> +#include <linux/pinctrl/consumer.h>
+>  
+>  #include "sdhci-pltfm.h"
+>  #include "cqhci.h"
+> @@ -1352,6 +1353,19 @@ static void sdhci_msm_set_uhs_signaling(struct sdhci_host *host,
+>  		sdhci_msm_hs400(host, &mmc->ios);
+>  }
+>  
+> +static int sdhci_msm_set_pincfg(struct sdhci_msm_host *msm_host, bool level)
+> +{
+> +	struct platform_device *pdev = msm_host->pdev;
+> +	int ret;
+> +
+> +	if (level)
+> +		ret = pinctrl_pm_select_default_state(&pdev->dev);
+> +	else
+> +		ret = pinctrl_pm_select_sleep_state(&pdev->dev);
+> +
+> +	return ret;
+> +}
+> +
+>  static int sdhci_msm_set_vmmc(struct mmc_host *mmc)
+>  {
+>  	if (IS_ERR(mmc->supply.vmmc))
+> @@ -1596,6 +1610,9 @@ static void sdhci_msm_handle_pwr_irq(struct sdhci_host *host, int irq)
+>  			ret = sdhci_msm_set_vqmmc(msm_host, mmc,
+>  					pwr_state & REQ_BUS_ON);
+>  		if (!ret)
+> +			ret = sdhci_msm_set_pincfg(msm_host,
+> +					pwr_state & REQ_BUS_ON);
+> +		if (!ret)
+>  			irq_ack |= CORE_PWRCTL_BUS_SUCCESS;
+>  		else
+>  			irq_ack |= CORE_PWRCTL_BUS_FAIL;
+
+I happened to have a debug patch in my tree which logs when regulators
+are enabled/disabled, with this patch I see the SD card regulator
+toggling constantly after returning from the first system suspend.
+
+I added more logs:
+
+[ 1156.085819] DBG: sdhci_msm_set_pincfg: level = 0 (ret: 0)
+[ 1156.248936] DBG: sdhci_msm_set_pincfg: level = 1 (ret: 0)
+[ 1156.301989] DBG: sdhci_msm_set_pincfg: level = 0 (ret: 0)
+[ 1156.462383] DBG: sdhci_msm_set_pincfg: level = 1 (ret: 0)
+[ 1156.525988] DBG: sdhci_msm_set_pincfg: level = 0 (ret: 0)
+[ 1156.670372] DBG: sdhci_msm_set_pincfg: level = 1 (ret: 0)
+[ 1156.717935] DBG: sdhci_msm_set_pincfg: level = 0 (ret: 0)
+[ 1156.878122] DBG: sdhci_msm_set_pincfg: level = 1 (ret: 0)
+[ 1156.928134] DBG: sdhci_msm_set_pincfg: level = 0 (ret: 0)
+
+This is on an SC7180 platform. It doesn't run an upstream kernel though,
+but v5.4 with plenty of upstream patches.
