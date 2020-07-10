@@ -2,87 +2,379 @@ Return-Path: <SRS0=hS93=AV=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+X-Spam-Status: No, score=-9.7 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+	URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9D8CDC433E0
-	for <linux-mmc@archiver.kernel.org>; Fri, 10 Jul 2020 06:42:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1C5D7C433E0
+	for <linux-mmc@archiver.kernel.org>; Fri, 10 Jul 2020 06:51:43 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 73B062078B
-	for <linux-mmc@archiver.kernel.org>; Fri, 10 Jul 2020 06:42:21 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id F3F9E207FC
+	for <linux-mmc@archiver.kernel.org>; Fri, 10 Jul 2020 06:51:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727031AbgGJGmV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 10 Jul 2020 02:42:21 -0400
-Received: from mga12.intel.com ([192.55.52.136]:11563 "EHLO mga12.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726908AbgGJGmU (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 10 Jul 2020 02:42:20 -0400
-IronPort-SDR: goCKN8fJFrRqUYMG8LSHBGlNkDBlj6eVldNjYymrP4hBzEVLqaT7Fi0UAsG+Qb5UuEVD4O23Mb
- qiUSDMNVU8FQ==
-X-IronPort-AV: E=McAfee;i="6000,8403,9677"; a="127751004"
-X-IronPort-AV: E=Sophos;i="5.75,334,1589266800"; 
-   d="scan'208";a="127751004"
-X-Amp-Result: SKIPPED(no attachment in message)
-X-Amp-File-Uploaded: False
-Received: from fmsmga001.fm.intel.com ([10.253.24.23])
-  by fmsmga106.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Jul 2020 23:42:20 -0700
-IronPort-SDR: OdJt/DPOJXTDMtl6BzBoR7MaAS7AcbsrG9FJ0PXw5fygo6H4LpeFs/7DaaQQ4xt/62Ii+Vx3wz
- VKyUNZcouXUw==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.75,334,1589266800"; 
-   d="scan'208";a="389396441"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.73]) ([10.237.72.73])
-  by fmsmga001.fm.intel.com with ESMTP; 09 Jul 2020 23:42:13 -0700
-Subject: Re: [PATCH 2/2] mmc: sdhci-of-aspeed: Fix clock divider calculation
-To:     Eddie James <eajames@linux.ibm.com>, linux-clk@vger.kernel.org
-Cc:     linux-kernel@vger.kernel.org, linux-aspeed@lists.ozlabs.org,
-        linux-mmc@vger.kernel.org, andrew@aj.id.au, joel@jms.id.au,
-        ulf.hansson@linaro.org, sboyd@kernel.org, mturquette@baylibre.com
-References: <20200709195706.12741-1-eajames@linux.ibm.com>
- <20200709195706.12741-3-eajames@linux.ibm.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <fe0c6b0f-0fa1-a4e4-1f60-5258b30c14f9@intel.com>
-Date:   Fri, 10 Jul 2020 09:41:32 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.8.1
-MIME-Version: 1.0
-In-Reply-To: <20200709195706.12741-3-eajames@linux.ibm.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+        id S1725851AbgGJGvm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 10 Jul 2020 02:51:42 -0400
+Received: from relmlor1.renesas.com ([210.160.252.171]:55228 "EHLO
+        relmlie5.idc.renesas.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1727873AbgGJGvm (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Jul 2020 02:51:42 -0400
+X-IronPort-AV: E=Sophos;i="5.75,334,1589209200"; 
+   d="scan'208";a="51789346"
+Received: from unknown (HELO relmlir5.idc.renesas.com) ([10.200.68.151])
+  by relmlie5.idc.renesas.com with ESMTP; 10 Jul 2020 15:51:40 +0900
+Received: from localhost.localdomain (unknown [10.166.252.89])
+        by relmlir5.idc.renesas.com (Postfix) with ESMTP id F331D400C728;
+        Fri, 10 Jul 2020 15:51:39 +0900 (JST)
+From:   Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+To:     ulf.hansson@linaro.org, robh+dt@kernel.org,
+        wsa+renesas@sang-engineering.com
+Cc:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-renesas-soc@vger.kernel.org,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Subject: [PATCH] dt-bindings: mmc: renesas,sdhi: convert to YAML
+Date:   Fri, 10 Jul 2020 15:51:23 +0900
+Message-Id: <1594363883-22154-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
+X-Mailer: git-send-email 2.7.4
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 9/07/20 10:57 pm, Eddie James wrote:
-> When calculating the clock divider, start dividing at 2 instead of 1.
-> The divider is divided by two at the end of the calculation, so starting
-> at 1 may result in a divider of 0, which shouldn't happen.
-> 
-> Signed-off-by: Eddie James <eajames@linux.ibm.com>
+Convert Renesas SDHI SD/MMC controller document to YAML.
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+---
+ Almost all node names in Renesas dtsi files have "sd@" name, but these should
+ be "mmc@". So converting the node names by using the following commands
+ is easy to check this patch :)
+  sed -i "s/sd@/mmc@/" arch/arm/boot/dts/*
+  sed -i "s/sd@/mmc@/" arch/arm64/boot/dts/renesas/*
 
-> ---
->  drivers/mmc/host/sdhci-of-aspeed.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-of-aspeed.c b/drivers/mmc/host/sdhci-of-aspeed.c
-> index 56912e30c47e..a1bcc0f4ba9e 100644
-> --- a/drivers/mmc/host/sdhci-of-aspeed.c
-> +++ b/drivers/mmc/host/sdhci-of-aspeed.c
-> @@ -68,7 +68,7 @@ static void aspeed_sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
->  	if (WARN_ON(clock > host->max_clk))
->  		clock = host->max_clk;
->  
-> -	for (div = 1; div < 256; div *= 2) {
-> +	for (div = 2; div < 256; div *= 2) {
->  		if ((parent / div) <= clock)
->  			break;
->  	}
-> 
+ r8a77470-iwg23s-sbc.dts doesn't seem to follow the document though...
+
+ .../devicetree/bindings/mmc/renesas,sdhi.txt       | 114 ------------
+ .../devicetree/bindings/mmc/renesas,sdhi.yaml      | 191 +++++++++++++++++++++
+ 2 files changed, 191 insertions(+), 114 deletions(-)
+ delete mode 100644 Documentation/devicetree/bindings/mmc/renesas,sdhi.txt
+ create mode 100644 Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
+
+diff --git a/Documentation/devicetree/bindings/mmc/renesas,sdhi.txt b/Documentation/devicetree/bindings/mmc/renesas,sdhi.txt
+deleted file mode 100644
+index 0ca9a62..0000000
+--- a/Documentation/devicetree/bindings/mmc/renesas,sdhi.txt
++++ /dev/null
+@@ -1,114 +0,0 @@
+-* Renesas SDHI SD/MMC controller
+-
+-Required properties:
+-- compatible: should contain one or more of the following:
+-		"renesas,sdhi-sh73a0" - SDHI IP on SH73A0 SoC
+-		"renesas,sdhi-r7s72100" - SDHI IP on R7S72100 SoC
+-		"renesas,sdhi-r7s9210" - SDHI IP on R7S9210 SoC
+-		"renesas,sdhi-r8a73a4" - SDHI IP on R8A73A4 SoC
+-		"renesas,sdhi-r8a7740" - SDHI IP on R8A7740 SoC
+-		"renesas,sdhi-r8a7742" - SDHI IP on R8A7742 SoC
+-		"renesas,sdhi-r8a7743" - SDHI IP on R8A7743 SoC
+-		"renesas,sdhi-r8a7744" - SDHI IP on R8A7744 SoC
+-		"renesas,sdhi-r8a7745" - SDHI IP on R8A7745 SoC
+-		"renesas,sdhi-r8a774a1" - SDHI IP on R8A774A1 SoC
+-		"renesas,sdhi-r8a774b1" - SDHI IP on R8A774B1 SoC
+-		"renesas,sdhi-r8a774c0" - SDHI IP on R8A774C0 SoC
+-		"renesas,sdhi-r8a77470" - SDHI IP on R8A77470 SoC
+-		"renesas,sdhi-mmc-r8a77470" - SDHI/MMC IP on R8A77470 SoC
+-		"renesas,sdhi-r8a7778" - SDHI IP on R8A7778 SoC
+-		"renesas,sdhi-r8a7779" - SDHI IP on R8A7779 SoC
+-		"renesas,sdhi-r8a7790" - SDHI IP on R8A7790 SoC
+-		"renesas,sdhi-r8a7791" - SDHI IP on R8A7791 SoC
+-		"renesas,sdhi-r8a7792" - SDHI IP on R8A7792 SoC
+-		"renesas,sdhi-r8a7793" - SDHI IP on R8A7793 SoC
+-		"renesas,sdhi-r8a7794" - SDHI IP on R8A7794 SoC
+-		"renesas,sdhi-r8a7795" - SDHI IP on R8A7795 SoC
+-		"renesas,sdhi-r8a7796" - SDHI IP on R8A77960 SoC
+-		"renesas,sdhi-r8a77961" - SDHI IP on R8A77961 SoC
+-		"renesas,sdhi-r8a77965" - SDHI IP on R8A77965 SoC
+-		"renesas,sdhi-r8a77970" - SDHI IP on R8A77970 SoC
+-		"renesas,sdhi-r8a77980" - SDHI IP on R8A77980 SoC
+-		"renesas,sdhi-r8a77990" - SDHI IP on R8A77990 SoC
+-		"renesas,sdhi-r8a77995" - SDHI IP on R8A77995 SoC
+-		"renesas,sdhi-shmobile" - a generic sh-mobile SDHI controller
+-		"renesas,rcar-gen1-sdhi" - a generic R-Car Gen1 SDHI controller
+-		"renesas,rcar-gen2-sdhi" - a generic R-Car Gen2 and RZ/G1 SDHI
+-					   (not SDHI/MMC) controller
+-		"renesas,rcar-gen3-sdhi" - a generic R-Car Gen3 or RZ/G2
+-					   SDHI controller
+-
+-
+-		When compatible with the generic version, nodes must list
+-		the SoC-specific version corresponding to the platform
+-		first followed by the generic version.
+-
+-- clocks: Most controllers only have 1 clock source per channel. However, on
+-	  some variations of this controller, the internal card detection
+-	  logic that exists in this controller is sectioned off to be run by a
+-	  separate second clock source to allow the main core clock to be turned
+-	  off to save power.
+-	  If 2 clocks are specified by the hardware, you must name them as
+-	  "core" and "cd". If the controller only has 1 clock, naming is not
+-	  required.
+-	  Devices which have more than 1 clock are listed below:
+-	  2: R7S72100, R7S9210
+-
+-Optional properties:
+-- pinctrl-names: should be "default", "state_uhs"
+-- pinctrl-0: should contain default/high speed pin ctrl
+-- pinctrl-1: should contain uhs mode pin ctrl
+-
+-Example: R8A7790 (R-Car H2) SDHI controller nodes
+-
+-	sdhi0: sd@ee100000 {
+-		compatible = "renesas,sdhi-r8a7790", "renesas,rcar-gen2-sdhi";
+-		reg = <0 0xee100000 0 0x328>;
+-		interrupts = <GIC_SPI 165 IRQ_TYPE_LEVEL_HIGH>;
+-		clocks = <&cpg CPG_MOD 314>;
+-		dmas = <&dmac0 0xcd>, <&dmac0 0xce>,
+-		       <&dmac1 0xcd>, <&dmac1 0xce>;
+-		dma-names = "tx", "rx", "tx", "rx";
+-		max-frequency = <195000000>;
+-		power-domains = <&sysc R8A7790_PD_ALWAYS_ON>;
+-		resets = <&cpg 314>;
+-	};
+-
+-	sdhi1: sd@ee120000 {
+-		compatible = "renesas,sdhi-r8a7790", "renesas,rcar-gen2-sdhi";
+-		reg = <0 0xee120000 0 0x328>;
+-		interrupts = <GIC_SPI 166 IRQ_TYPE_LEVEL_HIGH>;
+-		clocks = <&cpg CPG_MOD 313>;
+-		dmas = <&dmac0 0xc9>, <&dmac0 0xca>,
+-		       <&dmac1 0xc9>, <&dmac1 0xca>;
+-		dma-names = "tx", "rx", "tx", "rx";
+-		max-frequency = <195000000>;
+-		power-domains = <&sysc R8A7790_PD_ALWAYS_ON>;
+-		resets = <&cpg 313>;
+-	};
+-
+-	sdhi2: sd@ee140000 {
+-		compatible = "renesas,sdhi-r8a7790", "renesas,rcar-gen2-sdhi";
+-		reg = <0 0xee140000 0 0x100>;
+-		interrupts = <GIC_SPI 167 IRQ_TYPE_LEVEL_HIGH>;
+-		clocks = <&cpg CPG_MOD 312>;
+-		dmas = <&dmac0 0xc1>, <&dmac0 0xc2>,
+-		       <&dmac1 0xc1>, <&dmac1 0xc2>;
+-		dma-names = "tx", "rx", "tx", "rx";
+-		max-frequency = <97500000>;
+-		power-domains = <&sysc R8A7790_PD_ALWAYS_ON>;
+-		resets = <&cpg 312>;
+-	};
+-
+-	sdhi3: sd@ee160000 {
+-		compatible = "renesas,sdhi-r8a7790", "renesas,rcar-gen2-sdhi";
+-		reg = <0 0xee160000 0 0x100>;
+-		interrupts = <GIC_SPI 168 IRQ_TYPE_LEVEL_HIGH>;
+-		clocks = <&cpg CPG_MOD 311>;
+-		dmas = <&dmac0 0xd3>, <&dmac0 0xd4>,
+-		       <&dmac1 0xd3>, <&dmac1 0xd4>;
+-		dma-names = "tx", "rx", "tx", "rx";
+-		max-frequency = <97500000>;
+-		power-domains = <&sysc R8A7790_PD_ALWAYS_ON>;
+-		resets = <&cpg 311>;
+-	};
+diff --git a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
+new file mode 100644
+index 0000000..e5dbc20
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
+@@ -0,0 +1,191 @@
++# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
++%YAML 1.2
++---
++$id: "http://devicetree.org/schemas/mmc/renesas,sdhi.yaml#"
++$schema: "http://devicetree.org/meta-schemas/core.yaml#"
++
++title: Renesas SDHI SD/MMC controller
++
++maintainers:
++  - Wolfram Sang <wsa+renesas@sang-engineering.com>
++
++allOf:
++  - $ref: "mmc-controller.yaml"
++
++properties:
++  compatible:
++    oneOf:
++      - items:
++          - const: renesas,sdhi-sh73a0  # R-Mobile APE6
++      - items:
++          - const: renesas,sdhi-r7s72100 # RZ/A1H
++      - items:
++          - const: renesas,sdhi-r7s9210 # SH-Mobile AG5
++      - items:
++          - const: renesas,sdhi-r8a73a4 # R-Mobile APE6
++      - items:
++          - const: renesas,sdhi-r8a7740 # R-Mobile A1
++      - items:
++          - enum:
++              - renesas,sdhi-r8a7778 # R-Car M1
++              - renesas,sdhi-r8a7779 # R-Car H1
++          - const: renesas,rcar-gen1-sdhi # R-Car Gen1
++      - items:
++          - enum:
++              - renesas,sdhi-r8a7742  # RZ/G1H
++              - renesas,sdhi-r8a7743  # RZ/G1M
++              - renesas,sdhi-r8a7744  # RZ/G1N
++              - renesas,sdhi-r8a7745  # RZ/G1E
++              - renesas,sdhi-r8a77470 # RZ/G1C
++              - renesas,sdhi-r8a7790  # R-Car H2
++              - renesas,sdhi-r8a7791  # R-Car M2-W
++              - renesas,sdhi-r8a7792  # R-Car V2H
++              - renesas,sdhi-r8a7793  # R-Car M2-N
++              - renesas,sdhi-r8a7794  # R-Car E2
++          - const: renesas,rcar-gen2-sdhi # R-Car Gen2 and RZ/G1
++      - items:
++          - const: renesas,sdhi-mmc-r8a77470 # RZ/G1C (SDHI/MMC IP)
++      - items:
++          - enum:
++              - renesas,sdhi-r8a774a1 # RZ/G2M
++              - renesas,sdhi-r8a774b1 # RZ/G2N
++              - renesas,sdhi-r8a774c0 # RZ/G2E
++              - renesas,sdhi-r8a7795  # R-Car H3
++              - renesas,sdhi-r8a7796  # R-Car M3-W
++              - renesas,sdhi-r8a77961 # R-Car M3-W+
++              - renesas,sdhi-r8a77965 # R-Car M3-N
++              - renesas,sdhi-r8a77970 # R-Car V3M
++              - renesas,sdhi-r8a77980 # R-Car V3H
++              - renesas,sdhi-r8a77990 # R-Car E3
++              - renesas,sdhi-r8a77995 # R-Car D3
++          - const: renesas,rcar-gen3-sdhi # R-Car Gen3 or RZ/G2
++
++  reg:
++    maxItems: 1
++
++  interrupts:
++    minItems: 1
++    maxItems: 3
++
++  clocks:
++    minItems: 1
++    maxItems: 2
++
++  clock-names:
++    minItems: 1
++    maxItems: 2
++    items:
++      - const: core
++      - const: cd
++
++  dmas:
++    minItems: 4
++    maxItems: 4
++
++  dma-names:
++    minItems: 4
++    maxItems: 4
++    items:
++      enum:
++        - tx
++        - rx
++
++  power-domains:
++    maxItems: 1
++
++  resets:
++    maxItems: 1
++
++  pinctrl-0:
++    minItems: 1
++    maxItems: 2
++
++  pinctrl-1:
++    maxItems: 1
++
++  pinctrl-names:
++    minItems: 1
++    maxItems: 2
++    items:
++      - const: default
++      - const: state_uhs
++
++  max-frequency: true
++
++required:
++  - compatible
++  - reg
++  - interrupts
++  - clocks
++  - power-domains
++
++if:
++  properties:
++    compatible:
++      items:
++        enum:
++          - renesas,sdhi-r7s72100
++          - renesas,sdhi-r7s9210
++then:
++  required:
++    - clock-names
++  description:
++     The internal card detection logic that exists in these controllers is
++     sectioned off to be run by a separate second clock source to allow
++     the main core clock to be turned off to save power.
++
++unevaluatedProperties: false
++
++examples:
++  - |
++    #include <dt-bindings/clock/r8a7790-cpg-mssr.h>
++    #include <dt-bindings/interrupt-controller/arm-gic.h>
++    #include <dt-bindings/power/r8a7790-sysc.h>
++
++    sdhi0: mmc@ee100000 {
++            compatible = "renesas,sdhi-r8a7790", "renesas,rcar-gen2-sdhi";
++            reg = <0xee100000 0x328>;
++            interrupts = <GIC_SPI 165 IRQ_TYPE_LEVEL_HIGH>;
++            clocks = <&cpg CPG_MOD 314>;
++            dmas = <&dmac0 0xcd>, <&dmac0 0xce>, <&dmac1 0xcd>, <&dmac1 0xce>;
++            dma-names = "tx", "rx", "tx", "rx";
++            max-frequency = <195000000>;
++            power-domains = <&sysc R8A7790_PD_ALWAYS_ON>;
++            resets = <&cpg 314>;
++    };
++
++    sdhi1: mmc@ee120000 {
++             compatible = "renesas,sdhi-r8a7790", "renesas,rcar-gen2-sdhi";
++             reg = <0xee120000 0x328>;
++             interrupts = <GIC_SPI 166 IRQ_TYPE_LEVEL_HIGH>;
++             clocks = <&cpg CPG_MOD 313>;
++             dmas = <&dmac0 0xc9>, <&dmac0 0xca>, <&dmac1 0xc9>, <&dmac1 0xca>;
++             dma-names = "tx", "rx", "tx", "rx";
++             max-frequency = <195000000>;
++             power-domains = <&sysc R8A7790_PD_ALWAYS_ON>;
++             resets = <&cpg 313>;
++    };
++
++    sdhi2: mmc@ee140000 {
++             compatible = "renesas,sdhi-r8a7790", "renesas,rcar-gen2-sdhi";
++             reg = <0xee140000 0x100>;
++             interrupts = <GIC_SPI 167 IRQ_TYPE_LEVEL_HIGH>;
++             clocks = <&cpg CPG_MOD 312>;
++             dmas = <&dmac0 0xc1>, <&dmac0 0xc2>, <&dmac1 0xc1>, <&dmac1 0xc2>;
++             dma-names = "tx", "rx", "tx", "rx";
++             max-frequency = <97500000>;
++             power-domains = <&sysc R8A7790_PD_ALWAYS_ON>;
++             resets = <&cpg 312>;
++     };
++
++     sdhi3: mmc@ee160000 {
++              compatible = "renesas,sdhi-r8a7790", "renesas,rcar-gen2-sdhi";
++              reg = <0xee160000 0x100>;
++              interrupts = <GIC_SPI 168 IRQ_TYPE_LEVEL_HIGH>;
++              clocks = <&cpg CPG_MOD 311>;
++              dmas = <&dmac0 0xd3>, <&dmac0 0xd4>, <&dmac1 0xd3>, <&dmac1 0xd4>;
++              dma-names = "tx", "rx", "tx", "rx";
++              max-frequency = <97500000>;
++              power-domains = <&sysc R8A7790_PD_ALWAYS_ON>;
++              resets = <&cpg 311>;
++    };
+-- 
+2.7.4
 
