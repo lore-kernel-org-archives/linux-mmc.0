@@ -2,94 +2,87 @@ Return-Path: <SRS0=hS93=AV=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 94C13C433DF
-	for <linux-mmc@archiver.kernel.org>; Fri, 10 Jul 2020 03:04:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9D8CDC433E0
+	for <linux-mmc@archiver.kernel.org>; Fri, 10 Jul 2020 06:42:21 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 6D8D420720
-	for <linux-mmc@archiver.kernel.org>; Fri, 10 Jul 2020 03:04:17 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=jms.id.au header.i=@jms.id.au header.b="Z0lNoGhG"
+	by mail.kernel.org (Postfix) with ESMTP id 73B062078B
+	for <linux-mmc@archiver.kernel.org>; Fri, 10 Jul 2020 06:42:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726773AbgGJDEQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 9 Jul 2020 23:04:16 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51122 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726496AbgGJDEQ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Jul 2020 23:04:16 -0400
-Received: from mail-ed1-x541.google.com (mail-ed1-x541.google.com [IPv6:2a00:1450:4864:20::541])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 37299C08C5CE;
-        Thu,  9 Jul 2020 20:04:16 -0700 (PDT)
-Received: by mail-ed1-x541.google.com with SMTP id dm19so3414451edb.13;
-        Thu, 09 Jul 2020 20:04:16 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=jms.id.au; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=YLfw68r/hxoh0NgCLBxSxGfsf8FdyOcJYnFgZuru9c8=;
-        b=Z0lNoGhGxomlXESnJmJIj3kaLlNfCpfGBY6uILkYPuZZ9qub3uS3pGM34slmHTbaLj
-         +0gus1ZS50pj/Rg3hgjpyR5wff9NX1Ufq6Uu8ucnJW3va9mS5yhDd4NyuQZPyzZSAKhH
-         PneheiBTt10S8gJdhP0qMjFUgIW6DvjkkgEVk=
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=YLfw68r/hxoh0NgCLBxSxGfsf8FdyOcJYnFgZuru9c8=;
-        b=rRf8GI/aASv6dUGTACnZrA9xf/EJ5QviiLNb7y5jvN+RHpQ+Gr+xraJfB5IZV8/CW1
-         y++ZqnTmiTwftTGmv+Y4/LYE0LQdgny0ZiK7j0lc1UJTO7otkBu/XSkSV8e5eEbegAnX
-         1Kg2JdtKuvoM2bDmEYg4PG4rfwtjfLPtSayjXyyQrDDx1SnlfrfQGrSmmVEuQa6Mks3J
-         /+/De0g4WxEDNPkuhJFLMl4XbQgZIK6FvLdhTUH70J5VD2SanRZVrcblMVEvZLn0E8xS
-         psRmFmSITJe4PbyNYnpG2tUsUL9xafrgO7jPgVlF2y5elkkXizpDpE+1iTNK2gcqA7OK
-         IDtw==
-X-Gm-Message-State: AOAM531mSthAHS4VKPtD3lz1+o0R4xuVv5ojcohvp6+6BzRT2lToDrS7
-        vwrVFzBVsgnSlsX8QzkrYRcteF3FOf6TEUMAERs=
-X-Google-Smtp-Source: ABdhPJzpdveYcIc6pgM/Fe1jdllnZf80Q1VMKGv/QELC2YPCTMnO/7YKXw2PDoRwqL2q3b7XfvqI/pFBrn+kpAQhutY=
-X-Received: by 2002:a05:6402:202e:: with SMTP id ay14mr75165877edb.233.1594350254944;
- Thu, 09 Jul 2020 20:04:14 -0700 (PDT)
-MIME-Version: 1.0
-References: <20200709195706.12741-1-eajames@linux.ibm.com> <20200709195706.12741-3-eajames@linux.ibm.com>
- <4acad452-33c7-4fb2-ba90-19a824558b94@www.fastmail.com>
-In-Reply-To: <4acad452-33c7-4fb2-ba90-19a824558b94@www.fastmail.com>
-From:   Joel Stanley <joel@jms.id.au>
-Date:   Fri, 10 Jul 2020 03:04:03 +0000
-Message-ID: <CACPK8XcWEn-M291U1va7T=5R0qHp3D0hy53-fkEw7pa_iQu6tA@mail.gmail.com>
+        id S1727031AbgGJGmV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 10 Jul 2020 02:42:21 -0400
+Received: from mga12.intel.com ([192.55.52.136]:11563 "EHLO mga12.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726908AbgGJGmU (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 10 Jul 2020 02:42:20 -0400
+IronPort-SDR: goCKN8fJFrRqUYMG8LSHBGlNkDBlj6eVldNjYymrP4hBzEVLqaT7Fi0UAsG+Qb5UuEVD4O23Mb
+ qiUSDMNVU8FQ==
+X-IronPort-AV: E=McAfee;i="6000,8403,9677"; a="127751004"
+X-IronPort-AV: E=Sophos;i="5.75,334,1589266800"; 
+   d="scan'208";a="127751004"
+X-Amp-Result: SKIPPED(no attachment in message)
+X-Amp-File-Uploaded: False
+Received: from fmsmga001.fm.intel.com ([10.253.24.23])
+  by fmsmga106.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Jul 2020 23:42:20 -0700
+IronPort-SDR: OdJt/DPOJXTDMtl6BzBoR7MaAS7AcbsrG9FJ0PXw5fygo6H4LpeFs/7DaaQQ4xt/62Ii+Vx3wz
+ VKyUNZcouXUw==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.75,334,1589266800"; 
+   d="scan'208";a="389396441"
+Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.73]) ([10.237.72.73])
+  by fmsmga001.fm.intel.com with ESMTP; 09 Jul 2020 23:42:13 -0700
 Subject: Re: [PATCH 2/2] mmc: sdhci-of-aspeed: Fix clock divider calculation
-To:     Andrew Jeffery <andrew@aj.id.au>
-Cc:     Eddie James <eajames@linux.ibm.com>, linux-clk@vger.kernel.org,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-aspeed <linux-aspeed@lists.ozlabs.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Michael Turquette <mturquette@baylibre.com>
-Content-Type: text/plain; charset="UTF-8"
+To:     Eddie James <eajames@linux.ibm.com>, linux-clk@vger.kernel.org
+Cc:     linux-kernel@vger.kernel.org, linux-aspeed@lists.ozlabs.org,
+        linux-mmc@vger.kernel.org, andrew@aj.id.au, joel@jms.id.au,
+        ulf.hansson@linaro.org, sboyd@kernel.org, mturquette@baylibre.com
+References: <20200709195706.12741-1-eajames@linux.ibm.com>
+ <20200709195706.12741-3-eajames@linux.ibm.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Message-ID: <fe0c6b0f-0fa1-a4e4-1f60-5258b30c14f9@intel.com>
+Date:   Fri, 10 Jul 2020 09:41:32 +0300
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.8.1
+MIME-Version: 1.0
+In-Reply-To: <20200709195706.12741-3-eajames@linux.ibm.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 10 Jul 2020 at 01:14, Andrew Jeffery <andrew@aj.id.au> wrote:
->
->
->
-> On Fri, 10 Jul 2020, at 05:27, Eddie James wrote:
-> > When calculating the clock divider, start dividing at 2 instead of 1.
-> > The divider is divided by two at the end of the calculation, so starting
-> > at 1 may result in a divider of 0, which shouldn't happen.
-> >
-> > Signed-off-by: Eddie James <eajames@linux.ibm.com>
->
-> Reviewed-by: Andrew Jeffery <andrew@aj.id.au>
+On 9/07/20 10:57 pm, Eddie James wrote:
+> When calculating the clock divider, start dividing at 2 instead of 1.
+> The divider is divided by two at the end of the calculation, so starting
+> at 1 may result in a divider of 0, which shouldn't happen.
+> 
+> Signed-off-by: Eddie James <eajames@linux.ibm.com>
 
-Acked-by: Joel Stanley <joel@jms.id.au>
-Fixes: d3d04f6c330a ("clk: Add support for AST2600 SoC")
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-Stephen, I think this should go to stable too along with 1/2.
+> ---
+>  drivers/mmc/host/sdhci-of-aspeed.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-of-aspeed.c b/drivers/mmc/host/sdhci-of-aspeed.c
+> index 56912e30c47e..a1bcc0f4ba9e 100644
+> --- a/drivers/mmc/host/sdhci-of-aspeed.c
+> +++ b/drivers/mmc/host/sdhci-of-aspeed.c
+> @@ -68,7 +68,7 @@ static void aspeed_sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+>  	if (WARN_ON(clock > host->max_clk))
+>  		clock = host->max_clk;
+>  
+> -	for (div = 1; div < 256; div *= 2) {
+> +	for (div = 2; div < 256; div *= 2) {
+>  		if ((parent / div) <= clock)
+>  			break;
+>  	}
+> 
 
-Cheers,
-
-Joel
