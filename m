@@ -6,44 +6,44 @@ X-Spam-Status: No, score=-7.0 required=3.0 tests=BAYES_00,
 	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
 	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F0C75C433E2
-	for <linux-mmc@archiver.kernel.org>; Mon, 13 Jul 2020 11:28:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 73AC5C433E3
+	for <linux-mmc@archiver.kernel.org>; Mon, 13 Jul 2020 11:25:03 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D1D1D2075B
-	for <linux-mmc@archiver.kernel.org>; Mon, 13 Jul 2020 11:28:18 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5B895206F0
+	for <linux-mmc@archiver.kernel.org>; Mon, 13 Jul 2020 11:25:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729543AbgGML2P (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 13 Jul 2020 07:28:15 -0400
-Received: from mail-ot1-f65.google.com ([209.85.210.65]:38668 "EHLO
-        mail-ot1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728714AbgGML2P (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Jul 2020 07:28:15 -0400
-Received: by mail-ot1-f65.google.com with SMTP id t18so9232561otq.5;
-        Mon, 13 Jul 2020 04:28:14 -0700 (PDT)
+        id S1729143AbgGMLZC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 13 Jul 2020 07:25:02 -0400
+Received: from mail-ot1-f68.google.com ([209.85.210.68]:40969 "EHLO
+        mail-ot1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727890AbgGMLZC (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Jul 2020 07:25:02 -0400
+Received: by mail-ot1-f68.google.com with SMTP id a21so9213636otq.8;
+        Mon, 13 Jul 2020 04:25:01 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=VmnKT8NempII3Hl6CSCL6SevjCL0TxGwM55hoFOSL6w=;
-        b=ijwSZrezftp9qiGvFtUXn2p2heic3ZTiiOAt9gFJ2ikEyH8XsC1lh4nFom+Cizq++w
-         Sh+WrL5pbGAlIb8eW7mBKWVoiqIq9UoFpJQ0woGNKtplXr3tLuftJ4Mr1LiJ1KqcX8kL
-         GNigjDIIYoZrdj8Gl5dJavVnyy7PXRsxe++6DZ71zOZX4i1IGWTHgXsrRM3BqlCs+2D/
-         srdsgT17nZdoUxoE90UtLCjyroKH5DYdWJplVhU9VdbirodGJJjySyl4lHX0I+BPBE0z
-         WzkyAyKsWmPkFYbWfONZzKKLTN9gtx3hh/ha6Cu6s5EtxrI8ObeGJQKloMhGSNaOrS1H
-         Qz4A==
-X-Gm-Message-State: AOAM532oppO0oxEQDhBEwg7TF8Ms5wyreyfu1+2N6PeHVYqL21D6F9Sm
-        KGr3kBYRP0e3pAAfUwTSKb6VHNJRzT2P9aJjaMY=
-X-Google-Smtp-Source: ABdhPJwv4h+C8McCqHPa2Ma5j3n5B0iRYxepvun9IsQB2dq8KH6i5EsEEc/F6rTu4L3Gfc2JnGupkQa9YqmL6akFntg=
-X-Received: by 2002:a9d:2646:: with SMTP id a64mr65107444otb.107.1594639694020;
- Mon, 13 Jul 2020 04:28:14 -0700 (PDT)
+        bh=eJA1IRinJgbZYZbZZAxPJXmFYzKQSKN349MJoNikxhY=;
+        b=uZGv+V7EjAUtaIX7qqrkHOHjAOC480g/EXJdQkAft0JXXoP0esYXAbJPSfM+DaPLbj
+         uoIILSfWGZb9yYlhtApWgFo3l6iK2tqGeCMl9jUTSLGlLuR7JiaDbHlakeb/YIpL/NPy
+         Ko4qceIDp3sUmfwDlnIYzVfn10Q+XZHP7Ewu0FuHmATWkoYvl7rZc5V79JnpjSNc2Fan
+         OOQ/KIgg0t0fxQQZ3/aRyEG99zz5SYFuL6l6xI05pjQV5HgCEIipSaAzuScKUHTjReZp
+         WAp/K2jkSjG0+MnRjW0Cozi6bAozQI6DFp5dmeyYbCbAdcs772Mse8vjUeg46MPkniPT
+         3BuQ==
+X-Gm-Message-State: AOAM531rvXMVcX1FLasZrZ3/a7oXKL91mojcYZRe6KlOzlc0KyUdylYw
+        yj75zOs4UwGscxGvflefxIVATm6vXlceBNp7Rz4=
+X-Google-Smtp-Source: ABdhPJyqlZ4W8EF/gEChb9o/WfZDrwRK+3M9vyN/4qfzBUZ+4oUb8cRk4TAZO58rumpD/dex1l3MhdhTb324SMvrRLs=
+X-Received: by 2002:a05:6830:1451:: with SMTP id w17mr57043566otp.250.1594639501400;
+ Mon, 13 Jul 2020 04:25:01 -0700 (PDT)
 MIME-Version: 1.0
 References: <1594230511-24790-1-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
- <1594230511-24790-6-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
-In-Reply-To: <1594230511-24790-6-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
+ <1594230511-24790-3-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
+In-Reply-To: <1594230511-24790-3-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
 From:   Geert Uytterhoeven <geert@linux-m68k.org>
-Date:   Mon, 13 Jul 2020 13:28:03 +0200
-Message-ID: <CAMuHMdWDyxypASwxxjfyYw7tOxkwWXTjC=NeHZj9B8kaYjO9WQ@mail.gmail.com>
-Subject: Re: [PATCH 5/8] arm64: defconfig: Enable R8A774E1 SoC
+Date:   Mon, 13 Jul 2020 13:24:50 +0200
+Message-ID: <CAMuHMdUV-MzFxq4GpL4YzFrWr-aeF0__SubG72Bi-Au1OMTfYA@mail.gmail.com>
+Subject: Re: [PATCH 2/8] dt-bindings: serial: renesas,hscif: Document r8a774e1 bindings
 To:     Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
 Cc:     Magnus Damm <magnus.damm@gmail.com>,
         Rob Herring <robh+dt@kernel.org>,
@@ -70,15 +70,12 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 On Wed, Jul 8, 2020 at 7:48 PM Lad Prabhakar
 <prabhakar.mahadev-lad.rj@bp.renesas.com> wrote:
-> From: Marian-Cristian Rotariu <marian-cristian.rotariu.rb@bp.renesas.com>
+> RZ/G2H (R8A774E1) SoC also has the R-Car gen3 compatible HSCIF ports,
+> so document the SoC specific bindings.
 >
-> Enable the Renesas RZ/G2H (R8A774E1) SoC in the ARM64 defconfig.
->
-> Signed-off-by: Marian-Cristian Rotariu <marian-cristian.rotariu.rb@bp.renesas.com>
 > Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
 
 Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
-i.e. will queue in renesas-devel for v5.9.
 
 Gr{oetje,eeting}s,
 
