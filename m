@@ -6,44 +6,44 @@ X-Spam-Status: No, score=-7.0 required=3.0 tests=BAYES_00,
 	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
 	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 73AC5C433E3
-	for <linux-mmc@archiver.kernel.org>; Mon, 13 Jul 2020 11:25:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7D472C433F1
+	for <linux-mmc@archiver.kernel.org>; Mon, 13 Jul 2020 12:25:01 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5B895206F0
-	for <linux-mmc@archiver.kernel.org>; Mon, 13 Jul 2020 11:25:03 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 66B5120758
+	for <linux-mmc@archiver.kernel.org>; Mon, 13 Jul 2020 12:25:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729143AbgGMLZC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 13 Jul 2020 07:25:02 -0400
-Received: from mail-ot1-f68.google.com ([209.85.210.68]:40969 "EHLO
-        mail-ot1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727890AbgGMLZC (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Jul 2020 07:25:02 -0400
-Received: by mail-ot1-f68.google.com with SMTP id a21so9213636otq.8;
-        Mon, 13 Jul 2020 04:25:01 -0700 (PDT)
+        id S1729722AbgGMMY5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 13 Jul 2020 08:24:57 -0400
+Received: from mail-ot1-f66.google.com ([209.85.210.66]:40792 "EHLO
+        mail-ot1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728714AbgGMMY4 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Jul 2020 08:24:56 -0400
+Received: by mail-ot1-f66.google.com with SMTP id c25so9343712otf.7;
+        Mon, 13 Jul 2020 05:24:55 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=eJA1IRinJgbZYZbZZAxPJXmFYzKQSKN349MJoNikxhY=;
-        b=uZGv+V7EjAUtaIX7qqrkHOHjAOC480g/EXJdQkAft0JXXoP0esYXAbJPSfM+DaPLbj
-         uoIILSfWGZb9yYlhtApWgFo3l6iK2tqGeCMl9jUTSLGlLuR7JiaDbHlakeb/YIpL/NPy
-         Ko4qceIDp3sUmfwDlnIYzVfn10Q+XZHP7Ewu0FuHmATWkoYvl7rZc5V79JnpjSNc2Fan
-         OOQ/KIgg0t0fxQQZ3/aRyEG99zz5SYFuL6l6xI05pjQV5HgCEIipSaAzuScKUHTjReZp
-         WAp/K2jkSjG0+MnRjW0Cozi6bAozQI6DFp5dmeyYbCbAdcs772Mse8vjUeg46MPkniPT
-         3BuQ==
-X-Gm-Message-State: AOAM531rvXMVcX1FLasZrZ3/a7oXKL91mojcYZRe6KlOzlc0KyUdylYw
-        yj75zOs4UwGscxGvflefxIVATm6vXlceBNp7Rz4=
-X-Google-Smtp-Source: ABdhPJyqlZ4W8EF/gEChb9o/WfZDrwRK+3M9vyN/4qfzBUZ+4oUb8cRk4TAZO58rumpD/dex1l3MhdhTb324SMvrRLs=
-X-Received: by 2002:a05:6830:1451:: with SMTP id w17mr57043566otp.250.1594639501400;
- Mon, 13 Jul 2020 04:25:01 -0700 (PDT)
+        bh=NKzDJKlpDpfQR0XqsgcICeQR3a964ULdFkGju83hPh4=;
+        b=PZ8YhE6GE31idexlhmfb3Jirg1fmIzWelFz3bJoSnqo+EVZ4vFFRokFm0JrlHU+Wjt
+         8qYOpYcBQUmBcVX0OUjBRQkoBWsjFeCRcJbcXh8eDr7pEzceDVZB5EIZvviFDvUnaZ8x
+         uljKNjdd66Zog078sR8ZVwZsMp9ZKUAApgab5j0b11Zc2PNDmQStQJzTp3cxWTcd/e9O
+         Lbm/sK+7BLfprg7I1F6n1rLcPnhCqP7HeRblQ4MNtq9JdVXNSQZD/RWpRa9BvsTHvFGv
+         D5v7NmezD//lb4mE/NwB/84RY9jCWGE0vK7uOYm9nLO/N5m6KKkON4NwebacF8WQ8ozX
+         Qtog==
+X-Gm-Message-State: AOAM530+jeSYYKO7B1XtwgyItnWIIqrhIk0rckd9yaUI4yVg/Hu/M8ka
+        dH4zr6CDpZg/PtRo7TCQyrFQXkQoI+Qjn3B3lIw=
+X-Google-Smtp-Source: ABdhPJxFpWOlCjGDSPwtxen5jRbE20ZbTRROeQPrTNlSL/t1mKoQeo8W3SZGj1ef99nPDdRUJYfaYSbuaSZRFBz1XuE=
+X-Received: by 2002:a05:6830:1451:: with SMTP id w17mr57240483otp.250.1594643094760;
+ Mon, 13 Jul 2020 05:24:54 -0700 (PDT)
 MIME-Version: 1.0
 References: <1594230511-24790-1-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
- <1594230511-24790-3-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
-In-Reply-To: <1594230511-24790-3-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
+ <1594230511-24790-7-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
+In-Reply-To: <1594230511-24790-7-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
 From:   Geert Uytterhoeven <geert@linux-m68k.org>
-Date:   Mon, 13 Jul 2020 13:24:50 +0200
-Message-ID: <CAMuHMdUV-MzFxq4GpL4YzFrWr-aeF0__SubG72Bi-Au1OMTfYA@mail.gmail.com>
-Subject: Re: [PATCH 2/8] dt-bindings: serial: renesas,hscif: Document r8a774e1 bindings
+Date:   Mon, 13 Jul 2020 14:24:43 +0200
+Message-ID: <CAMuHMdWBLrPQJJzs=K7fHzu4UJsKyj29Yu9KZK4vf9QQNLQF+Q@mail.gmail.com>
+Subject: Re: [PATCH 6/8] arm64: dts: renesas: Initial r8a774e1 SoC device tree
 To:     Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
 Cc:     Magnus Damm <magnus.damm@gmail.com>,
         Rob Herring <robh+dt@kernel.org>,
@@ -68,20 +68,59 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Jul 8, 2020 at 7:48 PM Lad Prabhakar
+Hi Prabhakar,
+
+On Wed, Jul 8, 2020 at 7:49 PM Lad Prabhakar
 <prabhakar.mahadev-lad.rj@bp.renesas.com> wrote:
-> RZ/G2H (R8A774E1) SoC also has the R-Car gen3 compatible HSCIF ports,
-> so document the SoC specific bindings.
+> From: Marian-Cristian Rotariu <marian-cristian.rotariu.rb@bp.renesas.com>
 >
+> Basic support for the RZ/G2H SoC.
+>
+> Signed-off-by: Marian-Cristian Rotariu <marian-cristian.rotariu.rb@bp.renesas.com>
 > Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
 
+Thanks for your patch!
+
+> --- /dev/null
+> +++ b/arch/arm64/boot/dts/renesas/r8a774e1.dtsi
+
+> +               avb: ethernet@e6800000 {
+> +                       reg = <0 0xe6800000 0 0x800>, <0 0xe6a00000 0 0x10000>;
+
+According to Rev. 1.00 of the Hardware User's Manual, RZ/G2H does not
+have the Stream Buffer for EtherAVB-IF, so the second register block
+should be dropped.
+
+> +                       #address-cells = <1>;
+> +                       #size-cells = <0>;
+> +                       status = "disabled";
+> +
+> +                       /* placeholder */
+> +               };
+
+> +               gic: interrupt-controller@f1010000 {
+> +                       compatible = "arm,gic-400";
+> +                       #interrupt-cells = <3>;
+> +                       #address-cells = <0>;
+> +                       interrupt-controller;
+> +                       reg = <0x0 0xf1010000 0 0x1000>,
+> +                             <0x0 0xf1020000 0 0x20000>,
+> +                             <0x0 0xf1040000 0 0x20000>,
+> +                             <0x0 0xf1060000 0 0x20000>;
+> +                       interrupts = <GIC_PPI 9
+> +                                       (GIC_CPU_MASK_SIMPLE(2) | IRQ_TYPE_LEVEL_HIGH)>;
+
+Like Marc already pointed out, GIC_CPU_MASK_SIMPLE(8).
+
+With the above fixed:
 Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
+Will queue in renesas-devel for v5.9, after fixing the above.
 
 Gr{oetje,eeting}s,
 
                         Geert
 
--- 
+--
 Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
 
 In personal conversations with technical people, I call myself a hacker. But
