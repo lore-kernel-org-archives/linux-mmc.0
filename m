@@ -2,93 +2,92 @@ Return-Path: <SRS0=k+AD=AY=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.0 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.8 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F37DDC433E6
-	for <linux-mmc@archiver.kernel.org>; Mon, 13 Jul 2020 12:25:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 748ACC433E0
+	for <linux-mmc@archiver.kernel.org>; Mon, 13 Jul 2020 14:39:34 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D0B2820758
-	for <linux-mmc@archiver.kernel.org>; Mon, 13 Jul 2020 12:25:44 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3CC8420738
+	for <linux-mmc@archiver.kernel.org>; Mon, 13 Jul 2020 14:39:34 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=fail reason="signature verification failed" (1024-bit key) header.d=mg.codeaurora.org header.i=@mg.codeaurora.org header.b="IO3oScen"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729795AbgGMMZo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 13 Jul 2020 08:25:44 -0400
-Received: from mail-ot1-f65.google.com ([209.85.210.65]:37296 "EHLO
-        mail-ot1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729646AbgGMMZo (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Jul 2020 08:25:44 -0400
-Received: by mail-ot1-f65.google.com with SMTP id w17so9374478otl.4;
-        Mon, 13 Jul 2020 05:25:43 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=ngQqrXWqBxko6JtBE6sOb/BLJIUDqiUQnKCnbuzn+TQ=;
-        b=JmrdkBN7R6wb69xG9d7LwiOaJldc+6ACCT8EkQtjuInnYkV5+2na2UrUSZ70Njjhid
-         SZ5UBT/ApOus7mObz07QpwGXokQDr/FUSNf9Djp0I2yDAW9y96R7AlvSrQE1SjudnYxk
-         VsAckqUC4FQGZPadVaFYVECV2BQFUXFlJV1ZSVm4BlF+cfFSFunGxsy26SSe9zmGT7E7
-         5ia1pxqjYzhgsFtDuebzikCD83RSKwpbpyH7q4CVUkGQ+8Yo5oOW1qopUo3uBz/zH2Ii
-         ejQ1UA6LAcXhvdxv6OGjfyRCCTv0m6kYgwT3RenN9/l7roNdtEqi9zd4Olu4UuHC7rVW
-         c0DA==
-X-Gm-Message-State: AOAM5303Q8xJnky7cHB6QF56aA5aJbRG3qwdLoLFKZ5cmL1Fi5Zpfl0Z
-        AmKpKdOv+dekfrRS/UKKa0xMQxmjIRveNmKO8MM=
-X-Google-Smtp-Source: ABdhPJzZ7jGk83XfCIDNOcc26Jsxe8/Z0kqkWINTZY1+NJCMaRBt957GP2gBQfs3bj7Fb0KscTISiJUWI7W1/V3CD8k=
-X-Received: by 2002:a9d:2646:: with SMTP id a64mr65288809otb.107.1594643142951;
- Mon, 13 Jul 2020 05:25:42 -0700 (PDT)
+        id S1729695AbgGMOjd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 13 Jul 2020 10:39:33 -0400
+Received: from m43-7.mailgun.net ([69.72.43.7]:41503 "EHLO m43-7.mailgun.net"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1729644AbgGMOjc (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 13 Jul 2020 10:39:32 -0400
+DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
+ s=smtp; t=1594651171; h=Content-Transfer-Encoding: Content-Type:
+ MIME-Version: Message-ID: In-Reply-To: Date: References: Subject: Cc:
+ To: From: Sender; bh=RbZonCviqU0Iw3ZoaD2UXTdlv+ufrHYsECP40xt9bL8=; b=IO3oScenfkEsq1O8J+jI0zFEsNfnUQw1SJCzyQg7HYnMWfxdVFTgI6aRoEfTgRwrzvgu7KUI
+ FnakMVj9IQlPAf1pwu0sYNCFwAYDFjFLWRcFzmAtJEitucnIzf06AbX47Xs8rLsCsvZEATQo
+ x8vvE5ChBDH+7mqSy/TvaeyZdQo=
+X-Mailgun-Sending-Ip: 69.72.43.7
+X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
+Received: from smtp.codeaurora.org
+ (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171]) by
+ smtp-out-n02.prod.us-west-2.postgun.com with SMTP id
+ 5f0c72022991e765cd4ef3ff (version=TLS1.2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256); Mon, 13 Jul 2020 14:38:58
+ GMT
+Received: by smtp.codeaurora.org (Postfix, from userid 1001)
+        id A6FA8C433CA; Mon, 13 Jul 2020 14:38:57 +0000 (UTC)
+Received: from x230.qca.qualcomm.com (88-114-240-156.elisa-laajakaista.fi [88.114.240.156])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        (Authenticated sender: kvalo)
+        by smtp.codeaurora.org (Postfix) with ESMTPSA id 5D742C433C8;
+        Mon, 13 Jul 2020 14:38:55 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.3.2 smtp.codeaurora.org 5D742C433C8
+Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
+Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=none smtp.mailfrom=kvalo@codeaurora.org
+From:   Kalle Valo <kvalo@codeaurora.org>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Pali =?utf-8?Q?Roh=C3=A1r?= <pali@kernel.org>,
+        "linux-mmc\@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Amitkumar Karwar <amitkarwar@gmail.com>,
+        Siva Rebbagondla <siva8118@gmail.com>,
+        linux-wireless <linux-wireless@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Subject: Re: [PATCH] mmc: sdio: Move SDIO IDs from rsi_sdio driver to common include file
+References: <20200629072144.24351-1-pali@kernel.org>
+        <CAPDyKFp-meAG4XNgL3ixacYKpFByV-Pynz6-GRDtfT95hC-Jmw@mail.gmail.com>
+Date:   Mon, 13 Jul 2020 17:38:53 +0300
+In-Reply-To: <CAPDyKFp-meAG4XNgL3ixacYKpFByV-Pynz6-GRDtfT95hC-Jmw@mail.gmail.com>
+        (Ulf Hansson's message of "Mon, 6 Jul 2020 16:49:17 +0200")
+Message-ID: <87eepfxywy.fsf@codeaurora.org>
+User-Agent: Gnus/5.13 (Gnus v5.13) Emacs/24.5 (gnu/linux)
 MIME-Version: 1.0
-References: <1594230511-24790-1-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
- <1594230511-24790-9-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
-In-Reply-To: <1594230511-24790-9-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
-From:   Geert Uytterhoeven <geert@linux-m68k.org>
-Date:   Mon, 13 Jul 2020 14:25:32 +0200
-Message-ID: <CAMuHMdXw-rgKJUCz-eoqEQJbRuwdRfyrZj+Ot=Zrg6e4_9cWLg@mail.gmail.com>
-Subject: Re: [PATCH 8/8] arm64: dts: renesas: Add HiHope RZ/G2H sub board support
-To:     Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-Cc:     Magnus Damm <magnus.damm@gmail.com>,
-        Rob Herring <robh+dt@kernel.org>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Jason Cooper <jason@lakedaemon.net>,
-        Marc Zyngier <maz@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Catalin Marinas <catalin.marinas@arm.com>,
-        Will Deacon <will@kernel.org>,
-        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
-        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
-        <devicetree@vger.kernel.org>,
-        Linux MMC List <linux-mmc@vger.kernel.org>,
-        "open list:SERIAL DRIVERS" <linux-serial@vger.kernel.org>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Prabhakar <prabhakar.csengg@gmail.com>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Jul 8, 2020 at 7:49 PM Lad Prabhakar
-<prabhakar.mahadev-lad.rj@bp.renesas.com> wrote:
-> From: Marian-Cristian Rotariu <marian-cristian.rotariu.rb@bp.renesas.com>
+Ulf Hansson <ulf.hansson@linaro.org> writes:
+
+> On Mon, 29 Jun 2020 at 09:22, Pali Roh=C3=A1r <pali@kernel.org> wrote:
+>>
+>> Define appropriate macro names for consistency with other macros.
+>>
+>> Signed-off-by: Pali Roh=C3=A1r <pali@kernel.org>
 >
-> The HiHope RZ/G2H sub board sits below the HiHope RZ/G2H main board.
-> These boards are identical with the ones for RZ/G2M[N].
+> Applied for next, thanks!
 >
-> Signed-off-by: Marian-Cristian Rotariu <marian-cristian.rotariu.rb@bp.renesas.com>
-> Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+> If it turns out that it's a better idea to funnel this via Kale's
+> wireless tree, then I can drop it - and you may consider this as an
+> ack instead.
 
-Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
-i.e. will queue in renesas-devel for v5.9.
+I'm not expecting any conflicts with this so going via mmc tree is fine
+with me.
 
-Gr{oetje,eeting}s,
+Acked-by: Kalle Valo <kvalo@codeaurora.org>
 
-                        Geert
-
-
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+--=20
+https://wireless.wiki.kernel.org/en/developers/documentation/submittingpatc=
+hes
