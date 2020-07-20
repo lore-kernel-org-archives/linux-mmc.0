@@ -2,127 +2,240 @@ Return-Path: <SRS0=h0nN=A7=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.4 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,MIME_BASE64_TEXT,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	UNPARSEABLE_RELAY,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
+X-Spam-Status: No, score=-13.0 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BA629C433F7
-	for <linux-mmc@archiver.kernel.org>; Mon, 20 Jul 2020 00:43:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E60F7C433E0
+	for <linux-mmc@archiver.kernel.org>; Mon, 20 Jul 2020 06:27:49 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9A99022B51
-	for <linux-mmc@archiver.kernel.org>; Mon, 20 Jul 2020 00:43:11 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C14BA21775
+	for <linux-mmc@archiver.kernel.org>; Mon, 20 Jul 2020 06:27:49 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=mediatek.com header.i=@mediatek.com header.b="rvlvlbUc"
+	dkim=pass (2048-bit key) header.d=nifty.com header.i=@nifty.com header.b="J7C/fXyh"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726508AbgGTAnG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 19 Jul 2020 20:43:06 -0400
-Received: from mailgw02.mediatek.com ([1.203.163.81]:46765 "EHLO
-        mailgw02.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1726577AbgGTAmy (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 19 Jul 2020 20:42:54 -0400
-X-UUID: 0cd6a751f3a14a51a82852678aed2b43-20200720
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=mediatek.com; s=dk;
-        h=Content-Transfer-Encoding:Content-Type:MIME-Version:References:In-Reply-To:Message-ID:Date:Subject:CC:To:From; bh=juG6BnX41+DeE6Q27S76GMbkvGJcmbG29m+dVuuEOXo=;
-        b=rvlvlbUcUREd56eWXcM+xZM9O/VGdEbe9/5ysKIOjaBSPx6FRASQ6Y65aOcDtO+/yABGBGtnTTWvuivmW2AwaREvE94A464EHlKfCHOYOaO0byar/VZVEuTWITCVWqQq5VPjhLrCncVKocw1/RwdSH//J9U7ZyPCuRMwZRRA/Ek=;
-X-UUID: 0cd6a751f3a14a51a82852678aed2b43-20200720
-Received: from mtkcas32.mediatek.inc [(172.27.4.253)] by mailgw02.mediatek.com
-        (envelope-from <chun-hung.wu@mediatek.com>)
-        (mailgw01.mediatek.com ESMTP with TLS)
-        with ESMTP id 841372942; Mon, 20 Jul 2020 08:42:45 +0800
-Received: from mtkcas08.mediatek.inc (172.21.101.126) by
- MTKMBS31N2.mediatek.inc (172.27.4.87) with Microsoft SMTP Server (TLS) id
- 15.0.1497.2; Mon, 20 Jul 2020 08:42:43 +0800
-Received: from mtkswgap22.mediatek.inc (172.21.77.33) by mtkcas08.mediatek.inc
- (172.21.101.73) with Microsoft SMTP Server id 15.0.1497.2 via Frontend
- Transport; Mon, 20 Jul 2020 08:42:43 +0800
-From:   Chun-Hung Wu <chun-hung.wu@mediatek.com>
-To:     <mirq-linux@rere.qmqm.pl>, Jonathan Hunter <jonathanh@nvidia.com>,
-        Al Cooper <alcooperx@gmail.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Florian Fainelli <f.fainelli@gmail.com>,
-        <bcm-kernel-feedback-list@broadcom.com>,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>,
-        Michal Simek <michal.simek@xilinx.com>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Mark Rutland <mark.rutland@arm.com>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Pavel Machek <pavel@ucw.cz>,
-        Kate Stewart <kstewart@linuxfoundation.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
-        Pan Bian <bianpan2016@163.com>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Allison Randal <allison@lohutok.net>,
-        Mathieu Malaterre <malat@debian.org>,
-        Stanley Chu <stanley.chu@mediatek.com>,
-        Kuohong Wang <kuohong.wang@mediatek.com>
-CC:     <kernel-team@android.com>, <linux-kernel@vger.kernel.org>,
-        <linux-mmc@vger.kernel.org>, <linux-mediatek@lists.infradead.org>,
-        <devicetree@vger.kernel.org>, <wsd_upstream@mediatek.com>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <linux-arm-msm@vger.kernel.org>, <linux-tegra@vger.kernel.org>,
-        Chun-Hung Wu <chun-hung.wu@mediatek.com>
-Subject: [PATCH v7 2/4] mmc: mediatek: refine msdc timeout api
-Date:   Mon, 20 Jul 2020 08:42:37 +0800
-Message-ID: <1595205759-5825-3-git-send-email-chun-hung.wu@mediatek.com>
-X-Mailer: git-send-email 1.9.1
-In-Reply-To: <1595205759-5825-1-git-send-email-chun-hung.wu@mediatek.com>
-References: <1595205759-5825-1-git-send-email-chun-hung.wu@mediatek.com>
+        id S1726486AbgGTG1t (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 20 Jul 2020 02:27:49 -0400
+Received: from condef-05.nifty.com ([202.248.20.70]:17566 "EHLO
+        condef-05.nifty.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726084AbgGTG1t (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Jul 2020 02:27:49 -0400
+X-Greylist: delayed 371 seconds by postgrey-1.27 at vger.kernel.org; Mon, 20 Jul 2020 02:27:48 EDT
+Received: from conuserg-12.nifty.com ([10.126.8.75])by condef-05.nifty.com with ESMTP id 06K6CTPX019132
+        for <linux-mmc@vger.kernel.org>; Mon, 20 Jul 2020 15:12:29 +0900
+Received: from oscar.flets-west.jp (softbank126025067101.bbtec.net [126.25.67.101]) (authenticated)
+        by conuserg-12.nifty.com with ESMTP id 06K6Bt9l014925;
+        Mon, 20 Jul 2020 15:11:55 +0900
+DKIM-Filter: OpenDKIM Filter v2.10.3 conuserg-12.nifty.com 06K6Bt9l014925
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nifty.com;
+        s=dec2015msa; t=1595225516;
+        bh=ajfXrjRuB0rLVPDDQjNsmNcHActPPCJsNqB8ecJD89c=;
+        h=From:To:Cc:Subject:Date:From;
+        b=J7C/fXyhUPfJiiJlAhOEPPbDjm2vC8Z2dwTJfHtX0eN35TFplwpntwKPwp2s7LsQa
+         p/AzyI9623hLu0yUZNFJwD1LsRpKV7LrKcogBMadLnWb+KlmnFuG6KzCq1faN+mo1L
+         Peb1pVise7xPxuuCU4zfmIAp0QIIf+T4cKC6q+2lx8M3SiA4KmMKXp+Wx7JufdHACO
+         MpUUWeY51qM6eoH0ztzbnHQw4NC4H3PjgZc3J5gXpvyaacbS7saWoF50pwRpt6TG7v
+         +OwwSuBF+hRjqu/J9aUoALb+ZAwT3Uc7VIOxbxsiD/FWo/Qed9pkOnGlRtZRl08r3l
+         TYB88tPEGehWQ==
+X-Nifty-SrcIP: [126.25.67.101]
+From:   Masahiro Yamada <yamada.masahiro@socionext.com>
+To:     Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Masahiro Yamada <yamada.masahiro@socionext.com>,
+        linux-kernel@vger.kernel.org
+Subject: [PATCH] mmc: sdhci-cadence: do not use hardware tuning for SD mode
+Date:   Mon, 20 Jul 2020 15:11:41 +0900
+Message-Id: <20200720061141.172944-1-yamada.masahiro@socionext.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-Content-Type: text/plain
-X-TM-SNTS-SMTP: C4513997F2F8320F12D325293F26DF128DB1966A082367BFE74571B7E9C474092000:8
-X-MTK:  N
-Content-Transfer-Encoding: base64
+Content-Transfer-Encoding: 8bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-RXh0cmFjdCBtc2RjIHRpbWVvdXQgYXBpIGNvbW1vbiBwYXJ0IHRvIGhhdmUNCmJldHRlciBjb2Rl
-IGFyY2hpdGVjdHVyZSBhbmQgYXZvaWQgcmVkdW5kYW50IGNvZGUuDQoNClNpZ25lZC1vZmYtYnk6
-IENodW4tSHVuZyBXdSA8Y2h1bi1odW5nLnd1QG1lZGlhdGVrLmNvbT4NCi0tLQ0KIGRyaXZlcnMv
-bW1jL2hvc3QvbXRrLXNkLmMgfCAzMiArKysrKysrKysrKysrKysrKysrKysrLS0tLS0tLS0tLQ0K
-IDEgZmlsZSBjaGFuZ2VkLCAyMiBpbnNlcnRpb25zKCspLCAxMCBkZWxldGlvbnMoLSkNCg0KZGlm
-ZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2hvc3QvbXRrLXNkLmMgYi9kcml2ZXJzL21tYy9ob3N0L210
-ay1zZC5jDQppbmRleCBlZDM3YTNjLi4zNDdlZDcyIDEwMDY0NA0KLS0tIGEvZHJpdmVycy9tbWMv
-aG9zdC9tdGstc2QuYw0KKysrIGIvZHJpdmVycy9tbWMvaG9zdC9tdGstc2QuYw0KQEAgLTcyMywy
-MSArNzIzLDIxIEBAIHN0YXRpYyB2b2lkIG1zZGNfdW5wcmVwYXJlX2RhdGEoc3RydWN0IG1zZGNf
-aG9zdCAqaG9zdCwgc3RydWN0IG1tY19yZXF1ZXN0ICptcnEpDQogCX0NCiB9DQogDQotLyogY2xv
-Y2sgY29udHJvbCBwcmltaXRpdmVzICovDQotc3RhdGljIHZvaWQgbXNkY19zZXRfdGltZW91dChz
-dHJ1Y3QgbXNkY19ob3N0ICpob3N0LCB1MzIgbnMsIHUzMiBjbGtzKQ0KK3N0YXRpYyB1NjQgbXNk
-Y190aW1lb3V0X2NhbChzdHJ1Y3QgbXNkY19ob3N0ICpob3N0LCB1NjQgbnMsIHU2NCBjbGtzKQ0K
-IHsNCi0JdTMyIHRpbWVvdXQsIGNsa19uczsNCisJdTY0IHRpbWVvdXQsIGNsa19uczsNCiAJdTMy
-IG1vZGUgPSAwOw0KIA0KLQlob3N0LT50aW1lb3V0X25zID0gbnM7DQotCWhvc3QtPnRpbWVvdXRf
-Y2xrcyA9IGNsa3M7DQogCWlmIChob3N0LT5tbWMtPmFjdHVhbF9jbG9jayA9PSAwKSB7DQogCQl0
-aW1lb3V0ID0gMDsNCiAJfSBlbHNlIHsNCi0JCWNsa19ucyAgPSAxMDAwMDAwMDAwVUwgLyBob3N0
-LT5tbWMtPmFjdHVhbF9jbG9jazsNCi0JCXRpbWVvdXQgPSAobnMgKyBjbGtfbnMgLSAxKSAvIGNs
-a19ucyArIGNsa3M7DQorCQljbGtfbnMgID0gMTAwMDAwMDAwMFVMTDsNCisJCWRvX2RpdihjbGtf
-bnMsIGhvc3QtPm1tYy0+YWN0dWFsX2Nsb2NrKTsNCisJCXRpbWVvdXQgPSBucyArIGNsa19ucyAt
-IDE7DQorCQlkb19kaXYodGltZW91dCwgY2xrX25zKTsNCisJCXRpbWVvdXQgKz0gY2xrczsNCiAJ
-CS8qIGluIDEwNDg1NzYgc2NsayBjeWNsZSB1bml0ICovDQotCQl0aW1lb3V0ID0gKHRpbWVvdXQg
-KyAoMHgxIDw8IDIwKSAtIDEpID4+IDIwOw0KKwkJdGltZW91dCA9IERJVl9ST1VORF9VUCh0aW1l
-b3V0LCAoMHgxIDw8IDIwKSk7DQogCQlpZiAoaG9zdC0+ZGV2X2NvbXAtPmNsa19kaXZfYml0cyA9
-PSA4KQ0KIAkJCXNkcl9nZXRfZmllbGQoaG9zdC0+YmFzZSArIE1TRENfQ0ZHLA0KIAkJCQkgICAg
-ICBNU0RDX0NGR19DS01PRCwgJm1vZGUpOw0KQEAgLTc0Nyw5ICs3NDcsMjEgQEAgc3RhdGljIHZv
-aWQgbXNkY19zZXRfdGltZW91dChzdHJ1Y3QgbXNkY19ob3N0ICpob3N0LCB1MzIgbnMsIHUzMiBj
-bGtzKQ0KIAkJLypERFIgbW9kZSB3aWxsIGRvdWJsZSB0aGUgY2xrIGN5Y2xlcyBmb3IgZGF0YSB0
-aW1lb3V0ICovDQogCQl0aW1lb3V0ID0gbW9kZSA+PSAyID8gdGltZW91dCAqIDIgOiB0aW1lb3V0
-Ow0KIAkJdGltZW91dCA9IHRpbWVvdXQgPiAxID8gdGltZW91dCAtIDEgOiAwOw0KLQkJdGltZW91
-dCA9IHRpbWVvdXQgPiAyNTUgPyAyNTUgOiB0aW1lb3V0Ow0KIAl9DQotCXNkcl9zZXRfZmllbGQo
-aG9zdC0+YmFzZSArIFNEQ19DRkcsIFNEQ19DRkdfRFRPQywgdGltZW91dCk7DQorCXJldHVybiB0
-aW1lb3V0Ow0KK30NCisNCisvKiBjbG9jayBjb250cm9sIHByaW1pdGl2ZXMgKi8NCitzdGF0aWMg
-dm9pZCBtc2RjX3NldF90aW1lb3V0KHN0cnVjdCBtc2RjX2hvc3QgKmhvc3QsIHU2NCBucywgdTY0
-IGNsa3MpDQorew0KKwl1NjQgdGltZW91dDsNCisNCisJaG9zdC0+dGltZW91dF9ucyA9IG5zOw0K
-Kwlob3N0LT50aW1lb3V0X2Nsa3MgPSBjbGtzOw0KKw0KKwl0aW1lb3V0ID0gbXNkY190aW1lb3V0
-X2NhbChob3N0LCBucywgY2xrcyk7DQorCXNkcl9zZXRfZmllbGQoaG9zdC0+YmFzZSArIFNEQ19D
-RkcsIFNEQ19DRkdfRFRPQywNCisJCSAgICAgICh1MzIpKHRpbWVvdXQgPiAyNTUgPyAyNTUgOiB0
-aW1lb3V0KSk7DQogfQ0KIA0KIHN0YXRpYyB2b2lkIG1zZGNfZ2F0ZV9jbG9jayhzdHJ1Y3QgbXNk
-Y19ob3N0ICpob3N0KQ0KLS0gDQoxLjkuMQ0K
+As commit ef6b75671b5f ("mmc: sdhci-cadence: send tune request twice to
+work around errata") stated, this IP has an errata. This commit applies
+the second workaround for the SD mode.
+
+Due to the errata, it is not possible to use the hardware tuning provided
+by SDHCI_HOST_CONTROL2.
+
+Use the software-controlled tuning like the eMMC mode.
+
+Set sdhci_host_ops::platform_execute_tuning instead of overriding
+mmc_host_ops::execute_tuning.
+
+Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
+---
+
+ drivers/mmc/host/sdhci-cadence.c | 123 ++++++++++++++++---------------
+ 1 file changed, 62 insertions(+), 61 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
+index 4a6c9ba82538..4d9f7681817c 100644
+--- a/drivers/mmc/host/sdhci-cadence.c
++++ b/drivers/mmc/host/sdhci-cadence.c
+@@ -202,57 +202,6 @@ static u32 sdhci_cdns_get_emmc_mode(struct sdhci_cdns_priv *priv)
+ 	return FIELD_GET(SDHCI_CDNS_HRS06_MODE, tmp);
+ }
+ 
+-static void sdhci_cdns_set_uhs_signaling(struct sdhci_host *host,
+-					 unsigned int timing)
+-{
+-	struct sdhci_cdns_priv *priv = sdhci_cdns_priv(host);
+-	u32 mode;
+-
+-	switch (timing) {
+-	case MMC_TIMING_MMC_HS:
+-		mode = SDHCI_CDNS_HRS06_MODE_MMC_SDR;
+-		break;
+-	case MMC_TIMING_MMC_DDR52:
+-		mode = SDHCI_CDNS_HRS06_MODE_MMC_DDR;
+-		break;
+-	case MMC_TIMING_MMC_HS200:
+-		mode = SDHCI_CDNS_HRS06_MODE_MMC_HS200;
+-		break;
+-	case MMC_TIMING_MMC_HS400:
+-		if (priv->enhanced_strobe)
+-			mode = SDHCI_CDNS_HRS06_MODE_MMC_HS400ES;
+-		else
+-			mode = SDHCI_CDNS_HRS06_MODE_MMC_HS400;
+-		break;
+-	default:
+-		mode = SDHCI_CDNS_HRS06_MODE_SD;
+-		break;
+-	}
+-
+-	sdhci_cdns_set_emmc_mode(priv, mode);
+-
+-	/* For SD, fall back to the default handler */
+-	if (mode == SDHCI_CDNS_HRS06_MODE_SD)
+-		sdhci_set_uhs_signaling(host, timing);
+-}
+-
+-static const struct sdhci_ops sdhci_cdns_ops = {
+-	.set_clock = sdhci_set_clock,
+-	.get_timeout_clock = sdhci_cdns_get_timeout_clock,
+-	.set_bus_width = sdhci_set_bus_width,
+-	.reset = sdhci_reset,
+-	.set_uhs_signaling = sdhci_cdns_set_uhs_signaling,
+-};
+-
+-static const struct sdhci_pltfm_data sdhci_cdns_uniphier_pltfm_data = {
+-	.ops = &sdhci_cdns_ops,
+-	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
+-};
+-
+-static const struct sdhci_pltfm_data sdhci_cdns_pltfm_data = {
+-	.ops = &sdhci_cdns_ops,
+-};
+-
+ static int sdhci_cdns_set_tune_val(struct sdhci_host *host, unsigned int val)
+ {
+ 	struct sdhci_cdns_priv *priv = sdhci_cdns_priv(host);
+@@ -286,23 +235,24 @@ static int sdhci_cdns_set_tune_val(struct sdhci_host *host, unsigned int val)
+ 	return 0;
+ }
+ 
+-static int sdhci_cdns_execute_tuning(struct mmc_host *mmc, u32 opcode)
++/*
++ * In SD mode, software must not use the hardware tuning and instead perform
++ * an almost identical procedure to eMMC.
++ */
++static int sdhci_cdns_execute_tuning(struct sdhci_host *host, u32 opcode)
+ {
+-	struct sdhci_host *host = mmc_priv(mmc);
+ 	int cur_streak = 0;
+ 	int max_streak = 0;
+ 	int end_of_streak = 0;
+ 	int i;
+ 
+ 	/*
+-	 * This handler only implements the eMMC tuning that is specific to
+-	 * this controller.  Fall back to the standard method for SD timing.
++	 * Do not execute tuning for UHS_SDR50 or UHS_DDR50.
++	 * The delay is set by probe, based on the DT properties.
+ 	 */
+-	if (host->timing != MMC_TIMING_MMC_HS200)
+-		return sdhci_execute_tuning(mmc, opcode);
+-
+-	if (WARN_ON(opcode != MMC_SEND_TUNING_BLOCK_HS200))
+-		return -EINVAL;
++	if (host->timing != MMC_TIMING_MMC_HS200 &&
++	    host->timing != MMC_TIMING_UHS_SDR104)
++		return 0;
+ 
+ 	for (i = 0; i < SDHCI_CDNS_MAX_TUNING_LOOP; i++) {
+ 		if (sdhci_cdns_set_tune_val(host, i) ||
+@@ -325,6 +275,58 @@ static int sdhci_cdns_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 	return sdhci_cdns_set_tune_val(host, end_of_streak - max_streak / 2);
+ }
+ 
++static void sdhci_cdns_set_uhs_signaling(struct sdhci_host *host,
++					 unsigned int timing)
++{
++	struct sdhci_cdns_priv *priv = sdhci_cdns_priv(host);
++	u32 mode;
++
++	switch (timing) {
++	case MMC_TIMING_MMC_HS:
++		mode = SDHCI_CDNS_HRS06_MODE_MMC_SDR;
++		break;
++	case MMC_TIMING_MMC_DDR52:
++		mode = SDHCI_CDNS_HRS06_MODE_MMC_DDR;
++		break;
++	case MMC_TIMING_MMC_HS200:
++		mode = SDHCI_CDNS_HRS06_MODE_MMC_HS200;
++		break;
++	case MMC_TIMING_MMC_HS400:
++		if (priv->enhanced_strobe)
++			mode = SDHCI_CDNS_HRS06_MODE_MMC_HS400ES;
++		else
++			mode = SDHCI_CDNS_HRS06_MODE_MMC_HS400;
++		break;
++	default:
++		mode = SDHCI_CDNS_HRS06_MODE_SD;
++		break;
++	}
++
++	sdhci_cdns_set_emmc_mode(priv, mode);
++
++	/* For SD, fall back to the default handler */
++	if (mode == SDHCI_CDNS_HRS06_MODE_SD)
++		sdhci_set_uhs_signaling(host, timing);
++}
++
++static const struct sdhci_ops sdhci_cdns_ops = {
++	.set_clock = sdhci_set_clock,
++	.get_timeout_clock = sdhci_cdns_get_timeout_clock,
++	.set_bus_width = sdhci_set_bus_width,
++	.reset = sdhci_reset,
++	.platform_execute_tuning = sdhci_cdns_execute_tuning,
++	.set_uhs_signaling = sdhci_cdns_set_uhs_signaling,
++};
++
++static const struct sdhci_pltfm_data sdhci_cdns_uniphier_pltfm_data = {
++	.ops = &sdhci_cdns_ops,
++	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
++};
++
++static const struct sdhci_pltfm_data sdhci_cdns_pltfm_data = {
++	.ops = &sdhci_cdns_ops,
++};
++
+ static void sdhci_cdns_hs400_enhanced_strobe(struct mmc_host *mmc,
+ 					     struct mmc_ios *ios)
+ {
+@@ -385,7 +387,6 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
+ 	priv->hrs_addr = host->ioaddr;
+ 	priv->enhanced_strobe = false;
+ 	host->ioaddr += SDHCI_CDNS_SRS_BASE;
+-	host->mmc_host_ops.execute_tuning = sdhci_cdns_execute_tuning;
+ 	host->mmc_host_ops.hs400_enhanced_strobe =
+ 				sdhci_cdns_hs400_enhanced_strobe;
+ 	sdhci_enable_v4_mode(host);
+-- 
+2.25.1
 
