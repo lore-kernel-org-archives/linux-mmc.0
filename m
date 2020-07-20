@@ -2,124 +2,181 @@ Return-Path: <SRS0=h0nN=A7=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.1 required=3.0 tests=BAYES_00,
-	BODY_QUOTE_MALF_MSGID,DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-11.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BC37DC433E4
-	for <linux-mmc@archiver.kernel.org>; Mon, 20 Jul 2020 14:54:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 99644C43445
+	for <linux-mmc@archiver.kernel.org>; Mon, 20 Jul 2020 16:42:29 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 975F722C9C
-	for <linux-mmc@archiver.kernel.org>; Mon, 20 Jul 2020 14:54:39 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7B4CD22BF3
+	for <linux-mmc@archiver.kernel.org>; Mon, 20 Jul 2020 16:42:29 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="liI8qj38"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="JjmqZtkt"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728835AbgGTOyg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 20 Jul 2020 10:54:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60230 "EHLO
+        id S1726858AbgGTPnj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 20 Jul 2020 11:43:39 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39570 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726381AbgGTOyg (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Jul 2020 10:54:36 -0400
-Received: from mail-wm1-x341.google.com (mail-wm1-x341.google.com [IPv6:2a00:1450:4864:20::341])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A1C10C061794
-        for <linux-mmc@vger.kernel.org>; Mon, 20 Jul 2020 07:54:35 -0700 (PDT)
-Received: by mail-wm1-x341.google.com with SMTP id w3so25451498wmi.4
-        for <linux-mmc@vger.kernel.org>; Mon, 20 Jul 2020 07:54:35 -0700 (PDT)
+        with ESMTP id S1729188AbgGTPni (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Jul 2020 11:43:38 -0400
+Received: from mail-wm1-x344.google.com (mail-wm1-x344.google.com [IPv6:2a00:1450:4864:20::344])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 90191C061794;
+        Mon, 20 Jul 2020 08:43:37 -0700 (PDT)
+Received: by mail-wm1-x344.google.com with SMTP id f139so25644644wmf.5;
+        Mon, 20 Jul 2020 08:43:37 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:content-transfer-encoding:in-reply-to;
-        bh=2HQ9WNdGoOa/CwIT79FZmwN2wIlYigkcboh5TFIst00=;
-        b=liI8qj382ayQB0NSb2owvG3UxSLUff0mldH1n6TLUcWypVFzXS2rgB/iXysgz3XNOx
-         Is1y5KLq2ozy3dggJrJhcSH3SZg/rUCORgYHs9av6RFC4v8CpHObZI3BErLMGcCjGpjq
-         miRojRYwoBWVi8xxEnRrZI2dqQ2PXxy9dRMnQ9zQB9/rkizwJLACyRKFX7ZZDYvkel3E
-         gGTOH1MFfpsf9pPvntMP2BmlonSpqYBDDwHRDAdpTJEhbiHlhJ3eeaX0FOj/VsMBg0MO
-         JhA+sltxOCZyrbwtPjXTYSez+E+5LZL3XmrtJf2bTy3i42XRO4rat9dr4SM+/d3258OL
-         DaKQ==
+        d=gmail.com; s=20161025;
+        h=subject:to:cc:references:from:message-id:date:user-agent
+         :mime-version:in-reply-to:content-language:content-transfer-encoding;
+        bh=autVWWtMkcWJD2mnHeXx5OQfP35st6FKtCjEISqTu28=;
+        b=JjmqZtktLvk5Qc3N7R2sS1d6oGjjgW6kfwGPqn1Syigos8hcDhGKPO5zhOGp+p3mdM
+         7oFKNkkQZHy4DktD0yhGa/K5vU5uaVMuJjOzPVn+5YIFKs57KtNwbZbuRvelWsEaccIw
+         zvfTew212u4gLW5o5Px6DA8QVeHMU1ytQhfyDQrdJkrZXhBXGRmM8Lrx+Vnn29D5nKJA
+         NVj5ydC0Wf/yr/gH3kB+6lCRjT5wi6q/7Wfow+gFR8X8oIg1LvNCY9qKphQA1W8OPhZ7
+         qbmvTMCpGd6c734qKKg3v1DXdQBwVnv0ndrx1jbr275X5hPbR8dk3/R7fplUPwwA13g9
+         iwpg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:content-transfer-encoding
-         :in-reply-to;
-        bh=2HQ9WNdGoOa/CwIT79FZmwN2wIlYigkcboh5TFIst00=;
-        b=uX5E1MJzm6l9rveCTQ8Z6jLUGL86t6m15kcE2Hg1b2kNLqiVJtCxYmnAjnDiaOKg1H
-         hTyH74/x80l/swWkD0Q2CaLFsPQOeZql/I9SiFiynUTKOmKcrS+SNwqr13AWCG3++MzK
-         lOzUwyohIfVURO4oUgaydaXbIIGj7E0anWpMIVNvgLFpSDEhkRX7eKQgpdDJThgcHlqN
-         LmYygHwN8MPDlDYxL5Mp0K8G15zGvqXw7rlzixyIfX5Lm6BezkcF2OsOnyvaTZa8BqPq
-         UhkpTPDHgMHCZWCD1dP8CqGOeaWxDk8aRO343EwrJz3Nkayk4aoWNdaMs+nTsID9qvQ/
-         k5lA==
-X-Gm-Message-State: AOAM533BX1wRd/35RVeend/ZDZL6OZY1SV6mAxdGI59ZMVDQBtMEqmNM
-        5uwH/M2iQeYESY0QPJAfBKL43g==
-X-Google-Smtp-Source: ABdhPJzy+0wOfpiE6LNYySlZaHbDcWwb4VOTDYMPwGCSTSlzWPwT2BICiSwU4oN658n/kwOnVQzUJg==
-X-Received: by 2002:a7b:cb92:: with SMTP id m18mr21097163wmi.94.1595256874417;
-        Mon, 20 Jul 2020 07:54:34 -0700 (PDT)
-Received: from dell ([2.27.167.94])
-        by smtp.gmail.com with ESMTPSA id 62sm17771123wrq.31.2020.07.20.07.54.33
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 20 Jul 2020 07:54:33 -0700 (PDT)
-Date:   Mon, 20 Jul 2020 15:54:32 +0100
-From:   Lee Jones <lee.jones@linaro.org>
-To:     Linus Walleij <linus.walleij@linaro.org>
-Cc:     ricky_wu@realtek.com, Arnd Bergmann <arnd@arndb.de>,
-        Greg KH <gregkh@linuxfoundation.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>, rui_feng@realsil.com.cn,
-        Bjorn Helgaas <bhelgaas@google.com>, kdlnx@doth.eu,
-        Rui Miguel Silva <rmfrfs@gmail.com>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>
-Subject: Re: [PATCH] misc: rtsx: Add support new chip rts5228 mmc: rtsx: Add
- support MMC_CAP2_NO_MMC
-Message-ID: <20200720145432.GB621928@dell>
-References: <20200706070259.32565-1-ricky_wu@realtek.com>
- <CACRpkdbkpwMaS3FR1F1-WU5AjwvBchwLDKDhgHAA+-sKZLRpsg@mail.gmail.com>
- <20200720145202.GA621928@dell>
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=autVWWtMkcWJD2mnHeXx5OQfP35st6FKtCjEISqTu28=;
+        b=JZYPmGnfhJTBst3WuOULUS4sxXOO0nLCmEfHsdxrsg8JLyC3pdeGJJPgFCL7gPn8MR
+         ntXvSB2AFOV59MDOTw7AJQp8Zzdcmie5OS6FyWEaAyzAXtLTPs+GSHU3WCw036YKaTZp
+         WIKlkOKWhxwOggzPJdrjwVPFaKWlXXCpmyz2qEdSC1NXdWtxNfXGJoSOfE9AnFPRVvb8
+         OYSwvEZiNhddF8C6wBntEv0lfZEDkk+uG3R31Qp0Out3pHYUi/FeoeubH6z9gOkMUvPN
+         TYVg9V70QoyxkbMjeLAPMa00MI39scJ2dhXm0TzcNLpOjTSSMe5hh/0myQhvNzLNTGJ0
+         RWWA==
+X-Gm-Message-State: AOAM5322DzB+zY9d5mZpblMNXubBuYTB7JtdGsOU4bcdwacSWeBkoR3i
+        htTjxX2zhwOiJ60NWk93TnqafshCBag=
+X-Google-Smtp-Source: ABdhPJzHR5BO0TIk52hY7BBc/k3XRAgpQOahFxFCGnpt58cP2vReN2cLRt0KiZXlFZBCmuhiMR+Qaw==
+X-Received: by 2002:a7b:c857:: with SMTP id c23mr23660652wml.155.1595259815959;
+        Mon, 20 Jul 2020 08:43:35 -0700 (PDT)
+Received: from ziggy.stardust (81.172.57.81.dyn.user.ono.com. [81.172.57.81])
+        by smtp.gmail.com with ESMTPSA id e5sm16981210wrc.37.2020.07.20.08.43.33
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 20 Jul 2020 08:43:35 -0700 (PDT)
+Subject: Re: [PATCH v7 2/4] mmc: mediatek: refine msdc timeout api
+To:     Chun-Hung Wu <chun-hung.wu@mediatek.com>, mirq-linux@rere.qmqm.pl,
+        Jonathan Hunter <jonathanh@nvidia.com>,
+        Al Cooper <alcooperx@gmail.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Florian Fainelli <f.fainelli@gmail.com>,
+        bcm-kernel-feedback-list@broadcom.com,
+        Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Michal Simek <michal.simek@xilinx.com>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Mark Rutland <mark.rutland@arm.com>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Pavel Machek <pavel@ucw.cz>,
+        Kate Stewart <kstewart@linuxfoundation.org>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+        Pan Bian <bianpan2016@163.com>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Allison Randal <allison@lohutok.net>,
+        Mathieu Malaterre <malat@debian.org>,
+        Stanley Chu <stanley.chu@mediatek.com>,
+        Kuohong Wang <kuohong.wang@mediatek.com>
+Cc:     kernel-team@android.com, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-mediatek@lists.infradead.org,
+        devicetree@vger.kernel.org, wsd_upstream@mediatek.com,
+        linux-arm-kernel@lists.infradead.org,
+        linux-arm-msm@vger.kernel.org, linux-tegra@vger.kernel.org
+References: <1595205759-5825-1-git-send-email-chun-hung.wu@mediatek.com>
+ <1595205759-5825-3-git-send-email-chun-hung.wu@mediatek.com>
+From:   Matthias Brugger <matthias.bgg@gmail.com>
+Message-ID: <eb1d5973-55f2-3fb4-bf9c-03b98bd6955b@gmail.com>
+Date:   Mon, 20 Jul 2020 17:43:33 +0200
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.9.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <20200720145202.GA621928@dell>
+In-Reply-To: <1595205759-5825-3-git-send-email-chun-hung.wu@mediatek.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 20 Jul 2020, Lee Jones wrote:
 
-> On Mon, 20 Jul 2020, Linus Walleij wrote:
+
+On 20/07/2020 02:42, Chun-Hung Wu wrote:
+> Extract msdc timeout api common part to have
+> better code architecture and avoid redundant code.
 > 
-> > On Mon, Jul 6, 2020 at 9:03 AM <ricky_wu@realtek.com> wrote:
-> > 
-> > >  drivers/misc/cardreader/Makefile   |   2 +-
-> > >  drivers/misc/cardreader/rts5228.c  | 740 +++++++++++++++++++++++++++++
-> > >  drivers/misc/cardreader/rts5228.h  | 168 +++++++
-> > >  drivers/misc/cardreader/rtsx_pcr.c |  89 ++--
-> > >  drivers/misc/cardreader/rtsx_pcr.h |   5 +
-> > 
-> > This drivers/misc/cardreader business is a big confusion for my mind.
-> > 
-> > Is it really that fantastic that it needs to be a unique special case?
-> > 
-> > To me it looks like a drivers/mfd thing which should have separate
-> > drivers/regulator/rts5228.c (LDOs)
-> > drivers/clk/rts5228.c (clocks)
-> > subdrivers.
-> > 
-> > See for example drivers/mfd/sta2x11-mfd.c thay spawns a few
-> > devices off a PCI card.
+> Signed-off-by: Chun-Hung Wu <chun-hung.wu@mediatek.com>
+
+Reviewed-by: Matthias Brugger <matthias.bgg@gmail.com>
+
+> ---
+>   drivers/mmc/host/mtk-sd.c | 32 ++++++++++++++++++++++----------
+>   1 file changed, 22 insertions(+), 10 deletions(-)
 > 
-> Thanks for Cc'ing me Linus.
+> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+> index ed37a3c..347ed72 100644
+> --- a/drivers/mmc/host/mtk-sd.c
+> +++ b/drivers/mmc/host/mtk-sd.c
+> @@ -723,21 +723,21 @@ static void msdc_unprepare_data(struct msdc_host *host, struct mmc_request *mrq)
+>   	}
+>   }
+>   
+> -/* clock control primitives */
+> -static void msdc_set_timeout(struct msdc_host *host, u32 ns, u32 clks)
+> +static u64 msdc_timeout_cal(struct msdc_host *host, u64 ns, u64 clks)
+>   {
+> -	u32 timeout, clk_ns;
+> +	u64 timeout, clk_ns;
+>   	u32 mode = 0;
+>   
+> -	host->timeout_ns = ns;
+> -	host->timeout_clks = clks;
+>   	if (host->mmc->actual_clock == 0) {
+>   		timeout = 0;
+>   	} else {
+> -		clk_ns  = 1000000000UL / host->mmc->actual_clock;
+> -		timeout = (ns + clk_ns - 1) / clk_ns + clks;
+> +		clk_ns  = 1000000000ULL;
+> +		do_div(clk_ns, host->mmc->actual_clock);
+> +		timeout = ns + clk_ns - 1;
+> +		do_div(timeout, clk_ns);
+> +		timeout += clks;
+>   		/* in 1048576 sclk cycle unit */
+> -		timeout = (timeout + (0x1 << 20) - 1) >> 20;
+> +		timeout = DIV_ROUND_UP(timeout, (0x1 << 20));
+>   		if (host->dev_comp->clk_div_bits == 8)
+>   			sdr_get_field(host->base + MSDC_CFG,
+>   				      MSDC_CFG_CKMOD, &mode);
+> @@ -747,9 +747,21 @@ static void msdc_set_timeout(struct msdc_host *host, u32 ns, u32 clks)
+>   		/*DDR mode will double the clk cycles for data timeout */
+>   		timeout = mode >= 2 ? timeout * 2 : timeout;
+>   		timeout = timeout > 1 ? timeout - 1 : 0;
+> -		timeout = timeout > 255 ? 255 : timeout;
+>   	}
+> -	sdr_set_field(host->base + SDC_CFG, SDC_CFG_DTOC, timeout);
+> +	return timeout;
+> +}
+> +
+> +/* clock control primitives */
+> +static void msdc_set_timeout(struct msdc_host *host, u64 ns, u64 clks)
+> +{
+> +	u64 timeout;
+> +
+> +	host->timeout_ns = ns;
+> +	host->timeout_clks = clks;
+> +
+> +	timeout = msdc_timeout_cal(host, ns, clks);
+> +	sdr_set_field(host->base + SDC_CFG, SDC_CFG_DTOC,
+> +		      (u32)(timeout > 255 ? 255 : timeout));
+>   }
+>   
+>   static void msdc_gate_clock(struct msdc_host *host)
 > 
-> Can you please bounce the diff to me too?
-
-Never mind, I found it.
-
-So you may use MFD to register the (regulator, clk, card reader) child
-devices, but pretty much none of that *functional* code belongs in
-drivers/mfd.
-
--- 
-Lee Jones [李琼斯]
-Senior Technical Lead - Developer Services
-Linaro.org │ Open source software for Arm SoCs
-Follow Linaro: Facebook | Twitter | Blog
