@@ -2,134 +2,128 @@ Return-Path: <SRS0=gIoP=BB=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-4.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D101CC433E4
-	for <linux-mmc@archiver.kernel.org>; Wed, 22 Jul 2020 03:48:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 26947C433E5
+	for <linux-mmc@archiver.kernel.org>; Wed, 22 Jul 2020 08:51:01 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B17A720714
-	for <linux-mmc@archiver.kernel.org>; Wed, 22 Jul 2020 03:48:42 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id F29F22077D
+	for <linux-mmc@archiver.kernel.org>; Wed, 22 Jul 2020 08:51:00 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="V6d5SPlt"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="BsMkqFMF"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1731973AbgGVDsj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 21 Jul 2020 23:48:39 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37262 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1731920AbgGVDsj (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Jul 2020 23:48:39 -0400
-Received: from mail-pj1-x1044.google.com (mail-pj1-x1044.google.com [IPv6:2607:f8b0:4864:20::1044])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0D6A0C0619DC
-        for <linux-mmc@vger.kernel.org>; Tue, 21 Jul 2020 20:48:39 -0700 (PDT)
-Received: by mail-pj1-x1044.google.com with SMTP id k5so461892pjg.3
-        for <linux-mmc@vger.kernel.org>; Tue, 21 Jul 2020 20:48:39 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=G5KYjb9bNgf9eCCuCYizkaT2kpB0m1ixCzJ1dcGJY6U=;
-        b=V6d5SPltSWqumvHstU3VvtLH3Ci84LGquioPfjldy1c4jhoQ6FglxljnmTta/cKn+T
-         qIcb73/3/Zq5LzqI+8Pdijq8nmyesJbsxBubdTV4uA/K+CEfCl0t2wbrmjCM1Bi79Hvd
-         uRDKG72AbHFIAZY3whaU+wxChhzDp4CiViLqQugbf7Zfy2Ob0xKH52lgjvJkm+5SrsB1
-         /pw16L22jEI8bHLKdleJtlTaNbG6wdY69zqC9mtS0n9vQu4yMUTfkBHoz8OZMDCBZFS6
-         egrg/DTuecWnSNHSjcVkGw82Rm50z4ISCRC8t8LfAjZJv6IQ2RFd+23SO7+xYIeeuT+k
-         UxkQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=G5KYjb9bNgf9eCCuCYizkaT2kpB0m1ixCzJ1dcGJY6U=;
-        b=BzZ5xds/8BwKtvR7+DJSl8GKUcAkSpM42JtP/Wz9RhYEZN6/iQCqM1wDm2hMJot3f/
-         Ekj3HtUDm6emutjds4zMzSLH2JzC7gwcJdpWiooiWUSEvnR2ImDWRWnarK4fN/9ACEpr
-         RgrQDUTXexAY7BwlZGSz2IeQBgqySjZmbf1GweQCQQve2NkD5bTH1n2mBxHtBrYZxGhF
-         6oyVivA6vE04/PaCoX4ii2pMLXBd80u5Z1Ug84mJnGjSdf6Of7Zw4izqPDIMX00Y27vF
-         1xIlSfqc3bOaPgmxeE9SuNe/nugrLFhrIu7U2HB0EWbX5YO+Vw3dJEg0ZyvWA90BxrtV
-         AGrA==
-X-Gm-Message-State: AOAM5334O3Byl0iwgB4rKYJjpiMOyPZ2vF5scDiYXKQKkpvR834EqZ7I
-        mmvodw+6+DsH5yel+N3B9H7X8w==
-X-Google-Smtp-Source: ABdhPJxHUzJMxV2Q5+PGR2CNZ4P47YBRSndklbesbF/hAWkYin017A7oyZFQAs4vvRl+MU0+ZZw73A==
-X-Received: by 2002:a17:90a:a393:: with SMTP id x19mr8219218pjp.228.1595389718402;
-        Tue, 21 Jul 2020 20:48:38 -0700 (PDT)
-Received: from builder.lan (104-188-17-28.lightspeed.sndgca.sbcglobal.net. [104.188.17.28])
-        by smtp.gmail.com with ESMTPSA id e8sm21383713pff.185.2020.07.21.20.48.37
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 21 Jul 2020 20:48:37 -0700 (PDT)
-Date:   Tue, 21 Jul 2020 20:46:44 -0700
-From:   Bjorn Andersson <bjorn.andersson@linaro.org>
-To:     Shaik Sajida Bhanu <sbhanu@codeaurora.org>
-Cc:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
-        robh+dt@kernel.org, mka@chromium.org, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        devicetree@vger.kernel.org, agross@kernel.org,
-        Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
-Subject: Re: [PATCH V2] arm64: dts: qcom: sc7180: Include xo clock to sdhc
- clocks list
-Message-ID: <20200722034644.GP388985@builder.lan>
-References: <1595328268-29398-1-git-send-email-sbhanu@codeaurora.org>
+        id S1731052AbgGVIuw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 22 Jul 2020 04:50:52 -0400
+Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:59350 "EHLO
+        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1731035AbgGVIuv (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Jul 2020 04:50:51 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1595407849;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=H24R8qVAxwYFcsepHzRqkh8E1U4cEvx3I96Wl9ElKtQ=;
+        b=BsMkqFMF+ubQ7wV8IQwb1R24ZoiXLlH0MF5Kemojim66VCmvvZqO2LQ/BTeZQyWw0/lzDv
+        nKO82olnWP0W53eCBitVLNer4S5V2ilxmcgU1IVgsBxxvCN29c4dKXoefDYaHblosSrbco
+        gOLutvD6Bw2HAfToUzdf6TVC03FuY/8=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-293-M4qKbPESN9G2w4ycP9uygQ-1; Wed, 22 Jul 2020 04:50:46 -0400
+X-MC-Unique: M4qKbPESN9G2w4ycP9uygQ-1
+Received: from smtp.corp.redhat.com (int-mx06.intmail.prod.int.phx2.redhat.com [10.5.11.16])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 13A376C2F3;
+        Wed, 22 Jul 2020 08:50:34 +0000 (UTC)
+Received: from fedora-32-enviroment (unknown [10.35.206.213])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 3615969317;
+        Wed, 22 Jul 2020 08:50:27 +0000 (UTC)
+Message-ID: <c9124b5487ed51e02dc9264fa8c87b93313fa68f.camel@redhat.com>
+Subject: Re: [PATCH 01/10] block: introduce blk_is_valid_logical_block_size
+From:   Maxim Levitsky <mlevitsk@redhat.com>
+To:     Christoph Hellwig <hch@lst.de>
+Cc:     linux-kernel@vger.kernel.org, Keith Busch <kbusch@kernel.org>,
+        Josef Bacik <josef@toxicpanda.com>,
+        "open list:BLOCK LAYER" <linux-block@vger.kernel.org>,
+        Sagi Grimberg <sagi@grimberg.me>, Jens Axboe <axboe@kernel.dk>,
+        "open list:NVM EXPRESS DRIVER" <linux-nvme@lists.infradead.org>,
+        "open list:SCSI CDROM DRIVER" <linux-scsi@vger.kernel.org>,
+        Tejun Heo <tj@kernel.org>,
+        Bart Van Assche <bvanassche@acm.org>,
+        "Martin K. Petersen" <martin.petersen@oracle.com>,
+        Damien Le Moal <damien.lemoal@wdc.com>,
+        Jason Wang <jasowang@redhat.com>,
+        Maxim Levitsky <maximlevitsky@gmail.com>,
+        Stefan Hajnoczi <stefanha@redhat.com>,
+        Colin Ian King <colin.king@canonical.com>,
+        "Michael S. Tsirkin" <mst@redhat.com>,
+        Paolo Bonzini <pbonzini@redhat.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Ajay Joshi <ajay.joshi@wdc.com>,
+        Ming Lei <ming.lei@redhat.com>,
+        "open list:SONY MEMORYSTICK SUBSYSTEM" <linux-mmc@vger.kernel.org>,
+        Satya Tangirala <satyat@google.com>,
+        "open list:NETWORK BLOCK DEVICE (NBD)" <nbd@other.debian.org>,
+        Hou Tao <houtao1@huawei.com>, Jens Axboe <axboe@fb.com>,
+        "open list:VIRTIO CORE AND NET DRIVERS" 
+        <virtualization@lists.linux-foundation.org>,
+        "James E.J. Bottomley" <jejb@linux.ibm.com>,
+        Alex Dubov <oakad@yahoo.com>
+Date:   Wed, 22 Jul 2020 11:50:26 +0300
+In-Reply-To: <20200721151313.GA10620@lst.de>
+References: <20200721105239.8270-1-mlevitsk@redhat.com>
+         <20200721105239.8270-2-mlevitsk@redhat.com> <20200721151313.GA10620@lst.de>
+Content-Type: text/plain; charset="UTF-8"
+User-Agent: Evolution 3.36.2 (3.36.2-1.fc32) 
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1595328268-29398-1-git-send-email-sbhanu@codeaurora.org>
+Content-Transfer-Encoding: 7bit
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.16
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue 21 Jul 03:44 PDT 2020, Shaik Sajida Bhanu wrote:
-
-> From: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+On Tue, 2020-07-21 at 17:13 +0200, Christoph Hellwig wrote:
+> > +/**
+> > + * blk_check_logical_block_size - check if logical block size is
+> > supported
+> > + * by the kernel
+> > + * @size:  the logical block size, in bytes
+> > + *
+> > + * Description:
+> > + *   This function checks if the block layers supports given block
+> > size
+> > + **/
+> > +bool blk_is_valid_logical_block_size(unsigned int size)
+> > +{
+> > +	return size >= SECTOR_SIZE && size <= PAGE_SIZE &&
+> > !is_power_of_2(size);
 > 
-> Include xo clock to sdhc clocks list which will be used
-> in calculating MCLK_FREQ field of DLL_CONFIG2 register.
+> Shouldn't this be a ... && is_power_of_2(size)?
+Yep. I noticed that few minutes after I sent the patches.
+
 > 
-
-Can you please describe why this is useful, perhaps required? What
-difference does this make and what problem does it resolve?
-
-If required please include a Fixes: tag here to show that you're fixing
-the previous commit.
-
-Thanks,
-Bjorn
-
-> Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
-> Signed-off-by: Shaik Sajida Bhanu <sbhanu@codeaurora.org>
-> ---
->  arch/arm64/boot/dts/qcom/sc7180.dtsi | 10 ++++++----
->  1 file changed, 6 insertions(+), 4 deletions(-)
+> >  	if (q->limits.io_min < q->limits.physical_block_size)
+> >  		q->limits.io_min = q->limits.physical_block_size;
+> > +
+> >  }
 > 
-> diff --git a/arch/arm64/boot/dts/qcom/sc7180.dtsi b/arch/arm64/boot/dts/qcom/sc7180.dtsi
-> index d78a066..7ccb780 100644
-> --- a/arch/arm64/boot/dts/qcom/sc7180.dtsi
-> +++ b/arch/arm64/boot/dts/qcom/sc7180.dtsi
-> @@ -682,8 +682,9 @@
->  			interrupt-names = "hc_irq", "pwr_irq";
->  
->  			clocks = <&gcc GCC_SDCC1_APPS_CLK>,
-> -					<&gcc GCC_SDCC1_AHB_CLK>;
-> -			clock-names = "core", "iface";
-> +					<&gcc GCC_SDCC1_AHB_CLK>,
-> +					<&xo_board>;
-> +			clock-names = "core", "iface", "xo";
->  			interconnects = <&aggre1_noc MASTER_EMMC &mc_virt SLAVE_EBI1>,
->  				<&gem_noc MASTER_APPSS_PROC &config_noc SLAVE_EMMC_CFG>;
->  			interconnect-names = "sdhc-ddr","cpu-sdhc";
-> @@ -2481,8 +2482,9 @@
->  			interrupt-names = "hc_irq", "pwr_irq";
->  
->  			clocks = <&gcc GCC_SDCC2_APPS_CLK>,
-> -					<&gcc GCC_SDCC2_AHB_CLK>;
-> -			clock-names = "core", "iface";
-> +					<&gcc GCC_SDCC2_AHB_CLK>,
-> +					<&xo_board>;
-> +			clock-names = "core", "iface", "xo";
->  
->  			interconnects = <&aggre1_noc MASTER_SDCC_2 &mc_virt SLAVE_EBI1>,
->  				<&gem_noc MASTER_APPSS_PROC &config_noc	SLAVE_SDCC_2>;
-> -- 
-> QUALCOMM INDIA, on behalf of Qualcomm Innovation Center, Inc. is a member 
-> of Code Aurora Forum, hosted by The Linux Foundation
+> This adds a pointless empty line.
+Will fix.
 > 
+> > +extern bool blk_is_valid_logical_block_size(unsigned int size);
+> 
+> No need for externs on function declarations.
+I also think so, but I followed the style of all existing function
+prototypes in this file. Most of them have 'extern'.
+
+Thanks for the review!
+
+Best regards,
+	maxim Levitsky
+
