@@ -2,147 +2,124 @@ Return-Path: <SRS0=uUZJ=BD=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-4.0 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DF3D3C433E4
-	for <linux-mmc@archiver.kernel.org>; Fri, 24 Jul 2020 12:44:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6CDC4C433E1
+	for <linux-mmc@archiver.kernel.org>; Fri, 24 Jul 2020 13:36:09 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id BCBDB20767
-	for <linux-mmc@archiver.kernel.org>; Fri, 24 Jul 2020 12:44:20 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="EuAwwFRW"
+	by mail.kernel.org (Postfix) with ESMTP id 562DF206D7
+	for <linux-mmc@archiver.kernel.org>; Fri, 24 Jul 2020 13:36:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726967AbgGXMoU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 24 Jul 2020 08:44:20 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58732 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726326AbgGXMoT (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Jul 2020 08:44:19 -0400
-Received: from mail-vs1-xe41.google.com (mail-vs1-xe41.google.com [IPv6:2607:f8b0:4864:20::e41])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2D3D9C0619D3
-        for <linux-mmc@vger.kernel.org>; Fri, 24 Jul 2020 05:44:19 -0700 (PDT)
-Received: by mail-vs1-xe41.google.com with SMTP id x205so4802370vsc.11
-        for <linux-mmc@vger.kernel.org>; Fri, 24 Jul 2020 05:44:19 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=FGHawDNNHiCHWgrOxcXKqCSMD7oEiI1UqCmKADBljuU=;
-        b=EuAwwFRWeuUdb4vF35T0sjuH5dKD0BasNwv6q+tQLoNCduhL0GWSu7acttBEE3iv1H
-         bjK3j7nBVDXvHpMygDOgB/y1hWSgES61TVbuJCpr5iBiZuBSSEwo+9b0oVR3jhDxAtRx
-         UNKAU8CRfgMVR0ZeNRGN4w0yIX6LkRxIiFL/Xsme9m/0kt5bdvN7Rk6byC9Swb+auhbI
-         c2TD/rY5ENrsNnfZmnuh8zJ0mfiuK/2aYSEB4m9eqy4IQJcfXr+UtbMp5rlsNxmnRs6d
-         fjwfLn9fg2+ssivzVRjo8yVs4khRFeKgUgX6O8zn/chNccrgLUnT2x/QoJkUFzgauZ1y
-         onMg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=FGHawDNNHiCHWgrOxcXKqCSMD7oEiI1UqCmKADBljuU=;
-        b=MVQzj079tWDidJwo6IeAao6YaNLcV7O6Cjy3dKb99p0QauwZhvZskDtL5I/efM9/EK
-         PTOmX8c5OkrXQJ+OY4CZVI9fUCb3o89O3mpyBl6RMvbTEB/djAZI7oMhK0Njej7vKN1p
-         oiTJpxNhBhWAiqIxWD6140X3FC3IrIEpaepZL9KWHgzzyU6yQ7han1v9ZGas8Dfm1+Xt
-         rGQjUt9RSM+HiM4Oo53JB4gA46tmT6Sdb7bK5eOXL9mcre/YtL0t1ahRa2z0Y/gbsJto
-         tP10IRPAkO2O+oaV5n2UiF3noIrY5PmcYZr8v5J/RGQzjNIT6irRnbf/VTcNa+ZyhF+C
-         x5eA==
-X-Gm-Message-State: AOAM533demGRaQzEab6oTWk7p4iYKmwV3ZPyeebfyIpfqTg/itCcD86V
-        /F6DDD8XOrzSJzGhuP1d88pQ5nDDiK5Rvkj73zyrGeMW6SM=
-X-Google-Smtp-Source: ABdhPJycLPobdqjIlIM9BjxmDXvzoDmUte/V7P4h0bRLVGruk4z8NXmk6DXEi6GUkT4hQpVU32Ou5Bq/2mmkmEW1tWU=
-X-Received: by 2002:a67:f98c:: with SMTP id b12mr7556870vsq.34.1595594658333;
- Fri, 24 Jul 2020 05:44:18 -0700 (PDT)
+        id S1726979AbgGXNgI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 24 Jul 2020 09:36:08 -0400
+Received: from mout.kundenserver.de ([212.227.126.133]:59163 "EHLO
+        mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726366AbgGXNgH (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Jul 2020 09:36:07 -0400
+Received: from mail-qk1-f180.google.com ([209.85.222.180]) by
+ mrelayeu.kundenserver.de (mreue010 [212.227.15.129]) with ESMTPSA (Nemesis)
+ id 1N2Unv-1kwxDf44zv-013xIE; Fri, 24 Jul 2020 15:36:05 +0200
+Received: by mail-qk1-f180.google.com with SMTP id h7so8575895qkk.7;
+        Fri, 24 Jul 2020 06:36:04 -0700 (PDT)
+X-Gm-Message-State: AOAM532hYaDo6t+trYK+KCT+JMsg5jycchuLnjo51AAU19Wp3gLf8Ncu
+        35WOXYGXfPYuI7U6enw6YYbLwiplR8D/VkeqtT0=
+X-Google-Smtp-Source: ABdhPJw8PDUAcsa19D0JsA1UiJ+7gWd1V/OX8unaG7ilwuCw9y8HfDDcLAZ6+8VBtnlLCvi1Km+wsSFZgRokoxK9dkY=
+X-Received: by 2002:a37:9004:: with SMTP id s4mr10380921qkd.286.1595597763603;
+ Fri, 24 Jul 2020 06:36:03 -0700 (PDT)
 MIME-Version: 1.0
-References: <20200618141326.25723-1-lars.povlsen@microchip.com>
- <20200618141326.25723-3-lars.povlsen@microchip.com> <aee90bbf-f0ff-b0cb-b10a-9a2f3bb6acca@intel.com>
- <87wo2vkbns.fsf@soft-dev15.microsemi.net> <CAPDyKFpozhFSzWEM6s8cdeG+8JGX00YyFSzeXZxCsY7Efn0aeQ@mail.gmail.com>
- <87zh7pf8sg.fsf@soft-dev15.microsemi.net>
-In-Reply-To: <87zh7pf8sg.fsf@soft-dev15.microsemi.net>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 24 Jul 2020 14:43:41 +0200
-Message-ID: <CAPDyKFpzxPnVFwrPiG738_HpKnypvZev5r874k5WVgL8GEXHJg@mail.gmail.com>
-Subject: Re: [PATCH v4 2/3] sdhci: sparx5: Add Sparx5 SoC eMMC driver
-To:     Lars Povlsen <lars.povlsen@microchip.com>
-List-Id: <soc.lore.kernel.org>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>, SoC Team <soc@kernel.org>,
-        Microchip Linux Driver Support <UNGLinuxDriver@microchip.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        DTML <devicetree@vger.kernel.org>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Alexandre Belloni <alexandre.belloni@bootlin.com>
+References: <20200716141534.30241-1-ulf.hansson@linaro.org>
+ <CAK8P3a1+rwY5uFpUMijgET_W78Tj+tqqKDevgqstjUmmhxdKuA@mail.gmail.com> <CAPDyKFp3D8xZCSGNMm2ZOpa5f5wMwderCuAA5yLMXdjoKFoxQw@mail.gmail.com>
+In-Reply-To: <CAPDyKFp3D8xZCSGNMm2ZOpa5f5wMwderCuAA5yLMXdjoKFoxQw@mail.gmail.com>
+From:   Arnd Bergmann <arnd@arndb.de>
+Date:   Fri, 24 Jul 2020 15:35:47 +0200
+X-Gmail-Original-Message-ID: <CAK8P3a3wLPv58uqTqyXk7+0Cxoe4vdfahzCxXOp2pdGZDkeFsw@mail.gmail.com>
+Message-ID: <CAK8P3a3wLPv58uqTqyXk7+0Cxoe4vdfahzCxXOp2pdGZDkeFsw@mail.gmail.com>
+Subject: Re: [PATCH] mmc: core: Initial support for SD express card/host
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
+        Christoph Hellwig <hch@lst.de>,
+        Rui Feng <rui_feng@realsil.com.cn>,
+        linux-nvme@lists.infradead.org,
+        linux-pci <linux-pci@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 Content-Type: text/plain; charset="UTF-8"
+X-Provags-ID: V03:K1:sWySF2uPvNfnIJt2RYlZ05DeyB1/MWpKkxM0ZjPNdOei7NQaBl2
+ qjvVQFmCkkg7AiyOwRHvceQS4gdf9GbXdpE8DiWykSINr04WTI6S7WEtOIxgzGPIhmLZw94
+ Gftycli4cnN2AhZzNWTL/vt2w6qTOh41yvxPS+POCgoVcP/j6UwbbxPSkoAtDaOo7DUg2JM
+ PkSMVcg0M/8DNCgT1bkxQ==
+X-UI-Out-Filterresults: notjunk:1;V03:K0:xMpLX/THuQI=:xzY2tk0dNhSRXdDJ17jQpp
+ sGaBDDQKEIO2siPv7Z7qubu2rUnrbrGZMHlfkMd2XVA4H38r5NBxREpgqE+HsC7E2sjf1mHdB
+ SqVHokrnHo9G8GpqEwl9TPoq/jb6HB4zCr6fwEAmvtld9E/VxEDTpGss+8n1G2ciQaCKI6KpP
+ ihcf8h8TC+S8b3lkpjK2NSM45yTIYVteVvnaqoE/wLPpQrwKw4WkwkLwDRwc4GxBzKXIG3sUl
+ d4HRC/eDuVg5XKsqElXkEoEZvxpfIjAPlagZwpQRtmLFbPUGAw8cuHHtj1I7uv0ZD6Ph/rKnz
+ c5dLzbq2jXhYJKvib/ovnxHc9G3GiaIWEGT8bEIFATykHSY2hTz6ys3hjHj4JxajqOFM8JaJk
+ xqrNyn8jLzc9N3A4WA0XoCbQc8xJMlV3a3StdsM+TjokKoOFW+k0R1LJpN2INh+x+7wZflcl6
+ skRNeRL5hEXsFwsYYdDLHfMosb4sZbMb7JH8cRwma0eV1RSixBt3avzJ+NslyRN+GaeVhPHg0
+ piBzi2zBN+yDfiTxoBP51ASzPrrOattSJbATN+Ihll3ApuN9r9Tulr0kNKwLzTMO3xCH9HPJx
+ QxbOuro2Z2Wp3fH5terEPRI4E4aQWL2y5aqRVJLTXF9uqFdYaNqhH+4RM4GWzsaFTyL0Jdr5K
+ Trg5mNStOwW+xm/N30I7HhPnamJkZQWzoImXrSTEweuPT3FY+KQCFzFo3oBaF49wIhi+QUnzm
+ lq0h8v2rlLm7xPQiRXfbiNEHo1+wKSX/d+YePicTbbniKoNnWUsDKXT2hq/p6kOD6AYn+FUYL
+ T06vam23PeXJnSCGSiKEpWAEkmMLek6q+6KJeVaxnyaJYtVbvVlSmDgswQajm1KeZD7A/ezF7
+ u555Ld0Z5flYmYVofLp0ZvbDx8QFhwkQLEBBC7Weoos1IKpg4IJTv6PAahryVQPacfWgXewfw
+ pCfFH51zFlaVLZ/jL8c35flUsd3n0jclNR0cDp9gMtJL/KXzMCq0G
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 24 Jul 2020 at 13:32, Lars Povlsen <lars.povlsen@microchip.com> wrote:
->
->
-> Ulf Hansson writes:
->
-> > On Wed, 22 Jul 2020 at 13:54, Lars Povlsen <lars.povlsen@microchip.com> wrote:
-> >>
-> >>
-> >> Adrian Hunter writes:
-> >>
-> >> > On 18/06/20 5:13 pm, Lars Povlsen wrote:
-> >> >> This adds the eMMC driver for the Sparx5 SoC. It is based upon the
-> >> >> designware IP, but requires some extra initialization and quirks.
-> >> >>
-> >> >> Signed-off-by: Lars Povlsen <lars.povlsen@microchip.com>
-> >> >
-> >> > Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-> >> >
-> >>
-> >> Adrian,
-> >>
-> >> Thanks for the ack. I was expecting to see this in linux-next, anything
-> >> holding it back?
-> >>
-> >> pinctrl and hwmon drivers have been merged.
-> >>
-> >> Thanks,
+On Fri, Jul 24, 2020 at 12:06 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On Thu, 16 Jul 2020 at 20:23, Arnd Bergmann <arnd@arndb.de> wrote:
+> > On Thu, Jul 16, 2020 at 4:16 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
 > >
-> > Hi Lars,
+> > > +       /* Continue with the SD express init, if the card supports it. */
+> > > +       resp &= 0x3000;
+> > > +       if (pcie_bits && resp) {
+> > > +               if (resp == 0x3000)
+> > > +                       host->ios.timing = MMC_TIMING_SD_EXP_1_2V;
+> > > +               else
+> > > +                       host->ios.timing = MMC_TIMING_SD_EXP;
+> > > +
+> > > +               /*
+> > > +                * According to the spec the clock shall also be gated, but
+> > > +                * let's leave this to the host driver for more flexibility.
+> > > +                */
+> > > +               return host->ops->init_sd_express(host, &host->ios);
+> > > +       }
+> > > +
+> > >         return 0;
+> > >  }
 > >
-> > Looks like you got some feedback on the DT patch (patch1/3) from Rob.
-> > I didn't find that you have addressed them and therefore I am holding
-> > back on the $subject patch as well.
+> > Does this need an additional handshake or timeout to see if the
+> > device was successfully probed by the nvme driver?
 > >
+> > It looks like the card would just disappear here if e.g. the nvme driver
+> > is not loaded or runs into a runtime error.
 >
-> Uffe, thank you for responding.
+> You are correct! In principle, the card would not be detected (it
+> doesn't disappear as it never gets registered). Instead, it's left in
+> "half-initialized" state, waiting for the nvme driver to take over.
 >
-> The automated checker complains about the inclusion of a header file
-> (#include <dt-bindings/clock/microchip,sparx5.h>) in the example. The
-> header file itself is part of the "parent" patch series sent to arm-soc,
-> but is needed to make the example complete.
+> I simply didn't want to go that far, to introduce synchronizations
+> steps between the nvme driver and mmc driver, but rather started
+> simple. Perhaps we can discuss these things as improvements on top
+> instead?
 >
-> I e-mailed Rob about how to handle this, but never got a reply.
->
-> Can you suggest how to deal with this? I have checked the schema with
-> dt_binding_check manually - with the header file in place.
+> What do you think?
 
-I see, thanks for clarifying.
+Starting simple is generally a good idea, yes.
 
-When this kind of dependy happens, we have a couple of options.
+It would be good to have feedback from the nvme driver maintainers.
 
-1. Wait for a new rc to have the dependent changes included.
-2. Share the changes between maintainers's git trees, through
-immutable branches.
+One way I can see the handshake working would be to have
+an sdexpress class_driver that provides interfaces for both mmc
+and nvme to link against. The mmc core can then create a
+class device when it finds an sd-express device and that
+class device contains a simple state machine that keeps track of
+what either side think is going on, possibly also providing
+a way to perform callbacks between the two sides.
 
-Looks like 1) would be easiest here. So, I suggest you re-post the
-series when v5.9-rc1 is out.
-
->
-> I can of course remove the include and associated properties, but that
-> will make the example incomplete and irrelevant.
-
-No, that doesn't sound right.
-
-[...]
-
-Kind regards
-Uffe
+      Arnd
