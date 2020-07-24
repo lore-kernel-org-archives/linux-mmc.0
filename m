@@ -4,231 +4,105 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-10.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
-	autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D79BCC433DF
-	for <linux-mmc@archiver.kernel.org>; Fri, 24 Jul 2020 09:36:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 515DDC433E5
+	for <linux-mmc@archiver.kernel.org>; Fri, 24 Jul 2020 09:40:54 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id AB42F206D7
-	for <linux-mmc@archiver.kernel.org>; Fri, 24 Jul 2020 09:36:50 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2BBE220714
+	for <linux-mmc@archiver.kernel.org>; Fri, 24 Jul 2020 09:40:54 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="ECPu6+uJ"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Vita4HiW"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726643AbgGXJgu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 24 Jul 2020 05:36:50 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57776 "EHLO
+        id S1726643AbgGXJkx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 24 Jul 2020 05:40:53 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58412 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726114AbgGXJgt (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Jul 2020 05:36:49 -0400
-Received: from mail-vk1-xa44.google.com (mail-vk1-xa44.google.com [IPv6:2607:f8b0:4864:20::a44])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A1D90C0619E5
-        for <linux-mmc@vger.kernel.org>; Fri, 24 Jul 2020 02:36:49 -0700 (PDT)
-Received: by mail-vk1-xa44.google.com with SMTP id g22so2054026vke.9
-        for <linux-mmc@vger.kernel.org>; Fri, 24 Jul 2020 02:36:49 -0700 (PDT)
+        with ESMTP id S1726114AbgGXJkx (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Jul 2020 05:40:53 -0400
+Received: from mail-vs1-xe43.google.com (mail-vs1-xe43.google.com [IPv6:2607:f8b0:4864:20::e43])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 150C6C0619D3
+        for <linux-mmc@vger.kernel.org>; Fri, 24 Jul 2020 02:40:53 -0700 (PDT)
+Received: by mail-vs1-xe43.google.com with SMTP id x205so4561831vsc.11
+        for <linux-mmc@vger.kernel.org>; Fri, 24 Jul 2020 02:40:53 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=eOx9p9BRbHYFyzTDeDw1C6pMjBAIj6x0Ehxcc1dpviE=;
-        b=ECPu6+uJ3ZzbkRGb3tE2DYl78eO7To6KVAIEykSObvdCdOC8UYpYCXhwrLuj3yXU3m
-         hDps3bWLT8jFOvErQ8OjHMn+08iBtoAsrGUoK6yu9EpzbcoVF4CmaWt47LYBxamX1d2I
-         M4KVvniPWN3rj5V22sYt3kbkTDn4BY02zvoe3AXGpUtlU0zKuF4D5aflxhthdTQ8WRT0
-         N2EAUAJYiRtg4QKRaAeKm+qhFIGmRvTsFmyM9NSNQxZfplD0pJ34KI9vn3ygMFdmiZ5v
-         SB5tFwvO3DrAzsvmPQIKykXdSjgBNNVEb8QnGC6+UOtr36ecCJ1jO5Y9z3A6TzYAWNoM
-         3RLw==
+        bh=SPs3Kpl9gUxerrpH+PKf/MQttt7ODK3F6c++6G9cS0o=;
+        b=Vita4HiW9be8xgOd6mYZD7HSrlvQhjqS9kVNdJ+/RLLbDNCwz2L5abnEfQC14IQFLi
+         TOn9fbNZ/iFUej/om6UzGsFfh8WM0u8QpyG7aLH3xk/+6DEnlGbcAtj6A0mR20+cUlQ4
+         Z06v2f0RDmcaI84tVpg7gNpjpweAuGjT+CjyZ7dC2tDrh98AKtyJhJ30A4dEBx0oWxfg
+         Ani8/9IZnyJ3quWb4+793KXkPV63m6h/24VCZcypSC0+Mhm+VcJsvGTbIcKfDrr9oTDA
+         88wTeK6/XWbl0W9I+ufrj/K9JNqVg8/iKE/nS7rZU/8rBbHS7oYixV7H1chAZ1wALw1U
+         h6EQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=eOx9p9BRbHYFyzTDeDw1C6pMjBAIj6x0Ehxcc1dpviE=;
-        b=Iw7B9X0cS+joigKe06vOvfMYVoM+b0RxUGijUEc1VpsnDnHcQUYLxozhBi9qA4Fm1e
-         vIDBfIYoxy07l/HrrhMijhxdJUkBHD7EFK1GMLhcons6J8b+38rIGLAJQs1oJD2K+xbt
-         G/974ZeRKsGldFRu5BOB37aFS79jf245quOgZh46dcPwKh1Pu9zMZSTscd1WNwY44W5I
-         b+AlJB+/et+zA7QjkVK87C9KDAMMKdWNsyOM0p+Nv9FBdWHRW0MUdZ89wgOnoyiVnW94
-         vjH4NpsRUsRTPZW5IZVS6w41qmYnkxTvtut9OZwQaUgRJf0S4jXKIQD/iePvvHXq3zBj
-         Jbcg==
-X-Gm-Message-State: AOAM532q/02G3BezUg5dCUf5SHVkYJfoRM39EUYM+3lG5TE0ue2yFpLn
-        szX6UfxqiQ5+9y1VkQnJ3EMzjAHeUq1SN/R8OI8JFw==
-X-Google-Smtp-Source: ABdhPJwYNRHepiT7HFCBe+3t9Dq0oP/VTz3d5SmdWFkGQXl5erWU5g7rzzUNDCU6jQvAvpBTBCIpq/JTZuPwXRkS3pU=
-X-Received: by 2002:a1f:3f0f:: with SMTP id m15mr7154482vka.53.1595583408542;
- Fri, 24 Jul 2020 02:36:48 -0700 (PDT)
+        bh=SPs3Kpl9gUxerrpH+PKf/MQttt7ODK3F6c++6G9cS0o=;
+        b=Qffx7ol/bwkW4IM/GgOor2oUZfxXAvvadJyt6WaVQ5aC9xcCYsZE+SbCOq+12HUU7/
+         bkaWsvuu87AYNF0f79mBXMMqOUyvEvx/bAxchHDEyyQaQ0uaEB49ErD0ru8yNS0MCcHe
+         14GXFgVXKkvwcYYQQ9fRb8Ufent/1LUkaMT55pTlXn+uFwvxvgnolVU5hHJpUahzzLW3
+         7BgpzkASYwz+favjSNEg9s3WQdiFHaFUw/fKt4ZTeDGkWv3fWRpTrPHQxxQESOH+HXz8
+         kbSmKNw3+qdZ14dR1REr5paqe7wHYz37vcGqznZwFDvx5912BVdX3K3cHbUfu6wu8RGw
+         6bFQ==
+X-Gm-Message-State: AOAM5319Ug/YfO4iZFBZZOB8c7vGC4vHxpFI82PSUIx0z8RWZ0A2f44h
+        7KhoE+52A46I5/fE+Hp16ALjSXbJv8+HidTpfJre/Q==
+X-Google-Smtp-Source: ABdhPJz+ssJ9jfqPfiNHbj1PYiRmPAvAhHyfgqAVopt6PG8bSTO4fkaSkeRagOC1eMMhAFbfpPtr8dDM831CF0UT0Ow=
+X-Received: by 2002:a67:f888:: with SMTP id h8mr6889837vso.165.1595583652321;
+ Fri, 24 Jul 2020 02:40:52 -0700 (PDT)
 MIME-Version: 1.0
-References: <1594213888-2780-1-git-send-email-vbadigan@codeaurora.org>
- <1594213888-2780-2-git-send-email-vbadigan@codeaurora.org>
- <20200710005233.GN3191083@google.com> <63323fe2-e3a3-030f-5275-01fa6b04e23b@codeaurora.org>
- <20200711001948.GO3191083@google.com> <2c322fe1-6a86-43c9-11f3-387b917836ed@codeaurora.org>
- <406769f7-2282-d658-5573-3a510d256eee@codeaurora.org>
-In-Reply-To: <406769f7-2282-d658-5573-3a510d256eee@codeaurora.org>
+References: <20200709085331.8145-1-ludovic.desroches@microchip.com>
+In-Reply-To: <20200709085331.8145-1-ludovic.desroches@microchip.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 24 Jul 2020 11:36:12 +0200
-Message-ID: <CAPDyKFpLg0HnZ6p=x9Egv9w65hB5CtFw=gV1rpL8vbWcHYtCzg@mail.gmail.com>
-Subject: Re: [PATCH V1] mmc: sdhci-msm: Set IO pins in low power state during suspend
-To:     Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
-        Matthias Kaehlcke <mka@chromium.org>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>,
+Date:   Fri, 24 Jul 2020 11:40:15 +0200
+Message-ID: <CAPDyKFq5gCA1f=XVVepi93wotn4uR8JHcRh4JoFt-Preg4ATjg@mail.gmail.com>
+Subject: Re: [PATCH] MAINTAINERS: mmc: sdhci-of-at91: handover maintenance to
+ Eugen Hristev
+To:     Ludovic Desroches <ludovic.desroches@microchip.com>,
+        Eugen Hristev <eugen.hristev@microchip.com>
+Cc:     Linux ARM <linux-arm-kernel@lists.infradead.org>,
         "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
-        Andy Gross <agross@kernel.org>
+        Nicolas Ferre <nicolas.ferre@microchip.com>,
+        Alexandre Belloni <alexandre.belloni@bootlin.com>
 Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 14 Jul 2020 at 16:12, Veerabhadrarao Badiganti
-<vbadigan@codeaurora.org> wrote:
+On Thu, 9 Jul 2020 at 11:03, Ludovic Desroches
+<ludovic.desroches@microchip.com> wrote:
 >
+> As Eugen handles the software for bootloaders and new products, handover
+> the maintenance to him.
 >
-> On 7/13/2020 9:26 PM, Veerabhadrarao Badiganti wrote:
-> >
-> > On 7/11/2020 5:49 AM, Matthias Kaehlcke wrote:
-> >> Hi,
-> >>
-> >> On Fri, Jul 10, 2020 at 04:28:36PM +0530, Veerabhadrarao Badiganti
-> >> wrote:
-> >>> Hi Mathias,
-> >>>
-> >>> On 7/10/2020 6:22 AM, Matthias Kaehlcke wrote:
-> >>>> Hi,
-> >>>>
-> >>>> On Wed, Jul 08, 2020 at 06:41:20PM +0530, Veerabhadrarao Badiganti
-> >>>> wrote:
-> >>>>> Configure SDHC IO pins with low power configuration when the driver
-> >>>>> is in suspend state.
-> >>>>>
-> >>>>> Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
-> >>>>> ---
-> >>>>>    drivers/mmc/host/sdhci-msm.c | 17 +++++++++++++++++
-> >>>>>    1 file changed, 17 insertions(+)
-> >>>>>
-> >>>>> diff --git a/drivers/mmc/host/sdhci-msm.c
-> >>>>> b/drivers/mmc/host/sdhci-msm.c
-> >>>>> index 392d41d57a6e..efd2bae1430c 100644
-> >>>>> --- a/drivers/mmc/host/sdhci-msm.c
-> >>>>> +++ b/drivers/mmc/host/sdhci-msm.c
-> >>>>> @@ -15,6 +15,7 @@
-> >>>>>    #include <linux/iopoll.h>
-> >>>>>    #include <linux/regulator/consumer.h>
-> >>>>>    #include <linux/interconnect.h>
-> >>>>> +#include <linux/pinctrl/consumer.h>
-> >>>>>    #include "sdhci-pltfm.h"
-> >>>>>    #include "cqhci.h"
-> >>>>> @@ -1352,6 +1353,19 @@ static void
-> >>>>> sdhci_msm_set_uhs_signaling(struct sdhci_host *host,
-> >>>>>            sdhci_msm_hs400(host, &mmc->ios);
-> >>>>>    }
-> >>>>> +static int sdhci_msm_set_pincfg(struct sdhci_msm_host *msm_host,
-> >>>>> bool level)
-> >>>>> +{
-> >>>>> +    struct platform_device *pdev = msm_host->pdev;
-> >>>>> +    int ret;
-> >>>>> +
-> >>>>> +    if (level)
-> >>>>> +        ret = pinctrl_pm_select_default_state(&pdev->dev);
-> >>>>> +    else
-> >>>>> +        ret = pinctrl_pm_select_sleep_state(&pdev->dev);
-> >>>>> +
-> >>>>> +    return ret;
-> >>>>> +}
-> >>>>> +
-> >>>>>    static int sdhci_msm_set_vmmc(struct mmc_host *mmc)
-> >>>>>    {
-> >>>>>        if (IS_ERR(mmc->supply.vmmc))
-> >>>>> @@ -1596,6 +1610,9 @@ static void sdhci_msm_handle_pwr_irq(struct
-> >>>>> sdhci_host *host, int irq)
-> >>>>>                ret = sdhci_msm_set_vqmmc(msm_host, mmc,
-> >>>>>                        pwr_state & REQ_BUS_ON);
-> >>>>>            if (!ret)
-> >>>>> +            ret = sdhci_msm_set_pincfg(msm_host,
-> >>>>> +                    pwr_state & REQ_BUS_ON);
-> >>>>> +        if (!ret)
-> >>>>>                irq_ack |= CORE_PWRCTL_BUS_SUCCESS;
-> >>>>>            else
-> >>>>>                irq_ack |= CORE_PWRCTL_BUS_FAIL;
-> >>>> I happened to have a debug patch in my tree which logs when regulators
-> >>>> are enabled/disabled, with this patch I see the SD card regulator
-> >>>> toggling constantly after returning from the first system suspend.
-> >>>>
-> >>>> I added more logs:
-> >>>>
-> >>>> [ 1156.085819] DBG: sdhci_msm_set_pincfg: level = 0 (ret: 0)
-> >>>> [ 1156.248936] DBG: sdhci_msm_set_pincfg: level = 1 (ret: 0)
-> >>>> [ 1156.301989] DBG: sdhci_msm_set_pincfg: level = 0 (ret: 0)
-> >>>> [ 1156.462383] DBG: sdhci_msm_set_pincfg: level = 1 (ret: 0)
-> >>>> [ 1156.525988] DBG: sdhci_msm_set_pincfg: level = 0 (ret: 0)
-> >>>> [ 1156.670372] DBG: sdhci_msm_set_pincfg: level = 1 (ret: 0)
-> >>>> [ 1156.717935] DBG: sdhci_msm_set_pincfg: level = 0 (ret: 0)
-> >>>> [ 1156.878122] DBG: sdhci_msm_set_pincfg: level = 1 (ret: 0)
-> >>>> [ 1156.928134] DBG: sdhci_msm_set_pincfg: level = 0 (ret: 0)
-> >>>>
-> >>>> This is on an SC7180 platform. It doesn't run an upstream kernel
-> >>>> though,
-> >>>> but v5.4 with plenty of upstream patches.
-> >>> I have verified this on couple of sc7180 targets (on Chrome platform
-> >>> with
-> >>> Chrome kernel).
-> >>> But didn't see any issue. Its working as expected.
-> >> Did you test system suspend too? At least in the Chrome OS kernel
-> >> tree system
-> >> suspend is not supported yet in the main branch, you'd need a pile of
-> >> 30+
-> >> extra patches to get it to work. This is expected to change soon
-> >> though :)
-> > Yes. I have verified with system  suspend-resume scenario.
-> > Sorry forgot to mention this point explicitly in last response.
-> >
-> > I believe all the needed patches were present on qcom internal tree.
-> > Suspend-resume is working fine on sc7180 qcom chrome tree.
-> >
-> Thanks Matthias. I cloud reproduce the issue on device without SDcard.
->
-> Without SDcard inserted, cd-gpio (SD card detect GPIO) is getting read
-> as active HIGH
-> (as if card is inserted) during system-resume, resulting SDcard probe/scan.
->
-> After that its triggering interrupt again when pinctrl config is applied
-> during SDcard
-> power-up sequence (as part of probe/scan) which is again triggering
-> sdcard scan.
->
-> I will have to change SDcard cd-gpio sleep config to fix this issue like
-> below:
->
-> diff --git a/arch/arm64/boot/dts/qcom/sc7180.dtsi
-> b/arch/arm64/boot/dts/qcom/sc7180.dtsi
-> index e2230f47a17d..9266d514e163 100644
-> --- a/arch/arm64/boot/dts/qcom/sc7180.dtsi
-> +++ b/arch/arm64/boot/dts/qcom/sc7180.dtsi
-> @@ -2447,7 +2447,7 @@
->
->                                  pinconf-sd-cd {
->                                          pins = "gpio69";
-> -                                       bias-disable;
-> +                                       bias-pull-up;
->                                          drive-strength = <2>;
->
-> I will check more on why its getting read as active HIGH during resume.
->
->
-> >>> Let me know if you are observing this issue constantly on multiple
-> >>> boards, I
-> >>> will share you
-> >>> a debug patch to check it further.
-> >> I currently have only one board with the SD card slot populated, I might
-> >> get another one next week.
-> >>
-> >> The toggling occurs only when no SD card is inserted.
->
-> Thanks
->
-> Veera
->
+> Signed-off-by: Ludovic Desroches <ludovic.desroches@microchip.com>
 
-Thanks for testing and for looking into this. Perhaps I should drop
-the $subject patch then?
+I am okay with this, but am waiting to apply until I receive an ack from Eugen.
 
 Kind regards
 Uffe
+
+> ---
+>  MAINTAINERS | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/MAINTAINERS b/MAINTAINERS
+> index c87b94e6b2f6..dafcfa626c76 100644
+> --- a/MAINTAINERS
+> +++ b/MAINTAINERS
+> @@ -15376,7 +15376,7 @@ F:      drivers/mmc/host/sdhci*
+>  F:     include/linux/mmc/sdhci*
+>
+>  SECURE DIGITAL HOST CONTROLLER INTERFACE (SDHCI) MICROCHIP DRIVER
+> -M:     Ludovic Desroches <ludovic.desroches@microchip.com>
+> +M:     Eugen Hristev <eugen.hristev@microchip.com>
+>  L:     linux-mmc@vger.kernel.org
+>  S:     Supported
+>  F:     drivers/mmc/host/sdhci-of-at91.c
+> --
+> 2.24.0
+>
