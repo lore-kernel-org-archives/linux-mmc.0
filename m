@@ -2,310 +2,462 @@ Return-Path: <SRS0=uUZJ=BD=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.0 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham autolearn_force=no
+X-Spam-Status: No, score=-9.8 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7A3CDC433E0
-	for <linux-mmc@archiver.kernel.org>; Fri, 24 Jul 2020 11:11:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 56768C433DF
+	for <linux-mmc@archiver.kernel.org>; Fri, 24 Jul 2020 11:32:29 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 439B52067D
-	for <linux-mmc@archiver.kernel.org>; Fri, 24 Jul 2020 11:11:56 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 285B22074F
+	for <linux-mmc@archiver.kernel.org>; Fri, 24 Jul 2020 11:32:29 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="RujcnQvx"
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=microchip.com header.i=@microchip.com header.b="NLN8gZed"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726483AbgGXLLz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 24 Jul 2020 07:11:55 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44354 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726455AbgGXLLz (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Jul 2020 07:11:55 -0400
-Received: from mail-yb1-xb43.google.com (mail-yb1-xb43.google.com [IPv6:2607:f8b0:4864:20::b43])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 56083C0619D3;
-        Fri, 24 Jul 2020 04:11:55 -0700 (PDT)
-Received: by mail-yb1-xb43.google.com with SMTP id m200so333333ybf.10;
-        Fri, 24 Jul 2020 04:11:55 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=htaMFQv6j45WJ6fZ3EjiD70wvvoteJc0c7HebPkEhfg=;
-        b=RujcnQvxZ+0p91/6LzmjxdMCg9qgoo1LnOvQ6E9Xn3YVfGuvULZMEqa3hcqyXMKWgg
-         gvxS1PBVwmfFT7tFumTekROjlQ6/mh6QGV40pwCFQYUaBsOeRDZgaohKQSuokkIIOH+B
-         OBs/0HDIINdtBEhiadXj6X574Z4bpF2l83sxc3SIKrUgdg/deU5IE5FIAr/dRUCSzX6l
-         HmUYwjfLv+ZDlawnNy47Oa7odVVwCvbVZWFyljUqOtJM84hWTUYscHtvNROBgPjMUJFK
-         dBULMqEAHp+awXF/eEUABKoy92OVWCAvm1FgYgoEftdrrMughNjPOMA3lS4kF9PnMhUr
-         8DPA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=htaMFQv6j45WJ6fZ3EjiD70wvvoteJc0c7HebPkEhfg=;
-        b=ZjPP0PpYCIl9Zyx0V0nhqeERUoY/gKk9LH+AUrS7tpv7qBFlXY1ISt98ox8mzYQZu+
-         dGbpIn5vZLtHCdbcUm58c8n15yyrJ6dI9EVUVWlc3k2JlSrkHBq6ATKhyBECl9nd13xO
-         XUjY0fAs+EMFyaM9KPLDa5kgzuOlQMchC85Y/63b05cgBUUJzIMl32iv6eBDIiBU6EEB
-         TFeA75t6dGO3m3RBzUShfqk+eSo9NtQ+hkRUD0+q1BtqJByrwzFzPCK1j01/c2d8w0TR
-         BwhuBrPCUMA7ee8p41Hkc1UT892RD2LSW5A6IiRGsjJ9UTsBy5IBGS8z7VzkJnU4auXf
-         JvhA==
-X-Gm-Message-State: AOAM533XWkkxDrpWci5YCGXByQua/11lIiMuziABIjo/O0btu2P1pDSY
-        /loHuWuDGUI2g0BCpjMnCvEjrYAmb9P4gkMWvyXnu5QLOlo=
-X-Google-Smtp-Source: ABdhPJw5lojxc4r8bGD8PdOjcc4Y5hWe8K//DOz17/ak0S0v82nUVyUKE8mZ5gHxAoMx3YsNmmun0b99nkz9zZymKJg=
-X-Received: by 2002:a25:7811:: with SMTP id t17mr14123847ybc.48.1595589114372;
- Fri, 24 Jul 2020 04:11:54 -0700 (PDT)
-MIME-Version: 1.0
-References: <20200710110819.28965-1-benchuanggli@gmail.com> <CAPDyKFrvzZSYWkqD_JgZSCmF8p+Bj7JXfdbZ5D=OsszTPsSDdw@mail.gmail.com>
-In-Reply-To: <CAPDyKFrvzZSYWkqD_JgZSCmF8p+Bj7JXfdbZ5D=OsszTPsSDdw@mail.gmail.com>
-From:   Ben Chuang <benchuanggli@gmail.com>
-Date:   Fri, 24 Jul 2020 19:11:56 +0800
-Message-ID: <CACT4zj989TsK9CMtPwEVOwBr-HtLVqQyt_EPAdkEexGuGNfatQ@mail.gmail.com>
-Subject: Re: [RFC PATCH V3 02/21] mmc: core: UHS-II support, modify power-up sequence
+        id S1726366AbgGXLc2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 24 Jul 2020 07:32:28 -0400
+Received: from esa3.microchip.iphmx.com ([68.232.153.233]:25047 "EHLO
+        esa3.microchip.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726280AbgGXLc2 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Jul 2020 07:32:28 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=microchip.com; i=@microchip.com; q=dns/txt; s=mchp;
+  t=1595590347; x=1627126347;
+  h=references:from:to:cc:subject:in-reply-to:date:
+   message-id:mime-version;
+  bh=BjoAEaIor1zrZmYBGxOQZdTAdswFGI4g5Rket3zltvg=;
+  b=NLN8gZed/0TzDR52C6LGisXjQbDQl8YACIGGADA+f9U59WwUm2zEUDKy
+   3FFKcRF3QaafUJgazFkWvWy58w0CIt/unA91CwDiQ2kDzY7aRSYUw4Tot
+   n46GZXUJePpVPB7U/TUhxEOZ4ob9dFcv1+Td31GOUnUdpYJbG892M9HZT
+   9vKBrAJwh6i9ZPqMbSJvL3HwjUy9XtD+fgw8MAz1xrEuAwd2ZUNH4Fdgg
+   NIB9fqOrn9rrrZp0Z31ssJPi0vWMs6bPF/Z8L/lEPPUN4WaxW9abhsIOu
+   GVTdtfHMRpCFJ/9qwUK3i2kZEnWjk3nNFjgIZSiKCgDaY5mqX1hUkReGm
+   w==;
+IronPort-SDR: Iil8V1Zn+XMZHxEe+yDy6d3ZL752MSKvV8tnx7LpLlCMNTLPbh8VKy8fnKomZg2Wu3G2zhyaH4
+ vJMiOfaxRPrZOgSs9bYbqoS8xpFjyHu08od+KrJLAi0yfQcX160IyxarkKKrUxA5dKuFlUjLAx
+ oD9Mxq9afYl7J8Cpa5Dxnz1UzQI1eXDSreh/xETxiZOKGN5imNu1CPy2k23qkW3D8lQL7ZdTeL
+ DACSyddPEtzrJqd7pj9laGB3Hwl3iHrEoJ17LRJ1xNz5RdecEOP0KW+W3ZrRi6i9huqjWJ4fTY
+ GSI=
+X-IronPort-AV: E=Sophos;i="5.75,390,1589266800"; 
+   d="scan'208";a="85240826"
+Received: from smtpout.microchip.com (HELO email.microchip.com) ([198.175.253.82])
+  by esa3.microchip.iphmx.com with ESMTP/TLS/AES256-SHA256; 24 Jul 2020 04:32:20 -0700
+Received: from chn-vm-ex01.mchp-main.com (10.10.85.143) by
+ chn-vm-ex03.mchp-main.com (10.10.85.151) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.1979.3; Fri, 24 Jul 2020 04:32:20 -0700
+Received: from soft-dev15.microsemi.net.microchip.com (10.10.115.15) by
+ chn-vm-ex01.mchp-main.com (10.10.85.143) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.1979.3
+ via Frontend Transport; Fri, 24 Jul 2020 04:31:36 -0700
+References: <20200618141326.25723-1-lars.povlsen@microchip.com> <20200618141326.25723-3-lars.povlsen@microchip.com> <aee90bbf-f0ff-b0cb-b10a-9a2f3bb6acca@intel.com> <87wo2vkbns.fsf@soft-dev15.microsemi.net> <CAPDyKFpozhFSzWEM6s8cdeG+8JGX00YyFSzeXZxCsY7Efn0aeQ@mail.gmail.com>
+From:   Lars Povlsen <lars.povlsen@microchip.com>
 To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+List-Id: <soc.lore.kernel.org>
+CC:     Lars Povlsen <lars.povlsen@microchip.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        SoC Team <soc@kernel.org>,
+        "Microchip Linux Driver Support" <UNGLinuxDriver@microchip.com>,
         "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        DTML <devicetree@vger.kernel.org>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
         Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Ben Chuang <ben.chuang@genesyslogic.com.tw>,
-        Takahiro Akashi <takahiro.akashi@linaro.org>,
-        greg.tu@genesyslogic.com.tw
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+        Alexandre Belloni <alexandre.belloni@bootlin.com>
+Subject: Re: [PATCH v4 2/3] sdhci: sparx5: Add Sparx5 SoC eMMC driver
+In-Reply-To: <CAPDyKFpozhFSzWEM6s8cdeG+8JGX00YyFSzeXZxCsY7Efn0aeQ@mail.gmail.com>
+Date:   Fri, 24 Jul 2020 13:32:15 +0200
+Message-ID: <87zh7pf8sg.fsf@soft-dev15.microsemi.net>
+MIME-Version: 1.0
+Content-Type: text/plain
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Ulf,
 
-On Fri, Jul 17, 2020 at 7:26 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
->
-> On Fri, 10 Jul 2020 at 13:07, Ben Chuang <benchuanggli@gmail.com> wrote:
-> >
-> > From: AKASHI Takahiro <takahiro.akashi@linaro.org>
-> >
-> > According to Fig. 3-35 in "SD Host Controller Simplified Spec. Ver4.20"=
-:
-> > - Prepare vdd1, vdd2 and ios.timing for using after/in step (2)
-> > - chip_select is not used in UHS-II, used to return to the legacy flow
->
-> Thanks for pointing to the spec, but please explain why/what/how for
-> the change - as this helps me to review.
->
-> I am going to stop commenting on each patch's commit message, beyond
-> this patch - as it seems the same comment applies to more patches.
->
-> >
-> > Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
-> > Signed-off-by: AKASHI Takahiro <takahiro.akashi@linaro.org>
-> > ---
-> >  drivers/mmc/core/core.c      | 62 ++++++++++++++++++++++++------------
-> >  drivers/mmc/core/regulator.c | 14 ++++++++
-> >  2 files changed, 56 insertions(+), 20 deletions(-)
-> >
-> > diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> > index 8d2b808e9b58..85c83c82ad0c 100644
-> > --- a/drivers/mmc/core/core.c
-> > +++ b/drivers/mmc/core/core.c
-> > @@ -1315,33 +1315,51 @@ void mmc_power_up(struct mmc_host *host, u32 oc=
-r)
-> >         if (host->ios.power_mode =3D=3D MMC_POWER_ON)
-> >                 return;
-> >
-> > -       mmc_pwrseq_pre_power_on(host);
-> > +       if (host->flags & MMC_UHS2_SUPPORT) {
-> > +               /* TODO: handle 'ocr' parameter */
-> > +               host->ios.vdd =3D fls(host->ocr_avail) - 1;
-> > +               host->ios.vdd2 =3D fls(host->ocr_avail_uhs2) - 1;
-> > +               if (mmc_host_is_spi(host))
-> > +                       host->ios.chip_select =3D MMC_CS_HIGH;
-> > +               else
-> > +                       host->ios.chip_select =3D MMC_CS_DONTCARE;
-> > +               host->ios.timing =3D MMC_TIMING_UHS2;
->
-> If I understand correctly, the intent is to always try to initialize
-> the UHS-II interface/phy if that is supported. That doesn't seem
-> correct to me. What about if the SD card doesn't support UHS-II, then
-> we should use the legacy SD interface instead right?
+Ulf Hansson writes:
 
-Please always try UHS-II I/F first, then if UHS-II I/F fails, then
-switch to SD I/F.
-
+> On Wed, 22 Jul 2020 at 13:54, Lars Povlsen <lars.povlsen@microchip.com> wrote:
+>>
+>>
+>> Adrian Hunter writes:
+>>
+>> > On 18/06/20 5:13 pm, Lars Povlsen wrote:
+>> >> This adds the eMMC driver for the Sparx5 SoC. It is based upon the
+>> >> designware IP, but requires some extra initialization and quirks.
+>> >>
+>> >> Signed-off-by: Lars Povlsen <lars.povlsen@microchip.com>
+>> >
+>> > Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+>> >
+>>
+>> Adrian,
+>>
+>> Thanks for the ack. I was expecting to see this in linux-next, anything
+>> holding it back?
+>>
+>> pinctrl and hwmon drivers have been merged.
+>>
+>> Thanks,
 >
-> Or perhaps the MMC_UHS2_SUPPORT bit becomes cleared somewhere in the
-> error path when first trying to initialize an UHS-II card, from
-> subsequent changes?
-
-Yes, MMC_UHS2_SUPPORT will be cleared in some cases.
-
+> Hi Lars,
 >
-> So, assuming that is the intent then, I am still not sure about this appr=
-oach.
+> Looks like you got some feedback on the DT patch (patch1/3) from Rob.
+> I didn't find that you have addressed them and therefore I am holding
+> back on the $subject patch as well.
 >
-> What about if we instead always start with legacy SD initialization?
-> When we have read the OCR register, via mmc_send_app_op_cond(), we can
-> check if the card supports UHS-II by looking at the UHS-II Card Status
-> (bit 29).
 
-UHS-II spec recommends to detect UHS-II first.
-Or in Host controller spec, section 3.13.2 card interface detection sequenc=
-e,
-it also starts from UHS-II path, then go SD legacy path if UHS-II
-initialization fails.
+Uffe, thank you for responding.
 
-The bit29 in response of ACMD41 is defined as =E2=80=9CUHS-II Card Status=
-=E2=80=9D,
-not UHS-II supported.
-We have experience using this value to determine whether a card supports UH=
-S-II,
-but not every card reports if they support UHS-II by the response of
-ACMD41 correctly.
+The automated checker complains about the inclusion of a header file
+(#include <dt-bindings/clock/microchip,sparx5.h>) in the example. The
+header file itself is part of the "parent" patch series sent to arm-soc,
+but is needed to make the example complete.
 
->
-> If it turns out that the card supports UHS-II and the host does as
-> well, then we do a mmc_power_off() to completely reset the
-> card/host/phy. Then we can call into a UHS-II specific path, that
-> tries to power on and initialize things according to the UHS-II spec.
->
-> In this way, we are going to prioritize initialization of legacy SD
-> cards to remain quick, as we won't try to use UHS-II unless the card
-> supports it. Moreover, I get the impression that we can keep the
-> existing code more as is - and instead introduce UHS-II specifics in a
-> separate path. This also also for UHS-II specific optimizations, I
-> think.
+I e-mailed Rob about how to handle this, but never got a reply.
 
-Agree that we can try to keep the existing code and also need your advice/h=
-elp.
+Can you suggest how to deal with this? I have checked the schema with
+dt_binding_check manually - with the header file in place.
 
->
-> > +       } else {
-> > +               mmc_pwrseq_pre_power_on(host);
-> >
-> > -       host->ios.vdd =3D fls(ocr) - 1;
-> > -       host->ios.power_mode =3D MMC_POWER_UP;
-> > -       /* Set initial state and call mmc_set_ios */
-> > -       mmc_set_initial_state(host);
-> > +               host->ios.vdd =3D fls(ocr) - 1;
-> > +               host->ios.power_mode =3D MMC_POWER_UP;
-> > +               /* Set initial state and call mmc_set_ios */
-> > +               mmc_set_initial_state(host);
-> >
-> > -       mmc_set_initial_signal_voltage(host);
-> > +               mmc_set_initial_signal_voltage(host);
-> >
-> > -       /*
-> > -        * This delay should be sufficient to allow the power supply
-> > -        * to reach the minimum voltage.
-> > -        */
-> > -       mmc_delay(host->ios.power_delay_ms);
-> > -
-> > -       mmc_pwrseq_post_power_on(host);
-> > +               /*
-> > +                * This delay should be sufficient to allow the power s=
-upply
-> > +                * to reach the minimum voltage.
-> > +                */
-> > +               mmc_delay(host->ios.power_delay_ms);
-> >
-> > +               mmc_pwrseq_post_power_on(host);
-> > +       }
-> >         host->ios.clock =3D host->f_init;
-> > -
-> >         host->ios.power_mode =3D MMC_POWER_ON;
-> > +
-> >         mmc_set_ios(host);
-> >
-> > -       /*
-> > -        * This delay must be at least 74 clock sizes, or 1 ms, or the
-> > -        * time required to reach a stable voltage.
-> > -        */
-> > -       mmc_delay(host->ios.power_delay_ms);
-> > +       if (host->flags & MMC_UHS2_SUPPORT)
-> > +               /*
-> > +                * This delay should be sufficient to allow the power s=
-upply
-> > +                * to reach the minimum voltage.
-> > +                */
-> > +               /*  TODO: avoid an immediate value */
-> > +               mmc_delay(10);
-> > +       else
-> > +               /*
-> > +                * This delay must be at least 74 clock sizes, or 1 ms,=
- or the
-> > +                * time required to reach a stable voltage.
-> > +                */
-> > +               mmc_delay(host->ios.power_delay_ms);
-> >  }
-> >
-> >  void mmc_power_off(struct mmc_host *host)
-> > @@ -2307,7 +2325,11 @@ void mmc_start_host(struct mmc_host *host)
-> >
-> >         if (!(host->caps2 & MMC_CAP2_NO_PRESCAN_POWERUP)) {
-> >                 mmc_claim_host(host);
-> > -               mmc_power_up(host, host->ocr_avail);
-> > +
-> > +               /* Power up here will make UHS2 init ugly. */
-> > +               if (!(host->caps & MMC_CAP_UHS2))
-> > +                       mmc_power_up(host, host->ocr_avail);
-> > +
->
-> According to my suggestions, then this would not be needed.
+I can of course remove the include and associated properties, but that
+will make the example incomplete and irrelevant.
 
-This should not be needed. Thank you.
+---Lars
 
->
-> >                 mmc_release_host(host);
-> >         }
-> >
-> > diff --git a/drivers/mmc/core/regulator.c b/drivers/mmc/core/regulator.=
-c
-> > index 96b1d15045d6..05556225d9ac 100644
-> > --- a/drivers/mmc/core/regulator.c
-> > +++ b/drivers/mmc/core/regulator.c
-> > @@ -247,6 +247,7 @@ int mmc_regulator_get_supply(struct mmc_host *mmc)
-> >
-> >         mmc->supply.vmmc =3D devm_regulator_get_optional(dev, "vmmc");
-> >         mmc->supply.vqmmc =3D devm_regulator_get_optional(dev, "vqmmc")=
-;
-> > +       mmc->supply.vmmc2 =3D devm_regulator_get_optional(dev, "vmmc2")=
-;
->
-> Please move the regulator thingy here into a separate patch. Please
-> make sure corresponding header file, adding the vmmc2 to it is part of
-> that change as well.
-
-Yes. will do it.
-
->
-> >
-> >         if (IS_ERR(mmc->supply.vmmc)) {
-> >                 if (PTR_ERR(mmc->supply.vmmc) =3D=3D -EPROBE_DEFER)
-> > @@ -266,6 +267,19 @@ int mmc_regulator_get_supply(struct mmc_host *mmc)
-> >                 dev_dbg(dev, "No vqmmc regulator found\n");
-> >         }
-> >
-> > +       if (IS_ERR(mmc->supply.vmmc2)) {
-> > +               if (PTR_ERR(mmc->supply.vmmc2) =3D=3D -EPROBE_DEFER)
-> > +                       return -EPROBE_DEFER;
-> > +               dev_dbg(dev, "No vmmc2 regulator found\n");
-> > +       } else {
-> > +               ret =3D mmc_regulator_get_ocrmask(mmc->supply.vmmc2);
-> > +               if (ret > 0)
-> > +                       mmc->ocr_avail_uhs2 =3D ret;
-> > +               else
-> > +                       dev_warn(dev, "Failed getting UHS2 OCR mask: %d=
-\n",
-> > +                                ret);
-> > +       }
-> > +
-> >         return 0;
-> >  }
-> >  EXPORT_SYMBOL_GPL(mmc_regulator_get_supply);
-> > --
-> > 2.27.0
-> >
+> Please fix the DT patch and re-submit a new version of the series.
 >
 > Kind regards
 > Uffe
+>
+>
+>>
+>> ---Lars
+>>
+>> >> ---
+>> >>  drivers/mmc/host/Kconfig           |  13 ++
+>> >>  drivers/mmc/host/Makefile          |   1 +
+>> >>  drivers/mmc/host/sdhci-of-sparx5.c | 269 +++++++++++++++++++++++++++++
+>> >>  3 files changed, 283 insertions(+)
+>> >>  create mode 100644 drivers/mmc/host/sdhci-of-sparx5.c
+>> >>
+>> >> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+>> >> index 3b706af35ec31..a3bad4b4ed7ea 100644
+>> >> --- a/drivers/mmc/host/Kconfig
+>> >> +++ b/drivers/mmc/host/Kconfig
+>> >> @@ -213,6 +213,19 @@ config MMC_SDHCI_OF_DWCMSHC
+>> >>         If you have a controller with this interface, say Y or M here.
+>> >>         If unsure, say N.
+>> >>
+>> >> +config MMC_SDHCI_OF_SPARX5
+>> >> +     tristate "SDHCI OF support for the MCHP Sparx5 SoC"
+>> >> +     depends on MMC_SDHCI_PLTFM
+>> >> +     depends on ARCH_SPARX5
+>> >> +     select MMC_SDHCI_IO_ACCESSORS
+>> >> +     help
+>> >> +       This selects the Secure Digital Host Controller Interface (SDHCI)
+>> >> +       found in the MCHP Sparx5 SoC.
+>> >> +
+>> >> +       If you have a Sparx5 SoC with this interface, say Y or M here.
+>> >> +
+>> >> +       If unsure, say N.
+>> >> +
+>> >>  config MMC_SDHCI_CADENCE
+>> >>       tristate "SDHCI support for the Cadence SD/SDIO/eMMC controller"
+>> >>       depends on MMC_SDHCI_PLTFM
+>> >> diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+>> >> index 4d5bcb0144a0a..451c25fc2c692 100644
+>> >> --- a/drivers/mmc/host/Makefile
+>> >> +++ b/drivers/mmc/host/Makefile
+>> >> @@ -94,6 +94,7 @@ obj-$(CONFIG_MMC_SDHCI_OF_AT91)             += sdhci-of-at91.o
+>> >>  obj-$(CONFIG_MMC_SDHCI_OF_ESDHC)     += sdhci-of-esdhc.o
+>> >>  obj-$(CONFIG_MMC_SDHCI_OF_HLWD)              += sdhci-of-hlwd.o
+>> >>  obj-$(CONFIG_MMC_SDHCI_OF_DWCMSHC)   += sdhci-of-dwcmshc.o
+>> >> +obj-$(CONFIG_MMC_SDHCI_OF_SPARX5)    += sdhci-of-sparx5.o
+>> >>  obj-$(CONFIG_MMC_SDHCI_BCM_KONA)     += sdhci-bcm-kona.o
+>> >>  obj-$(CONFIG_MMC_SDHCI_IPROC)                += sdhci-iproc.o
+>> >>  obj-$(CONFIG_MMC_SDHCI_MSM)          += sdhci-msm.o
+>> >> diff --git a/drivers/mmc/host/sdhci-of-sparx5.c b/drivers/mmc/host/sdhci-of-sparx5.c
+>> >> new file mode 100644
+>> >> index 0000000000000..2b262c12e5530
+>> >> --- /dev/null
+>> >> +++ b/drivers/mmc/host/sdhci-of-sparx5.c
+>> >> @@ -0,0 +1,269 @@
+>> >> +// SPDX-License-Identifier: GPL-2.0-or-later
+>> >> +/*
+>> >> + * drivers/mmc/host/sdhci-of-sparx5.c
+>> >> + *
+>> >> + * MCHP Sparx5 SoC Secure Digital Host Controller Interface.
+>> >> + *
+>> >> + * Copyright (c) 2019 Microchip Inc.
+>> >> + *
+>> >> + * Author: Lars Povlsen <lars.povlsen@microchip.com>
+>> >> + */
+>> >> +
+>> >> +#include <linux/sizes.h>
+>> >> +#include <linux/delay.h>
+>> >> +#include <linux/module.h>
+>> >> +#include <linux/regmap.h>
+>> >> +#include <linux/of_device.h>
+>> >> +#include <linux/mfd/syscon.h>
+>> >> +#include <linux/dma-mapping.h>
+>> >> +
+>> >> +#include "sdhci-pltfm.h"
+>> >> +
+>> >> +#define CPU_REGS_GENERAL_CTRL        (0x22 * 4)
+>> >> +#define  MSHC_DLY_CC_MASK    GENMASK(16, 13)
+>> >> +#define  MSHC_DLY_CC_SHIFT   13
+>> >> +#define  MSHC_DLY_CC_MAX     15
+>> >> +
+>> >> +#define CPU_REGS_PROC_CTRL   (0x2C * 4)
+>> >> +#define  ACP_CACHE_FORCE_ENA BIT(4)
+>> >> +#define  ACP_AWCACHE         BIT(3)
+>> >> +#define  ACP_ARCACHE         BIT(2)
+>> >> +#define  ACP_CACHE_MASK              (ACP_CACHE_FORCE_ENA|ACP_AWCACHE|ACP_ARCACHE)
+>> >> +
+>> >> +#define MSHC2_VERSION                        0x500   /* Off 0x140, reg 0x0 */
+>> >> +#define MSHC2_TYPE                   0x504   /* Off 0x140, reg 0x1 */
+>> >> +#define MSHC2_EMMC_CTRL                      0x52c   /* Off 0x140, reg 0xB */
+>> >> +#define  MSHC2_EMMC_CTRL_EMMC_RST_N  BIT(2)
+>> >> +#define  MSHC2_EMMC_CTRL_IS_EMMC     BIT(0)
+>> >> +
+>> >> +struct sdhci_sparx5_data {
+>> >> +     struct sdhci_host *host;
+>> >> +     struct regmap *cpu_ctrl;
+>> >> +     int delay_clock;
+>> >> +};
+>> >> +
+>> >> +#define BOUNDARY_OK(addr, len) \
+>> >> +     ((addr | (SZ_128M - 1)) == ((addr + len - 1) | (SZ_128M - 1)))
+>> >> +
+>> >> +/*
+>> >> + * If DMA addr spans 128MB boundary, we split the DMA transfer into two
+>> >> + * so that each DMA transfer doesn't exceed the boundary.
+>> >> + */
+>> >> +static void sdhci_sparx5_adma_write_desc(struct sdhci_host *host, void **desc,
+>> >> +                                       dma_addr_t addr, int len,
+>> >> +                                       unsigned int cmd)
+>> >> +{
+>> >> +     int tmplen, offset;
+>> >> +
+>> >> +     if (likely(!len || BOUNDARY_OK(addr, len))) {
+>> >> +             sdhci_adma_write_desc(host, desc, addr, len, cmd);
+>> >> +             return;
+>> >> +     }
+>> >> +
+>> >> +     pr_debug("%s: write_desc: splitting dma len %d, offset 0x%0llx\n",
+>> >> +              mmc_hostname(host->mmc), len, addr);
+>> >> +
+>> >> +     offset = addr & (SZ_128M - 1);
+>> >> +     tmplen = SZ_128M - offset;
+>> >> +     sdhci_adma_write_desc(host, desc, addr, tmplen, cmd);
+>> >> +
+>> >> +     addr += tmplen;
+>> >> +     len -= tmplen;
+>> >> +     sdhci_adma_write_desc(host, desc, addr, len, cmd);
+>> >> +}
+>> >> +
+>> >> +static void sparx5_set_cacheable(struct sdhci_host *host, u32 value)
+>> >> +{
+>> >> +     struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>> >> +     struct sdhci_sparx5_data *sdhci_sparx5 = sdhci_pltfm_priv(pltfm_host);
+>> >> +
+>> >> +     pr_debug("%s: Set Cacheable = 0x%x\n", mmc_hostname(host->mmc), value);
+>> >> +
+>> >> +     /* Update ACP caching attributes in HW */
+>> >> +     regmap_update_bits(sdhci_sparx5->cpu_ctrl,
+>> >> +                        CPU_REGS_PROC_CTRL, ACP_CACHE_MASK, value);
+>> >> +}
+>> >> +
+>> >> +static void sparx5_set_delay(struct sdhci_host *host, u8 value)
+>> >> +{
+>> >> +     struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>> >> +     struct sdhci_sparx5_data *sdhci_sparx5 = sdhci_pltfm_priv(pltfm_host);
+>> >> +
+>> >> +     pr_debug("%s: Set DLY_CC = %u\n", mmc_hostname(host->mmc), value);
+>> >> +
+>> >> +     /* Update DLY_CC in HW */
+>> >> +     regmap_update_bits(sdhci_sparx5->cpu_ctrl,
+>> >> +                        CPU_REGS_GENERAL_CTRL,
+>> >> +                        MSHC_DLY_CC_MASK,
+>> >> +                        (value << MSHC_DLY_CC_SHIFT));
+>> >> +}
+>> >> +
+>> >> +static void sdhci_sparx5_set_emmc(struct sdhci_host *host)
+>> >> +{
+>> >> +     if (!mmc_card_is_removable(host->mmc)) {
+>> >> +             u8 value;
+>> >> +
+>> >> +             value = sdhci_readb(host, MSHC2_EMMC_CTRL);
+>> >> +             if (!(value & MSHC2_EMMC_CTRL_IS_EMMC)) {
+>> >> +                     value |= MSHC2_EMMC_CTRL_IS_EMMC;
+>> >> +                     pr_debug("%s: Set EMMC_CTRL: 0x%08x\n",
+>> >> +                              mmc_hostname(host->mmc), value);
+>> >> +                     sdhci_writeb(host, value, MSHC2_EMMC_CTRL);
+>> >> +             }
+>> >> +     }
+>> >> +}
+>> >> +
+>> >> +static void sdhci_sparx5_reset_emmc(struct sdhci_host *host)
+>> >> +{
+>> >> +     u8 value;
+>> >> +
+>> >> +     pr_debug("%s: Toggle EMMC_CTRL.EMMC_RST_N\n", mmc_hostname(host->mmc));
+>> >> +     value = sdhci_readb(host, MSHC2_EMMC_CTRL) &
+>> >> +             ~MSHC2_EMMC_CTRL_EMMC_RST_N;
+>> >> +     sdhci_writeb(host, value, MSHC2_EMMC_CTRL);
+>> >> +     /* For eMMC, minimum is 1us but give it 10us for good measure */
+>> >> +     usleep_range(10, 20);
+>> >> +     sdhci_writeb(host, value | MSHC2_EMMC_CTRL_EMMC_RST_N,
+>> >> +                  MSHC2_EMMC_CTRL);
+>> >> +     /* For eMMC, minimum is 200us but give it 300us for good measure */
+>> >> +     usleep_range(300, 400);
+>> >> +}
+>> >> +
+>> >> +static void sdhci_sparx5_reset(struct sdhci_host *host, u8 mask)
+>> >> +{
+>> >> +     pr_debug("%s: *** RESET: mask %d\n", mmc_hostname(host->mmc), mask);
+>> >> +
+>> >> +     sdhci_reset(host, mask);
+>> >> +
+>> >> +     /* Be sure CARD_IS_EMMC stays set */
+>> >> +     sdhci_sparx5_set_emmc(host);
+>> >> +}
+>> >> +
+>> >> +static const struct sdhci_ops sdhci_sparx5_ops = {
+>> >> +     .set_clock              = sdhci_set_clock,
+>> >> +     .set_bus_width          = sdhci_set_bus_width,
+>> >> +     .set_uhs_signaling      = sdhci_set_uhs_signaling,
+>> >> +     .get_max_clock          = sdhci_pltfm_clk_get_max_clock,
+>> >> +     .reset                  = sdhci_sparx5_reset,
+>> >> +     .adma_write_desc        = sdhci_sparx5_adma_write_desc,
+>> >> +};
+>> >> +
+>> >> +static const struct sdhci_pltfm_data sdhci_sparx5_pdata = {
+>> >> +     .quirks  = 0,
+>> >> +     .quirks2 = SDHCI_QUIRK2_HOST_NO_CMD23 | /* Controller issue */
+>> >> +                SDHCI_QUIRK2_NO_1_8_V, /* No sdr104, ddr50, etc */
+>> >> +     .ops = &sdhci_sparx5_ops,
+>> >> +};
+>> >> +
+>> >> +int sdhci_sparx5_probe(struct platform_device *pdev)
+>> >> +{
+>> >> +     int ret;
+>> >> +     const char *syscon = "microchip,sparx5-cpu-syscon";
+>> >> +     struct sdhci_host *host;
+>> >> +     struct sdhci_pltfm_host *pltfm_host;
+>> >> +     struct sdhci_sparx5_data *sdhci_sparx5;
+>> >> +     struct device_node *np = pdev->dev.of_node;
+>> >> +     u32 value;
+>> >> +     u32 extra;
+>> >> +
+>> >> +     host = sdhci_pltfm_init(pdev, &sdhci_sparx5_pdata,
+>> >> +                             sizeof(*sdhci_sparx5));
+>> >> +
+>> >> +     if (IS_ERR(host))
+>> >> +             return PTR_ERR(host);
+>> >> +
+>> >> +     /*
+>> >> +      * extra adma table cnt for cross 128M boundary handling.
+>> >> +      */
+>> >> +     extra = DIV_ROUND_UP_ULL(dma_get_required_mask(&pdev->dev), SZ_128M);
+>> >> +     if (extra > SDHCI_MAX_SEGS)
+>> >> +             extra = SDHCI_MAX_SEGS;
+>> >> +     host->adma_table_cnt += extra;
+>> >> +
+>> >> +     pltfm_host = sdhci_priv(host);
+>> >> +     sdhci_sparx5 = sdhci_pltfm_priv(pltfm_host);
+>> >> +     sdhci_sparx5->host = host;
+>> >> +
+>> >> +     pltfm_host->clk = devm_clk_get(&pdev->dev, "core");
+>> >> +     if (IS_ERR(pltfm_host->clk)) {
+>> >> +             ret = PTR_ERR(pltfm_host->clk);
+>> >> +             dev_err(&pdev->dev, "failed to get core clk: %d\n", ret);
+>> >> +             goto free_pltfm;
+>> >> +     }
+>> >> +     ret = clk_prepare_enable(pltfm_host->clk);
+>> >> +     if (ret)
+>> >> +             goto free_pltfm;
+>> >> +
+>> >> +     if (!of_property_read_u32(np, "microchip,clock-delay", &value) &&
+>> >> +         (value > 0 && value <= MSHC_DLY_CC_MAX))
+>> >> +             sdhci_sparx5->delay_clock = value;
+>> >> +
+>> >> +     sdhci_get_of_property(pdev);
+>> >> +
+>> >> +     ret = mmc_of_parse(host->mmc);
+>> >> +     if (ret)
+>> >> +             goto err_clk;
+>> >> +
+>> >> +     sdhci_sparx5->cpu_ctrl = syscon_regmap_lookup_by_compatible(syscon);
+>> >> +     if (IS_ERR(sdhci_sparx5->cpu_ctrl)) {
+>> >> +             dev_err(&pdev->dev, "No CPU syscon regmap !\n");
+>> >> +             ret = PTR_ERR(sdhci_sparx5->cpu_ctrl);
+>> >> +             goto err_clk;
+>> >> +     }
+>> >> +
+>> >> +     if (sdhci_sparx5->delay_clock >= 0)
+>> >> +             sparx5_set_delay(host, sdhci_sparx5->delay_clock);
+>> >> +
+>> >> +     if (!mmc_card_is_removable(host->mmc)) {
+>> >> +             /* Do a HW reset of eMMC card */
+>> >> +             sdhci_sparx5_reset_emmc(host);
+>> >> +             /* Update EMMC_CTRL */
+>> >> +             sdhci_sparx5_set_emmc(host);
+>> >> +             /* If eMMC, disable SD and SDIO */
+>> >> +             host->mmc->caps2 |= (MMC_CAP2_NO_SDIO|MMC_CAP2_NO_SD);
+>> >> +     }
+>> >> +
+>> >> +     ret = sdhci_add_host(host);
+>> >> +     if (ret)
+>> >> +             goto err_clk;
+>> >> +
+>> >> +     /* Set AXI bus master to use un-cached access (for DMA) */
+>> >> +     if (host->flags & (SDHCI_USE_SDMA | SDHCI_USE_ADMA) &&
+>> >> +         IS_ENABLED(CONFIG_DMA_DECLARE_COHERENT))
+>> >> +             sparx5_set_cacheable(host, ACP_CACHE_FORCE_ENA);
+>> >> +
+>> >> +     pr_debug("%s: SDHC version: 0x%08x\n",
+>> >> +              mmc_hostname(host->mmc), sdhci_readl(host, MSHC2_VERSION));
+>> >> +     pr_debug("%s: SDHC type:    0x%08x\n",
+>> >> +              mmc_hostname(host->mmc), sdhci_readl(host, MSHC2_TYPE));
+>> >> +
+>> >> +     return ret;
+>> >> +
+>> >> +err_clk:
+>> >> +     clk_disable_unprepare(pltfm_host->clk);
+>> >> +free_pltfm:
+>> >> +     sdhci_pltfm_free(pdev);
+>> >> +     return ret;
+>> >> +}
+>> >> +
+>> >> +static const struct of_device_id sdhci_sparx5_of_match[] = {
+>> >> +     { .compatible = "microchip,dw-sparx5-sdhci" },
+>> >> +     { }
+>> >> +};
+>> >> +MODULE_DEVICE_TABLE(of, sdhci_sparx5_of_match);
+>> >> +
+>> >> +static struct platform_driver sdhci_sparx5_driver = {
+>> >> +     .driver = {
+>> >> +             .name = "sdhci-sparx5",
+>> >> +             .of_match_table = sdhci_sparx5_of_match,
+>> >> +             .pm = &sdhci_pltfm_pmops,
+>> >> +     },
+>> >> +     .probe = sdhci_sparx5_probe,
+>> >> +     .remove = sdhci_pltfm_unregister,
+>> >> +};
+>> >> +
+>> >> +module_platform_driver(sdhci_sparx5_driver);
+>> >> +
+>> >> +MODULE_DESCRIPTION("Sparx5 SDHCI OF driver");
+>> >> +MODULE_AUTHOR("Lars Povlsen <lars.povlsen@microchip.com>");
+>> >> +MODULE_LICENSE("GPL v2");
+>> >>
+>>
+>> --
+>> Lars Povlsen,
+>> Microchip
 
-Best regards,
-Ben
+-- 
+Lars Povlsen,
+Microchip
