@@ -2,127 +2,141 @@ Return-Path: <SRS0=9Cpo=BG=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.4 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-7.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_GIT autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A8DFCC433E0
-	for <linux-mmc@archiver.kernel.org>; Mon, 27 Jul 2020 13:10:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F1A83C433E5
+	for <linux-mmc@archiver.kernel.org>; Mon, 27 Jul 2020 13:38:43 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 88B132074F
-	for <linux-mmc@archiver.kernel.org>; Mon, 27 Jul 2020 13:10:14 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="YpOet+5O"
+	by mail.kernel.org (Postfix) with ESMTP id CD8A42083B
+	for <linux-mmc@archiver.kernel.org>; Mon, 27 Jul 2020 13:38:43 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1595857123;
+	bh=bafirt8eG3bAnhbQomJL+lbC7o7oaIUWDBgbxYPMyAg=;
+	h=From:To:Cc:Subject:Date:List-ID:From;
+	b=HnvkbwJyIyL4kvSJIOWmQAhr5dUzgDuk0DbvNZLslzgiuVhAecPBa7I3Ha+4yiuh8
+	 chfac5c4VFMbqMSOUMikc4KIwcNCN2uApONK860hNa/8LXyPMP1UEXYomwVjjVc9HH
+	 4zX8iJM87dNYyOSPOym+xR3Pgp3M40uFd2/golq4=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728555AbgG0NKL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 27 Jul 2020 09:10:11 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53706 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728141AbgG0NKL (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Jul 2020 09:10:11 -0400
-Received: from mail-lj1-x243.google.com (mail-lj1-x243.google.com [IPv6:2a00:1450:4864:20::243])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A754FC061794;
-        Mon, 27 Jul 2020 06:10:10 -0700 (PDT)
-Received: by mail-lj1-x243.google.com with SMTP id x9so17157461ljc.5;
-        Mon, 27 Jul 2020 06:10:10 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=S8aJgTeOOMNvC3X35ZPNyQ7MJmZxrJEivSO6dpNlY0w=;
-        b=YpOet+5OohAKeocqhV4KRLZsIftxN6qyrcm78/wxaBs4d531oO5QKTKrZAavKghZL1
-         pCvTUMj6CTUQ7v/+BuleaUG+AhkLfMHR3pY4oYBx5YzOCRaa/7hEJ2fd3CUvYiZIHVsJ
-         YhVqVLUXSKvLjP2D3TReIOkhipMEb03uXaymu+V+PtUQ4Mj/bMQ5pnv2WGm1toyTWaFy
-         TVznEBSh19VXP+D2rafhgJJLiuV1/YzcVhg7LbMTkvVkKtaioOBnzibXP9GPx3C85zqq
-         Q1V6b2Yrfk2meVn+ZJe9/8si9mV1w3U2qX92U8RK+Ih6CAN0M8VfxziWYQ8JgrrTWrj6
-         xPbg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=S8aJgTeOOMNvC3X35ZPNyQ7MJmZxrJEivSO6dpNlY0w=;
-        b=RAYuWxAddQxooYjf7nVcS6fyNBErfL5tsUFzqmYworOA9hLbR/CoBBsU00v2n6choj
-         AYZkn7ZEJ9uuzqQZISiWsyMBdfhK9ZpM8sJ9K4mNXV0dI/4uP/Rwyo8sF08amc3vOyCm
-         BEwPAISwshsDZ8+rrgPvfMPvYm8efBMXPwrjFjVwqjdV4NjqHvpc/h2xxgjhpghVSkqI
-         gAs+332hD5rpiZGuRdpaucWXzuflBKRxnBtHBqMnfvjJ9kPBjKPgLsijNTaOYfBdMJY8
-         oM15SiSJYDCuZLpOUL1qigVBG6/Dz2Gb39rNlDw/WKWDiE2JX9QSay+DOEkaxZstzyET
-         WILw==
-X-Gm-Message-State: AOAM532rWUhSAxAiRn/q0kc6wU1CcbxVLM/m9djy2F5n6u21aI59a0Vh
-        wYAiiQ2t8hYGEIM8YseL4bEufgmB
-X-Google-Smtp-Source: ABdhPJwnoGvwlTb4Q7yMAGl31ThQ1KF8qea01jP6Ay2SV7pxHkffrZcL4Kvcg7FIL4wXQC4qb+FkRQ==
-X-Received: by 2002:a2e:a0cd:: with SMTP id f13mr9415769ljm.343.1595855409032;
-        Mon, 27 Jul 2020 06:10:09 -0700 (PDT)
-Received: from [192.168.2.145] (ppp91-76-12-16.pppoe.mtu-net.ru. [91.76.12.16])
-        by smtp.googlemail.com with ESMTPSA id l19sm2348443ljb.15.2020.07.27.06.10.07
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 27 Jul 2020 06:10:08 -0700 (PDT)
-Subject: Re: [PATCH] mmc: tegra: Add Runtime PM callbacks
-To:     Aniruddha Rao <anrao@nvidia.com>, adrian.hunter@intel.com,
-        ulf.hansson@linaro.org, thierry.reding@gmail.com,
-        jonathanh@nvidia.com, p.zabel@pengutronix.de
-Cc:     linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-References: <1595854036-15434-1-git-send-email-anrao@nvidia.com>
-From:   Dmitry Osipenko <digetx@gmail.com>
-Message-ID: <ea1a68b6-2399-f7ae-a336-bd1e14793b52@gmail.com>
-Date:   Mon, 27 Jul 2020 16:10:07 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.10.0
+        id S1729018AbgG0Nin (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 27 Jul 2020 09:38:43 -0400
+Received: from mail.kernel.org ([198.145.29.99]:39154 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726298AbgG0Nim (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 27 Jul 2020 09:38:42 -0400
+Received: from pali.im (pali.im [31.31.79.79])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id E108D2083B;
+        Mon, 27 Jul 2020 13:38:41 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1595857122;
+        bh=bafirt8eG3bAnhbQomJL+lbC7o7oaIUWDBgbxYPMyAg=;
+        h=From:To:Cc:Subject:Date:From;
+        b=KGLmBxyvMfNqEUSklx4QhC+8mySEiRI2Q54CN8T21jpd4DzJmNjUsF3lxgIRzhmKW
+         ikjM6sgC++lkpv6Ni9ZougW/B1j3QBCzHUlCg3VR+7EkxGP6PUSABVahohM9nmTP1V
+         9YIqo9bf4mZHaG4Ws8Ym/c4CuOp5qco11wRfhv9o=
+Received: by pali.im (Postfix)
+        id 9020FC89; Mon, 27 Jul 2020 15:38:39 +0200 (CEST)
+From:   =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: [PATCH 0/4] mmc: sdio: Export CISTPL_VERS_1 attributes to userspace
+Date:   Mon, 27 Jul 2020 15:38:33 +0200
+Message-Id: <20200727133837.19086-1-pali@kernel.org>
+X-Mailer: git-send-email 2.20.1
 MIME-Version: 1.0
-In-Reply-To: <1595854036-15434-1-git-send-email-anrao@nvidia.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-27.07.2020 15:47, Aniruddha Rao пишет:
-> Add runtime suspend/resume callbacks to save power
-> when the bus is not in use.
-> In runtime suspend
-> - Turn off the SDMMC host CAR clock.
-> - Turn off the trimmer/DLL circuit(BG) power supply(VREG).
-> - Turn off the SDMMC host internal clocks.
-> 
-> Re-enable all the disabled clocks/regulators in runtime resume.
-> 
-> Signed-off-by: Aniruddha Rao <anrao@nvidia.com>
-> ---
->  drivers/mmc/host/sdhci-tegra.c | 149 ++++++++++++++++++++++++++++++++++++++---
->  1 file changed, 140 insertions(+), 9 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-> index 0a3f9d0..1b4b245 100644
-> --- a/drivers/mmc/host/sdhci-tegra.c
-> +++ b/drivers/mmc/host/sdhci-tegra.c
-> @@ -23,6 +23,7 @@
->  #include <linux/mmc/slot-gpio.h>
->  #include <linux/gpio/consumer.h>
->  #include <linux/ktime.h>
-> +#include <linux/pm_runtime.h>
->  
->  #include "sdhci-pltfm.h"
->  #include "cqhci.h"
-> @@ -36,6 +37,7 @@
->  #define SDHCI_CLOCK_CTRL_SDR50_TUNING_OVERRIDE		BIT(5)
->  #define SDHCI_CLOCK_CTRL_PADPIPE_CLKEN_OVERRIDE		BIT(3)
->  #define SDHCI_CLOCK_CTRL_SPI_MODE_CLKEN_OVERRIDE	BIT(2)
-> +#define SDHCI_CLOCK_CTRL_SDMMC_CLK			BIT(0)
->  
->  #define SDHCI_TEGRA_VENDOR_SYS_SW_CTRL			0x104
->  #define SDHCI_TEGRA_SYS_SW_CTRL_ENHANCED_STROBE		BIT(31)
-> @@ -51,6 +53,9 @@
->  #define SDHCI_MISC_CTRL_ENABLE_SDHCI_SPEC_300		0x20
->  #define SDHCI_MISC_CTRL_ENABLE_DDR50			0x200
->  
-> +#define SDHCI_TEGRA_VENDOR_IO_TRIM_CTRL_0		0x1AC
-> +#define SDHCI_TEGRA_IO_TRIM_CTRL_0_SEL_VREG_MASK	0x4
+CISTPL_VERS_1 structure contains useful information for identification
+of SDIO cards. It contains revision number according to which standard
+is SDIO card compliant. And also it contain human readable info strings
+which should contain manufacturer name or product information, like for
+old PCMCIA cards. SDIO simplified specification 3.00 just contain
+reference to PCMCIA metaformat specification for definition of that
+CISTPL_VERS_1 structure itself.
 
-Hello Aniruddha,
+Human readable SDIO card strings can be useful for userspace to do card
+identification. Until now kernel exported to userspace only vendor and
+device numbers but these numbers do not help to identify new or unknown
+cards.
 
-Does this register exist on older Tegra SoCs?
+
+I have tested these patches with Marwell 88W8997 SDIO card (WiFi+Bluetooth)
+and here is content of attributes available in userspace:
+
+$ grep . /sys/class/mmc_host/mmc0/mmc0:0001/* /sys/class/mmc_host/mmc0/mmc0:0001/*/*
+/sys/class/mmc_host/mmc0/mmc0:0001/device:0x9140
+/sys/class/mmc_host/mmc0/mmc0:0001/info1:Marvell
+/sys/class/mmc_host/mmc0/mmc0:0001/info2:Wireless Device ID: 50
+/sys/class/mmc_host/mmc0/mmc0:0001/ocr:0x00200000
+/sys/class/mmc_host/mmc0/mmc0:0001/rca:0x0001
+/sys/class/mmc_host/mmc0/mmc0:0001/revision:1.0
+/sys/class/mmc_host/mmc0/mmc0:0001/type:SDIO
+/sys/class/mmc_host/mmc0/mmc0:0001/uevent:MMC_TYPE=SDIO
+/sys/class/mmc_host/mmc0/mmc0:0001/uevent:SDIO_ID=02DF:9140
+/sys/class/mmc_host/mmc0/mmc0:0001/uevent:SDIO_REVISION=1.0
+/sys/class/mmc_host/mmc0/mmc0:0001/uevent:SDIO_INFO1=Marvell
+/sys/class/mmc_host/mmc0/mmc0:0001/uevent:SDIO_INFO2=Wireless Device ID: 50
+/sys/class/mmc_host/mmc0/mmc0:0001/uevent:SDIO_INFO3=
+/sys/class/mmc_host/mmc0/mmc0:0001/vendor:0x02df
+/sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:1/class:0x00
+/sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:1/device:0x9141
+/sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:1/info1:Marvell WiFi Device
+/sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:1/modalias:sdio:c00v02DFd9141
+/sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:1/revision:1.0
+/sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:1/uevent:DRIVER=mwifiex_sdio
+/sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:1/uevent:SDIO_CLASS=00
+/sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:1/uevent:SDIO_ID=02DF:9141
+/sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:1/uevent:SDIO_REVISION=1.0
+/sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:1/uevent:SDIO_INFO1=Marvell WiFi Device
+/sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:1/uevent:SDIO_INFO2=
+/sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:1/uevent:MODALIAS=sdio:c00v02DFd9141
+/sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:1/vendor:0x02df
+/sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:2/class:0x00
+/sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:2/device:0x9142
+/sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:2/info1:Marvell Bluetooth Device
+/sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:2/modalias:sdio:c00v02DFd9142
+/sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:2/revision:1.0
+/sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:2/uevent:DRIVER=btmrvl_sdio
+/sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:2/uevent:SDIO_CLASS=00
+/sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:2/uevent:SDIO_ID=02DF:9142
+/sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:2/uevent:SDIO_REVISION=1.0
+/sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:2/uevent:SDIO_INFO1=Marvell Bluetooth Device
+/sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:2/uevent:SDIO_INFO2=
+/sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:2/uevent:MODALIAS=sdio:c00v02DFd9142
+/sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:2/vendor:0x02df
+/sys/class/mmc_host/mmc0/mmc0:0001/power/control:auto
+/sys/class/mmc_host/mmc0/mmc0:0001/power/runtime_active_time:0
+/sys/class/mmc_host/mmc0/mmc0:0001/power/runtime_status:unsupported
+/sys/class/mmc_host/mmc0/mmc0:0001/power/runtime_suspended_time:0
+/sys/class/mmc_host/mmc0/mmc0:0001/subsystem/drivers_autoprobe:1
+
+As can be seen SDIO card does not provide all 4 info strings as required by
+SDIO/PCMCIA specificaion and the third and the second strings are empty.
+
+
+Pali Rohár (4):
+  mmc: sdio: Check for CISTPL_VERS_1 buffer size
+  mmc: sdio: Parse CISTPL_VERS_1 major and minor revision numbers
+  mmc: sdio: Extend sdio_config_attr macro and use it also for modalias
+  mmc: sdio: Export SDIO revision and info strings to userspace
+
+ drivers/mmc/core/bus.c        | 12 ++++++++
+ drivers/mmc/core/sd.c         | 36 +++++++++++++++++++++--
+ drivers/mmc/core/sdio.c       | 24 ++++++++++++++++
+ drivers/mmc/core/sdio_bus.c   | 54 ++++++++++++++++++++++++++---------
+ drivers/mmc/core/sdio_cis.c   | 11 +++++++
+ include/linux/mmc/card.h      |  2 ++
+ include/linux/mmc/sdio_func.h |  2 ++
+ 7 files changed, 124 insertions(+), 17 deletions(-)
+
+-- 
+2.20.1
+
