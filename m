@@ -2,194 +2,244 @@ Return-Path: <SRS0=9Cpo=BG=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=BAYES_00,DKIM_INVALID,
+X-Spam-Status: No, score=-12.1 required=3.0 tests=BAYES_00,DKIM_INVALID,
 	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no
-	version=3.4.0
+	NICE_REPLY_A,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CED07C433E1
-	for <linux-mmc@archiver.kernel.org>; Mon, 27 Jul 2020 06:51:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2FD45C433E0
+	for <linux-mmc@archiver.kernel.org>; Mon, 27 Jul 2020 10:21:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A19482075D
-	for <linux-mmc@archiver.kernel.org>; Mon, 27 Jul 2020 06:51:05 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0356C2065E
+	for <linux-mmc@archiver.kernel.org>; Mon, 27 Jul 2020 10:21:53 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (1024-bit key) header.d=mg.codeaurora.org header.i=@mg.codeaurora.org header.b="JysotARB"
+	dkim=fail reason="signature verification failed" (1024-bit key) header.d=mg.codeaurora.org header.i=@mg.codeaurora.org header.b="COMRw359"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726887AbgG0GvF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 27 Jul 2020 02:51:05 -0400
-Received: from m43-7.mailgun.net ([69.72.43.7]:16363 "EHLO m43-7.mailgun.net"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726278AbgG0GvE (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 27 Jul 2020 02:51:04 -0400
+        id S1727814AbgG0KVw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 27 Jul 2020 06:21:52 -0400
+Received: from mail29.static.mailgun.info ([104.130.122.29]:30030 "EHLO
+        mail29.static.mailgun.info" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1727783AbgG0KVw (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Jul 2020 06:21:52 -0400
 DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
- s=smtp; t=1595832664; h=Message-ID: References: In-Reply-To: Subject:
- Cc: To: From: Date: Content-Transfer-Encoding: Content-Type:
- MIME-Version: Sender; bh=NZJVjYhVsFEASgD9T7lU7RM9AwnOeyEC5q0Uw50tNJ4=;
- b=JysotARB/reul7PGShxTLageak5DsuOj1NHaTavmRJ8OHR5II23t44vkiY5mMpCIATS0aLHZ
- s6FLMiBomuTGyO1NQH+NwOsfrQMBoOni2YmoLf8JxY4B5OHi5jW6ncRP0LbhfKWIG/RmnLk5
- ML67pOC6QNiK8TVQMN4FCZO8kvk=
-X-Mailgun-Sending-Ip: 69.72.43.7
+ s=smtp; t=1595845310; h=Content-Transfer-Encoding: Content-Type:
+ In-Reply-To: MIME-Version: Date: Message-ID: From: References: Cc: To:
+ Subject: Sender; bh=3ICFc++bUE871suhrVMhUt05tELazLFLFEnQc5uUq3s=; b=COMRw359HtXU2MBBK7FWxvSD2PC7eHt1O3GiSjxl4XywA6NolKSsUcRpRfjMJGxD4lXqfihe
+ QotQl18mVDEVleTup8NYK8hdHq34pBhiwuovxZiTCeQlY8tX6EytFqMHA+xy1xnx2gRbOFdL
+ rYEo2RLNMoiTBfVcE8WUYfKkt/s=
+X-Mailgun-Sending-Ip: 104.130.122.29
 X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
 Received: from smtp.codeaurora.org
  (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171]) by
- smtp-out-n19.prod.us-east-1.postgun.com with SMTP id
- 5f1e7940a61bb9e3f52225ba (version=TLS1.2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256); Mon, 27 Jul 2020 06:50:40
+ smtp-out-n08.prod.us-west-2.postgun.com with SMTP id
+ 5f1eaab1aa44a6db05abd0aa (version=TLS1.2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256); Mon, 27 Jul 2020 10:21:37
  GMT
 Received: by smtp.codeaurora.org (Postfix, from userid 1001)
-        id 4E8AAC433C6; Mon, 27 Jul 2020 06:50:39 +0000 (UTC)
-Received: from mail.codeaurora.org (localhost.localdomain [127.0.0.1])
-        (using TLSv1 with cipher ECDHE-RSA-AES256-SHA (256/256 bits))
+        id E45C1C43395; Mon, 27 Jul 2020 10:21:36 +0000 (UTC)
+Received: from [192.168.0.103] (unknown [49.205.245.25])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        (Authenticated sender: sbhanu)
-        by smtp.codeaurora.org (Postfix) with ESMTPSA id 7C5A3C433C9;
-        Mon, 27 Jul 2020 06:50:38 +0000 (UTC)
+        (Authenticated sender: vbadigan)
+        by smtp.codeaurora.org (Postfix) with ESMTPSA id AB14EC433C9;
+        Mon, 27 Jul 2020 10:21:32 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.3.2 smtp.codeaurora.org AB14EC433C9
+Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
+Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=none smtp.mailfrom=vbadigan@codeaurora.org
+Subject: Re: [PATCH V1] mmc: sdhci-msm: Set IO pins in low power state during
+ suspend
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Matthias Kaehlcke <mka@chromium.org>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
+        Andy Gross <agross@kernel.org>
+References: <1594213888-2780-1-git-send-email-vbadigan@codeaurora.org>
+ <1594213888-2780-2-git-send-email-vbadigan@codeaurora.org>
+ <20200710005233.GN3191083@google.com>
+ <63323fe2-e3a3-030f-5275-01fa6b04e23b@codeaurora.org>
+ <20200711001948.GO3191083@google.com>
+ <2c322fe1-6a86-43c9-11f3-387b917836ed@codeaurora.org>
+ <406769f7-2282-d658-5573-3a510d256eee@codeaurora.org>
+ <CAPDyKFpLg0HnZ6p=x9Egv9w65hB5CtFw=gV1rpL8vbWcHYtCzg@mail.gmail.com>
+From:   Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+Message-ID: <5779057c-1639-6e86-a44e-5a3827a4fd75@codeaurora.org>
+Date:   Mon, 27 Jul 2020 15:51:19 +0530
+User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:68.0) Gecko/20100101
+ Thunderbird/68.10.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII;
- format=flowed
+In-Reply-To: <CAPDyKFpLg0HnZ6p=x9Egv9w65hB5CtFw=gV1rpL8vbWcHYtCzg@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
-Date:   Mon, 27 Jul 2020 12:20:38 +0530
-From:   sbhanu@codeaurora.org
-To:     Matthias Kaehlcke <mka@chromium.org>
-Cc:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
-        robh+dt@kernel.org, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        devicetree@vger.kernel.org, agross@kernel.org,
-        bjorn.andersson@linaro.org, rnayak@codeaurora.org,
-        Pradeep P V K <ppvk@codeaurora.org>,
-        devicetree-owner@vger.kernel.org
-Subject: Re: [PATCH V2] arm64: dts: qcom: sc7180: Add bandwidth votes for eMMC
- and SDcard
-In-Reply-To: <20200724171018.GZ3191083@google.com>
-References: <1595328381-29552-1-git-send-email-sbhanu@codeaurora.org>
- <20200724171018.GZ3191083@google.com>
-Message-ID: <7ffcb56e9e6723f4bae687e0f491cb93@codeaurora.org>
-X-Sender: sbhanu@codeaurora.org
-User-Agent: Roundcube Webmail/1.3.9
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 2020-07-24 22:40, Matthias Kaehlcke wrote:
-> Hi Shaik,
-> 
-> On Tue, Jul 21, 2020 at 04:16:21PM +0530, Shaik Sajida Bhanu wrote:
->> From: Pradeep P V K <ppvk@codeaurora.org>
->> 
->> Add the bandwidth domain supporting performance state and
->> the corresponding OPP tables for the sdhc device on sc7180.
->> 
->> Signed-off-by: Pradeep P V K <ppvk@codeaurora.org>
->> Signed-off-by: Shaik Sajida Bhanu <sbhanu@codeaurora.org>
->> ---
->> 
->> Changes since V1:
->> 	- Incorporated review comments by Bjorn Andersson.
->> ---
->>  arch/arm64/boot/dts/qcom/sc7180.dtsi | 15 +++++++++++++++
->>  1 file changed, 15 insertions(+)
->> 
->> diff --git a/arch/arm64/boot/dts/qcom/sc7180.dtsi 
+
+On 7/24/2020 3:06 PM, Ulf Hansson wrote:
+> On Tue, 14 Jul 2020 at 16:12, Veerabhadrarao Badiganti
+> <vbadigan@codeaurora.org> wrote:
+>>
+>> On 7/13/2020 9:26 PM, Veerabhadrarao Badiganti wrote:
+>>> On 7/11/2020 5:49 AM, Matthias Kaehlcke wrote:
+>>>> Hi,
+>>>>
+>>>> On Fri, Jul 10, 2020 at 04:28:36PM +0530, Veerabhadrarao Badiganti
+>>>> wrote:
+>>>>> Hi Mathias,
+>>>>>
+>>>>> On 7/10/2020 6:22 AM, Matthias Kaehlcke wrote:
+>>>>>> Hi,
+>>>>>>
+>>>>>> On Wed, Jul 08, 2020 at 06:41:20PM +0530, Veerabhadrarao Badiganti
+>>>>>> wrote:
+>>>>>>> Configure SDHC IO pins with low power configuration when the driver
+>>>>>>> is in suspend state.
+>>>>>>>
+>>>>>>> Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+>>>>>>> ---
+>>>>>>>     drivers/mmc/host/sdhci-msm.c | 17 +++++++++++++++++
+>>>>>>>     1 file changed, 17 insertions(+)
+>>>>>>>
+>>>>>>> diff --git a/drivers/mmc/host/sdhci-msm.c
+>>>>>>> b/drivers/mmc/host/sdhci-msm.c
+>>>>>>> index 392d41d57a6e..efd2bae1430c 100644
+>>>>>>> --- a/drivers/mmc/host/sdhci-msm.c
+>>>>>>> +++ b/drivers/mmc/host/sdhci-msm.c
+>>>>>>> @@ -15,6 +15,7 @@
+>>>>>>>     #include <linux/iopoll.h>
+>>>>>>>     #include <linux/regulator/consumer.h>
+>>>>>>>     #include <linux/interconnect.h>
+>>>>>>> +#include <linux/pinctrl/consumer.h>
+>>>>>>>     #include "sdhci-pltfm.h"
+>>>>>>>     #include "cqhci.h"
+>>>>>>> @@ -1352,6 +1353,19 @@ static void
+>>>>>>> sdhci_msm_set_uhs_signaling(struct sdhci_host *host,
+>>>>>>>             sdhci_msm_hs400(host, &mmc->ios);
+>>>>>>>     }
+>>>>>>> +static int sdhci_msm_set_pincfg(struct sdhci_msm_host *msm_host,
+>>>>>>> bool level)
+>>>>>>> +{
+>>>>>>> +    struct platform_device *pdev = msm_host->pdev;
+>>>>>>> +    int ret;
+>>>>>>> +
+>>>>>>> +    if (level)
+>>>>>>> +        ret = pinctrl_pm_select_default_state(&pdev->dev);
+>>>>>>> +    else
+>>>>>>> +        ret = pinctrl_pm_select_sleep_state(&pdev->dev);
+>>>>>>> +
+>>>>>>> +    return ret;
+>>>>>>> +}
+>>>>>>> +
+>>>>>>>     static int sdhci_msm_set_vmmc(struct mmc_host *mmc)
+>>>>>>>     {
+>>>>>>>         if (IS_ERR(mmc->supply.vmmc))
+>>>>>>> @@ -1596,6 +1610,9 @@ static void sdhci_msm_handle_pwr_irq(struct
+>>>>>>> sdhci_host *host, int irq)
+>>>>>>>                 ret = sdhci_msm_set_vqmmc(msm_host, mmc,
+>>>>>>>                         pwr_state & REQ_BUS_ON);
+>>>>>>>             if (!ret)
+>>>>>>> +            ret = sdhci_msm_set_pincfg(msm_host,
+>>>>>>> +                    pwr_state & REQ_BUS_ON);
+>>>>>>> +        if (!ret)
+>>>>>>>                 irq_ack |= CORE_PWRCTL_BUS_SUCCESS;
+>>>>>>>             else
+>>>>>>>                 irq_ack |= CORE_PWRCTL_BUS_FAIL;
+>>>>>> I happened to have a debug patch in my tree which logs when regulators
+>>>>>> are enabled/disabled, with this patch I see the SD card regulator
+>>>>>> toggling constantly after returning from the first system suspend.
+>>>>>>
+>>>>>> I added more logs:
+>>>>>>
+>>>>>> [ 1156.085819] DBG: sdhci_msm_set_pincfg: level = 0 (ret: 0)
+>>>>>> [ 1156.248936] DBG: sdhci_msm_set_pincfg: level = 1 (ret: 0)
+>>>>>> [ 1156.301989] DBG: sdhci_msm_set_pincfg: level = 0 (ret: 0)
+>>>>>> [ 1156.462383] DBG: sdhci_msm_set_pincfg: level = 1 (ret: 0)
+>>>>>> [ 1156.525988] DBG: sdhci_msm_set_pincfg: level = 0 (ret: 0)
+>>>>>> [ 1156.670372] DBG: sdhci_msm_set_pincfg: level = 1 (ret: 0)
+>>>>>> [ 1156.717935] DBG: sdhci_msm_set_pincfg: level = 0 (ret: 0)
+>>>>>> [ 1156.878122] DBG: sdhci_msm_set_pincfg: level = 1 (ret: 0)
+>>>>>> [ 1156.928134] DBG: sdhci_msm_set_pincfg: level = 0 (ret: 0)
+>>>>>>
+>>>>>> This is on an SC7180 platform. It doesn't run an upstream kernel
+>>>>>> though,
+>>>>>> but v5.4 with plenty of upstream patches.
+>>>>> I have verified this on couple of sc7180 targets (on Chrome platform
+>>>>> with
+>>>>> Chrome kernel).
+>>>>> But didn't see any issue. Its working as expected.
+>>>> Did you test system suspend too? At least in the Chrome OS kernel
+>>>> tree system
+>>>> suspend is not supported yet in the main branch, you'd need a pile of
+>>>> 30+
+>>>> extra patches to get it to work. This is expected to change soon
+>>>> though :)
+>>> Yes. I have verified with system  suspend-resume scenario.
+>>> Sorry forgot to mention this point explicitly in last response.
+>>>
+>>> I believe all the needed patches were present on qcom internal tree.
+>>> Suspend-resume is working fine on sc7180 qcom chrome tree.
+>>>
+>> Thanks Matthias. I cloud reproduce the issue on device without SDcard.
+>>
+>> Without SDcard inserted, cd-gpio (SD card detect GPIO) is getting read
+>> as active HIGH
+>> (as if card is inserted) during system-resume, resulting SDcard probe/scan.
+>>
+>> After that its triggering interrupt again when pinctrl config is applied
+>> during SDcard
+>> power-up sequence (as part of probe/scan) which is again triggering
+>> sdcard scan.
+>>
+>> I will have to change SDcard cd-gpio sleep config to fix this issue like
+>> below:
+>>
+>> diff --git a/arch/arm64/boot/dts/qcom/sc7180.dtsi
 >> b/arch/arm64/boot/dts/qcom/sc7180.dtsi
->> index 68f9894..d78a066 100644
+>> index e2230f47a17d..9266d514e163 100644
 >> --- a/arch/arm64/boot/dts/qcom/sc7180.dtsi
 >> +++ b/arch/arm64/boot/dts/qcom/sc7180.dtsi
->> @@ -684,6 +684,9 @@
->>  			clocks = <&gcc GCC_SDCC1_APPS_CLK>,
->>  					<&gcc GCC_SDCC1_AHB_CLK>;
->>  			clock-names = "core", "iface";
->> +			interconnects = <&aggre1_noc MASTER_EMMC &mc_virt SLAVE_EBI1>,
->> +				<&gem_noc MASTER_APPSS_PROC &config_noc SLAVE_EMMC_CFG>;
->> +			interconnect-names = "sdhc-ddr","cpu-sdhc";
->>  			power-domains = <&rpmhpd SC7180_CX>;
->>  			operating-points-v2 = <&sdhc1_opp_table>;
->> 
->> @@ -704,11 +707,15 @@
->>  				opp-100000000 {
->>  					opp-hz = /bits/ 64 <100000000>;
->>  					required-opps = <&rpmhpd_opp_low_svs>;
->> +					opp-peak-kBps = <100000 100000>;
->> +					opp-avg-kBps = <100000 50000>;
->>  				};
->> 
->>  				opp-384000000 {
->>  					opp-hz = /bits/ 64 <384000000>;
->>  					required-opps = <&rpmhpd_opp_svs_l1>;
->> +					opp-peak-kBps = <600000 900000>;
->> +					opp-avg-kBps = <261438 300000>;
->>  				};
->>  			};
->>  		};
->> @@ -2476,6 +2483,10 @@
->>  			clocks = <&gcc GCC_SDCC2_APPS_CLK>,
->>  					<&gcc GCC_SDCC2_AHB_CLK>;
->>  			clock-names = "core", "iface";
->> +
->> +			interconnects = <&aggre1_noc MASTER_SDCC_2 &mc_virt SLAVE_EBI1>,
->> +				<&gem_noc MASTER_APPSS_PROC &config_noc	SLAVE_SDCC_2>;
->> +			interconnect-names = "sdhc-ddr","cpu-sdhc";
->>  			power-domains = <&rpmhpd SC7180_CX>;
->>  			operating-points-v2 = <&sdhc2_opp_table>;
->> 
->> @@ -2489,11 +2500,15 @@
->>  				opp-100000000 {
->>  					opp-hz = /bits/ 64 <100000000>;
->>  					required-opps = <&rpmhpd_opp_low_svs>;
->> +					opp-peak-kBps = <160000 100000>;
->> +					opp-avg-kBps = <80000 50000>;
->>  				};
->> 
->>  				opp-202000000 {
->>  					opp-hz = /bits/ 64 <202000000>;
->>  					required-opps = <&rpmhpd_opp_svs_l1>;
->> +					opp-peak-kBps = <200000	120000>;
->> +					opp-avg-kBps = <100000 60000>;
->>  				};
->>  			};
->>  		};
-> 
-> Does the sdhci-msm driver actually have BW scaling support at this 
-> point?
-> 
+>> @@ -2447,7 +2447,7 @@
+>>
+>>                                   pinconf-sd-cd {
+>>                                           pins = "gpio69";
+>> -                                       bias-disable;
+>> +                                       bias-pull-up;
+>>                                           drive-strength = <2>;
+>>
+>> I will check more on why its getting read as active HIGH during resume.
+>>
+>>
+>>>>> Let me know if you are observing this issue constantly on multiple
+>>>>> boards, I
+>>>>> will share you
+>>>>> a debug patch to check it further.
+>>>> I currently have only one board with the SD card slot populated, I might
+>>>> get another one next week.
+>>>>
+>>>> The toggling occurs only when no SD card is inserted.
+>> Thanks
+>>
+>> Veera
+>>
+> Thanks for testing and for looking into this. Perhaps I should drop
+> the $subject patch then?
+Hi Uffe,
 
-yes
+No need to drop this. We could root-casue the issue. Its a board 
+specific issue.
+This particular platform/board doesn't have external pull-up on the 
+cd-gpio pin.
 
-> There is commit 4ece9795be56 ("mmc: sdhci-msm: Add interconnect
-> bandwidth scaling support"), whose commit message says "make sure
-> interconnect driver is ready before handling interconnect scaling.".
-> 
-> I haven't seen any patch adding the scaling support (supposedly by
-> adding dev_pm_opp_set_bw() calls?). Did I miss it? If not it seems
-> it would make sense to post it in a series together with this patch,
-> as far as I can tell this patch alone does nothing in practical terms.
-> 
-> grep sdhc /sys/kernel/debug/interconnect/interconnect_summary
->   8804000.sdhci                          0            0            0
->   7c4000.sdhci                           0            0            0
->   7c4000.sdhci                           0            0            0
->   8804000.sdhci                          0            0            0
->   ...
+So internal pull-up config has to be applied on cd-gpio all the time.
+We posted this dt change to enable internal pull 
+https://patchwork.kernel.org/patch/11675347/
 
-"mmc: sdhci-msm: Use OPP API to set clk/perf 
-state"(https://lkml.org/lkml/2020/4/8/425) and "mmc: sdhci-msm: Add 
-interconnect bandwidth scaling 
-support"(https://lkml.org/lkml/2020/3/12/60) with these two patches 
-scaling will be supported for sdhci-msm driver.
+Thanks
+Veera
 
-the values  in  grep sdhc 
-/sys/kernel/debug/interconnect/interconnect_summary will be zero during 
-device is in suspend state... and the values in  grep sdhc 
-/sys/kernel/debug/interconnect/interconnect_summary during device in 
-resume state will be like the following::
-
-cicalhost / # cat /sys/kernel/debug/interconnect/interconnect_summary | 
-grep sdh
-   8804000.sdhci                          0        60000       120000
-   7c4000.sdhci                           0       300000       900000
-   7c4000.sdhci                           0       300000       900000
-   8804000.sdhci                          0        60000       120000
-   8804000.sdhci                          0       100000       200000
-   7c4000.sdhci                           0       261438       600000
-   8804000.sdhci                          0        60000       120000
-
+> Uffe
