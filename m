@@ -2,220 +2,156 @@ Return-Path: <SRS0=a44q=BH=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-4.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	NICE_REPLY_A,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1BC21C433E3
-	for <linux-mmc@archiver.kernel.org>; Tue, 28 Jul 2020 01:50:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 811E6C433E0
+	for <linux-mmc@archiver.kernel.org>; Tue, 28 Jul 2020 11:02:27 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E537B20714
-	for <linux-mmc@archiver.kernel.org>; Tue, 28 Jul 2020 01:50:54 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 532A120656
+	for <linux-mmc@archiver.kernel.org>; Tue, 28 Jul 2020 11:02:27 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="C2LHZbx6"
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=microchip.com header.i=@microchip.com header.b="HM2xCILz";
+	dkim=pass (1024-bit key) header.d=microchiptechnology.onmicrosoft.com header.i=@microchiptechnology.onmicrosoft.com header.b="jVJWSS6f"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726320AbgG1Buy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 27 Jul 2020 21:50:54 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59584 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726196AbgG1Buy (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Jul 2020 21:50:54 -0400
-Received: from mail-il1-x144.google.com (mail-il1-x144.google.com [IPv6:2607:f8b0:4864:20::144])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EA43EC061794;
-        Mon, 27 Jul 2020 18:50:53 -0700 (PDT)
-Received: by mail-il1-x144.google.com with SMTP id r13so7772270ilt.6;
-        Mon, 27 Jul 2020 18:50:53 -0700 (PDT)
+        id S1728801AbgG1LC0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 28 Jul 2020 07:02:26 -0400
+Received: from esa5.microchip.iphmx.com ([216.71.150.166]:2097 "EHLO
+        esa5.microchip.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728688AbgG1LC0 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Jul 2020 07:02:26 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=microchip.com; i=@microchip.com; q=dns/txt; s=mchp;
+  t=1595934144; x=1627470144;
+  h=from:to:cc:subject:date:message-id:references:
+   in-reply-to:content-id:content-transfer-encoding:
+   mime-version;
+  bh=RAIuHZMnYsJwBxdMQOs9QQxzFctJKrEZzvlkMR+0+pc=;
+  b=HM2xCILznL3OXolNI/hQ+Q0SxORAh8CPnhmRYZCNsaK9RZ17pBLoV6w5
+   G6RasRlWp6WtWD5SAZe0ogEp0efE1PpB/wwVTtSLuKJxo8BQ14kYl7OSM
+   vfVNowGZU15EzWp52CSALaxR+oG1JZ+I7hxKmShTWJbeCOBCJPmQiBP5/
+   4MTN/xldrh9H/x2bdOjNkMgUWn+lPsPywg5NMR1+FRM1b3IPAxpR3sseJ
+   DuyDqT7A1fG9olc3gnK8WGjmqcO3I6kJa8SOPnebdCcG1Ykf9AgLWClHC
+   AXPzM/hhq6w5awb31fdoEpbxWWgk9zmxmFvcJXaeyjmZneZe/9M2J8CdI
+   Q==;
+IronPort-SDR: u5bp6vmT06O9g9dKCssxAbmaFM5H76ivKPiQYHe5zuTi2/f9isZxkP3rR5lGEYQXBfUm9r1QHj
+ VE2zXRes/kWoxO+2soPOS/BiCO/Bg85ZvCWuDFQiDJFKaX7LHjWMJTFJMBMiYCFtIqDlEi893V
+ JZ9JKuorp9dthCSDnRR87CrTQvd1a8lTokv7wUuLGjY8C8zJ9EaJdmdFWhTnOD1KXR0mVs1kxy
+ zA8G/0vNoFeBgy6GWjV6nBFzyTkB58EoPtvj6Ah1bIduUkvnHfrhKk4gLwt3B6x/jWaHI4eOT4
+ cGE=
+X-IronPort-AV: E=Sophos;i="5.75,406,1589266800"; 
+   d="scan'208";a="84853061"
+Received: from smtpout.microchip.com (HELO email.microchip.com) ([198.175.253.82])
+  by esa5.microchip.iphmx.com with ESMTP/TLS/AES256-SHA256; 28 Jul 2020 04:02:24 -0700
+Received: from chn-vm-ex04.mchp-main.com (10.10.85.152) by
+ chn-vm-ex04.mchp-main.com (10.10.85.152) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.1979.3; Tue, 28 Jul 2020 04:02:22 -0700
+Received: from NAM10-BN7-obe.outbound.protection.outlook.com (10.10.215.89) by
+ email.microchip.com (10.10.87.151) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.1979.3
+ via Frontend Transport; Tue, 28 Jul 2020 04:02:22 -0700
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=VROxO4zkJQ527viR+q7Zdyg3czpvDXemzYlFBfqAKtvCRp/RdNpYI/k/Wrde/epP6iLDoZwEyp7948vLh/OJPugFSJJZOoX9/agZVFO3Afk8kFqzv49T4NuHk4tAwqJlUAeKhy2h2clvxZ97BqGCC1K0jFQPpKZM70epoXl7GQ516G8jufWTDdCCaOptiBoFjMIBO2HfyApCsuvUt/P1bWMX+5TxCPqCrLm9fd6kUlW9mGwZnw25DZWKYTn5uM/vmp9O4EUT9536VBLspK4yw59e5px9ILOmkJW7gg7JNxaLNOaoS6PvqbUvJXwq1IGpS0k/3WIVWl0q/dDvltgc1w==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=RAIuHZMnYsJwBxdMQOs9QQxzFctJKrEZzvlkMR+0+pc=;
+ b=CK6jme9qJHkI+lGiYLj6sHA4E2tRScSgOOaqWQl8Q0/fSwyzUTokkPoVhfquAQcDgTBf/frpWpARWUJZs1m3M0BvQifjLDNQK7zcEm+ZlAXiOXNP7L/WVWB4NwSm533sDUM4fphLvnFMeKewMvSJMOVvy3mgnbVgp4UwJHXWw2dT/JLDaupom5usH+7feTIKceM6v3hrstHQAeE1tnZ8fOprptUgAFm5b1SBlELVLOSM4lL4JPLeoVN+sk+nvbT3VtHjQs+JDcw8cym8aBtwjlvTdN6g+B+AFjHmiauNOxBWe1+ifMXplH0lier7g0i8kNGyKfy9cqXbafi1UCPu+A==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=microchip.com; dmarc=pass action=none
+ header.from=microchip.com; dkim=pass header.d=microchip.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:in-reply-to:references:from:date:message-id:subject:to
-         :cc;
-        bh=d8AIX6Jt0FrGJJO5RxD/791F0xEbWlpcv94oWhzTkkQ=;
-        b=C2LHZbx60OkuSsmGiL3SWROsKh85t9fN7z189B8DUbUN9j1FwVDMqO5oERtzxRKhU6
-         aMjvnaoUb1DsWpMbg9k1+utFyw4df2IiVO4rTn/SaOCrsWlBohDzGsKNu7/kEWc6j7jk
-         lZ4wTSulYDx0D5ehBrZcR4BPSRo0RAKuPjchN8rNK5V2b9KROzsM55DNsdqbFWLKfKTc
-         X1P1uvmvgxpCqpWwwabbnlzQnBH/d0kO8UnrOT76HcMZoTLrMIjNAalbE9DnQcVZpjM7
-         eAlbNQu+Tdt3m2HEerEmjxbTNshpzLMqEvagdqWbke3M0iDOVwiMKhgOISzSshS6hk10
-         tzvQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:in-reply-to:references:from:date
-         :message-id:subject:to:cc;
-        bh=d8AIX6Jt0FrGJJO5RxD/791F0xEbWlpcv94oWhzTkkQ=;
-        b=X83mW0On7Yg1wEnlQmmry3pOOeUXj93wEEvHWuzybKeoEXD6Ts7OlBa+sNNhkNnFPY
-         35r1XZJC61GymFq+MeC9Ws85CJaqU2R45hRBE4IBsHf55v/4X3WlJybbi2+MBwfSyneo
-         QEZluNi10X3RqBGg8OfXabgz8CQUQj3csw0HlT9c7Nft9D1zcz/bYlJPik1GQQ8lZCfj
-         6yggpz3EGNSe4eJT2G70R34+WYXXUZD2KUpWt9LQFRQ/VBeEU7Y4ylVkswYZ7e5c+UjT
-         uIOnKDlTIWVKVNbRztO8rkOXXAc9ieZz1ACrJFvsOzroXcNa/tYXIc8125oV9/it2hpJ
-         cRbw==
-X-Gm-Message-State: AOAM531SWNMCNMERxn3PxWZDQJ/2tnYUzM/xWj+JTZpxmnyBcIV9kI70
-        TZFi0low4pnMWRgOEdyAC/0lhE39nE0SX2FaoE0=
-X-Google-Smtp-Source: ABdhPJwzdRuIxBXTsqmO3T8lV5HJYUyVEvHoJS4NFcEmdwrQH3gqqCuv4KOKHYoLewEVooxtEn7LK9uJ/t8opb5kHv0=
-X-Received: by 2002:a05:6e02:8e4:: with SMTP id n4mr18085163ilt.96.1595901053248;
- Mon, 27 Jul 2020 18:50:53 -0700 (PDT)
+ d=microchiptechnology.onmicrosoft.com;
+ s=selector2-microchiptechnology-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=RAIuHZMnYsJwBxdMQOs9QQxzFctJKrEZzvlkMR+0+pc=;
+ b=jVJWSS6fuNgPBp+FnEDMRHjmDm8W2aKLBtea2cSpan/XDwzb6slPsgYvlKwci4WursHuFy1rsBZ7yCm4D5tic8nz1C5ZS/BgkFbtTnZxAyrNhAswG1QvvHQZuLEcHl9OmY5N3+ZlXCdy36jdyeAKCj7YURLnnpq8ZeRoPVHK5Kc=
+Received: from BYAPR11MB2999.namprd11.prod.outlook.com (2603:10b6:a03:90::17)
+ by BYAPR11MB2757.namprd11.prod.outlook.com (2603:10b6:a02:cb::16) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3216.20; Tue, 28 Jul
+ 2020 11:02:22 +0000
+Received: from BYAPR11MB2999.namprd11.prod.outlook.com
+ ([fe80::996a:3417:7ea7:2b8f]) by BYAPR11MB2999.namprd11.prod.outlook.com
+ ([fe80::996a:3417:7ea7:2b8f%7]) with mapi id 15.20.3216.033; Tue, 28 Jul 2020
+ 11:02:21 +0000
+From:   <Eugen.Hristev@microchip.com>
+To:     <ulf.hansson@linaro.org>, <Ludovic.Desroches@microchip.com>
+CC:     <linux-arm-kernel@lists.infradead.org>,
+        <linux-mmc@vger.kernel.org>, <Nicolas.Ferre@microchip.com>,
+        <alexandre.belloni@bootlin.com>
+Subject: Re: [PATCH] MAINTAINERS: mmc: sdhci-of-at91: handover maintenance to
+ Eugen Hristev
+Thread-Topic: [PATCH] MAINTAINERS: mmc: sdhci-of-at91: handover maintenance to
+ Eugen Hristev
+Thread-Index: AQHWVc/M1QIaZcTqdEqPsOa00K5WTakWkT6AgAZgQgA=
+Date:   Tue, 28 Jul 2020 11:02:21 +0000
+Message-ID: <9528a121-2f14-2cc4-8610-6561f4e1a31c@microchip.com>
+References: <20200709085331.8145-1-ludovic.desroches@microchip.com>
+ <CAPDyKFq5gCA1f=XVVepi93wotn4uR8JHcRh4JoFt-Preg4ATjg@mail.gmail.com>
+In-Reply-To: <CAPDyKFq5gCA1f=XVVepi93wotn4uR8JHcRh4JoFt-Preg4ATjg@mail.gmail.com>
+Accept-Language: en-US, ro-RO
+Content-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+user-agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.8.0
+authentication-results: linaro.org; dkim=none (message not signed)
+ header.d=none;linaro.org; dmarc=none action=none header.from=microchip.com;
+x-originating-ip: [86.121.125.159]
+x-ms-publictraffictype: Email
+x-ms-office365-filtering-correlation-id: b3c9e16d-9cf2-4053-69ec-08d832e5b3e1
+x-ms-traffictypediagnostic: BYAPR11MB2757:
+x-ms-exchange-transport-forked: True
+x-microsoft-antispam-prvs: <BYAPR11MB27574E501AE633B6376551A5E8730@BYAPR11MB2757.namprd11.prod.outlook.com>
+x-bypassexternaltag: True
+x-ms-oob-tlc-oobclassifiers: OLM:7691;
+x-ms-exchange-senderadcheck: 1
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: ykpKK5nQbXpgseejjtfsweyXt+pnHvbpvo4LHh3/fgLA3k6QooXzq+ciPsfvCIp+yzynTpOAPsQF3uT7I6HK9PKp7dOdA7WjTNkGy4N9aqNqMD7aFtBtrvOA3dtkPk1oSXEDJXAP+TIePY5unUl5FAfgeMYoYIRlLQNmn1ct1tH1pmbFluyNptDCH0FveBre0mH726VfHeBojEeFohCW6ibMpkw4v98//bre1+dwAjYuAH1IqVryeMMD3uxDRx1UxuNrpNQwPVdbO+skkL2XuirlBRvciLhG/xZULjgYkLW+LqmThRYut3hzi3wKhH7643N09xxfK8xmWd8B5Hwam769+B0r8IjMTkztutibRyI7yELjtIaRDbVYW0eMect0
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:BYAPR11MB2999.namprd11.prod.outlook.com;PTR:;CAT:NONE;SFTY:;SFS:(396003)(366004)(136003)(346002)(39860400002)(376002)(8676002)(2906002)(4744005)(6512007)(71200400001)(66446008)(66946007)(66476007)(66556008)(64756008)(186003)(31696002)(5660300002)(478600001)(4326008)(36756003)(86362001)(91956017)(76116006)(6506007)(53546011)(26005)(83380400001)(6636002)(6486002)(31686004)(316002)(110136005)(2616005)(8936002)(54906003)(43740500002);DIR:OUT;SFP:1101;
+x-ms-exchange-antispam-messagedata: J+RlNVQAThbK3gQhC+WP+zQbp73yYt9QS+xaMNDRyQsR4notMwnpeYHdop50Ah2RT/R8zw1dt2PUH1Q9irj7mhqP3WUU1g6XvDksCJZGee7ssK4uLcJxduSsPo4BTvLr8aN5jP1AIZKF08SfnYnpRWbfcQkXXFKji3kr+wjOrEs3jM6hAsqjsGM9AUOmDzHRu+WD1i7cjGdwI+3szcmxur+FaqT0ioiglPfbUrSKfR7weyXPQCXnhtd4GOIdY/KdADCxn+xen1ar7/e9zTgvSpdvwknWzSl8KGFFwMh/qU6L5wGwC6LVueLBg+z8Mn9ek2DPQozEz3X5ZFQWa6/z2vW2TFIQZZU7Y9k2gvFNteqPUUFXSqLfjxCbmH43OAg+T0z/IS98tGi9x5tl2Uhvjft+dPIkdA89KkT8/Ay3DopgA59JvjGhY3e+7zJJ5ddiSJS1TQ4StzObUnYcgvkn+icKXtc1HJMs9uAG5H9HdGia2UzPP0l6+Om0Z7QHwRM7
+Content-Type: text/plain; charset="utf-8"
+Content-ID: <5507349E33617D4289D26996F5613D49@namprd11.prod.outlook.com>
+Content-Transfer-Encoding: base64
 MIME-Version: 1.0
-Received: by 2002:a05:6602:2a46:0:0:0:0 with HTTP; Mon, 27 Jul 2020 18:50:52
- -0700 (PDT)
-In-Reply-To: <edab20f582d4402baeca9bb80e612ee2@willitsonline.com>
-References: <20191029170250.GA43972@google.com> <20200222165617.GA207731@google.com>
- <CAPDyKFq_exHufHyibFCjS78PTZ7duS9ZSt3vi18CNM6+jMmwnw@mail.gmail.com>
- <20200226011310.GA2116625@rani.riverdale.lan> <CAFjuqNg_NW7hcssWmMTtt=ioY143qn76ooT7GRhxEEe9ZVCqeQ@mail.gmail.com>
- <6e9db1f6-60c4-872b-c7c8-96ee411aa3ca@aol.com> <20200226045104.GA2191053@rani.riverdale.lan>
- <20200225212054.09865e0b@fido6> <CAFjuqNh8ja3maOFev4S9zOSi04yAvnyEo2GTTxjr1pbQvmAW=A@mail.gmail.com>
- <edab20f582d4402baeca9bb80e612ee2@willitsonline.com>
-From:   "Michael ." <keltoiboy@gmail.com>
-Date:   Tue, 28 Jul 2020 11:50:52 +1000
-Message-ID: <CAFjuqNgAxTjHMw9AX+yoHxug-+hHVExsiccWG6eb=QZJsV3fSQ@mail.gmail.com>
-Subject: Re: PCI device function not being enumerated [Was: PCMCIA not working
- on Panasonic Toughbook CF-29]
-To:     bluerocksaddles@willitsonline.com
-Cc:     Philip Langdale <philipl@overt.org>,
-        Arvind Sankar <nivedita@alum.mit.edu>,
-        Trevor Jacobs <trevor_jacobs@aol.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Bjorn Helgaas <helgaas@kernel.org>,
-        Dominik Brodowski <linux@dominikbrodowski.net>,
-        Linux PCI <linux-pci@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Kris Cleveland <tridentperfusion@yahoo.com>,
-        Morgan Klym <moklym@gmail.com>,
-        Pierre Ossman <pierre@ossman.eu>,
-        Maxim Levitsky <maximlevitsky@gmail.com>,
-        linux-mmc@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: BYAPR11MB2999.namprd11.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: b3c9e16d-9cf2-4053-69ec-08d832e5b3e1
+X-MS-Exchange-CrossTenant-originalarrivaltime: 28 Jul 2020 11:02:21.8050
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 3f4057f3-b418-4d4e-ba84-d55b4e897d88
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: 0ZjXLee5+Kba+cxnmpUfFYZBNiM6+70IWc+3kc5MiCPPzVaFsPZyv/yTf9GFKIAr2Vwkr9U9NJw+GfF1x+1HeJnUeVogmoPG64NjT0qnZGk=
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: BYAPR11MB2757
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-I have just compiled and uploaded a kernel to test for this issue,
-members of the Toughbook community have been provided with the link,
-though a forum discussion, to download the kernel and test it.
-Hopefully we will get positive results and can confirm the
-MMC_RICOH_MMC flag is the culprit.
-Regards.
-Stay safe.
-Michael.
-
-On 27/02/2020, bluerocksaddles@willitsonline.com
-<bluerocksaddles@willitsonline.com> wrote:
-> Somewhere in these messages is a clue....in that SD reader was involved.
->
-> MK 4 and 5 have SD whilst MK 1, 2 and three do not.
->
->
->
-> On 2020-02-25 22:10, Michael . wrote:
->>> Someone with access to real hardware could
->>> easily experiment with changing that magic value and seeing if it
->>> changes which function is disabled.
->>
->> One of our members has offered to supply a machine to a dev that can
->> use it to test any theory.
->>
->> It is nearly beyond the scope of the majority of us to do much more
->> than just testing. We appreciate all the effort the devs put in and
->> are willing to help in anyway we can but we aren't kernel devs.
->>
->> I, personally, use Debian. Others use Debian based distros such as MX
->> and Mint. We have been able to test many different distros such as
->> those listed in other comments but don't have the skills or expertise
->> to do much more. It is our hope that this discussion and subsequent
->> effort may enable others who prefer distros other than Debian based
->> distros can use a CF-29 (and possibly earlier) Toughbook with the
->> distro of their choice without having to rebuild a kernel so they can
->> use hardware that worked back in 2010. To do this the fix needs to be
->> at the kernel dev level not a local enthusiast level because while I
->> can rebuild a Debian kernel I can't rebuild a Fedora or Arch or
->> Slackware kernel.
->>
->> I did a search about this issue before I made initial contact late
->> last year and the issue was discovered on more than Toughbooks and
->> posted about on various sites not long after distros moved from
->> 2.6.32. It seems back then people just got new machines that didn't
->> have a 2nd slot so the search for an answer stopped. Us Toughbook
->> users are a loyal group we use our machines because they are exactly
->> what we need and they take alot of "punishment" taht other machines
->> simply cannot handle. Our machines are used rather than recycled or
->> worse still just left to sit in waste management facilities in a
->> country that the western world dumps its rubbish in, we are Linux and
->> Toughbook enthusiasts and hope to be able to keep our machines running
->> for many years to come with all their native capabilities working as
->> they were designed to but using a modern Linux instead of Windows XP
->> or Windows 7. (that wasn't a pep talk, its just an explanation of why
->> we are passionate about this).
->>
->> Let us know what you need us to do, we will let you know if we are
->> capable of it and give you any feedback you ask for. Over the weekend
->> I will try to rebuild a Debian kernel with the relevant option
->> disabled, provide it to my peers for testing and report back here what
->> the outcome is.
->>
->> Thank you all for all your time and effort, it is truly appreciated.
->> Cheers.
->> Michael.
->>
->> On 26/02/2020, Philip Langdale <philipl@overt.org> wrote:
->>> On Tue, 25 Feb 2020 23:51:05 -0500
->>> Arvind Sankar <nivedita@alum.mit.edu> wrote:
->>>
->>>> On Tue, Feb 25, 2020 at 09:12:48PM -0600, Trevor Jacobs wrote:
->>>> > That's correct, I tested a bunch of the old distros including
->>>> > slackware, and 2.6.32 is where the problem began.
->>>> >
->>>> > Also, the Panasonic Toughbook CF-29s effected that we tested are
->>>> > the later marks, MK4 and MK5 for certain. The MK2 CF-29 worked just
->>>> > fine because it has different hardware supporting the PCMCIA slots.
->>>> > I have not tested a MK3 but suspect it would work ok as it also
->>>> > uses the older hardware.
->>>> >
->>>> > Thanks for your help guys!
->>>> > Trevor
->>>> >
->>>>
->>>> Right, the distros probably all enabled MMC_RICOH_MMC earlier than
->>>> upstream. Can you test a custom kernel based off your distro kernel
->>>> but just disabling that config option? That's probably the easiest
->>>> fix
->>>> currently, even though not ideal. Perhaps there should be a command
->>>> line option to disable specific pci quirks to make this easier.
->>>>
->>>> An ideal fix is I feel hard, given this quirk is based on
->>>> undocumented
->>>> config registers -- it worked on Dell machines (that's where the
->>>> original authors seem to have gotten their info from), perhaps they
->>>> had only one Cardbus slot, but the code ends up disabling your second
->>>> Cardbus slot instead of disabling the MMC controller.
->>>
->>> Keeping in mind that this was 12+ years ago, you can at least still
->>> read the original discussion in the archives. My original Dell laptop
->>> (XPS m1330) had no cardbus slots at all, and used the r5c832
->>> controller. There was a subsequent change that I was not involved with
->>> which added support for the rl5c476, which is the problematic device
->>> in
->>> this thread.
->>>
->>> As a hypothesis, based on the observed behaviour, the quirk (keeping
->>> in
->>> mind that these are magic configuration register values that are not
->>> documented) probably disabled function 1, regardless of what it is,
->>> and
->>> the original example that motivated adding the rl5c476 quirk probably
->>> had one cardbus slot and the card reader functions were all moved up
->>> one, or something along those lines.
->>>
->>> Truly making this smart would then involve having the code enumerate
->>> the pci functions and identify the one that is the unwanted mmc
->>> controller, based on function ID or class or whatever, and then
->>> disabling that (assuming the magic can be reverse engineered: eg, the
->>> current magic ORs the disable flag with 0x02 - chances are, that's the
->>> index of the function: 0x01 would be the 0th function, 0x04 would be
->>> the 2nd function, etc). Someone with access to real hardware could
->>> easily experiment with changing that magic value and seeing if it
->>> changes which function is disabled.
->>>
->>> Good luck.
->>>
->>> --phil
->>>
->
+T24gMjQuMDcuMjAyMCAxMjo0MCwgVWxmIEhhbnNzb24gd3JvdGU6DQo+IEVYVEVSTkFMIEVNQUlM
+OiBEbyBub3QgY2xpY2sgbGlua3Mgb3Igb3BlbiBhdHRhY2htZW50cyB1bmxlc3MgeW91IGtub3cg
+dGhlIGNvbnRlbnQgaXMgc2FmZQ0KPiANCj4gT24gVGh1LCA5IEp1bCAyMDIwIGF0IDExOjAzLCBM
+dWRvdmljIERlc3JvY2hlcw0KPiA8bHVkb3ZpYy5kZXNyb2NoZXNAbWljcm9jaGlwLmNvbT4gd3Jv
+dGU6DQo+Pg0KPj4gQXMgRXVnZW4gaGFuZGxlcyB0aGUgc29mdHdhcmUgZm9yIGJvb3Rsb2FkZXJz
+IGFuZCBuZXcgcHJvZHVjdHMsIGhhbmRvdmVyDQo+PiB0aGUgbWFpbnRlbmFuY2UgdG8gaGltLg0K
+Pj4NCj4+IFNpZ25lZC1vZmYtYnk6IEx1ZG92aWMgRGVzcm9jaGVzIDxsdWRvdmljLmRlc3JvY2hl
+c0BtaWNyb2NoaXAuY29tPg0KPiANCj4gSSBhbSBva2F5IHdpdGggdGhpcywgYnV0IGFtIHdhaXRp
+bmcgdG8gYXBwbHkgdW50aWwgSSByZWNlaXZlIGFuIGFjayBmcm9tIEV1Z2VuLg0KDQpBY2tlZC1i
+eTogRXVnZW4gSHJpc3RldiA8ZXVnZW4uaHJpc3RldkBtaWNyb2NoaXAuY29tPg0KDQo+IA0KPiBL
+aW5kIHJlZ2FyZHMNCj4gVWZmZQ0KPiANCj4+IC0tLQ0KPj4gICBNQUlOVEFJTkVSUyB8IDIgKy0N
+Cj4+ICAgMSBmaWxlIGNoYW5nZWQsIDEgaW5zZXJ0aW9uKCspLCAxIGRlbGV0aW9uKC0pDQo+Pg0K
+Pj4gZGlmZiAtLWdpdCBhL01BSU5UQUlORVJTIGIvTUFJTlRBSU5FUlMNCj4+IGluZGV4IGM4N2I5
+NGU2YjJmNi4uZGFmY2ZhNjI2Yzc2IDEwMDY0NA0KPj4gLS0tIGEvTUFJTlRBSU5FUlMNCj4+ICsr
+KyBiL01BSU5UQUlORVJTDQo+PiBAQCAtMTUzNzYsNyArMTUzNzYsNyBAQCBGOiAgICAgIGRyaXZl
+cnMvbW1jL2hvc3Qvc2RoY2kqDQo+PiAgIEY6ICAgICBpbmNsdWRlL2xpbnV4L21tYy9zZGhjaSoN
+Cj4+DQo+PiAgIFNFQ1VSRSBESUdJVEFMIEhPU1QgQ09OVFJPTExFUiBJTlRFUkZBQ0UgKFNESENJ
+KSBNSUNST0NISVAgRFJJVkVSDQo+PiAtTTogICAgIEx1ZG92aWMgRGVzcm9jaGVzIDxsdWRvdmlj
+LmRlc3JvY2hlc0BtaWNyb2NoaXAuY29tPg0KPj4gK006ICAgICBFdWdlbiBIcmlzdGV2IDxldWdl
+bi5ocmlzdGV2QG1pY3JvY2hpcC5jb20+DQo+PiAgIEw6ICAgICBsaW51eC1tbWNAdmdlci5rZXJu
+ZWwub3JnDQo+PiAgIFM6ICAgICBTdXBwb3J0ZWQNCj4+ICAgRjogICAgIGRyaXZlcnMvbW1jL2hv
+c3Qvc2RoY2ktb2YtYXQ5MS5jDQo+PiAtLQ0KPj4gMi4yNC4wDQo+Pg0KDQo=
