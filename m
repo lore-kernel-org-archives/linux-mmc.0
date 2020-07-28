@@ -2,94 +2,144 @@ Return-Path: <SRS0=a44q=BH=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+X-Spam-Status: No, score=-4.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,NICE_REPLY_A,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 49357C433E4
-	for <linux-mmc@archiver.kernel.org>; Tue, 28 Jul 2020 14:12:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 57EBDC433E1
+	for <linux-mmc@archiver.kernel.org>; Tue, 28 Jul 2020 14:28:06 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2935A20775
-	for <linux-mmc@archiver.kernel.org>; Tue, 28 Jul 2020 14:12:32 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2D36720663
+	for <linux-mmc@archiver.kernel.org>; Tue, 28 Jul 2020 14:28:06 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=nvidia.com header.i=@nvidia.com header.b="BI2EYqoe"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="E2pBQjL4"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730380AbgG1OM3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 28 Jul 2020 10:12:29 -0400
-Received: from hqnvemgate25.nvidia.com ([216.228.121.64]:19148 "EHLO
-        hqnvemgate25.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1730335AbgG1OM3 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Jul 2020 10:12:29 -0400
-Received: from hqpgpgate101.nvidia.com (Not Verified[216.228.121.13]) by hqnvemgate25.nvidia.com (using TLS: TLSv1.2, DES-CBC3-SHA)
-        id <B5f2032200000>; Tue, 28 Jul 2020 07:11:44 -0700
-Received: from hqmail.nvidia.com ([172.20.161.6])
-  by hqpgpgate101.nvidia.com (PGP Universal service);
-  Tue, 28 Jul 2020 07:12:28 -0700
-X-PGP-Universal: processed;
-        by hqpgpgate101.nvidia.com on Tue, 28 Jul 2020 07:12:28 -0700
-Received: from [10.26.73.28] (10.124.1.5) by HQMAIL107.nvidia.com
- (172.20.187.13) with Microsoft SMTP Server (TLS) id 15.0.1473.3; Tue, 28 Jul
- 2020 14:12:24 +0000
-Subject: Re: [PATCH] mmc: tegra: Add Runtime PM callbacks
-To:     Aniruddha Rao <anrao@nvidia.com>, <adrian.hunter@intel.com>,
-        <ulf.hansson@linaro.org>, <thierry.reding@gmail.com>,
-        <p.zabel@pengutronix.de>
-CC:     <linux-mmc@vger.kernel.org>, <linux-tegra@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>
-References: <1595854036-15434-1-git-send-email-anrao@nvidia.com>
-From:   Jon Hunter <jonathanh@nvidia.com>
-Message-ID: <b0c41edb-e9cc-2c36-be21-e52e80577c97@nvidia.com>
-Date:   Tue, 28 Jul 2020 15:12:21 +0100
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.10.0
+        id S1730334AbgG1O2F (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 28 Jul 2020 10:28:05 -0400
+Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:50099 "EHLO
+        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1730331AbgG1O2F (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Jul 2020 10:28:05 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1595946484;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=Vk76CkPyZ5T42guo8MQRmFanU+aGvXip0+duA6MP1QY=;
+        b=E2pBQjL4iMvgit8efOcYKJjaRS6k7ZKRaHjRpBOQQEj4RWJHNNbCOsLk3yZ05Xnxs8q99Q
+        JuR1pCe94g+9VoYR3v30g3OnXKjSlrGKF51auqM8ENdf+E/GpvSpmj+TPWpHD3eCEmqndd
+        E6N+ZeBC+0Vlxhl8WjuW9JRfSzgO4uc=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-337-Jz4k5rM7NTirOgcPGnRijg-1; Tue, 28 Jul 2020 10:28:02 -0400
+X-MC-Unique: Jz4k5rM7NTirOgcPGnRijg-1
+Received: from smtp.corp.redhat.com (int-mx07.intmail.prod.int.phx2.redhat.com [10.5.11.22])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 80CAEE91C;
+        Tue, 28 Jul 2020 14:27:58 +0000 (UTC)
+Received: from fedora-32-enviroment (unknown [10.35.206.247])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id EA66F10013C4;
+        Tue, 28 Jul 2020 14:27:42 +0000 (UTC)
+Message-ID: <25011fed186bd8bfd1f25640158fbce60a7ad9ef.camel@redhat.com>
+Subject: Re: [PATCH 02/10] block: virtio-blk: check logical block size
+From:   Maxim Levitsky <mlevitsk@redhat.com>
+To:     "Martin K. Petersen" <martin.petersen@oracle.com>,
+        Christoph Hellwig <hch@lst.de>
+Cc:     linux-kernel@vger.kernel.org, Keith Busch <kbusch@kernel.org>,
+        Josef Bacik <josef@toxicpanda.com>,
+        "open list:BLOCK LAYER" <linux-block@vger.kernel.org>,
+        Sagi Grimberg <sagi@grimberg.me>, Jens Axboe <axboe@kernel.dk>,
+        "open list:NVM EXPRESS DRIVER" <linux-nvme@lists.infradead.org>,
+        "open list:SCSI CDROM DRIVER" <linux-scsi@vger.kernel.org>,
+        Tejun Heo <tj@kernel.org>,
+        Bart Van Assche <bvanassche@acm.org>,
+        Damien Le Moal <damien.lemoal@wdc.com>,
+        Jason Wang <jasowang@redhat.com>,
+        Maxim Levitsky <maximlevitsky@gmail.com>,
+        Stefan Hajnoczi <stefanha@redhat.com>,
+        Colin Ian King <colin.king@canonical.com>,
+        "Michael S. Tsirkin" <mst@redhat.com>,
+        Paolo Bonzini <pbonzini@redhat.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Ajay Joshi <ajay.joshi@wdc.com>,
+        Ming Lei <ming.lei@redhat.com>,
+        "open list:SONY MEMORYSTICK SUBSYSTEM" <linux-mmc@vger.kernel.org>,
+        Satya Tangirala <satyat@google.com>,
+        "open list:NETWORK BLOCK DEVICE (NBD)" <nbd@other.debian.org>,
+        Hou Tao <houtao1@huawei.com>, Jens Axboe <axboe@fb.com>,
+        "open list:VIRTIO CORE AND NET DRIVERS" 
+        <virtualization@lists.linux-foundation.org>,
+        "James E.J. Bottomley" <jejb@linux.ibm.com>,
+        Alex Dubov <oakad@yahoo.com>
+Date:   Tue, 28 Jul 2020 17:27:41 +0300
+In-Reply-To: <f16aba1020019530564f0869a67951282104a5d2.camel@redhat.com>
+References: <20200721105239.8270-1-mlevitsk@redhat.com>
+         <20200721105239.8270-3-mlevitsk@redhat.com> <20200721151437.GB10620@lst.de>
+         <yq1zh7sfedj.fsf@ca-mkp.ca.oracle.com>
+         <f16aba1020019530564f0869a67951282104a5d2.camel@redhat.com>
+Content-Type: text/plain; charset="UTF-8"
+User-Agent: Evolution 3.36.2 (3.36.2-1.fc32) 
 MIME-Version: 1.0
-In-Reply-To: <1595854036-15434-1-git-send-email-anrao@nvidia.com>
-X-Originating-IP: [10.124.1.5]
-X-ClientProxiedBy: HQMAIL101.nvidia.com (172.20.187.10) To
- HQMAIL107.nvidia.com (172.20.187.13)
-Content-Type: text/plain; charset="utf-8"
-Content-Language: en-US
 Content-Transfer-Encoding: 7bit
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nvidia.com; s=n1;
-        t=1595945504; bh=rs5ibOGKWRXVbpf5yHwMO8j6h6oLiVC4DnfaYH2lj3M=;
-        h=X-PGP-Universal:Subject:To:CC:References:From:Message-ID:Date:
-         User-Agent:MIME-Version:In-Reply-To:X-Originating-IP:
-         X-ClientProxiedBy:Content-Type:Content-Language:
-         Content-Transfer-Encoding;
-        b=BI2EYqoeiBRC5T6zDk9D/ZZ1BSRrdXjUUv1ouhze/xHbpj6/G3zWAbs8BXpP7XxeK
-         ya2do+R9pBTs3Z57uZijm79hKDEOqhj7lymHdwq5KCkHaldT6jYYQ/DO3DYZfU2NCv
-         6j/8egzzCQRrrJwZlLG80tt5Qpx8dLfKGA4wCe86TZeEJA3SQyOfJ4y8bx/BUengsi
-         ybtr24ceE8njZFcqBR1M1u1VKQydJIKR6O28R3Mfu8aK4UrpX6RboOOSqLR59Q1CN6
-         TtHeYYoR6rgLRC/6TbQnTXOOWgkMH8W1N7WaeXtGY9EBO1BeE3VTcwUofxINuSHDcg
-         Q5gj1qO+zAezw==
+X-Scanned-By: MIMEDefang 2.84 on 10.5.11.22
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-
-On 27/07/2020 13:47, Aniruddha Rao wrote:
-> Add runtime suspend/resume callbacks to save power
-> when the bus is not in use.
-> In runtime suspend
-> - Turn off the SDMMC host CAR clock.
-> - Turn off the trimmer/DLL circuit(BG) power supply(VREG).
-> - Turn off the SDMMC host internal clocks.
+On Wed, 2020-07-22 at 12:11 +0300, Maxim Levitsky wrote:
+> On Tue, 2020-07-21 at 22:55 -0400, Martin K. Petersen wrote:
+> > Christoph,
+> > 
+> > > Hmm, I wonder if we should simply add the check and warning to
+> > > blk_queue_logical_block_size and add an error in that case.  Then
+> > > drivers only have to check the error return, which might add a lot
+> > > less boiler plate code.
+> > 
+> > Yep, I agree.
+> > 
 > 
-> Re-enable all the disabled clocks/regulators in runtime resume.
+> I also agree that this would be cleaner (I actually tried to implement
+> this the way you suggest), but let me explain my reasoning for doing
+> it
+> this way.
 > 
-> Signed-off-by: Aniruddha Rao <anrao@nvidia.com>
+> The problem is that most current users of blk_queue_logical_block_size
+> (43 uses in the tree, out of which only 9 use constant block size)
+> check
+> for the block size relatively early, often store it in some internal
+> struct etc, prior to calling blk_queue_logical_block_size thus making
+> them only to rely on blk_queue_logical_block_size as the check for 
+> block size validity will need non-trivial changes in their code.
+> 
+> Instead of this adding blk_is_valid_logical_block_size allowed me
+> to trivially convert most of the uses.
+> 
+> For RFC I converted only some drivers that I am more familiar with
+> and/or can test but I can remove the driver's own checks in most other
+> drivers with low chance of introducing a bug, even if I can't test the
+> driver.
+> 
+> What do you think?
+> 
+> I can also both make blk_queue_logical_block_size return an error
+> value,
+> and have blk_is_valid_logical_block_size and use either of these
+> checks,
+> depending on the driver with eventual goal of un-exporting
+> blk_is_valid_logical_block_size.
+> 
+> Also note that I did add WARN_ON to blk_queue_logical_block_size.
 
+Any update on this?
 
-This patch is causing a boot regression on Tegra20 Ventana. Other boards
-appear to be booting fine, but this is breaking something for Tegra20.
-The bootlogs don't appear to show any particular crash, but I see a hang
-when initialising the sdhci controllers.
+Best regards,
+	Maxim Levitsky
 
-Cheers
-Jon
+> 
+> Best regards,
+> 	Maxim Levitsky
 
--- 
-nvpublic
