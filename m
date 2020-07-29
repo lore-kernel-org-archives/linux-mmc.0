@@ -2,142 +2,222 @@ Return-Path: <SRS0=hC2C=BI=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-4.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY autolearn=no
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.3 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_2 autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0DB45C433DF
-	for <linux-mmc@archiver.kernel.org>; Wed, 29 Jul 2020 04:34:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DDECAC433E0
+	for <linux-mmc@archiver.kernel.org>; Wed, 29 Jul 2020 08:43:19 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id DE1192074B
-	for <linux-mmc@archiver.kernel.org>; Wed, 29 Jul 2020 04:34:09 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B7ACE2076E
+	for <linux-mmc@archiver.kernel.org>; Wed, 29 Jul 2020 08:43:19 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="MUANNLB3"
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=tq-group.com header.i=@tq-group.com header.b="P1EI+mm4"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726548AbgG2EeJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 29 Jul 2020 00:34:09 -0400
-Received: from userp2130.oracle.com ([156.151.31.86]:56020 "EHLO
-        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726220AbgG2EeI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Jul 2020 00:34:08 -0400
-Received: from pps.filterd (userp2130.oracle.com [127.0.0.1])
-        by userp2130.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 06T4X5NE120312;
-        Wed, 29 Jul 2020 04:33:22 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=to : cc : subject :
- from : message-id : references : date : in-reply-to : mime-version :
- content-type; s=corp-2020-01-29;
- bh=h53xFNPOnAu2za+HlgzOC+33Caul8s3PIGMAjL9zqYc=;
- b=MUANNLB3paLQES1ITCwvWFQWzJZAFz7rsJkF3D6lhZO3wRENywTiG0r+5okWKkGJ2N2M
- DaGTv20AHMYg355l9ym2tW1wVzEVZfTRSL7rjD5IUZkPYC+JW5RHvEwNR6deIoJMP3fE
- vm85fX/uL2WSTVv4X7PydVVBu8Ij9SyFYxJzsk/Qrysb8Kw0RNxxwExX7tquU7glJRud
- mp56sD5XgSnc/DW+CDlCnIO0jaY7bONl+rx5yQx/tL6inf/00RKjw65HiJjYXxY21VPd
- VcHpdd/DrGG4sD2M3hwfszIYUQymWQs2xeIiKfHeKOQGZZsJ/pBsWvVANuIeFNVm/GlP 7Q== 
-Received: from userp3030.oracle.com (userp3030.oracle.com [156.151.31.80])
-        by userp2130.oracle.com with ESMTP id 32hu1jb81y-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL);
-        Wed, 29 Jul 2020 04:33:22 +0000
-Received: from pps.filterd (userp3030.oracle.com [127.0.0.1])
-        by userp3030.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 06T4XMJD078386;
-        Wed, 29 Jul 2020 04:33:22 GMT
-Received: from aserv0122.oracle.com (aserv0122.oracle.com [141.146.126.236])
-        by userp3030.oracle.com with ESMTP id 32hu5u1w9x-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Wed, 29 Jul 2020 04:33:11 +0000
-Received: from abhmp0017.oracle.com (abhmp0017.oracle.com [141.146.116.23])
-        by aserv0122.oracle.com (8.14.4/8.14.4) with ESMTP id 06T4X32F028038;
-        Wed, 29 Jul 2020 04:33:03 GMT
-Received: from ca-mkp.ca.oracle.com (/10.159.214.123)
-        by default (Oracle Beehive Gateway v4.0)
-        with ESMTP ; Tue, 28 Jul 2020 21:33:03 -0700
-To:     Maxim Levitsky <mlevitsk@redhat.com>
-Cc:     "Martin K. Petersen" <martin.petersen@oracle.com>,
-        Christoph Hellwig <hch@lst.de>, linux-kernel@vger.kernel.org,
-        Keith Busch <kbusch@kernel.org>,
-        Josef Bacik <josef@toxicpanda.com>,
-        "open list:BLOCK LAYER" <linux-block@vger.kernel.org>,
-        Sagi Grimberg <sagi@grimberg.me>, Jens Axboe <axboe@kernel.dk>,
-        "open list:NVM EXPRESS DRIVER" <linux-nvme@lists.infradead.org>,
-        "open list:SCSI CDROM DRIVER" <linux-scsi@vger.kernel.org>,
-        Tejun Heo <tj@kernel.org>,
-        Bart Van Assche <bvanassche@acm.org>,
-        Damien Le Moal <damien.lemoal@wdc.com>,
-        Jason Wang <jasowang@redhat.com>,
-        Maxim Levitsky <maximlevitsky@gmail.com>,
-        Stefan Hajnoczi <stefanha@redhat.com>,
-        Colin Ian King <colin.king@canonical.com>,
-        "Michael S. Tsirkin" <mst@redhat.com>,
-        Paolo Bonzini <pbonzini@redhat.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Ajay Joshi <ajay.joshi@wdc.com>,
-        Ming Lei <ming.lei@redhat.com>,
-        "open list:SONY MEMORYSTICK SUBSYSTEM" <linux-mmc@vger.kernel.org>,
-        Satya Tangirala <satyat@google.com>,
-        "open list:NETWORK BLOCK DEVICE (NBD)" <nbd@other.debian.org>,
-        Hou Tao <houtao1@huawei.com>, Jens Axboe <axboe@fb.com>,
-        "open list:VIRTIO CORE AND NET DRIVERS" 
-        <virtualization@lists.linux-foundation.org>,
-        "James E.J. Bottomley" <jejb@linux.ibm.com>,
-        Alex Dubov <oakad@yahoo.com>
-Subject: Re: [PATCH 02/10] block: virtio-blk: check logical block size
-From:   "Martin K. Petersen" <martin.petersen@oracle.com>
-Organization: Oracle Corporation
-Message-ID: <yq1bljz7y9q.fsf@ca-mkp.ca.oracle.com>
-References: <20200721105239.8270-1-mlevitsk@redhat.com>
-        <20200721105239.8270-3-mlevitsk@redhat.com>
-        <20200721151437.GB10620@lst.de> <yq1zh7sfedj.fsf@ca-mkp.ca.oracle.com>
-        <f16aba1020019530564f0869a67951282104a5d2.camel@redhat.com>
-Date:   Wed, 29 Jul 2020 00:32:55 -0400
-In-Reply-To: <f16aba1020019530564f0869a67951282104a5d2.camel@redhat.com>
-        (Maxim Levitsky's message of "Wed, 22 Jul 2020 12:11:17 +0300")
-MIME-Version: 1.0
-Content-Type: text/plain
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9696 signatures=668679
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 adultscore=0 mlxlogscore=999 mlxscore=0
- suspectscore=1 bulkscore=0 malwarescore=0 spamscore=0 phishscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2006250000
- definitions=main-2007290031
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9696 signatures=668679
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 adultscore=0 clxscore=1015
- malwarescore=0 spamscore=0 suspectscore=1 bulkscore=0 priorityscore=1501
- phishscore=0 mlxlogscore=999 lowpriorityscore=0 impostorscore=0 mlxscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2006250000
- definitions=main-2007290031
+        id S1726536AbgG2InQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 29 Jul 2020 04:43:16 -0400
+Received: from mx1.tq-group.com ([62.157.118.193]:62085 "EHLO mx1.tq-group.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726299AbgG2InP (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 29 Jul 2020 04:43:15 -0400
+IronPort-SDR: AjDidzdG+PcO3UoKsXwuVaHqD8ieK0k1oVYsGWDIf8nQy7CvuQQ2ZHWq6XYvPttpKwbn0jBtO/
+ wSvfwDBfTIXygYSL7DhTfJtOC7OxQg6Cfm2bDTaFNw00mbFMeuajJ4ehKUCUHmdV+72BmTNmaO
+ 2rPpFrVPNQjT7esU/4q/RCfAzhGhSDgm3uPo8xX3HC3rL/cA90PAMOKUwjypJtgITrBuoHbs+t
+ ya77NwUJKyt2XarhSEoU24FSm5WAV96Ots3+2mvMA+AGFRHs8PHa6EwCVPZdnr7IAccSPuGxFQ
+ lT4=
+X-IronPort-AV: E=Sophos;i="5.75,409,1589234400"; 
+   d="scan'208";a="13274294"
+Received: from unknown (HELO tq-pgp-pr1.tq-net.de) ([192.168.6.15])
+  by mx1-pgp.tq-group.com with ESMTP; 29 Jul 2020 10:43:13 +0200
+Received: from mx1.tq-group.com ([192.168.6.7])
+  by tq-pgp-pr1.tq-net.de (PGP Universal service);
+  Wed, 29 Jul 2020 10:43:13 +0200
+X-PGP-Universal: processed;
+        by tq-pgp-pr1.tq-net.de on Wed, 29 Jul 2020 10:43:13 +0200
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=tq-group.com; i=@tq-group.com; q=dns/txt; s=key1;
+  t=1596012193; x=1627548193;
+  h=message-id:subject:from:to:cc:date:in-reply-to:
+   references:mime-version:content-transfer-encoding;
+  bh=f6/RHCmsZt+4kR8cdg6CQy2UZgB2rT8qVlvZdIEZPtk=;
+  b=P1EI+mm4sbmy/xOXaocVwpY9vE78wq/Mxz0iBqVqlJqfWn6fuGv7egsy
+   32ErrylFuqylO6hBtHBc7ahZFiuItPItZ0KHvCO9FUfSNaDJhMi+cunV0
+   iiF6U3VBkw2hqgO/omg1dJlG1H3S000UoNjMJADAnUcuLEceWcjPUYj8+
+   hvDwGYXf1Uz9ssS7Mf0606qTWk+gIXhxxe3EAgdRQtb/wrJTYpbBtx8ah
+   TqYgROfhguu37pbbGFGXixD7cW53Zo+Z+FD/JznS/6RmJu1f8aEo8aj/C
+   B8UeWVGzWKkTTO3ZwVkYj2U5otl5zPvXT7Tyr0DWrtn6kPyrT65wjj4Lg
+   g==;
+IronPort-SDR: X5t7OEl9tYsEfhFVb54/do1hiiIpyuvK57YIOWOu+/i4Ix6x9Ff1jCSPsIVo7BZpk4EqNm3pQd
+ 3YtY/gHAh7jKOgfJm0ukyqNIpEmE4iLMAamqbpmuC/fmeKlnjFaApGeiem/ELk0RAD26UcUUiF
+ OrkHyFV+AfeKWg1Y1BYKxt00pGzHvPAFiy/4ecNRbG7Oj/z249yV7/woNGdNvnt73gZ4Sn7pmN
+ rsiw622e36Um+wGtX0M77SZu7EHA1YYOz73Jm/kSBXzI6Pd5kwn+oxE5wzxYm0QwdT52zPzhxb
+ dp4=
+X-IronPort-AV: E=Sophos;i="5.75,409,1589234400"; 
+   d="scan'208";a="13274293"
+Received: from vtuxmail01.tq-net.de ([10.115.0.20])
+  by mx1.tq-group.com with ESMTP; 29 Jul 2020 10:43:03 +0200
+Received: from schifferm-ubuntu4.tq-net.de (schifferm-ubuntu4.tq-net.de [10.117.49.26])
+        by vtuxmail01.tq-net.de (Postfix) with ESMTPA id 4E2ED280065;
+        Wed, 29 Jul 2020 10:43:03 +0200 (CEST)
+Message-ID: <4ecc41303f9232319cedf414fc466a8c4c0c6dc6.camel@ew.tq-group.com>
+Subject: Re: (EXT) Re: (EXT) Re: Consistent block device references for
+ root= cmdline
+From:   Matthias Schiffer <matthias.schiffer@ew.tq-group.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Al Viro <viro@zeniv.linux.org.uk>, Jens Axboe <axboe@kernel.dk>,
+        Sascha Hauer <s.hauer@pengutronix.de>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        linux-block <linux-block@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Date:   Wed, 29 Jul 2020 10:43:01 +0200
+In-Reply-To: <CAPDyKFptySRTbWto9QYWZ-feL51JvPkZDGsETJ4svz0VbV31Bw@mail.gmail.com>
+References: <fb0340aaf273be84e915214a3d8bae4ac85d7c0b.camel@ew.tq-group.com>
+         <CAPDyKFq+RiwbDj+58+W5GTcT7=ZOpZFmc02+FxjRGYwbBgA8oQ@mail.gmail.com>
+         <cfcec3df57e6dd5ef353ef3a5b4b9793c28eb401.camel@ew.tq-group.com>
+         <CAPDyKFptySRTbWto9QYWZ-feL51JvPkZDGsETJ4svz0VbV31Bw@mail.gmail.com>
+Content-Type: text/plain; charset="UTF-8"
+X-Mailer: Evolution 3.28.5-0ubuntu0.18.04.2 
+Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+On Tue, 2020-07-07 at 16:14 +0200, Ulf Hansson wrote:
+> On Thu, 11 Jun 2020 at 13:20, Matthias Schiffer
+> <matthias.schiffer@ew.tq-group.com> wrote:
+> > 
+> > On Wed, 2020-06-10 at 16:52 +0200, Ulf Hansson wrote:
+> > > On Wed, 10 Jun 2020 at 15:15, Matthias Schiffer
+> > > <matthias.schiffer@ew.tq-group.com> wrote:
+> > > > 
+> > > > Hello all,
+> > > > 
+> > > > there have been numerous attempts to make the numbering of
+> > > > mmcblk
+> > > > devices consistent, mostly by using aliases from the DTS ([1],
+> > > > [2],
+> > > > [3]), but all have been (rightfully) rejected. Unless I have
+> > > > overlooked
+> > > > a more recent development, no attempts for a different solution
+> > > > were
+> > > > made.
+> > > 
+> > > According to aliases attempts, I think those have failed, mainly
+> > > because of two reasons.
+> > > 
+> > > 1. Arguments stating that LABELs/UUIDs are variable alternatives.
+> > > This
+> > > isn't the case, which I think was also concluded from the several
+> > > earlier discussions.
+> > > 2. Patches that tried adding support for mmc aliases, were not
+> > > correctly coded. More precisely, what needs to be addressed is
+> > > that
+> > > the mmc core also preserves the same ids to be set for the host
+> > > class
+> > > as the block device, mmc[n] must correspond to mmcblk[n].
+> > > 
+> > > > 
+> > > > As far as I can tell, the core of the issue seems to be the
+> > > > following:
+> > > > 
+> > > > The existing solutions like LABELs and UUIDs are viable
+> > > > alternatives in
+> > > > many cases, but in particular on embedded systems, this is not
+> > > > quite
+> > > > sufficient: In addition to the problem that more knowledge
+> > > > about
+> > > > the
+> > > > system to boot is required in the bootloader, this approach
+> > > > fails
+> > > > completely when the same firmware image exists on multiple
+> > > > devices,
+> > > > for
+> > > > example on an eMMC and an SD card - not an entirely uncommon
+> > > > situation
+> > > > during the development of embedded systems.
+> > > > 
+> > > > With udev, I can refer to a specific partition using a path
+> > > > like
+> > > > /dev/disk/by-path/platform-2194000.usdhc-part2. In [4] it was
+> > > > proposed
+> > > > to add a way to refer to a device path/phandle from the kernel
+> > > > command
+> > > > line. Has there been any progress on this proposal?
+> > > 
+> > > Lots of time during the years I have been approached, both
+> > > publicly
+> > > and offlist, about whether it would be possible to add support
+> > > for
+> > > "consistent" mmcblk devices. To me, I am fine with the aliases
+> > > approach, as long as it gets implemented correctly.
+> > 
+> > 
+> > It seems the principal technical problem is the one described here:
+> > 
+> > https://www.spinics.net/lists/linux-mmc/msg26602.html
+> > 
+> > I don't see any way to solve this completely, as there seem to be
+> > two
+> > fundamentally conflicting requirements:
+> > 
+> > 1) If a mounted SD card is replaced, it must be assigned a new
+> > /dev/mmcblkN
+> > 2) /dev/mmcblkN should always match the configured alias IDs
+> > 
+> > What is the reason we need 1) - is it possible to have multiple
+> > eMMCs
+> > or SD cards on a single bus, with detection at runtime?
+> 
+> Yes. The mmc_bus_type holds all cards - all discovered at runtime.
+> 
+> > Otherwise I'd
+> > expect this to be handled like other drives with removable media
+> > (CD,
+> > floppy), with static device assignment.
+> > 
+> > If we can't give up on 1) for some reason, we'll have to accept
+> > that we
+> > can't guarantee 2) unconditionally. As far as I can tell, the
+> > patches
+> > provided by Sascha and others did that in a reasonable way: The
+> > aliases
+> > would work in most cases - in particular for the first assignment
+> > on
+> > boot, which is required to find the correct rootfs.
+> 
+> Well, if we would pre-parse the DTB to look for all "mmc block
+> aliases" and keep a mark of those ids as being reserved, then we
+> should be able to cope with both 1) and 2).
 
-Hi Maxim,
+Hello Ulf,
 
-> Instead of this adding blk_is_valid_logical_block_size allowed me to
-> trivially convert most of the uses.
->
-> For RFC I converted only some drivers that I am more familiar with
-> and/or can test but I can remove the driver's own checks in most other
-> drivers with low chance of introducing a bug, even if I can't test the
-> driver.
->
-> What do you think?
->
-> I can also both make blk_queue_logical_block_size return an error
-> value, and have blk_is_valid_logical_block_size and use either of
-> these checks, depending on the driver with eventual goal of
-> un-exporting blk_is_valid_logical_block_size.
+it seems to me like Sascha's patches from 2014 do precisely that:
 
-My concern is that blk_is_valid_logical_block_size() deviates from the
-regular block layer convention where the function to set a given queue
-limit will either adjust the passed value or print a warning.
+https://www.spinics.net/lists/linux-mmc/msg26587.html
+https://www.spinics.net/lists/linux-mmc/msg26588.html
 
-I guess I won't entirely object to having the actual check in a helper
-function that drivers with a peculiar initialization pattern can
-use. And then make blk_queue_logical_block_size() call that helper as
-well to validate the lbs.
+I haven't looked into porting this to a modern kernel yet, but do you
+think that the approach is sound?
 
-But I do think that blk_queue_logical_block_size() should be the
-preferred interface and that, where possible, drivers should be updated
-to check the return value of that.
 
--- 
-Martin K. Petersen	Oracle Linux Engineering
+
+> 
+> > 
+> > > 
+> > > > 
+> > > > Kind regards,
+> > > > Matthias
+> > > > 
+> > > > 
+> > > > [1] https://patchwork.kernel.org/patch/8685711/
+> > > > [2] https://lore.kernel.org/patchwork/cover/674381/
+> > > > [3] https://www.spinics.net/lists/linux-mmc/msg26586.html
+> > > > [4] https://www.spinics.net/lists/linux-mmc/msg26708.html
+> > > > 
+> 
+> Kind regards
+> Uffe
+
