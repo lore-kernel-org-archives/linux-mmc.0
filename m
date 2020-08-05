@@ -4,194 +4,119 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-10.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=ham autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CADF0C433E0
-	for <linux-mmc@archiver.kernel.org>; Wed,  5 Aug 2020 06:34:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D14CEC433DF
+	for <linux-mmc@archiver.kernel.org>; Wed,  5 Aug 2020 06:35:05 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A7228204EA
-	for <linux-mmc@archiver.kernel.org>; Wed,  5 Aug 2020 06:34:45 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id AAE9D204EA
+	for <linux-mmc@archiver.kernel.org>; Wed,  5 Aug 2020 06:35:05 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Pp1F3Gn3"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="SfxnniAa"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726459AbgHEGep (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 5 Aug 2020 02:34:45 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36178 "EHLO
+        id S1728012AbgHEGfF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 5 Aug 2020 02:35:05 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36240 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728045AbgHEGem (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Aug 2020 02:34:42 -0400
-Received: from mail-vs1-xe44.google.com (mail-vs1-xe44.google.com [IPv6:2607:f8b0:4864:20::e44])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7E6AEC06174A
-        for <linux-mmc@vger.kernel.org>; Tue,  4 Aug 2020 23:34:42 -0700 (PDT)
-Received: by mail-vs1-xe44.google.com with SMTP id b26so17576079vsa.13
-        for <linux-mmc@vger.kernel.org>; Tue, 04 Aug 2020 23:34:42 -0700 (PDT)
+        with ESMTP id S1727971AbgHEGfE (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Aug 2020 02:35:04 -0400
+Received: from mail-ua1-x943.google.com (mail-ua1-x943.google.com [IPv6:2607:f8b0:4864:20::943])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7F40BC061756
+        for <linux-mmc@vger.kernel.org>; Tue,  4 Aug 2020 23:35:04 -0700 (PDT)
+Received: by mail-ua1-x943.google.com with SMTP id o25so13555313uar.1
+        for <linux-mmc@vger.kernel.org>; Tue, 04 Aug 2020 23:35:04 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=d2ZiF+evfZ66+HifnXyioxGC5MxoHunhZYeIelbyLK0=;
-        b=Pp1F3Gn30EM5c6aAAsf4shLRD0JwsRXxIpCpLuM6vKt8rKp33GZvzZ+lkDYgPiLsXf
-         eZwJXF2sV30Uy39U3ktkOCtPYxfRQDoKF8HyLrQ67D7BH1Cm1DDOl5XtHacb3vD3t33M
-         ePteu5fZNSYNfBFgtbMuuYdHzw4y6ljHTkMVNGyB/Je9JUXjGtCTsvIo2HYb4vh45Cj9
-         W+Kg3fsbkojGqSnPmK36SFLOcR82MXJZlJiWN5AW24RZaL+bAfHt7LVNvoy74RLeo6pR
-         mauo67Usaupye6fc94QefbVEMyISOeirNMqzbZtMs9NJDtfjJK60+UIcTNdJDVAtNQ43
-         0VDA==
+        bh=thLd5vrBCF5P811qdhS5FGqyyjmv+p/jdT9ome4aBi8=;
+        b=SfxnniAa129b0crE1YIs3dMuOw1J3LmTLgMWqZEDtKroig4aaXS3lR2zXg8R9aXbOe
+         XOHmMzpTAa16Scwu8P+q6ELMY6fbQh7+3XFku/PNMUflM4yonPA8RzIz0zSVDZnO24C+
+         nm5eob0piBsXhHqpPAMWHcmLMRPJffWtadAOJ1YoF69GKcdPKlP+75g+ooRSxSmC3YPj
+         oFcaV1ij8aaDSl9BdW+cIxtboZRlJem4xhJCWhVRnKz33pEvPx2su7JClAveIbvjWbmm
+         /qKUgd0Gc3gG/v10HEZT04AfgPbURs5jdKYlgeG67azWJNtowg1uBztDBzW193xSGjsM
+         mUww==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=d2ZiF+evfZ66+HifnXyioxGC5MxoHunhZYeIelbyLK0=;
-        b=rSv0nPrbnHCTA9OaGeICbdsDK+fC/QeotHyfkPvURJefhP1B0y27jv9o+JgtN7h5cy
-         FYAQyeLIeiVDc45/b0tsqkNoDBxZ8jB2e4XxaKg1EsmfC7dGLi5DhKN0C+H8SizZgyzG
-         xZdWOdE5QQtKpEr8CRyvNhOR1GsJPqXvvJiR9HdTslTvvCnDcUGiK+lD4bZPNAyvwuaV
-         N1CMqBhKTTGyaMhgc9w01r7zx6QOIZ8vsNTnkoeJKbidMAuLJJNSO+bg68OFDwYXcNe3
-         6MtNHpIQa/zDCz1m6wY3p/Nvbrp9Fd7lzGuJRyr3vkOtAzX0NQkT4Wg44rgvJhpOncMt
-         zGKw==
-X-Gm-Message-State: AOAM530ThRyy5GsB1qY1rWNaaF4r1fD0Pr2IhLA3W9WVNpXkHL6kKCEj
-        Migu2n1RLKA0fkPWsIx8cCjmjoN9Bpiw6nKfQy1Qdw==
-X-Google-Smtp-Source: ABdhPJyRAxMGxKHCQASdyGMOW+VV/QwhN4h2J8nDZRBTQ8jRAAZ8+Pi9OLVoeV6w/H/WWYuftedBrzdoXivBkBl/+EM=
-X-Received: by 2002:a67:8c06:: with SMTP id o6mr912216vsd.200.1596609281713;
- Tue, 04 Aug 2020 23:34:41 -0700 (PDT)
+        bh=thLd5vrBCF5P811qdhS5FGqyyjmv+p/jdT9ome4aBi8=;
+        b=gN04UYqokB0Mqd4UYdvbdT1taaMahwgup5UdLpndglBzXk0XwRwg043iTF8Qd4/tNd
+         HyNmBFMFwqYn4F46kSMfG69+3QzzY06vGCSET0lI6RMjXXXNgKECVNGFBrM1SDBnxQT2
+         vsIGlv1NTpjWXZ4Rgf9AsVCoJKr9Qlhh+fQoy2tzDobw2Hu0FpE7liHfxPUAL+oukzwh
+         WCsrR7WGBgAPJxjYbiBTHva25HFvYBaRLArQpdGlkwBN44pCzxl2Bb5vgIjd0rD9yMyB
+         +YEudAm6G53nLwWCsR2JoIo/Pu/A1AyQ6YgiaTKQKGGDeQ37jjcHXgQcsim9DrP78phT
+         a71w==
+X-Gm-Message-State: AOAM533hlBefH2j9Kvi59oHq+Yg4iNPtBu+/+kk8pYkuOHagjL3kHbnr
+        2vBSSh3RgZe7WnY3WPZKlBiMYG1G0mhXc33eFz+fveBL9RKcgQ==
+X-Google-Smtp-Source: ABdhPJy8ojrQUZrccFBTduwq6pfZs56aMVCn+bFtsYmIcwR60XVGesaJV3i//CCOA2ED8/cqabMhiyiaSZz9CeZPcPI=
+X-Received: by 2002:ab0:6049:: with SMTP id o9mr993076ual.19.1596609303400;
+ Tue, 04 Aug 2020 23:35:03 -0700 (PDT)
 MIME-Version: 1.0
-References: <20200720142603.577323-1-vaibhavgupta40@gmail.com>
-In-Reply-To: <20200720142603.577323-1-vaibhavgupta40@gmail.com>
+References: <20200721011733.8416-1-shirley.her@bayhubtech.com>
+In-Reply-To: <20200721011733.8416-1-shirley.her@bayhubtech.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 5 Aug 2020 08:34:04 +0200
-Message-ID: <CAPDyKFpHxf7xWOy+-qX+DQVtufbD50_imfi51TtsEp6P=iGs7g@mail.gmail.com>
-Subject: Re: [PATCH v1] mmc: via-sdmmc: use generic power management
-To:     Vaibhav Gupta <vaibhavgupta40@gmail.com>
-Cc:     Bjorn Helgaas <helgaas@kernel.org>,
-        Bjorn Helgaas <bhelgaas@google.com>,
-        Bjorn Helgaas <bjorn@helgaas.com>,
-        Vaibhav Gupta <vaibhav.varodek@gmail.com>,
-        Bruce Chang <brucechang@via.com.tw>,
-        Harald Welte <HaraldWelte@viatech.com>,
+Date:   Wed, 5 Aug 2020 08:34:26 +0200
+Message-ID: <CAPDyKFq9moAmkz3RuCNgxB-jEW=-SkqWu_TmvinVcDOKVQQuBw@mail.gmail.com>
+Subject: Re: [PATCH V1 1/2] mmc: sdhci-pci-o2micro: Bug fix for O2 host
+ controller Seabird1
+To:     shirley her <shirley.her@bayhubtech.com>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
         "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
         Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-kernel-mentees@lists.linuxfoundation.org,
-        Shuah Khan <skhan@linuxfoundation.org>
+        "Shaper Liu (WH)" <shaper.liu@bayhubtech.com>,
+        "Chevron Li (WH)" <chevron.li@bayhubtech.com>,
+        "Xiaoguang Yu (WH)" <xiaoguang.yu@bayhubtech.com>,
+        "Max Huang (SC)" <max.huang@bayhubtech.com>
 Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 20 Jul 2020 at 16:28, Vaibhav Gupta <vaibhavgupta40@gmail.com> wrote:
+On Tue, 21 Jul 2020 at 03:18, shirley her <shirley.her@bayhubtech.com> wrote:
 >
-> Drivers using legacy PM have to manage PCI states and device's PM states
-> themselves. They also need to take care of configuration registers.
+> Add bug fix for O2 host controller Seabird1
 >
-> With improved and powerful support of generic PM, PCI Core takes care of
-> above mentioned, device-independent, jobs.
->
-> This driver makes use of PCI helper functions like
-> pci_save/restore_state(), pci_enable/disable_device(),
-> pci_enable_wake() and pci_set_power_state() and to do required operations.
-> In generic mode, they are no longer needed.
->
-> Change function parameter in both .suspend() and .resume() to
-> "struct device*" type. Use dev_get_drvdata() to get drv data.
->
-> Compile-tested only.
->
-> Signed-off-by: Vaibhav Gupta <vaibhavgupta40@gmail.com>
+> Signed-off-by: Shirley Her <shirley.her@bayhubtech.com>
 
 Applied for next (a while ago), thanks!
+
+> ---
+> change in V1:
+> 1. Add quriks2 and mmc->caps2 for Seabird1
+> 2. Add get_cd support for Seabird1
+
+Future wise, I wouldn't mind that you fold some of this information
+into the commit message. It's always good to have a good description
+of the change.
+
 Kind regards
 Uffe
 
 
 > ---
->  drivers/mmc/host/via-sdmmc.c | 33 ++++++++-------------------------
->  1 file changed, 8 insertions(+), 25 deletions(-)
+>  drivers/mmc/host/sdhci-pci-o2micro.c | 6 ++++++
+>  1 file changed, 6 insertions(+)
 >
-> diff --git a/drivers/mmc/host/via-sdmmc.c b/drivers/mmc/host/via-sdmmc.c
-> index ef95bce50889..49dab9f42b6d 100644
-> --- a/drivers/mmc/host/via-sdmmc.c
-> +++ b/drivers/mmc/host/via-sdmmc.c
-> @@ -1220,9 +1220,7 @@ static void via_sd_remove(struct pci_dev *pcidev)
->                 pci_name(pcidev), (int)pcidev->vendor, (int)pcidev->device);
->  }
+> diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
+> index e2a846885902..ed3c605fcf0c 100644
+> --- a/drivers/mmc/host/sdhci-pci-o2micro.c
+> +++ b/drivers/mmc/host/sdhci-pci-o2micro.c
+> @@ -561,6 +561,12 @@ static int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
+>                         slot->host->mmc_host_ops.get_cd = sdhci_o2_get_cd;
+>                 }
 >
-> -#ifdef CONFIG_PM
-> -
-> -static void via_init_sdc_pm(struct via_crdr_mmc_host *host)
-> +static void __maybe_unused via_init_sdc_pm(struct via_crdr_mmc_host *host)
->  {
->         struct sdhcreg *pm_sdhcreg;
->         void __iomem *addrbase;
-> @@ -1256,30 +1254,27 @@ static void via_init_sdc_pm(struct via_crdr_mmc_host *host)
->         via_print_sdchc(host);
->  }
+> +               if (chip->pdev->device == PCI_DEVICE_ID_O2_SEABIRD1) {
+> +                       slot->host->mmc_host_ops.get_cd = sdhci_o2_get_cd;
+> +                       host->mmc->caps2 |= MMC_CAP2_NO_SDIO;
+> +                       host->quirks2 |= SDHCI_QUIRK2_PRESET_VALUE_BROKEN;
+> +               }
+> +
+>                 host->mmc_host_ops.execute_tuning = sdhci_o2_execute_tuning;
 >
-> -static int via_sd_suspend(struct pci_dev *pcidev, pm_message_t state)
-> +static int __maybe_unused via_sd_suspend(struct device *dev)
->  {
->         struct via_crdr_mmc_host *host;
->
-> -       host = pci_get_drvdata(pcidev);
-> +       host = dev_get_drvdata(dev);
->
->         via_save_pcictrlreg(host);
->         via_save_sdcreg(host);
->
-> -       pci_save_state(pcidev);
-> -       pci_enable_wake(pcidev, pci_choose_state(pcidev, state), 0);
-> -       pci_disable_device(pcidev);
-> -       pci_set_power_state(pcidev, pci_choose_state(pcidev, state));
-> +       device_wakeup_enable(dev);
->
->         return 0;
->  }
->
-> -static int via_sd_resume(struct pci_dev *pcidev)
-> +static int __maybe_unused via_sd_resume(struct device *dev)
->  {
->         struct via_crdr_mmc_host *sdhost;
->         int ret = 0;
->         u8 gatt;
->
-> -       sdhost = pci_get_drvdata(pcidev);
-> +       sdhost = dev_get_drvdata(dev);
->
->         gatt = VIA_CRDR_PCICLKGATT_PAD_PWRON;
->         if (sdhost->power == MMC_VDD_165_195)
-> @@ -1294,32 +1289,20 @@ static int via_sd_resume(struct pci_dev *pcidev)
->
->         msleep(100);
->
-> -       pci_set_power_state(pcidev, PCI_D0);
-> -       pci_restore_state(pcidev);
-> -       ret = pci_enable_device(pcidev);
-> -       if (ret)
-> -               return ret;
-> -
->         via_restore_pcictrlreg(sdhost);
->         via_init_sdc_pm(sdhost);
->
->         return ret;
->  }
->
-> -#else /* CONFIG_PM */
-> -
-> -#define via_sd_suspend NULL
-> -#define via_sd_resume NULL
-> -
-> -#endif /* CONFIG_PM */
-> +static SIMPLE_DEV_PM_OPS(via_sd_pm_ops, via_sd_suspend, via_sd_resume);
->
->  static struct pci_driver via_sd_driver = {
->         .name = DRV_NAME,
->         .id_table = via_ids,
->         .probe = via_sd_probe,
->         .remove = via_sd_remove,
-> -       .suspend = via_sd_suspend,
-> -       .resume = via_sd_resume,
-> +       .driver.pm = &via_sd_pm_ops,
->  };
->
->  module_pci_driver(via_sd_driver);
+>                 if (chip->pdev->device != PCI_DEVICE_ID_O2_FUJIN2)
 > --
-> 2.27.0
+> 2.25.1
 >
