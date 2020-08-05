@@ -2,98 +2,131 @@ Return-Path: <SRS0=eJC8=BP=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.5 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 45E9DC433E3
-	for <linux-mmc@archiver.kernel.org>; Wed,  5 Aug 2020 07:53:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C1DAFC433DF
+	for <linux-mmc@archiver.kernel.org>; Wed,  5 Aug 2020 08:05:43 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2E98C21744
-	for <linux-mmc@archiver.kernel.org>; Wed,  5 Aug 2020 07:53:32 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9239020678
+	for <linux-mmc@archiver.kernel.org>; Wed,  5 Aug 2020 08:05:43 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="fMTw7nHA"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727808AbgHEHx2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 5 Aug 2020 03:53:28 -0400
-Received: from mga14.intel.com ([192.55.52.115]:24366 "EHLO mga14.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725868AbgHEHx2 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 5 Aug 2020 03:53:28 -0400
-IronPort-SDR: zBN4Fwh2DLIYS7Jn9JSNIKj4D715ZmQv9Z55fADOjbJRCfc4fCm9IdrebZY2vaGbxL21QMFRNb
- R6hWHjB2PC5A==
-X-IronPort-AV: E=McAfee;i="6000,8403,9703"; a="151710217"
-X-IronPort-AV: E=Sophos;i="5.75,436,1589266800"; 
-   d="scan'208";a="151710217"
-X-Amp-Result: SKIPPED(no attachment in message)
-X-Amp-File-Uploaded: False
-Received: from fmsmga005.fm.intel.com ([10.253.24.32])
-  by fmsmga103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 05 Aug 2020 00:53:25 -0700
-IronPort-SDR: OCRA3hVjAEAT0Z0bZrgC0gAjgMWwZy/945cJRGmHL0Ux0aIRDKr+BaOg+9mXqpLO+xwh+yLUo8
- jvMAKUaNiRjw==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.75,436,1589266800"; 
-   d="scan'208";a="493192454"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.73]) ([10.237.72.73])
-  by fmsmga005.fm.intel.com with ESMTP; 05 Aug 2020 00:53:22 -0700
-Subject: Re: [PATCH v2 2/6] sdhci: tegra: Remove
- SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK for Tegra186
-To:     Sowjanya Komatineni <skomatineni@nvidia.com>,
-        ulf.hansson@linaro.org, thierry.reding@gmail.com,
-        jonathanh@nvidia.com, robh+dt@kernel.org
-Cc:     devicetree@vger.kernel.org, linux-tegra@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
-References: <1596515363-27235-1-git-send-email-skomatineni@nvidia.com>
- <1596515363-27235-3-git-send-email-skomatineni@nvidia.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <a756daef-ff2b-c170-90a4-68afaf4527b9@intel.com>
-Date:   Wed, 5 Aug 2020 10:52:58 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.10.0
+        id S1728015AbgHEIFc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 5 Aug 2020 04:05:32 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50208 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728109AbgHEIE4 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Aug 2020 04:04:56 -0400
+Received: from mail-yb1-xb42.google.com (mail-yb1-xb42.google.com [IPv6:2607:f8b0:4864:20::b42])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 049F5C061757;
+        Wed,  5 Aug 2020 01:04:32 -0700 (PDT)
+Received: by mail-yb1-xb42.google.com with SMTP id e14so9497608ybf.4;
+        Wed, 05 Aug 2020 01:04:31 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=BiuuPtVTD0TIdLTlFbDmr4GJPdBHQfsmJUkSiUv0PmQ=;
+        b=fMTw7nHAmyojNDsyhXH2aNqC8O1PkqTHzVO/PnUwikGnJZK2hKak0OUyUzjx7VlP+S
+         HiiabgNJLGQ7dHfvKgHWb+ICEXl2kfFYqGoVM6u+FGD2Gl05sugti/x6k1XH19zn+hjr
+         /ZR5xkO31XqfJ++52Hx3pLgJpJhFnl1sW2hbqPIhUCO6edCHWPQiKzXwHWTGqwCiIQ4X
+         g0BV886F3c1y3po2yVxQSrcrv9WEGa9m5RpQvv/e6IAuZ9g1LJ6UIftUWBJeonEeAX/D
+         WYby2otwKWiWhW7mxVYcScSZ86lDJXcNCI4HMmSAHrERp2yv0aNNWBuuU3spM2EhBbRf
+         C9TA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=BiuuPtVTD0TIdLTlFbDmr4GJPdBHQfsmJUkSiUv0PmQ=;
+        b=TlqptdNgGfFcz+BXueeZPtumVYmXZxuqaYZbixGfIKfHbm+Z4g0Irgi0o9/8EKgkjY
+         9IaiCQTge5lMRJkAnF44Hemu4bGTI1fgw+sn75D6A2PBQ7OiV6CJM3f//jU1x3i9WZih
+         zo7QauLyKvBqKcmiDUKSGK4HT4ipNJ335X4y950MXMrwy6C3MzN655hxH+Db/uMXPgXJ
+         eKHZj8OznKxGapdqcnQInujJmxP+9t7n0YbW+wgITs7Uun7cFM8GFtADCQqkAsV+jQhO
+         oRCPv0mXm/DOc7/oyxKh8/SYGlI6lY6dBl9y+xZukNesIq0CzkihdxIphR3At/hly0KK
+         H1yQ==
+X-Gm-Message-State: AOAM533eL0qZvISCKDGz4PPamOGMf9zQeoLC/cxIJEsMSqilf8yhzZu1
+        Mbv244efvC1bmaqIawIoVXaMRw07Cep9Ese0fpU=
+X-Google-Smtp-Source: ABdhPJysh3lsTewqog7MiMBZa3uhA597rnIHVhPuIrHcPba7M8AIp8ClLZSH9skBUgGReuophzgnmo6NBEDS8+kuO3s=
+X-Received: by 2002:a25:4b01:: with SMTP id y1mr2768364yba.395.1596614671325;
+ Wed, 05 Aug 2020 01:04:31 -0700 (PDT)
 MIME-Version: 1.0
-In-Reply-To: <1596515363-27235-3-git-send-email-skomatineni@nvidia.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+References: <1594230511-24790-1-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
+ <1594230511-24790-5-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com> <CAPDyKFqeiEUeajprG=Bx3Nion8bGpVrDOuM7q6-kLDpOMY-QbQ@mail.gmail.com>
+In-Reply-To: <CAPDyKFqeiEUeajprG=Bx3Nion8bGpVrDOuM7q6-kLDpOMY-QbQ@mail.gmail.com>
+From:   "Lad, Prabhakar" <prabhakar.csengg@gmail.com>
+Date:   Wed, 5 Aug 2020 09:04:05 +0100
+Message-ID: <CA+V-a8txuETixBOg7iLRN_uYmSDpwpQJq=o83ewYAs6w9uHC0Q@mail.gmail.com>
+Subject: Re: [PATCH 4/8] dt-bindings: mmc: renesas,sdhi: Add r8a774e1 support
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>,
+        Geert Uytterhoeven <geert+renesas@glider.be>,
+        Magnus Damm <magnus.damm@gmail.com>,
+        Rob Herring <robh+dt@kernel.org>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Jason Cooper <jason@lakedaemon.net>,
+        Marc Zyngier <maz@kernel.org>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Catalin Marinas <catalin.marinas@arm.com>,
+        Will Deacon <will@kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
+        DTML <devicetree@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "open list:SERIAL DRIVERS" <linux-serial@vger.kernel.org>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 4/08/20 7:29 am, Sowjanya Komatineni wrote:
-> commit 4346b7c7941d ("mmc: tegra: Add Tegra186 support")
+Hi Ulf,
 
-So that could be a Fixes tag also?
+On Wed, Aug 5, 2020 at 7:32 AM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>
+> On Wed, 8 Jul 2020 at 19:48, Lad Prabhakar
+> <prabhakar.mahadev-lad.rj@bp.renesas.com> wrote:
+> >
+> > Document SDHI controller for RZ/G2H (R8A774E1) SoC, which is compatible
+> > with R-Car Gen3 SoC family.
+> >
+> > Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+> > Reviewed-by: Marian-Cristian Rotariu <marian-cristian.rotariu.rb@bp.renesas.com>
+>
+> Sorry, but this doesn't apply as the DT doc has been converted to
+> YAML. Can you please rebase and respin.
+>
+Sure will respin it.
 
-> 
-> SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK is set for Tegra186 from the
-> beginning of its support in driver.
-> 
-> Tegra186 SDMMC hardware by default uses timeout clock (TMCLK) instead
-> of SDCLK and this quirk should not be set.
-> 
-> So, this patch remove this quirk for Tegra186.
-> 
-> Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
+Cheers,
+Prabhakar
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-
-> ---
->  drivers/mmc/host/sdhci-tegra.c | 1 -
->  1 file changed, 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-> index 2be3511..31ed321 100644
-> --- a/drivers/mmc/host/sdhci-tegra.c
-> +++ b/drivers/mmc/host/sdhci-tegra.c
-> @@ -1455,7 +1455,6 @@ static const struct sdhci_ops tegra186_sdhci_ops = {
->  
->  static const struct sdhci_pltfm_data sdhci_tegra186_pdata = {
->  	.quirks = SDHCI_QUIRK_BROKEN_TIMEOUT_VAL |
-> -		  SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
->  		  SDHCI_QUIRK_SINGLE_POWER_WRITE |
->  		  SDHCI_QUIRK_NO_HISPD_BIT |
->  		  SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC |
-> 
-
+> Kind regards
+> Uffe
+>
+>
+>
+> > ---
+> >  Documentation/devicetree/bindings/mmc/renesas,sdhi.txt | 1 +
+> >  1 file changed, 1 insertion(+)
+> >
+> > diff --git a/Documentation/devicetree/bindings/mmc/renesas,sdhi.txt b/Documentation/devicetree/bindings/mmc/renesas,sdhi.txt
+> > index 0ca9a622cce0..779e484fa3ef 100644
+> > --- a/Documentation/devicetree/bindings/mmc/renesas,sdhi.txt
+> > +++ b/Documentation/devicetree/bindings/mmc/renesas,sdhi.txt
+> > @@ -14,6 +14,7 @@ Required properties:
+> >                 "renesas,sdhi-r8a774a1" - SDHI IP on R8A774A1 SoC
+> >                 "renesas,sdhi-r8a774b1" - SDHI IP on R8A774B1 SoC
+> >                 "renesas,sdhi-r8a774c0" - SDHI IP on R8A774C0 SoC
+> > +               "renesas,sdhi-r8a774e1" - SDHI IP on R8A774E1 SoC
+> >                 "renesas,sdhi-r8a77470" - SDHI IP on R8A77470 SoC
+> >                 "renesas,sdhi-mmc-r8a77470" - SDHI/MMC IP on R8A77470 SoC
+> >                 "renesas,sdhi-r8a7778" - SDHI IP on R8A7778 SoC
+> > --
+> > 2.17.1
+> >
