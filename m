@@ -2,98 +2,200 @@ Return-Path: <SRS0=eJC8=BP=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.5 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-4.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6CF2AC433DF
-	for <linux-mmc@archiver.kernel.org>; Wed,  5 Aug 2020 07:49:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9D4F1C433E0
+	for <linux-mmc@archiver.kernel.org>; Wed,  5 Aug 2020 07:50:47 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 51D8822B40
-	for <linux-mmc@archiver.kernel.org>; Wed,  5 Aug 2020 07:49:21 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7CCE621744
+	for <linux-mmc@archiver.kernel.org>; Wed,  5 Aug 2020 07:50:47 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="v+JgvnM9"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726175AbgHEHtQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 5 Aug 2020 03:49:16 -0400
-Received: from mga12.intel.com ([192.55.52.136]:40323 "EHLO mga12.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725920AbgHEHtP (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 5 Aug 2020 03:49:15 -0400
-IronPort-SDR: 0K+5ET+WOd1uiXNm+axO7fwQmCnYAh79VB6IjJP5r+/xiBYeOcZkj/Fu1ylcl/7pbgGkk1yVXU
- G0pC5LpZD1JA==
-X-IronPort-AV: E=McAfee;i="6000,8403,9703"; a="132046072"
-X-IronPort-AV: E=Sophos;i="5.75,436,1589266800"; 
-   d="scan'208";a="132046072"
-X-Amp-Result: SKIPPED(no attachment in message)
-X-Amp-File-Uploaded: False
-Received: from fmsmga005.fm.intel.com ([10.253.24.32])
-  by fmsmga106.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 05 Aug 2020 00:49:14 -0700
-IronPort-SDR: ik29/gHE1/qYrJ+mcPEOXOZQNZ8fPyZ5ZR8n8Bv0oNadrviTy1trgUVGCn/mFR4z1yzOWL51UI
- vIb0dr6lIdLQ==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.75,436,1589266800"; 
-   d="scan'208";a="493191854"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.73]) ([10.237.72.73])
-  by fmsmga005.fm.intel.com with ESMTP; 05 Aug 2020 00:49:12 -0700
-Subject: Re: [PATCH v2 1/6] sdhci: tegra: Remove
- SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK for Tegra210
-To:     Sowjanya Komatineni <skomatineni@nvidia.com>,
-        ulf.hansson@linaro.org, thierry.reding@gmail.com,
-        jonathanh@nvidia.com, robh+dt@kernel.org
-Cc:     devicetree@vger.kernel.org, linux-tegra@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
-References: <1596515363-27235-1-git-send-email-skomatineni@nvidia.com>
- <1596515363-27235-2-git-send-email-skomatineni@nvidia.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <63829275-2572-929b-c26c-79823f1e0ba5@intel.com>
-Date:   Wed, 5 Aug 2020 10:48:47 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.10.0
+        id S1727843AbgHEHuq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 5 Aug 2020 03:50:46 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48084 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727780AbgHEHuo (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Aug 2020 03:50:44 -0400
+Received: from mail-ua1-x930.google.com (mail-ua1-x930.google.com [IPv6:2607:f8b0:4864:20::930])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A85A3C06179E
+        for <linux-mmc@vger.kernel.org>; Wed,  5 Aug 2020 00:50:43 -0700 (PDT)
+Received: by mail-ua1-x930.google.com with SMTP id g11so1105947ual.2
+        for <linux-mmc@vger.kernel.org>; Wed, 05 Aug 2020 00:50:43 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=gj5SkepGEW+lETvyOPuyK01bP55UQABNwY/RW5WoiJM=;
+        b=v+JgvnM94+n4xy56dO+7zH4S6cRMiq122hMjDr16960VGLHmZ9x7hZt+xMACqjtMBw
+         4YWQB/add8XR6DKbGkgxwf4IeWSfvDG97fXYpjsv6s8kkrCBjyk36UeyreoVlzByW5xo
+         iuZgIy2LwS1heLM36TwLZzcz/31dH6/hWP9MEi+k1Ls/0EqN5O34n3CRJX8Ocvy/lFRs
+         HXTyHJf8W2/InzSr1U/KB2k4Nlf6OkK27DZms+wt7Y/T20lVJycCuoHncYEVJkzfUzU0
+         KI1sxOOGmXICSsOF/eSse9NpXubA5u2xbfFPxElvM0HLwNwQySZOx2YM3JofFvAq//wo
+         qb/w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=gj5SkepGEW+lETvyOPuyK01bP55UQABNwY/RW5WoiJM=;
+        b=uaUxMQiwp2M+OkASzpsYFuDZxOPgzB4IQbljO3N64kJPyuawzqaI60UV6T7jpiaHjP
+         Kfx1Nv6VhjM2QPFQfRs7CLKnMVzOTkDhLA1+KObZrUtUmRsqt168d41uUx4roiyQQCug
+         915Ac8b25H+a+ANfue+hUsBYphmv9cR7KNqy8BUrL6GZVpO+iOll62zE/ygCUtn1QgBg
+         W0OOdcDKSoD3dp8DSbIhRRHuSePdtaYXjOz8CKJLvrAWp3L1EJTBk30s8NfUnsTVxN6p
+         ay0RWA/tATI9E2nLzJwfLcOm+GrqaK+H+8/zLxb1UC6mWpBX7ZlNc2g6Bvy2m8EMrTYI
+         yOLA==
+X-Gm-Message-State: AOAM533o0n34Px+u6/KOufSHh3ZrJchkvqJcqQZ+jpL3fApCtnX+KFJN
+        s9bs0zXJVzo+v+f8sNLeH/k+1bVdNZ/hRPDA0Lmqjg==
+X-Google-Smtp-Source: ABdhPJxm66X3L3voqWv9Ix6YPW9OpTesj8g5n5syrl9ILyTi/zoy67G4hOSghhH2CNbeyn7o+bmQAWuLETdubR/svf8=
+X-Received: by 2002:ab0:1c14:: with SMTP id a20mr1150946uaj.129.1596613842255;
+ Wed, 05 Aug 2020 00:50:42 -0700 (PDT)
 MIME-Version: 1.0
-In-Reply-To: <1596515363-27235-2-git-send-email-skomatineni@nvidia.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+References: <fb0340aaf273be84e915214a3d8bae4ac85d7c0b.camel@ew.tq-group.com>
+ <CAPDyKFq+RiwbDj+58+W5GTcT7=ZOpZFmc02+FxjRGYwbBgA8oQ@mail.gmail.com>
+ <cfcec3df57e6dd5ef353ef3a5b4b9793c28eb401.camel@ew.tq-group.com>
+ <CAPDyKFptySRTbWto9QYWZ-feL51JvPkZDGsETJ4svz0VbV31Bw@mail.gmail.com> <4ecc41303f9232319cedf414fc466a8c4c0c6dc6.camel@ew.tq-group.com>
+In-Reply-To: <4ecc41303f9232319cedf414fc466a8c4c0c6dc6.camel@ew.tq-group.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Wed, 5 Aug 2020 09:50:06 +0200
+Message-ID: <CAPDyKFrA+P=G+LQLSJXZhPyAn_jUzv7tSfaphiKVMuenmKEs+w@mail.gmail.com>
+Subject: Re: (EXT) Re: (EXT) Re: Consistent block device references for root= cmdline
+To:     Matthias Schiffer <matthias.schiffer@ew.tq-group.com>
+Cc:     Al Viro <viro@zeniv.linux.org.uk>, Jens Axboe <axboe@kernel.dk>,
+        Sascha Hauer <s.hauer@pengutronix.de>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        linux-block <linux-block@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 4/08/20 7:29 am, Sowjanya Komatineni wrote:
-> commit b5a84ecf025a ("mmc: tegra: Add Tegra210 support")
+On Wed, 29 Jul 2020 at 10:43, Matthias Schiffer
+<matthias.schiffer@ew.tq-group.com> wrote:
+>
+> On Tue, 2020-07-07 at 16:14 +0200, Ulf Hansson wrote:
+> > On Thu, 11 Jun 2020 at 13:20, Matthias Schiffer
+> > <matthias.schiffer@ew.tq-group.com> wrote:
+> > >
+> > > On Wed, 2020-06-10 at 16:52 +0200, Ulf Hansson wrote:
+> > > > On Wed, 10 Jun 2020 at 15:15, Matthias Schiffer
+> > > > <matthias.schiffer@ew.tq-group.com> wrote:
+> > > > >
+> > > > > Hello all,
+> > > > >
+> > > > > there have been numerous attempts to make the numbering of
+> > > > > mmcblk
+> > > > > devices consistent, mostly by using aliases from the DTS ([1],
+> > > > > [2],
+> > > > > [3]), but all have been (rightfully) rejected. Unless I have
+> > > > > overlooked
+> > > > > a more recent development, no attempts for a different solution
+> > > > > were
+> > > > > made.
+> > > >
+> > > > According to aliases attempts, I think those have failed, mainly
+> > > > because of two reasons.
+> > > >
+> > > > 1. Arguments stating that LABELs/UUIDs are variable alternatives.
+> > > > This
+> > > > isn't the case, which I think was also concluded from the several
+> > > > earlier discussions.
+> > > > 2. Patches that tried adding support for mmc aliases, were not
+> > > > correctly coded. More precisely, what needs to be addressed is
+> > > > that
+> > > > the mmc core also preserves the same ids to be set for the host
+> > > > class
+> > > > as the block device, mmc[n] must correspond to mmcblk[n].
+> > > >
+> > > > >
+> > > > > As far as I can tell, the core of the issue seems to be the
+> > > > > following:
+> > > > >
+> > > > > The existing solutions like LABELs and UUIDs are viable
+> > > > > alternatives in
+> > > > > many cases, but in particular on embedded systems, this is not
+> > > > > quite
+> > > > > sufficient: In addition to the problem that more knowledge
+> > > > > about
+> > > > > the
+> > > > > system to boot is required in the bootloader, this approach
+> > > > > fails
+> > > > > completely when the same firmware image exists on multiple
+> > > > > devices,
+> > > > > for
+> > > > > example on an eMMC and an SD card - not an entirely uncommon
+> > > > > situation
+> > > > > during the development of embedded systems.
+> > > > >
+> > > > > With udev, I can refer to a specific partition using a path
+> > > > > like
+> > > > > /dev/disk/by-path/platform-2194000.usdhc-part2. In [4] it was
+> > > > > proposed
+> > > > > to add a way to refer to a device path/phandle from the kernel
+> > > > > command
+> > > > > line. Has there been any progress on this proposal?
+> > > >
+> > > > Lots of time during the years I have been approached, both
+> > > > publicly
+> > > > and offlist, about whether it would be possible to add support
+> > > > for
+> > > > "consistent" mmcblk devices. To me, I am fine with the aliases
+> > > > approach, as long as it gets implemented correctly.
+> > >
+> > >
+> > > It seems the principal technical problem is the one described here:
+> > >
+> > > https://www.spinics.net/lists/linux-mmc/msg26602.html
+> > >
+> > > I don't see any way to solve this completely, as there seem to be
+> > > two
+> > > fundamentally conflicting requirements:
+> > >
+> > > 1) If a mounted SD card is replaced, it must be assigned a new
+> > > /dev/mmcblkN
+> > > 2) /dev/mmcblkN should always match the configured alias IDs
+> > >
+> > > What is the reason we need 1) - is it possible to have multiple
+> > > eMMCs
+> > > or SD cards on a single bus, with detection at runtime?
+> >
+> > Yes. The mmc_bus_type holds all cards - all discovered at runtime.
+> >
+> > > Otherwise I'd
+> > > expect this to be handled like other drives with removable media
+> > > (CD,
+> > > floppy), with static device assignment.
+> > >
+> > > If we can't give up on 1) for some reason, we'll have to accept
+> > > that we
+> > > can't guarantee 2) unconditionally. As far as I can tell, the
+> > > patches
+> > > provided by Sascha and others did that in a reasonable way: The
+> > > aliases
+> > > would work in most cases - in particular for the first assignment
+> > > on
+> > > boot, which is required to find the correct rootfs.
+> >
+> > Well, if we would pre-parse the DTB to look for all "mmc block
+> > aliases" and keep a mark of those ids as being reserved, then we
+> > should be able to cope with both 1) and 2).
+>
+> Hello Ulf,
+>
+> it seems to me like Sascha's patches from 2014 do precisely that:
+>
+> https://www.spinics.net/lists/linux-mmc/msg26587.html
+> https://www.spinics.net/lists/linux-mmc/msg26588.html
+>
+> I haven't looked into porting this to a modern kernel yet, but do you
+> think that the approach is sound?
 
-So that could be a Fixes tag?
+Yes, something along those lines.
 
-> 
-> SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK is set for Tegra210 from the
-> beginning of Tegra210 support in the driver.
-> 
-> Tegra210 SDMMC hardware by default uses timeout clock (TMCLK)
-> instead of SDCLK and this quirk should not be set.
-> 
-> So, this patch remove this quirk for Tegra210.
-> 
-> Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
-
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-
-> ---
->  drivers/mmc/host/sdhci-tegra.c | 1 -
->  1 file changed, 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-> index 0a3f9d0..2be3511 100644
-> --- a/drivers/mmc/host/sdhci-tegra.c
-> +++ b/drivers/mmc/host/sdhci-tegra.c
-> @@ -1418,7 +1418,6 @@ static const struct sdhci_ops tegra210_sdhci_ops = {
->  
->  static const struct sdhci_pltfm_data sdhci_tegra210_pdata = {
->  	.quirks = SDHCI_QUIRK_BROKEN_TIMEOUT_VAL |
-> -		  SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
->  		  SDHCI_QUIRK_SINGLE_POWER_WRITE |
->  		  SDHCI_QUIRK_NO_HISPD_BIT |
->  		  SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC |
-> 
-
+Kind regards
+Uffe
