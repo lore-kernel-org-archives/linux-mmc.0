@@ -2,103 +2,93 @@ Return-Path: <SRS0=YBQu=BQ=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-13.0 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 73DF8C433E1
-	for <linux-mmc@archiver.kernel.org>; Thu,  6 Aug 2020 00:33:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E6893C4743A
+	for <linux-mmc@archiver.kernel.org>; Thu,  6 Aug 2020 11:05:23 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5541022D02
-	for <linux-mmc@archiver.kernel.org>; Thu,  6 Aug 2020 00:33:45 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=nvidia.com header.i=@nvidia.com header.b="o6N6qMAr"
+	by mail.kernel.org (Postfix) with ESMTP id E64C22333C
+	for <linux-mmc@archiver.kernel.org>; Thu,  6 Aug 2020 11:05:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726817AbgHFAda (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 5 Aug 2020 20:33:30 -0400
-Received: from hqnvemgate25.nvidia.com ([216.228.121.64]:2388 "EHLO
-        hqnvemgate25.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726515AbgHFAcm (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Aug 2020 20:32:42 -0400
-Received: from hqpgpgate101.nvidia.com (Not Verified[216.228.121.13]) by hqnvemgate25.nvidia.com (using TLS: TLSv1.2, DES-CBC3-SHA)
-        id <B5f2b4f780000>; Wed, 05 Aug 2020 17:31:52 -0700
-Received: from hqmail.nvidia.com ([172.20.161.6])
-  by hqpgpgate101.nvidia.com (PGP Universal service);
-  Wed, 05 Aug 2020 17:32:42 -0700
-X-PGP-Universal: processed;
-        by hqpgpgate101.nvidia.com on Wed, 05 Aug 2020 17:32:42 -0700
-Received: from HQMAIL111.nvidia.com (172.20.187.18) by HQMAIL105.nvidia.com
- (172.20.187.12) with Microsoft SMTP Server (TLS) id 15.0.1473.3; Thu, 6 Aug
- 2020 00:32:39 +0000
-Received: from rnnvemgw01.nvidia.com (10.128.109.123) by HQMAIL111.nvidia.com
- (172.20.187.18) with Microsoft SMTP Server (TLS) id 15.0.1473.3 via Frontend
- Transport; Thu, 6 Aug 2020 00:32:39 +0000
-Received: from skomatineni-linux.nvidia.com (Not Verified[10.2.172.190]) by rnnvemgw01.nvidia.com with Trustwave SEG (v7,5,8,10121)
-        id <B5f2b4fa60000>; Wed, 05 Aug 2020 17:32:38 -0700
-From:   Sowjanya Komatineni <skomatineni@nvidia.com>
-To:     <adrian.hunter@intel.com>, <ulf.hansson@linaro.org>,
-        <thierry.reding@gmail.com>, <jonathanh@nvidia.com>,
-        <robh+dt@kernel.org>
-CC:     <skomatineni@nvidia.com>, <linux-tegra@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
-        <devicetree@vger.kernel.org>, <stable@vger.kernel.org>
-Subject: [PATCH v3 2/6] sdhci: tegra: Remove SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK for Tegra186
-Date:   Wed, 5 Aug 2020 17:32:25 -0700
-Message-ID: <1596673949-1571-3-git-send-email-skomatineni@nvidia.com>
+        id S1728880AbgHFIX7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 6 Aug 2020 04:23:59 -0400
+Received: from inva020.nxp.com ([92.121.34.13]:47116 "EHLO inva020.nxp.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1728489AbgHFIX7 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 6 Aug 2020 04:23:59 -0400
+Received: from inva020.nxp.com (localhost [127.0.0.1])
+        by inva020.eu-rdc02.nxp.com (Postfix) with ESMTP id DE0F11A094E;
+        Thu,  6 Aug 2020 10:23:57 +0200 (CEST)
+Received: from invc005.ap-rdc01.nxp.com (invc005.ap-rdc01.nxp.com [165.114.16.14])
+        by inva020.eu-rdc02.nxp.com (Postfix) with ESMTP id BF3A01A0909;
+        Thu,  6 Aug 2020 10:23:54 +0200 (CEST)
+Received: from 10.192.242.69 (shlinux2.ap.freescale.net [10.192.224.44])
+        by invc005.ap-rdc01.nxp.com (Postfix) with ESMTP id 8FA78402E5;
+        Thu,  6 Aug 2020 10:23:50 +0200 (CEST)
+From:   haibo.chen@nxp.com
+To:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
+        linux-mmc@vger.kernel.org
+Cc:     linux-imx@nxp.com, haibo.chen@nxp.com, mka@chromium.org,
+        dianders@chromium.org
+Subject: [PATCH] mmc: sdio: change to use system_freezable_wq for sdio_irq_work
+Date:   Thu,  6 Aug 2020 16:19:04 +0800
+Message-Id: <1596701944-31965-1-git-send-email-haibo.chen@nxp.com>
 X-Mailer: git-send-email 2.7.4
-In-Reply-To: <1596673949-1571-1-git-send-email-skomatineni@nvidia.com>
-References: <1596673949-1571-1-git-send-email-skomatineni@nvidia.com>
-X-NVConfidentiality: public
-MIME-Version: 1.0
-Content-Type: text/plain
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nvidia.com; s=n1;
-        t=1596673912; bh=oz8A57gzhp0Azl3sB2boMW8c1eZVUyjxxtqlbUBC15k=;
-        h=X-PGP-Universal:From:To:CC:Subject:Date:Message-ID:X-Mailer:
-         In-Reply-To:References:X-NVConfidentiality:MIME-Version:
-         Content-Type;
-        b=o6N6qMAreBK2hWApldgN64WdOlmgO2/joGUYRHSdMNdc2bgnNHq6PjKmkETq2wNBe
-         ofMmo7XYkq9QNibNUxK0xaHUkaQ8acBz+t7x/mG+BWmbDRAYtiVphXQ48AHPVEh6wH
-         HCc1PfEM0b8ACEeyxGt/sqJidTpHlKx6hcjGGJxvNG3vT3okJogoM4pLVLmACh5aCo
-         O6tnXGnerR1MAXbFQdL9gFDX8CLfJaeRHUa4SgSyVYahv8HPoj5k1d4z+7I0Dqfhn9
-         Uqn6mP8NDVWFBylHdwz9cVUC8BdOnPiZ6+LKGlEyYBxFJRY3i8jTociMjYh6/HE6Iw
-         BbS3lpOobLk0w==
+X-Virus-Scanned: ClamAV using ClamSMTP
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-commit 4346b7c7941d ("mmc: tegra: Add Tegra186 support")
+From: Haibo Chen <haibo.chen@nxp.com>
 
-SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK is set for Tegra186 from the
-beginning of its support in driver.
+Change to use system_freezable_wq because it can make sure the queue
+becomes frozen when userspace becomes frozen during system PM.
 
-Tegra186 SDMMC hardware by default uses timeout clock (TMCLK) instead
-of SDCLK and this quirk should not be set.
+Find this issue on i.MX7D-sdb board with broadcom sdio wifi.
+When system resume, sometimes this wifi meet the tuning fail issue.
+All tuning command get command timeout error. This is because
+sdio_irq_work on system_wq was executed before the broadcom
+wifi driver resume. Due to broadcom wifi driver set the wifi in
+Sleep sate in system suspend, need to set the wifi to Wake state
+first. So need to make sure wifi driver resume first, then do the
+sdio_irq_work.
 
-So, this patch remove this quirk for Tegra186.
-
-Fixes: 4346b7c7941d ("mmc: tegra: Add Tegra186 support")
-Cc: stable <stable@vger.kernel.org> # 5.4
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
+Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
 ---
- drivers/mmc/host/sdhci-tegra.c | 1 -
- 1 file changed, 1 deletion(-)
+ drivers/mmc/core/sdio.c     | 2 +-
+ drivers/mmc/core/sdio_irq.c | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-index 2be3511..31ed321 100644
---- a/drivers/mmc/host/sdhci-tegra.c
-+++ b/drivers/mmc/host/sdhci-tegra.c
-@@ -1455,7 +1455,6 @@ static const struct sdhci_ops tegra186_sdhci_ops = {
+diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+index 26cabd53ddc5..269ae63d09eb 100644
+--- a/drivers/mmc/core/sdio.c
++++ b/drivers/mmc/core/sdio.c
+@@ -1015,7 +1015,7 @@ static int mmc_sdio_resume(struct mmc_host *host)
+ 		if (!(host->caps2 & MMC_CAP2_SDIO_IRQ_NOTHREAD))
+ 			wake_up_process(host->sdio_irq_thread);
+ 		else if (host->caps & MMC_CAP_SDIO_IRQ)
+-			queue_delayed_work(system_wq, &host->sdio_irq_work, 0);
++			queue_delayed_work(system_freezable_wq, &host->sdio_irq_work, 0);
+ 	}
  
- static const struct sdhci_pltfm_data sdhci_tegra186_pdata = {
- 	.quirks = SDHCI_QUIRK_BROKEN_TIMEOUT_VAL |
--		  SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
- 		  SDHCI_QUIRK_SINGLE_POWER_WRITE |
- 		  SDHCI_QUIRK_NO_HISPD_BIT |
- 		  SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC |
+ out:
+diff --git a/drivers/mmc/core/sdio_irq.c b/drivers/mmc/core/sdio_irq.c
+index 900871073bd7..9d7ec48bd963 100644
+--- a/drivers/mmc/core/sdio_irq.c
++++ b/drivers/mmc/core/sdio_irq.c
+@@ -132,7 +132,7 @@ void sdio_irq_work(struct work_struct *work)
+ void sdio_signal_irq(struct mmc_host *host)
+ {
+ 	host->sdio_irq_pending = true;
+-	queue_delayed_work(system_wq, &host->sdio_irq_work, 0);
++	queue_delayed_work(system_freezable_wq, &host->sdio_irq_work, 0);
+ }
+ EXPORT_SYMBOL_GPL(sdio_signal_irq);
+ 
 -- 
-2.7.4
+2.17.1
 
