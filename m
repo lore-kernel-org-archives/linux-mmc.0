@@ -7,49 +7,60 @@ X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4B958C433E1
-	for <linux-mmc@archiver.kernel.org>; Thu,  6 Aug 2020 18:37:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BA186C433E0
+	for <linux-mmc@archiver.kernel.org>; Thu,  6 Aug 2020 18:41:03 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8B982221E3
-	for <linux-mmc@archiver.kernel.org>; Thu,  6 Aug 2020 18:37:24 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0D992221E2
+	for <linux-mmc@archiver.kernel.org>; Thu,  6 Aug 2020 18:41:04 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1596739044;
-	bh=D1+9AmB8yaDm6+iMV1TG40QRlTP2+KI+dVoYAxhwdPo=;
+	s=default; t=1596739264;
+	bh=e1oSXjKRZ1/t6yaGmxeMpFJIIqxQuITtDtfD3fTgYtQ=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=opMRp5ODWmsW8mOGZJWKwPYggir0tYFTBpgreyA3EvzJffL2VBnR1wkr/DcVqE0SC
-	 X8Ckrs3EgDpTKynU5t7lWFPPijQZqS7NDyZwbwolKgbd8hah98gOELkH/GTrXXVa+U
-	 VtrPtArC2znvjKsJoPPJfhLYNqDEO+MNBcdLXCtc=
+	b=Cs72N1x9YZMCaUL7fJcntobCRZ9PZ9sV9nxEyXvlZ3gteCllAlKaTN8+7W1XeYrar
+	 0D9BdDxGFe7Ju8hR+nTnvCuqMIgbvHG5emOPPVcIxNs2hHTXQusI30diLYQE+9pc3+
+	 6aPKgdXTQfW1JlY23HrXRoU11EeFNHncjGdac+UU=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729591AbgHFShX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 6 Aug 2020 14:37:23 -0400
-Received: from mail.kernel.org ([198.145.29.99]:58940 "EHLO mail.kernel.org"
+        id S1729345AbgHFSkX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 6 Aug 2020 14:40:23 -0400
+Received: from mail.kernel.org ([198.145.29.99]:33610 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728932AbgHFSf7 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 6 Aug 2020 14:35:59 -0400
+        id S1729089AbgHFSkW (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 6 Aug 2020 14:40:22 -0400
 Received: from localhost.localdomain (unknown [194.230.155.117])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 53E9122D0A;
-        Thu,  6 Aug 2020 18:22:33 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 7B4C522D70;
+        Thu,  6 Aug 2020 18:22:48 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1596738155;
-        bh=D1+9AmB8yaDm6+iMV1TG40QRlTP2+KI+dVoYAxhwdPo=;
+        s=default; t=1596738173;
+        bh=e1oSXjKRZ1/t6yaGmxeMpFJIIqxQuITtDtfD3fTgYtQ=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=dZghzyiY7vh/WaG7QyfBJJNLyAJj4CZvSwPvbbLXKiTw1JWEv6YBCwyE+W9d262W4
-         KQXW9RC5Lb0J6wPcDvm4PEx1PqOtYCLu1SyBz9d9WgNbHAX0/cVeO/jsdGdpsD1XJC
-         jprsOp4IfKMewZ3GlB0OldO01mCjUp6dxJWf8TYM=
+        b=RnJk8Nw20oovJGOtix16awmixT2stIdDZnn5cCpdsfoPL1ZDrAouFmfTXazZkBryt
+         U6+/C4sQrMYB7/RhwqVpMgQSY+Lnf776wVev3iQBKSSjccZfpKA0QCfvg58nAuJV/9
+         XLhS2JgfS/EMeK/1j1FFEu/fmUc6n1ay5mUcjoIg=
 From:   Krzysztof Kozlowski <krzk@kernel.org>
 To:     linux-kernel@vger.kernel.org
 Cc:     Arnd Bergmann <arnd@arndb.de>,
         Krzysztof Kozlowski <krzk@kernel.org>,
         Russell King <linux@armlinux.org.uk>,
-        Kukjin Kim <kgene@kernel.org>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-arm-kernel@lists.infradead.org,
-        linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org
-Subject: [PATCH v2 15/41] ARM: exynos: stop selecting PLAT_SAMSUNG
-Date:   Thu,  6 Aug 2020 20:20:32 +0200
-Message-Id: <20200806182059.2431-15-krzk@kernel.org>
+        Thierry Reding <thierry.reding@gmail.com>,
+        =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= 
+        <u.kleine-koenig@pengutronix.de>, Lee Jones <lee.jones@linaro.org>,
+        Mark Brown <broonie@kernel.org>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Jiri Slaby <jirislaby@kernel.org>,
+        Sangbeom Kim <sbkim73@samsung.com>,
+        Sylwester Nawrocki <s.nawrocki@samsung.com>,
+        Liam Girdwood <lgirdwood@gmail.com>,
+        Jaroslav Kysela <perex@perex.cz>,
+        Takashi Iwai <tiwai@suse.com>,
+        linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org,
+        linux-pwm@vger.kernel.org, linux-spi@vger.kernel.org,
+        linux-serial@vger.kernel.org, alsa-devel@alsa-project.org
+Subject: [PATCH v2 18/41] ARM: s5pv210: don't imply CONFIG_PLAT_SAMSUNG
+Date:   Thu,  6 Aug 2020 20:20:35 +0200
+Message-Id: <20200806182059.2431-18-krzk@kernel.org>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20200806181932.2253-1-krzk@kernel.org>
 References: <20200806181932.2253-1-krzk@kernel.org>
@@ -60,30 +71,35 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Arnd Bergmann <arnd@arndb.de>
 
-Now that no code in arch/arm is shared between mach-exynos and the
-others, make the split formal.
+The plat-samsung directory and mach-s5pv210 can be build
+completely independently, so split the two Kconfig symbols
+CONFIG_PLAT_SAMSUNG and CONFIG_ARCH_S5PV210.
 
 Signed-off-by: Arnd Bergmann <arnd@arndb.de>
 Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+Acked-by: Thierry Reding <thierry.reding@gmail.com>
 Signed-off-by: Krzysztof Kozlowski <krzk@kernel.org>
 ---
- arch/arm/Kconfig.debug        | 8 ++++----
+ arch/arm/Kconfig.debug        | 6 +++---
  arch/arm/Makefile             | 1 -
- arch/arm/mach-exynos/Makefile | 4 ----
- arch/arm/plat-samsung/Kconfig | 4 ++--
+ arch/arm/plat-samsung/Kconfig | 2 +-
  drivers/mmc/host/Kconfig      | 2 +-
- 5 files changed, 7 insertions(+), 12 deletions(-)
+ drivers/pwm/Kconfig           | 2 +-
+ drivers/spi/Kconfig           | 2 +-
+ drivers/tty/serial/Kconfig    | 2 +-
+ sound/soc/samsung/Kconfig     | 2 +-
+ 8 files changed, 9 insertions(+), 10 deletions(-)
 
 diff --git a/arch/arm/Kconfig.debug b/arch/arm/Kconfig.debug
-index 7c34cf5c4a5b..153a9a35dd20 100644
+index 153a9a35dd20..b4b41f9d246b 100644
 --- a/arch/arm/Kconfig.debug
 +++ b/arch/arm/Kconfig.debug
 @@ -1005,7 +1005,7 @@ choice
  		  via SCIFA4 on Renesas SH-Mobile AG5 (SH73A0).
  
  	config DEBUG_S3C_UART0
--		depends on PLAT_SAMSUNG
-+		depends on PLAT_SAMSUNG || ARCH_EXYNOS
+-		depends on PLAT_SAMSUNG || ARCH_EXYNOS
++		depends on PLAT_SAMSUNG || ARCH_S5PV210 || ARCH_EXYNOS
  		select DEBUG_EXYNOS_UART if ARCH_EXYNOS
  		select DEBUG_S3C24XX_UART if ARCH_S3C24XX
  		select DEBUG_S3C64XX_UART if ARCH_S3C64XX
@@ -91,8 +107,8 @@ index 7c34cf5c4a5b..153a9a35dd20 100644
  		  by the boot-loader before use.
  
  	config DEBUG_S3C_UART1
--		depends on PLAT_SAMSUNG
-+		depends on PLAT_SAMSUNG || ARCH_EXYNOS
+-		depends on PLAT_SAMSUNG || ARCH_EXYNOS
++		depends on PLAT_SAMSUNG || ARCH_S5PV210 || ARCH_EXYNOS
  		select DEBUG_EXYNOS_UART if ARCH_EXYNOS
  		select DEBUG_S3C24XX_UART if ARCH_S3C24XX
  		select DEBUG_S3C64XX_UART if ARCH_S3C64XX
@@ -100,82 +116,101 @@ index 7c34cf5c4a5b..153a9a35dd20 100644
  		  by the boot-loader before use.
  
  	config DEBUG_S3C_UART2
--		depends on PLAT_SAMSUNG
-+		depends on PLAT_SAMSUNG || ARCH_EXYNOS
+-		depends on PLAT_SAMSUNG || ARCH_EXYNOS
++		depends on PLAT_SAMSUNG || ARCH_S5PV210 || ARCH_EXYNOS
  		select DEBUG_EXYNOS_UART if ARCH_EXYNOS
  		select DEBUG_S3C24XX_UART if ARCH_S3C24XX
  		select DEBUG_S3C64XX_UART if ARCH_S3C64XX
-@@ -1041,7 +1041,7 @@ choice
- 		  by the boot-loader before use.
- 
- 	config DEBUG_S3C_UART3
--		depends on PLAT_SAMSUNG && (ARCH_EXYNOS || ARCH_S5PV210)
-+		depends on ARCH_EXYNOS || ARCH_S5PV210
- 		select DEBUG_EXYNOS_UART if ARCH_EXYNOS
- 		select DEBUG_S3C64XX_UART if ARCH_S3C64XX
- 		select DEBUG_S5PV210_UART if ARCH_S5PV210
 diff --git a/arch/arm/Makefile b/arch/arm/Makefile
-index 4e877354515f..826613a20b7d 100644
+index 826613a20b7d..3997cec8848e 100644
 --- a/arch/arm/Makefile
 +++ b/arch/arm/Makefile
-@@ -232,7 +232,6 @@ machine-$(CONFIG_PLAT_SPEAR)		+= spear
- 
- # Platform directory name.  This list is sorted alphanumerically
+@@ -234,7 +234,6 @@ machine-$(CONFIG_PLAT_SPEAR)		+= spear
  # by CONFIG_* macro name.
--plat-$(CONFIG_ARCH_EXYNOS)	+= samsung
  plat-$(CONFIG_ARCH_OMAP)	+= omap
  plat-$(CONFIG_ARCH_S3C64XX)	+= samsung
- plat-$(CONFIG_ARCH_S5PV210)	+= samsung
-diff --git a/arch/arm/mach-exynos/Makefile b/arch/arm/mach-exynos/Makefile
-index 0fd3fcf8bfb0..53fa363c8e44 100644
---- a/arch/arm/mach-exynos/Makefile
-+++ b/arch/arm/mach-exynos/Makefile
-@@ -3,10 +3,6 @@
- # Copyright (c) 2010-2011 Samsung Electronics Co., Ltd.
- #		http://www.samsung.com/
- 
--ccflags-$(CONFIG_ARCH_MULTIPLATFORM) += -I$(srctree)/$(src)/include -I$(srctree)/arch/arm/plat-samsung/include
--
--# Core
--
- obj-$(CONFIG_ARCH_EXYNOS)	+= exynos.o exynos-smc.o firmware.o
- 
- obj-$(CONFIG_EXYNOS_CPU_SUSPEND) += pm.o sleep.o
+-plat-$(CONFIG_ARCH_S5PV210)	+= samsung
+ plat-$(CONFIG_PLAT_ORION)	+= orion
+ plat-$(CONFIG_PLAT_PXA)		+= pxa
+ plat-$(CONFIG_PLAT_S3C24XX)	+= samsung
 diff --git a/arch/arm/plat-samsung/Kconfig b/arch/arm/plat-samsung/Kconfig
-index c3d18b0aad75..920931c3fefd 100644
+index a7cb0db1d5cc..13b39684b582 100644
 --- a/arch/arm/plat-samsung/Kconfig
 +++ b/arch/arm/plat-samsung/Kconfig
 @@ -4,7 +4,7 @@
  
  config PLAT_SAMSUNG
  	bool
--	depends on PLAT_S3C24XX || ARCH_S3C64XX || ARCH_EXYNOS || ARCH_S5PV210
-+	depends on PLAT_S3C24XX || ARCH_S3C64XX || ARCH_S5PV210
+-	depends on PLAT_S3C24XX || ARCH_S3C64XX || ARCH_S5PV210
++	depends on PLAT_S3C24XX || ARCH_S3C64XX
  	default y
  	select GENERIC_IRQ_CHIP
  	select NO_IOPORT_MAP
-@@ -240,7 +240,7 @@ config SAMSUNG_PM_DEBUG
- 	bool "Samsung PM Suspend debug"
- 	depends on PM && DEBUG_KERNEL
- 	depends on PLAT_S3C24XX || ARCH_S3C64XX || ARCH_S5PV210
--	depends on DEBUG_EXYNOS_UART || DEBUG_S3C24XX_UART || DEBUG_S3C2410_UART
-+	depends on DEBUG_S3C24XX_UART || DEBUG_S3C2410_UART
- 	help
- 	  Say Y here if you want verbose debugging from the PM Suspend and
- 	  Resume code. See <file:Documentation/arm/samsung-s3c24xx/suspend.rst>
 diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index 9c89a5b780e8..ddce8e62280c 100644
+index ddce8e62280c..9f387daa764a 100644
 --- a/drivers/mmc/host/Kconfig
 +++ b/drivers/mmc/host/Kconfig
 @@ -289,7 +289,7 @@ config MMC_SDHCI_TEGRA
  
  config MMC_SDHCI_S3C
  	tristate "SDHCI support on Samsung S3C SoC"
--	depends on MMC_SDHCI && PLAT_SAMSUNG
-+	depends on MMC_SDHCI && (PLAT_SAMSUNG || ARCH_EXYNOS)
+-	depends on MMC_SDHCI && (PLAT_SAMSUNG || ARCH_EXYNOS)
++	depends on MMC_SDHCI && (PLAT_SAMSUNG || ARCH_S5PV210 || ARCH_EXYNOS)
  	help
  	  This selects the Secure Digital Host Controller Interface (SDHCI)
  	  often referrered to as the HSMMC block in some of the Samsung S3C
+diff --git a/drivers/pwm/Kconfig b/drivers/pwm/Kconfig
+index 7dbcf6973d33..9448e4ca8c73 100644
+--- a/drivers/pwm/Kconfig
++++ b/drivers/pwm/Kconfig
+@@ -410,7 +410,7 @@ config PWM_ROCKCHIP
+ 
+ config PWM_SAMSUNG
+ 	tristate "Samsung PWM support"
+-	depends on PLAT_SAMSUNG || ARCH_EXYNOS || COMPILE_TEST
++	depends on PLAT_SAMSUNG || ARCH_S5PV210 || ARCH_EXYNOS || COMPILE_TEST
+ 	help
+ 	  Generic PWM framework driver for Samsung.
+ 
+diff --git a/drivers/spi/Kconfig b/drivers/spi/Kconfig
+index c3008e423f59..85619ab64156 100644
+--- a/drivers/spi/Kconfig
++++ b/drivers/spi/Kconfig
+@@ -680,7 +680,7 @@ config SPI_S3C24XX_FIQ
+ 
+ config SPI_S3C64XX
+ 	tristate "Samsung S3C64XX series type SPI"
+-	depends on (PLAT_SAMSUNG || ARCH_EXYNOS || COMPILE_TEST)
++	depends on (PLAT_SAMSUNG || ARCH_S5PV210 || ARCH_EXYNOS || COMPILE_TEST)
+ 	help
+ 	  SPI driver for Samsung S3C64XX and newer SoCs.
+ 
+diff --git a/drivers/tty/serial/Kconfig b/drivers/tty/serial/Kconfig
+index 8a0352eb337c..10de494e808a 100644
+--- a/drivers/tty/serial/Kconfig
++++ b/drivers/tty/serial/Kconfig
+@@ -235,7 +235,7 @@ config SERIAL_CLPS711X_CONSOLE
+ 
+ config SERIAL_SAMSUNG
+ 	tristate "Samsung SoC serial support"
+-	depends on PLAT_SAMSUNG || ARCH_EXYNOS || COMPILE_TEST
++	depends on PLAT_SAMSUNG || ARCH_S5PV210 || ARCH_EXYNOS || COMPILE_TEST
+ 	select SERIAL_CORE
+ 	help
+ 	  Support for the on-chip UARTs on the Samsung S3C24XX series CPUs,
+diff --git a/sound/soc/samsung/Kconfig b/sound/soc/samsung/Kconfig
+index 1431be4ed054..a2221ebb1b6a 100644
+--- a/sound/soc/samsung/Kconfig
++++ b/sound/soc/samsung/Kconfig
+@@ -1,7 +1,7 @@
+ # SPDX-License-Identifier: GPL-2.0-only
+ menuconfig SND_SOC_SAMSUNG
+ 	tristate "ASoC support for Samsung"
+-	depends on PLAT_SAMSUNG || ARCH_EXYNOS || COMPILE_TEST
++	depends on PLAT_SAMSUNG || ARCH_S5PV210 || ARCH_EXYNOS || COMPILE_TEST
+ 	depends on COMMON_CLK
+ 	select SND_SOC_GENERIC_DMAENGINE_PCM
+ 	help
 -- 
 2.17.1
 
