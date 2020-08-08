@@ -1,106 +1,80 @@
-Return-Path: <SRS0=OnGT=BR=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=Xy0j=BS=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.6 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 752EDC433E0
-	for <linux-mmc@archiver.kernel.org>; Fri,  7 Aug 2020 11:35:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1521AC433DF
+	for <linux-mmc@archiver.kernel.org>; Sat,  8 Aug 2020 11:45:58 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4BC4122CBB
-	for <linux-mmc@archiver.kernel.org>; Fri,  7 Aug 2020 11:35:54 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E8F642087C
+	for <linux-mmc@archiver.kernel.org>; Sat,  8 Aug 2020 11:45:57 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1596800154;
-	bh=tB44LrcAJ3NxEYYWCxVL/xdN1g4mPUOLKmrBE/LmCZI=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
-	b=sLYJnc9QjaUlcWsO1tmAfnGHaKQ5frHmcuXOaLW++3uqDDN/q5JMXe9k1U5LcMVh5
-	 36kyUj/HBvoPYp7Lg+RGWFuALmFlHnmHd8awruSS6eMtR9UEYBgey8Ack/qu3UgHDz
-	 e8XP7XljjYKzAEChbm49F+nqziB5u17MqrOioQVw=
+	s=default; t=1596887157;
+	bh=6kFHne20m1V7qMn7k4pkplDI+VLBD8yYV1sJ/P6jx5I=;
+	h=From:To:Cc:Subject:Date:List-ID:From;
+	b=1ZwdXJ/rQ9YrsKd8XGyA5O7ri/tEUYtT6rrFxmvFEeBI/Ll+uz3GHhyQ+YIRC7w9p
+	 nVJIJfeEU+5kOF+axUcjL14rfuq6FYNt6ti8vIyZNPB6D6gn4nBTbvX0J0D+DRjnxq
+	 lvpOg2/zgdarmOnSXUlD60TqnRiGByTMx+CJAmtM=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728207AbgHGLfx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 7 Aug 2020 07:35:53 -0400
-Received: from mail.kernel.org ([198.145.29.99]:58494 "EHLO mail.kernel.org"
+        id S1726195AbgHHLp5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 8 Aug 2020 07:45:57 -0400
+Received: from mail.kernel.org ([198.145.29.99]:50892 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726293AbgHGLfx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 7 Aug 2020 07:35:53 -0400
-Received: from localhost (fw-tnat.cambridge.arm.com [217.140.96.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        id S1726076AbgHHLp4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Sat, 8 Aug 2020 07:45:56 -0400
+Received: from localhost.localdomain (unknown [89.208.247.74])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 1CE2522C9F;
-        Fri,  7 Aug 2020 11:35:52 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 478422075D;
+        Sat,  8 Aug 2020 11:45:54 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1596800152;
-        bh=tB44LrcAJ3NxEYYWCxVL/xdN1g4mPUOLKmrBE/LmCZI=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=adPdvx7BNkN3vzleYgFgdh5QTP1V3DG3dm6nNmuWVM8gkbIiTTFCE48YedudEmH4P
-         X6lzhSZuMMswEMloGb/39wFETPqu1rkcW6m5xnQg/jknYdA3B25xVAZg4N6Mc5/AfX
-         fSwa0ZcfFidwfuu3qxrr1xB0vJ7CvrA1LEk8tSfo=
-Date:   Fri, 7 Aug 2020 12:35:28 +0100
-From:   Mark Brown <broonie@kernel.org>
-To:     Krzysztof Kozlowski <krzk@kernel.org>
-Cc:     linux-kernel@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>,
-        Russell King <linux@armlinux.org.uk>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        Uwe =?iso-8859-1?Q?Kleine-K=F6nig?= 
-        <u.kleine-koenig@pengutronix.de>, Lee Jones <lee.jones@linaro.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Jiri Slaby <jirislaby@kernel.org>,
-        Sangbeom Kim <sbkim73@samsung.com>,
-        Sylwester Nawrocki <s.nawrocki@samsung.com>,
-        Liam Girdwood <lgirdwood@gmail.com>,
-        Jaroslav Kysela <perex@perex.cz>,
-        Takashi Iwai <tiwai@suse.com>,
-        linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org,
-        linux-pwm@vger.kernel.org, linux-spi@vger.kernel.org,
-        linux-serial@vger.kernel.org, alsa-devel@alsa-project.org
-Subject: Re: [PATCH v2 18/41] ARM: s5pv210: don't imply CONFIG_PLAT_SAMSUNG
-Message-ID: <20200807113528.GE5435@sirena.org.uk>
-References: <20200806181932.2253-1-krzk@kernel.org>
- <20200806182059.2431-18-krzk@kernel.org>
-MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="2qXFWqzzG3v1+95a"
-Content-Disposition: inline
-In-Reply-To: <20200806182059.2431-18-krzk@kernel.org>
-X-Cookie: Disposable, use only once.
-User-Agent: Mutt/1.10.1 (2018-07-13)
+        s=default; t=1596887156;
+        bh=6kFHne20m1V7qMn7k4pkplDI+VLBD8yYV1sJ/P6jx5I=;
+        h=From:To:Cc:Subject:Date:From;
+        b=N5jPpNJuvnUciRWqhpFaW4RJ2dovP6P2cIIdx+dLTZOp7MZ23rP2Ysd3vkxbSrHxY
+         sMcIz/Ifqb/2uxafs12EpZYM8Tei3qvwpp+ER9nKe7uIhpOUEj2TYpVNqBCA4g/nXq
+         blTXq/LV0osyKmw/FRcJGj/Dyv4rg2+kKwCd8RoI=
+From:   guoren@kernel.org
+To:     ulf.hansson@linaro.org
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-csky@vger.kernel.org, Guo Ren <guoren@linux.alibaba.com>
+Subject: [PATCH] mmc: Kconfig: Add RISCV and CSKY for MMC_DW
+Date:   Sat,  8 Aug 2020 11:45:02 +0000
+Message-Id: <1596887102-9743-1-git-send-email-guoren@kernel.org>
+X-Mailer: git-send-email 2.7.4
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+From: Guo Ren <guoren@linux.alibaba.com>
 
---2qXFWqzzG3v1+95a
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Synopsys DesignWare MMC controller could be used in RISC-V and
+C-SKY architectures.
 
-On Thu, Aug 06, 2020 at 08:20:35PM +0200, Krzysztof Kozlowski wrote:
-> From: Arnd Bergmann <arnd@arndb.de>
->=20
-> The plat-samsung directory and mach-s5pv210 can be build
-> completely independently, so split the two Kconfig symbols
-> CONFIG_PLAT_SAMSUNG and CONFIG_ARCH_S5PV210.
+Signed-off-by: Guo Ren <guoren@linux.alibaba.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
+---
+ drivers/mmc/host/Kconfig | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-Acked-by: Mark Brown <broonie@kernel.org>
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 3b706af..119adab 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -777,7 +777,7 @@ config MMC_CAVIUM_THUNDERX
+ 
+ config MMC_DW
+ 	tristate "Synopsys DesignWare Memory Card Interface"
+-	depends on ARC || ARM || ARM64 || MIPS || COMPILE_TEST
++	depends on ARC || ARM || ARM64 || MIPS || RISCV || CSKY || COMPILE_TEST
+ 	help
+ 	  This selects support for the Synopsys DesignWare Mobile Storage IP
+ 	  block, this provides host support for SD and MMC interfaces, in both
+-- 
+2.7.4
 
---2qXFWqzzG3v1+95a
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQEzBAABCgAdFiEEreZoqmdXGLWf4p/qJNaLcl1Uh9AFAl8tPH8ACgkQJNaLcl1U
-h9AKhQf/R7RK8Hp7GiOARjjdjgAtgRwwe6zGtME1BaY4sl5QjQX3lbKLy27zSN8g
-oIS4rQz7hiHTbEPAYejiOFvzEWdxiiJCwsb4LoUYmS7z5ZHh1hkymZNMNxkh03k5
-OtD206PpuFlkRBy5mQmvNSpCLcAZ933xTyhdUDH00eAg5/09+FEqq4z84afijimH
-EDgvn6dXYA8Zqd+w7Kx0fiERDK0Ygo1jl85OEsLKFbPZefjx9wUKqqNlm9Oz+s+k
-C6yb2uPrkc2t8FqW0jBc/nR+ky0+VBkW3duO0CCP1Sag3U2HLi5GZ2wdtQrXLXu+
-ZDfJfLruyTaIkzFFcfZgPsjk6niMXQ==
-=qNw4
------END PGP SIGNATURE-----
-
---2qXFWqzzG3v1+95a--
