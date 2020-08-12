@@ -2,88 +2,97 @@ Return-Path: <SRS0=5vaz=BW=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,
-	USER_AGENT_SANE_2 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-4.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E0721C433DF
-	for <linux-mmc@archiver.kernel.org>; Wed, 12 Aug 2020 13:04:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C4D7AC433DF
+	for <linux-mmc@archiver.kernel.org>; Wed, 12 Aug 2020 13:25:30 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id BB9B220774
-	for <linux-mmc@archiver.kernel.org>; Wed, 12 Aug 2020 13:04:37 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A5B5520756
+	for <linux-mmc@archiver.kernel.org>; Wed, 12 Aug 2020 13:25:30 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=mediatek.com header.i=@mediatek.com header.b="kLmhXN4/"
+	dkim=pass (2048-bit key) header.d=kroah.com header.i=@kroah.com header.b="sHdXFrps";
+	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="nnd9aDAe"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727906AbgHLNEg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 12 Aug 2020 09:04:36 -0400
-Received: from mailgw02.mediatek.com ([1.203.163.81]:15991 "EHLO
-        mailgw02.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1726404AbgHLNEg (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Aug 2020 09:04:36 -0400
-X-UUID: 62e8e19434fb43649ef0c4e501fd66a5-20200812
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=mediatek.com; s=dk;
-        h=Content-Transfer-Encoding:MIME-Version:Content-Type:References:In-Reply-To:Date:CC:To:From:Subject:Message-ID; bh=2D2otIxOT5Y9TE/5sGqjyAubG2N6RpU+rS+XIzBvd5M=;
-        b=kLmhXN4/Tan9ZglFsXOgX+kzqXZbJbh+v1/7gyKF7l/4j5kW4PQ27hkyvmpyMat2x+aU1pszBdKY9ibRWOFfsqlZu3SDG2H5W0FiK2F7J3AeVxFx11JgdSEUjoXzMKraquRVIs6C/mtf8pOgLsthAVHSIhJKkU9jcCHl+t4Qp18=;
-X-UUID: 62e8e19434fb43649ef0c4e501fd66a5-20200812
-Received: from mtkcas36.mediatek.inc [(172.27.4.253)] by mailgw02.mediatek.com
-        (envelope-from <wenbin.mei@mediatek.com>)
-        (mailgw01.mediatek.com ESMTP with TLS)
-        with ESMTP id 328971815; Wed, 12 Aug 2020 21:04:27 +0800
-Received: from MTKCAS36.mediatek.inc (172.27.4.186) by MTKMBS31DR.mediatek.inc
- (172.27.6.102) with Microsoft SMTP Server (TLS) id 15.0.1497.2; Wed, 12 Aug
- 2020 21:04:25 +0800
-Received: from [10.17.3.153] (10.17.3.153) by MTKCAS36.mediatek.inc
- (172.27.4.170) with Microsoft SMTP Server id 15.0.1497.2 via Frontend
- Transport; Wed, 12 Aug 2020 21:04:25 +0800
-Message-ID: <1597237413.10188.5.camel@mhfsdcap03>
-Subject: Re: [PATCH 1/3] mmc: dt-bindings: Add resets/reset-names for
- Mediatek MMC bindings
-From:   Wenbin Mei <wenbin.mei@mediatek.com>
-To:     Philipp Zabel <p.zabel@pengutronix.de>
-CC:     Ulf Hansson <ulf.hansson@linaro.org>,
+        id S1727872AbgHLNZ0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 12 Aug 2020 09:25:26 -0400
+Received: from new1-smtp.messagingengine.com ([66.111.4.221]:47113 "EHLO
+        new1-smtp.messagingengine.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726946AbgHLNZZ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Aug 2020 09:25:25 -0400
+Received: from compute1.internal (compute1.nyi.internal [10.202.2.41])
+        by mailnew.nyi.internal (Postfix) with ESMTP id 846665803D8;
+        Wed, 12 Aug 2020 09:25:24 -0400 (EDT)
+Received: from mailfrontend1 ([10.202.2.162])
+  by compute1.internal (MEProxy); Wed, 12 Aug 2020 09:25:24 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kroah.com; h=
+        date:from:to:cc:subject:message-id:references:mime-version
+        :content-type:in-reply-to; s=fm1; bh=RMHVXbkkQR++heuoiM+MhmJ5JCS
+        XfwoEAJZmcGdv5E0=; b=sHdXFrpsqDivqXytN+mzcwAC3wK/gl+f3WcRAdi4PaB
+        sjBoxrF9Boeho/UE8NeaElNM904QP2qfQ4bmZWXB/Qp30yvvbgrA+EPaIq+FTnDK
+        wt5pIW3mc9j5tKdVfxRQuC9x1qnlESsQ8iRw8T/JSNtJklXaoxnr2lcry2E1Pyf6
+        v9ZlJYuCygryjOncMiv5ayI6NuEKb3ptP4Irv+fLDrvMksC0+9ggJ/ltFC+9nB2q
+        pR28PmWbdx5WkeVOkBeA2B/09xFDjwcXb3OwhZhTlp7BjlDOtcyEsXU4iM0gI7+t
+        bvN7fqncVQAN84gy38LQoJRHpibad+9a8/DZyeJURiQ==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+        messagingengine.com; h=cc:content-type:date:from:in-reply-to
+        :message-id:mime-version:references:subject:to:x-me-proxy
+        :x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=fm3; bh=RMHVXb
+        kkQR++heuoiM+MhmJ5JCSXfwoEAJZmcGdv5E0=; b=nnd9aDAe3uRQZt9RpaQ3Yu
+        wXsVSELMVioDXhKTOICCCFPEO7GsjChFyug1hRhArcNR+ZCXW7oQv9wxJtxWzOwG
+        KIBkmiHjcDm17hbNGxTXkjXPi1qz+F4TpEnZHB6hVmUIgRAAR+K+c7YSc3oL2R0g
+        Xw7yiXKH9+XgDS5DGUlhRsp9s99FpYNx4UIsTNxQ+vm+ByeXOCLrwD/VJB6nJKKN
+        WSWyO3jMLXV9cgou1hCG9wYMpxeibTuDqaj5mjNH0A5EHeLjjjY3287LqQaBKASG
+        //nrliteazYATIz15qc3lU5d7lnVR5tSrQfA5hfk7y1MwLjafSdcqtjS5Ft+nHXA
+        ==
+X-ME-Sender: <xms:w-0zXytFvE8q2H6PMYuY_EqkoCHuNVtkGcK9x_YovuSpVRhHJjfITw>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeduiedrledvgdeifecutefuodetggdotefrodftvf
+    curfhrohhfihhlvgemucfhrghsthforghilhdpqfgfvfdpuffrtefokffrpgfnqfghnecu
+    uegrihhlohhuthemuceftddtnecusecvtfgvtghiphhivghnthhsucdlqddutddtmdenuc
+    fjughrpeffhffvuffkfhggtggujgesthdtredttddtvdenucfhrhhomhepifhrvghgucfm
+    jfcuoehgrhgvgheskhhrohgrhhdrtghomheqnecuggftrfgrthhtvghrnhepveeuheejgf
+    ffgfeivddukedvkedtleelleeghfeljeeiueeggeevueduudekvdetnecukfhppeekfedr
+    keeirdekledruddtjeenucevlhhushhtvghrufhiiigvpedtnecurfgrrhgrmhepmhgrih
+    hlfhhrohhmpehgrhgvgheskhhrohgrhhdrtghomh
+X-ME-Proxy: <xmx:w-0zX3cx6G6iRvRDAbPdS5a1hZVce8CKcQNLbhWnX2z2wWyZGkgw-w>
+    <xmx:w-0zX9xRYphP1JT1ZNcglcxX468swkKT88cgkP81AJNnxJXMgdZyqg>
+    <xmx:w-0zX9PuG7srrDgRJ2e-MbIoGN5MdAFrsGnXoRy3yA6jvTmvtXVvWA>
+    <xmx:xO0zX1Zqpi7Juq1WK7UB5WMHyl88blX6ITnH77B8nyMCgvEPIe4VQA>
+Received: from localhost (83-86-89-107.cable.dynamic.v4.ziggo.nl [83.86.89.107])
+        by mail.messagingengine.com (Postfix) with ESMTPA id A9C0D328005E;
+        Wed, 12 Aug 2020 09:25:22 -0400 (EDT)
+Date:   Wed, 12 Aug 2020 15:25:32 +0200
+From:   Greg KH <greg@kroah.com>
+To:     Wenbin Mei <wenbin.mei@mediatek.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
         Rob Herring <robh+dt@kernel.org>,
         Chaotian Jing <chaotian.jing@mediatek.com>,
         Matthias Brugger <matthias.bgg@gmail.com>,
-        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <linux-mediatek@lists.infradead.org>,
-        <linux-kernel@vger.kernel.org>, <srv_heupstream@mediatek.com>
-Date:   Wed, 12 Aug 2020 21:03:33 +0800
-In-Reply-To: <6e667ff6f5a1aae51b89d00e9ec5bba29852f683.camel@pengutronix.de>
-References: <20200812093726.10123-1-wenbin.mei@mediatek.com>
-         <20200812093726.10123-2-wenbin.mei@mediatek.com>
-         <6e667ff6f5a1aae51b89d00e9ec5bba29852f683.camel@pengutronix.de>
-Content-Type: text/plain; charset="UTF-8"
-X-Mailer: Evolution 3.10.4-0ubuntu2 
+        Philipp Zabel <p.zabel@pengutronix.de>,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org,
+        linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org,
+        stable@vger.kernel.org, srv_heupstream@mediatek.com
+Subject: Re: [v2,0/3] add optional reset property arm64: dts: mt7622: add
+ reset node for mmc device  mmc: mediatek: add optional module reset property
+ Documentation/devicetree/bindings/mmc/mtk-sd.txt |  2 ++
+ arch/arm64/boot/dts/mediatek/mt7622.dtsi         |  2 ++
+ drivers/mmc/host/mtk-sd.c                        | 13 +++++++++++++ 3 files
+ changed, 17 insertions(+)
+Message-ID: <20200812132532.GA2489711@kroah.com>
+References: <20200812130129.13519-1-wenbin.mei@mediatek.com>
 MIME-Version: 1.0
-X-TM-SNTS-SMTP: 88374733FA49679322C5DF06B0A77BFCA1834A5593A73B49D5804FC216869C7B2000:8
-X-MTK:  N
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20200812130129.13519-1-wenbin.mei@mediatek.com>
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-VGhhbmtzIGZvciB5b3VyIHJlcGx5Lg0KSSBoYXZlIGNoYW5nZWQgdGhpcyBpbiB2MiBwYXRjaC4N
-Ck9uIFdlZCwgMjAyMC0wOC0xMiBhdCAxNDowMyArMDIwMCwgUGhpbGlwcCBaYWJlbCB3cm90ZToN
-Cj4gT24gV2VkLCAyMDIwLTA4LTEyIGF0IDE3OjM3ICswODAwLCBXZW5iaW4gTWVpIHdyb3RlOg0K
-PiA+IEFkZCBkZXNjcmlwdGlvbiBmb3IgcmVzZXRzL3Jlc2V0LW5hbWVzLg0KPiA+IA0KPiA+IFNp
-Z25lZC1vZmYtYnk6IFdlbmJpbiBNZWkgPHdlbmJpbi5tZWlAbWVkaWF0ZWsuY29tPg0KPiA+IC0t
-LQ0KPiA+ICBEb2N1bWVudGF0aW9uL2RldmljZXRyZWUvYmluZGluZ3MvbW1jL210ay1zZC50eHQg
-fCAyICsrDQo+ID4gIDEgZmlsZSBjaGFuZ2VkLCAyIGluc2VydGlvbnMoKykNCj4gPiANCj4gPiBk
-aWZmIC0tZ2l0IGEvRG9jdW1lbnRhdGlvbi9kZXZpY2V0cmVlL2JpbmRpbmdzL21tYy9tdGstc2Qu
-dHh0IGIvRG9jdW1lbnRhdGlvbi9kZXZpY2V0cmVlL2JpbmRpbmdzL21tYy9tdGstc2QudHh0DQo+
-ID4gaW5kZXggOGE1MzJmNDQ1M2YyLi4zNWRhNzJkZTdhYWMgMTAwNjQ0DQo+ID4gLS0tIGEvRG9j
-dW1lbnRhdGlvbi9kZXZpY2V0cmVlL2JpbmRpbmdzL21tYy9tdGstc2QudHh0DQo+ID4gKysrIGIv
-RG9jdW1lbnRhdGlvbi9kZXZpY2V0cmVlL2JpbmRpbmdzL21tYy9tdGstc2QudHh0DQo+ID4gQEAg
-LTQ5LDYgKzQ5LDggQEAgT3B0aW9uYWwgcHJvcGVydGllczoNCj4gPiAgCQkgICAgIGVycm9yIGNh
-dXNlZCBieSBzdG9wIGNsb2NrKGZpZm8gZnVsbCkNCj4gPiAgCQkgICAgIFZhbGlkIHJhbmdlID0g
-WzA6MHg3XS4gaWYgbm90IHByZXNlbnQsIGRlZmF1bHQgdmFsdWUgaXMgMC4NCj4gPiAgCQkgICAg
-IGFwcGxpZWQgdG8gY29tcGF0aWJsZSAibWVkaWF0ZWssbXQyNzAxLW1tYyIuDQo+ID4gKy0gcmVz
-ZXRzOiBQaGFuZGxlIGFuZCByZXNldCBzcGVjaWZpZXIgcGFpciB0byBzb2Z0cmVzZXQgbGluZSBv
-ZiBNU0RDIElQLg0KPiA+ICstIHJlc2V0LW5hbWVzOiBSZXNldCBuYW1lcyBmb3IgTVNEQy4NCj4g
-DQo+IEkgdGhpbmsgdGhlIHJlc2V0LW5hbWVzIGRvY3VtZW50YXRpb24gc2hvdWxkIG1lbnRpb24g
-dGhlIGFjdHVhbCB2YWx1ZQ0KPiB0aGUgZHJpdmVyIHNob3VsZCBsb29rIGZvciwgImhyc3QiLg0K
-PiANCj4gcmVnYXJkcw0KPiBQaGlsaXBwDQoNCg==
+On Wed, Aug 12, 2020 at 09:01:26PM +0800, Wenbin Mei wrote:
+> --
+> 2.18.0
 
+I think something is wrong with your subject line :(
