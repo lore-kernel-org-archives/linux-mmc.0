@@ -2,106 +2,85 @@ Return-Path: <SRS0=5vaz=BW=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-4.0 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 648DDC433E0
-	for <linux-mmc@archiver.kernel.org>; Wed, 12 Aug 2020 14:05:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 24412C433E0
+	for <linux-mmc@archiver.kernel.org>; Wed, 12 Aug 2020 14:19:31 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 312A620838
-	for <linux-mmc@archiver.kernel.org>; Wed, 12 Aug 2020 14:05:59 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CF02520781
+	for <linux-mmc@archiver.kernel.org>; Wed, 12 Aug 2020 14:19:30 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="haS8Xtlz"
+	dkim=pass (1024-bit key) header.d=gmx.net header.i=@gmx.net header.b="KjmsEoeh"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726489AbgHLOF5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 12 Aug 2020 10:05:57 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42862 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726434AbgHLOFz (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Aug 2020 10:05:55 -0400
-Received: from mail-wr1-x443.google.com (mail-wr1-x443.google.com [IPv6:2a00:1450:4864:20::443])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 75BCFC061383
-        for <linux-mmc@vger.kernel.org>; Wed, 12 Aug 2020 07:05:55 -0700 (PDT)
-Received: by mail-wr1-x443.google.com with SMTP id y3so2170083wrl.4
-        for <linux-mmc@vger.kernel.org>; Wed, 12 Aug 2020 07:05:55 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=VtilRrD53TAdMxjjX3JU/V35Hl/WvabSAv9hkR9mbIo=;
-        b=haS8XtlzDKF65bhoMUOPOYBmQNDeRR4FP8YUEZmz147Szkwx5jyNHWh/mdYZ41ycwI
-         uqSlTJO0Kn5Rpzh/SiEisSNWE5lifM7NYHue5MbbXLwrOA1OwYBYorokzGjrnd+uySHO
-         8Ct3jIDQt9BJcVlJ+yi6fuchImDf4cT1H7fejBFiwLNnmUSwiEkkNvRN1w6pAy1p+nyk
-         bcIk2OntG1j8Es3Zzw6QucVASC6RtQ1OArcoXxiOnQFndGu2e8NREIZzF5nYL2LL9hGm
-         IhTwaeYtQUjA/Sat9cebHCaFRdVGkHZjptoY1I45YdW7aDpzbXpQOWEZILCffcKjZydL
-         fkyQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=VtilRrD53TAdMxjjX3JU/V35Hl/WvabSAv9hkR9mbIo=;
-        b=SouezkYNc5ADrxaxobrU67/Yo3Ke1vh8/ypIplk/x7zbcG+yUamIovRnQFmBGh82rO
-         yOjtHJ8c5KCOB1tw3QNxVeyi4/uTJg8yLb5IVocC8/L741UpOe1EYcPaq6iRa/0+nXwS
-         rvLKI+WW653mqdEgMYdsmvidcIgoZQpQXOr2rpvNX8Xt/Xu5DLcd0o4LVAqFOcROwXCb
-         Tgg9TesKomjg3xWgURXkF5o3Hv3iGy4TiFVa/kcrpFriI0/+8KyRKdGKpoHT656Ox8AO
-         23qKKQZVUt2IiCAyL6JrSCXuwNzL8Q4UVXGEB/f5GyF1BQ0Y7vpn+PkmhSqzcitbT2YO
-         d91w==
-X-Gm-Message-State: AOAM530tOcszham6y+XmAeWF80qIYND5fJ/3w+tCaSmSeBoc/CGcPCMq
-        PdgkLcA6/1HL+rYRck+wRkXOQZn8wi8R99h4GGyfug==
-X-Google-Smtp-Source: ABdhPJytQgXxWxig/9l09GRJvMEY7a6NgMxWo4zz8fCCadHTu8T6hXjIQHA8VANPfPFXBXQm826jc5M8rHkK1oxIaVg=
-X-Received: by 2002:a05:6000:1203:: with SMTP id e3mr34708903wrx.324.1597241154142;
- Wed, 12 Aug 2020 07:05:54 -0700 (PDT)
+        id S1726521AbgHLOT3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 12 Aug 2020 10:19:29 -0400
+Received: from mout.gmx.net ([212.227.15.18]:48351 "EHLO mout.gmx.net"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726485AbgHLOT3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 12 Aug 2020 10:19:29 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=gmx.net;
+        s=badeba3b8450; t=1597241944;
+        bh=2qIIIi+kVG7PNoSbul+CG9EF5Wr4xueF6mcdgIcW3EU=;
+        h=X-UI-Sender-Class:From:To:Cc:Subject:Date:In-Reply-To:References;
+        b=KjmsEoehBkJWt2WfLKDifatf+nhathRfdQWsUbieC3G4XEsJxHNktlZZq9HdNN4oE
+         JH2NtPH+SiluY9OBzFBhByu+/T+tMynOuKF+DqIGL7o3x6QsRhtkP/kGEvj31JOBEF
+         guug7jtkFazXpfY09Nqn46/088gEaBZ1+BAfB4to=
+X-UI-Sender-Class: 01bb95c1-4bf8-414a-932a-4f6e2808ef9c
+Received: from [185.53.41.139] ([185.53.41.139]) by web-mail.gmx.net
+ (3c-app-gmx-bs32.server.lan [172.19.170.84]) (via HTTP); Wed, 12 Aug 2020
+ 16:19:04 +0200
 MIME-Version: 1.0
-References: <20200806181932.2253-1-krzk@kernel.org> <20200806182059.2431-2-krzk@kernel.org>
-In-Reply-To: <20200806182059.2431-2-krzk@kernel.org>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 12 Aug 2020 16:05:17 +0200
-Message-ID: <CAPDyKFpBYDrn9dFGSNw9vHjrvPaP5amxYdxjifLBEM2U+AdVTQ@mail.gmail.com>
-Subject: Re: [PATCH v2 02/41] mmc: s3cmci: Remove unneeded machine header include
-To:     Krzysztof Kozlowski <krzk@kernel.org>
-Cc:     Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Arnd Bergmann <arnd@arndb.de>, Ben Dooks <ben-linux@fluff.org>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Message-ID: <trinity-b7a0d7ed-cbc7-421d-810d-162fd178a8f3-1597241944268@3c-app-gmx-bs32>
+From:   Frank Wunderlich <frank-w@public-files.de>
+To:     Wenbin Mei <wenbin.mei@mediatek.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>, devicetree@vger.kernel.org,
+        Wenbin Mei <wenbin.mei@mediatek.com>,
+        srv_heupstream@mediatek.com, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, stable@vger.kernel.org,
+        linux-mediatek@lists.infradead.org,
+        linux-arm-kernel@lists.infradead.org,
+        Philipp Zabel <p.zabel@pengutronix.de>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        Chaotian Jing <chaotian.jing@mediatek.com>
+Subject: Aw: [v2,3/3] mmc: mediatek: add optional module reset property
+Content-Type: text/plain; charset=UTF-8
+Date:   Wed, 12 Aug 2020 16:19:04 +0200
+Importance: normal
+Sensitivity: Normal
+In-Reply-To: <20200812130129.13519-4-wenbin.mei@mediatek.com>
+References: <20200812130129.13519-1-wenbin.mei@mediatek.com>
+ <20200812130129.13519-4-wenbin.mei@mediatek.com>
+X-UI-Message-Type: mail
+X-Priority: 3
+X-Provags-ID: V03:K1:DI9ytn25Mt7akP/u6K+zVHv5f9HCrC6Cv16qnII6teMTpW2XwfNpVoOFjsieNPVwxH/l4
+ cU9JOsQ/EywXacZma3nl2x+nLnZRWJetq0muKjnIFXHkClEF1/JKMVLhiQGD47pDpFys17mtusRl
+ IZj0JuYw2/1ZQNpDUsRUHTLewSnpAmCMNyaFY3QyL81a+Exg1Hd9W45f5B3QKDiXi8YPcFl3ujSC
+ htEJ6QIHlc+SwUugRjsLYSIYvPxrpe1U85FJ2oxUj1HDNAkgp5/kWi3ABWD/dfqso+NKIE0XQUAB
+ MA=
+X-UI-Out-Filterresults: notjunk:1;V03:K0:pT+4PmpTWt0=:MAHvXFTaSHTxJHOLIoWHrt
+ oieG5CBLtcg1W4OdS36hlQtCDvmdbxV16P+T5VgicjXog+nlR9AzaD1rc8OhGi9pfBxrkh6IF
+ N1BQtB/D649DurS3NpQSXn3DugHgBTDz8BIhxvccpJuvhkliYkmNM9ObXQmMTXrpsiFmYG3bX
+ K3ej55UX74QCj7oadVwk3Ml6YQ6+tB6DQ7Ab4eJjDDc9eSoIogYElzPQ4z//Zsvwq6VJgqFID
+ 7W+fnvwjUO6hUb5fE/Yct+QWj6rH46A/AEuGRsfBFDRUyytFj/ngG0b3WIXy8EvZHszgpO8nQ
+ i6jjqHuIJSZEZvlIbgfxHmQSMGVTfR3gcPfoFe6pcjkx/eRm6ZKIkCEJEshGVqTElrtikL3Yc
+ +mhl1GcwQcgkSYairRNGXtjkZvKH7A2/dALySYSkYWGa7UtZ8IwB03HXTPXe0VDJvcWRwJZ0n
+ YFcHDHDhLh+Ioyn9WTYMCTdsR3uCKjfrTHex4diVF1H9qMrsVBXNnHWcyMIL+G/dBt0nriNL8
+ o4NleJ1UuPAt05XXmA75uEJ0lMvjrMtGXBPetM3y+Mpzf6p5iupJ6PU4BXq38KLkvRmzXKccU
+ UdR+Ixupe4/pUkzw4pK7mJXlMxPvQZqdzZ3uMTb/5QFYmjQplOEtC9NeNEEH86EWZtWxHezUm
+ 5VjR2tYCGpgtxm3PBz4FgT28n6s4wMGzFHdRzJacbioG/hokFAsLHRZFufw2d3/VN8sI=
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 6 Aug 2020 at 20:21, Krzysztof Kozlowski <krzk@kernel.org> wrote:
->
-> The s3cmci driver does not use machine header mach/dma.h.
->
-> Signed-off-by: Krzysztof Kozlowski <krzk@kernel.org>
+Hi,
+it looks like you missed Philipps comments in v1
 
-If you want this to go through my mmc tree, then please tell me.
+for stable i guess you need only add Cc: Stable-line to signed-off-area (not add it to CC of mail), sorry my mistake
 
-Otherwise:
+Cc: stable@vger.kernel.org
 
-Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
-
-Kind regards
-Uffe
-
-> ---
->  drivers/mmc/host/s3cmci.c | 1 -
->  1 file changed, 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/s3cmci.c b/drivers/mmc/host/s3cmci.c
-> index b5df948f8155..60fc3fc30fb4 100644
-> --- a/drivers/mmc/host/s3cmci.c
-> +++ b/drivers/mmc/host/s3cmci.c
-> @@ -26,7 +26,6 @@
->  #include <linux/mmc/slot-gpio.h>
->
->  #include <plat/gpio-cfg.h>
-> -#include <mach/dma.h>
->  #include <mach/gpio-samsung.h>
->
->  #include <linux/platform_data/mmc-s3cmci.h>
-> --
-> 2.17.1
->
+regards Frank
