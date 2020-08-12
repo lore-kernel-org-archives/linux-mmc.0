@@ -2,85 +2,85 @@ Return-Path: <SRS0=5vaz=BW=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,USER_AGENT_SANE_2
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.0 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DC855C433E0
-	for <linux-mmc@archiver.kernel.org>; Wed, 12 Aug 2020 11:58:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2B3E9C433DF
+	for <linux-mmc@archiver.kernel.org>; Wed, 12 Aug 2020 12:03:14 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id BD2142065C
-	for <linux-mmc@archiver.kernel.org>; Wed, 12 Aug 2020 11:58:12 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=mediatek.com header.i=@mediatek.com header.b="nRKpy3VZ"
+	by mail.kernel.org (Postfix) with ESMTP id 117FF207F7
+	for <linux-mmc@archiver.kernel.org>; Wed, 12 Aug 2020 12:03:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727101AbgHLL6J (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 12 Aug 2020 07:58:09 -0400
-Received: from Mailgw01.mediatek.com ([1.203.163.78]:4362 "EHLO
-        mailgw01.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1727050AbgHLL6I (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Aug 2020 07:58:08 -0400
-X-UUID: 067306e7df5f4aab882d06df14bf470a-20200812
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=mediatek.com; s=dk;
-        h=Content-Transfer-Encoding:MIME-Version:Content-Type:References:In-Reply-To:Date:CC:To:From:Subject:Message-ID; bh=D6lfhIK0juhubU0dZSLfqofcrBNMDDsBIY7w5I1uBv4=;
-        b=nRKpy3VZDSoVi4nWSZxdi0nOaZzDOu3eon/6GKkSILA938TjEfYHJDixHbzAoEgzxAGbM6D5Gdp0yB+7/h7dwhhu9kyxCRt6f0x1YJYOT/Dcx8MDtyPE6JyZX5MzUYVeqB/0lMrsh8z/PSQxMGVXXVYfrUU5Pyusq2wS5zIICrs=;
-X-UUID: 067306e7df5f4aab882d06df14bf470a-20200812
-Received: from mtkcas35.mediatek.inc [(172.27.4.253)] by mailgw01.mediatek.com
-        (envelope-from <wenbin.mei@mediatek.com>)
-        (mailgw01.mediatek.com ESMTP with TLS)
-        with ESMTP id 539316086; Wed, 12 Aug 2020 19:57:59 +0800
-Received: from MTKCAS36.mediatek.inc (172.27.4.186) by MTKMBS31N2.mediatek.inc
- (172.27.4.87) with Microsoft SMTP Server (TLS) id 15.0.1497.2; Wed, 12 Aug
- 2020 19:57:58 +0800
-Received: from [10.17.3.153] (10.17.3.153) by MTKCAS36.mediatek.inc
- (172.27.4.170) with Microsoft SMTP Server id 15.0.1497.2 via Frontend
- Transport; Wed, 12 Aug 2020 19:57:58 +0800
-Message-ID: <1597233424.10188.4.camel@mhfsdcap03>
-Subject: Re: Aw: [PATCH 2/3] arm64: dts: mt7622: add reset node for mmc
- device
-From:   Wenbin Mei <wenbin.mei@mediatek.com>
-To:     Frank Wunderlich <frank-w@public-files.de>
-CC:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>, <devicetree@vger.kernel.org>,
-        <srv_heupstream@mediatek.com>, <linux-mmc@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>,
-        <linux-mediatek@lists.infradead.org>,
-        <linux-arm-kernel@lists.infradead.org>,
-        Philipp Zabel <p.zabel@pengutronix.de>,
+        id S1726871AbgHLMDN convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 12 Aug 2020 08:03:13 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52176 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726722AbgHLMDN (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Aug 2020 08:03:13 -0400
+Received: from metis.ext.pengutronix.de (metis.ext.pengutronix.de [IPv6:2001:67c:670:201:290:27ff:fe1d:cc33])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BAB0BC06174A
+        for <linux-mmc@vger.kernel.org>; Wed, 12 Aug 2020 05:03:12 -0700 (PDT)
+Received: from lupine.hi.pengutronix.de ([2001:67c:670:100:3ad5:47ff:feaf:1a17] helo=lupine)
+        by metis.ext.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
+        (Exim 4.92)
+        (envelope-from <p.zabel@pengutronix.de>)
+        id 1k5pTG-0006el-Oc; Wed, 12 Aug 2020 14:03:06 +0200
+Received: from pza by lupine with local (Exim 4.92)
+        (envelope-from <p.zabel@pengutronix.de>)
+        id 1k5pTE-0007Dr-MD; Wed, 12 Aug 2020 14:03:04 +0200
+Message-ID: <6e667ff6f5a1aae51b89d00e9ec5bba29852f683.camel@pengutronix.de>
+Subject: Re: [PATCH 1/3] mmc: dt-bindings: Add resets/reset-names for
+ Mediatek MMC bindings
+From:   Philipp Zabel <p.zabel@pengutronix.de>
+To:     Wenbin Mei <wenbin.mei@mediatek.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>
+Cc:     Chaotian Jing <chaotian.jing@mediatek.com>,
         Matthias Brugger <matthias.bgg@gmail.com>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        <stable@vger.kernel.org>
-Date:   Wed, 12 Aug 2020 19:57:04 +0800
-In-Reply-To: <trinity-a4a4e709-ca8d-4867-8f90-d0ddbfca05cb-1597228420620@3c-app-gmx-bap56>
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org,
+        linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org,
+        srv_heupstream@mediatek.com
+Date:   Wed, 12 Aug 2020 14:03:04 +0200
+In-Reply-To: <20200812093726.10123-2-wenbin.mei@mediatek.com>
 References: <20200812093726.10123-1-wenbin.mei@mediatek.com>
-         <20200812093726.10123-3-wenbin.mei@mediatek.com>
-         <trinity-a4a4e709-ca8d-4867-8f90-d0ddbfca05cb-1597228420620@3c-app-gmx-bap56>
+         <20200812093726.10123-2-wenbin.mei@mediatek.com>
 Content-Type: text/plain; charset="UTF-8"
-X-Mailer: Evolution 3.10.4-0ubuntu2 
+Content-Transfer-Encoding: 8BIT
+User-Agent: Evolution 3.30.5-1.1 
 MIME-Version: 1.0
-X-TM-SNTS-SMTP: B32ACDD6AC6B4D175228B6D78D1775133AD378FB68C06E1E2B072AAC9B9554922000:8
-X-MTK:  N
-Content-Transfer-Encoding: base64
+X-SA-Exim-Connect-IP: 2001:67c:670:100:3ad5:47ff:feaf:1a17
+X-SA-Exim-Mail-From: p.zabel@pengutronix.de
+X-SA-Exim-Scanned: No (on metis.ext.pengutronix.de); SAEximRunCond expanded to false
+X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-VGhhbmtzIGZvciB5b3VyIHJlcGx5Lg0KSSB3aWxsIGFkZCB0aGlzIGluIHRoZSBuZXh0IHZlcnNp
-b24uDQpPbiBXZWQsIDIwMjAtMDgtMTIgYXQgMTI6MzMgKzAyMDAsIEZyYW5rIFd1bmRlcmxpY2gg
-d3JvdGU6DQo+ID4gR2VzZW5kZXQ6IE1pdHR3b2NoLCAxMi4gQXVndXN0IDIwMjAgdW0gMTE6Mzcg
-VWhyDQo+ID4gVm9uOiAiV2VuYmluIE1laSIgPHdlbmJpbi5tZWlAbWVkaWF0ZWsuY29tPg0KPiA+
-IEJldHJlZmY6IFtQQVRDSCAzLzNdIG1tYzogbWVkaWF0ZWs6IGFkZCBvcHRpb25hbCBtb2R1bGUg
-cmVzZXQgcHJvcGVydHkNCj4gDQo+ID4gVGhpcyBwYXRjaCBhZGRzIGEgb3B0aW9uYWwgcmVzZXQg
-bWFuYWdlbWVudCBmb3IgbXNkYy4NCj4gPiBTb21ldGltZXMgdGhlIGJvb3Rsb2FkZXIgZG9lcyBu
-b3QgYnJpbmcgbXNkYyByZWdpc3Rlcg0KPiA+IHRvIGRlZmF1bHQgc3RhdGUsIHNvIG5lZWQgcmVz
-ZXQgdGhlIG1zZGMgY29udHJvbGxlci4NCj4gPg0KPiA+IFNpZ25lZC1vZmYtYnk6IFdlbmJpbiBN
-ZWkgPHdlbmJpbi5tZWlAbWVkaWF0ZWsuY29tPg0KPiANCj4gVGhhbmtzIGZvciBwb3N0aW5nIHRo
-ZSBmaXggdG8gTWFpbmxpbmUNCj4gc2FtZSBhcyAzLzMsIGR0cy1wYXRjaCBpcyBhbHNvIG5lZWRl
-ZCBmb3IgZml4aW5nIGVNTUMtSXNzdWUgb24gUjY0DQo+IA0KPiBGaXhlczogOTY2NTgwYWQyMzZl
-ICgibW1jOiBtZWRpYXRlazogYWRkIHN1cHBvcnQgZm9yIE1UNzYyMiBTb0MiKQ0KPiBUZXN0ZWQt
-Qnk6IEZyYW5rIFd1bmRlcmxpY2ggPGZyYW5rLXdAcHVibGljLWZpbGVzLmRlPg0KPiANCj4gYW5k
-IGl0IG5lZWRzIHRvIGJlIGZpeGVkIGF0IGxlYXN0IGZvciA1LjQrLCBzbyBhZGRpbmcgc3RhYmxl
-LUNDDQo+IA0KPiBDYzogc3RhYmxlQHZnZXIua2VybmVsLm9yZw0KDQo=
+On Wed, 2020-08-12 at 17:37 +0800, Wenbin Mei wrote:
+> Add description for resets/reset-names.
+> 
+> Signed-off-by: Wenbin Mei <wenbin.mei@mediatek.com>
+> ---
+>  Documentation/devicetree/bindings/mmc/mtk-sd.txt | 2 ++
+>  1 file changed, 2 insertions(+)
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.txt b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
+> index 8a532f4453f2..35da72de7aac 100644
+> --- a/Documentation/devicetree/bindings/mmc/mtk-sd.txt
+> +++ b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
+> @@ -49,6 +49,8 @@ Optional properties:
+>  		     error caused by stop clock(fifo full)
+>  		     Valid range = [0:0x7]. if not present, default value is 0.
+>  		     applied to compatible "mediatek,mt2701-mmc".
+> +- resets: Phandle and reset specifier pair to softreset line of MSDC IP.
+> +- reset-names: Reset names for MSDC.
 
+I think the reset-names documentation should mention the actual value
+the driver should look for, "hrst".
+
+regards
+Philipp
