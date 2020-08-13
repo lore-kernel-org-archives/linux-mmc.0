@@ -2,119 +2,62 @@ Return-Path: <SRS0=OPc0=BX=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.0 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.4 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	MIME_BASE64_TEXT,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,USER_AGENT_GIT
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 31E35C433E8
-	for <linux-mmc@archiver.kernel.org>; Thu, 13 Aug 2020 07:51:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F15B0C433E1
+	for <linux-mmc@archiver.kernel.org>; Thu, 13 Aug 2020 08:44:44 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1750C2078B
-	for <linux-mmc@archiver.kernel.org>; Thu, 13 Aug 2020 07:51:11 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9859920781
+	for <linux-mmc@archiver.kernel.org>; Thu, 13 Aug 2020 08:44:44 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (1024-bit key) header.d=mediatek.com header.i=@mediatek.com header.b="gQgNOIKU"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726793AbgHMHvK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 13 Aug 2020 03:51:10 -0400
-Received: from mail-ot1-f65.google.com ([209.85.210.65]:38760 "EHLO
-        mail-ot1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726106AbgHMHvJ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Aug 2020 03:51:09 -0400
-Received: by mail-ot1-f65.google.com with SMTP id q9so4110499oth.5;
-        Thu, 13 Aug 2020 00:51:08 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=eU62SrftExeZEPFtSlHLsBRzbUkLx1KNOgZc6VKFeBQ=;
-        b=RKVY0mqqakUrEXk4TORV8A5/ZSMY0dexhKfXyaOKBp8tYT6+lN9tMY1gCu59dMSnI/
-         6Av5sXCLtCtfska6KBUfoUvPLN8QSlHGcwX+BKv8ZNWhNtirhMGElzBnWp56J7vtBCeA
-         RTsTm+tpM0JqO6hs1Zx9oL0KiDPnHu2wr8nXIFBaGz9jqMUEyZCYMyj21d8ckpZmX8IH
-         sIyh51oPoVvqSR3qDoGMDZJhbXuz4s9KHdaT9j4oPeIaqxws0OL9u53GcL8uZhE7hrov
-         ikjJM0LMxR/OG4BC9tZAySXGXWwQpPbcG9j3oyJJCCrBhecUJhWEIB5ZPymwSBlP+imO
-         EXuw==
-X-Gm-Message-State: AOAM531KpbVTNZA6DQGhlLakjE36ZGk11NQSWXrXhgb2m/BrbDAUDZAN
-        GTNNlK5/qceLxjH+paJhJQLuqYhFPre+GsLWPoc=
-X-Google-Smtp-Source: ABdhPJzAAKS8g3t/W5mSJd2Vboc2FEvoNvVXoru7u4kNP7jabPCwVCki2JjTk/fEfMzVv8QAFC24k07bLAU2LYhSK+k=
-X-Received: by 2002:a05:6830:1b79:: with SMTP id d25mr2990956ote.107.1597305067462;
- Thu, 13 Aug 2020 00:51:07 -0700 (PDT)
+        id S1726533AbgHMIoo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 13 Aug 2020 04:44:44 -0400
+Received: from mailgw01.mediatek.com ([210.61.82.183]:25941 "EHLO
+        mailgw01.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1726081AbgHMIoo (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Aug 2020 04:44:44 -0400
+X-UUID: 48f7b7df88504e19851c9459faa44a64-20200813
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=mediatek.com; s=dk;
+        h=Content-Transfer-Encoding:Content-Type:MIME-Version:Message-ID:Date:Subject:CC:To:From; bh=xVTG3i3NZ+1cOXWR7yCUvveG4pS/BEjPy1kRWzM1V+Y=;
+        b=gQgNOIKUV634mhXdI8ViLjtLHo6VxPvLTSOjjyZwAgvx3SKdff7EuszeWSEW7pIJMkJ29Wz/gcQJAIy8Zf9LHQuTXuWf3LSHSVY5DcRB62VOlaFAwQ14otMGSMbPGwxCQk7TMoYPN1Qt6B6vfHAZX/oXRarZoKer7UOHCLNFytQ=;
+X-UUID: 48f7b7df88504e19851c9459faa44a64-20200813
+Received: from mtkcas10.mediatek.inc [(172.21.101.39)] by mailgw01.mediatek.com
+        (envelope-from <wenbin.mei@mediatek.com>)
+        (Cellopoint E-mail Firewall v4.1.10 Build 0809 with TLS)
+        with ESMTP id 369335559; Thu, 13 Aug 2020 16:44:40 +0800
+Received: from mtkcas08.mediatek.inc (172.21.101.126) by
+ mtkmbs07n1.mediatek.inc (172.21.101.16) with Microsoft SMTP Server (TLS) id
+ 15.0.1497.2; Thu, 13 Aug 2020 16:44:38 +0800
+Received: from localhost.localdomain (10.17.3.153) by mtkcas08.mediatek.inc
+ (172.21.101.73) with Microsoft SMTP Server id 15.0.1497.2 via Frontend
+ Transport; Thu, 13 Aug 2020 16:44:37 +0800
+From:   Wenbin Mei <wenbin.mei@mediatek.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>
+CC:     Chaotian Jing <chaotian.jing@mediatek.com>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        Philipp Zabel <p.zabel@pengutronix.de>,
+        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>,
+        <linux-mediatek@lists.infradead.org>,
+        <linux-kernel@vger.kernel.org>, <srv_heupstream@mediatek.com>
+Subject: [v3,0/3] mmc: mediatek: add optional reset property mmc: mediatek: add optional module reset property  arm64: dts: mt7622: add reset node for mmc device Documentation/devicetree/bindings/mmc/mtk-sd.txt |  2 ++ arch/arm64/boot/dts/mediatek/mt7622.dtsi         |  2 ++ drivers/mmc/host/mtk-sd.c                        | 13 +++++++++++++ 3 files changed, 17 insertions(+)
+Date:   Thu, 13 Aug 2020 16:43:37 +0800
+Message-ID: <20200813084340.27292-1-wenbin.mei@mediatek.com>
+X-Mailer: git-send-email 2.18.0
 MIME-Version: 1.0
-References: <20200812203618.2656699-1-robh@kernel.org>
-In-Reply-To: <20200812203618.2656699-1-robh@kernel.org>
-From:   Geert Uytterhoeven <geert@linux-m68k.org>
-Date:   Thu, 13 Aug 2020 09:50:55 +0200
-Message-ID: <CAMuHMdVXvSRF-G_TYu4P+Bqa2FZJWsUCyzqFur3Rb-tBExfbsw@mail.gmail.com>
-Subject: Re: [PATCH] dt-bindings: Whitespace clean-ups in schema files
-To:     Rob Herring <robh@kernel.org>
-Cc:     "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
-        <devicetree@vger.kernel.org>, linux-hwmon@vger.kernel.org,
-        linux-rtc@vger.kernel.org,
-        Linux Fbdev development list <linux-fbdev@vger.kernel.org>,
-        ALSA Development Mailing List <alsa-devel@alsa-project.org>,
-        Linux PM list <linux-pm@vger.kernel.org>,
-        linux-iio@vger.kernel.org,
-        Linux MMC List <linux-mmc@vger.kernel.org>,
-        USB list <linux-usb@vger.kernel.org>,
-        "open list:REMOTE PROCESSOR (REMOTEPROC) SUBSYSTEM" 
-        <linux-remoteproc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        DRI Development <dri-devel@lists.freedesktop.org>,
-        linux-spi <linux-spi@vger.kernel.org>,
-        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
-        netdev <netdev@vger.kernel.org>,
-        MTD Maling List <linux-mtd@lists.infradead.org>,
-        Linux I2C <linux-i2c@vger.kernel.org>,
-        "open list:SERIAL DRIVERS" <linux-serial@vger.kernel.org>,
-        linux-input@vger.kernel.org, linux-clk <linux-clk@vger.kernel.org>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        Linux Media Mailing List <linux-media@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain
+X-MTK:  N
+Content-Transfer-Encoding: base64
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Rob,
+LS0NCjIuMTguMA0K
 
-On Wed, Aug 12, 2020 at 10:36 PM Rob Herring <robh@kernel.org> wrote:
-> Clean-up incorrect indentation, extra spaces, long lines, and missing
-> EOF newline in schema files. Most of the clean-ups are for list
-> indentation which should always be 2 spaces more than the preceding
-> keyword.
->
-> Found with yamllint (which I plan to integrate into the checks).
-
-> Signed-off-by: Rob Herring <robh@kernel.org>
-
-Thanks for your patch!
-
-> --- a/Documentation/devicetree/bindings/clock/renesas,cpg-clocks.yaml
-> +++ b/Documentation/devicetree/bindings/clock/renesas,cpg-clocks.yaml
-> @@ -24,9 +24,9 @@ properties:
->        - const: renesas,r8a7778-cpg-clocks # R-Car M1
->        - const: renesas,r8a7779-cpg-clocks # R-Car H1
->        - items:
-> -        - enum:
-> -            - renesas,r7s72100-cpg-clocks # RZ/A1H
-> -        - const: renesas,rz-cpg-clocks    # RZ/A1
-> +          - enum:
-> +              - renesas,r7s72100-cpg-clocks # RZ/A1H
-> +          - const: renesas,rz-cpg-clocks    # RZ/A1
-
-This change breaks alignment of the comments at the end of each line.
-
->        - const: renesas,sh73a0-cpg-clocks  # SH-Mobile AG5
-
-(I only checked the files I care about)
-
-If you don't update commit  e0fe7fc6f2ca0781 ("dt-bindings: Whitespace
-clean-ups in schema files"), I can send a patch after v5.9-rc1.
-
-Gr{oetje,eeting}s,
-
-                        Geert
-
--- 
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
