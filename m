@@ -2,161 +2,240 @@ Return-Path: <SRS0=OPc0=BX=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-10.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable
-	autolearn_force=no version=3.4.0
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2FFE6C433DF
-	for <linux-mmc@archiver.kernel.org>; Thu, 13 Aug 2020 13:57:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1E78AC433E1
+	for <linux-mmc@archiver.kernel.org>; Thu, 13 Aug 2020 18:24:59 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0A37720866
-	for <linux-mmc@archiver.kernel.org>; Thu, 13 Aug 2020 13:57:15 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id DCAC620855
+	for <linux-mmc@archiver.kernel.org>; Thu, 13 Aug 2020 18:24:58 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="DZc9ySxO"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="C2k09ksy"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726249AbgHMN5K (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 13 Aug 2020 09:57:10 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37434 "EHLO
+        id S1726174AbgHMSY6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 13 Aug 2020 14:24:58 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50488 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726053AbgHMN5J (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Aug 2020 09:57:09 -0400
-Received: from mail-wm1-x342.google.com (mail-wm1-x342.google.com [IPv6:2a00:1450:4864:20::342])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 459FFC061757;
-        Thu, 13 Aug 2020 06:57:09 -0700 (PDT)
-Received: by mail-wm1-x342.google.com with SMTP id 184so5148260wmb.0;
-        Thu, 13 Aug 2020 06:57:09 -0700 (PDT)
+        with ESMTP id S1726167AbgHMSY5 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Aug 2020 14:24:57 -0400
+Received: from mail-io1-xd43.google.com (mail-io1-xd43.google.com [IPv6:2607:f8b0:4864:20::d43])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 12B84C061757;
+        Thu, 13 Aug 2020 11:24:57 -0700 (PDT)
+Received: by mail-io1-xd43.google.com with SMTP id q75so8385615iod.1;
+        Thu, 13 Aug 2020 11:24:56 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=ZL42NDAwRyqFSgHd9+LPNZsn853QbpqMscEZvhiYWzM=;
-        b=DZc9ySxOXmzqhLq8wmbQNIP8qC3GDOlMAZXwH7T9qCDObVYdxITsnlnU7bMMNL0I2v
-         8lwS7+qRhmzNhfUwwC0kNFVA8VZtzhOKjDROTB3vtPBcNcTcYjxuoURPglFJn45b2mgn
-         dnUGwPgc6LU4AEVPxf/jffEers4VwtF2ItE5gO9UUBy6QeE3kRF9mgP8QaLA6zi5aNj8
-         qbn1Q9yNmgEcfilN2hl4qfiHdQKqYejDnn/EhxGdOJL6+bOTWQiKbknzYBcjQnLzS6Vp
-         Q1q+E+nufJFqn8GO5egocKKELypeNx1wr8X2QMpEra5OR1Ndc0rUl/zoTuqIXLLdF5fN
-         V51g==
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=vQ9Cz8hQHo62MHI5THXHE1SZhC+agAAv3p4F2tX0JvE=;
+        b=C2k09ksy/hGnzNsFYKHZf29OFEMfDYyxq/QtR/Yj5V9rCixPOTSqLN+Vn+ZuzQQiJ4
+         NkYhsihB+1pQlumQKFDW/Pc9HFcXJTnuHyDkLBElmnz6vJn2x5shB5R59Imog4Z7/8Xz
+         YcwZjnEKdR4HEFAB4mcfAL5SQZYlcHA1KcKQ95yMXwmSrcxwjjZe0EmP+FwOv3JGpCKK
+         eGseNRldGMiYLRNkzmfw5/YxmuguZ8H7gEXM0z7AYAW57H8hgpGNCJUGL4QPHTLexp4z
+         AAtaG1PDz7bhdeXFLoWZBY8na8ffyI4ECKfhj9ogPGXAlV9Cz/d2JiqekMmVW3YzbYEH
+         SPpA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=ZL42NDAwRyqFSgHd9+LPNZsn853QbpqMscEZvhiYWzM=;
-        b=gSrlB0FcPa1fsKpSv/CD+cuX/ebAK6DdP946YBlkY0WpjxML6rDS3UKFBKhvSsC98R
-         cSebHRYpjjFbSNOnakJ54Xl2NUz74ZnHFYEEv4dl/sLHDh4uMP5UyunLAW4V1Fm/zENb
-         gd+u/xg2h6pBSdh/dDR2UctDnv415FCAri9k1lKfFmzx/iG8uGYdh3B6GIZMWi+wN87w
-         VQQ3NtF1C647zoChBiRuLK3XtbL9gCyzLgoIurS4z2pGTw9THuK9giSYqULXCjvrAHzB
-         +dTAJ3G0YYgqNhYfnJC0UZwQ8FzBohS3WlLULSwSgtl8gBbCWHSOxH8PyXBMurKVGvzj
-         VO5A==
-X-Gm-Message-State: AOAM5335jSLV/EhsHbyoYcdhAMjHA4qU4tT/hcRZUoyG/ELD2xQHY0F6
-        lDK9QYrIh6EKRquhFp1mSg2apLn2QRs=
-X-Google-Smtp-Source: ABdhPJxZvSJM5CEE+rwyY2plMtVpFbesLgpk5SnfITkTmQSlBIrtVpTBoa601/n+g2520vvERC4vGw==
-X-Received: by 2002:a1c:1b93:: with SMTP id b141mr4598606wmb.150.1597327027636;
-        Thu, 13 Aug 2020 06:57:07 -0700 (PDT)
-Received: from ziggy.stardust ([213.195.117.232])
-        by smtp.gmail.com with ESMTPSA id n11sm5016409wmi.15.2020.08.13.06.57.06
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 13 Aug 2020 06:57:06 -0700 (PDT)
-Subject: Re: [RESEND,v4,3/3] mmc: mediatek: add optional module reset property
-To:     Wenbin Mei <wenbin.mei@mediatek.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>
-Cc:     Chaotian Jing <chaotian.jing@mediatek.com>,
-        Philipp Zabel <p.zabel@pengutronix.de>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org,
-        linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org,
-        srv_heupstream@mediatek.com, stable@vger.kernel.org
-References: <20200813093811.28606-1-wenbin.mei@mediatek.com>
- <20200813093811.28606-4-wenbin.mei@mediatek.com>
-From:   Matthias Brugger <matthias.bgg@gmail.com>
-Message-ID: <7337a174-169d-2dd1-ed91-f05291d4f3a6@gmail.com>
-Date:   Thu, 13 Aug 2020 15:57:05 +0200
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.11.0
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=vQ9Cz8hQHo62MHI5THXHE1SZhC+agAAv3p4F2tX0JvE=;
+        b=GetU5bTg3/ITFbCwJXKluc2hWln3LtgDeoy5dnaZc+Us7IEyUFbk5MzRpqBUFQkmYF
+         py0QvdIax/x/PAkeVXB6lqr7X4ot5FvtjinuBcWnOj0kFpLsx/zr5nV2Ph1HYHBZskJj
+         ElfVUWoUITuPxoanQKYPCr1+hpVtOngMb6UyvdXeH2pMBLS13ym1ichbWDiLCDf41jjX
+         PH5Eh0d3X3vBxk8nSiyeMucCv4w3P2S/UwH8YPFJz5PRlGq6vbS/6OHw0M0zHtHmg0JN
+         /X7dlPAb7HecnhdPOUKDu30HIyjhIGUq20zmoxxzIID1cc8WIP9P4bmZulYDq31o7PXe
+         sXpw==
+X-Gm-Message-State: AOAM532HhBqu1ltCBfhiq7iNcdlyy5XzG7yjXjC+ni9e2XRp1ICwgjUz
+        awA/uHr4ib53xrD8Mai8VExyu36oKH7FYzL4b0c=
+X-Google-Smtp-Source: ABdhPJwZpB59lGNd3j3kDFe8tkvrqkRWxdQC/Rq1Gn9th6Fx88oZKQHA4Yg3J+bGXvgerbOh4gdBVYsBEQIXexTEmiU=
+X-Received: by 2002:a6b:b514:: with SMTP id e20mr6001654iof.160.1597343095882;
+ Thu, 13 Aug 2020 11:24:55 -0700 (PDT)
 MIME-Version: 1.0
-In-Reply-To: <20200813093811.28606-4-wenbin.mei@mediatek.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+References: <20200721191718.29414-1-alcooperx@gmail.com> <CAPDyKFqLX8TvZHZ+0Ytu9BO_56vuPQ+9cvFQCez+mEG-AJWkqQ@mail.gmail.com>
+ <CAOGqxeX=E6WrBUoy3cicFP-=uuxJZRTmyk_qODR=7Chzt9ixTw@mail.gmail.com> <CAPDyKFp7UReGd1xZPidErgeL2rfFCKekGZ+Tc3+vP63WX=vWWg@mail.gmail.com>
+In-Reply-To: <CAPDyKFp7UReGd1xZPidErgeL2rfFCKekGZ+Tc3+vP63WX=vWWg@mail.gmail.com>
+From:   Alan Cooper <alcooperx@gmail.com>
+Date:   Thu, 13 Aug 2020 14:24:44 -0400
+Message-ID: <CAOGqxeULZAojuHzhbwhakJXEKHLQ_1snwrCMMs9GtT0gpKLRjQ@mail.gmail.com>
+Subject: Re: [PATCH] mmc: Some Micron eMMC devices cause reboot to hang
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        Bradley Bolen <bradleybolen@gmail.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        =?UTF-8?Q?Pali_Roh=C3=A1r?= <pali@kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+On Wed, Aug 5, 2020 at 4:28 AM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>
+> On Mon, 27 Jul 2020 at 15:07, Alan Cooper <alcooperx@gmail.com> wrote:
+> >
+> > On Fri, Jul 24, 2020 at 7:03 AM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> > >
+> > > On Tue, 21 Jul 2020 at 21:18, Al Cooper <alcooperx@gmail.com> wrote:
+> > > >
+> > > > When using eMMC as the boot device, some Micron eMMC devices will
+> > > > cause reboot to hang. This is a result of the eMMC device not going
+> > > > into boot mode after the hardware sends CMD0 to reset the eMMC
+> > > > device. This only happens if the kernel driver sends CMD5 (SLEEP_WAKE),
+> > > > to put the device into sleep state, before restarting the system.
+> > >
+> > > What do you mean by "boot mode"?
+> >
+> > I'm referring to the "Boot operation mode" described in Section 6.3 of
+> > the JEDEC spec.
+> > Our hardware will send a CMD0 with 0xf0f0f0f0 argument at powerup or
+> > when the SoC is reset, and then hold the CLK signal low for 74 clock
+> > cycles. This should put the eMMC device into boot mode where it
+> > streams consecutive blocks without additional commands. With this
+> > Micron device I find that if I send a CMD5 before trying to restart
+> > the system by resetting the SoC, that the system hangs. I worked with
+> > Micron on the issue and they finally said to either avoid sending the
+> > CMD5 on restart or use a newer version of the Micron eMMC device.
+>
+> Thanks for clarifying the test sequence!
+>
+> However, I am still not (yet) convinced that a card quirk is the right
+> thing to do. What does the eMMC spec say about sending a CMD0 with
+> 0xf0f0f0f0 to a device that "sleeps"?
+
+This is from the spec:
+A Device may be switched between a Sleep state and a Standby state by
+SLEEP/AWAKE (CMD5). In the
+Sleep state the power consumption of the memory device is minimized.
+In this state the memory device
+reacts only to the commands RESET (CMD0 with argument of either
+0x00000000 or 0xF0F0F0F0 or
+H/W reset) and SLEEP/AWAKE (CMD5). All the other commands are ignored
+by the memory device.
 
 
-On 13/08/2020 11:38, Wenbin Mei wrote:
-> This patch fixs eMMC-Access on mt7622/Bpi-64.
-> Before we got these Errors on mounting eMMC ion R64:
-> [   48.664925] blk_update_request: I/O error, dev mmcblk0, sector 204800 op 0x1:(WRITE)
-> flags 0x800 phys_seg 1 prio class 0
-> [   48.676019] Buffer I/O error on dev mmcblk0p1, logical block 0, lost sync page write
-> 
-> This patch adds a optional reset management for msdc.
-> Sometimes the bootloader does not bring msdc register
-> to default state, so need reset the msdc controller.
-> 
-> Cc: <stable@vger.kernel.org> # v5.4+
-> Fixes: 966580ad236e ("mmc: mediatek: add support for MT7622 SoC")
-> Signed-off-by: Wenbin Mei <wenbin.mei@mediatek.com>
-> Tested-by: Frank Wunderlich <frank-w@public-files.de>
+>
+> Moreover, how does your mmc host driver (and platform) treat VCC and
+> VCCQ at system suspend/resume, compared to when a reset is done? Is
+> there a difference?
 
-I think you missed to add Philipp Zabels Reviewed-by tag.
+We don't change VCC and VCCQ during suspend.
 
-Regards,
-Matthias
+>
+> The point is, if the eMMC spec is being violated, we should not make a
+> card quirk - as it may cause problems for other platforms.
 
+The eMMC spec is being violated here by the Micron eMMC device.
+Our hardware has worked this way for over 10 years and has never had a
+problem with any of the eMMC devices from the major manufacturers
+including older and newer Micron eMMC devices.
+When I talked to Micron on the phone, one engineer said it was a
+firmware bug, but since it was an older chip that it wouldn't be fixed
+and that we should use a newer family of Micron eMMC devices.
 
-> ---
->   drivers/mmc/host/mtk-sd.c | 13 +++++++++++++
->   1 file changed, 13 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-> index 39e7fc54c438..fc97d5bf3a20 100644
-> --- a/drivers/mmc/host/mtk-sd.c
-> +++ b/drivers/mmc/host/mtk-sd.c
-> @@ -22,6 +22,7 @@
->   #include <linux/slab.h>
->   #include <linux/spinlock.h>
->   #include <linux/interrupt.h>
-> +#include <linux/reset.h>
->   
->   #include <linux/mmc/card.h>
->   #include <linux/mmc/core.h>
-> @@ -434,6 +435,7 @@ struct msdc_host {
->   	struct msdc_save_para save_para; /* used when gate HCLK */
->   	struct msdc_tune_para def_tune_para; /* default tune setting */
->   	struct msdc_tune_para saved_tune_para; /* tune result of CMD21/CMD19 */
-> +	struct reset_control *reset;
->   };
->   
->   static const struct mtk_mmc_compatible mt8135_compat = {
-> @@ -1516,6 +1518,12 @@ static void msdc_init_hw(struct msdc_host *host)
->   	u32 val;
->   	u32 tune_reg = host->dev_comp->pad_tune_reg;
->   
-> +	if (host->reset) {
-> +		reset_control_assert(host->reset);
-> +		usleep_range(10, 50);
-> +		reset_control_deassert(host->reset);
-> +	}
-> +
->   	/* Configure to MMC/SD mode, clock free running */
->   	sdr_set_bits(host->base + MSDC_CFG, MSDC_CFG_MODE | MSDC_CFG_CKPDN);
->   
-> @@ -2273,6 +2281,11 @@ static int msdc_drv_probe(struct platform_device *pdev)
->   	if (IS_ERR(host->src_clk_cg))
->   		host->src_clk_cg = NULL;
->   
-> +	host->reset = devm_reset_control_get_optional_exclusive(&pdev->dev,
-> +								"hrst");
-> +	if (IS_ERR(host->reset))
-> +		return PTR_ERR(host->reset);
-> +
->   	host->irq = platform_get_irq(pdev, 0);
->   	if (host->irq < 0) {
->   		ret = -EINVAL;
-> 
+>
+> >
+> >
+> > >
+> > > When the kernel sends the CMD0 to wake up the eMMC from sleep, at
+> > > system resume for example, it all works fine, I guess. What is the
+> > > difference?
+> >
+> > On system resume the hardware will not try to put the eMMC device back
+> > into boot mode.
+>
+> I see.
+>
+> Does your host driver support HW busy signalling, so DAT0 is monitored
+> for de-assertion to confirm the CMD5 is completed by the kernel - or
+> do you rely on the per card sleep timeout to be used in mmc_sleep()?
+
+We use the per card sleep delay.
+
+>
+> Additionally, I wonder about what options you have to reset the eMMC?
+> Can we use something along the lines of
+> drivers/mmc/core/pwrseq_emmc.c? If it's not possible to do a HW reset,
+> we could try sending CMD0 with argument being '0' in the reset path.
+
+The problem is that the system is rebooting and it's the hardware that
+automatically sends the CMD0/0xf0f0f0f0 because there's no software
+running yet. This can't be changed.
+
+>
+> What do you think?
+>
+> >
+> > Al
+> >
+> > >
+> > > > The fix is to add a quirk that avoids sending the SLEEP command
+> > > > and to use MMC_FIXUP to set the quirk for these Micron devices.
+> > >
+> > > I am not sure this is Micron device specific, but rather some it's a
+> > > driver/platform bug. Maybe on the kernel side or in the bootloader
+> > > code.
+> > >
+>
+> Kind regards
+> Uffe
+>
+> > >
+> > > >
+> > > > Signed-off-by: Al Cooper <alcooperx@gmail.com>
+> > > > ---
+> > > >  drivers/mmc/core/mmc.c    | 3 ++-
+> > > >  drivers/mmc/core/quirks.h | 8 ++++++++
+> > > >  include/linux/mmc/card.h  | 1 +
+> > > >  3 files changed, 11 insertions(+), 1 deletion(-)
+> > > >
+> > > > diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> > > > index 4203303f946a..4d69e8f8fe59 100644
+> > > > --- a/drivers/mmc/core/mmc.c
+> > > > +++ b/drivers/mmc/core/mmc.c
+> > > > @@ -1895,7 +1895,8 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+> > > >
+> > > >  static int mmc_can_sleep(struct mmc_card *card)
+> > > >  {
+> > > > -       return (card && card->ext_csd.rev >= 3);
+> > > > +       return card && card->ext_csd.rev >= 3 &&
+> > > > +               ((card->quirks & MMC_QUIRK_BROKEN_SLEEP) == 0);
+> > > >  }
+> > > >
+> > > >  static int mmc_sleep(struct mmc_host *host)
+> > > > diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h
+> > > > index 472fa2fdcf13..7263187b6323 100644
+> > > > --- a/drivers/mmc/core/quirks.h
+> > > > +++ b/drivers/mmc/core/quirks.h
+> > > > @@ -99,6 +99,14 @@ static const struct mmc_fixup mmc_blk_fixups[] = {
+> > > >         MMC_FIXUP("V10016", CID_MANFID_KINGSTON, CID_OEMID_ANY, add_quirk_mmc,
+> > > >                   MMC_QUIRK_TRIM_BROKEN),
+> > > >
+> > > > +       /*
+> > > > +        * Some Micron eMMC devices will not go into boot mode on
+> > > > +        * CMD0 arg: 0XF0F0F0F0 after going into SLEEP state.
+> > > > +        * This will hang a reboot.
+> > > > +        */
+> > > > +       MMC_FIXUP(CID_NAME_ANY, CID_MANFID_NUMONYX, 0x014e, add_quirk_mmc,
+> > > > +                 MMC_QUIRK_BROKEN_SLEEP),
+> > > > +
+> > > >         END_FIXUP
+> > > >  };
+> > > >
+> > > > diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> > > > index 7d46411ffaa2..0cdddcb5e17d 100644
+> > > > --- a/include/linux/mmc/card.h
+> > > > +++ b/include/linux/mmc/card.h
+> > > > @@ -270,6 +270,7 @@ struct mmc_card {
+> > > >  #define MMC_QUIRK_BROKEN_IRQ_POLLING   (1<<11) /* Polling SDIO_CCCR_INTx could create a fake interrupt */
+> > > >  #define MMC_QUIRK_TRIM_BROKEN  (1<<12)         /* Skip trim */
+> > > >  #define MMC_QUIRK_BROKEN_HPI   (1<<13)         /* Disable broken HPI support */
+> > > > +#define MMC_QUIRK_BROKEN_SLEEP (1<<14)         /* Broken sleep mode */
+> > > >
+> > > >         bool                    reenable_cmdq;  /* Re-enable Command Queue */
+> > > >
+> > > > --
+> > > > 2.17.1
+> > > >
