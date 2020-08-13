@@ -2,80 +2,88 @@ Return-Path: <SRS0=OPc0=BX=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.4 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,MIME_BASE64_TEXT,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	UNPARSEABLE_RELAY,USER_AGENT_GIT autolearn=unavailable autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-4.0 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CD76FC433E4
-	for <linux-mmc@archiver.kernel.org>; Thu, 13 Aug 2020 09:07:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 05FADC433DF
+	for <linux-mmc@archiver.kernel.org>; Thu, 13 Aug 2020 09:27:56 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9449D2074D
-	for <linux-mmc@archiver.kernel.org>; Thu, 13 Aug 2020 09:07:39 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CD9FF21775
+	for <linux-mmc@archiver.kernel.org>; Thu, 13 Aug 2020 09:27:55 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=mediatek.com header.i=@mediatek.com header.b="b7xCoKf8"
+	dkim=pass (1024-bit key) header.d=gmx.net header.i=@gmx.net header.b="XU2DRv/M"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726637AbgHMJHb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 13 Aug 2020 05:07:31 -0400
-Received: from mailgw02.mediatek.com ([210.61.82.184]:30433 "EHLO
-        mailgw02.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1726204AbgHMJHb (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Aug 2020 05:07:31 -0400
-X-UUID: b28c1db532aa4cf291066c0ffc851c14-20200813
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=mediatek.com; s=dk;
-        h=Content-Transfer-Encoding:Content-Type:MIME-Version:References:In-Reply-To:Message-ID:Date:Subject:CC:To:From; bh=v5RL6V9x3ufySZ6lQXXP3W0N4mG04Wkwj8+hcLlIG0M=;
-        b=b7xCoKf8OA74GZtLEi66e55I4YMaROmG4DF5OsPC9td9b0BXYWuxPfmi+/v3LaLCdHCt7dEJwbjV90HzRjngfqHCAKW1PutW1/KZP0/KjwoMnkJ9T7Bf6M1zKlIh44BGirkq8EEmn958/9B1Y8VgrNppQX1xsMV5yGUoEERoIGo=;
-X-UUID: b28c1db532aa4cf291066c0ffc851c14-20200813
-Received: from mtkcas07.mediatek.inc [(172.21.101.84)] by mailgw02.mediatek.com
-        (envelope-from <wenbin.mei@mediatek.com>)
-        (Cellopoint E-mail Firewall v4.1.10 Build 0809 with TLS)
-        with ESMTP id 1594527651; Thu, 13 Aug 2020 17:07:21 +0800
-Received: from MTKCAS06.mediatek.inc (172.21.101.30) by
- mtkmbs07n2.mediatek.inc (172.21.101.141) with Microsoft SMTP Server (TLS) id
- 15.0.1497.2; Thu, 13 Aug 2020 17:07:19 +0800
-Received: from localhost.localdomain (10.17.3.153) by MTKCAS06.mediatek.inc
- (172.21.101.73) with Microsoft SMTP Server id 15.0.1497.2 via Frontend
- Transport; Thu, 13 Aug 2020 17:07:18 +0800
-From:   Wenbin Mei <wenbin.mei@mediatek.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>
-CC:     Chaotian Jing <chaotian.jing@mediatek.com>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
+        id S1726167AbgHMJ1y (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 13 Aug 2020 05:27:54 -0400
+Received: from mout.gmx.net ([212.227.17.20]:48673 "EHLO mout.gmx.net"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726048AbgHMJ1x (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 13 Aug 2020 05:27:53 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=gmx.net;
+        s=badeba3b8450; t=1597310848;
+        bh=QQgcAqFsQMdctRYRQQkFM4/FaAdJSbAly6eNGHWh7JY=;
+        h=X-UI-Sender-Class:From:To:Cc:Subject:Date:In-Reply-To:References;
+        b=XU2DRv/M7Qr/SvQ4xb30m4g28JCoCIPLm6mmgWJQR0UE8+iK6wvgOkE9T31svAh8K
+         RCM9gAi7SG7BudQpY4+Hx3Ya6rgtF4G/3PewRpJ3m/6UDmlrxu1hWkgpRfK0RXpV+Q
+         Qg73xMfvZy9980EHBipZMpFjdr6MaV+TdayPqbMk=
+X-UI-Sender-Class: 01bb95c1-4bf8-414a-932a-4f6e2808ef9c
+Received: from [185.75.75.198] ([185.75.75.198]) by web-mail.gmx.net
+ (3c-app-gmx-bap04.server.lan [172.19.172.74]) (via HTTP); Thu, 13 Aug 2020
+ 11:27:28 +0200
+MIME-Version: 1.0
+Message-ID: <trinity-ba9f3a8a-4588-48d3-8131-ce2a7ab5403e-1597310848667@3c-app-gmx-bap04>
+From:   Frank Wunderlich <frank-w@public-files.de>
+To:     Wenbin Mei <wenbin.mei@mediatek.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>, devicetree@vger.kernel.org,
+        srv_heupstream@mediatek.com, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-mediatek@lists.infradead.org,
+        linux-arm-kernel@lists.infradead.org,
         Philipp Zabel <p.zabel@pengutronix.de>,
-        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <linux-mediatek@lists.infradead.org>,
-        <linux-kernel@vger.kernel.org>, <srv_heupstream@mediatek.com>,
-        Wenbin Mei <wenbin.mei@mediatek.com>, <stable@vger.kernel.org>
-Subject: [v4,2/3] arm64: dts: mt7622: add reset node for mmc device
-Date:   Thu, 13 Aug 2020 17:06:17 +0800
-Message-ID: <20200813090618.28009-3-wenbin.mei@mediatek.com>
-X-Mailer: git-send-email 2.18.0
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        Chaotian Jing <chaotian.jing@mediatek.com>
+Subject: Aw: [v4, 0/3] mmc: mediatek: add optional reset property mmc:
+ mediatek: add optional module reset property arm64: dts: mt7622: add reset
+ node for mmc device Documentation/devicetree/bindings/mmc/mtk-sd.txt | 2 ++
+ arch/arm64/boot/dts/mediatek/mt7622.d
+Content-Type: text/plain; charset=UTF-8
+Date:   Thu, 13 Aug 2020 11:27:28 +0200
+Importance: normal
+Sensitivity: Normal
 In-Reply-To: <20200813090618.28009-1-wenbin.mei@mediatek.com>
 References: <20200813090618.28009-1-wenbin.mei@mediatek.com>
-MIME-Version: 1.0
-Content-Type: text/plain
-X-MTK:  N
-Content-Transfer-Encoding: base64
+X-UI-Message-Type: mail
+X-Priority: 3
+X-Provags-ID: V03:K1:mXGJHHF88bG10JaMCy6eru/9VAgIE4rI2I0CB2gNmVZ1v9dYAOF3QLGE1FofnG1OstrvN
+ KvylGzK5GMDiyOno6TRQVoetCMIsdujumuFaURvjxwPLw8J7eEtyRWW3TZU9CuRo/nCSWvDCvfnQ
+ sXHdssRZ8ti/DhpGRn4ubmTmP/ocOwo5VUKfORmwt0Qt1Em77zg2+Q2YV39v0nL5niPDaUFYr4Lz
+ K54oLCH6eOWM5iwr+NTcggvyefPblhKiFYN7HZRzUbTXTbgax995RoUe60r5+xPg/qFizEKdpO5Q
+ iQ=
+X-UI-Out-Filterresults: notjunk:1;V03:K0:Vw33wiRjJGk=:p++MCWCwlhii3JRTH6pCA8
+ 8WIzt/TEIBJ4unZ8aragxwA2U3wg1XZGiKYnR3e8b5VPNV9nl9lmhde0bBDjMUj4DTYCU5bs6
+ qXoBZzlmOem/1Vf3EGxPlO7vxCPlomiH6fbc7U1XmRHSB/NQvCSXqRfcjIqW5AVPBxmX1hqie
+ x0zo8kAjNmj8AbHm/kxvLTCfrn4/YaaHl70652fQ10Me84Bmn5sCjB5c8zFrALc+xInNN4JN2
+ su1uyZTasOqQKH3/VZWJVOBuiOpM7Kqo1WXaxZXWfcDUWiCKf1sGDd9IdG0GRFWT0BOF78dPZ
+ Y8qE3JrkBuPgwccKNEIki/hgqALwb/ecmyONQ3HRRbv7PHexLQBrtX1CsgjHYFw3OSsdNIMOw
+ fdSDZw0b3vaJlJ66fe82fQKsbp4TI29F1JphoESRDJXL5uLQllHTpu7OowVRxirjcFgi1Tk4C
+ wOrOdyDkLjxLGuAMm4t5bYmg7sJjlMq2MMb4siJDaExN+tcQckr3daXZY27FJ1OaiBseKY0A/
+ laQy6hITzbHX/QgdJvIrTXRp/CR7MqPiuH5sm45RmDycUtJGWhK2mDfaaPH3yfp2fUspmKwPj
+ 3gYuoFUdOKkI4+QxUpdzrMK1fKMHYpsNTN154qKFFAIfmnvTeUj8seEb/qeEUylk0h+KEX7ov
+ XTaLna95HIosfil7jXgStJ0WRVqvgX3II4ftvv0azxnR9cI+U37ORAN+MQxiJoi3MGVg=
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-VGhpcyBjb21taXQgYWRkcyByZXNldCBub2RlIGZvciBtbWMgZGV2aWNlLg0KDQpDYzogPHN0YWJs
-ZUB2Z2VyLmtlcm5lbC5vcmc+ICMgdjUuNCsNCkZpeGVzOiA5NjY1ODBhZDIzNmUgKCJtbWM6IG1l
-ZGlhdGVrOiBhZGQgc3VwcG9ydCBmb3IgTVQ3NjIyIFNvQyIpDQpTaWduZWQtb2ZmLWJ5OiBXZW5i
-aW4gTWVpIDx3ZW5iaW4ubWVpQG1lZGlhdGVrLmNvbT4NClRlc3RlZC1ieTogRnJhbmsgV3VuZGVy
-bGljaCA8ZnJhbmstd0BwdWJsaWMtZmlsZXMuZGU+DQotLS0NCiBhcmNoL2FybTY0L2Jvb3QvZHRz
-L21lZGlhdGVrL210NzYyMi5kdHNpIHwgMiArKw0KIDEgZmlsZSBjaGFuZ2VkLCAyIGluc2VydGlv
-bnMoKykNCg0KZGlmZiAtLWdpdCBhL2FyY2gvYXJtNjQvYm9vdC9kdHMvbWVkaWF0ZWsvbXQ3NjIy
-LmR0c2kgYi9hcmNoL2FybTY0L2Jvb3QvZHRzL21lZGlhdGVrL210NzYyMi5kdHNpDQppbmRleCAx
-YTM5ZTBlZjc3NmIuLjViOWVjMDMyY2U4ZCAxMDA2NDQNCi0tLSBhL2FyY2gvYXJtNjQvYm9vdC9k
-dHMvbWVkaWF0ZWsvbXQ3NjIyLmR0c2kNCisrKyBiL2FyY2gvYXJtNjQvYm9vdC9kdHMvbWVkaWF0
-ZWsvbXQ3NjIyLmR0c2kNCkBAIC02ODYsNiArNjg2LDggQEANCiAJCWNsb2NrcyA9IDwmcGVyaWNm
-ZyBDTEtfUEVSSV9NU0RDMzBfMF9QRD4sDQogCQkJIDwmdG9wY2tnZW4gQ0xLX1RPUF9NU0RDNTBf
-MF9TRUw+Ow0KIAkJY2xvY2stbmFtZXMgPSAic291cmNlIiwgImhjbGsiOw0KKwkJcmVzZXRzID0g
-PCZwZXJpY2ZnIE1UNzYyMl9QRVJJX01TREMwX1NXX1JTVD47DQorCQlyZXNldC1uYW1lcyA9ICJo
-cnN0IjsNCiAJCXN0YXR1cyA9ICJkaXNhYmxlZCI7DQogCX07DQogDQotLSANCjIuMTguMA0K
+Hi,
+
+it looks like you still miss a blank line between subject and your text in cover-letter
+
+regards Frank
+
+> Betreff: [v4, 0/3] mmc: mediatek: add optional reset property mmc: mediatek: add optional module reset property arm64: dts: mt7622: add reset node for mmc device Documentation/devicetree/bindings/mmc/mtk-sd.txt | 2 ++ arch/arm64/boot/dts/mediatek/mt7622.dtsi | 2 ++ drivers/mmc/host/mtk-sd.c | 13 +++++++++++++ 3 files changed, 17 insertions(+)
+>
+> --
+> 2.18.0
 
