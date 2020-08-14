@@ -2,123 +2,158 @@ Return-Path: <SRS0=tY5E=BY=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.3 required=3.0 tests=BAYES_00,DKIM_INVALID,
-	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-7.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 37B21C433E4
-	for <linux-mmc@archiver.kernel.org>; Fri, 14 Aug 2020 07:15:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 68A51C433E8
+	for <linux-mmc@archiver.kernel.org>; Fri, 14 Aug 2020 14:51:42 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 00D9D22B43
-	for <linux-mmc@archiver.kernel.org>; Fri, 14 Aug 2020 07:15:18 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (1024-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="3JdRCJ0C"
+	by mail.kernel.org (Postfix) with ESMTP id 44D0620855
+	for <linux-mmc@archiver.kernel.org>; Fri, 14 Aug 2020 14:51:42 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1597416702;
+	bh=2azDCJAW0WmwzjFoNP1+Xf1baXp64Ykp/VUpBlKju0s=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:List-ID:From;
+	b=0v768cN60wiZYKAU2wpJyRSfFY1Ep9+hNIqIeEv2b0Hk/UEKDV1szePBgCkFWMhs6
+	 q3o76iZAiAsalKtSR+tUx1eoTD96xGAyWFjKwtn+3Em5CR937JeGai+/VwjPWqKK9r
+	 eNZ6z3KYOvu3YQy5FaCbp2IUJBIbJw/ilWllhvE8=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726735AbgHNHPQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 14 Aug 2020 03:15:16 -0400
-Received: from www.zeus03.de ([194.117.254.33]:38674 "EHLO mail.zeus03.de"
+        id S1728278AbgHNOvk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 14 Aug 2020 10:51:40 -0400
+Received: from mail.kernel.org ([198.145.29.99]:43326 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727075AbgHNHPF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 14 Aug 2020 03:15:05 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
-        date:from:to:cc:subject:message-id:references:mime-version
-        :content-type:in-reply-to; s=k1; bh=ZU9imafoyARZmgeI5Co4yxGTIOME
-        Q58g8rPkUCvXOJM=; b=3JdRCJ0CIvT1IxfewxkarbtZMzRmDGd5VBj315vRh1cZ
-        Kuep6UoeHklQgwNBimPhgdVrPVK8i1CslyOhAQcLGqeK1QyZO/Cf67pRSAk4DhVj
-        gSmvvRmTu1GO2+8zOYkkWp4oEC482UkGt8497e3ss0Jt1NZI8Wsb39cFrr4b0zQ=
-Received: (qmail 1671220 invoked from network); 14 Aug 2020 09:15:03 +0200
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 14 Aug 2020 09:15:03 +0200
-X-UD-Smtp-Session: l3s3148p1@6HX9LdGskI0gAwDPXwkTAFunKC2j/yWQ
-Date:   Fri, 14 Aug 2020 09:15:00 +0200
-From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
-To:     Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-renesas-soc@vger.kernel.org" 
-        <linux-renesas-soc@vger.kernel.org>
-Subject: Re: [PATCH 2/2] mmc: renesas_sdhi: keep SCC clock active when tuning
-Message-ID: <20200814071500.GA9410@ninjato>
-References: <20200604112040.22144-1-wsa+renesas@sang-engineering.com>
- <20200604112040.22144-3-wsa+renesas@sang-engineering.com>
- <TY2PR01MB36923A1D7091431CE3F73195D8850@TY2PR01MB3692.jpnprd01.prod.outlook.com>
- <20200608212702.GD917@ninjato>
- <TY2PR01MB3692310754A6B4D6A05DADF0D8820@TY2PR01MB3692.jpnprd01.prod.outlook.com>
+        id S1726193AbgHNOvi (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 14 Aug 2020 10:51:38 -0400
+Received: from mail-ot1-f54.google.com (mail-ot1-f54.google.com [209.85.210.54])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id E2C6E208B3;
+        Fri, 14 Aug 2020 14:51:36 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1597416697;
+        bh=2azDCJAW0WmwzjFoNP1+Xf1baXp64Ykp/VUpBlKju0s=;
+        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+        b=bjfRL+mBKQdeXNIPuXX+sib3fYs2/XZWJHPOjPd4x196xwXtWkEnxkwGCGKCP+vXy
+         CxGeqKP68MgYI300g+hNTJd4uQCvZb/zOsnBdJ/cEKlyynKbLGyhuMbkA+R9Y9MLDY
+         rajai6Sqx8HGb8L035zTD4t0BSpxCLooD+BQeHTA=
+Received: by mail-ot1-f54.google.com with SMTP id t7so7776444otp.0;
+        Fri, 14 Aug 2020 07:51:36 -0700 (PDT)
+X-Gm-Message-State: AOAM531YqcS4MUxvcGOYChGHRoRMcVsEFsDHYR5LbkHA90TiOSl6Dmh8
+        R/b9TCtT0vzAo6TEwQr7L0CGI1coatN8YZannA==
+X-Google-Smtp-Source: ABdhPJzAQOVgwIRLTeJz+4kS8jI7uSM4yy2bV/QUkiEz2152JH8sgfiQxJMSY+wk4abg95jsoFr6h5Ymz6ZJoeFhB2g=
+X-Received: by 2002:a05:6830:1b79:: with SMTP id d25mr1995774ote.107.1597416696235;
+ Fri, 14 Aug 2020 07:51:36 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="J2SCkAp4GZ/dPZZf"
-Content-Disposition: inline
-In-Reply-To: <TY2PR01MB3692310754A6B4D6A05DADF0D8820@TY2PR01MB3692.jpnprd01.prod.outlook.com>
-User-Agent: Mutt/1.10.1 (2018-07-13)
+References: <20200812203618.2656699-1-robh@kernel.org> <d5808e9c-07fe-1c28-b9a6-a16abe9df458@lucaceresoli.net>
+In-Reply-To: <d5808e9c-07fe-1c28-b9a6-a16abe9df458@lucaceresoli.net>
+From:   Rob Herring <robh@kernel.org>
+Date:   Fri, 14 Aug 2020 08:51:24 -0600
+X-Gmail-Original-Message-ID: <CAL_JsqKekx0VO4NROwLrgrU8+L584HaLHM9i3kCZvU+g5myeGw@mail.gmail.com>
+Message-ID: <CAL_JsqKekx0VO4NROwLrgrU8+L584HaLHM9i3kCZvU+g5myeGw@mail.gmail.com>
+Subject: Re: [PATCH] dt-bindings: Whitespace clean-ups in schema files
+To:     Luca Ceresoli <luca@lucaceresoli.net>
+Cc:     devicetree@vger.kernel.org,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "moderated list:ARM/FREESCALE IMX / MXC ARM ARCHITECTURE" 
+        <linux-arm-kernel@lists.infradead.org>,
+        linux-clk <linux-clk@vger.kernel.org>,
+        dri-devel <dri-devel@lists.freedesktop.org>,
+        linux-spi <linux-spi@vger.kernel.org>,
+        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
+        "open list:REMOTE PROCESSOR (REMOTEPROC) SUBSYSTEM" 
+        <linux-remoteproc@vger.kernel.org>,
+        Linux HWMON List <linux-hwmon@vger.kernel.org>,
+        Linux I2C <linux-i2c@vger.kernel.org>,
+        Linux Fbdev development list <linux-fbdev@vger.kernel.org>,
+        "open list:IIO SUBSYSTEM AND DRIVERS" <linux-iio@vger.kernel.org>,
+        Linux Input <linux-input@vger.kernel.org>,
+        "open list:THERMAL" <linux-pm@vger.kernel.org>,
+        Linux Media Mailing List <linux-media@vger.kernel.org>,
+        Linux-ALSA <alsa-devel@alsa-project.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        MTD Maling List <linux-mtd@lists.infradead.org>,
+        netdev <netdev@vger.kernel.org>,
+        "open list:REAL TIME CLOCK (RTC) SUBSYSTEM" 
+        <linux-rtc@vger.kernel.org>,
+        "open list:SERIAL DRIVERS" <linux-serial@vger.kernel.org>,
+        Linux USB List <linux-usb@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+On Thu, Aug 13, 2020 at 4:31 AM Luca Ceresoli <luca@lucaceresoli.net> wrote:
+>
+> Hi Rob,
+>
+> On 12/08/20 22:36, Rob Herring wrote:
+> > Clean-up incorrect indentation, extra spaces, long lines, and missing
+> > EOF newline in schema files. Most of the clean-ups are for list
+> > indentation which should always be 2 spaces more than the preceding
+> > keyword.
+> >
+> > Found with yamllint (which I plan to integrate into the checks).
+>
+> [...]
+>
+> > diff --git a/Documentation/devicetree/bindings/clock/idt,versaclock5.yaml b/Documentation/devicetree/bindings/clock/idt,versaclock5.yaml
+> > index 3d4e1685cc55..28c6461b9a9a 100644
+> > --- a/Documentation/devicetree/bindings/clock/idt,versaclock5.yaml
+> > +++ b/Documentation/devicetree/bindings/clock/idt,versaclock5.yaml
+> > @@ -95,10 +95,10 @@ allOf:
+> >        # Devices without builtin crystal
+> >        properties:
+> >          clock-names:
+> > -            minItems: 1
+> > -            maxItems: 2
+> > -            items:
+> > -              enum: [ xin, clkin ]
+> > +          minItems: 1
+> > +          maxItems: 2
+> > +          items:
+> > +            enum: [ xin, clkin ]
+> >          clocks:
+> >            minItems: 1
+> >            maxItems: 2
+>
+> Thanks for noticing, LGTM.
+>
+> [...]
+>
+> > diff --git a/Documentation/devicetree/bindings/input/touchscreen/touchscreen.yaml b/Documentation/devicetree/bindings/input/touchscreen/touchscreen.yaml
+> > index d7dac16a3960..36dc7b56a453 100644
+> > --- a/Documentation/devicetree/bindings/input/touchscreen/touchscreen.yaml
+> > +++ b/Documentation/devicetree/bindings/input/touchscreen/touchscreen.yaml
+> > @@ -33,8 +33,8 @@ properties:
+> >      $ref: /schemas/types.yaml#/definitions/uint32
+> >
+> >    touchscreen-min-pressure:
+> > -    description: minimum pressure on the touchscreen to be achieved in order for the
+> > -                 touchscreen driver to report a touch event.
+> > +    description: minimum pressure on the touchscreen to be achieved in order
+> > +      for the touchscreen driver to report a touch event.
+>
+> Out of personal taste, I find the original layout more pleasant and
+> readable. This third option is also good, especially for long descriptions:
+>
+>   description:
+>     minimum pressure on the touchscreen to be achieved in order for the
+>     touchscreen driver to report a touch event.
+>
+> At first glance yamllint seems to support exactly these two by default:
+>
+> > With indentation: {spaces: 4, check-multi-line-strings: true}
 
---J2SCkAp4GZ/dPZZf
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Turning on check-multi-line-strings results in 10K+ warnings, so no.
 
-Hi Shimoda-san,tftp 0x58000000 r8a77965-salvator-xs.dtb; tftp 0x50000000 Im=
-age-m3n-wsa; booti 0x50000000 - 0x58000000
+The other issue is the style ruamel.yaml wants to write out is as the
+patch does above. This matters when doing some scripted
+transformations where we read in the files and write them back out. I
+can somewhat work around that by first doing a pass with no changes
+and then another pass with the actual changes, but that's completely
+scriptable. Hopefully, ruamel learns to preserve the style better.
 
-> > > > +	/* Tuning done, no special handling for SCC clock needed anymore =
-*/
-> > > > +	priv->keep_scc_freq =3D false;
-> > > > +
-> > >
-> > > Setting keep_scc_freq to false is only here. But, I'm thinking
-> > > we should set it in some error paths like below somehow too:
-> > >  - error paths before hs400_complete() in mmc_select_hs400().
-> > >  - error path of mmc_execute_tuning() in mmc_retune().
-> >=20
-> > Hmm, I guess you are right. That would kind of spoil my approach taken
-> > here. Maybe we need another flag in the core like 'doing_tune' to
-> > supplement 'doing_retune', so or driver knows when any kind of tuning is
-> > going on?
->=20
-> Adding such a new flag is better, I think.
-
-So, I added a flag to the MMC core and I think it should work. However,
-I can't test it currently because, sadly, the issue disappeared again :(
-
-I even can't reproduce the issue with the same codebase and config which
-I used when I was working last time on it. And back then, the issue was
-happening. I am at a loss currently what really triggers this hang.
-
-I added some code to enforce reading something from the SCC with the
-hclk disabled. However, that reading works fine today here, no hang.
-
-So, it seems that keeping hclk enabled will fix the hang. However, it
-doesn't look like it will hang just when we allow to disable it. Seems
-something else is part of the equation, too...
-
-I kept trying to figure this out for the last two days, but no success
-so far. Will keep you updated.
-
-Thanks,
-
-   Wolfram
-
-
---J2SCkAp4GZ/dPZZf
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAl82OfAACgkQFA3kzBSg
-KbZMMg/+L33xWIdwYP0gtUMpfnMOY54bVtzTaJ4pswSVDxBR9CHlfNA4kd/L+7xe
-F02p3fXegQA15o42aescBFnp/xp8fgupq9WbI7cwFHxsKTRIAbL5zvd/D5hwTz9c
-Hcf/6XCYE0S0DlnuwT/+osVy60erd5jYUHcA5NS9L/Q7o8mhjmy/sH/PKmztPWOq
-PfApraWyi90CZwKe1eG7nDvuI65GZEi89gZxViyvzDdbFQRXENqQZZ2zLXHza72R
-dU3eGGYd8v3aybnuLGoJgNNLP41GVobIdC6NHAkLqoTjoCaLR8BQ5aoJtOmOMB24
-PWdGyO75uDPGHV4inMF+4f80UrxO6KbxxhSBWQ3AcVo/zt9rwgRjSgQ9ReA1Gm3/
-YWVHFN6zW4CdLL8dUkGW1KW9ahqGWtZhUhHusp+B+ZA0/DLTAFlid4bv1RK+NNDT
-pfDd1Wuxtex/HCsN09RoSjAly1eCY7KnWqMMrTCp2zQ9+oth0WhzVKATTvntnBsT
-/xlek8laql6urGt1M4+h4IUL/SBE/FzR/zm5jmhlmC1/uUCCSz2vHHJ5XRIdfpQj
-HDvVXf1B/GAQP3S2erasOKvtbpdhmAGsd7Zjrk1xR1QMfXKPIidWUEBGzs2eL7VU
-3mS9ESTrsvovvYvEbPzZD5IipJvUOjY/6rMzkGZgXyOh+uW2RFc=
-=LzUq
------END PGP SIGNATURE-----
-
---J2SCkAp4GZ/dPZZf--
+Rob
