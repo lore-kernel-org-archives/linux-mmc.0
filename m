@@ -2,70 +2,78 @@ Return-Path: <SRS0=tY5E=BY=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.0 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-4.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 97B0DC433E1
-	for <linux-mmc@archiver.kernel.org>; Fri, 14 Aug 2020 19:10:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9669DC433E4
+	for <linux-mmc@archiver.kernel.org>; Fri, 14 Aug 2020 22:15:06 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 79FB420791
-	for <linux-mmc@archiver.kernel.org>; Fri, 14 Aug 2020 19:10:07 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 68FE12074D
+	for <linux-mmc@archiver.kernel.org>; Fri, 14 Aug 2020 22:15:06 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="cpmo8Z7L"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727112AbgHNTKG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 14 Aug 2020 15:10:06 -0400
-Received: from mail.manjaro.org ([176.9.38.148]:52426 "EHLO mail.manjaro.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726761AbgHNTKG (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 14 Aug 2020 15:10:06 -0400
-X-Greylist: delayed 1171 seconds by postgrey-1.27 at vger.kernel.org; Fri, 14 Aug 2020 15:10:06 EDT
-Received: from localhost (localhost [127.0.0.1])
-        by mail.manjaro.org (Postfix) with ESMTP id 922D7E1446;
-        Fri, 14 Aug 2020 20:50:34 +0200 (CEST)
-X-Virus-Scanned: Debian amavisd-new at manjaro.org
-Received: from mail.manjaro.org ([127.0.0.1])
-        by localhost (manjaro.org [127.0.0.1]) (amavisd-new, port 10024)
-        with ESMTP id XD5iMQt1uVXx; Fri, 14 Aug 2020 20:50:31 +0200 (CEST)
-From:   Tobias Schramm <t.schramm@manjaro.org>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        Tobias Schramm <t.schramm@manjaro.org>
-Subject: [PATCH] mmc: mmc_spi: fix timeout calculation
-Date:   Fri, 14 Aug 2020 20:50:11 +0200
-Message-Id: <20200814185011.3252020-1-t.schramm@manjaro.org>
+        id S1726713AbgHNWPC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 14 Aug 2020 18:15:02 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53370 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726213AbgHNWPB (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Aug 2020 18:15:01 -0400
+Received: from mail-ej1-x641.google.com (mail-ej1-x641.google.com [IPv6:2a00:1450:4864:20::641])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D666BC061385
+        for <linux-mmc@vger.kernel.org>; Fri, 14 Aug 2020 15:14:59 -0700 (PDT)
+Received: by mail-ej1-x641.google.com with SMTP id jp10so11485963ejb.0
+        for <linux-mmc@vger.kernel.org>; Fri, 14 Aug 2020 15:14:59 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:cc;
+        bh=I1P9jSvj8KsgaDMEv65UiEF9Z+hJk+AMaAtGqjiPwHk=;
+        b=cpmo8Z7L00clOxaEygKbxnGwKvrxuJvVUvlujmlizi9+0bQBNLRlbFUu7fecqHsIpn
+         f3+bVXFK+H8VK1ymJV4wxOKKu2kF55hLWv6RlN5rOcQlaSJAxZ+CkC+R3bhG1aMmrxLi
+         GMQjLUGc5oDee3BjY6uYJ5Ofz8E7kHHM2uZ0pOUDrHH0D/OAK0prvli+7kFsEgfT4zMa
+         wixUAL0T/iH1UygkhlTk8ewnTmUybC72NlAQlOY+EnoC+xuARx/Mz8JlHUZPH+/vj+ia
+         vPF+M1G3bJ7J4nCtD7kLwJ3wIyCUTAi8P+VGqEl3xCVxObsC9OR6Zb7CicL/92e79rT9
+         /J6g==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:cc;
+        bh=I1P9jSvj8KsgaDMEv65UiEF9Z+hJk+AMaAtGqjiPwHk=;
+        b=qzrlMVrAZIRhl2vqrjn6dHgNUj+lTyOs6MyIqOjE35UUI3I4DhUZf3yfl89jhXlUJq
+         5BS+LBSdiAy9FxlwdfNk03aKPYE2B0BN0XDOZE0SzZKXNCOnb0OmbwUR2lzjevN137lV
+         X2rZvwkKaSb770HO00C9URIfg4Wss+Ab2tWqRyYzDuU+uw7O09K08PveANpLW6mmvpJF
+         vwv729fMqrDCLPIj/cu3tx/ugDZ+amxDgCBTZfufyi6DKMldAJA3JHTFKYli8zihek0T
+         8IsKHRvQckmUo3JJUMfRyK17uVZbzhbEeZbfyJGCFpNLPpLIWhEzMsnURmiEFwHLE8sD
+         lfUw==
+X-Gm-Message-State: AOAM532vTSGvG6/YlU+8Vujm+FyU6YPbYbiuiuQHSwn9MD7ZK0pSQ+E2
+        FubttfyOqAO2qt00jPUJlj513s97zlTSqWtGD4M=
+X-Received: by 2002:a17:906:3445:: with SMTP id d5mt3766886ejb.348.1597443298656;
+ Fri, 14 Aug 2020 15:14:58 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20200814152201.254010-1-konradybcio@gmail.com>
+In-Reply-To: <20200814152201.254010-1-konradybcio@gmail.com>
+From:   Konrad Dybcio <konradybcio@gmail.com>
+Date:   Sat, 15 Aug 2020 00:14:22 +0200
+Message-ID: <CAMS8qEVHGE9Q9WO5-FfM0yWccjKA=Ayo3204ncYbg5KdVHBCFA@mail.gmail.com>
+Subject: Re: [PATCH 1/2] [-next] mmc: host: msm: Add optional full power cycle property.
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        linux-mmc@vger.kernel.org, DTML <devicetree@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-arm-msm <linux-arm-msm@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+To:     unlisted-recipients:; (no To-header on input)
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Previously the cycle timeout was converted to a microsecond value but
-then incorrectly treated as a nanosecond timeout. This patch changes
-the code to convert both the nanosecond timeout and the cycle timeout
-to a microsecond value and use that directly.
+As I mentioned in the next email, please ignore this patch. The whole
+idea is incorrect and does not solve the problem.
 
-Signed-off-by: Tobias Schramm <t.schramm@manjaro.org>
----
- drivers/mmc/host/mmc_spi.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/mmc/host/mmc_spi.c b/drivers/mmc/host/mmc_spi.c
-index 39bb1e30c2d7..f85e0ad896a9 100644
---- a/drivers/mmc/host/mmc_spi.c
-+++ b/drivers/mmc/host/mmc_spi.c
-@@ -882,9 +882,9 @@ mmc_spi_data_do(struct mmc_spi_host *host, struct mmc_command *cmd,
- 	else
- 		clock_rate = spi->max_speed_hz;
- 
--	timeout = data->timeout_ns +
-+	timeout = data->timeout_ns / 1000 +
- 		  data->timeout_clks * 1000000 / clock_rate;
--	timeout = usecs_to_jiffies((unsigned int)(timeout / 1000)) + 1;
-+	timeout = usecs_to_jiffies((unsigned int)timeout) + 1;
- 
- 	/* Handle scatterlist segments one at a time, with synch for
- 	 * each 512-byte block
--- 
-2.28.0
-
+Konrad
