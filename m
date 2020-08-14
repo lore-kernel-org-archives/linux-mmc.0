@@ -2,80 +2,123 @@ Return-Path: <SRS0=tY5E=BY=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.4 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,MIME_BASE64_TEXT,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	UNPARSEABLE_RELAY,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.3 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 17786C433DF
-	for <linux-mmc@archiver.kernel.org>; Fri, 14 Aug 2020 01:45:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 37B21C433E4
+	for <linux-mmc@archiver.kernel.org>; Fri, 14 Aug 2020 07:15:18 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E11B322B47
-	for <linux-mmc@archiver.kernel.org>; Fri, 14 Aug 2020 01:45:03 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 00D9D22B43
+	for <linux-mmc@archiver.kernel.org>; Fri, 14 Aug 2020 07:15:18 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=mediatek.com header.i=@mediatek.com header.b="B0vETmTK"
+	dkim=fail reason="signature verification failed" (1024-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="3JdRCJ0C"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726653AbgHNBow (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 13 Aug 2020 21:44:52 -0400
-Received: from mailgw02.mediatek.com ([210.61.82.184]:43893 "EHLO
-        mailgw02.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1726564AbgHNBov (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Aug 2020 21:44:51 -0400
-X-UUID: f87b5a846e634f77a0de72d80417c25c-20200814
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=mediatek.com; s=dk;
-        h=Content-Transfer-Encoding:Content-Type:MIME-Version:References:In-Reply-To:Message-ID:Date:Subject:CC:To:From; bh=v5RL6V9x3ufySZ6lQXXP3W0N4mG04Wkwj8+hcLlIG0M=;
-        b=B0vETmTKvsxBb1noaJDYlh3KsTjswjB7EtiTOAfgw2Xxx8YR8oXWdCTrfQn/VrquZm10/vkXB3rGY/6o1A26ip3jAl18USnaQWIO0ARVpCuLQwA3gEcYoLYdC8IXm9qfzv6NxjFELyiS7Ua4h7d8hOQeIe2eWRiRPIJV+5wO6Vk=;
-X-UUID: f87b5a846e634f77a0de72d80417c25c-20200814
-Received: from mtkcas08.mediatek.inc [(172.21.101.126)] by mailgw02.mediatek.com
-        (envelope-from <wenbin.mei@mediatek.com>)
-        (Cellopoint E-mail Firewall v4.1.10 Build 0809 with TLS)
-        with ESMTP id 1854550537; Fri, 14 Aug 2020 09:44:48 +0800
-Received: from mtkcas08.mediatek.inc (172.21.101.126) by
- mtkmbs07n2.mediatek.inc (172.21.101.141) with Microsoft SMTP Server (TLS) id
- 15.0.1497.2; Fri, 14 Aug 2020 09:44:47 +0800
-Received: from localhost.localdomain (10.17.3.153) by mtkcas08.mediatek.inc
- (172.21.101.73) with Microsoft SMTP Server id 15.0.1497.2 via Frontend
- Transport; Fri, 14 Aug 2020 09:44:46 +0800
-From:   Wenbin Mei <wenbin.mei@mediatek.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>
-CC:     Chaotian Jing <chaotian.jing@mediatek.com>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        Philipp Zabel <p.zabel@pengutronix.de>,
-        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <linux-mediatek@lists.infradead.org>,
-        <linux-kernel@vger.kernel.org>, <srv_heupstream@mediatek.com>,
-        Wenbin Mei <wenbin.mei@mediatek.com>, <stable@vger.kernel.org>
-Subject: [v5,2/3] arm64: dts: mt7622: add reset node for mmc device
-Date:   Fri, 14 Aug 2020 09:43:45 +0800
-Message-ID: <20200814014346.6496-3-wenbin.mei@mediatek.com>
-X-Mailer: git-send-email 2.18.0
-In-Reply-To: <20200814014346.6496-1-wenbin.mei@mediatek.com>
-References: <20200814014346.6496-1-wenbin.mei@mediatek.com>
+        id S1726735AbgHNHPQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 14 Aug 2020 03:15:16 -0400
+Received: from www.zeus03.de ([194.117.254.33]:38674 "EHLO mail.zeus03.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1727075AbgHNHPF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 14 Aug 2020 03:15:05 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
+        date:from:to:cc:subject:message-id:references:mime-version
+        :content-type:in-reply-to; s=k1; bh=ZU9imafoyARZmgeI5Co4yxGTIOME
+        Q58g8rPkUCvXOJM=; b=3JdRCJ0CIvT1IxfewxkarbtZMzRmDGd5VBj315vRh1cZ
+        Kuep6UoeHklQgwNBimPhgdVrPVK8i1CslyOhAQcLGqeK1QyZO/Cf67pRSAk4DhVj
+        gSmvvRmTu1GO2+8zOYkkWp4oEC482UkGt8497e3ss0Jt1NZI8Wsb39cFrr4b0zQ=
+Received: (qmail 1671220 invoked from network); 14 Aug 2020 09:15:03 +0200
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 14 Aug 2020 09:15:03 +0200
+X-UD-Smtp-Session: l3s3148p1@6HX9LdGskI0gAwDPXwkTAFunKC2j/yWQ
+Date:   Fri, 14 Aug 2020 09:15:00 +0200
+From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
+To:     Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-renesas-soc@vger.kernel.org" 
+        <linux-renesas-soc@vger.kernel.org>
+Subject: Re: [PATCH 2/2] mmc: renesas_sdhi: keep SCC clock active when tuning
+Message-ID: <20200814071500.GA9410@ninjato>
+References: <20200604112040.22144-1-wsa+renesas@sang-engineering.com>
+ <20200604112040.22144-3-wsa+renesas@sang-engineering.com>
+ <TY2PR01MB36923A1D7091431CE3F73195D8850@TY2PR01MB3692.jpnprd01.prod.outlook.com>
+ <20200608212702.GD917@ninjato>
+ <TY2PR01MB3692310754A6B4D6A05DADF0D8820@TY2PR01MB3692.jpnprd01.prod.outlook.com>
 MIME-Version: 1.0
-Content-Type: text/plain
-X-MTK:  N
-Content-Transfer-Encoding: base64
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="J2SCkAp4GZ/dPZZf"
+Content-Disposition: inline
+In-Reply-To: <TY2PR01MB3692310754A6B4D6A05DADF0D8820@TY2PR01MB3692.jpnprd01.prod.outlook.com>
+User-Agent: Mutt/1.10.1 (2018-07-13)
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-VGhpcyBjb21taXQgYWRkcyByZXNldCBub2RlIGZvciBtbWMgZGV2aWNlLg0KDQpDYzogPHN0YWJs
-ZUB2Z2VyLmtlcm5lbC5vcmc+ICMgdjUuNCsNCkZpeGVzOiA5NjY1ODBhZDIzNmUgKCJtbWM6IG1l
-ZGlhdGVrOiBhZGQgc3VwcG9ydCBmb3IgTVQ3NjIyIFNvQyIpDQpTaWduZWQtb2ZmLWJ5OiBXZW5i
-aW4gTWVpIDx3ZW5iaW4ubWVpQG1lZGlhdGVrLmNvbT4NClRlc3RlZC1ieTogRnJhbmsgV3VuZGVy
-bGljaCA8ZnJhbmstd0BwdWJsaWMtZmlsZXMuZGU+DQotLS0NCiBhcmNoL2FybTY0L2Jvb3QvZHRz
-L21lZGlhdGVrL210NzYyMi5kdHNpIHwgMiArKw0KIDEgZmlsZSBjaGFuZ2VkLCAyIGluc2VydGlv
-bnMoKykNCg0KZGlmZiAtLWdpdCBhL2FyY2gvYXJtNjQvYm9vdC9kdHMvbWVkaWF0ZWsvbXQ3NjIy
-LmR0c2kgYi9hcmNoL2FybTY0L2Jvb3QvZHRzL21lZGlhdGVrL210NzYyMi5kdHNpDQppbmRleCAx
-YTM5ZTBlZjc3NmIuLjViOWVjMDMyY2U4ZCAxMDA2NDQNCi0tLSBhL2FyY2gvYXJtNjQvYm9vdC9k
-dHMvbWVkaWF0ZWsvbXQ3NjIyLmR0c2kNCisrKyBiL2FyY2gvYXJtNjQvYm9vdC9kdHMvbWVkaWF0
-ZWsvbXQ3NjIyLmR0c2kNCkBAIC02ODYsNiArNjg2LDggQEANCiAJCWNsb2NrcyA9IDwmcGVyaWNm
-ZyBDTEtfUEVSSV9NU0RDMzBfMF9QRD4sDQogCQkJIDwmdG9wY2tnZW4gQ0xLX1RPUF9NU0RDNTBf
-MF9TRUw+Ow0KIAkJY2xvY2stbmFtZXMgPSAic291cmNlIiwgImhjbGsiOw0KKwkJcmVzZXRzID0g
-PCZwZXJpY2ZnIE1UNzYyMl9QRVJJX01TREMwX1NXX1JTVD47DQorCQlyZXNldC1uYW1lcyA9ICJo
-cnN0IjsNCiAJCXN0YXR1cyA9ICJkaXNhYmxlZCI7DQogCX07DQogDQotLSANCjIuMTguMA0K
 
+--J2SCkAp4GZ/dPZZf
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+Hi Shimoda-san,tftp 0x58000000 r8a77965-salvator-xs.dtb; tftp 0x50000000 Im=
+age-m3n-wsa; booti 0x50000000 - 0x58000000
+
+> > > > +	/* Tuning done, no special handling for SCC clock needed anymore =
+*/
+> > > > +	priv->keep_scc_freq =3D false;
+> > > > +
+> > >
+> > > Setting keep_scc_freq to false is only here. But, I'm thinking
+> > > we should set it in some error paths like below somehow too:
+> > >  - error paths before hs400_complete() in mmc_select_hs400().
+> > >  - error path of mmc_execute_tuning() in mmc_retune().
+> >=20
+> > Hmm, I guess you are right. That would kind of spoil my approach taken
+> > here. Maybe we need another flag in the core like 'doing_tune' to
+> > supplement 'doing_retune', so or driver knows when any kind of tuning is
+> > going on?
+>=20
+> Adding such a new flag is better, I think.
+
+So, I added a flag to the MMC core and I think it should work. However,
+I can't test it currently because, sadly, the issue disappeared again :(
+
+I even can't reproduce the issue with the same codebase and config which
+I used when I was working last time on it. And back then, the issue was
+happening. I am at a loss currently what really triggers this hang.
+
+I added some code to enforce reading something from the SCC with the
+hclk disabled. However, that reading works fine today here, no hang.
+
+So, it seems that keeping hclk enabled will fix the hang. However, it
+doesn't look like it will hang just when we allow to disable it. Seems
+something else is part of the equation, too...
+
+I kept trying to figure this out for the last two days, but no success
+so far. Will keep you updated.
+
+Thanks,
+
+   Wolfram
+
+
+--J2SCkAp4GZ/dPZZf
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAl82OfAACgkQFA3kzBSg
+KbZMMg/+L33xWIdwYP0gtUMpfnMOY54bVtzTaJ4pswSVDxBR9CHlfNA4kd/L+7xe
+F02p3fXegQA15o42aescBFnp/xp8fgupq9WbI7cwFHxsKTRIAbL5zvd/D5hwTz9c
+Hcf/6XCYE0S0DlnuwT/+osVy60erd5jYUHcA5NS9L/Q7o8mhjmy/sH/PKmztPWOq
+PfApraWyi90CZwKe1eG7nDvuI65GZEi89gZxViyvzDdbFQRXENqQZZ2zLXHza72R
+dU3eGGYd8v3aybnuLGoJgNNLP41GVobIdC6NHAkLqoTjoCaLR8BQ5aoJtOmOMB24
+PWdGyO75uDPGHV4inMF+4f80UrxO6KbxxhSBWQ3AcVo/zt9rwgRjSgQ9ReA1Gm3/
+YWVHFN6zW4CdLL8dUkGW1KW9ahqGWtZhUhHusp+B+ZA0/DLTAFlid4bv1RK+NNDT
+pfDd1Wuxtex/HCsN09RoSjAly1eCY7KnWqMMrTCp2zQ9+oth0WhzVKATTvntnBsT
+/xlek8laql6urGt1M4+h4IUL/SBE/FzR/zm5jmhlmC1/uUCCSz2vHHJ5XRIdfpQj
+HDvVXf1B/GAQP3S2erasOKvtbpdhmAGsd7Zjrk1xR1QMfXKPIidWUEBGzs2eL7VU
+3mS9ESTrsvovvYvEbPzZD5IipJvUOjY/6rMzkGZgXyOh+uW2RFc=
+=LzUq
+-----END PGP SIGNATURE-----
+
+--J2SCkAp4GZ/dPZZf--
