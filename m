@@ -2,105 +2,162 @@ Return-Path: <SRS0=tY5E=BY=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-8.5 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 98E79C433E1
-	for <linux-mmc@archiver.kernel.org>; Fri, 14 Aug 2020 15:22:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8C66AC433DF
+	for <linux-mmc@archiver.kernel.org>; Fri, 14 Aug 2020 16:30:39 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 765DA207DA
-	for <linux-mmc@archiver.kernel.org>; Fri, 14 Aug 2020 15:22:16 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="apTCCIIR"
+	by mail.kernel.org (Postfix) with ESMTP id 761A720791
+	for <linux-mmc@archiver.kernel.org>; Fri, 14 Aug 2020 16:30:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726444AbgHNPWQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 14 Aug 2020 11:22:16 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45812 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726270AbgHNPWI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Aug 2020 11:22:08 -0400
-Received: from mail-ed1-x541.google.com (mail-ed1-x541.google.com [IPv6:2a00:1450:4864:20::541])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 42799C061384;
-        Fri, 14 Aug 2020 08:22:08 -0700 (PDT)
-Received: by mail-ed1-x541.google.com with SMTP id v22so7115889edy.0;
-        Fri, 14 Aug 2020 08:22:08 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=/ih4Rf1fys+3V3bYHR06uQQ/6JimIUcju77eK2mx+a8=;
-        b=apTCCIIRtZJe2OdaK+cQWlkqeq7lOBkdmQTPxItcxLC6M+Vo5BLbKn6pZ9e+jaQsqa
-         8CDuxHy5HatIbPaA3sCOEBU9t7p/tw/EENH+l3aweoCdjEJk1ql/ftuS3TC/uHGugyab
-         gDHiF/+J46W5IhqopoYvXMKepADIyPp6BtDu9wL+OcU5pT4oR6x2RqLwnOuCuleJQYK5
-         d4I6OQ8TgFP45auoSFoojgG9O1ESDEJrV50lDb2pxTnpk8mLU/sphA71i4+nRQmrPuqm
-         NRDmHjz8aiZhJubhHLLNKE2M2F/bJ1qFMGckEzPLiYdzWbbXA/2wBc5pn1s8rsiZg0lz
-         fswg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=/ih4Rf1fys+3V3bYHR06uQQ/6JimIUcju77eK2mx+a8=;
-        b=J1Q3aFUgCqNKIu2DU1aifDAC6NJPBZ5y/5xy6aAxOh8IXgO9d2wg014pazFE60qLN5
-         PC/HqUk5S94SkouJ3nuYvU0yTg/ES5xaZ9BDfo6MDODZLIT7qQ6CWt/UgttND5e5yYc5
-         xszCY7ouT8AwUc70RDxnqAZHCSDvbTYN5kwFHVxti9RzNGSaDQgb9giQ8P1W2m21dNvj
-         Wh85F+CAAAzThQbZgTyafyaSVItDw9XaCOnR7QdKdmNBnDOxK5hm1InMzXIttMyj6GWg
-         KBQ6zHjrgmWz76DLAtMDNWhCdGNBuZ7uKHLHIZlx5Cws+r8zeds0I+mJ1CJDNGnOt1Ed
-         TKXw==
-X-Gm-Message-State: AOAM532K8ypgRxmFra9yXD1ANHeJCWRNMaqZBZ57VnFKDXY370cVBsEy
-        TKhGaXpcy6OETcFIiLSlOqU=
-X-Google-Smtp-Source: ABdhPJw2WN3FXSBnT1ya0PnsO1C+XaduTRHZBOS2jAUmuI6LT40u+WhxoEh+VkXqMPZKMZpAA6mvqg==
-X-Received: by 2002:a05:6402:1c09:: with SMTP id ck9mr2807701edb.74.1597418527065;
-        Fri, 14 Aug 2020 08:22:07 -0700 (PDT)
-Received: from localhost.localdomain (abag79.neoplus.adsl.tpnet.pl. [83.6.170.79])
-        by smtp.googlemail.com with ESMTPSA id e8sm6087974edy.68.2020.08.14.08.22.05
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 14 Aug 2020 08:22:06 -0700 (PDT)
-From:   Konrad Dybcio <konradybcio@gmail.com>
-To:     ~postmarketos/upstreaming@lists.sr.ht
-Cc:     Konrad Dybcio <konradybcio@gmail.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org
-Subject: [PATCH 2/2] [-next] arm64: dts: qcom: kitakami: Enable qcom,full-pwr-cycle on SDHCI1
-Date:   Fri, 14 Aug 2020 17:22:00 +0200
-Message-Id: <20200814152201.254010-2-konradybcio@gmail.com>
-X-Mailer: git-send-email 2.28.0
-In-Reply-To: <20200814152201.254010-1-konradybcio@gmail.com>
-References: <20200814152201.254010-1-konradybcio@gmail.com>
+        id S1728394AbgHNQa2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 14 Aug 2020 12:30:28 -0400
+Received: from hostingweb31-40.netsons.net ([89.40.174.40]:58597 "EHLO
+        hostingweb31-40.netsons.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1728099AbgHNQa1 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Aug 2020 12:30:27 -0400
+Received: from [37.160.38.175] (port=40734 helo=[192.168.42.162])
+        by hostingweb31.netsons.net with esmtpsa  (TLS1.2) tls TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+        (Exim 4.93)
+        (envelope-from <luca@lucaceresoli.net>)
+        id 1k6cay-0001mB-F9; Fri, 14 Aug 2020 18:30:20 +0200
+Subject: Re: [PATCH] dt-bindings: Whitespace clean-ups in schema files
+To:     Rob Herring <robh@kernel.org>
+Cc:     devicetree@vger.kernel.org,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "moderated list:ARM/FREESCALE IMX / MXC ARM ARCHITECTURE" 
+        <linux-arm-kernel@lists.infradead.org>,
+        linux-clk <linux-clk@vger.kernel.org>,
+        dri-devel <dri-devel@lists.freedesktop.org>,
+        linux-spi <linux-spi@vger.kernel.org>,
+        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
+        "open list:REMOTE PROCESSOR (REMOTEPROC) SUBSYSTEM" 
+        <linux-remoteproc@vger.kernel.org>,
+        Linux HWMON List <linux-hwmon@vger.kernel.org>,
+        Linux I2C <linux-i2c@vger.kernel.org>,
+        Linux Fbdev development list <linux-fbdev@vger.kernel.org>,
+        "open list:IIO SUBSYSTEM AND DRIVERS" <linux-iio@vger.kernel.org>,
+        Linux Input <linux-input@vger.kernel.org>,
+        "open list:THERMAL" <linux-pm@vger.kernel.org>,
+        Linux Media Mailing List <linux-media@vger.kernel.org>,
+        Linux-ALSA <alsa-devel@alsa-project.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        MTD Maling List <linux-mtd@lists.infradead.org>,
+        netdev <netdev@vger.kernel.org>,
+        "open list:REAL TIME CLOCK (RTC) SUBSYSTEM" 
+        <linux-rtc@vger.kernel.org>,
+        "open list:SERIAL DRIVERS" <linux-serial@vger.kernel.org>,
+        Linux USB List <linux-usb@vger.kernel.org>
+References: <20200812203618.2656699-1-robh@kernel.org>
+ <d5808e9c-07fe-1c28-b9a6-a16abe9df458@lucaceresoli.net>
+ <CAL_JsqKekx0VO4NROwLrgrU8+L584HaLHM9i3kCZvU+g5myeGw@mail.gmail.com>
+From:   Luca Ceresoli <luca@lucaceresoli.net>
+Message-ID: <f1963eb9-283f-e903-2a3a-4f324d71d418@lucaceresoli.net>
+Date:   Fri, 14 Aug 2020 18:30:17 +0200
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.10.0
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+In-Reply-To: <CAL_JsqKekx0VO4NROwLrgrU8+L584HaLHM9i3kCZvU+g5myeGw@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+X-AntiAbuse: This header was added to track abuse, please include it with any abuse report
+X-AntiAbuse: Primary Hostname - hostingweb31.netsons.net
+X-AntiAbuse: Original Domain - vger.kernel.org
+X-AntiAbuse: Originator/Caller UID/GID - [47 12] / [47 12]
+X-AntiAbuse: Sender Address Domain - lucaceresoli.net
+X-Get-Message-Sender-Via: hostingweb31.netsons.net: authenticated_id: luca@lucaceresoli.net
+X-Authenticated-Sender: hostingweb31.netsons.net: luca@lucaceresoli.net
+X-Source: 
+X-Source-Args: 
+X-Source-Dir: 
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-This is required to prevent permanent eMMC damage.
+Hi,
 
-Signed-off-by: Konrad Dybcio <konradybcio@gmail.com>
----
- arch/arm64/boot/dts/qcom/msm8994-sony-xperia-kitakami.dtsi | 2 ++
- 1 file changed, 2 insertions(+)
+On 14/08/20 16:51, Rob Herring wrote:
+> On Thu, Aug 13, 2020 at 4:31 AM Luca Ceresoli <luca@lucaceresoli.net> wrote:
+>>
+>> Hi Rob,
+>>
+>> On 12/08/20 22:36, Rob Herring wrote:
+>>> Clean-up incorrect indentation, extra spaces, long lines, and missing
+>>> EOF newline in schema files. Most of the clean-ups are for list
+>>> indentation which should always be 2 spaces more than the preceding
+>>> keyword.
+>>>
+>>> Found with yamllint (which I plan to integrate into the checks).
+>>
+>> [...]
+>>
+>>> diff --git a/Documentation/devicetree/bindings/clock/idt,versaclock5.yaml b/Documentation/devicetree/bindings/clock/idt,versaclock5.yaml
+>>> index 3d4e1685cc55..28c6461b9a9a 100644
+>>> --- a/Documentation/devicetree/bindings/clock/idt,versaclock5.yaml
+>>> +++ b/Documentation/devicetree/bindings/clock/idt,versaclock5.yaml
+>>> @@ -95,10 +95,10 @@ allOf:
+>>>        # Devices without builtin crystal
+>>>        properties:
+>>>          clock-names:
+>>> -            minItems: 1
+>>> -            maxItems: 2
+>>> -            items:
+>>> -              enum: [ xin, clkin ]
+>>> +          minItems: 1
+>>> +          maxItems: 2
+>>> +          items:
+>>> +            enum: [ xin, clkin ]
+>>>          clocks:
+>>>            minItems: 1
+>>>            maxItems: 2
+>>
+>> Thanks for noticing, LGTM.
+>>
+>> [...]
+>>
+>>> diff --git a/Documentation/devicetree/bindings/input/touchscreen/touchscreen.yaml b/Documentation/devicetree/bindings/input/touchscreen/touchscreen.yaml
+>>> index d7dac16a3960..36dc7b56a453 100644
+>>> --- a/Documentation/devicetree/bindings/input/touchscreen/touchscreen.yaml
+>>> +++ b/Documentation/devicetree/bindings/input/touchscreen/touchscreen.yaml
+>>> @@ -33,8 +33,8 @@ properties:
+>>>      $ref: /schemas/types.yaml#/definitions/uint32
+>>>
+>>>    touchscreen-min-pressure:
+>>> -    description: minimum pressure on the touchscreen to be achieved in order for the
+>>> -                 touchscreen driver to report a touch event.
+>>> +    description: minimum pressure on the touchscreen to be achieved in order
+>>> +      for the touchscreen driver to report a touch event.
+>>
+>> Out of personal taste, I find the original layout more pleasant and
+>> readable. This third option is also good, especially for long descriptions:
+>>
+>>   description:
+>>     minimum pressure on the touchscreen to be achieved in order for the
+>>     touchscreen driver to report a touch event.
+>>
+>> At first glance yamllint seems to support exactly these two by default:
+>>
+>>> With indentation: {spaces: 4, check-multi-line-strings: true}
+> 
+> Turning on check-multi-line-strings results in 10K+ warnings, so no.
+> 
+> The other issue is the style ruamel.yaml wants to write out is as the
+> patch does above. This matters when doing some scripted
+> transformations where we read in the files and write them back out. I
+> can somewhat work around that by first doing a pass with no changes
+> and then another pass with the actual changes, but that's completely
+> scriptable. Hopefully, ruamel learns to preserve the style better.
 
-diff --git a/arch/arm64/boot/dts/qcom/msm8994-sony-xperia-kitakami.dtsi b/arch/arm64/boot/dts/qcom/msm8994-sony-xperia-kitakami.dtsi
-index 30cb3aa7d734..eb806d1e4454 100644
---- a/arch/arm64/boot/dts/qcom/msm8994-sony-xperia-kitakami.dtsi
-+++ b/arch/arm64/boot/dts/qcom/msm8994-sony-xperia-kitakami.dtsi
-@@ -439,6 +439,8 @@ &sdhc1 {
- 	 * vmmc-supply = <&pm8994_l20>;
- 	 * vqmmc-supply = <&pm8994_s4>;
- 	 */
-+
-+	qcom,full-pwr-cycle;
- };
- 
- &sdhc2 {
+Kind of sad, but I understand the reason as far as my understanding of
+the yaml world allows. Thanks for the explanation.
+
+[For idt,versaclock5.yaml, plus an overview of whole patch]
+Reviewed-by: Luca Ceresoli <luca@lucaceresoli.net>
+
 -- 
-2.28.0
-
+Luca
