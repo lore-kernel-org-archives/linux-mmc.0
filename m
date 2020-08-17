@@ -2,136 +2,104 @@ Return-Path: <SRS0=qrSd=B3=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
+X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 336AAC433E4
-	for <linux-mmc@archiver.kernel.org>; Mon, 17 Aug 2020 09:20:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C90BBC433E1
+	for <linux-mmc@archiver.kernel.org>; Mon, 17 Aug 2020 11:58:51 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0E25C2072E
-	for <linux-mmc@archiver.kernel.org>; Mon, 17 Aug 2020 09:20:51 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="cTZNXtt7"
+	by mail.kernel.org (Postfix) with ESMTP id 9B08E2072E
+	for <linux-mmc@archiver.kernel.org>; Mon, 17 Aug 2020 11:58:51 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1597665531;
+	bh=vDE6nEYxqVfNuVIUguyec/Ag/jloPYQtiTXFYHQ1MCI=;
+	h=From:To:Cc:Subject:Date:List-ID:From;
+	b=QzXjLKF9scZ3s7gOkVNtsynmnf58q+Jk4AXdDoBFmgriRKLlKnX24aAukVsfs7VTv
+	 ri9aGmx/pjwnMF0nvzbIlNTE3JtKIVBJlSpK2fOdt/CD0GRFfqRJVb0jXZlVc3Oi0I
+	 LbSWTurh43YRsTpEzP4gcH9klCEJYmdcZhXWawlY=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728938AbgHQJUb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 17 Aug 2020 05:20:31 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33190 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726161AbgHQJU3 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Aug 2020 05:20:29 -0400
-Received: from mail-pg1-x541.google.com (mail-pg1-x541.google.com [IPv6:2607:f8b0:4864:20::541])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 12C91C061389;
-        Mon, 17 Aug 2020 02:20:29 -0700 (PDT)
-Received: by mail-pg1-x541.google.com with SMTP id x6so7813804pgx.12;
-        Mon, 17 Aug 2020 02:20:29 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references;
-        bh=QhPrNAdoeJw7hjMh0pGw+sjN4I+tDKGZ699gTXbu9Pc=;
-        b=cTZNXtt7wNfV+e9cJ76fTsPPVQZeYJIEY2TuWXhYA+6rL5+mQtvGCpP7nLFEEHniIY
-         ttRYkgElaSdYzjheNY+aJq+wt2TbwHocg2rHezNcVM8LeXUN8gM2nT5FPn17bkKOZJ/R
-         FpcUeStKvy2IzIoPd11K1+w6c4p381QKwm4Dhy02AfZUx3SzHjBImZSC4gDgffWV6h+v
-         8YTTF/IpemIy0SQFRYOlz4ZDOq/9HJmYTUqHCVWY4C5ejhmLcUfPEpCe73ql4ONWBhLK
-         UZXD9rMiGnEuf0tCOKH/CAPFPO+ziHa24otJgykW+Fa09Aud/a6J7DqgcJ9+cKbuVreV
-         L6OQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references;
-        bh=QhPrNAdoeJw7hjMh0pGw+sjN4I+tDKGZ699gTXbu9Pc=;
-        b=BdQ4t8woOOOlewDc3FItD8QaSe8WAH2WZ/ysm1DYnHvOeaZcA3+uZS01deuOCtm5qM
-         9CmBeqGO6lGCm8/7TANqgYKChxYpFwr7ZdFdCjxsGVPFRce5FCLOW1p9ud8ONiHzUl4C
-         7t5xrUWdWPGcKrrt+P3RG6xJGwp44sxvI66K6kEqoPZigcg2raeta14ZS38OIgy3F6P/
-         J+iJgZ7nM2b3rTLgp/RNirCYOflpndZZkBHHwL7HZD6OE1Px1OX2Jsjk6hrC5/Yf0k7f
-         AQE3GWZ5yl2AhQfO42qHb8xSibQHRpwsGTs3ne2dp8i5Z+vTu0s3kZtnsmWIm8oxQ+h5
-         hPLw==
-X-Gm-Message-State: AOAM531agWFu0iPCQJ5AN76ECwqqZwx95+kBleCwticXVnspVn8DYdEp
-        FQBL7DwrCUQDwNimzKbLJwg=
-X-Google-Smtp-Source: ABdhPJzDyD/NrPXHKKUPdhhRODzrKgFhi3OcVBh0EqkEsk2AwP8x+cz/Kr8PlDriSCVb6p68quAdVw==
-X-Received: by 2002:a63:4545:: with SMTP id u5mr9191366pgk.229.1597656028627;
-        Mon, 17 Aug 2020 02:20:28 -0700 (PDT)
-Received: from localhost.localdomain ([49.207.202.98])
-        by smtp.gmail.com with ESMTPSA id r25sm15971028pgv.88.2020.08.17.02.20.15
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 17 Aug 2020 02:20:28 -0700 (PDT)
-From:   Allen Pais <allen.cryptic@gmail.com>
-To:     jdike@addtoit.com, richard@nod.at, anton.ivanov@cambridgegreys.com,
-        3chas3@gmail.com, axboe@kernel.dk, stefanr@s5r6.in-berlin.de,
-        airlied@linux.ie, daniel@ffwll.ch, sre@kernel.org,
-        James.Bottomley@HansenPartnership.com, kys@microsoft.com,
-        deller@gmx.de, dmitry.torokhov@gmail.com, jassisinghbrar@gmail.com,
-        shawnguo@kernel.org, s.hauer@pengutronix.de,
-        maximlevitsky@gmail.com, oakad@yahoo.com, ulf.hansson@linaro.org,
-        mporter@kernel.crashing.org, alex.bou9@gmail.com,
-        broonie@kernel.org, martyn@welchs.me.uk, manohar.vanga@gmail.com,
-        mitch@sfgoth.com, davem@davemloft.net, kuba@kernel.org
-Cc:     keescook@chromium.org, linux-um@lists.infradead.org,
-        linux-kernel@vger.kernel.org,
-        linux-atm-general@lists.sourceforge.net, netdev@vger.kernel.org,
-        linux-block@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        openipmi-developer@lists.sourceforge.net,
-        linux1394-devel@lists.sourceforge.net,
-        intel-gfx@lists.freedesktop.org, dri-devel@lists.freedesktop.org,
-        linux-hyperv@vger.kernel.org, linux-parisc@vger.kernel.org,
-        linux-input@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-ntb@googlegroups.com, linux-s390@vger.kernel.org,
-        linux-spi@vger.kernel.org, devel@driverdev.osuosl.org,
-        Allen Pais <allen.lkml@gmail.com>,
-        Romain Perier <romain.perier@gmail.com>
-Subject: [PATCH] platform: goldfish: convert tasklets to use new tasklet_setup() API
-Date:   Mon, 17 Aug 2020 14:46:12 +0530
-Message-Id: <20200817091617.28119-18-allen.cryptic@gmail.com>
-X-Mailer: git-send-email 2.17.1
-In-Reply-To: <20200817091617.28119-1-allen.cryptic@gmail.com>
-References: <20200817091617.28119-1-allen.cryptic@gmail.com>
+        id S1727880AbgHQL6u (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 17 Aug 2020 07:58:50 -0400
+Received: from mail.kernel.org ([198.145.29.99]:51844 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726871AbgHQL6u (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 17 Aug 2020 07:58:50 -0400
+Received: from localhost (p54b334f7.dip0.t-ipconnect.de [84.179.52.247])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id 61D36204EA;
+        Mon, 17 Aug 2020 11:58:49 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1597665530;
+        bh=vDE6nEYxqVfNuVIUguyec/Ag/jloPYQtiTXFYHQ1MCI=;
+        h=From:To:Cc:Subject:Date:From;
+        b=MoE4Ln+1msazDo09jb4j7OGXaCmVhVg/Xi+uXptZvVUscGM3Wz1IoKqMLwFweg1Yy
+         I069CEO8Sl9wHOVhxCxeYOs5kD16lwBOqMN7kTFwP6Qrk9ZrHsHNO+3Ao8uTL4m0s4
+         HU+290HLqeoEboScuz+4u5b/36+BMakVvZroILbI=
+From:   Wolfram Sang <wsa@kernel.org>
+To:     linux-mmc@vger.kernel.org
+Cc:     linux-renesas-soc@vger.kernel.org,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>
+Subject: [PATCH] mmc: test: remove ambiguity in test description
+Date:   Mon, 17 Aug 2020 13:58:38 +0200
+Message-Id: <20200817115838.2981-1-wsa@kernel.org>
+X-Mailer: git-send-email 2.20.1
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Allen Pais <allen.lkml@gmail.com>
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-In preparation for unconditionally passing the
-struct tasklet_struct pointer to all tasklet
-callbacks, switch to using the new tasklet_setup()
-and from_tasklet() to pass the tasklet pointer explicitly.
+When reading the test description, I thought a correction of the
+xfer_size was tested, which is not the case. It is tested that the
+xfer_size is correct. Use 'proper xfer_size' to remove this ambiguity.
 
-Signed-off-by: Romain Perier <romain.perier@gmail.com>
-Signed-off-by: Allen Pais <allen.lkml@gmail.com>
+Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 ---
- drivers/platform/goldfish/goldfish_pipe.c | 7 +++----
- 1 file changed, 3 insertions(+), 4 deletions(-)
 
-diff --git a/drivers/platform/goldfish/goldfish_pipe.c b/drivers/platform/goldfish/goldfish_pipe.c
-index 1ab207ec9c94..b9bead07760c 100644
---- a/drivers/platform/goldfish/goldfish_pipe.c
-+++ b/drivers/platform/goldfish/goldfish_pipe.c
-@@ -577,10 +577,10 @@ static struct goldfish_pipe *signalled_pipes_pop_front(
- 	return pipe;
- }
+This may be bike-shedding and I am not offended if you think it is
+minor. However, I ended up looking at the source wondering where is what
+automatically corrected.
+
+ drivers/mmc/core/mmc_test.c | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/mmc/core/mmc_test.c b/drivers/mmc/core/mmc_test.c
+index c21b3cb71775..152e7525ed33 100644
+--- a/drivers/mmc/core/mmc_test.c
++++ b/drivers/mmc/core/mmc_test.c
+@@ -2669,22 +2669,22 @@ static const struct mmc_test_case mmc_test_cases[] = {
+ 	},
  
--static void goldfish_interrupt_task(unsigned long dev_addr)
-+static void goldfish_interrupt_task(struct tasklet_struct *t)
- {
- 	/* Iterate over the signalled pipes and wake them one by one */
--	struct goldfish_pipe_dev *dev = (struct goldfish_pipe_dev *)dev_addr;
-+	struct goldfish_pipe_dev *dev = from_tasklet(dev, t, irq_tasklet);
- 	struct goldfish_pipe *pipe;
- 	int wakes;
+ 	{
+-		.name = "Correct xfer_size at write (start failure)",
++		.name = "Proper xfer_size at write (start failure)",
+ 		.run = mmc_test_xfersize_write,
+ 	},
  
-@@ -811,8 +811,7 @@ static int goldfish_pipe_device_init(struct platform_device *pdev,
- {
- 	int err;
+ 	{
+-		.name = "Correct xfer_size at read (start failure)",
++		.name = "Proper xfer_size at read (start failure)",
+ 		.run = mmc_test_xfersize_read,
+ 	},
  
--	tasklet_init(&dev->irq_tasklet, &goldfish_interrupt_task,
--		     (unsigned long)dev);
-+	tasklet_setup(&dev->irq_tasklet, &goldfish_interrupt_task);
+ 	{
+-		.name = "Correct xfer_size at write (midway failure)",
++		.name = "Proper xfer_size at write (midway failure)",
+ 		.run = mmc_test_multi_xfersize_write,
+ 	},
  
- 	err = devm_request_irq(&pdev->dev, dev->irq,
- 			       goldfish_pipe_interrupt,
+ 	{
+-		.name = "Correct xfer_size at read (midway failure)",
++		.name = "Proper xfer_size at read (midway failure)",
+ 		.run = mmc_test_multi_xfersize_read,
+ 	},
+ 
 -- 
-2.17.1
+2.20.1
 
