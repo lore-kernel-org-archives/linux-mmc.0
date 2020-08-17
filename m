@@ -1,259 +1,131 @@
-Return-Path: <SRS0=Qigx=B2=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=qrSd=B3=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.6 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_2 autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E45EBC433E4
-	for <linux-mmc@archiver.kernel.org>; Sun, 16 Aug 2020 08:44:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 54A24C433DF
+	for <linux-mmc@archiver.kernel.org>; Mon, 17 Aug 2020 06:41:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C22C72067C
-	for <linux-mmc@archiver.kernel.org>; Sun, 16 Aug 2020 08:44:33 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1597567473;
-	bh=T6UwMy4v18bgR1RYSk8bKZfCqTMnyUP8XZKnI31+u3w=;
-	h=Date:From:To:Cc:Subject:In-Reply-To:References:List-ID:From;
-	b=xr/jGARe+RgEp6ILGsiiAj5CxkEM1ZZxC6Q0ftF4xwTTQtrZBhuLmVIv6VPp9313E
-	 VsavrWYU5ll1cYr2loroy1vitv6u+9G5IFyXR4Fai/i1Cas0DNTDYhmDD8bU+NrMeD
-	 WvsNS7iYhdZSfhRZv3qShUbV7C0K5Pc+8Ap39ZrU=
+	by mail.kernel.org (Postfix) with ESMTP id 3C7BF2078A
+	for <linux-mmc@archiver.kernel.org>; Mon, 17 Aug 2020 06:41:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728966AbgHPIod (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 16 Aug 2020 04:44:33 -0400
-Received: from mail.kernel.org ([198.145.29.99]:55002 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725966AbgHPIo0 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Sun, 16 Aug 2020 04:44:26 -0400
-Received: from archlinux (cpc149474-cmbg20-2-0-cust94.5-4.cable.virginm.net [82.4.196.95])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 032672067C;
-        Sun, 16 Aug 2020 08:44:20 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1597567464;
-        bh=T6UwMy4v18bgR1RYSk8bKZfCqTMnyUP8XZKnI31+u3w=;
-        h=Date:From:To:Cc:Subject:In-Reply-To:References:From;
-        b=drEoeXpHv0E0mUqTh6XgOtxm5HjQ3BZXo/2Vyh0E5JgpqmZ5oJHeFCZAHCZB9rAXm
-         AbIb6f0WWGOxG4kSm3h11hWn0MA48MyZ6oiLma2mj2RujKNmxiI3bNdIjGxh0rdsDK
-         bybFa1BfDVi2cbQ+dCfDbBrEzAgdhLg63i6r2Z2c=
-Date:   Sun, 16 Aug 2020 09:44:18 +0100
-From:   Jonathan Cameron <jic23@kernel.org>
-To:     Sam Ravnborg <sam@ravnborg.org>
-Cc:     Rob Herring <robh@kernel.org>, devicetree@vger.kernel.org,
-        linux-hwmon@vger.kernel.org, linux-rtc@vger.kernel.org,
-        linux-fbdev@vger.kernel.org, alsa-devel@alsa-project.org,
-        linux-pm@vger.kernel.org, linux-iio@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-usb@vger.kernel.org,
-        linux-remoteproc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        dri-devel@lists.freedesktop.org, linux-spi@vger.kernel.org,
-        linux-gpio@vger.kernel.org, netdev@vger.kernel.org,
-        linux-mtd@lists.infradead.org, linux-i2c@vger.kernel.org,
-        linux-serial@vger.kernel.org, linux-input@vger.kernel.org,
-        linux-clk@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-media@vger.kernel.org
-Subject: Re: [PATCH] dt-bindings: Whitespace clean-ups in schema files
-Message-ID: <20200816094418.5bd08f5f@archlinux>
-In-Reply-To: <20200812213453.GA690477@ravnborg.org>
-References: <20200812203618.2656699-1-robh@kernel.org>
-        <20200812213453.GA690477@ravnborg.org>
-X-Mailer: Claws Mail 3.17.6 (GTK+ 2.24.32; x86_64-pc-linux-gnu)
-MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+        id S1726265AbgHQGlj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 17 Aug 2020 02:41:39 -0400
+Received: from alexa-out.qualcomm.com ([129.46.98.28]:31915 "EHLO
+        alexa-out.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726151AbgHQGli (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Aug 2020 02:41:38 -0400
+Received: from ironmsg09-lv.qualcomm.com ([10.47.202.153])
+  by alexa-out.qualcomm.com with ESMTP; 16 Aug 2020 23:41:38 -0700
+Received: from ironmsg02-blr.qualcomm.com ([10.86.208.131])
+  by ironmsg09-lv.qualcomm.com with ESMTP/TLS/AES256-SHA; 16 Aug 2020 23:41:36 -0700
+Received: from c-sbhanu-linux.qualcomm.com ([10.242.50.201])
+  by ironmsg02-blr.qualcomm.com with ESMTP; 17 Aug 2020 12:11:12 +0530
+Received: by c-sbhanu-linux.qualcomm.com (Postfix, from userid 2344807)
+        id 435CC40A2; Mon, 17 Aug 2020 12:11:11 +0530 (IST)
+From:   Shaik Sajida Bhanu <sbhanu@codeaurora.org>
+To:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
+        robh+dt@kernel.org, mka@chromium.org
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
+        agross@kernel.org, bjorn.andersson@linaro.org,
+        rnayak@codeaurora.org, Pradeep P V K <ppvk@codeaurora.org>,
+        Shaik Sajida Bhanu <sbhanu@codeaurora.org>
+Subject: [PATCH V3] arm64: dts: qcom: sc7180: Add bandwidth votes for eMMC and SDcard
+Date:   Mon, 17 Aug 2020 12:11:04 +0530
+Message-Id: <1597646464-1863-1-git-send-email-sbhanu@codeaurora.org>
+X-Mailer: git-send-email 2.7.4
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 12 Aug 2020 23:34:53 +0200
-Sam Ravnborg <sam@ravnborg.org> wrote:
+From: Pradeep P V K <ppvk@codeaurora.org>
 
-> Hi Rob.
-> 
-> On Wed, Aug 12, 2020 at 02:36:18PM -0600, Rob Herring wrote:
-> > Clean-up incorrect indentation, extra spaces, long lines, and missing
-> > EOF newline in schema files. Most of the clean-ups are for list
-> > indentation which should always be 2 spaces more than the preceding
-> > keyword.
-> > 
-> > Found with yamllint (which I plan to integrate into the checks).  
-> 
-> I have browsed through the patch - and there was only a few things
-> that jumped at me.
-> 
-> With these points considered:
-> Acked-by: Sam Ravnborg <sam@ravnborg.org>
+Add the bandwidth domain supporting performance state and
+the corresponding OPP tables for the sdhc device on sc7180.
 
-Replying here as the patch doesn't seem to have made it to linux-iio
-at least. I'm not sure why...
+Signed-off-by: Pradeep P V K <ppvk@codeaurora.org>
+Signed-off-by: Shaik Sajida Bhanu <sbhanu@codeaurora.org>
+---
 
-Anyhow, found it in an lkml archive so for the iio changes
-Acked-by: Jonathan Cameron <Jonathan.Cameron@huawei.com>
+This change is depends on the below patch series:
+https://lore.kernel.org/patchwork/patch/1278294/
 
-> 
-> I expect only some (few) of my points to actually results in any updates.
-> 
-> I look forward to have the lint functionality as part of the built-in
-> tools so we catch these things early.
-> 
-> 	Sam
-> 
-> > diff --git a/Documentation/devicetree/bindings/arm/fsl.yaml b/Documentation/devicetree/bindings/arm/fsl.yaml
-> > index f63895c8ce2d..88814a2a14a5 100644
-> > --- a/Documentation/devicetree/bindings/arm/fsl.yaml
-> > +++ b/Documentation/devicetree/bindings/arm/fsl.yaml
-> > @@ -273,8 +273,8 @@ properties:
-> >                - fsl,imx6ull-14x14-evk     # i.MX6 UltraLiteLite 14x14 EVK Board
-> >                - kontron,imx6ull-n6411-som # Kontron N6411 SOM
-> >                - myir,imx6ull-mys-6ulx-eval # MYiR Tech iMX6ULL Evaluation Board
-> > -              - toradex,colibri-imx6ull-eval            # Colibri iMX6ULL Module on Colibri Evaluation Board
-> > -              - toradex,colibri-imx6ull-wifi-eval       # Colibri iMX6ULL Wi-Fi / Bluetooth Module on Colibri Evaluation Board
-> > +              - toradex,colibri-imx6ull-eval      # Colibri iMX6ULL Module on Colibri Eval Board
-> > +              - toradex,colibri-imx6ull-wifi-eval # Colibri iMX6ULL Wi-Fi / BT Module on Colibri Eval Board
-> >            - const: fsl,imx6ull  
-> 
-> This change looks bad as it drops the alignment with the comments below.
-> See following patch chunck:
-> 
-> >
-> >        - description: Kontron N6411 S Board
-> > @@ -312,9 +312,12 @@ properties:
-> >                - toradex,colibri-imx7d                   # Colibri iMX7 Dual Module
-> >                - toradex,colibri-imx7d-aster             # Colibri iMX7 Dual Module on Aster Carrier Board
-> >                - toradex,colibri-imx7d-emmc              # Colibri iMX7 Dual 1GB (eMMC) Module
-> > -              - toradex,colibri-imx7d-emmc-aster        # Colibri iMX7 Dual 1GB (eMMC) Module on Aster Carrier Board
-> > -              - toradex,colibri-imx7d-emmc-eval-v3      # Colibri iMX7 Dual 1GB (eMMC) Module on Colibri Evaluation Board V3
-> > -              - toradex,colibri-imx7d-eval-v3           # Colibri iMX7 Dual Module on Colibri Evaluation Board V3
-> > +              - toradex,colibri-imx7d-emmc-aster        # Colibri iMX7 Dual 1GB (eMMC) Module on
-> > +                                                        #  Aster Carrier Board  
-> 
-> 
-> 
-> > diff --git a/Documentation/devicetree/bindings/display/panel/ilitek,ili9322.yaml b/Documentation/devicetree/bindings/display/panel/ilitek,ili9322.yaml
-> > index 177d48c5bd97..e89c1ea62ffa 100644
-> > --- a/Documentation/devicetree/bindings/display/panel/ilitek,ili9322.yaml
-> > +++ b/Documentation/devicetree/bindings/display/panel/ilitek,ili9322.yaml
-> > @@ -25,8 +25,7 @@ properties:
-> >    compatible:
-> >      items:
-> >        - enum:
-> > -        - dlink,dir-685-panel
-> > -
-> > +          - dlink,dir-685-panel
-> >        - const: ilitek,ili9322
-> >
-> >    reset-gpios: true
-> > diff --git a/Documentation/devicetree/bindings/display/panel/ilitek,ili9881c.yaml b/Documentation/devicetree/bindings/display/panel/ilitek,ili9881c.yaml
-> > index a39332276bab..76a9068a85dd 100644
-> > --- a/Documentation/devicetree/bindings/display/panel/ilitek,ili9881c.yaml
-> > +++ b/Documentation/devicetree/bindings/display/panel/ilitek,ili9881c.yaml
-> > @@ -13,8 +13,7 @@ properties:
-> >    compatible:
-> >      items:
-> >        - enum:
-> > -        - bananapi,lhr050h41
-> > -
-> > +          - bananapi,lhr050h41
-> >        - const: ilitek,ili9881c
-> >  
-> 
-> The extra lines is a simple way to indicate that here shall be added
-> more in the future. So I like the empty line.
-> 
-> 
-> > diff --git a/Documentation/devicetree/bindings/leds/backlight/qcom-wled.yaml b/Documentation/devicetree/bindings/leds/backlight/qcom-wled.yaml
-> > index 32e0896c6bc1..47938e372987 100644
-> > --- a/Documentation/devicetree/bindings/leds/backlight/qcom-wled.yaml
-> > +++ b/Documentation/devicetree/bindings/leds/backlight/qcom-wled.yaml
-> > @@ -79,7 +79,8 @@ properties:
-> >      description: |
-> >        kHz; switching frequency.
-> >      $ref: /schemas/types.yaml#/definitions/uint32
-> > -    enum: [ 600, 640, 685, 738, 800, 872, 960, 1066, 1200, 1371, 1600, 1920, 2400, 3200, 4800, 9600 ]
-> > +    enum: [ 600, 640, 685, 738, 800, 872, 960, 1066, 1200, 1371, 1600, 1920,
-> > +            2400, 3200, 4800, 9600 ]
-> >
-> >    qcom,ovp:
-> >      description: |  
-> 
-> In the modern world we are living in now line length of 100 chars are
-> OK. checkpatch and coding_style is updated to reflected this.
-> 
-> > diff --git a/Documentation/devicetree/bindings/spi/mikrotik,rb4xx-spi.yaml b/Documentation/devicetree/bindings/spi/mikrotik,rb4xx-spi.yaml
-> > index 4ddb42a4ae05..9102feae90a2 100644
-> > --- a/Documentation/devicetree/bindings/spi/mikrotik,rb4xx-spi.yaml
-> > +++ b/Documentation/devicetree/bindings/spi/mikrotik,rb4xx-spi.yaml
-> > @@ -33,4 +33,5 @@ examples:
-> >          reg = <0x1f000000 0x10>;
-> >      };
-> >
-> > -...
-> > \ No newline at end of file
-> > +...
-> > +  
-> 
-> Added one line too much?
-> 
->  diff --git a/Documentation/devicetree/bindings/spi/spi-mux.yaml b/Documentation/devicetree/bindings/spi/spi-mux.yaml
-> > index 0ae692dc28b5..3d3fed63409b 100644
-> > --- a/Documentation/devicetree/bindings/spi/spi-mux.yaml
-> > +++ b/Documentation/devicetree/bindings/spi/spi-mux.yaml
-> > @@ -43,47 +43,47 @@ properties:
-> >      maxItems: 1
-> >
-> >  required:
-> > -   - compatible
-> > -   - reg
-> > -   - spi-max-frequency
-> > -   - mux-controls
-> > +  - compatible
-> > +  - reg
-> > +  - spi-max-frequency
-> > +  - mux-controls
-> >
-> >  examples:
-> > -   - |
-> > -     #include <dt-bindings/gpio/gpio.h>
-> > -     mux: mux-controller {
-> > -       compatible = "gpio-mux";
-> > -       #mux-control-cells = <0>;
-> > +  - |
-> > +    #include <dt-bindings/gpio/gpio.h>
-> > +    mux: mux-controller {
-> > +        compatible = "gpio-mux";
-> > +        #mux-control-cells = <0>;
-> >
-> > -       mux-gpios = <&gpio0 3 GPIO_ACTIVE_HIGH>;
-> > -     };
-> > +        mux-gpios = <&gpio0 3 GPIO_ACTIVE_HIGH>;
-> > +    };  
-> 
-> Example is updated to use 4-space indent. I like.
-> 
-> But many other examples are left untouched.
-> 
-> So I wonder if updating all examples to the same indent should
-> be left for another mega-patch?
-> 
-> > diff --git a/Documentation/devicetree/bindings/vendor-prefixes.yaml b/Documentation/devicetree/bindings/vendor-prefixes.yaml
-> > index f3d847832fdc..2baee2c817c1 100644
-> > --- a/Documentation/devicetree/bindings/vendor-prefixes.yaml
-> > +++ b/Documentation/devicetree/bindings/vendor-prefixes.yaml
-> > @@ -993,7 +993,8 @@ patternProperties:
-> >    "^sst,.*":
-> >      description: Silicon Storage Technology, Inc.
-> >    "^sstar,.*":
-> > -    description: Xiamen Xingchen(SigmaStar) Technology Co., Ltd. (formerly part of MStar Semiconductor, Inc.)
-> > +    description: Xiamen Xingchen(SigmaStar) Technology Co., Ltd.
-> > +      (formerly part of MStar Semiconductor, Inc.)
-> >    "^st,.*":
-> >      description: STMicroelectronics
-> >    "^starry,.*":  
-> 
-> Did you check that they are all in alphabetical order?
-> I would be suprised if this is the only issue in this file.
-> 
-> 
+Change since V2:
+	- Included tag in the of innerconnect-cells for sdhc nodes in-tune with
+	  https://lore.kernel.org/patchwork/patch/1278294/
+
+Changes since V1:
+	- Included Pradeep Pragalapati signoff.
+	- Removed dependency patch list as those patches already merged
+	  on linux-next.
+---
+ arch/arm64/boot/dts/qcom/sc7180.dtsi | 15 +++++++++++++++
+ 1 file changed, 15 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/qcom/sc7180.dtsi b/arch/arm64/boot/dts/qcom/sc7180.dtsi
+index 68f9894..e5a7d88 100644
+--- a/arch/arm64/boot/dts/qcom/sc7180.dtsi
++++ b/arch/arm64/boot/dts/qcom/sc7180.dtsi
+@@ -684,6 +684,9 @@
+ 			clocks = <&gcc GCC_SDCC1_APPS_CLK>,
+ 					<&gcc GCC_SDCC1_AHB_CLK>;
+ 			clock-names = "core", "iface";
++			interconnects = <&aggre1_noc MASTER_EMMC 0 &mc_virt SLAVE_EBI1 0>,
++				<&gem_noc MASTER_APPSS_PROC 0 &config_noc SLAVE_EMMC_CFG 0>;
++			interconnect-names = "sdhc-ddr","cpu-sdhc";
+ 			power-domains = <&rpmhpd SC7180_CX>;
+ 			operating-points-v2 = <&sdhc1_opp_table>;
+ 
+@@ -704,11 +707,15 @@
+ 				opp-100000000 {
+ 					opp-hz = /bits/ 64 <100000000>;
+ 					required-opps = <&rpmhpd_opp_low_svs>;
++					opp-peak-kBps = <100000 100000>;
++					opp-avg-kBps = <100000 50000>;
+ 				};
+ 
+ 				opp-384000000 {
+ 					opp-hz = /bits/ 64 <384000000>;
+ 					required-opps = <&rpmhpd_opp_svs_l1>;
++					opp-peak-kBps = <600000 900000>;
++					opp-avg-kBps = <261438 300000>;
+ 				};
+ 			};
+ 		};
+@@ -2476,6 +2483,10 @@
+ 			clocks = <&gcc GCC_SDCC2_APPS_CLK>,
+ 					<&gcc GCC_SDCC2_AHB_CLK>;
+ 			clock-names = "core", "iface";
++
++			interconnects = <&aggre1_noc MASTER_SDCC_2 0 &mc_virt SLAVE_EBI1 0>,
++				<&gem_noc MASTER_APPSS_PROC 0 &config_noc SLAVE_SDCC_2 0>;
++			interconnect-names = "sdhc-ddr","cpu-sdhc";
+ 			power-domains = <&rpmhpd SC7180_CX>;
+ 			operating-points-v2 = <&sdhc2_opp_table>;
+ 
+@@ -2489,11 +2500,15 @@
+ 				opp-100000000 {
+ 					opp-hz = /bits/ 64 <100000000>;
+ 					required-opps = <&rpmhpd_opp_low_svs>;
++					opp-peak-kBps = <160000 100000>;
++					opp-avg-kBps = <80000 50000>;
+ 				};
+ 
+ 				opp-202000000 {
+ 					opp-hz = /bits/ 64 <202000000>;
+ 					required-opps = <&rpmhpd_opp_svs_l1>;
++					opp-peak-kBps = <200000	120000>;
++					opp-avg-kBps = <100000 60000>;
+ 				};
+ 			};
+ 		};
+-- 
+QUALCOMM INDIA, on behalf of Qualcomm Innovation Center, Inc. is a member 
+of Code Aurora Forum, hosted by The Linux Foundation
 
