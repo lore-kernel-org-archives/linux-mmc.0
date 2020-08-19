@@ -2,112 +2,171 @@ Return-Path: <SRS0=2cKM=B5=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 02E16C433E3
-	for <linux-mmc@archiver.kernel.org>; Wed, 19 Aug 2020 12:19:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8CD7CC433E1
+	for <linux-mmc@archiver.kernel.org>; Wed, 19 Aug 2020 13:03:11 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E1EB5206FA
-	for <linux-mmc@archiver.kernel.org>; Wed, 19 Aug 2020 12:19:32 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 68B91206FA
+	for <linux-mmc@archiver.kernel.org>; Wed, 19 Aug 2020 13:03:11 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=kernel-dk.20150623.gappssmtp.com header.i=@kernel-dk.20150623.gappssmtp.com header.b="ZtDUAent"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727869AbgHSMTa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 19 Aug 2020 08:19:30 -0400
-Received: from mga17.intel.com ([192.55.52.151]:33926 "EHLO mga17.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728106AbgHSMTW (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 19 Aug 2020 08:19:22 -0400
-IronPort-SDR: FO+o1Jbm9s7aRh63wj99UJdkli5KkX+0qJIv16AGc92acUbFbN2zGTqtl3nqXHsG5lLqT1szVq
- J/fA0g0IY7Xw==
-X-IronPort-AV: E=McAfee;i="6000,8403,9717"; a="135163089"
-X-IronPort-AV: E=Sophos;i="5.76,331,1592895600"; 
-   d="scan'208";a="135163089"
-X-Amp-Result: SKIPPED(no attachment in message)
-X-Amp-File-Uploaded: False
-Received: from fmsmga003.fm.intel.com ([10.253.24.29])
-  by fmsmga107.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 19 Aug 2020 05:19:22 -0700
-IronPort-SDR: Lpu1stuNTgWYH/6IJRfB4fHxLhb97RnZ8pD/q75L3KsH+37eH/zTOzbp0QhZCb2RPcPYqc3Xdi
- o9NWigKCor+A==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.76,331,1592895600"; 
-   d="scan'208";a="334662913"
-Received: from ahunter-desktop.fi.intel.com ([10.237.72.73])
-  by FMSMGA003.fm.intel.com with ESMTP; 19 Aug 2020 05:19:18 -0700
-From:   Adrian Hunter <adrian.hunter@intel.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
-        Faiz Abbas <faiz_abbas@ti.com>,
-        Al Cooper <alcooperx@gmail.com>,
-        Haibo Chen <haibo.chen@nxp.com>,
-        Michal Simek <michal.simek@xilinx.com>,
-        Manish Narani <manish.narani@xilinx.com>,
-        Wan Ahmad Zainie <wan.ahmad.zainie.wan.mohamad@intel.com>,
-        Ramuthevar Vadivel Muruganx 
-        <vadivel.muruganx.ramuthevar@linux.intel.com>,
-        Sowjanya Komatineni <skomatineni@nvidia.com>,
-        Thierry Reding <treding@nvidia.com>,
-        Ritesh Harjani <riteshh@codeaurora.org>
-Subject: [PATCH] mmc: sdhci-pci: Fix SDHCI_RESET_ALL for CQHCI for Intel GLK-based controllers
-Date:   Wed, 19 Aug 2020 15:18:48 +0300
-Message-Id: <20200819121848.16967-1-adrian.hunter@intel.com>
-X-Mailer: git-send-email 2.17.1
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki, Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+        id S1728584AbgHSNDG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 19 Aug 2020 09:03:06 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36592 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728571AbgHSNCC (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Aug 2020 09:02:02 -0400
+Received: from mail-pj1-x1041.google.com (mail-pj1-x1041.google.com [IPv6:2607:f8b0:4864:20::1041])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3291CC061346
+        for <linux-mmc@vger.kernel.org>; Wed, 19 Aug 2020 06:01:00 -0700 (PDT)
+Received: by mail-pj1-x1041.google.com with SMTP id ep8so1085606pjb.3
+        for <linux-mmc@vger.kernel.org>; Wed, 19 Aug 2020 06:01:00 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=kernel-dk.20150623.gappssmtp.com; s=20150623;
+        h=subject:to:cc:references:from:message-id:date:user-agent
+         :mime-version:in-reply-to:content-language:content-transfer-encoding;
+        bh=qNJVZUa8vOnjh3Y4FbI7cu96rnOZczrpWszoc4OM35E=;
+        b=ZtDUAentzHDOfXLt1WNpX0PqLZgZi3vnfEc6anllVjv7Z89UoKoCCMUiljAdsTAGBL
+         DEVHOWuWzMZeIuJcHwUlptWZjkCaOp1ZUKAoSs/2jyyTPejnx1zCbjPUY7C9na+Ftk+x
+         wpw/pPjI4UYNDosNdy4j7LcDWUJhwNxLapyy4W7f1U00+fT6jVYw1uO8CMpHCStxGd8w
+         JLOisGYqnJmeY5ie8I+x4A4vKZtwoQ6PsaOc8UAPD7eTAFlJwORflpx8o8EPJZR8cuSG
+         1j977OWh0YEI5r2DXie/ItwJ0iuosRobp25OObO0Ld6mXVix+wRg8r73enQ5lMOcXAoG
+         tjpA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=qNJVZUa8vOnjh3Y4FbI7cu96rnOZczrpWszoc4OM35E=;
+        b=RGqQ6ClJg7PmfPdAEwpaa3Bdd21W6Y6zEKi5LAtc7nAK5gMwHj8FwwW0htVa69eea5
+         wehkkKTAhjlMCh+Osg+NPnyMdi06fvOLPRgIkZfPn0esGlfQRD5sNFibtkfowEuTCb8Z
+         +bad+QU20Jwr7g5VB6elbILbNzzhSxO4B5duJgYWLNBX6o8O1EgOVTScYtZUlrJpGvHv
+         Pa1ZW+wEJaJelv6LLYuik5crrTpnWzbmwK+7TqQZsFlVHdELEF2wqIWK2TpFOQGdkDHt
+         0PQ08vIt1b2hXEj2+/CjKNvI2FzR+OZicYlzbbKLq6dzg3xGukX9WJUm0gXNPuf3cIW6
+         XPqQ==
+X-Gm-Message-State: AOAM5321zWFmfPr3a+4gjk9z2/Y4Hrk0WVfwPQUgUGY68eRIxIvzt/op
+        ckZxFLYkKZ+it0+HsqriNihzZQ==
+X-Google-Smtp-Source: ABdhPJwcWyLwqgVIDq5QVfeKWIJZ1zweeStVncOtMpfxCFFFEuEh0sSa6pW/Ah5NefbMm4I9GwEzLw==
+X-Received: by 2002:a17:90b:285:: with SMTP id az5mr3983315pjb.118.1597842058708;
+        Wed, 19 Aug 2020 06:00:58 -0700 (PDT)
+Received: from [192.168.1.182] ([66.219.217.173])
+        by smtp.gmail.com with ESMTPSA id d23sm20502027pgm.11.2020.08.19.06.00.54
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 19 Aug 2020 06:00:58 -0700 (PDT)
+Subject: Re: [PATCH] block: convert tasklets to use new tasklet_setup() API
+To:     James Bottomley <James.Bottomley@HansenPartnership.com>,
+        Kees Cook <keescook@chromium.org>
+Cc:     Allen Pais <allen.cryptic@gmail.com>, jdike@addtoit.com,
+        richard@nod.at, anton.ivanov@cambridgegreys.com, 3chas3@gmail.com,
+        stefanr@s5r6.in-berlin.de, airlied@linux.ie, daniel@ffwll.ch,
+        sre@kernel.org, kys@microsoft.com, deller@gmx.de,
+        dmitry.torokhov@gmail.com, jassisinghbrar@gmail.com,
+        shawnguo@kernel.org, s.hauer@pengutronix.de,
+        maximlevitsky@gmail.com, oakad@yahoo.com, ulf.hansson@linaro.org,
+        mporter@kernel.crashing.org, alex.bou9@gmail.com,
+        broonie@kernel.org, martyn@welchs.me.uk, manohar.vanga@gmail.com,
+        mitch@sfgoth.com, davem@davemloft.net, kuba@kernel.org,
+        linux-um@lists.infradead.org, linux-kernel@vger.kernel.org,
+        linux-atm-general@lists.sourceforge.net, netdev@vger.kernel.org,
+        linux-block@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        openipmi-developer@lists.sourceforge.net,
+        linux1394-devel@lists.sourceforge.net,
+        intel-gfx@lists.freedesktop.org, dri-devel@lists.freedesktop.org,
+        linux-hyperv@vger.kernel.org, linux-parisc@vger.kernel.org,
+        linux-input@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-ntb@googlegroups.com, linux-s390@vger.kernel.org,
+        linux-spi@vger.kernel.org, devel@driverdev.osuosl.org,
+        Allen Pais <allen.lkml@gmail.com>,
+        Romain Perier <romain.perier@gmail.com>
+References: <20200817091617.28119-1-allen.cryptic@gmail.com>
+ <20200817091617.28119-2-allen.cryptic@gmail.com>
+ <b5508ca4-0641-7265-2939-5f03cbfab2e2@kernel.dk>
+ <202008171228.29E6B3BB@keescook>
+ <161b75f1-4e88-dcdf-42e8-b22504d7525c@kernel.dk>
+ <202008171246.80287CDCA@keescook>
+ <df645c06-c30b-eafa-4d23-826b84f2ff48@kernel.dk>
+ <1597780833.3978.3.camel@HansenPartnership.com>
+From:   Jens Axboe <axboe@kernel.dk>
+Message-ID: <f3312928-430c-25f3-7112-76f2754df080@kernel.dk>
+Date:   Wed, 19 Aug 2020 07:00:53 -0600
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.10.0
+MIME-Version: 1.0
+In-Reply-To: <1597780833.3978.3.camel@HansenPartnership.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-For Intel controllers, SDHCI_RESET_ALL resets also CQHCI registers.
-Normally, SDHCI_RESET_ALL is not used while CQHCI is enabled, but that can
-happen on the error path. e.g. if mmc_cqe_recovery() fails, mmc_blk_reset()
-is called which, for a eMMC that does not support HW Reset, will cycle the
-bus power and the driver will perform SDHCI_RESET_ALL.
+On 8/18/20 1:00 PM, James Bottomley wrote:
+> On Mon, 2020-08-17 at 13:02 -0700, Jens Axboe wrote:
+>> On 8/17/20 12:48 PM, Kees Cook wrote:
+>>> On Mon, Aug 17, 2020 at 12:44:34PM -0700, Jens Axboe wrote:
+>>>> On 8/17/20 12:29 PM, Kees Cook wrote:
+>>>>> On Mon, Aug 17, 2020 at 06:56:47AM -0700, Jens Axboe wrote:
+>>>>>> On 8/17/20 2:15 AM, Allen Pais wrote:
+>>>>>>> From: Allen Pais <allen.lkml@gmail.com>
+>>>>>>>
+>>>>>>> In preparation for unconditionally passing the
+>>>>>>> struct tasklet_struct pointer to all tasklet
+>>>>>>> callbacks, switch to using the new tasklet_setup()
+>>>>>>> and from_tasklet() to pass the tasklet pointer explicitly.
+>>>>>>
+>>>>>> Who came up with the idea to add a macro 'from_tasklet' that
+>>>>>> is just container_of? container_of in the code would be
+>>>>>> _much_ more readable, and not leave anyone guessing wtf
+>>>>>> from_tasklet is doing.
+>>>>>>
+>>>>>> I'd fix that up now before everything else goes in...
+>>>>>
+>>>>> As I mentioned in the other thread, I think this makes things
+>>>>> much more readable. It's the same thing that the timer_struct
+>>>>> conversion did (added a container_of wrapper) to avoid the
+>>>>> ever-repeating use of typeof(), long lines, etc.
+>>>>
+>>>> But then it should use a generic name, instead of each sub-system 
+>>>> using some random name that makes people look up exactly what it
+>>>> does. I'm not huge fan of the container_of() redundancy, but
+>>>> adding private variants of this doesn't seem like the best way
+>>>> forward. Let's have a generic helper that does this, and use it
+>>>> everywhere.
+>>>
+>>> I'm open to suggestions, but as things stand, these kinds of
+>>> treewide
+>>
+>> On naming? Implementation is just as it stands, from_tasklet() is
+>> totally generic which is why I objected to it. from_member()? Not
+>> great with naming... But I can see this going further and then we'll
+>> suddenly have tons of these. It's not good for readability.
+> 
+> Since both threads seem to have petered out, let me suggest in
+> kernel.h:
+> 
+> #define cast_out(ptr, container, member) \
+> 	container_of(ptr, typeof(*container), member)
+> 
+> It does what you want, the argument order is the same as container_of
+> with the only difference being you name the containing structure
+> instead of having to specify its type.
 
-So whenever performing SDHCI_RESET_ALL ensure CQHCI is deactivated.
-That will force the driver to reinitialize CQHCI when it is next used.
+Not to incessantly bike shed on the naming, but I don't like cast_out,
+it's not very descriptive. And it has connotations of getting rid of
+something, which isn't really true.
 
-A similar change was done already for sdhci-msm, and other drivers using
-CQHCI might benefit from a similar change, if they also have CQHCI reset
-by SDHCI_RESET_ALL.
+FWIW, I like the from_ part of the original naming, as it has some clues
+as to what is being done here. Why not just from_container()? That
+should immediately tell people what it does without having to look up
+the implementation, even before this becomes a part of the accepted
+coding norm.
 
-Fixes: 8ee82bda230fc9 ("mmc: sdhci-pci: Add CQHCI support for Intel GLK")
-Cc: stable@vger.kernel.org # 5.4.x: 0ffa6cfbd949: mmc: cqhci: Add cqhci_deactivate()
-Cc: stable@vger.kernel.org # 5.4+
-Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
----
- drivers/mmc/host/sdhci-pci-core.c | 10 +++++++++-
- 1 file changed, 9 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-index c0e081e48d3f..d0c8d39d5dbd 100644
---- a/drivers/mmc/host/sdhci-pci-core.c
-+++ b/drivers/mmc/host/sdhci-pci-core.c
-@@ -234,6 +234,14 @@ static void sdhci_pci_dumpregs(struct mmc_host *mmc)
- 	sdhci_dumpregs(mmc_priv(mmc));
- }
- 
-+static void sdhci_cqhci_reset(struct sdhci_host *host, u8 mask)
-+{
-+	if ((host->mmc->caps2 & MMC_CAP2_CQE) && (mask & SDHCI_RESET_ALL) &&
-+	    host->mmc->cqe_private)
-+		cqhci_deactivate(host->mmc);
-+	sdhci_reset(host, mask);
-+}
-+
- /*****************************************************************************\
-  *                                                                           *
-  * Hardware specific quirk handling                                          *
-@@ -722,7 +730,7 @@ static const struct sdhci_ops sdhci_intel_glk_ops = {
- 	.set_power		= sdhci_intel_set_power,
- 	.enable_dma		= sdhci_pci_enable_dma,
- 	.set_bus_width		= sdhci_set_bus_width,
--	.reset			= sdhci_reset,
-+	.reset			= sdhci_cqhci_reset,
- 	.set_uhs_signaling	= sdhci_set_uhs_signaling,
- 	.hw_reset		= sdhci_pci_hw_reset,
- 	.irq			= sdhci_cqhci_irq,
 -- 
-2.17.1
+Jens Axboe
 
