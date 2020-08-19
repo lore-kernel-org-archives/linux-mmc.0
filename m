@@ -2,148 +2,77 @@ Return-Path: <SRS0=2cKM=B5=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1A80FC433E1
-	for <linux-mmc@archiver.kernel.org>; Wed, 19 Aug 2020 10:48:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E2C6AC433DF
+	for <linux-mmc@archiver.kernel.org>; Wed, 19 Aug 2020 11:25:01 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E63082076E
-	for <linux-mmc@archiver.kernel.org>; Wed, 19 Aug 2020 10:48:53 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="SAlnLFGs"
+	by mail.kernel.org (Postfix) with ESMTP id C1023206DA
+	for <linux-mmc@archiver.kernel.org>; Wed, 19 Aug 2020 11:25:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728057AbgHSKse (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 19 Aug 2020 06:48:34 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44222 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728013AbgHSKs3 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Aug 2020 06:48:29 -0400
-Received: from mail-ot1-x342.google.com (mail-ot1-x342.google.com [IPv6:2607:f8b0:4864:20::342])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 910FCC061757;
-        Wed, 19 Aug 2020 03:48:28 -0700 (PDT)
-Received: by mail-ot1-x342.google.com with SMTP id h22so18666179otq.11;
-        Wed, 19 Aug 2020 03:48:28 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=JFCS1wWCaky01GdCrS5KhBNLCXiKvx8eu/9Q1CWY57o=;
-        b=SAlnLFGsaJJ2xUQvXdp6/REunLAQzaLpmNpCPkhdMyKVNOL4zXoJc+uTpvFb1PLXQe
-         nN8aQpwx9KlR0QpjA0U0Eq9qCAcvJ1BkG1Pmvfae+wF16AUCkU8W0GDQheD/o4B1VrUX
-         PelVL5WwDQloIppGpod8O4LcRauK/SLT0vBKv+BhPM4L1DU+6rZBrJ0Dt0oV8Ce4u200
-         wfYajuI8k/buRZ/KOQgJS9xFj6qU+vsS6Mi/Pic5cr7hyqCbNaPaM64dCQ32B92C7zpm
-         twdkgIcY8FJxVqqD5N4bDX/Yu8aavznJiTYE5JD98MkyaozlEe8FkOVjNVcv9NBfu1pV
-         5Fgw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=JFCS1wWCaky01GdCrS5KhBNLCXiKvx8eu/9Q1CWY57o=;
-        b=uV1mk1B8VaF8tL03zX+JPDnTfyoDnCNxK3gH+iz+/rwHDaDH4hm566X1iC7oIitBQH
-         76P+QolpXTnIPEpqoQakVKdpGCMLf9musvyF1ESa7fTgxLvxsLlpc9mPgIglJ6Kdla24
-         N8C0ll+EATzolfkBKVJR3Th4rTUbCZNC/XglL/+byfkSD3y7hRaxWENgiDBdmfdfIh7U
-         Y8u1VPbZ6UuIL0gQsEiUx/i0BCYo7UPKLblql0q/72bOZsBHTbT7d2E3QZ0r9u5OlQ0m
-         V+td2rohBLQWIW0bo8naZ0z3+W9oIiIEvVpYQg8JLKwoORrOSoCIb7L0Ar3cWHzKVTZN
-         wXTA==
-X-Gm-Message-State: AOAM532ZQXvxDI/UlAajImfHfGl6AguDlbcNSDwj79tVy7i26jUl5ncm
-        IzmhgbQKiBsqdofNGeV5Bj3KUQ6wrj+EC22/IMQ=
-X-Google-Smtp-Source: ABdhPJwYTK+IRxToH0hqhLtJ7NIIqDs8lKmtEJkzNzElCKB5MQaF3rOwIOaAYWCB8rMlfnOVuvrNcqGFlbqr+yW4gKM=
-X-Received: by 2002:a9d:128c:: with SMTP id g12mr17527086otg.242.1597834108000;
- Wed, 19 Aug 2020 03:48:28 -0700 (PDT)
-MIME-Version: 1.0
-References: <20200817091617.28119-1-allen.cryptic@gmail.com>
- <20200817091617.28119-2-allen.cryptic@gmail.com> <b5508ca4-0641-7265-2939-5f03cbfab2e2@kernel.dk>
- <202008171228.29E6B3BB@keescook> <161b75f1-4e88-dcdf-42e8-b22504d7525c@kernel.dk>
- <202008171246.80287CDCA@keescook> <df645c06-c30b-eafa-4d23-826b84f2ff48@kernel.dk>
- <1597780833.3978.3.camel@HansenPartnership.com> <202008181309.FD3940A2D5@keescook>
-In-Reply-To: <202008181309.FD3940A2D5@keescook>
-From:   Allen <allen.lkml@gmail.com>
-Date:   Wed, 19 Aug 2020 16:18:16 +0530
-Message-ID: <CAOMdWSLi-aUeKDN8Xn-X2uW_LmWsp2n=NL3dPGiUbQKm_MxcAg@mail.gmail.com>
-Subject: Re: [PATCH] block: convert tasklets to use new tasklet_setup() API
-To:     Kees Cook <keescook@chromium.org>
-Cc:     James Bottomley <James.Bottomley@hansenpartnership.com>,
-        Jens Axboe <axboe@kernel.dk>,
-        Allen Pais <allen.cryptic@gmail.com>, jdike@addtoit.com,
-        richard@nod.at, anton.ivanov@cambridgegreys.com, 3chas3@gmail.com,
-        stefanr@s5r6.in-berlin.de, airlied@linux.ie, daniel@ffwll.ch,
-        sre@kernel.org, kys@microsoft.com, deller@gmx.de,
-        dmitry.torokhov@gmail.com, jassisinghbrar@gmail.com,
-        shawnguo@kernel.org, s.hauer@pengutronix.de,
-        maximlevitsky@gmail.com, oakad@yahoo.com,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        mporter@kernel.crashing.org, alex.bou9@gmail.com,
-        broonie@kernel.org, martyn@welchs.me.uk, manohar.vanga@gmail.com,
-        mitch@sfgoth.com, David Miller <davem@davemloft.net>,
-        Jakub Kicinski <kuba@kernel.org>, linux-um@lists.infradead.org,
-        linux-kernel@vger.kernel.org,
-        linux-atm-general@lists.sourceforge.net, netdev@vger.kernel.org,
-        linux-block@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        openipmi-developer@lists.sourceforge.net,
-        linux1394-devel@lists.sourceforge.net,
-        intel-gfx@lists.freedesktop.org, dri-devel@lists.freedesktop.org,
-        linux-hyperv@vger.kernel.org, linux-parisc@vger.kernel.org,
-        linux-input@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-ntb@googlegroups.com, linux-s390@vger.kernel.org,
-        linux-spi@vger.kernel.org, devel@driverdev.osuosl.org,
-        Romain Perier <romain.perier@gmail.com>
-Content-Type: text/plain; charset="UTF-8"
+        id S1726746AbgHSLZB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 19 Aug 2020 07:25:01 -0400
+Received: from inva020.nxp.com ([92.121.34.13]:44568 "EHLO inva020.nxp.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726710AbgHSLZA (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 19 Aug 2020 07:25:00 -0400
+Received: from inva020.nxp.com (localhost [127.0.0.1])
+        by inva020.eu-rdc02.nxp.com (Postfix) with ESMTP id E845C1A03BC;
+        Wed, 19 Aug 2020 13:24:58 +0200 (CEST)
+Received: from invc005.ap-rdc01.nxp.com (invc005.ap-rdc01.nxp.com [165.114.16.14])
+        by inva020.eu-rdc02.nxp.com (Postfix) with ESMTP id C0D561A03FA;
+        Wed, 19 Aug 2020 13:24:54 +0200 (CEST)
+Received: from 10.192.242.69 (shlinux2.ap.freescale.net [10.192.224.44])
+        by invc005.ap-rdc01.nxp.com (Postfix) with ESMTP id 074BA402C3;
+        Wed, 19 Aug 2020 13:24:49 +0200 (CEST)
+From:   haibo.chen@nxp.com
+To:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
+        linux-mmc@vger.kernel.org
+Cc:     linux-imx@nxp.com, haibo.chen@nxp.com, mka@chromium.org,
+        huyue2@yulong.com, dianders@chromium.org, pali@kernel.org
+Subject: [PATCH v2] mmc: sdio: add a delay to call sdio_irq_work when sdio bus resume
+Date:   Wed, 19 Aug 2020 19:19:19 +0800
+Message-Id: <1597835959-22402-1-git-send-email-haibo.chen@nxp.com>
+X-Mailer: git-send-email 2.7.4
+X-Virus-Scanned: ClamAV using ClamSMTP
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-> > > > > > > >
-> > > > > > > > In preparation for unconditionally passing the
-> > > > > > > > struct tasklet_struct pointer to all tasklet
-> > > > > > > > callbacks, switch to using the new tasklet_setup()
-> > > > > > > > and from_tasklet() to pass the tasklet pointer explicitly.
-> > > > > > >
-> > > > > > > Who came up with the idea to add a macro 'from_tasklet' that
-> > > > > > > is just container_of? container_of in the code would be
-> > > > > > > _much_ more readable, and not leave anyone guessing wtf
-> > > > > > > from_tasklet is doing.
-> > > > > > >
-> > > > > > > I'd fix that up now before everything else goes in...
-> > > > > >
-> > > > > > As I mentioned in the other thread, I think this makes things
-> > > > > > much more readable. It's the same thing that the timer_struct
-> > > > > > conversion did (added a container_of wrapper) to avoid the
-> > > > > > ever-repeating use of typeof(), long lines, etc.
-> > > > >
-> > > > > But then it should use a generic name, instead of each sub-system
-> > > > > using some random name that makes people look up exactly what it
-> > > > > does. I'm not huge fan of the container_of() redundancy, but
-> > > > > adding private variants of this doesn't seem like the best way
-> > > > > forward. Let's have a generic helper that does this, and use it
-> > > > > everywhere.
-> > > >
-> > > > I'm open to suggestions, but as things stand, these kinds of
-> > > > treewide
-> > >
-> > > On naming? Implementation is just as it stands, from_tasklet() is
-> > > totally generic which is why I objected to it. from_member()? Not
-> > > great with naming... But I can see this going further and then we'll
-> > > suddenly have tons of these. It's not good for readability.
-> >
-> > Since both threads seem to have petered out, let me suggest in
-> > kernel.h:
-> >
-> > #define cast_out(ptr, container, member) \
-> >       container_of(ptr, typeof(*container), member)
-> >
-> > It does what you want, the argument order is the same as container_of
-> > with the only difference being you name the containing structure
-> > instead of having to specify its type.
->
-> I like this! Shall I send this to Linus to see if this can land in -rc2
-> for use going forward?
->
+From: Haibo Chen <haibo.chen@nxp.com>
 
-Cool, I shall wait for it to be accepted and then spin out V2 with cast_out()
+Find this issue on i.MX7D-sdb board with broadcom sdio wifi.
+When system resume, sometimes this wifi meet the tuning fail issue.
+All tuning command get command timeout error. This is because
+sdio_irq_work on system_wq was executed before the broadcom
+wifi driver resume. Due to broadcom wifi driver set the wifi in
+Sleep sate in system suspend, need to set the wifi to Wake state
+first. So need to make sure wifi driver resume first, then do the
+sdio_irq_work.
 
+Fixes: 51133850bce2 ("mmc: core: Fixup processing of SDIO IRQs during system suspend/resume")
+Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
+---
+ drivers/mmc/core/sdio.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+index 7b40553d3934..101632617f69 100644
+--- a/drivers/mmc/core/sdio.c
++++ b/drivers/mmc/core/sdio.c
+@@ -1047,7 +1047,7 @@ static int mmc_sdio_resume(struct mmc_host *host)
+ 		if (!(host->caps2 & MMC_CAP2_SDIO_IRQ_NOTHREAD))
+ 			wake_up_process(host->sdio_irq_thread);
+ 		else if (host->caps & MMC_CAP_SDIO_IRQ)
+-			queue_delayed_work(system_wq, &host->sdio_irq_work, 0);
++			queue_delayed_work(system_wq, &host->sdio_irq_work, 1);
+ 	}
+ 
+ out:
 -- 
-       - Allen
+2.17.1
+
