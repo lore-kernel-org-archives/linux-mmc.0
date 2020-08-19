@@ -2,146 +2,162 @@ Return-Path: <SRS0=2cKM=B5=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.0 required=3.0 tests=BAYES_00,DKIM_INVALID,
-	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_SANE_2 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.9 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 02FBDC433E4
-	for <linux-mmc@archiver.kernel.org>; Wed, 19 Aug 2020 21:39:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 94DB4C433DF
+	for <linux-mmc@archiver.kernel.org>; Wed, 19 Aug 2020 22:56:39 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D3C902078D
-	for <linux-mmc@archiver.kernel.org>; Wed, 19 Aug 2020 21:39:48 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6B2B4207DA
+	for <linux-mmc@archiver.kernel.org>; Wed, 19 Aug 2020 22:56:39 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (1024-bit key) header.d=hansenpartnership.com header.i=@hansenpartnership.com header.b="QZWzNY/R";
-	dkim=fail reason="signature verification failed" (1024-bit key) header.d=hansenpartnership.com header.i=@hansenpartnership.com header.b="QZWzNY/R"
+	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="fVgWpyWB"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726718AbgHSVjj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 19 Aug 2020 17:39:39 -0400
-Received: from bedivere.hansenpartnership.com ([66.63.167.143]:47048 "EHLO
-        bedivere.hansenpartnership.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726482AbgHSVji (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Aug 2020 17:39:38 -0400
-Received: from localhost (localhost [127.0.0.1])
-        by bedivere.hansenpartnership.com (Postfix) with ESMTP id 770738EE1F3;
-        Wed, 19 Aug 2020 14:39:36 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=hansenpartnership.com;
-        s=20151216; t=1597873176;
-        bh=P5Nf0m7rIb0VsmSGOAvsuubsuKdLazFJ3PWgYJpOQYo=;
-        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
-        b=QZWzNY/RNv5GTOLC344QkDqvWPLVlJoIZZa/1SvyuRWg2n4Pm6sT1giNF3hS4dmal
-         2AgGeohtLxDuIx9MBYzKgKxS5vVGSeJVIhAssuqGCPXbCp5oJD0WlnV+VnG46ikJ5j
-         S3mk3MHG2hrcnsbyoMzE7CI3TS+/7QS3hnb2Remw=
-Received: from bedivere.hansenpartnership.com ([127.0.0.1])
-        by localhost (bedivere.hansenpartnership.com [127.0.0.1]) (amavisd-new, port 10024)
-        with ESMTP id bHKZiEX-QbYl; Wed, 19 Aug 2020 14:39:36 -0700 (PDT)
-Received: from [153.66.254.174] (c-73-35-198-56.hsd1.wa.comcast.net [73.35.198.56])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by bedivere.hansenpartnership.com (Postfix) with ESMTPSA id 07F3F8EE0E9;
-        Wed, 19 Aug 2020 14:39:33 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=hansenpartnership.com;
-        s=20151216; t=1597873176;
-        bh=P5Nf0m7rIb0VsmSGOAvsuubsuKdLazFJ3PWgYJpOQYo=;
-        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
-        b=QZWzNY/RNv5GTOLC344QkDqvWPLVlJoIZZa/1SvyuRWg2n4Pm6sT1giNF3hS4dmal
-         2AgGeohtLxDuIx9MBYzKgKxS5vVGSeJVIhAssuqGCPXbCp5oJD0WlnV+VnG46ikJ5j
-         S3mk3MHG2hrcnsbyoMzE7CI3TS+/7QS3hnb2Remw=
-Message-ID: <1597873172.4030.2.camel@HansenPartnership.com>
-Subject: Re: [PATCH] block: convert tasklets to use new tasklet_setup() API
-From:   James Bottomley <James.Bottomley@HansenPartnership.com>
-To:     Allen <allen.lkml@gmail.com>
-Cc:     Jens Axboe <axboe@kernel.dk>, Kees Cook <keescook@chromium.org>,
-        Allen Pais <allen.cryptic@gmail.com>, jdike@addtoit.com,
-        richard@nod.at, anton.ivanov@cambridgegreys.com, 3chas3@gmail.com,
-        stefanr@s5r6.in-berlin.de, airlied@linux.ie,
-        Daniel Vetter <daniel@ffwll.ch>, sre@kernel.org,
-        kys@microsoft.com, deller@gmx.de, dmitry.torokhov@gmail.com,
-        jassisinghbrar@gmail.com, shawnguo@kernel.org,
-        s.hauer@pengutronix.de, maximlevitsky@gmail.com, oakad@yahoo.com,
+        id S1726435AbgHSW4i (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 19 Aug 2020 18:56:38 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44380 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726342AbgHSW4i (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Aug 2020 18:56:38 -0400
+Received: from mail-ed1-x532.google.com (mail-ed1-x532.google.com [IPv6:2a00:1450:4864:20::532])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A79F6C061757
+        for <linux-mmc@vger.kernel.org>; Wed, 19 Aug 2020 15:56:37 -0700 (PDT)
+Received: by mail-ed1-x532.google.com with SMTP id c10so145073edk.6
+        for <linux-mmc@vger.kernel.org>; Wed, 19 Aug 2020 15:56:37 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=chromium.org; s=google;
+        h=mime-version:from:date:message-id:subject:to:cc;
+        bh=5CdGpPLchV3r1sgquFSI+KPaGqT2I/ptWGolNWVn8h0=;
+        b=fVgWpyWBnvCZeCnyxvWxLthiXMssKrJpGhHbOsLDG8gF2pcAr1kvPZnIkXaDxVidFG
+         yAsj2bboYpKFVcwnfaPHzJOUr85b6jmeAFk+T4c+lBoakhHoI55pKC3F3RI8ccqqM/gy
+         lY81hrsFRW392/+8noNbBepeq7kfY1T1dPxp8=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:from:date:message-id:subject:to:cc;
+        bh=5CdGpPLchV3r1sgquFSI+KPaGqT2I/ptWGolNWVn8h0=;
+        b=RrTq9ocnNOWhAJcAfoqk7oDK4vKZRHJR9oP2QgP5FB9yRI4HQkk0h5U42Aiksvpov/
+         IhtmbmoUkJHNChVTYr6zU5xj101sVuZfjBDPyvWsS90bwScCaW8rGAfQQMIn5lqvHC5G
+         YIB8nnMcrsXx3l+lWh0n1E/8E8eToUX/DoPkRC1obLje5owWA1of1/zLITG6BkwQJ8VB
+         IKU4Fhr32dChvkE20/v04c1uENmJzfx5TI2V9RTutO6mkwsovpTKqlgtszsJtAgvXIVh
+         T/QnzWTmvAfzzSU6Phi2wIZ1mvpXbX73XYTCD8acSfAt5C0r3fra2KyrMtRVZajt7pRp
+         QjZg==
+X-Gm-Message-State: AOAM531xXHH07NGGhDUpnmP554b6oJfGaF0Bi5dBC9nkJ/nBF3YCegRZ
+        pWcnGlnnj2hwugGREPiSsXhAUKJtvjO7JA==
+X-Google-Smtp-Source: ABdhPJxGQe+DNYm69Q4PbLNO8ETAeYErVbOqFDfb+fZkYYfjeZrJmT3kUb6Speq24WLWFg85H2P5lg==
+X-Received: by 2002:a05:6402:1c85:: with SMTP id cy5mr326148edb.6.1597877795793;
+        Wed, 19 Aug 2020 15:56:35 -0700 (PDT)
+Received: from mail-ej1-f46.google.com (mail-ej1-f46.google.com. [209.85.218.46])
+        by smtp.gmail.com with ESMTPSA id j11sm178063ejx.0.2020.08.19.15.56.35
+        for <linux-mmc@vger.kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 19 Aug 2020 15:56:35 -0700 (PDT)
+Received: by mail-ej1-f46.google.com with SMTP id qc22so377094ejb.4
+        for <linux-mmc@vger.kernel.org>; Wed, 19 Aug 2020 15:56:35 -0700 (PDT)
+X-Received: by 2002:a17:907:2712:: with SMTP id w18mr507253ejk.473.1597877794459;
+ Wed, 19 Aug 2020 15:56:34 -0700 (PDT)
+MIME-Version: 1.0
+From:   Raul Rangel <rrangel@chromium.org>
+Date:   Wed, 19 Aug 2020 16:56:23 -0600
+X-Gmail-Original-Message-ID: <CAHQZ30ApB3BEzgLv=EtzB_Kpnsfsr7-s+JcYmyzXN3j7OF80-w@mail.gmail.com>
+Message-ID: <CAHQZ30ApB3BEzgLv=EtzB_Kpnsfsr7-s+JcYmyzXN3j7OF80-w@mail.gmail.com>
+Subject: HS400 tuning and presets
+To:     linux-mmc@vger.kernel.org
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        mporter@kernel.crashing.org, alex.bou9@gmail.com,
-        broonie@kernel.org, martyn@welchs.me.uk, manohar.vanga@gmail.com,
-        mitch@sfgoth.com, David Miller <davem@davemloft.net>,
-        Jakub Kicinski <kuba@kernel.org>, linux-um@lists.infradead.org,
-        linux-kernel@vger.kernel.org,
-        linux-atm-general@lists.sourceforge.net, netdev@vger.kernel.org,
-        linux-block@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        openipmi-developer@lists.sourceforge.net,
-        linux1394-devel@lists.sourceforge.net,
-        intel-gfx@lists.freedesktop.org, dri-devel@lists.freedesktop.org,
-        linux-hyperv@vger.kernel.org, linux-parisc@vger.kernel.org,
-        linux-input@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-ntb@googlegroups.com, linux-s390@vger.kernel.org,
-        linux-spi@vger.kernel.org, devel@driverdev.osuosl.org,
-        Romain Perier <romain.perier@gmail.com>
-Date:   Wed, 19 Aug 2020 14:39:32 -0700
-In-Reply-To: <CAOMdWSJRR0BhjJK1FxD7UKxNd5sk4ycmEX6TYtJjRNR6UFAj6Q@mail.gmail.com>
-References: <20200817091617.28119-1-allen.cryptic@gmail.com>
-         <20200817091617.28119-2-allen.cryptic@gmail.com>
-         <b5508ca4-0641-7265-2939-5f03cbfab2e2@kernel.dk>
-         <202008171228.29E6B3BB@keescook>
-         <161b75f1-4e88-dcdf-42e8-b22504d7525c@kernel.dk>
-         <202008171246.80287CDCA@keescook>
-         <df645c06-c30b-eafa-4d23-826b84f2ff48@kernel.dk>
-         <1597780833.3978.3.camel@HansenPartnership.com>
-         <f3312928-430c-25f3-7112-76f2754df080@kernel.dk>
-         <1597849185.3875.7.camel@HansenPartnership.com>
-         <CAOMdWSJRR0BhjJK1FxD7UKxNd5sk4ycmEX6TYtJjRNR6UFAj6Q@mail.gmail.com>
+        Daniel Kurtz <djkurtz@chromium.org>
 Content-Type: text/plain; charset="UTF-8"
-X-Mailer: Evolution 3.26.6 
-Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 2020-08-19 at 21:54 +0530, Allen wrote:
-> > [...]
-> > > > Since both threads seem to have petered out, let me suggest in
-> > > > kernel.h:
-> > > > 
-> > > > #define cast_out(ptr, container, member) \
-> > > >     container_of(ptr, typeof(*container), member)
-> > > > 
-> > > > It does what you want, the argument order is the same as
-> > > > container_of with the only difference being you name the
-> > > > containing structure instead of having to specify its type.
-> > > 
-> > > Not to incessantly bike shed on the naming, but I don't like
-> > > cast_out, it's not very descriptive. And it has connotations of
-> > > getting rid of something, which isn't really true.
-> > 
-> > Um, I thought it was exactly descriptive: you're casting to the
-> > outer container.  I thought about following the C++ dynamic casting
-> > style, so out_cast(), but that seemed a bit pejorative.  What about
-> > outer_cast()?
-> > 
-> > > FWIW, I like the from_ part of the original naming, as it has
-> > > some clues as to what is being done here. Why not just
-> > > from_container()? That should immediately tell people what it
-> > > does without having to look up the implementation, even before
-> > > this becomes a part of the accepted coding norm.
-> > 
-> > I'm not opposed to container_from() but it seems a little less
-> > descriptive than outer_cast() but I don't really care.  I always
-> > have to look up container_of() when I'm using it so this would just
-> > be another macro of that type ...
-> > 
-> 
->  So far we have a few which have been suggested as replacement
-> for from_tasklet()
-> 
-> - out_cast() or outer_cast()
-> - from_member().
-> - container_from() or from_container()
-> 
-> from_container() sounds fine, would trimming it a bit work? like
-> from_cont().
+I noticed some odd things with the MMC/SDHCI code while debugging an
+HS400 tuning issue.
 
-I'm fine with container_from().  It's the same form as container_of()
-and I think we need urgent agreement to not stall everything else so
-the most innocuous name is likely to get the widest acceptance.
+1) Is it expected that we never enable SDHCI_CTRL_PRESET_VAL_ENABLE
+for an eMMC running at HS200 or HS400?
+The flow for enabling HS400 is: Legacy -> HS200 -> Perform Tuning ->
+HS -> HS400.
+Looking at [sdhci_set_ios](https://source.chromium.org/chromiumos/chromiumos/codesearch/+/master:src/third_party/kernel/v5.4/drivers/mmc/host/sdhci.c;l=2019),
+it looks like it's responsible for enabling presets.
 
-James
+    if (!(host->quirks2 & SDHCI_QUIRK2_PRESET_VALUE_BROKEN) &&
+                    ((ios->timing == MMC_TIMING_UHS_SDR12) ||
+                     (ios->timing == MMC_TIMING_UHS_SDR25) ||
+                     (ios->timing == MMC_TIMING_UHS_SDR50) ||
+                     (ios->timing == MMC_TIMING_UHS_SDR104) ||
+                     (ios->timing == MMC_TIMING_UHS_DDR50) ||
+                     (ios->timing == MMC_TIMING_MMC_DDR52))) {
+            u16 preset;
 
+            sdhci_enable_preset_value(host, true);
+            preset = sdhci_get_preset_value(host);
+            ios->drv_type = (preset & SDHCI_PRESET_DRV_MASK)
+                    >> SDHCI_PRESET_DRV_SHIFT;
+    }
+
+MMC_TIMING_MMC_HS200 and MMC_TIMING_MMC_HS400 are missing from the
+conditions, so we never enable presets. This means that by default
+(only 2 controllers provide select_drive_strength) we use drive
+strength B for both the card and the controller.
+
+    int mmc_select_drive_strength(struct mmc_card *card, unsigned int max_dtr,
+                                  int card_drv_type, int *drv_type)
+    {
+            struct mmc_host *host = card->host;
+            int host_drv_type = SD_DRIVER_TYPE_B;
+
+            *drv_type = 0;
+
+            if (!host->ops->select_drive_strength)
+                    return 0;
+            ...
+    }
+
+Here is a trace log showing HS400 initialization: https://0paste.com/79874
+
+2) When performing HS400 tuning we end up enabling presets.
+The re-tuning sequence is: HS400->DDR52->HS->HS200->Perform Tuning->HS->HS400
+
+So when we transition to DDR52 the code above enables presets. You can
+see this happening in this trace log: https://0paste.com/79875. Look
+at timestamp 1926.173800.
+
+This means that the card and controller have the potential to have
+mismatching drive strengths. This can be seen at timestamp
+1926.175813.The HS200 preset on my controller is configured to A, but
+the card would be set up as B (if the controller didn't override
+select_drive_strength).
+
+Should we be enabling presets for HS200/HS400 (and potentially
+MMC_HS), or should we remove MMC_DDR52 from the condition above?
+
+It looks like 0dafa60eb2506 ("mmc: sdhci: also get preset value and
+driver type for MMC_DDR52") was the CL that added MMC_DDR52 to the
+condition.
+
+3) How do we ensure that card drive strength and controller drive
+strength stay in sync when presets are enabled?
+Right now mmc_select_driver_type is only called from
+`mmc_select_hs400es` and `mmc_select_hs200`. `mmc_select_driver_type
+doesn't currently take the timing into account when making a decision.
+Only two devices currently provide the `select_drive_strength`
+override, so we are setting the card to drive strength B for most
+controllers.
+
+Should we modify mmc_select_drive_strength to take in the target
+timing so it can return the correct card drive strength. We could then
+add an sdhci_select_drive_strength that queries the preset registers
+(if enabled) and returns the target drive strength.
+
+4) Should we be calling `mmc_select_driver_type` from
+`mmc_hs400_to_hs200` and `mmc_hs200_to_hs400` during the transitions?
+Or do we not care?
+
+Sorry for the long email...
+Once I get some guidance, I can send some patches.
+
+Thanks,
+Raul
