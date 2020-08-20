@@ -2,92 +2,48 @@ Return-Path: <SRS0=808J=B6=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-12.5 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7434FC433E1
-	for <linux-mmc@archiver.kernel.org>; Thu, 20 Aug 2020 10:47:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 63E20C433E1
+	for <linux-mmc@archiver.kernel.org>; Thu, 20 Aug 2020 13:26:31 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5281220724
-	for <linux-mmc@archiver.kernel.org>; Thu, 20 Aug 2020 10:47:03 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 30FCA20658
+	for <linux-mmc@archiver.kernel.org>; Thu, 20 Aug 2020 13:26:31 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="zkaFZto0"
+	dkim=fail reason="signature verification failed" (1024-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="waYeKVoy"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1731429AbgHTKq4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 20 Aug 2020 06:46:56 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40196 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1731886AbgHTKoU (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Aug 2020 06:44:20 -0400
-Received: from mail-pf1-x442.google.com (mail-pf1-x442.google.com [IPv6:2607:f8b0:4864:20::442])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 57560C061342
-        for <linux-mmc@vger.kernel.org>; Thu, 20 Aug 2020 03:44:19 -0700 (PDT)
-Received: by mail-pf1-x442.google.com with SMTP id u128so825112pfb.6
-        for <linux-mmc@vger.kernel.org>; Thu, 20 Aug 2020 03:44:19 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=3PXtPhgN15xkqptqDoOT+6OR5bz1DwLunRYJNev9KR4=;
-        b=zkaFZto0eMoTUXrhXnN5c215rPk2SI+mYKS6axiQrRCTTNkAxc+HQ1zvbE+9q8CdK3
-         ejrwiC5XvbU1VEVR0PkGPGG669EkRUf07na+UAjM95hQEAsG4rAcauD7W4QS/mQQK9Ji
-         aHAzBEJD8cb3YAopp2IN0BnKR0TfeOemTuipy2eA7MsVI9rqpSpfngZuJ3YGffGgvoOr
-         2qaNwaJ3BQvjLM/eOrXzy4yluttDslK9WrVaLBIAQGyCyGmcBfTPfVT8FfIY5a1ueI/3
-         qAMmm3cwSJncp0MSZc3c4f5Ucf1L5617fzuL31JE1OimTfSyQCLy69f4jWzzKMfRVtbY
-         sboA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=3PXtPhgN15xkqptqDoOT+6OR5bz1DwLunRYJNev9KR4=;
-        b=Kdup2uMlZDNm6WFq83+uef+msCG/jIYkGeFK+ToNy7zQIupqt/rO6uQgkURZSs1/hL
-         ncwReRIdG37yezjsl21qG3UKqAJU+Mj+ei8kPrZp7fKj81gxmkVYEoR/nfwx6YL4G+vq
-         K0AzzM3CfxpR80zbhgg/zb5i5JzZ6og2UXNNUJZqowQsfXxXhvDh3tw6Ugry7X5+lFrF
-         CGPVvblAB90E8Crr8Y4DdVHaav41OKDlJpH+ZvVGYA+un6vifQBc1rqWaW6JhsDG65ox
-         31LGgp86n5L7RNUzyhDO0aWQDKjWaPdZ1DySRLrqdz+9R2FhVLP9N3wOZitIcVrDsAOM
-         +cFA==
-X-Gm-Message-State: AOAM532g6JJ+5uA8s/RLfoD1LVCa7+iJ+/UKA+uUJ1ABzC+U4A9Ubygk
-        QkTlXXhKw/+Xg7HWRSU6Zzc6eQ==
-X-Google-Smtp-Source: ABdhPJzGI4PMt2rxPglqL7BKdt2SWVVgHiE/GuL96GZfgXci06o5FRoVl3y2qYxeBmL8p5wYvmHOSw==
-X-Received: by 2002:a65:4808:: with SMTP id h8mr2045357pgs.113.1597920255960;
-        Thu, 20 Aug 2020 03:44:15 -0700 (PDT)
-Received: from localhost ([122.172.43.13])
-        by smtp.gmail.com with ESMTPSA id e8sm2352323pfd.34.2020.08.20.03.44.14
-        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 20 Aug 2020 03:44:15 -0700 (PDT)
-From:   Viresh Kumar <viresh.kumar@linaro.org>
-To:     rnayak@codeaurora.org, Adrian Hunter <adrian.hunter@intel.com>,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>,
-        Daniel Vetter <daniel@ffwll.ch>,
-        David Airlie <airlied@linux.ie>,
-        Fabio Estevam <festevam@gmail.com>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Jiri Slaby <jirislaby@kernel.org>,
-        Mark Brown <broonie@kernel.org>,
-        NXP Linux Team <linux-imx@nxp.com>,
-        Pengutronix Kernel Team <kernel@pengutronix.de>,
-        Qiang Yu <yuq825@gmail.com>,
-        "Rafael J. Wysocki" <rjw@rjwysocki.net>,
-        Rob Clark <robdclark@gmail.com>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        Sean Paul <sean@poorly.run>, Shawn Guo <shawnguo@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Viresh Kumar <viresh.kumar@linaro.org>
-Cc:     linux-pm@vger.kernel.org,
-        Vincent Guittot <vincent.guittot@linaro.org>,
-        Stephen Boyd <sboyd@kernel.org>, Nishanth Menon <nm@ti.com>,
-        dri-devel@lists.freedesktop.org, freedreno@lists.freedesktop.org,
-        lima@lists.freedesktop.org, linux-arm-kernel@lists.infradead.org,
-        linux-arm-msm@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-serial@vger.kernel.org,
-        linux-spi@vger.kernel.org
-Subject: [PATCH 0/8] opp: Unconditionally call dev_pm_opp_of_remove_table()
-Date:   Thu, 20 Aug 2020 16:13:49 +0530
-Message-Id: <cover.1597919647.git.viresh.kumar@linaro.org>
-X-Mailer: git-send-email 2.25.0.rc1.19.g042ed3e048af
+        id S1729810AbgHTN0Q (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 20 Aug 2020 09:26:16 -0400
+Received: from www.zeus03.de ([194.117.254.33]:47848 "EHLO mail.zeus03.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1730754AbgHTNZv (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 20 Aug 2020 09:25:51 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
+        from:to:cc:subject:date:message-id:in-reply-to:references
+        :mime-version:content-transfer-encoding; s=k1; bh=hjNThGVUxVmJ7F
+        t5ICc+pAgIb9ES8z3AiSIOPZEnIqM=; b=waYeKVoywwteSZL2hPQ/x7B/RadE0b
+        ooyZn7Zntw1knz6Mo8C8gIR4kUU6VH3fK4Yykkt25wJP3B1dfea4azVReSBGmvCj
+        W/O9yb9zXLBwgqedJVDMORvMaLD4kTrE93X2jzoIlS7QRr3Z52pI0M+diBg13PJZ
+        sfkhQx3c0YRDA=
+Received: (qmail 560039 invoked from network); 20 Aug 2020 15:25:47 +0200
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 20 Aug 2020 15:25:47 +0200
+X-UD-Smtp-Session: l3s3148p1@66PiDk+tKpggAwDPXwuPAFbD76CDVWXO
+From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
+To:     linux-mmc@vger.kernel.org
+Cc:     linux-renesas-soc@vger.kernel.org,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        =?UTF-8?q?Niklas=20S=C3=B6derlund?= <niklas.soderlund@ragnatech.se>,
+        Masahiro Yamada <masahiroy@kernel.org>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>
+Subject: [RFT 1/6] mmc: renesas_sdhi: move wrong 'hw_reset' to 'reset'
+Date:   Thu, 20 Aug 2020 15:25:33 +0200
+Message-Id: <20200820132538.24758-2-wsa+renesas@sang-engineering.com>
+X-Mailer: git-send-email 2.20.1
+In-Reply-To: <20200820132538.24758-1-wsa+renesas@sang-engineering.com>
+References: <20200820132538.24758-1-wsa+renesas@sang-engineering.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Sender: linux-mmc-owner@vger.kernel.org
@@ -95,44 +51,60 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hello,
+This driver got the usage of 'hw_reset' wrong and missed that it is used
+to reset the remote HW (card) only, not the local one (controller). Move
+everything to the proper 'reset' callback. Also, add the generic reset
+code from TMIO, so we will ensure the same behaviour (it will get
+refactored away in a later patch). This also means we need to drop
+MMC_CAP_HW_RESET because this is currently not supported by our
+hardware.
 
-This cleans up some of the user code around calls to
-dev_pm_opp_of_remove_table().
+Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+---
+ drivers/mmc/host/renesas_sdhi_core.c | 19 +++++++++++++------
+ 1 file changed, 13 insertions(+), 6 deletions(-)
 
-All the patches can be picked by respective maintainers directly except
-for the last patch, which needs the previous two to get merged first.
-
-These are based for 5.9-rc1.
-
-Rajendra, Since most of these changes are related to qcom stuff, it
-would be great if you can give them a try. I wasn't able to test them
-due to lack of hardware.
-
-Viresh Kumar (8):
-  cpufreq: imx6q: Unconditionally call dev_pm_opp_of_remove_table()
-  drm/lima: Unconditionally call dev_pm_opp_of_remove_table()
-  drm/msm: Unconditionally call dev_pm_opp_of_remove_table()
-  mmc: sdhci-msm: Unconditionally call dev_pm_opp_of_remove_table()
-  spi: spi-geni-qcom: Unconditionally call dev_pm_opp_of_remove_table()
-  spi: spi-qcom-qspi: Unconditionally call dev_pm_opp_of_remove_table()
-  tty: serial: qcom_geni_serial: Unconditionally call
-    dev_pm_opp_of_remove_table()
-  qcom-geni-se: remove has_opp_table
-
- drivers/cpufreq/imx6q-cpufreq.c         | 10 ++--------
- drivers/gpu/drm/lima/lima_devfreq.c     |  6 +-----
- drivers/gpu/drm/lima/lima_devfreq.h     |  1 -
- drivers/gpu/drm/msm/disp/dpu1/dpu_kms.c | 10 +++-------
- drivers/gpu/drm/msm/disp/dpu1/dpu_kms.h |  1 -
- drivers/gpu/drm/msm/dsi/dsi_host.c      |  8 ++------
- drivers/mmc/host/sdhci-msm.c            | 11 +++--------
- drivers/spi/spi-geni-qcom.c             | 10 +++-------
- drivers/spi/spi-qcom-qspi.c             | 11 +++--------
- drivers/tty/serial/qcom_geni_serial.c   | 10 +++-------
- include/linux/qcom-geni-se.h            |  2 --
- 11 files changed, 20 insertions(+), 60 deletions(-)
-
+diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
+index 15e21894bd44..73807c8cfa98 100644
+--- a/drivers/mmc/host/renesas_sdhi_core.c
++++ b/drivers/mmc/host/renesas_sdhi_core.c
+@@ -631,11 +631,20 @@ static bool renesas_sdhi_check_scc_error(struct tmio_mmc_host *host)
+ 	return renesas_sdhi_manual_correction(host, use_4tap);
+ }
+ 
+-static void renesas_sdhi_hw_reset(struct tmio_mmc_host *host)
++static void renesas_sdhi_reset(struct tmio_mmc_host *host)
+ {
+-	struct renesas_sdhi *priv;
++	struct renesas_sdhi *priv = host_to_priv(host);
+ 
+-	priv = host_to_priv(host);
++	/* FIXME - should we set stop clock reg here */
++	sd_ctrl_write16(host, CTL_RESET_SD, 0x0000);
++	usleep_range(10000, 11000);
++	sd_ctrl_write16(host, CTL_RESET_SD, 0x0001);
++	usleep_range(10000, 11000);
++
++	if (host->pdata->flags & TMIO_MMC_SDIO_IRQ) {
++		sd_ctrl_write16(host, CTL_SDIO_IRQ_MASK, host->sdio_irq_mask);
++		sd_ctrl_write16(host, CTL_TRANSACTION_CTL, 0x0001);
++	}
+ 
+ 	renesas_sdhi_reset_scc(host, priv);
+ 	renesas_sdhi_reset_hs400_mode(host, priv);
+@@ -862,11 +871,9 @@ int renesas_sdhi_probe(struct platform_device *pdev,
+ 			renesas_sdhi_start_signal_voltage_switch;
+ 		host->sdcard_irq_setbit_mask = TMIO_STAT_ALWAYS_SET_27;
+ 
+-		/* SDR and HS200/400 registers requires HW reset */
+ 		if (of_data && of_data->scc_offset) {
+ 			priv->scc_ctl = host->ctl + of_data->scc_offset;
+-			host->mmc->caps |= MMC_CAP_HW_RESET;
+-			host->hw_reset = renesas_sdhi_hw_reset;
++			host->reset = renesas_sdhi_reset;
+ 		}
+ 	}
+ 
 -- 
-2.25.0.rc1.19.g042ed3e048af
+2.20.1
 
