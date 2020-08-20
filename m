@@ -2,253 +2,166 @@ Return-Path: <SRS0=808J=B6=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
-	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.6 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,
+	SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AAF91C433DF
-	for <linux-mmc@archiver.kernel.org>; Thu, 20 Aug 2020 08:00:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7C5FFC433DF
+	for <linux-mmc@archiver.kernel.org>; Thu, 20 Aug 2020 08:56:20 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7728A208B3
-	for <linux-mmc@archiver.kernel.org>; Thu, 20 Aug 2020 08:00:00 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (2048-bit key) header.d=tq-group.com header.i=@tq-group.com header.b="E3Wi6uyR"
+	by mail.kernel.org (Postfix) with ESMTP id 5D3CF2075E
+	for <linux-mmc@archiver.kernel.org>; Thu, 20 Aug 2020 08:56:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725819AbgHTH77 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 20 Aug 2020 03:59:59 -0400
-Received: from mx1.tq-group.com ([62.157.118.193]:37647 "EHLO mx1.tq-group.com"
+        id S1726734AbgHTI4T (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 20 Aug 2020 04:56:19 -0400
+Received: from mga04.intel.com ([192.55.52.120]:53887 "EHLO mga04.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725797AbgHTH76 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 20 Aug 2020 03:59:58 -0400
-IronPort-SDR: S6y16wQS5NJBnXulz4btA7UCBh79HkIzZI17Y9xvS1XsOq8EksHElQGsSmNoESO6VlfKANb9kH
- 6Lyx+apUEIx4SaKEex+tBg5m2bGPN7nixdgKdPAvAhlIB2qZogpFnhkP7lPPzhf/zaQkgLV7gP
- hIndeArQ+X9Ar2HhI5aNWM7Ky8rB+zppjbpp1Y24aArwLGnwWd5NzGDp/adpBf4ZvdMYgkyKGM
- UyU/+B+AZDx8DJ78A1U/qJUWsXIVr0yTqycJIcSa6e/7DUo8HZLr4B7/uhg/hJ6FVh1yJExKTv
- d1c=
-X-IronPort-AV: E=Sophos;i="5.76,332,1592863200"; 
-   d="scan'208";a="13534484"
-Received: from unknown (HELO tq-pgp-pr1.tq-net.de) ([192.168.6.15])
-  by mx1-pgp.tq-group.com with ESMTP; 20 Aug 2020 09:59:55 +0200
-Received: from mx1.tq-group.com ([192.168.6.7])
-  by tq-pgp-pr1.tq-net.de (PGP Universal service);
-  Thu, 20 Aug 2020 09:59:55 +0200
-X-PGP-Universal: processed;
-        by tq-pgp-pr1.tq-net.de on Thu, 20 Aug 2020 09:59:55 +0200
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=tq-group.com; i=@tq-group.com; q=dns/txt; s=key1;
-  t=1597910395; x=1629446395;
-  h=from:to:cc:subject:date:message-id;
-  bh=HO7u0shBOUMf7ftO844jtABJD5UXzGgbOj7cMvvZQfU=;
-  b=E3Wi6uyRiE61bB02/E+JMx4T6X3moZ8NZ8NpyGZXAdzx7Nc62XYLsTJq
-   i3/wlEZnjX35SZ0tGhvEoZtvImihUqg+3axPp3FIpgScjFQ/VZrogsOxU
-   dyBlw1UrAijX1zdz37F52M6Bfgc4ZJ1YlSd31wPXLAgfLuQDS6b6ypI8k
-   xPgxHIrYRepzF1W4xMuu++DaalDexIhXkxyU7xj9Gr29lyYYX1MHIAjrM
-   ImCQZ27WJJr4cwHoFwSLC2RTnwgSB4jG4m/wSFvebZHvDRvwJVuyc9q+/
-   11VgFrwAc/gBIRQZz5w0Mc0sbv8vFlgrQgXbLqvMz4wil0L6aZ/G9B3sD
-   g==;
-IronPort-SDR: v5vSJDwBqSysn0qyXQZJu+YCO7/gv7KPTP1yuc6r9oJsXKZGg99x4SNHGtiML3cp6IMrekb9RO
- q1D3ewbDpYKRv8f4BBB8owAzZyBPMj0OojB845wrxCYaM3NjiGWmXqquYCQZzRpLlHTguEMz+3
- 7NSzm5Cmj3mYiIYk9dU+L7Zr1LO+rISJyxRLyZVEw06VceCmlW8B2TVi4eKtFyf/bvhrcWoP8X
- ZhuWZTulXsUoZ37ycsfL25Nkr5cascikQZtRjqBdHCVYGa0s9dDkGzcDbuvJyiPDgceQ56bRug
- nYc=
-X-IronPort-AV: E=Sophos;i="5.76,332,1592863200"; 
-   d="scan'208";a="13534483"
-Received: from vtuxmail01.tq-net.de ([10.115.0.20])
-  by mx1.tq-group.com with ESMTP; 20 Aug 2020 09:59:55 +0200
-Received: from schifferm-ubuntu4.tq-net.de (schifferm-ubuntu4.tq-net.de [10.117.49.26])
-        by vtuxmail01.tq-net.de (Postfix) with ESMTPA id 66DAE280065;
-        Thu, 20 Aug 2020 09:59:55 +0200 (CEST)
-From:   Matthias Schiffer <matthias.schiffer@ew.tq-group.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Sascha Hauer <s.hauer@pengutronix.de>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org,
-        Matthias Schiffer <matthias.schiffer@ew.tq-group.com>
-Subject: [PATCH mmc-next v2] mmc: allow setting slot index via device tree alias
-Date:   Thu, 20 Aug 2020 09:59:49 +0200
-Message-Id: <20200820075949.19133-1-matthias.schiffer@ew.tq-group.com>
-X-Mailer: git-send-email 2.17.1
+        id S1726738AbgHTI4S (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 20 Aug 2020 04:56:18 -0400
+IronPort-SDR: FgKbVFea8Ytpd3S4R4Rrf7MFyZku8IxhBIg/mTc7bX2Xz7SIahGsCyrd7MK3v4JLEL41xgYx3W
+ rnl8RsdGnI4A==
+X-IronPort-AV: E=McAfee;i="6000,8403,9718"; a="152675669"
+X-IronPort-AV: E=Sophos;i="5.76,332,1592895600"; 
+   d="scan'208";a="152675669"
+X-Amp-Result: SKIPPED(no attachment in message)
+X-Amp-File-Uploaded: False
+Received: from orsmga002.jf.intel.com ([10.7.209.21])
+  by fmsmga104.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 20 Aug 2020 01:56:17 -0700
+IronPort-SDR: UF5iSQUJjAO3bb/1hARBlKXodHS9VbU2swzQZB9GpkKUANw9olTnwkNwH1NbBkGpCrrXkVjce0
+ QEHb2yGN7Pnw==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.76,332,1592895600"; 
+   d="scan'208";a="311044485"
+Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.73]) ([10.237.72.73])
+  by orsmga002.jf.intel.com with ESMTP; 20 Aug 2020 01:56:13 -0700
+Subject: Re: HS400 tuning and presets
+To:     Raul Rangel <rrangel@chromium.org>, linux-mmc@vger.kernel.org
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Daniel Kurtz <djkurtz@chromium.org>
+References: <CAHQZ30ApB3BEzgLv=EtzB_Kpnsfsr7-s+JcYmyzXN3j7OF80-w@mail.gmail.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Message-ID: <671d418f-f411-ad94-4469-b2f0eb6cd693@intel.com>
+Date:   Thu, 20 Aug 2020 11:55:41 +0300
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.10.0
+MIME-Version: 1.0
+In-Reply-To: <CAHQZ30ApB3BEzgLv=EtzB_Kpnsfsr7-s+JcYmyzXN3j7OF80-w@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-As with GPIO, UART and others, allow specifying the device index via the
-aliases node in the device tree.
+On 20/08/20 1:56 am, Raul Rangel wrote:
+> I noticed some odd things with the MMC/SDHCI code while debugging an
+> HS400 tuning issue.
+> 
+> 1) Is it expected that we never enable SDHCI_CTRL_PRESET_VAL_ENABLE
+> for an eMMC running at HS200 or HS400?
 
-On embedded devices, there is often a combination of removable (e.g.
-SD card) and non-removable MMC devices (e.g. eMMC).
-Therefore the index might change depending on
+Seems like an oversight.  eMMC transfer modes are not supported by the SDHCI
+specification, and many drivers use SDHCI_QUIRK2_PRESET_VALUE_BROKEN, so it
+looks like it has never been noticeable.
 
-* host of removable device
-* removable card present or not
+> The flow for enabling HS400 is: Legacy -> HS200 -> Perform Tuning ->
+> HS -> HS400.
+> Looking at [sdhci_set_ios](https://source.chromium.org/chromiumos/chromiumos/codesearch/+/master:src/third_party/kernel/v5.4/drivers/mmc/host/sdhci.c;l=2019),
+> it looks like it's responsible for enabling presets.
+> 
+>     if (!(host->quirks2 & SDHCI_QUIRK2_PRESET_VALUE_BROKEN) &&
+>                     ((ios->timing == MMC_TIMING_UHS_SDR12) ||
+>                      (ios->timing == MMC_TIMING_UHS_SDR25) ||
+>                      (ios->timing == MMC_TIMING_UHS_SDR50) ||
+>                      (ios->timing == MMC_TIMING_UHS_SDR104) ||
+>                      (ios->timing == MMC_TIMING_UHS_DDR50) ||
+>                      (ios->timing == MMC_TIMING_MMC_DDR52))) {
+>             u16 preset;
+> 
+>             sdhci_enable_preset_value(host, true);
+>             preset = sdhci_get_preset_value(host);
+>             ios->drv_type = (preset & SDHCI_PRESET_DRV_MASK)
+>                     >> SDHCI_PRESET_DRV_SHIFT;
+>     }
+> 
+> MMC_TIMING_MMC_HS200 and MMC_TIMING_MMC_HS400 are missing from the
+> conditions, so we never enable presets. This means that by default
+> (only 2 controllers provide select_drive_strength) we use drive
+> strength B for both the card and the controller.
+> 
+>     int mmc_select_drive_strength(struct mmc_card *card, unsigned int max_dtr,
+>                                   int card_drv_type, int *drv_type)
+>     {
+>             struct mmc_host *host = card->host;
+>             int host_drv_type = SD_DRIVER_TYPE_B;
+> 
+>             *drv_type = 0;
+> 
+>             if (!host->ops->select_drive_strength)
+>                     return 0;
+>             ...
+>     }
+> 
+> Here is a trace log showing HS400 initialization: https://0paste.com/79874
+> 
+> 2) When performing HS400 tuning we end up enabling presets.
+> The re-tuning sequence is: HS400->DDR52->HS->HS200->Perform Tuning->HS->HS400
+> 
+> So when we transition to DDR52 the code above enables presets. You can
+> see this happening in this trace log: https://0paste.com/79875. Look
+> at timestamp 1926.173800.
+> 
+> This means that the card and controller have the potential to have
+> mismatching drive strengths. This can be seen at timestamp
+> 1926.175813.The HS200 preset on my controller is configured to A, but
+> the card would be set up as B (if the controller didn't override
+> select_drive_strength).
+> 
+> Should we be enabling presets for HS200/HS400 (and potentially
+> MMC_HS), or should we remove MMC_DDR52 from the condition above?
 
-This makes it difficult to hardcode the root device, if it is on the
-non-removable device. E.g. if SD card is present eMMC will be mmcblk1,
-if SD card is not present at boot, eMMC will be mmcblk0.
+The only things that matter are:
+1. don't break other drivers
+2. do make it work for your driver
 
-All indices defined in the aliases node will be reserved for use by the
-respective MMC device, moving the indices of devices that don't have an
-alias up into the non-reserved range. If the aliases node is not found,
-the driver will act as before.
+So we can't universally enable presets for HS200 and HS400, nor remove
+MMC_DDR52, but we can do something to make it work for you.
 
-This is a rebased and slightly cleaned up version of
-https://www.spinics.net/lists/linux-mmc/msg26588.html .
+> 
+> It looks like 0dafa60eb2506 ("mmc: sdhci: also get preset value and
+> driver type for MMC_DDR52") was the CL that added MMC_DDR52 to the
+> condition.
+> 
+> 3) How do we ensure that card drive strength and controller drive
+> strength stay in sync when presets are enabled?
 
-Based-on-patch-by: Sascha Hauer <s.hauer@pengutronix.de>
-Link: https://lkml.org/lkml/2020/8/5/194
-Signed-off-by: Matthias Schiffer <matthias.schiffer@ew.tq-group.com>
----
+Is that your requirement? Which driver is it?
 
-v2: fix missing symbols for modular mmcblock
+> Right now mmc_select_driver_type is only called from
+> `mmc_select_hs400es` and `mmc_select_hs200`. `mmc_select_driver_type
+> doesn't currently take the timing into account when making a decision.
+> Only two devices currently provide the `select_drive_strength`
+> override, so we are setting the card to drive strength B for most
+> controllers.
+> 
+> Should we modify mmc_select_drive_strength to take in the target
+> timing so it can return the correct card drive strength. We could then
+> add an sdhci_select_drive_strength that queries the preset registers
+> (if enabled) and returns the target drive strength.
+> 
+> 4) Should we be calling `mmc_select_driver_type` from
+> `mmc_hs400_to_hs200` and `mmc_hs200_to_hs400` during the transitions?
 
- drivers/mmc/core/block.c | 13 +++++++++++--
- drivers/mmc/core/core.c  | 40 ++++++++++++++++++++++++++++++++++++++++
- drivers/mmc/core/core.h  |  3 +++
- drivers/mmc/core/host.c  | 15 +++++++++++++--
- 4 files changed, 67 insertions(+), 4 deletions(-)
+The same driver strength continues to be used for HS200 and HS400 i.e.
+card->driver_strength
 
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 7896952de1ac..4620afaf0e50 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -38,6 +38,7 @@
- #include <linux/pm_runtime.h>
- #include <linux/idr.h>
- #include <linux/debugfs.h>
-+#include <linux/of.h>
- 
- #include <linux/mmc/ioctl.h>
- #include <linux/mmc/card.h>
-@@ -2260,9 +2261,17 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
- 					      int area_type)
- {
- 	struct mmc_blk_data *md;
--	int devidx, ret;
-+	int rsvidx, devidx = -1, ret;
-+
-+	rsvidx = mmc_get_reserved_index(card->host);
-+	if (rsvidx >= 0)
-+		devidx = ida_simple_get(&mmc_blk_ida, rsvidx, rsvidx + 1,
-+					GFP_KERNEL);
-+	if (devidx < 0)
-+		devidx = ida_simple_get(&mmc_blk_ida,
-+					mmc_first_nonreserved_index(),
-+					max_devices, GFP_KERNEL);
- 
--	devidx = ida_simple_get(&mmc_blk_ida, 0, max_devices, GFP_KERNEL);
- 	if (devidx < 0) {
- 		/*
- 		 * We get -ENOSPC because there are no more any available
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 8ccae6452b9c..5bce281a5faa 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -2419,10 +2419,50 @@ void mmc_unregister_pm_notifier(struct mmc_host *host)
- }
- #endif
- 
-+static int mmc_max_reserved_idx = -1;
-+
-+/**
-+ * mmc_first_nonreserved_index() - get the first index that is not reserved
-+ */
-+int mmc_first_nonreserved_index(void)
-+{
-+	return mmc_max_reserved_idx + 1;
-+}
-+EXPORT_SYMBOL(mmc_first_nonreserved_index);
-+
-+/**
-+ * mmc_get_reserved_index() - get the index reserved for this MMC host
-+ *
-+ * Returns:
-+ *   The index reserved for this host on success,
-+ *   negative error if no index is reserved for this host
-+ */
-+int mmc_get_reserved_index(struct mmc_host *host)
-+{
-+	return of_alias_get_id(host->parent->of_node, "mmc");
-+}
-+EXPORT_SYMBOL(mmc_get_reserved_index);
-+
-+static void __init mmc_of_reserve_idx(void)
-+{
-+	int max;
-+
-+	max = of_alias_get_highest_id("mmc");
-+	if (max < 0)
-+		return;
-+
-+	mmc_max_reserved_idx = max;
-+
-+	pr_debug("MMC: reserving %d slots for OF aliases\n",
-+		 mmc_max_reserved_idx + 1);
-+}
-+
- static int __init mmc_init(void)
- {
- 	int ret;
- 
-+	mmc_of_reserve_idx();
-+
- 	ret = mmc_register_bus();
- 	if (ret)
- 		return ret;
-diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
-index 575ac0257af2..6aef6cf4e90f 100644
---- a/drivers/mmc/core/core.h
-+++ b/drivers/mmc/core/core.h
-@@ -79,6 +79,9 @@ int mmc_attach_mmc(struct mmc_host *host);
- int mmc_attach_sd(struct mmc_host *host);
- int mmc_attach_sdio(struct mmc_host *host);
- 
-+int mmc_first_nonreserved_index(void);
-+int mmc_get_reserved_index(struct mmc_host *host);
-+
- /* Module parameters */
- extern bool use_spi_crc;
- 
-diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index ce43f7573d80..386e15afde83 100644
---- a/drivers/mmc/core/host.c
-+++ b/drivers/mmc/core/host.c
-@@ -387,6 +387,7 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
- {
- 	int err;
- 	struct mmc_host *host;
-+	int alias_id, min_idx, max_idx;
- 
- 	host = kzalloc(sizeof(struct mmc_host) + extra, GFP_KERNEL);
- 	if (!host)
-@@ -395,7 +396,18 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
- 	/* scanning will be enabled when we're ready */
- 	host->rescan_disable = 1;
- 
--	err = ida_simple_get(&mmc_host_ida, 0, 0, GFP_KERNEL);
-+	host->parent = dev;
-+
-+	alias_id = mmc_get_reserved_index(host);
-+	if (alias_id >= 0) {
-+		min_idx = alias_id;
-+		max_idx = alias_id + 1;
-+	} else {
-+		min_idx = mmc_first_nonreserved_index();
-+		max_idx = 0;
-+	}
-+
-+	err = ida_simple_get(&mmc_host_ida, min_idx, max_idx, GFP_KERNEL);
- 	if (err < 0) {
- 		kfree(host);
- 		return NULL;
-@@ -406,7 +418,6 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
- 	dev_set_name(&host->class_dev, "mmc%d", host->index);
- 	host->ws = wakeup_source_register(NULL, dev_name(&host->class_dev));
- 
--	host->parent = dev;
- 	host->class_dev.parent = dev;
- 	host->class_dev.class = &mmc_host_class;
- 	device_initialize(&host->class_dev);
--- 
-2.17.1
+> Or do we not care?
+> 
+> Sorry for the long email...
+> Once I get some guidance, I can send some patches.
 
+Generally people first want to know what problem you are trying to solve.
