@@ -7,115 +7,126 @@ X-Spam-Status: No, score=-9.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4257BC433E1
-	for <linux-mmc@archiver.kernel.org>; Fri, 21 Aug 2020 12:49:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 134BDC433E1
+	for <linux-mmc@archiver.kernel.org>; Fri, 21 Aug 2020 13:04:00 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1BFF82078D
-	for <linux-mmc@archiver.kernel.org>; Fri, 21 Aug 2020 12:49:21 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E302A207BB
+	for <linux-mmc@archiver.kernel.org>; Fri, 21 Aug 2020 13:03:59 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Gna3F4cQ"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="oye/IAhw"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728550AbgHUMtS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 21 Aug 2020 08:49:18 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56896 "EHLO
+        id S1727798AbgHUND6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 21 Aug 2020 09:03:58 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59202 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727106AbgHUMtO (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Aug 2020 08:49:14 -0400
-Received: from mail-vk1-xa43.google.com (mail-vk1-xa43.google.com [IPv6:2607:f8b0:4864:20::a43])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 714D9C061385
-        for <linux-mmc@vger.kernel.org>; Fri, 21 Aug 2020 05:49:14 -0700 (PDT)
-Received: by mail-vk1-xa43.google.com with SMTP id q200so382180vke.6
-        for <linux-mmc@vger.kernel.org>; Fri, 21 Aug 2020 05:49:14 -0700 (PDT)
+        with ESMTP id S1727106AbgHUNDx (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Aug 2020 09:03:53 -0400
+Received: from mail-ua1-x941.google.com (mail-ua1-x941.google.com [IPv6:2607:f8b0:4864:20::941])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 88561C061385
+        for <linux-mmc@vger.kernel.org>; Fri, 21 Aug 2020 06:03:53 -0700 (PDT)
+Received: by mail-ua1-x941.google.com with SMTP id g20so506034uap.8
+        for <linux-mmc@vger.kernel.org>; Fri, 21 Aug 2020 06:03:53 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=mQgK+SNMvMHD2kMEy8rXU+kpyN6Xvc8FHA+4wVp0ysE=;
-        b=Gna3F4cQeMdRPcx3MCe9fCAP6nafVCC1qEUsyb9rU2Au9Y4znu+61ohEmEmWjcq8JG
-         ssjcV0YRJUQlItcSkspzyh+tjBRXSXFqc4GOnR3eOU6GlzFluiYEtFw+Rh7hZlftS2bt
-         Mhm5S5M5v4SvAYTiEpkiL7NJuppdQklwADY47Oq3DRtqTBJ13lagaF+eTtu9ocArbjHd
-         Pn8d6RL5KZlsZN48xthW2uuAiz9xzoUDO+BCZtfVkNDFYIfdgX+eYWR/M1vKbgdNUA8I
-         by3cIZu6Ls+6ttjTsJcLdN36RJLVg8JdlC0imjFUazgjgyJpZRrldRmHVbLvOiTk5TpV
-         0Wvg==
+        bh=O+UdDeZ/2tqE7MfvVL8jobOjZYYl/iWCp3SMwXE+pYI=;
+        b=oye/IAhwoGHhUTKN0VDCeB9+n7Ej5BVwsxTVFBrPEUrAH3agaKG/a8gY/MpxPCDPQL
+         RhDAZBl1ESEo046+/7L962m/G0G9ZBoKssMsZ+UiQwq2KTW5KSLNgdLqtsdWuBFMNoSA
+         O9WJmv6LyF5YRFDFll1a4lw6Q7JgIPX7ffEvBu28jH1DXV46fBULX011gWhf2xqU7yOY
+         +cM47S3PVLc7HRUZz2U+fCtvWaLE2sp9piQtHatgqWV/iNGFqMxPXQ2LHxvfPCGwhYms
+         o6DrsY5zx0QTBIDLTElUd4P5ONhgafNb8/ZRgmSFJu1EF/r9N+KAZPUXAYrqBvv7Ifs/
+         yvzw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=mQgK+SNMvMHD2kMEy8rXU+kpyN6Xvc8FHA+4wVp0ysE=;
-        b=PZn0NaMuG7O9syqtZvl3VKx9gwG7AJev1pmVuBJIg1t54vWobVID/uPJehGp+N3+HA
-         OoMIqJpfW1tTIMOSz+oK+M4W5i3en5x1r7wy7HkPKTe0buKgw533vQruWeOwRSZcaQNN
-         YOFsLEQpzc0/6lJmAseeZYxScAasf/PLrAcMLAaCpfSFlE7D/0lJTmzpKNiY3pV6xK5n
-         C+XXK2YRYxAgmAyijXynOYiHgtKEaex0/QWMqVFWxOMHp4aXnd4tH7FH4QjG1b2U7qmh
-         bxafPLtgosmdDwPAjP9WGz6JjokFcCCZjzgDhI0FT85lGusqh5T5BPvCkDZcMe5FpZZk
-         UFhA==
-X-Gm-Message-State: AOAM5316jt9GVWiioTMBFxkkIc7k2QZ5g2apY+113UYe5ppdB5pIeqq3
-        nyufbMdcpSMST0A3FyrligHeTJiaaKwH7J7M0OxHT4Vo/PsQXA==
-X-Google-Smtp-Source: ABdhPJwrS6QbuUDR6nCJUwjTtfPYuTq0XZSBfGtPdzuQVxc0gkKzzB3hELKAxvsVsO3J9XYhJ1LvhP0yoRBwYDHYw2g=
-X-Received: by 2002:a1f:9d85:: with SMTP id g127mr1445404vke.101.1598014153688;
- Fri, 21 Aug 2020 05:49:13 -0700 (PDT)
+        bh=O+UdDeZ/2tqE7MfvVL8jobOjZYYl/iWCp3SMwXE+pYI=;
+        b=OwLgYY6CYMI14Jr6Rx/+U5q1Xee5dieh9aee1gCsm7pAUB36NrFR5m9I7oy/N96u6i
+         9oIzqn/aFPJfF4PUtL+6vFvhunoDDra62gGC6LxVNb2sVW8UGOQcDMGqwN+MKL2WFtyX
+         6q6CzNI3qn9tgBPHn+A+hYM2L842FJ2+ggwLPpQeKLCOMXDWYKFQ8OJIDuLQahwnjIFW
+         Yg4mtGb8RPXX3hMP8zBcyQWwVoGgxIlTAEHU9fhhX67CHCDOSnS3Z7tHTtwvypt3D2pW
+         1wsKVCJWtB1EgTXGitk2pG0s++PdQHWDhXVtniCBiM95Ho17zXI2LETzuU1zUGCEc5wi
+         yU3g==
+X-Gm-Message-State: AOAM532UpvYvJJeSpLHg7oxophIHWXdRwaQP6x013+BoajD3PF1yiMvh
+        jbrsclB4r6so2IBa1HF2LTSw1EVRgn90zCytzjYqQg==
+X-Google-Smtp-Source: ABdhPJxDTEfIcRtV8RMQHOwlZMFRP/4rR96hCwMj4qXIk7uEX+dsYaSghRhbtxsDlt6Dcfzr8CA6M9pC/tkoV/n7lWU=
+X-Received: by 2002:ab0:65c3:: with SMTP id n3mr1386883uaq.100.1598015032299;
+ Fri, 21 Aug 2020 06:03:52 -0700 (PDT)
 MIME-Version: 1.0
-References: <20200803072857.8880-1-madhuparnabhowmik10@gmail.com>
-In-Reply-To: <20200803072857.8880-1-madhuparnabhowmik10@gmail.com>
+References: <20200718090614.88946-1-grandmaster@al2klimov.de>
+In-Reply-To: <20200718090614.88946-1-grandmaster@al2klimov.de>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 21 Aug 2020 14:48:37 +0200
-Message-ID: <CAPDyKFo2njN6bU+VqpuHPpHDx4+ZkuoNRZVb0a0EjGBi9uXa7g@mail.gmail.com>
-Subject: Re: [PATCH] drivers: mmc: host: via-sdmmc: Fix data race bug
-To:     madhuparnabhowmik10@gmail.com
-Cc:     Bruce Chang <brucechang@via.com.tw>,
-        Harald Welte <HaraldWelte@viatech.com>,
+Date:   Fri, 21 Aug 2020 15:03:14 +0200
+Message-ID: <CAPDyKFrzq0dGKJtR4Ncp670-EdsoHBhWQQ=30dUnK3FM_TmWQQ@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci_am654: Replace HTTP links with HTTPS ones
+To:     "Alexander A. Klimov" <grandmaster@al2klimov.de>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
         "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        ldv-project@linuxtesting.org, andrianov@ispras.ru
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 3 Aug 2020 at 09:29, <madhuparnabhowmik10@gmail.com> wrote:
+On Sat, 18 Jul 2020 at 11:06, Alexander A. Klimov
+<grandmaster@al2klimov.de> wrote:
 >
-> From: Madhuparna Bhowmik <madhuparnabhowmik10@gmail.com>
+> Rationale:
+> Reduces attack surface on kernel devs opening the links for MITM
+> as HTTPS traffic is much harder to manipulate.
 >
-> via_save_pcictrlreg() should be called with host->lock held
-> as it writes to pm_pcictrl_reg, otherwise there can be a race
-> condition between via_sd_suspend() and via_sdc_card_detect().
-> The same pattern is used in the function via_reset_pcictrl()
-> as well, where via_save_pcictrlreg() is called with host->lock
-> held.
+> Deterministic algorithm:
+> For each file:
+>   If not .svg:
+>     For each line:
+>       If doesn't contain `\bxmlns\b`:
+>         For each link, `\bhttp://[^# \t\r\n]*(?:\w|/)`:
+>           If neither `\bgnu\.org/license`, nor `\bmozilla\.org/MPL\b`:
+>             If both the HTTP and HTTPS versions
+>             return 200 OK and serve the same content:
+>               Replace HTTP with HTTPS.
 >
-> Found by Linux Driver Verification project (linuxtesting.org).
->
-> Signed-off-by: Madhuparna Bhowmik <madhuparnabhowmik10@gmail.com>
+> Signed-off-by: Alexander A. Klimov <grandmaster@al2klimov.de>
 
-This doesn't apply to my mmc tree, can you please rebase and submit a
-new version.
+Applied for next, thanks!
 
 Kind regards
 Uffe
 
+
 > ---
->  drivers/mmc/host/via-sdmmc.c | 3 +++
->  1 file changed, 3 insertions(+)
+>  Continuing my work started at 93431e0607e5.
+>  See also: git log --oneline '--author=Alexander A. Klimov <grandmaster@al2klimov.de>' v5.7..master
 >
-> diff --git a/drivers/mmc/host/via-sdmmc.c b/drivers/mmc/host/via-sdmmc.c
-> index ef95bce50889..e4d8126cd4e5 100644
-> --- a/drivers/mmc/host/via-sdmmc.c
-> +++ b/drivers/mmc/host/via-sdmmc.c
-> @@ -1259,11 +1259,14 @@ static void via_init_sdc_pm(struct via_crdr_mmc_host *host)
->  static int via_sd_suspend(struct pci_dev *pcidev, pm_message_t state)
->  {
->         struct via_crdr_mmc_host *host;
-> +       unsigned long flags;
+>  If there are any URLs to be removed completely
+>  or at least not (just) HTTPSified:
+>  Just clearly say so and I'll *undo my change*.
+>  See also: https://lkml.org/lkml/2020/6/27/64
 >
->         host = pci_get_drvdata(pcidev);
+>  If there are any valid, but yet not changed URLs:
+>  See: https://lkml.org/lkml/2020/6/26/837
 >
-> +       spin_lock_irqsave(&host->lock, flags);
->         via_save_pcictrlreg(host);
->         via_save_sdcreg(host);
-> +       spin_unlock_irqrestore(&host->lock, flags);
+>  If you apply the patch, please let me know.
 >
->         pci_save_state(pcidev);
->         pci_enable_wake(pcidev, pci_choose_state(pcidev, state), 0);
+>
+>  drivers/mmc/host/sdhci_am654.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
+> index 061b4398a4f1..f2c89f0c0263 100644
+> --- a/drivers/mmc/host/sdhci_am654.c
+> +++ b/drivers/mmc/host/sdhci_am654.c
+> @@ -2,7 +2,7 @@
+>  /*
+>   * sdhci_am654.c - SDHCI driver for TI's AM654 SOCs
+>   *
+> - * Copyright (C) 2018 Texas Instruments Incorporated - http://www.ti.com
+> + * Copyright (C) 2018 Texas Instruments Incorporated - https://www.ti.com
+>   *
+>   */
+>  #include <linux/clk.h>
 > --
-> 2.17.1
+> 2.27.0
 >
