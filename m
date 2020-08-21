@@ -7,50 +7,50 @@ X-Spam-Status: No, score=-13.3 required=3.0 tests=BAYES_00,
 	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9BB8FC433DF
-	for <linux-mmc@archiver.kernel.org>; Fri, 21 Aug 2020 14:05:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 997D7C433DF
+	for <linux-mmc@archiver.kernel.org>; Fri, 21 Aug 2020 14:06:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 839FB207C3
-	for <linux-mmc@archiver.kernel.org>; Fri, 21 Aug 2020 14:05:31 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7E9DE207C3
+	for <linux-mmc@archiver.kernel.org>; Fri, 21 Aug 2020 14:06:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727822AbgHUOFa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 21 Aug 2020 10:05:30 -0400
-Received: from mga06.intel.com ([134.134.136.31]:13349 "EHLO mga06.intel.com"
+        id S1727898AbgHUOGY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 21 Aug 2020 10:06:24 -0400
+Received: from mga03.intel.com ([134.134.136.65]:43263 "EHLO mga03.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725897AbgHUOF3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 21 Aug 2020 10:05:29 -0400
-IronPort-SDR: Jc7Fv7OT4/Ccdyd+oRyBVaJlEWE59tmrvoySdyJ/muYMmNxSlX5D24p3mrpROCsjt1VygJKm98
- atuLG90lY3LQ==
-X-IronPort-AV: E=McAfee;i="6000,8403,9719"; a="217074549"
+        id S1726138AbgHUOGX (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 21 Aug 2020 10:06:23 -0400
+IronPort-SDR: kTm8tyVv1azRFqJHpbIdLS/Vxi3OZw59+Q0vaqXFRdFeptESV0i5E4AlrpPmBIKOxXI9UDOD1K
+ O6qSkdxt6bdA==
+X-IronPort-AV: E=McAfee;i="6000,8403,9719"; a="155522616"
 X-IronPort-AV: E=Sophos;i="5.76,335,1592895600"; 
-   d="scan'208";a="217074549"
+   d="scan'208";a="155522616"
 X-Amp-Result: SKIPPED(no attachment in message)
 X-Amp-File-Uploaded: False
 Received: from orsmga006.jf.intel.com ([10.7.209.51])
-  by orsmga104.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 21 Aug 2020 07:05:28 -0700
-IronPort-SDR: 8Khx1VGbvE3rMi/UZQkQ9MhBoCEA/OFMGNShgD6mRVGhafjgFy0zB4EhVSyatx02YkpaaEHZjc
- tJGCtT8O7l+w==
+  by orsmga103.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 21 Aug 2020 07:06:22 -0700
+IronPort-SDR: rA429/SPs+UYJIgosgfn1chovOBAF2J3Nx71RaEKWuF3Jj+LSgHoW3KsSIV851Cjadyf4Quf2R
+ 0cTgAeoYvXIg==
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="5.76,335,1592895600"; 
-   d="scan'208";a="297951887"
+   d="scan'208";a="297952071"
 Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.73]) ([10.237.72.73])
-  by orsmga006.jf.intel.com with ESMTP; 21 Aug 2020 07:05:26 -0700
+  by orsmga006.jf.intel.com with ESMTP; 21 Aug 2020 07:06:17 -0700
 From:   Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [RFC PATCH V3 10/21] mmc: sdhci: UHS-II support, dump UHS-II
- registers
+Subject: Re: [RFC PATCH V3 11/21] mmc: sdhci: UHS-II support, export host
+ operations to core
 To:     Ben Chuang <benchuanggli@gmail.com>, ulf.hansson@linaro.org
 Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
         ben.chuang@genesyslogic.com.tw, takahiro.akashi@linaro.org,
         greg.tu@genesyslogic.com.tw
-References: <20200710111034.29456-1-benchuanggli@gmail.com>
+References: <20200710111044.29509-1-benchuanggli@gmail.com>
 Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
  Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <bd374ef8-8b8b-031b-0e59-d6f881cb9330@intel.com>
-Date:   Fri, 21 Aug 2020 17:04:54 +0300
+Message-ID: <5f3dc200-b9ef-a678-25b7-3bff3a529703@intel.com>
+Date:   Fri, 21 Aug 2020 17:05:44 +0300
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
  Thunderbird/68.10.0
 MIME-Version: 1.0
-In-Reply-To: <20200710111034.29456-1-benchuanggli@gmail.com>
+In-Reply-To: <20200710111044.29509-1-benchuanggli@gmail.com>
 Content-Type: text/plain; charset=utf-8
 Content-Language: en-US
 Content-Transfer-Encoding: 7bit
@@ -62,55 +62,104 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 On 10/07/20 2:10 pm, Ben Chuang wrote:
 > From: AKASHI Takahiro <takahiro.akashi@linaro.org>
 > 
-> Dump UHS-II specific registers, if available, in sdhci_dumpregs()
-> for informative/debugging use.
+> Export sdhci-specific UHS-II operations to core.
 > 
 > Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
 > Signed-off-by: AKASHI Takahiro <takahiro.akashi@linaro.org>
 > ---
->  drivers/mmc/host/sdhci.c | 24 ++++++++++++++++++++++++
->  1 file changed, 24 insertions(+)
+>  drivers/mmc/host/sdhci.c | 70 ++++++++++++++++++++++++++++++++++++++++
+>  1 file changed, 70 insertions(+)
 > 
 > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 37b1158c1c0c..c2f6923d296c 100644
+> index c2f6923d296c..aaf41954511a 100644
 > --- a/drivers/mmc/host/sdhci.c
 > +++ b/drivers/mmc/host/sdhci.c
-> @@ -111,6 +111,30 @@ void sdhci_dumpregs(struct sdhci_host *host)
->  		}
->  	}
+> @@ -2977,6 +2977,70 @@ static void sdhci_card_event(struct mmc_host *mmc)
+>  	spin_unlock_irqrestore(&host->lock, flags);
+>  }
 >  
-> +	if (IS_ENABLED(CONFIG_MMC_SDHCI_UHS2) &&
-> +	    host->mmc && host->mmc->flags & MMC_UHS2_SUPPORT) {
-> +		SDHCI_DUMP("==================== UHS2 ==================\n");
-> +		SDHCI_DUMP("Blk Size:  0x%08x | Blk Cnt:  0x%08x\n",
-> +			   sdhci_readw(host, SDHCI_UHS2_BLOCK_SIZE),
-> +			   sdhci_readl(host, SDHCI_UHS2_BLOCK_COUNT));
-> +		SDHCI_DUMP("Cmd:       0x%08x | Trn mode: 0x%08x\n",
-> +			   sdhci_readw(host, SDHCI_UHS2_COMMAND),
-> +			   sdhci_readw(host, SDHCI_UHS2_TRANS_MODE));
-> +		SDHCI_DUMP("Int Stat:  0x%08x | Dev Sel : 0x%08x\n",
-> +			   sdhci_readw(host, SDHCI_UHS2_DEV_INT_STATUS),
-> +			   sdhci_readb(host, SDHCI_UHS2_DEV_SELECT));
-> +		SDHCI_DUMP("Dev Int Code:  0x%08x\n",
-> +			   sdhci_readb(host, SDHCI_UHS2_DEV_INT_CODE));
-> +		SDHCI_DUMP("Reset:     0x%08x | Timer:    0x%08x\n",
-> +			   sdhci_readw(host, SDHCI_UHS2_SW_RESET),
-> +			   sdhci_readw(host, SDHCI_UHS2_TIMER_CTRL));
-> +		SDHCI_DUMP("ErrInt:    0x%08x | ErrIntEn: 0x%08x\n",
-> +			   sdhci_readl(host, SDHCI_UHS2_ERR_INT_STATUS),
-> +			   sdhci_readl(host, SDHCI_UHS2_ERR_INT_STATUS_EN));
-> +		SDHCI_DUMP("ErrSigEn:  0x%08x\n",
-> +			   sdhci_readl(host, SDHCI_UHS2_ERR_INT_SIG_EN));
-> +	}
+> +#if IS_ENABLED(CONFIG_MMC_SDHCI_UHS2)
+> +static int sdhci_uhs2_detect_init(struct mmc_host *mmc)
+> +{
+> +	struct sdhci_host *host = mmc_priv(mmc);
+> +	int ret;
 > +
+> +	if (sdhci_uhs2_ops.do_detect_init)
+> +		ret = sdhci_uhs2_ops.do_detect_init(host);
+> +	else
+> +		return 0;
+> +
+> +	return ret;
+> +}
+> +
+> +static int sdhci_uhs2_set_reg(struct mmc_host *mmc, enum uhs2_act act)
+> +{
+> +	struct sdhci_host *host = mmc_priv(mmc);
+> +	int ret;
+> +
+> +	if (sdhci_uhs2_ops.do_set_reg)
+> +		ret = sdhci_uhs2_ops.do_set_reg(host, act);
+> +	else
+> +		ret = 0;
+> +
+> +	return ret;
+> +}
+> +
+> +static void sdhci_uhs2_disable_clk(struct mmc_host *mmc)
+> +{
+> +	struct sdhci_host *host = mmc_priv(mmc);
+> +	u16 clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+> +
+> +	clk &= ~SDHCI_CLOCK_CARD_EN;
+> +	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
+> +}
+> +
+> +static void sdhci_uhs2_enable_clk(struct mmc_host *mmc)
+> +{
+> +	struct sdhci_host *host = mmc_priv(mmc);
+> +	u16 clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+> +	ktime_t timeout;
+> +
+> +	clk |= SDHCI_CLOCK_CARD_EN;
+> +	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
+> +
+> +	/* Wait max 20 ms */
+> +	timeout = ktime_add_ms(ktime_get(), 20);
+> +	while (1) {
+> +		bool timedout = ktime_after(ktime_get(), timeout);
+> +
+> +		clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+> +		if (clk & SDHCI_CLOCK_INT_STABLE)
+> +			break;
+> +		if (timedout) {
+> +			pr_err("%s: Internal clock never stabilised.\n",
+> +			       mmc_hostname(host->mmc));
+> +			sdhci_dumpregs(host);
+> +			return;
+> +		}
+> +		udelay(10);
+> +	}
+> +}
+> +#endif /* CONFIG_MMC_SDHCI_UHS2 */
 
-Let's make this a host op instead ie.
+Please put all uhs2 functions in sdhci-uhs2.c and call them through sdhci_ops.
 
-	if (host->ops->dump_uhs2_regs)
-		host->ops->dump_uhs2_regs(host);
-
->  	if (host->ops->dump_vendor_regs)
->  		host->ops->dump_vendor_regs(host);
+> +
+>  static const struct mmc_host_ops sdhci_ops = {
+>  	.request	= sdhci_request,
+>  	.post_req	= sdhci_post_req,
+> @@ -2992,6 +3056,12 @@ static const struct mmc_host_ops sdhci_ops = {
+>  	.execute_tuning			= sdhci_execute_tuning,
+>  	.card_event			= sdhci_card_event,
+>  	.card_busy	= sdhci_card_busy,
+> +#if IS_ENABLED(CONFIG_MMC_SDHCI_UHS2)
+> +	.uhs2_detect_init	= sdhci_uhs2_detect_init,
+> +	.uhs2_set_reg		= sdhci_uhs2_set_reg,
+> +	.uhs2_disable_clk	= sdhci_uhs2_disable_clk,
+> +	.uhs2_enable_clk	= sdhci_uhs2_enable_clk,
+> +#endif /* CONFIG_MMC_SDHCI_UHS2 */
+>  };
 >  
+>  /*****************************************************************************\
 > 
 
