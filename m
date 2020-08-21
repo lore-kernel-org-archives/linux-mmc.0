@@ -7,78 +7,84 @@ X-Spam-Status: No, score=-9.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C83FAC433E1
-	for <linux-mmc@archiver.kernel.org>; Fri, 21 Aug 2020 13:04:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 54188C433DF
+	for <linux-mmc@archiver.kernel.org>; Fri, 21 Aug 2020 13:04:52 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A4DAE207BB
-	for <linux-mmc@archiver.kernel.org>; Fri, 21 Aug 2020 13:04:33 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2DC3D207DE
+	for <linux-mmc@archiver.kernel.org>; Fri, 21 Aug 2020 13:04:52 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="MsAQRhu3"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="xWvEjuaM"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728695AbgHUNEV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 21 Aug 2020 09:04:21 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59248 "EHLO
+        id S1727929AbgHUNEq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 21 Aug 2020 09:04:46 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59304 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727106AbgHUNEF (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Aug 2020 09:04:05 -0400
-Received: from mail-vk1-xa42.google.com (mail-vk1-xa42.google.com [IPv6:2607:f8b0:4864:20::a42])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E5106C061388
-        for <linux-mmc@vger.kernel.org>; Fri, 21 Aug 2020 06:04:04 -0700 (PDT)
-Received: by mail-vk1-xa42.google.com with SMTP id x142so396677vke.0
-        for <linux-mmc@vger.kernel.org>; Fri, 21 Aug 2020 06:04:04 -0700 (PDT)
+        with ESMTP id S1728728AbgHUNEX (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Aug 2020 09:04:23 -0400
+Received: from mail-vs1-xe44.google.com (mail-vs1-xe44.google.com [IPv6:2607:f8b0:4864:20::e44])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 29A35C061385
+        for <linux-mmc@vger.kernel.org>; Fri, 21 Aug 2020 06:04:22 -0700 (PDT)
+Received: by mail-vs1-xe44.google.com with SMTP id r7so772351vsq.5
+        for <linux-mmc@vger.kernel.org>; Fri, 21 Aug 2020 06:04:22 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=Of8B1JdNddjVmiolpjV5fIdtTFXK4mNZ1WJPME585rI=;
-        b=MsAQRhu3Yz/2CxCDMuK8lKA+6IRovanKanJ+xkv2q+6NkbAawmZpclkCicAmFD/GCn
-         LptyFlY1QNEZQQsXN+H9dDLRT4LBFDnWDJrOnwxLywkRMDS+y19GE8mt8p6MDEyHomi3
-         PFnKlUCyzg0eXSq7GzvqfoZXMFdHwEaMcn6/BoqVc/tZEQWIZMIrQZYAZpNpAoNWL5aY
-         uEMNLITtGGWZqH/4462D4EtFgtvMyRCanOIp3j+6P1azskPtkwwEgAeEiYnQyRUjuOro
-         zJOhRTVrnIiLVm7oWrK0GeYEDIzSDLV5oSxTEb1GfnRw/o4yqzjwpZJ2MntLh2eC175o
-         4rTg==
+        bh=PUu3fHHmkeuVepi71Wapqf6SIBAbLgY60c5ePr4Tr5Q=;
+        b=xWvEjuaMvJemjlkfe+Ap9R17WJfFuWvMW6PrxySz5Z1aapbrNHnl3KUUcxr3zD3Tym
+         CAK5E4QdvKEQ0yuv0xBEURL/POiwwYxlhZyie+qmxKeaJ2NplhRBZBCoDDui+TvDB9aa
+         BSvOSr8sUOrq59sepQNZxAwLrw5cKeWVI8eLZEIKQTknFjJRA/cJ5JAY03MaYw+Kluat
+         metgRHL7rPEgMnYg4twc4abWb4W+L+53V273bOY17j2+vrrCyfj9Si0sEMLgAA+iopDU
+         r3wMBePsk3WYs9cmq38TcHhLG/k8RYfCKDH8ajy7Gd0z5OvYI7wnpaIOye4FC6xXbSxW
+         k8kA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=Of8B1JdNddjVmiolpjV5fIdtTFXK4mNZ1WJPME585rI=;
-        b=VZgLNKYw6WoAvJAQ4Nb84n8LJzAI8wJsCF9wVqvnjorJE4k3o7aK9tsrfU4bg469Tr
-         Pw2Wgp0Z/tRV+tHx4rW9HZID9uxXCgjuDwBejssLRuk+oMxK3ZzFyS3uMN3OjMypdZCf
-         sKJh5nh+x/15SwbUe5Bk/xivpfoDLxuJMu2V/N0qhgllM9hjCO6+KZiyeLIRaaRZ7UJP
-         GPmspbDT0EotexEDqc4TOpJbcgZWg+LL+oWHW311+VP8yV5YTVbIJeY+CQNbu7/qRAfJ
-         0NfPzB8W/QGQF3hzXHKwUgPnHw1K3aCffr4uT7sL2b3sJz5db+bKJkCJWy6COrWQjE9a
-         4xeg==
-X-Gm-Message-State: AOAM533WI3BTfomRmHDdSBtJojTvyulau5qhZZaeIv0HnY5ybxevtPCO
-        sl7xL9/Ml0cp/D89Lt2Gmxk9tHRBB5XMOs0HtSCEKQ==
-X-Google-Smtp-Source: ABdhPJxexRNpnHIAvgnOO637NaC3Fo+35Ifzsik1b/A6iDZxGrmVTZ55K47fA64XUTB0JSJ5J9MQb/JS1o/wJWEBAJI=
-X-Received: by 2002:ac5:ccdb:: with SMTP id j27mr1509317vkn.43.1598015043981;
- Fri, 21 Aug 2020 06:04:03 -0700 (PDT)
+        bh=PUu3fHHmkeuVepi71Wapqf6SIBAbLgY60c5ePr4Tr5Q=;
+        b=tX9zjP/BEhwg8dtfOex62KvJwEdMYsLKZ4uuQWtpiehmjTmkBpppErke6AH47L329t
+         we3Sq8dLomPXqj/e54HOiS2lpCdSzSC9NnNYTzoDsZ5HvY7Yo2niu4UqSHckHmN6NSSI
+         P3WBY6ue9WGxPiUOff7xtQfRcr93Q7JNFCputDLEUIci430sKw+LFvCmonA4kVWucKT3
+         drTMPiFHF//qBZyYdukbJKuMbqmjJyzVxi4eVkr4sMMcyDxtHeJhTwLsksGqJn88+zJ6
+         xqnDyzpbRJBdIcdDgOGu0xug1DLyqtYqqd24PxqdSExmcK9A3wNqVyk/mcif66Q7SVOY
+         dq9w==
+X-Gm-Message-State: AOAM533Q71KOHOXdKdmiGOuzP+TKbqfXxrcixM3xiSnTo6iak+VbaMes
+        0JuFhQImzfbmQKj4n0QJF67BZ1+1c6wXah5Xgzc1WQ==
+X-Google-Smtp-Source: ABdhPJxbYaWSzJFov0NskkKmoYuLGjGxBhpX8rOfjV11Vo8G+t407OAs3qSCHQhDuSlVhwUhaDTTVZG4FsZQNUnlNu4=
+X-Received: by 2002:a05:6102:382:: with SMTP id m2mr1515570vsq.34.1598015061334;
+ Fri, 21 Aug 2020 06:04:21 -0700 (PDT)
 MIME-Version: 1.0
-References: <1596887102-9743-1-git-send-email-guoren@kernel.org>
-In-Reply-To: <1596887102-9743-1-git-send-email-guoren@kernel.org>
+References: <1597135057-22272-1-git-send-email-haibo.chen@nxp.com>
+In-Reply-To: <1597135057-22272-1-git-send-email-haibo.chen@nxp.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 21 Aug 2020 15:03:27 +0200
-Message-ID: <CAPDyKFoAonef5daQy0rZFdQeUhKwryYDM0k-aiWXKZG8XBxQxw@mail.gmail.com>
-Subject: Re: [PATCH] mmc: Kconfig: Add RISCV and CSKY for MMC_DW
-To:     guoren@kernel.org
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-csky@vger.kernel.org, Guo Ren <guoren@linux.alibaba.com>
+Date:   Fri, 21 Aug 2020 15:03:45 +0200
+Message-ID: <CAPDyKFpdijC4V=eq6mOXAzyt_spBizi6wz-ZMy53pZJwT27e2A@mail.gmail.com>
+Subject: Re: [PATCH v2] mmc: host: sdhci-esdhc-imx: reset usdhc before sending
+ tuning command for manual tuning method
+To:     Haibo Chen <haibo.chen@nxp.com>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        dl-linux-imx <linux-imx@nxp.com>,
+        Shawn Guo <shawnguo@kernel.org>,
+        Sascha Hauer <s.hauer@pengutronix.de>,
+        Sascha Hauer <kernel@pengutronix.de>,
+        Fabio Estevam <festevam@gmail.com>
 Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sat, 8 Aug 2020 at 13:45, <guoren@kernel.org> wrote:
+On Tue, 11 Aug 2020 at 10:42, <haibo.chen@nxp.com> wrote:
 >
-> From: Guo Ren <guoren@linux.alibaba.com>
+> From: Haibo Chen <haibo.chen@nxp.com>
 >
-> Synopsys DesignWare MMC controller could be used in RISC-V and
-> C-SKY architectures.
+> According to IC suggestion, everytime before sending the tuning command,
+> need to reset the usdhc, so to reset the tuning circuit, to let every
+> tuning command work well for the manual tuning method. For standard
+> tuning method, IC already add the reset operation in the hardware logic.
 >
-> Signed-off-by: Guo Ren <guoren@linux.alibaba.com>
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
+> Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
 
 Applied for next, thanks!
 
@@ -87,22 +93,34 @@ Uffe
 
 
 > ---
->  drivers/mmc/host/Kconfig | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+>  drivers/mmc/host/sdhci-esdhc-imx.c | 10 ++++++++++
+>  1 file changed, 10 insertions(+)
 >
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index 3b706af..119adab 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -777,7 +777,7 @@ config MMC_CAVIUM_THUNDERX
+> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+> index a76b4513fbec..cf335c661cc7 100644
+> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> @@ -987,10 +987,20 @@ static int usdhc_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>  static void esdhc_prepare_tuning(struct sdhci_host *host, u32 val)
+>  {
+>         u32 reg;
+> +       u8 sw_rst;
+> +       int ret;
 >
->  config MMC_DW
->         tristate "Synopsys DesignWare Memory Card Interface"
-> -       depends on ARC || ARM || ARM64 || MIPS || COMPILE_TEST
-> +       depends on ARC || ARM || ARM64 || MIPS || RISCV || CSKY || COMPILE_TEST
->         help
->           This selects support for the Synopsys DesignWare Mobile Storage IP
->           block, this provides host support for SD and MMC interfaces, in both
+>         /* FIXME: delay a bit for card to be ready for next tuning due to errors */
+>         mdelay(1);
+>
+> +       /* IC suggest to reset USDHC before every tuning command */
+> +       esdhc_clrset_le(host, 0xff, SDHCI_RESET_ALL, SDHCI_SOFTWARE_RESET);
+> +       ret = readb_poll_timeout(host->ioaddr + SDHCI_SOFTWARE_RESET, sw_rst,
+> +                               !(sw_rst & SDHCI_RESET_ALL), 10, 100);
+> +       if (ret == -ETIMEDOUT)
+> +               dev_warn(mmc_dev(host->mmc),
+> +               "warning! RESET_ALL never complete before sending tuning command\n");
+> +
+>         reg = readl(host->ioaddr + ESDHC_MIX_CTRL);
+>         reg |= ESDHC_MIX_CTRL_EXE_TUNE | ESDHC_MIX_CTRL_SMPCLK_SEL |
+>                         ESDHC_MIX_CTRL_FBCLK_SEL;
 > --
-> 2.7.4
+> 2.17.1
 >
