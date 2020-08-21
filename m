@@ -7,61 +7,60 @@ X-Spam-Status: No, score=-9.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
 	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 90F50C433E1
-	for <linux-mmc@archiver.kernel.org>; Fri, 21 Aug 2020 09:19:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 06461C433E1
+	for <linux-mmc@archiver.kernel.org>; Fri, 21 Aug 2020 11:34:29 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 57CDE208DB
-	for <linux-mmc@archiver.kernel.org>; Fri, 21 Aug 2020 09:19:13 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id AE9BD20720
+	for <linux-mmc@archiver.kernel.org>; Fri, 21 Aug 2020 11:34:28 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="tic4VOYG"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="kr4Waeqb"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727046AbgHUJTM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 21 Aug 2020 05:19:12 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52546 "EHLO
+        id S1727899AbgHULe0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 21 Aug 2020 07:34:26 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45276 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725806AbgHUJTK (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Aug 2020 05:19:10 -0400
-Received: from mail-yb1-xb41.google.com (mail-yb1-xb41.google.com [IPv6:2607:f8b0:4864:20::b41])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B0110C061385;
-        Fri, 21 Aug 2020 02:19:10 -0700 (PDT)
-Received: by mail-yb1-xb41.google.com with SMTP id m200so684531ybf.10;
-        Fri, 21 Aug 2020 02:19:10 -0700 (PDT)
+        with ESMTP id S1726983AbgHULeD (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Aug 2020 07:34:03 -0400
+Received: from mail-yb1-xb42.google.com (mail-yb1-xb42.google.com [IPv6:2607:f8b0:4864:20::b42])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E99F8C061385;
+        Fri, 21 Aug 2020 04:34:00 -0700 (PDT)
+Received: by mail-yb1-xb42.google.com with SMTP id a34so860596ybj.9;
+        Fri, 21 Aug 2020 04:34:00 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=giJS01C2uRmkcBNmO7mS9KtwK43uwMA7OS6WWAjaKvI=;
-        b=tic4VOYGe4Kp/x0I7VNK3QiuSOWdPzpfxMoWOnXJ7e6FPgCzwBT6zhRkB8aHSTTxFL
-         c4AbcRvayex5ykHsbjxYAZoj5+zn8vnCKpk+8ii04gzff2VztDe2vUGgMb5A/NWyBFvN
-         P6dCv3/xd3c8/n0VJgC2zrcLjm6JFoj/m0PiIiz2uqmnDtialqv4NtdDY7sYfLaakT/M
-         3TnlBC1fiHHbRHgAeMf5a2RSWvjM4beJGpzXGpk3Izqc/6efsK/QC1tpgvuVVFU87F7S
-         vTESbFSddJN8Wb+dTeI02MzC95cWqPqDkMQxyOvkp2m9KdvtKQDvRtV0ElOkmXHH6UpH
-         yhvQ==
+         :cc;
+        bh=RJsphOfHq5ntm4onck+nMutd9svBEmdpWwlP6u4BZ7w=;
+        b=kr4Waeqb1RFBq9k6UiPzrHGAQlkxwY9FJrcESk4xnVozzdwq3ypjZk6cG3TfjthWfZ
+         m4RAC1sqOLNSbLqOqoXivb9UUb+fat34mDkH++sUjEGndD1CH3lfTtAwdfEwQFy2Vf3z
+         3MQG3LNJr/RvbbLLTfB+yw+1cQulPIaT8TZSLJ0bdUHO9h/8sZfBsSRr02wxiTwM7ZS1
+         s2cVlMG9d5nQBfl3wTpWnzsvNnCia34z298v+ThC7YUjwY8J0d8843E0p/xwAqkP4mq1
+         vKSYsZMxOLQaCCthb4sCmK/7nEy5UFu8q8EAcllTC+WP6jqSNEKLr6gku+O1EEgXiI1v
+         O9KQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=giJS01C2uRmkcBNmO7mS9KtwK43uwMA7OS6WWAjaKvI=;
-        b=eUdcV1tA8i5ozZ9kMczI9CawZxSU+ir6Ip6ota8egq0e5rCL+UUZto5AObB+yHJwmh
-         NefvtBrDW2rsWGjn6RBG8Be0KHF89F/vO429GQsG93HJIQJgTxZ8g9qIWzb2+LVBjhbz
-         JarbfHCUTJJZZKK7Xg8RTec2XX0y71txzbzjNQmu6uvoFMjv0LgBy/5Y6Xc5jgu554Mw
-         5bdBsHg6yhLQXMQ7d2bayhXKehk3QEYNL1AKBXFoeXz+45lmMp83/MHAeRolLrkv0Uau
-         ptqFjOwr50zJDmJPqkTCjudLMGrZVfWmm3Giw95parufmXMG2rBLO29oBL9lJwSzUCVX
-         N7qA==
-X-Gm-Message-State: AOAM531AF/KNufxdnqtDE2AQTnO0aB2LoOYO+QADaS/fVuGy4tyEUz3v
-        uhuHVZCbRPGwTYhVO7a2bVG6lUo4dJksy3le7Uc=
-X-Google-Smtp-Source: ABdhPJzIgpqXFC8gbAcWn5p5M0LTP7U4xnkTWUlz29pKX9vsKGxNrpgUbSpg27/nBWhaPt/n0NvrA5eLtoF0eDDeVXs=
-X-Received: by 2002:a5b:d08:: with SMTP id y8mr2654456ybp.476.1598001549861;
- Fri, 21 Aug 2020 02:19:09 -0700 (PDT)
+         :message-id:subject:to:cc;
+        bh=RJsphOfHq5ntm4onck+nMutd9svBEmdpWwlP6u4BZ7w=;
+        b=Csee+P+6uGTc0AcEZc3wPbxq6U3397tPwjDSCTO8v5ECwk+tBwqlY4v/iUoV1p9nV/
+         MY0qeSqlFQMQVlhpqrqOgy19MEwEKXV08i6Tf2p9RpekAn6kWsAhp+n5254LVHzg27/T
+         Z6exrXdMVm5PyKJU1D5gJ8MELuNPLIKsHs1lqJUAwgrqFMkRwUzMcTtENjCgbkHhAcbh
+         vdrj7vfLCGjNsBsPPVSfKIAdAkiXFn8arntQ/8e+UwJmxdxl/MgUk2S64R+gxixsAboe
+         vvDbsMzjZJCeFBZLDiFSPoJqKk47OzsPb4MAv4wBhk3Y1GsBPTxe2w5IY5nyuBqewYNu
+         xQlg==
+X-Gm-Message-State: AOAM533HXNw9Ql473cHqnMe6U8E+bhiTiEiiDvXizkZOlxO8vmBALzP3
+        kxARhKRmxCSzgefXpl/FxtK5l4+ttbbuBsHw7pjQJ12Q2n+L9g==
+X-Google-Smtp-Source: ABdhPJzh45slGp0oNIpiCJ8oKmEc2JeCpi88akh8C9k2q9sKUvk4ryxPH43TELKM0tGJULkhE51yqZaLGTNqFNqFJWs=
+X-Received: by 2002:a25:a091:: with SMTP id y17mr3040952ybh.82.1598009638809;
+ Fri, 21 Aug 2020 04:33:58 -0700 (PDT)
 MIME-Version: 1.0
-References: <20200710110819.28965-1-benchuanggli@gmail.com>
- <CAPDyKFrvzZSYWkqD_JgZSCmF8p+Bj7JXfdbZ5D=OsszTPsSDdw@mail.gmail.com>
- <CACT4zj989TsK9CMtPwEVOwBr-HtLVqQyt_EPAdkEexGuGNfatQ@mail.gmail.com> <CAPDyKFqpy-+sL-8ai2v-Br1n8MC88u3wTF7r=8Lt3qyLwCxRKg@mail.gmail.com>
-In-Reply-To: <CAPDyKFqpy-+sL-8ai2v-Br1n8MC88u3wTF7r=8Lt3qyLwCxRKg@mail.gmail.com>
+References: <20200710110848.29114-1-benchuanggli@gmail.com> <CAPDyKFoGQFxdNVA+A76NitGP=yZvE2z90fewAo21Q8U+bgPbBQ@mail.gmail.com>
+In-Reply-To: <CAPDyKFoGQFxdNVA+A76NitGP=yZvE2z90fewAo21Q8U+bgPbBQ@mail.gmail.com>
 From:   Ben Chuang <benchuanggli@gmail.com>
-Date:   Fri, 21 Aug 2020 17:18:58 +0800
-Message-ID: <CACT4zj-W2EECQgMTQ=VoaFZdQfVgWer-sEWqnqpfNG25FT-xLw@mail.gmail.com>
-Subject: Re: [RFC PATCH V3 02/21] mmc: core: UHS-II support, modify power-up sequence
+Date:   Fri, 21 Aug 2020 19:33:47 +0800
+Message-ID: <CACT4zj_iO58CPk_PTfNCot+c2Z1_vcWeVUwH2nPgN-jx43eN2g@mail.gmail.com>
+Subject: Re: [RFC PATCH V3 04/21] mmc: core: UHS-II support, try to select
+ UHS-II interface
 To:     Ulf Hansson <ulf.hansson@linaro.org>
 Cc:     Adrian Hunter <adrian.hunter@intel.com>,
         "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
@@ -70,301 +69,1140 @@ Cc:     Adrian Hunter <adrian.hunter@intel.com>,
         Takahiro Akashi <takahiro.akashi@linaro.org>,
         greg.tu@genesyslogic.com.tw
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, Jul 24, 2020 at 8:36 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+On Tue, Aug 18, 2020 at 7:42 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
 >
-> On Fri, 24 Jul 2020 at 13:11, Ben Chuang <benchuanggli@gmail.com> wrote:
+> On Fri, 10 Jul 2020 at 13:08, Ben Chuang <benchuanggli@gmail.com> wrote:
 > >
-> > Hi Ulf,
+> > From: Ben Chuang <ben.chuang@genesyslogic.com.tw>
 > >
-> > On Fri, Jul 17, 2020 at 7:26 PM Ulf Hansson <ulf.hansson@linaro.org> wr=
-ote:
-> > >
-> > > On Fri, 10 Jul 2020 at 13:07, Ben Chuang <benchuanggli@gmail.com> wro=
-te:
-> > > >
-> > > > From: AKASHI Takahiro <takahiro.akashi@linaro.org>
-> > > >
-> > > > According to Fig. 3-35 in "SD Host Controller Simplified Spec. Ver4=
-.20":
-> > > > - Prepare vdd1, vdd2 and ios.timing for using after/in step (2)
-> > > > - chip_select is not used in UHS-II, used to return to the legacy f=
-low
-> > >
-> > > Thanks for pointing to the spec, but please explain why/what/how for
-> > > the change - as this helps me to review.
-> > >
-> > > I am going to stop commenting on each patch's commit message, beyond
-> > > this patch - as it seems the same comment applies to more patches.
-> > >
-> > > >
-> > > > Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
-> > > > Signed-off-by: AKASHI Takahiro <takahiro.akashi@linaro.org>
-> > > > ---
-> > > >  drivers/mmc/core/core.c      | 62 ++++++++++++++++++++++++--------=
-----
-> > > >  drivers/mmc/core/regulator.c | 14 ++++++++
-> > > >  2 files changed, 56 insertions(+), 20 deletions(-)
-> > > >
-> > > > diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> > > > index 8d2b808e9b58..85c83c82ad0c 100644
-> > > > --- a/drivers/mmc/core/core.c
-> > > > +++ b/drivers/mmc/core/core.c
-> > > > @@ -1315,33 +1315,51 @@ void mmc_power_up(struct mmc_host *host, u3=
-2 ocr)
-> > > >         if (host->ios.power_mode =3D=3D MMC_POWER_ON)
-> > > >                 return;
-> > > >
-> > > > -       mmc_pwrseq_pre_power_on(host);
-> > > > +       if (host->flags & MMC_UHS2_SUPPORT) {
-> > > > +               /* TODO: handle 'ocr' parameter */
-> > > > +               host->ios.vdd =3D fls(host->ocr_avail) - 1;
-> > > > +               host->ios.vdd2 =3D fls(host->ocr_avail_uhs2) - 1;
-> > > > +               if (mmc_host_is_spi(host))
-> > > > +                       host->ios.chip_select =3D MMC_CS_HIGH;
-> > > > +               else
-> > > > +                       host->ios.chip_select =3D MMC_CS_DONTCARE;
-> > > > +               host->ios.timing =3D MMC_TIMING_UHS2;
-> > >
-> > > If I understand correctly, the intent is to always try to initialize
-> > > the UHS-II interface/phy if that is supported. That doesn't seem
-> > > correct to me. What about if the SD card doesn't support UHS-II, then
-> > > we should use the legacy SD interface instead right?
+> > The flow of "interface selection and initialization" was a bit modified
+> > for UHS-II card. This commit follows the sequence defined in SD
+> > specification (Part 1).
+> > See section 7.2.3 in "UHS-II Simplified Addendum."
 > >
-> > Please always try UHS-II I/F first, then if UHS-II I/F fails, then
-> > switch to SD I/F.
+> > Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+> > Signed-off-by: AKASHI Takahiro <takahiro.akashi@linaro.org>
+> > ---
+> >  drivers/mmc/core/Makefile |   2 +-
+> >  drivers/mmc/core/bus.c    |   5 +-
+> >  drivers/mmc/core/core.c   |  33 +-
+> >  drivers/mmc/core/sd.c     |  26 ++
+> >  drivers/mmc/core/uhs2.c   | 800 ++++++++++++++++++++++++++++++++++++++
+> >  drivers/mmc/core/uhs2.h   |  20 +
+> >  6 files changed, 882 insertions(+), 4 deletions(-)
+> >  create mode 100644 drivers/mmc/core/uhs2.c
+> >  create mode 100644 drivers/mmc/core/uhs2.h
 > >
-> > >
-> > > Or perhaps the MMC_UHS2_SUPPORT bit becomes cleared somewhere in the
-> > > error path when first trying to initialize an UHS-II card, from
-> > > subsequent changes?
-> >
-> > Yes, MMC_UHS2_SUPPORT will be cleared in some cases.
-> >
-> > >
-> > > So, assuming that is the intent then, I am still not sure about this =
-approach.
-> > >
-> > > What about if we instead always start with legacy SD initialization?
-> > > When we have read the OCR register, via mmc_send_app_op_cond(), we ca=
-n
-> > > check if the card supports UHS-II by looking at the UHS-II Card Statu=
-s
-> > > (bit 29).
-> >
-> > UHS-II spec recommends to detect UHS-II first.
-> > Or in Host controller spec, section 3.13.2 card interface detection seq=
-uence,
-> > it also starts from UHS-II path, then go SD legacy path if UHS-II
-> > initialization fails.
+> > diff --git a/drivers/mmc/core/Makefile b/drivers/mmc/core/Makefile
+> > index 95ffe008ebdf..e2a90dc98afc 100644
+> > --- a/drivers/mmc/core/Makefile
+> > +++ b/drivers/mmc/core/Makefile
+> > @@ -8,7 +8,7 @@ mmc_core-y                      := core.o bus.o host.o \
+> >                                    mmc.o mmc_ops.o sd.o sd_ops.o \
+> >                                    sdio.o sdio_ops.o sdio_bus.o \
+> >                                    sdio_cis.o sdio_io.o sdio_irq.o \
+> > -                                  slot-gpio.o regulator.o
+> > +                                  slot-gpio.o regulator.o uhs2.o
+> >  mmc_core-$(CONFIG_OF)          += pwrseq.o
+> >  obj-$(CONFIG_PWRSEQ_SIMPLE)    += pwrseq_simple.o
+> >  obj-$(CONFIG_PWRSEQ_SD8787)    += pwrseq_sd8787.o
+> > diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
+> > index 70207f11a654..66d3e942f3fc 100644
+> > --- a/drivers/mmc/core/bus.c
+> > +++ b/drivers/mmc/core/bus.c
+> > @@ -350,8 +350,9 @@ int mmc_add_card(struct mmc_card *card)
+> >         } else {
+> >                 pr_info("%s: new %s%s%s%s%s%s card at address %04x\n",
+> >                         mmc_hostname(card->host),
+> > -                       mmc_card_uhs(card) ? "ultra high speed " :
+> > -                       (mmc_card_hs(card) ? "high speed " : ""),
+> > +                       mmc_card_uhs2(card) ? "ultra high speed 2 " :
+> > +                       (mmc_card_uhs(card) ? "ultra high speed 1 " :
 >
-> I have carefully read the specs. While you are right, that the flow
-> charts seem to prefer to start with UHS-II - I don't think it's a good
-> idea.
->
-> Have a look at "7.2.3.2 Interface Selection after Power Up", in the
-> UHS-II Addendum Version 2.00. This section states this:
->
-> "If Host intends to use only Legacy SD interface or detects that
-> Legacy SD Card is inserted, it is allowed to supply only VDD1 and
-> SDCLK, and issue CMD8 in order to accelerate initialization of Legacy
-> SD interface. Note that once UHS-II I/F is disabled, Host requires
-> power cycle to enable UHS-II again."
->
-> That said, I am also concerned about the case when a bootloader has
-> initialized the SD card. When the kernel tries to re-initialize the
-> card during boot, it may fail with UHS-II - unless the legacy SD init
-> path is tried first.
->
-> >
-> > The bit29 in response of ACMD41 is defined as =E2=80=9CUHS-II Card Stat=
-us=E2=80=9D,
-> > not UHS-II supported.
-> > We have experience using this value to determine whether a card support=
-s UHS-II,
-> > but not every card reports if they support UHS-II by the response of
-> > ACMD41 correctly.
->
-> I see.
->
-> If that is the case, I think we should invent an SD quirk for that
-> particular card. Along the lines of what already exists for SDIO and
-> eMMC.
->
-> So, when a card with this kind of quirk is found, we should simply
-> bail out in the SD legacy init path and try the UHS-II path instead.
->
-> What card have you found missing to set the bit29?
+> Perhaps use "UHS-I" and "UHS-II" instead.
 
-In my hand, two uhs-ii cards, one is a Lexar  card and another is an ADATA =
-card.
+OK, The next version will be changed.
 
 >
+> > +                       (mmc_card_hs(card) ? "high speed " : "")),
+> >                         mmc_card_hs400(card) ? "HS400 " :
+> >                         (mmc_card_hs200(card) ? "HS200 " : ""),
+> >                         mmc_card_hs400es(card) ? "Enhanced strobe " : "",
+> > diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> > index c6540d56646b..e2534f3446ce 100644
+> > --- a/drivers/mmc/core/core.c
+> > +++ b/drivers/mmc/core/core.c
+> > @@ -31,6 +31,7 @@
+> >  #include <linux/mmc/mmc.h>
+> >  #include <linux/mmc/sd.h>
+> >  #include <linux/mmc/slot-gpio.h>
+> > +#include <linux/mmc/uhs2.h>
 > >
-> > >
-> > > If it turns out that the card supports UHS-II and the host does as
-> > > well, then we do a mmc_power_off() to completely reset the
-> > > card/host/phy. Then we can call into a UHS-II specific path, that
-> > > tries to power on and initialize things according to the UHS-II spec.
-> > >
-> > > In this way, we are going to prioritize initialization of legacy SD
-> > > cards to remain quick, as we won't try to use UHS-II unless the card
-> > > supports it. Moreover, I get the impression that we can keep the
-> > > existing code more as is - and instead introduce UHS-II specifics in =
-a
-> > > separate path. This also also for UHS-II specific optimizations, I
-> > > think.
+> >  #define CREATE_TRACE_POINTS
+> >  #include <trace/events/mmc.h>
+> > @@ -41,6 +42,7 @@
+> >  #include "host.h"
+> >  #include "sdio_bus.h"
+> >  #include "pwrseq.h"
+> > +#include "uhs2.h"
 > >
-> > Agree that we can try to keep the existing code and also need your advi=
-ce/help.
+> >  #include "mmc_ops.h"
+> >  #include "sd_ops.h"
+> > @@ -51,6 +53,7 @@
+> >  #define SD_DISCARD_TIMEOUT_MS  (250)
+> >
+> >  static const unsigned freqs[] = { 400000, 300000, 200000, 100000 };
+> > +static const unsigned int uhs2_freqs[] = { 52000000, 26000000 };
+> >
+> >  /*
+> >   * Enabling software CRCs on the data blocks can be a significant (30%)
+> > @@ -2165,9 +2168,10 @@ static int mmc_rescan_try_freq(struct mmc_host *host, unsigned freq)
+> >                 if (!mmc_attach_sdio(host))
+> >                         return 0;
+> >
+> > -       if (!(host->caps2 & MMC_CAP2_NO_SD))
+> > +       if (!(host->caps2 & MMC_CAP2_NO_SD)) {
+> >                 if (!mmc_attach_sd(host))
+> >                         return 0;
+> > +       }
+> >
+> >         if (!(host->caps2 & MMC_CAP2_NO_MMC))
+> >                 if (!mmc_attach_mmc(host))
+> > @@ -2300,6 +2304,33 @@ void mmc_rescan(struct work_struct *work)
+> >                 goto out;
+> >         }
+> >
+> > +       if (host->caps & MMC_CAP_UHS2) {
+> > +               /*
+> > +                * Start to try UHS-II initialization from 52MHz to 26MHz
+> > +                * (RCLK range) per spec.
+> > +                */
+> > +               for (i = 0; i < ARRAY_SIZE(uhs2_freqs); i++) {
+> > +                       unsigned int freq = uhs2_freqs[i];
+> > +                       int err;
+> > +
+> > +                       err = mmc_uhs2_rescan_try_freq(host,
+> > +                                                      max(freq, host->f_min));
+> > +                       if (!err) {
+> > +                               mmc_release_host(host);
+> > +                               goto out;
+> > +                       }
+> > +
+> > +                       if (err == UHS2_PHY_INIT_ERR)
+> > +                               /* UHS2 IF detect or Lane Sync error.
+> > +                                * Try legacy interface.
+> > +                                */
+> > +                               break;
+> > +
+> > +                       if (freq <= host->f_min)
+> > +                               break;
+> > +               }
 >
-> Sure, I will help the best I can.
+> Assuming we change the initialization order, trying to initialize the
+> legacy SD interface first to figure out if UHS-II is supported, then I
+> think we should be able to move the entire code above into a the
+> UHS-II specific code/path.
+
+If the host tries to use the SD interface first,
+some failure status needs to be considered.
+
+For example, first run in SD mode, try UHS-II interface failure,
+ and then return to SD flow again.
+I don't know a good way to go back to SD flow again.
+
 >
-> I will have a look at the next patch in the series as well, but it may
-> take some time as I am currently trying to get some time off for
-> holidays.
+> > +       }
+> > +
+> >         for (i = 0; i < ARRAY_SIZE(freqs); i++) {
+> >                 unsigned int freq = freqs[i];
+> >                 if (freq > host->f_max) {
+> > diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+> > index 5a2210c25aa7..c5b071bd98b3 100644
+> > --- a/drivers/mmc/core/sd.c
+> > +++ b/drivers/mmc/core/sd.c
+> > @@ -901,6 +901,20 @@ int mmc_sd_setup_card(struct mmc_host *host, struct mmc_card *card,
+> >                 err = mmc_read_switch(card);
+> >                 if (err)
+> >                         return err;
+> > +               if (host->flags & MMC_UHS2_INITIALIZED) {
 >
+> Rather than using host->flags, to tweak the behavior of
+> mmc_sd_setup_card() to support UHS-II, I would prefer to give
+> mmc_sd_setup_card() a new in-parameter that it can look at instead.
+
+Do you mean that adding a new in-parameter to mmc_sd_setup_card() likes this
+mmc_sd_setup_card(struct mmc_host *, struct mmc_card *, boot reinit,
+boot uhsii); ?
+
+>
+> > +                       u8 status[64];
+> > +                       /*
+> > +                        * send CMD6 to set Maximum Power Consumption
+> > +                        * to get better performance
+> > +                        */
+> > +                       err = mmc_sd_switch(card, 0, 3,
+> > +                                           SD_SET_CURRENT_LIMIT_1000, status);
+> > +                       if (!err) {
+> > +                               err = mmc_sd_switch(card, 1, 3,
+> > +                                                   SD_SET_CURRENT_LIMIT_1000,
+> > +                                                   status);
+> > +                       }
+> > +               }
+> >         }
 > >
-> > >
-> > > > +       } else {
-> > > > +               mmc_pwrseq_pre_power_on(host);
-> > > >
-> > > > -       host->ios.vdd =3D fls(ocr) - 1;
-> > > > -       host->ios.power_mode =3D MMC_POWER_UP;
-> > > > -       /* Set initial state and call mmc_set_ios */
-> > > > -       mmc_set_initial_state(host);
-> > > > +               host->ios.vdd =3D fls(ocr) - 1;
-> > > > +               host->ios.power_mode =3D MMC_POWER_UP;
-> > > > +               /* Set initial state and call mmc_set_ios */
-> > > > +               mmc_set_initial_state(host);
-> > > >
-> > > > -       mmc_set_initial_signal_voltage(host);
-> > > > +               mmc_set_initial_signal_voltage(host);
-> > > >
-> > > > -       /*
-> > > > -        * This delay should be sufficient to allow the power suppl=
-y
-> > > > -        * to reach the minimum voltage.
-> > > > -        */
-> > > > -       mmc_delay(host->ios.power_delay_ms);
-> > > > -
-> > > > -       mmc_pwrseq_post_power_on(host);
-> > > > +               /*
-> > > > +                * This delay should be sufficient to allow the pow=
-er supply
-> > > > +                * to reach the minimum voltage.
-> > > > +                */
-> > > > +               mmc_delay(host->ios.power_delay_ms);
-> > > >
-> > > > +               mmc_pwrseq_post_power_on(host);
-> > > > +       }
-> > > >         host->ios.clock =3D host->f_init;
-> > > > -
-> > > >         host->ios.power_mode =3D MMC_POWER_ON;
-> > > > +
-> > > >         mmc_set_ios(host);
-> > > >
-> > > > -       /*
-> > > > -        * This delay must be at least 74 clock sizes, or 1 ms, or =
-the
-> > > > -        * time required to reach a stable voltage.
-> > > > -        */
-> > > > -       mmc_delay(host->ios.power_delay_ms);
-> > > > +       if (host->flags & MMC_UHS2_SUPPORT)
-> > > > +               /*
-> > > > +                * This delay should be sufficient to allow the pow=
-er supply
-> > > > +                * to reach the minimum voltage.
-> > > > +                */
-> > > > +               /*  TODO: avoid an immediate value */
-> > > > +               mmc_delay(10);
-> > > > +       else
-> > > > +               /*
-> > > > +                * This delay must be at least 74 clock sizes, or 1=
- ms, or the
-> > > > +                * time required to reach a stable voltage.
-> > > > +                */
-> > > > +               mmc_delay(host->ios.power_delay_ms);
-> > > >  }
-> > > >
-> > > >  void mmc_power_off(struct mmc_host *host)
-> > > > @@ -2307,7 +2325,11 @@ void mmc_start_host(struct mmc_host *host)
-> > > >
-> > > >         if (!(host->caps2 & MMC_CAP2_NO_PRESCAN_POWERUP)) {
-> > > >                 mmc_claim_host(host);
-> > > > -               mmc_power_up(host, host->ocr_avail);
-> > > > +
-> > > > +               /* Power up here will make UHS2 init ugly. */
-> > > > +               if (!(host->caps & MMC_CAP_UHS2))
-> > > > +                       mmc_power_up(host, host->ocr_avail);
-> > > > +
-> > >
-> > > According to my suggestions, then this would not be needed.
+> >         /*
+> > @@ -1043,6 +1057,11 @@ static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
+> >         if (err)
+> >                 goto free_card;
 > >
-> > This should not be needed. Thank you.
+> > +       /* For UHS2, skip the UHS-I initialization. */
+> > +       if ((host->flags & MMC_UHS2_SUPPORT) &&
+> > +           (host->flags & MMC_UHS2_INITIALIZED))
+> > +               goto done;
+>
+> mmc_sd_init_card() is also called at system resume, to re-initialize the card.
+>
+> Re-initialization is going to be needed for UHS-II cards as well,
+> since we should ideally avoid wasting energy in system suspend state
+> for these cards as well.
+>
+> Perhaps you haven't looked at that part yet? Or I may be missing something here?
+
+Yes, I didn't look at that power management. It should be considered.
+
+>
+> > +
+> >         /*
+> >          * If the card has not been power cycled, it may still be using 1.8V
+> >          * signaling. Detect that situation and try to initialize a UHS-I (1.8V)
+> > @@ -1334,6 +1353,13 @@ int mmc_attach_sd(struct mmc_host *host)
 > >
-> > >
-> > > >                 mmc_release_host(host);
-> > > >         }
-> > > >
-> > > > diff --git a/drivers/mmc/core/regulator.c b/drivers/mmc/core/regula=
-tor.c
-> > > > index 96b1d15045d6..05556225d9ac 100644
-> > > > --- a/drivers/mmc/core/regulator.c
-> > > > +++ b/drivers/mmc/core/regulator.c
-> > > > @@ -247,6 +247,7 @@ int mmc_regulator_get_supply(struct mmc_host *m=
-mc)
-> > > >
-> > > >         mmc->supply.vmmc =3D devm_regulator_get_optional(dev, "vmmc=
-");
-> > > >         mmc->supply.vqmmc =3D devm_regulator_get_optional(dev, "vqm=
-mc");
-> > > > +       mmc->supply.vmmc2 =3D devm_regulator_get_optional(dev, "vmm=
-c2");
-> > >
-> > > Please move the regulator thingy here into a separate patch. Please
-> > > make sure corresponding header file, adding the vmmc2 to it is part o=
-f
-> > > that change as well.
+> >         rocr = mmc_select_voltage(host, ocr);
 > >
-> > Yes. will do it.
+> > +       /*
+> > +        * Some cards have zero value of rocr in UHS-II mode. Assign host's ocr
+> > +        * value to rocr.
+> > +        */
+> > +       if ((host->flags & MMC_UHS2_INITIALIZED) && !rocr)
+> > +               rocr = host->ocr_avail;
+>
+> As stated already earlier above, we should probably be able to move
+> any UHS-II specific bits to the UHS-II code/path.
+>
+> > +
+> >         /*
+> >          * Can we support the voltage(s) of the card(s)?
+> >          */
+> > diff --git a/drivers/mmc/core/uhs2.c b/drivers/mmc/core/uhs2.c
+> > new file mode 100644
+> > index 000000000000..a3b20ac6f315
+> > --- /dev/null
+> > +++ b/drivers/mmc/core/uhs2.c
+> > @@ -0,0 +1,800 @@
+> > +// SPDX-License-Identifier: GPL-2.0-or-later
+> > +/*
+> > + *  linux/drivers/mmc/core/uhs2.c - UHS-II driver
+> > + *
+> > + *  Copyright (C) 2014 Intel Corp, All Rights Reserved.
+> > + *  Copyright (C) 2020 Genesys Logic, Inc.
+> > + *  Authors: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+> > + *  Copyright (C) 2020 Linaro Limited
+> > + *  Author: AKASHI Takahiro <takahiro.akashi@linaro.org>
+> > + */
+> > +
+> > +#include <asm/byteorder.h>
+> > +#include <linux/err.h>
+> > +#include <linux/slab.h>
+> > +
+> > +#include <linux/mmc/host.h>
+> > +#include <linux/mmc/card.h>
+> > +#include <linux/mmc/mmc.h>
+> > +#include <linux/mmc/core.h>
+> > +#include <linux/mmc/sdio.h>
+> > +#include <linux/mmc/slot-gpio.h>
+> > +#include <linux/mmc/uhs2.h>
+> > +
+> > +#include "uhs2.h"
+> > +#include "mmc_ops.h"
+> > +#include "sd_ops.h"
+> > +#include "core.h"
+> > +
+> > +#define DBG(f, x...) \
+> > +       pr_warn("[%s()]: " f, __func__, ## x)
+> > +
+> > +/**
+> > + * uhs2_cmd_assemble - assemble and build up uhs2 command
+> > + * @cmd:       MMC command
+> > + * @uhs2_cmd:  UHS2 command
+> > + * @header:    Value of packet header
+> > + * @arg:       Argument of packet
+> > + * @payload:   Payload of packet
+> > + * @plen:      Payload length
+> > + * @resp:      Buffer for response
+> > + * @resp_len:  Response buffer length
+> > + *
+> > + * resp is inputted outside which should be a variable created by caller
+> > + * so caller should handle it. For SD command, there is no uhs2_resp and
+> > + * response should be stored in resp of mmc_command.
+> > + */
+> > +static void uhs2_cmd_assemble(struct mmc_command *cmd,
+> > +                             struct uhs2_command *uhs2_cmd,
+> > +                             u16 header, u16 arg,
+> > +                             u32 *payload, u8 plen, u8 *resp, u8 resp_len)
+> > +{
+> > +       uhs2_cmd->header = header;
+> > +       uhs2_cmd->arg = arg;
+> > +       uhs2_cmd->payload = payload;
+> > +       uhs2_cmd->payload_len = plen * sizeof(u32);
+> > +       uhs2_cmd->packet_len = uhs2_cmd->payload_len + 4;
+> > +
+> > +       cmd->uhs2_cmd = uhs2_cmd;
+> > +       cmd->uhs2_resp = resp;
+> > +       cmd->uhs2_resp_len = resp_len;
+> > +
+> > +       pr_debug("%s: uhs2_cmd: header=0x%x arg=0x%x\n",
+> > +                __func__, uhs2_cmd->header, uhs2_cmd->arg);
+> > +       pr_debug("%s:           payload_len=%d packet_len=%d resp_len=%d\n",
+> > +                __func__, uhs2_cmd->payload_len, uhs2_cmd->packet_len,
+> > +               cmd->uhs2_resp_len);
+>
+> I noticed that there is lots of debug code around. I understand that
+> it's useful during development, but I think we should be able to
+> remove some of it. Can you please have a look and clean up that?
+
+OK, debug codes will be cleared.
+
+>
+> > +}
+> > +
+> > +static int uhs2_dev_init(struct mmc_host *host)
+> > +{
+> > +       struct mmc_command cmd = {0};
+> > +       struct uhs2_command uhs2_cmd = {};
+> > +       u32 cnt;
+> > +       u32 dap, gap, gap1;
+> > +       u16 header = 0, arg = 0;
+> > +       u32 payload[1];
+> > +       u8 plen = 1;
+> > +       u8 gd = 0, cf = 1;
+> > +       u8 resp[6] = {0};
+> > +       u8 resp_len = 6;
+> > +       int err;
+> > +
+> > +       dap = host->uhs2_caps.dap;
+> > +       gap = host->uhs2_caps.gap;
+> > +
+> > +       header = UHS2_NATIVE_PACKET | UHS2_PACKET_TYPE_CCMD;
+> > +       arg = ((UHS2_DEV_CMD_DEVICE_INIT & 0xFF) << 8) |
+> > +               UHS2_NATIVE_CMD_WRITE |
+> > +               UHS2_NATIVE_CMD_PLEN_4B |
+> > +               (UHS2_DEV_CMD_DEVICE_INIT >> 8);
+> > +
+> > +       /* need this for some cards */
+> > +       cmd.busy_timeout = 1000;
+>
+> Is this according to spec? Please add defines for timeout values.
+
+In UHS-II Addenum, table 6-25: device timing parameters in CM_TRAN,
+Please see `initialization' row in table 6-25.
+
+I will define it like "#define UHSII_DEVINIT_CMD_TIMEOUT 1000".
+
+>
+> > +
+> > +       for (cnt = 0; cnt < 30; cnt++) {
+> > +               payload[0] = ((dap & 0xF) << 12) |
+> > +                       (cf << 11) |
+> > +                       ((gd & 0xF) << 4) |
+> > +                       (gap & 0xF);
+> > +
+> > +               uhs2_cmd_assemble(&cmd, &uhs2_cmd, header, arg,
+> > +                                 payload, plen, resp, resp_len);
+> > +
+> > +               DBG("Begin DEVICE_INIT, header=0x%x, arg=0x%x, payload=0x%x.\n",
+> > +                   header, arg, payload[0]);
+> > +
+> > +               DBG("Sending DEVICE_INIT. Count = %d\n", cnt);
+> > +               err = mmc_wait_for_cmd(host, &cmd, 0);
+>
+> Debug code, please clean this up...
+
+OK.
+
+>
+> > +
+> > +               if (err) {
+> > +                       pr_err("%s: %s: UHS2 CMD send fail, err= 0x%x!\n",
+> > +                              mmc_hostname(host), __func__, err);
+> > +                       return -EIO;
+> > +               }
+> > +
+> > +               if (IS_ENABLED(CONFIG_MMC_DEBUG)) {
+>
+> Debug code, please clean this up. I am stopping from commenting on
+> that, as stated, please have a look at all the code to clean this up.
+
+OK, I will remove debug codes as much as possible.
+
+>
+> > +                       int i;
+> > +
+> > +                       pr_warn("%s: DEVICE_INIT response is: ",
+> > +                               mmc_hostname(host));
+> > +                       for (i = 0; i < resp_len; i++)
+> > +                               pr_warn("0x%x ", resp[i]);
+> > +                       pr_warn("\n");
+> > +               }
+> > +
+> > +               if (resp[3] != (UHS2_DEV_CMD_DEVICE_INIT & 0xFF)) {
+> > +                       pr_err("%s: DEVICE_INIT response is wrong!\n",
+> > +                              mmc_hostname(host));
+> > +                       return -EIO;
+> > +               }
+> > +
+> > +               if (resp[5] & 0x8) {
+> > +                       DBG("CF is set, device is initialized!\n");
+> > +                       host->group_desc = gd;
+> > +                       break;
+> > +               }
+> > +               gap1 = resp[4] & 0x0F;
+> > +               if (gap == gap1)
+> > +                       gd++;
+> > +       }
+> > +       if (cnt == 30) {
+> > +               pr_err("%s: DEVICE_INIT fail, already 30 times!\n",
+> > +                      mmc_hostname(host));
+> > +               return -EIO;
+> > +       }
+> > +
+> > +       return 0;
+> > +}
+> > +
+> > +static int uhs2_enum(struct mmc_host *host)
+> > +{
+> > +       struct mmc_command cmd = {0};
+> > +       struct uhs2_command uhs2_cmd = {};
+> > +       u16 header = 0, arg = 0;
+> > +       u32 payload[1];
+> > +       u8 plen = 1;
+> > +       u8 id_f = 0xF, id_l = 0x0;
+> > +       u8 resp[8] = {0};
+> > +       u8 resp_len = 8;
+> > +       int err;
+> > +
+> > +       header = UHS2_NATIVE_PACKET | UHS2_PACKET_TYPE_CCMD;
+> > +       arg = ((UHS2_DEV_CMD_ENUMERATE & 0xFF) << 8) |
+> > +               UHS2_NATIVE_CMD_WRITE |
+> > +               UHS2_NATIVE_CMD_PLEN_4B |
+> > +               (UHS2_DEV_CMD_ENUMERATE >> 8);
+> > +
+> > +       payload[0] = (id_f << 4) | id_l;
+> > +
+> > +       DBG("Begin ENUMERATE, header=0x%x, arg=0x%x, payload=0x%x.\n",
+> > +           header, arg, payload[0]);
+> > +       uhs2_cmd_assemble(&cmd, &uhs2_cmd, header, arg, payload, plen,
+> > +                         resp, resp_len);
+> > +
+> > +       err = mmc_wait_for_cmd(host, &cmd, 0);
+> > +       if (err) {
+> > +               pr_err("%s: %s: UHS2 CMD send fail, err= 0x%x!\n",
+> > +                      mmc_hostname(host), __func__, err);
+> > +               return -EIO;
+> > +       }
+> > +
+> > +       if (IS_ENABLED(CONFIG_MMC_DEBUG)) {
+> > +               int i;
+> > +
+> > +               pr_warn("%s: ENUMERATE response is: ", mmc_hostname(host));
+> > +               for (i = 0; i < resp_len; i++)
+> > +                       pr_warn("0x%x ", resp[i]);
+> > +               pr_warn("\n");
+> > +       }
+> > +
+> > +       if (resp[3] != (UHS2_DEV_CMD_ENUMERATE & 0xFF)) {
+> > +               pr_err("%s: ENUMERATE response is wrong!\n",
+> > +                      mmc_hostname(host));
+> > +               return -EIO;
+> > +       }
+> > +
+> > +       id_f = (resp[4] >> 4) & 0xF;
+> > +       id_l = resp[4] & 0xF;
+> > +       DBG("id_f = %d, id_l = %d.\n", id_f, id_l);
+> > +       DBG("Enumerate Cmd Completed. No. of Devices connected = %d\n",
+> > +           id_l - id_f + 1);
+> > +       host->uhs2_dev_prop.node_id = id_f;
+> > +
+> > +       return 0;
+> > +}
+> > +
+> > +static int uhs2_config_read(struct mmc_host *host)
+> > +{
+> > +       struct mmc_command cmd = {0};
+> > +       struct uhs2_command uhs2_cmd = {};
+> > +       u16 header = 0, arg = 0;
+> > +       u32 cap;
+> > +       int err;
+> > +
+> > +       DBG("INQUIRY_CFG: read Generic Caps.\n");
+> > +       header = UHS2_NATIVE_PACKET |
+> > +                UHS2_PACKET_TYPE_CCMD |
+> > +                host->uhs2_dev_prop.node_id;
+> > +       arg = ((UHS2_DEV_CONFIG_GEN_CAPS & 0xFF) << 8) |
+> > +               UHS2_NATIVE_CMD_READ |
+> > +               UHS2_NATIVE_CMD_PLEN_4B |
+> > +               (UHS2_DEV_CONFIG_GEN_CAPS >> 8);
+> > +
+> > +       DBG("Begin INQUIRY_CFG, header=0x%x, arg=0x%x.\n",
+> > +           header, arg);
+> > +       /* There is no payload because per spec, there should be
+> > +        * no payload field for read CCMD.
+> > +        * Plen is set in arg. Per spec, plen for read CCMD
+> > +        * represents the len of read data which is assigned in payload
+> > +        * of following RES (p136).
+> > +        */
+> > +       uhs2_cmd_assemble(&cmd, &uhs2_cmd, header, arg, NULL, 0, NULL, 0);
+> > +
+> > +       err = mmc_wait_for_cmd(host, &cmd, 0);
+> > +       if (err) {
+> > +               pr_err("%s: %s: UHS2 CMD send fail, err= 0x%x!\n",
+> > +                      mmc_hostname(host), __func__, err);
+> > +               return -EIO;
+> > +       }
+> > +
+> > +       if (IS_ENABLED(CONFIG_MMC_DEBUG)) {
+> > +               int i;
+> > +
+> > +               pr_warn("%s: INQUIRY_CFG generic response is: ",
+> > +                       mmc_hostname(host));
+> > +               for (i = 0; i < 2; i++)
+> > +                       pr_warn("0x%x ", cmd.resp[i]);
+> > +               pr_warn("\n");
+> > +       }
+> > +
+> > +       cap = cmd.resp[0];
+> > +       DBG("Device Generic Caps (0-31) is: 0x%x.\n", cap);
+> > +       host->uhs2_dev_prop.n_lanes = (cap >> UHS2_DEV_CONFIG_N_LANES_POS) &
+> > +                                       UHS2_DEV_CONFIG_N_LANES_MASK;
+> > +       host->uhs2_dev_prop.dadr_len = (cap >> UHS2_DEV_CONFIG_DADR_POS) &
+> > +                                       UHS2_DEV_CONFIG_DADR_MASK;
+> > +       host->uhs2_dev_prop.app_type = (cap >> UHS2_DEV_CONFIG_APP_POS) &
+> > +                                       UHS2_DEV_CONFIG_APP_MASK;
+> > +
+> > +       DBG("INQUIRY_CFG: read PHY Caps.\n");
+> > +       arg = ((UHS2_DEV_CONFIG_PHY_CAPS & 0xFF) << 8) |
+> > +               UHS2_NATIVE_CMD_READ |
+> > +               UHS2_NATIVE_CMD_PLEN_8B |
+> > +               (UHS2_DEV_CONFIG_PHY_CAPS >> 8);
+> > +
+> > +       DBG("Begin INQUIRY_CFG, header=0x%x, arg=0x%x.\n",
+> > +           header, arg);
+> > +       uhs2_cmd_assemble(&cmd, &uhs2_cmd, header, arg, NULL, 0, NULL, 0);
+> > +
+> > +       err = mmc_wait_for_cmd(host, &cmd, 0);
+> > +       if (err) {
+> > +               pr_err("%s: %s: UHS2 CMD send fail, err= 0x%x!\n",
+> > +                      mmc_hostname(host), __func__, err);
+> > +               return -EIO;
+> > +       }
+> > +
+> > +       if (IS_ENABLED(CONFIG_MMC_DEBUG)) {
+> > +               int i;
+> > +
+> > +               pr_warn("%s: INQUIRY_CFG PHY response is: ",
+> > +                       mmc_hostname(host));
+> > +               for (i = 0; i < 2; i++)
+> > +                       pr_warn("0x%x ", cmd.resp[i]);
+> > +               pr_warn("\n");
+> > +       }
+> > +
+> > +       cap = cmd.resp[0];
+> > +       DBG("Device PHY Caps (0-31) is: 0x%x.\n", cap);
+> > +       host->uhs2_dev_prop.phy_minor_rev = cap &
+> > +                                       UHS2_DEV_CONFIG_PHY_MINOR_MASK;
+> > +       host->uhs2_dev_prop.phy_major_rev = (cap >>
+> > +                                       UHS2_DEV_CONFIG_PHY_MAJOR_POS) &
+> > +                                       UHS2_DEV_CONFIG_PHY_MAJOR_MASK;
+> > +       host->uhs2_dev_prop.can_hibernate = (cap >>
+> > +                                       UHS2_DEV_CONFIG_CAN_HIBER_POS) &
+> > +                                       UHS2_DEV_CONFIG_CAN_HIBER_MASK;
+> > +
+> > +       cap = cmd.resp[1];
+> > +       DBG("Device PHY Caps (32-63) is: 0x%x.\n", cap);
+> > +       host->uhs2_dev_prop.n_lss_sync = cap & UHS2_DEV_CONFIG_N_LSS_SYN_MASK;
+> > +       host->uhs2_dev_prop.n_lss_dir = (cap >>
+> > +                                       UHS2_DEV_CONFIG_N_LSS_DIR_POS) &
+> > +                                       UHS2_DEV_CONFIG_N_LSS_DIR_MASK;
+> > +       if (host->uhs2_dev_prop.n_lss_sync == 0)
+> > +               host->uhs2_dev_prop.n_lss_sync = 16 << 2;
+> > +       else
+> > +               host->uhs2_dev_prop.n_lss_sync <<= 2;
+> > +
+> > +       if (host->uhs2_dev_prop.n_lss_dir == 0)
+> > +               host->uhs2_dev_prop.n_lss_dir = 16 << 3;
+> > +       else
+> > +               host->uhs2_dev_prop.n_lss_dir <<= 3;
+> > +
+> > +       DBG("INQUIRY_CFG: read LINK-TRAN Caps.\n");
+> > +       arg = ((UHS2_DEV_CONFIG_LINK_TRAN_CAPS & 0xFF) << 8) |
+> > +               UHS2_NATIVE_CMD_READ |
+> > +               UHS2_NATIVE_CMD_PLEN_8B |
+> > +               (UHS2_DEV_CONFIG_LINK_TRAN_CAPS >> 8);
+> > +
+> > +       DBG("Begin INQUIRY_CFG, header=0x%x, arg=0x%x.\n",
+> > +           header, arg);
+> > +       uhs2_cmd_assemble(&cmd, &uhs2_cmd, header, arg, NULL, 0, NULL, 0);
+> > +
+> > +       err = mmc_wait_for_cmd(host, &cmd, 0);
+> > +       if (err) {
+> > +               pr_err("%s: %s: UHS2 CMD send fail, err= 0x%x!\n",
+> > +                      mmc_hostname(host), __func__, err);
+> > +               return -EIO;
+> > +       }
+> > +
+> > +       if (IS_ENABLED(CONFIG_MMC_DEBUG)) {
+> > +               int i;
+> > +
+> > +               pr_warn("%s: INQUIRY_CFG Link-Tran response is: ",
+> > +                       mmc_hostname(host));
+> > +               for (i = 0; i < 2; i++)
+> > +                       pr_warn("0x%x ", cmd.resp[i]);
+> > +               pr_warn("\n");
+> > +       }
+> > +
+> > +       cap = cmd.resp[0];
+> > +       DBG("Device LINK-TRAN Caps (0-31) is: 0x%x.\n", cap);
+> > +       host->uhs2_dev_prop.link_minor_rev = cap &
+> > +                                       UHS2_DEV_CONFIG_LT_MINOR_MASK;
+> > +       host->uhs2_dev_prop.link_major_rev = (cap >>
+> > +                                       UHS2_DEV_CONFIG_LT_MAJOR_POS) &
+> > +                                       UHS2_DEV_CONFIG_LT_MAJOR_MASK;
+> > +       host->uhs2_dev_prop.n_fcu = (cap >> UHS2_DEV_CONFIG_N_FCU_POS) &
+> > +                                       UHS2_DEV_CONFIG_N_FCU_MASK;
+> > +       host->uhs2_dev_prop.dev_type = (cap >> UHS2_DEV_CONFIG_DEV_TYPE_POS) &
+> > +                                       UHS2_DEV_CONFIG_DEV_TYPE_MASK;
+> > +       host->uhs2_dev_prop.maxblk_len = (cap >>
+> > +                                       UHS2_DEV_CONFIG_MAX_BLK_LEN_POS) &
+> > +                                       UHS2_DEV_CONFIG_MAX_BLK_LEN_MASK;
+> > +
+> > +       cap = cmd.resp[1];
+> > +       DBG("Device LINK-TRAN Caps (32-63) is: 0x%x.\n", cap);
+> > +       host->uhs2_dev_prop.n_data_gap = cap & UHS2_DEV_CONFIG_N_DATA_GAP_MASK;
+> > +       if (host->uhs2_dev_prop.n_fcu == 0)
+> > +               host->uhs2_dev_prop.n_fcu = 256;
+> > +
+> > +       return 0;
+> > +}
+> > +
+> > +static int uhs2_config_write(struct mmc_host *host)
+> > +{
+> > +       struct mmc_command cmd = {0};
+> > +       struct uhs2_command uhs2_cmd = {};
+> > +       u16 header = 0, arg = 0;
+> > +       u32 nTry;
+> > +       u32 payload[2];
+> > +       u8 nMinDataGap;
+> > +       u8 plen;
+> > +       int err;
+> > +       u8 resp[5] = {0};
+> > +       u8 resp_len = 5;
+> > +       /*
+> > +        * must long enough for RECV_SW_DIR == 2;
+> > +        * need lss_dir at least 4 for GL9755 device
+> > +        * max compitable g_lss_dir = 0
+> > +        */
+> > +       u32 g_lss_dir = 0;
+> > +
+> > +       DBG("SET_COMMON_CFG: write Generic Settings.\n");
+> > +       header = UHS2_NATIVE_PACKET |
+> > +                UHS2_PACKET_TYPE_CCMD | host->uhs2_dev_prop.node_id;
+> > +       arg = ((UHS2_DEV_CONFIG_GEN_SET & 0xFF) << 8) |
+> > +               UHS2_NATIVE_CMD_WRITE |
+> > +               UHS2_NATIVE_CMD_PLEN_8B |
+> > +               (UHS2_DEV_CONFIG_GEN_SET >> 8);
+> > +
+> > +       if (host->uhs2_dev_prop.n_lanes == UHS2_DEV_CONFIG_2L_HD_FD &&
+> > +           host->uhs2_caps.n_lanes == UHS2_DEV_CONFIG_2L_HD_FD) {
+> > +               /* Support HD */
+> > +               DBG("Both Host and device support 2L-HD.\n");
+> > +               host->flags |= MMC_UHS2_2L_HD;
+> > +               host->uhs2_caps.n_lanes_set = UHS2_DEV_CONFIG_GEN_SET_2L_FD_HD;
+> > +               host->uhs2_dev_prop.n_lanes_set =
+> > +                               UHS2_DEV_CONFIG_GEN_SET_2L_FD_HD;
+> > +               nMinDataGap = 1;
+> > +       } else {
+> > +               /* Only support 2L-FD so far */
+> > +               host->flags &= ~MMC_UHS2_2L_HD;
+> > +               host->uhs2_caps.n_lanes_set = UHS2_DEV_CONFIG_GEN_SET_2L_FD_HD;
+> > +               host->uhs2_dev_prop.n_lanes_set =
+> > +                               UHS2_DEV_CONFIG_GEN_SET_2L_FD_HD;
+> > +               nMinDataGap = 3;
+> > +       }
+> > +
+> > +       plen = 2;
+> > +       payload[0] = host->uhs2_dev_prop.n_lanes_set <<
+> > +                    UHS2_DEV_CONFIG_N_LANES_POS;
+> > +       payload[1] = 0;
+> > +       payload[0] = cpu_to_be32(payload[0]);
+> > +       payload[1] = cpu_to_be32(payload[1]);
+> > +
+> > +       DBG("Begin SET_COMMON_CFG, header=0x%x, arg=0x%x\n", header, arg);
+> > +       DBG("UHS2 write Generic Settings %08x %08x\n",
+> > +           payload[0], payload[1]);
+> > +       DBG("flags=%08x dev_prop.n_lanes_set=%x host_caps.n_lanes_set=%x\n",
+> > +           host->flags,
+> > +           host->uhs2_dev_prop.n_lanes_set,
+> > +           host->uhs2_caps.n_lanes_set);
+> > +
+> > +       /*
+> > +        * There is no payload because per spec, there should be
+> > +        * no payload field for read CCMD.
+> > +        * Plen is set in arg. Per spec, plen for read CCMD
+> > +        * represents the len of read data which is assigned in payload
+> > +        * of following RES (p136).
+> > +        */
+> > +       uhs2_cmd_assemble(&cmd, &uhs2_cmd, header, arg, payload, plen, NULL, 0);
+> > +
+> > +       err = mmc_wait_for_cmd(host, &cmd, 0);
+> > +       if (err) {
+> > +               pr_err("%s: %s: UHS2 CMD send fail, err= 0x%x!\n",
+> > +                      mmc_hostname(host), __func__, err);
+> > +               return -EIO;
+> > +       }
+> > +
+> > +       DBG("SET_COMMON_CFG: PHY Settings.\n");
+> > +       arg = ((UHS2_DEV_CONFIG_PHY_SET & 0xFF) << 8) |
+> > +               UHS2_NATIVE_CMD_WRITE |
+> > +               UHS2_NATIVE_CMD_PLEN_8B |
+> > +               (UHS2_DEV_CONFIG_PHY_SET >> 8);
+> > +
+> > +       for (nTry = 0; nTry < 2; nTry++) {
+> > +               plen = 2;
+> > +
+> > +               if (host->uhs2_caps.speed_range ==
+> > +                       UHS2_DEV_CONFIG_PHY_SET_SPEED_B) {
+> > +                       host->flags |= MMC_UHS2_SPEED_B;
+> > +                       host->uhs2_dev_prop.speed_range_set =
+> > +                               UHS2_DEV_CONFIG_PHY_SET_SPEED_B;
+> > +                       DBG("set dev_prop.speed_range_set to SPEED_B\n");
+> > +               } else {
+> > +                       host->uhs2_dev_prop.speed_range_set =
+> > +                               UHS2_DEV_CONFIG_PHY_SET_SPEED_A;
+> > +                       host->flags &= ~MMC_UHS2_SPEED_B;
+> > +                       DBG("set dev_prop.speed_range_set to SPEED_A\n");
+> > +               }
+> > +
+> > +               payload[0] = host->uhs2_dev_prop.speed_range_set <<
+> > +                               UHS2_DEV_CONFIG_PHY_SET_SPEED_POS;
+> > +
+> > +               host->uhs2_dev_prop.n_lss_sync_set =
+> > +                       (min(host->uhs2_dev_prop.n_lss_sync,
+> > +                       host->uhs2_caps.n_lss_sync) >> 2) &
+> > +                       UHS2_DEV_CONFIG_N_LSS_SYN_MASK;
+> > +               host->uhs2_caps.n_lss_sync_set =
+> > +                       host->uhs2_dev_prop.n_lss_sync_set;
+> > +
+> > +               if (nTry) {
+> > +                       host->uhs2_dev_prop.n_lss_dir_set =
+> > +                               (max(host->uhs2_dev_prop.n_lss_dir,
+> > +                               host->uhs2_caps.n_lss_dir) >> 3) &
+> > +                               UHS2_DEV_CONFIG_N_LSS_DIR_MASK;
+> > +                       host->uhs2_caps.n_lss_dir_set =
+> > +                               host->uhs2_dev_prop.n_lss_dir_set;
+> > +                       payload[1] = (host->uhs2_dev_prop.n_lss_dir_set <<
+> > +                               UHS2_DEV_CONFIG_N_LSS_DIR_POS) |
+> > +                               host->uhs2_dev_prop.n_lss_sync_set;
+> > +               } else {
+> > +                       host->uhs2_caps.n_lss_dir_set =
+> > +                               (host->uhs2_dev_prop.n_lss_dir >> 3) &
+> > +                               UHS2_DEV_CONFIG_N_LSS_DIR_MASK;
+> > +                       host->uhs2_dev_prop.n_lss_dir_set =
+> > +                               ((host->uhs2_caps.n_lss_dir >> 3) + 1) &
+> > +                               UHS2_DEV_CONFIG_N_LSS_DIR_MASK;
+> > +               }
+> > +
+> > +               if (!g_lss_dir) {
+> > +                       host->uhs2_dev_prop.n_lss_dir_set = 0;
+> > +               } else {
+> > +                       host->uhs2_dev_prop.n_lss_dir_set =
+> > +                               max((u8)g_lss_dir,
+> > +                                   host->uhs2_dev_prop.n_lss_dir_set);
+> > +               }
+> > +
+> > +               payload[1] = (host->uhs2_dev_prop.n_lss_dir_set <<
+> > +                               UHS2_DEV_CONFIG_N_LSS_DIR_POS) |
+> > +                               host->uhs2_dev_prop.n_lss_sync_set;
+> > +               payload[0] = cpu_to_be32(payload[0]);
+> > +               payload[1] = cpu_to_be32(payload[1]);
+> > +
+> > +               DBG("UHS2 SET PHY Settings  %08x %08x\n",
+> > +                   payload[0], payload[1]);
+> > +               DBG("host->flags=%08x dev_prop.speed_range_set=%x\n",
+> > +                   host->flags,
+> > +                   host->uhs2_dev_prop.speed_range_set);
+> > +               DBG("dev_prop.n_lss_sync_set=%x host_caps.n_lss_sync_set=%x\n",
+> > +                   host->uhs2_dev_prop.n_lss_sync_set,
+> > +                   host->uhs2_caps.n_lss_sync_set);
+> > +               DBG("dev_prop.n_lss_dir_set=%x host_caps.n_lss_dir_set=%x\n",
+> > +                   host->uhs2_dev_prop.n_lss_dir_set,
+> > +                   host->uhs2_caps.n_lss_dir_set);
+> > +
+> > +               DBG("Begin SET_COMMON_CFG header=0x%x arg=0x%x\n",
+> > +                   header, arg);
+> > +               DBG("\t\tpayload[0]=0x%x payload[1]=0x%x\n",
+> > +                   payload[0], payload[1]);
+> > +
+> > +               resp_len = 4;
+> > +               memset(resp, 0, sizeof(resp));
+> > +
+> > +               uhs2_cmd_assemble(&cmd, &uhs2_cmd, header, arg,
+> > +                                 payload, plen, resp, resp_len);
+> > +
+> > +               err = mmc_wait_for_cmd(host, &cmd, 0);
+> > +               if (err) {
+> > +                       pr_err("%s: %s: UHS2 CMD send fail, err= 0x%x!\n",
+> > +                              mmc_hostname(host), __func__, err);
+> > +                       return -EIO;
+> > +               }
+> > +
+> > +               if (!(resp[2] & 0x80))
+> > +                       break;
+> > +
+> > +               DBG("%s: %s: UHS2 SET PHY Settings fail, res= 0x%x!\n",
+> > +                   mmc_hostname(host), __func__,  resp[2]);
+> > +       }
+> > +
+> > +       DBG("SET_COMMON_CFG: LINK-TRAN Settings.\n");
+> > +       arg = ((UHS2_DEV_CONFIG_LINK_TRAN_SET & 0xFF) << 8) |
+> > +               UHS2_NATIVE_CMD_WRITE |
+> > +               UHS2_NATIVE_CMD_PLEN_8B |
+> > +               (UHS2_DEV_CONFIG_LINK_TRAN_SET >> 8);
+> > +
+> > +       plen = 2;
+> > +
+> > +       if (host->uhs2_dev_prop.app_type == UHS2_DEV_CONFIG_APP_SD_MEM)
+> > +               host->uhs2_dev_prop.maxblk_len_set =
+> > +                       UHS2_DEV_CONFIG_LT_SET_MAX_BLK_LEN;
+> > +       else
+> > +               host->uhs2_dev_prop.maxblk_len_set =
+> > +                       min(host->uhs2_dev_prop.maxblk_len,
+> > +                           host->uhs2_caps.maxblk_len);
+> > +       host->uhs2_caps.maxblk_len_set = host->uhs2_dev_prop.maxblk_len_set;
+> > +
+> > +       host->uhs2_dev_prop.n_fcu_set =
+> > +               min(host->uhs2_dev_prop.n_fcu,
+> > +                   host->uhs2_caps.n_fcu);
+> > +       host->uhs2_caps.n_fcu_set = host->uhs2_dev_prop.n_fcu_set;
+> > +
+> > +       host->uhs2_dev_prop.n_data_gap_set =
+> > +               max(nMinDataGap, host->uhs2_dev_prop.n_data_gap);
+> > +
+> > +       host->uhs2_caps.n_data_gap_set = host->uhs2_dev_prop.n_data_gap_set;
+> > +
+> > +       host->uhs2_caps.max_retry_set = 3;
+> > +       host->uhs2_dev_prop.max_retry_set = host->uhs2_caps.max_retry_set;
+> > +
+> > +       payload[0] = (host->uhs2_dev_prop.maxblk_len_set <<
+> > +                       UHS2_DEV_CONFIG_MAX_BLK_LEN_POS) |
+> > +                       (host->uhs2_dev_prop.max_retry_set <<
+> > +                       UHS2_DEV_CONFIG_LT_SET_MAX_RETRY_POS) |
+> > +                       (host->uhs2_dev_prop.n_fcu_set <<
+> > +                       UHS2_DEV_CONFIG_N_FCU_POS);
+> > +       payload[1] = host->uhs2_dev_prop.n_data_gap_set;
+> > +       payload[0] = cpu_to_be32(payload[0]);
+> > +       payload[1] = cpu_to_be32(payload[1]);
+> > +
+> > +       DBG("Begin SET_COMMON_CFG header=0x%x arg=0x%x\n", header, arg);
+> > +       DBG("\t\tpayload[0]=0x%x payload[1]=0x%x\n", payload[0], payload[1]);
+> > +
+> > +       uhs2_cmd_assemble(&cmd, &uhs2_cmd, header, arg, payload, plen, NULL, 0);
+> > +
+> > +       err = mmc_wait_for_cmd(host, &cmd, 0);
+> > +       if (err) {
+> > +               pr_err("%s: %s: UHS2 CMD send fail, err= 0x%x!\n",
+> > +                      mmc_hostname(host), __func__, err);
+> > +               return -EIO;
+> > +       }
+> > +
+> > +       DBG("SET_COMMON_CFG: Set Config Completion.\n");
+> > +       arg = ((UHS2_DEV_CONFIG_GEN_SET & 0xFF) << 8) |
+> > +               UHS2_NATIVE_CMD_WRITE |
+> > +               UHS2_NATIVE_CMD_PLEN_8B |
+> > +               (UHS2_DEV_CONFIG_GEN_SET >> 8);
+> > +
+> > +       plen = 2;
+> > +       payload[0] = 0;
+> > +       payload[1] = UHS2_DEV_CONFIG_GEN_SET_CFG_COMPLETE;
+> > +       payload[0] = cpu_to_be32(payload[0]);
+> > +       payload[1] = cpu_to_be32(payload[1]);
+> > +
+> > +       DBG("Begin SET_COMMON_CFG, header=0x%x, arg=0x%x, payload[0] = 0x%x.\n",
+> > +           header, arg, payload[0]);
+> > +       resp_len = 5;
+> > +       memset(resp, 0, sizeof(resp));
+> > +       uhs2_cmd_assemble(&cmd, &uhs2_cmd, header, arg, payload, plen,
+> > +                         resp, resp_len);
+> > +
+> > +       err = mmc_wait_for_cmd(host, &cmd, 0);
+> > +       if (err) {
+> > +               pr_err("%s: %s: UHS2 CMD send fail, err= 0x%x!\n",
+> > +                      mmc_hostname(host), __func__, err);
+> > +               return -EIO;
+> > +       }
+> > +
+> > +       /* Set host Config Setting registers */
+> > +       if (host->ops->uhs2_set_reg(host, SET_CONFIG)) {
+> > +               pr_err("%s: %s: UHS2 SET_CONFIG fail!\n",
+> > +                      mmc_hostname(host), __func__);
+> > +               return -EIO;
+> > +       }
+> > +
+> > +       return 0;
+> > +}
+> > +
+> > +static int uhs2_go_dormant(struct mmc_host *host, bool hibernate)
+> > +{
+> > +       struct mmc_command cmd = {0};
+> > +       struct uhs2_command uhs2_cmd = {};
+> > +       u16 header = 0, arg = 0;
+> > +       u32 payload[1];
+> > +       u8 plen = 1;
+> > +       int err;
+> > +
+> > +       /* Disable Normal INT */
+> > +       if (host->ops->uhs2_set_reg(host, DISABLE_INT)) {
+> > +               pr_err("%s: %s: UHS2 DISABLE_INT fail!\n",
+> > +                      mmc_hostname(host), __func__);
+> > +               return -EIO;
+> > +       }
+> > +
+> > +       header = UHS2_NATIVE_PACKET | UHS2_PACKET_TYPE_CCMD |
+> > +               host->uhs2_dev_prop.node_id;
+> > +
+> > +       arg = ((UHS2_DEV_CMD_GO_DORMANT_STATE & 0xFF) << 8) |
+> > +               UHS2_NATIVE_CMD_WRITE |
+> > +               UHS2_NATIVE_CMD_PLEN_4B |
+> > +               (UHS2_DEV_CMD_GO_DORMANT_STATE >> 8);
+> > +
+> > +       if (hibernate)
+> > +               payload[0] = UHS2_DEV_CMD_DORMANT_HIBER;
+> > +
+> > +       DBG("Begin GO_DORMANT_STATE, header=0x%x, arg=0x%x, payload=0x%x.\n",
+> > +           header, arg, payload[0]);
+> > +       uhs2_cmd_assemble(&cmd, &uhs2_cmd, header, arg, payload, plen, NULL, 0);
+> > +
+> > +       err = mmc_wait_for_cmd(host, &cmd, 0);
+> > +       if (err) {
+> > +               pr_err("%s: %s: UHS2 CMD send fail, err= 0x%x!\n",
+> > +                      mmc_hostname(host), __func__, err);
+> > +               return -EIO;
+> > +       }
+> > +
+> > +       /* Check Dormant State in Present */
+> > +       if (host->ops->uhs2_set_reg(host, CHECK_DORMANT)) {
+> > +               pr_err("%s: %s: UHS2 GO_DORMANT_STATE fail!\n",
+> > +                      mmc_hostname(host), __func__);
+> > +               return -EIO;
+> > +       }
+> > +
+> > +       host->ops->uhs2_disable_clk(host);
+> > +
+> > +       return 0;
+> > +}
+> > +
+> > +static int uhs2_change_speed(struct mmc_host *host)
+> > +{
+> > +       int err;
+> > +
+> > +       /* Change Speed Range */
+> > +       if (host->ops->uhs2_set_reg(host, SET_SPEED_B)) {
+> > +               pr_err("%s: %s: UHS2 SET_SPEED fail!\n",
+> > +                      mmc_hostname(host), __func__);
+> > +               return -EIO;
+> > +       }
+> > +
+> > +       err = uhs2_go_dormant(host, false);
+> > +       if (err) {
+> > +               pr_err("%s: %s: UHS2 GO_DORMANT_STATE fail, err= 0x%x!\n",
+> > +                      mmc_hostname(host), __func__, err);
+> > +               return -EIO;
+> > +       }
+> > +
+> > +       /* restore sd clock */
+> > +       mdelay(5);
+> > +       host->ops->uhs2_enable_clk(host);
+> > +
+> > +       /* Enable Normal INT */
+> > +       if (host->ops->uhs2_set_reg(host, ENABLE_INT)) {
+> > +               pr_err("%s: %s: UHS2 ENABLE_INT fail!\n",
+> > +                      mmc_hostname(host), __func__);
+> > +               return -EIO;
+> > +       }
+> > +
+> > +       if (host->ops->uhs2_detect_init(host)) {
+> > +               pr_err("%s: %s: uhs2_detect_init() fail!\n",
+> > +                      mmc_hostname(host), __func__);
+> > +               return -EIO;
+> > +       }
+> > +
+> > +       return 0;
+> > +}
+> > +
+> > +/**
+> > + * mmc_uhs2_rescan_try_freq - select UHS2 interface
+> > + * @host: MMC host
+> > + * @freq: Bus speed
+> > + *
+> > + * Try to select UHS2 interface and initialize the bus for a given
+> > + * frequency, @freq.
+> > + *
+> > + * Return:     0 on success, non-zero error on failure
+> > + */
+> > +int mmc_uhs2_rescan_try_freq(struct mmc_host *host, unsigned int freq)
+> > +{
+> > +       int err = -EIO;
+> > +
+> > +       host->flags |= MMC_UHS2_SUPPORT;
+> > +       host->f_init = freq;
+> > +
+> > +       pr_debug("%s: %s: trying to init card at %u Hz\n",
+> > +                mmc_hostname(host), __func__, host->f_init);
+> > +
+> > +       mmc_power_up(host, 0);
+> > +       if (host->ops->uhs2_detect_init(host)) {
+> > +               pr_err("%s: fail to detect UHS2!\n", mmc_hostname(host));
+> > +               err = UHS2_PHY_INIT_ERR;
+> > +               goto init_fail;
+> > +       }
+> > +
+> > +       if (uhs2_dev_init(host)) {
+> > +               pr_err("%s: UHS2 DEVICE_INIT fail!\n", mmc_hostname(host));
+> > +               goto init_fail;
+> > +       }
+> > +
+> > +       if (uhs2_enum(host)) {
+> > +               pr_err("%s: UHS2 ENUMERATE fail!\n", mmc_hostname(host));
+> > +               goto init_fail;
+> > +       }
+> > +
+> > +       if (uhs2_config_read(host)) {
+> > +               pr_err("%s: UHS2 INQUIRY_CONFIG fail!\n", mmc_hostname(host));
+> > +               goto init_fail;
+> > +       }
+> > +
+> > +       if (uhs2_config_write(host)) {
+> > +               pr_err("%s: UHS2 SET_COMMON_CONFIG fail!\n",
+> > +                      mmc_hostname(host));
+> > +               goto init_fail;
+> > +       }
+> > +
+> > +       mmc_delay(10);
+> > +
+> > +       /* Change to Speed Range B if it is supported */
+> > +       if (host->flags & MMC_UHS2_SPEED_B)
+> > +               if (uhs2_change_speed(host)) {
+> > +                       pr_err("%s: UHS2 uhs2_change_speed() fail!\n",
+> > +                              mmc_hostname(host));
+> > +                       goto init_fail;
+> > +               }
+> > +
+> > +       host->flags |= MMC_UHS2_INITIALIZED;
+> > +
+> > +       mmc_send_if_cond(host, host->ocr_avail);
+> > +
+> > +       /* On market, only can some SD cards support UHS-II so only call SD
+> > +        * attach process here.
+> > +        */
+>
+> Not sure I understand this comment, can you please elaborate?
+
+Please ignore the comment. I will delete it.
+
+>
+> > +       if (!(host->caps2 & MMC_CAP2_NO_SD)) {
+> > +               err = mmc_attach_sd(host);
+>
+> While looking at this, perhaps we should simply add a new mmc_bus_ops
+> for UHS-II cards, rather than re-using the mmc_sd_ops. Have you
+> considered that?
+
+Thanks for this suggestion. I'll mull it over.
+
+>
+> There are a couple of reasons why I think it could make sense.
+>
+> *) The UHS-II code becomes more standalone, which seems like a good
+> idea since there really is lots of difference compared with the legacy
+> SD interface.
+> **) It would enable more flexibility and thus allow for easier UHS-II
+> optimizations. For example, it would make power management potentially
+> easier to support, as UHS-II re-initialization doesn't seem to have
+> much in common with legacy SD.
+>
+
+I haven't studied the power management subsystem part at present.
+If creating a new mmc_bus_ops can help simplify the power
+management,it can be considered.
+So there's currently no plan to modify the architecture.
+
+> For those parts that are still common, sharing legacy SD functions via
+> common header files can be done, along the lines of what we do between
+> MMC and SD already.
+
+Thanks for your comments . I still have a lot to learn and study.
+
+>
+> > +               if (!err)
+> > +                       return 0;
+> > +       } else {
+> > +               err = -EIO;
+> > +       }
+> > +
+> > +init_fail:
+> > +       mmc_power_off(host);
+> > +       if (host->flags & MMC_UHS2_INITIALIZED)
+> > +               host->flags &= ~MMC_UHS2_INITIALIZED;
+> > +       host->flags &= ~MMC_UHS2_SUPPORT;
+> > +
+> > +       return err;
+> > +}
+> > +EXPORT_SYMBOL_GPL(mmc_uhs2_rescan_try_freq);
+> > diff --git a/drivers/mmc/core/uhs2.h b/drivers/mmc/core/uhs2.h
+> > new file mode 100644
+> > index 000000000000..e3389d4dda3b
+> > --- /dev/null
+> > +++ b/drivers/mmc/core/uhs2.h
+> > @@ -0,0 +1,20 @@
+> > +/* SPDX-License-Identifier: GPL-2.0-or-later */
+> > +/*
+> > + *  driver/mmc/core/uhs2.h - UHS-II driver
+> > + *
+> > + * Header file for UHS-II packets, Host Controller registers and I/O
+> > + * accessors.
+> > + *
+> > + *  Copyright (C) 2014 Intel Corp, All Rights Reserved.
+> > + */
+> > +#ifndef MMC_UHS2_H
+> > +#define MMC_UHS2_H
+> > +
+> > +#include <linux/mmc/core.h>
+> > +#include <linux/mmc/host.h>
+> > +
+> > +#define UHS2_PHY_INIT_ERR      1
+> > +
+> > +int mmc_uhs2_rescan_try_freq(struct mmc_host *host, unsigned int freq);
+> > +
+> > +#endif /* MMC_UHS2_H */
+> > --
+> > 2.27.0
 > >
-> > >
-> > > >
-> > > >         if (IS_ERR(mmc->supply.vmmc)) {
-> > > >                 if (PTR_ERR(mmc->supply.vmmc) =3D=3D -EPROBE_DEFER)
-> > > > @@ -266,6 +267,19 @@ int mmc_regulator_get_supply(struct mmc_host *=
-mmc)
-> > > >                 dev_dbg(dev, "No vqmmc regulator found\n");
-> > > >         }
-> > > >
-> > > > +       if (IS_ERR(mmc->supply.vmmc2)) {
-> > > > +               if (PTR_ERR(mmc->supply.vmmc2) =3D=3D -EPROBE_DEFER=
-)
-> > > > +                       return -EPROBE_DEFER;
-> > > > +               dev_dbg(dev, "No vmmc2 regulator found\n");
-> > > > +       } else {
-> > > > +               ret =3D mmc_regulator_get_ocrmask(mmc->supply.vmmc2=
-);
-> > > > +               if (ret > 0)
-> > > > +                       mmc->ocr_avail_uhs2 =3D ret;
-> > > > +               else
-> > > > +                       dev_warn(dev, "Failed getting UHS2 OCR mask=
-: %d\n",
-> > > > +                                ret);
-> > > > +       }
-> > > > +
-> > > >         return 0;
-> > > >  }
-> > > >  EXPORT_SYMBOL_GPL(mmc_regulator_get_supply);
-> > > > --
-> > > > 2.27.0
-> > > >
 >
 > Kind regards
 > Uffe
+
+Best regards,
+Ben
