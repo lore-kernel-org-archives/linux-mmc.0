@@ -4,87 +4,81 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-9.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 20EDBC433E1
-	for <linux-mmc@archiver.kernel.org>; Fri, 21 Aug 2020 13:04:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 921A0C433E3
+	for <linux-mmc@archiver.kernel.org>; Fri, 21 Aug 2020 13:04:21 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id F39AB207BB
-	for <linux-mmc@archiver.kernel.org>; Fri, 21 Aug 2020 13:04:18 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 66573207BB
+	for <linux-mmc@archiver.kernel.org>; Fri, 21 Aug 2020 13:04:21 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Sx9MLkrA"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="amMeqn6M"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728130AbgHUNES (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 21 Aug 2020 09:04:18 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59264 "EHLO
+        id S1728653AbgHUNEH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 21 Aug 2020 09:04:07 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59232 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728678AbgHUNEJ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Aug 2020 09:04:09 -0400
-Received: from mail-vk1-xa41.google.com (mail-vk1-xa41.google.com [IPv6:2607:f8b0:4864:20::a41])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EFA9AC061387
-        for <linux-mmc@vger.kernel.org>; Fri, 21 Aug 2020 06:04:07 -0700 (PDT)
-Received: by mail-vk1-xa41.google.com with SMTP id j7so387593vkk.12
-        for <linux-mmc@vger.kernel.org>; Fri, 21 Aug 2020 06:04:07 -0700 (PDT)
+        with ESMTP id S1728577AbgHUNEC (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Aug 2020 09:04:02 -0400
+Received: from mail-ua1-x941.google.com (mail-ua1-x941.google.com [IPv6:2607:f8b0:4864:20::941])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 18033C061386
+        for <linux-mmc@vger.kernel.org>; Fri, 21 Aug 2020 06:04:02 -0700 (PDT)
+Received: by mail-ua1-x941.google.com with SMTP id s29so512161uae.1
+        for <linux-mmc@vger.kernel.org>; Fri, 21 Aug 2020 06:04:02 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=ag9vhIrITQpJEm39f+7OC9szPXt04RbAHbvMxPWSdZU=;
-        b=Sx9MLkrA4coWxp/6zwxJU1Xob9ceBPQVinMuzOOanr+ml/ZBrbRiogTGboi8y1rtgo
-         3ajd9nhZjSIMyM8JKHjnQoV3Zr0ZleW/n6B7uYLq4sLyG+p9UOYxwmSgJ/b5RaKpix5I
-         TvwQOGBI8Zq+wJOy+8pFIwuw2/mixwL+MA+kLF4R2vlUyWmZYyMcgTm41ZKUnU9pVH/E
-         Euqdq5WOIGdKmRlRzX0kzRZiShfDwTPVXCDdaH2tpQJ+4BCc9TjVBzAAjNzBY4MfZ+zS
-         8QOJ1MfoqcTnQFoC0yr1WUkcbomtdVzXxAsvJ6a/yRmgSV6ss6FEXylUhCjeNMsOGa1L
-         bXug==
+        bh=KnDW6llQiq63EFCJkVzXUzpg/vhNfgZSeuWupJPba2k=;
+        b=amMeqn6McxsW9H4NO/zZ0Pb6Eri6A3hNoEchjDZnuAUewx5ku9PhXwwnoQth9vHp1f
+         TMkmg7I90iD79l1oHaYDV6QvA6oZE4PAZF2h7NljHZ0tGjkOMlG1AMFdoQkqzfVWj1Zx
+         eaa/JoPXiBcKKJ81CpQxYwwhKiI/lL6/MhRhK3wjGrrevWMyowenQyVMF7GXFHJIV0HS
+         E5i2Jo1aR1RQHyiHsT8C3ImbQXLKI4Yn0xssjWKCcVEN9lZlFwAL+FuZqPQDECySk+5H
+         qXxyN82zE415KM+azojrn33wRmo54AoRQ5RzgIdOB6Z/3BViWqJETPAXxIhGfIXKiXh+
+         J+0Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=ag9vhIrITQpJEm39f+7OC9szPXt04RbAHbvMxPWSdZU=;
-        b=AtRA/OP135TSvVtvYGJV7QYNScGmuYbx+bKU8BL5DeoiSoy/P7KTYcWmCMT1SaobWg
-         ssUKAUnVhjc+aebtsQSU7fLHsPxgZH7CDxtHv52CWkK9r09qYoOBh+t2Dh1Yi189+jSd
-         6MbQoQPxZFEDL81ieYYfG3l0aue7X82FtJ5hzXmfh9xLAbmz2r/QtySsLY/Gg6CjtF48
-         QQbo4oLzUmnGwtqfDA9s1fnxFDuo2F+zZymJWSt9YkeEIgMijXq4Awh4UCRi7ah4MZ16
-         I3+tzWAveUF0raIeon51U8TDuNJlotPSF/TTx5u7IOXe9mGPrYW9K8s1PUhJk04CN25n
-         IYWg==
-X-Gm-Message-State: AOAM532LkPAdkQYRqutmI5BRnzPFRXrC7TUyqApF8zqeLo4Tx7yS6zWo
-        i5fIvRQkLBXFqsEmB5A09wSIZcNlq62yVEMOw/ECQg==
-X-Google-Smtp-Source: ABdhPJxKyZLQ8FSJ60agO2QvRppq9TDfuGiXVMqkDYSZ51SV1Ha7hGPPGCWgDSLcFz63E+E7JMjlx4MozuEZ9n30evM=
-X-Received: by 2002:a1f:9d85:: with SMTP id g127mr1496139vke.101.1598015047149;
- Fri, 21 Aug 2020 06:04:07 -0700 (PDT)
+        bh=KnDW6llQiq63EFCJkVzXUzpg/vhNfgZSeuWupJPba2k=;
+        b=DdpS0CuusrNv/rZ1TY6ztwMp1k7ADUDP+nXClgig8JL9LsjE2WMLnkBJUDh3udN2TY
+         rZSpfI/8Jo4dfrWbElgA/krVCPyUdgUb3vo8NhgRJal3zKS5yR81zK8g6MIItgYWwDtB
+         oRCCnBWB4Fb/kZrcVG3YkIiDXT02WcCtFPF7GEDX9rciwhsSgVZGMBP1ijeoNYe/rCe6
+         gcrSnFCz7u/CY+ySNaovWY/mEp3Wqfo8272HKiVPHmE7nmWreyjjoDsSeBEFcWfbeLUf
+         L9WuprvnBmLjot703oKLuLriHqwJxx2AZnU37+SKHN9oa5yEyFxXGW3l17dZvbJ8AX6l
+         iYWA==
+X-Gm-Message-State: AOAM532gq8xLz2hgTWQkJ9/2nbRcbljIHe/lYp4G3vTm+z8y6Lp6d+lx
+        Uf0fdyH+5p1Pw7IJCS1AnxbfFigjft6Qkvr3R1a/Tw==
+X-Google-Smtp-Source: ABdhPJxYz1Bdm75WVJtCJBiqXNkdHyyC+9S/ilWhmuwkmkOMDXcKiZPrxqZmT9vVbW6PxuHSOTTLxtnagEQRkiuWcps=
+X-Received: by 2002:ab0:2ea2:: with SMTP id y2mr1306910uay.15.1598015041353;
+ Fri, 21 Aug 2020 06:04:01 -0700 (PDT)
 MIME-Version: 1.0
-References: <20200809192001.19156-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
-In-Reply-To: <20200809192001.19156-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
+References: <20200804151345.28005-1-krzk@kernel.org>
+In-Reply-To: <20200804151345.28005-1-krzk@kernel.org>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 21 Aug 2020 15:03:30 +0200
-Message-ID: <CAPDyKFqKYVeva2XD6GX7n4jDQYwJrkLqGn9+zwMZLz7pFUCnXA@mail.gmail.com>
-Subject: Re: [PATCH v2] dt-bindings: mmc: renesas,sdhi: Add r8a774e1 support
-To:     Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-Cc:     Rob Herring <robh+dt@kernel.org>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Geert Uytterhoeven <geert+renesas@glider.be>,
+Date:   Fri, 21 Aug 2020 15:03:22 +0200
+Message-ID: <CAPDyKFqRq9u_w0AwhKELK11yetGj5nc9-bM9+-AOsQZVpVmZig@mail.gmail.com>
+Subject: Re: [PATCH] mmc: s3cmci: remove empty kerneldoc comment
+To:     Krzysztof Kozlowski <krzk@kernel.org>
+Cc:     Ben Dooks <ben-linux@fluff.org>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
         "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        DTML <devicetree@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
-        Prabhakar <prabhakar.csengg@gmail.com>
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sun, 9 Aug 2020 at 21:20, Lad Prabhakar
-<prabhakar.mahadev-lad.rj@bp.renesas.com> wrote:
+On Tue, 4 Aug 2020 at 17:14, Krzysztof Kozlowski <krzk@kernel.org> wrote:
 >
-> Document SDHI controller for RZ/G2H (R8A774E1) SoC, which is compatible
-> with R-Car Gen3 SoC family.
+> Remove empty comment to fix W=1 compile warning:
 >
-> Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-> Reviewed-by: Marian-Cristian Rotariu <marian-cristian.rotariu.rb@bp.renesas.com>
-> Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
-> Acked-by: Rob Herring <robh@kernel.org>
+>     drivers/mmc/host/s3cmci.c:400: warning: Cannot understand  *
+>      on line 400 - I thought it was a doc line
+>
+> Signed-off-by: Krzysztof Kozlowski <krzk@kernel.org>
 
 Applied for next, thanks!
 
@@ -93,27 +87,23 @@ Uffe
 
 
 > ---
-> v1->v2
-> * Rebased the patch on YAML binding conversion changes (this patch
->   is part of series [1], reset of the patches have been picked up).
-> * I have restored the Ack's from v1
->   [1] https://lkml.org/lkml/2020/7/8/1211
-> ---
->  Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml | 1 +
->  1 file changed, 1 insertion(+)
+>  drivers/mmc/host/s3cmci.c | 3 ---
+>  1 file changed, 3 deletions(-)
 >
-> diff --git a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-> index e5dbc20456e5..04eb0d3c5fa4 100644
-> --- a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-> @@ -50,6 +50,7 @@ properties:
->                - renesas,sdhi-r8a774a1 # RZ/G2M
->                - renesas,sdhi-r8a774b1 # RZ/G2N
->                - renesas,sdhi-r8a774c0 # RZ/G2E
-> +              - renesas,sdhi-r8a774e1 # RZ/G2H
->                - renesas,sdhi-r8a7795  # R-Car H3
->                - renesas,sdhi-r8a7796  # R-Car M3-W
->                - renesas,sdhi-r8a77961 # R-Car M3-W+
+> diff --git a/drivers/mmc/host/s3cmci.c b/drivers/mmc/host/s3cmci.c
+> index 444b2769ae2c..b5df948f8155 100644
+> --- a/drivers/mmc/host/s3cmci.c
+> +++ b/drivers/mmc/host/s3cmci.c
+> @@ -396,9 +396,6 @@ static void s3cmci_enable_irq(struct s3cmci_host *host, bool more)
+>         local_irq_restore(flags);
+>  }
+>
+> -/**
+> - *
+> - */
+>  static void s3cmci_disable_irq(struct s3cmci_host *host, bool transfer)
+>  {
+>         unsigned long flags;
 > --
 > 2.17.1
 >
