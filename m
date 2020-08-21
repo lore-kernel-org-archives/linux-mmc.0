@@ -2,141 +2,121 @@ Return-Path: <SRS0=v+1n=B7=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 59E4FC433DF
-	for <linux-mmc@archiver.kernel.org>; Fri, 21 Aug 2020 09:04:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 48FCAC433E4
+	for <linux-mmc@archiver.kernel.org>; Fri, 21 Aug 2020 09:04:36 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 27BC42087D
-	for <linux-mmc@archiver.kernel.org>; Fri, 21 Aug 2020 09:04:26 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 238C120578
+	for <linux-mmc@archiver.kernel.org>; Fri, 21 Aug 2020 09:04:36 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="wBmCFjpN"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="KXTqyq//"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725855AbgHUJEZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 21 Aug 2020 05:04:25 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50286 "EHLO
+        id S1727008AbgHUJEd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 21 Aug 2020 05:04:33 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50310 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725806AbgHUJEX (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Aug 2020 05:04:23 -0400
-Received: from mail-ua1-x942.google.com (mail-ua1-x942.google.com [IPv6:2607:f8b0:4864:20::942])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F0F19C061385
-        for <linux-mmc@vger.kernel.org>; Fri, 21 Aug 2020 02:04:22 -0700 (PDT)
-Received: by mail-ua1-x942.google.com with SMTP id z12so334447uam.12
-        for <linux-mmc@vger.kernel.org>; Fri, 21 Aug 2020 02:04:22 -0700 (PDT)
+        with ESMTP id S1725948AbgHUJEb (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Aug 2020 05:04:31 -0400
+Received: from mail-ua1-x941.google.com (mail-ua1-x941.google.com [IPv6:2607:f8b0:4864:20::941])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B2D79C061386
+        for <linux-mmc@vger.kernel.org>; Fri, 21 Aug 2020 02:04:30 -0700 (PDT)
+Received: by mail-ua1-x941.google.com with SMTP id g11so342641ual.2
+        for <linux-mmc@vger.kernel.org>; Fri, 21 Aug 2020 02:04:30 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=K2Wycv6dlh4JHdEGRJm+oTyIIhKKDR8J4RT5cAMpHCE=;
-        b=wBmCFjpNyW1NbttW/zQ9pNhl0OzqNZ9Ji4r4seZgFcoABo5/ZIkG0bQ+Kd5Ca+shdl
-         6m6xxUzKKImbAO2I9tVMvDH4nZvXiXQ+3jTr/YoVtfwNM+IdcgMKJzWKYG2ZZHEbaUYn
-         o93Vt53clrRp5Z65+IP4ymq09QSzU1hFXeSH6Z2j4fiK11j9oIT75G17G85aljI73H/A
-         oQBOQjfhyssB+OSvltNSFiA9SqQs8l7RqKG6Pf6Drgad6+aT0nU0csY0hW4mb45CtMpp
-         388qu1+ayPiD35WFPmDB0WgB4man17dRk00brvM1WAFVL2WVh+Ap8lLmu2hg/d1LiEoZ
-         fp0g==
+        bh=2aqaXn/OLBCEnJD6W+rO7Mlnssb9JvC0HBRl/U0OUUg=;
+        b=KXTqyq//OKA+RNGjE5YSIsFCI3e1XJ/Cbv7Kr7u8/PQc0Pne19cNWJTK3R16ixQbyV
+         VAMcV7KnRMckctx7KTif5eeTKATrRY8cWdVqpChUFOqX8BNVrLmVflXeAb8fjaVMF1zW
+         EKyw6ZB2LKGHT5NqprV9oUDt04K8Znv+gyIrF8yr/wGIDsrzsAKPaWox6IKO+hlYRpEk
+         IIbtK7XXBHZeuftRPOHcNPWUf2PfQEdiVxPdJLLe+jnsvQEwzPRGX9Kitbuh1ehG2SUR
+         BEEZz9VPJuWoBa+7bCQxdM6bIy7sWenPObAEnq9BK4FySXEghM3d93OZz1bTInRZPAnq
+         tJgg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=K2Wycv6dlh4JHdEGRJm+oTyIIhKKDR8J4RT5cAMpHCE=;
-        b=Ts/buz5OUxv9zOmTVNSFEuEUL4TQNGDhtvhLH4ERpoNKxF8p/BnZI82u7XBNYCu69J
-         ktVzYEKRZfrHHzdKIw3eKggdhGJHBQ2PIDACI2ljR/AaE4+AQNvsdpo5CFSyFlB65bxX
-         vY8jt6yCz4LVK8h2BiJtIu6MDMdK232CCTM5yjPC1kQ4emm8CsmritYBuI4hN1FF0sto
-         u3CJCsfltUIujoIjcxbM95ICNt66bk/sbzhq/5tJp26/ocOI/3QnFoU6gxTZO92xN4Pa
-         88WnPaMvgeii2/D1vlhneu9mb9cOwW/G1BjswhZcJVkzq2M9R7KyfMV2AdwkRQw+OTUr
-         W3Uw==
-X-Gm-Message-State: AOAM532fwKKHP3p+tBldw/NLQRi/p+tR6yFp3JyWIN7Afj4rBaWwZ0pM
-        MLCy0dLMHqlf63dNsXz1hYoj8jZZK9PvPb91T8tw3ICX7etnBA==
-X-Google-Smtp-Source: ABdhPJwt0HzwG8DvvttKDpTdVFqLQyH7D0Ky0GBxrM3d4XgN+IrW8bcFWQqmW4mcjJOtv4U0XObr9M6cDyhwwxI9Zos=
-X-Received: by 2002:ab0:65c3:: with SMTP id n3mr885863uaq.100.1598000662170;
- Fri, 21 Aug 2020 02:04:22 -0700 (PDT)
+        bh=2aqaXn/OLBCEnJD6W+rO7Mlnssb9JvC0HBRl/U0OUUg=;
+        b=OgUIrkKdN9S6U1SIW25p0wWS76M5LR1JiZvCPfvn4i2LM6zzDYL4Hwv/D1L97O9Bsg
+         L6tYO0mdVMcDSTWGk3OXmrJvpx2eiQr2t7moHrA6jt7Gn2EausxLE/xNlCw2RaCO0XJ+
+         M4KLJcs6OqbyQpzyEoFc7vkOp9buLCOaSTbtGztJFkpybGDnZYIk3o/dLVryIrY1A7Gb
+         QpVJ/enzg0t48+JshQn6HktXfHzDvyVS9RQQ9vnJl7YR8A9D6zxDMhgSZjLpLUdZUtM8
+         G9PcBVKC3pErL+yuR1MrJTRaVeQ5LxyVQiL6z7hxFPq8csZ8CV45KajLN7aOn6Tl1siu
+         iP0w==
+X-Gm-Message-State: AOAM532EUPcXMRxTM+YV/Hck0nqGEv6k2gAGkkAaVHGP+IeVOsmCQp4C
+        NllEDYz7hhbQknh133fTgS9iBBvgnm+yY5NNPVLOGg==
+X-Google-Smtp-Source: ABdhPJydH0kCtnDYCtghoZB5iwFnEbCN/wAnXbObjFLDzaJ5v/m+pKf0/FjLejd2JiPmOueyYS7pzqgtZYcXvBCBayM=
+X-Received: by 2002:ab0:2ea2:: with SMTP id y2mr820544uay.15.1598000669938;
+ Fri, 21 Aug 2020 02:04:29 -0700 (PDT)
 MIME-Version: 1.0
-References: <20200819121848.16967-1-adrian.hunter@intel.com>
-In-Reply-To: <20200819121848.16967-1-adrian.hunter@intel.com>
+References: <20200819125832.v2.1.Ie8f0689ec9f449203328b37409d1cf06b565f331@changeid>
+ <CANMq1KC3BC4bbh9YF1r3nfOAJgQp4mVZJ11_77cwFJY9fGK-Dg@mail.gmail.com>
+In-Reply-To: <CANMq1KC3BC4bbh9YF1r3nfOAJgQp4mVZJ11_77cwFJY9fGK-Dg@mail.gmail.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 21 Aug 2020 11:03:46 +0200
-Message-ID: <CAPDyKFpJmsi72FyxCZcP=WcJ3spprWrq08pF1t4rhPf8TwD8mQ@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-pci: Fix SDHCI_RESET_ALL for CQHCI for Intel
- GLK-based controllers
-To:     Adrian Hunter <adrian.hunter@intel.com>
-Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
-        Faiz Abbas <faiz_abbas@ti.com>,
-        Al Cooper <alcooperx@gmail.com>,
-        Haibo Chen <haibo.chen@nxp.com>,
-        Michal Simek <michal.simek@xilinx.com>,
-        Manish Narani <manish.narani@xilinx.com>,
-        Wan Ahmad Zainie <wan.ahmad.zainie.wan.mohamad@intel.com>,
-        Ramuthevar Vadivel Muruganx 
-        <vadivel.muruganx.ramuthevar@linux.intel.com>,
-        Sowjanya Komatineni <skomatineni@nvidia.com>,
-        Thierry Reding <treding@nvidia.com>,
-        Ritesh Harjani <riteshh@codeaurora.org>
+Date:   Fri, 21 Aug 2020 11:03:52 +0200
+Message-ID: <CAPDyKFoHW=taANc4UZU7spGghn8ASo+2VOiEVPNRh9URdeyQpA@mail.gmail.com>
+Subject: Re: [PATCH v2] mmc: sdhci-acpi: Fix HS400 tuning for AMDI0040
+To:     Raul E Rangel <rrangel@chromium.org>
+Cc:     Nicolas Boichat <drinkcat@chromium.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Akshu Agrawal <Akshu.Agrawal@amd.com>, chris.wang@amd.com,
+        "Shah, Nehal-bakulchandra" <Nehal-bakulchandra.Shah@amd.com>,
+        lkml <linux-kernel@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Steven Rostedt <rostedt@goodmis.org>
 Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 19 Aug 2020 at 14:19, Adrian Hunter <adrian.hunter@intel.com> wrote:
+On Fri, 21 Aug 2020 at 02:24, Nicolas Boichat <drinkcat@chromium.org> wrote:
 >
-> For Intel controllers, SDHCI_RESET_ALL resets also CQHCI registers.
-> Normally, SDHCI_RESET_ALL is not used while CQHCI is enabled, but that can
-> happen on the error path. e.g. if mmc_cqe_recovery() fails, mmc_blk_reset()
-> is called which, for a eMMC that does not support HW Reset, will cycle the
-> bus power and the driver will perform SDHCI_RESET_ALL.
->
-> So whenever performing SDHCI_RESET_ALL ensure CQHCI is deactivated.
-> That will force the driver to reinitialize CQHCI when it is next used.
->
-> A similar change was done already for sdhci-msm, and other drivers using
-> CQHCI might benefit from a similar change, if they also have CQHCI reset
-> by SDHCI_RESET_ALL.
->
-> Fixes: 8ee82bda230fc9 ("mmc: sdhci-pci: Add CQHCI support for Intel GLK")
-> Cc: stable@vger.kernel.org # 5.4.x: 0ffa6cfbd949: mmc: cqhci: Add cqhci_deactivate()
-> Cc: stable@vger.kernel.org # 5.4+
-> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+> On Thu, Aug 20, 2020 at 3:00 AM Raul E Rangel <rrangel@chromium.org> wrote:
+> >
+> > The AMD eMMC Controller can only use the tuned clock while in HS200 and
+> > HS400 mode. If we switch to a different mode, we need to disable the
+> > tuned clock. If we have previously performed tuning and switch back to
+> > HS200 or HS400, we can re-enable the tuned clock.
+> >
+> > Previously the tuned clock was not getting disabled when switching to
+> > DDR52 which is part of the HS400 tuning sequence.
+> >
+> > Fixes: 34597a3f60b1 ("mmc: sdhci-acpi: Add support for ACPI HID of AMD Controller with HS400")
+> > Signed-off-by: Raul E Rangel <rrangel@chromium.org>
+> > Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-Applied for fixes, thanks!
+Applied for fixes, by dropping the trace_printk below, thanks!
 
 Kind regards
 Uffe
 
-> ---
->  drivers/mmc/host/sdhci-pci-core.c | 10 +++++++++-
->  1 file changed, 9 insertions(+), 1 deletion(-)
+
+> > ---
+> >
+> > Changes in v2:
+> > - Added static to amd_sdhci_execute_tuning
+> >
+> >  drivers/mmc/host/sdhci-acpi.c | 68 +++++++++++++++++++++++++++++------
+> >  1 file changed, 58 insertions(+), 10 deletions(-)
+> [snip]
+> > +               /* DLL is only required for HS400 */
+> > +               if (host->timing == MMC_TIMING_MMC_HS400 &&
+> > +                   !amd_host->dll_enabled) {
+> > +                       trace_printk("%s: Enabling DLL\n", __func__);
 >
-> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-> index c0e081e48d3f..d0c8d39d5dbd 100644
-> --- a/drivers/mmc/host/sdhci-pci-core.c
-> +++ b/drivers/mmc/host/sdhci-pci-core.c
-> @@ -234,6 +234,14 @@ static void sdhci_pci_dumpregs(struct mmc_host *mmc)
->         sdhci_dumpregs(mmc_priv(mmc));
->  }
+> Please do not use trace_printk in production code [1,2], it is only
+> meant for debug use. Consider using dev_dbg.
 >
-> +static void sdhci_cqhci_reset(struct sdhci_host *host, u8 mask)
-> +{
-> +       if ((host->mmc->caps2 & MMC_CAP2_CQE) && (mask & SDHCI_RESET_ALL) &&
-> +           host->mmc->cqe_private)
-> +               cqhci_deactivate(host->mmc);
-> +       sdhci_reset(host, mask);
-> +}
-> +
->  /*****************************************************************************\
->   *                                                                           *
->   * Hardware specific quirk handling                                          *
-> @@ -722,7 +730,7 @@ static const struct sdhci_ops sdhci_intel_glk_ops = {
->         .set_power              = sdhci_intel_set_power,
->         .enable_dma             = sdhci_pci_enable_dma,
->         .set_bus_width          = sdhci_set_bus_width,
-> -       .reset                  = sdhci_reset,
-> +       .reset                  = sdhci_cqhci_reset,
->         .set_uhs_signaling      = sdhci_set_uhs_signaling,
->         .hw_reset               = sdhci_pci_hw_reset,
->         .irq                    = sdhci_cqhci_irq,
-> --
-> 2.17.1
+> [1] https://elixir.bootlin.com/linux/v5.8/source/kernel/trace/trace.c#L3158
+> [2] https://elixir.bootlin.com/linux/v5.8/source/include/linux/kernel.h#L766
 >
+> > +                       sdhci_acpi_amd_hs400_dll(host);
+> > +                       amd_host->dll_enabled = true;
+> > +               }
+> >         }
