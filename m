@@ -7,104 +7,136 @@ X-Spam-Status: No, score=-9.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DC88CC433DF
-	for <linux-mmc@archiver.kernel.org>; Fri, 21 Aug 2020 08:46:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 59E4FC433DF
+	for <linux-mmc@archiver.kernel.org>; Fri, 21 Aug 2020 09:04:26 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B849920720
-	for <linux-mmc@archiver.kernel.org>; Fri, 21 Aug 2020 08:46:12 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 27BC42087D
+	for <linux-mmc@archiver.kernel.org>; Fri, 21 Aug 2020 09:04:26 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="bzUnGTMp"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="wBmCFjpN"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728008AbgHUIqM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 21 Aug 2020 04:46:12 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47398 "EHLO
+        id S1725855AbgHUJEZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 21 Aug 2020 05:04:25 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50286 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726243AbgHUIqL (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Aug 2020 04:46:11 -0400
-Received: from mail-ua1-x941.google.com (mail-ua1-x941.google.com [IPv6:2607:f8b0:4864:20::941])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 92F10C061385
-        for <linux-mmc@vger.kernel.org>; Fri, 21 Aug 2020 01:46:09 -0700 (PDT)
-Received: by mail-ua1-x941.google.com with SMTP id x17so330756uao.5
-        for <linux-mmc@vger.kernel.org>; Fri, 21 Aug 2020 01:46:09 -0700 (PDT)
+        with ESMTP id S1725806AbgHUJEX (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Aug 2020 05:04:23 -0400
+Received: from mail-ua1-x942.google.com (mail-ua1-x942.google.com [IPv6:2607:f8b0:4864:20::942])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F0F19C061385
+        for <linux-mmc@vger.kernel.org>; Fri, 21 Aug 2020 02:04:22 -0700 (PDT)
+Received: by mail-ua1-x942.google.com with SMTP id z12so334447uam.12
+        for <linux-mmc@vger.kernel.org>; Fri, 21 Aug 2020 02:04:22 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=FBSyf+yXd7kiYAF9BZfiPGXH0tN6S8pKBPuNovCFIWg=;
-        b=bzUnGTMpFMBlKFRo4KHl6EmHFbz2NNiN55TErkmKGkClkdBPW7M8o/cmJou7X3zh0E
-         v5/1DmgNBKJFGQftdVexRCnYxq9PSrmpRxK9hFhyuewGRT8Q8cFKzskZTQqdYYppLPk0
-         PZiCmQp/v/qeABwXaKmgFTkeK7NPzfMpZYgDekBA3fbM0fUDL2rGNjmycIungSLFP3l1
-         Ixq4N3ChAyrt0ePjJF0OAvJhHeFgIx+uaM3OpcHRf3zaL08JxrD+npAW6F+jBN6DIat6
-         s1CYxZufog8kBKhFOL9J93G+rlVALXH/IVTc4E4FDU3BbV9XSNuz+ZrIyb/g625Sc+bI
-         A64Q==
+        bh=K2Wycv6dlh4JHdEGRJm+oTyIIhKKDR8J4RT5cAMpHCE=;
+        b=wBmCFjpNyW1NbttW/zQ9pNhl0OzqNZ9Ji4r4seZgFcoABo5/ZIkG0bQ+Kd5Ca+shdl
+         6m6xxUzKKImbAO2I9tVMvDH4nZvXiXQ+3jTr/YoVtfwNM+IdcgMKJzWKYG2ZZHEbaUYn
+         o93Vt53clrRp5Z65+IP4ymq09QSzU1hFXeSH6Z2j4fiK11j9oIT75G17G85aljI73H/A
+         oQBOQjfhyssB+OSvltNSFiA9SqQs8l7RqKG6Pf6Drgad6+aT0nU0csY0hW4mb45CtMpp
+         388qu1+ayPiD35WFPmDB0WgB4man17dRk00brvM1WAFVL2WVh+Ap8lLmu2hg/d1LiEoZ
+         fp0g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=FBSyf+yXd7kiYAF9BZfiPGXH0tN6S8pKBPuNovCFIWg=;
-        b=XiIaJc8x3YXE6lnybC54ZvoaLR1BwAuSp5KCCx5HxRd9SfdlSGfQc4E5Iwr67ofG4I
-         Pt5UQI76jzzBue9lvQfZaHyIIG8S+yELjHBAtk8Vj33gyzfDrB8upki3A0ubPJUe44aF
-         j7s1xttVuUdoVO8R6Qm1fWGBRQMRBmzkBmqqnHbxD2l2pG9f8tuy0rBzUxnhQu0dS2b1
-         /lQe22+OO8FgdWbym9oGmZa7cUiWx/E3jggrwolwTkEyTMgdoB1WonIIAirYWbVXokjY
-         SMCDuaLMKFOTLYXUR9rVHUJkD5sKPNkC3DOIc0Yc2RhhCRSh2poBMIyYpWOea/3RIl0W
-         CMrQ==
-X-Gm-Message-State: AOAM532MfWa3qHInlGSfLTlIHN2Yq9hntj1IaxBlxKYEf+9HGfWLto7i
-        ls47euyb4TWiSJinPycAlv9XGW8j0MluqwvNWbqbsfB3cwtO3Q==
-X-Google-Smtp-Source: ABdhPJzrlAajobgpJPI56OVk2bDqzvfYUokRh11GmgukIRnTn43dOHrshkENdJIqI9aJ7hMomaPoCzr2mWE9EakgQ+E=
-X-Received: by 2002:ab0:6341:: with SMTP id f1mr778421uap.19.1597999568563;
- Fri, 21 Aug 2020 01:46:08 -0700 (PDT)
+        bh=K2Wycv6dlh4JHdEGRJm+oTyIIhKKDR8J4RT5cAMpHCE=;
+        b=Ts/buz5OUxv9zOmTVNSFEuEUL4TQNGDhtvhLH4ERpoNKxF8p/BnZI82u7XBNYCu69J
+         ktVzYEKRZfrHHzdKIw3eKggdhGJHBQ2PIDACI2ljR/AaE4+AQNvsdpo5CFSyFlB65bxX
+         vY8jt6yCz4LVK8h2BiJtIu6MDMdK232CCTM5yjPC1kQ4emm8CsmritYBuI4hN1FF0sto
+         u3CJCsfltUIujoIjcxbM95ICNt66bk/sbzhq/5tJp26/ocOI/3QnFoU6gxTZO92xN4Pa
+         88WnPaMvgeii2/D1vlhneu9mb9cOwW/G1BjswhZcJVkzq2M9R7KyfMV2AdwkRQw+OTUr
+         W3Uw==
+X-Gm-Message-State: AOAM532fwKKHP3p+tBldw/NLQRi/p+tR6yFp3JyWIN7Afj4rBaWwZ0pM
+        MLCy0dLMHqlf63dNsXz1hYoj8jZZK9PvPb91T8tw3ICX7etnBA==
+X-Google-Smtp-Source: ABdhPJwt0HzwG8DvvttKDpTdVFqLQyH7D0Ky0GBxrM3d4XgN+IrW8bcFWQqmW4mcjJOtv4U0XObr9M6cDyhwwxI9Zos=
+X-Received: by 2002:ab0:65c3:: with SMTP id n3mr885863uaq.100.1598000662170;
+ Fri, 21 Aug 2020 02:04:22 -0700 (PDT)
 MIME-Version: 1.0
-References: <20200814185011.3252020-1-t.schramm@manjaro.org>
-In-Reply-To: <20200814185011.3252020-1-t.schramm@manjaro.org>
+References: <20200819121848.16967-1-adrian.hunter@intel.com>
+In-Reply-To: <20200819121848.16967-1-adrian.hunter@intel.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 21 Aug 2020 10:45:31 +0200
-Message-ID: <CAPDyKFruUf7BxrF3YeYnJn=U4vZKMoQhms4SC=Gp91Z3fzk0Sw@mail.gmail.com>
-Subject: Re: [PATCH] mmc: mmc_spi: fix timeout calculation
-To:     Tobias Schramm <t.schramm@manjaro.org>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Date:   Fri, 21 Aug 2020 11:03:46 +0200
+Message-ID: <CAPDyKFpJmsi72FyxCZcP=WcJ3spprWrq08pF1t4rhPf8TwD8mQ@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-pci: Fix SDHCI_RESET_ALL for CQHCI for Intel
+ GLK-based controllers
+To:     Adrian Hunter <adrian.hunter@intel.com>
+Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
+        Faiz Abbas <faiz_abbas@ti.com>,
+        Al Cooper <alcooperx@gmail.com>,
+        Haibo Chen <haibo.chen@nxp.com>,
+        Michal Simek <michal.simek@xilinx.com>,
+        Manish Narani <manish.narani@xilinx.com>,
+        Wan Ahmad Zainie <wan.ahmad.zainie.wan.mohamad@intel.com>,
+        Ramuthevar Vadivel Muruganx 
+        <vadivel.muruganx.ramuthevar@linux.intel.com>,
+        Sowjanya Komatineni <skomatineni@nvidia.com>,
+        Thierry Reding <treding@nvidia.com>,
+        Ritesh Harjani <riteshh@codeaurora.org>
 Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 14 Aug 2020 at 20:50, Tobias Schramm <t.schramm@manjaro.org> wrote:
+On Wed, 19 Aug 2020 at 14:19, Adrian Hunter <adrian.hunter@intel.com> wrote:
 >
-> Previously the cycle timeout was converted to a microsecond value but
-> then incorrectly treated as a nanosecond timeout. This patch changes
-> the code to convert both the nanosecond timeout and the cycle timeout
-> to a microsecond value and use that directly.
+> For Intel controllers, SDHCI_RESET_ALL resets also CQHCI registers.
+> Normally, SDHCI_RESET_ALL is not used while CQHCI is enabled, but that can
+> happen on the error path. e.g. if mmc_cqe_recovery() fails, mmc_blk_reset()
+> is called which, for a eMMC that does not support HW Reset, will cycle the
+> bus power and the driver will perform SDHCI_RESET_ALL.
 >
-> Signed-off-by: Tobias Schramm <t.schramm@manjaro.org>
+> So whenever performing SDHCI_RESET_ALL ensure CQHCI is deactivated.
+> That will force the driver to reinitialize CQHCI when it is next used.
+>
+> A similar change was done already for sdhci-msm, and other drivers using
+> CQHCI might benefit from a similar change, if they also have CQHCI reset
+> by SDHCI_RESET_ALL.
+>
+> Fixes: 8ee82bda230fc9 ("mmc: sdhci-pci: Add CQHCI support for Intel GLK")
+> Cc: stable@vger.kernel.org # 5.4.x: 0ffa6cfbd949: mmc: cqhci: Add cqhci_deactivate()
+> Cc: stable@vger.kernel.org # 5.4+
+> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 
-This looks good to me, but before applying just wanted to check that
-you tested this on some HW, to make sure it doesn't break anything?
+Applied for fixes, thanks!
 
 Kind regards
 Uffe
 
-
 > ---
->  drivers/mmc/host/mmc_spi.c | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
+>  drivers/mmc/host/sdhci-pci-core.c | 10 +++++++++-
+>  1 file changed, 9 insertions(+), 1 deletion(-)
 >
-> diff --git a/drivers/mmc/host/mmc_spi.c b/drivers/mmc/host/mmc_spi.c
-> index 39bb1e30c2d7..f85e0ad896a9 100644
-> --- a/drivers/mmc/host/mmc_spi.c
-> +++ b/drivers/mmc/host/mmc_spi.c
-> @@ -882,9 +882,9 @@ mmc_spi_data_do(struct mmc_spi_host *host, struct mmc_command *cmd,
->         else
->                 clock_rate = spi->max_speed_hz;
+> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+> index c0e081e48d3f..d0c8d39d5dbd 100644
+> --- a/drivers/mmc/host/sdhci-pci-core.c
+> +++ b/drivers/mmc/host/sdhci-pci-core.c
+> @@ -234,6 +234,14 @@ static void sdhci_pci_dumpregs(struct mmc_host *mmc)
+>         sdhci_dumpregs(mmc_priv(mmc));
+>  }
 >
-> -       timeout = data->timeout_ns +
-> +       timeout = data->timeout_ns / 1000 +
->                   data->timeout_clks * 1000000 / clock_rate;
-> -       timeout = usecs_to_jiffies((unsigned int)(timeout / 1000)) + 1;
-> +       timeout = usecs_to_jiffies((unsigned int)timeout) + 1;
->
->         /* Handle scatterlist segments one at a time, with synch for
->          * each 512-byte block
+> +static void sdhci_cqhci_reset(struct sdhci_host *host, u8 mask)
+> +{
+> +       if ((host->mmc->caps2 & MMC_CAP2_CQE) && (mask & SDHCI_RESET_ALL) &&
+> +           host->mmc->cqe_private)
+> +               cqhci_deactivate(host->mmc);
+> +       sdhci_reset(host, mask);
+> +}
+> +
+>  /*****************************************************************************\
+>   *                                                                           *
+>   * Hardware specific quirk handling                                          *
+> @@ -722,7 +730,7 @@ static const struct sdhci_ops sdhci_intel_glk_ops = {
+>         .set_power              = sdhci_intel_set_power,
+>         .enable_dma             = sdhci_pci_enable_dma,
+>         .set_bus_width          = sdhci_set_bus_width,
+> -       .reset                  = sdhci_reset,
+> +       .reset                  = sdhci_cqhci_reset,
+>         .set_uhs_signaling      = sdhci_set_uhs_signaling,
+>         .hw_reset               = sdhci_pci_hw_reset,
+>         .irq                    = sdhci_cqhci_irq,
 > --
-> 2.28.0
+> 2.17.1
 >
