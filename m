@@ -1,137 +1,113 @@
-Return-Path: <SRS0=v+1n=B7=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=q0fh=CA=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 53FF6C433E1
-	for <linux-mmc@archiver.kernel.org>; Fri, 21 Aug 2020 21:57:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AB5B7C433E1
+	for <linux-mmc@archiver.kernel.org>; Sat, 22 Aug 2020 06:15:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2DF01207DA
-	for <linux-mmc@archiver.kernel.org>; Fri, 21 Aug 2020 21:57:34 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8317620825
+	for <linux-mmc@archiver.kernel.org>; Sat, 22 Aug 2020 06:15:40 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Pw5Xo2UH"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="gmcE3FxI"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726817AbgHUV5d (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 21 Aug 2020 17:57:33 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57490 "EHLO
+        id S1725917AbgHVGPj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 22 Aug 2020 02:15:39 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49028 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726773AbgHUV5c (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Aug 2020 17:57:32 -0400
-Received: from mail-vs1-xe43.google.com (mail-vs1-xe43.google.com [IPv6:2607:f8b0:4864:20::e43])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 66BD0C061573
-        for <linux-mmc@vger.kernel.org>; Fri, 21 Aug 2020 14:57:31 -0700 (PDT)
-Received: by mail-vs1-xe43.google.com with SMTP id e14so1567804vsa.9
-        for <linux-mmc@vger.kernel.org>; Fri, 21 Aug 2020 14:57:31 -0700 (PDT)
+        with ESMTP id S1725863AbgHVGPi (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 22 Aug 2020 02:15:38 -0400
+Received: from mail-pg1-x542.google.com (mail-pg1-x542.google.com [IPv6:2607:f8b0:4864:20::542])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 934A8C061573;
+        Fri, 21 Aug 2020 23:15:38 -0700 (PDT)
+Received: by mail-pg1-x542.google.com with SMTP id p37so2018709pgl.3;
+        Fri, 21 Aug 2020 23:15:38 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=Ea41IW4FRO1fiOOu+MNwgvHwUn7WCVWJ5tD03OQqvkM=;
-        b=Pw5Xo2UHWDlSgrbQcxG+BrXhrL8Z7LLa8uwTq8y+Hb1n8SJqnVEDUsHacaTNt4Ydqh
-         Yz3ur1h9GYoyAOKh/BX7HR7DSFCZbutB6vW8ua4cqQBj/FpQD59/tn5UVneBsUi0ReXK
-         VqMRERyzHLqQqJtLROcsChQGNqGAXQYUelANpt01zRg1n5wSfIGaO97oV7/+/F0wc5qZ
-         OMWTB+Ka45i+5TQE/MYqK22KlP/ApUJCjEKwh0cayaOCdZX3B9gCeHFfGPbIaXnc77hE
-         vXiIeE2friHSLAONaBtMlTkqp1/nUiinZSMw9/CzpFRPYTAy5hcdpmN0rkwqj+7oaifE
-         WoyQ==
+        d=gmail.com; s=20161025;
+        h=from:to:cc:subject:date:message-id;
+        bh=fifKzZY0qdLJQEBEXEYD5nOp3Oo8eoTT9qv7E8Okxdc=;
+        b=gmcE3FxIz1pTECEv7Ib3E7T5Q1/clFxcPTQ82pECSXX1SBdFSS5sh/vs46N2nrXOnH
+         55F5ds+g1H5UhDYGIb2+nAybwJU/vbLnkQ26WLuCPcAkGQjv2oMuAnSfL6v72sSxTlqF
+         kO0rrOydaddclOE4zgsWILDjGVC2o+r4DNt/xbr8d+i9dpCEYnL/+Pu/4ukYCIRSlvO8
+         YWWMS8sPSpiBX1cWDmxDSXDyfpvItqh1lrS3ml2zDTa3d3uEtRNjSzmMOsxEPWD5HbT+
+         WmEdwWDoAqi+cxXB3IkjhCVjgi6wseVq84mV5As01fXgiZS6KejhjyT3WPyIAk6Di9Bi
+         ZGRg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=Ea41IW4FRO1fiOOu+MNwgvHwUn7WCVWJ5tD03OQqvkM=;
-        b=f1cML9zSTTjy2gw1YZl+23+5E0yfaowPmontiPCoJaaGc4xsWg/G8W7Hw1DXLgeNyd
-         lw6AnYJytUiIY5ZzfWY0rPM25/thz63wo3vRG+xaAvaDFAdTZDydqxit6Nmasl6TaLX8
-         XSHDBc5RPbxx2lFkAEK3UCbUGhn2xZ4V627sAzBXD3nbD74q/oKw33ey01Nrtm9g7Gnm
-         jWKxoCWdBDE1MyCfZQ+d+Kr4dS6bNHQV55OyizdaxKzEBJVnIf3IhiXRBkq+hzC/B2e6
-         n4BmvQGdX/qOlw0OyYl8SYm2ZTlmWPj9z8eHIroizvYUlKLR49ILar13z0iCKzAiORQv
-         m3yA==
-X-Gm-Message-State: AOAM531ta17KayLdLppA+PweRSJLVm8JN3OptLgRs6anbkUh2v5H6pnM
-        +uDxPGNTDf6ygvZwziz6ys3O4ylaWRl4tH3DuHMA2cL1aB8NIg==
-X-Google-Smtp-Source: ABdhPJxIbsHfva0t8MC9x0VZDf4ULSJcLPSdTF7LyvZ5vYS9dGrRQdcNDwYmfpQUh9Z5N+rsDRn4F2T/8VDA3SYlu4c=
-X-Received: by 2002:a67:e9d8:: with SMTP id q24mr3266310vso.165.1598047050532;
- Fri, 21 Aug 2020 14:57:30 -0700 (PDT)
-MIME-Version: 1.0
-References: <20200819125832.v2.1.Ie8f0689ec9f449203328b37409d1cf06b565f331@changeid>
- <CANMq1KC3BC4bbh9YF1r3nfOAJgQp4mVZJ11_77cwFJY9fGK-Dg@mail.gmail.com>
- <CAPDyKFoHW=taANc4UZU7spGghn8ASo+2VOiEVPNRh9URdeyQpA@mail.gmail.com> <CAHQZ30BW4YMzK9KUOHP8wV49Yw0UG_PZY6UdaQZdQRdMYFjFwQ@mail.gmail.com>
-In-Reply-To: <CAHQZ30BW4YMzK9KUOHP8wV49Yw0UG_PZY6UdaQZdQRdMYFjFwQ@mail.gmail.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 21 Aug 2020 23:56:54 +0200
-Message-ID: <CAPDyKFqRNQaNVw5WL1jxKE5gnfcKbm1e_bzEgnP--arvNJezXg@mail.gmail.com>
-Subject: Re: [PATCH v2] mmc: sdhci-acpi: Fix HS400 tuning for AMDI0040
-To:     Raul Rangel <rrangel@chromium.org>
-Cc:     Nicolas Boichat <drinkcat@chromium.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Akshu Agrawal <Akshu.Agrawal@amd.com>,
-        "Wang, Chris" <chris.wang@amd.com>,
-        "Shah, Nehal-bakulchandra" <Nehal-bakulchandra.Shah@amd.com>,
-        lkml <linux-kernel@vger.kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Steven Rostedt <rostedt@goodmis.org>
-Content-Type: text/plain; charset="UTF-8"
+        h=x-gm-message-state:from:to:cc:subject:date:message-id;
+        bh=fifKzZY0qdLJQEBEXEYD5nOp3Oo8eoTT9qv7E8Okxdc=;
+        b=AKxZs/sRQzEwvxb6AcBssqJI9d+9zmOdp2FPuPlM8S5JMFWDihbRavZbd+UMcmRpMA
+         9sNoJHB6wOiCbGv1yYsl2oyKoQ9WkVN+2Biqi6aUGMMr81+/PzPG1+LjnWOwMERHpwD+
+         oCwwUqLFyzgHLvOvKKsd4iHG17Xgc/Miz6oaZZpKiegn8ehN+RYJ5mP17nf5ZsNP5FE9
+         zFSlvcLjF0GKnGtNzaRUKem/C5+/7vnkHnwjluMEKUC7CkFatxmi96Ctm5/+EVeiB2oh
+         WM4L3yC+EKpNqf9EPqCYgRUU8scXUqPWna5R1b/YkRhYhbe/aT65xiYFE1XzsS5ddL44
+         BZGQ==
+X-Gm-Message-State: AOAM531Ktg68fvRiqrC/BZ93ypcmAPhBcy09ZRwJh0Qj7/V82tsy7/Py
+        oNp46WqM26QhV59KKwJNdukrY/A1fg==
+X-Google-Smtp-Source: ABdhPJz5qi9VrfyPvyxtw7BqJcL/06LNMaxTH7wjLMfxubkMec2ovTR9LavX0xdm50tnrICSb3/XZQ==
+X-Received: by 2002:a62:5fc6:: with SMTP id t189mr5222464pfb.138.1598076938059;
+        Fri, 21 Aug 2020 23:15:38 -0700 (PDT)
+Received: from localhost.localdomain ([2402:3a80:cfa:ae3e:f998:8f12:465c:736b])
+        by smtp.gmail.com with ESMTPSA id y20sm4440244pfn.183.2020.08.21.23.15.34
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 21 Aug 2020 23:15:37 -0700 (PDT)
+From:   madhuparnabhowmik10@gmail.com
+To:     brucechang@via.com.tw, HaraldWelte@viatech.com,
+        ulf.hansson@linaro.org
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        andrianov@ispras.ru, ldv-project@linuxtesting.org,
+        Madhuparna Bhowmik <madhuparnabhowmik10@gmail.com>
+Subject: [PATCH v2] drivers: mmc: host: via-sdmmc: Fix data race bug
+Date:   Sat, 22 Aug 2020 11:45:28 +0530
+Message-Id: <20200822061528.7035-1-madhuparnabhowmik10@gmail.com>
+X-Mailer: git-send-email 2.17.1
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 21 Aug 2020 at 16:31, Raul Rangel <rrangel@chromium.org> wrote:
->
-> Oops, what was embarrassing! Thanks Ulf for removing it. Thanks Nick for caching that.
+From: Madhuparna Bhowmik <madhuparnabhowmik10@gmail.com>
 
-No worries, we all make mistakes. The important thing is that we take
-good care of fixing them as soon as possible.
+via_save_pcictrlreg() should be called with host->lock held
+as it writes to pm_pcictrl_reg, otherwise there can be a race
+condition between via_sd_suspend() and via_sdc_card_detect().
+The same pattern is used in the function via_reset_pcictrl()
+as well, where via_save_pcictrlreg() is called with host->lock
+held.
 
-Kind regards
-Uffe
+Found by Linux Driver Verification project (linuxtesting.org).
 
->
-> On Fri, Aug 21, 2020 at 3:04 AM Ulf Hansson <ulf.hansson@linaro.org> wrote:
->>
->> On Fri, 21 Aug 2020 at 02:24, Nicolas Boichat <drinkcat@chromium.org> wrote:
->> >
->> > On Thu, Aug 20, 2020 at 3:00 AM Raul E Rangel <rrangel@chromium.org> wrote:
->> > >
->> > > The AMD eMMC Controller can only use the tuned clock while in HS200 and
->> > > HS400 mode. If we switch to a different mode, we need to disable the
->> > > tuned clock. If we have previously performed tuning and switch back to
->> > > HS200 or HS400, we can re-enable the tuned clock.
->> > >
->> > > Previously the tuned clock was not getting disabled when switching to
->> > > DDR52 which is part of the HS400 tuning sequence.
->> > >
->> > > Fixes: 34597a3f60b1 ("mmc: sdhci-acpi: Add support for ACPI HID of AMD Controller with HS400")
->> > > Signed-off-by: Raul E Rangel <rrangel@chromium.org>
->> > > Acked-by: Adrian Hunter <adrian.hunter@intel.com>
->>
->> Applied for fixes, by dropping the trace_printk below, thanks!
->>
->> Kind regards
->> Uffe
->>
->>
->> > > ---
->> > >
->> > > Changes in v2:
->> > > - Added static to amd_sdhci_execute_tuning
->> > >
->> > >  drivers/mmc/host/sdhci-acpi.c | 68 +++++++++++++++++++++++++++++------
->> > >  1 file changed, 58 insertions(+), 10 deletions(-)
->> > [snip]
->> > > +               /* DLL is only required for HS400 */
->> > > +               if (host->timing == MMC_TIMING_MMC_HS400 &&
->> > > +                   !amd_host->dll_enabled) {
->> > > +                       trace_printk("%s: Enabling DLL\n", __func__);
->> >
->> > Please do not use trace_printk in production code [1,2], it is only
->> > meant for debug use. Consider using dev_dbg.
->> >
->> > [1] https://elixir.bootlin.com/linux/v5.8/source/kernel/trace/trace.c#L3158
->> > [2] https://elixir.bootlin.com/linux/v5.8/source/include/linux/kernel.h#L766
->> >
->> > > +                       sdhci_acpi_amd_hs400_dll(host);
->> > > +                       amd_host->dll_enabled = true;
->> > > +               }
->> > >         }
+Signed-off-by: Madhuparna Bhowmik <madhuparnabhowmik10@gmail.com>
+---
+v2: Rebase v5.9-rc1
+
+ drivers/mmc/host/via-sdmmc.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/drivers/mmc/host/via-sdmmc.c b/drivers/mmc/host/via-sdmmc.c
+index 49dab9f42b6d..9b755ea0fa03 100644
+--- a/drivers/mmc/host/via-sdmmc.c
++++ b/drivers/mmc/host/via-sdmmc.c
+@@ -1257,11 +1257,14 @@ static void __maybe_unused via_init_sdc_pm(struct via_crdr_mmc_host *host)
+ static int __maybe_unused via_sd_suspend(struct device *dev)
+ {
+ 	struct via_crdr_mmc_host *host;
++	unsigned long flags;
+ 
+ 	host = dev_get_drvdata(dev);
+ 
++	spin_lock_irqsave(&host->lock, flags);
+ 	via_save_pcictrlreg(host);
+ 	via_save_sdcreg(host);
++	spin_unlock_irqrestore(&host->lock, flags);
+ 
+ 	device_wakeup_enable(dev);
+ 
+-- 
+2.17.1
+
