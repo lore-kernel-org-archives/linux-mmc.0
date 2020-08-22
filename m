@@ -2,135 +2,149 @@ Return-Path: <SRS0=q0fh=CA=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-5.6 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 25BC2C433DF
-	for <linux-mmc@archiver.kernel.org>; Sat, 22 Aug 2020 06:17:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6A013C433DF
+	for <linux-mmc@archiver.kernel.org>; Sat, 22 Aug 2020 09:41:41 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0182A20825
-	for <linux-mmc@archiver.kernel.org>; Sat, 22 Aug 2020 06:17:33 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="L64oCmJw"
+	by mail.kernel.org (Postfix) with ESMTP id 4501B20738
+	for <linux-mmc@archiver.kernel.org>; Sat, 22 Aug 2020 09:41:41 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1598089301;
+	bh=utJ4hiZTOEP47TRMs3nrbGiyawUJF8FD0oQwzZTnQTQ=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
+	b=MyP1LaP2jCLVqgb1G6w4ncu+cw2+gPIXXHXU5Q6dp0qMOlS61aH50JT+uv9Pvl+D1
+	 VqGwDwAL/UHKi8i86HIcbm7+QjknN6b6ne4NxlCDVOzu04G2hh5dS1f7omqweDFCn1
+	 blX+C0P7219sha2XfZQ7ujcJaggdc6SduotDBnnA=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725917AbgHVGRd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 22 Aug 2020 02:17:33 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49318 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725863AbgHVGRc (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 22 Aug 2020 02:17:32 -0400
-Received: from mail-pj1-x1042.google.com (mail-pj1-x1042.google.com [IPv6:2607:f8b0:4864:20::1042])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 58116C061573;
-        Fri, 21 Aug 2020 23:17:32 -0700 (PDT)
-Received: by mail-pj1-x1042.google.com with SMTP id d4so1730586pjx.5;
-        Fri, 21 Aug 2020 23:17:32 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=from:date:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to:user-agent;
-        bh=/vsXxIYoH9IaQYN9SpjWFRYwceGPVmhGBMx9DqjyaCA=;
-        b=L64oCmJwVTF5reQ8SOLuTTPV5gWEEEMC3h4StMqJ/EiQJARv55oVXDUXfzd+w37xOD
-         +SR4p/LCjf/oTjg7I0kSn3FjUj6ItqeG0NgHsdf6ddPCIL56bA4AICnDxat0uUL7F0Fm
-         owaLo2KopE49AXej+lF9qgFrlzmK88Vl+rporEN0WgZbciioS/Q3KOR8hstjeeKibBfw
-         Ws1Jk7l/rvaMXw0oqiC3lVyM55xzPaOCvhF1ZjSwcJdu00MRWI9Le8JEOlh3Cl9k+qtQ
-         lBry93n7hIk62FDZB6krMEjuiv8YTxK8cuZwTJm8bWvmomWkYjGGC3+YLmEfBpZuMIDw
-         AJeA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:date:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to:user-agent;
-        bh=/vsXxIYoH9IaQYN9SpjWFRYwceGPVmhGBMx9DqjyaCA=;
-        b=sVWikr68DxWX4UAmmJ7EqKuUPdQCsbMsBd+x8CfySyJsjki/JBVuRFUmRVd6HTNj9v
-         1k9WIMrFo97Gal10tMwd33vqB8WB0Cl0EiYtn3aCZwOAPwYYL3K3aDvtusmVtzUiCaXL
-         nvlBCCQWt7fvTmaX7VZTol738+cU+G9Cu47u5YvP6pOp7D0gUPQYE+uDFf+fD+6ZF6rM
-         H/kHZRzOe72k3DQZmogKy7d4cx/a5SWp8ggWQ01CdR33g7fWc9RFQk7tyRxIrOy6VszZ
-         s6jJyQOp/Hl6PAF1d6QeU+0aaNP23/IorIHDOdckVZkbP3inyVK+bdllSybHefNNoQj8
-         JhlA==
-X-Gm-Message-State: AOAM533wLBIQLZKCZEKUWO9PjfgKHp3cmSJMVEtaDWxsl2GSyONdMPeB
-        2pzb4LG8VCildAKUbGovQ2ns5Wx78A==
-X-Google-Smtp-Source: ABdhPJz/zvfXAXwavjIE33/xdQA79vArlk5b5NzTPeQs2PGpP78M3V+Cqm13Pa0hBcfjKK7ft/9phw==
-X-Received: by 2002:a17:90a:17ab:: with SMTP id q40mr5286180pja.28.1598077050740;
-        Fri, 21 Aug 2020 23:17:30 -0700 (PDT)
-Received: from madhuparna-HP-Notebook ([2402:3a80:cfa:ae3e:f998:8f12:465c:736b])
-        by smtp.gmail.com with ESMTPSA id t2sm4500370pfb.123.2020.08.21.23.17.27
-        (version=TLS1_2 cipher=ECDHE-ECDSA-CHACHA20-POLY1305 bits=256/256);
-        Fri, 21 Aug 2020 23:17:30 -0700 (PDT)
-From:   Madhuparna Bhowmik <madhuparnabhowmik10@gmail.com>
-X-Google-Original-From: Madhuparna Bhowmik <change_this_user_name@gmail.com>
-Date:   Sat, 22 Aug 2020 11:47:25 +0530
+        id S1725973AbgHVJlk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 22 Aug 2020 05:41:40 -0400
+Received: from mail.kernel.org ([198.145.29.99]:56752 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1725864AbgHVJlj (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Sat, 22 Aug 2020 05:41:39 -0400
+Received: from pali.im (pali.im [31.31.79.79])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id C240620738;
+        Sat, 22 Aug 2020 09:41:38 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1598089298;
+        bh=utJ4hiZTOEP47TRMs3nrbGiyawUJF8FD0oQwzZTnQTQ=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=BjkUGhvDuiIgKve74tsGaykUZQ1NY3Yp8JyPjNKfY6G9HhmEBnTKGMPRtKbOkrqL2
+         ceDb4MGlgQ2TNT/q6TqbYn/43/sgvevFiQHB8zFvbprQVRBeO4ABUaYvnkQFiGI8In
+         RMGiI4IDmbH0L+0fE5RQUrniUQbzvafpCDEn1lV4=
+Received: by pali.im (Postfix)
+        id EF747860; Sat, 22 Aug 2020 11:41:36 +0200 (CEST)
+Date:   Sat, 22 Aug 2020 11:41:36 +0200
+From:   Pali =?utf-8?B?Um9ow6Fy?= <pali@kernel.org>
 To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     madhuparnabhowmik10@gmail.com, Bruce Chang <brucechang@via.com.tw>,
-        Harald Welte <HaraldWelte@viatech.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        ldv-project@linuxtesting.org, andrianov@ispras.ru
-Subject: Re: [PATCH] drivers: mmc: host: via-sdmmc: Fix data race bug
-Message-ID: <20200822061725.GA7141@madhuparna-HP-Notebook>
-References: <20200803072857.8880-1-madhuparnabhowmik10@gmail.com>
- <CAPDyKFo2njN6bU+VqpuHPpHDx4+ZkuoNRZVb0a0EjGBi9uXa7g@mail.gmail.com>
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH 0/4] mmc: sdio: Export CISTPL_VERS_1 attributes to
+ userspace
+Message-ID: <20200822094136.nm2hlq57jx2yfbju@pali>
+References: <20200727133837.19086-1-pali@kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <CAPDyKFo2njN6bU+VqpuHPpHDx4+ZkuoNRZVb0a0EjGBi9uXa7g@mail.gmail.com>
-User-Agent: Mutt/1.9.4 (2018-02-28)
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <20200727133837.19086-1-pali@kernel.org>
+User-Agent: NeoMutt/20180716
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, Aug 21, 2020 at 02:48:37PM +0200, Ulf Hansson wrote:
-> On Mon, 3 Aug 2020 at 09:29, <madhuparnabhowmik10@gmail.com> wrote:
-> >
-> > From: Madhuparna Bhowmik <madhuparnabhowmik10@gmail.com>
-> >
-> > via_save_pcictrlreg() should be called with host->lock held
-> > as it writes to pm_pcictrl_reg, otherwise there can be a race
-> > condition between via_sd_suspend() and via_sdc_card_detect().
-> > The same pattern is used in the function via_reset_pcictrl()
-> > as well, where via_save_pcictrlreg() is called with host->lock
-> > held.
-> >
-> > Found by Linux Driver Verification project (linuxtesting.org).
-> >
-> > Signed-off-by: Madhuparna Bhowmik <madhuparnabhowmik10@gmail.com>
-> 
-> This doesn't apply to my mmc tree, can you please rebase and submit a
-> new version.
->
-Sure, I have rebased it to v5.9-rc1, please have a look.
+Hello Ulf! I would like to remind you this SDIO patch series. Could you
+please look and review it?
 
-Thanks,
-Madhuparna
-
-> Kind regards
-> Uffe
+On Monday 27 July 2020 15:38:33 Pali Rohár wrote:
+> CISTPL_VERS_1 structure contains useful information for identification
+> of SDIO cards. It contains revision number according to which standard
+> is SDIO card compliant. And also it contain human readable info strings
+> which should contain manufacturer name or product information, like for
+> old PCMCIA cards. SDIO simplified specification 3.00 just contain
+> reference to PCMCIA metaformat specification for definition of that
+> CISTPL_VERS_1 structure itself.
 > 
-> > ---
-> >  drivers/mmc/host/via-sdmmc.c | 3 +++
-> >  1 file changed, 3 insertions(+)
-> >
-> > diff --git a/drivers/mmc/host/via-sdmmc.c b/drivers/mmc/host/via-sdmmc.c
-> > index ef95bce50889..e4d8126cd4e5 100644
-> > --- a/drivers/mmc/host/via-sdmmc.c
-> > +++ b/drivers/mmc/host/via-sdmmc.c
-> > @@ -1259,11 +1259,14 @@ static void via_init_sdc_pm(struct via_crdr_mmc_host *host)
-> >  static int via_sd_suspend(struct pci_dev *pcidev, pm_message_t state)
-> >  {
-> >         struct via_crdr_mmc_host *host;
-> > +       unsigned long flags;
-> >
-> >         host = pci_get_drvdata(pcidev);
-> >
-> > +       spin_lock_irqsave(&host->lock, flags);
-> >         via_save_pcictrlreg(host);
-> >         via_save_sdcreg(host);
-> > +       spin_unlock_irqrestore(&host->lock, flags);
-> >
-> >         pci_save_state(pcidev);
-> >         pci_enable_wake(pcidev, pci_choose_state(pcidev, state), 0);
-> > --
-> > 2.17.1
-> >
+> Human readable SDIO card strings can be useful for userspace to do card
+> identification. Until now kernel exported to userspace only vendor and
+> device numbers but these numbers do not help to identify new or unknown
+> cards.
+> 
+> 
+> I have tested these patches with Marwell 88W8997 SDIO card (WiFi+Bluetooth)
+> and here is content of attributes available in userspace:
+> 
+> $ grep . /sys/class/mmc_host/mmc0/mmc0:0001/* /sys/class/mmc_host/mmc0/mmc0:0001/*/*
+> /sys/class/mmc_host/mmc0/mmc0:0001/device:0x9140
+> /sys/class/mmc_host/mmc0/mmc0:0001/info1:Marvell
+> /sys/class/mmc_host/mmc0/mmc0:0001/info2:Wireless Device ID: 50
+> /sys/class/mmc_host/mmc0/mmc0:0001/ocr:0x00200000
+> /sys/class/mmc_host/mmc0/mmc0:0001/rca:0x0001
+> /sys/class/mmc_host/mmc0/mmc0:0001/revision:1.0
+> /sys/class/mmc_host/mmc0/mmc0:0001/type:SDIO
+> /sys/class/mmc_host/mmc0/mmc0:0001/uevent:MMC_TYPE=SDIO
+> /sys/class/mmc_host/mmc0/mmc0:0001/uevent:SDIO_ID=02DF:9140
+> /sys/class/mmc_host/mmc0/mmc0:0001/uevent:SDIO_REVISION=1.0
+> /sys/class/mmc_host/mmc0/mmc0:0001/uevent:SDIO_INFO1=Marvell
+> /sys/class/mmc_host/mmc0/mmc0:0001/uevent:SDIO_INFO2=Wireless Device ID: 50
+> /sys/class/mmc_host/mmc0/mmc0:0001/uevent:SDIO_INFO3=
+> /sys/class/mmc_host/mmc0/mmc0:0001/vendor:0x02df
+> /sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:1/class:0x00
+> /sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:1/device:0x9141
+> /sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:1/info1:Marvell WiFi Device
+> /sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:1/modalias:sdio:c00v02DFd9141
+> /sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:1/revision:1.0
+> /sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:1/uevent:DRIVER=mwifiex_sdio
+> /sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:1/uevent:SDIO_CLASS=00
+> /sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:1/uevent:SDIO_ID=02DF:9141
+> /sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:1/uevent:SDIO_REVISION=1.0
+> /sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:1/uevent:SDIO_INFO1=Marvell WiFi Device
+> /sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:1/uevent:SDIO_INFO2=
+> /sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:1/uevent:MODALIAS=sdio:c00v02DFd9141
+> /sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:1/vendor:0x02df
+> /sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:2/class:0x00
+> /sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:2/device:0x9142
+> /sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:2/info1:Marvell Bluetooth Device
+> /sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:2/modalias:sdio:c00v02DFd9142
+> /sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:2/revision:1.0
+> /sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:2/uevent:DRIVER=btmrvl_sdio
+> /sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:2/uevent:SDIO_CLASS=00
+> /sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:2/uevent:SDIO_ID=02DF:9142
+> /sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:2/uevent:SDIO_REVISION=1.0
+> /sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:2/uevent:SDIO_INFO1=Marvell Bluetooth Device
+> /sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:2/uevent:SDIO_INFO2=
+> /sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:2/uevent:MODALIAS=sdio:c00v02DFd9142
+> /sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:2/vendor:0x02df
+> /sys/class/mmc_host/mmc0/mmc0:0001/power/control:auto
+> /sys/class/mmc_host/mmc0/mmc0:0001/power/runtime_active_time:0
+> /sys/class/mmc_host/mmc0/mmc0:0001/power/runtime_status:unsupported
+> /sys/class/mmc_host/mmc0/mmc0:0001/power/runtime_suspended_time:0
+> /sys/class/mmc_host/mmc0/mmc0:0001/subsystem/drivers_autoprobe:1
+> 
+> As can be seen SDIO card does not provide all 4 info strings as required by
+> SDIO/PCMCIA specificaion and the third and the second strings are empty.
+> 
+> 
+> Pali Rohár (4):
+>   mmc: sdio: Check for CISTPL_VERS_1 buffer size
+>   mmc: sdio: Parse CISTPL_VERS_1 major and minor revision numbers
+>   mmc: sdio: Extend sdio_config_attr macro and use it also for modalias
+>   mmc: sdio: Export SDIO revision and info strings to userspace
+> 
+>  drivers/mmc/core/bus.c        | 12 ++++++++
+>  drivers/mmc/core/sd.c         | 36 +++++++++++++++++++++--
+>  drivers/mmc/core/sdio.c       | 24 ++++++++++++++++
+>  drivers/mmc/core/sdio_bus.c   | 54 ++++++++++++++++++++++++++---------
+>  drivers/mmc/core/sdio_cis.c   | 11 +++++++
+>  include/linux/mmc/card.h      |  2 ++
+>  include/linux/mmc/sdio_func.h |  2 ++
+>  7 files changed, 124 insertions(+), 17 deletions(-)
+> 
+> -- 
+> 2.20.1
+> 
