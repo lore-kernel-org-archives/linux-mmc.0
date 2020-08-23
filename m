@@ -7,37 +7,37 @@ X-Spam-Status: No, score=-14.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 87685C433E3
-	for <linux-mmc@archiver.kernel.org>; Sun, 23 Aug 2020 16:19:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 45171C433DF
+	for <linux-mmc@archiver.kernel.org>; Sun, 23 Aug 2020 16:19:37 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 653882072D
-	for <linux-mmc@archiver.kernel.org>; Sun, 23 Aug 2020 16:19:26 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1E0A72072D
+	for <linux-mmc@archiver.kernel.org>; Sun, 23 Aug 2020 16:19:37 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1598199566;
-	bh=Dm+3LfgmxlFk7lfKGosmt5pRH6F3QaIaaVYrmFBasII=;
+	s=default; t=1598199577;
+	bh=D0lGql3068l0qoya1++oR3DiMvBwPOUE4frjDG+x5vE=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=lUrJRZkHAE2r8tjNbcZ9xvBFU9JzmhUDnaP+1FYnEYFH5XLXlt9NjQDZlYJkQZzkg
-	 ABwJqg+bGgBe2uoN7N6YEDiauk9G0G3iNhyupcaypzn2PuxVNZSMbhbLWnz6iaoax0
-	 Zn2/pz0sS49ggT3oQevPE5pxUo/D3VMJGGJQdmFU=
+	b=M0rFpXo2gNPzUjUJuYHcrplhxAUQVQ6LPH0NahOJZv9aOimN0YurJ16P31FKJ7+oy
+	 5qnWvHUf/sTDHY9L6XUgMY8GE3Hj1na4kunvA46fPAuA5chmBPQgPzGv/myhLoGJm7
+	 engAVBxAq8wK78NjDUXCcwSavwTzSoniLPXrrLus=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728000AbgHWQQo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 23 Aug 2020 12:16:44 -0400
-Received: from mail.kernel.org ([198.145.29.99]:45602 "EHLO mail.kernel.org"
+        id S1727843AbgHWQT2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 23 Aug 2020 12:19:28 -0400
+Received: from mail.kernel.org ([198.145.29.99]:45364 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728077AbgHWQQn (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Sun, 23 Aug 2020 12:16:43 -0400
+        id S1728058AbgHWQQk (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Sun, 23 Aug 2020 12:16:40 -0400
 Received: from kozik-lap.proceq-device.com (unknown [194.230.155.216])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 1CC512072D;
-        Sun, 23 Aug 2020 16:16:38 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 84E8020767;
+        Sun, 23 Aug 2020 16:16:34 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1598199403;
-        bh=Dm+3LfgmxlFk7lfKGosmt5pRH6F3QaIaaVYrmFBasII=;
+        s=default; t=1598199398;
+        bh=D0lGql3068l0qoya1++oR3DiMvBwPOUE4frjDG+x5vE=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=alxYw3w0Yojxo8jsqF6OWmbny22Aq5p49ceacHXctvdMTGq8lrsNE0znpfK1f+5Oo
-         rLtD7QUVvLsv8msNK0W4qxahHmXsJC3GvITu6EU5tGYRkfxTmX9fLCyEmYsl8mOVZz
-         uPlUjFBDUkJBUddPpfnyPkYarqtGTtofEtSF2PjU=
+        b=B/E0sV3kwDQRaFmn8EdN7bwjcXjd8MTgJEGTp73HqPVT4rQNhHCoD8KfzDzzcKy2z
+         sqZzm5CLgq76fFj0BdYO9NbFl8Ku8n7GzzdFGj0jMqiVQBQDD1FZgG5+dPPjkEWNIu
+         6wPmKkb/QE93ZeTgXR+Rg8/vErI34DbgrE9UBs2Y=
 From:   Krzysztof Kozlowski <krzk@kernel.org>
 To:     Rob Herring <robh+dt@kernel.org>,
         Linus Walleij <linus.walleij@linaro.org>,
@@ -55,9 +55,9 @@ To:     Rob Herring <robh+dt@kernel.org>,
 Cc:     Thierry Reding <thierry.reding@gmail.com>,
         Anson Huang <Anson.Huang@nxp.com>,
         Krzysztof Kozlowski <krzk@kernel.org>
-Subject: [PATCH 10/22] dt-bindings: reset: fsl,imx7-src: Add i.MX 8M compatibles
-Date:   Sun, 23 Aug 2020 18:15:38 +0200
-Message-Id: <20200823161550.3981-10-krzk@kernel.org>
+Subject: [PATCH 09/22] dt-bindings: mtd: gpmi-nand: Add i.MX 8M compatibles
+Date:   Sun, 23 Aug 2020 18:15:37 +0200
+Message-Id: <20200823161550.3981-9-krzk@kernel.org>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20200823161550.3981-1-krzk@kernel.org>
 References: <20200823161550.3981-1-krzk@kernel.org>
@@ -69,51 +69,50 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 DTSes with new i.MX 8M SoCs introduce their own compatibles so add them
 to fix dtbs_check warnings like:
 
-  arch/arm64/boot/dts/freescale/imx8mm-evk.dt.yaml: reset-controller@30390000:
-    compatible:0: 'fsl,imx8mm-src' is not one of ['fsl,imx7d-src', 'fsl,imx8mq-src', 'fsl,imx8mp-src']
-    From schema: Documentation/devicetree/bindings/reset/fsl,imx7-src.yaml
+  arch/arm64/boot/dts/freescale/imx8mm-evk.dt.yaml: nand-controller@33002000:
+    compatible:0: 'fsl,imx8mm-gpmi-nand' is not one of ['fsl,imx23-gpmi-nand', 'fsl,imx28-gpmi-nand', 'fsl,imx6q-gpmi-nand', 'fsl,imx6sx-gpmi-nand', 'fsl,imx7d-gpmi-nand']
+    From schema: Documentation/devicetree/bindings/mtd/gpmi-nand.yaml
 
-  arch/arm64/boot/dts/freescale/imx8mm-evk.dt.yaml: reset-controller@30390000:
-    compatible:1: 'syscon' was expected
+  arch/arm64/boot/dts/freescale/imx8mm-evk.dt.yaml: nand-controller@33002000:
+    compatible: ['fsl,imx8mm-gpmi-nand', 'fsl,imx7d-gpmi-nand'] is too long
 
-  arch/arm64/boot/dts/freescale/imx8mm-evk.dt.yaml: reset-controller@30390000:
-    compatible: ['fsl,imx8mm-src', 'fsl,imx8mq-src', 'syscon'] is too long
+  arch/arm64/boot/dts/freescale/imx8mm-evk.dt.yaml: nand-controller@33002000:
+    compatible: Additional items are not allowed ('fsl,imx7d-gpmi-nand' was unexpected)
 
 Signed-off-by: Krzysztof Kozlowski <krzk@kernel.org>
 ---
- .../bindings/reset/fsl,imx7-src.yaml          | 19 +++++++++++++------
- 1 file changed, 13 insertions(+), 6 deletions(-)
+ .../devicetree/bindings/mtd/gpmi-nand.yaml     | 18 ++++++++++++------
+ 1 file changed, 12 insertions(+), 6 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/reset/fsl,imx7-src.yaml b/Documentation/devicetree/bindings/reset/fsl,imx7-src.yaml
-index 569cd3bd3a70..00430e2eabc8 100644
---- a/Documentation/devicetree/bindings/reset/fsl,imx7-src.yaml
-+++ b/Documentation/devicetree/bindings/reset/fsl,imx7-src.yaml
-@@ -22,12 +22,19 @@ description: |
+diff --git a/Documentation/devicetree/bindings/mtd/gpmi-nand.yaml b/Documentation/devicetree/bindings/mtd/gpmi-nand.yaml
+index 3201372b7f85..28ff8c581837 100644
+--- a/Documentation/devicetree/bindings/mtd/gpmi-nand.yaml
++++ b/Documentation/devicetree/bindings/mtd/gpmi-nand.yaml
+@@ -20,12 +20,18 @@ description: |
  
  properties:
    compatible:
--    items:
--      - enum:
--          - fsl,imx7d-src
--          - fsl,imx8mq-src
--          - fsl,imx8mp-src
--      - const: syscon
+-    enum:
+-      - fsl,imx23-gpmi-nand
+-      - fsl,imx28-gpmi-nand
+-      - fsl,imx6q-gpmi-nand
+-      - fsl,imx6sx-gpmi-nand
+-      - fsl,imx7d-gpmi-nand
 +    oneOf:
++      - enum:
++          - fsl,imx23-gpmi-nand
++          - fsl,imx28-gpmi-nand
++          - fsl,imx6q-gpmi-nand
++          - fsl,imx6sx-gpmi-nand
++          - fsl,imx7d-gpmi-nand
 +      - items:
 +          - enum:
-+              - fsl,imx7d-src
-+              - fsl,imx8mq-src
-+              - fsl,imx8mp-src
-+          - const: syscon
-+      - items:
-+          - enum:
-+              - fsl,imx8mm-src
-+              - fsl,imx8mn-src
-+          - const: fsl,imx8mq-src
-+          - const: syscon
++              - fsl,imx8mm-gpmi-nand
++              - fsl,imx8mn-gpmi-nand
++          - const: fsl,imx7d-gpmi-nand
  
    reg:
-     maxItems: 1
+     items:
 -- 
 2.17.1
 
