@@ -7,37 +7,37 @@ X-Spam-Status: No, score=-14.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7A8EAC433E3
-	for <linux-mmc@archiver.kernel.org>; Sun, 23 Aug 2020 16:18:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 66B08C433E1
+	for <linux-mmc@archiver.kernel.org>; Sun, 23 Aug 2020 16:18:57 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5257C2075B
-	for <linux-mmc@archiver.kernel.org>; Sun, 23 Aug 2020 16:18:55 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3A89A2075B
+	for <linux-mmc@archiver.kernel.org>; Sun, 23 Aug 2020 16:18:57 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1598199535;
-	bh=IcWdUIpZPLrTFhfMFn5K5VkjUKVluLTxZ3P2v5TWsEE=;
+	s=default; t=1598199537;
+	bh=1X/cRmfopwt+rCsRoYRr5R5QW8XW/gYCIDl6hjON3qs=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=PVF1N5QdJHjoPQjPhAX9ZdHE+D/zf9yePmRJW8nolVoTRy/Wj9FwWEvf2QJ85E/h2
-	 4uruXTERgQRm7V+mJ06yFlHrHDkIh7uBbdXY1XNIqZ9mGNYGyIhqy1x9mA1itQci1d
-	 izXM/xtLZsW/T3y26M6Q74OT3aRpd009xcHK6fQ4=
+	b=x7VA1U1wlpSlXqR//eQPJQIyueOBhJ6L0uRXi7N38/lF2/ZLSi3wP1u+WUQtWbNHX
+	 u+VY1p3jBrW5IR6VCLAz6AVFFkzrNk7c1NUmEMCxuA7gi5QtHBThD3jWtnPU4hPEaD
+	 HuaAxG1gbImvPXcBlRU2jm6uQBVv6aQiLA6gAp9k=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727042AbgHWQRX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 23 Aug 2020 12:17:23 -0400
-Received: from mail.kernel.org ([198.145.29.99]:46858 "EHLO mail.kernel.org"
+        id S1728155AbgHWQRO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 23 Aug 2020 12:17:14 -0400
+Received: from mail.kernel.org ([198.145.29.99]:46652 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728165AbgHWQRQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Sun, 23 Aug 2020 12:17:16 -0400
+        id S1728148AbgHWQRL (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Sun, 23 Aug 2020 12:17:11 -0400
 Received: from kozik-lap.proceq-device.com (unknown [194.230.155.216])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id B598F20767;
-        Sun, 23 Aug 2020 16:17:11 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id F3BC72072D;
+        Sun, 23 Aug 2020 16:17:06 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1598199435;
-        bh=IcWdUIpZPLrTFhfMFn5K5VkjUKVluLTxZ3P2v5TWsEE=;
+        s=default; t=1598199431;
+        bh=1X/cRmfopwt+rCsRoYRr5R5QW8XW/gYCIDl6hjON3qs=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=g7c5SyZZT6Zq8zJcs7lELf9ENGqIJrTY1K8TN0SnqUBmDOtVgzwuLqzGeDHKGyVRQ
-         lj9S8EE9fqkp5cgD2AX3lCDtvNKRKtootihwVhEMWPId8da+rT2m3wXQtkwVclHGWe
-         +3LUdG7rGfwqnbJILBO4DM5BJs/DnK/O2os08ITE=
+        b=OmxIKuI0++TYe9fb9g6cyyUrwH9XYJ6k5PXI+/VqYSNFPo4x2EIXeD/6b3/YO/9Z5
+         Nm0uZORFSVdiL8NVmYUoiu/w+rB3+zxfMAKDZ7eCd3+DeDav3kfCSYLNK4Lr5DRdlY
+         vv+cL69/sf2gnMqWSl3I8uTPr85T8nzUd5PY3Bb8=
 From:   Krzysztof Kozlowski <krzk@kernel.org>
 To:     Rob Herring <robh+dt@kernel.org>,
         Linus Walleij <linus.walleij@linaro.org>,
@@ -55,9 +55,9 @@ To:     Rob Herring <robh+dt@kernel.org>,
 Cc:     Thierry Reding <thierry.reding@gmail.com>,
         Anson Huang <Anson.Huang@nxp.com>,
         Krzysztof Kozlowski <krzk@kernel.org>
-Subject: [PATCH 17/22] arm64: dts: imx8mq-evk: Add hog suffix to wl-reg-on
-Date:   Sun, 23 Aug 2020 18:15:45 +0200
-Message-Id: <20200823161550.3981-17-krzk@kernel.org>
+Subject: [PATCH 16/22] dt-bindings: interrupt-controller: fsl,irqsteer: Fix compatible matching
+Date:   Sun, 23 Aug 2020 18:15:44 +0200
+Message-Id: <20200823161550.3981-16-krzk@kernel.org>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20200823161550.3981-1-krzk@kernel.org>
 References: <20200823161550.3981-1-krzk@kernel.org>
@@ -66,28 +66,40 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-According to device tree specification, device node names should be
-somewhat generic and reflecting the function of the device so add the
-"hog" suffix to wl-reg-on GPIO hog.
+The i.MX 8M DTSes use two compatibles so update the binding to fix
+dtbs_check warnings like:
+
+  arch/arm64/boot/dts/freescale/imx8mq-thor96.dt.yaml: interrupt-controller@32e2d000:
+    compatible: ['fsl,imx8m-irqsteer', 'fsl,imx-irqsteer'] is too long
+    From schema: Domentation/devicetree/bindings/interrupt-controller/fsl,irqsteer.yaml
+
+  arch/arm64/boot/dts/freescale/imx8mq-thor96.dt.yaml: interrupt-controller@32e2d000:
+    compatible: Additional items are not allowed ('fsl,imx-irqsteer' was unexpected)
 
 Signed-off-by: Krzysztof Kozlowski <krzk@kernel.org>
 ---
- arch/arm64/boot/dts/freescale/imx8mq-evk.dts | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ .../bindings/interrupt-controller/fsl,irqsteer.yaml       | 8 +++++---
+ 1 file changed, 5 insertions(+), 3 deletions(-)
 
-diff --git a/arch/arm64/boot/dts/freescale/imx8mq-evk.dts b/arch/arm64/boot/dts/freescale/imx8mq-evk.dts
-index 8aa9cd8e495a..a088831d2e24 100644
---- a/arch/arm64/boot/dts/freescale/imx8mq-evk.dts
-+++ b/arch/arm64/boot/dts/freescale/imx8mq-evk.dts
-@@ -157,7 +157,7 @@
- 	pinctrl-names = "default";
- 	pinctrl-0 = <&pinctrl_wifi_reset>;
+diff --git a/Documentation/devicetree/bindings/interrupt-controller/fsl,irqsteer.yaml b/Documentation/devicetree/bindings/interrupt-controller/fsl,irqsteer.yaml
+index 360a575ef8b0..3b11a1a15398 100644
+--- a/Documentation/devicetree/bindings/interrupt-controller/fsl,irqsteer.yaml
++++ b/Documentation/devicetree/bindings/interrupt-controller/fsl,irqsteer.yaml
+@@ -11,9 +11,11 @@ maintainers:
  
--	wl-reg-on {
-+	wl-reg-on-hog {
- 		gpio-hog;
- 		gpios = <29 GPIO_ACTIVE_HIGH>;
- 		output-high;
+ properties:
+   compatible:
+-    enum:
+-      - fsl,imx8m-irqsteer
+-      - fsl,imx-irqsteer
++    oneOf:
++      - const: fsl,imx-irqsteer
++      - items:
++          - const: fsl,imx8m-irqsteer
++          - const: fsl,imx-irqsteer
+ 
+   reg:
+     maxItems: 1
 -- 
 2.17.1
 
