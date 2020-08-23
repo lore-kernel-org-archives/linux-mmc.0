@@ -7,37 +7,37 @@ X-Spam-Status: No, score=-14.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 815F5C433EA
-	for <linux-mmc@archiver.kernel.org>; Sun, 23 Aug 2020 16:20:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1765EC433DF
+	for <linux-mmc@archiver.kernel.org>; Sun, 23 Aug 2020 16:20:08 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5DF9722B40
-	for <linux-mmc@archiver.kernel.org>; Sun, 23 Aug 2020 16:20:06 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id DDA202075B
+	for <linux-mmc@archiver.kernel.org>; Sun, 23 Aug 2020 16:20:07 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1598199606;
-	bh=yKCM7tLnXxMws8MTZ9jhKA97yUjAzHOZPP6ETkwSECU=;
+	s=default; t=1598199607;
+	bh=qT97af3F+6zT5YN98/ik4UyHTeDAWVRhgipmgnsunZo=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=MIupGLGQw43g8xNbZsmkdUmX2JE6ob6jFxDwXwgQ2tVLYFqSboWD2flvLCyij1N3s
-	 Ixf9CE81X1gC4rbAXO5uCJZwA+XLytqfg7tMUiFopoYAv+3mKVAUw9K/aGo+ieiBAX
-	 niC0PAkudYkjiN7dos871BwoyDAJVz1e4oOZCY68=
+	b=gpk8NennAnFPGrsBC9qxfMj7ZpMGWm3T+PWdDfSFSQDl61dFUrlhgVeVTUBazUgAj
+	 v7X5P9EDnageMD1PP+MNLyPMGNcKT1Vs5k+Bbel/7le1l6z/3KOFPW/nTs5jnrZPbt
+	 dyqqyWk3HzEq9va9cJGksn1QLjN10J7AdLdPmHC4=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727988AbgHWQQ1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 23 Aug 2020 12:16:27 -0400
-Received: from mail.kernel.org ([198.145.29.99]:44752 "EHLO mail.kernel.org"
+        id S1727849AbgHWQQ0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 23 Aug 2020 12:16:26 -0400
+Received: from mail.kernel.org ([198.145.29.99]:44432 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727836AbgHWQQZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Sun, 23 Aug 2020 12:16:25 -0400
+        id S1727905AbgHWQQQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Sun, 23 Aug 2020 12:16:16 -0400
 Received: from kozik-lap.proceq-device.com (unknown [194.230.155.216])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id CC9C720767;
-        Sun, 23 Aug 2020 16:16:20 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 96E282072D;
+        Sun, 23 Aug 2020 16:16:11 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1598199384;
-        bh=yKCM7tLnXxMws8MTZ9jhKA97yUjAzHOZPP6ETkwSECU=;
+        s=default; t=1598199375;
+        bh=qT97af3F+6zT5YN98/ik4UyHTeDAWVRhgipmgnsunZo=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=J9UTaE5wLzgKph+nZVaiHPQI/bQFi3jkQu3Bq/mCJqqVDhAzVHrOGSla5kcuHNpfW
-         Rjsz3FrMJmE0UPj9VM21JQKK7tMGqF9soY6qz0m7GmBM3jaasdWJw1GufujloLb+5m
-         +QbsRgkisM82EefUDSBdUUPuwPJ4IegaiTipCzQA=
+        b=IYTIJdnKD8ggSMwFP0uCdP7QfLgD+Q74psSfXOgJNF5q1PJXOQdH2j3H/mktYKKxk
+         DnYLOalxi3KdGoGad4midcoNESDhAXpSuIJlQ+fPr/zEZ7AILWav3BrpWW3cBW04+m
+         3PvCTduJ7FmVeJHkBVTHB+S1jPBqkoz9/l8chR/o=
 From:   Krzysztof Kozlowski <krzk@kernel.org>
 To:     Rob Herring <robh+dt@kernel.org>,
         Linus Walleij <linus.walleij@linaro.org>,
@@ -55,9 +55,9 @@ To:     Rob Herring <robh+dt@kernel.org>,
 Cc:     Thierry Reding <thierry.reding@gmail.com>,
         Anson Huang <Anson.Huang@nxp.com>,
         Krzysztof Kozlowski <krzk@kernel.org>
-Subject: [PATCH 06/22] dt-bindings: pwm: imx-pwm: Add i.MX 8M compatibles
-Date:   Sun, 23 Aug 2020 18:15:34 +0200
-Message-Id: <20200823161550.3981-6-krzk@kernel.org>
+Subject: [PATCH 04/22] dt-bindings: gpio: fsl-imx-gpio: Add power-domains
+Date:   Sun, 23 Aug 2020 18:15:32 +0200
+Message-Id: <20200823161550.3981-4-krzk@kernel.org>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20200823161550.3981-1-krzk@kernel.org>
 References: <20200823161550.3981-1-krzk@kernel.org>
@@ -66,49 +66,31 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-DTSes with new i.MX 8M SoCs introduce their own compatibles so add them
-to fix dtbs_check warnings like:
+Parse also optional power-domains property to fix dtbs_check warnings
+like:
 
-  arch/arm64/boot/dts/freescale/imx8mm-evk.dt.yaml: pwm@30660000:
-    compatible:0: 'fsl,imx8mm-pwm' is not one of ['fsl,imx1-pwm', 'fsl,imx27-pwm']
-    From schema: Documentation/devicetree/bindings/pwm/imx-pwm.yaml
-
-  arch/arm64/boot/dts/freescale/imx8mm-evk.dt.yaml: pwm@30660000:
-    compatible: ['fsl,imx8mm-pwm', 'fsl,imx27-pwm'] is too long
-
-  arch/arm64/boot/dts/freescale/imx8mm-evk.dt.yaml: pwm@30660000:
-    compatible: Additional items are not allowed ('fsl,imx27-pwm' was unexpected)
+  arch/arm64/boot/dts/freescale/imx8qxp-ai_ml.dt.yaml: gpio@5d080000: 'power-domains' does not match any of the regexes: 'pinctrl-[0-9]+'
+    From schema: Documentation/devicetree/bindings/gpio/fsl-imx-gpio.yaml
 
 Signed-off-by: Krzysztof Kozlowski <krzk@kernel.org>
 ---
- Documentation/devicetree/bindings/pwm/imx-pwm.yaml | 14 +++++++++++---
- 1 file changed, 11 insertions(+), 3 deletions(-)
+ Documentation/devicetree/bindings/gpio/fsl-imx-gpio.yaml | 3 +++
+ 1 file changed, 3 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/pwm/imx-pwm.yaml b/Documentation/devicetree/bindings/pwm/imx-pwm.yaml
-index 01df06777cba..473863eb67e5 100644
---- a/Documentation/devicetree/bindings/pwm/imx-pwm.yaml
-+++ b/Documentation/devicetree/bindings/pwm/imx-pwm.yaml
-@@ -19,9 +19,17 @@ properties:
-       - 3
- 
-   compatible:
--    enum:
--      - fsl,imx1-pwm
--      - fsl,imx27-pwm
-+    oneOf:
-+      - enum:
-+          - fsl,imx1-pwm
-+          - fsl,imx27-pwm
-+      - items:
-+          - enum:
-+              - fsl,imx8mm-pwm
-+              - fsl,imx8mn-pwm
-+              - fsl,imx8mp-pwm
-+              - fsl,imx8mq-pwm
-+          - const: fsl,imx27-pwm
- 
-   reg:
+diff --git a/Documentation/devicetree/bindings/gpio/fsl-imx-gpio.yaml b/Documentation/devicetree/bindings/gpio/fsl-imx-gpio.yaml
+index 337b99343dce..a7d17a98df6b 100644
+--- a/Documentation/devicetree/bindings/gpio/fsl-imx-gpio.yaml
++++ b/Documentation/devicetree/bindings/gpio/fsl-imx-gpio.yaml
+@@ -54,6 +54,9 @@ properties:
+   gpio-ranges:
      maxItems: 1
+ 
++  power-domains:
++    maxItems: 1
++
+ patternProperties:
+   "^(hog-[0-9]+|.+-hog(-[0-9]+)?)$":
+     type: object
 -- 
 2.17.1
 
