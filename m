@@ -7,37 +7,37 @@ X-Spam-Status: No, score=-14.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 68989C433E8
-	for <linux-mmc@archiver.kernel.org>; Sun, 23 Aug 2020 16:19:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D11A3C433E1
+	for <linux-mmc@archiver.kernel.org>; Sun, 23 Aug 2020 16:19:09 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 49B742072D
-	for <linux-mmc@archiver.kernel.org>; Sun, 23 Aug 2020 16:19:00 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B12D42087D
+	for <linux-mmc@archiver.kernel.org>; Sun, 23 Aug 2020 16:19:09 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1598199540;
-	bh=QlwySSBCvmniu5l1kZrfLw5QDFpCJZGwDezndX9H7Zo=;
+	s=default; t=1598199549;
+	bh=VqDD3KFuiRD86Z7+w0i17rgKkKCPFxI1DEBp8fL8MEs=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=hzL3PKD3VJ+7E7h5AN+lGCtZiYmNRnhaxko2X7fOHdrz16gMkg/pMTlQlLJGiDWGP
-	 mAQsOT02IrSqufQCHX1Nx3khPB+8C6OQLIChk/N+AY/+yZcKKMsk7SXwC6EC6522ka
-	 8C1liWXULphRYaF3uGwf+cnjLnpSxjCEqH1HV9SA=
+	b=EpmXixFQIcWXR6WK/5Y+vqrUe5FUb/K724GMeaAL0NZsxWuOaaAslCa3uWZ07Pu9J
+	 v/cMD6Fm8at3X8jN3lWawjFAYhiGhvCfJuasXqMzEmJSpDAyn73AnfY90aDcRySM66
+	 u74cIRRG0uXIvY7aGlqw/tUaDnZUYNOXV+lQarv8=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728119AbgHWQRF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 23 Aug 2020 12:17:05 -0400
-Received: from mail.kernel.org ([198.145.29.99]:46288 "EHLO mail.kernel.org"
+        id S1726057AbgHWQTB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 23 Aug 2020 12:19:01 -0400
+Received: from mail.kernel.org ([198.145.29.99]:46096 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727049AbgHWQRC (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Sun, 23 Aug 2020 12:17:02 -0400
+        id S1728105AbgHWQQ5 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Sun, 23 Aug 2020 12:16:57 -0400
 Received: from kozik-lap.proceq-device.com (unknown [194.230.155.216])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id AEEB02072D;
-        Sun, 23 Aug 2020 16:16:57 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 193DD2078A;
+        Sun, 23 Aug 2020 16:16:52 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1598199421;
-        bh=QlwySSBCvmniu5l1kZrfLw5QDFpCJZGwDezndX9H7Zo=;
+        s=default; t=1598199417;
+        bh=VqDD3KFuiRD86Z7+w0i17rgKkKCPFxI1DEBp8fL8MEs=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=djqIqNfpDmCmAnKttL/Jn8WVYR+hrsPFeZ18Xf1X9f0kSf3uyPd+3W9sIOZ2oGCj9
-         eU/976pAeoTdxJrCRFp4IOXobPGzAwtVOoEP0biGIMBSRLT15GOWf+zLhV+1fu1JBw
-         oYITexJMsa1/UlJ4n4pCKbkCKIwpmRNO4zXg4YbU=
+        b=MCzDXQVgp12mbtB449hvqtg7DzFdqsO50NCG20CPk1CsZdLEJfHDaLpgv7hQiFozl
+         65k5IkpH4qZJ/JxrPVyr6VCgjsJNsUFOxZFdgzzJK9n3KQX0m6DpPrmDLR7D6+wrHK
+         Z0iUD8IrtKeucGsZayZVT8FCgSjVCTBh+IVhWc6o=
 From:   Krzysztof Kozlowski <krzk@kernel.org>
 To:     Rob Herring <robh+dt@kernel.org>,
         Linus Walleij <linus.walleij@linaro.org>,
@@ -55,9 +55,9 @@ To:     Rob Herring <robh+dt@kernel.org>,
 Cc:     Thierry Reding <thierry.reding@gmail.com>,
         Anson Huang <Anson.Huang@nxp.com>,
         Krzysztof Kozlowski <krzk@kernel.org>
-Subject: [PATCH 14/22] dt-bindings: arm: fsl: Fix Toradex Colibri i.MX 8 binding
-Date:   Sun, 23 Aug 2020 18:15:42 +0200
-Message-Id: <20200823161550.3981-14-krzk@kernel.org>
+Subject: [PATCH 13/22] dt-bindings: nvmem: imx-ocotp: Update i.MX 8M compatibles
+Date:   Sun, 23 Aug 2020 18:15:41 +0200
+Message-Id: <20200823161550.3981-13-krzk@kernel.org>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20200823161550.3981-1-krzk@kernel.org>
 References: <20200823161550.3981-1-krzk@kernel.org>
@@ -66,36 +66,73 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The Toradex Colibri i.MX 8 Evaluation board has two Toradex compatibles
-so it needs separate entry.  This fixes dtbs_check warning:
+DTSes with new i.MX 8M SoCs use two compatibles so update the binding to
+fix dtbs_check warnings like:
 
-  arch/arm64/boot/dts/freescale/imx8qxp-colibri-eval-v3.dt.yaml: /:
-    compatible: ['toradex,colibri-imx8x-eval-v3', 'toradex,colibri-imx8x', 'fsl,imx8qxp'] is not valid under any of the given schemas (Possible causes of the failure):
-    arch/arm64/boot/dts/freescale/imx8qxp-colibri-eval-v3.dt.yaml: /: compatible: ['toradex,colibri-imx8x-eval-v3', 'toradex,colibri-imx8x', 'fsl,imx8qxp'] is too long
+  arch/arm64/boot/dts/freescale/imx8mn-evk.dt.yaml: efuse@30350000: compatible:1: 'syscon' was expected
+    From schema: Documentation/devicetree/bindings/nvmem/imx-ocotp.yaml
+
+  arch/arm64/boot/dts/freescale/imx8mn-evk.dt.yaml: efuse@30350000:
+    compatible: ['fsl,imx8mn-ocotp', 'fsl,imx8mm-ocotp', 'syscon'] is too long
+
+  arch/arm64/boot/dts/freescale/imx8mn-evk.dt.yaml: efuse@30350000:
+    compatible: Additional items are not allowed ('syscon' was unexpected)
 
 Signed-off-by: Krzysztof Kozlowski <krzk@kernel.org>
 ---
- Documentation/devicetree/bindings/arm/fsl.yaml | 6 ++++++
- 1 file changed, 6 insertions(+)
+ .../devicetree/bindings/nvmem/imx-ocotp.yaml  | 39 ++++++++++++-------
+ 1 file changed, 24 insertions(+), 15 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/arm/fsl.yaml b/Documentation/devicetree/bindings/arm/fsl.yaml
-index 591fa336d6fa..93a21b10d115 100644
---- a/Documentation/devicetree/bindings/arm/fsl.yaml
-+++ b/Documentation/devicetree/bindings/arm/fsl.yaml
-@@ -385,7 +385,13 @@ properties:
-               - einfochips,imx8qxp-ai_ml  # i.MX8QXP AI_ML Board
-               - fsl,imx8qxp-mek           # i.MX8QXP MEK Board
-               - toradex,colibri-imx8x         # Colibri iMX8X Module
-+          - const: fsl,imx8qxp
-+
-+      - description: Toradex Colibri i.MX8 Evaluation Board
-+        items:
-+          - enum:
-               - toradex,colibri-imx8x-eval-v3 # Colibri iMX8X Module on Colibri Evaluation Board V3
-+          - const: toradex,colibri-imx8x
-           - const: fsl,imx8qxp
+diff --git a/Documentation/devicetree/bindings/nvmem/imx-ocotp.yaml b/Documentation/devicetree/bindings/nvmem/imx-ocotp.yaml
+index 1c9d7f05f173..b5b250185afd 100644
+--- a/Documentation/devicetree/bindings/nvmem/imx-ocotp.yaml
++++ b/Documentation/devicetree/bindings/nvmem/imx-ocotp.yaml
+@@ -19,21 +19,30 @@ allOf:
  
-       - description:
+ properties:
+   compatible:
+-    items:
+-      - enum:
+-          - fsl,imx6q-ocotp
+-          - fsl,imx6sl-ocotp
+-          - fsl,imx6sx-ocotp
+-          - fsl,imx6ul-ocotp
+-          - fsl,imx6ull-ocotp
+-          - fsl,imx7d-ocotp
+-          - fsl,imx6sll-ocotp
+-          - fsl,imx7ulp-ocotp
+-          - fsl,imx8mq-ocotp
+-          - fsl,imx8mm-ocotp
+-          - fsl,imx8mn-ocotp
+-          - fsl,imx8mp-ocotp
+-      - const: syscon
++    oneOf:
++      - items:
++          - enum:
++              - fsl,imx6q-ocotp
++              - fsl,imx6sl-ocotp
++              - fsl,imx6sx-ocotp
++              - fsl,imx6ul-ocotp
++              - fsl,imx6ull-ocotp
++              - fsl,imx7d-ocotp
++              - fsl,imx6sll-ocotp
++              - fsl,imx7ulp-ocotp
++              - fsl,imx8mq-ocotp
++              - fsl,imx8mm-ocotp
++              - fsl,imx8mn-ocotp
++              - fsl,imx8mp-ocotp
++          - const: syscon
++      - items:
++          # The devices are not really compatible with fsl,imx8mm-ocotp, however
++          # the code for getting SoC revision depends on fsl,imx8mm-ocotp compatible.
++          - enum:
++              - fsl,imx8mn-ocotp
++              - fsl,imx8mp-ocotp
++          - const: fsl,imx8mm-ocotp
++          - const: syscon
+ 
+   reg:
+     maxItems: 1
 -- 
 2.17.1
 
