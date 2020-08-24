@@ -2,124 +2,106 @@ Return-Path: <SRS0=kf8L=CC=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+X-Spam-Status: No, score=-7.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=no
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7179CC433DF
-	for <linux-mmc@archiver.kernel.org>; Mon, 24 Aug 2020 18:21:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1F2CFC433E1
+	for <linux-mmc@archiver.kernel.org>; Mon, 24 Aug 2020 19:16:04 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4C547207CD
-	for <linux-mmc@archiver.kernel.org>; Mon, 24 Aug 2020 18:21:54 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E732420578
+	for <linux-mmc@archiver.kernel.org>; Mon, 24 Aug 2020 19:16:03 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="Xel1cwvS"
+	dkim=pass (2048-bit key) header.d=nvidia.com header.i=@nvidia.com header.b="brZDqkME"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726903AbgHXSVx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 24 Aug 2020 14:21:53 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41888 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726854AbgHXSVw (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Aug 2020 14:21:52 -0400
-Received: from mail-io1-xd42.google.com (mail-io1-xd42.google.com [IPv6:2607:f8b0:4864:20::d42])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 57DD0C061573
-        for <linux-mmc@vger.kernel.org>; Mon, 24 Aug 2020 11:21:52 -0700 (PDT)
-Received: by mail-io1-xd42.google.com with SMTP id d18so383661iop.13
-        for <linux-mmc@vger.kernel.org>; Mon, 24 Aug 2020 11:21:52 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=chromium.org; s=google;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=KjirmPfX4W9rT73jPThF+9JniX1tKDNgMG3YqTPfGnQ=;
-        b=Xel1cwvSauFvptddlfCWFjPiT+nfKjtTlIw++H3xgXBm/8BlDlV/BI22VoNvMKSLRP
-         N4p/p0RAziv1t0uzkiA/iVnY67oVae0zrG/8aiJBgCu7MPgYywo30f7J5Uld7P7mvCVs
-         goYgjQHTwTHxbZPOz3AKNqmV+QwhRf6VNt0qI=
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=KjirmPfX4W9rT73jPThF+9JniX1tKDNgMG3YqTPfGnQ=;
-        b=R0BRyIL/XgN7diANg9On8tSk6mCZDVztrHP4Gv8JlxwDtIXQdTpENc5PaydveTSXHP
-         2zdjEFETCXMSzAwEJAMXl4x4JyGmG15jrQIhuCQhUmnc18aGrTq1sTOOsWuzL43UQzSe
-         zv5/Vosd4KnS+xWMcF26H2wcWybpKt+6hyAS5bpGkwTnP/Vz/+JGiVYkNWx9rrAgKIBp
-         eODuDbhayIXRhzgYodDdcnXz28YuDnVSAk2KYgzv/Tph327Qkq4IyBzfX4FkODM+lyuj
-         ixkb9DigFZqQIlPxjbJPb4gxUd/B9rUFxdqqRd+Do1813Pga9KXNlDYYpGkw33hEMMZ5
-         qCSA==
-X-Gm-Message-State: AOAM532zSuleVL7ueKNEVnsKbyET9rPqhEGejGhg/AxEPkq4jIr76S9f
-        7sNUY6AHEmhCLmrwx5pxEuAoZQ==
-X-Google-Smtp-Source: ABdhPJzjxsIBY+edXGA4/GBDOSm8NXcQcVVet4cTReIMCb1qJ2qFJd+u78d2mm6coFLEhAYEEcXRRA==
-X-Received: by 2002:a05:6638:530:: with SMTP id j16mr6729905jar.55.1598293311632;
-        Mon, 24 Aug 2020 11:21:51 -0700 (PDT)
-Received: from rrangel920.bld.corp.google.com (h184-60-195-141.arvdco.broadband.dynamic.tds.net. [184.60.195.141])
-        by smtp.gmail.com with ESMTPSA id a16sm7507469ilc.7.2020.08.24.11.21.50
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 24 Aug 2020 11:21:51 -0700 (PDT)
-From:   Raul E Rangel <rrangel@chromium.org>
-To:     adrian.hunter@intel.com
-Cc:     Nehal-bakulchandra.Shah@amd.com, chris.wang@amd.com,
-        Akshu.Agrawal@amd.com, Raul E Rangel <rrangel@chromium.org>,
-        Jisheng Zhang <jszhang@marvell.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        clang-built-linux@googlegroups.com, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org
-Subject: [PATCH v2] mmc: sdhci: Don't enable presets while tuning
-Date:   Mon, 24 Aug 2020 12:21:48 -0600
-Message-Id: <20200824122131.v2.1.Id6f3c92fecf4acc60c3b7f57d5f4e4c854ace765@changeid>
-X-Mailer: git-send-email 2.28.0.297.g1956fa8f8d-goog
+        id S1726303AbgHXTQD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 24 Aug 2020 15:16:03 -0400
+Received: from hqnvemgate26.nvidia.com ([216.228.121.65]:7898 "EHLO
+        hqnvemgate26.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725946AbgHXTQC (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Aug 2020 15:16:02 -0400
+Received: from hqpgpgate102.nvidia.com (Not Verified[216.228.121.13]) by hqnvemgate26.nvidia.com (using TLS: TLSv1.2, DES-CBC3-SHA)
+        id <B5f4411e40002>; Mon, 24 Aug 2020 12:15:48 -0700
+Received: from hqmail.nvidia.com ([172.20.161.6])
+  by hqpgpgate102.nvidia.com (PGP Universal service);
+  Mon, 24 Aug 2020 12:16:02 -0700
+X-PGP-Universal: processed;
+        by hqpgpgate102.nvidia.com on Mon, 24 Aug 2020 12:16:02 -0700
+Received: from HQMAIL105.nvidia.com (172.20.187.12) by HQMAIL109.nvidia.com
+ (172.20.187.15) with Microsoft SMTP Server (TLS) id 15.0.1473.3; Mon, 24 Aug
+ 2020 19:16:00 +0000
+Received: from rnnvemgw01.nvidia.com (10.128.109.123) by HQMAIL105.nvidia.com
+ (172.20.187.12) with Microsoft SMTP Server (TLS) id 15.0.1473.3 via Frontend
+ Transport; Mon, 24 Aug 2020 19:16:00 +0000
+Received: from skomatineni-linux.nvidia.com (Not Verified[10.2.174.186]) by rnnvemgw01.nvidia.com with Trustwave SEG (v7,5,8,10121)
+        id <B5f4411ef0002>; Mon, 24 Aug 2020 12:16:00 -0700
+From:   Sowjanya Komatineni <skomatineni@nvidia.com>
+To:     <adrian.hunter@intel.com>, <ulf.hansson@linaro.org>,
+        <thierry.reding@gmail.com>, <jonathanh@nvidia.com>,
+        <robh+dt@kernel.org>
+CC:     <skomatineni@nvidia.com>, <linux-tegra@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
+        <devicetree@vger.kernel.org>, <stable@vger.kernel.org>
+Subject: [PATCH v4 0/7] Fix timeout clock used by hardware data timeout
+Date:   Mon, 24 Aug 2020 12:15:50 -0700
+Message-ID: <1598296557-32020-1-git-send-email-skomatineni@nvidia.com>
+X-Mailer: git-send-email 2.7.4
+X-NVConfidentiality: public
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nvidia.com; s=n1;
+        t=1598296548; bh=mW6MeP2iOU3Fc2Kxb88P6mogFG3buNVYe9PqrpY910w=;
+        h=X-PGP-Universal:From:To:CC:Subject:Date:Message-ID:X-Mailer:
+         X-NVConfidentiality:MIME-Version:Content-Type;
+        b=brZDqkME0E/izfVwIhupHb3rXUULOTCDnGU89OUndJrW3PIHMmqmax9zZTrem2HF0
+         jlZ32gKyucoUziV/V8v/dvQgpg0hcS8fGedO6AcjxZ3wK9KL/jA+WnmFMNJoz01hzE
+         o1Rj+rvl8YyfoCMAzDqnlS7arJk2mEHnNPXvkKrXTRFB2CWj+lExteWhA3teLnX3wW
+         P9nLzs3/8TIWrbrbraNdze7m7wbhvHnpefpHx5CxWHEYQSIDfgD93L69TQetzYaIr/
+         JMsLGNUzhlABue0Jj2QZDKeBG2jPoSLYH0e7wz8dbzxHPsgGJRBueEM/bx4oWLfsWt
+         FdRRdiHV28rzg==
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-SDHCI presets are not currently used for eMMC HS/HS200/HS400, but are
-used for DDR52. The HS400 retuning sequence is:
+Tegra210/Tegra186/Tegra194 has incorrectly enabled
+SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK from the beginning of their support.
 
-    HS400->DDR52->HS->HS200->Perform Tuning->HS->HS400
+Tegra210 and later SDMMC hardware default uses sdmmc_legacy_tm (TMCLK)
+all the time for hardware data timeout instead of SDCLK and this TMCLK
+need to be kept enabled by Tegra sdmmc driver.
 
-This means that when HS400 tuning happens, we transition through DDR52
-for a very brief period. This causes presets to be enabled
-unintentionally and stay enabled when transitioning back to HS200 or
-HS400.
+This series includes patches to fix this for Tegra210/Tegra186/Tegra194.
 
-This patch prevents enabling presets while tuning is in progress.
+These patches need to be manually backported for 4.9, 4.14 and 4.19.
 
-Fixes: 0dafa60eb2506 ("mmc: sdhci: also get preset value and driver type for MMC_DDR52")
-Signed-off-by: Raul E Rangel <rrangel@chromium.org>
----
-The indentation changed because I ran clang-format
+Will send patches to backport separately once these patches are ack'd.
 
-Changes in v2:
-- Fixed commit message. Patman didn't properly strip off the TEST= line.
+Delta between patch versions:
+[v4]:	Include additional dt-binding patch
 
- drivers/mmc/host/sdhci.c | 13 +++++++------
- 1 file changed, 7 insertions(+), 6 deletions(-)
+[v3]:	Same as v2 with fixes tag
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 37b1158c1c0c9..fd702c436c165 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2360,12 +2360,13 @@ void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 		host->timing = ios->timing;
- 
- 		if (!(host->quirks2 & SDHCI_QUIRK2_PRESET_VALUE_BROKEN) &&
--				((ios->timing == MMC_TIMING_UHS_SDR12) ||
--				 (ios->timing == MMC_TIMING_UHS_SDR25) ||
--				 (ios->timing == MMC_TIMING_UHS_SDR50) ||
--				 (ios->timing == MMC_TIMING_UHS_SDR104) ||
--				 (ios->timing == MMC_TIMING_UHS_DDR50) ||
--				 (ios->timing == MMC_TIMING_MMC_DDR52))) {
-+		    !mmc_doing_retune(mmc) &&
-+		    ((ios->timing == MMC_TIMING_UHS_SDR12) ||
-+		     (ios->timing == MMC_TIMING_UHS_SDR25) ||
-+		     (ios->timing == MMC_TIMING_UHS_SDR50) ||
-+		     (ios->timing == MMC_TIMING_UHS_SDR104) ||
-+		     (ios->timing == MMC_TIMING_UHS_DDR50) ||
-+		     (ios->timing == MMC_TIMING_MMC_DDR52))) {
- 			u16 preset;
- 
- 			sdhci_enable_preset_value(host, true);
+[v2]:	Includes minor fix
+	- Patch-0006: parentheses around operand of '!'
+
+Sowjanya Komatineni (7):
+  sdhci: tegra: Remove SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK for Tegra210
+  sdhci: tegra: Remove SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK for Tegra186
+  dt-bindings: mmc: tegra: Add tmclk for Tegra210 and later
+  arm64: tegra: Add missing timeout clock to Tegra210 SDMMC
+  arm64: tegra: Add missing timeout clock to Tegra186 SDMMC nodes
+  arm64: tegra: Add missing timeout clock to Tegra194 SDMMC nodes
+  sdhci: tegra: Add missing TMCLK for data timeout
+
+ .../bindings/mmc/nvidia,tegra20-sdhci.txt          | 23 +++++++++++-
+ arch/arm64/boot/dts/nvidia/tegra186.dtsi           | 20 ++++++----
+ arch/arm64/boot/dts/nvidia/tegra194.dtsi           | 15 +++++---
+ arch/arm64/boot/dts/nvidia/tegra210.dtsi           | 20 ++++++----
+ drivers/mmc/host/sdhci-tegra.c                     | 43 +++++++++++++++++++++-
+ 5 files changed, 96 insertions(+), 25 deletions(-)
+
 -- 
-2.28.0.297.g1956fa8f8d-goog
+2.7.4
 
