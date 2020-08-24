@@ -2,71 +2,68 @@ Return-Path: <SRS0=kf8L=CC=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
-	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_GIT autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7A570C433DF
-	for <linux-mmc@archiver.kernel.org>; Mon, 24 Aug 2020 15:11:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 35B5CC433DF
+	for <linux-mmc@archiver.kernel.org>; Mon, 24 Aug 2020 15:11:43 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5337D206F0
-	for <linux-mmc@archiver.kernel.org>; Mon, 24 Aug 2020 15:11:19 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 118352177B
+	for <linux-mmc@archiver.kernel.org>; Mon, 24 Aug 2020 15:11:43 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (2048-bit key) header.d=microchip.com header.i=@microchip.com header.b="MFiALiEI"
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=microchip.com header.i=@microchip.com header.b="lE/eGTLP"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727910AbgHXPLK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 24 Aug 2020 11:11:10 -0400
-Received: from esa2.microchip.iphmx.com ([68.232.149.84]:22095 "EHLO
-        esa2.microchip.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727894AbgHXPKy (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Aug 2020 11:10:54 -0400
+        id S1727903AbgHXPLF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 24 Aug 2020 11:11:05 -0400
+Received: from esa1.microchip.iphmx.com ([68.232.147.91]:35255 "EHLO
+        esa1.microchip.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726825AbgHXPKw (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Aug 2020 11:10:52 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
   d=microchip.com; i=@microchip.com; q=dns/txt; s=mchp;
-  t=1598281853; x=1629817853;
-  h=from:to:cc:subject:date:message-id:in-reply-to:
-   references:mime-version:content-transfer-encoding;
-  bh=Olbw4+eagxlIiCMHRbBmMPr4NjxHK3uFqmkVqHcK/q4=;
-  b=MFiALiEIcMPgLGqb71oVI6vuXBT2/pJknUeK03uJSriP1n4g3M8H586z
-   ImGGeA2ZdUx7+bN0mOjPo+d/KxnB7KY83Obd2VuG09SuPog+MXKnrjtBw
-   PSq3am3QvO3bxHWTfeJ8SelwJt1FxJLQKILQOAP5vH6qcqWQbNAdpP2pW
-   jF4IyYZbleC1xK4Xl48L8bTQPpZpxioI67225phtFxPijDpHdMLWpVsP6
-   ujo7/QtUsqyfxInMyrzUqJRi4DTspcWSTqsBBjDa3TvPbfk10Z8dNrGTC
-   qHVgkWsLJnbPX+d5xIGSQrGB8iH8er2jDz2Ocxp9Uwf6sDed8Dpblq8YH
-   A==;
-IronPort-SDR: l6xZfwp0+YCYmNFBUJ610+1789b35PQU9MMYkn1FPg3R0jHyLbiabiAqItRsG6hOuLhkQBaScu
- qZ5d/iawBKWsi+4qRfBntul44U/DGn6UUip/nwgyyn1YUFgXVV5ylb6eBmXFCDyz+21+Wty96L
- azJ+7TUBu5oZ8caO79DN2A79Hy3BqIPv4b+UHeBBAWbdklstKcPhEQeY6gpb5S25hEupWNjeXu
- vv0yyh8oKFDrjQh+Jv5xNcGAEfsAFxJPncs2TdONMAAzmJS3Jx10oYFo75TbLJiE4NKsazMfg1
- a7c=
+  t=1598281851; x=1629817851;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=t4cBW0KJQ9oAF55ARnk4BDNoEvlWUJYtIpys/EI51Sk=;
+  b=lE/eGTLPwFEif79xf1Z7tXMMpPgRo5Oi4BNWgrRdtledyr6S1Yt+Bg9t
+   kW0PK4HED5QTL0BJ/18Et9AmuoXXOCFNQ785uGfJx3RxAHfxflxxDygz6
+   nUCCFj/TMZSlWgRjCuEXBSmRWQzKeYejBfu9go1YaE8RafH22LGNzVxTF
+   qIulAf81X+nNHipU61IJKbRIrz+9RfY4J/BWJ7v55U9yZdeHG3Oop38MG
+   iPG0Uqm+CWca00XWvQZDgmT0Nu6QQoDaFnbaZ72MD4RguyOm8zjQbkCcs
+   M4RIZG79XbKgnKRIfdJNCMK1NADv8iySnLbVdjenWLP2ED+gTw1b2fUof
+   g==;
+IronPort-SDR: CmC1ij+6/53nmSXaamACFN8afuFA/IfnsSnlrU2LnWEc8NDuLI5yZndWLtG05i5hGusMZjmBVR
+ 4qNEhEfNNSVCZ3TT7lRgyeKwsZT18f0b9IH4YMrsX/5hP8tr3Uw39qoJcutJtr9KzXfxjFsFjQ
+ hdXRF7xYun1ohCnkKmGv/6Aod217wafBLHeU7z5mQTPzmvN5Jd99jUSxSvsu4FOBNcmH0AAtNC
+ m2APQ6MARLNgG54zTSGm3s4DrFrGoA1x5n3agrHpj9P5yoCq+a7JRvvjdSnjdIgUk2MfljIjVz
+ 9C0=
 X-IronPort-AV: E=Sophos;i="5.76,349,1592895600"; 
-   d="scan'208";a="86699606"
+   d="scan'208";a="92912510"
 Received: from smtpout.microchip.com (HELO email.microchip.com) ([198.175.253.82])
-  by esa2.microchip.iphmx.com with ESMTP/TLS/AES256-SHA256; 24 Aug 2020 08:10:52 -0700
+  by esa1.microchip.iphmx.com with ESMTP/TLS/AES256-SHA256; 24 Aug 2020 08:10:46 -0700
 Received: from chn-vm-ex04.mchp-main.com (10.10.85.152) by
- chn-vm-ex04.mchp-main.com (10.10.85.152) with Microsoft SMTP Server
+ chn-vm-ex02.mchp-main.com (10.10.85.144) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.1979.3; Mon, 24 Aug 2020 08:10:49 -0700
+ 15.1.1979.3; Mon, 24 Aug 2020 08:10:10 -0700
 Received: from soft-dev15.microsemi.net (10.10.115.15) by
  chn-vm-ex04.mchp-main.com (10.10.85.152) with Microsoft SMTP Server id
- 15.1.1979.3 via Frontend Transport; Mon, 24 Aug 2020 08:10:46 -0700
+ 15.1.1979.3 via Frontend Transport; Mon, 24 Aug 2020 08:10:40 -0700
 From:   Lars Povlsen <lars.povlsen@microchip.com>
 List-Id: <soc.lore.kernel.org>
 To:     Ulf Hansson <ulf.hansson@linaro.org>,
         Adrian Hunter <adrian.hunter@intel.com>,
-        SoC Team <soc@kernel.org>, Rob Herring <robh+dt@kernel.org>
+        SoC Team <soc@kernel.org>
 CC:     Lars Povlsen <lars.povlsen@microchip.com>,
         Microchip Linux Driver Support <UNGLinuxDriver@microchip.com>,
         <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
         <linux-arm-kernel@lists.infradead.org>,
         <linux-kernel@vger.kernel.org>,
         Alexandre Belloni <alexandre.belloni@bootlin.com>
-Subject: [PATCH v4 1/3] dt-bindings: mmc: Add Sparx5 SDHCI controller bindings
-Date:   Mon, 24 Aug 2020 17:10:33 +0200
-Message-ID: <20200824151035.31093-2-lars.povlsen@microchip.com>
+Subject: [PATCH v4 0/3] mmc: Adding support for Microchip Sparx5 SoC
+Date:   Mon, 24 Aug 2020 17:10:32 +0200
+Message-ID: <20200824151035.31093-1-lars.povlsen@microchip.com>
 X-Mailer: git-send-email 2.27.0
-In-Reply-To: <20200824151035.31093-1-lars.povlsen@microchip.com>
-References: <20200824151035.31093-1-lars.povlsen@microchip.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Content-Type: text/plain
@@ -75,84 +72,48 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The Sparx5 SDHCI controller is based on the Designware controller IP.
+(This is a resend of an identical patch set, sent at a time where
+Sparx5 support was not integrated yet. With the Sparx5 clock driver
+and associated header now in place in the v5.9rc series, the driver is
+now resubmitted for inclusion).
 
-Signed-off-by: Lars Povlsen <lars.povlsen@microchip.com>
----
- .../mmc/microchip,dw-sparx5-sdhci.yaml        | 65 +++++++++++++++++++
- 1 file changed, 65 insertions(+)
+The patch adds eMMC support for Sparx5, by adding a driver for the SoC
+SDHCI controller, DT configuration and DT binding documentation.
+
+Changes in v4:
+- Disable clock if sdhci_add_host() fails
+- Remove dev_err if sdhci_add_host() fails
+
+Changes in v3:
+- Add dt-bindings for property "microchip,clock-delay"
+- Enforce "microchip,clock-delay" valid range in driver
+- Removed a noisy pr_debug() in sdhci_sparx5_adma_write_desc()
+
+Changes in v2:
+- Changes in driver as per review comments
+ - Drop debug code
+ - Drop sysfs code
+ - use usleep_range()
+ - use mmc_hostname() in pr_debug()
+ - Remove deactivated code
+ - Minor cosmetics
+
+Lars Povlsen (3):
+  dt-bindings: mmc: Add Sparx5 SDHCI controller bindings
+  sdhci: sparx5: Add Sparx5 SoC eMMC driver
+  arm64: dts: sparx5: Add Sparx5 eMMC support
+
+ .../mmc/microchip,dw-sparx5-sdhci.yaml        |  65 +++++
+ arch/arm64/boot/dts/microchip/sparx5.dtsi     |  24 ++
+ .../boot/dts/microchip/sparx5_pcb125.dts      |  23 ++
+ .../boot/dts/microchip/sparx5_pcb134_emmc.dts |  23 ++
+ .../boot/dts/microchip/sparx5_pcb135_emmc.dts |  23 ++
+ drivers/mmc/host/Kconfig                      |  13 +
+ drivers/mmc/host/Makefile                     |   1 +
+ drivers/mmc/host/sdhci-of-sparx5.c            | 269 ++++++++++++++++++
+ 8 files changed, 441 insertions(+)
  create mode 100644 Documentation/devicetree/bindings/mmc/microchip,dw-sparx5-sdhci.yaml
+ create mode 100644 drivers/mmc/host/sdhci-of-sparx5.c
 
-diff --git a/Documentation/devicetree/bindings/mmc/microchip,dw-sparx5-sdhci.yaml b/Documentation/devicetree/bindings/mmc/microchip,dw-sparx5-sdhci.yaml
-new file mode 100644
-index 0000000000000..55883290543b9
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/microchip,dw-sparx5-sdhci.yaml
-@@ -0,0 +1,65 @@
-+# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
-+%YAML 1.2
-+---
-+$id: http://devicetree.org/schemas/mmc/microchip,dw-sparx5-sdhci.yaml#
-+$schema: http://devicetree.org/meta-schemas/core.yaml#
-+
-+title: Microchip Sparx5 Mobile Storage Host Controller Binding
-+
-+allOf:
-+  - $ref: "mmc-controller.yaml"
-+
-+maintainers:
-+  - Lars Povlsen <lars.povlsen@microchip.com>
-+
-+# Everything else is described in the common file
-+properties:
-+  compatible:
-+    const: microchip,dw-sparx5-sdhci
-+
-+  reg:
-+    maxItems: 1
-+
-+  interrupts:
-+    maxItems: 1
-+
-+  clocks:
-+    maxItems: 1
-+    description:
-+      Handle to "core" clock for the sdhci controller.
-+
-+  clock-names:
-+    items:
-+      - const: core
-+
-+  microchip,clock-delay:
-+    description: Delay clock to card to meet setup time requirements.
-+      Each step increase by 1.25ns.
-+    $ref: "/schemas/types.yaml#/definitions/uint32"
-+    minimum: 1
-+    maximum: 15
-+
-+required:
-+  - compatible
-+  - reg
-+  - interrupts
-+  - clocks
-+  - clock-names
-+
-+examples:
-+  - |
-+    #include <dt-bindings/interrupt-controller/arm-gic.h>
-+    #include <dt-bindings/clock/microchip,sparx5.h>
-+    sdhci0: mmc@600800000 {
-+        compatible = "microchip,dw-sparx5-sdhci";
-+        reg = <0x00800000 0x1000>;
-+        pinctrl-0 = <&emmc_pins>;
-+        pinctrl-names = "default";
-+        clocks = <&clks CLK_ID_AUX1>;
-+        clock-names = "core";
-+        assigned-clocks = <&clks CLK_ID_AUX1>;
-+        assigned-clock-rates = <800000000>;
-+        interrupts = <GIC_SPI 4 IRQ_TYPE_LEVEL_HIGH>;
-+        bus-width = <8>;
-+        microchip,clock-delay = <10>;
-+    };
 --
 2.27.0
