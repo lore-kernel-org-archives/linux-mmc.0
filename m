@@ -2,73 +2,66 @@ Return-Path: <SRS0=kf8L=CC=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.9 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.9 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6F359C433E3
-	for <linux-mmc@archiver.kernel.org>; Mon, 24 Aug 2020 06:34:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B47D4C433E1
+	for <linux-mmc@archiver.kernel.org>; Mon, 24 Aug 2020 06:36:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 415A92076D
-	for <linux-mmc@archiver.kernel.org>; Mon, 24 Aug 2020 06:34:41 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8E09220578
+	for <linux-mmc@archiver.kernel.org>; Mon, 24 Aug 2020 06:36:17 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Nc6vsHNo"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="SenChbyY"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725850AbgHXGeg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 24 Aug 2020 02:34:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43204 "EHLO
+        id S1725906AbgHXGgQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 24 Aug 2020 02:36:16 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43460 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725926AbgHXGef (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Aug 2020 02:34:35 -0400
-Received: from mail-ua1-x944.google.com (mail-ua1-x944.google.com [IPv6:2607:f8b0:4864:20::944])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 85916C061575
-        for <linux-mmc@vger.kernel.org>; Sun, 23 Aug 2020 23:34:34 -0700 (PDT)
-Received: by mail-ua1-x944.google.com with SMTP id 68so93442ual.3
-        for <linux-mmc@vger.kernel.org>; Sun, 23 Aug 2020 23:34:34 -0700 (PDT)
+        with ESMTP id S1726086AbgHXGgN (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Aug 2020 02:36:13 -0400
+Received: from mail-vs1-xe43.google.com (mail-vs1-xe43.google.com [IPv6:2607:f8b0:4864:20::e43])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A9102C061573
+        for <linux-mmc@vger.kernel.org>; Sun, 23 Aug 2020 23:36:13 -0700 (PDT)
+Received: by mail-vs1-xe43.google.com with SMTP id b26so3861454vsa.13
+        for <linux-mmc@vger.kernel.org>; Sun, 23 Aug 2020 23:36:13 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc:content-transfer-encoding;
-        bh=g0O7JTTEG8zhra8Bmg9qzPY8D1AcZ5n76o6w8ixndyc=;
-        b=Nc6vsHNoA7tyvTeoyEk/516QqWonlIVTa5PIghtJCkIBB60ctW7pnM6s1MxqOYQRzj
-         9flK76JLPqsVr6jgcvEENxKMZhBMdpyVoz46hcu7lELf8vbsU+U0P8W6krU52IU0IE7c
-         y8Aizy9JTOnPM7Qf7hTY1hltjtojdKO7qWriIEWDJS5MI2/L0tkV0tBHLQn6IWc+DJzs
-         xESjMdyDNixzBEK8TXDNbQB0+SsO9CSRn4g2tGoDi4VKi138BqetjefnMfS1HwlFE78X
-         XLE4wmIEHeBSmK99rJxKE4oxirb97De0wSCI9XTBfzsXh1KACd+3xTrGw6evmXQdyN0G
-         czAA==
+        bh=oE+ltfruvc9Qubq44a39foWSD+M3lecV1ywVYs1Y2qI=;
+        b=SenChbyYVpumtOiQc0/mz1kVAnq7/GMf3G8hvhzgB1YnrQn8GrNcGA/EoWz+UA/NgK
+         QCTEX7PIk9kEQf1GA61PMFKqe+5eFNoovLPAE+pXvMxokwXllMWQ5FZ50TPMExU2f5DL
+         aO28hGvNDijqouUJDrA80fyegKTFnI8mxMmox775565n2VLEjEKQRo81IB7Z+ZsHFmaM
+         NzKx20wxWyl+Q4on4SW+E9g9lxc6ONxq2jL/zmVfTZiU/CkWzGNb0fpL6LxaybLBZplp
+         AJ5vdkmfgyRRW2MHjCG9IrBoysdS3sX6PYbZvuVpuLpcY+pdzthvRuzujzKGv0oKOv72
+         X4Kg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc:content-transfer-encoding;
-        bh=g0O7JTTEG8zhra8Bmg9qzPY8D1AcZ5n76o6w8ixndyc=;
-        b=lRv0ZHPnyH2gF/QExSk/XXTEKLi8VYF4qkO/UQkH587S8t4Lat0wQNG+3PJzRbONfz
-         n4lw7shLvqQchth/vtTyWxoiKaE3qNfXqU8KaSh9TpM1DNcgpSSTQR1wMyWZr4kUn7xJ
-         TZz17tkkrKERXfS9juQ3F6UDtQJ4C9F9zRD8Nt44fiI9dM82Id4lrlrXBcE/U46oMeLx
-         6J2lazlfprxfZXy7bcr0sE1vVRdA3q7zDsfF8z3rKJdsU8qoYwj0wA7xNxJpI0dN0hWh
-         uNBNOX+fSdZNs/wU7RI4lv6wEx/L3nQNlvPsIgtnPdIZsIz1hVq9N/rEQgxV1s2+xV68
-         YEiA==
-X-Gm-Message-State: AOAM532h5Ql8AV/sPSYHCgJfjiBH5YVuS0DFbLMOIRJf5nFKH/67Srw3
-        ch1Oh4h//jRPd9m9h/U43GJQSnkJ8rg8A0XYRnOWsg==
-X-Google-Smtp-Source: ABdhPJzUK/zzpLyTaZNUq3D08AEPc3DpsY8FmM6IbHqVYAv0DvFNoLUEzWRZ5xuxYKq6Rno77e4i5E7HnKfw3Agv8hI=
-X-Received: by 2002:ab0:3a85:: with SMTP id r5mr1733713uaw.100.1598250873271;
- Sun, 23 Aug 2020 23:34:33 -0700 (PDT)
+        bh=oE+ltfruvc9Qubq44a39foWSD+M3lecV1ywVYs1Y2qI=;
+        b=hxmX6GR0YBWdB3tp2LV1x2P9cXdPLTwvn9NG9168MQEKO2CV6/RyV6U7Z3lNuXckbo
+         huTdWRpfUvKnsuru9IcbRa1uqE3Cedw/62PnCJa7JT/9Wa9GW3xB69Ev9cqv6dhzaGg0
+         ix8YPKcloHGkJZxh21se3lQlR7aQ3dfioZIO4wLIVUlZGfpFgGCqIT5EgeWWPKkK/zMD
+         TO9P1Jf3aM2VdVfM31C8+sxRNBP0ZIhDjQSE6iYpttzey93H8sJBPtg5oVI8FglWLoC3
+         ZwTbnpmPAl41rMRTgQZeykILsi61usCVuHFk63zwWfs1KOyg36o/d2e9/ZlEd4wYuQj9
+         O40w==
+X-Gm-Message-State: AOAM531BI+UQSx0NL5mUeee7eX1uvgetpgDmc0SjOP2tjv9ZflQ+KWWF
+        DLLbNGYAI+otQSlh87a1X7AXrZ4qhxFIeG6LORGhy5vD43Q4Qw==
+X-Google-Smtp-Source: ABdhPJwTZ71ucLeOztSWb74KVGlYNiX8afd3xXrvAS3MJdD0CYXamCxUdS1A77EFOgLxaG1r05qrTkjvBRNEEa2uGeI=
+X-Received: by 2002:a67:e9d8:: with SMTP id q24mr1693589vso.165.1598250970881;
+ Sun, 23 Aug 2020 23:36:10 -0700 (PDT)
 MIME-Version: 1.0
-References: <20200716141534.30241-1-ulf.hansson@linaro.org>
- <CAPDyKFr5WQ1kpFguDe2e8G7t7p_99CFbqwRQFZPCSuMV2eYsMQ@mail.gmail.com> <f4d74498a8c246a595e56b8daa09ece8@realsil.com.cn>
-In-Reply-To: <f4d74498a8c246a595e56b8daa09ece8@realsil.com.cn>
+References: <20200727133837.19086-1-pali@kernel.org> <20200822094136.nm2hlq57jx2yfbju@pali>
+In-Reply-To: <20200822094136.nm2hlq57jx2yfbju@pali>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 24 Aug 2020 08:33:57 +0200
-Message-ID: <CAPDyKFqwcQO2E2b4h7kmgHYRBQJAJ5N1RgW3Kk5hR2ccZ34VAA@mail.gmail.com>
-Subject: Re: [PATCH] mmc: core: Initial support for SD express card/host
-To:     =?UTF-8?B?5Yav6ZSQ?= <rui_feng@realsil.com.cn>
-Cc:     Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>,
-        "linux-nvme@lists.infradead.org" <linux-nvme@lists.infradead.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux PCI <linux-pci@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Date:   Mon, 24 Aug 2020 08:35:34 +0200
+Message-ID: <CAPDyKFr7GfXxH4GKbshEtS5--Ud992chqSV17KoNjN-VtshrTQ@mail.gmail.com>
+Subject: Re: [PATCH 0/4] mmc: sdio: Export CISTPL_VERS_1 attributes to userspace
+To:     =?UTF-8?Q?Pali_Roh=C3=A1r?= <pali@kernel.org>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 Sender: linux-mmc-owner@vger.kernel.org
@@ -76,285 +69,120 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 24 Aug 2020 at 03:04, =E5=86=AF=E9=94=90 <rui_feng@realsil.com.cn> =
-wrote:
+On Sat, 22 Aug 2020 at 11:41, Pali Roh=C3=A1r <pali@kernel.org> wrote:
 >
-> Hi Hansson:
->
-> If this patch will not be changed, I will post a patch for rtsx driver ac=
-cording your patch.
+> Hello Ulf! I would like to remind you this SDIO patch series. Could you
+> please look and review it?
 
-I don't think there is any change needed, unless you think so.
+Yes, thanks for pinging, I will have a look.
 
 Kind regards
 Uffe
 
 >
+> On Monday 27 July 2020 15:38:33 Pali Roh=C3=A1r wrote:
+> > CISTPL_VERS_1 structure contains useful information for identification
+> > of SDIO cards. It contains revision number according to which standard
+> > is SDIO card compliant. And also it contain human readable info strings
+> > which should contain manufacturer name or product information, like for
+> > old PCMCIA cards. SDIO simplified specification 3.00 just contain
+> > reference to PCMCIA metaformat specification for definition of that
+> > CISTPL_VERS_1 structure itself.
 > >
-> > Rui,
+> > Human readable SDIO card strings can be useful for userspace to do card
+> > identification. Until now kernel exported to userspace only vendor and
+> > device numbers but these numbers do not help to identify new or unknown
+> > cards.
 > >
-> > On Thu, 16 Jul 2020 at 16:16, Ulf Hansson <ulf.hansson@linaro.org> wrot=
-e:
-> > >
-> > > In the SD specification v7.10 the SD express card has been added. Thi=
-s
-> > > new type of removable SD card, can be managed via a PCIe/NVMe based
-> > > interface, while also allowing backwards compatibility towards the
-> > > legacy SD interface.
-> > >
-> > > To keep the backwards compatibility, it's required to start the
-> > > initialization through the legacy SD interface. If it turns out that
-> > > the mmc host and the SD card, both supports the PCIe/NVMe interface,
-> > > then a switch should be allowed.
-> > >
-> > > Therefore, let's introduce some basic support for this type of SD
-> > > cards to the mmc core. The mmc host, should set MMC_CAP2_SD_EXP if it
-> > > supports this interface and MMC_CAP2_SD_EXP_1_2V, if also 1.2V is
-> > > supported, as to inform the core about it.
-> > >
-> > > To deal with the switch to the PCIe/NVMe interface, the mmc host is
-> > > required to implement a new host ops, ->init_sd_express(). Based on
-> > > the initial communication between the host and the card,
-> > > host->ios.timing is set to either MMC_TIMING_SD_EXP or
-> > > MMC_TIMING_SD_EXP_1_2V, depending on if 1.2V is supported or not. In
-> > > this way, the mmc host can check these values in its ->init_sd_expres=
-s() ops,
-> > to know how to proceed with the handover.
-> > >
-> > > Note that, to manage card insert/removal, the mmc core sticks with
-> > > using the ->get_cd() callback, which means it's the host's
-> > > responsibility to make sure it provides valid data, even if the card
-> > > may be managed by PCIe/NVMe at the moment. As long as the card seems
-> > > to be present, the mmc core keeps the card powered on.
-> > >
-> > > Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-> > > Cc: Arnd Bergmann <arnd@arndb.de>
-> > > Cc: Christoph Hellwig <hch@lst.de>
-> > > Cc: Rui Feng <rui_feng@realsil.com.cn>
-> > > Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 > >
-> > Rui, did you manage to get some time to look at $subject patch?
+> > I have tested these patches with Marwell 88W8997 SDIO card (WiFi+Blueto=
+oth)
+> > and here is content of attributes available in userspace:
 > >
-> > If you need some help to understand what's needed to implement the
-> > corresponding support in drivers/mmc/host/rtsx_pci_sdmmc.c, then please
-> > just ask.
+> > $ grep . /sys/class/mmc_host/mmc0/mmc0:0001/* /sys/class/mmc_host/mmc0/=
+mmc0:0001/*/*
+> > /sys/class/mmc_host/mmc0/mmc0:0001/device:0x9140
+> > /sys/class/mmc_host/mmc0/mmc0:0001/info1:Marvell
+> > /sys/class/mmc_host/mmc0/mmc0:0001/info2:Wireless Device ID: 50
+> > /sys/class/mmc_host/mmc0/mmc0:0001/ocr:0x00200000
+> > /sys/class/mmc_host/mmc0/mmc0:0001/rca:0x0001
+> > /sys/class/mmc_host/mmc0/mmc0:0001/revision:1.0
+> > /sys/class/mmc_host/mmc0/mmc0:0001/type:SDIO
+> > /sys/class/mmc_host/mmc0/mmc0:0001/uevent:MMC_TYPE=3DSDIO
+> > /sys/class/mmc_host/mmc0/mmc0:0001/uevent:SDIO_ID=3D02DF:9140
+> > /sys/class/mmc_host/mmc0/mmc0:0001/uevent:SDIO_REVISION=3D1.0
+> > /sys/class/mmc_host/mmc0/mmc0:0001/uevent:SDIO_INFO1=3DMarvell
+> > /sys/class/mmc_host/mmc0/mmc0:0001/uevent:SDIO_INFO2=3DWireless Device =
+ID: 50
+> > /sys/class/mmc_host/mmc0/mmc0:0001/uevent:SDIO_INFO3=3D
+> > /sys/class/mmc_host/mmc0/mmc0:0001/vendor:0x02df
+> > /sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:1/class:0x00
+> > /sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:1/device:0x9141
+> > /sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:1/info1:Marvell WiFi Devic=
+e
+> > /sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:1/modalias:sdio:c00v02DFd9=
+141
+> > /sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:1/revision:1.0
+> > /sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:1/uevent:DRIVER=3Dmwifiex_=
+sdio
+> > /sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:1/uevent:SDIO_CLASS=3D00
+> > /sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:1/uevent:SDIO_ID=3D02DF:91=
+41
+> > /sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:1/uevent:SDIO_REVISION=3D1=
+.0
+> > /sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:1/uevent:SDIO_INFO1=3DMarv=
+ell WiFi Device
+> > /sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:1/uevent:SDIO_INFO2=3D
+> > /sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:1/uevent:MODALIAS=3Dsdio:c=
+00v02DFd9141
+> > /sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:1/vendor:0x02df
+> > /sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:2/class:0x00
+> > /sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:2/device:0x9142
+> > /sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:2/info1:Marvell Bluetooth =
+Device
+> > /sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:2/modalias:sdio:c00v02DFd9=
+142
+> > /sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:2/revision:1.0
+> > /sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:2/uevent:DRIVER=3Dbtmrvl_s=
+dio
+> > /sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:2/uevent:SDIO_CLASS=3D00
+> > /sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:2/uevent:SDIO_ID=3D02DF:91=
+42
+> > /sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:2/uevent:SDIO_REVISION=3D1=
+.0
+> > /sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:2/uevent:SDIO_INFO1=3DMarv=
+ell Bluetooth Device
+> > /sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:2/uevent:SDIO_INFO2=3D
+> > /sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:2/uevent:MODALIAS=3Dsdio:c=
+00v02DFd9142
+> > /sys/class/mmc_host/mmc0/mmc0:0001/mmc0:0001:2/vendor:0x02df
+> > /sys/class/mmc_host/mmc0/mmc0:0001/power/control:auto
+> > /sys/class/mmc_host/mmc0/mmc0:0001/power/runtime_active_time:0
+> > /sys/class/mmc_host/mmc0/mmc0:0001/power/runtime_status:unsupported
+> > /sys/class/mmc_host/mmc0/mmc0:0001/power/runtime_suspended_time:0
+> > /sys/class/mmc_host/mmc0/mmc0:0001/subsystem/drivers_autoprobe:1
 > >
-> > I think it would make sense to queue changes for rtsx_pci at the same p=
-oint as
-> > the mmc core changes. That's because I don't want to maintain code in t=
-he
-> > mmc core that's left unused.
+> > As can be seen SDIO card does not provide all 4 info strings as require=
+d by
+> > SDIO/PCMCIA specificaion and the third and the second strings are empty=
+.
 > >
-> > Kind regards
-> > Uffe
 > >
-> > > ---
-> > >  drivers/mmc/core/core.c   | 15 ++++++++++--
-> > >  drivers/mmc/core/host.h   |  6 +++++
-> > >  drivers/mmc/core/sd_ops.c | 49
-> > > +++++++++++++++++++++++++++++++++++++--
-> > >  drivers/mmc/core/sd_ops.h |  1 +
-> > >  include/linux/mmc/host.h  |  7 ++++++
-> > >  5 files changed, 74 insertions(+), 4 deletions(-)
-> > >
-> > > diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c index
-> > > 8ccae6452b9c..6673c0f33cc7 100644
-> > > --- a/drivers/mmc/core/core.c
-> > > +++ b/drivers/mmc/core/core.c
-> > > @@ -2137,8 +2137,12 @@ static int mmc_rescan_try_freq(struct
-> > mmc_host
-> > > *host, unsigned freq)
-> > >
-> > >         mmc_go_idle(host);
-> > >
-> > > -       if (!(host->caps2 & MMC_CAP2_NO_SD))
-> > > -               mmc_send_if_cond(host, host->ocr_avail);
-> > > +       if (!(host->caps2 & MMC_CAP2_NO_SD)) {
-> > > +               if (mmc_send_if_cond_pcie(host, host->ocr_avail))
-> > > +                       goto out;
-> > > +               if (mmc_card_sd_express(host))
-> > > +                       return 0;
-> > > +       }
-> > >
-> > >         /* Order's important: probe SDIO, then SD, then MMC */
-> > >         if (!(host->caps2 & MMC_CAP2_NO_SDIO)) @@ -2153,6 +2157,7
-> > @@
-> > > static int mmc_rescan_try_freq(struct mmc_host *host, unsigned freq)
-> > >                 if (!mmc_attach_mmc(host))
-> > >                         return 0;
-> > >
-> > > +out:
-> > >         mmc_power_off(host);
-> > >         return -EIO;
-> > >  }
-> > > @@ -2280,6 +2285,12 @@ void mmc_rescan(struct work_struct *work)
-> > >                 goto out;
-> > >         }
-> > >
-> > > +       /* If an SD express card is present, then leave it as is. */
-> > > +       if (mmc_card_sd_express(host)) {
-> > > +               mmc_release_host(host);
-> > > +               goto out;
-> > > +       }
-> > > +
-> > >         for (i =3D 0; i < ARRAY_SIZE(freqs); i++) {
-> > >                 unsigned int freq =3D freqs[i];
-> > >                 if (freq > host->f_max) { diff --git
-> > > a/drivers/mmc/core/host.h b/drivers/mmc/core/host.h index
-> > > 5e3b9534ffb2..ba407617ed23 100644
-> > > --- a/drivers/mmc/core/host.h
-> > > +++ b/drivers/mmc/core/host.h
-> > > @@ -77,5 +77,11 @@ static inline bool mmc_card_hs400es(struct
-> > mmc_card *card)
-> > >         return card->host->ios.enhanced_strobe;  }
-> > >
-> > > +static inline bool mmc_card_sd_express(struct mmc_host *host) {
-> > > +       return host->ios.timing =3D=3D MMC_TIMING_SD_EXP ||
-> > > +               host->ios.timing =3D=3D MMC_TIMING_SD_EXP_1_2V; }
-> > > +
-> > >  #endif
-> > >
-> > > diff --git a/drivers/mmc/core/sd_ops.c b/drivers/mmc/core/sd_ops.c
-> > > index 22bf528294b9..d61ff811218c 100644
-> > > --- a/drivers/mmc/core/sd_ops.c
-> > > +++ b/drivers/mmc/core/sd_ops.c
-> > > @@ -158,7 +158,8 @@ int mmc_send_app_op_cond(struct mmc_host *host,
-> > u32 ocr, u32 *rocr)
-> > >         return err;
-> > >  }
-> > >
-> > > -int mmc_send_if_cond(struct mmc_host *host, u32 ocr)
-> > > +static int __mmc_send_if_cond(struct mmc_host *host, u32 ocr, u8
-> > pcie_bits,
-> > > +                             u32 *resp)
-> > >  {
-> > >         struct mmc_command cmd =3D {};
-> > >         int err;
-> > > @@ -171,7 +172,7 @@ int mmc_send_if_cond(struct mmc_host *host, u32
-> > ocr)
-> > >          * SD 1.0 cards.
-> > >          */
-> > >         cmd.opcode =3D SD_SEND_IF_COND;
-> > > -       cmd.arg =3D ((ocr & 0xFF8000) !=3D 0) << 8 | test_pattern;
-> > > +       cmd.arg =3D ((ocr & 0xFF8000) !=3D 0) << 8 | pcie_bits << 8 |
-> > > + test_pattern;
-> > >         cmd.flags =3D MMC_RSP_SPI_R7 | MMC_RSP_R7 |
-> > MMC_CMD_BCR;
-> > >
-> > >         err =3D mmc_wait_for_cmd(host, &cmd, 0); @@ -186,6 +187,50
-> > @@
-> > > int mmc_send_if_cond(struct mmc_host *host, u32 ocr)
-> > >         if (result_pattern !=3D test_pattern)
-> > >                 return -EIO;
-> > >
-> > > +       if (resp)
-> > > +               *resp =3D cmd.resp[0];
-> > > +
-> > > +       return 0;
-> > > +}
-> > > +
-> > > +int mmc_send_if_cond(struct mmc_host *host, u32 ocr) {
-> > > +       return __mmc_send_if_cond(host, ocr, 0, NULL); }
-> > > +
-> > > +int mmc_send_if_cond_pcie(struct mmc_host *host, u32 ocr) {
-> > > +       u32 resp =3D 0;
-> > > +       u8 pcie_bits =3D 0;
-> > > +       int ret;
-> > > +
-> > > +       if (host->caps2 & MMC_CAP2_SD_EXP) {
-> > > +               /* Probe card for SD express support via PCIe. */
-> > > +               pcie_bits =3D 0x10;
-> > > +               if (host->caps2 & MMC_CAP2_SD_EXP_1_2V)
-> > > +                       /* Probe also for 1.2V support. */
-> > > +                       pcie_bits =3D 0x30;
-> > > +       }
-> > > +
-> > > +       ret =3D __mmc_send_if_cond(host, ocr, pcie_bits, &resp);
-> > > +       if (ret)
-> > > +               return 0;
-> > > +
-> > > +       /* Continue with the SD express init, if the card supports it=
-. */
-> > > +       resp &=3D 0x3000;
-> > > +       if (pcie_bits && resp) {
-> > > +               if (resp =3D=3D 0x3000)
-> > > +                       host->ios.timing =3D
-> > MMC_TIMING_SD_EXP_1_2V;
-> > > +               else
-> > > +                       host->ios.timing =3D MMC_TIMING_SD_EXP;
-> > > +
-> > > +               /*
-> > > +                * According to the spec the clock shall also be gate=
-d, but
-> > > +                * let's leave this to the host driver for more flexi=
-bility.
-> > > +                */
-> > > +               return host->ops->init_sd_express(host, &host->ios);
-> > > +       }
-> > > +
-> > >         return 0;
-> > >  }
-> > >
-> > > diff --git a/drivers/mmc/core/sd_ops.h b/drivers/mmc/core/sd_ops.h
-> > > index 2194cabfcfc5..3ba7b3cf4652 100644
-> > > --- a/drivers/mmc/core/sd_ops.h
-> > > +++ b/drivers/mmc/core/sd_ops.h
-> > > @@ -16,6 +16,7 @@ struct mmc_host;
-> > >  int mmc_app_set_bus_width(struct mmc_card *card, int width);  int
-> > > mmc_send_app_op_cond(struct mmc_host *host, u32 ocr, u32 *rocr);  int
-> > > mmc_send_if_cond(struct mmc_host *host, u32 ocr);
-> > > +int mmc_send_if_cond_pcie(struct mmc_host *host, u32 ocr);
-> > >  int mmc_send_relative_addr(struct mmc_host *host, unsigned int *rca)=
-;
-> > > int mmc_app_send_scr(struct mmc_card *card);  int mmc_sd_switch(struc=
-t
-> > > mmc_card *card, int mode, int group, diff --git
-> > > a/include/linux/mmc/host.h b/include/linux/mmc/host.h index
-> > > c5b6e97cb21a..905cddc5e6f3 100644
-> > > --- a/include/linux/mmc/host.h
-> > > +++ b/include/linux/mmc/host.h
-> > > @@ -60,6 +60,8 @@ struct mmc_ios {
-> > >  #define MMC_TIMING_MMC_DDR52   8
-> > >  #define MMC_TIMING_MMC_HS200   9
-> > >  #define MMC_TIMING_MMC_HS400   10
-> > > +#define MMC_TIMING_SD_EXP      11
-> > > +#define MMC_TIMING_SD_EXP_1_2V 12
-> > >
-> > >         unsigned char   signal_voltage;         /* signalling voltage
-> > (1.8V or 3.3V) */
-> > >
-> > > @@ -172,6 +174,9 @@ struct mmc_host_ops {
-> > >          */
-> > >         int     (*multi_io_quirk)(struct mmc_card *card,
-> > >                                   unsigned int direction, int
-> > > blk_size);
-> > > +
-> > > +       /* Initialize an SD express card, mandatory for MMC_CAP2_SD_E=
-XP.
-> > */
-> > > +       int     (*init_sd_express)(struct mmc_host *host, struct
-> > mmc_ios *ios);
-> > >  };
-> > >
-> > >  struct mmc_cqe_ops {
-> > > @@ -357,6 +362,8 @@ struct mmc_host {
-> > >  #define MMC_CAP2_HS200_1_2V_SDR        (1 << 6)        /* can
-> > support */
-> > >  #define MMC_CAP2_HS200         (MMC_CAP2_HS200_1_8V_SDR | \
-> > >                                  MMC_CAP2_HS200_1_2V_SDR)
-> > > +#define MMC_CAP2_SD_EXP                (1 << 7)        /* SD
-> > express via PCIe */
-> > > +#define MMC_CAP2_SD_EXP_1_2V   (1 << 8)        /* SD express 1.2V
-> > */
-> > >  #define MMC_CAP2_CD_ACTIVE_HIGH        (1 << 10)       /*
-> > Card-detect signal active high */
-> > >  #define MMC_CAP2_RO_ACTIVE_HIGH        (1 << 11)       /*
-> > Write-protect signal active high */
-> > >  #define MMC_CAP2_NO_PRESCAN_POWERUP (1 << 14)  /* Don't power
-> > up
-> > > before scan */
-> > > --
-> > > 2.20.1
-> > >
+> > Pali Roh=C3=A1r (4):
+> >   mmc: sdio: Check for CISTPL_VERS_1 buffer size
+> >   mmc: sdio: Parse CISTPL_VERS_1 major and minor revision numbers
+> >   mmc: sdio: Extend sdio_config_attr macro and use it also for modalias
+> >   mmc: sdio: Export SDIO revision and info strings to userspace
 > >
-> > ------Please consider the environment before printing this e-mail.
+> >  drivers/mmc/core/bus.c        | 12 ++++++++
+> >  drivers/mmc/core/sd.c         | 36 +++++++++++++++++++++--
+> >  drivers/mmc/core/sdio.c       | 24 ++++++++++++++++
+> >  drivers/mmc/core/sdio_bus.c   | 54 ++++++++++++++++++++++++++---------
+> >  drivers/mmc/core/sdio_cis.c   | 11 +++++++
+> >  include/linux/mmc/card.h      |  2 ++
+> >  include/linux/mmc/sdio_func.h |  2 ++
+> >  7 files changed, 124 insertions(+), 17 deletions(-)
+> >
+> > --
+> > 2.20.1
+> >
