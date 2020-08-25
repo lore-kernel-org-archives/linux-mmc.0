@@ -7,60 +7,60 @@ X-Spam-Status: No, score=-5.1 required=3.0 tests=BAYES_00,DKIM_INVALID,
 	SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_2 autolearn=no autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9DF78C433DF
-	for <linux-mmc@archiver.kernel.org>; Tue, 25 Aug 2020 11:24:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 73288C433E1
+	for <linux-mmc@archiver.kernel.org>; Tue, 25 Aug 2020 12:02:03 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7074720715
-	for <linux-mmc@archiver.kernel.org>; Tue, 25 Aug 2020 11:24:16 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 451EC20706
+	for <linux-mmc@archiver.kernel.org>; Tue, 25 Aug 2020 12:02:03 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (2048-bit key) header.d=tq-group.com header.i=@tq-group.com header.b="aGppIgky"
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=tq-group.com header.i=@tq-group.com header.b="TFpFgGII"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729885AbgHYLYQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 25 Aug 2020 07:24:16 -0400
-Received: from mx1.tq-group.com ([62.157.118.193]:30835 "EHLO mx1.tq-group.com"
+        id S1728659AbgHYMB7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 25 Aug 2020 08:01:59 -0400
+Received: from mx1.tq-group.com ([62.157.118.193]:61528 "EHLO mx1.tq-group.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1729873AbgHYLYP (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 25 Aug 2020 07:24:15 -0400
-IronPort-SDR: l4Vuf8WTzX9BgJf23Fn9jXkHwyuqj30PyE4qjAY+TlCPBQUvILt43cbreN2GTOsCn3quVNVwCG
- br/BPtKLP9o41EXJrGEvPBAJf8c9k9/1+ykxc0h7Q5f6tCGcgmtx4Hm1DlFzIBl92r3lyrHRJ8
- b0v+JgLeUkrjaNlJXUwo1j0O4PnAlU00awgvxmBPyYjNa4FJXZcsajHRapjtomFr/Ak3X3DEzy
- 9cel1uGAQS/NwT2gEucRtB6qHABOQA2ai/X4yR0VwNRRwqQCA6Ma8ss1qNpz//fNBs90SYBc4Y
- bjQ=
+        id S1728567AbgHYMBB (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 25 Aug 2020 08:01:01 -0400
+IronPort-SDR: 6zdHpv3OdfV3hyh0EdskEu+UPLu/M69ZmFtzQKXZ1pCrVeU7JOR82StliBN4baJEAea/bJSd+5
+ F/2twTHqOfoeNmGl+BrodQTF2fpEriSycrhp/VM0Mgo5LKwRHCEPi55A1V6J4yL9M0+OpRkpq9
+ ulam5l+pqQpnHw9qrVop951qwBhIcSZZAA4pSQ9koMnuv6ht8UTmCPSnhCcwW+1yf73ZDsmYbM
+ /0BvNI895j9fSvmD6y1EgnrG5lZ9Zi6pmz0G5FVvtBTkbvpwZ74jRDwLo9Zp8LRfb3hsWSn2rL
+ qE8=
 X-IronPort-AV: E=Sophos;i="5.76,352,1592863200"; 
-   d="scan'208";a="13589397"
+   d="scan'208";a="13590046"
 Received: from unknown (HELO tq-pgp-pr1.tq-net.de) ([192.168.6.15])
-  by mx1-pgp.tq-group.com with ESMTP; 25 Aug 2020 13:24:13 +0200
+  by mx1-pgp.tq-group.com with ESMTP; 25 Aug 2020 14:00:40 +0200
 Received: from mx1.tq-group.com ([192.168.6.7])
   by tq-pgp-pr1.tq-net.de (PGP Universal service);
-  Tue, 25 Aug 2020 13:24:13 +0200
+  Tue, 25 Aug 2020 14:00:40 +0200
 X-PGP-Universal: processed;
-        by tq-pgp-pr1.tq-net.de on Tue, 25 Aug 2020 13:24:13 +0200
+        by tq-pgp-pr1.tq-net.de on Tue, 25 Aug 2020 14:00:40 +0200
 DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
   d=tq-group.com; i=@tq-group.com; q=dns/txt; s=key1;
-  t=1598354653; x=1629890653;
+  t=1598356840; x=1629892840;
   h=message-id:subject:from:to:cc:date:in-reply-to:
    references:mime-version:content-transfer-encoding;
-  bh=EE2R5sLmnj/yzSqma8+AXL+jr4yYEH7vlKI8ggnnb50=;
-  b=aGppIgkyoJmoBnEMOfaEdyLY/pVhj4tFBSy3TMDoxR59bYtGNxQ8Xxst
-   ThipZxTgXMlj0Md0TyxePMAqpLK81Q/bM+PML/FB03V9yDjHKcOV3Cj5X
-   IxjSIXNej2O4j0nKg4v4d0cOaDKwiuxZYz1A1sGeTRDffq8haUE3rwy+T
-   5OcQKiZqkkTPhUsE1uWLvBXoIpW4cTsLi4ilRz17eYEK0Oc7gTJXFhNkT
-   msZopCgrGww0oJipaJyyLItosZgmSg4iAjVMeAsV8UUBVIVRt8S5FxnI5
-   +zmL9MZnka0LJtf3TPcNwa4a7aXM2GEyPAEzyFtYqA7hpjgKJB0LNCtRx
+  bh=8miJjHVFYc/bpyj6qBdQOmlSnWEp1x28yyZ2xAwXd7E=;
+  b=TFpFgGIItZZ6Hfm9j+DSHG8urROrM04d6sXbAaGI11CpJC+CGjRuY2FN
+   FVhKNCK9vRyd3ipqGaNKnvFPiYuBQwMQ/OEcgLhyUoojyLmkDCM6I+Psp
+   pHxSg7PYV9L7xPqSZUDCj06dOiSkOZu9OIOw67XJdu0+J+cP/VNp9iDlF
+   gyepLv9uKgaXiwg+iTl94HOO6Gt4c7Jsnkt9ql7YllOnZ48BIwTYLChQO
+   8Z78wvHiRWCDDS7mWU0HsIk0LflJhbMsH3lWU1xOuoqG/oi8Xkw7b1UIC
+   Zs1+0PDC3jH+A1vW12qtYk+wJJ/E9LWOPij++EoBpQxd2YOPPn7X3kJgX
    g==;
-IronPort-SDR: Nd1N5rubAGnAH8MP8Ey/6MF4/cj4EQqY967yrHgvky6U1P5ZlW6WWTvT9Jzqs5IpunIXH9MVxr
- 9k//jsnpzPGH2V/2CsiUIZs+DtTyCzqpkVEd02gxFi6Vj7W9chE4kTPsooTmap5OVHraGd34yf
- NT0KRMBAJlQ4UWQA7qaFXeoTNkHIASLkMcH0aeGcTxYHwVrdRIjnsHbPSV22qdXRtsjsalWp/2
- 545IEs3EcafVaI6JJsyp4cmOofyRrXlO0z8AgPq83OKliiDVlBX8ZEqRMBdnECh4D377Pxhk9m
- 2rM=
+IronPort-SDR: 3ZUPXeoIoG8BMineYbSaOq103KqArpYZptsK7J8L/+d6BXHFTn08diiop2JaQ/kg+DYBuAIV0n
+ vTV+IwTJoidgr6baurJmZgR3v4PEjLWIf9Z+Er3215Zmc3NRRywTQrnVDRoAN2loUfVBNztZLt
+ bMBkmgdmjJTEQXQsCol1+JPuA10WP/tj9bomARTk5jINV5YdULrMfWQpOK/r56z5HIwSprcusO
+ oCmsqYusVbOzIsgyuf+DpewTRRCw5/l/nbGmRTtXiYSPxkYLK7QHeZHkHJZ1hhfsLzUTVx/q6C
+ yRQ=
 X-IronPort-AV: E=Sophos;i="5.76,352,1592863200"; 
-   d="scan'208";a="13589396"
+   d="scan'208";a="13590045"
 Received: from vtuxmail01.tq-net.de ([10.115.0.20])
-  by mx1.tq-group.com with ESMTP; 25 Aug 2020 13:24:13 +0200
+  by mx1.tq-group.com with ESMTP; 25 Aug 2020 14:00:40 +0200
 Received: from schifferm-ubuntu4.tq-net.de (schifferm-ubuntu4.tq-net.de [10.117.49.26])
-        by vtuxmail01.tq-net.de (Postfix) with ESMTPA id 01841280065;
-        Tue, 25 Aug 2020 13:24:12 +0200 (CEST)
-Message-ID: <50b5b51e31d9497dbb84c52e11d0d1547d4804f4.camel@ew.tq-group.com>
+        by vtuxmail01.tq-net.de (Postfix) with ESMTPA id 3DA40280065;
+        Tue, 25 Aug 2020 14:00:40 +0200 (CEST)
+Message-ID: <11654b05dd8fb87e195aed20cbdaa22d8856b072.camel@ew.tq-group.com>
 Subject: Re: (EXT) Re: [PATCH mmc-next v2] mmc: allow setting slot index via
  device tree alias
 From:   Matthias Schiffer <matthias.schiffer@ew.tq-group.com>
@@ -68,7 +68,7 @@ To:     Ulf Hansson <ulf.hansson@linaro.org>
 Cc:     Sascha Hauer <s.hauer@pengutronix.de>,
         "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
         Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-Date:   Tue, 25 Aug 2020 13:24:10 +0200
+Date:   Tue, 25 Aug 2020 14:00:38 +0200
 In-Reply-To: <548605506aa2e73afafdc228263da04585871e0b.camel@ew.tq-group.com>
 References: <20200820075949.19133-1-matthias.schiffer@ew.tq-group.com>
          <CAPDyKFoi7KghuBqu7YVS4GH4Bp1puhgb=PcwBVDvaTesLujrrw@mail.gmail.com>
@@ -86,33 +86,61 @@ On Tue, 2020-08-25 at 11:39 +0200, Matthias Schiffer wrote:
 > On Tue, 2020-08-25 at 11:14 +0200, Ulf Hansson wrote:
 > > On Thu, 20 Aug 2020 at 09:59, Matthias Schiffer
 > > <matthias.schiffer@ew.tq-group.com> wrote:
+> > > --- a/drivers/mmc/core/host.c
+> > > +++ b/drivers/mmc/core/host.c
+> > > @@ -387,6 +387,7 @@ struct mmc_host *mmc_alloc_host(int extra,
+> > > struct device *dev)
+> > >  {
+> > >         int err;
+> > >         struct mmc_host *host;
+> > > +       int alias_id, min_idx, max_idx;
+> > > 
+> > >         host = kzalloc(sizeof(struct mmc_host) + extra,
+> > > GFP_KERNEL);
+> > >         if (!host)
+> > > @@ -395,7 +396,18 @@ struct mmc_host *mmc_alloc_host(int extra,
+> > > struct device *dev)
+> > >         /* scanning will be enabled when we're ready */
+> > >         host->rescan_disable = 1;
+> > > 
+> > > -       err = ida_simple_get(&mmc_host_ida, 0, 0, GFP_KERNEL);
+> > > +       host->parent = dev;
 > > > +
-> > > +static void __init mmc_of_reserve_idx(void)
-> > > +{
-> > > +       int max;
+> > > +       alias_id = mmc_get_reserved_index(host);
+> > > +       if (alias_id >= 0) {
+> > > +               min_idx = alias_id;
+> > > +               max_idx = alias_id + 1;
+> > > +       } else {
+> > > +               min_idx = mmc_first_nonreserved_index();
+> > > +               max_idx = 0;
+> > > +       }
 > > > +
-> > > +       max = of_alias_get_highest_id("mmc");
-> > 
-> > Is calling of_alias_get_highest_id("mmc") costly from an execution
-> > point of view?
-> > 
-> > If not, we might as well call it directly from mmc_alloc_host()
-> > each
-> > time a host is allocated instead, to simplify the code a bit.
-> 
-> It's not particularly costly (it just walks the list of aliases once
-> and does a string comparison for each entry), but it does so while
-> holding the of_mutex.
-> 
-> Both variants exist in the current kernel: The I2C core stores the
-> hightest index in a global variable, while of_alias_get_highest_id()
-> is
-> called once for each registered SPI controller. I have a slight
-> preference for the global variable solution.
+> > > +       err = ida_simple_get(&mmc_host_ida, min_idx, max_idx,
+> > > GFP_KERNEL);
 
-Looking at this again, it's pretty much the same as of_alias_get_id().
-I'll remove the extra functions and global variable.
 
-Kind regards,
-Matthias
+One more question I came across when reworking my patch: Do we need a
+fallback here for the case where the reserved index is already taken?
+To handle an SD card being replaced while still mounted?
+
+
+> > >         if (err < 0) {
+> > >                 kfree(host);
+> > >                 return NULL;
+> > > @@ -406,7 +418,6 @@ struct mmc_host *mmc_alloc_host(int extra,
+> > > struct device *dev)
+> > >         dev_set_name(&host->class_dev, "mmc%d", host->index);
+> > >         host->ws = wakeup_source_register(NULL, dev_name(&host-
+> > > > class_dev));
+> > > 
+> > > -       host->parent = dev;
+> > >         host->class_dev.parent = dev;
+> > >         host->class_dev.class = &mmc_host_class;
+> > >         device_initialize(&host->class_dev);
+> > > --
+> > > 2.17.1
+> > > 
+> > 
+> > Kind regards
+> > Uffe
 
