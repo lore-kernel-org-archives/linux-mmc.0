@@ -7,58 +7,58 @@ X-Spam-Status: No, score=-9.9 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 15DDDC433E1
-	for <linux-mmc@archiver.kernel.org>; Tue, 25 Aug 2020 09:15:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 52614C433E3
+	for <linux-mmc@archiver.kernel.org>; Tue, 25 Aug 2020 09:20:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C4C792074D
-	for <linux-mmc@archiver.kernel.org>; Tue, 25 Aug 2020 09:15:03 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 29C1A2068F
+	for <linux-mmc@archiver.kernel.org>; Tue, 25 Aug 2020 09:20:40 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="jZFhWfFp"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="jaSXdba5"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729008AbgHYJPA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 25 Aug 2020 05:15:00 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39834 "EHLO
+        id S1728352AbgHYJUg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 25 Aug 2020 05:20:36 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40702 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728033AbgHYJO7 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Aug 2020 05:14:59 -0400
-Received: from mail-ua1-x941.google.com (mail-ua1-x941.google.com [IPv6:2607:f8b0:4864:20::941])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 41E11C061755
-        for <linux-mmc@vger.kernel.org>; Tue, 25 Aug 2020 02:14:59 -0700 (PDT)
-Received: by mail-ua1-x941.google.com with SMTP id z12so3498104uam.12
-        for <linux-mmc@vger.kernel.org>; Tue, 25 Aug 2020 02:14:59 -0700 (PDT)
+        with ESMTP id S1726934AbgHYJUg (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Aug 2020 05:20:36 -0400
+Received: from mail-vs1-xe41.google.com (mail-vs1-xe41.google.com [IPv6:2607:f8b0:4864:20::e41])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 756E6C061755
+        for <linux-mmc@vger.kernel.org>; Tue, 25 Aug 2020 02:20:35 -0700 (PDT)
+Received: by mail-vs1-xe41.google.com with SMTP id y8so5960384vsq.8
+        for <linux-mmc@vger.kernel.org>; Tue, 25 Aug 2020 02:20:35 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=VxEKn+VgQLIAUt9o+qYYMpyQtY4C5HwaXsz1Yt1p/4M=;
-        b=jZFhWfFpne20XTn7qhkiBtKMf4UM2L6sMQ36gltw+hWmRXXzxfGI1UjhA3vTXLcYak
-         PD0BJ5ouRoFRHTz0Ls5dhDIpPa1GKSnfi77HSdbXrodGmxHeg7yvE5rMN4hIIzuqmDtt
-         Mox6zlYCS4xC6WfD/0OdL6W9rof4PrZQn5zdxHNBL3Iu4xGoDhx2n0oWW7MSsD47OPqU
-         Rr/xXb0VP9chOAVPGaYSuXBvn4p9JoOwmhFaeU5IwwiBR0wwjgeOu6yqgtaPadH1HZ9W
-         YDacvKsQHHxQ10Y++d8DNsYzKqCFaTPdsyqjER9dKYj0maX+ZpSMSaKFMKMIUvYNMBPu
-         Z/Rw==
+        bh=RE4Ki0KsQ1ZCjBgLwwwcSn3VtnY3dVfuiwED9hvbSeQ=;
+        b=jaSXdba5X+bBzry1TQOZDk+5dtAHbETHyvKYqbEPs1bmgJzW8DPYoewuuztM9m6TQ3
+         nOaLZQnUlsJGhLn8aR3vkrzi7JnWBdwqQRoN5SJ7UQJGcB1cEXtbvTmpmtBco7bQ67TN
+         AdgGj3TUhrfzF/0rmrfCKiiimSOH6a30o9+SHy2juX4w0FFddoDHy/eT2y1PAWNTT8Nr
+         krCjL2BpZdknCArUnYpYLvbn4zlJC8F4TZQQqI1x5ansp8VW4l6C3/eVPWSIZnM+a3IU
+         HK4RZrA5xb91vgGcVRh5VIILEEG1iOYfD+cn+O2GtLgVhYaSXjkFwsT4dIwC7ZXahKcq
+         Ln6w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=VxEKn+VgQLIAUt9o+qYYMpyQtY4C5HwaXsz1Yt1p/4M=;
-        b=pmT5cfZSfHn5pecWYpeb2Uj6ryRhBhNeOTuWtvan/iClMska/6RJirYFa9acVtm/YT
-         Qs88OL25pitClkdnQIO5Qm+ZGPT3pW5ox28fNj19UySFPS6XHmKjhA7jrOQ3AVApBR8t
-         P0Hy7ZPaJlFJGcqZEAEX76QzMrFqgbFOpDsX0zzioArOo8S+TR0xZwHubqUOR2E14TZV
-         xI5gkpS9OVKc9tks1IFKXV2RJQr4ANGYQsQsTYcKFyRItZnzCec4TwWw3nHULHdRvAku
-         PwrRbz0ak8kEhGDrn/TBLMelac1RMVXhY1O07JCN463p7bkkL/E3bobnd9hlJgLfvtc1
-         xsdA==
-X-Gm-Message-State: AOAM531bJaCKdF8rpnJjtiCnwF1/lG5d0thzIyR26pcAMdJteVYLVnt2
-        cedj3VUemw22DGDp9nxKHHl1gDUCoKEGM+5LBQdWAA==
-X-Google-Smtp-Source: ABdhPJyIJirAXXZMRiF9QywEqHmEs4xn5v5/bkWbZKyqLAGShmULErMuRiR8g8iqogmgX+DqxEBq+CI/czqc74J9frE=
-X-Received: by 2002:ab0:3114:: with SMTP id e20mr4691406ual.104.1598346897996;
- Tue, 25 Aug 2020 02:14:57 -0700 (PDT)
+        bh=RE4Ki0KsQ1ZCjBgLwwwcSn3VtnY3dVfuiwED9hvbSeQ=;
+        b=rOsZzdLLH7Mtr6koerllgFAtxkdDFTPjViQW6xc1cgdeslujInOitxYanvZDXLy8Tv
+         bS5N24MG8Mlovl6So8WklBtOo+6j2HxosQVxzf5p7F3ke9YiAR9lpDRm5IEHWTbeSop8
+         pqPkjuVUXp17Xludvxv8HaUJ4jwavmIHpTtzwR6R85ZRkwS28syp9TlwP+nE+PhGA4jp
+         HDUSOCkCEMjPqjkBKcfm0x0vgGVOoBnEEVG5DBLgFniEUhk5QFbINHQBF39Rj0hPp83h
+         cex0QQUqLIDD9ztgXVIx5IcfxpqEhk0AeirY2ACP0zXKrHv2kFTKHDVD3feGH5nFcEEO
+         oOmQ==
+X-Gm-Message-State: AOAM5312z7Mg5CE3FUcSdJ6/vZx9ozy6wg3kEhwkbKK5HGwd6CRrFQ9f
+        2u7MRHp9V4fyqAdPXlPl5OUm5s3LmxI7NDVI9Gwclw==
+X-Google-Smtp-Source: ABdhPJwkkicekTC3pU8dLL4Fs6NujFaf6Q6aRPdusTHFwELiwk8Tp8c+YfE+JVOT1IwgNu431PAptkDFAdGSjW/c0c0=
+X-Received: by 2002:a67:8c06:: with SMTP id o6mr5206839vsd.200.1598347234392;
+ Tue, 25 Aug 2020 02:20:34 -0700 (PDT)
 MIME-Version: 1.0
 References: <20200820075949.19133-1-matthias.schiffer@ew.tq-group.com>
 In-Reply-To: <20200820075949.19133-1-matthias.schiffer@ew.tq-group.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 25 Aug 2020 11:14:20 +0200
-Message-ID: <CAPDyKFoi7KghuBqu7YVS4GH4Bp1puhgb=PcwBVDvaTesLujrrw@mail.gmail.com>
+Date:   Tue, 25 Aug 2020 11:19:58 +0200
+Message-ID: <CAPDyKFq8RL8=1bF2Tc3eQPpTBDv-z4K5jEhu5J1TOF=X-GJPqA@mail.gmail.com>
 Subject: Re: [PATCH mmc-next v2] mmc: allow setting slot index via device tree alias
 To:     Matthias Schiffer <matthias.schiffer@ew.tq-group.com>
 Cc:     Sascha Hauer <s.hauer@pengutronix.de>,
@@ -98,6 +98,14 @@ On Thu, 20 Aug 2020 at 09:59, Matthias Schiffer
 > Based-on-patch-by: Sascha Hauer <s.hauer@pengutronix.de>
 > Link: https://lkml.org/lkml/2020/8/5/194
 > Signed-off-by: Matthias Schiffer <matthias.schiffer@ew.tq-group.com>
+
+One more thing, can you please also update the DT doc example in
+mmc-controller.yaml, to show that mmc supports aliases. In a separate
+patch, of course.
+
+Kind regards
+Uffe
+
 > ---
 >
 > v2: fix missing symbols for modular mmcblock
@@ -137,12 +145,6 @@ On Thu, 20 Aug 2020 at 09:59, Matthias Schiffer
 > +                                       max_devices, GFP_KERNEL);
 >
 > -       devidx = ida_simple_get(&mmc_blk_ida, 0, max_devices, GFP_KERNEL);
-
-I am not sure why you need to change any of this. Currently we use the
-host->index, when creating the blockpartion name (dev.init_name).
-
-This is done for both rpmb and regular partitions. Isn't that sufficient?
-
 >         if (devidx < 0) {
 >                 /*
 >                  * We get -ENOSPC because there are no more any available
@@ -177,23 +179,12 @@ This is done for both rpmb and regular partitions. Isn't that sufficient?
 > +       return of_alias_get_id(host->parent->of_node, "mmc");
 > +}
 > +EXPORT_SYMBOL(mmc_get_reserved_index);
-
-I think you can drop this function, just call of_alias_get_id() from
-where it's needed.
-
 > +
 > +static void __init mmc_of_reserve_idx(void)
 > +{
 > +       int max;
 > +
 > +       max = of_alias_get_highest_id("mmc");
-
-Is calling of_alias_get_highest_id("mmc") costly from an execution
-point of view?
-
-If not, we might as well call it directly from mmc_alloc_host() each
-time a host is allocated instead, to simplify the code a bit.
-
 > +       if (max < 0)
 > +               return;
 > +
@@ -201,10 +192,6 @@ time a host is allocated instead, to simplify the code a bit.
 > +
 > +       pr_debug("MMC: reserving %d slots for OF aliases\n",
 > +                mmc_max_reserved_idx + 1);
-
-If this function is needed at all (see comments above), then please
-drop this debug print.
-
 > +}
 > +
 >  static int __init mmc_init(void)
@@ -273,6 +260,3 @@ drop this debug print.
 > --
 > 2.17.1
 >
-
-Kind regards
-Uffe
