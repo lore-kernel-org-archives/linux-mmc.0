@@ -2,136 +2,138 @@ Return-Path: <SRS0=3fsM=CD=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 107F1C433E1
-	for <linux-mmc@archiver.kernel.org>; Tue, 25 Aug 2020 17:00:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1DCEBC433E1
+	for <linux-mmc@archiver.kernel.org>; Tue, 25 Aug 2020 19:36:01 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id DAB15207BC
-	for <linux-mmc@archiver.kernel.org>; Tue, 25 Aug 2020 17:00:25 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="aatZMowo"
+	by mail.kernel.org (Postfix) with ESMTP id 004AE207DF
+	for <linux-mmc@archiver.kernel.org>; Tue, 25 Aug 2020 19:36:00 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1598384161;
+	bh=M1J8uZpqgbBk0Tp3JOS/OOQb4fA/JLnQDLU2aYyUXZk=;
+	h=From:To:Cc:Subject:Date:List-ID:From;
+	b=fxCJkhpnzLW3DK2m2eqH97Otvng2i7dPZrhR9opVi/jecXywWmE+gojZev2cP+xuJ
+	 Xlmfj+k3XdhdFOdAzUIToVC3F7FJVTJizMP9AWpLmxw5u0//Hdpx9PKute+z7rfFjA
+	 vGvduALId69w+nakqj4GlRP/zFX8Xmv/hSWxZFTk=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726187AbgHYRAY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 25 Aug 2020 13:00:24 -0400
-Received: from lelv0143.ext.ti.com ([198.47.23.248]:60472 "EHLO
-        lelv0143.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726180AbgHYRAY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Aug 2020 13:00:24 -0400
-Received: from lelv0266.itg.ti.com ([10.180.67.225])
-        by lelv0143.ext.ti.com (8.15.2/8.15.2) with ESMTP id 07PH0IpM100291;
-        Tue, 25 Aug 2020 12:00:18 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
-        s=ti-com-17Q1; t=1598374818;
-        bh=wx+MkPPTaYJfYBTcROXK3BjImjEGwmVDFhuR5gyn5Ak=;
-        h=From:To:CC:Subject:Date;
-        b=aatZMowob99TDnUIbBhAkgDFCu1zmhjXUSJO+U/jMgqaK+8aVVSQWrX3Tx0qdK9Jh
-         twKXuDxOqvXHeAbsxKpXiVLh46eYqI621uT6l9ZZMGBr5WqLT8I8H2fb7GPfwp8wPl
-         Ou++F3QbfW3B/mk7vLe2pU2Ti2oq7TvVwgli7I+g=
-Received: from DLEE110.ent.ti.com (dlee110.ent.ti.com [157.170.170.21])
-        by lelv0266.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 07PH0Ina051836
-        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
-        Tue, 25 Aug 2020 12:00:18 -0500
-Received: from DLEE115.ent.ti.com (157.170.170.26) by DLEE110.ent.ti.com
- (157.170.170.21) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.1979.3; Tue, 25
- Aug 2020 12:00:18 -0500
-Received: from fllv0040.itg.ti.com (10.64.41.20) by DLEE115.ent.ti.com
- (157.170.170.26) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.1979.3 via
- Frontend Transport; Tue, 25 Aug 2020 12:00:18 -0500
-Received: from a0230074-OptiPlex-7010.dhcp.ti.com (ileax41-snat.itg.ti.com [10.172.224.153])
-        by fllv0040.itg.ti.com (8.15.2/8.15.2) with ESMTP id 07PH0FWY016183;
-        Tue, 25 Aug 2020 12:00:16 -0500
-From:   Faiz Abbas <faiz_abbas@ti.com>
-To:     <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>
-CC:     <ulf.hansson@linaro.org>, <adrian.hunter@intel.com>,
-        <faiz_abbas@ti.com>
-Subject: [PATCH v2] mmc: sdhci_am654: Add workaround for card detect debounce timer
-Date:   Tue, 25 Aug 2020 22:30:15 +0530
-Message-ID: <20200825170015.32285-1-faiz_abbas@ti.com>
+        id S1726090AbgHYTgA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 25 Aug 2020 15:36:00 -0400
+Received: from mail.kernel.org ([198.145.29.99]:39366 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726149AbgHYTf7 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 25 Aug 2020 15:35:59 -0400
+Received: from localhost.localdomain (unknown [194.230.155.216])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id D9EB72075E;
+        Tue, 25 Aug 2020 19:35:50 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1598384158;
+        bh=M1J8uZpqgbBk0Tp3JOS/OOQb4fA/JLnQDLU2aYyUXZk=;
+        h=From:To:Cc:Subject:Date:From;
+        b=HIS7rlbZC99+PFJ+c8TL3+mAFsePhLupI704uWAszxjjQtUK0rRn26QHhWk51eWPf
+         osIIVZV6O8lT/j7Ew+BLD285VUcGHCFOkYLMR0yuSzUtYuTjxNzMDHDy+Ab3kRUQYC
+         hmdIrv3bnxN73fG1c+3EPyro5Z47zPoDJd5DzXyQ=
+From:   Krzysztof Kozlowski <krzk@kernel.org>
+To:     Rob Herring <robh+dt@kernel.org>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
+        Shawn Guo <shawnguo@kernel.org>,
+        Sascha Hauer <s.hauer@pengutronix.de>,
+        Pengutronix Kernel Team <kernel@pengutronix.de>,
+        Fabio Estevam <festevam@gmail.com>,
+        NXP Linux Team <linux-imx@nxp.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Miquel Raynal <miquel.raynal@bootlin.com>,
+        Mark Rutland <mark.rutland@arm.com>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        Anson Huang <Anson.Huang@nxp.com>,
+        Li Yang <leoyang.li@nxp.com>, Han Xu <han.xu@nxp.com>,
+        Frank Li <frank.li@nxp.com>, Fugang Duan <fugang.duan@nxp.com>,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-gpio@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org,
+        linux-pwm@vger.kernel.org, linux-serial@vger.kernel.org,
+        linux-pm@vger.kernel.org, linux-watchdog@vger.kernel.org
+Cc:     Krzysztof Kozlowski <krzk@kernel.org>
+Subject: [PATCH v3 00/19] dt-bindings / arm64: Cleanup of i.MX 8 bindings
+Date:   Tue, 25 Aug 2020 21:35:17 +0200
+Message-Id: <20200825193536.7332-1-krzk@kernel.org>
 X-Mailer: git-send-email 2.17.1
-MIME-Version: 1.0
-Content-Type: text/plain
-X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-There is a one time delay because of a card detect debounce timer in the
-controller IP. This timer runs as soon as power is applied to the module
-regardless of whether a card is present or not and any writes to
-SDHCI_POWER_ON will return 0 before it expires. This timeout has been
-measured to be about 1 second in am654x and j721e.
+Hi,
 
-Write-and-read-back in a loop on SDHCI_POWER_ON for a maximum of
-1.5 seconds to make sure that the controller actually powers on.
+This is a v3 of cleanup of i.XM 8 bindings and DTSes.
 
-Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
----
+It is separate patchset from i.MX 8 pin configuration cleanup, which
+also touch the bindings [1]. No dependencies (although in my tree this
+comes first).
 
-v2: Use read_poll_timeout() standard macro
+Merging
+=======
+There are no dependencies, so dt-bindings could go through Rob's tree,
+DTS through SoC. I think there is no point to push dt-bindings changes
+through subsystem maintainers (gpio, pwm, watchdog, mtd etc). Usually
+Rob has been picking them up.
 
- drivers/mmc/host/sdhci_am654.c | 24 ++++++++++++++++++++++++
- 1 file changed, 24 insertions(+)
+Changes since v2:
+=================
+1. Add Rob's review,
+2. Correct things pointed during review (see individual patches and
+their change logs).
 
-diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
-index f9d24af12396..9a048c80dad4 100644
---- a/drivers/mmc/host/sdhci_am654.c
-+++ b/drivers/mmc/host/sdhci_am654.c
-@@ -6,6 +6,7 @@
-  *
-  */
- #include <linux/clk.h>
-+#include <linux/iopoll.h>
- #include <linux/of.h>
- #include <linux/module.h>
- #include <linux/pm_runtime.h>
-@@ -272,9 +273,19 @@ static void sdhci_j721e_4bit_set_clock(struct sdhci_host *host,
- 	sdhci_set_clock(host, clock);
- }
- 
-+static u8 sdhci_am654_write_power_on(struct sdhci_host *host, u8 val, int reg)
-+{
-+	writeb(val, host->ioaddr + reg);
-+	usleep_range(1000, 10000);
-+	return readb(host->ioaddr + reg);
-+}
-+
-+#define MAX_POWER_ON_TIMEOUT	1500000 /* us */
- static void sdhci_am654_write_b(struct sdhci_host *host, u8 val, int reg)
- {
- 	unsigned char timing = host->mmc->ios.timing;
-+	u8 pwr;
-+	int ret;
- 
- 	if (reg == SDHCI_HOST_CONTROL) {
- 		switch (timing) {
-@@ -291,6 +302,19 @@ static void sdhci_am654_write_b(struct sdhci_host *host, u8 val, int reg)
- 	}
- 
- 	writeb(val, host->ioaddr + reg);
-+	if (reg == SDHCI_POWER_CONTROL && (val & SDHCI_POWER_ON)) {
-+		/*
-+		 * Power on will not happen until the card detect debounce
-+		 * timer expires. Wait at least 1.5 seconds for the power on
-+		 * bit to be set
-+		 */
-+		ret = read_poll_timeout(sdhci_am654_write_power_on, pwr,
-+					pwr & SDHCI_POWER_ON, 0,
-+					MAX_POWER_ON_TIMEOUT, false, host, val,
-+					reg);
-+		if (ret)
-+			dev_warn(mmc_dev(host->mmc), "Power on failed\n");
-+	}
- }
- 
- static int sdhci_am654_execute_tuning(struct mmc_host *mmc, u32 opcode)
+[1] dt-bindings: mtd: gpmi-nand: Fix matching of clocks on different SoC
+
+Best regards,
+Krzysztof
+
+
+Krzysztof Kozlowski (19):
+  dt-bindings: gpio: fsl-imx-gpio: Add i.MX 8 compatibles
+  dt-bindings: gpio: fsl-imx-gpio: Add gpio-ranges property
+  dt-bindings: gpio: fsl-imx-gpio: Add parsing of hogs
+  dt-bindings: gpio: fsl-imx-gpio: Add power-domains
+  dt-bindings: perf: fsl-imx-ddr: Add i.MX 8M compatibles
+  dt-bindings: pwm: imx-pwm: Add i.MX 8M compatibles
+  dt-bindings: serial: fsl-imx-uart: Add i.MX 8M compatibles
+  dt-bindings: watchdog: fsl-imx-wdt: Add i.MX 8M compatibles
+  dt-bindings: mtd: gpmi-nand: Add i.MX 8M compatibles
+  dt-bindings: reset: fsl,imx7-src: Add i.MX 8M compatibles
+  dt-bindings: thermal: imx8mm-thermal: Add i.MX 8M Nano compatible
+  dt-bindings: mmc: fsl-imx-esdhc: Fix i.MX 8 compatible matching
+  dt-bindings: nvmem: imx-ocotp: Update i.MX 8M compatibles
+  dt-bindings: arm: fsl: Fix Toradex Colibri i.MX 8 binding
+  dt-bindings: arm: fsl: Add ZII Ultra boards binding
+  dt-bindings: interrupt-controller: fsl,irqsteer: Fix compatible
+    matching
+  dt-bindings: serial: fsl-lpuart: Fix compatible matching
+  arm64: dts: imx8mq-evk: Add hog suffix to wl-reg-on
+  arm64: dts: imx8mq-zii-ultra: Add hog suffixes to GPIO hogs
+
+ .../devicetree/bindings/arm/fsl.yaml          | 14 ++++++
+ .../bindings/gpio/fsl-imx-gpio.yaml           | 43 ++++++++++++++++---
+ .../interrupt-controller/fsl,irqsteer.yaml    |  8 ++--
+ .../bindings/mmc/fsl-imx-esdhc.yaml           | 37 ++++++++--------
+ .../devicetree/bindings/mtd/gpmi-nand.yaml    | 18 +++++---
+ .../devicetree/bindings/nvmem/imx-ocotp.yaml  | 38 +++++++++-------
+ .../devicetree/bindings/perf/fsl-imx-ddr.yaml | 16 +++++--
+ .../devicetree/bindings/pwm/imx-pwm.yaml      | 14 ++++--
+ .../bindings/reset/fsl,imx7-src.yaml          | 19 +++++---
+ .../bindings/serial/fsl-imx-uart.yaml         |  4 ++
+ .../bindings/serial/fsl-lpuart.yaml           | 17 +++++---
+ .../bindings/thermal/imx8mm-thermal.yaml      | 10 +++--
+ .../bindings/watchdog/fsl-imx-wdt.yaml        | 11 ++++-
+ arch/arm64/boot/dts/freescale/imx8mq-evk.dts  |  2 +-
+ .../boot/dts/freescale/imx8mq-zii-ultra.dtsi  |  8 ++--
+ 15 files changed, 182 insertions(+), 77 deletions(-)
+
 -- 
 2.17.1
 
