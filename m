@@ -7,37 +7,37 @@ X-Spam-Status: No, score=-14.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 11E21C433E4
-	for <linux-mmc@archiver.kernel.org>; Tue, 25 Aug 2020 19:37:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D05BFC433E1
+	for <linux-mmc@archiver.kernel.org>; Tue, 25 Aug 2020 19:37:49 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id EC6F42076C
-	for <linux-mmc@archiver.kernel.org>; Tue, 25 Aug 2020 19:37:32 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id BA3022075F
+	for <linux-mmc@archiver.kernel.org>; Tue, 25 Aug 2020 19:37:49 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1598384253;
-	bh=85RKMTmKECIMFM6DGRK+YX/4QokPxJS+EKnA8zzJN1U=;
+	s=default; t=1598384269;
+	bh=oLRBjrakobO00fQoSHuH7N5PbZAoKW+gBHMvclqPiN4=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=0qh7RUE069zUExw4LxOZPWz+qGL9Px3ul/mlEFj15gMErnbvYOayloSxGyO4IBh3/
-	 TNdgbGclKG5t9QLnb2cYY01fCdxhPoJG13SqAjZPNKZ7d+C6OIY6tsVWoiOnApQtcx
-	 jbNY9ZrZzNpqClt1oi67ThPQiUx3eQpLIRz8rBcE=
+	b=EGLoyDl4xPqQ75pGBY36hR0d/Q7CL2Q9qlNZ9KhL23ob0IIFP6CTp2Oy01IsrkI8a
+	 oFlyqtv0i7hi+GWuesoo9yZMan900cLvz96felsROizTeTJXPC1YO5D1Ob3AnYzXcq
+	 ESHE+7/tTv960mt4UdpisD0CcpnDoHHp7L1lSiD8=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726798AbgHYTh1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 25 Aug 2020 15:37:27 -0400
-Received: from mail.kernel.org ([198.145.29.99]:42494 "EHLO mail.kernel.org"
+        id S1727076AbgHYThm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 25 Aug 2020 15:37:42 -0400
+Received: from mail.kernel.org ([198.145.29.99]:43046 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726090AbgHYTh1 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 25 Aug 2020 15:37:27 -0400
+        id S1726180AbgHYThl (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 25 Aug 2020 15:37:41 -0400
 Received: from localhost.localdomain (unknown [194.230.155.216])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 383B8207DF;
-        Tue, 25 Aug 2020 19:37:16 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 79B9B2076C;
+        Tue, 25 Aug 2020 19:37:35 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1598384246;
-        bh=85RKMTmKECIMFM6DGRK+YX/4QokPxJS+EKnA8zzJN1U=;
+        s=default; t=1598384261;
+        bh=oLRBjrakobO00fQoSHuH7N5PbZAoKW+gBHMvclqPiN4=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=1mhyc2hFMV1Kl1VwHgMe7aKSzXGPKK1Or/omGY8U3pUngppO6NjrP7fkDSj4szw1E
-         TkWRcWbSPnnuchHuQNQ7pSvSpdxHWysYTbsVaNXezUQewJKsDQdW9y64qM0lVD7rK/
-         dyncXh1XGtYjAqDQj30ErtI7JkZgSxy4VTxkwOZs=
+        b=wZYN9o640+VFHGKh1osxq8NjcnAVTCAs0ov9HzZBc6xlW9uvTt88RXvE/chPYzK1A
+         8Z5yemHpf3GD/1tQGnMTagBv5e1hNVAhv3XYkXtJCM54QXePe9Xq2vdBnkl3U5MbXK
+         CKWDGAtOnMYsoXLtfGVazUeI07XZvl30zs0l+7HU=
 From:   Krzysztof Kozlowski <krzk@kernel.org>
 To:     Rob Herring <robh+dt@kernel.org>,
         Linus Walleij <linus.walleij@linaro.org>,
@@ -60,9 +60,9 @@ To:     Rob Herring <robh+dt@kernel.org>,
         linux-pwm@vger.kernel.org, linux-serial@vger.kernel.org,
         linux-pm@vger.kernel.org, linux-watchdog@vger.kernel.org
 Cc:     Krzysztof Kozlowski <krzk@kernel.org>
-Subject: [PATCH v3 10/19] dt-bindings: reset: fsl,imx7-src: Add i.MX 8M compatibles
-Date:   Tue, 25 Aug 2020 21:35:27 +0200
-Message-Id: <20200825193536.7332-11-krzk@kernel.org>
+Subject: [PATCH v3 12/19] dt-bindings: mmc: fsl-imx-esdhc: Fix i.MX 8 compatible matching
+Date:   Tue, 25 Aug 2020 21:35:29 +0200
+Message-Id: <20200825193536.7332-13-krzk@kernel.org>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20200825193536.7332-1-krzk@kernel.org>
 References: <20200825193536.7332-1-krzk@kernel.org>
@@ -71,52 +71,77 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-DTSes with new i.MX 8M SoCs introduce their own compatibles so add them
-to fix dtbs_check warnings like:
+The i.MX 8 DTSes use two compatibles so update the binding to fix
+dtbs_check warnings like:
 
-  arch/arm64/boot/dts/freescale/imx8mm-evk.dt.yaml: reset-controller@30390000:
-    compatible:0: 'fsl,imx8mm-src' is not one of ['fsl,imx7d-src', 'fsl,imx8mq-src', 'fsl,imx8mp-src']
-    From schema: Documentation/devicetree/bindings/reset/fsl,imx7-src.yaml
+  arch/arm64/boot/dts/freescale/imx8mn-evk.dt.yaml: mmc@30b40000:
+    compatible: ['fsl,imx8mn-usdhc', 'fsl,imx7d-usdhc'] is too long
+    From schema: Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
 
-  arch/arm64/boot/dts/freescale/imx8mm-evk.dt.yaml: reset-controller@30390000:
-    compatible:1: 'syscon' was expected
+  arch/arm64/boot/dts/freescale/imx8mn-evk.dt.yaml: mmc@30b40000:
+    compatible: Additional items are not allowed ('fsl,imx7d-usdhc' was unexpected)
 
-  arch/arm64/boot/dts/freescale/imx8mm-evk.dt.yaml: reset-controller@30390000:
-    compatible: ['fsl,imx8mm-src', 'fsl,imx8mq-src', 'syscon'] is too long
+  arch/arm64/boot/dts/freescale/imx8mn-ddr4-evk.dt.yaml: mmc@30b40000:
+    compatible: ['fsl,imx8mn-usdhc', 'fsl,imx7d-usdhc'] is too long
 
 Signed-off-by: Krzysztof Kozlowski <krzk@kernel.org>
-Reviewed-by: Rob Herring <robh@kernel.org>
----
- .../bindings/reset/fsl,imx7-src.yaml          | 19 +++++++++++++------
- 1 file changed, 13 insertions(+), 6 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/reset/fsl,imx7-src.yaml b/Documentation/devicetree/bindings/reset/fsl,imx7-src.yaml
-index 569cd3bd3a70..00430e2eabc8 100644
---- a/Documentation/devicetree/bindings/reset/fsl,imx7-src.yaml
-+++ b/Documentation/devicetree/bindings/reset/fsl,imx7-src.yaml
-@@ -22,12 +22,19 @@ description: |
+---
+
+Changes since v2:
+1. Remove moved compatibles.
+
+Changes since v1:
+1. Handle also fsl,imx8mm-usdhc and fsl,imx8qxp-usdhc
+---
+ .../bindings/mmc/fsl-imx-esdhc.yaml           | 37 ++++++++++---------
+ 1 file changed, 20 insertions(+), 17 deletions(-)
+
+diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
+index 10b45966f1b8..e71d13c2d109 100644
+--- a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
++++ b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
+@@ -21,23 +21,26 @@ description: |
  
  properties:
    compatible:
--    items:
--      - enum:
--          - fsl,imx7d-src
--          - fsl,imx8mq-src
--          - fsl,imx8mp-src
--      - const: syscon
+-    enum:
+-      - fsl,imx25-esdhc
+-      - fsl,imx35-esdhc
+-      - fsl,imx51-esdhc
+-      - fsl,imx53-esdhc
+-      - fsl,imx6q-usdhc
+-      - fsl,imx6sl-usdhc
+-      - fsl,imx6sx-usdhc
+-      - fsl,imx6ull-usdhc
+-      - fsl,imx7d-usdhc
+-      - fsl,imx7ulp-usdhc
+-      - fsl,imx8mq-usdhc
+-      - fsl,imx8mm-usdhc
+-      - fsl,imx8mn-usdhc
+-      - fsl,imx8mp-usdhc
+-      - fsl,imx8qm-usdhc
+-      - fsl,imx8qxp-usdhc
 +    oneOf:
++      - enum:
++          - fsl,imx25-esdhc
++          - fsl,imx35-esdhc
++          - fsl,imx51-esdhc
++          - fsl,imx53-esdhc
++          - fsl,imx6q-usdhc
++          - fsl,imx6sl-usdhc
++          - fsl,imx6sx-usdhc
++          - fsl,imx6ull-usdhc
++          - fsl,imx7d-usdhc
++          - fsl,imx7ulp-usdhc
 +      - items:
 +          - enum:
-+              - fsl,imx7d-src
-+              - fsl,imx8mq-src
-+              - fsl,imx8mp-src
-+          - const: syscon
-+      - items:
-+          - enum:
-+              - fsl,imx8mm-src
-+              - fsl,imx8mn-src
-+          - const: fsl,imx8mq-src
-+          - const: syscon
++              - fsl,imx8mm-usdhc
++              - fsl,imx8mn-usdhc
++              - fsl,imx8mp-usdhc
++              - fsl,imx8mq-usdhc
++              - fsl,imx8qxp-usdhc
++          - const: fsl,imx7d-usdhc
  
    reg:
      maxItems: 1
