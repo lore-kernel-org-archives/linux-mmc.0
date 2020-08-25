@@ -2,154 +2,108 @@ Return-Path: <SRS0=3fsM=CD=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.1 required=3.0 tests=BAYES_00,DKIM_INVALID,
-	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_2 autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-12.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 46BECC433E1
-	for <linux-mmc@archiver.kernel.org>; Tue, 25 Aug 2020 12:32:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F3449C433DF
+	for <linux-mmc@archiver.kernel.org>; Tue, 25 Aug 2020 13:46:11 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 21CB920767
-	for <linux-mmc@archiver.kernel.org>; Tue, 25 Aug 2020 12:32:45 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D1A1F2075F
+	for <linux-mmc@archiver.kernel.org>; Tue, 25 Aug 2020 13:46:11 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (2048-bit key) header.d=tq-group.com header.i=@tq-group.com header.b="X2TFKHrY"
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=tq-group.com header.i=@tq-group.com header.b="N1MxhvFB"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726985AbgHYMcn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 25 Aug 2020 08:32:43 -0400
-Received: from mx1.tq-group.com ([62.157.118.193]:34172 "EHLO mx1.tq-group.com"
+        id S1726672AbgHYNp6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 25 Aug 2020 09:45:58 -0400
+Received: from mx1.tq-group.com ([62.157.118.193]:40528 "EHLO mx1.tq-group.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726633AbgHYMcm (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 25 Aug 2020 08:32:42 -0400
-IronPort-SDR: 3x1e3Pz1wwgpI9X+zYjsp9iXbYNiCGl6869zS6wKdQlry6UZ/QchFDCnrbItKQ+Vj5mwNn73fY
- byJi0Cffvj6It9fidoVSnaFFCBWKd2afRv5/mDfZQv1SiI9lyShuLUx5gQE588CqzErvIoI6cy
- 7Kq5KOv+gwTbrFo94qPj8mssP87LEkQbBEoSD2lIugvY+KHxPFbbk4ztRClaMWjAMS0VVAiSAr
- PtnDaCIGZe/BMmwhAInG4XzAvde97QvTIz/fCZ4Qr5KHCHrAfZjZxLTrbQ1ViYsJfCIavZK3pc
- acg=
+        id S1726730AbgHYNpx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 25 Aug 2020 09:45:53 -0400
+IronPort-SDR: EWepCS+1mazOO+d5eLqNjy3LCf4T4rGNVIZfE5RnWj3/mC2fy6VwcCarTx4PlRW7xqYxs4CTPD
+ x80tyrxo8qkNz+DY8xVh2QFvDzdlAhbVa43SSt5g6n1B6UTgYOhmw21wQeYNGe1KMsRjejO8Fb
+ d9d8RwdDrPJz5AxUt3C6NrZ3yU/gNET2YTixcYyHJjYgwOtC2GEdHiMED8760kPj6RmZnhjpjG
+ O6Vj+s51HhXAvLFL4atetCaB0RusqjKtnML2e9MoWcTREqNWpj2LLoPRNCjPIdJC8KzJoIGj7g
+ QIs=
 X-IronPort-AV: E=Sophos;i="5.76,352,1592863200"; 
-   d="scan'208";a="13590729"
+   d="scan'208";a="13592257"
 Received: from unknown (HELO tq-pgp-pr1.tq-net.de) ([192.168.6.15])
-  by mx1-pgp.tq-group.com with ESMTP; 25 Aug 2020 14:32:40 +0200
+  by mx1-pgp.tq-group.com with ESMTP; 25 Aug 2020 15:45:34 +0200
 Received: from mx1.tq-group.com ([192.168.6.7])
   by tq-pgp-pr1.tq-net.de (PGP Universal service);
-  Tue, 25 Aug 2020 14:32:40 +0200
+  Tue, 25 Aug 2020 15:45:34 +0200
 X-PGP-Universal: processed;
-        by tq-pgp-pr1.tq-net.de on Tue, 25 Aug 2020 14:32:40 +0200
+        by tq-pgp-pr1.tq-net.de on Tue, 25 Aug 2020 15:45:34 +0200
 DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
   d=tq-group.com; i=@tq-group.com; q=dns/txt; s=key1;
-  t=1598358760; x=1629894760;
-  h=message-id:subject:from:to:cc:date:in-reply-to:
-   references:mime-version:content-transfer-encoding;
-  bh=//UX+6dtDsOUhxAY7i7j/5wz0r3N+fBK+XOosoJPu7c=;
-  b=X2TFKHrYtkCTYBCwj2Tz1QOT9Ld6aw4ZVo7Ky2Hz3m1fRxYfd930e874
-   dlCsgaPZv/5RsWw71Jflo4f/hU43VstavrYDkKiRnoQnA7sHZArxJzOaT
-   QooIvqWfOqv6fLss6u7199on/eGrT6E5OmeeaL4avxvaw+sLjq89N3v+D
-   iHsTTS9p0cj47T5xXuW+1p+Gj4xYRSGCdeLnTn+r3ffzeKNT84QuuLmyv
-   TKL1bX1cI3PBxj+MPlgUqcDsFFOwQVVT91huR3kf3HcZhb7mOih+6gxQu
-   ktJDZjs1YNsACgKNwXUgjhWmSv8ol2qm7AvUtK8fvmvWKCdBUxtokwEBc
-   g==;
-IronPort-SDR: U8bM6z9Do0ynMVDiZZr75f3Wt1TQ80iR8iTg4Zpzn4MSYaMYvxaXQWguiRy2D1M0xaiIA+xRfw
- QIB6ZKrPXlqJPzGNUB37NTBVovbPRQ1cgrxqWN/m1pLAerVydGwddVk+w/VK6mYozdVQY5T3UJ
- BEeP1kG5h0zLWKcGd1TGUsKnQiNP5Bm/igIWEUk7vDjqUouwfuhRipm8QYkvvpdegkAt4A932p
- e8wehn69XnqkCMjdQeexCE4EUpSbnZ95QBlY4kaIH5mlRJYnxeJVINdNwJKitjpk1BgqFhDrMq
- 2zc=
+  t=1598363134; x=1629899134;
+  h=from:to:cc:subject:date:message-id;
+  bh=fUqsPE/ZO4LWYoE8Q40E9k79iF8jdqLY6H5vK/D03uU=;
+  b=N1MxhvFBkHSgLoGTAkYNUnrzhNL2SLQIPQaUmt1EpiBJhtMP9HiTRPto
+   Y2qbpaWRZKtKM1AkgGNdZlFOLRQeGH6Z9MwW/yq6A7wi3JJ/Mn7Jx2JDX
+   loGCItdOZnJwfy5hEqp6WsTWpg5kp+jir/k+a2vp7PvcrQpGfmVfdmpQd
+   pueFlhDZQ7oPL5gQCLH/HNp9+LlOaJyd9QVtsHDRvAUkXBKYdD0mpRpIP
+   CsebwOAEMcEpWeVsPapwvKn2LyFEEEhsUOEF9GCfmSH2pTz8WWZdKjx8Q
+   pY+6+HAkdLJvjd7Y2q5ydTvpgbze+6rqZPE8KIBfH5mIGTzuVydzhU4bR
+   A==;
+IronPort-SDR: T2F+3bqy5rZURdVPnteiUoZlsLwR7+OAK9TaRMfSCf3g99BUQOIVMLEFNQBnxLRx6covkVmJ8F
+ L8fSAClNtpW+amrJ7JA80xz0KKAV3tt0JhPKdVKMSg44qp6BuxD+GWJGilfNGUbiqlxCxuREGK
+ pG6y41bO1TUk51ontoPE7lywW2c9TJZKKS+utz39F5e3QcnFF/VoaIkU7S8vptiXampI1z1DXd
+ nHm1qawYEaVwD/yGWA8vbcksMGTJQxiW2IyUiw8PKStaM+6Y4o14+eWSYzN9Qe3ospvV07VwsA
+ zKY=
 X-IronPort-AV: E=Sophos;i="5.76,352,1592863200"; 
-   d="scan'208";a="13590728"
+   d="scan'208";a="13592256"
 Received: from vtuxmail01.tq-net.de ([10.115.0.20])
-  by mx1.tq-group.com with ESMTP; 25 Aug 2020 14:32:40 +0200
+  by mx1.tq-group.com with ESMTP; 25 Aug 2020 15:45:34 +0200
 Received: from schifferm-ubuntu4.tq-net.de (schifferm-ubuntu4.tq-net.de [10.117.49.26])
-        by vtuxmail01.tq-net.de (Postfix) with ESMTPA id 54326280065;
-        Tue, 25 Aug 2020 14:32:40 +0200 (CEST)
-Message-ID: <936a2a0d85b9bd8455cc1844e264a0d9fc86c5ac.camel@ew.tq-group.com>
-Subject: Re: (EXT) Re: (EXT) Re: [PATCH mmc-next v2] mmc: allow setting slot
- index via device tree alias
+        by vtuxmail01.tq-net.de (Postfix) with ESMTPA id 7E1E9280065;
+        Tue, 25 Aug 2020 15:45:34 +0200 (CEST)
 From:   Matthias Schiffer <matthias.schiffer@ew.tq-group.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Sascha Hauer <s.hauer@pengutronix.de>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-Date:   Tue, 25 Aug 2020 14:32:38 +0200
-In-Reply-To: <CAPDyKFrBj2RO3jqgrQ5qhYpMOFfjufBnr2y8McdgJXR-Z_618g@mail.gmail.com>
-References: <20200820075949.19133-1-matthias.schiffer@ew.tq-group.com>
-         <CAPDyKFoi7KghuBqu7YVS4GH4Bp1puhgb=PcwBVDvaTesLujrrw@mail.gmail.com>
-         <548605506aa2e73afafdc228263da04585871e0b.camel@ew.tq-group.com>
-         <11654b05dd8fb87e195aed20cbdaa22d8856b072.camel@ew.tq-group.com>
-         <CAPDyKFrBj2RO3jqgrQ5qhYpMOFfjufBnr2y8McdgJXR-Z_618g@mail.gmail.com>
-Content-Type: text/plain; charset="UTF-8"
-X-Mailer: Evolution 3.28.5-0ubuntu0.18.04.2 
-Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>
+Cc:     Sascha Hauer <s.hauer@pengutronix.de>, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Matthias Schiffer <matthias.schiffer@ew.tq-group.com>
+Subject: [PATCH mmc-next v3 1/2] dt-bindings: mmc: add alias example
+Date:   Tue, 25 Aug 2020 15:44:40 +0200
+Message-Id: <20200825134441.17537-1-matthias.schiffer@ew.tq-group.com>
+X-Mailer: git-send-email 2.17.1
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 2020-08-25 at 14:27 +0200, Ulf Hansson wrote:
-> On Tue, 25 Aug 2020 at 14:00, Matthias Schiffer
-> <matthias.schiffer@ew.tq-group.com> wrote:
-> > 
-> > On Tue, 2020-08-25 at 11:39 +0200, Matthias Schiffer wrote:
-> > > On Tue, 2020-08-25 at 11:14 +0200, Ulf Hansson wrote:
-> > > > On Thu, 20 Aug 2020 at 09:59, Matthias Schiffer
-> > > > <matthias.schiffer@ew.tq-group.com> wrote:
-> > > > > --- a/drivers/mmc/core/host.c
-> > > > > +++ b/drivers/mmc/core/host.c
-> > > > > @@ -387,6 +387,7 @@ struct mmc_host *mmc_alloc_host(int
-> > > > > extra,
-> > > > > struct device *dev)
-> > > > >  {
-> > > > >         int err;
-> > > > >         struct mmc_host *host;
-> > > > > +       int alias_id, min_idx, max_idx;
-> > > > > 
-> > > > >         host = kzalloc(sizeof(struct mmc_host) + extra,
-> > > > > GFP_KERNEL);
-> > > > >         if (!host)
-> > > > > @@ -395,7 +396,18 @@ struct mmc_host *mmc_alloc_host(int
-> > > > > extra,
-> > > > > struct device *dev)
-> > > > >         /* scanning will be enabled when we're ready */
-> > > > >         host->rescan_disable = 1;
-> > > > > 
-> > > > > -       err = ida_simple_get(&mmc_host_ida, 0, 0,
-> > > > > GFP_KERNEL);
-> > > > > +       host->parent = dev;
-> > > > > +
-> > > > > +       alias_id = mmc_get_reserved_index(host);
-> > > > > +       if (alias_id >= 0) {
-> > > > > +               min_idx = alias_id;
-> > > > > +               max_idx = alias_id + 1;
-> > > > > +       } else {
-> > > > > +               min_idx = mmc_first_nonreserved_index();
-> > > > > +               max_idx = 0;
-> > > > > +       }
-> > > > > +
-> > > > > +       err = ida_simple_get(&mmc_host_ida, min_idx, max_idx,
-> > > > > GFP_KERNEL);
-> > 
-> > 
-> > One more question I came across when reworking my patch: Do we need
-> > a
-> > fallback here for the case where the reserved index is already
-> > taken?
-> > To handle an SD card being replaced while still mounted?
-> 
-> Removal/insertion of an SD card should be fine, as that doesn't mean
-> that the host is removed. In other words, host->index remains the
-> same.
-> 
-> Although, for a bad DT configuration, where for example the same
-> aliases id is used twice, a fallback could make sense. On the other
-> hand, as such configuration would be wrong, we might as well just
-> print a message and return an error.
+As for I2C and SPI, it now is possible to reserve a fixed index for
+mmc/mmcblk devices.
 
-I don't think this can happen as long as we don't have DTs changing at
-runtime: Each alias is a DT property name in /aliases, which can only exist once.
+Signed-off-by: Matthias Schiffer <matthias.schiffer@ew.tq-group.com>
+---
 
+v3: new patch
 
-> 
-> [...]
-> 
-> Kind regards
-> Uffe
+ Documentation/devicetree/bindings/mmc/mmc-controller.yaml | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
+index b96da0c7f819..22ed4a36c65d 100644
+--- a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
++++ b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
+@@ -367,6 +367,14 @@ examples:
+     };
+ 
+   - |
++    /*
++     * Optionally define an alias to reserve a fixed index for the
++     * mmc and mmcblk devices
++     */
++    aliases {
++        mmc0 = &mmc3;
++    };
++
+     mmc3: mmc@1c12000 {
+         #address-cells = <1>;
+         #size-cells = <0>;
+-- 
+2.17.1
 
