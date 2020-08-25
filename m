@@ -2,156 +2,277 @@ Return-Path: <SRS0=3fsM=CD=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-9.9 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 42EE7C433E1
-	for <linux-mmc@archiver.kernel.org>; Tue, 25 Aug 2020 08:47:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 15DDDC433E1
+	for <linux-mmc@archiver.kernel.org>; Tue, 25 Aug 2020 09:15:04 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1EEA62065F
-	for <linux-mmc@archiver.kernel.org>; Tue, 25 Aug 2020 08:47:58 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C4C792074D
+	for <linux-mmc@archiver.kernel.org>; Tue, 25 Aug 2020 09:15:03 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="jZFhWfFp"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726790AbgHYIr5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 25 Aug 2020 04:47:57 -0400
-Received: from relay5-d.mail.gandi.net ([217.70.183.197]:52657 "EHLO
-        relay5-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728124AbgHYIr5 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Aug 2020 04:47:57 -0400
-X-Originating-IP: 90.66.108.79
-Received: from localhost (lfbn-lyo-1-1932-79.w90-66.abo.wanadoo.fr [90.66.108.79])
-        (Authenticated sender: alexandre.belloni@bootlin.com)
-        by relay5-d.mail.gandi.net (Postfix) with ESMTPSA id 2CD061C0011;
-        Tue, 25 Aug 2020 08:47:53 +0000 (UTC)
-Date:   Tue, 25 Aug 2020 10:47:52 +0200
-From:   Alexandre Belloni <alexandre.belloni@bootlin.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-List-Id: <soc.lore.kernel.org>
-Cc:     Lars Povlsen <lars.povlsen@microchip.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        SoC Team <soc@kernel.org>, Rob Herring <robh+dt@kernel.org>,
-        Microchip Linux Driver Support <UNGLinuxDriver@microchip.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        DTML <devicetree@vger.kernel.org>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-Subject: Re: [PATCH v4 1/3] dt-bindings: mmc: Add Sparx5 SDHCI controller
- bindings
-Message-ID: <20200825084752.GD2389103@piout.net>
-References: <20200824151035.31093-1-lars.povlsen@microchip.com>
- <20200824151035.31093-2-lars.povlsen@microchip.com>
- <CAPDyKFoBom1n4AHniiukPiE_szskHrhcmVXfMpKTvNo9Xw9v0w@mail.gmail.com>
+        id S1729008AbgHYJPA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 25 Aug 2020 05:15:00 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39834 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728033AbgHYJO7 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Aug 2020 05:14:59 -0400
+Received: from mail-ua1-x941.google.com (mail-ua1-x941.google.com [IPv6:2607:f8b0:4864:20::941])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 41E11C061755
+        for <linux-mmc@vger.kernel.org>; Tue, 25 Aug 2020 02:14:59 -0700 (PDT)
+Received: by mail-ua1-x941.google.com with SMTP id z12so3498104uam.12
+        for <linux-mmc@vger.kernel.org>; Tue, 25 Aug 2020 02:14:59 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=VxEKn+VgQLIAUt9o+qYYMpyQtY4C5HwaXsz1Yt1p/4M=;
+        b=jZFhWfFpne20XTn7qhkiBtKMf4UM2L6sMQ36gltw+hWmRXXzxfGI1UjhA3vTXLcYak
+         PD0BJ5ouRoFRHTz0Ls5dhDIpPa1GKSnfi77HSdbXrodGmxHeg7yvE5rMN4hIIzuqmDtt
+         Mox6zlYCS4xC6WfD/0OdL6W9rof4PrZQn5zdxHNBL3Iu4xGoDhx2n0oWW7MSsD47OPqU
+         Rr/xXb0VP9chOAVPGaYSuXBvn4p9JoOwmhFaeU5IwwiBR0wwjgeOu6yqgtaPadH1HZ9W
+         YDacvKsQHHxQ10Y++d8DNsYzKqCFaTPdsyqjER9dKYj0maX+ZpSMSaKFMKMIUvYNMBPu
+         Z/Rw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=VxEKn+VgQLIAUt9o+qYYMpyQtY4C5HwaXsz1Yt1p/4M=;
+        b=pmT5cfZSfHn5pecWYpeb2Uj6ryRhBhNeOTuWtvan/iClMska/6RJirYFa9acVtm/YT
+         Qs88OL25pitClkdnQIO5Qm+ZGPT3pW5ox28fNj19UySFPS6XHmKjhA7jrOQ3AVApBR8t
+         P0Hy7ZPaJlFJGcqZEAEX76QzMrFqgbFOpDsX0zzioArOo8S+TR0xZwHubqUOR2E14TZV
+         xI5gkpS9OVKc9tks1IFKXV2RJQr4ANGYQsQsTYcKFyRItZnzCec4TwWw3nHULHdRvAku
+         PwrRbz0ak8kEhGDrn/TBLMelac1RMVXhY1O07JCN463p7bkkL/E3bobnd9hlJgLfvtc1
+         xsdA==
+X-Gm-Message-State: AOAM531bJaCKdF8rpnJjtiCnwF1/lG5d0thzIyR26pcAMdJteVYLVnt2
+        cedj3VUemw22DGDp9nxKHHl1gDUCoKEGM+5LBQdWAA==
+X-Google-Smtp-Source: ABdhPJyIJirAXXZMRiF9QywEqHmEs4xn5v5/bkWbZKyqLAGShmULErMuRiR8g8iqogmgX+DqxEBq+CI/czqc74J9frE=
+X-Received: by 2002:ab0:3114:: with SMTP id e20mr4691406ual.104.1598346897996;
+ Tue, 25 Aug 2020 02:14:57 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFoBom1n4AHniiukPiE_szskHrhcmVXfMpKTvNo9Xw9v0w@mail.gmail.com>
+References: <20200820075949.19133-1-matthias.schiffer@ew.tq-group.com>
+In-Reply-To: <20200820075949.19133-1-matthias.schiffer@ew.tq-group.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Tue, 25 Aug 2020 11:14:20 +0200
+Message-ID: <CAPDyKFoi7KghuBqu7YVS4GH4Bp1puhgb=PcwBVDvaTesLujrrw@mail.gmail.com>
+Subject: Re: [PATCH mmc-next v2] mmc: allow setting slot index via device tree alias
+To:     Matthias Schiffer <matthias.schiffer@ew.tq-group.com>
+Cc:     Sascha Hauer <s.hauer@pengutronix.de>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 25/08/2020 09:33:45+0200, Ulf Hansson wrote:
-> On Mon, 24 Aug 2020 at 17:10, Lars Povlsen <lars.povlsen@microchip.com> wrote:
-> >
-> > The Sparx5 SDHCI controller is based on the Designware controller IP.
-> >
-> > Signed-off-by: Lars Povlsen <lars.povlsen@microchip.com>
-> > ---
-> >  .../mmc/microchip,dw-sparx5-sdhci.yaml        | 65 +++++++++++++++++++
-> >  1 file changed, 65 insertions(+)
-> >  create mode 100644 Documentation/devicetree/bindings/mmc/microchip,dw-sparx5-sdhci.yaml
-> >
-> > diff --git a/Documentation/devicetree/bindings/mmc/microchip,dw-sparx5-sdhci.yaml b/Documentation/devicetree/bindings/mmc/microchip,dw-sparx5-sdhci.yaml
-> > new file mode 100644
-> > index 0000000000000..55883290543b9
-> > --- /dev/null
-> > +++ b/Documentation/devicetree/bindings/mmc/microchip,dw-sparx5-sdhci.yaml
-> > @@ -0,0 +1,65 @@
-> > +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
-> > +%YAML 1.2
-> > +---
-> > +$id: http://devicetree.org/schemas/mmc/microchip,dw-sparx5-sdhci.yaml#
-> > +$schema: http://devicetree.org/meta-schemas/core.yaml#
-> > +
-> > +title: Microchip Sparx5 Mobile Storage Host Controller Binding
-> > +
-> > +allOf:
-> > +  - $ref: "mmc-controller.yaml"
-> > +
-> > +maintainers:
-> > +  - Lars Povlsen <lars.povlsen@microchip.com>
-> > +
-> > +# Everything else is described in the common file
-> > +properties:
-> > +  compatible:
-> > +    const: microchip,dw-sparx5-sdhci
-> > +
-> > +  reg:
-> > +    maxItems: 1
-> > +
-> > +  interrupts:
-> > +    maxItems: 1
-> > +
-> > +  clocks:
-> > +    maxItems: 1
-> > +    description:
-> > +      Handle to "core" clock for the sdhci controller.
-> > +
-> > +  clock-names:
-> > +    items:
-> > +      - const: core
-> > +
-> > +  microchip,clock-delay:
-> > +    description: Delay clock to card to meet setup time requirements.
-> > +      Each step increase by 1.25ns.
-> > +    $ref: "/schemas/types.yaml#/definitions/uint32"
-> > +    minimum: 1
-> > +    maximum: 15
-> > +
-> > +required:
-> > +  - compatible
-> > +  - reg
-> > +  - interrupts
-> > +  - clocks
-> > +  - clock-names
-> > +
-> > +examples:
-> > +  - |
-> > +    #include <dt-bindings/interrupt-controller/arm-gic.h>
-> > +    #include <dt-bindings/clock/microchip,sparx5.h>
-> > +    sdhci0: mmc@600800000 {
-> 
-> Nitpick:
-> 
-> I think we should use solely "mmc[n]" here. So:
-> 
-> mmc0@600800000 {
-> 
-> Please update patch3/3 accordingly as well.
+On Thu, 20 Aug 2020 at 09:59, Matthias Schiffer
+<matthias.schiffer@ew.tq-group.com> wrote:
+>
+> As with GPIO, UART and others, allow specifying the device index via the
+> aliases node in the device tree.
+>
+> On embedded devices, there is often a combination of removable (e.g.
+> SD card) and non-removable MMC devices (e.g. eMMC).
+> Therefore the index might change depending on
+>
+> * host of removable device
+> * removable card present or not
+>
+> This makes it difficult to hardcode the root device, if it is on the
+> non-removable device. E.g. if SD card is present eMMC will be mmcblk1,
+> if SD card is not present at boot, eMMC will be mmcblk0.
+>
+> All indices defined in the aliases node will be reserved for use by the
+> respective MMC device, moving the indices of devices that don't have an
+> alias up into the non-reserved range. If the aliases node is not found,
+> the driver will act as before.
+>
+> This is a rebased and slightly cleaned up version of
+> https://www.spinics.net/lists/linux-mmc/msg26588.html .
+>
+> Based-on-patch-by: Sascha Hauer <s.hauer@pengutronix.de>
+> Link: https://lkml.org/lkml/2020/8/5/194
+> Signed-off-by: Matthias Schiffer <matthias.schiffer@ew.tq-group.com>
+> ---
+>
+> v2: fix missing symbols for modular mmcblock
+>
+>  drivers/mmc/core/block.c | 13 +++++++++++--
+>  drivers/mmc/core/core.c  | 40 ++++++++++++++++++++++++++++++++++++++++
+>  drivers/mmc/core/core.h  |  3 +++
+>  drivers/mmc/core/host.c  | 15 +++++++++++++--
+>  4 files changed, 67 insertions(+), 4 deletions(-)
+>
+> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+> index 7896952de1ac..4620afaf0e50 100644
+> --- a/drivers/mmc/core/block.c
+> +++ b/drivers/mmc/core/block.c
+> @@ -38,6 +38,7 @@
+>  #include <linux/pm_runtime.h>
+>  #include <linux/idr.h>
+>  #include <linux/debugfs.h>
+> +#include <linux/of.h>
+>
+>  #include <linux/mmc/ioctl.h>
+>  #include <linux/mmc/card.h>
+> @@ -2260,9 +2261,17 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
+>                                               int area_type)
+>  {
+>         struct mmc_blk_data *md;
+> -       int devidx, ret;
+> +       int rsvidx, devidx = -1, ret;
+> +
+> +       rsvidx = mmc_get_reserved_index(card->host);
+> +       if (rsvidx >= 0)
+> +               devidx = ida_simple_get(&mmc_blk_ida, rsvidx, rsvidx + 1,
+> +                                       GFP_KERNEL);
+> +       if (devidx < 0)
+> +               devidx = ida_simple_get(&mmc_blk_ida,
+> +                                       mmc_first_nonreserved_index(),
+> +                                       max_devices, GFP_KERNEL);
+>
+> -       devidx = ida_simple_get(&mmc_blk_ida, 0, max_devices, GFP_KERNEL);
 
-This is not what the devicetree specification says. 2.2.2 says that the
-generic name is mmc, not mmc[n]. Since there is a proper unit-address, I
-don't see the need for an index here.
+I am not sure why you need to change any of this. Currently we use the
+host->index, when creating the blockpartion name (dev.init_name).
 
-> 
-> > +        compatible = "microchip,dw-sparx5-sdhci";
-> > +        reg = <0x00800000 0x1000>;
-> > +        pinctrl-0 = <&emmc_pins>;
-> > +        pinctrl-names = "default";
-> > +        clocks = <&clks CLK_ID_AUX1>;
-> > +        clock-names = "core";
-> > +        assigned-clocks = <&clks CLK_ID_AUX1>;
-> > +        assigned-clock-rates = <800000000>;
-> > +        interrupts = <GIC_SPI 4 IRQ_TYPE_LEVEL_HIGH>;
-> > +        bus-width = <8>;
-> > +        microchip,clock-delay = <10>;
-> > +    };
-> 
-> Kind regards
-> Uffe
+This is done for both rpmb and regular partitions. Isn't that sufficient?
 
--- 
-Alexandre Belloni, Bootlin
-Embedded Linux and Kernel engineering
-https://bootlin.com
+>         if (devidx < 0) {
+>                 /*
+>                  * We get -ENOSPC because there are no more any available
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 8ccae6452b9c..5bce281a5faa 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -2419,10 +2419,50 @@ void mmc_unregister_pm_notifier(struct mmc_host *host)
+>  }
+>  #endif
+>
+> +static int mmc_max_reserved_idx = -1;
+> +
+> +/**
+> + * mmc_first_nonreserved_index() - get the first index that is not reserved
+> + */
+> +int mmc_first_nonreserved_index(void)
+> +{
+> +       return mmc_max_reserved_idx + 1;
+> +}
+> +EXPORT_SYMBOL(mmc_first_nonreserved_index);
+> +
+> +/**
+> + * mmc_get_reserved_index() - get the index reserved for this MMC host
+> + *
+> + * Returns:
+> + *   The index reserved for this host on success,
+> + *   negative error if no index is reserved for this host
+> + */
+> +int mmc_get_reserved_index(struct mmc_host *host)
+> +{
+> +       return of_alias_get_id(host->parent->of_node, "mmc");
+> +}
+> +EXPORT_SYMBOL(mmc_get_reserved_index);
+
+I think you can drop this function, just call of_alias_get_id() from
+where it's needed.
+
+> +
+> +static void __init mmc_of_reserve_idx(void)
+> +{
+> +       int max;
+> +
+> +       max = of_alias_get_highest_id("mmc");
+
+Is calling of_alias_get_highest_id("mmc") costly from an execution
+point of view?
+
+If not, we might as well call it directly from mmc_alloc_host() each
+time a host is allocated instead, to simplify the code a bit.
+
+> +       if (max < 0)
+> +               return;
+> +
+> +       mmc_max_reserved_idx = max;
+> +
+> +       pr_debug("MMC: reserving %d slots for OF aliases\n",
+> +                mmc_max_reserved_idx + 1);
+
+If this function is needed at all (see comments above), then please
+drop this debug print.
+
+> +}
+> +
+>  static int __init mmc_init(void)
+>  {
+>         int ret;
+>
+> +       mmc_of_reserve_idx();
+> +
+>         ret = mmc_register_bus();
+>         if (ret)
+>                 return ret;
+> diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
+> index 575ac0257af2..6aef6cf4e90f 100644
+> --- a/drivers/mmc/core/core.h
+> +++ b/drivers/mmc/core/core.h
+> @@ -79,6 +79,9 @@ int mmc_attach_mmc(struct mmc_host *host);
+>  int mmc_attach_sd(struct mmc_host *host);
+>  int mmc_attach_sdio(struct mmc_host *host);
+>
+> +int mmc_first_nonreserved_index(void);
+> +int mmc_get_reserved_index(struct mmc_host *host);
+> +
+>  /* Module parameters */
+>  extern bool use_spi_crc;
+>
+> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+> index ce43f7573d80..386e15afde83 100644
+> --- a/drivers/mmc/core/host.c
+> +++ b/drivers/mmc/core/host.c
+> @@ -387,6 +387,7 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
+>  {
+>         int err;
+>         struct mmc_host *host;
+> +       int alias_id, min_idx, max_idx;
+>
+>         host = kzalloc(sizeof(struct mmc_host) + extra, GFP_KERNEL);
+>         if (!host)
+> @@ -395,7 +396,18 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
+>         /* scanning will be enabled when we're ready */
+>         host->rescan_disable = 1;
+>
+> -       err = ida_simple_get(&mmc_host_ida, 0, 0, GFP_KERNEL);
+> +       host->parent = dev;
+> +
+> +       alias_id = mmc_get_reserved_index(host);
+> +       if (alias_id >= 0) {
+> +               min_idx = alias_id;
+> +               max_idx = alias_id + 1;
+> +       } else {
+> +               min_idx = mmc_first_nonreserved_index();
+> +               max_idx = 0;
+> +       }
+> +
+> +       err = ida_simple_get(&mmc_host_ida, min_idx, max_idx, GFP_KERNEL);
+>         if (err < 0) {
+>                 kfree(host);
+>                 return NULL;
+> @@ -406,7 +418,6 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
+>         dev_set_name(&host->class_dev, "mmc%d", host->index);
+>         host->ws = wakeup_source_register(NULL, dev_name(&host->class_dev));
+>
+> -       host->parent = dev;
+>         host->class_dev.parent = dev;
+>         host->class_dev.class = &mmc_host_class;
+>         device_initialize(&host->class_dev);
+> --
+> 2.17.1
+>
+
+Kind regards
+Uffe
