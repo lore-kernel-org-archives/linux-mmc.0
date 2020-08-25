@@ -2,114 +2,144 @@ Return-Path: <SRS0=3fsM=CD=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-14.9 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,SIGNED_OFF_BY,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=unavailable
+X-Spam-Status: No, score=-12.6 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CA415C433E1
-	for <linux-mmc@archiver.kernel.org>; Tue, 25 Aug 2020 07:39:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 68184C433E1
+	for <linux-mmc@archiver.kernel.org>; Tue, 25 Aug 2020 07:55:52 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A1BC1204FD
-	for <linux-mmc@archiver.kernel.org>; Tue, 25 Aug 2020 07:39:56 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=nvidia.com header.i=@nvidia.com header.b="XfIj7G4H"
+	by mail.kernel.org (Postfix) with ESMTP id 44E9620782
+	for <linux-mmc@archiver.kernel.org>; Tue, 25 Aug 2020 07:55:52 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1598342152;
+	bh=S5rlKBx7VFgdSrBKPZytFQQydfMl9pnBjLY78TfRSRo=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
+	b=ArGpCHsVpmrM0wo5YFUZCT6NRUHllYvQnnf4yxxp/JxzkAekQdc6+K4sSjKh8m1Gj
+	 w+ZzdXJh5kHjugTceeM2R42QJsztyTcKHfqAT3KmILn5dld4wmnZUjwxGXM9Ou5PKK
+	 L1kKdAhVG4jwd2aYJMW4fOM5sa7M8QPOro2XebG0=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729516AbgHYHjv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 25 Aug 2020 03:39:51 -0400
-Received: from hqnvemgate26.nvidia.com ([216.228.121.65]:17265 "EHLO
-        hqnvemgate26.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729470AbgHYHju (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Aug 2020 03:39:50 -0400
-Received: from hqpgpgate101.nvidia.com (Not Verified[216.228.121.13]) by hqnvemgate26.nvidia.com (using TLS: TLSv1.2, DES-CBC3-SHA)
-        id <B5f44c0370000>; Tue, 25 Aug 2020 00:39:35 -0700
-Received: from hqmail.nvidia.com ([172.20.161.6])
-  by hqpgpgate101.nvidia.com (PGP Universal service);
-  Tue, 25 Aug 2020 00:39:49 -0700
-X-PGP-Universal: processed;
-        by hqpgpgate101.nvidia.com on Tue, 25 Aug 2020 00:39:49 -0700
-Received: from [10.26.74.41] (10.124.1.5) by HQMAIL107.nvidia.com
- (172.20.187.13) with Microsoft SMTP Server (TLS) id 15.0.1473.3; Tue, 25 Aug
- 2020 07:39:42 +0000
-Subject: Re: [PATCH v4 3/7] dt-bindings: mmc: tegra: Add tmclk for Tegra210
- and later
-To:     Sowjanya Komatineni <skomatineni@nvidia.com>,
-        <adrian.hunter@intel.com>, <ulf.hansson@linaro.org>,
-        <thierry.reding@gmail.com>, <robh+dt@kernel.org>
-CC:     <linux-tegra@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <stable@vger.kernel.org>
-References: <1598296557-32020-1-git-send-email-skomatineni@nvidia.com>
- <1598296557-32020-4-git-send-email-skomatineni@nvidia.com>
-From:   Jon Hunter <jonathanh@nvidia.com>
-Message-ID: <64f1b068-d935-ae47-e5f3-fa318196a5af@nvidia.com>
-Date:   Tue, 25 Aug 2020 08:39:39 +0100
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.10.0
+        id S1728865AbgHYHzv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 25 Aug 2020 03:55:51 -0400
+Received: from mail-wr1-f65.google.com ([209.85.221.65]:45806 "EHLO
+        mail-wr1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725379AbgHYHzv (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Aug 2020 03:55:51 -0400
+Received: by mail-wr1-f65.google.com with SMTP id h15so4958434wrt.12;
+        Tue, 25 Aug 2020 00:55:48 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to:user-agent;
+        bh=aBjVw1JG0tpm4bk51wIknFht9NwTSZ65KB4U3gClblQ=;
+        b=pVQLT+8ijKQCPTJ9nJSzGdtsvR4/qHb2QG9MgKgdIdQ2hG1dj2KpBB8/UQzGdjBnrG
+         YyCru7GkjEW1Z2avQWxiG/fCrKBPJ8QLh7Ak9F4nZ797j6oRUqOhRDx1vcJ0Didy1eh4
+         pterNAMGOBwZ+SC1cypGNjD7gNwVaG1ORbIDM9wyKISr3dMwnhqVxIvWq+/cECtf1ZVT
+         i2nYue89aCsbjA1z3gQLqGHe7hFUPHIhQUW8NA+ARK/3s5DEwLOyri6XUavdKa7MBTJJ
+         yvhAgAaQK4/bMkq+sxNvowGly71mHlHX7xdg0tdijpLF57CchJpgSl+5bPAc9qDr96s5
+         bjIw==
+X-Gm-Message-State: AOAM531VaZJ9MZnL9VRgwXymUo0hQu1KXP7Pt3vjMMEplrw4cCwPLMhE
+        xhxP7RtNtC49OSmDbRJDYO8=
+X-Google-Smtp-Source: ABdhPJy11J0dvtltETiMUmgoqOGY5vwRYKznzFSM+Jn9Jhy70mulHl9VGChcIKqtFo0jH3ClWuVjng==
+X-Received: by 2002:adf:f5c7:: with SMTP id k7mr9247503wrp.230.1598342147767;
+        Tue, 25 Aug 2020 00:55:47 -0700 (PDT)
+Received: from kozik-lap ([194.230.155.216])
+        by smtp.googlemail.com with ESMTPSA id f9sm8049134wrm.5.2020.08.25.00.55.45
+        (version=TLS1_2 cipher=ECDHE-ECDSA-CHACHA20-POLY1305 bits=256/256);
+        Tue, 25 Aug 2020 00:55:47 -0700 (PDT)
+Date:   Tue, 25 Aug 2020 09:55:43 +0200
+From:   Krzysztof Kozlowski <krzk@kernel.org>
+To:     Rob Herring <robh@kernel.org>
+Cc:     Linus Walleij <linus.walleij@linaro.org>,
+        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
+        Shawn Guo <shawnguo@kernel.org>,
+        Sascha Hauer <s.hauer@pengutronix.de>,
+        Pengutronix Kernel Team <kernel@pengutronix.de>,
+        Fabio Estevam <festevam@gmail.com>,
+        NXP Linux Team <linux-imx@nxp.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Miquel Raynal <miquel.raynal@bootlin.com>,
+        Srinivas Kandagatla <srinivas.kandagatla@linaro.org>,
+        Will Deacon <will@kernel.org>,
+        Mark Rutland <mark.rutland@arm.com>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= 
+        <u.kleine-koenig@pengutronix.de>,
+        Philipp Zabel <p.zabel@pengutronix.de>,
+        Guenter Roeck <linux@roeck-us.net>,
+        Li Yang <leoyang.li@nxp.com>, Han Xu <han.xu@nxp.com>,
+        Frank Li <frank.li@nxp.com>, Fugang Duan <fugang.duan@nxp.com>,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-gpio@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org,
+        linux-pwm@vger.kernel.org, linux-serial@vger.kernel.org,
+        linux-pm@vger.kernel.org, linux-watchdog@vger.kernel.org
+Subject: Re: [PATCH v2 17/19] dt-bindings: serial: fsl-lpuart: Fix compatible
+ matching
+Message-ID: <20200825075543.GA10369@kozik-lap>
+References: <20200824162652.21047-1-krzk@kernel.org>
+ <20200824162652.21047-17-krzk@kernel.org>
+ <20200825024226.GA3843643@bogus>
 MIME-Version: 1.0
-In-Reply-To: <1598296557-32020-4-git-send-email-skomatineni@nvidia.com>
-X-Originating-IP: [10.124.1.5]
-X-ClientProxiedBy: HQMAIL105.nvidia.com (172.20.187.12) To
- HQMAIL107.nvidia.com (172.20.187.13)
-Content-Type: text/plain; charset="utf-8"
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nvidia.com; s=n1;
-        t=1598341175; bh=0xmlVzVjCdyLV1AnfSQ918bzgENv4gOD4+okuss+xJk=;
-        h=X-PGP-Universal:Subject:To:CC:References:From:Message-ID:Date:
-         User-Agent:MIME-Version:In-Reply-To:X-Originating-IP:
-         X-ClientProxiedBy:Content-Type:Content-Language:
-         Content-Transfer-Encoding;
-        b=XfIj7G4H0xTpGl2IgChp5HG/WcgT5qIic+yVtzUw6ExSGLFRI/ZtypWGTe8+C3Nzt
-         nti+eZgjJijD/uqo4bMRoQcvrrcb+1yU5MnHFPehNNZN8rcRiMYodpSkKJIX3sWt6+
-         hIuoMVE1V1U+7vPqXO4VMUWYf8bI4ePPH4Gqhod0qiYB+u9pE3+A0acIyTMaD/EHSC
-         jzAaho3KwuEEMXX0kxJ3R9W0eowowsEjH0B+QGjsPuZtwgBHXGPLGXrpb/b6Ub8OxW
-         GhR/KwHzT3yIPCzf6nDEXbRPbbxFKop+nJqlamWAxVdCGIo1ThSQfm44d5TlktttX7
-         dK/Om5HMMrO+w==
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <20200825024226.GA3843643@bogus>
+User-Agent: Mutt/1.9.4 (2018-02-28)
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-
-On 24/08/2020 20:15, Sowjanya Komatineni wrote:
-> Tegra210 and later uses separate SDMMC_LEGACY_TM clock for data
-> timeout.
+On Mon, Aug 24, 2020 at 08:42:26PM -0600, Rob Herring wrote:
+> On Mon, Aug 24, 2020 at 06:26:50PM +0200, Krzysztof Kozlowski wrote:
+> > The i.MX 8QXP DTSes use two compatibles so update the binding to fix
+> > dtbs_check warnings like:
+> > 
+> >   arch/arm64/boot/dts/freescale/imx8qxp-mek.dt.yaml: serial@5a060000:
+> >     compatible: ['fsl,imx8qxp-lpuart', 'fsl,imx7ulp-lpuart'] is too long
+> >     From schema: Documentation/devicetree/bindings/serial/fsl-lpuart.yaml
+> > 
+> >   arch/arm64/boot/dts/freescale/imx8qxp-mek.dt.yaml: serial@5a060000:
+> >     compatible: Additional items are not allowed ('fsl,imx7ulp-lpuart' was unexpected)
+> > 
+> > Signed-off-by: Krzysztof Kozlowski <krzk@kernel.org>
+> > 
+> > ---
+> > 
+> > Changes since v1:
+> > 1. New patch.
+> > ---
+> >  .../devicetree/bindings/serial/fsl-lpuart.yaml | 18 +++++++++++-------
+> >  1 file changed, 11 insertions(+), 7 deletions(-)
+> > 
+> > diff --git a/Documentation/devicetree/bindings/serial/fsl-lpuart.yaml b/Documentation/devicetree/bindings/serial/fsl-lpuart.yaml
+> > index e82c2cf9fef7..8ee651f2ef0b 100644
+> > --- a/Documentation/devicetree/bindings/serial/fsl-lpuart.yaml
+> > +++ b/Documentation/devicetree/bindings/serial/fsl-lpuart.yaml
+> > @@ -14,13 +14,17 @@ allOf:
+> >  
+> >  properties:
+> >    compatible:
+> > -    enum:
+> > -      - fsl,vf610-lpuart
+> > -      - fsl,ls1021a-lpuart
+> > -      - fsl,ls1028a-lpuart
+> > -      - fsl,imx7ulp-lpuart
+> > -      - fsl,imx8qxp-lpuart
+> > -      - fsl,imx8qm-lpuart
+> > +    oneOf:
+> > +      - enum:
+> > +          - fsl,vf610-lpuart
+> > +          - fsl,ls1021a-lpuart
+> > +          - fsl,ls1028a-lpuart
+> > +          - fsl,imx7ulp-lpuart
+> > +          - fsl,imx8qxp-lpuart
 > 
-> So, this patch adds "tmclk" to Tegra sdhci clock property in the
-> device tree binding.
-> 
-> Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
-> ---
->  .../bindings/mmc/nvidia,tegra20-sdhci.txt          | 23 +++++++++++++++++++++-
->  1 file changed, 22 insertions(+), 1 deletion(-)
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt b/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
-> index 2cf3aff..9603d05 100644
-> --- a/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
-> +++ b/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
-> @@ -17,6 +17,8 @@ Required properties:
->    - "nvidia,tegra194-sdhci": for Tegra194
->  - clocks : Must contain one entry, for the module clock.
->    See ../clocks/clock-bindings.txt for details.
-> +  Must also contain "tmclk" entry for Tegra210, Tegra186, and Tegra194.
-> +  Tegra210 and later uses separate SDMMC_LEGACY_TM clock for data timeout.
+> This should be dropped.
 
-Maybe we should make this a bit clearer ...
+Right.
 
-- clocks : For Tegra210, Tegra186 and Tegra194 must contain two entries;
-           one for the module clock and one for the timeout clock. For
-           all other Tegra devices, must contain a single entry for the
-           module clock. See ../clocks/clock-bindings.txt for details.
-- clock-names: For Tegra210, Tegra186 and Tegra194 must contain the
-               strings 'sdhci' and 'tmclk' to represent the module and
-               timeout clocks, respectively. For all other Tegra devices
-               must contain the string 'sdhci' to represent the module
-               clock.
+Best regards,
+Krzysztof
 
-Cheers
-Jon
-
--- 
-nvpublic
