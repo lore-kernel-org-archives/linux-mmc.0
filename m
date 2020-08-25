@@ -2,158 +2,170 @@ Return-Path: <SRS0=3fsM=CD=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.6 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-14.9 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,SIGNED_OFF_BY,SPF_HELO_NONE,
+	SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3010DC433E1
-	for <linux-mmc@archiver.kernel.org>; Tue, 25 Aug 2020 07:19:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9B905C433E1
+	for <linux-mmc@archiver.kernel.org>; Tue, 25 Aug 2020 07:29:10 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 025B420706
-	for <linux-mmc@archiver.kernel.org>; Tue, 25 Aug 2020 07:19:15 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1598339955;
-	bh=uVRaxrX5Jll1lXAtEM4/cjSlNqlXI6TYJhQJelKIvuk=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
-	b=uZyrA3J1/DicPT66Y2YdskLlaczHwWRU5Q8jJM9ZvpGg3p++hf9EAnviGhCiiZwrN
-	 Z5fWxDmc8EbFGPlCMA8bECdYEar8KApM4NLHYJ5l7K0vlfuYZmg/VcBVY1jUTT2B8Y
-	 jbf26RsOT6dYqfCUUAwqy7keghJLBDtSiQcrFb4o=
+	by mail.kernel.org (Postfix) with ESMTP id 6688520706
+	for <linux-mmc@archiver.kernel.org>; Tue, 25 Aug 2020 07:29:10 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=nvidia.com header.i=@nvidia.com header.b="YVimBWLT"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729363AbgHYHTO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 25 Aug 2020 03:19:14 -0400
-Received: from mail-wr1-f68.google.com ([209.85.221.68]:41704 "EHLO
-        mail-wr1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729194AbgHYHTM (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Aug 2020 03:19:12 -0400
-Received: by mail-wr1-f68.google.com with SMTP id p17so5931634wrj.8;
-        Tue, 25 Aug 2020 00:19:09 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to:user-agent;
-        bh=WzjocZ6AbgdZxSRavuClgS3bWv6X8HTLysz12xiMgeg=;
-        b=qyVhXj9agD5+H3XVK+tGkvhZNeQX6hvhMZSkWy/nLUggaEVvTuapXW7pPIk6cU8A+K
-         nuZwvr16njwOmCPuhbfNSaYUSm/wW2RcplMrJjJGrnfkw0EC9OfZ3Vd/AqaB9ydKN88Z
-         VwCe5YDfCKE+3LptNqpWKyrj/C+Y97JUV5IReEapkIPmPeI16SryBOTUP9l/2IHbEnZk
-         IQtlCVM5/vt00leFHp2O2D1ipL20vQ8Qn91XNyi5YtMc6pzkrcV6IujgEdWvuGn9F5OW
-         NXOspjyjzl2cK8rdda58N2BQOb3WlXwXyKBSBh3svaRl+uMGyCtbXrNwiH4uABvqLG8w
-         rzDA==
-X-Gm-Message-State: AOAM533G7Z/K85Dollgia6nd7o08jhVncziIKOhq/nmJGdYEE5b1nhpt
-        isX4TtDpsynKsLZEK/7wAik=
-X-Google-Smtp-Source: ABdhPJwkhdWQGkLwZ00kAqnPEmqc8N+HVtkEdsjRUBu5ZaCv9oCeqT0wAbIggVlRGDIzjGcy8OFy8Q==
-X-Received: by 2002:a5d:51c3:: with SMTP id n3mr9451383wrv.104.1598339948999;
-        Tue, 25 Aug 2020 00:19:08 -0700 (PDT)
-Received: from kozik-lap ([194.230.155.216])
-        by smtp.googlemail.com with ESMTPSA id c6sm1611593wrr.15.2020.08.25.00.19.06
-        (version=TLS1_2 cipher=ECDHE-ECDSA-CHACHA20-POLY1305 bits=256/256);
-        Tue, 25 Aug 2020 00:19:08 -0700 (PDT)
-Date:   Tue, 25 Aug 2020 09:19:05 +0200
-From:   Krzysztof Kozlowski <krzk@kernel.org>
-To:     Rob Herring <robh@kernel.org>
-Cc:     Linus Walleij <linus.walleij@linaro.org>,
-        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
-        Shawn Guo <shawnguo@kernel.org>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        Pengutronix Kernel Team <kernel@pengutronix.de>,
-        Fabio Estevam <festevam@gmail.com>,
-        NXP Linux Team <linux-imx@nxp.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Miquel Raynal <miquel.raynal@bootlin.com>,
-        Srinivas Kandagatla <srinivas.kandagatla@linaro.org>,
-        Will Deacon <will@kernel.org>,
-        Mark Rutland <mark.rutland@arm.com>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= 
-        <u.kleine-koenig@pengutronix.de>,
-        Philipp Zabel <p.zabel@pengutronix.de>,
-        Guenter Roeck <linux@roeck-us.net>,
-        Li Yang <leoyang.li@nxp.com>, Han Xu <han.xu@nxp.com>,
-        Frank Li <frank.li@nxp.com>, Fugang Duan <fugang.duan@nxp.com>,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-gpio@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org,
-        linux-pwm@vger.kernel.org, linux-serial@vger.kernel.org,
-        linux-pm@vger.kernel.org, linux-watchdog@vger.kernel.org
-Subject: Re: [PATCH v2 13/19] dt-bindings: nvmem: imx-ocotp: Update i.MX 8M
- compatibles
-Message-ID: <20200825071905.GE3458@kozik-lap>
-References: <20200824162652.21047-1-krzk@kernel.org>
- <20200824162652.21047-13-krzk@kernel.org>
- <20200825023904.GA3837236@bogus>
+        id S1729469AbgHYH3E (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 25 Aug 2020 03:29:04 -0400
+Received: from hqnvemgate24.nvidia.com ([216.228.121.143]:16435 "EHLO
+        hqnvemgate24.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1729194AbgHYH3E (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Aug 2020 03:29:04 -0400
+Received: from hqpgpgate102.nvidia.com (Not Verified[216.228.121.13]) by hqnvemgate24.nvidia.com (using TLS: TLSv1.2, DES-CBC3-SHA)
+        id <B5f44bd480002>; Tue, 25 Aug 2020 00:27:04 -0700
+Received: from hqmail.nvidia.com ([172.20.161.6])
+  by hqpgpgate102.nvidia.com (PGP Universal service);
+  Tue, 25 Aug 2020 00:29:03 -0700
+X-PGP-Universal: processed;
+        by hqpgpgate102.nvidia.com on Tue, 25 Aug 2020 00:29:03 -0700
+Received: from [10.26.74.41] (10.124.1.5) by HQMAIL107.nvidia.com
+ (172.20.187.13) with Microsoft SMTP Server (TLS) id 15.0.1473.3; Tue, 25 Aug
+ 2020 07:28:56 +0000
+Subject: Re: [PATCH v4 7/7] sdhci: tegra: Add missing TMCLK for data timeout
+To:     Sowjanya Komatineni <skomatineni@nvidia.com>,
+        <adrian.hunter@intel.com>, <ulf.hansson@linaro.org>,
+        <thierry.reding@gmail.com>, <robh+dt@kernel.org>
+CC:     <linux-tegra@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <stable@vger.kernel.org>
+References: <1598296557-32020-1-git-send-email-skomatineni@nvidia.com>
+ <1598296557-32020-8-git-send-email-skomatineni@nvidia.com>
+From:   Jon Hunter <jonathanh@nvidia.com>
+Message-ID: <a8ea7d0e-ed1d-165a-bba7-2a39c31cc107@nvidia.com>
+Date:   Tue, 25 Aug 2020 08:28:53 +0100
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.10.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <20200825023904.GA3837236@bogus>
-User-Agent: Mutt/1.9.4 (2018-02-28)
+In-Reply-To: <1598296557-32020-8-git-send-email-skomatineni@nvidia.com>
+X-Originating-IP: [10.124.1.5]
+X-ClientProxiedBy: HQMAIL111.nvidia.com (172.20.187.18) To
+ HQMAIL107.nvidia.com (172.20.187.13)
+Content-Type: text/plain; charset="utf-8"
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nvidia.com; s=n1;
+        t=1598340424; bh=R3hLvCd5YUZLhhnoklm4RrizfdS9HAJpYHSPgk5QwRc=;
+        h=X-PGP-Universal:Subject:To:CC:References:From:Message-ID:Date:
+         User-Agent:MIME-Version:In-Reply-To:X-Originating-IP:
+         X-ClientProxiedBy:Content-Type:Content-Language:
+         Content-Transfer-Encoding;
+        b=YVimBWLTRrbrR+FkD2wyHFGJzWM82x9PGLcjxAyHWw/Z5zCgc2BKGnQYsvhaBsX34
+         GlEmTtT0sVhAM+a70ut0CbPpN9swBjfOLru9INzrN9Z2wTbqOQqWYyHze8SLVOONEL
+         XjI+Juwc1EiGSxo+5VuQQyuhCBHqIG6ATKQkca54RIHuMUdx5jfNgytCpVXt5KmFHD
+         GoTfedudxaB8zEQ1yiOrBMg6x5E1pu/J31sZthQNAuys7McMDRzS9yigsvbB3czgdJ
+         gIo54HQ6AM32cMzqw8wH6q0CyBWEMsLBNAJ6uzbpBOrrwwXlDONclUzCQ4ffpDgxYX
+         AdbggAbwKFkHg==
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, Aug 24, 2020 at 08:39:04PM -0600, Rob Herring wrote:
-> On Mon, Aug 24, 2020 at 06:26:46PM +0200, Krzysztof Kozlowski wrote:
-> > DTSes with new i.MX 8M SoCs use two compatibles so update the binding to
-> > fix dtbs_check warnings like:
-> > 
-> >   arch/arm64/boot/dts/freescale/imx8mn-evk.dt.yaml: efuse@30350000: compatible:1: 'syscon' was expected
-> >     From schema: Documentation/devicetree/bindings/nvmem/imx-ocotp.yaml
-> > 
-> >   arch/arm64/boot/dts/freescale/imx8mn-evk.dt.yaml: efuse@30350000:
-> >     compatible: ['fsl,imx8mn-ocotp', 'fsl,imx8mm-ocotp', 'syscon'] is too long
-> > 
-> >   arch/arm64/boot/dts/freescale/imx8mn-evk.dt.yaml: efuse@30350000:
-> >     compatible: Additional items are not allowed ('syscon' was unexpected)
-> > 
-> > Signed-off-by: Krzysztof Kozlowski <krzk@kernel.org>
-> > ---
-> >  .../devicetree/bindings/nvmem/imx-ocotp.yaml  | 39 ++++++++++++-------
-> >  1 file changed, 24 insertions(+), 15 deletions(-)
-> > 
-> > diff --git a/Documentation/devicetree/bindings/nvmem/imx-ocotp.yaml b/Documentation/devicetree/bindings/nvmem/imx-ocotp.yaml
-> > index 1c9d7f05f173..b5b250185afd 100644
-> > --- a/Documentation/devicetree/bindings/nvmem/imx-ocotp.yaml
-> > +++ b/Documentation/devicetree/bindings/nvmem/imx-ocotp.yaml
-> > @@ -19,21 +19,30 @@ allOf:
-> >  
-> >  properties:
-> >    compatible:
-> > -    items:
-> > -      - enum:
-> > -          - fsl,imx6q-ocotp
-> > -          - fsl,imx6sl-ocotp
-> > -          - fsl,imx6sx-ocotp
-> > -          - fsl,imx6ul-ocotp
-> > -          - fsl,imx6ull-ocotp
-> > -          - fsl,imx7d-ocotp
-> > -          - fsl,imx6sll-ocotp
-> > -          - fsl,imx7ulp-ocotp
-> > -          - fsl,imx8mq-ocotp
-> > -          - fsl,imx8mm-ocotp
-> > -          - fsl,imx8mn-ocotp
-> > -          - fsl,imx8mp-ocotp
-> > -      - const: syscon
-> > +    oneOf:
-> > +      - items:
-> > +          - enum:
-> > +              - fsl,imx6q-ocotp
-> > +              - fsl,imx6sl-ocotp
-> > +              - fsl,imx6sx-ocotp
-> > +              - fsl,imx6ul-ocotp
-> > +              - fsl,imx6ull-ocotp
-> > +              - fsl,imx7d-ocotp
-> > +              - fsl,imx6sll-ocotp
-> > +              - fsl,imx7ulp-ocotp
-> > +              - fsl,imx8mq-ocotp
-> > +              - fsl,imx8mm-ocotp
+
+On 24/08/2020 20:15, Sowjanya Komatineni wrote:
+> commit b5a84ecf025a ("mmc: tegra: Add Tegra210 support")
 > 
-> > +              - fsl,imx8mn-ocotp
-> > +              - fsl,imx8mp-ocotp
+> Tegra210 and later has a separate sdmmc_legacy_tm (TMCLK) used by Tegra
+> SDMMC hawdware for data timeout to achive better timeout than using
+> SDCLK and using TMCLK is recommended.
 > 
-> Should be dropped.
+> USE_TMCLK_FOR_DATA_TIMEOUT bit in Tegra SDMMC register
+> SDHCI_TEGRA_VENDOR_SYS_SW_CTRL can be used to choose either TMCLK or
+> SDCLK for data timeout.
+> 
+> Default USE_TMCLK_FOR_DATA_TIMEOUT bit is set to 1 and TMCLK is used
+> for data timeout by Tegra SDMMC hardware and having TMCLK not enabled
+> is not recommended.
+> 
+> So, this patch fixes it.
+> 
+> Fixes: b5a84ecf025a ("mmc: tegra: Add Tegra210 support")
+> Cc: stable <stable@vger.kernel.org> # 5.4
+> Tested-by: Jon Hunter <jonathanh@nvidia.com>
+> Reviewed-by: Jon Hunter <jonathanh@nvidia.com>
+> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+> Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
+> ---
+>  drivers/mmc/host/sdhci-tegra.c | 41 +++++++++++++++++++++++++++++++++++++++++
+>  1 file changed, 41 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+> index 31ed321..c0b9405 100644
+> --- a/drivers/mmc/host/sdhci-tegra.c
+> +++ b/drivers/mmc/host/sdhci-tegra.c
+> @@ -140,6 +140,7 @@ struct sdhci_tegra_autocal_offsets {
+>  struct sdhci_tegra {
+>  	const struct sdhci_tegra_soc_data *soc_data;
+>  	struct gpio_desc *power_gpio;
+> +	struct clk *tmclk;
+>  	bool ddr_signaling;
+>  	bool pad_calib_required;
+>  	bool pad_control_available;
+> @@ -1611,6 +1612,44 @@ static int sdhci_tegra_probe(struct platform_device *pdev)
+>  		goto err_power_req;
+>  	}
+>  
+> +	/*
+> +	 * Tegra210 has a separate SDMMC_LEGACY_TM clock used for host
+> +	 * timeout clock and SW can choose TMCLK or SDCLK for hardware
+> +	 * data timeout through the bit USE_TMCLK_FOR_DATA_TIMEOUT of
+> +	 * the register SDHCI_TEGRA_VENDOR_SYS_SW_CTRL.
+> +	 *
+> +	 * USE_TMCLK_FOR_DATA_TIMEOUT bit default is set to 1 and SDMMC uses
+> +	 * 12Mhz TMCLK which is advertised in host capability register.
+> +	 * With TMCLK of 12Mhz provides maximum data timeout period that can
+> +	 * be achieved is 11s better than using SDCLK for data timeout.
+> +	 *
+> +	 * So, TMCLK is set to 12Mhz and kept enabled all the time on SoC's
+> +	 * supporting SDR104 mode and when not using SDCLK for data timeout.
+> +	 */
+> +
+> +	if ((soc_data->nvquirks & NVQUIRK_ENABLE_SDR104) &&
+> +	    !(soc_data->pdata->quirks & SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK)) {
+> +		clk = devm_clk_get(&pdev->dev, "tmclk");
+> +		if (IS_ERR(clk)) {
+> +			rc = PTR_ERR(clk);
+> +			if (rc == -EPROBE_DEFER)
+> +				goto err_power_req;
+> +
+> +			dev_warn(&pdev->dev, "failed to get tmclk: %d\n", rc);
+> +			clk = NULL;
+> +		}
+> +
+> +		clk_set_rate(clk, 12000000);
+> +		rc = clk_prepare_enable(clk);
+> +		if (rc) {
+> +			dev_err(&pdev->dev,
+> +				"failed to enable tmclk: %d\n", rc);
+> +			goto err_power_req;
+> +		}
+> +
+> +		tegra_host->tmclk = clk;
+> +	}
+> +
+>  	clk = devm_clk_get(mmc_dev(host->mmc), NULL);
 
-OK
 
-Best regards,
-Krzysztof
+One thing that I just thought of is that now we may have two clocks,
+shouldn't we use the name, 'sdhci', for requesting the above clock as well?
 
+Unfortunately, the name 'sdhci' has not been populated for all Tegra
+devices until recently and so we may need to check if there are one of
+two clocks populated. If there is only one, then maybe we fall back to
+the above.
+
+Cheers
+Jon
+
+-- 
+nvpublic
