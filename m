@@ -1,191 +1,156 @@
-Return-Path: <SRS0=3fsM=CD=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=hbc/=CE=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.7 required=3.0 tests=BAYES_00,DKIM_INVALID,
-	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	NICE_REPLY_A,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6582DC433E4
-	for <linux-mmc@archiver.kernel.org>; Tue, 25 Aug 2020 22:21:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 73ACFC433E5
+	for <linux-mmc@archiver.kernel.org>; Wed, 26 Aug 2020 01:51:58 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 231832075F
-	for <linux-mmc@archiver.kernel.org>; Tue, 25 Aug 2020 22:21:26 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5483C2074A
+	for <linux-mmc@archiver.kernel.org>; Wed, 26 Aug 2020 01:51:58 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="K5UGRk30"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="rkPU8zA6"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726711AbgHYWVZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 25 Aug 2020 18:21:25 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50374 "EHLO
+        id S1726718AbgHZBvu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 25 Aug 2020 21:51:50 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54518 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726391AbgHYWVY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Aug 2020 18:21:24 -0400
-Received: from mail-pf1-x442.google.com (mail-pf1-x442.google.com [IPv6:2607:f8b0:4864:20::442])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5E934C061574;
-        Tue, 25 Aug 2020 15:21:23 -0700 (PDT)
-Received: by mail-pf1-x442.google.com with SMTP id m71so8453416pfd.1;
-        Tue, 25 Aug 2020 15:21:23 -0700 (PDT)
+        with ESMTP id S1726599AbgHZBvs (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Aug 2020 21:51:48 -0400
+Received: from mail-wr1-x443.google.com (mail-wr1-x443.google.com [IPv6:2a00:1450:4864:20::443])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 19FDAC061574;
+        Tue, 25 Aug 2020 18:51:48 -0700 (PDT)
+Received: by mail-wr1-x443.google.com with SMTP id r15so144621wrp.13;
+        Tue, 25 Aug 2020 18:51:48 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=sender:subject:to:references:from:autocrypt:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=Xo3Lh0ar7wK8VvvtzSvlcOKRsOHINzAQAPvkHRS8eCk=;
-        b=K5UGRk30zCXsG7GyY8ibqJTsvhuFGMNYsMqdZaXvDUMwQedYWITYCEidSXBJOsM6xX
-         G5lm7jYUuJjWCyn68p+/Ji763YxWvw113AC6Wr06+QqcibsW/uuPKKguaG10PDggRgaA
-         VaB5WEjxaIvUd9pV3jAtNE7xWq/qwemnzDOPDUtmOuPjKHbMDsBHty7OUhWg33wZLSAm
-         dZbPw5t5ZyNZBjssFp72nGKKgNUNHTbZOrDCmh8xiFcvLcm3v5WdC9ZizdwE9HdXTRux
-         qfexwp2ykIJg+a0OYiJ8JdNv30nsS//N5XihqqZwzkSMUwvYlLN6GL4EK9shYfzVePQq
-         brfA==
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=6lKBXswTrzhA0xBsr6HB8AlB5+bACM8/QHtln5EsmDM=;
+        b=rkPU8zA6FnvPI7YRdwlrF32Z+jufZRPGDhsVbublBxI+2WdfyrQZ4OMYugj2LjMgRs
+         tcBC2iVxYnWeg8Zk6YWzQfE0csZvqLsQKSxRKrpJnxvpSdJ9HVsaxBuVVCZ33a7Fy89F
+         YzL00nv71TEx1KwJewv+LaAx654GeLawZ3dB08BJtkewTW0RxdimmA59/2c32/oJxdK5
+         dSKP0GfmMvAUQJfWlO1JkSN5McliJO+sig5zbM32H0/Kuj9D+O0+2QWE9ikcOBAgMoCE
+         knF+3yVSHzD+dH7rwDtBk3Dij3c2i2NaVRbX/WHThEgypBISYgNE6EdHQjalStrd+n7R
+         ERAQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:sender:subject:to:references:from:autocrypt
-         :message-id:date:user-agent:mime-version:in-reply-to
-         :content-language:content-transfer-encoding;
-        bh=Xo3Lh0ar7wK8VvvtzSvlcOKRsOHINzAQAPvkHRS8eCk=;
-        b=o8ZPvYq1Al82gKZVkbSyC80vcPvmxlCL+E1i2SoJdMyMkYMyxgc1WNHo8oGxA+cpFY
-         cmW8LoynNndVcOa9pmlcAlk0C5kZZS09HugHvsUMUkBCjpypuZ3SUscXpGmqLFtpe2bU
-         +my4T63djd7ssBVYh5hh7IWMqfP+Q85UxN3+gWk6QGfZW7o7YVdBfaJuUffYFrdialon
-         Agv9+JInRgWlh7HKsbao9A84ASLLhtrO/JO7D3pIHJhwByVAns/XZVUG48aaWRpKkIUh
-         jpFn9zVAc/d+8OFGePB5O6OmzopZngo0tTWCOOXsPFWdo5jS0FhOeDqMZvfSrIpNCILS
-         D4zw==
-X-Gm-Message-State: AOAM532KOUKrmagO3m0ZlgMraf9LKmdgtI+EJdot5ZLqjZmavGpldBlL
-        hZ56Uw9VMeVZOHeVuaeYIz6q9n7lXmo=
-X-Google-Smtp-Source: ABdhPJx/W1tKY8ncOnd42CczsmOXPD+BXGz4pzZDJOXSv79W0b26Rxxdd7HgbovfyrFCE6/1S6CseA==
-X-Received: by 2002:a63:1341:: with SMTP id 1mr880005pgt.144.1598394082624;
-        Tue, 25 Aug 2020 15:21:22 -0700 (PDT)
-Received: from server.roeck-us.net ([2600:1700:e321:62f0:329c:23ff:fee3:9d7c])
-        by smtp.gmail.com with ESMTPSA id e3sm258500pfj.78.2020.08.25.15.21.20
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 25 Aug 2020 15:21:21 -0700 (PDT)
-Subject: Re: [PATCH v3 08/19] dt-bindings: watchdog: fsl-imx-wdt: Add i.MX 8M
- compatibles
-To:     Krzysztof Kozlowski <krzk@kernel.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
-        Shawn Guo <shawnguo@kernel.org>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        Pengutronix Kernel Team <kernel@pengutronix.de>,
-        Fabio Estevam <festevam@gmail.com>,
-        NXP Linux Team <linux-imx@nxp.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Miquel Raynal <miquel.raynal@bootlin.com>,
-        Mark Rutland <mark.rutland@arm.com>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        Anson Huang <Anson.Huang@nxp.com>,
-        Li Yang <leoyang.li@nxp.com>, Han Xu <han.xu@nxp.com>,
-        Frank Li <frank.li@nxp.com>, Fugang Duan <fugang.duan@nxp.com>,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-gpio@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org,
-        linux-pwm@vger.kernel.org, linux-serial@vger.kernel.org,
-        linux-pm@vger.kernel.org, linux-watchdog@vger.kernel.org
-References: <20200825193536.7332-1-krzk@kernel.org>
- <20200825193536.7332-9-krzk@kernel.org>
-From:   Guenter Roeck <linux@roeck-us.net>
-Autocrypt: addr=linux@roeck-us.net; keydata=
- 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
- mDW4+i+XlNFUPUYMrIKi9joBhu18ssf5i5Q=
-Message-ID: <88bcb8db-1e19-fdf6-6527-6f3755cd5709@roeck-us.net>
-Date:   Tue, 25 Aug 2020 15:21:19 -0700
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.10.0
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=6lKBXswTrzhA0xBsr6HB8AlB5+bACM8/QHtln5EsmDM=;
+        b=Smmunnpt1LjXpGp/N/t0FV0JpDIO+k456WlcUpDewg1p2nTBOA1P67S7CZhYS2eSnR
+         +OOu2WflF/myrmiKXjLyTDaOm9yWRQ/+m8rWhp4lfGRIQPptsKuzcIbQK/gfqzrsmgb2
+         BdQeToImOPECJssEo1/TBCGYzI7wfdeorUnpu7sSaErjF0BZxrIBwxej/FG4QVGmlh2X
+         1BHiv36vlSmis5BKaAtrqFc4MD1qxap9ZHiDz2gBaMW3K4hIGCY8DekMKBubBcRoWA2R
+         RBoRwxM4sCife/uTbJfjeAzX/lJkNnPNGkYKMD/Hi0cHsiYPB61eiVR70QtO+4h+3P/C
+         fPwA==
+X-Gm-Message-State: AOAM530oFG3ifVTPrO+3udsr1xhmkYJh0IEhN4H2KNWhmkrJD+j5JUa9
+        fGPsJZQ/BpxSlrw+43if6fdezIzMsx/vRGp6QYY=
+X-Google-Smtp-Source: ABdhPJyeqlKj5YPc50Em7rO4ODLMTr2DC/m+jfMJDMOpF+XoOI2kKLAaJQ+LNrc4dhPoiuNEDU0+R/Ls8lv1xf0wUss=
+X-Received: by 2002:adf:db43:: with SMTP id f3mr14164955wrj.219.1598406706678;
+ Tue, 25 Aug 2020 18:51:46 -0700 (PDT)
 MIME-Version: 1.0
-In-Reply-To: <20200825193536.7332-9-krzk@kernel.org>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+References: <20200817091617.28119-1-allen.cryptic@gmail.com>
+ <20200817091617.28119-2-allen.cryptic@gmail.com> <b5508ca4-0641-7265-2939-5f03cbfab2e2@kernel.dk>
+ <202008171228.29E6B3BB@keescook> <161b75f1-4e88-dcdf-42e8-b22504d7525c@kernel.dk>
+ <202008171246.80287CDCA@keescook> <df645c06-c30b-eafa-4d23-826b84f2ff48@kernel.dk>
+ <1597780833.3978.3.camel@HansenPartnership.com> <f3312928-430c-25f3-7112-76f2754df080@kernel.dk>
+ <1597849185.3875.7.camel@HansenPartnership.com> <CAOMdWSJRR0BhjJK1FxD7UKxNd5sk4ycmEX6TYtJjRNR6UFAj6Q@mail.gmail.com>
+ <1597873172.4030.2.camel@HansenPartnership.com>
+In-Reply-To: <1597873172.4030.2.camel@HansenPartnership.com>
+From:   Allen Pais <allen.cryptic@gmail.com>
+Date:   Wed, 26 Aug 2020 07:21:35 +0530
+Message-ID: <CAEogwTCH8qqjAnSpT0GDn+NuAps8dNbfcPVQ9h8kfOWNbzrD0w@mail.gmail.com>
+Subject: Re: [PATCH] block: convert tasklets to use new tasklet_setup() API
+To:     James Bottomley <James.Bottomley@hansenpartnership.com>
+Cc:     Allen <allen.lkml@gmail.com>, Jens Axboe <axboe@kernel.dk>,
+        Kees Cook <keescook@chromium.org>, jdike@addtoit.com,
+        richard@nod.at, anton.ivanov@cambridgegreys.com, 3chas3@gmail.com,
+        stefanr@s5r6.in-berlin.de, airlied@linux.ie,
+        Daniel Vetter <daniel@ffwll.ch>, sre@kernel.org,
+        kys@microsoft.com, deller@gmx.de, dmitry.torokhov@gmail.com,
+        jassisinghbrar@gmail.com, shawnguo@kernel.org,
+        s.hauer@pengutronix.de, maximlevitsky@gmail.com, oakad@yahoo.com,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        mporter@kernel.crashing.org, alex.bou9@gmail.com,
+        broonie@kernel.org, martyn@welchs.me.uk, manohar.vanga@gmail.com,
+        mitch@sfgoth.com, David Miller <davem@davemloft.net>,
+        Jakub Kicinski <kuba@kernel.org>, linux-um@lists.infradead.org,
+        linux-kernel@vger.kernel.org,
+        linux-atm-general@lists.sourceforge.net, netdev@vger.kernel.org,
+        linux-block@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        openipmi-developer@lists.sourceforge.net,
+        linux1394-devel@lists.sourceforge.net,
+        intel-gfx@lists.freedesktop.org, dri-devel@lists.freedesktop.org,
+        linux-hyperv@vger.kernel.org, linux-parisc@vger.kernel.org,
+        linux-input@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-ntb@googlegroups.com, linux-s390@vger.kernel.org,
+        linux-spi@vger.kernel.org, devel@driverdev.osuosl.org,
+        Romain Perier <romain.perier@gmail.com>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 8/25/20 12:35 PM, Krzysztof Kozlowski wrote:
-> DTSes with new i.MX 8M SoCs introduce their own compatibles so add them
-> to fix dtbs_check warnings like:
-> 
->   arch/arm64/boot/dts/freescale/imx8mm-var-som-symphony.dt.yaml: watchdog@30280000:
->     compatible:0: 'fsl,imx8mm-wdt' is not one of ['fsl,imx21-wdt']
->     From schema: Documentation/devicetree/bindings/watchdog/fsl-imx-wdt.yaml
-> 
->   arch/arm64/boot/dts/freescale/imx8mm-var-som-symphony.dt.yaml: watchdog@30280000:
->     compatible: ['fsl,imx8mm-wdt', 'fsl,imx21-wdt'] is too long
-> 
->   arch/arm64/boot/dts/freescale/imx8mm-var-som-symphony.dt.yaml: watchdog@30280000:
->     compatible: Additional items are not allowed ('fsl,imx21-wdt' was unexpected)
-> 
-> Signed-off-by: Krzysztof Kozlowski <krzk@kernel.org>
-> Reviewed-by: Rob Herring <robh@kernel.org>
+On Thu, Aug 20, 2020 at 3:09 AM James Bottomley
+<James.Bottomley@hansenpartnership.com> wrote:
+>
+> On Wed, 2020-08-19 at 21:54 +0530, Allen wrote:
+> > > [...]
+> > > > > Since both threads seem to have petered out, let me suggest in
+> > > > > kernel.h:
+> > > > >
+> > > > > #define cast_out(ptr, container, member) \
+> > > > >     container_of(ptr, typeof(*container), member)
+> > > > >
+> > > > > It does what you want, the argument order is the same as
+> > > > > container_of with the only difference being you name the
+> > > > > containing structure instead of having to specify its type.
+> > > >
+> > > > Not to incessantly bike shed on the naming, but I don't like
+> > > > cast_out, it's not very descriptive. And it has connotations of
+> > > > getting rid of something, which isn't really true.
+> > >
+> > > Um, I thought it was exactly descriptive: you're casting to the
+> > > outer container.  I thought about following the C++ dynamic casting
+> > > style, so out_cast(), but that seemed a bit pejorative.  What about
+> > > outer_cast()?
+> > >
+> > > > FWIW, I like the from_ part of the original naming, as it has
+> > > > some clues as to what is being done here. Why not just
+> > > > from_container()? That should immediately tell people what it
+> > > > does without having to look up the implementation, even before
+> > > > this becomes a part of the accepted coding norm.
+> > >
+> > > I'm not opposed to container_from() but it seems a little less
+> > > descriptive than outer_cast() but I don't really care.  I always
+> > > have to look up container_of() when I'm using it so this would just
+> > > be another macro of that type ...
+> > >
+> >
+> >  So far we have a few which have been suggested as replacement
+> > for from_tasklet()
+> >
+> > - out_cast() or outer_cast()
+> > - from_member().
+> > - container_from() or from_container()
+> >
+> > from_container() sounds fine, would trimming it a bit work? like
+> > from_cont().
+>
+> I'm fine with container_from().  It's the same form as container_of()
+> and I think we need urgent agreement to not stall everything else so
+> the most innocuous name is likely to get the widest acceptance.
 
-Reviewed-by: Guenter Roeck <linux@roeck-us.net>
+Kees,
 
-> ---
->  .../devicetree/bindings/watchdog/fsl-imx-wdt.yaml     | 11 +++++++++--
->  1 file changed, 9 insertions(+), 2 deletions(-)
-> 
-> diff --git a/Documentation/devicetree/bindings/watchdog/fsl-imx-wdt.yaml b/Documentation/devicetree/bindings/watchdog/fsl-imx-wdt.yaml
-> index d96b93b11fad..991b4e33486e 100644
-> --- a/Documentation/devicetree/bindings/watchdog/fsl-imx-wdt.yaml
-> +++ b/Documentation/devicetree/bindings/watchdog/fsl-imx-wdt.yaml
-> @@ -14,8 +14,15 @@ allOf:
->  
->  properties:
->    compatible:
-> -    enum:
-> -      - fsl,imx21-wdt
-> +    oneOf:
-> +      - const: fsl,imx21-wdt
-> +      - items:
-> +          - enum:
-> +              - fsl,imx8mm-wdt
-> +              - fsl,imx8mn-wdt
-> +              - fsl,imx8mp-wdt
-> +              - fsl,imx8mq-wdt
-> +          - const: fsl,imx21-wdt
->  
->    reg:
->      maxItems: 1
-> 
+  Will you be  sending the newly proposed API to Linus? I have V2
+which uses container_from()
+ready to be sent out.
 
+Thanks.
