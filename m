@@ -2,179 +2,95 @@ Return-Path: <SRS0=hbc/=CE=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,USER_AGENT_SANE_1
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8020CC433E1
-	for <linux-mmc@archiver.kernel.org>; Wed, 26 Aug 2020 10:01:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A655EC433DF
+	for <linux-mmc@archiver.kernel.org>; Wed, 26 Aug 2020 13:01:37 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5ACB72067C
-	for <linux-mmc@archiver.kernel.org>; Wed, 26 Aug 2020 10:01:39 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 70ED020B1F
+	for <linux-mmc@archiver.kernel.org>; Wed, 26 Aug 2020 13:01:37 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="pHUo6T87"
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=microchip.com header.i=@microchip.com header.b="CW86bqMC"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728501AbgHZKB2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 26 Aug 2020 06:01:28 -0400
-Received: from aserp2120.oracle.com ([141.146.126.78]:33948 "EHLO
-        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728165AbgHZKBY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 26 Aug 2020 06:01:24 -0400
-Received: from pps.filterd (aserp2120.oracle.com [127.0.0.1])
-        by aserp2120.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 07Q9rmML110211;
-        Wed, 26 Aug 2020 09:58:06 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
- : subject : message-id : references : mime-version : content-type :
- in-reply-to; s=corp-2020-01-29;
- bh=99lx5iUfIkT1H9yGqvvBxJOhPDkHKQlkIHLEmQ8PDXw=;
- b=pHUo6T87aN4HkyoolW4yELYhdaG6ZvSavIkxfBgUOj0Org1O9z1r+ZQOuET12WJ7H5Pc
- xnVCQfyl6qFGmQNX19oW+/bFETNvgM6pF7csHfuvBHB3cwqfsUd0O1/rGIc/5OQTnnFB
- MEojeNBzUtEmGEuqP0gM6P7/G+Nn01P+JHgzxPDBnzH/evLKYOeuFaI9EUmCauKOO4Dv
- zZppw57NrWnHoxtj9wH99M6dzm4GlspA3OSB7TYDhwfTGMPmrp1Qrwutr2AFfwHTZX4W
- mmUMO7IJxJ3uJAsWGpM1c6assMY729yLXVkHlFuUfSzlq1xzAsoVwPIWis3T8JNJMC4u Ng== 
-Received: from userp3020.oracle.com (userp3020.oracle.com [156.151.31.79])
-        by aserp2120.oracle.com with ESMTP id 333dbryf24-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL);
-        Wed, 26 Aug 2020 09:58:06 +0000
-Received: from pps.filterd (userp3020.oracle.com [127.0.0.1])
-        by userp3020.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 07Q9odrR139540;
-        Wed, 26 Aug 2020 09:56:05 GMT
-Received: from aserv0122.oracle.com (aserv0122.oracle.com [141.146.126.236])
-        by userp3020.oracle.com with ESMTP id 333rtywr8n-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Wed, 26 Aug 2020 09:56:05 +0000
-Received: from abhmp0019.oracle.com (abhmp0019.oracle.com [141.146.116.25])
-        by aserv0122.oracle.com (8.14.4/8.14.4) with ESMTP id 07Q9tlAJ026067;
-        Wed, 26 Aug 2020 09:55:47 GMT
-Received: from kadam (/41.57.98.10)
-        by default (Oracle Beehive Gateway v4.0)
-        with ESMTP ; Wed, 26 Aug 2020 02:55:46 -0700
-Date:   Wed, 26 Aug 2020 12:55:28 +0300
-From:   Dan Carpenter <dan.carpenter@oracle.com>
-To:     Allen Pais <allen.cryptic@gmail.com>
-Cc:     James Bottomley <James.Bottomley@hansenpartnership.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-atm-general@lists.sourceforge.net, manohar.vanga@gmail.com,
-        airlied@linux.ie, linux-hyperv@vger.kernel.org,
-        dri-devel@lists.freedesktop.org, sre@kernel.org,
-        anton.ivanov@cambridgegreys.com, devel@driverdev.osuosl.org,
-        linux-s390@vger.kernel.org, linux1394-devel@lists.sourceforge.net,
-        maximlevitsky@gmail.com, richard@nod.at, deller@gmx.de,
-        jassisinghbrar@gmail.com, linux-spi@vger.kernel.org,
-        3chas3@gmail.com, intel-gfx@lists.freedesktop.org,
-        Jakub Kicinski <kuba@kernel.org>, mporter@kernel.crashing.org,
-        jdike@addtoit.com, Kees Cook <keescook@chromium.org>,
-        oakad@yahoo.com, s.hauer@pengutronix.de,
-        linux-input@vger.kernel.org, linux-um@lists.infradead.org,
-        linux-block@vger.kernel.org, broonie@kernel.org,
-        openipmi-developer@lists.sourceforge.net, mitch@sfgoth.com,
-        linux-arm-kernel@lists.infradead.org, Jens Axboe <axboe@kernel.dk>,
-        linux-parisc@vger.kernel.org, netdev@vger.kernel.org,
-        martyn@welchs.me.uk, dmitry.torokhov@gmail.com,
-        linux-mmc@vger.kernel.org, Allen <allen.lkml@gmail.com>,
-        linux-kernel@vger.kernel.org, alex.bou9@gmail.com,
-        stefanr@s5r6.in-berlin.de, Daniel Vetter <daniel@ffwll.ch>,
-        linux-ntb@googlegroups.com,
-        Romain Perier <romain.perier@gmail.com>, shawnguo@kernel.org,
-        David Miller <davem@davemloft.net>
-Subject: Re: [PATCH] block: convert tasklets to use new tasklet_setup() API
-Message-ID: <20200826095528.GX1793@kadam>
-References: <202008171228.29E6B3BB@keescook>
- <161b75f1-4e88-dcdf-42e8-b22504d7525c@kernel.dk>
- <202008171246.80287CDCA@keescook>
- <df645c06-c30b-eafa-4d23-826b84f2ff48@kernel.dk>
- <1597780833.3978.3.camel@HansenPartnership.com>
- <f3312928-430c-25f3-7112-76f2754df080@kernel.dk>
- <1597849185.3875.7.camel@HansenPartnership.com>
- <CAOMdWSJRR0BhjJK1FxD7UKxNd5sk4ycmEX6TYtJjRNR6UFAj6Q@mail.gmail.com>
- <1597873172.4030.2.camel@HansenPartnership.com>
- <CAEogwTCH8qqjAnSpT0GDn+NuAps8dNbfcPVQ9h8kfOWNbzrD0w@mail.gmail.com>
+        id S1730058AbgHZNB1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 26 Aug 2020 09:01:27 -0400
+Received: from esa4.microchip.iphmx.com ([68.232.154.123]:36830 "EHLO
+        esa4.microchip.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1729504AbgHZNBW (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 26 Aug 2020 09:01:22 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=microchip.com; i=@microchip.com; q=dns/txt; s=mchp;
+  t=1598446882; x=1629982882;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=f8YseWpy5OIzvYfLWuUdbGIF6BgijGQN3Ey51pWgf6A=;
+  b=CW86bqMCWPCRGl9MENfRZ2vJ3O4qhLK7Y6YEfVf0g7RGTUgAgNF6BRW4
+   OINLcVGfbUeSWVpXVAcTn4YQmrqwo0bk+bFNc/7ym17WCS3mV9e4cDqRa
+   jyUQtEVfdIuEl6LZ+bEu4IKwxRbr4jOHxaTilYjaSluFSXgOAKH4dovId
+   kAxx0Q9ACItfml/KvB6ZdwTlY0nMUa2EUXelIEZdFEYETrCUiLFyjOr3j
+   yqSS0qAB3WoL2nam00a1UIgsimHN/mwT4bNgnaknXX0H3BT/0C0uqjYqL
+   uR+q3ckZCoDS8rndAkmQeIGEXgDNyaFr3ik59OV/pL57378t1g20ci1Xm
+   g==;
+IronPort-SDR: OY4Pz5f+cjZ6NWR6TZIvlUoTVRzvzZr6wjNCkza/dH/p2pLTRATMycA9/yHA85Hckl82iNfS3m
+ mZgpaY7ZWPVOUOdFZRhn4GoADQ/6uimmffnUtil32bJEaFCULs1HqkUN2inmLuyrNiFDcR+rE9
+ jbnC8V6w9zv64sRR7n20dIdQ9PyWPCDWJa71E7v0ZRBHhUkHyNjbG7Af+JiocUL8amPjewKeku
+ mjRcbfwo1rt0WPoF7y+suGPLrvqgcbUjDyPQ7Vva3vtA7TVK3QEH7x8mFHEm1wyOfm564NOPvk
+ A7k=
+X-IronPort-AV: E=Sophos;i="5.76,355,1592895600"; 
+   d="scan'208";a="84799218"
+Received: from smtpout.microchip.com (HELO email.microchip.com) ([198.175.253.82])
+  by esa4.microchip.iphmx.com with ESMTP/TLS/AES256-SHA256; 26 Aug 2020 06:01:20 -0700
+Received: from chn-vm-ex04.mchp-main.com (10.10.85.152) by
+ chn-vm-ex02.mchp-main.com (10.10.85.144) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.1979.3; Wed, 26 Aug 2020 06:00:30 -0700
+Received: from soft-dev15.microsemi.net (10.10.115.15) by
+ chn-vm-ex04.mchp-main.com (10.10.85.152) with Microsoft SMTP Server id
+ 15.1.1979.3 via Frontend Transport; Wed, 26 Aug 2020 06:01:16 -0700
+From:   Lars Povlsen <lars.povlsen@microchip.com>
+To:     Rob Herring <robh+dt@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+CC:     Lars Povlsen <lars.povlsen@microchip.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Microchip Linux Driver Support <UNGLinuxDriver@microchip.com>,
+        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>,
+        "Alexandre Belloni" <alexandre.belloni@bootlin.com>
+Subject: [PATCH mmc-next] dt-bindings: mmc: Fix mmc node name in DT example
+Date:   Wed, 26 Aug 2020 15:01:06 +0200
+Message-ID: <20200826130106.22889-1-lars.povlsen@microchip.com>
+X-Mailer: git-send-email 2.27.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAEogwTCH8qqjAnSpT0GDn+NuAps8dNbfcPVQ9h8kfOWNbzrD0w@mail.gmail.com>
-User-Agent: Mutt/1.9.4 (2018-02-28)
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9724 signatures=668679
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 suspectscore=0 adultscore=0
- phishscore=0 spamscore=0 bulkscore=0 mlxlogscore=999 malwarescore=0
- mlxscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2006250000 definitions=main-2008260078
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9724 signatures=668679
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 bulkscore=0 clxscore=1011
- priorityscore=1501 impostorscore=0 phishscore=0 malwarescore=0
- mlxlogscore=999 spamscore=0 mlxscore=0 lowpriorityscore=0 suspectscore=0
- adultscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2006250000 definitions=main-2008260079
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Aug 26, 2020 at 07:21:35AM +0530, Allen Pais wrote:
-> On Thu, Aug 20, 2020 at 3:09 AM James Bottomley
-> <James.Bottomley@hansenpartnership.com> wrote:
-> >
-> > On Wed, 2020-08-19 at 21:54 +0530, Allen wrote:
-> > > > [...]
-> > > > > > Since both threads seem to have petered out, let me suggest in
-> > > > > > kernel.h:
-> > > > > >
-> > > > > > #define cast_out(ptr, container, member) \
-> > > > > >     container_of(ptr, typeof(*container), member)
-> > > > > >
-> > > > > > It does what you want, the argument order is the same as
-> > > > > > container_of with the only difference being you name the
-> > > > > > containing structure instead of having to specify its type.
-> > > > >
-> > > > > Not to incessantly bike shed on the naming, but I don't like
-> > > > > cast_out, it's not very descriptive. And it has connotations of
-> > > > > getting rid of something, which isn't really true.
-> > > >
-> > > > Um, I thought it was exactly descriptive: you're casting to the
-> > > > outer container.  I thought about following the C++ dynamic casting
-> > > > style, so out_cast(), but that seemed a bit pejorative.  What about
-> > > > outer_cast()?
-> > > >
-> > > > > FWIW, I like the from_ part of the original naming, as it has
-> > > > > some clues as to what is being done here. Why not just
-> > > > > from_container()? That should immediately tell people what it
-> > > > > does without having to look up the implementation, even before
-> > > > > this becomes a part of the accepted coding norm.
-> > > >
-> > > > I'm not opposed to container_from() but it seems a little less
-> > > > descriptive than outer_cast() but I don't really care.  I always
-> > > > have to look up container_of() when I'm using it so this would just
-> > > > be another macro of that type ...
-> > > >
-> > >
-> > >  So far we have a few which have been suggested as replacement
-> > > for from_tasklet()
-> > >
-> > > - out_cast() or outer_cast()
-> > > - from_member().
-> > > - container_from() or from_container()
-> > >
-> > > from_container() sounds fine, would trimming it a bit work? like
-> > > from_cont().
-> >
-> > I'm fine with container_from().  It's the same form as container_of()
-> > and I think we need urgent agreement to not stall everything else so
-> > the most innocuous name is likely to get the widest acceptance.
-> 
-> Kees,
-> 
->   Will you be  sending the newly proposed API to Linus? I have V2
-> which uses container_from()
-> ready to be sent out.
+This changes the "mmc0@600800000" node name to "mmc@600800000" to be
+compliant with devicetree naming rules.
 
-I liked that James swapped the first two arguments so that it matches
-container_of().  Plus it's nice that when you have:
+Signed-off-by: Lars Povlsen <lars.povlsen@microchip.com>
+---
+ .../devicetree/bindings/mmc/microchip,dw-sparx5-sdhci.yaml      | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-	struct whatever *foo = container_from(ptr, foo, member);
-
-Then it means that "ptr == &foo->member".
-
-regards,
-dan carpenter
-
+diff --git a/Documentation/devicetree/bindings/mmc/microchip,dw-sparx5-sdhci.yaml b/Documentation/devicetree/bindings/mmc/microchip,dw-sparx5-sdhci.yaml
+index c9a572863b88..55883290543b 100644
+--- a/Documentation/devicetree/bindings/mmc/microchip,dw-sparx5-sdhci.yaml
++++ b/Documentation/devicetree/bindings/mmc/microchip,dw-sparx5-sdhci.yaml
+@@ -50,7 +50,7 @@ examples:
+   - |
+     #include <dt-bindings/interrupt-controller/arm-gic.h>
+     #include <dt-bindings/clock/microchip,sparx5.h>
+-    sdhci0: mmc0@600800000 {
++    sdhci0: mmc@600800000 {
+         compatible = "microchip,dw-sparx5-sdhci";
+         reg = <0x00800000 0x1000>;
+         pinctrl-0 = <&emmc_pins>;
+--
+2.27.0
