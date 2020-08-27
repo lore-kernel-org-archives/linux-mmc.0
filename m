@@ -1,116 +1,179 @@
-Return-Path: <SRS0=hbc/=CE=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=bPLn=CF=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=no
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CE5B4C433ED
-	for <linux-mmc@archiver.kernel.org>; Wed, 26 Aug 2020 20:06:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DF9ABC433E3
+	for <linux-mmc@archiver.kernel.org>; Thu, 27 Aug 2020 01:38:11 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9FDEF2078D
-	for <linux-mmc@archiver.kernel.org>; Wed, 26 Aug 2020 20:06:20 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id BF6982074A
+	for <linux-mmc@archiver.kernel.org>; Thu, 27 Aug 2020 01:38:11 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=nvidia.com header.i=@nvidia.com header.b="sAdcDtKk"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="I80xaBRJ"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726876AbgHZUFf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 26 Aug 2020 16:05:35 -0400
-Received: from hqnvemgate26.nvidia.com ([216.228.121.65]:15640 "EHLO
-        hqnvemgate26.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726609AbgHZUFe (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 26 Aug 2020 16:05:34 -0400
-Received: from hqpgpgate101.nvidia.com (Not Verified[216.228.121.13]) by hqnvemgate26.nvidia.com (using TLS: TLSv1.2, DES-CBC3-SHA)
-        id <B5f46c0800000>; Wed, 26 Aug 2020 13:05:20 -0700
-Received: from hqmail.nvidia.com ([172.20.161.6])
-  by hqpgpgate101.nvidia.com (PGP Universal service);
-  Wed, 26 Aug 2020 13:05:34 -0700
-X-PGP-Universal: processed;
-        by hqpgpgate101.nvidia.com on Wed, 26 Aug 2020 13:05:34 -0700
-Received: from HQMAIL107.nvidia.com (172.20.187.13) by HQMAIL101.nvidia.com
- (172.20.187.10) with Microsoft SMTP Server (TLS) id 15.0.1473.3; Wed, 26 Aug
- 2020 20:05:31 +0000
-Received: from rnnvemgw01.nvidia.com (10.128.109.123) by HQMAIL107.nvidia.com
- (172.20.187.13) with Microsoft SMTP Server (TLS) id 15.0.1473.3 via Frontend
- Transport; Wed, 26 Aug 2020 20:05:31 +0000
-Received: from skomatineni-linux.nvidia.com (Not Verified[10.2.174.186]) by rnnvemgw01.nvidia.com with Trustwave SEG (v7,5,8,10121)
-        id <B5f46c08a0001>; Wed, 26 Aug 2020 13:05:31 -0700
-From:   Sowjanya Komatineni <skomatineni@nvidia.com>
-To:     <adrian.hunter@intel.com>, <ulf.hansson@linaro.org>,
-        <thierry.reding@gmail.com>, <jonathanh@nvidia.com>,
-        <robh+dt@kernel.org>
-CC:     <skomatineni@nvidia.com>, <linux-tegra@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
-        <devicetree@vger.kernel.org>, <stable@vger.kernel.org>
-Subject: [PATCH v5 0/7] Fix timeout clock used by hardware data timeout
-Date:   Wed, 26 Aug 2020 13:05:07 -0700
-Message-ID: <1598472314-30235-1-git-send-email-skomatineni@nvidia.com>
-X-Mailer: git-send-email 2.7.4
-X-NVConfidentiality: public
+        id S1726867AbgH0BiD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 26 Aug 2020 21:38:03 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49800 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726784AbgH0BiA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 26 Aug 2020 21:38:00 -0400
+Received: from mail-oi1-x242.google.com (mail-oi1-x242.google.com [IPv6:2607:f8b0:4864:20::242])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CDE32C0617BD;
+        Wed, 26 Aug 2020 18:37:59 -0700 (PDT)
+Received: by mail-oi1-x242.google.com with SMTP id j18so3306654oig.5;
+        Wed, 26 Aug 2020 18:37:59 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=Rsb5LLd+wEYl5+11BE05ItDTZCXQhjeMW019xM5KW9w=;
+        b=I80xaBRJ50n8a6fI5zGd+zDFXBJzdkM/CYwdFxWUUjYU3c+2p64n4BZ92Q57vwyNvT
+         WA9AXEE5mkmSWs9RicapGSPmYl7SBg2jYYPKSa/nI/+15pdR7K1Y4Cu0DHfnjPwN8yXR
+         icr8tNGeIcQL3s2nHPbJyB6yfauHJDS+gWazTyaRFZfsu6K/xYzwtyDy670Ye8cnRtyg
+         TR/hJM9qLFyVWX5fPwsxGxi/JNo/PLB2M5jflTu50Xv+DnpTnsNDIefohCCH/iR6ipaV
+         nyjrEne62FM9W1doljqrO4mZtREkO1PUraYtOXDLLpGubpcLL1+FWyQrEJDylKkUrU3D
+         wKgA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=Rsb5LLd+wEYl5+11BE05ItDTZCXQhjeMW019xM5KW9w=;
+        b=qMrmCoI84efbjfMD7KDJeqH7ZE33nfwRRNOEBDAFYAmZ64MsLb0ZHHlmeiS88hcBs/
+         ePZRVD7kvVwt0V3JIeUZNVchFLfCE4W71m3YT4aLSd3nmkquG7Do6CZLFNsoeiMvq/8m
+         7eBMWCRGCjwEEg3kdEiLW7PkKj9deR3HKx29fxqjfr1l6DrDV3B3pcu8x5vRoCQxHULk
+         uKYTS7xg/Ij+dqdeKmaM5a4d1FaO6SFQCwd0X8+YwKI2CMLZKtd68GsCfPuiJgvwKDSr
+         SdQUDJfjvavMsEQhNwg4twUVJjEuCnTOmUfz2lCrFGoLqVcNIFth6Rfm5ezVKMBd8lYx
+         KLeg==
+X-Gm-Message-State: AOAM530nhtFrgOEAHBAa60mRHRHzv4Y1VRGh2sOmswDl1vRN71bxp2Te
+        +GqlxbfzB4/4540wWxRq/8ANkCdXo7Dbv53ePZk=
+X-Google-Smtp-Source: ABdhPJwhCHTUyQeL6NO7VZ9TErlPHSPJaUSJlRG8on4DJcl3XVowSsSaDNvfXk39W2OiRUOfnXZzLQickeYXItlZbbE=
+X-Received: by 2002:aca:ec95:: with SMTP id k143mr5299041oih.76.1598492278869;
+ Wed, 26 Aug 2020 18:37:58 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nvidia.com; s=n1;
-        t=1598472320; bh=OdHdRc/UaKnVvZSMHA9sLxAncOLEzYZlr2zxYS7NCA8=;
-        h=X-PGP-Universal:From:To:CC:Subject:Date:Message-ID:X-Mailer:
-         X-NVConfidentiality:MIME-Version:Content-Type;
-        b=sAdcDtKkrSV7v71/ylV5CdddbSsNGcdWUtD93tmrrU8I6vAzTN8ABnIMcY2RfqVzO
-         APeQBIJ564TncDxfV852Dy9g1tvAQURmvfcHfeEn3XjnNuTUEsQzfAx4102501Q/JS
-         MLejpnY9Dd885BSoSZvP+1nREqNop/ENTV7T0QYf4knbeNYK9AlEmqITZvucBEk55q
-         RyGGydmX8japWg2pX3H16C8xSTBBtFhZ6HuF0lhS+E0/ezimf/U/MITo2nLFVKZ+JV
-         G+zmIxhlMsovytOJitiQjiedRhQ/tiBgMIcC6lY/CCbb8a0RtgitpbJO3Z6NPSqu27
-         xKmS6XlQwNOfg==
+References: <161b75f1-4e88-dcdf-42e8-b22504d7525c@kernel.dk>
+ <202008171246.80287CDCA@keescook> <df645c06-c30b-eafa-4d23-826b84f2ff48@kernel.dk>
+ <1597780833.3978.3.camel@HansenPartnership.com> <f3312928-430c-25f3-7112-76f2754df080@kernel.dk>
+ <1597849185.3875.7.camel@HansenPartnership.com> <CAOMdWSJRR0BhjJK1FxD7UKxNd5sk4ycmEX6TYtJjRNR6UFAj6Q@mail.gmail.com>
+ <1597873172.4030.2.camel@HansenPartnership.com> <CAEogwTCH8qqjAnSpT0GDn+NuAps8dNbfcPVQ9h8kfOWNbzrD0w@mail.gmail.com>
+ <20200826095528.GX1793@kadam> <202008260811.1CE425B5C2@keescook>
+In-Reply-To: <202008260811.1CE425B5C2@keescook>
+From:   Allen <allen.lkml@gmail.com>
+Date:   Thu, 27 Aug 2020 07:07:47 +0530
+Message-ID: <CAOMdWSLyacdeoqnZBuLu6z1B6cY-WbtUJQm6+8=WHyE49tVaEg@mail.gmail.com>
+Subject: Re: [PATCH] block: convert tasklets to use new tasklet_setup() API
+To:     Kees Cook <keescook@chromium.org>
+Cc:     Dan Carpenter <dan.carpenter@oracle.com>,
+        Allen Pais <allen.cryptic@gmail.com>,
+        James Bottomley <James.Bottomley@hansenpartnership.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-atm-general@lists.sourceforge.net, manohar.vanga@gmail.com,
+        airlied@linux.ie, linux-hyperv@vger.kernel.org,
+        dri-devel@lists.freedesktop.org, sre@kernel.org,
+        anton.ivanov@cambridgegreys.com, devel@driverdev.osuosl.org,
+        linux-s390@vger.kernel.org, linux1394-devel@lists.sourceforge.net,
+        maximlevitsky@gmail.com, richard@nod.at, deller@gmx.de,
+        jassisinghbrar@gmail.com, linux-spi@vger.kernel.org,
+        3chas3@gmail.com, intel-gfx@lists.freedesktop.org,
+        Jakub Kicinski <kuba@kernel.org>, mporter@kernel.crashing.org,
+        jdike@addtoit.com, oakad@yahoo.com, s.hauer@pengutronix.de,
+        linux-input@vger.kernel.org, linux-um@lists.infradead.org,
+        linux-block@vger.kernel.org, Mark Brown <broonie@kernel.org>,
+        openipmi-developer@lists.sourceforge.net, mitch@sfgoth.com,
+        linux-arm-kernel@lists.infradead.org, Jens Axboe <axboe@kernel.dk>,
+        linux-parisc@vger.kernel.org, netdev@vger.kernel.org,
+        martyn@welchs.me.uk, dmitry.torokhov@gmail.com,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        alex.bou9@gmail.com, stefanr@s5r6.in-berlin.de,
+        Daniel Vetter <daniel@ffwll.ch>, linux-ntb@googlegroups.com,
+        Romain Perier <romain.perier@gmail.com>, shawnguo@kernel.org,
+        David Miller <davem@davemloft.net>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Tegra210/Tegra186/Tegra194 has incorrectly enabled
-SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK from the beginning of their support.
+On Wed, Aug 26, 2020 at 8:43 PM Kees Cook <keescook@chromium.org> wrote:
+>
+> On Wed, Aug 26, 2020 at 12:55:28PM +0300, Dan Carpenter wrote:
+> > On Wed, Aug 26, 2020 at 07:21:35AM +0530, Allen Pais wrote:
+> > > On Thu, Aug 20, 2020 at 3:09 AM James Bottomley
+> > > <James.Bottomley@hansenpartnership.com> wrote:
+> > > >
+> > > > On Wed, 2020-08-19 at 21:54 +0530, Allen wrote:
+> > > > > > [...]
+> > > > > > > > Since both threads seem to have petered out, let me suggest in
+> > > > > > > > kernel.h:
+> > > > > > > >
+> > > > > > > > #define cast_out(ptr, container, member) \
+> > > > > > > >     container_of(ptr, typeof(*container), member)
+> > > > > > > >
+> > > > > > > > It does what you want, the argument order is the same as
+> > > > > > > > container_of with the only difference being you name the
+> > > > > > > > containing structure instead of having to specify its type.
+> > > > > > >
+> > > > > > > Not to incessantly bike shed on the naming, but I don't like
+> > > > > > > cast_out, it's not very descriptive. And it has connotations of
+> > > > > > > getting rid of something, which isn't really true.
+> > > > > >
+> > > > > > Um, I thought it was exactly descriptive: you're casting to the
+> > > > > > outer container.  I thought about following the C++ dynamic casting
+> > > > > > style, so out_cast(), but that seemed a bit pejorative.  What about
+> > > > > > outer_cast()?
+> > > > > >
+> > > > > > > FWIW, I like the from_ part of the original naming, as it has
+> > > > > > > some clues as to what is being done here. Why not just
+> > > > > > > from_container()? That should immediately tell people what it
+> > > > > > > does without having to look up the implementation, even before
+> > > > > > > this becomes a part of the accepted coding norm.
+> > > > > >
+> > > > > > I'm not opposed to container_from() but it seems a little less
+> > > > > > descriptive than outer_cast() but I don't really care.  I always
+> > > > > > have to look up container_of() when I'm using it so this would just
+> > > > > > be another macro of that type ...
+> > > > > >
+> > > > >
+> > > > >  So far we have a few which have been suggested as replacement
+> > > > > for from_tasklet()
+> > > > >
+> > > > > - out_cast() or outer_cast()
+> > > > > - from_member().
+> > > > > - container_from() or from_container()
+> > > > >
+> > > > > from_container() sounds fine, would trimming it a bit work? like
+> > > > > from_cont().
+> > > >
+> > > > I'm fine with container_from().  It's the same form as container_of()
+> > > > and I think we need urgent agreement to not stall everything else so
+> > > > the most innocuous name is likely to get the widest acceptance.
+> > >
+> > > Kees,
+> > >
+> > >   Will you be  sending the newly proposed API to Linus? I have V2
+> > > which uses container_from()
+> > > ready to be sent out.
+> >
+> > I liked that James swapped the first two arguments so that it matches
+> > container_of().  Plus it's nice that when you have:
+> >
+> >       struct whatever *foo = container_from(ptr, foo, member);
+> >
+> > Then it means that "ptr == &foo->member".
+>
+> I'm a bit stalled right now -- the merge window was keeping me busy, and
+> this week is the Linux Plumbers Conference. This is on my list, but I
+> haven't gotten back around to it. If you want, feel free to send the
+> container_from() patch; you might be able to unblock this faster than me
+> right now. :)
+>
 
-Tegra210 and later SDMMC hardware default uses sdmmc_legacy_tm (TMCLK)
-all the time for hardware data timeout instead of SDCLK and this TMCLK
-need to be kept enabled by Tegra sdmmc driver.
+Sure, Thanks.
 
-This series includes patches to fix this for Tegra210/Tegra186/Tegra194.
 
-These patches need to be manually backported for 4.9, 4.14 and 4.19.
-
-Will send patches to backport separately once these patches are ack'd.
-
-Delta between patch versions:
-[v5]:	Include below changes based on v4 feedback
-	- updated dt-binding doc to be more clear
-	- updated Tegra sdhci driver to retrieve sdhci and tmclk clocks
-	  based on no. of clocks in sdhci device node as old device trees
-	  do not use sdhci clock name and this allows proper clock retrival
-	  irrespective of sdhci and tmclk clocks order in device tree.	  
-	- Added separate quirk for identifying SoC's supporting separate
-	  timeout clock to be more clear.
-
-[v4]:	Include additional dt-binding patch
-
-[v3]:	Same as v2 with fixes tag
-
-[v2]:	Includes minor fix
-	- Patch-0006: parentheses around operand of '!'
-
-Sowjanya Komatineni (7):
-  sdhci: tegra: Remove SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK for Tegra210
-  sdhci: tegra: Remove SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK for Tegra186
-  dt-bindings: mmc: tegra: Add tmclk for Tegra210 and later
-  arm64: tegra: Add missing timeout clock to Tegra210 SDMMC
-  arm64: tegra: Add missing timeout clock to Tegra186 SDMMC nodes
-  arm64: tegra: Add missing timeout clock to Tegra194 SDMMC nodes
-  sdhci: tegra: Add missing TMCLK for data timeout
-
- .../bindings/mmc/nvidia,tegra20-sdhci.txt          | 32 +++++++-
- arch/arm64/boot/dts/nvidia/tegra186.dtsi           | 20 +++--
- arch/arm64/boot/dts/nvidia/tegra194.dtsi           | 15 ++--
- arch/arm64/boot/dts/nvidia/tegra210.dtsi           | 20 +++--
- drivers/mmc/host/sdhci-tegra.c                     | 91 +++++++++++++++++++---
- 5 files changed, 143 insertions(+), 35 deletions(-)
 
 -- 
-2.7.4
-
+       - Allen
