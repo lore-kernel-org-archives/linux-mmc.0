@@ -2,142 +2,246 @@ Return-Path: <SRS0=bPLn=CF=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+X-Spam-Status: No, score=-14.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+	INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,SIGNED_OFF_BY,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 34BD6C433E1
-	for <linux-mmc@archiver.kernel.org>; Thu, 27 Aug 2020 14:59:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C62C5C433E1
+	for <linux-mmc@archiver.kernel.org>; Thu, 27 Aug 2020 15:08:52 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0F0BB22B4B
-	for <linux-mmc@archiver.kernel.org>; Thu, 27 Aug 2020 14:59:55 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9FD5F22B40
+	for <linux-mmc@archiver.kernel.org>; Thu, 27 Aug 2020 15:08:52 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="ghTzCFJC"
+	dkim=pass (2048-bit key) header.d=nvidia.com header.i=@nvidia.com header.b="XlQaLVnA"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726234AbgH0O7v (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 27 Aug 2020 10:59:51 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34546 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726335AbgH0O7m (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Aug 2020 10:59:42 -0400
-Received: from mail-pf1-x441.google.com (mail-pf1-x441.google.com [IPv6:2607:f8b0:4864:20::441])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 214C3C06121B
-        for <linux-mmc@vger.kernel.org>; Thu, 27 Aug 2020 07:59:42 -0700 (PDT)
-Received: by mail-pf1-x441.google.com with SMTP id x143so3717060pfc.4
-        for <linux-mmc@vger.kernel.org>; Thu, 27 Aug 2020 07:59:42 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=chromium.org; s=google;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=WuL1dIUKsXBKS74w29uHtR6KbU+GU+6B3P99Ro425TA=;
-        b=ghTzCFJCnPmQ+DImiDILpCS6WX5yhT8MFpZj9RUpmJjv3EXxiJN5WUqT8L4MXcuwxD
-         pDNzURkebg9gNy52q5ZsI/Dui3sJhS0Z/2W9PKez79BQdhhRwnf5Mb6p8J4gRu4Gxh8v
-         SveFSFYljkwpakvd+DNDZCZJZwc8Vmf6chJRE=
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=WuL1dIUKsXBKS74w29uHtR6KbU+GU+6B3P99Ro425TA=;
-        b=EK9IJ2LcADjA54BVAqDl3k0b+eE3Re6ff2+t9azS6TUcwKX/u83V0hVS1iVFY5ljkr
-         8+lnrzf/s3Ybebtps1XuAc9hq13JKO3tzSxkmJvR7TMOZ06NcMpLJhbOG/KT5FDm4tyU
-         5ea28nvW5D1r3QresgqP5gDBTrQlFV6zADjL9NIBPGFJ8ZBBsUqbLGljaLOI/hSqSUdW
-         OIGB4WW7baPBT6iUvoYmL0tdjfDGtzzeMxrYK6uGieB5ewTnctDneus5/RzWHjd0L5Dq
-         KwocAI9dRnI1fYMjLpLpSy6LNdTVyjHtTym4+BcWqGue9AP/MnzB+krs5uaJ8OK03RlC
-         /CTg==
-X-Gm-Message-State: AOAM532mEBrPB+Yu59H1HjPR4EHsMoew71Dg+WzPU+CnwxeNZsstCedv
-        2Xm8I+gAc6QCC/pb04geTo7KWg==
-X-Google-Smtp-Source: ABdhPJzzU+IA2AKHCax5T4tD+YBJLoQ/6ieQfs/9z2zBy3H5T5H0eGgx+8rRdt3zBu85loFG04lVjg==
-X-Received: by 2002:aa7:9427:: with SMTP id y7mr17053693pfo.12.1598540381631;
-        Thu, 27 Aug 2020 07:59:41 -0700 (PDT)
-Received: from tictac2.mtv.corp.google.com ([2620:15c:202:1:42b0:34ff:fe3d:58e6])
-        by smtp.gmail.com with ESMTPSA id u123sm3113198pfb.209.2020.08.27.07.59.40
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 27 Aug 2020 07:59:41 -0700 (PDT)
-From:   Douglas Anderson <dianders@chromium.org>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     vbadigan@codeaurora.org, Douglas Anderson <dianders@chromium.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Andy Gross <agross@kernel.org>,
-        Asutosh Das <asutoshd@codeaurora.org>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>,
-        Chris Ball <chris@printf.net>,
-        Georgi Djakov <gdjakov@mm-sol.com>,
-        Venkat Gopalakrishnan <venkatg@codeaurora.org>,
-        linux-arm-msm@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org
-Subject: [PATCH] mmc: sdhci-msm: Add retries when all tuning phases are found valid
-Date:   Thu, 27 Aug 2020 07:58:41 -0700
-Message-Id: <20200827075809.1.If179abf5ecb67c963494db79c3bc4247d987419b@changeid>
-X-Mailer: git-send-email 2.28.0.297.g1956fa8f8d-goog
+        id S1726217AbgH0PG5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 27 Aug 2020 11:06:57 -0400
+Received: from hqnvemgate25.nvidia.com ([216.228.121.64]:18922 "EHLO
+        hqnvemgate25.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727850AbgH0PEa (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Aug 2020 11:04:30 -0400
+Received: from hqpgpgate101.nvidia.com (Not Verified[216.228.121.13]) by hqnvemgate25.nvidia.com (using TLS: TLSv1.2, DES-CBC3-SHA)
+        id <B5f47cb450001>; Thu, 27 Aug 2020 08:03:34 -0700
+Received: from hqmail.nvidia.com ([172.20.161.6])
+  by hqpgpgate101.nvidia.com (PGP Universal service);
+  Thu, 27 Aug 2020 08:04:17 -0700
+X-PGP-Universal: processed;
+        by hqpgpgate101.nvidia.com on Thu, 27 Aug 2020 08:04:17 -0700
+Received: from [10.2.174.186] (172.20.13.39) by HQMAIL107.nvidia.com
+ (172.20.187.13) with Microsoft SMTP Server (TLS) id 15.0.1473.3; Thu, 27 Aug
+ 2020 15:04:16 +0000
+Subject: Re: [PATCH v6 7/7] sdhci: tegra: Add missing TMCLK for data timeout
+To:     Jon Hunter <jonathanh@nvidia.com>, <adrian.hunter@intel.com>,
+        <ulf.hansson@linaro.org>, <thierry.reding@gmail.com>,
+        <robh+dt@kernel.org>
+CC:     <linux-tegra@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <stable@vger.kernel.org>
+References: <1598500201-5987-1-git-send-email-skomatineni@nvidia.com>
+ <1598500201-5987-8-git-send-email-skomatineni@nvidia.com>
+ <93d0188b-c833-33b4-211e-b9293c4f3a1c@nvidia.com>
+From:   Sowjanya Komatineni <skomatineni@nvidia.com>
+Message-ID: <3deac67c-bb1e-ef23-7dcc-8d4024203ab1@nvidia.com>
+Date:   Thu, 27 Aug 2020 08:03:56 -0700
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.10.0
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+In-Reply-To: <93d0188b-c833-33b4-211e-b9293c4f3a1c@nvidia.com>
+X-Originating-IP: [172.20.13.39]
+X-ClientProxiedBy: HQMAIL107.nvidia.com (172.20.187.13) To
+ HQMAIL107.nvidia.com (172.20.187.13)
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+Content-Language: en-US
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nvidia.com; s=n1;
+        t=1598540614; bh=DoTOabdYopsUxy9pThG/x9MurfIlwI7HTUiu8cCQwwY=;
+        h=X-PGP-Universal:Subject:To:CC:References:From:Message-ID:Date:
+         User-Agent:MIME-Version:In-Reply-To:X-Originating-IP:
+         X-ClientProxiedBy:Content-Type:Content-Transfer-Encoding:
+         Content-Language;
+        b=XlQaLVnA320/cdF58QoaOOm3uyXjuQO8XG4qcBlae1/h4o66sfrpaoFVAataUX953
+         l91yA0tOtieTaZ6/6JFb6XYXuuNpgoyBAXXdVehSz4SF9BUVzyPkI2VZuqPwKNpErv
+         Zds4wZ03jx103ddD78yf/Y2w7V593avKzNqZY2j7aJE6jalT49CE07sESPbSoSum34
+         gQ5DxapOF4nrLKXwR1wPtVu1h0AzaKHGk1cc9F40VZObRqrmxM9sFLtSpHhO1g98OS
+         Cpp+xYMD9DKBph8EEvT+VTLcjDiZ3p+NvRaw74YlyrMO+fE6WF4zbUnovGv4fiE8+H
+         N4kDqpLheY/Gw==
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-As the comments in this patch say, if we tune and find all phases are
-valid it's _almost_ as bad as no phases being found valid.  Probably
-all phases are not really reliable but we didn't detect where the
-unreliable place is.  That means we'll essentially be guessing and
-hoping we get a good phase.
 
-This is not just a problem in theory.  It was causing real problems on
-a real board.  On that board, most often phase 10 is found as the only
-invalid phase, though sometimes 10 and 11 are invalid and sometimes
-just 11.  Some percentage of the time, however, all phases are found
-to be valid.  When this happens, the current logic will decide to use
-phase 11.  Since phase 11 is sometimes found to be invalid, this is a
-bad choice.  Sure enough, when phase 11 is picked we often get mmc
-errors later in boot.
+On 8/27/20 1:40 AM, Jon Hunter wrote:
+> On 27/08/2020 04:50, Sowjanya Komatineni wrote:
+>> commit b5a84ecf025a ("mmc: tegra: Add Tegra210 support")
+>>
+>> Tegra210 and later has a separate sdmmc_legacy_tm (TMCLK) used by Tegra
+>> SDMMC hawdware for data timeout to achive better timeout than using
+>> SDCLK and using TMCLK is recommended.
+>>
+>> USE_TMCLK_FOR_DATA_TIMEOUT bit in Tegra SDMMC register
+>> SDHCI_TEGRA_VENDOR_SYS_SW_CTRL can be used to choose either TMCLK or
+>> SDCLK for data timeout.
+>>
+>> Default USE_TMCLK_FOR_DATA_TIMEOUT bit is set to 1 and TMCLK is used
+>> for data timeout by Tegra SDMMC hardware and having TMCLK not enabled
+>> is not recommended.
+>>
+>> So, this patch adds quirk NVQUIRK_HAS_TMCLK for SoC having separate
+>> timeout clock and keeps TMCLK enabled all the time.
+>>
+>> Fixes: b5a84ecf025a ("mmc: tegra: Add Tegra210 support")
+>> Cc: stable <stable@vger.kernel.org> # 5.4
+>> Tested-by: Jon Hunter <jonathanh@nvidia.com>
+>> Reviewed-by: Jon Hunter <jonathanh@nvidia.com>
+>> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+>> Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
+>> ---
+>>   drivers/mmc/host/sdhci-tegra.c | 90 ++++++++++++++++++++++++++++++++++++++----
+>>   1 file changed, 82 insertions(+), 8 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+>> index 31ed321..f69ca8d 100644
+>> --- a/drivers/mmc/host/sdhci-tegra.c
+>> +++ b/drivers/mmc/host/sdhci-tegra.c
+>> @@ -13,6 +13,7 @@
+>>   #include <linux/clk.h>
+>>   #include <linux/io.h>
+>>   #include <linux/of.h>
+>> +#include <linux/of_clk.h>
+>>   #include <linux/of_device.h>
+>>   #include <linux/pinctrl/consumer.h>
+>>   #include <linux/regulator/consumer.h>
+>> @@ -110,6 +111,12 @@
+>>   #define NVQUIRK_DIS_CARD_CLK_CONFIG_TAP			BIT(8)
+>>   #define NVQUIRK_CQHCI_DCMD_R1B_CMD_TIMING		BIT(9)
+>>   
+>> +/*
+>> + * NVQUIRK_HAS_TMCLK is for SoC's having separate timeout clock for Tegra
+>> + * SDMMC hardware data timeout.
+>> + */
+>> +#define NVQUIRK_HAS_TMCLK				BIT(10)
+>> +
+>>   /* SDMMC CQE Base Address for Tegra Host Ver 4.1 and Higher */
+>>   #define SDHCI_TEGRA_CQE_BASE_ADDR			0xF000
+>>   
+>> @@ -140,6 +147,7 @@ struct sdhci_tegra_autocal_offsets {
+>>   struct sdhci_tegra {
+>>   	const struct sdhci_tegra_soc_data *soc_data;
+>>   	struct gpio_desc *power_gpio;
+>> +	struct clk *tmclk;
+>>   	bool ddr_signaling;
+>>   	bool pad_calib_required;
+>>   	bool pad_control_available;
+>> @@ -1433,7 +1441,8 @@ static const struct sdhci_tegra_soc_data soc_data_tegra210 = {
+>>   		    NVQUIRK_HAS_PADCALIB |
+>>   		    NVQUIRK_DIS_CARD_CLK_CONFIG_TAP |
+>>   		    NVQUIRK_ENABLE_SDR50 |
+>> -		    NVQUIRK_ENABLE_SDR104,
+>> +		    NVQUIRK_ENABLE_SDR104 |
+>> +		    NVQUIRK_HAS_TMCLK,
+>>   	.min_tap_delay = 106,
+>>   	.max_tap_delay = 185,
+>>   };
+>> @@ -1471,6 +1480,7 @@ static const struct sdhci_tegra_soc_data soc_data_tegra186 = {
+>>   		    NVQUIRK_DIS_CARD_CLK_CONFIG_TAP |
+>>   		    NVQUIRK_ENABLE_SDR50 |
+>>   		    NVQUIRK_ENABLE_SDR104 |
+>> +		    NVQUIRK_HAS_TMCLK |
+>>   		    NVQUIRK_CQHCI_DCMD_R1B_CMD_TIMING,
+>>   	.min_tap_delay = 84,
+>>   	.max_tap_delay = 136,
+>> @@ -1483,7 +1493,8 @@ static const struct sdhci_tegra_soc_data soc_data_tegra194 = {
+>>   		    NVQUIRK_HAS_PADCALIB |
+>>   		    NVQUIRK_DIS_CARD_CLK_CONFIG_TAP |
+>>   		    NVQUIRK_ENABLE_SDR50 |
+>> -		    NVQUIRK_ENABLE_SDR104,
+>> +		    NVQUIRK_ENABLE_SDR104 |
+>> +		    NVQUIRK_HAS_TMCLK,
+>>   	.min_tap_delay = 96,
+>>   	.max_tap_delay = 139,
+>>   };
+>> @@ -1611,15 +1622,76 @@ static int sdhci_tegra_probe(struct platform_device *pdev)
+>>   		goto err_power_req;
+>>   	}
+>>   
+>> -	clk = devm_clk_get(mmc_dev(host->mmc), NULL);
+>> -	if (IS_ERR(clk)) {
+>> -		rc = PTR_ERR(clk);
+>> +	/*
+>> +	 * Tegra210 and later has separate SDMMC_LEGACY_TM clock used for
+>> +	 * hardware data timeout clock and SW can choose TMCLK or SDCLK for
+>> +	 * hardware data timeout through the bit USE_TMCLK_FOR_DATA_TIMEOUT
+>> +	 * of the register SDHCI_TEGRA_VENDOR_SYS_SW_CTRL.
+>> +	 *
+>> +	 * USE_TMCLK_FOR_DATA_TIMEOUT bit default is set to 1 and SDMMC uses
+>> +	 * 12Mhz TMCLK which is advertised in host capability register.
+>> +	 * With TMCLK of 12Mhz provides maximum data timeout period that can
+>> +	 * be achieved is 11s better than using SDCLK for data timeout.
+>> +	 *
+>> +	 * So, TMCLK is set to 12Mhz and kept enabled all the time on SoC's
+>> +	 * supporting separate TMCLK.
+>> +	 *
+>> +	 * Old device tree has single sdhci clock. So with addition of TMCLK,
+>> +	 * retrieving sdhci clock by "sdhci" clock name based on number of
+>> +	 * clocks in sdhci device node.
+>> +	 */
+>> +
+>> +	if (of_clk_get_parent_count(pdev->dev.of_node) == 1) {
+>> +		if (soc_data->nvquirks & NVQUIRK_HAS_TMCLK)
+>> +			dev_warn(&pdev->dev,
+>> +				 "missing tmclk in the device tree\n");
+>> +
+>> +		clk = devm_clk_get(&pdev->dev, NULL);
+>> +		if (IS_ERR(clk)) {
+>> +			rc = PTR_ERR(clk);
+>>   
+>> -		if (rc != -EPROBE_DEFER)
+>> -			dev_err(&pdev->dev, "failed to get clock: %d\n", rc);
+>> +			if (rc != -EPROBE_DEFER)
+>> +				dev_err(&pdev->dev,
+>> +					"failed to get sdhci clock: %d\n", rc);
+>>   
+>> -		goto err_clk_get;
+>> +			goto err_power_req;
+>> +		}
+>> +	} else {
+>> +		if (soc_data->nvquirks & NVQUIRK_HAS_TMCLK) {
+>
+> I think that I would do the inverse of this ...
+>
+>     } else {
+>          if (!(soc_data->nvquirks & NVQUIRK_HAS_TMCLK)) {
+>                  dev_err(&pdev->dev, "Device has unexpected clocks!\n");
+>                  rc = -EINVAL;
+>                  goto_power_req;
+>          }
+>
+>          clk = devm_clk_get(&pdev->dev, "tmclk");
+>          ...
+>
+> If the device does not have a single clock, then we expect it to support
+> the tmclk. If this is not the case, then this is a bug.
+>
+> Cheers
+> Jon
 
-I have seen cases where all phases were found to be valid 3 times in a
-row, so increase the retry count to 10 just to be extra sure.
+I don't see other drivers validating for unexpected device tree entries.
 
-Fixes: 415b5a75da43 ("mmc: sdhci-msm: Add platform_execute_tuning implementation")
-Signed-off-by: Douglas Anderson <dianders@chromium.org>
----
+Also only for SoC with quirk HAS_TMCLK, we are retrieving TMCLK with 
+clock name and enabling it.
 
- drivers/mmc/host/sdhci-msm.c | 18 +++++++++++++++++-
- 1 file changed, 17 insertions(+), 1 deletion(-)
+So for other SoC even if device tree has additional clock entry other 
+than sdhci driver don't use it and also dt-binding do not have any tmclk 
+entry for other SoC. So why would this be a bug?
 
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index b7e47107a31a..1b78106681e0 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -1165,7 +1165,7 @@ static void sdhci_msm_set_cdr(struct sdhci_host *host, bool enable)
- static int sdhci_msm_execute_tuning(struct mmc_host *mmc, u32 opcode)
- {
- 	struct sdhci_host *host = mmc_priv(mmc);
--	int tuning_seq_cnt = 3;
-+	int tuning_seq_cnt = 10;
- 	u8 phase, tuned_phases[16], tuned_phase_cnt = 0;
- 	int rc;
- 	struct mmc_ios ios = host->mmc->ios;
-@@ -1221,6 +1221,22 @@ static int sdhci_msm_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 	} while (++phase < ARRAY_SIZE(tuned_phases));
- 
- 	if (tuned_phase_cnt) {
-+		if (tuned_phase_cnt == ARRAY_SIZE(tuned_phases)) {
-+			/*
-+			 * All phases valid is _almost_ as bad as no phases
-+			 * valid.  Probably all phases are not really reliable
-+			 * but we didn't detect where the unreliable place is.
-+			 * That means we'll essentially be guessing and hoping
-+			 * we get a good phase.  Better to try a few times.
-+			 */
-+			dev_dbg(mmc_dev(mmc), "%s: All phases valid; try again\n",
-+				mmc_hostname(mmc));
-+			if (--tuning_seq_cnt) {
-+				tuned_phase_cnt = 0;
-+				goto retry;
-+			}
-+		}
-+
- 		rc = msm_find_most_appropriate_phase(host, tuned_phases,
- 						     tuned_phase_cnt);
- 		if (rc < 0)
--- 
-2.28.0.297.g1956fa8f8d-goog
+Can you please correct if I misunderstood you comment?
+
+Thanks
+
+Sowjanya
+
+
 
