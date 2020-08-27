@@ -2,105 +2,120 @@ Return-Path: <SRS0=bPLn=CF=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 65284C433DF
-	for <linux-mmc@archiver.kernel.org>; Thu, 27 Aug 2020 17:22:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4240DC433E3
+	for <linux-mmc@archiver.kernel.org>; Thu, 27 Aug 2020 20:27:44 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2BE442087E
-	for <linux-mmc@archiver.kernel.org>; Thu, 27 Aug 2020 17:22:19 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 21CE3208CA
+	for <linux-mmc@archiver.kernel.org>; Thu, 27 Aug 2020 20:27:44 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=nvidia.com header.i=@nvidia.com header.b="M25K8WSO"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="cW9R1YXa"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727814AbgH0RV0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 27 Aug 2020 13:21:26 -0400
-Received: from hqnvemgate26.nvidia.com ([216.228.121.65]:12441 "EHLO
-        hqnvemgate26.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726804AbgH0RVZ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Aug 2020 13:21:25 -0400
-Received: from hqpgpgate101.nvidia.com (Not Verified[216.228.121.13]) by hqnvemgate26.nvidia.com (using TLS: TLSv1.2, DES-CBC3-SHA)
-        id <B5f47eb870000>; Thu, 27 Aug 2020 10:21:11 -0700
-Received: from hqmail.nvidia.com ([172.20.161.6])
-  by hqpgpgate101.nvidia.com (PGP Universal service);
-  Thu, 27 Aug 2020 10:21:25 -0700
-X-PGP-Universal: processed;
-        by hqpgpgate101.nvidia.com on Thu, 27 Aug 2020 10:21:25 -0700
-Received: from HQMAIL109.nvidia.com (172.20.187.15) by HQMAIL111.nvidia.com
- (172.20.187.18) with Microsoft SMTP Server (TLS) id 15.0.1473.3; Thu, 27 Aug
- 2020 17:21:24 +0000
-Received: from hqnvemgw03.nvidia.com (10.124.88.68) by HQMAIL109.nvidia.com
- (172.20.187.15) with Microsoft SMTP Server (TLS) id 15.0.1473.3 via Frontend
- Transport; Thu, 27 Aug 2020 17:21:24 +0000
-Received: from skomatineni-linux.nvidia.com (Not Verified[10.2.174.186]) by hqnvemgw03.nvidia.com with Trustwave SEG (v7,5,8,10121)
-        id <B5f47eb940000>; Thu, 27 Aug 2020 10:21:24 -0700
-From:   Sowjanya Komatineni <skomatineni@nvidia.com>
-To:     <adrian.hunter@intel.com>, <ulf.hansson@linaro.org>,
-        <thierry.reding@gmail.com>, <jonathanh@nvidia.com>,
-        <robh+dt@kernel.org>
-CC:     <skomatineni@nvidia.com>, <linux-tegra@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
-        <devicetree@vger.kernel.org>, <stable@vger.kernel.org>
-Subject: [PATCH v7 2/7] sdhci: tegra: Remove SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK for Tegra186
-Date:   Thu, 27 Aug 2020 10:20:56 -0700
-Message-ID: <1598548861-32373-3-git-send-email-skomatineni@nvidia.com>
-X-Mailer: git-send-email 2.7.4
-In-Reply-To: <1598548861-32373-1-git-send-email-skomatineni@nvidia.com>
-References: <1598548861-32373-1-git-send-email-skomatineni@nvidia.com>
-X-NVConfidentiality: public
+        id S1726243AbgH0U1n (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 27 Aug 2020 16:27:43 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57750 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726854AbgH0U1l (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Aug 2020 16:27:41 -0400
+Received: from mail-ua1-x944.google.com (mail-ua1-x944.google.com [IPv6:2607:f8b0:4864:20::944])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2C5EFC06121B
+        for <linux-mmc@vger.kernel.org>; Thu, 27 Aug 2020 13:27:40 -0700 (PDT)
+Received: by mail-ua1-x944.google.com with SMTP id y2so2089674uaq.0
+        for <linux-mmc@vger.kernel.org>; Thu, 27 Aug 2020 13:27:40 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=pZ//jLyEGc9rQ/5ywgZs9AFGiQ4M3Jn6N3wi0W6fLTk=;
+        b=cW9R1YXaVzPIgb19g8eHR8EByOO083Db4fVQIjH2ZM5PSNpYKloAXezTr/CP2u/mQA
+         fvI9or4iuYtkKnYTQoORu5kv3YBwvSNmt9ZZYuPrUupI2TegHbXdJTPo5YypvYmxp8hx
+         rJiqqxwpyyyZkCI0eAxr5m+KSQX1SjZBLpCz35ERVmRV7XMyrHFdzaY/PyiEvIVAq5X9
+         hHQWjx4uhvCQ09u5QjwypG+jFOEFmJfRes61/kzhSe4xTo/Jk9QDPScuRoskWUDeWlXC
+         2rn4iNmGYiWNVazbSXBBgM/hv6Lc0RAc09bPUmSAdDsk4LD33n2Castf2l92TfPyELj5
+         77Xg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=pZ//jLyEGc9rQ/5ywgZs9AFGiQ4M3Jn6N3wi0W6fLTk=;
+        b=flDztjeVu9mZHsxkc3+5NBBXDxHkiQ/kSXrQ+zuFoKB+CB+wjN8YyArb8jJmRoXKa0
+         S/KDH3t1IJpxZnIAhpsAoys+p7pyIkSsxH13u+LIDswIJV1I/nRVahmu9T5Vtx5CAK6n
+         oZ58UFLfF/apt2tAYyqIdazjCyjYdjCTKw7VPathgPBdLGWlgEdYhnGv31F1SQFMrD2F
+         MgAG+jFA/CW5K9SfqwJSkXUXd72HReY8jdZmMs6lB4AHBQzR5tKs5Bh2kBeM+HcgDQA2
+         au8WOO+vRJ0vIEBF8R9t1yrELOJMg2Qyfhs48bFbEH8NBMY5dQl0sMl3ZsBN95wFY4Rg
+         tiLQ==
+X-Gm-Message-State: AOAM531FhtU04OSCWCXaWjvF2X390epOp9CmrLebtNwLsBWJkOFo+qzK
+        Aeac9PH141j9mEQJvK9RdwkCQda8sIS1FAfqJM9NLg==
+X-Google-Smtp-Source: ABdhPJxzBjdIjLP+fic8QVRqI7i2HXnTm0gMDDu/fk4wtDvJw2bF8nvr92kZ7hQ/2QAwAvkj2Lc4HmeA0C6LORz2ceA=
+X-Received: by 2002:ab0:142e:: with SMTP id b43mr14014891uae.7.1598560057400;
+ Thu, 27 Aug 2020 13:27:37 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nvidia.com; s=n1;
-        t=1598548871; bh=mXqaDHZAnjiA2FC3TMHhwQF8i9i1LflPE/o4KLabvD8=;
-        h=X-PGP-Universal:From:To:CC:Subject:Date:Message-ID:X-Mailer:
-         In-Reply-To:References:X-NVConfidentiality:MIME-Version:
-         Content-Type;
-        b=M25K8WSOq2mO9Upcrlb21CYGug2SVFxWxAyIo7imxWincvTQ7AsDcrZ+FG3kweO3G
-         1gkVc9JVyfe1jgTf6/zgQcEYXOyu48tjNqbaWo7M2B/JUtGAnM2zptwIwZipeh1waC
-         aBJ7q/Le6EXzQDUww67ausdpkwR/FuJLGSIpPUfrkn+Gbqf2TLmK3vTGxd35KaVHid
-         J0mE7p0oXIKvQ3BUtRYbU+VRoWHjmbrHATjNKkSzKlox2ohdV1mFDjaquwVIUam+kC
-         IWHa6nbPQaWCQ5aFnfYG4cqX2q+Fmk/Qc1zADJokidChfYgiNTYEPMY77dZ+Mb254s
-         VQsQpQ5+Lafiw==
+References: <20200827083330.1.I669bb4dc3d92bd04e9a695f97904797dc8241b79@changeid>
+In-Reply-To: <20200827083330.1.I669bb4dc3d92bd04e9a695f97904797dc8241b79@changeid>
+From:   Naresh Kamboju <naresh.kamboju@linaro.org>
+Date:   Fri, 28 Aug 2020 01:57:25 +0530
+Message-ID: <CA+G9fYtWpBQb8Ew_G=bjcR7wBHMgKm=EXV7vuk6FE9m0-4Ef3A@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-msm: When dev_pm_opp_of_add_table() returns 0
+ it's not an error
+To:     Douglas Anderson <dianders@chromium.org>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Arnd Bergmann <arnd@arndb.de>, vbadigan@codeaurora.org,
+        Rajendra Nayak <rnayak@codeaurora.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Viresh Kumar <viresh.kumar@linaro.org>,
+        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
+        open list <linux-kernel@vger.kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-commit 4346b7c7941d ("mmc: tegra: Add Tegra186 support")
+On Thu, 27 Aug 2020 at 21:03, Douglas Anderson <dianders@chromium.org> wrote:
+>
+> The commit d05a7238fe1c ("mmc: sdhci-msm: Unconditionally call
+> dev_pm_opp_of_remove_table()") works fine in the case where there is
+> no OPP table.  However, if there is an OPP table then
+> dev_pm_opp_of_add_table() will return 0.  Since 0 != -ENODEV then the
+> "if (ret != -ENODEV)" will evaluate to true and we'll fall into the
+> error case.  Oops.
+>
+> Let's fix this.
+>
+> Fixes: d05a7238fe1c ("mmc: sdhci-msm: Unconditionally call dev_pm_opp_of_remove_table()")
+> Signed-off-by: Douglas Anderson <dianders@chromium.org>
 
-SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK is set for Tegra186 from the
-beginning of its support in driver.
+Reported-by: Naresh Kamboju <naresh.kamboju@linaro.org>
 
-Tegra186 SDMMC hardware by default uses timeout clock (TMCLK) instead
-of SDCLK and this quirk should not be set.
+I will test this patch and report again on this email thread.
 
-So, this patch remove this quirk for Tegra186.
+> ---
+>
+>  drivers/mmc/host/sdhci-msm.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index b7e47107a31a..55101dba42bd 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -2284,7 +2284,7 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+>
+>         /* OPP table is optional */
+>         ret = dev_pm_opp_of_add_table(&pdev->dev);
+> -       if (ret != -ENODEV) {
+> +       if (ret && ret != -ENODEV) {
+>                 dev_err(&pdev->dev, "Invalid OPP table in Device tree\n");
+>                 goto opp_cleanup;
+>         }
+> --
+> 2.28.0.297.g1956fa8f8d-goog
+>
 
-Fixes: 4346b7c7941d ("mmc: tegra: Add Tegra186 support")
-Cc: stable <stable@vger.kernel.org> # 5.4
-Tested-by: Jon Hunter <jonathanh@nvidia.com>
-Reviewed-by: Jon Hunter <jonathanh@nvidia.com>
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
----
- drivers/mmc/host/sdhci-tegra.c | 1 -
- 1 file changed, 1 deletion(-)
-
-diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-index 2be3511..31ed321 100644
---- a/drivers/mmc/host/sdhci-tegra.c
-+++ b/drivers/mmc/host/sdhci-tegra.c
-@@ -1455,7 +1455,6 @@ static const struct sdhci_ops tegra186_sdhci_ops = {
- 
- static const struct sdhci_pltfm_data sdhci_tegra186_pdata = {
- 	.quirks = SDHCI_QUIRK_BROKEN_TIMEOUT_VAL |
--		  SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
- 		  SDHCI_QUIRK_SINGLE_POWER_WRITE |
- 		  SDHCI_QUIRK_NO_HISPD_BIT |
- 		  SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC |
--- 
-2.7.4
-
+- Naresh
