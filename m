@@ -2,74 +2,103 @@ Return-Path: <SRS0=bPLn=CF=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 476B1C433E1
-	for <linux-mmc@archiver.kernel.org>; Thu, 27 Aug 2020 15:22:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 469DBC433DF
+	for <linux-mmc@archiver.kernel.org>; Thu, 27 Aug 2020 15:23:10 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2D01022CAF
-	for <linux-mmc@archiver.kernel.org>; Thu, 27 Aug 2020 15:22:23 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1E40C2087D
+	for <linux-mmc@archiver.kernel.org>; Thu, 27 Aug 2020 15:23:10 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="T+RtF9Wl"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728516AbgH0PWS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 27 Aug 2020 11:22:18 -0400
-Received: from alexa-out.qualcomm.com ([129.46.98.28]:56536 "EHLO
-        alexa-out.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728196AbgH0PWN (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Aug 2020 11:22:13 -0400
-Received: from ironmsg-lv-alpha.qualcomm.com ([10.47.202.13])
-  by alexa-out.qualcomm.com with ESMTP; 27 Aug 2020 08:22:12 -0700
-Received: from ironmsg02-blr.qualcomm.com ([10.86.208.131])
-  by ironmsg-lv-alpha.qualcomm.com with ESMTP/TLS/AES256-SHA; 27 Aug 2020 08:22:10 -0700
-Received: from vbadigan-linux.qualcomm.com ([10.206.24.109])
-  by ironmsg02-blr.qualcomm.com with ESMTP; 27 Aug 2020 20:51:52 +0530
-Received: by vbadigan-linux.qualcomm.com (Postfix, from userid 76677)
-        id C251C4F12; Thu, 27 Aug 2020 20:51:49 +0530 (IST)
-From:   Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
-To:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
-        dianders@chromium.org
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-msm@vger.kernel.org,
-        Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>
-Subject: [PATCH] mmc: sdhci-msm: Enable restore_dll_config flag for sc7180 target
-Date:   Thu, 27 Aug 2020 20:51:28 +0530
-Message-Id: <1598541694-15694-1-git-send-email-vbadigan@codeaurora.org>
-X-Mailer: git-send-email 1.9.1
+        id S1728641AbgH0Lao (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 27 Aug 2020 07:30:44 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57536 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728550AbgH0L37 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Aug 2020 07:29:59 -0400
+Received: from mail-yb1-xb42.google.com (mail-yb1-xb42.google.com [IPv6:2607:f8b0:4864:20::b42])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3C332C06123E;
+        Thu, 27 Aug 2020 04:08:34 -0700 (PDT)
+Received: by mail-yb1-xb42.google.com with SMTP id q16so2729576ybk.6;
+        Thu, 27 Aug 2020 04:08:34 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=4AC1iNQgWZrkBSCQYpKpySGolDqTh2HDf1hkAeZFNb4=;
+        b=T+RtF9WlK+QYlzaFRforZObowt16Z/icVvaSdm1jjwL0BDGUHQxVhiDeSCIDIn/cF4
+         +Jfk9BSyfhzclpoE+pdql83jioly+c2MdVx6NLOqCLqCWsfKn3Ao1cjYW7XGKcbi7b+U
+         lMPm9mwtitTgaESAs6c79YF6oXOk0GFbAjfy2CbREnXE5LP9HiOSzDqqm6SpSwKIwp78
+         jol6U5yB2v5SJpmbkCRsn9lIz1UpWha3gERsgWwwi0BiYzt2T8ctaMSbXxTOd937vCr6
+         +e/ereWKyJnAtDM99NFXloqA5EQ1i1oc8Q08QBJG2EdSdwUiYA2aTShsnaRZ5mV5pyJT
+         LM7A==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=4AC1iNQgWZrkBSCQYpKpySGolDqTh2HDf1hkAeZFNb4=;
+        b=r04hRvZH6rcwvRX+/cRGvUFv/2GkV3XgabSorz8yILWPdCehOTI2OO+ohm+29kz8H2
+         /IJFFb9afn0OBe4o/xBJnn9EeN012EA2Yb31d5oPwYacFBRxGKfFnwA+COBEFRgZrRON
+         y47z4xOva9+tJNnKIhrxOjlqB4494nnY0iOYi/pIT02T9X+TlLciJlT8YWhyZWoPUL/U
+         1yqG3SPPMWegXE0/M0UKPIepbIQiOK/M3GW1nJKr/6djtdwuB1RHSQEh+CgKl/LfwwZr
+         PztxWNgFgyeQI1EtM2ouNM+X2cIVoahXLkdOtRjRR9K7CqfSsQzx/fNzhyFz8pkYYijW
+         Lbww==
+X-Gm-Message-State: AOAM5307fAgGfz9DoT3BBnMCsuWPXrf4iuHC+A55rVifiBN0DL2MD9q/
+        8ZYokM/uCiAn6XVYB64uIid7qAKWbddK5RCXWaY=
+X-Google-Smtp-Source: ABdhPJxqcVtXp1n3gyHbu5k3vj5n974w3z1wdNTj6pVg7CQ0rfbSLCDrB4IgRwp3FjMCjoGv8C0ToybrrjeIiLUlXDE=
+X-Received: by 2002:a25:8149:: with SMTP id j9mr28989594ybm.214.1598526513604;
+ Thu, 27 Aug 2020 04:08:33 -0700 (PDT)
+MIME-Version: 1.0
+References: <1588542414-14826-1-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
+ <1588542414-14826-6-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
+In-Reply-To: <1588542414-14826-6-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
+From:   "Lad, Prabhakar" <prabhakar.csengg@gmail.com>
+Date:   Thu, 27 Aug 2020 12:08:07 +0100
+Message-ID: <CA+V-a8v5CtxJQxjSWcvJrPtf9JyYKZeACdc3as_hjM710pk1AQ@mail.gmail.com>
+Subject: Re: [PATCH v2 05/10] dt-bindings: renesas,rcar-dmac: Document r8a7742 support
+To:     Vinod Koul <vkoul@kernel.org>
+Cc:     Geert Uytterhoeven <geert+renesas@glider.be>,
+        Magnus Damm <magnus.damm@gmail.com>,
+        Rob Herring <robh+dt@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
+        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
+        <devicetree@vger.kernel.org>,
+        Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>,
+        LKML <linux-kernel@vger.kernel.org>,
+        dmaengine <dmaengine@vger.kernel.org>,
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
+        "open list:SERIAL DRIVERS" <linux-serial@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On sc7180 target, issues are observed with HS400 mode due to a
-hardware limitation. If sdcc clock is dynamically gated and ungated,
-the very next command is failing with command CRC/timeout errors.
+Hi Vinod,
 
-To mitigate this issue, DLL phase has to be restored whenever sdcc
-clock is gated dynamically. The restore_dll_config ensures this.
-Enabling this flag with this change. And simply re-using the sdm845
-target configuration for this flag.
+On Sun, May 3, 2020 at 10:47 PM Lad Prabhakar
+<prabhakar.mahadev-lad.rj@bp.renesas.com> wrote:
+>
+> Renesas RZ/G SoC also have the R-Car gen2/3 compatible DMA controllers.
+> Document RZ/G1H (also known as R8A7742) SoC bindings.
+>
+> Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+> Reviewed-by: Marian-Cristian Rotariu <marian-cristian.rotariu.rb@bp.renesas.com>
+> Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
+> ---
+>  Documentation/devicetree/bindings/dma/renesas,rcar-dmac.yaml | 1 +
+>  1 file changed, 1 insertion(+)
+>
+This patch is not present in linux-next yet, could you please take care of it.
 
-Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
----
- drivers/mmc/host/sdhci-msm.c | 1 +
- 1 file changed, 1 insertion(+)
-
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index 5a33389037cd..d4c02884cca8 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -2151,6 +2151,7 @@ static void sdhci_msm_dump_vendor_regs(struct sdhci_host *host)
- 	{.compatible = "qcom,sdhci-msm-v5", .data = &sdhci_msm_v5_var},
- 	{.compatible = "qcom,sdm845-sdhci", .data = &sdm845_sdhci_var},
- 	{.compatible = "qcom,sm8250-sdhci", .data = &sm8250_sdhci_var},
-+	{.compatible = "qcom,sc7180-sdhci", .data = &sdm845_sdhci_var},
- 	{},
- };
- 
--- 
-Qualcomm India Private Limited, on behalf of Qualcomm Innovation Center, Inc., is a member of Code Aurora Forum, a Linux Foundation Collaborative Project
-
+Cheers,
+Prabhakar
