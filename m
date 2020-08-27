@@ -2,63 +2,88 @@ Return-Path: <SRS0=bPLn=CF=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.0 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.9 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6C01DC433DF
-	for <linux-mmc@archiver.kernel.org>; Thu, 27 Aug 2020 06:46:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 94CAAC433E1
+	for <linux-mmc@archiver.kernel.org>; Thu, 27 Aug 2020 08:24:26 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3425D20786
-	for <linux-mmc@archiver.kernel.org>; Thu, 27 Aug 2020 06:46:01 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7508322BF3
+	for <linux-mmc@archiver.kernel.org>; Thu, 27 Aug 2020 08:24:26 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="AFPvat03"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727068AbgH0GqA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 27 Aug 2020 02:46:00 -0400
-Received: from mga18.intel.com ([134.134.136.126]:3564 "EHLO mga18.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726882AbgH0Gp7 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 27 Aug 2020 02:45:59 -0400
-IronPort-SDR: UxdRk3eXKp44EuIdGe6/N7CSC0Okx5OasHBuyi5J3iZyw8C/bFJzakxE7MXATLwYg9/rmqx8Zq
- ReY3H39f7qPA==
-X-IronPort-AV: E=McAfee;i="6000,8403,9725"; a="144109102"
-X-IronPort-AV: E=Sophos;i="5.76,358,1592895600"; 
-   d="scan'208";a="144109102"
-X-Amp-Result: SKIPPED(no attachment in message)
-X-Amp-File-Uploaded: False
-Received: from fmsmga003.fm.intel.com ([10.253.24.29])
-  by orsmga106.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 26 Aug 2020 23:45:58 -0700
-IronPort-SDR: bhh5IeRvAmjU2S8givn05HqpKnUHorYxlVY0p7rP2Tn8QhhVJFBnGpvTYH7lMm/wUXMEH+gUcm
- Mmwrulc9/cmQ==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.76,358,1592895600"; 
-   d="scan'208";a="337069793"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.73]) ([10.237.72.73])
-  by FMSMGA003.fm.intel.com with ESMTP; 26 Aug 2020 23:45:51 -0700
-Subject: Re: Broadcom WiFi SDIO performance regression after commit "mmc:
- sdhci: Remove finish_tasklet"
-To:     Dmitry Osipenko <digetx@gmail.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Arend van Spriel <arend.vanspriel@broadcom.com>,
-        Franky Lin <franky.lin@broadcom.com>,
-        Hante Meuleman <hante.meuleman@broadcom.com>,
-        Chi-Hsien Lin <chi-hsien.lin@cypress.com>,
-        Wright Feng <wright.feng@cypress.com>,
-        brcm80211-dev-list@cypress.com,
-        brcm80211-dev-list.pdl@broadcom.com,
-        "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-References: <5cf1af89-6026-09ad-7f20-82e19ad49fa1@gmail.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <9332715c-6ee5-fce3-8b93-305823d5a551@intel.com>
-Date:   Thu, 27 Aug 2020 09:45:16 +0300
+        id S1728053AbgH0IXv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 27 Aug 2020 04:23:51 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57102 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727986AbgH0IXu (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Aug 2020 04:23:50 -0400
+Received: from mail-wr1-x444.google.com (mail-wr1-x444.google.com [IPv6:2a00:1450:4864:20::444])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 53F1CC061264;
+        Thu, 27 Aug 2020 01:23:50 -0700 (PDT)
+Received: by mail-wr1-x444.google.com with SMTP id w13so4465591wrk.5;
+        Thu, 27 Aug 2020 01:23:50 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=subject:to:cc:references:from:message-id:date:user-agent
+         :mime-version:in-reply-to:content-language:content-transfer-encoding;
+        bh=L4XCCnRN6fG15vCYo2bW4Pc6TLiOQjp7cLIshmu9c9U=;
+        b=AFPvat03Xy0424JfFgdxZskpWCg155al8jI1hGe+5UheZKEzOKDhqy027O/CM1zTv+
+         zfdalVG0lrpwTR+pRnvJLIcC/AUdTrNykqBBw3SDe2WpDGWeWaM6lx/nXNUYAjLF5tp8
+         auYwaMB7NxJ0aV1Bc+4ClWDa7jm5uXtECHmCIGVTvNYVlLa10+Ulpq9Rfxvtn1ptpENV
+         uLRmZZiivyg0c6afnm7TydjsXNzmqNaD74iChCObjyFkIdR4tMmrCwQyVfonXFXGIGsx
+         LKeSMn0Kh2A0iu2YhCHvTGuoIZ2X1B2GHxR7RPouuBjA3HBkAKvfxxm4osLBBwmCREJG
+         JlTg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=L4XCCnRN6fG15vCYo2bW4Pc6TLiOQjp7cLIshmu9c9U=;
+        b=bt3qNqWXsbCnLlOGdK/vrrBqGZtosPT7z/swpL20NX3Fcjl00O/D6x3Ykkl/qp9XRD
+         BwaLkyP7i13kdVwbSZ+XCCnHtPtK3hB2xenVFKPxYnMwwO1cuNJ8vqiAO4mKg0HSjvte
+         6Icj7rfi8YyDpVDb/6OUaI9tWpLgd6pHApFQ0DnsgOMEsvS/38r5o4vahCUFYd27JsgQ
+         jvK21YBvmWq0OEmPPOZZ8ggNwT1CDcT4lId5goJGwDHui3mTIx2u8dIONzlpRtNOlYqc
+         L7uf3GhSvclkfQmWDElsz9Je82Na9U57UcKYzKboopPWWzzsd6Ig3pqYnYziymvPA0HI
+         DE0Q==
+X-Gm-Message-State: AOAM5306buJwIZ/CAGgFAqSr3rQxE5sIWUz8fBtU1lLDItjDu0oPE8Oi
+        EZ2M+1UkavMzRtFmAIIt+j03taThWHC3MQ==
+X-Google-Smtp-Source: ABdhPJwzK3eFiKm90v/V4n4a5o+w0AzbR7Sg2+CRdvmTmpqjt1qvB5e6vObKUp7mNhpPEzvUNfxKAQ==
+X-Received: by 2002:a5d:5223:: with SMTP id i3mr16960587wra.58.1598516628776;
+        Thu, 27 Aug 2020 01:23:48 -0700 (PDT)
+Received: from ziggy.stardust ([213.195.119.187])
+        by smtp.gmail.com with ESMTPSA id c10sm3843104wrn.24.2020.08.27.01.23.47
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 27 Aug 2020 01:23:47 -0700 (PDT)
+Subject: Re: [v5,2/3] arm64: dts: mt7622: add reset node for mmc device
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Wenbin Mei <wenbin.mei@mediatek.com>
+Cc:     Rob Herring <robh+dt@kernel.org>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        Philipp Zabel <p.zabel@pengutronix.de>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        DTML <devicetree@vger.kernel.org>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        "moderated list:ARM/Mediatek SoC support" 
+        <linux-mediatek@lists.infradead.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        srv_heupstream <srv_heupstream@mediatek.com>,
+        "# 4.0+" <stable@vger.kernel.org>
+References: <20200814014346.6496-1-wenbin.mei@mediatek.com>
+ <20200814014346.6496-3-wenbin.mei@mediatek.com>
+ <CAPDyKFpt6-a+pkTXb2RZdx=yTONetugSCKbtSsRD2xQ3PRPhDQ@mail.gmail.com>
+From:   Matthias Brugger <matthias.bgg@gmail.com>
+Message-ID: <1dfc1938-f5e8-c4c8-57c7-d7b6c33dcb1d@gmail.com>
+Date:   Thu, 27 Aug 2020 10:23:46 +0200
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.10.0
+ Thunderbird/68.11.0
 MIME-Version: 1.0
-In-Reply-To: <5cf1af89-6026-09ad-7f20-82e19ad49fa1@gmail.com>
-Content-Type: text/plain; charset=utf-8
+In-Reply-To: <CAPDyKFpt6-a+pkTXb2RZdx=yTONetugSCKbtSsRD2xQ3PRPhDQ@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Language: en-US
 Content-Transfer-Encoding: 7bit
 Sender: linux-mmc-owner@vger.kernel.org
@@ -66,39 +91,50 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 27/08/20 9:07 am, Dmitry Osipenko wrote:
-> Hello!
-> 
-> I was debugging WiFi performance problems on Acer A500 tablet device
-> that has BCM4329 WiFi chip which is connected to NVIDIA Terga20 SoC via
-> SDIO and found that the following commit causes a solid 5-10 Mbit/s of
-> WiFi throughput regression after 5.2 kernel:
 
-What is that in percentage terms?
+
+On 24/08/2020 11:50, Ulf Hansson wrote:
+> On Fri, 14 Aug 2020 at 03:44, Wenbin Mei <wenbin.mei@mediatek.com> wrote:
+>>
+>> This commit adds reset node for mmc device.
+>>
+>> Cc: <stable@vger.kernel.org> # v5.4+
+>> Fixes: 966580ad236e ("mmc: mediatek: add support for MT7622 SoC")
+>> Signed-off-by: Wenbin Mei <wenbin.mei@mediatek.com>
+>> Tested-by: Frank Wunderlich <frank-w@public-files.de>
+> 
+> I can pick this for my fixes branch, together with the other changes,
+> however deferring that until Matthias acks it.
+
+Acked-by: Matthias Brugger <matthias.bgg@gmail.com>
+
+My understanding is, that this will land also in v5.9-rc[3,4], correct?
+
+Regards,
+Matthias
 
 > 
-> commit c07a48c2651965e84d35cf193dfc0e5f7892d612
-> Author: Adrian Hunter <adrian.hunter@intel.com>
-> Date:   Fri Apr 5 15:40:20 2019 +0300
+> Kind regards
+> Uffe
 > 
->     mmc: sdhci: Remove finish_tasklet
 > 
->     Remove finish_tasklet. Requests that require DMA-unmapping or
-> sdhci_reset
->     are completed either in the IRQ thread or a workqueue if the
-> completion is
->     not initiated by the IRQ.
 > 
-> Reverting the offending commit on top of recent linux-next resolves the
-> problem.
-> 
-> Ulf / Adrian, do you have any ideas what could be done in regards to
-> restoring the SDIO performance? Should we just revert the offending commit?
-> 
-
-Unfortunately I think we are past the point of returning to the tasklet.
-
-sdhci can complete requests in the irq handler but only if ->pre_req() and
-->post_req() are used, which is not supported by SDIO at present.  pre_req
-and post_req were introduced to reduce latency for the block driver, so it
-seems reasonable perhaps to look at using them in SDIO as well.
+>> ---
+>>   arch/arm64/boot/dts/mediatek/mt7622.dtsi | 2 ++
+>>   1 file changed, 2 insertions(+)
+>>
+>> diff --git a/arch/arm64/boot/dts/mediatek/mt7622.dtsi b/arch/arm64/boot/dts/mediatek/mt7622.dtsi
+>> index 1a39e0ef776b..5b9ec032ce8d 100644
+>> --- a/arch/arm64/boot/dts/mediatek/mt7622.dtsi
+>> +++ b/arch/arm64/boot/dts/mediatek/mt7622.dtsi
+>> @@ -686,6 +686,8 @@
+>>                  clocks = <&pericfg CLK_PERI_MSDC30_0_PD>,
+>>                           <&topckgen CLK_TOP_MSDC50_0_SEL>;
+>>                  clock-names = "source", "hclk";
+>> +               resets = <&pericfg MT7622_PERI_MSDC0_SW_RST>;
+>> +               reset-names = "hrst";
+>>                  status = "disabled";
+>>          };
+>>
+>> --
+>> 2.18.0
