@@ -2,139 +2,178 @@ Return-Path: <SRS0=bPLn=CF=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.9 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable
+X-Spam-Status: No, score=-8.9 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 94CAAC433E1
-	for <linux-mmc@archiver.kernel.org>; Thu, 27 Aug 2020 08:24:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 58B0DC433DF
+	for <linux-mmc@archiver.kernel.org>; Thu, 27 Aug 2020 08:32:55 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7508322BF3
-	for <linux-mmc@archiver.kernel.org>; Thu, 27 Aug 2020 08:24:26 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 253B422B47
+	for <linux-mmc@archiver.kernel.org>; Thu, 27 Aug 2020 08:32:55 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="AFPvat03"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="aZGBoTuO"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728053AbgH0IXv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 27 Aug 2020 04:23:51 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57102 "EHLO
+        id S1728043AbgH0Icw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 27 Aug 2020 04:32:52 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58512 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727986AbgH0IXu (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Aug 2020 04:23:50 -0400
-Received: from mail-wr1-x444.google.com (mail-wr1-x444.google.com [IPv6:2a00:1450:4864:20::444])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 53F1CC061264;
-        Thu, 27 Aug 2020 01:23:50 -0700 (PDT)
-Received: by mail-wr1-x444.google.com with SMTP id w13so4465591wrk.5;
-        Thu, 27 Aug 2020 01:23:50 -0700 (PDT)
+        with ESMTP id S1726938AbgH0Icv (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Aug 2020 04:32:51 -0400
+Received: from mail-ua1-x943.google.com (mail-ua1-x943.google.com [IPv6:2607:f8b0:4864:20::943])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6E075C061264
+        for <linux-mmc@vger.kernel.org>; Thu, 27 Aug 2020 01:32:51 -0700 (PDT)
+Received: by mail-ua1-x943.google.com with SMTP id v24so1420813uaj.7
+        for <linux-mmc@vger.kernel.org>; Thu, 27 Aug 2020 01:32:51 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=L4XCCnRN6fG15vCYo2bW4Pc6TLiOQjp7cLIshmu9c9U=;
-        b=AFPvat03Xy0424JfFgdxZskpWCg155al8jI1hGe+5UheZKEzOKDhqy027O/CM1zTv+
-         zfdalVG0lrpwTR+pRnvJLIcC/AUdTrNykqBBw3SDe2WpDGWeWaM6lx/nXNUYAjLF5tp8
-         auYwaMB7NxJ0aV1Bc+4ClWDa7jm5uXtECHmCIGVTvNYVlLa10+Ulpq9Rfxvtn1ptpENV
-         uLRmZZiivyg0c6afnm7TydjsXNzmqNaD74iChCObjyFkIdR4tMmrCwQyVfonXFXGIGsx
-         LKeSMn0Kh2A0iu2YhCHvTGuoIZ2X1B2GHxR7RPouuBjA3HBkAKvfxxm4osLBBwmCREJG
-         JlTg==
+        d=linaro.org; s=google;
+        h=mime-version:from:date:message-id:subject:to:cc;
+        bh=rhR9VT3qebWft3rYGOJFMfWNZvBnzCun5bg3Dhn/9i0=;
+        b=aZGBoTuOF8rVF32THhxOpsi9PYhXbUvkb7iA9BiVqWrK8A9fNOuzqoabQppcZSffWj
+         lc1HEiWuoGdzD6xADgq6iHj7Fl3VuPh/n/fFXFQ88/6ljd7tIoV7MRPg+on6RG0TDF3E
+         WZVnI9QP0LWXlrWq+gSpRdsQcwC/wmONP0YEk5M43P6cDAFKaN0MD5m41Mnbnp6tYec8
+         NhdAF7hFFTIvK94EmZ9H6ockxQRNv3NPxgwHS8tesQCzKWP8hHh1hW39cZOXeSsMvgnO
+         uJVmcQv3X91JXfI1eEi49uao06EanOa1XLRbh7RdNsgusTUSoY4C9sVztXE4Ay8XzGyV
+         sHFQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=L4XCCnRN6fG15vCYo2bW4Pc6TLiOQjp7cLIshmu9c9U=;
-        b=bt3qNqWXsbCnLlOGdK/vrrBqGZtosPT7z/swpL20NX3Fcjl00O/D6x3Ykkl/qp9XRD
-         BwaLkyP7i13kdVwbSZ+XCCnHtPtK3hB2xenVFKPxYnMwwO1cuNJ8vqiAO4mKg0HSjvte
-         6Icj7rfi8YyDpVDb/6OUaI9tWpLgd6pHApFQ0DnsgOMEsvS/38r5o4vahCUFYd27JsgQ
-         jvK21YBvmWq0OEmPPOZZ8ggNwT1CDcT4lId5goJGwDHui3mTIx2u8dIONzlpRtNOlYqc
-         L7uf3GhSvclkfQmWDElsz9Je82Na9U57UcKYzKboopPWWzzsd6Ig3pqYnYziymvPA0HI
-         DE0Q==
-X-Gm-Message-State: AOAM5306buJwIZ/CAGgFAqSr3rQxE5sIWUz8fBtU1lLDItjDu0oPE8Oi
-        EZ2M+1UkavMzRtFmAIIt+j03taThWHC3MQ==
-X-Google-Smtp-Source: ABdhPJwzK3eFiKm90v/V4n4a5o+w0AzbR7Sg2+CRdvmTmpqjt1qvB5e6vObKUp7mNhpPEzvUNfxKAQ==
-X-Received: by 2002:a5d:5223:: with SMTP id i3mr16960587wra.58.1598516628776;
-        Thu, 27 Aug 2020 01:23:48 -0700 (PDT)
-Received: from ziggy.stardust ([213.195.119.187])
-        by smtp.gmail.com with ESMTPSA id c10sm3843104wrn.24.2020.08.27.01.23.47
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 27 Aug 2020 01:23:47 -0700 (PDT)
-Subject: Re: [v5,2/3] arm64: dts: mt7622: add reset node for mmc device
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Wenbin Mei <wenbin.mei@mediatek.com>
-Cc:     Rob Herring <robh+dt@kernel.org>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        Philipp Zabel <p.zabel@pengutronix.de>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        DTML <devicetree@vger.kernel.org>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        "moderated list:ARM/Mediatek SoC support" 
-        <linux-mediatek@lists.infradead.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        srv_heupstream <srv_heupstream@mediatek.com>,
-        "# 4.0+" <stable@vger.kernel.org>
-References: <20200814014346.6496-1-wenbin.mei@mediatek.com>
- <20200814014346.6496-3-wenbin.mei@mediatek.com>
- <CAPDyKFpt6-a+pkTXb2RZdx=yTONetugSCKbtSsRD2xQ3PRPhDQ@mail.gmail.com>
-From:   Matthias Brugger <matthias.bgg@gmail.com>
-Message-ID: <1dfc1938-f5e8-c4c8-57c7-d7b6c33dcb1d@gmail.com>
-Date:   Thu, 27 Aug 2020 10:23:46 +0200
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.11.0
+        h=x-gm-message-state:mime-version:from:date:message-id:subject:to:cc;
+        bh=rhR9VT3qebWft3rYGOJFMfWNZvBnzCun5bg3Dhn/9i0=;
+        b=pw5SKuplUPOHP+GnclHctFny7N3QsB3Jk9/MmWc0YeVJ5iE7SgqV8wsE14uiVtTLqR
+         vMWhtz52p+oEX+eT4uWeuBAzuDN8P64iz05KONX4BLU03sKjt/QJ1QzbfKSWBnspZxyG
+         AHJJucB5s3l7kLkg0CDtMdDC/uFIFWdEBBQ99deeEQ2VVUUpmyg8xS5iwWpd7Sw0pgDW
+         InszawdDQLVmaDju9VljgPAOXLSmKHdq7Yjx5JbOyJB5PpJuSokdBma1WRQSGRS2taA/
+         p7Y2h/Ahsu4RgmQFGN0KrUF+JyBtfzlcBh1Agswi5ve1r9nSqho4jzmcrvZOcVnBK+Zt
+         f/2Q==
+X-Gm-Message-State: AOAM531mUW42dF26a1PqRsB3+JYBNbzmYiz302nyhVaoJ0gA0lQFXQ4s
+        Rl/KDyZnpG7LbHjlH4wulsfeirN0h2K4FtMBCmggpw==
+X-Google-Smtp-Source: ABdhPJyoDOX/UthsLuZecX/ETu8CpM1kRCQDNaNdec9QOaHPHOZ2e7G31MPopmbp4IpYYMkzGeVnrnBFXG52IvlRFt8=
+X-Received: by 2002:ab0:679a:: with SMTP id v26mr11228375uar.27.1598517170448;
+ Thu, 27 Aug 2020 01:32:50 -0700 (PDT)
 MIME-Version: 1.0
-In-Reply-To: <CAPDyKFpt6-a+pkTXb2RZdx=yTONetugSCKbtSsRD2xQ3PRPhDQ@mail.gmail.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+From:   Naresh Kamboju <naresh.kamboju@linaro.org>
+Date:   Thu, 27 Aug 2020 14:02:39 +0530
+Message-ID: <CA+G9fYvUwH2FA9GOeA_7GYpLA31uOmEpg32VKnJ8-d5QSK4PdQ@mail.gmail.com>
+Subject: Kernel panic : Unable to handle kernel paging request at virtual
+ address - dead address between user and kernel address ranges
+To:     open list <linux-kernel@vger.kernel.org>,
+        Linux-Next Mailing List <linux-next@vger.kernel.org>,
+        Stephen Rothwell <sfr@canb.auug.org.au>,
+        linux-clk <linux-clk@vger.kernel.org>, linux-mmc@vger.kernel.org,
+        lkft-triage@lists.linaro.org
+Cc:     Arnd Bergmann <arnd@arndb.de>,
+        John Stultz <john.stultz@linaro.org>,
+        Daniel Lezcano <daniel.lezcano@linaro.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Michael Turquette <mturquette@baylibre.com>,
+        Stephen Boyd <sboyd@kernel.org>, lars.povlsen@microchip.com,
+        madhuparnabhowmik10@gmail.com,
+        Viresh Kumar <viresh.kumar@linaro.org>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+arm64 dragonboard db410c boot failed while running linux next 20200827 kernel.
 
+metadata:
+  git branch: master
+  git repo: https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
+  git commit: 88abac0b753dfdd85362a26d2da8277cb1e0842b
+  git describe: next-20200827
+  make_kernelversion: 5.9.0-rc2
+  kernel-config:
+https://builds.tuxbuild.com/vThV35pOF_GMlWdiTs3Bdw/kernel.config
 
-On 24/08/2020 11:50, Ulf Hansson wrote:
-> On Fri, 14 Aug 2020 at 03:44, Wenbin Mei <wenbin.mei@mediatek.com> wrote:
->>
->> This commit adds reset node for mmc device.
->>
->> Cc: <stable@vger.kernel.org> # v5.4+
->> Fixes: 966580ad236e ("mmc: mediatek: add support for MT7622 SoC")
->> Signed-off-by: Wenbin Mei <wenbin.mei@mediatek.com>
->> Tested-by: Frank Wunderlich <frank-w@public-files.de>
-> 
-> I can pick this for my fixes branch, together with the other changes,
-> however deferring that until Matthias acks it.
+Boot log,
 
-Acked-by: Matthias Brugger <matthias.bgg@gmail.com>
+[    0.000000] Booting Linux on physical CPU 0x0000000000 [0x410fd030]
+[    0.000000] Linux version 5.9.0-rc2-next-20200827
+(TuxBuild@12963d21faa5) (aarch64-linux-gnu-gcc (Debian 9.3.0-8) 9.3.0,
+GNU ld (GNU Binutils for Debian) 2.34) #1 SMP PREEMPT Thu Aug 27
+05:19:00 UTC 2020
+[    0.000000] Machine model: Qualcomm Technologies, Inc. APQ 8016 SBC
+[    0.000000] efi: UEFI not found.
+[    0.000000] [Firmware Bug]: Kernel image misaligned at boot, please
+fix your bootloader!
+<trmi>
+[    3.451425] i2c_qup 78ba000.i2c: using default clock-frequency 100000
+[    3.451491] i2c_qup 78ba000.i2c:
+[    3.451491]  tx channel not available
+[    3.493455] sdhci: Secure Digital Host Controller Interface driver
+[    3.493508] sdhci: Copyright(c) Pierre Ossman
+[    3.500902] Synopsys Designware Multimedia Card Interface Driver
+[    3.507441] sdhci-pltfm: SDHCI platform and OF driver helper
+[    3.514308] Unable to handle kernel paging request at virtual
+address dead000000000108
+[    3.514695] Mem abort info:
+[    3.522421]   ESR = 0x96000044
+[    3.525096]   EC = 0x25: DABT (current EL), IL = 32 bits
+[    3.528236]   SET = 0, FnV = 0
+[    3.533703]   EA = 0, S1PTW = 0
+[    3.536561] Data abort info:
+[    3.539601]   ISV = 0, ISS = 0x00000044
+[    3.542727]   CM = 0, WnR = 1
+[    3.546287] [dead000000000108] address between user and kernel address ranges
+[    3.549414] Internal error: Oops: 96000044 [#1] PREEMPT SMP
+[    3.556520] Modules linked in:
+[    3.561901] CPU: 0 PID: 1 Comm: swapper/0 Not tainted
+5.9.0-rc2-next-20200827 #1
+[    3.565034] Hardware name: Qualcomm Technologies, Inc. APQ 8016 SBC (DT)
+[    3.572584] pstate: 60000005 (nZCv daif -PAN -UAO BTYPE=--)
+[    3.579271] pc : __clk_put+0x40/0x140
+[    3.584556] lr : __clk_put+0x2c/0x140
+[    3.588373] sp : ffff80001002bb00
+[    3.592016] x29: ffff80001002bb00 x28: 000000000000002e
+[    3.595320] x27: ffff000009f7ba68 x26: ffff80001146d878
+[    3.600703] x25: ffff00003fcfd8f8 x24: ffff00003d0bc410
+[    3.605999] x23: ffff80001146d0e0 x22: ffff000009f7ba40
+[    3.611293] x21: ffff00003d0bc400 x20: ffff000009f7b580
+[    3.616588] x19: ffff00003bccc780 x18: 0000000007824000
+[    3.621883] x17: ffff000009f7ba00 x16: ffff000009f7b5d0
+[    3.627177] x15: ffff800011966cf8 x14: ffffffffffffffff
+[    3.632472] x13: ffff800012917000 x12: ffff800012917000
+[    3.637769] x11: 0000000000000020 x10: 0101010101010101
+[    3.643063] x9 : ffff8000107a984c x8 : 7f7f7f7f7f7f7f7f
+[    3.648358] x7 : ffff000009fd8000 x6 : ffff80001237a000
+[    3.653653] x5 : 0000000000000000 x4 : ffff000009fd8000
+[    3.658949] x3 : ffff8000124e6768 x2 : ffff000009fd8000
+[    3.664243] x1 : ffff00003bccca80 x0 : dead000000000100
+[    3.669539] Call trace:
+[    3.674830]  __clk_put+0x40/0x140
+[    3.677003]  clk_put+0x18/0x28
+[    3.680477]  dev_pm_opp_put_clkname+0x30/0x58
+[    3.683431]  sdhci_msm_probe+0x284/0x9a0
+[    3.687857]  platform_drv_probe+0x5c/0xb0
+[    3.691847]  really_probe+0xf0/0x4d8
+[    3.695753]  driver_probe_device+0xfc/0x168
+[    3.699399]  device_driver_attach+0x7c/0x88
+[    3.703306]  __driver_attach+0xac/0x178
+[    3.707472]  bus_for_each_dev+0x78/0xc8
+[    3.711291]  driver_attach+0x2c/0x38
+[    3.715110]  bus_add_driver+0x14c/0x230
+[    3.718929]  driver_register+0x6c/0x128
+[    3.722489]  __platform_driver_register+0x50/0x60
+[    3.726312]  sdhci_msm_driver_init+0x24/0x30
+[    3.731173]  do_one_initcall+0x4c/0x2c0
+[    3.735511]  kernel_init_freeable+0x21c/0x284
+[    3.739072]  kernel_init+0x1c/0x120
+[    3.743582]  ret_from_fork+0x10/0x30
+[    3.746885] Code: 35000720 a9438660 f9000020 b4000040 (f9000401)
+[    3.750720] ---[ end trace a8d4100497387a2e ]---
+[    3.756736] Kernel panic - not syncing: Attempted to kill init!
+exitcode=0x0000000b
+[    3.761392] SMP: stopping secondary CPUs
+[    3.768877] Kernel Offset: 0x80000 from 0xffff800010000000
+[    3.772924] PHYS_OFFSET: 0x80000000
+[    3.778216] CPU features: 0x0240002,24802005
+[    3.781602] Memory Limit: none
 
-My understanding is, that this will land also in v5.9-rc[3,4], correct?
+full test log,
+https://qa-reports.linaro.org/lkft/linux-next-oe/build/next-20200827/testrun/3123101/suite/linux-log-parser/test/check-kernel-oops-1714695/log
 
-Regards,
-Matthias
-
-> 
-> Kind regards
-> Uffe
-> 
-> 
-> 
->> ---
->>   arch/arm64/boot/dts/mediatek/mt7622.dtsi | 2 ++
->>   1 file changed, 2 insertions(+)
->>
->> diff --git a/arch/arm64/boot/dts/mediatek/mt7622.dtsi b/arch/arm64/boot/dts/mediatek/mt7622.dtsi
->> index 1a39e0ef776b..5b9ec032ce8d 100644
->> --- a/arch/arm64/boot/dts/mediatek/mt7622.dtsi
->> +++ b/arch/arm64/boot/dts/mediatek/mt7622.dtsi
->> @@ -686,6 +686,8 @@
->>                  clocks = <&pericfg CLK_PERI_MSDC30_0_PD>,
->>                           <&topckgen CLK_TOP_MSDC50_0_SEL>;
->>                  clock-names = "source", "hclk";
->> +               resets = <&pericfg MT7622_PERI_MSDC0_SW_RST>;
->> +               reset-names = "hrst";
->>                  status = "disabled";
->>          };
->>
->> --
->> 2.18.0
+-- 
+Linaro LKFT
+https://lkft.linaro.org
