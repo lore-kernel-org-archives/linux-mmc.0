@@ -7,80 +7,81 @@ X-Spam-Status: No, score=-7.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=no
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3DBE7C43461
-	for <linux-mmc@archiver.kernel.org>; Fri, 28 Aug 2020 14:56:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F115CC433E6
+	for <linux-mmc@archiver.kernel.org>; Fri, 28 Aug 2020 15:06:23 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 18B0320665
-	for <linux-mmc@archiver.kernel.org>; Fri, 28 Aug 2020 14:56:21 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CBA342075B
+	for <linux-mmc@archiver.kernel.org>; Fri, 28 Aug 2020 15:06:23 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="eyWU4USi"
+	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="G8e1hSdW"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728009AbgH1O4T (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 28 Aug 2020 10:56:19 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60030 "EHLO
+        id S1726141AbgH1PGX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 28 Aug 2020 11:06:23 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33402 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726878AbgH1O4S (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Aug 2020 10:56:18 -0400
-Received: from mail-vk1-xa43.google.com (mail-vk1-xa43.google.com [IPv6:2607:f8b0:4864:20::a43])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0F6FDC061232
-        for <linux-mmc@vger.kernel.org>; Fri, 28 Aug 2020 07:56:17 -0700 (PDT)
-Received: by mail-vk1-xa43.google.com with SMTP id n193so306396vkf.12
-        for <linux-mmc@vger.kernel.org>; Fri, 28 Aug 2020 07:56:17 -0700 (PDT)
+        with ESMTP id S1726330AbgH1PGR (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Aug 2020 11:06:17 -0400
+Received: from mail-ua1-x942.google.com (mail-ua1-x942.google.com [IPv6:2607:f8b0:4864:20::942])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 58259C06121B
+        for <linux-mmc@vger.kernel.org>; Fri, 28 Aug 2020 08:06:17 -0700 (PDT)
+Received: by mail-ua1-x942.google.com with SMTP id g20so465627uap.8
+        for <linux-mmc@vger.kernel.org>; Fri, 28 Aug 2020 08:06:17 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=chromium.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=gTaoSyHl3HqBsHrY5A4LuCqff0xNJw9//Kl7Y7tQ/M4=;
-        b=eyWU4USiiQHhauh+FMao8Op72UXp1qitc0E2GZbWptF8sa6nAWnBPCn9xxOOXhSXB5
-         aPXkX6rwzK6pL7JZvxRyZskSKLenOvFqESRRJx3DmaPc79bPObCOFBVPDxuCJ1FheAhQ
-         vrB2C/VgFTyn1jotUHzF7U49NATW0dZFMF7zY=
+        bh=XP81KhbFfFMLjt/9HZBr2wWZSwrB3/aa9mKjEXE/AKE=;
+        b=G8e1hSdWLuYEJPV3B0RaF3rvGxxGkCTIF80d31pPr9iF136sww25RkRnSUV+j1AcVv
+         H9OJX1KXsDnaVLCtVvW7DPjEh69HZSR8Wupn9bRJ83yTG9C9qa0dn2v0dqy+eonTsPmp
+         MohmqV0MA4Mfl9vG7cBkhQAXWLoMyULgQUxkw=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=gTaoSyHl3HqBsHrY5A4LuCqff0xNJw9//Kl7Y7tQ/M4=;
-        b=HDzcBrdESReJ2IShVkIujDW1IYYzU/zK4slqkaj9vSZIz+618qfjLK580XkkRSaPJo
-         RJx0EZmpkHljVp7toW8Mj5N7xzXHmXHvbCdWUBIfMM0JAMdFHx0EZUSvaW1huuTmgvPg
-         P/cbARpFaJgEVqiQD1qcJDZ2q9oFeWODAKyEDmVNv8IZkm6mYfTOt0sOWcJsF5NOADjc
-         t2Gf5QcoFlmB4FFYRe8zLs/hFFK9kHmTYVuZmr3TfFOhhGDh6jG4kYgljDeS9cygymQe
-         OLbtAvkKIyir0JvMVw2qoD0tdQwVjyjsaag2UE8FARfA+ypZbJR44yCyiVpo5y+kwjnv
-         xD9g==
-X-Gm-Message-State: AOAM532tS2wLNz/Ce3FNvrF1yXm6xF8XKJCKG1Hne9GEsXfeDUEmEF6p
-        XB5YChVuhpZxCygq4fU4EnItVcyMGvo3Qg==
-X-Google-Smtp-Source: ABdhPJyMiyuWdHja5/34KWAONo/uFMlo1O1gU4huO14n/tVdTD6Z7gDoXatT8e6pOossRzNNAXQfKw==
-X-Received: by 2002:a1f:7c45:: with SMTP id x66mr1314364vkc.53.1598626576523;
-        Fri, 28 Aug 2020 07:56:16 -0700 (PDT)
-Received: from mail-ua1-f48.google.com (mail-ua1-f48.google.com. [209.85.222.48])
-        by smtp.gmail.com with ESMTPSA id c10sm180357vsp.32.2020.08.28.07.56.15
+        bh=XP81KhbFfFMLjt/9HZBr2wWZSwrB3/aa9mKjEXE/AKE=;
+        b=SOVsBT4KFVjGkzxHfj54o6VDTEx0P6F2HVAj/o2no/SBCDChFruy00t0O2mBvP2tA4
+         wVTmq9IXf8WKQyt8yIqSqBP0zj34Wf2wHIDLsT0PN+7G5HZxn12o3JTVd6v/sbwzWn7S
+         ewOzBlXUUUifLmg2iOKHrVaKg9aRWy2xeP2P6ojmLopC1b8xkwC+5H1hwLR7x8KGJIK7
+         2krNDUzqoTmnwZXlS0UYoDnMpZioOEGwywcxAdUw8Mtv6XvMIIxfJiEKSN21j+TamQvA
+         L98eP8CpXaZeuWt/OOqMGYMH5Vyz8u5+ljknL17VJb6UMXMr4mCac4CF/W3MTbykUC0g
+         phiQ==
+X-Gm-Message-State: AOAM530MrBFF3d63s0N1G7VFe4IJnb0ZLe6SDpS/vxBsfJDy1EduAGjI
+        B3YRD+kvaqh3i9GVQJ6LLJyPaF5nMmmHXA==
+X-Google-Smtp-Source: ABdhPJzwQ4BZCmYR2ZyPSJKNLgKLVQx4OyktMv/5hni3JLVCbVPKxpjJAsJcsR3UkRN2uyeq4geJjg==
+X-Received: by 2002:ab0:21cf:: with SMTP id u15mr1377086uan.85.1598627176337;
+        Fri, 28 Aug 2020 08:06:16 -0700 (PDT)
+Received: from mail-vs1-f44.google.com (mail-vs1-f44.google.com. [209.85.217.44])
+        by smtp.gmail.com with ESMTPSA id j20sm208558vsg.18.2020.08.28.08.06.15
         for <linux-mmc@vger.kernel.org>
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 28 Aug 2020 07:56:15 -0700 (PDT)
-Received: by mail-ua1-f48.google.com with SMTP id 68so459054ual.3
-        for <linux-mmc@vger.kernel.org>; Fri, 28 Aug 2020 07:56:15 -0700 (PDT)
-X-Received: by 2002:ab0:3114:: with SMTP id e20mr1362127ual.104.1598626574941;
- Fri, 28 Aug 2020 07:56:14 -0700 (PDT)
+        Fri, 28 Aug 2020 08:06:15 -0700 (PDT)
+Received: by mail-vs1-f44.google.com with SMTP id y3so742842vsn.1
+        for <linux-mmc@vger.kernel.org>; Fri, 28 Aug 2020 08:06:15 -0700 (PDT)
+X-Received: by 2002:a05:6102:10de:: with SMTP id t30mr1312397vsr.13.1598627175058;
+ Fri, 28 Aug 2020 08:06:15 -0700 (PDT)
 MIME-Version: 1.0
-References: <20200827083330.1.I669bb4dc3d92bd04e9a695f97904797dc8241b79@changeid>
- <CA+G9fYtWpBQb8Ew_G=bjcR7wBHMgKm=EXV7vuk6FE9m0-4Ef3A@mail.gmail.com> <CA+G9fYt-k9FMq0HcRN5iQyvt7yaz8YMpENcUktm7yQ1y+zgd1A@mail.gmail.com>
-In-Reply-To: <CA+G9fYt-k9FMq0HcRN5iQyvt7yaz8YMpENcUktm7yQ1y+zgd1A@mail.gmail.com>
+References: <cover.1598594714.git.viresh.kumar@linaro.org> <1d7c97524b9e1fbc60271d9c246c5461ca8a106c.1598594714.git.viresh.kumar@linaro.org>
+ <CAPDyKFpdZhzXQv3hpTzf3UkJDhFqBhgMXCqVfAfE6PejLCxvfg@mail.gmail.com>
+In-Reply-To: <CAPDyKFpdZhzXQv3hpTzf3UkJDhFqBhgMXCqVfAfE6PejLCxvfg@mail.gmail.com>
 From:   Doug Anderson <dianders@chromium.org>
-Date:   Fri, 28 Aug 2020 07:56:03 -0700
-X-Gmail-Original-Message-ID: <CAD=FV=V7SuUEFAtqPhDpW0O9H3bznsGma_n-fB-JArDAtfHrFg@mail.gmail.com>
-Message-ID: <CAD=FV=V7SuUEFAtqPhDpW0O9H3bznsGma_n-fB-JArDAtfHrFg@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-msm: When dev_pm_opp_of_add_table() returns 0
- it's not an error
-To:     Naresh Kamboju <naresh.kamboju@linaro.org>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Arnd Bergmann <arnd@arndb.de>,
-        Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
+Date:   Fri, 28 Aug 2020 08:06:03 -0700
+X-Gmail-Original-Message-ID: <CAD=FV=UP2ZA_GB8nzrpFNP3VzB6AZtEZaagVO5qggW+8EQ0THQ@mail.gmail.com>
+Message-ID: <CAD=FV=UP2ZA_GB8nzrpFNP3VzB6AZtEZaagVO5qggW+8EQ0THQ@mail.gmail.com>
+Subject: Re: [PATCH V2 4/8] mmc: sdhci-msm: Unconditionally call dev_pm_opp_of_remove_table()
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Viresh Kumar <viresh.kumar@linaro.org>,
         Rajendra Nayak <rnayak@codeaurora.org>,
         Adrian Hunter <adrian.hunter@intel.com>,
         Andy Gross <agross@kernel.org>,
         Bjorn Andersson <bjorn.andersson@linaro.org>,
-        Viresh Kumar <viresh.kumar@linaro.org>,
+        Linux PM <linux-pm@vger.kernel.org>,
+        Vincent Guittot <vincent.guittot@linaro.org>,
+        Rafael Wysocki <rjw@rjwysocki.net>,
+        Stephen Boyd <sboyd@kernel.org>, Nishanth Menon <nm@ti.com>,
+        Naresh Kamboju <naresh.kamboju@linaro.org>,
         linux-arm-msm <linux-arm-msm@vger.kernel.org>,
-        open list <linux-kernel@vger.kernel.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
@@ -89,50 +90,47 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 Hi,
 
-On Fri, Aug 28, 2020 at 2:15 AM Naresh Kamboju
-<naresh.kamboju@linaro.org> wrote:
+On Fri, Aug 28, 2020 at 1:44 AM Ulf Hansson <ulf.hansson@linaro.org> wrote:
 >
-> On Fri, 28 Aug 2020 at 01:57, Naresh Kamboju <naresh.kamboju@linaro.org> wrote:
+> On Fri, 28 Aug 2020 at 08:08, Viresh Kumar <viresh.kumar@linaro.org> wrote:
 > >
-> > On Thu, 27 Aug 2020 at 21:03, Douglas Anderson <dianders@chromium.org> wrote:
-> > >
-> > > The commit d05a7238fe1c ("mmc: sdhci-msm: Unconditionally call
-> > > dev_pm_opp_of_remove_table()") works fine in the case where there is
-> > > no OPP table.  However, if there is an OPP table then
-> > > dev_pm_opp_of_add_table() will return 0.  Since 0 != -ENODEV then the
-> > > "if (ret != -ENODEV)" will evaluate to true and we'll fall into the
-> > > error case.  Oops.
-> > >
-> > > Let's fix this.
-> > >
-> > > Fixes: d05a7238fe1c ("mmc: sdhci-msm: Unconditionally call dev_pm_opp_of_remove_table()")
-> > > Signed-off-by: Douglas Anderson <dianders@chromium.org>
+> > dev_pm_opp_of_remove_table() doesn't report any errors when it fails to
+> > find the OPP table with error -ENODEV (i.e. OPP table not present for
+> > the device). And we can call dev_pm_opp_of_remove_table()
+> > unconditionally here.
 > >
-> > Reported-by: Naresh Kamboju <naresh.kamboju@linaro.org>
-> >
-> > I will test this patch and report again on this email thread.
+> > Signed-off-by: Viresh Kumar <viresh.kumar@linaro.org>
 >
-> Sorry this patch did not solve the reported problem.
+> Replaced v1 with v2 on my next branch, thanks!
 
-To be fair, I wasn't trying to.  ;-)  That's why I didn't add
-Reported-by to my original patch.  I was trying to solve problems I
-was seeing myself and my patch did solve the problems I was seeing.  I
-only CCed you because I saw that you were having problems with the
-same patch...
+Actually, I don't see it on there yet, but at least the old broken v1
+isn't there anymore.  ;-)
 
-> However, I would be testing the V2 set from Viresh Kumar.
+I picked v2 and tried it on my sc7180-based device (which does have
+OPP tables).  It worked fine.  Thus:
 
-I've confirmed that the current mmc/next (with Viresh's new patch) no
-longer breaks me.  :-)
+Tested-by: Douglas Anderson <dianders@chromium.org>
 
-$ git show --format=fuller linux_mmc/next | head -8
-commit 174e889d08aa54219b841464458f81d13fafec93
-Merge: c282fdb49b18 8048822bac01
-Author:     Ulf Hansson <ulf.hansson@linaro.org>
-AuthorDate: Fri Aug 28 14:26:25 2020 +0200
-Commit:     Ulf Hansson <ulf.hansson@linaro.org>
-CommitDate: Fri Aug 28 14:26:25 2020 +0200
+I looked at the code and it looks right to me.  Thus:
 
-    Merge branch 'fixes' into next
+Reviewed-by: Douglas Anderson <dianders@chromium.org>
 
--Doug
+
+> Just to be sure, this patch doesn't depend on any changes for the opp
+> core that are queued for v5.10?
+
+Running atop mmc-next, I see the check for -ENODEV, so I'm gonna
+assume that the required change is there.
+
+$ git grep -A10 'void _dev_pm_opp_find_and_remove_table' -- drivers/opp/core.c
+drivers/opp/core.c:void _dev_pm_opp_find_and_remove_table(struct device *dev)
+drivers/opp/core.c-{
+drivers/opp/core.c-     struct opp_table *opp_table;
+drivers/opp/core.c-
+drivers/opp/core.c-     /* Check for existing table for 'dev' */
+drivers/opp/core.c-     opp_table = _find_opp_table(dev);
+drivers/opp/core.c-     if (IS_ERR(opp_table)) {
+drivers/opp/core.c-             int error = PTR_ERR(opp_table);
+drivers/opp/core.c-
+drivers/opp/core.c-             if (error != -ENODEV)
+drivers/opp/core.c-                     WARN(1, "%s: opp_table: %d\n",
