@@ -2,113 +2,104 @@ Return-Path: <SRS0=IgIp=CG=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D51B1C2BC0E
-	for <linux-mmc@archiver.kernel.org>; Fri, 28 Aug 2020 22:26:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D9DE0C2BBDA
+	for <linux-mmc@archiver.kernel.org>; Fri, 28 Aug 2020 22:26:43 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id AB0B32086A
-	for <linux-mmc@archiver.kernel.org>; Fri, 28 Aug 2020 22:26:44 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1598653604;
-	bh=S01LC1e4Xd/Rb0OpBXn57vh9WrYjBt6uM4gurSlRj6A=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
-	b=uKk8eXM2/sID7IQRKAG6bWFsdQuIfG9ntp8jB09hz6lmJEm3Y5wGZ6KdDdOsRQLHX
-	 DrcjJyxKUAq6SSF3A+Isznqmy0XhnuJw1Ug3BfPI1UwFx5ahLeecu/XPK93MQ529Sb
-	 XVR1HJTKeom/xF9f/JGPuEdD+BvEcNzA4bnrk0ow=
+	by mail.kernel.org (Postfix) with ESMTP id B3BBA21548
+	for <linux-mmc@archiver.kernel.org>; Fri, 28 Aug 2020 22:26:43 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=nvidia.com header.i=@nvidia.com header.b="N5UZnWji"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726839AbgH1W0o (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 28 Aug 2020 18:26:44 -0400
-Received: from mail-io1-f66.google.com ([209.85.166.66]:37027 "EHLO
-        mail-io1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726386AbgH1W0K (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Aug 2020 18:26:10 -0400
-Received: by mail-io1-f66.google.com with SMTP id b16so622655ioj.4;
-        Fri, 28 Aug 2020 15:26:09 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=4duqBmGrOIE5h/MJFYsH8A08MjLB2XqWQDb7B6Dfs74=;
-        b=TmtOIpaHqGCAZgJqPOx28dvGaCvJHfiuT0c014Excs6ark6RVFMYjaF/4z5/jXoILg
-         iZWXp3mKR+Z0p7sKr/Kra4ByspMwik+MH7uqL3nqw8DprcKb8SSBmErshqdqk+7JCGsN
-         54H+xUqC1muXm0SCJlr3ThKrrGUtck5SBqqZYzkI3qzzYZY54Jn1DLJxdt/b48iMc3XJ
-         +reavvzaTvNHSJIK+AmQbteSoQP/XDDgOUBG21eygCVWllnCLYer0ZcEFR5eTJVIC4xU
-         hwDQ0Es/3mP0DI02be9tLyxnUssNMocwJ/7kOyAg+FEWCMVGdg94gDKg4Pqv9b8D59/H
-         hd4w==
-X-Gm-Message-State: AOAM53245nuzsEpP2JP5bbGQugWDBrjsuKHm6iXxfDl4ChBwh/E24EDp
-        j3oCGHFmdKO2jcomSqYscQ==
-X-Google-Smtp-Source: ABdhPJyWo64sqjslBZ2g1+ACJ1BfQG2GiCxOUhoNMkowfb9iLK/cF8i/5RAnmdqpHsTGdOTEKzSrEA==
-X-Received: by 2002:a05:6602:1589:: with SMTP id e9mr699348iow.85.1598653569509;
-        Fri, 28 Aug 2020 15:26:09 -0700 (PDT)
-Received: from xps15 ([64.188.179.249])
-        by smtp.gmail.com with ESMTPSA id y8sm255986iom.26.2020.08.28.15.26.05
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 28 Aug 2020 15:26:08 -0700 (PDT)
-Received: (nullmailer pid 3514602 invoked by uid 1000);
-        Fri, 28 Aug 2020 22:26:04 -0000
-Date:   Fri, 28 Aug 2020 16:26:04 -0600
-From:   Rob Herring <robh@kernel.org>
-To:     Krzysztof Kozlowski <krzk@kernel.org>
-Cc:     Shawn Guo <shawnguo@kernel.org>,
-        Fabio Estevam <festevam@gmail.com>,
-        Rob Herring <robh+dt@kernel.org>, Han Xu <han.xu@nxp.com>,
-        linux-kernel@vger.kernel.org, Frank Li <frank.li@nxp.com>,
-        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
-        linux-watchdog@vger.kernel.org,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        linux-pm@vger.kernel.org, linux-mtd@lists.infradead.org,
-        linux-mmc@vger.kernel.org, Li Yang <leoyang.li@nxp.com>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        devicetree@vger.kernel.org,
-        Thierry Reding <thierry.reding@gmail.com>,
-        linux-arm-kernel@lists.infradead.org,
-        Anson Huang <Anson.Huang@nxp.com>,
-        NXP Linux Team <linux-imx@nxp.com>,
-        Fugang Duan <fugang.duan@nxp.com>,
-        Mark Rutland <mark.rutland@arm.com>,
-        Miquel Raynal <miquel.raynal@bootlin.com>,
-        linux-gpio@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-serial@vger.kernel.org, linux-pwm@vger.kernel.org,
-        Pengutronix Kernel Team <kernel@pengutronix.de>
-Subject: Re: [PATCH v3 13/19] dt-bindings: nvmem: imx-ocotp: Update i.MX 8M
- compatibles
-Message-ID: <20200828222604.GA3514520@bogus>
-References: <20200825193536.7332-1-krzk@kernel.org>
- <20200825193536.7332-14-krzk@kernel.org>
+        id S1727000AbgH1W0L (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 28 Aug 2020 18:26:11 -0400
+Received: from hqnvemgate25.nvidia.com ([216.228.121.64]:18108 "EHLO
+        hqnvemgate25.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726677AbgH1WZ5 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Aug 2020 18:25:57 -0400
+Received: from hqpgpgate101.nvidia.com (Not Verified[216.228.121.13]) by hqnvemgate25.nvidia.com (using TLS: TLSv1.2, DES-CBC3-SHA)
+        id <B5f4984460001>; Fri, 28 Aug 2020 15:25:10 -0700
+Received: from hqmail.nvidia.com ([172.20.161.6])
+  by hqpgpgate101.nvidia.com (PGP Universal service);
+  Fri, 28 Aug 2020 15:25:53 -0700
+X-PGP-Universal: processed;
+        by hqpgpgate101.nvidia.com on Fri, 28 Aug 2020 15:25:53 -0700
+Received: from HQMAIL107.nvidia.com (172.20.187.13) by HQMAIL109.nvidia.com
+ (172.20.187.15) with Microsoft SMTP Server (TLS) id 15.0.1473.3; Fri, 28 Aug
+ 2020 22:25:49 +0000
+Received: from rnnvemgw01.nvidia.com (10.128.109.123) by HQMAIL107.nvidia.com
+ (172.20.187.13) with Microsoft SMTP Server (TLS) id 15.0.1473.3 via Frontend
+ Transport; Fri, 28 Aug 2020 22:25:49 +0000
+Received: from skomatineni-linux.nvidia.com (Not Verified[10.2.174.186]) by rnnvemgw01.nvidia.com with Trustwave SEG (v7,5,8,10121)
+        id <B5f49846b0002>; Fri, 28 Aug 2020 15:25:48 -0700
+From:   Sowjanya Komatineni <skomatineni@nvidia.com>
+To:     <adrian.hunter@intel.com>, <ulf.hansson@linaro.org>,
+        <thierry.reding@gmail.com>, <jonathanh@nvidia.com>,
+        <robh+dt@kernel.org>
+CC:     <skomatineni@nvidia.com>, <linux-tegra@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
+        <devicetree@vger.kernel.org>, <stable@vger.kernel.org>
+Subject: [PATCH 4.19 1/7] sdhci: tegra: Remove SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK for Tegra210
+Date:   Fri, 28 Aug 2020 15:25:11 -0700
+Message-ID: <1598653517-13658-2-git-send-email-skomatineni@nvidia.com>
+X-Mailer: git-send-email 2.7.4
+In-Reply-To: <1598653517-13658-1-git-send-email-skomatineni@nvidia.com>
+References: <1598653517-13658-1-git-send-email-skomatineni@nvidia.com>
+X-NVConfidentiality: public
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20200825193536.7332-14-krzk@kernel.org>
+Content-Type: text/plain
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nvidia.com; s=n1;
+        t=1598653510; bh=VIKWDEAvPiySVCmo5Iz/KvGAZ9ESjUXPa7bO4W72NME=;
+        h=X-PGP-Universal:From:To:CC:Subject:Date:Message-ID:X-Mailer:
+         In-Reply-To:References:X-NVConfidentiality:MIME-Version:
+         Content-Type;
+        b=N5UZnWji/SOKcDV8HGvHgzx8yH2vSztJjdWhFVr7bYp9Mcw8vQpQ3aTVEjBkoVX1T
+         hLfwtUA0VLdYuLb41Qi2nH2NWqNHiO/3WXZ0eHZCzlAgTFG4JTSVpWNQCcYudALsz1
+         7R7T6oA9B9TQcB9t5xhaHk8AKCPO7JmYwPNuy5NphKAqWp4gd35bupuhRa3OYFi3gM
+         2PyHwfIRe0NJ8xT/e+LTnnFQ7vcoWK9r0ZDhvKg35pbT8Lq6pByDdaHTrtdJqK/hZg
+         GFBYHmL0ueTuMHf7QT6rr6jN5fzu7eE9RsroN6qm0+E5jlpLBWWXySQXDSyQ+Xf2Py
+         ZS/lWEBTW5Hiw==
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 25 Aug 2020 21:35:30 +0200, Krzysztof Kozlowski wrote:
-> DTSes with new i.MX 8M SoCs use two compatibles so update the binding to
-> fix dtbs_check warnings like:
-> 
->   arch/arm64/boot/dts/freescale/imx8mn-evk.dt.yaml: efuse@30350000: compatible:1: 'syscon' was expected
->     From schema: Documentation/devicetree/bindings/nvmem/imx-ocotp.yaml
-> 
->   arch/arm64/boot/dts/freescale/imx8mn-evk.dt.yaml: efuse@30350000:
->     compatible: ['fsl,imx8mn-ocotp', 'fsl,imx8mm-ocotp', 'syscon'] is too long
-> 
->   arch/arm64/boot/dts/freescale/imx8mn-evk.dt.yaml: efuse@30350000:
->     compatible: Additional items are not allowed ('syscon' was unexpected)
-> 
-> Signed-off-by: Krzysztof Kozlowski <krzk@kernel.org>
-> 
-> ---
-> 
-> Changes since v2:
-> 1. Remove moved compatibles.
-> ---
->  .../devicetree/bindings/nvmem/imx-ocotp.yaml  | 38 +++++++++++--------
->  1 file changed, 23 insertions(+), 15 deletions(-)
-> 
+commit b5a84ecf025a ("mmc: tegra: Add Tegra210 support")
 
-Reviewed-by: Rob Herring <robh@kernel.org>
+SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK is set for Tegra210 from the
+beginning of Tegra210 support in the driver.
+
+Tegra210 SDMMC hardware by default uses timeout clock (TMCLK)
+instead of SDCLK and this quirk should not be set.
+
+So, this patch remove this quirk for Tegra210.
+
+Fixes: b5a84ecf025a ("mmc: tegra: Add Tegra210 support")
+Cc: stable <stable@vger.kernel.org> # 4.19
+Tested-by: Jon Hunter <jonathanh@nvidia.com>
+Reviewed-by: Jon Hunter <jonathanh@nvidia.com>
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
+---
+ drivers/mmc/host/sdhci-tegra.c | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+index 27bdf6d..731956e 100644
+--- a/drivers/mmc/host/sdhci-tegra.c
++++ b/drivers/mmc/host/sdhci-tegra.c
+@@ -423,7 +423,6 @@ static const struct sdhci_tegra_soc_data soc_data_tegra124 = {
+ 
+ static const struct sdhci_pltfm_data sdhci_tegra210_pdata = {
+ 	.quirks = SDHCI_QUIRK_BROKEN_TIMEOUT_VAL |
+-		  SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
+ 		  SDHCI_QUIRK_SINGLE_POWER_WRITE |
+ 		  SDHCI_QUIRK_NO_HISPD_BIT |
+ 		  SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC |
+-- 
+2.7.4
+
