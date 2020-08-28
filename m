@@ -2,146 +2,104 @@ Return-Path: <SRS0=IgIp=CG=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
-	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-3.9 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C1177C433E6
-	for <linux-mmc@archiver.kernel.org>; Fri, 28 Aug 2020 12:42:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 579CEC43461
+	for <linux-mmc@archiver.kernel.org>; Fri, 28 Aug 2020 12:52:10 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 997B82078A
-	for <linux-mmc@archiver.kernel.org>; Fri, 28 Aug 2020 12:42:59 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 330C82087D
+	for <linux-mmc@archiver.kernel.org>; Fri, 28 Aug 2020 12:52:10 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (1024-bit key) header.d=mg.codeaurora.org header.i=@mg.codeaurora.org header.b="fhFymwhY"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Pf4uaxGE"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729388AbgH1Mm5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 28 Aug 2020 08:42:57 -0400
-Received: from mail29.static.mailgun.info ([104.130.122.29]:48331 "EHLO
-        mail29.static.mailgun.info" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1729339AbgH1Mmu (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Aug 2020 08:42:50 -0400
-DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
- s=smtp; t=1598618570; h=Message-ID: References: In-Reply-To: Subject:
- Cc: To: From: Date: Content-Transfer-Encoding: Content-Type:
- MIME-Version: Sender; bh=c6xULzU1XsJ6TGZBb+0t/bcTsFldcoqHdKPiZhgYt0A=;
- b=fhFymwhYkkbbPcEfXLSs2GAN4RWH6P0ogmIn1WroVyjuxAPLVT2wrIjvBEeJ8EdO4cVS5Qg3
- gWpXOou3XkTeLUpFUbg51yVL7VPQy/Wo5PWNPpAOAgNvRRj/PSIbJN41idrjqo377PByQbXI
- DxWpPgrCqUnc3I3DYfbZhHNJl/E=
-X-Mailgun-Sending-Ip: 104.130.122.29
-X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
-Received: from smtp.codeaurora.org
- (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171]) by
- smtp-out-n04.prod.us-east-1.postgun.com with SMTP id
- 5f48fbbc9db79768eb10e007 (version=TLS1.2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256); Fri, 28 Aug 2020 12:42:36
- GMT
-Received: by smtp.codeaurora.org (Postfix, from userid 1001)
-        id 6775DC433A1; Fri, 28 Aug 2020 12:42:35 +0000 (UTC)
-Received: from mail.codeaurora.org (localhost.localdomain [127.0.0.1])
-        (using TLSv1 with cipher ECDHE-RSA-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        (Authenticated sender: vbadigan)
-        by smtp.codeaurora.org (Postfix) with ESMTPSA id 75AA5C433C6;
-        Fri, 28 Aug 2020 12:42:34 +0000 (UTC)
+        id S1729455AbgH1MwJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 28 Aug 2020 08:52:09 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40640 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1729486AbgH1Mvf (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Aug 2020 08:51:35 -0400
+Received: from mail-lj1-x243.google.com (mail-lj1-x243.google.com [IPv6:2a00:1450:4864:20::243])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 76D1AC061233
+        for <linux-mmc@vger.kernel.org>; Fri, 28 Aug 2020 05:51:34 -0700 (PDT)
+Received: by mail-lj1-x243.google.com with SMTP id w25so1145858ljo.12
+        for <linux-mmc@vger.kernel.org>; Fri, 28 Aug 2020 05:51:34 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=RSrvv0FJmitf6q9JxmYipGO4Y6PZy6cFkX1VzqR3xEU=;
+        b=Pf4uaxGE3D9QkcwZ3m7v40UpPYGsLMXlPXzxXdofFxgCOrudLrDJjKqDtapXdZT1me
+         U/qpgdyHur4b2ylpfOmLYfGRbbgioYR4DE8hUX9n3OD1PsJjx4bY6DfOPPLZ+nR7uoPR
+         t2fPwIQzvGmoNipg0tib+zvmAuyzH0asX7NHoXYzOS+c1S9GjWZHK3ZfK4tTEAShELZn
+         UQgYkmIIjXX9+QwSVHsgwAXyE2t1Y98bukfmK6CGzaKFvQbixk0LvK3eWs+XS6UxLeZr
+         H6WwkkQfXpaJarmhsieD/FOJieotOGDuhvpWyJnLOHQ5bvJH2PkEoyOghCRX7loqwBdo
+         Wlxw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=RSrvv0FJmitf6q9JxmYipGO4Y6PZy6cFkX1VzqR3xEU=;
+        b=GHQmJc5hBNULVieZNs6cANaPKiptpvpRpozffbqJK+yw350y+XL3uj3vjBUSOP1WGy
+         wJQWgIJXwGud1pAU3pO0VALedM86kafECXyMIKEFwctPeSVBrOKV2jZyVuL931ZMB0aE
+         fxYd721/mFHalzyaGj3SFe9tcuzgliYTwqAhtS8DS+3okenGPdOcv3b0UlJsdJeFzST0
+         49Kdc9pWTqM7xkgXcrX+OI0D/kDH0O22jjxQp/KubjX616r+MZf3ERo9u+C6OCpoEtgT
+         oHI6n8LJTU2JcZa58gL/D+kNm7RSKLKOMUCGAQc4YmpIBu/2MPamqAzZFTa34Zp4JC0X
+         v+oQ==
+X-Gm-Message-State: AOAM533kKUzFK5QQAdJosB/+zFuIE4az7Jp0E4G66YoahqdFQsAedkId
+        rg9lOF6quS6gb1EXQx+kXj3CLn8gWX/fmcYo7PHapA==
+X-Google-Smtp-Source: ABdhPJzTyH+jeLvxiBsauaVxTH5hij7/x8BNA+Ly/857QQXdScYFOsf9kjoayIwSsdP0TIKRwlItOzGM4zkgBEGoiX8=
+X-Received: by 2002:a2e:b80b:: with SMTP id u11mr872506ljo.286.1598619091424;
+ Fri, 28 Aug 2020 05:51:31 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII;
- format=flowed
-Content-Transfer-Encoding: 7bit
-Date:   Fri, 28 Aug 2020 18:12:34 +0530
-From:   vbadigan@codeaurora.org
-To:     Douglas Anderson <dianders@chromium.org>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Andy Gross <agross@kernel.org>,
-        Asutosh Das <asutoshd@codeaurora.org>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>,
-        Chris Ball <chris@printf.net>,
-        Georgi Djakov <gdjakov@mm-sol.com>,
-        Venkat Gopalakrishnan <venkatg@codeaurora.org>,
-        linux-arm-msm@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org
-Subject: Re: [PATCH] mmc: sdhci-msm: Add retries when all tuning phases are
- found valid
-In-Reply-To: <20200827075809.1.If179abf5ecb67c963494db79c3bc4247d987419b@changeid>
-References: <20200827075809.1.If179abf5ecb67c963494db79c3bc4247d987419b@changeid>
-Message-ID: <f986b516b37dbb788330334468af07cf@codeaurora.org>
-X-Sender: vbadigan@codeaurora.org
-User-Agent: Roundcube Webmail/1.3.9
+References: <20200825193536.7332-1-krzk@kernel.org>
+In-Reply-To: <20200825193536.7332-1-krzk@kernel.org>
+From:   Linus Walleij <linus.walleij@linaro.org>
+Date:   Fri, 28 Aug 2020 14:51:20 +0200
+Message-ID: <CACRpkdb4j2kJvpY23G-os9gTktZW5HT287MsvMZxC=ovgn_9LQ@mail.gmail.com>
+Subject: Re: [PATCH v3 00/19] dt-bindings / arm64: Cleanup of i.MX 8 bindings
+To:     Krzysztof Kozlowski <krzk@kernel.org>,
+        Shawn Guo <shawnguo@kernel.org>,
+        Sascha Hauer <s.hauer@pengutronix.de>,
+        Fabio Estevam <festevam@gmail.com>
+Cc:     Rob Herring <robh+dt@kernel.org>,
+        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
+        Pengutronix Kernel Team <kernel@pengutronix.de>,
+        NXP Linux Team <linux-imx@nxp.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Miquel Raynal <miquel.raynal@bootlin.com>,
+        Mark Rutland <mark.rutland@arm.com>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        Anson Huang <Anson.Huang@nxp.com>,
+        Li Yang <leoyang.li@nxp.com>, Han Xu <han.xu@nxp.com>,
+        Frank Li <frank.li@nxp.com>, Fugang Duan <fugang.duan@nxp.com>,
+        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
+        <devicetree@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        linux-mtd@lists.infradead.org, linux-pwm@vger.kernel.org,
+        "open list:SERIAL DRIVERS" <linux-serial@vger.kernel.org>,
+        Linux PM list <linux-pm@vger.kernel.org>,
+        LINUXWATCHDOG <linux-watchdog@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 2020-08-27 20:28, Douglas Anderson wrote:
-> As the comments in this patch say, if we tune and find all phases are
-> valid it's _almost_ as bad as no phases being found valid.  Probably
-> all phases are not really reliable but we didn't detect where the
-> unreliable place is.  That means we'll essentially be guessing and
-> hoping we get a good phase.
-> 
-> This is not just a problem in theory.  It was causing real problems on
-> a real board.  On that board, most often phase 10 is found as the only
-> invalid phase, though sometimes 10 and 11 are invalid and sometimes
-> just 11.  Some percentage of the time, however, all phases are found
-> to be valid.  When this happens, the current logic will decide to use
-> phase 11.  Since phase 11 is sometimes found to be invalid, this is a
-> bad choice.  Sure enough, when phase 11 is picked we often get mmc
-> errors later in boot.
-> 
-> I have seen cases where all phases were found to be valid 3 times in a
-> row, so increase the retry count to 10 just to be extra sure.
-> 
-> Fixes: 415b5a75da43 ("mmc: sdhci-msm: Add platform_execute_tuning
-> implementation")
-> Signed-off-by: Douglas Anderson <dianders@chromium.org>
-> ---
-> 
+On Tue, Aug 25, 2020 at 9:35 PM Krzysztof Kozlowski <krzk@kernel.org> wrote:
 
-Thanks for adding this logic.
+> This is a v3 of cleanup of i.XM 8 bindings and DTSes.
 
-Reviewed-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+If you are going to be working a lot on Freescale SoC code going forward
+I wouldn't mind if you could add yourself as maintainer for the
+Freescale pin controller and GPIO at least, I already have high trust
+in you in general so if the Freescale maintainers also have that I think you
+should just sign up as maintainer. This makes it easier to do pull requests
+and things like that.
 
-
->  drivers/mmc/host/sdhci-msm.c | 18 +++++++++++++++++-
->  1 file changed, 17 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-msm.c 
-> b/drivers/mmc/host/sdhci-msm.c
-> index b7e47107a31a..1b78106681e0 100644
-> --- a/drivers/mmc/host/sdhci-msm.c
-> +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -1165,7 +1165,7 @@ static void sdhci_msm_set_cdr(struct sdhci_host
-> *host, bool enable)
->  static int sdhci_msm_execute_tuning(struct mmc_host *mmc, u32 opcode)
->  {
->  	struct sdhci_host *host = mmc_priv(mmc);
-> -	int tuning_seq_cnt = 3;
-> +	int tuning_seq_cnt = 10;
->  	u8 phase, tuned_phases[16], tuned_phase_cnt = 0;
->  	int rc;
->  	struct mmc_ios ios = host->mmc->ios;
-> @@ -1221,6 +1221,22 @@ static int sdhci_msm_execute_tuning(struct
-> mmc_host *mmc, u32 opcode)
->  	} while (++phase < ARRAY_SIZE(tuned_phases));
-> 
->  	if (tuned_phase_cnt) {
-> +		if (tuned_phase_cnt == ARRAY_SIZE(tuned_phases)) {
-> +			/*
-> +			 * All phases valid is _almost_ as bad as no phases
-> +			 * valid.  Probably all phases are not really reliable
-> +			 * but we didn't detect where the unreliable place is.
-> +			 * That means we'll essentially be guessing and hoping
-> +			 * we get a good phase.  Better to try a few times.
-> +			 */
-> +			dev_dbg(mmc_dev(mmc), "%s: All phases valid; try again\n",
-> +				mmc_hostname(mmc));
-> +			if (--tuning_seq_cnt) {
-> +				tuned_phase_cnt = 0;
-> +				goto retry;
-> +			}
-> +		}
-> +
->  		rc = msm_find_most_appropriate_phase(host, tuned_phases,
->  						     tuned_phase_cnt);
->  		if (rc < 0)
+Yours,
+Linus Walleij
