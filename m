@@ -2,123 +2,146 @@ Return-Path: <SRS0=IgIp=CG=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1CCBFC433E7
-	for <linux-mmc@archiver.kernel.org>; Fri, 28 Aug 2020 05:09:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D7842C433E6
+	for <linux-mmc@archiver.kernel.org>; Fri, 28 Aug 2020 06:08:25 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id EB9642080C
-	for <linux-mmc@archiver.kernel.org>; Fri, 28 Aug 2020 05:09:44 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B161020791
+	for <linux-mmc@archiver.kernel.org>; Fri, 28 Aug 2020 06:08:25 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="K2gzEacc"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="dQYbjhEl"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726500AbgH1FJl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 28 Aug 2020 01:09:41 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53708 "EHLO
+        id S1727922AbgH1GIW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 28 Aug 2020 02:08:22 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34456 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726338AbgH1FJj (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Aug 2020 01:09:39 -0400
-Received: from mail-pj1-x1042.google.com (mail-pj1-x1042.google.com [IPv6:2607:f8b0:4864:20::1042])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 008C7C06121B
-        for <linux-mmc@vger.kernel.org>; Thu, 27 Aug 2020 22:09:38 -0700 (PDT)
-Received: by mail-pj1-x1042.google.com with SMTP id n3so52911pjq.1
-        for <linux-mmc@vger.kernel.org>; Thu, 27 Aug 2020 22:09:38 -0700 (PDT)
+        with ESMTP id S1725858AbgH1GIR (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Aug 2020 02:08:17 -0400
+Received: from mail-pj1-x1044.google.com (mail-pj1-x1044.google.com [IPv6:2607:f8b0:4864:20::1044])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0AA04C061264
+        for <linux-mmc@vger.kernel.org>; Thu, 27 Aug 2020 23:08:15 -0700 (PDT)
+Received: by mail-pj1-x1044.google.com with SMTP id s2so49297pjr.4
+        for <linux-mmc@vger.kernel.org>; Thu, 27 Aug 2020 23:08:15 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to:user-agent;
-        bh=M4xpwJ3VfAAdK51sDF+C1DZUS1S/ZC/8+tu65yMzW6Q=;
-        b=K2gzEaccXAzpM1PQKdX7+cdYjofnz8Ui+aHuJMoA3db3qIRpYO7uXsRRS2oeRd1+Kg
-         tyDH5wJu5u4A79RbPTcSy7CaDVTjECOl6uhJUMAfizV8VWLo56q3Bq7RpYLRWrNh9Vu6
-         k+/CVMNXc0GddYXwBt3TybTzrKC2/i8rzDXyn5SS5VnXbShluYzlb5nm+obLPEKGpRly
-         kne1v0GyDwyIen+xVKM1xW5Savv5e/jTs99enzM9JIoY/jtBEIK4U4YMAyR24sDrdk4O
-         0TRxYJ84UcYwYsShEdMcbphU+/6shloh+B05VrYkfgdJURWwli/5ZQYnq87LI5HTnSgf
-         J1Cw==
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=Wkk0kqQojZrEOjifkrPuQd7LDxgIRSjnsXOzLYLA0o8=;
+        b=dQYbjhElGdyqNV6ZV4eRZLnjn+zjUbF+jtnas/LabHDnJ+Bjn0HtzNQmB320LDS+96
+         fhlB4zaGpJR3quVew2N2RhJDZht63NvQK61dKvUxIdfZNQr5KwhfqvJE+FSUJjkHylGV
+         PC5K5iEgtt/x33wvKqqocbVo9geCyxNA+eFluF5Sjx/AwofF1lbAbX0nadTZmF1OliRg
+         Z3+2f7jPjXKbtXdaj8DMQOeqbpZsxGr89tRXm8wbD7Z7MCIMpyZv6OdZAIBZulWbkBZa
+         4jvONY/qfEHHjj4vLYdK5/UAxUyH3Wn35F3H3242AshY2o6tOPC7VyXzMc9RqWL3ZJ+4
+         Be1g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to:user-agent;
-        bh=M4xpwJ3VfAAdK51sDF+C1DZUS1S/ZC/8+tu65yMzW6Q=;
-        b=jO1FAJbJIKqAP92/VkODkaIoCNZrL1oFp78RwRdDPpMFSDH2P3FKu8VTrTKP55mb62
-         AvyWVaTrwak97bUgaOfIsX6Jk9dPwBHb5OBnzpMrqhZMHVk4hChuspj96Vvq2G7Ry8uZ
-         UOAdTymuUcP52DeCHWKOs8QPkrDTw4vKCl4L/dT6wDrMzZQ7eQ7/cUScJvRZ6w+eBPpj
-         gpUsd91HBJM7DiOgzYRaE+XF9FjQLdCOZa+c8c8Q0GxufDr5XbrxsihzqaWAiiISOXmx
-         LlRGHyUG03ici8WoNdtBCEPAp1FIp/DkMTokvRIDZOE7LMC9nyYFYzRkOvaRl5dt99Iz
-         hqug==
-X-Gm-Message-State: AOAM533YuRwNDyEp8NQSPO3YcbJJItHUA3asS3Y2PXSWmb6BZsKGCFHr
-        34ZYcj5UbxJRgmde1204CStLsw==
-X-Google-Smtp-Source: ABdhPJzXqVArIpytkRgvLkDrGcAXVpRBlXTIjtihwJUwu3AipIuRUMld0qG+k2M8oycHe8nx80H3jQ==
-X-Received: by 2002:a17:90a:4314:: with SMTP id q20mr131480pjg.49.1598591378247;
-        Thu, 27 Aug 2020 22:09:38 -0700 (PDT)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=Wkk0kqQojZrEOjifkrPuQd7LDxgIRSjnsXOzLYLA0o8=;
+        b=rmwW6Wz6n+0eslZOsmBUosjHCxpn8PnRPF0uobc2p92e2WkvdKb6Cy8DwoLBFy7xXb
+         k8yF6CgiD0IFYzLBR0UPQyxNCh3nmzZ3TCTHKGqL8BjSuY+zsxggkacU3jyQ0H/nkOYj
+         mak+A9wE/kHsnpTfm1LkLnjTxr3mzXi5tZChova0QzMN/NDygMX6KiIaPd3mkPy7j74D
+         /fiGpUJ89gmmGK4wCkqwckshqJJOK+/BBrv5I/aoWtu2JoKUR/ugzxG4xw83Rt2cKite
+         xzkYrLYaXyzQdesKcM9vA/N8nGdXfgCxruFcXeZyNQAiVF91kYaCl4H7TOyd771+bpXH
+         lGKQ==
+X-Gm-Message-State: AOAM530BJIAdvFdiWkaFJ4WEe+65Qj/D35TlyjUs6HBbo/SGTTD1l9dJ
+        UEJRucsuh/fA0KcQijT5OL/I/A==
+X-Google-Smtp-Source: ABdhPJwbf3i6rXPmZ0ExE+Q7jiAQQHIVdD9AnhEKARQdQY7dJTgP0tK4U6F2U2zkZN0+YzfEAQJ7Bw==
+X-Received: by 2002:a17:90a:d3c2:: with SMTP id d2mr303366pjw.112.1598594894529;
+        Thu, 27 Aug 2020 23:08:14 -0700 (PDT)
 Received: from localhost ([122.167.135.199])
-        by smtp.gmail.com with ESMTPSA id n17sm101436pgg.6.2020.08.27.22.09.37
+        by smtp.gmail.com with ESMTPSA id n17sm304177pgg.6.2020.08.27.23.08.13
         (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 27 Aug 2020 22:09:37 -0700 (PDT)
-Date:   Fri, 28 Aug 2020 10:39:35 +0530
+        Thu, 27 Aug 2020 23:08:13 -0700 (PDT)
 From:   Viresh Kumar <viresh.kumar@linaro.org>
-To:     Douglas Anderson <dianders@chromium.org>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>, arnd@arndb.de,
-        naresh.kamboju@linaro.org, vbadigan@codeaurora.org,
-        rnayak@codeaurora.org, Adrian Hunter <adrian.hunter@intel.com>,
+To:     rnayak@codeaurora.org, Adrian Hunter <adrian.hunter@intel.com>,
         Andy Gross <agross@kernel.org>,
         Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Daniel Vetter <daniel@ffwll.ch>,
+        David Airlie <airlied@linux.ie>,
+        Fabio Estevam <festevam@gmail.com>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Jiri Slaby <jirislaby@kernel.org>,
+        Mark Brown <broonie@kernel.org>,
+        NXP Linux Team <linux-imx@nxp.com>,
+        Pengutronix Kernel Team <kernel@pengutronix.de>,
+        Qiang Yu <yuq825@gmail.com>,
+        "Rafael J. Wysocki" <rjw@rjwysocki.net>,
+        Rob Clark <robdclark@gmail.com>,
+        Sascha Hauer <s.hauer@pengutronix.de>,
+        Sean Paul <sean@poorly.run>, Shawn Guo <shawnguo@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Viresh Kumar <viresh.kumar@linaro.org>
+Cc:     linux-pm@vger.kernel.org,
+        Vincent Guittot <vincent.guittot@linaro.org>,
+        Stephen Boyd <sboyd@kernel.org>, Nishanth Menon <nm@ti.com>,
+        Douglas Anderson <dianders@chromium.org>,
+        Naresh Kamboju <naresh.kamboju@linaro.org>,
+        dri-devel@lists.freedesktop.org, freedreno@lists.freedesktop.org,
+        lima@lists.freedesktop.org, linux-arm-kernel@lists.infradead.org,
         linux-arm-msm@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org
-Subject: Re: [PATCH] mmc: sdhci-msm: When dev_pm_opp_of_add_table() returns 0
- it's not an error
-Message-ID: <20200828050935.m32njmxdrgbudw4r@vireshk-i7>
-References: <20200827083330.1.I669bb4dc3d92bd04e9a695f97904797dc8241b79@changeid>
+        linux-mmc@vger.kernel.org, linux-serial@vger.kernel.org,
+        linux-spi@vger.kernel.org
+Subject: [PATCH V2 0/8] opp: Unconditionally call dev_pm_opp_of_remove_table()
+Date:   Fri, 28 Aug 2020 11:37:45 +0530
+Message-Id: <cover.1598594714.git.viresh.kumar@linaro.org>
+X-Mailer: git-send-email 2.25.0.rc1.19.g042ed3e048af
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20200827083330.1.I669bb4dc3d92bd04e9a695f97904797dc8241b79@changeid>
-User-Agent: NeoMutt/20180716-391-311a52
+Content-Transfer-Encoding: 8bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 27-08-20, 08:33, Douglas Anderson wrote:
-> The commit d05a7238fe1c ("mmc: sdhci-msm: Unconditionally call
-> dev_pm_opp_of_remove_table()") works fine in the case where there is
-> no OPP table.  However, if there is an OPP table then
-> dev_pm_opp_of_add_table() will return 0.  Since 0 != -ENODEV then the
-> "if (ret != -ENODEV)" will evaluate to true and we'll fall into the
-> error case.  Oops.
-> 
-> Let's fix this.
-> 
-> Fixes: d05a7238fe1c ("mmc: sdhci-msm: Unconditionally call dev_pm_opp_of_remove_table()")
-> Signed-off-by: Douglas Anderson <dianders@chromium.org>
-> ---
-> 
->  drivers/mmc/host/sdhci-msm.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> index b7e47107a31a..55101dba42bd 100644
-> --- a/drivers/mmc/host/sdhci-msm.c
-> +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -2284,7 +2284,7 @@ static int sdhci_msm_probe(struct platform_device *pdev)
->  
->  	/* OPP table is optional */
->  	ret = dev_pm_opp_of_add_table(&pdev->dev);
-> -	if (ret != -ENODEV) {
-> +	if (ret && ret != -ENODEV) {
->  		dev_err(&pdev->dev, "Invalid OPP table in Device tree\n");
->  		goto opp_cleanup;
->  	}
+Hello,
 
-Wow!
+This cleans up some of the user code around calls to
+dev_pm_opp_of_remove_table().
 
-How many bugs did I introduce with a simple patch :(
+All the patches can be picked by respective maintainers directly except
+for the last patch, which needs the previous two to get merged first.
 
-@Ulf, since this is material for 5.10 I was planning to resend the
-original patch itself with all the things fixed. Will you be able to
-rebase your tree? Or do you want to apply fixes separately ?
+These are based for 5.9-rc1.
 
+Rajendra, Since most of these changes are related to qcom stuff, it
+would be great if you can give them a try. I wasn't able to test them
+due to lack of hardware.
+
+Ulf, I had to revise the sdhci patch, sorry about that. Please pick this
+one.
+
+Diff between V1 and V2 is mentioned in each of the patches separately.
+
+Viresh Kumar (8):
+  cpufreq: imx6q: Unconditionally call dev_pm_opp_of_remove_table()
+  drm/lima: Unconditionally call dev_pm_opp_of_remove_table()
+  drm/msm: Unconditionally call dev_pm_opp_of_remove_table()
+  mmc: sdhci-msm: Unconditionally call dev_pm_opp_of_remove_table()
+  spi: spi-geni-qcom: Unconditionally call dev_pm_opp_of_remove_table()
+  spi: spi-qcom-qspi: Unconditionally call dev_pm_opp_of_remove_table()
+  tty: serial: qcom_geni_serial: Unconditionally call
+    dev_pm_opp_of_remove_table()
+  qcom-geni-se: remove has_opp_table
+
+ drivers/cpufreq/imx6q-cpufreq.c         | 10 ++--------
+ drivers/gpu/drm/lima/lima_devfreq.c     |  6 +-----
+ drivers/gpu/drm/lima/lima_devfreq.h     |  1 -
+ drivers/gpu/drm/msm/disp/dpu1/dpu_kms.c | 14 +++++---------
+ drivers/gpu/drm/msm/disp/dpu1/dpu_kms.h |  1 -
+ drivers/gpu/drm/msm/dsi/dsi_host.c      |  8 ++------
+ drivers/mmc/host/sdhci-msm.c            | 14 +++++---------
+ drivers/spi/spi-geni-qcom.c             | 13 +++++--------
+ drivers/spi/spi-qcom-qspi.c             | 15 ++++++---------
+ drivers/tty/serial/qcom_geni_serial.c   | 13 +++++--------
+ include/linux/qcom-geni-se.h            |  2 --
+ 11 files changed, 31 insertions(+), 66 deletions(-)
+
+
+base-commit: 9123e3a74ec7b934a4a099e98af6a61c2f80bbf5
 -- 
-viresh
+2.25.0.rc1.19.g042ed3e048af
+
