@@ -2,122 +2,137 @@ Return-Path: <SRS0=IgIp=CG=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.9 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-7.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=no
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 12AA7C433E2
-	for <linux-mmc@archiver.kernel.org>; Fri, 28 Aug 2020 14:51:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3DBE7C43461
+	for <linux-mmc@archiver.kernel.org>; Fri, 28 Aug 2020 14:56:21 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E394B2086A
-	for <linux-mmc@archiver.kernel.org>; Fri, 28 Aug 2020 14:51:44 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 18B0320665
+	for <linux-mmc@archiver.kernel.org>; Fri, 28 Aug 2020 14:56:21 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="m3SH83Jh"
+	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="eyWU4USi"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726579AbgH1Ovn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 28 Aug 2020 10:51:43 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59292 "EHLO
+        id S1728009AbgH1O4T (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 28 Aug 2020 10:56:19 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60030 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727964AbgH1Ovg (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Aug 2020 10:51:36 -0400
-Received: from mail-lj1-x241.google.com (mail-lj1-x241.google.com [IPv6:2a00:1450:4864:20::241])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 58D40C061236
-        for <linux-mmc@vger.kernel.org>; Fri, 28 Aug 2020 07:51:35 -0700 (PDT)
-Received: by mail-lj1-x241.google.com with SMTP id 185so1611553ljj.7
-        for <linux-mmc@vger.kernel.org>; Fri, 28 Aug 2020 07:51:34 -0700 (PDT)
+        with ESMTP id S1726878AbgH1O4S (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Aug 2020 10:56:18 -0400
+Received: from mail-vk1-xa43.google.com (mail-vk1-xa43.google.com [IPv6:2607:f8b0:4864:20::a43])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0F6FDC061232
+        for <linux-mmc@vger.kernel.org>; Fri, 28 Aug 2020 07:56:17 -0700 (PDT)
+Received: by mail-vk1-xa43.google.com with SMTP id n193so306396vkf.12
+        for <linux-mmc@vger.kernel.org>; Fri, 28 Aug 2020 07:56:17 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
+        d=chromium.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=ImiWhFwiMiRaDILGK2vYxwtK6H1QbPrDWNEB8Fo5yp0=;
-        b=m3SH83JhPp5zysOZ8UGaOASaGvHwyBdy+dMZYhDz9IjeZrOUNDL7DGC2IYkYpae6UT
-         FpGAiEisi2hdICi2QBwVlxCRBlQYajQ6kIl3apwv6Zd5zwaMsm+woTJe0VxhXsJCBmVB
-         /Krz+up/rlea+pltJEx57NrY0mSwXBmgaoM8eBGVocnnO/EabniaNW7LYGT8om9EynVv
-         CIC9WHLTJ4TqH3GGF/DLZDlPvjr7OZ+u5Gmua0OvS7bbxfJ/KVP9l6u2f80iB9oWA4S5
-         XcREjqO8mQbwzNglMH6NjTAUpG2SBhzd1ox2KvfQMgaZMf3Rcty3gxm60W7RrjIkgx2T
-         DCMQ==
+        bh=gTaoSyHl3HqBsHrY5A4LuCqff0xNJw9//Kl7Y7tQ/M4=;
+        b=eyWU4USiiQHhauh+FMao8Op72UXp1qitc0E2GZbWptF8sa6nAWnBPCn9xxOOXhSXB5
+         aPXkX6rwzK6pL7JZvxRyZskSKLenOvFqESRRJx3DmaPc79bPObCOFBVPDxuCJ1FheAhQ
+         vrB2C/VgFTyn1jotUHzF7U49NATW0dZFMF7zY=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=ImiWhFwiMiRaDILGK2vYxwtK6H1QbPrDWNEB8Fo5yp0=;
-        b=UeRbW4YKzPywikUgWku++xwTx03Qsck9cfUq/lcRKjvYm9p0lmXzZjPr0+pb5h/O+3
-         JtxcL1dVEsIK8BwcAElfp2U0qAMVs2MrpPSecfcYyRhg+QeyRjk+xS74kc942Yvap9Ih
-         /4Z2A+ATCutffFBcYg+4mi2m75ONrvGgiZXliYE/J0oBVV9S4OL+it5c+edBWCKe5BS3
-         66iIcLIXdGcDdaB/E2ookxRA92aI/uIbvWSwAd6+o6yenI3cOK8FAtena6M5PYEhGmlR
-         Dycmu0sPAXJ7WwXYrcCKVIYYGEnrFix+Z3F3LiCvD6KpLa1iNIMQH8v6S6u/RGL/TDUN
-         WeQA==
-X-Gm-Message-State: AOAM532BfGkJlUG3kwjzEN5p5bGWuoMaYLoTZjnRUNSqO8Y8wCPJS3ob
-        7K8rnVZvTa/mEHGJvfNi9v2DPs/Q/wMHAY40qrjzig==
-X-Google-Smtp-Source: ABdhPJz7nqwPZB2YVbmFth99db1dEuQGwLTN+Hy4/7RmCxHXULzHeBqpJLldBTh4ZZ0VSRoDavwoeUh9uKGkK6yVJPw=
-X-Received: by 2002:a2e:9dd0:: with SMTP id x16mr1026817ljj.144.1598626291535;
- Fri, 28 Aug 2020 07:51:31 -0700 (PDT)
+        bh=gTaoSyHl3HqBsHrY5A4LuCqff0xNJw9//Kl7Y7tQ/M4=;
+        b=HDzcBrdESReJ2IShVkIujDW1IYYzU/zK4slqkaj9vSZIz+618qfjLK580XkkRSaPJo
+         RJx0EZmpkHljVp7toW8Mj5N7xzXHmXHvbCdWUBIfMM0JAMdFHx0EZUSvaW1huuTmgvPg
+         P/cbARpFaJgEVqiQD1qcJDZ2q9oFeWODAKyEDmVNv8IZkm6mYfTOt0sOWcJsF5NOADjc
+         t2Gf5QcoFlmB4FFYRe8zLs/hFFK9kHmTYVuZmr3TfFOhhGDh6jG4kYgljDeS9cygymQe
+         OLbtAvkKIyir0JvMVw2qoD0tdQwVjyjsaag2UE8FARfA+ypZbJR44yCyiVpo5y+kwjnv
+         xD9g==
+X-Gm-Message-State: AOAM532tS2wLNz/Ce3FNvrF1yXm6xF8XKJCKG1Hne9GEsXfeDUEmEF6p
+        XB5YChVuhpZxCygq4fU4EnItVcyMGvo3Qg==
+X-Google-Smtp-Source: ABdhPJyMiyuWdHja5/34KWAONo/uFMlo1O1gU4huO14n/tVdTD6Z7gDoXatT8e6pOossRzNNAXQfKw==
+X-Received: by 2002:a1f:7c45:: with SMTP id x66mr1314364vkc.53.1598626576523;
+        Fri, 28 Aug 2020 07:56:16 -0700 (PDT)
+Received: from mail-ua1-f48.google.com (mail-ua1-f48.google.com. [209.85.222.48])
+        by smtp.gmail.com with ESMTPSA id c10sm180357vsp.32.2020.08.28.07.56.15
+        for <linux-mmc@vger.kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 28 Aug 2020 07:56:15 -0700 (PDT)
+Received: by mail-ua1-f48.google.com with SMTP id 68so459054ual.3
+        for <linux-mmc@vger.kernel.org>; Fri, 28 Aug 2020 07:56:15 -0700 (PDT)
+X-Received: by 2002:ab0:3114:: with SMTP id e20mr1362127ual.104.1598626574941;
+ Fri, 28 Aug 2020 07:56:14 -0700 (PDT)
 MIME-Version: 1.0
-References: <20200825193536.7332-1-krzk@kernel.org> <CACRpkdb4j2kJvpY23G-os9gTktZW5HT287MsvMZxC=ovgn_9LQ@mail.gmail.com>
- <20200828130837.GA14163@kozik-lap>
-In-Reply-To: <20200828130837.GA14163@kozik-lap>
-From:   Linus Walleij <linus.walleij@linaro.org>
-Date:   Fri, 28 Aug 2020 16:51:20 +0200
-Message-ID: <CACRpkdaWAzJQz_Z1zsRbyVQNPO2wUogH8U_mDNV2fSkW22zmtQ@mail.gmail.com>
-Subject: Re: [PATCH v3 00/19] dt-bindings / arm64: Cleanup of i.MX 8 bindings
-To:     Krzysztof Kozlowski <krzk@kernel.org>
-Cc:     Shawn Guo <shawnguo@kernel.org>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        Fabio Estevam <festevam@gmail.com>,
-        Rob Herring <robh+dt@kernel.org>,
-        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
-        Pengutronix Kernel Team <kernel@pengutronix.de>,
-        NXP Linux Team <linux-imx@nxp.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Miquel Raynal <miquel.raynal@bootlin.com>,
-        Mark Rutland <mark.rutland@arm.com>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        Anson Huang <Anson.Huang@nxp.com>,
-        Li Yang <leoyang.li@nxp.com>, Han Xu <han.xu@nxp.com>,
-        Frank Li <frank.li@nxp.com>, Fugang Duan <fugang.duan@nxp.com>,
-        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
-        <devicetree@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        linux-mtd@lists.infradead.org, linux-pwm@vger.kernel.org,
-        "open list:SERIAL DRIVERS" <linux-serial@vger.kernel.org>,
-        Linux PM list <linux-pm@vger.kernel.org>,
-        LINUXWATCHDOG <linux-watchdog@vger.kernel.org>
+References: <20200827083330.1.I669bb4dc3d92bd04e9a695f97904797dc8241b79@changeid>
+ <CA+G9fYtWpBQb8Ew_G=bjcR7wBHMgKm=EXV7vuk6FE9m0-4Ef3A@mail.gmail.com> <CA+G9fYt-k9FMq0HcRN5iQyvt7yaz8YMpENcUktm7yQ1y+zgd1A@mail.gmail.com>
+In-Reply-To: <CA+G9fYt-k9FMq0HcRN5iQyvt7yaz8YMpENcUktm7yQ1y+zgd1A@mail.gmail.com>
+From:   Doug Anderson <dianders@chromium.org>
+Date:   Fri, 28 Aug 2020 07:56:03 -0700
+X-Gmail-Original-Message-ID: <CAD=FV=V7SuUEFAtqPhDpW0O9H3bznsGma_n-fB-JArDAtfHrFg@mail.gmail.com>
+Message-ID: <CAD=FV=V7SuUEFAtqPhDpW0O9H3bznsGma_n-fB-JArDAtfHrFg@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-msm: When dev_pm_opp_of_add_table() returns 0
+ it's not an error
+To:     Naresh Kamboju <naresh.kamboju@linaro.org>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Arnd Bergmann <arnd@arndb.de>,
+        Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
+        Rajendra Nayak <rnayak@codeaurora.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Viresh Kumar <viresh.kumar@linaro.org>,
+        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
+        open list <linux-kernel@vger.kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, Aug 28, 2020 at 3:08 PM Krzysztof Kozlowski <krzk@kernel.org> wrote:
-> On Fri, Aug 28, 2020 at 02:51:20PM +0200, Linus Walleij wrote:
-> > On Tue, Aug 25, 2020 at 9:35 PM Krzysztof Kozlowski <krzk@kernel.org> wrote:
-> >
-> > > This is a v3 of cleanup of i.XM 8 bindings and DTSes.
-> >
-> > If you are going to be working a lot on Freescale SoC code going forward
-> > I wouldn't mind if you could add yourself as maintainer for the
-> > Freescale pin controller and GPIO at least, I already have high trust
-> > in you in general so if the Freescale maintainers also have that I think you
-> > should just sign up as maintainer. This makes it easier to do pull requests
-> > and things like that.
+Hi,
+
+On Fri, Aug 28, 2020 at 2:15 AM Naresh Kamboju
+<naresh.kamboju@linaro.org> wrote:
 >
-> Thanks for encouragement.  Indeed I am planning to do more work around
-> i.MX 8M platforms from NXP/Freescale. However there are already four
-> maintainers for Freescale pin controller drivers so I doubt there is
-> need for fifth entry :).
+> On Fri, 28 Aug 2020 at 01:57, Naresh Kamboju <naresh.kamboju@linaro.org> wrote:
+> >
+> > On Thu, 27 Aug 2020 at 21:03, Douglas Anderson <dianders@chromium.org> wrote:
+> > >
+> > > The commit d05a7238fe1c ("mmc: sdhci-msm: Unconditionally call
+> > > dev_pm_opp_of_remove_table()") works fine in the case where there is
+> > > no OPP table.  However, if there is an OPP table then
+> > > dev_pm_opp_of_add_table() will return 0.  Since 0 != -ENODEV then the
+> > > "if (ret != -ENODEV)" will evaluate to true and we'll fall into the
+> > > error case.  Oops.
+> > >
+> > > Let's fix this.
+> > >
+> > > Fixes: d05a7238fe1c ("mmc: sdhci-msm: Unconditionally call dev_pm_opp_of_remove_table()")
+> > > Signed-off-by: Douglas Anderson <dianders@chromium.org>
+> >
+> > Reported-by: Naresh Kamboju <naresh.kamboju@linaro.org>
+> >
+> > I will test this patch and report again on this email thread.
+>
+> Sorry this patch did not solve the reported problem.
 
-I beg to differ. As subsystem maintainer it has happened to me more
-than once that the i.MX pin control patches went unreviewed for weeks.
-Everyone listed for this driver is a kitchen sink maintainer that get
-way too much traffic and things fall over the edge.
+To be fair, I wasn't trying to.  ;-)  That's why I didn't add
+Reported-by to my original patch.  I was trying to solve problems I
+was seeing myself and my patch did solve the problems I was seeing.  I
+only CCed you because I saw that you were having problems with the
+same patch...
 
-> Different question is the GPIO driver which apparently lacks entry in
-> Maintainers file.
+> However, I would be testing the V2 set from Viresh Kumar.
 
-That's probably just an oversight. Feel free to add it!
+I've confirmed that the current mmc/next (with Viresh's new patch) no
+longer breaks me.  :-)
 
-Yours,
-Linus Walleij
+$ git show --format=fuller linux_mmc/next | head -8
+commit 174e889d08aa54219b841464458f81d13fafec93
+Merge: c282fdb49b18 8048822bac01
+Author:     Ulf Hansson <ulf.hansson@linaro.org>
+AuthorDate: Fri Aug 28 14:26:25 2020 +0200
+Commit:     Ulf Hansson <ulf.hansson@linaro.org>
+CommitDate: Fri Aug 28 14:26:25 2020 +0200
+
+    Merge branch 'fixes' into next
+
+-Doug
