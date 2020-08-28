@@ -2,118 +2,105 @@ Return-Path: <SRS0=IgIp=CG=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CC2C2C2BB56
-	for <linux-mmc@archiver.kernel.org>; Fri, 28 Aug 2020 09:12:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DD8A4C433E2
+	for <linux-mmc@archiver.kernel.org>; Fri, 28 Aug 2020 09:15:44 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A199D21532
-	for <linux-mmc@archiver.kernel.org>; Fri, 28 Aug 2020 09:12:11 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1598605931;
-	bh=dl/oE2dXqQqYmllFe32d/zeg/9DKqx8jd7V9ebuQ6Ws=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
-	b=wiqgtgiGVAsA6sNz+w7dE4t7I6+9ZV2rzx3fGBLaDFNtXNMLq47Y+Nrvmi4Pe2g6d
-	 xFW5FfnOMpPD1wpOgu9MtJs3d702mueQUl5tDoIG2YtrqsKAzptYWPYAFe8iXVPiIC
-	 ipnGbJgnXkggMDrXZ1JlTDOdfJm5IK1KKPfuQIqc=
+	by mail.kernel.org (Postfix) with ESMTP id A9FE22080C
+	for <linux-mmc@archiver.kernel.org>; Fri, 28 Aug 2020 09:15:44 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="ARMU3Sm1"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728894AbgH1JMK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 28 Aug 2020 05:12:10 -0400
-Received: from mail-ej1-f67.google.com ([209.85.218.67]:45208 "EHLO
-        mail-ej1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728548AbgH1JMH (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Aug 2020 05:12:07 -0400
-Received: by mail-ej1-f67.google.com with SMTP id si26so542424ejb.12;
-        Fri, 28 Aug 2020 02:12:04 -0700 (PDT)
+        id S1728556AbgH1JPm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 28 Aug 2020 05:15:42 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35282 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728896AbgH1JPe (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Aug 2020 05:15:34 -0400
+Received: from mail-vs1-xe43.google.com (mail-vs1-xe43.google.com [IPv6:2607:f8b0:4864:20::e43])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 06963C061232
+        for <linux-mmc@vger.kernel.org>; Fri, 28 Aug 2020 02:15:33 -0700 (PDT)
+Received: by mail-vs1-xe43.google.com with SMTP id b16so229995vsl.6
+        for <linux-mmc@vger.kernel.org>; Fri, 28 Aug 2020 02:15:33 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=Zi8nSPHMdjjrzjQ95uIpbJn6FzlNcwjQhcXkzfbqLfM=;
+        b=ARMU3Sm1HfR4wX1HJxIZnHKc/bbvOhVrX9LVg6THxme0OoKcI6xmfOkKHnjYpbteCJ
+         VV1vimGJX0cqcH1aC9HPCwBN15ob8K/0SGVqqHmyitfUWuS7psXryKzORuPO1Smy7lvw
+         9HkaLdtakfX2KQt/oN4ePv3vSaRCZ2khzWeB+//oPpndINVRlK7rfd76r1ArDlVIbScf
+         DXrPfgo4r4UQWymB/8otAlH9gstuPpeB4VGamPFYq6kL6FwO+F8J4bczClot5TDZaZXA
+         nYvKm+4/wt3p4bQlQrZtheVKR5Zdm3utMCRueQ/QGk1uzppqHCqs09NbvNR6Bohm5Ekz
+         /KoA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=RBT1OCzQ02U3NCjA6vShk0xXCvUozK7o2xDuaQszpRk=;
-        b=TvccGzRkZO9Yu3GfGDi1oKDH4qFZFKxMRBEdwfVkquCmWvKCkG7e06KvfjXecSYVIP
-         Q6wBJ0hBgzoWEtfpA4XSSZXv664ycTZGw3a3AGtWCZA1hNSkkhsABVt8DSMoSVcKg6FP
-         h3TAVWlCn6/iXyohxSXashNrfUyjVggDMGm4izCGmjCo1Su54I1ciHg9FOyjnHvRLMro
-         +8tDFh4i+mBrZWBW049+RKLTyF+Wg3y8YaaEsMyPMJZD87W8ymdkQURQmLACx6+ZyRo4
-         DD0fiV0h1eDibzWigRmLrnQ2MvmDYwkgvqHsF2tFYA4KzJmmatzEjyzMuajDwaa0g3zv
-         /abQ==
-X-Gm-Message-State: AOAM531lwtRcruNZKFAK71vx3i7fmR28GzdVF6syUsjbWr8Mhv8ppbQ2
-        vTdudhnnvKNvcpkgxW4RqXk=
-X-Google-Smtp-Source: ABdhPJw3xCQnxyK7qlNke96fwa8aWRja8fL7fhhy3QWYB7wgkOEFUlEEvMzYUPI2MkBVhFAa2/goAg==
-X-Received: by 2002:a17:906:40e:: with SMTP id d14mr762072eja.455.1598605924082;
-        Fri, 28 Aug 2020 02:12:04 -0700 (PDT)
-Received: from pi3 ([194.230.155.216])
-        by smtp.googlemail.com with ESMTPSA id bn14sm334810ejb.115.2020.08.28.02.12.02
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 28 Aug 2020 02:12:03 -0700 (PDT)
-Date:   Fri, 28 Aug 2020 11:12:00 +0200
-From:   Krzysztof Kozlowski <krzk@kernel.org>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Rob Herring <robh+dt@kernel.org>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
-        Shawn Guo <shawnguo@kernel.org>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        Pengutronix Kernel Team <kernel@pengutronix.de>,
-        Fabio Estevam <festevam@gmail.com>,
-        NXP Linux Team <linux-imx@nxp.com>,
-        Miquel Raynal <miquel.raynal@bootlin.com>,
-        Mark Rutland <mark.rutland@arm.com>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        Anson Huang <Anson.Huang@nxp.com>,
-        Li Yang <leoyang.li@nxp.com>, Han Xu <han.xu@nxp.com>,
-        Frank Li <frank.li@nxp.com>, Fugang Duan <fugang.duan@nxp.com>,
-        DTML <devicetree@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        linux-mtd@lists.infradead.org, linux-pwm@vger.kernel.org,
-        linux-serial@vger.kernel.org, Linux PM <linux-pm@vger.kernel.org>,
-        linux-watchdog@vger.kernel.org
-Subject: Re: [PATCH v3 12/19] dt-bindings: mmc: fsl-imx-esdhc: Fix i.MX 8
- compatible matching
-Message-ID: <20200828091200.GB17786@pi3>
-References: <20200825193536.7332-1-krzk@kernel.org>
- <20200825193536.7332-13-krzk@kernel.org>
- <CAPDyKFp9m6xBJMGn2TgwD8VEUZ0JwzgowU32qUbL1qgEPua-GA@mail.gmail.com>
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=Zi8nSPHMdjjrzjQ95uIpbJn6FzlNcwjQhcXkzfbqLfM=;
+        b=MvlKupe+ZAjzawSpL8rq2JmtrD0k4DLqw4c8BYYFJSBxCryLycXn2OrjAH3s9I+VfW
+         kpW8GBJvAgl4j24BiDJ8pMDpQ4PaTsCRkzbg0R3AF4RIz7w0RuAs6llx0QlmEsabAhnB
+         im6t5WGDrTyeMOKT/n0XsmQnxgHdGpbrOn8M/xJs4F+LZF9TDyX+17zSUMhMqOeDmSGO
+         k/kZh10r8XXEuAtxgyETo2h/NFbVCymqt/XuPZUiON0azuANpFWmnPW2Yta8k80XKgaG
+         V1xUe7x1MgCArMFu+1eH/xEzf88xlid7eOKZ787N9d79jIDd3WrzgYNQX1albDJlLIAj
+         qeYA==
+X-Gm-Message-State: AOAM5305UOCk5CX9kNADA7w9+D0rHfCPjbFNOvD7m7zmgqEHRlTV++PB
+        7HdqM/J6piazYe/qG9UjEoQwNFE2jBWAJTcI3Mz/pqXJwrkCIA6B
+X-Google-Smtp-Source: ABdhPJyIDuUnOpmtIaCu/f8jrHWtD3Gs+OyjgcG3Z1bCdQZadwCfr0m7nO46s64/KtzS83TI683giQyQ5NxFVTcNIP4=
+X-Received: by 2002:a67:e218:: with SMTP id g24mr227520vsa.167.1598606133029;
+ Fri, 28 Aug 2020 02:15:33 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFp9m6xBJMGn2TgwD8VEUZ0JwzgowU32qUbL1qgEPua-GA@mail.gmail.com>
+References: <20200827083330.1.I669bb4dc3d92bd04e9a695f97904797dc8241b79@changeid>
+ <CA+G9fYtWpBQb8Ew_G=bjcR7wBHMgKm=EXV7vuk6FE9m0-4Ef3A@mail.gmail.com>
+In-Reply-To: <CA+G9fYtWpBQb8Ew_G=bjcR7wBHMgKm=EXV7vuk6FE9m0-4Ef3A@mail.gmail.com>
+From:   Naresh Kamboju <naresh.kamboju@linaro.org>
+Date:   Fri, 28 Aug 2020 14:45:21 +0530
+Message-ID: <CA+G9fYt-k9FMq0HcRN5iQyvt7yaz8YMpENcUktm7yQ1y+zgd1A@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-msm: When dev_pm_opp_of_add_table() returns 0
+ it's not an error
+To:     Douglas Anderson <dianders@chromium.org>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Arnd Bergmann <arnd@arndb.de>, vbadigan@codeaurora.org,
+        Rajendra Nayak <rnayak@codeaurora.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Viresh Kumar <viresh.kumar@linaro.org>,
+        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
+        open list <linux-kernel@vger.kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, Aug 28, 2020 at 10:45:40AM +0200, Ulf Hansson wrote:
-> On Tue, 25 Aug 2020 at 21:37, Krzysztof Kozlowski <krzk@kernel.org> wrote:
+On Fri, 28 Aug 2020 at 01:57, Naresh Kamboju <naresh.kamboju@linaro.org> wrote:
+>
+> On Thu, 27 Aug 2020 at 21:03, Douglas Anderson <dianders@chromium.org> wrote:
 > >
-> > The i.MX 8 DTSes use two compatibles so update the binding to fix
-> > dtbs_check warnings like:
+> > The commit d05a7238fe1c ("mmc: sdhci-msm: Unconditionally call
+> > dev_pm_opp_of_remove_table()") works fine in the case where there is
+> > no OPP table.  However, if there is an OPP table then
+> > dev_pm_opp_of_add_table() will return 0.  Since 0 != -ENODEV then the
+> > "if (ret != -ENODEV)" will evaluate to true and we'll fall into the
+> > error case.  Oops.
 > >
-> >   arch/arm64/boot/dts/freescale/imx8mn-evk.dt.yaml: mmc@30b40000:
-> >     compatible: ['fsl,imx8mn-usdhc', 'fsl,imx7d-usdhc'] is too long
-> >     From schema: Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
+> > Let's fix this.
 > >
-> >   arch/arm64/boot/dts/freescale/imx8mn-evk.dt.yaml: mmc@30b40000:
-> >     compatible: Additional items are not allowed ('fsl,imx7d-usdhc' was unexpected)
-> >
-> >   arch/arm64/boot/dts/freescale/imx8mn-ddr4-evk.dt.yaml: mmc@30b40000:
-> >     compatible: ['fsl,imx8mn-usdhc', 'fsl,imx7d-usdhc'] is too long
-> >
-> > Signed-off-by: Krzysztof Kozlowski <krzk@kernel.org>
-> 
-> Rob, Krzysztof - do you want me to pick this one?
+> > Fixes: d05a7238fe1c ("mmc: sdhci-msm: Unconditionally call dev_pm_opp_of_remove_table()")
+> > Signed-off-by: Douglas Anderson <dianders@chromium.org>
+>
+> Reported-by: Naresh Kamboju <naresh.kamboju@linaro.org>
+>
+> I will test this patch and report again on this email thread.
 
-dt-bindings are independent so they can be applied individually.
+Sorry this patch did not solve the reported problem.
+However, I would be testing the V2 set from Viresh Kumar.
 
-I don't mind you taking it but still Rob's ack/review would be needed.
-
-Other choice is that entire dt-bindings series go through Rob's tree.
-
-Rob, what's your preference?
-
-Best regards,
-Krzysztof
+and report the test results on the other patch set [1].
+[1] https://lore.kernel.org/linux-pm/cover.1598594714.git.viresh.kumar@linaro.org
