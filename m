@@ -2,127 +2,103 @@ Return-Path: <SRS0=IgIp=CG=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-3.9 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
-	version=3.4.0
+	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0C063C433E6
-	for <linux-mmc@archiver.kernel.org>; Fri, 28 Aug 2020 09:23:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2BD11C433E6
+	for <linux-mmc@archiver.kernel.org>; Fri, 28 Aug 2020 09:27:45 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id DE4C0208CA
-	for <linux-mmc@archiver.kernel.org>; Fri, 28 Aug 2020 09:23:04 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 07CCF208D5
+	for <linux-mmc@archiver.kernel.org>; Fri, 28 Aug 2020 09:27:45 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Yw5Y94hL"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="L0FafcRx"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728887AbgH1JXA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 28 Aug 2020 05:23:00 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36424 "EHLO
+        id S1728444AbgH1J1l (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 28 Aug 2020 05:27:41 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37172 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726010AbgH1JWu (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Aug 2020 05:22:50 -0400
-Received: from mail-ua1-x943.google.com (mail-ua1-x943.google.com [IPv6:2607:f8b0:4864:20::943])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A2A71C061264
-        for <linux-mmc@vger.kernel.org>; Fri, 28 Aug 2020 02:22:49 -0700 (PDT)
-Received: by mail-ua1-x943.google.com with SMTP id v20so172020ual.4
-        for <linux-mmc@vger.kernel.org>; Fri, 28 Aug 2020 02:22:49 -0700 (PDT)
+        with ESMTP id S1728788AbgH1J1f (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Aug 2020 05:27:35 -0400
+Received: from mail-vs1-xe41.google.com (mail-vs1-xe41.google.com [IPv6:2607:f8b0:4864:20::e41])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1F93CC061264
+        for <linux-mmc@vger.kernel.org>; Fri, 28 Aug 2020 02:27:35 -0700 (PDT)
+Received: by mail-vs1-xe41.google.com with SMTP id p3so247259vsr.4
+        for <linux-mmc@vger.kernel.org>; Fri, 28 Aug 2020 02:27:35 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=+h9ZmfHl6gD6OPpN/SlVWioXyrTiMAhgaOR2eUM9lrs=;
-        b=Yw5Y94hLnxuDQc0xMuJ3wJ0zdgZ5TprcSHRASqRPnFiahEe7Jsrt1CJdobZrJZZuVu
-         pKBbKeRpUXw5iAK+LJuHCKgKNyb9VYPWO+O2N9iyV+R7ZnBZQyfgmeo5pOWKWzuIwVl+
-         fGx4lWMXvwCfhSKDJ/Y5BzMivxP0K4t1RbiqXmsncmXuWJrllCE1gs8deO3ML2EUaPjE
-         tj5Ab5rOzBDdvxSxqEE0uNP/KfRRugqhQawuXjH2/BrKM+tfPomu3Vuo+xls34YG4128
-         MR98sjAjeqAL5LSR1wPQT6djpvD3rN6T888qiuFx30am718+PJsJefUh+1ZRx8PQFYgO
-         D0+g==
+        bh=52zKqUSdV0qZVoQTtvFuZSla22zZLeCM10kF2S2vylo=;
+        b=L0FafcRxcvqheShftDUhSlbBJqAncc/ePSfPwPCIweprjftt5/BSgKy3BKAM1BIq8e
+         d30cYn4yCMozW389UnScIzZA25N7mV48wgStk8TiZdT1bD6uB962M94nBJaZKxYvo/Gy
+         HU7t/wY2ow3sRQ4AXXumJAONBgcaPrIKF0N0/HyR1NZiEGAeCCCp/6LL8hM7zHiVXksw
+         bQO8ZmKqH8g/4wh2kgPILpNVwbm1LvlKJLjLtafFlsn49lhNg0zke4FGIMadetI0OUW5
+         8HDZwmB0ef7yW3dz4nuGmLZrudcB6G5cqT0pOWgpJ+K/D7+LGf7Czf+JNZ77oJE6OQui
+         K13g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=+h9ZmfHl6gD6OPpN/SlVWioXyrTiMAhgaOR2eUM9lrs=;
-        b=esA4F0rxG8Ij7xzUsPVQazitwBi/wgmQUKo51YVIdMlxmdAKsBx/TbCXqN+6inAUoo
-         1zXZGkQKTrOv/2utNcCk8Lddt41IHRz06efXlO/VwFh8eFxwnAyXkGT/1i39IUgONURm
-         9qgkKoszLkoGPtVPg6JQFSS3yvcITAgjEnwNtOOM/RFiJidYVInA73xSh/txLLtnswRX
-         JrKzpqXnLYGhNKlgsm5BZt0SmOhVPqHU5AVPJ0Yu3FqWHhXe0og5PBUZu6GXERTXHDgi
-         7ctzNh97oSfirs5lqpubsNwrGYcwAAoRmRr4dyQZ9nTMcnSE1SqoZRbHvDVK0uppA4Sz
-         GpFA==
-X-Gm-Message-State: AOAM533HQ9D3Dq3W/sL+c4SOA+odttFShepGjKV7CAvnyWI8rdI1O8oY
-        mBU7opelptP+xyYrCKB9gxWX0wMPmDXNGIrA0mdjyw==
-X-Google-Smtp-Source: ABdhPJxy4rF0dUrJQq4+r6O19pPIHqxVxrAFH3xWa3DmfMA4EagdwmwABlFGcsGn23M3lc2uXFNy1Q0PgUxY25Tr2zA=
-X-Received: by 2002:ab0:3443:: with SMTP id a3mr372138uaq.6.1598606568733;
- Fri, 28 Aug 2020 02:22:48 -0700 (PDT)
+        bh=52zKqUSdV0qZVoQTtvFuZSla22zZLeCM10kF2S2vylo=;
+        b=spF+Nr4Z0Szs6X2dozrvo0wcYu8yknXOob1ElmfQZAZ3CoKydJHxeU3c7YanoAWk7W
+         QXNBATxeJtYjip90evK2Hz4LuHJ0SQ5wKsP9eq73p551JXtUV4FwOqZqNNrRnjJ3m0B9
+         Qxa+vAQIwVk1Hzny5tyIkBNPZcUvQ60ZjmZyO1Ku0hAbAICuIcXBQsemQiNGiHjvHP/c
+         SisnHG7ZzOk8ZRho7Tx8O+N79tpuUOpaSdOv2nwdlQkf9k917LYaJTd1NK/92XK+ROSl
+         wIeh/KVDVZfYnUcUSWD2B1/Bl/4VtG/Yo8umBFj5P9ZQl5P3KKYkBA6X28MRZph93LUc
+         1cMA==
+X-Gm-Message-State: AOAM533Rcx1dMzczQ96hTf99yyo2EW02FwRbpEGEWVJm88wJ2M6L0yqd
+        j7IKlVCD0dVLwEn7r2lnmK89f1I3uLycCTEs+83a8g==
+X-Google-Smtp-Source: ABdhPJy/B7VHMvzvzbEi7QEAfxMZ4jV3nwJaVkTt3w6kaS4gxUPya72WKU4yOeFrkvQuSmkZLEUi4A5sE5rkYCX+fYk=
+X-Received: by 2002:a67:f8ce:: with SMTP id c14mr251691vsp.14.1598606854311;
+ Fri, 28 Aug 2020 02:27:34 -0700 (PDT)
 MIME-Version: 1.0
-References: <CA+G9fYvUwH2FA9GOeA_7GYpLA31uOmEpg32VKnJ8-d5QSK4PdQ@mail.gmail.com>
- <20200827090813.fjugeqbb47fachy7@vireshk-i7> <CAK8P3a2zxybiMDzHXkTsT=VpHJOLkwd1=YTtCNU04vuMjZLkxA@mail.gmail.com>
- <20200827101231.smqrhqu5da6jlz6i@vireshk-i7> <CA+G9fYv=XLtsuD=tVR1HHotwpKLkbwZVyPr4UhY-jD+6-duTmw@mail.gmail.com>
-In-Reply-To: <CA+G9fYv=XLtsuD=tVR1HHotwpKLkbwZVyPr4UhY-jD+6-duTmw@mail.gmail.com>
-From:   Naresh Kamboju <naresh.kamboju@linaro.org>
-Date:   Fri, 28 Aug 2020 14:52:37 +0530
-Message-ID: <CA+G9fYvSEHua0EpW64rASucWuS-U2STAZxufrfN75UDspGt2cA@mail.gmail.com>
-Subject: Re: Kernel panic : Unable to handle kernel paging request at virtual
- address - dead address between user and kernel address ranges
-To:     Viresh Kumar <viresh.kumar@linaro.org>,
-        Stephen Rothwell <sfr@canb.auug.org.au>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Arnd Bergmann <arnd@arndb.de>,
-        Rajendra Nayak <rnayak@codeaurora.org>,
-        open list <linux-kernel@vger.kernel.org>,
-        Linux-Next Mailing List <linux-next@vger.kernel.org>,
-        linux-clk <linux-clk@vger.kernel.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        lkft-triage@lists.linaro.org, John Stultz <john.stultz@linaro.org>,
-        Daniel Lezcano <daniel.lezcano@linaro.org>,
-        Michael Turquette <mturquette@baylibre.com>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Lars Povlsen <lars.povlsen@microchip.com>,
-        madhuparnabhowmik10@gmail.com,
-        Anders Roxell <anders.roxell@linaro.org>
+References: <20200714121856.955680-1-hch@lst.de> <20200714121856.955680-10-hch@lst.de>
+ <20200828020045.GT3265@brightrain.aerifal.cx> <20200828021152.GU3265@brightrain.aerifal.cx>
+ <20200828042422.GA29734@lst.de>
+In-Reply-To: <20200828042422.GA29734@lst.de>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Fri, 28 Aug 2020 11:26:57 +0200
+Message-ID: <CAPDyKFrKJrUN8mJ94g0+0Vs3aT1uq9MmHWfvzcVaoA5efaYPmQ@mail.gmail.com>
+Subject: Re: [PATCH 09/10] sh: don't allow non-coherent DMA for NOMMU
+To:     Christoph Hellwig <hch@lst.de>
+Cc:     Rich Felker <dalias@libc.org>,
+        Yoshinori Sato <ysato@users.sourceforge.jp>,
+        Linux-sh list <linux-sh@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        linux-spi@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 27 Aug 2020 at 17:06, Naresh Kamboju <naresh.kamboju@linaro.org> wrote:
+On Fri, 28 Aug 2020 at 06:24, Christoph Hellwig <hch@lst.de> wrote:
 >
-> On Thu, 27 Aug 2020 at 15:42, Viresh Kumar <viresh.kumar@linaro.org> wrote:
+> On Thu, Aug 27, 2020 at 10:11:53PM -0400, Rich Felker wrote:
+> > > This change broke SD card support on J2 because MMC_SPI spuriously
+> > > depends on HAS_DMA. It looks like it can be fixed just by removing
+> > > that dependency from drivers/mmc/host/Kconfig.
 > >
-> > On 27-08-20, 11:48, Arnd Bergmann wrote:
-> > > > > [    3.680477]  dev_pm_opp_put_clkname+0x30/0x58
-> > > > > [    3.683431]  sdhci_msm_probe+0x284/0x9a0
-> > >
-> > > dev_pm_opp_put_clkname() is part of the error handling in the
-> > > probe function, so I would deduct there are two problems:
-> > >
-> > > - something failed during the probe and the driver is trying
-> > >   to unwind
-> > > - the error handling it self is buggy and tries to undo something
-> > >   again that has already been undone.
-> >
-> > Right.
-> >
-> > > This points to Viresh's
-> > > d05a7238fe1c mmc: sdhci-msm: Unconditionally call dev_pm_opp_of_remove_table()
-> >
-> > I completely forgot that Ulf already pushed this patch and I was
-> > wondering on which of the OPP core changes I wrote have done this :(
-> >
-> > > Most likely this is not the entire problem but it uncovered a preexisting
-> > > bug.
-> >
-> > I think this is.
-> >
-> > Naresh: Can you please test with this diff ?
+> > It can't. mmp_spi_probe fails with ENOMEM, probably due to trying to
+> > do some DMA setup thing that's not going to be needed if the
+> > underlying SPI device doesn't support/use DMA.
 >
-> I have applied your patch and tested but still see the reported problem.
+> Adding the linux-mmc and linux-spi lists, as that seems pretty odd.
 
-The git bisect shows that the first bad commit is,
-d05a7238fe1c mmc: sdhci-msm: Unconditionally call dev_pm_opp_of_remove_table()
+The mmc_spi driver needs modernizations, so I am not surprised to see
+odd things.
 
-Reported-by: Naresh Kamboju <naresh.kamboju@linaro.org>
-Reported-by: Anders Roxell <anders.roxell@linaro.org>
+My guess is that in ->probe() we check "if
+(spi->master->dev.parent->dma_mask)" - > and runs dma_map*()
+operations, which fails and leads to bailing out of ->probe() to
+return an error code.
 
->
-> - Naresh
+However, by looking at the code, one get the feeling that the DMA
+support is somewhat prepared to be made optional. I guess it has never
+been really tested, as the Kconfig option has "depends on HAS_DMA"  -
+and it's been like that as long as I can remember.
+
+Kind regards
+Uffe
