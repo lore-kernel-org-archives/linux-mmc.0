@@ -1,121 +1,141 @@
-Return-Path: <SRS0=bPLn=CF=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=IgIp=CG=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4240DC433E3
-	for <linux-mmc@archiver.kernel.org>; Thu, 27 Aug 2020 20:27:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A83EEC433E7
+	for <linux-mmc@archiver.kernel.org>; Fri, 28 Aug 2020 00:51:54 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 21CE3208CA
-	for <linux-mmc@archiver.kernel.org>; Thu, 27 Aug 2020 20:27:44 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8885720872
+	for <linux-mmc@archiver.kernel.org>; Fri, 28 Aug 2020 00:51:54 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="cW9R1YXa"
+	dkim=pass (1024-bit key) header.d=renesasgroup.onmicrosoft.com header.i=@renesasgroup.onmicrosoft.com header.b="RbgJDyMV"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726243AbgH0U1n (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 27 Aug 2020 16:27:43 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57750 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726854AbgH0U1l (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Aug 2020 16:27:41 -0400
-Received: from mail-ua1-x944.google.com (mail-ua1-x944.google.com [IPv6:2607:f8b0:4864:20::944])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2C5EFC06121B
-        for <linux-mmc@vger.kernel.org>; Thu, 27 Aug 2020 13:27:40 -0700 (PDT)
-Received: by mail-ua1-x944.google.com with SMTP id y2so2089674uaq.0
-        for <linux-mmc@vger.kernel.org>; Thu, 27 Aug 2020 13:27:40 -0700 (PDT)
+        id S1727043AbgH1Avy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 27 Aug 2020 20:51:54 -0400
+Received: from mail-eopbgr1310093.outbound.protection.outlook.com ([40.107.131.93]:45472
+        "EHLO APC01-SG2-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1726147AbgH1Avw (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 27 Aug 2020 20:51:52 -0400
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=aNYoob9PzjJJt72BZgZhUMOilg6Ue31UFAggqXQGgJeNFbSZniJW3XgUdnbTy32H24Nm+XYdBZ0gnBXCD+3rAfDq0zju6vI/2xdgC8B9Fd5SNXz2UQbnOW/fOHNFr2t663ZFjkV5lBPb3QHpHMk3DJD6dJCzuZW+QJ0OuKWedsoUkoFKcvPuQtQeQvN1TyF4vS4eIfrHYtxwlrVKW9tCtKWk1gn6AnWB6G/igRG3JNcJBR5MAIBTI6jc+XtdHgLSHoaxA58p3KltmHE/fjuruW+Ltd2AUOg/0gAVZ1XM2Eofgku3R6UmI6T3HVx214Oby+QCQGaGHWP1KFPNebI2tQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=v83rRVaFeplPP73XSSbstVRHVQX+2C4Hud1FPPn+dXs=;
+ b=h5WvQsnJtgj/tEhcM6guU7+BzOsNKRgf+OnfraQDpC/zbPkJh26xjxU7gyNYj92Ii5bYoC4XEz5+KvaDXrrsu73qimZ6RZDbNzWt9VgpUK9uTzr8mA+WUpm+Z/WPyvCJASM/N4OgRBz72bM5Q+46ci7gQJijRGoCMmZWoNKQcvTICIm4Q8TfYLBWCE0CWORC09UwhODZdm0QXp1RenGdq57g143Y+62dugYHvjm83MqQkzcIsb/DSQVRZDOOHzFGlSr/5Tcv9YHezytfwroL7Qhlwg3Tbg8vvNfS0W95FtbKRR/1ZOGCpsvvRu32u5NjGQwN6vKw/js3NWzLHkS4Tw==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=renesas.com; dmarc=pass action=none header.from=renesas.com;
+ dkim=pass header.d=renesas.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=pZ//jLyEGc9rQ/5ywgZs9AFGiQ4M3Jn6N3wi0W6fLTk=;
-        b=cW9R1YXaVzPIgb19g8eHR8EByOO083Db4fVQIjH2ZM5PSNpYKloAXezTr/CP2u/mQA
-         fvI9or4iuYtkKnYTQoORu5kv3YBwvSNmt9ZZYuPrUupI2TegHbXdJTPo5YypvYmxp8hx
-         rJiqqxwpyyyZkCI0eAxr5m+KSQX1SjZBLpCz35ERVmRV7XMyrHFdzaY/PyiEvIVAq5X9
-         hHQWjx4uhvCQ09u5QjwypG+jFOEFmJfRes61/kzhSe4xTo/Jk9QDPScuRoskWUDeWlXC
-         2rn4iNmGYiWNVazbSXBBgM/hv6Lc0RAc09bPUmSAdDsk4LD33n2Castf2l92TfPyELj5
-         77Xg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=pZ//jLyEGc9rQ/5ywgZs9AFGiQ4M3Jn6N3wi0W6fLTk=;
-        b=flDztjeVu9mZHsxkc3+5NBBXDxHkiQ/kSXrQ+zuFoKB+CB+wjN8YyArb8jJmRoXKa0
-         S/KDH3t1IJpxZnIAhpsAoys+p7pyIkSsxH13u+LIDswIJV1I/nRVahmu9T5Vtx5CAK6n
-         oZ58UFLfF/apt2tAYyqIdazjCyjYdjCTKw7VPathgPBdLGWlgEdYhnGv31F1SQFMrD2F
-         MgAG+jFA/CW5K9SfqwJSkXUXd72HReY8jdZmMs6lB4AHBQzR5tKs5Bh2kBeM+HcgDQA2
-         au8WOO+vRJ0vIEBF8R9t1yrELOJMg2Qyfhs48bFbEH8NBMY5dQl0sMl3ZsBN95wFY4Rg
-         tiLQ==
-X-Gm-Message-State: AOAM531FhtU04OSCWCXaWjvF2X390epOp9CmrLebtNwLsBWJkOFo+qzK
-        Aeac9PH141j9mEQJvK9RdwkCQda8sIS1FAfqJM9NLg==
-X-Google-Smtp-Source: ABdhPJxzBjdIjLP+fic8QVRqI7i2HXnTm0gMDDu/fk4wtDvJw2bF8nvr92kZ7hQ/2QAwAvkj2Lc4HmeA0C6LORz2ceA=
-X-Received: by 2002:ab0:142e:: with SMTP id b43mr14014891uae.7.1598560057400;
- Thu, 27 Aug 2020 13:27:37 -0700 (PDT)
+ d=renesasgroup.onmicrosoft.com; s=selector2-renesasgroup-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=v83rRVaFeplPP73XSSbstVRHVQX+2C4Hud1FPPn+dXs=;
+ b=RbgJDyMVAiVDM9JeSdJ/wgHaBNh88E70G+nRnd10NyjEJKpUVUkYYzS3NBamfSWFX6riYthrS8kvlEtm5YFmDQbLWP6hHBVz419+P9wRE8YvlU6JWCSp/Y4LEOuv0Ilt/6EKbsI4pkMv+ZdmPeImU9TrjPtUVYKVDCRcGbMkzu0=
+Received: from TY2PR01MB3692.jpnprd01.prod.outlook.com (2603:1096:404:d5::22)
+ by TY2PR01MB4218.jpnprd01.prod.outlook.com (2603:1096:404:d3::10) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3305.26; Fri, 28 Aug
+ 2020 00:51:45 +0000
+Received: from TY2PR01MB3692.jpnprd01.prod.outlook.com
+ ([fe80::9083:6001:8090:9f3]) by TY2PR01MB3692.jpnprd01.prod.outlook.com
+ ([fe80::9083:6001:8090:9f3%6]) with mapi id 15.20.3305.032; Fri, 28 Aug 2020
+ 00:51:45 +0000
+From:   Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
+CC:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-renesas-soc@vger.kernel.org" 
+        <linux-renesas-soc@vger.kernel.org>
+Subject: RE: [PATCH 2/2] mmc: renesas_sdhi: keep SCC clock active when tuning
+Thread-Topic: [PATCH 2/2] mmc: renesas_sdhi: keep SCC clock active when tuning
+Thread-Index: AQHWOmI34Rq2naXnyEWINhVI/t25BKjORxnQgAD7OwCAANxGQIBngd8AgBWPxKA=
+Date:   Fri, 28 Aug 2020 00:51:45 +0000
+Message-ID: <TY2PR01MB3692C46B1A21109E7CC03478D8520@TY2PR01MB3692.jpnprd01.prod.outlook.com>
+References: <20200604112040.22144-1-wsa+renesas@sang-engineering.com>
+ <20200604112040.22144-3-wsa+renesas@sang-engineering.com>
+ <TY2PR01MB36923A1D7091431CE3F73195D8850@TY2PR01MB3692.jpnprd01.prod.outlook.com>
+ <20200608212702.GD917@ninjato>
+ <TY2PR01MB3692310754A6B4D6A05DADF0D8820@TY2PR01MB3692.jpnprd01.prod.outlook.com>
+ <20200814071500.GA9410@ninjato>
+In-Reply-To: <20200814071500.GA9410@ninjato>
+Accept-Language: ja-JP, en-US
+Content-Language: ja-JP
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+authentication-results: sang-engineering.com; dkim=none (message not signed)
+ header.d=none;sang-engineering.com; dmarc=none action=none
+ header.from=renesas.com;
+x-originating-ip: [240f:60:5f3e:1:b16e:b7b1:d350:3c9a]
+x-ms-publictraffictype: Email
+x-ms-office365-filtering-ht: Tenant
+x-ms-office365-filtering-correlation-id: 12571868-2cd7-4fd0-3366-08d84aec89d0
+x-ms-traffictypediagnostic: TY2PR01MB4218:
+x-microsoft-antispam-prvs: <TY2PR01MB4218F73459CFF49D8EC831EBD8520@TY2PR01MB4218.jpnprd01.prod.outlook.com>
+x-ms-oob-tlc-oobclassifiers: OLM:10000;
+x-ms-exchange-senderadcheck: 1
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: KSbsLibdL6w9QtugDlrCwR5W6RCZJdxX4Wv+20pjAOg0cLychQpWqvqQxyr3KJHp15v6vrs6C2o4/ZSiD9xnzca8YnwYDwPsvpxi00O/I9xb4idjp1Qt6FHl7jQFXXawgp4pMyYjITw4Mi3RlR/hv/w4wLljdEwa+ckz59ID4DC1/a+839HfOwSma+sMKUUKA+9SzaIJqcCHDITjb6lqodFV8HgDL2LEdAn8CLmloHycLrpocsLwMa7WU/LMZlwZYDhJ8wmKb6I9d549RaKtF7rcifI+CYWxBC5MnCPKOQM4FbuvPcEPZhtoENJ9oOJMJE1XSnh+2HypabEI0aXlQA==
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY2PR01MB3692.jpnprd01.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(346002)(39860400002)(366004)(396003)(136003)(376002)(2906002)(9686003)(33656002)(316002)(66946007)(8936002)(83380400001)(71200400001)(7696005)(76116006)(6506007)(54906003)(55016002)(8676002)(4326008)(52536014)(66446008)(66476007)(478600001)(186003)(66556008)(86362001)(5660300002)(64756008);DIR:OUT;SFP:1102;
+x-ms-exchange-antispam-messagedata: ADyW+WT1pL+i9oDeP9iF/tIqeizdkONh4Lp2XC0rAAXmv8VHIrpzFwMjhpZ2rUMV8FVyogqn59sPwm/pscFQWWZwk0iSAp8U2S7e/ywVhOOGp+xaPcJWujajZji7szktKJecKvEzBMWvCiSPLTw11IWFrkWYXVC71ttQ8RqOMlFJck9C6rclG4HIsqQyG7s6Le1/S10LY+GYTgJX8rRexOUnpQup4TWdfN7yraPNti74ghCGVroI5iQe6HeYohhEDCwRMy94PwxqjJGVn9vn6RDPpjYwZxoiAIrKpb9CmHQWASugxwhr9xACW82LhFNHBLFwYx7rWvuHOQYGk1PrN4kMrLAvJhbIhkGeaRsOW2Md30aZCam3BoDikzDkMwAPgNorYyDFfThzwU980j+gpNJjx8NESxC4LmfBpjQme4R0/IcuDm3nF6G5P46i5oBYIgi6fFmscbkkZZb/CSFFcc1KNX0u5bMkjNR1V7EUJS5MMRxJ3TSXo0QkJXT3O+e4mBBbjb93UTWP060kmY800CaOto26z+PgyFp18lsNYUbXd0guiCnRBe73KpWbx0Me9kQcQt//z7gQruqaOx3pE4Mzwt6lELEoLUJw6DXv9JyWDbb+6scPMUfW1a5tuAkssyJC0UrMn74CfiXwzXmuky14bDFLVMmxxqOeGZ63yknUreb7y1gha28GCC5E96R93J3ce3f7foas1Q9k6M1xHQ==
+x-ms-exchange-transport-forked: True
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 MIME-Version: 1.0
-References: <20200827083330.1.I669bb4dc3d92bd04e9a695f97904797dc8241b79@changeid>
-In-Reply-To: <20200827083330.1.I669bb4dc3d92bd04e9a695f97904797dc8241b79@changeid>
-From:   Naresh Kamboju <naresh.kamboju@linaro.org>
-Date:   Fri, 28 Aug 2020 01:57:25 +0530
-Message-ID: <CA+G9fYtWpBQb8Ew_G=bjcR7wBHMgKm=EXV7vuk6FE9m0-4Ef3A@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-msm: When dev_pm_opp_of_add_table() returns 0
- it's not an error
-To:     Douglas Anderson <dianders@chromium.org>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Arnd Bergmann <arnd@arndb.de>, vbadigan@codeaurora.org,
-        Rajendra Nayak <rnayak@codeaurora.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>,
-        Viresh Kumar <viresh.kumar@linaro.org>,
-        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
-        open list <linux-kernel@vger.kernel.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+X-OriginatorOrg: renesas.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: TY2PR01MB3692.jpnprd01.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 12571868-2cd7-4fd0-3366-08d84aec89d0
+X-MS-Exchange-CrossTenant-originalarrivaltime: 28 Aug 2020 00:51:45.6816
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 53d82571-da19-47e4-9cb4-625a166a4a2a
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: Ht7P36KdSLp58Cv148GpPNRVi0wfKKG9ruSi3BNl7drzmHtSoKyurq7h7SbzXxWRH0P6PqQPq4kG4pcFmkaPnm9dhLemyqZx8IWv88WxeleleBaKH5gFb332pWUFttzu
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: TY2PR01MB4218
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 27 Aug 2020 at 21:03, Douglas Anderson <dianders@chromium.org> wrote:
->
-> The commit d05a7238fe1c ("mmc: sdhci-msm: Unconditionally call
-> dev_pm_opp_of_remove_table()") works fine in the case where there is
-> no OPP table.  However, if there is an OPP table then
-> dev_pm_opp_of_add_table() will return 0.  Since 0 != -ENODEV then the
-> "if (ret != -ENODEV)" will evaluate to true and we'll fall into the
-> error case.  Oops.
->
-> Let's fix this.
->
-> Fixes: d05a7238fe1c ("mmc: sdhci-msm: Unconditionally call dev_pm_opp_of_remove_table()")
-> Signed-off-by: Douglas Anderson <dianders@chromium.org>
+Hi Wolfram-san,
 
-Reported-by: Naresh Kamboju <naresh.kamboju@linaro.org>
+> From: Wolfram Sang, Sent: Friday, August 14, 2020 4:15 PM
+>=20
+> > > > > +	/* Tuning done, no special handling for SCC clock needed anymor=
+e */
+> > > > > +	priv->keep_scc_freq =3D false;
+> > > > > +
+> > > >
+> > > > Setting keep_scc_freq to false is only here. But, I'm thinking
+> > > > we should set it in some error paths like below somehow too:
+> > > >  - error paths before hs400_complete() in mmc_select_hs400().
+> > > >  - error path of mmc_execute_tuning() in mmc_retune().
+> > >
+> > > Hmm, I guess you are right. That would kind of spoil my approach take=
+n
+> > > here. Maybe we need another flag in the core like 'doing_tune' to
+> > > supplement 'doing_retune', so or driver knows when any kind of tuning=
+ is
+> > > going on?
+> >
+> > Adding such a new flag is better, I think.
+>=20
+> So, I added a flag to the MMC core and I think it should work. However,
+> I can't test it currently because, sadly, the issue disappeared again :(
 
-I will test this patch and report again on this email thread.
+I got a report from a colleague about this issue. According to the report,
+this issue is related to retuning. When retuning happens, the mmc core
+calls mmc_hs400_to_hs200() and then mmc_hs400_to_hs200() will set the clock
+as 52MHz at first. So, it's possible to cause the issue.
 
-> ---
->
->  drivers/mmc/host/sdhci-msm.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> index b7e47107a31a..55101dba42bd 100644
-> --- a/drivers/mmc/host/sdhci-msm.c
-> +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -2284,7 +2284,7 @@ static int sdhci_msm_probe(struct platform_device *pdev)
->
->         /* OPP table is optional */
->         ret = dev_pm_opp_of_add_table(&pdev->dev);
-> -       if (ret != -ENODEV) {
-> +       if (ret && ret != -ENODEV) {
->                 dev_err(&pdev->dev, "Invalid OPP table in Device tree\n");
->                 goto opp_cleanup;
->         }
-> --
-> 2.28.0.297.g1956fa8f8d-goog
->
+It's difficult to cause retuning in normal situation. But, according to
+the report, if we add a code which the sdhi driver reports an error
+at the first CMD18 once, we can cause retuning and then the issue happens.
 
-- Naresh
+Best regards,
+Yoshihiro Shimoda
+
