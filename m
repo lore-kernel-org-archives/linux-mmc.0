@@ -2,131 +2,152 @@ Return-Path: <SRS0=IgIp=CG=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F15BEC433E7
-	for <linux-mmc@archiver.kernel.org>; Fri, 28 Aug 2020 12:19:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 78078C433E6
+	for <linux-mmc@archiver.kernel.org>; Fri, 28 Aug 2020 12:23:48 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id CFF5720848
-	for <linux-mmc@archiver.kernel.org>; Fri, 28 Aug 2020 12:19:07 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 52D4520872
+	for <linux-mmc@archiver.kernel.org>; Fri, 28 Aug 2020 12:23:48 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=renesasgroup.onmicrosoft.com header.i=@renesasgroup.onmicrosoft.com header.b="IED3yhiQ"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Nk2iyxnX"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729155AbgH1MTG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 28 Aug 2020 08:19:06 -0400
-Received: from mail-eopbgr1410132.outbound.protection.outlook.com ([40.107.141.132]:6115
-        "EHLO JPN01-OS2-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1726904AbgH1MTD (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 28 Aug 2020 08:19:03 -0400
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=Iju/eRsKEFki1hp2CAggeP1GL8EkDJAj2LH1DP5oFpXa15bGtyftC3e35BcyQYryHRnukqdN5GQxFUl/4S9PA3ISIWS4RpPAwYoqPwREJwnBz/ya3+2fYm5UevFibRa0EGX3oNgRNP1I+UAFwlcZfRu2vSmVDltBpfKnqaFcGIAb+fbdDiMND2n1M1WZV425Ta82UzWMdbnrYqC7hw48TDYrOS/WUhWqcBhcACpZmDO7EOjA3ATGAq9PNVfv70XVFs/HEBlcGDi2+HMaz6u7AVRsCqBzNFcRacqiQNJz+iPx/jkttrG2xibSOL4wN6bqQ44M2teMrP5Srttf0/9r4Q==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=I0Hps5R16v3Zx8vtwcWi3znIu231Nutnrwn9FGcfBAA=;
- b=HPomwV2pHzz6SlWwrCp4mU3cncwgmDko3BRDT6beF5urU1Yhbj6Ex+fy0JRDxj5/DR07rcHaJal4vL9/K3RWxAS1fLUeKOJztygE071+Yq2ytHXNmdsiVC8ed52TAm0di6t6VA3N7FUhXa7UNwTeGVrqK/n9Q5ECGH3vQPYsdgU9/1Gh0s13Kum/7WeBC0HL2mz5cq4GnKQeDvz/MWZQfhGiN5vgJk2XjJFoc16LZpW5VOujgGukEfJLKVE3FhgtJzjuxydRW5BpLB0JKRGgTGXSwYWJo9n4662MhWsZvxJCanIhIY559t8Q0Lu0aJIgLkVkpRrAP2UkezPKq+/aFQ==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=renesas.com; dmarc=pass action=none header.from=renesas.com;
- dkim=pass header.d=renesas.com; arc=none
+        id S1729296AbgH1MXq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 28 Aug 2020 08:23:46 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36234 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1729155AbgH1MXm (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Aug 2020 08:23:42 -0400
+Received: from mail-vs1-xe44.google.com (mail-vs1-xe44.google.com [IPv6:2607:f8b0:4864:20::e44])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F044BC06121B
+        for <linux-mmc@vger.kernel.org>; Fri, 28 Aug 2020 05:23:39 -0700 (PDT)
+Received: by mail-vs1-xe44.google.com with SMTP id u131so455839vsu.11
+        for <linux-mmc@vger.kernel.org>; Fri, 28 Aug 2020 05:23:39 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=renesasgroup.onmicrosoft.com; s=selector2-renesasgroup-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=I0Hps5R16v3Zx8vtwcWi3znIu231Nutnrwn9FGcfBAA=;
- b=IED3yhiQ385KGY5X3Yfkrlk6LWasXiaOxMuPDS+bbGR6m7XdEzYfGbWyqoBjKXLJJkTnvJMEDr2m4FOHrXw+pplh2ydmw5UsEFN7R7xYVkFvw3YAENfqxIVMcGCTVyukgOZNNNsZdFEjGR4C2FITRI8pvvZpWZUYuZwD0IgyyI0=
-Received: from TY2PR01MB3692.jpnprd01.prod.outlook.com (2603:1096:404:d5::22)
- by TYAPR01MB2958.jpnprd01.prod.outlook.com (2603:1096:404:85::21) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3326.19; Fri, 28 Aug
- 2020 12:19:00 +0000
-Received: from TY2PR01MB3692.jpnprd01.prod.outlook.com
- ([fe80::9083:6001:8090:9f3]) by TY2PR01MB3692.jpnprd01.prod.outlook.com
- ([fe80::9083:6001:8090:9f3%6]) with mapi id 15.20.3305.032; Fri, 28 Aug 2020
- 12:19:00 +0000
-From:   Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-To:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-CC:     "linux-renesas-soc@vger.kernel.org" 
-        <linux-renesas-soc@vger.kernel.org>
-Subject: RE: [RFT] mmc: tmio: reset device on timeout, too
-Thread-Topic: [RFT] mmc: tmio: reset device on timeout, too
-Thread-Index: AQHWd5Nzg4tKYT7IDky74I31z7szlKlNeZzg
-Date:   Fri, 28 Aug 2020 12:18:59 +0000
-Message-ID: <TY2PR01MB3692ED98183C4248163CECAFD8520@TY2PR01MB3692.jpnprd01.prod.outlook.com>
-References: <20200821081654.28280-1-wsa+renesas@sang-engineering.com>
-In-Reply-To: <20200821081654.28280-1-wsa+renesas@sang-engineering.com>
-Accept-Language: ja-JP, en-US
-Content-Language: ja-JP
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-authentication-results: sang-engineering.com; dkim=none (message not signed)
- header.d=none;sang-engineering.com; dmarc=none action=none
- header.from=renesas.com;
-x-originating-ip: [124.210.22.195]
-x-ms-publictraffictype: Email
-x-ms-office365-filtering-ht: Tenant
-x-ms-office365-filtering-correlation-id: e677614a-19b7-4d5f-a31c-08d84b4c8b6a
-x-ms-traffictypediagnostic: TYAPR01MB2958:
-x-microsoft-antispam-prvs: <TYAPR01MB29584D305AAE213665CCE0BBD8520@TYAPR01MB2958.jpnprd01.prod.outlook.com>
-x-ms-oob-tlc-oobclassifiers: OLM:10000;
-x-ms-exchange-senderadcheck: 1
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: N722hG/2oEVPYUxG75COF/T46lJXrN/1gejjaSCh/hu0zvHshsEKHJ1NmcJMlF/iZRWv89HheCsXLbKoP0TXIxQ4XV6NOqQu8j5wT9YFYI5JVmvtMETaiKdXAmNhSnq1NwCl30Sk+B3dvPuO79dZJQSxfr8oo6xBRXOr+FRHmmE+3ou5Zw3PRahjWNimwnpWOBU5lVlus2bO8basyBZ32AA3OoHP6Q4CUHO9uoXbEjwlCFmIWswDGmP6XffmS7Rr82YnsC7hhcCi9+Fg+XZqGTrnaOEBI69ryJLUuqdhYbgTW6fHKoG9hYnux6xAHP3XF1cZdubI0ev8PyePQFIXWg==
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY2PR01MB3692.jpnprd01.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(396003)(136003)(376002)(39860400002)(366004)(346002)(7696005)(478600001)(66556008)(316002)(6506007)(66946007)(83380400001)(71200400001)(66446008)(8676002)(64756008)(66476007)(26005)(86362001)(52536014)(55236004)(33656002)(9686003)(55016002)(110136005)(2906002)(4326008)(8936002)(186003)(76116006)(5660300002)(4744005);DIR:OUT;SFP:1102;
-x-ms-exchange-antispam-messagedata: 7G5ojpwW8rhCiVInKLO41fYkoolZJipLsr2MlBQ+7QQvtOV8fPnnaL3HAGufXQNMdi/eAXr0GlR83oS7ZPHnz7wZ3xfEKKoeEuX0R9GqgD/a8hKqUCzOZWSsCjNUQEwBvo1Rs5Qe+yTv3qSjoDRV58IEzpdxb6XZOpFLHxbKxziVmeoS/SYMu5RS0SSzGA+hWWoSSIfoFWoizJEXmiRrcCpZUEkC+LYR8WSB9ENRoAwF/T25oKZrT/OKMc43l9rsgbErYLNq0DxM1PTC1F1giTZz9S9/HETd516sdeP+y15Nc8HrplT+f0MpNq1JY+t2hLeG9tueZ3agPCaHE+kCXgcSgIavfpkioabynxyu2GvbDiNB3AWDPZoVjtz83SijJ0+dZwiT0/NZ7yMafW5CJwUknhKpEnZJZfbFkTJdpg4qH0Wy52hWzx/221/O/MJpAUpiazDEqDQov7Be8C8KEhdNCdUj5dCV5bQA7uOC2Hftu5WH3ZNrUptgcbqquVVeDxEyFcshIEwLYosVHxZkyV03WeJiMu9+HLQWyKVPYpb++UbMS94P7/LdZ22grxFyWu36nfpHHqddpoxCPTcLRtXe5kuPS1dCGATmIYHw6OqoHy71nNpMqRPWCVO76N1hFP79vCElFFqrfW4SZGBruQ==
-x-ms-exchange-transport-forked: True
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=l+h+5XJ+em1JYNkK91WZyfQCnc3U3ITRWLKDQcz7Tz8=;
+        b=Nk2iyxnX3VcxNGcUkNfIcs/0gqMCwNoJycWt9IuI72hQw1RDzGqQYv7T/Oci9THJPg
+         YsMMWXtr8YQ7KsKBT36Oi7lM1LgchA/VZvPxFTBcCFQtxVh/gw0x3onsqlTtfi5PhfKv
+         R+V/gIIDTMO/xIcnZfV3eS5Zd+KV+JAc0VjP+eOxgIGsySwx3cEJgIu5Thcl/c/sOacK
+         UY9ynuhxom0XR3cLW31i2OeeFecjBDmU67bQbmlGl9u5FY6LzL14w5AAFFlROCh6GuNz
+         sqk41UtOVvJrfnbDIcYXZ+ta3tieXLtw4292FTBf+++492g/DGSMpiVeowZXfWh0OGId
+         Q6lg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=l+h+5XJ+em1JYNkK91WZyfQCnc3U3ITRWLKDQcz7Tz8=;
+        b=YDGn3Or4ESa/ZZcw56KFLjSIEyy18NIELPBU9lDg8EbAjz2B1+r9XJdB1efd5yc/Ut
+         40wbmUG10vSUHAsIyonZbCgvkU6C9KX5IMKF3YNYCexYaR6bLZTFIvWRz80uwEutUqbk
+         PWwfmkPN5nNRSvp58PqLIQ/TCkGFYUoKPGQizZLgj04dHHajbCOzRPvbtPFPOmZzhzF3
+         IxR0jFl9vaxOunG1LF4+OypbLUJQPQaG2m42DYIZlh4RpcOkOrsvIWXraRgw8l2RR9bk
+         JDGdB7QDfxgmivfgPI26zsXGern8BY0tekSeXPi58OuHnDYD8MNLKJG5ZWiET0/UPPGj
+         8eAw==
+X-Gm-Message-State: AOAM533Nvnh04dbKNHXCLOlk1Hl/lfNx+MRSP7ks6SNoJ3RvONCPaZr9
+        lVlMZaHdbD6Pxyla4yg33GL4jOz8iQPyz4N98JHBUA==
+X-Google-Smtp-Source: ABdhPJyjruMDViNwBvxoZ1ZSIkD9wSIeXDFzCU5GboJ6CETuh0DyRNRlHDBPQo2WEgCHhwlh2jCNV5uFFcOWjVVFIfw=
+X-Received: by 2002:a67:f8ce:: with SMTP id c14mr634530vsp.14.1598617419004;
+ Fri, 28 Aug 2020 05:23:39 -0700 (PDT)
 MIME-Version: 1.0
-X-OriginatorOrg: renesas.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: TY2PR01MB3692.jpnprd01.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: e677614a-19b7-4d5f-a31c-08d84b4c8b6a
-X-MS-Exchange-CrossTenant-originalarrivaltime: 28 Aug 2020 12:18:59.9805
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 53d82571-da19-47e4-9cb4-625a166a4a2a
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: 35wBGQiB8BpYVV4FYJUSmdUXO65GqQbUqX8Q1kFodar6IVX1/14taRnETYYllhBsKM29DVEeCdYfGFWii5jOcXJPHQzp7Hr3AeVDehNQoJQXeGsYU/ueIPf5h0RrX2of
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: TYAPR01MB2958
+References: <CA+G9fYvUwH2FA9GOeA_7GYpLA31uOmEpg32VKnJ8-d5QSK4PdQ@mail.gmail.com>
+ <20200827090813.fjugeqbb47fachy7@vireshk-i7> <CAK8P3a2zxybiMDzHXkTsT=VpHJOLkwd1=YTtCNU04vuMjZLkxA@mail.gmail.com>
+ <20200827101231.smqrhqu5da6jlz6i@vireshk-i7> <CA+G9fYv=XLtsuD=tVR1HHotwpKLkbwZVyPr4UhY-jD+6-duTmw@mail.gmail.com>
+ <CA+G9fYvSEHua0EpW64rASucWuS-U2STAZxufrfN75UDspGt2cA@mail.gmail.com>
+ <CAPDyKFrpOqpBiSvkvO7sXHiQDOwdXYmx-80Ji5wW79QF-MrOuQ@mail.gmail.com> <CADYN=9K3D3OZ5T_K+6MfcgVLRoktPB6LvwDiXGj-+Zpq3faYfg@mail.gmail.com>
+In-Reply-To: <CADYN=9K3D3OZ5T_K+6MfcgVLRoktPB6LvwDiXGj-+Zpq3faYfg@mail.gmail.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Fri, 28 Aug 2020 14:23:02 +0200
+Message-ID: <CAPDyKFpNVJZ0FddJ8naXYp-oZr-mYSOH-5iXG-wASZEFozBJJQ@mail.gmail.com>
+Subject: Re: Kernel panic : Unable to handle kernel paging request at virtual
+ address - dead address between user and kernel address ranges
+To:     Anders Roxell <anders.roxell@linaro.org>
+Cc:     Naresh Kamboju <naresh.kamboju@linaro.org>,
+        Viresh Kumar <viresh.kumar@linaro.org>,
+        Stephen Rothwell <sfr@canb.auug.org.au>,
+        Arnd Bergmann <arnd@arndb.de>,
+        Rajendra Nayak <rnayak@codeaurora.org>,
+        open list <linux-kernel@vger.kernel.org>,
+        Linux-Next Mailing List <linux-next@vger.kernel.org>,
+        linux-clk <linux-clk@vger.kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        lkft-triage@lists.linaro.org, John Stultz <john.stultz@linaro.org>,
+        Daniel Lezcano <daniel.lezcano@linaro.org>,
+        Michael Turquette <mturquette@baylibre.com>,
+        Stephen Boyd <sboyd@kernel.org>,
+        Lars Povlsen <lars.povlsen@microchip.com>,
+        madhuparnabhowmik10@gmail.com
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Wolfram-san,
+On Fri, 28 Aug 2020 at 12:29, Anders Roxell <anders.roxell@linaro.org> wrote:
+>
+> On Fri, 28 Aug 2020 at 11:35, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> >
+> > On Fri, 28 Aug 2020 at 11:22, Naresh Kamboju <naresh.kamboju@linaro.org> wrote:
+> > >
+> > > On Thu, 27 Aug 2020 at 17:06, Naresh Kamboju <naresh.kamboju@linaro.org> wrote:
+> > > >
+> > > > On Thu, 27 Aug 2020 at 15:42, Viresh Kumar <viresh.kumar@linaro.org> wrote:
+> > > > >
+> > > > > On 27-08-20, 11:48, Arnd Bergmann wrote:
+> > > > > > > > [    3.680477]  dev_pm_opp_put_clkname+0x30/0x58
+> > > > > > > > [    3.683431]  sdhci_msm_probe+0x284/0x9a0
+> > > > > >
+> > > > > > dev_pm_opp_put_clkname() is part of the error handling in the
+> > > > > > probe function, so I would deduct there are two problems:
+> > > > > >
+> > > > > > - something failed during the probe and the driver is trying
+> > > > > >   to unwind
+> > > > > > - the error handling it self is buggy and tries to undo something
+> > > > > >   again that has already been undone.
+> > > > >
+> > > > > Right.
+> > > > >
+> > > > > > This points to Viresh's
+> > > > > > d05a7238fe1c mmc: sdhci-msm: Unconditionally call dev_pm_opp_of_remove_table()
+> > > > >
+> > > > > I completely forgot that Ulf already pushed this patch and I was
+> > > > > wondering on which of the OPP core changes I wrote have done this :(
+> > > > >
+> > > > > > Most likely this is not the entire problem but it uncovered a preexisting
+> > > > > > bug.
+> > > > >
+> > > > > I think this is.
+> > > > >
+> > > > > Naresh: Can you please test with this diff ?
+> > > >
+> > > > I have applied your patch and tested but still see the reported problem.
+> > >
+> > > The git bisect shows that the first bad commit is,
+> > > d05a7238fe1c mmc: sdhci-msm: Unconditionally call dev_pm_opp_of_remove_table()
+> > >
+> > > Reported-by: Naresh Kamboju <naresh.kamboju@linaro.org>
+> > > Reported-by: Anders Roxell <anders.roxell@linaro.org>
+> >
+> > I am not sure what version of the patch you tested. However, I have
+> > dropped Viresh's v1 and replaced it with v2 [1]. It's available for
+> > testing at:
+> >
+> > https://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git next
+> >
+> > Can you please check if it still causes problems, then I will drop it, again.
+>
+> I tried to run with a kernel from your tree and I could see the same
+> kernel panic on db410c [1].
 
-> From: Wolfram Sang, Sent: Friday, August 21, 2020 5:17 PM
->=20
-> When a command response times out, the TMIO driver has been resetting
-> the controller ever since. However, this means some initialization like
-> bus width or tuning settings will be forgotten. To ensure proper working
-> in all code paths, we will enforce a reset of the remote device, too.
-> Many thanks to the Renesas BSP team for the detailed description of the
-> problem.
->=20
-> Reported-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-> ---
->=20
-> This patch depends on the TMIO reset refactorization:
->=20
-> [RFT 0/6] mmc: refactor reset callbacks
->=20
-> Looking also for tests here. Thanks!
+Anders, Naresh - thanks for testing and reporting. I am dropping the
+patch from my tree.
 
-Thank you for the patch!
+Viresh, I suggest to keep Anders/Naresh in the cc, for the next
+version. Then I can wait for their tested-by tag before I apply again.
 
-Reviewed-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-
-Also, I tested on R-Car H3 ES3.0 and confirmed that this patch resolved
-an issue which any commands of eMMC could not work after
-tmio_mmc_reset_work() was called. So,
-
-Tested-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-
-Best regards,
-Yoshihiro Shimoda
-
+Kind regards
+Uffe
