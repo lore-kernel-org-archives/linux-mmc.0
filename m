@@ -2,136 +2,96 @@ Return-Path: <SRS0=IgIp=CG=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-17.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	MENTIONS_GIT_HOSTING,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6A018C433E2
-	for <linux-mmc@archiver.kernel.org>; Fri, 28 Aug 2020 21:38:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B5D91C433E2
+	for <linux-mmc@archiver.kernel.org>; Fri, 28 Aug 2020 21:48:59 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3B32C2080C
-	for <linux-mmc@archiver.kernel.org>; Fri, 28 Aug 2020 21:38:58 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1598650738;
-	bh=xQv5Tdp0ELrwAB92vt6+SmRAky13xSOm/tUEevUuoAI=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
-	b=P/EUGKM+b8KXUBvlzHBqAFxvkPljbcD0GVwPaVMB3jmnQ+pKDxlIHuLfveUOoBhpH
-	 IA8Pau0HwIdUHXBmE+BKCzcj0AakcFQJaeyMv4y12waVcMHrfdTOZq/O0gbsDwxha9
-	 MJuwSh8l/T5r5DnguTOBdGskSFeHr8y+0Mx8yFJA=
+	by mail.kernel.org (Postfix) with ESMTP id 94B332086A
+	for <linux-mmc@archiver.kernel.org>; Fri, 28 Aug 2020 21:48:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726379AbgH1Vi5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 28 Aug 2020 17:38:57 -0400
-Received: from mail-il1-f196.google.com ([209.85.166.196]:40618 "EHLO
-        mail-il1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726536AbgH1Viz (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Aug 2020 17:38:55 -0400
-Received: by mail-il1-f196.google.com with SMTP id y2so1905101ilp.7;
-        Fri, 28 Aug 2020 14:38:54 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=Z9aNuFEY8MHLzwmbgIdHHAKZXLe3aQgkptJsyFL+HWw=;
-        b=mI8y56Vyety6L8Vk+sh058Im4xbh3izhfaoT6GLfZDM3AdOy2ZST0dwUBlrTg4KMuK
-         EJ3FMpw1J/jb3cR6ru5oQ63hebgS4w/rYL1qqHx/de36z/9M0zPXk2Wh9C2OjUyWkzyZ
-         mH/zUPvDhe3q+PK4wX5jAvFkROTCzBj9Zq0zTp6YI6HRLuV8nwsRkWEW0P5eQmCaEFV3
-         pZzK+Ro5bq+EGubseHbdB1JRpw311ZitRQJTHDoak8pEryJunDPCqGt6QG6Lcu/TT0gx
-         PyA3VeWNePfKFU7tfyFURiFwuuzK6pVSwY8m7+OI+Z2zS7km3m7GP6Z9ZbEJvK9LRmUK
-         g9LA==
-X-Gm-Message-State: AOAM53032OGGthGk8GkKi4defUO/af1YhPXZ4VkL4xt7smWkqhc4X7cf
-        lh/XoRqi1y5SWpkcBs8Pcg==
-X-Google-Smtp-Source: ABdhPJzS3P2Iz0zwjThn5mGNinrojy9M8UeF8yi+ZuR6dvHqFhATIGtKUGFyG79NQ/sI23b+DIN6qw==
-X-Received: by 2002:a92:79ca:: with SMTP id u193mr669859ilc.185.1598650734133;
-        Fri, 28 Aug 2020 14:38:54 -0700 (PDT)
-Received: from xps15 ([64.188.179.249])
-        by smtp.gmail.com with ESMTPSA id a9sm224951iol.9.2020.08.28.14.38.51
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 28 Aug 2020 14:38:53 -0700 (PDT)
-Received: (nullmailer pid 3445893 invoked by uid 1000);
-        Fri, 28 Aug 2020 21:38:50 -0000
-Date:   Fri, 28 Aug 2020 15:38:50 -0600
-From:   Rob Herring <robh@kernel.org>
-To:     Krzysztof Kozlowski <krzk@kernel.org>
-Cc:     Fabio Estevam <festevam@gmail.com>,
-        Miquel Raynal <miquel.raynal@bootlin.com>,
-        Fugang Duan <fugang.duan@nxp.com>, linux-pm@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-gpio@vger.kernel.org,
-        Thierry Reding <thierry.reding@gmail.com>,
-        Anson Huang <Anson.Huang@nxp.com>, Han Xu <han.xu@nxp.com>,
-        linux-serial@vger.kernel.org, Li Yang <leoyang.li@nxp.com>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        Rob Herring <robh+dt@kernel.org>,
-        linux-arm-kernel@lists.infradead.org,
-        Shawn Guo <shawnguo@kernel.org>,
-        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
+        id S1726418AbgH1Vs7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 28 Aug 2020 17:48:59 -0400
+Received: from mout.kundenserver.de ([217.72.192.73]:41343 "EHLO
+        mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726379AbgH1Vs5 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Aug 2020 17:48:57 -0400
+Received: from localhost.localdomain ([37.4.249.236]) by
+ mrelayeu.kundenserver.de (mreue107 [212.227.15.183]) with ESMTPSA (Nemesis)
+ id 1MzQTm-1kXpKC3Jq4-00vObT; Fri, 28 Aug 2020 23:48:40 +0200
+From:   Stefan Wahren <stefan.wahren@i2se.com>
+To:     Adrian Hunter <adrian.hunter@intel.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Pengutronix Kernel Team <kernel@pengutronix.de>,
-        NXP Linux Team <linux-imx@nxp.com>,
-        Frank Li <frank.li@nxp.com>,
-        Mark Rutland <mark.rutland@arm.com>,
-        devicetree@vger.kernel.org, linux-pwm@vger.kernel.org,
-        linux-watchdog@vger.kernel.org
-Subject: Re: [PATCH v3 12/19] dt-bindings: mmc: fsl-imx-esdhc: Fix i.MX 8
- compatible matching
-Message-ID: <20200828213850.GA3444012@bogus>
-References: <20200825193536.7332-1-krzk@kernel.org>
- <20200825193536.7332-13-krzk@kernel.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20200825193536.7332-13-krzk@kernel.org>
+        Ray Jui <rjui@broadcom.com>,
+        Scott Branden <sbranden@broadcom.com>
+Cc:     Florian Fainelli <f.fainelli@gmail.com>,
+        Nicolas Saenz Julienne <nsaenzjulienne@suse.de>,
+        Matthias Brugger <mbrugger@suse.com>,
+        bcm-kernel-feedback-list@broadcom.com, linux-mmc@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org,
+        Stefan Wahren <stefan.wahren@i2se.com>
+Subject: [PATCH] mmc: sdhci-iproc: Enable eMMC DDR 3.3V support for bcm2711
+Date:   Fri, 28 Aug 2020 23:47:14 +0200
+Message-Id: <1598651234-29826-1-git-send-email-stefan.wahren@i2se.com>
+X-Mailer: git-send-email 2.7.4
+X-Provags-ID: V03:K1:kiziRvARXQvcShivifQ3e8jFQc5NDvS/jk5DcBO1+kY24pjuxcW
+ pNMzHbKjpwEkD+6H3B4dmClTpiU+4kjeXUo3zfO/VqTahci/RQgw2Jjg5ClfAO20vRj4cmp
+ eqHXUd9TKy5yr6xa9AzDep/tDWw/ZAMYe72C6NEC+QVodXdoe7JDC+duHvIEy7khM7PY+GF
+ NzqIu6pdSVbj1v16NZ+sA==
+X-UI-Out-Filterresults: notjunk:1;V03:K0:eelQECZEP/o=:AtkwbFez+YK2lUaKrnCAex
+ dIlTU0COpkkpKB5Qb0bMKrb8/w/SPJ2rMBPQOKwEd9/tUzoKWo+ZbAPQPpEnEcUM5QKbnzw+7
+ qB1kFvhlFgAjX6S2VYE4TsPxy/Dk93b1KLbB3TpK4iOUqvcYMDP11kGtwphrPqzjB+yWqwO6y
+ KgxT+VLe4SNkCYaD9JES6M1Hj770HNy3DMUeor3ZbWVQqJsm02Xd9jnX8ThCwNQM0x9NSolVQ
+ 25RoD6I8fehNYcceOQKKGQTSKFw5NMv66cwKfnVYhvG9mj1Fix4xF1ssUx+PIaAKz9IPtf88l
+ ls9Dj7R5z6+Jfpg2yCxV8pPeg1/NewyDH1Bmv2XVIVVZa3o3Ffms2jaDcGuRIJzYvAGzwhj+z
+ G+spv31CNuWsBbUeimVwPoWruWAapA+EIOp57iNo95TYAamLRoBF+aIc4DiCyoVKiHvWl7mOh
+ iDs2nI+sgIn+GWEfuSGJNNmNXiOSRr8PyVRuQELwCvbnkr1JmZqzYOdiYlIdE60pjRs0VVnSZ
+ xYhbUBsbEC/lXnNUb5fF1o3qlK742HPj1nJQ3lQOdh1rcqOG20kRgACUeVAbq1NMG3DNsuHRS
+ xsYTKTMMWPPeSrsGrGwEWQurcjWiskZ8QvmiCkaJHzyxpEWZfmqH30xnyIVdeVakqbob0ddv6
+ VLEnvtryHj/lA4fHtioyBJ4A5CpKR2At7wnlKOICKyaHniUfMlssMuxexvZkbh5Tk/TR7aW7A
+ krPi5wigbGYz2Pf0BiIjJOix9EDYS3+e2oyn6oFZX2gJcfDBT48tMcVYK3IOk6vnwvvmszY/k
+ jexjMPuNFqHptYGNN/TyrXxKulWcZQdCYcksDfKHCrY0TIrxu44YkbhUl22nDy4LRXZQU6h
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 25 Aug 2020 21:35:29 +0200, Krzysztof Kozlowski wrote:
-> The i.MX 8 DTSes use two compatibles so update the binding to fix
-> dtbs_check warnings like:
-> 
->   arch/arm64/boot/dts/freescale/imx8mn-evk.dt.yaml: mmc@30b40000:
->     compatible: ['fsl,imx8mn-usdhc', 'fsl,imx7d-usdhc'] is too long
->     From schema: Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
-> 
->   arch/arm64/boot/dts/freescale/imx8mn-evk.dt.yaml: mmc@30b40000:
->     compatible: Additional items are not allowed ('fsl,imx7d-usdhc' was unexpected)
-> 
->   arch/arm64/boot/dts/freescale/imx8mn-ddr4-evk.dt.yaml: mmc@30b40000:
->     compatible: ['fsl,imx8mn-usdhc', 'fsl,imx7d-usdhc'] is too long
-> 
-> Signed-off-by: Krzysztof Kozlowski <krzk@kernel.org>
-> 
-> ---
-> 
-> Changes since v2:
-> 1. Remove moved compatibles.
-> 
-> Changes since v1:
-> 1. Handle also fsl,imx8mm-usdhc and fsl,imx8qxp-usdhc
-> ---
->  .../bindings/mmc/fsl-imx-esdhc.yaml           | 37 ++++++++++---------
->  1 file changed, 20 insertions(+), 17 deletions(-)
-> 
+The emmc2 interface on the bcm2711 supports DDR modes for eMMC devices
+running at 3.3V. This allows to run eMMC module with 3.3V signaling voltage
+at DDR52 mode on the Raspberry Pi 4 using a SD adapter:
 
+  clock: 52000000 Hz
+  actual clock: 50000000 Hz
+  vdd: 21 (3.3 ~ 3.4 V)
+  bus mode: 2 (push-pull)
+  chip select: 0 (don't care)
+  power mode: 2 (on)
+  bus width: 2 (4 bits)
+  timing spec: 8 (mmc DDR52)
+  signal voltage: 0 (3.30 V)
+  driver type: 0 (driver type B)
 
-My bot found errors running 'make dt_binding_check' on your patch:
+Link: https://github.com/raspberrypi/linux/issues/3802
+Signed-off-by: Stefan Wahren <stefan.wahren@i2se.com>
+---
+ drivers/mmc/host/sdhci-iproc.c | 1 +
+ 1 file changed, 1 insertion(+)
 
-/builds/robherring/linux-dt-review/Documentation/devicetree/bindings/clock/imx8qxp-lpcg.example.dt.yaml: mmc@5b010000: compatible: ['fsl,imx8qxp-usdhc'] is not valid under any of the given schemas (Possible causes of the failure):
-	/builds/robherring/linux-dt-review/Documentation/devicetree/bindings/clock/imx8qxp-lpcg.example.dt.yaml: mmc@5b010000: compatible: ['fsl,imx8qxp-usdhc'] is too short
-	/builds/robherring/linux-dt-review/Documentation/devicetree/bindings/clock/imx8qxp-lpcg.example.dt.yaml: mmc@5b010000: compatible:0: 'fsl,imx8qxp-usdhc' is not one of ['fsl,imx25-esdhc', 'fsl,imx35-esdhc', 'fsl,imx51-esdhc', 'fsl,imx53-esdhc', 'fsl,imx6q-usdhc', 'fsl,imx6sl-usdhc', 'fsl,imx6sx-usdhc', 'fsl,imx6ull-usdhc', 'fsl,imx7d-usdhc', 'fsl,imx7ulp-usdhc']
-
-	From schema: /builds/robherring/linux-dt-review/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
-
-
-See https://patchwork.ozlabs.org/patch/1351360
-
-If you already ran 'make dt_binding_check' and didn't see the above
-error(s), then make sure dt-schema is up to date:
-
-pip3 install git+https://github.com/devicetree-org/dt-schema.git@master --upgrade
-
-Please check and re-submit.
+diff --git a/drivers/mmc/host/sdhci-iproc.c b/drivers/mmc/host/sdhci-iproc.c
+index e2d8dfe..b540aa6 100644
+--- a/drivers/mmc/host/sdhci-iproc.c
++++ b/drivers/mmc/host/sdhci-iproc.c
+@@ -283,6 +283,7 @@ static const struct sdhci_pltfm_data sdhci_bcm2711_pltfm_data = {
+ 
+ static const struct sdhci_iproc_data bcm2711_data = {
+ 	.pdata = &sdhci_bcm2711_pltfm_data,
++	.mmc_caps = MMC_CAP_3_3V_DDR,
+ };
+ 
+ static const struct of_device_id sdhci_iproc_of_match[] = {
+-- 
+2.7.4
 
