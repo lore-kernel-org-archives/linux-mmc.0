@@ -1,45 +1,53 @@
-Return-Path: <SRS0=8eEd=CH=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=HNq4=CI=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-4.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D6DCCC433E2
-	for <linux-mmc@archiver.kernel.org>; Sat, 29 Aug 2020 20:34:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A7E85C433E6
+	for <linux-mmc@archiver.kernel.org>; Sun, 30 Aug 2020 09:11:48 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id BFA2220776
-	for <linux-mmc@archiver.kernel.org>; Sat, 29 Aug 2020 20:34:14 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8728820DD4
+	for <linux-mmc@archiver.kernel.org>; Sun, 30 Aug 2020 09:11:48 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1598778708;
+	bh=BWklOV6bppJJ3A+SKZXddiVUDib6q31F3dsVGTSMtbw=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
+	b=jMa3iz/ff2m2rSIZq9OU1NIR7CsQeim3L5K8JRJRb68yqsv4THoTh5GPamgIlRR4K
+	 ALDxHk7Kt5DMJu0s03pzT/EPOb3BQFPZ9hzt6X8kTT/N0Eb6D1IiOqWcC7i/94Oc/o
+	 bE+kxvaTqJpHg3AKvOv5am3BBwv7nH15pmcPNoTU=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728509AbgH2UeG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 29 Aug 2020 16:34:06 -0400
-Received: from smtprelay0042.hostedemail.com ([216.40.44.42]:60978 "EHLO
-        smtprelay.hostedemail.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1728464AbgH2UeF (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 29 Aug 2020 16:34:05 -0400
-Received: from filter.hostedemail.com (clb03-v110.bra.tucows.net [216.40.38.60])
-        by smtprelay06.hostedemail.com (Postfix) with ESMTP id 4AD2918225DF6;
-        Sat, 29 Aug 2020 20:34:03 +0000 (UTC)
-X-Session-Marker: 6A6F6540706572636865732E636F6D
-X-HE-Tag: head85_181739b27081
-X-Filterd-Recvd-Size: 3499
-Received: from XPS-9350.home (unknown [47.151.133.149])
-        (Authenticated sender: joe@perches.com)
-        by omf19.hostedemail.com (Postfix) with ESMTPA;
-        Sat, 29 Aug 2020 20:33:57 +0000 (UTC)
-Message-ID: <b64a4cb0ee68fee01973616e5ef0f299ac191f6d.camel@perches.com>
-Subject: Re: sysfs output without newlines
-From:   Joe Perches <joe@perches.com>
-To:     Denis Efremov <efremov@linux.com>,
-        LKML <linux-kernel@vger.kernel.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        id S1726479AbgH3JLr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 30 Aug 2020 05:11:47 -0400
+Received: from mail.kernel.org ([198.145.29.99]:60982 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1725869AbgH3JLq (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Sun, 30 Aug 2020 05:11:46 -0400
+Received: from localhost (83-86-89-107.cable.dynamic.v4.ziggo.nl [83.86.89.107])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id 5E151207BB;
+        Sun, 30 Aug 2020 09:11:45 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1598778705;
+        bh=BWklOV6bppJJ3A+SKZXddiVUDib6q31F3dsVGTSMtbw=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=Ai0UuHTnZlo4wf/I5Ov08/TrKTmcZtSZYe3sSmtFPMekal3JdcbUjzjqFbnUO+Xal
+         3yu7jLxoRUMmC3+CDPYPEQ3UI5NZnEfFVp9S1Y2s6awOmfdpwE/crUJIFWSu1iADuB
+         /HLt1Sk8k3z7Ye5JS2yTFeHHb/XaDjL5nXdJ7wQA=
+Date:   Sun, 30 Aug 2020 11:11:42 +0200
+From:   Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+To:     Joe Perches <joe@perches.com>
+Cc:     LKML <linux-kernel@vger.kernel.org>,
+        Denis Efremov <efremov@linux.com>,
         "Rafael J. Wysocki" <rafael@kernel.org>,
         Kees Cook <keescook@chromium.org>,
         "Gustavo A . R . Silva" <gustavoars@kernel.org>,
         Julia Lawall <julia.lawall@inria.fr>,
-        Alex Dewar <alex.dewar90@gmail.com>
-Cc:     York Sun <york.sun@nxp.com>, Borislav Petkov <bp@alien8.de>,
+        Alex Dewar <alex.dewar90@gmail.com>,
+        York Sun <york.sun@nxp.com>, Borislav Petkov <bp@alien8.de>,
         Mauro Carvalho Chehab <mchehab@kernel.org>,
         Tony Luck <tony.luck@intel.com>,
         James Morse <james.morse@arm.com>,
@@ -59,7 +67,7 @@ Cc:     York Sun <york.sun@nxp.com>, Borislav Petkov <bp@alien8.de>,
         Kalle Valo <kvalo@codeaurora.org>,
         Darren Hart <dvhart@infradead.org>,
         Andy Shevchenko <andy@infradead.org>,
-        Kai =?ISO-8859-1?Q?M=E4kisara?= <Kai.Makisara@kolumbus.fi>,
+        Kai =?iso-8859-1?Q?M=E4kisara?= <Kai.Makisara@kolumbus.fi>,
         "James E.J. Bottomley" <jejb@linux.ibm.com>,
         "Martin K. Petersen" <martin.petersen@oracle.com>,
         Mark Brown <broonie@kernel.org>,
@@ -70,48 +78,31 @@ Cc:     York Sun <york.sun@nxp.com>, Borislav Petkov <bp@alien8.de>,
         netdev@vger.kernel.org, linux-wireless@vger.kernel.org,
         platform-driver-x86@vger.kernel.org, linux-scsi@vger.kernel.org,
         linux-spi@vger.kernel.org, linux-usb@vger.kernel.org
-Date:   Sat, 29 Aug 2020 13:33:56 -0700
-In-Reply-To: <4cd6275c-6e95-3aeb-9924-141f62e00449@linux.com>
+Subject: Re: sysfs output without newlines
+Message-ID: <20200830091142.GC112265@kroah.com>
 References: <0f837bfb394ac632241eaac3e349b2ba806bce09.camel@perches.com>
-         <4cd6275c-6e95-3aeb-9924-141f62e00449@linux.com>
-Content-Type: text/plain; charset="ISO-8859-1"
-User-Agent: Evolution 3.36.4-0ubuntu1 
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <0f837bfb394ac632241eaac3e349b2ba806bce09.camel@perches.com>
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sat, 2020-08-29 at 23:23 +0300, Denis Efremov wrote:
-> Hi,
+On Sat, Aug 29, 2020 at 11:23:43AM -0700, Joe Perches wrote:
+> While doing an investigation for a possible treewide conversion of
+> sysfs output using sprintf/snprintf/scnprintf, I discovered
+> several instances of sysfs output without terminating newlines.
 > 
-> On 8/29/20 9:23 PM, Joe Perches wrote:
-> > While doing an investigation for a possible treewide conversion of
-> > sysfs output using sprintf/snprintf/scnprintf, I discovered
-> > several instances of sysfs output without terminating newlines.
-> > 
-> > It seems likely all of these should have newline terminations
-> > or have the \n\r termination changed to a single newline.
+> It seems likely all of these should have newline terminations
+> or have the \n\r termination changed to a single newline.
 > 
-> I think that it could break badly written scripts in rare cases.
+> Anyone have any objection to patches adding newlines to these
+> in their original forms using sprintf/snprintf/scnprintf?
 
-Maybe.
+No objection for me, patches for my subsystems will be gladly taken.
 
-Is sysfs output a nominally unchangeable api like seq_?
-Dunno.  seq_ output is extended all the time.
+thanks,
 
-I think whitespace isn't generally considered part of
-sscanf type input content awareness.
-
-> > Anyone have any objection to patches adding newlines to these
-> > in their original forms using sprintf/snprintf/scnprintf?
-> 
-> I'm not sure about existing cases, but I think it's a good
-> checkpatch.pl warning for new patches. It should be 
-> possible to check sysfs_emit() calls.
-
-Eventually, yes.
-
-cheers, Joe
-
+greg k-h
