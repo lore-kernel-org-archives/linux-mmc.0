@@ -2,107 +2,102 @@ Return-Path: <SRS0=HNq4=CI=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-4.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A7E85C433E6
-	for <linux-mmc@archiver.kernel.org>; Sun, 30 Aug 2020 09:11:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id ED04DC433E7
+	for <linux-mmc@archiver.kernel.org>; Sun, 30 Aug 2020 13:04:23 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8728820DD4
-	for <linux-mmc@archiver.kernel.org>; Sun, 30 Aug 2020 09:11:48 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1598778708;
-	bh=BWklOV6bppJJ3A+SKZXddiVUDib6q31F3dsVGTSMtbw=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
-	b=jMa3iz/ff2m2rSIZq9OU1NIR7CsQeim3L5K8JRJRb68yqsv4THoTh5GPamgIlRR4K
-	 ALDxHk7Kt5DMJu0s03pzT/EPOb3BQFPZ9hzt6X8kTT/N0Eb6D1IiOqWcC7i/94Oc/o
-	 bE+kxvaTqJpHg3AKvOv5am3BBwv7nH15pmcPNoTU=
+	by mail.kernel.org (Postfix) with ESMTP id CB021206E3
+	for <linux-mmc@archiver.kernel.org>; Sun, 30 Aug 2020 13:04:23 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=fail reason="signature verification failed" (1024-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="WegSttbZ"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726479AbgH3JLr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 30 Aug 2020 05:11:47 -0400
-Received: from mail.kernel.org ([198.145.29.99]:60982 "EHLO mail.kernel.org"
+        id S1728766AbgH3NET (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 30 Aug 2020 09:04:19 -0400
+Received: from www.zeus03.de ([194.117.254.33]:55160 "EHLO mail.zeus03.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725869AbgH3JLq (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Sun, 30 Aug 2020 05:11:46 -0400
-Received: from localhost (83-86-89-107.cable.dynamic.v4.ziggo.nl [83.86.89.107])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 5E151207BB;
-        Sun, 30 Aug 2020 09:11:45 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1598778705;
-        bh=BWklOV6bppJJ3A+SKZXddiVUDib6q31F3dsVGTSMtbw=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=Ai0UuHTnZlo4wf/I5Ov08/TrKTmcZtSZYe3sSmtFPMekal3JdcbUjzjqFbnUO+Xal
-         3yu7jLxoRUMmC3+CDPYPEQ3UI5NZnEfFVp9S1Y2s6awOmfdpwE/crUJIFWSu1iADuB
-         /HLt1Sk8k3z7Ye5JS2yTFeHHb/XaDjL5nXdJ7wQA=
-Date:   Sun, 30 Aug 2020 11:11:42 +0200
-From:   Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-To:     Joe Perches <joe@perches.com>
-Cc:     LKML <linux-kernel@vger.kernel.org>,
-        Denis Efremov <efremov@linux.com>,
-        "Rafael J. Wysocki" <rafael@kernel.org>,
-        Kees Cook <keescook@chromium.org>,
-        "Gustavo A . R . Silva" <gustavoars@kernel.org>,
-        Julia Lawall <julia.lawall@inria.fr>,
-        Alex Dewar <alex.dewar90@gmail.com>,
-        York Sun <york.sun@nxp.com>, Borislav Petkov <bp@alien8.de>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Tony Luck <tony.luck@intel.com>,
-        James Morse <james.morse@arm.com>,
-        Robert Richter <rric@kernel.org>,
-        Michal Simek <michal.simek@xilinx.com>,
-        Boris Brezillon <bbrezillon@kernel.org>,
-        Maxim Levitsky <maximlevitsky@gmail.com>,
-        Alex Dubov <oakad@yahoo.com>,
+        id S1728761AbgH3NEE (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Sun, 30 Aug 2020 09:04:04 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
+        date:from:to:cc:subject:message-id:references:mime-version
+        :content-type:in-reply-to; s=k1; bh=LE6L2YJPOg9EPuBdt7s5WuIzZffq
+        0MU75aTKorgEk9Y=; b=WegSttbZfRckBci5opwlsTtxcTvcaH1AJKY+b3uAIS25
+        j3MMqH5eV9eYm5fauA9yp4sqpqWsGlTfsNe6ngr3oAA/jRCtP+mEj30QNkRPaqDK
+        kOCsS0mg+Kteg2BGMryM1sxT+iQFgL/1/7JOiARycjdNXTTR0nwRuvOc25Sazx0=
+Received: (qmail 1811957 invoked from network); 30 Aug 2020 15:04:00 +0200
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 30 Aug 2020 15:04:00 +0200
+X-UD-Smtp-Session: l3s3148p1@H29s6xeuDKsgAwDPXyx9ACJFoyCAs3WD
+Date:   Sun, 30 Aug 2020 15:03:57 +0200
+From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Subject: Re: [RFT] mmc: tmio: reset device on timeout, too
+Message-ID: <20200830130357.GA2194@kunai>
+Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Tomas Winkler <tomas.winkler@intel.com>,
-        Arnd Bergmann <arnd@arndb.de>,
-        Madalin Bucur <madalin.bucur@nxp.com>,
-        "David S. Miller" <davem@davemloft.net>,
-        Jakub Kicinski <kuba@kernel.org>,
-        Douglas Miller <dougmill@linux.ibm.com>,
-        Stanislav Yakovlev <stas.yakovlev@gmail.com>,
-        Kalle Valo <kvalo@codeaurora.org>,
-        Darren Hart <dvhart@infradead.org>,
-        Andy Shevchenko <andy@infradead.org>,
-        Kai =?iso-8859-1?Q?M=E4kisara?= <Kai.Makisara@kolumbus.fi>,
-        "James E.J. Bottomley" <jejb@linux.ibm.com>,
-        "Martin K. Petersen" <martin.petersen@oracle.com>,
-        Mark Brown <broonie@kernel.org>,
-        Oliver Neukum <oneukum@suse.com>,
-        Pete Zaitcev <zaitcev@redhat.com>, linux-edac@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org,
-        linux-i3c@lists.infradead.org, linux-mmc@vger.kernel.org,
-        netdev@vger.kernel.org, linux-wireless@vger.kernel.org,
-        platform-driver-x86@vger.kernel.org, linux-scsi@vger.kernel.org,
-        linux-spi@vger.kernel.org, linux-usb@vger.kernel.org
-Subject: Re: sysfs output without newlines
-Message-ID: <20200830091142.GC112265@kroah.com>
-References: <0f837bfb394ac632241eaac3e349b2ba806bce09.camel@perches.com>
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+References: <20200821081654.28280-1-wsa+renesas@sang-engineering.com>
+ <CAPDyKFp7rsHDY2vREakrR+PFJLs0n8JBR+URV1vCu5bydEhHuA@mail.gmail.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="45Z9DzgjV8m4Oswq"
 Content-Disposition: inline
-In-Reply-To: <0f837bfb394ac632241eaac3e349b2ba806bce09.camel@perches.com>
+In-Reply-To: <CAPDyKFp7rsHDY2vREakrR+PFJLs0n8JBR+URV1vCu5bydEhHuA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sat, Aug 29, 2020 at 11:23:43AM -0700, Joe Perches wrote:
-> While doing an investigation for a possible treewide conversion of
-> sysfs output using sprintf/snprintf/scnprintf, I discovered
-> several instances of sysfs output without terminating newlines.
-> 
-> It seems likely all of these should have newline terminations
-> or have the \n\r termination changed to a single newline.
-> 
-> Anyone have any objection to patches adding newlines to these
-> in their original forms using sprintf/snprintf/scnprintf?
 
-No objection for me, patches for my subsystems will be gladly taken.
+--45Z9DzgjV8m4Oswq
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-thanks,
 
-greg k-h
+> This isn't how mmc_hw_reset() is intended to be used. Instead, the
+> idea is that it should be called by upper layer code, when some error
+> path is triggered for an I/O request.
+
+Hmm, there are some wireless drivers using it as well. I am confused, is
+this considered "upper layer"?
+
+drivers/net/wireless/ath/ath10k/sdio.c: ret = mmc_hw_reset(ar_sdio->func->card->host);
+drivers/net/wireless/broadcom/brcm80211/brcmfmac/sdio.c:        mmc_hw_reset(sdiodev->func1->card->host);
+drivers/net/wireless/marvell/mwifiex/sdio.c:    ret = mmc_hw_reset(func->card->host);
+drivers/net/wireless/ti/wlcore/sdio.c:  mmc_hw_reset(card->host);
+
+I'd like to understand, so I can add some docs. Because the intended use
+is nowhere documented to the best of my knowledge.
+
+> However, let me think a bit about this.
+
+Sure, thanks for the help!
+
+
+--45Z9DzgjV8m4Oswq
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAl9Lo7kACgkQFA3kzBSg
+KbbFqw/9H1aa8lAq+QseP3pyMMvdnAZcpkQD9kIq3ywhjiktFc4yqlRSxj5LKdN8
+KM1c1WNPKAhNON2GM6TM5Chn76kns3BElu/XM7Hom4oe22idsA0N71qU910zDvck
+xeuezOW77S9bfB7nVv0lVTNmNb93TKgRaHH07PAz8/+WvCiu6wfdVzfECdXklQpY
+G6Kxdz2PK1DoeZELewMbj+EVwujbVfTA17SMzoVMLotqR9YP6AeP+1ckac1u8CBG
+5/LgvYVTZFKBIiOmcgSGs5aMRAJV+fLdJM3MFGB3hgcBRp3JXBdcXrF24tChduDi
+FECQiA+qSWF0Z+X/ph25FWXl/TIsrvZTcVNBk7k84CupUtRzCxpzcjD7O+qORNuU
+tv3RSKAc/OkTCMDabi/I8XT4NGdXWgh6tJlcF+2EV8e87rpvAzZ/wcu9rWeFCR4z
+E75XuuBfasmm9/Nuvwm40qFMjiD3U2nDP4nzVPlesIVVNB/uTlI+qpOGY0avDeBM
+c4LPjbeCbtp4Wl/JCCryLexdMGA4r+dY3ildB7/F9ZvxqBUVQvsNfWlPNCy8nwYb
+XqzGJys1KGZOrxL9WCuBTP3QXJfMQWZ9lT48115u52qCSrShzak43D2W5AfY3wmB
+jKjLE1a8zVn2VmVj/InoBnWNeeBpuJ+tpnymmIs6JtcIkyfe94E=
+=nM6F
+-----END PGP SIGNATURE-----
+
+--45Z9DzgjV8m4Oswq--
