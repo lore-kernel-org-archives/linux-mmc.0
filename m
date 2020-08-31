@@ -2,146 +2,148 @@ Return-Path: <SRS0=ypud=CJ=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.3 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 90BC3C433E6
-	for <linux-mmc@archiver.kernel.org>; Mon, 31 Aug 2020 11:30:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B9390C433E6
+	for <linux-mmc@archiver.kernel.org>; Mon, 31 Aug 2020 11:41:55 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 6D6A5206F0
-	for <linux-mmc@archiver.kernel.org>; Mon, 31 Aug 2020 11:30:27 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 96C4F20866
+	for <linux-mmc@archiver.kernel.org>; Mon, 31 Aug 2020 11:41:55 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="irsBQYiw"
+	dkim=fail reason="signature verification failed" (1024-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="g9eF1cbW"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726384AbgHaLaW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 31 Aug 2020 07:30:22 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45900 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726726AbgHaL3l (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 31 Aug 2020 07:29:41 -0400
-Received: from mail-vk1-xa42.google.com (mail-vk1-xa42.google.com [IPv6:2607:f8b0:4864:20::a42])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 047A5C06123D
-        for <linux-mmc@vger.kernel.org>; Mon, 31 Aug 2020 04:29:27 -0700 (PDT)
-Received: by mail-vk1-xa42.google.com with SMTP id q124so1216404vkb.8
-        for <linux-mmc@vger.kernel.org>; Mon, 31 Aug 2020 04:29:27 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=JIN710TFLeLsKqRRlGqyF1G56AtXFbXojtnB+ek7vjU=;
-        b=irsBQYiwNj1Qd8vMPMDZ4IELqeCiPeWMfkpBS3c2ZNz7mZFu5GH+I3B7C0OPEjwMVD
-         9jI1XXFeXGnU2b2vums9U5nwrWH6D0JR8+2oZUphySN+PnNxeueJzDWGnvYwt/oltfMD
-         22ZbWt8+LSAgrcF3KfEDBpLH3L3bqcmci89/GwhyaMurg6aJNkKIcnBmBAkNJinIQkY1
-         sd8lVRWhg89SyMdMugmmdByKiTxoWw4s11IaTQo1XbNMhUAko8qoNtgXLFhxi6gu+Sow
-         h1kW2Fb4raKYv6Gc7y/Bhtd4ewL/1azXQH6Gakmz1md2e2rsSKov/8PxpyaUZ9MImqDH
-         NVGg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=JIN710TFLeLsKqRRlGqyF1G56AtXFbXojtnB+ek7vjU=;
-        b=iRCcJy0741bBBH6447pWWAK9qKqAKpDCeTN3imdcgCyjt7+aoXZmanHNFS5NHQ9+RP
-         ziCLHO45qlH6uQMtr/OvD5zjNTy+Yxo2RKhpbBOctRxPDnb4FY/zv6YbSXP7JHoDBoTX
-         ot5tU5ID3k+55HPaH9iIF6yXY2TTaDsaJJA2WvUFGzPOFubY4h+pkBytHZLa1giWD60E
-         Ub7OcDydYGGixKBYK2QMejgri2quiSm0mQEejNaEivjkSqhFLq3JwwiOndl9jN+CKHRK
-         tF4UBFzxNPWlwzhPUs2qN61jYIyXdinRxOcHA2jxns7O4i7K37lhCi6pMS0G//AJY9nn
-         m6RQ==
-X-Gm-Message-State: AOAM531S7cw9jvviiVeiXY42LW1UJ1/H14jF00HWIvfeqcNyZuZD+AYS
-        utHJLGyo63FM0uphUZKA/xMTavAMRi5tDw0r5koRVkrfHfXK/D6X
-X-Google-Smtp-Source: ABdhPJw4BM3EMv3eBn1ExCUI2PJJGFIfafdTX935b2p/ZrPMqqlhkRsSr+VDzuwhyidZqSRYvMBnWkwMt12C+fZFJyw=
-X-Received: by 2002:a1f:2a48:: with SMTP id q69mr458218vkq.69.1598873366828;
- Mon, 31 Aug 2020 04:29:26 -0700 (PDT)
+        id S1726546AbgHaLly (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 31 Aug 2020 07:41:54 -0400
+Received: from www.zeus03.de ([194.117.254.33]:44160 "EHLO mail.zeus03.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726121AbgHaLly (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 31 Aug 2020 07:41:54 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
+        date:from:to:cc:subject:message-id:references:mime-version
+        :content-type:in-reply-to; s=k1; bh=Rlo+b87xmJ7xqCoMXBaqTI+im096
+        OJ7Uj5B+OJVPxWw=; b=g9eF1cbW5ONJh1qNNlEIdhNXwmkncIhnUfLApfGrm2rm
+        f/6QwM1CekgZ8P3M+RMYV6UBVBOjFCRAS6gpvkeaVjSeGgPcwIAXhve+AqqihFJi
+        dDdxmrJ3rUIcIdRTmEbOBCvsh+j0K4XHW5cSbKMDdhAS5Um+dWm22pD0CuyuP6k=
+Received: (qmail 2106240 invoked from network); 31 Aug 2020 13:41:48 +0200
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 31 Aug 2020 13:41:48 +0200
+X-UD-Smtp-Session: l3s3148p1@cYdD4yquztAgAwDPXwczAOmbI0TU8LCu
+Date:   Mon, 31 Aug 2020 13:41:47 +0200
+From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
+To:     Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-renesas-soc@vger.kernel.org" 
+        <linux-renesas-soc@vger.kernel.org>,
+        Takeshi Saito <takeshi.saito.xv@renesas.com>
+Subject: Re: [PATCH 2/2] mmc: renesas_sdhi: support manual calibration
+Message-ID: <20200831114147.GC1070@ninjato>
+References: <20200605101222.10783-1-wsa+renesas@sang-engineering.com>
+ <20200605101222.10783-3-wsa+renesas@sang-engineering.com>
+ <TY2PR01MB369224E06BAE72C1711B681AD8510@TY2PR01MB3692.jpnprd01.prod.outlook.com>
 MIME-Version: 1.0
-References: <20200714121856.955680-1-hch@lst.de> <20200714121856.955680-10-hch@lst.de>
- <20200828020045.GT3265@brightrain.aerifal.cx> <20200828021152.GU3265@brightrain.aerifal.cx>
- <20200828042422.GA29734@lst.de> <CAPDyKFrKJrUN8mJ94g0+0Vs3aT1uq9MmHWfvzcVaoA5efaYPmQ@mail.gmail.com>
- <20200828150942.GV3265@brightrain.aerifal.cx> <20200829083121.GA7851@lst.de>
-In-Reply-To: <20200829083121.GA7851@lst.de>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 31 Aug 2020 13:28:50 +0200
-Message-ID: <CAPDyKFpqd2n64=i5-45nJ=acbgS0AmOK0D2rtn-1bJj2HV9pnQ@mail.gmail.com>
-Subject: Re: [PATCH 09/10] sh: don't allow non-coherent DMA for NOMMU
-To:     Christoph Hellwig <hch@lst.de>, Rich Felker <dalias@libc.org>
-Cc:     Yoshinori Sato <ysato@users.sourceforge.jp>,
-        Linux-sh list <linux-sh@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        linux-spi@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="zCKi3GIZzVBPywwA"
+Content-Disposition: inline
+In-Reply-To: <TY2PR01MB369224E06BAE72C1711B681AD8510@TY2PR01MB3692.jpnprd01.prod.outlook.com>
+User-Agent: Mutt/1.10.1 (2018-07-13)
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sat, 29 Aug 2020 at 10:31, Christoph Hellwig <hch@lst.de> wrote:
->
-> On Fri, Aug 28, 2020 at 11:09:43AM -0400, Rich Felker wrote:
-> > > However, by looking at the code, one get the feeling that the DMA
-> > > support is somewhat prepared to be made optional. I guess it has never
-> > > been really tested, as the Kconfig option has "depends on HAS_DMA"  -
-> > > and it's been like that as long as I can remember.
-> >
-> > It always worked on our "byte-banged" SPI controller, with no DMA
-> > controller present, before Christoph's changes in this patch series,
->
-> Before that nommu sh builds provided a DMA mapping implementation
-> that even worked for the streaming side (dma_map_*), but would corrupt
-> data if you used dma_alloc_coherent memory to communicate with the
-> device.
 
-I see.
+--zCKi3GIZzVBPywwA
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
->
-> > and seems to be working now (although I have some other, hopefully
-> > unrelated regressions to debug) with #ifdef CONFIG_HAS_DMA around the
-> > if (spi->master->dev.parent->dma_mask) block in mmc_spi_probe. That's
-> > probably not the right fix though -- why isn't it checking
-> > host->dma_dev instead and only attempting DMA setup if dma_dev is
-> > non-null?
->
-> I don't think dma_dev can be NULL right now.  dma_dev is assigned here:
->
->         if (spi->master->dev.parent->dma_mask) {
->                 struct device   *dev = spi->master->dev.parent;
->
->                 host->dma_dev = dev;
->
-> but for any OF or real bus device dma_mask never is zero (it actually is
-> a pointer), and the value of it also is initialized to 32-bit by default,
-> making this effectively an "if (1) {".  The driver needs some way to
-> communicate if a given device actually is DMA capable or not. Or is that
-> purely a factor of the platform which would be a little strange.
+Hi Shimoda-san,
 
-Okay, thanks for clarifying things.
+> We should set the needs_adjust_hs400 when HS400EN=3D1 is set.
+> In other words, we should set it in renesas_sdhi_hs400_complete(),
+> not renesas_sdhi_prepare_hs400_tuning().
 
->
-> In which case we should do something like:
->
->
-> diff --git a/drivers/mmc/host/mmc_spi.c b/drivers/mmc/host/mmc_spi.c
-> index 39bb1e30c2d722..3b0cc9a70e6432 100644
-> --- a/drivers/mmc/host/mmc_spi.c
-> +++ b/drivers/mmc/host/mmc_spi.c
-> @@ -1374,7 +1374,7 @@ static int mmc_spi_probe(struct spi_device *spi)
->         if (!host->data)
->                 goto fail_nobuf1;
->
-> -       if (spi->master->dev.parent->dma_mask) {
-> +       if (IS_ENABLED(CONFIG_HAS_DMA)) {
+Oh, thanks for pointing this out! I simply put it into the same function
+as the BSP, but due to massive refactoring in the upstream driver we
+really need to put it where tuning is completed. I used the following
+patch on top of this patch:
 
-I guess "#ifdef CONFIG_HAS_DMA", would work as well as CONFIG_HAS_DMA
-can't be "m".
+diff --git b/drivers/mmc/host/renesas_sdhi_core.c a/drivers/mmc/host/renesa=
+s_sdhi_core.c
+index 2834b30c3ba6..b54dd8a7ecaa 100644
+--- b/drivers/mmc/host/renesas_sdhi_core.c
++++ a/drivers/mmc/host/renesas_sdhi_core.c
+@@ -419,6 +419,9 @@ static void renesas_sdhi_hs400_complete(struct mmc_host=
+ *mmc)
+=20
+ 	sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, CLK_CTL_SCLKEN |
+ 			sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL));
++
++	if (priv->adjust_hs400_calib_table)
++		priv->needs_adjust_hs400 =3D true;
+ }
+=20
+ static void renesas_sdhi_reset_scc(struct tmio_mmc_host *host,
+@@ -544,12 +547,8 @@ static void renesas_sdhi_reset_hs400_mode(struct tmio_=
+mmc_host *host,
+ static int renesas_sdhi_prepare_hs400_tuning(struct mmc_host *mmc, struct =
+mmc_ios *ios)
+ {
+ 	struct tmio_mmc_host *host =3D mmc_priv(mmc);
+-	struct renesas_sdhi *priv =3D host_to_priv(host);
+=20
+-	if (priv->adjust_hs400_calib_table)
+-		priv->needs_adjust_hs400 =3D true;
+-
+-	renesas_sdhi_reset_hs400_mode(host, priv);
++	renesas_sdhi_reset_hs400_mode(host, host_to_priv(host));
+ 	return 0;
+ }
 
-I would also suggest moving the DMA setup things into a separate
-function. Then when CONFIG_HAS_DMA is unset, we can use a stub.
+and got these debug reports from my M3-N:
 
->                 struct device   *dev = spi->master->dev.parent;
->
->                 host->dma_dev = dev;
+     kworker/0:1-21    [000] ....     4.171435: renesas_sdhi_fixup_request:=
+ code 17 replacement 18
 
-Let me cook a patch that we can try.
+which was different without the fix:
 
-Kind regards
-Uffe
+     kworker/0:1-21    [000] ....     4.171435: renesas_sdhi_fixup_request:=
+ code 31 replacement 31
+
+> When we read the calib_code at room temperature, the value will be around=
+ 0x10.
+> However, we will get 0x00 here. So, we need to fix it.
+
+So, my new debug output looks good.
+
+I will fold the fixup patch into the next version of this series. I
+still need to get the stalled-SCC issue tackled first. But I am now
+working on it.
+
+Thanks again,
+
+   Wolfram
+
+
+--zCKi3GIZzVBPywwA
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAl9M4fcACgkQFA3kzBSg
+KbZqORAAjtXdyjdaveVv7rrFD0pPRakeAlR3dsfbVVIKH1DheeieIDUll5VmlAtV
+Jr9q1OeC49GRijWh3dveZH7cyPjpXwJ8YZuW8HXpAj7ET0ZrB1o/fmOxPsDMLlVW
+rb5Ma1RBIQ206r394cQsb3AscTpDw9mn5evKdoLw1MeiKnzHOfgBNprT+VXWnp+t
+7WORFc04MnJ+WulztmUczcnAY1qbtiYkrH47sJRqvXIf4jS3Wayb1jJyJVM2IAlk
+aw5KDUd070EcTHL2tGqL9NRubAjPlYb0vbHPbJ99X+DyvypluoO2g+mMkEKeyn7C
+WQzHoC97E0DXGnCddFmrsjgyUpGsrhgt62doEjD8St8yf+WcUJbOGSovZHwSOcIq
+VnfVM4K8Q55n0XfbsTcWgedtBlAewV8PuxRMSx2uUrOpj6r7mdZ0zmEzDbs1l+lN
+K15R6R53mur4eAZ2DHpWd4Y3UnFktHDK/9p5BDtfquu9jXQayZheizzM4hVOTR7S
+hOmgCCusVuCQFSv8f/2udqHtQI0hTdEmp2JdX4G2cetSiYep+bTq/bPos1kv+LkB
+6/1Xh0u9ff/e54bPxVqF4JrBmQaL2T/U5m9tITJV0drKASeNyeWZP8W0qZSbJQUY
+g9j/K0ZEqYmAmkEfiJn1CTbVqklexakWxWtadb4fj7SAJNJR4Aw=
+=+7nk
+-----END PGP SIGNATURE-----
+
+--zCKi3GIZzVBPywwA--
