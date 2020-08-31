@@ -2,241 +2,142 @@ Return-Path: <SRS0=ypud=CJ=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-11.3 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_2
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E6257C433E7
-	for <linux-mmc@archiver.kernel.org>; Mon, 31 Aug 2020 06:32:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 04B5FC433E6
+	for <linux-mmc@archiver.kernel.org>; Mon, 31 Aug 2020 07:58:51 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id BF98B2073A
-	for <linux-mmc@archiver.kernel.org>; Mon, 31 Aug 2020 06:32:50 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D95162073A
+	for <linux-mmc@archiver.kernel.org>; Mon, 31 Aug 2020 07:58:50 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="cMuyRTSx"
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=tq-group.com header.i=@tq-group.com header.b="fQpZacdn"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725794AbgHaGcs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 31 Aug 2020 02:32:48 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56012 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725835AbgHaGco (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 31 Aug 2020 02:32:44 -0400
-Received: from mail-vs1-xe31.google.com (mail-vs1-xe31.google.com [IPv6:2607:f8b0:4864:20::e31])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 037AAC061755
-        for <linux-mmc@vger.kernel.org>; Sun, 30 Aug 2020 23:32:44 -0700 (PDT)
-Received: by mail-vs1-xe31.google.com with SMTP id q67so601407vsd.5
-        for <linux-mmc@vger.kernel.org>; Sun, 30 Aug 2020 23:32:43 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:from:date:message-id:subject:to:cc;
-        bh=JL5FY/OPoxC6HDWJYlv4yemjpNN92vvIN4CMSxtN6co=;
-        b=cMuyRTSxyhExkZY0IKNSWlVvO8PuH5Ok63c4pQ9nutHuvq2NWmeGFZJRG1IDHzqY8Q
-         cIZwp2JhXWSUOq9UojMJbh+mQk+yzS31Vc23awkX6gzCudYOuf6XYs4UgNnH8S1DzvEY
-         JWZ5xdwn/SRpSX9QhihOqPOXU5UBEItfwrSuL8nsYby9QjLXgzxdNBPiMnoMMqxinIt8
-         f2aZ8fGRQqOG4lprhboGisuN+ZPhkiHTi2In5WeKxBRsfdDnwybgFMFWcNF8W476CJky
-         qX2XGIpLab2UOus7H6JYxviic+Dp12HREV7rndufZMvTSyj1yGME0SzW19qdzw2jWbJ5
-         hTYg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:from:date:message-id:subject:to:cc;
-        bh=JL5FY/OPoxC6HDWJYlv4yemjpNN92vvIN4CMSxtN6co=;
-        b=rBuKoe6dkzh0TXXEu46nx5VH+UpPSmYLZgfPUtRFy1Waxx+Dg77cVv+3oPg5F1b3z5
-         /e8Xk1a5j4++NtMxD407N5QwRJHfPa3PTR22aMlQJjY432r6gIpmyrvc2zE0sYANAIH0
-         5u6QzKZUztDT6fseWKBLLDWmIkePdDISy/USZum4/+Vjm2lbr+EtLfJWkCZd2uhYSEpL
-         MZq+eQ0AFf0RMCDi1CznSaawgrfyWDNW18TCNbhbDTvyXBJ4peY4ql7hBqSk6een2cKs
-         3JXugu0SAAqyphRwPUVkABDVKiTNGeOol+c3/tx0L9qsU4EiICPjeTamgXORzxmuQ4OD
-         /ntw==
-X-Gm-Message-State: AOAM530ppWHU9UHhmjM4rcBKEFu9oMznvC9ISnJn8g1GTXAW3azEreP9
-        8j5jRUCD6lOBdgLcYMn0hxfZzFsgofvBVmpGLdhK6Q==
-X-Google-Smtp-Source: ABdhPJzOO76mzWnFTJKnD/SXT05L8mq2/oW90RWTXbauVOOkxUkgcAw1KvyWdnOAxbqvkf4WnYp37Ns7eHcYcwoOJXg=
-X-Received: by 2002:a67:7905:: with SMTP id u5mr41080vsc.179.1598855562545;
- Sun, 30 Aug 2020 23:32:42 -0700 (PDT)
-MIME-Version: 1.0
-From:   Naresh Kamboju <naresh.kamboju@linaro.org>
-Date:   Mon, 31 Aug 2020 12:02:31 +0530
-Message-ID: <CA+G9fYuiJwN1ad955Xw4ShamX2=373r+56KsbpeverEs+i_NAg@mail.gmail.com>
-Subject: WARNING: suspicious RCU usage - sdhci-pltfm: SDHCI platform and OF
- driver helper
-To:     open list <linux-kernel@vger.kernel.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        lkft-triage@lists.linaro.org, rcu@vger.kernel.org,
-        Linux PM <linux-pm@vger.kernel.org>
-Cc:     Anders Roxell <anders.roxell@linaro.org>,
-        Arnd Bergmann <arnd@arndb.de>,
-        Rajendra Nayak <rnayak@codeaurora.org>,
-        John Stultz <john.stultz@linaro.org>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Lars Povlsen <lars.povlsen@microchip.com>,
-        madhuparnabhowmik10@gmail.com,
-        "Paul E. McKenney" <paulmck@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Viresh Kumar <viresh.kumar@linaro.org>,
-        Vincent Guittot <vincent.guittot@linaro.org>
+        id S1727833AbgHaH6t (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 31 Aug 2020 03:58:49 -0400
+Received: from mx1.tq-group.com ([62.157.118.193]:23825 "EHLO mx1.tq-group.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1725829AbgHaH6s (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 31 Aug 2020 03:58:48 -0400
+IronPort-SDR: aW48Qhm+twaX2qlVg3Do+gTihhJUNur1nE8Kt7Gox9N13xf9buBscX+fXgDBqQdU42JzyDm9/o
+ 2/6Zz1OgJHq8dr6yhAQ3/Tgaw1WYZW83B9gWxWTpRraLBYSDwQz8MxKlDcL24XwlHTEf1jJFun
+ PaXlZrs7az5HmYVG8wxblRua1flbKqj5rwmOWsDIhSYhG0n2T+AdEL9rOqgXslUDV9UQ2IX/Br
+ iWt3R5nQRKKlMIhhwazOPmBINS+BVFveCVkrm5WcdegVm4JY/WK22zR+yOMGybTGqGgEeW/zVM
+ Pmg=
+X-IronPort-AV: E=Sophos;i="5.76,374,1592863200"; 
+   d="scan'208";a="13658304"
+Received: from unknown (HELO tq-pgp-pr1.tq-net.de) ([192.168.6.15])
+  by mx1-pgp.tq-group.com with ESMTP; 31 Aug 2020 09:58:45 +0200
+Received: from mx1.tq-group.com ([192.168.6.7])
+  by tq-pgp-pr1.tq-net.de (PGP Universal service);
+  Mon, 31 Aug 2020 09:58:45 +0200
+X-PGP-Universal: processed;
+        by tq-pgp-pr1.tq-net.de on Mon, 31 Aug 2020 09:58:45 +0200
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=tq-group.com; i=@tq-group.com; q=dns/txt; s=key1;
+  t=1598860725; x=1630396725;
+  h=message-id:subject:from:to:cc:date:in-reply-to:
+   references:mime-version:content-transfer-encoding;
+  bh=vyCow1rPqvLNj8Yuh9CZ0tVP0KoFa72Scu/pyJZGO20=;
+  b=fQpZacdnZRyU92CerHJYvaJGJp5mNQ9h7q5s+1q1XnQnaj+jVWWWE2Gm
+   X83cSSknF0GyM/QWRaunsvSahfpXEkZn08hXfz9/geDROnBRY55OwdNvg
+   beW0ly3cJd0jjCfw/Y0XmkZ7L+0+DOV153xwC7zCG4VtFBzyK5jbAtq2s
+   ar12i/jh0m/9JFO62AgvwFYgkMEtgIBzVxmwkBxeNOBUSdId9ajk4nfqa
+   AZsZLufuJqdgCRyV6Bpw8O+7AxvQ/l6XkjTZuP0mgJPAOfN2BkqHIlQli
+   tlHA0Q8FWT4NGavXo6PPzcBc/AOUlklEJPQfGK4wkuOjxAzTjHWFtdWts
+   Q==;
+IronPort-SDR: xSrRVFkECV8huYMhm5XOtvRW4br2dXyeq8ohB6S90OWRTpVT5ggO3W1Qn7yr+EUOgVHbFgFxUi
+ bqNXXrN52QefdPgIhy/5eE18LzuZJWmIA6CJQr4ufLA2h5eJBuGUyCyfSECSuKxiRnbhgml28x
+ KO+aQXlQbP1wtZjIFLBjsrBTk5Y4AoeUQ1ibcpsho3sE23c7LlECtIOMBdMraKrSVzsK7yt/y+
+ g7qAMXBm/ysVECwCxqsgRE1R7jH6YCOIAYbYYPGLElF7/4ntC1ZAv5kfvITnRZ+9Ucrnn3KTlm
+ D4c=
+X-IronPort-AV: E=Sophos;i="5.76,374,1592863200"; 
+   d="scan'208";a="13658303"
+Received: from vtuxmail01.tq-net.de ([10.115.0.20])
+  by mx1.tq-group.com with ESMTP; 31 Aug 2020 09:58:45 +0200
+Received: from schifferm-ubuntu4.tq-net.de (schifferm-ubuntu4.tq-net.de [10.117.49.26])
+        by vtuxmail01.tq-net.de (Postfix) with ESMTPA id EDEC7280065;
+        Mon, 31 Aug 2020 09:58:44 +0200 (CEST)
+Message-ID: <4e1182d756a81e10b32b465bb36938cb62a98cdd.camel@ew.tq-group.com>
+Subject: Re: [PATCH mmc-next v3 1/2] dt-bindings: mmc: add alias example
+From:   Matthias Schiffer <matthias.schiffer@ew.tq-group.com>
+To:     Rob Herring <robh@kernel.org>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Sascha Hauer <s.hauer@pengutronix.de>,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Date:   Mon, 31 Aug 2020 09:58:42 +0200
+In-Reply-To: <20200828222440.GA3507259@bogus>
+References: <20200825134441.17537-1-matthias.schiffer@ew.tq-group.com>
+         <20200828222440.GA3507259@bogus>
 Content-Type: text/plain; charset="UTF-8"
+X-Mailer: Evolution 3.28.5-0ubuntu0.18.04.2 
+Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-While booting linux mainline kernel on arm64 db410c this kernel warning
-noticed.
+On Fri, 2020-08-28 at 16:24 -0600, Rob Herring wrote:
+> On Tue, Aug 25, 2020 at 03:44:40PM +0200, Matthias Schiffer wrote:
+> > As for I2C and SPI, it now is possible to reserve a fixed index for
+> > mmc/mmcblk devices.
+> > 
+> > Signed-off-by: Matthias Schiffer <matthias.schiffer@ew.tq-group.com
+> > >
+> > ---
+> > 
+> > v3: new patch
+> > 
+> >  Documentation/devicetree/bindings/mmc/mmc-controller.yaml | 8
+> > ++++++++
+> >  1 file changed, 8 insertions(+)
+> > 
+> > diff --git a/Documentation/devicetree/bindings/mmc/mmc-
+> > controller.yaml b/Documentation/devicetree/bindings/mmc/mmc-
+> > controller.yaml
+> > index b96da0c7f819..22ed4a36c65d 100644
+> > --- a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
+> > +++ b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
+> > @@ -367,6 +367,14 @@ examples:
+> >      };
+> >  
+> >    - |
+> > +    /*
+> > +     * Optionally define an alias to reserve a fixed index for the
+> > +     * mmc and mmcblk devices
+> > +     */
+> > +    aliases {
+> > +        mmc0 = &mmc3;
+> > +    };
+> 
+> This will break if we improve schemas because this node is actually 
+> /example-1/aliases.
+> 
+> So please drop. If you want, I'd really like to have a defined set
+> (i.e. 
+> a schema) of alias names. This would require deleting a bunch on
+> some 
+> platforms that just made up a bunch of them.
 
-metadata:
-  git branch: master
-  git repo: https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
-  git commit: f75aef392f869018f78cfedf3c320a6b3fcfda6b
-  git describe: v5.9-rc3
-  make_kernelversion: 5.9.0-rc3
-  kernel-config:
-http://snapshots.linaro.org/openembedded/lkft/lkft/sumo/dragonboard-410c/lkft/linux-mainline/2965/config
+Ulf suggested that I add some kind of documentation about the new mmc
+alias support to the binding docs.
 
-Boot log,
+As long as we don't have a proper schema for aliases, should I just add
+an explanation to the toplevel description of
+Documentation/devicetree/bindings/mmc/mmc-controller.yaml, or maybe a
+comment?
 
-[    0.000000] Booting Linux on physical CPU 0x0000000000 [0x410fd030]
-[    0.000000] Linux version 5.9.0-rc3 (oe-user@oe-host)
-(aarch64-linaro-linux-gcc (GCC) 7.3.0, GNU ld (GNU Binutils)
-2.30.0.20180208) #1 SMP PREEMPT Mon Aug 31 00:23:15 UTC 2020
-[    0.000000] Machine model: Qualcomm Technologies, Inc. APQ 8016 SBC
-<>
-[    5.299090] sdhci: Secure Digital Host Controller Interface driver
-[    5.299140] sdhci: Copyright(c) Pierre Ossman
-[    5.304313]
-[    5.307771] Synopsys Designware Multimedia Card Interface Driver
-[    5.308588] =============================
-[    5.308593] WARNING: suspicious RCU usage
-[    5.316628] sdhci-pltfm: SDHCI platform and OF driver helper
-[    5.320052] 5.9.0-rc3 #1 Not tainted
-[    5.320057] -----------------------------
-[    5.320063] /usr/src/kernel/include/trace/events/lock.h:37
-suspicious rcu_dereference_check() usage!
-[    5.320068]
-[    5.320068] other info that might help us debug this:
-[    5.320068]
-[    5.320074]
-[    5.320074] rcu_scheduler_active = 2, debug_locks = 1
-[    5.320078] RCU used illegally from extended quiescent state!
-[    5.320084] no locks held by swapper/0/0.
-[    5.320089]
-[    5.320089] stack backtrace:
-[    5.320098] CPU: 0 PID: 0 Comm: swapper/0 Not tainted 5.9.0-rc3 #1
-[    5.346354] sdhci_msm 7864900.sdhci: Got CD GPIO
-[    5.346446] Hardware name: Qualcomm Technologies, Inc. APQ 8016 SBC (DT)
-[    5.346452] Call trace:
-[    5.346463]  dump_backtrace+0x0/0x1f8
-[    5.346471]  show_stack+0x2c/0x38
-[    5.346480]  dump_stack+0xec/0x15c
-[    5.346490]  lockdep_rcu_suspicious+0xd4/0xf8
-[    5.346499]  lock_acquire+0x3d0/0x440
-[    5.346510]  _raw_spin_lock_irqsave+0x80/0xb0
-[    5.413118]  __pm_runtime_suspend+0x34/0x1d0
-[    5.417457]  psci_enter_domain_idle_state+0x4c/0xb0
-[    5.421795]  cpuidle_enter_state+0xc8/0x610
-[    5.426392]  cpuidle_enter+0x3c/0x50
-[    5.430561]  call_cpuidle+0x44/0x80
-[    5.434378]  do_idle+0x240/0x2a0
-[    5.437589]  cpu_startup_entry+0x2c/0x78
-[    5.441063]  rest_init+0x1ac/0x280
-[    5.444970]  arch_call_rest_init+0x14/0x1c
-[    5.448180]  start_kernel+0x50c/0x544
-[    5.452395]
-[    5.452399]
-[    5.452403] =============================
-[    5.452406] WARNING: suspicious RCU usage
-[    5.452409] 5.9.0-rc3 #1 Not tainted
-[    5.452412] -----------------------------
-[    5.452417] /usr/src/kernel/include/trace/events/ipi.h:36
-suspicious rcu_dereference_check() usage!
-[    5.452420]
-[    5.452424] other info that might help us debug this:
-[    5.452426]
-[    5.452429]
-[    5.452432] rcu_scheduler_active = 2, debug_locks = 1
-[    5.452436] RCU used illegally from extended quiescent state!
-[    5.452440] 1 lock held by swapper/0/0:
-[    5.452443]  #0: ffff8000127408f8 (logbuf_lock){-...}-{2:2}, at:
-vprintk_emit+0xb0/0x358
-[    5.452458]
-[    5.452461] stack backtrace:
-[    5.452465] CPU: 0 PID: 0 Comm: swapper/0 Not tainted 5.9.0-rc3 #1
-[    5.452469] Hardware name: Qualcomm Technologies, Inc. APQ 8016 SBC (DT)
-[    5.452472] Call trace:
-[    5.452476]  dump_backtrace+0x0/0x1f8
-[    5.452479]  show_stack+0x2c/0x38
-[    5.452481]  dump_stack+0xec/0x15c
-[    5.452485]  lockdep_rcu_suspicious+0xd4/0xf8
-[    5.452489]  arch_irq_work_raise+0x208/0x210
-[    5.452493]  __irq_work_queue_local+0x64/0x88
-[    5.452495]  irq_work_queue+0x3c/0x88
-[    5.452499]  printk_safe_log_store+0x148/0x178
-[    5.452502]  vprintk_func+0x1cc/0x2b8
-[    5.452506]  printk+0x74/0x94
-[    5.452509]  lockdep_rcu_suspicious+0x28/0xf8
-[    5.452512]  lock_release+0x338/0x360
-[    5.452516]  _raw_spin_unlock+0x3c/0xa0
-[    5.452519]  vprintk_emit+0xf8/0x358
-[    5.452522]  vprintk_default+0x48/0x58
-[    5.452526]  vprintk_func+0xec/0x2b8
-[    5.452528]  printk+0x74/0x94
-[    5.452532]  lockdep_rcu_suspicious+0x28/0xf8
-[    5.452535]  lock_acquire+0x3d0/0x440
-[    5.452538]  _raw_spin_lock_irqsave+0x80/0xb0
-[    5.452542]  __pm_runtime_suspend+0x34/0x1d0
-[    5.452545]  psci_enter_domain_idle_state+0x4c/0xb0
-[    5.452549]  cpuidle_enter_state+0xc8/0x610
-[    5.452552]  cpuidle_enter+0x3c/0x50
-[    5.452555]  call_cpuidle+0x44/0x80
-[    5.452559]  do_idle+0x240/0x2a0
-[    5.452562]  cpu_startup_entry+0x2c/0x78
-[    5.452564]  rest_init+0x1ac/0x280
-[    5.452568]  arch_call_rest_init+0x14/0x1c
-[    5.452571]  start_kernel+0x50c/0x544
-[    5.452575] =============================
-[    5.452578] WARNING: suspicious RCU usage
-[    5.452582] 5.9.0-rc3 #1 Not tainted
-[    5.452585] -----------------------------
-[    5.452590] /usr/src/kernel/include/trace/events/lock.h:63
-suspicious rcu_dereference_check() usage!
-[    5.452593]
-[    5.452596] other info that might help us debug this:
-[    5.452599]
-[    5.452601]
-[    5.452605] rcu_scheduler_active = 2, debug_locks = 1
-[    5.452609] RCU used illegally from extended quiescent state!
-[    5.452612] 1 lock held by swapper/0/0:
-[    5.452615]  #0: ffff8000127408f8 (logbuf_lock){-...}-{2:2}, at:
-vprintk_emit+0xb0/0x358
-[    5.452630]
-[    5.452633] stack backtrace:
-[    5.452636] CPU: 0 PID: 0 Comm: swapper/0 Not tainted 5.9.0-rc3 #1
-[    5.452640] Hardware name: Qualcomm Technologies, Inc. APQ 8016 SBC (DT)
-[    5.452643] Call trace:
-[    5.452646]  dump_backtrace+0x0/0x1f8
-[    5.452649]  show_stack+0x2c/0x38
-[    5.452652]  dump_stack+0xec/0x15c
-[    5.452656]  lockdep_rcu_suspicious+0xd4/0xf8
-[    5.452659]  lock_release+0x338/0x360
-[    5.452662]  _raw_spin_unlock+0x3c/0xa0
-[    5.452665]  vprintk_emit+0xf8/0x358
-[    5.452669]  vprintk_default+0x48/0x58
-[    5.452671]  vprintk_func+0xec/0x2b8
-[    5.452674]  printk+0x74/0x94
-[    5.452677]  lockdep_rcu_suspicious+0x28/0xf8
-[    5.452680]  lock_acquire+0x3d0/0x440
-[    5.452683]  _raw_spin_lock_irqsave+0x80/0xb0
-[    5.452686]  __pm_runtime_suspend+0x34/0x1d0
-[    5.452690]  psci_enter_domain_idle_state+0x4c/0xb0
-[    5.452693]  cpuidle_enter_state+0xc8/0x610
-[    5.452696]  cpuidle_enter+0x3c/0x50
-[    5.452698]  call_cpuidle+0x44/0x80
-[    5.452701]  do_idle+0x240/0x2a0
-[    5.452704]  cpu_startup_entry+0x2c/0x78
-[    5.452708]  rest_init+0x1ac/0x280
-[    5.452711]  arch_call_rest_init+0x14/0x1c
-[    5.452714]  start_kernel+0x50c/0x544
 
-full test log link,
-https://qa-reports.linaro.org/lkft/linux-mainline-oe/build/v5.9-rc3/testrun/3137660/suite/linux-log-parser/test/check-kernel-warning-1722813/log
+> 
+> > +
+> >      mmc3: mmc@1c12000 {
+> >          #address-cells = <1>;
+> >          #size-cells = <0>;
+> > -- 
+> > 2.17.1
+> > 
 
--- 
-Linaro LKFT
-https://lkft.linaro.org
