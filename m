@@ -2,148 +2,143 @@ Return-Path: <SRS0=ypud=CJ=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.3 required=3.0 tests=BAYES_00,DKIM_INVALID,
-	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.6 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B9390C433E6
-	for <linux-mmc@archiver.kernel.org>; Mon, 31 Aug 2020 11:41:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B2C43C433E2
+	for <linux-mmc@archiver.kernel.org>; Mon, 31 Aug 2020 13:09:20 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 96C4F20866
-	for <linux-mmc@archiver.kernel.org>; Mon, 31 Aug 2020 11:41:55 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (1024-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="g9eF1cbW"
+	by mail.kernel.org (Postfix) with ESMTP id 9D40521532
+	for <linux-mmc@archiver.kernel.org>; Mon, 31 Aug 2020 13:09:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726546AbgHaLly (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 31 Aug 2020 07:41:54 -0400
-Received: from www.zeus03.de ([194.117.254.33]:44160 "EHLO mail.zeus03.de"
+        id S1726654AbgHaNIs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 31 Aug 2020 09:08:48 -0400
+Received: from mga18.intel.com ([134.134.136.126]:21885 "EHLO mga18.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726121AbgHaLly (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 31 Aug 2020 07:41:54 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
-        date:from:to:cc:subject:message-id:references:mime-version
-        :content-type:in-reply-to; s=k1; bh=Rlo+b87xmJ7xqCoMXBaqTI+im096
-        OJ7Uj5B+OJVPxWw=; b=g9eF1cbW5ONJh1qNNlEIdhNXwmkncIhnUfLApfGrm2rm
-        f/6QwM1CekgZ8P3M+RMYV6UBVBOjFCRAS6gpvkeaVjSeGgPcwIAXhve+AqqihFJi
-        dDdxmrJ3rUIcIdRTmEbOBCvsh+j0K4XHW5cSbKMDdhAS5Um+dWm22pD0CuyuP6k=
-Received: (qmail 2106240 invoked from network); 31 Aug 2020 13:41:48 +0200
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 31 Aug 2020 13:41:48 +0200
-X-UD-Smtp-Session: l3s3148p1@cYdD4yquztAgAwDPXwczAOmbI0TU8LCu
-Date:   Mon, 31 Aug 2020 13:41:47 +0200
-From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
-To:     Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-renesas-soc@vger.kernel.org" 
-        <linux-renesas-soc@vger.kernel.org>,
-        Takeshi Saito <takeshi.saito.xv@renesas.com>
-Subject: Re: [PATCH 2/2] mmc: renesas_sdhi: support manual calibration
-Message-ID: <20200831114147.GC1070@ninjato>
-References: <20200605101222.10783-1-wsa+renesas@sang-engineering.com>
- <20200605101222.10783-3-wsa+renesas@sang-engineering.com>
- <TY2PR01MB369224E06BAE72C1711B681AD8510@TY2PR01MB3692.jpnprd01.prod.outlook.com>
+        id S1726984AbgHaNIn (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 31 Aug 2020 09:08:43 -0400
+IronPort-SDR: epgQ2NisbhrzCux6S+AsxqKKo0r2JuYgVrgHJoA52YXrxBLO+RTr2BoGjUcU63+LBM75XG59qL
+ 3rYMPH2nMGzA==
+X-IronPort-AV: E=McAfee;i="6000,8403,9729"; a="144643457"
+X-IronPort-AV: E=Sophos;i="5.76,375,1592895600"; 
+   d="scan'208";a="144643457"
+X-Amp-Result: SKIPPED(no attachment in message)
+X-Amp-File-Uploaded: False
+Received: from fmsmga006.fm.intel.com ([10.253.24.20])
+  by orsmga106.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 31 Aug 2020 06:08:34 -0700
+IronPort-SDR: EohOby+7M8jiGk+t8vzztTtibrfD4QbKSTQq1hGxL18iqul7w31+Wm23G0lKBK+P+i0d3SJVq3
+ VWCHzD9m0qhg==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.76,375,1592895600"; 
+   d="scan'208";a="501331763"
+Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.73]) ([10.237.72.73])
+  by fmsmga006.fm.intel.com with ESMTP; 31 Aug 2020 06:08:20 -0700
+Subject: Re: [PATCH v1 1/2] mmc: cqhci: add new cqhci_host_ops pre_enable()
+ and post_disable()
+To:     Chun-Hung Wu <chun-hung.wu@mediatek.com>, mirq-linux@rere.qmqm.pl,
+        Jonathan Hunter <jonathanh@nvidia.com>,
+        Al Cooper <alcooperx@gmail.com>,
+        Florian Fainelli <f.fainelli@gmail.com>,
+        bcm-kernel-feedback-list@broadcom.com,
+        Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Michal Simek <michal.simek@xilinx.com>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        Mao Yong <yong.mao@mediatek.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Mark Rutland <mark.rutland@arm.com>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Pavel Machek <pavel@ucw.cz>,
+        Kate Stewart <kstewart@linuxfoundation.org>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+        Pan Bian <bianpan2016@163.com>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Allison Randal <allison@lohutok.net>,
+        Mathieu Malaterre <malat@debian.org>,
+        Asutosh Das <asutoshd@codeaurora.org>,
+        Ritesh Harjani <riteshh@codeaurora.org>,
+        Stanley Chu <stanley.chu@mediatek.com>,
+        Kuohong Wang <kuohong.wang@mediatek.com>
+Cc:     kernel-team@android.com, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-mediatek@lists.infradead.org,
+        devicetree@vger.kernel.org, wsd_upstream@mediatek.com,
+        linux-arm-kernel@lists.infradead.org,
+        linux-arm-msm@vger.kernel.org, linux-tegra@vger.kernel.org
+References: <1598520783-25250-1-git-send-email-chun-hung.wu@mediatek.com>
+ <1598520783-25250-2-git-send-email-chun-hung.wu@mediatek.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Message-ID: <9c0dd5b4-5d9e-e559-81f5-fbf6024b67bb@intel.com>
+Date:   Mon, 31 Aug 2020 16:07:43 +0300
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.10.0
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="zCKi3GIZzVBPywwA"
-Content-Disposition: inline
-In-Reply-To: <TY2PR01MB369224E06BAE72C1711B681AD8510@TY2PR01MB3692.jpnprd01.prod.outlook.com>
-User-Agent: Mutt/1.10.1 (2018-07-13)
+In-Reply-To: <1598520783-25250-2-git-send-email-chun-hung.wu@mediatek.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+On 27/08/20 12:33 pm, Chun-Hung Wu wrote:
+> Add pre_enable() and post_disable() for cqhci_host_ops.
+> Add hook functions before cqhci enable and
+> after cqhci disable for platforms need them.
+> 
+> Signed-off-by: Chun-Hung Wu <chun-hung.wu@mediatek.com>
 
---zCKi3GIZzVBPywwA
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-Hi Shimoda-san,
+> ---
+>  drivers/mmc/host/cqhci.c |    6 ++++++
+>  drivers/mmc/host/cqhci.h |    2 ++
+>  2 files changed, 8 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/cqhci.c b/drivers/mmc/host/cqhci.c
+> index cfa87df..697fe40 100644
+> --- a/drivers/mmc/host/cqhci.c
+> +++ b/drivers/mmc/host/cqhci.c
+> @@ -376,6 +376,9 @@ static void cqhci_off(struct mmc_host *mmc)
+>  	else
+>  		pr_debug("%s: cqhci: CQE off\n", mmc_hostname(mmc));
+>  
+> +	if (cq_host->ops->post_disable)
+> +		cq_host->ops->post_disable(mmc);
+> +
+>  	mmc->cqe_on = false;
+>  }
+>  
+> @@ -580,6 +583,9 @@ static int cqhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>  		__cqhci_enable(cq_host);
+>  
+>  	if (!mmc->cqe_on) {
+> +		if (cq_host->ops->pre_enable)
+> +			cq_host->ops->pre_enable(mmc);
+> +
+>  		cqhci_writel(cq_host, 0, CQHCI_CTL);
+>  		mmc->cqe_on = true;
+>  		pr_debug("%s: cqhci: CQE on\n", mmc_hostname(mmc));
+> diff --git a/drivers/mmc/host/cqhci.h b/drivers/mmc/host/cqhci.h
+> index 4377001..89bf6ad 100644
+> --- a/drivers/mmc/host/cqhci.h
+> +++ b/drivers/mmc/host/cqhci.h
+> @@ -206,6 +206,8 @@ struct cqhci_host_ops {
+>  	void (*disable)(struct mmc_host *mmc, bool recovery);
+>  	void (*update_dcmd_desc)(struct mmc_host *mmc, struct mmc_request *mrq,
+>  				 u64 *data);
+> +	void (*pre_enable)(struct mmc_host *mmc);
+> +	void (*post_disable)(struct mmc_host *mmc);
+>  };
+>  
+>  static inline void cqhci_writel(struct cqhci_host *host, u32 val, int reg)
+> 
 
-> We should set the needs_adjust_hs400 when HS400EN=3D1 is set.
-> In other words, we should set it in renesas_sdhi_hs400_complete(),
-> not renesas_sdhi_prepare_hs400_tuning().
-
-Oh, thanks for pointing this out! I simply put it into the same function
-as the BSP, but due to massive refactoring in the upstream driver we
-really need to put it where tuning is completed. I used the following
-patch on top of this patch:
-
-diff --git b/drivers/mmc/host/renesas_sdhi_core.c a/drivers/mmc/host/renesa=
-s_sdhi_core.c
-index 2834b30c3ba6..b54dd8a7ecaa 100644
---- b/drivers/mmc/host/renesas_sdhi_core.c
-+++ a/drivers/mmc/host/renesas_sdhi_core.c
-@@ -419,6 +419,9 @@ static void renesas_sdhi_hs400_complete(struct mmc_host=
- *mmc)
-=20
- 	sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, CLK_CTL_SCLKEN |
- 			sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL));
-+
-+	if (priv->adjust_hs400_calib_table)
-+		priv->needs_adjust_hs400 =3D true;
- }
-=20
- static void renesas_sdhi_reset_scc(struct tmio_mmc_host *host,
-@@ -544,12 +547,8 @@ static void renesas_sdhi_reset_hs400_mode(struct tmio_=
-mmc_host *host,
- static int renesas_sdhi_prepare_hs400_tuning(struct mmc_host *mmc, struct =
-mmc_ios *ios)
- {
- 	struct tmio_mmc_host *host =3D mmc_priv(mmc);
--	struct renesas_sdhi *priv =3D host_to_priv(host);
-=20
--	if (priv->adjust_hs400_calib_table)
--		priv->needs_adjust_hs400 =3D true;
--
--	renesas_sdhi_reset_hs400_mode(host, priv);
-+	renesas_sdhi_reset_hs400_mode(host, host_to_priv(host));
- 	return 0;
- }
-
-and got these debug reports from my M3-N:
-
-     kworker/0:1-21    [000] ....     4.171435: renesas_sdhi_fixup_request:=
- code 17 replacement 18
-
-which was different without the fix:
-
-     kworker/0:1-21    [000] ....     4.171435: renesas_sdhi_fixup_request:=
- code 31 replacement 31
-
-> When we read the calib_code at room temperature, the value will be around=
- 0x10.
-> However, we will get 0x00 here. So, we need to fix it.
-
-So, my new debug output looks good.
-
-I will fold the fixup patch into the next version of this series. I
-still need to get the stalled-SCC issue tackled first. But I am now
-working on it.
-
-Thanks again,
-
-   Wolfram
-
-
---zCKi3GIZzVBPywwA
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAl9M4fcACgkQFA3kzBSg
-KbZqORAAjtXdyjdaveVv7rrFD0pPRakeAlR3dsfbVVIKH1DheeieIDUll5VmlAtV
-Jr9q1OeC49GRijWh3dveZH7cyPjpXwJ8YZuW8HXpAj7ET0ZrB1o/fmOxPsDMLlVW
-rb5Ma1RBIQ206r394cQsb3AscTpDw9mn5evKdoLw1MeiKnzHOfgBNprT+VXWnp+t
-7WORFc04MnJ+WulztmUczcnAY1qbtiYkrH47sJRqvXIf4jS3Wayb1jJyJVM2IAlk
-aw5KDUd070EcTHL2tGqL9NRubAjPlYb0vbHPbJ99X+DyvypluoO2g+mMkEKeyn7C
-WQzHoC97E0DXGnCddFmrsjgyUpGsrhgt62doEjD8St8yf+WcUJbOGSovZHwSOcIq
-VnfVM4K8Q55n0XfbsTcWgedtBlAewV8PuxRMSx2uUrOpj6r7mdZ0zmEzDbs1l+lN
-K15R6R53mur4eAZ2DHpWd4Y3UnFktHDK/9p5BDtfquu9jXQayZheizzM4hVOTR7S
-hOmgCCusVuCQFSv8f/2udqHtQI0hTdEmp2JdX4G2cetSiYep+bTq/bPos1kv+LkB
-6/1Xh0u9ff/e54bPxVqF4JrBmQaL2T/U5m9tITJV0drKASeNyeWZP8W0qZSbJQUY
-g9j/K0ZEqYmAmkEfiJn1CTbVqklexakWxWtadb4fj7SAJNJR4Aw=
-=+7nk
------END PGP SIGNATURE-----
-
---zCKi3GIZzVBPywwA--
