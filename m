@@ -2,153 +2,109 @@ Return-Path: <SRS0=ypud=CJ=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.0 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AAA01C433E2
-	for <linux-mmc@archiver.kernel.org>; Mon, 31 Aug 2020 06:23:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 55FA1C433E2
+	for <linux-mmc@archiver.kernel.org>; Mon, 31 Aug 2020 06:23:26 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 895CA20782
-	for <linux-mmc@archiver.kernel.org>; Mon, 31 Aug 2020 06:23:05 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3016320782
+	for <linux-mmc@archiver.kernel.org>; Mon, 31 Aug 2020 06:23:26 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=renesasgroup.onmicrosoft.com header.i=@renesasgroup.onmicrosoft.com header.b="B0LXdmIO"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="NdFQqz3k"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725848AbgHaGXE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 31 Aug 2020 02:23:04 -0400
-Received: from mail-eopbgr1400121.outbound.protection.outlook.com ([40.107.140.121]:47760
-        "EHLO JPN01-TY1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1725835AbgHaGW7 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 31 Aug 2020 02:22:59 -0400
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=JG+y5p7aepHFcHhwHTTnh1K0KiZdc98CqsK2x+onkiu46EiKu1QKSTtBSeYNxohoCw+IZYBAFTHAtAhRSlut9LpE5tL/Stb9RHKJ+aXwMNFT1SAMmaP5lMePDusJnZ+8mDTHfv/Sg599qYkMML0c3cNhINzyq+TscmQmougYCu6yX/wCPE//Xy7F8Q4eHpquwpsD/XYQUhb4vWJIvuUgVu+tU0c8QANdAHYPhWrDokbb0eF/uOogSAO7zIfkgASPz0sNUdIZCpBFgdsE/KjrQ7XL6lptCm+0OldYPD2jIpqA1MjP4bHiidRqVk0HtR0QAczT2v7l2+gMN7itLVLtDA==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=+1QeILV1dnNm7tUm+Zfl+l0K2mNHtLiQ9IgI55USnA8=;
- b=DjM0WMER4oH9C/o0dJjst9ab3K8J6Diqij2U3pl6PyC6HeP719ncnfkH24+WY1XepRJ53ZkkQGF3Swh4eHkjn14mlM03YfWMeKM69M4HMbPgKTlE+dLS4SGpuGV0iiu1nK/QqiA5tUOgj8esE6pk1rSjInk95hmTiUbN/e7FzMa9o79OK5eM8MzcYDR7/NK9M8jTpHYrR8P2/7z24+Mg2PiQCtqrtziw9lNFXOm4pDyn2JvKgPHY9SlCqYXbzCK+NQ5NObrsKTvlg17nngz15eZrYvIoE9NDOBpb1Wy4e9xad7kJV5y0WyN6XeCzp7UHTVkU4CZGt9UD7FmCJOv8tg==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=renesas.com; dmarc=pass action=none header.from=renesas.com;
- dkim=pass header.d=renesas.com; arc=none
+        id S1727015AbgHaGXZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 31 Aug 2020 02:23:25 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54556 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725835AbgHaGXW (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 31 Aug 2020 02:23:22 -0400
+Received: from mail-pg1-x541.google.com (mail-pg1-x541.google.com [IPv6:2607:f8b0:4864:20::541])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BEC3EC061573
+        for <linux-mmc@vger.kernel.org>; Sun, 30 Aug 2020 23:23:22 -0700 (PDT)
+Received: by mail-pg1-x541.google.com with SMTP id l191so71073pgd.5
+        for <linux-mmc@vger.kernel.org>; Sun, 30 Aug 2020 23:23:22 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=renesasgroup.onmicrosoft.com; s=selector2-renesasgroup-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=+1QeILV1dnNm7tUm+Zfl+l0K2mNHtLiQ9IgI55USnA8=;
- b=B0LXdmIOsjOVSgeCPhAxeS69u6RnKIClKAC6MHIQ+PbYizW5p2+sa9T+qH4/vTaUOk1xRAykMGkcs57OfOB0ImOGzlKpmbzjkayD30xCa04ePB+zYGn9yoraCrQa5/ndn65krhxgrp7hrIzo1BgWY0HNiUhYhrSFg+xt8P7I55I=
-Received: from TY2PR01MB3692.jpnprd01.prod.outlook.com (2603:1096:404:d5::22)
- by TYAPR01MB3935.jpnprd01.prod.outlook.com (2603:1096:404:c2::15) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3326.25; Mon, 31 Aug
- 2020 06:22:56 +0000
-Received: from TY2PR01MB3692.jpnprd01.prod.outlook.com
- ([fe80::9055:525d:2d64:b625]) by TY2PR01MB3692.jpnprd01.prod.outlook.com
- ([fe80::9055:525d:2d64:b625%5]) with mapi id 15.20.3326.025; Mon, 31 Aug 2020
- 06:22:56 +0000
-From:   Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-To:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-CC:     "linux-renesas-soc@vger.kernel.org" 
-        <linux-renesas-soc@vger.kernel.org>,
-        Takeshi Saito <takeshi.saito.xv@renesas.com>
-Subject: RE: [PATCH 2/2] mmc: renesas_sdhi: support manual calibration
-Thread-Topic: [PATCH 2/2] mmc: renesas_sdhi: support manual calibration
-Thread-Index: AQHWOyHXDJ9Nxdhj2Uux3nDBdkC+TalSQ+Ng
-Date:   Mon, 31 Aug 2020 06:22:55 +0000
-Message-ID: <TY2PR01MB369224E06BAE72C1711B681AD8510@TY2PR01MB3692.jpnprd01.prod.outlook.com>
-References: <20200605101222.10783-1-wsa+renesas@sang-engineering.com>
- <20200605101222.10783-3-wsa+renesas@sang-engineering.com>
-In-Reply-To: <20200605101222.10783-3-wsa+renesas@sang-engineering.com>
-Accept-Language: ja-JP, en-US
-Content-Language: ja-JP
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-authentication-results: sang-engineering.com; dkim=none (message not signed)
- header.d=none;sang-engineering.com; dmarc=none action=none
- header.from=renesas.com;
-x-originating-ip: [240f:60:5f3e:1:cdc5:a58d:f30f:99c5]
-x-ms-publictraffictype: Email
-x-ms-office365-filtering-ht: Tenant
-x-ms-office365-filtering-correlation-id: 9c3ef85a-b9fb-4632-d62b-08d84d764ca4
-x-ms-traffictypediagnostic: TYAPR01MB3935:
-x-ms-exchange-transport-forked: True
-x-microsoft-antispam-prvs: <TYAPR01MB39351585922D6CBD91D0194ED8510@TYAPR01MB3935.jpnprd01.prod.outlook.com>
-x-ms-oob-tlc-oobclassifiers: OLM:9508;
-x-ms-exchange-senderadcheck: 1
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: AIKhnrYUKskCpQ3DmvUrvaTQG3Hm9ALXIzZg2t9I3mJVIYL8E29ACuFuFDBmVGk/aGNzodUEEGIYho+X2mWRfI8c2iGsO1sU6owh9qxHMbo/Ta22acyjWFU6G3zErh0XRfq/vUCcBRnLzD40OgYxAw6KxbL1/goP57I3GOC5GgRUbVl7Q24QMOLfX+Il8WRBoQX93w6r1zlgO0hY/QmynVHCGMiFQe0PsfLIkGZZm54LabFgIdWbfyv8WgJK5ldAaZmF2179xuvy+8RQYmDi4jVgAYSocIhiBHZ64a/O7KzUhMmFOs2LoAcFHZ0naPR90pUrftL6xhObVUeoJ94yjQ==
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY2PR01MB3692.jpnprd01.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(39860400002)(396003)(366004)(346002)(376002)(136003)(83380400001)(66556008)(186003)(7696005)(107886003)(6506007)(66476007)(316002)(64756008)(66446008)(66946007)(52536014)(76116006)(86362001)(71200400001)(4326008)(54906003)(110136005)(55016002)(9686003)(8676002)(33656002)(8936002)(478600001)(5660300002)(2906002);DIR:OUT;SFP:1102;
-x-ms-exchange-antispam-messagedata: MM9XWpEIDqU3UHrmRABGPvid1l8m9/S2jMIs8vBbt19too+06xUO/bfEW58QEdupsYlCyWFc/S1OtGxtlMaLZnET64IcAzURM+A7WDCw2EIChlOPB/lwvg5oOo9GWp9rlvd8evEvuPh8M4x5+y5UJFRz19tLwshwxABiCQ+JojBCBVkw9qzRdUp8PPBk+JzEkKEzyNRKZBMEfYuLTZ/ud6VN6ofRN4RW17VHUna+Sfws7Bs4cRmZUiow7w+cmtBsClz6uYcO+D76a8FxGyl/F2LKptJGikXbt54nzu6c58joH07ua3Ic2YMT2PLF0dd7f1k65SzzDw1h+rTwK31LBWTDWAl/Nw/azeLnXIEPcmv7kgummRIkgJKiFxjXlZ7NVA1aIQX7gefZv/56UlW56CIl7Vc7OMppwby3qVemEEsyU1BQ5Rt578dq+b5OtX8JRGTg87Djby0eI2kcQNRxYCW7DRrsaq+EPwz81sTcf5O20JELhEQPKzXAemiTZFm21pf4vPwxXx5EDI0s1WnrIHvNiRaXCye2/Z7EwBD34vOwia2EQy5KqjEo4oDh9fA2Of2l/4Z3/UtoMnrm+5BDWUx8/y88knmDAIpUQj/r3fZ2tYAX3WpQmfVMbyccFv4jrrW0dXreBxtLGWysrqeB8rJyZHsUmHxK52uRSW6+g9YjUtf+P8Wzmcs7sF1dIj1vszp99VKEQbWxF1lwwWE/TA==
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+        d=linaro.org; s=google;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to:user-agent;
+        bh=sJ3ExN1YxmSdx9B7tVLJI57jrIcdEL//wrxOl/kRJWM=;
+        b=NdFQqz3k5Iy9JJFE9r18DQJpRVzxdYliPIP9i2pEQlEeomBtcfsSHhloWxe7mrQVeo
+         lutWaOfriaHAwoEmV67pzgXONF6kGJ8yC5lh+weCG/HFRUBc2AAO6/Sb5cANAMqyj4AX
+         Nvf7VkwI7ebBEtT4OoybeA8ao0SfvzGbOKWk78h2s9gK+gKpLc/erWBvbIvarsi1t19h
+         epj4IdDkCuPcDo2IZmGtY0j46noVF1nHP05UpbRHaXpESJLyBBKP0tjqyzcAzEzv5EV0
+         UZgNc8gDx7cXvzkFnvYV1KmLmi0t+PP/7cNNQcnSyGy2Q+cu0VPBJ3lLAYN35XyCY4hz
+         NUOQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to:user-agent;
+        bh=sJ3ExN1YxmSdx9B7tVLJI57jrIcdEL//wrxOl/kRJWM=;
+        b=QK7+egVzSbH9IVbqt4KuIyNik1k5gqCPU5xPrRFUuJgc35o1+z124bdPAkMyEbyFzw
+         mDWoLVhhnilwPQMp4Fq15OQBQEH7YPjSX90IQhxX/acwfSPo63mFeLyeno8hn+va5LL4
+         ep3sVi5OiXKU1LQ0VCmxTz8DK1ysQplsMog+XKo29T5fckFiiewdgVa+FUqR0uQ1kNU9
+         g+GzE7wIBzKAYCEdp5GyKiCRHlgpRy2yreo1OUMzYhs9HnF9uBH0AqSqOBnAEpvzaEjQ
+         4igH8ywocOiPYXPSw+kr0TaAZlAQvva5hWTo/y8rBxcGN0XsrE+4PbheVitn00LXj+VC
+         Ft8w==
+X-Gm-Message-State: AOAM533bEg/pRVnueJlve0cG+suQy1Tl81bmrLWs0u1/M9uFc97BrDaI
+        3+RW4s0tq2VtVM4wQzfgoLUsZw==
+X-Google-Smtp-Source: ABdhPJx0AUeqO6ezJIrG1OgWb9NbCxwBOlpdZyGvrt5hn2Kk0+xHZDXZDamEYsx5aa4MzqvruGcKHw==
+X-Received: by 2002:a05:6a00:16c2:: with SMTP id l2mr118487pfc.112.1598855002263;
+        Sun, 30 Aug 2020 23:23:22 -0700 (PDT)
+Received: from localhost ([122.167.135.199])
+        by smtp.gmail.com with ESMTPSA id t15sm6617073pfl.175.2020.08.30.23.23.20
+        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
+        Sun, 30 Aug 2020 23:23:21 -0700 (PDT)
+Date:   Mon, 31 Aug 2020 11:53:19 +0530
+From:   Viresh Kumar <viresh.kumar@linaro.org>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Rajendra Nayak <rnayak@codeaurora.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Linux PM <linux-pm@vger.kernel.org>,
+        Vincent Guittot <vincent.guittot@linaro.org>,
+        Rafael Wysocki <rjw@rjwysocki.net>,
+        Stephen Boyd <sboyd@kernel.org>, Nishanth Menon <nm@ti.com>,
+        Douglas Anderson <dianders@chromium.org>,
+        Naresh Kamboju <naresh.kamboju@linaro.org>,
+        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Subject: Re: [PATCH V2 4/8] mmc: sdhci-msm: Unconditionally call
+ dev_pm_opp_of_remove_table()
+Message-ID: <20200831062319.fibgrzes4nmlwcx5@vireshk-i7>
+References: <cover.1598594714.git.viresh.kumar@linaro.org>
+ <1d7c97524b9e1fbc60271d9c246c5461ca8a106c.1598594714.git.viresh.kumar@linaro.org>
+ <CAPDyKFpdZhzXQv3hpTzf3UkJDhFqBhgMXCqVfAfE6PejLCxvfg@mail.gmail.com>
 MIME-Version: 1.0
-X-OriginatorOrg: renesas.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: TY2PR01MB3692.jpnprd01.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 9c3ef85a-b9fb-4632-d62b-08d84d764ca4
-X-MS-Exchange-CrossTenant-originalarrivaltime: 31 Aug 2020 06:22:55.9306
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 53d82571-da19-47e4-9cb4-625a166a4a2a
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: jJMVMBC8EXVr/ptOF8VUFynmgA07X1vemQVLNnnfsF+HzJO9k5Z61GSQrbhHOGjMnneZ8XIyvGVkbfw7/b7nyohGcOJx3tTPDqVXBS8cNt/hvWNVCjU7e0lniBunRVH4
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: TYAPR01MB3935
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFpdZhzXQv3hpTzf3UkJDhFqBhgMXCqVfAfE6PejLCxvfg@mail.gmail.com>
+User-Agent: NeoMutt/20180716-391-311a52
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Wolfram-san,
+On 28-08-20, 10:43, Ulf Hansson wrote:
+> On Fri, 28 Aug 2020 at 08:08, Viresh Kumar <viresh.kumar@linaro.org> wrote:
+> >
+> > dev_pm_opp_of_remove_table() doesn't report any errors when it fails to
+> > find the OPP table with error -ENODEV (i.e. OPP table not present for
+> > the device). And we can call dev_pm_opp_of_remove_table()
+> > unconditionally here.
+> >
+> > Signed-off-by: Viresh Kumar <viresh.kumar@linaro.org>
+> 
+> Replaced v1 with v2 on my next branch, thanks!
+> 
+> Just to be sure, this patch doesn't depend on any changes for the opp
+> core that are queued for v5.10?
 
-Thank you for the patch!
- (And, I'm sorry for the delayed response.)
+No it doesn't.
 
-> From: Wolfram Sang, Sent: Friday, June 5, 2020 7:12 PM
->=20
-> Some R-Car Gen3 SoCs need some manual correction of timing parameters
-> after the automatic tuning has finished but before next CMD13 is
-> completed. This patch implements that by this state machine:
->=20
-> - introducing a per-SoC correction table if needed
-> - iff such a table exists, the 'fixup_request' callback is populated
->   during probe
-> - iff such a table exists, a runtime flag ('needs_adjust_hs400')
->   is set when HS400 tuning gets prepared
-
-We should set the needs_adjust_hs400 when HS400EN=3D1 is set.
-In other words, we should set it in renesas_sdhi_hs400_complete(),
-not renesas_sdhi_prepare_hs400_tuning().
-=09
-> - if tuning HS400 fails, the runtime flag is cleared again
-> - the callback will check the runtime flag and enable the corrected
->   manual mode if the flag is set and CMD13 is encountered
-> - at the end of the enablement the runtime flag is cleared
-> - iff the configuration flag is set, the manual mode will be disabled
->   when HS400 gets downgraded
->=20
-> There also some helper functions added to access the TMPPORT registers.
-> The actual correction table is SoC and instance(!) specific and is
-> added to the quirks struct.
->=20
-> Signed-off-by: Takeshi Saito <takeshi.saito.xv@renesas.com>
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-<snip>
-> +static void renesas_sdhi_adjust_hs400_mode_enable(struct tmio_mmc_host *=
-host)
-> +{
-> +	struct renesas_sdhi *priv =3D host_to_priv(host);
-> +	u32 calib_code;
-> +
-> +	/* disable write protect */
-> +	sd_scc_tmpport_write32(host, priv, 0x00,
-> +			       SH_MOBILE_SDHI_SCC_TMPPORT_DISABLE_WP_CODE);
-> +	/* read calibration code and adjust */
-> +	calib_code =3D sd_scc_tmpport_read32(host, priv, 0x26);
-
-When we read the calib_code at room temperature, the value will be around 0=
-x10.
-However, we will get 0x00 here. So, we need to fix it.
-
-Best regards,
-Yoshihiro Shimoda
-
+-- 
+viresh
