@@ -2,250 +2,157 @@ Return-Path: <SRS0=ypud=CJ=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.6 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8DC5AC433E6
-	for <linux-mmc@archiver.kernel.org>; Mon, 31 Aug 2020 19:44:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DAA8FC433E7
+	for <linux-mmc@archiver.kernel.org>; Mon, 31 Aug 2020 21:11:02 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 60ACE20719
-	for <linux-mmc@archiver.kernel.org>; Mon, 31 Aug 2020 19:44:04 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1598903044;
-	bh=9B6/M6/43/N+VrQX6UwnkiY8uNrfSqXz8/e67LODxn8=;
-	h=Date:From:To:Cc:Subject:Reply-To:References:In-Reply-To:List-ID:
-	 From;
-	b=fb3jSVKXa/xczzaN67yWzH8bkjx2WPrUk4DBspZYtHOwx3kkGJZpqvwBI+Mpf7PEF
-	 mTigl0KP+YVXFcxUBh4BHL1nVhPkEXvmGANwnQhObHwqhL+bLu5JxC/JMXMx584tbq
-	 mQnE+p9jaqCF4UAI//1i17gBIVnza93cZwxjJf/E=
+	by mail.kernel.org (Postfix) with ESMTP id B5E77208CA
+	for <linux-mmc@archiver.kernel.org>; Mon, 31 Aug 2020 21:11:02 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="OS9gs7zA"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727075AbgHaToD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 31 Aug 2020 15:44:03 -0400
-Received: from mail.kernel.org ([198.145.29.99]:41544 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726755AbgHaToD (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 31 Aug 2020 15:44:03 -0400
-Received: from paulmck-ThinkPad-P72.home (unknown [50.45.173.55])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 53792206E3;
-        Mon, 31 Aug 2020 19:44:02 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1598903042;
-        bh=9B6/M6/43/N+VrQX6UwnkiY8uNrfSqXz8/e67LODxn8=;
-        h=Date:From:To:Cc:Subject:Reply-To:References:In-Reply-To:From;
-        b=w8hFO41BDU39LCL9ZCa1qgGOdeuxpAELFO0uNMmN+YWn0MQE0cqn/xsnvz7GmpE0i
-         Idi3UfMleZwXdWRWcy8+s2LBiyXN9+KTwpuUelORm8OFRQs1kGO1+7KG4KRrPrIIqv
-         04mCkuDoeGVSo+I13lAazkwxXcbztxOIKCmnxBG4=
-Received: by paulmck-ThinkPad-P72.home (Postfix, from userid 1000)
-        id 36D2B35230F1; Mon, 31 Aug 2020 12:44:02 -0700 (PDT)
-Date:   Mon, 31 Aug 2020 12:44:02 -0700
-From:   "Paul E. McKenney" <paulmck@kernel.org>
-To:     Naresh Kamboju <naresh.kamboju@linaro.org>
-Cc:     open list <linux-kernel@vger.kernel.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        lkft-triage@lists.linaro.org, rcu@vger.kernel.org,
-        Linux PM <linux-pm@vger.kernel.org>,
-        Anders Roxell <anders.roxell@linaro.org>,
-        Arnd Bergmann <arnd@arndb.de>,
-        Rajendra Nayak <rnayak@codeaurora.org>,
-        John Stultz <john.stultz@linaro.org>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Lars Povlsen <lars.povlsen@microchip.com>,
-        madhuparnabhowmik10@gmail.com,
+        id S1730218AbgHaVLA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 31 Aug 2020 17:11:00 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52078 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728753AbgHaVKg (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 31 Aug 2020 17:10:36 -0400
+Received: from mail-io1-xd42.google.com (mail-io1-xd42.google.com [IPv6:2607:f8b0:4864:20::d42])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9E2E8C061575
+        for <linux-mmc@vger.kernel.org>; Mon, 31 Aug 2020 14:10:35 -0700 (PDT)
+Received: by mail-io1-xd42.google.com with SMTP id d190so6619953iof.3
+        for <linux-mmc@vger.kernel.org>; Mon, 31 Aug 2020 14:10:35 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=chromium.org; s=google;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=Fct3OniIAh7vq4PmVo6V6yOdFXmba0zXgaN8XqOugb8=;
+        b=OS9gs7zA6vnWaXIdgW4oTD/29+9QNuHo5Y+QT5MuPNicJHhOcRmGlh+T1zGfudkOME
+         dKws0e3uJnOS3WV3S3sD6O0y315yxtmuBUq/8pFEA+owp3gliITgFSBKSCeJCJMBlRQz
+         C4DgV+AJ1pGIhAVDSwGxQcuoCGB8+vA0GHOe8=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=Fct3OniIAh7vq4PmVo6V6yOdFXmba0zXgaN8XqOugb8=;
+        b=X8n0b6EYJV7QlxZHAzBz4F1COFbwQZ9P2Fo+6LA9kuArxWOTNeogPdv2jSPjawLcWi
+         gTvVkSwFTS5aVcRmtofsLueW2v78/ILG1YMXB2tf538//fNHsGDrYBtVod4cbMNipNJ7
+         cJPCcgI/QRVWgVF8lV8MQG83mQ4eHiNPE+g+W4XI/qI7oOH89qW4Q/Af5ONQRbXV+Zjk
+         ilKfu9m8uFW2JFlSTNak0dxEvup+mHnzLpin4Cu+ZFZPaCa0zMmAu8zPhFt7sLdxY6ot
+         XnzU05ERnSEbZLi0+iG/YKJ9M72/vfelp8hBpMmpfL5ltiG9vhohcEVl0oO+ywt7FK2v
+         g/Lw==
+X-Gm-Message-State: AOAM531Dqf0oFTK8x4dqq02o3IvQfXH+M0Ju9flCBffUI4BbiVHmcseU
+        MW3Q5e43JZgBxRKGshx8JgaMAg==
+X-Google-Smtp-Source: ABdhPJwlJ/rs0nG0HBgLhylpvYBhuBlWkXOCzKi3WbxNowDljJgS3+8Nvv2ps1fh0YXLqokwqRAeYw==
+X-Received: by 2002:a02:65c2:: with SMTP id u185mr2914044jab.35.1598908234755;
+        Mon, 31 Aug 2020 14:10:34 -0700 (PDT)
+Received: from rrangel920.bld.corp.google.com (h184-60-195-141.arvdco.broadband.dynamic.tds.net. [184.60.195.141])
+        by smtp.gmail.com with ESMTPSA id w13sm4090144iox.10.2020.08.31.14.10.33
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 31 Aug 2020 14:10:34 -0700 (PDT)
+From:   Raul E Rangel <rrangel@chromium.org>
+To:     adrian.hunter@intel.com
+Cc:     Nehal-bakulchandra.Shah@amd.com, chris.wang@amd.com,
+        Akshu.Agrawal@amd.com, Raul E Rangel <rrangel@chromium.org>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Viresh Kumar <viresh.kumar@linaro.org>,
-        Vincent Guittot <vincent.guittot@linaro.org>,
-        peterz@infrdead.org
-Subject: Re: WARNING: suspicious RCU usage - sdhci-pltfm: SDHCI platform and
- OF driver helper
-Message-ID: <20200831194402.GD2855@paulmck-ThinkPad-P72>
-Reply-To: paulmck@kernel.org
-References: <CA+G9fYuiJwN1ad955Xw4ShamX2=373r+56KsbpeverEs+i_NAg@mail.gmail.com>
+        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+Subject: [PATCH] mmc: sdhci-acpi: Clear amd_sdhci_host on reset
+Date:   Mon, 31 Aug 2020 15:10:32 -0600
+Message-Id: <20200831150517.1.I93c78bfc6575771bb653c9d3fca5eb018a08417d@changeid>
+X-Mailer: git-send-email 2.28.0.402.g5ffc5be6b7-goog
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CA+G9fYuiJwN1ad955Xw4ShamX2=373r+56KsbpeverEs+i_NAg@mail.gmail.com>
-User-Agent: Mutt/1.9.4 (2018-02-28)
+Content-Transfer-Encoding: 8bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, Aug 31, 2020 at 12:02:31PM +0530, Naresh Kamboju wrote:
-> While booting linux mainline kernel on arm64 db410c this kernel warning
-> noticed.
-> 
-> metadata:
->   git branch: master
->   git repo: https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
->   git commit: f75aef392f869018f78cfedf3c320a6b3fcfda6b
->   git describe: v5.9-rc3
->   make_kernelversion: 5.9.0-rc3
->   kernel-config:
-> http://snapshots.linaro.org/openembedded/lkft/lkft/sumo/dragonboard-410c/lkft/linux-mainline/2965/config
-> 
-> Boot log,
-> 
-> [    0.000000] Booting Linux on physical CPU 0x0000000000 [0x410fd030]
-> [    0.000000] Linux version 5.9.0-rc3 (oe-user@oe-host)
-> (aarch64-linaro-linux-gcc (GCC) 7.3.0, GNU ld (GNU Binutils)
-> 2.30.0.20180208) #1 SMP PREEMPT Mon Aug 31 00:23:15 UTC 2020
-> [    0.000000] Machine model: Qualcomm Technologies, Inc. APQ 8016 SBC
-> <>
-> [    5.299090] sdhci: Secure Digital Host Controller Interface driver
-> [    5.299140] sdhci: Copyright(c) Pierre Ossman
-> [    5.304313]
-> [    5.307771] Synopsys Designware Multimedia Card Interface Driver
-> [    5.308588] =============================
-> [    5.308593] WARNING: suspicious RCU usage
-> [    5.316628] sdhci-pltfm: SDHCI platform and OF driver helper
-> [    5.320052] 5.9.0-rc3 #1 Not tainted
-> [    5.320057] -----------------------------
-> [    5.320063] /usr/src/kernel/include/trace/events/lock.h:37
-> suspicious rcu_dereference_check() usage!
-> [    5.320068]
-> [    5.320068] other info that might help us debug this:
-> [    5.320068]
-> [    5.320074]
-> [    5.320074] rcu_scheduler_active = 2, debug_locks = 1
-> [    5.320078] RCU used illegally from extended quiescent state!
-> [    5.320084] no locks held by swapper/0/0.
-> [    5.320089]
-> [    5.320089] stack backtrace:
-> [    5.320098] CPU: 0 PID: 0 Comm: swapper/0 Not tainted 5.9.0-rc3 #1
-> [    5.346354] sdhci_msm 7864900.sdhci: Got CD GPIO
-> [    5.346446] Hardware name: Qualcomm Technologies, Inc. APQ 8016 SBC (DT)
-> [    5.346452] Call trace:
-> [    5.346463]  dump_backtrace+0x0/0x1f8
-> [    5.346471]  show_stack+0x2c/0x38
-> [    5.346480]  dump_stack+0xec/0x15c
-> [    5.346490]  lockdep_rcu_suspicious+0xd4/0xf8
-> [    5.346499]  lock_acquire+0x3d0/0x440
-> [    5.346510]  _raw_spin_lock_irqsave+0x80/0xb0
-> [    5.413118]  __pm_runtime_suspend+0x34/0x1d0
-> [    5.417457]  psci_enter_domain_idle_state+0x4c/0xb0
-> [    5.421795]  cpuidle_enter_state+0xc8/0x610
-> [    5.426392]  cpuidle_enter+0x3c/0x50
-> [    5.430561]  call_cpuidle+0x44/0x80
-> [    5.434378]  do_idle+0x240/0x2a0
+commit 61d7437ed1390 ("mmc: sdhci-acpi: Fix HS400 tuning for AMDI0040")
+broke resume for HS400. When the system suspends the eMMC controller is
+powered down. So on resume we need to reinitialize the controller.
+amd_sdhci_host was not getting cleared, so the DLL was never re-enabled
+on resume. This results in HS400 being non-functional.
 
-RCU ignores CPUs in the idle loop, which means that you cannot use
-rcu_read_lock() from the idle loop without use of something like
-RCU_NONIDLE().  If this is due to event tracing, you should use the
-_rcuidle() variant of the event trace statement.
+This change clears the tuned_clock flag, clears the dll_enabled flag and
+disables the DLL on reset.
 
-Note also that Peter Zijlstra (CCed) is working to shrink the portion
-of the idle loop that RCU ignores.  Not sure that it covers your
-case, but it is worth checking.
+Fixes: 61d7437ed1390 ("mmc: sdhci-acpi: Fix HS400 tuning for AMDI0040")
 
-							Thanx, Paul
+Signed-off-by: Raul E Rangel <rrangel@chromium.org>
+---
+- Performed 100+ suspend/resume cycles without issue.
+- Also verified tuning continues to work.
 
-> [    5.437589]  cpu_startup_entry+0x2c/0x78
-> [    5.441063]  rest_init+0x1ac/0x280
-> [    5.444970]  arch_call_rest_init+0x14/0x1c
-> [    5.448180]  start_kernel+0x50c/0x544
-> [    5.452395]
-> [    5.452399]
-> [    5.452403] =============================
-> [    5.452406] WARNING: suspicious RCU usage
-> [    5.452409] 5.9.0-rc3 #1 Not tainted
-> [    5.452412] -----------------------------
-> [    5.452417] /usr/src/kernel/include/trace/events/ipi.h:36
-> suspicious rcu_dereference_check() usage!
-> [    5.452420]
-> [    5.452424] other info that might help us debug this:
-> [    5.452426]
-> [    5.452429]
-> [    5.452432] rcu_scheduler_active = 2, debug_locks = 1
-> [    5.452436] RCU used illegally from extended quiescent state!
-> [    5.452440] 1 lock held by swapper/0/0:
-> [    5.452443]  #0: ffff8000127408f8 (logbuf_lock){-...}-{2:2}, at:
-> vprintk_emit+0xb0/0x358
-> [    5.452458]
-> [    5.452461] stack backtrace:
-> [    5.452465] CPU: 0 PID: 0 Comm: swapper/0 Not tainted 5.9.0-rc3 #1
-> [    5.452469] Hardware name: Qualcomm Technologies, Inc. APQ 8016 SBC (DT)
-> [    5.452472] Call trace:
-> [    5.452476]  dump_backtrace+0x0/0x1f8
-> [    5.452479]  show_stack+0x2c/0x38
-> [    5.452481]  dump_stack+0xec/0x15c
-> [    5.452485]  lockdep_rcu_suspicious+0xd4/0xf8
-> [    5.452489]  arch_irq_work_raise+0x208/0x210
-> [    5.452493]  __irq_work_queue_local+0x64/0x88
-> [    5.452495]  irq_work_queue+0x3c/0x88
-> [    5.452499]  printk_safe_log_store+0x148/0x178
-> [    5.452502]  vprintk_func+0x1cc/0x2b8
-> [    5.452506]  printk+0x74/0x94
-> [    5.452509]  lockdep_rcu_suspicious+0x28/0xf8
-> [    5.452512]  lock_release+0x338/0x360
-> [    5.452516]  _raw_spin_unlock+0x3c/0xa0
-> [    5.452519]  vprintk_emit+0xf8/0x358
-> [    5.452522]  vprintk_default+0x48/0x58
-> [    5.452526]  vprintk_func+0xec/0x2b8
-> [    5.452528]  printk+0x74/0x94
-> [    5.452532]  lockdep_rcu_suspicious+0x28/0xf8
-> [    5.452535]  lock_acquire+0x3d0/0x440
-> [    5.452538]  _raw_spin_lock_irqsave+0x80/0xb0
-> [    5.452542]  __pm_runtime_suspend+0x34/0x1d0
-> [    5.452545]  psci_enter_domain_idle_state+0x4c/0xb0
-> [    5.452549]  cpuidle_enter_state+0xc8/0x610
-> [    5.452552]  cpuidle_enter+0x3c/0x50
-> [    5.452555]  call_cpuidle+0x44/0x80
-> [    5.452559]  do_idle+0x240/0x2a0
-> [    5.452562]  cpu_startup_entry+0x2c/0x78
-> [    5.452564]  rest_init+0x1ac/0x280
-> [    5.452568]  arch_call_rest_init+0x14/0x1c
-> [    5.452571]  start_kernel+0x50c/0x544
-> [    5.452575] =============================
-> [    5.452578] WARNING: suspicious RCU usage
-> [    5.452582] 5.9.0-rc3 #1 Not tainted
-> [    5.452585] -----------------------------
-> [    5.452590] /usr/src/kernel/include/trace/events/lock.h:63
-> suspicious rcu_dereference_check() usage!
-> [    5.452593]
-> [    5.452596] other info that might help us debug this:
-> [    5.452599]
-> [    5.452601]
-> [    5.452605] rcu_scheduler_active = 2, debug_locks = 1
-> [    5.452609] RCU used illegally from extended quiescent state!
-> [    5.452612] 1 lock held by swapper/0/0:
-> [    5.452615]  #0: ffff8000127408f8 (logbuf_lock){-...}-{2:2}, at:
-> vprintk_emit+0xb0/0x358
-> [    5.452630]
-> [    5.452633] stack backtrace:
-> [    5.452636] CPU: 0 PID: 0 Comm: swapper/0 Not tainted 5.9.0-rc3 #1
-> [    5.452640] Hardware name: Qualcomm Technologies, Inc. APQ 8016 SBC (DT)
-> [    5.452643] Call trace:
-> [    5.452646]  dump_backtrace+0x0/0x1f8
-> [    5.452649]  show_stack+0x2c/0x38
-> [    5.452652]  dump_stack+0xec/0x15c
-> [    5.452656]  lockdep_rcu_suspicious+0xd4/0xf8
-> [    5.452659]  lock_release+0x338/0x360
-> [    5.452662]  _raw_spin_unlock+0x3c/0xa0
-> [    5.452665]  vprintk_emit+0xf8/0x358
-> [    5.452669]  vprintk_default+0x48/0x58
-> [    5.452671]  vprintk_func+0xec/0x2b8
-> [    5.452674]  printk+0x74/0x94
-> [    5.452677]  lockdep_rcu_suspicious+0x28/0xf8
-> [    5.452680]  lock_acquire+0x3d0/0x440
-> [    5.452683]  _raw_spin_lock_irqsave+0x80/0xb0
-> [    5.452686]  __pm_runtime_suspend+0x34/0x1d0
-> [    5.452690]  psci_enter_domain_idle_state+0x4c/0xb0
-> [    5.452693]  cpuidle_enter_state+0xc8/0x610
-> [    5.452696]  cpuidle_enter+0x3c/0x50
-> [    5.452698]  call_cpuidle+0x44/0x80
-> [    5.452701]  do_idle+0x240/0x2a0
-> [    5.452704]  cpu_startup_entry+0x2c/0x78
-> [    5.452708]  rest_init+0x1ac/0x280
-> [    5.452711]  arch_call_rest_init+0x14/0x1c
-> [    5.452714]  start_kernel+0x50c/0x544
-> 
-> full test log link,
-> https://qa-reports.linaro.org/lkft/linux-mainline-oe/build/v5.9-rc3/testrun/3137660/suite/linux-log-parser/test/check-kernel-warning-1722813/log
-> 
-> -- 
-> Linaro LKFT
-> https://lkft.linaro.org
+ drivers/mmc/host/sdhci-acpi.c | 31 ++++++++++++++++++++++++-------
+ 1 file changed, 24 insertions(+), 7 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+index 962f074ca1742..284cba11e2795 100644
+--- a/drivers/mmc/host/sdhci-acpi.c
++++ b/drivers/mmc/host/sdhci-acpi.c
+@@ -551,12 +551,18 @@ static int amd_select_drive_strength(struct mmc_card *card,
+ 	return MMC_SET_DRIVER_TYPE_A;
+ }
+ 
+-static void sdhci_acpi_amd_hs400_dll(struct sdhci_host *host)
++static void sdhci_acpi_amd_hs400_dll(struct sdhci_host *host, bool enable)
+ {
++	struct sdhci_acpi_host *acpi_host = sdhci_priv(host);
++	struct amd_sdhci_host *amd_host = sdhci_acpi_priv(acpi_host);
++
+ 	/* AMD Platform requires dll setting */
+ 	sdhci_writel(host, 0x40003210, SDHCI_AMD_RESET_DLL_REGISTER);
+ 	usleep_range(10, 20);
+-	sdhci_writel(host, 0x40033210, SDHCI_AMD_RESET_DLL_REGISTER);
++	if (enable)
++		sdhci_writel(host, 0x40033210, SDHCI_AMD_RESET_DLL_REGISTER);
++
++	amd_host->dll_enabled = enable;
+ }
+ 
+ /*
+@@ -596,10 +602,8 @@ static void amd_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 
+ 		/* DLL is only required for HS400 */
+ 		if (host->timing == MMC_TIMING_MMC_HS400 &&
+-		    !amd_host->dll_enabled) {
+-			sdhci_acpi_amd_hs400_dll(host);
+-			amd_host->dll_enabled = true;
+-		}
++		    !amd_host->dll_enabled)
++			sdhci_acpi_amd_hs400_dll(host, true);
+ 	}
+ }
+ 
+@@ -620,10 +624,23 @@ static int amd_sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 	return err;
+ }
+ 
++static void amd_sdhci_reset(struct sdhci_host *host, u8 mask)
++{
++	struct sdhci_acpi_host *acpi_host = sdhci_priv(host);
++	struct amd_sdhci_host *amd_host = sdhci_acpi_priv(acpi_host);
++
++	if (mask & SDHCI_RESET_ALL) {
++		amd_host->tuned_clock = false;
++		sdhci_acpi_amd_hs400_dll(host, false);
++	}
++
++	sdhci_reset(host, mask);
++}
++
+ static const struct sdhci_ops sdhci_acpi_ops_amd = {
+ 	.set_clock	= sdhci_set_clock,
+ 	.set_bus_width	= sdhci_set_bus_width,
+-	.reset		= sdhci_reset,
++	.reset		= amd_sdhci_reset,
+ 	.set_uhs_signaling = sdhci_set_uhs_signaling,
+ };
+ 
+-- 
+2.28.0.402.g5ffc5be6b7-goog
+
