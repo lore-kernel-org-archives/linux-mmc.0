@@ -2,146 +2,250 @@ Return-Path: <SRS0=ypud=CJ=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.5 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.6 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 15619C433E2
-	for <linux-mmc@archiver.kernel.org>; Mon, 31 Aug 2020 18:53:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8DC5AC433E6
+	for <linux-mmc@archiver.kernel.org>; Mon, 31 Aug 2020 19:44:04 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id EB62420936
-	for <linux-mmc@archiver.kernel.org>; Mon, 31 Aug 2020 18:53:42 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ThTytV7I"
+	by mail.kernel.org (Postfix) with ESMTP id 60ACE20719
+	for <linux-mmc@archiver.kernel.org>; Mon, 31 Aug 2020 19:44:04 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1598903044;
+	bh=9B6/M6/43/N+VrQX6UwnkiY8uNrfSqXz8/e67LODxn8=;
+	h=Date:From:To:Cc:Subject:Reply-To:References:In-Reply-To:List-ID:
+	 From;
+	b=fb3jSVKXa/xczzaN67yWzH8bkjx2WPrUk4DBspZYtHOwx3kkGJZpqvwBI+Mpf7PEF
+	 mTigl0KP+YVXFcxUBh4BHL1nVhPkEXvmGANwnQhObHwqhL+bLu5JxC/JMXMx584tbq
+	 mQnE+p9jaqCF4UAI//1i17gBIVnza93cZwxjJf/E=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728077AbgHaSxj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 31 Aug 2020 14:53:39 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58942 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727933AbgHaSxi (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 31 Aug 2020 14:53:38 -0400
-Received: from mail-lj1-x22a.google.com (mail-lj1-x22a.google.com [IPv6:2a00:1450:4864:20::22a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 77395C061573;
-        Mon, 31 Aug 2020 11:53:38 -0700 (PDT)
-Received: by mail-lj1-x22a.google.com with SMTP id h19so7883047ljg.13;
-        Mon, 31 Aug 2020 11:53:38 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=subject:to:references:from:message-id:date:user-agent:mime-version
-         :in-reply-to:content-language:content-transfer-encoding;
-        bh=L+p5pMS5zt9rDPom08XJnrF8bxGqtpHNHupyZeHaC5s=;
-        b=ThTytV7Ig5B7hm5YhpUR7zmDLEA87iCYPbWjyx8p+PsfxGlbwgztuZy58UpfJO6Nxx
-         VhfPLNKvBjbBXXKzwM7D+1XMN/uomJ6lUKBWaFe2i4jpaRTu5Yi1yexGBMD4Aaxlq9Rg
-         q2bqNn89VqwZQNWafA2F341nTltxnX71p1yGQGO5lfemofdwH53xFcQytgqAu5CAQjA9
-         FUEGNXsRv5PiYfIW4JjW/Mu7fHCcI1AUIRKJXO2yWzCSQIUSxC/sQTPhszuq/4VJ3nv3
-         arh6NPgS34g3IKi0wmDM9XYYQTc0CClpl0sW3LkQsGW8iFzbcEKqZWhy1i+NpAInYUSi
-         RQeg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:to:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=L+p5pMS5zt9rDPom08XJnrF8bxGqtpHNHupyZeHaC5s=;
-        b=XPVOc+iKWXDIByWdOYllchJ/ANCeLNE0rPq26eaM0LrCc7i4mDwW/MFaFpqcqtt41M
-         nXFez4unNBYxwvDLQMKWD4m5d0ShwxWkDBcPq2fSDgI2o/5h7WF+tlpHWMzkJUJfkKGR
-         9xzlh7HVpu/BUVE/StxDH9gsOLexyknrA/g0K4GxOjzq3AvzNAC1MSbe5osTleQe/+U5
-         ZuFAE2suy12EG/ycx32yKQarVgUkU4KsAUjaFnLdEi5TR8HWU8NfeP3oiVByqQAd7Dkg
-         viJ0G/OtoofHtr8OjiFXJIvmxX5kACQKOS2OxbZD0gYNwSjB2JCr9gOXUkVUbcP7Kt9U
-         G0EA==
-X-Gm-Message-State: AOAM5314JipIG3BKrfFeL5XZWGnLd6VpymLr/ET3wHxWsEuYV3SHU/fH
-        cwIY0abUqk4FlWOZIhD67t78x+YSDLU=
-X-Google-Smtp-Source: ABdhPJxEzrfGn7i3KNEykO5kPP4BLGlg14bAOleoamj8Ou3Tqnrnw+7oiuPQ4tHno4EbnaB0QEFEXA==
-X-Received: by 2002:a2e:91d2:: with SMTP id u18mr1244754ljg.436.1598900016513;
-        Mon, 31 Aug 2020 11:53:36 -0700 (PDT)
-Received: from [192.168.2.145] (109-252-170-211.dynamic.spd-mgts.ru. [109.252.170.211])
-        by smtp.googlemail.com with ESMTPSA id m26sm1538132ljc.82.2020.08.31.11.53.35
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 31 Aug 2020 11:53:35 -0700 (PDT)
-Subject: Re: Broadcom WiFi SDIO performance regression after commit "mmc:
- sdhci: Remove finish_tasklet"
-To:     Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Arend van Spriel <arend.vanspriel@broadcom.com>,
-        Franky Lin <franky.lin@broadcom.com>,
-        Hante Meuleman <hante.meuleman@broadcom.com>,
-        Chi-Hsien Lin <chi-hsien.lin@cypress.com>,
-        Wright Feng <wright.feng@cypress.com>,
-        brcm80211-dev-list@cypress.com,
-        brcm80211-dev-list.pdl@broadcom.com,
-        "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>,
+        id S1727075AbgHaToD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 31 Aug 2020 15:44:03 -0400
+Received: from mail.kernel.org ([198.145.29.99]:41544 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726755AbgHaToD (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 31 Aug 2020 15:44:03 -0400
+Received: from paulmck-ThinkPad-P72.home (unknown [50.45.173.55])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id 53792206E3;
+        Mon, 31 Aug 2020 19:44:02 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1598903042;
+        bh=9B6/M6/43/N+VrQX6UwnkiY8uNrfSqXz8/e67LODxn8=;
+        h=Date:From:To:Cc:Subject:Reply-To:References:In-Reply-To:From;
+        b=w8hFO41BDU39LCL9ZCa1qgGOdeuxpAELFO0uNMmN+YWn0MQE0cqn/xsnvz7GmpE0i
+         Idi3UfMleZwXdWRWcy8+s2LBiyXN9+KTwpuUelORm8OFRQs1kGO1+7KG4KRrPrIIqv
+         04mCkuDoeGVSo+I13lAazkwxXcbztxOIKCmnxBG4=
+Received: by paulmck-ThinkPad-P72.home (Postfix, from userid 1000)
+        id 36D2B35230F1; Mon, 31 Aug 2020 12:44:02 -0700 (PDT)
+Date:   Mon, 31 Aug 2020 12:44:02 -0700
+From:   "Paul E. McKenney" <paulmck@kernel.org>
+To:     Naresh Kamboju <naresh.kamboju@linaro.org>
+Cc:     open list <linux-kernel@vger.kernel.org>,
         linux-mmc <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-References: <5cf1af89-6026-09ad-7f20-82e19ad49fa1@gmail.com>
- <9332715c-6ee5-fce3-8b93-305823d5a551@intel.com>
- <eec0c7d2-87f3-1213-dec1-bb34c5bde35a@gmail.com>
- <379c7435-a940-c427-305d-c4fa5f1970d6@intel.com>
-From:   Dmitry Osipenko <digetx@gmail.com>
-Message-ID: <17a4729b-b307-92cb-8669-bf043e65bc49@gmail.com>
-Date:   Mon, 31 Aug 2020 21:53:34 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.10.0
+        lkft-triage@lists.linaro.org, rcu@vger.kernel.org,
+        Linux PM <linux-pm@vger.kernel.org>,
+        Anders Roxell <anders.roxell@linaro.org>,
+        Arnd Bergmann <arnd@arndb.de>,
+        Rajendra Nayak <rnayak@codeaurora.org>,
+        John Stultz <john.stultz@linaro.org>,
+        Stephen Boyd <sboyd@kernel.org>,
+        Lars Povlsen <lars.povlsen@microchip.com>,
+        madhuparnabhowmik10@gmail.com,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Viresh Kumar <viresh.kumar@linaro.org>,
+        Vincent Guittot <vincent.guittot@linaro.org>,
+        peterz@infrdead.org
+Subject: Re: WARNING: suspicious RCU usage - sdhci-pltfm: SDHCI platform and
+ OF driver helper
+Message-ID: <20200831194402.GD2855@paulmck-ThinkPad-P72>
+Reply-To: paulmck@kernel.org
+References: <CA+G9fYuiJwN1ad955Xw4ShamX2=373r+56KsbpeverEs+i_NAg@mail.gmail.com>
 MIME-Version: 1.0
-In-Reply-To: <379c7435-a940-c427-305d-c4fa5f1970d6@intel.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CA+G9fYuiJwN1ad955Xw4ShamX2=373r+56KsbpeverEs+i_NAg@mail.gmail.com>
+User-Agent: Mutt/1.9.4 (2018-02-28)
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-31.08.2020 18:08, Adrian Hunter пишет:
-> On 27/08/20 12:36 pm, Dmitry Osipenko wrote:
->> 27.08.2020 09:45, Adrian Hunter пишет:
->>> On 27/08/20 9:07 am, Dmitry Osipenko wrote:
->>>> Hello!
->>>>
->>>> I was debugging WiFi performance problems on Acer A500 tablet device
->>>> that has BCM4329 WiFi chip which is connected to NVIDIA Terga20 SoC via
->>>> SDIO and found that the following commit causes a solid 5-10 Mbit/s of
->>>> WiFi throughput regression after 5.2 kernel:
->>>
->>> What is that in percentage terms?
->>
->> That is about 20%.
->>
->>>> commit c07a48c2651965e84d35cf193dfc0e5f7892d612
->>>> Author: Adrian Hunter <adrian.hunter@intel.com>
->>>> Date:   Fri Apr 5 15:40:20 2019 +0300
->>>>
->>>>     mmc: sdhci: Remove finish_tasklet
->>>>
->>>>     Remove finish_tasklet. Requests that require DMA-unmapping or
->>>> sdhci_reset
->>>>     are completed either in the IRQ thread or a workqueue if the
->>>> completion is
->>>>     not initiated by the IRQ.
->>>>
->>>> Reverting the offending commit on top of recent linux-next resolves the
->>>> problem.
->>>>
->>>> Ulf / Adrian, do you have any ideas what could be done in regards to
->>>> restoring the SDIO performance? Should we just revert the offending commit?
->>>>
->>>
->>> Unfortunately I think we are past the point of returning to the tasklet.
->>>
->>> sdhci can complete requests in the irq handler but only if ->pre_req() and
->>> ->post_req() are used, which is not supported by SDIO at present.  pre_req
->>> and post_req were introduced to reduce latency for the block driver, so it
->>> seems reasonable perhaps to look at using them in SDIO as well.
->>>
->>
->> I'll try to take a look at pre/post_req(), but I'm not very familiar
->> with the MMC code, so it may take quite some time. Will be great if you
->> could help with making a patch that I could test!
->>
+On Mon, Aug 31, 2020 at 12:02:31PM +0530, Naresh Kamboju wrote:
+> While booting linux mainline kernel on arm64 db410c this kernel warning
+> noticed.
 > 
-> You could start by seeing if using pre/post_req helps at all, as below.
-> If that doesn't help, then it might need more analysis.
+> metadata:
+>   git branch: master
+>   git repo: https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
+>   git commit: f75aef392f869018f78cfedf3c320a6b3fcfda6b
+>   git describe: v5.9-rc3
+>   make_kernelversion: 5.9.0-rc3
+>   kernel-config:
+> http://snapshots.linaro.org/openembedded/lkft/lkft/sumo/dragonboard-410c/lkft/linux-mainline/2965/config
+> 
+> Boot log,
+> 
+> [    0.000000] Booting Linux on physical CPU 0x0000000000 [0x410fd030]
+> [    0.000000] Linux version 5.9.0-rc3 (oe-user@oe-host)
+> (aarch64-linaro-linux-gcc (GCC) 7.3.0, GNU ld (GNU Binutils)
+> 2.30.0.20180208) #1 SMP PREEMPT Mon Aug 31 00:23:15 UTC 2020
+> [    0.000000] Machine model: Qualcomm Technologies, Inc. APQ 8016 SBC
+> <>
+> [    5.299090] sdhci: Secure Digital Host Controller Interface driver
+> [    5.299140] sdhci: Copyright(c) Pierre Ossman
+> [    5.304313]
+> [    5.307771] Synopsys Designware Multimedia Card Interface Driver
+> [    5.308588] =============================
+> [    5.308593] WARNING: suspicious RCU usage
+> [    5.316628] sdhci-pltfm: SDHCI platform and OF driver helper
+> [    5.320052] 5.9.0-rc3 #1 Not tainted
+> [    5.320057] -----------------------------
+> [    5.320063] /usr/src/kernel/include/trace/events/lock.h:37
+> suspicious rcu_dereference_check() usage!
+> [    5.320068]
+> [    5.320068] other info that might help us debug this:
+> [    5.320068]
+> [    5.320074]
+> [    5.320074] rcu_scheduler_active = 2, debug_locks = 1
+> [    5.320078] RCU used illegally from extended quiescent state!
+> [    5.320084] no locks held by swapper/0/0.
+> [    5.320089]
+> [    5.320089] stack backtrace:
+> [    5.320098] CPU: 0 PID: 0 Comm: swapper/0 Not tainted 5.9.0-rc3 #1
+> [    5.346354] sdhci_msm 7864900.sdhci: Got CD GPIO
+> [    5.346446] Hardware name: Qualcomm Technologies, Inc. APQ 8016 SBC (DT)
+> [    5.346452] Call trace:
+> [    5.346463]  dump_backtrace+0x0/0x1f8
+> [    5.346471]  show_stack+0x2c/0x38
+> [    5.346480]  dump_stack+0xec/0x15c
+> [    5.346490]  lockdep_rcu_suspicious+0xd4/0xf8
+> [    5.346499]  lock_acquire+0x3d0/0x440
+> [    5.346510]  _raw_spin_lock_irqsave+0x80/0xb0
+> [    5.413118]  __pm_runtime_suspend+0x34/0x1d0
+> [    5.417457]  psci_enter_domain_idle_state+0x4c/0xb0
+> [    5.421795]  cpuidle_enter_state+0xc8/0x610
+> [    5.426392]  cpuidle_enter+0x3c/0x50
+> [    5.430561]  call_cpuidle+0x44/0x80
+> [    5.434378]  do_idle+0x240/0x2a0
 
-Hello, Adrian! I tested yours patch and 100% fixes the problem! Thank
-you very much! Please make a proper patch and feel free to add my t-b!
+RCU ignores CPUs in the idle loop, which means that you cannot use
+rcu_read_lock() from the idle loop without use of something like
+RCU_NONIDLE().  If this is due to event tracing, you should use the
+_rcuidle() variant of the event trace statement.
 
-Tested-by: Dmitry Osipenko <digetx@gmail.com>
+Note also that Peter Zijlstra (CCed) is working to shrink the portion
+of the idle loop that RCU ignores.  Not sure that it covers your
+case, but it is worth checking.
+
+							Thanx, Paul
+
+> [    5.437589]  cpu_startup_entry+0x2c/0x78
+> [    5.441063]  rest_init+0x1ac/0x280
+> [    5.444970]  arch_call_rest_init+0x14/0x1c
+> [    5.448180]  start_kernel+0x50c/0x544
+> [    5.452395]
+> [    5.452399]
+> [    5.452403] =============================
+> [    5.452406] WARNING: suspicious RCU usage
+> [    5.452409] 5.9.0-rc3 #1 Not tainted
+> [    5.452412] -----------------------------
+> [    5.452417] /usr/src/kernel/include/trace/events/ipi.h:36
+> suspicious rcu_dereference_check() usage!
+> [    5.452420]
+> [    5.452424] other info that might help us debug this:
+> [    5.452426]
+> [    5.452429]
+> [    5.452432] rcu_scheduler_active = 2, debug_locks = 1
+> [    5.452436] RCU used illegally from extended quiescent state!
+> [    5.452440] 1 lock held by swapper/0/0:
+> [    5.452443]  #0: ffff8000127408f8 (logbuf_lock){-...}-{2:2}, at:
+> vprintk_emit+0xb0/0x358
+> [    5.452458]
+> [    5.452461] stack backtrace:
+> [    5.452465] CPU: 0 PID: 0 Comm: swapper/0 Not tainted 5.9.0-rc3 #1
+> [    5.452469] Hardware name: Qualcomm Technologies, Inc. APQ 8016 SBC (DT)
+> [    5.452472] Call trace:
+> [    5.452476]  dump_backtrace+0x0/0x1f8
+> [    5.452479]  show_stack+0x2c/0x38
+> [    5.452481]  dump_stack+0xec/0x15c
+> [    5.452485]  lockdep_rcu_suspicious+0xd4/0xf8
+> [    5.452489]  arch_irq_work_raise+0x208/0x210
+> [    5.452493]  __irq_work_queue_local+0x64/0x88
+> [    5.452495]  irq_work_queue+0x3c/0x88
+> [    5.452499]  printk_safe_log_store+0x148/0x178
+> [    5.452502]  vprintk_func+0x1cc/0x2b8
+> [    5.452506]  printk+0x74/0x94
+> [    5.452509]  lockdep_rcu_suspicious+0x28/0xf8
+> [    5.452512]  lock_release+0x338/0x360
+> [    5.452516]  _raw_spin_unlock+0x3c/0xa0
+> [    5.452519]  vprintk_emit+0xf8/0x358
+> [    5.452522]  vprintk_default+0x48/0x58
+> [    5.452526]  vprintk_func+0xec/0x2b8
+> [    5.452528]  printk+0x74/0x94
+> [    5.452532]  lockdep_rcu_suspicious+0x28/0xf8
+> [    5.452535]  lock_acquire+0x3d0/0x440
+> [    5.452538]  _raw_spin_lock_irqsave+0x80/0xb0
+> [    5.452542]  __pm_runtime_suspend+0x34/0x1d0
+> [    5.452545]  psci_enter_domain_idle_state+0x4c/0xb0
+> [    5.452549]  cpuidle_enter_state+0xc8/0x610
+> [    5.452552]  cpuidle_enter+0x3c/0x50
+> [    5.452555]  call_cpuidle+0x44/0x80
+> [    5.452559]  do_idle+0x240/0x2a0
+> [    5.452562]  cpu_startup_entry+0x2c/0x78
+> [    5.452564]  rest_init+0x1ac/0x280
+> [    5.452568]  arch_call_rest_init+0x14/0x1c
+> [    5.452571]  start_kernel+0x50c/0x544
+> [    5.452575] =============================
+> [    5.452578] WARNING: suspicious RCU usage
+> [    5.452582] 5.9.0-rc3 #1 Not tainted
+> [    5.452585] -----------------------------
+> [    5.452590] /usr/src/kernel/include/trace/events/lock.h:63
+> suspicious rcu_dereference_check() usage!
+> [    5.452593]
+> [    5.452596] other info that might help us debug this:
+> [    5.452599]
+> [    5.452601]
+> [    5.452605] rcu_scheduler_active = 2, debug_locks = 1
+> [    5.452609] RCU used illegally from extended quiescent state!
+> [    5.452612] 1 lock held by swapper/0/0:
+> [    5.452615]  #0: ffff8000127408f8 (logbuf_lock){-...}-{2:2}, at:
+> vprintk_emit+0xb0/0x358
+> [    5.452630]
+> [    5.452633] stack backtrace:
+> [    5.452636] CPU: 0 PID: 0 Comm: swapper/0 Not tainted 5.9.0-rc3 #1
+> [    5.452640] Hardware name: Qualcomm Technologies, Inc. APQ 8016 SBC (DT)
+> [    5.452643] Call trace:
+> [    5.452646]  dump_backtrace+0x0/0x1f8
+> [    5.452649]  show_stack+0x2c/0x38
+> [    5.452652]  dump_stack+0xec/0x15c
+> [    5.452656]  lockdep_rcu_suspicious+0xd4/0xf8
+> [    5.452659]  lock_release+0x338/0x360
+> [    5.452662]  _raw_spin_unlock+0x3c/0xa0
+> [    5.452665]  vprintk_emit+0xf8/0x358
+> [    5.452669]  vprintk_default+0x48/0x58
+> [    5.452671]  vprintk_func+0xec/0x2b8
+> [    5.452674]  printk+0x74/0x94
+> [    5.452677]  lockdep_rcu_suspicious+0x28/0xf8
+> [    5.452680]  lock_acquire+0x3d0/0x440
+> [    5.452683]  _raw_spin_lock_irqsave+0x80/0xb0
+> [    5.452686]  __pm_runtime_suspend+0x34/0x1d0
+> [    5.452690]  psci_enter_domain_idle_state+0x4c/0xb0
+> [    5.452693]  cpuidle_enter_state+0xc8/0x610
+> [    5.452696]  cpuidle_enter+0x3c/0x50
+> [    5.452698]  call_cpuidle+0x44/0x80
+> [    5.452701]  do_idle+0x240/0x2a0
+> [    5.452704]  cpu_startup_entry+0x2c/0x78
+> [    5.452708]  rest_init+0x1ac/0x280
+> [    5.452711]  arch_call_rest_init+0x14/0x1c
+> [    5.452714]  start_kernel+0x50c/0x544
+> 
+> full test log link,
+> https://qa-reports.linaro.org/lkft/linux-mainline-oe/build/v5.9-rc3/testrun/3137660/suite/linux-log-parser/test/check-kernel-warning-1722813/log
+> 
+> -- 
+> Linaro LKFT
+> https://lkft.linaro.org
