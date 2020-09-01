@@ -2,147 +2,264 @@ Return-Path: <SRS0=T3o1=CK=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.6 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-7.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E5E33C433E6
-	for <linux-mmc@archiver.kernel.org>; Tue,  1 Sep 2020 12:25:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B85CBC433E6
+	for <linux-mmc@archiver.kernel.org>; Tue,  1 Sep 2020 12:38:06 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C6436207BC
-	for <linux-mmc@archiver.kernel.org>; Tue,  1 Sep 2020 12:25:04 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8112720767
+	for <linux-mmc@archiver.kernel.org>; Tue,  1 Sep 2020 12:38:06 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="yk/K5bvk"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728101AbgIAMXf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 1 Sep 2020 08:23:35 -0400
-Received: from mga11.intel.com ([192.55.52.93]:29629 "EHLO mga11.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727924AbgIAMUk (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 1 Sep 2020 08:20:40 -0400
-IronPort-SDR: +Y58Nfe+2xzVBuQxPOE+vtsc1+Wo1uJ+KW23QY3mC6uaplk7FjyWZLJbjtBUXRxPQAzoqV5Vyh
- b+zDFGALAmHg==
-X-IronPort-AV: E=McAfee;i="6000,8403,9730"; a="154663713"
-X-IronPort-AV: E=Sophos;i="5.76,379,1592895600"; 
-   d="scan'208";a="154663713"
-X-Amp-Result: SKIPPED(no attachment in message)
-X-Amp-File-Uploaded: False
-Received: from fmsmga005.fm.intel.com ([10.253.24.32])
-  by fmsmga102.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 01 Sep 2020 05:20:15 -0700
-IronPort-SDR: zK7OorMoSOaxzYDHEAlRJHlcn2R5hw3H7mViMqe8GXURp2ENj082eqMQvZvaO5zr/iL5lfA63X
- mLFakkxiBMtA==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.76,379,1592895600"; 
-   d="scan'208";a="502221986"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.73]) ([10.237.72.73])
-  by fmsmga005.fm.intel.com with ESMTP; 01 Sep 2020 05:20:08 -0700
-Subject: Re: [PATCH] mmc: sdhci-acpi: Clear amd_sdhci_host on reset
-To:     Raul E Rangel <rrangel@chromium.org>
-Cc:     Nehal-bakulchandra.Shah@amd.com, chris.wang@amd.com,
-        Akshu.Agrawal@amd.com, Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
-References: <20200831150517.1.I93c78bfc6575771bb653c9d3fca5eb018a08417d@changeid>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <99bd9e1a-7062-83d5-8416-9aef53d2eda0@intel.com>
-Date:   Tue, 1 Sep 2020 15:19:30 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.10.0
+        id S1728045AbgIAMiD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 1 Sep 2020 08:38:03 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55540 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728192AbgIAMga (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Sep 2020 08:36:30 -0400
+Received: from mail-vk1-xa42.google.com (mail-vk1-xa42.google.com [IPv6:2607:f8b0:4864:20::a42])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D5AECC061244
+        for <linux-mmc@vger.kernel.org>; Tue,  1 Sep 2020 05:36:29 -0700 (PDT)
+Received: by mail-vk1-xa42.google.com with SMTP id n193so281753vkf.12
+        for <linux-mmc@vger.kernel.org>; Tue, 01 Sep 2020 05:36:29 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=JIq7XVpK3n6IBrRKcWvFGTeHUzpcAgzGWVIVAICj3Vw=;
+        b=yk/K5bvkVu6dpLU+EByoft625JzFjIlUFkj77MwfRCan3R8sS+dMvuUbzn6rywTJGs
+         iffFySQOWlRfGKtOa4kVQHY1P74S00plVslJTmkbEN+8Kx2A0n/6+MbpmDdab3yp5QH4
+         fSSgnVv8M1wOx0tigIzAf5yDDIm8Q8vXngOgq/IUbIOu0wR1zqUztmJxsAkI+gSq91rN
+         1lTJLBnRdnRWCeYPGVKOSB4iAvjK8jDB30lI1nVq0EMJ5nf2h0aFj817QIkeeN7uBCo/
+         IQjUZPPR6Wp9zCr/SUbsu+stAhgACz5wlQgb0EKpQu2iuo+rUiPBo6HcwxHaL5ptRzL8
+         9ahg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=JIq7XVpK3n6IBrRKcWvFGTeHUzpcAgzGWVIVAICj3Vw=;
+        b=JlCPguhQhaX/Rk9UWpfLi6QgQoCk25fewSTpARBldyLlUNc7EPD/ZILOqVBhMS1b7o
+         uRmxNZ3BGFrZVk1d7m3S7fvxDLRbAORXQVpwVpuDkx3Dd4i6lkW42wls2taFwpjXxNzC
+         VXAjZUChtI1Ewo2THvqLJm2RmxCjqE63dN6rLRQj0hBVkMBWQftQf3gy+ShsXCKFatBL
+         /uOtI+SGlnw/BSXYxF7RbIrgckmfKqFtiugAf++okZosdpmqhrf42QXtTg88qyJ/PqOx
+         NiqwOwtZGMEnKL1zebM5QqSNvL9oyJCcdo1SH3YMRt1mlVWUPwjTkqTp/xElMa+ENs/0
+         p0gw==
+X-Gm-Message-State: AOAM533djCbDQcrQAYSRYEoVfHoL8znrgHxzdEuSolBBuRde7ZhUGprp
+        vOH1ny9keoiemCrIi8UmTQ51jn1fNdjO43VPQEI0oA==
+X-Google-Smtp-Source: ABdhPJwgDqe0N+qK4Dxfh8JARoblxSy7BIomJtM3LlAM2rhyqVXOSEqkoHbXjfzB2zezVXHyj84O0k/kJJV4+UFhw5s=
+X-Received: by 2002:a1f:4392:: with SMTP id q140mr1012387vka.0.1598963788944;
+ Tue, 01 Sep 2020 05:36:28 -0700 (PDT)
 MIME-Version: 1.0
-In-Reply-To: <20200831150517.1.I93c78bfc6575771bb653c9d3fca5eb018a08417d@changeid>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+References: <CA+G9fYuiJwN1ad955Xw4ShamX2=373r+56KsbpeverEs+i_NAg@mail.gmail.com>
+ <20200831194402.GD2855@paulmck-ThinkPad-P72> <CAPDyKFq7KWo=4VmPhgrt7vEEQ_P6NdVgQp+MO_1cg1dtoVR_Fw@mail.gmail.com>
+ <CAPDyKFrTERjpLrPOFtkqLyNsk2T_58Ye2FQ1mPf-0u78aWW=Xw@mail.gmail.com> <20200901104206.GU1362448@hirez.programming.kicks-ass.net>
+In-Reply-To: <20200901104206.GU1362448@hirez.programming.kicks-ass.net>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Tue, 1 Sep 2020 14:35:52 +0200
+Message-ID: <CAPDyKFo0VkW-cgRSkvPQ0whpuJCo4OKcL1nmH7nz1tDEChOtVg@mail.gmail.com>
+Subject: Re: WARNING: suspicious RCU usage - sdhci-pltfm: SDHCI platform and
+ OF driver helper
+To:     Peter Zijlstra <peterz@infradead.org>,
+        Naresh Kamboju <naresh.kamboju@linaro.org>
+Cc:     paulmck@kernel.org, "Rafael J. Wysocki" <rjw@rjwysocki.net>,
+        Saravana Kannan <saravanak@google.com>,
+        open list <linux-kernel@vger.kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        lkft-triage@lists.linaro.org, rcu@vger.kernel.org,
+        Linux PM <linux-pm@vger.kernel.org>,
+        Anders Roxell <anders.roxell@linaro.org>,
+        Arnd Bergmann <arnd@arndb.de>,
+        Rajendra Nayak <rnayak@codeaurora.org>,
+        John Stultz <john.stultz@linaro.org>,
+        Stephen Boyd <sboyd@kernel.org>,
+        Lars Povlsen <lars.povlsen@microchip.com>,
+        madhuparnabhowmik10@gmail.com,
+        Viresh Kumar <viresh.kumar@linaro.org>,
+        Vincent Guittot <vincent.guittot@linaro.org>,
+        Lina Iyer <ilina@codeaurora.org>,
+        Thomas Gleixner <tglx@linutronix.de>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 1/09/20 12:10 am, Raul E Rangel wrote:
-> commit 61d7437ed1390 ("mmc: sdhci-acpi: Fix HS400 tuning for AMDI0040")
-> broke resume for HS400. When the system suspends the eMMC controller is
-> powered down. So on resume we need to reinitialize the controller.
-> amd_sdhci_host was not getting cleared, so the DLL was never re-enabled
-> on resume. This results in HS400 being non-functional.
-> 
-> This change clears the tuned_clock flag, clears the dll_enabled flag and
-> disables the DLL on reset.
-> 
-> Fixes: 61d7437ed1390 ("mmc: sdhci-acpi: Fix HS400 tuning for AMDI0040")
-> 
-> Signed-off-by: Raul E Rangel <rrangel@chromium.org>
+On Tue, 1 Sep 2020 at 12:42, <peterz@infradead.org> wrote:
+>
+> On Tue, Sep 01, 2020 at 08:50:57AM +0200, Ulf Hansson wrote:
+> > On Tue, 1 Sep 2020 at 08:46, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> > > On Mon, 31 Aug 2020 at 21:44, Paul E. McKenney <paulmck@kernel.org> wrote:
+>
+> > > > > [    5.308588] =============================
+> > > > > [    5.308593] WARNING: suspicious RCU usage
+> > > > > [    5.316628] sdhci-pltfm: SDHCI platform and OF driver helper
+> > > > > [    5.320052] 5.9.0-rc3 #1 Not tainted
+> > > > > [    5.320057] -----------------------------
+> > > > > [    5.320063] /usr/src/kernel/include/trace/events/lock.h:37 suspicious rcu_dereference_check() usage!
+> > > > > [    5.320068]
+> > > > > [    5.320068] other info that might help us debug this:
+> > > > > [    5.320068]
+> > > > > [    5.320074]
+> > > > > [    5.320074] rcu_scheduler_active = 2, debug_locks = 1
+> > > > > [    5.320078] RCU used illegally from extended quiescent state!
+> > > > > [    5.320084] no locks held by swapper/0/0.
+> > > > > [    5.320089]
+> > > > > [    5.320089] stack backtrace:
+> > > > > [    5.320098] CPU: 0 PID: 0 Comm: swapper/0 Not tainted 5.9.0-rc3 #1
+> > > > > [    5.346354] sdhci_msm 7864900.sdhci: Got CD GPIO
+> > > > > [    5.346446] Hardware name: Qualcomm Technologies, Inc. APQ 8016 SBC (DT)
+> > > > > [    5.346452] Call trace:
+> > > > > [    5.346463]  dump_backtrace+0x0/0x1f8
+> > > > > [    5.346471]  show_stack+0x2c/0x38
+> > > > > [    5.346480]  dump_stack+0xec/0x15c
+> > > > > [    5.346490]  lockdep_rcu_suspicious+0xd4/0xf8
+> > > > > [    5.346499]  lock_acquire+0x3d0/0x440
+> > > > > [    5.346510]  _raw_spin_lock_irqsave+0x80/0xb0
+> > > > > [    5.413118]  __pm_runtime_suspend+0x34/0x1d0
+> > > > > [    5.417457]  psci_enter_domain_idle_state+0x4c/0xb0
+> > > > > [    5.421795]  cpuidle_enter_state+0xc8/0x610
+> > > > > [    5.426392]  cpuidle_enter+0x3c/0x50
+> > > > > [    5.430561]  call_cpuidle+0x44/0x80
+> > > > > [    5.434378]  do_idle+0x240/0x2a0
+>
+> > > > Note also that Peter Zijlstra (CCed) is working to shrink the portion
+> > > > of the idle loop that RCU ignores.  Not sure that it covers your
+> > > > case, but it is worth checking.
+>
+> Right, so I think I 'caused' this by making the lock tracepoints
+> visible. That is, the error always existed, now we actually warn about
+> it.
+>
+> > > Thanks for letting me know. Let's see what Peter thinks about this then.
+> > >
+> > > Apologize for my ignorance, but from a cpuidle point of view, what
+> > > does it mean using RCU_NONIDLE()? I guess we should avoid RCU_NONIDLE
+> > > on bigger code paths?
+> > >
+> > > I could add RCU_NONIDLE for the calls to pm_runtime_put_sync_suspend()
+> > > and pm_runtime_get_sync() in psci_enter_domain_idle_state(). Perhaps
+> > > that's the easiest approach, at least to start with.
+> > >
+> > > Or do you have any other ideas?
+>
+> So IMO trace_*_rcuidle() and RCU_NONIDLE() are bugs, they just mean we
+> got the ordering wrong and are papering over it. That said, that's been
+> the modus operandi for a while now, just make it shut up and don't think
+> about it :-/
+>
+> That said; I pushed the rcu_idle_enter() about as deep as it goes into
+> generic code in commit 1098582a0f6c ("sched,idle,rcu: Push rcu_idle
+> deeper into the idle path")
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Aha, that commit should fix this problem, I think. Looks like that
+commit was sent as a fix and included in the recent v5.9-rc3.
 
+Naresh, can you try with the above commit?
+
+>
+> I suppose the next step is pushing it into individual driver when
+> needed, something like the below perhaps. I realize the coupled idle
+> state stuff is more complicated that most, but it's also not an area
+> I've looked at in detail, so perhaps I've just made a bigger mess, but
+> it ought to give you enough to get going I think.
+
+These aren't coupled states. Instead, in cpuidle-psci, we are using PM
+domains through genpd and runtime PM to manage "shared idle states"
+between CPUs.
+
+Kind regards
+Uffe
+
+>
+> Rafael?
+>
 > ---
-> - Performed 100+ suspend/resume cycles without issue.
-> - Also verified tuning continues to work.
-> 
->  drivers/mmc/host/sdhci-acpi.c | 31 ++++++++++++++++++++++++-------
->  1 file changed, 24 insertions(+), 7 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-> index 962f074ca1742..284cba11e2795 100644
-> --- a/drivers/mmc/host/sdhci-acpi.c
-> +++ b/drivers/mmc/host/sdhci-acpi.c
-> @@ -551,12 +551,18 @@ static int amd_select_drive_strength(struct mmc_card *card,
->  	return MMC_SET_DRIVER_TYPE_A;
->  }
->  
-> -static void sdhci_acpi_amd_hs400_dll(struct sdhci_host *host)
-> +static void sdhci_acpi_amd_hs400_dll(struct sdhci_host *host, bool enable)
+> diff --git a/drivers/cpuidle/cpuidle-psci.c b/drivers/cpuidle/cpuidle-psci.c
+> index 74463841805f..617bbef316e6 100644
+> --- a/drivers/cpuidle/cpuidle-psci.c
+> +++ b/drivers/cpuidle/cpuidle-psci.c
+> @@ -49,6 +49,9 @@ static inline u32 psci_get_domain_state(void)
+>
+>  static inline int psci_enter_state(int idx, u32 state)
 >  {
-> +	struct sdhci_acpi_host *acpi_host = sdhci_priv(host);
-> +	struct amd_sdhci_host *amd_host = sdhci_acpi_priv(acpi_host);
-> +
->  	/* AMD Platform requires dll setting */
->  	sdhci_writel(host, 0x40003210, SDHCI_AMD_RESET_DLL_REGISTER);
->  	usleep_range(10, 20);
-> -	sdhci_writel(host, 0x40033210, SDHCI_AMD_RESET_DLL_REGISTER);
-> +	if (enable)
-> +		sdhci_writel(host, 0x40033210, SDHCI_AMD_RESET_DLL_REGISTER);
-> +
-> +	amd_host->dll_enabled = enable;
+> +       /*
+> +        * XXX push rcu_idle_enter into the coupled code
+> +        */
+>         return CPU_PM_CPU_IDLE_ENTER_PARAM(psci_cpu_suspend_enter, idx, state);
 >  }
->  
->  /*
-> @@ -596,10 +602,8 @@ static void amd_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->  
->  		/* DLL is only required for HS400 */
->  		if (host->timing == MMC_TIMING_MMC_HS400 &&
-> -		    !amd_host->dll_enabled) {
-> -			sdhci_acpi_amd_hs400_dll(host);
-> -			amd_host->dll_enabled = true;
-> -		}
-> +		    !amd_host->dll_enabled)
-> +			sdhci_acpi_amd_hs400_dll(host, true);
->  	}
+>
+> @@ -72,7 +75,9 @@ static int psci_enter_domain_idle_state(struct cpuidle_device *dev,
+>         if (!state)
+>                 state = states[idx];
+>
+> +       rcu_idle_enter();
+>         ret = psci_cpu_suspend_enter(state) ? -1 : idx;
+> +       rcu_idle_exit();
+>
+>         pm_runtime_get_sync(pd_dev);
+>
+> @@ -125,8 +130,13 @@ static int psci_enter_idle_state(struct cpuidle_device *dev,
+>                                 struct cpuidle_driver *drv, int idx)
+>  {
+>         u32 *state = __this_cpu_read(psci_cpuidle_data.psci_states);
+> +       int ret;
+>
+> -       return psci_enter_state(idx, state[idx]);
+> +       rcu_idle_enter();
+> +       ret = psci_enter_state(idx, state[idx]);
+> +       rcu_idle_exit();
+> +
+> +       return ret;
 >  }
->  
-> @@ -620,10 +624,23 @@ static int amd_sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
->  	return err;
->  }
->  
-> +static void amd_sdhci_reset(struct sdhci_host *host, u8 mask)
-> +{
-> +	struct sdhci_acpi_host *acpi_host = sdhci_priv(host);
-> +	struct amd_sdhci_host *amd_host = sdhci_acpi_priv(acpi_host);
-> +
-> +	if (mask & SDHCI_RESET_ALL) {
-> +		amd_host->tuned_clock = false;
-> +		sdhci_acpi_amd_hs400_dll(host, false);
-> +	}
-> +
-> +	sdhci_reset(host, mask);
-> +}
-> +
->  static const struct sdhci_ops sdhci_acpi_ops_amd = {
->  	.set_clock	= sdhci_set_clock,
->  	.set_bus_width	= sdhci_set_bus_width,
-> -	.reset		= sdhci_reset,
-> +	.reset		= amd_sdhci_reset,
->  	.set_uhs_signaling = sdhci_set_uhs_signaling,
->  };
->  
-> 
-
+>
+>  static const struct of_device_id psci_idle_state_match[] = {
+> @@ -170,6 +180,7 @@ static int psci_dt_cpu_init_topology(struct cpuidle_driver *drv,
+>          * deeper states.
+>          */
+>         drv->states[state_count - 1].enter = psci_enter_domain_idle_state;
+> +       drv->states[state_count - 1].flags = CPUIDLE_FLAG_RCU_IDLE;
+>         psci_cpuidle_use_cpuhp = true;
+>
+>         return 0;
+> @@ -285,6 +296,7 @@ static int psci_idle_init_cpu(struct device *dev, int cpu)
+>          * state index 0.
+>          */
+>         drv->states[0].enter = psci_enter_idle_state;
+> +       drv->states[0].flags = CPUIDLE_FLAG_RCU_IDLE;
+>         drv->states[0].exit_latency = 1;
+>         drv->states[0].target_residency = 1;
+>         drv->states[0].power_usage = UINT_MAX;
+> diff --git a/drivers/cpuidle/cpuidle.c b/drivers/cpuidle/cpuidle.c
+> index 04becd70cc41..3dbac3bb761b 100644
+> --- a/drivers/cpuidle/cpuidle.c
+> +++ b/drivers/cpuidle/cpuidle.c
+> @@ -239,9 +239,11 @@ int cpuidle_enter_state(struct cpuidle_device *dev, struct cpuidle_driver *drv,
+>         time_start = ns_to_ktime(local_clock());
+>
+>         stop_critical_timings();
+> -       rcu_idle_enter();
+> +       if (!(target_state->flags & CPUIDLE_FLAG_RCU_IDLE))
+> +               rcu_idle_enter();
+>         entered_state = target_state->enter(dev, drv, index);
+> -       rcu_idle_exit();
+> +       if (!(target_state->flags & CPUIDLE_FLAG_RCU_IDLE))
+> +               rcu_idle_exit();
+>         start_critical_timings();
+>
+>         sched_clock_idle_wakeup_event();
+> diff --git a/include/linux/cpuidle.h b/include/linux/cpuidle.h
+> index 75895e6363b8..47f686131a54 100644
+> --- a/include/linux/cpuidle.h
+> +++ b/include/linux/cpuidle.h
+> @@ -82,6 +82,7 @@ struct cpuidle_state {
+>  #define CPUIDLE_FLAG_UNUSABLE          BIT(3) /* avoid using this state */
+>  #define CPUIDLE_FLAG_OFF               BIT(4) /* disable this state by default */
+>  #define CPUIDLE_FLAG_TLB_FLUSHED       BIT(5) /* idle-state flushes TLBs */
+> +#define CPUIDLE_FLAG_RCU_IDLE          BIT(6) /* driver will do RCU-idle */
+>
+>  struct cpuidle_device_kobj;
+>  struct cpuidle_state_kobj;
