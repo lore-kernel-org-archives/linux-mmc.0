@@ -2,98 +2,106 @@ Return-Path: <SRS0=T3o1=CK=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-4.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
+X-Spam-Status: No, score=-5.6 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1118CC433E6
-	for <linux-mmc@archiver.kernel.org>; Tue,  1 Sep 2020 16:12:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4FB04C433E2
+	for <linux-mmc@archiver.kernel.org>; Tue,  1 Sep 2020 16:13:49 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id CD49620767
-	for <linux-mmc@archiver.kernel.org>; Tue,  1 Sep 2020 16:12:21 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="EjZj6y+T"
+	by mail.kernel.org (Postfix) with ESMTP id 123BE208CA
+	for <linux-mmc@archiver.kernel.org>; Tue,  1 Sep 2020 16:13:48 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1598976829;
+	bh=wSYh3X+qxwyoZekqoM20nCWZcWw1dfhsCUJVuXIEPaE=;
+	h=Date:From:To:Cc:Subject:Reply-To:References:In-Reply-To:List-ID:
+	 From;
+	b=1JMsEzIIEFyiaIdTt/ec4SXVjeBV8S6tzKu40/GQrQrj+0jEC3osNTRT5p/RoB8JX
+	 MEu2MWdFpdUjV6l2McwGize401uCRExR5uLQaSfcvo0NOXsogXpzr2x+Uhg9gDNFRp
+	 Lotz3qhXKYr33EkebDjF3Qgd9G1VEmKKIqii8BwI=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1731310AbgIAPhC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 1 Sep 2020 11:37:02 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55204 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1731308AbgIAPg4 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Sep 2020 11:36:56 -0400
-Received: from mail-ua1-x944.google.com (mail-ua1-x944.google.com [IPv6:2607:f8b0:4864:20::944])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 53391C061245
-        for <linux-mmc@vger.kernel.org>; Tue,  1 Sep 2020 08:36:55 -0700 (PDT)
-Received: by mail-ua1-x944.google.com with SMTP id z12so550803uam.12
-        for <linux-mmc@vger.kernel.org>; Tue, 01 Sep 2020 08:36:55 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=1B9nLNVLY42WxzWWaQLkKFC09iT2uTznxSa/7Ga9+ik=;
-        b=EjZj6y+TjUP2e0zRcKUUQvE66STizixCKC/KAIDXV/69rk8mNQSfWyAU6WYWSKFuzu
-         YdysqzXgzI2xtpYHzb6Bg9vJ2avPXngJVilLH84994hthxQshimmjhHojPFW896ik/4d
-         7+SfIVuVuc/ZxqJXQpx6oVzAu/cP4B59SJR8lGPID+5gG2w4v4nOMnEQcQrCru633HNP
-         zuDN+/5pNOLV30vak4kZQMnpd+VUgw2bg+XdxSwnEBkVo/zJgSOy5ArWNiN7cmol12Bb
-         IqdXYacCg5YMcR4+mn8aBUmFtkx7PyrkYdutuPTIGu4pnVnQseXCdI/TJgx4fELy5snC
-         I+0A==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=1B9nLNVLY42WxzWWaQLkKFC09iT2uTznxSa/7Ga9+ik=;
-        b=Hueo9iN7eeUlpWKhki5H4w9Zp/sKNRVELazclm1F/N3pLFOEuVgbgdRk+/aPHgDXgu
-         CSXcdtIhHNhWLli7Vw7C2KZxioww2jhDnKBomMPbGdxxfEcJHRRH28a2/MDYH0DMwtiO
-         uPuqNBsEXOEnjYHoiskKtgXlr7cxL1STSZTSBhS6uREuTzJbkeVcYV7PORZNZAXh9tB2
-         c+o6QnEPWzDQC3h/PMNS3hTwYKDmI3IJLV+VazQ2+pds0pZuM1N1mCSCoifCu+mVSFv8
-         WDs9eWhooRJUuXd83eYP3JnTUtzbRRUFhRwTd+/e16KKx46NLOoYcGBzKlI73ljbJn3n
-         dcMg==
-X-Gm-Message-State: AOAM530JzQ5mBZTX1xT8jrzq8czM5B06MKlMX99kdHI2tSCNITSjkaRU
-        DqYieVDBqiDrR97nFgiOd5koPpYTyXmR4140wzl6Cw==
-X-Google-Smtp-Source: ABdhPJwNEOdYZ2JzAa+esqv8ikW74w5nzhA2RPqk11Z0XyL+fuHQHEnv1hhlq9RrJ7o9td9gDXMcOORUJEPmsoYSFJ0=
-X-Received: by 2002:ab0:5e43:: with SMTP id a3mr1793697uah.19.1598974614146;
- Tue, 01 Sep 2020 08:36:54 -0700 (PDT)
+        id S1731150AbgIAQNq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 1 Sep 2020 12:13:46 -0400
+Received: from mail.kernel.org ([198.145.29.99]:54610 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1731108AbgIAQNo (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 1 Sep 2020 12:13:44 -0400
+Received: from paulmck-ThinkPad-P72.home (unknown [50.45.173.55])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id 76C99204EC;
+        Tue,  1 Sep 2020 16:13:40 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1598976820;
+        bh=wSYh3X+qxwyoZekqoM20nCWZcWw1dfhsCUJVuXIEPaE=;
+        h=Date:From:To:Cc:Subject:Reply-To:References:In-Reply-To:From;
+        b=WKc3b7+l3qEJxpTCJykOhIL5mC4+Tc+4xUuoNh86NmlHnYI62zNec4SSfKIrB0rAl
+         ejM533Ibu1SyDPQ5Dx6TmnAip7Lh6b8EbpmM29rchZrIEuzNWLMiSMXe5Dank5qQjr
+         uH/ubRDB/JaW46oPe7Zn39dD8nr2lIcTL1jF36E8=
+Received: by paulmck-ThinkPad-P72.home (Postfix, from userid 1000)
+        id 1FB1F35226A5; Tue,  1 Sep 2020 09:13:40 -0700 (PDT)
+Date:   Tue, 1 Sep 2020 09:13:40 -0700
+From:   "Paul E. McKenney" <paulmck@kernel.org>
+To:     peterz@infradead.org
+Cc:     Lina Iyer <ilina@codeaurora.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Naresh Kamboju <naresh.kamboju@linaro.org>,
+        "Rafael J. Wysocki" <rjw@rjwysocki.net>,
+        Saravana Kannan <saravanak@google.com>,
+        open list <linux-kernel@vger.kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        lkft-triage@lists.linaro.org, rcu@vger.kernel.org,
+        Linux PM <linux-pm@vger.kernel.org>,
+        Anders Roxell <anders.roxell@linaro.org>,
+        Arnd Bergmann <arnd@arndb.de>,
+        Rajendra Nayak <rnayak@codeaurora.org>,
+        John Stultz <john.stultz@linaro.org>,
+        Stephen Boyd <sboyd@kernel.org>,
+        Lars Povlsen <lars.povlsen@microchip.com>,
+        madhuparnabhowmik10@gmail.com,
+        Viresh Kumar <viresh.kumar@linaro.org>,
+        Vincent Guittot <vincent.guittot@linaro.org>,
+        Thomas Gleixner <tglx@linutronix.de>
+Subject: Re: WARNING: suspicious RCU usage - sdhci-pltfm: SDHCI platform and
+ OF driver helper
+Message-ID: <20200901161340.GC29330@paulmck-ThinkPad-P72>
+Reply-To: paulmck@kernel.org
+References: <CA+G9fYuiJwN1ad955Xw4ShamX2=373r+56KsbpeverEs+i_NAg@mail.gmail.com>
+ <20200831194402.GD2855@paulmck-ThinkPad-P72>
+ <CAPDyKFq7KWo=4VmPhgrt7vEEQ_P6NdVgQp+MO_1cg1dtoVR_Fw@mail.gmail.com>
+ <CAPDyKFrTERjpLrPOFtkqLyNsk2T_58Ye2FQ1mPf-0u78aWW=Xw@mail.gmail.com>
+ <20200901104206.GU1362448@hirez.programming.kicks-ass.net>
+ <CAPDyKFo0VkW-cgRSkvPQ0whpuJCo4OKcL1nmH7nz1tDEChOtVg@mail.gmail.com>
+ <CAPDyKFrv+DTF8=twZZk_tenB-sLg6H-CFn9HVDVA5S2kK2=U5Q@mail.gmail.com>
+ <20200901154417.GD20303@codeaurora.org>
+ <20200901155014.GF2674@hirez.programming.kicks-ass.net>
 MIME-Version: 1.0
-References: <20200901150438.228887-1-ulf.hansson@linaro.org> <20200901150654.GB30034@lst.de>
-In-Reply-To: <20200901150654.GB30034@lst.de>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 1 Sep 2020 17:36:17 +0200
-Message-ID: <CAPDyKFqZXdtVokrDQvJAh-NzN0T2ayPD6MepemLEaDt1TRPduw@mail.gmail.com>
-Subject: Re: [PATCH v2] mmc: mmc_spi: Allow the driver to be built when
- CONFIG_HAS_DMA is unset
-To:     Christoph Hellwig <hch@lst.de>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Rich Felker <dalias@libc.org>, Mark Brown <broonie@kernel.org>,
-        Linux-sh list <linux-sh@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20200901155014.GF2674@hirez.programming.kicks-ass.net>
+User-Agent: Mutt/1.9.4 (2018-02-28)
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 1 Sep 2020 at 17:06, Christoph Hellwig <hch@lst.de> wrote:
->
-> On Tue, Sep 01, 2020 at 05:04:38PM +0200, Ulf Hansson wrote:
-> > +#ifdef CONFIG_HAS_DMA
-> > +static int mmc_spi_dma_alloc(struct mmc_spi_host *host)
-> > +{
-> > +     struct spi_device *spi = host->spi;
-> > +     struct device *dev;
-> > +
-> > +     if (!spi->master->dev.parent->dma_mask)
-> > +             return 0;
->
-> I still don't think this makes sense, as the dma_mask should always
-> be non-NULL here.
+On Tue, Sep 01, 2020 at 05:50:14PM +0200, peterz@infradead.org wrote:
+> On Tue, Sep 01, 2020 at 09:44:17AM -0600, Lina Iyer wrote:
+> > > > > > > I could add RCU_NONIDLE for the calls to pm_runtime_put_sync_suspend()
+> > > > > > > and pm_runtime_get_sync() in psci_enter_domain_idle_state(). Perhaps
+> > > > > > > that's the easiest approach, at least to start with.
+> 
+> > I think this would be nice. This should also cover the case, where PM domain
+> > power off notification callbacks call trace function internally. Right?
+> 
+> That's just more crap for me to clean up later :-(
+> 
+> trace_*_rcuidle() and RCU_NONIDLE() need to die, not proliferate.
 
-If that is the case, I wonder how the driver could even have worked without DMA.
+Moving the idle-entry boundary further in is good in any number of ways.
+But experience indicates that no matter how far you move it, there will
+be something complex further in.  Unless you are pushing it all the way
+into all the arch-specific code down as far as it can possibly go?
 
-Because in the existing code, host->dma_dev gets assigned to
-spi->master->dev.parent->dma_mask - which seems to turn on the DMA
-usage in the driver.
-
-What am I missing?
-
-Kind regards
-Uffe
+							Thanx, Paul
