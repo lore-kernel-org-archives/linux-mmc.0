@@ -2,171 +2,209 @@ Return-Path: <SRS0=T3o1=CK=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-4.0 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	UNPARSEABLE_RELAY,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.6 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 38B3EC433E6
-	for <linux-mmc@archiver.kernel.org>; Tue,  1 Sep 2020 14:54:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 90B14C433E6
+	for <linux-mmc@archiver.kernel.org>; Tue,  1 Sep 2020 15:00:52 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0A8D6206EB
-	for <linux-mmc@archiver.kernel.org>; Tue,  1 Sep 2020 14:54:52 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 60B88206FA
+	for <linux-mmc@archiver.kernel.org>; Tue,  1 Sep 2020 15:00:52 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1598972452;
+	bh=JzIUQF3u39f15CEM94wBRei78s+vKxwzAnubKQpennk=;
+	h=Date:From:To:Cc:Subject:Reply-To:References:In-Reply-To:List-ID:
+	 From;
+	b=nuHJ5TZbya51b7D/yWoL2cZI5ic7Nmg+lm9BiPYcnMe614jzGmAj3R7NUcDsZ33Ta
+	 dQf5nHgBiOZgKwi7jIMzXndyUitV41F2UG9CAbz/dG5k3DT4K7xlq+DUl4QpbmBlKv
+	 ewzy1PSCFmVPa1na2QMv1oDtEPF/zg5+hdkwrNmE=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726105AbgIALrV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 1 Sep 2020 07:47:21 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47860 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727771AbgIALqt (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Sep 2020 07:46:49 -0400
-Received: from bhuna.collabora.co.uk (bhuna.collabora.co.uk [IPv6:2a00:1098:0:82:1000:25:2eeb:e3e3])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 17CD2C061244
-        for <linux-mmc@vger.kernel.org>; Tue,  1 Sep 2020 04:46:45 -0700 (PDT)
-Received: from [127.0.0.1] (localhost [127.0.0.1])
-        (Authenticated sender: sre)
-        with ESMTPSA id 062A7296213
-Received: by earth.universe (Postfix, from userid 1000)
-        id 1DCCB3C0C82; Tue,  1 Sep 2020 13:46:42 +0200 (CEST)
-Date:   Tue, 1 Sep 2020 13:46:42 +0200
-From:   Sebastian Reichel <sebastian.reichel@collabora.com>
-To:     NXP Linux Team <linux-imx@nxp.com>
-Cc:     linux-mmc@vger.kernel.org, Haibo Chen <haibo.chen@nxp.com>,
-        Shawn Guo <shawnguo@kernel.org>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        Pengutronix Kernel Team <kernel@pengutronix.de>,
-        Fabio Estevam <festevam@gmail.com>,
-        "Baumgartner, Claus (GE Healthcare)" <claus.baumgartner@med.ge.com>
-Subject: Re: mmc0: Timeout waiting for hardware cmd interrupt on i.MX535
-Message-ID: <20200901114642.vhivtsfrarua6ce4@earth.universe>
-References: <AM0P101MB03060DFCABC4A82C2D40F180D12E0@AM0P101MB0306.NAMP101.PROD.OUTLOOK.COM>
+        id S1727025AbgIAPAu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 1 Sep 2020 11:00:50 -0400
+Received: from mail.kernel.org ([198.145.29.99]:45322 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726922AbgIAPAt (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 1 Sep 2020 11:00:49 -0400
+Received: from paulmck-ThinkPad-P72.home (unknown [50.45.173.55])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id 22BC0206CD;
+        Tue,  1 Sep 2020 15:00:48 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1598972448;
+        bh=JzIUQF3u39f15CEM94wBRei78s+vKxwzAnubKQpennk=;
+        h=Date:From:To:Cc:Subject:Reply-To:References:In-Reply-To:From;
+        b=lcD6FQqTyeceUmYzSAoYuNyO2bJ/pq+O+W8qI6LcJG6tu2LpK3eCQGR0qaqLZiSwX
+         kgiC8bkrHgcpsQAmPD/FLZnNtSmpsllWjOcAV/H1vrDFb4G1v13zbv5BnuRQSxmZpD
+         pcJtC+qgulftC9W1EXSC3ZipTwJilOS4/vW20dlE=
+Received: by paulmck-ThinkPad-P72.home (Postfix, from userid 1000)
+        id DD78035226A5; Tue,  1 Sep 2020 08:00:47 -0700 (PDT)
+Date:   Tue, 1 Sep 2020 08:00:47 -0700
+From:   "Paul E. McKenney" <paulmck@kernel.org>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     "Rafael J. Wysocki" <rjw@rjwysocki.net>,
+        Saravana Kannan <saravanak@google.com>,
+        Naresh Kamboju <naresh.kamboju@linaro.org>,
+        open list <linux-kernel@vger.kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        lkft-triage@lists.linaro.org, rcu@vger.kernel.org,
+        Linux PM <linux-pm@vger.kernel.org>,
+        Anders Roxell <anders.roxell@linaro.org>,
+        Arnd Bergmann <arnd@arndb.de>,
+        Rajendra Nayak <rnayak@codeaurora.org>,
+        John Stultz <john.stultz@linaro.org>,
+        Stephen Boyd <sboyd@kernel.org>,
+        Lars Povlsen <lars.povlsen@microchip.com>,
+        madhuparnabhowmik10@gmail.com,
+        Viresh Kumar <viresh.kumar@linaro.org>,
+        Vincent Guittot <vincent.guittot@linaro.org>,
+        peterz@infrdead.org, Lina Iyer <ilina@codeaurora.org>
+Subject: Re: WARNING: suspicious RCU usage - sdhci-pltfm: SDHCI platform and
+ OF driver helper
+Message-ID: <20200901150047.GB29330@paulmck-ThinkPad-P72>
+Reply-To: paulmck@kernel.org
+References: <CA+G9fYuiJwN1ad955Xw4ShamX2=373r+56KsbpeverEs+i_NAg@mail.gmail.com>
+ <20200831194402.GD2855@paulmck-ThinkPad-P72>
+ <CAPDyKFq7KWo=4VmPhgrt7vEEQ_P6NdVgQp+MO_1cg1dtoVR_Fw@mail.gmail.com>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="juz373rbwhruhhy3"
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <AM0P101MB03060DFCABC4A82C2D40F180D12E0@AM0P101MB0306.NAMP101.PROD.OUTLOOK.COM>
+In-Reply-To: <CAPDyKFq7KWo=4VmPhgrt7vEEQ_P6NdVgQp+MO_1cg1dtoVR_Fw@mail.gmail.com>
+User-Agent: Mutt/1.9.4 (2018-02-28)
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+On Tue, Sep 01, 2020 at 08:46:54AM +0200, Ulf Hansson wrote:
+> + Saravanna, Rafael, Lina
+> 
+> On Mon, 31 Aug 2020 at 21:44, Paul E. McKenney <paulmck@kernel.org> wrote:
+> >
+> > On Mon, Aug 31, 2020 at 12:02:31PM +0530, Naresh Kamboju wrote:
+> > > While booting linux mainline kernel on arm64 db410c this kernel warning
+> > > noticed.
+> > >
+> > > metadata:
+> > >   git branch: master
+> > >   git repo: https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
+> > >   git commit: f75aef392f869018f78cfedf3c320a6b3fcfda6b
+> > >   git describe: v5.9-rc3
+> > >   make_kernelversion: 5.9.0-rc3
+> > >   kernel-config:
+> > > http://snapshots.linaro.org/openembedded/lkft/lkft/sumo/dragonboard-410c/lkft/linux-mainline/2965/config
+> > >
+> > > Boot log,
+> > >
+> > > [    0.000000] Booting Linux on physical CPU 0x0000000000 [0x410fd030]
+> > > [    0.000000] Linux version 5.9.0-rc3 (oe-user@oe-host)
+> > > (aarch64-linaro-linux-gcc (GCC) 7.3.0, GNU ld (GNU Binutils)
+> > > 2.30.0.20180208) #1 SMP PREEMPT Mon Aug 31 00:23:15 UTC 2020
+> > > [    0.000000] Machine model: Qualcomm Technologies, Inc. APQ 8016 SBC
+> > > <>
+> > > [    5.299090] sdhci: Secure Digital Host Controller Interface driver
+> > > [    5.299140] sdhci: Copyright(c) Pierre Ossman
+> > > [    5.304313]
+> > > [    5.307771] Synopsys Designware Multimedia Card Interface Driver
+> > > [    5.308588] =============================
+> > > [    5.308593] WARNING: suspicious RCU usage
+> > > [    5.316628] sdhci-pltfm: SDHCI platform and OF driver helper
+> > > [    5.320052] 5.9.0-rc3 #1 Not tainted
+> > > [    5.320057] -----------------------------
+> > > [    5.320063] /usr/src/kernel/include/trace/events/lock.h:37
+> > > suspicious rcu_dereference_check() usage!
+> > > [    5.320068]
+> > > [    5.320068] other info that might help us debug this:
+> > > [    5.320068]
+> > > [    5.320074]
+> > > [    5.320074] rcu_scheduler_active = 2, debug_locks = 1
+> > > [    5.320078] RCU used illegally from extended quiescent state!
+> > > [    5.320084] no locks held by swapper/0/0.
+> > > [    5.320089]
+> > > [    5.320089] stack backtrace:
+> > > [    5.320098] CPU: 0 PID: 0 Comm: swapper/0 Not tainted 5.9.0-rc3 #1
+> > > [    5.346354] sdhci_msm 7864900.sdhci: Got CD GPIO
+> > > [    5.346446] Hardware name: Qualcomm Technologies, Inc. APQ 8016 SBC (DT)
+> > > [    5.346452] Call trace:
+> > > [    5.346463]  dump_backtrace+0x0/0x1f8
+> > > [    5.346471]  show_stack+0x2c/0x38
+> > > [    5.346480]  dump_stack+0xec/0x15c
+> > > [    5.346490]  lockdep_rcu_suspicious+0xd4/0xf8
+> > > [    5.346499]  lock_acquire+0x3d0/0x440
+> > > [    5.346510]  _raw_spin_lock_irqsave+0x80/0xb0
+> > > [    5.413118]  __pm_runtime_suspend+0x34/0x1d0
+> > > [    5.417457]  psci_enter_domain_idle_state+0x4c/0xb0
+> > > [    5.421795]  cpuidle_enter_state+0xc8/0x610
+> > > [    5.426392]  cpuidle_enter+0x3c/0x50
+> > > [    5.430561]  call_cpuidle+0x44/0x80
+> > > [    5.434378]  do_idle+0x240/0x2a0
+> >
+> > RCU ignores CPUs in the idle loop, which means that you cannot use
+> > rcu_read_lock() from the idle loop without use of something like
+> > RCU_NONIDLE().  If this is due to event tracing, you should use the
+> > _rcuidle() variant of the event trace statement.
+> 
+> In the runtime suspend path, the runtime PM core calls
+> device_links_read_lock() - if the device in question has any links to
+> suppliers (to allow them to be suspended too).
+> 
+> device_links_read_lock() calls srcu_read_lock().
 
---juz373rbwhruhhy3
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Except that it is perfectly legal to invoke srcu_read_lock() from the
+idle loop.  The problem is instead rcu_read_lock() and similar.
 
-Hi,
+> It turns out that the device in question (the CPU device that is
+> attached to genpd) didn't have any links before - but that seems to
+> have changed, due to the work done by Saravana (links become created
+> on a per resource basis, parsed from DT during boot).
+> 
+> > Note also that Peter Zijlstra (CCed) is working to shrink the portion
+> > of the idle loop that RCU ignores.  Not sure that it covers your
+> > case, but it is worth checking.
+> 
+> Thanks for letting me know. Let's see what Peter thinks about this then.
+> 
+> Apologize for my ignorance, but from a cpuidle point of view, what
+> does it mean using RCU_NONIDLE()? I guess we should avoid RCU_NONIDLE
+> on bigger code paths?
 
-[add i.MX architecture maintainers to Cc]
+It means that as far as RCU (and only RCU) is concerned there is an
+exit from idle state for just long enough to execute RCU_NONIDLE()'s
+argument.  This involves an atomic operation on both entry to and exit
+from RCU_NONIDLE(), which in most cases won't be noticeable.  But in some
+cases you might (for example) want to enclose a loop in RCU_NONIDLE()
+rather than doing RCU_NONIDLE() on each pass through the loop.
 
-On Tue, Sep 01, 2020 at 07:37:31AM +0000, Baumgartner, Claus (GE Healthcare=
-) wrote:
-> We have a board with an i.MX535 using a Samsung eMMC as persistent
-> storage connected to eSDHCv3. Every now and then we produce a
-> build that causes emmc timeouts:=20
->=20
-> Aug 28 07:32:12 csmon kernel: mmc0: Timeout waiting for hardware cmd inte=
-rrupt.
-> Aug 28 07:32:12 csmon kernel: mmc0: sdhci: =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D SDHCI REGISTER DUMP =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-> Aug 28 07:32:12 csmon kernel: mmc0: sdhci: Sys addr:  0xe3f12000 | Versio=
-n:  0x00001201
-> Aug 28 07:32:12 csmon kernel: mmc0: sdhci: Blk size:  0x00000200 | Blk cn=
-t:  0x00000001
-> Aug 28 07:32:12 csmon kernel: mmc0: sdhci: Argument:  0x00010000 | Trn mo=
-de: 0x00000000
-> Aug 28 07:32:12 csmon kernel: mmc0: sdhci: Present:   0x01f80008 | Host c=
-tl: 0x00000031
-> Aug 28 07:32:12 csmon kernel: mmc0: sdhci: Power:     0x00000002 | Blk ga=
-p:  0x00000000
-> Aug 28 07:32:12 csmon kernel: mmc0: sdhci: Wake-up:   0x00000000 | Clock:=
-    0x0000011f
-> Aug 28 07:32:12 csmon kernel: mmc0: sdhci: Timeout:   0x0000008e | Int st=
-at: 0x00000000
-> Aug 28 07:32:12 csmon kernel: mmc0: sdhci: Int enab:  0x107f000b | Sig en=
-ab: 0x107f000b
-> Aug 28 07:32:12 csmon kernel: mmc0: sdhci: ACmd stat: 0x00000000 | Slot i=
-nt: 0x00001201
-> Aug 28 07:32:12 csmon kernel: mmc0: sdhci: Caps:      0x07eb0000 | Caps_1=
-:   0x08100810
-> Aug 28 07:32:12 csmon kernel: mmc0: sdhci: Cmd:       0x00000d1a | Max cu=
-rr: 0x00000000
-> Aug 28 07:32:12 csmon kernel: mmc0: sdhci: Resp[0]:   0x00400900 | Resp[1=
-]:  0x00000000
-> Aug 28 07:32:12 csmon kernel: mmc0: sdhci: Resp[2]:   0x00000000 | Resp[3=
-]:  0x00000000
-> Aug 28 07:32:12 csmon kernel: mmc0: sdhci: Host ctl2: 0x00000000
-> Aug 28 07:32:12 csmon kernel: mmc0: sdhci: ADMA Err:  0x00000000 | ADMA P=
-tr: 0xef041208
-> Aug 28 07:32:12 csmon kernel: mmc0: sdhci: =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D
+> I could add RCU_NONIDLE for the calls to pm_runtime_put_sync_suspend()
+> and pm_runtime_get_sync() in psci_enter_domain_idle_state(). Perhaps
+> that's the easiest approach, at least to start with.
+> 
+> Or do you have any other ideas?
 
-Some extra information: The timeout always has cmd =3D 0x00000d1a
-(MMC_SEND_STATUS) and resp[0] =3D 0x00400900 with resp[0] translating
-to this IIUIC:
+Here is the list, though it is early in the morning here:
 
-Bit 8 =3D Ready for data
-Bit 11 =3D CURRENT_STATE is TRAN
-Bit 22 =3D Illegal command
+1.	RCU_NONIDLE().
 
-> Timeouts do not occur with every build. After some debugging I
-> have found that timeouts seem to depend on code alignment of the
-> esdhc_readl_le function. I have bisected the behavior by using the
-> System.map and moving/padding the code with NOP instructions (mov
-> r0,r0).
->=20
-> My test case has 5 processes continuously creating a file, writing
-> random long data, reading data and deleting the file. It seems
-> that when the esdhc_writel_le is aligned on a certain address then
-> the timeout will occur about 5 times/12h using my test case. If I
-> add one more NOP, the timeout will not occur at all. If I continue
-> adding some more NOPs the timeouts come back. Seems that it
-> doesn't matter where in the code I add NOPs as long as the address
-> is below the address of esdhc_writel_le.=20
->=20
-> We also run the same software on a dual core i.MX6 without any
-> timeout issues.
+2.	Peter's patch, if it turns out to hoist your code out of what
+	RCU considers to be the idle loop.
 
-And the same kernel binary is also used on an i.MX6 single core
-(albeit with different SW) withot triggering the problem so far.
+3.	If the problem is trace events, use the _rcuidle() variant of the
+	trace event.  Instead of trace_blah(), use trace_blah_rcuidle().
 
-> I have reproduced this with kernel version 4.19.94 and 5.8.3 and
-> we have compiled with both gcc8 and gcc9. I'm still searching for
-> the root cause and I would appreciate any thoughts about where to
-> go next.=20
->=20
-> Thanks,
->=20
-> -Claus-
+4.	Switch from RCU (as in rcu_read_lock()) to SRCU (as in
+	srcu_read_lock()).
 
-To me it looks like it might involve an unknown hardware errata for
-i.MX53, but there has been one similar report before (unfortunately
-without the full register dump) involving virtualization:
+5.	Take Peter's patch a step further, moving the rcu_idle_enter()
+	and rcu_idle_exit() calls as needed.  But please keep in mind
+	that these two functions require that irqs be disabled by their
+	callers.
 
-https://patchwork.kernel.org/patch/10705823/
+6.	If RCU_NONIDLE() in inconvenient due to early exits and such,
+	you could use the rcu_irq_enter_irqson() and rcu_irq_exit_irqson()
+	functions that it calls.
 
-Note, that Claus' kernel has been built with CONFIG_PREEMPT_NONE=3Dy.
+Do any of those help?
 
--- Sebastian
-
---juz373rbwhruhhy3
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCgAdFiEE72YNB0Y/i3JqeVQT2O7X88g7+poFAl9ONI8ACgkQ2O7X88g7
-+pqXPxAAol9/2DT8+tYPvY11oKDyN5ppdW0D3iQmEVZGXvMMCRLfW1tyrvnG5+Ad
-QJLi+D8Q3Kr9k2ER2Xn+G/qAwD0mhBVHbHkzLvsAB2CQsqIYnbkFI9guyV08ruuC
-v/BTaBbkjsrCn5rfP2JHqZsy6RXfYG2pp0+h1p2j19GYrEdWRgvkgsGgglctWLZP
-wt16PFFjTQVMjv0rfap/7+noounLzvYeEi3F8GYvaEQk9dYwz56w1Bhy//mdkCrW
-rBW/6aH7sqz9Sj8Ga+EzD9IvtKsKLlZ8rlVlAdq8OHcD5mN3Nos2Z03RiwViI5Re
-98mIP23gjqR6g04AygnuP30G/hY4o00otoehIuXIC1N6faaGTKOTi7zfK10g57st
-nZeFyNPitsu0Grxty6PRZzy3plYvLcHsiemnmQNGfdL+POZoUx+C4g7Y27pR6Yy6
-aVnnOFDECGKjTDBNrXaOC7Z1mIw5oHD922jBaSr9gHHj9GlrK5wHtq/duh26c4cz
-FcYVQ4Yj6WbA+WWV59GjeID/SeYlwjHOmG/XaKpc8t1g6YdsP/mfc1OZXWU1EAgs
-ix3zMGea4N5cUNRL/naGRac3zxyiohByw7La1DETP313oeZ1rWXlbn09KZ1DxoB1
-pBT7Ulf/bT5CZImm8GNRo9zWrqCHKZTLKk2Z0q99J/VtCocNPv0=
-=2phV
------END PGP SIGNATURE-----
-
---juz373rbwhruhhy3--
+							Thanx, Paul
