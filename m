@@ -2,149 +2,241 @@ Return-Path: <SRS0=T3o1=CK=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.3 required=3.0 tests=BAYES_00,DKIM_INVALID,
+X-Spam-Status: No, score=-6.8 required=3.0 tests=BAYES_00,DKIM_INVALID,
 	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham
-	autolearn_force=no version=3.4.0
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1A0DFC433E2
-	for <linux-mmc@archiver.kernel.org>; Tue,  1 Sep 2020 10:24:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 60467C433E6
+	for <linux-mmc@archiver.kernel.org>; Tue,  1 Sep 2020 10:42:24 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E1CDB20C56
-	for <linux-mmc@archiver.kernel.org>; Tue,  1 Sep 2020 10:24:24 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 248CD20BED
+	for <linux-mmc@archiver.kernel.org>; Tue,  1 Sep 2020 10:42:24 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (1024-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="w1A/+3iE"
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="p2ufOJ3p"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725848AbgIAKYX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 1 Sep 2020 06:24:23 -0400
-Received: from www.zeus03.de ([194.117.254.33]:45800 "EHLO mail.zeus03.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726311AbgIAKYV (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 1 Sep 2020 06:24:21 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
-        date:from:to:cc:subject:message-id:references:mime-version
-        :content-type:in-reply-to; s=k1; bh=BjZKy24CLqczsJHypRPS8Iz06ulA
-        rDhDWR4SwPVg3JM=; b=w1A/+3iEKKim9AwotI6vGzTkTAKwq6brsJso0d1bNlTx
-        sog6E2ZdT4NE7ygUs0B/498emICzeA3NeDEXH6wPZJG3p1ZIf+ysFrjMpRZdx0De
-        89R3Kiaddvf2LMI4per7KOzHSkGnwlQavFCJnlWENYExGhJTek69jmICrm8Kspg=
-Received: (qmail 2477913 invoked from network); 1 Sep 2020 12:24:17 +0200
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 1 Sep 2020 12:24:17 +0200
-X-UD-Smtp-Session: l3s3148p1@xHfo6z2uILggAwDPXymmANnQBv1GRuIL
-Date:   Tue, 1 Sep 2020 12:24:16 +0200
-From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
-To:     Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-renesas-soc@vger.kernel.org" 
-        <linux-renesas-soc@vger.kernel.org>
-Subject: Re: [PATCH 2/2] mmc: renesas_sdhi: keep SCC clock active when tuning
-Message-ID: <20200901102416.GA2971@ninjato>
-References: <20200604112040.22144-1-wsa+renesas@sang-engineering.com>
- <20200604112040.22144-3-wsa+renesas@sang-engineering.com>
- <TY2PR01MB36923A1D7091431CE3F73195D8850@TY2PR01MB3692.jpnprd01.prod.outlook.com>
- <20200608212702.GD917@ninjato>
- <TY2PR01MB3692310754A6B4D6A05DADF0D8820@TY2PR01MB3692.jpnprd01.prod.outlook.com>
- <20200814071500.GA9410@ninjato>
- <TY2PR01MB3692C46B1A21109E7CC03478D8520@TY2PR01MB3692.jpnprd01.prod.outlook.com>
+        id S1726107AbgIAKmW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 1 Sep 2020 06:42:22 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37930 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725848AbgIAKmT (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Sep 2020 06:42:19 -0400
+Received: from casper.infradead.org (casper.infradead.org [IPv6:2001:8b0:10b:1236::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9F56CC061244;
+        Tue,  1 Sep 2020 03:42:18 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=casper.20170209; h=In-Reply-To:Content-Type:MIME-Version:
+        References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+        Content-Transfer-Encoding:Content-ID:Content-Description;
+        bh=l5j8KNQP+yNFDRUyLOaJZdGiV+leggfa6HVh2IT5b2U=; b=p2ufOJ3p+0wVG534RhcyUp0Pys
+        +BCX9S5vLYTDs1pMo9e6Qd8AG5BvRQ5UAMbTvsY/DEdsF6IFl66E/O+/gM9YsKebB9lrEQ4dUnhJy
+        JAGcarCihZjLgPFsvXf5O9NloarCLNmn4RQlUoUg+OAV15p8u2ZRpv9qq4GgHI370z9x1oNxg8vg3
+        xZpBDX37L1NzGZBQAnV2bn9BywlA/y3H+V9MymPbp1YBWKwx49PmqAif+mSmbiJw9YrLlMkaCKmGN
+        eNd+sU2J1cKknlxeApHl2Zc+zSNfu7BehTt5hucspn4RBm3FFj3E2Rr6lifpkl4jhf/EolU3JpcqW
+        Odiw+wnQ==;
+Received: from j217100.upc-j.chello.nl ([24.132.217.100] helo=noisy.programming.kicks-ass.net)
+        by casper.infradead.org with esmtpsa (Exim 4.92.3 #3 (Red Hat Linux))
+        id 1kD3js-0000AQ-C0; Tue, 01 Sep 2020 10:42:08 +0000
+Received: from hirez.programming.kicks-ass.net (hirez.programming.kicks-ass.net [192.168.1.225])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (Client did not present a certificate)
+        by noisy.programming.kicks-ass.net (Postfix) with ESMTPS id A11D53003E5;
+        Tue,  1 Sep 2020 12:42:06 +0200 (CEST)
+Received: by hirez.programming.kicks-ass.net (Postfix, from userid 1000)
+        id 71FE52BBA43E6; Tue,  1 Sep 2020 12:42:06 +0200 (CEST)
+Date:   Tue, 1 Sep 2020 12:42:06 +0200
+From:   peterz@infradead.org
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     paulmck@kernel.org, "Rafael J. Wysocki" <rjw@rjwysocki.net>,
+        Saravana Kannan <saravanak@google.com>,
+        Naresh Kamboju <naresh.kamboju@linaro.org>,
+        open list <linux-kernel@vger.kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        lkft-triage@lists.linaro.org, rcu@vger.kernel.org,
+        Linux PM <linux-pm@vger.kernel.org>,
+        Anders Roxell <anders.roxell@linaro.org>,
+        Arnd Bergmann <arnd@arndb.de>,
+        Rajendra Nayak <rnayak@codeaurora.org>,
+        John Stultz <john.stultz@linaro.org>,
+        Stephen Boyd <sboyd@kernel.org>,
+        Lars Povlsen <lars.povlsen@microchip.com>,
+        madhuparnabhowmik10@gmail.com,
+        Viresh Kumar <viresh.kumar@linaro.org>,
+        Vincent Guittot <vincent.guittot@linaro.org>,
+        Lina Iyer <ilina@codeaurora.org>,
+        Thomas Gleixner <tglx@linutronix.de>
+Subject: Re: WARNING: suspicious RCU usage - sdhci-pltfm: SDHCI platform and
+ OF driver helper
+Message-ID: <20200901104206.GU1362448@hirez.programming.kicks-ass.net>
+References: <CA+G9fYuiJwN1ad955Xw4ShamX2=373r+56KsbpeverEs+i_NAg@mail.gmail.com>
+ <20200831194402.GD2855@paulmck-ThinkPad-P72>
+ <CAPDyKFq7KWo=4VmPhgrt7vEEQ_P6NdVgQp+MO_1cg1dtoVR_Fw@mail.gmail.com>
+ <CAPDyKFrTERjpLrPOFtkqLyNsk2T_58Ye2FQ1mPf-0u78aWW=Xw@mail.gmail.com>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="qDbXVdCdHGoSgWSk"
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <TY2PR01MB3692C46B1A21109E7CC03478D8520@TY2PR01MB3692.jpnprd01.prod.outlook.com>
-User-Agent: Mutt/1.10.1 (2018-07-13)
+In-Reply-To: <CAPDyKFrTERjpLrPOFtkqLyNsk2T_58Ye2FQ1mPf-0u78aWW=Xw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+On Tue, Sep 01, 2020 at 08:50:57AM +0200, Ulf Hansson wrote:
+> On Tue, 1 Sep 2020 at 08:46, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> > On Mon, 31 Aug 2020 at 21:44, Paul E. McKenney <paulmck@kernel.org> wrote:
 
---qDbXVdCdHGoSgWSk
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+> > > > [    5.308588] =============================
+> > > > [    5.308593] WARNING: suspicious RCU usage
+> > > > [    5.316628] sdhci-pltfm: SDHCI platform and OF driver helper
+> > > > [    5.320052] 5.9.0-rc3 #1 Not tainted
+> > > > [    5.320057] -----------------------------
+> > > > [    5.320063] /usr/src/kernel/include/trace/events/lock.h:37 suspicious rcu_dereference_check() usage!
+> > > > [    5.320068]
+> > > > [    5.320068] other info that might help us debug this:
+> > > > [    5.320068]
+> > > > [    5.320074]
+> > > > [    5.320074] rcu_scheduler_active = 2, debug_locks = 1
+> > > > [    5.320078] RCU used illegally from extended quiescent state!
+> > > > [    5.320084] no locks held by swapper/0/0.
+> > > > [    5.320089]
+> > > > [    5.320089] stack backtrace:
+> > > > [    5.320098] CPU: 0 PID: 0 Comm: swapper/0 Not tainted 5.9.0-rc3 #1
+> > > > [    5.346354] sdhci_msm 7864900.sdhci: Got CD GPIO
+> > > > [    5.346446] Hardware name: Qualcomm Technologies, Inc. APQ 8016 SBC (DT)
+> > > > [    5.346452] Call trace:
+> > > > [    5.346463]  dump_backtrace+0x0/0x1f8
+> > > > [    5.346471]  show_stack+0x2c/0x38
+> > > > [    5.346480]  dump_stack+0xec/0x15c
+> > > > [    5.346490]  lockdep_rcu_suspicious+0xd4/0xf8
+> > > > [    5.346499]  lock_acquire+0x3d0/0x440
+> > > > [    5.346510]  _raw_spin_lock_irqsave+0x80/0xb0
+> > > > [    5.413118]  __pm_runtime_suspend+0x34/0x1d0
+> > > > [    5.417457]  psci_enter_domain_idle_state+0x4c/0xb0
+> > > > [    5.421795]  cpuidle_enter_state+0xc8/0x610
+> > > > [    5.426392]  cpuidle_enter+0x3c/0x50
+> > > > [    5.430561]  call_cpuidle+0x44/0x80
+> > > > [    5.434378]  do_idle+0x240/0x2a0
 
-Hi Shimoda-san,
+> > > Note also that Peter Zijlstra (CCed) is working to shrink the portion
+> > > of the idle loop that RCU ignores.  Not sure that it covers your
+> > > case, but it is worth checking.
 
-> I got a report from a colleague about this issue. According to the report,
-> this issue is related to retuning. When retuning happens, the mmc core
-> calls mmc_hs400_to_hs200() and then mmc_hs400_to_hs200() will set the clo=
-ck
-> as 52MHz at first. So, it's possible to cause the issue.
->=20
-> It's difficult to cause retuning in normal situation. But, according to
-> the report, if we add a code which the sdhi driver reports an error
-> at the first CMD18 once, we can cause retuning and then the issue happens.
+Right, so I think I 'caused' this by making the lock tracepoints
+visible. That is, the error always existed, now we actually warn about
+it.
 
-I took the liberty of a different approach because I wanted to reproduce
-the issue when doing the initial tuning and not a retune. Because my new
-series adds (and checks) a flag for doing_initial_tune, so I really
-wanted to excercise this code path. This is a real problem, too, because
-I saw this with my boards earlier back then.
+> > Thanks for letting me know. Let's see what Peter thinks about this then.
+> >
+> > Apologize for my ignorance, but from a cpuidle point of view, what
+> > does it mean using RCU_NONIDLE()? I guess we should avoid RCU_NONIDLE
+> > on bigger code paths?
+> >
+> > I could add RCU_NONIDLE for the calls to pm_runtime_put_sync_suspend()
+> > and pm_runtime_get_sync() in psci_enter_domain_idle_state(). Perhaps
+> > that's the easiest approach, at least to start with.
+> >
+> > Or do you have any other ideas?
 
-And halleluja, today I saw it again, once. I switched to my H3-ES2.0
-board which I haven't used for weeks. And when booting that for the
-first time, I got a failure including logs. Later boots just went fine.
+So IMO trace_*_rcuidle() and RCU_NONIDLE() are bugs, they just mean we
+got the ordering wrong and are papering over it. That said, that's been
+the modus operandi for a while now, just make it shut up and don't think
+about it :-/
 
-And because of the logs, I could finally inject an error which will
-reproducibly cause the boot to hang because of a stalled SCC. Tada, here
-is the patch:
+That said; I pushed the rcu_idle_enter() about as deep as it goes into
+generic code in commit 1098582a0f6c ("sched,idle,rcu: Push rcu_idle
+deeper into the idle path")
 
-=46rom: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: [PATCH] GOLD: simulate stalled SCC
+I suppose the next step is pushing it into individual driver when
+needed, something like the below perhaps. I realize the coupled idle
+state stuff is more complicated that most, but it's also not an area
+I've looked at in detail, so perhaps I've just made a bigger mess, but
+it ought to give you enough to get going I think.
 
-Geez, this took ages to find...
+Rafael?
+
 ---
- drivers/mmc/core/mmc.c | 1 +
- 1 file changed, 1 insertion(+)
-
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 216bd1aed373..6b3056437b37 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -1218,6 +1218,7 @@ static int mmc_select_hs400(struct mmc_card *card)
- 		host->ops->hs400_complete(host);
-=20
- 	err =3D mmc_switch_status(card, true);
-+	err =3D -EILSEQ;
- 	if (err)
- 		goto out_err;
-
-Interestingly, the other mmc_switch_status() in mmc_select_hs400() was
-not stalling the SCC. Anyhow, after this failute, the MMC core switches
-back to 300kHz and the SCC clock is off but for some reason SCC is still
-accessed. I will investigate why. The good news is that my new patch set
-fixes the hang as expected. The board will continue to boot so we
-probably want to have this series. However, I have the feeling that this
-SCC access which hangs the board might be a bug because of an unintended
-code path. I mean, this is also one reason why the bug triggers so
-rarely these days. We have been fixing a lot of things and the SCC is
-only accessed when it should be accessed. We will see. I also need to
-test other boards, too.
-
-So much for now, I hope I can report more later.
-
-Happy hacking and kind regards,
-
-   Wolfram
-
-
---qDbXVdCdHGoSgWSk
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAl9OIUwACgkQFA3kzBSg
-KbZrsRAAqBLn5V3ZOaeNHiYrYdlFo62nukFYUH+yGD5RiEai16qD6npruMaUqMml
-d/UzloiePYe5CWylaII0rFGNT+Xfq7/nx57g4V/cAFTYCOl+dT+97Xa6OBuSAnI5
-aWbfRtYNeOrklMPjR0ywmigehUHFO2t/ks5DBOaAMgghfb+4MFJk/j56KkWBTlQJ
-ZVFUqfsGisEmnLTNdVyLltKPWY9JKAMZTaVTeYO9xD2J3ObH5Ci5h7carjAw6kiu
-agrYXZZgZzOnukCtb1XvUtkxgaNPQEZy0FwDv0Xv7hz6WF0LtLbVFZAa17eV4T7o
-npm57nSceJ+sJC1poAL78qhuJzewWVLFBEgZTu5eXaTpW7GlJT1i8UXQwbGqDuQS
-znfzEXYslpDYLYCy0JdWJjEK6f2WkJilf2K6ReTxncq14IVZJlk0KaFW/H1Dbnxv
-c6RV2A0Qw06RbeB9eioHpSXyyR1OpKIdTdLj3Cyb19Ns4NSTiqzBcgaVu8p7I7AR
-AOEA+NgpcEfcvjZI3/pQYF7J1QxJwLDyCJJmX2c24zzDlK1S4XwdrCIM63Gpisux
-/Ek7vXUpRP+3cUOUdnR0BwYzv67iNC2F8ULe2k8YKFnmmhrnXQTCBos2W+QlcRGN
-emT1fTfv1aYRuX1sDU/qkKFY4hKPFLAl8Jdzg8aeHLqVe2FSemU=
-=LDzp
------END PGP SIGNATURE-----
-
---qDbXVdCdHGoSgWSk--
+diff --git a/drivers/cpuidle/cpuidle-psci.c b/drivers/cpuidle/cpuidle-psci.c
+index 74463841805f..617bbef316e6 100644
+--- a/drivers/cpuidle/cpuidle-psci.c
++++ b/drivers/cpuidle/cpuidle-psci.c
+@@ -49,6 +49,9 @@ static inline u32 psci_get_domain_state(void)
+ 
+ static inline int psci_enter_state(int idx, u32 state)
+ {
++	/*
++	 * XXX push rcu_idle_enter into the coupled code
++	 */
+ 	return CPU_PM_CPU_IDLE_ENTER_PARAM(psci_cpu_suspend_enter, idx, state);
+ }
+ 
+@@ -72,7 +75,9 @@ static int psci_enter_domain_idle_state(struct cpuidle_device *dev,
+ 	if (!state)
+ 		state = states[idx];
+ 
++	rcu_idle_enter();
+ 	ret = psci_cpu_suspend_enter(state) ? -1 : idx;
++	rcu_idle_exit();
+ 
+ 	pm_runtime_get_sync(pd_dev);
+ 
+@@ -125,8 +130,13 @@ static int psci_enter_idle_state(struct cpuidle_device *dev,
+ 				struct cpuidle_driver *drv, int idx)
+ {
+ 	u32 *state = __this_cpu_read(psci_cpuidle_data.psci_states);
++	int ret;
+ 
+-	return psci_enter_state(idx, state[idx]);
++	rcu_idle_enter();
++	ret = psci_enter_state(idx, state[idx]);
++	rcu_idle_exit();
++
++	return ret;
+ }
+ 
+ static const struct of_device_id psci_idle_state_match[] = {
+@@ -170,6 +180,7 @@ static int psci_dt_cpu_init_topology(struct cpuidle_driver *drv,
+ 	 * deeper states.
+ 	 */
+ 	drv->states[state_count - 1].enter = psci_enter_domain_idle_state;
++	drv->states[state_count - 1].flags = CPUIDLE_FLAG_RCU_IDLE;
+ 	psci_cpuidle_use_cpuhp = true;
+ 
+ 	return 0;
+@@ -285,6 +296,7 @@ static int psci_idle_init_cpu(struct device *dev, int cpu)
+ 	 * state index 0.
+ 	 */
+ 	drv->states[0].enter = psci_enter_idle_state;
++	drv->states[0].flags = CPUIDLE_FLAG_RCU_IDLE;
+ 	drv->states[0].exit_latency = 1;
+ 	drv->states[0].target_residency = 1;
+ 	drv->states[0].power_usage = UINT_MAX;
+diff --git a/drivers/cpuidle/cpuidle.c b/drivers/cpuidle/cpuidle.c
+index 04becd70cc41..3dbac3bb761b 100644
+--- a/drivers/cpuidle/cpuidle.c
++++ b/drivers/cpuidle/cpuidle.c
+@@ -239,9 +239,11 @@ int cpuidle_enter_state(struct cpuidle_device *dev, struct cpuidle_driver *drv,
+ 	time_start = ns_to_ktime(local_clock());
+ 
+ 	stop_critical_timings();
+-	rcu_idle_enter();
++	if (!(target_state->flags & CPUIDLE_FLAG_RCU_IDLE))
++		rcu_idle_enter();
+ 	entered_state = target_state->enter(dev, drv, index);
+-	rcu_idle_exit();
++	if (!(target_state->flags & CPUIDLE_FLAG_RCU_IDLE))
++		rcu_idle_exit();
+ 	start_critical_timings();
+ 
+ 	sched_clock_idle_wakeup_event();
+diff --git a/include/linux/cpuidle.h b/include/linux/cpuidle.h
+index 75895e6363b8..47f686131a54 100644
+--- a/include/linux/cpuidle.h
++++ b/include/linux/cpuidle.h
+@@ -82,6 +82,7 @@ struct cpuidle_state {
+ #define CPUIDLE_FLAG_UNUSABLE		BIT(3) /* avoid using this state */
+ #define CPUIDLE_FLAG_OFF		BIT(4) /* disable this state by default */
+ #define CPUIDLE_FLAG_TLB_FLUSHED	BIT(5) /* idle-state flushes TLBs */
++#define CPUIDLE_FLAG_RCU_IDLE		BIT(6) /* driver will do RCU-idle */
+ 
+ struct cpuidle_device_kobj;
+ struct cpuidle_state_kobj;
