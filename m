@@ -2,116 +2,100 @@ Return-Path: <SRS0=T3o1=CK=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,DKIM_INVALID,
-	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-11.8 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 70B71C433E2
-	for <linux-mmc@archiver.kernel.org>; Tue,  1 Sep 2020 15:01:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B5FD1C433E6
+	for <linux-mmc@archiver.kernel.org>; Tue,  1 Sep 2020 15:03:02 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 350AA2078B
-	for <linux-mmc@archiver.kernel.org>; Tue,  1 Sep 2020 15:01:19 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4035A206FA
+	for <linux-mmc@archiver.kernel.org>; Tue,  1 Sep 2020 15:03:02 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="afn94a0r"
+	dkim=fail reason="signature verification failed" (1024-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="Xyf7yP3/"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726948AbgIAPBL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 1 Sep 2020 11:01:11 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49682 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725989AbgIAPBK (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Sep 2020 11:01:10 -0400
-Received: from merlin.infradead.org (merlin.infradead.org [IPv6:2001:8b0:10b:1231::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B360DC061244;
-        Tue,  1 Sep 2020 08:01:09 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=merlin.20170209; h=In-Reply-To:Content-Type:MIME-Version:
-        References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-        Content-Transfer-Encoding:Content-ID:Content-Description;
-        bh=c4Ee9icQII2DGAoMrIbwKT8Ude3XzoISGtg+XB13lKQ=; b=afn94a0rd08dIeIK+nPtOLy9ZF
-        2kHzRnga5rpNnJdpfqAdEkDoDXnbQLFe53sru0CkEghz/uu1jDS/OLaSJ+nTqEjhT34UhvcmEEJIY
-        MqjQVEuWOQeiiEIl9BzC7QTXM3oeEPCjpJZW0uTROZyy/No0zCe/etHYanQR7sMptJckLhBj1ciT8
-        pB3s3YkIryDdSN+nEtCUxp7av0xGykhSncbcxwlkFtcNGZVMyZ4FT31TI2XkJIpM72reeWASyq8Lo
-        1Es0Ru63eoYj9KldC//FQZ4EIGB9kRInPDRT/Y1JbvmfYRhsX3+W+/83DND1k4IpIOTaeVkdknDH/
-        mlMV2o1Q==;
-Received: from j217100.upc-j.chello.nl ([24.132.217.100] helo=noisy.programming.kicks-ass.net)
-        by merlin.infradead.org with esmtpsa (Exim 4.92.3 #3 (Red Hat Linux))
-        id 1kD7mL-0004dC-KN; Tue, 01 Sep 2020 15:00:57 +0000
-Received: from hirez.programming.kicks-ass.net (hirez.programming.kicks-ass.net [192.168.1.225])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (Client did not present a certificate)
-        by noisy.programming.kicks-ass.net (Postfix) with ESMTPS id 770E6300F7A;
-        Tue,  1 Sep 2020 17:00:55 +0200 (CEST)
-Received: by hirez.programming.kicks-ass.net (Postfix, from userid 1000)
-        id 6633520BEB41B; Tue,  1 Sep 2020 17:00:55 +0200 (CEST)
-Date:   Tue, 1 Sep 2020 17:00:55 +0200
-From:   peterz@infradead.org
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Naresh Kamboju <naresh.kamboju@linaro.org>, paulmck@kernel.org,
-        "Rafael J. Wysocki" <rjw@rjwysocki.net>,
-        Saravana Kannan <saravanak@google.com>,
-        open list <linux-kernel@vger.kernel.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        lkft-triage@lists.linaro.org, rcu@vger.kernel.org,
-        Linux PM <linux-pm@vger.kernel.org>,
-        Anders Roxell <anders.roxell@linaro.org>,
-        Arnd Bergmann <arnd@arndb.de>,
-        Rajendra Nayak <rnayak@codeaurora.org>,
-        John Stultz <john.stultz@linaro.org>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Lars Povlsen <lars.povlsen@microchip.com>,
-        madhuparnabhowmik10@gmail.com,
-        Viresh Kumar <viresh.kumar@linaro.org>,
-        Vincent Guittot <vincent.guittot@linaro.org>,
-        Lina Iyer <ilina@codeaurora.org>,
-        Thomas Gleixner <tglx@linutronix.de>
-Subject: Re: WARNING: suspicious RCU usage - sdhci-pltfm: SDHCI platform and
- OF driver helper
-Message-ID: <20200901150055.GD2674@hirez.programming.kicks-ass.net>
-References: <CA+G9fYuiJwN1ad955Xw4ShamX2=373r+56KsbpeverEs+i_NAg@mail.gmail.com>
- <20200831194402.GD2855@paulmck-ThinkPad-P72>
- <CAPDyKFq7KWo=4VmPhgrt7vEEQ_P6NdVgQp+MO_1cg1dtoVR_Fw@mail.gmail.com>
- <CAPDyKFrTERjpLrPOFtkqLyNsk2T_58Ye2FQ1mPf-0u78aWW=Xw@mail.gmail.com>
- <20200901104206.GU1362448@hirez.programming.kicks-ass.net>
- <CAPDyKFo0VkW-cgRSkvPQ0whpuJCo4OKcL1nmH7nz1tDEChOtVg@mail.gmail.com>
+        id S1726895AbgIAPDA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 1 Sep 2020 11:03:00 -0400
+Received: from www.zeus03.de ([194.117.254.33]:44196 "EHLO mail.zeus03.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1728418AbgIAPC5 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 1 Sep 2020 11:02:57 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
+        from:to:cc:subject:date:message-id:mime-version
+        :content-transfer-encoding; s=k1; bh=DL6NFyOKpUaIvPMuHk7soZwzuQh
+        V7fucyf3pAdXHfs0=; b=Xyf7yP3/xTJz3RAeTs9v1L5q+MoqqcNFmzFlm10+Qfo
+        4KlSaRH/0lhfnswSv4qQA9q69wRL3lTV/eal4dizDOSub235UI538SwK4TA0YZbd
+        jmzKp1xGADAdudtz5+3Ktdw8ASyFI9hCc63VYOLf67vsCagbbFQ74xr7+hd5Zqn0
+        =
+Received: (qmail 2554147 invoked from network); 1 Sep 2020 17:02:55 +0200
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 1 Sep 2020 17:02:55 +0200
+X-UD-Smtp-Session: l3s3148p1@PPNZ0EGuWowgAwDPXxBIAL7SzoTwUEK2
+From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
+To:     linux-mmc@vger.kernel.org
+Cc:     linux-renesas-soc@vger.kernel.org,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>
+Subject: [PATCH v2 0/4] renesas_sdhi: fix hang when SCC loses its clock
+Date:   Tue,  1 Sep 2020 17:02:46 +0200
+Message-Id: <20200901150250.26236-1-wsa+renesas@sang-engineering.com>
+X-Mailer: git-send-email 2.20.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFo0VkW-cgRSkvPQ0whpuJCo4OKcL1nmH7nz1tDEChOtVg@mail.gmail.com>
+Content-Transfer-Encoding: 8bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Sep 01, 2020 at 02:35:52PM +0200, Ulf Hansson wrote:
-> On Tue, 1 Sep 2020 at 12:42, <peterz@infradead.org> wrote:
+This again took a while since v1 because the issue was so hard to
+trigger. But I finally found a way to inject the flaw, so this series
+could be tested and it fixes the issue.
 
-> > That said; I pushed the rcu_idle_enter() about as deep as it goes into
-> > generic code in commit 1098582a0f6c ("sched,idle,rcu: Push rcu_idle
-> > deeper into the idle path")
-> 
-> Aha, that commit should fix this problem, I think. Looks like that
-> commit was sent as a fix and included in the recent v5.9-rc3.
+Changes since v1:
+	* introduce a new flag to MMC core indicating any kind of tuning
+	  not only retune
+	* use the new flag to keep SCC flag active
+	* new patch 4, minor cleanup to MMC core
 
-AFAICT psci_enter_domain_idle_state() is still buggered. All that
-pm_runtime_*() stuff is using locks.
+A branch including the DEBUG patch can be found here:
 
-Look at this:
+git://git.kernel.org/pub/scm/linux/kernel/git/wsa/linux.git renesas/sdhi/new_manual_calib-for-5.10
 
-  psci_enter_domain_idle_state()
-    pm_runtime_put_sync_suspend()
-      __pm_runtime_suspend()
-        spin_lock_irqsave(&dev->power.lock, flags);
+If you revert patch 3, you should have the SCC hang during boot again.
+For the record, let me copy some findings I mentioned in another thread:
 
-That's a definite fail after we've done rcu_idle_enter().
+===
+Interesting news: The hang comes from a code path I would have not
+expected. It is not because of accessing an SCC register, it is this
+line from renesas_sdhi_set_clock() which causes the issue:
 
-> > I suppose the next step is pushing it into individual driver when
-> > needed, something like the below perhaps. I realize the coupled idle
-> > state stuff is more complicated that most, but it's also not an area
-> > I've looked at in detail, so perhaps I've just made a bigger mess, but
-> > it ought to give you enough to get going I think.
-> 
-> These aren't coupled states. Instead, in cpuidle-psci, we are using PM
-> domains through genpd and runtime PM to manage "shared idle states"
-> between CPUs.
+186         sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, clk & CLK_CTL_DIV_MASK);
 
-Similar problem I'm thinking, 'complicated' stuff.
+I mean I can guess that the clock setting has something to do with the
+SCC, but I can't see the direct connection with the documentation I
+have.
+===
+
+Tested on R-Car H3 ES2.0 and M3-N and patches based on mmc/next.
+
+Another hope this is gone for good now...
+
+Kind regards,
+
+   Wolfram
+
+
+Wolfram Sang (4):
+  mmc: core: when downgrading HS400, callback into drivers earlier
+  mmc: core: add a 'doing_init_tune' flag and a 'mmc_doing_tune' helper
+  mmc: renesas_sdhi: keep SCC clock active when tuning
+  mmc: core: simplify an expression
+
+ drivers/mmc/core/mmc.c               | 16 ++++++++++------
+ drivers/mmc/host/renesas_sdhi_core.c |  8 ++++++--
+ include/linux/mmc/host.h             |  6 ++++++
+ 3 files changed, 22 insertions(+), 8 deletions(-)
+
+-- 
+2.20.1
+
