@@ -2,104 +2,171 @@ Return-Path: <SRS0=T3o1=CK=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.3 required=3.0 tests=BAYES_00,DKIM_INVALID,
-	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-4.0 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	UNPARSEABLE_RELAY,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 32E17C433E7
-	for <linux-mmc@archiver.kernel.org>; Tue,  1 Sep 2020 14:22:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 38B3EC433E6
+	for <linux-mmc@archiver.kernel.org>; Tue,  1 Sep 2020 14:54:52 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 06F79206EB
-	for <linux-mmc@archiver.kernel.org>; Tue,  1 Sep 2020 14:22:45 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (1024-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="Id9DKAh3"
+	by mail.kernel.org (Postfix) with ESMTP id 0A8D6206EB
+	for <linux-mmc@archiver.kernel.org>; Tue,  1 Sep 2020 14:54:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728324AbgIAOWc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 1 Sep 2020 10:22:32 -0400
-Received: from www.zeus03.de ([194.117.254.33]:33136 "EHLO mail.zeus03.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728045AbgIAOWT (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 1 Sep 2020 10:22:19 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
-        date:from:to:subject:message-id:references:mime-version
-        :content-type:in-reply-to; s=k1; bh=sDS+WFg3DhHAV/zWZxCTHjl6+AZm
-        CAXSyO+MFPoof20=; b=Id9DKAh3kv15b/ZRUmolzN7CralUQH43ruz9z2sr/FUq
-        4zrLNFJunTlZjHEnPzskU45akb5jBWosdYWsE2XNK32biAgrETFGCqo1+4vqIl7E
-        WoMpK1cVF3LlBMKCFwN2GE3zPb9L+AbCjvqpSl0ABwFBeIe9NKB5Pv46g1KM22E=
-Received: (qmail 2544193 invoked from network); 1 Sep 2020 16:22:14 +0200
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 1 Sep 2020 16:22:14 +0200
-X-UD-Smtp-Session: l3s3148p1@o1PiPkGuMIwgAwDPXxBIAL7SzoTwUEK2
-Date:   Tue, 1 Sep 2020 16:22:14 +0200
-From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
-To:     linux-mmc@vger.kernel.org
-Subject: Re: [PATCH] mmc: core: simplify an expression
-Message-ID: <20200901142214.GB11393@ninjato>
-References: <20200901141931.25357-1-wsa+renesas@sang-engineering.com>
+        id S1726105AbgIALrV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 1 Sep 2020 07:47:21 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47860 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727771AbgIALqt (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Sep 2020 07:46:49 -0400
+Received: from bhuna.collabora.co.uk (bhuna.collabora.co.uk [IPv6:2a00:1098:0:82:1000:25:2eeb:e3e3])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 17CD2C061244
+        for <linux-mmc@vger.kernel.org>; Tue,  1 Sep 2020 04:46:45 -0700 (PDT)
+Received: from [127.0.0.1] (localhost [127.0.0.1])
+        (Authenticated sender: sre)
+        with ESMTPSA id 062A7296213
+Received: by earth.universe (Postfix, from userid 1000)
+        id 1DCCB3C0C82; Tue,  1 Sep 2020 13:46:42 +0200 (CEST)
+Date:   Tue, 1 Sep 2020 13:46:42 +0200
+From:   Sebastian Reichel <sebastian.reichel@collabora.com>
+To:     NXP Linux Team <linux-imx@nxp.com>
+Cc:     linux-mmc@vger.kernel.org, Haibo Chen <haibo.chen@nxp.com>,
+        Shawn Guo <shawnguo@kernel.org>,
+        Sascha Hauer <s.hauer@pengutronix.de>,
+        Pengutronix Kernel Team <kernel@pengutronix.de>,
+        Fabio Estevam <festevam@gmail.com>,
+        "Baumgartner, Claus (GE Healthcare)" <claus.baumgartner@med.ge.com>
+Subject: Re: mmc0: Timeout waiting for hardware cmd interrupt on i.MX535
+Message-ID: <20200901114642.vhivtsfrarua6ce4@earth.universe>
+References: <AM0P101MB03060DFCABC4A82C2D40F180D12E0@AM0P101MB0306.NAMP101.PROD.OUTLOOK.COM>
 MIME-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="8P1HSweYDcXXzwPJ"
+        protocol="application/pgp-signature"; boundary="juz373rbwhruhhy3"
 Content-Disposition: inline
-In-Reply-To: <20200901141931.25357-1-wsa+renesas@sang-engineering.com>
-User-Agent: Mutt/1.10.1 (2018-07-13)
+In-Reply-To: <AM0P101MB03060DFCABC4A82C2D40F180D12E0@AM0P101MB0306.NAMP101.PROD.OUTLOOK.COM>
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 
---8P1HSweYDcXXzwPJ
+--juz373rbwhruhhy3
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-On Tue, Sep 01, 2020 at 04:19:31PM +0200, Wolfram Sang wrote:
-> We already have 'host' as a variable, so use it.
->=20
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Hi,
 
-Sorry, I overlooked this depends on another patch. Will resend within
-the whole series.
+[add i.MX architecture maintainers to Cc]
 
-> ---
->  drivers/mmc/core/mmc.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+On Tue, Sep 01, 2020 at 07:37:31AM +0000, Baumgartner, Claus (GE Healthcare=
+) wrote:
+> We have a board with an i.MX535 using a Samsung eMMC as persistent
+> storage connected to eSDHCv3. Every now and then we produce a
+> build that causes emmc timeouts:=20
 >=20
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 6b3056437b37..6794eb142f05 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -1173,7 +1173,7 @@ static int mmc_select_hs400(struct mmc_card *card)
->  		host->ops->hs400_downgrade(host);
-> =20
->  	/* Set host controller to HS timing */
-> -	mmc_set_timing(card->host, MMC_TIMING_MMC_HS);
-> +	mmc_set_timing(host, MMC_TIMING_MMC_HS);
-> =20
->  	/* Reduce frequency to HS frequency */
->  	max_dtr =3D card->ext_csd.hs_max_dtr;
-> --=20
-> 2.20.1
->=20
+> Aug 28 07:32:12 csmon kernel: mmc0: Timeout waiting for hardware cmd inte=
+rrupt.
+> Aug 28 07:32:12 csmon kernel: mmc0: sdhci: =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D SDHCI REGISTER DUMP =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+> Aug 28 07:32:12 csmon kernel: mmc0: sdhci: Sys addr:  0xe3f12000 | Versio=
+n:  0x00001201
+> Aug 28 07:32:12 csmon kernel: mmc0: sdhci: Blk size:  0x00000200 | Blk cn=
+t:  0x00000001
+> Aug 28 07:32:12 csmon kernel: mmc0: sdhci: Argument:  0x00010000 | Trn mo=
+de: 0x00000000
+> Aug 28 07:32:12 csmon kernel: mmc0: sdhci: Present:   0x01f80008 | Host c=
+tl: 0x00000031
+> Aug 28 07:32:12 csmon kernel: mmc0: sdhci: Power:     0x00000002 | Blk ga=
+p:  0x00000000
+> Aug 28 07:32:12 csmon kernel: mmc0: sdhci: Wake-up:   0x00000000 | Clock:=
+    0x0000011f
+> Aug 28 07:32:12 csmon kernel: mmc0: sdhci: Timeout:   0x0000008e | Int st=
+at: 0x00000000
+> Aug 28 07:32:12 csmon kernel: mmc0: sdhci: Int enab:  0x107f000b | Sig en=
+ab: 0x107f000b
+> Aug 28 07:32:12 csmon kernel: mmc0: sdhci: ACmd stat: 0x00000000 | Slot i=
+nt: 0x00001201
+> Aug 28 07:32:12 csmon kernel: mmc0: sdhci: Caps:      0x07eb0000 | Caps_1=
+:   0x08100810
+> Aug 28 07:32:12 csmon kernel: mmc0: sdhci: Cmd:       0x00000d1a | Max cu=
+rr: 0x00000000
+> Aug 28 07:32:12 csmon kernel: mmc0: sdhci: Resp[0]:   0x00400900 | Resp[1=
+]:  0x00000000
+> Aug 28 07:32:12 csmon kernel: mmc0: sdhci: Resp[2]:   0x00000000 | Resp[3=
+]:  0x00000000
+> Aug 28 07:32:12 csmon kernel: mmc0: sdhci: Host ctl2: 0x00000000
+> Aug 28 07:32:12 csmon kernel: mmc0: sdhci: ADMA Err:  0x00000000 | ADMA P=
+tr: 0xef041208
+> Aug 28 07:32:12 csmon kernel: mmc0: sdhci: =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D
 
---8P1HSweYDcXXzwPJ
+Some extra information: The timeout always has cmd =3D 0x00000d1a
+(MMC_SEND_STATUS) and resp[0] =3D 0x00400900 with resp[0] translating
+to this IIUIC:
+
+Bit 8 =3D Ready for data
+Bit 11 =3D CURRENT_STATE is TRAN
+Bit 22 =3D Illegal command
+
+> Timeouts do not occur with every build. After some debugging I
+> have found that timeouts seem to depend on code alignment of the
+> esdhc_readl_le function. I have bisected the behavior by using the
+> System.map and moving/padding the code with NOP instructions (mov
+> r0,r0).
+>=20
+> My test case has 5 processes continuously creating a file, writing
+> random long data, reading data and deleting the file. It seems
+> that when the esdhc_writel_le is aligned on a certain address then
+> the timeout will occur about 5 times/12h using my test case. If I
+> add one more NOP, the timeout will not occur at all. If I continue
+> adding some more NOPs the timeouts come back. Seems that it
+> doesn't matter where in the code I add NOPs as long as the address
+> is below the address of esdhc_writel_le.=20
+>=20
+> We also run the same software on a dual core i.MX6 without any
+> timeout issues.
+
+And the same kernel binary is also used on an i.MX6 single core
+(albeit with different SW) withot triggering the problem so far.
+
+> I have reproduced this with kernel version 4.19.94 and 5.8.3 and
+> we have compiled with both gcc8 and gcc9. I'm still searching for
+> the root cause and I would appreciate any thoughts about where to
+> go next.=20
+>=20
+> Thanks,
+>=20
+> -Claus-
+
+To me it looks like it might involve an unknown hardware errata for
+i.MX53, but there has been one similar report before (unfortunately
+without the full register dump) involving virtualization:
+
+https://patchwork.kernel.org/patch/10705823/
+
+Note, that Claus' kernel has been built with CONFIG_PREEMPT_NONE=3Dy.
+
+-- Sebastian
+
+--juz373rbwhruhhy3
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAl9OWRIACgkQFA3kzBSg
-KbZQGhAAmZ/oUa4bC/3Vgqmq1rCZQVv7Zu1qyI9Rd7Q2mIxnl1lWAU/2tnXTEvJn
-EG4guIN0aVAbQDO26HAwdP7ZuA+nxMZKeYoLOZR9rikIZoAM/yM4PJ2DfGLjhoV3
-Ojg7GlD0GH48WwCubdRqfFWdZQQo7rYUUmUD//rgcw43JM4hX+sXZQwd82urnKWi
-pyIk7q8xvA1J7J3Q1LrCbJsgARSzGQparsSNjIgHtVV4TVUiWGEBXUAmARingnuu
-5no6/FWgQKpLjZm/jcQ4qQiPzxGieLCwOmwO2T++F5BuS1uEwYV28zVrXzcrmgRO
-/oh35/G4bB3vH81y1Ym5Db2JWBe0PTpcgEZyHcpdVAmZO8FHVJW5T/YT4wArXK7L
-EqxQXCl25EIxzkYeGsUygSdGY2GEJC4g017wnt3yRShJtI6Eh/qxmhWpr8Sez7XA
-/+aMdV+34s7Tc40rgfQopHaHMkHlSct6VB6j9yQPFpzS0PAAWRM10OKg0qWc/bvj
-XooOl6PGTIB64lxSRVTdJ5BEGYF5hNFpSKZ/1rWYj6N+SJEfS8ojSazB+0fJ0Zwz
-9wrupvMqDWR8nEubkxbT5omyhFwyphGNCQJCrdDGVOwVQ+le1Yv2pgMlE3xO7b/2
-2etBcjwO4SkLldue1a3TkntszPpPQ8Xt3CNE6x4F8YYfDtebuR0=
-=somm
+iQIzBAABCgAdFiEE72YNB0Y/i3JqeVQT2O7X88g7+poFAl9ONI8ACgkQ2O7X88g7
++pqXPxAAol9/2DT8+tYPvY11oKDyN5ppdW0D3iQmEVZGXvMMCRLfW1tyrvnG5+Ad
+QJLi+D8Q3Kr9k2ER2Xn+G/qAwD0mhBVHbHkzLvsAB2CQsqIYnbkFI9guyV08ruuC
+v/BTaBbkjsrCn5rfP2JHqZsy6RXfYG2pp0+h1p2j19GYrEdWRgvkgsGgglctWLZP
+wt16PFFjTQVMjv0rfap/7+noounLzvYeEi3F8GYvaEQk9dYwz56w1Bhy//mdkCrW
+rBW/6aH7sqz9Sj8Ga+EzD9IvtKsKLlZ8rlVlAdq8OHcD5mN3Nos2Z03RiwViI5Re
+98mIP23gjqR6g04AygnuP30G/hY4o00otoehIuXIC1N6faaGTKOTi7zfK10g57st
+nZeFyNPitsu0Grxty6PRZzy3plYvLcHsiemnmQNGfdL+POZoUx+C4g7Y27pR6Yy6
+aVnnOFDECGKjTDBNrXaOC7Z1mIw5oHD922jBaSr9gHHj9GlrK5wHtq/duh26c4cz
+FcYVQ4Yj6WbA+WWV59GjeID/SeYlwjHOmG/XaKpc8t1g6YdsP/mfc1OZXWU1EAgs
+ix3zMGea4N5cUNRL/naGRac3zxyiohByw7La1DETP313oeZ1rWXlbn09KZ1DxoB1
+pBT7Ulf/bT5CZImm8GNRo9zWrqCHKZTLKk2Z0q99J/VtCocNPv0=
+=2phV
 -----END PGP SIGNATURE-----
 
---8P1HSweYDcXXzwPJ--
+--juz373rbwhruhhy3--
