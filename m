@@ -7,80 +7,79 @@ X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 476E6C433E2
-	for <linux-mmc@archiver.kernel.org>; Wed,  2 Sep 2020 20:48:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6B1DCC433E7
+	for <linux-mmc@archiver.kernel.org>; Wed,  2 Sep 2020 20:49:03 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 230C7208C7
-	for <linux-mmc@archiver.kernel.org>; Wed,  2 Sep 2020 20:48:58 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 49B3C20BED
+	for <linux-mmc@archiver.kernel.org>; Wed,  2 Sep 2020 20:49:03 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1599079738;
-	bh=t/8BcFdSorWnivrsoG38nd1y314QH2po1FsRQi2lhnU=;
-	h=From:To:Subject:Date:List-ID:From;
-	b=FsVEyv7paAa7NLUKUqr9r38wB/d9TsvN00BbG1o7Yg+aMgbAwUP0z2pHb/jIeT47v
-	 XMXKIQFebG0w2+xCNZO/QTRI5uEEIIfRuS+IqstUgcWPFCKCAKZveT5433lUqIn3iv
-	 0vpUPYgT5uuYwgP0oi3xc4vqPEzaFVoeM/pkITzw=
+	s=default; t=1599079743;
+	bh=/GhIFha/+TBHI6MyiiKEJbWoOQuukXfIzVKICT5nktg=;
+	h=From:To:Subject:Date:In-Reply-To:References:List-ID:From;
+	b=xq/c3ckMfOokMUa/fP1qoHcjtedqnP52cW2WN9d7p97vncLP8OXJVKGtlaZRivDZb
+	 0VGUPLI1lqvs/vxmA/fhlj1q8kHINVsEy4HuCm1oBPELuvXIpTCD/e8FsT91SW9C1f
+	 AKhqwLv4nQk+ERi63lfX3psUNzpLMwGRk+XhHY0M=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726247AbgIBUs5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 2 Sep 2020 16:48:57 -0400
-Received: from mail.kernel.org ([198.145.29.99]:58386 "EHLO mail.kernel.org"
+        id S1726479AbgIBUtC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 2 Sep 2020 16:49:02 -0400
+Received: from mail.kernel.org ([198.145.29.99]:58420 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726226AbgIBUs5 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 2 Sep 2020 16:48:57 -0400
+        id S1726226AbgIBUtA (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 2 Sep 2020 16:49:00 -0400
 Received: from kozik-lap.mshome.net (unknown [194.230.155.106])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 22435207EA;
-        Wed,  2 Sep 2020 20:48:53 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 4DD2F2083B;
+        Wed,  2 Sep 2020 20:48:57 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1599079736;
-        bh=t/8BcFdSorWnivrsoG38nd1y314QH2po1FsRQi2lhnU=;
-        h=From:To:Subject:Date:From;
-        b=cep2yre4au+2ROtrnWF4L3OjIjRecdkmIKyTCjCm308tuR14rW+RQ8bA+Cy4vkVTj
-         5/ty7o2J/UNblaLlVPOFF29MvytJ2z9w8RC7lLjQJg0VZSt8U2gfIwQS8Kjzif4YN5
-         JWdk9wyDqqs4VpsEQkYozAJ4zUpvzf4mXFN8NyrI=
+        s=default; t=1599079739;
+        bh=/GhIFha/+TBHI6MyiiKEJbWoOQuukXfIzVKICT5nktg=;
+        h=From:To:Subject:Date:In-Reply-To:References:From;
+        b=co/qoHbiTAzDR0BKe7yk+ALRQGX6M9VQAT24HXHnyX6QT1AS2FLEr0iuuygtYDhth
+         2Y45ZWyWOqgzE+dgRyTu/qxPorUj+6vMKc/7b4qho98ADAFvt46DLoemA49Ytn0dSm
+         tRYWNmq2GSRu5KeRe8fiu6R2gphLESuin1E9h640=
 From:   Krzysztof Kozlowski <krzk@kernel.org>
 To:     Ulf Hansson <ulf.hansson@linaro.org>,
         Ben Dooks <ben-linux@fluff.org>,
         Krzysztof Kozlowski <krzk@kernel.org>,
         linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
         linux-arm-kernel@lists.infradead.org
-Subject: [PATCH 1/3] mmc: davinci: Fix -Wpointer-to-int-cast on compile test
-Date:   Wed,  2 Sep 2020 22:48:45 +0200
-Message-Id: <20200902204847.2764-1-krzk@kernel.org>
+Subject: [PATCH 2/3] mmc: s3cmci: Use proper printk format for iomem pointer
+Date:   Wed,  2 Sep 2020 22:48:46 +0200
+Message-Id: <20200902204847.2764-2-krzk@kernel.org>
 X-Mailer: git-send-email 2.17.1
+In-Reply-To: <20200902204847.2764-1-krzk@kernel.org>
+References: <20200902204847.2764-1-krzk@kernel.org>
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Store in interrupt service routine always '1' in end_command, not the
-value of host->cmd to fix compile test warnings on RISC-V:
+iomem pointers should be printed with pointer format to hide the
+actual value and fix warnings when compile testing for 64-bit
+architecture:
 
-  drivers/mmc/host/davinci_mmc.c:999:17: warning:
+  drivers/mmc/host/s3cmci.c:1355:46: warning:
     cast from pointer to integer of different size [-Wpointer-to-int-cast]
 
 Signed-off-by: Krzysztof Kozlowski <krzk@kernel.org>
 ---
-
-Follow up to:
-https://lore.kernel.org/linux-arm-kernel/20200902193658.20539-1-krzk@kernel.org/T/#t
-
- drivers/mmc/host/davinci_mmc.c | 2 +-
+ drivers/mmc/host/s3cmci.c | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/davinci_mmc.c b/drivers/mmc/host/davinci_mmc.c
-index fad1010fb52b..66d740ee7d45 100644
---- a/drivers/mmc/host/davinci_mmc.c
-+++ b/drivers/mmc/host/davinci_mmc.c
-@@ -996,7 +996,7 @@ static irqreturn_t mmc_davinci_irq(int irq, void *dev_id)
+diff --git a/drivers/mmc/host/s3cmci.c b/drivers/mmc/host/s3cmci.c
+index dcd458649338..3fb597095079 100644
+--- a/drivers/mmc/host/s3cmci.c
++++ b/drivers/mmc/host/s3cmci.c
+@@ -1352,7 +1352,7 @@ static int s3cmci_state_show(struct seq_file *seq, void *v)
+ {
+ 	struct s3cmci_host *host = seq->private;
  
- 	if (qstatus & MMCST0_RSPDNE) {
- 		/* End of command phase */
--		end_command = (int) host->cmd;
-+		end_command = host->cmd ? 1 : 0;
- 	}
- 
- 	if (end_command)
+-	seq_printf(seq, "Register base = 0x%08x\n", (u32)host->base);
++	seq_printf(seq, "Register base = 0x%p\n", host->base);
+ 	seq_printf(seq, "Clock rate = %ld\n", host->clk_rate);
+ 	seq_printf(seq, "Prescale = %d\n", host->prescaler);
+ 	seq_printf(seq, "is2440 = %d\n", host->is2440);
 -- 
 2.17.1
 
