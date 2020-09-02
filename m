@@ -2,108 +2,168 @@ Return-Path: <SRS0=r8P+=CL=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-4.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-10.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A86E1C433E2
-	for <linux-mmc@archiver.kernel.org>; Wed,  2 Sep 2020 08:32:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 045DBC433E2
+	for <linux-mmc@archiver.kernel.org>; Wed,  2 Sep 2020 09:03:37 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 797B220773
-	for <linux-mmc@archiver.kernel.org>; Wed,  2 Sep 2020 08:32:27 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D2BA520709
+	for <linux-mmc@archiver.kernel.org>; Wed,  2 Sep 2020 09:03:36 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="ZKW3UwWf"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="FdUJXWds"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726130AbgIBIc0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 2 Sep 2020 04:32:26 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42256 "EHLO
+        id S1726446AbgIBJDf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 2 Sep 2020 05:03:35 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47022 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726144AbgIBIcZ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Sep 2020 04:32:25 -0400
-Received: from mail-ua1-x943.google.com (mail-ua1-x943.google.com [IPv6:2607:f8b0:4864:20::943])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3123CC061245
-        for <linux-mmc@vger.kernel.org>; Wed,  2 Sep 2020 01:32:24 -0700 (PDT)
-Received: by mail-ua1-x943.google.com with SMTP id r13so1310612uah.10
-        for <linux-mmc@vger.kernel.org>; Wed, 02 Sep 2020 01:32:24 -0700 (PDT)
+        with ESMTP id S1726400AbgIBJDe (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Sep 2020 05:03:34 -0400
+Received: from mail-ua1-x942.google.com (mail-ua1-x942.google.com [IPv6:2607:f8b0:4864:20::942])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E46C9C061245
+        for <linux-mmc@vger.kernel.org>; Wed,  2 Sep 2020 02:03:33 -0700 (PDT)
+Received: by mail-ua1-x942.google.com with SMTP id v20so1341154ual.4
+        for <linux-mmc@vger.kernel.org>; Wed, 02 Sep 2020 02:03:33 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=V59oKVGgQ2o/hrV2OUnBHec2zNyLXF8phchXBgtNQf4=;
-        b=ZKW3UwWfVmaJ7OUihqUwbWM0KxRjc5z+m5CDEaVftJB8efuWn9X40Ib8Z5tfvwApHa
-         wQYES3HC6ruUfDohVzEUxEHvvX7qlbus/XvNhvEoXGCA/YawKvHGP/ibStZGq7iMcg/y
-         XBvnqJ7w8XicH2VcNqsyivv7cRj2H1j8qXYpEVx89XDKaCiJjKx2otlIro4U9Y7POqu3
-         J/S/Si1auHeHqSdj/0ZGa+1SfPeLiYixs0s8UUhQcYgxj8f80egeQPSduPL5Ih64gENY
-         ISrt0Icc1gjJD55DhRrM7GtojiwI3s4lEWUTrLqlWt3PKznWlM5lxXNKK1f1jtKkxknL
-         6OmA==
+        bh=5non/mH33hYNnT7K/jyemSoSsUl6fyRsBJcyHttPwYs=;
+        b=FdUJXWdsf6gKrFgqqh450pXH77gnb3JCbR/WfRlIaAW/X5dNYj9dl4w5er1kirJoPD
+         PlunBAWov9vDuk89yZOeS8SzvjP0XTjzUuil/FV4k6IyPTSKHVwiopBnS6MV0gNTt3oy
+         vpihaVWVfCEz8zxcVDke34LoqUvUJHpAJb4k1WizTWUU3LO7hphXcyxTB7+kWBrANTmg
+         tShLRxYKws7zHVeyh4hWDUoh63FI/MRcOLN/btNSRIREle/dsu4WhcOaCADlSBc+J59K
+         L2er0xSh0uSOjQExQ3xzKn1zPAXPGSG76uIqdfWVI9XtPVFEBSExCREQ/keCuIHJdBJA
+         Sndg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=V59oKVGgQ2o/hrV2OUnBHec2zNyLXF8phchXBgtNQf4=;
-        b=B938at/P28RCOSWASu51oPjOef2TcYjhMhtFF0zeCY4TdzUntAuA70ReWFbxAmHKMT
-         0GYsxMIbkBsclDV+s0uZ0Ksi49j6Q6LoVqaJN37GMROZccEYf2SM/zOcmH7MTsuAX2EX
-         AfcWTKoJPMnspKNx25xvRrTe8TUpeoJhYMlmftKeVqQ+DW/ua4wLLIb6xxMnPZytcOyF
-         zDb+78t5lVfRQC2rg9sRa6sOQ0Gie7c9uP4aiMBk+tq/eWs6ceiBmS7QEeDwwpK3m+g4
-         21WLlR2zOkCrsfPmM5ZLueDkd8GwqLBI206I5ZYmIEPolWA5h1814S/sQa4gp+3hLUm/
-         FCoQ==
-X-Gm-Message-State: AOAM531TjRoPpcd3GtdXCxO/E2wUsRVVuCiM46Hsta/3C6N1kB2XPAM8
-        cfdwaNJNMRKI74q/H6ZukdOMMNlaZnk4aHuyL6rfqw==
-X-Google-Smtp-Source: ABdhPJzJlz0hPiPBx35vVZO+9fTCBRG4euIzrUMfRIboxgPwg9dJcuWO9GyJxP8/hgp9b5ll67xVA7G/+FfNxda+yJc=
-X-Received: by 2002:a9f:2431:: with SMTP id 46mr3617265uaq.129.1599035543174;
- Wed, 02 Sep 2020 01:32:23 -0700 (PDT)
+        bh=5non/mH33hYNnT7K/jyemSoSsUl6fyRsBJcyHttPwYs=;
+        b=WdNwISC2aqvQiWeOL55i3MTi9tgqV4CEWBZZ9oxeCcwdRkUT3H1RJecE0pYwHclN0k
+         FdwfyFANIVhlemyvG0SOzy+CPf4UrvvqaeoODvebOEYUkhnDnR9nTsm2GAAXrXl4jR8w
+         THOeWQynHZ5UjXRyeRYUQQXlEfX96Z6DMzQm1bwz58iqnyA4A33AL7kD2QLNZFKwGd/5
+         xjs1vX0pfcaWGt+ghXSzQ7E/ZVr8yiVKa5foxUJsiYO0BPPSfQS5iMnvSihxkJDMvyQO
+         ioaXO8jUgwTFnuyn70x3yXwqvoDJK+9J9h5Fguax6KsxjqVoSP3lybafKRkgK2rxyXho
+         xGQA==
+X-Gm-Message-State: AOAM5325kvogcAapzQD02UBFvytGBfAsuxs9d3slEZqCZ73ySlwN0S7y
+        aLGzyh3PY8sjXD7tBfC/BK8J1CUvgw6IrOPW5cX/Vw==
+X-Google-Smtp-Source: ABdhPJxUhsYDJqZr+S2DnXSmktdz1rbcrmTUXe81Wm8CM3eLPWzV93DWmovX8ETkt+tgUNa/T1ptifV3FeK831DdelI=
+X-Received: by 2002:ab0:2ea1:: with SMTP id y1mr1954663uay.104.1599037412847;
+ Wed, 02 Sep 2020 02:03:32 -0700 (PDT)
 MIME-Version: 1.0
-References: <20200901150438.228887-1-ulf.hansson@linaro.org>
- <20200901150654.GB30034@lst.de> <CAPDyKFqZXdtVokrDQvJAh-NzN0T2ayPD6MepemLEaDt1TRPduw@mail.gmail.com>
- <20200901154049.GA376@lst.de>
-In-Reply-To: <20200901154049.GA376@lst.de>
+References: <20200831150517.1.I93c78bfc6575771bb653c9d3fca5eb018a08417d@changeid>
+In-Reply-To: <20200831150517.1.I93c78bfc6575771bb653c9d3fca5eb018a08417d@changeid>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 2 Sep 2020 10:31:47 +0200
-Message-ID: <CAPDyKFqDKUG3RC241hv535CLFGEQc4b-vv0e3bexzGkDSY82Jg@mail.gmail.com>
-Subject: Re: [PATCH v2] mmc: mmc_spi: Allow the driver to be built when
- CONFIG_HAS_DMA is unset
-To:     Christoph Hellwig <hch@lst.de>, Rich Felker <dalias@libc.org>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Mark Brown <broonie@kernel.org>,
-        Linux-sh list <linux-sh@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Date:   Wed, 2 Sep 2020 11:02:56 +0200
+Message-ID: <CAPDyKFqiOpqh+wNXx8sNtoYrNUGPNkCtHeFP2KpaFukN+nMymw@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-acpi: Clear amd_sdhci_host on reset
+To:     Raul E Rangel <rrangel@chromium.org>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        "Shah, Nehal-bakulchandra" <Nehal-bakulchandra.Shah@amd.com>,
+        "Wang, Chris" <chris.wang@amd.com>,
+        Akshu Agrawal <Akshu.Agrawal@amd.com>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 1 Sep 2020 at 17:40, Christoph Hellwig <hch@lst.de> wrote:
+On Mon, 31 Aug 2020 at 23:10, Raul E Rangel <rrangel@chromium.org> wrote:
 >
-> On Tue, Sep 01, 2020 at 05:36:17PM +0200, Ulf Hansson wrote:
-> > > I still don't think this makes sense, as the dma_mask should always
-> > > be non-NULL here.
-> >
-> > If that is the case, I wonder how the driver could even have worked without DMA.
-> >
-> > Because in the existing code, host->dma_dev gets assigned to
-> > spi->master->dev.parent->dma_mask - which seems to turn on the DMA
-> > usage in the driver.
-> >
-> > What am I missing?
+> commit 61d7437ed1390 ("mmc: sdhci-acpi: Fix HS400 tuning for AMDI0040")
+> broke resume for HS400. When the system suspends the eMMC controller is
+> powered down. So on resume we need to reinitialize the controller.
+> amd_sdhci_host was not getting cleared, so the DLL was never re-enabled
+> on resume. This results in HS400 being non-functional.
 >
-> Do you know of other non-DMA users?  For SH nommu it probably worked
+> This change clears the tuned_clock flag, clears the dll_enabled flag and
+> disables the DLL on reset.
+>
+> Fixes: 61d7437ed1390 ("mmc: sdhci-acpi: Fix HS400 tuning for AMDI0040")
+>
+> Signed-off-by: Raul E Rangel <rrangel@chromium.org>
 
-I don't know of other non-DMA users. As I said, I wish someone could
-step in and take better care of mmc_spi - as I know it's being used a
-lot.
-
-> because SH nommu used to provide a DMA implementation that worked
-> fine for streaming maps, but was completely broken for coherent
-> allocation.  And this driver appears to only use the former.
-
-Alright, so you are saying the DMA support may potentially never have
-been optional to this driver. In any case, I can remove the check in
-$subject patch, as it shouldn't matter.
-
-Anyway, let's see what Rich thinks of this. I am curious to see if the
-patch works on his SH boards - as I haven't been able to test it.
+Applied for fixes, by updating the commit message a bit, thanks!
 
 Kind regards
 Uffe
+
+
+> ---
+> - Performed 100+ suspend/resume cycles without issue.
+> - Also verified tuning continues to work.
+>
+>  drivers/mmc/host/sdhci-acpi.c | 31 ++++++++++++++++++++++++-------
+>  1 file changed, 24 insertions(+), 7 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+> index 962f074ca1742..284cba11e2795 100644
+> --- a/drivers/mmc/host/sdhci-acpi.c
+> +++ b/drivers/mmc/host/sdhci-acpi.c
+> @@ -551,12 +551,18 @@ static int amd_select_drive_strength(struct mmc_card *card,
+>         return MMC_SET_DRIVER_TYPE_A;
+>  }
+>
+> -static void sdhci_acpi_amd_hs400_dll(struct sdhci_host *host)
+> +static void sdhci_acpi_amd_hs400_dll(struct sdhci_host *host, bool enable)
+>  {
+> +       struct sdhci_acpi_host *acpi_host = sdhci_priv(host);
+> +       struct amd_sdhci_host *amd_host = sdhci_acpi_priv(acpi_host);
+> +
+>         /* AMD Platform requires dll setting */
+>         sdhci_writel(host, 0x40003210, SDHCI_AMD_RESET_DLL_REGISTER);
+>         usleep_range(10, 20);
+> -       sdhci_writel(host, 0x40033210, SDHCI_AMD_RESET_DLL_REGISTER);
+> +       if (enable)
+> +               sdhci_writel(host, 0x40033210, SDHCI_AMD_RESET_DLL_REGISTER);
+> +
+> +       amd_host->dll_enabled = enable;
+>  }
+>
+>  /*
+> @@ -596,10 +602,8 @@ static void amd_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>
+>                 /* DLL is only required for HS400 */
+>                 if (host->timing == MMC_TIMING_MMC_HS400 &&
+> -                   !amd_host->dll_enabled) {
+> -                       sdhci_acpi_amd_hs400_dll(host);
+> -                       amd_host->dll_enabled = true;
+> -               }
+> +                   !amd_host->dll_enabled)
+> +                       sdhci_acpi_amd_hs400_dll(host, true);
+>         }
+>  }
+>
+> @@ -620,10 +624,23 @@ static int amd_sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>         return err;
+>  }
+>
+> +static void amd_sdhci_reset(struct sdhci_host *host, u8 mask)
+> +{
+> +       struct sdhci_acpi_host *acpi_host = sdhci_priv(host);
+> +       struct amd_sdhci_host *amd_host = sdhci_acpi_priv(acpi_host);
+> +
+> +       if (mask & SDHCI_RESET_ALL) {
+> +               amd_host->tuned_clock = false;
+> +               sdhci_acpi_amd_hs400_dll(host, false);
+> +       }
+> +
+> +       sdhci_reset(host, mask);
+> +}
+> +
+>  static const struct sdhci_ops sdhci_acpi_ops_amd = {
+>         .set_clock      = sdhci_set_clock,
+>         .set_bus_width  = sdhci_set_bus_width,
+> -       .reset          = sdhci_reset,
+> +       .reset          = amd_sdhci_reset,
+>         .set_uhs_signaling = sdhci_set_uhs_signaling,
+>  };
+>
+> --
+> 2.28.0.402.g5ffc5be6b7-goog
+>
