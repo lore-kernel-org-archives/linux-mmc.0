@@ -7,37 +7,37 @@ X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B07B2C433E2
-	for <linux-mmc@archiver.kernel.org>; Wed,  2 Sep 2020 19:37:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 501EEC433E2
+	for <linux-mmc@archiver.kernel.org>; Wed,  2 Sep 2020 19:38:03 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8767F20C56
-	for <linux-mmc@archiver.kernel.org>; Wed,  2 Sep 2020 19:37:55 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2ED8821527
+	for <linux-mmc@archiver.kernel.org>; Wed,  2 Sep 2020 19:38:03 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1599075475;
-	bh=+v0Gvo3NEuIgVnTGsMBHhqS8LDWaVSLs4O1rtCOSwpQ=;
+	s=default; t=1599075483;
+	bh=ysxU/OkPk0mx2jmOsOpW9mYF9nZJUrqNoDbkIh/24jA=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=0BWkVf8zoDG6S1M1GcQo0EvKOKX1ezpVanyQ+n/CuUHb2zr59L79ZkiSm4E1gFLd2
-	 kfhpuCxrCtQd/2c4euxPGUe6c+hYzy3LYWu/8/XHmyW9ZB5MijvkKw42W8yf1gnhhA
-	 IAVFsUMA/VwYIoe7oUOm3DtkOQRniMu2A3rm5iXo=
+	b=H/EYL7RHrcrJQssLZNqBMkyrJTHU/I6JZuHmKrzaSto8EirWlZh6+QtnXOyZxr2yA
+	 im1tI+2LlxjqupyRNrQEG/IQzMg4Q/ouvuu+6uWhgmV2BoCx4VrAKbCdCqxPAkLNNw
+	 1GkclVhzQpc5Fb2UuEBaZe49y3sKOLxy8DKjiBzs=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726800AbgIBThz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 2 Sep 2020 15:37:55 -0400
-Received: from mail.kernel.org ([198.145.29.99]:43300 "EHLO mail.kernel.org"
+        id S1727780AbgIBTiC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 2 Sep 2020 15:38:02 -0400
+Received: from mail.kernel.org ([198.145.29.99]:43588 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726528AbgIBThx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 2 Sep 2020 15:37:53 -0400
+        id S1726762AbgIBTiB (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 2 Sep 2020 15:38:01 -0400
 Received: from kozik-lap.mshome.net (unknown [194.230.155.106])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 24A8C20DD4;
-        Wed,  2 Sep 2020 19:37:44 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id AAFBC20E65;
+        Wed,  2 Sep 2020 19:37:53 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1599075473;
-        bh=+v0Gvo3NEuIgVnTGsMBHhqS8LDWaVSLs4O1rtCOSwpQ=;
+        s=default; t=1599075480;
+        bh=ysxU/OkPk0mx2jmOsOpW9mYF9nZJUrqNoDbkIh/24jA=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=qmFkZ/kkB4WxgIEw8otKZYIuPvlX/EZQ8cGAMveQSNYjAkyBOCW75NK/Sx/61+kgw
-         oqzDBwnVLGJVpfqsBudQ9kKBz5GwYGbGmeAR7ntYjzpzVzksZRsfxAcVDQrI63d+ji
-         t7Q1KG7yC0Y3C+kYXOaBipkZhyU0eLOUrSp1OlTo=
+        b=vpFu8350AnZO/VZulHS3cosgdptpwzKBP54kcGKYYm+c84d7OK0hpajGsgvwtOFKS
+         kmJCuXW8VdBTDiKusxw3hbdgYxmp3Agznd240GsJTGXakAFEVej8jF2rXA0RVL33Bn
+         QWutahXiiNH/ft4IpIIAIUlTNFX4B8Oe+FxhtXwM=
 From:   Krzysztof Kozlowski <krzk@kernel.org>
 To:     Ulf Hansson <ulf.hansson@linaro.org>,
         Florian Fainelli <f.fainelli@gmail.com>,
@@ -65,9 +65,9 @@ To:     Ulf Hansson <ulf.hansson@linaro.org>,
         linux-arm-kernel@lists.infradead.org,
         linux-amlogic@lists.infradead.org, linux-tegra@vger.kernel.org
 Cc:     Krzysztof Kozlowski <krzk@kernel.org>
-Subject: [PATCH 05/11] mmc: meson: Simplify with dev_err_probe()
-Date:   Wed,  2 Sep 2020 21:36:52 +0200
-Message-Id: <20200902193658.20539-6-krzk@kernel.org>
+Subject: [RFT 06/11] mmc: sdhci-brcmstb: Simplify with optional clock and dev_err_probe()
+Date:   Wed,  2 Sep 2020 21:36:53 +0200
+Message-Id: <20200902193658.20539-7-krzk@kernel.org>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20200902193658.20539-1-krzk@kernel.org>
 References: <20200902193658.20539-1-krzk@kernel.org>
@@ -76,48 +76,45 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Common pattern of handling deferred probe can be simplified with
-dev_err_probe().  Less code and the error value gets printed.
+Only -ENOENT from devm_clk_get() means that clock is not present in
+device tree.  Other errors have their own meaning and should not be
+ignored.
+
+Simplify getting the clock which is in fact optional and also use
+dev_err_probe() for handling deferred.
 
 Signed-off-by: Krzysztof Kozlowski <krzk@kernel.org>
----
- drivers/mmc/host/meson-gx-mmc.c | 16 +++++-----------
- 1 file changed, 5 insertions(+), 11 deletions(-)
 
-diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-index 08a3b1c05acb..2802e4520783 100644
---- a/drivers/mmc/host/meson-gx-mmc.c
-+++ b/drivers/mmc/host/meson-gx-mmc.c
-@@ -426,11 +426,9 @@ static int meson_mmc_clk_init(struct meson_host *host)
+---
+
+Not tested on HW.
+---
+ drivers/mmc/host/sdhci-brcmstb.c | 12 +++++-------
+ 1 file changed, 5 insertions(+), 7 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-brcmstb.c b/drivers/mmc/host/sdhci-brcmstb.c
+index ad01f6451a95..876668827580 100644
+--- a/drivers/mmc/host/sdhci-brcmstb.c
++++ b/drivers/mmc/host/sdhci-brcmstb.c
+@@ -235,13 +235,11 @@ static int sdhci_brcmstb_probe(struct platform_device *pdev)
  
- 		snprintf(name, sizeof(name), "clkin%d", i);
- 		clk = devm_clk_get(host->dev, name);
--		if (IS_ERR(clk)) {
--			if (clk != ERR_PTR(-EPROBE_DEFER))
--				dev_err(host->dev, "Missing clock %s\n", name);
--			return PTR_ERR(clk);
--		}
-+		if (IS_ERR(clk))
-+			return dev_err_probe(host->dev, PTR_ERR(clk),
-+					     "Missing clock %s\n", name);
+ 	dev_dbg(&pdev->dev, "Probe found match for %s\n",  match->compatible);
  
- 		mux_parent_names[i] = __clk_get_name(clk);
- 	}
-@@ -1077,12 +1075,8 @@ static int meson_mmc_probe(struct platform_device *pdev)
- 	}
- 
- 	ret = device_reset_optional(&pdev->dev);
--	if (ret) {
--		if (ret != -EPROBE_DEFER)
--			dev_err(&pdev->dev, "device reset failed: %d\n", ret);
--
--		return ret;
+-	clk = devm_clk_get(&pdev->dev, NULL);
+-	if (IS_ERR(clk)) {
+-		if (PTR_ERR(clk) == -EPROBE_DEFER)
+-			return -EPROBE_DEFER;
+-		dev_err(&pdev->dev, "Clock not found in Device Tree\n");
+-		clk = NULL;
 -	}
-+	if (ret)
-+		return dev_err_probe(&pdev->dev, ret, "device reset failed\n");
- 
- 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
- 	host->regs = devm_ioremap_resource(&pdev->dev, res);
++	clk = devm_clk_get_optional(&pdev->dev, NULL);
++	if (IS_ERR(clk))
++		return dev_err_probe(&pdev->dev, PTR_ERR(clk),
++				     "Failed to get clock from Device Tree\n");
++
+ 	res = clk_prepare_enable(clk);
+ 	if (res)
+ 		return res;
 -- 
 2.17.1
 
