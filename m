@@ -2,122 +2,134 @@ Return-Path: <SRS0=r8P+=CL=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.0 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BC28AC433E7
-	for <linux-mmc@archiver.kernel.org>; Wed,  2 Sep 2020 09:04:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0356CC433E7
+	for <linux-mmc@archiver.kernel.org>; Wed,  2 Sep 2020 09:51:10 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 946E920709
-	for <linux-mmc@archiver.kernel.org>; Wed,  2 Sep 2020 09:04:39 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D5FC1208DB
+	for <linux-mmc@archiver.kernel.org>; Wed,  2 Sep 2020 09:51:09 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="z1kMa/o0"
+	dkim=pass (1024-bit key) header.d=renesasgroup.onmicrosoft.com header.i=@renesasgroup.onmicrosoft.com header.b="Bgj9h6b6"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727025AbgIBJEd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 2 Sep 2020 05:04:33 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47060 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726654AbgIBJDn (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Sep 2020 05:03:43 -0400
-Received: from mail-vk1-xa44.google.com (mail-vk1-xa44.google.com [IPv6:2607:f8b0:4864:20::a44])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 10141C061245
-        for <linux-mmc@vger.kernel.org>; Wed,  2 Sep 2020 02:03:43 -0700 (PDT)
-Received: by mail-vk1-xa44.google.com with SMTP id e5so1051187vkm.2
-        for <linux-mmc@vger.kernel.org>; Wed, 02 Sep 2020 02:03:43 -0700 (PDT)
+        id S1726183AbgIBJvJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 2 Sep 2020 05:51:09 -0400
+Received: from mail-eopbgr1310138.outbound.protection.outlook.com ([40.107.131.138]:3920
+        "EHLO APC01-SG2-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1726173AbgIBJvI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 2 Sep 2020 05:51:08 -0400
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=Q0mucdgKebYunMZYXXI/0l9sQm0RW+6HnNtYS2kbRg+oxZSC6k2gnr7gAbRgIACqAZC/dBtkHKIJij8WnUrPUDVjEffoOm+s7fxXWnzp++hFZCYSmlCXm2Q57hBRbKbG1b3ag65/YlhG21FBUZGAn2Gy0rRAsqQAnxaJzM+7V0OjA3pTZeGxbAfgnNHMq6MFvaJIBBPE3STXRUnqhp571ussd317gxQIBeOpBaC8W+Cf/bfxR8m06JCOvm/tgill1gwj5GF95LnB5h91hR2Bw9e8wNsz7QDLML/uS4d11zBvBgxBUfjhOLLqKtjI/1O43ld0ueq0FGNHHrrPMa+NMw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=Mfcn7t90Ro2vjuY6h6HGmoixwn1muKV8IxbvqyztVV8=;
+ b=A9/A2S5djSOyudYRNZJs7QFYZFM//5nQDkE/+AqaGJB1Ytzc7xVFaQ11Ztt47+qhxyU04Ohqy6buqb9SCayfl0ueFSEYO8fqqMmF/IrtPHwjlB+aSepWHQC1odIOKdPI84YCzLy47T/fqqIFSguTnFzzUyOfeLWmXROekzs3wTGvpA6f+GORqM1yhTjGaeru8xjI2UXl4oTs1CbOW3r79/PM50e2kK/oJDHnAEPuiBU34VOAcxNav3NSSL84RhmLWGAC9zkeH7om+gzJIGcfd0DA8IK748gjUKbnHzG/eAZqxjmiacczaMJCJzmQSVCm4gSc0G+EyC6HNgyueQV0Cg==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=renesas.com; dmarc=pass action=none header.from=renesas.com;
+ dkim=pass header.d=renesas.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=9P3wsxqoze0W6a0mrHELuT43xJEcIHDEYNF+C7OQKQI=;
-        b=z1kMa/o0lJ6db7VFFIgX3zwfAI3PmRBK61copltiv3/W6UyGC0jBl0o+igdv9c8GkH
-         UYk+TgkbK+5vVE8zuHUoCye4snKHrvvPIjR58Ic/SbcepnSePDacs1cnh8rcWwXCq+Nz
-         XEfXUiZGZujy7lMtuoZ5GTuTH61E1HGGzcBO4AQ7Ff2nc7HKbIiVB4pD744A3stRBPEi
-         UcDCz0ghGSxSSOkK2GsP8dK6M6dQ9rvqO7I354sQXM3JuuJ+Q/BKF0B+gC+dd93rU/ef
-         3OKlMbQuxQlvb7lLssullWsaVdxEnqynj76LNwQ1IGdl9i03TMatIb/iy16J61LvlmaX
-         2qAQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=9P3wsxqoze0W6a0mrHELuT43xJEcIHDEYNF+C7OQKQI=;
-        b=R6HP8oKMW1L7oitcXHVTnBnhT00/jDD8ZNCgaX1Ggr2UfNIC7VVFC5B51BmYWh4qYQ
-         HvKidJ1WFKFLE/Gd+rUKqsTgCbOhzpGAXq9laxcFVNfAV4KeHBwyE4i/88tRY7TtbdYo
-         3unOAl7czuCg1tsnOz4Aj2ZQ8Ixjzdpjm0OmkuDj6Gwh9iiCqno/Y5iuDPHLmtrW33vW
-         U0dXSBkgFZtIsBMloz3M84JZyAP+rbpfXIoa1e4NlmHFnNThG0rjf8HJYc1huk2apL/4
-         01HomCQtYRCH/KrW+e84l/LWMQ3nKG8g07+iMyO0zAlfTtNq611uzv1sMkdaves0PGeB
-         VV2Q==
-X-Gm-Message-State: AOAM533uMRJDFsDy+FQa289lfOkX3Jt+xC+PPrQlnIWJhsMBzlthYlWm
-        hQkF4h1RT+lh1OfQzORlagi1ev6lMlYyeyfEPD1bMQ==
-X-Google-Smtp-Source: ABdhPJxhX7kHXjegHwdXoUHpCkNbNv05kzwJYOYliiMwlfVGeUdqGLLERRCiX7ZP53djUoDsW4aIcGPFyOzxlmc6Gj4=
-X-Received: by 2002:a1f:16d1:: with SMTP id 200mr4453490vkw.31.1599037422215;
- Wed, 02 Sep 2020 02:03:42 -0700 (PDT)
+ d=renesasgroup.onmicrosoft.com; s=selector2-renesasgroup-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=Mfcn7t90Ro2vjuY6h6HGmoixwn1muKV8IxbvqyztVV8=;
+ b=Bgj9h6b62wE0ay+cOELy0f9FvOBjXO+dTwvS0voRs3CfF3NSCitTV4ZuosmcnuB2QLbdmQP4YXtpd/z67y5J/MW79rfQgEQRNYdgItyNVjdH/YAIt8ztXNi+mNig3xRKcDiOXTaEln8za00NcnOzCzSVNbD6NtlzyJcBgCAPQ2k=
+Received: from TY2PR01MB3692.jpnprd01.prod.outlook.com (2603:1096:404:d5::22)
+ by TY2PR01MB2636.jpnprd01.prod.outlook.com (2603:1096:404:77::10) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3348.15; Wed, 2 Sep
+ 2020 09:51:02 +0000
+Received: from TY2PR01MB3692.jpnprd01.prod.outlook.com
+ ([fe80::9055:525d:2d64:b625]) by TY2PR01MB3692.jpnprd01.prod.outlook.com
+ ([fe80::9055:525d:2d64:b625%5]) with mapi id 15.20.3348.015; Wed, 2 Sep 2020
+ 09:51:02 +0000
+From:   Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+To:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+CC:     "linux-renesas-soc@vger.kernel.org" 
+        <linux-renesas-soc@vger.kernel.org>
+Subject: RE: [PATCH v2 0/4] renesas_sdhi: fix hang when SCC loses its clock
+Thread-Topic: [PATCH v2 0/4] renesas_sdhi: fix hang when SCC loses its clock
+Thread-Index: AQHWgHD8IvG1abDPREWPL/ci570GkqlVGxww
+Date:   Wed, 2 Sep 2020 09:51:01 +0000
+Message-ID: <TY2PR01MB3692563894AD0A65B4AF37ACD82F0@TY2PR01MB3692.jpnprd01.prod.outlook.com>
+References: <20200901150250.26236-1-wsa+renesas@sang-engineering.com>
+In-Reply-To: <20200901150250.26236-1-wsa+renesas@sang-engineering.com>
+Accept-Language: ja-JP, en-US
+Content-Language: ja-JP
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+authentication-results: sang-engineering.com; dkim=none (message not signed)
+ header.d=none;sang-engineering.com; dmarc=none action=none
+ header.from=renesas.com;
+x-originating-ip: [124.210.22.195]
+x-ms-publictraffictype: Email
+x-ms-office365-filtering-ht: Tenant
+x-ms-office365-filtering-correlation-id: 7cda2d40-1a76-4dfc-bd01-08d84f25b3d7
+x-ms-traffictypediagnostic: TY2PR01MB2636:
+x-microsoft-antispam-prvs: <TY2PR01MB26360724FFC6A973EEE90249D82F0@TY2PR01MB2636.jpnprd01.prod.outlook.com>
+x-ms-oob-tlc-oobclassifiers: OLM:8273;
+x-ms-exchange-senderadcheck: 1
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: guzPH7j/uEqrJrdmQMYUEPwj0L02EGGw9YFZbVwWWsbGwmhRedIoUN0xBh3d52tVJL0ypcA1EqAwbzySuTt3HPU33mqJv3GfHLpxM4CuxICmILHfTdsL/7pL4Usf54GyZLF+4S8OmgjsaZEh3Jgs2Ryrj/swuffskyxl3Qt9n4x3/VxREjjhEgTznzIgWRIu52JP10l9eP2JbSaPaMqZplXz5o09xZ4nZwdw2zUojx7lpuodrh+k4CoUOoCl+XivCdZ3DlmUPWd3MhPJOn+2lXOpbplWol1/ovR85i8JW4CVlNe2K0+6NIoINE7J2HY7EyMrlcVQEzho+00phEatCQ==
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY2PR01MB3692.jpnprd01.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(366004)(66446008)(66556008)(66476007)(66946007)(71200400001)(8676002)(4326008)(64756008)(86362001)(498600001)(5660300002)(76116006)(7696005)(55236004)(186003)(83380400001)(52536014)(110136005)(55016002)(9686003)(33656002)(26005)(6506007)(2906002)(8936002);DIR:OUT;SFP:1102;
+x-ms-exchange-antispam-messagedata: Pktlpi55z2lnLXH8vPc0Jrm5VqiwPfkfFalu5wpV0B8TxPR21jubqPKBE1xX+ZM76VGjIl/gtP5PMnFn8vUagV5vmdj6QEFTIHf1pIPR/ItIlUkmFOsBnEtWN/DzZMBXDfaV6TtvTqXIpTRqQW33NKTISxiC7Gi6trjj1aGIyd7u5ZPBt/u3EZNUMRr0XzDF8t4XBxm9eBd2S2ezs5lA5cR8jhJQ6bUfwqSGUK3y4eVQn/ALJ5jl8UWf2Dl7OmGbCdjqYgCF+CnDBkTPls/g1/+sOBR0hryf0H2IyZrBxWKxIPcKssqRzfvsat2257vntFw5mbk1ng5d/tyQH9rTAfr2WaXDFlahZn5VYuQUNBp4xt+4RBz+AzRvWKUO+PDInQZd4T8LPrJ0yLycplou6sg9hGhZIBJwk8jwDS7ULsZvBnNegR3PGY9KuII3b7kerhXEU6GHYLURjuzgK8J0JaFDE8WOldYXs+leTOEIjM/tXVPayuJ3o0duN185RBuW6fIXK5coS6GypMIOQxRoj3qcQYiMHgzwYccaXNAn5w/cJG/NoQCDcW+m13UqkgJJB1LJLY53aiZrqRPLE9iQsfU3wMfaphHOB5GdMywju5lcVWX/ChqtnZnIP+w93Doz76AE3aUOYGtLq3fmhZjBvA==
+x-ms-exchange-transport-forked: True
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 MIME-Version: 1.0
-References: <1598651234-29826-1-git-send-email-stefan.wahren@i2se.com>
-In-Reply-To: <1598651234-29826-1-git-send-email-stefan.wahren@i2se.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 2 Sep 2020 11:03:06 +0200
-Message-ID: <CAPDyKFq35cgC5Cp3=kFnBaghz9r6Sjkzb8CDaCB8395avMnYKw@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-iproc: Enable eMMC DDR 3.3V support for bcm2711
-To:     Stefan Wahren <stefan.wahren@i2se.com>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        Ray Jui <rjui@broadcom.com>,
-        Scott Branden <sbranden@broadcom.com>,
-        Florian Fainelli <f.fainelli@gmail.com>,
-        Nicolas Saenz Julienne <nsaenzjulienne@suse.de>,
-        Matthias Brugger <mbrugger@suse.com>,
-        BCM Kernel Feedback <bcm-kernel-feedback-list@broadcom.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>
-Content-Type: text/plain; charset="UTF-8"
+X-OriginatorOrg: renesas.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: TY2PR01MB3692.jpnprd01.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 7cda2d40-1a76-4dfc-bd01-08d84f25b3d7
+X-MS-Exchange-CrossTenant-originalarrivaltime: 02 Sep 2020 09:51:02.0740
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 53d82571-da19-47e4-9cb4-625a166a4a2a
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: filyx6FOsWHB8iEBLh6HL1juDYxG0vRS1WWN/LeXlX2ybBjja60yi7hpnUJLVHR86xSJ2d2FTHg6heDSSIkwWcFH/soscZs7rFbSRHOSto8M1XYpe/NqXWFLC6h6jK7c
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: TY2PR01MB2636
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 28 Aug 2020 at 23:48, Stefan Wahren <stefan.wahren@i2se.com> wrote:
->
-> The emmc2 interface on the bcm2711 supports DDR modes for eMMC devices
-> running at 3.3V. This allows to run eMMC module with 3.3V signaling voltage
-> at DDR52 mode on the Raspberry Pi 4 using a SD adapter:
->
->   clock: 52000000 Hz
->   actual clock: 50000000 Hz
->   vdd: 21 (3.3 ~ 3.4 V)
->   bus mode: 2 (push-pull)
->   chip select: 0 (don't care)
->   power mode: 2 (on)
->   bus width: 2 (4 bits)
->   timing spec: 8 (mmc DDR52)
->   signal voltage: 0 (3.30 V)
->   driver type: 0 (driver type B)
->
-> Link: https://github.com/raspberrypi/linux/issues/3802
-> Signed-off-by: Stefan Wahren <stefan.wahren@i2se.com>
+Hello Wolfram-san,
 
-Applied for next, thanks!
+> From: Wolfram Sang, Sent: Wednesday, September 2, 2020 12:03 AM
+>=20
+> This again took a while since v1 because the issue was so hard to
+> trigger. But I finally found a way to inject the flaw, so this series
+> could be tested and it fixes the issue.
+>=20
+> Changes since v1:
+> 	* introduce a new flag to MMC core indicating any kind of tuning
+> 	  not only retune
+> 	* use the new flag to keep SCC flag active
+> 	* new patch 4, minor cleanup to MMC core
+>=20
+> A branch including the DEBUG patch can be found here:
+>=20
+> git://git.kernel.org/pub/scm/linux/kernel/git/wsa/linux.git renesas/sdhi/=
+new_manual_calib-for-5.10
+>=20
+> If you revert patch 3, you should have the SCC hang during boot again.
+<snip>
+>=20
+> Tested on R-Car H3 ES2.0 and M3-N and patches based on mmc/next.
 
-Kind regards
-Uffe
+Thank you for the patch!
 
+Reviewed-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
 
-> ---
->  drivers/mmc/host/sdhci-iproc.c | 1 +
->  1 file changed, 1 insertion(+)
->
-> diff --git a/drivers/mmc/host/sdhci-iproc.c b/drivers/mmc/host/sdhci-iproc.c
-> index e2d8dfe..b540aa6 100644
-> --- a/drivers/mmc/host/sdhci-iproc.c
-> +++ b/drivers/mmc/host/sdhci-iproc.c
-> @@ -283,6 +283,7 @@ static const struct sdhci_pltfm_data sdhci_bcm2711_pltfm_data = {
->
->  static const struct sdhci_iproc_data bcm2711_data = {
->         .pdata = &sdhci_bcm2711_pltfm_data,
-> +       .mmc_caps = MMC_CAP_3_3V_DDR,
->  };
->
->  static const struct of_device_id sdhci_iproc_of_match[] = {
-> --
-> 2.7.4
->
+And, I tested this series on R-Car H3 ES3.0 and M3-W+. And,
+I confirmed this series could fix the SCC hang issue. So,
+
+Tested-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+
+Best regards,
+Yoshihiro Shimoda
+
