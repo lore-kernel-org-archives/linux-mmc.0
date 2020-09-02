@@ -4,99 +4,81 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-10.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=ham autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C351DC433E2
-	for <linux-mmc@archiver.kernel.org>; Wed,  2 Sep 2020 09:03:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0584AC433E2
+	for <linux-mmc@archiver.kernel.org>; Wed,  2 Sep 2020 09:04:06 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9DF3D20709
-	for <linux-mmc@archiver.kernel.org>; Wed,  2 Sep 2020 09:03:58 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D08FC20709
+	for <linux-mmc@archiver.kernel.org>; Wed,  2 Sep 2020 09:04:05 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="ZNr7dTiM"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="WQ+kQwXp"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726669AbgIBJD5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 2 Sep 2020 05:03:57 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47082 "EHLO
+        id S1726892AbgIBJEE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 2 Sep 2020 05:04:04 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47074 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726674AbgIBJDr (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Sep 2020 05:03:47 -0400
+        with ESMTP id S1726762AbgIBJDy (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Sep 2020 05:03:54 -0400
 Received: from mail-ua1-x943.google.com (mail-ua1-x943.google.com [IPv6:2607:f8b0:4864:20::943])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3E62CC061258
-        for <linux-mmc@vger.kernel.org>; Wed,  2 Sep 2020 02:03:47 -0700 (PDT)
-Received: by mail-ua1-x943.google.com with SMTP id g11so1338975ual.2
-        for <linux-mmc@vger.kernel.org>; Wed, 02 Sep 2020 02:03:47 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EC350C061244
+        for <linux-mmc@vger.kernel.org>; Wed,  2 Sep 2020 02:03:53 -0700 (PDT)
+Received: by mail-ua1-x943.google.com with SMTP id r13so1333864uah.10
+        for <linux-mmc@vger.kernel.org>; Wed, 02 Sep 2020 02:03:53 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=G7z93t1Etv3+Y7YRGqoitCZfELcgVcpVmZuSYiiuAMc=;
-        b=ZNr7dTiMyg6AJhHsdVCwXw5CQaH02wnOnH42Zr5wVBHqxb0354fDvNOiMNx6Lmc0hE
-         QvUDEGEWKwtU63Sv5gfBy3asdk4Xo6wqAh6SE5d/9t3h1Fxsg32wfjXT/7xiodD5G5pZ
-         0EKEDKEi/A7o5IvEbPeol4SFl6PQFNNTja+vjlcRop0AWOnZ6JXzH6BbUGiJylF0O1Lx
-         PgOOwKbmHa4RJS0q13zHAf5qCeEB1iseAEndTs3QjRUXhEGIRfelydA6FGU1BnRoV/bw
-         KjsQoPeNLOw3BNLzdxNjYZpjA3Mq+Ou8H87Ud5PLEAhDNMXtemEaevQudQWIQhnvouuq
-         3ypg==
+        bh=HJzUeSF+5rfhIEqW5Y3fudwXDrc2+BNzuQkwiBNzFL4=;
+        b=WQ+kQwXpmiMbmM++3SGStKdu8DfotRMOpqrwA5q4bHtdJy9QMoEuJc5j/DKPN9esfh
+         TQnNtWcPdvtjlOGXk6lMbGAWO97Q/B3oTIbShRS2KU7mN9bF8pwNxjqtEEOpNgKeeSoF
+         5vPV4E1GH8dyf6dZN4nLeM4NYT2aVDd9zvoKiIUgsLohC+8JbQ22SJbx9wnjSbkj7xL8
+         JsM/O3Q//97AjUOmNmXAzlIbuCSjbi/qQVWHYr3mood8wfSt8Zo60+0PYH3nWBUC9yct
+         FTmh/ZE20RiJD40hlQlzblmlJbQWUdiyrAwwuV/0mkrVPnqhO7ph2zS10dQORe/iAwGQ
+         yyxQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=G7z93t1Etv3+Y7YRGqoitCZfELcgVcpVmZuSYiiuAMc=;
-        b=bmWCrWvLEGNvC8wxCSG9AMIEHG+Yy+Yljw4L0gL/jqxZ5JTj16CkatEJzJNib/AvAe
-         2wrOXRA1uvOOn2tCOTkT6ZXRfg8DWX6WSpCluwVSoaMMpc8dY+Cnpg48CzQATHb1cxLn
-         FNX7b+A/UdKI54sAXovH0NHL8BJY2iEQZUM1O2zUD9gfYSg8B7bp/ZzKIa9m7JAoJI3Y
-         /waqW/lFOOiCuhkv6kwVlfjQl403EZviJZom8TMcZt4yjlJn6jKrB1RrZZy4WYLy5cB8
-         qvOtiDLa0DAkEF+1peZ4zKjOYXJI6tHwBcDbXpxJHb0YAu8PIwQ1QxlOwnbY85PBpnMf
-         B+Rg==
-X-Gm-Message-State: AOAM531isvL2gTvTN8SYmTv31MPHs6JuEHtEFvOhXKpCzQt02xaJsQ/N
-        kxq9zIwuvjAuHq+J0tqxQx/rqxaAXW1AUa/jd9+u0A==
-X-Google-Smtp-Source: ABdhPJyTJjkE0DbQ9blDWav98w+X2eEv5Ao+aqHbo6v8vW6kAJ3iH1xM8Vn6niOHiZAqARCskMhgKTsCoqH+TsHxDac=
-X-Received: by 2002:a9f:2722:: with SMTP id a31mr4520715uaa.100.1599037426432;
- Wed, 02 Sep 2020 02:03:46 -0700 (PDT)
+        bh=HJzUeSF+5rfhIEqW5Y3fudwXDrc2+BNzuQkwiBNzFL4=;
+        b=TQzCgYNVPTvzPiZs48WoRjRP+utVS3TsqGPlozK1TVwJrT1wXhmbKHOA5jbzOIk/4+
+         Bu2c8hn9NckgibCbaxmyWaHNtmEEyBRhoe9xsFfcQPRjObHFN4wrtIYvQ1nxxQrpv4fq
+         DEtZRB5ckPoFqyvosMdkVPAR8IqhQjWcoodBOs/oX7DXxqipwdBD3KlWRRAKtc+Ny9U/
+         BVEbRkAd/nnPoy5vO7QvPAvKgmz3x+JrYx1LlBeJrFWq6EVFgzUTncUBauVhcSP/zqa9
+         8I+SeiABKmwfzUSuP5DrEDenb+IVFPO7Zci/KIalqPbNhY8Qg5CXPMrwsgzU91sOLfMr
+         5lcw==
+X-Gm-Message-State: AOAM530+cBHn8Y5a+vVg3uyhe6zvsRdY7ijk0fvPAA/je51QGRZZi0fO
+        fTtccbdjrqzykTVYt9vgIB1sO6mmtE046n2GB+ku7w==
+X-Google-Smtp-Source: ABdhPJyhJYTVm/R+GBYtGPEgC6V5+EOBdX93qBkeA616egxMMvQgh3s57gjKKHh0bsOtxZckjPPEU7gVSF32drfco5E=
+X-Received: by 2002:ab0:2848:: with SMTP id c8mr4291207uaq.15.1599037433179;
+ Wed, 02 Sep 2020 02:03:53 -0700 (PDT)
 MIME-Version: 1.0
-References: <20200829062505.4642-1-krzk@kernel.org>
-In-Reply-To: <20200829062505.4642-1-krzk@kernel.org>
+References: <20200831102324.12566-1-wsa+renesas@sang-engineering.com>
+In-Reply-To: <20200831102324.12566-1-wsa+renesas@sang-engineering.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 2 Sep 2020 11:03:09 +0200
-Message-ID: <CAPDyKFrVLZUXEV6pCa6aPJFtFsZ4xv9mtcycUQ1-XHyGOqKi+A@mail.gmail.com>
-Subject: Re: [PATCH v4] dt-bindings: mmc: fsl-imx-esdhc: Fix i.MX 8 compatible matching
-To:     Krzysztof Kozlowski <krzk@kernel.org>
-Cc:     Michael Turquette <mturquette@baylibre.com>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Shawn Guo <shawnguo@kernel.org>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        Pengutronix Kernel Team <kernel@pengutronix.de>,
-        Fabio Estevam <festevam@gmail.com>,
-        NXP Linux Team <linux-imx@nxp.com>,
-        Aisheng Dong <aisheng.dong@nxp.com>,
-        linux-clk <linux-clk@vger.kernel.org>,
-        DTML <devicetree@vger.kernel.org>,
+Date:   Wed, 2 Sep 2020 11:03:16 +0200
+Message-ID: <CAPDyKFpmfjuGcLTxCDdCvp5j_yaJzySENBEcgC_w1tvkK1Gz4g@mail.gmail.com>
+Subject: Re: [PATCH] mmc: meson-gx: use wrapper to avoid accessing internal vars
+To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Kevin Hilman <khilman@baylibre.com>,
+        Neil Armstrong <narmstrong@baylibre.com>,
+        Jerome Brunet <jbrunet@baylibre.com>,
+        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
         Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+        "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sat, 29 Aug 2020 at 08:25, Krzysztof Kozlowski <krzk@kernel.org> wrote:
+On Mon, 31 Aug 2020 at 12:23, Wolfram Sang
+<wsa+renesas@sang-engineering.com> wrote:
 >
-> The i.MX 8 DTSes use two compatibles so update the binding to fix
-> dtbs_check warnings like:
->
->   arch/arm64/boot/dts/freescale/imx8mn-evk.dt.yaml: mmc@30b40000:
->     compatible: ['fsl,imx8mn-usdhc', 'fsl,imx7d-usdhc'] is too long
->     From schema: Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
->
->   arch/arm64/boot/dts/freescale/imx8mn-evk.dt.yaml: mmc@30b40000:
->     compatible: Additional items are not allowed ('fsl,imx7d-usdhc' was unexpected)
->
->   arch/arm64/boot/dts/freescale/imx8mn-ddr4-evk.dt.yaml: mmc@30b40000:
->     compatible: ['fsl,imx8mn-usdhc', 'fsl,imx7d-usdhc'] is too long
->
-> Signed-off-by: Krzysztof Kozlowski <krzk@kernel.org>
+> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
 Applied for next, thanks!
 
@@ -104,83 +86,26 @@ Kind regards
 Uffe
 
 
->
 > ---
 >
-> Changes since v3:
-> 1. Fix also example in Documentation/devicetree/bindings/clock/imx8qxp-lpcg.yaml
+> Only buildtested. Found while analyzing retune-handling in the core.
 >
-> Changes since v2:
-> 1. Remove moved compatibles.
+>  drivers/mmc/host/meson-gx-mmc.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 >
-> Changes since v1:
-> 1. Handle also fsl,imx8mm-usdhc and fsl,imx8qxp-usdhc
-> ---
->  .../bindings/clock/imx8qxp-lpcg.yaml          |  2 +-
->  .../bindings/mmc/fsl-imx-esdhc.yaml           | 37 ++++++++++---------
->  2 files changed, 21 insertions(+), 18 deletions(-)
+> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
+> index 08a3b1c05acb..a1db8685e30e 100644
+> --- a/drivers/mmc/host/meson-gx-mmc.c
+> +++ b/drivers/mmc/host/meson-gx-mmc.c
+> @@ -521,7 +521,7 @@ static int meson_mmc_resampling_tuning(struct mmc_host *mmc, u32 opcode)
+>         val |= ADJUST_ADJ_EN;
+>         writel(val, host->regs + host->data->adjust);
 >
-> diff --git a/Documentation/devicetree/bindings/clock/imx8qxp-lpcg.yaml b/Documentation/devicetree/bindings/clock/imx8qxp-lpcg.yaml
-> index 1d5e9bcce4c8..33f3010f48c3 100644
-> --- a/Documentation/devicetree/bindings/clock/imx8qxp-lpcg.yaml
-> +++ b/Documentation/devicetree/bindings/clock/imx8qxp-lpcg.yaml
-> @@ -62,7 +62,7 @@ examples:
->      };
->
->      mmc@5b010000 {
-> -        compatible = "fsl,imx8qxp-usdhc";
-> +        compatible = "fsl,imx8qxp-usdhc", "fsl,imx7d-usdhc";
->          interrupts = <GIC_SPI 232 IRQ_TYPE_LEVEL_HIGH>;
->          reg = <0x5b010000 0x10000>;
->          clocks = <&conn_lpcg IMX_CONN_LPCG_SDHC0_IPG_CLK>,
-> diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
-> index 10b45966f1b8..e71d13c2d109 100644
-> --- a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
-> @@ -21,23 +21,26 @@ description: |
->
->  properties:
->    compatible:
-> -    enum:
-> -      - fsl,imx25-esdhc
-> -      - fsl,imx35-esdhc
-> -      - fsl,imx51-esdhc
-> -      - fsl,imx53-esdhc
-> -      - fsl,imx6q-usdhc
-> -      - fsl,imx6sl-usdhc
-> -      - fsl,imx6sx-usdhc
-> -      - fsl,imx6ull-usdhc
-> -      - fsl,imx7d-usdhc
-> -      - fsl,imx7ulp-usdhc
-> -      - fsl,imx8mq-usdhc
-> -      - fsl,imx8mm-usdhc
-> -      - fsl,imx8mn-usdhc
-> -      - fsl,imx8mp-usdhc
-> -      - fsl,imx8qm-usdhc
-> -      - fsl,imx8qxp-usdhc
-> +    oneOf:
-> +      - enum:
-> +          - fsl,imx25-esdhc
-> +          - fsl,imx35-esdhc
-> +          - fsl,imx51-esdhc
-> +          - fsl,imx53-esdhc
-> +          - fsl,imx6q-usdhc
-> +          - fsl,imx6sl-usdhc
-> +          - fsl,imx6sx-usdhc
-> +          - fsl,imx6ull-usdhc
-> +          - fsl,imx7d-usdhc
-> +          - fsl,imx7ulp-usdhc
-> +      - items:
-> +          - enum:
-> +              - fsl,imx8mm-usdhc
-> +              - fsl,imx8mn-usdhc
-> +              - fsl,imx8mp-usdhc
-> +              - fsl,imx8mq-usdhc
-> +              - fsl,imx8qxp-usdhc
-> +          - const: fsl,imx7d-usdhc
->
->    reg:
->      maxItems: 1
+> -       if (mmc->doing_retune)
+> +       if (mmc_doing_retune(mmc))
+>                 dly = FIELD_GET(ADJUST_ADJ_DELAY_MASK, val) + 1;
+>         else
+>                 dly = 0;
 > --
-> 2.17.1
+> 2.20.1
 >
