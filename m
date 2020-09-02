@@ -2,43 +2,66 @@ Return-Path: <SRS0=r8P+=CL=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_GIT autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CCCF9C433E2
-	for <linux-mmc@archiver.kernel.org>; Wed,  2 Sep 2020 19:45:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 494C0C43461
+	for <linux-mmc@archiver.kernel.org>; Wed,  2 Sep 2020 19:56:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id AC28220C56
-	for <linux-mmc@archiver.kernel.org>; Wed,  2 Sep 2020 19:45:29 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1599075929;
-	bh=+D+HnNz+VrpzF30cgOx0/44g3rIEaRFahWzOaAq0owE=;
-	h=From:To:Cc:Subject:Date:List-ID:From;
-	b=YWdUqxQODdRNeLzPL3k2yMh0zZOeMYY9Krrbr2ffGA5iR/jULWeryPJV4sJ4EfIpn
-	 26p2D3ps04EsFTmJGXoVyUCeqTcLHVOCbawIFRVzNsEepV78GWAZeiG9lp9+DG37aq
-	 nQtqe0h+IwJFaKstExl+n8c3NBMar+3kBUha3H8U=
+	by mail.kernel.org (Postfix) with ESMTP id 2718420767
+	for <linux-mmc@archiver.kernel.org>; Wed,  2 Sep 2020 19:56:53 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Oryep4f/"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726323AbgIBTp2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 2 Sep 2020 15:45:28 -0400
-Received: from mail.kernel.org ([198.145.29.99]:53528 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726140AbgIBTp1 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 2 Sep 2020 15:45:27 -0400
-Received: from kozik-lap.mshome.net (unknown [194.230.155.106])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 0C98D20773;
-        Wed,  2 Sep 2020 19:37:07 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1599075435;
-        bh=+D+HnNz+VrpzF30cgOx0/44g3rIEaRFahWzOaAq0owE=;
-        h=From:To:Cc:Subject:Date:From;
-        b=1SQS24JOeFsx1iasRvSrQ65PxPvLq6dmxeYcepsSK8GUZGbyMelZlNIuhySqBfDi1
-         bZnWylzcAirhjbBZDld4bG3srPaamgSu01Z9UN63UVkQ+oyD8xxZqDnIHmEKgpQ6sm
-         zRt4WFNvhEsJP72JojS+Lha8JOjX4CQ66Zr6jp9Y=
-From:   Krzysztof Kozlowski <krzk@kernel.org>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        id S1726269AbgIBT4w (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 2 Sep 2020 15:56:52 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34752 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726140AbgIBT4r (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Sep 2020 15:56:47 -0400
+Received: from mail-pj1-x1041.google.com (mail-pj1-x1041.google.com [IPv6:2607:f8b0:4864:20::1041])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D5854C061244;
+        Wed,  2 Sep 2020 12:56:47 -0700 (PDT)
+Received: by mail-pj1-x1041.google.com with SMTP id np15so2608226pjb.0;
+        Wed, 02 Sep 2020 12:56:47 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=subject:to:references:from:message-id:date:user-agent:mime-version
+         :in-reply-to:content-language:content-transfer-encoding;
+        bh=kuKGy0nMzCedIxYfbaeRSNCf0OjAifTH7DorC8oMLIc=;
+        b=Oryep4f/il09PEeRvkAzCa5yEamHX3IfI4haHnZFqft2sDVyMzWOa2oW6q5r7iV5cP
+         4WT9+KMNL0+EhJccY9W2L8b8ZRNf5/yo2w1W4WhJ8XUROyxfdUB59D07znI18+pINr/N
+         BcNZBzI0Gy8lVLdV6hEaC0yuvFtHvvTjC55K9Sa9xT2q7JBJXf2m3p90Sa3cB7/q91y0
+         ceFFSnakSGrgS6Uk+aqsVKfyHoIJd+8xJXzN2S5xseiX/Z3zDW4R94HHyVGEN+V6jqOz
+         ByLYj8x/gERQejNbUXCouYpjDKb2Tvtc67e8dxDbrAFFi+bTIhE6bVbxm/6YTah8KX7G
+         xOWA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:subject:to:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=kuKGy0nMzCedIxYfbaeRSNCf0OjAifTH7DorC8oMLIc=;
+        b=KwuTkCAP5jj1LePyWciFHCHs4MqJq/x9RNvBHXSdGTlCLufgQyfCT2LvOkuCTWqiKY
+         6B6/vliucj2x94poi/u72SWQiwUF2IIdC+x5UX2IeYqNeqvJaxIcBRVrzI3Qgof0iaNO
+         t0c+wfKYFY6Tp367JtX6nIBRI/yvAM3UyvHrI3vK0I0j+VgSSjG/+Hq2zSV9bJ1U/yTX
+         4Nac2ncxdCqy4PRhG7WayvS9gL6m/BCCxUSO98YFH5eXE+432aZlqQaokymW5sET2+hB
+         7ZnZ9XCCbVhfkzVoDEhjQK96N2J+XwKQlOu48IrBcmBpEtndhVZjAQDWfsEdWhyEONJ/
+         mSvw==
+X-Gm-Message-State: AOAM530xg2dH+nhKMEbfjEENKlVKSxrjWvDVfc8t4SSoTUzpLhLJgQE0
+        ClK3vG9pxr8KYO15NM98v2b3vofehNQ=
+X-Google-Smtp-Source: ABdhPJyEGSaG8BPaN9z2skZyEo+FUnajjLrY5nUupDll1Zmgpd/sTj0J5IIHRSDG1t8oto5PtF2n8Q==
+X-Received: by 2002:a17:902:d213:: with SMTP id t19mr111855ply.46.1599076606592;
+        Wed, 02 Sep 2020 12:56:46 -0700 (PDT)
+Received: from [10.230.30.107] ([192.19.223.252])
+        by smtp.gmail.com with ESMTPSA id t20sm225492pjg.21.2020.09.02.12.56.42
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 02 Sep 2020 12:56:45 -0700 (PDT)
+Subject: Re: [PATCH 01/11] mmc: bcm2835: Simplify with dev_err_probe()
+To:     Krzysztof Kozlowski <krzk@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
         Florian Fainelli <f.fainelli@gmail.com>,
         Ray Jui <rjui@broadcom.com>,
         Scott Branden <sbranden@broadcom.com>,
@@ -63,56 +86,31 @@ To:     Ulf Hansson <ulf.hansson@linaro.org>,
         linux-kernel@vger.kernel.org, linux-rpi-kernel@lists.infradead.org,
         linux-arm-kernel@lists.infradead.org,
         linux-amlogic@lists.infradead.org, linux-tegra@vger.kernel.org
-Cc:     Krzysztof Kozlowski <krzk@kernel.org>
-Subject: [PATCH 00/11] mmc: Minor cleanups and compile test
-Date:   Wed,  2 Sep 2020 21:36:47 +0200
-Message-Id: <20200902193658.20539-1-krzk@kernel.org>
-X-Mailer: git-send-email 2.17.1
+References: <20200902193658.20539-1-krzk@kernel.org>
+ <20200902193658.20539-2-krzk@kernel.org>
+From:   Florian Fainelli <f.fainelli@gmail.com>
+Message-ID: <03ecf673-908c-823e-484b-7c442ad16621@gmail.com>
+Date:   Wed, 2 Sep 2020 12:56:41 -0700
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101
+ Firefox/78.0 Thunderbird/78.1.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+In-Reply-To: <20200902193658.20539-2-krzk@kernel.org>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi,
 
-Set of minor cleanups.  Patches requiring more attention:
- - 6/11: Testing and review would be appreciated,
- - 11/11: I build tested multiple architectures but not all and
-   definitely no all possible configs. This one could sit on the lists
-   for few days so 0-day would try it.
 
-Best regards,
-Krzysztof
+On 9/2/2020 12:36 PM, Krzysztof Kozlowski wrote:
+> Common pattern of handling deferred probe can be simplified with
+> dev_err_probe().  Less code and the error value gets printed.
+> 
+> Signed-off-by: Krzysztof Kozlowski <krzk@kernel.org>
 
-Krzysztof Kozlowski (11):
-  mmc: bcm2835: Simplify with dev_err_probe()
-  mmc: davinci: Simplify with dev_err_probe()
-  mmc: dw_mmc-zx: Simplify with dev_err_probe()
-  mmc: jz4740: Simplify with dev_err_probe()
-  mmc: meson: Simplify with dev_err_probe()
-  mmc: sdhci-brcmstb: Simplify with optional clock and dev_err_probe()
-  mmc: sdhci-of-arasan: Simplify with dev_err_probe()
-  mmc: sdhci-tegra: Simplify with dev_err_probe()
-  mmc: dw_mmc: Simplify with dev_err_probe()
-  mmc: sdhci-of-sparx5: Use proper printk format for dma_addr_t
-  mmc: host: Enable compile testing of multiple drivers
-
- drivers/mmc/host/Kconfig           | 42 ++++++++++++++++--------------
- drivers/mmc/host/bcm2835.c         |  4 +--
- drivers/mmc/host/davinci_mmc.c     |  5 ++--
- drivers/mmc/host/dw_mmc-zx.c       | 11 +++-----
- drivers/mmc/host/dw_mmc.c          |  9 +++----
- drivers/mmc/host/jz4740_mmc.c      |  5 ++--
- drivers/mmc/host/meson-gx-mmc.c    | 16 ++++--------
- drivers/mmc/host/sdhci-brcmstb.c   | 12 ++++-----
- drivers/mmc/host/sdhci-of-arasan.c |  7 +++--
- drivers/mmc/host/sdhci-of-sparx5.c |  4 +--
- drivers/mmc/host/sdhci-tegra.c     |  7 ++---
- 11 files changed, 51 insertions(+), 71 deletions(-)
-
+Acked-by: Florian Fainelli <f.fainelli@gmail.com>
 -- 
-2.17.1
-
+Florian
