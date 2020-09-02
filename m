@@ -4,192 +4,115 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-10.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=unavailable autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0EFE4C433E7
-	for <linux-mmc@archiver.kernel.org>; Wed,  2 Sep 2020 09:04:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C620AC433E2
+	for <linux-mmc@archiver.kernel.org>; Wed,  2 Sep 2020 09:04:33 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id DE7632071B
-	for <linux-mmc@archiver.kernel.org>; Wed,  2 Sep 2020 09:04:26 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9C74720709
+	for <linux-mmc@archiver.kernel.org>; Wed,  2 Sep 2020 09:04:33 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="N0KHXRDt"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="wOfT6RjW"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726937AbgIBJEN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 2 Sep 2020 05:04:13 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47134 "EHLO
+        id S1727020AbgIBJEc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 2 Sep 2020 05:04:32 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47048 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726913AbgIBJEE (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Sep 2020 05:04:04 -0400
+        with ESMTP id S1726686AbgIBJDt (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Sep 2020 05:03:49 -0400
 Received: from mail-vs1-xe42.google.com (mail-vs1-xe42.google.com [IPv6:2607:f8b0:4864:20::e42])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7491BC06124F
-        for <linux-mmc@vger.kernel.org>; Wed,  2 Sep 2020 02:04:04 -0700 (PDT)
-Received: by mail-vs1-xe42.google.com with SMTP id q13so2148721vsj.13
-        for <linux-mmc@vger.kernel.org>; Wed, 02 Sep 2020 02:04:04 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 81F93C06125C
+        for <linux-mmc@vger.kernel.org>; Wed,  2 Sep 2020 02:03:49 -0700 (PDT)
+Received: by mail-vs1-xe42.google.com with SMTP id s62so317761vsc.7
+        for <linux-mmc@vger.kernel.org>; Wed, 02 Sep 2020 02:03:49 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=hFnfq76GlnsUYLxeV0fKqnYc2qmykFYSJOcJXdU/GGk=;
-        b=N0KHXRDtwYgxVI4n0o099cYfeLkcI4F7PipVrxLx0iYnKFfBhKor9MYqScRo5TyAbK
-         rV4KCiPzj2lt4a3gg2qucLoNE57VSPmACia+ffSBqz7/DGBHgfRbcclvWl09zsAHllDq
-         GO7AGWM5jyTOwqUP4gUF5qtUPvXUCHp4434AYzgEQdZCLPbRtImYmg13LihPzeC+/1br
-         PwZzDfr/O+ubvpD/LEWEoKocxSm9drxEQM+tB7XVHS/ytNH26cuRFe4URiXue8deNKdq
-         cahqc04wc7/PAnFAbgEm5vcUtOUAyYyQAqN2c7MAloeaIGTkACYLdKz/KHv39nDDo45E
-         yXBw==
+        bh=Ew8uPftzd7rZEwyKmHbAQ1uIc01gvs5Er2gSjYfu7W8=;
+        b=wOfT6RjWKK9Cg08Nc5h2tPkm+jRI7/v3eKlCGASt8OfijrkTGiscXmoX8NyAqTFy2x
+         t8mxemk7NUQGcOapBDBtIwgX+s7T+aMA7Isp1w44mxKk6ATRf3yvQn0EXwJpxb4wkiRY
+         Zeh+pnFgy1Hlpxau2tEjagoxu23SnPstE5T+wd9RiN1dSuAWlyyLZPcBhVsJKNJFHIsh
+         9DbTFjdf5ZE3a++HkXY9hQRc6g9tWl6fKc8giGuYZwKs9tOi+OBd7WvS9N7IZ21R0HfL
+         M4euvKPWeZeSVeBlExbHJB09fiU6fWabTVlxt4CbIbW7hfxqfjDIA3cmCY9M9abnRu6y
+         KcrA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=hFnfq76GlnsUYLxeV0fKqnYc2qmykFYSJOcJXdU/GGk=;
-        b=NGCu6giqowG9HClsI41Y+TpqKJWa+P2P4VT2CW9YtTx/WYbBvczxkafBLm8udcsseA
-         8ReCtOp0ncYz2zSwNhVreX8v4BGvhdblwAzSUoOFZUXTOaeTJoTMT1ULUm/ZogryxUvS
-         J/I8EDgVJlxNBlKgheX9YgqLMbHWEh03ge4ASxQqWUF6OccDZwPog4lvtOSMfUJhxhGO
-         pZDaHzLkvtmgE73uHQtkICBCkQvcsOc1BFE5RBiPCaK7Fn06f73hCrJFzOY4paNtuM+6
-         /odi2OxMkRhPauquw/9dbCLtG+/FMtX6ZaPKJwVHqkpELYQj/Pogo/+Up6u1B+sHoiT5
-         LJaw==
-X-Gm-Message-State: AOAM532mHJaswg+2j2L0iY01BplHXGS7A4E++A52DbphHU00tiaE54Ia
-        VweAt0HQVrFYbwRzsR2X2OzpMqiirMJ9nLA1LLfIuQX3YARWpA==
-X-Google-Smtp-Source: ABdhPJxvNkCHqkXeW6+ncgi9B+yO4U+7Pipy1zHbUW8fR1FyXHaqe/R4OuugY6ftNvPRbMGxAdOqpJOUH7HNDNC0i9M=
-X-Received: by 2002:a67:b44a:: with SMTP id c10mr4492088vsm.35.1599037443576;
- Wed, 02 Sep 2020 02:04:03 -0700 (PDT)
+        bh=Ew8uPftzd7rZEwyKmHbAQ1uIc01gvs5Er2gSjYfu7W8=;
+        b=ZQPu3//USnDgJl1Xo6CX9KyQlz7KoHKV/NAJQpuiGqdFyRFE3got9nDBguJKcED0CX
+         gm8pTdHgH6zTfga7T/ZFpLveSbAtox0V4vLlWzb5f89H/USbel+HliAnxoyvdVPgQYr7
+         qViJPUsNKqZvKZAyEYJErHWK1i6AFfva9tkw2PRW4R2J0MDEPtdeVdomDLAkYKQFpeyU
+         AQyS4ArhG6GTYJsdgIl328E+qmSiS5wd0MBd2dMuBWaH5nWFVHmRYRCT30Sxv5zqcN6b
+         cbF6BQSDDKUu6I2Ec6lsMuCyAkExF7HvxNNd6dD4MvJ93ZelhDheQQv+5OqM5SDeSRhM
+         nbEw==
+X-Gm-Message-State: AOAM532Uk9pWUg3OAJv4hUImOGDdIuh0/ij3hkutGLh1+Vj1aF/aqwkw
+        tqisDfuGbqJmO0ln1WRWduRlAtaFJFjFPShKNaPYMQ==
+X-Google-Smtp-Source: ABdhPJypfiJBpPKqO5parBohEkYTMjyGzwzAwZxO6TYjuaHX2IfAFD06OB4IGnxO8uyCU9sql8Or1PQuWxYknwgZ2nk=
+X-Received: by 2002:a05:6102:5a:: with SMTP id k26mr4959457vsp.52.1599037428764;
+ Wed, 02 Sep 2020 02:03:48 -0700 (PDT)
 MIME-Version: 1.0
-References: <20200901085004.2512-1-matthias.schiffer@ew.tq-group.com> <20200901085004.2512-2-matthias.schiffer@ew.tq-group.com>
-In-Reply-To: <20200901085004.2512-2-matthias.schiffer@ew.tq-group.com>
+References: <20200831161147.13515-1-krzk@kernel.org> <20200831161147.13515-2-krzk@kernel.org>
+In-Reply-To: <20200831161147.13515-2-krzk@kernel.org>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 2 Sep 2020 11:03:27 +0200
-Message-ID: <CAPDyKFoMcxxm5=tNmn8b9xU+xRYUchz5pXOMZQUed8gR9G-Hrw@mail.gmail.com>
-Subject: Re: [PATCH mmc-next v4 2/2] mmc: allow setting slot index via device
- tree alias
-To:     Matthias Schiffer <matthias.schiffer@ew.tq-group.com>
-Cc:     Rob Herring <robh+dt@kernel.org>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+Date:   Wed, 2 Sep 2020 11:03:12 +0200
+Message-ID: <CAPDyKFrwABSPKq9w9Mm=6COsFPuf18MYbuC_KffSgWyMJa+AWA@mail.gmail.com>
+Subject: Re: [PATCH 2/2] dt-bindings: mmc: mmc-pwreq-simple: Accept more than
+ one reset GPIO
+To:     Krzysztof Kozlowski <krzk@kernel.org>
+Cc:     Lee Jones <lee.jones@linaro.org>, Rob Herring <robh+dt@kernel.org>,
+        Benson Leung <bleung@chromium.org>,
+        Enric Balletbo i Serra <enric.balletbo@collabora.com>,
+        Guenter Roeck <groeck@chromium.org>,
         DTML <devicetree@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Marek Szyprowski <m.szyprowski@samsung.com>,
+        Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>,
+        Sylwester Nawrocki <snawrocki@kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 1 Sep 2020 at 10:50, Matthias Schiffer
-<matthias.schiffer@ew.tq-group.com> wrote:
+On Mon, 31 Aug 2020 at 18:11, Krzysztof Kozlowski <krzk@kernel.org> wrote:
 >
-> As with GPIO, UART and others, allow specifying the device index via the
-> aliases node in the device tree.
+> There might be multiple reset GPIOs but dtschema has trouble parsing it
+> if there are no maxItems:
 >
-> On embedded devices, there is often a combination of removable (e.g.
-> SD card) and non-removable MMC devices (e.g. eMMC).
-> Therefore the index might change depending on
+>   arch/arm/boot/dts/exynos5250-snow.dt.yaml: mmc3_pwrseq: reset-gpios: [[20, 2, 1], [20, 1, 1]] is too long
+>     From schema: Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.yaml
 >
-> * host of removable device
-> * removable card present or not
+> Signed-off-by: Krzysztof Kozlowski <krzk@kernel.org>
+> ---
+>  Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.yaml | 2 ++
+>  1 file changed, 2 insertions(+)
 >
-> This makes it difficult to hardcode the root device, if it is on the
-> non-removable device. E.g. if SD card is present eMMC will be mmcblk1,
-> if SD card is not present at boot, eMMC will be mmcblk0.
+> diff --git a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.yaml b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.yaml
+> index 449215444723..8d625f903856 100644
+> --- a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.yaml
+> @@ -20,6 +20,8 @@ properties:
 >
-> Alternative solutions like PARTUUIDs do not cover the case where multiple
-> mmcblk devices contain the same image. This is a common issue on devices
-> that can boot both from eMMC (for regular boot) and SD cards (as a
-> temporary boot medium for development). When a firmware image is
-> installed to eMMC after a test boot via SD card, there will be no
-> reliable way to refer to a specific device using (PART)UUIDs oder
-> LABELs.
+>    reset-gpios:
+>      minItems: 1
+> +    # Put some limit to avoid false warnings
+> +    maxItems: 32
+
+Not sure what number to pick. I guess two should be enough, but on the
+other hand it doesn't really matter.
+
+>      description:
+>        contains a list of GPIO specifiers. The reset GPIOs are asserted
+>        at initialization and prior we start the power up procedure of the card.
+> --
+> 2.17.1
 >
-> The demand for this feature has led to multiple attempts to implement
-> it, dating back at least to 2012 (see
-> https://www.spinics.net/lists/linux-mmc/msg26586.html for a previous
-> discussion from 2014).
->
-> All indices defined in the aliases node will be reserved for use by the
-> respective MMC device, moving the indices of devices that don't have an
-> alias up into the non-reserved range. If the aliases node is not found,
-> the driver will act as before.
->
-> This is a rebased and cleaned up version of
-> https://www.spinics.net/lists/linux-mmc/msg26588.html .
->
-> Based-on-patch-by: Sascha Hauer <s.hauer@pengutronix.de>
-> Link: https://lkml.org/lkml/2020/8/5/194
-> Signed-off-by: Matthias Schiffer <matthias.schiffer@ew.tq-group.com>
 
 Applied for next, thanks!
 
 Kind regards
 Uffe
-
-
-> ---
->
-> v4:
-> - minor adjustments to commit message
->
-> v3:
-> - remove unneeded mmcblock changes
-> - remove most helper functions to simplify code
-> - extended commit message
->
-> v2:
-> - fix missing symbols for modular mmcblock
->
->
->
->  drivers/mmc/core/host.c | 26 +++++++++++++++++++++++++-
->  1 file changed, 25 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-> index c8fae6611b73..96b2ca1f1b06 100644
-> --- a/drivers/mmc/core/host.c
-> +++ b/drivers/mmc/core/host.c
-> @@ -376,6 +376,20 @@ int mmc_of_parse_voltage(struct device_node *np, u32 *mask)
->  }
->  EXPORT_SYMBOL(mmc_of_parse_voltage);
->
-> +/**
-> + * mmc_first_nonreserved_index() - get the first index that is not reserved
-> + */
-> +static int mmc_first_nonreserved_index(void)
-> +{
-> +       int max;
-> +
-> +       max = of_alias_get_highest_id("mmc");
-> +       if (max < 0)
-> +               return 0;
-> +
-> +       return max + 1;
-> +}
-> +
->  /**
->   *     mmc_alloc_host - initialise the per-host structure.
->   *     @extra: sizeof private data structure
-> @@ -387,6 +401,7 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
->  {
->         int err;
->         struct mmc_host *host;
-> +       int alias_id, min_idx, max_idx;
->
->         host = kzalloc(sizeof(struct mmc_host) + extra, GFP_KERNEL);
->         if (!host)
-> @@ -395,7 +410,16 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
->         /* scanning will be enabled when we're ready */
->         host->rescan_disable = 1;
->
-> -       err = ida_simple_get(&mmc_host_ida, 0, 0, GFP_KERNEL);
-> +       alias_id = of_alias_get_id(dev->of_node, "mmc");
-> +       if (alias_id >= 0) {
-> +               min_idx = alias_id;
-> +               max_idx = alias_id + 1;
-> +       } else {
-> +               min_idx = mmc_first_nonreserved_index();
-> +               max_idx = 0;
-> +       }
-> +
-> +       err = ida_simple_get(&mmc_host_ida, min_idx, max_idx, GFP_KERNEL);
->         if (err < 0) {
->                 kfree(host);
->                 return NULL;
-> --
-> 2.17.1
->
