@@ -7,112 +7,148 @@ X-Spam-Status: No, score=-10.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C620AC433E2
-	for <linux-mmc@archiver.kernel.org>; Wed,  2 Sep 2020 09:04:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6BCEDC433E2
+	for <linux-mmc@archiver.kernel.org>; Wed,  2 Sep 2020 09:04:39 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9C74720709
-	for <linux-mmc@archiver.kernel.org>; Wed,  2 Sep 2020 09:04:33 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 46B7320709
+	for <linux-mmc@archiver.kernel.org>; Wed,  2 Sep 2020 09:04:39 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="wOfT6RjW"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="ccyj7iwV"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727020AbgIBJEc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 2 Sep 2020 05:04:32 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47048 "EHLO
+        id S1726654AbgIBJEd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 2 Sep 2020 05:04:33 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47058 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726686AbgIBJDt (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Sep 2020 05:03:49 -0400
-Received: from mail-vs1-xe42.google.com (mail-vs1-xe42.google.com [IPv6:2607:f8b0:4864:20::e42])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 81F93C06125C
-        for <linux-mmc@vger.kernel.org>; Wed,  2 Sep 2020 02:03:49 -0700 (PDT)
-Received: by mail-vs1-xe42.google.com with SMTP id s62so317761vsc.7
-        for <linux-mmc@vger.kernel.org>; Wed, 02 Sep 2020 02:03:49 -0700 (PDT)
+        with ESMTP id S1726124AbgIBJDm (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Sep 2020 05:03:42 -0400
+Received: from mail-ua1-x941.google.com (mail-ua1-x941.google.com [IPv6:2607:f8b0:4864:20::941])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 82D3CC061251
+        for <linux-mmc@vger.kernel.org>; Wed,  2 Sep 2020 02:03:39 -0700 (PDT)
+Received: by mail-ua1-x941.google.com with SMTP id z12so1333984uam.12
+        for <linux-mmc@vger.kernel.org>; Wed, 02 Sep 2020 02:03:39 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=Ew8uPftzd7rZEwyKmHbAQ1uIc01gvs5Er2gSjYfu7W8=;
-        b=wOfT6RjWKK9Cg08Nc5h2tPkm+jRI7/v3eKlCGASt8OfijrkTGiscXmoX8NyAqTFy2x
-         t8mxemk7NUQGcOapBDBtIwgX+s7T+aMA7Isp1w44mxKk6ATRf3yvQn0EXwJpxb4wkiRY
-         Zeh+pnFgy1Hlpxau2tEjagoxu23SnPstE5T+wd9RiN1dSuAWlyyLZPcBhVsJKNJFHIsh
-         9DbTFjdf5ZE3a++HkXY9hQRc6g9tWl6fKc8giGuYZwKs9tOi+OBd7WvS9N7IZ21R0HfL
-         M4euvKPWeZeSVeBlExbHJB09fiU6fWabTVlxt4CbIbW7hfxqfjDIA3cmCY9M9abnRu6y
-         KcrA==
+        bh=upktra/6N5emKh7zvhc7gnHBaffqMLEbCV10tmOPScE=;
+        b=ccyj7iwV1I8JjY1UHxeji0yJ0pPCBmQh8EC8+5I+78EMJ9CJTqGDgzaHKVJGcpJGUL
+         hN/9an7B8iC9RUmg2KYdm3DT1NQjzLHOhZdZzmiOWNfSIO4AtpSo8XFy+Nv81tpUbOgi
+         xtUNNIXTRFi/ir0DDVeTakmrL/ktIE7C9ruWEnSo7RQw9vytDoJIQto9IHkd8NgzSSua
+         HELp1r21BKjxocLn6wedYf4i5s2I7HlGoXQzcuCbbHY2lZtvhg40gFv4d0xC1bBUzeAi
+         Ey+JweUb4u3rDmoX4NS3Y6z864knovorET27+g1K4ysBlA5wfSwI+z1sFEoICVsd55Uz
+         8Deg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=Ew8uPftzd7rZEwyKmHbAQ1uIc01gvs5Er2gSjYfu7W8=;
-        b=ZQPu3//USnDgJl1Xo6CX9KyQlz7KoHKV/NAJQpuiGqdFyRFE3got9nDBguJKcED0CX
-         gm8pTdHgH6zTfga7T/ZFpLveSbAtox0V4vLlWzb5f89H/USbel+HliAnxoyvdVPgQYr7
-         qViJPUsNKqZvKZAyEYJErHWK1i6AFfva9tkw2PRW4R2J0MDEPtdeVdomDLAkYKQFpeyU
-         AQyS4ArhG6GTYJsdgIl328E+qmSiS5wd0MBd2dMuBWaH5nWFVHmRYRCT30Sxv5zqcN6b
-         cbF6BQSDDKUu6I2Ec6lsMuCyAkExF7HvxNNd6dD4MvJ93ZelhDheQQv+5OqM5SDeSRhM
-         nbEw==
-X-Gm-Message-State: AOAM532Uk9pWUg3OAJv4hUImOGDdIuh0/ij3hkutGLh1+Vj1aF/aqwkw
-        tqisDfuGbqJmO0ln1WRWduRlAtaFJFjFPShKNaPYMQ==
-X-Google-Smtp-Source: ABdhPJypfiJBpPKqO5parBohEkYTMjyGzwzAwZxO6TYjuaHX2IfAFD06OB4IGnxO8uyCU9sql8Or1PQuWxYknwgZ2nk=
-X-Received: by 2002:a05:6102:5a:: with SMTP id k26mr4959457vsp.52.1599037428764;
- Wed, 02 Sep 2020 02:03:48 -0700 (PDT)
+        bh=upktra/6N5emKh7zvhc7gnHBaffqMLEbCV10tmOPScE=;
+        b=M4zxoB3v0ael1XVZGswmQ82OkHqqOxxvhhmcMw/mY7qCW53SHfECpJUrr+lQGY7awx
+         s3k5Y3WIVRZXMsZeBKmXc8VNbMubMYndxHRvow550Lw9gHzOjI/dtDB9nHgX9PkXLyBE
+         eUyLaMcXE6VrGwWBEEpoo6yysBm/oHk60uK/qocgM45rWWx1zF71WqAPBWWDvBIIQ93d
+         KQhW6DsS7iEXZyy7cKytZ7bvCY9Agb+8f0pa3GAIm6iHD1rWnpBvtMBrU9WCsmW4olEN
+         5O8gv83m8w54Pm6jRp2iAMBNL8WOviNZJEZaM7NHt3N+ZZzjIO+L5MHPxW1pWawvMB9T
+         pDcQ==
+X-Gm-Message-State: AOAM5326UDJ/w1n07enSGFco+Qm1X/rJa6yc7M8Y5vzDk09M6WXHThat
+        bEmp7nztMnrdcJqayE7Se8BLAg4f21+81IPrO2vOcQ==
+X-Google-Smtp-Source: ABdhPJzpbY3N1DOxGoSiFAa5u53PceFM0ve5E9HnO0kFcgXs6+5D1tRc8VeQ0iGX/g4t/gGuGWsUVm/lRGJnL+dPCkw=
+X-Received: by 2002:a9f:2431:: with SMTP id 46mr3660526uaq.129.1599037418663;
+ Wed, 02 Sep 2020 02:03:38 -0700 (PDT)
 MIME-Version: 1.0
-References: <20200831161147.13515-1-krzk@kernel.org> <20200831161147.13515-2-krzk@kernel.org>
-In-Reply-To: <20200831161147.13515-2-krzk@kernel.org>
+References: <20200827075809.1.If179abf5ecb67c963494db79c3bc4247d987419b@changeid>
+In-Reply-To: <20200827075809.1.If179abf5ecb67c963494db79c3bc4247d987419b@changeid>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 2 Sep 2020 11:03:12 +0200
-Message-ID: <CAPDyKFrwABSPKq9w9Mm=6COsFPuf18MYbuC_KffSgWyMJa+AWA@mail.gmail.com>
-Subject: Re: [PATCH 2/2] dt-bindings: mmc: mmc-pwreq-simple: Accept more than
- one reset GPIO
-To:     Krzysztof Kozlowski <krzk@kernel.org>
-Cc:     Lee Jones <lee.jones@linaro.org>, Rob Herring <robh+dt@kernel.org>,
-        Benson Leung <bleung@chromium.org>,
-        Enric Balletbo i Serra <enric.balletbo@collabora.com>,
-        Guenter Roeck <groeck@chromium.org>,
-        DTML <devicetree@vger.kernel.org>,
+Date:   Wed, 2 Sep 2020 11:03:02 +0200
+Message-ID: <CAPDyKFobQqtjjvTQbZ+MTex2A--5HcTsNT5MGhaLRA52cXuUMg@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-msm: Add retries when all tuning phases are
+ found valid
+To:     Douglas Anderson <dianders@chromium.org>
+Cc:     Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Andy Gross <agross@kernel.org>,
+        Asutosh Das <asutoshd@codeaurora.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Chris Ball <chris@printf.net>,
+        Georgi Djakov <gdjakov@mm-sol.com>,
+        Venkat Gopalakrishnan <venkatg@codeaurora.org>,
+        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
         Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Marek Szyprowski <m.szyprowski@samsung.com>,
-        Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>,
-        Sylwester Nawrocki <snawrocki@kernel.org>
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 31 Aug 2020 at 18:11, Krzysztof Kozlowski <krzk@kernel.org> wrote:
+On Thu, 27 Aug 2020 at 16:59, Douglas Anderson <dianders@chromium.org> wrote:
 >
-> There might be multiple reset GPIOs but dtschema has trouble parsing it
-> if there are no maxItems:
+> As the comments in this patch say, if we tune and find all phases are
+> valid it's _almost_ as bad as no phases being found valid.  Probably
+> all phases are not really reliable but we didn't detect where the
+> unreliable place is.  That means we'll essentially be guessing and
+> hoping we get a good phase.
 >
->   arch/arm/boot/dts/exynos5250-snow.dt.yaml: mmc3_pwrseq: reset-gpios: [[20, 2, 1], [20, 1, 1]] is too long
->     From schema: Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.yaml
+> This is not just a problem in theory.  It was causing real problems on
+> a real board.  On that board, most often phase 10 is found as the only
+> invalid phase, though sometimes 10 and 11 are invalid and sometimes
+> just 11.  Some percentage of the time, however, all phases are found
+> to be valid.  When this happens, the current logic will decide to use
+> phase 11.  Since phase 11 is sometimes found to be invalid, this is a
+> bad choice.  Sure enough, when phase 11 is picked we often get mmc
+> errors later in boot.
 >
-> Signed-off-by: Krzysztof Kozlowski <krzk@kernel.org>
-> ---
->  Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.yaml | 2 ++
->  1 file changed, 2 insertions(+)
+> I have seen cases where all phases were found to be valid 3 times in a
+> row, so increase the retry count to 10 just to be extra sure.
 >
-> diff --git a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.yaml b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.yaml
-> index 449215444723..8d625f903856 100644
-> --- a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.yaml
-> @@ -20,6 +20,8 @@ properties:
->
->    reset-gpios:
->      minItems: 1
-> +    # Put some limit to avoid false warnings
-> +    maxItems: 32
+> Fixes: 415b5a75da43 ("mmc: sdhci-msm: Add platform_execute_tuning implementation")
+> Signed-off-by: Douglas Anderson <dianders@chromium.org>
 
-Not sure what number to pick. I guess two should be enough, but on the
-other hand it doesn't really matter.
-
->      description:
->        contains a list of GPIO specifiers. The reset GPIOs are asserted
->        at initialization and prior we start the power up procedure of the card.
-> --
-> 2.17.1
->
-
-Applied for next, thanks!
+Applied for fixes and by adding a stable tag, thanks!
 
 Kind regards
 Uffe
+
+
+> ---
+>
+>  drivers/mmc/host/sdhci-msm.c | 18 +++++++++++++++++-
+>  1 file changed, 17 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index b7e47107a31a..1b78106681e0 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -1165,7 +1165,7 @@ static void sdhci_msm_set_cdr(struct sdhci_host *host, bool enable)
+>  static int sdhci_msm_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>  {
+>         struct sdhci_host *host = mmc_priv(mmc);
+> -       int tuning_seq_cnt = 3;
+> +       int tuning_seq_cnt = 10;
+>         u8 phase, tuned_phases[16], tuned_phase_cnt = 0;
+>         int rc;
+>         struct mmc_ios ios = host->mmc->ios;
+> @@ -1221,6 +1221,22 @@ static int sdhci_msm_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>         } while (++phase < ARRAY_SIZE(tuned_phases));
+>
+>         if (tuned_phase_cnt) {
+> +               if (tuned_phase_cnt == ARRAY_SIZE(tuned_phases)) {
+> +                       /*
+> +                        * All phases valid is _almost_ as bad as no phases
+> +                        * valid.  Probably all phases are not really reliable
+> +                        * but we didn't detect where the unreliable place is.
+> +                        * That means we'll essentially be guessing and hoping
+> +                        * we get a good phase.  Better to try a few times.
+> +                        */
+> +                       dev_dbg(mmc_dev(mmc), "%s: All phases valid; try again\n",
+> +                               mmc_hostname(mmc));
+> +                       if (--tuning_seq_cnt) {
+> +                               tuned_phase_cnt = 0;
+> +                               goto retry;
+> +                       }
+> +               }
+> +
+>                 rc = msm_find_most_appropriate_phase(host, tuned_phases,
+>                                                      tuned_phase_cnt);
+>                 if (rc < 0)
+> --
+> 2.28.0.297.g1956fa8f8d-goog
+>
