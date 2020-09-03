@@ -2,99 +2,127 @@ Return-Path: <SRS0=lwnd=CM=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.5 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0B54BC433E7
-	for <linux-mmc@archiver.kernel.org>; Thu,  3 Sep 2020 00:41:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BB93EC433E2
+	for <linux-mmc@archiver.kernel.org>; Thu,  3 Sep 2020 01:20:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id CCF4F20786
-	for <linux-mmc@archiver.kernel.org>; Thu,  3 Sep 2020 00:41:37 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 348B2206E7
+	for <linux-mmc@archiver.kernel.org>; Thu,  3 Sep 2020 01:20:40 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=alliedtelesis.co.nz header.i=@alliedtelesis.co.nz header.b="klyZE/Bj"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726654AbgICAlh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 2 Sep 2020 20:41:37 -0400
-Received: from brightrain.aerifal.cx ([216.12.86.13]:49006 "EHLO
-        brightrain.aerifal.cx" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726377AbgICAlh (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Sep 2020 20:41:37 -0400
-Date:   Wed, 2 Sep 2020 20:41:35 -0400
-From:   Rich Felker <dalias@libc.org>
-To:     Geert Uytterhoeven <geert@linux-m68k.org>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Christoph Hellwig <hch@lst.de>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Mark Brown <broonie@kernel.org>,
-        Linux-sh list <linux-sh@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-Subject: Re: [PATCH v2] mmc: mmc_spi: Allow the driver to be built when
- CONFIG_HAS_DMA is unset
-Message-ID: <20200903004135.GT3265@brightrain.aerifal.cx>
-References: <20200901150438.228887-1-ulf.hansson@linaro.org>
- <20200901150654.GB30034@lst.de>
- <CAPDyKFqZXdtVokrDQvJAh-NzN0T2ayPD6MepemLEaDt1TRPduw@mail.gmail.com>
- <20200901154049.GA376@lst.de>
- <CAPDyKFqDKUG3RC241hv535CLFGEQc4b-vv0e3bexzGkDSY82Jg@mail.gmail.com>
- <20200902134418.GR3265@brightrain.aerifal.cx>
- <CAMuHMdUiPhHtkQfcpMSA6HMvmcFyg__rSGUoHRKQfQf2N5QTYA@mail.gmail.com>
+        id S1727865AbgICBUj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 2 Sep 2020 21:20:39 -0400
+Received: from gate2.alliedtelesis.co.nz ([202.36.163.20]:40952 "EHLO
+        gate2.alliedtelesis.co.nz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726814AbgICBUg (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Sep 2020 21:20:36 -0400
+Received: from mmarshal3.atlnz.lc (mmarshal3.atlnz.lc [10.32.18.43])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (Client did not present a certificate)
+        by gate2.alliedtelesis.co.nz (Postfix) with ESMTPS id EB6A984487;
+        Thu,  3 Sep 2020 13:20:30 +1200 (NZST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=alliedtelesis.co.nz;
+        s=mail181024; t=1599096030;
+        bh=ZcX7TAd0fNPu0z2dBLatCyLAmXlOHgvmAtrIUZg0cdE=;
+        h=From:To:Cc:Subject:Date;
+        b=klyZE/Bjgl6xmEAD/lbHNYkNhyn3Hj4V1NjZevgr2oKO6gRKV/hE1JQdU6UJH3fDS
+         rSe3dV3xu0qKSDtlAJOvmufsBokG0EgxB1gyqfQBmEd37SnuuE0KO/2+iKwXGe4Yfh
+         X8gLZhHAmeSdEvDXhmz+awnoyze5rFoUvl6zwHXqy61bwDygUxsj0mbIPkE7AS+4l1
+         JBero81gxM+bVzuhAbmkDKGNfd+4UYOzUErfWIcE/CyEOZ17nUQmFiz96Z+iYQXnEY
+         Z0nuDGPhLqq9rxuPW2hmcpZP6yex23yTY+xmDXEKOAgc6Qt8KG6mzlqfOp7s5RWgRs
+         iNpc5CYkH5TRA==
+Received: from smtp (Not Verified[10.32.16.33]) by mmarshal3.atlnz.lc with Trustwave SEG (v7,5,8,10121)
+        id <B5f5044dc0000>; Thu, 03 Sep 2020 13:20:28 +1200
+Received: from chrisp-dl.ws.atlnz.lc (chrisp-dl.ws.atlnz.lc [10.33.22.20])
+        by smtp (Postfix) with ESMTP id DF61D13EEB7;
+        Thu,  3 Sep 2020 13:20:29 +1200 (NZST)
+Received: by chrisp-dl.ws.atlnz.lc (Postfix, from userid 1030)
+        id 9EDC0280060; Thu,  3 Sep 2020 13:20:30 +1200 (NZST)
+From:   Chris Packham <chris.packham@alliedtelesis.co.nz>
+To:     adrian.hunter@intel.com, ulf.hansson@linaro.org, yinbo.zhu@nxp.com
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Chris Packham <chris.packham@alliedtelesis.co.nz>
+Subject: [PATCH v2] mmc: sdhci-of-esdhc: Don't walk device-tree on every interrupt
+Date:   Thu,  3 Sep 2020 13:20:29 +1200
+Message-Id: <20200903012029.25673-1-chris.packham@alliedtelesis.co.nz>
+X-Mailer: git-send-email 2.28.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAMuHMdUiPhHtkQfcpMSA6HMvmcFyg__rSGUoHRKQfQf2N5QTYA@mail.gmail.com>
-User-Agent: Mutt/1.5.21 (2010-09-15)
+Content-Transfer-Encoding: quoted-printable
+x-atlnz-ls: pat
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Sep 02, 2020 at 05:51:16PM +0200, Geert Uytterhoeven wrote:
-> Hi Rich,
-> 
-> On Wed, Sep 2, 2020 at 5:43 PM Rich Felker <dalias@libc.org> wrote:
-> > On Wed, Sep 02, 2020 at 10:31:47AM +0200, Ulf Hansson wrote:
-> > > On Tue, 1 Sep 2020 at 17:40, Christoph Hellwig <hch@lst.de> wrote:
-> > > > On Tue, Sep 01, 2020 at 05:36:17PM +0200, Ulf Hansson wrote:
-> > > > > > I still don't think this makes sense, as the dma_mask should always
-> > > > > > be non-NULL here.
-> > > > >
-> > > > > If that is the case, I wonder how the driver could even have worked without DMA.
-> > > > >
-> > > > > Because in the existing code, host->dma_dev gets assigned to
-> > > > > spi->master->dev.parent->dma_mask - which seems to turn on the DMA
-> > > > > usage in the driver.
-> > > > >
-> > > > > What am I missing?
-> > > >
-> > > > Do you know of other non-DMA users?  For SH nommu it probably worked
-> > >
-> > > I don't know of other non-DMA users. As I said, I wish someone could
-> > > step in and take better care of mmc_spi - as I know it's being used a
-> > > lot.
-> > >
-> > > > because SH nommu used to provide a DMA implementation that worked
-> > > > fine for streaming maps, but was completely broken for coherent
-> > > > allocation.  And this driver appears to only use the former.
-> > >
-> > > Alright, so you are saying the DMA support may potentially never have
-> > > been optional to this driver. In any case, I can remove the check in
-> > > $subject patch, as it shouldn't matter.
-> >
-> > DMA support was always optional, because even on systems where DMA is
-> > present, it doesn't necessarily mean the SPI controller uses DMA. In
-> > particular, pure bit-banged SPI via GPIOs doesn't have DMA, but has
-> > always worked. See my previous reply to Christoph about host->dma_dev
-> > for my current-best understanding of what's going on here.
-> >
-> > > Anyway, let's see what Rich thinks of this. I am curious to see if the
-> > > patch works on his SH boards - as I haven't been able to test it.
-> >
-> > I'll rebuild and retest just to confirm, but I already tested a
-> > functionally equivalent patch that just did the #ifdef inline (rather
-> > than moving the logic out to separate functions) and it worked fine.
-> 
-> Hence, Tested-by? ;-)
+Commit b214fe592ab7 ("mmc: sdhci-of-esdhc: add erratum eSDHC7 support")
+added code to check for a specific compatible string in the device-tree
+on every esdhc interrupat. Instead of doing this record the quirk in
+struct sdhci_esdhc and lookup the struct in esdhc_irq.
 
-Confirmed that this version of the patch works too. Thus,
+Signed-off-by: Chris Packham <chris.packham@alliedtelesis.co.nz>
+---
+I found this in passing while trying to track down another issue using ft=
+race.
+I found it odd that I was seeing a lot of calls to __of_device_is_compati=
+ble()
+coming from esdhc_irq() (the fact that this interrupt is going off on my =
+board
+is also odd, but that's a different story).
 
-Tested-by: Rich Felker <dalias@libc.org>
+Changes in v2:
+- add quirk_trans_complete_erratum to struct sdhci_esdhc so all the dt ha=
+ndling
+  is taken care of in esdhc_init.
+
+ drivers/mmc/host/sdhci-of-esdhc.c | 10 +++++++---
+ 1 file changed, 7 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-o=
+f-esdhc.c
+index 7c73d243dc6c..45881b309956 100644
+--- a/drivers/mmc/host/sdhci-of-esdhc.c
++++ b/drivers/mmc/host/sdhci-of-esdhc.c
+@@ -81,6 +81,7 @@ struct sdhci_esdhc {
+ 	bool quirk_tuning_erratum_type2;
+ 	bool quirk_ignore_data_inhibit;
+ 	bool quirk_delay_before_data_reset;
++	bool quirk_trans_complete_erratum;
+ 	bool in_sw_tuning;
+ 	unsigned int peripheral_clock;
+ 	const struct esdhc_clk_fixup *clk_fixup;
+@@ -1177,10 +1178,11 @@ static void esdhc_set_uhs_signaling(struct sdhci_=
+host *host,
+=20
+ static u32 esdhc_irq(struct sdhci_host *host, u32 intmask)
+ {
++	struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host);
++	struct sdhci_esdhc *esdhc =3D sdhci_pltfm_priv(pltfm_host);
+ 	u32 command;
+=20
+-	if (of_find_compatible_node(NULL, NULL,
+-				"fsl,p2020-esdhc")) {
++	if (esdhc->quirk_trans_complete_erratum) {
+ 		command =3D SDHCI_GET_CMD(sdhci_readw(host,
+ 					SDHCI_COMMAND));
+ 		if (command =3D=3D MMC_WRITE_MULTIPLE_BLOCK &&
+@@ -1334,8 +1336,10 @@ static void esdhc_init(struct platform_device *pde=
+v, struct sdhci_host *host)
+ 		esdhc->clk_fixup =3D match->data;
+ 	np =3D pdev->dev.of_node;
+=20
+-	if (of_device_is_compatible(np, "fsl,p2020-esdhc"))
++	if (of_device_is_compatible(np, "fsl,p2020-esdhc")) {
+ 		esdhc->quirk_delay_before_data_reset =3D true;
++		esdhc->quirk_trans_complete_erratum =3D true;
++	}
+=20
+ 	clk =3D of_clk_get(np, 0);
+ 	if (!IS_ERR(clk)) {
+--=20
+2.28.0
 
