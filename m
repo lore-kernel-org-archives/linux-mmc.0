@@ -2,175 +2,270 @@ Return-Path: <SRS0=lwnd=CM=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-4.0 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	UNPARSEABLE_RELAY,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 74EA7C43461
-	for <linux-mmc@archiver.kernel.org>; Thu,  3 Sep 2020 14:39:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F08FEC433E9
+	for <linux-mmc@archiver.kernel.org>; Thu,  3 Sep 2020 14:42:01 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3AC27206EB
-	for <linux-mmc@archiver.kernel.org>; Thu,  3 Sep 2020 14:39:57 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="zgd2rOKC"
+	by mail.kernel.org (Postfix) with ESMTP id CE752206EB
+	for <linux-mmc@archiver.kernel.org>; Thu,  3 Sep 2020 14:42:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729371AbgICOjz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 3 Sep 2020 10:39:55 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37528 "EHLO
+        id S1729403AbgICOmA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 3 Sep 2020 10:42:00 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37590 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729356AbgICOjd (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Sep 2020 10:39:33 -0400
-Received: from mail-vk1-xa42.google.com (mail-vk1-xa42.google.com [IPv6:2607:f8b0:4864:20::a42])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 583AAC061249
-        for <linux-mmc@vger.kernel.org>; Thu,  3 Sep 2020 07:37:13 -0700 (PDT)
-Received: by mail-vk1-xa42.google.com with SMTP id q124so852461vkb.8
-        for <linux-mmc@vger.kernel.org>; Thu, 03 Sep 2020 07:37:13 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=kLSg32zqZ1uwFhUQgFcon/VKvTPBahvcvor+61b9Y2o=;
-        b=zgd2rOKCWNgbCnJWXnh44ZDoxhEral6Emwexd7kiirr8wCHd/0yXVlAzK3KL5dPaKm
-         S5xjJ6F7XDedhaKcOwhxa/r2qRzjW0S4sMRxXeIhQJE14GYbMbMEjGz8YEBOS+9ZNHD7
-         JX5Ug4XQLqLFfyAg1+R1pRWRoAWQ/fjpxcSOTDTXadYdAKECLtDIK852FPb9LfY7o9wU
-         tHdKqRzEmAUT35ppQjItABIv5EYLCH6id9/WykRkwGPEwMFbM0R84gnHMbUkNbnF7nQL
-         HJTyO/epUTizMmCuW2ZIUin9VCHRDWEinx3pukDX9Dw9R0Ka+2eNEwYbepMEaztvJRi7
-         tNbQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=kLSg32zqZ1uwFhUQgFcon/VKvTPBahvcvor+61b9Y2o=;
-        b=ZbXsnhQu6RdFzQ5wzwNFr8BsF8Bs1z4yucIPIHyiC+XfkbShAs0KVuUfaj3/hpvsw1
-         4we3LXfLWe7gPk8R5A1s8ZwgbnTTxfccQsUr+6ugXunHnkmBXEj9oyE9ssuPvPk+y3Bz
-         UWwuJbl5G8/FIc/ueUSupGLlgWTDMq8TxvGU/xOfiGSiwMki294fd48Y5tQvLlf4/ZIA
-         /1kwwtbj7qq5jy4vJNmFKIyIrnkFnBQEVe93I9d6Wsq578DGl3VdUd5xWxNq8xXSIFFo
-         H5z+6c5oviymUwavWbNClU2RSKUeb73mlziBBwpNFBgDgPektzEwXG3ZRSLYP5Qas/t8
-         TMzQ==
-X-Gm-Message-State: AOAM5308icyB+jdqP4O3jTvvHNqQ8tNY5sZ9aIFAdRxQdHE9sQGCI2C4
-        BN+FAAV5Vxb4TEU05kV0txNY4lCJMqlJd4Sb5nNcwQ==
-X-Google-Smtp-Source: ABdhPJxVBD/I9k3j29ntwBERLlwmUh+XdA4TLiaA+ldSn5HoDrbT+XvZ9K1ienLPG0zjVT/1zM3yMdHFGfj8JQO3z2I=
-X-Received: by 2002:a05:6122:6bb:: with SMTP id r27mr1616268vkq.3.1599143832258;
- Thu, 03 Sep 2020 07:37:12 -0700 (PDT)
+        with ESMTP id S1729400AbgICOix (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Sep 2020 10:38:53 -0400
+Received: from bhuna.collabora.co.uk (bhuna.collabora.co.uk [IPv6:2a00:1098:0:82:1000:25:2eeb:e3e3])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1113BC0619D0
+        for <linux-mmc@vger.kernel.org>; Thu,  3 Sep 2020 06:29:32 -0700 (PDT)
+Received: from [127.0.0.1] (localhost [127.0.0.1])
+        (Authenticated sender: sre)
+        with ESMTPSA id 30B0D29AF80
+Received: by earth.universe (Postfix, from userid 1000)
+        id 542E83C0C82; Thu,  3 Sep 2020 15:29:26 +0200 (CEST)
+Date:   Thu, 3 Sep 2020 15:29:26 +0200
+From:   Sebastian Reichel <sebastian.reichel@collabora.com>
+To:     Bough Chen <haibo.chen@nxp.com>
+Cc:     dl-linux-imx <linux-imx@nxp.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Shawn Guo <shawnguo@kernel.org>,
+        Sascha Hauer <s.hauer@pengutronix.de>,
+        Pengutronix Kernel Team <kernel@pengutronix.de>,
+        Fabio Estevam <festevam@gmail.com>,
+        "Baumgartner, Claus (GE Healthcare)" <claus.baumgartner@med.ge.com>
+Subject: Re: mmc0: Timeout waiting for hardware cmd interrupt on i.MX535
+Message-ID: <20200903132926.yc2lx25k2xbzglzc@earth.universe>
+References: <AM0P101MB03060DFCABC4A82C2D40F180D12E0@AM0P101MB0306.NAMP101.PROD.OUTLOOK.COM>
+ <20200901114642.vhivtsfrarua6ce4@earth.universe>
+ <VI1PR04MB5294C1AE26EA2D0DA163F307902F0@VI1PR04MB5294.eurprd04.prod.outlook.com>
+ <20200902134906.uqyoejyv4atljm46@earth.universe>
+ <AM0PR04MB52835B3EF15DA576F6E46F8E902C0@AM0PR04MB5283.eurprd04.prod.outlook.com>
 MIME-Version: 1.0
-References: <20200901104206.GU1362448@hirez.programming.kicks-ass.net>
- <CAPDyKFo0VkW-cgRSkvPQ0whpuJCo4OKcL1nmH7nz1tDEChOtVg@mail.gmail.com>
- <CAPDyKFrv+DTF8=twZZk_tenB-sLg6H-CFn9HVDVA5S2kK2=U5Q@mail.gmail.com>
- <20200901154417.GD20303@codeaurora.org> <20200901155014.GF2674@hirez.programming.kicks-ass.net>
- <20200901161340.GC29330@paulmck-ThinkPad-P72> <20200901174216.GJ29142@worktop.programming.kicks-ass.net>
- <CAPDyKFqPh7bg16AsitGv2QQHgwOPnWx9DiPPCMuD1EGA5TFFdg@mail.gmail.com>
- <20200902121355.GE1362448@hirez.programming.kicks-ass.net>
- <CAPDyKFrGj+8hOXi7sWxWNv2QP0=mx9pFKLG0JM-L5VNKUPDgeA@mail.gmail.com> <20200903135347.GC1362448@hirez.programming.kicks-ass.net>
-In-Reply-To: <20200903135347.GC1362448@hirez.programming.kicks-ass.net>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 3 Sep 2020 16:36:35 +0200
-Message-ID: <CAPDyKFqduU65YmhBZ8PwDRTZDLtWhWX087LBy0bx56go+ra4Ow@mail.gmail.com>
-Subject: Re: [RFC][PATCH] cpu_pm: Remove RCU abuse
-To:     Peter Zijlstra <peterz@infradead.org>
-Cc:     "Paul E. McKenney" <paulmck@kernel.org>,
-        Lina Iyer <ilina@codeaurora.org>,
-        Naresh Kamboju <naresh.kamboju@linaro.org>,
-        "Rafael J. Wysocki" <rjw@rjwysocki.net>,
-        Saravana Kannan <saravanak@google.com>,
-        open list <linux-kernel@vger.kernel.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        lkft-triage@lists.linaro.org, rcu@vger.kernel.org,
-        Linux PM <linux-pm@vger.kernel.org>,
-        Anders Roxell <anders.roxell@linaro.org>,
-        Arnd Bergmann <arnd@arndb.de>,
-        Rajendra Nayak <rnayak@codeaurora.org>,
-        John Stultz <john.stultz@linaro.org>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Lars Povlsen <lars.povlsen@microchip.com>,
-        madhuparnabhowmik10@gmail.com,
-        Viresh Kumar <viresh.kumar@linaro.org>,
-        Vincent Guittot <vincent.guittot@linaro.org>,
-        Thomas Gleixner <tglx@linutronix.de>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="ksw64c6ovndzqk25"
+Content-Disposition: inline
+In-Reply-To: <AM0PR04MB52835B3EF15DA576F6E46F8E902C0@AM0PR04MB5283.eurprd04.prod.outlook.com>
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 3 Sep 2020 at 15:53, <peterz@infradead.org> wrote:
->
-> On Wed, Sep 02, 2020 at 05:58:55PM +0200, Ulf Hansson wrote:
-> > On Wed, 2 Sep 2020 at 14:14, <peterz@infradead.org> wrote:
+
+--ksw64c6ovndzqk25
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+Hi,
+
+On Thu, Sep 03, 2020 at 02:10:43AM +0000, Bough Chen wrote:
+> > -----Original Message-----
+> > From: Sebastian Reichel [mailto:sebastian.reichel@collabora.com]
+> > Sent: 2020=E5=B9=B49=E6=9C=882=E6=97=A5 21:49
+> > To: Bough Chen <haibo.chen@nxp.com>
+> > Cc: dl-linux-imx <linux-imx@nxp.com>; linux-mmc@vger.kernel.org; Shawn =
+Guo
+> > <shawnguo@kernel.org>; Sascha Hauer <s.hauer@pengutronix.de>;
+> > Pengutronix Kernel Team <kernel@pengutronix.de>; Fabio Estevam
+> > <festevam@gmail.com>; Baumgartner, Claus (GE Healthcare)
+> > <claus.baumgartner@med.ge.com>
+> > Subject: Re: mmc0: Timeout waiting for hardware cmd interrupt on i.MX535
+> >=20
+> > On Wed, Sep 02, 2020 at 11:24:52AM +0000, Bough Chen wrote:
+> > > > -----Original Message-----
+> > > > From: Sebastian Reichel [mailto:sebastian.reichel@collabora.com]
+> > > > Sent: 2020=E5=B9=B49=E6=9C=881=E6=97=A5 19:47
+> > > > To: dl-linux-imx <linux-imx@nxp.com>
+> > > > Cc: linux-mmc@vger.kernel.org; Bough Chen <haibo.chen@nxp.com>;
+> > > > Shawn Guo <shawnguo@kernel.org>; Sascha Hauer
+> > > > <s.hauer@pengutronix.de>; Pengutronix Kernel Team
+> > > > <kernel@pengutronix.de>; Fabio Estevam <festevam@gmail.com>;
+> > > > Baumgartner, Claus (GE Healthcare) <claus.baumgartner@med.ge.com>
+> > > > Subject: Re: mmc0: Timeout waiting for hardware cmd interrupt on
+> > > > i.MX535
+> > > >
+> > > > Hi,
+> > > >
+> > > > [add i.MX architecture maintainers to Cc]
+> > > >
+> > > > On Tue, Sep 01, 2020 at 07:37:31AM +0000, Baumgartner, Claus (GE
+> > > > Healthcare) wrote:
+> > > > > We have a board with an i.MX535 using a Samsung eMMC as persistent
+> > > > > storage connected to eSDHCv3. Every now and then we produce a
+> > > > > build that causes emmc timeouts:
+> > > > >
+> > > > > Aug 28 07:32:12 csmon kernel: mmc0: Timeout waiting for hardware
+> > > > > cmd
+> > > > interrupt.
+> > > > > Aug 28 07:32:12 csmon kernel: mmc0: sdhci: =3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D SDHCI
+> > > > > REGISTER DUMP =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D Aug 28 07:32:12 c=
+smon kernel: mmc0:
+> > sdhci: Sys addr:
+> > > > > 0xe3f12000 | Version:  0x00001201 Aug 28 07:32:12 csmon kernel:
+> > mmc0:
+> > > > > sdhci: Blk size:  0x00000200 | Blk cnt:  0x00000001 Aug 28
+> > > > > 07:32:12 csmon
+> > > > kernel: mmc0: sdhci: Argument:  0x00010000 | Trn mode: 0x00000000
+> > > > > Aug 28 07:32:12 csmon kernel: mmc0: sdhci: Present:   0x01f80008 |
+> > Host
+> > > > ctl: 0x00000031
+> > > > > Aug 28 07:32:12 csmon kernel: mmc0: sdhci: Power:     0x00000002 |
+> > Blk
+> > > > gap:  0x00000000
+> > > > > Aug 28 07:32:12 csmon kernel: mmc0: sdhci: Wake-up:   0x00000000 |
+> > > > Clock:    0x0000011f
+> > > > > Aug 28 07:32:12 csmon kernel: mmc0: sdhci: Timeout:   0x0000008e |
+> > Int
+> > > > stat: 0x00000000
+> > > > > Aug 28 07:32:12 csmon kernel: mmc0: sdhci: Int enab:  0x107f000b |
+> > > > > Sig
+> > > > > enab: 0x107f000b Aug 28 07:32:12 csmon kernel: mmc0: sdhci: ACmd
+> > stat:
+> > > > 0x00000000 | Slot int: 0x00001201
+> > > > > Aug 28 07:32:12 csmon kernel: mmc0: sdhci: Caps:      0x07eb0000 |
+> > > > Caps_1:   0x08100810
+> > > > > Aug 28 07:32:12 csmon kernel: mmc0: sdhci: Cmd:       0x00000d1a |
+> > > > Max curr: 0x00000000
+> > > > > Aug 28 07:32:12 csmon kernel: mmc0: sdhci: Resp[0]:   0x00400900 |
+> > > > Resp[1]:  0x00000000
+> > > > > Aug 28 07:32:12 csmon kernel: mmc0: sdhci: Resp[2]:   0x00000000 |
+> > > > Resp[3]:  0x00000000
+> > > > > Aug 28 07:32:12 csmon kernel: mmc0: sdhci: Host ctl2: 0x00000000
+> > > > > Aug
+> > > > > 28 07:32:12 csmon kernel: mmc0: sdhci: ADMA Err:  0x00000000 |
+> > > > > ADMA
+> > > > > Ptr: 0xef041208 Aug 28 07:32:12 csmon kernel: mmc0: sdhci:
+> > > > > =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+> > > >
+> > > > Some extra information: The timeout always has cmd =3D 0x00000d1a
+> > > > (MMC_SEND_STATUS) and resp[0] =3D 0x00400900 with resp[0] translati=
+ng
+> > > > to this IIUIC:
+> > > >
+> > > > Bit 8 =3D Ready for data
+> > > > Bit 11 =3D CURRENT_STATE is TRAN
+> > > > Bit 22 =3D Illegal command
 > > >
-> > > On Wed, Sep 02, 2020 at 09:03:37AM +0200, Ulf Hansson wrote:
-> > > > Lots of cpuidle drivers are using CPU_PM notifiers (grep for
-> > > > cpu_pm_enter and you will see) from their idlestates ->enter()
-> > > > callbacks. And for those we are already calling
-> > > > rcu_irq_enter_irqson|off() in cpu_pm_notify() when firing them.
+> > > According to the code logic, since this cmd13 get hardware cmd
+> > > timeout, which means this cmd13 do not get any response. Here the
+> > > Resp[0] should be the previous command's response.
 > > >
-> > > Yeah, that particular trainwreck is on my todo list already ... then
-> > > again, that list is forever overflowing.
+> > > So this means the previous command is an illegal command, cause the
+> > > emmc internal firmware stuck, and can't response to the next cmd13.
 > > >
-> > > I'm thinking cpu_pm_unregister_notifier() is not a common thing? The few
-> > > I looked at seem to suggest 'never' is a good approximation.
-> >
-> > The trend is that drivers are turning into regular modules that may
-> > also need to manage "->remove()", which may mean unregistering the
-> > notifier. Of course, I don't know for sure whether that becomes a
-> > problem, but it seems quite limiting.
->
-> You can pin modules, once they're loaded they can never be removed
-> again.
->
-> Anyway, the below should 'work', I think.
->
-> ---
-> diff --git a/kernel/cpu_pm.c b/kernel/cpu_pm.c
-> index f7e1d0eccdbc..72804e0883d5 100644
-> --- a/kernel/cpu_pm.c
-> +++ b/kernel/cpu_pm.c
-> @@ -12,21 +12,18 @@
->  #include <linux/notifier.h>
->  #include <linux/spinlock.h>
->  #include <linux/syscore_ops.h>
-> +#include <linux/cpu.h>
-> +#include <linux/smp.h>
->
-> -static ATOMIC_NOTIFIER_HEAD(cpu_pm_notifier_chain);
-> +static RAW_NOTIFIER_HEAD(cpu_pm_notifier_chain);
-> +static DEFINE_SPINLOCK(cpu_pm_lock);
->
->  static int cpu_pm_notify(enum cpu_pm_event event)
->  {
->         int ret;
->
-> -       /*
-> -        * atomic_notifier_call_chain has a RCU read critical section, which
-> -        * could be disfunctional in cpu idle. Copy RCU_NONIDLE code to let
-> -        * RCU know this.
-> -        */
-> -       rcu_irq_enter_irqson();
-> -       ret = atomic_notifier_call_chain(&cpu_pm_notifier_chain, event, NULL);
-> -       rcu_irq_exit_irqson();
-> +       lockdep_assert_irqs_disabled();
+> > > I think we need to firstly identify the specific place in emmc driver
+> > > which trigger the log dump.
+> >=20
+> > My understanding is, that a missing response from the eMMC should trigg=
+er
+> > the Command Timeout Error Status IRQ in eSDHC after 64 SDCLK cycles (see
+> > section 30.7.10 [ESDHCV3x_IRQSTAT] in the i.MX53 reference manual).
+> > 64 SDCLK cycles means, that this should recover quickly and would not b=
+e a
+> > problem for most usecases.
+> >=20
+> > But what we are seeing is the software 10 seconds timeout. My understan=
+ding
+> > is, that this should not be triggered if the SDHCI controller works as =
+expected
+> > (e.g. by generating a IRQ for the timeout). This timeout is much more
+> > problematic, since all eMMC accessing processes block for those 10 seco=
+nds.
+> >=20
+>=20
+> Agree, only one possibility, the cmd13 do not send out successfully.
 
-Nitpick, maybe the lockdep should be moved to a separate patch.
+I think there are two possibilities:
 
-> +       ret = raw_notifier_call_chain(&cpu_pm_notifier_chain, event, NULL);
+1. The command is not send out, so no IRQs are received.
+2. The IRQ gets lost or is not generated
 
-Converting to raw_notifiers seems reasonable - if we need to avoid the
-RCU usage.
+The esdhc_writel_le() has a workaround to avoid missing the card
+irq. If that does not fully fix the issue, I would expect the SW
+fallback to also cover that case.
 
-My point is, I wonder about if the notifier callbacks themselves are
-safe from RCU usage. For example, I would not be surprised if tracing
-is happening behind them.
+> The count of 64 SDCLK cycle only trigged by the end of the sending
+> command. If the command still not send out completely, then
+> should trigger the 10s sw timeout. Let me double confirm with our
+> IC team.
 
-Moreover, I am not sure that we really need to prevent and limit
-tracing from happening. Instead we could push rcu_idle_enter|exit()
-further down to the arch specific code in the cpuidle drivers, as you
-kind of all proposed earlier.
+Ack.
 
-In this way, we can step by step, move to a new "version" of
-cpu_pm_enter() that doesn't have to deal with rcu_irq_enter_irqson(),
-because RCU hasn't been pushed to idle yet.
+> I still suggest that we need first to find which cmd13 in our mmc
+> driver meet this issue.
 
-[...]
+We will try to figure that out and report back. Needs a bit of time,
+since the error only appears after some hours on an affected kernel
+and adding the necessary code potentially hides the problem due to
+the alignment changes requiring another run with padding nops.
 
-Kind regards
-Uffe
+-- Sebastian
+
+> > > > > Timeouts do not occur with every build. After some debugging I
+> > > > > have found that timeouts seem to depend on code alignment of the
+> > > > > esdhc_readl_le function. I have bisected the behavior by using the
+> > > > > System.map and moving/padding the code with NOP instructions (mov
+> > > > > r0,r0).
+> > > > >
+> > > > > My test case has 5 processes continuously creating a file, writing
+> > > > > random long data, reading data and deleting the file. It seems
+> > > > > that when the esdhc_writel_le is aligned on a certain address then
+> > > > > the timeout will occur about 5 times/12h using my test case. If I
+> > > > > add one more NOP, the timeout will not occur at all. If I continue
+> > > > > adding some more NOPs the timeouts come back. Seems that it
+> > > > > doesn't matter where in the code I add NOPs as long as the address
+> > > > > is below the address of esdhc_writel_le.
+> > > > >
+> > > > > We also run the same software on a dual core i.MX6 without any
+> > > > > timeout issues.
+> > > >
+> > > > And the same kernel binary is also used on an i.MX6 single core
+> > > > (albeit with different SW) withot triggering the problem so far.
+> > > >
+> > > > > I have reproduced this with kernel version 4.19.94 and 5.8.3 and
+> > > > > we have compiled with both gcc8 and gcc9. I'm still searching for
+> > > > > the root cause and I would appreciate any thoughts about where to=
+ go
+> > next.
+> > > > >
+> > > > > Thanks,
+> > > > >
+> > > > > -Claus-
+> > > >
+> > > > To me it looks like it might involve an unknown hardware errata for
+> > > > i.MX53, but there has been one similar report before (unfortunately
+> > > > without the full register dump) involving virtualization:
+> > > >
+> > > > https://patchwork.kernel.org/patch/10705823/
+> > > >
+> > > > Note, that Claus' kernel has been built with CONFIG_PREEMPT_NONE=3D=
+y.
+> > > >
+> > > > -- Sebastian
+
+--ksw64c6ovndzqk25
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEE72YNB0Y/i3JqeVQT2O7X88g7+poFAl9Q76cACgkQ2O7X88g7
++ppxHA/+Nug7kVnYprmKlNYt+SZ5t2CxG68vqOfZUvBMcpIuwotsEE55S75vlj1u
+pby8hWGzrGO5vwAIHugIgCzhLyPvG26cYH4lmtdPfx08x0HqObD0H7/x1Ow4u33J
+WjFofDUMdA3cCFYq/21L8HJA+vRXyXkx6G7y0JvpLkVW+VRr7ehiyU/Juv/RjVtZ
+1HL7HMZDOgucPvJP2WcPetXyXO59v9kzkREfOm+J12ANlBPRRA8i2YtCIy7bnZob
+8LO8vHoNSzaI2li5HXDQUG6U1hsqm/KAE1at4wquOc7vcx8JmaWuIGpQg9LlN/EL
+RIOTxAYPIX40iCg1+4PfWwtN0cEr2NdD75cG7ANzuGTH/aBaFJRHvvnGL/0hu0LH
+efPlVPzzO12Fg7/grsdjMkPGu4pbl2/Wi+2YLfRwy/IeCJ6R4NuivId154E6iPv+
+rOx13KQh0QYdauYQ0sxAahqoPwZQzWSJrp3CK+0NBqXP7Fnoszi2jg1E/6xkuqqn
+1GRrd+JerWS6ajca8f+FM0VLCGZfesCXDLdHTQAX5oU2ok70rkaMEASwll33dcQa
+BlDHc7+5+Dy64/2JeWiDBFt/5JYabC2lD8EqV1tsw2v68/3ECAZ9HlRz8mYLnv1f
+SPmWgXVS1Qxgp3Kyz33GpJd3d4TQPFsLLIuS9mPTaPy6M3nM+9Y=
+=z14K
+-----END PGP SIGNATURE-----
+
+--ksw64c6ovndzqk25--
