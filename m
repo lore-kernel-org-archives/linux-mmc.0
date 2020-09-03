@@ -2,141 +2,314 @@ Return-Path: <SRS0=lwnd=CM=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-4.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 290ABC433E7
-	for <linux-mmc@archiver.kernel.org>; Thu,  3 Sep 2020 08:12:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9DC1CC2BC0E
+	for <linux-mmc@archiver.kernel.org>; Thu,  3 Sep 2020 08:20:27 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id DF83B21D7E
-	for <linux-mmc@archiver.kernel.org>; Thu,  3 Sep 2020 08:12:10 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 677C120658
+	for <linux-mmc@archiver.kernel.org>; Thu,  3 Sep 2020 08:20:27 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="LNj9s0VD"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="RoUq46ul"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728061AbgICIMB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 3 Sep 2020 04:12:01 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34082 "EHLO
+        id S1727020AbgICIUZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 3 Sep 2020 04:20:25 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35650 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728867AbgICIK2 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Sep 2020 04:10:28 -0400
-Received: from mail-ua1-x941.google.com (mail-ua1-x941.google.com [IPv6:2607:f8b0:4864:20::941])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 262FAC061245
-        for <linux-mmc@vger.kernel.org>; Thu,  3 Sep 2020 01:10:27 -0700 (PDT)
-Received: by mail-ua1-x941.google.com with SMTP id z46so609673uac.13
-        for <linux-mmc@vger.kernel.org>; Thu, 03 Sep 2020 01:10:27 -0700 (PDT)
+        with ESMTP id S1727927AbgICIUR (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Sep 2020 04:20:17 -0400
+Received: from mail-vk1-xa43.google.com (mail-vk1-xa43.google.com [IPv6:2607:f8b0:4864:20::a43])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 75D43C061258
+        for <linux-mmc@vger.kernel.org>; Thu,  3 Sep 2020 01:20:12 -0700 (PDT)
+Received: by mail-vk1-xa43.google.com with SMTP id n193so584197vkf.12
+        for <linux-mmc@vger.kernel.org>; Thu, 03 Sep 2020 01:20:12 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=LrOjlA1x52Sx3PNdexN+2X/ozkPpzSng8Vccaxs54Zw=;
-        b=LNj9s0VDa9drWeLKU2VtX/B9wbQgZmQkc6JpKMfK3e9C+15ObehWeink4X7oCMDirp
-         WPafqIvq9t4fj1FDRMiaapi9ohjzXf41O7a5YaafCVZPvVQ9M2pyoTOBkhB2a+84EXOK
-         AiANcRalw5n97ufIUIOei9DTEGLrtbKe/WatzVK99QTXRF7K/qYw86pIst4ltUDzOJQd
-         Gn04+W0cxdaZGW5nD0qXPij/7pKctDdjpM60SGN4pobi5xXjPsFhZ71Edv4qO8JPESdz
-         B5NaqGd/yzgyFw8wRa5dCrYP9Mm74fIRm4/AmfvKAjITRKgEyNhX9nL3RBTyIQ0ByLE0
-         bmzw==
+        bh=kIOKgbobCAauivLjjD3+5H4D5uI6eOXaqQyNwWMzaro=;
+        b=RoUq46ulZfpZ3paDBrOfHAcAMJ15GQITaSjDmtoXsPqSrrimdeqw0GpvJFItoGcvFb
+         DN3wSTWA+C16s3z582YgsfunvLAxRZDsTr7GOPi0wCItVvqXppqiaopIUqFT+5bXl9sd
+         NkA+MMJ3XTJ1YlmzoiZSSsVTJtcYmB/DDfVyCaACd0470zyZM8lVLen6FBuOPvoqkM18
+         oTXDKFLQokjO0x7S4utPI6uaxClWtFTXDqZKKH6MGw4UoXBCv/Vmgt7u9DnMt43MZ7vb
+         tDE1ikGwPpETwpaBATLHw5RLqWeWExa5U8OQfv9hnryx1WaZHqTAbZRRoASZUwwFq8hy
+         InLQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=LrOjlA1x52Sx3PNdexN+2X/ozkPpzSng8Vccaxs54Zw=;
-        b=V+nsZubKec81yNlX3Cu2f/7AllFV0W73RJ6+0T/CpuR4fD32T3AlFXCPmgwhpMco7w
-         +/YuN34tjeTBMK8nWaOOWYIcztI3PyI9b+QriQuUh2av14gC9D6LOM1cHtc8WObMyhy7
-         p4uGmglS4fvr9gStR1kY7Ct7j3UYYmlYIadzUcUYTNWPsT15j9WX5VL4Lw8QmOPtAcfJ
-         5CpXQMfGgFb22vZsrHH6ShqEmIqc5pt8dJd+rGqRmjG2Q5tojU9rIntAtqtyrFtSPKKq
-         OjKW1MizNtKnVAmQgilhzYlcSNpNKGtL1VK9DNhIQU7F2HFs90plAkv7uoWZUhTNhcTK
-         XHlQ==
-X-Gm-Message-State: AOAM531oUqJeAGi9CPLic1VIULR7pgkKqrbQti/hOQGyoK/07gNKPgy6
-        Yx20IZh6sYmZAYu3HkcF6bUDeoGgMnM7YmwZvbc4Ig==
-X-Google-Smtp-Source: ABdhPJw7qVTiuZksAFcWPUutKJ0zYg2tpTJGwRa2BumR3h5BzwPXYQoKG7VAuSHc8ImsX3M25x7A+yZZGSSWhcaYqhE=
-X-Received: by 2002:ab0:6f91:: with SMTP id f17mr357139uav.129.1599120626145;
- Thu, 03 Sep 2020 01:10:26 -0700 (PDT)
+        bh=kIOKgbobCAauivLjjD3+5H4D5uI6eOXaqQyNwWMzaro=;
+        b=q8sEaOsuucVMbACMXFeC7miLO7TLbSS7U9LW18syvLRZOLD9raawuVYrpcy4ioSP8b
+         gW2JiL7R1XCaoYyygBwyaEbLHcWe7n3UnSihsqRU/9KzC7yOuFCynWLbpbw5IK+CAD40
+         uTbwlsf8uvGidEC4D76LBi6W7HGjeJjbXHRCdSvPgN6U7c9SdID6FDVN/6jW2m/+QuT/
+         f9htEpkrNPoJrOfPFfMAOy2mhmebobv1tngh4MPWKuDCLdoErZ80iDMHRdH9v1IJu6eQ
+         x6I7XuuuN29LiiZEGDnxIRnZfLo/oxd1cOOHk6MxLZ6DJHuxAWqI+CXRZkWdW0gMStq/
+         K3lQ==
+X-Gm-Message-State: AOAM530MMm9sTpmVZQFvZfYHjy6w/Y7CFG84Ypa2LYfn7UC8VbkCYzPB
+        PreQOjyXtwu6Rfi7WPbqObTS4cy2eItvETgI4xvTag==
+X-Google-Smtp-Source: ABdhPJygatPCTgngzA8BfCoD0l3nfEZ9seGBOFA3kGWjYO2vX4zcfDvdTtVrBTHFloSlsoY7V3JH6u4jQTlBSAJOSyQ=
+X-Received: by 2002:a1f:e443:: with SMTP id b64mr859520vkh.17.1599121210936;
+ Thu, 03 Sep 2020 01:20:10 -0700 (PDT)
 MIME-Version: 1.0
-References: <20200902193658.20539-1-krzk@kernel.org>
-In-Reply-To: <20200902193658.20539-1-krzk@kernel.org>
+References: <20200903054104.228829-1-hch@lst.de> <20200903054104.228829-3-hch@lst.de>
+In-Reply-To: <20200903054104.228829-3-hch@lst.de>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 3 Sep 2020 10:09:49 +0200
-Message-ID: <CAPDyKFqBS-ws6fkirDQL8EEqh9At88K2vrG5fc8K5_JiXsmfyg@mail.gmail.com>
-Subject: Re: [PATCH 00/11] mmc: Minor cleanups and compile test
-To:     Krzysztof Kozlowski <krzk@kernel.org>
-Cc:     Florian Fainelli <f.fainelli@gmail.com>,
-        Ray Jui <rjui@broadcom.com>,
-        Scott Branden <sbranden@broadcom.com>,
-        BCM Kernel Feedback <bcm-kernel-feedback-list@broadcom.com>,
-        Nicolas Saenz Julienne <nsaenzjulienne@suse.de>,
-        Jaehoon Chung <jh80.chung@samsung.com>,
-        Jun Nie <jun.nie@linaro.org>, Shawn Guo <shawnguo@kernel.org>,
-        Paul Cercueil <paul@crapouillou.net>,
-        Kevin Hilman <khilman@baylibre.com>,
-        Neil Armstrong <narmstrong@baylibre.com>,
-        Jerome Brunet <jbrunet@baylibre.com>,
-        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
-        Al Cooper <alcooperx@gmail.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Michal Simek <michal.simek@xilinx.com>,
-        Lars Povlsen <lars.povlsen@microchip.com>,
-        Steen Hegelund <Steen.Hegelund@microchip.com>,
-        Microchip Linux Driver Support <UNGLinuxDriver@microchip.com>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        Jonathan Hunter <jonathanh@nvidia.com>,
-        Arnd Bergmann <arnd@arndb.de>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+Date:   Thu, 3 Sep 2020 10:19:34 +0200
+Message-ID: <CAPDyKFrkcpziGFPmSd8Kx4bzhoN6zxF1E8MagLQSa4sBmnicOg@mail.gmail.com>
+Subject: Re: [PATCH 2/9] block: add a bdev_is_partition helper
+To:     Christoph Hellwig <hch@lst.de>
+Cc:     Jens Axboe <axboe@kernel.dk>, dm-devel@redhat.com,
+        Linux Documentation <linux-doc@vger.kernel.org>,
         Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-rpi-kernel@lists.infradead.org,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>,
-        linux-tegra <linux-tegra@vger.kernel.org>
+        linux-block <linux-block@vger.kernel.org>,
+        drbd-dev@lists.linbit.com, linux-ide@vger.kernel.org,
+        linux-raid@vger.kernel.org,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        linux-s390@vger.kernel.org,
+        linux-scsi <linux-scsi@vger.kernel.org>,
+        target-devel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 2 Sep 2020 at 21:37, Krzysztof Kozlowski <krzk@kernel.org> wrote:
+On Thu, 3 Sep 2020 at 07:42, Christoph Hellwig <hch@lst.de> wrote:
 >
-> Hi,
+> Add a littler helper to make the somewhat arcane bd_contains checks a
+> little more obvious.
 >
-> Set of minor cleanups.  Patches requiring more attention:
->  - 6/11: Testing and review would be appreciated,
->  - 11/11: I build tested multiple architectures but not all and
->    definitely no all possible configs. This one could sit on the lists
->    for few days so 0-day would try it.
->
-> Best regards,
-> Krzysztof
->
-> Krzysztof Kozlowski (11):
->   mmc: bcm2835: Simplify with dev_err_probe()
->   mmc: davinci: Simplify with dev_err_probe()
->   mmc: dw_mmc-zx: Simplify with dev_err_probe()
->   mmc: jz4740: Simplify with dev_err_probe()
->   mmc: meson: Simplify with dev_err_probe()
->   mmc: sdhci-brcmstb: Simplify with optional clock and dev_err_probe()
->   mmc: sdhci-of-arasan: Simplify with dev_err_probe()
->   mmc: sdhci-tegra: Simplify with dev_err_probe()
->   mmc: dw_mmc: Simplify with dev_err_probe()
->   mmc: sdhci-of-sparx5: Use proper printk format for dma_addr_t
->   mmc: host: Enable compile testing of multiple drivers
->
->  drivers/mmc/host/Kconfig           | 42 ++++++++++++++++--------------
->  drivers/mmc/host/bcm2835.c         |  4 +--
->  drivers/mmc/host/davinci_mmc.c     |  5 ++--
->  drivers/mmc/host/dw_mmc-zx.c       | 11 +++-----
->  drivers/mmc/host/dw_mmc.c          |  9 +++----
->  drivers/mmc/host/jz4740_mmc.c      |  5 ++--
->  drivers/mmc/host/meson-gx-mmc.c    | 16 ++++--------
->  drivers/mmc/host/sdhci-brcmstb.c   | 12 ++++-----
->  drivers/mmc/host/sdhci-of-arasan.c |  7 +++--
->  drivers/mmc/host/sdhci-of-sparx5.c |  4 +--
->  drivers/mmc/host/sdhci-tegra.c     |  7 ++---
->  11 files changed, 51 insertions(+), 71 deletions(-)
->
-> --
-> 2.17.1
->
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
 
-Series applied for next, except 11, thanks!
+Not sure why we have both "bd_contains" and "bd_partno", nevertheless,
+feel free to add:
+
+Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
 
 Kind regards
 Uffe
+
+> ---
+>  block/blk-lib.c                 | 2 +-
+>  block/ioctl.c                   | 4 ++--
+>  block/scsi_ioctl.c              | 2 +-
+>  drivers/ide/ide-ioctls.c        | 4 ++--
+>  drivers/md/dm-table.c           | 2 +-
+>  drivers/mmc/core/block.c        | 2 +-
+>  drivers/s390/block/dasd_ioctl.c | 8 ++++----
+>  fs/nfsd/blocklayout.c           | 4 ++--
+>  include/linux/blkdev.h          | 9 +++++++--
+>  kernel/trace/blktrace.c         | 2 +-
+>  10 files changed, 22 insertions(+), 17 deletions(-)
+>
+> diff --git a/block/blk-lib.c b/block/blk-lib.c
+> index 0d1811e57ac704..e90614fd8d6a42 100644
+> --- a/block/blk-lib.c
+> +++ b/block/blk-lib.c
+> @@ -64,7 +64,7 @@ int __blkdev_issue_discard(struct block_device *bdev, sector_t sector,
+>                 return -EINVAL;
+>
+>         /* In case the discard request is in a partition */
+> -       if (bdev->bd_partno)
+> +       if (bdev_is_partition(bdev))
+>                 part_offset = bdev->bd_part->start_sect;
+>
+>         while (nr_sects) {
+> diff --git a/block/ioctl.c b/block/ioctl.c
+> index bdb3bbb253d9f8..e4af3df9d28a68 100644
+> --- a/block/ioctl.c
+> +++ b/block/ioctl.c
+> @@ -23,7 +23,7 @@ static int blkpg_do_ioctl(struct block_device *bdev,
+>                 return -EACCES;
+>         if (copy_from_user(&p, upart, sizeof(struct blkpg_partition)))
+>                 return -EFAULT;
+> -       if (bdev != bdev->bd_contains)
+> +       if (bdev_is_partition(bdev))
+>                 return -EINVAL;
+>
+>         if (p.pno <= 0)
+> @@ -94,7 +94,7 @@ static int blkdev_reread_part(struct block_device *bdev)
+>  {
+>         int ret;
+>
+> -       if (!disk_part_scan_enabled(bdev->bd_disk) || bdev != bdev->bd_contains)
+> +       if (!disk_part_scan_enabled(bdev->bd_disk) || bdev_is_partition(bdev))
+>                 return -EINVAL;
+>         if (!capable(CAP_SYS_ADMIN))
+>                 return -EACCES;
+> diff --git a/block/scsi_ioctl.c b/block/scsi_ioctl.c
+> index ef722f04f88a93..3bb4571385ce21 100644
+> --- a/block/scsi_ioctl.c
+> +++ b/block/scsi_ioctl.c
+> @@ -854,7 +854,7 @@ EXPORT_SYMBOL(scsi_cmd_ioctl);
+>
+>  int scsi_verify_blk_ioctl(struct block_device *bd, unsigned int cmd)
+>  {
+> -       if (bd && bd == bd->bd_contains)
+> +       if (bd && !bdev_is_partition(bd))
+>                 return 0;
+>
+>         if (capable(CAP_SYS_RAWIO))
+> diff --git a/drivers/ide/ide-ioctls.c b/drivers/ide/ide-ioctls.c
+> index 09491098047bff..58994da10c0664 100644
+> --- a/drivers/ide/ide-ioctls.c
+> +++ b/drivers/ide/ide-ioctls.c
+> @@ -49,7 +49,7 @@ int ide_setting_ioctl(ide_drive_t *drive, struct block_device *bdev,
+>         return err >= 0 ? put_user_long(err, arg) : err;
+>
+>  set_val:
+> -       if (bdev != bdev->bd_contains)
+> +       if (bdev_is_partition(bdev))
+>                 err = -EINVAL;
+>         else {
+>                 if (!capable(CAP_SYS_ADMIN))
+> @@ -257,7 +257,7 @@ int generic_ide_ioctl(ide_drive_t *drive, struct block_device *bdev,
+>         switch (cmd) {
+>         case HDIO_OBSOLETE_IDENTITY:
+>         case HDIO_GET_IDENTITY:
+> -               if (bdev != bdev->bd_contains)
+> +               if (bdev_is_partition(bdev))
+>                         return -EINVAL;
+>                 return ide_get_identity_ioctl(drive, cmd, argp);
+>         case HDIO_GET_NICE:
+> diff --git a/drivers/md/dm-table.c b/drivers/md/dm-table.c
+> index 5edc3079e7c199..af156256e511ff 100644
+> --- a/drivers/md/dm-table.c
+> +++ b/drivers/md/dm-table.c
+> @@ -903,7 +903,7 @@ static int device_is_rq_stackable(struct dm_target *ti, struct dm_dev *dev,
+>         struct request_queue *q = bdev_get_queue(bdev);
+>
+>         /* request-based cannot stack on partitions! */
+> -       if (bdev != bdev->bd_contains)
+> +       if (bdev_is_partition(bdev))
+>                 return false;
+>
+>         return queue_is_mq(q);
+> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+> index fa313b63413547..8d3df0be0355ce 100644
+> --- a/drivers/mmc/core/block.c
+> +++ b/drivers/mmc/core/block.c
+> @@ -723,7 +723,7 @@ static int mmc_blk_check_blkdev(struct block_device *bdev)
+>          * whole block device, not on a partition.  This prevents overspray
+>          * between sibling partitions.
+>          */
+> -       if ((!capable(CAP_SYS_RAWIO)) || (bdev != bdev->bd_contains))
+> +       if (!capable(CAP_SYS_RAWIO) || bdev_is_partition(bdev))
+>                 return -EPERM;
+>         return 0;
+>  }
+> diff --git a/drivers/s390/block/dasd_ioctl.c b/drivers/s390/block/dasd_ioctl.c
+> index faaf5596e31c12..cb6427fb9f3d16 100644
+> --- a/drivers/s390/block/dasd_ioctl.c
+> +++ b/drivers/s390/block/dasd_ioctl.c
+> @@ -277,7 +277,7 @@ dasd_ioctl_format(struct block_device *bdev, void __user *argp)
+>                 dasd_put_device(base);
+>                 return -EFAULT;
+>         }
+> -       if (bdev != bdev->bd_contains) {
+> +       if (bdev_is_partition(bdev)) {
+>                 pr_warn("%s: The specified DASD is a partition and cannot be formatted\n",
+>                         dev_name(&base->cdev->dev));
+>                 dasd_put_device(base);
+> @@ -304,7 +304,7 @@ static int dasd_ioctl_check_format(struct block_device *bdev, void __user *argp)
+>         base = dasd_device_from_gendisk(bdev->bd_disk);
+>         if (!base)
+>                 return -ENODEV;
+> -       if (bdev != bdev->bd_contains) {
+> +       if (bdev_is_partition(bdev)) {
+>                 pr_warn("%s: The specified DASD is a partition and cannot be checked\n",
+>                         dev_name(&base->cdev->dev));
+>                 rc = -EINVAL;
+> @@ -362,7 +362,7 @@ static int dasd_ioctl_release_space(struct block_device *bdev, void __user *argp
+>                 rc = -EROFS;
+>                 goto out_err;
+>         }
+> -       if (bdev != bdev->bd_contains) {
+> +       if (bdev_is_partition(bdev)) {
+>                 pr_warn("%s: The specified DASD is a partition and tracks cannot be released\n",
+>                         dev_name(&base->cdev->dev));
+>                 rc = -EINVAL;
+> @@ -540,7 +540,7 @@ dasd_ioctl_set_ro(struct block_device *bdev, void __user *argp)
+>
+>         if (!capable(CAP_SYS_ADMIN))
+>                 return -EACCES;
+> -       if (bdev != bdev->bd_contains)
+> +       if (bdev_is_partition(bdev))
+>                 // ro setting is not allowed for partitions
+>                 return -EINVAL;
+>         if (get_user(intval, (int __user *)argp))
+> diff --git a/fs/nfsd/blocklayout.c b/fs/nfsd/blocklayout.c
+> index 311e5ce80cfc27..a07c39c94bbd03 100644
+> --- a/fs/nfsd/blocklayout.c
+> +++ b/fs/nfsd/blocklayout.c
+> @@ -170,7 +170,7 @@ nfsd4_block_proc_getdeviceinfo(struct super_block *sb,
+>                 struct nfs4_client *clp,
+>                 struct nfsd4_getdeviceinfo *gdp)
+>  {
+> -       if (sb->s_bdev != sb->s_bdev->bd_contains)
+> +       if (bdev_is_partition(sb->s_bdev))
+>                 return nfserr_inval;
+>         return nfserrno(nfsd4_block_get_device_info_simple(sb, gdp));
+>  }
+> @@ -382,7 +382,7 @@ nfsd4_scsi_proc_getdeviceinfo(struct super_block *sb,
+>                 struct nfs4_client *clp,
+>                 struct nfsd4_getdeviceinfo *gdp)
+>  {
+> -       if (sb->s_bdev != sb->s_bdev->bd_contains)
+> +       if (bdev_is_partition(sb->s_bdev))
+>                 return nfserr_inval;
+>         return nfserrno(nfsd4_block_get_device_info_scsi(sb, clp, gdp));
+>  }
+> diff --git a/include/linux/blkdev.h b/include/linux/blkdev.h
+> index 7575fa0aae6e5c..0006a78ebc5dde 100644
+> --- a/include/linux/blkdev.h
+> +++ b/include/linux/blkdev.h
+> @@ -1341,6 +1341,11 @@ static inline int sb_issue_zeroout(struct super_block *sb, sector_t block,
+>
+>  extern int blk_verify_command(unsigned char *cmd, fmode_t mode);
+>
+> +static inline bool bdev_is_partition(struct block_device *bdev)
+> +{
+> +       return bdev->bd_partno;
+> +}
+> +
+>  enum blk_default_limits {
+>         BLK_MAX_SEGMENTS        = 128,
+>         BLK_SAFE_MAX_SECTORS    = 255,
+> @@ -1457,7 +1462,7 @@ static inline int bdev_alignment_offset(struct block_device *bdev)
+>
+>         if (q->limits.misaligned)
+>                 return -1;
+> -       if (bdev != bdev->bd_contains)
+> +       if (bdev_is_partition(bdev))
+>                 return queue_limit_alignment_offset(&q->limits,
+>                                 bdev->bd_part->start_sect);
+>         return q->limits.alignment_offset;
+> @@ -1498,7 +1503,7 @@ static inline int bdev_discard_alignment(struct block_device *bdev)
+>  {
+>         struct request_queue *q = bdev_get_queue(bdev);
+>
+> -       if (bdev != bdev->bd_contains)
+> +       if (bdev_is_partition(bdev))
+>                 return queue_limit_discard_alignment(&q->limits,
+>                                 bdev->bd_part->start_sect);
+>         return q->limits.discard_alignment;
+> diff --git a/kernel/trace/blktrace.c b/kernel/trace/blktrace.c
+> index 4b3a42fc3b24f1..157758a88773b9 100644
+> --- a/kernel/trace/blktrace.c
+> +++ b/kernel/trace/blktrace.c
+> @@ -527,7 +527,7 @@ static int do_blk_trace_setup(struct request_queue *q, char *name, dev_t dev,
+>          * and scsi-generic block devices we create a temporary new debugfs
+>          * directory that will be removed once the trace ends.
+>          */
+> -       if (bdev && bdev == bdev->bd_contains)
+> +       if (bdev && !bdev_is_partition(bdev))
+>                 dir = q->debugfs_dir;
+>         else
+>                 bt->dir = dir = debugfs_create_dir(buts->name, blk_debugfs_root);
+> --
+> 2.28.0
+>
