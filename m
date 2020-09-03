@@ -2,130 +2,116 @@ Return-Path: <SRS0=lwnd=CM=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.0 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 33AEFC433E2
-	for <linux-mmc@archiver.kernel.org>; Thu,  3 Sep 2020 08:48:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DDFEEC433E2
+	for <linux-mmc@archiver.kernel.org>; Thu,  3 Sep 2020 10:50:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 028552071B
-	for <linux-mmc@archiver.kernel.org>; Thu,  3 Sep 2020 08:48:42 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id AB1A320775
+	for <linux-mmc@archiver.kernel.org>; Thu,  3 Sep 2020 10:50:17 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=fail reason="signature verification failed" (1024-bit key) header.d=crapouillou.net header.i=@crapouillou.net header.b="aL+sHYDo"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726268AbgICIsj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 3 Sep 2020 04:48:39 -0400
-Received: from smtp25.cstnet.cn ([159.226.251.25]:36030 "EHLO cstnet.cn"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1725984AbgICIsi (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 3 Sep 2020 04:48:38 -0400
-Received: from localhost.localdomain (unknown [159.226.5.100])
-        by APP-05 (Coremail) with SMTP id zQCowAD3H1jbrVBf+u8MAQ--.28886S2;
-        Thu, 03 Sep 2020 16:48:28 +0800 (CST)
-From:   Xu Wang <vulab@iscas.ac.cn>
-To:     ulf.hansson@linaro.org, lgirdwood@gmail.com, broonie@kernel.org,
-        hns@goldelico.com, linus.walleij@linaro.org, rmfrfs@gmail.com
-Cc:     linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Subject: [PATCH] mmc: host: omap-hsmmc: remove redundant null check
-Date:   Thu,  3 Sep 2020 08:48:25 +0000
-Message-Id: <20200903084825.85616-1-vulab@iscas.ac.cn>
-X-Mailer: git-send-email 2.17.1
-X-CM-TRANSID: zQCowAD3H1jbrVBf+u8MAQ--.28886S2
-X-Coremail-Antispam: 1UD129KBjvJXoW7ur48KF43ZrWkZr4DKF47XFb_yoW5Jr1xpF
-        97Xa9Fkw47XrZ0vF4kJa1qqFyrtr4rtas5KrW8Ga4xGw15ArZ5ta4DGa4SvFsYk3s3C3WS
-        qF48tFy8Cw15GaDanT9S1TB71UUUUUUqnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
-        9KBjDU0xBIdaVrnRJUUUkIb7Iv0xC_Kw4lb4IE77IF4wAFF20E14v26r4j6ryUM7CY07I2
-        0VC2zVCF04k26cxKx2IYs7xG6rWj6s0DM7CIcVAFz4kK6r1j6r18M28lY4IEw2IIxxk0rw
-        A2F7IY1VAKz4vEj48ve4kI8wA2z4x0Y4vE2Ix0cI8IcVAFwI0_Xr0_Ar1l84ACjcxK6xII
-        jxv20xvEc7CjxVAFwI0_Gr0_Cr1l84ACjcxK6I8E87Iv67AKxVWxJr0_GcWl84ACjcxK6I
-        8E87Iv6xkF7I0E14v26rxl6s0DM2AIxVAIcxkEcVAq07x20xvEncxIr21l5I8CrVACY4xI
-        64kE6c02F40Ex7xfMcIj6xIIjxv20xvE14v26r106r15McIj6I8E87Iv67AKxVW8JVWxJw
-        Am72CE4IkC6x0Yz7v_Jr0_Gr1lF7xvr2IYc2Ij64vIr41lc2xSY4AK67AK6r43MxAIw28I
-        cxkI7VAKI48JMxC20s026xCaFVCjc4AY6r1j6r4UMI8I3I0E5I8CrVAFwI0_Jr0_Jr4lx2
-        IqxVCjr7xvwVAFwI0_JrI_JrWlx4CE17CEb7AF67AKxVWUtVW8ZwCIc40Y0x0EwIxGrwCI
-        42IY6xIIjxv20xvE14v26r1j6r1xMIIF0xvE2Ix0cI8IcVCY1x0267AKxVW8JVWxJwCI42
-        IY6xAIw20EY4v20xvaj40_Wr1j6rW3Jr1lIxAIcVC2z280aVAFwI0_Jr0_Gr1lIxAIcVC2
-        z280aVCY1x0267AKxVW8JVW8JrUvcSsGvfC2KfnxnUUI43ZEXa7IU5LZ2DUUUUU==
-X-Originating-IP: [159.226.5.100]
-X-CM-SenderInfo: pyxotu46lvutnvoduhdfq/1tbiCAwIA18J9nTQWAAAsT
+        id S1726025AbgICKuP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 3 Sep 2020 06:50:15 -0400
+Received: from crapouillou.net ([89.234.176.41]:49158 "EHLO crapouillou.net"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1725984AbgICKuM (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 3 Sep 2020 06:50:12 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=crapouillou.net;
+        s=mail; t=1599130208; h=from:from:sender:reply-to:subject:subject:date:date:
+         message-id:message-id:to:to:cc:cc:mime-version:mime-version:
+         content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=YXg3aqgmFb8tKfR4TEoiu32nZCgBWfcl5v4Q44mU658=;
+        b=aL+sHYDogDi8odA19gwRz4rweOeF1jr+yCLbpS1gEROe3fA7E/jfDC5BeFmJAUnF5eryIC
+        IdxX7nQpGG7VkZGyAzxbp9xwe0eFQFIBK58dVNueyRCjIxt/lOYFswheujnU2UtA4nuHiz
+        Erg60GWs/LhPy2ysrTXzXyDxGTvSHyo=
+Date:   Thu, 03 Sep 2020 12:49:52 +0200
+From:   Paul Cercueil <paul@crapouillou.net>
+Subject: Re: [PATCH 04/11] mmc: jz4740: Simplify with dev_err_probe()
+To:     Krzysztof Kozlowski <krzk@kernel.org>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Florian Fainelli <f.fainelli@gmail.com>,
+        Ray Jui <rjui@broadcom.com>,
+        Scott Branden <sbranden@broadcom.com>,
+        bcm-kernel-feedback-list@broadcom.com,
+        Nicolas Saenz Julienne <nsaenzjulienne@suse.de>,
+        Jaehoon Chung <jh80.chung@samsung.com>,
+        Jun Nie <jun.nie@linaro.org>, Shawn Guo <shawnguo@kernel.org>,
+        Kevin Hilman <khilman@baylibre.com>,
+        Neil Armstrong <narmstrong@baylibre.com>,
+        Jerome Brunet <jbrunet@baylibre.com>,
+        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+        Al Cooper <alcooperx@gmail.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Michal Simek <michal.simek@xilinx.com>,
+        Lars Povlsen <lars.povlsen@microchip.com>,
+        Steen Hegelund <Steen.Hegelund@microchip.com>,
+        Microchip Linux Driver Support <UNGLinuxDriver@microchip.com>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        Jonathan Hunter <jonathanh@nvidia.com>,
+        Arnd Bergmann <arnd@arndb.de>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-rpi-kernel@lists.infradead.org,
+        linux-arm-kernel@lists.infradead.org,
+        linux-amlogic@lists.infradead.org, linux-tegra@vger.kernel.org
+Message-Id: <4RW2GQ.J2DD55HCZMCH2@crapouillou.net>
+In-Reply-To: <20200902193658.20539-5-krzk@kernel.org>
+References: <20200902193658.20539-1-krzk@kernel.org>
+        <20200902193658.20539-5-krzk@kernel.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=iso-8859-1; format=flowed
+Content-Transfer-Encoding: quoted-printable
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Because clk_disable_unprepare already checked NULL clock
-parameter, so the additional checks are unnecessary, just remove them.
+Hi Krzysztof,
 
-Signed-off-by: Xu Wang <vulab@iscas.ac.cn>
----
- drivers/mmc/host/omap_hsmmc.c | 18 ++++++------------
- 1 file changed, 6 insertions(+), 12 deletions(-)
+Le mer. 2 sept. 2020 =E0 21:36, Krzysztof Kozlowski <krzk@kernel.org> a=20
+=E9crit :
+> Common pattern of handling deferred probe can be simplified with
+> dev_err_probe().  Less code and the error value gets printed.
+>=20
+> Signed-off-by: Krzysztof Kozlowski <krzk@kernel.org>
+> ---
+>  drivers/mmc/host/jz4740_mmc.c | 5 ++---
+>  1 file changed, 2 insertions(+), 3 deletions(-)
+>=20
+> diff --git a/drivers/mmc/host/jz4740_mmc.c=20
+> b/drivers/mmc/host/jz4740_mmc.c
+> index 81d71010b474..0c5b52b53303 100644
+> --- a/drivers/mmc/host/jz4740_mmc.c
+> +++ b/drivers/mmc/host/jz4740_mmc.c
+> @@ -991,9 +991,8 @@ static int jz4740_mmc_probe(struct=20
+> platform_device* pdev)
+>=20
+>  	ret =3D mmc_of_parse(mmc);
+>  	if (ret) {
+> -		if (ret !=3D -EPROBE_DEFER)
+> -			dev_err(&pdev->dev,
+> -				"could not parse device properties: %d\n", ret);
+> +		dev_err_probe(&pdev->dev, ret,
+> +			      "could not parse device properties\n");
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 37b8740513f5..d02983e23ed1 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -1114,8 +1114,7 @@ static int omap_hsmmc_switch_opcond(struct omap_hsmmc_host *host, int vdd)
- 	int ret;
- 
- 	/* Disable the clocks */
--	if (host->dbclk)
--		clk_disable_unprepare(host->dbclk);
-+	clk_disable_unprepare(host->dbclk);
- 
- 	/* Turn the power off */
- 	ret = omap_hsmmc_set_power(host, 0);
-@@ -1123,8 +1122,7 @@ static int omap_hsmmc_switch_opcond(struct omap_hsmmc_host *host, int vdd)
- 	/* Turn the power ON with given VDD 1.8 or 3.0v */
- 	if (!ret)
- 		ret = omap_hsmmc_set_power(host, 1);
--	if (host->dbclk)
--		clk_prepare_enable(host->dbclk);
-+	clk_prepare_enable(host->dbclk);
- 
- 	if (ret != 0)
- 		goto err;
-@@ -2014,8 +2012,7 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
- 	pm_runtime_dont_use_autosuspend(host->dev);
- 	pm_runtime_put_sync(host->dev);
- 	pm_runtime_disable(host->dev);
--	if (host->dbclk)
--		clk_disable_unprepare(host->dbclk);
-+	clk_disable_unprepare(host->dbclk);
- err1:
- 	mmc_free_host(mmc);
- err:
-@@ -2037,8 +2034,7 @@ static int omap_hsmmc_remove(struct platform_device *pdev)
- 	pm_runtime_put_sync(host->dev);
- 	pm_runtime_disable(host->dev);
- 	device_init_wakeup(&pdev->dev, false);
--	if (host->dbclk)
--		clk_disable_unprepare(host->dbclk);
-+	clk_disable_unprepare(host->dbclk);
- 
- 	mmc_free_host(host->mmc);
- 
-@@ -2063,8 +2059,7 @@ static int omap_hsmmc_suspend(struct device *dev)
- 				OMAP_HSMMC_READ(host->base, HCTL) & ~SDBP);
- 	}
- 
--	if (host->dbclk)
--		clk_disable_unprepare(host->dbclk);
-+	clk_disable_unprepare(host->dbclk);
- 
- 	pm_runtime_put_sync(host->dev);
- 	return 0;
-@@ -2080,8 +2075,7 @@ static int omap_hsmmc_resume(struct device *dev)
- 
- 	pm_runtime_get_sync(host->dev);
- 
--	if (host->dbclk)
--		clk_prepare_enable(host->dbclk);
-+	clk_prepare_enable(host->dbclk);
- 
- 	if (!(host->mmc->pm_flags & MMC_PM_KEEP_POWER))
- 		omap_hsmmc_conf_bus_power(host);
--- 
-2.17.1
+I think you can put that on one line.
+
+With that said:
+Reviewed-by: Paul Cercueil <paul@crapouillou.net>
+
+Cheers,
+-Paul
+
+>  		goto err_free_host;
+>  	}
+>=20
+> --
+> 2.17.1
+>=20
+
 
