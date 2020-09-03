@@ -2,151 +2,63 @@ Return-Path: <SRS0=lwnd=CM=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.0 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
+X-Spam-Status: No, score=-8.5 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
+	SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D9EAAC433E2
-	for <linux-mmc@archiver.kernel.org>; Thu,  3 Sep 2020 08:20:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 84F07C433E7
+	for <linux-mmc@archiver.kernel.org>; Thu,  3 Sep 2020 08:26:20 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B56DE20658
-	for <linux-mmc@archiver.kernel.org>; Thu,  3 Sep 2020 08:20:33 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 670D3208CA
+	for <linux-mmc@archiver.kernel.org>; Thu,  3 Sep 2020 08:26:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728222AbgICIUc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 3 Sep 2020 04:20:32 -0400
-Received: from mga05.intel.com ([192.55.52.43]:36764 "EHLO mga05.intel.com"
+        id S1726770AbgICI0O (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 3 Sep 2020 04:26:14 -0400
+Received: from verein.lst.de ([213.95.11.211]:36890 "EHLO verein.lst.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726967AbgICIUc (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 3 Sep 2020 04:20:32 -0400
-IronPort-SDR: UAhQwI9nWr5N0Ssk91Enat0eUs15ciWos+Mpf9aZyd9VfUitB9WC+vPWh1uI8SDDj4GleLaAws
- HrPm3i/171hQ==
-X-IronPort-AV: E=McAfee;i="6000,8403,9732"; a="242356326"
-X-IronPort-AV: E=Sophos;i="5.76,385,1592895600"; 
-   d="scan'208";a="242356326"
-X-Amp-Result: SKIPPED(no attachment in message)
-X-Amp-File-Uploaded: False
-Received: from fmsmga002.fm.intel.com ([10.253.24.26])
-  by fmsmga105.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 03 Sep 2020 01:20:31 -0700
-IronPort-SDR: us9vTGT33QbxjZoviJb7le3HTC8FOUlIec36VMhX5tXlhCcvcPW9B/SKFJcwEJiMvCa3zvNnDf
- 7Vbl3UaoRlmQ==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.76,385,1592895600"; 
-   d="scan'208";a="334396201"
-Received: from slisovsk-lenovo-ideapad-720s-13ikb.fi.intel.com (HELO ahunter-Desktop.fi.intel.com) ([10.237.72.190])
-  by fmsmga002.fm.intel.com with ESMTP; 03 Sep 2020 01:20:29 -0700
-From:   Adrian Hunter <adrian.hunter@intel.com>
+        id S1725984AbgICI0N (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 3 Sep 2020 04:26:13 -0400
+Received: by verein.lst.de (Postfix, from userid 2407)
+        id 727D868BEB; Thu,  3 Sep 2020 10:26:09 +0200 (CEST)
+Date:   Thu, 3 Sep 2020 10:26:09 +0200
+From:   Christoph Hellwig <hch@lst.de>
 To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
-        =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>,
-        Haibo Chen <haibo.chen@nxp.com>, Yue Hu <huyue2@yulong.com>,
-        Douglas Anderson <dianders@chromium.org>,
-        Dmitry Osipenko <digetx@gmail.com>
-Subject: [PATCH] mmc: sdio: Use mmc_pre_req() / mmc_post_req()
-Date:   Thu,  3 Sep 2020 11:20:07 +0300
-Message-Id: <20200903082007.18715-1-adrian.hunter@intel.com>
-X-Mailer: git-send-email 2.17.1
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki, Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Cc:     Christoph Hellwig <hch@lst.de>, Jens Axboe <axboe@kernel.dk>,
+        dm-devel@redhat.com,
+        Linux Documentation <linux-doc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-block <linux-block@vger.kernel.org>,
+        drbd-dev@lists.linbit.com, linux-ide@vger.kernel.org,
+        linux-raid@vger.kernel.org,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        linux-s390@vger.kernel.org,
+        linux-scsi <linux-scsi@vger.kernel.org>,
+        target-devel@vger.kernel.org
+Subject: Re: [PATCH 2/9] block: add a bdev_is_partition helper
+Message-ID: <20200903082609.GA23498@lst.de>
+References: <20200903054104.228829-1-hch@lst.de> <20200903054104.228829-3-hch@lst.de> <CAPDyKFrkcpziGFPmSd8Kx4bzhoN6zxF1E8MagLQSa4sBmnicOg@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFrkcpziGFPmSd8Kx4bzhoN6zxF1E8MagLQSa4sBmnicOg@mail.gmail.com>
+User-Agent: Mutt/1.5.17 (2007-11-01)
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-SDHCI changed from using a tasklet to finish requests, to using an IRQ
-thread i.e. commit c07a48c2651965 ("mmc: sdhci: Remove finish_tasklet").
-Because this increased the latency to complete requests, a preparatory
-change was made to complete the request from the IRQ handler if
-possible i.e. commit 19d2f695f4e827 ("mmc: sdhci: Call mmc_request_done()
-from IRQ handler if possible").  That alleviated the situation for MMC
-block devices because the MMC block driver makes use of mmc_pre_req()
-and mmc_post_req() so that successful requests are completed in the IRQ
-handler and any DMA unmapping is handled separately in mmc_post_req().
-However SDIO was still affected, and an example has been reported with
-up to 20% degradation in performance.
+On Thu, Sep 03, 2020 at 10:19:34AM +0200, Ulf Hansson wrote:
+> On Thu, 3 Sep 2020 at 07:42, Christoph Hellwig <hch@lst.de> wrote:
+> >
+> > Add a littler helper to make the somewhat arcane bd_contains checks a
+> > little more obvious.
+> >
+> > Signed-off-by: Christoph Hellwig <hch@lst.de>
+> 
+> Not sure why we have both "bd_contains" and "bd_partno", nevertheless,
+> feel free to add:
 
-Looking at SDIO I/O helper functions, sdio_io_rw_ext_helper() appeared
-to be a possible candidate for making use of asynchronous requests
-within its I/O loops, but analysis revealed that these loops almost
-never iterate more than once, so the complexity of the change would not
-be warrented.
-
-Instead, mmc_pre_req() and mmc_post_req() are added before and after I/O
-submission (mmc_wait_for_req) in mmc_io_rw_extended().  This still has
-the potential benefit of reducing the duration of interrupt handlers, as
-well as addressing the latency issue for SDHCI.  It also seems a more
-reasonable solution than forcing drivers to do everything in the IRQ
-handler.
-
-Reported-by: Dmitry Osipenko <digetx@gmail.com>
-Fixes: c07a48c2651965 ("mmc: sdhci: Remove finish_tasklet")
-Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
-Tested-by: Dmitry Osipenko <digetx@gmail.com>
----
- drivers/mmc/core/sdio_ops.c | 39 +++++++++++++++++++++----------------
- 1 file changed, 22 insertions(+), 17 deletions(-)
-
-diff --git a/drivers/mmc/core/sdio_ops.c b/drivers/mmc/core/sdio_ops.c
-index 93d346c01110..4c229dd2b6e5 100644
---- a/drivers/mmc/core/sdio_ops.c
-+++ b/drivers/mmc/core/sdio_ops.c
-@@ -121,6 +121,7 @@ int mmc_io_rw_extended(struct mmc_card *card, int write, unsigned fn,
- 	struct sg_table sgtable;
- 	unsigned int nents, left_size, i;
- 	unsigned int seg_size = card->host->max_seg_size;
-+	int err;
- 
- 	WARN_ON(blksz == 0);
- 
-@@ -170,28 +171,32 @@ int mmc_io_rw_extended(struct mmc_card *card, int write, unsigned fn,
- 
- 	mmc_set_data_timeout(&data, card);
- 
--	mmc_wait_for_req(card->host, &mrq);
-+	mmc_pre_req(card->host, &mrq);
- 
--	if (nents > 1)
--		sg_free_table(&sgtable);
-+	mmc_wait_for_req(card->host, &mrq);
- 
- 	if (cmd.error)
--		return cmd.error;
--	if (data.error)
--		return data.error;
--
--	if (mmc_host_is_spi(card->host)) {
-+		err = cmd.error;
-+	else if (data.error)
-+		err = data.error;
-+	else if (mmc_host_is_spi(card->host))
- 		/* host driver already reported errors */
--	} else {
--		if (cmd.resp[0] & R5_ERROR)
--			return -EIO;
--		if (cmd.resp[0] & R5_FUNCTION_NUMBER)
--			return -EINVAL;
--		if (cmd.resp[0] & R5_OUT_OF_RANGE)
--			return -ERANGE;
--	}
-+		err = 0;
-+	else if (cmd.resp[0] & R5_ERROR)
-+		err = -EIO;
-+	else if (cmd.resp[0] & R5_FUNCTION_NUMBER)
-+		err = -EINVAL;
-+	else if (cmd.resp[0] & R5_OUT_OF_RANGE)
-+		err = -ERANGE;
-+	else
-+		err = 0;
- 
--	return 0;
-+	mmc_post_req(card->host, &mrq, err);
-+
-+	if (nents > 1)
-+		sg_free_table(&sgtable);
-+
-+	return err;
- }
- 
- int sdio_reset(struct mmc_host *host)
--- 
-2.17.1
+Right now both are needed for how blkdev_get/put work.  But I plan to
+eventual kill off bd_contains after some major surgery to that code.
 
