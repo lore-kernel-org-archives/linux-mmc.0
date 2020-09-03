@@ -2,140 +2,220 @@ Return-Path: <SRS0=lwnd=CM=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-4.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.8 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 82722C43461
-	for <linux-mmc@archiver.kernel.org>; Thu,  3 Sep 2020 14:46:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9304EC433E2
+	for <linux-mmc@archiver.kernel.org>; Thu,  3 Sep 2020 14:59:47 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 50DF8206EF
-	for <linux-mmc@archiver.kernel.org>; Thu,  3 Sep 2020 14:46:04 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 645D720658
+	for <linux-mmc@archiver.kernel.org>; Thu,  3 Sep 2020 14:59:47 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="C8FbPyMo"
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="j+QW6nUz"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729292AbgICOqB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 3 Sep 2020 10:46:01 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37016 "EHLO
+        id S1729209AbgICO7p (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 3 Sep 2020 10:59:45 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60768 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729282AbgICOfR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Sep 2020 10:35:17 -0400
-Received: from mail-vs1-xe42.google.com (mail-vs1-xe42.google.com [IPv6:2607:f8b0:4864:20::e42])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B6C6FC061245
-        for <linux-mmc@vger.kernel.org>; Thu,  3 Sep 2020 07:35:16 -0700 (PDT)
-Received: by mail-vs1-xe42.google.com with SMTP id a16so1823283vsp.12
-        for <linux-mmc@vger.kernel.org>; Thu, 03 Sep 2020 07:35:16 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=chromium.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=rXLxFi+fNCyjeqFnfAYDTSiQ62DVLQBxSbiw89atuck=;
-        b=C8FbPyMoOuaDAUAP3f6Tkl0bV7CbwuPoTySJwTJt/01GpE+KCTnWNnGUtKNKPTCaiQ
-         0h840v0TCvEk+7wTUtgVDPJ1KqE9eNc3jxsZYrpi4GMk0FmgnW1ga0OgwW2QJv04wdLp
-         /p3Lhr/5FCpe7NCfyVFe4jL0DICEnJBP5lN2g=
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=rXLxFi+fNCyjeqFnfAYDTSiQ62DVLQBxSbiw89atuck=;
-        b=ldA5oLi9YtxXH6leu8XnfdCLanwvOuN1aXnmr7eALc5Y0kTr4D42hRBJW4DGCUjZwk
-         lNY16gg9JV488Kfx/IlPPKH+gr6QarWawZdexlV8eEYgmqHafmhuaVe3D8KWUDaV8PSD
-         2ZL7J7tk5nm6AHxOuyDPirE9ewcZ+Jl9e7V0uNMfF1f2X7Am7w3fhqSZS+4W+eaWtQt1
-         CcdP49Nug7NGNaWLd2FfxxEvylFJbjUFZ/F+Iu/eI5kVFZCBIIYlDk/ih4dAJm/p1GoE
-         h6ttABDEouPVWB+brpwxzZgsq7gg5Gba7apGkGZ0xDBHnBIFzhNWrMnNCmj4cjjLD4Cc
-         3Tgw==
-X-Gm-Message-State: AOAM533RuHMvRc9PtvYjevTKYIG2GRqZN18w8Ge/6HfOdOqK70UXlU2H
-        vT3kuNTY2itrXol9SLWMHEdB5OAB1hcBWA==
-X-Google-Smtp-Source: ABdhPJxLoM3iHWOmOaSjpOwfeR8bbbFFU1Awfio+fOy0irA9zQEjE0tkxAcVEE0P6Mi/hs33RGcrKg==
-X-Received: by 2002:a67:77c5:: with SMTP id s188mr1587772vsc.9.1599143715307;
-        Thu, 03 Sep 2020 07:35:15 -0700 (PDT)
-Received: from mail-vs1-f42.google.com (mail-vs1-f42.google.com. [209.85.217.42])
-        by smtp.gmail.com with ESMTPSA id g142sm524362vkg.36.2020.09.03.07.35.14
-        for <linux-mmc@vger.kernel.org>
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 03 Sep 2020 07:35:14 -0700 (PDT)
-Received: by mail-vs1-f42.google.com with SMTP id j188so1863378vsd.2
-        for <linux-mmc@vger.kernel.org>; Thu, 03 Sep 2020 07:35:14 -0700 (PDT)
-X-Received: by 2002:a67:e447:: with SMTP id n7mr2033870vsm.53.1599143714032;
- Thu, 03 Sep 2020 07:35:14 -0700 (PDT)
-MIME-Version: 1.0
-References: <20200902164303.1.I5e598a25222b4534c0083b61dbfa4e0e76f66171@changeid>
- <CAPDyKFoyKjKhwKGtLMtEyDSeSiBU6wasc=jt6c=sHnhN8jqqjg@mail.gmail.com>
-In-Reply-To: <CAPDyKFoyKjKhwKGtLMtEyDSeSiBU6wasc=jt6c=sHnhN8jqqjg@mail.gmail.com>
-From:   Doug Anderson <dianders@chromium.org>
-Date:   Thu, 3 Sep 2020 07:35:02 -0700
-X-Gmail-Original-Message-ID: <CAD=FV=WaWwJnquPy+9aB89-1OwKmYKJv2PpfOkgo94Z6J8uRUg@mail.gmail.com>
-Message-ID: <CAD=FV=WaWwJnquPy+9aB89-1OwKmYKJv2PpfOkgo94Z6J8uRUg@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-msm: Prefer asynchronous probe
+        with ESMTP id S1729101AbgICOHH (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Sep 2020 10:07:07 -0400
+Received: from casper.infradead.org (casper.infradead.org [IPv6:2001:8b0:10b:1236::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E4685C0610E3;
+        Thu,  3 Sep 2020 06:54:01 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=casper.20170209; h=In-Reply-To:Content-Type:MIME-Version:
+        References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+        Content-Transfer-Encoding:Content-ID:Content-Description;
+        bh=HMKdcBAh3Qfsb0YqV9KE1AdBeTa9W/Y2t3RJ7FugT60=; b=j+QW6nUzroNn72HmxKzqjWDO5S
+        NWwyKermXl6fL1UShM1HWUPvHIV2VIC61NK+tJPlQRgbUknfX0vL45DhVcnFsWSUHk8HyK/8ECR1j
+        8+8hm8yUaQRdj6wv2p+8RHIZ28gNkNG1iXSl0/vv0liO/UhJx2SDdQnywRYDUxMehPBrvx+dElVDu
+        +G3fDh/zuuQs1ELn9WRIGouAYkJXP2cZI3UadK89ovYuIhezQzpPZp5Ik3CKgqCxrX0hXW08muef1
+        0tTDaI96K+tEE1jjCVH5g6SluGC4xrhyijttNv08u4guRe3iaUCPcfKe47q1uJ6mgOrT/0lKotz6o
+        4x4yk5pg==;
+Received: from j217100.upc-j.chello.nl ([24.132.217.100] helo=noisy.programming.kicks-ass.net)
+        by casper.infradead.org with esmtpsa (Exim 4.92.3 #3 (Red Hat Linux))
+        id 1kDpgU-0002gF-IL; Thu, 03 Sep 2020 13:53:51 +0000
+Received: from hirez.programming.kicks-ass.net (hirez.programming.kicks-ass.net [192.168.1.225])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (Client did not present a certificate)
+        by noisy.programming.kicks-ass.net (Postfix) with ESMTPS id B8EFE300F7A;
+        Thu,  3 Sep 2020 15:53:47 +0200 (CEST)
+Received: by hirez.programming.kicks-ass.net (Postfix, from userid 1000)
+        id 9ABEA2BB8B563; Thu,  3 Sep 2020 15:53:47 +0200 (CEST)
+Date:   Thu, 3 Sep 2020 15:53:47 +0200
+From:   peterz@infradead.org
 To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>,
-        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Cc:     "Paul E. McKenney" <paulmck@kernel.org>,
+        Lina Iyer <ilina@codeaurora.org>,
+        Naresh Kamboju <naresh.kamboju@linaro.org>,
+        "Rafael J. Wysocki" <rjw@rjwysocki.net>,
+        Saravana Kannan <saravanak@google.com>,
+        open list <linux-kernel@vger.kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        lkft-triage@lists.linaro.org, rcu@vger.kernel.org,
+        Linux PM <linux-pm@vger.kernel.org>,
+        Anders Roxell <anders.roxell@linaro.org>,
+        Arnd Bergmann <arnd@arndb.de>,
+        Rajendra Nayak <rnayak@codeaurora.org>,
+        John Stultz <john.stultz@linaro.org>,
+        Stephen Boyd <sboyd@kernel.org>,
+        Lars Povlsen <lars.povlsen@microchip.com>,
+        madhuparnabhowmik10@gmail.com,
+        Viresh Kumar <viresh.kumar@linaro.org>,
+        Vincent Guittot <vincent.guittot@linaro.org>,
+        Thomas Gleixner <tglx@linutronix.de>
+Subject: [RFC][PATCH] cpu_pm: Remove RCU abuse
+Message-ID: <20200903135347.GC1362448@hirez.programming.kicks-ass.net>
+References: <20200901104206.GU1362448@hirez.programming.kicks-ass.net>
+ <CAPDyKFo0VkW-cgRSkvPQ0whpuJCo4OKcL1nmH7nz1tDEChOtVg@mail.gmail.com>
+ <CAPDyKFrv+DTF8=twZZk_tenB-sLg6H-CFn9HVDVA5S2kK2=U5Q@mail.gmail.com>
+ <20200901154417.GD20303@codeaurora.org>
+ <20200901155014.GF2674@hirez.programming.kicks-ass.net>
+ <20200901161340.GC29330@paulmck-ThinkPad-P72>
+ <20200901174216.GJ29142@worktop.programming.kicks-ass.net>
+ <CAPDyKFqPh7bg16AsitGv2QQHgwOPnWx9DiPPCMuD1EGA5TFFdg@mail.gmail.com>
+ <20200902121355.GE1362448@hirez.programming.kicks-ass.net>
+ <CAPDyKFrGj+8hOXi7sWxWNv2QP0=mx9pFKLG0JM-L5VNKUPDgeA@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFrGj+8hOXi7sWxWNv2QP0=mx9pFKLG0JM-L5VNKUPDgeA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi,
+On Wed, Sep 02, 2020 at 05:58:55PM +0200, Ulf Hansson wrote:
+> On Wed, 2 Sep 2020 at 14:14, <peterz@infradead.org> wrote:
+> >
+> > On Wed, Sep 02, 2020 at 09:03:37AM +0200, Ulf Hansson wrote:
+> > > Lots of cpuidle drivers are using CPU_PM notifiers (grep for
+> > > cpu_pm_enter and you will see) from their idlestates ->enter()
+> > > callbacks. And for those we are already calling
+> > > rcu_irq_enter_irqson|off() in cpu_pm_notify() when firing them.
+> >
+> > Yeah, that particular trainwreck is on my todo list already ... then
+> > again, that list is forever overflowing.
+> >
+> > I'm thinking cpu_pm_unregister_notifier() is not a common thing? The few
+> > I looked at seem to suggest 'never' is a good approximation.
+> 
+> The trend is that drivers are turning into regular modules that may
+> also need to manage "->remove()", which may mean unregistering the
+> notifier. Of course, I don't know for sure whether that becomes a
+> problem, but it seems quite limiting.
 
-On Thu, Sep 3, 2020 at 1:10 AM Ulf Hansson <ulf.hansson@linaro.org> wrote:
->
-> On Thu, 3 Sep 2020 at 01:43, Douglas Anderson <dianders@chromium.org> wrote:
-> >
-> > Turning on initcall debug on one system showed this:
-> >   initcall sdhci_msm_driver_init+0x0/0x28 returned 0 after 34782 usecs
-> >
-> > The lion's share of this time (~33 ms) was in mmc_power_up().  This
-> > shouldn't be terribly surprising since there are a few calls to delay
-> > based on "power_delay_ms" and the default delay there is 10 ms.
-> >
-> > Because we haven't specified that we'd prefer asynchronous probe for
-> > this driver then we'll wait for this driver to finish before we start
-> > probes for more drivers.  While 33 ms doesn't sound like tons, every
-> > little bit counts.
-> >
-> > There should be little problem with turning on asynchronous probe for
-> > this driver.  It's already possible that previous drivers may have
-> > turned on asynchronous probe so we might already have other things
-> > (that probed before us) probing at the same time we are anyway.  This
-> > driver isn't really providing resources (clocks, regulators, etc) that
-> > other drivers need to probe and even if it was they should be handling
-> > -EPROBE_DEFER.
-> >
-> > Let's turn this on and get a bit of boot speed back.
->
-> Thanks for a very well written commit message!
->
-> Indeed, I am sure many mmc host drivers could benefit from a similar
-> change. At least regular platform drivers and amba drivers are pretty
-> sure to work, but who knows.
+You can pin modules, once they're loaded they can never be removed
+again.
 
-Yeah, and many non-mmc drivers can benefit too, which is why I've been
-sending several of these patches recently as I optimize boot perf on
-the device that's sitting in front of me.  ;-)  I think the idea was
-that eventually we'd want the kernel to just turn on async by default
-everywhere, but at the time the flag was introduced there were too
-many subtle bugs everywhere.  It feels like one way to get to the
-point where we'd be confident that this is OK to turn on everywhere is
-to just start turning it on in lots of places.  Once enough places
-have it on then perhaps that will give folks confidence that it's OK
-to turn on by default across the board.
+Anyway, the below should 'work', I think.
 
-If you'd like, I can post patches to update some other set of MMC host
-drivers, either as one giant patch (hard to backport, but not as
-spammy) or as a large pile of patches.  I've never played with
-coccinelle so I'd probably fall back to doing this by hand.  I could
-probably only test on a small handful (I think I have easy access to
-dw-mmc-rockchip and sdhci-of-arasan besides the msm one I already
-posted), so another option is that I could also just post for those
-devices...  ...or we can just hope others will notice and start
-posting similar patches themselves after testing.  Let me know what
-you'd prefer.  ;-)
-
--Doug
+---
+diff --git a/kernel/cpu_pm.c b/kernel/cpu_pm.c
+index f7e1d0eccdbc..72804e0883d5 100644
+--- a/kernel/cpu_pm.c
++++ b/kernel/cpu_pm.c
+@@ -12,21 +12,18 @@
+ #include <linux/notifier.h>
+ #include <linux/spinlock.h>
+ #include <linux/syscore_ops.h>
++#include <linux/cpu.h>
++#include <linux/smp.h>
+ 
+-static ATOMIC_NOTIFIER_HEAD(cpu_pm_notifier_chain);
++static RAW_NOTIFIER_HEAD(cpu_pm_notifier_chain);
++static DEFINE_SPINLOCK(cpu_pm_lock);
+ 
+ static int cpu_pm_notify(enum cpu_pm_event event)
+ {
+ 	int ret;
+ 
+-	/*
+-	 * atomic_notifier_call_chain has a RCU read critical section, which
+-	 * could be disfunctional in cpu idle. Copy RCU_NONIDLE code to let
+-	 * RCU know this.
+-	 */
+-	rcu_irq_enter_irqson();
+-	ret = atomic_notifier_call_chain(&cpu_pm_notifier_chain, event, NULL);
+-	rcu_irq_exit_irqson();
++	lockdep_assert_irqs_disabled();
++	ret = raw_notifier_call_chain(&cpu_pm_notifier_chain, event, NULL);
+ 
+ 	return notifier_to_errno(ret);
+ }
+@@ -35,9 +32,8 @@ static int cpu_pm_notify_robust(enum cpu_pm_event event_up, enum cpu_pm_event ev
+ {
+ 	int ret;
+ 
+-	rcu_irq_enter_irqson();
+-	ret = atomic_notifier_call_chain_robust(&cpu_pm_notifier_chain, event_up, event_down, NULL);
+-	rcu_irq_exit_irqson();
++	lockdep_assert_irqs_disabled();
++	ret = raw_notifier_call_chain_robust(&cpu_pm_notifier_chain, event_up, event_down, NULL);
+ 
+ 	return notifier_to_errno(ret);
+ }
+@@ -54,10 +50,28 @@ static int cpu_pm_notify_robust(enum cpu_pm_event event_up, enum cpu_pm_event ev
+  */
+ int cpu_pm_register_notifier(struct notifier_block *nb)
+ {
+-	return atomic_notifier_chain_register(&cpu_pm_notifier_chain, nb);
++	unsigned long flags;
++	int ret;
++
++	spin_lock_irqsave(&cpu_pm_lock, flags);
++	ret = raw_notifier_chain_register(&cpu_pm_notifier_chain, nb);
++	spin_unlock_irqrestore(&cpu_pm_lock, flags);
++
++	return ret;
+ }
+ EXPORT_SYMBOL_GPL(cpu_pm_register_notifier);
+ 
++static bool __is_idle_cpu(int cpu, void *info)
++{
++	/*
++	 * Racy as heck, however if we fail to see an idle task, it must be
++	 * after we removed our element, so all is fine.
++	 */
++	return is_idle_task(curr_task(cpu));
++}
++
++static void __nop_func(void *arg) { }
++
+ /**
+  * cpu_pm_unregister_notifier - unregister a driver with cpu_pm
+  * @nb: notifier block to be unregistered
+@@ -69,7 +83,30 @@ EXPORT_SYMBOL_GPL(cpu_pm_register_notifier);
+  */
+ int cpu_pm_unregister_notifier(struct notifier_block *nb)
+ {
+-	return atomic_notifier_chain_unregister(&cpu_pm_notifier_chain, nb);
++	unsigned long flags;
++	int ret, cpu;
++
++	spin_lock_irqsave(&cpu_pm_lock, flags);
++	ret = raw_notifier_chain_unregister(&cpu_pm_notifier_chain, nb);
++	spin_unlock_irqrestore(&cpu_pm_lock, flags);
++
++	/*
++	 * Orders the removal above vs the __is_idle_cpu() test below. Matches
++	 * schedule() switching to the idle task.
++	 *
++	 * Ensures that if we miss an idle task, it must be after the removal.
++	 */
++	smp_mb();
++
++	/*
++	 * IPI all idle CPUs, this guarantees that no CPU is currently
++	 * iterating the notifier list.
++	 */
++	cpus_read_lock();
++	on_each_cpu_cond(__is_idle_cpu, __nop_func, NULL, 1);
++	cpus_read_unlock();
++
++	return ret;
+ }
+ EXPORT_SYMBOL_GPL(cpu_pm_unregister_notifier);
+ 
