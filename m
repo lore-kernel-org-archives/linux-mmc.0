@@ -5,64 +5,64 @@ X-Spam-Level:
 X-Spam-Status: No, score=-10.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
 	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=ham autolearn_force=no version=3.4.0
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BF538C433E2
-	for <linux-mmc@archiver.kernel.org>; Thu,  3 Sep 2020 08:11:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 185BBC43461
+	for <linux-mmc@archiver.kernel.org>; Thu,  3 Sep 2020 08:11:38 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9209521D7B
+	by mail.kernel.org (Postfix) with ESMTP id DCC6B2176B
 	for <linux-mmc@archiver.kernel.org>; Thu,  3 Sep 2020 08:11:37 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="WV2YQwBy"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="VSkCGrMZ"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728311AbgICILh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        id S1728421AbgICILh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
         Thu, 3 Sep 2020 04:11:37 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34152 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34174 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728421AbgICIKq (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Sep 2020 04:10:46 -0400
-Received: from mail-vs1-xe42.google.com (mail-vs1-xe42.google.com [IPv6:2607:f8b0:4864:20::e42])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4B46CC061247
-        for <linux-mmc@vger.kernel.org>; Thu,  3 Sep 2020 01:10:46 -0700 (PDT)
-Received: by mail-vs1-xe42.google.com with SMTP id p185so1233722vsp.8
-        for <linux-mmc@vger.kernel.org>; Thu, 03 Sep 2020 01:10:46 -0700 (PDT)
+        with ESMTP id S1728255AbgICIKx (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Sep 2020 04:10:53 -0400
+Received: from mail-vk1-xa43.google.com (mail-vk1-xa43.google.com [IPv6:2607:f8b0:4864:20::a43])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1AD22C061249
+        for <linux-mmc@vger.kernel.org>; Thu,  3 Sep 2020 01:10:52 -0700 (PDT)
+Received: by mail-vk1-xa43.google.com with SMTP id q124so581358vkb.8
+        for <linux-mmc@vger.kernel.org>; Thu, 03 Sep 2020 01:10:52 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=W6LsPfr5gFZyjAJhJ1htpVvYg6c4dCrFqquppUrb+pM=;
-        b=WV2YQwByktAObsod47J822KrC/FHRhiSoUACACKvWnufVMSwUyKNjdY63RocHXof26
-         cx8Ya/rnK0PKhtl6+Uc41KNZXqibvOsimJDbYcxqblhb71ZGyLjepEVa6RXqqyWyaxDA
-         Tt8tMCuFF6fM/z1CK0YUmCvAgeuQx0Gcj2vZJS4FITqT0clwhZTEmOIt6L1ANqDQmP5j
-         le08/1r2jIBbkdnfKlSrP0BTK87jCd2C4sllPSjR89OwHGMVHJFrHcRrWQQpL9EA0RWX
-         2BjCJrN5LHn7IGM9Pvw0LgcWZAyyyKTZqcHZkIidL6h8U32HlElUVldAaLCRnjxW7XMl
-         twsA==
+        bh=zIKaB5S0qzt1j0qrP3RfGo4Ng5m6tD5YBvW+p6cBWpo=;
+        b=VSkCGrMZk9uqiovnuB3gCxlXpkc7tTawunYl4GuvwlwGaTWeRnkpX7DC8IgCu+aIK7
+         quL7hVQZ0FJ8ccYYng/AUAgBPBeJulmZg6wiq2nLWIXRbeTiOMfIkPtNOiu+UPUYehnl
+         wM4L/kWPhjBjy/2lgY5aYsl/LVJWPLHBzOYqb3V6l2AcG27k5Ho9tDPCZsCXLCR3NyhV
+         YV1llI8naBDHt585QE2OFKGdyi6zmOwfUcyYKTKRZyywRMHXca2hUUZ8RqP+XicOaD83
+         Gj3GPCHq0iXlVm4H9pappL+i2GtA3oo11nLBC7Rq+Fa2OJQ/TUIzy0FYmmmKkyStXTil
+         Mnlw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=W6LsPfr5gFZyjAJhJ1htpVvYg6c4dCrFqquppUrb+pM=;
-        b=f1xFnOanJDPssuAdsJ5IbeTaxj4q0Vt+2oFSPMKOslg7PWHJ0XSHtO7jFy0HPtlteS
-         IkpWVZiMkJ9BLAjtF+T4lvmKwV+W1iF5eK46JGhAPdlFS21P2uakzmyq/e1FfuBYnU0c
-         rXG6F8Reas7AK9VimAkGAqLj1qE/8jaVhgm+nIF/YI0OyMiWDgy2FAjksjUpO6DG8Tww
-         Wg7mK1f3RAFlq3Wx+8RPwJD4YmIURoTFGgHoLrk1jJ7B0Nn2ylT5+bByGH206kcpmRfY
-         gvM5kb13iZ91CnGr0BlfGbrdIFZ9tRICwiZ5mXRuuIAMSEByAb7pxQWaVfMi20FYw8Wv
-         Cs0g==
-X-Gm-Message-State: AOAM533pD5dQmbOS5yC4Aa9RSsej3eUM2c/ElaGOLgjCPdoMfs7UlRs/
-        kHiykP9fJ1MSEeTOInQ1L20t7qyL/yMbbpwXhHOfKQ==
-X-Google-Smtp-Source: ABdhPJxIUy5MxKGx8qbHJTTySUccfXkN5uPedOk+7Ne8jVpgbd3HgSEgllLV2IRu0n9jm/Btpnnqm32x8+dJmCaYFSU=
-X-Received: by 2002:a67:308c:: with SMTP id w134mr387339vsw.8.1599120645493;
- Thu, 03 Sep 2020 01:10:45 -0700 (PDT)
+        bh=zIKaB5S0qzt1j0qrP3RfGo4Ng5m6tD5YBvW+p6cBWpo=;
+        b=fEK5DWWZnY1PAR/Qxx7LSVEZFcOtVOYaevYlTQxNOXJ8uSlwUluQ7uGT9LgPZeJ2kg
+         G/9VkOPdwJbmhZcEmg+0PnQbBOej1uxfaGZmQXmQZfwnh+YqSwycTTFQH6QAyKQX5M2J
+         gL3r0MsRD1MR5Jsp0MEuaS7f+2T11i2EZwepWf8MEBK5aHlaRrRy4DzqQodmC9N7Ujmt
+         Eh4LjlsSWdl/EKy+3kNcMWSLnA6dnbBgYXcJnhaiQGv73GsNC5k0wQPJpVCO8tKL0elo
+         RKXS8eYJ6z8W7lK5ALhTOGtl7fLvVMQAu+KAwMaszrme4kP2H+uw9dydC6TBNQ2J4C6B
+         wEWg==
+X-Gm-Message-State: AOAM533dR4jha+dKovMCegpGLVSESNTnnFxLY7FcYbMEJwQzaV7j2l8J
+        3Az/xzF/tPIEBDLOgODDFIAYlw1zWQrKEbf0em6T1Q==
+X-Google-Smtp-Source: ABdhPJxfAPAkxGsAxNbyrIBprTd99bTvdjLzQF9t7lNgAVPgtFBvQhAsLzJxujDDxAJ7NOa99qGNjuKVubA2UYhu8rE=
+X-Received: by 2002:a05:6122:10ca:: with SMTP id l10mr868318vko.15.1599120651296;
+ Thu, 03 Sep 2020 01:10:51 -0700 (PDT)
 MIME-Version: 1.0
-References: <20200903054333.18331-1-krzk@kernel.org>
-In-Reply-To: <20200903054333.18331-1-krzk@kernel.org>
+References: <20200903012029.25673-1-chris.packham@alliedtelesis.co.nz>
+In-Reply-To: <20200903012029.25673-1-chris.packham@alliedtelesis.co.nz>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 3 Sep 2020 10:10:08 +0200
-Message-ID: <CAPDyKFrzBD-m78Q=k2sgYh1zh03N=_1KcFQ3hYpR29LiqHBOpg@mail.gmail.com>
-Subject: Re: [PATCH] mmc: s3cmci: Drop unused variables in dbg_dumpregs
-To:     Krzysztof Kozlowski <krzk@kernel.org>
-Cc:     Ben Dooks <ben-linux@fluff.org>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+Date:   Thu, 3 Sep 2020 10:10:13 +0200
+Message-ID: <CAPDyKFpMOKs9t4O73XWZiZhb+6wNh=BL5t-jhej7nxCocbq7NA@mail.gmail.com>
+Subject: Re: [PATCH v2] mmc: sdhci-of-esdhc: Don't walk device-tree on every interrupt
+To:     Chris Packham <chris.packham@alliedtelesis.co.nz>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        "yinbo.zhu" <yinbo.zhu@nxp.com>,
         "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
         Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
@@ -71,54 +71,73 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 3 Sep 2020 at 07:43, Krzysztof Kozlowski <krzk@kernel.org> wrote:
+On Thu, 3 Sep 2020 at 03:20, Chris Packham
+<chris.packham@alliedtelesis.co.nz> wrote:
 >
-> The 'imask' and 'bsize' are not used in dbg_dumpregs:
+> Commit b214fe592ab7 ("mmc: sdhci-of-esdhc: add erratum eSDHC7 support")
+> added code to check for a specific compatible string in the device-tree
+> on every esdhc interrupat. Instead of doing this record the quirk in
+> struct sdhci_esdhc and lookup the struct in esdhc_irq.
 >
->   drivers/mmc/host/s3cmci.c:149:36: warning: variable 'imask' set but not used [-Wunused-but-set-variable]
->   drivers/mmc/host/s3cmci.c:148:63: warning: variable 'bsize' set but not used [-Wunused-but-set-variable]
->
-> Reported-by: kernel test robot <lkp@intel.com>
-> Signed-off-by: Krzysztof Kozlowski <krzk@kernel.org>
+> Signed-off-by: Chris Packham <chris.packham@alliedtelesis.co.nz>
 
-Applied for next, thanks!
+Applied for fixes, and by adding a stable tag, thanks!
 
 Kind regards
 Uffe
 
 
 > ---
->  drivers/mmc/host/s3cmci.c | 6 ++----
->  1 file changed, 2 insertions(+), 4 deletions(-)
+> I found this in passing while trying to track down another issue using ftrace.
+> I found it odd that I was seeing a lot of calls to __of_device_is_compatible()
+> coming from esdhc_irq() (the fact that this interrupt is going off on my board
+> is also odd, but that's a different story).
 >
-> diff --git a/drivers/mmc/host/s3cmci.c b/drivers/mmc/host/s3cmci.c
-> index ac94f926624d..40329aeacfdf 100644
-> --- a/drivers/mmc/host/s3cmci.c
-> +++ b/drivers/mmc/host/s3cmci.c
-> @@ -145,8 +145,8 @@ static void s3cmci_reset(struct s3cmci_host *host);
+> Changes in v2:
+> - add quirk_trans_complete_erratum to struct sdhci_esdhc so all the dt handling
+>   is taken care of in esdhc_init.
 >
->  static void dbg_dumpregs(struct s3cmci_host *host, char *prefix)
+>  drivers/mmc/host/sdhci-of-esdhc.c | 10 +++++++---
+>  1 file changed, 7 insertions(+), 3 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+> index 7c73d243dc6c..45881b309956 100644
+> --- a/drivers/mmc/host/sdhci-of-esdhc.c
+> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
+> @@ -81,6 +81,7 @@ struct sdhci_esdhc {
+>         bool quirk_tuning_erratum_type2;
+>         bool quirk_ignore_data_inhibit;
+>         bool quirk_delay_before_data_reset;
+> +       bool quirk_trans_complete_erratum;
+>         bool in_sw_tuning;
+>         unsigned int peripheral_clock;
+>         const struct esdhc_clk_fixup *clk_fixup;
+> @@ -1177,10 +1178,11 @@ static void esdhc_set_uhs_signaling(struct sdhci_host *host,
+>
+>  static u32 esdhc_irq(struct sdhci_host *host, u32 intmask)
 >  {
-> -       u32 con, pre, cmdarg, cmdcon, cmdsta, r0, r1, r2, r3, timer, bsize;
-> -       u32 datcon, datcnt, datsta, fsta, imask;
-> +       u32 con, pre, cmdarg, cmdcon, cmdsta, r0, r1, r2, r3, timer;
-> +       u32 datcon, datcnt, datsta, fsta;
+> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +       struct sdhci_esdhc *esdhc = sdhci_pltfm_priv(pltfm_host);
+>         u32 command;
 >
->         con     = readl(host->base + S3C2410_SDICON);
->         pre     = readl(host->base + S3C2410_SDIPRE);
-> @@ -158,12 +158,10 @@ static void dbg_dumpregs(struct s3cmci_host *host, char *prefix)
->         r2      = readl(host->base + S3C2410_SDIRSP2);
->         r3      = readl(host->base + S3C2410_SDIRSP3);
->         timer   = readl(host->base + S3C2410_SDITIMER);
-> -       bsize   = readl(host->base + S3C2410_SDIBSIZE);
->         datcon  = readl(host->base + S3C2410_SDIDCON);
->         datcnt  = readl(host->base + S3C2410_SDIDCNT);
->         datsta  = readl(host->base + S3C2410_SDIDSTA);
->         fsta    = readl(host->base + S3C2410_SDIFSTA);
-> -       imask   = readl(host->base + host->sdiimsk);
+> -       if (of_find_compatible_node(NULL, NULL,
+> -                               "fsl,p2020-esdhc")) {
+> +       if (esdhc->quirk_trans_complete_erratum) {
+>                 command = SDHCI_GET_CMD(sdhci_readw(host,
+>                                         SDHCI_COMMAND));
+>                 if (command == MMC_WRITE_MULTIPLE_BLOCK &&
+> @@ -1334,8 +1336,10 @@ static void esdhc_init(struct platform_device *pdev, struct sdhci_host *host)
+>                 esdhc->clk_fixup = match->data;
+>         np = pdev->dev.of_node;
 >
->         dbg(host, dbg_debug, "%s  CON:[%08x]  PRE:[%08x]  TMR:[%08x]\n",
->                                 prefix, con, pre, timer);
+> -       if (of_device_is_compatible(np, "fsl,p2020-esdhc"))
+> +       if (of_device_is_compatible(np, "fsl,p2020-esdhc")) {
+>                 esdhc->quirk_delay_before_data_reset = true;
+> +               esdhc->quirk_trans_complete_erratum = true;
+> +       }
+>
+>         clk = of_clk_get(np, 0);
+>         if (!IS_ERR(clk)) {
 > --
-> 2.17.1
+> 2.28.0
 >
