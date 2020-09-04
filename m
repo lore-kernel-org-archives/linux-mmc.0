@@ -4,125 +4,116 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-9.8 required=3.0 tests=BAYES_00,DKIM_INVALID,
 	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 09F7BC43461
-	for <linux-mmc@archiver.kernel.org>; Fri,  4 Sep 2020 08:09:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BF644C433E2
+	for <linux-mmc@archiver.kernel.org>; Fri,  4 Sep 2020 08:14:37 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C580020791
-	for <linux-mmc@archiver.kernel.org>; Fri,  4 Sep 2020 08:09:11 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 90F00206B8
+	for <linux-mmc@archiver.kernel.org>; Fri,  4 Sep 2020 08:14:37 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (2048-bit key) header.d=microchip.com header.i=@microchip.com header.b="BBvwVZVA"
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=microchip.com header.i=@microchip.com header.b="pcRvcBUq"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726089AbgIDIJK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 4 Sep 2020 04:09:10 -0400
-Received: from esa3.microchip.iphmx.com ([68.232.153.233]:30821 "EHLO
-        esa3.microchip.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728293AbgIDIJH (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Sep 2020 04:09:07 -0400
+        id S1726655AbgIDIOh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 4 Sep 2020 04:14:37 -0400
+Received: from esa6.microchip.iphmx.com ([216.71.154.253]:13762 "EHLO
+        esa6.microchip.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726575AbgIDIOg (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Sep 2020 04:14:36 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
   d=microchip.com; i=@microchip.com; q=dns/txt; s=mchp;
-  t=1599206946; x=1630742946;
-  h=references:from:to:cc:subject:in-reply-to:date:
-   message-id:mime-version:content-transfer-encoding;
-  bh=8kg7NVGvA/Y4ravBA+Ck9g+ekPrMr/sJwXHN4ceS2DY=;
-  b=BBvwVZVA5EyI70ql0luan7uUrbQjOW9SWdfqJNCAQkQSKVmq+Ay0idPf
-   Ee50RPVHTkouPwJr5cWSL0a9hxC6DqV/7ps2eqGXnpXLP21QWSOAjXJKa
-   ZcM9Zwfj7Ydzj7hU78ohR2BWuojh+ITMtkNcTAyQwZ3UoVrejJ5LzHFUG
-   Fb9+F0KqZA3G/2HHlaOHcfIyh+RaEo3LW2HVmV4lLQNtGnIOYDFwCxKHI
-   4uQMcyptwlWsLKXk33HTU4cLNhqrcPdH/yKy9enHrIPsSGi+l4JmtQG/I
-   3LfL0lnLStkBHaX2eIWzkijQXnZyOSW1Kyt+gnPd15a5BQRrYlC63vOJH
-   g==;
-IronPort-SDR: gFJOOhxnbMekT+gVguHT6+Xjx6sB8n0ubMR5otjKsB+saYnGsOOppBCh+Fj0+R+9J65PTYV2wf
- dGSvHGIUiWDX8mmGYWMD9l5tHBxzEVhOzHkD0xk0VJAyFaqkKnXGuLkFAquFe8OYNFzYg5us/O
- 5hPW1xnCuOFYZvDMcr+oFh27Ht4NZ8KdA2fEMvQdWVpXfGghpUjg9s+QOe53DLcVCB3Wk62jPv
- FRF6/hiBOfsRphm+lo3KYSbpidZ+5L8BTG4RFT/HBis8Eclgsv7eK/7BIThzFeFJvMZn81bb0k
- 0Ec=
+  t=1599207276; x=1630743276;
+  h=references:from:to:cc:subject:message-id:in-reply-to:
+   date:mime-version;
+  bh=C+bBXo0rf5HHX2D82rfzwmnGYsZpnmPVAqTS90P4am0=;
+  b=pcRvcBUqHdlNCEP+t1VZnniPGamW6WX7EnuqYI7Bl7Y0efdw0QRverRr
+   kW4VRxL0b2hh9m2sDjX6065afA5bLOcbEHQsXXr++eK0Ntge4Z3P9D8fS
+   rEY7X6ns+JkKU+jyWkn6ktjp8n5OYLWwTDsFtld8zuHhvjLWkst4/pFab
+   iVDiqlaWcQ9r7LUzO8djT2+nBHpXs5aDs4Rxl2we1GvRQIJP0VxMguaVs
+   VolIIU2zGSCGGWQcU/paU+WXNsjA274rsrc7pML7U/hL6MJBz8cJFcma5
+   YdeWsoUPwDyFvFMUVV8Q2HtS2bAPqoSytlkhtu0y232oqNUVGIeYA0rHN
+   w==;
+IronPort-SDR: 8nv+Um/Ajp+8yrHw100jjMRAOk4Jxm6ZdpjZuFbSFSqzSHVNfarzUTxB4U/zHleMXwKqeSV43E
+ nPBHsUvfd8GH4ukaL7bmc21hsu8jj78TFnNccjxmDAJggvvVjdKuxZTG8Z1mZPuOjbMJ9sEhts
+ AGUYa4FtxwdKyya67QIctsoP6Sy9a6tLX6b96xzX/ULE3qrv5lpEP10xP5SCsNCbwZy/31TiMl
+ lKOqpWkVpu+zgj1+DCdXM8Huxgb0GC19DjdqLZn6dkM/iDU+Dr6VMlGJdc8JpNvqQUdoiZwVpQ
+ 28w=
 X-IronPort-AV: E=Sophos;i="5.76,389,1592895600"; 
-   d="scan'208";a="90544258"
+   d="scan'208";a="25333146"
 Received: from smtpout.microchip.com (HELO email.microchip.com) ([198.175.253.82])
-  by esa3.microchip.iphmx.com with ESMTP/TLS/AES256-SHA256; 04 Sep 2020 01:09:05 -0700
-Received: from chn-vm-ex01.mchp-main.com (10.10.85.143) by
+  by esa6.microchip.iphmx.com with ESMTP/TLS/AES256-SHA256; 04 Sep 2020 01:14:35 -0700
+Received: from chn-vm-ex02.mchp-main.com (10.10.85.144) by
  chn-vm-ex03.mchp-main.com (10.10.85.151) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.1979.3; Fri, 4 Sep 2020 01:08:54 -0700
+ 15.1.1979.3; Fri, 4 Sep 2020 01:14:33 -0700
 Received: from soft-dev15.microsemi.net.microchip.com (10.10.115.15) by
- chn-vm-ex01.mchp-main.com (10.10.85.143) with Microsoft SMTP Server
+ chn-vm-ex02.mchp-main.com (10.10.85.144) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.1979.3
- via Frontend Transport; Fri, 4 Sep 2020 01:08:04 -0700
-References: <20200902193658.20539-1-krzk@kernel.org> <20200902193658.20539-11-krzk@kernel.org>
+ via Frontend Transport; Fri, 4 Sep 2020 01:13:42 -0700
+References: <20200903232441.2694866-1-dianders@chromium.org> <20200903162412.6.Ib121debfb18e5f923a3cd38fe9c36aa086c650c5@changeid>
 From:   Lars Povlsen <lars.povlsen@microchip.com>
-To:     Krzysztof Kozlowski <krzk@kernel.org>
-CC:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Florian Fainelli <f.fainelli@gmail.com>,
-        Ray Jui <rjui@broadcom.com>,
-        Scott Branden <sbranden@broadcom.com>,
-        <bcm-kernel-feedback-list@broadcom.com>,
-        "Nicolas Saenz Julienne" <nsaenzjulienne@suse.de>,
-        Jaehoon Chung <jh80.chung@samsung.com>,
-        Jun Nie <jun.nie@linaro.org>, Shawn Guo <shawnguo@kernel.org>,
-        Paul Cercueil <paul@crapouillou.net>,
-        Kevin Hilman <khilman@baylibre.com>,
-        Neil Armstrong <narmstrong@baylibre.com>,
-        "Jerome Brunet" <jbrunet@baylibre.com>,
-        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
-        Al Cooper <alcooperx@gmail.com>,
+To:     Douglas Anderson <dianders@chromium.org>
+CC:     Ulf Hansson <ulf.hansson@linaro.org>, <swboyd@chromium.org>,
         Adrian Hunter <adrian.hunter@intel.com>,
-        Michal Simek <michal.simek@xilinx.com>,
-        Lars Povlsen <lars.povlsen@microchip.com>,
-        "Steen Hegelund" <Steen.Hegelund@microchip.com>,
+        Andreas =?utf-8?Q?F=C3=A4rber?= <afaerber@suse.de>,
+        Angelo Dureghello <angelo.dureghello@timesys.com>,
+        "Jerome Brunet" <jbrunet@baylibre.com>,
+        Kevin Hilman <khilman@baylibre.com>,
+        "Lars Povlsen" <lars.povlsen@microchip.com>,
+        Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>,
+        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
         Microchip Linux Driver Support <UNGLinuxDriver@microchip.com>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        Jonathan Hunter <jonathanh@nvidia.com>,
-        Arnd Bergmann <arnd@arndb.de>, <linux-mmc@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>,
-        <linux-rpi-kernel@lists.infradead.org>,
+        Neil Armstrong <narmstrong@baylibre.com>,
+        Steen Hegelund <Steen.Hegelund@microchip.com>,
+        <linux-amlogic@lists.infradead.org>,
         <linux-arm-kernel@lists.infradead.org>,
-        <linux-amlogic@lists.infradead.org>, <linux-tegra@vger.kernel.org>
-Subject: Re: [PATCH 10/11] mmc: sdhci-of-sparx5: Use proper printk format for dma_addr_t
-In-Reply-To: <20200902193658.20539-11-krzk@kernel.org>
-Date:   Fri, 4 Sep 2020 10:08:48 +0200
-Message-ID: <87zh66vu9b.fsf@soft-dev15.microsemi.net>
+        <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>
+Subject: Re: [PATCH 6/6] mmc: Set PROBE_PREFER_ASYNCHRONOUS for drivers that are newer than 5.4
+Message-ID: <87y2lqvu0m.fsf@soft-dev15.microsemi.net>
+In-Reply-To: <20200903162412.6.Ib121debfb18e5f923a3cd38fe9c36aa086c650c5@changeid>
+Date:   Fri, 4 Sep 2020 10:14:29 +0200
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 
-Krzysztof Kozlowski writes:
+Douglas Anderson writes:
 
-> dma_addr_t size varies between architectures so use dedicated printk
-> format to fix compile testing warning (e.g. on 32-bit MIPS):
+> This is like commit 3d3451124f3d ("mmc: sdhci-msm: Prefer asynchronous
+> probe") but applied to a whole pile of drivers.  This batch converts
+> the drivers that appeared to have been added after kernel 5.4.
 >
->   drivers/mmc/host/sdhci-of-sparx5.c:63:11: warning:
->     format ‘%llx’ expects argument of type ‘long long unsigned int’, but argument 5 has type ‘dma_addr_t {aka unsigned int}’ [-Wformat=]
->
-> Signed-off-by: Krzysztof Kozlowski <krzk@kernel.org>
+> Signed-off-by: Douglas Anderson <dianders@chromium.org>
 > ---
->  drivers/mmc/host/sdhci-of-sparx5.c | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
 >
+>  drivers/mmc/host/meson-mx-sdhc-mmc.c | 1 +
+>  drivers/mmc/host/owl-mmc.c           | 1 +
+>  drivers/mmc/host/sdhci-esdhc-mcf.c   | 1 +
+>  drivers/mmc/host/sdhci-milbeaut.c    | 1 +
+>  drivers/mmc/host/sdhci-of-sparx5.c   | 1 +
+>  5 files changed, 5 insertions(+)
+>
+
+[snip]
+
 > diff --git a/drivers/mmc/host/sdhci-of-sparx5.c b/drivers/mmc/host/sdhci-of-sparx5.c
-> index 14b5dad6575a..747f108a0ace 100644
+> index 747f108a0ace..28e4ee69e100 100644
 > --- a/drivers/mmc/host/sdhci-of-sparx5.c
 > +++ b/drivers/mmc/host/sdhci-of-sparx5.c
-> @@ -60,8 +60,8 @@ static void sdhci_sparx5_adma_write_desc(struct sdhci_host *host, void **desc,
->                 return;
->         }
->
-> -       pr_debug("%s: write_desc: splitting dma len %d, offset 0x%0llx\n",
-> -                mmc_hostname(host->mmc), len, addr);
-> +       pr_debug("%s: write_desc: splitting dma len %d, offset %pad\n",
-> +                mmc_hostname(host->mmc), len, &addr);
->
->         offset = addr & (SZ_128M - 1);
->         tmplen = SZ_128M - offset;
+> @@ -255,6 +255,7 @@ MODULE_DEVICE_TABLE(of, sdhci_sparx5_of_match);
+>  static struct platform_driver sdhci_sparx5_driver = {
+>         .driver = {
+>                 .name = "sdhci-sparx5",
+> +               .probe_type = PROBE_PREFER_ASYNCHRONOUS,
+>                 .of_match_table = sdhci_sparx5_of_match,
+>                 .pm = &sdhci_pltfm_pmops,
+>         },
 
-Acked-by: Lars Povlsen <larc.povlsen@microchip.com>
+Acked-by: Lars Povlsen <lars.povlsen@microchip.com>
 
 -- 
 Lars Povlsen,
