@@ -1,266 +1,161 @@
-Return-Path: <SRS0=Rn8H=CN=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=qSan=CQ=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+X-Spam-Status: No, score=-9.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1D623C2BC84
-	for <linux-mmc@archiver.kernel.org>; Fri,  4 Sep 2020 16:44:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 52837C433E2
+	for <linux-mmc@archiver.kernel.org>; Mon,  7 Sep 2020 10:07:58 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id DA2EB2074D
-	for <linux-mmc@archiver.kernel.org>; Fri,  4 Sep 2020 16:44:03 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1599237843;
-	bh=M0F0NujsJbA6VRAoiFk6VohTncRpdlqvI+V+EXO6eTI=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=wwsl1FVeJzOl2jcfw8X77UH0U1T/y4j2yuHHliJZkYP27zDaMmxU5iAq894t/Xi6O
-	 /obMDHehFTWaNS2X2pc0TCVFicHhPQQY3yxkjek9L3c4Z10RhwIO0y1bkTzY9ZzoID
-	 QNXOK7faLfr+h5TybvI9PeGd/Oo7qqFDpEFSMxaE=
+	by mail.kernel.org (Postfix) with ESMTP id DBE4D207C3
+	for <linux-mmc@archiver.kernel.org>; Mon,  7 Sep 2020 10:07:57 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="gpG2iBWS"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727821AbgIDQnx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 4 Sep 2020 12:43:53 -0400
-Received: from mail.kernel.org ([198.145.29.99]:36422 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726441AbgIDQnt (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 4 Sep 2020 12:43:49 -0400
-Received: from kozik-lap.mshome.net (unknown [194.230.155.106])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 808062074D;
-        Fri,  4 Sep 2020 16:43:43 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1599237828;
-        bh=M0F0NujsJbA6VRAoiFk6VohTncRpdlqvI+V+EXO6eTI=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=YNhuRd9bPGkZy4dXcqM4wKBiNUbzE9fZg+ZWuG0rftUJ+tr0tNSNpYkBZTA38LTUr
-         C2BCBXN88B/3wM5OaP8T8RT99NAHiaGDVfp8omRAWmcls7cWRlAVAhuHexZ1jV1ODZ
-         D3tvHvz+KgvITSlGuGrAtkaCNFw9z57g2bkJBSCk=
-From:   Krzysztof Kozlowski <krzk@kernel.org>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Arnd Bergmann <arnd@arndb.de>,
-        Krzysztof Kozlowski <krzk@kernel.org>,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        Ludovic Desroches <ludovic.desroches@microchip.com>,
-        Nicolas Ferre <nicolas.ferre@microchip.com>,
-        Alexandre Belloni <alexandre.belloni@bootlin.com>,
-        Manuel Lauss <manuel.lauss@gmail.com>,
-        Kishon Vijay Abraham I <kishon@ti.com>,
-        Prabu Thangamuthu <prabu.t@synopsys.com>,
-        Manjunath M B <manjumb@synopsys.com>,
-        linux-arm-kernel@lists.infradead.org,
-        linux-samsung-soc@vger.kernel.org,
-        linux-amlogic@lists.infradead.org, linux-arm-msm@vger.kernel.org,
-        linux-stm32@st-md-mailman.stormreply.com,
-        linux-mediatek@lists.infradead.org, linux-omap@vger.kernel.org,
-        linux-aspeed@lists.ozlabs.org, linux-tegra@vger.kernel.org,
-        linux-arm-kernel@axis.com
-Cc:     =?UTF-8?q?Micha=C5=82=20Miros=C5=82aw?= <mirq-linux@rere.qmqm.pl>
-Subject: [PATCH v2 2/2] mmc: host: Enable compile testing of multiple drivers
-Date:   Fri,  4 Sep 2020 18:43:15 +0200
-Message-Id: <20200904164315.24618-2-krzk@kernel.org>
-X-Mailer: git-send-email 2.17.1
-In-Reply-To: <20200904164315.24618-1-krzk@kernel.org>
-References: <20200904164315.24618-1-krzk@kernel.org>
+        id S1728503AbgIGKHr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 7 Sep 2020 06:07:47 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59098 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728456AbgIGKHp (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Sep 2020 06:07:45 -0400
+Received: from mail-vs1-xe41.google.com (mail-vs1-xe41.google.com [IPv6:2607:f8b0:4864:20::e41])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BD8CEC061575
+        for <linux-mmc@vger.kernel.org>; Mon,  7 Sep 2020 03:07:44 -0700 (PDT)
+Received: by mail-vs1-xe41.google.com with SMTP id o184so7119433vsc.0
+        for <linux-mmc@vger.kernel.org>; Mon, 07 Sep 2020 03:07:44 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=ce6obAoY06qb3yfC15lC/wYcbO24HR4Ggz8VlArYV5I=;
+        b=gpG2iBWSdQ5eahHqJWkR0z9Znx1jhPqheJ1ciSe4hCMHTL9NyEPjrAb+nC0AtfZVMF
+         iX3JbaU10TsRqgFHKITh5NU86iQcIlIfRTQOR62AQqb/8MeRJ8kNYSui+PYqCXoxnzLG
+         PFKWzjBzT81bfnVq2yFpbmA7gp7VxxmwoyofYsl2Sq6J7Bt2gxyptwnky2biQZpY2ae1
+         TJkWumpJPbtatrVQuZxIihT0UjmJrMCtsYw0twy/yXroZrrHCgfFjJ7X84TCw+MjjaeZ
+         t5B2fRvYmP5FYuDqaUa+q7Vthib56jvWeECcJi2vVjl40w8peFKT06ty53K4n6XRfvM1
+         Yy1A==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=ce6obAoY06qb3yfC15lC/wYcbO24HR4Ggz8VlArYV5I=;
+        b=LgwGTQQeNd/Q9f1RUg0djmxAcjCS4kVWvif7frcd3y3u0wz+aFccXLmxEm4xlHvgd/
+         91fejU8KVyJyl1M/Yf/Myxv+MbLXKpVzMZddPb1qoWNHpMEGLKvP8qrW3CI9abGdmih1
+         rUkTF83il4p5lts710XdReujFvNpPKDCu2tkGJ+Vr9IDt7M/BcKP10GLipFJWpseOYh9
+         bqAbksxzgoQS1ObDjSiojoGj5zR0NAAq+pEsTTO6xE/NJ8oDu1h8APfn/WT8FqQ/j9pg
+         0dBbezaCTgfOnNLPntaiejiCkycj9ZvyfzhKrGWF0KS+v0/oTgJuD+Ft9ppJ4NOVSj6p
+         uO+w==
+X-Gm-Message-State: AOAM533p0hEkmKMYNOi3tYG39K+sl4oVM2TDw3APoXyyqAbCs7w2mVUq
+        V3N7ShebZpTIxTqVZFteKoQNzOY8vF1p05M7nGxHTA==
+X-Google-Smtp-Source: ABdhPJwDJaI3759+fZr6m+VSJRYg+e8v1KCPXZUCXbChfkQ7zkupTb2pUy+KivsGmeJZ4vk4HulUd5jk+xtdLdPpiPw=
+X-Received: by 2002:a67:e197:: with SMTP id e23mr11355927vsl.7.1599473263611;
+ Mon, 07 Sep 2020 03:07:43 -0700 (PDT)
+MIME-Version: 1.0
+References: <20200903084825.85616-1-vulab@iscas.ac.cn>
+In-Reply-To: <20200903084825.85616-1-vulab@iscas.ac.cn>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Mon, 7 Sep 2020 12:07:06 +0200
+Message-ID: <CAPDyKFrADVAs2zK2FY5sOh0R=8Kgsm9GwAKkbV9pfdczt07QOg@mail.gmail.com>
+Subject: Re: [PATCH] mmc: host: omap-hsmmc: remove redundant null check
+To:     Xu Wang <vulab@iscas.ac.cn>
+Cc:     Liam Girdwood <lgirdwood@gmail.com>,
+        Mark Brown <broonie@kernel.org>,
+        "Dr. H. Nikolaus Schaller" <hns@goldelico.com>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Rui Miguel Silva <rmfrfs@gmail.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        linux-omap <linux-omap@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Multiple MMC host controller driver can be compile tested as they do not
-depend on architecture specific headers.
+On Thu, 3 Sep 2020 at 10:48, Xu Wang <vulab@iscas.ac.cn> wrote:
+>
+> Because clk_disable_unprepare already checked NULL clock
+> parameter, so the additional checks are unnecessary, just remove them.
+>
+> Signed-off-by: Xu Wang <vulab@iscas.ac.cn>
 
-Signed-off-by: Krzysztof Kozlowski <krzk@kernel.org>
+Applied for next, thanks!
 
----
+Kind regards
+Uffe
 
-Changes since v1:
-1. Add COMMON_CLK dependency to MESON_GX to fix errors like:
-   ERROR: modpost: "devm_clk_register" [drivers/mmc/host/meson-gx-mmc.ko] undefined!
----
- drivers/mmc/host/Kconfig | 41 +++++++++++++++++++++-------------------
- 1 file changed, 22 insertions(+), 19 deletions(-)
 
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index eea01fde0591..93db789cf8ec 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -178,7 +178,7 @@ config MMC_SDHCI_OF_AT91
- config MMC_SDHCI_OF_ESDHC
- 	tristate "SDHCI OF support for the Freescale eSDHC controller"
- 	depends on MMC_SDHCI_PLTFM
--	depends on PPC || ARCH_MXC || ARCH_LAYERSCAPE
-+	depends on PPC || ARCH_MXC || ARCH_LAYERSCAPE || COMPILE_TEST
- 	select MMC_SDHCI_IO_ACCESSORS
- 	select FSL_GUTS
- 	help
-@@ -216,7 +216,7 @@ config MMC_SDHCI_OF_DWCMSHC
- config MMC_SDHCI_OF_SPARX5
- 	tristate "SDHCI OF support for the MCHP Sparx5 SoC"
- 	depends on MMC_SDHCI_PLTFM
--	depends on ARCH_SPARX5
-+	depends on ARCH_SPARX5 || COMPILE_TEST
- 	help
- 	  This selects the Secure Digital Host Controller Interface (SDHCI)
- 	  found in the MCHP Sparx5 SoC.
-@@ -238,7 +238,7 @@ config MMC_SDHCI_CADENCE
- 
- config MMC_SDHCI_CNS3XXX
- 	tristate "SDHCI support on the Cavium Networks CNS3xxx SoC"
--	depends on ARCH_CNS3XXX
-+	depends on ARCH_CNS3XXX || COMPILE_TEST
- 	depends on MMC_SDHCI_PLTFM
- 	help
- 	  This selects the SDHCI support for CNS3xxx System-on-Chip devices.
-@@ -262,7 +262,7 @@ config MMC_SDHCI_ESDHC_MCF
- 
- config MMC_SDHCI_ESDHC_IMX
- 	tristate "SDHCI support for the Freescale eSDHC/uSDHC i.MX controller"
--	depends on ARCH_MXC
-+	depends on ARCH_MXC || COMPILE_TEST
- 	depends on MMC_SDHCI_PLTFM
- 	select MMC_SDHCI_IO_ACCESSORS
- 	select MMC_CQHCI
-@@ -276,7 +276,7 @@ config MMC_SDHCI_ESDHC_IMX
- 
- config MMC_SDHCI_DOVE
- 	tristate "SDHCI support on Marvell's Dove SoC"
--	depends on ARCH_DOVE || MACH_DOVE
-+	depends on ARCH_DOVE || MACH_DOVE || COMPILE_TEST
- 	depends on MMC_SDHCI_PLTFM
- 	select MMC_SDHCI_IO_ACCESSORS
- 	help
-@@ -289,7 +289,7 @@ config MMC_SDHCI_DOVE
- 
- config MMC_SDHCI_TEGRA
- 	tristate "SDHCI platform support for the Tegra SD/MMC Controller"
--	depends on ARCH_TEGRA
-+	depends on ARCH_TEGRA || COMPILE_TEST
- 	depends on MMC_SDHCI_PLTFM
- 	select MMC_SDHCI_IO_ACCESSORS
- 	select MMC_CQHCI
-@@ -301,7 +301,8 @@ config MMC_SDHCI_TEGRA
- 
- config MMC_SDHCI_S3C
- 	tristate "SDHCI support on Samsung S3C SoC"
--	depends on MMC_SDHCI && (PLAT_SAMSUNG || ARCH_S5PV210 || ARCH_EXYNOS)
-+	depends on MMC_SDHCI
-+	depends on PLAT_SAMSUNG || ARCH_S5PV210 || ARCH_EXYNOS || COMPILE_TEST
- 	help
- 	  This selects the Secure Digital Host Controller Interface (SDHCI)
- 	  often referrered to as the HSMMC block in some of the Samsung S3C
-@@ -313,7 +314,7 @@ config MMC_SDHCI_S3C
- 
- config MMC_SDHCI_SIRF
- 	tristate "SDHCI support on CSR SiRFprimaII and SiRFmarco SoCs"
--	depends on ARCH_SIRF
-+	depends on ARCH_SIRF || COMPILE_TEST
- 	depends on MMC_SDHCI_PLTFM
- 	select MMC_SDHCI_IO_ACCESSORS
- 	help
-@@ -351,7 +352,8 @@ config MMC_SDHCI_PXAV2
- 
- config MMC_SDHCI_SPEAR
- 	tristate "SDHCI support on ST SPEAr platform"
--	depends on MMC_SDHCI && PLAT_SPEAR
-+	depends on MMC_SDHCI
-+	depends on PLAT_SPEAR || COMPILE_TEST
- 	depends on OF
- 	help
- 	  This selects the Secure Digital Host Controller Interface (SDHCI)
-@@ -374,7 +376,7 @@ config MMC_SDHCI_S3C_DMA
- 
- config MMC_SDHCI_BCM_KONA
- 	tristate "SDHCI support on Broadcom KONA platform"
--	depends on ARCH_BCM_MOBILE
-+	depends on ARCH_BCM_MOBILE || COMPILE_TEST
- 	depends on MMC_SDHCI_PLTFM
- 	help
- 	  This selects the Broadcom Kona Secure Digital Host Controller
-@@ -422,7 +424,8 @@ config MMC_SDHCI_IPROC
- 
- config MMC_MESON_GX
- 	tristate "Amlogic S905/GX*/AXG SD/MMC Host Controller support"
--	depends on ARCH_MESON
-+	depends on ARCH_MESON || COMPILE_TEST
-+	depends on COMMON_CLK
- 	help
- 	  This selects support for the Amlogic SD/MMC Host Controller
- 	  found on the S905/GX*/AXG family of SoCs.  This controller is
-@@ -458,7 +461,7 @@ config MMC_MESON_MX_SDIO
- 
- config MMC_MOXART
- 	tristate "MOXART SD/MMC Host Controller support"
--	depends on ARCH_MOXART
-+	depends on ARCH_MOXART || COMPILE_TEST
- 	help
- 	  This selects support for the MOXART SD/MMC Host Controller.
- 	  MOXA provides one multi-functional card reader which can
-@@ -467,7 +470,7 @@ config MMC_MOXART
- 
- config MMC_SDHCI_ST
- 	tristate "SDHCI support on STMicroelectronics SoC"
--	depends on ARCH_STI || FSP2
-+	depends on ARCH_STI || FSP2 || COMPILE_TEST
- 	depends on MMC_SDHCI_PLTFM
- 	select MMC_SDHCI_IO_ACCESSORS
- 	help
-@@ -587,7 +590,7 @@ config MMC_TIFM_SD
- 
- config MMC_MVSDIO
- 	tristate "Marvell MMC/SD/SDIO host driver"
--	depends on PLAT_ORION
-+	depends on PLAT_ORION || (COMPILE_TEST && ARM)
- 	depends on OF
- 	help
- 	  This selects the Marvell SDIO host driver.
-@@ -599,7 +602,7 @@ config MMC_MVSDIO
- 
- config MMC_DAVINCI
- 	tristate "TI DAVINCI Multimedia Card Interface support"
--	depends on ARCH_DAVINCI
-+	depends on ARCH_DAVINCI || COMPILE_TEST
- 	help
- 	  This selects the TI DAVINCI Multimedia card Interface.
- 	  If you have an DAVINCI board with a Multimedia Card slot,
-@@ -628,7 +631,7 @@ config MMC_SPI
- 
- config MMC_S3C
- 	tristate "Samsung S3C SD/MMC Card Interface support"
--	depends on ARCH_S3C24XX
-+	depends on ARCH_S3C24XX || COMPILE_TEST
- 	depends on S3C24XX_DMAC
- 	help
- 	  This selects a driver for the MCI interface found in
-@@ -681,7 +684,7 @@ config MMC_SDRICOH_CS
- 
- config MMC_SDHCI_SPRD
- 	tristate "Spreadtrum SDIO host Controller"
--	depends on ARCH_SPRD
-+	depends on ARCH_SPRD || COMPILE_TEST
- 	depends on MMC_SDHCI_PLTFM
- 	select MMC_SDHCI_IO_ACCESSORS
- 	select MMC_HSQ
-@@ -698,7 +701,7 @@ config MMC_TMIO_CORE
- 
- config MMC_TMIO
- 	tristate "Toshiba Mobile IO Controller (TMIO) MMC/SD function support"
--	depends on MFD_TMIO || MFD_ASIC3
-+	depends on MFD_TMIO || MFD_ASIC3 || COMPILE_TEST
- 	select MMC_TMIO_CORE
- 	help
- 	  This provides support for the SD/MMC cell found in TC6393XB,
-@@ -971,7 +974,7 @@ config MMC_REALTEK_USB
- 
- config MMC_SUNXI
- 	tristate "Allwinner sunxi SD/MMC Host Controller support"
--	depends on ARCH_SUNXI
-+	depends on ARCH_SUNXI || COMPILE_TEST
- 	help
- 	  This selects support for the SD/MMC Host Controller on
- 	  Allwinner sunxi SoCs.
--- 
-2.17.1
-
+> ---
+>  drivers/mmc/host/omap_hsmmc.c | 18 ++++++------------
+>  1 file changed, 6 insertions(+), 12 deletions(-)
+>
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+> index 37b8740513f5..d02983e23ed1 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -1114,8 +1114,7 @@ static int omap_hsmmc_switch_opcond(struct omap_hsmmc_host *host, int vdd)
+>         int ret;
+>
+>         /* Disable the clocks */
+> -       if (host->dbclk)
+> -               clk_disable_unprepare(host->dbclk);
+> +       clk_disable_unprepare(host->dbclk);
+>
+>         /* Turn the power off */
+>         ret = omap_hsmmc_set_power(host, 0);
+> @@ -1123,8 +1122,7 @@ static int omap_hsmmc_switch_opcond(struct omap_hsmmc_host *host, int vdd)
+>         /* Turn the power ON with given VDD 1.8 or 3.0v */
+>         if (!ret)
+>                 ret = omap_hsmmc_set_power(host, 1);
+> -       if (host->dbclk)
+> -               clk_prepare_enable(host->dbclk);
+> +       clk_prepare_enable(host->dbclk);
+>
+>         if (ret != 0)
+>                 goto err;
+> @@ -2014,8 +2012,7 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+>         pm_runtime_dont_use_autosuspend(host->dev);
+>         pm_runtime_put_sync(host->dev);
+>         pm_runtime_disable(host->dev);
+> -       if (host->dbclk)
+> -               clk_disable_unprepare(host->dbclk);
+> +       clk_disable_unprepare(host->dbclk);
+>  err1:
+>         mmc_free_host(mmc);
+>  err:
+> @@ -2037,8 +2034,7 @@ static int omap_hsmmc_remove(struct platform_device *pdev)
+>         pm_runtime_put_sync(host->dev);
+>         pm_runtime_disable(host->dev);
+>         device_init_wakeup(&pdev->dev, false);
+> -       if (host->dbclk)
+> -               clk_disable_unprepare(host->dbclk);
+> +       clk_disable_unprepare(host->dbclk);
+>
+>         mmc_free_host(host->mmc);
+>
+> @@ -2063,8 +2059,7 @@ static int omap_hsmmc_suspend(struct device *dev)
+>                                 OMAP_HSMMC_READ(host->base, HCTL) & ~SDBP);
+>         }
+>
+> -       if (host->dbclk)
+> -               clk_disable_unprepare(host->dbclk);
+> +       clk_disable_unprepare(host->dbclk);
+>
+>         pm_runtime_put_sync(host->dev);
+>         return 0;
+> @@ -2080,8 +2075,7 @@ static int omap_hsmmc_resume(struct device *dev)
+>
+>         pm_runtime_get_sync(host->dev);
+>
+> -       if (host->dbclk)
+> -               clk_prepare_enable(host->dbclk);
+> +       clk_prepare_enable(host->dbclk);
+>
+>         if (!(host->mmc->pm_flags & MMC_PM_KEEP_POWER))
+>                 omap_hsmmc_conf_bus_power(host);
+> --
+> 2.17.1
+>
