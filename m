@@ -2,122 +2,133 @@ Return-Path: <SRS0=Un3z=CS=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.0 required=3.0 tests=BAYES_00,DKIM_INVALID,
-	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B3A7FC433E2
-	for <linux-mmc@archiver.kernel.org>; Wed,  9 Sep 2020 11:45:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F3415C43461
+	for <linux-mmc@archiver.kernel.org>; Wed,  9 Sep 2020 14:28:10 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 12E4421D7E
-	for <linux-mmc@archiver.kernel.org>; Wed,  9 Sep 2020 11:45:07 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 98A722224F
+	for <linux-mmc@archiver.kernel.org>; Wed,  9 Sep 2020 14:28:10 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (1024-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="R/HBDZ8O"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Ir+Aia3k"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730077AbgIILob (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 9 Sep 2020 07:44:31 -0400
-Received: from www.zeus03.de ([194.117.254.33]:55834 "EHLO mail.zeus03.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1730022AbgIILo3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 9 Sep 2020 07:44:29 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
-        date:from:to:cc:subject:message-id:references:mime-version
-        :content-type:in-reply-to; s=k1; bh=tM7cWgnJUQTZ+8zw0k6ph15lgunQ
-        9GxTudYwUe71iHc=; b=R/HBDZ8OmO6QIUJhgdqM6c8SrnR6HTXT0y+7YucZrOJu
-        IAjwHmv9NQ0F4Odfr/e8jeitJtjlOVVyZuqxH3V6fjqnTTrpaDCdLKi/Krn1um23
-        wobk3sSKVnrV77pAL91SA5JX65WF6hp66mtO7mx2iiezHSfI6HP2M67LMjodOFw=
-Received: (qmail 284838 invoked from network); 9 Sep 2020 13:37:46 +0200
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 9 Sep 2020 13:37:46 +0200
-X-UD-Smtp-Session: l3s3148p1@nFxm4d+uTIUgAwDPXwesAAPl1NpCEY8B
-Date:   Wed, 9 Sep 2020 13:37:45 +0200
-From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-Subject: Re: [RFT] mmc: tmio: reset device on timeout, too
-Message-ID: <20200909113745.GK2272@ninjato>
-References: <20200821081654.28280-1-wsa+renesas@sang-engineering.com>
- <CAPDyKFp7rsHDY2vREakrR+PFJLs0n8JBR+URV1vCu5bydEhHuA@mail.gmail.com>
- <20200830130357.GA2194@kunai>
- <CAPDyKFr24YxoJ3m5r1C_4-UAdtJQp_MK0+wwZjsQXzrs5dxLjw@mail.gmail.com>
+        id S1730280AbgIIO1E (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 9 Sep 2020 10:27:04 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51824 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1730259AbgIIM5d (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Sep 2020 08:57:33 -0400
+Received: from mail-ua1-x944.google.com (mail-ua1-x944.google.com [IPv6:2607:f8b0:4864:20::944])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E1941C06179F
+        for <linux-mmc@vger.kernel.org>; Wed,  9 Sep 2020 05:48:41 -0700 (PDT)
+Received: by mail-ua1-x944.google.com with SMTP id v24so814725uaj.7
+        for <linux-mmc@vger.kernel.org>; Wed, 09 Sep 2020 05:48:41 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=Q9M1Vskts4JRHY9FBKuy5Sl90Ew3XMdMRCLYYCvUArU=;
+        b=Ir+Aia3k1phkbjo07kIy3KryziEAUctzOrRfSX0hHbEaIIaFzvCIHoB6CfDuJY7T2n
+         cNbGu0p3qDNT60dSu4TPUyPjir0s+gOl2VwwnvNVL9Nnq0x8pLYNyTwysa54ofQ6hZTr
+         S/V2zmAsJ4IhxygFVxkZGwF/fH7EQg3/OHK8NrhRGWuRxvT96z/OJur4wjDewVY5+UeM
+         7tpi51C47+E2EM9oPhzZlPDDk/j3TM96dqWItzfBKv6Oq5cVYioygMpGXrHyKJ5la7QU
+         7+YQMJKbvbjIkezmrtAgpGKLnP0PHEHbeINRKBjlOHjNJpuiaEnpcBLb3SXm9k/4bNV4
+         wi/Q==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=Q9M1Vskts4JRHY9FBKuy5Sl90Ew3XMdMRCLYYCvUArU=;
+        b=WbihT++QK87H2WLPzZntX9fUMrI14zcAq1DKJMV0GAXIJEepia4qMMu6XzhIFNkOiS
+         oZdblL6zgvcMOsdA+eFVerNcWR2RXxqUSC3AhJ3LCen+yXK/nZMw/ZPqRbgNoTfpjQxx
+         ilmE6oOPdcNNsPv8pZRjkyYEeFqR9Mdmy3/hI1IUbs0ROv9mn/kXTvGOsYvZabvuf7fy
+         t/XpCyWXwe0nkSBANWj5quvqhGvRvWt/IMMj+k6SJuFR9lMVZAFBxgcPgydR4noPIIkR
+         DRwiQNFLoiRIM6K1jQhEREurKy4tdW0k+zjT76SohEwbW4uRa5RYEHHsy8cNl9FfGAoO
+         rvng==
+X-Gm-Message-State: AOAM530P5jgkl0xBURmhIKCObocH8rDQEQ1QMd3HHTKAi2lcXhwN1LJy
+        JBqRRM309u7h5oEyXMoeWP3h8kBHaYyUccLgO2u/fw==
+X-Google-Smtp-Source: ABdhPJwdE+navQ2r6yXbpY92vwAATdTQhd3CubjjUMOOk3FM3FdxGXP5NUGBX80ycQbG1aS7lVhw7lyGqD/GlOFmbG0=
+X-Received: by 2002:ab0:2ea1:: with SMTP id y1mr368999uay.104.1599655720008;
+ Wed, 09 Sep 2020 05:48:40 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="tKtFalx5NIx0HZ72"
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFr24YxoJ3m5r1C_4-UAdtJQp_MK0+wwZjsQXzrs5dxLjw@mail.gmail.com>
-User-Agent: Mutt/1.10.1 (2018-07-13)
+References: <cover.1598594714.git.viresh.kumar@linaro.org> <1d7c97524b9e1fbc60271d9c246c5461ca8a106c.1598594714.git.viresh.kumar@linaro.org>
+ <CAPDyKFpdZhzXQv3hpTzf3UkJDhFqBhgMXCqVfAfE6PejLCxvfg@mail.gmail.com>
+ <20200831104453.ux5fb5bpt57tj5am@vireshk-i7> <CAPDyKFp1fCE3bBKngcia1LBKHEkQRoVzUwZYE6+Y++Hu=6aJfw@mail.gmail.com>
+ <20200909110707.jv2beta5rdr3wux3@vireshk-i7>
+In-Reply-To: <20200909110707.jv2beta5rdr3wux3@vireshk-i7>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Wed, 9 Sep 2020 14:48:03 +0200
+Message-ID: <CAPDyKFr-u31Z=uqJj1q8BK0Xi7paWaKdXyU_G7tA5G=wpS+AXg@mail.gmail.com>
+Subject: Re: [PATCH V2 4/8] mmc: sdhci-msm: Unconditionally call dev_pm_opp_of_remove_table()
+To:     Viresh Kumar <viresh.kumar@linaro.org>
+Cc:     Rajendra Nayak <rnayak@codeaurora.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Linux PM <linux-pm@vger.kernel.org>,
+        Vincent Guittot <vincent.guittot@linaro.org>,
+        Rafael Wysocki <rjw@rjwysocki.net>,
+        Stephen Boyd <sboyd@kernel.org>, Nishanth Menon <nm@ti.com>,
+        Douglas Anderson <dianders@chromium.org>,
+        Naresh Kamboju <naresh.kamboju@linaro.org>,
+        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-
---tKtFalx5NIx0HZ72
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-
-Hi Ulf,
-
-> > Hmm, there are some wireless drivers using it as well. I am confused, is
-> > this considered "upper layer"?
+On Wed, 9 Sep 2020 at 13:07, Viresh Kumar <viresh.kumar@linaro.org> wrote:
+>
+> On 31-08-20, 12:57, Ulf Hansson wrote:
+> > On Mon, 31 Aug 2020 at 12:45, Viresh Kumar <viresh.kumar@linaro.org> wrote:
+> > >
+> > > On 28-08-20, 10:43, Ulf Hansson wrote:
+> > > > On Fri, 28 Aug 2020 at 08:08, Viresh Kumar <viresh.kumar@linaro.org> wrote:
+> > > > >
+> > > > > dev_pm_opp_of_remove_table() doesn't report any errors when it fails to
+> > > > > find the OPP table with error -ENODEV (i.e. OPP table not present for
+> > > > > the device). And we can call dev_pm_opp_of_remove_table()
+> > > > > unconditionally here.
+> > > > >
+> > > > > Signed-off-by: Viresh Kumar <viresh.kumar@linaro.org>
+> > > >
+> > > > Replaced v1 with v2 on my next branch, thanks!
+> > > >
+> > > > Just to be sure, this patch doesn't depend on any changes for the opp
+> > > > core that are queued for v5.10?
+> > >
+> > > The recent crashes reported by Anders and Naresh were related to a OPP
+> > > core bug, for which I have just sent the fix here:
+> > >
+> > > https://lore.kernel.org/lkml/922ff0759a16299e24cacfc981ac07914d8f1826.1598865786.git.viresh.kumar@linaro.org/
+> > >
+> > > This is already tested by Naresh now and finally everything works as
+> > > expected.
+> > >
+> > > I am going to get this fix merged in 5.9-rc4, but we do have a
+> > > dependency now with that fix.
+> > >
+> > > What's the best way to handle this stuff now ? The easiest IMO would
+> > > be for me to send these patches through the OPP tree, otherwise people
+> > > need to carry this and the OPP fix (for which I can provide the
+> > > branch/tag).
 > >
-> > drivers/net/wireless/ath/ath10k/sdio.c: ret =3D mmc_hw_reset(ar_sdio->f=
-unc->card->host);
-> > drivers/net/wireless/broadcom/brcm80211/brcmfmac/sdio.c:        mmc_hw_=
-reset(sdiodev->func1->card->host);
-> > drivers/net/wireless/marvell/mwifiex/sdio.c:    ret =3D mmc_hw_reset(fu=
-nc->card->host);
-> > drivers/net/wireless/ti/wlcore/sdio.c:  mmc_hw_reset(card->host);
->=20
-> Correct, these are "upper layers". The same applies for the mmc block
-> device driver.
->=20
-> In this way there is a guarantee that the struct mmc_card is still presen=
-t.
+> > No need for a tag/branch to be shared. Instead I am simply going to
+> > defer to pick up any related changes for mmc, until I can rebase my
+> > tree on an rc[n] that contains your fix.
+> >
+> > When that is possible, please re-post the mmc patches.
+>
+> The dependency patch got merged in 5.9-rc4. Do you still want me to
+> resend this patch or you can apply it directly from here ?
 
-Ah, now I get it. "upper layers" as in consumers. And because consumers
-sit on a card, this guarantees that mmc_card is still there. Correct?
+Please re-submit, then I will pick it from the patchtracker.
 
-> That would be great. I appreciate all kinds of improvements on the doc pa=
-rts.
-
-You are welcome!
-
-> Perhaps a better option is to return a specific error code for the
-> last request, that makes the core run mmc_hw_reset(). Or potentially,
-> add a host cap and let the core treat some error code, specifically
-> for hosts like tmio.
-
-A specific errno could work. I don't see the advantage of a CAP (besides
-it is rather a quirk than a cap). We could also have
-'mmc_controller_card_reset()' or something which ensures mmc_card is
-present and let that controllers call when they see fit. Or?
-
-Thanks for your help,
-
-   Wolfram
-
-
---tKtFalx5NIx0HZ72
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAl9YvokACgkQFA3kzBSg
-KbZfmA//azKjz4Gk7mPb7bDj5wnUWB/Vo6zpR/nlqO8njiKu5635jNow9XZLMEgT
-CgPLPAnLyNj1/yBKHLmTdu3CU/3eg6Grelp+QrghWRdxkXiQyN/nNKZxbMYwGCg7
-Bdl+qbCLJ/99LcHfF7w9TZeMRh0hrFHR/Ch2WKV/w1YwINDqe/FUi3DLjOlYdMsl
-tbfTRiTIgNGtIbOMtJA6c3cauoIwO4v4bOMDGMr28gGW7VyTWauQ9hDkUZQ0pSdE
-nOnI/7i6gcdTIA8cWEoXfHKKzwFXm+8mj/wsetE7YnqHxW8vNdOaFaIrsgaDFlXO
-hY3MF2Onv7/KGrB8c2x5A3DZJDQIZpnWMPdFMFTZL6NMoPAdyM7SF7bDANQxU+0Q
-K/s2c9WW3XcNCEMRreHMka/WzQdzBdM79X28Yw42pPKBt1IvPzJVBuld4aVga7eX
-fA3ys2j7DDVjosSLH0xeAC1t/MjTmYc/SNVgLt7lcoaUuOpVTUpqZna8IQWXFFS7
-Bfh6P3EeH2Ns6k1HirO5D6JzCzl/B64sD/ABrXQColY1Ls2YJ312bjtUvNb05zdN
-jpALQYhjm/t02u9oPwRExGI6f5+UkV1gOJ6134S2sfgaHNVCNOIuEhlTnlh64n22
-kXheME4ISdeZ+MdcxF7mlMmF4Bc3A13UcOvA8+huMFsXiWLWasU=
-=J+pI
------END PGP SIGNATURE-----
-
---tKtFalx5NIx0HZ72--
+Kind regards
+Uffe
