@@ -2,110 +2,137 @@ Return-Path: <SRS0=Un3z=CS=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 57504C43461
-	for <linux-mmc@archiver.kernel.org>; Wed,  9 Sep 2020 00:56:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6C54AC43461
+	for <linux-mmc@archiver.kernel.org>; Wed,  9 Sep 2020 11:08:50 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2328221D42
-	for <linux-mmc@archiver.kernel.org>; Wed,  9 Sep 2020 00:56:15 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1599612975;
-	bh=RvzjuGzz/kTSEdxXHggSfWjCrdq+3b4CqDYSDYaXs48=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:List-ID:From;
-	b=H4neIm4Z2yI7CFZn+QChJkOqDXuU4g5SITOzU3Jj1bqZp6mk2TRT9EWmKGGJha5KR
-	 Ty2WsdIzKkifU4GLMh5jeJRyJKOY5de3vFvtg1EqsGln/fZ3X1eHB6vcYVtcqaDJ4B
-	 u6KPEBpOhN78UmKbqUTIiDTMLflfi+AEsQRJMnws=
+	by mail.kernel.org (Postfix) with ESMTP id 0B5A621D80
+	for <linux-mmc@archiver.kernel.org>; Wed,  9 Sep 2020 11:08:50 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="R365BsX7"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729773AbgIIA4C (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 8 Sep 2020 20:56:02 -0400
-Received: from mail.kernel.org ([198.145.29.99]:52378 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726489AbgIIA4B (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 8 Sep 2020 20:56:01 -0400
-Received: from mail-lj1-f173.google.com (mail-lj1-f173.google.com [209.85.208.173])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 9626421D40;
-        Wed,  9 Sep 2020 00:56:00 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1599612960;
-        bh=RvzjuGzz/kTSEdxXHggSfWjCrdq+3b4CqDYSDYaXs48=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=QCrNHxqhyTNUbEUBWg7m5RppKYxhztDiw//6ubU7/VQofyzcTv22t1N98zavCtLup
-         QysnOQsfy4G3tScSXrtRl0tR2KP2W+WLMdIRlzmAp5TUK0MJw/rxTcC/h816xb25+8
-         K183C1Rs3MqMJKmfCbVj974g3dCS/0aa3QBb0zJU=
-Received: by mail-lj1-f173.google.com with SMTP id a15so1304276ljk.2;
-        Tue, 08 Sep 2020 17:56:00 -0700 (PDT)
-X-Gm-Message-State: AOAM532WrJ4gIibYUTQl9nOlAcrxw9EtcERfolk57Gmhgq+WaeAMceDL
-        0x38q0EWLgveQT4DskbpHXZ+OS3051v6kqNMutM=
-X-Google-Smtp-Source: ABdhPJxM7jCblK+I3K12WYnFdTKastGkaOpZLr2TCZ6RdAZ0LK1RcX7wDsfx2yoNcvq/FpYJy3EsInbbGExnKObCwTE=
-X-Received: by 2002:a2e:9c8d:: with SMTP id x13mr523960lji.392.1599612958934;
- Tue, 08 Sep 2020 17:55:58 -0700 (PDT)
+        id S1727005AbgIILIi (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 9 Sep 2020 07:08:38 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34832 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1729529AbgIILH1 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Sep 2020 07:07:27 -0400
+Received: from mail-pj1-x1043.google.com (mail-pj1-x1043.google.com [IPv6:2607:f8b0:4864:20::1043])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D070BC061755
+        for <linux-mmc@vger.kernel.org>; Wed,  9 Sep 2020 04:07:13 -0700 (PDT)
+Received: by mail-pj1-x1043.google.com with SMTP id kk9so1174361pjb.2
+        for <linux-mmc@vger.kernel.org>; Wed, 09 Sep 2020 04:07:13 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to:user-agent;
+        bh=vov2dA/KW/bn72Ejzr9klJyhX5C88qedShxokRR3aNg=;
+        b=R365BsX7Ty4AzzqOSLwELZjOZev1K7gL80aq+v4OVAV6+F4TcWo9C+0dMIYzsLxkVx
+         +i8yCdt9e569HVDNWo1DDHrtItgxrB9kATz3/PqjbR3nbgUDebwF3G81O7b3dWiaTKlK
+         g+lOVocaZ8uCYuiExZFnnyj+X9iT3nXMfAdEj+yNQaaQcoRBKK6qR1KbGsKRr10Jep/j
+         h0cUBCGDCrWIydOWCVVWvoay4gX2I2PZDWgd/MZyXWFWKNpTN3t/Nm3tV46jQIpc3Nu7
+         hYmUfP2voxzFM4xbvV3h16QnYOELlaYWGHnkkz+YBlYP10XikBbMa93P8JkODTS0UwCn
+         uPzw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to:user-agent;
+        bh=vov2dA/KW/bn72Ejzr9klJyhX5C88qedShxokRR3aNg=;
+        b=G42rzkHVwXzb0e3SGmtJHAEreQZbl2hfP0QhDkw/SnrAIp+oB5NoJnex2xt8MOdQSn
+         K8AzhsyJ0ze7fjCA+qiiTet2oUNNf4jGYF4C9Wp0Cbcz//v9nJDmVojmBkFsqBtKLxxq
+         qmFIfHMjYp/gNNwsmS748wQMfO6I0XeLqef4MzRS0xd/7a9AL4DF6mOB4ynVRqxX/tpy
+         6Tv2d4RtP8IlZS9JBCsbGL1hhHWTl3bsmLYENVl2RK+CmUjh0R8wf4hbZqG9swYK5HKr
+         d/Mq8mjoc0xoqYWyRRSquDDRdGlmgNLYfAs5/HAOoQdj3aFJxn+XC9uY91oVkxu14h8v
+         58Lw==
+X-Gm-Message-State: AOAM530wERQocBb83KhsoIC3pi5ENNsxlLExsOYpGsj/atfUkhXqo+w+
+        rFJDvZk1h4eDYDmiHpOVXoaQ4Q==
+X-Google-Smtp-Source: ABdhPJyCZVgnQXi30pqYsiZcXXeTmANMigiEsaDsJ6dg0Pg/CZzHHwSMlI2D1oXOAeWt1zTAKG+xhg==
+X-Received: by 2002:a17:90a:13c7:: with SMTP id s7mr393903pjf.124.1599649633150;
+        Wed, 09 Sep 2020 04:07:13 -0700 (PDT)
+Received: from localhost ([122.181.54.133])
+        by smtp.gmail.com with ESMTPSA id j35sm1804786pgi.91.2020.09.09.04.07.11
+        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
+        Wed, 09 Sep 2020 04:07:12 -0700 (PDT)
+Date:   Wed, 9 Sep 2020 16:37:07 +0530
+From:   Viresh Kumar <viresh.kumar@linaro.org>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Rajendra Nayak <rnayak@codeaurora.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Linux PM <linux-pm@vger.kernel.org>,
+        Vincent Guittot <vincent.guittot@linaro.org>,
+        Rafael Wysocki <rjw@rjwysocki.net>,
+        Stephen Boyd <sboyd@kernel.org>, Nishanth Menon <nm@ti.com>,
+        Douglas Anderson <dianders@chromium.org>,
+        Naresh Kamboju <naresh.kamboju@linaro.org>,
+        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Subject: Re: [PATCH V2 4/8] mmc: sdhci-msm: Unconditionally call
+ dev_pm_opp_of_remove_table()
+Message-ID: <20200909110707.jv2beta5rdr3wux3@vireshk-i7>
+References: <cover.1598594714.git.viresh.kumar@linaro.org>
+ <1d7c97524b9e1fbc60271d9c246c5461ca8a106c.1598594714.git.viresh.kumar@linaro.org>
+ <CAPDyKFpdZhzXQv3hpTzf3UkJDhFqBhgMXCqVfAfE6PejLCxvfg@mail.gmail.com>
+ <20200831104453.ux5fb5bpt57tj5am@vireshk-i7>
+ <CAPDyKFp1fCE3bBKngcia1LBKHEkQRoVzUwZYE6+Y++Hu=6aJfw@mail.gmail.com>
 MIME-Version: 1.0
-References: <20200903054104.228829-1-hch@lst.de> <20200903054104.228829-5-hch@lst.de>
-In-Reply-To: <20200903054104.228829-5-hch@lst.de>
-From:   Song Liu <song@kernel.org>
-Date:   Tue, 8 Sep 2020 17:55:48 -0700
-X-Gmail-Original-Message-ID: <CAPhsuW62Cd329s-LUR9uQVcFvn4pbOj7H0434P7zwRhbNVScgA@mail.gmail.com>
-Message-ID: <CAPhsuW62Cd329s-LUR9uQVcFvn4pbOj7H0434P7zwRhbNVScgA@mail.gmail.com>
-Subject: Re: [PATCH 4/9] md: don't detour through bd_contains for the gendisk
-To:     Christoph Hellwig <hch@lst.de>
-Cc:     Jens Axboe <axboe@kernel.dk>, dm-devel@redhat.com,
-        Linux Doc Mailing List <linux-doc@vger.kernel.org>,
-        open list <linux-kernel@vger.kernel.org>,
-        linux-block@vger.kernel.org, drbd-dev@lists.linbit.com,
-        linux-ide@vger.kernel.org, linux-raid <linux-raid@vger.kernel.org>,
-        linux-mmc@vger.kernel.org, linux-s390@vger.kernel.org,
-        linux-scsi@vger.kernel.org, target-devel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFp1fCE3bBKngcia1LBKHEkQRoVzUwZYE6+Y++Hu=6aJfw@mail.gmail.com>
+User-Agent: NeoMutt/20180716-391-311a52
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Sep 2, 2020 at 10:43 PM Christoph Hellwig <hch@lst.de> wrote:
->
-> bd_disk is set on all block devices, including those for partitions.
->
-> Signed-off-by: Christoph Hellwig <hch@lst.de>
+On 31-08-20, 12:57, Ulf Hansson wrote:
+> On Mon, 31 Aug 2020 at 12:45, Viresh Kumar <viresh.kumar@linaro.org> wrote:
+> >
+> > On 28-08-20, 10:43, Ulf Hansson wrote:
+> > > On Fri, 28 Aug 2020 at 08:08, Viresh Kumar <viresh.kumar@linaro.org> wrote:
+> > > >
+> > > > dev_pm_opp_of_remove_table() doesn't report any errors when it fails to
+> > > > find the OPP table with error -ENODEV (i.e. OPP table not present for
+> > > > the device). And we can call dev_pm_opp_of_remove_table()
+> > > > unconditionally here.
+> > > >
+> > > > Signed-off-by: Viresh Kumar <viresh.kumar@linaro.org>
+> > >
+> > > Replaced v1 with v2 on my next branch, thanks!
+> > >
+> > > Just to be sure, this patch doesn't depend on any changes for the opp
+> > > core that are queued for v5.10?
+> >
+> > The recent crashes reported by Anders and Naresh were related to a OPP
+> > core bug, for which I have just sent the fix here:
+> >
+> > https://lore.kernel.org/lkml/922ff0759a16299e24cacfc981ac07914d8f1826.1598865786.git.viresh.kumar@linaro.org/
+> >
+> > This is already tested by Naresh now and finally everything works as
+> > expected.
+> >
+> > I am going to get this fix merged in 5.9-rc4, but we do have a
+> > dependency now with that fix.
+> >
+> > What's the best way to handle this stuff now ? The easiest IMO would
+> > be for me to send these patches through the OPP tree, otherwise people
+> > need to carry this and the OPP fix (for which I can provide the
+> > branch/tag).
+> 
+> No need for a tag/branch to be shared. Instead I am simply going to
+> defer to pick up any related changes for mmc, until I can rebase my
+> tree on an rc[n] that contains your fix.
+> 
+> When that is possible, please re-post the mmc patches.
 
-Acked-by: Song Liu <song@kernel.org>
+The dependency patch got merged in 5.9-rc4. Do you still want me to
+resend this patch or you can apply it directly from here ?
 
-> ---
->  drivers/md/md.c | 2 +-
->  drivers/md/md.h | 2 +-
->  2 files changed, 2 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/md/md.c b/drivers/md/md.c
-> index 3f33562d10d6f5..5a0fd93769a70e 100644
-> --- a/drivers/md/md.c
-> +++ b/drivers/md/md.c
-> @@ -8444,7 +8444,7 @@ static int is_mddev_idle(struct mddev *mddev, int init)
->         idle = 1;
->         rcu_read_lock();
->         rdev_for_each_rcu(rdev, mddev) {
-> -               struct gendisk *disk = rdev->bdev->bd_contains->bd_disk;
-> +               struct gendisk *disk = rdev->bdev->bd_disk;
->                 curr_events = (int)part_stat_read_accum(&disk->part0, sectors) -
->                               atomic_read(&disk->sync_io);
->                 /* sync IO will cause sync_io to increase before the disk_stats
-> diff --git a/drivers/md/md.h b/drivers/md/md.h
-> index f9e2ccdd22c478..2175a5ac4f7c68 100644
-> --- a/drivers/md/md.h
-> +++ b/drivers/md/md.h
-> @@ -551,7 +551,7 @@ extern void mddev_unlock(struct mddev *mddev);
->
->  static inline void md_sync_acct(struct block_device *bdev, unsigned long nr_sectors)
->  {
-> -       atomic_add(nr_sectors, &bdev->bd_contains->bd_disk->sync_io);
-> +       atomic_add(nr_sectors, &bdev->bd_disk->sync_io);
->  }
->
->  static inline void md_sync_acct_bio(struct bio *bio, unsigned long nr_sectors)
-> --
-> 2.28.0
->
+-- 
+viresh
