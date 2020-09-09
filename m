@@ -2,141 +2,113 @@ Return-Path: <SRS0=Un3z=CS=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AD8C5C10DAA
-	for <linux-mmc@archiver.kernel.org>; Wed,  9 Sep 2020 11:27:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C3719C433E2
+	for <linux-mmc@archiver.kernel.org>; Wed,  9 Sep 2020 11:35:19 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 6902121D7F
-	for <linux-mmc@archiver.kernel.org>; Wed,  9 Sep 2020 11:27:47 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 873B720897
+	for <linux-mmc@archiver.kernel.org>; Wed,  9 Sep 2020 11:35:19 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="m4KHcZLZ"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="QAazgdff"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726293AbgIIL02 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 9 Sep 2020 07:26:28 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35080 "EHLO
+        id S1726714AbgIILfL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 9 Sep 2020 07:35:11 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38710 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726976AbgIILIq (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Sep 2020 07:08:46 -0400
-Received: from mail-pf1-x443.google.com (mail-pf1-x443.google.com [IPv6:2607:f8b0:4864:20::443])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 121FEC061796
-        for <linux-mmc@vger.kernel.org>; Wed,  9 Sep 2020 04:08:14 -0700 (PDT)
-Received: by mail-pf1-x443.google.com with SMTP id o68so1970752pfg.2
-        for <linux-mmc@vger.kernel.org>; Wed, 09 Sep 2020 04:08:14 -0700 (PDT)
+        with ESMTP id S1729521AbgIILcO (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Sep 2020 07:32:14 -0400
+Received: from mail-vs1-xe2c.google.com (mail-vs1-xe2c.google.com [IPv6:2607:f8b0:4864:20::e2c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 721BEC061786
+        for <linux-mmc@vger.kernel.org>; Wed,  9 Sep 2020 04:24:58 -0700 (PDT)
+Received: by mail-vs1-xe2c.google.com with SMTP id b16so1115355vsl.6
+        for <linux-mmc@vger.kernel.org>; Wed, 09 Sep 2020 04:24:58 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to:user-agent;
-        bh=hHbPBPqCAjeHpFptYktHnZF2Ot4j4iCHuxaSsZ+eCnQ=;
-        b=m4KHcZLZ3vphfXLl8Z6uPW+Z5xRc7prauxsfl0JLhrjWsiglWRJP4MpIyU91H/iLho
-         zrypWq/9xIvYPiotVpXou3HNQ/xOAUSdnA0p1Aeb2P6B8wsSa9RZ/k3wQsg8i79uXKFf
-         oqrgkMysLIqLInktyZ0qNeCahTkBgCR1FU+Sdh8z08fzYT7FIdiuUuOj/THP1lBYxblb
-         crk/ICcFVagGGuLu1MtvSBSpBtzUON7VuahiwpKU9qQILtWVvIRGlEVE5GFGdKpbyIDw
-         gFqItvEzQktmZxC+C5bsJupV5InVVkiOeLk+WlFuumCOeBab41igCm17UsYlleFsQ8ke
-         LG/Q==
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to;
+        bh=YwF7oGdkWmJxr0DaGGL2B5zSMTxCBRgZEPjg5JlP9Ks=;
+        b=QAazgdff84HXGeKSgLpqmQVikaFSdP5UNb6QrEEWjbfQtYZbq/0ISulDu4wVRDbAgV
+         Blzaz406rfa9YdqqZ5byBj240HvKycb6mfHlmdSRBOaSWl+UNf/kM3UM8Nu53SmvTycg
+         3DG2b4SlvINhCnVkLOheyROaLI1GgGzumTLHyV1QTg1hRGVrFNoeyAQ+WuglXbW6AUCl
+         mGwzRhpfqjEiby8FgSU1jXPWUl9uJGpKpD6VcUs0sl5sTt910ES8bg+jdlhLxGjQsC+1
+         1LCpHDV2JXl79AMSuB/lgZeCe5RvygOAaXT6CdcFlDcMmv25hU03bv87mITUk7WP9GAD
+         AQKw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to:user-agent;
-        bh=hHbPBPqCAjeHpFptYktHnZF2Ot4j4iCHuxaSsZ+eCnQ=;
-        b=b1ccCkXggsm41i+17yfTx9+IlEgemZ/2oKeYWa7XyhW+aasJ6A7J56vOQTvyyiyebU
-         zp+0sCPTbAgJwBDYen1kGWeUzHuvUxmH2auhsxBTXNVgq0uY09XHPr87COorhPRDYbDx
-         N4pUzXqWOZD0p/fG/A3xYE8+OAhtcOcxHVRWpU1HvMPUHK0ZU1FRopZHvCV/EWoNMO6Y
-         N8pTytP7c2NWKRWrlkUOAHfFEaaf3Cqbm1Z5ItcXolzhgv6cXR2Xxh6VoDd1GzP2jnUV
-         7tClghbxiUgiwHAoRvJjNdx2TLMZxX2bM+AzTjN7w7GEJ2jZgYCxdTH+Uxv72ipqeETz
-         jxyQ==
-X-Gm-Message-State: AOAM532xdHnSJNTQrch1Zml76z+gDZy6LemWoxnr4PRjhO0AtYddrZpw
-        D9PZ5/hzvbeeN5XoShUVsULzDA==
-X-Google-Smtp-Source: ABdhPJy2EZv/VIxB9RnTfqRMANkRu2WWxpNJfCDbS9BRC+1+0r57LjDxgPFYplFTRs+2i65+o+pECA==
-X-Received: by 2002:a65:5849:: with SMTP id s9mr215399pgr.439.1599649690536;
-        Wed, 09 Sep 2020 04:08:10 -0700 (PDT)
-Received: from localhost ([122.181.54.133])
-        by smtp.gmail.com with ESMTPSA id w185sm2619035pfc.36.2020.09.09.04.08.09
-        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 09 Sep 2020 04:08:09 -0700 (PDT)
-Date:   Wed, 9 Sep 2020 16:38:07 +0530
-From:   Viresh Kumar <viresh.kumar@linaro.org>
-To:     rnayak@codeaurora.org, Adrian Hunter <adrian.hunter@intel.com>,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>,
-        Daniel Vetter <daniel@ffwll.ch>,
-        David Airlie <airlied@linux.ie>,
-        Fabio Estevam <festevam@gmail.com>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Jiri Slaby <jirislaby@kernel.org>,
-        Mark Brown <broonie@kernel.org>,
-        NXP Linux Team <linux-imx@nxp.com>,
-        Pengutronix Kernel Team <kernel@pengutronix.de>,
-        Qiang Yu <yuq825@gmail.com>,
-        "Rafael J. Wysocki" <rjw@rjwysocki.net>,
-        Rob Clark <robdclark@gmail.com>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        Sean Paul <sean@poorly.run>, Shawn Guo <shawnguo@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     linux-pm@vger.kernel.org,
-        Vincent Guittot <vincent.guittot@linaro.org>,
-        Stephen Boyd <sboyd@kernel.org>, Nishanth Menon <nm@ti.com>,
-        Douglas Anderson <dianders@chromium.org>,
-        Naresh Kamboju <naresh.kamboju@linaro.org>,
-        dri-devel@lists.freedesktop.org, freedreno@lists.freedesktop.org,
-        lima@lists.freedesktop.org, linux-arm-kernel@lists.infradead.org,
-        linux-arm-msm@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-serial@vger.kernel.org,
-        linux-spi@vger.kernel.org
-Subject: Re: [PATCH V2 0/8] opp: Unconditionally call
- dev_pm_opp_of_remove_table()
-Message-ID: <20200909110807.aw3q4bqxis3ya5ci@vireshk-i7>
-References: <cover.1598594714.git.viresh.kumar@linaro.org>
- <20200831110939.qnyugmhajkg36gzw@vireshk-i7>
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to;
+        bh=YwF7oGdkWmJxr0DaGGL2B5zSMTxCBRgZEPjg5JlP9Ks=;
+        b=h0U8qwlZoVAu09VrbPj0k3LI25iBbGt2+eEqF5XsgwWZcWb+k+ouIBEoDZvdsc/x6/
+         lStt9bG1ZTL1vvVH0TEXxnJEd0pWoxuIgy7vtkG6jf8W/gb2DBGYiclxeF+gfIeJEUBq
+         x0CsNsl8VO7Xi9BJG3IBmzBa5jdihgOhajT9RzqzLihQI10vVo8lOi9kJI3RBm5WRVyZ
+         /jE/jaqRzvt1F9c56+8+Nuq/IeXl0+RjSzMjZ5ppmUIETjDx/JtYEQFkIeZr5cLLiKc4
+         cz/4fcsdZTNh7cRKJ8OC6+YTzdTDQKKTc6dEhuE5kaXXd4J0rdgXnjXZJDxoFEhtU1IH
+         v/0w==
+X-Gm-Message-State: AOAM531hVq9RVZ7BmGgEPqY8wOZEh10ZbZyJXlSDekQIU5dp3+bzC+gB
+        dAeFEeehhk5nNR7xxQQm4mD6hwMLCYn8Drfj/66/m4iEeRhIhw==
+X-Google-Smtp-Source: ABdhPJyX26PiK8pf7hK5CA4/JStCB7QVEAiAc0iFsKHA7XBKfawE+lpIL55g2UGbvOG2rRpZZjOsbTjNKTGylQm5SnU=
+X-Received: by 2002:a67:e355:: with SMTP id s21mr145683vsm.50.1599650697707;
+ Wed, 09 Sep 2020 04:24:57 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20200831110939.qnyugmhajkg36gzw@vireshk-i7>
-User-Agent: NeoMutt/20180716-391-311a52
+References: <20200821081654.28280-1-wsa+renesas@sang-engineering.com>
+ <CAPDyKFp7rsHDY2vREakrR+PFJLs0n8JBR+URV1vCu5bydEhHuA@mail.gmail.com> <20200830130357.GA2194@kunai>
+In-Reply-To: <20200830130357.GA2194@kunai>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Wed, 9 Sep 2020 13:24:21 +0200
+Message-ID: <CAPDyKFr24YxoJ3m5r1C_4-UAdtJQp_MK0+wwZjsQXzrs5dxLjw@mail.gmail.com>
+Subject: Re: [RFT] mmc: tmio: reset device on timeout, too
+To:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 31-08-20, 16:39, Viresh Kumar wrote:
-> On 28-08-20, 11:37, Viresh Kumar wrote:
-> > Hello,
-> > 
-> > This cleans up some of the user code around calls to
-> > dev_pm_opp_of_remove_table().
-> > 
-> > All the patches can be picked by respective maintainers directly except
-> > for the last patch, which needs the previous two to get merged first.
-> > 
-> > These are based for 5.9-rc1.
->  
-> > Viresh Kumar (8):
-> >   cpufreq: imx6q: Unconditionally call dev_pm_opp_of_remove_table()
-> >   drm/lima: Unconditionally call dev_pm_opp_of_remove_table()
-> >   drm/msm: Unconditionally call dev_pm_opp_of_remove_table()
-> >   mmc: sdhci-msm: Unconditionally call dev_pm_opp_of_remove_table()
-> >   spi: spi-geni-qcom: Unconditionally call dev_pm_opp_of_remove_table()
-> >   spi: spi-qcom-qspi: Unconditionally call dev_pm_opp_of_remove_table()
-> >   tty: serial: qcom_geni_serial: Unconditionally call
-> >     dev_pm_opp_of_remove_table()
-> >   qcom-geni-se: remove has_opp_table
-> 
-> During testing by some of the Linaro folks on linux-next, we found out
-> that there was a bug in the OPP core (which makes the kernel crash in
-> some corner cases with these patches) for which I have sent a fix
-> today which should be part of 5.9-rc4:
-> 
-> https://lore.kernel.org/lkml/922ff0759a16299e24cacfc981ac07914d8f1826.1598865786.git.viresh.kumar@linaro.org/
-> 
-> Please apply the patches over rc4 only once it comes out (I will
-> confirm by that time once the patch gets merged). Else you guys can
-> provide your Ack and I can take the patches through OPP tree.
+On Sun, 30 Aug 2020 at 15:04, Wolfram Sang
+<wsa+renesas@sang-engineering.com> wrote:
+>
+>
+> > This isn't how mmc_hw_reset() is intended to be used. Instead, the
+> > idea is that it should be called by upper layer code, when some error
+> > path is triggered for an I/O request.
+>
+> Hmm, there are some wireless drivers using it as well. I am confused, is
+> this considered "upper layer"?
+>
+> drivers/net/wireless/ath/ath10k/sdio.c: ret = mmc_hw_reset(ar_sdio->func->card->host);
+> drivers/net/wireless/broadcom/brcm80211/brcmfmac/sdio.c:        mmc_hw_reset(sdiodev->func1->card->host);
+> drivers/net/wireless/marvell/mwifiex/sdio.c:    ret = mmc_hw_reset(func->card->host);
+> drivers/net/wireless/ti/wlcore/sdio.c:  mmc_hw_reset(card->host);
 
-The fix got merged in 5.9-rc4, please apply the patches from this
-series in your trees and base them on rc4. Thanks.
+Correct, these are "upper layers". The same applies for the mmc block
+device driver.
 
--- 
-viresh
+In this way there is a guarantee that the struct mmc_card is still present.
+
+>
+> I'd like to understand, so I can add some docs. Because the intended use
+> is nowhere documented to the best of my knowledge.
+
+That would be great. I appreciate all kinds of improvements on the doc parts.
+
+>
+> > However, let me think a bit about this.
+>
+> Sure, thanks for the help!
+
+Thinking more about this.
+
+Perhaps a better option is to return a specific error code for the
+last request, that makes the core run mmc_hw_reset(). Or potentially,
+add a host cap and let the core treat some error code, specifically
+for hosts like tmio.
+
+Kind regards
+Uffe
