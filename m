@@ -2,119 +2,147 @@ Return-Path: <SRS0=ANdn=CT=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-14.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7F580C2D0A7
-	for <linux-mmc@archiver.kernel.org>; Thu, 10 Sep 2020 21:24:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DC0B8C433E2
+	for <linux-mmc@archiver.kernel.org>; Thu, 10 Sep 2020 22:55:42 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 45DC9221E2
-	for <linux-mmc@archiver.kernel.org>; Thu, 10 Sep 2020 21:24:39 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A4C5320684
+	for <linux-mmc@archiver.kernel.org>; Thu, 10 Sep 2020 22:55:42 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1599778542;
+	bh=qcDtdo4KtSRqLIHBTyQuxQS343VMAgWt9vLx/LQN3EM=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:List-ID:From;
+	b=wcCB0y0rtkIorAkIhCkqbpOZKBuJUS9va6U2EUJm5+249QeyvNT44uGfZ15116QYx
+	 FTIGjmBKl3B0L/kaiPvuDvXjxyZJgUtAezn3Iyv3IryJ8I6+VH1mo6S8WDjLMvUgO9
+	 meJlJkinUgR/ObWirEEnJGtlAiSvW6fUU24B8YxA=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728191AbgIJVYh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 10 Sep 2020 17:24:37 -0400
-Received: from foss.arm.com ([217.140.110.172]:37282 "EHLO foss.arm.com"
+        id S1725290AbgIJWzi (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 10 Sep 2020 18:55:38 -0400
+Received: from mail.kernel.org ([198.145.29.99]:50208 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1731004AbgIJOXM (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 10 Sep 2020 10:23:12 -0400
-Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
-        by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id E3BEB11B3;
-        Thu, 10 Sep 2020 07:21:17 -0700 (PDT)
-Received: from [10.57.40.122] (unknown [10.57.40.122])
-        by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 1B4783F66E;
-        Thu, 10 Sep 2020 07:21:08 -0700 (PDT)
-Subject: Re: [trivial PATCH] treewide: Convert switch/case fallthrough; to
- break;
-To:     Joe Perches <joe@perches.com>, LKML <linux-kernel@vger.kernel.org>,
-        Jiri Kosina <trivial@kernel.org>
-Cc:     linux-wireless@vger.kernel.org, linux-fbdev@vger.kernel.org,
-        oss-drivers@netronome.com, nouveau@lists.freedesktop.org,
-        alsa-devel <alsa-devel@alsa-project.org>,
-        dri-devel@lists.freedesktop.org, linux-ide@vger.kernel.org,
-        dm-devel@redhat.com, linux-mtd@lists.infradead.org,
-        linux-i2c@vger.kernel.org, sparclinux@vger.kernel.org,
-        kvmarm@lists.cs.columbia.edu, linux-rtc@vger.kernel.org,
-        linux-s390@vger.kernel.org, linux-scsi@vger.kernel.org,
-        dccp@vger.kernel.org, linux-rdma@vger.kernel.org,
-        linux-atm-general@lists.sourceforge.net,
-        linux-afs@lists.infradead.org, coreteam@netfilter.org,
-        intel-wired-lan@lists.osuosl.org, linux-serial@vger.kernel.org,
-        linux-input@vger.kernel.org, linux-mmc@vger.kernel.org,
-        Kees Cook <kees.cook@canonical.com>,
-        linux-media@vger.kernel.org, linux-pm@vger.kernel.org,
-        intel-gfx@lists.freedesktop.org, linux-sctp@vger.kernel.org,
-        linux-mediatek@lists.infradead.org, linux-nvme@lists.infradead.org,
-        storagedev@microchip.com, ceph-devel@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, linux-nfs@vger.kernel.org,
-        linux-parisc@vger.kernel.org, netdev@vger.kernel.org,
-        linux-usb@vger.kernel.org,
-        Nick Desaulniers <ndesaulniers@google.com>,
-        linux-mips@vger.kernel.org, iommu@lists.linux-foundation.org,
-        netfilter-devel@vger.kernel.org, linux-crypto@vger.kernel.org,
-        bpf@vger.kernel.org, linuxppc-dev@lists.ozlabs.org,
-        Will Deacon <will@kernel.org>
-References: <e6387578c75736d61b2fe70d9783d91329a97eb4.camel@perches.com>
-From:   Robin Murphy <robin.murphy@arm.com>
-Message-ID: <9372456a-8dcf-2735-57a4-e126aa5df3a6@arm.com>
-Date:   Thu, 10 Sep 2020 15:21:05 +0100
-User-Agent: Mozilla/5.0 (Windows NT 10.0; rv:68.0) Gecko/20100101
- Thunderbird/68.12.0
+        id S1725280AbgIJWzi (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 10 Sep 2020 18:55:38 -0400
+Received: from mail-ot1-f41.google.com (mail-ot1-f41.google.com [209.85.210.41])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id E350521D81;
+        Thu, 10 Sep 2020 22:55:36 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1599778537;
+        bh=qcDtdo4KtSRqLIHBTyQuxQS343VMAgWt9vLx/LQN3EM=;
+        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+        b=EQdTeSVMOyglZrJ0y9T548kiI7MRiDSrEo47DwdhHEHN4RxB+VTRtSw56opOsDIOc
+         WYdet4IJLbdKzGORoMPu51NLQpp7MxMQev1pboeHfMxnPAK8rvhimKnpmWTJi3AikZ
+         pDmfs0Emi8Ad6yLOoRQK63OCOGC/IjNpTGDx2nnA=
+Received: by mail-ot1-f41.google.com with SMTP id e23so6790666otk.7;
+        Thu, 10 Sep 2020 15:55:36 -0700 (PDT)
+X-Gm-Message-State: AOAM532m5fsYYVUSqkmUKtrWbw8nOtXt5d4msp7DRCQRw6lR1FTL0PM0
+        OGD+u06R4hWOe9mPTwVXQiiyD5h2DDdupQaPCQ==
+X-Google-Smtp-Source: ABdhPJwxLrtw8P1iDFnINFBcq5+LFkPAZuZ45Y+BpDa4K34pf79dsdO3g4++HkIgCm6/pIKr4h47efJjCIAix2IDiXQ=
+X-Received: by 2002:a9d:411:: with SMTP id 17mr5602788otc.192.1599778536187;
+ Thu, 10 Sep 2020 15:55:36 -0700 (PDT)
 MIME-Version: 1.0
-In-Reply-To: <e6387578c75736d61b2fe70d9783d91329a97eb4.camel@perches.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-GB
-Content-Transfer-Encoding: 7bit
+References: <20200902193658.20539-1-krzk@kernel.org> <CAPDyKFqBS-ws6fkirDQL8EEqh9At88K2vrG5fc8K5_JiXsmfyg@mail.gmail.com>
+In-Reply-To: <CAPDyKFqBS-ws6fkirDQL8EEqh9At88K2vrG5fc8K5_JiXsmfyg@mail.gmail.com>
+From:   Rob Herring <robh@kernel.org>
+Date:   Thu, 10 Sep 2020 16:55:24 -0600
+X-Gmail-Original-Message-ID: <CAL_Jsq+ajm5aiAJfQdS2+2DO1ynBDHWha_7TsA4u-2qwd87y6g@mail.gmail.com>
+Message-ID: <CAL_Jsq+ajm5aiAJfQdS2+2DO1ynBDHWha_7TsA4u-2qwd87y6g@mail.gmail.com>
+Subject: Re: [PATCH 00/11] mmc: Minor cleanups and compile test
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Krzysztof Kozlowski <krzk@kernel.org>
+Cc:     Neil Armstrong <narmstrong@baylibre.com>,
+        Al Cooper <alcooperx@gmail.com>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        Paul Cercueil <paul@crapouillou.net>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        Jerome Brunet <jbrunet@baylibre.com>,
+        Florian Fainelli <f.fainelli@gmail.com>,
+        Kevin Hilman <khilman@baylibre.com>,
+        Steen Hegelund <Steen.Hegelund@microchip.com>,
+        Michal Simek <michal.simek@xilinx.com>,
+        Jonathan Hunter <jonathanh@nvidia.com>,
+        Jaehoon Chung <jh80.chung@samsung.com>,
+        BCM Kernel Feedback <bcm-kernel-feedback-list@broadcom.com>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        Arnd Bergmann <arnd@arndb.de>,
+        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+        Ray Jui <rjui@broadcom.com>,
+        "moderated list:BROADCOM BCM2835 ARM ARCHITECTURE" 
+        <linux-rpi-kernel@lists.infradead.org>,
+        linux-tegra <linux-tegra@vger.kernel.org>,
+        "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>,
+        Lars Povlsen <lars.povlsen@microchip.com>,
+        Scott Branden <sbranden@broadcom.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Microchip Linux Driver Support <UNGLinuxDriver@microchip.com>,
+        Jun Nie <jun.nie@linaro.org>, Shawn Guo <shawnguo@kernel.org>,
+        Nicolas Saenz Julienne <nsaenzjulienne@suse.de>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 2020-09-09 21:06, Joe Perches wrote:
-> fallthrough to a separate case/default label break; isn't very readable.
-> 
-> Convert pseudo-keyword fallthrough; statements to a simple break; when
-> the next label is case or default and the only statement in the next
-> label block is break;
-> 
-> Found using:
-> 
-> $ grep-2.5.4 -rP --include=*.[ch] -n "fallthrough;(\s*(case\s+\w+|default)\s*:\s*){1,7}break;" *
-> 
-> Miscellanea:
-> 
-> o Move or coalesce a couple label blocks above a default: block.
-> 
-> Signed-off-by: Joe Perches <joe@perches.com>
-> ---
-> 
-> Compiled allyesconfig x86-64 only.
-> A few files for other arches were not compiled.
-> 
+On Thu, Sep 3, 2020 at 2:40 AM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>
+> On Wed, 2 Sep 2020 at 21:37, Krzysztof Kozlowski <krzk@kernel.org> wrote:
+> >
+> > Hi,
+> >
+> > Set of minor cleanups.  Patches requiring more attention:
+> >  - 6/11: Testing and review would be appreciated,
+> >  - 11/11: I build tested multiple architectures but not all and
+> >    definitely no all possible configs. This one could sit on the lists
+> >    for few days so 0-day would try it.
+> >
+> > Best regards,
+> > Krzysztof
+> >
+> > Krzysztof Kozlowski (11):
+> >   mmc: bcm2835: Simplify with dev_err_probe()
+> >   mmc: davinci: Simplify with dev_err_probe()
+> >   mmc: dw_mmc-zx: Simplify with dev_err_probe()
+> >   mmc: jz4740: Simplify with dev_err_probe()
+> >   mmc: meson: Simplify with dev_err_probe()
+> >   mmc: sdhci-brcmstb: Simplify with optional clock and dev_err_probe()
+> >   mmc: sdhci-of-arasan: Simplify with dev_err_probe()
+> >   mmc: sdhci-tegra: Simplify with dev_err_probe()
+> >   mmc: dw_mmc: Simplify with dev_err_probe()
+> >   mmc: sdhci-of-sparx5: Use proper printk format for dma_addr_t
+> >   mmc: host: Enable compile testing of multiple drivers
+> >
+> >  drivers/mmc/host/Kconfig           | 42 ++++++++++++++++--------------
+> >  drivers/mmc/host/bcm2835.c         |  4 +--
+> >  drivers/mmc/host/davinci_mmc.c     |  5 ++--
+> >  drivers/mmc/host/dw_mmc-zx.c       | 11 +++-----
+> >  drivers/mmc/host/dw_mmc.c          |  9 +++----
+> >  drivers/mmc/host/jz4740_mmc.c      |  5 ++--
+> >  drivers/mmc/host/meson-gx-mmc.c    | 16 ++++--------
+> >  drivers/mmc/host/sdhci-brcmstb.c   | 12 ++++-----
+> >  drivers/mmc/host/sdhci-of-arasan.c |  7 +++--
+> >  drivers/mmc/host/sdhci-of-sparx5.c |  4 +--
+> >  drivers/mmc/host/sdhci-tegra.c     |  7 ++---
+> >  11 files changed, 51 insertions(+), 71 deletions(-)
+> >
+> > --
+> > 2.17.1
+> >
+>
+> Series applied for next, except 11, thanks!
 
-[...]
-> diff --git a/drivers/iommu/arm/arm-smmu-v3/arm-smmu-v3.c b/drivers/iommu/arm/arm-smmu-v3/arm-smmu-v3.c
-> index c192544e874b..743db1abec40 100644
-> --- a/drivers/iommu/arm/arm-smmu-v3/arm-smmu-v3.c
-> +++ b/drivers/iommu/arm/arm-smmu-v3/arm-smmu-v3.c
-> @@ -3777,7 +3777,7 @@ static int arm_smmu_device_hw_probe(struct arm_smmu_device *smmu)
->   	switch (FIELD_GET(IDR0_TTF, reg)) {
->   	case IDR0_TTF_AARCH32_64:
->   		smmu->ias = 40;
-> -		fallthrough;
-> +		break;
->   	case IDR0_TTF_AARCH64:
->   		break;
->   	default:
+I see there's a bunch of these already, but I think we can do better
+here than dev_err_probe. We have _optional variants for the case not
+getting a resource is not an error. So the called functions like
+devm_clk_get can print an error. We already have this for
+platform_get_irq along with a coccinelle script to fix cases. I have a
+WIP branch[1] doing this.
 
-I have to say I don't really agree with the readability argument for 
-this one - a fallthrough is semantically correct here, since the first 
-case is a superset of the second. It just happens that anything we would 
-do for the common subset is implicitly assumed (there are other 
-potential cases we simply haven't added support for at the moment), thus 
-the second case is currently empty.
+Rob
 
-This change actively obfuscates that distinction.
-
-Robin.
+[1] git://git.kernel.org/pub/scm/linux/kernel/git/robh/linux.git dev_err-removal
